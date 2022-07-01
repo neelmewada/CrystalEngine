@@ -51,10 +51,10 @@ target_link_directories(${PROJECT_NAME} PRIVATE ${LIB_DIR})
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE
             Engine vulkan-1 SDL2)
-else()
+elseif (APPLE) # macOS
     set(LIBS vulkan vulkan.1 SDL2)
     target_link_libraries(${PROJECT_NAME} PRIVATE
-            Engine ${LIBS} MoltenVK)
+            Engine ${LIBS})
 endif()
 
 if (PLATFORM_MACOS)
@@ -72,11 +72,13 @@ if (PLATFORM_MACOS)
     # Set rpath of the macos executable after build
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks" "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}"
-            COMMAND install_name_tool -add_rpath ${CMAKE_CURRENT_BINARY_DIR}/../Engine "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}"
-            )
+            COMMAND install_name_tool -add_rpath ${CMAKE_CURRENT_BINARY_DIR}/../Engine "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}")
 
     # Copy the libEngine.dylib on install time
     install(CODE "
             file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../Engine/libEngine.dylib DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Frameworks/)
             ")
+elseif(PLATFORM_WIN32)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/../Engine/Engine.dll ${CMAKE_CURRENT_BINARY_DIR}/)
 endif()

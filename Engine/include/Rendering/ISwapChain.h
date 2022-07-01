@@ -1,9 +1,11 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 namespace Vox
 {
 
-class ISwapChain
+class ENGINE_API ISwapChain
 {
 protected:
     ISwapChain() {}

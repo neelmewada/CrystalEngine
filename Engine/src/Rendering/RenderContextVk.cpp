@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 
 #include <iostream>
+#include <functional>
 
 using namespace Vox;
 
@@ -13,13 +14,14 @@ RenderContextVk::RenderContextVk(RenderContextCreateInfoVk &renderContextInfo)
     m_pEngine = dynamic_cast<EngineContextVk*>(renderContextInfo.engineContext);
     m_pDevice = dynamic_cast<DeviceContextVk*>(renderContextInfo.deviceContext);
     m_pSwapChain = dynamic_cast<SwapChainVk*>(renderContextInfo.swapChain);
+    m_pSwapChain->SetRenderContext(this);
 
     std::cout << "Created RenderContextVk" << std::endl;
 }
 
 RenderContextVk::~RenderContextVk()
 {
-    
+
 
     std::cout << "Destroyed RenderContextVk" << std::endl;
 }
@@ -30,6 +32,12 @@ void RenderContextVk::SetClearColor(float clearColor[4])
 {
     for (int i = 0; i < 4; ++i)
         m_ClearColor[i] = clearColor[i];
+}
+
+void RenderContextVk::ReRecordCommands()
+{
+    // TODO: Temp Code
+    BeginRecording();
 }
 
 void RenderContextVk::BeginRecording()

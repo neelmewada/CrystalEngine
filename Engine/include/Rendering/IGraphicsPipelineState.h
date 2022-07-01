@@ -1,10 +1,11 @@
 #pragma once
 
+#include "EngineDefs.h"
 
 namespace Vox
 {
 
-class IGraphicsPipelineState
+class ENGINE_API IGraphicsPipelineState
 {
 protected:
     IGraphicsPipelineState() {}

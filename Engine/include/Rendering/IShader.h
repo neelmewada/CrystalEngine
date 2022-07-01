@@ -1,9 +1,11 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 namespace Vox
 {
 
-class IShader
+class ENGINE_API IShader
 {
 protected:
     IShader() {}

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 #include <string>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
@@ -9,10 +11,10 @@ struct SDL_Window;
 namespace Vox
 {
 
-class ApplicationBase
+class ENGINE_API ApplicationBase
 {
 public:
-    ApplicationBase(std::string windowTitle);
+    ApplicationBase(std::string windowTitle, bool maximised, bool fullscreen, int w, int h);
     ~ApplicationBase();
 
     ApplicationBase(const ApplicationBase&) = delete;

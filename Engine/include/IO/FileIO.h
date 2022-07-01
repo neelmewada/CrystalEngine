@@ -1,11 +1,13 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 #include <string>
 #include <vector>
 
 namespace Vox::IO
 {
 
-bool ReadAllBytesFromFile(const std::string& filePath, std::vector<char>& fileBuffer);
+bool ENGINE_API ReadAllBytesFromFile(const std::string& filePath, std::vector<char>& fileBuffer);
 
 }

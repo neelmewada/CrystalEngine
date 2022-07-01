@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 #include "Rendering/IEngineContext.h"
 #include "Rendering/IDeviceContext.h"
 #include "Rendering/ISwapChain.h"
@@ -35,7 +37,7 @@ struct RenderContextCreateInfoVk
     ISwapChain* swapChain;
 };
 
-class EngineFactoryVk
+class ENGINE_API EngineFactoryVk
 {
 private:
     EngineFactoryVk();

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 namespace Vox
 {
 
-class IEngineContext
+class ENGINE_API IEngineContext
 {
 protected:
     IEngineContext() {}

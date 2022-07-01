@@ -19,8 +19,10 @@ const std::string GetSharedDirectory()
     return (curPath / "../Resources/").string();
 #elif PLATFORM_LINUX
     return (curPath / "share").string();
+#elif PLATFORM_WIN32
+    return curPath.string();
 #else
-    return (curPath / "shared").string();
+#   error Unsupported Platform
 #endif
 }
 

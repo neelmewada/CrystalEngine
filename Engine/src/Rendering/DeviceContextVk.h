@@ -28,7 +28,7 @@ private:
 public:
     // - Getters
     QueueFamilyInfo GetQueueFamilies() { return m_QueueFamilies; }
-    SurfaceCompatInfo GetSurfaceCompatInfo() { return m_SurfaceCompatInfo; }
+    SurfaceCompatInfo GetSurfaceCompatInfo() { return FetchSurfaceCompatInfo(m_PhysicalDevice); }
     VkSurfaceKHR GetSurface() { return m_Surface; }
     VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
     VkDevice GetDevice() { return m_Device; }

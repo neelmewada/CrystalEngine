@@ -24,6 +24,7 @@ public: // Public API
     void SetClearColor(float clearColor[4]) override;
 
     // - Commands
+    void ReRecordCommands() override;
     void BeginRecording() override;
     void EndRecording() override;
 

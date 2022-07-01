@@ -1,4 +1,5 @@
 
+#define SDL_MAIN_HANDLED
 #include "Engine.h"
 
 #include <iostream>
@@ -13,7 +14,7 @@ using namespace Vox;
 class Application : public ApplicationBase
 {
 public:
-    Application(std::string title) : ApplicationBase(title)
+    Application(std::string title) : ApplicationBase(title, false, false, 1280, 720)
     {
 
     }
@@ -63,14 +64,16 @@ public:
         renderContextInfo.swapChain = m_pSwapChain;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
-        m_pRenderContext->SetClearColor((float[4]){0.6f, 0.65f, 0.4f, 1.0f});
+        float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
+
+        m_pRenderContext->SetClearColor(clearColor);
 
         m_pRenderContext->BeginRecording();
         //m_pRenderContext->CmdBindPipeline(cubePipeline);
         //m_pRenderContext->CmdBindVertexBuffers(2, vertexBuffers);
         //m_pRenderContext->CmdBindIndexBuffer(indexBuffers);
         //m_pRenderContext->CmdDrawIndexed();
-        //m_pRenderContext->EndRecording();
+        m_pRenderContext->EndRecording();
 
         fs::path shaderDir = IO::GetSharedDirectory();
         shaderDir = shaderDir / "shaders/";
@@ -98,7 +101,7 @@ public:
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
         pipelineInfo.device = m_pDeviceContext;
-        //pipelineInfo.shader = shader;
+        pipelineInfo.shader = shader;
 
         //m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 

@@ -1,5 +1,6 @@
 
 #include "SwapChainVk.h"
+#include "RenderContextVk.h"
 
 #include <vulkan/vulkan.h>
 #include <SDL2/SDL.h>
@@ -36,7 +37,9 @@ SwapChainVk::~SwapChainVk() noexcept
         vkDestroySemaphore(m_pDevice->GetDevice(), m_ImageAvailableForRendering[i], nullptr);
     }
 
-    // No need to de-allocate command buffers
+    // De-allocate (free) command buffers
+    vkFreeCommandBuffers(m_pDevice->GetDevice(), m_pDevice->GetGraphicsCommandPool(),
+                         static_cast<uint32_t>(m_CommandBuffers.size()), m_CommandBuffers.data());
 
     // Framebuffers
     for (const auto& framebuffer: m_SwapchainFramebuffers)
@@ -104,7 +107,6 @@ void SwapChainVk::Submit()
     {
         throw std::runtime_error("Failed to submit Command Buffer to the Graphics Queue!");
     }
-
 }
 
 void SwapChainVk::Present()
@@ -121,7 +123,13 @@ void SwapChainVk::Present()
 
 
     auto result = vkQueuePresentKHR(m_pDevice->m_PresentQueue, &presentInfo);
-    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
+        std::cout << "Recreating swap chain " << std::endl;
+        RecreateSwapChainObjects();
+        return;
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
     {
         throw std::runtime_error("Failed to present rendered image!");
     }
@@ -132,8 +140,21 @@ void SwapChainVk::Present()
 
 #pragma endregion
 
+void SwapChainVk::RecreateSwapChainObjects()
+{
+    vkDeviceWaitIdle(m_pDevice->GetDevice());
+
+    CreateSwapChain();
+    CreateFramebuffers();
+    //m_pRenderContext->ReRecordCommands();
+
+    std::cout << "Recreated Swap Chain" << std::endl;
+}
+
 void SwapChainVk::CreateSwapChain()
 {
+    auto oldSwapchain = m_Swapchain;
+
     SurfaceCompatInfo surfaceCompatInfo = m_pDevice->GetSurfaceCompatInfo();
 
     // Find optimal surface values for swapchain
@@ -191,7 +212,7 @@ void SwapChainVk::CreateSwapChain()
 
     // If old swap chain needs to be destroyed (due to resizing) and this one replaces it,
     // then link the old one to hand over responsibilities
-    swapchainInfo.oldSwapchain = m_Swapchain;
+    swapchainInfo.oldSwapchain = oldSwapchain;
 
     // Create swap chain
     auto result = vkCreateSwapchainKHR(m_pDevice->GetDevice(), &swapchainInfo, nullptr, &m_Swapchain);
@@ -200,9 +221,17 @@ void SwapChainVk::CreateSwapChain()
         throw std::runtime_error("Failed to create Swap Chain!");
     }
 
+    if (oldSwapchain != nullptr)
+    {
+        vkDestroySwapchainKHR(m_pDevice->GetDevice(), oldSwapchain, nullptr);
+        oldSwapchain = nullptr;
+    }
+
     // Store for later reference
     m_SwapchainImageFormat = selectedFormat.format;
     m_SwapchainExtent = extent;
+
+    std::cout << "Swapchain Extent: " << m_SwapchainExtent.width << " ; " << m_SwapchainExtent.height << std::endl;
 
     uint32_t swapchainImageCount = 0;
     vkGetSwapchainImagesKHR(m_pDevice->GetDevice(), m_Swapchain, &swapchainImageCount, nullptr);
@@ -213,10 +242,11 @@ void SwapChainVk::CreateSwapChain()
     if (!m_SwapchainImages.empty())
     {
         vkDeviceWaitIdle(m_pDevice->GetDevice()); // Wait for GPU to go idle to be able to destroy image views
-        for (const auto& item: m_SwapchainImages)
+        for (auto& item: m_SwapchainImages)
         {
             if (item.imageView != nullptr)
                 vkDestroyImageView(m_pDevice->GetDevice(), item.imageView, nullptr);
+            item.imageView = nullptr;
         }
     }
 
@@ -312,6 +342,18 @@ void SwapChainVk::CreateRenderPass()
 
 void SwapChainVk::CreateFramebuffers()
 {
+    if (!m_SwapchainFramebuffers.empty())
+    {
+        for (int i = 0; i < m_SwapchainFramebuffers.size(); ++i)
+        {
+            if (m_SwapchainFramebuffers[i] != nullptr)
+            {
+                vkDestroyFramebuffer(m_pDevice->GetDevice(), m_SwapchainFramebuffers[i], nullptr);
+                m_SwapchainFramebuffers[i] = nullptr;
+            }
+        }
+    }
+
     m_SwapchainFramebuffers.resize(m_SwapchainImages.size());
 
     for (int i = 0; i < m_SwapchainFramebuffers.size(); ++i)
@@ -341,6 +383,13 @@ void SwapChainVk::CreateFramebuffers()
 
 void SwapChainVk::CreateCommandBuffers()
 {
+    if (!m_CommandBuffers.empty())
+    {
+        vkFreeCommandBuffers(m_pDevice->GetDevice(), m_pDevice->GetGraphicsCommandPool(),
+                             static_cast<uint32_t>(m_CommandBuffers.size()), m_CommandBuffers.data());
+        m_CommandBuffers.resize(0);
+    }
+
     m_CommandBuffers.resize(m_SwapchainFramebuffers.size());
 
     VkCommandBufferAllocateInfo allocInfo = {};
@@ -360,6 +409,27 @@ void SwapChainVk::CreateCommandBuffers()
 
 void SwapChainVk::CreateSyncObjects()
 {
+    auto device = m_pDevice->GetDevice();
+
+    for (auto &item: m_ImageAvailableForRendering)
+    {
+        if (item != nullptr)
+            vkDestroySemaphore(device, item, nullptr);
+        item = nullptr;
+    }
+    for (auto &item: m_RenderFinished)
+    {
+        if (item != nullptr)
+            vkDestroySemaphore(device, item, nullptr);
+        item = nullptr;
+    }
+    for (auto &item: m_DrawFinishedFences)
+    {
+        if (item != nullptr)
+            vkDestroyFence(device, item, nullptr);
+        item = nullptr;
+    }
+
     m_ImageAvailableForRendering.resize(m_MaxSimultaneousFrameDraws);
     m_RenderFinished.resize(m_MaxSimultaneousFrameDraws);
     m_DrawFinishedFences.resize(m_MaxSimultaneousFrameDraws);
@@ -370,8 +440,6 @@ void SwapChainVk::CreateSyncObjects()
     VkFenceCreateInfo fenceCreateInfo = {};
     fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Create the fence in signaled state
-
-    auto device = m_pDevice->GetDevice();
 
     for (int i = 0; i < m_MaxSimultaneousFrameDraws; ++i)
     {

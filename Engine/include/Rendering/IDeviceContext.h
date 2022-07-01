@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 #include "IGraphicsPipelineState.h"
 #include "IShader.h"
 
@@ -33,7 +35,7 @@ struct ShaderCreateInfo
     ShaderVariantCreateInfo* pShaderVariants = nullptr;
 };
 
-class IDeviceContext
+class ENGINE_API IDeviceContext
 {
 protected:
     IDeviceContext() {}

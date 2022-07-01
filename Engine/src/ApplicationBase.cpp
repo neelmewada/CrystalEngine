@@ -12,19 +12,23 @@ using namespace Vox;
 
 ApplicationBase* ApplicationBase::m_Instance = nullptr;
 
-ApplicationBase::ApplicationBase(std::string windowTitle)
+ApplicationBase::ApplicationBase(std::string windowTitle, bool maximised, bool fullscreen, int w, int h)
 {
     m_Title = windowTitle;
     m_Instance = this;
 
     SDL_Init(SDL_INIT_VIDEO);
 
-    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_ALLOW_HIGHDPI |
-                                                    SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);// | SDL_WINDOW_FULLSCREEN_DESKTOP);
+    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
+
+    if (maximised)
+        windowFlags = (SDL_WindowFlags)(windowFlags | SDL_WINDOW_MAXIMIZED);
+    if (fullscreen)
+        windowFlags = (SDL_WindowFlags)(windowFlags | SDL_WINDOW_FULLSCREEN_DESKTOP);
 
     m_Window = SDL_CreateWindow(m_Title.c_str(),
                                 SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                                1280, 720, windowFlags);
+                                w, h, windowFlags);
 }
 
 ApplicationBase::~ApplicationBase()
