@@ -520,12 +520,13 @@ VkPresentModeKHR SwapChainVk::ChooseBestPresentationMode(const std::vector<VkPre
 
 VkExtent2D SwapChainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities)
 {
-    // If current extent is at max limit, then extent can vary
+    // If current extent is at max limit, then we can pick our own extent
     if (surfaceCapabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
     {
         return surfaceCapabilities.currentExtent;
     }
 
+    // Pick our own extent
     int width, height;
     SDL_Vulkan_GetDrawableSize(m_pEngine->GetWindow(), &width, &height);
 
