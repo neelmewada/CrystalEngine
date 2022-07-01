@@ -5,6 +5,7 @@
 
 #include "IGraphicsPipelineState.h"
 #include "IShader.h"
+#include "ISwapChain.h"
 
 #include <vector>
 
@@ -13,6 +14,7 @@ namespace Vox
 
 class IDeviceContext;
 class IGraphicsPipelineState;
+class ISwapChain;
 
 struct GraphicsPipelineVertexAttributeDesc
 {
@@ -24,6 +26,7 @@ struct GraphicsPipelineVertexAttributeDesc
 struct GraphicsPipelineStateCreateInfo
 {
     IDeviceContext* pDevice;
+    ISwapChain* pSwapChain;
     IShader* pShader;
     uint32_t vertexStructByteSize; // Number of bytes used per vertex
     uint32_t attributesCount;
@@ -43,6 +46,7 @@ struct ShaderVariantCreateInfo
 
 struct ShaderCreateInfo
 {
+    uint32_t defaultVariant = 0;
     size_t variantCount = 1;
     ShaderVariantCreateInfo* pVariants = nullptr;
 };

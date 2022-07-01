@@ -49,7 +49,7 @@ void RenderContextVk::BeginRecording()
     auto extent = m_pSwapChain->GetExtent();
 
     // -- Dynamic Viewport & Scissor --
-    // Create a viewport info struct
+    // CreateGraphicsPipeline a viewport info struct
     VkViewport viewport = {};
     viewport.x = 0;
     viewport.y = 0;
@@ -58,7 +58,7 @@ void RenderContextVk::BeginRecording()
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
-    // Create a scissor info struct (aka Cropping region)
+    // CreateGraphicsPipeline a scissor info struct (aka Cropping region)
     VkRect2D scissor = {};
     scissor.offset = {0,0};     // Offset to use region from
     scissor.extent = extent;  // Extent of the region starting from offset

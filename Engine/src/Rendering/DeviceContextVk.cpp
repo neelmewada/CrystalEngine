@@ -230,7 +230,7 @@ void DeviceContextVk::CreateCommandPool()
     poolInfo.queueFamilyIndex = m_QueueFamilies.graphicsFamilyIndex;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-    // Create a graphics queue family command pool
+    // CreateGraphicsPipeline a graphics queue family command pool
     auto result = vkCreateCommandPool(m_Device, &poolInfo, nullptr, &m_GraphicsCommandPool);
     if (result != VK_SUCCESS)
     {

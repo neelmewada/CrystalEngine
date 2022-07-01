@@ -49,6 +49,7 @@ ShaderVariantVk::~ShaderVariantVk()
 ShaderVk::ShaderVk(const ShaderCreateInfo &createInfo, DeviceContextVk* device) : IShader()
 {
     m_Device = device;
+    m_CurrentVariant = m_DefaultVariant = createInfo.defaultVariant;
 
     m_VariantsCount = createInfo.variantCount;
     m_pVariants = new ShaderVariantVk*[m_VariantsCount];

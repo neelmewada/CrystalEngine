@@ -21,6 +21,7 @@ public:
 
     ~Application()
     {
+        delete m_pPSO;
         delete m_pRenderContext;
         delete m_pSwapChain;
         delete m_pDeviceContext;
@@ -76,7 +77,7 @@ public:
         //m_pRenderContext->CmdDrawIndexed();
         m_pRenderContext->EndRecording();
 
-        // -- Create Shaders --
+        // -- CreateGraphicsPipeline Shaders --
         fs::path shaderDir = IO::GetSharedDirectory();
         shaderDir = shaderDir / "shaders/";
 
@@ -114,10 +115,11 @@ public:
         pipelineInfo.pShader = shader;
         pipelineInfo.attributesCount = 2;
         pipelineInfo.pAttributes = vertAttribs;
+        pipelineInfo.pSwapChain = m_pSwapChain;
 
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
-        // We're responsible for deleting the pShader coz we created it ourselves.
+        // We're responsible for deleting the shader coz we created it ourselves.
         delete shader;
     }
 

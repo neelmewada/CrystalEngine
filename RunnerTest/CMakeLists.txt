@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(RunnerTest)
+project(RunnerTest CXX)
 
 # This little macro lets you set any XCode specific property
 macro (set_xcode_property TARGET XCODE_PROPERTY XCODE_VALUE)
@@ -24,17 +24,19 @@ include(Shaders.cmake)
 # Compile Shaders during CMake Configuration
 compile_vert_shaders("${VERT_SHADER_SRCS}")
 compile_frag_shaders("${FRAG_SHADER_SRCS}")
-compile_hlsl_shaders("${HLSL_SRCS}")
+#compile_hlsl_shaders("${HLSL_SRCS}")
 file(COPY shaders DESTINATION      ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB_RECURSE VERT_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.vert)
 file(GLOB_RECURSE FRAG_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.frag)
 file(GLOB_RECURSE HLSL_SRCS        ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.hlsl)
-file(REMOVE "${VERT_SHADER_SRCS}" "${FRAG_SHADER_SRCS}")
+file(REMOVE "${VERT_SHADER_SRCS}" "${FRAG_SHADER_SRCS}" "${HLSL_SRCS}")
 
 
 add_executable(${PROJECT_NAME}
         ${EXEC_TYPE}
         src/main.cpp)
+
+add_dependencies(${PROJECT_NAME} Engine)
 
 if (PLATFORM_MACOS)
     SET_XCODE_PROPERTY(${PROJECT_NAME} CODE_SIGN_IDENTITY ${APPLE_DEV_CERT_NAME})#"Apple Developer")
@@ -62,7 +64,7 @@ elseif (APPLE) # macOS
 endif()
 
 if (PLATFORM_MACOS)
-    # Create Frameworks directory
+    # CreateGraphicsPipeline Frameworks directory
     execute_process(COMMAND rm -rf ${APP_BUNDLE_FRAMEWORKS_DIR})
     execute_process(COMMAND mkdir ${APP_BUNDLE_FRAMEWORKS_DIR})
     # Copy all the linked libraries to Frameworks directory
@@ -83,6 +85,7 @@ if (PLATFORM_MACOS)
             file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../Engine/libEngine.dylib DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Frameworks/)
             ")
 elseif(PLATFORM_WIN32)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    add_custom_target(COPY_DLL
+            COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_BINARY_DIR}/Engine.dll
             COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/../Engine/Engine.dll ${CMAKE_CURRENT_BINARY_DIR}/)
 endif()

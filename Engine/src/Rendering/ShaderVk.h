@@ -19,6 +19,8 @@ public: // Public API
     const char* GetName() { return m_pName; }
     size_t GetDefineFlagsCount() { return m_DefineFlagsCount; }
     const char* GetDefineFlagAt(int index) { return m_pDefineFlags[index]; }
+    VkShaderModule GetVertexModule() { return m_VertModule; }
+    VkShaderModule GetFragmentModule() { return m_FragModule; }
 
 private: // Internal API
     DeviceContextVk* m_Device = nullptr;
@@ -40,11 +42,15 @@ public:
 public: // Public API
     int GetVariantsCount() { return m_VariantsCount; }
     ShaderVariantVk* GetVariantAt(int index) { return m_pVariants[index]; }
+    ShaderVariantVk* GetDefaultVariant() { return GetVariantAt(m_DefaultVariant); }
+    ShaderVariantVk* GetCurrentVariant() { return GetVariantAt(m_CurrentVariant); }
 
 private: // Internal API
     DeviceContextVk* m_Device;
 
 private: // Internal Members
+    int m_DefaultVariant = 0;
+    int m_CurrentVariant = 0;
     size_t m_VariantsCount;
     ShaderVariantVk** m_pVariants; // Array of pointer to variants
 };

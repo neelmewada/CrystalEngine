@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(Engine)
+project(Engine CXX)
 
 add_library(${PROJECT_NAME} SHARED
         src/ApplicationBase.cpp src/Rendering/EngineFactoryVk.cpp src/Rendering/EngineContextVk.cpp src/Rendering/DeviceContextVk.cpp src/Rendering/SwapChainVk.cpp src/Rendering/RenderContextVk.cpp src/Rendering/GraphicsPipelineStateVk.cpp src/Rendering/ShaderVk.cpp src/IO/Directories.cpp src/IO/FileIO.cpp)

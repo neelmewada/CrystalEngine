@@ -174,7 +174,7 @@ void SwapChainVk::CreateSwapChain()
 
     m_MaxSimultaneousFrameDraws = imageCount - 1;
 
-    // Swapchain Create Info
+    // Swapchain CreateGraphicsPipeline Info
     VkSwapchainCreateInfoKHR swapchainInfo = {};
     swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     swapchainInfo.surface = m_pDevice->GetSurface();
@@ -214,7 +214,7 @@ void SwapChainVk::CreateSwapChain()
     // then link the old one to hand over responsibilities
     swapchainInfo.oldSwapchain = oldSwapchain;
 
-    // Create swap chain
+    // CreateGraphicsPipeline swap chain
     auto result = vkCreateSwapchainKHR(m_pDevice->GetDevice(), &swapchainInfo, nullptr, &m_Swapchain);
     if (result != VK_SUCCESS)
     {
@@ -323,7 +323,7 @@ void SwapChainVk::CreateRenderPass()
     subpassDependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
     subpassDependencies[1].dependencyFlags = 0;
 
-    // RenderPass Create Info
+    // RenderPass CreateGraphicsPipeline Info
     VkRenderPassCreateInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.subpassCount = 1;
@@ -439,7 +439,7 @@ void SwapChainVk::CreateSyncObjects()
 
     VkFenceCreateInfo fenceCreateInfo = {};
     fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Create the fence in signaled state
+    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // CreateGraphicsPipeline the fence in signaled state
 
     for (int i = 0; i < m_MaxSimultaneousFrameDraws; ++i)
     {
@@ -475,7 +475,7 @@ VkImageView SwapChainVk::CreateImageView(VkImage image, VkFormat format, VkImage
     viewCreateInfo.subresourceRange.baseArrayLayer = 0;        // Start array layer to view from
     viewCreateInfo.subresourceRange.layerCount = 1;            // No. of array layers to view
 
-    // Create image view and return it
+    // CreateGraphicsPipeline image view and return it
     VkImageView imageView;
     VkResult result = vkCreateImageView(m_pDevice->GetDevice(), &viewCreateInfo, nullptr, &imageView);
     if (result != VK_SUCCESS)
