@@ -121,15 +121,14 @@ void SwapChainVk::Present()
     // Index of images inside the respective swapchains to present. Count is 1:1 with pSwapchains
     presentInfo.pImageIndices = &m_CurrentImageIndex;
 
-
     auto result = vkQueuePresentKHR(m_pDevice->m_PresentQueue, &presentInfo);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
     {
         std::cout << "Recreating swap chain " << std::endl;
         RecreateSwapChainObjects();
         return;
     }
-    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+    else if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to present rendered image!");
     }
@@ -147,6 +146,7 @@ void SwapChainVk::RecreateSwapChainObjects()
     CreateSwapChain();
     CreateFramebuffers();
     //m_pRenderContext->ReRecordCommands();
+    CreateSyncObjects(); // Recreate sync objects, so they can be set to correct state
 
     std::cout << "Recreated Swap Chain" << std::endl;
 }
