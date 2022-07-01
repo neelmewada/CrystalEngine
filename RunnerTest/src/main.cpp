@@ -64,6 +64,7 @@ public:
         renderContextInfo.swapChain = m_pSwapChain;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
+        // -- Record Commands --
         float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
 
         m_pRenderContext->SetClearColor(clearColor);
@@ -75,6 +76,7 @@ public:
         //m_pRenderContext->CmdDrawIndexed();
         m_pRenderContext->EndRecording();
 
+        // -- Create Shaders --
         fs::path shaderDir = IO::GetSharedDirectory();
         shaderDir = shaderDir / "shaders/";
 
@@ -85,6 +87,7 @@ public:
         IO::ReadAllBytesFromFile(vertexFile, vertSpv);
         IO::ReadAllBytesFromFile(fragFile, fragSpv);
 
+        // Shader Variant Creation
         ShaderVariantCreateInfo variant = {};
         variant.defineFlagsCount = 0; // No define flags used
         variant.pDefineFlags = nullptr;
@@ -93,18 +96,28 @@ public:
         variant.fragmentByteSize = fragSpv.size();
         variant.pFragmentBytes = reinterpret_cast<const uint32_t*>(fragSpv.data());
 
+        // Shader Creation (Collection of Variants)
         ShaderCreateInfo shaderInfo = {};
         shaderInfo.variantCount = 1;
-        shaderInfo.pShaderVariants = &variant;
+        shaderInfo.pVariants = &variant;
 
         IShader* shader = m_pDeviceContext->CreateShader(shaderInfo);
 
+        // -- Graphics Pipeline --
+        GraphicsPipelineVertexAttributeDesc vertAttribs[2] = {
+                {0, 0, VERTEX_ATTRIB_FLOAT3}, // Position (float3)
+                {1, 0, VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
+        };
+
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
-        pipelineInfo.device = m_pDeviceContext;
-        pipelineInfo.shader = shader;
+        pipelineInfo.pDevice = m_pDeviceContext;
+        pipelineInfo.pShader = shader;
+        pipelineInfo.attributesCount = 2;
+        pipelineInfo.pAttributes = vertAttribs;
 
-        //m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
+        m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
+        // We're responsible for deleting the pShader coz we created it ourselves.
         delete shader;
     }
 

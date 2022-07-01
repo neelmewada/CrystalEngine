@@ -64,7 +64,7 @@ void DeviceContextVk::FetchPhysicalDevice()
 {
     auto instance = m_EngineContext->GetInstance();
 
-    // Get the physical device count first
+    // Get the physical pDevice count first
     uint32_t physicalDeviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
 
@@ -87,7 +87,7 @@ void DeviceContextVk::FetchPhysicalDevice()
         m_PhysicalDevice = physicalDevices[0];
         if (!CheckPhysicalDeviceSuitable(m_PhysicalDevice))
         {
-            throw std::runtime_error("The physical device does not have a Graphics queue and/or Compute queue.");
+            throw std::runtime_error("The physical pDevice does not have a Graphics queue and/or Compute queue.");
         }
         vkGetPhysicalDeviceProperties(m_PhysicalDevice, &selectedDeviceProps);
         std::cout << "Successfully selected the only GPU (" << selectedDeviceProps.deviceName << ") as the Physical Device." << std::endl;
@@ -99,11 +99,11 @@ void DeviceContextVk::FetchPhysicalDevice()
 
     for (const auto& physicalDevice: physicalDevices)
     {
-        // Info about the device itself
+        // Info about the pDevice itself
         VkPhysicalDeviceProperties props;
         vkGetPhysicalDeviceProperties(physicalDevice, &props);
 
-        // Info about what the device can do
+        // Info about what the pDevice can do
         VkPhysicalDeviceFeatures features;
         vkGetPhysicalDeviceFeatures(physicalDevice, &features);
 
@@ -127,7 +127,7 @@ void DeviceContextVk::FetchPhysicalDevice()
     if (!CheckPhysicalDeviceSuitable(m_PhysicalDevice))
     {
         throw std::runtime_error(std::string() +
-                                 "The physical device " + selectedDeviceProps.deviceName + " does not have a Graphics queue and/or Compute queue.");
+                                 "The physical pDevice " + selectedDeviceProps.deviceName + " does not have a Graphics queue and/or Compute queue.");
     }
 
     std::cout << "Successfully selected " << selectedDeviceProps.deviceName << " as the Physical Device." << std::endl;
@@ -169,7 +169,7 @@ void DeviceContextVk::CreateLogicalDevice()
     deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
     deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-    // Setup the enabled device extensions
+    // Setup the enabled pDevice extensions
     auto deviceExtensionNames = std::vector<const char*>();
     uint32_t propCount = 0;
     vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, nullptr, &propCount, nullptr);
@@ -195,9 +195,9 @@ void DeviceContextVk::CreateLogicalDevice()
 
     // Physical Device Features
     VkPhysicalDeviceFeatures deviceFeatures = {};
-    deviceCreateInfo.pEnabledFeatures = &deviceFeatures; // Physical device features the logical device will use
+    deviceCreateInfo.pEnabledFeatures = &deviceFeatures; // Physical pDevice features the logical pDevice will use
 
-    // Queues and logical device are created together by this function
+    // Queues and logical pDevice are created together by this function
     VkResult result = vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_Device);
 
     if (result != VK_SUCCESS)
@@ -269,7 +269,7 @@ bool DeviceContextVk::CheckPhysicalDeviceExtensionSupport(VkPhysicalDevice physi
     std::vector<VkExtensionProperties> extensions(extensionCount);
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, extensions.data());
 
-    // Check for required extensions in the Physical device extensions.
+    // Check for required extensions in the Physical pDevice extensions.
     for (const auto& requiredExtension: k_RequiredDeviceExtensions)
     {
         bool hasExtension = false;
@@ -291,7 +291,7 @@ bool DeviceContextVk::CheckPhysicalDeviceExtensionSupport(VkPhysicalDevice physi
 
 VkDeviceSize DeviceContextVk::GetPhysicalDeviceLocalMemory(VkPhysicalDevice physicalDevice)
 {
-    // Determine the available device local memory.
+    // Determine the available pDevice local memory.
     VkPhysicalDeviceMemoryProperties memoryProps;
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProps);
 
@@ -365,7 +365,7 @@ SurfaceCompatInfo DeviceContextVk::FetchSurfaceCompatInfo(VkPhysicalDevice physi
     SurfaceCompatInfo surfaceCompatInfo = {};
 
     // -- CAPABILITIES --
-    // Get the surface capabilities for the given physical device
+    // Get the surface capabilities for the given physical pDevice
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_Surface, &surfaceCompatInfo.surfaceCapabilities);
 
     // -- FORMATS --

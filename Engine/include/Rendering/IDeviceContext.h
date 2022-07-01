@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineDefs.h"
+#include "Types.h"
 
 #include "IGraphicsPipelineState.h"
 #include "IShader.h"
@@ -11,11 +12,22 @@ namespace Vox
 {
 
 class IDeviceContext;
+class IGraphicsPipelineState;
+
+struct GraphicsPipelineVertexAttributeDesc
+{
+    uint32_t location;
+    uint32_t offset;
+    VertexAttribFormat format; //usage: format = offsetof(Vertex, position);
+};
 
 struct GraphicsPipelineStateCreateInfo
 {
-    IDeviceContext* device;
-    IShader* shader;
+    IDeviceContext* pDevice;
+    IShader* pShader;
+    uint32_t vertexStructByteSize; // Number of bytes used per vertex
+    uint32_t attributesCount;
+    GraphicsPipelineVertexAttributeDesc* pAttributes;
 };
 
 struct ShaderVariantCreateInfo
@@ -31,8 +43,8 @@ struct ShaderVariantCreateInfo
 
 struct ShaderCreateInfo
 {
-    int variantCount = 1;
-    ShaderVariantCreateInfo* pShaderVariants = nullptr;
+    size_t variantCount = 1;
+    ShaderVariantCreateInfo* pVariants = nullptr;
 };
 
 class ENGINE_API IDeviceContext

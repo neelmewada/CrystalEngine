@@ -55,7 +55,7 @@ ShaderVk::ShaderVk(const ShaderCreateInfo &createInfo, DeviceContextVk* device) 
 
     for (int i = 0; i < m_VariantsCount; ++i)
     {
-        m_pVariants[i] = new ShaderVariantVk(createInfo.pShaderVariants[i], device);
+        m_pVariants[i] = new ShaderVariantVk(createInfo.pVariants[i], device);
     }
 }
 

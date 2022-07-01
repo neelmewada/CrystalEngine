@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineDefs.h"
+#include "IDeviceContext.h"
 
 namespace Vox
 {

@@ -1,4 +1,19 @@
 #pragma once
 
+namespace Vox
+{
 
+enum VertexAttribFormat
+{
+    VERTEX_ATTRIB_FLOAT,
+    VERTEX_ATTRIB_FLOAT2,
+    VERTEX_ATTRIB_FLOAT3,
+    VERTEX_ATTRIB_FLOAT4,
+    VERTEX_ATTRIB_HALF,
+    VERTEX_ATTRIB_HALF2,
+    VERTEX_ATTRIB_HALF3,
+    VERTEX_ATTRIB_HALF4
+};
+
+}
 

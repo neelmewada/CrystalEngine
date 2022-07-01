@@ -26,7 +26,7 @@ SwapChainVk::SwapChainVk(SwapChainCreateInfoVk &swapChainInfo)
 
 SwapChainVk::~SwapChainVk() noexcept
 {
-    // Wait until device finishes running draw commands, executing graphics queue, etc. Should always be called on the same thread as the rendering thread.
+    // Wait until pDevice finishes running draw commands, executing graphics queue, etc. Should always be called on the same thread as the rendering thread.
     vkDeviceWaitIdle(m_pDevice->GetDevice());
 
     // Sync Objects: Semaphores & Fences
@@ -87,8 +87,8 @@ void SwapChainVk::Submit()
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = &m_ImageAvailableForRendering[m_CurrentFrameIndex]; // List of semaphores to wait on before running the command buffer on GPU
 
-    // Execute the whole command buffer until the fragment shader (so we don't output any data to framebuffer yet)
-    // and THEN wait for the image to be available (m_ImageAvailable) so fragment shader can output pixels to it.
+    // Execute the whole command buffer until the fragment pShader (so we don't output any data to framebuffer yet)
+    // and THEN wait for the image to be available (m_ImageAvailable) so fragment pShader can output pixels to it.
     VkPipelineStageFlags waitStages[] = {
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
     };
@@ -145,8 +145,8 @@ void SwapChainVk::RecreateSwapChainObjects()
 
     CreateSwapChain();
     CreateFramebuffers();
-    //m_pRenderContext->ReRecordCommands();
-    CreateSyncObjects(); // Recreate sync objects, so they can be set to correct state
+    m_pRenderContext->ReRecordCommands();
+    CreateSyncObjects(); // Recreate sync objects, so they can be set to correct state (signalled or unsignalled)
 
     std::cout << "Recreated Swap Chain" << std::endl;
 }

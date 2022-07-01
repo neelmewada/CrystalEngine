@@ -15,18 +15,22 @@ if (PLATFORM_MACOS)
     set(APP_BUNDLE_FRAMEWORKS_DIR "${APP_BUNDLE_CONTENTS_DIR}/Frameworks")
 endif()
 
-# Retrieve all shader source files
+# Retrieve all pShader source files
 file(GLOB_RECURSE VERT_SHADER_SRCS shaders/*.vert)
 file(GLOB_RECURSE FRAG_SHADER_SRCS shaders/*.frag)
+file(GLOB_RECURSE HLSL_SRCS        shaders/*.hlsl)
 
 include(Shaders.cmake)
 # Compile Shaders during CMake Configuration
 compile_vert_shaders("${VERT_SHADER_SRCS}")
 compile_frag_shaders("${FRAG_SHADER_SRCS}")
-file(COPY shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+compile_hlsl_shaders("${HLSL_SRCS}")
+file(COPY shaders DESTINATION      ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB_RECURSE VERT_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.vert)
 file(GLOB_RECURSE FRAG_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.frag)
+file(GLOB_RECURSE HLSL_SRCS        ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.hlsl)
 file(REMOVE "${VERT_SHADER_SRCS}" "${FRAG_SHADER_SRCS}")
+
 
 add_executable(${PROJECT_NAME}
         ${EXEC_TYPE}

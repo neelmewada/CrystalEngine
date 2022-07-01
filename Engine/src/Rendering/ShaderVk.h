@@ -11,8 +11,14 @@ namespace Vox
 class ShaderVariantVk
 {
 public:
+    friend class ShaderVk;
     ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, DeviceContextVk* device);
     ~ShaderVariantVk();
+
+public: // Public API
+    const char* GetName() { return m_pName; }
+    size_t GetDefineFlagsCount() { return m_DefineFlagsCount; }
+    const char* GetDefineFlagAt(int index) { return m_pDefineFlags[index]; }
 
 private: // Internal API
     DeviceContextVk* m_Device = nullptr;
@@ -32,13 +38,14 @@ public:
     ~ShaderVk();
 
 public: // Public API
-
+    int GetVariantsCount() { return m_VariantsCount; }
+    ShaderVariantVk* GetVariantAt(int index) { return m_pVariants[index]; }
 
 private: // Internal API
     DeviceContextVk* m_Device;
 
 private: // Internal Members
-    int m_VariantsCount;
+    size_t m_VariantsCount;
     ShaderVariantVk** m_pVariants; // Array of pointer to variants
 };
 

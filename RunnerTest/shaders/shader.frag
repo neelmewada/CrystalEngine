@@ -1,4 +1,4 @@
-#version 450 // GLSL 4.5
+#version 450  // GLSL v4.5
 
 layout (location = 0) in vec3 inColor;
 
