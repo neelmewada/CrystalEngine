@@ -9,7 +9,9 @@ endmacro (set_xcode_property)
 
 if (PLATFORM_MACOS)
     set(EXEC_TYPE MACOSX_BUNDLE)
-    #set(CMAKE_SKIP_BUILD_RPATH TRUE)
+    if (NOT GENERATOR_XCODE)
+        set(CMAKE_SKIP_BUILD_RPATH TRUE)
+    endif()
 
     set(APP_BUNDLE_CONTENTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents")
     set(APP_BUNDLE_FRAMEWORKS_DIR "${APP_BUNDLE_CONTENTS_DIR}/Frameworks")
@@ -30,7 +32,6 @@ file(GLOB_RECURSE VERT_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.vert)
 file(GLOB_RECURSE FRAG_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.frag)
 file(GLOB_RECURSE HLSL_SRCS        ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.hlsl)
 file(REMOVE "${VERT_SHADER_SRCS}" "${FRAG_SHADER_SRCS}" "${HLSL_SRCS}")
-
 
 add_executable(${PROJECT_NAME}
         ${EXEC_TYPE}
@@ -75,15 +76,17 @@ if (PLATFORM_MACOS)
         unset(LIB_PATH CACHE)
     endforeach()
 
-    # Set rpath of the macos executable after build
-#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-#            COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks" "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}"
-#            COMMAND install_name_tool -add_rpath ${CMAKE_CURRENT_BINARY_DIR}/../Engine "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}")
+    if (NOT GENERATOR_XCODE) # Don't modify rpath if generating xcode project
+        # Set rpath of the macos executable after build
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks" "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}"
+                COMMAND install_name_tool -add_rpath ${CMAKE_CURRENT_BINARY_DIR}/../Engine "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}")
 
-    # Copy the libEngine.dylib on install time
-#    install(CODE "
-#            file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../Engine/libEngine.dylib DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Frameworks/)
-#            ")
+        # Copy the libEngine.dylib on install time
+        install(CODE "
+                file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../Engine/libEngine.dylib DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Frameworks/)
+                ")
+    endif()
 elseif(PLATFORM_WIN32)
     add_custom_target(COPY_DLL
             COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_BINARY_DIR}/Engine.dll

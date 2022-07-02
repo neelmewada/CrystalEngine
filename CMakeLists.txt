@@ -5,6 +5,10 @@ project(VoxEngine)
 set(CMAKE_CXX_STANDARD 17)
 set(VK_SDK $ENV{VK_SDK}) # VK_SDK needs to be set up in your system's environment variables
 
+if (${CMAKE_GENERATOR} STREQUAL "Xcode")
+    set(GENERATOR_XCODE TRUE)
+endif()
+
 if (APPLE)
     # Be sure to set 'export HOMEBREW ...' in ~/.zshrc on macOS
     # Because on newer macs (m1), homebrew installs on /opt/homebrew/ directory
