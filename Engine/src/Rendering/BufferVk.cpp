@@ -1,6 +1,8 @@
 
 #include "BufferVk.h"
 
+#include <stdexcept>
+
 using namespace Vox;
 
 BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, DeviceContextVk* pDevice)

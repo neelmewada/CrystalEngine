@@ -73,7 +73,7 @@ public:
 
         // -- CreateGraphicsPipeline Shaders --
         fs::path shaderDir = IO::GetSharedDirectory();
-        shaderDir = std::string("/Users/neelmewada/CLionProjects/VoxEngine/RunnerTest/shaders");//shaderDir / "shaders/";
+        shaderDir = shaderDir / "shaders/";
 
         std::string vertexFile = (shaderDir / "shader_vert.spv").string();
         std::string fragFile = (shaderDir / "shader_frag.spv").string();
@@ -106,8 +106,8 @@ public:
 
         // -- Graphics Pipeline --
         GraphicsPipelineVertexAttributeDesc vertAttribs[2] = {
-                {0, 0, offsetof(Vertex, position), VERTEX_ATTRIB_FLOAT3}, // Position (float3)
-                {0, 1, offsetof(Vertex, color), VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
+                {0, 0, static_cast<uint32_t>(offsetof(Vertex, position)), VERTEX_ATTRIB_FLOAT3}, // Position (float3)
+                {0, 1, static_cast<uint32_t>(offsetof(Vertex, color)), VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
         };
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};

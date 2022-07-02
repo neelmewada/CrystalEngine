@@ -9,6 +9,8 @@
 #include "DeviceContextVk.h"
 #include "SwapChainVk.h"
 
+#include <functional>
+
 typedef std::function<void(VkCommandBuffer)> RenderCommand;
 
 namespace Vox
