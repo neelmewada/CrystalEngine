@@ -9,7 +9,7 @@ endmacro (set_xcode_property)
 
 if (PLATFORM_MACOS)
     set(EXEC_TYPE MACOSX_BUNDLE)
-    set(CMAKE_SKIP_BUILD_RPATH TRUE)
+    #set(CMAKE_SKIP_BUILD_RPATH TRUE)
 
     set(APP_BUNDLE_CONTENTS_DIR "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents")
     set(APP_BUNDLE_FRAMEWORKS_DIR "${APP_BUNDLE_CONTENTS_DIR}/Frameworks")
@@ -76,14 +76,14 @@ if (PLATFORM_MACOS)
     endforeach()
 
     # Set rpath of the macos executable after build
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks" "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}"
-            COMMAND install_name_tool -add_rpath ${CMAKE_CURRENT_BINARY_DIR}/../Engine "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}")
+#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#            COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks" "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}"
+#            COMMAND install_name_tool -add_rpath ${CMAKE_CURRENT_BINARY_DIR}/../Engine "${APP_BUNDLE_CONTENTS_DIR}/MacOS/${PROJECT_NAME}")
 
     # Copy the libEngine.dylib on install time
-    install(CODE "
-            file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../Engine/libEngine.dylib DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Frameworks/)
-            ")
+#    install(CODE "
+#            file(COPY ${CMAKE_CURRENT_BINARY_DIR}/../Engine/libEngine.dylib DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Frameworks/)
+#            ")
 elseif(PLATFORM_WIN32)
     add_custom_target(COPY_DLL
             COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_BINARY_DIR}/Engine.dll

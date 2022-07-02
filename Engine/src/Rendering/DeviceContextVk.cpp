@@ -5,10 +5,14 @@
 #include "DeviceContextVk.h"
 #include "GraphicsPipelineStateVk.h"
 #include "ShaderVk.h"
+#include "BufferVk.h"
 
 #include <vulkan/vulkan.h>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
+
+#include <vulkan/vulkan_beta.h>
 
 #include "TypesVk.h"
 
@@ -182,6 +186,8 @@ void DeviceContextVk::CreateLogicalDevice()
         if (strcmp(extensionProps[i].extensionName, "VK_KHR_portability_subset") == 0)
         {
             deviceExtensionNames.push_back(extensionProps[i].extensionName);
+            m_PortabilitySubsetEnabled = true;
+            break;
         }
     }
 
@@ -193,8 +199,9 @@ void DeviceContextVk::CreateLogicalDevice()
     deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensionNames.size());
     deviceCreateInfo.ppEnabledExtensionNames = deviceExtensionNames.size() > 0 ? deviceExtensionNames.data() : nullptr;
 
-    // Physical Device Features
+    // Physical Device Features the logical device will use
     VkPhysicalDeviceFeatures deviceFeatures = {};
+
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures; // Physical pDevice features the logical pDevice will use
 
     // Queues and logical pDevice are created together by this function
@@ -413,14 +420,19 @@ VkFormat DeviceContextVk::FindSupportedFormat(const std::vector<VkFormat> &candi
 
 #pragma region Public API
 
-IGraphicsPipelineState *DeviceContextVk::CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo &createInfo)
+IGraphicsPipelineState* DeviceContextVk::CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo &createInfo)
 {
     return new GraphicsPipelineStateVk(createInfo);
 }
 
-IShader *DeviceContextVk::CreateShader(const ShaderCreateInfo& createInfo)
+IShader* DeviceContextVk::CreateShader(const ShaderCreateInfo& createInfo)
 {
     return new ShaderVk(createInfo, this);
+}
+
+IBuffer* DeviceContextVk::CreateBuffer(const BufferCreateInfo& createInfo, BufferData &bufferData)
+{
+    return new BufferVk(createInfo, bufferData, this);
 }
 
 #pragma endregion

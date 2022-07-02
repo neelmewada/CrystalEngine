@@ -6,6 +6,8 @@
 #include <chrono>
 #include <filesystem>
 
+#include <glm/glm.hpp>
+
 namespace fs = std::filesystem;
 
 using namespace Vox;
@@ -21,6 +23,10 @@ public:
 
     ~Application()
     {
+        m_pDeviceContext->WaitUntilIdle(); // Wait until device is idle before destroying everything
+
+        delete m_IndexBuffer;
+        delete m_VertexBuffer;
         delete m_pPSO;
         delete m_pRenderContext;
         delete m_pSwapChain;
@@ -65,21 +71,9 @@ public:
         renderContextInfo.swapChain = m_pSwapChain;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
-        // -- Record Commands --
-        float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
-
-        m_pRenderContext->SetClearColor(clearColor);
-
-        m_pRenderContext->BeginRecording();
-        //m_pRenderContext->CmdBindPipeline(cubePipeline);
-        //m_pRenderContext->CmdBindVertexBuffers(2, vertexBuffers);
-        //m_pRenderContext->CmdBindIndexBuffer(indexBuffers);
-        //m_pRenderContext->CmdDrawIndexed();
-        m_pRenderContext->EndRecording();
-
         // -- CreateGraphicsPipeline Shaders --
         fs::path shaderDir = IO::GetSharedDirectory();
-        shaderDir = shaderDir / "shaders/";
+        shaderDir = std::string("/Users/neelmewada/CLionProjects/VoxEngine/RunnerTest/shaders");//shaderDir / "shaders/";
 
         std::string vertexFile = (shaderDir / "shader_vert.spv").string();
         std::string fragFile = (shaderDir / "shader_frag.spv").string();
@@ -104,10 +98,16 @@ public:
 
         IShader* shader = m_pDeviceContext->CreateShader(shaderInfo);
 
+        struct Vertex
+        {
+            glm::vec3 position;
+            glm::vec3 color;
+        };
+
         // -- Graphics Pipeline --
         GraphicsPipelineVertexAttributeDesc vertAttribs[2] = {
-                {0, 0, VERTEX_ATTRIB_FLOAT3}, // Position (float3)
-                {1, 0, VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
+                {0, 0, offsetof(Vertex, position), VERTEX_ATTRIB_FLOAT3}, // Position (float3)
+                {0, 1, offsetof(Vertex, color), VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
         };
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
@@ -116,8 +116,61 @@ public:
         pipelineInfo.attributesCount = 2;
         pipelineInfo.pAttributes = vertAttribs;
         pipelineInfo.pSwapChain = m_pSwapChain;
+        pipelineInfo.vertexStructByteSize = static_cast<uint32_t>(sizeof(Vertex));
 
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
+
+        // Buffer Creation
+
+        Vertex vertices[4];
+        // Vertex positions
+        vertices[0].position = { 0.5f, 0.5f, 0.0f };
+        vertices[1].position = {-0.5f, 0.5f, 0.0f };
+        vertices[2].position = { -0.5f,-0.5f, 0.0f };
+        vertices[3].position = { 0.5f,-0.5f, 0.0f };
+        // Vertex colors
+        vertices[0].color = { 0.0f, 1.0f, 0.0f };
+        vertices[1].color = { 0.0f, 1.0f, 0.0f };
+        vertices[2].color = { 0.0f, 1.0f, 0.0f };
+        vertices[3].color = { 0.0f, 1.0f, 0.0f };
+
+        uint16_t indices[6] = {0, 1, 2, 2, 3, 0};
+
+        // Vertex Buffer
+        BufferCreateInfo vertBufferInfo = {};
+        vertBufferInfo.pName = "Rect";
+        vertBufferInfo.bindFlags = Vox::BIND_VERTEX_BUFFER;
+        vertBufferInfo.usageFlags = Vox::USAGE_IMMUTABLE;
+        vertBufferInfo.size = sizeof(vertices);
+        BufferData vertBufferData = {};
+        vertBufferData.dataSize = sizeof(vertices);
+        vertBufferData.pData = vertices;
+        m_VertexBuffer = m_pDeviceContext->CreateBuffer(vertBufferInfo, vertBufferData);
+
+        // Index Buffer
+        BufferCreateInfo indexBufferInfo = {};
+        indexBufferInfo.pName = "Rect";
+        indexBufferInfo.bindFlags = Vox::BIND_INDEX_BUFFER;
+        indexBufferInfo.usageFlags = Vox::USAGE_IMMUTABLE;
+        indexBufferInfo.size = sizeof(indices);
+        BufferData indexBufferData = {};
+        indexBufferData.dataSize = sizeof(indices);
+        indexBufferData.pData = indices;
+        m_IndexBuffer = m_pDeviceContext->CreateBuffer(indexBufferInfo, indexBufferData);
+
+        // -- Record Commands --
+        float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
+
+        m_pRenderContext->SetClearColor(clearColor);
+
+        m_pRenderContext->BeginRecording();
+        m_pRenderContext->CmdBindPipeline(m_pPSO);
+        uint64_t offset = 0;
+        // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
+        m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
+        m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
+        m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0);
+        m_pRenderContext->EndRecording();
 
         // We're responsible for deleting the shader coz we created it ourselves.
         delete shader;
@@ -126,7 +179,11 @@ public:
 protected:
     void PollEvent(SDL_Event e) override
     {
-
+        // Handle OS events ...
+        if (e.window.event == SDL_WINDOWEVENT_RESIZED)
+        {
+            m_pSwapChain->Resize();
+        }
     }
 
     void Render() override
@@ -149,6 +206,8 @@ private: // Internal Members
     ISwapChain* m_pSwapChain;
     IRenderContext* m_pRenderContext;
     IGraphicsPipelineState* m_pPSO;
+    IBuffer* m_VertexBuffer;
+    IBuffer* m_IndexBuffer;
 };
 
 int main(int argc, const char* argv[])

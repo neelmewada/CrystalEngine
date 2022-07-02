@@ -19,6 +19,7 @@ class SwapChainVk : public ISwapChain
 {
 private:
     friend class EngineFactoryVk;
+    friend class RenderContextVk;
     SwapChainVk(SwapChainCreateInfoVk& swapChainInfo);
     ~SwapChainVk();
 
@@ -26,6 +27,7 @@ public: // Public API
     // - API
     void Submit() override;
     void Present() override;
+    void Resize() override;
 
     // - Getters
     VkExtent2D GetExtent() { return m_SwapchainExtent; }

@@ -3,6 +3,7 @@
 #include "Rendering/EngineFactoryVk.h"
 #include "Rendering/IDeviceContext.h"
 #include "Rendering/EngineContextVk.h"
+#include "Rendering/BufferVk.h"
 #include "TypesVk.h"
 
 #include <SDL2/SDL.h>
@@ -35,12 +36,16 @@ public:
     VkCommandPool GetGraphicsCommandPool() { return m_GraphicsCommandPool; }
     VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
     VkQueue GetPresentQueue() { return m_PresentQueue; }
+    bool IsPortabilitySubsetEnabled() { return m_PortabilitySubsetEnabled; }
+    VmaAllocator GetVmaAllocator() { return m_Allocator; }
 
     VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 public: // Public API
-    IGraphicsPipelineState * CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo& createInfo) override;
-    IShader * CreateShader(const ShaderCreateInfo& createInfo) override;
+    void WaitUntilIdle() override { vkDeviceWaitIdle(m_Device); }
+    IGraphicsPipelineState* CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo& createInfo) override;
+    IShader* CreateShader(const ShaderCreateInfo& createInfo) override;
+    IBuffer* CreateBuffer(const BufferCreateInfo& createInfo, BufferData& bufferData) override;
 
 private: // Internal API
     // - Vulkan Main
@@ -50,7 +55,7 @@ private: // Internal API
     void CreateVmaAllocator();
     void CreateCommandPool();
 
-    // - Support Device
+    // - Supports
     bool CheckPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice);
     bool CheckPhysicalDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
     VkDeviceSize GetPhysicalDeviceLocalMemory(VkPhysicalDevice physicalDevice);
@@ -61,6 +66,7 @@ private: // Internal Members
     EngineContextVk* m_EngineContext = nullptr;
     SurfaceCompatInfo m_SurfaceCompatInfo;
     QueueFamilyInfo m_QueueFamilies;
+    bool m_PortabilitySubsetEnabled = false;
 
 private: // Vulkan Members
     VkSurfaceKHR m_Surface = nullptr;

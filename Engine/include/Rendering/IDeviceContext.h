@@ -6,6 +6,7 @@
 #include "IGraphicsPipelineState.h"
 #include "IShader.h"
 #include "ISwapChain.h"
+#include "IBuffer.h"
 
 #include <vector>
 
@@ -18,6 +19,7 @@ class ISwapChain;
 
 struct GraphicsPipelineVertexAttributeDesc
 {
+    uint32_t binding;
     uint32_t location;
     uint32_t offset;
     VertexAttribFormat format; //usage: format = offsetof(Vertex, position);
@@ -51,6 +53,20 @@ struct ShaderCreateInfo
     ShaderVariantCreateInfo* pVariants = nullptr;
 };
 
+struct BufferCreateInfo
+{
+    const char* pName;
+    BufferBindFlags bindFlags;
+    BufferUsageFlags usageFlags;
+    uint64_t size;
+};
+
+struct BufferData
+{
+    uint64_t dataSize; // number of bytes
+    void* pData;
+};
+
 class ENGINE_API IDeviceContext
 {
 protected:
@@ -59,9 +75,10 @@ public:
     virtual ~IDeviceContext() {}
 
 public: // Public API
+    virtual void WaitUntilIdle() = 0;
     virtual IGraphicsPipelineState* CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo& createInfo) = 0;
     virtual IShader* CreateShader(const ShaderCreateInfo& createInfo) = 0;
-
+    virtual IBuffer* CreateBuffer(const BufferCreateInfo& createInfo, BufferData& bufferData) = 0;
 };
 
 }

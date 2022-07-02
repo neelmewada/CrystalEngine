@@ -5,6 +5,11 @@
 namespace Vox
 {
 
+enum IndexType
+{
+    INDEX_TYPE_UINT16 = 0, INDEX_TYPE_UINT32 = 1
+};
+
 class ENGINE_API IRenderContext
 {
 protected:
@@ -18,7 +23,13 @@ public: // Public API
 
     // - Commands
     virtual void ReRecordCommands() = 0;
+    virtual void ClearRecording() = 0;
+
     virtual void BeginRecording() = 0;
+    virtual void CmdBindPipeline(IGraphicsPipelineState* pPipeline) = 0;
+    virtual void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** pBuffers, uint64_t* offsets) = 0;
+    virtual void CmdBindIndexBuffer(IBuffer* pBuffer, IndexType indexType, uint64_t offset) = 0;
+    virtual void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex) = 0;
     virtual void EndRecording() = 0;
 };
 

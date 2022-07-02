@@ -1,5 +1,6 @@
 
 #include "RenderContextVk.h"
+#include "GraphicsPipelineStateVk.h"
 
 #include <vulkan/vulkan.h>
 #include <SDL2/SDL.h>
@@ -36,13 +37,90 @@ void RenderContextVk::SetClearColor(float clearColor[4])
 
 void RenderContextVk::ReRecordCommands()
 {
-    // TODO: Temp Code
-    BeginRecording();
+    if (m_RenderCommands.empty())
+    {
+        std::cerr << "ReRecordCommands() called while there are no recorded commands!" << std::endl;
+    }
+    EndRecording();
+}
+
+void RenderContextVk::ClearRecording()
+{
+    m_IsRecording = false;
+    m_RenderCommands.clear();
 }
 
 void RenderContextVk::BeginRecording()
 {
-    // TODO: Temp Function Code
+    m_IsRecording = true;
+
+    m_RenderCommands.clear();
+}
+
+void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
+{
+    GraphicsPipelineStateVk* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
+    if (pPipelineVk == nullptr)
+    {
+        throw std::runtime_error("Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
+    }
+
+    m_RenderCommands.push_back([pPipelineVk](VkCommandBuffer commandBuffer) -> void {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
+    });
+}
+
+void RenderContextVk::CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets)
+{
+    std::vector<VkBuffer> buffers(bufferCount);
+    std::vector<uint64_t> offsetList(bufferCount);
+    for (int i = 0; i < bufferCount; ++i)
+    {
+        BufferVk* buffer = dynamic_cast<BufferVk*>(ppBuffers[i]);
+        if (buffer == nullptr)
+        {
+            throw std::runtime_error("Failed to bind Vertex Buffers! Couldn't cast IBuffer to VkBuffer!");
+        }
+        buffers[i] = buffer->GetBuffer();
+        offsetList[i] = offsets[i];
+    }
+
+    m_RenderCommands.push_back([bufferCount, buffers, offsetList](VkCommandBuffer commandBuffer) -> void {
+        vkCmdBindVertexBuffers(commandBuffer, 0, bufferCount, buffers.data(), offsetList.data());
+    });
+}
+
+void RenderContextVk::CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, uint64_t offset)
+{
+    BufferVk* pBufferVk = dynamic_cast<BufferVk*>(pBuffer);
+    if (pBufferVk == nullptr)
+    {
+        throw std::runtime_error("Failed to bind index buffer! pBuffer passed is not of type BufferVk!");
+    }
+
+    VkBuffer buffer = pBufferVk->GetBuffer();
+
+    m_RenderCommands.push_back([buffer, offset, indexType](VkCommandBuffer commandBuffer) -> void {
+        auto vkIndexType = VK_INDEX_TYPE_UINT16;
+        if (indexType == INDEX_TYPE_UINT16)
+            vkIndexType = VK_INDEX_TYPE_UINT16;
+        else if (indexType == INDEX_TYPE_UINT32)
+            vkIndexType = VK_INDEX_TYPE_UINT32;
+        vkCmdBindIndexBuffer(commandBuffer, buffer, offset, vkIndexType);
+    });
+}
+
+void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex)
+{
+    m_RenderCommands.push_back([indexCount, instanceCount, vertexOffset, firstIndex](VkCommandBuffer commandBuffer) -> void {
+        vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, 0);
+    });
+}
+
+void RenderContextVk::EndRecording()
+{
+    m_IsRecording = false;
+
     // Make sure the command buffers aren't being used by GPU while we record commands
     vkQueueWaitIdle(m_pDevice->GetGraphicsQueue());
 
@@ -73,7 +151,7 @@ void RenderContextVk::BeginRecording()
     renderPassBeginInfo.renderArea.offset = {0, 0}; // Start point of renderpass render region
     renderPassBeginInfo.renderArea.extent = extent; // Size of region to run render pass on
     VkClearValue clearValues[] = {
-        {m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]}
+            {m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]}
     };
     // TODO: Add Depth Attachment clear values later
     renderPassBeginInfo.pClearValues = clearValues; // Clear values are 1:1 with the attachments of the whole render pass
@@ -101,7 +179,11 @@ void RenderContextVk::BeginRecording()
                 vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
                 vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
 
-                // Do nothing for now
+                // Run recording of stored commands
+                for (const auto& command: m_RenderCommands)
+                {
+                    command(commandBuffers[i]);
+                }
             }
             vkCmdEndRenderPass(commandBuffers[i]);
             // End Render Pass
@@ -114,11 +196,6 @@ void RenderContextVk::BeginRecording()
             throw std::runtime_error("Failed to stop recording the command buffer at index " + std::to_string(i));
         }
     }
-}
-
-void RenderContextVk::EndRecording()
-{
-
 }
 
 #pragma endregion

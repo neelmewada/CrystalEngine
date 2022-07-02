@@ -18,6 +18,9 @@ public:
     ~GraphicsPipelineStateVk();
 
 public: // Public API
+    // - Getters
+    VkPipelineLayout GetPipelineLayout() { return m_PipelineLayout; }
+    VkPipeline GetPipeline() { return m_Pipeline; }
 
 private: // Internal API
     void CreateGraphicsPipeline(const GraphicsPipelineStateCreateInfo& createInfo);

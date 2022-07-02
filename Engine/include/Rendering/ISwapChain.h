@@ -15,6 +15,7 @@ public:
 public: // Public API
     virtual void Submit() = 0;
     virtual void Present() = 0;
+    virtual void Resize() = 0;
 
 };
 

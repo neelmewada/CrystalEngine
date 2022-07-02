@@ -8,12 +8,13 @@
 #include "IO/FileIO.h"
 
 // -- RENDERING --
-#include "Rendering/IShader.h"
 #include "Rendering/Types.h"
 #include "Rendering/IEngineContext.h"
 #include "Rendering/IDeviceContext.h"
+#include "Rendering/IShader.h"
 #include "Rendering/ISwapChain.h"
 #include "Rendering/IRenderContext.h"
+#include "Rendering/IBuffer.h"
 #include "Rendering/IGraphicsPipelineState.h"
 #include "Rendering/EngineFactoryVk.h"
 

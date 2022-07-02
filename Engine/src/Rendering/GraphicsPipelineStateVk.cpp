@@ -38,7 +38,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
 
     for (int i = 0; i < createInfo.attributesCount; ++i)
     {
-        vertexAttribs[i].binding = 0;
+        vertexAttribs[i].binding = createInfo.pAttributes[i].binding;
         vertexAttribs[i].location = createInfo.pAttributes[i].location;
         vertexAttribs[i].format = VkFormatFromVertexAttribFormat(createInfo.pAttributes[i].format);
         vertexAttribs[i].offset = createInfo.pAttributes[i].offset;

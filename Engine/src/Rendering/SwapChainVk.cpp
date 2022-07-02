@@ -137,6 +137,11 @@ void SwapChainVk::Present()
     m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_MaxSimultaneousFrameDraws;
 }
 
+void SwapChainVk::Resize()
+{
+    RecreateSwapChainObjects();
+}
+
 #pragma endregion
 
 void SwapChainVk::RecreateSwapChainObjects()
