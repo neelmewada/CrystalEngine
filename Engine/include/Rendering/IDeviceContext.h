@@ -51,6 +51,8 @@ struct ShaderCreateInfo
     uint32_t defaultVariant = 0;
     size_t variantCount = 1;
     ShaderVariantCreateInfo* pVariants = nullptr;
+    const char* pVertEntryPoint;
+    const char* pFragEntryPoint;
 };
 
 struct BufferCreateInfo

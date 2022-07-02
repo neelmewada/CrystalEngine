@@ -26,7 +26,7 @@ include(Shaders.cmake)
 # Compile Shaders during CMake Configuration
 compile_vert_shaders("${VERT_SHADER_SRCS}")
 compile_frag_shaders("${FRAG_SHADER_SRCS}")
-#compile_hlsl_shaders("${HLSL_SRCS}")
+compile_hlsl_shaders("${HLSL_SRCS}")
 file(COPY shaders DESTINATION      ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB_RECURSE VERT_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.vert)
 file(GLOB_RECURSE FRAG_SHADER_SRCS ${CMAKE_CURRENT_BINARY_DIR}/shaders/*.frag)

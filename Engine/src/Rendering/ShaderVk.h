@@ -44,11 +44,15 @@ public: // Public API
     ShaderVariantVk* GetVariantAt(int index) { return m_pVariants[index]; }
     ShaderVariantVk* GetDefaultVariant() { return GetVariantAt(m_DefaultVariant); }
     ShaderVariantVk* GetCurrentVariant() { return GetVariantAt(m_CurrentVariant); }
+    const char* GetVertEntryPoint() { return m_pVertEntryPoint; }
+    const char* GetFragEntryPoint() { return m_pFragEntryPoint; }
 
 private: // Internal API
     DeviceContextVk* m_Device;
 
 private: // Internal Members
+    const char* m_pVertEntryPoint = nullptr;
+    const char* m_pFragEntryPoint = nullptr;
     int m_DefaultVariant = 0;
     int m_CurrentVariant = 0;
     size_t m_VariantsCount;

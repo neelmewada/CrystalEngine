@@ -8,7 +8,6 @@ using namespace Vox;
 ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, DeviceContextVk *device)
 {
     m_Device = device;
-
     m_pName = createInfo.name;
 
     m_DefineFlagsCount = createInfo.defineFlagsCount;
@@ -50,6 +49,8 @@ ShaderVk::ShaderVk(const ShaderCreateInfo &createInfo, DeviceContextVk* device) 
 {
     m_Device = device;
     m_CurrentVariant = m_DefaultVariant = createInfo.defaultVariant;
+    m_pVertEntryPoint = createInfo.pVertEntryPoint;
+    m_pFragEntryPoint = createInfo.pFragEntryPoint;
 
     m_VariantsCount = createInfo.variantCount;
     m_pVariants = new ShaderVariantVk*[m_VariantsCount];

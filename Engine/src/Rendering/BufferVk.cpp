@@ -33,7 +33,7 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, D
         throw std::runtime_error("Failed to create VkBuffer using vmaCreateBuffer!");
     }
 
-    // -- Copy Buffer Data To GPU --
+    // -- Copy Data To Buffer --
     void* data;
     vmaMapMemory(m_VmaAllocator, m_Allocation, &data);
     memcpy(data, bufferData.pData, bufferData.dataSize);

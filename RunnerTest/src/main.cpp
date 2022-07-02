@@ -90,11 +90,13 @@ public:
         variant.pVertexBytes = reinterpret_cast<const uint32_t*>(vertSpv.data());
         variant.fragmentByteSize = fragSpv.size();
         variant.pFragmentBytes = reinterpret_cast<const uint32_t*>(fragSpv.data());
-
+        
         // Shader Creation (Collection of Variants)
         ShaderCreateInfo shaderInfo = {};
         shaderInfo.variantCount = 1;
         shaderInfo.pVariants = &variant;
+        shaderInfo.pVertEntryPoint = "main";
+        shaderInfo.pFragEntryPoint = "main";
 
         IShader* shader = m_pDeviceContext->CreateShader(shaderInfo);
 

@@ -145,14 +145,14 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     vertexShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertexShaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
     vertexShaderStage.module = shaderVariant->GetVertexModule();
-    vertexShaderStage.pName = pShaderEntry;
+    vertexShaderStage.pName = m_pShader->GetVertEntryPoint();
 
     // Fragment Shader
     VkPipelineShaderStageCreateInfo fragmentShaderStage = {};
     fragmentShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragmentShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     fragmentShaderStage.module = shaderVariant->GetFragmentModule();
-    fragmentShaderStage.pName = pShaderEntry;
+    fragmentShaderStage.pName = m_pShader->GetFragEntryPoint();
 
     VkPipelineShaderStageCreateInfo shaderStages[2] = { vertexShaderStage, fragmentShaderStage };
 
