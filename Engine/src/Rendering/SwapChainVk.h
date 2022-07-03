@@ -43,6 +43,7 @@ private: // Internal API
     // - Vulkan Main
     void CreateSwapChain();
     void CreateRenderPass();
+    void CreateDepthBufferImage();
     void CreateFramebuffers();
     void CreateCommandBuffers();
     void CreateSyncObjects();
@@ -50,11 +51,12 @@ private: // Internal API
     void RecreateSwapChainObjects();
 
     // - Helpers
+    VkImage CreateImage(uint32_t width, uint32_t height, VkFormat imageFormat, VkImageTiling tiling, VkImageUsageFlags usage, VmaAllocation* pAllocation);
     VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
     VkSurfaceFormatKHR ChooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& surfaceFormats);
     VkPresentModeKHR ChooseBestPresentationMode(const std::vector<VkPresentModeKHR>& presentationModes);
     VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
-    VkFormat FindDepthFormat();
+    VkFormat ChooseDepthFormat();
 
 private: // Internal Members
     int m_CurrentFrameIndex = 0; // Index of current frame we're rendering
@@ -76,6 +78,11 @@ private: // Vulkan Members
     std::vector<SwapchainImage> m_SwapchainImages;
     std::vector<VkFramebuffer> m_SwapchainFramebuffers;
     std::vector<VkCommandBuffer> m_CommandBuffers;
+
+    // - Depth Buffer
+    VmaAllocation m_DepthImageAllocation = nullptr;
+    VkImage m_DepthImage = nullptr;
+    VkImageView m_DepthImageView = nullptr;
 
     // - Synchronization
     std::vector<VkSemaphore> m_ImageAvailableForRendering;

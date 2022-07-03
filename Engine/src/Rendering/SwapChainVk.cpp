@@ -17,6 +17,7 @@ SwapChainVk::SwapChainVk(SwapChainCreateInfoVk &swapChainInfo)
 
     CreateSwapChain();
     CreateRenderPass();
+    CreateDepthBufferImage();
     CreateFramebuffers();
     CreateCommandBuffers();
     CreateSyncObjects();
@@ -149,6 +150,7 @@ void SwapChainVk::RecreateSwapChainObjects()
     vkDeviceWaitIdle(m_pDevice->GetDevice());
 
     CreateSwapChain();
+    CreateDepthBufferImage();
     CreateFramebuffers();
     m_pRenderContext->ReRecordCommands();
     CreateSyncObjects(); // Recreate sync objects, so they can be set to correct state (signalled or unsignalled)
@@ -211,7 +213,7 @@ void SwapChainVk::CreateSwapChain()
     else
     {
         swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE; // Exclusive to a single family
-        swapchainInfo.queueFamilyIndexCount = 0;  // 0 because the images are not shared between any families
+        swapchainInfo.queueFamilyIndexCount = 0;  // 0 because the images are not shared between any families (aka exclusive)
         swapchainInfo.pQueueFamilyIndices = nullptr; // nullptr because count is 0
     }
 
@@ -288,7 +290,7 @@ void SwapChainVk::CreateRenderPass()
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     VkAttachmentDescription depthAttachment = {};
-    depthAttachment.format = FindDepthFormat();
+    depthAttachment.format = ChooseDepthFormat();
     depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; // Don't care about storing depth after render pass has finished
@@ -343,6 +345,11 @@ void SwapChainVk::CreateRenderPass()
     {
         throw std::runtime_error("Failed to create RenderPass!");
     }
+}
+
+void SwapChainVk::CreateDepthBufferImage()
+{
+
 }
 
 void SwapChainVk::CreateFramebuffers()
@@ -459,6 +466,37 @@ void SwapChainVk::CreateSyncObjects()
 
 #pragma region HELPERS
 
+VkImage SwapChainVk::CreateImage(uint32_t width, uint32_t height, VkFormat imageFormat, VkImageTiling tiling,
+                                 VkImageUsageFlags usage, VmaAllocation *pAllocation)
+{
+    // -- Image Create --
+    VkImageCreateInfo imageCreateInfo = {};
+    imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+    imageCreateInfo.extent = VkExtent3D{width, height, 1};
+    imageCreateInfo.mipLevels = 1;
+    imageCreateInfo.arrayLayers = 1;   // Use only 1 layers. More layers used often in cubemaps, etc
+    imageCreateInfo.format = imageFormat;
+    imageCreateInfo.tiling = tiling;   // How image should be arranged in memory
+    imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;  // Layout of image data on creation
+    imageCreateInfo.usage = usage;
+    imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;           // No. of samples for multisampling
+    imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;  // Exclusive to only 1 queue
+
+    VmaAllocationCreateInfo allocationInfo = {};
+    allocationInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+    VkImage image;
+    auto result = vmaCreateImage(m_pDevice->GetVmaAllocator(), &imageCreateInfo,
+                                 &allocationInfo, &image, pAllocation,nullptr);
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create image using vmaCreateImage!");
+    }
+
+    return image;
+}
+
 VkImageView SwapChainVk::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
 {
     VkImageViewCreateInfo viewCreateInfo = {};
@@ -546,7 +584,7 @@ VkExtent2D SwapChainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& surface
     return newExtent;
 }
 
-VkFormat SwapChainVk::FindDepthFormat()
+VkFormat SwapChainVk::ChooseDepthFormat()
 {
     return m_pDevice->FindSupportedFormat(
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
