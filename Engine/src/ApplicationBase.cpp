@@ -8,6 +8,10 @@
 #include "ApplicationBase.h"
 #include <iostream>
 
+#ifdef PLATFORM_WIN32
+#include <Windows.h>
+#endif
+
 using namespace Vox;
 
 ApplicationBase* ApplicationBase::m_Instance = nullptr;
@@ -65,3 +69,5 @@ void ApplicationBase::Run()
         Render();
     }
 }
+
+

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "EngineDefs.h"
 #define SDL_MAIN_HANDLED
+
+#include "EngineDefs.h"
 
 // -- IO --
 #include "IO/Directories.h"

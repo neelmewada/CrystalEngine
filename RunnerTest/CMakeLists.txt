@@ -17,6 +17,10 @@ if (PLATFORM_MACOS)
     set(APP_BUNDLE_FRAMEWORKS_DIR "${APP_BUNDLE_CONTENTS_DIR}/Frameworks")
 endif()
 
+if (PLATFORM_WIN32)
+    set(EXEC_TYPE WIN32)
+endif()
+
 # Retrieve all pShader source files
 file(GLOB_RECURSE VERT_SHADER_SRCS shaders/*.vert)
 file(GLOB_RECURSE FRAG_SHADER_SRCS shaders/*.frag)

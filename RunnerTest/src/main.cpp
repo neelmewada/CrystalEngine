@@ -8,6 +8,10 @@
 
 #include <glm/glm.hpp>
 
+#if PLATFORM_WIN32
+#include <Windows.h>
+#endif
+
 namespace fs = std::filesystem;
 
 using namespace Vox;
@@ -214,10 +218,20 @@ private: // Internal Members
     IBuffer* m_IndexBuffer;
 };
 
-int main(int argc, const char* argv[])
+
+
+int main(int argc, char* argv[])
 {
     Application app("VoxEngine Test");
     app.Start();
     app.Run();
     return 0;
 }
+
+#ifdef PLATFORM_WIN32
+int WINAPI CALLBACK WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+    return main(__argc, __argv);
+}
+#endif
+
