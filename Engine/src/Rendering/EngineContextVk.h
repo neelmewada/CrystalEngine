@@ -24,6 +24,9 @@ private:
     EngineContextVk(EngineCreateInfoVk& engineInfo);
     ~EngineContextVk();
 
+public:
+    EngineContextVk(const EngineContextVk&) = delete;
+
 public: // Public API
     // - Getters
     SDL_Window* GetWindow() { return m_Window; }

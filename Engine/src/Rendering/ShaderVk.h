@@ -15,6 +15,9 @@ public:
     ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, DeviceContextVk* device);
     ~ShaderVariantVk();
 
+public:
+    ShaderVariantVk(const ShaderVariantVk&) = delete;
+
 public: // Public API
     const char* GetName() { return m_pName; }
     size_t GetDefineFlagsCount() { return m_DefineFlagsCount; }

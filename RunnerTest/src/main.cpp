@@ -40,6 +40,8 @@ public:
 
     virtual void Start() override
     {
+        ApplicationBase::Start(); // call base function first
+
         auto* pEngineFactoryVk = EngineFactoryVk::Get();
 
         // -- Engine Creation --

@@ -23,6 +23,9 @@ private:
     RenderContextVk(RenderContextCreateInfoVk& renderContextInfo);
     ~RenderContextVk();
 
+public:
+    RenderContextVk(const RenderContextVk&) = delete;
+
 public: // Public API
     // - Setup
     void SetClearColor(float clearColor[4]) override;

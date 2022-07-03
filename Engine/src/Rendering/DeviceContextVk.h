@@ -27,6 +27,9 @@ private:
     ~DeviceContextVk();
 
 public:
+    DeviceContextVk(const DeviceContextVk&) = delete;
+
+public:
     // - Getters
     QueueFamilyInfo GetQueueFamilies() { return m_QueueFamilies; }
     SurfaceCompatInfo GetSurfaceCompatInfo() { return FetchSurfaceCompatInfo(m_PhysicalDevice); }

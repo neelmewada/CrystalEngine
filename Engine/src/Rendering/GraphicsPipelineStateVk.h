@@ -17,6 +17,9 @@ public:
     GraphicsPipelineStateVk(const GraphicsPipelineStateCreateInfo& createInfo);
     ~GraphicsPipelineStateVk();
 
+public:
+    GraphicsPipelineStateVk(const GraphicsPipelineStateVk&) = delete;
+
 public: // Public API
     // - Getters
     VkPipelineLayout GetPipelineLayout() { return m_PipelineLayout; }
