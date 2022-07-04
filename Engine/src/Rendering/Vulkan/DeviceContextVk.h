@@ -2,8 +2,8 @@
 
 #include "Rendering/EngineFactoryVk.h"
 #include "Rendering/IDeviceContext.h"
-#include "Rendering/EngineContextVk.h"
-#include "Rendering/BufferVk.h"
+#include "EngineContextVk.h"
+#include "BufferVk.h"
 #include "TypesVk.h"
 
 #include <SDL2/SDL.h>

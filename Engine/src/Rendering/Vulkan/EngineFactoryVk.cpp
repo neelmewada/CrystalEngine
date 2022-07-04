@@ -1,9 +1,9 @@
 
 #include "Rendering/EngineFactoryVk.h"
-#include "Rendering/EngineContextVk.h"
-#include "Rendering/DeviceContextVk.h"
-#include "Rendering/SwapChainVk.h"
-#include "Rendering/RenderContextVk.h"
+#include "EngineContextVk.h"
+#include "DeviceContextVk.h"
+#include "SwapChainVk.h"
+#include "RenderContextVk.h"
 
 #include <iostream>
 

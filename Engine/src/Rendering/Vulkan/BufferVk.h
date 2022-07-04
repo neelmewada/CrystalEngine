@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Rendering/IBuffer.h"
-#include "Rendering/DeviceContextVk.h"
+#include "DeviceContextVk.h"
 
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
