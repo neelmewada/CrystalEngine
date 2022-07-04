@@ -59,8 +59,7 @@ void ApplicationBase::Run()
             if (e.type == SDL_QUIT) quit = true;
             if (e.window.event == SDL_WINDOWEVENT_RESIZED)
             {
-                // Window resized
-                std::cout << "Window Resized" << std::endl;
+                
             }
             PollEvent(e);
         }
