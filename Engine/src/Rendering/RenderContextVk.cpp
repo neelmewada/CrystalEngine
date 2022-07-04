@@ -121,9 +121,13 @@ void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount
 void RenderContextVk::EndRecording()
 {
     m_IsRecording = false;
+    auto uint64_max = std::numeric_limits<uint64_t>::max();
 
-    // Make sure the command buffers aren't being used by GPU while we record commands
-    vkQueueWaitIdle(m_pDevice->GetGraphicsQueue());
+    // Make sure the command buffers aren't being used by GPU while we record new commands
+    const auto& commandBufferFences = m_pSwapChain->m_DrawFinishedFences;
+    vkWaitForFences(m_pDevice->GetDevice(),
+                    static_cast<uint32_t>(commandBufferFences.size()), commandBufferFences.data(),
+                    VK_TRUE, uint64_max);
 
     auto extent = m_pSwapChain->GetExtent();
 

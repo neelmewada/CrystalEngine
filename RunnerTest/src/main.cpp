@@ -196,6 +196,7 @@ protected:
 
     void Render() override
     {
+        m_pRenderContext->ReRecordCommands();
         m_pSwapChain->Submit();
         m_pSwapChain->Present();
     }
