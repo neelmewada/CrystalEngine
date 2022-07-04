@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <functional>
+#include <array>
 
 using namespace Vox;
 
@@ -150,12 +151,12 @@ void RenderContextVk::EndRecording()
     renderPassBeginInfo.renderPass = m_pSwapChain->GetRenderPass();
     renderPassBeginInfo.renderArea.offset = {0, 0}; // Start point of renderpass render region
     renderPassBeginInfo.renderArea.extent = extent; // Size of region to run render pass on
-    VkClearValue clearValues[] = {
-            {m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]}
-    };
-    // TODO: Add Depth Attachment clear values later
-    renderPassBeginInfo.pClearValues = clearValues; // Clear values are 1:1 with the attachments of the whole render pass
-    renderPassBeginInfo.clearValueCount = 1;    // clear value count should be exactly equal to the no. of attachments in render pass
+
+    std::array<VkClearValue, 2> clearValues{};
+    clearValues[0].color = {m_ClearColor[0], m_ClearColor[1], m_ClearColor[2], m_ClearColor[3]};
+    clearValues[1].depthStencil.depth = 1.0;
+    renderPassBeginInfo.pClearValues = clearValues.data(); // Clear values are 1:1 with the attachments of the whole render pass
+    renderPassBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());    // clear value count should be exactly equal to the no. of attachments in render pass
 
     const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
     const auto& framebuffers = m_pSwapChain->GetFramebuffers();

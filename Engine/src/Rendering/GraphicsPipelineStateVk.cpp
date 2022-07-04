@@ -136,7 +136,13 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     }
 
     // -- Depth Stencil --
-    // TODO: Setup depth stencil testing here
+    VkPipelineDepthStencilStateCreateInfo depthStencilState = {};
+    depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencilState.depthTestEnable = VK_TRUE;
+    depthStencilState.depthWriteEnable = VK_TRUE;
+    depthStencilState.depthCompareOp = VK_COMPARE_OP_LESS; // Only draw if Z depth of new pixel is less than current
+    depthStencilState.depthBoundsTestEnable = VK_FALSE;
+    depthStencilState.stencilTestEnable = VK_FALSE;   // We aren't using stencil at this moment
 
     // -- Shader Stages --
     auto shaderVariant = m_pShader->GetCurrentVariant();
@@ -168,7 +174,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     pipelineInfo.pRasterizationState = &rasterizerState;
     pipelineInfo.pMultisampleState = &multisamplingState;
     pipelineInfo.pColorBlendState = &colorBlendState;
-    pipelineInfo.pDepthStencilState = nullptr; // TODO: Add depth stencil here
+    pipelineInfo.pDepthStencilState = &depthStencilState;
     pipelineInfo.layout = m_PipelineLayout;
     pipelineInfo.renderPass = m_pSwapChain->GetRenderPass();
     pipelineInfo.subpass = 0; // You can use only 1 subpass per pipeline. Use separate pipeline for different subpasses

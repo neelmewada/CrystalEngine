@@ -81,8 +81,8 @@ private: // Vulkan Members
 
     // - Depth Buffer
     VmaAllocation m_DepthImageAllocation = nullptr;
-    VkImage m_DepthImage = nullptr;
-    VkImageView m_DepthImageView = nullptr;
+    VkImage m_DepthBufferImage = nullptr;
+    VkImageView m_DepthBufferImageView = nullptr;
 
     // - Synchronization
     std::vector<VkSemaphore> m_ImageAvailableForRendering;

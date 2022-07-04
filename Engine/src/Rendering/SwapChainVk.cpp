@@ -48,6 +48,10 @@ SwapChainVk::~SwapChainVk() noexcept
         vkDestroyFramebuffer(m_pDevice->GetDevice(), framebuffer, nullptr);
     }
 
+    // Depth Buffer Image
+    vkDestroyImageView(m_pDevice->GetDevice(), m_DepthBufferImageView, nullptr);
+    vmaDestroyImage(m_pDevice->GetVmaAllocator(), m_DepthBufferImage, m_DepthImageAllocation);
+
     // RenderPass
     vkDestroyRenderPass(m_pDevice->GetDevice(), m_RenderPass, nullptr);
 
@@ -272,6 +276,7 @@ void SwapChainVk::CreateSwapChain()
 
 void SwapChainVk::CreateRenderPass()
 {
+    // -- COLOR Attachment --
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = m_SwapchainImageFormat;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -286,9 +291,10 @@ void SwapChainVk::CreateRenderPass()
 
     VkAttachmentReference colorAttachmentRef = {};
     colorAttachmentRef.attachment = 0; // attachment index in renderPassCreateInfo.pAttachments
-    // initialLayout is converted to this layout before passing it to Subpass 0
+    // initialLayout is converted to this layout before this attachment reference is used in any way (in Subpass 0)
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    // -- DEPTH Attachment --
     VkAttachmentDescription depthAttachment = {};
     depthAttachment.format = ChooseDepthFormat();
     depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -300,14 +306,16 @@ void SwapChainVk::CreateRenderPass()
     depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference depthAttachmentRef = {};
-    depthAttachmentRef.attachment = 1;
+    depthAttachmentRef.attachment = 1;  // attachment index in renderPassCreateInfo.pAttachments
     depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    std::array<VkAttachmentDescription, 2> renderPassAttachments = {colorAttachment, depthAttachment };
 
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
-    //subpass.pDepthStencilAttachment = &depthAttachmentRef; // TODO: Add Depth attachment
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
     // Need to determine when layout transitions occur using subpass dependencies
     std::array<VkSubpassDependency, 2> subpassDependencies{};
@@ -335,8 +343,8 @@ void SwapChainVk::CreateRenderPass()
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(renderPassAttachments.size());
+    renderPassInfo.pAttachments = renderPassAttachments.data();
     renderPassInfo.dependencyCount = static_cast<uint32_t>(subpassDependencies.size());
     renderPassInfo.pDependencies = subpassDependencies.data();
 
@@ -349,6 +357,24 @@ void SwapChainVk::CreateRenderPass()
 
 void SwapChainVk::CreateDepthBufferImage()
 {
+    if (m_DepthBufferImageView != nullptr)
+    {
+        vkDestroyImageView(m_pDevice->GetDevice(), m_DepthBufferImageView, nullptr);
+        m_DepthBufferImageView = nullptr;
+    }
+    if (m_DepthBufferImage != nullptr)
+    {
+        vmaDestroyImage(m_pDevice->GetVmaAllocator(), m_DepthBufferImage, m_DepthImageAllocation);
+        m_DepthBufferImage = nullptr;
+    }
+
+    VkFormat depthFormat = ChooseDepthFormat();
+
+    m_DepthBufferImage = CreateImage(m_SwapchainExtent.width, m_SwapchainExtent.height, depthFormat,
+                                     VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                                     &m_DepthImageAllocation);
+
+    m_DepthBufferImageView = CreateImageView(m_DepthBufferImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 
 }
 
@@ -371,9 +397,9 @@ void SwapChainVk::CreateFramebuffers()
     for (int i = 0; i < m_SwapchainFramebuffers.size(); ++i)
     {
         // Make sure the position indices in this array is same as in renderPassCreateInfo.pAttachments array
-        std::array<VkImageView, 1> attachments = {
-                m_SwapchainImages[i].imageView // Maps to ColorAttachment
-                // TODO: Add Depth Attachment image view
+        std::array<VkImageView, 2> attachments = {
+                m_SwapchainImages[i].imageView, // Maps to Color Attachment
+                m_DepthBufferImageView          // Maps to Depth Attachment
         };
 
         VkFramebufferCreateInfo framebufferInfo = {};
@@ -587,7 +613,7 @@ VkExtent2D SwapChainVk::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& surface
 VkFormat SwapChainVk::ChooseDepthFormat()
 {
     return m_pDevice->FindSupportedFormat(
-        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+        {VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT},
         VK_IMAGE_TILING_OPTIMAL,
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
