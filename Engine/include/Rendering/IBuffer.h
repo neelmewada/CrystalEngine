@@ -9,7 +9,7 @@ namespace Vox
 
 enum BufferUsageFlags
 {
-    USAGE_IMMUTABLE
+    BUFFER_USAGE_IMMUTABLE
 };
 
 enum BufferBindFlags
@@ -18,6 +18,14 @@ enum BufferBindFlags
     BIND_INDEX_BUFFER = 0x02,
     BIND_UNIFORM_BUFFER = 0x04,
     BIND_STORAGE_BUFFER = 0x08
+};
+
+enum BufferAllocationFlags
+{
+    BUFFER_MEM_UNKNOWN = 0,
+    BUFFER_MEM_GPU_ONLY = 1,
+    BUFFER_MEM_CPU_ONLY = 2,
+    BUFFER_MEM_CPU_TO_GPU = 3,
 };
 
 class ENGINE_API IBuffer

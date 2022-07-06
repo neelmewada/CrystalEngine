@@ -28,10 +28,16 @@ public: // Public API
     void Submit() override;
     void Present() override;
     void Resize() override;
+    void GetSize(uint32_t *w, uint32_t *h) override {
+        *w = m_SwapchainExtent.width;
+        *h = m_SwapchainExtent.height;
+    }
 
     // - Getters
     VkExtent2D GetExtent() { return m_SwapchainExtent; }
     VkRenderPass GetRenderPass() { return m_RenderPass; }
+    VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
+    int GetCurrentFrameIndex() { return m_CurrentFrameIndex; }
     int GetMaxSimultaneousFrameDraws() { return m_MaxSimultaneousFrameDraws; }
     const std::vector<VkCommandBuffer>& GetCommandBuffers() { return m_CommandBuffers; }
     const std::vector<VkFramebuffer>& GetFramebuffers() { return m_SwapchainFramebuffers; }
@@ -47,6 +53,7 @@ private: // Internal API
     void CreateFramebuffers();
     void CreateCommandBuffers();
     void CreateSyncObjects();
+    void CreateDescriptorPool();
 
     void RecreateSwapChainObjects();
 
@@ -69,6 +76,7 @@ private: // Internal Members
 private: // Vulkan Members
     VkSwapchainKHR m_Swapchain = nullptr;
     VkRenderPass m_RenderPass = nullptr;
+    VkDescriptorPool m_DescriptorPool = nullptr;
 
     // - Swapchain details
     VkFormat m_SwapchainImageFormat{};

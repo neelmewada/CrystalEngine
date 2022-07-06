@@ -13,7 +13,7 @@ class DeviceContextVk;
 
 class BufferVk : public IBuffer
 {
-private:
+public:
     friend class DeviceContextVk;
     BufferVk(const BufferCreateInfo& createInfo, BufferData &bufferData, DeviceContextVk* pDevice);
     ~BufferVk();
@@ -22,6 +22,9 @@ public: // Public API
     // - Getters
     VkBuffer GetBuffer() { return m_Buffer; }
     uint64_t GetBufferSize() override { return m_BufferSize; }
+
+    // - Setters
+    void SetBufferData(BufferData& bufferData);
 
 private: // Internal API
     VkBufferUsageFlags VkBufferUsageFlagsFromBufferBindFlags(BufferBindFlags bindFlag);

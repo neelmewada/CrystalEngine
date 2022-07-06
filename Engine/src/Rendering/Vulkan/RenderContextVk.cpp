@@ -66,7 +66,16 @@ void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
         throw std::runtime_error("Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
     }
 
-    m_RenderCommands.push_back([pPipelineVk](VkCommandBuffer commandBuffer) -> void {
+    auto swapChain = m_pSwapChain;
+
+    m_RenderCommands.push_back([pPipelineVk, swapChain](VkCommandBuffer commandBuffer) -> void {
+        auto descriptorSet = pPipelineVk->GetDescriptorSet(swapChain->GetCurrentFrameIndex());
+        if (descriptorSet != nullptr)
+        {
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(),
+                                    0, 1, &descriptorSet, 0,nullptr);
+        }
+
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
     });
 }

@@ -24,7 +24,7 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, D
 
     // -- VMA Allocation --
     VmaAllocationCreateInfo allocationInfo = {};
-    allocationInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+    allocationInfo.usage = static_cast<VmaMemoryUsage>(createInfo.allocFlags);
 
     auto result = vmaCreateBuffer(m_VmaAllocator, &bufferInfo,
                                   &allocationInfo, &m_Buffer, &m_Allocation, nullptr);
@@ -32,6 +32,9 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, D
     {
         throw std::runtime_error("Failed to create VkBuffer using vmaCreateBuffer!");
     }
+
+    if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
+        return;
 
     // -- Copy Data To Buffer --
     void* data;
@@ -43,6 +46,18 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, D
 BufferVk::~BufferVk()
 {
     vmaDestroyBuffer(m_VmaAllocator, m_Buffer, m_Allocation);
+}
+
+void BufferVk::SetBufferData(BufferData& bufferData)
+{
+    if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
+        return;
+
+    // -- Copy Data To Buffer --
+    void* data;
+    vmaMapMemory(m_VmaAllocator, m_Allocation, &data);
+    memcpy(data, bufferData.pData, bufferData.dataSize);
+    vmaUnmapMemory(m_VmaAllocator, m_Allocation);
 }
 
 VkBufferUsageFlags BufferVk::VkBufferUsageFlagsFromBufferBindFlags(BufferBindFlags bindFlag)

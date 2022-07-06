@@ -7,6 +7,7 @@
 // -- IO --
 #include "IO/Directories.h"
 #include "IO/FileIO.h"
+#include "IO/FileManager.h"
 
 // -- RENDERING --
 #include "Rendering/Types.h"

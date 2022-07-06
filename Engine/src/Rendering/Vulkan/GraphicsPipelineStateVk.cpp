@@ -20,6 +20,14 @@ GraphicsPipelineStateVk::GraphicsPipelineStateVk(const GraphicsPipelineStateCrea
 
 GraphicsPipelineStateVk::~GraphicsPipelineStateVk()
 {
+    for (int i = 0; i < m_UniformBuffer.size(); ++i)
+    {
+        if (m_UniformBuffer[i] != nullptr)
+            delete m_UniformBuffer[i];
+    }
+    m_UniformBuffer.clear();
+
+    vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_DescriptorSetLayout, nullptr);
     vkDestroyPipeline(m_pDevice->GetDevice(), m_Pipeline, nullptr);
     vkDestroyPipelineLayout(m_pDevice->GetDevice(), m_PipelineLayout, nullptr);
 }
@@ -34,7 +42,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     vertBindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
     vertBindingDesc.stride = createInfo.vertexStructByteSize;
 
-    auto* vertexAttribs = new VkVertexInputAttributeDescription[createInfo.attributesCount];
+    std::vector<VkVertexInputAttributeDescription> vertexAttribs(createInfo.attributesCount);
 
     for (int i = 0; i < createInfo.attributesCount; ++i)
     {
@@ -49,7 +57,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     vertexInputState.vertexBindingDescriptionCount = 1;
     vertexInputState.pVertexBindingDescriptions = &vertBindingDesc;
     vertexInputState.vertexAttributeDescriptionCount = createInfo.attributesCount;
-    vertexInputState.pVertexAttributeDescriptions = vertexAttribs;
+    vertexInputState.pVertexAttributeDescriptions = vertexAttribs.data();
 
     // -- Input Assembly State --
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = {};
@@ -67,7 +75,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
 
     // -- Dynamic States --
     VkDynamicState dynamicStateEnables[2] = {
-            VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR
+        VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR
     };
 
     VkPipelineDynamicStateCreateInfo dynamicState = {};
@@ -82,7 +90,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     rasterizerState.rasterizerDiscardEnable = VK_FALSE; // Stops the pipeline here if true. Useful only if you don't need pixel output
     rasterizerState.polygonMode = VK_POLYGON_MODE_FILL;  // How to handle filling points between vertices
     rasterizerState.lineWidth = 1.0f;                    // How think the lines should be when drawn
-    rasterizerState.cullMode = VK_CULL_MODE_BACK_BIT;    // Cull the back face of triangles
+    rasterizerState.cullMode = VK_CULL_MODE_NONE;    // Cull the back face of triangles
     rasterizerState.frontFace = VK_FRONT_FACE_CLOCKWISE; // Front face of triangle is the one whose indices are in clockwise direction
     rasterizerState.depthBiasEnable = VK_FALSE;
 
@@ -114,11 +122,30 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     colorBlendState.attachmentCount = 1;
     colorBlendState.pAttachments = &colorBlendAttachment;
 
-    // -- Pipeline Layout -- TODO: Apply future descriptor set & push constant layouts
+    // -- Descriptor Set Layouts --
+    VkDescriptorSetLayoutBinding setLayoutBinding = {};
+    setLayoutBinding.binding = 0;
+    setLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    setLayoutBinding.descriptorCount = 1;
+    setLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    setLayoutBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo = {};
+    descriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    descriptorSetLayoutInfo.bindingCount = 1;               // No. of binding infos
+    descriptorSetLayoutInfo.pBindings = &setLayoutBinding;  // Array of binding infos
+
+    auto result = vkCreateDescriptorSetLayout(m_pDevice->GetDevice(), &descriptorSetLayoutInfo, nullptr, &m_DescriptorSetLayout);
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create a Descriptor Set Layout!");
+    }
+
+    // -- Pipeline Layout --
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 0;
-    pipelineLayoutInfo.pSetLayouts = nullptr;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &m_DescriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
@@ -129,7 +156,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     }
 
     // Create Pipeline Layout
-    auto result = vkCreatePipelineLayout(m_pDevice->GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout);
+    result = vkCreatePipelineLayout(m_pDevice->GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Pipeline Layout!");
@@ -194,8 +221,86 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     {
         throw std::runtime_error("Failed to create Graphics Pipeline!");
     }
+}
 
-    delete[] vertexAttribs;
+void GraphicsPipelineStateVk::CreateUniformBuffer(uint64_t bufferSize, BufferData& initialData)
+{
+    auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
+
+    // -- Uniform Buffer --
+    m_UniformBuffer.resize(maxSimultaneousFrames);
+
+    for (int i = 0; i < maxSimultaneousFrames; ++i)
+    {
+        BufferCreateInfo bufferInfo = {};
+        bufferInfo.size = bufferSize;
+        bufferInfo.pName = "Uniform Buffer";
+        bufferInfo.usageFlags = BUFFER_USAGE_IMMUTABLE;
+        bufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
+        bufferInfo.allocFlags = BUFFER_MEM_CPU_TO_GPU;
+
+        auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
+        m_UniformBuffer[i] = buffer;
+    }
+
+    // -- Descriptor Sets --
+    m_DescriptorSets.resize(maxSimultaneousFrames);
+
+    std::vector<VkDescriptorSetLayout> setLayouts(m_DescriptorSets.size(), m_DescriptorSetLayout);
+
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = m_pSwapChain->GetDescriptorPool();	// Pool to allocate Descriptor Set from
+    allocateInfo.descriptorSetCount = static_cast<uint32_t>(m_UniformBuffer.size()); // Number of sets to allocate
+    allocateInfo.pSetLayouts = setLayouts.data();
+
+    // Allocate descriptor sets (multiple)
+    VkResult result = vkAllocateDescriptorSets(m_pDevice->GetDevice(), &allocateInfo, m_DescriptorSets.data());
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate Descriptor Sets!");
+    }
+
+    // Update all the descriptor set buffer bindings
+    for (int i = 0; i < m_UniformBuffer.size(); ++i)
+    {
+        VkDescriptorBufferInfo bufferInfo = {};
+        bufferInfo.buffer = m_UniformBuffer[i]->GetBuffer(); // Buffer to get data from
+        bufferInfo.offset = 0;              // Position of start of data
+        bufferInfo.range = bufferSize;      // Size of the data
+
+        // Data about connection between binding and buffer
+        VkWriteDescriptorSet setWrite = {};
+        setWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        setWrite.dstSet = m_DescriptorSets[i];  // Descriptor set to update
+        setWrite.dstBinding = 0;        // Binding to update (matches with binding on layout/shader)
+        setWrite.dstArrayElement = 0;   // Index in array to update
+        setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        setWrite.descriptorCount = 1;  // No. of descriptors to update
+        setWrite.pBufferInfo = &bufferInfo;  // Info about buffer data to bind
+        setWrite.pImageInfo = nullptr;
+        setWrite.pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
+    }
+
+    if (initialData.dataSize > 0 && initialData.pData != nullptr)
+    {
+        UpdateUniformBuffer(initialData);
+    }
+}
+
+void GraphicsPipelineStateVk::UpdateUniformBuffer(BufferData& bufferData)
+{
+    if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
+        return;
+
+    auto currentFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
+
+    m_UniformBuffer[currentFrameIndex]->SetBufferData(bufferData);
+    //vkMapMemory(device, m_UniformBuffer[currentFrameIndex]->GetBuffer(), 0, bufferData.dataSize, 0, &data);
+    //memcpy(data, &mvp, bufferData.dataSize);
+    //vkUnmapMemory(mainDevice.logicalDevice, uniformBufferMemory[currentFrameIndex]);
 }
 
 VkFormat GraphicsPipelineStateVk::VkFormatFromVertexAttribFormat(VertexAttribFormat &attribFormat)

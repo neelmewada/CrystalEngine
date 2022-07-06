@@ -60,6 +60,7 @@ struct BufferCreateInfo
     const char* pName;
     BufferBindFlags bindFlags;
     BufferUsageFlags usageFlags;
+    BufferAllocationFlags allocFlags;
     uint64_t size;
 };
 

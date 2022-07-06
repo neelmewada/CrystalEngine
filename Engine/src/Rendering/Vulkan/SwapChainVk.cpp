@@ -21,6 +21,7 @@ SwapChainVk::SwapChainVk(SwapChainCreateInfoVk &swapChainInfo)
     CreateFramebuffers();
     CreateCommandBuffers();
     CreateSyncObjects();
+    CreateDescriptorPool();
 
     std::cout << "Created SwapChainVk" << std::endl;
 }
@@ -29,6 +30,9 @@ SwapChainVk::~SwapChainVk() noexcept
 {
     // Wait until pDevice finishes running draw commands, executing graphics queue, etc. Should always be called on the same thread as the rendering thread.
     vkDeviceWaitIdle(m_pDevice->GetDevice());
+
+    // Descriptor Pool
+    vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_DescriptorPool, nullptr);
 
     // Sync Objects: Semaphores & Fences
     for (int i = 0; i < m_MaxSimultaneousFrameDraws; ++i)
@@ -487,6 +491,26 @@ void SwapChainVk::CreateSyncObjects()
         {
             throw std::runtime_error("Failed to create Semaphores and/or Fences!");
         }
+    }
+}
+
+void SwapChainVk::CreateDescriptorPool()
+{
+    // A pool of Uniform Buffer type of descriptors
+    VkDescriptorPoolSize poolSize = {};
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.descriptorCount = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
+
+    VkDescriptorPoolCreateInfo poolCreateInfo = {};
+    poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolCreateInfo.poolSizeCount = 1;
+    poolCreateInfo.pPoolSizes = &poolSize;
+    poolCreateInfo.maxSets = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
+
+    auto result = vkCreateDescriptorPool(m_pDevice->GetDevice(), &poolCreateInfo, nullptr, &m_DescriptorPool);
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create Descriptor Pool");
     }
 }
 

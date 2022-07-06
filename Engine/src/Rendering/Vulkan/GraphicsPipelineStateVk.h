@@ -24,9 +24,16 @@ public: // Public API
     // - Getters
     VkPipelineLayout GetPipelineLayout() { return m_PipelineLayout; }
     VkPipeline GetPipeline() { return m_Pipeline; }
+    VkDescriptorSet GetDescriptorSet(int frameIndex) {
+        if (frameIndex >= m_DescriptorSets.size()) return nullptr;
+        return m_DescriptorSets[frameIndex];
+    }
 
 private: // Internal API
     void CreateGraphicsPipeline(const GraphicsPipelineStateCreateInfo& createInfo);
+    // TODO: Temp function
+    void CreateUniformBuffer(uint64_t bufferSize, BufferData& initialData) override;
+    void UpdateUniformBuffer(BufferData& data) override;
     VkFormat VkFormatFromVertexAttribFormat(VertexAttribFormat& attribFormat);
 
 private: // Internal Members
@@ -38,6 +45,10 @@ private: // Internal Members
 private: // Vulkan Members
     VkPipelineLayout m_PipelineLayout = nullptr;
     VkPipeline m_Pipeline = nullptr;
+    VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
+
+    std::vector<BufferVk*> m_UniformBuffer{};
+    std::vector<VkDescriptorSet> m_DescriptorSets;
 };
 
 }

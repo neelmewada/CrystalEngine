@@ -6,7 +6,9 @@
 #include <chrono>
 #include <filesystem>
 
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #if PLATFORM_WIN32
 #include <Windows.h>
@@ -78,7 +80,7 @@ public:
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
         // -- CreateGraphicsPipeline Shaders --
-        fs::path shaderDir = IO::GetSharedDirectory();
+        fs::path shaderDir = IO::FileManager::GetSharedDirectory();
         shaderDir = shaderDir / "shaders/";
 
         std::string vertexFile = (shaderDir / "shader_vert.spv").string();
@@ -128,7 +130,15 @@ public:
 
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
-        // Buffer Creation
+        // -- Mesh --
+        uint32_t w = 0, h = 0;
+        m_pSwapChain->GetSize(&w, &h);
+
+        mvp.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
+        mvp.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        mvp.model = glm::mat4(1.0f);
+
+        mvp.projection[1][1] *= -1;
 
         Vertex vertices[4];
         // Vertex positions
@@ -148,7 +158,8 @@ public:
         BufferCreateInfo vertBufferInfo = {};
         vertBufferInfo.pName = "Rect";
         vertBufferInfo.bindFlags = Vox::BIND_VERTEX_BUFFER;
-        vertBufferInfo.usageFlags = Vox::USAGE_IMMUTABLE;
+        vertBufferInfo.usageFlags = Vox::BUFFER_USAGE_IMMUTABLE;
+        vertBufferInfo.allocFlags = Vox::BUFFER_MEM_CPU_TO_GPU;
         vertBufferInfo.size = sizeof(vertices);
         BufferData vertBufferData = {};
         vertBufferData.dataSize = sizeof(vertices);
@@ -159,12 +170,19 @@ public:
         BufferCreateInfo indexBufferInfo = {};
         indexBufferInfo.pName = "Rect";
         indexBufferInfo.bindFlags = Vox::BIND_INDEX_BUFFER;
-        indexBufferInfo.usageFlags = Vox::USAGE_IMMUTABLE;
+        indexBufferInfo.usageFlags = Vox::BUFFER_USAGE_IMMUTABLE;
+        indexBufferInfo.allocFlags = Vox::BUFFER_MEM_CPU_TO_GPU;
         indexBufferInfo.size = sizeof(indices);
         BufferData indexBufferData = {};
         indexBufferData.dataSize = sizeof(indices);
         indexBufferData.pData = indices;
         m_IndexBuffer = m_pDeviceContext->CreateBuffer(indexBufferInfo, indexBufferData);
+
+        // Uniform Buffer
+        BufferData uniformData;
+        uniformData.dataSize = sizeof(mvp);
+        uniformData.pData = &mvp;
+        m_pPSO->CreateUniformBuffer(sizeof(MVP), uniformData);
 
         // -- Record Commands --
         float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
@@ -191,6 +209,17 @@ protected:
         if (e.window.event == SDL_WINDOWEVENT_RESIZED)
         {
             m_pSwapChain->Resize();
+
+            uint32_t w = 0, h = 0;
+            m_pSwapChain->GetSize(&w, &h);
+
+            mvp.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
+            mvp.projection[1][1] *= -1;
+
+            BufferData uniformData;
+            uniformData.dataSize = sizeof(mvp);
+            uniformData.pData = &mvp;
+            m_pPSO->UpdateUniformBuffer(uniformData);
         }
     }
 
@@ -217,6 +246,12 @@ private: // Internal Members
     IGraphicsPipelineState* m_pPSO;
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
+
+    struct MVP {
+        glm::mat4 projection;
+        glm::mat4 view;
+        glm::mat4 model;
+    } mvp;
 };
 
 
