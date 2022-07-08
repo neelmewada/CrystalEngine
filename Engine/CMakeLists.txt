@@ -15,6 +15,6 @@ if (PLATFORM_WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_DLL_EXPORT=1)
 else()
     target_link_libraries(${PROJECT_NAME}
-            vulkan vulkan.1 SDL2)
+            vulkan vulkan.1 SDL2 spirv-cross-reflect)
 endif()
 

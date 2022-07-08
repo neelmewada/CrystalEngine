@@ -40,10 +40,12 @@ public: // Public Abstract Functions
 
 protected: // Internal Functions
 
-protected: // Private Members
+protected: // Internal Members
     std::string m_Title;
     SDL_Window* m_Window;
     static ApplicationBase* m_Instance;
+
+    float m_DeltaTime = 0;
 };
 
 }

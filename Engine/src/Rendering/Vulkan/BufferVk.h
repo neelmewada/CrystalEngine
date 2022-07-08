@@ -23,8 +23,8 @@ public: // Public API
     VkBuffer GetBuffer() { return m_Buffer; }
     uint64_t GetBufferSize() override { return m_BufferSize; }
 
-    // - Setters
-    void SetBufferData(BufferData& bufferData);
+    // - Buffer API
+    void SendBufferData(BufferData& bufferData) override;
 
 private: // Internal API
     VkBufferUsageFlags VkBufferUsageFlagsFromBufferBindFlags(BufferBindFlags bindFlag);
@@ -33,6 +33,7 @@ private: // Internal Members
     DeviceContextVk* m_pDevice;
 
 private: // Vulkan Members
+    BufferAllocationType m_AllocType;
     VmaAllocator m_VmaAllocator;
     VmaAllocation m_Allocation;
     VkBuffer m_Buffer;

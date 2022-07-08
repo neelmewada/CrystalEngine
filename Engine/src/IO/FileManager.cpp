@@ -2,6 +2,15 @@
 #include "IO/FileManager.h"
 
 #include <filesystem>
+#include <iostream>
+
+#if PLATFORM_MACOS
+#include <mach-o/dyld.h>
+#endif
+
+#if PLATFORM_WIN32
+#include <Windows.h>
+#endif
 
 namespace fs = std::filesystem;
 
@@ -19,7 +28,7 @@ FileManager::~FileManager()
 
 const std::string FileManager::GetSharedDirectoryImpl()
 {
-    fs::path curPath = fs::current_path();
+    fs::path curPath = GetBinDirectoryImpl();
 #if PLATFORM_MACOS
     return (curPath / "../Resources/").string();
 #elif PLATFORM_LINUX
@@ -33,5 +42,15 @@ const std::string FileManager::GetSharedDirectoryImpl()
 
 const std::string FileManager::GetBinDirectoryImpl()
 {
-    return fs::current_path().string();
+    char path[1024];
+    uint32_t size = sizeof(path);
+#if PLATFORM_MACOS
+    _NSGetExecutablePath(path, &size);
+#elif PLATFORM_WIN32
+    GetModuleFileName(NULL, path, size);
+#elif PLATFORM_LINUX
+    readlink("/proc/self/exe", result, size);
+#endif
+    fs::path dirPath = fs::path(std::string(path)).parent_path();
+    return std::string(dirPath);
 }

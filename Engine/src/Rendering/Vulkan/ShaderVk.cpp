@@ -38,11 +38,8 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
 
 ShaderVariantVk::~ShaderVariantVk()
 {
-    if (m_FragModule != nullptr)
-        vkDestroyShaderModule(m_Device->GetDevice(), m_FragModule, nullptr);
-    if (m_VertModule != nullptr)
-        vkDestroyShaderModule(m_Device->GetDevice(), m_VertModule, nullptr);
-    m_VertModule = m_FragModule = nullptr;
+    vkDestroyShaderModule(m_Device->GetDevice(), m_FragModule, nullptr);
+    vkDestroyShaderModule(m_Device->GetDevice(), m_VertModule, nullptr);
 }
 
 ShaderVk::ShaderVk(const ShaderCreateInfo &createInfo, DeviceContextVk* device) : IShader()
@@ -53,7 +50,7 @@ ShaderVk::ShaderVk(const ShaderCreateInfo &createInfo, DeviceContextVk* device) 
     m_pFragEntryPoint = createInfo.pFragEntryPoint;
 
     m_VariantsCount = createInfo.variantCount;
-    m_pVariants = new ShaderVariantVk*[m_VariantsCount];
+    m_pVariants.resize(m_VariantsCount);
 
     for (int i = 0; i < m_VariantsCount; ++i)
     {
@@ -68,6 +65,8 @@ ShaderVk::~ShaderVk()
         delete m_pVariants[i];
         m_pVariants[i] = nullptr;
     }
+
     m_VariantsCount = 0;
+    m_pVariants.clear();
 }
 

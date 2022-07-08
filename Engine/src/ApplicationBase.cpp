@@ -8,6 +8,8 @@
 #include "ApplicationBase.h"
 #include <iostream>
 
+#include <time.h>
+
 #ifdef PLATFORM_WIN32
 #include <Windows.h>
 #endif
@@ -44,7 +46,7 @@ ApplicationBase::~ApplicationBase()
 
 void ApplicationBase::Start()
 {
-    
+
 }
 
 void ApplicationBase::Run()
@@ -54,6 +56,8 @@ void ApplicationBase::Run()
 
     while (!quit)
     {
+        auto last = SDL_GetPerformanceCounter();
+
         while (SDL_PollEvent(&e))
         {
             if (e.type == SDL_QUIT) quit = true;
@@ -66,6 +70,9 @@ void ApplicationBase::Run()
 
         Update();
         Render();
+
+        auto now = SDL_GetPerformanceCounter();
+        m_DeltaTime = (float)((now - last) / (double)SDL_GetPerformanceFrequency());
     }
 }
 

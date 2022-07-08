@@ -60,13 +60,14 @@ struct BufferCreateInfo
     const char* pName;
     BufferBindFlags bindFlags;
     BufferUsageFlags usageFlags;
-    BufferAllocationFlags allocFlags;
+    BufferAllocationType allocType;
     uint64_t size;
 };
 
 struct BufferData
 {
     uint64_t dataSize; // number of bytes
+    uint64_t offset = 0; // offset in number of bytes
     void* pData;
 };
 
@@ -82,6 +83,10 @@ public: // Public API
     virtual IGraphicsPipelineState* CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo& createInfo) = 0;
     virtual IShader* CreateShader(const ShaderCreateInfo& createInfo) = 0;
     virtual IBuffer* CreateBuffer(const BufferCreateInfo& createInfo, BufferData& bufferData) = 0;
+
+public: // Getters & Setters
+    // - Getters
+    virtual Uint64 GetUniformBufferOffsetAlignment() = 0;
 };
 
 }

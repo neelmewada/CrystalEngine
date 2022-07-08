@@ -59,7 +59,7 @@ private: // Internal Members
     int m_DefaultVariant = 0;
     int m_CurrentVariant = 0;
     size_t m_VariantsCount;
-    ShaderVariantVk** m_pVariants; // Array of pointer to variants
+    std::vector<ShaderVariantVk*> m_pVariants; // Array of pointer to variants
 };
 
 }

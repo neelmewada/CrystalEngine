@@ -72,11 +72,25 @@ void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
         auto descriptorSet = pPipelineVk->GetDescriptorSet(swapChain->GetCurrentFrameIndex());
         if (descriptorSet != nullptr)
         {
+            // Dynamic Offset amount
+            uint32_t dynamicOffset = static_cast<uint32_t>(pPipelineVk->GetDynamicUniformBufferAlignment()) * 0; // 0 = mesh index in dynamic uniform buffer
             vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(),
-                                    0, 1, &descriptorSet, 0,nullptr);
+                                    0, 1, &descriptorSet, 1,&dynamicOffset);
         }
-
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
+    });
+}
+
+void RenderContextVk::CmdSetConstants(IGraphicsPipelineState* pPipeline, uint32_t offset, uint32_t size, const void* pValues)
+{
+    auto* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
+    if (pPipelineVk == nullptr)
+    {
+        throw std::runtime_error("Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
+    }
+
+    m_RenderCommands.push_back([pPipelineVk, offset, size, pValues](VkCommandBuffer commandBuffer) -> void {
+        vkCmdPushConstants(commandBuffer, pPipelineVk->GetPipelineLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, offset, size, pValues);
     });
 }
 

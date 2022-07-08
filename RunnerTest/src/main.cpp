@@ -9,6 +9,7 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 
 #if PLATFORM_WIN32
 #include <Windows.h>
@@ -18,6 +19,10 @@ namespace fs = std::filesystem;
 
 using namespace Vox;
 
+Uint64 GetAlignedMemorySize(Uint64 originalSize, Uint64 alignment)
+{
+    return (originalSize + alignment - 1) & ~(alignment - 1);
+}
 
 class Application : public ApplicationBase
 {
@@ -33,6 +38,8 @@ public:
 
         delete m_IndexBuffer;
         delete m_VertexBuffer;
+        if (modelTransferSpace != nullptr)
+            free(modelTransferSpace);
         delete m_pPSO;
         delete m_pRenderContext;
         delete m_pSwapChain;
@@ -79,12 +86,12 @@ public:
         renderContextInfo.swapChain = m_pSwapChain;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
-        // -- CreateGraphicsPipeline Shaders --
+        // -- Shaders --
         fs::path shaderDir = IO::FileManager::GetSharedDirectory();
         shaderDir = shaderDir / "shaders/";
 
-        std::string vertexFile = (shaderDir / "shader_vert.spv").string();
-        std::string fragFile = (shaderDir / "shader_frag.spv").string();
+        std::string vertexFile = (shaderDir / "shader2_vert.spv").string();
+        std::string fragFile = (shaderDir / "shader2_frag.spv").string();
 
         std::vector<char> vertSpv, fragSpv;
         IO::ReadAllBytesFromFile(vertexFile, vertSpv);
@@ -105,6 +112,7 @@ public:
         shaderInfo.pVariants = &variant;
         shaderInfo.pVertEntryPoint = "main";
         shaderInfo.pFragEntryPoint = "main";
+        shaderInfo.defaultVariant = 0;
 
         IShader* shader = m_pDeviceContext->CreateShader(shaderInfo);
 
@@ -130,15 +138,17 @@ public:
 
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
-        // -- Mesh --
+        // -- MVP Matrix --
         uint32_t w = 0, h = 0;
         m_pSwapChain->GetSize(&w, &h);
 
-        mvp.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
-        mvp.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        mvp.model = glm::mat4(1.0f);
+        viewProjection.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
+        viewProjection.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model.model = glm::mat4(1.0f);
 
-        mvp.projection[1][1] *= -1;
+        viewProjection.projection[1][1] *= -1;
+
+        // -- MESH --
 
         Vertex vertices[4];
         // Vertex positions
@@ -158,8 +168,8 @@ public:
         BufferCreateInfo vertBufferInfo = {};
         vertBufferInfo.pName = "Rect";
         vertBufferInfo.bindFlags = Vox::BIND_VERTEX_BUFFER;
-        vertBufferInfo.usageFlags = Vox::BUFFER_USAGE_IMMUTABLE;
-        vertBufferInfo.allocFlags = Vox::BUFFER_MEM_CPU_TO_GPU;
+        vertBufferInfo.usageFlags = Vox::BUFFER_USAGE_DEFAULT;
+        vertBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
         vertBufferInfo.size = sizeof(vertices);
         BufferData vertBufferData = {};
         vertBufferData.dataSize = sizeof(vertices);
@@ -170,22 +180,37 @@ public:
         BufferCreateInfo indexBufferInfo = {};
         indexBufferInfo.pName = "Rect";
         indexBufferInfo.bindFlags = Vox::BIND_INDEX_BUFFER;
-        indexBufferInfo.usageFlags = Vox::BUFFER_USAGE_IMMUTABLE;
-        indexBufferInfo.allocFlags = Vox::BUFFER_MEM_CPU_TO_GPU;
+        indexBufferInfo.usageFlags = Vox::BUFFER_USAGE_DEFAULT;
+        indexBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
         indexBufferInfo.size = sizeof(indices);
         BufferData indexBufferData = {};
         indexBufferData.dataSize = sizeof(indices);
         indexBufferData.pData = indices;
         m_IndexBuffer = m_pDeviceContext->CreateBuffer(indexBufferInfo, indexBufferData);
 
-        // Uniform Buffer
-        BufferData uniformData;
-        uniformData.dataSize = sizeof(mvp);
-        uniformData.pData = &mvp;
-        m_pPSO->CreateUniformBuffer(sizeof(MVP), uniformData);
+        /*
+        // Uniform Buffer TODO: Temp Code
+        Uint64 minBufferOffset = m_pDeviceContext->GetUniformBufferOffsetAlignment();
+        modelBufferAlignment = (sizeof(UboModel) + minBufferOffset - 1) & ~(minBufferOffset - 1);
+        modelTransferSpace = (UboModel*)std::aligned_alloc(modelBufferAlignment, modelBufferAlignment * 1);
+
+        *modelTransferSpace = model;
+        BufferData modelData{};
+        modelData.offset = 0;
+        modelData.dataSize = modelBufferAlignment;
+        modelData.pData = modelTransferSpace;
+
+        BufferData vpData{};
+        vpData.dataSize = sizeof(viewProjection);
+        vpData.pData = &viewProjection;
+
+        // TODO: Temp functions. To be changed.
+        m_pPSO->CreateUniformBuffer(sizeof(UboViewProjection), vpData);
+        m_pPSO->CreateDynamicUniformBuffer(modelBufferAlignment, modelData, minBufferOffset);
+        */
 
         // -- Record Commands --
-        float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
+        /*float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
 
         m_pRenderContext->SetClearColor(clearColor);
 
@@ -196,7 +221,7 @@ public:
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
         m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0);
-        m_pRenderContext->EndRecording();
+        m_pRenderContext->EndRecording();*/
 
         // We're responsible for deleting the shader coz we created it ourselves.
         delete shader;
@@ -213,26 +238,61 @@ protected:
             uint32_t w = 0, h = 0;
             m_pSwapChain->GetSize(&w, &h);
 
-            mvp.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
-            mvp.projection[1][1] *= -1;
+            viewProjection.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
+            viewProjection.projection[1][1] *= -1;
 
             BufferData uniformData;
-            uniformData.dataSize = sizeof(mvp);
-            uniformData.pData = &mvp;
+            uniformData.dataSize = sizeof(viewProjection);
+            uniformData.pData = &viewProjection;
             m_pPSO->UpdateUniformBuffer(uniformData);
         }
     }
 
     void Render() override
     {
-        m_pRenderContext->ReRecordCommands();
+        float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
+
+        m_pRenderContext->SetClearColor(clearColor);
+
+        m_pRenderContext->BeginRecording();
+        m_pRenderContext->CmdBindPipeline(m_pPSO);
+        uint64_t offset = 0;
+        // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
+        m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
+        m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
+        m_pRenderContext->CmdSetConstants(m_pPSO, 0, sizeof(glm::mat4), &model.model);
+        m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0);
+        m_pRenderContext->EndRecording();
+
         m_pSwapChain->Submit();
         m_pSwapChain->Present();
     }
 
     void Update() override
     {
+        static float angle = 0.0f;
+        angle += m_DeltaTime * 30;
+        if (angle > 360) angle -= 360;
 
+        model.model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+
+//        modelTransferSpace->model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+//
+//        BufferData modelData{};
+//        modelData.offset = 0;
+//        modelData.dataSize = modelBufferAlignment;
+//        modelData.pData = modelTransferSpace;
+//
+//        m_pPSO->UpdateDynamicUniformBuffer(modelData);
+
+        /*
+        mvp.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //mvp.model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+
+        BufferData uniformData;
+        uniformData.dataSize = sizeof(mvp);
+        uniformData.pData = &mvp;
+        m_pPSO->UpdateUniformBuffer(uniformData);*/
     }
 
 private: // Vulkan Functions
@@ -247,11 +307,21 @@ private: // Internal Members
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
 
-    struct MVP {
-        glm::mat4 projection;
-        glm::mat4 view;
-        glm::mat4 model;
-    } mvp;
+    struct UboViewProjection {
+        alignas(16) glm::mat4 projection;
+        alignas(16) glm::mat4 view;
+    } viewProjection;
+
+    struct Lighting {
+        alignas(16) glm::vec4 lightColor;
+    } lighting;
+
+    struct UboModel {
+        alignas(16) glm::mat4 model;
+    } model;
+
+    UboModel* modelTransferSpace = nullptr;
+    Uint64 modelBufferAlignment;
 };
 
 

@@ -53,7 +53,7 @@ private: // Internal API
     void CreateFramebuffers();
     void CreateCommandBuffers();
     void CreateSyncObjects();
-    void CreateDescriptorPool();
+    void CreateDescriptorPool(); // TODO: Temp Function
 
     void RecreateSwapChainObjects();
 

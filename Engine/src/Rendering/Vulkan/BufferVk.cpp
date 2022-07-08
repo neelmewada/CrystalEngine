@@ -9,11 +9,7 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, D
 {
     m_pDevice = pDevice;
     m_VmaAllocator = pDevice->GetVmaAllocator();
-
-    if (createInfo.size != bufferData.dataSize)
-    {
-        throw std::runtime_error("ERROR: BufferVk constructor passed with 2 different sizes in createInfo & bufferData!");
-    }
+    m_AllocType = createInfo.allocType;
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -24,7 +20,7 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, D
 
     // -- VMA Allocation --
     VmaAllocationCreateInfo allocationInfo = {};
-    allocationInfo.usage = static_cast<VmaMemoryUsage>(createInfo.allocFlags);
+    allocationInfo.usage = static_cast<VmaMemoryUsage>(createInfo.allocType);
 
     auto result = vmaCreateBuffer(m_VmaAllocator, &bufferInfo,
                                   &allocationInfo, &m_Buffer, &m_Allocation, nullptr);
@@ -33,14 +29,8 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, D
         throw std::runtime_error("Failed to create VkBuffer using vmaCreateBuffer!");
     }
 
-    if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
-        return;
-
     // -- Copy Data To Buffer --
-    void* data;
-    vmaMapMemory(m_VmaAllocator, m_Allocation, &data);
-    memcpy(data, bufferData.pData, bufferData.dataSize);
-    vmaUnmapMemory(m_VmaAllocator, m_Allocation);
+    SendBufferData(bufferData);
 }
 
 BufferVk::~BufferVk()
@@ -48,16 +38,19 @@ BufferVk::~BufferVk()
     vmaDestroyBuffer(m_VmaAllocator, m_Buffer, m_Allocation);
 }
 
-void BufferVk::SetBufferData(BufferData& bufferData)
+void BufferVk::SendBufferData(BufferData& bufferData)
 {
     if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
         return;
 
-    // -- Copy Data To Buffer --
-    void* data;
-    vmaMapMemory(m_VmaAllocator, m_Allocation, &data);
-    memcpy(data, bufferData.pData, bufferData.dataSize);
-    vmaUnmapMemory(m_VmaAllocator, m_Allocation);
+    // ONLY if VmaMemoryUsage is set to: CPU_TO_GPU (aka Host & Device visible memory)
+    if (m_AllocType == BUFFER_MEM_CPU_TO_GPU)
+    {
+        void* data;
+        vmaMapMemory(m_VmaAllocator, m_Allocation, &data);
+        memcpy((void*)(data), bufferData.pData, bufferData.dataSize); // TODO: Add offset to data pointer
+        vmaUnmapMemory(m_VmaAllocator, m_Allocation);
+    }
 }
 
 VkBufferUsageFlags BufferVk::VkBufferUsageFlagsFromBufferBindFlags(BufferBindFlags bindFlag)

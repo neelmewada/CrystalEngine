@@ -33,8 +33,7 @@ DeviceContextVk::DeviceContextVk(DeviceCreateInfoVk& deviceInfo)
 
     CreateSurface();
     FetchPhysicalDevice();
-    // Save for later use
-    m_SurfaceCompatInfo = FetchSurfaceCompatInfo(m_PhysicalDevice);
+    FetchSupportInfo();
     CreateLogicalDevice();
     CreateVmaAllocator();
     CreateCommandPool();
@@ -94,6 +93,7 @@ void DeviceContextVk::FetchPhysicalDevice()
             throw std::runtime_error("The physical pDevice does not have a Graphics queue and/or Compute queue.");
         }
         vkGetPhysicalDeviceProperties(m_PhysicalDevice, &selectedDeviceProps);
+        vkGetPhysicalDeviceFeatures(selectedDevice, &selectedDeviceFeatures);
         std::cout << "Successfully selected the only GPU (" << selectedDeviceProps.deviceName << ") as the Physical Device." << std::endl;
         return;
     }
@@ -135,6 +135,17 @@ void DeviceContextVk::FetchPhysicalDevice()
     }
 
     std::cout << "Successfully selected " << selectedDeviceProps.deviceName << " as the Physical Device." << std::endl;
+}
+
+// Fetch Support related information for later usage
+void DeviceContextVk::FetchSupportInfo()
+{
+    VkPhysicalDeviceProperties physicalDeviceProperties{};
+    vkGetPhysicalDeviceProperties(m_PhysicalDevice, &physicalDeviceProperties);
+
+    m_UniformBufferOffsetAlignment = physicalDeviceProperties.limits.minUniformBufferOffsetAlignment;
+
+    m_SurfaceCompatInfo = FetchSurfaceCompatInfo(m_PhysicalDevice);
 }
 
 void DeviceContextVk::CreateLogicalDevice()

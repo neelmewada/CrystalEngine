@@ -178,7 +178,7 @@ void SwapChainVk::CreateSwapChain()
     VkExtent2D extent = ChooseSwapExtent(surfaceCompatInfo.surfaceCapabilities);
 
     // Add 1 extra image to allow triple buffering
-    uint32_t imageCount = surfaceCompatInfo.surfaceCapabilities.minImageCount + 1;
+    uint32_t imageCount = surfaceCompatInfo.surfaceCapabilities.minImageCount; // Disable triple buffering for now
 
     // If imageCount is higher than max allowed image count. If it's 0 then limitless
     if (surfaceCompatInfo.surfaceCapabilities.maxImageCount > 0 &&
@@ -494,17 +494,25 @@ void SwapChainVk::CreateSyncObjects()
     }
 }
 
+// TODO: Temp Function. ReDo it later
 void SwapChainVk::CreateDescriptorPool()
 {
     // A pool of Uniform Buffer type of descriptors
-    VkDescriptorPoolSize poolSize = {};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
+    VkDescriptorPoolSize vpPoolSize = {};
+    vpPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    // Only 2 (or 1) uniform buffers can ever be allocated from this pool.
+    vpPoolSize.descriptorCount = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
+
+    VkDescriptorPoolSize modelPoolSize = {};
+    modelPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    modelPoolSize.descriptorCount = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
+
+    std::array<VkDescriptorPoolSize, 2> poolSizes = {vpPoolSize, modelPoolSize};
 
     VkDescriptorPoolCreateInfo poolCreateInfo = {};
     poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolCreateInfo.poolSizeCount = 1;
-    poolCreateInfo.pPoolSizes = &poolSize;
+    poolCreateInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolCreateInfo.pPoolSizes = poolSizes.data();
     poolCreateInfo.maxSets = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
 
     auto result = vkCreateDescriptorPool(m_pDevice->GetDevice(), &poolCreateInfo, nullptr, &m_DescriptorPool);

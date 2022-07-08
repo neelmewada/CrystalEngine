@@ -50,10 +50,15 @@ public: // Public API
     IShader* CreateShader(const ShaderCreateInfo& createInfo) override;
     IBuffer* CreateBuffer(const BufferCreateInfo& createInfo, BufferData& bufferData) override;
 
+    // - Getters
+    // -- Support Info
+    Uint64 GetUniformBufferOffsetAlignment() override { return m_UniformBufferOffsetAlignment; }
+
 private: // Internal API
     // - Vulkan Main
     void CreateSurface();
     void FetchPhysicalDevice();
+    void FetchSupportInfo();
     void CreateLogicalDevice();
     void CreateVmaAllocator();
     void CreateCommandPool();
@@ -67,9 +72,11 @@ private: // Internal API
 
 private: // Internal Members
     EngineContextVk* m_EngineContext = nullptr;
-    SurfaceCompatInfo m_SurfaceCompatInfo;
     QueueFamilyInfo m_QueueFamilies;
+    // - Support Info
+    SurfaceCompatInfo m_SurfaceCompatInfo;
     bool m_PortabilitySubsetEnabled = false;
+    Uint64 m_UniformBufferOffsetAlignment;
 
 private: // Vulkan Members
     VkSurfaceKHR m_Surface = nullptr;
