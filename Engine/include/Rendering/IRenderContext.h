@@ -36,8 +36,6 @@ public: // Public API
     virtual void SetClearColor(float clearColor[4]) = 0;
 
     // - Commands
-    virtual void ReRecordCommands() = 0;
-    virtual void ClearRecording() = 0;
 
     virtual void BeginRecording() = 0;
     virtual void CmdBindPipeline(IGraphicsPipelineState* pPipeline) = 0;

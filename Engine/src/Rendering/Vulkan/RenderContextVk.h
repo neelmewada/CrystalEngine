@@ -43,8 +43,6 @@ public: // Public API
     void SetClearColor(float clearColor[4]) override;
 
     // - Commands
-    void ReRecordCommands() override;
-    void ClearRecording() override;
 
     void BeginRecording() override;
     void CmdBindPipeline(IGraphicsPipelineState* pPipeline) override;
@@ -72,7 +70,6 @@ private: // Internal Members
     // - Data
     GlobalUniforms m_GlobalUniforms{};
     float m_ClearColor[4] = {0,0,0,1};
-    std::vector<RenderCommand> m_RenderCommands;
     bool m_IsRecording = false;
 
 private: // Vulkan Members

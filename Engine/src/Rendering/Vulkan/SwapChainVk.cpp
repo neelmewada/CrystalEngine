@@ -156,7 +156,6 @@ void SwapChainVk::RecreateSwapChainObjects()
     CreateSwapChain();
     CreateDepthBufferImage();
     CreateFramebuffers();
-    m_pRenderContext->ReRecordCommands();
     CreateSyncObjects(); // Recreate sync objects, so they can be set to correct state (signalled or unsignalled)
 
     std::cout << "Recreated Swap Chain" << std::endl;

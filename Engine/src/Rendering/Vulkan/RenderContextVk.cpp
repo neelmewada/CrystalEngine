@@ -1,4 +1,5 @@
 
+#include "EngineDefs.h"
 
 #include "RenderContextVk.h"
 
@@ -173,112 +174,10 @@ void RenderContextVk::SetClearColor(float clearColor[4])
         m_ClearColor[i] = clearColor[i];
 }
 
-void RenderContextVk::ReRecordCommands()
-{
-    if (m_RenderCommands.empty())
-    {
-        std::cerr << "ReRecordCommands() called while there are no recorded commands!" << std::endl;
-    }
-    EndRecording();
-}
-
-void RenderContextVk::ClearRecording()
-{
-    m_IsRecording = false;
-    m_RenderCommands.clear();
-}
-
 void RenderContextVk::BeginRecording()
 {
     m_IsRecording = true;
-    m_RenderCommands.clear();
-}
 
-void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
-{
-    GraphicsPipelineStateVk* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
-    if (pPipelineVk == nullptr)
-    {
-        throw std::runtime_error("Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
-    }
-
-    auto swapChain = m_pSwapChain;
-    auto globalDescriptorSet = m_GlobalDescriptorSet[0];
-
-    m_RenderCommands.push_back([pPipelineVk, swapChain, globalDescriptorSet](VkCommandBuffer commandBuffer) -> void {
-//        auto descriptorSet = pPipelineVk->GetDescriptorSet(swapChain->GetCurrentFrameIndex());
-//        if (descriptorSet != nullptr)
-//        {
-//            // Dynamic Offset amount
-//            uint32_t dynamicOffset = 0; // 0 * (size of 1 dynamic entry including alignment)
-//            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(),
-//                                    0, 1, &descriptorSet, 1,&dynamicOffset);
-//        }
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(), 0,
-                                1, &globalDescriptorSet, 0, nullptr);
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
-    });
-}
-
-void RenderContextVk::CmdSetConstants(IGraphicsPipelineState* pPipeline, uint32_t offset, uint32_t size, const void* pValues)
-{
-    auto* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
-    if (pPipelineVk == nullptr)
-    {
-        throw std::runtime_error("Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
-    }
-
-    m_RenderCommands.push_back([pPipelineVk, offset, size, pValues](VkCommandBuffer commandBuffer) -> void {
-        vkCmdPushConstants(commandBuffer, pPipelineVk->GetPipelineLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, offset, size, pValues);
-    });
-}
-
-void RenderContextVk::CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets)
-{
-    std::vector<VkBuffer> buffers(bufferCount);
-    std::vector<uint64_t> offsetList(bufferCount);
-    for (int i = 0; i < bufferCount; ++i)
-    {
-        BufferVk* buffer = dynamic_cast<BufferVk*>(ppBuffers[i]);
-        if (buffer == nullptr)
-        {
-            throw std::runtime_error("Failed to bind Vertex Buffers! Couldn't cast IBuffer to VkBuffer!");
-        }
-        buffers[i] = buffer->GetBuffer();
-        offsetList[i] = offsets[i];
-    }
-
-    m_RenderCommands.push_back([bufferCount, buffers, offsetList](VkCommandBuffer commandBuffer) -> void {
-        vkCmdBindVertexBuffers(commandBuffer, 0, bufferCount, buffers.data(), offsetList.data());
-    });
-}
-
-void RenderContextVk::CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, uint64_t offset)
-{
-    BufferVk* pBufferVk = dynamic_cast<BufferVk*>(pBuffer);
-    if (pBufferVk == nullptr)
-    {
-        throw std::runtime_error("Failed to bind index buffer! pBuffer passed is not of type BufferVk!");
-    }
-
-    VkBuffer buffer = pBufferVk->GetBuffer();
-
-    m_RenderCommands.push_back([buffer, offset, indexType](VkCommandBuffer commandBuffer) -> void {
-        VkIndexType indexTypeVk = static_cast<VkIndexType>(indexType);
-        vkCmdBindIndexBuffer(commandBuffer, buffer, offset, indexTypeVk);
-    });
-}
-
-void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex, uint32_t firstInstanceIndex)
-{
-    m_RenderCommands.push_back([indexCount, instanceCount, vertexOffset, firstIndex, firstInstanceIndex](VkCommandBuffer commandBuffer) -> void {
-        vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstanceIndex);
-    });
-}
-
-void RenderContextVk::EndRecording()
-{
-    m_IsRecording = false;
     auto uint64_max = std::numeric_limits<uint64_t>::max();
 
     // Make sure the command buffers aren't being used by GPU while we record new commands
@@ -327,37 +226,115 @@ void RenderContextVk::EndRecording()
     {
         renderPassBeginInfo.framebuffer = framebuffers[i];
 
-        auto result = vkBeginCommandBuffer(commandBuffers[i], &bufferBeginInfo);
-        if (result != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to start recording the command buffer at index " + std::to_string(i));
-        }
-
         // Begin Command Buffer
-        {
-            // Begin Render Pass
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-            {
-                // Set viewport & scissor dynamic state
-                vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
-                vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+        VK_ASSERT(vkBeginCommandBuffer(commandBuffers[i], &bufferBeginInfo),
+                  "Failed to start recording the command buffer at index " + std::to_string(i));
 
-                // Run recording of stored commands
-                for (const auto& command: m_RenderCommands)
-                {
-                    command(commandBuffers[i]);
-                }
-            }
-            vkCmdEndRenderPass(commandBuffers[i]);
-            // End Render Pass
-        }
-        // End Command Buffer
+        // Begin Render Pass
+        vkCmdBeginRenderPass(commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        result = vkEndCommandBuffer(commandBuffers[i]);
-        if (result != VK_SUCCESS)
+        // Set viewport & scissor dynamic state
+        vkCmdSetViewport(commandBuffers[i], 0, 1, &viewport);
+        vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+    }
+}
+
+void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
+{
+    GraphicsPipelineStateVk* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
+
+    VOX_ASSERT(pPipelineVk != nullptr, "Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
+
+    auto curFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
+
+    auto globalDescriptorSet = m_GlobalDescriptorSet[curFrameIndex];
+
+    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
+
+    for (int i = 0; i < commandBuffers.size(); ++i)
+    {
+        vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(), 0,
+                                1, &globalDescriptorSet, 0, nullptr);
+        vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
+    }
+}
+
+void RenderContextVk::CmdSetConstants(IGraphicsPipelineState* pPipeline, uint32_t offset, uint32_t size, const void* pValues)
+{
+    auto* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
+    if (pPipelineVk == nullptr)
+    {
+        throw std::runtime_error("Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
+    }
+
+    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
+
+    for (int i = 0; i < commandBuffers.size(); ++i)
+    {
+        vkCmdPushConstants(commandBuffers[i], pPipelineVk->GetPipelineLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, offset, size, pValues);
+    }
+}
+
+void RenderContextVk::CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets)
+{
+    std::vector<VkBuffer> buffers(bufferCount);
+    std::vector<uint64_t> offsetList(bufferCount);
+    for (int i = 0; i < bufferCount; ++i)
+    {
+        BufferVk* buffer = dynamic_cast<BufferVk*>(ppBuffers[i]);
+        if (buffer == nullptr)
         {
-            throw std::runtime_error("Failed to stop recording the command buffer at index " + std::to_string(i));
+            throw std::runtime_error("Failed to bind Vertex Buffers! Couldn't cast IBuffer to VkBuffer!");
         }
+        buffers[i] = buffer->GetBuffer();
+        offsetList[i] = offsets[i];
+    }
+
+    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
+
+    for (int i = 0; i < commandBuffers.size(); ++i)
+    {
+        vkCmdBindVertexBuffers(commandBuffers[i], 0, bufferCount, buffers.data(), offsetList.data());
+    }
+}
+
+void RenderContextVk::CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, uint64_t offset)
+{
+    BufferVk* pBufferVk = dynamic_cast<BufferVk*>(pBuffer);
+    if (pBufferVk == nullptr)
+    {
+        throw std::runtime_error("Failed to bind index buffer! pBuffer passed is not of type BufferVk!");
+    }
+
+    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
+
+    for (int i = 0; i < commandBuffers.size(); ++i)
+    {
+        VkIndexType indexTypeVk = static_cast<VkIndexType>(indexType);
+        vkCmdBindIndexBuffer(commandBuffers[i], pBufferVk->GetBuffer(), offset, indexTypeVk);
+    }
+}
+
+void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex, uint32_t firstInstanceIndex)
+{
+    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
+
+    for (int i = 0; i < commandBuffers.size(); ++i)
+    {
+        vkCmdDrawIndexed(commandBuffers[i], indexCount, instanceCount, firstIndex, vertexOffset, firstInstanceIndex);
+    }
+}
+
+void RenderContextVk::EndRecording()
+{
+    m_IsRecording = false;
+
+    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
+
+    for (int i = 0; i < commandBuffers.size(); ++i)
+    {
+        vkCmdEndRenderPass(commandBuffers[i]);
+        vkEndCommandBuffer(commandBuffers[i]);
     }
 }
 
