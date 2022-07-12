@@ -34,6 +34,9 @@ typedef int8_t Sint8;
 
 #define VOX_ASSERT(condition,message) if (!(condition)) throw std::runtime_error(message)
 
+#define MAKE_VERSION(variant, major, minor, patch) \
+    ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
+
 #ifdef ENGINE_INTERNAL
 #include "EngineInternal.h"
 #endif

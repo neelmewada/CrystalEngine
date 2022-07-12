@@ -11,12 +11,19 @@ target_link_directories(${PROJECT_NAME} PRIVATE ${LIB_DIR})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_INTERNAL=1)
 
+
+set(SPIRV_LIBS shaderc SPIRV spirv-cross-cpp spirv-cross-reflect spirv-cross-util spirv-cross-core spirv-cross-glsl)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+    list(TRANSFORM SPIRV_LIBS APPEND "d")
+endif()
+
 if (PLATFORM_WIN32)
     target_link_libraries(${PROJECT_NAME}
-            vulkan-1 SDL2)
+            vulkan-1 SDL2 ${SPIRV_LIBS})
     target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_DLL_EXPORT=1)
 else()
     target_link_libraries(${PROJECT_NAME}
-            vulkan vulkan.1 SDL2 spirv-cross-reflect)
+            vulkan vulkan.1 SDL2 ${SPIRV_LIBS})
 endif()
 

@@ -1,5 +1,9 @@
 
+#include "EngineDefs.h"
+
 #include "ShaderVk.h"
+
+#include <spirv_cross/spirv_reflect.hpp>
 
 #include <iostream>
 
@@ -18,21 +22,41 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
     vertShaderInfo.codeSize = createInfo.vertexByteSize;
     vertShaderInfo.pCode = createInfo.pVertexBytes;
 
-    auto result = vkCreateShaderModule(device->GetDevice(), &vertShaderInfo, nullptr, &m_VertModule);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create Vertex Shader");
-    }
+    VK_ASSERT(vkCreateShaderModule(device->GetDevice(), &vertShaderInfo, nullptr, &m_VertModule),
+              "Failed to create Vertex Shader");
 
     VkShaderModuleCreateInfo fragShaderInfo = {};
     fragShaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     fragShaderInfo.codeSize = createInfo.fragmentByteSize;
     fragShaderInfo.pCode = createInfo.pFragmentBytes;
 
-    result = vkCreateShaderModule(device->GetDevice(), &fragShaderInfo, nullptr, &m_FragModule);
-    if (result != VK_SUCCESS)
+    VK_ASSERT(vkCreateShaderModule(device->GetDevice(), &fragShaderInfo, nullptr, &m_FragModule),
+              "Failed to create Fragment Shader");
+
+    using namespace spirv_cross;
+
+    CompilerReflection vertReflection(createInfo.pVertexBytes, createInfo.vertexByteSize / 4);
+
+    auto resources = vertReflection.get_shader_resources();
+
+    for (const auto& uniformBuffer: resources.uniform_buffers)
     {
-        throw std::runtime_error("Failed to create Fragment Shader");
+        auto descriptorSet = vertReflection.get_decoration(uniformBuffer.id, spv::DecorationDescriptorSet);
+        auto binding = vertReflection.get_decoration(uniformBuffer.id, spv::DecorationBinding);
+        std::cout << "Uniform Buffer: " << uniformBuffer.name << " ; " << descriptorSet << " ; " << binding << std::endl;
+
+        auto& type = vertReflection.get_type(uniformBuffer.type_id);
+        if (type.basetype == SPIRType::Struct)
+        {
+            std::cout << "Struct: " << vertReflection.get_declared_struct_size(type) << std::endl;
+            int i = 0;
+            for (const auto& member: type.member_types)
+            {
+                auto& memType = vertReflection.get_type(member);
+                std::cout << "Member: " << vertReflection.get_declared_struct_member_size(type, i) << std::endl;
+                i++;
+            }
+        }
     }
 }
 

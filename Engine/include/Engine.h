@@ -34,9 +34,6 @@
 #include "ApplicationBase.h"
 
 
-#define MAKE_VERSION(variant, major, minor, patch) \
-    ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
-
 #define ENGINE_VERSION MAKE_VERSION(0, 0, 1, 0)
 #define ENGINE_NAME "VoxEngine"
 

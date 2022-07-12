@@ -1,6 +1,7 @@
 #version 450  // GLSL v4.5
 
 // Uniforms that are same for all objects in scene
+
 layout(set = 0, binding = 0) uniform GlobalUniforms {
     mat4 projection;
     mat4 view;
@@ -31,7 +32,6 @@ layout(std140, set = 1, binding = 2) readonly buffer ObjectBuffer { // Storage B
 layout(std140, set = 2, binding = 0) uniform DrawCall {
     uint objectIndices[];
 };
-
 
 layout(push_constant) uniform Constants {
     mat4 model;

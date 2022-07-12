@@ -255,75 +255,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     }
 }
 
-// TODO: Temp Function
-void GraphicsPipelineStateVk::CreateUniformBuffer(uint64_t bufferSize, BufferData& initialData)
-{
-    auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
-
-    // -- Uniform Buffer --
-    m_VPUniformBuffer.resize(maxSimultaneousFrames);
-
-    for (int i = 0; i < maxSimultaneousFrames; ++i)
-    {
-        BufferCreateInfo bufferInfo = {};
-        bufferInfo.size = bufferSize;
-        bufferInfo.pName = "Uniform Buffer";
-        bufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
-        bufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
-        bufferInfo.allocType = BUFFER_MEM_CPU_TO_GPU;
-
-        auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
-        m_VPUniformBuffer[i] = buffer;
-    }
-
-    // -- Descriptor Sets --
-    m_DescriptorSets.resize(maxSimultaneousFrames);
-
-    std::vector<VkDescriptorSetLayout> setLayouts(m_DescriptorSets.size(), m_pRenderContext->GetGlobalDescriptorSetLayout());
-
-    VkDescriptorSetAllocateInfo allocateInfo = {};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocateInfo.descriptorPool = m_pRenderContext->GetDescriptorPool();
-    allocateInfo.descriptorSetCount = static_cast<uint32_t>(m_VPUniformBuffer.size()); // Number of sets to allocate
-    allocateInfo.pSetLayouts = setLayouts.data();
-
-    // Allocate descriptor sets (multiple)
-    VkResult result = vkAllocateDescriptorSets(m_pDevice->GetDevice(), &allocateInfo, m_DescriptorSets.data());
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to allocate Descriptor Sets!");
-    }
-
-    // Update all the descriptor set buffer bindings
-    for (int i = 0; i < m_VPUniformBuffer.size(); ++i)
-    {
-        VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer = m_VPUniformBuffer[i]->GetBuffer(); // Buffer to get data from
-        bufferInfo.offset = 0;              // Position of start of data
-        bufferInfo.range = bufferSize;      // Size of the data
-
-        // Data about connection between binding and buffer
-        VkWriteDescriptorSet setWrite = {};
-        setWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        setWrite.dstSet = m_DescriptorSets[i];  // Descriptor set to update
-        setWrite.dstBinding = 0;        // Binding to update (matches with binding on layout/shader)
-        setWrite.dstArrayElement = 0;   // Index in array to update
-        setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        setWrite.descriptorCount = 1;  // No. of descriptors to update
-        setWrite.pBufferInfo = &bufferInfo;  // Info about buffer data to bind
-        setWrite.pImageInfo = nullptr;
-        setWrite.pTexelBufferView = nullptr;
-
-        vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
-    }
-
-    if (initialData.dataSize > 0 && initialData.pData != nullptr)
-    {
-        UpdateUniformBuffer(initialData);
-    }
-}
-
-// TODO: Temp Function
+/*
 void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, BufferData& initialData, uint64_t alignment)
 {
     auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
@@ -369,32 +301,8 @@ void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, Buff
 
         vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
     }
-
-    if (initialData.dataSize > 0 && initialData.pData != nullptr)
-    {
-        UpdateDynamicUniformBuffer(initialData);
-    }
 }
-
-void GraphicsPipelineStateVk::UpdateUniformBuffer(BufferData& bufferData)
-{
-    if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
-        return;
-
-    auto currentFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
-
-    m_VPUniformBuffer[currentFrameIndex]->SetBufferData(bufferData);
-}
-
-void GraphicsPipelineStateVk::UpdateDynamicUniformBuffer(BufferData& bufferData)
-{
-    if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
-        return;
-
-    auto currentFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
-
-    m_ModelUniformBufferDynamic[currentFrameIndex]->SetBufferData(bufferData);
-}
+*/
 
 VkFormat GraphicsPipelineStateVk::VkFormatFromVertexAttribFormat(VertexAttribFormat &attribFormat)
 {

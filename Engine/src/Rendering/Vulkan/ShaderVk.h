@@ -8,6 +8,19 @@
 namespace Vox
 {
 
+enum ShaderResourceTypeVk
+{
+    SHADER_RESOURCE_UNIFORM_BUFFER_VK,
+    SHADER_RESOURCE_STORAGE_BUFFER_VK
+};
+
+struct ShaderResourceDefinitionVk
+{
+    Uint32 set;
+    Uint32 binding;
+    std::string name;
+};
+
 class ShaderVariantVk
 {
 public:
@@ -29,8 +42,11 @@ private: // Internal API
     DeviceContextVk* m_Device = nullptr;
 
 private: // Internal Members
+    // - Vulkan
     VkShaderModule m_VertModule = nullptr;
     VkShaderModule m_FragModule = nullptr;
+
+    // - Internal
     const char* m_pName = nullptr;
     size_t m_DefineFlagsCount = 0;
     const char** m_pDefineFlags = nullptr;

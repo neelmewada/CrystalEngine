@@ -22,11 +22,7 @@ public:
     DELETE_COPY_CONSTRUCTORS(GraphicsPipelineStateVk)
 
 public: // Public API
-    // TODO: All of them are Temp functions. To be changed.
-    void CreateUniformBuffer(uint64_t bufferSize, BufferData& initialData) override;
-    void UpdateUniformBuffer(BufferData& data) override;
-    void CreateDynamicUniformBuffer(Uint64 bufferSize, BufferData& initialData, uint64_t alignment) override;
-    void UpdateDynamicUniformBuffer(BufferData& data) override;
+
 
     // - Getters
     VkPipelineLayout GetPipelineLayout() { return m_PipelineLayout; }

@@ -56,7 +56,7 @@ void RenderContextVk::CreateDescriptorPool()
 {
     VkDescriptorPoolSize sizes[] = {
             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 4},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 5},
             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10}
     };
 
@@ -64,7 +64,7 @@ void RenderContextVk::CreateDescriptorPool()
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = _countof(sizes);
     poolInfo.pPoolSizes = sizes;
-    poolInfo.maxSets = 10;
+    poolInfo.maxSets = 16;
 
     auto result = vkCreateDescriptorPool(m_pDevice->GetDevice(), &poolInfo, nullptr, &m_DescriptorPool);
     if (result != VK_SUCCESS)
