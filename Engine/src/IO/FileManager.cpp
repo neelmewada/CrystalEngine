@@ -50,6 +50,8 @@ const std::string FileManager::GetBinDirectoryImpl()
     GetModuleFileName(NULL, path, size);
 #elif PLATFORM_LINUX
     readlink("/proc/self/exe", result, size);
+#else
+#   error Unsupported Platform
 #endif
     fs::path dirPath = fs::path(std::string(path)).parent_path();
     return dirPath.string();
