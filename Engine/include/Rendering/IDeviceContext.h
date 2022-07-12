@@ -3,10 +3,12 @@
 #include "EngineDefs.h"
 #include "Types.h"
 
+#include "IRenderContext.h"
 #include "IGraphicsPipelineState.h"
 #include "IShader.h"
 #include "ISwapChain.h"
 #include "IBuffer.h"
+#include "ITexture.h"
 
 #include <vector>
 
@@ -16,6 +18,8 @@ namespace Vox
 class IDeviceContext;
 class IGraphicsPipelineState;
 class ISwapChain;
+class IRenderContext;
+class ITexture;
 
 struct GraphicsPipelineVertexAttributeDesc
 {
@@ -29,6 +33,7 @@ struct GraphicsPipelineStateCreateInfo
 {
     IDeviceContext* pDevice;
     ISwapChain* pSwapChain;
+    IRenderContext* pRenderContext;
     IShader* pShader;
     uint32_t vertexStructByteSize; // Number of bytes used per vertex
     uint32_t attributesCount;
@@ -59,8 +64,9 @@ struct BufferCreateInfo
 {
     const char* pName;
     BufferBindFlags bindFlags;
-    BufferUsageFlags usageFlags;
     BufferAllocationType allocType;
+    BufferTransferFlags transferFlags;
+    BufferOptimizationFlags optimizationFlags;
     uint64_t size;
 };
 
@@ -68,7 +74,27 @@ struct BufferData
 {
     uint64_t dataSize; // number of bytes
     uint64_t offset = 0; // offset in number of bytes
+    uint64_t range = 0;
     void* pData;
+};
+
+enum TextureLayout
+{
+    TEXTURE_LAYOUT_OPTIMAL = 0,
+    TEXTURE_LAYOUT_LINEAR = 1
+};
+
+struct TextureCreateInfo
+{
+    const char* pName = nullptr;
+    Uint32 width;
+    Uint32 height;
+    int mipLevels = 1;
+    TextureLayout textureLayout;
+    ImageFormat format;
+    BufferAllocationType allocType;
+    void* pImageData = nullptr;
+    size_t imageDataSize;
 };
 
 class ENGINE_API IDeviceContext
@@ -83,6 +109,7 @@ public: // Public API
     virtual IGraphicsPipelineState* CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo& createInfo) = 0;
     virtual IShader* CreateShader(const ShaderCreateInfo& createInfo) = 0;
     virtual IBuffer* CreateBuffer(const BufferCreateInfo& createInfo, BufferData& bufferData) = 0;
+    virtual ITexture* CreateTexture(const TextureCreateInfo& createInfo) = 0;
 
 public: // Getters & Setters
     // - Getters

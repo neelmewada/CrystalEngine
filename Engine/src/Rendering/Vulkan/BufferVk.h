@@ -15,8 +15,12 @@ class BufferVk : public IBuffer
 {
 public:
     friend class DeviceContextVk;
+    BufferVk(const BufferCreateInfo& createInfo, DeviceContextVk* pDevice);
     BufferVk(const BufferCreateInfo& createInfo, BufferData &bufferData, DeviceContextVk* pDevice);
     ~BufferVk();
+
+public:
+    DELETE_COPY_CONSTRUCTORS(BufferVk)
 
 public: // Public API
     // - Getters
@@ -24,20 +28,29 @@ public: // Public API
     uint64_t GetBufferSize() override { return m_BufferSize; }
 
     // - Buffer API
-    void SendBufferData(BufferData& bufferData) override;
+    void SetBufferData(BufferData& bufferData) override;
+    void UploadBufferDataToGPU(BufferData &bufferData) override;
 
 private: // Internal API
     VkBufferUsageFlags VkBufferUsageFlagsFromBufferBindFlags(BufferBindFlags bindFlag);
 
 private: // Internal Members
-    DeviceContextVk* m_pDevice;
+    DeviceContextVk* m_pDevice = nullptr;
+    BufferAllocationType m_AllocType;
+    BufferBindFlags m_BindFlags;
+    BufferOptimizationFlags m_OptimizationFlags;
+    const char* m_pName = nullptr;
 
 private: // Vulkan Members
-    BufferAllocationType m_AllocType;
-    VmaAllocator m_VmaAllocator;
-    VmaAllocation m_Allocation;
-    VkBuffer m_Buffer;
+    VkBuffer m_Buffer = nullptr;
     uint64_t m_BufferSize;
+    VmaAllocator m_VmaAllocator = nullptr;
+    VmaAllocation m_Allocation = nullptr;
+
+    bool m_UploadContextExists = false;
+    VkFence m_UploadFence = nullptr;
+    VkCommandPool m_UploadCmdPool = nullptr;
+    VkCommandBuffer m_UploadCmdBuffer = nullptr;
 };
 
 }

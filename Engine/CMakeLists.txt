@@ -3,11 +3,13 @@ cmake_minimum_required(VERSION 3.22)
 project(Engine CXX)
 
 add_library(${PROJECT_NAME} SHARED
-        src/ApplicationBase.cpp src/Rendering/Vulkan/EngineFactoryVk.cpp src/Rendering/Vulkan/EngineContextVk.cpp src/Rendering/Vulkan/DeviceContextVk.cpp src/Rendering/Vulkan/SwapChainVk.cpp src/Rendering/Vulkan/RenderContextVk.cpp src/Rendering/Vulkan/GraphicsPipelineStateVk.cpp src/Rendering/Vulkan/ShaderVk.cpp src/IO/Directories.cpp src/IO/FileIO.cpp src/Rendering/Vulkan/BufferVk.cpp src/IO/FileManager.cpp)
+        src/ApplicationBase.cpp src/Rendering/Vulkan/EngineFactoryVk.cpp src/Rendering/Vulkan/EngineContextVk.cpp src/Rendering/Vulkan/DeviceContextVk.cpp src/Rendering/Vulkan/SwapChainVk.cpp src/Rendering/Vulkan/RenderContextVk.cpp src/Rendering/Vulkan/GraphicsPipelineStateVk.cpp src/Rendering/Vulkan/ShaderVk.cpp src/IO/Directories.cpp src/IO/FileIO.cpp src/Rendering/Vulkan/BufferVk.cpp src/IO/FileManager.cpp src/Rendering/Vulkan/TextureVk.cpp src/Utils/Image/stb_lib.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE include src ${INCLUDE_DIR})
 
 target_link_directories(${PROJECT_NAME} PRIVATE ${LIB_DIR})
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_INTERNAL=1)
 
 if (PLATFORM_WIN32)
     target_link_libraries(${PROJECT_NAME}

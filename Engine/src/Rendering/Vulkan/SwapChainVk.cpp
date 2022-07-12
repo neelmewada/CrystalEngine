@@ -21,7 +21,6 @@ SwapChainVk::SwapChainVk(SwapChainCreateInfoVk &swapChainInfo)
     CreateFramebuffers();
     CreateCommandBuffers();
     CreateSyncObjects();
-    CreateDescriptorPool();
 
     std::cout << "Created SwapChainVk" << std::endl;
 }
@@ -30,9 +29,6 @@ SwapChainVk::~SwapChainVk() noexcept
 {
     // Wait until pDevice finishes running draw commands, executing graphics queue, etc. Should always be called on the same thread as the rendering thread.
     vkDeviceWaitIdle(m_pDevice->GetDevice());
-
-    // Descriptor Pool
-    vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_DescriptorPool, nullptr);
 
     // Sync Objects: Semaphores & Fences
     for (int i = 0; i < m_MaxSimultaneousFrameDraws; ++i)
@@ -497,6 +493,7 @@ void SwapChainVk::CreateSyncObjects()
 // TODO: Temp Function. ReDo it later
 void SwapChainVk::CreateDescriptorPool()
 {
+    /*
     // A pool of Uniform Buffer type of descriptors
     VkDescriptorPoolSize vpPoolSize = {};
     vpPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -519,7 +516,7 @@ void SwapChainVk::CreateDescriptorPool()
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Descriptor Pool");
-    }
+    }*/
 }
 
 #pragma region HELPERS

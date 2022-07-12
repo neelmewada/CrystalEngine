@@ -79,11 +79,21 @@ public:
         swapChainInfo.deviceContext = m_pDeviceContext;
         pEngineFactoryVk->CreateSwapChainVk(swapChainInfo, &m_pSwapChain);
 
+        // -- View Projection Matrix --
+        uint32_t w = 0, h = 0;
+        m_pSwapChain->GetSize(&w, &h);
+
+        viewProjection.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
+        viewProjection.projection[1][1] *= -1;
+        viewProjection.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
         // -- Render Context Creation --
         RenderContextCreateInfoVk renderContextInfo = {};
         renderContextInfo.engineContext = m_pEngineContext;
         renderContextInfo.deviceContext = m_pDeviceContext;
         renderContextInfo.swapChain = m_pSwapChain;
+        renderContextInfo.initialGlobalUniforms.projection = viewProjection.projection;
+        renderContextInfo.initialGlobalUniforms.view = viewProjection.view;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
         // -- Shaders --
@@ -130,23 +140,17 @@ public:
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
         pipelineInfo.pDevice = m_pDeviceContext;
+        pipelineInfo.pSwapChain = m_pSwapChain;
+        pipelineInfo.pRenderContext = m_pRenderContext;
         pipelineInfo.pShader = shader;
         pipelineInfo.attributesCount = 2;
         pipelineInfo.pAttributes = vertAttribs;
-        pipelineInfo.pSwapChain = m_pSwapChain;
         pipelineInfo.vertexStructByteSize = static_cast<uint32_t>(sizeof(Vertex));
 
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
-        // -- MVP Matrix --
-        uint32_t w = 0, h = 0;
-        m_pSwapChain->GetSize(&w, &h);
-
-        viewProjection.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
-        viewProjection.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        // -- Model Matrix --
         model.model = glm::mat4(1.0f);
-
-        viewProjection.projection[1][1] *= -1;
 
         // -- MESH --
 
@@ -168,7 +172,6 @@ public:
         BufferCreateInfo vertBufferInfo = {};
         vertBufferInfo.pName = "Rect";
         vertBufferInfo.bindFlags = Vox::BIND_VERTEX_BUFFER;
-        vertBufferInfo.usageFlags = Vox::BUFFER_USAGE_DEFAULT;
         vertBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
         vertBufferInfo.size = sizeof(vertices);
         BufferData vertBufferData = {};
@@ -180,7 +183,6 @@ public:
         BufferCreateInfo indexBufferInfo = {};
         indexBufferInfo.pName = "Rect";
         indexBufferInfo.bindFlags = Vox::BIND_INDEX_BUFFER;
-        indexBufferInfo.usageFlags = Vox::BUFFER_USAGE_DEFAULT;
         indexBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
         indexBufferInfo.size = sizeof(indices);
         BufferData indexBufferData = {};
@@ -241,10 +243,10 @@ protected:
             viewProjection.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
             viewProjection.projection[1][1] *= -1;
 
-            BufferData uniformData;
-            uniformData.dataSize = sizeof(viewProjection);
-            uniformData.pData = &viewProjection;
-            m_pPSO->UpdateUniformBuffer(uniformData);
+            //BufferData uniformData;
+            //uniformData.dataSize = sizeof(viewProjection);
+            //uniformData.pData = &viewProjection;
+            //m_pPSO->UpdateUniformBuffer(uniformData);
         }
     }
 
@@ -260,8 +262,8 @@ protected:
         // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
-        m_pRenderContext->CmdSetConstants(m_pPSO, 0, sizeof(glm::mat4), &model.model);
-        m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0);
+        //m_pRenderContext->CmdSetConstants(m_pPSO, 0, sizeof(glm::mat4), &model.model);
+        m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0, 0);
         m_pRenderContext->EndRecording();
 
         m_pSwapChain->Submit();

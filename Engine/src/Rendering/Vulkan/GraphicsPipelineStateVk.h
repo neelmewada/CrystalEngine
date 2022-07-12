@@ -4,6 +4,7 @@
 
 #include "DeviceContextVk.h"
 #include "SwapChainVk.h"
+#include "RenderContextVk.h"
 #include "ShaderVk.h"
 
 #include <vulkan/vulkan.h>
@@ -18,7 +19,7 @@ public:
     ~GraphicsPipelineStateVk();
 
 public:
-    GraphicsPipelineStateVk(const GraphicsPipelineStateVk&) = delete;
+    DELETE_COPY_CONSTRUCTORS(GraphicsPipelineStateVk)
 
 public: // Public API
     // TODO: All of them are Temp functions. To be changed.
@@ -46,13 +47,15 @@ private: // Internal Members
     DeviceContextVk* m_pDevice = nullptr;
     SwapChainVk* m_pSwapChain = nullptr;
     ShaderVk* m_pShader = nullptr;
+    RenderContextVk* m_pRenderContext = nullptr;
+
     // - Info
     uint64_t m_DynamicUniformBufferAlignment = 0;
 
 private: // Vulkan Members
     VkPipelineLayout m_PipelineLayout = nullptr;
     VkPipeline m_Pipeline = nullptr;
-    VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
+    //VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
 
     std::vector<BufferVk*> m_VPUniformBuffer{};
     std::vector<BufferVk*> m_ModelUniformBufferDynamic{};

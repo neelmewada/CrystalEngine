@@ -1,6 +1,12 @@
 
+
 #include "RenderContextVk.h"
+
+#include "SwapChainVk.h"
 #include "GraphicsPipelineStateVk.h"
+
+#include "EngineContextVk.h"
+#include "DeviceContextVk.h"
 
 #include <vulkan/vulkan.h>
 #include <SDL2/SDL.h>
@@ -17,16 +23,134 @@ RenderContextVk::RenderContextVk(RenderContextCreateInfoVk &renderContextInfo)
     m_pDevice = dynamic_cast<DeviceContextVk*>(renderContextInfo.deviceContext);
     m_pSwapChain = dynamic_cast<SwapChainVk*>(renderContextInfo.swapChain);
     m_pSwapChain->SetRenderContext(this);
+    m_GlobalUniforms = renderContextInfo.initialGlobalUniforms;
+
+    CreateDescriptorPool();
+    CreateGlobalDescriptorSet();
 
     std::cout << "Created RenderContextVk" << std::endl;
 }
 
 RenderContextVk::~RenderContextVk()
 {
+    // Global Uniform Buffer
+    for (int i = 0; i < m_GlobalUniformBuffer.size(); ++i)
+    {
+        delete m_GlobalUniformBuffer[i];
+    }
+    m_GlobalUniformBuffer.clear();
 
+    // Global Descriptor Set Layout
+    vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_GlobalDescriptorSetLayout, nullptr);
+
+    // Descriptor Pool
+    vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_DescriptorPool, nullptr);
 
     std::cout << "Destroyed RenderContextVk" << std::endl;
 }
+
+#pragma region Internal API
+
+void RenderContextVk::CreateDescriptorPool()
+{
+    VkDescriptorPoolSize sizes[] = {
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 4},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10}
+    };
+
+    VkDescriptorPoolCreateInfo poolInfo = {};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = _countof(sizes);
+    poolInfo.pPoolSizes = sizes;
+    poolInfo.maxSets = 10;
+
+    auto result = vkCreateDescriptorPool(m_pDevice->GetDevice(), &poolInfo, nullptr, &m_DescriptorPool);
+    if (result != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create Descriptor Pool!");
+    }
+}
+
+void RenderContextVk::CreateGlobalDescriptorSet()
+{
+    // -- Global Descriptor Set Layout --
+    VkDescriptorSetLayoutBinding globalDescriptorSetBinding = {};
+    globalDescriptorSetBinding.binding = 0;
+    globalDescriptorSetBinding.descriptorCount = 1;
+    globalDescriptorSetBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    globalDescriptorSetBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    globalDescriptorSetBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo layoutCreateInfo = {};
+    layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutCreateInfo.bindingCount = 1;
+    layoutCreateInfo.pBindings = &globalDescriptorSetBinding;
+
+    VK_ASSERT(vkCreateDescriptorSetLayout(m_pDevice->GetDevice(), &layoutCreateInfo, nullptr, &m_GlobalDescriptorSetLayout),
+              "Failed to create Global Descriptor Set Layout!");
+
+    auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
+    uint64_t bufferSize = sizeof(GlobalUniforms);
+
+    // -- Global Uniform Buffer --
+    m_GlobalUniformBuffer.resize(maxSimultaneousFrames);
+
+    for (int i = 0; i < maxSimultaneousFrames; ++i)
+    {
+        BufferCreateInfo bufferInfo = {};
+        bufferInfo.size = bufferSize;
+        bufferInfo.pName = "Global Uniform Buffer";
+        bufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
+        bufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
+        bufferInfo.allocType = BUFFER_MEM_CPU_TO_GPU;
+
+        BufferData initialData = {};
+        initialData.pData = &m_GlobalUniforms;
+        initialData.dataSize = sizeof(GlobalUniforms);
+
+        auto* buffer = new BufferVk(bufferInfo, m_pDevice);
+        m_GlobalUniformBuffer[i] = buffer;
+    }
+
+    // -- Global Descriptor Set --
+    m_GlobalDescriptorSet.resize(maxSimultaneousFrames);
+
+    std::vector<VkDescriptorSetLayout> globalSetLayout(m_GlobalDescriptorSet.size(), m_GlobalDescriptorSetLayout);
+
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = m_DescriptorPool;
+    allocateInfo.descriptorSetCount = static_cast<uint32_t>(m_GlobalDescriptorSet.size()); // Number of sets to allocate
+    allocateInfo.pSetLayouts = globalSetLayout.data();
+
+    VK_ASSERT(vkAllocateDescriptorSets(m_pDevice->GetDevice(), &allocateInfo, m_GlobalDescriptorSet.data()),
+              "Failed to allocate Global Descriptor Set!");
+
+    for (int i = 0; i < m_GlobalDescriptorSet.size(); ++i)
+    {
+        VkDescriptorBufferInfo bufferInfo = {};
+        bufferInfo.buffer = m_GlobalUniformBuffer[i]->GetBuffer(); // Buffer to get data from
+        bufferInfo.offset = 0;              // Position of start of data
+        bufferInfo.range = bufferSize;      // Size of the data
+
+        // Data about connection between binding and buffer
+        VkWriteDescriptorSet setWrite = {};
+        setWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        setWrite.dstSet = m_GlobalDescriptorSet[i];  // Descriptor set to update
+        setWrite.dstBinding = 0;        // Binding to update (matches with binding on layout/shader)
+        setWrite.dstArrayElement = 0;   // Index in array to update
+        setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        setWrite.descriptorCount = 1;  // No. of descriptors to update
+        setWrite.pBufferInfo = &bufferInfo;  // Info about buffer data to bind
+        setWrite.pImageInfo = nullptr;
+        setWrite.pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
+    }
+}
+
+#pragma endregion
 
 #pragma region Public API
 
@@ -54,7 +178,6 @@ void RenderContextVk::ClearRecording()
 void RenderContextVk::BeginRecording()
 {
     m_IsRecording = true;
-
     m_RenderCommands.clear();
 }
 
@@ -67,16 +190,19 @@ void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
     }
 
     auto swapChain = m_pSwapChain;
+    auto globalDescriptorSet = m_GlobalDescriptorSet[0];
 
-    m_RenderCommands.push_back([pPipelineVk, swapChain](VkCommandBuffer commandBuffer) -> void {
-        auto descriptorSet = pPipelineVk->GetDescriptorSet(swapChain->GetCurrentFrameIndex());
-        if (descriptorSet != nullptr)
-        {
-            // Dynamic Offset amount
-            uint32_t dynamicOffset = static_cast<uint32_t>(pPipelineVk->GetDynamicUniformBufferAlignment()) * 0; // 0 = mesh index in dynamic uniform buffer
-            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(),
-                                    0, 1, &descriptorSet, 1,&dynamicOffset);
-        }
+    m_RenderCommands.push_back([pPipelineVk, swapChain, globalDescriptorSet](VkCommandBuffer commandBuffer) -> void {
+//        auto descriptorSet = pPipelineVk->GetDescriptorSet(swapChain->GetCurrentFrameIndex());
+//        if (descriptorSet != nullptr)
+//        {
+//            // Dynamic Offset amount
+//            uint32_t dynamicOffset = 0; // 0 * (size of 1 dynamic entry including alignment)
+//            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(),
+//                                    0, 1, &descriptorSet, 1,&dynamicOffset);
+//        }
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(), 0,
+                                1, &globalDescriptorSet, 0, nullptr);
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
     });
 }
@@ -125,19 +251,15 @@ void RenderContextVk::CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, 
     VkBuffer buffer = pBufferVk->GetBuffer();
 
     m_RenderCommands.push_back([buffer, offset, indexType](VkCommandBuffer commandBuffer) -> void {
-        auto vkIndexType = VK_INDEX_TYPE_UINT16;
-        if (indexType == INDEX_TYPE_UINT16)
-            vkIndexType = VK_INDEX_TYPE_UINT16;
-        else if (indexType == INDEX_TYPE_UINT32)
-            vkIndexType = VK_INDEX_TYPE_UINT32;
-        vkCmdBindIndexBuffer(commandBuffer, buffer, offset, vkIndexType);
+        VkIndexType indexTypeVk = static_cast<VkIndexType>(indexType);
+        vkCmdBindIndexBuffer(commandBuffer, buffer, offset, indexTypeVk);
     });
 }
 
-void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex)
+void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex, uint32_t firstInstanceIndex)
 {
-    m_RenderCommands.push_back([indexCount, instanceCount, vertexOffset, firstIndex](VkCommandBuffer commandBuffer) -> void {
-        vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, 0);
+    m_RenderCommands.push_back([indexCount, instanceCount, vertexOffset, firstIndex, firstInstanceIndex](VkCommandBuffer commandBuffer) -> void {
+        vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstanceIndex);
     });
 }
 

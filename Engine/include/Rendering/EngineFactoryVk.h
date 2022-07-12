@@ -2,6 +2,7 @@
 
 #include "EngineDefs.h"
 
+#include "IBuffer.h"
 #include "Rendering/IEngineContext.h"
 #include "Rendering/IDeviceContext.h"
 #include "Rendering/ISwapChain.h"
@@ -35,12 +36,16 @@ struct RenderContextCreateInfoVk
     IEngineContext* engineContext;
     IDeviceContext* deviceContext;
     ISwapChain* swapChain;
+    GlobalUniforms initialGlobalUniforms;
 };
 
 class ENGINE_API EngineFactoryVk
 {
 private:
     EngineFactoryVk();
+
+public:
+    DELETE_COPY_CONSTRUCTORS(EngineFactoryVk)
 
 public:
     static EngineFactoryVk* Get() { return m_Instance; }

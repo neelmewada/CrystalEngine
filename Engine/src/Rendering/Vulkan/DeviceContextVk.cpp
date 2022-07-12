@@ -1,4 +1,7 @@
 
+#include <stdio.h>
+
+//#define VMA_DEBUG_LOG printf
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
@@ -6,6 +9,7 @@
 #include "GraphicsPipelineStateVk.h"
 #include "ShaderVk.h"
 #include "BufferVk.h"
+#include "TextureVk.h"
 
 #include <vulkan/vulkan.h>
 
@@ -444,6 +448,11 @@ IShader* DeviceContextVk::CreateShader(const ShaderCreateInfo& createInfo)
 IBuffer* DeviceContextVk::CreateBuffer(const BufferCreateInfo& createInfo, BufferData &bufferData)
 {
     return new BufferVk(createInfo, bufferData, this);
+}
+
+ITexture* DeviceContextVk::CreateTexture(const TextureCreateInfo& createInfo)
+{
+    return new TextureVk(createInfo, this);
 }
 
 #pragma endregion

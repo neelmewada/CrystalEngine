@@ -14,6 +14,8 @@
 #define _countof(arr) sizeof(arr) / sizeof(arr[0])
 #endif
 
+#define DELETE_COPY_CONSTRUCTORS(Class) Class(const Class&) = delete; Class operator=(const Class&) = delete;
+
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_RADIANS
 
@@ -28,3 +30,8 @@ typedef int32_t Sint32;
 typedef int16_t Sint16;
 typedef int8_t Sint8;
 
+#define VOX_ASSERT(condition,message) if (!(condition)) throw std::runtime_error(message)
+
+#ifdef ENGINE_INTERNAL
+#include "EngineInternal.h"
+#endif

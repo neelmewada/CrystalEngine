@@ -19,6 +19,7 @@ GraphicsPipelineStateVk::GraphicsPipelineStateVk(const GraphicsPipelineStateCrea
     m_pDevice = dynamic_cast<DeviceContextVk*>(createInfo.pDevice);
     m_pSwapChain = dynamic_cast<SwapChainVk*>(createInfo.pSwapChain);
     m_pShader = dynamic_cast<ShaderVk*>(createInfo.pShader);
+    m_pRenderContext = dynamic_cast<RenderContextVk*>(createInfo.pRenderContext);
 
     CreateGraphicsPipeline(createInfo);
 }
@@ -39,7 +40,8 @@ GraphicsPipelineStateVk::~GraphicsPipelineStateVk()
     }
     m_ModelUniformBufferDynamic.clear();
 
-    vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_DescriptorSetLayout, nullptr);
+    //vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_DescriptorSetLayout, nullptr);
+
     vkDestroyPipeline(m_pDevice->GetDevice(), m_Pipeline, nullptr);
     vkDestroyPipelineLayout(m_pDevice->GetDevice(), m_PipelineLayout, nullptr);
 }
@@ -135,7 +137,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     colorBlendState.pAttachments = &colorBlendAttachment;
 
     // -- Descriptor Set Layouts --
-    VkDescriptorSetLayoutBinding vpLayoutBinding = {};
+    /*VkDescriptorSetLayoutBinding vpLayoutBinding = {};
     vpLayoutBinding.binding = 0;
     vpLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     vpLayoutBinding.descriptorCount = 1;
@@ -160,7 +162,10 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create a Descriptor Set Layout!");
-    }
+    }*/
+
+    // -- Descriptor Set Layouts --
+    std::array<VkDescriptorSetLayout, 1> descriptorSetLayouts = {m_pRenderContext->GetGlobalDescriptorSetLayout()};
 
     // -- Push Constants --
     VkPushConstantRange pushConstant = {};
@@ -171,10 +176,10 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     // -- Pipeline Layout --
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &m_DescriptorSetLayout;
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
-    pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
+    pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+    pipelineLayoutInfo.pushConstantRangeCount = 0;
+    pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
     if (m_PipelineLayout != nullptr)
     {
@@ -183,7 +188,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     }
 
     // Create Pipeline Layout
-    result = vkCreatePipelineLayout(m_pDevice->GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout);
+    auto result = vkCreatePipelineLayout(m_pDevice->GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Pipeline Layout!");
@@ -263,7 +268,7 @@ void GraphicsPipelineStateVk::CreateUniformBuffer(uint64_t bufferSize, BufferDat
         BufferCreateInfo bufferInfo = {};
         bufferInfo.size = bufferSize;
         bufferInfo.pName = "Uniform Buffer";
-        bufferInfo.usageFlags = BUFFER_USAGE_DEFAULT;
+        bufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
         bufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
         bufferInfo.allocType = BUFFER_MEM_CPU_TO_GPU;
 
@@ -274,11 +279,11 @@ void GraphicsPipelineStateVk::CreateUniformBuffer(uint64_t bufferSize, BufferDat
     // -- Descriptor Sets --
     m_DescriptorSets.resize(maxSimultaneousFrames);
 
-    std::vector<VkDescriptorSetLayout> setLayouts(m_DescriptorSets.size(), m_DescriptorSetLayout);
+    std::vector<VkDescriptorSetLayout> setLayouts(m_DescriptorSets.size(), m_pRenderContext->GetGlobalDescriptorSetLayout());
 
     VkDescriptorSetAllocateInfo allocateInfo = {};
     allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocateInfo.descriptorPool = m_pSwapChain->GetDescriptorPool();	// Pool to allocate Descriptor Set from
+    allocateInfo.descriptorPool = m_pRenderContext->GetDescriptorPool();
     allocateInfo.descriptorSetCount = static_cast<uint32_t>(m_VPUniformBuffer.size()); // Number of sets to allocate
     allocateInfo.pSetLayouts = setLayouts.data();
 
@@ -319,7 +324,7 @@ void GraphicsPipelineStateVk::CreateUniformBuffer(uint64_t bufferSize, BufferDat
 }
 
 // TODO: Temp Function
-void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, BufferData &initialData, uint64_t alignment)
+void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, BufferData& initialData, uint64_t alignment)
 {
     auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
     m_DynamicUniformBufferAlignment = alignment;
@@ -332,9 +337,10 @@ void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, Buff
         BufferCreateInfo bufferInfo = {};
         bufferInfo.size = bufferSize;
         bufferInfo.pName = "Uniform Buffer";
-        bufferInfo.usageFlags = BUFFER_USAGE_DEFAULT;
         bufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
         bufferInfo.allocType = BUFFER_MEM_CPU_TO_GPU;
+        bufferInfo.transferFlags = BUFFER_TRANSFER_NONE;
+        bufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
 
         auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
         m_ModelUniformBufferDynamic[i] = buffer;
@@ -377,7 +383,7 @@ void GraphicsPipelineStateVk::UpdateUniformBuffer(BufferData& bufferData)
 
     auto currentFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
 
-    m_VPUniformBuffer[currentFrameIndex]->SendBufferData(bufferData);
+    m_VPUniformBuffer[currentFrameIndex]->SetBufferData(bufferData);
 }
 
 void GraphicsPipelineStateVk::UpdateDynamicUniformBuffer(BufferData& bufferData)
@@ -387,7 +393,7 @@ void GraphicsPipelineStateVk::UpdateDynamicUniformBuffer(BufferData& bufferData)
 
     auto currentFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
 
-    m_ModelUniformBufferDynamic[currentFrameIndex]->SendBufferData(bufferData);
+    m_ModelUniformBufferDynamic[currentFrameIndex]->SetBufferData(bufferData);
 }
 
 VkFormat GraphicsPipelineStateVk::VkFormatFromVertexAttribFormat(VertexAttribFormat &attribFormat)

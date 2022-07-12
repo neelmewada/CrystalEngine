@@ -49,6 +49,7 @@ public: // Public API
     IGraphicsPipelineState* CreateGraphicsPipelineState(const GraphicsPipelineStateCreateInfo& createInfo) override;
     IShader* CreateShader(const ShaderCreateInfo& createInfo) override;
     IBuffer* CreateBuffer(const BufferCreateInfo& createInfo, BufferData& bufferData) override;
+    ITexture * CreateTexture(const TextureCreateInfo &createInfo) override;
 
     // - Getters
     // -- Support Info

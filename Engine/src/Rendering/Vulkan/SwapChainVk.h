@@ -23,6 +23,9 @@ private:
     SwapChainVk(SwapChainCreateInfoVk& swapChainInfo);
     ~SwapChainVk();
 
+public:
+    DELETE_COPY_CONSTRUCTORS(SwapChainVk)
+
 public: // Public API
     // - API
     void Submit() override;
@@ -36,7 +39,7 @@ public: // Public API
     // - Getters
     VkExtent2D GetExtent() { return m_SwapchainExtent; }
     VkRenderPass GetRenderPass() { return m_RenderPass; }
-    VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
+    //VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
     int GetCurrentFrameIndex() { return m_CurrentFrameIndex; }
     int GetMaxSimultaneousFrameDraws() { return m_MaxSimultaneousFrameDraws; }
     const std::vector<VkCommandBuffer>& GetCommandBuffers() { return m_CommandBuffers; }
@@ -76,7 +79,7 @@ private: // Internal Members
 private: // Vulkan Members
     VkSwapchainKHR m_Swapchain = nullptr;
     VkRenderPass m_RenderPass = nullptr;
-    VkDescriptorPool m_DescriptorPool = nullptr;
+    //VkDescriptorPool m_DescriptorPool = nullptr;
 
     // - Swapchain details
     VkFormat m_SwapchainImageFormat{};

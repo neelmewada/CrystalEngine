@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EngineDefs.h"
+
 namespace Vox
 {
 
@@ -13,6 +15,16 @@ enum VertexAttribFormat
     VERTEX_ATTRIB_HALF2,
     VERTEX_ATTRIB_HALF3,
     VERTEX_ATTRIB_HALF4
+};
+
+enum ImageFormat
+{
+    IMG_FORMAT_UNDEFINED = 0,
+    IMG_FORMAT_R8_SRGB = 15,
+    IMG_FORMAT_R8G8_SRGB = 22,
+    IMG_FORMAT_R8G8B8_SRGB = 29,
+    IMG_FORMAT_R8G8B8A8_SRGB = 43,
+    IMG_FORMAT_B8G8R8A8_SRGB = 50,
 };
 
 }
