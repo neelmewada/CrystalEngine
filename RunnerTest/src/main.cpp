@@ -217,14 +217,14 @@ public:
 
         m_pRenderContext->SetClearColor(clearColor);
 
-        m_pRenderContext->BeginRecording();
+        m_pRenderContext->Begin();
         m_pRenderContext->CmdBindPipeline(m_pPSO);
         uint64_t offset = 0;
         // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
         m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0);
-        m_pRenderContext->EndRecording();*/
+        m_pRenderContext->End();*/
 
         // We're responsible for deleting the shader coz we created it ourselves.
         delete shader;
@@ -259,15 +259,14 @@ protected:
 
         m_pRenderContext->SetClearColor(clearColor);
 
-        m_pRenderContext->BeginRecording();
+        m_pRenderContext->Begin();
         m_pRenderContext->CmdBindPipeline(m_pPSO);
         uint64_t offset = 0;
         // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
-        //m_pRenderContext->CmdSetConstants(m_pPSO, 0, sizeof(glm::mat4), &model.model);
         m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0, 0);
-        m_pRenderContext->EndRecording();
+        m_pRenderContext->End();
 
         m_pSwapChain->Submit();
         m_pSwapChain->Present();

@@ -44,14 +44,13 @@ public: // Public API
 
     // - Commands
 
-    void BeginRecording() override;
+    void Begin() override;
     void CmdBindPipeline(IGraphicsPipelineState* pPipeline) override;
-    void CmdSetConstants(IGraphicsPipelineState *pPipeline, uint32_t offset, uint32_t size, const void *pValues) override;
     void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets) override;
     void CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, uint64_t offset) override;
 
     void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex, uint32_t firstInstanceIndex) override;
-    void EndRecording() override;
+    void End() override;
 
 private: // Internal API
     void CreateDescriptorPool();

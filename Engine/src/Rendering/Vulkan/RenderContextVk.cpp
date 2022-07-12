@@ -174,7 +174,7 @@ void RenderContextVk::SetClearColor(float clearColor[4])
         m_ClearColor[i] = clearColor[i];
 }
 
-void RenderContextVk::BeginRecording()
+void RenderContextVk::Begin()
 {
     m_IsRecording = true;
 
@@ -259,22 +259,6 @@ void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
     }
 }
 
-void RenderContextVk::CmdSetConstants(IGraphicsPipelineState* pPipeline, uint32_t offset, uint32_t size, const void* pValues)
-{
-    auto* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
-    if (pPipelineVk == nullptr)
-    {
-        throw std::runtime_error("Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
-    }
-
-    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
-
-    for (int i = 0; i < commandBuffers.size(); ++i)
-    {
-        vkCmdPushConstants(commandBuffers[i], pPipelineVk->GetPipelineLayout(), VK_SHADER_STAGE_ALL_GRAPHICS, offset, size, pValues);
-    }
-}
-
 void RenderContextVk::CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets)
 {
     std::vector<VkBuffer> buffers(bufferCount);
@@ -325,7 +309,7 @@ void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount
     }
 }
 
-void RenderContextVk::EndRecording()
+void RenderContextVk::End()
 {
     m_IsRecording = false;
 
