@@ -30,6 +30,8 @@ typedef int32_t Sint32;
 typedef int16_t Sint16;
 typedef int8_t Sint8;
 
+#include <stdexcept>
+
 #define VOX_ASSERT(condition,message) if (!(condition)) throw std::runtime_error(message)
 
 #ifdef ENGINE_INTERNAL

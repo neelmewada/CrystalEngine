@@ -52,5 +52,5 @@ const std::string FileManager::GetBinDirectoryImpl()
     readlink("/proc/self/exe", result, size);
 #endif
     fs::path dirPath = fs::path(std::string(path)).parent_path();
-    return std::string(dirPath);
+    return dirPath.string();
 }
