@@ -75,7 +75,7 @@ struct BufferData
     uint64_t dataSize; // number of bytes
     uint64_t offset = 0; // offset in number of bytes
     uint64_t range = 0;
-    void* pData;
+    const void* pData;
 };
 
 enum TextureLayout

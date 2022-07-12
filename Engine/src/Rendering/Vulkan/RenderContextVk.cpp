@@ -109,7 +109,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
         initialData.pData = &m_GlobalUniforms;
         initialData.dataSize = sizeof(GlobalUniforms);
 
-        auto* buffer = new BufferVk(bufferInfo, m_pDevice);
+        auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
         m_GlobalUniformBuffer[i] = buffer;
     }
 
@@ -153,6 +153,19 @@ void RenderContextVk::CreateGlobalDescriptorSet()
 #pragma endregion
 
 #pragma region Public API
+
+void RenderContextVk::UpdateGlobalUniforms(const GlobalUniforms& globals)
+{
+    BufferData bufferData = {};
+    bufferData.dataSize = sizeof(GlobalUniforms);
+    bufferData.pData = &globals;
+    bufferData.offset = 0;
+
+    for (int i = 0; i < m_GlobalUniformBuffer.size(); ++i)
+    {
+        m_GlobalUniformBuffer[i]->SetBufferData(bufferData);
+    }
+}
 
 void RenderContextVk::SetClearColor(float clearColor[4])
 {

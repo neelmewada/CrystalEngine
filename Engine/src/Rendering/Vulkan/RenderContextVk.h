@@ -32,6 +32,9 @@ public:
     DELETE_COPY_CONSTRUCTORS(RenderContextVk)
 
 public: // Public API
+    // - API
+    void UpdateGlobalUniforms(const GlobalUniforms &globals) override;
+
     // - Getters
     VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
     VkDescriptorSetLayout GetGlobalDescriptorSetLayout() { return m_GlobalDescriptorSetLayout; }

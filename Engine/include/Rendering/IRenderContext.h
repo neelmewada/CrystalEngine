@@ -14,8 +14,8 @@ enum IndexType
 
 struct GlobalUniforms
 {
-    glm::mat4 projection;
-    glm::mat4 view;
+    alignas(16) glm::mat4 projection;
+    alignas(16) glm::mat4 view;
 };
 
 class IGraphicsPipelineState;
@@ -29,6 +29,9 @@ public:
     virtual ~IRenderContext() {}
 
 public: // Public API
+    // - API
+    virtual void UpdateGlobalUniforms(const GlobalUniforms& globals) = 0;
+
     // - Setup
     virtual void SetClearColor(float clearColor[4]) = 0;
 

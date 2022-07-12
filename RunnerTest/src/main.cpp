@@ -83,22 +83,23 @@ public:
         uint32_t w = 0, h = 0;
         m_pSwapChain->GetSize(&w, &h);
 
-        viewProjection.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
-        viewProjection.projection[1][1] *= -1;
-        viewProjection.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        m_GlobalUniforms.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
+        m_GlobalUniforms.projection[1][1] *= -1;
+        m_GlobalUniforms.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         // -- Render Context Creation --
         RenderContextCreateInfoVk renderContextInfo = {};
         renderContextInfo.engineContext = m_pEngineContext;
         renderContextInfo.deviceContext = m_pDeviceContext;
         renderContextInfo.swapChain = m_pSwapChain;
-        renderContextInfo.initialGlobalUniforms.projection = viewProjection.projection;
-        renderContextInfo.initialGlobalUniforms.view = viewProjection.view;
+        renderContextInfo.initialGlobalUniforms.projection = m_GlobalUniforms.projection;
+        renderContextInfo.initialGlobalUniforms.view = m_GlobalUniforms.view;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
         // -- Shaders --
         fs::path shaderDir = IO::FileManager::GetSharedDirectory();
         shaderDir = shaderDir / "shaders/";
+        //shaderDir = std::string("/Users/neelmewada/CLionProjects/VoxEngine/RunnerTest/shaders");
 
         std::string vertexFile = (shaderDir / "shader2_vert.spv").string();
         std::string fragFile = (shaderDir / "shader2_frag.spv").string();
@@ -191,7 +192,7 @@ public:
         m_IndexBuffer = m_pDeviceContext->CreateBuffer(indexBufferInfo, indexBufferData);
 
         /*
-        // Uniform Buffer TODO: Temp Code
+        // Uniform Buffer - OLD CODE
         Uint64 minBufferOffset = m_pDeviceContext->GetUniformBufferOffsetAlignment();
         modelBufferAlignment = (sizeof(UboModel) + minBufferOffset - 1) & ~(minBufferOffset - 1);
         modelTransferSpace = (UboModel*)std::aligned_alloc(modelBufferAlignment, modelBufferAlignment * 1);
@@ -203,10 +204,10 @@ public:
         modelData.pData = modelTransferSpace;
 
         BufferData vpData{};
-        vpData.dataSize = sizeof(viewProjection);
-        vpData.pData = &viewProjection;
+        vpData.dataSize = sizeof(m_GlobalUniforms);
+        vpData.pData = &m_GlobalUniforms;
 
-        // TODO: Temp functions. To be changed.
+        // OLD CODE
         m_pPSO->CreateUniformBuffer(sizeof(UboViewProjection), vpData);
         m_pPSO->CreateDynamicUniformBuffer(modelBufferAlignment, modelData, minBufferOffset);
         */
@@ -240,12 +241,14 @@ protected:
             uint32_t w = 0, h = 0;
             m_pSwapChain->GetSize(&w, &h);
 
-            viewProjection.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
-            viewProjection.projection[1][1] *= -1;
+            m_GlobalUniforms.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
+            m_GlobalUniforms.projection[1][1] *= -1;
+
+            m_pRenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
 
             //BufferData uniformData;
-            //uniformData.dataSize = sizeof(viewProjection);
-            //uniformData.pData = &viewProjection;
+            //uniformData.dataSize = sizeof(m_GlobalUniforms);
+            //uniformData.pData = &m_GlobalUniforms;
             //m_pPSO->UpdateUniformBuffer(uniformData);
         }
     }
@@ -287,14 +290,6 @@ protected:
 //
 //        m_pPSO->UpdateDynamicUniformBuffer(modelData);
 
-        /*
-        mvp.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        //mvp.model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
-
-        BufferData uniformData;
-        uniformData.dataSize = sizeof(mvp);
-        uniformData.pData = &mvp;
-        m_pPSO->UpdateUniformBuffer(uniformData);*/
     }
 
 private: // Vulkan Functions
@@ -309,14 +304,7 @@ private: // Internal Members
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
 
-    struct UboViewProjection {
-        alignas(16) glm::mat4 projection;
-        alignas(16) glm::mat4 view;
-    } viewProjection;
-
-    struct Lighting {
-        alignas(16) glm::vec4 lightColor;
-    } lighting;
+    GlobalUniforms m_GlobalUniforms;
 
     struct UboModel {
         alignas(16) glm::mat4 model;
