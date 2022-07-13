@@ -1,10 +1,16 @@
 #version 450  // GLSL v4.5
 
-// Uniforms that are same for all objects in scene
+#define STATIC(location) layout(set = 0, binding = location)
+#define MUTABLE(location) layout(set = 1, binding = location)
+#define DYNAMIC(location) layout(set = 2, binding = location)
 
-layout(set = 0, binding = 0) uniform GlobalUniforms {
+// STATIC
+STATIC(0) uniform GlobalUniforms {
     mat4 projection;
     mat4 view;
+    vec4 test;
+    float test2;
+    uint integers;
 };
 
 struct MaterialData {
@@ -18,25 +24,6 @@ struct PerObjectData {
     uint objectIndex;
     uint materialIndex;
 };
-
-/*
-layout(set = 1, binding = 0) uniform sampler2D textures[4]; // Max 4 textures per material
-layout(std140, set = 1, binding = 1) readonly buffer MaterialBuffer { // Dynamic Offset Storage Buffer
-    MaterialData materials[];
-};
-layout(std140, set = 1, binding = 2) readonly buffer ObjectBuffer { // Storage Buffer
-    PerObjectData objects[];
-};
-
-// Per-DrawCall Uniform Buffer
-layout(std140, set = 2, binding = 0) uniform DrawCall {
-    uint objectIndices[];
-};
-
-layout(push_constant) uniform Constants {
-    mat4 model;
-};
-*/
 
 #ifdef VERTEX
 
@@ -63,3 +50,43 @@ void main() {
 }
 
 #endif
+
+/*
+// set0: STATIC
+layout(set = 0, binding = 0) uniform mat4 view;
+layout(set = 0, binding = 1) uniform mat4 projection;
+layout(set = 0, binding = 2) uniform vec4 dirLightColor;
+--OR--
+layout(set = 0, binding = 0) uniform GlobalUniforms {
+    mat4 view;
+    mat4 projection;
+    vec4 dirLightColor;
+};
+
+// set1: MUTABLE (they are Dynamic Uniform/Storage Buffers)
+layout(set = 1, binding = 0) uniform sampler2D textures[];
+
+*/
+
+/*
+// Below 2 are same for all shaders
+layout(set = 0, binding = 1) readonly buffer MaterialBuffer { // Dynamic Offset Storage Buffer
+    MaterialData materials[];
+};
+layout(set = 0, binding = 2) readonly buffer ObjectBuffer { // Storage Buffer
+    PerObjectData objects[];
+};
+
+// Per Shader textures
+layout(set = 1, binding = 0) uniform sampler2D textures[5]; // Max 5 textures per material
+
+// Per-DrawCall Uniform Buffer
+layout(std140, set = 2, binding = 0) uniform DrawCall {
+    uint objectIndices[];
+};
+
+layout(push_constant) uniform Constants {
+    mat4 model;
+};
+*/
+

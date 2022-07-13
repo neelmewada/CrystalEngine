@@ -92,8 +92,8 @@ public:
         renderContextInfo.engineContext = m_pEngineContext;
         renderContextInfo.deviceContext = m_pDeviceContext;
         renderContextInfo.swapChain = m_pSwapChain;
-        renderContextInfo.initialGlobalUniforms.projection = m_GlobalUniforms.projection;
-        renderContextInfo.initialGlobalUniforms.view = m_GlobalUniforms.view;
+        //renderContextInfo.initialGlobalUniforms.projection = m_GlobalUniforms.projection;
+        //renderContextInfo.initialGlobalUniforms.view = m_GlobalUniforms.view;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
 
         // -- Shaders --
@@ -244,7 +244,7 @@ protected:
             m_GlobalUniforms.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
             m_GlobalUniforms.projection[1][1] *= -1;
 
-            m_pRenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
+            //m_pRenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
 
             //BufferData uniformData;
             //uniformData.dataSize = sizeof(m_GlobalUniforms);
@@ -302,6 +302,12 @@ private: // Internal Members
     IGraphicsPipelineState* m_pPSO;
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
+
+    struct GlobalUniforms
+    {
+        alignas(16) glm::mat4 projection;
+        alignas(16) glm::mat4 view;
+    };
 
     GlobalUniforms m_GlobalUniforms;
 

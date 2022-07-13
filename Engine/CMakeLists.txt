@@ -11,10 +11,9 @@ target_link_directories(${PROJECT_NAME} PRIVATE ${LIB_DIR})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_INTERNAL=1)
 
+set(SPIRV_LIBS shaderc glslang MachineIndependent GenericCodeGen OSDependent OGLCompiler SPIRV SPIRV-Tools spirv-cross-cpp spirv-cross-reflect spirv-cross-util spirv-cross-core spirv-cross-glsl)
 
-set(SPIRV_LIBS shaderc SPIRV spirv-cross-cpp spirv-cross-reflect spirv-cross-util spirv-cross-core spirv-cross-glsl)
-
-if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+if (PLATFORM_WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL Debug)
     list(TRANSFORM SPIRV_LIBS APPEND "d")
 endif()
 

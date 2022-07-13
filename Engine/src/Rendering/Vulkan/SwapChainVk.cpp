@@ -173,7 +173,7 @@ void SwapChainVk::CreateSwapChain()
     VkExtent2D extent = ChooseSwapExtent(surfaceCompatInfo.surfaceCapabilities);
 
     // Add 1 extra image to allow triple buffering
-    uint32_t imageCount = surfaceCompatInfo.surfaceCapabilities.minImageCount; // Disable triple buffering for now
+    uint32_t imageCount = surfaceCompatInfo.surfaceCapabilities.minImageCount; // Disable triple buffering for now (+1 for triple buffering)
 
     // If imageCount is higher than max allowed image count. If it's 0 then limitless
     if (surfaceCompatInfo.surfaceCapabilities.maxImageCount > 0 &&
@@ -556,7 +556,7 @@ VkImageView SwapChainVk::CreateImageView(VkImage image, VkFormat format, VkImage
     VkImageViewCreateInfo viewCreateInfo = {};
     viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewCreateInfo.image = image;
-    viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;  // Type of image (1D, 2D, 3D, Cube, etc)
+    viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;  // ResourceType of image (1D, 2D, 3D, Cube, etc)
     viewCreateInfo.format = format;
 
     // Allows remapping of RGBA components to other channel values

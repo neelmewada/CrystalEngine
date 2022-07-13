@@ -137,35 +137,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     colorBlendState.pAttachments = &colorBlendAttachment;
 
     // -- Descriptor Set Layouts --
-    /*VkDescriptorSetLayoutBinding vpLayoutBinding = {};
-    vpLayoutBinding.binding = 0;
-    vpLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    vpLayoutBinding.descriptorCount = 1;
-    vpLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    vpLayoutBinding.pImmutableSamplers = nullptr;
-
-    VkDescriptorSetLayoutBinding modelLayoutBinding = {};
-    modelLayoutBinding.binding = 1;
-    modelLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    modelLayoutBinding.descriptorCount = 1;
-    modelLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    modelLayoutBinding.pImmutableSamplers = nullptr;
-
-    std::array<VkDescriptorSetLayoutBinding, 2> layoutBindings{ vpLayoutBinding, modelLayoutBinding };
-
-    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutInfo = {};
-    descriptorSetLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    descriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size()); // No. of binding infos
-    descriptorSetLayoutInfo.pBindings = layoutBindings.data();                           // Array of binding infos
-
-    auto result = vkCreateDescriptorSetLayout(m_pDevice->GetDevice(), &descriptorSetLayoutInfo, nullptr, &m_DescriptorSetLayout);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to create a Descriptor Set Layout!");
-    }*/
-
-    // -- Descriptor Set Layouts --
-    std::array<VkDescriptorSetLayout, 1> descriptorSetLayouts = {m_pRenderContext->GetGlobalDescriptorSetLayout()};
+    //std::array<VkDescriptorSetLayout, 1> descriptorSetLayouts = {m_pRenderContext->GetGlobalDescriptorSetLayout()};
 
     // -- Push Constants --
     VkPushConstantRange pushConstant = {};
@@ -176,8 +148,8 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     // -- Pipeline Layout --
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+    pipelineLayoutInfo.setLayoutCount = 0;//static_cast<uint32_t>(descriptorSetLayouts.size());
+    pipelineLayoutInfo.pSetLayouts = nullptr;//descriptorSetLayouts.data();
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 

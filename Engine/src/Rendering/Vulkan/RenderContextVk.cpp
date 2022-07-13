@@ -24,10 +24,10 @@ RenderContextVk::RenderContextVk(RenderContextCreateInfoVk &renderContextInfo)
     m_pDevice = dynamic_cast<DeviceContextVk*>(renderContextInfo.deviceContext);
     m_pSwapChain = dynamic_cast<SwapChainVk*>(renderContextInfo.swapChain);
     m_pSwapChain->SetRenderContext(this);
-    m_GlobalUniforms = renderContextInfo.initialGlobalUniforms;
+    //m_GlobalUniforms = renderContextInfo.initialGlobalUniforms;
 
     CreateDescriptorPool();
-    CreateGlobalDescriptorSet();
+    //CreateGlobalDescriptorSet();
 
     std::cout << "Created RenderContextVk" << std::endl;
 }
@@ -35,14 +35,14 @@ RenderContextVk::RenderContextVk(RenderContextCreateInfoVk &renderContextInfo)
 RenderContextVk::~RenderContextVk()
 {
     // Global Uniform Buffer
-    for (int i = 0; i < m_GlobalUniformBuffer.size(); ++i)
-    {
-        delete m_GlobalUniformBuffer[i];
-    }
-    m_GlobalUniformBuffer.clear();
+//    for (int i = 0; i < m_GlobalUniformBuffer.size(); ++i)
+//    {
+//        delete m_GlobalUniformBuffer[i];
+//    }
+//    m_GlobalUniformBuffer.clear();
 
     // Global Descriptor Set Layout
-    vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_GlobalDescriptorSetLayout, nullptr);
+    //vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_GlobalDescriptorSetLayout, nullptr);
 
     // Descriptor Pool
     vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_DescriptorPool, nullptr);
@@ -71,8 +71,12 @@ void RenderContextVk::CreateDescriptorPool()
     {
         throw std::runtime_error("Failed to create Descriptor Pool!");
     }
-}
 
+    VkDescriptorSetLayoutBinding b = {};
+    b.descriptorCount = 8; // array of 8
+    b.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // sampler2d
+}
+/*
 void RenderContextVk::CreateGlobalDescriptorSet()
 {
     // -- Global Descriptor Set Layout --
@@ -149,13 +153,13 @@ void RenderContextVk::CreateGlobalDescriptorSet()
 
         vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
     }
-}
+}*/
 
 #pragma endregion
 
 #pragma region Public API
 
-void RenderContextVk::UpdateGlobalUniforms(const GlobalUniforms& globals)
+/*void RenderContextVk::UpdateGlobalUniforms(const GlobalUniforms& globals)
 {
     BufferData bufferData = {};
     bufferData.dataSize = sizeof(GlobalUniforms);
@@ -166,7 +170,7 @@ void RenderContextVk::UpdateGlobalUniforms(const GlobalUniforms& globals)
     {
         m_GlobalUniformBuffer[i]->SetBufferData(bufferData);
     }
-}
+}*/
 
 void RenderContextVk::SetClearColor(float clearColor[4])
 {
@@ -247,14 +251,14 @@ void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
 
     auto curFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
 
-    auto globalDescriptorSet = m_GlobalDescriptorSet[curFrameIndex];
+    //auto globalDescriptorSet = m_GlobalDescriptorSet[curFrameIndex];
 
     const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
 
     for (int i = 0; i < commandBuffers.size(); ++i)
     {
-        vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(), 0,
-                                1, &globalDescriptorSet, 0, nullptr);
+        //vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(), 0,
+        //                        1, &globalDescriptorSet, 0, nullptr);
         vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
     }
 }

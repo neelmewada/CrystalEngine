@@ -5,6 +5,18 @@
 namespace Vox
 {
 
+class ENGINE_API IShaderResourceObject
+{
+protected:
+    IShaderResourceObject() {}
+public:
+    virtual ~IShaderResourceObject() {}
+
+public: // Public API
+
+
+};
+
 class ENGINE_API IShader
 {
 protected:
@@ -14,7 +26,6 @@ public:
 
 public: // Public API
 
-protected: // Internal Members
 
 };
 

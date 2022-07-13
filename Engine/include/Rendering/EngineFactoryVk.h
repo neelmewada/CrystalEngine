@@ -36,7 +36,7 @@ struct RenderContextCreateInfoVk
     IEngineContext* engineContext;
     IDeviceContext* deviceContext;
     ISwapChain* swapChain;
-    GlobalUniforms initialGlobalUniforms;
+    //GlobalUniforms initialGlobalUniforms;
 };
 
 class ENGINE_API EngineFactoryVk

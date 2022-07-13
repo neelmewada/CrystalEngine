@@ -37,7 +37,7 @@ struct GraphicsPipelineStateCreateInfo
     IShader* pShader;
     uint32_t vertexStructByteSize; // Number of bytes used per vertex
     uint32_t attributesCount;
-    GraphicsPipelineVertexAttributeDesc* pAttributes;
+    GraphicsPipelineVertexAttributeDesc* pAttributes = nullptr;
 };
 
 struct ShaderVariantCreateInfo

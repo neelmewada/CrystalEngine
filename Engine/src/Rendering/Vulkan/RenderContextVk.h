@@ -33,11 +33,11 @@ public:
 
 public: // Public API
     // - API
-    void UpdateGlobalUniforms(const GlobalUniforms &globals) override;
+    //void UpdateGlobalUniforms(const GlobalUniforms &globals) override;
 
     // - Getters
     VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
-    VkDescriptorSetLayout GetGlobalDescriptorSetLayout() { return m_GlobalDescriptorSetLayout; }
+    //VkDescriptorSetLayout GetGlobalDescriptorSetLayout() { return m_GlobalDescriptorSetLayout; }
 
     // - Setup
     void SetClearColor(float clearColor[4]) override;
@@ -58,22 +58,22 @@ private: // Internal API
 
 private: // Internal Members
     // - Buffers
-    std::vector<BufferVk*> m_GlobalUniformBuffer;
+    //std::vector<BufferVk*> m_GlobalUniformBuffer;
 
     // - References
     EngineContextVk* m_pEngine = nullptr;
     DeviceContextVk* m_pDevice = nullptr;
     SwapChainVk* m_pSwapChain = nullptr;
-    std::vector<VkDescriptorSet> m_GlobalDescriptorSet;
+    //std::vector<VkDescriptorSet> m_GlobalDescriptorSet;
 
     // - Data
-    GlobalUniforms m_GlobalUniforms{};
+    //GlobalUniforms m_GlobalUniforms{};
     float m_ClearColor[4] = {0,0,0,1};
     bool m_IsRecording = false;
 
 private: // Vulkan Members
     VkDescriptorPool m_DescriptorPool = nullptr;
-    VkDescriptorSetLayout m_GlobalDescriptorSetLayout = nullptr;
+    //VkDescriptorSetLayout m_GlobalDescriptorSetLayout = nullptr;
 
 };
 
