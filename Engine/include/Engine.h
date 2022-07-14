@@ -26,6 +26,7 @@
 #include "Rendering/IBuffer.h"
 #include "Rendering/ITexture.h"
 #include "Rendering/IGraphicsPipelineState.h"
+#include "Rendering/IShaderResourceBinding.h"
 #include "Rendering/EngineFactoryVk.h"
 
 // -- UTILS --

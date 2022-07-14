@@ -3,6 +3,27 @@
 namespace Vox
 {
 
+enum ShaderResourceVariableBaseType
+{
+    Struct, UInt, Int, Sampler2D, Sampler3D, Float, Vec2, Vec3, Vec4, Mat2, Mat3, Mat4,
+    UVec2, UVec3, UVec4, IVec2, IVec3, IVec4
+};
+
+enum ShaderResourceVariableType
+{
+    UniformBuffer, StorageBuffer, SampledImage2D
+};
+
+struct ShaderBlockMember
+{
+    Uint32 offset;
+    Uint32 size;
+    std::string name;
+    ShaderResourceVariableBaseType baseType;
+    bool isArray;
+};
+
+
 // Indices of Queue families if they exist
 struct QueueFamilyInfo
 {

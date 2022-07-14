@@ -9,7 +9,7 @@
 
 using namespace Vox;
 
-Uint32 GetShaderBaseTypeSize(ShaderBaseType baseType)
+Uint32 GetShaderBaseTypeSize(ShaderResourceVariableBaseType baseType)
 {
     switch (baseType)
     {
@@ -32,7 +32,7 @@ Uint32 GetShaderBaseTypeSize(ShaderBaseType baseType)
     return 0;
 }
 
-ShaderBaseType GetShaderBaseType(const spirv_cross::SPIRType& memType)
+ShaderResourceVariableBaseType GetShaderBaseType(const spirv_cross::SPIRType& memType)
 {
     if (memType.basetype == spirv_cross::SPIRType::Float)
     {
@@ -70,16 +70,24 @@ ShaderBaseType GetShaderBaseType(const spirv_cross::SPIRType& memType)
         if (memType.image.dim == spv::Dim2D) return ::Sampler2D;
         else if (memType.image.dim == spv::Dim3D) return ::Sampler3D;
     }
+    else if (memType.basetype == spirv_cross::SPIRType::Struct)
+    {
+        return ::Struct;
+    }
     throw std::runtime_error("Failed to find a member type using SPIRV Reflection!");
 }
 
 ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, DeviceContextVk *device)
 {
     m_Device = device;
-    m_pName = createInfo.name;
+    if (createInfo.name != nullptr)
+        m_Name = createInfo.name;
 
-    m_DefineFlagsCount = createInfo.defineFlagsCount;
-    m_pDefineFlags = createInfo.pDefineFlags;
+    m_DefineFlags.resize(createInfo.defineFlagsCount);
+    for (int i = 0; i < m_DefineFlags.size(); ++i)
+    {
+        m_DefineFlags[i] = createInfo.pDefineFlags[i];
+    }
 
     VkShaderModuleCreateInfo vertShaderInfo = {};
     vertShaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -105,28 +113,28 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
     auto vertResources = vertReflection.get_shader_resources();
     auto fragResources = fragReflection.get_shader_resources();
 
-    // Spir-V Cross Reflection
+    // Spir-V Reflection
 
+    // -- Uniform Buffers --
+    // Vertex
     for (const auto& uniformBuffer: vertResources.uniform_buffers)
     {
         auto descriptorSet = vertReflection.get_decoration(uniformBuffer.id, spv::DecorationDescriptorSet);
         auto binding = vertReflection.get_decoration(uniformBuffer.id, spv::DecorationBinding);
         auto& type = vertReflection.get_type(uniformBuffer.type_id);
 
-        std::cout << "Uniform Buffer: " << uniformBuffer.name << " ; " << descriptorSet << " ; " << binding << std::endl;
-        std::cout << "Uniform Name: " << vertReflection.get_block_fallback_name(uniformBuffer.id) << std::endl;
-
         ShaderResourceVariableDefinition variableDef = {};
         variableDef.set = descriptorSet;
         variableDef.binding = binding;
         variableDef.size = static_cast<Uint32>(vertReflection.get_declared_struct_size(type));
         variableDef.name = uniformBuffer.name;
-        variableDef.type = ShaderResourceVariableDefinition::UniformBuffer;
+        variableDef.type = ::UniformBuffer;
         variableDef.members.clear();
+        variableDef.shaderStages = SHADER_STAGE_VERTEX;
 
         if (type.basetype == SPIRType::Struct)
         {
-            variableDef.baseType = ShaderBaseType::Struct;
+            variableDef.baseType = ShaderResourceVariableBaseType::Struct;
 
             for (int i = 0; i < type.member_types.size(); ++i)
             {
@@ -137,6 +145,56 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
 
                 auto& memType = vertReflection.get_type(type.member_types[i]);
                 member.baseType = GetShaderBaseType(memType);
+                member.isArray = !memType.array.empty();
+
+                variableDef.members.push_back(member);
+            }
+        }
+        m_ShaderVariableDefinitions.push_back(variableDef);
+    }
+    // Fragment
+    for (const auto& uniformBuffer: fragResources.uniform_buffers)
+    {
+        auto descriptorSet = fragReflection.get_decoration(uniformBuffer.id, spv::DecorationDescriptorSet);
+        auto binding = fragReflection.get_decoration(uniformBuffer.id, spv::DecorationBinding);
+        auto& type = fragReflection.get_type(uniformBuffer.type_id);
+
+        ShaderResourceVariableDefinition variableDef = {};
+        variableDef.set = descriptorSet;
+        variableDef.binding = binding;
+        variableDef.size = static_cast<Uint32>(fragReflection.get_declared_struct_size(type));
+        variableDef.name = uniformBuffer.name;
+        variableDef.type = ::UniformBuffer;
+        variableDef.members.clear();
+        variableDef.shaderStages = SHADER_STAGE_FRAGMENT;
+
+        auto result = std::find_if(m_ShaderVariableDefinitions.begin(), m_ShaderVariableDefinitions.end(),
+                     [&variableDef](const ShaderResourceVariableDefinition& arg) -> bool {
+            return variableDef.name == arg.name && variableDef.set == arg.set && variableDef.binding == arg.binding
+                && variableDef.size == arg.size;
+        });
+
+        if (result != m_ShaderVariableDefinitions.end()) // Entry exists
+        {
+            result->shaderStages = (ShaderStageFlags)(result->shaderStages | SHADER_STAGE_FRAGMENT);
+            continue;
+        }
+
+        // Entry doesn't exist
+        if (type.basetype == SPIRType::Struct)
+        {
+            variableDef.baseType = ShaderResourceVariableBaseType::Struct;
+
+            for (int i = 0; i < type.member_types.size(); ++i)
+            {
+                ShaderBlockMember member = {};
+                member.name = fragReflection.get_member_name(uniformBuffer.base_type_id, i);
+                member.offset = fragReflection.type_struct_member_offset(type, i);
+                member.size = static_cast<Uint32>(fragReflection.get_declared_struct_member_size(type, i));
+
+                auto& memType = fragReflection.get_type(type.member_types[i]);
+                member.baseType = GetShaderBaseType(memType);
+                member.isArray = !memType.array.empty();
 
                 variableDef.members.push_back(member);
             }
@@ -144,6 +202,8 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
         m_ShaderVariableDefinitions.push_back(variableDef);
     }
 
+    // -- Sampled Images --
+    // Vertex
     for (const auto& sampledImage: vertResources.sampled_images)
     {
         auto descriptorSet = vertReflection.get_decoration(sampledImage.id, spv::DecorationDescriptorSet);
@@ -155,11 +215,13 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
         variableDef.binding = binding;
         variableDef.size = 0;
         variableDef.name = sampledImage.name;
-        variableDef.type = ShaderResourceVariableDefinition::SampledImage;
+        variableDef.type = ::SampledImage2D;
         variableDef.isArray = !type.array.empty();
+        variableDef.shaderStages = SHADER_STAGE_VERTEX;
+
         if (variableDef.isArray)
         {
-            variableDef.members.resize(type.array[0]);
+            variableDef.members.resize(type.array[0]); // No. of array elements
             auto elementBaseType = GetShaderBaseType(type);
             auto elementSize = GetShaderBaseTypeSize(elementBaseType);
             for (int i = 0; i < variableDef.members.size(); ++i)
@@ -169,6 +231,59 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
                 arrayElement.size = elementSize;
                 arrayElement.baseType = elementBaseType;
                 arrayElement.name = std::to_string(i);
+                arrayElement.isArray = false;
+                variableDef.members[i] = arrayElement;
+            }
+        }
+        else
+        {
+            variableDef.members.clear();
+        }
+
+        m_ShaderVariableDefinitions.push_back(variableDef);
+    }
+    // Fragment
+    for (const auto& sampledImage: fragResources.sampled_images)
+    {
+        auto descriptorSet = fragReflection.get_decoration(sampledImage.id, spv::DecorationDescriptorSet);
+        auto binding = fragReflection.get_decoration(sampledImage.id, spv::DecorationBinding);
+        auto& type = fragReflection.get_type(sampledImage.type_id);
+
+        ShaderResourceVariableDefinition variableDef = {};
+        variableDef.set = descriptorSet;
+        variableDef.binding = binding;
+        variableDef.size = 0;
+        variableDef.name = sampledImage.name;
+        variableDef.type = ::SampledImage2D;
+        variableDef.isArray = !type.array.empty();
+        variableDef.shaderStages = SHADER_STAGE_FRAGMENT;
+
+        auto result = std::find_if(m_ShaderVariableDefinitions.begin(), m_ShaderVariableDefinitions.end(),
+        [&variableDef](const ShaderResourceVariableDefinition& arg) -> bool {
+            return variableDef.name == arg.name && variableDef.set == arg.set && variableDef.binding == arg.binding
+                  && variableDef.size == arg.size;
+        });
+
+        if (result != m_ShaderVariableDefinitions.end()) // Entry exists
+        {
+            result->shaderStages = (ShaderStageFlags)(result->shaderStages | SHADER_STAGE_FRAGMENT);
+            continue;
+        }
+
+        // Entry doesn't exist
+        if (variableDef.isArray)
+        {
+            variableDef.members.resize(type.array[0]); // No. of array elements
+            auto elementBaseType = GetShaderBaseType(type);
+            auto elementSize = GetShaderBaseTypeSize(elementBaseType);
+            for (int i = 0; i < variableDef.members.size(); ++i)
+            {
+                ShaderBlockMember arrayElement = {};
+                arrayElement.offset = i * elementSize;
+                arrayElement.size = elementSize;
+                arrayElement.baseType = elementBaseType;
+                arrayElement.name = std::to_string(i);
+                arrayElement.isArray = false;
                 variableDef.members[i] = arrayElement;
             }
         }

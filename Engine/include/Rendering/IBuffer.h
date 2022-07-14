@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineDefs.h"
+#include "IDeviceObject.h"
 
 #include <stdint.h>
 
@@ -47,7 +48,9 @@ enum BufferOptimizationFlags
 
 struct BufferData;
 
-class ENGINE_API IBuffer
+class IDeviceObject;
+
+class ENGINE_API IBuffer : public IDeviceObject
 {
 protected:
     IBuffer() {}

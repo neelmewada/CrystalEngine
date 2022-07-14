@@ -34,16 +34,6 @@ RenderContextVk::RenderContextVk(RenderContextCreateInfoVk &renderContextInfo)
 
 RenderContextVk::~RenderContextVk()
 {
-    // Global Uniform Buffer
-//    for (int i = 0; i < m_GlobalUniformBuffer.size(); ++i)
-//    {
-//        delete m_GlobalUniformBuffer[i];
-//    }
-//    m_GlobalUniformBuffer.clear();
-
-    // Global Descriptor Set Layout
-    //vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_GlobalDescriptorSetLayout, nullptr);
-
     // Descriptor Pool
     vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_DescriptorPool, nullptr);
 
@@ -57,24 +47,21 @@ void RenderContextVk::CreateDescriptorPool()
     VkDescriptorPoolSize sizes[] = {
             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10},
             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 5},
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10}
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10}
     };
 
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     poolInfo.poolSizeCount = _countof(sizes);
     poolInfo.pPoolSizes = sizes;
-    poolInfo.maxSets = 16;
+    poolInfo.maxSets = 32;
 
     auto result = vkCreateDescriptorPool(m_pDevice->GetDevice(), &poolInfo, nullptr, &m_DescriptorPool);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Descriptor Pool!");
     }
-
-    VkDescriptorSetLayoutBinding b = {};
-    b.descriptorCount = 8; // array of 8
-    b.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; // sampler2d
 }
 /*
 void RenderContextVk::CreateGlobalDescriptorSet()
@@ -92,10 +79,10 @@ void RenderContextVk::CreateGlobalDescriptorSet()
     layoutCreateInfo.bindingCount = 1;
     layoutCreateInfo.pBindings = &globalDescriptorSetBinding;
 
-    VK_ASSERT(vkCreateDescriptorSetLayout(m_pDevice->GetDevice(), &layoutCreateInfo, nullptr, &m_GlobalDescriptorSetLayout),
+    VK_ASSERT(vkCreateDescriptorSetLayout(m_Device->GetDevice(), &layoutCreateInfo, nullptr, &m_GlobalDescriptorSetLayout),
               "Failed to create Global Descriptor Set Layout!");
 
-    auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
+    auto maxSimultaneousFrames = m_SwapChain->GetMaxSimultaneousFrameDraws();
     uint64_t bufferSize = sizeof(GlobalUniforms);
 
     // -- Global Uniform Buffer --
@@ -114,7 +101,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
         initialData.pData = &m_GlobalUniforms;
         initialData.dataSize = sizeof(GlobalUniforms);
 
-        auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
+        auto* buffer = new BufferVk(bufferInfo, initialData, m_Device);
         m_GlobalUniformBuffer[i] = buffer;
     }
 
@@ -129,7 +116,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
     allocateInfo.descriptorSetCount = static_cast<uint32_t>(m_GlobalDescriptorSet.size()); // Number of sets to allocate
     allocateInfo.pSetLayouts = globalSetLayout.data();
 
-    VK_ASSERT(vkAllocateDescriptorSets(m_pDevice->GetDevice(), &allocateInfo, m_GlobalDescriptorSet.data()),
+    VK_ASSERT(vkAllocateDescriptorSets(m_Device->GetDevice(), &allocateInfo, m_GlobalDescriptorSet.data()),
               "Failed to allocate Global Descriptor Set!");
 
     for (int i = 0; i < m_GlobalDescriptorSet.size(); ++i)
@@ -151,7 +138,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
         setWrite.pImageInfo = nullptr;
         setWrite.pTexelBufferView = nullptr;
 
-        vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
+        vkUpdateDescriptorSets(m_Device->GetDevice(), 1, &setWrite, 0, nullptr);
     }
 }*/
 
@@ -259,6 +246,7 @@ void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
     {
         //vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(), 0,
         //                        1, &globalDescriptorSet, 0, nullptr);
+        pPipelineVk->CmdBindDescriptorSets(commandBuffers[i]);
         vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
     }
 }

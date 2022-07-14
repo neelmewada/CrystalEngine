@@ -23,6 +23,7 @@ public:
 public: // Public API
     Uint32 GetNumOfBytesPerPixel();
     ImageFormat GetImageFormat() { return m_Format; }
+    Type GetDeviceObjectType() { return DEVICE_OBJECT_TEXTURE; }
 
 private: // Internal API
     void CreateTexture(const TextureCreateInfo& createInfo);

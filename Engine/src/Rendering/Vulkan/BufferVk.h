@@ -23,6 +23,8 @@ public:
     DELETE_COPY_CONSTRUCTORS(BufferVk)
 
 public: // Public API
+    Type GetDeviceObjectType() override { return DEVICE_OBJECT_BUFFER; }
+
     // - Getters
     VkBuffer GetBuffer() { return m_Buffer; }
     uint64_t GetBufferSize() override { return m_BufferSize; }

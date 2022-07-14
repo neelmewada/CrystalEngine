@@ -3,6 +3,7 @@
 #include "EngineDefs.h"
 #include "IDeviceContext.h"
 #include "IBuffer.h"
+#include "IShaderResourceBinding.h"
 
 namespace Vox
 {
@@ -17,6 +18,7 @@ public:
     virtual ~IGraphicsPipelineState() {}
 
 public: // Public API
+    virtual IShaderResourceVariable* GetStaticVariableByName(const char* pName) = 0;
 
 };
 

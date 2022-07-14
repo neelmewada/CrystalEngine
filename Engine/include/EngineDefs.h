@@ -37,6 +37,8 @@ typedef int8_t Sint8;
 #define MAKE_VERSION(variant, major, minor, patch) \
     ((((uint32_t)(variant)) << 29) | (((uint32_t)(major)) << 22) | (((uint32_t)(minor)) << 12) | ((uint32_t)(patch)))
 
+#define MAX_MAX_SIMULTANEOUS_FRAME_DRAWS 2
+
 #ifdef ENGINE_INTERNAL
 #include "EngineInternal.h"
 #endif

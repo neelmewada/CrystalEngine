@@ -41,6 +41,7 @@ public:
         if (modelTransferSpace != nullptr)
             free(modelTransferSpace);
         delete m_pPSO;
+        delete m_GlobalUniformBuffer;
         delete m_pRenderContext;
         delete m_pSwapChain;
         delete m_pDeviceContext;
@@ -92,9 +93,21 @@ public:
         renderContextInfo.engineContext = m_pEngineContext;
         renderContextInfo.deviceContext = m_pDeviceContext;
         renderContextInfo.swapChain = m_pSwapChain;
-        //renderContextInfo.initialGlobalUniforms.projection = m_GlobalUniforms.projection;
-        //renderContextInfo.initialGlobalUniforms.view = m_GlobalUniforms.view;
         pEngineFactoryVk->CreateRenderContextVk(renderContextInfo, &m_pRenderContext);
+
+        // -- Global Uniform Buffer --
+        BufferCreateInfo globalUniformBufferInfo = {};
+        globalUniformBufferInfo.pName = "Global Uniforms";
+        globalUniformBufferInfo.size = sizeof(GlobalUniforms);
+        globalUniformBufferInfo.bindFlags = Vox::BIND_UNIFORM_BUFFER;
+        globalUniformBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU; // CPU & GPU Shared Memory
+        globalUniformBufferInfo.optimizationFlags = Vox::BUFFER_OPTIMIZE_UPDATE_SELDOM_BIT;
+
+        BufferData globalUniformsData = {};
+        globalUniformsData.dataSize = sizeof(GlobalUniforms);
+        globalUniformsData.pData = &m_GlobalUniforms;
+
+        m_GlobalUniformBuffer = m_pDeviceContext->CreateBuffer(globalUniformBufferInfo, globalUniformsData);
 
         // -- Shaders --
         fs::path shaderDir = IO::FileManager::GetSharedDirectory();
@@ -139,6 +152,10 @@ public:
                 {0, 1, static_cast<uint32_t>(offsetof(Vertex, color)), VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
         };
 
+        ShaderResourceVariableDesc variables[1] = {
+            {"GlobalUniformBuffer", Vox::SHADER_STAGE_ALL, Vox::SHADER_RESOURCE_TYPE_STATIC}
+        };
+
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
         pipelineInfo.pDevice = m_pDeviceContext;
         pipelineInfo.pSwapChain = m_pSwapChain;
@@ -147,8 +164,11 @@ public:
         pipelineInfo.attributesCount = 2;
         pipelineInfo.pAttributes = vertAttribs;
         pipelineInfo.vertexStructByteSize = static_cast<uint32_t>(sizeof(Vertex));
-
+        pipelineInfo.variableCount = _countof(variables);
+        pipelineInfo.pResourceVariables = variables;
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
+
+        m_pPSO->GetStaticVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
 
         // -- Model Matrix --
         model.model = glm::mat4(1.0f);
@@ -215,16 +235,16 @@ public:
         // -- Record Commands --
         /*float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
 
-        m_pRenderContext->SetClearColor(clearColor);
+        m_RenderContext->SetClearColor(clearColor);
 
-        m_pRenderContext->Begin();
-        m_pRenderContext->CmdBindPipeline(m_pPSO);
+        m_RenderContext->Begin();
+        m_RenderContext->CmdBindPipeline(m_pPSO);
         uint64_t offset = 0;
         // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
-        m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
-        m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
-        m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0);
-        m_pRenderContext->End();*/
+        m_RenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
+        m_RenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
+        m_RenderContext->CmdDrawIndexed(6, 1, 0, 0);
+        m_RenderContext->End();*/
 
         // We're responsible for deleting the shader coz we created it ourselves.
         delete shader;
@@ -244,7 +264,12 @@ protected:
             m_GlobalUniforms.projection = glm::perspective(glm::radians(60.0f), (float)w / (float)h, 0.1f, 100.0f);
             m_GlobalUniforms.projection[1][1] *= -1;
 
-            //m_pRenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
+            BufferData globalUniformData = {};
+            globalUniformData.dataSize = sizeof(m_GlobalUniforms);
+            globalUniformData.pData = &m_GlobalUniforms;
+            m_GlobalUniformBuffer->SetBufferData(globalUniformData);
+
+            //m_RenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
 
             //BufferData uniformData;
             //uniformData.dataSize = sizeof(m_GlobalUniforms);
@@ -302,17 +327,16 @@ private: // Internal Members
     IGraphicsPipelineState* m_pPSO;
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
+    IBuffer* m_GlobalUniformBuffer;
 
     struct GlobalUniforms
     {
-        alignas(16) glm::mat4 projection;
+        glm::mat4 projection;
         alignas(16) glm::mat4 view;
-    };
-
-    GlobalUniforms m_GlobalUniforms;
+    } m_GlobalUniforms;
 
     struct UboModel {
-        alignas(16) glm::mat4 model;
+        glm::mat4 model;
     } model;
 
     UboModel* modelTransferSpace = nullptr;

@@ -2,43 +2,26 @@
 
 #include "Rendering/IShader.h"
 #include "DeviceContextVk.h"
+#include "TypesVk.h"
 
 #include <vulkan/vulkan.h>
-#include <unordered_map>
+#include <map>
 
 namespace Vox
 {
 
-enum ShaderBaseType
-{
-    Struct, UInt, Int, Sampler2D, Sampler3D, Float, Vec2, Vec3, Vec4, Mat2, Mat3, Mat4,
-    UVec2, UVec3, UVec4, IVec2, IVec3, IVec4
-};
-
-struct ShaderBlockMember
-{
-    Uint32 offset;
-    Uint32 size;
-    std::string name;
-    ShaderBaseType baseType;
-};
-
 struct ShaderResourceVariableDefinition
 {
 public:
-    enum ResourceType
-    {
-        UniformBuffer, StorageBuffer, SampledImage
-    };
-
     Uint32 set;
     Uint32 binding;
     std::string name;
     Uint32 size;
-    ShaderBaseType baseType;
-    ResourceType type;
+    ShaderResourceVariableBaseType baseType;
+    ShaderResourceVariableType type;
     bool isArray;
     std::vector<ShaderBlockMember> members;
+    ShaderStageFlags shaderStages;
 };
 
 class ShaderVariantVk
@@ -53,9 +36,9 @@ public:
 
 public: // Public API
     // - Getters
-    const char* GetName() { return m_pName; }
-    size_t GetDefineFlagsCount() { return m_DefineFlagsCount; }
-    const char* GetDefineFlagAt(int index) { return m_pDefineFlags[index]; }
+    const char* GetName() { return m_Name.c_str(); }
+    size_t GetDefineFlagsCount() { return m_DefineFlags.size(); }
+    const char* GetDefineFlagAt(int index) { return m_DefineFlags[index].c_str(); }
     const std::vector<ShaderResourceVariableDefinition>& GetShaderVariableDefinitions() {
         return m_ShaderVariableDefinitions;
     }
@@ -72,9 +55,8 @@ private: // Internal Members
 
     // - Internal
     DeviceContextVk* m_Device = nullptr;
-    const char* m_pName = nullptr;
-    size_t m_DefineFlagsCount = 0;
-    const char** m_pDefineFlags = nullptr;
+    std::string m_Name{};
+    std::vector<std::string> m_DefineFlags{};
 
     std::vector<ShaderResourceVariableDefinition> m_ShaderVariableDefinitions{0};
 };
@@ -94,13 +76,14 @@ public: // Public API
     const char* GetFragEntryPoint() { return m_pFragEntryPoint; }
 
 private: // Internal API
-    DeviceContextVk* m_Device;
 
 private: // Internal Members
+    DeviceContextVk* m_Device;
+
     const char* m_pVertEntryPoint = nullptr;
     const char* m_pFragEntryPoint = nullptr;
-    int m_DefaultVariant = 0;
-    int m_CurrentVariant = 0;
+    Uint32 m_DefaultVariant = 0;
+    Uint32 m_CurrentVariant = 0;
     size_t m_VariantsCount;
     std::vector<ShaderVariantVk*> m_pVariants; // Array of pointer to variants
 };

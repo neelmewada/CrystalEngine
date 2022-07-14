@@ -1,7 +1,9 @@
 
 #include "EngineDefs.h"
+#include "VulkanLimits.h"
 
 #include "GraphicsPipelineStateVk.h"
+#include "ShaderResourceBindingVk.h"
 #include "TypesVk.h"
 
 #include <glm/glm.hpp>
@@ -16,37 +18,244 @@ const char* pShaderEntry = "main";
 
 GraphicsPipelineStateVk::GraphicsPipelineStateVk(const GraphicsPipelineStateCreateInfo &createInfo)
 {
-    m_pDevice = dynamic_cast<DeviceContextVk*>(createInfo.pDevice);
-    m_pSwapChain = dynamic_cast<SwapChainVk*>(createInfo.pSwapChain);
-    m_pShader = dynamic_cast<ShaderVk*>(createInfo.pShader);
-    m_pRenderContext = dynamic_cast<RenderContextVk*>(createInfo.pRenderContext);
+    m_Device = dynamic_cast<DeviceContextVk*>(createInfo.pDevice);
+    m_SwapChain = dynamic_cast<SwapChainVk*>(createInfo.pSwapChain);
+    m_Shader = dynamic_cast<ShaderVk*>(createInfo.pShader);
+    m_RenderContext = dynamic_cast<RenderContextVk*>(createInfo.pRenderContext);
+    if (createInfo.pName != nullptr)
+        m_Name = createInfo.pName;
 
+    CreateDescriptorSets(createInfo);
+    CreateStaticResourceBinding(createInfo);
     CreateGraphicsPipeline(createInfo);
 }
 
 GraphicsPipelineStateVk::~GraphicsPipelineStateVk()
 {
-    for (int i = 0; i < m_VPUniformBuffer.size(); ++i)
+    // -- Graphics Pipeline --
+    vkDestroyPipeline(m_Device->GetDevice(), m_Pipeline, nullptr);
+    vkDestroyPipelineLayout(m_Device->GetDevice(), m_PipelineLayout, nullptr);
+
+    // -- Static Resource Binding --
+    delete m_StaticBinding;
+
+    // -- Descriptor Sets --
+    for (auto& descriptorSetLayout : m_DescriptorSetLayouts)
     {
-        if (m_VPUniformBuffer[i] != nullptr)
-            delete m_VPUniformBuffer[i];
+        vkDestroyDescriptorSetLayout(m_Device->GetDevice(), descriptorSetLayout, nullptr);
     }
-    m_VPUniformBuffer.clear();
+    m_DescriptorSetLayouts.clear();
 
-    for (int i = 0; i < m_ModelUniformBufferDynamic.size(); ++i)
+    for (auto& sampler : m_Samplers)
     {
-        if (m_ModelUniformBufferDynamic[i] != nullptr)
-            delete m_ModelUniformBufferDynamic[i];
+        vkDestroySampler(m_Device->GetDevice(), sampler, nullptr);
     }
-    m_ModelUniformBufferDynamic.clear();
+    m_Samplers.clear();
 
-    //vkDestroyDescriptorSetLayout(m_pDevice->GetDevice(), m_DescriptorSetLayout, nullptr);
-
-    vkDestroyPipeline(m_pDevice->GetDevice(), m_Pipeline, nullptr);
-    vkDestroyPipelineLayout(m_pDevice->GetDevice(), m_PipelineLayout, nullptr);
+    vkDestroyDescriptorPool(m_Device->GetDevice(), m_DescriptorPool, nullptr);
+    vkDestroyDescriptorPool(m_Device->GetDevice(), m_StaticDescriptorPool, nullptr);
 }
 
+IShaderResourceVariable* GraphicsPipelineStateVk::GetStaticVariableByName(const char* pName)
+{
+    return m_StaticBinding->GetVariableByName(pName);
+}
+
+void GraphicsPipelineStateVk::CmdBindDescriptorSets(VkCommandBuffer commandBuffer)
+{
+    int currentFrame = m_SwapChain->GetCurrentFrameIndex();
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout,0,
+                            m_DescriptorSetsPerFrame[currentFrame].size(),
+                            m_DescriptorSetsPerFrame[currentFrame].data(),
+                            0,nullptr);
+}
+
+#pragma region Shader Binding
+
+void GraphicsPipelineStateVk::BindShaderResource(IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
+                                                 Uint32 descriptorCount, ShaderResourceVariableType resourceType)
+{
+    auto maxSimultaneousFrames = m_SwapChain->GetMaxSimultaneousFrameDraws();
+
+    for (int i = 0; i < maxSimultaneousFrames; ++i)
+    {
+        VOX_ASSERT(set < m_DescriptorSetsPerFrame[i].size() || m_DescriptorSetsPerFrame[i][set] == nullptr,
+                   "Failed to bind shader resource! Descriptor Set No. " + std::to_string(set) +
+                   " doesn't exist in Graphics Pipeline " + m_Name);
+
+        auto descriptorSet = m_DescriptorSetsPerFrame[i][set];
+
+        VkDescriptorBufferInfo bufferInfo = {};
+        if (resourceType == ::UniformBuffer)
+        {
+            auto buffer = dynamic_cast<BufferVk*>(pDeviceObject);
+            bufferInfo.buffer = buffer->GetBuffer();
+            bufferInfo.offset = 0;
+            bufferInfo.range = buffer->GetBufferSize();
+        }
+
+        VkWriteDescriptorSet setWrite = {};
+        setWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        setWrite.dstSet = descriptorSet;
+        setWrite.dstBinding = binding;
+        setWrite.dstArrayElement = 0;
+        if (resourceType == ::UniformBuffer)
+            setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        else if (resourceType == ::StorageBuffer)
+            setWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+
+        setWrite.descriptorCount = descriptorCount; // no. of descriptors to bind
+        if (resourceType == ::UniformBuffer)
+            setWrite.pBufferInfo = &bufferInfo;
+
+        vkUpdateDescriptorSets(m_Device->GetDevice(), 1, &setWrite, 0, nullptr);
+    }
+}
+
+#pragma endregion
+
 #pragma region Internal API
+
+void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCreateInfo& createInfo)
+{
+    auto maxSimultaneousFrames = m_SwapChain->GetMaxSimultaneousFrameDraws();
+
+    // -- Descriptor Pool --
+    VkDescriptorPoolSize sizes[] = {
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 4},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 2},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10}
+    };
+
+    // Static Descriptor Pool
+    VkDescriptorPoolCreateInfo poolInfo = {};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    // Fast allocation
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    poolInfo.poolSizeCount = _countof(sizes);
+    poolInfo.pPoolSizes = sizes;
+    poolInfo.maxSets = 1 * maxSimultaneousFrames; // Only 1 Static Descriptor Set
+
+    VK_ASSERT(vkCreateDescriptorPool(m_Device->GetDevice(), &poolInfo, nullptr, &m_StaticDescriptorPool),
+              "Failed to create Descriptor Pool for Graphics Pipeline");
+
+    // Dynamic Descriptor Pool
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+    poolInfo.maxSets = (MAX_BOUND_DESCRIPTOR_SETS - 1) * maxSimultaneousFrames;
+
+    VK_ASSERT(vkCreateDescriptorPool(m_Device->GetDevice(), &poolInfo, nullptr, &m_DescriptorPool),
+              "Failed to create Descriptor Pool for Graphics Pipeline");
+
+    auto& shaderResources = m_Shader->GetCurrentVariant()->GetShaderVariableDefinitions();
+
+    typedef std::vector<VkDescriptorSetLayoutBinding> LayoutBindingCollection;
+    std::map<Uint32, LayoutBindingCollection> setBindings{};
+
+    // -- Layout Bindings --
+    for (const auto& resource: shaderResources)
+    {
+        VkDescriptorSetLayoutBinding layoutBinding = {};
+        layoutBinding.binding = resource.binding;
+        if (resource.type == ::UniformBuffer)
+            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        else if (resource.type == ::SampledImage2D)
+            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        else if (resource.type == ::StorageBuffer)
+            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        if (resource.isArray)
+            layoutBinding.descriptorCount = static_cast<Uint32>(resource.members.size());
+        else
+            layoutBinding.descriptorCount = 1;
+        layoutBinding.stageFlags = static_cast<VkShaderStageFlags>(resource.shaderStages);
+        layoutBinding.pImmutableSamplers = nullptr;
+        if (resource.type == ::SampledImage2D)
+        {
+            // TODO: Create immutable samplers
+        }
+
+        if (setBindings.count(resource.set) == 0)
+            setBindings.insert(std::pair<Uint32, LayoutBindingCollection>(resource.set, LayoutBindingCollection()));
+
+        setBindings[resource.set].push_back(layoutBinding);
+
+        for (int i = 0; i < createInfo.variableCount; ++i)
+        {
+            const auto& var = createInfo.pResourceVariables[i];
+            if (resource.name == var.pVariableName)
+            {
+                VOX_ASSERT((var.stages & resource.shaderStages) != var.stages,
+                           "Shader Stages passed in ShaderResourceVariableDesc doesn't match with the shader stages in Shader!");
+                m_ShaderResourceVariables[{resource.set, resource.binding}] = var;
+            }
+        }
+    }
+
+    // -- Descriptor Set Layout --
+    m_DescriptorSetLayouts.clear();
+    bool set0Used = false;
+
+    for (int set = 0; set < MAX_BOUND_DESCRIPTOR_SETS; ++set) // MAX_BOUND_DESCRIPTOR_SETS = 4
+    {
+        if (setBindings.count(set) == 0) continue;
+
+        VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = setBindings.count(set);
+        layoutInfo.pBindings = setBindings[set].data();
+        if (set > 0) // Set 0 is static
+            layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+
+        VkDescriptorSetLayout setLayout = nullptr;
+        VK_ASSERT(vkCreateDescriptorSetLayout(m_Device->GetDevice(), &layoutInfo, nullptr, &setLayout),
+                  "Failed to create Descriptor Set Layout!");
+
+        m_DescriptorSetLayouts.push_back(setLayout);
+        if (set == 0) set0Used = true;
+    }
+
+    // -- Descriptor Sets --
+    auto numOfSetsUsed = static_cast<Uint32>(m_DescriptorSetLayouts.size());
+
+    m_DescriptorSetsPerFrame.clear();
+    for (int i = 0; i < maxSimultaneousFrames; ++i)
+    {
+        m_DescriptorSetsPerFrame[i] = std::vector<VkDescriptorSet>(numOfSetsUsed);
+
+        VkDescriptorSetAllocateInfo descriptorSetInfo = {};
+        descriptorSetInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descriptorSetInfo.descriptorPool = m_DescriptorPool;
+        descriptorSetInfo.descriptorSetCount = !set0Used ? numOfSetsUsed : numOfSetsUsed - 1;
+        descriptorSetInfo.pSetLayouts = !set0Used
+                ? m_DescriptorSetLayouts.data()
+                : std::vector<VkDescriptorSetLayout>(m_DescriptorSetLayouts.begin() + 1, m_DescriptorSetLayouts.end()).data();
+
+        if (descriptorSetInfo.descriptorSetCount > 0)
+            VK_ASSERT(vkAllocateDescriptorSets(m_Device->GetDevice(), &descriptorSetInfo, &*(m_DescriptorSetsPerFrame[i].begin() + 1)),
+                      "Failed to allocate Descriptor Sets for Graphics Pipeline!");
+
+        if (set0Used)
+        {
+            descriptorSetInfo.descriptorPool = m_StaticDescriptorPool;
+            descriptorSetInfo.descriptorSetCount = 1;
+            descriptorSetInfo.pSetLayouts = &m_DescriptorSetLayouts[0];
+
+            if (descriptorSetInfo.descriptorSetCount > 0)
+                VK_ASSERT(vkAllocateDescriptorSets(m_Device->GetDevice(), &descriptorSetInfo, m_DescriptorSetsPerFrame[i].data()),
+                          "Failed to allocate Static Descriptor Set for Graphics Pipeline!");
+        }
+    }
+}
+
+void GraphicsPipelineStateVk::CreateStaticResourceBinding(const GraphicsPipelineStateCreateInfo& createInfo)
+{
+    ShaderResourceBindingVkCreateInfo bindingCreateInfo = {
+            m_Shader->GetCurrentVariant()->GetShaderVariableDefinitions()
+    };
+
+    m_StaticBinding = new ShaderResourceBindingVk(bindingCreateInfo, this);
+}
 
 void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineStateCreateInfo& createInfo)
 {
@@ -136,31 +345,22 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     colorBlendState.attachmentCount = 1;
     colorBlendState.pAttachments = &colorBlendAttachment;
 
-    // -- Descriptor Set Layouts --
-    //std::array<VkDescriptorSetLayout, 1> descriptorSetLayouts = {m_pRenderContext->GetGlobalDescriptorSetLayout()};
-
-    // -- Push Constants --
-    VkPushConstantRange pushConstant = {};
-    pushConstant.offset = 0;  // The beginning of this range
-    pushConstant.size = sizeof(glm::mat4); // The size of this range ; Only passing a mat4 to push constants for now
-    pushConstant.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS; // Accessible to all graphics stages (vertex, fragment, etc)
-
     // -- Pipeline Layout --
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 0;//static_cast<uint32_t>(descriptorSetLayouts.size());
-    pipelineLayoutInfo.pSetLayouts = nullptr;//descriptorSetLayouts.data();
+    pipelineLayoutInfo.setLayoutCount = m_DescriptorSetLayouts.size();
+    pipelineLayoutInfo.pSetLayouts = m_DescriptorSetLayouts.data();
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
     if (m_PipelineLayout != nullptr)
     {
-        vkDestroyPipelineLayout(m_pDevice->GetDevice(), m_PipelineLayout, nullptr);
+        vkDestroyPipelineLayout(m_Device->GetDevice(), m_PipelineLayout, nullptr);
         m_PipelineLayout = nullptr;
     }
 
     // Create Pipeline Layout
-    auto result = vkCreatePipelineLayout(m_pDevice->GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout);
+    auto result = vkCreatePipelineLayout(m_Device->GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Pipeline Layout!");
@@ -176,20 +376,20 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     depthStencilState.stencilTestEnable = VK_FALSE;   // We aren't using stencil at this moment
 
     // -- Shader Stages --
-    auto shaderVariant = m_pShader->GetCurrentVariant();
+    auto shaderVariant = m_Shader->GetCurrentVariant();
     // Vertex Shader
     VkPipelineShaderStageCreateInfo vertexShaderStage = {};
     vertexShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertexShaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
     vertexShaderStage.module = shaderVariant->GetVertexModule();
-    vertexShaderStage.pName = m_pShader->GetVertEntryPoint();
+    vertexShaderStage.pName = m_Shader->GetVertEntryPoint();
 
     // Fragment Shader
     VkPipelineShaderStageCreateInfo fragmentShaderStage = {};
     fragmentShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragmentShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     fragmentShaderStage.module = shaderVariant->GetFragmentModule();
-    fragmentShaderStage.pName = m_pShader->GetFragEntryPoint();
+    fragmentShaderStage.pName = m_Shader->GetFragEntryPoint();
 
     VkPipelineShaderStageCreateInfo shaderStages[2] = { vertexShaderStage, fragmentShaderStage };
 
@@ -207,7 +407,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     pipelineInfo.pColorBlendState = &colorBlendState;
     pipelineInfo.pDepthStencilState = &depthStencilState;
     pipelineInfo.layout = m_PipelineLayout;
-    pipelineInfo.renderPass = m_pSwapChain->GetRenderPass();
+    pipelineInfo.renderPass = m_SwapChain->GetRenderPass();
     pipelineInfo.subpass = 0; // You can use only 1 subpass per pipeline. Use separate pipeline for different subpasses
 
     // Pipeline derivatives : Can create multiple pipelines that rely on one another for optimization
@@ -216,11 +416,11 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
 
     if (m_Pipeline != nullptr)
     {
-        vkDestroyPipeline(m_pDevice->GetDevice(), m_Pipeline, nullptr);
+        vkDestroyPipeline(m_Device->GetDevice(), m_Pipeline, nullptr);
         m_Pipeline = nullptr;
     }
 
-    result = vkCreateGraphicsPipelines(m_pDevice->GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline);
+    result = vkCreateGraphicsPipelines(m_Device->GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_Pipeline);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Graphics Pipeline!");
@@ -230,7 +430,7 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
 /*
 void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, BufferData& initialData, uint64_t alignment)
 {
-    auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
+    auto maxSimultaneousFrames = m_SwapChain->GetMaxSimultaneousFrameDraws();
     m_DynamicUniformBufferAlignment = alignment;
 
     // -- Dynamic Uniform Buffer --
@@ -246,7 +446,7 @@ void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, Buff
         bufferInfo.transferFlags = BUFFER_TRANSFER_NONE;
         bufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
 
-        auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
+        auto* buffer = new BufferVk(bufferInfo, initialData, m_Device);
         m_ModelUniformBufferDynamic[i] = buffer;
     }
 
@@ -262,7 +462,7 @@ void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, Buff
         // Data about connection between binding and buffer. It uses the buffer to write to the descriptor set
         VkWriteDescriptorSet setWrite = {};
         setWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        setWrite.dstSet = m_DescriptorSets[i];  // Descriptor set to update
+        setWrite.dstSet = m_DescriptorSetsPerFrame[i];  // Descriptor set to update
         setWrite.dstBinding = 1;        // Binding to update (matches with binding on layout/shader)
         setWrite.dstArrayElement = 0;   // Index in array to update
         setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;  // Dynamic Uniform Buffer
@@ -271,7 +471,7 @@ void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, Buff
         setWrite.pImageInfo = nullptr;
         setWrite.pTexelBufferView = nullptr;
 
-        vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
+        vkUpdateDescriptorSets(m_Device->GetDevice(), 1, &setWrite, 0, nullptr);
     }
 }
 */

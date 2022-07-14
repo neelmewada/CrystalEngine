@@ -29,8 +29,34 @@ struct GraphicsPipelineVertexAttributeDesc
     VertexAttribFormat format; //usage: format = offsetof(Vertex, position);
 };
 
+enum ShaderStageFlags : Uint32
+{
+    SHADER_STAGE_NONE = 0,
+    SHADER_STAGE_VERTEX = 0x01,
+    SHADER_STAGE_FRAGMENT = 0x10,
+    SHADER_STAGE_ALL = 0x1F,
+};
+
+enum ShaderResourceType
+{
+    // Static resources can't be bound/unbound once they're bound initially. Ex: Global Uniforms, etc.
+    SHADER_RESOURCE_TYPE_STATIC,
+    // Mutable resources are bound on a per-material or per-object basis. In Vulkan, they're always storage buffers.
+    SHADER_RESOURCE_TYPE_MUTABLE,
+    // Dynamic resources can change their binding frequently and randomly.
+    SHADER_RESOURCE_TYPE_DYNAMIC
+};
+
+struct ShaderResourceVariableDesc
+{
+    const char* pVariableName;
+    ShaderStageFlags stages;
+    ShaderResourceType resourceType;
+};
+
 struct GraphicsPipelineStateCreateInfo
 {
+    const char* pName;
     IDeviceContext* pDevice;
     ISwapChain* pSwapChain;
     IRenderContext* pRenderContext;
@@ -38,6 +64,8 @@ struct GraphicsPipelineStateCreateInfo
     uint32_t vertexStructByteSize; // Number of bytes used per vertex
     uint32_t attributesCount;
     GraphicsPipelineVertexAttributeDesc* pAttributes = nullptr;
+    uint32_t variableCount;
+    const ShaderResourceVariableDesc* pResourceVariables;
 };
 
 struct ShaderVariantCreateInfo

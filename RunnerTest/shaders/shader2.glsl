@@ -1,29 +1,56 @@
 #version 450  // GLSL v4.5
 
-#define STATIC(location) layout(set = 0, binding = location)
-#define MUTABLE(location) layout(set = 1, binding = location)
-#define DYNAMIC(location) layout(set = 2, binding = location)
+#define GLOBAL(location) layout(set = 0, binding = location)
+#define PERPASS(location) layout(set = 1, binding = location)
+#define MATERIAL(location) layout(set = 2, binding = location)
+#define INSTANCE(location) layout(set = 3, binding = location)
 
-// STATIC
-STATIC(0) uniform GlobalUniforms {
-    mat4 projection;
-    mat4 view;
-    vec4 test;
-    float test2;
-    uint integers;
-};
+#define SET1(location) layout(set = 1, binding = location)
+#define SET2(location) layout(set = 2, binding = location)
+#define SET3(location) layout(set = 3, binding = location)
+
+
+#define MAX_INSTANCES 1023
 
 struct MaterialData {
     uint tex1Idx;
     uint tex2Idx;
-    uint tex3Idx;
+    vec4 color;
 };
 
-struct PerObjectData {
+struct ObjectData {
     mat4 model;
-    uint objectIndex;
     uint materialIndex;
 };
+
+struct LightData {
+    vec4 lightColor;
+    vec3 lightPos;
+};
+
+GLOBAL(0) uniform GlobalUniformBuffer {
+    mat4 projection;
+    mat4 view;
+};
+
+/*
+// Set1: Per-Pass Data
+layout(std140, set = 1, binding = 0) uniform buffer PerPassData {
+    float someValue;
+};
+
+// Set2: Per-Pipeline Data
+layout(std140, set = 2, binding = 0) readonly buffer MaterialBuffer {
+    MaterialData materials[];
+};
+
+// Set3: Per-Instance Data
+layout(std140, set = 3, binding = 0) readonly buffer ObjectBuffer {
+    uint objectIndices[];
+    ObjectData objects[]; // access using: objects[objectIndices[gl_InstanceIndex]]
+};
+*/
+
 
 #ifdef VERTEX
 
@@ -50,43 +77,4 @@ void main() {
 }
 
 #endif
-
-/*
-// set0: STATIC
-layout(set = 0, binding = 0) uniform mat4 view;
-layout(set = 0, binding = 1) uniform mat4 projection;
-layout(set = 0, binding = 2) uniform vec4 dirLightColor;
---OR--
-layout(set = 0, binding = 0) uniform GlobalUniforms {
-    mat4 view;
-    mat4 projection;
-    vec4 dirLightColor;
-};
-
-// set1: MUTABLE (they are Dynamic Uniform/Storage Buffers)
-layout(set = 1, binding = 0) uniform sampler2D textures[];
-
-*/
-
-/*
-// Below 2 are same for all shaders
-layout(set = 0, binding = 1) readonly buffer MaterialBuffer { // Dynamic Offset Storage Buffer
-    MaterialData materials[];
-};
-layout(set = 0, binding = 2) readonly buffer ObjectBuffer { // Storage Buffer
-    PerObjectData objects[];
-};
-
-// Per Shader textures
-layout(set = 1, binding = 0) uniform sampler2D textures[5]; // Max 5 textures per material
-
-// Per-DrawCall Uniform Buffer
-layout(std140, set = 2, binding = 0) uniform DrawCall {
-    uint objectIndices[];
-};
-
-layout(push_constant) uniform Constants {
-    mat4 model;
-};
-*/
 

@@ -183,6 +183,8 @@ void SwapChainVk::CreateSwapChain()
     }
 
     m_MaxSimultaneousFrameDraws = imageCount - 1;
+    if (m_MaxSimultaneousFrameDraws > MAX_MAX_SIMULTANEOUS_FRAME_DRAWS)
+        m_MaxSimultaneousFrameDraws = MAX_MAX_SIMULTANEOUS_FRAME_DRAWS;
 
     // Swapchain CreateGraphicsPipeline Info
     VkSwapchainCreateInfoKHR swapchainInfo = {};
@@ -511,7 +513,7 @@ void SwapChainVk::CreateDescriptorPool()
     poolCreateInfo.pPoolSizes = poolSizes.data();
     poolCreateInfo.maxSets = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
 
-    auto result = vkCreateDescriptorPool(m_pDevice->GetDevice(), &poolCreateInfo, nullptr, &m_DescriptorPool);
+    auto result = vkCreateDescriptorPool(m_Device->GetDevice(), &poolCreateInfo, nullptr, &m_DescriptorPool);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Descriptor Pool");
@@ -556,7 +558,7 @@ VkImageView SwapChainVk::CreateImageView(VkImage image, VkFormat format, VkImage
     VkImageViewCreateInfo viewCreateInfo = {};
     viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewCreateInfo.image = image;
-    viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;  // ResourceType of image (1D, 2D, 3D, Cube, etc)
+    viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;  // ShaderResourceVariableType of image (1D, 2D, 3D, Cube, etc)
     viewCreateInfo.format = format;
 
     // Allows remapping of RGBA components to other channel values
