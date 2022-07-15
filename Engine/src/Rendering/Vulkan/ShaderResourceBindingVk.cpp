@@ -42,7 +42,7 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
         varInfo.descriptorCount = !varDef.isArray ? 1 : varDef.members.size();
         varInfo.set = varDef.set;
         varInfo.binding = varDef.binding;
-        varInfo.resourceType = varInfo.resourceType;
+        varInfo.resourceType = varDef.type;
 
         auto* variableBinding = new ShaderResourceVariableVk(varInfo, m_pReceiver);
         m_VariableBindings.push_back(variableBinding);

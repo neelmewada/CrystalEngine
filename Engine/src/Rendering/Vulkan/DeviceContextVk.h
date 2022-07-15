@@ -53,7 +53,7 @@ public: // Public API
 
     // - Getters
     // -- Support Info
-    Uint64 GetUniformBufferOffsetAlignment() override { return m_UniformBufferOffsetAlignment; }
+    Uint64 GetMinUniformBufferOffsetAlignment() override { return m_UniformBufferOffsetAlignment; }
 
 private: // Internal API
     // - Vulkan Main

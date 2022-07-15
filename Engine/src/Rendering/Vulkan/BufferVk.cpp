@@ -12,8 +12,10 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, DeviceContextVk* pDevice)
     m_VmaAllocator = pDevice->GetVmaAllocator();
     m_AllocType = createInfo.allocType;
     m_BindFlags = createInfo.bindFlags;
+    m_UsageFlags = createInfo.usageFlags;
     m_OptimizationFlags = createInfo.optimizationFlags;
     m_pName = createInfo.pName;
+    m_StructureByteStride = createInfo.structureByteStride;
 
     VOX_ASSERT(createInfo.allocType != BUFFER_MEM_UNKNOWN,
                "ERROR: Buffer " + std::string(m_pName) + " created with allocType of " + std::to_string(m_AllocType));
@@ -72,7 +74,7 @@ void BufferVk::SetBufferData(BufferData& bufferData)
     {
         void* data;
         vmaMapMemory(m_VmaAllocator, m_Allocation, &data);
-        memcpy((void*)(data), bufferData.pData, bufferData.dataSize); // TODO: Add offset to data pointer
+        memcpy((void*)(data), bufferData.pData, bufferData.dataSize); // TODO: Add offsetInBuffer to data pointer
         vmaUnmapMemory(m_VmaAllocator, m_Allocation);
     }
 }
@@ -107,16 +109,16 @@ void BufferVk::UploadBufferDataToGPU(BufferData& bufferData)
 
         VK_ASSERT(vkCreateCommandPool(m_pDevice->GetDevice(), &cmdPoolInfo, nullptr, &m_UploadCmdPool),
                   "Failed to create Upload CommandPool for a GPU-ONLY Buffer transfer!");
-
-        VkCommandBufferAllocateInfo cmdBufferInfo = {};
-        cmdBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        cmdBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        cmdBufferInfo.commandBufferCount = 1;
-        cmdBufferInfo.commandPool = m_UploadCmdPool;
-
-        VK_ASSERT(vkAllocateCommandBuffers(m_pDevice->GetDevice(), &cmdBufferInfo, &m_UploadCmdBuffer),
-                  "Failed to allocate Upload CommandBuffer for a GPU-ONLY Buffer transfer!");
     }
+
+    VkCommandBufferAllocateInfo cmdBufferInfo = {};
+    cmdBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdBufferInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    cmdBufferInfo.commandBufferCount = 1;
+    cmdBufferInfo.commandPool = m_UploadCmdPool;
+
+    VK_ASSERT(vkAllocateCommandBuffers(m_pDevice->GetDevice(), &cmdBufferInfo, &m_UploadCmdBuffer),
+              "Failed to allocate Upload CommandBuffer for a GPU-ONLY Buffer transfer!");
 
     BufferCreateInfo stagingBufferInfo = {};
     stagingBufferInfo.size = m_BufferSize;
@@ -158,7 +160,7 @@ void BufferVk::UploadBufferDataToGPU(BufferData& bufferData)
     VK_ASSERT(vkQueueSubmit(m_pDevice->GetGraphicsQueue(), 1, &submitInfo, m_UploadFence),
               "Failed to submit Buffer Copy Command to the main Graphics Queue!");
 
-    // Wait for transfer to finish
+    // Wait for transfer to finish : Time Consuming operation for large data sizes
     vkWaitForFences(m_pDevice->GetDevice(), 1, &m_UploadFence, VK_TRUE, uint64_max);
     vkResetFences(m_pDevice->GetDevice(), 1, &m_UploadFence);
 

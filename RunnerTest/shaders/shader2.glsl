@@ -33,6 +33,11 @@ GLOBAL(0) uniform GlobalUniformBuffer {
     mat4 view;
 };
 
+//SET1(0) uniform ObjectBuffer {
+//    mat4 model;
+//    vec3 colorTint;
+//};
+
 /*
 // Set1: Per-Pass Data
 layout(std140, set = 1, binding = 0) uniform buffer PerPassData {

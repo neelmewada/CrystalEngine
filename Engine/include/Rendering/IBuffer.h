@@ -27,6 +27,14 @@ enum BufferAllocationType
     BUFFER_MEM_GPU_TO_CPU = 4
 };
 
+enum BufferUsageFlags
+{
+    BUFFER_USAGE_DEFAULT = 0,
+    BUFFER_USAGE_DYNAMIC_OFFSET_BIT = 0x01,
+    // TODO: Not implemented. Does nothing for now!
+    BUFFER_USAGE_DYNAMIC_SIZE_BIT = 0x02,
+};
+
 enum BufferTransferFlags
 {
     BUFFER_TRANSFER_NONE = 0,

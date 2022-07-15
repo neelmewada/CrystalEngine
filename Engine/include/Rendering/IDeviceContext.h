@@ -37,21 +37,20 @@ enum ShaderStageFlags : Uint32
     SHADER_STAGE_ALL = 0x1F,
 };
 
-enum ShaderResourceType
+enum ShaderResourceVariableFlags
 {
-    // Static resources can't be bound/unbound once they're bound initially. Ex: Global Uniforms, etc.
-    SHADER_RESOURCE_TYPE_STATIC,
-    // Mutable resources are bound on a per-material or per-object basis. In Vulkan, they're always storage buffers.
-    SHADER_RESOURCE_TYPE_MUTABLE,
-    // Dynamic resources can change their binding frequently and randomly.
-    SHADER_RESOURCE_TYPE_DYNAMIC
+    SHADER_RESOURCE_VARIABLE_NONE_BIT = 0x00,
+    // Static resources can't be bound/unbound once they're bound initially
+    SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT = 0x01,
+    // Dynamic offset uniform or storage buffers
+    SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT = 0x02,
 };
 
 struct ShaderResourceVariableDesc
 {
     const char* pVariableName;
     ShaderStageFlags stages;
-    ShaderResourceType resourceType;
+    ShaderResourceVariableFlags flags;
 };
 
 struct GraphicsPipelineStateCreateInfo
@@ -95,14 +94,15 @@ struct BufferCreateInfo
     BufferAllocationType allocType;
     BufferTransferFlags transferFlags;
     BufferOptimizationFlags optimizationFlags;
+    BufferUsageFlags usageFlags;
     uint64_t size;
+    uint64_t structureByteStride;
 };
 
 struct BufferData
 {
     uint64_t dataSize; // number of bytes
-    uint64_t offset = 0; // offset in number of bytes
-    uint64_t range = 0;
+    uint64_t offsetInBuffer = 0; // offsetInBuffer in number of bytes
     const void* pData;
 };
 
@@ -141,7 +141,7 @@ public: // Public API
 
 public: // Getters & Setters
     // - Getters
-    virtual Uint64 GetUniformBufferOffsetAlignment() = 0;
+    virtual Uint64 GetMinUniformBufferOffsetAlignment() = 0;
 };
 
 }

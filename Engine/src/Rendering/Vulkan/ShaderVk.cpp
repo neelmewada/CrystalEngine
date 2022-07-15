@@ -9,7 +9,7 @@
 
 using namespace Vox;
 
-Uint32 GetShaderBaseTypeSize(ShaderResourceVariableBaseType baseType)
+Uint32 GetShaderNativeTypeSize(ShaderResourceVariableBaseType baseType)
 {
     switch (baseType)
     {
@@ -28,8 +28,8 @@ Uint32 GetShaderBaseTypeSize(ShaderResourceVariableBaseType baseType)
         case IVec2: return 8;
         case IVec3: return 12;
         case IVec4: return 16;
+        default: return 0;
     }
-    return 0;
 }
 
 ShaderResourceVariableBaseType GetShaderBaseType(const spirv_cross::SPIRType& memType)
@@ -113,7 +113,7 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
     auto vertResources = vertReflection.get_shader_resources();
     auto fragResources = fragReflection.get_shader_resources();
 
-    // Spir-V Reflection
+    // Spir-V Reflection -------------
 
     // -- Uniform Buffers --
     // Vertex
@@ -223,7 +223,7 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
         {
             variableDef.members.resize(type.array[0]); // No. of array elements
             auto elementBaseType = GetShaderBaseType(type);
-            auto elementSize = GetShaderBaseTypeSize(elementBaseType);
+            auto elementSize = GetShaderNativeTypeSize(elementBaseType);
             for (int i = 0; i < variableDef.members.size(); ++i)
             {
                 ShaderBlockMember arrayElement = {};
@@ -275,7 +275,7 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
         {
             variableDef.members.resize(type.array[0]); // No. of array elements
             auto elementBaseType = GetShaderBaseType(type);
-            auto elementSize = GetShaderBaseTypeSize(elementBaseType);
+            auto elementSize = GetShaderNativeTypeSize(elementBaseType);
             for (int i = 0; i < variableDef.members.size(); ++i)
             {
                 ShaderBlockMember arrayElement = {};

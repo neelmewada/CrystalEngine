@@ -213,7 +213,7 @@ typedef uint32_t stbir_uint32;
 //
 //     * "input pixels" points to an array of image data with 'num_channels' channels (e.g. RGB=3, RGBA=4)
 //     * input_w is input image width (x-axis), input_h is input image height (y-axis)
-//     * stride is the offset between successive rows of image data in memory, in bytes. you can
+//     * stride is the offsetInBuffer between successive rows of image data in memory, in bytes. you can
 //       specify 0 to mean packed continuously in memory
 //     * alpha channel is treated identically to other channels.
 //     * colorspace is linear or sRGB as specified by function name

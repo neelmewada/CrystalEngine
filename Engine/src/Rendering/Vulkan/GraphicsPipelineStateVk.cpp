@@ -77,6 +77,10 @@ void GraphicsPipelineStateVk::BindShaderResource(IDeviceObject* pDeviceObject, U
 {
     auto maxSimultaneousFrames = m_SwapChain->GetMaxSimultaneousFrameDraws();
 
+    auto flags = m_ShaderResourceVariables[{set, binding}].flags;
+
+    bool dynamicOffsetFlag = flags & SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT;
+
     for (int i = 0; i < maxSimultaneousFrames; ++i)
     {
         VOX_ASSERT(set < m_DescriptorSetsPerFrame[i].size() || m_DescriptorSetsPerFrame[i][set] == nullptr,
@@ -86,12 +90,20 @@ void GraphicsPipelineStateVk::BindShaderResource(IDeviceObject* pDeviceObject, U
         auto descriptorSet = m_DescriptorSetsPerFrame[i][set];
 
         VkDescriptorBufferInfo bufferInfo = {};
-        if (resourceType == ::UniformBuffer)
+        if (pDeviceObject->GetDeviceObjectType() == IDeviceObject::DEVICE_OBJECT_BUFFER &&
+            (resourceType == ::UniformBuffer || resourceType == ::StorageBuffer))
         {
             auto buffer = dynamic_cast<BufferVk*>(pDeviceObject);
             bufferInfo.buffer = buffer->GetBuffer();
             bufferInfo.offset = 0;
             bufferInfo.range = buffer->GetBufferSize();
+            VOX_ASSERT(!dynamicOffsetFlag || (dynamicOffsetFlag && buffer->IsDynamicOffset()),
+                       "ERROR: If the shader resource variable is marked as Dynamic Offset, the buffer should be Dynamic too and vice versa!");
+
+            if (dynamicOffsetFlag && buffer->IsDynamicOffset())
+            {
+                Uint64 numOfElements = buffer->GetBufferSize() / buffer->GetStructureByteStride();
+            }
         }
 
         VkWriteDescriptorSet setWrite = {};
@@ -100,13 +112,22 @@ void GraphicsPipelineStateVk::BindShaderResource(IDeviceObject* pDeviceObject, U
         setWrite.dstBinding = binding;
         setWrite.dstArrayElement = 0;
         if (resourceType == ::UniformBuffer)
-            setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        {
+            if (dynamicOffsetFlag) setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+            else setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        }
         else if (resourceType == ::StorageBuffer)
-            setWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-
-        setWrite.descriptorCount = descriptorCount; // no. of descriptors to bind
-        if (resourceType == ::UniformBuffer)
+        {
+            if (dynamicOffsetFlag) setWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+            else setWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        }
+        else if (resourceType == ::SampledImage2D)
+            setWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        setWrite.descriptorCount = descriptorCount; // no. of descriptors to use
+        if (resourceType == ::UniformBuffer || resourceType == ::StorageBuffer)
             setWrite.pBufferInfo = &bufferInfo;
+        else if (resourceType == ::SampledImage2D)
+            setWrite.pImageInfo = nullptr;
 
         vkUpdateDescriptorSets(m_Device->GetDevice(), 1, &setWrite, 0, nullptr);
     }
@@ -129,6 +150,11 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10}
     };
 
+    for (int i = 0; i < _countof(sizes); ++i)
+    {
+        sizes[i].descriptorCount *= maxSimultaneousFrames;
+    }
+
     // Static Descriptor Pool
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -143,7 +169,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
 
     // Dynamic Descriptor Pool
     poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-    poolInfo.maxSets = (MAX_BOUND_DESCRIPTOR_SETS - 1) * maxSimultaneousFrames;
+    poolInfo.maxSets = (MAX_BOUND_DESCRIPTOR_SETS - 1) * maxSimultaneousFrames; // Only 3 regular Descriptor Sets
 
     VK_ASSERT(vkCreateDescriptorPool(m_Device->GetDevice(), &poolInfo, nullptr, &m_DescriptorPool),
               "Failed to create Descriptor Pool for Graphics Pipeline");
@@ -156,14 +182,38 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
     // -- Layout Bindings --
     for (const auto& resource: shaderResources)
     {
+        ShaderResourceVariableFlags flags = SHADER_RESOURCE_VARIABLE_NONE_BIT;
+
+        // Find this resource in user passed data from createInfo struct.
+        for (int i = 0; i < createInfo.variableCount; ++i)
+        {
+            const auto& var = createInfo.pResourceVariables[i];
+            if (resource.name == var.pVariableName)
+            {
+                VOX_ASSERT((var.stages & resource.shaderStages) != var.stages,
+                           "Shader Stages passed in ShaderResourceVariableDesc doesn't match with the shader stages in Shader!");
+                m_ShaderResourceVariables[{resource.set, resource.binding}] = var;
+                flags = var.flags;
+                break;
+            }
+        }
+
+        bool dynamicOffset = flags & SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT;
+
         VkDescriptorSetLayoutBinding layoutBinding = {};
         layoutBinding.binding = resource.binding;
         if (resource.type == ::UniformBuffer)
-            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        {
+            if (dynamicOffset) layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+            else layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        }
+        else if (resource.type == ::StorageBuffer)
+        {
+            if (dynamicOffset) layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            else layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        }
         else if (resource.type == ::SampledImage2D)
             layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        else if (resource.type == ::StorageBuffer)
-            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
         if (resource.isArray)
             layoutBinding.descriptorCount = static_cast<Uint32>(resource.members.size());
         else
@@ -179,17 +229,6 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
             setBindings.insert(std::pair<Uint32, LayoutBindingCollection>(resource.set, LayoutBindingCollection()));
 
         setBindings[resource.set].push_back(layoutBinding);
-
-        for (int i = 0; i < createInfo.variableCount; ++i)
-        {
-            const auto& var = createInfo.pResourceVariables[i];
-            if (resource.name == var.pVariableName)
-            {
-                VOX_ASSERT((var.stages & resource.shaderStages) != var.stages,
-                           "Shader Stages passed in ShaderResourceVariableDesc doesn't match with the shader stages in Shader!");
-                m_ShaderResourceVariables[{resource.set, resource.binding}] = var;
-            }
-        }
     }
 
     // -- Descriptor Set Layout --
@@ -250,8 +289,13 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
 
 void GraphicsPipelineStateVk::CreateStaticResourceBinding(const GraphicsPipelineStateCreateInfo& createInfo)
 {
+    auto staticVariables = m_Shader->GetCurrentVariant()->GetShaderVariableDefinitions();
+    staticVariables.end() = std::remove_if(staticVariables.begin(), staticVariables.end(), [](const ShaderResourceVariableDefinition& item) -> bool {
+        return item.set > 0;
+    });
+
     ShaderResourceBindingVkCreateInfo bindingCreateInfo = {
-            m_Shader->GetCurrentVariant()->GetShaderVariableDefinitions()
+            staticVariables
     };
 
     m_StaticBinding = new ShaderResourceBindingVk(bindingCreateInfo, this);
@@ -456,7 +500,7 @@ void GraphicsPipelineStateVk::CreateDynamicUniformBuffer(Uint64 bufferSize, Buff
     {
         VkDescriptorBufferInfo bufferInfo = {};
         bufferInfo.buffer = m_ModelUniformBufferDynamic[i]->GetBuffer(); // Buffer to get data from
-        bufferInfo.offset = 0;              // Position of start of data
+        bufferInfo.offsetInBuffer = 0;              // Position of start of data
         bufferInfo.range = alignment;      // Size of the data
 
         // Data about connection between binding and buffer. It uses the buffer to write to the descriptor set

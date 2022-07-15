@@ -123,7 +123,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
     {
         VkDescriptorBufferInfo bufferInfo = {};
         bufferInfo.buffer = m_GlobalUniformBuffer[i]->GetBuffer(); // Buffer to get data from
-        bufferInfo.offset = 0;              // Position of start of data
+        bufferInfo.offsetInBuffer = 0;              // Position of start of data
         bufferInfo.range = bufferSize;      // Size of the data
 
         // Data about connection between binding and buffer
@@ -151,7 +151,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
     BufferData bufferData = {};
     bufferData.dataSize = sizeof(GlobalUniforms);
     bufferData.pData = &globals;
-    bufferData.offset = 0;
+    bufferData.offsetInBuffer = 0;
 
     for (int i = 0; i < m_GlobalUniformBuffer.size(); ++i)
     {
@@ -192,7 +192,7 @@ void RenderContextVk::Begin()
     // CreateGraphicsPipeline a scissor info struct (aka Cropping region)
     VkRect2D scissor = {};
     scissor.offset = {0,0};     // Offset to use region from
-    scissor.extent = extent;  // Extent of the region starting from offset
+    scissor.extent = extent;  // Extent of the region starting from offsetInBuffer
 
     // -- Command Buffer & Render Pass --
     VkCommandBufferBeginInfo bufferBeginInfo = {};

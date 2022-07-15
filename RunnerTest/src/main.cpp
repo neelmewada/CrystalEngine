@@ -38,9 +38,10 @@ public:
 
         delete m_IndexBuffer;
         delete m_VertexBuffer;
-        if (modelTransferSpace != nullptr)
-            free(modelTransferSpace);
+        if (m_ObjectUniformData != nullptr)
+            free(m_ObjectUniformData);
         delete m_pPSO;
+        delete m_ObjectUniformBuffer;
         delete m_GlobalUniformBuffer;
         delete m_pRenderContext;
         delete m_pSwapChain;
@@ -61,7 +62,7 @@ public:
         // -- Engine Creation --
         EngineCreateInfoVk engineInfo = {};
         engineInfo.applicationVersion = MAKE_VERSION(0, 0, 0, 1);
-        engineInfo.applicationName = "Vox Test";
+        engineInfo.applicationName = "Vox Sandbox";
 #if NDEBUG
         engineInfo.enableValidationLayers = false;
 #else
@@ -88,6 +89,12 @@ public:
         m_GlobalUniforms.projection[1][1] *= -1;
         m_GlobalUniforms.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
+        // -- Model Matrix --
+        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
+        {
+            m_ObjectUniform[i].model = glm::mat4(1.0f);
+        }
+
         // -- Render Context Creation --
         RenderContextCreateInfoVk renderContextInfo = {};
         renderContextInfo.engineContext = m_pEngineContext;
@@ -108,6 +115,33 @@ public:
         globalUniformsData.pData = &m_GlobalUniforms;
 
         m_GlobalUniformBuffer = m_pDeviceContext->CreateBuffer(globalUniformBufferInfo, globalUniformsData);
+
+        // -- Object Uniform Buffer --
+        Uint64 minBufferOffsetAlignment = m_pDeviceContext->GetMinUniformBufferOffsetAlignment();
+        Uint64 stride = (sizeof(ObjectUniforms) + minBufferOffsetAlignment - 1) & ~(minBufferOffsetAlignment - 1);
+        m_ObjectUniformDataSize = stride * _countof(m_ObjectUniform);
+//        m_ObjectUniformData = (ObjectUniforms*)std::aligned_alloc(stride, m_ObjectUniformDataSize); // 4 elements
+//        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
+//        {
+//            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + stride * i);
+//            *ptr = m_ObjectUniform[i];
+//        }
+
+        BufferCreateInfo objectBufferInfo = {};
+        objectBufferInfo.pName = "Object Buffer";
+        objectBufferInfo.size = m_ObjectUniformDataSize;
+        objectBufferInfo.bindFlags = Vox::BIND_UNIFORM_BUFFER;
+        objectBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
+        objectBufferInfo.optimizationFlags = Vox::BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
+        objectBufferInfo.usageFlags = Vox::BUFFER_USAGE_DYNAMIC_OFFSET_BIT;
+        objectBufferInfo.structureByteStride = stride;
+
+        BufferData objectBufferData = {};
+        objectBufferData.dataSize = m_ObjectUniformDataSize;
+        objectBufferData.pData = m_ObjectUniformData;
+        objectBufferData.offsetInBuffer = 0;
+
+        //m_ObjectUniformBuffer = m_pDeviceContext->CreateBuffer(objectBufferInfo, objectBufferData);
 
         // -- Shaders --
         fs::path shaderDir = IO::FileManager::GetSharedDirectory();
@@ -152,8 +186,11 @@ public:
                 {0, 1, static_cast<uint32_t>(offsetof(Vertex, color)), VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
         };
 
-        ShaderResourceVariableDesc variables[1] = {
-            {"GlobalUniformBuffer", Vox::SHADER_STAGE_ALL, Vox::SHADER_RESOURCE_TYPE_STATIC}
+        ShaderResourceVariableDesc variables[2] = {
+            {"GlobalUniformBuffer", Vox::SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT},
+            {"ObjectBuffer", Vox::SHADER_STAGE_ALL, static_cast<ShaderResourceVariableFlags>(
+                                                            SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT |
+                                                            SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT)}
         };
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
@@ -161,7 +198,7 @@ public:
         pipelineInfo.pSwapChain = m_pSwapChain;
         pipelineInfo.pRenderContext = m_pRenderContext;
         pipelineInfo.pShader = shader;
-        pipelineInfo.attributesCount = 2;
+        pipelineInfo.attributesCount = _countof(vertAttribs);
         pipelineInfo.pAttributes = vertAttribs;
         pipelineInfo.vertexStructByteSize = static_cast<uint32_t>(sizeof(Vertex));
         pipelineInfo.variableCount = _countof(variables);
@@ -169,9 +206,7 @@ public:
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
         m_pPSO->GetStaticVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
-
-        // -- Model Matrix --
-        model.model = glm::mat4(1.0f);
+        //m_pPSO->GetStaticVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
 
         // -- MESH --
 
@@ -213,15 +248,15 @@ public:
 
         /*
         // Uniform Buffer - OLD CODE
-        Uint64 minBufferOffset = m_pDeviceContext->GetUniformBufferOffsetAlignment();
-        modelBufferAlignment = (sizeof(UboModel) + minBufferOffset - 1) & ~(minBufferOffset - 1);
-        modelTransferSpace = (UboModel*)std::aligned_alloc(modelBufferAlignment, modelBufferAlignment * 1);
+        Uint64 minBufferOffsetAlignment = m_pDeviceContext->GetMinUniformBufferOffsetAlignment();
+        modelBufferAlignment = (sizeof(ObjectUniforms) + minBufferOffsetAlignment - 1) & ~(minBufferOffsetAlignment - 1);
+        m_ObjectUniformData = (ObjectUniforms*)std::aligned_alloc(modelBufferAlignment, modelBufferAlignment * 1);
 
-        *modelTransferSpace = model;
+        *m_ObjectUniformData = m_ObjectUniform;
         BufferData modelData{};
-        modelData.offset = 0;
+        modelData.offsetInBuffer = 0;
         modelData.dataSize = modelBufferAlignment;
-        modelData.pData = modelTransferSpace;
+        modelData.pData = m_ObjectUniformData;
 
         BufferData vpData{};
         vpData.dataSize = sizeof(m_GlobalUniforms);
@@ -229,7 +264,7 @@ public:
 
         // OLD CODE
         m_pPSO->CreateUniformBuffer(sizeof(UboViewProjection), vpData);
-        m_pPSO->CreateDynamicUniformBuffer(modelBufferAlignment, modelData, minBufferOffset);
+        m_pPSO->CreateDynamicUniformBuffer(modelBufferAlignment, modelData, minBufferOffsetAlignment);
         */
 
         // -- Record Commands --
@@ -239,9 +274,9 @@ public:
 
         m_RenderContext->Begin();
         m_RenderContext->CmdBindPipeline(m_pPSO);
-        uint64_t offset = 0;
+        uint64_t offsetInBuffer = 0;
         // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
-        m_RenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
+        m_RenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offsetInBuffer);
         m_RenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
         m_RenderContext->CmdDrawIndexed(6, 1, 0, 0);
         m_RenderContext->End();*/
@@ -303,14 +338,14 @@ protected:
         angle += m_DeltaTime * 30;
         if (angle > 360) angle -= 360;
 
-        model.model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+        m_ObjectUniform[0].model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
 
-//        modelTransferSpace->model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+//        m_ObjectUniformData->m_ObjectUniform = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
 //
 //        BufferData modelData{};
-//        modelData.offset = 0;
+//        modelData.offsetInBuffer = 0;
 //        modelData.dataSize = modelBufferAlignment;
-//        modelData.pData = modelTransferSpace;
+//        modelData.pData = m_ObjectUniformData;
 //
 //        m_pPSO->UpdateDynamicUniformBuffer(modelData);
 
@@ -328,21 +363,22 @@ private: // Internal Members
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
     IBuffer* m_GlobalUniformBuffer;
+    IBuffer* m_ObjectUniformBuffer;
 
     struct GlobalUniforms
     {
-        glm::mat4 projection;
+        alignas(16) glm::mat4 projection;
         alignas(16) glm::mat4 view;
     } m_GlobalUniforms;
 
-    struct UboModel {
-        glm::mat4 model;
-    } model;
+    struct ObjectUniforms {
+        alignas(16) glm::vec3 colorTint;
+        alignas(16) glm::mat4 model;
+    } m_ObjectUniform[4];
 
-    UboModel* modelTransferSpace = nullptr;
-    Uint64 modelBufferAlignment;
+    ObjectUniforms* m_ObjectUniformData = nullptr;
+    size_t m_ObjectUniformDataSize;
 };
-
 
 
 int main(int argc, char* argv[])
