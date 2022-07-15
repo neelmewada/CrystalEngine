@@ -26,7 +26,7 @@ GraphicsPipelineStateVk::GraphicsPipelineStateVk(const GraphicsPipelineStateCrea
         m_Name = createInfo.pName;
 
     CreateDescriptorSets(createInfo);
-    CreateStaticResourceBinding(createInfo);
+    CreateResourceBindings(createInfo);
     CreateGraphicsPipeline(createInfo);
 }
 
@@ -35,6 +35,9 @@ GraphicsPipelineStateVk::~GraphicsPipelineStateVk()
     // -- Graphics Pipeline --
     vkDestroyPipeline(m_Device->GetDevice(), m_Pipeline, nullptr);
     vkDestroyPipelineLayout(m_Device->GetDevice(), m_PipelineLayout, nullptr);
+
+    if (m_Binding != nullptr)
+        delete m_Binding;
 
     // -- Static Resource Binding --
     delete m_StaticBinding;
@@ -63,16 +66,22 @@ IShaderResourceVariable* GraphicsPipelineStateVk::GetStaticVariableByName(const 
 
 void GraphicsPipelineStateVk::CmdBindDescriptorSets(VkCommandBuffer commandBuffer)
 {
+    if (m_DynamicOffsetsDirty)
+        BuildDynamicOffsets();
+
+    Uint32 offset = m_DynamicOffsets[0];
+
     int currentFrame = m_SwapChain->GetCurrentFrameIndex();
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout,0,
                             m_DescriptorSetsPerFrame[currentFrame].size(),
                             m_DescriptorSetsPerFrame[currentFrame].data(),
-                            0,nullptr);
+                            1,&offset);
 }
 
 #pragma region Shader Binding
 
-void GraphicsPipelineStateVk::BindShaderResource(IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
+void GraphicsPipelineStateVk::BindShaderResource(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject,
+                                                 Uint32 set, Uint32 binding,
                                                  Uint32 descriptorCount, ShaderResourceVariableType resourceType)
 {
     auto maxSimultaneousFrames = m_SwapChain->GetMaxSimultaneousFrameDraws();
@@ -102,7 +111,8 @@ void GraphicsPipelineStateVk::BindShaderResource(IDeviceObject* pDeviceObject, U
 
             if (dynamicOffsetFlag && buffer->IsDynamicOffset())
             {
-                Uint64 numOfElements = buffer->GetBufferSize() / buffer->GetStructureByteStride();
+                bufferInfo.range = buffer->GetStructureByteStride();
+                m_DynamicOffsetBuffers[{set, binding}] = buffer;
             }
         }
 
@@ -136,6 +146,27 @@ void GraphicsPipelineStateVk::BindShaderResource(IDeviceObject* pDeviceObject, U
 #pragma endregion
 
 #pragma region Internal API
+
+void GraphicsPipelineStateVk::BuildDynamicOffsets()
+{
+    m_DynamicOffsetsDirty = false;
+    m_DynamicOffsets.clear();
+    m_DynamicOffsetCount = 0;
+
+    for (const auto& pair: m_DynamicOffsetBuffers)
+    {
+        Uint32 numOfElements = pair.second->GetBufferSize() / pair.second->GetStructureByteStride();
+        auto startIndex = m_DynamicOffsets.size();
+        if (m_DynamicOffsets.size() < numOfElements)
+            m_DynamicOffsets.resize(m_DynamicOffsets.size() + numOfElements);
+
+        for (int i = 0; i < numOfElements; ++i)
+        {
+            m_DynamicOffsets[startIndex + i] = static_cast<Uint32>(i * pair.second->GetStructureByteStride());
+        }
+        m_DynamicOffsetCount++;
+    }
+}
 
 void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCreateInfo& createInfo)
 {
@@ -183,6 +214,8 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
     for (const auto& resource: shaderResources)
     {
         ShaderResourceVariableFlags flags = SHADER_RESOURCE_VARIABLE_NONE_BIT;
+
+        m_ShaderVariableDefinitions[{resource.set, resource.binding}] = resource;
 
         // Find this resource in user passed data from createInfo struct.
         for (int i = 0; i < createInfo.variableCount; ++i)
@@ -268,7 +301,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
         descriptorSetInfo.descriptorSetCount = !set0Used ? numOfSetsUsed : numOfSetsUsed - 1;
         descriptorSetInfo.pSetLayouts = !set0Used
                 ? m_DescriptorSetLayouts.data()
-                : std::vector<VkDescriptorSetLayout>(m_DescriptorSetLayouts.begin() + 1, m_DescriptorSetLayouts.end()).data();
+                : &*(m_DescriptorSetLayouts.begin() + 1);
 
         if (descriptorSetInfo.descriptorSetCount > 0)
             VK_ASSERT(vkAllocateDescriptorSets(m_Device->GetDevice(), &descriptorSetInfo, &*(m_DescriptorSetsPerFrame[i].begin() + 1)),
@@ -287,18 +320,29 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
     }
 }
 
-void GraphicsPipelineStateVk::CreateStaticResourceBinding(const GraphicsPipelineStateCreateInfo& createInfo)
+void GraphicsPipelineStateVk::CreateResourceBindings(const GraphicsPipelineStateCreateInfo& createInfo)
 {
     auto staticVariables = m_Shader->GetCurrentVariant()->GetShaderVariableDefinitions();
     staticVariables.end() = std::remove_if(staticVariables.begin(), staticVariables.end(), [](const ShaderResourceVariableDefinition& item) -> bool {
         return item.set > 0;
     });
 
-    ShaderResourceBindingVkCreateInfo bindingCreateInfo = {
+    ShaderResourceBindingVkCreateInfo staticBindingCreateInfo = {
             staticVariables
     };
 
-    m_StaticBinding = new ShaderResourceBindingVk(bindingCreateInfo, this);
+    m_StaticBinding = new ShaderResourceBindingVk(staticBindingCreateInfo, this);
+
+    auto nonStaticVariables = m_Shader->GetCurrentVariant()->GetShaderVariableDefinitions();
+    nonStaticVariables.end() = std::remove_if(nonStaticVariables.begin(), nonStaticVariables.end(), [](const ShaderResourceVariableDefinition& item) -> bool {
+        return item.set == 0;
+    });
+
+    ShaderResourceBindingVkCreateInfo bindingCreateInfo = {
+            nonStaticVariables
+    };
+
+    m_Binding = new ShaderResourceBindingVk(bindingCreateInfo, this);
 }
 
 void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineStateCreateInfo& createInfo)

@@ -33,10 +33,10 @@ GLOBAL(0) uniform GlobalUniformBuffer {
     mat4 view;
 };
 
-//SET1(0) uniform ObjectBuffer {
-//    mat4 model;
-//    vec3 colorTint;
-//};
+SET1(0) uniform ObjectBuffer {
+    mat4 model;
+    vec3 colorTint;
+};
 
 /*
 // Set1: Per-Pass Data
@@ -65,7 +65,7 @@ layout (location = 1) in vec3 vColor;
 layout (location = 0) out vec3 outColor;
 
 void main() {
-    gl_Position = projection * view * vec4(vPosition, 1.0);
+    gl_Position = projection * view * model * vec4(vPosition, 1.0);
     outColor = vColor;
 }
 

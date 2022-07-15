@@ -15,10 +15,12 @@ protected:
     virtual ~IShaderResourceBindingCallbacks() {}
 
 public: // Public API
-    virtual void BindShaderResource(IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
+    virtual void BindShaderResource(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
                                     Uint32 descriptorCount, ShaderResourceVariableType resourceType) = 0;
 
 };
+
+class ShaderResourceBindingVk;
 
 struct ShaderResourceVariableVkCreateInfo
 {
@@ -27,6 +29,7 @@ struct ShaderResourceVariableVkCreateInfo
     Uint32 binding;
     Uint32 descriptorCount;
     ShaderResourceVariableType resourceType;
+    ShaderResourceBindingVk* bindingRef;
 };
 
 class ShaderResourceVariableVk : public IShaderResourceVariable
@@ -48,6 +51,7 @@ private: // Internal Members
     Uint32 m_DescriptorCount = 0;
     ShaderResourceVariableType m_ResourceVariableType;
     IShaderResourceBindingCallbacks* m_pReceiver;
+    ShaderResourceBindingVk* m_BindingRef;
 };
 
 struct ShaderResourceBindingVkCreateInfo

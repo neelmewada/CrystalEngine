@@ -40,10 +40,12 @@ enum ShaderStageFlags : Uint32
 enum ShaderResourceVariableFlags
 {
     SHADER_RESOURCE_VARIABLE_NONE_BIT = 0x00,
-    // Static resources can't be bound/unbound once they're bound initially
+    // Statically bound resources can't be bound/unbound once they're bound initially
     SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT = 0x01,
+    // Dynamically bound resources can be bound/unbound whenever needed
+    SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT = 0x02,
     // Dynamic offset uniform or storage buffers
-    SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT = 0x02,
+    SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT = 0x10,
 };
 
 struct ShaderResourceVariableDesc

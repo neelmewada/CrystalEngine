@@ -24,11 +24,14 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, DeviceContextVk* pDevice)
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = createInfo.size;
     m_BufferSize = bufferInfo.size;
+
     bufferInfo.usage = VkBufferUsageFlagsFromBufferBindFlags(createInfo.bindFlags);
+
     if (createInfo.allocType == BUFFER_MEM_GPU_ONLY || (createInfo.transferFlags & BUFFER_TRANSFER_DST_BIT))
         bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     if (createInfo.transferFlags & BUFFER_TRANSFER_SRC_BIT)
         bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE; // Exclusive to 1 queue
 
     // -- VMA Allocation --

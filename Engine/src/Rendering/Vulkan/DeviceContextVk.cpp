@@ -211,6 +211,9 @@ void DeviceContextVk::CreateLogicalDevice()
         deviceExtensionNames.push_back(requiredExtension);
     }
 
+    // Allow descriptor set bindings to change after binding it once
+    deviceExtensionNames.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+
     deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensionNames.size());
     deviceCreateInfo.ppEnabledExtensionNames = deviceExtensionNames.size() > 0 ? deviceExtensionNames.data() : nullptr;
 

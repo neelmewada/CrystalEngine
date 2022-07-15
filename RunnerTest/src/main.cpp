@@ -118,14 +118,14 @@ public:
 
         // -- Object Uniform Buffer --
         Uint64 minBufferOffsetAlignment = m_pDeviceContext->GetMinUniformBufferOffsetAlignment();
-        Uint64 stride = (sizeof(ObjectUniforms) + minBufferOffsetAlignment - 1) & ~(minBufferOffsetAlignment - 1);
-        m_ObjectUniformDataSize = stride * _countof(m_ObjectUniform);
-//        m_ObjectUniformData = (ObjectUniforms*)std::aligned_alloc(stride, m_ObjectUniformDataSize); // 4 elements
-//        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
-//        {
-//            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + stride * i);
-//            *ptr = m_ObjectUniform[i];
-//        }
+        m_ObjectUniformStride = (sizeof(ObjectUniforms) + minBufferOffsetAlignment - 1) & ~(minBufferOffsetAlignment - 1);
+        m_ObjectUniformDataSize = m_ObjectUniformStride * _countof(m_ObjectUniform);
+        m_ObjectUniformData = (ObjectUniforms*)malloc(m_ObjectUniformDataSize);
+        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
+        {
+            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + m_ObjectUniformStride * i);
+            *ptr = m_ObjectUniform[i];
+        }
 
         BufferCreateInfo objectBufferInfo = {};
         objectBufferInfo.pName = "Object Buffer";
@@ -134,14 +134,14 @@ public:
         objectBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
         objectBufferInfo.optimizationFlags = Vox::BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
         objectBufferInfo.usageFlags = Vox::BUFFER_USAGE_DYNAMIC_OFFSET_BIT;
-        objectBufferInfo.structureByteStride = stride;
+        objectBufferInfo.structureByteStride = m_ObjectUniformStride;
 
         BufferData objectBufferData = {};
         objectBufferData.dataSize = m_ObjectUniformDataSize;
         objectBufferData.pData = m_ObjectUniformData;
         objectBufferData.offsetInBuffer = 0;
 
-        //m_ObjectUniformBuffer = m_pDeviceContext->CreateBuffer(objectBufferInfo, objectBufferData);
+        m_ObjectUniformBuffer = m_pDeviceContext->CreateBuffer(objectBufferInfo, objectBufferData);
 
         // -- Shaders --
         fs::path shaderDir = IO::FileManager::GetSharedDirectory();
@@ -206,7 +206,9 @@ public:
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
         m_pPSO->GetStaticVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
-        //m_pPSO->GetStaticVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
+        m_pSRB = m_pPSO->GetShaderResourceBinding();
+
+        m_pSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
 
         // -- MESH --
 
@@ -340,15 +342,17 @@ protected:
 
         m_ObjectUniform[0].model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
 
-//        m_ObjectUniformData->m_ObjectUniform = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
-//
-//        BufferData modelData{};
-//        modelData.offsetInBuffer = 0;
-//        modelData.dataSize = modelBufferAlignment;
-//        modelData.pData = m_ObjectUniformData;
-//
-//        m_pPSO->UpdateDynamicUniformBuffer(modelData);
+        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
+        {
+            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + m_ObjectUniformStride * i);
+            *ptr = m_ObjectUniform[i];
+        }
 
+        BufferData objectUniformData = {};
+        objectUniformData.dataSize = m_ObjectUniformDataSize;
+        objectUniformData.pData = m_ObjectUniformData;
+
+        m_ObjectUniformBuffer->SetBufferData(objectUniformData);
     }
 
 private: // Vulkan Functions
@@ -360,6 +364,7 @@ private: // Internal Members
     ISwapChain* m_pSwapChain;
     IRenderContext* m_pRenderContext;
     IGraphicsPipelineState* m_pPSO;
+    IShaderResourceBinding* m_pSRB;
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
     IBuffer* m_GlobalUniformBuffer;
@@ -372,12 +377,13 @@ private: // Internal Members
     } m_GlobalUniforms;
 
     struct ObjectUniforms {
-        alignas(16) glm::vec3 colorTint;
         alignas(16) glm::mat4 model;
+        alignas(16) glm::vec3 colorTint;
     } m_ObjectUniform[4];
 
     ObjectUniforms* m_ObjectUniformData = nullptr;
     size_t m_ObjectUniformDataSize;
+    size_t m_ObjectUniformStride;
 };
 
 

@@ -24,6 +24,8 @@ public:
 
 public: // Public API
     IShaderResourceVariable* GetStaticVariableByName(const char* pName) override;
+    IShaderResourceBinding* GetShaderResourceBinding() override { return m_Binding; }
+
     void CmdBindDescriptorSets(VkCommandBuffer commandBuffer);
 
     // - Getters
@@ -31,13 +33,15 @@ public: // Public API
     VkPipeline GetPipeline() { return m_Pipeline; }
 
 public: // Shader Resource Binding Callbacks
-    void BindShaderResource(IDeviceObject *pDeviceObject, Uint32 set, Uint32 binding,
+    void BindShaderResource(IShaderResourceBinding* resourceBinding, IDeviceObject *pDeviceObject, Uint32 set, Uint32 binding,
                             Uint32 descriptorCount, ShaderResourceVariableType resourceType) override;
 
 private: // Internal API
     void CreateDescriptorSets(const GraphicsPipelineStateCreateInfo& createInfo);
-    void CreateStaticResourceBinding(const GraphicsPipelineStateCreateInfo& createInfo);
+    void CreateResourceBindings(const GraphicsPipelineStateCreateInfo& createInfo);
     void CreateGraphicsPipeline(const GraphicsPipelineStateCreateInfo& createInfo);
+
+    void BuildDynamicOffsets();
 
     VkFormat VkFormatFromVertexAttribFormat(VertexAttribFormat& attribFormat);
 
@@ -67,12 +71,16 @@ private: // Vulkan Members
         }
     };
 
+
     std::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts{};
     std::map<Uint32, std::vector<VkDescriptorSet>> m_DescriptorSetsPerFrame{};
     std::vector<VkSampler> m_Samplers{};
 
-    std::map<ResourceLocation, Uint32> m_DynamicOffsetIndices{};
+    bool m_DynamicOffsetsDirty = true;
+    Uint32 m_DynamicOffsetCount = 0;
     std::vector<Uint32> m_DynamicOffsets{};
+    std::map<ResourceLocation, BufferVk*> m_DynamicOffsetBuffers{};
+    std::map<ResourceLocation, ShaderResourceVariableDefinition> m_ShaderVariableDefinitions;
     std::map<ResourceLocation, ShaderResourceVariableDesc> m_ShaderResourceVariables;
 };
 

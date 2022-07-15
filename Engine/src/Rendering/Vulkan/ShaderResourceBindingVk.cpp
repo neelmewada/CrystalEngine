@@ -12,6 +12,7 @@ ShaderResourceVariableVk::ShaderResourceVariableVk(const ShaderResourceVariableV
     m_DescriptorCount = createInfo.descriptorCount;
     m_Name = createInfo.name;
     m_pReceiver = pReceiver;
+    m_BindingRef = createInfo.bindingRef;
 }
 
 ShaderResourceVariableVk::~ShaderResourceVariableVk()
@@ -21,7 +22,7 @@ ShaderResourceVariableVk::~ShaderResourceVariableVk()
 
 void ShaderResourceVariableVk::Set(IDeviceObject* pObject)
 {
-    m_pReceiver->BindShaderResource(pObject, m_Set, m_Binding,
+    m_pReceiver->BindShaderResource(m_BindingRef, pObject, m_Set, m_Binding,
                                     m_DescriptorCount, m_ResourceVariableType);
 }
 
@@ -43,6 +44,7 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
         varInfo.set = varDef.set;
         varInfo.binding = varDef.binding;
         varInfo.resourceType = varDef.type;
+        varInfo.bindingRef = this;
 
         auto* variableBinding = new ShaderResourceVariableVk(varInfo, m_pReceiver);
         m_VariableBindings.push_back(variableBinding);
