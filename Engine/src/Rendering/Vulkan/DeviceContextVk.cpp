@@ -148,6 +148,7 @@ void DeviceContextVk::FetchSupportInfo()
     vkGetPhysicalDeviceProperties(m_PhysicalDevice, &physicalDeviceProperties);
 
     m_UniformBufferOffsetAlignment = physicalDeviceProperties.limits.minUniformBufferOffsetAlignment;
+    m_MaxSamplerAnisotropy = physicalDeviceProperties.limits.maxSamplerAnisotropy;
 
     m_SurfaceCompatInfo = FetchSurfaceCompatInfo(m_PhysicalDevice);
 }
@@ -219,6 +220,7 @@ void DeviceContextVk::CreateLogicalDevice()
 
     // Physical Device Features the logical device will use
     VkPhysicalDeviceFeatures deviceFeatures = {};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
 
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures; // Physical pDevice features the logical pDevice will use
 

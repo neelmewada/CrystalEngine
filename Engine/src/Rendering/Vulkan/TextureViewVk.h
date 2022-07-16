@@ -26,13 +26,15 @@ public:
 public: // Public API
     VkImageView GetImageView() { return m_ImageView; }
     VkImageLayout GetImageLayout() { return m_ImageLayout; }
+    VkSampler GetSampler() { return m_Sampler; }
 
 private: // Internal API
 
 private: // Members
-    DeviceContextVk* m_pDevice;
-    VkImageView m_ImageView;
+    DeviceContextVk* m_pDevice = nullptr;
+    VkImageView m_ImageView = nullptr;
     VkImageLayout m_ImageLayout;
+    VkSampler m_Sampler = nullptr;
 
 };
 

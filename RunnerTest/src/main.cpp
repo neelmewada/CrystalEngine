@@ -212,7 +212,12 @@ protected:
             {"ObjectBuffer", SHADER_STAGE_ALL, static_cast<ShaderResourceVariableFlags>(
                                                             SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT |
                                                             SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT)},
-            {"texture", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT}
+            {"tex", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT}
+        };
+
+        ImmutableSamplerDesc immutableSamplers[] = {
+                {"tex", SHADER_STAGE_ALL, SAMPLER_FILTER_TYPE_LINEAR, SAMPLER_FILTER_TYPE_LINEAR, SAMPLER_FILTER_TYPE_LINEAR,
+                 SAMPLER_ADDRESS_MODE_REPEAT, SAMPLER_ADDRESS_MODE_REPEAT, SAMPLER_ADDRESS_MODE_REPEAT, 16}
         };
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
@@ -225,12 +230,14 @@ protected:
         pipelineInfo.vertexStructByteSize = static_cast<uint32_t>(sizeof(Vertex));
         pipelineInfo.variableCount = _countof(variables);
         pipelineInfo.pResourceVariables = variables;
+        pipelineInfo.immutableSamplersCount = _countof(immutableSamplers);
+        pipelineInfo.pImmutableSamplers = immutableSamplers;
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
         m_pSRB = m_pPSO->GetShaderResourceBinding();
 
         m_pPSO->GetStaticVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
         m_pSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
-        //m_pSRB->GetVariableByName("texture")->Set(m_TextureView);
+        m_pSRB->GetVariableByName("tex")->Set(m_TextureView);
 
         // -- MESH --
 

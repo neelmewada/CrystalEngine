@@ -27,5 +27,56 @@ enum ImageFormat
     IMG_FORMAT_B8G8R8A8_SRGB = 50,
 };
 
+enum ShaderStageFlags : Uint32
+{
+    SHADER_STAGE_NONE = 0,
+    SHADER_STAGE_VERTEX = 0x01,
+    SHADER_STAGE_FRAGMENT = 0x10,
+    SHADER_STAGE_ALL = 0x1F,
+};
+
+enum ShaderResourceVariableFlags
+{
+    SHADER_RESOURCE_VARIABLE_NONE_BIT = 0x00,
+    // Statically bound resources can't be bound/unbound once they're bound initially
+    SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT = 0x01,
+    // Dynamically bound resources can be bound/unbound whenever needed
+    SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT = 0x02,
+    // Dynamic offset uniform or storage buffers
+    SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT = 0x10,
+};
+
+struct ShaderResourceVariableDesc
+{
+    const char* pVariableName;
+    ShaderStageFlags stages;
+    ShaderResourceVariableFlags flags;
+};
+
+enum SamplerAddressMode
+{
+    SAMPLER_ADDRESS_MODE_REPEAT = 0,
+    SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1,
+    SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2,
+    SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER = 3,
+    SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE = 4,
+};
+
+enum SamplerFilterType
+{
+    SAMPLER_FILTER_TYPE_NEAREST = 0,
+    SAMPLER_FILTER_TYPE_LINEAR = 1,
+};
+
+struct SamplerDesc
+{
+    ShaderStageFlags shaderStages;
+    SamplerFilterType minFilter = SAMPLER_FILTER_TYPE_LINEAR,
+            magFilter = SAMPLER_FILTER_TYPE_LINEAR,
+            mipFilter = SAMPLER_FILTER_TYPE_LINEAR;
+    SamplerAddressMode addressModeU, addressModeV, addressModeW;
+    float anisotropy = 0;
+};
+
 }
 

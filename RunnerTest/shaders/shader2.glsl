@@ -38,7 +38,7 @@ SET1(0) uniform ObjectBuffer {
     vec3 colorTint;
 };
 
-SET1(1) uniform sampler2D texture;
+SET1(1) uniform sampler2D tex;
 
 /*
 // Set1: Per-Pass Data
@@ -84,7 +84,7 @@ layout (location = 1) in vec3 inColor;
 layout(location = 0) out vec4 outColor; // Final output color
 
 void main() {
-    outColor = vec4(inColor, 1.0);
+    outColor = vec4(texture(tex, inUV).rgb, 1.0);
 }
 
 #endif

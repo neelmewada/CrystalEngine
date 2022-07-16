@@ -27,6 +27,7 @@ GraphicsPipelineStateVk::GraphicsPipelineStateVk(const GraphicsPipelineStateCrea
     if (createInfo.pName != nullptr)
         m_Name = createInfo.pName;
 
+    CreateImmutableSamplers(createInfo);
     CreateDescriptorSets(createInfo);
     CreateResourceBindings(createInfo);
     CreateGraphicsPipeline(createInfo);
@@ -51,14 +52,14 @@ GraphicsPipelineStateVk::~GraphicsPipelineStateVk()
     }
     m_DescriptorSetLayouts.clear();
 
+    vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_DescriptorPool, nullptr);
+    vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_StaticDescriptorPool, nullptr);
+
     for (auto& pair : m_ImmutableSamplers)
     {
         vkDestroySampler(m_pDevice->GetDevice(), pair.second, nullptr);
     }
     m_ImmutableSamplers.clear();
-
-    vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_DescriptorPool, nullptr);
-    vkDestroyDescriptorPool(m_pDevice->GetDevice(), m_StaticDescriptorPool, nullptr);
 }
 
 IShaderResourceVariable* GraphicsPipelineStateVk::GetStaticVariableByName(const char* pName)
@@ -85,7 +86,8 @@ void GraphicsPipelineStateVk::BindShaderResource(IShaderResourceBinding* resourc
 {
     auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
 
-    auto flags = m_ShaderResourceVariables[{set, binding}].flags;
+    auto resourceVariableDesc = m_ShaderResourceVariables[{set, binding}];
+    auto flags = resourceVariableDesc.flags;
 
     bool dynamicOffsetFlag = flags & SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT;
 
@@ -118,7 +120,13 @@ void GraphicsPipelineStateVk::BindShaderResource(IShaderResourceBinding* resourc
         else throw std::runtime_error("ERROR: Resource type is a sampled image, but the passed Device Object is not of texture view type!");
         imageInfo.imageView = textureView->GetImageView();
         imageInfo.imageLayout = textureView->GetImageLayout();
-        //imageInfo.sampler = // TODO: Create & add sampler
+        if (m_ImmutableSamplers.count(resourceVariableDesc.pVariableName) == 0)
+        {
+            VOX_ASSERT(textureView->GetSampler() != nullptr,
+                       std::string() + "No sampler found for texture named " + resourceVariableDesc.pVariableName + "\n" +
+                       "If an immutable sampler description is not passed to Graphics Pipeline, a dynamic sampler should exist in the Texture View!");
+            imageInfo.sampler = textureView->GetSampler();
+        }
     }
 
     for (int i = 0; i < maxSimultaneousFrames; ++i)
@@ -150,7 +158,7 @@ void GraphicsPipelineStateVk::BindShaderResource(IShaderResourceBinding* resourc
         if (resourceType == ::UniformBuffer || resourceType == ::StorageBuffer)
             setWrite.pBufferInfo = &bufferInfo;
         else if (resourceType == ::SampledImage2D)
-            setWrite.pImageInfo = nullptr;
+            setWrite.pImageInfo = &imageInfo;
 
         vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
     }
@@ -162,13 +170,41 @@ void GraphicsPipelineStateVk::BindShaderResource(IShaderResourceBinding* resourc
 
 void GraphicsPipelineStateVk::CreateImmutableSamplers(const GraphicsPipelineStateCreateInfo& createInfo)
 {
+    m_ImmutableSamplers.clear();
 
+    float maxAnisotropyLimit = m_pDevice->GetMaxSamplerAnisotropy();
 
     for (int i = 0; i < createInfo.immutableSamplersCount; ++i)
     {
         auto samplerDesc = createInfo.pImmutableSamplers[i];
 
+        VkSamplerCreateInfo samplerInfo = {};
+        samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerInfo.minFilter = static_cast<VkFilter>(samplerDesc.minFilter);
+        samplerInfo.magFilter = static_cast<VkFilter>(samplerDesc.magFilter);
+        samplerInfo.mipmapMode = static_cast<VkSamplerMipmapMode>(samplerDesc.mipFilter);
+        samplerInfo.minLod = 0.0f;
+        samplerInfo.maxLod = 0.0f;
+        samplerInfo.mipLodBias = 0.0f;
 
+        samplerInfo.addressModeU = static_cast<VkSamplerAddressMode>(samplerDesc.addressModeU);
+        samplerInfo.addressModeV = static_cast<VkSamplerAddressMode>(samplerDesc.addressModeV);
+        samplerInfo.addressModeW = static_cast<VkSamplerAddressMode>(samplerDesc.addressModeW);
+
+        samplerInfo.anisotropyEnable = samplerDesc.anisotropy > 0 ? VK_TRUE : VK_FALSE;
+        samplerInfo.maxAnisotropy = std::min(samplerDesc.anisotropy, maxAnisotropyLimit);
+
+        samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+
+        samplerInfo.unnormalizedCoordinates = VK_FALSE;
+
+        samplerInfo.compareEnable = VK_FALSE;
+        samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+        VkSampler sampler = nullptr;
+        VK_ASSERT(vkCreateSampler(m_pDevice->GetDevice(), &samplerInfo, nullptr, &sampler),
+                  "Failed to create Immutable Sampler!");
+        m_ImmutableSamplers[samplerDesc.pTextureName] = sampler;
     }
 }
 
@@ -213,6 +249,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
 
     typedef std::vector<VkDescriptorSetLayoutBinding> LayoutBindingCollection;
     std::map<Uint32, LayoutBindingCollection> setBindings{};
+    std::vector<VkSampler*> samplerArraysAllocated;
 
     // -- Layout Bindings --
     for (const auto& resource: shaderResources)
@@ -220,6 +257,8 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
         ShaderResourceVariableFlags flags = static_cast<ShaderResourceVariableFlags>(0);
 
         m_ShaderVariableDefinitions[{resource.set, resource.binding}] = resource;
+
+        ShaderResourceVariableDesc currentVariableDesc;
 
         // Find this resource in user passed data from createInfo struct.
         for (int i = 0; i < createInfo.variableCount; ++i)
@@ -230,6 +269,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
                 VOX_ASSERT((var.stages & resource.shaderStages) != var.stages,
                            "Shader Stages passed in ShaderResourceVariableDesc doesn't match with the shader stages in Shader!");
                 m_ShaderResourceVariables[{resource.set, resource.binding}] = var;
+                currentVariableDesc = var;
                 flags = var.flags;
                 break;
             }
@@ -239,6 +279,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
 
         VkDescriptorSetLayoutBinding layoutBinding = {};
         layoutBinding.binding = resource.binding;
+
         if (resource.type == ::UniformBuffer)
         {
             if (dynamicOffset) layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
@@ -251,15 +292,25 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
         }
         else if (resource.type == ::SampledImage2D)
             layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+
         if (resource.isArray)
             layoutBinding.descriptorCount = static_cast<Uint32>(resource.members.size());
         else
             layoutBinding.descriptorCount = 1;
+
         layoutBinding.stageFlags = static_cast<VkShaderStageFlags>(resource.shaderStages);
+
         layoutBinding.pImmutableSamplers = nullptr;
-        if (resource.type == ::SampledImage2D)
+
+        if (resource.type == ::SampledImage2D && m_ImmutableSamplers.count(resource.name) > 0)
         {
-            // TODO: Create immutable samplers
+            VkSampler* immutableSamplerList = new VkSampler[layoutBinding.descriptorCount];
+            samplerArraysAllocated.push_back(immutableSamplerList);
+            for (int i = 0; i < layoutBinding.descriptorCount; ++i)
+            {
+                immutableSamplerList[i] = m_ImmutableSamplers[resource.name];
+            }
+            layoutBinding.pImmutableSamplers = immutableSamplerList;
         }
 
         if (setBindings.count(resource.set) == 0)
@@ -278,7 +329,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = {};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = setBindings.count(set);
+        layoutInfo.bindingCount = static_cast<uint32_t>(setBindings[set].size());
         layoutInfo.pBindings = setBindings[set].data();
         if (set > 0) // Set 0 is static
             layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
@@ -321,6 +372,12 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
                 VK_ASSERT(vkAllocateDescriptorSets(m_pDevice->GetDevice(), &descriptorSetInfo, m_DescriptorSetsPerFrame[i].data()),
                           "Failed to allocate Static Descriptor Set for Graphics Pipeline!");
         }
+    }
+
+    // Release resources that are no longer needed
+    for (const auto& item: samplerArraysAllocated)
+    {
+        delete[] item;
     }
 }
 

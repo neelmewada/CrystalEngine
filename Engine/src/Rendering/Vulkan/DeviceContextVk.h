@@ -54,6 +54,8 @@ public: // Public API
     // - Getters
     // -- Support Info
     Uint64 GetMinUniformBufferOffsetAlignment() override { return m_UniformBufferOffsetAlignment; }
+    float GetMaxSamplerAnisotropy() { return m_MaxSamplerAnisotropy; }
+
 
 private: // Internal API
     // - Vulkan Main
@@ -74,10 +76,12 @@ private: // Internal API
 private: // Internal Members
     EngineContextVk* m_EngineContext = nullptr;
     QueueFamilyInfo m_QueueFamilies;
+
     // - Support Info
     SurfaceCompatInfo m_SurfaceCompatInfo;
     bool m_PortabilitySubsetEnabled = false;
     Uint64 m_UniformBufferOffsetAlignment;
+    float m_MaxSamplerAnisotropy;
 
 private: // Vulkan Members
     VkSurfaceKHR m_Surface = nullptr;
