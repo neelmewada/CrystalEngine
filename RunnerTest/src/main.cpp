@@ -41,6 +41,7 @@ public:
         if (m_ObjectUniformData != nullptr)
             free(m_ObjectUniformData);
         delete m_pPSO;
+        delete m_Texture;
         delete m_ObjectUniformBuffer;
         delete m_GlobalUniformBuffer;
         delete m_pRenderContext;
@@ -53,7 +54,8 @@ public:
     const char * GetApplicationName() override { return "VoxEngine Test App"; }
     uint32_t GetApplicationVersion() override { return MAKE_VERSION(0, 0, 1, 0); }
 
-    virtual void Start() override
+protected:
+    void Start() override
     {
         ApplicationBase::Start(); // call base function first
 
@@ -107,7 +109,7 @@ public:
         globalUniformBufferInfo.pName = "Global Uniforms";
         globalUniformBufferInfo.size = sizeof(GlobalUniforms);
         globalUniformBufferInfo.bindFlags = Vox::BIND_UNIFORM_BUFFER;
-        globalUniformBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU; // CPU & GPU Shared Memory
+        globalUniformBufferInfo.allocType = Vox::DEVICE_MEM_CPU_TO_GPU; // CPU & GPU Shared Memory
         globalUniformBufferInfo.optimizationFlags = Vox::BUFFER_OPTIMIZE_UPDATE_SELDOM_BIT;
 
         BufferData globalUniformsData = {};
@@ -131,7 +133,7 @@ public:
         objectBufferInfo.pName = "Object Buffer";
         objectBufferInfo.size = m_ObjectUniformDataSize;
         objectBufferInfo.bindFlags = Vox::BIND_UNIFORM_BUFFER;
-        objectBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
+        objectBufferInfo.allocType = Vox::DEVICE_MEM_CPU_TO_GPU;
         objectBufferInfo.optimizationFlags = Vox::BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
         objectBufferInfo.usageFlags = Vox::BUFFER_USAGE_DYNAMIC_OFFSET_BIT;
         objectBufferInfo.structureByteStride = m_ObjectUniformStride;
@@ -142,6 +144,18 @@ public:
         objectBufferData.offsetInBuffer = 0;
 
         m_ObjectUniformBuffer = m_pDeviceContext->CreateBuffer(objectBufferInfo, objectBufferData);
+
+        // -- Load Texture From File --
+        std::vector<char> textureData;
+        IO::ReadAllBytesFromFile(IO::FileManager::GetBinDirectory() + "/textures/crate.png", textureData);
+
+        // -- Texture Samplers --
+        TextureCreateInfo textureInfo = {};
+        textureInfo.pName = "My Texture";
+        textureInfo.imageDataSize = textureData.size();
+        textureInfo.pImageData = textureData.data();
+        m_Texture = m_pDeviceContext->CreateTexture(textureInfo);
+        m_TextureView = m_Texture->GetDefaultView();
 
         // -- Shaders --
         fs::path shaderDir = IO::FileManager::GetSharedDirectory();
@@ -178,19 +192,22 @@ public:
         {
             glm::vec3 position;
             glm::vec3 color;
+            glm::vec2 uv;
         };
 
         // -- Graphics Pipeline --
-        GraphicsPipelineVertexAttributeDesc vertAttribs[2] = {
-                {0, 0, static_cast<uint32_t>(offsetof(Vertex, position)), VERTEX_ATTRIB_FLOAT3}, // Position (float3)
-                {0, 1, static_cast<uint32_t>(offsetof(Vertex, color)), VERTEX_ATTRIB_FLOAT3}  // Color    (float3)
+        GraphicsPipelineVertexAttributeDesc vertAttribs[3] = {
+                {0, 0, static_cast<Uint32>(offsetof(Vertex, position)), VERTEX_ATTRIB_FLOAT3}, // Position (float3)
+                {0, 1, static_cast<Uint32>(offsetof(Vertex, color)), VERTEX_ATTRIB_FLOAT3},  // Color    (float3)
+                {0, 2, static_cast<Uint32>(offsetof(Vertex, uv)), VERTEX_ATTRIB_FLOAT2},
         };
 
-        ShaderResourceVariableDesc variables[2] = {
-            {"GlobalUniformBuffer", Vox::SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT},
-            {"ObjectBuffer", Vox::SHADER_STAGE_ALL, static_cast<ShaderResourceVariableFlags>(
+        ShaderResourceVariableDesc variables[3] = {
+            {"GlobalUniformBuffer", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT},
+            {"ObjectBuffer", SHADER_STAGE_ALL, static_cast<ShaderResourceVariableFlags>(
                                                             SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT |
-                                                            SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT)}
+                                                            SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT)},
+            {"texture", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT}
         };
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
@@ -204,11 +221,11 @@ public:
         pipelineInfo.variableCount = _countof(variables);
         pipelineInfo.pResourceVariables = variables;
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
-
-        m_pPSO->GetStaticVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
         m_pSRB = m_pPSO->GetShaderResourceBinding();
 
+        m_pPSO->GetStaticVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
         m_pSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
+        //m_pSRB->GetVariableByName("texture")->Set(m_TextureView);
 
         // -- MESH --
 
@@ -223,6 +240,11 @@ public:
         vertices[1].color = { 0.0f, 1.0f, 0.0f };
         vertices[2].color = { 0.0f, 1.0f, 0.0f };
         vertices[3].color = { 0.0f, 1.0f, 0.0f };
+        // Vertex UVs
+        vertices[0].uv = {1.0f, 0.0f};
+        vertices[1].uv = {0.0f, 0.0f};
+        vertices[2].uv = {0.0f, 1.0f};
+        vertices[3].uv = {1.0f, 1.0f};
 
         uint16_t indices[6] = {0, 1, 2, 2, 3, 0};
 
@@ -230,7 +252,7 @@ public:
         BufferCreateInfo vertBufferInfo = {};
         vertBufferInfo.pName = "Rect";
         vertBufferInfo.bindFlags = Vox::BIND_VERTEX_BUFFER;
-        vertBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
+        vertBufferInfo.allocType = Vox::DEVICE_MEM_CPU_TO_GPU;
         vertBufferInfo.size = sizeof(vertices);
         BufferData vertBufferData = {};
         vertBufferData.dataSize = sizeof(vertices);
@@ -241,53 +263,17 @@ public:
         BufferCreateInfo indexBufferInfo = {};
         indexBufferInfo.pName = "Rect";
         indexBufferInfo.bindFlags = Vox::BIND_INDEX_BUFFER;
-        indexBufferInfo.allocType = Vox::BUFFER_MEM_CPU_TO_GPU;
+        indexBufferInfo.allocType = Vox::DEVICE_MEM_CPU_TO_GPU;
         indexBufferInfo.size = sizeof(indices);
         BufferData indexBufferData = {};
         indexBufferData.dataSize = sizeof(indices);
         indexBufferData.pData = indices;
         m_IndexBuffer = m_pDeviceContext->CreateBuffer(indexBufferInfo, indexBufferData);
 
-        /*
-        // Uniform Buffer - OLD CODE
-        Uint64 minBufferOffsetAlignment = m_pDeviceContext->GetMinUniformBufferOffsetAlignment();
-        modelBufferAlignment = (sizeof(ObjectUniforms) + minBufferOffsetAlignment - 1) & ~(minBufferOffsetAlignment - 1);
-        m_ObjectUniformData = (ObjectUniforms*)std::aligned_alloc(modelBufferAlignment, modelBufferAlignment * 1);
-
-        *m_ObjectUniformData = m_ObjectUniform;
-        BufferData modelData{};
-        modelData.offsetInBuffer = 0;
-        modelData.dataSize = modelBufferAlignment;
-        modelData.pData = m_ObjectUniformData;
-
-        BufferData vpData{};
-        vpData.dataSize = sizeof(m_GlobalUniforms);
-        vpData.pData = &m_GlobalUniforms;
-
-        // OLD CODE
-        m_pPSO->CreateUniformBuffer(sizeof(UboViewProjection), vpData);
-        m_pPSO->CreateDynamicUniformBuffer(modelBufferAlignment, modelData, minBufferOffsetAlignment);
-        */
-
-        // -- Record Commands --
-        /*float clearColor[4] = {0.6f, 0.65f, 0.4f, 1.0f};
-
-        m_RenderContext->SetClearColor(clearColor);
-
-        m_RenderContext->Begin();
-        m_RenderContext->CmdBindPipeline(m_pPSO);
-        uint64_t offsetInBuffer = 0;
-        // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
-        m_RenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offsetInBuffer);
-        m_RenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
-        m_RenderContext->CmdDrawIndexed(6, 1, 0, 0);
-        m_RenderContext->End();*/
-
-        // We're responsible for deleting the shader coz we created it ourselves.
+        // We're responsible for deleting the shader because we created it ourselves.
         delete shader;
     }
 
-protected:
     void PollEvent(SDL_Event e) override
     {
         // Handle OS events ...
@@ -306,7 +292,7 @@ protected:
             globalUniformData.pData = &m_GlobalUniforms;
             m_GlobalUniformBuffer->SetBufferData(globalUniformData);
 
-            //m_RenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
+            //m_pRenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
 
             //BufferData uniformData;
             //uniformData.dataSize = sizeof(m_GlobalUniforms);
@@ -369,6 +355,8 @@ private: // Internal Members
     IBuffer* m_IndexBuffer;
     IBuffer* m_GlobalUniformBuffer;
     IBuffer* m_ObjectUniformBuffer;
+    ITexture* m_Texture;
+    ITextureView* m_TextureView;
 
     struct GlobalUniforms
     {
@@ -390,7 +378,6 @@ private: // Internal Members
 int main(int argc, char* argv[])
 {
     Application app("VoxEngine Test");
-    app.Start();
     app.Run();
     return 0;
 }

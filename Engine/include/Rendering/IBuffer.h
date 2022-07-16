@@ -18,13 +18,13 @@ enum BufferBindFlags
     BIND_STAGING_BUFFER = 0x10
 };
 
-enum BufferAllocationType
+enum DeviceAllocationType
 {
-    BUFFER_MEM_UNKNOWN = 0,
-    BUFFER_MEM_GPU_ONLY = 1,
-    BUFFER_MEM_CPU_ONLY = 2,
-    BUFFER_MEM_CPU_TO_GPU = 3,
-    BUFFER_MEM_GPU_TO_CPU = 4
+    DEVICE_MEM_UNKNOWN = 0,
+    DEVICE_MEM_GPU_ONLY = 1,
+    DEVICE_MEM_CPU_ONLY = 2,
+    DEVICE_MEM_CPU_TO_GPU = 3,
+    DEVICE_MEM_GPU_TO_CPU = 4
 };
 
 enum BufferUsageFlags

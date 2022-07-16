@@ -513,7 +513,7 @@ void SwapChainVk::CreateDescriptorPool()
     poolCreateInfo.pPoolSizes = poolSizes.data();
     poolCreateInfo.maxSets = static_cast<uint32_t>(m_MaxSimultaneousFrameDraws);
 
-    auto result = vkCreateDescriptorPool(m_Device->GetDevice(), &poolCreateInfo, nullptr, &m_DescriptorPool);
+    auto result = vkCreateDescriptorPool(m_pDevice->GetDevice(), &poolCreateInfo, nullptr, &m_DescriptorPool);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Descriptor Pool");

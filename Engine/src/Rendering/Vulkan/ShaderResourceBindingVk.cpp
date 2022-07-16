@@ -1,5 +1,6 @@
 
 #include "ShaderResourceBindingVk.h"
+#include <iostream>
 
 using namespace Vox;
 
@@ -37,6 +38,7 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
     for (int i = 0; i < m_VariableDefinitions.size(); ++i)
     {
         auto varDef = m_VariableDefinitions[i];
+        if (varDef.name.empty()) continue;
 
         ShaderResourceVariableVkCreateInfo varInfo = {};
         varInfo.name = varDef.name;

@@ -14,7 +14,7 @@ public:
 
 public: // Public API
     enum Type {
-        DEVICE_OBJECT_BUFFER, DEVICE_OBJECT_TEXTURE
+        DEVICE_OBJECT_BUFFER, DEVICE_OBJECT_TEXTURE, DEVICE_OBJECT_TEXTURE_VIEW
     };
 
     virtual Type GetDeviceObjectType() = 0;

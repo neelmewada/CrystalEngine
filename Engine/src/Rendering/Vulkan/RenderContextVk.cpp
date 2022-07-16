@@ -79,10 +79,10 @@ void RenderContextVk::CreateGlobalDescriptorSet()
     layoutCreateInfo.bindingCount = 1;
     layoutCreateInfo.pBindings = &globalDescriptorSetBinding;
 
-    VK_ASSERT(vkCreateDescriptorSetLayout(m_Device->GetDevice(), &layoutCreateInfo, nullptr, &m_GlobalDescriptorSetLayout),
+    VK_ASSERT(vkCreateDescriptorSetLayout(m_pDevice->GetDevice(), &layoutCreateInfo, nullptr, &m_GlobalDescriptorSetLayout),
               "Failed to create Global Descriptor Set Layout!");
 
-    auto maxSimultaneousFrames = m_SwapChain->GetMaxSimultaneousFrameDraws();
+    auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
     uint64_t bufferSize = sizeof(GlobalUniforms);
 
     // -- Global Uniform Buffer --
@@ -95,13 +95,13 @@ void RenderContextVk::CreateGlobalDescriptorSet()
         bufferInfo.pName = "Global Uniform Buffer";
         bufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
         bufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
-        bufferInfo.allocType = BUFFER_MEM_CPU_TO_GPU;
+        bufferInfo.allocType = DEVICE_MEM_CPU_TO_GPU;
 
         BufferData initialData = {};
         initialData.pData = &m_GlobalUniforms;
         initialData.dataSize = sizeof(GlobalUniforms);
 
-        auto* buffer = new BufferVk(bufferInfo, initialData, m_Device);
+        auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
         m_GlobalUniformBuffer[i] = buffer;
     }
 
@@ -116,7 +116,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
     allocateInfo.descriptorSetCount = static_cast<uint32_t>(m_GlobalDescriptorSet.size()); // Number of sets to allocate
     allocateInfo.pSetLayouts = globalSetLayout.data();
 
-    VK_ASSERT(vkAllocateDescriptorSets(m_Device->GetDevice(), &allocateInfo, m_GlobalDescriptorSet.data()),
+    VK_ASSERT(vkAllocateDescriptorSets(m_pDevice->GetDevice(), &allocateInfo, m_GlobalDescriptorSet.data()),
               "Failed to allocate Global Descriptor Set!");
 
     for (int i = 0; i < m_GlobalDescriptorSet.size(); ++i)
@@ -138,7 +138,7 @@ void RenderContextVk::CreateGlobalDescriptorSet()
         setWrite.pImageInfo = nullptr;
         setWrite.pTexelBufferView = nullptr;
 
-        vkUpdateDescriptorSets(m_Device->GetDevice(), 1, &setWrite, 0, nullptr);
+        vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
     }
 }*/
 

@@ -6,6 +6,8 @@
 #include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
 
+#include "TextureViewVk.h"
+
 namespace Vox
 {
 
@@ -21,12 +23,17 @@ public:
     DELETE_COPY_CONSTRUCTORS(TextureVk)
 
 public: // Public API
+
+    ITextureView* GetDefaultView() override { return m_pDefaultView; }
+
+    TextureViewVk* GetDefaultViewInternal() { return m_pDefaultView; }
     Uint32 GetNumOfBytesPerPixel();
     ImageFormat GetImageFormat() { return m_Format; }
-    Type GetDeviceObjectType() { return DEVICE_OBJECT_TEXTURE; }
+    VkImage GetImage() { return m_Image; }
 
 private: // Internal API
     void CreateTexture(const TextureCreateInfo& createInfo);
+    void CreateDefaultTextureView(const TextureCreateInfo& createInfo);
 
     // - Helpers
     void TransitionImageLayout(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout);
@@ -34,8 +41,12 @@ private: // Internal API
 private: // Internal Members
     DeviceContextVk* m_pDevice = nullptr;
     ImageFormat m_Format;
-    int m_MipLevels = 1;
+    TextureType m_TextureType;
+    Uint32 m_MipLevels = 1;
+    VkImageLayout m_ImageLayout;
     const char* m_pName = nullptr;
+
+    TextureViewVk* m_pDefaultView = nullptr;
 
 private: // Vulkan Members
     VkImage m_Image = nullptr;

@@ -10,12 +10,16 @@ TextureVk::TextureVk(const TextureCreateInfo& createInfo, DeviceContextVk* pDevi
 {
     m_pDevice = pDevice;
     m_pName = createInfo.pName;
+    m_TextureType = createInfo.textureType;
 
     CreateTexture(createInfo);
+    CreateDefaultTextureView(createInfo);
 }
 
 TextureVk::~TextureVk()
 {
+    delete m_pDefaultView;
+
     // Image
     vmaDestroyImage(m_pDevice->GetVmaAllocator(), m_Image, m_ImageAlloc);
 }
@@ -81,12 +85,14 @@ void TextureVk::CreateTexture(const TextureCreateInfo& createInfo)
     VK_ASSERT(vmaCreateImage(m_pDevice->GetVmaAllocator(), &imageCreateInfo, &allocInfo,&m_Image, &m_ImageAlloc, nullptr),
               "Failed to create image " + std::string(createInfo.pName) + " using vmaCreateImage!");
 
+    m_ImageLayout = imageCreateInfo.initialLayout;
+
     if (pixels != nullptr)
     {
         BufferCreateInfo stagingBufferInfo = {};
         stagingBufferInfo.pName = "Texture Staging Buffer";
         stagingBufferInfo.size = imageSize;
-        stagingBufferInfo.allocType = BUFFER_MEM_CPU_ONLY;
+        stagingBufferInfo.allocType = DEVICE_MEM_CPU_ONLY;
         stagingBufferInfo.bindFlags = BIND_STAGING_BUFFER;
         stagingBufferInfo.transferFlags = BUFFER_TRANSFER_SRC_BIT;
         stagingBufferInfo.optimizationFlags = BUFFER_OPTIMIZE_TEMPORARY_BIT;
@@ -141,7 +147,7 @@ void TextureVk::CreateTexture(const TextureCreateInfo& createInfo)
         region.imageOffset = {0, 0, 0};
         region.imageExtent = {width, height, 1};
         region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        region.imageSubresource.mipLevel = 0;
+        region.imageSubresource.mipLevel = 0; // The current mip level to copy
         region.imageSubresource.baseArrayLayer = 0;
         region.imageSubresource.layerCount = 1;
 
@@ -163,6 +169,9 @@ void TextureVk::CreateTexture(const TextureCreateInfo& createInfo)
         vkWaitForFences(m_pDevice->GetDevice(), 1, &uploadFence, VK_TRUE, uint64_max);
         vkResetFences(m_pDevice->GetDevice(), 1, &uploadFence);
 
+        // Store image layout
+        m_ImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
         // Destroy UploadCommandPool
         vkDestroyCommandPool(m_pDevice->GetDevice(), uploadCmdPool, nullptr);
         // Destroy UploadFence
@@ -173,6 +182,18 @@ void TextureVk::CreateTexture(const TextureCreateInfo& createInfo)
         stbi_image_free(pixels);
         pixels = nullptr;
     }
+}
+
+void TextureVk::CreateDefaultTextureView(const TextureCreateInfo& createInfo)
+{
+    TextureViewCreateInfo textureViewInfo = {};
+    textureViewInfo.textureType = m_TextureType;
+    textureViewInfo.image = m_Image;
+    textureViewInfo.format = static_cast<VkFormat>(m_Format);
+    textureViewInfo.mipLevels = m_MipLevels;
+    textureViewInfo.imageLayout = m_ImageLayout;
+
+    m_pDefaultView = new TextureViewVk(textureViewInfo, m_pDevice);
 }
 
 void TextureVk::TransitionImageLayout(VkCommandBuffer cmdBuffer, VkImageLayout oldLayout, VkImageLayout newLayout)

@@ -11,7 +11,7 @@ enum ShaderResourceVariableBaseType
 
 enum ShaderResourceVariableType
 {
-    UniformBuffer, StorageBuffer, SampledImage2D
+    UniformBuffer, StorageBuffer, SampledImage2D, SampledImageCube
 };
 
 struct ShaderBlockMember

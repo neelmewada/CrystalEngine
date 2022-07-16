@@ -24,6 +24,7 @@
 #include "Rendering/ISwapChain.h"
 #include "Rendering/IRenderContext.h"
 #include "Rendering/IBuffer.h"
+#include "Rendering/ITextureView.h"
 #include "Rendering/ITexture.h"
 #include "Rendering/IGraphicsPipelineState.h"
 #include "Rendering/IShaderResourceBinding.h"

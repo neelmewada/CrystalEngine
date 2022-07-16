@@ -51,6 +51,8 @@ void ApplicationBase::Start()
 
 void ApplicationBase::Run()
 {
+    Start();
+
     SDL_Event e;
     bool quit = false;
 

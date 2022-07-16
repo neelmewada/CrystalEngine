@@ -40,7 +40,7 @@ private: // Internal API
 
 private: // Internal Members
     DeviceContextVk* m_pDevice = nullptr;
-    BufferAllocationType m_AllocType;
+    DeviceAllocationType m_AllocType;
     BufferBindFlags m_BindFlags;
     BufferOptimizationFlags m_OptimizationFlags;
     BufferUsageFlags m_UsageFlags;

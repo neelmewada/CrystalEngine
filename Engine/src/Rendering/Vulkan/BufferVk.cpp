@@ -17,7 +17,7 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, DeviceContextVk* pDevice)
     m_pName = createInfo.pName;
     m_StructureByteStride = createInfo.structureByteStride;
 
-    VOX_ASSERT(createInfo.allocType != BUFFER_MEM_UNKNOWN,
+    VOX_ASSERT(createInfo.allocType != DEVICE_MEM_UNKNOWN,
                "ERROR: Buffer " + std::string(m_pName) + " created with allocType of " + std::to_string(m_AllocType));
 
     VkBufferCreateInfo bufferInfo = {};
@@ -27,7 +27,7 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, DeviceContextVk* pDevice)
 
     bufferInfo.usage = VkBufferUsageFlagsFromBufferBindFlags(createInfo.bindFlags);
 
-    if (createInfo.allocType == BUFFER_MEM_GPU_ONLY || (createInfo.transferFlags & BUFFER_TRANSFER_DST_BIT))
+    if (createInfo.allocType == DEVICE_MEM_GPU_ONLY || (createInfo.transferFlags & BUFFER_TRANSFER_DST_BIT))
         bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     if (createInfo.transferFlags & BUFFER_TRANSFER_SRC_BIT)
         bufferInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -47,7 +47,7 @@ BufferVk::BufferVk(const BufferCreateInfo& createInfo, DeviceContextVk* pDevice)
 BufferVk::BufferVk(const BufferCreateInfo& createInfo, BufferData& bufferData, DeviceContextVk* pDevice) :
         BufferVk(createInfo, pDevice)
 {
-    if (createInfo.allocType != BUFFER_MEM_GPU_ONLY)
+    if (createInfo.allocType != DEVICE_MEM_GPU_ONLY)
         SetBufferData(bufferData);
     else
         UploadBufferDataToGPU(bufferData);
@@ -73,7 +73,7 @@ void BufferVk::SetBufferData(BufferData& bufferData)
         return;
 
     // ONLY if VmaMemoryUsage is set to: CPU_TO_GPU or CPU_ONLY
-    if (m_AllocType == BUFFER_MEM_CPU_TO_GPU || m_AllocType == BUFFER_MEM_CPU_ONLY)
+    if (m_AllocType == DEVICE_MEM_CPU_TO_GPU || m_AllocType == DEVICE_MEM_CPU_ONLY)
     {
         void* data;
         vmaMapMemory(m_VmaAllocator, m_Allocation, &data);
@@ -87,7 +87,7 @@ void BufferVk::UploadBufferDataToGPU(BufferData& bufferData)
     if (bufferData.dataSize <= 0 || bufferData.pData == nullptr)
         return;
 
-    if (m_AllocType != BUFFER_MEM_GPU_ONLY)
+    if (m_AllocType != DEVICE_MEM_GPU_ONLY)
     {
         throw std::runtime_error("UploadBufferDataToGPU called on Buffer that isn't a GPU_ONLY buffer!");
     }
@@ -127,7 +127,7 @@ void BufferVk::UploadBufferDataToGPU(BufferData& bufferData)
     stagingBufferInfo.size = m_BufferSize;
     stagingBufferInfo.bindFlags = BIND_STAGING_BUFFER;
     stagingBufferInfo.pName = "Staging Buffer";
-    stagingBufferInfo.allocType = BUFFER_MEM_CPU_ONLY;
+    stagingBufferInfo.allocType = DEVICE_MEM_CPU_ONLY;
     stagingBufferInfo.optimizationFlags = BUFFER_OPTIMIZE_TEMPORARY_BIT;
 
     BufferVk* stagingBuffer = new BufferVk(stagingBufferInfo, bufferData, m_pDevice);

@@ -38,6 +38,8 @@ SET1(0) uniform ObjectBuffer {
     vec3 colorTint;
 };
 
+SET1(1) uniform sampler2D texture;
+
 /*
 // Set1: Per-Pass Data
 layout(std140, set = 1, binding = 0) uniform buffer PerPassData {
@@ -61,19 +63,23 @@ layout(std140, set = 3, binding = 0) readonly buffer ObjectBuffer {
 
 layout (location = 0) in vec3 vPosition;
 layout (location = 1) in vec3 vColor;
+layout (location = 2) in vec2 vUV;
 
-layout (location = 0) out vec3 outColor;
+layout (location = 0) out vec2 outUV;
+layout (location = 1) out vec3 outColor;
 
 void main() {
     gl_Position = projection * view * model * vec4(vPosition, 1.0);
     outColor = vColor;
+    outUV = vUV;
 }
 
 #endif
 
 #ifdef FRAGMENT
 
-layout (location = 0) in vec3 inColor;
+layout (location = 0) in vec2 inUV;
+layout (location = 1) in vec3 inColor;
 
 layout(location = 0) out vec4 outColor; // Final output color
 

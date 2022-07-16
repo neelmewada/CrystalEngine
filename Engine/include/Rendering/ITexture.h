@@ -3,6 +3,8 @@
 #include "EngineDefs.h"
 #include "IDeviceObject.h"
 
+#include "ITextureView.h"
+
 namespace Vox
 {
 
@@ -14,10 +16,11 @@ public:
     virtual ~ITexture() {}
 
 public: // Public API
-
+    virtual ITextureView* GetDefaultView() = 0;
 
 public:
     // - Getters
+    Type GetDeviceObjectType() override { return DEVICE_OBJECT_TEXTURE; }
 
     // - Setters
 };

@@ -55,6 +55,31 @@ struct ShaderResourceVariableDesc
     ShaderResourceVariableFlags flags;
 };
 
+enum SamplerAddressMode
+{
+    SAMPLER_ADDRESS_MODE_REPEAT = 0,
+    SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1,
+    SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2,
+    SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER = 3,
+    SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE = 4,
+};
+
+enum SamplerFilterType
+{
+    SAMPLER_FILTER_TYPE_NEAREST = 0,
+    SAMPLER_FILTER_TYPE_LINEAR = 1,
+};
+
+struct ImmutableSamplerDesc
+{
+    const char* pTextureName;
+    ShaderStageFlags shaderStages;
+    SamplerFilterType minFilter = SAMPLER_FILTER_TYPE_LINEAR,
+    magFilter = SAMPLER_FILTER_TYPE_LINEAR,
+    mipFilter = SAMPLER_FILTER_TYPE_LINEAR;
+    SamplerAddressMode addressModeU, addressModeV, addressModeW;
+};
+
 struct GraphicsPipelineStateCreateInfo
 {
     const char* pName;
@@ -67,6 +92,8 @@ struct GraphicsPipelineStateCreateInfo
     GraphicsPipelineVertexAttributeDesc* pAttributes = nullptr;
     uint32_t variableCount;
     const ShaderResourceVariableDesc* pResourceVariables;
+    uint32_t immutableSamplersCount;
+    ImmutableSamplerDesc* pImmutableSamplers = nullptr;
 };
 
 struct ShaderVariantCreateInfo
@@ -93,7 +120,7 @@ struct BufferCreateInfo
 {
     const char* pName;
     BufferBindFlags bindFlags;
-    BufferAllocationType allocType;
+    DeviceAllocationType allocType;
     BufferTransferFlags transferFlags;
     BufferOptimizationFlags optimizationFlags;
     BufferUsageFlags usageFlags;
@@ -119,10 +146,11 @@ struct TextureCreateInfo
     const char* pName = nullptr;
     Uint32 width;
     Uint32 height;
-    int mipLevels = 1;
-    TextureLayout textureLayout;
+    Uint32 mipLevels = 1;
+    TextureType textureType = TEXTURE_TYPE_2D;
+    TextureLayout textureLayout = TEXTURE_LAYOUT_OPTIMAL;
     ImageFormat format;
-    BufferAllocationType allocType;
+    DeviceAllocationType allocType = DEVICE_MEM_GPU_ONLY;
     void* pImageData = nullptr;
     size_t imageDataSize;
 };
