@@ -47,8 +47,6 @@ add_executable(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME} Engine)
 
 if (PLATFORM_MACOS)
-    SET_XCODE_PROPERTY(${PROJECT_NAME} CODE_SIGN_IDENTITY ${APPLE_DEV_CERT_NAME})#"Apple Developer")
-    SET_XCODE_PROPERTY(${PROJECT_NAME} DEVELOPMENT_TEAM ${APPLE_DEV_TEAM_ID})
 
     # Copy the resources to the macOS app bundle
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
