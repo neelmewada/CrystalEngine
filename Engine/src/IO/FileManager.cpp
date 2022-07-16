@@ -30,7 +30,7 @@ const std::string FileManager::GetSharedDirectoryImpl()
 {
     fs::path curPath = GetBinDirectoryImpl();
 #if PLATFORM_MACOS
-    return (curPath / "../Resources/").string();
+    return (curPath / "../Resources").string();
 #elif PLATFORM_LINUX
     return (curPath / "share").string();
 #elif PLATFORM_WIN32

@@ -146,8 +146,13 @@ protected:
         m_ObjectUniformBuffer = m_pDeviceContext->CreateBuffer(objectBufferInfo, objectBufferData);
 
         // -- Load Texture From File --
+        fs::path binDir = IO::FileManager::GetBinDirectory();
         std::vector<char> textureData;
-        IO::ReadAllBytesFromFile(IO::FileManager::GetBinDirectory() + "/textures/crate.png", textureData);
+#if PLATFORM_MACOS
+        IO::ReadAllBytesFromFile(binDir / "../../../textures/crate.png", textureData);
+#else
+        IO::ReadAllBytesFromFile(binDir / "textures/crate.png", textureData);
+#endif
 
         // -- Texture Samplers --
         TextureCreateInfo textureInfo = {};
