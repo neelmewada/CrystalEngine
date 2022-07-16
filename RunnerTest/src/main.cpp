@@ -340,12 +340,22 @@ protected:
 
         m_pRenderContext->SetClearColor(clearColor);
 
+        // Begin Render Pass
         m_pRenderContext->Begin();
+
+        // Bind Graphics Pipeline
         m_pRenderContext->CmdBindGraphicsPipeline(m_pPSO);
+
+        // TODO: API to Bind Descriptor Sets (IShaderResourceBinding* object) (For later)
+        //m_pRenderContext->CmdBindShaderResource(m_pStaticShaderResource);
+
+        // Bind Mesh Data
         uint64_t offset = 0;
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
         m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0, 0);
+
+        // End Render Pass
         m_pRenderContext->End();
 
         m_pSwapChain->Submit();

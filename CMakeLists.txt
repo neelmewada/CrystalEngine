@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 project(VoxEngine)
 
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+
 set(VK_SDK $ENV{VK_SDK}) # VK_SDK needs to be set up in your system's environment variables
 
 if (${CMAKE_GENERATOR} STREQUAL "Xcode")
@@ -14,9 +16,6 @@ if (APPLE)
     # Because on newer macs (m1), homebrew installs on /opt/homebrew/ directory
     set(HOMEBREW_DIR $ENV{HOMEBREW})
 
-    # Signing related
-    set(APPLE_DEV_CERT_NAME 8UUBKX96BH)
-    set(APPLE_DEV_TEAM_ID 6U5D4S4U6V)
 endif()
 
 if (WIN32)

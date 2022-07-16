@@ -43,7 +43,8 @@ GraphicsPipelineStateVk::~GraphicsPipelineStateVk()
         delete m_pBinding;
 
     // -- Static Resource Binding --
-    delete m_pStaticBinding;
+    if (m_pStaticBinding != nullptr)
+        delete m_pStaticBinding;
 
     // -- Descriptor Sets --
     for (auto& descriptorSetLayout : m_DescriptorSetLayouts)
@@ -59,11 +60,13 @@ GraphicsPipelineStateVk::~GraphicsPipelineStateVk()
     {
         vkDestroySampler(m_pDevice->GetDevice(), pair.second, nullptr);
     }
+
     m_ImmutableSamplers.clear();
 }
 
 IShaderResourceVariable* GraphicsPipelineStateVk::GetStaticVariableByName(const char* pName)
 {
+    VOX_ASSERT(m_pStaticBinding != nullptr, "GetStaticVariableByName() called on Graphics Pipeline whose Static Resource Binding has not been created!");
     return m_pStaticBinding->GetVariableByName(pName);
 }
 
