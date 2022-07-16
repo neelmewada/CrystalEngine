@@ -2,6 +2,8 @@
 
 #include "EngineDefs.h"
 
+#include "IShaderResourceBinding.h"
+
 #include <glm/glm.hpp>
 
 namespace Vox
@@ -19,6 +21,7 @@ enum IndexType
 };*/
 
 class IGraphicsPipelineState;
+class IShaderResourceBinding;
 class IBuffer;
 
 class ENGINE_API IRenderContext
@@ -39,6 +42,7 @@ public: // Public API
 
     virtual void Begin() = 0;
     virtual void CmdBindGraphicsPipeline(IGraphicsPipelineState* pPipeline) = 0;
+    virtual void CmdBindShaderResources(IShaderResourceBinding* pSRB) = 0;
     virtual void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets) = 0;
     virtual void CmdBindIndexBuffer(IBuffer* pBuffer, IndexType indexType, uint64_t offset) = 0;
     virtual void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex, uint32_t firstInstanceIndex) = 0;

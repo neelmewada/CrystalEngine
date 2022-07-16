@@ -168,6 +168,7 @@ void RenderContextVk::SetClearColor(float clearColor[4])
 void RenderContextVk::Begin()
 {
     m_IsRecording = true;
+    m_CurrentPipeline = nullptr;
 
     auto uint64_max = std::numeric_limits<uint64_t>::max();
 
@@ -236,6 +237,8 @@ void RenderContextVk::CmdBindGraphicsPipeline(IGraphicsPipelineState *pPipeline)
 
     VOX_ASSERT(pPipelineVk != nullptr, "Failed to bind pipeline! Pipeline passed to CmdBindGraphicsPipeline is not of type GraphicsPipelineStateVk!");
 
+    m_CurrentPipeline = pPipelineVk;
+
     auto curFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
 
     //auto globalDescriptorSet = m_GlobalDescriptorSet[curFrameIndex];
@@ -244,8 +247,23 @@ void RenderContextVk::CmdBindGraphicsPipeline(IGraphicsPipelineState *pPipeline)
 
     for (int i = 0; i < commandBuffers.size(); ++i)
     {
-        pPipelineVk->CmdBindDescriptorSets(commandBuffers[i]);
+        //pPipelineVk->CmdBindDescriptorSets(commandBuffers[i]);
         vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
+    }
+}
+
+void RenderContextVk::CmdBindShaderResources(IShaderResourceBinding* pSRB)
+{
+    ShaderResourceBindingVk* pShaderResourceBinding = dynamic_cast<ShaderResourceBindingVk*>(pSRB);
+
+    VOX_ASSERT(pShaderResourceBinding != nullptr, "Failed to bind shader resources! Shader Resource Binding passed to CmdBindShaderResources is not of type ShaderResourceBindingVk!");
+
+    const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
+    auto curFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
+
+    for (int i = 0; i < commandBuffers.size(); ++i)
+    {
+        pShaderResourceBinding->CmdBindDescriptorSets(commandBuffers[i], curFrameIndex);
     }
 }
 
@@ -302,6 +320,7 @@ void RenderContextVk::CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount
 void RenderContextVk::End()
 {
     m_IsRecording = false;
+    m_CurrentPipeline = nullptr;
 
     const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
 

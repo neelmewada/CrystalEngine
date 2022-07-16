@@ -3,6 +3,7 @@
 #include "EngineDefs.h"
 #include "Rendering/EngineFactoryVk.h"
 #include "BufferVk.h"
+#include "GraphicsPipelineStateVk.h"
 
 #include <vulkan/vulkan.h>
 
@@ -18,6 +19,7 @@ class EngineContextVk;
 class DeviceContextVk;
 class SwapChainVk;
 class BufferVk;
+class GraphicsPipelineStateVk;
 
 typedef std::function<void(VkCommandBuffer)> RenderCommand;
 
@@ -38,6 +40,7 @@ public: // Public API
     // - Getters
     VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
     //VkDescriptorSetLayout GetGlobalDescriptorSetLayout() { return m_GlobalDescriptorSetLayout; }
+    GraphicsPipelineStateVk* GetBoundGraphicsPipeline();
 
     // - Setup
     void SetClearColor(float clearColor[4]) override;
@@ -45,7 +48,10 @@ public: // Public API
     // - Commands
 
     void Begin() override;
+
     void CmdBindGraphicsPipeline(IGraphicsPipelineState* pPipeline) override;
+    void CmdBindShaderResources(IShaderResourceBinding* pSRB) override;
+
     void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets) override;
     void CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, uint64_t offset) override;
 
@@ -64,10 +70,9 @@ private: // Internal Members
     EngineContextVk* m_pEngine = nullptr;
     DeviceContextVk* m_pDevice = nullptr;
     SwapChainVk* m_pSwapChain = nullptr;
-    //std::vector<VkDescriptorSet> m_GlobalDescriptorSet;
+    GraphicsPipelineStateVk* m_CurrentPipeline = nullptr;
 
     // - Data
-    //GlobalUniforms m_GlobalUniforms{};
     float m_ClearColor[4] = {0,0,0,1};
     bool m_IsRecording = false;
 

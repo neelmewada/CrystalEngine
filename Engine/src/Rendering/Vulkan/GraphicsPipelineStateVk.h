@@ -10,12 +10,15 @@
 
 #include <vulkan/vulkan.h>
 
+#include <array>
+
 namespace Vox
 {
 
-class GraphicsPipelineStateVk : public IGraphicsPipelineState, public IShaderResourceBindingCallbacks
+class GraphicsPipelineStateVk : public IGraphicsPipelineState
 {
 public:
+    friend class ShaderResourceBindingVk;
     GraphicsPipelineStateVk(const GraphicsPipelineStateCreateInfo& createInfo);
     ~GraphicsPipelineStateVk();
 
@@ -26,6 +29,8 @@ public: // Public API
     IShaderResourceVariable* GetStaticVariableByName(const char* pName) override;
     IShaderResourceBinding* GetShaderResourceBinding() override { return m_pBinding; }
 
+    IShaderResourceBinding* CreateResourceBinding(ResourceBindingFrequency bindingFrequency) override;
+
     void CmdBindDescriptorSets(VkCommandBuffer commandBuffer);
 
     // - Getters
@@ -33,12 +38,10 @@ public: // Public API
     VkPipeline GetPipeline() { return m_Pipeline; }
 
 public: // Shader Resource Binding Callbacks
-    void BindDeviceObject(IShaderResourceBinding* resourceBinding, IDeviceObject *pDeviceObject, Uint32 set, Uint32 binding,
-                          Uint32 descriptorCount, ShaderResourceVariableType resourceType) override;
 
 private: // Internal API
     void CreateImmutableSamplers(const GraphicsPipelineStateCreateInfo& createInfo);
-    void CreateDescriptorSets(const GraphicsPipelineStateCreateInfo& createInfo);
+    void CreateDescriptorSetLayouts(const GraphicsPipelineStateCreateInfo& createInfo);
     void CreateResourceBindings(const GraphicsPipelineStateCreateInfo& createInfo);
     void CreateGraphicsPipeline(const GraphicsPipelineStateCreateInfo& createInfo);
 

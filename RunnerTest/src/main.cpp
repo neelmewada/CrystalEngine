@@ -40,6 +40,8 @@ public:
         delete m_VertexBuffer;
         if (m_ObjectUniformData != nullptr)
             free(m_ObjectUniformData);
+        delete m_pPerFrameSRB;
+        delete m_pStaticSRB;
         delete m_pPSO;
         delete m_Texture2;
         delete m_Texture;
@@ -246,11 +248,12 @@ protected:
         pipelineInfo.immutableSamplersCount = _countof(immutableSamplers);
         pipelineInfo.pImmutableSamplers = immutableSamplers;
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
-        m_pSRB = m_pPSO->GetShaderResourceBinding();
+        m_pStaticSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_STATIC);
+        m_pPerFrameSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_PER_FRAME);
 
-        m_pPSO->GetStaticVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
-        m_pSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
-        m_pSRB->GetVariableByName("tex")->Set(m_TextureView);
+        m_pStaticSRB->GetVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
+        m_pPerFrameSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
+        m_pPerFrameSRB->GetVariableByName("tex")->Set(m_TextureView);
 
         // -- MESH --
 
@@ -325,12 +328,12 @@ protected:
             //m_pPSO->UpdateUniformBuffer(uniformData);
         }
 
-        static bool tex2 = false;
+        static bool useTex2 = false;
 
         if (e.key.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE)
         {
-            tex2 = !tex2;
-            m_pSRB->GetVariableByName("tex")->Set(tex2 ? m_TextureView2 : m_TextureView);
+            useTex2 = !useTex2;
+            m_pPerFrameSRB->GetVariableByName("tex")->Set(useTex2 ? m_TextureView2 : m_TextureView);
         }
     }
 
@@ -345,6 +348,8 @@ protected:
 
         // Bind Graphics Pipeline
         m_pRenderContext->CmdBindGraphicsPipeline(m_pPSO);
+        m_pRenderContext->CmdBindShaderResources(m_pStaticSRB);
+        m_pRenderContext->CmdBindShaderResources(m_pPerFrameSRB);
 
         // TODO: API to Bind Descriptor Sets (IShaderResourceBinding* object) (For later)
         //m_pRenderContext->CmdBindShaderResource(m_pStaticShaderResource);
@@ -392,7 +397,8 @@ private: // Internal Members
     ISwapChain* m_pSwapChain;
     IRenderContext* m_pRenderContext;
     IGraphicsPipelineState* m_pPSO;
-    IShaderResourceBinding* m_pSRB;
+    IShaderResourceBinding* m_pStaticSRB;
+    IShaderResourceBinding* m_pPerFrameSRB;
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
     IBuffer* m_GlobalUniformBuffer;

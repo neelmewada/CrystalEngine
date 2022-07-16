@@ -2,6 +2,7 @@
 
 #include "Rendering/IShaderResourceBinding.h"
 #include "ShaderVk.h"
+#include "RenderContextVk.h"
 #include "TypesVk.h"
 
 #include <vulkan/vulkan.h>
@@ -22,6 +23,7 @@ public: // Public API
 };
 
 class ShaderResourceBindingVk;
+
 
 struct ShaderResourceVariableVkCreateInfo
 {
@@ -57,13 +59,19 @@ private: // Internal Members
 
 struct ShaderResourceBindingVkCreateInfo
 {
-    const std::vector<ShaderResourceVariableDefinition>& variableDefinitions;
+    Uint32 firstSet;
+    Uint32 setCount;
+    int maxSimultaneousFrames;
+    ResourceBindingFrequency bindingFrequency;
 };
 
-class ShaderResourceBindingVk : public IShaderResourceBinding
+class ShaderResourceBindingVk : public IShaderResourceBinding, public IShaderResourceBindingCallbacks
 {
 public:
-    ShaderResourceBindingVk(const ShaderResourceBindingVkCreateInfo& createInfo, IShaderResourceBindingCallbacks* pReceiver);
+    ShaderResourceBindingVk(const ShaderResourceBindingVkCreateInfo& createInfo,
+                            const std::vector<ShaderResourceVariableDefinition>& variableDefinitions,
+                            const std::vector<VkDescriptorSetLayout>& setLayouts,
+                            DeviceContextVk* pDevice, RenderContextVk* pRenderCtx);
     ~ShaderResourceBindingVk();
 
     DELETE_COPY_CONSTRUCTORS(ShaderResourceBindingVk)
@@ -71,16 +79,30 @@ public:
 public: // Public API
     IShaderResourceVariable* GetVariableByName(const char* pName) override;
 
+    void BindDeviceObject(IShaderResourceBinding *resourceBinding, IDeviceObject *pDeviceObject,
+                          Uint32 set, Uint32 binding, Uint32 descriptorCount,
+                          ShaderResourceVariableType resourceType) override;
+
+    void CmdBindDescriptorSets(VkCommandBuffer cmdBuffer, int currentFrame);
+
 private: // Internal API
 
 
 private: // Internal Members
-    IShaderResourceBindingCallbacks* m_pReceiver;
-    std::vector<ShaderResourceVariableDefinition> m_VariableDefinitions;
+    DeviceContextVk* m_pDevice = nullptr;
+    RenderContextVk* m_pRenderContext = nullptr;
+
+    Uint32 m_FirstSet;
+    Uint32 m_SetCount;
+    int m_MaxSimultaneousFrames;
+
+    ResourceBindingFrequency m_BindingFrequency;
+    std::vector<VkDescriptorSet> m_DescriptorSets;
     std::vector<ShaderResourceVariableVk*> m_VariableBindings;
 
-private: // Vulkan Members
 
+private: // Vulkan Members
+    VkDescriptorPool m_DescriptorPool = nullptr;
 
 };
 

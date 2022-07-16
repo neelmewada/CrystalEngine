@@ -1,9 +1,9 @@
 #version 450  // GLSL v4.5
 
 #define STATIC(location) layout(set = 0, binding = location)
-#define PERPASS(location) layout(set = 1, binding = location)
-#define MATERIAL(location) layout(set = 2, binding = location)
-#define INSTANCE(location) layout(set = 3, binding = location)
+#define PER_FRAME(location) layout(set = 1, binding = location)
+#define PER_PIPELINE(location) layout(set = 2, binding = location)
+#define DYNAMIC(location) layout(set = 3, binding = location)
 
 #define SET1(location) layout(set = 1, binding = location)
 #define SET2(location) layout(set = 2, binding = location)
@@ -33,12 +33,12 @@ STATIC(0) uniform GlobalUniformBuffer {
     mat4 view;
 };
 
-SET1(0) uniform ObjectBuffer {
+PER_FRAME(0) uniform ObjectBuffer {
     mat4 model;
     vec3 colorTint;
 };
 
-SET1(1) uniform sampler2D tex;
+PER_FRAME(1) uniform sampler2D tex;
 
 /*
 // Set1: Per-Pass Data
