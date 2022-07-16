@@ -175,9 +175,9 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
     // -- Descriptor Pool --
     VkDescriptorPoolSize sizes[] = {
             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10},
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 4},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 5},
             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10},
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 2},
+            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 5},
             {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10}
     };
 
