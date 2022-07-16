@@ -217,7 +217,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
     // -- Layout Bindings --
     for (const auto& resource: shaderResources)
     {
-        ShaderResourceVariableFlags flags = SHADER_RESOURCE_VARIABLE_NONE_BIT;
+        ShaderResourceVariableFlags flags = static_cast<ShaderResourceVariableFlags>(0);
 
         m_ShaderVariableDefinitions[{resource.set, resource.binding}] = resource;
 

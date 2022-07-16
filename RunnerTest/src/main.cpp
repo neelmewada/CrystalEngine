@@ -151,7 +151,7 @@ protected:
 #if PLATFORM_MACOS
         IO::ReadAllBytesFromFile(binDir / "../../../textures/crate.png", textureData);
 #else
-        IO::ReadAllBytesFromFile(binDir / "textures/crate.png", textureData);
+        IO::ReadAllBytesFromFile((binDir / "textures/crate.png").string(), textureData);
 #endif
 
         // -- Texture Samplers --

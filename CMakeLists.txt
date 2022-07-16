@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project(VoxEngine)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(VK_SDK $ENV{VK_SDK}) # VK_SDK needs to be set up in your system's environment variables
 
 if (${CMAKE_GENERATOR} STREQUAL "Xcode")
