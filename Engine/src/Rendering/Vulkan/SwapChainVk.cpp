@@ -78,6 +78,8 @@ void SwapChainVk::Submit()
     vkWaitForFences(m_pDevice->GetDevice(),
                     1, &m_DrawFinishedFences[m_CurrentFrameIndex],
                     VK_TRUE, uint64_max);
+    m_RenderInProgress = false;
+
     // Manually reset (close) the fence
     vkResetFences(m_pDevice->GetDevice(), 1, &m_DrawFinishedFences[m_CurrentFrameIndex]);
 
@@ -90,16 +92,16 @@ void SwapChainVk::Submit()
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &m_ImageAvailableForRendering[m_CurrentFrameIndex]; // List of semaphores to wait on before running the command buffer on GPU
+    submitInfo.pWaitSemaphores = &m_ImageAvailableForRendering[m_CurrentFrameIndex]; // List of semaphores to wait on at waitStages[i]
 
-    // Execute the whole command buffer until the fragment pShader (so we don't output any data to framebuffer yet)
-    // and THEN wait for the image to be available (m_ImageAvailable) so fragment pShader can output pixels to it.
+    // Execute the whole command buffer until the fragment shader stage (so we don't output any data to framebuffer yet)
+    // and THEN wait for the image to be available (m_ImageAvailableForRendering) so fragment pShader can output pixels to it.
     VkPipelineStageFlags waitStages[] = {
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
     };
     submitInfo.pWaitDstStageMask = waitStages; // Stages to check semaphores at
 
-    // Only submit the command buffer we want to render to. Coz they're 1:1 with SwapChain Images
+    // Only submit the command buffer we want to render to since they're 1:1 with SwapChain Images
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentImageIndex];
 
@@ -107,11 +109,10 @@ void SwapChainVk::Submit()
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &m_RenderFinished[m_CurrentFrameIndex]; // 1:1 with frames (0..<=MaxSimultaneousDraws)
 
-    result = vkQueueSubmit(m_pDevice->m_GraphicsQueue, 1, &submitInfo, m_DrawFinishedFences[m_CurrentFrameIndex]);
-    if (result != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to submit Command Buffer to the Graphics Queue!");
-    }
+    VK_ASSERT(vkQueueSubmit(m_pDevice->m_GraphicsQueue, 1, &submitInfo, m_DrawFinishedFences[m_CurrentFrameIndex]),
+              "Failed to submit Command Buffer to the Graphics Queue!");
+
+    m_RenderInProgress = true;
 }
 
 void SwapChainVk::Present()

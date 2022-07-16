@@ -230,11 +230,11 @@ void RenderContextVk::Begin()
     }
 }
 
-void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
+void RenderContextVk::CmdBindGraphicsPipeline(IGraphicsPipelineState *pPipeline)
 {
     GraphicsPipelineStateVk* pPipelineVk = dynamic_cast<GraphicsPipelineStateVk*>(pPipeline);
 
-    VOX_ASSERT(pPipelineVk != nullptr, "Failed to bind pipeline! Pipeline passed to CmdBindPipeline is not of type GraphicsPipelineStateVk!");
+    VOX_ASSERT(pPipelineVk != nullptr, "Failed to bind pipeline! Pipeline passed to CmdBindGraphicsPipeline is not of type GraphicsPipelineStateVk!");
 
     auto curFrameIndex = m_pSwapChain->GetCurrentFrameIndex();
 
@@ -244,8 +244,6 @@ void RenderContextVk::CmdBindPipeline(IGraphicsPipelineState *pPipeline)
 
     for (int i = 0; i < commandBuffers.size(); ++i)
     {
-        //vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipelineLayout(), 0,
-        //                        1, &globalDescriptorSet, 0, nullptr);
         pPipelineVk->CmdBindDescriptorSets(commandBuffers[i]);
         vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pPipelineVk->GetPipeline());
     }

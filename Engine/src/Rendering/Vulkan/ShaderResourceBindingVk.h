@@ -15,9 +15,10 @@ protected:
     virtual ~IShaderResourceBindingCallbacks() {}
 
 public: // Public API
-    virtual void BindShaderResource(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
-                                    Uint32 descriptorCount, ShaderResourceVariableType resourceType) = 0;
+    virtual void BindDeviceObject(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
+                                  Uint32 descriptorCount, ShaderResourceVariableType resourceType) = 0;
 
+    //virtual void BindShaderResource(IShaderResourceBinding* binding) = 0;
 };
 
 class ShaderResourceBindingVk;
@@ -79,6 +80,7 @@ private: // Internal Members
     std::vector<ShaderResourceVariableVk*> m_VariableBindings;
 
 private: // Vulkan Members
+
 
 };
 

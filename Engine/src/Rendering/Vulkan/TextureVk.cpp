@@ -43,9 +43,9 @@ void TextureVk::CreateTexture(const TextureCreateInfo& createInfo)
         width = static_cast<Uint32>(texWidth);
         height = static_cast<Uint32>(texHeight);
 
-        if (texChannels == 1) format = IMG_FORMAT_R8_SRGB;
+        if (texChannels == 1) format = IMG_FORMAT_R32_SFLOAT;
         else if (texChannels == 2) format = IMG_FORMAT_R8G8_SRGB;
-        else if (texChannels == 3) format = IMG_FORMAT_R8G8B8_SRGB;
+        else if (texChannels == 3) format = IMG_FORMAT_R8G8B8A8_SRGB; // 24-bit (RGB) formats aren't fully supported
         else if (texChannels == 4) format = IMG_FORMAT_R8G8B8A8_SRGB;
         else throw std::runtime_error("Failed to fetch format from STB Image! Invalid no. of texChannels: " + std::to_string(texChannels));
     }
@@ -58,6 +58,7 @@ void TextureVk::CreateTexture(const TextureCreateInfo& createInfo)
 
     VkImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageCreateInfo.flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
     imageCreateInfo.extent = VkExtent3D{width, height, 1};
     imageCreateInfo.mipLevels = createInfo.mipLevels;

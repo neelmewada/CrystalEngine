@@ -1,6 +1,6 @@
 #version 450  // GLSL v4.5
 
-#define GLOBAL(location) layout(set = 0, binding = location)
+#define STATIC(location) layout(set = 0, binding = location)
 #define PERPASS(location) layout(set = 1, binding = location)
 #define MATERIAL(location) layout(set = 2, binding = location)
 #define INSTANCE(location) layout(set = 3, binding = location)
@@ -28,7 +28,7 @@ struct LightData {
     vec3 lightPos;
 };
 
-GLOBAL(0) uniform GlobalUniformBuffer {
+STATIC(0) uniform GlobalUniformBuffer {
     mat4 projection;
     mat4 view;
 };

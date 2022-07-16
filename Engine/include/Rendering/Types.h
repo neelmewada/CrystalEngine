@@ -25,6 +25,7 @@ enum ImageFormat
     IMG_FORMAT_R8G8B8_SRGB = 29,
     IMG_FORMAT_R8G8B8A8_SRGB = 43,
     IMG_FORMAT_B8G8R8A8_SRGB = 50,
+    IMG_FORMAT_R32_SFLOAT = 100,
 };
 
 enum ShaderStageFlags : Uint32

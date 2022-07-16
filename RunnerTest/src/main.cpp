@@ -41,6 +41,7 @@ public:
         if (m_ObjectUniformData != nullptr)
             free(m_ObjectUniformData);
         delete m_pPSO;
+        delete m_Texture2;
         delete m_Texture;
         delete m_ObjectUniformBuffer;
         delete m_GlobalUniformBuffer;
@@ -156,11 +157,23 @@ protected:
 
         // -- Texture Samplers --
         TextureCreateInfo textureInfo = {};
-        textureInfo.pName = "My Texture";
+        textureInfo.pName = "Crate 1";
         textureInfo.imageDataSize = textureData.size();
         textureInfo.pImageData = textureData.data();
         m_Texture = m_pDeviceContext->CreateTexture(textureInfo);
         m_TextureView = m_Texture->GetDefaultView();
+
+#if PLATFORM_MACOS
+        IO::ReadAllBytesFromFile(binDir / "../../../textures/crate.jpg", textureData);
+#else
+        IO::ReadAllBytesFromFile((binDir / "textures/crate2.jpg").string(), textureData);
+#endif
+        textureInfo.pName = "Crate 2";
+        textureInfo.imageDataSize = textureData.size();
+        textureInfo.pImageData = textureData.data();
+
+        m_Texture2 = m_pDeviceContext->CreateTexture(textureInfo);
+        m_TextureView2 = m_Texture2->GetDefaultView();
 
         // -- Shaders --
         fs::path shaderDir = IO::FileManager::GetSharedDirectory();
@@ -204,7 +217,7 @@ protected:
         GraphicsPipelineVertexAttributeDesc vertAttribs[3] = {
                 {0, 0, static_cast<Uint32>(offsetof(Vertex, position)), VERTEX_ATTRIB_FLOAT3}, // Position (float3)
                 {0, 1, static_cast<Uint32>(offsetof(Vertex, color)), VERTEX_ATTRIB_FLOAT3},  // Color    (float3)
-                {0, 2, static_cast<Uint32>(offsetof(Vertex, uv)), VERTEX_ATTRIB_FLOAT2},
+                {0, 2, static_cast<Uint32>(offsetof(Vertex, uv)), VERTEX_ATTRIB_FLOAT2},     // UV (float2)
         };
 
         ShaderResourceVariableDesc variables[3] = {
@@ -311,6 +324,14 @@ protected:
             //uniformData.pData = &m_GlobalUniforms;
             //m_pPSO->UpdateUniformBuffer(uniformData);
         }
+
+        static bool tex2 = false;
+
+        if (e.key.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE)
+        {
+            tex2 = !tex2;
+            m_pSRB->GetVariableByName("tex")->Set(tex2 ? m_TextureView2 : m_TextureView);
+        }
     }
 
     void Render() override
@@ -320,9 +341,8 @@ protected:
         m_pRenderContext->SetClearColor(clearColor);
 
         m_pRenderContext->Begin();
-        m_pRenderContext->CmdBindPipeline(m_pPSO);
+        m_pRenderContext->CmdBindGraphicsPipeline(m_pPSO);
         uint64_t offset = 0;
-        // This function expects elements of pBuffers to not be destroyed, so it can be called in ReRecordCommands
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
         m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0, 0);
@@ -369,6 +389,8 @@ private: // Internal Members
     IBuffer* m_ObjectUniformBuffer;
     ITexture* m_Texture;
     ITextureView* m_TextureView;
+    ITexture* m_Texture2;
+    ITextureView* m_TextureView2;
 
     struct GlobalUniforms
     {

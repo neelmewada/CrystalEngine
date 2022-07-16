@@ -80,9 +80,9 @@ void GraphicsPipelineStateVk::CmdBindDescriptorSets(VkCommandBuffer commandBuffe
 
 #pragma region Shader Binding
 
-void GraphicsPipelineStateVk::BindShaderResource(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject,
-                                                 Uint32 set, Uint32 binding,
-                                                 Uint32 descriptorCount, ShaderResourceVariableType resourceType)
+void GraphicsPipelineStateVk::BindDeviceObject(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject,
+                                               Uint32 set, Uint32 binding,
+                                               Uint32 descriptorCount, ShaderResourceVariableType resourceType)
 {
     auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
 
@@ -128,6 +128,8 @@ void GraphicsPipelineStateVk::BindShaderResource(IShaderResourceBinding* resourc
             imageInfo.sampler = textureView->GetSampler();
         }
     }
+
+    vkQueueWaitIdle(m_pDevice->GetGraphicsQueue());
 
     for (int i = 0; i < maxSimultaneousFrames; ++i)
     {
@@ -319,7 +321,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSets(const GraphicsPipelineStateCr
         setBindings[resource.set].push_back(layoutBinding);
     }
 
-    // -- Descriptor Set Layout --
+    // -- Descriptor Set Layouts --
     m_DescriptorSetLayouts.clear();
     bool set0Used = false;
 

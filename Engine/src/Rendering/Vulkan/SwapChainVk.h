@@ -72,6 +72,8 @@ private: // Internal Members
     int m_CurrentFrameIndex = 0; // Index of current frame we're rendering
     uint32_t m_CurrentImageIndex = 0; // Index of current swapchain image we're rendering to
     int m_MaxSimultaneousFrameDraws = 0;
+    bool m_RenderInProgress = false;
+
     EngineContextVk* m_pEngine = nullptr;
     DeviceContextVk* m_pDevice = nullptr;
     IRenderContext* m_pRenderContext = nullptr;

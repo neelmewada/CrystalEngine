@@ -45,7 +45,7 @@ public: // Public API
     // - Commands
 
     void Begin() override;
-    void CmdBindPipeline(IGraphicsPipelineState* pPipeline) override;
+    void CmdBindGraphicsPipeline(IGraphicsPipelineState* pPipeline) override;
     void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets) override;
     void CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, uint64_t offset) override;
 

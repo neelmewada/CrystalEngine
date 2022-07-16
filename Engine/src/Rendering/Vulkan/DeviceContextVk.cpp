@@ -418,13 +418,14 @@ SurfaceCompatInfo DeviceContextVk::FetchSurfaceCompatInfo(VkPhysicalDevice physi
     return surfaceCompatInfo;
 }
 
-VkFormat DeviceContextVk::FindSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
+VkFormat DeviceContextVk::FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
                                               VkFormatFeatureFlags features)
 {
     for (const auto& format: candidates)
     {
         VkFormatProperties props;
         vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &props);
+        VkImageFormatProperties p;
 
         if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
         {
@@ -435,7 +436,7 @@ VkFormat DeviceContextVk::FindSupportedFormat(const std::vector<VkFormat> &candi
             return format;
         }
     }
-    throw std::runtime_error("Failed to find Supported VkFormat!");
+    return VK_FORMAT_UNDEFINED;
 }
 
 #pragma region Public API

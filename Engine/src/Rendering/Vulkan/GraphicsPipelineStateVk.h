@@ -33,8 +33,8 @@ public: // Public API
     VkPipeline GetPipeline() { return m_Pipeline; }
 
 public: // Shader Resource Binding Callbacks
-    void BindShaderResource(IShaderResourceBinding* resourceBinding, IDeviceObject *pDeviceObject, Uint32 set, Uint32 binding,
-                            Uint32 descriptorCount, ShaderResourceVariableType resourceType) override;
+    void BindDeviceObject(IShaderResourceBinding* resourceBinding, IDeviceObject *pDeviceObject, Uint32 set, Uint32 binding,
+                          Uint32 descriptorCount, ShaderResourceVariableType resourceType) override;
 
 private: // Internal API
     void CreateImmutableSamplers(const GraphicsPipelineStateCreateInfo& createInfo);

@@ -23,8 +23,8 @@ ShaderResourceVariableVk::~ShaderResourceVariableVk()
 
 void ShaderResourceVariableVk::Set(IDeviceObject* pObject)
 {
-    m_pReceiver->BindShaderResource(m_BindingRef, pObject, m_Set, m_Binding,
-                                    m_DescriptorCount, m_ResourceVariableType);
+    m_pReceiver->BindDeviceObject(m_BindingRef, pObject, m_Set, m_Binding,
+                                  m_DescriptorCount, m_ResourceVariableType);
 }
 
 #pragma region ShaderResourceBindingVk
@@ -64,14 +64,13 @@ ShaderResourceBindingVk::~ShaderResourceBindingVk()
 
 IShaderResourceVariable* ShaderResourceBindingVk::GetVariableByName(const char* pName)
 {
-    auto iter = std::find_if(m_VariableBindings.begin(), m_VariableBindings.end(),
-        [pName](const ShaderResourceVariableVk* item) {
-            return item->m_Name == pName;
-        });
+    for (int i = 0; i < m_VariableBindings.size(); ++i)
+    {
+        if (m_VariableBindings[i]->m_Name == pName)
+            return m_VariableBindings[i];
+    }
 
-    if (iter == m_VariableBindings.end())
-        return nullptr;
-    return *iter;
+    return nullptr;
 }
 
 #pragma endregion
