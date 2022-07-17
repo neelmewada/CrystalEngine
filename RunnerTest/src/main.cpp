@@ -140,7 +140,7 @@ protected:
 
         for (int i = 0; i < 255; ++i)
         {
-            m_InstanceUniformBlock.instances[i].instance = i;
+            m_InstanceUniformBlock.instances[i].value = i;
             m_ObjectUniformBlock.objects[i].model = glm::mat4(1.0f) * glm::translate(glm::vec3(i/2, 0, 0));
         }
 
@@ -451,12 +451,13 @@ private: // Internal Members
         alignas(16) ObjectUniforms objects[255];
     } m_ObjectUniformBlock;
 
-    struct InstanceID {
-        alignas(8) Uint32 instance;
+    template<typename Type, Uint8 Align>
+    struct Aligned {
+        alignas(Align) Type value;
     };
 
     struct InstanceUniformBlock {
-        InstanceID instances[255];
+        Aligned<Uint32, 8> instances[255]; // Uint32 array where each element is 8-byte aligned (instead of 4-byte)
     } m_InstanceUniformBlock;
 
     ObjectUniforms* m_ObjectUniformData = nullptr;
