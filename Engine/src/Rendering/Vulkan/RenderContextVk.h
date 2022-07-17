@@ -40,7 +40,7 @@ public: // Public API
     // - Getters
     VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
     //VkDescriptorSetLayout GetGlobalDescriptorSetLayout() { return m_GlobalDescriptorSetLayout; }
-    GraphicsPipelineStateVk* GetBoundGraphicsPipeline();
+    GraphicsPipelineStateVk* GetBoundGraphicsPipeline() { return m_CurrentPipeline; }
 
     // - Setup
     void SetClearColor(float clearColor[4]) override;

@@ -537,11 +537,17 @@ void GraphicsPipelineStateVk::CreateGraphicsPipeline(const GraphicsPipelineState
     colorBlendState.attachmentCount = 1;
     colorBlendState.pAttachments = &colorBlendAttachment;
 
+    std::vector<VkDescriptorSetLayout> setLayouts;
+    for (const auto& item: m_DescriptorSetLayouts)
+    {
+        if (item != nullptr) setLayouts.push_back(item);
+    }
+
     // -- Pipeline Layout --
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = m_DescriptorSetLayouts.size();
-    pipelineLayoutInfo.pSetLayouts = m_DescriptorSetLayouts.data();
+    pipelineLayoutInfo.setLayoutCount = setLayouts.size();
+    pipelineLayoutInfo.pSetLayouts = setLayouts.data();
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 

@@ -10,6 +10,8 @@
 namespace Vox
 {
 
+class RenderContextVk;
+
 class IShaderResourceBindingCallbacks
 {
 protected:

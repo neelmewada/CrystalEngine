@@ -127,8 +127,8 @@ void ShaderResourceBindingVk::CmdBindDescriptorSets(VkCommandBuffer commandBuffe
 
     auto currentPipeline = m_pRenderContext->GetBoundGraphicsPipeline();
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetPipelineLayout(), 0,
-                            m_DescriptorSets.size() / descriptorSetCountPerFrame,
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetPipelineLayout(), m_FirstSet,
+                            m_SetCount,
                             &*(m_DescriptorSets.begin() + currentFrame * descriptorSetCountPerFrame),
                             1,&offset);
 }

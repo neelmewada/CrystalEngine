@@ -166,7 +166,7 @@ protected:
         m_TextureView = m_Texture->GetDefaultView();
 
 #if PLATFORM_MACOS
-        IO::ReadAllBytesFromFile(binDir / "../../../textures/crate.jpg", textureData);
+        IO::ReadAllBytesFromFile(binDir / "../../../textures/crate.png", textureData);
 #else
         IO::ReadAllBytesFromFile((binDir / "textures/crate2.jpg").string(), textureData);
 #endif

@@ -15,6 +15,8 @@
 namespace Vox
 {
 
+class RenderContextVk;
+
 class GraphicsPipelineStateVk : public IGraphicsPipelineState
 {
 public:
