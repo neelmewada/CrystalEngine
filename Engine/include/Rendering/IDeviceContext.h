@@ -34,11 +34,11 @@ struct ImmutableSamplerDesc
 {
     const char* pTextureName;
     ShaderStageFlags shaderStages;
+    float anisotropy = 0;
     SamplerFilterType minFilter = SAMPLER_FILTER_TYPE_LINEAR,
     magFilter = SAMPLER_FILTER_TYPE_LINEAR,
     mipFilter = SAMPLER_FILTER_TYPE_LINEAR;
     SamplerAddressMode addressModeU, addressModeV, addressModeW;
-    float anisotropy = 0;
 };
 
 struct GraphicsPipelineStateCreateInfo

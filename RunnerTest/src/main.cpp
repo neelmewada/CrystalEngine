@@ -232,8 +232,9 @@ protected:
         };
 
         ImmutableSamplerDesc immutableSamplers[] = {
-                {"tex", SHADER_STAGE_ALL, SAMPLER_FILTER_TYPE_LINEAR, SAMPLER_FILTER_TYPE_LINEAR, SAMPLER_FILTER_TYPE_LINEAR,
-                 SAMPLER_ADDRESS_MODE_REPEAT, SAMPLER_ADDRESS_MODE_REPEAT, SAMPLER_ADDRESS_MODE_REPEAT, 16}
+                {"tex", SHADER_STAGE_ALL, 16,
+                 SAMPLER_FILTER_TYPE_LINEAR, SAMPLER_FILTER_TYPE_LINEAR, SAMPLER_FILTER_TYPE_LINEAR,
+                 SAMPLER_ADDRESS_MODE_REPEAT, SAMPLER_ADDRESS_MODE_REPEAT, SAMPLER_ADDRESS_MODE_REPEAT}
         };
 
         GraphicsPipelineStateCreateInfo pipelineInfo = {};
@@ -248,7 +249,10 @@ protected:
         pipelineInfo.pResourceVariables = variables;
         pipelineInfo.immutableSamplersCount = _countof(immutableSamplers);
         pipelineInfo.pImmutableSamplers = immutableSamplers;
+
         m_pPSO = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
+        m_pPSO2 = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
+
         m_pStaticSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_STATIC);
         m_pPerFrameSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_PER_FRAME);
 
@@ -349,11 +353,9 @@ protected:
 
         // Bind Graphics Pipeline
         m_pRenderContext->CmdBindGraphicsPipeline(m_pPSO);
-        m_pRenderContext->CmdBindShaderResources(m_pStaticSRB);
-        m_pRenderContext->CmdBindShaderResources(m_pPerFrameSRB);
-
-        // TODO: API to Bind Descriptor Sets (IShaderResourceBinding* object) (For later)
-        //m_pRenderContext->CmdBindShaderResource(m_pStaticShaderResource);
+        // Bind Shader Resources
+        m_pRenderContext->CmdBindShaderResources(m_pStaticSRB); // Static Resources (set 0)
+        m_pRenderContext->CmdBindShaderResources(m_pPerFrameSRB); // Per-Frame Resources (set 1)
 
         // Bind Mesh Data
         uint64_t offset = 0;

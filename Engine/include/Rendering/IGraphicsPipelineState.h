@@ -20,9 +20,6 @@ public:
 public: // Public API
     virtual IShaderResourceBinding* CreateResourceBinding(ResourceBindingFrequency bindingFrequency) = 0;
 
-    virtual IShaderResourceVariable* GetStaticVariableByName(const char* pName) = 0;
-    virtual IShaderResourceBinding* GetShaderResourceBinding() = 0;
-
 };
 
 }
