@@ -3,7 +3,10 @@
 
 #include "TextureVk.h"
 
+#include "GraphicsPipelineStateVk.h"
+
 #include <iostream>
+#include <string>
 
 using namespace Vox;
 
@@ -15,8 +18,8 @@ ShaderResourceVariableVk::ShaderResourceVariableVk(const ShaderResourceVariableV
     m_ResourceVariableType = createInfo.resourceType;
     m_DescriptorCount = createInfo.descriptorCount;
     m_Name = createInfo.name;
+    m_DynamicOffset = createInfo.usesDynamicOffset;
     m_pReceiver = pReceiver;
-    m_BindingRef = createInfo.bindingRef;
 }
 
 ShaderResourceVariableVk::~ShaderResourceVariableVk()
@@ -33,7 +36,7 @@ void ShaderResourceVariableVk::Set(IDeviceObject* pObject)
 #pragma region ShaderResourceBindingVk
 
 ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCreateInfo& createInfo,
-                                                 const std::vector<ShaderResourceVariableDefinition>& variableDefinitions,
+                                                 const std::vector<ShaderVariableMetaData>& variableMetaData,
                                                  const std::vector<VkDescriptorSetLayout>& setLayouts,
                                                  DeviceContextVk* pDevice, RenderContextVk* pRenderCtx)
 {
@@ -41,6 +44,13 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
     m_FirstSet = createInfo.firstSet;
     m_SetCount = createInfo.setCount;
     m_pDevice = pDevice;
+    m_pRenderContext = pRenderCtx;
+
+    m_VariableMetaData.clear();
+    for (const auto& item: variableMetaData)
+    {
+        m_VariableMetaData[{item.set, item.binding}] = item;
+    }
 
     // -- Descriptor Pool --
     VkDescriptorPoolSize sizes[] = {
@@ -79,18 +89,18 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
     VK_ASSERT(vkAllocateDescriptorSets(m_pDevice->GetDevice(), &descriptorSetInfo, m_DescriptorSets.data()),
               "Failed to allocate Static Descriptor Set for Graphics Pipeline!");
 
-    for (int i = 0; i < variableDefinitions.size(); ++i)
+    for (int i = 0; i < variableMetaData.size(); ++i)
     {
-        const auto& varDef = variableDefinitions[i];
-        if (varDef.name.empty()) continue;
+        const auto& varData = variableMetaData[i];
+        if (varData.name.empty()) continue;
 
         ShaderResourceVariableVkCreateInfo varInfo = {};
-        varInfo.name = varDef.name;
-        varInfo.descriptorCount = !varDef.isArray ? 1 : varDef.members.size();
-        varInfo.set = varDef.set;
-        varInfo.binding = varDef.binding;
-        varInfo.resourceType = varDef.type;
-        varInfo.bindingRef = this;
+        varInfo.name = varData.name;
+        varInfo.descriptorCount = !varData.isArray ? 1 : varData.arraySize;
+        varInfo.set = varData.set;
+        varInfo.binding = varData.binding;
+        varInfo.resourceType = varData.resourceVarType;
+        varInfo.usesDynamicOffset = varData.flags & SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT;
 
         auto* variableBinding = new ShaderResourceVariableVk(varInfo, this);
         m_VariableBindings.push_back(variableBinding);
@@ -122,6 +132,14 @@ IShaderResourceVariable* ShaderResourceBindingVk::GetVariableByName(const char* 
 void ShaderResourceBindingVk::CmdBindDescriptorSets(VkCommandBuffer commandBuffer, int currentFrame)
 {
     Uint32 offset = 0;
+    Uint32 dynamicDescriptorCount = 0;
+    for (const auto& variableBinding: m_VariableBindings)
+    {
+        if (variableBinding->m_DynamicOffset)
+        {
+            dynamicDescriptorCount++;
+        }
+    }
 
     auto descriptorSetCountPerFrame = m_DescriptorSets.size() / m_MaxSimultaneousFrames;
 
@@ -130,17 +148,15 @@ void ShaderResourceBindingVk::CmdBindDescriptorSets(VkCommandBuffer commandBuffe
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetPipelineLayout(), m_FirstSet,
                             m_SetCount,
                             &*(m_DescriptorSets.begin() + currentFrame * descriptorSetCountPerFrame),
-                            1,&offset);
+                            dynamicDescriptorCount, &offset);
 }
 
 void ShaderResourceBindingVk::BindDeviceObject(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject,
                                                Uint32 set, Uint32 binding, Uint32 descriptorCount,
                                                ShaderResourceVariableType resourceType)
 {
-    auto currentPipeline = m_pRenderContext->GetBoundGraphicsPipeline();
-
-    auto resourceVariableDesc = currentPipeline->m_ShaderResourceVariables[{set, binding}];
-    auto flags = resourceVariableDesc.flags;
+    auto resourceVariableMetaData = m_VariableMetaData[{set, binding}];
+    auto flags = resourceVariableMetaData.flags;
 
     bool dynamicOffsetFlag = flags & SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT;
 
@@ -172,10 +188,10 @@ void ShaderResourceBindingVk::BindDeviceObject(IShaderResourceBinding* resourceB
         else throw std::runtime_error("ERROR: Resource type is a sampled image, but the passed Device Object is not of texture view type!");
         imageInfo.imageView = textureView->GetImageView();
         imageInfo.imageLayout = textureView->GetImageLayout();
-        if (currentPipeline->m_ImmutableSamplers.count(resourceVariableDesc.pVariableName) == 0)
+        if (!resourceVariableMetaData.immutableSamplerExists)
         {
             VOX_ASSERT(textureView->GetSampler() != nullptr,
-                       std::string() + "No sampler found for texture named " + resourceVariableDesc.pVariableName + "\n" +
+                       std::string() + "No sampler found for texture named " + resourceVariableMetaData.name + "\n" +
                        "If an immutable sampler description is not passed to Graphics Pipeline, a dynamic sampler should exist in the Texture View!");
             imageInfo.sampler = textureView->GetSampler();
         }
@@ -191,8 +207,7 @@ void ShaderResourceBindingVk::BindDeviceObject(IShaderResourceBinding* resourceB
         {
             auto setIdx = i * frameIdx;
 
-            VOX_ASSERT(set < maxDescriptorSetCount || m_DescriptorSets[setIdx] == nullptr,
-                       "Failed to bind shader resource! Descriptor Set No. " + std::to_string(set));
+            VOX_ASSERT(m_DescriptorSets[setIdx] != nullptr, "Failed to bind shader resource!");
 
             auto descriptorSet = m_DescriptorSets[setIdx];
 

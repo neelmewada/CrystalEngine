@@ -42,3 +42,6 @@ typedef int8_t Sint8;
 #ifdef ENGINE_INTERNAL
 #include "EngineInternal.h"
 #endif
+
+#define ENGINE_VERSION MAKE_VERSION(0, 0, 1, 0)
+#define ENGINE_NAME "VoxEngine"

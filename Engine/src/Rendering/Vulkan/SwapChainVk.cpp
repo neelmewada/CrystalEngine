@@ -4,9 +4,11 @@
 
 #include <vulkan/vulkan.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_vulkan.h>
 
 #include <iostream>
 #include <array>
+#include <string>
 
 using namespace Vox;
 

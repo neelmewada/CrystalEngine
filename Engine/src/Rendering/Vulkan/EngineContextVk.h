@@ -2,7 +2,6 @@
 
 #include "Rendering/EngineFactoryVk.h"
 #include "Rendering/IEngineContext.h"
-#include "Engine.h"
 
 #include <SDL2/SDL.h>
 

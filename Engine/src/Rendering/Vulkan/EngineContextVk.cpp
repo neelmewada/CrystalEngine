@@ -1,5 +1,7 @@
 
+#include "EngineDefs.h"
 #include "EngineContextVk.h"
+#include "ApplicationBase.h"
 
 #include <vulkan/vulkan.h>
 #include <SDL2/SDL.h>

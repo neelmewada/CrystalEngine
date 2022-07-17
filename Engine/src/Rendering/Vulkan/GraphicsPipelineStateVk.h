@@ -66,15 +66,6 @@ private: // Vulkan Members
     VkPipeline m_Pipeline = nullptr;
     VkDescriptorPool m_StaticDescriptorPool = nullptr;
     VkDescriptorPool m_DescriptorPool = nullptr;
-    
-    struct ResourceLocation {
-        Uint32 set; Uint32 binding;
-        bool operator<(const ResourceLocation& t) const
-        {
-            return (this->set < t.set || (this->set == t.set && this->binding < t.binding));
-        }
-    };
-
 
     std::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts{};
     std::map<Uint32, std::vector<VkDescriptorSet>> m_DescriptorSetsPerFrame{};
@@ -82,7 +73,7 @@ private: // Vulkan Members
 
     std::map<ResourceLocation, BufferVk*> m_DynamicOffsetBuffers{};
     std::map<ResourceLocation, ShaderResourceVariableDefinition> m_ShaderVariableDefinitions;
-    std::map<ResourceLocation, ShaderResourceVariableDesc> m_ShaderResourceVariables;
+    std::map<ResourceLocation, ShaderResourceVariableDesc> m_ShaderVariables;
 };
 
 }

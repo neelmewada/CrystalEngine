@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <limits>
+#include <string>
 
 using namespace Vox;
 

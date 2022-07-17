@@ -11,6 +11,7 @@ namespace Vox
 {
 
 class RenderContextVk;
+struct ResourceLocation;
 
 class IShaderResourceBindingCallbacks
 {
@@ -34,7 +35,7 @@ struct ShaderResourceVariableVkCreateInfo
     Uint32 binding;
     Uint32 descriptorCount;
     ShaderResourceVariableType resourceType;
-    ShaderResourceBindingVk* bindingRef;
+    bool usesDynamicOffset;
 };
 
 class ShaderResourceVariableVk : public IShaderResourceVariable
@@ -57,6 +58,7 @@ private: // Internal Members
     ShaderResourceVariableType m_ResourceVariableType;
     IShaderResourceBindingCallbacks* m_pReceiver;
     ShaderResourceBindingVk* m_BindingRef;
+    bool m_DynamicOffset;
 };
 
 struct ShaderResourceBindingVkCreateInfo
@@ -67,11 +69,25 @@ struct ShaderResourceBindingVkCreateInfo
     ResourceBindingFrequency bindingFrequency;
 };
 
+struct ShaderVariableMetaData
+{
+    Uint32 set;
+    Uint32 binding;
+    std::string name;
+    bool isArray;
+    Uint32 arraySize;
+    ShaderResourceVariableType resourceVarType;
+    bool immutableSamplerExists;
+    ShaderStageFlags stages;
+    ShaderResourceVariableFlags flags;
+};
+
+
 class ShaderResourceBindingVk : public IShaderResourceBinding, public IShaderResourceBindingCallbacks
 {
 public:
     ShaderResourceBindingVk(const ShaderResourceBindingVkCreateInfo& createInfo,
-                            const std::vector<ShaderResourceVariableDefinition>& variableDefinitions,
+                            const std::vector<ShaderVariableMetaData>& variableMetaData,
                             const std::vector<VkDescriptorSetLayout>& setLayouts,
                             DeviceContextVk* pDevice, RenderContextVk* pRenderCtx);
     ~ShaderResourceBindingVk();
@@ -101,7 +117,7 @@ private: // Internal Members
     ResourceBindingFrequency m_BindingFrequency;
     std::vector<VkDescriptorSet> m_DescriptorSets;
     std::vector<ShaderResourceVariableVk*> m_VariableBindings;
-
+    std::map<ResourceLocation, ShaderVariableMetaData> m_VariableMetaData;
 
 private: // Vulkan Members
     VkDescriptorPool m_DescriptorPool = nullptr;

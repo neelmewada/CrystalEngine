@@ -15,6 +15,7 @@
 #include <iostream>
 #include <functional>
 #include <array>
+#include <string>
 
 using namespace Vox;
 

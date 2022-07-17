@@ -42,6 +42,8 @@ public:
             free(m_ObjectUniformData);
         delete m_pPerFrameSRB;
         delete m_pStaticSRB;
+        if (m_pPSO != nullptr)
+            delete m_pPSO2;
         delete m_pPSO;
         delete m_Texture2;
         delete m_Texture;
@@ -224,9 +226,8 @@ protected:
 
         ShaderResourceVariableDesc variables[3] = {
             {"GlobalUniformBuffer", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT},
-            {"ObjectBuffer", SHADER_STAGE_ALL, static_cast<ShaderResourceVariableFlags>(
-                                                            SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT |
-                                                            SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT)},
+            {"ObjectBuffer", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT |
+                                                                  SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT},
             {"tex", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT}
         };
 
@@ -397,6 +398,7 @@ private: // Internal Members
     ISwapChain* m_pSwapChain;
     IRenderContext* m_pRenderContext;
     IGraphicsPipelineState* m_pPSO;
+    IGraphicsPipelineState* m_pPSO2 = nullptr;
     IShaderResourceBinding* m_pStaticSRB;
     IShaderResourceBinding* m_pPerFrameSRB;
     IBuffer* m_VertexBuffer;

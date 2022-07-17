@@ -98,7 +98,7 @@ IShaderResourceBinding* GraphicsPipelineStateVk::CreateResourceBinding(ResourceB
     std::vector<VkDescriptorSetLayout> setLayouts;
     for (int i = 0; i < maxSimultaneousFrames; ++i)
     {
-        for (Uint32 set = setNumber; set < setCount; set++)
+        for (Uint32 set = setNumber; set < setNumber + setCount; set++)
         {
             setLayouts.push_back(m_DescriptorSetLayouts[set]);
         }
@@ -112,7 +112,32 @@ IShaderResourceBinding* GraphicsPipelineStateVk::CreateResourceBinding(ResourceB
 
     const auto& shaderResources = m_pShader->GetCurrentVariant()->GetShaderVariableDefinitions();
 
-    return new ShaderResourceBindingVk(bindingInfo, shaderResources, setLayouts, m_pDevice, m_pRenderContext);
+    std::vector<ShaderVariableMetaData> perVariableInfo;
+
+    for (const auto& resource: shaderResources)
+    {
+        if (resource.set >= setNumber && resource.set < (setNumber + setCount))
+        {
+            const auto& variableDesc = m_ShaderVariables[{resource.set, resource.binding}];
+            ShaderVariableMetaData varMetaData = {};
+            varMetaData.name = resource.name;
+            varMetaData.set = resource.set;
+            varMetaData.binding = resource.binding;
+            varMetaData.arraySize = resource.isArray ? resource.members.size() : 1;
+            varMetaData.resourceVarType = resource.type;
+            varMetaData.isArray = resource.isArray;
+            varMetaData.immutableSamplerExists = m_ImmutableSamplers.count(resource.name) > 0;
+            varMetaData.stages = resource.shaderStages;
+            varMetaData.flags = variableDesc.flags;
+
+            perVariableInfo.push_back(varMetaData);
+        }
+    }
+
+    if (perVariableInfo.empty())
+        return nullptr;
+
+    return new ShaderResourceBindingVk(bindingInfo, perVariableInfo, setLayouts, m_pDevice, m_pRenderContext);
 }
 
 #pragma endregion
@@ -125,7 +150,7 @@ void GraphicsPipelineStateVk::BindDeviceObject(IShaderResourceBinding* resourceB
 {
     auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
 
-    auto resourceVariableDesc = m_ShaderResourceVariables[{set, binding}];
+    auto resourceVariableDesc = m_ShaderVariables[{set, binding}];
     auto flags = resourceVariableDesc.flags;
 
     bool dynamicOffsetFlag = flags & SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT;
@@ -309,7 +334,7 @@ void GraphicsPipelineStateVk::CreateDescriptorSetLayouts(const GraphicsPipelineS
             {
                 VOX_ASSERT((var.stages & resource.shaderStages) != var.stages,
                            "Shader Stages passed in ShaderResourceVariableDesc doesn't match with the shader stages in Shader!");
-                m_ShaderResourceVariables[{resource.set, resource.binding}] = var;
+                m_ShaderVariables[{resource.set, resource.binding}] = var;
                 currentVariableDesc = var;
                 flags = var.flags;
                 break;

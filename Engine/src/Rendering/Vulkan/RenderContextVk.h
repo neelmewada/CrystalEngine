@@ -2,8 +2,8 @@
 
 #include "EngineDefs.h"
 #include "Rendering/EngineFactoryVk.h"
-#include "BufferVk.h"
-#include "GraphicsPipelineStateVk.h"
+//#include "BufferVk.h"
+//#include "GraphicsPipelineStateVk.h"
 
 #include <vulkan/vulkan.h>
 
@@ -27,6 +27,7 @@ class RenderContextVk : public IRenderContext
 {
 private:
     friend class EngineFactoryVk;
+    friend class ShaderResourceBindingVk;
     RenderContextVk(RenderContextCreateInfoVk& renderContextInfo);
     ~RenderContextVk();
 

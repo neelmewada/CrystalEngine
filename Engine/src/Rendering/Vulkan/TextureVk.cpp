@@ -4,6 +4,8 @@
 #include "Utils/Image/stb_lib.h"
 #include "Utils/Image/stb_image_resize.h"
 
+#include <string>
+
 using namespace Vox;
 
 TextureVk::TextureVk(const TextureCreateInfo& createInfo, DeviceContextVk* pDevice)

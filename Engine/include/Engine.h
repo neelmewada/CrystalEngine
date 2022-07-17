@@ -36,6 +36,3 @@
 #include "ApplicationBase.h"
 
 
-#define ENGINE_VERSION MAKE_VERSION(0, 0, 1, 0)
-#define ENGINE_NAME "VoxEngine"
-

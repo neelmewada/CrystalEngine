@@ -23,6 +23,14 @@ struct ShaderBlockMember
     bool isArray;
 };
 
+struct ResourceLocation {
+    Uint32 set; Uint32 binding;
+    bool operator<(const ResourceLocation& t) const
+    {
+        return (this->set < t.set || (this->set == t.set && this->binding < t.binding));
+    }
+};
+
 
 // Indices of Queue families if they exist
 struct QueueFamilyInfo
