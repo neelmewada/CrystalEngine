@@ -46,9 +46,9 @@ void TextureVk::CreateTexture(const TextureCreateInfo& createInfo)
         height = static_cast<Uint32>(texHeight);
 
         if (texChannels == 1) format = IMG_FORMAT_R32_SFLOAT;
-        else if (texChannels == 2) format = IMG_FORMAT_R8G8_SRGB;
-        else if (texChannels == 3) format = IMG_FORMAT_R8G8B8A8_SRGB; // 24-bit (RGB) formats aren't fully supported
-        else if (texChannels == 4) format = IMG_FORMAT_R8G8B8A8_SRGB;
+        else if (texChannels == 2) format = IMG_FORMAT_R8G8_UNORM;
+        else if (texChannels == 3) format = IMG_FORMAT_R8G8B8A8_UNORM; // 24-bit (RGB) formats aren't fully supported
+        else if (texChannels == 4) format = IMG_FORMAT_R8G8B8A8_UNORM;
         else throw std::runtime_error("Failed to fetch format from STB Image! Invalid no. of texChannels: " + std::to_string(texChannels));
     }
 

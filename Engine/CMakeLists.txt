@@ -18,11 +18,11 @@ if (PLATFORM_WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL Debug)
 endif()
 
 if (PLATFORM_WIN32)
-    target_link_libraries(${PROJECT_NAME}
-            vulkan-1 SDL2 ${SPIRV_LIBS})
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+            vulkan-1.lib SDL2.lib ${SPIRV_LIBS})
     target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_DLL_EXPORT=1)
 else()
-    target_link_libraries(${PROJECT_NAME}
+    target_link_libraries(${PROJECT_NAME} PRIVATE
             vulkan vulkan.1 SDL2 ${SPIRV_LIBS})
 endif()
 
