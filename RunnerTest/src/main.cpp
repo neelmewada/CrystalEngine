@@ -57,8 +57,8 @@ public:
     }
 
 public:
-    const char * GetApplicationName() override { return "VoxEngine Test App"; }
-    uint32_t GetApplicationVersion() override { return MAKE_VERSION(0, 0, 1, 0); }
+    const char* GetApplicationName() override { return "VoxEngine Test App"; }
+    Uint32 GetApplicationVersion() override { return MAKE_VERSION(0, 0, 1, 0); }
 
 protected:
     void Start() override
@@ -69,7 +69,7 @@ protected:
 
         // -- Engine Creation --
         EngineCreateInfoVk engineInfo = {};
-        engineInfo.applicationVersion = MAKE_VERSION(0, 0, 0, 1);
+        engineInfo.applicationVersion = GetApplicationVersion();
         engineInfo.applicationName = "Vox Sandbox";
 #if NDEBUG
         engineInfo.enableValidationLayers = false;
@@ -132,7 +132,7 @@ protected:
         BufferCreateInfo objectBufferInfo = {};
         objectBufferInfo.pName = "Object Buffer";
         objectBufferInfo.size = sizeof(m_ObjectUniformBlock);//m_ObjectUniformDataSize;
-        objectBufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
+        objectBufferInfo.bindFlags = BIND_STORAGE_BUFFER;
         objectBufferInfo.allocType = DEVICE_MEM_CPU_TO_GPU;
         objectBufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
         //objectBufferInfo.usageFlags = Vox::BUFFER_USAGE_DYNAMIC_OFFSET_BIT;

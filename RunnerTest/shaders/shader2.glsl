@@ -34,7 +34,7 @@ STATIC(0) uniform GlobalUniformBuffer {
     mat4 view;
 };
 
-DYNAMIC0_std140(0) uniform ObjectBuffer {
+DYNAMIC0_std140(0) readonly buffer ObjectBuffer {
     ObjectData objects[MAX_INSTANCES];
 };
 
