@@ -20,7 +20,7 @@ public:
     ShaderResourceVariableBaseType baseType;
     ShaderResourceVariableType type;
     bool isArray;
-    std::vector<ShaderBlockMember> members;
+    std::vector<ShaderResourceVariableBlockMember> members;
     ShaderStageFlags shaderStages;
 };
 

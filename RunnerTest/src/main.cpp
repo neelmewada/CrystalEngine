@@ -157,7 +157,7 @@ protected:
         BufferCreateInfo instanceBufferInfo = {};
         instanceBufferInfo.pName = "Instance Buffer";
         instanceBufferInfo.size = sizeof(m_InstanceUniformBlock);
-        instanceBufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
+        instanceBufferInfo.bindFlags = BIND_STORAGE_BUFFER;
         instanceBufferInfo.allocType = DEVICE_MEM_CPU_TO_GPU;
         instanceBufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
 
@@ -367,13 +367,13 @@ protected:
 
         // Bind Shader Resources
         m_pRenderContext->CmdBindShaderResources(m_pStaticSRB); // Static Resources (set 0)
-        m_pRenderContext->CmdBindShaderResources(m_pDynamicSRB); // Dynamic Resources (set 2)
+        m_pRenderContext->CmdBindShaderResources(m_pDynamicSRB); // Dynamic Resources (set 2,3)
 
         // Bind Mesh Data
         uint64_t offset = 0;
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
-        m_pRenderContext->CmdDrawIndexed(6, 24, 0, 0, 0);
+        m_pRenderContext->CmdDrawIndexed(6, 255, 0, 0, 0);
 
         // End Render Pass
         m_pRenderContext->End();

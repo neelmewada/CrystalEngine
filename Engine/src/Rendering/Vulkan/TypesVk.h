@@ -16,7 +16,7 @@ enum ShaderResourceVariableType
     UniformBuffer, StorageBuffer, SampledImage2D, SampledImageCube
 };
 
-struct ShaderBlockMember
+struct ShaderResourceVariableBlockMember
 {
     Uint32 offset;
     Uint32 size;

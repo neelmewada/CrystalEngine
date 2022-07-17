@@ -10,11 +10,11 @@
 #include <vector>
 #include <iostream>
 
-#pragma region DEBUGGING
+#pragma region Validation Layers
 
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 {
-    std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+    std::cerr << "Vulkan " << pCallbackData->pMessage << std::endl;
     return VK_FALSE;
 }
 

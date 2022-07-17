@@ -40,7 +40,7 @@ DYNAMIC0_std140(0) uniform ObjectBuffer {
 
 DYNAMIC0(1) uniform sampler2D tex;
 
-DYNAMIC0_std140(2) uniform InstanceBuffer {
+DYNAMIC0_std140(2) readonly buffer InstanceBuffer {
     uint instances[MAX_INSTANCES];
 };
 
@@ -55,7 +55,7 @@ layout (location = 1) out vec3 outColor;
 layout (location = 2) out float outInt;
 
 void main() {
-    gl_Position = projection * view * objects[instances[gl_InstanceIndex]].model * vec4(vPosition, 1.0);
+    gl_Position = projection * view * objects[instances[MAX_INSTANCES - gl_InstanceIndex - 1]].model * vec4(vPosition, 1.0);
     outColor = vColor;
     outUV = vUV;
     outInt = instances[gl_InstanceIndex];

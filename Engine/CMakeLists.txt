@@ -19,7 +19,7 @@ endif()
 
 if (PLATFORM_WIN32)
     target_link_libraries(${PROJECT_NAME}
-            vulkan-1 SDL2 ${SPIRV_LIBS} libboost_filesystem)
+            vulkan-1 SDL2 ${SPIRV_LIBS})
     target_compile_definitions(${PROJECT_NAME} PRIVATE ENGINE_DLL_EXPORT=1)
 else()
     target_link_libraries(${PROJECT_NAME}

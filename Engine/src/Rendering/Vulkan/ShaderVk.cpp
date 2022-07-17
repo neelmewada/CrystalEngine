@@ -138,7 +138,7 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
 
             for (int i = 0; i < type.member_types.size(); ++i)
             {
-                ShaderBlockMember member = {};
+                ShaderResourceVariableBlockMember member = {};
                 member.name = vertReflection.get_member_name(uniformBuffer.base_type_id, i);
                 member.offset = vertReflection.type_struct_member_offset(type, i);
                 member.size = static_cast<Uint32>(vertReflection.get_declared_struct_member_size(type, i));
@@ -187,7 +187,7 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
 
             for (int i = 0; i < type.member_types.size(); ++i)
             {
-                ShaderBlockMember member = {};
+                ShaderResourceVariableBlockMember member = {};
                 member.name = fragReflection.get_member_name(uniformBuffer.base_type_id, i);
                 member.offset = fragReflection.type_struct_member_offset(type, i);
                 member.size = static_cast<Uint32>(fragReflection.get_declared_struct_member_size(type, i));
@@ -226,7 +226,7 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
             auto elementSize = GetShaderNativeTypeSize(elementBaseType);
             for (int i = 0; i < variableDef.members.size(); ++i)
             {
-                ShaderBlockMember arrayElement = {};
+                ShaderResourceVariableBlockMember arrayElement = {};
                 arrayElement.offset = i * elementSize;
                 arrayElement.size = elementSize;
                 arrayElement.baseType = elementBaseType;
@@ -278,7 +278,7 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
             auto elementSize = GetShaderNativeTypeSize(elementBaseType);
             for (int i = 0; i < variableDef.members.size(); ++i)
             {
-                ShaderBlockMember arrayElement = {};
+                ShaderResourceVariableBlockMember arrayElement = {};
                 arrayElement.offset = i * elementSize;
                 arrayElement.size = elementSize;
                 arrayElement.baseType = elementBaseType;
@@ -292,6 +292,93 @@ ShaderVariantVk::ShaderVariantVk(const ShaderVariantCreateInfo& createInfo, Devi
             variableDef.members.clear();
         }
 
+        m_ShaderVariableDefinitions.push_back(variableDef);
+    }
+
+    // -- Storage Buffers --
+    // Vertex
+    for (const auto& uniformBuffer: vertResources.storage_buffers)
+    {
+        auto descriptorSet = vertReflection.get_decoration(uniformBuffer.id, spv::DecorationDescriptorSet);
+        auto binding = vertReflection.get_decoration(uniformBuffer.id, spv::DecorationBinding);
+        auto& type = vertReflection.get_type(uniformBuffer.type_id);
+
+        ShaderResourceVariableDefinition variableDef = {};
+        variableDef.set = descriptorSet;
+        variableDef.binding = binding;
+        variableDef.size = static_cast<Uint32>(vertReflection.get_declared_struct_size(type));
+        variableDef.name = uniformBuffer.name;
+        variableDef.type = ::StorageBuffer;
+        variableDef.members.clear();
+        variableDef.shaderStages = SHADER_STAGE_VERTEX;
+
+        if (type.basetype == SPIRType::Struct)
+        {
+            variableDef.baseType = ShaderResourceVariableBaseType::Struct;
+
+            for (int i = 0; i < type.member_types.size(); ++i)
+            {
+                ShaderResourceVariableBlockMember member = {};
+                member.name = vertReflection.get_member_name(uniformBuffer.base_type_id, i);
+                member.offset = vertReflection.type_struct_member_offset(type, i);
+                member.size = static_cast<Uint32>(vertReflection.get_declared_struct_member_size(type, i));
+
+                auto& memType = vertReflection.get_type(type.member_types[i]);
+                member.baseType = GetShaderBaseType(memType);
+                member.isArray = !memType.array.empty();
+
+                variableDef.members.push_back(member);
+            }
+        }
+        m_ShaderVariableDefinitions.push_back(variableDef);
+    }
+    // Fragment
+    for (const auto& uniformBuffer: fragResources.storage_buffers)
+    {
+        auto descriptorSet = fragReflection.get_decoration(uniformBuffer.id, spv::DecorationDescriptorSet);
+        auto binding = fragReflection.get_decoration(uniformBuffer.id, spv::DecorationBinding);
+        auto& type = fragReflection.get_type(uniformBuffer.type_id);
+
+        ShaderResourceVariableDefinition variableDef = {};
+        variableDef.set = descriptorSet;
+        variableDef.binding = binding;
+        variableDef.size = static_cast<Uint32>(fragReflection.get_declared_struct_size(type));
+        variableDef.name = uniformBuffer.name;
+        variableDef.type = ::StorageBuffer;
+        variableDef.members.clear();
+        variableDef.shaderStages = SHADER_STAGE_FRAGMENT;
+
+        auto result = std::find_if(m_ShaderVariableDefinitions.begin(), m_ShaderVariableDefinitions.end(),
+                                   [&variableDef](const ShaderResourceVariableDefinition& arg) -> bool {
+                                       return variableDef.name == arg.name && variableDef.set == arg.set && variableDef.binding == arg.binding
+                                              && variableDef.size == arg.size;
+                                   });
+
+        if (result != m_ShaderVariableDefinitions.end()) // Entry exists
+        {
+            result->shaderStages = (ShaderStageFlags)(result->shaderStages | SHADER_STAGE_FRAGMENT);
+            continue;
+        }
+
+        // Entry doesn't exist
+        if (type.basetype == SPIRType::Struct)
+        {
+            variableDef.baseType = ShaderResourceVariableBaseType::Struct;
+
+            for (int i = 0; i < type.member_types.size(); ++i)
+            {
+                ShaderResourceVariableBlockMember member = {};
+                member.name = fragReflection.get_member_name(uniformBuffer.base_type_id, i);
+                member.offset = fragReflection.type_struct_member_offset(type, i);
+                member.size = static_cast<Uint32>(fragReflection.get_declared_struct_member_size(type, i));
+
+                auto& memType = fragReflection.get_type(type.member_types[i]);
+                member.baseType = GetShaderBaseType(memType);
+                member.isArray = !memType.array.empty();
+
+                variableDef.members.push_back(member);
+            }
+        }
         m_ShaderVariableDefinitions.push_back(variableDef);
     }
 }
