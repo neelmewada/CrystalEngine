@@ -53,7 +53,7 @@ public: // Public API
     void CmdBindGraphicsPipeline(IGraphicsPipelineState* pPipeline) override;
     void CmdBindShaderResources(IShaderResourceBinding* pSRB) override;
 
-    void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets) override;
+    void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsetInBuffers) override;
     void CmdBindIndexBuffer(IBuffer *pBuffer, IndexType indexType, uint64_t offset) override;
 
     void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex, uint32_t firstInstanceIndex) override;

@@ -40,6 +40,8 @@ enum BufferTransferFlags
     BUFFER_TRANSFER_NONE = 0,
     BUFFER_TRANSFER_SRC_BIT = 0x01,
     BUFFER_TRANSFER_DST_BIT = 0x02,
+    // Buffer can be used as both source & destination for transfer operations
+    BUFFER_TRANSFER_ALL = 0x03,
 };
 
 enum BufferOptimizationFlags

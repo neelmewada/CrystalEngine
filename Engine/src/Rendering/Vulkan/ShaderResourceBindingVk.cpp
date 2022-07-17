@@ -95,8 +95,7 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
 
     VkDescriptorPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    // Fast allocation
-    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; // Fast allocation
     if (m_BindingFrequency != RESOURCE_BINDING_FREQUENCY_STATIC) // Allow re-binding only for non-static resources
         poolInfo.flags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
     poolInfo.poolSizeCount = _countof(sizes);
@@ -165,6 +164,7 @@ IShaderResourceVariable* ShaderResourceBindingVk::GetVariableByName(const char* 
             return m_VariableBindings[i];
     }
 
+    std::cerr << "ERROR: Failed to find a variable named " << pName << " in a Shader Resource Binding!" << std::endl;
     return nullptr;
 }
 

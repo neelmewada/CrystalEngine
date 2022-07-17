@@ -43,9 +43,9 @@ public: // Public API
     virtual void Begin() = 0;
     virtual void CmdBindGraphicsPipeline(IGraphicsPipelineState* pPipeline) = 0;
     virtual void CmdBindShaderResources(IShaderResourceBinding* pSRB) = 0;
-    virtual void CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets) = 0;
-    virtual void CmdBindIndexBuffer(IBuffer* pBuffer, IndexType indexType, uint64_t offset) = 0;
-    virtual void CmdDrawIndexed(uint32_t indexCount, uint32_t instanceCount, int32_t vertexOffset, uint32_t firstIndex, uint32_t firstInstanceIndex) = 0;
+    virtual void CmdBindVertexBuffers(Uint32 bufferCount, IBuffer** ppBuffers, Uint64* pOffsetInBuffers) = 0;
+    virtual void CmdBindIndexBuffer(IBuffer* pBuffer, IndexType indexType, Uint64 offset) = 0;
+    virtual void CmdDrawIndexed(Uint32 indexCount, Uint32 instanceCount, int32_t vertexOffset, Uint32 firstIndex, Uint32 firstInstanceIndex) = 0;
     virtual void End() = 0;
 };
 

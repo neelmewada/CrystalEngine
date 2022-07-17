@@ -12,10 +12,10 @@ enum ResourceBindingFrequency : Uint32
     // Static resources once bound cannot be unbound/rebound. Useful for fixed global constants.
     // In vulkan, this uses the descriptor set 0.
     RESOURCE_BINDING_FREQUENCY_STATIC = 0,
-    // Resources that change binding on a per-frame basis.
+    // Resources that change binding on a per-pipeline basis.
     // In vulkan, this uses the descriptor set 1.
-    RESOURCE_BINDING_FREQUENCY_PER_FRAME = 1,
-    // Resources that are bound/unbound multiple times throughout the frame. Ex: Material Buffers (Per-Pipeline), model matrices (Per-Object), etc.
+    RESOURCE_BINDING_FREQUENCY_PER_PIPELINE = 1,
+    // Resources that are bound/unbound multiple times throughout the frame. Ex: Model matrices (Per-Object), etc.
     // In vulkan, this uses the descriptor sets 2 & 3.
     RESOURCE_BINDING_FREQUENCY_DYNAMIC = 2,
 };

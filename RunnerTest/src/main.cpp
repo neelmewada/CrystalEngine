@@ -47,6 +47,7 @@ public:
         delete m_pPSO;
         delete m_Texture2;
         delete m_Texture;
+        delete m_InstanceUniformBuffer;
         delete m_ObjectUniformBuffer;
         delete m_GlobalUniformBuffer;
         delete m_pRenderContext;
@@ -96,12 +97,6 @@ protected:
         m_GlobalUniforms.projection[1][1] *= -1;
         m_GlobalUniforms.view = glm::lookAt(glm::vec3(0.0f, 2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-        // -- Model Matrix --
-        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
-        {
-            m_ObjectUniform[i].model = glm::mat4(1.0f);
-        }
-
         // -- Render Context Creation --
         RenderContextCreateInfoVk renderContextInfo = {};
         renderContextInfo.engineContext = m_pEngineContext;
@@ -124,31 +119,54 @@ protected:
         m_GlobalUniformBuffer = m_pDeviceContext->CreateBuffer(globalUniformBufferInfo, globalUniformsData);
 
         // -- Object Uniform Buffer --
-        Uint64 minBufferOffsetAlignment = m_pDeviceContext->GetMinUniformBufferOffsetAlignment();
-        m_ObjectUniformStride = (sizeof(ObjectUniforms) + minBufferOffsetAlignment - 1) & ~(minBufferOffsetAlignment - 1);
-        m_ObjectUniformDataSize = m_ObjectUniformStride * _countof(m_ObjectUniform);
-        m_ObjectUniformData = (ObjectUniforms*)malloc(m_ObjectUniformDataSize);
-        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
-        {
-            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + m_ObjectUniformStride * i);
-            *ptr = m_ObjectUniform[i];
-        }
+//        Uint64 minBufferOffsetAlignment = m_pDeviceContext->GetMinUniformBufferOffsetAlignment();
+//        m_ObjectUniformStride = (sizeof(ObjectUniforms) + minBufferOffsetAlignment - 1) & ~(minBufferOffsetAlignment - 1);
+//        m_ObjectUniformDataSize = m_ObjectUniformStride * _countof(m_ObjectUniform);
+//        m_ObjectUniformData = (ObjectUniforms*)malloc(m_ObjectUniformDataSize);
+//        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
+//        {
+//            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + m_ObjectUniformStride * i);
+//            *ptr = m_ObjectUniform[i];
+//        }
 
         BufferCreateInfo objectBufferInfo = {};
         objectBufferInfo.pName = "Object Buffer";
-        objectBufferInfo.size = m_ObjectUniformDataSize;
-        objectBufferInfo.bindFlags = Vox::BIND_UNIFORM_BUFFER;
-        objectBufferInfo.allocType = Vox::DEVICE_MEM_CPU_TO_GPU;
-        objectBufferInfo.optimizationFlags = Vox::BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
-        objectBufferInfo.usageFlags = Vox::BUFFER_USAGE_DYNAMIC_OFFSET_BIT;
-        objectBufferInfo.structureByteStride = m_ObjectUniformStride;
+        objectBufferInfo.size = sizeof(m_ObjectUniformBlock);//m_ObjectUniformDataSize;
+        objectBufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
+        objectBufferInfo.allocType = DEVICE_MEM_CPU_TO_GPU;
+        objectBufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
+        //objectBufferInfo.usageFlags = Vox::BUFFER_USAGE_DYNAMIC_OFFSET_BIT;
+        //objectBufferInfo.structureByteStride = m_ObjectUniformStride;
+
+        for (int i = 0; i < 255; ++i)
+        {
+            m_InstanceUniformBlock.instances[i].instance = i;
+            m_ObjectUniformBlock.objects[i].model = glm::mat4(1.0f) * glm::translate(glm::vec3(i/2, 0, 0));
+        }
 
         BufferData objectBufferData = {};
-        objectBufferData.dataSize = m_ObjectUniformDataSize;
-        objectBufferData.pData = m_ObjectUniformData;
+        //objectBufferData.dataSize = m_ObjectUniformDataSize;
+        //objectBufferData.pData = m_ObjectUniformData;
+        objectBufferData.dataSize = sizeof(m_ObjectUniformBlock);
+        objectBufferData.pData = &m_ObjectUniformBlock;
         objectBufferData.offsetInBuffer = 0;
 
         m_ObjectUniformBuffer = m_pDeviceContext->CreateBuffer(objectBufferInfo, objectBufferData);
+
+        // -- Instance Buffer --
+        BufferCreateInfo instanceBufferInfo = {};
+        instanceBufferInfo.pName = "Instance Buffer";
+        instanceBufferInfo.size = sizeof(m_InstanceUniformBlock);
+        instanceBufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
+        instanceBufferInfo.allocType = DEVICE_MEM_CPU_TO_GPU;
+        instanceBufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
+
+        BufferData instanceBufferData = {};
+        instanceBufferData.dataSize = sizeof(m_InstanceUniformBlock);
+        instanceBufferData.pData = &m_InstanceUniformBlock;
+        instanceBufferData.offsetInBuffer = 0;
+
+        m_InstanceUniformBuffer = m_pDeviceContext->CreateBuffer(instanceBufferInfo, instanceBufferData);
 
         // -- Load Texture From File --
         fs::path binDir = IO::FileManager::GetBinDirectory();
@@ -226,8 +244,7 @@ protected:
 
         ShaderResourceVariableDesc variables[3] = {
             {"GlobalUniformBuffer", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT},
-            {"ObjectBuffer", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_STATIC_BINDING_BIT |
-                                                                  SHADER_RESOURCE_VARIABLE_DYNAMIC_OFFSET_BIT},
+            {"ObjectBuffer", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT},
             {"tex", SHADER_STAGE_ALL, SHADER_RESOURCE_VARIABLE_DYNAMIC_BINDING_BIT}
         };
 
@@ -257,8 +274,9 @@ protected:
         m_pDynamicSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_DYNAMIC);
 
         m_pStaticSRB->GetVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
-        m_pDynamicSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer, 0); // Uses Dynamic Offsets
+        m_pDynamicSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
         m_pDynamicSRB->GetVariableByName("tex")->Set(m_TextureView);
+        m_pDynamicSRB->GetVariableByName("InstanceBuffer")->Set(m_InstanceUniformBuffer);
 
         // -- MESH --
 
@@ -283,7 +301,7 @@ protected:
 
         // Vertex Buffer
         BufferCreateInfo vertBufferInfo = {};
-        vertBufferInfo.pName = "Rect";
+        vertBufferInfo.pName = "Rect Vertices";
         vertBufferInfo.bindFlags = Vox::BIND_VERTEX_BUFFER;
         vertBufferInfo.allocType = Vox::DEVICE_MEM_CPU_TO_GPU;
         vertBufferInfo.size = sizeof(vertices);
@@ -294,7 +312,7 @@ protected:
 
         // Index Buffer
         BufferCreateInfo indexBufferInfo = {};
-        indexBufferInfo.pName = "Rect";
+        indexBufferInfo.pName = "Rect Indices";
         indexBufferInfo.bindFlags = Vox::BIND_INDEX_BUFFER;
         indexBufferInfo.allocType = Vox::DEVICE_MEM_CPU_TO_GPU;
         indexBufferInfo.size = sizeof(indices);
@@ -324,13 +342,6 @@ protected:
             globalUniformData.dataSize = sizeof(m_GlobalUniforms);
             globalUniformData.pData = &m_GlobalUniforms;
             m_GlobalUniformBuffer->SetBufferData(globalUniformData);
-
-            //m_pRenderContext->UpdateGlobalUniforms(m_GlobalUniforms);
-
-            //BufferData uniformData;
-            //uniformData.dataSize = sizeof(m_GlobalUniforms);
-            //uniformData.pData = &m_GlobalUniforms;
-            //m_pPSO->UpdateUniformBuffer(uniformData);
         }
 
         static bool useTex2 = false;
@@ -353,15 +364,16 @@ protected:
 
         // Bind Graphics Pipeline
         m_pRenderContext->CmdBindGraphicsPipeline(m_pPSO);
+
         // Bind Shader Resources
         m_pRenderContext->CmdBindShaderResources(m_pStaticSRB); // Static Resources (set 0)
-        m_pRenderContext->CmdBindShaderResources(m_pDynamicSRB); // Per-Frame Resources (set 1)
+        m_pRenderContext->CmdBindShaderResources(m_pDynamicSRB); // Dynamic Resources (set 2)
 
         // Bind Mesh Data
         uint64_t offset = 0;
         m_pRenderContext->CmdBindVertexBuffers(1, &m_VertexBuffer, &offset);
         m_pRenderContext->CmdBindIndexBuffer(m_IndexBuffer, INDEX_TYPE_UINT16, 0);
-        m_pRenderContext->CmdDrawIndexed(6, 1, 0, 0, 0);
+        m_pRenderContext->CmdDrawIndexed(6, 24, 0, 0, 0);
 
         // End Render Pass
         m_pRenderContext->End();
@@ -376,19 +388,31 @@ protected:
         angle += m_DeltaTime * 30;
         if (angle > 360) angle -= 360;
 
-        m_ObjectUniform[0].model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+        m_ObjectUniformBlock.objects[0].model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+//        m_ObjectUniformBlock.objects[1].model = glm::mat4(1.0f) * glm::translate(glm::vec3(0, 1, 0));
+//        m_ObjectUniformBlock.objects[2].model = glm::mat4(1.0f) * glm::translate(glm::vec3(0, -1, 0));
+//        m_ObjectUniformBlock.objects[3].model = glm::mat4(1.0f) * glm::translate(glm::vec3(-1, 0, 0));
 
-        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
-        {
-            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + m_ObjectUniformStride * i);
-            *ptr = m_ObjectUniform[i];
-        }
+        BufferData objectBufferData = {};
+        objectBufferData.dataSize = sizeof(m_ObjectUniformBlock);
+        objectBufferData.pData = &m_ObjectUniformBlock;
+        objectBufferData.offsetInBuffer = 0;
 
-        BufferData objectUniformData = {};
-        objectUniformData.dataSize = m_ObjectUniformDataSize;
-        objectUniformData.pData = m_ObjectUniformData;
+        m_ObjectUniformBuffer->SetBufferData(objectBufferData);
 
-        m_ObjectUniformBuffer->SetBufferData(objectUniformData);
+//        m_ObjectUniform[0].model = glm::mat4(1.0f) * glm::rotate(glm::radians(angle), glm::vec3(0, 1, 0));
+//
+//        for (int i = 0; i < _countof(m_ObjectUniform); ++i)
+//        {
+//            auto ptr = (ObjectUniforms*)((Uint64)m_ObjectUniformData + m_ObjectUniformStride * i);
+//            *ptr = m_ObjectUniform[i];
+//        }
+//
+//        BufferData objectUniformData = {};
+//        objectUniformData.dataSize = m_ObjectUniformDataSize;
+//        objectUniformData.pData = m_ObjectUniformData;
+//
+//        m_ObjectUniformBuffer->SetBufferData(objectUniformData);
     }
 
 private: // Vulkan Functions
@@ -405,6 +429,7 @@ private: // Internal Members
     IShaderResourceBinding* m_pDynamicSRB;
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
+    IBuffer* m_InstanceUniformBuffer;
     IBuffer* m_GlobalUniformBuffer;
     IBuffer* m_ObjectUniformBuffer;
     ITexture* m_Texture;
@@ -420,8 +445,19 @@ private: // Internal Members
 
     struct ObjectUniforms {
         alignas(16) glm::mat4 model;
-        alignas(16) glm::vec3 colorTint;
-    } m_ObjectUniform[4];
+    };// m_ObjectUniform[4];
+
+    struct ObjectUniformBlock {
+        alignas(16) ObjectUniforms objects[255];
+    } m_ObjectUniformBlock;
+
+    struct InstanceID {
+        alignas(8) Uint32 instance;
+    };
+
+    struct InstanceUniformBlock {
+        InstanceID instances[255];
+    } m_InstanceUniformBlock;
 
     ObjectUniforms* m_ObjectUniformData = nullptr;
     size_t m_ObjectUniformDataSize;

@@ -175,26 +175,21 @@ void RenderContextVk::CmdBindShaderResources(IShaderResourceBinding* pSRB)
     }
 }
 
-void RenderContextVk::CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsets)
+void RenderContextVk::CmdBindVertexBuffers(uint32_t bufferCount, IBuffer** ppBuffers, uint64_t* offsetInBuffers)
 {
     std::vector<VkBuffer> buffers(bufferCount);
-    std::vector<uint64_t> offsetList(bufferCount);
     for (int i = 0; i < bufferCount; ++i)
     {
-        BufferVk* buffer = dynamic_cast<BufferVk*>(ppBuffers[i]);
-        if (buffer == nullptr)
-        {
-            throw std::runtime_error("Failed to bind Vertex Buffers! Couldn't cast IBuffer to VkBuffer!");
-        }
+        auto* buffer = dynamic_cast<BufferVk*>(ppBuffers[i]);
+        VOX_ASSERT(buffer != nullptr, "Failed to bind Vertex Buffers! Couldn't cast IBuffer to BufferVk");
         buffers[i] = buffer->GetBuffer();
-        offsetList[i] = offsets[i];
     }
 
     const auto& commandBuffers = m_pSwapChain->GetCommandBuffers();
 
-    for (int i = 0; i < commandBuffers.size(); ++i)
+    for (const auto& commandBuffer : commandBuffers)
     {
-        vkCmdBindVertexBuffers(commandBuffers[i], 0, bufferCount, buffers.data(), offsetList.data());
+        vkCmdBindVertexBuffers(commandBuffer, 0, bufferCount, buffers.data(), offsetInBuffers);
     }
 }
 

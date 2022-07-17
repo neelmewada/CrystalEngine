@@ -93,7 +93,7 @@ void BufferVk::UploadBufferDataToGPU(BufferData& bufferData)
         throw std::runtime_error("UploadBufferDataToGPU called on Buffer that isn't a GPU_ONLY buffer!");
     }
 
-    bool updatedRegularly = (m_OptimizationFlags & BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT);
+    bool regularlyUpdated = (m_OptimizationFlags & BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT);
     bool seldomUpdated = (m_OptimizationFlags & BUFFER_OPTIMIZE_UPDATE_SELDOM_BIT);
     bool neverUpdated = (m_OptimizationFlags & BUFFER_OPTIMIZE_UPDATE_NEVER_BIT);
 
@@ -175,7 +175,7 @@ void BufferVk::UploadBufferDataToGPU(BufferData& bufferData)
     delete stagingBuffer;
     stagingBuffer = nullptr;
 
-    if (!updatedRegularly) // Destroy the resources if they aren't updated regularly
+    if (!regularlyUpdated) // Destroy the resources if they aren't updated regularlyUpdated
     {
         m_UploadContextExists = false;
         // Upload CommandPool
