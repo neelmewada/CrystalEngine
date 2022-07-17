@@ -2,8 +2,8 @@
 
 #define STATIC(location) layout(set = 0, binding = location)
 #define PER_FRAME(location) layout(set = 1, binding = location)
-#define PER_PIPELINE(location) layout(set = 2, binding = location)
-#define DYNAMIC(location) layout(set = 3, binding = location)
+#define DYNAMIC0(location) layout(set = 2, binding = location)
+#define DYNAMIC1(location) layout(set = 3, binding = location)
 
 #define SET2(location) layout(set = 2, binding = location)
 #define SET3(location) layout(set = 3, binding = location)
@@ -31,12 +31,12 @@ STATIC(0) uniform GlobalUniformBuffer {
     mat4 view;
 };
 
-PER_FRAME(0) uniform ObjectBuffer {
+DYNAMIC0(0) uniform ObjectBuffer {
     mat4 model;
     vec3 colorTint;
 };
 
-PER_FRAME(1) uniform sampler2D tex;
+DYNAMIC0(1) uniform sampler2D tex;
 
 /*
 // Set1: Per-Pass Data

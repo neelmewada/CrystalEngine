@@ -18,7 +18,7 @@ ShaderResourceVariableVk::ShaderResourceVariableVk(const ShaderResourceVariableV
     m_ResourceVariableType = createInfo.resourceType;
     m_DescriptorCount = createInfo.descriptorCount;
     m_Name = createInfo.name;
-    m_DynamicOffset = createInfo.usesDynamicOffset;
+    m_UsesDynamicOffset = createInfo.usesDynamicOffset;
     m_pReceiver = pReceiver;
 }
 
@@ -29,8 +29,36 @@ ShaderResourceVariableVk::~ShaderResourceVariableVk()
 
 void ShaderResourceVariableVk::Set(IDeviceObject* pObject)
 {
-    m_pReceiver->BindDeviceObject(m_BindingRef, pObject, m_Set, m_Binding,
+    m_pBoundObject = pObject;
+    m_pReceiver->BindDeviceObject(pObject, m_Set, m_Binding,
                                   m_DescriptorCount, m_ResourceVariableType);
+}
+
+void ShaderResourceVariableVk::Set(IDeviceObject* pObject, Uint32 dynamicOffset)
+{
+    m_DynamicOffset = dynamicOffset;
+    Set(pObject);
+    SetDynamicOffset(m_DynamicOffset);
+}
+
+void ShaderResourceVariableVk::SetDynamicOffset(Uint32 offset)
+{
+    if (!m_UsesDynamicOffset) return;
+    m_DynamicOffset = offset;
+    VOX_ASSERT(m_pBoundObject != nullptr, "ERROR: IShaderResourceVariable::SetDynamicOffset called before any Buffer is bound to it");
+    if (m_pBoundObject->GetDeviceObjectType() == IDeviceObject::DEVICE_OBJECT_BUFFER)
+    {
+        auto* buffer = dynamic_cast<BufferVk*>(m_pBoundObject);
+        VOX_ASSERT(buffer != nullptr, "Buffer bound to IShaderResourceVariable, is not of type BufferVk");
+        m_DynamicOffset = offset * buffer->GetStructureByteStride();
+    }
+    m_pReceiver->OnDynamicOffsetUpdated(m_Set, m_Binding, m_DynamicOffset);
+}
+
+Uint32 ShaderResourceVariableVk::GetDynamicOffset()
+{
+    if (!m_UsesDynamicOffset) return 0;
+    return m_DynamicOffset;
 }
 
 #pragma region ShaderResourceBindingVk
@@ -85,6 +113,9 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
     descriptorSetInfo.pSetLayouts = setLayouts.data();
 
     m_DescriptorSets.resize(descriptorSetInfo.descriptorSetCount);
+    m_DynamicDescriptorCount = 0;
+    m_DynamicOffsets.clear();
+    m_VariableBindings.clear();
 
     VK_ASSERT(vkAllocateDescriptorSets(m_pDevice->GetDevice(), &descriptorSetInfo, m_DescriptorSets.data()),
               "Failed to allocate Static Descriptor Set for Graphics Pipeline!");
@@ -104,7 +135,15 @@ ShaderResourceBindingVk::ShaderResourceBindingVk(const ShaderResourceBindingVkCr
 
         auto* variableBinding = new ShaderResourceVariableVk(varInfo, this);
         m_VariableBindings.push_back(variableBinding);
+
+        if (varInfo.usesDynamicOffset)
+        {
+            m_DynamicDescriptorCount++;
+            m_VariablePositionInDynamicOffsetsList[{varInfo.set, varInfo.binding}] = m_DynamicDescriptorCount - 1;
+        }
     }
+
+    m_DynamicOffsets.resize(m_DynamicDescriptorCount, 0);
 }
 
 ShaderResourceBindingVk::~ShaderResourceBindingVk()
@@ -131,27 +170,23 @@ IShaderResourceVariable* ShaderResourceBindingVk::GetVariableByName(const char* 
 
 void ShaderResourceBindingVk::CmdBindDescriptorSets(VkCommandBuffer commandBuffer, int currentFrame)
 {
-    Uint32 offset = 0;
-    Uint32 dynamicDescriptorCount = 0;
-    for (const auto& variableBinding: m_VariableBindings)
-    {
-        if (variableBinding->m_DynamicOffset)
-        {
-            dynamicDescriptorCount++;
-        }
-    }
-
-    auto descriptorSetCountPerFrame = m_DescriptorSets.size() / m_MaxSimultaneousFrames;
+    Uint32 descriptorSetsStridePerFrame = m_DescriptorSets.size() / m_MaxSimultaneousFrames;
 
     auto currentPipeline = m_pRenderContext->GetBoundGraphicsPipeline();
 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipeline->GetPipelineLayout(), m_FirstSet,
                             m_SetCount,
-                            &*(m_DescriptorSets.begin() + currentFrame * descriptorSetCountPerFrame),
-                            dynamicDescriptorCount, &offset);
+                            &*(m_DescriptorSets.begin() + currentFrame * descriptorSetsStridePerFrame),
+                            m_DynamicDescriptorCount, m_DynamicOffsets.data());
 }
 
-void ShaderResourceBindingVk::BindDeviceObject(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject,
+void ShaderResourceBindingVk::OnDynamicOffsetUpdated(Uint32 set, Uint32 binding, Uint32 dynamicOffsetValue)
+{
+    Uint32 index = m_VariablePositionInDynamicOffsetsList[{set, binding}];
+    m_DynamicOffsets[index] = dynamicOffsetValue;
+}
+
+void ShaderResourceBindingVk::BindDeviceObject(IDeviceObject* pDeviceObject,
                                                Uint32 set, Uint32 binding, Uint32 descriptorCount,
                                                ShaderResourceVariableType resourceType)
 {

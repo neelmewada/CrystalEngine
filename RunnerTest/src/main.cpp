@@ -40,7 +40,7 @@ public:
         delete m_VertexBuffer;
         if (m_ObjectUniformData != nullptr)
             free(m_ObjectUniformData);
-        delete m_pPerFrameSRB;
+        delete m_pDynamicSRB;
         delete m_pStaticSRB;
         if (m_pPSO != nullptr)
             delete m_pPSO2;
@@ -254,11 +254,11 @@ protected:
         m_pPSO2 = m_pDeviceContext->CreateGraphicsPipelineState(pipelineInfo);
 
         m_pStaticSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_STATIC);
-        m_pPerFrameSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_PER_FRAME);
+        m_pDynamicSRB = m_pPSO->CreateResourceBinding(RESOURCE_BINDING_FREQUENCY_DYNAMIC);
 
         m_pStaticSRB->GetVariableByName("GlobalUniformBuffer")->Set(m_GlobalUniformBuffer);
-        m_pPerFrameSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer);
-        m_pPerFrameSRB->GetVariableByName("tex")->Set(m_TextureView);
+        m_pDynamicSRB->GetVariableByName("ObjectBuffer")->Set(m_ObjectUniformBuffer, 0); // Uses Dynamic Offsets
+        m_pDynamicSRB->GetVariableByName("tex")->Set(m_TextureView);
 
         // -- MESH --
 
@@ -338,7 +338,7 @@ protected:
         if (e.key.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_SPACE)
         {
             useTex2 = !useTex2;
-            m_pPerFrameSRB->GetVariableByName("tex")->Set(useTex2 ? m_TextureView2 : m_TextureView);
+            m_pDynamicSRB->GetVariableByName("tex")->Set(useTex2 ? m_TextureView2 : m_TextureView);
         }
     }
 
@@ -355,7 +355,7 @@ protected:
         m_pRenderContext->CmdBindGraphicsPipeline(m_pPSO);
         // Bind Shader Resources
         m_pRenderContext->CmdBindShaderResources(m_pStaticSRB); // Static Resources (set 0)
-        m_pRenderContext->CmdBindShaderResources(m_pPerFrameSRB); // Per-Frame Resources (set 1)
+        m_pRenderContext->CmdBindShaderResources(m_pDynamicSRB); // Per-Frame Resources (set 1)
 
         // Bind Mesh Data
         uint64_t offset = 0;
@@ -402,7 +402,7 @@ private: // Internal Members
     IGraphicsPipelineState* m_pPSO;
     IGraphicsPipelineState* m_pPSO2 = nullptr;
     IShaderResourceBinding* m_pStaticSRB;
-    IShaderResourceBinding* m_pPerFrameSRB;
+    IShaderResourceBinding* m_pDynamicSRB;
     IBuffer* m_VertexBuffer;
     IBuffer* m_IndexBuffer;
     IBuffer* m_GlobalUniformBuffer;

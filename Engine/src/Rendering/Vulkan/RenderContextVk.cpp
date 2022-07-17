@@ -25,10 +25,8 @@ RenderContextVk::RenderContextVk(RenderContextCreateInfoVk &renderContextInfo)
     m_pDevice = dynamic_cast<DeviceContextVk*>(renderContextInfo.deviceContext);
     m_pSwapChain = dynamic_cast<SwapChainVk*>(renderContextInfo.swapChain);
     m_pSwapChain->SetRenderContext(this);
-    //m_GlobalUniforms = renderContextInfo.initialGlobalUniforms;
 
     CreateDescriptorPool();
-    //CreateGlobalDescriptorSet();
 
     std::cout << "Created RenderContextVk" << std::endl;
 }
@@ -64,101 +62,10 @@ void RenderContextVk::CreateDescriptorPool()
         throw std::runtime_error("Failed to create Descriptor Pool!");
     }
 }
-/*
-void RenderContextVk::CreateGlobalDescriptorSet()
-{
-    // -- Global Descriptor Set Layout --
-    VkDescriptorSetLayoutBinding globalDescriptorSetBinding = {};
-    globalDescriptorSetBinding.binding = 0;
-    globalDescriptorSetBinding.descriptorCount = 1;
-    globalDescriptorSetBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    globalDescriptorSetBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
-    globalDescriptorSetBinding.pImmutableSamplers = nullptr;
-
-    VkDescriptorSetLayoutCreateInfo layoutCreateInfo = {};
-    layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutCreateInfo.bindingCount = 1;
-    layoutCreateInfo.pBindings = &globalDescriptorSetBinding;
-
-    VK_ASSERT(vkCreateDescriptorSetLayout(m_pDevice->GetDevice(), &layoutCreateInfo, nullptr, &m_GlobalDescriptorSetLayout),
-              "Failed to create Global Descriptor Set Layout!");
-
-    auto maxSimultaneousFrames = m_pSwapChain->GetMaxSimultaneousFrameDraws();
-    uint64_t bufferSize = sizeof(GlobalUniforms);
-
-    // -- Global Uniform Buffer --
-    m_GlobalUniformBuffer.resize(maxSimultaneousFrames);
-
-    for (int i = 0; i < maxSimultaneousFrames; ++i)
-    {
-        BufferCreateInfo bufferInfo = {};
-        bufferInfo.size = bufferSize;
-        bufferInfo.pName = "Global Uniform Buffer";
-        bufferInfo.optimizationFlags = BUFFER_OPTIMIZE_UPDATE_REGULAR_BIT;
-        bufferInfo.bindFlags = BIND_UNIFORM_BUFFER;
-        bufferInfo.allocType = DEVICE_MEM_CPU_TO_GPU;
-
-        BufferData initialData = {};
-        initialData.pData = &m_GlobalUniforms;
-        initialData.dataSize = sizeof(GlobalUniforms);
-
-        auto* buffer = new BufferVk(bufferInfo, initialData, m_pDevice);
-        m_GlobalUniformBuffer[i] = buffer;
-    }
-
-    // -- Global Descriptor Set --
-    m_GlobalDescriptorSet.resize(maxSimultaneousFrames);
-
-    std::vector<VkDescriptorSetLayout> globalSetLayout(m_GlobalDescriptorSet.size(), m_GlobalDescriptorSetLayout);
-
-    VkDescriptorSetAllocateInfo allocateInfo = {};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocateInfo.descriptorPool = m_DescriptorPool;
-    allocateInfo.descriptorSetCount = static_cast<uint32_t>(m_GlobalDescriptorSet.size()); // Number of sets to allocate
-    allocateInfo.pSetLayouts = globalSetLayout.data();
-
-    VK_ASSERT(vkAllocateDescriptorSets(m_pDevice->GetDevice(), &allocateInfo, m_GlobalDescriptorSet.data()),
-              "Failed to allocate Global Descriptor Set!");
-
-    for (int i = 0; i < m_GlobalDescriptorSet.size(); ++i)
-    {
-        VkDescriptorBufferInfo bufferInfo = {};
-        bufferInfo.buffer = m_GlobalUniformBuffer[i]->GetBuffer(); // Buffer to get data from
-        bufferInfo.offsetInBuffer = 0;              // Position of start of data
-        bufferInfo.range = bufferSize;      // Size of the data
-
-        // Data about connection between binding and buffer
-        VkWriteDescriptorSet setWrite = {};
-        setWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        setWrite.dstSet = m_GlobalDescriptorSet[i];  // Descriptor set to update
-        setWrite.dstBinding = 0;        // Binding to update (matches with binding on layout/shader)
-        setWrite.dstArrayElement = 0;   // Index in array to update
-        setWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        setWrite.descriptorCount = 1;  // No. of descriptors to update
-        setWrite.pBufferInfo = &bufferInfo;  // Info about buffer data to bind
-        setWrite.pImageInfo = nullptr;
-        setWrite.pTexelBufferView = nullptr;
-
-        vkUpdateDescriptorSets(m_pDevice->GetDevice(), 1, &setWrite, 0, nullptr);
-    }
-}*/
 
 #pragma endregion
 
 #pragma region Public API
-
-/*void RenderContextVk::UpdateGlobalUniforms(const GlobalUniforms& globals)
-{
-    BufferData bufferData = {};
-    bufferData.dataSize = sizeof(GlobalUniforms);
-    bufferData.pData = &globals;
-    bufferData.offsetInBuffer = 0;
-
-    for (int i = 0; i < m_GlobalUniformBuffer.size(); ++i)
-    {
-        m_GlobalUniformBuffer[i]->SetBufferData(bufferData);
-    }
-}*/
 
 void RenderContextVk::SetClearColor(float clearColor[4])
 {

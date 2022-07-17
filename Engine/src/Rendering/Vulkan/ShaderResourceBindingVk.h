@@ -19,10 +19,10 @@ protected:
     virtual ~IShaderResourceBindingCallbacks() {}
 
 public: // Public API
-    virtual void BindDeviceObject(IShaderResourceBinding* resourceBinding, IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
+    virtual void BindDeviceObject(IDeviceObject* pDeviceObject, Uint32 set, Uint32 binding,
                                   Uint32 descriptorCount, ShaderResourceVariableType resourceType) = 0;
 
-    //virtual void BindShaderResource(IShaderResourceBinding* binding) = 0;
+    virtual void OnDynamicOffsetUpdated(Uint32 set, Uint32 binding, Uint32 dynamicOffsetValue) = 0;
 };
 
 class ShaderResourceBindingVk;
@@ -49,6 +49,9 @@ public:
 
 public: // Public API
     void Set(IDeviceObject* pObject) override;
+    void Set(IDeviceObject* pObject, Uint32 dynamicOffset) override;
+    void SetDynamicOffset(Uint32 offset) override;
+    Uint32 GetDynamicOffset() override;
 
 private: // Internal Members
     std::string m_Name;
@@ -57,8 +60,11 @@ private: // Internal Members
     Uint32 m_DescriptorCount = 0;
     ShaderResourceVariableType m_ResourceVariableType;
     IShaderResourceBindingCallbacks* m_pReceiver;
-    ShaderResourceBindingVk* m_BindingRef;
-    bool m_DynamicOffset;
+    bool m_UsesDynamicOffset;
+
+    // - Data
+    Uint32 m_DynamicOffset = 0;
+    IDeviceObject* m_pBoundObject = nullptr;
 };
 
 struct ShaderResourceBindingVkCreateInfo
@@ -97,9 +103,11 @@ public:
 public: // Public API
     IShaderResourceVariable* GetVariableByName(const char* pName) override;
 
-    void BindDeviceObject(IShaderResourceBinding *resourceBinding, IDeviceObject *pDeviceObject,
+    void BindDeviceObject(IDeviceObject *pDeviceObject,
                           Uint32 set, Uint32 binding, Uint32 descriptorCount,
                           ShaderResourceVariableType resourceType) override;
+
+    void OnDynamicOffsetUpdated(Uint32 set, Uint32 binding, Uint32 dynamicOffsetValue) override;
 
     void CmdBindDescriptorSets(VkCommandBuffer cmdBuffer, int currentFrame);
 
@@ -113,8 +121,12 @@ private: // Internal Members
     Uint32 m_FirstSet;
     Uint32 m_SetCount;
     int m_MaxSimultaneousFrames;
-
     ResourceBindingFrequency m_BindingFrequency;
+
+    Uint32 m_DynamicDescriptorCount;
+    std::vector<Uint32> m_DynamicOffsets;
+    std::map<ResourceLocation, Uint32> m_VariablePositionInDynamicOffsetsList;
+
     std::vector<VkDescriptorSet> m_DescriptorSets;
     std::vector<ShaderResourceVariableVk*> m_VariableBindings;
     std::map<ResourceLocation, ShaderVariableMetaData> m_VariableMetaData;
