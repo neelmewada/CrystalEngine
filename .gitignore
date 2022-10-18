@@ -1,3 +1,8 @@
+# Custom
+[Bb]uild
+[Bb]inaries
+[Ii]ntermediates
+
 # Prerequisites
 *.d
 
@@ -54,9 +59,6 @@ cmake-build-*/
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Icon must end with two \r
-Icon
 
 # Thumbnails
 ._*
