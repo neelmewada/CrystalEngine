@@ -7,6 +7,6 @@ include(CMake/OutputDirectory.cmake)
 # Initialize
 ################################################################################
 include(CMake/GeneralSettings.cmake)
-include(CMake/PlatformSettings.cmake)
+include(CMake/PAL.cmake)
 include(CMake/Configurations.cmake)
 
