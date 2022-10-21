@@ -1,49 +1,53 @@
 
 include_guard(GLOBAL)
 
-# Detect platforms
+# Get platform name maps
+file(GLOB detection_files "CMake/Platform/*/PALDetection_*.cmake")
+foreach(detection_file ${detection_files})
+    include(${detection_file})
+endforeach()
 
 if (CE_STANDALONE)
     
     if (${CE_STANDALONE} STREQUAL "Windows")
 
-        set(PAL_STANDALONE_PLATFORM_NAME "Windows")
-        set(CMAKE_SYSTEM_NAME "Windows")
-        set(CE_STANDALONE ON)
-        set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
+        ce_set(PAL_STANDALONE_PLATFORM_NAME "Windows")
+        ce_set(CMAKE_SYSTEM_NAME "Windows")
+        ce_set(CE_STANDALONE ON)
+        ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
     elseif(${CE_STANDALONE} STREQUAL "Mac")
 
-        set(PAL_STANDALONE_PLATFORM_NAME "Mac")
-        set(CMAKE_SYSTEM_NAME "Darwin")
-        set(CE_STANDALONE ON)
-        set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
+        ce_set(PAL_STANDALONE_PLATFORM_NAME "Mac")
+        ce_set(CMAKE_SYSTEM_NAME "Darwin")
+        ce_set(CE_STANDALONE ON)
+        ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
     elseif(${CE_STANDALONE} STREQUAL "Linux")
 
-        set(PAL_STANDALONE_PLATFORM_NAME "Linux")
-        set(CMAKE_SYSTEM_NAME "Linux")
-        set(CE_STANDALONE ON)
-        set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
+        ce_set(PAL_STANDALONE_PLATFORM_NAME "Linux")
+        ce_set(CMAKE_SYSTEM_NAME "Linux")
+        ce_set(CE_STANDALONE ON)
+        ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
     elseif(${CE_STANDALONE} STREQUAL "Android")
 
-        set(PAL_STANDALONE_PLATFORM_NAME "Android")
-        set(CMAKE_SYSTEM_NAME "Android")
-        set(CE_STANDALONE ON)
-        set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
+        ce_set(PAL_STANDALONE_PLATFORM_NAME "Android")
+        ce_set(CMAKE_SYSTEM_NAME "Android")
+        ce_set(CE_STANDALONE ON)
+        ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
     elseif(${CE_STANDALONE} STREQUAL "iOS")
 
-        set(PAL_STANDALONE_PLATFORM_NAME "iOS")
-        set(CMAKE_SYSTEM_NAME "iOS")
-        set(CE_STANDALONE ON)
-        set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
+        ce_set(PAL_STANDALONE_PLATFORM_NAME "iOS")
+        ce_set(CMAKE_SYSTEM_NAME "iOS")
+        ce_set(CE_STANDALONE ON)
+        ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
     elseif(${CE_STANDALONE} STREQUAL "OFF")
 
-        set(CE_STANDALONE OFF)
-        set(PAL_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+        ce_set(CE_STANDALONE OFF)
+        ce_set(PAL_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
         
     else()
         message(FATAL_ERROR "Invalid CE_STANDALONE platform passed: ${CE_STANDALONE}")
@@ -68,6 +72,11 @@ endif()
 string(TOLOWER ${PAL_PLATFORM_NAME} PAL_PLATFORM_NAME_LOWERCASE)
 string(TOLOWER ${PAL_HOST_PLATFORM_NAME} PAL_HOST_PLATFORM_NAME_LOWERCASE)
 
+string(TOLOWER ${PAL_PLATFORM_NAME} PAL_PLATFORM_NAME_LOWERCASE)
+ce_set(PAL_PLATFORM_NAME_LOWERCASE ${PAL_PLATFORM_NAME_LOWERCASE})
+
+string(TOLOWER ${PAL_HOST_PLATFORM_NAME} PAL_HOST_PLATFORM_NAME_LOWERCASE)
+ce_set(PAL_HOST_PLATFORM_NAME_LOWERCASE ${PAL_HOST_PLATFORM_NAME_LOWERCASE})
 
 include(CMake/Platform/${PAL_PLATFORM_NAME}/PAL_${PAL_PLATFORM_NAME_LOWERCASE}.cmake)
 
