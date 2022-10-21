@@ -1,6 +1,8 @@
 
 include_guard(GLOBAL)
 
+# Detect platforms
+
 if (CE_STANDALONE)
     
     if (${CE_STANDALONE} STREQUAL "Windows")
@@ -48,8 +50,13 @@ if (CE_STANDALONE)
     endif()
 
 else()
-    set(PAL_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
-    set(PAL_HOST_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        set(PAL_PLATFORM_NAME "Mac")
+        set(PAL_HOST_PLATFORM_NAME "Mac")
+    else()
+        set(PAL_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+        set(PAL_HOST_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+    endif()
 endif()
 
 if (${CE_STANDALONE})
@@ -58,7 +65,9 @@ else()
     message(STATUS "Editor Build: ${PAL_PLATFORM_NAME}")
 endif()
 
+string(TOLOWER ${PAL_PLATFORM_NAME} PAL_PLATFORM_NAME_LOWERCASE)
+string(TOLOWER ${PAL_HOST_PLATFORM_NAME} PAL_HOST_PLATFORM_NAME_LOWERCASE)
 
 
-
+include(CMake/Platform/${PAL_PLATFORM_NAME}/PAL_${PAL_PLATFORM_NAME_LOWERCASE}.cmake)
 
