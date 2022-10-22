@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 
 project(ThirdParty)
 
+# Utils
 find_package(xxHash REQUIRED)
+
+# Qt5
 find_package(Qt REQUIRED)
 
 

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(Core CXX)
 
 ce_add_target(Core SHARED
+    NAMESPACE CE
     FOLDER Engine
     GENERATED
     PCHHEADER 

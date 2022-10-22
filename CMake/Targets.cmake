@@ -17,7 +17,7 @@ function(ce_add_target NAME TARGET_TYPE)
     string(TOUPPER ${NAME} NAME_UPPERCASE)
 
     set(options GENERATED)
-    set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER)
+    set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE)
     set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
 
     cmake_parse_arguments(ce_add_target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -70,6 +70,11 @@ function(ce_add_target NAME TARGET_TYPE)
     
     if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
         add_library(${NAME} ${TARGET_TYPE} ${SOURCES})
+
+        if(ce_add_target_NAMESPACE)
+            add_library("${ce_add_target_NAMESPACE}::${NAME}" ALIAS ${NAME})
+        endif()
+
     elseif(${TARGET_TYPE_${TARGET_TYPE}_IS_EXECUTABLE})
         add_executable(${NAME} ${EXE_FLAG} ${SOURCES})
     else()
