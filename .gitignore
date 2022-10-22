@@ -3,6 +3,8 @@
 [Ii]ntermediates
 ThirdParty/*
 !ThirdParty/CMakeLists.txt
+!ThirdParty/Find*.cmake
+!ThirdParty/*/Find*.cmake
 
 # Prerequisites
 *.d
