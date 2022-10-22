@@ -1,6 +1,8 @@
 # Custom
 [Bb]uild
 [Ii]ntermediates
+ThirdParty/*
+!ThirdParty/CMakeLists.txt
 
 # Prerequisites
 *.d

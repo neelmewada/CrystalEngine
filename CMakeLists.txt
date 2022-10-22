@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 
+if(NOT PROJECT_NAME)
+    project(CrystalEngine
+        LANGUAGES C CXX)
+endif()
+
 include(CMake/CESet.cmake)
 
 ################################################################################
@@ -16,5 +21,5 @@ if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     add_subdirectory(Tools)
 endif()
 
-
+add_subdirectory(Engine/Source/Core)
 

@@ -58,10 +58,12 @@ else()
     ce_set(PAL_HOST_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
 endif()
 
-if (${CE_STANDALONE})
+if (${CE_STANDALONE}) # Standalone build (runtime)
     message(STATUS "Standalone Build: ${PAL_PLATFORM_NAME}")
-else()
+    add_compile_definitions(CE_STANDALONE=1)
+else() # Editor build (host)
     message(STATUS "Editor Build: ${PAL_PLATFORM_NAME}")
+    add_compile_definitions(CE_EDITOR_BUILD=1)
 endif()
 
 
