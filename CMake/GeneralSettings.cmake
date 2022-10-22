@@ -10,3 +10,4 @@ set(CE_EXTERNAL_SUBDIRS "" CACHE STRING "Additional list of subdirectory to recu
 
 ce_set(CE_ROOT_FOLDER ${CMAKE_CURRENT_SOURCE_DIR})
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)

@@ -1,4 +1,4 @@
 
 set(FILES
-    Private/CorePCH.cpp
+    Private/Core.cpp
 )

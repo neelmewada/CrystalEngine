@@ -1,5 +1,5 @@
 
 set(FILES
-    Public/CoreDLL.h
-    Public/CorePCH.h
+    Public/Core.h
+    Public/CoreMinimal.h
 )

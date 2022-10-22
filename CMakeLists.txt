@@ -6,6 +6,9 @@ if(NOT PROJECT_NAME)
 endif()
 
 include(CMake/CESet.cmake)
+include(CMake/Macros.cmake)
+
+ce_set(CE_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 ################################################################################
 # Initialize
@@ -17,14 +20,18 @@ include(CMake/OutputDirectory.cmake)
 include(CMake/Targets.cmake)
 include(CMake/ThirdParty.cmake)
 
+# Import 3rd Party libraries
 add_subdirectory(ThirdParty)
 
+# Build Host Tools
 if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     add_subdirectory(Tools)
 endif()
 
-add_subdirectory(Engine/Source/Core)
+#Build Engine
+add_subdirectory(Engine)
 
+# Build Editor
 if(${PAL_TRAIT_BUILD_EDITOR})
     
 endif()

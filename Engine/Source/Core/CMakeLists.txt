@@ -3,7 +3,12 @@ cmake_minimum_required(VERSION 3.20)
 project(Core CXX)
 
 ce_add_target(Core SHARED
+    FOLDER Engine
     GENERATED
+    PCHHEADER 
+        PUBLIC 
+            Public/Core.h
+            Public/CoreMinimal.h
     FILES_CMAKE
         PRIVATE
             core_private_files.cmake
@@ -18,7 +23,8 @@ ce_add_target(Core SHARED
         PRIVATE
             Core_EXPORTS
     BUILD_DEPENDENCIES
-        PUBLIC
-            
-    )
+        PRIVATE
+            ThirdParty::xxHash
+)
+
 

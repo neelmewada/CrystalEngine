@@ -4,7 +4,6 @@
 ThirdParty/*
 !ThirdParty/CMakeLists.txt
 !ThirdParty/Find*.cmake
-!ThirdParty/*/Find*.cmake
 
 # Prerequisites
 *.d
@@ -108,6 +107,3 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# Misc
-/Local-README.md
-/xcode/
