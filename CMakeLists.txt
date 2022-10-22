@@ -12,8 +12,16 @@ include(CMake/OutputDirectory.cmake)
 include(CMake/Targets.cmake)
 include(CMake/ThirdParty.cmake)
 
+add_subdirectory(ThirdParty)
+
 if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     add_subdirectory(Tools)
+endif()
+
+
+
+if(${PAL_TRAIT_BUILD_EDITOR})
+    
 endif()
 
 
