@@ -1,4 +1,3 @@
 
-set(FILES
-    Private/Core.cpp
-)
+file(GLOB_RECURSE FILES "Private/*.h" "Private/*.cpp")
+

@@ -5,7 +5,7 @@ project(Core CXX)
 ce_add_target(Core SHARED
     NAMESPACE CE
     FOLDER Engine
-    GENERATED
+    #GENERATED
     PCHHEADER 
         PUBLIC 
             Public/Core.h

@@ -53,8 +53,10 @@ CTestTestfile.cmake
 _deps
 cmake-build-*/
 
-# Idea
+# IDE
 .idea
+.vs
+.vscode
 
 
 # macOS General

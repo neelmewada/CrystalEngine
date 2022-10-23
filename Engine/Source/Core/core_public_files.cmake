@@ -1,5 +1,3 @@
 
-set(FILES
-    Public/Core.h
-    Public/CoreMinimal.h
-)
+file(GLOB_RECURSE FILES "Public/*.h" "Public/*.cpp")
+

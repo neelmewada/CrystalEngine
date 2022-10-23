@@ -12,11 +12,41 @@ ce_set(TARGET_TYPE_STATIC_IS_STATICLIB TRUE)
 ce_set(TARGET_TYPE_SHARED_IS_SHAREDLIB TRUE)
 ce_set(TARGET_TYPE_MODULE_IS_SHAREDLIB TRUE)
 
+function(ce_group_sources_by_folder target)
+  set(SOURCE_GROUP_DELIMITER "/")
+  set(last_dir "")
+  set(files "")
+
+  get_target_property(sources ${target} SOURCES)
+
+  foreach(file ${sources})
+    if(IS_ABSOLUTE ${file})
+        file(RELATIVE_PATH relative_file "${PROJECT_SOURCE_DIR}" ${file})
+    else()
+        set(relative_file ${file})
+    endif()
+    
+    get_filename_component(dir "${relative_file}" PATH)
+    if(NOT "${dir}" STREQUAL "${last_dir}")
+      if(files)
+        source_group("${last_dir}" FILES ${files})
+      endif()
+      set(files "")
+    endif()
+    set(files ${files} ${file})
+    set(last_dir "${dir}")
+  endforeach()
+
+  if(files)
+    source_group("${last_dir}" FILES ${files})
+  endif()
+endfunction()
+
 # \arg:TARGET_TYPE: SHARED; STATIC; MODULE; CONSOLEAPP ; GUIAPP ;
 function(ce_add_target NAME TARGET_TYPE)
     string(TOUPPER ${NAME} NAME_UPPERCASE)
 
-    set(options GENERATED)
+    set(options GENERATED AUTOMOC AUTOUIC AUTORCC)
     set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE)
     set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
 
@@ -80,10 +110,31 @@ function(ce_add_target NAME TARGET_TYPE)
     else()
         message(FATAL_ERROR "Invalid TARGET_TYPE passed: ${TARGET_TYPE}")
     endif()
+    
+    ce_group_sources_by_folder(${NAME})
 
-    source_group(Public FILES ${PUBLIC_FILES})
-    source_group(Private FILES ${PRIVATE_FILES})
-    source_group(Generated FILES ${GENERATED_FILES})
+    # source_group(Public FILES ${PUBLIC_FILES})
+    # source_group(Private FILES ${PRIVATE_FILES})
+    # source_group(Generated FILES ${GENERATED_FILES})
+
+    # Qt AUTO*
+
+    if(ce_add_target_AUTOMOC)
+        set_target_properties(${NAME} 
+            PROPERTIES AUTOMOC
+        )
+    endif()
+    if(ce_add_target_AUTOUIC)
+        set_target_properties(${NAME} 
+            PROPERTIES AUTOUIC
+        )
+    endif()
+    if(ce_add_target_AUTORCC)
+        set_target_properties(${NAME} 
+            PROPERTIES AUTORCC
+        )
+    endif()
+    
 
     # PCH
 
