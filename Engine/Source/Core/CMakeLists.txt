@@ -29,3 +29,7 @@ ce_add_target(Core SHARED
 )
 
 
+if(${PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED})
+    add_subdirectory(Tests)
+endif()
+

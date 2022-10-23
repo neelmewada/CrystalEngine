@@ -156,6 +156,19 @@ function(ce_add_target NAME TARGET_TYPE)
         )
     endif()
     
+    # RUNTIME_DEPENDENCIES
+
+    set(multiValueArgs PRIVATE PUBLIC INTERFACE)
+    cmake_parse_arguments(ce_add_target_RUNTIME_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_target_RUNTIME_DEPENDENCIES})
+
+    if(ce_add_target_RUNTIME_DEPENDENCIES_PRIVATE OR ce_add_target_RUNTIME_DEPENDENCIES_PUBLIC OR ce_add_target_RUNTIME_DEPENDENCIES_INTERFACE)
+        target_link_libraries(${NAME}
+            PRIVATE   ${ce_add_target_RUNTIME_DEPENDENCIES_PRIVATE}
+            PUBLIC    ${ce_add_target_RUNTIME_DEPENDENCIES_PUBLIC}
+            INTERFACE ${ce_add_target_RUNTIME_DEPENDENCIES_INTERFACE}
+        )
+    endif()
+    
 
 endfunction()
 
