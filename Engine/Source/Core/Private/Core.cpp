@@ -1,6 +1,5 @@
 
+#include "Core.h"
 
-void Test()
-{
 
-}
+

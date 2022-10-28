@@ -1,0 +1,24 @@
+#pragma once
+
+#include "Misc/CoreDefines.h"
+
+namespace CE
+{
+
+    class CORE_API Module
+    {
+    public:
+        Module();
+        ~Module();
+
+        CE_NO_COPY(Module);
+
+        virtual void StartupModule() = 0;
+        virtual void ShutdownModule() = 0;
+
+        
+    };
+    
+} // namespace CE
+
+

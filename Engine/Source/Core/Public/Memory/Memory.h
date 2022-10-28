@@ -12,6 +12,7 @@ namespace CE
 {
     class CORE_API Memory
     {
+    public:
         CE_STATIC_CLASS(Memory);
         
         static inline void* SystemMalloc(SIZE_T size)
