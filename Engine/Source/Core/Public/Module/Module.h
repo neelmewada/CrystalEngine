@@ -18,6 +18,21 @@ namespace CE
 
         
     };
+
+    class DefaultModuleImpl : public Module
+    {
+    public:
+
+        void StartupModule() override
+        {
+
+        }
+
+        void ShutdownModule() override
+        {
+
+        }
+    };
     
 } // namespace CE
 

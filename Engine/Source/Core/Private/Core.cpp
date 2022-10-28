@@ -1,5 +1,5 @@
 
-#include "Core.h"
+#include "CoreMinimal.h"
 
-
+IMPLEMENT_MODULE(CE::DefaultModuleImpl)
 

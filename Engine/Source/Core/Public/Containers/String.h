@@ -197,4 +197,10 @@ namespace CE
 
 		static FixedSizeFreeListAllocator<STRING_BUFFER_SIZE, STRING_BUFFER_GROW_COUNT> StaticBufferAllocator;
 	};
+
+    template<>
+    inline SIZE_T GetHash(const String& Value)
+    {
+        return CalculateHash(Value.GetCString(), Value.GetLength());
+    }
 }
