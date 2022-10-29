@@ -46,6 +46,52 @@ namespace Test::Child
         const char* Attributes = nullptr;
     };
 
+    struct FunctionInfo
+    {
+        const char* Name;
+
+    };
+
+    // Header file
+    class CE_Generated_Meta_TestClass_Singleton : CE::ClassType
+    {
+    private:
+        CE_Generated_Meta_TestClass_Singleton();
+        ~CE_Generated_Meta_TestClass_Singleton();
+
+    public:
+        static CE_Generated_Meta_TestClass_Singleton& Get()
+        {
+            static CE_Generated_Meta_TestClass_Singleton instance;
+            return instance;
+        }
+
+        // Properties here...
+        static constexpr PropertyInfo Properties[] = {
+            { "Prop1", offsetof(TestClass, Prop1), sizeof(TestClass::Prop1), CE::FieldType::Plain, CE::FieldBaseType::String, "CE::String", "Hidden,Default=Type here...," },
+            
+        };
+
+        // Function Execution Calls here...
+        static constexpr auto ExposedFunction = &TestClass::ExposedFunction;
+
+        void execExposedFunction(void* instance, CE::Array<std::any> params, std::any& result)
+        {
+            (*(TestClass*)instance.*ExposedFunction)(std::any_cast<int>(params[0]));
+        }
+    };
+
+    // C++ file
+    CE_Generated_Meta_TestClass_Singleton::CE_Generated_Meta_TestClass_Singleton()
+    {
+
+    }
+
+    CE_Generated_Meta_TestClass_Singleton::~CE_Generated_Meta_TestClass_Singleton()
+    {
+
+    }
+
     //struct CE_Generated_Meta_TestClass_Statics
     //{
     //public:

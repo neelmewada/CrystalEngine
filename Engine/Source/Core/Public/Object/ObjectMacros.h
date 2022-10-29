@@ -2,10 +2,10 @@
 
 #include "Misc/CoreDefines.h"
 
-#define CE_META_CLASS(ClassName, ...) friend struct CE_Generated_Meta_##ClassName##_Statics;
+#define CE_META_CLASS(ClassName, ...) friend class CE_Generated_Meta_##ClassName##_Singleton;
 
 #define CE_META_BEGIN_CLASS(Namespace, ClassName, ...)\
-struct CE_Generated_Meta_##ClassName##_Statics\
+class CE_Generated_Meta_##ClassName##_Statics\
 {\
 public:
 
