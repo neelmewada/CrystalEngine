@@ -9,16 +9,18 @@
 namespace CE
 {
     typedef Module* (*LoadModuleFunc)();
+    typedef void (*UnloadModuleFunc)(Module* modulePtr);
 
     struct ModuleInfo
     {
         String ModuleName;
-        Module* ModuleImpl;
         
         void* DllHandle;
         LoadModuleFunc LoadFuncPtr;
+        UnloadModuleFunc UnloadFuncPtr;
 
         bool bIsLoaded;
+        Module* ModuleImpl; // nullptr if not loaded
     };
 
     enum class ModuleLoadResult
@@ -28,6 +30,7 @@ namespace CE
         DllNotFound,
         FailedToLoad,
         InvalidSymbols,
+        InvalidModulePtr,
     };
     
     class CORE_API ModuleManager
@@ -49,6 +52,8 @@ namespace CE
         Module* LoadModule(String moduleName, ModuleLoadResult& result);
         void UnloadModule(String moduleName);
 
+        Module* LoadModule(String moduleName);
+
     private:
 
         ModuleInfo* AddModule(String moduleName, ModuleLoadResult& result);
@@ -62,16 +67,16 @@ namespace CE
 
 #if IS_MONOLITHIC
 
-#define IMPLEMENT_MODULE(ModuleClass)
+#define IMPLEMENT_MODULE(ModuleName, ModuleImplClass)
 
 #else
 
-#define IMPLEMENT_MODULE(ModuleClass)\
-CE::Module* LoadModule()\
+#define IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
+extern "C" DLL_EXPORT CE::Module* LoadModule()\
 {\
-    return new ModuleClass();\
+    return new ModuleImplClass();\
 }\
-void UnloadModule(CE::Module* modulePtr)\
+extern "C" DLL_EXPORT void UnloadModule(CE::Module* modulePtr)\
 {\
     delete modulePtr;\
 }

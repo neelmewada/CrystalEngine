@@ -21,6 +21,11 @@ namespace CE
         return GetLaunchDir();
     }
 
+    IO::Path WindowsDirectories::GetLogDir()
+    {
+        return GetLaunchDir() / "Logs";
+    }
+
 }
 
 

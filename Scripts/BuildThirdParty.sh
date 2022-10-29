@@ -36,8 +36,9 @@ PrintBuildingProject() {
 CleanCMake() {
     rm -rf cmake-build
     mkdir cmake-build
-    rm -rf Debug Release
+    rm -rf Debug Development Release
     mkdir Debug
+    mkdir Development
     mkdir Release
 }
 
@@ -90,7 +91,7 @@ BuildCMake() {
 
     cmake -E env CXXFLAGS="${CxxFlags}" ${MacFlags} cmake ${CMakeBuildSystem} -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=$BuildType ../${CmakeRootDir}
     
-    cmake -E env CXXFLAGS="${CxxFlags}" cmake --build . -j 6 ${CMakeBuildFlags}
+    cmake -E env CXXFLAGS="${CxxFlags}" cmake --build . -j 8 ${CMakeBuildFlags}
     
     if [[ $platform == "windows" ]]; then
         echo "Copying windows files to " $1
@@ -119,6 +120,7 @@ BuildCMake() {
 
 CleanCMake
 BuildCMake Debug
+BuildCMake Development
 BuildCMake Release
 
 cd $base_dir

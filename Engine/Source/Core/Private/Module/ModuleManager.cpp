@@ -28,19 +28,56 @@ namespace CE
 
 		if (info == nullptr)
 		{
-			AddModule(moduleName);
+			info = AddModule(moduleName, result);
+
+			if (info == nullptr)
+			{
+				return nullptr;
+			}
 		}
 
-		
+		// Load module
+		Module* modulePtr = info->LoadFuncPtr();
+		if (modulePtr == nullptr)
+		{
+			result = ModuleLoadResult::InvalidModulePtr;
+			return nullptr;
+		}
 
+		info->bIsLoaded = true;
+		info->ModuleImpl = modulePtr;
 
+		// Startup module
+		modulePtr->StartupModule();
 
 		return nullptr;
 	}
 
 	void ModuleManager::UnloadModule(String moduleName)
 	{
+		auto info = FindModuleInfo(moduleName);
 
+		if (info == nullptr || !info->bIsLoaded || info->ModuleImpl == nullptr)
+		{
+			return;
+		}
+
+		// Shutdown module
+		info->ModuleImpl->ShutdownModule();
+
+		// Unload module
+		info->bIsLoaded = false;
+		info->UnloadFuncPtr(info->ModuleImpl);
+		PlatformProcess::UnloadDll(info->DllHandle);
+
+		// Remove module
+		ModuleMap.Remove(moduleName);
+	}
+
+	Module* ModuleManager::LoadModule(String moduleName)
+	{
+		ModuleLoadResult result;
+		return LoadModule(moduleName, result);
 	}
 
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
@@ -65,6 +102,27 @@ namespace CE
 			result = ModuleLoadResult::InvalidSymbols;
 			return nullptr;
 		}
+
+		auto unloadFuntion = (UnloadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "UnloadModule");
+		if (unloadFuntion == nullptr)
+		{
+			result = ModuleLoadResult::InvalidSymbols;
+			return nullptr;
+		}
+
+		ModuleMap.Emplace(moduleName, ModuleInfo{});
+		
+		ModuleInfo* ptr = &ModuleMap[moduleName];
+		ptr->bIsLoaded = false;
+		ptr->DllHandle = dllHandle;
+		ptr->LoadFuncPtr = loadFunction;
+		ptr->UnloadFuncPtr = unloadFuntion;
+		ptr->ModuleName = moduleName;
+		ptr->ModuleImpl = nullptr;
+
+		result = ModuleLoadResult::Success;
+
+		return ptr;
 	}
 
 	ModuleInfo* ModuleManager::FindModuleInfo(String moduleName)

@@ -1,6 +1,10 @@
 #pragma once
 
+#include "Algorithm/Hash.h"
+
 #include "Memory/FixedSizeAllocator.h"
+
+#include "fmt/format.h"
 
 #ifndef STRING_BUFFER_SIZE
 #define STRING_BUFFER_SIZE 32
@@ -15,12 +19,15 @@
 
 namespace CE
 {
+    class CORE_API StringView;
+
 	class CORE_API String
 	{
 	public:
 
         String();
         String(std::string string);
+        String(StringView stringView);
         String(u32 reservedSize);
         String(const char* value);
         String(const char* cStringA, const char* cStringB);
@@ -179,10 +186,15 @@ namespace CE
             return String(std::to_string(value));
         }
 
+        template<typename... Args>
+        static inline String Format(String str, Args... args)
+        {
+            return String(fmt::vformat(str.Buffer, fmt::make_format_args(args...)));
+        }
+
         void Concatenate(const String& string);
         void ConcatenateCString(const char* cString);
         void Concatenate(s64 integer);
-
 
     private:
 
@@ -204,3 +216,20 @@ namespace CE
         return CalculateHash(Value.GetCString(), Value.GetLength());
     }
 }
+
+/// fmt user-defined Formatter for CE::String
+template <> struct fmt::formatter<CE::String> {
+    // Parses format specifications of the form ['f' | 'e'].
+    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+        // Return an iterator past the end of the parsed range:
+        return ctx.end();
+    }
+
+    // Formats the point p using the parsed format specification (presentation)
+    // stored in this formatter.
+    template <typename FormatContext>
+    auto format(const CE::String& string, FormatContext& ctx) const -> decltype(ctx.out()) {
+        // ctx.out() is an output iterator to write to.
+        return fmt::format_to(ctx.out(), "{}", string.GetCString());
+    }
+};

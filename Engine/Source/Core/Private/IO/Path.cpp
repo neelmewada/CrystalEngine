@@ -7,7 +7,7 @@ namespace CE::IO
 
 	Path::Path() : Impl()
 	{
-
+		
 	}
 
 	Path::~Path()

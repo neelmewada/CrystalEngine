@@ -48,6 +48,16 @@ namespace CE::IO
             return Path(lhs.Impl / rhs.Impl);
         }
 
+        inline friend Path operator/(const Path& lhs, const String& rhs)
+        {
+            return Path(lhs.Impl / rhs.GetCString());
+        }
+
+        inline friend Path operator/(const Path& lhs, const char* rhs)
+        {
+            return Path(lhs.Impl / rhs);
+        }
+
         inline bool Exists()
         {
             return fs::exists(Impl);

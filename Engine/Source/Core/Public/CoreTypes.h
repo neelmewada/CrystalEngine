@@ -7,9 +7,10 @@
 
 #include "Misc/EnumClass.h"
 
-// Containers
+// Container Types
 #include "Algorithm/Hash.h"
 #include "Containers/String.h"
+#include "Containers/StringView.h"
 #include "Containers/Array.h"
 #include "Containers/HashMap.h"
 

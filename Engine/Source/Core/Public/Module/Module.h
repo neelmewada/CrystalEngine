@@ -9,14 +9,14 @@ namespace CE
     {
     public:
         Module();
-        ~Module();
+        virtual ~Module();
 
         CE_NO_COPY(Module);
 
         virtual void StartupModule() = 0;
         virtual void ShutdownModule() = 0;
 
-        
+        virtual void RegisterTypes() = 0;
     };
 
     class DefaultModuleImpl : public Module
@@ -32,6 +32,12 @@ namespace CE
         {
 
         }
+
+        void RegisterTypes() override
+        {
+
+        }
+
     };
     
 } // namespace CE

@@ -8,3 +8,15 @@
 
 #define CE_SINGLETON_CLASS(Class) Class(Class& Copy) = delete; Class operator=(Class& copy) = delete
 
+#if PLATFORM_WINDOWS
+#	define DLL_EXPORT __declspec(dllexport)
+#	define DLL_IMPORT __declspec(dllimport)
+#else
+#	define DLL_EXPORT
+#	define DLL_IMPORT
+#endif
+
+#define BIT(x) (1 << x)
+
+#define RECURSE_STRING(x, ...) #x RECURSE_STRING(__VA_ARGS__)
+

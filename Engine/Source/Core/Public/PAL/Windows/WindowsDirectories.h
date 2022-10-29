@@ -17,6 +17,7 @@ namespace CE
 
         static IO::Path GetModuleDir();
 
+        static IO::Path GetLogDir();
     };
 
     typedef WindowsDirectories PlatformDirectories;

@@ -1,6 +1,5 @@
 
-#include "Containers/String.h"
-#include "Misc/CoreLiterals.h"
+#include "CoreTypes.h"
 
 using namespace CE;
 
@@ -12,6 +11,11 @@ String::String()
 }
 
 String::String(std::string string) : String(string.c_str())
+{
+
+}
+
+String::String(StringView stringView) : String(stringView.GetCString())
 {
 
 }
@@ -109,24 +113,24 @@ void String::Reserve(u32 reserveCharacterCount)
         }
         else if (!bIsUsingDynamicBuffer && Buffer != nullptr) // If we were using static buffer earlier
         {
-            auto OldBuffer = Buffer;
+            auto oldBuffer = Buffer;
 
             Capacity = reserveCharacterCount;
             Buffer = new char[Capacity];
             if (StringLength > 0)
-                memcpy(Buffer, OldBuffer, StringLength + 1);
+                memcpy(Buffer, oldBuffer, StringLength + 1);
 
-            StaticBufferAllocator.Free(OldBuffer); // Release the previously used static buffer
+            StaticBufferAllocator.Free(oldBuffer); // Release the previously used static buffer
         }
         else if (bIsUsingDynamicBuffer && reserveCharacterCount > Capacity) // If we were already using dynamic buffer, but need more capacity
         {
-            auto StagingBuffer = new char[reserveCharacterCount];
+            auto stagingBuffer = new char[reserveCharacterCount];
             if (StringLength > 0)
-                memcpy(StagingBuffer, Buffer, StringLength + 1);
+                memcpy(stagingBuffer, Buffer, StringLength + 1);
 
             Capacity = reserveCharacterCount;
             delete[] Buffer;
-            Buffer = StagingBuffer;
+            Buffer = stagingBuffer;
         }
 
         bIsUsingDynamicBuffer = true;
@@ -207,4 +211,5 @@ void String::Concatenate(s64 integer)
 {
     Concatenate(std::to_string(integer));
 }
+
 
