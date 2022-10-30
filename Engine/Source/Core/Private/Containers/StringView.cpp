@@ -18,4 +18,9 @@ namespace CE
 		return Impl != rhs.GetCString();
 	}
 
+	bool StringView::StartsWith(StringView str)
+	{
+		return Impl.starts_with(str.Impl);
+	}
+
 } // namespace CE

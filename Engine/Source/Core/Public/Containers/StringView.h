@@ -60,6 +60,11 @@ namespace CE
 			return Impl != rhs;
 		}
 
+		// ********************************
+		// Helper / Utility Functions
+
+		bool StartsWith(StringView str);
+
 	private:
 		std::string_view Impl;
 	};

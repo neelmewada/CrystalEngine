@@ -27,6 +27,13 @@ String::String(u32 reservedSize)
 
 String::String(const char* value)
 {
+    if (value == nullptr)
+    {
+        Reserve(1);
+        SetCString("");
+        return;
+    }
+
 	Reserve(strlen(value));
 	SetCString(value);
 }
@@ -36,6 +43,13 @@ String::String(const char* cStringA, const char* cStringB)
 	Reserve(strlen(cStringA) + strlen(cStringB));
 	SetCString(cStringA);
 	ConcatenateCString(cStringB);
+}
+
+String::String(Iterator begin, Iterator end)
+{
+    auto length = end.Ptr - begin.Ptr;
+    Reserve(length);
+    CopyCString(begin.Ptr, length);
 }
 
 String::String(String&& move) noexcept
@@ -166,6 +180,7 @@ void String::SetCString(const char* cString)
 
     Reserve(StringLength);
     memcpy(Buffer, cString, StringLength + 1);
+    Buffer[StringLength] = 0;
 }
 
 void String::CopyCString(const char* cString, u32 copyStringLength)
@@ -187,7 +202,8 @@ void String::CopyCString(const char* cString, u32 copyStringLength)
     }
 
     Reserve(StringLength);
-    memcpy(Buffer, cString, StringLength + 1);
+    memcpy(Buffer, cString, StringLength);
+    Buffer[StringLength] = 0;
 }
 
 /*
@@ -210,6 +226,70 @@ void String::ConcatenateCString(const char* cString)
 void String::Concatenate(s64 integer)
 {
     Concatenate(std::to_string(integer));
+}
+
+bool String::StartsWith(const String& string)
+{
+    return StartsWith(string.GetCString());
+}
+
+bool String::StartsWith(const char* cString)
+{
+    int charIndex = 0;
+    if (cString == nullptr)
+        return true;
+
+    while (*cString != 0)
+    {
+        if (charIndex >= GetLength())
+            return false;
+
+        if (Buffer[charIndex] != *cString)
+            return false;
+
+        charIndex++;
+        cString++;
+    }
+
+    return true;
+}
+
+String String::GetSubstring(int startIndex, int length)
+{
+    if (length == -1)
+    {
+        return String(Buffer + startIndex);
+    }
+
+    if (length == 0)
+    {
+        return "";
+    }
+
+    return String(Iterator(Begin().Ptr + startIndex), Iterator(Begin().Ptr + startIndex + length));
+}
+
+Array<String> String::Split(char delimiter)
+{
+    int startIdx = 0;
+    int endIdx = 0;
+
+    Array<String> result{};
+
+    for (int i = 0; i < StringLength; i++)
+    {
+        if (Buffer[i] == delimiter)
+        {
+            
+
+            startIdx = i + 1;
+            endIdx = startIdx;
+        }
+
+        endIdx++;
+    }
+
+    return result;
 }
 
 

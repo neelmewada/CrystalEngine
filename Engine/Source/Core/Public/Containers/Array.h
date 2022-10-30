@@ -47,6 +47,14 @@ namespace CE
             Impl.push_back(item);
         }
 
+        inline void AddRange(std::initializer_list<const ElementType&> elements)
+        {
+            for (auto it = elements.begin(); it != elements.end(); ++it)
+            {
+                Impl.push_back(*it);
+            }
+        }
+
         inline void Remove(const ElementType& item)
         {
             for (int i = 0; i < Impl.size(); i++)

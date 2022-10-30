@@ -18,5 +18,5 @@
 
 #define BIT(x) (1 << x)
 
-#define RECURSE_STRING(x, ...) #x RECURSE_STRING(__VA_ARGS__)
+#define TEXT(x) #x
 

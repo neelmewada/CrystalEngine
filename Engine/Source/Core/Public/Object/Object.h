@@ -19,6 +19,10 @@ namespace CE
             return Name;
         }
 
+        // Virtual methods
+
+        virtual ClassType* GetType() = 0;
+
     private:
         String Name;
     };

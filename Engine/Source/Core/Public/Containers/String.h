@@ -24,6 +24,7 @@ namespace CE
 	class CORE_API String
 	{
 	public:
+        struct Iterator;
 
         String();
         String(std::string string);
@@ -31,6 +32,7 @@ namespace CE
         String(u32 reservedSize);
         String(const char* value);
         String(const char* cStringA, const char* cStringB);
+        String(Iterator begin, Iterator end);
 
         String(String&& move) noexcept;
         String(const String& copy);
@@ -168,6 +170,7 @@ namespace CE
 
         private:
             pointer Ptr;
+            friend class CE::String;
         };
 
         Iterator begin() { return Iterator{ &Buffer[0] }; }
@@ -195,6 +198,13 @@ namespace CE
         void Concatenate(const String& string);
         void ConcatenateCString(const char* cString);
         void Concatenate(s64 integer);
+
+        bool StartsWith(const String& string);
+        bool StartsWith(const char* cString);
+
+        String GetSubstring(int startIndex, int length = -1);
+
+        Array<String> Split(char delimiter);
 
     private:
 
