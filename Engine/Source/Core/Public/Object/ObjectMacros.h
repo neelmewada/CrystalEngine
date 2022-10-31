@@ -30,30 +30,49 @@ ClassType* GetType() override {\
 
 #define CE_FUNCTION_LIST(x) x
 
-
+#define CE_PARAM_POSITIONS(...) __VA_ARGS__
 #define CE_PARAM_LIST(...) __VA_ARGS__
+
 #define CE_PARAM_POS(pos, type) std::any_cast<type>(*(params.begin() + pos))
 
-#define CE_PARAM(position, name, rawTypeName, type, baseType) position, name, rawTypeName, type, baseType
+#define CE_PARAM(name, rawTypeName, type, baseType, ...)\
+new CE::ParameterType({ #name, false, sizeof(rawTypeName), CE::FieldType::type, CE::FieldBaseType::baseType, #rawTypeName, "" #__VA_ARGS__ })
 
-#define CE_PARAM_POSITION_DEFS(position, name, rawTypeName, type, baseType, ...) using name##position = rawTypeName;
+#define CE_RETURN_TYPE(rawTypeName, type, baseType, ...)\
+new CE::ParameterType({ "", true, sizeof(rawTypeName), CE::FieldType::type, CE::FieldBaseType::baseType, #rawTypeName, "" #__VA_ARGS__ })\
 
-#define CE_FUNCTION(name, paramList)\
+#define CE_FUNCTION(name, paramPositions, paramList, returnType, attributes)\
 Functions.Add(new CE::FunctionType(CE::FunctionInitializer{\
     #name, String(_ClassPath) + "::" #name, false, \
     [&](void* instance, std::initializer_list<std::any> params, std::any& result) -> void {\
         Type* ptr = (Type*)instance;\
         result = ptr->name(\
-            paramList\
+            paramPositions\
         );\
     },\
     \
     {\
-        new CE::ParameterType({ "integer", false, sizeof(s32), CE::FieldType::Plain, CE::FieldBaseType::s32, "CE::s32", "SomeAttribute,Hidden,Max=12" }),\
-        new CE::ParameterType({ "extra", false, sizeof(CE::String), CE::FieldType::Plain, CE::FieldBaseType::String, "CE::String", "SomeAttribute,Hidden,Display=Extra Value" }),\
+        paramList\
+    },\
+    returnType,\
+    "" attributes\
+}));
+
+#define CE_VOID_FUNCTION(name, paramPositions, paramList, attributes)\
+Functions.Add(new CE::FunctionType(CE::FunctionInitializer{\
+    #name, String(_ClassPath) + "::" #name, false, \
+    [&](void* instance, std::initializer_list<std::any> params, std::any& result) -> void {\
+        Type* ptr = (Type*)instance;\
+        ptr->name(\
+            paramPositions\
+        );\
     },\
     \
-    new CE::ParameterType({ "", true, sizeof(CE::String), CE::FieldType::Plain, CE::FieldBaseType::String, "", ""})\
+    {\
+        paramList\
+    },\
+    nullptr,\
+    "" attributes\
 }));
 
 //std::any_cast<s32>(*(params.begin() + 0)), \

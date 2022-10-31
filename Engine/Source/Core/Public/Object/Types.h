@@ -465,4 +465,25 @@ namespace CE
 		
 	};
 
+	// **********************************************************
+	// Helper / Utils
+
+	template<typename TypeName>
+	TypeInfo* StaticType()
+	{
+		return TypeName::Type();
+	}
+
+	template<typename Class>
+	ClassType* StaticClass()
+	{
+		return Class::Type();
+	}
+
+	template<typename Struct>
+	StructType* StaticStruct()
+	{
+		return Struct::Type();
+	}
+
 } // namespace CE

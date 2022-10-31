@@ -10,9 +10,6 @@ using namespace CE;
 
 #define EXPORT_API
 
-#define MACRO_TEST(x, y, z) x, z, y
-#define STRINGIFY(x) #x
-#define MACRO2(x) STRINGIFY(x)
 
 namespace Test::Child
 {
@@ -24,7 +21,7 @@ namespace Test::Child
 
         TestClass() : CE::Object()
         {
-            MACRO2(MACRO_TEST(1, 2, 3));
+            
         }
 
     //private:
@@ -51,17 +48,36 @@ namespace Test::Child
         ,//CE_EXTRA_SUPER_CLASS(SomeSuperclass, ISomeInterface),
         CE_ATTRIBUTES(Hidden, Max = 412, DontSave),
 
+        // Properties
         CE_PROPERTY_LIST(
             CE_PROPERTY(Prop1, Plain, String, CE::String)
             CE_PROPERTY(Prop2, Plain, f32, CE::f32)
         ),
 
+        // Functions
         CE_FUNCTION_LIST(
-            CE_FUNCTION(ExposedFunction,
+            // String ExposedFunction(s32 integer, String extra);
+            CE_FUNCTION(ExposedFunction, 
+                CE_PARAM_POSITIONS(
+                    CE_PARAM_POS(0, CE::s32),
+                    CE_PARAM_POS(1, CE::String)
+                ),
                 CE_PARAM_LIST(
-                    CE_PARAM(0, integer, CE::s32, Plain, s32, "", ""),
-                    CE_PARAM(1, extra, CE::String, Plain, String, "", "")
-                )
+                    CE_PARAM(integer, CE::s32, Plain, s32),
+                    CE_PARAM(extra, CE::String, Plain, String)
+                ),
+                CE_RETURN_TYPE(CE::String, Plain, String),
+                CE_ATTRIBUTES(HideFunction, CallStack = 32)
+            )
+            // void ExposedFunc2(String value);
+            CE_VOID_FUNCTION(ExposedFunc2,
+                CE_PARAM_POSITIONS(
+                    CE_PARAM_POS(0, CE::String)
+                ),
+                CE_PARAM_LIST(
+                    CE_PARAM(value, CE::String, Plain, String)
+                ),
+                CE_ATTRIBUTES()
             )
         )
     )
@@ -71,12 +87,7 @@ namespace Test::Child
 
     void Example()
     {
-        CE_FUNCTION(ExposedFunction,
-            CE_PARAM_LIST(
-                CE_PARAM(0, integer, CE::s32, Plain, s32, "", ""),
-                CE_PARAM(1, extra, CE::String, Plain, String, "", "")
-            )
-        )
+        
     }
     
     
@@ -201,17 +212,14 @@ int main(int argc, char* argv[])
 
     CE_LOG(Info, All, "Value: {} {}", testClass->Prop1, testClass->Prop2);
 
-    //auto func1 = type->GetFunctionAt(0);
-    //auto func2 = type->GetFunctionAt(1);
+    auto func1 = type->GetFunctionAt(0);
 
-    //CE_LOG(Info, All, "Func name: {}", func1->GetName());
+    CE_LOG(Info, All, "Func name: {}", func1->GetName());
 
-    //std::any result = func1->Invoke(testClass, { (s32)45, String("hello") });
-    //CE::String resultString = std::any_cast<CE::String>(result);
+    std::any result = func1->Invoke(testClass, { (s32)45, String("hello") });
+    CE::String resultString = std::any_cast<CE::String>(result);
 
-    //CE_LOG(Info, All, "Result: {}", resultString);
-
-    //func2->Invoke<void>(testClass, resultString);
+    CE_LOG(Info, All, "Result: {}", resultString);
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");
