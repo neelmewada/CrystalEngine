@@ -6,45 +6,21 @@
 
 #include <type_traits>
 #include <any>
+#include <iostream>
 
 namespace CE
 {
 
-	enum class FieldBaseType
-	{
-		Undefined,
-		u8, u16, u32, u64,
-		s8, s16, s32, s64,
-		Bool, f32, f64,
-		String,
-		Enum, Struct, Class, Object
-	};
-
-	enum class FieldType
-	{
-		Plain,
-		Pointer,
-		Array,
-		ArrayPtr,
-		Function,
-	};
-
 	// Forward Declarations
-
-	class CORE_API TypeInfo;
-	class CORE_API ClassType;
-	class CORE_API StructType;
-	class CORE_API PropertyType;
-	class CORE_API FunctionType;
-	class CORE_API EnumType;
+	
 
 	// **********************************************************
-	// Any
+	// Variant
 
-	class Any
+	class CORE_API Variant
 	{
 	public:
-		Any() : bHasValue(false)
+		Variant() : bHasValue(false)
 		{}
 
 		inline bool HasValue()
@@ -65,425 +41,184 @@ namespace CE
 	};
 
 	// **********************************************************
-	// Type Info
+	// Type ID
+	
+	typedef u32 TypeId;
+	typedef TypeId TypeIdSize;
 
-	class CORE_API TypeInfo
+	namespace Internal
 	{
-	public:
-		TypeInfo(const char* name, CE::FieldType type, CE::FieldBaseType underlyingType, String underlyingTypePath)
-			: Name(name), Type(type), UnderlyingType(underlyingType), UnderlyingTypePath(underlyingTypePath)
-		{}
+		inline TypeId GenerateNewTypeId()
+		{
+			static TypeId id = 0;
+			return ++id;
+		}
 
-		virtual ~TypeInfo()
-		{}
+		template<typename Derived, typename Base>
+		inline static ptrdiff_t ComputePointerOffset()
+		{
+			Derived* derivedPtr = (Derived*)1;
+			Base* basePtr = static_cast<Base*>(derivedPtr);
+			return (intptr_t)basePtr - (intptr_t)derivedPtr;
+		}
+	}
 
-		const char* GetName() { return Name; }
+	template<typename Type>
+	TypeId GetTypeId()
+	{
+		static TypeId typeId = Internal::GenerateNewTypeId();
+		return typeId;
+	}
 
-		CE::FieldType GetType() { return Type; }
-		CE::FieldBaseType GetUnderlyingType() { return UnderlyingType; }
-		const char* GetUnderlyingTypePath() { return UnderlyingTypePath.GetCString(); }
-
-		virtual bool IsStructType() = 0;
-
-		virtual bool IsClassType() = 0;
-
-		virtual bool IsFunctionType() = 0;
-
-		virtual bool IsPropertyType() = 0;
-
-		virtual bool IsParameterType() = 0;
-
-	private:
-		const char* Name;
-		CE::FieldType Type;
-		CE::FieldBaseType UnderlyingType;
-		String UnderlyingTypePath;
-	};
-
-
-	// **********************************************************
-	// Property Type
-
-	struct PropertyInitializer
+	struct TypeInfo
 	{
 		const char* Name;
-		const char* OwnerPath;
-		u32 Offset;
-		u32 Size;
-		CE::FieldType Type;
-		CE::FieldBaseType UnderlyingType;
-		const char* UnderlyingTypePath;
-		const char* Attributes = nullptr;
-	};
 
-	class CORE_API PropertyType : public TypeInfo
-	{
-	public:
-		PropertyType(PropertyInitializer init) 
-			: TypeInfo(init.Name, init.Type, init.UnderlyingType, init.UnderlyingTypePath)
-			, Offset(init.Offset), Size(init.Size)
-			, OwnerPath(init.OwnerPath)
-			, Attributes(init.Attributes)
-		{}
+		const char* GetName() const { return Name; }
+		const char* GetTypeData() const { return (char*)(this + 1); }
 
-		CE_NO_COPY(PropertyType);
-
-		bool IsStructType() override
-		{
-			return true;
+		TypeId GetTypeId() const 
+		{ 
+			return *(TypeId*)(GetTypeData() + sizeof(TypeId));
 		}
 
-		bool IsClassType() override
+		intptr_t TryCast(intptr_t ptr, TypeId castToType) const
 		{
-			return false;
-		}
+			const char* data = GetTypeData();
+			size_t byteIndex = 0;
+			ptrdiff_t offset = 0;
 
-		bool IsFunctionType() override
-		{
-			return false;
-		}
-
-		bool IsPropertyType() override
-		{
-			return true;
-		}
-
-		bool IsParameterType() override
-		{
-			return false;
-		}
-
-		template<typename PropertyType>
-		inline PropertyType& GetValue(const void* instance)
-		{
-			return *(PropertyType*)((SIZE_T)instance + Offset);
-		}
-
-		template<typename PropertyType>
-		inline void SetValue(void* instance, const PropertyType& value)
-		{
-			*(PropertyType*)((SIZE_T)instance + Offset) = value;
-		}
-
-		template<>
-		inline void SetValue<String>(void* instance, const String& value)
-		{
-			String* ptr = (String*)((SIZE_T)instance + Offset);
-			*ptr = value;
-		}
-
-	private:
-		const char* OwnerPath;
-		u32 Offset;
-		u32 Size;
-		const char* Attributes = nullptr;
-
-		Array<String> AttributeList{};
-	};
-
-
-	// **********************************************************
-	// Struct Type
-
-	struct StructInitializer
-	{
-		const char* Name;
-		CE::FieldType Type; 
-		CE::FieldBaseType UnderlyingType;
-		const char* UnderlyingTypePath;
-	};
-
-	class CORE_API StructType : public TypeInfo
-	{
-	public:
-		StructType(StructInitializer init)
-			: TypeInfo(init.Name, init.Type, init.UnderlyingType, init.UnderlyingTypePath)
-		{}
-
-		virtual ~StructType();
-
-		CE_NO_COPY(StructType);
-
-		bool IsStructType() override
-		{
-			return true;
-		}
-
-		bool IsClassType() override
-		{
-			return false;
-		}
-
-		bool IsFunctionType() override
-		{
-			return false;
-		}
-
-		bool IsPropertyType() override
-		{
-			return false;
-		}
-
-		bool IsParameterType() override
-		{
-			return false;
-		}
-
-		u32 GetPropertyCount();
-		PropertyType* GetPropertyAt(u32 index);
-
-		u32 GetFunctionCount();
-		FunctionType* GetFunctionAt(u32 index);
-
-	protected:
-		CE::Array<CE::PropertyType*> Properties{};
-		CE::Array<CE::FunctionType*> Functions{};
-	};
-
-
-	// **********************************************************
-	// Parameter Type
-
-	struct ParameterInitializer
-	{
-		const char* ParameterName;
-		bool bIsReturnParam;
-		u32 Size;
-		CE::FieldType Type;
-		CE::FieldBaseType UnderlyingType;
-		const char* UnderlyingTypePath;
-		const char* Attributes = "";
-	};
-
-	class CORE_API ParameterType : public TypeInfo
-	{
-	public:
-		ParameterType(ParameterInitializer init)
-			: Size(init.Size)
-			, Attributes(init.Attributes)
-			, bIsReturnParam(init.bIsReturnParam)
-			, TypeInfo(init.ParameterName, init.Type, init.UnderlyingType, init.UnderlyingTypePath)
-		{
-
-		}
-
-		bool IsStructType() override
-		{
-			return false;
-		}
-
-		bool IsClassType() override
-		{
-			return false;
-		}
-
-		bool IsFunctionType() override
-		{
-			return false;
-		}
-
-		bool IsPropertyType() override
-		{
-			return true;
-		}
-
-		bool IsParameterType() override
-		{
-			return true;
-		}
-
-		inline bool IsReturnParameter()
-		{
-			return bIsReturnParam;
-		}
-
-		inline u32 GetPosition()
-		{
-			return Position;
-		}
-
-	private:
-		bool bIsReturnParam;
-		u32 Position = 0;
-		u32 Size;
-		const char* Attributes;
-
-		friend class FunctionType;
-	};
-
-
-	// **********************************************************
-	// Function Type
-
-	typedef std::function<void(void* instance, std::initializer_list<std::any> params, std::any& result)> MetaFunction;
-
-	struct FunctionInitializer
-	{
-		const char* Name;
-		// Full type path with namespace and owner class
-		String FunctionPath;
-		bool bIsStatic;
-		MetaFunction Function = nullptr;
-		std::initializer_list<CE::ParameterType*> ParameterTypes;
-		CE::ParameterType* ReturnType = nullptr;
-		const char* Attributes = "";
-	};
-
-	class CORE_API FunctionType : public TypeInfo
-	{
-	public:
-		FunctionType(FunctionInitializer init) 
-			: TypeInfo(init.Name, FieldType::Function, FieldBaseType::Undefined, init.FunctionPath)
-			, Name(init.Name), Function(init.Function), bIsStatic(init.bIsStatic)
-			, ParameterTypes(init.ParameterTypes), ReturnType(init.ReturnType)
-		{
-			s32 idx = 0;
-			for (auto paramType : ParameterTypes)
+			while (true)
 			{
-				if (paramType != nullptr)
+				TypeIdSize size = *(TypeIdSize*)(data + byteIndex);
+				byteIndex += sizeof(TypeIdSize);
+
+				for (TypeIdSize i = 0; i < size; i++, byteIndex += sizeof(TypeIdSize))
 				{
-					paramType->Position = idx;
-					idx++;
+					if (*(TypeIdSize*)(data + byteIndex) == castToType)
+						return ptr + offset;
 				}
+
+				offset = *(ptrdiff_t*)(data + byteIndex);
+
+				if (offset == 0)
+					return 0;
+
+				byteIndex += sizeof(ptrdiff_t);
+			}
+
+			return 0;
+		}
+	};
+
+	template<typename Type>
+	struct TypeDataImpl
+	{
+		TypeDataImpl()
+		{
+			this->TypeId = GetTypeId<Type>();
+			Size = 1;
+			EndMarker = 0;
+		}
+
+		const char* GetData() const { return (char*)&TypeId; }
+
+		TypeIdSize Size;
+		TypeId TypeId;
+		ptrdiff_t EndMarker;
+	};
+
+	// Specialization will contain the magic data.
+	template<typename T>
+	struct TypeData
+	{
+	};
+
+	// Recursively populates the typeData
+	// Layout of typeData:
+	// [ typeId_t size, typeId_t firstTypeId ... typeId_t lastTypeId, ptrdiff_t offset/endMarker if = 0,
+	// typeId_t size, typeId_t firstTypeId ... typeId_t lastTypeId, ptrdiff_t offset/endMarker if = 0... ]
+	// Each block represents inherited types from a base, the first block doesn't need offset as it is implicitly 0
+	// Therefore we can use the offset as an end marker, all other bases will have a positive offset
+	template<typename... BaseTypes>
+	struct BaseTypeData
+	{
+
+	};
+
+	template<typename Base>
+	struct BaseTypeData<Base>
+	{
+
+		void FillBaseTypeData(ptrdiff_t aOffset, TypeId& outHeadSize)
+		{
+			const TypeData<Base>* baseTypeId = (TypeData<Base>*)(GetTypeInfo<Base>::Get()->GetTypeData());
+
+			// return size of head list
+			outHeadSize = baseTypeId->Size;
+
+			const char* data = baseTypeId->GetData();
+			size_t byteSize = baseTypeId->Size * sizeof(TypeId);
+
+			// copy type list
+			memcpy(Data, data, byteSize);
+
+			size_t byteIndex = byteSize;
+			ptrdiff_t offset = *reinterpret_cast<const ptrdiff_t*>(data + byteIndex);
+			while (offset != 0)
+			{
+				// fill next offset and add pointer offset
+				*reinterpret_cast<ptrdiff_t*>(Data + byteIndex) = offset + aOffset;
+				byteIndex += sizeof(ptrdiff_t);
+
+				// fill next size
+				const TypeId size = *reinterpret_cast<const TypeId*>(data + byteIndex);
+				*reinterpret_cast<TypeId*>(Data + byteIndex) = size;
+				byteSize = size * sizeof(typeId_t);
+				byteIndex += sizeof(typeId_t);
+
+				// copy types
+				memcpy(Data + byteIndex, data + byteIndex, byteSize);
+				byteIndex += byteSize;
+
+				offset = *reinterpret_cast<const ptrdiff_t*>(data + byteIndex);
 			}
 		}
 
-		CE_NO_COPY(FunctionType);
-
-		bool IsStructType() override
-		{
-			return false;
-		}
-
-		bool IsClassType() override
-		{
-			return false;
-		}
-
-		bool IsFunctionType() override
-		{
-			return true;
-		}
-
-		bool IsPropertyType() override
-		{
-			return false;
-		}
-
-		bool IsParameterType() override
-		{
-			return false;
-		}
-
-		bool IsStatic()
-		{
-			return bIsStatic;
-		}
-
-		std::any Invoke(void* instance, std::initializer_list<std::any> params)
-		{
-			std::any result{};
-			Function(instance, params, result);
-			return result;
-		}
-
-		template<typename ReturnType, typename... Args>
-		ReturnType Invoke(void* instance, Args... args)
-		{
-			return std::any_cast<ReturnType>(Invoke(instance, { args... }));
-		}
-
-	private:
-		const char* Name;
-		bool bIsStatic;
-		MetaFunction Function = nullptr;
-		CE::Array<CE::ParameterType*> ParameterTypes{};
-		CE::ParameterType* ReturnType = nullptr;
+		// We only need the previous type data array, but not its size or end marker
+		char Data[sizeof(TypeData<Base>) - sizeof(ptrdiff_t) - sizeof(TypeId)];
 	};
 
-
-	// **********************************************************
-	// Class Type
-
-	struct ClassInitializer
+	template<typename Type, typename... BaseTypes>
+	struct TypeDataImpl
 	{
-		const char* Name;
-		u32 Size;
-		CE::FieldType Type;
-		CE::FieldBaseType UnderlyingType;
-		const char* ClassPath; // ex: SomeNamespace::ChildNamespace::SomeClass
-		const char* Attributes = nullptr;
-	};
-
-	class CORE_API ClassType : public StructType
-	{
-	public:
-		ClassType(ClassInitializer init)
-			: StructType(StructInitializer{ init.Name, init.Type, init.UnderlyingType, init.ClassPath })
-		{}
-
-		bool IsStructType() override
+		TypeDataImpl()
 		{
-			return false;
+			this->TypeId = GetTypeId<Type>();
+			// Fill base types
+			Size++; // Size is the base's size + 1 to account for current type id
+			EndMarker = 0;
 		}
 
-		bool IsClassType() override
-		{
-			return true;
-		}
+		const char* GetData() const { return (char*)&TypeId; }
 
-		static ClassType* FindClass(String classPath);
-
-		static void RegisterClassType(ClassType* classType);
-		static void UnregisterClassType(ClassType* classType);
-
-	private:
-		static HashMap<String, ClassType*> RegisteredClasses;
-	};
-
-
-	// **********************************************************
-	// Enum Type
-
-	class CORE_API EnumConstant
-	{
-	public:
-
-	private:
-
-	};
-
-	class CORE_API EnumType : TypeInfo
-	{
-	public:
-		EnumType(const char* name, const char* enumTypePath) : TypeInfo(name, FieldType::Plain, FieldBaseType::Enum, enumTypePath)
-		{}
-
-		virtual CE::FieldBaseType GetEnumUnderlyingType() = 0;
-
-	private:
-		
+		TypeIdSize Size;
+		TypeId TypeId;
+		BaseTypeData<BaseTypes...> BaseTypeData;
+		ptrdiff_t EndMarker;
 	};
 
 	// **********************************************************
-	// Helper / Utils
+	// Struct Type
+	
 
-	template<typename TypeName>
-	TypeInfo* StaticType()
-	{
-		return TypeName::Type();
-	}
+	//template<class ClassType, class FieldType>
+	//void AddProperty(const char* name, FieldType ClassType::* member, const char* attributes)
+	//{
+	//	//using UnderlyingType = AZStd::RemoveEnumT<FieldType>;
+	//	using ValueType = std::remove_pointer_t<FieldType>;
+	//	std::cout << "Type: " << typeid(ValueType).name() << " id: " << GetTypeId<ValueType>() << "\n";
+	//}
 
-	template<typename Class>
-	ClassType* StaticClass()
-	{
-		return Class::Type();
-	}
-
-	template<typename Struct>
-	StructType* StaticStruct()
-	{
-		return Struct::Type();
-	}
 
 } // namespace CE

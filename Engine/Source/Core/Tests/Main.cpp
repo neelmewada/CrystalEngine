@@ -27,8 +27,10 @@ namespace Test::Child
     //private:
 
         CE::String Prop1;
+        CE::String Str;
 
         float Prop2;
+        float Prop3;
 
         CE::Object* ObjRef = nullptr;
 
@@ -42,54 +44,6 @@ namespace Test::Child
             CE_LOG(Info, All, "Test Function: {}", value);
         }
     };
-    
-    // Header file
-    CE_META_DECLARE_CLASS(Test::Child, TestClass, EXPORT_API, CE::Object,
-        ,//CE_EXTRA_SUPER_CLASS(SomeSuperclass, ISomeInterface),
-        CE_ATTRIBUTES(Hidden, Max = 412, DontSave),
-
-        // Properties
-        CE_PROPERTY_LIST(
-            CE_PROPERTY(Prop1, Plain, String, CE::String)
-            CE_PROPERTY(Prop2, Plain, f32, CE::f32)
-        ),
-
-        // Functions
-        CE_FUNCTION_LIST(
-            // String ExposedFunction(s32 integer, String extra);
-            CE_FUNCTION(ExposedFunction, 
-                CE_PARAM_POSITIONS(
-                    CE_PARAM_POS(0, CE::s32),
-                    CE_PARAM_POS(1, CE::String)
-                ),
-                CE_PARAM_LIST(
-                    CE_PARAM(integer, CE::s32, Plain, s32),
-                    CE_PARAM(extra, CE::String, Plain, String)
-                ),
-                CE_RETURN_TYPE(CE::String, Plain, String),
-                CE_ATTRIBUTES(HideFunction, CallStack = 32)
-            )
-            // void ExposedFunc2(String value);
-            CE_VOID_FUNCTION(ExposedFunc2,
-                CE_PARAM_POSITIONS(
-                    CE_PARAM_POS(0, CE::String)
-                ),
-                CE_PARAM_LIST(
-                    CE_PARAM(value, CE::String, Plain, String)
-                ),
-                CE_ATTRIBUTES()
-            )
-        )
-    )
-
-    // Cpp file
-    CE_META_IMPLEMENT_CLASS(TestClass, EXPORT_API);
-
-    void Example()
-    {
-        
-    }
-    
     
     // Header file
     /*class EXPORT_API CE_Generated_MetaClass_TestClass_Singleton : public CE::ClassType // Begin meta class
@@ -120,6 +74,7 @@ namespace Test::Child
                 "Prop1", _ClassPath, offsetof(Type, Prop1), sizeof(Type::Prop1), CE::FieldType::Plain, CE::FieldBaseType::String, "CE::String", "Hidden,Default=Type here...,"
                 }));
 
+            AddProperty("Prop1", Prop1);
         } // End props
 
         void SetupFunctions()
@@ -188,15 +143,15 @@ int main(int argc, char* argv[])
     CE::ModuleManager::Get().LoadModule("Core");
     CE::Logger::Initialize();
 
-    CE_LOG(Info, All, "Test string {} {} {} {}", 12.532f, "string", 'c', 1451);
-
     using namespace Test::Child;
 
-    CE::ClassType* type = TestClass::Type();
+    CE_LOG(Info, All, "Id: {}", GetTypeId<s32>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<CE::String>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<int>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<float>());
 
-    CE_LOG(Info, All, "Properties count: {}", type->GetPropertyCount());
-
-    CE_LOG(Info, All, "Prop: {}", type->GetPropertyAt(0)->GetName());
+    /*CE_LOG(Info, All, "Prop: {}", type->GetPropertyAt(0)->GetName());
 
     auto prop1 = type->GetPropertyAt(0);
     auto prop2 = type->GetPropertyAt(1);
@@ -210,16 +165,16 @@ int main(int argc, char* argv[])
     prop1->SetValue<String>(testClass, "New string");
     prop2->SetValue<f32>(testClass, 824.2124f);
 
-    CE_LOG(Info, All, "Value: {} {}", testClass->Prop1, testClass->Prop2);
+    CE_LOG(Info, All, "Value: {} {}", testClass->Prop1, testClass->Prop2);*/
 
-    auto func1 = type->GetFunctionAt(0);
+    //auto func1 = type->GetFunctionAt(0);
 
-    CE_LOG(Info, All, "Func name: {}", func1->GetName());
+    //CE_LOG(Info, All, "Func name: {}", func1->GetName());
 
-    std::any result = func1->Invoke(testClass, { (s32)45, String("hello") });
-    CE::String resultString = std::any_cast<CE::String>(result);
+    //std::any result = func1->Invoke(testClass, { (s32)45, String("hello") });
+    //CE::String resultString = std::any_cast<CE::String>(result);
 
-    CE_LOG(Info, All, "Result: {}", resultString);
+    //CE_LOG(Info, All, "Result: {}", resultString);
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");

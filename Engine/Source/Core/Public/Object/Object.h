@@ -21,7 +21,7 @@ namespace CE
 
         // Virtual methods
 
-        virtual ClassType* GetType() = 0;
+        //virtual ClassType* GetType() = 0;
 
     private:
         String Name;
