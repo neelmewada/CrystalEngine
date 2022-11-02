@@ -26,6 +26,7 @@ else()
 endif()
 
 ce_set(PAL_PLATFORM_ARCHITECTURE "x64")
+
 ce_set(PAL_PLATFORM_IS_64_BIT TRUE)
 ce_set(PAL_PLATFORM_IS_WINDOWS TRUE)
 
