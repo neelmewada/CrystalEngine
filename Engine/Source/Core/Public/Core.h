@@ -1,4 +1,17 @@
 #pragma once
 
-CORE_API void Test();
+#include "CoreMinimal.h"
 
+// Module Class
+
+namespace CE
+{
+    class CoreModule : public CE::Module
+    {
+    public:
+        void RegisterTypes() override;
+        void StartupModule() override;
+        void ShutdownModule() override;
+
+    };
+}

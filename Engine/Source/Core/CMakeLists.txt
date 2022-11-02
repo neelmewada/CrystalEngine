@@ -5,7 +5,6 @@ project(Core CXX)
 ce_add_target(Core SHARED
     NAMESPACE CE
     FOLDER Engine
-    #GENERATED
     PCHHEADER 
         PUBLIC 
             Public/Core.h
@@ -26,6 +25,11 @@ ce_add_target(Core SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::xxHash
+            ThirdParty::spdlog
+        PUBLIC
+            ThirdParty::fmt
+    RUNTIME_DEPENDENCIES
+        
 )
 
 

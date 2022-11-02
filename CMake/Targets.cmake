@@ -121,17 +121,17 @@ function(ce_add_target NAME TARGET_TYPE)
 
     if(ce_add_target_AUTOMOC)
         set_target_properties(${NAME} 
-            PROPERTIES AUTOMOC
+            PROPERTIES AUTOMOC ON
         )
     endif()
     if(ce_add_target_AUTOUIC)
         set_target_properties(${NAME} 
-            PROPERTIES AUTOUIC
+            PROPERTIES AUTOUIC ON
         )
     endif()
     if(ce_add_target_AUTORCC)
         set_target_properties(${NAME} 
-            PROPERTIES AUTORCC
+            PROPERTIES AUTORCC ON
         )
     endif()
     
@@ -209,17 +209,19 @@ function(ce_add_target NAME TARGET_TYPE)
     
     # RUNTIME_DEPENDENCIES
 
-    set(multiValueArgs PRIVATE PUBLIC INTERFACE)
-    cmake_parse_arguments(ce_add_target_RUNTIME_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_target_RUNTIME_DEPENDENCIES})
+    foreach(runtime_dep ${ce_add_target_RUNTIME_DEPENDENCIES})
+        if(DEFINED ${runtime_dep}_BIN_DIR AND DEFINED ${runtime_dep}_RUNTIME_DEPS)
 
-    if(ce_add_target_RUNTIME_DEPENDENCIES_PRIVATE OR ce_add_target_RUNTIME_DEPENDENCIES_PUBLIC OR ce_add_target_RUNTIME_DEPENDENCIES_INTERFACE)
-        target_link_libraries(${NAME}
-            PRIVATE   ${ce_add_target_RUNTIME_DEPENDENCIES_PRIVATE}
-            PUBLIC    ${ce_add_target_RUNTIME_DEPENDENCIES_PUBLIC}
-            INTERFACE ${ce_add_target_RUNTIME_DEPENDENCIES_INTERFACE}
-        )
-    endif()
-    
+            foreach(copy_dll ${${runtime_dep}_RUNTIME_DEPS})
+                if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY} OR ${TARGET_TYPE_${TARGET_TYPE}_IS_EXECUTABLE})
+                    add_custom_command(TARGET ${NAME} POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${${runtime_dep}_BIN_DIR}/${copy_dll} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
+                    )
+                endif()
+            endforeach()
+        endif()
+        
+    endforeach()
 
 endfunction()
 

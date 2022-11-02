@@ -82,3 +82,27 @@ ce_set(PAL_HOST_PLATFORM_NAME_LOWERCASE ${PAL_HOST_PLATFORM_NAME_LOWERCASE})
 
 include(CMake/Platform/${PAL_PLATFORM_NAME}/PAL_${PAL_PLATFORM_NAME_LOWERCASE}.cmake)
 
+function(ce_exclude_platform_files FILES_LIST)
+    if(NOT ${PAL_PLATFORM_NAME} STREQUAL "Windows")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Windows/.*")
+    endif()
+    
+    if(NOT ${PAL_PLATFORM_NAME} STREQUAL "Mac")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Mac/.*")
+    endif()
+
+    if(NOT ${PAL_PLATFORM_NAME} STREQUAL "Linux")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Linux/.*")
+    endif()
+
+    if(NOT ${PAL_PLATFORM_NAME} STREQUAL "Android")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Android/.*")
+    endif()
+
+    if(NOT ${PAL_PLATFORM_NAME} STREQUAL "iOS")
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/iOS/.*")
+    endif()
+
+    set(${FILES_LIST} ${${FILES_LIST}} PARENT_SCOPE)
+endfunction()
+

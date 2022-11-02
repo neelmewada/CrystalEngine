@@ -19,6 +19,8 @@ namespace CE
 
     typedef char c8;
     
+    typedef intptr_t IntPtr;
+    typedef uintptr_t UintPtr;
 }
 
 typedef char TCHAR;

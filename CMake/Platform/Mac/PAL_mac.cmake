@@ -22,5 +22,11 @@ endif()
 set(CE_MAC_DEPLOYMENT_TARGET "11.0" CACHE STRING "Mac Deployment Target")
 set(CMAKE_OSX_DEPLOYMENT_TARGET ${CE_MAC_DEPLOYMENT_TARGET})
 
-ce_set(CMAKE_OSX_ARCHITECTURES "universal")
+ce_set(CMAKE_OSX_ARCHITECTURES "x64")
+
+ce_set(PAL_PLATFORM_IS_64_BIT TRUE)
+ce_set(PAL_PLATFORM_IS_MAC TRUE)
+
+add_compile_definitions(PLATFORM_MAC=1)
+add_compile_definitions(IS_64BIT=1)
 

@@ -25,13 +25,13 @@ include(CMake/ThirdParty.cmake)
 # Import 3rd Party libraries
 add_subdirectory(ThirdParty)
 
+# Build Engine
+add_subdirectory(Engine)
+
 # Build Host Tools
 if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     add_subdirectory(Tools)
 endif()
-
-#Build Engine
-add_subdirectory(Engine)
 
 # Build Editor
 if(${PAL_TRAIT_BUILD_EDITOR})
