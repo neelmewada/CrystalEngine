@@ -22,7 +22,7 @@ namespace CE
     typedef intptr_t IntPtr;
     typedef uintptr_t UintPtr;
 
-    typedef ptrdiff_t PtrDiff;
+    typedef intptr_t PtrDiff;
 }
 
 typedef char TCHAR;

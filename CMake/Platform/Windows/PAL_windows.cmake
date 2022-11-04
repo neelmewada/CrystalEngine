@@ -27,8 +27,6 @@ else()
     message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported on ${PAL_PLATFORM_NAME}")
 endif()
 
-ce_set(PAL_PLATFORM_ARCHITECTURE "x64")
-
 ce_set(PAL_PLATFORM_IS_64_BIT TRUE)
 ce_set(PAL_PLATFORM_IS_WINDOWS TRUE)
 

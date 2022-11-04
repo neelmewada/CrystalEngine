@@ -36,6 +36,7 @@ namespace Test::Child
     };
 }
 
+
 CE_RTTI_DECLARE_CLASS(Test::Child::BaseClass);
 CE_RTTI_IMPLEMENT_CLASS(Test::Child::BaseClass);
 

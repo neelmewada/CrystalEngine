@@ -7,7 +7,6 @@
 
 #include <memory>
 
-
 namespace CE
 {
     class CORE_API Memory

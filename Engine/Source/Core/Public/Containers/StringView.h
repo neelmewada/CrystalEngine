@@ -3,7 +3,7 @@
 #include "Types/CoreTypeDefs.h"
 #include "Algorithm/Hash.h"
 
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 
 #include <string_view>
 

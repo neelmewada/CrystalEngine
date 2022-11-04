@@ -12,7 +12,7 @@ namespace CE
 		{}
 
 		template<typename T>
-		friend const TypeInfo* GetStaticType<T>();
+		friend const TypeInfo* GetStaticType();
 
 	public:
 
@@ -27,7 +27,7 @@ namespace CE
 		{}
 
 		template<typename T>
-		friend const TypeInfo* GetStaticType<T>();
+		friend const TypeInfo* GetStaticType();
 
 	public:
 
@@ -40,26 +40,27 @@ namespace CE
 
 }
 
-#define CE_RTTI_DECLARE_CLASS(Class, ...)\
+
+#define CE_RTTI_DECLARE_CLASS(...)\
 namespace CE\
 {\
 	template<>\
-	struct TypeData<Class> : public Internal::TypeDataImpl<Class, __VA_ARGS__>\
+	struct TypeData<CE_FIRST_ARG(__VA_ARGS__)> : public Internal::TypeDataImpl<__VA_ARGS__>\
 	{\
 	};\
 	namespace Internal\
 	{\
 		template<>\
-		struct TypeInfoImpl<Class>\
+		struct TypeInfoImpl<CE_FIRST_ARG(__VA_ARGS__)>\
 		{\
 			const ClassType Type;\
-			const TypeData<Class> TypeData;\
+			const TypeData<CE_FIRST_ARG(__VA_ARGS__)> TypeData;\
 		};\
 	}\
 	template<>\
-	inline const TypeInfo* GetStaticType<Class>()\
+	inline const TypeInfo* GetStaticType<CE_FIRST_ARG(__VA_ARGS__)>()\
 	{\
-		static Internal::TypeInfoImpl<Class> instance{ ClassType{#Class}, TypeData<Class>() };\
+		static Internal::TypeInfoImpl<CE_FIRST_ARG(__VA_ARGS__)> instance{ ClassType{CE_TOSTRING(CE_FIRST_ARG(__VA_ARGS__))}, TypeData<CE_FIRST_ARG(__VA_ARGS__)>() };\
 		return &instance.Type;\
 	}\
 }
@@ -70,13 +71,4 @@ const TypeInfo* Class::Type()\
 	return CE::template GetStaticType<Self>();\
 }
 
-
-/*
-template<>\
-const TypeInfo* GetStaticType<Class>()\
-{\
-	static Internal::TypeInfoImpl<Class> instance{ ClassType{#Class}, TypeData<Class>() };\
-	return &instance.Type;\
-}\
-*/
 

@@ -4,7 +4,7 @@
 
 #include "Memory/FixedSizeAllocator.h"
 
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 
 #ifndef STRING_BUFFER_SIZE
 #define STRING_BUFFER_SIZE 32
@@ -56,6 +56,10 @@ namespace CE
         {
             this->ConcatenateCString(cString);
             return *this;
+        }
+        friend inline String operator+(const char* lhs, const String& rhs)
+        {
+            return String(lhs, rhs.GetCString());
         }
         inline String& operator+=(const char* cString)
         {

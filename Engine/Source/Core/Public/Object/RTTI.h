@@ -44,8 +44,8 @@ namespace CE
 	{
 		constexpr bool isPointer = std::is_pointer<Type>::value;
 
-		typedef std::remove_pointer<Type>::type TypeWithoutPtr;
-		typedef std::remove_cv<TypeWithoutPtr>::type FinalType;
+        typedef typename std::remove_pointer<Type>::type TypeWithoutPtr;
+		typedef typename std::remove_cv<TypeWithoutPtr>::type FinalType;
 
 		if constexpr (isPointer)
 		{
@@ -251,13 +251,14 @@ namespace CE
 
 #define __CE_RTTI_SUPERCLASS_0(...) typedef void Super;
 #define __CE_RTTI_SUPERCLASS_1(SuperClass) typedef SuperClass Super;
+#define __CE_RTTI_SUPERCLASS_2(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
 
-#define __CE_RTTI_SUPERCLASS(SuperClass) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(SuperClass)))(SuperClass)
+#define __CE_RTTI_SUPERCLASS(...) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
-#define CE_RTTI(Class, SuperClass)\
+#define CE_RTTI(Class, ...)\
 public:\
 	typedef Class Self;\
-	__CE_RTTI_SUPERCLASS(SuperClass)\
+	__CE_RTTI_SUPERCLASS(__VA_ARGS__)\
 	static const TypeInfo* Type();\
 	virtual const TypeInfo* GetType() const\
 	{\
