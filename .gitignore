@@ -2,8 +2,6 @@
 [Bb]uild
 [Ii]ntermediates
 ThirdParty/*
-!ThirdParty/CMakeLists.txt
-!ThirdParty/Find*.cmake
 
 # Prerequisites
 *.d

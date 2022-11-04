@@ -15,8 +15,6 @@ namespace CE
 
         virtual void StartupModule() = 0;
         virtual void ShutdownModule() = 0;
-
-        virtual void RegisterTypes() = 0;
     };
 
     class DefaultModuleImpl : public Module
@@ -29,11 +27,6 @@ namespace CE
         }
 
         void ShutdownModule() override
-        {
-
-        }
-
-        void RegisterTypes() override
         {
 
         }

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ObjectMacros.h"
-#include "Types.h"
+#include "RTTI.h"
+#include "Class.h"
 #include "Containers/String.h"
 
 namespace CE

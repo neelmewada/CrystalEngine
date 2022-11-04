@@ -6,10 +6,9 @@
 
 namespace CE
 {
-    class CoreModule : public CE::Module
+    class CoreModule : public Module
     {
     public:
-        void RegisterTypes() override;
         void StartupModule() override;
         void ShutdownModule() override;
 

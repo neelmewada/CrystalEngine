@@ -67,11 +67,11 @@ namespace CE
 
 #if IS_MONOLITHIC
 
-#define IMPLEMENT_MODULE(ModuleName, ModuleImplClass)
+#define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)
 
 #else
 
-#define IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
+#define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
 extern "C" DLL_EXPORT CE::Module* LoadModule()\
 {\
     return new ModuleImplClass();\

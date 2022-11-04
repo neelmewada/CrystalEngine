@@ -13,129 +13,38 @@ using namespace CE;
 
 namespace Test::Child
 {
-
-    class TestClass : public CE::Object
-    {
-    public:
-        CE_META_CLASS(Test::Child, TestClass, CE::Object);
-
-        TestClass() : CE::Object()
-        {
-            
-        }
-
-    //private:
-
-        CE::String Prop1;
-        CE::String Str;
-
-        float Prop2;
-        float Prop3;
-
-        CE::Object* ObjRef = nullptr;
-
-        String ExposedFunction(s32 integer, String extra)
-        {
-            return String::Format("Formated string: {} {}", integer, extra);
-        }
-
-        void ExposedFunc2(String value)
-        {
-            CE_LOG(Info, All, "Test Function: {}", value);
-        }
-    };
     
-    // Header file
-    /*class EXPORT_API CE_Generated_MetaClass_TestClass_Singleton : public CE::ClassType // Begin meta class
+    class BaseClass
     {
-    private:
-        CE_Generated_MetaClass_TestClass_Singleton();
-        ~CE_Generated_MetaClass_TestClass_Singleton();
-
+        CE_RTTI(BaseClass);
     public:
-        typedef TestClass Type; // typedef ClassType Type;
-
-        static CE_Generated_MetaClass_TestClass_Singleton& Get()
-        {
-            static CE_Generated_MetaClass_TestClass_Singleton instance;
-            return instance;
-        }
-
-    private:
-        static constexpr const char* _Name = "TestClass";
-        static constexpr CE::FieldType _Type = CE::FieldType::Plain;
-        static constexpr CE::FieldBaseType _UnderlyingType = CE::FieldBaseType::Class;
-        static constexpr const char* _ClassPath = "Test::Child" "::" "TestClass";
-        static constexpr const char* _Attributes = "SomeAttribute,DontSave,EditAnywhere";
-
-        void SetupProperties() // Begin props
-        {
-            Properties.Add(new CE::PropertyType(CE::PropertyInitializer{
-                "Prop1", _ClassPath, offsetof(Type, Prop1), sizeof(Type::Prop1), CE::FieldType::Plain, CE::FieldBaseType::String, "CE::String", "Hidden,Default=Type here...,"
-                }));
-
-            AddProperty("Prop1", Prop1);
-        } // End props
-
-        void SetupFunctions()
-        {
-            using ExposedFunction0 = s32;
-            using ExposedFunction1 = CE::String;
-            
-            Functions.Add(new CE::FunctionType(CE::FunctionInitializer
-                {
-                    "ExposedFunction", TEXT(Test::Child::TestClass::ExposedFunction), false, 
-                    [&](void* instance, std::initializer_list<std::any> params, std::any& result) -> void {
-                        Type* ptr = (Type*)instance;
-                        result = ptr->ExposedFunction(
-                            std::any_cast<CE::s32>(*(params.begin() + 0)),
-                            std::any_cast<CE::String>(*(params.begin() + 1))
-                        );
-                    },
-                    // Parameters
-                    {
-                        new CE::ParameterType({ "integer", false, sizeof(s32), CE::FieldType::Plain, CE::FieldBaseType::s32, "CE::s32", "SomeAttribute,Hidden,Max=12" }),
-                        new CE::ParameterType({ "extra", false, sizeof(CE::String), CE::FieldType::Plain, CE::FieldBaseType::String, "CE::String", "SomeAttribute,Hidden,Display=Extra Value" }),
-                    },
-                    // Return Type
-                    new CE::ParameterType({ "", true, sizeof(CE::String), CE::FieldType::Plain, CE::FieldBaseType::String, "", ""})
-                }));
-
-            Functions.Add(new CE::FunctionType(CE::FunctionInitializer
-                {
-                    "ExposedFunc2", TEXT(Test::Child::TestClass::ExposedFunc2), false,
-                    [&](void* instance, std::initializer_list<std::any> params, std::any& result) -> void {
-                        Type* ptr = (Type*)instance;
-                        ptr->ExposedFunc2(
-                            std::any_cast<CE::String>(*(params.begin() + 0))
-                        );
-                    },
-                    // Parameters
-                    {
-                        new CE::ParameterType({ "value", false, sizeof(CE::String), CE::FieldType::Plain, CE::FieldBaseType::String, "", "" }),
-                    },
-                    nullptr
-                }));
-        }
+        int a = 1;
     };
-    EXPORT_API extern CE_Generated_MetaClass_TestClass_Singleton& CE_Generated_MetaClass_TestClass_Instance; // End meta class
 
-    // Cpp file
-    EXPORT_API CE_Generated_MetaClass_TestClass_Singleton& CE_Generated_MetaClass_TestClass_Instance = CE_Generated_MetaClass_TestClass_Singleton::Get();
-
-    CE_Generated_MetaClass_TestClass_Singleton::CE_Generated_MetaClass_TestClass_Singleton() 
-        : CE::ClassType(CE::ClassInitializer{ _Name, sizeof(TestClass), _Type, _UnderlyingType, _ClassPath, _Attributes })
+    class BaseClass2
     {
-        SetupProperties();
-        SetupFunctions();
-        ClassType::RegisterClassType(this);
-    }
+        CE_RTTI(BaseClass2);
+    public:
+        int b = 2;
+    };
 
-    CE_Generated_MetaClass_TestClass_Singleton::~CE_Generated_MetaClass_TestClass_Singleton()
+    class Derived : public BaseClass, public BaseClass2
     {
-        ClassType::UnregisterClassType(this);
-    }*/
+        CE_RTTI(Derived, BaseClass);
+    public:
+        int c = 3;
+    };
 }
+
+CE_RTTI_DECLARE_CLASS(Test::Child::BaseClass);
+CE_RTTI_IMPLEMENT_CLASS(Test::Child::BaseClass);
+
+CE_RTTI_DECLARE_CLASS(Test::Child::BaseClass2);
+CE_RTTI_IMPLEMENT_CLASS(Test::Child::BaseClass2);
+
+CE_RTTI_DECLARE_CLASS(Test::Child::Derived, Test::Child::BaseClass, Test::Child::BaseClass2);
+CE_RTTI_IMPLEMENT_CLASS(Test::Child::Derived);
+
 
 
 int main(int argc, char* argv[])
@@ -148,8 +57,16 @@ int main(int argc, char* argv[])
     CE_LOG(Info, All, "Id: {}", GetTypeId<s32>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<CE::String>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object*>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<const CE::Object*>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object const*>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object* const>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<int>());
-    CE_LOG(Info, All, "Id: {}", GetTypeId<float>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<Derived>());
+    
+    auto type = Derived::Type();
+
+    CE_LOG(Info, All, "Name: {} | Id: {}", type->GetName(), type->GetTypeId());
 
     /*CE_LOG(Info, All, "Prop: {}", type->GetPropertyAt(0)->GetName());
 

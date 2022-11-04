@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Types.h"
-
 namespace CE
 {
+    
+    class CORE_API Name
+    {
+    public:
 
-    
-    
+    };
+
 } // namespace CE
 
