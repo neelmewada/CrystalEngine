@@ -74,9 +74,9 @@ namespace CE
 		// TypeData is always located AFTER TypeInfo in memory
 		virtual const u8* GetRawTypeData() const { return (u8*)(this + 1); }
 
-		virtual bool IsClass() { return false; }
-		virtual bool IsStruct() { return false; }
-		virtual bool IsField() { return false; }
+		virtual bool IsClass() const { return false; }
+		virtual bool IsStruct() const { return false; }
+		virtual bool IsField() const { return false; }
 
 		TypeId GetTypeId() const
 		{
@@ -212,13 +212,15 @@ namespace CE
 		{
 			TypeDataImpl()
 			{
-				this->ThisTypeId = GetTypeId<Type>();
+				this->ThisTypeId = CE::GetTypeId<Type>();
 				BaseTypeData.template FillBaseTypeData<Type>(0, Size);
 				Size++;
 				EndMarker = 0;
 			}
 
 			const char* GetData() const { return (char*)&ThisTypeId; }
+            
+            TypeId GetTypeId() const { return ThisTypeId; }
 
 			TypeIdSize Size;
 			TypeId ThisTypeId;
@@ -247,21 +249,4 @@ namespace CE
 
 } // namespace CE
 
-// RTTI Macros
-
-#define __CE_RTTI_SUPERCLASS_0(...) typedef void Super;
-#define __CE_RTTI_SUPERCLASS_1(SuperClass) typedef SuperClass Super;
-#define __CE_RTTI_SUPERCLASS_2(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
-
-#define __CE_RTTI_SUPERCLASS(...) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
-
-#define CE_RTTI(Class, ...)\
-public:\
-	typedef Class Self;\
-	__CE_RTTI_SUPERCLASS(__VA_ARGS__)\
-	static const TypeInfo* Type();\
-	virtual const TypeInfo* GetType() const\
-	{\
-		return Type();\
-	}
 

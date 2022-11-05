@@ -13,38 +13,34 @@ using namespace CE;
 
 namespace Test::Child
 {
-    
-    class BaseClass
+    class Some0
     {
-        CE_RTTI(BaseClass);
+        CE_RTTI_CLASS(Some0);
+    public:
+        int s0 = 0;
+    };
+
+    class BaseClass : public Some0
+    {
+        CE_RTTI_CLASS(BaseClass);
     public:
         int a = 1;
     };
 
-    class BaseClass2
-    {
-        CE_RTTI(BaseClass2);
-    public:
-        int b = 2;
-    };
-
-    class Derived : public BaseClass, public BaseClass2
-    {
-        CE_RTTI(Derived, BaseClass);
-    public:
-        int c = 3;
-    };
 }
 
+CE_RTTI_DECLARE_CLASS(Test::Child::Some0,
+                      CE_RTTI_SUPER()
+);
 
-CE_RTTI_DECLARE_CLASS(Test::Child::BaseClass);
+CE_RTTI_IMPLEMENT_CLASS(Test::Child::Some0);
+
+
+CE_RTTI_DECLARE_CLASS(Test::Child::BaseClass,
+                      CE_RTTI_SUPER(Test::Child::Some0)
+);
+
 CE_RTTI_IMPLEMENT_CLASS(Test::Child::BaseClass);
-
-CE_RTTI_DECLARE_CLASS(Test::Child::BaseClass2);
-CE_RTTI_IMPLEMENT_CLASS(Test::Child::BaseClass2);
-
-CE_RTTI_DECLARE_CLASS(Test::Child::Derived, Test::Child::BaseClass, Test::Child::BaseClass2);
-CE_RTTI_IMPLEMENT_CLASS(Test::Child::Derived);
 
 
 
@@ -63,11 +59,15 @@ int main(int argc, char* argv[])
     CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object const*>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object* const>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<int>());
-    CE_LOG(Info, All, "Id: {}", GetTypeId<Derived>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<BaseClass>());
     
-    auto type = Derived::Type();
+    auto type = BaseClass::Type();
 
-    CE_LOG(Info, All, "Name: {} | Id: {}", type->GetName(), type->GetTypeId());
+    CE_LOG(Info, All, "Name: {} | Id: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass());
+    
+    type = Some0::Type();
+
+    CE_LOG(Info, All, "Name: {} | Id: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass());
 
     /*CE_LOG(Info, All, "Prop: {}", type->GetPropertyAt(0)->GetName());
 
