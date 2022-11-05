@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Containers/String.h"
+
 #include "ObjectMacros.h"
 #include "RTTI.h"
 #include "Class.h"
-#include "Containers/String.h"
 
 namespace CE
 {

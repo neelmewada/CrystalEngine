@@ -3,6 +3,7 @@
 #include "Misc/CoreDefines.h"
 #include "Misc/CoreMacros.h"
 #include "Containers/String.h"
+#include "Containers/Array.h"
 #include "Containers/HashMap.h"
 #include "RTTI.h"
 
@@ -26,29 +27,51 @@ namespace CE
 	class CORE_API Variant
 	{
 	public:
-		Variant() : ValueType(0)
+		Variant() : ValueTypeId(0)
 		{}
 
-		template<typename PtrType>
-		Variant(PtrType* ptr) : ValueType(GetTypeId<PtrType*>())
+		Variant(f32 value) { SetInternalValue(value); }
+		Variant(f64 value) { SetInternalValue(value); }
+
+		Variant(u8  value) { SetInternalValue(value); }
+		Variant(u16 value) { SetInternalValue(value); }
+		Variant(u32 value) { SetInternalValue(value); }
+		Variant(u64 value) { SetInternalValue(value); }
+
+		Variant(s8  value) { SetInternalValue(value); }
+		Variant(s16 value) { SetInternalValue(value); }
+		Variant(s32 value) { SetInternalValue(value); }
+		Variant(s64 value) { SetInternalValue(value); }
+
+		Variant(bool value) { SetInternalValue(value); }
+
+		Variant(const char* value) { SetInternalValue(String(value)); }
+		Variant(String value) { SetInternalValue(value); }
+
+		template<typename ElementType>
+		Variant(CE::Array<ElementType> value) : ValueTypeId(GetTypeId<CE::Array<ElementType>>())
 		{
-			
+
 		}
+
+		template<typename PtrType>
+		Variant(PtrType* ptr) : ValueTypeId(GetTypeId<PtrType*>()), PtrValue(ptr)
+		{}
 
 		inline bool HasValue() const
 		{
-			return ValueType > 0;
+			return ValueTypeId > 0;
 		}
 
-		inline TypeId GetValueType() const
+		inline TypeId GetValueTypeId() const
 		{
-			return ValueType;
+			return ValueTypeId;
 		}
 
 		template<typename T>
 		inline T GetValue() const
 		{
-			if (ValueType != GetTypeId<T>())
+			if (ValueTypeId != GetTypeId<T>())
 			{
 				throw VariantCastException("Failed to cast Variant to the return type!");
 			}
@@ -67,6 +90,14 @@ namespace CE
 		}
 
 	private:
+
+		template<typename T>
+		void SetInternalValue(T value)
+		{
+			ValueTypeId = GetTypeId<T>();
+			*(T*)this = value;
+		}
+
 		union
 		{
 			bool   BoolValue;
@@ -82,39 +113,12 @@ namespace CE
 			f32    Float32Value;
 			f64    Float64Value;
 			void*  PtrValue;
+
+			// Complex types
+			CE::Array<Variant> ArrayValue;
 		};
 
-		TypeId ValueType = 0;
+		TypeId ValueTypeId = 0;
 	};
-
-#pragma pack(push, 1)
-
-
-	namespace Internal
-	{
-
-		//template<typename T>
-		//struct TypeInfoImpl
-		//{
-		//	const TypeInfo TypeInfo;
-		//	const TypeData<T> TypeData;
-		//};
-	}
-
-
-#pragma pack(pop)
-
-	// **********************************************************
-	// Struct Type
-	
-
-	//template<class ClassType, class FieldType>
-	//void AddProperty(const char* name, FieldType ClassType::* member, const char* attributes)
-	//{
-	//	//using UnderlyingType = AZStd::RemoveEnumT<FieldType>;
-	//	using ValueType = std::remove_pointer_t<FieldType>;
-	//	std::cout << "Type: " << typeid(ValueType).name() << " id: " << GetTypeId<ValueType>() << "\n";
-	//}
-
 
 } // namespace CE

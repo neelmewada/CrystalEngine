@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithm/Hash.h"
+#include "Containers/Array.h"
 
 #include "Memory/FixedSizeAllocator.h"
 
@@ -20,6 +21,9 @@
 namespace CE
 {
     class CORE_API StringView;
+
+    template<typename T>
+    class Array;
 
 	class CORE_API String
 	{

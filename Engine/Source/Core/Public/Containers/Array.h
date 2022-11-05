@@ -2,6 +2,8 @@
 
 #include "Types/CoreTypeDefs.h"
 
+#include "Object/RTTI.h"
+
 #include <vector>
 #include <functional>
 
@@ -12,7 +14,12 @@ namespace CE
     class Array
     {
     public:
-        Array(SIZE_T count = 0) : Impl(count)
+        Array() : Impl()
+        {
+            
+        }
+
+        Array(SIZE_T count) : Impl(count)
         {
             
         }
@@ -25,6 +32,16 @@ namespace CE
         Array(std::initializer_list<ElementType> list) : Impl(list)
         {
             
+        }
+
+        Array(std::vector<ElementType> vector) : Impl(vector)
+        {
+
+        }
+
+        inline static TypeId ElementTypeId()
+        {
+            return GetTypeId<ElementType>();
         }
 
         ElementType& operator[](SIZE_T index)
@@ -45,6 +62,12 @@ namespace CE
         inline void Add(const ElementType& item)
         {
             Impl.push_back(item);
+        }
+
+        template<typename... Args>
+        inline void EmplaceBack(Args... args)
+        {
+            Impl.emplace_back(args...);
         }
 
         inline void AddRange(std::initializer_list<const ElementType&> elements)
@@ -117,9 +140,12 @@ namespace CE
             // Increment ops
             Iterator& operator++() { Ptr++; return *this; }
             Iterator operator++(int) { Iterator Temp = *this; ++(*this); return Temp; }
+            Iterator& operator+(SIZE_T rhs) { Ptr += rhs; return *this; }
+
             // Decrement ops
             Iterator& operator--() { Ptr--; return *this; }
             Iterator operator--(int) { Iterator Temp = *this; --(*this); return Temp; }
+            Iterator& operator-(SIZE_T rhs) { Ptr -= rhs; return *this; }
 
             friend bool operator== (const Iterator& A, const Iterator& B) { return A.Ptr == B.Ptr; };
             friend bool operator!= (const Iterator& A, const Iterator& B) { return A.Ptr != B.Ptr; };
@@ -145,9 +171,11 @@ namespace CE
             // Increment ops
             ConstIterator& operator++() { Ptr++; return *this; }
             ConstIterator operator++(int) { ConstIterator temp = *this; ++(*this); return temp; }
+            ConstIterator& operator+(SIZE_T rhs) { Ptr += rhs; return *this; }
             // Decrement ops
             ConstIterator& operator--() { Ptr--; return *this; }
             ConstIterator operator--(int) { ConstIterator temp = *this; --(*this); return temp; }
+            ConstIterator& operator-(SIZE_T rhs) { Ptr -= rhs; return *this; }
 
             friend bool operator== (const ConstIterator& A, const ConstIterator& B) { return A.Ptr == B.Ptr; };
             friend bool operator!= (const ConstIterator& A, const ConstIterator& B) { return A.Ptr != B.Ptr; };
@@ -166,7 +194,7 @@ namespace CE
         Iterator End() { return end(); }
 
     private:
-        std::vector<ElementType> Impl{};
+        std::vector<ElementType> Impl;
     };
     
 } // namespace CE
