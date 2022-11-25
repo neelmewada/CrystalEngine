@@ -5,7 +5,6 @@
 #include "Containers/String.h"
 #include "Containers/Array.h"
 #include "Containers/HashMap.h"
-#include "RTTI.h"
 
 
 namespace CE
@@ -29,6 +28,8 @@ namespace CE
 	public:
 		Variant() : ValueTypeId(0)
 		{}
+
+		~Variant() = default;
 
 		Variant(f32 value) { SetInternalValue(value); }
 		Variant(f64 value) { SetInternalValue(value); }

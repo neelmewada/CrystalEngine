@@ -16,9 +16,14 @@ namespace Test::Child
     class Some0
     {
         CE_RTTI_CLASS(Some0);
-    public:
+    private:
         int s0 = 0;
         CE::String baseString;
+
+        void PrintHello()
+        {
+            CE_LOG(Info, All, "Hello world from Some0");
+        }
     };
 
     class BaseClass : public Some0
@@ -60,6 +65,7 @@ int main(int argc, char* argv[])
     using namespace Test::Child;
 
     CE_LOG(Info, All, "Id: {}", GetTypeId<s32>());
+    CE_LOG(Info, All, "Id: {}", GetTypeId<void>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<CE::String>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Object*>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<CE::Array<void>>());
@@ -68,21 +74,22 @@ int main(int argc, char* argv[])
     CE_LOG(Info, All, "Id: {}", GetTypeId<int>());
     CE_LOG(Info, All, "Id: {}", GetTypeId<BaseClass>());
     
-    auto type = BaseClass::Type();
+    //auto type = BaseClass::Type();
 
-    CE_LOG(Info, All, "Name: {} | Id: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass());
+    //CE_LOG(Info, All, "Name: {} | Id: {} | {} | Super Count: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass(), type->GetSuperTypesCount(), type->GetLocalFunctionCount());
     
-    type = Some0::Type();
+    auto type = Some0::Type();
 
-    CE_LOG(Info, All, "Name: {} | Id: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass());
+    CE_LOG(Info, All, "Name: {} | Id: {} | {} | Super Count: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass(), type->GetSuperTypesCount(), type->GetLocalFunctionCount());
 
-    CE_LOG(Info, All, "Field Count: {}", type->GetFieldCount());
+    CE_LOG(Info, All, "Field Count: {}", type->GetLocalFieldCount());
 
-    for (int i = 0; i < type->GetFieldCount(); i++)
+    for (int i = 0; i < type->GetLocalFieldCount(); i++)
     {
-        CE_LOG(Info, All, "Field {}: {} | typeId: {} | ({}, {}) | Attrs: {}", i, type->GetFieldAt(i)->GetName(), type->GetFieldAt(i)->GetTypeId(), 
-            type->GetFieldAt(i)->GetSize(), type->GetFieldAt(i)->GetOffset(),
-            type->GetFieldAt(i)->GetRawAttributes());
+        auto field = type->GetLocalFieldAt(i);
+        CE_LOG(Info, All, "Field {}: {} | typeId: {} | ({}, {}) | Attrs: {}", i, field->GetName(), field->GetTypeId(), 
+            field->GetSize(), field->GetOffset(),
+            field->GetRawAttributes());
     }
     
     CE::Logger::Shutdown();

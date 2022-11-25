@@ -21,6 +21,8 @@
 //More background info in https://stackoverflow.com/questions/5134523/msvc-doesnt-expand-va-args-correctly
 #define CE_MACRO_EXPAND(va_args) va_args
 
+#define CE_EXPAND(va_args) va_args
+
 #define __CE_FIRST_ARG(First, ...) First
 #define CE_FIRST_ARG(...) CE_MACRO_EXPAND(__CE_FIRST_ARG(__VA_ARGS__))
 

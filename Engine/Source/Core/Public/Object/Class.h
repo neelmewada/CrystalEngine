@@ -1,7 +1,10 @@
 #pragma once
 
 #include "RTTI.h"
+#include "Variant.h"
+
 #include "Field.h"
+#include "Function.h"
 
 #include "Containers/Array.h"
 
@@ -13,12 +16,19 @@ namespace CE
 
 	class StructType;
 	class ClassType;
+	class Variant;
+
+	template<typename ElementType>
+	class Array;
 
 	namespace Internal
 	{
 		template<typename Struct>
 		struct TypeInfoImpl;
 	}
+
+	// *************************************************
+	// RTTI
 
 	// Default implementation always returns nullptr. Specialization will return the correct data
 	template<typename Type>
@@ -34,7 +44,11 @@ namespace CE
 		return nullptr;
 	}
 
-	class StructType : public TypeInfo
+
+	// *************************************************
+	// Struct Type
+
+	class CORE_API StructType : public TypeInfo
 	{
 	protected:
 		StructType(String name) : TypeInfo(name)
@@ -86,28 +100,78 @@ namespace CE
 			return 0;
 		}
 
-		inline s32 GetFieldCount() const
+		inline u32 GetLocalFieldCount() const
 		{
-			return Fields.GetSize();
+			return LocalFields.GetSize();
 		}
 
-		inline const FieldType* GetFieldAt(s32 index) const
+		inline const FieldType* GetLocalFieldAt(u32 index) const
 		{
-			return &Fields[index];
+			return &LocalFields[index];
 		}
+
+		inline u32 GetLocalFunctionCount() const
+		{
+			return LocalFunctions.GetSize();
+		}
+
+		inline const FunctionType* GetLocalFunctionAt(u32 index) const
+		{
+			return &LocalFunctions[index];
+		}
+
+		inline u32 GetSuperTypesCount() const
+		{
+			return SuperTypeIds.GetSize();
+		}
+
+		inline TypeId GetSuperType(s32 index) const
+		{
+			return SuperTypeIds[index];
+		}
+
+		FieldType* GetFirstField();
 
 	protected:
 
+		virtual void CacheAllFields();
+
 		template<typename Struct, typename Field>
-		void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
+		inline void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
 		{
-			Fields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes));
+			LocalFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes));
 		}
 
-		CE::Array<FieldType> Fields;
+		template<typename... SuperTypes>
+		inline void AddSuper()
+		{
+			TypeId ids[] = { CE::GetTypeId<SuperTypes>()... };
+			constexpr int count = sizeof(ids) / sizeof(TypeId);
+			for (int i = 0; i < count; i++)
+			{
+				SuperTypeIds.Add(ids[i]);
+			}
+		}
+
+		template<>
+		inline void AddSuper<>()
+		{
+			
+		}
+
+		CE::Array<FieldType> CachedFields;
+
+		CE::Array<FieldType> LocalFields;
+		CE::Array<TypeId> SuperTypeIds;
+		CE::Array<FunctionType> LocalFunctions;
+		bool bFieldsCached = false;
 	};
 
-	class ClassType : public StructType
+
+	// *************************************************
+	// Class Type
+
+	class CORE_API ClassType : public StructType
 	{
 	protected:
 		ClassType(String name) : StructType(name)
@@ -280,9 +344,13 @@ namespace CE
 
 }
 
-#define CE_FIELD_LIST(x) x
+#define __CE_SUPER_LIST(...) CE_EXPAND(CE_CONCATENATE(__CE_SUPER_LIST_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
+#define CE_FIELD_LIST(x) x
 #define CE_FIELD(FieldName, ...) Type.AddField(#FieldName, &Self::FieldName, offsetof(Self, FieldName), "" #__VA_ARGS__);
+
+//#define CE_FUNCTION_LIST(x) x
+//#define CE_FUNCTION(FunctionName, ...) Type.AddFunction(#FunctionName, &Self::FunctionName, "" #__VA_ARGS__);
 
 #define __CE_RTTI_JOIN_CLASSES_0()
 #define __CE_RTTI_JOIN_CLASSES_1(...) , __VA_ARGS__
@@ -294,11 +362,11 @@ namespace CE
 #define __CE_RTTI_JOIN_CLASSES_7(...) , __VA_ARGS__
 #define __CE_RTTI_JOIN_CLASSES_8(...) , __VA_ARGS__
 
-#define __CE_RTTI_JOIN_CLASSES(Class, ...) Class CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_JOIN_CLASSES_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
+#define __CE_RTTI_JOIN_CLASSES(Class, ...) Class CE_EXPAND(CE_CONCATENATE(__CE_RTTI_JOIN_CLASSES_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
 #define CE_SUPER(...) __VA_ARGS__
 
-#define CE_RTTI_DECLARE_CLASS(Class, SuperClasses, PropertyList)\
+#define CE_RTTI_DECLARE_CLASS(Class, SuperClasses, FieldList)\
 namespace CE\
 {\
 	template<>\
@@ -315,7 +383,8 @@ namespace CE\
 			const CE::StructTypeData<Class> TypeData;\
             TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Class> typeData) : Type(type), TypeData(typeData)\
             {\
-                PropertyList\
+                FieldList\
+				Type.AddSuper<SuperClasses>();\
             }\
 		};\
 	}\
@@ -342,11 +411,14 @@ const ClassType* Class::Type()\
 #define __CE_RTTI_SUPERCLASS_1(SuperClass) typedef SuperClass Super;
 #define __CE_RTTI_SUPERCLASS_2(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
 #define __CE_RTTI_SUPERCLASS_3(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
+#define __CE_RTTI_SUPERCLASS_4(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
 
 #define __CE_RTTI_SUPERCLASS(...) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
 #define CE_RTTI_CLASS(Class, ...)\
 public:\
+	template<typename T>\
+	friend struct CE::Internal::TypeInfoImpl;\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static const ClassType* Type();\

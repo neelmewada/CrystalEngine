@@ -21,6 +21,8 @@ namespace CE
 
         virtual bool IsField() const override { return true; }
 
+        inline const FieldType* GetNext() const { return Next; }
+
         virtual TypeId GetTypeId() const
         {
             return FieldTypeId;
@@ -40,6 +42,8 @@ namespace CE
 
         SIZE_T Offset;
         SIZE_T Size;
+
+        FieldType* Next = nullptr;
 
         friend class StructType;
         friend class ClassType;

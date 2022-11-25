@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace CE::Traits
+namespace CE
 {
 
 	template <class, template <class> class>

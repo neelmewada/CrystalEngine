@@ -52,8 +52,8 @@ namespace CE
 	{
 		constexpr bool isPointer = std::is_pointer<Type>::value;
 
-        typedef typename Traits::RemovePointerFromType<Type> TypeWithoutPtr;
-		typedef typename Traits::RemoveConstVolatileFromType<TypeWithoutPtr> FinalType;
+        typedef typename CE::RemovePointerFromType<Type> TypeWithoutPtr;
+		typedef typename CE::RemoveConstVolatileFromType<TypeWithoutPtr> FinalType;
 
 		if constexpr (isPointer)
 		{
@@ -83,6 +83,7 @@ namespace CE
 		virtual bool IsClass() const { return false; }
 		virtual bool IsStruct() const { return false; }
 		virtual bool IsField() const { return false; }
+		virtual bool IsFunction() const { return false; }
 
 		virtual TypeId GetTypeId() const = 0;
 
