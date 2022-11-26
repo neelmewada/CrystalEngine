@@ -3,6 +3,7 @@
 #include "Misc/CoreDefines.h"
 #include "Misc/CoreMacros.h"
 #include "Containers/Array.h"
+#include "Containers/HashMap.h"
 #include "Containers/String.h"
 
 #include "TypeTraits.h"
@@ -14,6 +15,12 @@ namespace CE
 
 	template<typename ElementType>
 	class Array;
+
+    namespace Internal
+    {
+        template<typename Struct>
+        struct TypeInfoImpl;
+    }
 
 	// **********************************************************
 	// Type ID
@@ -73,6 +80,11 @@ namespace CE
 	protected:
 		TypeInfo(String name) : Name(name)
 		{}
+        
+        template<typename Struct>
+        friend struct TypeInfoImpl;
+        
+        friend const TypeInfo* GetStaticType(String namePath);
 
 	public:
 		const String& GetName() const { return Name; }
@@ -89,6 +101,16 @@ namespace CE
 
 	private:
 		String Name;
+        static HashMap<String, const TypeInfo*> RegisteredTypes;
+        
+    public:
+        // For internal use only!
+        static void RegisterType(const TypeInfo* type);
+        
+        inline static u32 GetRegisteredCount()
+        {
+            return RegisteredTypes.GetSize();
+        }
 	};
 
 	// Default implementation always returns nullptr. Specialization will return the correct data
@@ -97,6 +119,8 @@ namespace CE
 	{
 		return nullptr;
 	}
+
+    CORE_API const TypeInfo* GetStaticType(String namePath);
 
 	// Specialization will contain the magic data.
 	template<typename T>

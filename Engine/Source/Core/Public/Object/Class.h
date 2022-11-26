@@ -366,46 +366,52 @@ namespace CE
 
 #define CE_SUPER(...) __VA_ARGS__
 
-#define CE_RTTI_DECLARE_CLASS(Class, SuperClasses, FieldList)\
+#define CE_RTTI_DECLARE_CLASS(Namespace, Class, SuperClasses, FieldList)\
 namespace CE\
 {\
 	template<>\
-	struct StructTypeData<Class> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Class, SuperClasses)>\
+	struct StructTypeData<Namespace::Class> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Class, SuperClasses)>\
 	{\
 	};\
 	namespace Internal\
 	{\
 		template<>\
-		struct TypeInfoImpl<Class>\
+		struct TypeInfoImpl<Namespace::Class>\
 		{\
-            typedef Class Self;\
+            typedef Namespace::Class Self;\
             CE::ClassType Type;\
-			const CE::StructTypeData<Class> TypeData;\
-            TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Class> typeData) : Type(type), TypeData(typeData)\
+			const CE::StructTypeData<Namespace::Class> TypeData;\
+            TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Namespace::Class> typeData) : Type(type), TypeData(typeData)\
             {\
+                TypeInfo::RegisterType(&Type);\
                 FieldList\
 				Type.AddSuper<SuperClasses>();\
             }\
 		};\
 	}\
 	template<>\
-	inline const TypeInfo* GetStaticType<Class>()\
+	inline const TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
-        static Internal::TypeInfoImpl<Class> instance{ ClassType{#Class}, StructTypeData<Class>() };\
+        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{#Namespace "::" #Class}, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\
-	inline const ClassType* GetStaticClass<Class>()\
+	inline const ClassType* GetStaticClass<Namespace::Class>()\
 	{\
-		return (ClassType*)GetStaticType<Class>();\
+		return (ClassType*)GetStaticType<Namespace::Class>();\
 	}\
+}\
+namespace Namespace\
+{\
+    extern const TypeInfo* CE_Generated_ClassType_##Class##_Registrant;\
 }
 
-#define CE_RTTI_IMPLEMENT_CLASS(Class)\
-const ClassType* Class::Type()\
+#define CE_RTTI_IMPLEMENT_CLASS(Namespace, Class)\
+const ClassType* Namespace::Class::Type()\
 {\
 	return (ClassType*)(CE::template GetStaticType<Self>());\
-}
+}\
+const TypeInfo* Namespace::CE_Generated_ClassType_##Class##_Registrant = GetStaticClass<Namespace::Class>();
 
 #define __CE_RTTI_SUPERCLASS_0(...) typedef void Super;
 #define __CE_RTTI_SUPERCLASS_1(SuperClass) typedef SuperClass Super;

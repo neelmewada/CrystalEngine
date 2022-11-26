@@ -22,7 +22,6 @@ namespace CE
         for (int i = 0; i < SuperTypeIds.GetSize(); i++)
         {
             auto typeId = SuperTypeIds[i];
-            
         }
     }
 

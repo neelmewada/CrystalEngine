@@ -35,7 +35,7 @@ namespace Test::Child
 
 }
 
-CE_RTTI_DECLARE_CLASS(Test::Child::Some0, 
+CE_RTTI_DECLARE_CLASS(Test::Child, Some0,
     CE_SUPER(),
     CE_FIELD_LIST(
         CE_FIELD(s0)
@@ -43,17 +43,17 @@ CE_RTTI_DECLARE_CLASS(Test::Child::Some0,
     )
 );
 
-CE_RTTI_IMPLEMENT_CLASS(Test::Child::Some0);
+CE_RTTI_IMPLEMENT_CLASS(Test::Child, Some0);
 
 
-CE_RTTI_DECLARE_CLASS(Test::Child::BaseClass,
+CE_RTTI_DECLARE_CLASS(Test::Child, BaseClass,
     CE_SUPER(Test::Child::Some0),
     CE_FIELD_LIST(
         CE_FIELD(childString)
     )
 );
 
-CE_RTTI_IMPLEMENT_CLASS(Test::Child::BaseClass);
+CE_RTTI_IMPLEMENT_CLASS(Test::Child, BaseClass);
 
 
 
@@ -76,21 +76,26 @@ int main(int argc, char* argv[])
     
     //auto type = BaseClass::Type();
 
+    CE_LOG(Info, All, "Registered: {}", TypeInfo::GetRegisteredCount());
+    
+    auto type = GetStaticType("Test::Child::BaseClass");
+    
+    if (type != nullptr)
+    {
+        CE_LOG(Info, All, "Type found: {} | {}", type->IsClass(), type->GetName());
+    }
+    else
+    {
+        CE_LOG(Error, All, "Type not found!");
+    }
+    
     //CE_LOG(Info, All, "Name: {} | Id: {} | {} | Super Count: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass(), type->GetSuperTypesCount(), type->GetLocalFunctionCount());
     
-    auto type = Some0::Type();
+    //auto type = Some0::Type();
 
-    CE_LOG(Info, All, "Name: {} | Id: {} | {} | Super Count: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass(), type->GetSuperTypesCount(), type->GetLocalFunctionCount());
+    //CE_LOG(Info, All, "Name: {} | Id: {} | {} | Super Count: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass(), type->GetSuperTypesCount(), type->GetLocalFunctionCount());
 
-    CE_LOG(Info, All, "Field Count: {}", type->GetLocalFieldCount());
-
-    for (int i = 0; i < type->GetLocalFieldCount(); i++)
-    {
-        auto field = type->GetLocalFieldAt(i);
-        CE_LOG(Info, All, "Field {}: {} | typeId: {} | ({}, {}) | Attrs: {}", i, field->GetName(), field->GetTypeId(), 
-            field->GetSize(), field->GetOffset(),
-            field->GetRawAttributes());
-    }
+    //CE_LOG(Info, All, "Field Count: {}", type->GetLocalFieldCount());
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");
