@@ -12,5 +12,6 @@ namespace CE
         void StartupModule() override;
         void ShutdownModule() override;
 
+        void RegisterTypes() override;
     };
 }

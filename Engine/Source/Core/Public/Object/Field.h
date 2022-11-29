@@ -12,8 +12,8 @@ namespace CE
     class CORE_API FieldType : public TypeInfo
     {
     private:
-        FieldType(String name, TypeId fieldTypeId, SIZE_T size, SIZE_T offset, const char* attributes) : TypeInfo(name)
-            , FieldTypeId(fieldTypeId), Attributes(attributes)
+        FieldType(String name, TypeId fieldTypeId, SIZE_T size, SIZE_T offset, String attributes) : TypeInfo(name, attributes)
+            , FieldTypeId(fieldTypeId)
             , Size(size), Offset(offset)
         {}
 
@@ -21,14 +21,12 @@ namespace CE
 
         virtual bool IsField() const override { return true; }
 
-        inline const FieldType* GetNext() const { return Next; }
+        inline FieldType* GetNext() const { return Next; }
 
         virtual TypeId GetTypeId() const
         {
             return FieldTypeId;
         }
-
-        const char* GetRawAttributes() const { return Attributes; }
 
         inline SIZE_T GetOffset() const { return Offset; }
         inline SIZE_T GetSize() const { return Size; }
@@ -38,7 +36,6 @@ namespace CE
 
     private:
         TypeId FieldTypeId;
-        const char* Attributes;
 
         SIZE_T Offset;
         SIZE_T Size;

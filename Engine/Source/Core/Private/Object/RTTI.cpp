@@ -4,21 +4,50 @@
 namespace CE
 {
 
-    HashMap<String, const TypeInfo*> TypeInfo::RegisteredTypes{};
+    namespace Internal
+    {
+        CORE_API TypeId TypeIdGenerator::Counter = 0;
+    }
+
+    HashMap<Name, const TypeInfo*> TypeInfo::RegisteredTypes{};
+    HashMap<TypeId, const TypeInfo*> TypeInfo::RegisteredTypeIds{};
 
     void TypeInfo::RegisterType(const TypeInfo* type)
     {
-        RegisteredTypes.Add({type->Name, type});
+        if (type == nullptr)
+            return;
+        
+        if (!RegisteredTypes.KeyExists(type->Name))
+        {
+            RegisteredTypes.Add({ type->Name, type });
+        }
+        if (!RegisteredTypeIds.KeyExists(type->GetTypeId()))
+        {
+            RegisteredTypeIds.Add({ type->GetTypeId(), type });
+        }
     }
 
-    const TypeInfo* GetStaticType(String namePath)
+    CORE_API const TypeInfo* GetTypeInfo(Name name)
     {
-        if (TypeInfo::RegisteredTypes.KeyExists(namePath))
+        if (TypeInfo::RegisteredTypes.KeyExists(name))
         {
-            return TypeInfo::RegisteredTypes[namePath];
+            return TypeInfo::RegisteredTypes[name];
+        }
+        return nullptr;
+    }
+
+    CORE_API const TypeInfo* GetTypeInfo(TypeId typeId)
+    {
+        if (TypeInfo::RegisteredTypeIds.KeyExists(typeId))
+        {
+            return TypeInfo::RegisteredTypeIds[typeId];
         }
         return nullptr;
     }
 
 }
+
+// POD Types
+
+
 

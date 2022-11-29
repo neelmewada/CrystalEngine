@@ -2,7 +2,7 @@
 
 #include "Types/CoreTypeDefs.h"
 
-#include "Object/RTTI.h"
+#include "Object/RTTIDefines.h"
 
 #include <vector>
 #include <functional>
@@ -14,34 +14,34 @@ namespace CE
     class Array
     {
     public:
-        Array() : Impl()
+        Array() : Impl(), ElementTypeId(GetTypeId<ElementType>())
         {
             
         }
 
-        Array(SIZE_T count) : Impl(count)
+        Array(SIZE_T count) : Impl(count), ElementTypeId(GetTypeId<ElementType>())
         {
             
         }
 
-        Array(SIZE_T count, const ElementType& defaultValue) : Impl(count, defaultValue)
+        Array(SIZE_T count, const ElementType& defaultValue) : Impl(count, defaultValue), ElementTypeId(GetTypeId<ElementType>())
         {
 
         }
 
-        Array(std::initializer_list<ElementType> list) : Impl(list)
+        Array(std::initializer_list<ElementType> list) : Impl(list), ElementTypeId(GetTypeId<ElementType>())
         {
             
         }
 
-        Array(std::vector<ElementType> vector) : Impl(vector)
+        Array(std::vector<ElementType> vector) : Impl(vector), ElementTypeId(GetTypeId<ElementType>())
         {
 
         }
 
-        inline static TypeId ElementTypeId()
+        inline TypeId GetElementTypeId()
         {
-            return GetTypeId<ElementType>();
+            return ElementTypeId;
         }
 
         ElementType& operator[](SIZE_T index)
@@ -71,6 +71,14 @@ namespace CE
         }
 
         inline void AddRange(std::initializer_list<const ElementType&> elements)
+        {
+            for (auto it = elements.begin(); it != elements.end(); ++it)
+            {
+                Impl.push_back(*it);
+            }
+        }
+
+        inline void AddRange(CE::Array<ElementType> elements)
         {
             for (auto it = elements.begin(); it != elements.end(); ++it)
             {
@@ -194,6 +202,7 @@ namespace CE
         Iterator End() { return end(); }
 
     private:
+        TypeId ElementTypeId;
         std::vector<ElementType> Impl;
     };
     

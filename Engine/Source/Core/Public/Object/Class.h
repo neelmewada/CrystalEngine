@@ -51,7 +51,7 @@ namespace CE
 	class CORE_API StructType : public TypeInfo
 	{
 	protected:
-		StructType(String name) : TypeInfo(name)
+		StructType(String name, String attributes = "") : TypeInfo(name, attributes)
 		{}
 
 		template<typename T>
@@ -159,6 +159,7 @@ namespace CE
 			
 		}
 
+		// Inherited + Local fields
 		CE::Array<FieldType> CachedFields;
 
 		CE::Array<FieldType> LocalFields;
@@ -174,7 +175,7 @@ namespace CE
 	class CORE_API ClassType : public StructType
 	{
 	protected:
-		ClassType(String name) : StructType(name)
+		ClassType(String name, String attributes = "") : StructType(name, attributes)
 		{}
 
 		template<typename T>
@@ -365,8 +366,9 @@ namespace CE
 #define __CE_RTTI_JOIN_CLASSES(Class, ...) Class CE_EXPAND(CE_CONCATENATE(__CE_RTTI_JOIN_CLASSES_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
 #define CE_SUPER(...) __VA_ARGS__
+#define CE_ATTRIBS(...) __VA_ARGS__
 
-#define CE_RTTI_DECLARE_CLASS(Namespace, Class, SuperClasses, FieldList)\
+#define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, FieldList, Attributes)\
 namespace CE\
 {\
 	template<>\
@@ -392,7 +394,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{#Namespace "::" #Class}, StructTypeData<Namespace::Class>() };\
+        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, Attributes "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\
@@ -403,25 +405,29 @@ namespace CE\
 }\
 namespace Namespace\
 {\
-    extern const TypeInfo* CE_Generated_ClassType_##Class##_Registrant;\
+    API extern const TypeInfo* CE_Generated_ClassType_##Class##_Registrant;\
 }
 
-#define CE_RTTI_IMPLEMENT_CLASS(Namespace, Class)\
+#define CE_RTTI_CLASS_IMPL(API, Namespace, Class)\
 const ClassType* Namespace::Class::Type()\
 {\
 	return (ClassType*)(CE::template GetStaticType<Self>());\
 }\
-const TypeInfo* Namespace::CE_Generated_ClassType_##Class##_Registrant = GetStaticClass<Namespace::Class>();
+API const TypeInfo* Namespace::CE_Generated_ClassType_##Class##_Registrant = GetStaticClass<Namespace::Class>();
 
 #define __CE_RTTI_SUPERCLASS_0(...) typedef void Super;
 #define __CE_RTTI_SUPERCLASS_1(SuperClass) typedef SuperClass Super;
 #define __CE_RTTI_SUPERCLASS_2(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
 #define __CE_RTTI_SUPERCLASS_3(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
 #define __CE_RTTI_SUPERCLASS_4(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
+#define __CE_RTTI_SUPERCLASS_5(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
+#define __CE_RTTI_SUPERCLASS_6(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
+#define __CE_RTTI_SUPERCLASS_7(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
+#define __CE_RTTI_SUPERCLASS_8(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
 
 #define __CE_RTTI_SUPERCLASS(...) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
-#define CE_RTTI_CLASS(Class, ...)\
+#define CE_RTTI(Class, ...)\
 public:\
 	template<typename T>\
 	friend struct CE::Internal::TypeInfoImpl;\

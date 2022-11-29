@@ -15,6 +15,8 @@
 #include "Containers/StringView.h"
 #include "Containers/HashMap.h"
 
+#include "Types/Name.h"
+
 // Object
 #include "Object/Object.h"
 

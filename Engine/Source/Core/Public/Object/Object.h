@@ -5,6 +5,7 @@
 #include "ObjectMacros.h"
 #include "RTTI.h"
 #include "Class.h"
+#include "Enum.h"
 
 namespace CE
 {

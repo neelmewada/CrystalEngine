@@ -15,9 +15,10 @@ String::String(std::string string) : String(string.c_str())
 
 }
 
-String::String(StringView stringView) : String(stringView.GetCString())
+String::String(StringView stringView) : String()
 {
-
+    Reserve(stringView.GetSize());
+    CopyCString(stringView.GetCString(), stringView.GetSize());
 }
 
 String::String(u32 reservedSize)
@@ -161,6 +162,11 @@ const char* String::GetCString() const
     return Buffer;
 }
 
+StringView CE::String::ToStringView()
+{
+    return StringView(*this);
+}
+
 void String::SetCString(const char* cString)
 {
     if (cString == nullptr) // Clear the string
@@ -209,6 +215,12 @@ void String::CopyCString(const char* cString, u32 copyStringLength)
 /*
  *  Helper/Utility
  */
+
+inline void CE::String::Append(char c)
+{
+    char copyStr[] = { c, '\0' };
+    ConcatenateCString(copyStr);
+}
 
 void String::Concatenate(const String& string)
 {
@@ -267,6 +279,21 @@ String String::GetSubstring(int startIndex, int length)
     }
 
     return String(Iterator(Begin().Ptr + startIndex), Iterator(Begin().Ptr + startIndex + length));
+}
+
+StringView CE::String::GetSubstringView(int startIndex, int length)
+{
+    if (length == -1)
+    {
+        return StringView(Buffer + startIndex);
+    }
+
+    if (length == 0)
+    {
+        return "";
+    }
+
+    return StringView(GetCString() + startIndex, length);
 }
 
 Array<String> String::Split(char delimiter)

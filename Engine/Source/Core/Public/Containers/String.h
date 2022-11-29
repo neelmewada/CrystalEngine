@@ -136,11 +136,6 @@ namespace CE
         const char* GetCString() const;
         inline u32 GetLength() const { return StringLength; }
 
-        inline std::string_view ToStringView()
-        {
-            return std::string_view(GetCString(), StringLength);
-        }
-
         inline void Clear()
         {
             SetCString(nullptr);
@@ -203,6 +198,8 @@ namespace CE
             return String(fmt::vformat(str.Buffer, fmt::make_format_args(args...)));
         }
 
+        inline void Append(char c);
+
         void Concatenate(const String& string);
         void ConcatenateCString(const char* cString);
         void Concatenate(s64 integer);
@@ -211,6 +208,9 @@ namespace CE
         bool StartsWith(const char* cString);
 
         String GetSubstring(int startIndex, int length = -1);
+        StringView GetSubstringView(int startIndex, int length = -1);
+
+        StringView ToStringView();
 
         Array<String> Split(char delimiter);
 

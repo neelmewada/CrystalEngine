@@ -47,6 +47,9 @@ namespace CE
 		info->bIsLoaded = true;
 		info->ModuleImpl = modulePtr;
 
+		// Register types
+		modulePtr->RegisterTypes();
+
 		// Startup module
 		modulePtr->StartupModule();
 

@@ -15,6 +15,8 @@ namespace CE
 
         virtual void StartupModule() = 0;
         virtual void ShutdownModule() = 0;
+
+        virtual void RegisterTypes() {}
     };
 
     class DefaultModuleImpl : public Module
