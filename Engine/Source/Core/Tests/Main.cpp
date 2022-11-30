@@ -58,11 +58,11 @@ CE_RTTI_ENUM_IMPL(, Test::Child, MyEnum);
 
 CE_RTTI_CLASS(,Test::Child, Some0,
     CE_SUPER(),
+    CE_ATTRIBS(Abstract),
     CE_FIELD_LIST(
         CE_FIELD(s0)
         CE_FIELD(baseString, CustomAttribute, MaxLength = 32)
-    ),
-    CE_ATTRIBS()
+    )
 );
 
 CE_RTTI_CLASS_IMPL(,Test::Child, Some0);
@@ -70,10 +70,10 @@ CE_RTTI_CLASS_IMPL(,Test::Child, Some0);
 
 CE_RTTI_CLASS(,Test::Child, BaseClass,
     CE_SUPER(Test::Child::Some0),
+    CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(childString)
-    ),
-    CE_ATTRIBS()
+    )
 );
 
 CE_RTTI_CLASS_IMPL(,Test::Child, BaseClass);
@@ -98,14 +98,15 @@ int main(int argc, char* argv[])
     CE_LOG(Info, All, "Typeid: {:X}", TYPEID(const s32*));
     CE_LOG(Info, All, "Typeid: {:X}", TYPEID(s32*));
     CE_LOG(Info, All, "Typeid: {:X}", TYPEID(CE::String));
-
+    
     CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(MyEnum));
+    CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(__underlying_type(MyEnum))); // int = s32
     CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(s32));
     CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(u32));
-
+    
     CE_LOG(Info, All, "Some0: {}", TYPEID(Test::Child::Some0));
     CE_LOG(Info, All, "Base Class: {}", TYPEID(Test::Child::BaseClass));
-
+    
     CE_LOG(Info, All, "Registered: {}", TypeInfo::GetRegisteredCount());
     
     auto type = GetTypeInfo(TYPEID(Test::Child::BaseClass));

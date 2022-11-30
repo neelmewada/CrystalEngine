@@ -70,7 +70,7 @@ namespace CE
             Impl.emplace_back(args...);
         }
 
-        inline void AddRange(std::initializer_list<const ElementType&> elements)
+        inline void AddRange(std::initializer_list<ElementType> elements)
         {
             for (auto it = elements.begin(); it != elements.end(); ++it)
             {

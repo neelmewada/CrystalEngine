@@ -368,7 +368,7 @@ namespace CE
 #define CE_SUPER(...) __VA_ARGS__
 #define CE_ATTRIBS(...) __VA_ARGS__
 
-#define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, FieldList, Attributes)\
+#define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, Attributes, FieldList)\
 namespace CE\
 {\
 	template<>\

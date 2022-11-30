@@ -3,7 +3,7 @@
 #include "TypeTraits.h"
 #include "Containers/Array.h"
 
-#define TYPEID(x) CE::GetTypeId<x>()
+#define TYPEID(type) CE::GetTypeId<type>()
 
 #define CE_RTTI_POD(Namespace, Type)\
 namespace Namespace\
