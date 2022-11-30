@@ -27,9 +27,12 @@ namespace CE
 	{
 	public:
 		Variant() : ValueTypeId(0)
-		{}
+		{
+			memset(this, 0, sizeof(Variant));
+		}
 
-		~Variant() = default;
+		~Variant()
+		{}
 
 		Variant(f32 value) { SetInternalValue(value); }
 		Variant(f64 value) { SetInternalValue(value); }
@@ -50,7 +53,7 @@ namespace CE
 		Variant(String value) { SetInternalValue(value); }
 
 		template<typename ElementType>
-		Variant(CE::Array<ElementType> value) : ValueTypeId(GetTypeId<CE::Array<ElementType>>())
+		Variant(CE::Array<ElementType> value) : ValueTypeId(TYPEID(CE::Array<ElementType>)), ArrayValue(value)
 		{
 
 		}
@@ -101,6 +104,7 @@ namespace CE
 
 		union
 		{
+			// Simple types
 			bool   BoolValue;
 			String StringValue;
 			s8	   Int8Value;

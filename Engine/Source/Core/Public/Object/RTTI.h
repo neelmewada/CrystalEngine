@@ -79,14 +79,18 @@ namespace CE
         }
 	};
 
-	// Default implementation always returns nullptr. Specialization will return the correct data
+	/// Default implementation always returns nullptr. Specialization will return the correct data.
+	/// Returns the type info of the specified type at compile time.
 	template<typename Type>
 	const TypeInfo* GetStaticType()
 	{
 		return nullptr;
 	}
 
+	/// Returns dynamic type info of the type with specified name. Ex: ParentNamespace::ChildNamespace::SomeClass
     CORE_API const TypeInfo* GetTypeInfo(CE::Name name);
+
+	/// Returns dynamic type info of the type with specified type id.
 	CORE_API const TypeInfo* GetTypeInfo(TypeId typeId);
 
 	// Specialization will contain the magic data.

@@ -139,7 +139,7 @@ namespace CE
 		template<typename Struct, typename Field>
 		inline void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
 		{
-			LocalFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes));
+			LocalFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes, this));
 		}
 
 		template<typename... SuperTypes>
@@ -394,7 +394,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, Attributes "" }, StructTypeData<Namespace::Class>() };\
+        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, #Attributes "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\
@@ -427,13 +427,25 @@ API const TypeInfo* Namespace::CE_Generated_ClassType_##Class##_Registrant = Get
 
 #define __CE_RTTI_SUPERCLASS(...) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
-#define CE_RTTI(Class, ...)\
+#define CE_CLASS(Class, ...)\
 public:\
 	template<typename T>\
 	friend struct CE::Internal::TypeInfoImpl;\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static const ClassType* Type();\
+    virtual const TypeInfo* GetType() const\
+    {\
+        return Type();\
+    }
+
+#define CE_STRUCT(Struct, ...)\
+public:\
+	template<typename T>\
+	friend struct CE::Internal::TypeInfoImpl;\
+    typedef Struct Self;\
+    __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
+    static const StructType* Type();\
     virtual const TypeInfo* GetType() const\
     {\
         return Type();\

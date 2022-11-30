@@ -12,9 +12,10 @@ namespace CE
     class CORE_API FieldType : public TypeInfo
     {
     private:
-        FieldType(String name, TypeId fieldTypeId, SIZE_T size, SIZE_T offset, String attributes) : TypeInfo(name, attributes)
+        FieldType(String name, TypeId fieldTypeId, SIZE_T size, SIZE_T offset, String attributes, const TypeInfo* owner = nullptr) : TypeInfo(name, attributes)
             , FieldTypeId(fieldTypeId)
             , Size(size), Offset(offset)
+            , Owner(owner)
         {}
 
     public:
@@ -41,6 +42,7 @@ namespace CE
         SIZE_T Size;
 
         FieldType* Next = nullptr;
+        const TypeInfo* Owner = nullptr;
 
         friend class StructType;
         friend class ClassType;

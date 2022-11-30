@@ -47,6 +47,8 @@ namespace CE
 
         for (int i = 0; i < CachedFields.GetSize(); i++)
         {
+            CachedFields[i].Owner = this;
+
             if (i == CachedFields.GetSize() - 1)
             {
                 CachedFields[i].Next = nullptr;

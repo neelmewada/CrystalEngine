@@ -4,12 +4,19 @@
 namespace CE
 {
 
-	Object::Object() : Name()
+	Object::Object() : Name("")
 	{
+
 	}
 
-	Object::Object(String name) : Name(name)
+	Object::Object(CE::Name name) : Name(name)
 	{
+
+	}
+
+	Object::~Object()
+	{
+
 	}
 
 }

@@ -14,10 +14,12 @@ namespace CE
     {
     public:
         Object();
-        Object(String name);
+        Object(CE::Name name);
+
+        ~Object();
 
         // - Getters & Setters -
-        inline String GetName()
+        inline CE::Name GetName()
         {
             return Name;
         }
@@ -27,7 +29,7 @@ namespace CE
         //virtual ClassType* GetType() = 0;
 
     private:
-        String Name;
+        CE::Name Name;
     };
 
 } // namespace CE

@@ -15,12 +15,13 @@ namespace Test::Child
 {
     class Some0
     {
-        CE_RTTI(Some0);
+        CE_CLASS(Some0);
     private:
         int s0 = 0;
         CE::String baseString;
 
-        void PrintHello()
+    public:
+        virtual void PrintHello() const
         {
             CE_LOG(Info, All, "Hello world from Some0");
         }
@@ -28,9 +29,14 @@ namespace Test::Child
 
     class BaseClass : public Some0
     {
-        CE_RTTI(BaseClass);
+        CE_CLASS(BaseClass);
     public:
         CE::String childString;
+
+        virtual void PrintHello() const override
+        {
+            CE_LOG(Info, All, "Hello world from BaseClass");
+        }
     };
 
     enum class MyEnum
@@ -61,7 +67,7 @@ CE_RTTI_CLASS(,Test::Child, Some0,
     CE_ATTRIBS(Abstract),
     CE_FIELD_LIST(
         CE_FIELD(s0)
-        CE_FIELD(baseString, CustomAttribute, MaxLength = 32)
+        CE_FIELD(baseString, TextArea, MaxLength = 32)
     )
 );
 
@@ -151,14 +157,18 @@ int main(int argc, char* argv[])
     {
         CE_LOG(Error, All, "Enum Type not found!");
     }
-    
-    //CE_LOG(Info, All, "Name: {} | Id: {} | {} | Super Count: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass(), type->GetSuperTypesCount(), type->GetLocalFunctionCount());
-    
-    //auto type = Some0::Type();
 
-    //CE_LOG(Info, All, "Name: {} | Id: {} | {} | Super Count: {} | {}", type->GetName(), type->GetTypeId(), type->IsClass(), type->GetSuperTypesCount(), type->GetLocalFunctionCount());
+    CE_LOG(Info, All, "Dynamic Casting...");
 
-    //CE_LOG(Info, All, "Field Count: {}", type->GetLocalFieldCount());
+    BaseClass* ptr = new BaseClass;
+
+    {
+        auto classType = (ClassType*)ptr->GetType();
+        auto cast = classType->TryCast((CE::IntPtr)ptr, TYPEID(Some0));
+
+        CE_LOG(Info, All, "Cast: {} |  {} ; {}", cast == 0 ? "Failed" : "Succeeded", cast, (IntPtr)ptr);
+    }
+    
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");

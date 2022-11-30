@@ -11,5 +11,8 @@
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
 
+// RTTI headers
 #include "Object/Object.h"
+
+#include "Messaging/MessageBus.h"
 
