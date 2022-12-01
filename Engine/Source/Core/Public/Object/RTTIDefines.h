@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TypeTraits.h"
-#include "Containers/Array.h"
 
 #define TYPEID(type) CE::GetTypeId<type>()
 

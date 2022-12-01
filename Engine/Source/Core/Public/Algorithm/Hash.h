@@ -35,6 +35,11 @@ namespace CE
 	DECL_HASH(s32)
 	DECL_HASH(s64)
 
+	DECL_HASH(f32)
+	DECL_HASH(f64)
+
+	DECL_HASH(bool)
+	DECL_HASH(char)
 
 	template<typename T>
 	struct HashFunc

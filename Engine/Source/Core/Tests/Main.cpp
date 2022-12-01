@@ -29,7 +29,7 @@ namespace Test::Child
 
     class BaseClass : public Some0
     {
-        CE_CLASS(BaseClass);
+        CE_CLASS(BaseClass, Some0);
     public:
         CE::String childString;
 
@@ -84,7 +84,49 @@ CE_RTTI_CLASS(,Test::Child, BaseClass,
 
 CE_RTTI_CLASS_IMPL(,Test::Child, BaseClass);
 
+class MyCustomRequests : public CE::IBusInterface
+{
+    CE_CLASS(MyCustomRequests, CE::IBusInterface);
 
+public:
+
+    virtual void PrintOut(int number) = 0;
+
+};
+
+CE_RTTI_CLASS(, , MyCustomRequests,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+
+    )
+);
+
+CE_RTTI_CLASS_IMPL(, , MyCustomRequests);
+
+using CustomRequestBus = CE::MessageBus<MyCustomRequests>;
+
+class SomeTestClass : public CustomRequestBus::Handler
+{
+    CE_CLASS(SomeTestClass, CustomRequestBus::Handler);
+
+public:
+
+    virtual SIZE_T GetAddress() override { return 1; }
+
+    virtual void PrintOut(int number) override { std::cout << "Print: " << number << std::endl; }
+
+};
+
+CE_RTTI_CLASS(, , SomeTestClass,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+
+    )
+);
+
+CE_RTTI_CLASS_IMPL(, , SomeTestClass);
 
 int main(int argc, char* argv[])
 {
@@ -93,7 +135,6 @@ int main(int argc, char* argv[])
 
     using namespace Test::Child;
     
-    //auto type = BaseClass::Type();
 
     CE_LOG(Info, All, "s8: {:X}", TYPEID(CE::s8));
     CE_LOG(Info, All, "s16: {:X}", TYPEID(CE::s16));
@@ -168,6 +209,14 @@ int main(int argc, char* argv[])
 
         CE_LOG(Info, All, "Cast: {} |  {} ; {}", cast == 0 ? "Failed" : "Succeeded", cast, (IntPtr)ptr);
     }
+
+    SomeTestClass handler{};
+
+    CustomRequestBus::AddHandler(&handler);
+
+    CustomRequestBus::DispatchMessage(&MyCustomRequests::PrintOut, 142);
+
+    CustomRequestBus::RemoveHandler(&handler);
     
     
     CE::Logger::Shutdown();
