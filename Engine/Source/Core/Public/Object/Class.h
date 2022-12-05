@@ -402,18 +402,13 @@ namespace CE\
 	{\
 		return (ClassType*)GetStaticType<Namespace::Class>();\
 	}\
-}\
-namespace Namespace\
-{\
-    API extern const TypeInfo* CE_Generated_ClassType_##Class##_Registrant;\
 }
 
 #define CE_RTTI_CLASS_IMPL(API, Namespace, Class)\
-const ClassType* Namespace::Class::Type()\
+const CE::ClassType* Namespace::Class::Type()\
 {\
-	return (ClassType*)(CE::template GetStaticType<Self>());\
-}\
-API const TypeInfo* Namespace::CE_Generated_ClassType_##Class##_Registrant = GetStaticClass<Namespace::Class>();
+	return (CE::ClassType*)(CE::template GetStaticType<Self>());\
+}
 
 #define __CE_RTTI_SUPERCLASS_0(...) typedef void Super;
 #define __CE_RTTI_SUPERCLASS_1(SuperClass) typedef SuperClass Super;

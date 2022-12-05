@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
 
     using namespace Test::Child;
     
+    CE_REGISTER_TYPES(Some0, BaseClass);
 
     CE_LOG(Info, All, "s8: {:X}", TYPEID(CE::s8));
     CE_LOG(Info, All, "s16: {:X}", TYPEID(CE::s16));

@@ -25,7 +25,9 @@ namespace CE
             CE::u8, CE::u16, CE::u32, CE::u64, CE::f32, CE::f64,
             CE::String);
 
-        std::cout << "s8 is: " << TYPEID(CE::s8) << std::endl;
+        CE_REGISTER_TYPES(
+            Object
+        );
     }
 
 }
