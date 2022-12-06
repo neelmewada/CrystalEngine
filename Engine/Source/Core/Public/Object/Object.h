@@ -6,10 +6,13 @@
 #include "RTTI.h"
 #include "Class.h"
 #include "Enum.h"
+#include "Field.h"
 
 namespace CE
 {
-    
+
+    class CORE_API Component;
+
     class CORE_API Object
     {
         CE_CLASS(Object);
@@ -32,6 +35,8 @@ namespace CE
 
     private:
         CE::Name Name;
+        
+        CE::Array<Component*> Components{};
     };
 
 } // namespace CE
@@ -41,5 +46,6 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(Name)
+        CE_FIELD(Components)
     )
 )

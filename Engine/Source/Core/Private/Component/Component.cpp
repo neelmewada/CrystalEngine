@@ -3,6 +3,6 @@
 
 namespace CE
 {
-    
+
 } // namespace CE
 
