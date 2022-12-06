@@ -76,7 +76,7 @@ namespace CE
                     (handler->*function)(args...);
                 }
             }
-            else if constexpr (BusTraits::AddressPolicy = MBusAddressPolicy::ById)
+            else if constexpr (BusTraits::AddressPolicy == MBusAddressPolicy::ById)
             {
                 for (Interface* handler : Handlers)
                 {
