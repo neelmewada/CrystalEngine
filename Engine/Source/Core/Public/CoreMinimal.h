@@ -13,6 +13,12 @@
 
 // RTTI headers
 #include "Object/Object.h"
+#include "Object/ObjectManager.h"
+
+// Math headers
+#include "Math/Math.h"
+#include "Math/Vector.h"
+#include "Math/Quaternion.h"
 
 #include "Messaging/MessageBus.h"
 

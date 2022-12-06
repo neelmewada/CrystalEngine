@@ -13,9 +13,9 @@ using namespace CE;
 
 namespace Test::Child
 {
-    class Some0
+    class Some0 : CE::Object
     {
-        CE_CLASS(Some0);
+        CE_CLASS(Some0, CE::Object);
     private:
         int s0 = 0;
         CE::String baseString;
@@ -63,7 +63,7 @@ CE_RTTI_ENUM(, Test::Child, MyEnum,
 CE_RTTI_ENUM_IMPL(, Test::Child, MyEnum);
 
 CE_RTTI_CLASS(,Test::Child, Some0,
-    CE_SUPER(),
+    CE_SUPER(CE::Object),
     CE_ATTRIBS(Abstract),
     CE_FIELD_LIST(
         CE_FIELD(s0)
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     CE::Logger::Initialize();
 
     using namespace Test::Child;
-    
+
     CE_REGISTER_TYPES(Some0, BaseClass);
 
     CE_LOG(Info, All, "s8: {:X}", TYPEID(CE::s8));
