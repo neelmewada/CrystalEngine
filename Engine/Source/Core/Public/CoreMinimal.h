@@ -19,6 +19,7 @@
 #include "Math/Math.h"
 #include "Math/Vector.h"
 #include "Math/Quaternion.h"
+#include "Math/Matrix.h"
 
 #include "Messaging/MessageBus.h"
 

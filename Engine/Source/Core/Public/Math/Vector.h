@@ -87,9 +87,33 @@ namespace CE
             return TVector2(value * X, value * Y);
         }
 
+        inline TVector2 operator*=(s32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector2 operator*=(u32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector2 operator*=(f32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
         inline TVector2 operator/(f32 value)
         {
             return TVector2(X / value, Y / value);
+        }
+
+        inline TVector2 operator/=(f32 value)
+        {
+            *this = *this / value;
+            return *this;
         }
 
         inline f32 GetSqrMagnitude() const
@@ -169,6 +193,11 @@ namespace CE
             T XYZ[4]; // size/alignment is same as Vector4
         };
 
+        inline T operator[](int index) const
+        {
+            return XYZ[index];
+        }
+
         inline TVector3 operator+(const TVector3& rhs) const
         {
             return TVector3(X + rhs.X, Y + rhs.Y, Z + rhs.Z);
@@ -216,9 +245,33 @@ namespace CE
             return TVector3(value * X, value * Y, value * Z);
         }
 
+        inline TVector3 operator*=(s32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector3 operator*=(u32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector3 operator*=(f32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
         inline TVector3 operator/(f32 value)
         {
             return TVector3(X / value, Y / value, Z / value);
+        }
+
+        inline TVector3 operator/=(f32 value)
+        {
+            *this = *this / value;
+            return *this;
         }
 
         inline f32 GetSqrMagnitude() const
@@ -311,6 +364,16 @@ namespace CE
             T XYZW[4];
         };
 
+        inline T& operator[](int index)
+        {
+            return XYZW[index];
+        }
+
+        inline const T& operator[](int index) const
+        {
+            return XYZW[index];
+        }
+
         inline TVector4 operator+(const TVector4& rhs) const
         {
             return TVector4(X + rhs.X, Y + rhs.Y, Z + rhs.Z, W + rhs.W);
@@ -358,9 +421,33 @@ namespace CE
             return TVector4(value * X, value * Y, value * Z, value * W);
         }
 
+        inline TVector4 operator*=(s32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector4 operator*=(u32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector4 operator*=(f32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
         inline TVector4 operator/(f32 value)
         {
             return TVector4(X / value, Y / value, Z / value, W / value);
+        }
+
+        inline TVector4 operator/=(f32 value)
+        {
+            *this = *this / value;
+            return *this;
         }
 
         inline f32 GetSqrMagnitude() const

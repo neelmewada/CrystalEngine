@@ -123,6 +123,16 @@ namespace CE
             return Quat(normalizedVec.X, normalizedVec.Y, normalizedVec.Z, W);
         }
 
+        Quat GetUnitNormLerped(f32 t)
+        {
+            f32 angle = Math::ToRadians(W);
+            auto normalizedVec = Vec3(X, Y, Z).GetNormalized();
+            W = Math::Cos(angle * Math::Clamp01(t) * 0.5f);
+            normalizedVec = normalizedVec * Math::Sin(angle * Math::Clamp01(t) * 0.5f);
+
+            return Quat(normalizedVec.X, normalizedVec.Y, normalizedVec.Z, W);
+        }
+
         inline void Normalize()
         {
             auto norm = GetNorm();
@@ -147,9 +157,26 @@ namespace CE
 
         Quat Multiply(const Quat& quat);
 
+        inline static Quat Lerp(Quat from, Quat to, f32 t)
+        {
+            return from * (1 - t) + to * t;
+        }
+
+        // TODO: To be tested later
+        static Quat Slerp(Quat from, Quat to, f32 t)
+        {
+            return (to * from.GetInverse()).GetUnitNormLerped(t) * from;
+        }
+
     public:
 
-        f32 X, Y, Z, W;
+        union {
+            struct {
+                f32 X, Y, Z, W;
+            };
+
+            f32 XYZW[4];
+        };
     };
 
     inline Quat operator*(s32 lhs, const Quat& rhs)
