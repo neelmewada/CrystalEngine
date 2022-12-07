@@ -94,7 +94,8 @@ CE_RTTI_CLASS(,Test::Child, BaseClass,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(childString)
-    )
+    ),
+    CE_FUNCTION_LIST()
 );
 
 CE_RTTI_CLASS_IMPL(,Test::Child, BaseClass);
@@ -114,7 +115,8 @@ CE_RTTI_CLASS(, , MyCustomRequests,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
 
-    )
+    ),
+    CE_FUNCTION_LIST()
 );
 
 CE_RTTI_CLASS_IMPL(, , MyCustomRequests);
@@ -138,7 +140,8 @@ CE_RTTI_CLASS(, , SomeTestClass,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         
-    )
+    ),
+    CE_FUNCTION_LIST()
 );
 
 CE_RTTI_CLASS_IMPL(, , SomeTestClass);

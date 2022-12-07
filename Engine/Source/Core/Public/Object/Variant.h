@@ -100,7 +100,7 @@ namespace CE
 
 			if constexpr (std::is_reference_v<T>)
 			{
-				typedef std::remove_reference<T>::type PlainType;
+                typedef typename std::remove_reference<T>::type PlainType;
 				return *(PlainType*)this;
 			}
 			else

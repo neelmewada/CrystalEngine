@@ -49,5 +49,6 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_FIELD_LIST(
         CE_FIELD(Name)
         CE_FIELD(Components)
-    )
+    ),
+    CE_FUNCTION_LIST()
 )
