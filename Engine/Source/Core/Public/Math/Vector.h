@@ -72,17 +72,27 @@ namespace CE
             return *this;
         }
 
-        inline TVector2 operator*(s32 value)
+        inline bool operator==(const TVector2& rhs) const
+        {
+            return X == rhs.X && Y == rhs.Y;
+        }
+
+        inline bool operator!=(const TVector2& rhs) const
+        {
+            return X != rhs.X || Y != rhs.Y;
+        }
+
+        inline TVector2 operator*(s32 value) const
         {
             return TVector2(value * X, value * Y);
         }
 
-        inline TVector2 operator*(u32 value)
+        inline TVector2 operator*(u32 value) const
         {
             return TVector2(value * X, value * Y);
         }
 
-        inline TVector2 operator*(f32 value)
+        inline TVector2 operator*(f32 value) const
         {
             return TVector2(value * X, value * Y);
         }
@@ -230,17 +240,27 @@ namespace CE
             return *this;
         }
 
-        inline TVector3 operator*(s32 value)
+        inline bool operator==(const TVector3& rhs) const
+        {
+            return X == rhs.X && Y == rhs.Y && Z == rhs.Z;
+        }
+
+        inline bool operator!=(const TVector3& rhs) const
+        {
+            return X != rhs.X || Y != rhs.Y || Z != rhs.Z;
+        }
+
+        inline TVector3 operator*(s32 value) const
         {
             return TVector3(value * X, value * Y, value * Z);
         }
 
-        inline TVector3 operator*(u32 value)
+        inline TVector3 operator*(u32 value) const
         {
             return TVector3(value * X, value * Y, value * Z);
         }
 
-        inline TVector3 operator*(f32 value)
+        inline TVector3 operator*(f32 value) const
         {
             return TVector3(value * X, value * Y, value * Z);
         }
@@ -406,17 +426,27 @@ namespace CE
             return *this;
         }
 
-        inline TVector4 operator*(s32 value)
+        inline bool operator==(const TVector4& rhs) const
+        {
+            return X == rhs.X && Y == rhs.Y && Z == rhs.Z && W == rhs.W;
+        }
+
+        inline bool operator!=(const TVector4& rhs) const
+        {
+            return X != rhs.X || Y != rhs.Y || Z != rhs.Z || W != rhs.W;
+        }
+
+        inline TVector4 operator*(s32 value) const
         {
             return TVector4(value * X, value * Y, value * Z, value * W);
         }
 
-        inline TVector4 operator*(u32 value)
+        inline TVector4 operator*(u32 value) const
         {
             return TVector4(value * X, value * Y, value * Z, value * W);
         }
 
-        inline TVector4 operator*(f32 value)
+        inline TVector4 operator*(f32 value) const
         {
             return TVector4(value * X, value * Y, value * Z, value * W);
         }

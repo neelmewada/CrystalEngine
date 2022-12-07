@@ -20,5 +20,5 @@
 
 #define TEXT(x) #x
 
-#define NAME(x) CE::NamePath(x)
+#define NAME(x) CE::Name(#x)
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RTTI.h"
+#include "TypeTraits.h"
 #include "Variant.h"
 
 #include "Field.h"
@@ -9,6 +10,7 @@
 #include "Containers/Array.h"
 
 #include <iostream>
+#include <utility>
 
 namespace CE
 {
@@ -140,6 +142,55 @@ namespace CE
 		inline void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
 		{
 			LocalFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes, this));
+		}
+
+	private:
+
+		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
+		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...), const char* attributes, std::index_sequence<Is...>) {
+			ReturnType(ClassOrStruct:: * funcPtr)(Args...) = function;
+
+			FunctionDelegate funcDelegate = [funcPtr](Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue) -> void
+			{
+				if constexpr (std::is_same_v<ReturnType, void>) // No return value
+				{
+					(((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())...);
+					returnValue = CE::Variant();
+				}
+				else
+				{
+					auto value = (((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())... );
+					returnValue = CE::Variant(value);
+				}
+			};
+
+			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, attributes));
+		}
+
+	protected:
+
+		template<typename ReturnType, typename ClassOrStruct, typename... Args>
+		void AddFunction(const char* name, ReturnType (ClassOrStruct::*function)(Args...), const char* attributes)
+		{
+			AddFunction<ReturnType, ClassOrStruct, Args...>(name, function, attributes, std::make_index_sequence<sizeof...(Args)>());
+			/*ReturnType(ClassOrStruct:: * funcPtr)(Args...) = function;
+
+			FunctionDelegate funcDelegate = [funcPtr](Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue) -> void
+			{
+				auto it = params.begin();
+				if constexpr (std::is_same_v<ReturnType, void>) // No return value
+				{
+					
+					(((ClassOrStruct*)instance)->*funcPtr)( ((it++)->GetValue<Args>())... );
+					//returnValue = CE::Variant();
+				}
+				else
+				{
+					//returnValue = (((ClassOrStruct*)instance)->*function)( ((it++)->GetValue<Args>())... );
+				}
+			};
+
+			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, attributes));*/
 		}
 
 		template<typename... SuperTypes>
@@ -350,8 +401,8 @@ namespace CE
 #define CE_FIELD_LIST(x) x
 #define CE_FIELD(FieldName, ...) Type.AddField(#FieldName, &Self::FieldName, offsetof(Self, FieldName), "" #__VA_ARGS__);
 
-//#define CE_FUNCTION_LIST(x) x
-//#define CE_FUNCTION(FunctionName, ...) Type.AddFunction(#FunctionName, &Self::FunctionName, "" #__VA_ARGS__);
+#define CE_FUNCTION_LIST(x) x
+#define CE_FUNCTION(FunctionName, ...) Type.AddFunction(#FunctionName, &Self::FunctionName, "" #__VA_ARGS__);
 
 #define __CE_RTTI_JOIN_CLASSES_0()
 #define __CE_RTTI_JOIN_CLASSES_1(...) , __VA_ARGS__
@@ -368,7 +419,7 @@ namespace CE
 #define CE_SUPER(...) __VA_ARGS__
 #define CE_ATTRIBS(...) __VA_ARGS__
 
-#define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, Attributes, FieldList)\
+#define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, Attributes, FieldList, FunctionList)\
 namespace CE\
 {\
 	template<>\
@@ -387,6 +438,7 @@ namespace CE\
             {\
                 TypeInfo::RegisterType(&Type);\
                 FieldList\
+				FunctionList\
 				Type.AddSuper<SuperClasses>();\
             }\
 		};\

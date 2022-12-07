@@ -4,8 +4,6 @@
 #include "Containers/String.h"
 #include "Containers/Array.h"
 
-#define NAME(x) CE::Name(x)
-
 namespace CE
 {
 

@@ -4,6 +4,7 @@
 
 #include "ObjectMacros.h"
 #include "RTTI.h"
+#include "Variant.h"
 #include "Class.h"
 #include "Enum.h"
 #include "Field.h"
@@ -36,6 +37,7 @@ namespace CE
     private:
         CE::Name Name;
         
+    protected:
         CE::Array<Component*> Components{};
     };
 

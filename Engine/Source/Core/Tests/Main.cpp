@@ -13,7 +13,7 @@ using namespace CE;
 
 namespace Test::Child
 {
-    class Some0 : CE::Object
+    class Some0 : public CE::Object
     {
         CE_CLASS(Some0, CE::Object);
     private:
@@ -24,6 +24,17 @@ namespace Test::Child
         virtual void PrintHello() const
         {
             CE_LOG(Info, All, "Hello world from Some0");
+        }
+
+        void DoTest(s32 number, String text)
+        {
+            CE_LOG(Info, All, "Test called: {} | {}", number, text);
+        }
+
+        f32 Add(f32 a, f32 b)
+        {
+            CE_LOG(Info, All, "Add called: {} + {} = {}", a, b, a + b);
+            return a + b;
         }
     };
 
@@ -68,6 +79,10 @@ CE_RTTI_CLASS(,Test::Child, Some0,
     CE_FIELD_LIST(
         CE_FIELD(s0)
         CE_FIELD(baseString, TextArea, MaxLength = 32)
+    ),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION(DoTest, HiddenFunction)
+        CE_FUNCTION(Add)
     )
 );
 
@@ -137,6 +152,17 @@ int main(int argc, char* argv[])
 
     CE_REGISTER_TYPES(Some0, BaseClass);
 
+    Matrix mat = Matrix({
+        { 5, -2, 2, 7 },
+        { 1, 0, 0, 3 },
+        { -3, 1, 5, 0 },
+        { 3, -1, -9, 4 }
+    });
+
+    Matrix inverse = mat.GetInverse();
+
+    CE_LOG(Info, All, "Matrix: \n{}", (inverse));
+
     CE_LOG(Info, All, "s8: {:X}", TYPEID(CE::s8));
     CE_LOG(Info, All, "s16: {:X}", TYPEID(CE::s16));
     CE_LOG(Info, All, "s32: {:X}", TYPEID(CE::s32));
@@ -157,18 +183,43 @@ int main(int argc, char* argv[])
     
     CE_LOG(Info, All, "Registered: {}", TypeInfo::GetRegisteredCount());
     
-    auto type = GetTypeInfo(TYPEID(Test::Child::BaseClass));
+    auto type = GetTypeInfo(TYPEID(Test::Child::Some0));
     
     if (type != nullptr)
     {
         auto name = type->GetName();
 
-        CE_LOG(Info, All, "Type found: {} | {}", type->IsClass(), name);
+        CE_LOG(Info, All, "Type found: {}", name);
 
         CE_LOG(Info, All, "Names {}: {} ; {} ; {}", name.GetComponentCount(), name.GetComponentAt(0), name.GetComponentAt(1), name.GetComponentAt(2));
 
         auto classType = (ClassType*)type;
         auto field = classType->GetFirstField();
+
+        Some0 instance{};
+
+        CE_LOG(Info, All, "Local functions: {}", classType->GetLocalFunctionCount());
+
+        for (int i = 0; i < classType->GetLocalFunctionCount(); i++)
+        {
+            auto funcType = classType->GetLocalFunctionAt(i);
+
+            CE_LOG(Info, All, "Function {}: {}", i, funcType->GetName());
+
+            if (i == 0)
+            {
+                funcType->Invoke(&instance, { (s32)214, String("Hello") });
+            }
+            else if (i == 1)
+            {
+                auto returnValue = funcType->Invoke(&instance, { (f32)12.5f, (f32)0.5f });
+
+                if (returnValue.HasValue() && returnValue.IsOfType<f32>())
+                {
+                    CE_LOG(Info, All, "Add Result: {}", returnValue.GetValue<f32>());
+                }
+            }
+        }
 
         while (field != nullptr)
         {
@@ -180,24 +231,6 @@ int main(int argc, char* argv[])
     else
     {
         CE_LOG(Error, All, "Type not found!");
-    }
-
-    type = GetTypeInfo(TYPEID(Test::Child::MyEnum));
-
-    if (type != nullptr)
-    {
-        auto enumType = (EnumType*)type;
-
-        CE_LOG(Info, All, "Enum: {}", enumType->GetName(), enumType->GetConstantsCount());
-
-        for (int i = 0; i < enumType->GetConstantsCount(); i++)
-        {
-            CE_LOG(Info, All, "Constant {}: {} = {:b}", i, enumType->GetConstant(i)->GetName(), enumType->GetConstant(i)->GetValue());
-        }
-    }
-    else
-    {
-        CE_LOG(Error, All, "Enum Type not found!");
     }
 
     CE_LOG(Info, All, "Dynamic Casting...");

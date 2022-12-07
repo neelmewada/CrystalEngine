@@ -6,6 +6,7 @@
 #include "Containers/Array.h"
 #include "Containers/HashMap.h"
 
+#include "RTTIDefines.h"
 
 namespace CE
 {
@@ -31,6 +32,17 @@ namespace CE
 			memset(this, 0, sizeof(Variant));
 		}
 
+		Variant(const Variant& copy)
+		{
+			memcpy(this, &copy, sizeof(Variant));
+		}
+
+		CE::Variant& operator=(const CE::Variant& copy)
+		{
+			memcpy(this, &copy, sizeof(Variant));
+			return *this;
+		}
+
 		~Variant()
 		{}
 
@@ -49,8 +61,8 @@ namespace CE
 
 		Variant(bool value) { SetInternalValue(value); }
 
-		Variant(const char* value) { SetInternalValue(String(value)); }
-		Variant(String value) { SetInternalValue(value); }
+		Variant(const char* value) { StringValue = value; ValueTypeId = TYPEID(String); }
+		Variant(String value) { StringValue = value; ValueTypeId = TYPEID(String); }
 
 		template<typename ElementType>
 		Variant(CE::Array<ElementType> value) : ValueTypeId(TYPEID(CE::Array<ElementType>)), ArrayValue(value)
@@ -67,6 +79,12 @@ namespace CE
 			return ValueTypeId > 0;
 		}
 
+		template<typename T>
+		inline bool IsOfType() const
+		{
+			return ValueTypeId == TYPEID(T);
+		}
+
 		inline TypeId GetValueTypeId() const
 		{
 			return ValueTypeId;
@@ -79,8 +97,18 @@ namespace CE
 			{
 				throw VariantCastException("Failed to cast Variant to the return type!");
 			}
-			return *(T*)this;
+
+			if constexpr (std::is_reference_v<T>)
+			{
+				typedef std::remove_reference<T>::type PlainType;
+				return *(PlainType*)this;
+			}
+			else
+			{
+				return *(T*)this;
+			}
 		}
+
 
 		inline void* GetRawPtrValue() const
 		{
@@ -106,7 +134,7 @@ namespace CE
 		{
 			// Simple types
 			bool   BoolValue;
-			String StringValue;
+			String StringValue{};
 			s8	   Int8Value;
 			s16    Int16Value;
 			s32    Int32Value;

@@ -110,14 +110,10 @@ void String::Reserve(u32 reserveCharacterCount)
     if (Capacity > 16_MB) // High capacity values are often because of garbage values and can cause crashes because it's higher than reserveCharacterCount.
     {
         Capacity = 0;
+        Buffer = nullptr;
     }
 
     reserveCharacterCount++; // Add extra byte for null terminator
-
-    if (reserveCharacterCount > 16_MB)
-    {
-        //LOG_ERROR("Error: FString::Reserve() called with a capacity higher than 16 MB! Value: %i", reserveCharacterCount);
-    }
 
     if (reserveCharacterCount > STRING_BUFFER_SIZE) // Use dynamic buffer
     {
@@ -137,7 +133,7 @@ void String::Reserve(u32 reserveCharacterCount)
 
             StaticBufferAllocator.Free(oldBuffer); // Release the previously used static buffer
         }
-        else if (bIsUsingDynamicBuffer && reserveCharacterCount > Capacity) // If we were already using dynamic buffer, but need more capacity
+        else if (bIsUsingDynamicBuffer && reserveCharacterCount > Capacity && Buffer != nullptr) // If we were already using dynamic buffer, but need more capacity
         {
             auto stagingBuffer = new char[reserveCharacterCount];
             if (StringLength > 0)
