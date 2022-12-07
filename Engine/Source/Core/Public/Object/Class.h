@@ -147,8 +147,9 @@ namespace CE
 	private:
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
-		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...), const char* attributes, std::index_sequence<Is...>) {
-			ReturnType(ClassOrStruct:: * funcPtr)(Args...) = function;
+		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...), const char* attributes, std::index_sequence<Is...>) 
+		{
+			ReturnType(ClassOrStruct::*funcPtr)(Args...) = function;
 
 			FunctionDelegate funcDelegate = [funcPtr](Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
@@ -167,30 +168,40 @@ namespace CE
 			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, attributes));
 		}
 
+		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
+		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...) const, const char* attributes, std::index_sequence<Is...>) 
+		{
+			ReturnType(ClassOrStruct::*funcPtr)(Args...) const = function;
+
+			FunctionDelegate funcDelegate = [funcPtr](Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue) -> void
+			{
+				if constexpr (std::is_same_v<ReturnType, void>) // No return value
+				{
+					(((ClassOrStruct*)instance)->*funcPtr)(((params.begin() + Is)->GetValue<Args>())...);
+					returnValue = CE::Variant();
+				}
+				else
+				{
+					auto value = (((ClassOrStruct*)instance)->*funcPtr)(((params.begin() + Is)->GetValue<Args>())...);
+					returnValue = CE::Variant(value);
+				}
+			};
+
+			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, attributes));
+		}
+
 	protected:
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args>
 		void AddFunction(const char* name, ReturnType (ClassOrStruct::*function)(Args...), const char* attributes)
 		{
 			AddFunction<ReturnType, ClassOrStruct, Args...>(name, function, attributes, std::make_index_sequence<sizeof...(Args)>());
-			/*ReturnType(ClassOrStruct:: * funcPtr)(Args...) = function;
+		}
 
-			FunctionDelegate funcDelegate = [funcPtr](Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue) -> void
-			{
-				auto it = params.begin();
-				if constexpr (std::is_same_v<ReturnType, void>) // No return value
-				{
-					
-					(((ClassOrStruct*)instance)->*funcPtr)( ((it++)->GetValue<Args>())... );
-					//returnValue = CE::Variant();
-				}
-				else
-				{
-					//returnValue = (((ClassOrStruct*)instance)->*function)( ((it++)->GetValue<Args>())... );
-				}
-			};
-
-			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, attributes));*/
+		template<typename ReturnType, typename ClassOrStruct, typename... Args>
+		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...) const, const char* attributes)
+		{
+			AddFunction<ReturnType, ClassOrStruct, Args...>(name, function, attributes, std::make_index_sequence<sizeof...(Args)>());
 		}
 
 		template<typename... SuperTypes>

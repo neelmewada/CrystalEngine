@@ -31,7 +31,7 @@ namespace Test::Child
             CE_LOG(Info, All, "Test called: {} | {}", number, text);
         }
 
-        f32 Add(f32 a, f32 b)
+        f32 Add(f32 a, f32 b) const
         {
             CE_LOG(Info, All, "Add called: {} + {} = {}", a, b, a + b);
             return a + b;
@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
             }
             else if (i == 1)
             {
-                auto returnValue = funcType->Invoke(&instance, { (f32)12.5f, (f32)0.5f });
+                CE::Variant returnValue = funcType->Invoke(&instance, { (f32)12.5f, (f32)0.5f });
 
                 if (returnValue.HasValue() && returnValue.IsOfType<f32>())
                 {
