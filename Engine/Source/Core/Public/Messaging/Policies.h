@@ -9,8 +9,11 @@ namespace CE
         /// (Default) Message bus supports single address, i.e. No addressing used
         Single,
 
-        /// Message bus supports addressing via multiple Ids
+        /// Message bus supports addressing via multiple IDs
         ById,
+
+        /// Message bus supports addressing via multiple IDs, and the execution order is in the increasing order of their IDs
+        ByIdAndOrdered,
     };
 
     enum class MBusHandlerPolicy
@@ -19,7 +22,10 @@ namespace CE
         Single,
 
         /// (Default) Message bus supports multiple handlers
-        Multiple
+        Multiple,
+
+        /// Message bus supports multiple orders, and the execution order is in the increasing order of their GetHandlerOrder() overrides
+        MultipleOrdered
     };
     
     

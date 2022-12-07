@@ -21,5 +21,14 @@
 #include "Math/Quaternion.h"
 #include "Math/Matrix.h"
 
+// Messaging
 #include "Messaging/MessageBus.h"
+#include "Component/ComponentBus.h"
+#include "Component/Component.h"
+#include "Component/SystemComponent.h"
+
+// System
+#include "System/SystemObject.h"
+#include "System/SystemApplicationBus.h"
+#include "System/SystemApplication.h"
 

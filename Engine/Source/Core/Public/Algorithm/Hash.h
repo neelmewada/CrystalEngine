@@ -13,7 +13,7 @@ inline SIZE_T GetHash<Type>(const Type& Value)\
 
 namespace CE
 {
-
+	/// Default implementation doesn't have any code. Specializations do all the work.
 	template<typename T>
 	SIZE_T GetHash(const T& Value);
 

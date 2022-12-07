@@ -22,7 +22,7 @@ namespace CE
         Object();
         Object(CE::Name name);
 
-        ~Object();
+        virtual ~Object();
 
         // - Getters & Setters -
         inline CE::Name GetName()

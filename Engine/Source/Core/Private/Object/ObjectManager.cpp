@@ -7,31 +7,22 @@ namespace CE
 
     void ObjectManager::RegisterObject(Object* object)
     {
-        if (object == nullptr)
-            return;
-
-        ObjectStore.Add({ object->GetName(), object });
+        
     }
 
     void ObjectManager::DeregisterObject(Object* object)
     {
-        if (object == nullptr)
-            return;
-
-        ObjectStore.Remove(object->GetName());
+        
     }
 
     bool ObjectManager::IsObjectRegistered(Name name)
     {
-        return ObjectStore.KeyExists(name);
+        return true;
     }
 
     bool ObjectManager::IsObjectRegistered(Object* object)
     {
-        if (object == nullptr)
-            return false;
-
-        return ObjectStore.KeyExists(object->GetName());
+        return true;
     }
 
 } // namespace CE

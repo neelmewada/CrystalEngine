@@ -12,8 +12,8 @@
 #	define DLL_EXPORT __declspec(dllexport)
 #	define DLL_IMPORT __declspec(dllimport)
 #else
-#	define DLL_EXPORT
-#	define DLL_IMPORT
+#	define DLL_EXPORT 
+#	define DLL_IMPORT 
 #endif
 
 #define BIT(x) (1 << x)
@@ -21,4 +21,8 @@
 #define TEXT(x) #x
 
 #define NAME(x) CE::Name(#x)
+
+#define CE_INLINE inline
+
+#define CE_FORCE_INLINE __forceinline
 

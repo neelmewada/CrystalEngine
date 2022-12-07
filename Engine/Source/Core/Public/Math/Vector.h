@@ -591,6 +591,10 @@ namespace CE
 
 } // namespace CE
 
+CE_RTTI_POD(CE, Vec2)
+CE_RTTI_POD(CE, Vec3)
+CE_RTTI_POD(CE, Vec4)
+
 /// fmt user-defined Formatter for CE::Vec2
 template <> struct fmt::formatter<CE::Vec2> {
     // Parses format specifications of the form ['f' | 'e'].

@@ -187,7 +187,7 @@ namespace CE
 				}
 			};
 
-			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, attributes));
+			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, String(attributes) + ",Const"));
 		}
 
 	protected:
@@ -496,6 +496,50 @@ public:\
     {\
         return Type();\
     }
+
+
+
+#define CE_RTTI_STRUCT(API, Namespace, Struct, SuperStructs, Attributes, FieldList)\
+namespace CE\
+{\
+	template<>\
+	struct StructTypeData<Namespace::Struct> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Struct, SuperStructs)>\
+	{\
+	};\
+	namespace Internal\
+	{\
+		template<>\
+		struct TypeInfoImpl<Namespace::Struct>\
+		{\
+            typedef Namespace::Struct Self;\
+            CE::StructType Type;\
+			const CE::StructTypeData<Namespace::Struct> TypeData;\
+            TypeInfoImpl(CE::StructType type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
+            {\
+                TypeInfo::RegisterType(&Type);\
+                FieldList\
+				Type.AddSuper<SuperStructs>();\
+            }\
+		};\
+	}\
+	template<>\
+	inline const TypeInfo* GetStaticType<Namespace::Struct>()\
+	{\
+        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, #Attributes "" }, StructTypeData<Namespace::Struct>() };\
+		return &instance.Type;\
+	}\
+	template<>\
+	inline const StructType* GetStaticStruct<Namespace::Struct>()\
+	{\
+		return (StructType*)GetStaticType<Namespace::Struct>();\
+	}\
+}
+
+#define CE_RTTI_STRUCT_IMPL(API, Namespace, Struct)\
+const CE::StructType* Namespace::Struct::Type()\
+{\
+	return (CE::StructType*)(CE::template GetStaticType<Self>());\
+}
 
 #define CE_STRUCT(Struct, ...)\
 public:\

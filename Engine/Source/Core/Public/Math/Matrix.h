@@ -30,7 +30,7 @@ namespace CE
             memcpy(Rows, copy.Rows, sizeof(Rows));
         }
 
-        inline static Matrix Zero()
+        CE_INLINE static Matrix Zero()
         {
             Vec4 rows[4] = {
                 Vec4{ 0, 0, 0, 0 },
@@ -42,7 +42,7 @@ namespace CE
             return Matrix(rows);
         }
 
-        inline static Matrix Identity()
+        CE_INLINE static Matrix Identity()
         {
             Vec4 rows[4] = {
                 Vec4{ 1, 0, 0, 0 },
@@ -54,12 +54,12 @@ namespace CE
             return Matrix(rows);
         }
 
-        inline Vec4& operator[](int index)
+        CE_INLINE Vec4& operator[](int index)
         {
             return Rows[index];
         }
 
-        inline const Vec4& operator[](int index) const
+        CE_INLINE const Vec4& operator[](int index) const
         {
             return Rows[index];
         }
@@ -67,13 +67,13 @@ namespace CE
         Matrix operator+(const Matrix& rhs) const;
         Matrix operator-(const Matrix& rhs) const;
 
-        inline Matrix operator+=(const Matrix& rhs)
+        CE_INLINE Matrix operator+=(const Matrix& rhs)
         {
             *this = *this + rhs;
             return *this;
         }
 
-        inline Matrix operator-=(const Matrix& rhs)
+        CE_INLINE Matrix operator-=(const Matrix& rhs)
         {
             *this = *this - rhs;
             return *this;
@@ -82,35 +82,35 @@ namespace CE
         Matrix operator*(f32 rhs) const;
         Matrix operator/(f32 rhs) const;
 
-        inline Matrix operator*=(f32 rhs)
+        CE_INLINE Matrix operator*=(f32 rhs)
         {
             *this = *this * rhs;
             return *this;
         }
 
-        inline Matrix operator/=(f32 rhs)
+        CE_INLINE Matrix operator/=(f32 rhs)
         {
             *this = *this / rhs;
             return *this;
         }
 
-        inline Matrix operator*(const Matrix& rhs) const
+        CE_INLINE Matrix operator*(const Matrix& rhs) const
         {
             return Multiply(*this, rhs);
         }
 
-        inline Matrix operator*=(const Matrix& rhs)
+        CE_INLINE Matrix operator*=(const Matrix& rhs)
         {
             *this = *this * rhs;
             return *this;
         }
 
-        inline bool operator==(const Matrix& rhs) const
+        CE_INLINE bool operator==(const Matrix& rhs) const
         {
             return Rows[0] == rhs.Rows[0] && Rows[1] == rhs.Rows[1] && Rows[2] == rhs.Rows[2] && Rows[3] == rhs.Rows[3];
         }
 
-        inline bool operator!=(const Matrix& rhs) const
+        CE_INLINE bool operator!=(const Matrix& rhs) const
         {
             return !(*this == rhs);
         }
@@ -119,27 +119,27 @@ namespace CE
 
         static Matrix GetTranspose(const Matrix& mat);
 
-        inline Matrix GetTranspose() const
+        CE_INLINE Matrix GetTranspose() const
         {
             return GetTranspose(*this);
         }
 
-        inline void Transpose()
+        CE_INLINE void Transpose()
         {
             *this = GetTranspose(*this);
         }
 
-        inline Matrix GetInverse() const
+        CE_INLINE Matrix GetInverse() const
         {
             return GetInverse(*this);
         }
 
-        inline void Invert()
+        CE_INLINE void Invert()
         {
             *this = GetInverse(*this);
         }
 
-        inline String ToString() const
+        CE_INLINE String ToString() const
         {
             return String::Format("[{} {} {} {}]\n[{} {} {} {}]\n[{} {} {} {}]\n[{} {} {} {}]",
                 Rows[0][0], Rows[0][1], Rows[0][2], Rows[0][3],
@@ -165,6 +165,7 @@ namespace CE
 
 } // namespace CE
 
+CE_RTTI_POD(CE, Matrix)
 
 /// fmt user-defined Formatter for CE::Matrix
 template <> struct fmt::formatter<CE::Matrix> {

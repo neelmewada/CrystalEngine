@@ -162,16 +162,6 @@ int main(int argc, char* argv[])
     Matrix inverse = mat.GetInverse();
 
     CE_LOG(Info, All, "Matrix: \n{}", (inverse));
-
-    CE_LOG(Info, All, "s8: {:X}", TYPEID(CE::s8));
-    CE_LOG(Info, All, "s16: {:X}", TYPEID(CE::s16));
-    CE_LOG(Info, All, "s32: {:X}", TYPEID(CE::s32));
-    CE_LOG(Info, All, "s64: {:X}", TYPEID(CE::s64));
-    CE_LOG(Info, All, "Typeid: {:X}", TYPEID(CE::Array<s32>));
-    CE_LOG(Info, All, "Typeid: {:X}", TYPEID(CE::Array<CE::String>));
-    CE_LOG(Info, All, "Typeid: {:X}", TYPEID(const s32*));
-    CE_LOG(Info, All, "Typeid: {:X}", TYPEID(s32*));
-    CE_LOG(Info, All, "Typeid: {:X}", TYPEID(CE::String));
     
     CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(MyEnum));
     CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(__underlying_type(MyEnum))); // int = s32
@@ -246,12 +236,11 @@ int main(int argc, char* argv[])
 
     SomeTestClass handler{};
 
-    CustomRequestBus::AddHandler(&handler);
+    CustomRequestBus::BusConnect(&handler);
 
-    CustomRequestBus::DispatchMessage(&MyCustomRequests::PrintOut, 142);
+    CustomRequestBus::Broadcast(&MyCustomRequests::PrintOut, 142);
 
-    CustomRequestBus::RemoveHandler(&handler);
-    
+    CustomRequestBus::BusDisconnect(&handler);
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");

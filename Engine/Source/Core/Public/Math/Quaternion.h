@@ -190,3 +190,5 @@ namespace CE
     }
 
 } // namespace CE
+
+CE_RTTI_POD(CE, Quat)

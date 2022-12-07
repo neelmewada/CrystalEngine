@@ -56,7 +56,7 @@ namespace CE
         inline static T Max(std::initializer_list<T> list)
         {
             auto max = std::numeric_limits<T>::min();
-
+            
             for (auto entry : list)
             {
                 if (entry > max)

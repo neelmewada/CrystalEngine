@@ -27,6 +27,8 @@ namespace CE
 
         virtual SIZE_T GetAddress() { return 0; }
 
+        virtual SIZE_T GetHandlerOrder() { return 0; }
+
     };
 
     /// Message bus class.
@@ -39,7 +41,7 @@ namespace CE
 
         using Handler = Interface;
 
-        static void AddHandler(Handler* handler)
+        static void BusConnect(Handler* handler)
         {
             if (!Handlers.Exists(handler))
             {
@@ -47,33 +49,43 @@ namespace CE
             }
         }
 
-        static void RemoveHandler(Handler* handler)
+        static void BusDisconnect(Handler* handler)
         {
             Handlers.Remove(handler);
         }
 
         /// Dispatch message to all handlers if Single addressing mode. Does nothing if address mode is ById.
         template<typename... Args>
-        static void DispatchMessage(auto function, Args... args)
+        static void Broadcast(auto function, Args... args)
         {
             if constexpr (BusTraits::AddressPolicy == MBusAddressPolicy::Single)
             {
                 for (Interface* handler : Handlers)
                 {
                     (handler->*function)(args...);
+
+                    if constexpr (BusTraits::HandlerPolicy == MBusHandlerPolicy::Single)
+                    {
+                        break;
+                    }
                 }
             }
         }
 
         /// Dispatches message to handlers with the specified address in ById address mode. Address is ignored if Single addressing.
         template<typename... Args>
-        static void DispatchMessage(auto function, SIZE_T address, Args... args)
+        static void Broadcast(auto function, SIZE_T address, Args... args)
         {
             if constexpr (BusTraits::AddressPolicy == MBusAddressPolicy::Single)
             {
                 for (Interface* handler : Handlers)
                 {
                     (handler->*function)(args...);
+
+                    if constexpr (BusTraits::HandlerPolicy == MBusHandlerPolicy::Single)
+                    {
+                        break;
+                    }
                 }
             }
             else if constexpr (BusTraits::AddressPolicy == MBusAddressPolicy::ById)
@@ -83,6 +95,11 @@ namespace CE
                     if (handler->GetAddress() == address)
                     {
                         (handler->*function)(args...);
+
+                        if constexpr (BusTraits::HandlerPolicy == MBusHandlerPolicy::Single)
+                        {
+                            break;
+                        }
                     }
                 }
             }
