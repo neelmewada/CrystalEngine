@@ -25,7 +25,7 @@ namespace CE
         virtual ~Object();
 
         // - Getters & Setters -
-        inline CE::Name GetName()
+        CE_INLINE CE::Name GetName()
         {
             return Name;
         }

@@ -23,9 +23,9 @@ namespace CE
         SystemApplication(int argc, char** argv);
 
         virtual ~SystemApplication();
-
-    private:
-        static SystemApplication* Singleton;
+        
+        virtual SystemApplication* GetApplication() override { return this; }
+        
     };
 
 } // namespace CE

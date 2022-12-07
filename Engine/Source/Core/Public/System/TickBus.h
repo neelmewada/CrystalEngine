@@ -45,6 +45,7 @@ namespace CE
         virtual s32 GetTickOrder() { return 0; }
     };
 
+    using TickEventBus = MessageBus<TickEvents>;
 
     class TickRequests : public IBusInterface
     {

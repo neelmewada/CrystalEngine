@@ -13,15 +13,11 @@ namespace CE
 
     SystemApplication::SystemApplication(int argc, char** argv)
     {
-        Singleton = this;
-
         SystemApplicationBus::BusConnect(this);
     }
 
     SystemApplication::~SystemApplication()
     {
-        Singleton = nullptr;
-
         SystemApplicationBus::BusDisconnect(this);
     }
 
