@@ -24,6 +24,7 @@ ce_add_target(System SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             CE::Core
+            ThirdParty::sdl
     RUNTIME_DEPENDENCIES
         
 )
