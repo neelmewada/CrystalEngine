@@ -1,19 +1,18 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Core CXX)
+project(System CXX)
 
-ce_add_target(Core SHARED
+ce_add_target(System SHARED
     NAMESPACE CE
     FOLDER Engine
     PCHHEADER 
         PUBLIC 
-            Public/Core.h
-            Public/CoreMinimal.h
+            Public/System.h
     FILES_CMAKE
         PRIVATE
-            core_private_files.cmake
+            system_private_files.cmake
         PUBLIC
-            core_public_files.cmake
+            system_public_files.cmake
     INCLUDE_DIRECTORIES
         PRIVATE
             Private/
@@ -24,9 +23,7 @@ ce_add_target(Core SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            ThirdParty::xxHash
-        PUBLIC
-            ThirdParty::spdlog
+            CE::Core
     RUNTIME_DEPENDENCIES
         
 )

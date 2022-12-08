@@ -26,8 +26,10 @@ namespace CE
 
 } // namespace CE
 
+
 CE_RTTI_CLASS(CORE_API, CE, Component,
     CE_SUPER(CE::Object),
+    CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
 

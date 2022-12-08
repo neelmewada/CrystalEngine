@@ -7,9 +7,10 @@
 
 #include "Policies.h"
 
+#define MBUS_EVENT(_MBUS, ...) _MBUS::Broadcast(&_MBUS::Events::__VA_ARGS__)
+
 namespace CE
 {
-
     
     class MBusTraits
     {
@@ -40,6 +41,7 @@ namespace CE
     public:
 
         using Handler = Interface;
+        using Events = Interface;
 
         static void BusConnect(Handler* handler)
         {
@@ -62,6 +64,9 @@ namespace CE
             {
                 for (Interface* handler : Handlers)
                 {
+                    if (handler == nullptr)
+                        continue;
+
                     (handler->*function)(args...);
 
                     if constexpr (BusTraits::HandlerPolicy == MBusHandlerPolicy::Single)
@@ -80,6 +85,9 @@ namespace CE
             {
                 for (Interface* handler : Handlers)
                 {
+                    if (handler == nullptr)
+                        continue;
+
                     (handler->*function)(args...);
 
                     if constexpr (BusTraits::HandlerPolicy == MBusHandlerPolicy::Single)
@@ -92,6 +100,9 @@ namespace CE
             {
                 for (Interface* handler : Handlers)
                 {
+                    if (handler == nullptr)
+                        continue;
+
                     if (handler->GetAddress() == address)
                     {
                         (handler->*function)(args...);

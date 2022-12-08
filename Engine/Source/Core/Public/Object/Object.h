@@ -45,6 +45,7 @@ namespace CE
 
 CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_SUPER(),
+    CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(Name)

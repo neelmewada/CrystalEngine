@@ -23,15 +23,14 @@ namespace CE
         CE_REGISTER_TYPES(bool, CE::s8, CE::s16, CE::s32, CE::s64,
             CE::u8, CE::u16, CE::u32, CE::u64, CE::f32, CE::f64,
             CE::String,
-            CE::Vec2, CE::Vec3, CE::Vec4, CE::Quat, CE::Matrix);
+            CE::Vec2, CE::Vec3, CE::Vec4, CE::Quat, CE::Matrix4x4);
 
         // Register Objects
         CE_REGISTER_TYPES(
             Object,
             SystemObject,
             Component,
-            SystemComponent,
-            SystemApplication
+            SystemComponent
         );
     }
 

@@ -4,7 +4,6 @@ project(ThirdParty)
 
 # Utils
 find_package(xxHash REQUIRED)
-#find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 
 # Qt5

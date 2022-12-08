@@ -4,9 +4,9 @@
 namespace CE
 {
 
-	Matrix Matrix::operator+(const Matrix& rhs) const
+	Matrix4x4 Matrix4x4::operator+(const Matrix4x4& rhs) const
 	{
-		Matrix result{};
+		Matrix4x4 result{};
 		
 		for (int i = 0; i < 4; i++)
 		{
@@ -16,9 +16,9 @@ namespace CE
 		return result;
 	}
 
-	Matrix Matrix::operator-(const Matrix& rhs) const
+	Matrix4x4 Matrix4x4::operator-(const Matrix4x4& rhs) const
 	{
-		Matrix result{};
+		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -28,9 +28,9 @@ namespace CE
 		return result;
 	}
 
-	Matrix Matrix::operator*(f32 rhs) const
+	Matrix4x4 Matrix4x4::operator*(f32 rhs) const
 	{
-		Matrix result{};
+		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -40,9 +40,9 @@ namespace CE
 		return result;
 	}
 
-	Matrix Matrix::operator/(f32 rhs) const
+	Matrix4x4 Matrix4x4::operator/(f32 rhs) const
 	{
-		Matrix result{};
+		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -52,9 +52,9 @@ namespace CE
 		return result;
 	}
 
-	Matrix Matrix::Multiply(const Matrix& lhs, const Matrix& rhs)
+	Matrix4x4 Matrix4x4::Multiply(const Matrix4x4& lhs, const Matrix4x4& rhs)
 	{
-		Matrix result{};
+		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -72,9 +72,9 @@ namespace CE
 		return result;
 	}
 
-	Matrix Matrix::GetTranspose(const Matrix& mat)
+	Matrix4x4 Matrix4x4::GetTranspose(const Matrix4x4& mat)
 	{
-		Matrix result{};
+		Matrix4x4 result{};
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -87,7 +87,7 @@ namespace CE
 		return result;
 	}
 
-	void Matrix::GetCofactor(const Matrix& mat, Matrix& cofactor, s32 p, s32 q, s32 n)
+	void Matrix4x4::GetCofactor(const Matrix4x4& mat, Matrix4x4& cofactor, s32 p, s32 q, s32 n)
 	{
 		s32 i = 0, j = 0;
 
@@ -111,14 +111,14 @@ namespace CE
 		}
 	}
 
-	int Matrix::GetDeterminant(const Matrix& mat, s32 n)
+	int Matrix4x4::GetDeterminant(const Matrix4x4& mat, s32 n)
 	{
 		int determinant = 0;
 
 		if (n == 1)
 			return mat[0][0];
 
-		Matrix temp{};
+		Matrix4x4 temp{};
 
 		int sign = 1;
 
@@ -136,12 +136,12 @@ namespace CE
 		return determinant;
 	}
 
-	Matrix Matrix::GetAdjoint(const Matrix& mat)
+	Matrix4x4 Matrix4x4::GetAdjoint(const Matrix4x4& mat)
 	{
-		Matrix adj{};
+		Matrix4x4 adj{};
 
 		// temp is used to store cofactors of mat[][]
-		Matrix temp{};
+		Matrix4x4 temp{};
 
 		int sign = 1;
 
@@ -165,16 +165,16 @@ namespace CE
 		return adj;
 	}
 
-	Matrix Matrix::GetInverse(const Matrix& mat)
+	Matrix4x4 Matrix4x4::GetInverse(const Matrix4x4& mat)
 	{
-		Matrix inverse{};
+		Matrix4x4 inverse{};
 
 		// Find determinant of A[][]
 		int det = GetDeterminant(mat, 4);
 		if (det == 0) 
 		{
 			CE_LOG(Error, All, "Singular matrix given to GetInverse function (Invalid)");
-			return Matrix::Zero();
+			return Matrix4x4::Zero();
 		}
 
 		// Find adjoint

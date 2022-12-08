@@ -25,7 +25,7 @@ namespace CE
         Multiple,
 
         /// Message bus supports multiple orders, and the execution order is in the increasing order of their GetHandlerOrder() overrides
-        MultipleOrdered
+        MultipleAndOrdered
     };
     
     

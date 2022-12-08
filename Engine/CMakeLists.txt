@@ -4,6 +4,7 @@ project(Engine)
 
 # Engine Modules
 add_subdirectory(Source/Core)
+add_subdirectory(Source/System)
 
 
 

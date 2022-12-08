@@ -75,6 +75,7 @@ CE_RTTI_ENUM_IMPL(, Test::Child, MyEnum);
 
 CE_RTTI_CLASS(,Test::Child, Some0,
     CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
     CE_ATTRIBS(Abstract),
     CE_FIELD_LIST(
         CE_FIELD(s0)
@@ -91,6 +92,7 @@ CE_RTTI_CLASS_IMPL(,Test::Child, Some0);
 
 CE_RTTI_CLASS(,Test::Child, BaseClass,
     CE_SUPER(Test::Child::Some0),
+    CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(childString)
@@ -112,6 +114,7 @@ public:
 
 CE_RTTI_CLASS(, , MyCustomRequests,
     CE_SUPER(),
+    CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
 
@@ -137,6 +140,7 @@ public:
 
 CE_RTTI_CLASS(, , SomeTestClass,
     CE_SUPER(),
+    false,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         
@@ -155,14 +159,14 @@ int main(int argc, char* argv[])
 
     CE_REGISTER_TYPES(Some0, BaseClass);
 
-    Matrix mat = Matrix({
+    Matrix4x4 mat = Matrix4x4({
         { 5, -2, 2, 7 },
         { 1, 0, 0, 3 },
         { -3, 1, 5, 0 },
         { 3, -1, -9, 4 }
     });
 
-    Matrix inverse = mat.GetInverse();
+    Matrix4x4 inverse = mat.GetInverse();
 
     CE_LOG(Info, All, "Matrix: \n{}", (inverse));
     

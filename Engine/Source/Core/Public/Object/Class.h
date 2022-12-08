@@ -165,7 +165,7 @@ namespace CE
 				}
 			};
 
-			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, attributes));
+			LocalFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, attributes));
 		}
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
@@ -187,7 +187,7 @@ namespace CE
 				}
 			};
 
-			LocalFunctions.Add(FunctionType(name, TYPEID(void), {}, funcDelegate, String(attributes) + ",Const"));
+			LocalFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, String(attributes) + ",Constant"));
 		}
 
 	protected:
@@ -234,10 +234,20 @@ namespace CE
 	// *************************************************
 	// Class Type
 
+	namespace Internal
+	{
+		class CORE_API IClassTypeImpl
+		{
+		public:
+			virtual void* CreateDefaultInstance() = 0;
+			virtual void DestroyInstance(void* instance) = 0;
+		};
+	}
+
 	class CORE_API ClassType : public StructType
 	{
 	protected:
-		ClassType(String name, String attributes = "") : StructType(name, attributes)
+		ClassType(String name, Internal::IClassTypeImpl* impl, String attributes = "") : StructType(name, attributes), Impl(impl)
 		{}
 
 		template<typename T>
@@ -259,7 +269,10 @@ namespace CE
 		virtual bool IsStruct() const override { return false; }
 		virtual bool IsClass() const override { return true; }
 
+		
+
 	private:
+		Internal::IClassTypeImpl* Impl = nullptr;
 
 	};
 
@@ -430,7 +443,17 @@ namespace CE
 #define CE_SUPER(...) __VA_ARGS__
 #define CE_ATTRIBS(...) __VA_ARGS__
 
-#define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, Attributes, FieldList, FunctionList)\
+#define __CE_NEW_INSTANCE_(Namespace, Class) new Namespace::Class
+#define __CE_NEW_INSTANCE_NotAbstract(Namespace, Class) new Namespace::Class
+#define __CE_NEW_INSTANCE_false(Namespace, Class) new Namespace::Class
+
+#define __CE_NEW_INSTANCE_Abstract(Namespace, Class) nullptr
+#define __CE_NEW_INSTANCE_true(Namespace, Class) nullptr
+
+#define CE_ABSTRACT Abstract
+#define CE_NOT_ABSTRACT NotAbstract
+
+#define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, IsAbstract, Attributes, FieldList, FunctionList)\
 namespace CE\
 {\
 	template<>\
@@ -440,7 +463,7 @@ namespace CE\
 	namespace Internal\
 	{\
 		template<>\
-		struct TypeInfoImpl<Namespace::Class>\
+		struct TypeInfoImpl<Namespace::Class> : public CE::Internal::IClassTypeImpl\
 		{\
             typedef Namespace::Class Self;\
             CE::ClassType Type;\
@@ -452,12 +475,20 @@ namespace CE\
 				FunctionList\
 				Type.AddSuper<SuperClasses>();\
             }\
+			virtual void* CreateDefaultInstance() override\
+			{\
+				return CE_EXPAND(CE_CONCATENATE(__CE_NEW_INSTANCE_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
+			}\
+			virtual void DestroyInstance(void* instance) override\
+			{\
+				if (instance != nullptr) delete (Namespace::Class*)instance;\
+			}\
 		};\
 	}\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, #Attributes "" }, StructTypeData<Namespace::Class>() };\
+        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, #Attributes "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\

@@ -6,31 +6,31 @@
 namespace CE
 {
     
-    class CORE_API Matrix
+    class CORE_API Matrix4x4
     {
     public:
 
-        Matrix()
+        Matrix4x4()
         {
             memset(Rows, 0, sizeof(Rows));
         }
 
-        Matrix(Vec4 rows[4])
+        Matrix4x4(Vec4 rows[4])
         {
             memcpy(Rows, rows, sizeof(Rows));
         }
 
-        Matrix(std::initializer_list<Vec4> rows)
+        Matrix4x4(std::initializer_list<Vec4> rows)
         {
             memcpy(Rows, rows.begin(), sizeof(Rows));
         }
 
-        Matrix(const Matrix& copy)
+        Matrix4x4(const Matrix4x4& copy)
         {
             memcpy(Rows, copy.Rows, sizeof(Rows));
         }
 
-        CE_INLINE static Matrix Zero()
+        CE_INLINE static Matrix4x4 Zero()
         {
             Vec4 rows[4] = {
                 Vec4{ 0, 0, 0, 0 },
@@ -39,10 +39,10 @@ namespace CE
                 Vec4{ 0, 0, 0, 0 }
             };
 
-            return Matrix(rows);
+            return Matrix4x4(rows);
         }
 
-        CE_INLINE static Matrix Identity()
+        CE_INLINE static Matrix4x4 Identity()
         {
             Vec4 rows[4] = {
                 Vec4{ 1, 0, 0, 0 },
@@ -51,7 +51,7 @@ namespace CE
                 Vec4{ 0, 0, 0, 1 }
             };
 
-            return Matrix(rows);
+            return Matrix4x4(rows);
         }
 
         CE_INLINE Vec4& operator[](int index)
@@ -64,62 +64,62 @@ namespace CE
             return Rows[index];
         }
 
-        Matrix operator+(const Matrix& rhs) const;
-        Matrix operator-(const Matrix& rhs) const;
+        Matrix4x4 operator+(const Matrix4x4& rhs) const;
+        Matrix4x4 operator-(const Matrix4x4& rhs) const;
 
-        CE_INLINE Matrix operator+=(const Matrix& rhs)
+        CE_INLINE Matrix4x4 operator+=(const Matrix4x4& rhs)
         {
             *this = *this + rhs;
             return *this;
         }
 
-        CE_INLINE Matrix operator-=(const Matrix& rhs)
+        CE_INLINE Matrix4x4 operator-=(const Matrix4x4& rhs)
         {
             *this = *this - rhs;
             return *this;
         }
 
-        Matrix operator*(f32 rhs) const;
-        Matrix operator/(f32 rhs) const;
+        Matrix4x4 operator*(f32 rhs) const;
+        Matrix4x4 operator/(f32 rhs) const;
 
-        CE_INLINE Matrix operator*=(f32 rhs)
+        CE_INLINE Matrix4x4 operator*=(f32 rhs)
         {
             *this = *this * rhs;
             return *this;
         }
 
-        CE_INLINE Matrix operator/=(f32 rhs)
+        CE_INLINE Matrix4x4 operator/=(f32 rhs)
         {
             *this = *this / rhs;
             return *this;
         }
 
-        CE_INLINE Matrix operator*(const Matrix& rhs) const
+        CE_INLINE Matrix4x4 operator*(const Matrix4x4& rhs) const
         {
             return Multiply(*this, rhs);
         }
 
-        CE_INLINE Matrix operator*=(const Matrix& rhs)
+        CE_INLINE Matrix4x4 operator*=(const Matrix4x4& rhs)
         {
             *this = *this * rhs;
             return *this;
         }
 
-        CE_INLINE bool operator==(const Matrix& rhs) const
+        CE_INLINE bool operator==(const Matrix4x4& rhs) const
         {
             return Rows[0] == rhs.Rows[0] && Rows[1] == rhs.Rows[1] && Rows[2] == rhs.Rows[2] && Rows[3] == rhs.Rows[3];
         }
 
-        CE_INLINE bool operator!=(const Matrix& rhs) const
+        CE_INLINE bool operator!=(const Matrix4x4& rhs) const
         {
             return !(*this == rhs);
         }
 
-        static Matrix Multiply(const Matrix& lhs, const Matrix& rhs);
+        static Matrix4x4 Multiply(const Matrix4x4& lhs, const Matrix4x4& rhs);
 
-        static Matrix GetTranspose(const Matrix& mat);
+        static Matrix4x4 GetTranspose(const Matrix4x4& mat);
 
-        CE_INLINE Matrix GetTranspose() const
+        CE_INLINE Matrix4x4 GetTranspose() const
         {
             return GetTranspose(*this);
         }
@@ -129,7 +129,7 @@ namespace CE
             *this = GetTranspose(*this);
         }
 
-        CE_INLINE Matrix GetInverse() const
+        CE_INLINE Matrix4x4 GetInverse() const
         {
             return GetInverse(*this);
         }
@@ -150,13 +150,13 @@ namespace CE
 
     private:
         /// Function to get determinant of mat[p][q]
-        static void GetCofactor(const Matrix& mat, Matrix& cofactor, s32 p, s32 q, s32 n);
+        static void GetCofactor(const Matrix4x4& mat, Matrix4x4& cofactor, s32 p, s32 q, s32 n);
 
-        static int GetDeterminant(const Matrix& mat, s32 n);
+        static int GetDeterminant(const Matrix4x4& mat, s32 n);
 
-        static Matrix GetAdjoint(const Matrix& mat);
+        static Matrix4x4 GetAdjoint(const Matrix4x4& mat);
 
-        static Matrix GetInverse(const Matrix& mat);
+        static Matrix4x4 GetInverse(const Matrix4x4& mat);
         
     public:
 
@@ -165,10 +165,10 @@ namespace CE
 
 } // namespace CE
 
-CE_RTTI_POD(CE, Matrix)
+CE_RTTI_POD(CE, Matrix4x4)
 
-/// fmt user-defined Formatter for CE::Matrix
-template <> struct fmt::formatter<CE::Matrix> {
+/// fmt user-defined Formatter for CE::Matrix4x4
+template <> struct fmt::formatter<CE::Matrix4x4> {
     // Parses format specifications of the form ['f' | 'e'].
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
         // Return an iterator past the end of the parsed range:
@@ -178,7 +178,7 @@ template <> struct fmt::formatter<CE::Matrix> {
     // Formats the point p using the parsed format specification (presentation)
     // stored in this formatter.
     template <typename FormatContext>
-    auto format(const CE::Matrix& mat, FormatContext& ctx) const -> decltype(ctx.out()) {
+    auto format(const CE::Matrix4x4& mat, FormatContext& ctx) const -> decltype(ctx.out()) {
         // ctx.out() is an output iterator to write to.
         return fmt::format_to(ctx.out(), "{}", mat.ToString());
     }
