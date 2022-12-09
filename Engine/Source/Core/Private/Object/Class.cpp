@@ -7,6 +7,37 @@ namespace CE
 
     
     
+    bool StructType::IsAssignableTo(TypeId typeId) const
+    {
+        if (typeId == this->GetTypeId())
+            return true;
+
+        for (auto superTypeId : SuperTypeIds)
+        {
+            if (superTypeId == typeId)
+            {
+                return true;
+            }
+
+            auto superType = GetTypeInfo(superTypeId);
+
+            if (superType != nullptr && superType->IsStruct())
+            {
+                auto structType = (StructType*)superType;
+                if (structType->IsAssignableTo(typeId))
+                    return true;
+            }
+            else if (superType != nullptr && superType->IsClass())
+            {
+                auto classType = (ClassType*)superType;
+                if (classType->IsAssignableTo(typeId))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     FieldType* StructType::GetFirstField()
     {
         if (!bFieldsCached)

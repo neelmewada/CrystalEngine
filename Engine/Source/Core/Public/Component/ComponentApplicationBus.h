@@ -4,7 +4,7 @@
 
 namespace CE
 {
-    class IComponentApplication;
+    class ComponentApplication;
 
     class ComponentApplicationRequsts : public MBusTraits
     {
@@ -14,7 +14,7 @@ namespace CE
         static const MBusHandlerPolicy HandlerPolicy = MBusHandlerPolicy::Single;
 
         /// Gets a pointer to the application singleton
-        virtual IComponentApplication* GetApplication() = 0;
+        virtual ComponentApplication* GetApplication() = 0;
 
     };
 

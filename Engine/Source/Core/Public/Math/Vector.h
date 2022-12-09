@@ -591,9 +591,9 @@ namespace CE
 
 } // namespace CE
 
-CE_RTTI_POD(CE, Vec2)
-CE_RTTI_POD(CE, Vec3)
-CE_RTTI_POD(CE, Vec4)
+CE_RTTI_POD(CE, Vec2, TYPEID(CE::Vec3), TYPEID(CE::Vec4))
+CE_RTTI_POD(CE, Vec3, TYPEID(CE::Vec2), TYPEID(CE::Vec4))
+CE_RTTI_POD(CE, Vec4, TYPEID(CE::Vec2), TYPEID(CE::Vec3))
 
 /// fmt user-defined Formatter for CE::Vec2
 template <> struct fmt::formatter<CE::Vec2> {

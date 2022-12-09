@@ -16,6 +16,8 @@ namespace CE
         virtual void Activate() override;
         virtual void Deactivate() override;
 
+        virtual void Tick(f32 deltaTime) override;
+
         virtual bool IsCompatibleWith(SystemObject* systemObject) { return true; }
     };
     

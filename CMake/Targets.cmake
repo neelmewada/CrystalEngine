@@ -213,7 +213,11 @@ function(ce_add_target NAME TARGET_TYPE)
         if(DEFINED ${runtime_dep}_BIN_DIR AND DEFINED ${runtime_dep}_RUNTIME_DEPS)
 
             foreach(copy_dll ${${runtime_dep}_RUNTIME_DEPS})
-                if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY} OR ${TARGET_TYPE_${TARGET_TYPE}_IS_EXECUTABLE})
+                if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
+                    add_custom_command(TARGET ${NAME} POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${${runtime_dep}_BIN_DIR}/${copy_dll} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
+                    )
+                elseif(${TARGET_TYPE_${TARGET_TYPE}_IS_EXECUTABLE})
                     add_custom_command(TARGET ${NAME} POST_BUILD
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${${runtime_dep}_BIN_DIR}/${copy_dll} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
                     )

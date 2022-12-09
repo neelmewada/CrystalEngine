@@ -35,7 +35,7 @@ endif()
 
 # Build Editor
 if(${PAL_TRAIT_BUILD_EDITOR})
-    
+    add_subdirectory(Editor)
 endif()
 
 

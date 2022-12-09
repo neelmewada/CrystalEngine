@@ -6,5 +6,8 @@ project(Engine)
 add_subdirectory(Source/Core)
 add_subdirectory(Source/System)
 
+add_subdirectory(Source/GameSystem)
+add_subdirectory(Source/GameLauncher)
+
 
 

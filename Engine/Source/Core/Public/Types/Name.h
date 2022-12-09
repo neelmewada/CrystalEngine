@@ -2,10 +2,13 @@
 
 #include "Algorithm/Hash.h"
 #include "Containers/String.h"
+#include "Containers/StringView.h"
 #include "Containers/Array.h"
 
 namespace CE
 {
+    class String;
+    class StringView;
 
     /// A type used to define path to Reflected c++ types & members
     /// Ex: ParentNamespace::ChildNamespace::SomeClass

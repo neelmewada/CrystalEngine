@@ -74,6 +74,8 @@ namespace CE
 
 		virtual bool IsStruct() const override { return true; }
 
+		virtual bool IsAssignableTo(TypeId typeId) const override;
+
 		IntPtr TryCast(IntPtr ptr, TypeId castToType) const
 		{
 			const u8* data = GetRawTypeData();
@@ -193,7 +195,7 @@ namespace CE
 	protected:
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args>
-		void AddFunction(const char* name, ReturnType (ClassOrStruct::*function)(Args...), const char* attributes)
+		void AddFunction(const char* name, ReturnType (ClassOrStruct::* function)(Args...), const char* attributes)
 		{
 			AddFunction<ReturnType, ClassOrStruct, Args...>(name, function, attributes, std::make_index_sequence<sizeof...(Args)>());
 		}
@@ -323,7 +325,6 @@ namespace CE
 			template<typename Derived>
 			void FillBaseStructTypeData(PtrDiff inOffset, TypeIdSize& outHeadSize)
 			{
-				//const StructTypeData<Base>* baseTypeData = (StructTypeData<Base>*)(GetStaticType<Base>()->GetRawTypeData());
 				StructTypeData<Base>* baseTypeData = nullptr;
 				if (GetStaticStruct<Base>() != nullptr)
 				{

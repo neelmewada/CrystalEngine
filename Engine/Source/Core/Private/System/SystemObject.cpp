@@ -1,6 +1,8 @@
 
 #include "System/SystemObject.h"
 
+#include "Component/SystemComponent.h"
+
 namespace CE
 {
     

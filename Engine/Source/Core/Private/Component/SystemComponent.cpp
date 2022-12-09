@@ -19,4 +19,9 @@ namespace CE
 
     }
 
+    void SystemComponent::Tick(f32 deltaTime)
+    {
+
+    }
+
 } // namespace CE

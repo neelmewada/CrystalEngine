@@ -4,7 +4,7 @@
 
 #define TYPEID(type) CE::GetTypeId<type>()
 
-#define CE_RTTI_POD(Namespace, Type)\
+#define CE_RTTI_POD(Namespace, Type, ...)\
 namespace Namespace\
 {\
 	class CE_##Type##_TypeInfo : public CE::TypeInfo\
@@ -18,6 +18,18 @@ namespace Namespace\
 	public:\
 		virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::Type); }\
 		virtual bool IsPOD() const { return true; }\
+		virtual bool IsAssignableTo(TypeId typeId) const override\
+		{\
+			std::initializer_list<TypeId> types = { __VA_ARGS__ };\
+			for (auto assignableType : types)\
+			{\
+				if (typeId == assignableType)\
+				{\
+					return true;\
+				}\
+			}\
+			return typeId == this->GetTypeId();\
+		}\
 	};\
 }\
 namespace CE\
@@ -32,7 +44,7 @@ namespace CE\
 
 
 
-#define CE_RTTI_POD2(Type)\
+#define CE_RTTI_POD2(Type, ...)\
 class CE_##Type##_TypeInfo : public CE::TypeInfo\
 {\
 private:\
@@ -44,6 +56,18 @@ private:\
 public:\
 	virtual CE::TypeId GetTypeId() const { return TYPEID(Type); }\
 	virtual bool IsPOD() const { return true; }\
+	virtual bool IsAssignableTo(CE::TypeId typeId) const override\
+	{\
+		std::initializer_list<CE::TypeId> types = { __VA_ARGS__ };\
+		for (auto assignableType : types)\
+		{\
+			if (typeId == assignableType)\
+			{\
+				return true;\
+			}\
+		}\
+		return typeId == this->GetTypeId();\
+	}\
 };\
 namespace CE\
 {\

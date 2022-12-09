@@ -2,10 +2,10 @@
 
 #include "Object/Object.h"
 
-#include "Component/SystemComponent.h"
-
 namespace CE
 {
+
+    class SystemComponent;
 
     class CORE_API SystemObject : public Object
     {
@@ -37,6 +37,7 @@ namespace CE
 
 CE_RTTI_CLASS(CORE_API, CE, SystemObject,
     CE_SUPER(CE::Object),
+    CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
 

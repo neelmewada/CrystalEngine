@@ -4,17 +4,17 @@
 namespace CE
 {
 
-    IComponentApplication::IComponentApplication() : IComponentApplication(0, nullptr)
+    ComponentApplication::ComponentApplication() : ComponentApplication(0, nullptr)
     {
 
     }
 
-    IComponentApplication::IComponentApplication(int argc, char** argv)
+    ComponentApplication::ComponentApplication(int argc, char** argv)
     {
         ComponentApplicationBus::BusConnect(this);
     }
 
-    IComponentApplication::~IComponentApplication()
+    ComponentApplication::~ComponentApplication()
     {
         ComponentApplicationBus::BusDisconnect(this);
     }
@@ -22,7 +22,7 @@ namespace CE
     //////////////////////////////////////////////////////////////////////////
     // ComponentApplicationRequests
 
-    IComponentApplication* IComponentApplication::GetApplication()
+    ComponentApplication* ComponentApplication::GetApplication()
     {
         return this;
     }
@@ -30,18 +30,25 @@ namespace CE
     //////////////////////////////////////////////////////////////////////////
     // TickRequests
 
-    f32 IComponentApplication::GetTickDeltaTime()
+    f32 ComponentApplication::GetTickDeltaTime()
     {
-        return 0;
+        return (f32)(clock() - PrevClock) / CLOCKS_PER_SEC;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
-    void IComponentApplication::Tick()
+    void ComponentApplication::Tick()
     {
         MBUS_EVENT(TickBus, OnTick, (f32)(clock() - PrevClock) / CLOCKS_PER_SEC);
         PrevClock = clock();
     }
 
+    void ComponentApplication::TickSystem()
+    {
+        
+    }
+
 } // namespace CE
+
+CE_RTTI_CLASS_IMPL(CORE_API, CE, ComponentApplication)
 

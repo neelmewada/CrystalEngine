@@ -74,24 +74,24 @@ namespace CE
 		Variant(PtrType* ptr) : ValueTypeId(GetTypeId<PtrType*>()), PtrValue(ptr)
 		{}
 
-		inline bool HasValue() const
+		CE_INLINE bool HasValue() const
 		{
 			return ValueTypeId > 0;
 		}
 
 		template<typename T>
-		inline bool IsOfType() const
+		CE_INLINE bool IsOfType() const
 		{
 			return ValueTypeId == TYPEID(T);
 		}
 
-		inline TypeId GetValueTypeId() const
+		CE_INLINE TypeId GetValueTypeId() const
 		{
 			return ValueTypeId;
 		}
 
 		template<typename T>
-		inline T GetValue() const
+		CE_INLINE T GetValue() const
 		{
 			if (ValueTypeId != GetTypeId<T>())
 			{
@@ -110,13 +110,13 @@ namespace CE
 		}
 
 
-		inline void* GetRawPtrValue() const
+		CE_INLINE void* GetRawPtrValue() const
 		{
 			return PtrValue;
 		}
 
 		template<typename PtrType>
-		inline PtrType* GetPointerValue() const
+		CE_INLINE PtrType* GetPointerValue() const
 		{
 			return (PtrType*)PtrValue;
 		}
@@ -124,7 +124,7 @@ namespace CE
 	private:
 
 		template<typename T>
-		void SetInternalValue(T value)
+		CE_INLINE void SetInternalValue(T value)
 		{
 			ValueTypeId = GetTypeId<T>();
 			*(T*)this = value;
