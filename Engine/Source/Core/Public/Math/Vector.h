@@ -115,7 +115,7 @@ namespace CE
             return *this;
         }
 
-        inline TVector2 operator/(f32 value)
+        inline TVector2 operator/(f32 value) const
         {
             return TVector2(X / value, Y / value);
         }
@@ -136,7 +136,7 @@ namespace CE
             return sqrt(GetSqrMagnitude());
         }
 
-        inline TVector2 GetNormalized()
+        inline TVector2 GetNormalized() const
         {
             return *this / GetMagnitude();
         }
@@ -283,7 +283,7 @@ namespace CE
             return *this;
         }
 
-        inline TVector3 operator/(f32 value)
+        inline TVector3 operator/(f32 value) const
         {
             return TVector3(X / value, Y / value, Z / value);
         }
@@ -304,7 +304,7 @@ namespace CE
             return sqrt(GetSqrMagnitude());
         }
 
-        inline TVector3 GetNormalized()
+        inline TVector3 GetNormalized() const
         {
             return *this / GetMagnitude();
         }
@@ -469,7 +469,7 @@ namespace CE
             return *this;
         }
 
-        inline TVector4 operator/(f32 value)
+        inline TVector4 operator/(f32 value) const
         {
             return TVector4(X / value, Y / value, Z / value, W / value);
         }
@@ -490,7 +490,7 @@ namespace CE
             return sqrt(GetSqrMagnitude());
         }
 
-        inline TVector4 GetNormalized()
+        inline TVector4 GetNormalized() const
         {
             return *this / GetMagnitude();
         }
@@ -585,6 +585,24 @@ namespace CE
     
     template<typename T>
     inline TVector4<T> operator*(s32 lhs, TVector4<T> rhs)
+    {
+        return rhs * lhs;
+    }
+
+    template<typename T>
+    inline TVector2<T> operator*(f32 lhs, TVector2<T> rhs)
+    {
+        return rhs * lhs;
+    }
+
+    template<typename T>
+    inline TVector3<T> operator*(f32 lhs, TVector3<T> rhs)
+    {
+        return rhs * lhs;
+    }
+
+    template<typename T>
+    inline TVector4<T> operator*(f32 lhs, TVector4<T> rhs)
     {
         return rhs * lhs;
     }

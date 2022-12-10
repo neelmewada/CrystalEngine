@@ -32,7 +32,7 @@ namespace CE
         TICK_LAST = 100000,  ///< Last position in the tick handler order.
     };
 
-    class TickEvents : public MBusTraits
+    class TickEvents : public IBusInterface
     {
     public:
 

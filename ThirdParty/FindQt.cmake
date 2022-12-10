@@ -1,8 +1,4 @@
 
-# this file actually ingests the library and defines targets.
-if (TARGET Qt6::Core)
-    return()
-endif()
 
 set(PACKAGE_NAME "qt")
 set(PACKAGE_VERISON "6.4.1")
@@ -41,8 +37,6 @@ set(QT6_COMPONENTS
 set(QT_LIB_PATH ${QT_PATH}/lib)
 
 list(APPEND CMAKE_PREFIX_PATH ${QT_LIB_PATH}/cmake/Qt6)
-
-find_package(Qt6 REQUIRED COMPONENTS ${QT6_COMPONENTS})
 
 if(${PAL_PLATFORM_IS_WINDOWS}) # Windows
     set(${QT_PACKAGE_NAME}_RUNTIME_DEPS "Qt6Multimedia$<$<CONFIG:DEBUG>:d>.dll")

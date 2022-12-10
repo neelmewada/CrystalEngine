@@ -1,4 +1,5 @@
-#pragma once
+
+#include "EditorSystem.h"
 
 namespace CE::Editor
 {

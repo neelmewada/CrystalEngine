@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(EditorCore CXX)
+project(EditorSystem CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
+    AUTOMOC
+    AUTOUIC
+    AUTORCC
     NAMESPACE CE
     FOLDER Editor
-    PCHHEADER 
-        PUBLIC 
+    PCHHEADER
+        PUBLIC
             Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
@@ -25,15 +28,9 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            
         PUBLIC
-            CE::Core
-            CE::System
-            "Qt6::Core"
-            "Qt6::Gui"
-            "Qt6::Widgets"
+            CE::EditorCore
     RUNTIME_DEPENDENCIES
-        qt
 )
 
 

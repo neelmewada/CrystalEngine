@@ -211,7 +211,6 @@ function(ce_add_target NAME TARGET_TYPE)
 
     foreach(runtime_dep ${ce_add_target_RUNTIME_DEPENDENCIES})
         if(DEFINED ${runtime_dep}_BIN_DIR AND DEFINED ${runtime_dep}_RUNTIME_DEPS)
-
             foreach(copy_dll ${${runtime_dep}_RUNTIME_DEPS})
                 if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
                     add_custom_command(TARGET ${NAME} POST_BUILD

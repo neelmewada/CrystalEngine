@@ -11,18 +11,16 @@
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
 
-// RTTI headers
+// RTTI & Object
 #include "Object/Object.h"
 #include "Object/ObjectManager.h"
+#include "Object/SystemObject.h"
 
 // Math headers
 #include "Math/Math.h"
 #include "Math/Vector.h"
 #include "Math/Quaternion.h"
 #include "Math/Matrix.h"
-
-// System
-#include "System/SystemObject.h"
 
 // Messaging
 #include "Messaging/MessageBus.h"

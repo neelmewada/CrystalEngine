@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(EditorCore CXX)
+project(QtComponents CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
@@ -27,11 +27,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             
         PUBLIC
-            CE::Core
-            CE::System
-            "Qt6::Core"
-            "Qt6::Gui"
-            "Qt6::Widgets"
+            CE::EditorCore
     RUNTIME_DEPENDENCIES
         qt
 )

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Object/Object.h"
-#include "System/SystemObject.h"
+#include "Object/SystemObject.h"
 #include "Component/ComponentApplication.h"
 
 #include "ApplicationBus.h"

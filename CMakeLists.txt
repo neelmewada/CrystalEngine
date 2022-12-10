@@ -28,15 +28,13 @@ add_subdirectory(ThirdParty)
 # Build Engine
 add_subdirectory(Engine)
 
-# Build Host Tools
-if(${PAL_TRAIT_BUILD_HOST_TOOLS})
-    add_subdirectory(Tools)
-endif()
-
 # Build Editor
 if(${PAL_TRAIT_BUILD_EDITOR})
     add_subdirectory(Editor)
 endif()
 
-
+# Build Host Tools
+if(${PAL_TRAIT_BUILD_HOST_TOOLS})
+    add_subdirectory(Tools)
+endif()
 

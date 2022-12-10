@@ -22,5 +22,14 @@ function(ce_add_external_target NAME TARGET_TYPE)
 
 endfunction()
 
-find_package(Qt6 REQUIRED COMPONENTS Core)
+set(QT6_COMPONENTS
+    Core
+    Concurrent
+    Gui
+    Svg
+    Widgets
+    Xml
+)
+
+find_package(Qt6 REQUIRED COMPONENTS ${QT6_COMPONENTS})
 

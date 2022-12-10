@@ -453,6 +453,8 @@ namespace CE
 
 #define CE_ABSTRACT Abstract
 #define CE_NOT_ABSTRACT NotAbstract
+#define CE_DONT_INSTANTIATE Abstract
+#define CE_INSTANTIATE NotAbstract
 
 #define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, IsAbstract, Attributes, FieldList, FunctionList)\
 namespace CE\

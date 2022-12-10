@@ -32,14 +32,15 @@ namespace CE
 
     f32 ComponentApplication::GetTickDeltaTime()
     {
-        return (f32)(clock() - PrevClock) / CLOCKS_PER_SEC;
+        return TickDeltaTime;
     }
 
     //////////////////////////////////////////////////////////////////////////
 
     void ComponentApplication::Tick()
     {
-        MBUS_EVENT(TickBus, OnTick, (f32)(clock() - PrevClock) / CLOCKS_PER_SEC);
+        TickDeltaTime = (f32)(clock() - PrevClock) / CLOCKS_PER_SEC;
+        MBUS_EVENT(TickBus, OnTick, TickDeltaTime);
         PrevClock = clock();
     }
 

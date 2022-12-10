@@ -4,7 +4,8 @@ project(Editor)
 
 # Editor Modules
 add_subdirectory(Source/EditorCore)
-#add_subdirectory(Source/EditorSystem)
-
+add_subdirectory(Source/QtComponents)
+add_subdirectory(Source/EditorSystem)
+add_subdirectory(Source/EditorLauncher)
 
 

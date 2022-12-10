@@ -11,7 +11,8 @@
 
 namespace CE
 {
-    
+    typedef SIZE_T BusAddress;
+
     class MBusTraits
     {
     public:
@@ -26,7 +27,7 @@ namespace CE
     {
     public:
 
-        virtual SIZE_T GetAddress() { return 0; }
+        virtual BusAddress GetAddress() { return 0; }
 
         virtual SIZE_T GetHandlerOrder() { return 0; }
 
@@ -79,7 +80,7 @@ namespace CE
 
         /// Dispatches message to handlers with the specified address in ById address mode. Address is ignored if Single addressing.
         template<typename... Args>
-        static void Broadcast(auto function, SIZE_T address, Args... args)
+        static void Broadcast(auto function, BusAddress address, Args... args)
         {
             if constexpr (BusTraits::AddressPolicy == MBusAddressPolicy::Single)
             {

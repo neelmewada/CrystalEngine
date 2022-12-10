@@ -27,9 +27,6 @@ namespace CE
     typedef intptr_t PtrDiff;
 }
 
-typedef char TCHAR;
-typedef wchar_t WCHAR;
-
 #if IS_64BIT
     typedef CE::u64 SIZE_T;
     typedef CE::s64 SSIZE_T;

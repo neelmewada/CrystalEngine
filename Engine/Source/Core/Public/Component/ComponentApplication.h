@@ -3,7 +3,7 @@
 #include "TickBus.h"
 #include "ComponentApplicationBus.h"
 
-#include "System/SystemObject.h"
+#include "Object/SystemObject.h"
 
 #include <time.h>
 
@@ -33,7 +33,7 @@ namespace CE
         //////////////////////////////////////////////////////////////////////////
         // TickRequests
 
-        /// To be called before Tick()
+        /// To be called before calling Tick()
         virtual f32 GetTickDeltaTime() override;
 
 
@@ -44,7 +44,7 @@ namespace CE
         virtual void TickSystem();
 
     protected:
-
+        f32 TickDeltaTime = 0;
         clock_t PrevClock = 0;
     };
     
