@@ -25,13 +25,11 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            
         PUBLIC
+            CE::QtComponents
             CE::Core
             CE::System
-            "Qt6::Core"
-            "Qt6::Gui"
-            "Qt6::Widgets"
+            "ThirdParty::yaml"
     RUNTIME_DEPENDENCIES
         qt
 )

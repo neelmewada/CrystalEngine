@@ -88,7 +88,7 @@ function(ce_add_target NAME TARGET_TYPE)
     # EXE_FLAG
 
     if(${TARGET_TYPE} STREQUAL "GUIAPP")
-        set(EXE_FLAG ${PAL_EXECUTABLE_APPLICATION_FLAG})
+        #set(EXE_FLAG "$<$<CONFIG:Release>:${PAL_EXECUTABLE_APPLICATION_FLAG}>")
     endif()
     
     # Create target
@@ -107,6 +107,13 @@ function(ce_add_target NAME TARGET_TYPE)
 
     elseif(${TARGET_TYPE_${TARGET_TYPE}_IS_EXECUTABLE})
         add_executable(${NAME} ${EXE_FLAG} ${SOURCES})
+
+        if(${TARGET_TYPE} STREQUAL "GUIAPP")
+            set_target_properties(${NAME} 
+                PROPERTIES ${PAL_EXECUTABLE_APPLICATION_FLAG} $<CONFIG:Release>
+            )
+        endif()
+        
     else()
         message(FATAL_ERROR "Invalid TARGET_TYPE passed: ${TARGET_TYPE}")
     endif()

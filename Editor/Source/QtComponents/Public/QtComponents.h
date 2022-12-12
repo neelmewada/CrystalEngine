@@ -1,5 +1,7 @@
 #pragma once
 
+#include "QtComponents/StyleManager.h"
+
 namespace CE::Editor::Qt
 {
     

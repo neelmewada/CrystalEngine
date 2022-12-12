@@ -2,6 +2,8 @@
 
 #include <QApplication>
 
+#include "QtComponents/StyleManager.h"
+
 namespace CE::Editor::Qt
 {
 
@@ -11,8 +13,12 @@ namespace CE::Editor::Qt
 
         CEQtApplication(int argc, char** argv);
 
+        virtual ~CEQtApplication();
+
         static void InitializeDpiScaling();
 
+    private:
+        StyleManager StyleManager{ this };
     };
     
 } // namespace CE::Editor

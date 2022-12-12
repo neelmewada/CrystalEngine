@@ -47,4 +47,13 @@ if(${PAL_PLATFORM_IS_WINDOWS}) # Windows
     set(${QT_PACKAGE_NAME}_RUNTIME_DEPS ${${QT_PACKAGE_NAME}_RUNTIME_DEPS} PARENT_SCOPE)
 endif()
 
+set(QT_ADDITIONAL_INCLUDES
+    "${QT_PATH}/include/QtWidgets/${PACKAGE_VERISON}/"
+    "${QT_PATH}/include/QtGui/${PACKAGE_VERISON}/"
+    "${QT_PATH}/include/QtCore/${PACKAGE_VERISON}/"
+    "${QT_PATH}/include/QtWidgets/${PACKAGE_VERISON}/QtWidgets"
+    "${QT_PATH}/include/QtGui/${PACKAGE_VERISON}/QtGui"
+    "${QT_PATH}/include/QtCore/${PACKAGE_VERISON}/QtCore"
+PARENT_SCOPE)
+
 

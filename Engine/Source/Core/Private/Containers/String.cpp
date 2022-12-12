@@ -301,9 +301,9 @@ Array<String> String::Split(char delimiter)
 
     for (int i = 0; i < StringLength; i++)
     {
-        if (Buffer[i] == delimiter)
+        if (Buffer[i] == delimiter && startIdx < StringLength)
         {
-            
+            result.Add(GetSubstringView(startIdx, endIdx - startIdx + 1));
 
             startIdx = i + 1;
             endIdx = startIdx;

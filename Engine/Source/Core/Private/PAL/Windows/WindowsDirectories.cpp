@@ -1,8 +1,8 @@
 
 #include "PAL/Windows/WindowsDirectories.h"
 
-#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <ShlObj_core.h>
 
 #define MAX_PATH 512
 
@@ -24,6 +24,19 @@ namespace CE
     IO::Path WindowsDirectories::GetLogDir()
     {
         return GetLaunchDir() / "Logs";
+    }
+
+    IO::Path WindowsDirectories::GetAppDataDir()
+    {
+        PWSTR path = NULL;
+        SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &path);
+
+        IO::Path appDataPath{ path };
+
+        appDataPath = appDataPath / "CrystalEngine";
+        
+        CoTaskMemFree(path);
+        return appDataPath;
     }
 
 }

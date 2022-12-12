@@ -5,6 +5,9 @@ project(QtComponents CXX)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
+    AUTOMOC
+    AUTOUIC
+    AUTORCC
     NAMESPACE CE
     FOLDER Editor
     PCHHEADER 
@@ -20,14 +23,16 @@ ce_add_target(${PROJECT_NAME} SHARED
             Private/
         PUBLIC
             Public/
+            ${QT_ADDITIONAL_INCLUDES}
     COMPILE_DEFINITIONS
         PRIVATE
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            
         PUBLIC
-            CE::EditorCore
+            "Qt6::Core"
+            "Qt6::Gui"
+            "Qt6::Widgets"
     RUNTIME_DEPENDENCIES
         qt
 )

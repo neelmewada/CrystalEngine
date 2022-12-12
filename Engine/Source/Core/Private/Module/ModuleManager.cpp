@@ -53,6 +53,8 @@ namespace CE
 		// Startup module
 		modulePtr->StartupModule();
 
+		CE_LOG(Info, All, "Loaded Module: {}", moduleName);
+
 		return nullptr;
 	}
 
@@ -75,6 +77,8 @@ namespace CE
 
 		// Remove module
 		ModuleMap.Remove(moduleName);
+
+		CE_LOG(Info, All, "Unloaded Module: {}", moduleName);
 	}
 
 	Module* ModuleManager::LoadModule(String moduleName)

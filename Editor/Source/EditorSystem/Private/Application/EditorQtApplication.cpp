@@ -1,10 +1,12 @@
 
-#include "Application/EditorQtApplication.h"
+#include "CoreMinimal.h"
 
-#include "GUI/WelcomeScreen/WelcomeScreen.h"
-#include "GUI/TestWindow/testwindow.h"
+#include "Application/EditorQtApplication.h"
+#include "GUI/Screens/WelcomeScreen/WelcomeScreen.h"
+#include "GUI/Screens/ProjectBrowser/ProjectBrowser.h"
 
 #include <QStyleFactory>
+#include <QWidget>
 
 namespace CE::Editor
 {
@@ -12,19 +14,32 @@ namespace CE::Editor
     EditorQtApplication::EditorQtApplication(int argc, char** argv)
         : CEQtApplication(argc, argv)
     {
-        
+        EditorSystemEventBus::BusConnect(this);
     }
 
     EditorQtApplication::~EditorQtApplication()
     {
-        delete WelcomeScreen;
-        WelcomeScreen = nullptr;
+        EditorSystemEventBus::BusDisconnect(this);
+
+        delete welcomeScreen;
+        delete projectBrowser;
     }
 
     void EditorQtApplication::Initialize()
     {
-        this->WelcomeScreen = new CE::Editor::WelcomeScreen;
-        WelcomeScreen->show();
+        this->welcomeScreen = new WelcomeScreen;
+        welcomeScreen->show();
+    }
+
+    void EditorQtApplication::OnWelcomeScreenTimeout()
+    {
+        this->projectBrowser = new ProjectBrowser;
+        projectBrowser->show();
+    }
+
+    void EditorQtApplication::CreateProject(IO::Path projectDirectory, String projectName)
+    {
+        
     }
 
 } // namespace CE::Editor

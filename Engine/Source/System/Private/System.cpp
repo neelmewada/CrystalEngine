@@ -2,6 +2,8 @@
 #include "System.h"
 #include "CoreMinimal.h"
 
+CE_IMPLEMENT_MODULE(System, CE::SystemModule)
+
 namespace CE
 {
     
@@ -23,3 +25,4 @@ namespace CE
     }
 
 } // namespace CE
+
