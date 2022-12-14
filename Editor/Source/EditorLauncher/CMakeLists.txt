@@ -28,6 +28,7 @@ ce_add_target(${PROJECT_NAME} GUIAPP
         PUBLIC
             CE::EditorCore
             CE::EditorSystem
+            CE::CrystalEditor
     RUNTIME_DEPENDENCIES
         qt
 )

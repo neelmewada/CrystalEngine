@@ -6,7 +6,7 @@ namespace CE
 
 
 
-	Component::Component() : Object()
+	Component::Component(CE::Name name) : Object(name)
 	{
 
 	}

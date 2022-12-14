@@ -13,7 +13,7 @@ namespace CE
 
     public:
 
-        Component();
+        Component(CE::Name name);
         virtual ~Component();
         
         virtual void Init() = 0;

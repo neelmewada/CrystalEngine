@@ -16,7 +16,7 @@ namespace CE
 
     void Application::RunMainLoop()
     {
-        while (!bExitMainLoopRequested)
+        while (!exitMainLoopRequested)
         {
             Tick();
         }
@@ -24,7 +24,7 @@ namespace CE
 
     void Application::ExitMainLoop()
     {
-        bExitMainLoopRequested = true;
+        exitMainLoopRequested = true;
     }
 
     void Application::Tick()

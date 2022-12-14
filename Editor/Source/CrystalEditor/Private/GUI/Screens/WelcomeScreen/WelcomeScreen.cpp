@@ -1,5 +1,5 @@
 
-#include "Events/EditorSystemEventBus.h"
+#include "Events/CrystalEditorEventBus.h"
 
 #include "GUI/Screens/WelcomeScreen/WelcomeScreen.h"
 #include "ui_WelcomeScreen.h"
@@ -31,6 +31,6 @@ namespace CE::Editor
     {
         hide();
 
-        MBUS_EVENT(EditorSystemEventBus, OnWelcomeScreenTimeout);
+        MBUS_EVENT(CrystalEditorEventBus, OnWelcomeScreenTimeout);
     }
 }

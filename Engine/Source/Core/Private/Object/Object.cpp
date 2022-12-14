@@ -6,12 +6,12 @@
 namespace CE
 {
 
-	Object::Object() : Name("")
+	Object::Object() : name("")
 	{
 		ObjectManager::RegisterObject(this);
 	}
 
-	Object::Object(CE::Name name) : Name(name)
+	Object::Object(CE::Name name) : name(name)
 	{
 		ObjectManager::RegisterObject(this);
 	}

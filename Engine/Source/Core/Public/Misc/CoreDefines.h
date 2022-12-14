@@ -26,3 +26,4 @@
 
 #define CE_FORCE_INLINE __forceinline
 
+#define CE_DELETE(ptr) delete ptr; ptr = nullptr

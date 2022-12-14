@@ -271,7 +271,15 @@ namespace CE
 		virtual bool IsStruct() const override { return false; }
 		virtual bool IsClass() const override { return true; }
 
-		
+		virtual void* CreateDefaultInstance()
+		{
+			return Impl->CreateDefaultInstance();
+		}
+
+		virtual void DestroyInstance(void* instance)
+		{
+			return Impl->DestroyInstance(instance);
+		}
 
 	private:
 		Internal::IClassTypeImpl* Impl = nullptr;
@@ -450,6 +458,8 @@ namespace CE
 
 #define __CE_NEW_INSTANCE_Abstract(Namespace, Class) nullptr
 #define __CE_NEW_INSTANCE_true(Namespace, Class) nullptr
+
+#define __CE_CAN_INSTANTIATE_() true
 
 #define CE_ABSTRACT Abstract
 #define CE_NOT_ABSTRACT NotAbstract

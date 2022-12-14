@@ -11,6 +11,8 @@ namespace CE::Editor::Qt
         QApplication::setApplicationName("CE Tools Application");
 
         StyleManager.Initialize(this);
+
+        InitializeDpiScaling();
     }
 
     CEQtApplication::~CEQtApplication()

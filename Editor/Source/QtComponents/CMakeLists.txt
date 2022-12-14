@@ -33,8 +33,10 @@ ce_add_target(${PROJECT_NAME} SHARED
             "Qt6::Core"
             "Qt6::Gui"
             "Qt6::Widgets"
+            "ThirdParty::qads"
     RUNTIME_DEPENDENCIES
         qt
+        qads
 )
 
 

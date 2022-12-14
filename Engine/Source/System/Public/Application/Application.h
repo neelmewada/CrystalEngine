@@ -27,7 +27,7 @@ namespace CE
         virtual void Tick() override;
 
     protected:
-        bool bExitMainLoopRequested = false;
+        bool exitMainLoopRequested = false;
     };
     
 } // namespace CE

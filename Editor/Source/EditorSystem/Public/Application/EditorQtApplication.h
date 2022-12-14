@@ -6,13 +6,8 @@
 namespace CE::Editor
 {
 
-    class TestWindow;
-    class WelcomeScreen;
-    class ProjectBrowser;
-
     class EDITORSYSTEM_API EditorQtApplication
         : public Qt::CEQtApplication
-        , public EditorSystemEventBus::Handler
     {
         Q_OBJECT
 
@@ -22,20 +17,8 @@ namespace CE::Editor
 
         virtual ~EditorQtApplication();
 
-        void Initialize();
-
-        ///////////////////////////////////////////
-        // EditorSystemEventBus::Handler
-
-        virtual void OnWelcomeScreenTimeout() override;
-
-        virtual void CreateProject(IO::Path projectDirectory, String projectName) override;
-
-        ///////////////////////////////////////////
 
     private:
-        WelcomeScreen* welcomeScreen = nullptr;
-        ProjectBrowser* projectBrowser = nullptr;
 
     };
     

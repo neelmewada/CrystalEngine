@@ -2,6 +2,8 @@
 #include "System.h"
 #include "CoreMinimal.h"
 
+#include "GameFramework/GameFramework.h"
+
 CE_IMPLEMENT_MODULE(System, CE::SystemModule)
 
 namespace CE
@@ -20,7 +22,9 @@ namespace CE
     void SystemModule::RegisterTypes()
     {
         CE_REGISTER_TYPES(
-            Application
+            Application,
+            GameObject,
+            GameComponent
         );
     }
 

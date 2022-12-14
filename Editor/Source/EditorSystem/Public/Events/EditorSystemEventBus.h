@@ -8,6 +8,7 @@
 namespace CE::Editor
 {
 
+    /// Event bus used by multiple Editor tools to communicate with each other
     class EditorSystemEvents : public IBusInterface
     {
     public:
@@ -16,10 +17,6 @@ namespace CE::Editor
 
         static constexpr MBusHandlerPolicy HandlerPolicy = MBusHandlerPolicy::Multiple;
 
-
-        virtual void OnWelcomeScreenTimeout() {}
-
-        virtual void CreateProject(IO::Path projectDirectory, String projectName) {}
 
     };
 

@@ -3,6 +3,7 @@
 
 #include "EditorCore.h"
 #include "EditorSystem.h"
+#include "CrystalEditor.h"
 
 int GuardedMain(int argc, char** argv);
 
@@ -17,7 +18,7 @@ int GuardedMain(int argc, char** argv)
 	CE::ModuleManager::Get().LoadModule("EditorCore");
 	CE::ModuleManager::Get().LoadModule("EditorSystem");
 
-	EditorQtApplication app{ argc, argv };
+	CrystalEditorApplication app{ argc, argv };
 
 	app.Initialize();
 

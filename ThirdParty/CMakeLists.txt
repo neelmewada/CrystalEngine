@@ -11,3 +11,4 @@ find_package(yaml REQUIRED)
 find_package(sdl REQUIRED)
 
 include(FindQt.cmake)
+find_package(qads REQUIRED)

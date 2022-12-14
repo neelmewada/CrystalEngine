@@ -27,7 +27,7 @@ namespace CE
         // - Getters & Setters -
         CE_INLINE CE::Name GetName()
         {
-            return Name;
+            return name;
         }
 
         // Virtual methods
@@ -35,10 +35,10 @@ namespace CE
         //virtual ClassType* GetType() = 0;
 
     private:
-        CE::Name Name;
+        CE::Name name;
         
     protected:
-        CE::Array<Component*> Components{};
+        CE::Array<Component*> components{};
     };
 
 } // namespace CE
@@ -48,8 +48,8 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(Name)
-        CE_FIELD(Components)
+        CE_FIELD(name)
+        CE_FIELD(components)
     ),
     CE_FUNCTION_LIST()
 )

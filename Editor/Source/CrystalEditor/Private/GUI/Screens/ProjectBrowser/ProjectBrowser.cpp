@@ -3,6 +3,8 @@
 
 #include <QFileDialog>
 
+#include "Events/CrystalEditorEventBus.h"
+
 namespace CE::Editor
 {
     ProjectBrowser::ProjectBrowser(QWidget* parent) :
@@ -30,7 +32,7 @@ namespace CE::Editor
 
     void ProjectBrowser::on_createProjectButtonBox_accepted()
     {
-
+        MBUS_EVENT(CrystalEditorEventBus, OnOpenProject, ""); // TODO: Placeholder empty project path
     }
 
 

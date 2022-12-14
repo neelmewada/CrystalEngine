@@ -1,14 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(EditorCore CXX)
+project(CrystalEditor CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
+    AUTOMOC
+    AUTOUIC
+    AUTORCC
     NAMESPACE CE
     FOLDER Editor
-    PCHHEADER 
-        PUBLIC 
+    PCHHEADER
+        PUBLIC
             Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
@@ -26,12 +29,9 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
         PUBLIC
-            CE::QtComponents
-            CE::Core
-            CE::System
-            "ThirdParty::yaml"
+            CE::EditorCore
+            CE::EditorSystem
     RUNTIME_DEPENDENCIES
-        
 )
 
 
