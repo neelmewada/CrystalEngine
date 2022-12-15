@@ -6,6 +6,7 @@
 namespace CE
 {
 
+    /// The Engine class that manages the game engine and it's subsystems (i.e. components)
     class SYSTEM_API Engine : public SystemObject
     {
         CE_CLASS(Engine, SystemObject);
@@ -22,6 +23,7 @@ namespace CE
         virtual void Tick(f32 deltaTime);
 
         virtual void OnSystemComponentAdded(SystemComponent* component) override;
+        virtual void OnSystemComponentRemoved(SystemComponent* component) override;
 
         friend class SystemModule;
     };
