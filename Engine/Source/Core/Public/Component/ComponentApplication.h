@@ -11,12 +11,9 @@ namespace CE
 {
 
     class CORE_API ComponentApplication
-        : public SystemObject
-        , public ComponentApplicationBus::Handler
+        : public ComponentApplicationBus::Handler
         , public TickRequestBus::Handler
     {
-        CE_CLASS(ComponentApplication, SystemObject);
-
     public:
 
         ComponentApplication();
@@ -50,14 +47,3 @@ namespace CE
     
 } // namespace CE
 
-CE_RTTI_CLASS(CORE_API, CE, ComponentApplication,
-    CE_SUPER(CE::SystemObject),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-
-    ),
-    CE_FUNCTION_LIST(
-
-    )
-)

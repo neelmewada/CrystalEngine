@@ -33,12 +33,28 @@ namespace CE
 		components.Remove(component);
 	}
 
-	void GameObject::AddComponent(TypeId typeId)
+	GameComponent* GameObject::AddComponent(TypeId typeId)
 	{
 		auto typeInfo = CE::GetTypeInfo(typeId);
-		if (typeInfo == nullptr)
-			return;
+		if (typeInfo == nullptr || !typeInfo->IsClass())
+			return nullptr;
 		
+		auto classType = (ClassType*)typeInfo;
+		if (!classType->IsAssignableTo(TYPEID(GameComponent)))
+			return nullptr;
+
+		auto instance = (GameComponent*)classType->CreateDefaultInstance();
+		AddComponent(instance);
+
+		return instance;
+	}
+
+	void GameObject::Tick(f32 deltaTime)
+	{
+		for (int i = 0; i < components.GetSize(); i++)
+		{
+			components[i]->Tick(deltaTime);
+		}
 	}
 
 } // namespace CE

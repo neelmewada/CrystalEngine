@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Containers/Array.h"
 #include "RTTI.h"
 
 #include <functional>
@@ -13,29 +14,30 @@ namespace CE
 	template<class _Fty>
 	using Function = std::function<_Fty>;
 
-	using FunctionDelegate = std::function<void(CE::Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue)>;
+	using FunctionDelegate = std::function<void(CE::Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue)>;
 
     class CORE_API FunctionType : public TypeInfo
     {
 	protected:
 		FunctionType(String name, TypeId returnType, std::initializer_list<TypeId> parameterTypes, 
-			FunctionDelegate delegate, String attributes)
+			FunctionDelegate delegate, const TypeInfo* owner, String attributes)
 			: TypeInfo(name)
-			, ReturnType(returnType)
-			, ParamTypes(parameterTypes)
-			, Attributes(attributes)
-			, Delegate(delegate)
+			, returnType(returnType)
+			, paramTypes(parameterTypes)
+			, attributes(attributes)
+			, delegateCallback(delegate)
+			, owner(owner)
 		{}
 
 	public:
 
 		virtual bool IsFunction() const override { return true; }
 
-		inline TypeId GetReturnTypeId() const { return ReturnType; }
+		inline TypeId GetReturnTypeId() const { return returnType; }
 		
-		inline u32 GetParameterCount() const { return ParamTypes.GetSize(); }
+		inline u32 GetParameterCount() const { return paramTypes.GetSize(); }
 
-		inline TypeId GetParameterTypeIdAt(u32 index) const { return ParamTypes[index]; }
+		inline TypeId GetParameterTypeIdAt(u32 index) const { return paramTypes[index]; }
 
 		virtual TypeId GetTypeId() const override
 		{
@@ -50,16 +52,17 @@ namespace CE
 		inline CE::Variant Invoke(CE::Object* instance, std::initializer_list<CE::Variant> params) const
 		{
 			CE::Variant returnValue{};
-			Delegate(instance, params, returnValue);
+			delegateCallback(instance, params, returnValue);
 			return returnValue;
 		}
 
 	protected:
-		TypeId ReturnType = 0;
-		Array<TypeId> ParamTypes{};
-		String Attributes = "";
-		FunctionDelegate Delegate;
+		TypeId returnType = 0;
+		Array<TypeId> paramTypes{};
+		String attributes = "";
+		FunctionDelegate delegateCallback;
 		FunctionType* Next = nullptr;
+		const TypeInfo* owner = nullptr;
 
 		friend class StructType;
 		friend class ClassType;

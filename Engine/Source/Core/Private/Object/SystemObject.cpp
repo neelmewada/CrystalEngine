@@ -28,10 +28,11 @@ namespace CE
         if (!systemComponent->IsCompatibleWith(this))
             return false;
 
-        if (!Components.Exists(systemComponent))
+        if (!components.Exists(systemComponent))
         {
-            Components.Add(systemComponent);
+            components.Add(systemComponent);
             systemComponent->Init();
+            OnSystemComponentAdded(systemComponent);
             return true;
         }
 
@@ -44,7 +45,7 @@ namespace CE
         if (systemComponent == nullptr)
             return;
 
-        Components.Remove(systemComponent);
+        components.Remove(systemComponent);
     }
 
 } // namespace CE

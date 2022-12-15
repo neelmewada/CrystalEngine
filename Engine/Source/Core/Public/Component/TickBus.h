@@ -62,4 +62,19 @@ namespace CE
 
     using TickRequestBus = MessageBus<TickRequests>;
 
+
+    class SystemTickEvents : public IBusInterface
+    {
+    public:
+
+        static constexpr MBusAddressPolicy AddressPolicy = MBusAddressPolicy::Single;
+
+        static constexpr MBusHandlerPolicy HandlerPolicy = MBusHandlerPolicy::MultipleAndOrdered;
+
+        virtual void OnTick(f32 deltaTime) = 0;
+
+    };
+
+    using SystemTickBus = MessageBus<SystemTickEvents>;
+
 } // namespace CE

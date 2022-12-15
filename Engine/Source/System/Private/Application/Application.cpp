@@ -1,6 +1,8 @@
 
 #include "Application/Application.h"
 
+#include "System.h"
+
 namespace CE
 {
 
@@ -31,6 +33,11 @@ namespace CE
     {
         auto deltaTime = GetTickDeltaTime();
         Super::Tick();
+        
+        if (GEngine != nullptr)
+        {
+            GEngine->Tick(deltaTime);
+        }
     }
 
 } // namespace CE

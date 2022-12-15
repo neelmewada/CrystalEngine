@@ -50,10 +50,18 @@ namespace CE
 	// *************************************************
 	// Struct Type
 
+	namespace Internal
+	{
+		class CORE_API IStructTypeImpl
+		{
+
+		};
+	}
+
 	class CORE_API StructType : public TypeInfo
 	{
 	protected:
-		StructType(String name, String attributes = "") : TypeInfo(name, attributes)
+		StructType(String name, Internal::IStructTypeImpl* impl, u32 size, String attributes = "") : TypeInfo(name, attributes), Impl(impl)
 		{}
 
 		template<typename T>
@@ -104,34 +112,52 @@ namespace CE
 			return 0;
 		}
 
-		inline u32 GetLocalFieldCount() const
+		CE_INLINE u32 GetLocalFieldCount() const
 		{
-			return LocalFields.GetSize();
+			return localFields.GetSize();
 		}
 
-		inline const FieldType* GetLocalFieldAt(u32 index) const
+		CE_INLINE const FieldType* GetLocalFieldAt(u32 index) const
 		{
-			return &LocalFields[index];
+			return &localFields[index];
 		}
 
-		inline u32 GetLocalFunctionCount() const
+		CE_INLINE u32 GetFunctionCount()
 		{
-			return LocalFunctions.GetSize();
+			if (!functionsCached)
+			{
+				CacheAllFunctions();
+			}
+			return cachedFunctions.GetSize();
 		}
 
-		inline const FunctionType* GetLocalFunctionAt(u32 index) const
+		CE_INLINE const FunctionType* GetFunctionAt(u32 index)
 		{
-			return &LocalFunctions[index];
+			if (!functionsCached)
+			{
+				CacheAllFunctions();
+			}
+			return &cachedFunctions[index];
 		}
 
-		inline u32 GetSuperTypesCount() const
+		CE_INLINE u32 GetLocalFunctionCount() const
 		{
-			return SuperTypeIds.GetSize();
+			return localFunctions.GetSize();
 		}
 
-		inline TypeId GetSuperType(s32 index) const
+		CE_INLINE const FunctionType* GetLocalFunctionAt(u32 index) const
 		{
-			return SuperTypeIds[index];
+			return &localFunctions[index];
+		}
+
+		CE_INLINE u32 GetSuperTypesCount() const
+		{
+			return superTypeIds.GetSize();
+		}
+
+		CE_INLINE TypeId GetSuperType(s32 index) const
+		{
+			return superTypeIds[index];
 		}
 
 		FieldType* GetFirstField();
@@ -140,8 +166,10 @@ namespace CE
 
 		virtual void CacheAllFields();
 
+		virtual void CacheAllFunctions();
+
 		template<typename Struct, typename Field>
-		inline void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
+		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
 		{
 			LocalFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes, this));
 		}
@@ -153,11 +181,11 @@ namespace CE
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) = function;
 
-			FunctionDelegate funcDelegate = [funcPtr](Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{
-					(((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())...);
+					(((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())... );
 					returnValue = CE::Variant();
 				}
 				else
@@ -167,7 +195,7 @@ namespace CE
 				}
 			};
 
-			LocalFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, attributes));
+			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, attributes));
 		}
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
@@ -175,21 +203,21 @@ namespace CE
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) const = function;
 
-			FunctionDelegate funcDelegate = [funcPtr](Object* instance, std::initializer_list<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{
-					(((ClassOrStruct*)instance)->*funcPtr)(((params.begin() + Is)->GetValue<Args>())...);
+					(((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())... );
 					returnValue = CE::Variant();
 				}
 				else
 				{
-					auto value = (((ClassOrStruct*)instance)->*funcPtr)(((params.begin() + Is)->GetValue<Args>())...);
+					auto value = (((ClassOrStruct*)instance)->*funcPtr)( ((params.begin() + Is)->GetValue<Args>())... );
 					returnValue = CE::Variant(value);
 				}
 			};
 
-			LocalFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, String(attributes) + ",Constant"));
+			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, String(attributes) + ",Constant"));
 		}
 
 	protected:
@@ -207,7 +235,7 @@ namespace CE
 		}
 
 		template<typename... SuperTypes>
-		inline void AddSuper()
+		CE_INLINE void AddSuper()
 		{
 			TypeId ids[] = { CE::GetTypeId<SuperTypes>()... };
 			constexpr int count = sizeof(ids) / sizeof(TypeId);
@@ -218,18 +246,24 @@ namespace CE
 		}
 
 		template<>
-		inline void AddSuper<>()
+		CE_INLINE void AddSuper<>()
 		{
 			
 		}
 
 		// Inherited + Local fields
-		CE::Array<FieldType> CachedFields;
+		CE::Array<FieldType> cachedFields{};
+		CE::Array<FunctionType> cachedFunctions{};
 
-		CE::Array<FieldType> LocalFields;
-		CE::Array<TypeId> SuperTypeIds;
-		CE::Array<FunctionType> LocalFunctions;
-		bool bFieldsCached = false;
+		CE::Array<FieldType> localFields{};
+		CE::Array<TypeId> superTypeIds{};
+		CE::Array<FunctionType> localFunctions{};
+		bool fieldsCached = false;
+		bool functionsCached = false;
+		u32 size = 0;
+
+	private:
+		Internal::IStructTypeImpl* Impl = nullptr;
 	};
 
 
@@ -241,15 +275,16 @@ namespace CE
 		class CORE_API IClassTypeImpl
 		{
 		public:
-			virtual void* CreateDefaultInstance() = 0;
-			virtual void DestroyInstance(void* instance) = 0;
+			virtual void* CreateDefaultInstance() const = 0;
+			virtual void DestroyInstance(void* instance) const = 0;
+			virtual bool CanInstantiate() const = 0;
 		};
 	}
 
 	class CORE_API ClassType : public StructType
 	{
 	protected:
-		ClassType(String name, Internal::IClassTypeImpl* impl, String attributes = "") : StructType(name, attributes), Impl(impl)
+		ClassType(String name, Internal::IClassTypeImpl* impl, u32 size, String attributes = "") : StructType(name, nullptr, size, attributes), Impl(impl)
 		{}
 
 		template<typename T>
@@ -271,14 +306,25 @@ namespace CE
 		virtual bool IsStruct() const override { return false; }
 		virtual bool IsClass() const override { return true; }
 
-		virtual void* CreateDefaultInstance()
+		virtual void* CreateDefaultInstance() const
 		{
+			if (Impl == nullptr)
+				return nullptr;
 			return Impl->CreateDefaultInstance();
 		}
 
-		virtual void DestroyInstance(void* instance)
+		virtual void DestroyInstance(void* instance) const
 		{
+			if (Impl == nullptr)
+				return;
 			return Impl->DestroyInstance(instance);
+		}
+
+		virtual bool CanBeInstantiated() const
+		{
+			if (Impl == nullptr)
+				return false;
+			return Impl->CanInstantiate();
 		}
 
 	private:
@@ -455,11 +501,14 @@ namespace CE
 #define __CE_NEW_INSTANCE_(Namespace, Class) new Namespace::Class
 #define __CE_NEW_INSTANCE_NotAbstract(Namespace, Class) new Namespace::Class
 #define __CE_NEW_INSTANCE_false(Namespace, Class) new Namespace::Class
-
 #define __CE_NEW_INSTANCE_Abstract(Namespace, Class) nullptr
 #define __CE_NEW_INSTANCE_true(Namespace, Class) nullptr
 
 #define __CE_CAN_INSTANTIATE_() true
+#define __CE_CAN_INSTANTIATE_Abstract() false
+#define __CE_CAN_INSTANTIATE_NotAbstract() true
+#define __CE_CAN_INSTANTIATE_false() true
+#define __CE_CAN_INSTANTIATE_true() false
 
 #define CE_ABSTRACT Abstract
 #define CE_NOT_ABSTRACT NotAbstract
@@ -488,11 +537,15 @@ namespace CE\
 				FunctionList\
 				Type.AddSuper<SuperClasses>();\
             }\
-			virtual void* CreateDefaultInstance() override\
+			virtual bool CanInstantiate() const override\
+			{\
+				return CE_EXPAND(CE_CONCATENATE(__CE_CAN_INSTANTIATE_,CE_FIRST_ARG(IsAbstract)))();\
+			}\
+			virtual void* CreateDefaultInstance() const override\
 			{\
 				return CE_EXPAND(CE_CONCATENATE(__CE_NEW_INSTANCE_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
 			}\
-			virtual void DestroyInstance(void* instance) override\
+			virtual void DestroyInstance(void* instance) const override\
 			{\
 				if (instance != nullptr) delete (Namespace::Class*)instance;\
 			}\
@@ -501,7 +554,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, #Attributes "" }, StructTypeData<Namespace::Class>() };\
+        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, sizeof(Namespace::Class), #Attributes "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\
@@ -512,7 +565,7 @@ namespace CE\
 }
 
 #define CE_RTTI_CLASS_IMPL(API, Namespace, Class)\
-const CE::ClassType* Namespace::Class::Type()\
+CE::ClassType* Namespace::Class::Type()\
 {\
 	return (CE::ClassType*)(CE::template GetStaticType<Self>());\
 }
@@ -535,7 +588,7 @@ public:\
 	friend struct CE::Internal::TypeInfoImpl;\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
-    static const ClassType* Type();\
+    static CE::ClassType* Type();\
     virtual const TypeInfo* GetType() const\
     {\
         return Type();\
@@ -553,7 +606,7 @@ namespace CE\
 	namespace Internal\
 	{\
 		template<>\
-		struct TypeInfoImpl<Namespace::Struct>\
+		struct TypeInfoImpl<Namespace::Struct> : public CE::Internal::IStructTypeImpl\
 		{\
             typedef Namespace::Struct Self;\
             CE::StructType Type;\
@@ -569,7 +622,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Struct>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, #Attributes "" }, StructTypeData<Namespace::Struct>() };\
+        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), #Attributes "" }, StructTypeData<Namespace::Struct>() };\
 		return &instance.Type;\
 	}\
 	template<>\
@@ -580,7 +633,7 @@ namespace CE\
 }
 
 #define CE_RTTI_STRUCT_IMPL(API, Namespace, Struct)\
-const CE::StructType* Namespace::Struct::Type()\
+CE::StructType* Namespace::Struct::Type()\
 {\
 	return (CE::StructType*)(CE::template GetStaticType<Self>());\
 }
@@ -591,7 +644,7 @@ public:\
 	friend struct CE::Internal::TypeInfoImpl;\
     typedef Struct Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
-    static const StructType* Type();\
+    static CE::StructType* Type();\
     virtual const TypeInfo* GetType() const\
     {\
         return Type();\

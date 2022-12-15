@@ -14,7 +14,7 @@ namespace CE
         GameComponent(CE::Name name);
         virtual ~GameComponent();
 
-        
+        virtual void Tick(f32 deltaTime) override {}
     };
     
 } // namespace CE

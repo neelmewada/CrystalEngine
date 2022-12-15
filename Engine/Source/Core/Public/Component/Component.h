@@ -18,10 +18,18 @@ namespace CE
         
         virtual void Init() = 0;
         
-        virtual void Activate() = 0;
-        virtual void Deactivate() = 0;
+        virtual void Activate() { isActive = true; }
+        virtual void Deactivate() { isActive = false; }
         
         virtual void Tick(f32 deltaTime) = 0;
+
+        inline bool IsActive()
+        {
+            return isActive;
+        }
+
+    private:
+        bool isActive = false;
     };
 
 } // namespace CE

@@ -27,6 +27,7 @@ ce_add_target(Core SHARED
             ThirdParty::xxHash
         PUBLIC
             ThirdParty::spdlog
+            ThirdParty::yaml
     RUNTIME_DEPENDENCIES
         
 )

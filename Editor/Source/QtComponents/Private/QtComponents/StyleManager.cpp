@@ -30,6 +30,7 @@ namespace CE::Editor::Qt
 
         QPalette palette;
 
+        // ezEditor styling
         palette.setColor(QPalette::WindowText, QColor(200, 200, 200, 255));
         palette.setColor(QPalette::Button, QColor(100, 100, 100, 255));
         palette.setColor(QPalette::Light, QColor(97, 97, 97, 255));
@@ -58,9 +59,8 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::Disabled, QPalette::BrightText, QColor(255, 255, 255, 255));
         palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(128, 128, 128, 255));
         palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(86, 117, 148, 255));
-        //app->setPalette(palette);
 
-        //QPalette palette;
+        // purple highlight theme override
         palette.setColor(QPalette::Window, QColor(53, 53, 53));
         palette.setColor(QPalette::WindowText, ::Qt::white);
         palette.setColor(QPalette::Base, QColor(15, 15, 15));

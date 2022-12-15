@@ -8,6 +8,7 @@
 
 namespace CE
 {
+    class Engine;
 
     class SYSTEM_API Application
         : public ComponentApplication

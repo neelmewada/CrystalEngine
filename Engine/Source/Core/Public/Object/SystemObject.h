@@ -31,6 +31,10 @@ namespace CE
         }
 
         void RemoveSystemComponent(SystemComponent* systemComponent);
+
+        virtual void OnSystemComponentAdded(SystemComponent* component) {}
+
+        virtual void OnSystemComponentRemoved(SystemComponent* component) {}
     };
     
 } // namespace CE

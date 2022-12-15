@@ -12,7 +12,7 @@ namespace CE
         if (typeId == this->GetTypeId())
             return true;
 
-        for (auto superTypeId : SuperTypeIds)
+        for (auto superTypeId : superTypeIds)
         {
             if (superTypeId == typeId)
             {
@@ -40,53 +40,84 @@ namespace CE
 
     FieldType* StructType::GetFirstField()
     {
-        if (!bFieldsCached)
+        if (!fieldsCached)
             CacheAllFields();
-        if (CachedFields.GetSize() == 0)
+        if (cachedFields.GetSize() == 0)
             return nullptr;
 
-        return &CachedFields[0];
+        return &cachedFields[0];
     }
 
     void StructType::CacheAllFields()
     {
-        if (bFieldsCached)
+        if (fieldsCached)
             return;
 
-        bFieldsCached = true;
+        fieldsCached = true;
 
-        for (int i = 0; i < SuperTypeIds.GetSize(); i++)
+        for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
-            auto typeId = SuperTypeIds[i];
+            auto typeId = superTypeIds[i];
+            if (typeId == this->GetTypeId())
+                continue;
 
             const TypeInfo* type = GetTypeInfo(typeId);
             if (type->IsStruct())
             {
                 auto structType = (StructType*)type;
                 structType->CacheAllFields();
-                CachedFields.AddRange(structType->CachedFields);
+                cachedFields.AddRange(structType->cachedFields);
             }
             else if (type->IsClass())
             {
                 auto classType = (ClassType*)type;
                 classType->CacheAllFields();
-                CachedFields.AddRange(classType->CachedFields);
+                cachedFields.AddRange(classType->cachedFields);
             }
         }
 
-        CachedFields.AddRange(LocalFields);
+        cachedFields.AddRange(localFields);
 
-        for (int i = 0; i < CachedFields.GetSize(); i++)
+        for (int i = 0; i < cachedFields.GetSize(); i++)
         {
-            CachedFields[i].Owner = this;
+            cachedFields[i].Owner = this;
 
-            if (i == CachedFields.GetSize() - 1)
+            if (i == cachedFields.GetSize() - 1)
             {
-                CachedFields[i].Next = nullptr;
+                cachedFields[i].Next = nullptr;
             }
             else
             {
-                CachedFields[i].Next = &CachedFields[i + 1];
+                cachedFields[i].Next = &cachedFields[i + 1];
+            }
+        }
+    }
+
+    void StructType::CacheAllFunctions()
+    {
+        if (functionsCached)
+            return;
+
+        functionsCached = true;
+
+        for (int i = 0; i < superTypeIds.GetSize(); i++)
+        {
+            auto typeId = superTypeIds[i];
+            if (typeId == this->GetTypeId())
+                continue;
+
+            const TypeInfo* type = GetTypeInfo(typeId);
+            if (type->IsStruct())
+            {
+                auto structType = (StructType*)type;
+                structType->CacheAllFunctions();
+                
+            }
+            else if (type->IsClass())
+            {
+                auto classType = (ClassType*)type;
+                classType->CacheAllFunctions();
+
             }
         }
     }

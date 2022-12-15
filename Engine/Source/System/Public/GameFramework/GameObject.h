@@ -20,12 +20,14 @@ namespace CE
         void RemoveComponent(GameComponent* component);
         
         template<typename T> requires std::is_base_of<GameComponent, T>::value
-        void AddComponent()
+        GameComponent* AddComponent()
         {
-            AddComponent(new T);
+            return AddComponent(TYPEID(T));
         }
 
-        void AddComponent(TypeId typeId);
+        GameComponent* AddComponent(TypeId typeId);
+
+        virtual void Tick(f32 deltaTime);
     };
     
 } // namespace CE
