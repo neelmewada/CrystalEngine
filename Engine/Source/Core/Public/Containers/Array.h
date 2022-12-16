@@ -39,7 +39,7 @@ namespace CE
 
         }
 
-        inline TypeId GetElementTypeId()
+        CE_INLINE TypeId GetElementTypeId()
         {
             return ElementTypeId;
         }
@@ -54,23 +54,23 @@ namespace CE
             return Impl[index];
         }
 
-        inline SIZE_T GetSize() const
+        CE_INLINE SIZE_T GetSize() const
         {
             return Impl.size();
         }
 
-        inline void Add(const ElementType& item)
+        CE_INLINE void Add(const ElementType& item)
         {
             Impl.push_back(item);
         }
 
         template<typename... Args>
-        inline void EmplaceBack(Args... args)
+        CE_INLINE void EmplaceBack(Args... args)
         {
             Impl.emplace_back(args...);
         }
 
-        inline void AddRange(std::initializer_list<ElementType> elements)
+        CE_INLINE void AddRange(std::initializer_list<ElementType> elements)
         {
             for (auto it = elements.begin(); it != elements.end(); ++it)
             {
@@ -78,7 +78,7 @@ namespace CE
             }
         }
 
-        inline void AddRange(CE::Array<ElementType> elements)
+        CE_INLINE void AddRange(CE::Array<ElementType> elements)
         {
             for (auto it = elements.begin(); it != elements.end(); ++it)
             {
@@ -86,7 +86,7 @@ namespace CE
             }
         }
 
-        inline void Remove(const ElementType& item)
+        CE_INLINE void Remove(const ElementType& item)
         {
             for (int i = 0; i < Impl.size(); i++)
             {
@@ -98,12 +98,12 @@ namespace CE
             }
         }
 
-        inline void RemoveAt(SIZE_T index)
+        CE_INLINE void RemoveAt(SIZE_T index)
         {
             Impl.erase(Impl.begin() + index);
         }
 
-        inline bool Exists(const ElementType& item)
+        CE_INLINE bool Exists(const ElementType& item)
         {
             for (int i = 0; i < Impl.size(); i++)
             {
@@ -115,7 +115,7 @@ namespace CE
             return false;
         }
 
-        inline bool Exists(std::function<bool(const ElementType&)> func)
+        CE_INLINE bool Exists(std::function<bool(const ElementType&)> func)
         {
             for (int i = 0; i < Impl.size(); i++)
             {

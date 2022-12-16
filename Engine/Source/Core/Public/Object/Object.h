@@ -9,6 +9,8 @@
 #include "Enum.h"
 #include "Field.h"
 
+#include "Serialization.h"
+
 namespace CE
 {
 
@@ -38,7 +40,7 @@ namespace CE
         CE::Name name;
         
     protected:
-        CE::Array<Component*> components{};
+        //CE::Array<Component*> components{};
     };
 
 } // namespace CE
@@ -49,7 +51,6 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(name)
-        CE_FIELD(components)
     ),
     CE_FUNCTION_LIST()
 )

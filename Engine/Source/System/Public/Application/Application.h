@@ -22,6 +22,8 @@ namespace CE
 
         virtual ~Application();
 
+        virtual Engine* GetEngineRef() override;
+
         virtual void RunMainLoop() override;
         virtual void ExitMainLoop() override;
 
@@ -29,17 +31,17 @@ namespace CE
 
     protected:
         bool exitMainLoopRequested = false;
+
+        Engine* engineRef = nullptr;
     };
     
 } // namespace CE
 
 
 CE_RTTI_CLASS(SYSTEM_API, CE, Application,
-    CE_SUPER(CE::ComponentApplication),
+    CE_SUPER(),
     CE_ABSTRACT,
     CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        
-    ),
+    CE_FIELD_LIST(),
     CE_FUNCTION_LIST()
 )

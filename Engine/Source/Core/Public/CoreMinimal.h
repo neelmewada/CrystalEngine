@@ -11,6 +11,10 @@
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
 
+// IO
+#include "IO/Stream/GenericStream.h"
+#include "IO/Stream/MemoryStream.h"
+
 // RTTI & Object
 #include "Object/Object.h"
 #include "Object/ObjectManager.h"

@@ -17,6 +17,35 @@ namespace CE
 	template<typename T>
 	using RemoveConstVolatileFromType = std::remove_cv_t<T>;
 
+	template<typename T>
+	class Array;
+
+	template<typename T>
+	struct IsArrayType : std::false_type
+	{
+		typedef void ElementType;
+	};
+
+	template<typename T>
+	struct IsArrayType<Array<T>> : std::true_type
+	{
+		typedef T ElementType;
+	};
+
+	template<typename T>
+	class ObjectStore;
     
+	template<typename T>
+	struct IsObjectStoreType : std::false_type
+	{
+		typedef void ElementType;
+	};
+
+	template<typename T>
+	struct IsObjectStoreType<ObjectStore<T>> : std::true_type
+	{
+		typedef T ElementType;
+	};
+
 } // namespace CE::Traits
 

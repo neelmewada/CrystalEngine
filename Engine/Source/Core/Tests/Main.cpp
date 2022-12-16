@@ -16,9 +16,11 @@ namespace Test::Child
     class Some0 : public CE::Object
     {
         CE_CLASS(Some0, CE::Object);
-    private:
+    public:
+        Some0() : CE::Object("Some0 Object")
+        {}
         int s0 = 0;
-        CE::String baseString;
+        CE::String baseString{};
 
     public:
         virtual void PrintHello() const
@@ -42,7 +44,10 @@ namespace Test::Child
     {
         CE_CLASS(BaseClass, Some0);
     public:
-        CE::String childString;
+        BaseClass() : Some0()
+        {}
+
+        CE::String childString{};
 
         virtual void PrintHello() const override
         {
@@ -170,10 +175,9 @@ int main(int argc, char* argv[])
 
     CE_LOG(Info, All, "Matrix: \n{}", (inverse));
     
-    CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(MyEnum));
-    CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(__underlying_type(MyEnum))); // int = s32
-    CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(s32));
-    CE_LOG(Info, All, "MyEnum: {:X}", TYPEID(u32));
+    CE_LOG(Info, All, "Array: {}", TYPEID(Array<f32>));
+    CE_LOG(Info, All, "Array: {}", TYPEID(Array<u8>));
+    CE_LOG(Info, All, "Array: {}", TYPEID(Array<Vec4>));
     
     CE_LOG(Info, All, "Some0: {}", TYPEID(Test::Child::Some0));
     CE_LOG(Info, All, "Base Class: {}", TYPEID(Test::Child::BaseClass));
@@ -233,13 +237,27 @@ int main(int argc, char* argv[])
     CE_LOG(Info, All, "Dynamic Casting...");
 
     BaseClass* ptr = new BaseClass;
+    ptr->baseString = "this is base";
+    ptr->childString = "this is child";
+    ptr->s0 = -24;
+
+    SerializedObject obj{ ptr->GetType() };
+
+    CE::IO::MemoryStream memStream{};
+    obj.Serialize(ptr, &memStream);
+
+    CE_LOG(Info, All, "Serialized Data:\n{}", memStream.GetBuffer());
+
+    memStream.Free();
 
     {
         auto classType = (ClassType*)ptr->GetType();
         auto cast = classType->TryCast((CE::IntPtr)ptr, TYPEID(Some0));
-
-        CE_LOG(Info, All, "Cast: {} |  {} ; {}", cast == 0 ? "Failed" : "Succeeded", cast, (IntPtr)ptr);
+        
+        CE_LOG(Info, All, "Cast: {} | {} ; {}", cast == 0 ? "Failed" : "Succeeded", cast, (IntPtr)ptr);
     }
+
+    CE_DELETE(ptr);
 
     SomeTestClass handler{};
 

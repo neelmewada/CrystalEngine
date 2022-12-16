@@ -5,6 +5,9 @@
 #include "Containers/StringView.h"
 #include "Containers/Array.h"
 
+#define YAML_CPP_API
+#include "yaml-cpp/yaml.h"
+
 namespace CE
 {
     class String;
@@ -76,3 +79,9 @@ template <> struct fmt::formatter<CE::Name> {
     }
 };
 
+namespace YAML 
+{
+    inline Emitter& operator<<(Emitter& emitter, CE::Name name) {
+        return emitter.Write(std::string(name.GetString().GetCString()));
+    }
+}

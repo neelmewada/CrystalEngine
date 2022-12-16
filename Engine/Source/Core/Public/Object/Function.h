@@ -56,6 +56,8 @@ namespace CE
 			return returnValue;
 		}
 
+		virtual u32 GetSize() const override { return 0; }
+
 	protected:
 		TypeId returnType = 0;
 		Array<TypeId> paramTypes{};

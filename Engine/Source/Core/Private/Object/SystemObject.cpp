@@ -35,7 +35,7 @@ namespace CE
             OnSystemComponentAdded(systemComponent);
             return true;
         }
-
+        
         // Component already exists
         return true;
     }

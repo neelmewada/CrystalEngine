@@ -18,12 +18,18 @@ namespace CE::Editor
     {
         EditorSystemEventBus::BusConnect(this);
         CrystalEditorEventBus::BusConnect(this);
+        ApplicationBus::BusConnect(this);
+
+        engineRef = new Engine;
     }
 
     CrystalEditorApplication::~CrystalEditorApplication()
     {
+        ApplicationBus::BusDisconnect(this);
         CrystalEditorEventBus::BusDisconnect(this);
         EditorSystemEventBus::BusDisconnect(this);
+
+        delete engineRef;
 
         delete welcomeScreen;
         delete projectBrowser;
@@ -57,6 +63,15 @@ namespace CE::Editor
     void CrystalEditorApplication::OnCreateProject(IO::Path projectDirectory, String projectName)
     {
 
+    }
+
+    Engine* CrystalEditorApplication::GetEngineRef()
+    {
+        if (engineRef == nullptr)
+        {
+            engineRef = new Engine;
+        }
+        return engineRef;
     }
 
 } // namespace CE::Editor

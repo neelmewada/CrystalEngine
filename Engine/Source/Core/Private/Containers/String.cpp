@@ -107,8 +107,10 @@ String::~String()
 
 void String::Reserve(u32 reserveCharacterCount)
 {
-    if (Capacity > 16_MB) // High capacity values are often because of garbage values and can cause crashes because it's higher than reserveCharacterCount.
+    // High capacity values are often because of garbage values and can cause crashes because String buffer is pointing to garbage location
+    if (Capacity > 16_MB)
     {
+        // Reset string to defaults
         Capacity = 0;
         Buffer = nullptr;
     }

@@ -4,6 +4,10 @@
 #include "Events/EditorSystemEventBus.h"
 #include "Events/CrystalEditorEventBus.h"
 
+#include "Application/ApplicationBus.h"
+
+#include "GameFramework/GameFramework.h"
+
 namespace CE::Editor
 {
     class WelcomeScreen;
@@ -13,6 +17,7 @@ namespace CE::Editor
     class CRYSTALEDITOR_API CrystalEditorApplication
         : public EditorQtApplication
         , public CrystalEditorEventBus::Handler
+        , public CE::ApplicationBus::Handler
     {
         Q_OBJECT
 
@@ -34,11 +39,16 @@ namespace CE::Editor
         virtual void OnCreateProject(IO::Path projectDirectory, String projectName) override;
 
         ///////////////////////////////////////////
+        // CE::ApplicationBus::Handler
+
+        virtual Engine* GetEngineRef() override;
 
     private:
         WelcomeScreen* welcomeScreen = nullptr;
         ProjectBrowser* projectBrowser = nullptr;
         CrystalEditorWindow* editorWindow = nullptr;
+
+        Engine* engineRef = nullptr;
     };
     
 } // namespace CE::Editor

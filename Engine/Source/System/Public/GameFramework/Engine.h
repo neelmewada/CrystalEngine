@@ -5,6 +5,10 @@
 
 namespace CE
 {
+    namespace Editor
+    {
+        class CrystalEditorApplication;
+    }
 
     /// The Engine class that manages the game engine and it's subsystems (i.e. components)
     class SYSTEM_API Engine : public SystemObject
@@ -26,6 +30,8 @@ namespace CE
         virtual void OnSystemComponentRemoved(SystemComponent* component) override;
 
         friend class SystemModule;
+        friend class Application;
+        friend class CE::Editor::CrystalEditorApplication;
     };
     
 } // namespace CE

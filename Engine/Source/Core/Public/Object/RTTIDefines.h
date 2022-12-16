@@ -30,6 +30,10 @@ namespace Namespace\
 			}\
 			return typeId == this->GetTypeId();\
 		}\
+		virtual CE::u32 GetSize() const override\
+		{\
+			return (CE::u32)sizeof(Namespace::Type);\
+		}\
 	};\
 }\
 namespace CE\
@@ -67,6 +71,10 @@ public:\
 			}\
 		}\
 		return typeId == this->GetTypeId();\
+	}\
+	virtual CE::u32 GetSize() const override\
+	{\
+		return (CE::u32)sizeof(Type);\
 	}\
 };\
 namespace CE\
@@ -120,11 +128,16 @@ namespace CE
 	TypeId GetTypeId()
 	{
 		constexpr const bool isPointer = std::is_pointer_v<Type>;
+		constexpr const bool isArray = IsArrayType<Type>::value;
 		
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;
-
-		if constexpr (isPointer) // a pointer type
+		
+		if constexpr (isArray) // array time
+		{
+			return (TypeId)typeid(Array<u8>).hash_code();
+		}
+		else if constexpr (isPointer) // a pointer type
 		{
 			return (TypeId)typeid(FinalType*).hash_code();
 		}

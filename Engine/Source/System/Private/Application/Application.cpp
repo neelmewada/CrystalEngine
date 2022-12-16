@@ -14,6 +14,17 @@ namespace CE
     Application::~Application()
     {
         ApplicationBus::BusDisconnect(this);
+
+        delete engineRef;
+    }
+
+    Engine* Application::GetEngineRef()
+    {
+        if (engineRef == nullptr)
+        {
+            engineRef = new Engine;
+        }
+        return engineRef;
     }
 
     void Application::RunMainLoop()
@@ -34,9 +45,9 @@ namespace CE
         auto deltaTime = GetTickDeltaTime();
         Super::Tick();
         
-        if (GEngine != nullptr)
+        if (engineRef != nullptr)
         {
-            GEngine->Tick(deltaTime);
+            engineRef->Tick(deltaTime);
         }
     }
 

@@ -4,6 +4,7 @@
 
 namespace CE
 {
+    class Engine;
 
     class ApplicationRequests : public MBusTraits
     {
@@ -17,6 +18,7 @@ namespace CE
 
         virtual void ExitMainLoop() {}
 
+        virtual Engine* GetEngineRef() { return nullptr; }
     };
 
     using ApplicationBus = MessageBus<ApplicationRequests>;

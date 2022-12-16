@@ -13,36 +13,50 @@ namespace CE
     {
     private:
         FieldType(String name, TypeId fieldTypeId, SIZE_T size, SIZE_T offset, String attributes, const TypeInfo* owner = nullptr) : TypeInfo(name, attributes)
-            , FieldTypeId(fieldTypeId)
-            , Size(size), Offset(offset)
-            , Owner(owner)
+            , fieldTypeId(fieldTypeId)
+            , size(size), offset(offset)
+            , owner(owner)
         {}
 
     public:
 
         virtual bool IsField() const override { return true; }
 
-        inline FieldType* GetNext() const { return Next; }
+        inline FieldType* GetNext() const { return next; }
 
         virtual TypeId GetTypeId() const
         {
-            return FieldTypeId;
+            return fieldTypeId;
         }
 
-        inline SIZE_T GetOffset() const { return Offset; }
-        inline SIZE_T GetSize() const { return Size; }
+        inline SIZE_T GetOffset() const { return offset; }
+
+        virtual u32 GetSize() const override { return size; }
 
         // TypeData is always NULL for field types
         //virtual const u8* GetRawTypeData() const { return nullptr; }
 
+        template<typename T>
+        T& GetFieldValue(void* instance)
+        {
+            return *(T*)((SIZE_T)instance + offset);
+        }
+
+        template<typename T>
+        const T& GetFieldValue(void* instance) const
+        {
+            return *(T*)((SIZE_T)instance + offset);
+        }
+
     private:
-        TypeId FieldTypeId;
 
-        SIZE_T Offset;
-        SIZE_T Size;
+        TypeId fieldTypeId;
 
-        FieldType* Next = nullptr;
-        const TypeInfo* Owner = nullptr;
+        SIZE_T offset;
+        SIZE_T size;
+
+        FieldType* next = nullptr;
+        const TypeInfo* owner = nullptr;
 
         friend class StructType;
         friend class ClassType;

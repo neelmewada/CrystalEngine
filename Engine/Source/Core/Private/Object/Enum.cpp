@@ -5,18 +5,21 @@
 namespace CE
 {
 
-	EnumConstant::EnumConstant(CE::Name name, CE::TypeId typeId, s64 value, const char* attributes)
+	EnumConstant::EnumConstant(CE::Name name, CE::TypeId typeId, s64 value, u32 size, const char* attributes)
 		: TypeInfo(name, attributes)
-		, TypeId(typeId)
-		, Value(value)
+		, typeId(typeId)
+		, value(value)
+		, size(size)
 	{
 
 	}
 
-	EnumType::EnumType(CE::Name name, CE::TypeId typeId, std::initializer_list<EnumConstant> constants, const char* attributes)
+	EnumType::EnumType(CE::Name name, CE::TypeId typeId, CE::TypeId underlyingTypeId, std::initializer_list<EnumConstant> constants, u32 size, const char* attributes)
 		: TypeInfo(name, attributes)
-		, TypeId(typeId)
-		, Constants(constants)
+		, typeId(typeId)
+		, underlyingTypeId(underlyingTypeId)
+		, constants(constants)
+		, size(size)
 	{
 		TypeInfo::RegisterType(this);
 	}

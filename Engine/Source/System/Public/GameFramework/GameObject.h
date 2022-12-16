@@ -28,6 +28,9 @@ namespace CE
         GameComponent* AddComponent(TypeId typeId);
 
         virtual void Tick(f32 deltaTime);
+
+    protected:
+        CE::Array<GameComponent*> components{};
     };
     
 } // namespace CE

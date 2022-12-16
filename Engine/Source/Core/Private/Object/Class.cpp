@@ -80,15 +80,15 @@ namespace CE
 
         for (int i = 0; i < cachedFields.GetSize(); i++)
         {
-            cachedFields[i].Owner = this;
+            cachedFields[i].owner = this;
 
             if (i == cachedFields.GetSize() - 1)
             {
-                cachedFields[i].Next = nullptr;
+                cachedFields[i].next = nullptr;
             }
             else
             {
-                cachedFields[i].Next = &cachedFields[i + 1];
+                cachedFields[i].next = &cachedFields[i + 1];
             }
         }
     }

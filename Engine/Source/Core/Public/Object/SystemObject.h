@@ -35,6 +35,9 @@ namespace CE
         virtual void OnSystemComponentAdded(SystemComponent* component) {}
 
         virtual void OnSystemComponentRemoved(SystemComponent* component) {}
+
+    protected:
+        CE::Array<SystemComponent*> components{};
     };
     
 } // namespace CE
@@ -43,9 +46,7 @@ CE_RTTI_CLASS(CORE_API, CE, SystemObject,
     CE_SUPER(CE::Object),
     CE_ABSTRACT,
     CE_ATTRIBS(),
-    CE_FIELD_LIST(
-
-    ),
+    CE_FIELD_LIST(),
     CE_FUNCTION_LIST()
 )
 

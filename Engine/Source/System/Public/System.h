@@ -7,7 +7,6 @@
 
 namespace CE
 {
-    extern SYSTEM_API Engine* GEngine;
 
     class SYSTEM_API SystemModule : public Module
     {

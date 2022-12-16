@@ -46,7 +46,6 @@ namespace CE
 		return nullptr;
 	}
 
-
 	// *************************************************
 	// Struct Type
 
@@ -54,7 +53,8 @@ namespace CE
 	{
 		class CORE_API IStructTypeImpl
 		{
-
+		public:
+			virtual void InitializeDefaults(void* instance) const = 0;
 		};
 	}
 
@@ -162,6 +162,18 @@ namespace CE
 
 		FieldType* GetFirstField();
 
+		virtual void InitializeDefaults(void* instance) const
+		{
+			if (Impl == nullptr || instance == nullptr)
+				return;
+			return Impl->InitializeDefaults(instance);
+		}
+
+		virtual CE::u32 GetSize() const override
+		{
+			return size;
+		}
+
 	protected:
 
 		virtual void CacheAllFields();
@@ -171,7 +183,7 @@ namespace CE
 		template<typename Struct, typename Field>
 		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
 		{
-			LocalFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes, this));
+			localFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes, this));
 		}
 
 	private:
@@ -241,7 +253,7 @@ namespace CE
 			constexpr int count = sizeof(ids) / sizeof(TypeId);
 			for (int i = 0; i < count; i++)
 			{
-				SuperTypeIds.Add(ids[i]);
+				superTypeIds.Add(ids[i]);
 			}
 		}
 
@@ -277,6 +289,9 @@ namespace CE
 		public:
 			virtual void* CreateDefaultInstance() const = 0;
 			virtual void DestroyInstance(void* instance) const = 0;
+			
+			virtual void InitializeDefaults(void* instance) const = 0;
+
 			virtual bool CanInstantiate() const = 0;
 		};
 	}
@@ -325,6 +340,13 @@ namespace CE
 			if (Impl == nullptr)
 				return false;
 			return Impl->CanInstantiate();
+		}
+
+		virtual void InitializeDefaults(void* instance) const
+		{
+			if (Impl == nullptr || instance == nullptr)
+				return;
+			return Impl->InitializeDefaults(instance);
 		}
 
 	private:
@@ -510,6 +532,12 @@ namespace CE
 #define __CE_CAN_INSTANTIATE_false() true
 #define __CE_CAN_INSTANTIATE_true() false
 
+#define __CE_INIT_DEFAULTS_(Namespace, Class) new(instance) Namespace::Class
+#define __CE_INIT_DEFAULTS_NotAbstract(Namespace, Class) new(instance) Namespace::Class
+#define __CE_INIT_DEFAULTS_false(Namespace, Class) new(instance) Namespace::Class
+#define __CE_INIT_DEFAULTS_Abstract(Namespace, Class)
+#define __CE_INIT_DEFAULTS_true(Namespace, Class)
+
 #define CE_ABSTRACT Abstract
 #define CE_NOT_ABSTRACT NotAbstract
 #define CE_DONT_INSTANTIATE Abstract
@@ -548,6 +576,10 @@ namespace CE\
 			virtual void DestroyInstance(void* instance) const override\
 			{\
 				if (instance != nullptr) delete (Namespace::Class*)instance;\
+			}\
+			virtual void InitializeDefaults(void* instance) const override\
+			{\
+				CE_EXPAND(CE_CONCATENATE(__CE_INIT_DEFAULTS_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
 			}\
 		};\
 	}\
@@ -617,6 +649,10 @@ namespace CE\
                 FieldList\
 				Type.AddSuper<SuperStructs>();\
             }\
+			virtual void InitializeDefaults(void* instance) const override\
+			{\
+				new(instance) Namespace::Struct;\
+			}\
 		};\
 	}\
 	template<>\
