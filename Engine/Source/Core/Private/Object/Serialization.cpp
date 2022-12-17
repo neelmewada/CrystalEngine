@@ -30,8 +30,6 @@ namespace CE
 
 		YAML::Emitter out{};
 
-		out << YAML::Flow;
-
 		if (type->IsStruct())
 		{
 			auto structType = (StructType*)type;
@@ -78,9 +76,6 @@ namespace CE
 		const char* str = out.c_str();
 		u32 length = strlen(str);
 		*outStream = IO::MemoryStream(length + 1); // null terminator at the end ; Allocates memory on heap
-
-		std::cout << "Serialized cout: \n" << str << std::endl;
-		std::cout << std::endl;
 
 		outStream->Write(length + 1, str);
 	}
@@ -173,3 +168,5 @@ namespace CE
 	}
 
 } // namespace CE
+
+CE_RTTI_CLASS_IMPL(CORE_API, CE, SerializedObject)

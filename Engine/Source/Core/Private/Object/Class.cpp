@@ -123,5 +123,40 @@ namespace CE
     }
 
 
+    bool ClassType::IsObject()
+    {
+        if (this->GetTypeId() == TYPEID(CE::Object))
+            return true;
+
+        if (!superTypesCached)
+        {
+            CacheSuperTypes();
+        }
+
+        for (int i = 0; i < superTypes.GetSize(); i++)
+        {
+            if (superTypes[i]->IsObject())
+                return true;
+        }
+
+        return false;
+    }
+
+    void ClassType::CacheSuperTypes()
+    {
+        if (superTypesCached)
+            return;
+
+        superTypesCached = true;
+
+        for (int i = 0; i < superTypeIds.GetSize(); i++)
+        {
+            auto type = GetTypeInfo(superTypeIds[i]);
+            if (type == nullptr || !type->IsClass())
+                continue;
+
+            superTypes.Add((ClassType*)type);
+        }
+    }
 
 } // namespace CE

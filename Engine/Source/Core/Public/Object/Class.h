@@ -321,6 +321,8 @@ namespace CE
 		virtual bool IsStruct() const override { return false; }
 		virtual bool IsClass() const override { return true; }
 
+		virtual bool IsObject();
+
 		virtual void* CreateDefaultInstance() const
 		{
 			if (Impl == nullptr)
@@ -350,8 +352,12 @@ namespace CE
 		}
 
 	private:
+		void CacheSuperTypes();
+
 		Internal::IClassTypeImpl* Impl = nullptr;
 
+		bool superTypesCached = false;
+		Array<ClassType*> superTypes{};
 	};
 
 #pragma pack(push, 1)

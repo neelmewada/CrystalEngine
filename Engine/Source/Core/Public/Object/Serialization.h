@@ -10,8 +10,10 @@
 namespace CE
 {
 
-    class CORE_API SerializedObject
+    class CORE_API SerializedObject : public Object
     {
+        CE_CLASS(SerializedObject, Object)
+
     public:
         SerializedObject(const TypeInfo* type);
         virtual ~SerializedObject();
@@ -19,14 +21,26 @@ namespace CE
         void Serialize(void* instance, IO::MemoryStream* outStream);
         void Deserialize(void* instance, IO::GenericStream* inStream);
 
+        virtual bool IsContext() const { return false; }
+
     protected:
         void SerializeProperty(void* instance, FieldType* fieldType, YAML::Emitter& out);
 
         const TypeInfo* type = nullptr;
         void* instance = nullptr;
 
+        SerializedObject* context = nullptr;
     };
 
-    
-    
 } // namespace CE
+
+CE_RTTI_CLASS(CORE_API, CE, SerializedObject,
+    CE_SUPER(CE::Object),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(context)
+    ),
+    CE_FUNCTION_LIST()
+)
+
