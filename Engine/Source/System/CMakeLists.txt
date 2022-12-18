@@ -23,8 +23,9 @@ ce_add_target(System SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            CE::Core
             ThirdParty::sdl
+        PUBLIC
+            CE::Core
     RUNTIME_DEPENDENCIES
         
 )

@@ -10,9 +10,11 @@
 namespace CE
 {
 
-    class CORE_API SerializedObject : public Object
+    class CORE_API SerializedObject
     {
-        CE_CLASS(SerializedObject, Object)
+        CE_CLASS(SerializedObject)
+    private:
+        SerializedObject(const TypeInfo* type, void* instance, YAML::Emitter* emitter);
 
     public:
         SerializedObject(const TypeInfo* type);
@@ -30,12 +32,14 @@ namespace CE
         void* instance = nullptr;
 
         SerializedObject* context = nullptr;
+
+        YAML::Emitter* emitter = nullptr;
     };
 
 } // namespace CE
 
 CE_RTTI_CLASS(CORE_API, CE, SerializedObject,
-    CE_SUPER(CE::Object),
+    CE_SUPER(),
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
     CE_FIELD_LIST(

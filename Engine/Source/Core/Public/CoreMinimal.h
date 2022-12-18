@@ -15,9 +15,11 @@
 #include "IO/Stream/GenericStream.h"
 #include "IO/Stream/MemoryStream.h"
 
-// RTTI & Object
+// RTTI, Object & Serialization
 #include "Object/Object.h"
 #include "Object/ObjectManager.h"
+#include "Object/ObjectStore.h"
+#include "Object/Serialization.h"
 #include "Object/SystemObject.h"
 
 // Math headers

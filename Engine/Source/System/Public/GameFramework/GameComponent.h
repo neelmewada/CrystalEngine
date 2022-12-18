@@ -26,3 +26,4 @@ CE_RTTI_CLASS(SYSTEM_API, CE, GameComponent,
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST()
 )
+

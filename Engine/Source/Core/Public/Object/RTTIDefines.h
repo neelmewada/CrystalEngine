@@ -91,6 +91,12 @@ namespace CE\
 
 namespace CE
 {
+	// Forward Decls
+
+	class Object;
+
+	template<typename T>
+	class ObjectStore;
 
 	// **********************************************************
 	// Type ID
@@ -129,11 +135,16 @@ namespace CE
 	{
 		constexpr const bool isPointer = std::is_pointer_v<Type>;
 		constexpr const bool isArray = IsArrayType<Type>::value;
+		constexpr const bool isObjectStore = IsObjectStoreType<Type>::value;
 		
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;
 		
-		if constexpr (isArray) // array time
+		if constexpr (isObjectStore)
+		{
+			return (TypeId)typeid(ObjectStore<Object>).hash_code();
+		}
+		else if constexpr (isArray) // array time
 		{
 			return (TypeId)typeid(Array<u8>).hash_code();
 		}

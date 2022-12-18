@@ -9,8 +9,6 @@
 #include "Enum.h"
 #include "Field.h"
 
-#include "Serialization.h"
-
 namespace CE
 {
 

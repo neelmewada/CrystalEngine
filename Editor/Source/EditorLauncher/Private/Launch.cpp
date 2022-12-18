@@ -11,8 +11,8 @@ int GuardedMain(int argc, char** argv)
 {
 	using namespace CE::Editor;
 
-	CE::ModuleManager::Get().LoadModule("Core");
 	CE::Logger::Initialize();
+	CE::ModuleManager::Get().LoadModule("Core");
 
 	CE::ModuleManager::Get().LoadModule("System");
 	CE::ModuleManager::Get().LoadModule("EditorCore");
@@ -28,8 +28,8 @@ int GuardedMain(int argc, char** argv)
 	CE::ModuleManager::Get().UnloadModule("EditorCore");
 	CE::ModuleManager::Get().UnloadModule("System");
 
-	CE::Logger::Shutdown();
 	CE::ModuleManager::Get().UnloadModule("Core");
+	CE::Logger::Shutdown();
 
 	return ret;
 }

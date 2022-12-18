@@ -160,6 +160,13 @@ namespace CE
 
 			out << YAML::EndSeq;
 		}
+		else if (fieldType->GetTypeId() == TYPEID(ObjectStore<Object>)) // An object store
+		{
+			auto store = fieldType->GetFieldValue<ObjectStore<Object>>(instance);
+			out << YAML::BeginSeq;
+			
+			out << YAML::EndSeq;
+		}
 		else
 		{
 			out << YAML::Null;
