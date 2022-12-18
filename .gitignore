@@ -2,6 +2,7 @@
 [Bb]uild
 [Ii]ntermediates
 ThirdParty/*
+!ThirdParty/*.cmake
 
 # Prerequisites
 *.d
