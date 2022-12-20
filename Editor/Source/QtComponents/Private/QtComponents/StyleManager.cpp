@@ -3,7 +3,6 @@
 
 #include <QPalette>
 #include <QStyleFactory>
-#include <QStyleFactory>
 #include <QPointer>
 #include <QStyle>
 

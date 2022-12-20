@@ -19,7 +19,7 @@ set(${LIB_NAME}_INCLUDE_DIR ${${LIB_NAME}_BASE_DIR}/yaml/include)
 set(${LIB_NAME}_LIBS_DIR ${${LIB_NAME}_BASE_DIR}/yaml)
 
 if (${PAL_PLATFORM_NAME} STREQUAL "Linux" OR ${PAL_PLATFORM_NAME} STREQUAL "Mac")
-    set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/lib${LIB_NAME}-cpp.a)
+    set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/lib${LIB_NAME}-cppd.a)
     set(${LIB_NAME}_STATIC_LIBRARY_DEV     ${${LIB_NAME}_LIBS_DIR}/Development/lib${LIB_NAME}-cpp.a)
     set(${LIB_NAME}_STATIC_LIBRARY_RELEASE ${${LIB_NAME}_LIBS_DIR}/Release/lib${LIB_NAME}-cpp.a)
 elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")

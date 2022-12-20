@@ -3,7 +3,6 @@
 
 namespace CE
 {
-    static HashMap<CE::Name, CE::Object*> ObjectStore{};
 
     void ObjectManager::RegisterObject(Object* object)
     {

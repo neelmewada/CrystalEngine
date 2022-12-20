@@ -36,7 +36,6 @@ ce_add_target(${PROJECT_NAME} SHARED
             "ThirdParty::qads"
     RUNTIME_DEPENDENCIES
         qt
-        qads
 )
 
 

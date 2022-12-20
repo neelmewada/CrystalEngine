@@ -27,17 +27,17 @@ namespace CE::IO
         inline Path(const char* cString) : Impl(cString)
         {}
 
-        inline String GetString()
+        inline String GetString() const
         {
             return Impl.string();
         }
 
-        inline bool IsRelative()
+        inline bool IsRelative() const
         {
             return Impl.is_relative();
         }
 
-        inline bool IsAbsolute()
+        inline bool IsAbsolute() const
         {
             return Impl.is_absolute();
         }

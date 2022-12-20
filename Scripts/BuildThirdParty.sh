@@ -79,7 +79,7 @@ BuildCMake() {
     MacFlags=""
 
     if [ $platform == "mac" ]; then
-        MacFlags="CMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+        MacFlags="CMAKE_OSX_ARCHITECTURES=arm64;x86_64 -mmacosx-version-min 11"
     fi
 
     echo "Build Type: " $1

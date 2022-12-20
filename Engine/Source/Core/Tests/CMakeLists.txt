@@ -14,7 +14,7 @@ set_target_properties(${TEST_NAME}
         FOLDER "Tests/Engine"
 )
 
-target_link_libraries(${TEST_NAME} PRIVATE ${TEST_TARGET})
+target_link_libraries(${TEST_NAME} PRIVATE ${TEST_TARGET} "c" "c++")
 
 add_test(NAME ${TEST_NAME}
     COMMAND ${TEST_NAME}

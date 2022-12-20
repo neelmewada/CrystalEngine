@@ -3,6 +3,9 @@
 #include <QObject>
 #include <QApplication>
 
+#include <string>
+#include <cstring>
+
 class QApplication;
 class QStyle;
 class QWidget;

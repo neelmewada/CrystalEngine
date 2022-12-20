@@ -98,6 +98,9 @@ namespace CE
 	template<typename T>
 	class ObjectStore;
 
+    template<typename T>
+    class Array;
+
 	// **********************************************************
 	// Type ID
 
@@ -113,21 +116,9 @@ namespace CE
 			Base* basePtr = static_cast<Base*>(derivedPtr);
 			return (IntPtr)basePtr - (IntPtr)derivedPtr;
 		}
-
-		CORE_API extern TypeId GCurrentTypeId;
-
-		struct CORE_API TypeIdGenerator
-		{
-			static TypeId Counter;
-		};
-
-		template<typename>
-		struct ElementTypeId : TypeIdGenerator {
-			static const TypeId Type;
-		};
-
-		template<typename T>
-		const TypeId ElementTypeId<T>::Type = ElementTypeId::Counter++;
+        
+        CORE_API TypeId GetArrayTypeId();
+        CORE_API TypeId GetObjectStoreTypeId();
 	}
 
 	template<typename Type>
@@ -140,13 +131,13 @@ namespace CE
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;
 		
-		if constexpr (isObjectStore)
+		if constexpr (isObjectStore) // object store type
 		{
-			return (TypeId)typeid(ObjectStore<Object>).hash_code();
+            return Internal::GetObjectStoreTypeId();
 		}
-		else if constexpr (isArray) // array time
+		else if constexpr (isArray) // array type
 		{
-			return (TypeId)typeid(Array<u8>).hash_code();
+            return Internal::GetArrayTypeId();
 		}
 		else if constexpr (isPointer) // a pointer type
 		{

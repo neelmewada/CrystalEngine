@@ -45,6 +45,11 @@ if(${PAL_PLATFORM_IS_WINDOWS}) # Windows
     endforeach()
 
     set(${QT_PACKAGE_NAME}_RUNTIME_DEPS ${${QT_PACKAGE_NAME}_RUNTIME_DEPS} PARENT_SCOPE)
+else(${PAL_PLATFORM_IS_MAC})
+    set(${QT_PACKAGE_NAME}_RUNTIME_DEPS_FRAMEWORKS "QtMultimedia.framework")
+    foreach(component ${QT6_COMPONENTS})
+        list(APPEND ${QT_PACKAGE_NAME}_RUNTIME_DEPS_FRAMEWORKS "Qt${component}.framework")
+    endforeach()
 endif()
 
 set(QT_ADDITIONAL_INCLUDES

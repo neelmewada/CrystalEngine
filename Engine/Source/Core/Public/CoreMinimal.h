@@ -16,9 +16,9 @@
 #include "IO/Stream/MemoryStream.h"
 
 // RTTI, Object & Serialization
+#include "Object/ObjectStore.h"
 #include "Object/Object.h"
 #include "Object/ObjectManager.h"
-#include "Object/ObjectStore.h"
 #include "Object/Serialization.h"
 #include "Object/SystemObject.h"
 

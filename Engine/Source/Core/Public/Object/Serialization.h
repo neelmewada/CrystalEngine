@@ -9,7 +9,7 @@
 
 namespace CE
 {
-
+    
     class CORE_API SerializedObject
     {
         CE_CLASS(SerializedObject)
@@ -26,6 +26,8 @@ namespace CE
         virtual bool IsContext() const { return false; }
 
     protected:
+        void Serialize(const TypeInfo* type, void* instance, YAML::Emitter& out);
+        
         void SerializeProperty(void* instance, FieldType* fieldType, YAML::Emitter& out);
 
         const TypeInfo* type = nullptr;
@@ -43,7 +45,7 @@ CE_RTTI_CLASS(CORE_API, CE, SerializedObject,
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(context)
+        
     ),
     CE_FUNCTION_LIST()
 )

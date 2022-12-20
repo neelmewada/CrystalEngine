@@ -1,17 +1,25 @@
 #pragma once
 
-#include "Object/Object.h"
+#include "Types/CoreTypeDefs.h"
+
+#include "Containers/Array.h"
+
+#include "Object/RTTIDefines.h"
 
 namespace CE
 {
-
     template<typename T>
     class ObjectStore
     {
     public:
-        ObjectStore() : elementTypeId(TYPEID(T))
+        ObjectStore() : objectTypeId(TYPEID(T))
         {
 
+        }
+        
+        CE_INLINE TypeId GetObjectTypeId() const
+        {
+            return objectTypeId;
         }
 
         CE_INLINE u32 GetObjectCount() const
@@ -24,13 +32,8 @@ namespace CE
             return objects[index];
         }
 
-        CE_INLINE TypeId GetElementTypeId() const
-        {
-            return elementTypeId;
-        }
-
     private:
-        TypeId elementTypeId = 0;
+        CE::TypeId objectTypeId = 0;
         CE::Array<T*> objects{};
     };
     

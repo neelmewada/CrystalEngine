@@ -22,16 +22,16 @@ namespace CE
 
         virtual bool IsField() const override { return true; }
 
-        inline FieldType* GetNext() const { return next; }
+        CE_INLINE FieldType* GetNext() const { return next; }
 
-        virtual TypeId GetTypeId() const
+        virtual TypeId GetTypeId() const override
         {
             return fieldTypeId;
         }
 
-        inline SIZE_T GetOffset() const { return offset; }
+        CE_INLINE SIZE_T GetOffset() const { return offset; }
 
-        virtual u32 GetSize() const override { return size; }
+        virtual u32 GetSize() const override { return (u32)size; }
 
         // TypeData is always NULL for field types
         //virtual const u8* GetRawTypeData() const { return nullptr; }

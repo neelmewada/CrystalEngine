@@ -36,15 +36,15 @@ namespace CE
 	struct CORE_API TypeInfo
 	{
 	protected:
-		TypeInfo(CE::Name name, CE::String attributes = "") : Name(name)
+		TypeInfo(CE::Name name, CE::String attributes = "") : name(name)
 		{}
         
         template<typename Struct>
         friend struct TypeInfoImpl;
 
 	public:
-		const CE::Name& GetName() const { return Name; }
-		const CE::String& GetAttributes() const { return Attributes; }
+		const CE::Name& GetName() const { return name; }
+		const CE::String& GetAttributes() const { return attributes; }
 
 		// TypeData is always located AFTER TypeInfo in memory
 		//virtual const u8* GetRawTypeData() const { return (u8*)(this + 1); }
@@ -64,10 +64,11 @@ namespace CE
 		virtual u32 GetSize() const = 0;
 
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }
+        virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectStore<Object>); }
 
 	private:
-		CE::Name Name;
-		CE::String Attributes;
+		CE::Name name;
+		CE::String attributes;
 
 	public:
 		// For internal use only!
@@ -78,7 +79,7 @@ namespace CE
         // For internal use only!
         static void RegisterType(const TypeInfo* type);
 		// For internal use only!
-        inline static u32 GetRegisteredCount()
+        CE_INLINE static u32 GetRegisteredCount()
         {
             return RegisteredTypes.GetSize();
         }
@@ -104,7 +105,7 @@ namespace CE
 	{};
 
 	template<typename... Args>
-	inline void RegisterTypes()
+    CE_INLINE void RegisterTypes()
 	{
 		const TypeInfo* types[] = { GetStaticType<Args>()... };
 	}

@@ -165,9 +165,9 @@ int main(int argc, char* argv[])
     CE_REGISTER_TYPES(Some0, BaseClass);
 
     Matrix4x4 mat = Matrix4x4({
-        { 5, -2, 2, 7 },
-        { 1, 0, 0, 3 },
-        { -3, 1, 5, 0 },
+        { 5, -2,  2, 7 },
+        { 1,  0,  0, 3 },
+        { -3, 1,  5, 0 },
         { 3, -1, -9, 4 }
     });
 

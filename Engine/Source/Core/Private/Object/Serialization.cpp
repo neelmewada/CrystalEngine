@@ -8,9 +8,18 @@
 namespace CE
 {
 
+    SerializedObject::SerializedObject(const TypeInfo* type, void* instance, YAML::Emitter* emitter)
+        : type(type)
+        , instance(instance)
+        , emitter(emitter)
+    {
+        
+    }
+
 	SerializedObject::SerializedObject(const TypeInfo* type)
 		: type(type)
 		, instance(nullptr)
+        , emitter(nullptr)
 	{
 		
 	}
@@ -30,48 +39,7 @@ namespace CE
 
 		YAML::Emitter out{};
 
-		if (type->IsStruct())
-		{
-			auto structType = (StructType*)type;
-
-			auto first = structType->GetFirstField();
-
-			out << YAML::BeginMap;
-
-			while (first != nullptr)
-			{
-				out << YAML::Key << first->GetName();
-				out << YAML::Value;
-				SerializeProperty(instance, first, out);
-
-				first = first->GetNext();
-			}
-
-			out << YAML::EndMap;
-		}
-		else if (type->IsClass())
-		{
-			auto classType = (ClassType*)type;
-			
-			auto first = classType->GetFirstField();
-
-			out << YAML::BeginMap;
-
-			while (first != nullptr)
-			{
-				out << YAML::Key << first->GetName();
-				out << YAML::Value;
-				SerializeProperty(instance, first, out);
-
-				first = first->GetNext();
-			}
-
-			out << YAML::EndMap;
-		}
-		else
-		{
-			return;
-		}
+        Serialize(type, instance, out);
 
 		const char* str = out.c_str();
 		u32 length = strlen(str);
@@ -79,6 +47,55 @@ namespace CE
 
 		outStream->Write(length + 1, str);
 	}
+
+    void SerializedObject::Serialize(const TypeInfo* type, void* instance, YAML::Emitter& out)
+    {
+        if (type == nullptr)
+            return;
+        
+        if (type->IsStruct())
+        {
+            auto structType = (StructType*)type;
+
+            auto first = structType->GetFirstField();
+
+            out << YAML::BeginMap;
+
+            while (first != nullptr)
+            {
+                out << YAML::Key << first->GetName();
+                out << YAML::Value;
+                SerializeProperty(instance, first, out);
+
+                first = first->GetNext();
+            }
+
+            out << YAML::EndMap;
+        }
+        else if (type->IsClass())
+        {
+            auto classType = (ClassType*)type;
+            
+            auto first = classType->GetFirstField();
+
+            out << YAML::BeginMap;
+
+            while (first != nullptr)
+            {
+                out << YAML::Key << first->GetName();
+                out << YAML::Value;
+                SerializeProperty(instance, first, out);
+
+                first = first->GetNext();
+            }
+
+            out << YAML::EndMap;
+        }
+        else
+        {
+            return;
+        }
+    }
 
 	void SerializedObject::Deserialize(void* instance, IO::GenericStream* inStream)
 	{
@@ -93,7 +110,7 @@ namespace CE
 			out << YAML::Null;
 			return;
 		}
-
+        
 		auto name = fieldType->GetName().GetString();
 		
 		if		TYPEID_MATCHES(u8)
@@ -147,7 +164,7 @@ namespace CE
 				<< mat.Rows[3].X << mat.Rows[3].Y << mat.Rows[3].Z << mat.Rows[3].W
 				<< YAML::EndSeq;
 		}
-		else if (fieldType->GetTypeId() == TYPEID(Array<u8>))
+		else if (fieldType->GetTypeId() == TYPEID(Array<u8>)) // Serialize an array
 		{
 			auto array = fieldType->GetFieldValue<Array<u8>>(instance);
 			out << YAML::BeginSeq
@@ -160,11 +177,16 @@ namespace CE
 
 			out << YAML::EndSeq;
 		}
-		else if (fieldType->GetTypeId() == TYPEID(ObjectStore<Object>)) // An object store
+		else if (fieldType->GetTypeId() == TYPEID(ObjectStore<Object>)) // Serialize an object store
 		{
 			auto store = fieldType->GetFieldValue<ObjectStore<Object>>(instance);
 			out << YAML::BeginSeq;
 			
+            for (int i = 0; i < store.GetObjectCount(); i++)
+            {
+                Serialize(store.GetObjectAt(i)->GetType(), store.GetObjectAt(i), out);
+            }
+            
 			out << YAML::EndSeq;
 		}
 		else

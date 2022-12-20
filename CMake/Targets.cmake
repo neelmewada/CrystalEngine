@@ -206,6 +206,9 @@ function(ce_add_target NAME TARGET_TYPE)
     set(multiValueArgs PRIVATE PUBLIC INTERFACE)
     cmake_parse_arguments(ce_add_target_BUILD_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_target_BUILD_DEPENDENCIES})
 
+    list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c")
+    list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c++")
+
     if(ce_add_target_BUILD_DEPENDENCIES_PRIVATE OR ce_add_target_BUILD_DEPENDENCIES_PUBLIC OR ce_add_target_BUILD_DEPENDENCIES_INTERFACE)
         target_link_libraries(${NAME}
             PRIVATE   ${ce_add_target_BUILD_DEPENDENCIES_PRIVATE}
@@ -230,7 +233,15 @@ function(ce_add_target NAME TARGET_TYPE)
                 endif()
             endforeach()
         endif()
-        
+        # Mac frameworks
+        if(DEFINED ${runtime_dep}_RUNTIME_DEPS_FRAMEWORKS)
+            foreach(copy_framework ${${runtime_dep}_RUNTIME_DEPS_FRAMEWORKS})
+                add_custom_command(TARGET ${NAME} POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${${runtime_dep}_BIN_DIR}/${copy_framework} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
+                )
+            endforeach()
+            
+        endif()
     endforeach()
 
 endfunction()
