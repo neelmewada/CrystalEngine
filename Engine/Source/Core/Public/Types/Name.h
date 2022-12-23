@@ -18,30 +18,38 @@ namespace CE
     class CORE_API Name
     {
     public:
+        Name() : Name("")
+        {}
+        
         Name(String name);
         Name(const char* name);
         ~Name() = default;
 
-        inline SIZE_T GetHashValue() const { return HashValue; }
+        CE_INLINE SIZE_T GetHashValue() const { return HashValue; }
 
-        inline String GetString() const { return Value; }
+        CE_INLINE String GetString() const { return Value; }
+        
+        CE_INLINE const char* GetCString() const
+        {
+            return Value.GetCString();
+        }
 
-        inline bool operator==(const Name& rhs) const
+        CE_INLINE bool operator==(const Name& rhs) const
         {
             return HashValue == rhs.HashValue;
         }
 
-        inline bool operator!=(const Name& rhs) const
+        CE_INLINE bool operator!=(const Name& rhs) const
         {
             return HashValue != rhs.HashValue;
         }
 
-        inline u32 GetComponentCount()
+        CE_INLINE u32 GetComponentCount()
         {
-            return Components.GetSize();
+            return (u32)Components.GetSize();
         }
 
-        inline StringView GetComponentAt(u32 index)
+        CE_INLINE StringView GetComponentAt(u32 index)
         {
             return StringView(Components[index]);
         }

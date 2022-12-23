@@ -13,29 +13,32 @@ namespace CE
     class CORE_API SerializedObject
     {
         CE_CLASS(SerializedObject)
-    private:
-        SerializedObject(const TypeInfo* type, void* instance, YAML::Emitter* emitter);
 
     public:
-        SerializedObject(const TypeInfo* type);
+        SerializedObject(const TypeInfo* type, void* instance, SerializedObject* parent = nullptr);
+        SerializedObject(Object* instance, SerializedObject* parent = nullptr);
         virtual ~SerializedObject();
-
-        void Serialize(void* instance, IO::MemoryStream* outStream);
-        void Deserialize(void* instance, IO::GenericStream* inStream);
-
-        virtual bool IsContext() const { return false; }
-
-    protected:
-        void Serialize(const TypeInfo* type, void* instance, YAML::Emitter& out);
         
-        void SerializeProperty(void* instance, FieldType* fieldType, YAML::Emitter& out);
-
-        const TypeInfo* type = nullptr;
-        void* instance = nullptr;
-
-        SerializedObject* context = nullptr;
-
-        YAML::Emitter* emitter = nullptr;
+        void Serialize(IO::MemoryStream& outStream);
+        void Serialize(YAML::Emitter& emitter);
+        
+        void SerializeField(FieldType* fieldType, YAML::Emitter& emitter);
+        void DeserializeField(FieldType* fieldType, YAML::Node& node);
+        
+        void Deserialize(IO::MemoryStream& inStream);
+        void Deserialize(YAML::Node& root);
+        
+    protected:
+        
+        void DeserializeObjectStore(YAML::Node& seqNode, ObjectStore& store);
+        
+        Object* ResolveObjectReference(UUID objectUuid);
+        
+        SerializedObject* parent = nullptr;
+        const TypeInfo* type;
+        void* instance;
+        
+        CE::Array<FieldType*> objectStores{};
     };
 
 } // namespace CE

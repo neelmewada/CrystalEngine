@@ -6,19 +6,19 @@
 namespace CE
 {
 
-	Object::Object() : name("")
+	Object::Object(UUID uuid) : name(""), uuid(uuid)
 	{
-		ObjectManager::RegisterObject(this);
+		
 	}
 
-	Object::Object(CE::Name name) : name(name)
+	Object::Object(CE::Name name, UUID uuid) : name(name), uuid(uuid)
 	{
-		ObjectManager::RegisterObject(this);
+		
 	}
 
 	Object::~Object()
 	{
-		ObjectManager::DeregisterObject(this);
+		
 	}
 
 }

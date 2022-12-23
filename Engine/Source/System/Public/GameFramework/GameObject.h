@@ -6,6 +6,7 @@
 namespace CE
 {
     class GameComponent;
+    class Scene;
 
     class SYSTEM_API GameObject : public Object
     {
@@ -13,6 +14,7 @@ namespace CE
     public:
         GameObject();
         GameObject(CE::Name name);
+        GameObject(Scene* scene);
         
         virtual ~GameObject();
 
@@ -31,6 +33,9 @@ namespace CE
 
     protected:
         CE::Array<GameComponent*> components{};
+        Scene* owner = nullptr;
+        
+        friend class Scene;
     };
     
 } // namespace CE
@@ -40,7 +45,7 @@ CE_RTTI_CLASS(SYSTEM_API, CE, GameObject,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        
+        CE_FIELD(components)
     ),
     CE_FUNCTION_LIST()
 )

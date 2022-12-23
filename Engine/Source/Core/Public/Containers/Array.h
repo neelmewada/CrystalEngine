@@ -39,7 +39,7 @@ namespace CE
 
         }
 
-        CE_INLINE TypeId GetElementTypeId()
+        CE_INLINE TypeId GetElementTypeId() const
         {
             return ElementTypeId;
         }
@@ -102,8 +102,13 @@ namespace CE
         {
             Impl.erase(Impl.begin() + index);
         }
+        
+        CE_INLINE void Clear()
+        {
+            Impl.clear();
+        }
 
-        CE_INLINE bool Exists(const ElementType& item)
+        CE_INLINE bool Exists(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)
             {
@@ -115,7 +120,7 @@ namespace CE
             return false;
         }
 
-        CE_INLINE bool Exists(std::function<bool(const ElementType&)> func)
+        CE_INLINE bool Exists(std::function<bool(const ElementType&)> func) const
         {
             for (int i = 0; i < Impl.size(); i++)
             {

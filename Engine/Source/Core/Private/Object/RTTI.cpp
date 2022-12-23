@@ -9,7 +9,6 @@ namespace CE
 
     namespace Internal
     {
-        CORE_API TypeId TypeIdGenerator::Counter = 0;
     
         CORE_API TypeId GetArrayTypeId()
         {
@@ -18,7 +17,7 @@ namespace CE
     
         CORE_API TypeId GetObjectStoreTypeId()
         {
-            return (TypeId)typeid(CE::ObjectStore<Object>).hash_code();
+            return (TypeId)typeid(CE::ObjectStore).hash_code();
         }
     }
 

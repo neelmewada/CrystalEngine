@@ -1,7 +1,7 @@
 
 #include "GameFramework/GameObject.h"
-
 #include "GameFramework/GameComponent.h"
+#include "GameFramework/Scene.h"
 
 namespace CE
 {
@@ -14,6 +14,14 @@ namespace CE
 	{
 
 	}
+
+    GameObject::GameObject(Scene* scene) : Object()
+    {
+        if (scene != nullptr)
+        {
+            scene->AddGameObject(this);
+        }
+    }
 
 	GameObject::~GameObject()
 	{

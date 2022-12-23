@@ -1,5 +1,6 @@
 #pragma once
 
+#include "CoreTypes.h"
 #include "Containers/String.h"
 
 #include "ObjectMacros.h"
@@ -19,28 +20,30 @@ namespace CE
         CE_CLASS(Object);
 
     public:
-        Object();
-        Object(CE::Name name);
+        Object(UUID uuid = UUID());
+        Object(CE::Name name, UUID uuid = UUID());
 
         virtual ~Object();
 
         // - Getters & Setters -
-        CE_INLINE CE::Name GetName()
+        CE_INLINE CE::Name GetName() const
         {
             return name;
         }
-
-        // Virtual methods
-
-        //virtual ClassType* GetType() = 0;
+        
+        CE_INLINE UUID GetUuid() const
+        {
+            return uuid;
+        }
 
     private:
         CE::Name name;
+        CE::UUID uuid;
         
     protected:
         //CE::Array<Component*> components{};
     };
-
+    
 } // namespace CE
 
 CE_RTTI_CLASS(CORE_API, CE, Object,
@@ -49,6 +52,7 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(name)
+        CE_FIELD(uuid)
     ),
     CE_FUNCTION_LIST()
 )

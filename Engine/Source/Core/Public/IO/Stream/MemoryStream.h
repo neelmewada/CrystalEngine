@@ -65,10 +65,14 @@ namespace CE::IO
         bool        IsOpen() const override { return buffer != NULL; }
         bool        CanSeek() const override { return true; }
         bool        CanRead() const override { return true; }
-        bool        CanWrite() const override { return true; }
+        bool        CanWrite() const override { return mode == MSM_READWRITE; }
         void        Seek(SSIZE_T bytes, SeekMode mode) override;
         SIZE_T      Read(SIZE_T bytes, void* outBuffer) override;
+        u8          ReadNextByte() override;
         SIZE_T      Write(SIZE_T bytes, const void* inBuffer) override;
+        
+        virtual const char* GetRawPointer() const override { return buffer; }
+        
         //SIZE_T      WriteFromStream(SIZE_T bytes, GenericStream* inputStream) override;
         virtual const void* GetData() const { return buffer; }
         SIZE_T      GetCurPos() const override { return currentOffset; }

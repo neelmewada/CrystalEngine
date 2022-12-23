@@ -45,10 +45,7 @@ namespace CE
 	public:
 		const CE::Name& GetName() const { return name; }
 		const CE::String& GetAttributes() const { return attributes; }
-
-		// TypeData is always located AFTER TypeInfo in memory
-		//virtual const u8* GetRawTypeData() const { return (u8*)(this + 1); }
-
+        
 		virtual bool IsClass() const { return false; }
 		virtual bool IsStruct() const { return false; }
 		virtual bool IsField() const { return false; }
@@ -64,7 +61,9 @@ namespace CE
 		virtual u32 GetSize() const = 0;
 
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }
-        virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectStore<Object>); }
+        virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectStore); }
+        
+        virtual bool IsObject() const { return IsClass() && IsAssignableTo(TYPEID(Object)); }
 
 	private:
 		CE::Name name;
@@ -81,7 +80,7 @@ namespace CE
 		// For internal use only!
         CE_INLINE static u32 GetRegisteredCount()
         {
-            return RegisteredTypes.GetSize();
+            return (u32)RegisteredTypes.GetSize();
         }
 	};
 
@@ -125,6 +124,7 @@ CE_RTTI_POD(CE, u8,  TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u
 CE_RTTI_POD(CE, u16, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8),  TYPEID(u32), TYPEID(u64))
 CE_RTTI_POD(CE, u32, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8),  TYPEID(u16), TYPEID(u64))
 CE_RTTI_POD(CE, u64, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8),  TYPEID(u16), TYPEID(u32))
+CE_RTTI_POD(CE, UUID, TYPEID(u64), TYPEID(s64))
 
 CE_RTTI_POD(CE, f32, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8),  TYPEID(u16), TYPEID(u32), TYPEID(u64), TYPEID(f64))
 CE_RTTI_POD(CE, f64, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8),  TYPEID(u16), TYPEID(u32), TYPEID(u64), TYPEID(f32))

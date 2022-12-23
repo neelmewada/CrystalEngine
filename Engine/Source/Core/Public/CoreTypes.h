@@ -13,9 +13,10 @@
 #include "Containers/Array.h"
 #include "Containers/String.h"
 #include "Containers/StringView.h"
-#include "Containers/HashMap.h"
-
 #include "Types/Name.h"
+#include "Types/UUID.h"
+#include "Containers/HashMap.h"
+#include "Containers/HashSet.h"
 
 // Object
 #include "Object/Object.h"

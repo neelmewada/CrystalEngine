@@ -21,18 +21,26 @@ namespace CE::IO
         {
             return 0;
         }
+        
         SIZE_T bytesLeft = GetLength() - currentOffset;
         if (bytes > bytesLeft)
         {
             bytes = bytesLeft;
         }
+        
         if (bytes)
         {
             memcpy(outBuffer, buffer + currentOffset, static_cast<SIZE_T>(bytes));
             currentOffset += static_cast<SIZE_T>(bytes);
         }
+        
         return bytes;
 	}
+
+    u8 MemoryStream::ReadNextByte()
+    {
+        return buffer[currentOffset++];
+    }
 
     SIZE_T MemoryStream::PrepareForWrite(SIZE_T bytes)
     {
@@ -40,16 +48,23 @@ namespace CE::IO
         {
             return 0;
         }
+        
         SIZE_T bytesLeft = bufferLength - currentOffset;
         if (bytes > bytesLeft)
         {
             bytes = bytesLeft;
         }
+        
         return bytes;
     }
 
 	SIZE_T MemoryStream::Write(SIZE_T bytes, const void* inBuffer)
 	{
+        if (mode == MSM_READONLY)
+        {
+            return 0;
+        }
+        
         bytes = PrepareForWrite(bytes);
         if (bytes)
         {

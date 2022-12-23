@@ -35,6 +35,10 @@ namespace CE
 
         // TypeData is always NULL for field types
         //virtual const u8* GetRawTypeData() const { return nullptr; }
+        
+        virtual bool IsAssignableTo(TypeId typeId) const override;
+        
+        const TypeInfo* GetDeclarationType() const;
 
         template<typename T>
         T& GetFieldValue(void* instance)
@@ -46,6 +50,12 @@ namespace CE
         const T& GetFieldValue(void* instance) const
         {
             return *(T*)((SIZE_T)instance + offset);
+        }
+        
+        template<typename T>
+        void SetFieldValue(void* instance, T value)
+        {
+            *(T*)((SIZE_T)instance + offset) = value;
         }
 
     private:

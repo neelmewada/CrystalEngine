@@ -13,11 +13,26 @@ inline SIZE_T GetHash<Type>(const Type& Value)\
 
 namespace CE
 {
-	/// Default implementation doesn't have any code. Specializations do all the work.
-	template<typename T>
-	SIZE_T GetHash(const T& Value);
-
+	
 	CORE_API SIZE_T CalculateHash(const void* data, SIZE_T length);
+
+    /// Default implementation doesn't have any code. Specializations do all the work.
+    template<typename T>
+    SIZE_T GetHash(const T& Value)
+    {
+        constexpr bool isPointer = std::is_pointer_v<T>;
+        
+        typedef std::remove_pointer_t<T> NotPtrType;
+        
+        if constexpr (isPointer)
+        {
+            return (SIZE_T)(NotPtrType*)Value;
+        }
+        else
+        {
+            // Do nothing : Specialization handles it
+        }
+    }
 
 	template <class T>
 	inline void CombineHash(SIZE_T& seed, const T& v)
@@ -46,7 +61,7 @@ namespace CE
 	{
 		SIZE_T operator()(const T& Value) const
 		{
-			return GetHash(Value);
+			return CE::template GetHash(Value);
 		}
 	};
 

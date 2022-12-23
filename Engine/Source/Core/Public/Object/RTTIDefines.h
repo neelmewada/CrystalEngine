@@ -95,7 +95,6 @@ namespace CE
 
 	class Object;
 
-	template<typename T>
 	class ObjectStore;
 
     template<typename T>
@@ -141,7 +140,7 @@ namespace CE
 		}
 		else if constexpr (isPointer) // a pointer type
 		{
-			return (TypeId)typeid(FinalType*).hash_code();
+			return (TypeId)typeid(FinalType).hash_code(); // always ignore pointers for TypeId. i.e. TYPEID(Object) = TYPEID(Object*)
 		}
 		else // a plain data type
 		{

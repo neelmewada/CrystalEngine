@@ -32,19 +32,19 @@ namespace CE
 		typedef T ElementType;
 	};
 
-	template<typename T>
+
 	class ObjectStore;
     
 	template<typename T>
 	struct IsObjectStoreType : std::false_type
 	{
-		typedef void ElementType;
+		
 	};
 
-	template<typename T>
-	struct IsObjectStoreType<ObjectStore<T>> : std::true_type
+	template<>
+	struct IsObjectStoreType<ObjectStore> : std::true_type
 	{
-		typedef T ElementType;
+		
 	};
 
 } // namespace CE::Traits

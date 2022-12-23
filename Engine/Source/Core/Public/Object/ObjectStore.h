@@ -3,38 +3,64 @@
 #include "Types/CoreTypeDefs.h"
 
 #include "Containers/Array.h"
+#include "Containers/HashSet.h"
 
 #include "Object/RTTIDefines.h"
 
 namespace CE
 {
-    template<typename T>
+    class Object;
+
     class ObjectStore
     {
     public:
-        ObjectStore() : objectTypeId(TYPEID(T))
+        ObjectStore()
         {
 
-        }
-        
-        CE_INLINE TypeId GetObjectTypeId() const
-        {
-            return objectTypeId;
         }
 
         CE_INLINE u32 GetObjectCount() const
         {
-            return objects.GetSize();
+            return (u32)objects.GetSize();
         }
 
-        CE_INLINE T* GetObjectAt(u32 index) const
+        CE_INLINE Object* GetObjectAt(u32 index) const
         {
             return objects[index];
         }
+        
+        CE_INLINE Object* RemoveObjectAt(u32 index)
+        {
+            auto obj = objects[index];
+            objects.RemoveAt(index);
+            addedObjects.Remove(obj);
+            return obj;
+        }
+        
+        CE_INLINE void AddObject(Object* object)
+        {
+            if (addedObjects.Exists(object))
+                return;
+            
+            objects.Add(object);
+            addedObjects.Add(object);
+        }
+        
+        CE_INLINE void RemoveObject(Object* object)
+        {
+            objects.Remove(object);
+            addedObjects.Remove(object);
+        }
+        
+        CE_INLINE void Clear()
+        {
+            objects.Clear();
+            addedObjects.Clear();
+        }
 
     private:
-        CE::TypeId objectTypeId = 0;
-        CE::Array<T*> objects{};
+        Array<Object*> objects{};
+        HashSet<Object*> addedObjects{};
     };
     
 } // namespace CE

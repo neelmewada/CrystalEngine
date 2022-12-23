@@ -30,10 +30,16 @@ namespace CE::IO
         virtual bool        CanWrite() const = 0;
         virtual void        Seek(SSIZE_T offsetInBytes, SeekMode mode) = 0;
         virtual SIZE_T      Read(SIZE_T bytes, void* outBuffer) = 0;
+        virtual u8          ReadNextByte() = 0;
         virtual SIZE_T      Write(SIZE_T bytes, const void* inBuffer) = 0;
+        
+        virtual const char* GetRawPointer() const = 0;
 
         virtual SIZE_T      GetCurPos() const = 0;
+        
+        /// Returns the length/size of the actual meaningful data which is always less than or equal to the buffer size.
         virtual SIZE_T      GetLength() const = 0;
+        
         virtual SIZE_T      ReadAtOffset(SIZE_T bytes, void* oBuffer, SSIZE_T offsetInBytes = -1);
         virtual SIZE_T      WriteAtOffset(SIZE_T bytes, const void* iBuffer, SSIZE_T offsetInBytes = -1);
         virtual bool        IsCompressed() const { return false; }

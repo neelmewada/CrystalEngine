@@ -258,14 +258,6 @@ int main(int argc, char* argv[])
     }
 
     CE_DELETE(ptr);
-
-    SomeTestClass handler{};
-
-    CustomRequestBus::BusConnect(&handler);
-
-    CustomRequestBus::Broadcast(&MyCustomRequests::PrintOut, 142);
-
-    CustomRequestBus::BusDisconnect(&handler);
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");
