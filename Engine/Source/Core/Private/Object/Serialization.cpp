@@ -340,9 +340,11 @@ namespace CE
         }
         else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>))
         {
-            auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
+            //auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
             
-            u32 arraySize = (u32)node.size() - 1; // first element is always a TypeId of element type
+            // NEW CODE...
+            auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
+            auto elementType = GetTypeInfo(array.GetElementTypeId());
             
             if (array.GetElementTypeId() != node[0].as<TypeId>())
             {
@@ -351,12 +353,40 @@ namespace CE
                 return;
             }
             
-            array.Clear();
+            u32 arraySize = (u32)node.size() - 1; // first element is always a TypeId of element type
             
-            for (int i = 1; i < arraySize + 1; i++)
+            if (elementType == nullptr)
             {
-                array.Add(node[i].as<u8>());
+                return;
             }
+            
+            if (elementType->IsPOD() || elementType->IsStruct() || elementType->IsEnum()) // Value types: can be serialized per byte
+            {
+                array.Clear();
+                
+                for (int i = 1; i < arraySize + 1; i++)
+                {
+                    array.Add(node[i].as<u8>());
+                }
+            }
+            else if (elementType->IsObject()) // Reference types: Objects are stored as pointers
+            {
+                Array<Object*>& objectArray = fieldType->GetFieldValue<Array<Object*>>(instance);
+                
+                objectArray.Clear();
+                
+                for (int i = 1; i < arraySize + 1; i++)
+                {
+                    Object* objectInstance = ResolveObjectReference(node[i]["uuid"].as<u64>());
+                    objectArray.Add(objectInstance);
+                }
+            }
+        }
+        else if (fieldType->GetDeclarationType() == GetStaticType<UUID>())
+        {
+            const UUID& uuid = fieldType->GetFieldValue<UUID>(instance);
+            
+            fieldType->SetFieldValue<UUID>(instance, UUID(node.as<u64>()));
         }
         else if TYPE_DESERIALIZE(u8)
         else if TYPE_DESERIALIZE(u16)
@@ -391,7 +421,7 @@ namespace CE
             if (objectType == nullptr)
                 continue;
             
-            if (!objectType->IsObject()) // ObjectStore should always contain classes that derive from Object class (No structs)
+            if (!objectType->IsObject()) // ObjectStore should always contain classes that derive from Object class
                 continue;
             
             auto classType = (ClassType*)objectType;
@@ -424,7 +454,7 @@ namespace CE
             if (objectType == nullptr)
                 continue;
             
-            if (!objectType->IsObject()) // ObjectStore should always contain classes that derive from Object class (No structs)
+            if (!objectType->IsObject()) // ObjectStore should always contain classes that derive from Object class
                 continue;
             
             auto classType = (ClassType*)objectType;

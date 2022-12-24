@@ -26,6 +26,19 @@ void Serialize()
     delete scene;
 }
 
+void Deserialize()
+{
+    using namespace CE;
+    
+    Scene* scene = new Scene("New Scene");
+    
+    SerializedObject so = SerializedObject(scene);
+    so.Deserialize(GStream);
+    
+    delete scene;
+    GStream.Free();
+}
+
 int main(int argc, char** argv)
 {
 	using namespace CE;
@@ -35,6 +48,8 @@ int main(int argc, char** argv)
 	CE::ModuleManager::Get().LoadModule("System");
     
     Serialize();
+    
+    Deserialize();
     
 	CE::ModuleManager::Get().UnloadModule("System");
 	CE::ModuleManager::Get().UnloadModule("Core");

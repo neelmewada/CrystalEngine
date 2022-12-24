@@ -3,7 +3,7 @@
 #include "Types/CoreTypeDefs.h"
 
 #include "Containers/Array.h"
-#include "Containers/HashSet.h"
+#include "Containers/HashMap.h"
 
 #include "Object/RTTIDefines.h"
 
@@ -33,23 +33,31 @@ namespace CE
         {
             auto obj = objects[index];
             objects.RemoveAt(index);
-            addedObjects.Remove(obj);
+            if (obj != nullptr)
+            {
+                addedObjects.Remove(obj->GetUuid());
+            }
             return obj;
         }
         
         CE_INLINE void AddObject(Object* object)
         {
-            if (addedObjects.Exists(object))
+            if (object == nullptr)
+                return;
+            if (addedObjects.KeyExists(object->GetUuid()))
                 return;
             
             objects.Add(object);
-            addedObjects.Add(object);
+            addedObjects.Add({object->GetUuid(), object});
         }
         
         CE_INLINE void RemoveObject(Object* object)
         {
+            if (object == nullptr)
+                return;
+            
             objects.Remove(object);
-            addedObjects.Remove(object);
+            addedObjects.Remove(object->GetUuid());
         }
         
         CE_INLINE void Clear()
@@ -60,7 +68,7 @@ namespace CE
 
     private:
         Array<Object*> objects{};
-        HashSet<Object*> addedObjects{};
+        HashMap<UUID, Object*> addedObjects{};
     };
     
 } // namespace CE

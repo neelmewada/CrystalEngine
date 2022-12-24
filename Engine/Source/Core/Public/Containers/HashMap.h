@@ -70,6 +70,11 @@ namespace CE
         {
             Impl.erase(key);
         }
+        
+        inline void Clear()
+        {
+            Impl.clear();
+        }
 
         inline auto begin() { return Impl.begin(); }
         inline auto end() { return Impl.end(); }
