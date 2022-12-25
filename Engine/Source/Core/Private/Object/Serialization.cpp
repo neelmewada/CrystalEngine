@@ -283,7 +283,29 @@ namespace CE
         
         if (type->IsStruct())
         {
+            auto structType = (StructType*)type;
             
+            TypeId structTypeId = root["_TypeId"].as<TypeId>();
+            
+            if (structType->GetTypeId() != structTypeId)
+            {
+                CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n",
+                       "The serialized text data is for an object of type id {} whereas the object to deserialize data to has type id {}.", type->GetName(), structTypeId, structType->GetTypeId());
+                return;
+            }
+            
+            auto field = structType->GetFirstField();
+            
+            while (field != nullptr)
+            {
+                auto fieldName = field->GetName().GetCString();
+                
+                YAML::Node fieldNode = root[fieldName];
+                
+                DeserializeField(field, fieldNode);
+                
+                field = field->GetNext();
+            }
         }
         else if (type->IsClass())
         {
@@ -296,6 +318,14 @@ namespace CE
                 CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n"
                        "The serialized text data is for an object of type id {} whereas the object to deserialize data to has type id {}.", type->GetName(), classTypeId, classType->GetTypeId());
                 return;
+            }
+            
+            
+            // Deserialize Object properties first: uuid
+            if (classType->IsObject())
+            {
+                auto uuidField = classType->FindFieldWithName("uuid");
+                uuidField->SetFieldValue<UUID>(instance, root["uuid"].as<u64>());
             }
             
             // Deserialize object stores first
@@ -352,9 +382,14 @@ namespace CE
         if (fieldType == nullptr || instance == nullptr)
             return;
         
-        if (fieldType->IsObject() && objectStores.GetSize() > 0)
+        if (fieldType->IsObject()) // Deserialize object reference
         {
-            // Deserialize object reference
+            if (node.IsNull())
+            {
+                fieldType->SetFieldValue<Object*>(instance, nullptr);
+                return;
+            }
+            
             UUID objectUuid = node["uuid"].as<u64>();
             
             Object* object = ResolveObjectReference(objectUuid);
@@ -522,6 +557,15 @@ namespace CE
     
     Object* SerializedObject::ResolveObjectReference(UUID objectUuid)
     {
+        if (type != nullptr && type->IsObject() && instance != nullptr) // If the serialized object itself is an "Object" type
+        {
+            ClassType* classType = (ClassType*)type;
+            Object* object = (Object*)instance;
+            
+            if (object->GetUuid() == objectUuid)
+                return object;
+        }
+        
         for (int storeIdx = 0; storeIdx < objectStores.GetSize(); storeIdx++)
         {
             ObjectStore& store = objectStores[storeIdx]->GetFieldValue<ObjectStore>(instance);

@@ -37,6 +37,7 @@ namespace CE
         //virtual const u8* GetRawTypeData() const { return nullptr; }
         
         virtual bool IsAssignableTo(TypeId typeId) const override;
+        virtual bool IsObject() const override { return IsAssignableTo(TYPEID(Object)); }
         
         const TypeInfo* GetDeclarationType() const;
 

@@ -30,20 +30,27 @@ namespace CE
 
     GameComponent* GameObject::AddComponent(GameComponent* component)
 	{
-		if (component == nullptr)
+		if (component == nullptr || components.Exists(component))
 			return nullptr;
 
 		components.Add(component);
+        component->owner = this;
+        
         if (owner != nullptr)
         {
             owner->objects.AddObject(component);
         }
+        
+        component->Init();
+        component->Activate();
         
         return component;
 	}
 
 	void GameObject::RemoveComponent(GameComponent* component)
 	{
+        if (component->IsActive())
+            component->Deactivate();
 		components.Remove(component);
         
         if (owner != nullptr)
@@ -61,7 +68,7 @@ namespace CE
 		auto classType = (ClassType*)typeInfo;
 		if (!classType->IsAssignableTo(TYPEID(GameComponent)))
         {
-            CE_LOG(Error, All, "GameComponent::AddComponent(): The TypeId passed ({}) to AddComponent() doesn't derive from GameComponent class", typeId);
+            CE_LOG(Error, All, "GameComponent::AddComponent(): The TypeId passed {} to AddComponent() doesn't derive from GameComponent class", typeId);
             return nullptr;
         }
         

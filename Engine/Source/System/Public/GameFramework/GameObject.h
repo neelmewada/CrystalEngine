@@ -32,8 +32,12 @@ namespace CE
         virtual void Tick(f32 deltaTime);
 
     protected:
-        CE::Array<GameComponent*> components{};
         Scene* owner = nullptr;
+        
+        CE::Array<GameComponent*> components{};
+        GameObject* parent = nullptr;
+        
+        CE::Array<GameObject*> children{};
         
         friend class Scene;
     };
@@ -45,7 +49,10 @@ CE_RTTI_CLASS(SYSTEM_API, CE, GameObject,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
+        CE_FIELD(owner)
         CE_FIELD(components)
+        CE_FIELD(parent)
+        CE_FIELD(children)
     ),
     CE_FUNCTION_LIST()
 )

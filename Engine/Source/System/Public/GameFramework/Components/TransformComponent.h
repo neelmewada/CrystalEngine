@@ -55,6 +55,8 @@ namespace CE
         Vec3 localPosition{0, 0, 0};
         Quat localRotation{0, 0, 0, 0};
         Vec3 localScale{1, 1, 1};
+        
+        friend class GameObject;
     };
     
 } // namespace CE
