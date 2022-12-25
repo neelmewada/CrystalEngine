@@ -27,6 +27,11 @@ namespace CE
             GameObject,
             GameComponent
         );
+        
+        // Register Components
+        CE_REGISTER_TYPES(
+            TransformComponent
+        );
     }
 
 } // namespace CE

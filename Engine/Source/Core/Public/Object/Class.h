@@ -161,6 +161,8 @@ namespace CE
 		}
 
 		FieldType* GetFirstField();
+        
+        FieldType* FindFieldWithName(Name name);
 
 		virtual void InitializeDefaults(void* instance) const
 		{
@@ -189,7 +191,7 @@ namespace CE
 	private:
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
-		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...), const char* attributes, std::index_sequence<Is...>) 
+		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...), const char* attributes, std::index_sequence<Is...>)
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) = function;
 
@@ -211,7 +213,7 @@ namespace CE
 		}
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
-		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...) const, const char* attributes, std::index_sequence<Is...>) 
+		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...) const, const char* attributes, std::index_sequence<Is...>)
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) const = function;
 
@@ -265,6 +267,8 @@ namespace CE
 
 		// Inherited + Local fields
 		CE::Array<FieldType> cachedFields{};
+        CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
+        
 		CE::Array<FunctionType> cachedFunctions{};
 
 		CE::Array<FieldType> localFields{};

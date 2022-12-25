@@ -107,14 +107,13 @@ namespace CE
         
         if (fieldType->IsObjectStoreType()) // Serialize an object store
         {
-            const auto& objectStore = fieldType->GetFieldValue<ObjectStore>(instance);
+            auto& objectStore = fieldType->GetFieldValue<ObjectStore>(instance);
             objectStores.Add(fieldType);
             
             emitter << YAML::BeginSeq;
             
-            for (int i = 0; i < objectStore.GetObjectCount(); i++)
+            for (auto [uuid, object] : objectStore)
             {
-                auto object = objectStore.GetObjectAt(i);
                 if (object == nullptr)
                     continue;
                 
@@ -208,6 +207,38 @@ namespace CE
             const UUID& uuid = fieldType->GetFieldValue<UUID>(instance);
             
             emitter << (u64)uuid;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec2))
+        {
+            const Vec2& vec = fieldType->GetFieldValue<Vec2>(instance);
+            
+            emitter << YAML::BeginSeq;
+            emitter << vec.x << vec.y;
+            emitter << YAML::EndSeq;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec3))
+        {
+            const Vec3& vec = fieldType->GetFieldValue<Vec3>(instance);
+            
+            emitter << YAML::BeginSeq;
+            emitter << vec.x << vec.y << vec.z;
+            emitter << YAML::EndSeq;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec4))
+        {
+            const Vec4& vec = fieldType->GetFieldValue<Vec4>(instance);
+            
+            emitter << YAML::BeginSeq;
+            emitter << vec.x << vec.y << vec.z << vec.w;
+            emitter << YAML::EndSeq;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Quat))
+        {
+            const Quat& quat = fieldType->GetFieldValue<Quat>(instance);
+            
+            emitter << YAML::BeginSeq;
+            emitter << quat.x << quat.y << quat.z << quat.w;
+            emitter << YAML::EndSeq;
         }
         else if TYPE_SERIALIZE(u8)
         else if TYPE_SERIALIZE(u16)
@@ -382,11 +413,25 @@ namespace CE
                 }
             }
         }
-        else if (fieldType->GetDeclarationType() == GetStaticType<UUID>())
+        else if (fieldType->GetTypeId() == TYPEID(UUID))
         {
-            const UUID& uuid = fieldType->GetFieldValue<UUID>(instance);
-            
             fieldType->SetFieldValue<UUID>(instance, UUID(node.as<u64>()));
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec2))
+        {
+            fieldType->SetFieldValue<Vec2>(instance, {node[0].as<f32>(), node[1].as<f32>()});
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec3))
+        {
+            fieldType->SetFieldValue<Vec3>(instance, {node[0].as<f32>(), node[1].as<f32>(), node[2].as<f32>()});
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec4))
+        {
+            fieldType->SetFieldValue<Vec4>(instance, {node[0].as<f32>(), node[1].as<f32>(), node[2].as<f32>(), node[3].as<f32>()});
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Quat))
+        {
+            fieldType->SetFieldValue<Quat>(instance, {node[0].as<f32>(), node[1].as<f32>(), node[2].as<f32>(), node[3].as<f32>()});
         }
         else if TYPE_DESERIALIZE(u8)
         else if TYPE_DESERIALIZE(u16)
@@ -433,10 +478,16 @@ namespace CE
                 continue;
             }
             
-            store.AddObject((Object*)classType->CreateDefaultInstance());
+            Object* instance = (Object*)classType->CreateDefaultInstance();
+            
+            FieldType* uuidField = classType->FindFieldWithName("uuid");
+            if (uuidField != nullptr)
+            {
+                uuidField->SetFieldValue<UUID>(instance, node["uuid"].as<u64>());
+            }
+            
+            store.AddObject(instance);
         }
-        
-        u32 index = 0;
         
         // Step 2: Now deserialize every single instance of objects we created in the store
         for (int i = 0; i < seqNode.size(); i++)
@@ -462,7 +513,7 @@ namespace CE
             if (!classType->CanBeInstantiated())
                 continue;
             
-            Object* object = store.GetObjectAt(index++);
+            Object* object = store.GetObjectWithUuid(node["uuid"].as<u64>());
             
             SerializedObject serializedObj = SerializedObject(classType, object, this);
             serializedObj.Deserialize(node);
@@ -475,14 +526,9 @@ namespace CE
         {
             ObjectStore& store = objectStores[storeIdx]->GetFieldValue<ObjectStore>(instance);
             
-            for (int i = 0; i < store.GetObjectCount(); i++)
+            if (store.ObjectExistsWithUuid(objectUuid))
             {
-                Object* object = store.GetObjectAt(i);
-                if (object == nullptr)
-                    continue;
-                
-                if (object->GetUuid() == objectUuid)
-                    return object;
+                return store.GetObjectWithUuid(objectUuid);
             }
         }
         

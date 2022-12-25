@@ -18,13 +18,13 @@ namespace CE
         
         virtual ~GameObject();
 
-        void AddComponent(GameComponent* component);
+        GameComponent* AddComponent(GameComponent* component);
         void RemoveComponent(GameComponent* component);
         
         template<typename T> requires std::is_base_of<GameComponent, T>::value
-        GameComponent* AddComponent()
+        T* AddComponent()
         {
-            return AddComponent(TYPEID(T));
+            return (T*)AddComponent(TYPEID(T));
         }
 
         GameComponent* AddComponent(TypeId typeId);

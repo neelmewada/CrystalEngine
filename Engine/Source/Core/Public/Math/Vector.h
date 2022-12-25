@@ -24,10 +24,10 @@ namespace CE
     {
     public:
 
-        TVector2() : X(0), Y(0)
+        TVector2() : x(0), y(0)
         {}
 
-        TVector2(T x, T y) : X(x), Y(y)
+        TVector2(T x, T y) : x(x), y(y)
         {}
 
         TVector2(TVector3<T> vec3);
@@ -35,19 +35,19 @@ namespace CE
 
         union {
             struct {
-                T X, Y;
+                T x, y;
             };
-            T XY[2];
+            T xy[2];
         };
 
         inline TVector2 operator+(const TVector2& rhs) const
         {
-            return TVector2(X + rhs.X, Y + rhs.Y);
+            return TVector2(x + rhs.x, y + rhs.y);
         }
 
         inline TVector2 operator-(const TVector2& rhs) const
         {
-            return TVector2(X - rhs.X, Y - rhs.Y);
+            return TVector2(x - rhs.x, y - rhs.y);
         }
 
         inline TVector2 operator+() const
@@ -57,7 +57,7 @@ namespace CE
 
         inline TVector2 operator-() const
         {
-            return TVector2(-X, -Y);
+            return TVector2(-x, -y);
         }
 
         inline TVector2 operator+=(const TVector2& rhs)
@@ -74,27 +74,27 @@ namespace CE
 
         inline bool operator==(const TVector2& rhs) const
         {
-            return X == rhs.X && Y == rhs.Y;
+            return x == rhs.x && y == rhs.y;
         }
 
         inline bool operator!=(const TVector2& rhs) const
         {
-            return X != rhs.X || Y != rhs.Y;
+            return x != rhs.x || y != rhs.y;
         }
 
         inline TVector2 operator*(s32 value) const
         {
-            return TVector2(value * X, value * Y);
+            return TVector2(value * x, value * y);
         }
 
         inline TVector2 operator*(u32 value) const
         {
-            return TVector2(value * X, value * Y);
+            return TVector2(value * x, value * y);
         }
 
         inline TVector2 operator*(f32 value) const
         {
-            return TVector2(value * X, value * Y);
+            return TVector2(value * x, value * y);
         }
 
         inline TVector2 operator*=(s32 value)
@@ -117,7 +117,7 @@ namespace CE
 
         inline TVector2 operator/(f32 value) const
         {
-            return TVector2(X / value, Y / value);
+            return TVector2(x / value, y / value);
         }
 
         inline TVector2 operator/=(f32 value)
@@ -128,7 +128,7 @@ namespace CE
 
         inline f32 GetSqrMagnitude() const
         {
-            return X * X + Y * Y;
+            return x * x + y * y;
         }
 
         inline f32 GetMagnitude() const
@@ -143,12 +143,12 @@ namespace CE
 
         inline static T Dot(TVector2 a, TVector2 b)
         {
-            return a.X * b.X + a.Y * b.Y;
+            return a.x * b.x + a.y * b.y;
         }
 
         inline f32 Dot(TVector2 b) const
         {
-            return X * b.X + Y * b.Y;
+            return x * b.x + y * b.y;
         }
 
         /// Signed angle in radians between 2 vectors
@@ -165,17 +165,17 @@ namespace CE
 
         inline static TVector2<f32> Lerp(TVector2 from, TVector2 to, f32 t)
         {
-            return TVector2<f32>(Math::Lerp(from.X, to.X, t), Math::Lerp(from.Y, to.Y, t));
+            return TVector2<f32>(Math::Lerp(from.x, to.x, t), Math::Lerp(from.y, to.y, t));
         }
 
         inline static TVector2<f32> LerpUnclamped(TVector2 from, TVector2 to, f32 t)
         {
-            return TVector2<f32>(Math::LerpUnclamped(from.X, to.X, t), Math::LerpUnclamped(from.Y, to.Y, t));
+            return TVector2<f32>(Math::LerpUnclamped(from.x, to.x, t), Math::LerpUnclamped(from.y, to.y, t));
         }
 
         inline String ToString() const
         {
-            return String::Format("({}, {})", X, Y);
+            return String::Format("({}, {})", x, y);
         }
     };
     
@@ -184,13 +184,13 @@ namespace CE
     {
     public:
 
-        TVector3() : X(0), Y(0), Z(0)
+        TVector3() : x(0), y(0), z(0)
         {}
 
-        TVector3(T x, T y) : X(x), Y(y), Z(0)
+        TVector3(T x, T y) : x(x), y(y), z(0)
         {}
 
-        TVector3(T x, T y, T z) : X(x), Y(y), Z(z)
+        TVector3(T x, T y, T z) : x(x), y(y), z(z)
         {}
 
         TVector3(TVector2<T> vec2);
@@ -198,24 +198,24 @@ namespace CE
 
         union {
             struct {
-                T X, Y, Z;
+                T x, y, z;
             };
-            T XYZ[4]; // size/alignment is same as Vector4
+            T xyz[4]; // size/alignment is same as Vector4
         };
 
         inline T operator[](int index) const
         {
-            return XYZ[index];
+            return xyz[index];
         }
 
         inline TVector3 operator+(const TVector3& rhs) const
         {
-            return TVector3(X + rhs.X, Y + rhs.Y, Z + rhs.Z);
+            return TVector3(x + rhs.x, y + rhs.y, z + rhs.z);
         }
 
         inline TVector3 operator-(const TVector3& rhs) const
         {
-            return TVector3(X - rhs.X, Y - rhs.Y, Z - rhs.Z);
+            return TVector3(x - rhs.x, y - rhs.y, z - rhs.z);
         }
 
         inline TVector3 operator+() const
@@ -225,7 +225,7 @@ namespace CE
 
         inline TVector3 operator-() const
         {
-            return TVector3(-X, -Y, -Z);
+            return TVector3(-x, -y, -z);
         }
 
         inline TVector3 operator+=(const TVector3& rhs)
@@ -242,27 +242,27 @@ namespace CE
 
         inline bool operator==(const TVector3& rhs) const
         {
-            return X == rhs.X && Y == rhs.Y && Z == rhs.Z;
+            return x == rhs.x && y == rhs.y && z == rhs.z;
         }
 
         inline bool operator!=(const TVector3& rhs) const
         {
-            return X != rhs.X || Y != rhs.Y || Z != rhs.Z;
+            return x != rhs.x || y != rhs.y || z != rhs.z;
         }
 
         inline TVector3 operator*(s32 value) const
         {
-            return TVector3(value * X, value * Y, value * Z);
+            return TVector3(value * x, value * y, value * z);
         }
 
         inline TVector3 operator*(u32 value) const
         {
-            return TVector3(value * X, value * Y, value * Z);
+            return TVector3(value * x, value * y, value * z);
         }
 
         inline TVector3 operator*(f32 value) const
         {
-            return TVector3(value * X, value * Y, value * Z);
+            return TVector3(value * x, value * y, value * z);
         }
 
         inline TVector3 operator*=(s32 value)
@@ -285,7 +285,7 @@ namespace CE
 
         inline TVector3 operator/(f32 value) const
         {
-            return TVector3(X / value, Y / value, Z / value);
+            return TVector3(x / value, y / value, z / value);
         }
 
         inline TVector3 operator/=(f32 value)
@@ -296,7 +296,7 @@ namespace CE
 
         inline f32 GetSqrMagnitude() const
         {
-            return X * X + Y * Y + Z * Z;
+            return x * x + y * y + z * z;
         }
 
         inline f32 GetMagnitude() const
@@ -311,22 +311,22 @@ namespace CE
 
         inline static T Dot(TVector3 a, TVector3 b)
         {
-            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+            return a.x * b.x + a.y * b.y + a.z * b.z;
         }
 
         inline f32 Dot(TVector3 b) const
         {
-            return X * b.X + Y * b.Y + Z * b.Z;
+            return x * b.x + y * b.y + z * b.z;
         }
 
         inline static TVector3 Cross(TVector3 a, TVector3 b)
         {
-            return TVector3(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
+            return TVector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
         }
 
         inline TVector3 Cross(TVector3 b) const
         {
-            return TVector3(Y * b.Z - Z * b.Y, Z * b.X - X * b.Z, X * b.Y - Y * b.X);
+            return TVector3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
         }
 
         /// Signed angle in radians between 2 vectors
@@ -343,17 +343,17 @@ namespace CE
 
         inline static TVector3<f32> Lerp(TVector3 from, TVector3 to, f32 t)
         {
-            return TVector3<f32>(Math::Lerp(from.X, to.X, t), Math::Lerp(from.Y, to.Y, t), Math::Lerp(from.Z, to.Z, t));
+            return TVector3<f32>(Math::Lerp(from.x, to.x, t), Math::Lerp(from.y, to.y, t), Math::Lerp(from.z, to.z, t));
         }
 
         inline static TVector3<f32> LerpUnclamped(TVector3 from, TVector3 to, f32 t)
         {
-            return TVector3<f32>(Math::LerpUnclamped(from.X, to.X, t), Math::LerpUnclamped(from.Y, to.Y, t), Math::LerpUnclamped(from.Z, to.Z, t));
+            return TVector3<f32>(Math::LerpUnclamped(from.x, to.x, t), Math::LerpUnclamped(from.y, to.y, t), Math::LerpUnclamped(from.z, to.z, t));
         }
 
         inline String ToString() const
         {
-            return String::Format("({}, {}, {})", X, Y, Z);
+            return String::Format("({}, {}, {})", x, y, z);
         }
     };
 
@@ -362,16 +362,16 @@ namespace CE
     {
     public:
 
-        TVector4() : X(0), Y(0), Z(0), W(0)
+        TVector4() : x(0), y(0), z(0), w(0)
         {}
 
-        TVector4(T x, T y) : X(x), Y(y), Z(0), W(0)
+        TVector4(T x, T y) : x(x), y(y), z(0), w(0)
         {}
 
-        TVector4(T x, T y, T z) : X(x), Y(y), Z(z), W(0)
+        TVector4(T x, T y, T z) : x(x), y(y), z(z), w(0)
         {}
 
-        TVector4(T x, T y, T z, T w) : X(x), Y(y), Z(z), W(w)
+        TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
         {}
 
         TVector4(TVector2<T> vec2);
@@ -379,29 +379,29 @@ namespace CE
 
         union {
             struct {
-                T X, Y, Z, W;
+                T x, y, z, w;
             };
-            T XYZW[4];
+            T xyzw[4];
         };
 
         inline T& operator[](int index)
         {
-            return XYZW[index];
+            return xyzw[index];
         }
 
         inline const T& operator[](int index) const
         {
-            return XYZW[index];
+            return xyzw[index];
         }
 
         inline TVector4 operator+(const TVector4& rhs) const
         {
-            return TVector4(X + rhs.X, Y + rhs.Y, Z + rhs.Z, W + rhs.W);
+            return TVector4(x + rhs.x, y + rhs.y, z + rhs.z, w + rhs.w);
         }
 
         inline TVector4 operator-(const TVector4& rhs) const
         {
-            return TVector4(X - rhs.X, Y - rhs.Y, Z - rhs.Z, W - rhs.W);
+            return TVector4(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w);
         }
 
         inline TVector4 operator+() const
@@ -411,7 +411,7 @@ namespace CE
 
         inline TVector4 operator-() const
         {
-            return TVector4(-X, -Y, -Z, -W);
+            return TVector4(-x, -y, -z, -w);
         }
 
         inline TVector4 operator+=(const TVector4& rhs)
@@ -428,27 +428,27 @@ namespace CE
 
         inline bool operator==(const TVector4& rhs) const
         {
-            return X == rhs.X && Y == rhs.Y && Z == rhs.Z && W == rhs.W;
+            return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w;
         }
 
         inline bool operator!=(const TVector4& rhs) const
         {
-            return X != rhs.X || Y != rhs.Y || Z != rhs.Z || W != rhs.W;
+            return x != rhs.x || y != rhs.y || z != rhs.z || w != rhs.w;
         }
 
         inline TVector4 operator*(s32 value) const
         {
-            return TVector4(value * X, value * Y, value * Z, value * W);
+            return TVector4(value * x, value * y, value * z, value * w);
         }
 
         inline TVector4 operator*(u32 value) const
         {
-            return TVector4(value * X, value * Y, value * Z, value * W);
+            return TVector4(value * x, value * y, value * z, value * w);
         }
 
         inline TVector4 operator*(f32 value) const
         {
-            return TVector4(value * X, value * Y, value * Z, value * W);
+            return TVector4(value * x, value * y, value * z, value * w);
         }
 
         inline TVector4 operator*=(s32 value)
@@ -471,7 +471,7 @@ namespace CE
 
         inline TVector4 operator/(f32 value) const
         {
-            return TVector4(X / value, Y / value, Z / value, W / value);
+            return TVector4(x / value, y / value, z / value, w / value);
         }
 
         inline TVector4 operator/=(f32 value)
@@ -482,7 +482,7 @@ namespace CE
 
         inline f32 GetSqrMagnitude() const
         {
-            return X * X + Y * Y + Z * Z + W * W;
+            return x * x + y * y + z * z + w * w;
         }
 
         inline f32 GetMagnitude() const
@@ -497,22 +497,22 @@ namespace CE
 
         inline static f32 Dot(TVector4 a, TVector4 b)
         {
-            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+            return a.x * b.x + a.y * b.y + a.z * b.z;
         }
 
         inline f32 Dot(TVector4 b) const
         {
-            return X * b.X + Y * b.Y + Z * b.Z + W * b.W;
+            return x * b.x + y * b.y + z * b.z + w * b.w;
         }
 
         inline static TVector4 Cross(TVector4 a, TVector4 b)
         {
-            return TVector4(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X, a.W * b.W);
+            return TVector4(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x, a.w * b.w);
         }
 
         inline TVector4 Cross(TVector4 b) const
         {
-            return TVector4(Y * b.Z - Z * b.Y, Z * b.X - X * b.Z, X * b.Y - Y * b.X, W * b.W);
+            return TVector4(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x, w * b.w);
         }
 
         /// Signed angle in radians between 2 vectors
@@ -529,46 +529,46 @@ namespace CE
 
         inline static TVector4<f32> Lerp(TVector4 from, TVector4 to, f32 t)
         {
-            return TVector4<f32>(Math::Lerp(from.X, to.X, t), Math::Lerp(from.Y, to.Y, t), Math::Lerp(from.Z, to.Z, t), Math::Lerp(from.W, to.W, t));
+            return TVector4<f32>(Math::Lerp(from.x, to.x, t), Math::Lerp(from.y, to.y, t), Math::Lerp(from.z, to.z, t), Math::Lerp(from.w, to.w, t));
         }
 
         inline static TVector4<f32> LerpUnclamped(TVector4 from, TVector4 to, f32 t)
         {
-            return TVector4<f32>(Math::LerpUnclamped(from.X, to.X, t), Math::LerpUnclamped(from.Y, to.Y, t), Math::LerpUnclamped(from.Z, to.Z, t), Math::LerpUnclamped(from.W, to.W, t));
+            return TVector4<f32>(Math::LerpUnclamped(from.x, to.x, t), Math::LerpUnclamped(from.y, to.y, t), Math::LerpUnclamped(from.z, to.z, t), Math::LerpUnclamped(from.w, to.w, t));
         }
 
         inline String ToString() const
         {
-            return String::Format("({}, {}, {}, {})", X, Y, Z, W);
+            return String::Format("({}, {}, {}, {})", x, y, z, w);
         }
     };
 
     template<typename T>
-    TVector2<T>::TVector2(TVector3<T> vec3) : X(vec3.X), Y(vec3.Y)
+    TVector2<T>::TVector2(TVector3<T> vec3) : x(vec3.x), y(vec3.y)
     {}
 
     template<typename T>
-    TVector2<T>::TVector2(TVector4<T> vec4) : X(vec4.X), Y(vec4.Y)
+    TVector2<T>::TVector2(TVector4<T> vec4) : x(vec4.x), y(vec4.y)
     {}
 
     template<typename T>
-    TVector3<T>::TVector3(TVector4<T> vec4) : X(vec4.X), Y(vec4.Y), Z(vec4.Z)
+    TVector3<T>::TVector3(TVector4<T> vec4) : x(vec4.x), y(vec4.y), z(vec4.z)
     {
-        XYZ[3] = 0;
+        xyz[3] = 0;
     }
 
     template<typename T>
-    TVector3<T>::TVector3(TVector2<T> vec2) : X(vec2.X), Y(vec2.Y), Z(0)
+    TVector3<T>::TVector3(TVector2<T> vec2) : x(vec2.x), y(vec2.y), z(0)
     {
-        XYZ[3] = 0;
+        xyz[3] = 0;
     }
 
     template<typename T>
-    TVector4<T>::TVector4(TVector2<T> vec2) : X(vec2.X), Y(vec2.Y), Z(0), W(0)
+    TVector4<T>::TVector4(TVector2<T> vec2) : x(vec2.x), y(vec2.y), z(0), w(0)
     {}
 
     template<typename T>
-    TVector4<T>::TVector4(TVector3<T> vec3) : X(vec3.X), Y(vec3.Y), Z(vec3.Z), W(0)
+    TVector4<T>::TVector4(TVector3<T> vec3) : x(vec3.x), y(vec3.y), z(vec3.z), w(0)
     {}
 
     template<typename T>

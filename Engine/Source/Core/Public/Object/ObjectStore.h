@@ -7,6 +7,8 @@
 
 #include "Object/RTTIDefines.h"
 
+#include "Logger/Logger.h"
+
 namespace CE
 {
     class Object;
@@ -23,52 +25,55 @@ namespace CE
         {
             return (u32)objects.GetSize();
         }
-
-        CE_INLINE Object* GetObjectAt(u32 index) const
+        
+        CE_INLINE Object* GetObjectWithUuid(UUID uuid)
         {
-            return objects[index];
+            return objects[uuid];
         }
         
-        CE_INLINE Object* RemoveObjectAt(u32 index)
+        CE_INLINE bool ObjectExistsWithUuid(UUID uuid) const
         {
-            auto obj = objects[index];
-            objects.RemoveAt(index);
-            if (obj != nullptr)
-            {
-                addedObjects.Remove(obj->GetUuid());
-            }
-            return obj;
+            return objects.KeyExists(uuid);
         }
         
-        CE_INLINE void AddObject(Object* object)
+        void AddObject(Object* object)
         {
             if (object == nullptr)
                 return;
-            if (addedObjects.KeyExists(object->GetUuid()))
+            if (objects.KeyExists(object->GetUuid()))
                 return;
             
-            objects.Add(object);
-            addedObjects.Add({object->GetUuid(), object});
+            objects.Add({object->GetUuid(), object});
+            objectsArray.Add(object);
         }
         
-        CE_INLINE void RemoveObject(Object* object)
+        void RemoveObject(Object* object)
         {
             if (object == nullptr)
                 return;
             
-            objects.Remove(object);
-            addedObjects.Remove(object->GetUuid());
+            objects.Remove(object->GetUuid());
+            objectsArray.Remove(object);
         }
         
-        CE_INLINE void Clear()
+        void RemoveObjectWithUuid(UUID uuid)
+        {
+            objects.Remove(uuid);
+        }
+        
+        void Clear()
         {
             objects.Clear();
-            addedObjects.Clear();
         }
+        
+        auto begin() { return objects.begin(); }
+        auto end() { return objects.end(); }
+        
+        
 
     private:
-        Array<Object*> objects{};
-        HashMap<UUID, Object*> addedObjects{};
+        HashMap<UUID, Object*> objects{};
+        CE::Array<Object*> objectsArray{};
     };
     
 } // namespace CE

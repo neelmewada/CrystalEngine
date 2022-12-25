@@ -48,6 +48,16 @@ namespace CE
         return &cachedFields[0];
     }
 
+    FieldType* StructType::FindFieldWithName(Name name)
+    {
+        if (!fieldsCached)
+            CacheAllFields();
+        
+        if (cachedFieldsMap.KeyExists(name))
+            return cachedFieldsMap[name];
+        return nullptr;
+    }
+
     void StructType::CacheAllFields()
     {
         if (fieldsCached)
@@ -90,6 +100,8 @@ namespace CE
             {
                 cachedFields[i].next = &cachedFields[i + 1];
             }
+            
+            cachedFieldsMap.Add({ cachedFields[i].GetName(), &cachedFields[i] });
         }
     }
 

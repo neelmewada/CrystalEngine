@@ -28,6 +28,8 @@ namespace CE
         ObjectStore objects{};
         
         CE::Array<GameObject*> gameObjects{};
+        
+        friend class GameObject;
     };
     
 } // namespace CE

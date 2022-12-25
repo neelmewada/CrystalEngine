@@ -19,9 +19,8 @@ namespace CE
 	Scene::~Scene()
 	{
         // Clean up the object store
-        for (int i = 0; i < objects.GetObjectCount(); i++)
+        for (auto [uuid, object] : objects)
         {
-            Object* object = objects.GetObjectAt(i);
             delete object;
         }
         
@@ -44,6 +43,11 @@ namespace CE
         gameObjects.Add(gameObject);
         objects.AddObject(gameObject);
         gameObject->owner = this;
+        
+        for (GameComponent* comp : gameObject->components)
+        {
+            objects.AddObject(comp);
+        }
     }
 
     void Scene::DestroyGameObject(GameObject* gameObject)
@@ -51,6 +55,11 @@ namespace CE
         gameObjects.Remove(gameObject);
         objects.RemoveObject(gameObject);
         gameObject->owner = nullptr;
+        
+        for (GameComponent* comp : gameObject->components)
+        {
+            objects.RemoveObject(comp);
+        }
         
         delete gameObject;
     }

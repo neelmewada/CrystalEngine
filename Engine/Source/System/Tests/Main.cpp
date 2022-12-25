@@ -18,6 +18,8 @@ void Serialize()
     
     scene->AddGameObject(go);
     
+    TransformComponent* transform = go->AddComponent<TransformComponent>();
+    
     SerializedObject so = SerializedObject(scene);
     so.Serialize(GStream);
     
@@ -34,9 +36,9 @@ void Deserialize()
     
     SerializedObject so = SerializedObject(scene);
     so.Deserialize(GStream);
+    GStream.Free();
     
     delete scene;
-    GStream.Free();
 }
 
 int main(int argc, char** argv)

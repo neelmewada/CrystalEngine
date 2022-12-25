@@ -11,23 +11,23 @@ namespace CE
     {
     public:
 
-        Quat() : X(0), Y(0), Z(0), W(0)
+        Quat() : x(0), y(0), z(0), w(0)
         {}
 
-        Quat(f32 x, f32 y, f32 z, f32 w) : X(x), Y(y), Z(z), W(w)
+        Quat(f32 x, f32 y, f32 z, f32 w) : x(x), y(y), z(z), w(w)
         {}
 
-        Quat(Vec3 vec, f32 w) : X(vec.X), Y(vec.Y), Z(vec.Z), W(w)
+        Quat(Vec3 vec, f32 w) : x(vec.x), y(vec.y), z(vec.z), w(w)
         {}
 
         inline Quat operator+(const Quat& rhs) const
         {
-            return Quat(X + rhs.X, Y + rhs.Y, Z + rhs.Z, W + rhs.W);
+            return Quat(x + rhs.x, y + rhs.y, z + rhs.z, w + rhs.w);
         }
 
         inline Quat operator-(const Quat& rhs) const
         {
-            return Quat(X - rhs.X, Y - rhs.Y, Z - rhs.Z, W - rhs.W);
+            return Quat(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w);
         }
 
         inline Quat operator+=(const Quat& rhs)
@@ -49,33 +49,33 @@ namespace CE
 
         inline Quat operator*(s32 rhs)
         {
-            return Quat(X * rhs, Y * rhs, Z * rhs, W * rhs);
+            return Quat(x * rhs, y * rhs, z * rhs, w * rhs);
         }
 
         inline Quat operator*(f32 rhs)
         {
-            return Quat(X * rhs, Y * rhs, Z * rhs, W * rhs);
+            return Quat(x * rhs, y * rhs, z * rhs, w * rhs);
         }
 
         inline Quat operator/(s32 rhs)
         {
-            return Quat(X / rhs, Y / rhs, Z / rhs, W / rhs);
+            return Quat(x / rhs, y / rhs, z / rhs, w / rhs);
         }
 
         inline Quat operator/(f32 rhs)
         {
-            return Quat(X / rhs, Y / rhs, Z / rhs, W / rhs);
+            return Quat(x / rhs, y / rhs, z / rhs, w / rhs);
         }
 
         inline Quat operator*=(s32 rhs)
         {
-            *this = Quat(X * rhs, Y * rhs, Z * rhs, W * rhs);
+            *this = Quat(x * rhs, y * rhs, z * rhs, w * rhs);
             return *this;
         }
 
         inline Quat operator*=(f32 rhs)
         {
-            *this = Quat(X * rhs, Y * rhs, Z * rhs, W * rhs);
+            *this = Quat(x * rhs, y * rhs, z * rhs, w * rhs);
             return *this;
         }
 
@@ -93,9 +93,31 @@ namespace CE
             return result.GetVectorComponent();
         }
 
+        Vec3 ToEuler() const
+        {
+            Vec3 angles{};
+
+            // roll (x-axis rotation)
+            double sinr_cosp = 2 * (w * x + y * z);
+            double cosr_cosp = 1 - 2 * (x * x + y * y);
+            angles.x = std::atan2(sinr_cosp, cosr_cosp);
+
+            // pitch (y-axis rotation)
+            double sinp = std::sqrt(1 + 2 * (w * x - y * z));
+            double cosp = std::sqrt(1 - 2 * (w * x - y * z));
+            angles.y = 2 * std::atan2(sinp, cosp) - M_PI / 2;
+
+            // yaw (z-axis rotation)
+            double siny_cosp = 2 * (w * z + x * y);
+            double cosy_cosp = 1 - 2 * (y * y + z * z);
+            angles.z = std::atan2(siny_cosp, cosy_cosp);
+
+            return angles;
+        }
+        
         inline f32 GetSqrNorm()
         {
-            return X * X + Y * Y + Z * Z + W * W;
+            return x * x + y * y + z * z + w * w;
         }
 
         inline f32 GetNorm()
@@ -110,27 +132,27 @@ namespace CE
 
         inline Vec3 GetVectorComponent()
         {
-            return Vec3(X, Y, Z);
+            return Vec3(x, y, z);
         }
 
         Quat GetUnitNorm()
         {
-            f32 angle = Math::ToRadians(W);
-            auto normalizedVec = Vec3(X, Y, Z).GetNormalized();
-            W = Math::Cos(angle * 0.5f);
+            f32 angle = Math::ToRadians(w);
+            auto normalizedVec = Vec3(x, y, z).GetNormalized();
+            w = Math::Cos(angle * 0.5f);
             normalizedVec = normalizedVec * Math::Sin(angle * 0.5f);
 
-            return Quat(normalizedVec.X, normalizedVec.Y, normalizedVec.Z, W);
+            return Quat(normalizedVec.x, normalizedVec.y, normalizedVec.z, w);
         }
 
         Quat GetUnitNormLerped(f32 t)
         {
-            f32 angle = Math::ToRadians(W);
-            auto normalizedVec = Vec3(X, Y, Z).GetNormalized();
-            W = Math::Cos(angle * Math::Clamp01(t) * 0.5f);
+            f32 angle = Math::ToRadians(w);
+            auto normalizedVec = Vec3(x, y, z).GetNormalized();
+            w = Math::Cos(angle * Math::Clamp01(t) * 0.5f);
             normalizedVec = normalizedVec * Math::Sin(angle * Math::Clamp01(t) * 0.5f);
 
-            return Quat(normalizedVec.X, normalizedVec.Y, normalizedVec.Z, W);
+            return Quat(normalizedVec.x, normalizedVec.y, normalizedVec.z, w);
         }
 
         inline void Normalize()
@@ -147,7 +169,7 @@ namespace CE
 
         inline Quat GetConjugate()
         {
-            return Quat(-X, -Y, -Z, W);
+            return Quat(-x, -y, -z, w);
         }
 
         inline Quat GetInverse()
@@ -172,21 +194,21 @@ namespace CE
 
         union {
             struct {
-                f32 X, Y, Z, W;
+                f32 x, y, z, w;
             };
 
-            f32 XYZW[4];
+            f32 xyzw[4];
         };
     };
 
     inline Quat operator*(s32 lhs, const Quat& rhs)
     {
-        return Quat(lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z, lhs * rhs.W);
+        return Quat(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.w);
     }
 
     inline Quat operator*(f32 lhs, const Quat& rhs)
     {
-        return Quat(lhs * rhs.X, lhs * rhs.Y, lhs * rhs.Z, lhs * rhs.W);
+        return Quat(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.w);
     }
 
 } // namespace CE

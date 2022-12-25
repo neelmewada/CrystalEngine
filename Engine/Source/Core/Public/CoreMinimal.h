@@ -35,5 +35,3 @@
 #include "Component/SystemComponent.h"
 #include "Component/ComponentApplication.h"
 
-
-

@@ -28,17 +28,28 @@ namespace CE
 
 	}
 
-	void GameObject::AddComponent(GameComponent* component)
+    GameComponent* GameObject::AddComponent(GameComponent* component)
 	{
 		if (component == nullptr)
-			return;
+			return nullptr;
 
 		components.Add(component);
+        if (owner != nullptr)
+        {
+            owner->objects.AddObject(component);
+        }
+        
+        return component;
 	}
 
 	void GameObject::RemoveComponent(GameComponent* component)
 	{
 		components.Remove(component);
+        
+        if (owner != nullptr)
+        {
+            owner->objects.RemoveObject(component);
+        }
 	}
 
 	GameComponent* GameObject::AddComponent(TypeId typeId)
@@ -49,12 +60,19 @@ namespace CE
 		
 		auto classType = (ClassType*)typeInfo;
 		if (!classType->IsAssignableTo(TYPEID(GameComponent)))
-			return nullptr;
+        {
+            CE_LOG(Error, All, "GameComponent::AddComponent(): The TypeId passed ({}) to AddComponent() doesn't derive from GameComponent class", typeId);
+            return nullptr;
+        }
+        
+        if (!classType->CanBeInstantiated())
+        {
+            CE_LOG(Error, All, "GameComponent::AddComponent(): The component with TypeId {} cannot be instantiated", typeId);
+            return nullptr;
+        }
 
 		auto instance = (GameComponent*)classType->CreateDefaultInstance();
-		AddComponent(instance);
-
-		return instance;
+		return AddComponent(instance);
 	}
 
 	void GameObject::Tick(f32 deltaTime)
