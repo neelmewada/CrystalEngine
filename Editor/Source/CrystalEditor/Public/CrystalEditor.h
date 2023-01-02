@@ -4,6 +4,12 @@
 #include "Application/EditorQtApplication.h"
 #include "Application/CrystalEditorApplication.h"
 
+#include "Editor/EditorWindowBase.h"
+#include "Editor/EditorViewBase.h"
+
+// Editor Buses
+#include "Editor/SceneEditor/SceneOutlinerViewBus.h"
+
 #include "Module/ModuleManager.h"
 
 namespace CE::Editor

@@ -38,8 +38,10 @@ namespace CE::Editor
 
     void CrystalEditorApplication::Initialize()
     {
-        this->welcomeScreen = new WelcomeScreen;
-        welcomeScreen->show();
+        //this->welcomeScreen = new WelcomeScreen;
+        //welcomeScreen->show();
+        this->projectBrowser = new ProjectBrowser;
+        projectBrowser->show();
     }
 
     void CrystalEditorApplication::OnWelcomeScreenTimeout()

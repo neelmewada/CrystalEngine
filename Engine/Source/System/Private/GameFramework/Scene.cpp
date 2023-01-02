@@ -29,18 +29,18 @@ namespace CE
 
     void Scene::Tick(f32 deltaTime)
     {
-        for (int i = 0; i < gameObjects.GetSize(); i++)
+        for (int i = 0; i < rootGameObjects.GetSize(); i++)
         {
-            if (gameObjects[i] != nullptr)
+            if (rootGameObjects[i] != nullptr)
             {
-                gameObjects[i]->Tick(deltaTime);
+                rootGameObjects[i]->Tick(deltaTime);
             }
         }
     }
 
     void Scene::AddGameObject(GameObject* gameObject)
     {
-        gameObjects.Add(gameObject);
+        rootGameObjects.Add(gameObject);
         objects.AddObject(gameObject);
         gameObject->owner = this;
         
@@ -52,7 +52,7 @@ namespace CE
 
     void Scene::DestroyGameObject(GameObject* gameObject)
     {
-        gameObjects.Remove(gameObject);
+        rootGameObjects.Remove(gameObject);
         objects.RemoveObject(gameObject);
         gameObject->owner = nullptr;
         
@@ -62,6 +62,22 @@ namespace CE
         }
         
         delete gameObject;
+    }
+
+    void Scene::AddObject(Object* object)
+    {
+        objects.AddObject(object);
+    }
+
+    void Scene::RemoveObject(Object* object)
+    {
+        objects.RemoveObject(object);
+    }
+
+    void Scene::DestroyObject(Object* object)
+    {
+        objects.RemoveObject(object);
+        delete object;
     }
 
 } // namespace CE

@@ -23,11 +23,25 @@ namespace CE
         
         void AddGameObject(GameObject* gameObject);
         void DestroyGameObject(GameObject* gameObject);
+        
+        CE_INLINE u32 GetRootGameObjectCount() const
+        {
+            return (u32)rootGameObjects.GetSize();
+        }
+        
+        CE_INLINE GameObject* GetRootGameObject(u32 index) const
+        {
+            return rootGameObjects[index];
+        }
+        
+        void AddObject(Object* object);
+        void RemoveObject(Object* object);
+        void DestroyObject(Object* object);
 
     protected:
         ObjectStore objects{};
         
-        CE::Array<GameObject*> gameObjects{};
+        CE::Array<GameObject*> rootGameObjects{};
         
         friend class GameObject;
     };
@@ -40,7 +54,7 @@ CE_RTTI_CLASS(SYSTEM_API, CE, Scene,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(objects)
-        CE_FIELD(gameObjects)
+        CE_FIELD(rootGameObjects)
     ),
     CE_FUNCTION_LIST()
 )

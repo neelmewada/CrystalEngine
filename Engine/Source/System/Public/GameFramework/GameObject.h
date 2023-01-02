@@ -31,6 +31,27 @@ namespace CE
 
         virtual void Tick(f32 deltaTime);
 
+        CE_INLINE u32 GetChildrenCount() const
+        {
+            return (u32)children.GetSize();
+        }
+        
+        CE_INLINE GameObject* GetChildAt(u32 index) const
+        {
+            return children[index];
+        }
+        
+        void AddChild(GameObject* child);
+        void RemoveChild(GameObject* child);
+        
+        CE_INLINE GameObject* GetParent() const
+        {
+            return parent;
+        }
+        
+        s32 GetIndexInParent();
+        s32 GetChildIndex(GameObject* child);
+        
     protected:
         Scene* owner = nullptr;
         

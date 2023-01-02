@@ -19,7 +19,7 @@ namespace CE::Editor
 
         timer = new QTimer(this);
 
-        QTimer::singleShot(2000, this, &WelcomeScreen::OnTimer);
+        QTimer::singleShot(1000, this, &WelcomeScreen::OnTimer);
     }
 
     WelcomeScreen::~WelcomeScreen()

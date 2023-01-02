@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>19</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -41,10 +41,15 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
    </widget>
+   <widget class="QMenu" name="menuViews">
+    <property name="title">
+     <string>Views</string>
+    </property>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuViews"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
    <property name="text">
     <string>New...</string>

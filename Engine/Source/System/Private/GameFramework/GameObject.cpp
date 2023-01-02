@@ -25,7 +25,7 @@ namespace CE
 
 	GameObject::~GameObject()
 	{
-
+        
 	}
 
     GameComponent* GameObject::AddComponent(GameComponent* component)
@@ -93,6 +93,54 @@ namespace CE
 				components[i]->Tick(deltaTime);
 		}
 	}
+
+    void GameObject::AddChild(GameObject* go)
+    {
+        if (go == nullptr)
+            return;
+        
+        go->parent = this;
+        children.Add(go);
+        
+        if (owner != nullptr)
+        {
+            owner->AddObject(go);
+        }
+    }
+
+    void GameObject::RemoveChild(GameObject* go)
+    {
+        if (go == nullptr)
+            return;
+        
+        go->parent = nullptr;
+        children.Remove(go);
+        
+        if (owner != nullptr)
+        {
+            owner->RemoveObject(go);
+        }
+    }
+
+    s32 GameObject::GetIndexInParent()
+    {
+        if (parent == nullptr)
+            return 0;
+        
+        return parent->GetChildIndex(this);
+    }
+
+    s32 GameObject::GetChildIndex(GameObject* child)
+    {
+        int i = 0;
+        for (auto childGO : children)
+        {
+            if (childGO == child)
+                return i;
+            i++;
+        }
+        return -1;
+    }
 
 } // namespace CE
 
