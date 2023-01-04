@@ -27,7 +27,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             CE::Core
             CE::System
-            CE::NuklearRHI
     RUNTIME_DEPENDENCIES
         
 )

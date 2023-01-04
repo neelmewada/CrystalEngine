@@ -52,6 +52,8 @@ else(${PAL_PLATFORM_IS_MAC})
     endforeach()
 endif()
 
+set(${QT_PACKAGE_NAME}_RUNTIME_DEPS_DIRS "${QT_PATH}/plugins")
+
 set(QT_ADDITIONAL_INCLUDES
     "${QT_PATH}/include/QtWidgets/${PACKAGE_VERISON}/"
     "${QT_PATH}/include/QtGui/${PACKAGE_VERISON}/"

@@ -13,6 +13,13 @@ else()
     add_compile_definitions(PAL_TRAIT_WITH_EDITOR=1)
 endif()
 
+# Graphics APIs
+ce_set(PAL_TRAIT_VULKAN_SUPPORTED TRUE)
+ce_set(PAL_TRAIT_METAL_SUPPORTED FALSE)
+
+add_compile_definitions(VULKAN_SUPPORTED=1)
+
+
 ce_set(PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED TRUE)
 ce_set(PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED TRUE)
 

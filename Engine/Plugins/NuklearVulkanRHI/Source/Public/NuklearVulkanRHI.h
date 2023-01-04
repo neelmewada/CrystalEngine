@@ -1,11 +1,11 @@
 #pragma once
 
-#include "NuklearRHI.h"
+#include "RHI/RHI.h"
 
 namespace CE
 {
 
-    class NUKLEARVULKANRHI_API NuklearVulkanRHI : public NuklearRHI
+    class NUKLEARVULKANRHI_API NuklearVulkanRHI : public DynamicRHI
     {
     public:
         

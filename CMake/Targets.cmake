@@ -206,8 +206,11 @@ function(ce_add_target NAME TARGET_TYPE)
     set(multiValueArgs PRIVATE PUBLIC INTERFACE)
     cmake_parse_arguments(ce_add_target_BUILD_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_target_BUILD_DEPENDENCIES})
 
-    list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c")
-    list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c++")
+    if(${PAL_PLATFORM_IS_MAC})
+        list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c")
+        list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c++") 
+    endif()
+    
 
     if(ce_add_target_BUILD_DEPENDENCIES_PRIVATE OR ce_add_target_BUILD_DEPENDENCIES_PUBLIC OR ce_add_target_BUILD_DEPENDENCIES_INTERFACE)
         target_link_libraries(${NAME}
@@ -242,6 +245,16 @@ function(ce_add_target NAME TARGET_TYPE)
             endforeach()
             
         endif()
+
+        # directories
+        if(DEFINED ${runtime_dep}_RUNTIME_DEPS_DIRS)
+            foreach(copy_dir ${runtime_dep}_RUNTIME_DEPS_DIRS)
+                add_custom_command(TARGET ${NAME} POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${copy_dir} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
+                )
+            endforeach()
+        endif()
+        
     endforeach()
 
 endfunction()

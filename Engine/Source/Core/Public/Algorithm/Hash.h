@@ -31,6 +31,7 @@ namespace CE
         else
         {
             // Do nothing : Specialization handles it
+			return 0;
         }
     }
 

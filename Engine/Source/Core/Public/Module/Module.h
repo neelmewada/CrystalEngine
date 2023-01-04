@@ -23,6 +23,9 @@ namespace CE
     {
     public:
         CE_NO_COPY(PluginModule);
+
+        PluginModule() {}
+        virtual ~PluginModule() {}
         
     };
 

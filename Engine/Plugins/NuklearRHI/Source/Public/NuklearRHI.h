@@ -7,11 +7,7 @@
 namespace CE
 {
 
-    class NUKLEARRHI_API NuklearRHI : public DynamicRHI
-    {
-    public:
-        
-    };
+    NUKLEARRHI_API extern DynamicRHI* GDynamicRHI;
 
     class NUKLEARRHI_API NuklearRHIModule : public PluginModule
     {
@@ -19,15 +15,8 @@ namespace CE
         NuklearRHIModule() {}
         virtual ~NuklearRHIModule() {}
         
-        virtual void StartupModule() override
-        {
-            
-        }
-        
-        virtual void ShutdownModule() override
-        {
-            
-        }
+        virtual void StartupModule() override;
+        virtual void ShutdownModule() override;
         
     };
     
