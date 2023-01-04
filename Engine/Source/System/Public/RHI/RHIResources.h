@@ -2,10 +2,10 @@
 
 namespace CE
 {
-    enum GraphicsAPI
+    enum class RHIGraphicsBackend
     {
-        GFX_NONE,
-        GFX_VULKAN
+        None,
+        Vulkan
     };
 
     enum class RHIResourceType
