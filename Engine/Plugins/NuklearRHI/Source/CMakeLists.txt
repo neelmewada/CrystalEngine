@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(GameSystem CXX)
+project(NuklearRHI)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
     NAMESPACE CE
-    FOLDER Engine/Source
-    PCHHEADER 
+    FOLDER Engine/Plugins
+    PCHHEADER
         PUBLIC 
             Public/${PROJECT_NAME}.h
-            Public/GameApplication.h
     FILES_CMAKE
         PRIVATE
             ${PROJECT_NAME_LOWERCASE}_private_files.cmake
@@ -31,9 +30,4 @@ ce_add_target(${PROJECT_NAME} SHARED
     RUNTIME_DEPENDENCIES
         
 )
-
-
-if(${PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED})
-    add_subdirectory(Tests)
-endif()
 

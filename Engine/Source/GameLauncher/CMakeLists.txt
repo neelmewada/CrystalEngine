@@ -6,7 +6,7 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} CONSOLEAPP
     NAMESPACE CE
-    FOLDER Engine
+    FOLDER Engine/Source
     PCHHEADER 
         PUBLIC 
             Public/${PROJECT_NAME}.h

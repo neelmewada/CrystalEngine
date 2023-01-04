@@ -81,4 +81,14 @@ extern "C" DLL_EXPORT void UnloadModule(CE::Module* modulePtr)\
     delete modulePtr;\
 }
 
+#define CE_IMPLEMENT_PLUGIN(PluginName, PluginImplClass)\
+extern "C" DLL_EXPORT CE::Module* LoadModule()\
+{\
+    return new PluginImplClass();\
+}\
+extern "C" DLL_EXPORT void UnloadModule(CE::Module* modulePtr)\
+{\
+    delete modulePtr;\
+}
+
 #endif

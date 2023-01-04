@@ -19,7 +19,30 @@ namespace CE
         virtual void RegisterTypes() {}
     };
 
+    class CORE_API PluginModule : public Module
+    {
+    public:
+        CE_NO_COPY(PluginModule);
+        
+    };
+
     class DefaultModuleImpl : public Module
+    {
+    public:
+
+        void StartupModule() override
+        {
+
+        }
+
+        void ShutdownModule() override
+        {
+
+        }
+
+    };
+
+    class DefaultPluginImpl : public PluginModule
     {
     public:
 

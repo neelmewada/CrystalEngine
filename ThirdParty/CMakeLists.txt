@@ -12,3 +12,6 @@ find_package(sdl REQUIRED)
 
 include(FindQt.cmake)
 find_package(qads REQUIRED)
+
+# Vulkan
+find_package(vulkan)

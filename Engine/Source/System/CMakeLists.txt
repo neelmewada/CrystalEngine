@@ -4,7 +4,7 @@ project(System CXX)
 
 ce_add_target(System SHARED
     NAMESPACE CE
-    FOLDER Engine
+    FOLDER Engine/Source
     PCHHEADER 
         PUBLIC 
             Public/System.h
