@@ -27,7 +27,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             CE::Core
             CE::System
-            CE::NuklearVulkanRHI
+            $<$<BOOL:${PAL_TRAIT_VULKAN_SUPPORTED}>:CE::NuklearVulkanRHI>
     RUNTIME_DEPENDENCIES
         
 )
