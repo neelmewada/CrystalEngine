@@ -6,6 +6,7 @@ project(ThirdParty)
 find_package(xxHash REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yaml REQUIRED)
+find_package(mINI REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)
@@ -14,4 +15,4 @@ include(FindQt.cmake)
 find_package(qads REQUIRED)
 
 # Vulkan
-find_package(vulkan)
+find_package(Vulkan)

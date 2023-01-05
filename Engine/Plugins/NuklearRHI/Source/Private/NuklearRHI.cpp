@@ -1,7 +1,7 @@
 
 #include "NuklearRHI.h"
 
-#if VULKAN_SUPPORTED
+#if PAL_TRAIT_VULKAN_SUPPORTED
 #include "NuklearVulkanRHI.h"
 #endif
 
@@ -13,14 +13,25 @@ namespace CE
 
     void NuklearRHIModule::StartupModule()
     {
-#if VULKAN_SUPPORTED
 
-#endif
     }
 
     void NuklearRHIModule::ShutdownModule()
     {
 
+    }
+
+    void NuklearRHIModule::Initialize()
+    {
+#if PAL_TRAIT_VULKAN_SUPPORTED
+        GDynamicRHI = new CE::NuklearVulkanRHI();
+#endif
+    }
+
+    void NuklearRHIModule::PreShutdown()
+    {
+        delete GDynamicRHI;
+        GDynamicRHI = nullptr;
     }
 
 } // namespace CE

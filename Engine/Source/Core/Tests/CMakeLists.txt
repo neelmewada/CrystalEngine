@@ -14,7 +14,12 @@ set_target_properties(${TEST_NAME}
         FOLDER "Tests/Engine"
 )
 
-target_link_libraries(${TEST_NAME} PRIVATE ${TEST_TARGET} "c" "c++")
+target_link_libraries(${TEST_NAME} PRIVATE ${TEST_TARGET})
+
+if(${PAL_PLATFORM_IS_MAC})
+    target_link_libraries(${TEST_NAME} PRIVATE "c" "c++")
+endif()
+
 
 add_test(NAME ${TEST_NAME}
     COMMAND ${TEST_NAME}

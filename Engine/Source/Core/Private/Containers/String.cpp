@@ -288,7 +288,7 @@ StringView CE::String::GetSubstringView(int startIndex, int length)
 
     if (length == 0)
     {
-        return "";
+        return StringView();
     }
 
     return StringView(GetCString() + startIndex, length);
@@ -313,6 +313,25 @@ Array<String> String::Split(char delimiter)
 
         endIdx++;
     }
+
+    return result;
+}
+
+String CE::String::RemoveWhitespaces()
+{
+    String result{ GetLength() };
+    int index = 0;
+
+    for (int i = 0; i < GetLength(); i++)
+    {
+        if (Buffer[i] != ' ')
+        {
+            result[index++] = Buffer[i];
+        }
+    }
+
+    result[index++] = 0;
+    result.StringLength = strlen(result.Buffer);
 
     return result;
 }

@@ -11,8 +11,7 @@
 #include "RTTIDefines.h"
 
 #include "Types/Name.h"
-
-#include <iostream>
+#include "Variant.h"
 
 
 namespace CE
@@ -31,20 +30,38 @@ namespace CE
 	}
 
 	// **********************************************************
+	// Attribute
+
+	struct CORE_API Attribute
+	{
+	public:
+		Attribute()
+		{}
+		Attribute(String key, String value = "") : key(key), value(value)
+		{}
+
+		CE_INLINE const String& GetKey() const { return key; }
+		CE_INLINE const String& GetValue() const { return value; }
+
+	private:
+		String key{};
+		String value{};
+	};
+
+	// **********************************************************
 	// Type Info
 
-	struct CORE_API TypeInfo
+	class CORE_API TypeInfo
 	{
 	protected:
-		TypeInfo(CE::Name name, CE::String attributes = "") : name(name)
-		{}
+		TypeInfo(CE::Name name, CE::String attributes = "");
         
         template<typename Struct>
         friend struct TypeInfoImpl;
 
 	public:
 		const CE::Name& GetName() const { return name; }
-		const CE::String& GetAttributes() const { return attributes; }
+		const CE::Array<CE::Attribute>& GetAttributes() const { return attributes; }
         
 		virtual bool IsClass() const { return false; }
 		virtual bool IsStruct() const { return false; }
@@ -67,7 +84,7 @@ namespace CE
 
 	private:
 		CE::Name name;
-		CE::String attributes;
+		CE::Array<CE::Attribute> attributes{};
 
 	public:
 		// For internal use only!

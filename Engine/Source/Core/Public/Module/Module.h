@@ -5,6 +5,14 @@
 namespace CE
 {
 
+    enum class ModuleType
+    {
+        Undefined,
+        Module,
+        PluginModule,
+        GameModule
+    };
+
     class CORE_API Module
     {
     public:
@@ -17,6 +25,9 @@ namespace CE
         virtual void ShutdownModule() = 0;
 
         virtual void RegisterTypes() {}
+
+        virtual bool IsPluginModule() { return false; }
+        virtual bool IsGameModule() { return false; }
     };
 
     class CORE_API PluginModule : public Module
@@ -27,6 +38,7 @@ namespace CE
         PluginModule() {}
         virtual ~PluginModule() {}
         
+        virtual bool IsPluginModule() override { return true; }
     };
 
     class DefaultModuleImpl : public Module

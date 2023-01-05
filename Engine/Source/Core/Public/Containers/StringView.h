@@ -41,6 +41,11 @@ namespace CE
 			return Impl.size();
 		}
 
+		inline u32 GetLength()
+		{
+			return (u32)Impl.size();
+		}
+
 		const char* GetCString() const
 		{
 			return Impl.data();
@@ -49,6 +54,11 @@ namespace CE
 		// Operators
 		bool operator==(const String& rhs);
 		bool operator!=(const String& rhs);
+
+		inline char operator[](s32 index)
+		{
+			return Impl[index];
+		}
 
 		inline bool operator==(const char* rhs)
 		{

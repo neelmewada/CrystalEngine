@@ -25,7 +25,8 @@ namespace CE
         CE_REGISTER_TYPES(
             Engine,
             GameObject,
-            GameComponent
+            GameComponent,
+            Scene
         );
         
         // Register Components

@@ -20,10 +20,10 @@ namespace CE
 	{
 		auto info = FindModuleInfo(moduleName);
 
-		if (info != nullptr && info->bIsLoaded)
+		if (info != nullptr && info->isLoaded)
 		{
 			result = ModuleLoadResult::AlreadyLoaded;
-			return info->ModuleImpl;
+			return info->moduleImpl;
 		}
 
 		if (info == nullptr)
@@ -37,15 +37,15 @@ namespace CE
 		}
 
 		// Load module
-		Module* modulePtr = info->LoadFuncPtr();
+		Module* modulePtr = info->loadFuncPtr();
 		if (modulePtr == nullptr)
 		{
 			result = ModuleLoadResult::InvalidModulePtr;
 			return nullptr;
 		}
 
-		info->bIsLoaded = true;
-		info->ModuleImpl = modulePtr;
+		info->isLoaded = true;
+		info->moduleImpl = modulePtr;
 
 		// Register types
 		modulePtr->RegisterTypes();
@@ -55,25 +55,25 @@ namespace CE
 
 		CE_LOG(Info, All, "Loaded Module: {}", moduleName);
 
-		return nullptr;
+		return modulePtr;
 	}
 
 	void ModuleManager::UnloadModule(String moduleName)
 	{
 		auto info = FindModuleInfo(moduleName);
 
-		if (info == nullptr || !info->bIsLoaded || info->ModuleImpl == nullptr)
+		if (info == nullptr || !info->isLoaded || info->moduleImpl == nullptr)
 		{
 			return;
 		}
 
 		// Shutdown module
-		info->ModuleImpl->ShutdownModule();
+		info->moduleImpl->ShutdownModule();
 
 		// Unload module
-		info->bIsLoaded = false;
-		info->UnloadFuncPtr(info->ModuleImpl);
-		PlatformProcess::UnloadDll(info->DllHandle);
+		info->isLoaded = false;
+		info->unloadFuncPtr(info->moduleImpl);
+		PlatformProcess::UnloadDll(info->dllHandle);
 
 		// Remove module
 		ModuleMap.Remove(moduleName);
@@ -85,6 +85,61 @@ namespace CE
 	{
 		ModuleLoadResult result;
 		return LoadModule(moduleName, result);
+	}
+
+	PluginModule* ModuleManager::LoadPluginModule(String moduleName, ModuleLoadResult& result)
+	{
+		auto info = FindModuleInfo(moduleName);
+
+		if (info != nullptr && info->isLoaded)
+		{
+			result = ModuleLoadResult::AlreadyLoaded;
+			return (PluginModule*)info->moduleImpl;
+		}
+
+		// Load module
+		PluginModule* modulePtr = (PluginModule*)info->loadFuncPtr();
+		if (modulePtr == nullptr)
+		{
+			result = ModuleLoadResult::InvalidModulePtr;
+			return nullptr;
+		}
+
+		info->isLoaded = true;
+		info->moduleImpl = modulePtr;
+
+		// Register types
+		modulePtr->RegisterTypes();
+
+		// Startup module
+		modulePtr->StartupModule();
+
+		CE_LOG(Info, All, "Loaded Plugin: {}", moduleName);
+
+		return modulePtr;
+	}
+
+	void ModuleManager::UnloadPluginModule(String moduleName)
+	{
+		auto info = FindModuleInfo(moduleName);
+
+		if (info == nullptr || !info->isLoaded || info->moduleImpl == nullptr)
+		{
+			return;
+		}
+
+		// Shutdown module
+		info->moduleImpl->ShutdownModule();
+
+		// Unload module
+		info->isLoaded = false;
+		info->unloadFuncPtr(info->moduleImpl);
+		PlatformProcess::UnloadDll(info->dllHandle);
+
+		// Remove module
+		ModuleMap.Remove(moduleName);
+
+		CE_LOG(Info, All, "Unloaded Plugin: {}", moduleName);
 	}
 
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
@@ -120,12 +175,12 @@ namespace CE
 		ModuleMap.Emplace(moduleName, ModuleInfo{});
 		
 		ModuleInfo* ptr = &ModuleMap[moduleName];
-		ptr->bIsLoaded = false;
-		ptr->DllHandle = dllHandle;
-		ptr->LoadFuncPtr = loadFunction;
-		ptr->UnloadFuncPtr = unloadFuntion;
-		ptr->ModuleName = moduleName;
-		ptr->ModuleImpl = nullptr;
+		ptr->isLoaded = false;
+		ptr->dllHandle = dllHandle;
+		ptr->loadFuncPtr = loadFunction;
+		ptr->unloadFuncPtr = unloadFuntion;
+		ptr->moduleName = moduleName;
+		ptr->moduleImpl = nullptr;
 
 		result = ModuleLoadResult::Success;
 

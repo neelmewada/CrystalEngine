@@ -13,14 +13,14 @@ namespace CE
 
     struct ModuleInfo
     {
-        String ModuleName;
+        String moduleName;
         
-        void* DllHandle;
-        LoadModuleFunc LoadFuncPtr;
-        UnloadModuleFunc UnloadFuncPtr;
+        void* dllHandle;
+        LoadModuleFunc loadFuncPtr;
+        UnloadModuleFunc unloadFuncPtr;
 
-        bool bIsLoaded;
-        Module* ModuleImpl; // nullptr if not loaded
+        bool isLoaded;
+        Module* moduleImpl; // nullptr if not loaded
     };
 
     enum class ModuleLoadResult
@@ -53,6 +53,9 @@ namespace CE
         void UnloadModule(String moduleName);
 
         Module* LoadModule(String moduleName);
+
+        PluginModule* LoadPluginModule(String moduleName, ModuleLoadResult& result);
+        void UnloadPluginModule(String moduleName);
 
     private:
 

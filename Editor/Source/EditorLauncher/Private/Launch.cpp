@@ -15,6 +15,10 @@ int GuardedMain(int argc, char** argv)
 	CE::ModuleManager::Get().LoadModule("Core");
 
 	CE::ModuleManager::Get().LoadModule("System");
+	
+	// Load NuklearRHI plugins
+
+
 	CE::ModuleManager::Get().LoadModule("EditorCore");
 	CE::ModuleManager::Get().LoadModule("EditorSystem");
 

@@ -18,6 +18,8 @@ namespace CE
         virtual void StartupModule() override;
         virtual void ShutdownModule() override;
         
+        void Initialize();
+        void PreShutdown();
     };
     
 } // namespace CE

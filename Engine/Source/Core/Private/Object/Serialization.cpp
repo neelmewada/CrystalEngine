@@ -143,8 +143,25 @@ namespace CE
                 emitter << YAML::Null;
                 return;
             }
-            
-            if (elementType->IsPOD() || elementType->IsStruct() || elementType->IsEnum()) // Value types: can be serialized per byte
+
+
+            if (elementType->GetTypeId() == TYPEID(String))
+            {
+                const Array<String>& stringArray = fieldType->GetFieldValue<Array<String>>(instance);
+
+                emitter << YAML::BeginSeq;
+                emitter << TYPEID(String);
+
+                for (int i = 0; i < stringArray.GetSize(); i++)
+                {
+                    const String& str = stringArray[i];
+
+                    emitter << str;
+                }
+
+                emitter << YAML::EndSeq;
+            }
+            else if (elementType->IsPOD() || elementType->IsStruct() || elementType->IsEnum()) // Value types: can be serialized per byte
             {
                 emitter << YAML::BeginSeq;
                 emitter << elementType->GetTypeId();
@@ -426,7 +443,18 @@ namespace CE
                 return;
             }
             
-            if (elementType->IsPOD() || elementType->IsStruct() || elementType->IsEnum()) // Value types: can be serialized per byte
+            if (elementType->GetTypeId() == TYPEID(String))
+            {
+                Array<String>& stringArray = fieldType->GetFieldValue<Array<String>>(instance);
+
+                stringArray.Clear();
+
+                for (int i = 1; i < arraySize + 1; i++)
+                {
+                    stringArray.Add(String(node[i].as<std::string>()));
+                }
+            }
+            else if (elementType->IsPOD() || elementType->IsStruct() || elementType->IsEnum()) // Value types: can be serialized per byte
             {
                 array.Clear();
                 

@@ -25,6 +25,7 @@ ce_add_target(Core SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::xxHash
+            ThirdParty::mINI
         PUBLIC
             ThirdParty::spdlog
             ThirdParty::yaml

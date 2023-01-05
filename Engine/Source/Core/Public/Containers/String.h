@@ -216,6 +216,7 @@ namespace CE
         StringView ToStringView();
 
         Array<String> Split(char delimiter);
+        String RemoveWhitespaces();
 
     private:
 

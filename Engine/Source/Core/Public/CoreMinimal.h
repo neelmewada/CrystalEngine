@@ -8,12 +8,11 @@
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
 #include "IO/Path.h"
+#include "IO/Stream/GenericStream.h"
+#include "IO/Stream/MemoryStream.h"
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
 
-// IO
-#include "IO/Stream/GenericStream.h"
-#include "IO/Stream/MemoryStream.h"
 
 // RTTI, Object & Serialization
 #include "Object/ObjectStore.h"
