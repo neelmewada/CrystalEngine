@@ -4,6 +4,7 @@
 #include "mini/ini.h"
 
 #include <string>
+#include <iostream>
 
 namespace CE
 {
@@ -72,6 +73,7 @@ namespace CE
             }
             else if (fieldType->GetTypeId() == TYPEID(String))
             {
+                std::cout << "Value: " << structure[category.GetCString()][field->GetName().GetCString()] << std::endl;
                 field->SetFieldValue<String>(structInstance, String(structure[category.GetCString()][field->GetName().GetCString()]));
             }
             else if (fieldType->GetTypeId() == TYPEID(f32))

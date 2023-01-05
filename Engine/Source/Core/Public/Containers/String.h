@@ -201,7 +201,7 @@ namespace CE
             return String(fmt::vformat(str.Buffer, fmt::make_format_args(args...)));
         }
 
-        inline void Append(char c);
+        void Append(char c);
 
         void Concatenate(const String& string);
         void ConcatenateCString(const char* cString);

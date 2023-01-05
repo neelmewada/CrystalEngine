@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IO/Path.h"
 #include "IO/Stream/GenericStream.h"
 #include "IO/Stream/MemoryStream.h"
 

@@ -24,11 +24,38 @@ namespace CE
     HashMap<Name, const TypeInfo*> TypeInfo::RegisteredTypes{};
     HashMap<TypeId, const TypeInfo*> TypeInfo::RegisteredTypeIds{};
 
+    String CleanupAttributeString(const String& inString)
+    {
+        char* result = new char[inString.GetLength() + 1];
+        result[inString.GetLength()] = 0;
+        bool isString = false;
+        int idx = 0;
+        
+        for (int i = 0; i < inString.GetLength(); i++)
+        {
+            if (inString[i] == '"')
+            {
+                isString = !isString;
+                continue;
+            }
+            
+            if (inString[i] == ' ' && !isString)
+            {
+                continue;
+            }
+            
+            result[idx++] = inString[i];
+        }
+        
+        return String(result);
+    }
+
     TypeInfo::TypeInfo(CE::Name name, CE::String attributes)
         : name(name)
     {
         int curScope = 0;
-        String attribs = attributes.RemoveWhitespaces();
+        bool isString = false;
+        String attribs = CleanupAttributeString(attributes);
         this->attributes.Clear();
 
         int startIdx = 0;

@@ -10,6 +10,8 @@
 #include "Enum.h"
 #include "Field.h"
 
+#include "ConfigParser.h"
+
 namespace CE
 {
 

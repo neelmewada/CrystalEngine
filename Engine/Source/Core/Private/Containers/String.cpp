@@ -214,7 +214,7 @@ void String::CopyCString(const char* cString, u32 copyStringLength)
  *  Helper/Utility
  */
 
-inline void CE::String::Append(char c)
+void CE::String::Append(char c)
 {
     char copyStr[] = { c, '\0' };
     ConcatenateCString(copyStr);

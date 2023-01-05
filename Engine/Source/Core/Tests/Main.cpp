@@ -50,6 +50,10 @@ int main(int argc, char* argv[])
         CE_LOG(Info, All, "{} = {}", attrib.GetKey(), attrib.GetValue());
     }
     
+    CE::ConfigParser parser = CE::ConfigParser(type);
+    
+    parser.Parse(&test, "TestConfig.ini");
+    
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");
 
