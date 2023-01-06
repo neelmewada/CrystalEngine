@@ -29,6 +29,7 @@ ce_add_target(Core SHARED
         PUBLIC
             ThirdParty::spdlog
             ThirdParty::yaml
+        TARGETS EngineConfig
     RUNTIME_DEPENDENCIES
         
 )

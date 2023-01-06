@@ -223,7 +223,7 @@ function(ce_add_target NAME TARGET_TYPE)
     
     # BUILD_DEPENDENCIES
 
-    set(multiValueArgs PRIVATE PUBLIC INTERFACE)
+    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS)
     cmake_parse_arguments(ce_add_target_BUILD_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_target_BUILD_DEPENDENCIES})
 
     if(${PAL_PLATFORM_IS_MAC})
@@ -239,6 +239,11 @@ function(ce_add_target NAME TARGET_TYPE)
             INTERFACE ${ce_add_target_BUILD_DEPENDENCIES_INTERFACE}
         )
     endif()
+
+    if(ce_add_target_BUILD_DEPENDENCIES_TARGETS)
+        add_dependencies(${NAME} ${ce_add_target_BUILD_DEPENDENCIES_TARGETS})
+    endif()
+    
     
     # RUNTIME_DEPENDENCIES
 
@@ -269,8 +274,9 @@ function(ce_add_target NAME TARGET_TYPE)
         # directories
         if(DEFINED ${runtime_dep}_RUNTIME_DEPS_DIRS)
             foreach(copy_dir ${runtime_dep}_RUNTIME_DEPS_DIRS)
+                get_filename_component(dir_name ${copy_dir} DIRECTORY)
                 add_custom_command(TARGET ${NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${copy_dir} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${copy_dir} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${dir_name}
                 )
             endforeach()
         endif()
