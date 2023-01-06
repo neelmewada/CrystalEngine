@@ -17,6 +17,15 @@ namespace CE
         return false;
     }
 
+    bool FieldType::IsSerialized() const
+    {
+        return !attributes.Exists([](const CE::Attribute& attr) -> bool
+            {
+                return attr.GetKey() == "NonSerialized";
+            }
+        );
+    }
+
     const TypeInfo* FieldType::GetDeclarationType() const
     {
         return GetTypeInfo(fieldTypeId);

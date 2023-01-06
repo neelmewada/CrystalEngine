@@ -85,10 +85,13 @@ namespace CE
             
             while (field != nullptr)
             {
-                auto fieldName = field->GetName().GetCString();
-                emitter << YAML::Key << fieldName;
-                emitter << YAML::Value;
-                SerializeField(field, emitter);
+                if (field->IsSerialized())
+                {
+                    auto fieldName = field->GetName().GetCString();
+                    emitter << YAML::Key << fieldName;
+                    emitter << YAML::Value;
+                    SerializeField(field, emitter);
+                }
                 
                 field = field->GetNext();
             }
@@ -99,7 +102,7 @@ namespace CE
 
     void SerializedObject::SerializeField(FieldType* fieldType, YAML::Emitter& emitter)
     {
-        if (fieldType == nullptr || instance == nullptr)
+        if (fieldType == nullptr || instance == nullptr || !fieldType->IsSerialized())
         {
             emitter << YAML::Null;
             return;
@@ -396,7 +399,7 @@ namespace CE
 
     void SerializedObject::DeserializeField(FieldType* fieldType, YAML::Node& node)
     {
-        if (fieldType == nullptr || instance == nullptr)
+        if (fieldType == nullptr || instance == nullptr || !fieldType->IsSerialized())
             return;
         
         if (fieldType->IsObject()) // Deserialize object reference

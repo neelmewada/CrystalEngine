@@ -1,8 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
 #include "RHI/RHI.h"
-
-#include "Module/ModuleManager.h"
 
 namespace CE
 {

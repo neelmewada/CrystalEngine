@@ -18,16 +18,21 @@ namespace CE
     {
         auto field = structType->GetFirstField();
 
-        mINI::INIFile file = mINI::INIFile(filePath.GetString().GetCString());
+        String filePathStr = filePath.GetString();
+        mINI::INIFile file = mINI::INIFile(filePathStr.GetCString());
         mINI::INIStructure structure;
-        
-        file.read(structure);
+
+        if (!file.read(structure))
+        {
+            CE_LOG(Error, All, "Failed to parse config file: {}", filePath);
+            return;
+        }
 
         while (field != nullptr)
         {
             const auto& attribs = field->GetAttributes();
 
-            String category = "Default";
+            String category = "General";
 
             for (int i = 0; i < attribs.GetSize(); i++)
             {
@@ -65,7 +70,8 @@ namespace CE
             }
             else if (fieldType->GetTypeId() == TYPEID(s32))
             {
-                field->SetFieldValue<s32>(structInstance, std::stoi(structure[category.GetCString()][field->GetName().GetCString()]));
+                auto v = structure[category.GetCString()][field->GetName().GetCString()];
+                field->SetFieldValue<s32>(structInstance, std::stoi(v));
             }
             else if (fieldType->GetTypeId() == TYPEID(s64))
             {

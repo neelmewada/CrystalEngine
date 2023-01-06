@@ -238,12 +238,12 @@ void String::Concatenate(s64 integer)
     Concatenate(std::to_string(integer));
 }
 
-bool String::StartsWith(const String& string)
+bool String::StartsWith(const String& string) const
 {
     return StartsWith(string.GetCString());
 }
 
-bool String::StartsWith(const char* cString)
+bool String::StartsWith(const char* cString) const
 {
     int charIndex = 0;
     if (cString == nullptr)

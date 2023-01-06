@@ -207,8 +207,8 @@ namespace CE
         void ConcatenateCString(const char* cString);
         void Concatenate(s64 integer);
 
-        bool StartsWith(const String& string);
-        bool StartsWith(const char* cString);
+        bool StartsWith(const String& string) const;
+        bool StartsWith(const char* cString) const;
 
         String GetSubstring(int startIndex, int length = -1);
         StringView GetSubstringView(int startIndex, int length = -1);

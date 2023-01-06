@@ -7,6 +7,8 @@
 #include "Memory/Memory.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
+#include "PAL/Common/PlatformDirectories.h"
+#include "PAL/Common/PlatformProcess.h"
 #include "IO/Path.h"
 #include "IO/Stream/GenericStream.h"
 #include "IO/Stream/MemoryStream.h"

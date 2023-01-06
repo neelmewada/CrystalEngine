@@ -82,7 +82,7 @@ namespace CE
         
         virtual bool IsObject() const { return IsClass() && IsAssignableTo(TYPEID(Object)); }
 
-	private:
+	protected:
 		CE::Name name;
 		CE::Array<CE::Attribute> attributes{};
 

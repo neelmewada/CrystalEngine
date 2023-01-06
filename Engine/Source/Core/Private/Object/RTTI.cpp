@@ -46,6 +46,8 @@ namespace CE
             
             result[idx++] = inString[i];
         }
+
+        result[idx++] = 0;
         
         return String(result);
     }

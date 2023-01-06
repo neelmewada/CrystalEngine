@@ -46,8 +46,8 @@ endfunction()
 function(ce_add_target NAME TARGET_TYPE)
     string(TOUPPER ${NAME} NAME_UPPERCASE)
 
-    set(options GENERATED AUTOMOC AUTOUIC AUTORCC)
-    set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE)
+    set(options GENERATED AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS)
+    set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY)
     set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
 
     cmake_parse_arguments(ce_add_target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -88,7 +88,7 @@ function(ce_add_target NAME TARGET_TYPE)
     # EXE_FLAG
 
     if(${TARGET_TYPE} STREQUAL "GUIAPP")
-        #set(EXE_FLAG "$<$<CONFIG:Release>:${PAL_EXECUTABLE_APPLICATION_FLAG}>")
+        #set(EXE_FLAG $<$<CONFIG:Release>:${PAL_EXECUTABLE_APPLICATION_FLAG}>)
     endif()
     
     # Create target
@@ -124,6 +124,26 @@ function(ce_add_target NAME TARGET_TYPE)
     # source_group(Private FILES ${PRIVATE_FILES})
     # source_group(Generated FILES ${GENERATED_FILES})
 
+    # OUTPUT_DIRECTORY
+
+    if(ce_add_target_OUTPUT_DIRECTORY)
+        set_target_properties(${NAME}
+            PROPERTIES
+                ARCHIVE_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+                LIBRARY_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+                RUNTIME_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+        ) 
+    endif()
+
+    # COPY_CONFIGS
+
+    if(ce_add_target_COPY_CONFIGS)
+        add_custom_command(TARGET ${NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../Config ${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}/Config
+        )
+    endif()
+    
+    
     # Qt AUTO*
 
     if(ce_add_target_AUTOMOC)

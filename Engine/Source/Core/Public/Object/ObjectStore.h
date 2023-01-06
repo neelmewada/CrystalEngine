@@ -2,10 +2,10 @@
 
 #include "Types/CoreTypeDefs.h"
 
+#include "Object/RTTIDefines.h"
+
 #include "Containers/Array.h"
 #include "Containers/HashMap.h"
-
-#include "Object/RTTIDefines.h"
 
 #include "Logger/Logger.h"
 

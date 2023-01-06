@@ -10,6 +10,9 @@ ce_add_target(${PROJECT_NAME} SHARED
     PCHHEADER
         PUBLIC 
             Public/${PROJECT_NAME}.h
+    OUTPUT_DIRECTORY
+        "Engine/Plugins/NuklearRHI"
+    COPY_CONFIGS
     FILES_CMAKE
         PRIVATE
             ${PROJECT_NAME_LOWERCASE}_private_files.cmake

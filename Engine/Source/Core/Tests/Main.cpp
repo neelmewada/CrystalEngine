@@ -52,7 +52,13 @@ int main(int argc, char* argv[])
     
     CE::ConfigParser parser = CE::ConfigParser(type);
     
+#if PLATFORM_WINDOWS
+    parser.Parse(&test, "E:\\Projects\\CrystalEngine\\Build\\Windows\\Debug\\TestConfig.ini");
+#else
     parser.Parse(&test, "TestConfig.ini");
+#endif
+
+    CE_LOG(Info, All, "Values: {} {}", test.intValue, test.stringValue);
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");
