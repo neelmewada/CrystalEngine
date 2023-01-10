@@ -2,6 +2,7 @@
 #include "PAL/Mac/MacDirectories.h"
 
 #include <mach-o/dyld.h>
+#include <CoreServices/CoreServices.h>
 #include <limits.h>
 
 namespace CE
@@ -23,6 +24,34 @@ namespace CE
     IO::Path MacDirectories::GetLogDir()
     {
         return GetLaunchDir() / "Logs";
+    }
+
+    IO::Path MacDirectories::GetAppRootDir()
+    {
+        return GetLaunchDir();
+    }
+
+    IO::Path MacDirectories::GetEngineDir()
+    {
+        return GetAppRootDir() / "Engine";
+    }
+
+    IO::Path MacDirectories::GetEditorDir()
+    {
+        return GetAppRootDir() / "Editor";
+    }
+
+    IO::Path MacDirectories::GetAppDataDir()
+    {
+        FSRef ref;
+        OSType folderType = kApplicationSupportFolderType;
+        char path[PATH_MAX];
+        
+        FSFindFolder( kUserDomain, folderType, kCreateFolder, &ref );
+
+        FSRefMakePath( &ref, (UInt8*)&path, PATH_MAX );
+        
+        return IO::Path(path) / "CrystalEngine";
     }
 
 }

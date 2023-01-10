@@ -15,9 +15,16 @@ namespace CE
 
         static IO::Path GetLaunchDir();
 
+        static IO::Path GetAppRootDir();
+
+        static IO::Path GetEngineDir();
+        static IO::Path GetEditorDir();
+
         static IO::Path GetModuleDir();
 
         static IO::Path GetLogDir();
+
+        static IO::Path GetAppDataDir();
     };
 
     typedef MacDirectories PlatformDirectories;

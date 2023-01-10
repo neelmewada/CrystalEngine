@@ -20,6 +20,8 @@ namespace CE
         static void UnloadDll(void* dllHandle);
 
         static IO::Path GetModuleDllPath(String moduleName);
+
+        static String GetDllDecoratedName(String baseName);
     };
 
     typedef MacProcess PlatformProcess;

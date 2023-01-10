@@ -43,6 +43,12 @@ namespace CE
             }
 
             auto fieldType = field->GetDeclarationType();
+            
+            if (!field->IsSerialized())
+            {
+                field = field->GetNext();
+                continue;
+            }
 
             if (fieldType->GetTypeId() == TYPEID(u8))
             {

@@ -30,4 +30,9 @@ namespace CE
 		return PlatformDirectories::GetLaunchDir() / dllName;
 	}
 
+	String MacProcess::GetDllDecoratedName(String baseName)
+	{
+		return "lib" + baseName + ".dylib";
+	}
+
 }

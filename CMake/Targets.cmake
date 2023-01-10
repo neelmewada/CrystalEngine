@@ -228,7 +228,8 @@ function(ce_add_target NAME TARGET_TYPE)
 
     if(${PAL_PLATFORM_IS_MAC})
         list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c")
-        list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c++") 
+        list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c++")
+        list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "-framework CoreServices")
     endif()
     
 
