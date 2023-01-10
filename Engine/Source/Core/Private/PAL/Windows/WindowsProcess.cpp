@@ -30,4 +30,9 @@ namespace CE
 		return PlatformDirectories::GetLaunchDir() / dllName;
 	}
 
+	String WindowsProcess::GetDllDecoratedName(String baseName)
+	{
+		return baseName + ".dll";
+	}
+
 }

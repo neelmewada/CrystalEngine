@@ -20,6 +20,7 @@ namespace CE
         UnloadModuleFunc unloadFuncPtr;
 
         bool isLoaded;
+        bool isPlugin = false;
         Module* moduleImpl; // nullptr if not loaded
     };
 
@@ -57,9 +58,12 @@ namespace CE
         PluginModule* LoadPluginModule(String moduleName, ModuleLoadResult& result);
         void UnloadPluginModule(String moduleName);
 
+        PluginModule* LoadPluginModule(String moduleName);
+
     private:
 
         ModuleInfo* AddModule(String moduleName, ModuleLoadResult& result);
+        ModuleInfo* AddPluginModule(String moduleName, ModuleLoadResult& result);
 
         ModuleInfo* FindModuleInfo(String moduleName);
 

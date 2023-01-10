@@ -13,10 +13,9 @@ int GuardedMain(int argc, char** argv)
 
 	CE::Logger::Initialize();
 	CE::ModuleManager::Get().LoadModule("Core");
-
 	CE::ModuleManager::Get().LoadModule("System");
 	
-	// Load NuklearRHI plugins
+	// Load plugins
 
 
 	CE::ModuleManager::Get().LoadModule("EditorCore");
@@ -30,8 +29,8 @@ int GuardedMain(int argc, char** argv)
 
 	CE::ModuleManager::Get().UnloadModule("EditorSystem");
 	CE::ModuleManager::Get().UnloadModule("EditorCore");
-	CE::ModuleManager::Get().UnloadModule("System");
 
+	CE::ModuleManager::Get().UnloadModule("System");
 	CE::ModuleManager::Get().UnloadModule("Core");
 	CE::Logger::Shutdown();
 

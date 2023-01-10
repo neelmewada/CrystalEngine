@@ -16,6 +16,21 @@ namespace CE
         return IO::Path(String(buffer)).GetParentPath();
     }
 
+    IO::Path WindowsDirectories::GetAppRootDir()
+    {
+        return GetLaunchDir();
+    }
+
+    IO::Path WindowsDirectories::GetEngineDir()
+    {
+        return GetAppRootDir() / "Engine";
+    }
+
+    IO::Path WindowsDirectories::GetEditorDir()
+    {
+        return GetAppRootDir() / "Editor";
+    }
+
     IO::Path WindowsDirectories::GetModuleDir()
     {
         return GetLaunchDir();

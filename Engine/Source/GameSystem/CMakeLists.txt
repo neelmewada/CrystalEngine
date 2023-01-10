@@ -28,6 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             CE::Core
             CE::System
+        TARGETS EngineConfig
     RUNTIME_DEPENDENCIES
         
 )

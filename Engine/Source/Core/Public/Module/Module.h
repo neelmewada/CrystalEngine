@@ -16,8 +16,8 @@ namespace CE
     class CORE_API Module
     {
     public:
-        Module();
-        virtual ~Module();
+        Module() {}
+        virtual ~Module() {}
 
         CE_NO_COPY(Module);
 

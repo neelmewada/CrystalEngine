@@ -97,6 +97,16 @@ namespace CE
 			return (PluginModule*)info->moduleImpl;
 		}
 
+		if (info == nullptr)
+		{
+			info = AddPluginModule(moduleName, result);
+
+			if (info == nullptr)
+			{
+				return nullptr;
+			}
+		}
+
 		// Load module
 		PluginModule* modulePtr = (PluginModule*)info->loadFuncPtr();
 		if (modulePtr == nullptr)
@@ -142,6 +152,12 @@ namespace CE
 		CE_LOG(Info, All, "Unloaded Plugin: {}", moduleName);
 	}
 
+	PluginModule* ModuleManager::LoadPluginModule(String moduleName)
+	{
+		ModuleLoadResult result;
+		return LoadPluginModule(moduleName, result);
+	}
+
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
 	{
 		IO::Path moduleDllPath = PlatformProcess::GetModuleDllPath(moduleName);
@@ -176,6 +192,68 @@ namespace CE
 		
 		ModuleInfo* ptr = &ModuleMap[moduleName];
 		ptr->isLoaded = false;
+		ptr->isPlugin = false;
+		ptr->dllHandle = dllHandle;
+		ptr->loadFuncPtr = loadFunction;
+		ptr->unloadFuncPtr = unloadFuntion;
+		ptr->moduleName = moduleName;
+		ptr->moduleImpl = nullptr;
+
+		result = ModuleLoadResult::Success;
+
+		return ptr;
+	}
+
+	ModuleInfo* ModuleManager::AddPluginModule(String moduleName, ModuleLoadResult& result)
+	{
+		IO::Path enginePluginDir = PlatformDirectories::GetEngineDir() / "Plugins";
+		IO::Path editorPluginDir = PlatformDirectories::GetEditorDir() / "Plugins";
+
+		IO::Path engineModulePath = enginePluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
+		IO::Path editorModulePath = editorPluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
+
+		IO::Path pluginDllPath;
+
+		if (engineModulePath.Exists())
+		{
+			pluginDllPath = engineModulePath;
+		}
+		else if (editorModulePath.Exists())
+		{
+			pluginDllPath = editorModulePath;
+		}
+		else
+		{
+			result = ModuleLoadResult::DllNotFound;
+			return nullptr;
+		}
+
+		void* dllHandle = PlatformProcess::LoadDll(pluginDllPath);
+		if (dllHandle == nullptr)
+		{
+			result = ModuleLoadResult::FailedToLoad;
+			return nullptr;
+		}
+
+		auto loadFunction = (LoadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "LoadModule");
+		if (loadFunction == nullptr)
+		{
+			result = ModuleLoadResult::InvalidSymbols;
+			return nullptr;
+		}
+
+		auto unloadFuntion = (UnloadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "UnloadModule");
+		if (unloadFuntion == nullptr)
+		{
+			result = ModuleLoadResult::InvalidSymbols;
+			return nullptr;
+		}
+
+		ModuleMap.Emplace(moduleName, ModuleInfo{});
+
+		ModuleInfo* ptr = &ModuleMap[moduleName];
+		ptr->isLoaded = false;
+		ptr->isPlugin = true;
 		ptr->dllHandle = dllHandle;
 		ptr->loadFuncPtr = loadFunction;
 		ptr->unloadFuncPtr = unloadFuntion;

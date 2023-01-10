@@ -5,6 +5,17 @@
 
 namespace CE
 {
+    class NUKLEARVULKANRHI_API NuklearVulkanRHIModule : public PluginModule
+    {
+    public:
+        NuklearVulkanRHIModule() {}
+        virtual ~NuklearVulkanRHIModule() {}
+
+        virtual void StartupModule() override;
+        virtual void ShutdownModule() override;
+
+        
+    };
 
     class NUKLEARVULKANRHI_API NuklearVulkanRHI : public DynamicRHI
     {

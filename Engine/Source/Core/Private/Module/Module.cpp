@@ -4,14 +4,6 @@
 namespace CE
 {
 
-	Module::Module()
-	{
-
-	}
-
-	Module::~Module()
-	{
-
-	}
+	
 
 }

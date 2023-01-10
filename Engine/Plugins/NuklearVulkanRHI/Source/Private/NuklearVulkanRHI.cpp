@@ -1,6 +1,8 @@
 
 #include "NuklearVulkanRHI.h"
 
+CE_IMPLEMENT_PLUGIN(NuklearVulkanRHI, CE::NuklearVulkanRHIModule)
+
 namespace CE
 {
 
@@ -15,6 +17,16 @@ namespace CE
 	}
 
 	void NuklearVulkanRHI::Shutdown()
+	{
+
+	}
+
+	void NuklearVulkanRHIModule::StartupModule()
+	{
+
+	}
+
+	void NuklearVulkanRHIModule::ShutdownModule()
 	{
 
 	}
