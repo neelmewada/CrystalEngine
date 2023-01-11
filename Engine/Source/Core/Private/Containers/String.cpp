@@ -305,10 +305,14 @@ Array<String> String::Split(char delimiter)
     {
         if (Buffer[i] == delimiter && startIdx < StringLength)
         {
-            result.Add(GetSubstringView(startIdx, endIdx - startIdx + 1));
+            result.Add(GetSubstringView(startIdx, endIdx - startIdx)); // Don't add +1: we don't want the delimiter present in the split string
 
             startIdx = i + 1;
             endIdx = startIdx;
+        }
+        else if (i == StringLength - 1) // last character
+        {
+            result.Add(GetSubstringView(startIdx, endIdx - startIdx));
         }
 
         endIdx++;

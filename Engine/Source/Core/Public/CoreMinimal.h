@@ -7,6 +7,7 @@
 #include "Memory/Memory.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
+#include "PAL/Common/PlatformMisc.h"
 #include "PAL/Common/PlatformDirectories.h"
 #include "PAL/Common/PlatformProcess.h"
 #include "IO/Path.h"

@@ -109,7 +109,7 @@ namespace CE
 		return nullptr;
 	}
 
-	/// Returns dynamic type info of the type with specified name. Ex: ParentNamespace::ChildNamespace::SomeClass
+	/// Returns dynamic type info of the type with specified name. Ex:  GetTypeInfo("ParentNamespace::ChildNamespace::SomeClass")
     CORE_API const TypeInfo* GetTypeInfo(CE::Name name);
 
 	/// Returns dynamic type info of the type with specified type id.

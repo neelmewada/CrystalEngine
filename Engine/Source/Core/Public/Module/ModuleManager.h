@@ -33,6 +33,15 @@ namespace CE
         InvalidSymbols,
         InvalidModulePtr,
     };
+
+    enum class PluginLoadType
+    {
+        DontLoad,
+        LoadEarliest,
+        LoadOnPreInit,
+        LoadOnInit,
+        LoadOnPostInit
+    };
     
     class CORE_API ModuleManager
     {
@@ -59,6 +68,8 @@ namespace CE
         void UnloadPluginModule(String moduleName);
 
         PluginModule* LoadPluginModule(String moduleName);
+
+        String GetLoadedModuleName(Module* modulePtr);
 
     private:
 

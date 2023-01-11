@@ -1,41 +1,39 @@
 #pragma once
 
-#include "Containers/Array.h"
-#include "Object/Object.h"
+#include "CoreMinimal.h"
+
+#include "Module/ModuleManager.h"
+
+#include "ConfigBase.h"
 
 namespace CE
 {
-    enum class PluginLoadType
-    {
-        DontLoad,
-        LoadOnPreInit,
-        LoadOnInit,
-        LoadOnPostInit
-    };
-
     struct PluginInfo
     {
-        String name;
-        bool enabledByDefault = false;
+        CE::Name name;
+        bool enabled = false;
         PluginLoadType loadType;
     };
 
-    struct SYSTEM_API PluginConfig
+    struct SYSTEM_API PluginConfig : public ConfigBase
     {
-        CE_STRUCT(PluginConfig)
+        CE_STRUCT(PluginConfig, ConfigBase)
 
     public:
+
+        static String GetDefaultConfigFile() { return "DefaultPlugins"; }
 
         String PluginList;
         String EnabledPlugins;
 
+        String LoadEarliest;
         String LoadOnPreInit;
         String LoadOnInit;
         String LoadOnPostInit;
 
     public: // Non serialized
 
-        void Validate();
+        void OnAfterDeserialize();
 
         Array<PluginInfo> plugins{};
 
@@ -44,12 +42,13 @@ namespace CE
 } // namespace CE
 
 CE_RTTI_STRUCT(SYSTEM_API, CE, PluginConfig,
-    CE_SUPER(),
+    CE_SUPER(CE::ConfigBase),
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(PluginList)
         CE_FIELD(EnabledPlugins)
 
+        CE_FIELD(LoadEarliest)
         CE_FIELD(LoadOnPreInit)
         CE_FIELD(LoadOnInit)
         CE_FIELD(LoadOnPostInit)

@@ -14,7 +14,7 @@ namespace CE
 
     }
 
-    void ConfigParser::Parse(void* structInstance, CE::IO::Path filePath)
+    bool ConfigParser::Parse(void* structInstance, CE::IO::Path filePath)
     {
         auto field = structType->GetFirstField();
 
@@ -25,7 +25,7 @@ namespace CE
         if (!file.read(structure))
         {
             CE_LOG(Error, All, "Failed to parse config file: {}", filePath);
-            return;
+            return false;
         }
 
         while (field != nullptr)
@@ -45,6 +45,12 @@ namespace CE
             auto fieldType = field->GetDeclarationType();
             
             if (!field->IsSerialized())
+            {
+                field = field->GetNext();
+                continue;
+            }
+
+            if (!structure.has(category.GetCString()) || !structure[category.GetCString()].has(field->GetName().GetCString()))
             {
                 field = field->GetNext();
                 continue;
@@ -97,11 +103,21 @@ namespace CE
             }
             else if (fieldType->GetTypeId() == TYPEID(bool))
             {
-                field->SetFieldValue<bool>(structInstance, (bool)std::stoi(structure[category.GetCString()][field->GetName().GetCString()]));
+                auto str = structure[category.GetCString()][field->GetName().GetCString()];
+                int strToInt = 0;
+                try
+                {
+                    strToInt = std::stoi(str);
+                }
+                catch (...)
+                {}
+                field->SetFieldValue<bool>(structInstance, (str == "True" || str == "true" || strToInt > 0) ? true : false);
             }
 
             field = field->GetNext();
         }
+
+        return true;
     }
 
 } // namespace CE

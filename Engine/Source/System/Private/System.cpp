@@ -1,8 +1,5 @@
 
 #include "System.h"
-#include "CoreMinimal.h"
-
-#include "GameFramework/GameFramework.h"
 
 CE_IMPLEMENT_MODULE(System, CE::SystemModule)
 
@@ -22,6 +19,7 @@ namespace CE
 
     void SystemModule::RegisterTypes()
     {
+        // Game Framework Types
         CE_REGISTER_TYPES(
             Engine,
             GameObject,
@@ -29,6 +27,12 @@ namespace CE
             Scene
         );
         
+        // Configs
+        CE_REGISTER_TYPES(
+            ConfigBase,
+            PluginConfig
+        );
+
         // Register Components
         CE_REGISTER_TYPES(
             TransformComponent

@@ -31,6 +31,11 @@ namespace CE
         return GetAppRootDir() / "Editor";
     }
 
+    IO::Path WindowsDirectories::GetGameDir()
+    {
+        return GetAppRootDir() / "Game";
+    }
+
     IO::Path WindowsDirectories::GetModuleDir()
     {
         return GetLaunchDir();

@@ -16,6 +16,7 @@ namespace CE
         
         virtual void StartupModule() override;
         virtual void ShutdownModule() override;
+        virtual void RegisterTypes() override;
         
         void Initialize();
         void PreShutdown();

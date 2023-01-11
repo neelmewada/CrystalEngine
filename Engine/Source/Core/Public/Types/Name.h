@@ -25,40 +25,28 @@ namespace CE
         Name(const char* name);
         ~Name() = default;
 
-        CE_INLINE SIZE_T GetHashValue() const { return HashValue; }
+        CE_INLINE SIZE_T GetHashValue() const { return hashValue; }
 
-        CE_INLINE String GetString() const { return Value; }
+        CE_INLINE String GetString() const { return value; }
         
         CE_INLINE const char* GetCString() const
         {
-            return Value.GetCString();
+            return value.GetCString();
         }
 
         CE_INLINE bool operator==(const Name& rhs) const
         {
-            return HashValue == rhs.HashValue;
+            return hashValue == rhs.hashValue;
         }
 
         CE_INLINE bool operator!=(const Name& rhs) const
         {
-            return HashValue != rhs.HashValue;
-        }
-
-        CE_INLINE u32 GetComponentCount()
-        {
-            return (u32)Components.GetSize();
-        }
-
-        CE_INLINE StringView GetComponentAt(u32 index)
-        {
-            return StringView(Components[index]);
+            return hashValue != rhs.hashValue;
         }
 
     private:
-        String Value;
-        SIZE_T HashValue;
-
-        CE::Array<String> Components{};
+        String value;
+        SIZE_T hashValue;
     };
 
     template<>

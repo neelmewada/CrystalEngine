@@ -158,6 +158,22 @@ namespace CE
 		return LoadPluginModule(moduleName, result);
 	}
 
+	String ModuleManager::GetLoadedModuleName(Module* modulePtr)
+	{
+		if (modulePtr == nullptr)
+			return "";
+
+		for (auto [moduleName, moduleInfo] : ModuleMap)
+		{
+			if (moduleInfo.moduleImpl == modulePtr)
+			{
+				return moduleName;
+			}
+		}
+
+		return "";
+	}
+
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
 	{
 		IO::Path moduleDllPath = PlatformProcess::GetModuleDllPath(moduleName);
@@ -209,20 +225,13 @@ namespace CE
 		IO::Path enginePluginDir = PlatformDirectories::GetEngineDir() / "Plugins";
 		IO::Path editorPluginDir = PlatformDirectories::GetEditorDir() / "Plugins";
 
-		IO::Path engineModulePath = enginePluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
-		IO::Path editorModulePath = editorPluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
+		//IO::Path engineModulePath = enginePluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
+		//IO::Path editorModulePath = editorPluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
 
-		IO::Path pluginDllPath;
+		String dllName = PlatformProcess::GetDllDecoratedName(moduleName);
+		IO::Path pluginDllPath = PlatformDirectories::GetLaunchDir() / dllName;
 
-		if (engineModulePath.Exists())
-		{
-			pluginDllPath = engineModulePath;
-		}
-		else if (editorModulePath.Exists())
-		{
-			pluginDllPath = editorModulePath;
-		}
-		else
+		if (!pluginDllPath.Exists())
 		{
 			result = ModuleLoadResult::DllNotFound;
 			return nullptr;

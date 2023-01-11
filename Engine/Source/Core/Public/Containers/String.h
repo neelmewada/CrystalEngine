@@ -48,10 +48,11 @@ namespace CE
         String& operator=(const char* cString);
 
         // Concatenate operators
-        inline String& operator+(const String& other)
+        inline String operator+(const String& other)
         {
-            this->Concatenate(other);
-            return *this;
+            String result = String(*this);
+            result.Concatenate(other);
+            return result;
         }
 
         inline String& operator+=(const String& other)
@@ -59,10 +60,11 @@ namespace CE
             this->Concatenate(other);
             return *this;
         }
-        inline String& operator+(const char* cString)
+        inline String operator+(const char* cString)
         {
-            this->ConcatenateCString(cString);
-            return *this;
+            String result = String(*this);
+            result.ConcatenateCString(cString);
+            return result;
         }
         friend inline String operator+(const char* lhs, const String& rhs)
         {

@@ -19,7 +19,7 @@ namespace CE
     {
         for (int i = 0; i < components.GetSize(); i++)
         {
-            if (components[i]->IsActive())
+            if (!components[i]->IsActive())
             {
                 components[i]->Init();
                 components[i]->Activate();

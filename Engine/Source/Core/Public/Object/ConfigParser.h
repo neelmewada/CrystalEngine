@@ -16,7 +16,7 @@ namespace CE
     public:
         ConfigParser(StructType* structType);
 
-        void Parse(void* structInstance, CE::IO::Path filePath);
+        bool Parse(void* structInstance, CE::IO::Path filePath);
 
     private:
         StructType* structType = nullptr;

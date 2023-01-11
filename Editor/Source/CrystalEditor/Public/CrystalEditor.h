@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Launch/EditorLoop.h"
+
 #include "Events/EditorSystemEventBus.h"
 #include "Application/EditorQtApplication.h"
 #include "Application/CrystalEditorApplication.h"

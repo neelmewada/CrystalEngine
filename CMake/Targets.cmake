@@ -127,12 +127,12 @@ function(ce_add_target NAME TARGET_TYPE)
     # OUTPUT_DIRECTORY
 
     if(ce_add_target_OUTPUT_DIRECTORY)
-        set_target_properties(${NAME}
-            PROPERTIES
-                ARCHIVE_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
-                LIBRARY_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
-                RUNTIME_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
-        ) 
+        # set_target_properties(${NAME}
+        #     PROPERTIES
+        #         ARCHIVE_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+        #         LIBRARY_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+        #         RUNTIME_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+        # )
     endif()
 
     # COPY_CONFIGS

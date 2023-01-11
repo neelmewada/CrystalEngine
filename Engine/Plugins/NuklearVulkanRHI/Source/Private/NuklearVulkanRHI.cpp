@@ -31,4 +31,9 @@ namespace CE
 
 	}
 
+	void NuklearVulkanRHIModule::RegisterTypes()
+	{
+
+	}
+
 } // namespace CE

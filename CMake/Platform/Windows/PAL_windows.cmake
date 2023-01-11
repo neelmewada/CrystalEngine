@@ -1,5 +1,4 @@
 
-
 ce_set(PAL_EXECUTABLE_APPLICATION_FLAG WIN32_EXECUTABLE)
 
 if(${CE_STANDALONE})
@@ -10,7 +9,7 @@ else()
     ce_set(PAL_TRAIT_BUILD_EDITOR TRUE)
     ce_set(PAL_TRAIT_BUILD_HOST_TOOLS TRUE)
     ce_set(PAL_TRAIT_BUILD_HOST_LIBRARIES TRUE)
-    add_compile_definitions(PAL_TRAIT_WITH_EDITOR=1)
+    add_compile_definitions(PAL_TRAIT_BUILD_EDITOR=1)
 endif()
 
 # Graphics APIs

@@ -1,8 +1,16 @@
 #pragma once
 
-#include "Module/ModuleManager.h"
+#include "CoreMinimal.h"
 #include "Application/Application.h"
 
+// Configs
+#include "Config/ConfigBase.h"
+#include "Config/PluginConfig.h"
+#include "Config/ConfigManager.h"
+
+#include "Plugin/PluginManager.h"
+
+// Game Framework
 #include "GameFramework/GameFramework.h"
 
 namespace CE

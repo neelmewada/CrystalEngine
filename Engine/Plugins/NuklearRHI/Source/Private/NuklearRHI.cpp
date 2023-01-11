@@ -21,15 +21,26 @@ namespace CE
 
     }
 
+    void NuklearRHIModule::RegisterTypes()
+    {
+
+    }
+
     void NuklearRHIModule::Initialize()
     {
 #if PAL_TRAIT_VULKAN_SUPPORTED
         GDynamicRHI = new CE::NuklearVulkanRHI();
+#else
+#   error No valid Graphics API Supported by target platform
 #endif
+
+        RHIBus::BusConnect(GDynamicRHI);
     }
 
     void NuklearRHIModule::PreShutdown()
     {
+        RHIBus::BusDisconnect(GDynamicRHI);
+
         delete GDynamicRHI;
         GDynamicRHI = nullptr;
     }

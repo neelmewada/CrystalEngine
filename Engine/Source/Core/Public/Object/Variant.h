@@ -109,7 +109,6 @@ namespace CE
 			}
 		}
 
-
 		CE_INLINE void* GetRawPtrValue() const
 		{
 			return PtrValue;

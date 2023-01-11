@@ -5,35 +5,12 @@
 #include "EditorSystem.h"
 #include "CrystalEditor.h"
 
+static CE::Editor::EditorLoop GEditorLoop{};
+
 int GuardedMain(int argc, char** argv);
 
 int GuardedMain(int argc, char** argv)
 {
-	using namespace CE::Editor;
-
-	CE::Logger::Initialize();
-	CE::ModuleManager::Get().LoadModule("Core");
-	CE::ModuleManager::Get().LoadModule("System");
-	
-	// Load plugins
-
-
-	CE::ModuleManager::Get().LoadModule("EditorCore");
-	CE::ModuleManager::Get().LoadModule("EditorSystem");
-
-	CrystalEditorApplication app{ argc, argv };
-
-	app.Initialize();
-
-	auto ret = app.exec();
-
-	CE::ModuleManager::Get().UnloadModule("EditorSystem");
-	CE::ModuleManager::Get().UnloadModule("EditorCore");
-
-	CE::ModuleManager::Get().UnloadModule("System");
-	CE::ModuleManager::Get().UnloadModule("Core");
-	CE::Logger::Shutdown();
-
-	return ret;
+	return GEditorLoop.RunLoop(argc, argv);
 }
 
