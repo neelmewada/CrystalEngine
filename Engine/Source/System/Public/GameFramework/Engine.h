@@ -40,7 +40,9 @@ CE_RTTI_CLASS(SYSTEM_API, CE, Engine,
     CE_SUPER(CE::SystemObject),
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
-    CE_FIELD_LIST(),
+    CE_FIELD_LIST(
+        
+    ),
     CE_FUNCTION_LIST()
 )
 

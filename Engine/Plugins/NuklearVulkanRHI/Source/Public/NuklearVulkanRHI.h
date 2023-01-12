@@ -25,6 +25,8 @@ namespace CE
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
         
+        virtual RHIGraphicsBackend GetGraphicsBackend() override;
+
     };
     
 } // namespace CE

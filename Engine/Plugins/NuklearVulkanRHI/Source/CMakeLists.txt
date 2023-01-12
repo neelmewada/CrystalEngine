@@ -20,6 +20,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME_LOWERCASE}_public_files.cmake
     INCLUDE_DIRECTORIES
         PRIVATE
+            ${Vulkan_INCLUDE_DIR}
             Private/
         PUBLIC
             Public/
@@ -30,6 +31,9 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             CE::Core
             CE::System
+            Vulkan
+        PUBLIC
+            ThirdParty::sdl
     RUNTIME_DEPENDENCIES
         
 )

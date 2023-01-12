@@ -35,11 +35,17 @@ namespace CE
 #endif
 
         RHIBus::BusConnect(GDynamicRHI);
+
+        GDynamicRHI->Initialize();
     }
 
     void NuklearRHIModule::PreShutdown()
     {
+        GDynamicRHI->PreShutdown();
+
         RHIBus::BusDisconnect(GDynamicRHI);
+
+        GDynamicRHI->Shutdown();
 
         delete GDynamicRHI;
         GDynamicRHI = nullptr;
