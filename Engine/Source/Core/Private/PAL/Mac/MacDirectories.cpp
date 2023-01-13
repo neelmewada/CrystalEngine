@@ -41,6 +41,11 @@ namespace CE
         return GetAppRootDir() / "Editor";
     }
 
+    IO::Path MacDirectories::GetGameDir()
+    {
+        return GetAppRootDir() / "Game";
+    }
+
     IO::Path MacDirectories::GetAppDataDir()
     {
         FSRef ref;

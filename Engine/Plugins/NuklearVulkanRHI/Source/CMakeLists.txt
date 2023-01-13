@@ -31,7 +31,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             CE::Core
             CE::System
-            Vulkan
+            ${Vulkan_LIBRARIES}
         PUBLIC
             ThirdParty::sdl
     RUNTIME_DEPENDENCIES

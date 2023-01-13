@@ -19,6 +19,7 @@ namespace CE
 
         static IO::Path GetEngineDir();
         static IO::Path GetEditorDir();
+        static IO::Path GetGameDir();
 
         static IO::Path GetModuleDir();
 
