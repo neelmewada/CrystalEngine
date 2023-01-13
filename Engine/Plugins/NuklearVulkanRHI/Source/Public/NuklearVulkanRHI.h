@@ -3,6 +3,9 @@
 #include "CoreMinimal.h"
 #include "RHI/RHI.h"
 
+struct VkInstance_T;
+typedef VkInstance_T* VkInstance;
+
 namespace CE
 {
     class NUKLEARVULKANRHI_API NuklearVulkanRHIModule : public PluginModule
@@ -27,6 +30,8 @@ namespace CE
         
         virtual RHIGraphicsBackend GetGraphicsBackend() override;
 
+    private:
+        VkInstance vkInstance = nullptr;
     };
     
 } // namespace CE
