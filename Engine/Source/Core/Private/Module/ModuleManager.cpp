@@ -222,12 +222,6 @@ namespace CE
 
 	ModuleInfo* ModuleManager::AddPluginModule(String moduleName, ModuleLoadResult& result)
 	{
-		IO::Path enginePluginDir = PlatformDirectories::GetEngineDir() / "Plugins";
-		IO::Path editorPluginDir = PlatformDirectories::GetEditorDir() / "Plugins";
-
-		//IO::Path engineModulePath = enginePluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
-		//IO::Path editorModulePath = editorPluginDir / moduleName / (PlatformProcess::GetDllDecoratedName(moduleName));
-
 		String dllName = PlatformProcess::GetDllDecoratedName(moduleName);
 		IO::Path pluginDllPath = PlatformDirectories::GetLaunchDir() / dllName;
 
