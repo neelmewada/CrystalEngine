@@ -3,6 +3,7 @@
 #include "VulkanRHIPrivate.h"
 
 #include "vulkan/vulkan.h"
+#include "vma/vk_mem_alloc.h"
 
 CE_IMPLEMENT_PLUGIN(NuklearVulkanRHI, CE::NuklearVulkanRHIModule)
 
@@ -27,8 +28,10 @@ namespace CE
 	{
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.apiVersion = VK_VERSION_1_0;
+        appInfo.apiVersion = VK_API_VERSION_1_0;
+        appInfo.pEngineName = "Crystal Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
+        appInfo.pApplicationName = "Crystal Engine App";
         appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
         
         VkInstanceCreateInfo instanceCI{};
@@ -49,8 +52,14 @@ namespace CE
 
 	void NuklearVulkanRHI::Shutdown()
 	{
-
+        vkDestroyInstance(vkInstance, nullptr);
+        vkInstance = nullptr;
 	}
+
+    void* NuklearVulkanRHI::GetNativeHandle()
+    {
+        return vkInstance;
+    }
 
 	RHIGraphicsBackend NuklearVulkanRHI::GetGraphicsBackend()
 	{

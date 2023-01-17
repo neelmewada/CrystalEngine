@@ -28,6 +28,8 @@ namespace CE
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
         
+        virtual void* GetNativeHandle() override;
+        
         virtual RHIGraphicsBackend GetGraphicsBackend() override;
 
     private:
