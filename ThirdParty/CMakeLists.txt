@@ -7,6 +7,7 @@ find_package(xxHash REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yaml REQUIRED)
 find_package(mINI REQUIRED)
+find_package(cxxopts REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)

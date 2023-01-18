@@ -3,6 +3,9 @@
 #include "Events/EditorSystemEventBus.h"
 #include "Application/EditorQtApplication.h"
 
+// Data
+#include "Data/EditorPrefs.h"
+
 #include "Module/ModuleManager.h"
 
 namespace CE::Editor

@@ -33,6 +33,11 @@ if(${PAL_TRAIT_BUILD_EDITOR})
     add_subdirectory(Editor)
 endif()
 
+# Build Host Libraries
+if(${PAL_TRAIT_BUILD_HOST_LIBRARIES})
+    add_subdirectory(Libraries)
+endif()
+
 # Build Host Tools
 if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     add_subdirectory(Tools)

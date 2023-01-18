@@ -3,11 +3,13 @@
 #include "Containers/String.h"
 
 #include <filesystem>
+#include <fstream>
 
 namespace fs = std::filesystem;
 
 namespace CE::IO
 {
+    class FileStream;
     
     class CORE_API Path
     {
@@ -98,8 +100,15 @@ namespace CE::IO
             return os;
         }
 
+        inline static bool CreateDirectories(IO::Path path)
+        {
+            return fs::create_directories(path.Impl);
+        }
+
     private:
         fs::path Impl;
+
+        friend class CE::IO::FileStream;
     };
 
 } // namespace CE::IO

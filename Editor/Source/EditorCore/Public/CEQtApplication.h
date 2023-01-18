@@ -17,7 +17,14 @@ namespace CE::Editor::Qt
 
         static void InitializeDpiScaling();
 
+        inline int GetArgumentCount() { return argc; }
+        
+        inline char** GetArguments() { return argv; }
+
     private:
+        int argc;
+        char** argv;
+
         StyleManager StyleManager{ this };
     };
     

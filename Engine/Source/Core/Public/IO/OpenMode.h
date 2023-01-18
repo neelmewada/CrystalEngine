@@ -14,5 +14,6 @@ namespace CE::IO
         ModeUpdate = (1 << 5),
         ModeCreatePath = (1 << 6),
     };
+    ENUM_CLASS_FLAGS(OpenMode)
 
 } // namespace CE::IO

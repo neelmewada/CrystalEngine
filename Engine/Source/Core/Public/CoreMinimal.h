@@ -13,6 +13,7 @@
 #include "IO/Path.h"
 #include "IO/Stream/GenericStream.h"
 #include "IO/Stream/MemoryStream.h"
+#include "IO/Stream/FileStream.h"
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
 

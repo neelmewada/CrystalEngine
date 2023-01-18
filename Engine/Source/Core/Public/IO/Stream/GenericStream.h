@@ -43,7 +43,7 @@ namespace CE::IO
         virtual SIZE_T      ReadAtOffset(SIZE_T bytes, void* oBuffer, SSIZE_T offsetInBytes = -1);
         virtual SIZE_T      WriteAtOffset(SIZE_T bytes, const void* iBuffer, SSIZE_T offsetInBytes = -1);
         virtual bool        IsCompressed() const { return false; }
-        virtual const char* GetFilename() const { return ""; }
+        virtual String      GetFilename() const { return ""; }
         virtual OpenMode    GetModeFlags() const { return OpenMode(); }
         virtual bool        ReOpen() { return true; }
         virtual void        Close() {}

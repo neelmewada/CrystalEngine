@@ -18,7 +18,9 @@ namespace CE::Editor
 
     void EditorSystemModule::RegisterTypes()
     {
-
+        CE_REGISTER_TYPES(
+            EditorPrefs
+        )
     }
 
 } // namespace CE::Editor
