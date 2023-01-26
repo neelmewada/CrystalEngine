@@ -44,6 +44,7 @@ namespace CE::Editor
         virtual Engine* GetEngineRef() override;
 
     private:
+
         WelcomeScreen* welcomeScreen = nullptr;
         ProjectBrowser* projectBrowser = nullptr;
         CrystalEditorWindow* editorWindow = nullptr;

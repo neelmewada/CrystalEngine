@@ -8,6 +8,7 @@ find_package(spdlog REQUIRED)
 find_package(yaml REQUIRED)
 find_package(mINI REQUIRED)
 find_package(cxxopts REQUIRED)
+find_package(efsw REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)

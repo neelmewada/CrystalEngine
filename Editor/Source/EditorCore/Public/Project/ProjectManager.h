@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ProjectMetaData.h"
+#include "Project/ProjectSettings.h"
 
 #include "IO/Path.h"
 

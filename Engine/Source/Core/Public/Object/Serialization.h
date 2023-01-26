@@ -19,12 +19,14 @@ namespace CE
         SerializedObject(Object* instance, SerializedObject* parent = nullptr);
         virtual ~SerializedObject();
         
+        void Serialize(IO::FileStream& outFile);
         void Serialize(IO::MemoryStream& outStream);
         void Serialize(YAML::Emitter& emitter);
         
         void SerializeField(FieldType* fieldType, YAML::Emitter& emitter);
         void DeserializeField(FieldType* fieldType, YAML::Node& node);
         
+        void Deserialize(IO::FileStream& inFile);
         void Deserialize(IO::MemoryStream& inStream);
         void Deserialize(YAML::Node& root);
         

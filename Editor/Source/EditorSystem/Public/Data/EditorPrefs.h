@@ -14,12 +14,14 @@ namespace CE::Editor
 
     public:
 
-        static EditorPrefs* Load();
+        static void Reload();
+        static EditorPrefs& Load();
         
         String latestProjectPath{};
         String latestProjectName{};
 
     private:
+        
         static EditorPrefs editorPrefs;
     };
 

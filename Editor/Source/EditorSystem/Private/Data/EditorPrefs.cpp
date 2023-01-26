@@ -6,7 +6,7 @@ namespace CE::Editor
     
     EditorPrefs EditorPrefs::editorPrefs{};
 
-    EditorPrefs* EditorPrefs::Load()
+    void EditorPrefs::Reload()
     {
         auto editorPrefsDir = PlatformDirectories::GetAppDataDir();
         auto editorPrefsPath = editorPrefsDir / "EditorPrefs.dat";
@@ -21,13 +21,26 @@ namespace CE::Editor
         if (editorPrefsPath.Exists())
         {
             file = IO::FileStream(editorPrefsPath, IO::OpenMode::ModeRead);
+
+            SerializedObject so{ Self::Type(), &editorPrefs };
+
+            so.Deserialize(file);
         }
         else
         {
             file = IO::FileStream(editorPrefsPath, IO::OpenMode::ModeWrite | IO::OpenMode::ModeRead); // ModeWrite will create the file if it doesn't exist
-        }
 
-        return &editorPrefs;
+            SerializedObject so{ Self::Type(), &editorPrefs };
+
+            so.Serialize(file);
+        }
+    }
+
+    EditorPrefs& EditorPrefs::Load()
+    {
+        Reload();
+
+        return editorPrefs;
     }
 
 } // namespace CE::Editor

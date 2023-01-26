@@ -73,7 +73,6 @@ namespace CE::IO
         
         virtual const char* GetRawPointer() const override { return buffer; }
         
-        //SIZE_T      WriteFromStream(SIZE_T bytes, GenericStream* inputStream) override;
         virtual const void* GetData() const { return buffer; }
         SIZE_T      GetCurPos() const override { return currentOffset; }
         SIZE_T      GetLength() const override { return currentLength; }

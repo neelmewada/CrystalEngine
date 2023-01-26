@@ -121,10 +121,6 @@ function(ce_add_target NAME TARGET_TYPE)
     
     ce_group_sources_by_folder(${NAME})
 
-    # source_group(Public FILES ${PUBLIC_FILES})
-    # source_group(Private FILES ${PRIVATE_FILES})
-    # source_group(Generated FILES ${GENERATED_FILES})
-
     # OUTPUT_DIRECTORY
 
     if((${ce_add_target_OUTPUT_DIRECTORY}) AND (${TARGET_TYPE} STREQUAL "TOOL"))

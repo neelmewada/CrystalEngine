@@ -40,6 +40,20 @@ namespace CE
         
     }
 
+    void SerializedObject::Serialize(IO::FileStream& outFile)
+    {
+        if (type == nullptr || instance == nullptr)
+            return;
+
+        IO::MemoryStream memStream{};
+
+        Serialize(memStream);
+
+        outFile.Write(memStream.GetLength(), memStream.GetData());
+
+        memStream.Free();
+    }
+
     void SerializedObject::Serialize(IO::MemoryStream& outStream)
     {
         if (type == nullptr || instance == nullptr)
@@ -276,6 +290,21 @@ namespace CE
             emitter << YAML::Null;
             return;
         }
+    }
+
+    void SerializedObject::Deserialize(IO::FileStream& inStream)
+    {
+        if (type == nullptr || instance == nullptr)
+            return;
+
+        auto size = inStream.GetLength();
+
+        IO::MemoryStream memStream{ size };
+        memStream.Read(size, (void*)memStream.GetRawPointer());
+
+        Deserialize(memStream);
+        
+        memStream.Free();
     }
 
     void SerializedObject::Deserialize(IO::MemoryStream& inStream)
