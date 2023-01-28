@@ -102,7 +102,7 @@ namespace CE::Editor
 
     void EditorPrefs::HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName)
     {
-        CE_LOG(Info, All, "File changed. Dir = {}\nFile = {}\nAction = {}", directory, fileName, fileAction);
+        CE_LOG(Info, All, "File changed. Dir = {}\nFile = {}\nAction = {}", directory, fileName, (u32)fileAction);
         if (fileName == "EditorPrefs.dat")
         {
             cacheValid = false;

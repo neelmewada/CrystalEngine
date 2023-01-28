@@ -22,7 +22,7 @@ namespace CE::IO
 
     bool FileStream::CanWrite() const
     {
-        return (u32)(fileMode & OpenMode::ModeWrite) || (u32)(fileMode & OpenMode::ModeAppend) || (u32)(fileMode & OpenMode::ModeBinary) || (u32)(fileMode & OpenMode::ModeText);
+        return (u32)(fileMode & OpenMode::ModeWrite) || (u32)(fileMode & OpenMode::ModeAppend) || (u32)(fileMode & OpenMode::ModeBinary);
     }
 
     void FileStream::Seek(SSIZE_T offsetInBytes, SeekMode mode)

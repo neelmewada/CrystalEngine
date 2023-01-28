@@ -44,7 +44,7 @@ namespace CE
     {
         if (type == nullptr || instance == nullptr)
             return;
-
+        
         IO::FileStream fileStream{ outFilePath, IO::OpenMode::ModeWrite };
         Serialize(fileStream);
     }
