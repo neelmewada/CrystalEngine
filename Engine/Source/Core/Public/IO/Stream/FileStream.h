@@ -16,11 +16,23 @@ namespace CE::IO
         {}
 
         FileStream(Path filePath, OpenMode fileMode)
-            : fStream(filePath.Impl, (std::ios_base::openmode)fileMode)
+            : fileMode(fileMode), filePath(filePath)
         {
-
+            if (filePath.IsDirectory())
+            {
+                valid = false;
+                return;
+            }
+            Path baseDir = filePath.GetParentPath();
+            if (!baseDir.Exists())
+            {
+                Path::CreateDirectories(baseDir);
+            }
+            fStream = std::fstream(filePath.Impl, (std::ios_base::openmode)fileMode);
+            valid = true;
         }
 
+        virtual bool        IsValid() const { return valid; }
         virtual bool        IsOpen() const override;
         virtual bool        CanSeek() const override;
         virtual bool        CanRead() const override;
@@ -42,6 +54,7 @@ namespace CE::IO
         virtual void        Close() override;
 
     private:
+        bool valid = true;
         SIZE_T currentOffset = 0;
         SeekMode seekMode = ST_SEEK_BEGIN;
 

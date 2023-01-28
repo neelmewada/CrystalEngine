@@ -108,6 +108,11 @@ namespace CE
             Impl.clear();
         }
 
+        CE_INLINE void Resize(u32 newSize)
+        {
+            Impl.resize(newSize);
+        }
+
         CE_INLINE bool Exists(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)

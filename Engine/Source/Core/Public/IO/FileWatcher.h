@@ -40,6 +40,8 @@ namespace CE::IO
 
         void RemoveWatcher(WatchID watchId);
 
+        void Watch();
+
     private:
         efsw::FileWatcher* fileWatcherImpl = nullptr;
         HashMap<WatchID, FileWatchListernerImpl*> watchIdToListenerMap{};

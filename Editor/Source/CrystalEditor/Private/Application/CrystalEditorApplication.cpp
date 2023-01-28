@@ -52,6 +52,8 @@ namespace CE::Editor
 
     void CrystalEditorApplication::OnOpenProject(IO::Path projectPath)
     {
+        ProjectManager::Get().LoadProject(projectPath);
+
         editorWindow = new CrystalEditorWindow;
         editorWindow->show();
 
@@ -64,7 +66,16 @@ namespace CE::Editor
 
     void CrystalEditorApplication::OnCreateProject(IO::Path projectDirectory, String projectName)
     {
+        ProjectManager::Get().CreateProject(projectDirectory, projectName);
 
+        editorWindow = new CrystalEditorWindow;
+        editorWindow->show();
+
+        if (projectBrowser != nullptr && projectBrowser->isVisible())
+        {
+            projectBrowser->close();
+            CE_DELETE(projectBrowser);
+        }
     }
 
     Engine* CrystalEditorApplication::GetEngineRef()

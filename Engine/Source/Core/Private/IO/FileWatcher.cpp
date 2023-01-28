@@ -68,5 +68,10 @@ namespace CE::IO
         fileWatcherImpl->removeWatch(static_cast<efsw::WatchID>(watchId));
     }
 
+    void FileWatcher::Watch()
+    {
+        fileWatcherImpl->watch();
+    }
+
 } // namespace CE::IO
 

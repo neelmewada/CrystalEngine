@@ -29,6 +29,10 @@
 #include "Object/Serialization.h"
 #include "Object/SystemObject.h"
 
+// *****************************************************
+// Project
+#include "Project/ProjectSettings.h"
+
 // ******************************************************
 // Math
 #include "Math/Math.h"

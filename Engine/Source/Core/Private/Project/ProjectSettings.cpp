@@ -5,6 +5,7 @@
 
 namespace CE
 {
+	ProjectSettings ProjectSettings::currentProject = {};
 
 	ProjectSettings::ProjectSettings()
 	{
@@ -27,6 +28,8 @@ namespace CE
 
 		IO::FileStream file{ filePath, IO::OpenMode::ModeRead };
 		so.Deserialize(file);
+
+		loaded = true;
 #endif
 	}
 

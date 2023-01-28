@@ -21,7 +21,7 @@ namespace CE
     {
         // Miscellaneous Types
         CE_REGISTER_TYPES(
-            ProjectSettings
+            
         );
 
         // Game Framework Types

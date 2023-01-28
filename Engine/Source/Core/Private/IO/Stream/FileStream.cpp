@@ -77,7 +77,7 @@ namespace CE::IO
             curPos = curPos - GetLength() - bytes;
         }
 
-        SIZE_T curPos = GetCurPos();
+        curPos = GetCurPos();
         fStream.write((const char*)inBuffer, bytes);
         SIZE_T count = fStream.gcount();
         Seek(curPos, seekMode);

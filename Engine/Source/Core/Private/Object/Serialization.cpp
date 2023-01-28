@@ -40,6 +40,15 @@ namespace CE
         
     }
 
+    void SerializedObject::Serialize(IO::Path outFilePath)
+    {
+        if (type == nullptr || instance == nullptr)
+            return;
+
+        IO::FileStream fileStream{ outFilePath, IO::OpenMode::ModeWrite };
+        Serialize(fileStream);
+    }
+
     void SerializedObject::Serialize(IO::FileStream& outFile)
     {
         if (type == nullptr || instance == nullptr)
@@ -86,6 +95,20 @@ namespace CE
             emitter << YAML::Key << "_TypeId";
             emitter << YAML::Value << structType->GetTypeId();
             
+            auto field = structType->GetFirstField();
+
+            while (field != nullptr)
+            {
+                if (field->IsSerialized())
+                {
+                    auto fieldName = field->GetName().GetCString();
+                    emitter << YAML::Key << fieldName;
+                    emitter << YAML::Value;
+                    SerializeField(field, emitter);
+                }
+
+                field = field->GetNext();
+            }
         }
         else if (type->IsClass())
         {
@@ -161,7 +184,6 @@ namespace CE
                 return;
             }
 
-
             if (elementType->GetTypeId() == TYPEID(String))
             {
                 const Array<String>& stringArray = fieldType->GetFieldValue<Array<String>>(instance);
@@ -178,7 +200,7 @@ namespace CE
 
                 emitter << YAML::EndSeq;
             }
-            else if (elementType->IsPOD() || elementType->IsStruct() || elementType->IsEnum()) // Value types: can be serialized per byte
+            else if (elementType->IsPOD() || elementType->IsEnum()) // Value types: can be serialized per byte
             {
                 emitter << YAML::BeginSeq;
                 emitter << elementType->GetTypeId();
@@ -188,6 +210,24 @@ namespace CE
                     emitter << array[i];
                 }
                 
+                emitter << YAML::EndSeq;
+            }
+            else if (elementType->IsStruct())
+            {
+                const u8* ptr = &array[0];
+
+                u32 elementSize = elementType->GetSize();
+                int arrayElementCount = array.GetSize() / elementSize;
+
+                emitter << YAML::BeginSeq;
+                emitter << elementType->GetTypeId();
+
+                for (int i = 0; i < arrayElementCount; i++)
+                {
+                    SerializedObject so{ elementType, (void*)(ptr + i * elementSize) };
+                    so.Serialize(emitter);
+                }
+
                 emitter << YAML::EndSeq;
             }
             else if (elementType->IsObject()) // Reference types: Objects are stored as pointers
@@ -292,6 +332,15 @@ namespace CE
         }
     }
 
+    void SerializedObject::Deserialize(IO::Path inFilePath)
+    {
+        if (type == nullptr || instance == nullptr)
+            return;
+
+        IO::FileStream fileStream{ inFilePath, IO::OpenMode::ModeRead };
+        Deserialize(fileStream);
+    }
+
     void SerializedObject::Deserialize(IO::FileStream& inStream)
     {
         if (type == nullptr || instance == nullptr)
@@ -300,7 +349,7 @@ namespace CE
         auto size = inStream.GetLength();
 
         IO::MemoryStream memStream{ size };
-        memStream.Read(size, (void*)memStream.GetRawPointer());
+        inStream.Read(size, (void*)memStream.GetRawPointer());
 
         Deserialize(memStream);
         
@@ -348,6 +397,12 @@ namespace CE
             while (field != nullptr)
             {
                 auto fieldName = field->GetName().GetCString();
+
+                if (!root[fieldName].IsDefined())
+                {
+                    field = field->GetNext();
+                    continue;
+                }
                 
                 YAML::Node fieldNode = root[fieldName];
                 
@@ -369,7 +424,6 @@ namespace CE
                 return;
             }
             
-            
             // Deserialize Object properties first: uuid
             if (classType->IsObject())
             {
@@ -377,13 +431,19 @@ namespace CE
                 uuidField->SetFieldValue<UUID>(instance, root["uuid"].as<u64>());
             }
             
-            // Deserialize object stores first
+            // 1. Deserialize object stores first
             
             auto field = classType->GetFirstField();
             
             while (field != nullptr)
             {
                 const auto& fieldName = field->GetName();
+
+                if (!root[fieldName.GetCString()].IsDefined())
+                {
+                    field = field->GetNext();
+                    continue;
+                }
                 
                 if (field->IsObjectStoreType())
                 {
@@ -409,13 +469,19 @@ namespace CE
                 field = field->GetNext();
             }
             
-            // Deserialize other fields next
+            // 2. Deserialize other fields next
             
             field = classType->GetFirstField();
             
             while (field != nullptr)
             {
                 const auto& fieldName = field->GetName().GetCString();
+
+                if (!root[fieldName].IsDefined())
+                {
+                    field = field->GetNext();
+                    continue;
+                }
                 
                 YAML::Node fieldNode = root[fieldName];
                 
@@ -455,9 +521,6 @@ namespace CE
         }
         else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>))
         {
-            //auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
-            
-            // NEW CODE...
             auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
             auto elementType = GetTypeInfo(array.GetElementTypeId());
             
@@ -486,13 +549,31 @@ namespace CE
                     stringArray.Add(String(node[i].as<std::string>()));
                 }
             }
-            else if (elementType->IsPOD() || elementType->IsStruct() || elementType->IsEnum()) // Value types: can be serialized per byte
+            else if (elementType->IsPOD() || elementType->IsEnum()) // Value types: can be serialized per byte
             {
                 array.Clear();
                 
                 for (int i = 1; i < arraySize + 1; i++)
                 {
                     array.Add(node[i].as<u8>());
+                }
+            }
+            else if (elementType->IsStruct())
+            {
+                u32 elementSize = elementType->GetSize();
+                int arrayElementCount = node.size() - 1; // 1st element in node is always a TypeId
+                int numBytes = arrayElementCount * elementSize;
+
+                array.Clear();
+                array.Resize(numBytes);
+
+                const u8* ptr = &array[0];
+
+                for (int i = 0; i < arrayElementCount; i++)
+                {
+                    SerializedObject so{ elementType, (void*)(ptr + i * elementSize) };
+                    auto n = node[i + 1]; // 1st element is always a TypeId
+                    so.Deserialize(n);
                 }
             }
             else if (elementType->IsObject()) // Reference types: Objects are stored as pointers

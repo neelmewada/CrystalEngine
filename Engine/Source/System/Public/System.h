@@ -10,9 +10,6 @@
 
 #include "Plugin/PluginManager.h"
 
-// Project
-#include "Project/ProjectSettings.h"
-
 // Game Framework
 #include "GameFramework/GameFramework.h"
 

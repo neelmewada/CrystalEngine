@@ -19,6 +19,7 @@ namespace CE::Editor
     void EditorSystemModule::RegisterTypes()
     {
         CE_REGISTER_TYPES(
+            ProjectHistory,
             EditorPrefs
         )
     }

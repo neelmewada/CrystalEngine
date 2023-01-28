@@ -22,14 +22,18 @@ namespace CE::Editor
             return instance;
         }
 
-        inline bool IsLoaded() const { return isLoaded; }
+        CE_INLINE bool IsLoaded() const { return isLoaded; }
+        CE_INLINE IO::Path GetLoadedProjectPath() const { return loadedProjectPath; }
 
+        void CreateProject(IO::Path projectDirectory, String projectName);
         void LoadProject(IO::Path projectPath);
         void UnloadProject();
 
+        ProjectSettings& GetCurrentProject();
+
     private:
-        bool isLoaded = false;
         IO::Path loadedProjectPath{};
+        bool isLoaded = false;
     };
     
 } // namespace CE::Editor

@@ -32,13 +32,38 @@ namespace CE::Editor
 
     void ProjectBrowser::on_createProjectButtonBox_accepted()
     {
-        MBUS_EVENT(CrystalEditorEventBus, OnOpenProject, ""); // TODO: Placeholder empty project path
+        MBUS_EVENT(CrystalEditorEventBus, OnCreateProject, IO::Path(ui->projectFolderTextBox->text().toStdString()), String(ui->projectNameTextBox->text().toStdString())); // TODO: Placeholder empty project path
     }
 
 
     void ProjectBrowser::on_createProjectButtonBox_rejected()
     {
         close();
+        qApp->quit();
+    }
+
+
+    void ProjectBrowser::on_openProjectButtonBox_accepted()
+    {
+        MBUS_EVENT(CrystalEditorEventBus, OnOpenProject, IO::Path(ui->openProjectPathTextBox->text().toStdString()));
+    }
+
+
+    void ProjectBrowser::on_openProjectButtonBox_rejected()
+    {
+        close();
+        qApp->quit();
+    }
+
+
+    void ProjectBrowser::on_openSelectProjectButton_clicked()
+    {
+        QString projectFilePath = QFileDialog::getOpenFileName(this, "Select a Crystal Engine project", QString(), "*.cproject");
+
+        if (!projectFilePath.isEmpty())
+        {
+            ui->openProjectPathTextBox->setText(projectFilePath);
+        }
     }
 
 }

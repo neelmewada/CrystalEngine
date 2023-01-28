@@ -26,6 +26,12 @@ namespace CE::Editor
 
         void on_createProjectButtonBox_rejected();
 
+        void on_openProjectButtonBox_accepted();
+
+        void on_openProjectButtonBox_rejected();
+
+        void on_openSelectProjectButton_clicked();
+
     private:
         Ui::ProjectBrowser* ui;
     };

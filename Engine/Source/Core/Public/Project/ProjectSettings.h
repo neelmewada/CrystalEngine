@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "CoreTypes.h"
 
 namespace CE
 {
@@ -11,7 +11,7 @@ namespace CE
     }
 #endif
 
-    struct SYSTEM_API ProjectSettings
+    struct CORE_API ProjectSettings
     {
         CE_STRUCT(ProjectSettings)
 
@@ -24,10 +24,23 @@ namespace CE
 
         static ProjectSettings& Get();
 
+        CE_INLINE UUID GetProjectUuid() const { return projectUuid; }
+        CE_INLINE String GetProjectName() const { return projectName; }
+        CE_INLINE String GetProjectVersion() const { return projectVersion; }
+        CE_INLINE String GetEngineVersion() const { return engineVersion; }
+
+    private:
+
+        static ProjectSettings currentProject;
+
+        bool loaded = false;
+
+        UUID projectUuid{};
+
         String projectName{};
         String projectVersion{};
 
-        String engineVersion = "0.1.0";
+        String engineVersion{};
 
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::ProjectManager;
@@ -36,10 +49,11 @@ namespace CE
     
 } // namespace CE
 
-CE_RTTI_STRUCT(SYSTEM_API, CE, ProjectSettings,
+CE_RTTI_STRUCT(CORE_API, CE, ProjectSettings,
     CE_SUPER(),
     CE_ATTRIBS(),
     CE_FIELD_LIST(
+        CE_FIELD(projectUuid)
         CE_FIELD(projectName)
         CE_FIELD(projectVersion)
         CE_FIELD(engineVersion)

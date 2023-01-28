@@ -1,5 +1,10 @@
 #pragma once
 
+#define CE_MAKE_VERSION(major, minor, patch, build) ((u64)major << (16*16*16)) | ((u64)minor << (16*16)) | ((u64)patch << 16) | (u64)build
+
+#define CE_ENGINE_VERSION CE_MAKE_VERSION(0, 1, 0, 0)
+#define CE_ENGINE_VERSION_STRING "0.1.0.0"
+
 #define CE_DEPRECATED(Version, Message) [[deprecated(Message " Please update your code to not use the deprecated API.")]]
 
 #define CE_NO_COPY(Class) Class(Class& Copy) = delete;

@@ -25,6 +25,10 @@ namespace CE
             CE::String, CE::UUID, CE::Name,
             CE::Vec2, CE::Vec3, CE::Vec4, CE::Quat, CE::Matrix4x4);
 
+        CE_REGISTER_TYPES(
+            ProjectSettings
+        );
+
         // Register Objects
         CE_REGISTER_TYPES(
             Object,
