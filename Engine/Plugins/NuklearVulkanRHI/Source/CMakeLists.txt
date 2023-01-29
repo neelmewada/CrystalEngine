@@ -38,3 +38,4 @@ ce_add_target(${PROJECT_NAME} SHARED
         
 )
 
+add_dependencies(EnginePlugins ${PROJECT_NAME})

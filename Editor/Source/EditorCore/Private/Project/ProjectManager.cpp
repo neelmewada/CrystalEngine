@@ -43,6 +43,8 @@ namespace CE::Editor
 		{
 			return;
 		}
+        
+        CE_LOG(Info, All, "Loading project at path: {}", projectPath);
 
 		ProjectSettings* projectSettings = &ProjectSettings::Get();
 		
