@@ -126,6 +126,12 @@ namespace CE
 		const TypeInfo* types[] = { GetStaticType<Args>()... };
 	}
 
+	template<>
+	CE_INLINE void RegisterTypes()
+	{
+
+	}
+
 } // namespace CE
 
 // Simple data types

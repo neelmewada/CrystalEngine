@@ -3,6 +3,8 @@
 
 #include "Project/ProjectSettings.h"
 
+#include <cstring>
+
 namespace CE
 {
 	ProjectSettings ProjectSettings::currentProject = {};

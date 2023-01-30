@@ -80,7 +80,7 @@ namespace CE::Editor
         return instance;
     }
 
-    void EditorPrefs::OnProjectOpened()
+    void EditorPrefs::OnProjectChanged()
     {
         ProjectSettings& project = ProjectSettings::Get();
 
@@ -100,9 +100,18 @@ namespace CE::Editor
         }
     }
 
+    IO::Path EditorPrefs::GetLatestProjectPath()
+    {
+        if (recentProjects.GetSize() == 0)
+        {
+            return IO::Path();
+        }
+
+        return recentProjects[recentProjects.GetSize() - 1].projectPath;
+    }
+
     void EditorPrefs::HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName)
     {
-        CE_LOG(Info, All, "File changed. Dir = {}\nFile = {}\nAction = {}", directory, fileName, (u32)fileAction);
         if (fileName == "EditorPrefs.dat")
         {
             cacheValid = false;

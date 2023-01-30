@@ -44,6 +44,7 @@ namespace CE::IO
 
     private:
         efsw::FileWatcher* fileWatcherImpl = nullptr;
+        CE::Array<WatchID> watchIds{};
         HashMap<WatchID, FileWatchListernerImpl*> watchIdToListenerMap{};
     };
     

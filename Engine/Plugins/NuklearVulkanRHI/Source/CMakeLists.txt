@@ -32,6 +32,9 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::Core
             CE::System
             ${Vulkan_LIBRARIES}
+            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Core>
+            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Gui>
+            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Widgets>
         PUBLIC
             ThirdParty::sdl
     RUNTIME_DEPENDENCIES

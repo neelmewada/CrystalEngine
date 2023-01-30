@@ -29,9 +29,9 @@ namespace CE
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.apiVersion = VK_API_VERSION_1_0;
-        appInfo.pEngineName = "Crystal Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
-        appInfo.pApplicationName = "Crystal Engine App";
+        appInfo.pEngineName = CE_ENGINE_NAME_STRING;
+        appInfo.engineVersion = VK_MAKE_VERSION(CE_VERSION_MAJOR, CE_VERSION_MINOR, CE_VERSION_PATCH);
+        appInfo.pApplicationName = ProjectSettings::Get().GetProjectName().GetCString();
         appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
         
         VkInstanceCreateInfo instanceCI{};

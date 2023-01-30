@@ -12,6 +12,16 @@ namespace CE::Editor
         ui(new Ui::ProjectBrowser)
     {
         ui->setupUi(this);
+
+        auto path = EditorPrefs::Get().GetLatestProjectPath();
+
+        if (!path.IsEmpty())
+        {
+            String pathStr = path.GetString();
+            String parentPathStr = path.GetParentPath().GetString();
+            ui->openProjectPathTextBox->setText(QString(pathStr.GetCString()));
+            ui->projectFolderTextBox->setText(QString(parentPathStr.GetCString()));
+        }
     }
 
     ProjectBrowser::~ProjectBrowser()
@@ -21,7 +31,7 @@ namespace CE::Editor
 
     void ProjectBrowser::on_openSelectFolderButton_clicked()
     {
-        QString folderPath = QFileDialog::getExistingDirectory(this, "Select a folder for new project");
+        QString folderPath = QFileDialog::getExistingDirectory(this, "Select a folder for new project", ui->projectFolderTextBox->text());
         
         if (!folderPath.isEmpty())
         {
@@ -58,7 +68,7 @@ namespace CE::Editor
 
     void ProjectBrowser::on_openSelectProjectButton_clicked()
     {
-        QString projectFilePath = QFileDialog::getOpenFileName(this, "Select a Crystal Engine project", QString(), "*.cproject");
+        QString projectFilePath = QFileDialog::getOpenFileName(this, "Select a Crystal Engine project", ui->openProjectPathTextBox->text(), "*.cproject");
 
         if (!projectFilePath.isEmpty())
         {

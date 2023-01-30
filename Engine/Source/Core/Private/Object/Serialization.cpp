@@ -93,7 +93,7 @@ namespace CE
             
             // Store the TypeId of the struct
             emitter << YAML::Key << "_TypeId";
-            emitter << YAML::Value << structType->GetTypeId();
+            emitter << YAML::Value << structType->GetName();
             
             auto field = structType->GetFirstField();
 
@@ -116,7 +116,7 @@ namespace CE
             
             // Store the TypeId of the class
             emitter << YAML::Key << "_TypeId";
-            emitter << YAML::Value << classType->GetTypeId();
+            emitter << YAML::Value << classType->GetName();
             
             auto field = classType->GetFirstField();
             
@@ -189,7 +189,7 @@ namespace CE
                 const Array<String>& stringArray = fieldType->GetFieldValue<Array<String>>(instance);
 
                 emitter << YAML::BeginSeq;
-                emitter << TYPEID(String);
+                emitter << GetStaticType<String>()->GetName();
 
                 for (int i = 0; i < stringArray.GetSize(); i++)
                 {
@@ -203,7 +203,7 @@ namespace CE
             else if (elementType->IsPOD() || elementType->IsEnum()) // Value types: can be serialized per byte
             {
                 emitter << YAML::BeginSeq;
-                emitter << elementType->GetTypeId();
+                emitter << elementType->GetName();
                 
                 for (int i = 0; array.GetSize(); i++)
                 {
@@ -214,18 +214,21 @@ namespace CE
             }
             else if (elementType->IsStruct())
             {
-                const u8* ptr = &array[0];
-
                 u32 elementSize = elementType->GetSize();
                 int arrayElementCount = array.GetSize() / elementSize;
 
                 emitter << YAML::BeginSeq;
-                emitter << elementType->GetTypeId();
+                emitter << elementType->GetName();
 
-                for (int i = 0; i < arrayElementCount; i++)
+                if (array.GetSize() > 0)
                 {
-                    SerializedObject so{ elementType, (void*)(ptr + i * elementSize) };
-                    so.Serialize(emitter);
+                    const u8* ptr = &array[0];
+
+                    for (int i = 0; i < arrayElementCount; i++)
+                    {
+                        SerializedObject so{ elementType, (void*)(ptr + i * elementSize) };
+                        so.Serialize(emitter);
+                    }
                 }
 
                 emitter << YAML::EndSeq;
@@ -235,7 +238,7 @@ namespace CE
                 Array<Object*>& objectArray = fieldType->GetFieldValue<Array<Object*>>(instance);
                 
                 emitter << YAML::BeginSeq;
-                emitter << elementType->GetTypeId();
+                emitter << elementType->GetName();
                 
                 for (int i = 0; i < objectArray.GetSize(); i++)
                 {
@@ -383,12 +386,13 @@ namespace CE
         {
             auto structType = (StructType*)type;
             
-            TypeId structTypeId = root["_TypeId"].as<TypeId>();
-            
-            if (structType->GetTypeId() != structTypeId)
+            String structTypeName = root["_TypeId"].as<std::string>();
+            auto typeInfo = CE::GetTypeInfo(CE::Name(structTypeName));
+
+            if (typeInfo == nullptr || typeInfo->GetTypeId() != type->GetTypeId())
             {
-                CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n",
-                       "The serialized text data is for an object of type id {} whereas the object to deserialize data to has type id {}.", type->GetName(), structTypeId, structType->GetTypeId());
+                CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n"
+                    "The serialized text data is for an object of type name {} which either couldn't be found or is different!", type->GetName(), structTypeName);
                 return;
             }
             
@@ -415,12 +419,13 @@ namespace CE
         {
             auto classType = (ClassType*)type;
             
-            TypeId classTypeId = root["_TypeId"].as<TypeId>();
+            String classTypeName = root["_TypeId"].as<std::string>();
+            auto typeInfo = CE::GetTypeInfo(CE::Name(classTypeName));
             
-            if (classType->GetTypeId() != classTypeId)
+            if (typeInfo == nullptr || typeInfo->GetTypeId() != type->GetTypeId())
             {
                 CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n"
-                       "The serialized text data is for an object of type id {} whereas the object to deserialize data to has type id {}.", type->GetName(), classTypeId, classType->GetTypeId());
+                    "The serialized text data is for an object of type name {} which either couldn't be found or is different!", type->GetName(), classTypeName);
                 return;
             }
             
@@ -523,8 +528,11 @@ namespace CE
         {
             auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
             auto elementType = GetTypeInfo(array.GetElementTypeId());
+
+            String typeName = node[0].as<std::string>();
+            auto serializedElementTypeInfo = GetTypeInfo(CE::Name(typeName));
             
-            if (array.GetElementTypeId() != node[0].as<TypeId>())
+            if (elementType->GetName() != serializedElementTypeInfo->GetName())
             {
                 CE_LOG(Error, All, "Failed to deserialize Array field: {}.\n"
                        "ElementType of array ({}) doesn't match with serialized element type {}", fieldType->GetName(), array.GetElementTypeId(), node[0].as<TypeId>());
@@ -636,8 +644,8 @@ namespace CE
                 continue;
             }
             
-            TypeId objectTypeId = node["_TypeId"].as<TypeId>();
-            const TypeInfo* objectType = GetTypeInfo(objectTypeId);
+            String objectTypeName = node["_TypeId"].as<std::string>();
+            const TypeInfo* objectType = GetTypeInfo(CE::Name(objectTypeName));
             
             if (objectType == nullptr)
                 continue;
@@ -675,8 +683,8 @@ namespace CE
                 continue;
             }
             
-            TypeId objectTypeId = node["_TypeId"].as<TypeId>();
-            const TypeInfo* objectType = GetTypeInfo(objectTypeId);
+            String objectTypeName = node["_TypeId"].as<std::string>();
+            const TypeInfo* objectType = GetTypeInfo(objectTypeName);
             
             if (objectType == nullptr)
                 continue;

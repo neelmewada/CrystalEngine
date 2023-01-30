@@ -61,7 +61,7 @@ namespace CE
 	class CORE_API StructType : public TypeInfo
 	{
 	protected:
-		StructType(String name, Internal::IStructTypeImpl* impl, u32 size, String attributes = "") : TypeInfo(name, attributes), Impl(impl)
+		StructType(String name, Internal::IStructTypeImpl* impl, u32 size, String attributes = "") : TypeInfo(name, attributes), Impl(impl), size(size)
 		{}
 
 		template<typename T>

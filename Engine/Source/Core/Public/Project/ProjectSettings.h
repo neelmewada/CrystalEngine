@@ -25,9 +25,9 @@ namespace CE
         static ProjectSettings& Get();
 
         CE_INLINE UUID GetProjectUuid() const { return projectUuid; }
-        CE_INLINE String GetProjectName() const { return projectName; }
-        CE_INLINE String GetProjectVersion() const { return projectVersion; }
-        CE_INLINE String GetEngineVersion() const { return engineVersion; }
+        CE_INLINE const String& GetProjectName() const { return projectName; }
+        CE_INLINE const String& GetProjectVersionString() const { return projectVersion; }
+        CE_INLINE const String& GetEngineVersion() const { return engineVersion; }
 
     private:
 

@@ -9,6 +9,7 @@ endif()
 
 include(CMake/CESet.cmake)
 include(CMake/Macros.cmake)
+include(CMake/Version.cmake)
 
 ce_set(CE_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 

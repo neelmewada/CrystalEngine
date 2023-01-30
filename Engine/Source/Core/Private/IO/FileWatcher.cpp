@@ -39,9 +39,15 @@ namespace CE::IO
 
     FileWatcher::~FileWatcher()
     {
-        for (auto [watchId, watcher] : watchIdToListenerMap)
+        if (watchIdToListenerMap.GetSize() == 0)
         {
-            RemoveWatcher(watchId);
+            delete fileWatcherImpl;
+            return;
+        }
+
+        for (int i = 0; i < watchIds.GetSize(); i++)
+        {
+            RemoveWatcher(watchIds[i]);
         }
 
         delete fileWatcherImpl;
@@ -54,6 +60,7 @@ namespace CE::IO
         
         WatchID watchId = static_cast<WatchID>(fileWatcherImpl->addWatch(std::string(dir.GetCString()), watcher, recursive));
         watchIdToListenerMap.Add({ watchId, watcher });
+        watchIds.Add(watchId);
         return watchId;
     }
 
@@ -64,6 +71,7 @@ namespace CE::IO
 
         delete watchIdToListenerMap[watchId];
         watchIdToListenerMap.Remove(watchId);
+        watchIds.Remove(watchId);
 
         fileWatcherImpl->removeWatch(static_cast<efsw::WatchID>(watchId));
     }

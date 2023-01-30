@@ -31,7 +31,9 @@ namespace CE::Editor
 
         static EditorPrefs& Get();
 
-        void OnProjectOpened();
+        void OnProjectChanged();
+
+        IO::Path GetLatestProjectPath();
 
     private:
         virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName) override;

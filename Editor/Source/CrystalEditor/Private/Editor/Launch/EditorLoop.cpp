@@ -27,7 +27,7 @@ namespace CE::Editor
 
 		app.Initialize();
 
-		auto ret = app.exec();
+		auto value = app.exec();
 
 		CE::ModuleManager::Get().UnloadModule("EditorSystem");
 		CE::ModuleManager::Get().UnloadModule("EditorCore");
@@ -38,7 +38,7 @@ namespace CE::Editor
 		CE::ModuleManager::Get().UnloadModule("Core");
 		CE::Logger::Shutdown();
         
-		return app.exec();
+		return value;
     }
 
 } // namespace CE::Editor

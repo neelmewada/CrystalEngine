@@ -62,6 +62,8 @@ namespace CE::Editor
             projectBrowser->close();
             CE_DELETE(projectBrowser);
         }
+
+        EditorPrefs::Get().OnProjectChanged();
     }
 
     void CrystalEditorApplication::OnCreateProject(IO::Path projectDirectory, String projectName)
@@ -76,6 +78,8 @@ namespace CE::Editor
             projectBrowser->close();
             CE_DELETE(projectBrowser);
         }
+
+        EditorPrefs::Get().OnProjectChanged();
     }
 
     Engine* CrystalEditorApplication::GetEngineRef()
