@@ -6,6 +6,9 @@
 struct VkInstance_T;
 typedef VkInstance_T* VkInstance;
 
+struct VkDebugUtilsMessengerEXT_T;
+typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
+
 namespace CE
 {
     class NUKLEARVULKANRHI_API NuklearVulkanRHIModule : public PluginModule
@@ -34,6 +37,7 @@ namespace CE
 
     private:
         VkInstance vkInstance = nullptr;
+        VkDebugUtilsMessengerEXT vkMessenger = nullptr;
     };
     
 } // namespace CE

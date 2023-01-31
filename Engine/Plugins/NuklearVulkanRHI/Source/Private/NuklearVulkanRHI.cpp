@@ -1,6 +1,9 @@
 
+#include "CoreMinimal.h"
+
 #include "NuklearVulkanRHI.h"
 #include "VulkanRHIPrivate.h"
+#include "PAL/Common/VulkanPlatform.h"
 
 #include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
@@ -24,6 +27,64 @@ namespace CE
 
 	}
 
+    VKAPI_ATTR VkBool32 VulkanValidationCallback(
+        VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+        VkDebugUtilsMessageTypeFlagsEXT messageTypes,
+        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+        void* pUserData)
+    {
+        if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+        {
+            CE_LOG(Error, All, "Vulkan Error: {}", pCallbackData->pMessage);
+        }
+        else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
+        {
+            CE_LOG(Info, All, "Vulkan Info: {}", pCallbackData->pMessage);
+        }
+        else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
+        {
+            CE_LOG(Debug, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
+        }
+        else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+        {
+            CE_LOG(Warn, All, "Vulkan Warning: {}", pCallbackData->pMessage);
+        }
+        return VK_FALSE;
+    }
+
+    VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) 
+    {
+        auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+        if (func != nullptr) 
+        {
+            return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+        }
+        else 
+        {
+            return VK_ERROR_EXTENSION_NOT_PRESENT;
+        }
+    }
+
+    void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+    {
+        createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        if (VulkanPlatform::IsVerboseValidationEnabled())
+            createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
+        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        createInfo.pfnUserCallback = VulkanValidationCallback;
+    }
+
+    void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) 
+    {
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+        if (func != nullptr) 
+        {
+            func(instance, debugMessenger, pAllocator);
+        }
+    }
+
 	void NuklearVulkanRHI::Initialize()
 	{
         VkApplicationInfo appInfo{};
@@ -34,15 +95,49 @@ namespace CE
         appInfo.pApplicationName = ProjectSettings::Get().GetProjectName().GetCString();
         appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
         
+        CE::Array<const char*> validationLayers = VulkanPlatform::GetValidationLayers();
+        bool enableValidation = VulkanPlatform::IsValidationEnabled();
+        CE::Array<const char*> instanceExtensions = VulkanPlatform::GetRequiredInstanceExtensions();
+
         VkInstanceCreateInfo instanceCI{};
         instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCI.pApplicationInfo = &appInfo;
+
+        VkDebugUtilsMessengerCreateInfoEXT debugCI{};
+        debugCI.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        debugCI.pNext = nullptr;
+
+        instanceCI.enabledExtensionCount = instanceExtensions.GetSize();
+        instanceCI.ppEnabledExtensionNames = instanceExtensions.GetData();
+
+        if (enableValidation)
+        {
+            instanceCI.enabledLayerCount = static_cast<uint32_t>(validationLayers.GetSize());
+            instanceCI.ppEnabledLayerNames = validationLayers.GetData();
+
+            PopulateDebugMessengerCreateInfo(debugCI);
+            instanceCI.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCI;
+        }
+        else
+        {
+            instanceCI.enabledLayerCount = 0;
+            instanceCI.ppEnabledLayerNames = nullptr;
+        }
         
         VkResult result = vkCreateInstance(&instanceCI, nullptr, &vkInstance);
         if (result != VK_SUCCESS)
         {
+            CE_LOG(Critical, All, "Failed to create vulkan instance. Result = {}" , (int)result);
             return;
         }
+
+        if (enableValidation && CreateDebugUtilsMessengerEXT(vkInstance, &debugCI, nullptr, &vkMessenger) != VK_SUCCESS)
+        {
+            CE_LOG(Error, All, "Failed to create Vulkan debug messenger!");
+            return;
+        }
+
+        CE_LOG(Info, All, "Vulkan validation!");
 	}
 
 	void NuklearVulkanRHI::PreShutdown()
@@ -52,6 +147,11 @@ namespace CE
 
 	void NuklearVulkanRHI::Shutdown()
 	{
+        if (VulkanPlatform::IsValidationEnabled())
+        {
+            DestroyDebugUtilsMessengerEXT(vkInstance, vkMessenger, nullptr);
+        }
+
         vkDestroyInstance(vkInstance, nullptr);
         vkInstance = nullptr;
 	}

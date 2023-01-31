@@ -54,6 +54,16 @@ namespace CE
             return Impl[index];
         }
 
+        CE_INLINE ElementType* GetData()
+        {
+            return Impl.data();
+        }
+
+        CE_INLINE const ElementType* GetData() const
+        {
+            return Impl.data();
+        }
+
         CE_INLINE SIZE_T GetSize() const
         {
             return Impl.size();
