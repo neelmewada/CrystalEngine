@@ -25,7 +25,15 @@ namespace CE::Editor
 
 		CrystalEditorApplication app{ argc, argv };
 
+		// Pre-Init plugins
+		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadOnPreInit);
+
 		app.Initialize();
+
+		// Init plugins
+		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadOnInit);
+		// Post-Init plugins
+		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadOnPostInit);
 
 		auto value = app.exec();
 

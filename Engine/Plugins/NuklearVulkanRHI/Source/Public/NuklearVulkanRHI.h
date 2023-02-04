@@ -11,6 +11,8 @@ typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 
 namespace CE
 {
+    class VulkanDevice;
+
     class NUKLEARVULKANRHI_API NuklearVulkanRHIModule : public PluginModule
     {
     public:
@@ -31,13 +33,15 @@ namespace CE
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
         
-        virtual void* GetNativeHandle() override;
+        virtual void GetNativeHandle(void** outInstance) override;
         
         virtual RHIGraphicsBackend GetGraphicsBackend() override;
 
     private:
         VkInstance vkInstance = nullptr;
         VkDebugUtilsMessengerEXT vkMessenger = nullptr;
+
+        VulkanDevice* device = nullptr;
     };
     
 } // namespace CE

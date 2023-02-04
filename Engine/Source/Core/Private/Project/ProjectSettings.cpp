@@ -24,7 +24,7 @@ namespace CE
 
 		if (!filePath.Exists())
 		{
-			CE_LOG(Error, All, "Failed to LoadProjectSettings(). Couldn't find file at path: {}", filePath);
+			CE_LOG(Error, All, "Failed to LoadProjectSettings(). Couldn't find the file at path: {}", filePath);
 			return;
 		}
 

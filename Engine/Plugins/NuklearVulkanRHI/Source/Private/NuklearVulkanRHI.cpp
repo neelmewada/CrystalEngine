@@ -43,7 +43,7 @@ namespace CE
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
         {
-            CE_LOG(Debug, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
+            CE_LOG(Info, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         {
@@ -122,6 +122,7 @@ namespace CE
         {
             instanceCI.enabledLayerCount = 0;
             instanceCI.ppEnabledLayerNames = nullptr;
+            instanceCI.pNext = nullptr;
         }
         
         VkResult result = vkCreateInstance(&instanceCI, nullptr, &vkInstance);
@@ -137,16 +138,20 @@ namespace CE
             return;
         }
 
-        CE_LOG(Info, All, "Vulkan validation!");
+        device = new VulkanDevice(vkInstance, this);
+        device->Initialize();
 	}
 
 	void NuklearVulkanRHI::PreShutdown()
 	{
-
+        device->PreShutdown();
 	}
 
 	void NuklearVulkanRHI::Shutdown()
 	{
+        device->Shutdown();
+        delete device;
+
         if (VulkanPlatform::IsValidationEnabled())
         {
             DestroyDebugUtilsMessengerEXT(vkInstance, vkMessenger, nullptr);
@@ -156,9 +161,9 @@ namespace CE
         vkInstance = nullptr;
 	}
 
-    void* NuklearVulkanRHI::GetNativeHandle()
+    void NuklearVulkanRHI::GetNativeHandle(void** outInstance)
     {
-        return vkInstance;
+        *outInstance = vkInstance;
     }
 
 	RHIGraphicsBackend NuklearVulkanRHI::GetGraphicsBackend()

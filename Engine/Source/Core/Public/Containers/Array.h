@@ -54,6 +54,11 @@ namespace CE
             return Impl[index];
         }
 
+        CE_INLINE bool IsEmpty() const
+        {
+            return Impl.empty();
+        }
+
         CE_INLINE ElementType* GetData()
         {
             return Impl.data();

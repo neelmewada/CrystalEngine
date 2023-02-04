@@ -190,14 +190,14 @@ namespace CE
 			return nullptr;
 		}
 
-		auto loadFunction = (LoadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "LoadModule");
+		auto loadFunction = (LoadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "CELoadModule");
 		if (loadFunction == nullptr)
 		{
 			result = ModuleLoadResult::InvalidSymbols;
 			return nullptr;
 		}
 
-		auto unloadFuntion = (UnloadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "UnloadModule");
+		auto unloadFuntion = (UnloadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "CEUnloadModule");
 		if (unloadFuntion == nullptr)
 		{
 			result = ModuleLoadResult::InvalidSymbols;
@@ -238,14 +238,14 @@ namespace CE
 			return nullptr;
 		}
 
-		auto loadFunction = (LoadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "LoadModule");
+		auto loadFunction = (LoadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "CELoadModule");
 		if (loadFunction == nullptr)
 		{
 			result = ModuleLoadResult::InvalidSymbols;
 			return nullptr;
 		}
 
-		auto unloadFuntion = (UnloadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "UnloadModule");
+		auto unloadFuntion = (UnloadModuleFunc)PlatformProcess::GetDllSymbol(dllHandle, "CEUnloadModule");
 		if (unloadFuntion == nullptr)
 		{
 			result = ModuleLoadResult::InvalidSymbols;

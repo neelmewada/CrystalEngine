@@ -49,7 +49,6 @@ namespace CE::Editor
     void ProjectBrowser::on_createProjectButtonBox_rejected()
     {
         close();
-        qApp->quit();
     }
 
 
@@ -62,7 +61,6 @@ namespace CE::Editor
     void ProjectBrowser::on_openProjectButtonBox_rejected()
     {
         close();
-        qApp->quit();
     }
 
 

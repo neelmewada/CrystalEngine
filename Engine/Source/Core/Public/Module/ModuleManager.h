@@ -90,21 +90,21 @@ namespace CE
 #else
 
 #define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
-extern "C" DLL_EXPORT CE::Module* LoadModule()\
+extern "C" DLL_EXPORT CE::Module* CELoadModule()\
 {\
     return new ModuleImplClass();\
 }\
-extern "C" DLL_EXPORT void UnloadModule(CE::Module* modulePtr)\
+extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
 {\
     delete modulePtr;\
 }
 
 #define CE_IMPLEMENT_PLUGIN(PluginName, PluginImplClass)\
-extern "C" DLL_EXPORT CE::Module* LoadModule()\
+extern "C" DLL_EXPORT CE::Module* CELoadModule()\
 {\
     return new PluginImplClass();\
 }\
-extern "C" DLL_EXPORT void UnloadModule(CE::Module* modulePtr)\
+extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
 {\
     delete modulePtr;\
 }

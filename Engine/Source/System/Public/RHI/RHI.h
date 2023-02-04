@@ -22,7 +22,7 @@ namespace CE
         virtual void PreShutdown() = 0;
         virtual void Shutdown() = 0;
         
-        virtual void* GetNativeHandle() = 0;
+        virtual void GetNativeHandle(void** outInstance) = 0;
 
         virtual RHIGraphicsBackend GetGraphicsBackend() = 0;
     };

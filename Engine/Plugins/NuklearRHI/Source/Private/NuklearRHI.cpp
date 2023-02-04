@@ -13,8 +13,6 @@ namespace CE
 
     void NuklearRHIModule::StartupModule()
     {
-        CE_LOG(Info, All, "StartupModule!");
-
         Initialize();
     }
 

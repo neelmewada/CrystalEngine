@@ -5,6 +5,11 @@
 #include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
 
+#include <QVulkanInstance>
+#include <QApplication>
+#include <QWidget>
+#include <QWindow>
+
 namespace CE
 {
 
@@ -53,8 +58,20 @@ namespace CE
                 "VK_LAYER_KHRONOS_validation"
             };
         }
+
+        static void* GetActiveWindowHandle()
+        {
+            if (qApp->activeWindow() == nullptr)
+                return nullptr;
+            return qApp->activeWindow()->windowHandle();
+        }
+
+        static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)
+        {
+            return QVulkanInstance::surfaceForWindow((QWindow*)windowHandle);
+        }
     };
 
-    typedef VulkanQtPlatform VulkanPlatform;
+    typedef VulkanQtPlatform VulkanAPIPlatform;
     
 } // namespace CE
