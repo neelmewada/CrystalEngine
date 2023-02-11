@@ -5,8 +5,7 @@
 #include "VulkanRHIPrivate.h"
 #include "PAL/Common/VulkanPlatform.h"
 
-#include "vulkan/vulkan.h"
-#include "vma/vk_mem_alloc.h"
+#include <vulkan/vulkan.h>
 
 CE_IMPLEMENT_PLUGIN(NuklearVulkanRHI, CE::NuklearVulkanRHIModule)
 
@@ -141,6 +140,11 @@ namespace CE
         device = new VulkanDevice(vkInstance, this);
         device->Initialize();
 	}
+
+    void NuklearVulkanRHI::PostInitialize()
+    {
+
+    }
 
 	void NuklearVulkanRHI::PreShutdown()
 	{

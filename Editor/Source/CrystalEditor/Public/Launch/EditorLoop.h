@@ -10,6 +10,12 @@ namespace CE::Editor
         ~EditorLoop() = default;
 
         int RunLoop(int argc, char** argv);
+
+    private:
+        void PreInit();
+        void PostInit();
+        void PreShutdown();
+        void Shutdown();
     };
     
 } // namespace CE::Editor

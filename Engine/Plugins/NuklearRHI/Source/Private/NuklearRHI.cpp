@@ -9,7 +9,6 @@ CE_IMPLEMENT_PLUGIN(NuklearRHI, CE::NuklearRHIModule)
 
 namespace CE
 {
-    NUKLEARRHI_API DynamicRHI* GDynamicRHI = nullptr;
 
     void NuklearRHIModule::StartupModule()
     {
@@ -18,7 +17,7 @@ namespace CE
 
     void NuklearRHIModule::ShutdownModule()
     {
-        PreShutdown();
+        Shutdown();
     }
 
     void NuklearRHIModule::RegisterTypes()
@@ -29,26 +28,17 @@ namespace CE
     void NuklearRHIModule::Initialize()
     {
 #if PAL_TRAIT_VULKAN_SUPPORTED
-        GDynamicRHI = new CE::NuklearVulkanRHI();
+        gDynamicRHI = new CE::NuklearVulkanRHI();
 #else
 #   error No valid Graphics API Supported by target platform
 #endif
 
-        RHIBus::BusConnect(GDynamicRHI);
-
-        GDynamicRHI->Initialize();
     }
 
-    void NuklearRHIModule::PreShutdown()
+    void NuklearRHIModule::Shutdown()
     {
-        GDynamicRHI->PreShutdown();
-
-        RHIBus::BusDisconnect(GDynamicRHI);
-
-        GDynamicRHI->Shutdown();
-
-        delete GDynamicRHI;
-        GDynamicRHI = nullptr;
+        delete gDynamicRHI;
+        gDynamicRHI = nullptr;
     }
 
 } // namespace CE

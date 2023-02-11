@@ -164,6 +164,8 @@ namespace CE
         
         FieldType* FindFieldWithName(Name name);
 
+		FunctionType* FindFunctionWithName(Name name);
+
 		virtual void InitializeDefaults(void* instance) const
 		{
 			if (Impl == nullptr || instance == nullptr)
@@ -268,6 +270,7 @@ namespace CE
 		// Inherited + Local fields
 		CE::Array<FieldType> cachedFields{};
         CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
+		CE::HashMap<CE::Name, FunctionType*> cachedFunctionMap{};
         
 		CE::Array<FunctionType> cachedFunctions{};
 

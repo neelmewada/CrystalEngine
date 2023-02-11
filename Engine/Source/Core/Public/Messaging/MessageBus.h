@@ -123,6 +123,59 @@ namespace CE
 
     template<class Interface, class BusTraits>
     Array<Interface*> MessageBus<Interface, BusTraits>::Handlers = {};
+
+    class EventBus
+    {
+    public:
+
+        struct Subscriber
+        {
+            FunctionType* function;
+            Object* object;
+        };
+
+        void Publish(Name eventName)
+        {
+            
+        }
+
+        void AddSubscriber(Object* object, Name functionName)
+        {
+            if (object == nullptr || !object->GetType()->IsClass())
+                return;
+
+            ClassType* type = (ClassType*)object->GetType();
+            
+        }
+
+        void RemoveSubscriber(Object* object)
+        {
+            for (int i = 0; i < subscribers.GetSize(); i++)
+            {
+                if (subscribers[i].object == object)
+                {
+                    subscribers.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+    private:
+        Array<Subscriber> subscribers{};
+    };
     
 } // namespace CE
+
+#define CE_EVENT_BUS(BusName)\
+class BusName : public CE::EventBus\
+{\
+private:\
+    BusName() {}\
+public:\
+    static BusName& Get()\
+    {\
+        static BusName instance{};\
+        return instance;\
+    }\
+};
 

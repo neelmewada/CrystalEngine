@@ -9,6 +9,9 @@ typedef VkInstance_T* VkInstance;
 struct VkDebugUtilsMessengerEXT_T;
 typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 
+struct VmaAllocator_T;
+typedef VmaAllocator_T* VmaAllocator;
+
 namespace CE
 {
     class VulkanDevice;
@@ -30,6 +33,7 @@ namespace CE
     public:
 
         virtual void Initialize() override;
+        virtual void PostInitialize() override;
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
         

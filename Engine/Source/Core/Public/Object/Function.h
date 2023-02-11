@@ -14,7 +14,7 @@ namespace CE
 	template<class _Fty>
 	using Function = std::function<_Fty>;
 
-	using FunctionDelegate = std::function<void(CE::Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue)>;
+	using FunctionDelegate = Function<void(CE::Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue)>;
 
     class CORE_API FunctionType : public TypeInfo
     {
@@ -49,7 +49,7 @@ namespace CE
 			return Next;
 		}
 
-		inline CE::Variant Invoke(CE::Object* instance, std::initializer_list<CE::Variant> params) const
+		inline CE::Variant Invoke(CE::Object* instance, Array<CE::Variant> params) const
 		{
 			CE::Variant returnValue{};
 			delegateCallback(instance, params, returnValue);

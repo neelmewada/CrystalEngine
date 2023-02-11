@@ -10,6 +10,9 @@
 
 #include "Plugin/PluginManager.h"
 
+// RHI
+#include "RHI/RHI.h"
+
 // Game Framework
 #include "GameFramework/GameFramework.h"
 

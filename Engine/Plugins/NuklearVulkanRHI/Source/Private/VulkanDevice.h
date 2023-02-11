@@ -1,12 +1,16 @@
 #pragma once
 
+#include "CoreTypes.h"
+
 #include "NuklearVulkanRHI.h"
 #include "VulkanStructs.h"
+#include "VulkanQueue.h"
 
-#include "vulkan/vulkan.h"
+#include <vulkan/vulkan.h>
 
 namespace CE
 {
+    class VulkanQueue;
 
     class VulkanDevice
     {
@@ -14,6 +18,11 @@ namespace CE
     public:
         VulkanDevice(VkInstance instance, NuklearVulkanRHI* vulkanRhi);
         ~VulkanDevice();
+
+        CE_INLINE bool IsInitialized() const
+        {
+            return isInitialized;
+        }
 
         void Initialize();
         void PreShutdown();
@@ -29,7 +38,9 @@ namespace CE
         VkDeviceSize GetPhysicalDeviceLocalMemory(VkPhysicalDevice gpu);
         SurfaceSupportInfo GetSurfaceSupportInfo(VkPhysicalDevice gpu);
 
+        bool isInitialized = false;
         VkInstance instance = nullptr;
+        VmaAllocator vmaAllocator = nullptr;
         NuklearVulkanRHI* vulkanRhi = nullptr;
 
         VkPhysicalDevice gpu = nullptr;
@@ -41,6 +52,11 @@ namespace CE
         SurfaceSupportInfo surfaceSupport{};
 
         VkSurfaceKHR testSurface = nullptr;
+        VulkanQueue* graphicsQueue;
+        VulkanQueue* presentQueue;
+        VkCommandPool gfxCommandPool = nullptr;
+
+        HashMap<u32, VkCommandPool> queueFamilyToCmdPool{};
     };
     
 } // namespace CE

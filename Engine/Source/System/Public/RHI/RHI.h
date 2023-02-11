@@ -7,18 +7,15 @@
 namespace CE
 {
 
-    class SYSTEM_API DynamicRHI : public CE::IBusInterface
+    class SYSTEM_API DynamicRHI
     {
     public:
-        
-        static constexpr MBusAddressPolicy AddressPolicy = MBusAddressPolicy::Single;
-        
-        static constexpr MBusHandlerPolicy HandlerPolicy = MBusHandlerPolicy::Single;
         
         virtual ~DynamicRHI() = default;
         
         // Lifecycle
         virtual void Initialize() = 0;
+        virtual void PostInitialize() = 0;
         virtual void PreShutdown() = 0;
         virtual void Shutdown() = 0;
         
@@ -27,6 +24,6 @@ namespace CE
         virtual RHIGraphicsBackend GetGraphicsBackend() = 0;
     };
 
-    using RHIBus = MessageBus<DynamicRHI>;
+    SYSTEM_API extern DynamicRHI* gDynamicRHI;
     
 } // namespace CE

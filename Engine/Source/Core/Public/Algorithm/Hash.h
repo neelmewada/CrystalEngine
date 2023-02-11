@@ -41,6 +41,12 @@ namespace CE
 		seed ^= GetHash<T>(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}
 
+	CE_INLINE SIZE_T GetCombinedHash(SIZE_T hashA, SIZE_T hashB)
+	{
+		hashA ^= (hashB + 0x9e3779b9 + (hashA << 6) + (hashA >> 2));
+		return hashA;
+	}
+
 	DECL_HASH(u8)
 	DECL_HASH(u16)
 	DECL_HASH(u32)

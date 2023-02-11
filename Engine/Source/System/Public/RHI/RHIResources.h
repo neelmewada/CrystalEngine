@@ -40,6 +40,11 @@ namespace CE
         {}
         
         virtual ~IRHIDeviceObject() {}
+
+        virtual RHIDeviceObjectType GetDeviceObjectType() const
+        {
+            return deviceObjectType;
+        }
         
     private:
         RHIDeviceObjectType deviceObjectType = RHIDeviceObjectType::None;

@@ -29,6 +29,11 @@ namespace CE::Editor::Qt
 
         QPalette palette;
 
+        QColor darkGray(53, 53, 53);
+        QColor gray(128, 128, 128);
+        QColor black(25, 25, 25);
+        QColor blue(42, 130, 218);
+
         // ezEditor styling
         palette.setColor(QPalette::WindowText, QColor(200, 200, 200, 255));
         palette.setColor(QPalette::Button, QColor(100, 100, 100, 255));
@@ -73,6 +78,32 @@ namespace CE::Editor::Qt
 
         palette.setColor(QPalette::Highlight, QColor(142, 45, 197).lighter());
         palette.setColor(QPalette::HighlightedText, ::Qt::black);
+
+        qApp->setStyle(QStyleFactory::create("Fusion"));
+
+        // New Theme
+        palette.setColor(QPalette::Window, QColor(53, 53, 53));
+        palette.setColor(QPalette::WindowText, ::Qt::white);
+        palette.setColor(QPalette::Base, QColor(25, 25, 25));
+        palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+        palette.setColor(QPalette::ToolTipBase, ::Qt::white);
+        palette.setColor(QPalette::ToolTipText, ::Qt::white);
+        palette.setColor(QPalette::Text, ::Qt::white);
+        palette.setColor(QPalette::Button, QColor(53, 53, 53));
+        palette.setColor(QPalette::ButtonText, ::Qt::white);
+        palette.setColor(QPalette::BrightText, ::Qt::red);
+        palette.setColor(QPalette::Link, QColor(42, 130, 218));
+        palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        palette.setColor(QPalette::HighlightedText, ::Qt::black);
+
+        palette.setColor(QPalette::Active, QPalette::Button, gray.darker());
+        palette.setColor(QPalette::Disabled, QPalette::ButtonText, gray);
+        palette.setColor(QPalette::Disabled, QPalette::WindowText, gray);
+        palette.setColor(QPalette::Disabled, QPalette::Text, gray);
+        palette.setColor(QPalette::Disabled, QPalette::Light, darkGray);
+
+        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+
         app->setPalette(palette);
     }
 

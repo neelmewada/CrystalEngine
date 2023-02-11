@@ -42,6 +42,7 @@ namespace CE
     {
         if (!fieldsCached)
             CacheAllFields();
+
         if (cachedFields.GetSize() == 0)
             return nullptr;
 
@@ -55,6 +56,18 @@ namespace CE
         
         if (cachedFieldsMap.KeyExists(name))
             return cachedFieldsMap[name];
+
+        return nullptr;
+    }
+
+    FunctionType* StructType::FindFunctionWithName(Name name)
+    {
+        if (!functionsCached)
+            CacheAllFunctions();
+
+        if (cachedFunctionMap.KeyExists(name))
+            return cachedFunctionMap[name];
+
         return nullptr;
     }
 
@@ -123,14 +136,21 @@ namespace CE
             {
                 auto structType = (StructType*)type;
                 structType->CacheAllFunctions();
-                
+                cachedFunctions.AddRange(structType->cachedFunctions);
             }
             else if (type->IsClass())
             {
                 auto classType = (ClassType*)type;
                 classType->CacheAllFunctions();
-
+                cachedFunctions.AddRange(classType->cachedFunctions);
             }
+        }
+
+        cachedFunctions.AddRange(localFunctions);
+
+        for (int i = 0; i < cachedFunctions.GetSize(); i++)
+        {
+            cachedFunctionMap.Add({ cachedFunctions[i].GetName(), &cachedFunctions[i] });
         }
     }
 

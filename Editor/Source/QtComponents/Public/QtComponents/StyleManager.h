@@ -25,7 +25,7 @@ namespace CE::Editor::Qt
 
         void Initialize(QApplication* app);
 
-    private Q_SLOTS:
+    private slots:
 
 
     };

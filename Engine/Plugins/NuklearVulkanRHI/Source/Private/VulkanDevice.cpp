@@ -2,6 +2,9 @@
 #include "VulkanDevice.h"
 #include "PAL/Common/VulkanPlatform.h"
 
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
+
 namespace CE
 {
 
@@ -18,23 +21,57 @@ namespace CE
 
 	void VulkanDevice::Initialize()
 	{
-		testSurface = VulkanPlatform::CreateSurface(instance, VulkanPlatform::GetActiveWindowHandle());
+		auto window = VulkanPlatform::GetActiveWindowHandle();
+		testSurface = VulkanPlatform::CreateSurface(instance, window);
 
 		SelectGpu();
 		InitGpu();
 
+		VkCommandPoolCreateInfo poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = queueFamilies.graphicsFamily;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		if (vkCreateCommandPool(device, &poolInfo, nullptr, &gfxCommandPool) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create Graphics Command Pool");
+			return;
+		}
+
 		vkDestroySurfaceKHR(instance, testSurface, nullptr);
 		testSurface = nullptr;
+
+		isInitialized = true;
+
+		CE_LOG(Info, All, "Vulkan device initialized");
 	}
 
 	void VulkanDevice::PreShutdown()
 	{
+		isInitialized = false;
 
+		delete graphicsQueue;
+		delete presentQueue;
 	}
 
 	void VulkanDevice::Shutdown()
 	{
+		vkDestroyCommandPool(device, gfxCommandPool, nullptr);
+		gfxCommandPool = nullptr;
 
+		// Command Pools
+		for (const auto& pair : queueFamilyToCmdPool)
+		{
+			vkDestroyCommandPool(device, pair.second, nullptr);
+		}
+		queueFamilyToCmdPool.Clear();
+
+		vmaDestroyAllocator(vmaAllocator);
+		vmaAllocator = nullptr;
+
+		vkDestroyDevice(device, nullptr);
+		device = nullptr;
+
+		CE_LOG(Info, All, "Vulkan device shutdown");
 	}
 
 	void VulkanDevice::SelectGpu()
@@ -167,6 +204,40 @@ namespace CE
 		VkQueue gfxQueue = nullptr, presentQueue = nullptr;
 		vkGetDeviceQueue(device, queueFamilies.graphicsFamily, graphicsQueueIndex, &gfxQueue);
 		vkGetDeviceQueue(device, queueFamilies.presentFamily, presentQueueIndex, &presentQueue);
+
+		this->graphicsQueue = new VulkanQueue(this, queueFamilies.graphicsFamily, graphicsQueueIndex, gfxQueue);
+		this->presentQueue = new VulkanQueue(this, queueFamilies.presentFamily, presentQueueIndex, presentQueue);
+
+		VmaAllocatorCreateInfo allocatorCI{};
+		allocatorCI.instance = instance;
+		allocatorCI.device = device;
+		allocatorCI.physicalDevice = gpu;
+
+		if (vmaCreateAllocator(&allocatorCI, &vmaAllocator) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create Vulkan VmaAllocator!");
+			return;
+		}
+
+		// Command Pools
+		for (const auto& familyIndex : queueFamilyIndices)
+		{
+			VkCommandPoolCreateInfo commandPoolCI = {};
+			commandPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			commandPoolCI.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			commandPoolCI.queueFamilyIndex = familyIndex;
+
+			VkCommandPool commandPool = nullptr;
+			if (vkCreateCommandPool(device, &commandPoolCI, nullptr, &commandPool) != VK_SUCCESS)
+			{
+				CE_LOG(Error, All, "Failed to create Vulkan Command Pool!");
+				return;
+			}
+
+			queueFamilyToCmdPool[familyIndex] = commandPool;
+		}
+
+		CE_LOG(Info, All, "Vulkan: Created logical device & queues");
 	}
 
 	bool VulkanDevice::QueryGpu(u32 gpuIndex)
