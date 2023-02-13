@@ -21,3 +21,5 @@ namespace CE::Editor
     }
 
 } // namespace CE::Editor
+
+CE_RTTI_CLASS_IMPL(EDITORSYSTEM_API, CE::Editor, EditorQtApplication)

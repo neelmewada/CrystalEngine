@@ -17,9 +17,11 @@ namespace CE::Editor
     class CRYSTALEDITOR_API CrystalEditorApplication
         : public EditorQtApplication
         , public CrystalEditorEventBus::Handler
-        , public CE::ApplicationBus::Handler
+        //, public CE::ApplicationBus::Handler
     {
         Q_OBJECT
+
+        CE_CLASS(CrystalEditorApplication, EditorQtApplication)
 
     public:
 
@@ -41,7 +43,7 @@ namespace CE::Editor
         ///////////////////////////////////////////
         // CE::ApplicationBus::Handler
 
-        virtual Engine* GetEngineRef() override;
+        virtual Engine* GetEngineRef();
 
     private:
 
@@ -53,3 +55,13 @@ namespace CE::Editor
     };
     
 } // namespace CE::Editor
+
+CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, CrystalEditorApplication,
+    CE_SUPER(CE::Editor::EditorQtApplication),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION(GetEngineRef, Event, Bus = ApplicationBus)
+    )
+)

@@ -136,14 +136,12 @@ namespace CE
             CE_LOG(Error, All, "Failed to create Vulkan debug messenger!");
             return;
         }
-
-        device = new VulkanDevice(vkInstance, this);
-        device->Initialize();
 	}
 
     void NuklearVulkanRHI::PostInitialize()
     {
-
+        device = new VulkanDevice(vkInstance, this);
+        device->Initialize();
     }
 
 	void NuklearVulkanRHI::PreShutdown()

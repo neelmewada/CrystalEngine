@@ -124,7 +124,7 @@ namespace CE
     template<class Interface, class BusTraits>
     Array<Interface*> MessageBus<Interface, BusTraits>::Handlers = {};
 
-    class EventBus
+    class CORE_API EventBus
     {
     public:
 
@@ -134,40 +134,61 @@ namespace CE
             Object* object;
         };
 
-        void Publish(Name eventName)
+        template<typename... Args>
+        void Publish(Name eventName, Args... args)
         {
-            
+            for (const auto& subscriber : subscribers)
+            {
+                if (subscriber.function == nullptr)
+                    continue;
+                try
+                {
+                    subscriber.function->Invoke(subscriber.object, { args... });
+                }
+                catch (CE::VariantCastException exc)
+                {
+                    continue;
+                }
+            }
         }
 
-        void AddSubscriber(Object* object, Name functionName)
+        void AddSubscriber(Object* object)
         {
-            if (object == nullptr || !object->GetType()->IsClass())
+            if (object == nullptr)
                 return;
 
-            ClassType* type = (ClassType*)object->GetType();
-            
+            subscribers.Add(object);
         }
 
         void RemoveSubscriber(Object* object)
         {
             for (int i = 0; i < subscribers.GetSize(); i++)
             {
-                if (subscribers[i].object == object)
+                if (subscribers[i] == object)
                 {
+                    object->subscribedBuses.Remove(this);
                     subscribers.RemoveAt(i);
                     break;
                 }
             }
         }
 
+        virtual Name GetBusName() = 0;
+
     private:
-        Array<Subscriber> subscribers{};
+        friend class Object;
+
+        Array<Object*> subscribers{};
     };
     
 } // namespace CE
 
-#define CE_EVENT_BUS(BusName)\
-class BusName : public CE::EventBus\
+#define CE_CONNECT(BusName, Subscriber) BusName::Get().AddSubscriber(Subscriber);
+
+#define CE_DISCONNECT(BusName, Subscriber) BusName::Get().RemoveSubscriber(Subscriber);
+
+#define CE_EVENT_BUS(API, BusName)\
+class API BusName : public CE::EventBus\
 {\
 private:\
     BusName() {}\
@@ -177,5 +198,6 @@ public:\
         static BusName instance{};\
         return instance;\
     }\
+    virtual Name GetBusName() override { return #BusName; }\
 };
 

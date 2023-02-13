@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include <QApplication>
 
 #include "QtComponents/StyleManager.h"
@@ -7,8 +9,11 @@
 namespace CE::Editor::Qt
 {
 
-    class EDITORCORE_API CEQtApplication : public QApplication
+    class EDITORCORE_API CEQtApplication : public Object, public QApplication
     {
+        Q_OBJECT
+
+        CE_CLASS(CEQtApplication, Object)
     public:
 
         CEQtApplication(int argc, char** argv);
@@ -29,3 +34,11 @@ namespace CE::Editor::Qt
     };
     
 } // namespace CE::Editor
+
+CE_RTTI_CLASS(EDITORCORE_API, CE::Editor::Qt, CEQtApplication,
+    CE_SUPER(CE::Object),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST()
+)

@@ -35,8 +35,8 @@ namespace CE::Editor
 		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadOnPostInit);
 
 		// Initialize RHI
-		MBUS_EVENT(RHIBus, Initialize);
-		MBUS_EVENT(RHIBus, PostInitialize);
+		gDynamicRHI->Initialize();
+		//gDynamicRHI->PostInitialize();
 	}
 
 	void EditorLoop::PreShutdown()
@@ -45,8 +45,8 @@ namespace CE::Editor
 		CE::ModuleManager::Get().UnloadModule("EditorCore");
 
 		// Shutdown RHI
-		MBUS_EVENT(RHIBus, PreShutdown);
-		MBUS_EVENT(RHIBus, Shutdown);
+		gDynamicRHI->PreShutdown();
+		gDynamicRHI->Shutdown();
 
 		PluginManager::Get().UnloadAllPlugins();
 	}

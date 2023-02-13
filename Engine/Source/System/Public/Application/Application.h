@@ -12,7 +12,6 @@ namespace CE
 
     class SYSTEM_API Application
         : public ComponentApplication
-        , public ApplicationBus::Handler
     {
         CE_CLASS(Application, ComponentApplication);
 
@@ -22,12 +21,13 @@ namespace CE
 
         virtual ~Application();
 
-        virtual Engine* GetEngineRef() override;
-
-        virtual void RunMainLoop() override;
-        virtual void ExitMainLoop() override;
-
         virtual void Tick() override;
+
+    public: // ApplicationBus Events
+        virtual Engine* GetEngineRef();
+
+        virtual void RunMainLoop();
+        virtual void ExitMainLoop();
 
     protected:
         bool exitMainLoopRequested = false;
@@ -43,5 +43,9 @@ CE_RTTI_CLASS(SYSTEM_API, CE, Application,
     CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
+    CE_FUNCTION_LIST(
+        CE_FUNCTION(GetEngineRef, Event)
+        CE_FUNCTION(RunMainLoop, Event)
+        CE_FUNCTION(ExitMainLoop, Event)
+    )
 )

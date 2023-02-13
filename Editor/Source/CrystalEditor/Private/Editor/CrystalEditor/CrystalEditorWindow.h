@@ -3,6 +3,7 @@
 
 #include "IO/Path.h"
 
+#include <QWindow>
 #include <QMainWindow>
 
 #include "DockManager.h"

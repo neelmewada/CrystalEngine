@@ -21,7 +21,7 @@ namespace CE::Editor
         instance = new QVulkanInstance();
 
         VkInstance vkInstance = nullptr;
-        MBUS_EVENT(RHIBus, GetNativeHandle, (void**)&vkInstance);
+        gDynamicRHI->GetNativeHandle((void**)&vkInstance);
 
         instance->setVkInstance(vkInstance);
     }

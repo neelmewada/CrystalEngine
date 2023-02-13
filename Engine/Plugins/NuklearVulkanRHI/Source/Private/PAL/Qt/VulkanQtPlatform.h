@@ -61,14 +61,21 @@ namespace CE
 
         static void* GetActiveWindowHandle()
         {
-            if (qApp->activeWindow() == nullptr)
+            auto windowList = qApp->topLevelWindows();
+            if (windowList.size() == 0)
                 return nullptr;
-            return qApp->activeWindow()->windowHandle();
+            return windowList.at(0);
         }
 
         static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)
         {
-            return QVulkanInstance::surfaceForWindow((QWindow*)windowHandle);
+            QVulkanInstance* instance = new QVulkanInstance;
+            instance->setVkInstance(vkInstance);
+
+            auto surface = instance->surfaceForWindow((QWindow*)windowHandle);
+
+            delete instance;
+            return surface;
         }
     };
 

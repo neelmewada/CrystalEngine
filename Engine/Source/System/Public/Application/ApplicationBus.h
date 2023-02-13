@@ -9,11 +9,6 @@ namespace CE
     class ApplicationRequests : public MBusTraits
     {
     public:
-
-        static constexpr MBusAddressPolicy AddressPolicy = MBusAddressPolicy::Single;
-
-        static constexpr MBusHandlerPolicy HandlerPolicy = MBusHandlerPolicy::Single;
-
         virtual void RunMainLoop() {}
 
         virtual void ExitMainLoop() {}
@@ -21,6 +16,8 @@ namespace CE
         virtual Engine* GetEngineRef() { return nullptr; }
     };
 
-    using ApplicationBus = MessageBus<ApplicationRequests>;
-    
+    //using ApplicationBus = MessageBus<ApplicationRequests>;
+
+    CE_EVENT_BUS(SYSTEM_API, ApplicationBus);
+
 } // namespace CE

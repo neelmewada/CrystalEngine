@@ -47,6 +47,9 @@ namespace CE
 		return hashA;
 	}
 
+	
+	CORE_API SIZE_T GetCombinedHashes(CE::Array<SIZE_T> hashes);
+
 	DECL_HASH(u8)
 	DECL_HASH(u16)
 	DECL_HASH(u32)

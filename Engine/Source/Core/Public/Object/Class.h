@@ -117,7 +117,7 @@ namespace CE
 			return localFields.GetSize();
 		}
 
-		CE_INLINE const FieldType* GetLocalFieldAt(u32 index) const
+		CE_INLINE FieldType* GetLocalFieldAt(u32 index)
 		{
 			return &localFields[index];
 		}
@@ -131,7 +131,7 @@ namespace CE
 			return cachedFunctions.GetSize();
 		}
 
-		CE_INLINE const FunctionType* GetFunctionAt(u32 index)
+		CE_INLINE FunctionType* GetFunctionAt(u32 index)
 		{
 			if (!functionsCached)
 			{
@@ -145,7 +145,7 @@ namespace CE
 			return localFunctions.GetSize();
 		}
 
-		CE_INLINE const FunctionType* GetLocalFunctionAt(u32 index) const
+		CE_INLINE FunctionType* GetLocalFunctionAt(u32 index)
 		{
 			return &localFunctions[index];
 		}

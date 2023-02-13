@@ -15,4 +15,19 @@ namespace CE
 #endif
 	}
 
+	CORE_API SIZE_T GetCombinedHashes(CE::Array<SIZE_T> hashes)
+	{
+		if (hashes.GetSize() == 0)
+			return 0;
+
+		SIZE_T hash = hashes[0];
+
+		for (int i = 1; i < hashes.GetSize(); i++)
+		{
+			hash = GetCombinedHash(hash, hashes[i]);
+		}
+
+		return hash;
+	}
+
 }

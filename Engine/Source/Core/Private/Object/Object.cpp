@@ -1,5 +1,6 @@
 
 #include "Object/Object.h"
+#include "Messaging/MessageBus.h"
 
 #include "Object/ObjectManager.h"
 
@@ -18,7 +19,10 @@ namespace CE
 
 	Object::~Object()
 	{
-		
+		for (auto bus : subscribedBuses)
+		{
+			bus->RemoveSubscriber(this);
+		}
 	}
 
 }

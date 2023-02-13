@@ -19,37 +19,39 @@ namespace CE
     class CORE_API FunctionType : public TypeInfo
     {
 	protected:
-		FunctionType(String name, TypeId returnType, std::initializer_list<TypeId> parameterTypes, 
-			FunctionDelegate delegate, const TypeInfo* owner, String attributes)
-			: TypeInfo(name)
-			, returnType(returnType)
-			, paramTypes(parameterTypes)
-			, attributes(attributes)
-			, delegateCallback(delegate)
-			, owner(owner)
-		{}
+		FunctionType(String name, TypeId returnType, std::initializer_list<TypeId> parameterTypes,
+			FunctionDelegate delegate, const TypeInfo* owner, String attributes);
 
 	public:
 
 		virtual bool IsFunction() const override { return true; }
 
-		inline TypeId GetReturnTypeId() const { return returnType; }
-		
-		inline u32 GetParameterCount() const { return paramTypes.GetSize(); }
+		CE_INLINE TypeId GetReturnTypeId() const { return returnType; }
 
-		inline TypeId GetParameterTypeIdAt(u32 index) const { return paramTypes[index]; }
+		CE_INLINE TypeId GetFunctionSignature() const
+		{
+			return GetCombinedHashes(paramTypes);
+		}
+		
+		CE_INLINE u32 GetParameterCount() const { return paramTypes.GetSize(); }
+
+		CE_INLINE TypeId GetParameterTypeIdAt(u32 index) const { return paramTypes[index]; }
+
+		CE_INLINE const TypeInfo* GetOwner() const { return owner; }
+
+		bool IsEvent() const;
 
 		virtual TypeId GetTypeId() const override
 		{
 			return GetReturnTypeId();
 		}
 
-		inline FunctionType* GetNext() const
+		CE_INLINE FunctionType* GetNext() const
 		{
 			return Next;
 		}
 
-		inline CE::Variant Invoke(CE::Object* instance, Array<CE::Variant> params) const
+		CE_INLINE CE::Variant Invoke(CE::Object* instance, Array<CE::Variant> params) const
 		{
 			CE::Variant returnValue{};
 			delegateCallback(instance, params, returnValue);
@@ -65,6 +67,8 @@ namespace CE
 		FunctionDelegate delegateCallback;
 		FunctionType* Next = nullptr;
 		const TypeInfo* owner = nullptr;
+
+		Array<Attribute> attributeList{};
 
 		friend class StructType;
 		friend class ClassType;

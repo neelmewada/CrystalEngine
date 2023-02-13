@@ -16,6 +16,7 @@ namespace CE
 {
 
     class CORE_API Component;
+    class CORE_API EventBus;
 
     class CORE_API Object
     {
@@ -39,8 +40,12 @@ namespace CE
         }
 
     private:
+        friend class EventBus;
+
         CE::Name name;
         CE::UUID uuid;
+
+        Array<EventBus*> subscribedBuses{};
         
     protected:
         //CE::Array<Component*> components{};

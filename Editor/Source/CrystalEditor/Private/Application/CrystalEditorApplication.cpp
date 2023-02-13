@@ -1,5 +1,6 @@
 
 #include "CoreMinimal.h"
+#include "RHI/RHI.h"
 
 #include "Application/EditorQtApplication.h"
 #include "GUI/Screens/WelcomeScreen/WelcomeScreen.h"
@@ -64,6 +65,9 @@ namespace CE::Editor
         }
 
         EditorPrefs::Get().OnProjectChanged();
+
+        // Initialize RHI device, etc
+        gDynamicRHI->PostInitialize();
     }
 
     void CrystalEditorApplication::OnCreateProject(IO::Path projectDirectory, String projectName)
@@ -92,3 +96,5 @@ namespace CE::Editor
     }
 
 } // namespace CE::Editor
+
+CE_RTTI_CLASS_IMPL(CRYSTALEDITOR_API, CE::Editor, CrystalEditorApplication)

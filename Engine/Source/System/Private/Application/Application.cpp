@@ -8,12 +8,12 @@ namespace CE
 
     Application::Application(int argc, char** argv)
     {
-        ApplicationBus::BusConnect(this);
+        CE_CONNECT(ApplicationBus, this);
     }
 
     Application::~Application()
     {
-        ApplicationBus::BusDisconnect(this);
+        CE_DISCONNECT(ApplicationBus, this);
 
         delete engineRef;
     }

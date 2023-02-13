@@ -128,7 +128,7 @@ namespace CE
             Impl.resize(newSize);
         }
 
-        CE_INLINE bool Exists(const ElementType& item) const
+        bool Exists(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)
             {
@@ -140,7 +140,7 @@ namespace CE
             return false;
         }
 
-        CE_INLINE bool Exists(std::function<bool(const ElementType&)> func) const
+        bool Exists(std::function<bool(const ElementType&)> func) const
         {
             for (int i = 0; i < Impl.size(); i++)
             {
