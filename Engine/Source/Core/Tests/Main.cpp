@@ -6,59 +6,61 @@
 
 #define LOG(x) std::cout << x << std::endl
 
-using namespace CE;
-
-struct TestConfig
+class ApplicationRequests
 {
-    CE_STRUCT(TestConfig)
-
 public:
-    int intValue = 0;
-    String stringValue{};
+    virtual void GetValue(int* outValue) = 0;
 };
 
-CE_RTTI_STRUCT(,,TestConfig,
-    CE_SUPER(),
+CE_EVENT_BUS(, ApplicationBus, ApplicationRequests);
+
+class TestClass : public CE::Object, public ApplicationRequests
+{
+    CE_CLASS(TestClass, CE::Object)
+public:
+
+    TestClass() : Object("TestClass")
+    {
+        CE_CONNECT(ApplicationBus, this);
+    }
+
+    ~TestClass()
+    {
+        CE_DISCONNECT(ApplicationBus, this);
+    }
+
+    virtual void GetValue(int* outValue) override
+    {
+        LOG("GetValue() called");
+        *outValue = 12;
+    }
+};
+
+CE_RTTI_CLASS(, , TestClass,
+    CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        CE_FIELD(intValue)
-        CE_FIELD(stringValue, Category = "Some Category")
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION(GetValue, Event)
     )
 )
 
-CE_RTTI_STRUCT_IMPL(,,TestConfig)
-
+CE_RTTI_CLASS_IMPL(, , TestClass)
 
 int main(int argc, char* argv[])
 {
     CE::ModuleManager::Get().LoadModule("Core");
     CE::Logger::Initialize();
 
-    CE_REGISTER_TYPES(TestConfig);
+    CE_REGISTER_TYPES(TestClass);
 
-    TestConfig test{};
+    TestClass inst{};
 
-    auto type = TestConfig::Type();
-    auto field = type->FindFieldWithName("stringValue");
-    const auto& attrs = field->GetAttributes();
+    int val = 0;
+    CE_PUBLISH(ApplicationBus, GetValue, &val);
 
-    CE_LOG(Info, All, "Count: {}", attrs.GetSize());
-    
-    for (int i = 0; i < attrs.GetSize(); i++)
-    {
-        const Attribute& attrib = attrs[i];
-        CE_LOG(Info, All, "{} = {}", attrib.GetKey(), attrib.GetValue());
-    }
-    
-    CE::ConfigParser parser = CE::ConfigParser(type);
-    
-#if PLATFORM_WINDOWS
-    parser.Parse(&test, "E:\\Projects\\CrystalEngine\\Build\\Windows\\Debug\\TestConfig.ini");
-#else
-    parser.Parse(&test, "TestConfig.ini");
-#endif
-
-    CE_LOG(Info, All, "Values: {} {}", test.intValue, test.stringValue);
+    LOG("Value: " << val);
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");

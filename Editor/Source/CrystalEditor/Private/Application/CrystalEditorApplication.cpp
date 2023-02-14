@@ -18,16 +18,16 @@ namespace CE::Editor
         : EditorQtApplication(argc, argv)
     {
         EditorSystemEventBus::BusConnect(this);
-        CrystalEditorEventBus::BusConnect(this);
-        ApplicationBus::BusConnect(this);
+        CE_CONNECT(CrystalEditorEventBus, this);
+        CE_CONNECT(ApplicationBus, this);
 
         engineRef = new Engine;
     }
 
     CrystalEditorApplication::~CrystalEditorApplication()
     {
-        ApplicationBus::BusDisconnect(this);
-        CrystalEditorEventBus::BusDisconnect(this);
+        CE_DISCONNECT(CrystalEditorEventBus, this);
+        CE_DISCONNECT(ApplicationBus, this);
         EditorSystemEventBus::BusDisconnect(this);
 
         delete engineRef;
@@ -86,13 +86,23 @@ namespace CE::Editor
         EditorPrefs::Get().OnProjectChanged();
     }
 
-    Engine* CrystalEditorApplication::GetEngineRef()
+    void CrystalEditorApplication::RunMainLoop()
     {
+    }
+
+    void CrystalEditorApplication::ExitMainLoop()
+    {
+    }
+
+    void CrystalEditorApplication::GetEngineRef(Engine** outEngineRef)
+    {
+        if (outEngineRef == nullptr)
+            return;
         if (engineRef == nullptr)
         {
             engineRef = new Engine;
         }
-        return engineRef;
+        *outEngineRef = engineRef;
     }
 
 } // namespace CE::Editor

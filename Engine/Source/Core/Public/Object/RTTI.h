@@ -5,6 +5,7 @@
 #include "Containers/Array.h"
 #include "Containers/HashMap.h"
 #include "Containers/String.h"
+#include "IO/Path.h"
 
 #include "Types/CoreTypeDefs.h"
 
@@ -153,4 +154,6 @@ CE_RTTI_POD(CE, f32, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u
 CE_RTTI_POD(CE, f64, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8),  TYPEID(u16), TYPEID(u32), TYPEID(u64), TYPEID(f32))
 
 CE_RTTI_POD(CE, String, TYPEID(const char*), TYPEID(char*))
+CE_RTTI_POD(CE, Name)
+CE_RTTI_POD(CE::IO, Path)
 

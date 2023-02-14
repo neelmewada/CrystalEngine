@@ -13,6 +13,8 @@ inline SIZE_T GetHash<Type>(const Type& Value)\
 
 namespace CE
 {
+	template<typename T>
+	class Array;
 	
 	CORE_API SIZE_T CalculateHash(const void* data, SIZE_T length);
 
@@ -36,7 +38,7 @@ namespace CE
     }
 
 	template <class T>
-	inline void CombineHash(SIZE_T& seed, const T& v)
+	CE_INLINE void CombineHash(SIZE_T& seed, const T& v)
 	{
 		seed ^= GetHash<T>(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}

@@ -6,18 +6,18 @@ namespace CE
 {
     class Engine;
 
-    class ApplicationRequests : public MBusTraits
+    class ApplicationRequests
     {
     public:
         virtual void RunMainLoop() {}
 
         virtual void ExitMainLoop() {}
 
-        virtual Engine* GetEngineRef() { return nullptr; }
+        virtual void GetEngineRef(Engine** outEngineRef) {}
     };
 
     //using ApplicationBus = MessageBus<ApplicationRequests>;
 
-    CE_EVENT_BUS(SYSTEM_API, ApplicationBus);
+    CE_EVENT_BUS(SYSTEM_API, ApplicationBus, ApplicationRequests);
 
 } // namespace CE

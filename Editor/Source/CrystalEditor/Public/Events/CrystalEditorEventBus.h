@@ -25,7 +25,9 @@ namespace CE::Editor
         virtual void OnOpenProject(IO::Path projectPath) {}
     };
 
-    using CrystalEditorEventBus = MessageBus<CrystalEditorEvents>;
+    //using CrystalEditorEventBus = MessageBus<CrystalEditorEvents>;
+
+    CE_EVENT_BUS(CRYSTALEDITOR_API, CrystalEditorEventBus, CrystalEditorEvents);
     
 } // namespace CE::Editor
 

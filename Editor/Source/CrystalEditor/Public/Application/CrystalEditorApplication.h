@@ -16,8 +16,8 @@ namespace CE::Editor
 
     class CRYSTALEDITOR_API CrystalEditorApplication
         : public EditorQtApplication
-        , public CrystalEditorEventBus::Handler
-        //, public CE::ApplicationBus::Handler
+        , public CrystalEditorEventBus::Interface
+        , public CE::ApplicationBus::Interface
     {
         Q_OBJECT
 
@@ -32,7 +32,7 @@ namespace CE::Editor
         void Initialize();
 
         ///////////////////////////////////////////
-        // EditorSystemEventBus::Handler
+        // EditorSystemEventBus::Interface
 
         virtual void OnWelcomeScreenTimeout() override;
 
@@ -41,9 +41,14 @@ namespace CE::Editor
         virtual void OnCreateProject(IO::Path projectDirectory, String projectName) override;
 
         ///////////////////////////////////////////
-        // CE::ApplicationBus::Handler
+        // CE::ApplicationBus::Interface
 
-        virtual Engine* GetEngineRef();
+        virtual void RunMainLoop() override;
+
+        virtual void ExitMainLoop() override;
+
+        virtual void GetEngineRef(Engine** outEngineRef) override;
+
 
     private:
 
@@ -62,6 +67,14 @@ CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, CrystalEditorApplication,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST(
-        CE_FUNCTION(GetEngineRef, Event, Bus = ApplicationBus)
+        // EditorSystemEventBus::Interface
+        CE_FUNCTION(OnWelcomeScreenTimeout, Event)
+        CE_FUNCTION(OnOpenProject, Event)
+        CE_FUNCTION(OnCreateProject, Event)
+
+        // CE::ApplicationBus::Interface
+        CE_FUNCTION(GetEngineRef, Event)
+        CE_FUNCTION(RunMainLoop, Event)
+        CE_FUNCTION(ExitMainLoop, Event)
     )
 )

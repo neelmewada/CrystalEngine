@@ -64,10 +64,14 @@ namespace CE
 		Variant(const char* value) { StringValue = value; ValueTypeId = TYPEID(String); }
 		Variant(String value) { StringValue = value; ValueTypeId = TYPEID(String); }
 
-		template<typename ElementType>
-		Variant(CE::Array<ElementType> value) : ValueTypeId(TYPEID(CE::Array<ElementType>)), ArrayValue(value)
-		{
+		Variant(IO::Path value) { PathValue = value; ValueTypeId = TYPEID(IO::Path); }
+		Variant(Name value) { NameValue = value; ValueTypeId = TYPEID(Name); }
 
+		template<typename ElementType>
+		Variant(CE::Array<ElementType> value) : ValueTypeId(TYPEID(CE::Array<ElementType>))//, ArrayValue(value)
+		{
+			void* ref = &value;
+			memcpy(this, ref, sizeof(value));
 		}
 
 		template<typename PtrType>
@@ -146,8 +150,9 @@ namespace CE
 			f64    Float64Value;
 			void*  PtrValue;
 
-			// Complex types
-			CE::Array<Variant> ArrayValue;
+			CE::Array<u8> ArrayValue;
+			IO::Path PathValue;
+			CE::Name NameValue;
 		};
 
 		TypeId ValueTypeId = 0;

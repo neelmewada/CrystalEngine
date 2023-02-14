@@ -5,6 +5,9 @@ project(EditorCore CXX)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
+    AUTOMOC
+    AUTOUIC
+    AUTORCC
     NAMESPACE CE
     FOLDER Editor
     PCHHEADER 

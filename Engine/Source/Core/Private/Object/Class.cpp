@@ -65,10 +65,17 @@ namespace CE
         if (!functionsCached)
             CacheAllFunctions();
 
-        if (cachedFunctionMap.KeyExists(name))
-            return cachedFunctionMap[name];
+        if (cachedFunctionMap.KeyExists(name) && cachedFunctionMap[name].GetSize() > 0)
+            return cachedFunctionMap[name][0];
 
         return nullptr;
+    }
+
+    CE::Array<FunctionType*> StructType::FindAllFunctionsWithName(Name name)
+    {
+        if (!functionsCached)
+            CacheAllFunctions();
+        return cachedFunctionMap[name];
     }
 
     void StructType::CacheAllFields()
@@ -136,13 +143,35 @@ namespace CE
             {
                 auto structType = (StructType*)type;
                 structType->CacheAllFunctions();
-                cachedFunctions.AddRange(structType->cachedFunctions);
+                //cachedFunctions.AddRange(structType->cachedFunctions);
+
+                for (const auto& func : structType->cachedFunctions)
+                {
+                    if (!cachedFunctions.Exists([&](const FunctionType& f) -> bool
+                        {
+                            return (func.GetFunctionSignature() == f.GetFunctionSignature()) && func.GetName() == f.GetName();
+                        }))
+                    {
+                        cachedFunctions.Add(func);
+                    }
+                }
             }
             else if (type->IsClass())
             {
                 auto classType = (ClassType*)type;
                 classType->CacheAllFunctions();
-                cachedFunctions.AddRange(classType->cachedFunctions);
+                //cachedFunctions.AddRange(classType->cachedFunctions);
+
+                for (const auto& func : classType->cachedFunctions)
+                {
+                    if (!cachedFunctions.Exists([&](const FunctionType& f) -> bool
+                        {
+                            return (func.GetFunctionSignature() == f.GetFunctionSignature()) && func.GetName() == f.GetName();
+                        }))
+                    {
+                        cachedFunctions.Add(func);
+                    }
+                }
             }
         }
 
@@ -150,7 +179,14 @@ namespace CE
 
         for (int i = 0; i < cachedFunctions.GetSize(); i++)
         {
-            cachedFunctionMap.Add({ cachedFunctions[i].GetName(), &cachedFunctions[i] });
+            if (!cachedFunctionMap.KeyExists(cachedFunctions[i].GetName()))
+            {
+                cachedFunctionMap.Add({ cachedFunctions[i].GetName(), { &cachedFunctions[i] } });
+            }
+            else
+            {
+                cachedFunctionMap[cachedFunctions[i].GetName()].Add(&cachedFunctions[i]);
+            }
         }
     }
 

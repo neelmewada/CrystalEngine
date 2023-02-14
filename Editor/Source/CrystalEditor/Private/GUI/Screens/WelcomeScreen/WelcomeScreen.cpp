@@ -31,6 +31,6 @@ namespace CE::Editor
     {
         hide();
 
-        MBUS_EVENT(CrystalEditorEventBus, OnWelcomeScreenTimeout);
+        CE_PUBLISH(CrystalEditorEventBus, OnWelcomeScreenTimeout);
     }
 }

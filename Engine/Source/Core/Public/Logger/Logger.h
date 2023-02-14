@@ -22,7 +22,7 @@ namespace CE
 
     enum class LogTarget
     {
-        Default = 0,
+        None = 0,
         Console = BIT(0),
         LogFile = BIT(1),
         All = Console | LogFile,

@@ -1,5 +1,6 @@
 
 #include "Algorithm/Hash.h"
+#include "Containers/Array.h"
 
 #include "xxhash.h"
 

@@ -16,7 +16,6 @@ namespace CE::Editor
         ui->setupUi(this);
 
         setWindowTitle("Viewport");
-        //windowHandle()->setSurfaceType(QSurface::VulkanSurface);
         
         instance = new QVulkanInstance();
 

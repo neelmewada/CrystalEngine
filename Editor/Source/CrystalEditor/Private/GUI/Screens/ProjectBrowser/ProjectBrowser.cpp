@@ -42,7 +42,7 @@ namespace CE::Editor
 
     void ProjectBrowser::on_createProjectButtonBox_accepted()
     {
-        MBUS_EVENT(CrystalEditorEventBus, OnCreateProject, IO::Path(ui->projectFolderTextBox->text().toStdString()), String(ui->projectNameTextBox->text().toStdString())); // TODO: Placeholder empty project path
+        CE_PUBLISH(CrystalEditorEventBus, OnCreateProject, IO::Path(ui->projectFolderTextBox->text().toStdString()), String(ui->projectNameTextBox->text().toStdString()));
     }
 
 
@@ -54,7 +54,7 @@ namespace CE::Editor
 
     void ProjectBrowser::on_openProjectButtonBox_accepted()
     {
-        MBUS_EVENT(CrystalEditorEventBus, OnOpenProject, IO::Path(ui->openProjectPathTextBox->text().toStdString()));
+        CE_PUBLISH(CrystalEditorEventBus, OnOpenProject, IO::Path(ui->openProjectPathTextBox->text().toStdString()));
     }
 
 

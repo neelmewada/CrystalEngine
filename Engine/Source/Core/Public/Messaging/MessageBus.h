@@ -3,6 +3,8 @@
 #include "Containers/Array.h"
 #include "Containers/String.h"
 
+#include "Logger/Logger.h"
+
 #include "Object/Object.h"
 
 #include "Policies.h"
@@ -128,26 +130,49 @@ namespace CE
     {
     public:
 
-        struct Subscriber
-        {
-            FunctionType* function;
-            Object* object;
-        };
-
         template<typename... Args>
         void Publish(Name eventName, Args... args)
         {
-            for (const auto& subscriber : subscribers)
+            for (auto subscriber : subscribers)
             {
-                if (subscriber.function == nullptr)
+                if (subscriber == nullptr)
                     continue;
-                try
+
+                auto type = subscriber->GetType();
+
+                if (!type->IsClass())
+                    continue;
+
+                auto classType = (ClassType*)type;
+
+                auto functions = classType->FindAllFunctionsWithName(eventName);
+
+                CE::Array<SIZE_T> typeIds = { ((SIZE_T)TYPEID(Args))... };
+                SIZE_T signature = GetCombinedHashes(typeIds);
+
+                bool funcFound = false;
+                
+                for (auto function : functions)
                 {
-                    subscriber.function->Invoke(subscriber.object, { args... });
+                    if (function->GetFunctionSignature() == signature)
+                    {
+                        try
+                        {
+                            function->Invoke(subscriber, { args... });
+                            funcFound = true;
+                        }
+                        catch (...)
+                        {
+                            continue;
+                        }
+                        break;
+                    }
                 }
-                catch (CE::VariantCastException exc)
+
+                if (!funcFound)
                 {
-                    continue;
+                    CE_LOG(Error, All, "Failed to publish {} event for subscriber {}\nCould not find a function with name {} and signature {}",
+                        eventName, subscriber->GetName(), eventName, signature);
                 }
             }
         }
@@ -175,7 +200,7 @@ namespace CE
 
         virtual Name GetBusName() = 0;
 
-    private:
+    protected:
         friend class Object;
 
         Array<Object*> subscribers{};
@@ -187,17 +212,20 @@ namespace CE
 
 #define CE_DISCONNECT(BusName, Subscriber) BusName::Get().RemoveSubscriber(Subscriber);
 
-#define CE_EVENT_BUS(API, BusName)\
+#define CE_EVENT_BUS(API, BusName, HandlerInterface)\
 class API BusName : public CE::EventBus\
 {\
 private:\
     BusName() {}\
 public:\
+    using Interface = HandlerInterface;\
     static BusName& Get()\
     {\
         static BusName instance{};\
         return instance;\
     }\
-    virtual Name GetBusName() override { return #BusName; }\
+    virtual CE::Name GetBusName() override { return #BusName; }\
 };
+
+#define CE_PUBLISH(BusName, EventName, ...) BusName::Get().Publish(#EventName, ##__VA_ARGS__)
 

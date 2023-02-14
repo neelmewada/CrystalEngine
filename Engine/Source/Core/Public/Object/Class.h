@@ -165,6 +165,7 @@ namespace CE
         FieldType* FindFieldWithName(Name name);
 
 		FunctionType* FindFunctionWithName(Name name);
+		CE::Array<FunctionType*> FindAllFunctionsWithName(Name name);
 
 		virtual void InitializeDefaults(void* instance) const
 		{
@@ -270,7 +271,7 @@ namespace CE
 		// Inherited + Local fields
 		CE::Array<FieldType> cachedFields{};
         CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
-		CE::HashMap<CE::Name, FunctionType*> cachedFunctionMap{};
+		CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionMap{};
         
 		CE::Array<FunctionType> cachedFunctions{};
 
@@ -634,7 +635,7 @@ public:\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::ClassType* Type();\
-    virtual const TypeInfo* GetType() const\
+    virtual const CE::TypeInfo* GetType() const\
     {\
         return Type();\
     }
@@ -698,4 +699,16 @@ public:\
     {\
         return Type();\
     }
+
+#define __CE_PROP_GETTER_(FieldName)
+#define __CE_PROP_GETTER_NULL(FieldName)
+#define __CE_PROP_GETTER_GET(FieldName) CE_INLINE decltype(FieldName) Get_##FieldName() const { return FieldName; }
+
+#define __CE_PROP_SETTER_(FieldName)
+#define __CE_PROP_SETTER_NULL(FieldName)
+#define __CE_PROP_SETTER_SET(FieldName) CE_INLINE void Set_##FieldName(const decltype(FieldName)& value) { FieldName = value; }
+
+#define CE_PROPERTY(FieldName, Getter, Setter)\
+CE_EXPAND(CE_CONCATENATE(__CE_PROP_GETTER_, Getter))(FieldName)\
+CE_EXPAND(CE_CONCATENATE(__CE_PROP_SETTER_, Setter))(FieldName)
 

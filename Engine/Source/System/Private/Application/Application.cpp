@@ -9,6 +9,8 @@ namespace CE
     Application::Application(int argc, char** argv)
     {
         CE_CONNECT(ApplicationBus, this);
+
+        CE_PUBLISH(ApplicationBus, RunMainLoop);
     }
 
     Application::~Application()
@@ -18,13 +20,15 @@ namespace CE
         delete engineRef;
     }
 
-    Engine* Application::GetEngineRef()
+    void Application::GetEngineRef(Engine** outEngineRef)
     {
+        if (outEngineRef == nullptr)
+            return;
         if (engineRef == nullptr)
         {
             engineRef = new Engine;
         }
-        return engineRef;
+        *outEngineRef = engineRef;
     }
 
     void Application::RunMainLoop()

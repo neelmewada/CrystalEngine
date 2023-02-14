@@ -12,6 +12,7 @@ namespace CE
 
     class SYSTEM_API Application
         : public ComponentApplication
+        , public ApplicationBus::Interface
     {
         CE_CLASS(Application, ComponentApplication);
 
@@ -23,11 +24,11 @@ namespace CE
 
         virtual void Tick() override;
 
-    public: // ApplicationBus Events
-        virtual Engine* GetEngineRef();
+    private: // ApplicationBus::Interface
+        virtual void GetEngineRef(Engine** outEngineRef) override;
 
-        virtual void RunMainLoop();
-        virtual void ExitMainLoop();
+        virtual void RunMainLoop() override;
+        virtual void ExitMainLoop() override;
 
     protected:
         bool exitMainLoopRequested = false;
