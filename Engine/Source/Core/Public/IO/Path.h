@@ -69,22 +69,22 @@ namespace CE::IO
             return lhs.Impl != rhs.Impl;
         }
 
-        inline bool Exists()
+        inline bool Exists() const
         {
             return fs::exists(Impl);
         }
 
-        inline bool IsEmpty()
+        inline bool IsEmpty() const
         {
             return Impl.empty();
         }
 
-        inline bool IsDirectory()
+        inline bool IsDirectory() const
         {
             return fs::is_directory(Impl);
         }
 
-        inline Path GetParentPath()
+        inline Path GetParentPath() const
         {
             return Path(Impl.parent_path());
         }

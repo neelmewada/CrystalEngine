@@ -9,6 +9,7 @@
 
 namespace CE
 {
+    class Variant;
 
     template<typename ElementType>
     class Array
@@ -34,7 +35,7 @@ namespace CE
             
         }
 
-        Array(std::vector<ElementType> vector) : Impl(vector), ElementTypeId(GetTypeId<ElementType>())
+        Array(const std::vector<ElementType>& vector) : Impl(vector), ElementTypeId(GetTypeId<ElementType>())
         {
 
         }
@@ -229,6 +230,8 @@ namespace CE
     private:
         TypeId ElementTypeId;
         std::vector<ElementType> Impl;
+
+        friend class Variant;
     };
     
 } // namespace CE

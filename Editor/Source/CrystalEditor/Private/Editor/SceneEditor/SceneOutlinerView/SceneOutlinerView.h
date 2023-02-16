@@ -35,6 +35,16 @@ namespace CE::Editor
         void SetModel(SceneOutlinerModel* model);
         
         CE_INLINE SceneOutlinerModel* GetModel() const { return model; }
+
+        void Update();
+
+    private slots:
+        void ShowContextMenu(const QPoint& pos);
+
+        void on_contextMenu_EmptyGameObject();
+
+    signals: // Signals to Scene Editor Window
+        void CreateEmptyGameObject();
         
     private:
         SceneOutlinerModel* model = nullptr;

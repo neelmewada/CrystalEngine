@@ -64,14 +64,30 @@ namespace CE
 		Variant(const char* value) { StringValue = value; ValueTypeId = TYPEID(String); }
 		Variant(String value) { StringValue = value; ValueTypeId = TYPEID(String); }
 
-		Variant(IO::Path value) { PathValue = value; ValueTypeId = TYPEID(IO::Path); }
-		Variant(Name value) { NameValue = value; ValueTypeId = TYPEID(Name); }
+		Variant(IO::Path value) 
+		{
+			SetInternalValue(value);
+		}
+		
+		Variant(Name value) 
+		{
+			SetInternalValue(value); 
+		}
 
 		template<typename ElementType>
-		Variant(CE::Array<ElementType> value) : ValueTypeId(TYPEID(CE::Array<ElementType>))//, ArrayValue(value)
+		Variant(CE::Array<ElementType> value)
 		{
-			void* ref = &value;
-			memcpy(this, ref, sizeof(value));
+			memset(this, 0, sizeof(Variant));
+			ArrayValue = Array<u8>(value.GetSize() * sizeof(ElementType));
+
+			for (int i = 0; i < value.GetSize(); i++)
+			{
+				ElementType* dest = (ElementType*)(&*ArrayValue.Begin() + i * sizeof(ElementType));
+				*dest = value[i];
+			}
+
+			ArrayValue.ElementTypeId = TYPEID(ElementType);
+			ValueTypeId = TYPEID(CE::Array<ElementType>);
 		}
 
 		template<typename PtrType>
@@ -129,6 +145,7 @@ namespace CE
 		template<typename T>
 		CE_INLINE void SetInternalValue(T value)
 		{
+			memset(this, 0, sizeof(Variant));
 			ValueTypeId = GetTypeId<T>();
 			*(T*)this = value;
 		}

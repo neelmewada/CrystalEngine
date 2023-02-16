@@ -66,7 +66,8 @@ namespace CE::Editor
 
         EditorPrefs::Get().OnProjectChanged();
 
-        // Initialize RHI device, etc
+        // Initialize RHI, device, etc
+        gDynamicRHI->Initialize();
         gDynamicRHI->PostInitialize();
     }
 
@@ -84,14 +85,6 @@ namespace CE::Editor
         }
 
         EditorPrefs::Get().OnProjectChanged();
-    }
-
-    void CrystalEditorApplication::RunMainLoop()
-    {
-    }
-
-    void CrystalEditorApplication::ExitMainLoop()
-    {
     }
 
     void CrystalEditorApplication::GetEngineRef(Engine** outEngineRef)

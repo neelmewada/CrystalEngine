@@ -26,12 +26,25 @@ namespace CE::Editor
         ~SceneEditorWindow();
 
         virtual void OpenEmptyScene() override;
+
+    private slots:
+        void CreateEmptyGameObject();
         
+    private slots:
+        void on_actionNewScene_triggered();
+
+        void on_actionSaveScene_triggered();
+
+        void on_actionSaveSceneAs_triggered();
+
+        void on_actionOpenScene_triggered();
+
     private:
         Ui::SceneEditorWindow* ui;
         
         ads::CDockManager* dockManager = nullptr;
         
+        String scenePath{};
         SceneOutlinerView* sceneOutlinerView = nullptr;
         ViewportView* viewportView = nullptr;
     };

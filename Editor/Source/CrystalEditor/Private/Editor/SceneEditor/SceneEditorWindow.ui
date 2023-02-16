@@ -20,7 +20,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>24</height>
+     <height>19</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -30,9 +30,10 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionNew"/>
-    <addaction name="actionOpen"/>
-    <addaction name="actionExit"/>
+    <addaction name="actionNewScene"/>
+    <addaction name="actionOpenScene"/>
+    <addaction name="actionSaveScene"/>
+    <addaction name="actionSaveSceneAs"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -50,19 +51,17 @@
    <addaction name="menuEdit"/>
    <addaction name="menuViews"/>
   </widget>
-  <action name="actionNew">
+  <action name="actionNewScene">
    <property name="text">
-    <string>New...</string>
+    <string>New Scene</string>
+   </property>
+   <property name="toolTip">
+    <string>New Scene</string>
    </property>
   </action>
-  <action name="actionOpen">
+  <action name="actionOpenScene">
    <property name="text">
-    <string>Open...</string>
-   </property>
-  </action>
-  <action name="actionExit">
-   <property name="text">
-    <string>Exit</string>
+    <string>Open Scene...</string>
    </property>
   </action>
   <action name="actionCopy">
@@ -78,6 +77,16 @@
   <action name="actionPaste_Match_Style">
    <property name="text">
     <string>Paste &amp; Match Style</string>
+   </property>
+  </action>
+  <action name="actionSaveScene">
+   <property name="text">
+    <string>Save Scene</string>
+   </property>
+  </action>
+  <action name="actionSaveSceneAs">
+   <property name="text">
+    <string>Save Scene as...</string>
    </property>
   </action>
  </widget>

@@ -27,9 +27,6 @@ namespace CE
     private: // ApplicationBus::Interface
         virtual void GetEngineRef(Engine** outEngineRef) override;
 
-        virtual void RunMainLoop() override;
-        virtual void ExitMainLoop() override;
-
     protected:
         bool exitMainLoopRequested = false;
 
@@ -46,7 +43,5 @@ CE_RTTI_CLASS(SYSTEM_API, CE, Application,
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST(
         CE_FUNCTION(GetEngineRef, Event)
-        CE_FUNCTION(RunMainLoop, Event)
-        CE_FUNCTION(ExitMainLoop, Event)
     )
 )

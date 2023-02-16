@@ -61,6 +61,15 @@ int main(int argc, char* argv[])
     CE_PUBLISH(ApplicationBus, GetValue, &val);
 
     LOG("Value: " << val);
+
+    CE::Variant variant = CE::Array<float>({ 1.1f, 2.2f, 3.3f, 4.4f });
+
+    auto array = variant.GetValue<CE::Array<float>>();
+
+    for (int i = 0; i < array.GetSize(); i++)
+    {
+        LOG(i << " == " << array[i]);
+    }
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");

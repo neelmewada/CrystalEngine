@@ -31,7 +31,7 @@ namespace CE
         *outEngineRef = engineRef;
     }
 
-    void Application::RunMainLoop()
+    /*void Application::RunMainLoop()
     {
         while (!exitMainLoopRequested)
         {
@@ -42,7 +42,7 @@ namespace CE
     void Application::ExitMainLoop()
     {
         exitMainLoopRequested = true;
-    }
+    }*/
 
     void Application::Tick()
     {

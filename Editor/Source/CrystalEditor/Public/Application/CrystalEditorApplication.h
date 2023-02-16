@@ -17,7 +17,7 @@ namespace CE::Editor
     class CRYSTALEDITOR_API CrystalEditorApplication
         : public EditorQtApplication
         , public CrystalEditorEventBus::Interface
-        , public CE::ApplicationBus::Interface
+        , public ApplicationBus::Interface
     {
         Q_OBJECT
 
@@ -42,10 +42,6 @@ namespace CE::Editor
 
         ///////////////////////////////////////////
         // CE::ApplicationBus::Interface
-
-        virtual void RunMainLoop() override;
-
-        virtual void ExitMainLoop() override;
 
         virtual void GetEngineRef(Engine** outEngineRef) override;
 
@@ -74,7 +70,5 @@ CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, CrystalEditorApplication,
 
         // CE::ApplicationBus::Interface
         CE_FUNCTION(GetEngineRef, Event)
-        CE_FUNCTION(RunMainLoop, Event)
-        CE_FUNCTION(ExitMainLoop, Event)
     )
 )

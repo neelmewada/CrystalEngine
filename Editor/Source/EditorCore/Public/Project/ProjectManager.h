@@ -22,8 +22,9 @@ namespace CE::Editor
             return instance;
         }
 
-        CE_INLINE bool IsLoaded() const { return isLoaded; }
+        CE_INLINE bool IsProjectLoaded() const { return isLoaded; }
         CE_INLINE IO::Path GetLoadedProjectPath() const { return loadedProjectPath; }
+        CE_INLINE IO::Path GetProjectBaseDirectory() const { return loadedProjectPath.GetParentPath(); }
 
         void CreateProject(IO::Path projectDirectory, String projectName);
         void LoadProject(IO::Path projectPath);

@@ -22,6 +22,8 @@ namespace CE::Editor
         
         void OnSceneOpened(Scene* scene);
         void OnSceneClosed(Scene* scene);
+
+        void OnSceneUpdated();
         
         CE_INLINE Scene* GetScene() const
         {

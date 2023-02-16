@@ -9,10 +9,6 @@ namespace CE
     class ApplicationRequests
     {
     public:
-        virtual void RunMainLoop() {}
-
-        virtual void ExitMainLoop() {}
-
         virtual void GetEngineRef(Engine** outEngineRef) {}
     };
 

@@ -30,6 +30,11 @@ namespace CE::Editor
             this->currentScene = nullptr;
     }
 
+    void SceneOutlinerModel::OnSceneUpdated()
+    {
+        emit dataChanged(QModelIndex(), QModelIndex());
+    }
+
     QVariant SceneOutlinerModel::data(const QModelIndex &index, int role) const
     {
         if (!index.isValid())

@@ -34,9 +34,7 @@ namespace CE::Editor
 		// Post-Init plugins
 		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadOnPostInit);
 
-		// Initialize RHI
-		gDynamicRHI->Initialize();
-		//gDynamicRHI->PostInitialize();
+		
 	}
 
 	void EditorLoop::PreShutdown()
