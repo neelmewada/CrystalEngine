@@ -2,6 +2,7 @@
 #define SCENEOUTLINERVIEW_H
 
 #include <QWidget>
+#include <QTreeView>
 
 #include "Editor/EditorViewBase.h"
 #include "Editor/SceneEditor/SceneOutlinerViewBus.h"
@@ -26,6 +27,8 @@ namespace CE::Editor
     {
         Q_OBJECT
 
+        CE_CLASS(SceneOutlinerView, EditorViewBase)
+
     public:
         explicit SceneOutlinerView(QWidget *parent = nullptr);
         ~SceneOutlinerView();
@@ -36,7 +39,9 @@ namespace CE::Editor
         
         CE_INLINE SceneOutlinerModel* GetModel() const { return model; }
 
-        void Update();
+        QTreeView* GetTreeView() const;
+
+        void Refresh();
 
     private slots:
         void ShowContextMenu(const QPoint& pos);
@@ -54,4 +59,13 @@ namespace CE::Editor
 
 }
 
+CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, SceneOutlinerView,
+    CE_SUPER(CE::Editor::EditorViewBase),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST()
+)
+
 #endif // SCENEOUTLINERVIEW_H
+

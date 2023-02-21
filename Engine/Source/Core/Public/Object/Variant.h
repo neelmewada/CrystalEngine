@@ -94,6 +94,13 @@ namespace CE
 		Variant(PtrType* ptr) : ValueTypeId(GetTypeId<PtrType*>()), PtrValue(ptr)
 		{}
 
+		template<typename T> requires std::is_enum<T>::value
+		Variant(T enumValue)
+		{
+			SetInternalValue((std::underlying_type_t<T>)enumValue);
+			ValueTypeId = TYPEID(T);
+		}
+
 		CE_INLINE bool HasValue() const
 		{
 			return ValueTypeId > 0;

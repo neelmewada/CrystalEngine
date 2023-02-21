@@ -79,8 +79,6 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::Highlight, QColor(142, 45, 197).lighter());
         palette.setColor(QPalette::HighlightedText, ::Qt::black);
 
-        qApp->setStyle(QStyleFactory::create("Fusion"));
-
         // New Theme
         palette.setColor(QPalette::Window, QColor(53, 53, 53));
         palette.setColor(QPalette::WindowText, ::Qt::white);
@@ -96,6 +94,7 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
         palette.setColor(QPalette::HighlightedText, ::Qt::black);
 
+        palette.setColor(QPalette::PlaceholderText, gray);
         palette.setColor(QPalette::Active, QPalette::Button, gray.darker());
         palette.setColor(QPalette::Disabled, QPalette::ButtonText, gray);
         palette.setColor(QPalette::Disabled, QPalette::WindowText, gray);

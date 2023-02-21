@@ -3,6 +3,7 @@
 
 #include "ViewportView/ViewportView.h"
 #include "SceneOutlinerView/SceneOutlinerView.h"
+#include "DetailsView/DetailsView.h"
 
 #include <QFileDialog>
 
@@ -13,6 +14,8 @@ namespace CE::Editor
         : EditorWindowBase(parent)
         , ui(new Ui::SceneEditorWindow)
     {
+        CE_CONNECT(SceneEditorBus, this);
+
         ui->setupUi(this);
         scenePath = "";
 
@@ -26,37 +29,41 @@ namespace CE::Editor
 
         dockManager = new CDockManager(this);
 
-        // Viewport
+        // **********************************
+        // Viewport View
         viewportView = new ViewportView();
         ads::CDockWidget* viewportViewDockWidget = new ads::CDockWidget(viewportView->windowTitle());
         viewportViewDockWidget->setWidget(viewportView);
         
-        // Scene Outliner
+        // **********************************
+        // Scene Outliner View
         sceneOutlinerView = new SceneOutlinerView();
         ads::CDockWidget* sceneOutlinerDockWidget = new ads::CDockWidget(sceneOutlinerView->windowTitle());
         sceneOutlinerDockWidget->setWidget(sceneOutlinerView);
 
         // Scene Outliner connections
-        connect(sceneOutlinerView, &SceneOutlinerView::CreateEmptyGameObject, this, &SceneEditorWindow::CreateEmptyGameObject);
-        
-        // TODO: Test code
-        //editorScene->AddGameObject(new GameObject("GO 1"));
-        //auto go2 = new GameObject("GO 2");
-        //editorScene->AddGameObject(go2);
-        //go2->AddChild(new GameObject("Child 1"));
-        //go2->AddChild(new GameObject("Child 2"));
+        connect(sceneOutlinerView, &SceneOutlinerView::CreateEmptyGameObject, this, &SceneEditorWindow::on_createEmptyGameObject_triggered);
         
         // Set models
         sceneOutlinerView->SetModel(new SceneOutlinerModel(this));
         sceneOutlinerView->GetModel()->OnSceneOpened(editorScene);
 
+        // **********************************
+        // Details View
+        detailsView = new DetailsView();
+        ads::CDockWidget* detailsViewDockWidget = new ads::CDockWidget(detailsView->windowTitle());
+        detailsViewDockWidget->setWidget(detailsView);
+
         // Add the dock widget to the top dock widget area
         dockManager->addDockWidget(ads::CenterDockWidgetArea, viewportViewDockWidget);
         dockManager->addDockWidget(ads::LeftDockWidgetArea, sceneOutlinerDockWidget);
+        dockManager->addDockWidget(ads::RightDockWidgetArea, detailsViewDockWidget);
     }
 
     SceneEditorWindow::~SceneEditorWindow()
     {
+        CE_DISCONNECT(SceneEditorBus, this);
+
         delete ui;
     }
 
@@ -71,16 +78,83 @@ namespace CE::Editor
 
     void SceneEditorWindow::CreateEmptyGameObject()
     {
-        editorScene->AddGameObject(new GameObject("Empty"));
+        auto go = new GameObject("Empty");
+        auto selection = sceneOutlinerView->GetTreeView()->selectionModel()->selectedIndexes();
 
-        sceneOutlinerView->Update();
+        GameObject* parent = nullptr;
+        int parentSiblingIdx = 0;
+        int goAddIndex = 0;
+
+        if (selection.size() == 0)
+        {
+            goAddIndex = editorScene->GetRootGameObjectCount();
+            editorScene->AddGameObject(go);
+        }
+        else
+        {
+            auto idx = selection.at(0);
+            if (idx.isValid() && idx.internalPointer() != nullptr)
+            {
+                GameObject* selected = (GameObject*)idx.internalPointer();
+                goAddIndex = selected->GetChildrenCount();
+                selected->AddChild(go);
+                parent = selected;
+
+                if (parent->GetParent() != nullptr)
+                {
+                    parentSiblingIdx = parent->GetParent()->GetChildIndex(parent);
+                }
+                else
+                {
+                    parentSiblingIdx = editorScene->GetRootGameObjectIndex(parent);
+                }
+            }
+            else
+            {
+                goAddIndex = editorScene->GetRootGameObjectCount();
+                editorScene->AddGameObject(go);
+            }
+        }
+
+        auto model = sceneOutlinerView->GetModel();
+        emit model->rowsInserted(parent != nullptr ? model->CreateIndex(parentSiblingIdx, 0, parent) : QModelIndex(), goAddIndex, 0, {});
+    }
+
+    void SceneEditorWindow::OpenScene(String sceneAssetPath)
+    {
+        String openPath = (ProjectManager::Get().GetProjectBaseDirectory() / sceneAssetPath).GetString();
+        QString openPathQString = openPath.GetCString();
+
+        QFileDialog* openFileDialog = new QFileDialog(this);
+        QString openFileFinalPath = openFileDialog->getOpenFileName(this, "Open Scene", openPathQString, "*.cscene");
+
+        if (!openFileFinalPath.isEmpty())
+        {
+            if (!openFileFinalPath.endsWith(".cscene"))
+                return;
+
+            OpenEmptyScene();
+
+            SerializedObject so{ editorScene };
+            so.Deserialize(IO::Path(openFileFinalPath.toStdString()));
+
+            sceneOutlinerView->Refresh();
+
+            CE_LOG(Info, All, "Opening scene at path: {}", openFileFinalPath);
+        }
+    }
+
+    // SLOTS
+
+    void SceneEditorWindow::on_createEmptyGameObject_triggered()
+    {
+        CreateEmptyGameObject();
     }
 
     void SceneEditorWindow::on_actionNewScene_triggered()
     {
         OpenEmptyScene();
     }
-
 
     void SceneEditorWindow::on_actionSaveScene_triggered()
     {
@@ -102,7 +176,6 @@ namespace CE::Editor
         sceneSO.Serialize(savePath);
     }
 
-
     void SceneEditorWindow::on_actionSaveSceneAs_triggered()
     {
         String savePath = (ProjectManager::Get().GetProjectBaseDirectory() / scenePath).GetString();
@@ -119,35 +192,15 @@ namespace CE::Editor
             SerializedObject so{ editorScene };
             so.Serialize(IO::Path(saveFileFinalPath.toStdString()));
 
-            sceneOutlinerView->Update();
-
             CE_LOG(Info, All, "Saving scene at path: {}", saveFileFinalPath);
         }
     }
 
     void SceneEditorWindow::on_actionOpenScene_triggered()
     {
-        String openPath = (ProjectManager::Get().GetProjectBaseDirectory() / scenePath).GetString();
-        QString openPathQString = openPath.GetCString();
-
-        QFileDialog* openFileDialog = new QFileDialog(this);
-        QString openFileFinalPath = openFileDialog->getOpenFileName(this, "Open Scene", openPathQString, "*.cscene");
-
-        if (!openFileFinalPath.isEmpty())
-        {
-            if (!openFileFinalPath.endsWith(".cscene"))
-                return;
-
-            OpenEmptyScene();
-
-            SerializedObject so{ editorScene };
-            so.Deserialize(IO::Path(openFileFinalPath.toStdString()));
-
-            sceneOutlinerView->Update();
-
-            CE_LOG(Info, All, "Opening scene at path: {}", openFileFinalPath);
-        }
+        OpenScene(scenePath);
     }
-
-
 }
+
+
+CE_RTTI_CLASS_IMPL(CRYSTALEDITOR_API, CE::Editor, SceneEditorWindow)

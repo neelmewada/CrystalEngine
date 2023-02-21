@@ -10,7 +10,7 @@ namespace CE
 namespace CE::Editor
 {
     
-    class SceneOutlinerViewInterface : public CE::IBusInterface
+    class SceneOutlinerViewInterface
     {
     public:
         

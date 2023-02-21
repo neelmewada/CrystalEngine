@@ -30,12 +30,21 @@ namespace CE::Editor
 
         ads::CDockWidget* dockWidget = new ads::CDockWidget(sceneEditor->windowTitle());
         dockWidget->setWidget(sceneEditor);
+
+        dockWidgets.Add(dockWidget);
         
         mainDockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
     }
 
     CrystalEditorWindow::~CrystalEditorWindow()
     {
+        for (auto dockWidget : dockWidgets)
+        {
+            mainDockManager->removeDockWidget(dockWidget);
+            delete dockWidget;
+        }
+
+        delete mainDockManager;
         delete ui;
     }
 

@@ -8,6 +8,7 @@
 #include "Object/Object.h"
 
 #include "Policies.h"
+#include "Event.h"
 
 #define MBUS_EVENT(_MBUS, ...) _MBUS::Broadcast(&_MBUS::Events::__VA_ARGS__)
 
@@ -158,7 +159,62 @@ namespace CE
                     {
                         try
                         {
-                            function->Invoke(subscriber, { args... });
+                            auto result = function->Invoke(subscriber, { args... });
+                            funcFound = true;
+                        }
+                        catch (...)
+                        {
+                            continue;
+                        }
+                        break;
+                    }
+                }
+
+                if (!funcFound)
+                {
+                    CE_LOG(Error, All, "Failed to publish {} event for subscriber {}\nCould not find a function with name {} and signature {}",
+                        eventName, subscriber->GetName(), eventName, signature);
+                }
+            }
+        }
+
+        template<typename... Args>
+        void Publish(UUID messageTarget, Name eventName, Args... args)
+        {
+            for (auto subscriber : subscribers)
+            {
+                if (subscriber == nullptr || subscriber->GetUuid() != messageTarget)
+                    continue;
+
+                auto type = subscriber->GetType();
+
+                if (!type->IsClass())
+                    continue;
+
+                auto classType = (ClassType*)type;
+
+                auto functions = classType->FindAllFunctionsWithName(eventName);
+
+                CE::Array<SIZE_T> typeIds = { ((SIZE_T)TYPEID(Args))... };
+                SIZE_T signature = GetCombinedHashes(typeIds);
+
+                bool funcFound = false;
+
+                for (auto function : functions)
+                {
+                    if (function->GetFunctionSignature() == signature)
+                    {
+                        try
+                        {
+                            auto result = function->Invoke(subscriber, { args... });
+                            if (result.HasValue() && result.GetValueTypeId() == TYPEID(EventResult))
+                            {
+                                auto value = result.GetValue<EventResult>();
+                                if (value == EventResult::HandleAndStopPropagation)
+                                {
+                                    break;
+                                }
+                            }
                             funcFound = true;
                         }
                         catch (...)
@@ -228,4 +284,5 @@ public:\
 };
 
 #define CE_PUBLISH(BusName, EventName, ...) BusName::Get().Publish(#EventName, ##__VA_ARGS__)
+#define CE_PUBLISH_TO(MessageTarget, BusName, EventName, ...) BusName::Get().Publish(MessageTarget, #EventName, ##__VA_ARGS__)
 

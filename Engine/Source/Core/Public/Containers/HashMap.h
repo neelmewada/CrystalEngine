@@ -47,7 +47,7 @@ namespace CE
 
         inline bool KeyExists(const KeyType& key) const
         {
-            return Impl.count(key) > 0;
+            return Impl.contains(key);
         }
 
         inline ValueType& operator[](const KeyType& key)

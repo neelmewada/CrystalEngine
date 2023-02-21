@@ -25,6 +25,7 @@ namespace CE
         }
         
         objects.Clear();
+        rootGameObjects.Clear();
 	}
 
     void Scene::Tick(f32 deltaTime)

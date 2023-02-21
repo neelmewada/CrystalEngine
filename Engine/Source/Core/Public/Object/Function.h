@@ -39,7 +39,7 @@ namespace CE
 
 		CE_INLINE const TypeInfo* GetOwner() const { return owner; }
 
-		bool IsEvent() const;
+		bool IsEventFunction() const;
 
 		virtual TypeId GetTypeId() const override
 		{

@@ -20,7 +20,7 @@ namespace CE
 
     }
 
-    bool FunctionType::IsEvent() const
+    bool FunctionType::IsEventFunction() const
     {
         return GetAttributes().Exists([](const Attribute& attr) -> bool
             {

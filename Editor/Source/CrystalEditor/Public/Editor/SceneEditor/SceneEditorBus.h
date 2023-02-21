@@ -10,16 +10,19 @@ namespace CE
 namespace CE::Editor
 {
 
-    class CRYSTALEDITOR_API SceneEditorRequests : public IBusInterface
+    class CRYSTALEDITOR_API SceneEditorRequests
     {
     public:
         
         virtual void OpenEmptyScene() = 0;
+
+        virtual void CreateEmptyGameObject() = 0;
         
-        // virtual void OpenScene(String sceneAssetPath) = 0;
+        virtual void OpenScene(String sceneAssetPath) = 0;
         
     };
 
-    using SceneEditorBus = MessageBus<SceneEditorRequests>;
+    //using SceneEditorBus = MessageBus<SceneEditorRequests>;
+    CE_EVENT_BUS(CRYSTALEDITOR_API, SceneEditorBus, SceneEditorRequests);
     
 } // namespace CE::Editor

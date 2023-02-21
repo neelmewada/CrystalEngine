@@ -33,6 +33,12 @@
    </property>
    <item>
     <widget class="QTreeWidget" name="treeWidget">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectItems</enum>
+     </property>
      <property name="headerHidden">
       <bool>true</bool>
      </property>

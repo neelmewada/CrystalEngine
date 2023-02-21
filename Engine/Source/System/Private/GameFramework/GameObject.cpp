@@ -100,6 +100,7 @@ namespace CE
             return;
         
         go->parent = this;
+        go->owner = owner;
         children.Add(go);
         
         if (owner != nullptr)

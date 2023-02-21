@@ -1,7 +1,7 @@
 #ifndef CRYSTALEDITORWINDOW_H
 #define CRYSTALEDITORWINDOW_H
 
-#include "IO/Path.h"
+#include "CoreMinimal.h"
 
 #include <QWindow>
 #include <QMainWindow>
@@ -14,6 +14,8 @@ class CrystalEditorWindow;
 
 namespace CE::Editor
 {
+    class SceneEditorWindow;
+
     class CrystalEditorWindow : public QMainWindow
     {
         Q_OBJECT
@@ -28,6 +30,8 @@ namespace CE::Editor
         Ui::CrystalEditorWindow* ui;
 
         ads::CDockManager* mainDockManager = nullptr;
+
+        Array<ads::CDockWidget*> dockWidgets{};
     };
 }
 

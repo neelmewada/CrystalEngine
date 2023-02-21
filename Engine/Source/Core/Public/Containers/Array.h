@@ -80,6 +80,18 @@ namespace CE
             Impl.push_back(item);
         }
 
+        CE_INLINE s32 IndexOf(const ElementType& item) const
+        {
+            for (int i = 0; i < Impl.size(); i++)
+            {
+                if (Impl[i] == item)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         template<typename... Args>
         CE_INLINE void EmplaceBack(Args... args)
         {

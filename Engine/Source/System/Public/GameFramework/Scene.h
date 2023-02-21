@@ -33,6 +33,13 @@ namespace CE
         {
             return rootGameObjects[index];
         }
+
+        s32 GetRootGameObjectIndex(GameObject* go) const
+        {
+            if (go == nullptr)
+                return -1;
+            return rootGameObjects.IndexOf(go);
+        }
         
         void AddObject(Object* object);
         void RemoveObject(Object* object);

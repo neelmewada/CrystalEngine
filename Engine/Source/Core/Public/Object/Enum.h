@@ -99,14 +99,9 @@ namespace CE\
     {\
         return (EnumType*)GetStaticType<Namespace::Enum>();\
     }\
-}\
-namespace Namespace\
-{\
-    API extern const TypeInfo* CE_Generated_EnumType_##Enum##_Registrant;\
 }
 
-#define CE_RTTI_ENUM_IMPL(API, Namespace, Enum)\
-API const TypeInfo* Namespace::CE_Generated_EnumType_##Enum##_Registrant = CE::GetStaticEnum<Namespace::Enum>();
+#define CE_RTTI_ENUM_IMPL(API, Namespace, Enum)
 
 
 

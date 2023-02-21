@@ -21,18 +21,24 @@ namespace CE::Editor
     void SceneOutlinerModel::OnSceneOpened(Scene* scene)
     {
         this->currentScene = scene;
-        emit dataChanged(QModelIndex(), QModelIndex());
+        OnSceneUpdated();
     }
 
     void SceneOutlinerModel::OnSceneClosed(Scene *scene)
     {
         if (currentScene == scene)
             this->currentScene = nullptr;
+        OnSceneUpdated();
     }
 
     void SceneOutlinerModel::OnSceneUpdated()
     {
-        emit dataChanged(QModelIndex(), QModelIndex());
+        emit modelReset({});
+    }
+
+    QModelIndex SceneOutlinerModel::CreateIndex(int row, int col, void* data)
+    {
+        return createIndex(row, col, data);
     }
 
     QVariant SceneOutlinerModel::data(const QModelIndex &index, int role) const
@@ -49,13 +55,13 @@ namespace CE::Editor
         return go->GetName().GetCString();
     }
 
-    ::Qt::ItemFlags SceneOutlinerModel::flags(const QModelIndex &index) const
-    {
-        //if (!index.isValid())
-        //    return ::Qt::NoItemFlags;
-        
-        return ::Qt::ItemFlag::ItemIsSelectable;// & ::Qt::ItemFlag::ItemIsDragEnabled;
-    }
+    //::Qt::ItemFlags SceneOutlinerModel::flags(const QModelIndex &index) const
+    //{
+    //    //if (!index.isValid())
+    //    //    return ::Qt::NoItemFlags;
+    //    
+    //    return ::Qt::ItemFlag::ItemIsSelectable;// & ::Qt::ItemFlag::ItemIsDragEnabled;
+    //}
     
     QVariant SceneOutlinerModel::headerData(int section, ::Qt::Orientation orientation, int role) const
     {
@@ -88,6 +94,7 @@ namespace CE::Editor
         GameObject* gameObject = (GameObject*)index.internalPointer();
         if (gameObject->GetParent() == nullptr)
             return QModelIndex();
+
         return createIndex(gameObject->GetParent()->GetIndexInParent(), 0, gameObject->GetParent());
     }
     
@@ -100,6 +107,10 @@ namespace CE::Editor
             return currentScene->GetRootGameObjectCount();
         
         GameObject* go = (GameObject*)parent.internalPointer();
+
+        if (go == nullptr)
+            return 0;
+
         return go->GetChildrenCount();
     }
     

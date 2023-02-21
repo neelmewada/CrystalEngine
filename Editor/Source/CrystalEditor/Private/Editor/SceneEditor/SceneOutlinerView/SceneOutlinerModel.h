@@ -24,6 +24,8 @@ namespace CE::Editor
         void OnSceneClosed(Scene* scene);
 
         void OnSceneUpdated();
+
+        QModelIndex CreateIndex(int row, int col, void* data);
         
         CE_INLINE Scene* GetScene() const
         {
@@ -31,7 +33,7 @@ namespace CE::Editor
         }
         
         QVariant data(const QModelIndex &index, int role) const override;
-        ::Qt::ItemFlags flags(const QModelIndex &index) const override;
+        //::Qt::ItemFlags flags(const QModelIndex &index) const override;
         QVariant headerData(int section, ::Qt::Orientation orientation, int role = ::Qt::DisplayRole) const override;
         
         QModelIndex index(int row, int column,

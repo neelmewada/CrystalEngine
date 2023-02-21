@@ -14,23 +14,32 @@ namespace CE::Editor
 {
     class SceneOutlinerView;
     class ViewportView;
+    class DetailsView;
 
     class SceneEditorWindow
         : public EditorWindowBase
-        , public SceneEditorBus::Handler
+        , public SceneEditorBus::Interface
     {
         Q_OBJECT
+
+        CE_CLASS(SceneEditorWindow, EditorWindowBase)
 
     public:
         explicit SceneEditorWindow(QWidget* parent = nullptr);
         ~SceneEditorWindow();
 
+        ///////////////////////////////////////
+        // SceneEditorBus::Interface
+
         virtual void OpenEmptyScene() override;
 
-    private slots:
-        void CreateEmptyGameObject();
+        virtual void CreateEmptyGameObject() override;
+
+        virtual void OpenScene(String sceneAssetPath) override;
         
     private slots:
+        void on_createEmptyGameObject_triggered();
+
         void on_actionNewScene_triggered();
 
         void on_actionSaveScene_triggered();
@@ -45,10 +54,28 @@ namespace CE::Editor
         ads::CDockManager* dockManager = nullptr;
         
         String scenePath{};
+
+        // Sub Views
         SceneOutlinerView* sceneOutlinerView = nullptr;
         ViewportView* viewportView = nullptr;
+        DetailsView* detailsView = nullptr;
     };
 
 }
 
+CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, SceneEditorWindow,
+    CE_SUPER(CE::Editor::EditorWindowBase),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST(
+        // SceneEditorBus::Interface
+        CE_FUNCTION(OpenEmptyScene, Event)
+        CE_FUNCTION(CreateEmptyGameObject, Event)
+        CE_FUNCTION(OpenScene, Event)
+    )
+)
+
 #endif // SCENEEDITOR_H
+
+

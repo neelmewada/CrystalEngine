@@ -29,6 +29,11 @@ namespace CE
             ProjectSettings
         );
 
+        // Enums
+        CE_REGISTER_TYPES(
+            EventResult
+        );
+
         // Register Objects
         CE_REGISTER_TYPES(
             Object,

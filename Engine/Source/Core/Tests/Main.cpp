@@ -70,6 +70,8 @@ int main(int argc, char* argv[])
     {
         LOG(i << " == " << array[i]);
     }
+
+    CE::Variant v = CE::Variant(CE::EventResult::HandleAndStopPropagation);
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");

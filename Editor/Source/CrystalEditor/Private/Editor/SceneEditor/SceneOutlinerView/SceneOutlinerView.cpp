@@ -16,7 +16,7 @@ namespace CE::Editor
         
         setWindowTitle("Scene Outliner");
         
-        ui->treeWidget->setIndentation(8);
+        ui->treeWidget->setIndentation(12);
 
         this->setContextMenuPolicy(::Qt::CustomContextMenu);
         connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
@@ -34,9 +34,14 @@ namespace CE::Editor
         ui->treeWidget->QTreeView::setModel(model);
     }
 
-    void SceneOutlinerView::Update()
+    QTreeView* SceneOutlinerView::GetTreeView() const
     {
-        ui->treeWidget->update();
+        return ui->treeWidget;
+    }
+
+    void SceneOutlinerView::Refresh()
+    {
+        this->model->modelReset({});
     }
 
     void SceneOutlinerView::on_contextMenu_EmptyGameObject()
@@ -56,13 +61,16 @@ namespace CE::Editor
     {
         QMenu contextMenu(tr("Context menu"), this);
 
+        auto font = contextMenu.font();
+        font.setPointSize(12);
+        contextMenu.setFont(font);
+
         QAction action1("Empty GameObject", this);
         connect(&action1, SIGNAL(triggered()), this, SLOT(on_contextMenu_EmptyGameObject()));
         contextMenu.addAction(&action1);
 
-        QAction action2("GameObject", this);
-        contextMenu.addAction(&action2);
-
         contextMenu.exec(mapToGlobal(pos));
     }
 }
+
+CE_RTTI_CLASS_IMPL(CRYSTALEDITOR_API, CE::Editor, SceneOutlinerView)
