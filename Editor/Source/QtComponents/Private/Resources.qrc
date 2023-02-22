@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="vertical-dots">Resources/Icons/dots.png</file>
+    </qresource>
+</RCC>

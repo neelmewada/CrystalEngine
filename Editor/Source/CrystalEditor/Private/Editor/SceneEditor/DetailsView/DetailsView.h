@@ -18,6 +18,9 @@ namespace CE::Editor
         explicit DetailsView(QWidget* parent = nullptr);
         ~DetailsView();
 
+    private slots:
+        void HandleCardContextMenu(const QPoint& pos);
+
     private:
         Ui::DetailsView* ui;
     };

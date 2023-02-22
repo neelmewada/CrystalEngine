@@ -22,7 +22,6 @@ namespace CE::Editor
         
     };
 
-    //using SceneEditorBus = MessageBus<SceneEditorRequests>;
     CE_EVENT_BUS(CRYSTALEDITOR_API, SceneEditorBus, SceneEditorRequests);
     
 } // namespace CE::Editor

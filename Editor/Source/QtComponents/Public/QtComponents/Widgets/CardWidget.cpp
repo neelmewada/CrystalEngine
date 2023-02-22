@@ -13,6 +13,10 @@ namespace CE::Editor::Qt
         ui(new Ui::CardWidget)
     {
         ui->setupUi(this);
+        ui->menuButton->setIcon(QIcon(":/icons/vertical-dots"));
+
+        QObject::connect(ui->headerWidget, &QWidget::customContextMenuRequested, this, &CardWidget::handleCustomContextMenu);
+        QObject::connect(ui->headerLabel, &QPushButton::customContextMenuRequested, this, &CardWidget::handleCustomContextMenu);
     }
 
     CardWidget::~CardWidget()
@@ -51,4 +55,15 @@ namespace CE::Editor::Qt
         UpdateFoldout();
     }
 
+    void CardWidget::on_menuButton_clicked()
+    {
+        emit handleContextMenu(QCursor::pos());
+    }
+
+    void CardWidget::handleCustomContextMenu(const QPoint& pos)
+    {
+        emit handleContextMenu(QCursor::pos());
+    }
+
 }
+

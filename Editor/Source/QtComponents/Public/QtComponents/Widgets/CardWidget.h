@@ -38,10 +38,17 @@ namespace CE::Editor::Qt
 
         void UpdateFoldout();
 
+    signals:
+        void handleContextMenu(const QPoint& pos);
+
     private slots:
         void on_collapseButton_clicked();
 
         void on_headerLabel_clicked();
+
+        void on_menuButton_clicked();
+
+        void handleCustomContextMenu(const QPoint& pos);
 
     private:
         Ui::CardWidget* ui;
