@@ -20,7 +20,6 @@ namespace CE
 
 namespace CE::Editor
 {
-
     class SceneOutlinerView :
         public EditorViewBase,
         public SceneOutlinerViewBus::Handler
@@ -48,8 +47,12 @@ namespace CE::Editor
 
         void on_contextMenu_EmptyGameObject();
 
+        void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+
     signals: // Signals to Scene Editor Window
         void CreateEmptyGameObject();
+
+        void OnSceneSelectionChanged();
         
     private:
         SceneOutlinerModel* model = nullptr;

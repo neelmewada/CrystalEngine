@@ -17,14 +17,15 @@ namespace CE::Editor
 
         auto card1 = new Qt::CardWidget(this);
         QObject::connect(card1, &Qt::CardWidget::handleContextMenu, this, &DetailsView::HandleCardContextMenu);
-        layout()->addWidget(card1);
-
-        auto card2 = new Qt::CardWidget(this);
-        QObject::connect(card2, &Qt::CardWidget::handleContextMenu, this, &DetailsView::HandleCardContextMenu);
-        layout()->addWidget(card2);
+        ui->componentsContainer->layout()->addWidget(card1);
+        ui->componentsContainer->layout()->addWidget(new QPushButton(this));
 
         auto spacer = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
         layout()->addItem(spacer);
+
+        ui->componentsContainer->setVisible(false);
+        ui->headerFrame->setVisible(false);
+        ui->addComponentButton->setVisible(false);
     }
 
     DetailsView::~DetailsView()

@@ -54,6 +54,10 @@ namespace CE::Editor
         ads::CDockWidget* detailsViewDockWidget = new ads::CDockWidget(detailsView->windowTitle());
         detailsViewDockWidget->setWidget(detailsView);
 
+        // Details View connections
+
+
+        // **********************************
         // Add the dock widget to the top dock widget area
         dockManager->addDockWidget(ads::CenterDockWidgetArea, viewportViewDockWidget);
         dockManager->addDockWidget(ads::LeftDockWidgetArea, sceneOutlinerDockWidget);

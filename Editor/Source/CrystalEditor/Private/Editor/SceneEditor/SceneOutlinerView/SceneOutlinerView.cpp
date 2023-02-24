@@ -3,6 +3,8 @@
 
 #include "GameFramework/GameFramework.h"
 
+#include "SceneOutlinerViewSelectionModel.h"
+
 #include <QMenu>
 
 namespace CE::Editor
@@ -19,8 +21,12 @@ namespace CE::Editor
         ui->treeWidget->setIndentation(12);
 
         this->setContextMenuPolicy(::Qt::CustomContextMenu);
+
         connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(ShowContextMenu(const QPoint&)));
+
+        QObject::connect(ui->treeWidget->selectionModel(), &QItemSelectionModel::selectionChanged, 
+            this, &SceneOutlinerView::selectionChanged);
     }
 
     SceneOutlinerView::~SceneOutlinerView()
@@ -47,6 +53,11 @@ namespace CE::Editor
     void SceneOutlinerView::on_contextMenu_EmptyGameObject()
     {
         emit CreateEmptyGameObject();
+    }
+
+    void SceneOutlinerView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+    {
+        CE_LOG(Info, All, "Selection changed: {}", selected.count());
     }
     
     void SceneOutlinerView::OnSceneOpened(Scene* scene)
