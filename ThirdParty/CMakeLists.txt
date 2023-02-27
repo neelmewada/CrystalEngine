@@ -18,4 +18,12 @@ find_package(qads REQUIRED)
 find_package(qtnodes REQUIRED)
 
 # Vulkan
-find_package(Vulkan)
+if(${PAL_TRAIT_VULKAN_SUPPORTED})
+    find_package(Vulkan)
+endif()
+
+# Metal
+if(${PAL_TRAIT_METAL_SUPPORTED})
+    find_package(metalcpp)
+endif()
+

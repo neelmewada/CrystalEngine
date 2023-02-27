@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-if(NOT ${PAL_TRAIT_VULKAN_SUPPORTED})
+if(NOT ${PAL_TRAIT_METAL_SUPPORTED})
     return()
 endif()
 

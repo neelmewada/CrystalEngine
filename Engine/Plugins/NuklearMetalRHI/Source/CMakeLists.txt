@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(NuklearRHI)
+project(NuklearMetalRHI)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
@@ -11,7 +11,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PUBLIC 
             Public/${PROJECT_NAME}.h
     OUTPUT_DIRECTORY
-        "Engine/Plugins/NuklearRHI"
+        "Engine/Plugins/${PROJECT_NAME}"
     COPY_CONFIGS
     FILES_CMAKE
         PRIVATE
@@ -30,11 +30,14 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             CE::Core
             CE::System
-            $<$<BOOL:${PAL_TRAIT_VULKAN_SUPPORTED}>:CE::NuklearVulkanRHI>
-            $<$<BOOL:${PAL_TRAIT_METAL_SUPPORTED}>:CE::NuklearMetalRHI>
+            "ThirdParty::metalcpp"
+            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Core>
+            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Gui>
+            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Widgets>
+        PUBLIC
+            ThirdParty::sdl
     RUNTIME_DEPENDENCIES
         
 )
 
 add_dependencies(EnginePlugins ${PROJECT_NAME})
-

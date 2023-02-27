@@ -209,7 +209,7 @@ namespace CE
                             auto result = function->Invoke(subscriber, { args... });
                             if (result.HasValue() && result.GetValueTypeId() == TYPEID(EventResult))
                             {
-                                auto value = result.GetValue<EventResult>();
+                                auto value = result.template GetValue<EventResult>();
                                 if (value == EventResult::HandleAndStopPropagation)
                                 {
                                     break;

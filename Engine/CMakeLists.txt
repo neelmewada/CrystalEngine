@@ -14,5 +14,4 @@ add_subdirectory(Source/GameLauncher)
 
 # Plugins
 add_library(EnginePlugins INTERFACE)
-add_subdirectory(Plugins/NuklearRHI)
-add_subdirectory(Plugins/NuklearVulkanRHI)
+add_subdirectory(Plugins)

@@ -5,7 +5,8 @@ namespace CE
     enum class RHIGraphicsBackend
     {
         None,
-        Vulkan
+        Vulkan,
+        Metal
     };
 
     enum class RHIResourceType

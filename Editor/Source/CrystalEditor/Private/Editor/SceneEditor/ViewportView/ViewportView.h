@@ -3,7 +3,6 @@
 
 #include <QWindow>
 #include <QWidget>
-#include <QVulkanInstance>
 
 #include "Editor/EditorViewBase.h"
 
@@ -24,7 +23,6 @@ namespace CE::Editor
 
     private:
         Ui::ViewportView* ui;
-        QVulkanInstance* instance = nullptr;
     };
 
 }

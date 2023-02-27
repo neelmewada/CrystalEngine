@@ -5,6 +5,10 @@
 #include "NuklearVulkanRHI.h"
 #endif
 
+#if PAL_TRAIT_METAL_SUPPORTED
+#include "NuklearMetalRHI.h"
+#endif
+
 CE_IMPLEMENT_PLUGIN(NuklearRHI, CE::NuklearRHIModule)
 
 namespace CE
@@ -29,6 +33,8 @@ namespace CE
     {
 #if PAL_TRAIT_VULKAN_SUPPORTED
         gDynamicRHI = new CE::NuklearVulkanRHI();
+#elif PAL_TRAIT_METAL_SUPPORTED
+        gDynamicRHI = new CE::NuklearMetalRHI();
 #else
 #   error No valid Graphics API Supported by target platform
 #endif

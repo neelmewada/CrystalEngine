@@ -11,7 +11,8 @@ namespace CE
 	{
 		String pathString = path.GetString();
         
-        return dlopen(pathString.GetCString(), RTLD_NOLOAD | RTLD_LAZY | RTLD_LOCAL);
+        auto ptr = dlopen(pathString.GetCString(), RTLD_LOCAL | RTLD_LAZY);
+        return ptr;
 	}
 
 	void* MacProcess::GetDllSymbol(void* dllHandle, const char* procName)

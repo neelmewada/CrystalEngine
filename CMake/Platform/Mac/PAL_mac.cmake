@@ -14,11 +14,10 @@ else()
 endif()
 
 # Graphics APIs
-ce_set(PAL_TRAIT_VULKAN_SUPPORTED TRUE)
+ce_set(PAL_TRAIT_VULKAN_SUPPORTED FALSE)
 ce_set(PAL_TRAIT_METAL_SUPPORTED TRUE)
 ce_set(PAL_TRAIT_SDL_SUPPORTED TRUE)
 
-add_compile_definitions(PAL_TRAIT_VULKAN_SUPPORTED=1)
 add_compile_definitions(PAL_TRAIT_METAL_SUPPORTED=1)
 add_compile_definitions(PAL_TRAIT_SDL_SUPPORTED=1)
 

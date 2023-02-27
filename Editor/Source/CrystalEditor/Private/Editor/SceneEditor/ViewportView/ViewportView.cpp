@@ -17,12 +17,12 @@ namespace CE::Editor
 
         setWindowTitle("Viewport");
         
-        instance = new QVulkanInstance();
+        //instance = new QVulkanInstance();
 
-        VkInstance vkInstance = nullptr;
-        gDynamicRHI->GetNativeHandle((void**)&vkInstance);
+        //VkInstance vkInstance = nullptr;
+        //gDynamicRHI->GetNativeHandle((void**)&vkInstance);
 
-        instance->setVkInstance(vkInstance);
+        //instance->setVkInstance(vkInstance);
     }
 
     ViewportView::~ViewportView()
