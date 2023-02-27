@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>247</width>
-    <height>79</height>
+    <height>80</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -141,7 +141,8 @@ border: 0px;
          <string/>
         </property>
         <property name="icon">
-         <iconset theme="folder"/>
+         <iconset theme="folder">
+          <normaloff>.</normaloff>.</iconset>
         </property>
         <property name="toolButtonStyle">
          <enum>Qt::ToolButtonIconOnly</enum>
