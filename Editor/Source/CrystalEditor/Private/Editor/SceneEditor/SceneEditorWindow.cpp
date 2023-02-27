@@ -55,7 +55,8 @@ namespace CE::Editor
         detailsViewDockWidget->setWidget(detailsView);
 
         // Details View connections
-
+        connect(sceneOutlinerView, &SceneOutlinerView::OnSceneSelectionChanged, detailsView, &DetailsView::OnSceneSelectionChanged);
+        connect(detailsView, &DetailsView::GameObjectEntriesNeedRefresh, sceneOutlinerView, &SceneOutlinerView::UpdateSelectedGameObjectEntries);
 
         // **********************************
         // Add the dock widget to the top dock widget area

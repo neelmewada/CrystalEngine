@@ -49,10 +49,13 @@ namespace CE::Editor
 
         void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
+    public slots:
+        void UpdateSelectedGameObjectEntries(Array<GameObject*> gameObjects);
+
     signals: // Signals to Scene Editor Window
         void CreateEmptyGameObject();
 
-        void OnSceneSelectionChanged();
+        void OnSceneSelectionChanged(Array<GameObject*> selected);
         
     private:
         SceneOutlinerModel* model = nullptr;

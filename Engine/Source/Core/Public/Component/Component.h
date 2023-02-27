@@ -9,8 +9,7 @@ namespace CE
     
     class CORE_API Component : public Object
     {
-        CE_CLASS(Component, CE::Object);
-
+        CE_CLASS(Component, CE::Object)
     public:
 
         Component(CE::Name name);

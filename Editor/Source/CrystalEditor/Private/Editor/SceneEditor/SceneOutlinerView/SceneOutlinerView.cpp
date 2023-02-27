@@ -24,9 +24,6 @@ namespace CE::Editor
 
         connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(ShowContextMenu(const QPoint&)));
-
-        QObject::connect(ui->treeWidget->selectionModel(), &QItemSelectionModel::selectionChanged, 
-            this, &SceneOutlinerView::selectionChanged);
     }
 
     SceneOutlinerView::~SceneOutlinerView()
@@ -38,6 +35,9 @@ namespace CE::Editor
     {
         this->model = model;
         ui->treeWidget->QTreeView::setModel(model);
+
+        QObject::connect(ui->treeWidget->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &SceneOutlinerView::selectionChanged);
     }
 
     QTreeView* SceneOutlinerView::GetTreeView() const
@@ -57,7 +57,23 @@ namespace CE::Editor
 
     void SceneOutlinerView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
     {
-        CE_LOG(Info, All, "Selection changed: {}", selected.count());
+        auto selectedList = ui->treeWidget->selectionModel()->selectedIndexes();
+        
+        Array<GameObject*> selectedGO{};
+
+        for (const auto& selection : selectedList)
+        {
+            if (selection.internalPointer() == nullptr)
+                continue;
+            selectedGO.Add((GameObject*)selection.internalPointer());
+        }
+
+        emit OnSceneSelectionChanged(selectedGO);
+    }
+
+    void SceneOutlinerView::UpdateSelectedGameObjectEntries(Array<GameObject*> gameObjects)
+    {
+        ui->treeWidget->dataChanged(QModelIndex(), QModelIndex());
     }
     
     void SceneOutlinerView::OnSceneOpened(Scene* scene)

@@ -3,6 +3,9 @@
 
 #include <QWidget>
 
+#include "CoreMinimal.h"
+#include "GameFramework/GameFramework.h"
+
 namespace Ui {
 class DetailsView;
 }
@@ -21,8 +24,18 @@ namespace CE::Editor
     private slots:
         void HandleCardContextMenu(const QPoint& pos);
 
+        void NameLabelApplyChanges();
+
+    public slots:
+        void OnSceneSelectionChanged(Array<GameObject*> selected);
+
+    signals:
+        void GameObjectEntriesNeedRefresh(Array<GameObject*> gameObjects);
+
     private:
         Ui::DetailsView* ui;
+
+        CE::Array<CE::GameObject*> selection{};
     };
 }
 

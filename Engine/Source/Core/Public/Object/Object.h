@@ -33,6 +33,11 @@ namespace CE
         {
             return name;
         }
+
+        CE_INLINE void SetName(CE::Name newName)
+        {
+            this->name = newName;
+        }
         
         CE_INLINE UUID GetUuid() const
         {

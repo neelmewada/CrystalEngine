@@ -44,7 +44,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="nameInput"/>
+         <widget class="CE::Editor::Qt::ExLineEdit" name="nameInput"/>
         </item>
        </layout>
       </item>
@@ -121,6 +121,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CE::Editor::Qt::ExLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">QtComponents/Widgets/ExLineEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
