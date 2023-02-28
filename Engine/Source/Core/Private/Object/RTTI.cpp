@@ -6,6 +6,7 @@
 
 namespace CE
 {
+    class Component;
 
     namespace Internal
     {
@@ -109,6 +110,11 @@ namespace CE
         }
     }
 
+    bool TypeInfo::IsComponent() const
+    {
+        return IsClass() && IsAssignableTo(TYPEID(Component));
+    }
+
     void TypeInfo::RegisterType(const TypeInfo* type)
     {
         if (type == nullptr)
@@ -122,6 +128,15 @@ namespace CE
         {
             RegisteredTypeIds.Add({ type->GetTypeId(), type });
         }
+    }
+
+    void TypeInfo::DeregisterType(const TypeInfo* type)
+    {
+        if (type == nullptr)
+            return;
+
+        RegisteredTypes.Remove(type->name);
+        RegisteredTypeIds.Remove(type->GetTypeId());
     }
 
     CORE_API const TypeInfo* GetTypeInfo(Name name)

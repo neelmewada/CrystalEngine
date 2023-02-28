@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>384</width>
-    <height>531</height>
+    <width>401</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="mainLayout">
    <item>
     <widget class="QFrame" name="headerFrame">
      <property name="styleSheet">

@@ -18,8 +18,15 @@ namespace CE::Editor::Qt
 
     }
 
+    void ExLineEdit::focusInEvent(QFocusEvent* event)
+    {
+        QLineEdit::focusInEvent(event);
+        emit OnFocusIn();
+    }
+
     void ExLineEdit::focusOutEvent(QFocusEvent* event)
     {
+        QLineEdit::focusOutEvent(event);
         emit OnFocusOut();
     }
 

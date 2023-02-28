@@ -160,7 +160,7 @@ const char* String::GetCString() const
     return Buffer;
 }
 
-StringView CE::String::ToStringView()
+StringView CE::String::ToStringView() const
 {
     return StringView(*this);
 }
@@ -264,6 +264,99 @@ bool String::StartsWith(const char* cString) const
     return true;
 }
 
+bool CE::String::Contains(const String& string) const
+{
+    int thisIndex = 0;
+
+    while (thisIndex < GetLength())
+    {
+        StringView stringView = StringView(Buffer + thisIndex, GetLength() - thisIndex);
+        if (stringView.StartsWith(string.ToStringView()))
+        {
+            return true;
+        }
+
+        thisIndex++;
+    }
+
+    return false;
+}
+
+bool CE::String::Contains(const char* string) const
+{
+    int thisIndex = 0;
+    StringView other = StringView(string);
+
+    while (thisIndex < GetLength())
+    {
+        StringView stringView = StringView(Buffer + thisIndex, GetLength() - thisIndex);
+        if (stringView.StartsWith(other))
+        {
+            return true;
+        }
+
+        thisIndex++;
+    }
+
+    return false;
+}
+
+bool CE::String::Search(const String& string) const
+{
+    int thisIndex = 0;
+    String thisLower = ToLower();
+    String otherLower = string.ToLower();
+
+    return thisLower.Contains(otherLower);
+}
+
+bool CE::String::Search(const char* string) const
+{
+    int thisIndex = 0;
+    String thisLower = ToLower();
+    String otherLower = String(string).ToLower();
+
+    return thisLower.Contains(otherLower);
+}
+
+String CE::String::ToLower() const
+{
+    String result{ GetLength() };
+
+    for (int i = 0; i < GetLength(); i++)
+    {
+        char ch = Buffer[i];
+        if (ch >= 'A' && ch <= 'Z')
+            result[i] = std::tolower(ch);
+        else
+            result[i] = ch;
+    }
+
+    result.Buffer[GetLength()] = 0;
+    result.StringLength = std::strlen(result.Buffer);
+
+    return result;
+}
+
+String CE::String::ToUpper() const
+{
+    String result{ GetLength() };
+
+    for (int i = 0; i < GetLength(); i++)
+    {
+        char ch = Buffer[i];
+        if (ch >= 'a' && ch <= 'z')
+            result[i] = std::toupper(ch);
+        else
+            result[i] = ch;
+    }
+
+    result.Buffer[GetLength()] = 0;
+    result.StringLength = std::strlen(result.Buffer);
+
+    return result;
+}
+
 String String::GetSubstring(int startIndex, int length)
 {
     if (length == -1)
@@ -309,10 +402,12 @@ Array<String> String::Split(char delimiter)
 
             startIdx = i + 1;
             endIdx = startIdx;
+            continue;
         }
         else if (i == StringLength - 1) // last character
         {
-            result.Add(GetSubstringView(startIdx, endIdx - startIdx));
+            result.Add(GetSubstringView(startIdx, endIdx - startIdx + 1)); // +1 to include the last character
+            continue;
         }
 
         endIdx++;

@@ -25,6 +25,11 @@ namespace CE
         Name(const char* name);
         ~Name() = default;
 
+        CE_INLINE bool IsValid() const
+        {
+            return !value.IsEmpty() && hashValue != 0;
+        }
+
         CE_INLINE SIZE_T GetHashValue() const { return hashValue; }
 
         CE_INLINE String GetString() const { return value; }
@@ -43,6 +48,8 @@ namespace CE
         {
             return hashValue != rhs.hashValue;
         }
+
+        void GetComponents(CE::Array<String>& components);
 
     private:
         String value;

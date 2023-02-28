@@ -579,6 +579,10 @@ namespace CE\
 				FunctionList\
 				Type.AddSuper<SuperClasses>();\
             }\
+			virtual ~TypeInfoImpl()\
+			{\
+				TypeInfo::DeregisterType(&Type);\
+			}\
 			virtual bool CanInstantiate() const override\
 			{\
 				return CE_EXPAND(CE_CONCATENATE(__CE_CAN_INSTANTIATE_,CE_FIRST_ARG(IsAbstract)))();\
@@ -663,6 +667,10 @@ namespace CE\
                 FieldList\
 				Type.AddSuper<SuperStructs>();\
             }\
+			virtual ~TypeInfoImpl()\
+			{\
+				TypeInfo::DeregisterType(&Type);\
+			}\
 			virtual void InitializeDefaults(void* instance) const override\
 			{\
 				new(instance) Namespace::Struct;\

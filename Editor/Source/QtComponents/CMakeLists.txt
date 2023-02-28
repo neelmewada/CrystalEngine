@@ -30,6 +30,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             CE::Core
+            CE::System
         PUBLIC
             "Qt6::Core"
             "Qt6::Gui"

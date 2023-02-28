@@ -12,6 +12,11 @@ class DetailsView;
 
 namespace CE::Editor
 {
+    namespace Qt
+    {
+        class AddComponentWidget;
+    }
+
     class DetailsView 
         : public EditorViewBase
     {
@@ -26,14 +31,22 @@ namespace CE::Editor
 
         void NameLabelApplyChanges();
 
+        void on_addComponentButton_clicked();
+
+        void OnAddComponentOfType(ClassType* componentType);
+
     public slots:
         void OnSceneSelectionChanged(Array<GameObject*> selected);
 
     signals:
         void GameObjectEntriesNeedRefresh(Array<GameObject*> gameObjects);
 
+    protected:
+        void focusInEvent(QFocusEvent* event) override;
+
     private:
         Ui::DetailsView* ui;
+        Qt::AddComponentWidget* addComponentMenu = nullptr;
 
         CE::Array<CE::GameObject*> selection{};
     };

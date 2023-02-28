@@ -55,6 +55,26 @@ namespace CE
             return Impl[index];
         }
 
+        ElementType& GetFirst()
+        {
+            return Impl[0];
+        }
+
+        const ElementType& GetFirst() const
+        {
+            return Impl[0];
+        }
+
+        ElementType& GetLast()
+        {
+            return Impl[GetSize() - 1];
+        }
+
+        const ElementType& GetLast() const
+        {
+            return Impl[GetSize() - 1];
+        }
+
         CE_INLINE bool IsEmpty() const
         {
             return Impl.empty();
@@ -80,11 +100,23 @@ namespace CE
             Impl.push_back(item);
         }
 
-        CE_INLINE s32 IndexOf(const ElementType& item) const
+        s32 IndexOf(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)
             {
                 if (Impl[i] == item)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        s32 IndexOf(std::function<bool(const ElementType&)> pred) const
+        {
+            for (int i = 0; i < Impl.size(); i++)
+            {
+                if (pred(Impl[i]))
                 {
                     return i;
                 }

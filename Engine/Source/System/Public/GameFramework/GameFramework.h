@@ -6,5 +6,6 @@
 #include "Engine.h"
 
 // Components
+#include "GameComponentRegistry.h"
 #include "Components/TransformComponent.h"
 

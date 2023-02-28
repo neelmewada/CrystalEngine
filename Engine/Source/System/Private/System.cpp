@@ -38,8 +38,8 @@ namespace CE
             PluginConfig
         );
 
-        // Register Components
-        CE_REGISTER_TYPES(
+        // Register Game Components
+        CE_REGISTER_GAMECOMPONENTS(
             TransformComponent
         );
     }

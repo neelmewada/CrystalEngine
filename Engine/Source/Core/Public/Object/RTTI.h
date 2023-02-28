@@ -62,7 +62,7 @@ namespace CE
 
 	public:
 		const CE::Name& GetName() const { return name; }
-		const CE::Array<CE::Attribute>& GetAttributes() const { return attributes; }
+		const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
         
 		virtual bool IsClass() const { return false; }
 		virtual bool IsStruct() const { return false; }
@@ -82,6 +82,7 @@ namespace CE
         virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectStore); }
         
         virtual bool IsObject() const { return IsClass() && IsAssignableTo(TYPEID(Object)); }
+		virtual bool IsComponent() const;
 
 	protected:
 		CE::Name name;
@@ -95,6 +96,8 @@ namespace CE
 
         // For internal use only!
         static void RegisterType(const TypeInfo* type);
+		// For internal use only!
+		static void DeregisterType(const TypeInfo* type);
 		// For internal use only!
         CE_INLINE static u32 GetRegisteredCount()
         {

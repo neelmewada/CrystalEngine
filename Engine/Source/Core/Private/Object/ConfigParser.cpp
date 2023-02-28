@@ -30,7 +30,7 @@ namespace CE
 
         while (field != nullptr)
         {
-            const auto& attribs = field->GetAttributes();
+            const auto& attribs = field->GetLocalAttributes();
 
             String category = "General";
 

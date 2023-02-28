@@ -16,9 +16,11 @@ namespace CE::Editor::Qt
         ~ExLineEdit();
 
     protected:
+        void focusInEvent(QFocusEvent* event) override;
         void focusOutEvent(QFocusEvent* event) override;
 
     signals:
+        void OnFocusIn();
         void OnFocusOut();
     };
 

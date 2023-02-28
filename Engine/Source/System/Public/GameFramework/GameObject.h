@@ -27,6 +27,7 @@ namespace CE
             return (T*)AddComponent(TYPEID(T));
         }
 
+        GameComponent* AddComponent(ClassType* componentType);
         GameComponent* AddComponent(TypeId typeId);
 
         virtual void Tick(f32 deltaTime);

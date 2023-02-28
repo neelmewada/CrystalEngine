@@ -7,7 +7,7 @@ namespace CE
     GameComponent::GameComponent(CE::Name name)
         : Component(name)
     {
-
+        
     }
 
     GameComponent::~GameComponent()

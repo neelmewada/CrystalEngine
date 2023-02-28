@@ -30,8 +30,33 @@ namespace CE
 
     GameComponent* GameObject::AddComponent(GameComponent* component)
 	{
-		if (component == nullptr || components.Exists(component))
+        if (component == nullptr)
 			return nullptr;
+
+        auto componentType = (ClassType*)component->GetType();
+
+        if (components.Exists(component))
+        {
+            CE_LOG(Error, All, "GameObject::AddComponent(GameComponent*): Attempted to add duplicate components {} of type {}", component->GetName(), componentType->GetName());
+            return nullptr;
+        }
+
+        if (components.Exists([component](CE::GameComponent* comp) -> bool
+            {
+                return comp->GetType()->GetTypeId() == component->GetType()->GetTypeId();
+            }))
+        {
+            const auto& localAttribs = componentType->GetLocalAttributes();
+            int idx = localAttribs.IndexOf([](const Attribute& attrib) -> bool
+                {
+                    return attrib.GetKey() == "AllowMultiple";
+                });
+            if (idx == -1 || localAttribs[idx].GetValue() != "true") // Cannot add multiple components
+            {
+                CE_LOG(Error, All, "GameObject::AddComponent(GameComponent*): Cannot add multiple components of type {}", componentType->GetName());
+                return nullptr;
+            }
+        }
 
 		components.Add(component);
         component->owner = this;
@@ -43,6 +68,8 @@ namespace CE
         
         component->Init();
         component->Activate();
+
+        CE_LOG(Info, All, "Added component: {}", component->GetName());
         
         return component;
 	}
@@ -59,27 +86,43 @@ namespace CE
         }
 	}
 
-	GameComponent* GameObject::AddComponent(TypeId typeId)
+    GameComponent* GameObject::AddComponent(ClassType* componentType)
+    {
+        if (componentType == nullptr)
+        {
+            CE_LOG(Error, All, "GameComponent::AddComponent(ClassType*): The componentType is passed as null");
+            return nullptr;
+        }
+
+        if (!componentType->IsAssignableTo(TYPEID(GameComponent)))
+        {
+            CE_LOG(Error, All, "GameComponent::AddComponent(ClassType*): The componentType {} passed to AddComponent() does not derive from GameComponent class", componentType->GetName());
+            return nullptr;
+        }
+
+        if (!componentType->CanBeInstantiated())
+        {
+            CE_LOG(Error, All, "GameComponent::AddComponent(ClassType*): The component with name {} cannot be instantiated", componentType->GetName());
+            return nullptr;
+        }
+
+        auto instance = (GameComponent*)componentType->CreateDefaultInstance();
+        auto result = AddComponent(instance);
+        if (result == nullptr)
+        {
+            componentType->DestroyInstance(instance);
+        }
+        return result;
+    }
+
+    GameComponent* GameObject::AddComponent(TypeId typeId)
 	{
 		auto typeInfo = CE::GetTypeInfo(typeId);
 		if (typeInfo == nullptr || !typeInfo->IsClass())
 			return nullptr;
 		
 		auto classType = (ClassType*)typeInfo;
-		if (!classType->IsAssignableTo(TYPEID(GameComponent)))
-        {
-            CE_LOG(Error, All, "GameComponent::AddComponent(): The TypeId passed {} to AddComponent() doesn't derive from GameComponent class", typeId);
-            return nullptr;
-        }
-        
-        if (!classType->CanBeInstantiated())
-        {
-            CE_LOG(Error, All, "GameComponent::AddComponent(): The component with TypeId {} cannot be instantiated", typeId);
-            return nullptr;
-        }
-
-		auto instance = (GameComponent*)classType->CreateDefaultInstance();
-		return AddComponent(instance);
+        return AddComponent(classType);
 	}
 
 	void GameObject::Tick(f32 deltaTime)

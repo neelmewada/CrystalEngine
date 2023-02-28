@@ -212,10 +212,19 @@ namespace CE
         bool StartsWith(const String& string) const;
         bool StartsWith(const char* cString) const;
 
+        bool Contains(const String& string) const;
+        bool Contains(const char* string) const;
+
+        bool Search(const String& string) const;
+        bool Search(const char* string) const;
+
+        String ToLower() const;
+        String ToUpper() const;
+
         String GetSubstring(int startIndex, int length = -1);
         StringView GetSubstringView(int startIndex, int length = -1);
 
-        StringView ToStringView();
+        StringView ToStringView() const;
 
         Array<String> Split(char delimiter);
         String RemoveWhitespaces();

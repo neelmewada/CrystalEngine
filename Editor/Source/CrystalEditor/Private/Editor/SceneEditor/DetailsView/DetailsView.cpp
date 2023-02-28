@@ -2,6 +2,7 @@
 #include "ui_DetailsView.h"
 
 #include "QtComponents/Widgets/CardWidget.h"
+#include "QtComponents/Widgets/AddComponentWidget.h"
 
 #include <QMenu>
 
@@ -18,12 +19,18 @@ namespace CE::Editor
         auto spacer = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
         layout()->addItem(spacer);
 
+        addComponentMenu = new Qt::AddComponentWidget(this);
+
         ui->componentsContainer->setVisible(false);
         ui->headerFrame->setVisible(false);
         ui->addComponentButton->setVisible(false);
 
+        // Name Input
         connect(ui->nameInput, &QLineEdit::returnPressed, this, &DetailsView::NameLabelApplyChanges);
         connect(ui->nameInput, &Qt::ExLineEdit::OnFocusOut, this, &DetailsView::NameLabelApplyChanges);
+
+        // Add Component Menu
+        connect(addComponentMenu, &Qt::AddComponentWidget::AddComponentOfType, this, &DetailsView::OnAddComponentOfType);
     }
 
     DetailsView::~DetailsView()
@@ -49,6 +56,9 @@ namespace CE::Editor
 
     void DetailsView::OnSceneSelectionChanged(Array<GameObject*> selected)
     {
+        if (addComponentMenu != nullptr)
+            addComponentMenu->hide();
+
         if (selected.GetSize() == 0)
         {
             ui->componentsContainer->setVisible(false);
@@ -104,6 +114,32 @@ namespace CE::Editor
 
         contextMenu.exec(pos);
     }
+
+
+    void DetailsView::on_addComponentButton_clicked()
+    {
+        addComponentMenu->move(mapToGlobal(ui->addComponentButton->pos()) + QPoint(0, 25));
+        addComponentMenu->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        addComponentMenu->setFixedSize(ui->addComponentButton->size().width(), 300);
+        addComponentMenu->show();
+    }
+
+    void DetailsView::OnAddComponentOfType(ClassType* componentType)
+    {
+        if (selection.GetSize() == 0)
+            return;
+
+        for (auto go : selection)
+        {
+            go->AddComponent(componentType);
+        }
+    }
+
+    void DetailsView::focusInEvent(QFocusEvent* event)
+    {
+        EditorViewBase::focusInEvent(event);
+    }
+
 }
 
 CE_RTTI_CLASS_IMPL(CRYSTALEDITOR_API, CE::Editor, DetailsView)

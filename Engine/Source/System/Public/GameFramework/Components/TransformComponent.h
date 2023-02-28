@@ -64,11 +64,11 @@ namespace CE
 CE_RTTI_CLASS(SYSTEM_API, CE, TransformComponent,
     CE_SUPER(CE::GameComponent),
     CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
+    CE_ATTRIBS(AllowMultiple = false),
     CE_FIELD_LIST(
-        CE_FIELD(localPosition)
-        CE_FIELD(localRotation)
-        CE_FIELD(localScale)
+        CE_FIELD(localPosition, Display = Position)
+        CE_FIELD(localRotation, Display = Rotation)
+        CE_FIELD(localScale, Display = Scale)
     ),
     CE_FUNCTION_LIST()
 )

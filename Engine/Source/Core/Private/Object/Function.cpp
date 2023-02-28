@@ -22,7 +22,7 @@ namespace CE
 
     bool FunctionType::IsEventFunction() const
     {
-        return GetAttributes().Exists([](const Attribute& attr) -> bool
+        return GetLocalAttributes().Exists([](const Attribute& attr) -> bool
             {
                 return attr.GetKey() == "Event";
             });

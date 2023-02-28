@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Application/Application.h"
 
 // Configs
