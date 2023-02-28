@@ -95,8 +95,8 @@ namespace CE::Editor
         }
 
         auto card1 = new Qt::CardWidget(this);
-        QObject::connect(card1, &Qt::CardWidget::handleContextMenu, this, &DetailsView::HandleCardContextMenu);
-        ui->componentsContainer->layout()->addWidget(card1);
+        //QObject::connect(card1, &Qt::CardWidget::handleContextMenu, this, &DetailsView::HandleCardContextMenu);
+        //ui->componentsContainer->layout()->addWidget(card1);
 
         this->selection = selected;
     }

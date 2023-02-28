@@ -24,6 +24,11 @@ namespace CE::Editor
             EditorWindowBase,
             SceneEditorWindow
         )
+        
+        // Drawers
+        CE_REGISTER_TYPES(
+            DrawerBase
+        );
     }
 
 } // namespace CE::Editor

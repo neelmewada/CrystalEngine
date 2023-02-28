@@ -38,6 +38,7 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::WindowText, QColor(200, 200, 200, 255));
         palette.setColor(QPalette::Button, QColor(100, 100, 100, 255));
         palette.setColor(QPalette::Light, QColor(97, 97, 97, 255));
+        //palette.setColor(QPalette::Light, QColor(37, 37, 37, 255));
         palette.setColor(QPalette::Midlight, QColor(59, 59, 59, 255));
         palette.setColor(QPalette::Dark, QColor(37, 37, 37, 255));
         palette.setColor(QPalette::Mid, QColor(45, 45, 45, 255));
@@ -63,7 +64,7 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::Disabled, QPalette::BrightText, QColor(255, 255, 255, 255));
         palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(128, 128, 128, 255));
         palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(86, 117, 148, 255));
-
+        
         // purple highlight theme override
         palette.setColor(QPalette::Window, QColor(53, 53, 53));
         palette.setColor(QPalette::WindowText, ::Qt::white);
@@ -101,7 +102,7 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::Disabled, QPalette::Text, gray);
         palette.setColor(QPalette::Disabled, QPalette::Light, darkGray);
 
-        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+        app->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
         app->setPalette(palette);
     }

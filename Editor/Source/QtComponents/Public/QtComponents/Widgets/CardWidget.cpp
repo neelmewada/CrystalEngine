@@ -24,6 +24,11 @@ namespace CE::Editor::Qt
         delete ui;
     }
 
+    QWidget* CardWidget::GetContentContainer()
+    {
+        return ui->content;
+    }
+
     void CardWidget::paintEvent(QPaintEvent* event)
     {
         

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>247</width>
-    <height>80</height>
+    <width>254</width>
+    <height>111</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -171,22 +171,7 @@ border: 0px;
 	background-color: rgb(80, 80, 80);
 }</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4">
-      <item>
-       <widget class="QPushButton" name="pushButton">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButton_2">
-        <property name="text">
-         <string>PushButton</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <layout class="QVBoxLayout" name="verticalLayout_4"/>
     </widget>
    </item>
   </layout>

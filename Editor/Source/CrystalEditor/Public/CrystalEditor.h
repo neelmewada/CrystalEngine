@@ -9,6 +9,9 @@
 #include "Editor/EditorWindowBase.h"
 #include "Editor/EditorViewBase.h"
 
+// Drawers
+#include "Drawers/DrawerBase.h"
+
 // Editor Buses
 #include "Editor/SceneEditor/SceneOutlinerViewBus.h"
 

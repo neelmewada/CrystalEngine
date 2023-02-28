@@ -4,17 +4,7 @@
 
 namespace CE::Editor::Qt
 {
-    struct ComponentEntry
-    {
-        String name = "";
-        Array<ComponentEntry> children{};
-
-        bool isTerminal = false;
-        CE::Name fullName{};
-        ComponentEntry* parent = nullptr;
-        int siblingIndex = 0;
-    };
-
+    
     AddComponentWidgetModel::AddComponentWidgetModel(QObject* parent)
         : QAbstractItemModel(parent)
     {

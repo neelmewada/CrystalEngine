@@ -14,8 +14,8 @@ namespace CE::Editor::Qt
         ui->setupUi(this);
         setWindowFlags(::Qt::Popup);
 
-        widgetModel = new AddComponentWidgetModel(this);
-        ui->treeView->setModel(widgetModel);
+        model = new AddComponentWidgetModel(this);
+        ui->treeView->setModel(model);
 
         connect(ui->searchInput, &Qt::ExLineEdit::textChanged, this, &AddComponentWidget::OnSearchTextChanged);
         connect(ui->treeView, &QTreeView::doubleClicked, this, &AddComponentWidget::OnItemDoubleClicked);
@@ -28,18 +28,18 @@ namespace CE::Editor::Qt
 
     void AddComponentWidget::OnSearchTextChanged(const QString& newText)
     {
-        widgetModel->SetSearchText(ui->searchInput->text());
+        model->SetSearchText(ui->searchInput->text());
     }
 
     void AddComponentWidget::UpdateComponentRegistry()
     {
-        widgetModel->UpdateComponentRegistry();
+        model->UpdateComponentRegistry();
     }
 
     void AddComponentWidget::OnItemDoubleClicked(const QModelIndex& index)
     {
         CE::Name name{};
-        auto componentType = widgetModel->GetComponentTypeFromIndex(index, name);
+        auto componentType = model->GetComponentTypeFromIndex(index, name);
 
         if (componentType == nullptr)
         {
@@ -48,6 +48,7 @@ namespace CE::Editor::Qt
         }
 
         emit AddComponentOfType(componentType);
+        hide();
     }
 
     void AddComponentWidget::showEvent(QShowEvent* event)

@@ -15,7 +15,6 @@ namespace CE::Editor::Qt
     class QTCOMPONENTS_API CardWidget : public QWidget
     {
         Q_OBJECT
-
     public:
         explicit CardWidget(QWidget* parent = nullptr);
         ~CardWidget();
@@ -32,6 +31,8 @@ namespace CE::Editor::Qt
             foldToggle = toggle;
             UpdateFoldout();
         }
+        
+        QWidget* GetContentContainer();
 
     protected:
         void paintEvent(QPaintEvent* event) override;

@@ -17,8 +17,7 @@ namespace CE::Editor
         class AddComponentWidget;
     }
 
-    class DetailsView 
-        : public EditorViewBase
+    class DetailsView : public EditorViewBase
     {
         Q_OBJECT
         CE_CLASS(DetailsView, EditorViewBase)

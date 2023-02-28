@@ -39,7 +39,7 @@ namespace CE::Editor::Qt
     private:
 
         Ui::AddComponentWidget* ui;
-        AddComponentWidgetModel* widgetModel = nullptr;
+        AddComponentWidgetModel* model = nullptr;
     };
 
 }
