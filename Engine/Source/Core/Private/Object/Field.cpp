@@ -3,7 +3,16 @@
 
 namespace CE
 {
-    
+    String FieldType::GetDisplayName() const
+    {
+        String displayAttrib = GetLocalAttributeValue("Display");
+
+        if (!displayAttrib.IsEmpty())
+            return displayAttrib;
+
+        return name.GetString();
+    }
+
     bool FieldType::IsAssignableTo(TypeId typeId) const
     {
         const auto declType = GetDeclarationType();

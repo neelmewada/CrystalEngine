@@ -13,7 +13,7 @@ namespace CE::Editor
 
     class FieldDrawer;
 
-    class CRYSTALEDITOR_API GameComponentDrawer : public DrawerBase
+    class CRYSTALEDITOR_API GameComponentDrawer : public DrawerBase, public IObjectUpdateListener<GameComponent>
     {
         CE_CLASS(GameComponentDrawer, DrawerBase)
     protected:
@@ -25,6 +25,9 @@ namespace CE::Editor
 
     public: // API
 
+        virtual void OnEnable() override;
+        virtual void OnDisable() override;
+
         virtual void CreateGUI(QLayout* container);
         virtual void ClearGUI(QLayout* container);
 
@@ -33,6 +36,8 @@ namespace CE::Editor
         virtual void* GetTargetInstance();
 
         virtual bool IsValid() { return componentType != nullptr && targetComponent != nullptr; }
+
+        virtual void OnObjectUpdated(GameComponent* component) override;
 
     private slots:
         void HandleCardContextMenu(const QPoint& pos);

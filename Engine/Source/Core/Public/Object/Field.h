@@ -20,6 +20,8 @@ namespace CE
 
     public:
 
+        virtual String GetDisplayName() const override;
+
         virtual bool IsField() const override { return true; }
 
         CE_INLINE FieldType* GetNext() const { return next; }

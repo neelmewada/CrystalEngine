@@ -66,6 +66,22 @@ namespace CE::Editor
 		return nullptr;
 	}
 
+	void GameComponentDrawer::OnEnable()
+	{
+		if (targetComponent == nullptr)
+			return;
+
+		targetComponent->AddUpdateListener(this);
+	}
+
+	void GameComponentDrawer::OnDisable()
+	{
+		if (targetComponent == nullptr)
+			return;
+
+		targetComponent->RemoveUpdateListener(this);
+	}
+
 	void GameComponentDrawer::CreateGUI(QLayout* container)
 	{
 		if (!IsValid())
@@ -76,10 +92,6 @@ namespace CE::Editor
 			delete fieldDrawer;
 		}
 		fieldDrawers.Clear();
-
-		//card = new Qt::CardWidget(container->parentWidget());
-		//QObject::connect(card, &Qt::CardWidget::handleContextMenu, this, &GameComponentDrawer::HandleCardContextMenu);
-		//container->addWidget(card);
 
 		auto field = componentType->GetFirstField();
 
@@ -99,20 +111,19 @@ namespace CE::Editor
 				continue;
 			}
 
-			FieldDrawer* drawer = (FieldDrawer*)fieldDrawerType->CreateDefaultInstance();
+			FieldDrawer* fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateDefaultInstance();
 
-			if (drawer == nullptr)
+			if (fieldDrawer == nullptr)
 			{
 				field = field->GetNext();
 				continue;
 			}
 
-			drawer->SetTarget(field, targetComponent);
+			fieldDrawer->SetTarget(field, targetComponent);
 
-			fieldDrawers.Add(drawer);
+			fieldDrawers.Add(fieldDrawer);
 
-			drawer->CreateGUI(container);
-			//drawer->CreateGUI(card->GetContentContainer()->layout());
+			fieldDrawer->CreateGUI(container);
 
 			field = field->GetNext();
 		}
@@ -150,6 +161,15 @@ namespace CE::Editor
 	void* GameComponentDrawer::GetTargetInstance()
 	{
 		return targetComponent;
+	}
+
+	void GameComponentDrawer::OnObjectUpdated(GameComponent* component)
+	{
+		for (auto fieldDrawer : fieldDrawers)
+		{
+			fieldDrawer->OnValuesUpdated();
+		}
+		CE_LOG(Info, All, "Component Updated: {}", component->GetName());
 	}
 
 } // namespace CE::Editor

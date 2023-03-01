@@ -29,6 +29,7 @@ namespace CE
         CE_INLINE void SetLocalPositon(Vec3 newLocalPosition)
         {
             this->localPosition = newLocalPosition;
+            OnComponentValuesUpdated();
         }
         
         CE_INLINE Quat GetLocalRotation() const
@@ -39,6 +40,7 @@ namespace CE
         CE_INLINE void SetLocalRotation(Quat newLocalRotation)
         {
             this->localRotation = newLocalRotation.ToEuler();
+            OnComponentValuesUpdated();
         }
 
         CE_INLINE Vec3 GetLocalEuler() const
@@ -49,6 +51,7 @@ namespace CE
         CE_INLINE void SetLocalEuler(Vec3 euler)
         {
             this->localRotation = euler;
+            OnComponentValuesUpdated();
         }
         
         CE_INLINE Vec3 GetLocalScale() const
@@ -59,6 +62,7 @@ namespace CE
         CE_INLINE void SetLocalScale(Vec3 newLocalScale)
         {
             this->localScale = newLocalScale;
+            OnComponentValuesUpdated();
         }
         
     protected:

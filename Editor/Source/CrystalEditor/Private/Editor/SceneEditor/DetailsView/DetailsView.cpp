@@ -39,6 +39,7 @@ namespace CE::Editor
     {
         for (auto drawer : drawers)
         {
+            drawer->OnDisable();
             delete drawer;
         }
         drawers.Clear();
@@ -114,6 +115,7 @@ namespace CE::Editor
 
         for (auto drawer : drawers)
         {
+            drawer->OnDisable();
             delete drawer;
         }
         drawers.Clear();
@@ -146,6 +148,9 @@ namespace CE::Editor
                 continue;
 
             drawer->SetTarget(componentType, component);
+
+            drawer->OnEnable();
+
             drawer->CreateGUI(card->GetContentContainer()->layout());
 
             drawers.Add(drawer);

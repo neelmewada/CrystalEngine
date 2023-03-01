@@ -2,10 +2,18 @@
 
 #include "FieldDrawer.h"
 
+#include "QtComponents/Input/Vec4Input.h"
+
+#include <QObject>
+
 namespace CE::Editor
 {
+    namespace Qt
+    {
+        class Vec4Input;
+    }
 
-    class CRYSTALEDITOR_API VectorFieldDrawer : public FieldDrawer
+    class CRYSTALEDITOR_API VectorFieldDrawer : public FieldDrawer, public Qt::IVec4InputListener
     {
         CE_CLASS(VectorFieldDrawer, FieldDrawer)
     protected:
@@ -13,8 +21,15 @@ namespace CE::Editor
     public:
         virtual ~VectorFieldDrawer();
 
-        virtual void CreateGUI(QLayout* container);
+        virtual void OnValuesUpdated() override;
 
+        virtual void CreateGUI(QLayout* container) override;
+
+        virtual void OnValueChanged(Vec4 value) override;
+
+
+    private:
+        Qt::Vec4Input* vec4Field = nullptr;
     };
     
 } // namespace CE::Editor

@@ -18,6 +18,13 @@ namespace CE
     class CORE_API Component;
     class CORE_API EventBus;
 
+    template<typename TObject>
+    class IObjectUpdateListener
+    {
+    public:
+        virtual void OnObjectUpdated(TObject* component) {}
+    };
+
     class CORE_API Object
     {
         CE_CLASS(Object);

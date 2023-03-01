@@ -64,6 +64,8 @@ namespace CE
 		const CE::Name& GetName() const { return name; }
 		const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
 
+		virtual String GetDisplayName() const { return name.GetString(); }
+
 		String GetLocalAttributeValue(const String& key) const;
         
 		virtual bool IsClass() const { return false; }

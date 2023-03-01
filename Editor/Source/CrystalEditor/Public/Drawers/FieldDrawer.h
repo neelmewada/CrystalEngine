@@ -18,6 +18,8 @@ namespace CE::Editor
     public:
         virtual ~FieldDrawer();
 
+        virtual void OnValuesUpdated() = 0;
+
         //virtual void CreateGUI(QLayout* container);
         virtual void ClearGUI(QLayout* container);
 

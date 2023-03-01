@@ -37,6 +37,9 @@ namespace CE::Editor
 
     public: // API
 
+        virtual void OnEnable() {}
+        virtual void OnDisable() {}
+
         virtual void CreateGUI(QLayout* container) = 0;
         virtual void ClearGUI(QLayout* container) = 0;
 
