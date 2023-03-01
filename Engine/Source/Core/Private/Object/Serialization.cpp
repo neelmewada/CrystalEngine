@@ -335,16 +335,16 @@ namespace CE
         }
     }
 
-    void SerializedObject::Deserialize(IO::Path inFilePath)
+    bool SerializedObject::Deserialize(IO::Path inFilePath)
     {
         if (type == nullptr || instance == nullptr)
-            return;
+            return false;
 
         IO::FileStream fileStream{ inFilePath, IO::OpenMode::ModeRead };
-        Deserialize(fileStream);
+        return Deserialize(fileStream);
     }
 
-    void SerializedObject::Deserialize(IO::FileStream& inStream)
+    bool SerializedObject::Deserialize(IO::FileStream& inStream)
     {
         if (type == nullptr || instance == nullptr)
             return;
@@ -354,30 +354,32 @@ namespace CE
         IO::MemoryStream memStream{ size };
         inStream.Read(size, (void*)memStream.GetRawPointer());
 
-        Deserialize(memStream);
+        bool val = Deserialize(memStream);
         
         memStream.Free();
+        
+        return val;
     }
 
-    void SerializedObject::Deserialize(IO::MemoryStream& inStream)
+    bool SerializedObject::Deserialize(IO::MemoryStream& inStream)
     {
         if (type == nullptr || instance == nullptr)
             return;
         
         YAML::Node root = YAML::Load(inStream.GetRawPointer());
         
-        Deserialize(root);
+        return Deserialize(root);
     }
     
-    void SerializedObject::Deserialize(YAML::Node& root)
+    bool SerializedObject::Deserialize(YAML::Node& root)
     {
         if (type == nullptr || instance == nullptr)
-            return;
+            return false;
         
         if (!root.IsMap())
         {
             CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}. YAML node passed isn't a map", type->GetName());
-            return;
+            return false;
         }
         
         objectStores.Clear();
@@ -393,7 +395,7 @@ namespace CE
             {
                 CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n"
                     "The serialized text data is for an object of type name {} which either couldn't be found or is different!", type->GetName(), structTypeName);
-                return;
+                return false;
             }
             
             auto field = structType->GetFirstField();
@@ -426,7 +428,7 @@ namespace CE
             {
                 CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n"
                     "The serialized text data is for an object of type name {} which either couldn't be found or is different!", type->GetName(), classTypeName);
-                return;
+                return false;
             }
             
             // Deserialize Object properties first: uuid
@@ -495,6 +497,8 @@ namespace CE
                 field = field->GetNext();
             }
         }
+        
+        return true;
     }
 
     void SerializedObject::DeserializeField(FieldType* fieldType, YAML::Node& node)

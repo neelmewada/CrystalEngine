@@ -2,8 +2,6 @@
 #include "Drawers/GameComponentDrawer.h"
 #include "Drawers/FieldDrawer.h"
 
-#include "QtComponents/Widgets/CardWidget.h"
-
 #include <QWidget>
 #include <QLayout>
 
@@ -136,8 +134,6 @@ namespace CE::Editor
 			delete fieldDrawer;
 		}
 		fieldDrawers.Clear();
-
-		// Deleting the card also deletes all of its children
 	}
 
 	void GameComponentDrawer::SetTarget(TypeInfo* targetType, void* instance)

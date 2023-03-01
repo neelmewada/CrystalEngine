@@ -2,14 +2,12 @@
 
 #include "CoreMinimal.h"
 
+#include "QtComponents/Widgets/CardWidget.h"
+
 #include "DrawerBase.h"
 
 namespace CE::Editor
 {
-    namespace Qt
-    {
-        class CardWidget;
-    }
 
     class FieldDrawer;
 
@@ -28,14 +26,14 @@ namespace CE::Editor
         virtual void OnEnable() override;
         virtual void OnDisable() override;
 
-        virtual void CreateGUI(QLayout* container);
-        virtual void ClearGUI(QLayout* container);
+        virtual void CreateGUI(QLayout* container) override;
+        virtual void ClearGUI(QLayout* container) override;
 
-        virtual void SetTarget(TypeInfo* targetType, void* instance);
-        virtual TypeInfo* GetTargetType();
-        virtual void* GetTargetInstance();
+        virtual void SetTarget(TypeInfo* targetType, void* instance) override;
+        virtual TypeInfo* GetTargetType() override;
+        virtual void* GetTargetInstance() override;
 
-        virtual bool IsValid() { return componentType != nullptr && targetComponent != nullptr; }
+        virtual bool IsValid() override { return componentType != nullptr && targetComponent != nullptr; }
 
         virtual void OnObjectUpdated(GameComponent* component) override;
 

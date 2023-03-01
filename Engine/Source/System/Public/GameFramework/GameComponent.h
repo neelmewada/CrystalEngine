@@ -30,7 +30,7 @@ namespace CE
         void RemoveUpdateListener(IObjectUpdateListener<GameComponent>* listener);
         
     protected:
-        void OnComponentValuesUpdated();
+        virtual void OnComponentValuesUpdated();
 
         CE::GameObject* owner = nullptr;
 

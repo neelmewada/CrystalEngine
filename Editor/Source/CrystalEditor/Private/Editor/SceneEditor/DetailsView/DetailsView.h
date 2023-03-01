@@ -29,7 +29,7 @@ namespace CE::Editor
         ~DetailsView();
 
     private slots:
-        void HandleCardContextMenu(const QPoint& pos);
+        void HandleCardContextMenu(u32 index, const QPoint& pos);
 
         void NameLabelApplyChanges();
 

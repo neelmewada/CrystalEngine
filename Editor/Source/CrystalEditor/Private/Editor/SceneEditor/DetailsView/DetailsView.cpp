@@ -129,6 +129,13 @@ namespace CE::Editor
         {
             auto card = new Qt::CardWidget(this);
             ui->componentsContainer->layout()->addWidget(card);
+            
+            int idx = i;
+            connect(card, &Qt::CardWidget::handleContextMenu, [idx, this](const QPoint& pos) -> void
+            {
+                HandleCardContextMenu(idx, pos);
+            });
+            
             cards.Add(card);
 
             auto component = selection[0]->GetComponentAt(i);
@@ -157,16 +164,27 @@ namespace CE::Editor
         }
     }
 
-    void DetailsView::HandleCardContextMenu(const QPoint& pos)
+    void DetailsView::HandleCardContextMenu(u32 index, const QPoint& pos)
     {
+        if (selection.GetSize() == 0)
+            return;
+        
         QMenu contextMenu(tr("Context menu"), this);
 
         auto font = contextMenu.font();
-        font.setPointSize(12);
+        font.setPointSize(13);
         contextMenu.setFont(font);
 
-        QAction action1("Delete Component", this);
-        contextMenu.addAction(&action1);
+        QAction deleteAction("Delete Component", this);
+        connect(&deleteAction, &QAction::triggered, this, [index,this]() -> void
+        {
+            if (index < selection[0]->GetComponentCount())
+            {
+                selection[0]->RemoveComponent(selection[0]->GetComponentAt(index));
+            }
+            this->Refresh();
+        });
+        contextMenu.addAction(&deleteAction);
 
         contextMenu.exec(pos);
     }

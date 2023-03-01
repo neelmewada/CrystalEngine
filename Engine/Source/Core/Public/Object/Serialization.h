@@ -13,7 +13,6 @@ namespace CE
     class CORE_API SerializedObject
     {
         CE_CLASS(SerializedObject)
-
     public:
         SerializedObject(const TypeInfo* type, void* instance, SerializedObject* parent = nullptr);
         SerializedObject(Object* instance, SerializedObject* parent = nullptr);
@@ -27,10 +26,10 @@ namespace CE
         void SerializeField(FieldType* fieldType, YAML::Emitter& emitter);
         void DeserializeField(FieldType* fieldType, YAML::Node& node);
         
-        void Deserialize(IO::Path inFilePath);
-        void Deserialize(IO::FileStream& inFile);
-        void Deserialize(IO::MemoryStream& inStream);
-        void Deserialize(YAML::Node& root);
+        bool Deserialize(IO::Path inFilePath);
+        bool Deserialize(IO::FileStream& inFile);
+        bool Deserialize(IO::MemoryStream& inStream);
+        bool Deserialize(YAML::Node& root);
         
     protected:
         

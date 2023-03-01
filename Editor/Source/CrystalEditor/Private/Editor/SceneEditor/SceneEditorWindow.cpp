@@ -79,6 +79,9 @@ namespace CE::Editor
         scenePath = "";
         
         sceneOutlinerView->GetModel()->OnSceneOpened(editorScene);
+        
+        sceneOutlinerView->Refresh();
+        detailsView->Refresh();
     }
 
     void SceneEditorWindow::CreateEmptyGameObject()
@@ -138,15 +141,13 @@ namespace CE::Editor
             if (!openFileFinalPath.endsWith(".cscene"))
                 return;
 
-            //OpenEmptyScene();
-            delete editorScene;
-            editorScene = new Scene();
-            scenePath = "";
+            OpenEmptyScene();
 
             SerializedObject so{ editorScene };
             so.Deserialize(IO::Path(openFileFinalPath.toStdString()));
 
             sceneOutlinerView->Refresh();
+            detailsView->Refresh();
 
             CE_LOG(Info, All, "Opening scene at path: {}", openFileFinalPath);
         }

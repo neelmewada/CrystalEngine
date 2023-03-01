@@ -43,12 +43,12 @@ namespace CE::Editor
 	{
 		CE::ModuleManager::Get().UnloadModule("CrystalEditor");
 
+        // Shutdown RHI
+        gDynamicRHI->PreShutdown();
+        gDynamicRHI->Shutdown();
+        
 		CE::ModuleManager::Get().UnloadModule("EditorSystem");
 		CE::ModuleManager::Get().UnloadModule("EditorCore");
-
-		// Shutdown RHI
-		gDynamicRHI->PreShutdown();
-		gDynamicRHI->Shutdown();
 
 		PluginManager::Get().UnloadAllPlugins();
 	}

@@ -21,9 +21,7 @@ namespace CE::Editor
         , public SceneEditorBus::Interface
     {
         Q_OBJECT
-
         CE_CLASS(SceneEditorWindow, EditorWindowBase)
-
     public:
         explicit SceneEditorWindow(QWidget* parent = nullptr);
         ~SceneEditorWindow();

@@ -528,11 +528,12 @@ namespace CE
 #define __CE_RTTI_JOIN_CLASSES_6(...) , __VA_ARGS__
 #define __CE_RTTI_JOIN_CLASSES_7(...) , __VA_ARGS__
 #define __CE_RTTI_JOIN_CLASSES_8(...) , __VA_ARGS__
+#define __CE_RTTI_JOIN_CLASSES_9(...) , __VA_ARGS__
 
 #define __CE_RTTI_JOIN_CLASSES(Class, ...) Class CE_EXPAND(CE_CONCATENATE(__CE_RTTI_JOIN_CLASSES_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
 #define CE_SUPER(...) __VA_ARGS__
-#define CE_ATTRIBS(...) __VA_ARGS__
+#define CE_ATTRIBS(...) #__VA_ARGS__
 
 #define __CE_NEW_INSTANCE_(Namespace, Class) new Namespace::Class
 #define __CE_NEW_INSTANCE_NotAbstract(Namespace, Class) new Namespace::Class
@@ -604,7 +605,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, sizeof(Namespace::Class), CE_TOSTRING(Attributes) "" }, StructTypeData<Namespace::Class>() };\
+        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, sizeof(Namespace::Class), Attributes "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\
@@ -680,7 +681,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Struct>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), CE_TOSTRING(Attributes) "" }, StructTypeData<Namespace::Struct>() };\
+        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), Attributes "" }, StructTypeData<Namespace::Struct>() };\
 		return &instance.Type;\
 	}\
 	template<>\

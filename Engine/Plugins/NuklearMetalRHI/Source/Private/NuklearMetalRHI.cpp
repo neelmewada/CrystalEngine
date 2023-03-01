@@ -45,18 +45,24 @@ namespace CE
 
     void NuklearMetalRHI::PreShutdown()
     {
+        if (device == nullptr)
+            return;
+        
         device->PreShutdown();
     }
 
     void NuklearMetalRHI::Shutdown()
     {
+        if (device == nullptr)
+            return;
+        
         device->Shutdown();
         delete device;
     }
     
     void NuklearMetalRHI::GetNativeHandle(void** outInstance)
     {
-
+        *outInstance = device;
     }
     
     RHIGraphicsBackend NuklearMetalRHI::GetGraphicsBackend()
