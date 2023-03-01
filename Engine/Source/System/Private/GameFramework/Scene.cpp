@@ -81,6 +81,12 @@ namespace CE
         delete object;
     }
 
+    void Scene::DestroyAll()
+    {
+        objects.DestroyAll();
+        rootGameObjects.Clear();
+    }
+
 } // namespace CE
 
 CE_RTTI_CLASS_IMPL(SYSTEM_API, CE, Scene)

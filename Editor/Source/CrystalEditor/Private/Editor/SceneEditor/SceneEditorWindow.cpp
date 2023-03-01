@@ -138,7 +138,10 @@ namespace CE::Editor
             if (!openFileFinalPath.endsWith(".cscene"))
                 return;
 
-            OpenEmptyScene();
+            //OpenEmptyScene();
+            delete editorScene;
+            editorScene = new Scene();
+            scenePath = "";
 
             SerializedObject so{ editorScene };
             so.Deserialize(IO::Path(openFileFinalPath.toStdString()));

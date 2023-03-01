@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>232</width>
-    <height>108</height>
+    <width>231</width>
+    <height>103</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -171,7 +171,11 @@ border: 0px;
 	background-color: rgb(80, 80, 80);
 }</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_4"/>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+     </layout>
     </widget>
    </item>
   </layout>

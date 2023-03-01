@@ -60,10 +60,20 @@ namespace CE
         {
             objects.Remove(uuid);
         }
+
+        void DestroyAll()
+        {
+            for (auto object : objectsArray)
+            {
+                delete object;
+            }
+            Clear();
+        }
         
         void Clear()
         {
             objects.Clear();
+            objectsArray.Clear();
         }
         
         auto begin() { return objects.begin(); }
