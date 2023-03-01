@@ -73,7 +73,7 @@ namespace CE
 		
 	}
 
-	void Name::GetComponents(CE::Array<String>& components)
+	void Name::GetComponents(CE::Array<String>& components) const
 	{
 		components.Clear();
 
@@ -110,6 +110,46 @@ namespace CE
 
 			i++;
 		}
+	}
+
+	String Name::GetLastComponent() const
+	{
+		String last = "";
+		int i = 0;
+		int length = value.GetLength();
+
+		while (i < length)
+		{
+			if (i < length - 1 && value[i] == ':' && value[i + 1] == ':')
+			{
+				i += 2;
+				continue;
+			}
+			else if (value[i] == ':')
+			{
+				i++;
+				continue;
+			}
+			else
+			{
+				int startIdx = i;
+				int len = 0;
+
+				while (value[i] != ':' && i < length)
+				{
+					i++;
+					len++;
+				}
+
+				last = value.GetSubstringView(startIdx, len);
+
+				i = startIdx + len;
+			}
+
+			i++;
+		}
+
+		return last;
 	}
 
 } // namespace CE

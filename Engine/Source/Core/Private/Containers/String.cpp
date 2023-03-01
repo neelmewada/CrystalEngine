@@ -372,7 +372,7 @@ String String::GetSubstring(int startIndex, int length)
     return String(Iterator(Begin().Ptr + startIndex), Iterator(Begin().Ptr + startIndex + length));
 }
 
-StringView CE::String::GetSubstringView(int startIndex, int length)
+StringView CE::String::GetSubstringView(int startIndex, int length) const
 {
     if (length == -1)
     {

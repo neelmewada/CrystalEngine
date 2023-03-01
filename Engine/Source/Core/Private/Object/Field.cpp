@@ -26,6 +26,15 @@ namespace CE
         );
     }
 
+    bool FieldType::IsHidden() const
+    {
+        return attributes.Exists([](const CE::Attribute& attr) -> bool
+            {
+                return attr.GetKey() == "Hidden";
+            }
+        );
+    }
+
     const TypeInfo* FieldType::GetDeclarationType() const
     {
         return GetTypeInfo(fieldTypeId);

@@ -6,19 +6,50 @@
 
 namespace CE::Editor
 {
+    namespace Qt
+    {
+        class CardWidget;
+    }
+
+    class FieldDrawer;
 
     class CRYSTALEDITOR_API GameComponentDrawer : public DrawerBase
     {
         CE_CLASS(GameComponentDrawer, DrawerBase)
+    protected:
+        GameComponentDrawer();
     public:
+        virtual ~GameComponentDrawer();
 
+        static ClassType* GetGameComponentDrawerClassFor(TypeId targetType);
+
+    public: // API
+
+        virtual void CreateGUI(QLayout* container);
+        virtual void ClearGUI(QLayout* container);
+
+        virtual void SetTarget(TypeInfo* targetType, void* instance);
+        virtual TypeInfo* GetTargetType();
+        virtual void* GetTargetInstance();
+
+        virtual bool IsValid() { return componentType != nullptr && targetComponent != nullptr; }
+
+    private slots:
+        void HandleCardContextMenu(const QPoint& pos);
+
+    protected:
+
+        ClassType* componentType = nullptr;
+        GameComponent* targetComponent = nullptr;
+
+        Array<FieldDrawer*> fieldDrawers{};
     };
 
 }
 
 CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, GameComponentDrawer,
     CE_SUPER(CE::Editor::DrawerBase),
-    CE_DONT_INSTANTIATE,
+    CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST()

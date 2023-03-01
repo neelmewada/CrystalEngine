@@ -34,6 +34,8 @@ namespace CE::Editor::Qt
         
         QWidget* GetContentContainer();
 
+        void SetCardTitle(String title);
+
     protected:
         void paintEvent(QPaintEvent* event) override;
 

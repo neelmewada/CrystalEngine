@@ -604,7 +604,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, sizeof(Namespace::Class), #Attributes "" }, StructTypeData<Namespace::Class>() };\
+        static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, sizeof(Namespace::Class), CE_TOSTRING(Attributes) "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\
@@ -680,7 +680,7 @@ namespace CE\
 	template<>\
 	inline const TypeInfo* GetStaticType<Namespace::Struct>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), #Attributes "" }, StructTypeData<Namespace::Struct>() };\
+        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), CE_TOSTRING(Attributes) "" }, StructTypeData<Namespace::Struct>() };\
 		return &instance.Type;\
 	}\
 	template<>\

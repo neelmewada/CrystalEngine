@@ -4,6 +4,8 @@
 #include "QtComponents/Widgets/CardWidget.h"
 #include "QtComponents/Widgets/AddComponentWidget.h"
 
+#include "Drawers/GameComponentDrawer.h"
+
 #include <QMenu>
 
 namespace CE::Editor
@@ -35,6 +37,12 @@ namespace CE::Editor
 
     DetailsView::~DetailsView()
     {
+        for (auto drawer : drawers)
+        {
+            delete drawer;
+        }
+        drawers.Clear();
+
         delete ui;
     }
 
@@ -56,10 +64,17 @@ namespace CE::Editor
 
     void DetailsView::OnSceneSelectionChanged(Array<GameObject*> selected)
     {
+        this->selection = selected;
+        
+        Refresh();
+    }
+
+    void DetailsView::Refresh()
+    {
         if (addComponentMenu != nullptr)
             addComponentMenu->hide();
 
-        if (selected.GetSize() == 0)
+        if (selection.GetSize() == 0)
         {
             ui->componentsContainer->setVisible(false);
             ui->headerFrame->setVisible(false);
@@ -71,14 +86,17 @@ namespace CE::Editor
         ui->headerFrame->setVisible(true);
         ui->addComponentButton->setVisible(true);
 
-        // Clear the component cards
+        // Clear the component container
         auto layout = ui->componentsContainer->layout();
-        for (int i = layout->count() - 1; i >= 0; i--)
+        QLayoutItem* item;
+        while ((item = layout->takeAt(0)) != NULL)
         {
-            layout->removeItem(layout->itemAt(i));
+            delete item->widget();
+            delete item;
         }
 
-        if (selected.GetSize() > 1 || selected[0] == nullptr)
+
+        if (selection.GetSize() > 1 || selection[0] == nullptr)
         {
             ui->nameInput->setText("-");
             ui->nameInput->setEnabled(true);
@@ -86,19 +104,52 @@ namespace CE::Editor
         }
         else
         {
-            QString name = QString(selected[0]->GetName().GetCString());
-            QString uuid = QStringLiteral("%1").arg((size_t)selected[0]->GetUuid());
-            
+            QString name = QString(selection[0]->GetName().GetCString());
+            QString uuid = QStringLiteral("%1").arg((size_t)selection[0]->GetUuid());
+
             ui->nameInput->setText(name);
             ui->nameInput->setEnabled(true);
             ui->uuidValue->setText(uuid);
         }
 
-        auto card1 = new Qt::CardWidget(this);
-        //QObject::connect(card1, &Qt::CardWidget::handleContextMenu, this, &DetailsView::HandleCardContextMenu);
-        //ui->componentsContainer->layout()->addWidget(card1);
+        for (auto drawer : drawers)
+        {
+            delete drawer;
+        }
+        drawers.Clear();
 
-        this->selection = selected;
+        cards.Clear();
+        
+        if (selection.GetSize() != 1)
+            return;
+
+        for (int i = 0; i < selection[0]->GetComponentCount(); i++)
+        {
+            auto card = new Qt::CardWidget(this);
+            ui->componentsContainer->layout()->addWidget(card);
+            cards.Add(card);
+
+            auto component = selection[0]->GetComponentAt(i);
+            auto componentType = (ClassType*)component->GetType();
+
+            auto componentName = componentType->GetLocalAttributeValue("Display");
+            if (componentName.IsEmpty())
+                componentName = componentType->GetName().GetLastComponent();
+            card->SetCardTitle(componentName);
+            
+            auto drawerClass = GameComponentDrawer::GetGameComponentDrawerClassFor(componentType->GetTypeId());
+            if (drawerClass == nullptr)
+                continue;
+
+            GameComponentDrawer* drawer = (GameComponentDrawer*)drawerClass->CreateDefaultInstance();
+            if (drawer == nullptr)
+                continue;
+
+            drawer->SetTarget(componentType, component);
+            drawer->CreateGUI(card->GetContentContainer()->layout());
+
+            drawers.Add(drawer);
+        }
     }
 
     void DetailsView::HandleCardContextMenu(const QPoint& pos)
@@ -133,6 +184,8 @@ namespace CE::Editor
         {
             go->AddComponent(componentType);
         }
+
+        Refresh();
     }
 
     void DetailsView::focusInEvent(QFocusEvent* event)

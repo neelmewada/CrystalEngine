@@ -12,9 +12,12 @@ class DetailsView;
 
 namespace CE::Editor
 {
+    class GameComponentDrawer;
+
     namespace Qt
     {
         class AddComponentWidget;
+        class CardWidget;
     }
 
     class DetailsView : public EditorViewBase
@@ -37,6 +40,8 @@ namespace CE::Editor
     public slots:
         void OnSceneSelectionChanged(Array<GameObject*> selected);
 
+        void Refresh();
+
     signals:
         void GameObjectEntriesNeedRefresh(Array<GameObject*> gameObjects);
 
@@ -46,6 +51,8 @@ namespace CE::Editor
     private:
         Ui::DetailsView* ui;
         Qt::AddComponentWidget* addComponentMenu = nullptr;
+        Array<GameComponentDrawer*> drawers{};
+        Array<Qt::CardWidget*> cards{};
 
         CE::Array<CE::GameObject*> selection{};
     };

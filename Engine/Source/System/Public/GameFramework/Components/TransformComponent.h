@@ -33,12 +33,22 @@ namespace CE
         
         CE_INLINE Quat GetLocalRotation() const
         {
-            return localRotation;
+            return Quat::FromEuler(localRotation);
         }
         
         CE_INLINE void SetLocalRotation(Quat newLocalRotation)
         {
-            this->localRotation = newLocalRotation;
+            this->localRotation = newLocalRotation.ToEuler();
+        }
+
+        CE_INLINE Vec3 GetLocalEuler() const
+        {
+            return localRotation;
+        }
+
+        CE_INLINE void SetLocalEuler(Vec3 euler)
+        {
+            this->localRotation = euler;
         }
         
         CE_INLINE Vec3 GetLocalScale() const
@@ -53,7 +63,7 @@ namespace CE
         
     protected:
         Vec3 localPosition{0, 0, 0};
-        Quat localRotation{0, 0, 0, 0};
+        Vec3 localRotation{0, 0, 0};
         Vec3 localScale{1, 1, 1};
         
         friend class GameObject;
@@ -64,7 +74,7 @@ namespace CE
 CE_RTTI_CLASS(SYSTEM_API, CE, TransformComponent,
     CE_SUPER(CE::GameComponent),
     CE_NOT_ABSTRACT,
-    CE_ATTRIBS(AllowMultiple = false),
+    CE_ATTRIBS(AllowMultiple = false, Display = Transform),
     CE_FIELD_LIST(
         CE_FIELD(localPosition, Display = Position)
         CE_FIELD(localRotation, Display = Rotation)

@@ -222,7 +222,7 @@ namespace CE
         String ToUpper() const;
 
         String GetSubstring(int startIndex, int length = -1);
-        StringView GetSubstringView(int startIndex, int length = -1);
+        StringView GetSubstringView(int startIndex, int length = -1) const;
 
         StringView ToStringView() const;
 

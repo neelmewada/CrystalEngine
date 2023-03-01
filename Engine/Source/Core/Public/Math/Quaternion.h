@@ -20,6 +20,42 @@ namespace CE
         Quat(Vec3 vec, f32 w) : x(vec.x), y(vec.y), z(vec.z), w(w)
         {}
 
+        static Quat FromEuler(Vec3 euler)
+        {
+            f32 cr = std::cos(euler.x * 0.5);
+            f32 sr = std::sin(euler.x * 0.5);
+            f32 cp = std::cos(euler.y * 0.5);
+            f32 sp = std::sin(euler.y * 0.5);
+            f32 cy = std::cos(euler.z * 0.5);
+            f32 sy = std::sin(euler.z * 0.5);
+
+            Quat q;
+            q.w = cr * cp * cy + sr * sp * sy;
+            q.x = sr * cp * cy - cr * sp * sy;
+            q.y = cr * sp * cy + sr * cp * sy;
+            q.z = cr * cp * sy - sr * sp * cy;
+
+            return q;
+        }
+
+        static Quat FromEuler(f32 x, f32 y, f32 z)
+        {
+            f32 cr = std::cos(x * 0.5);
+            f32 sr = std::sin(x * 0.5);
+            f32 cp = std::cos(y * 0.5);
+            f32 sp = std::sin(y * 0.5);
+            f32 cy = std::cos(z * 0.5);
+            f32 sy = std::sin(z * 0.5);
+
+            Quat q;
+            q.w = cr * cp * cy + sr * sp * sy;
+            q.x = sr * cp * cy - cr * sp * sy;
+            q.y = cr * sp * cy + sr * cp * sy;
+            q.z = cr * cp * sy - sr * sp * cy;
+
+            return q;
+        }
+
         inline Quat operator+(const Quat& rhs) const
         {
             return Quat(x + rhs.x, y + rhs.y, z + rhs.z, w + rhs.w);
@@ -98,18 +134,18 @@ namespace CE
             Vec3 angles{};
 
             // roll (x-axis rotation)
-            double sinr_cosp = 2 * (w * x + y * z);
-            double cosr_cosp = 1 - 2 * (x * x + y * y);
+            f32 sinr_cosp = 2 * (w * x + y * z);
+            f32 cosr_cosp = 1 - 2 * (x * x + y * y);
             angles.x = std::atan2(sinr_cosp, cosr_cosp);
 
             // pitch (y-axis rotation)
-            double sinp = std::sqrt(1 + 2 * (w * x - y * z));
-            double cosp = std::sqrt(1 - 2 * (w * x - y * z));
+            f32 sinp = std::sqrt(1 + 2 * (w * x - y * z));
+            f32 cosp = std::sqrt(1 - 2 * (w * x - y * z));
             angles.y = 2 * std::atan2(sinp, cosp) - M_PI / 2;
 
             // yaw (z-axis rotation)
-            double siny_cosp = 2 * (w * z + x * y);
-            double cosy_cosp = 1 - 2 * (y * y + z * z);
+            f32 siny_cosp = 2 * (w * z + x * y);
+            f32 cosy_cosp = 1 - 2 * (y * y + z * z);
             angles.z = std::atan2(siny_cosp, cosy_cosp);
 
             return angles;

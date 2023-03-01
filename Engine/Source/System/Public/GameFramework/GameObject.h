@@ -41,6 +41,16 @@ namespace CE
         {
             return children[index];
         }
+
+        CE_INLINE u32 GetComponentCount() const
+        {
+            return components.GetSize();
+        }
+
+        CE_INLINE GameComponent* GetComponentAt(u32 index) const
+        {
+            return components[index];
+        }
         
         void AddChild(GameObject* child);
         void RemoveChild(GameObject* child);

@@ -106,8 +106,23 @@ namespace CE
                 }
 
                 this->attributes.Add(Attribute(attribKey, attribValue));
+
+                startIdx = i + 1;
             }
         }
+    }
+
+    String TypeInfo::GetLocalAttributeValue(const String& key) const
+    {
+        for (int i = 0; i < attributes.GetSize(); i++)
+        {
+            if (attributes[i].GetKey() == key)
+            {
+                return attributes[i].GetValue();
+            }
+        }
+
+        return "";
     }
 
     bool TypeInfo::IsComponent() const

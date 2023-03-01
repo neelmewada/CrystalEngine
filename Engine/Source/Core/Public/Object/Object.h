@@ -63,8 +63,8 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(name)
-        CE_FIELD(uuid)
+        CE_FIELD(name, Hidden)
+        CE_FIELD(uuid, Hidden)
     ),
     CE_FUNCTION_LIST()
 )

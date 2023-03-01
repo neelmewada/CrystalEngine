@@ -11,6 +11,9 @@
 
 // Drawers
 #include "Drawers/DrawerBase.h"
+#include "Drawers/FieldDrawer.h"
+#include "Drawers/VectorFieldDrawer.h"
+#include "Drawers/GameComponentDrawer.h"
 
 // Editor Buses
 #include "Editor/SceneEditor/SceneOutlinerViewBus.h"

@@ -49,7 +49,9 @@ namespace CE
             return hashValue != rhs.hashValue;
         }
 
-        void GetComponents(CE::Array<String>& components);
+        void GetComponents(CE::Array<String>& components) const;
+        
+        String GetLastComponent() const;
 
     private:
         String value;

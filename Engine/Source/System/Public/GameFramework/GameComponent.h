@@ -17,6 +17,8 @@ namespace CE
         virtual void Init() override {}
 
         virtual void Tick(f32 deltaTime) override {}
+
+        CE_INLINE GameObject* GetOwner() const { return owner; }
         
     protected:
         CE::GameObject* owner = nullptr;

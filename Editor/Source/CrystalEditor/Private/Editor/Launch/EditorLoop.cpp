@@ -29,6 +29,8 @@ namespace CE::Editor
 
 	void EditorLoop::PostInit()
 	{
+		CE::ModuleManager::Get().LoadModule("CrystalEditor");
+
 		// Init plugins
 		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadOnInit);
 		// Post-Init plugins
@@ -39,6 +41,8 @@ namespace CE::Editor
 
 	void EditorLoop::PreShutdown()
 	{
+		CE::ModuleManager::Get().UnloadModule("CrystalEditor");
+
 		CE::ModuleManager::Get().UnloadModule("EditorSystem");
 		CE::ModuleManager::Get().UnloadModule("EditorCore");
 

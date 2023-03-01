@@ -29,6 +29,13 @@ namespace CE::Editor::Qt
         return ui->content;
     }
 
+    void CardWidget::SetCardTitle(String title)
+    {
+        QString text = QString(title.GetCString());
+
+        ui->headerLabel->setText(text);
+    }
+
     void CardWidget::paintEvent(QPaintEvent* event)
     {
         

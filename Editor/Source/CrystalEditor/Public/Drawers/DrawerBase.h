@@ -5,6 +5,9 @@
 #include <QWidget>
 #include <QLayout>
 
+#define CE_REGISTER_DRAWER(drawerClass, targetType) CE::Editor::DrawerBase::RegisterDrawer(TYPEID(targetType), drawerClass::Type())
+#define CE_REGISTER_DRAWERS(drawerClass, ...) CE::Editor::DrawerBase::RegisterDrawers<__VA_ARGS__>(drawerClass::Type())
+
 namespace CE::Editor
 {
     
@@ -12,16 +15,39 @@ namespace CE::Editor
     {
         CE_CLASS(DrawerBase, CE::Object)
     protected:
-        DrawerBase(CE::Name name, TypeInfo* targetType);
+        DrawerBase(CE::Name name);
     
     public:
         virtual ~DrawerBase();
-        
-    public:
-        
+
+        static void RegisterDrawer(TypeId targetType, ClassType* drawerClass);
+        static void RegisterDrawer(Array<TypeId> targetTypes, ClassType* drawerClass);
+
+        template<typename... Args>
+        static void RegisterDrawers(ClassType* drawerClass)
+        {
+            Array<TypeId> targetTypes = { TYPEID(Args)... };
+            RegisterDrawer(targetTypes, drawerClass);
+        }
+
+        template<>
+        static void RegisterDrawers(ClassType* drawerClass) {}
+
+        static ClassType* GetDrawerClassFor(TypeId targetType);
+
+    public: // API
+
+        virtual void CreateGUI(QLayout* container) = 0;
+        virtual void ClearGUI(QLayout* container) = 0;
+
+        virtual void SetTarget(TypeInfo* targetType, void* instance) = 0;
+        virtual TypeInfo* GetTargetType() = 0;
+        virtual void* GetTargetInstance() = 0;
+
+        virtual bool IsValid() = 0;
         
     protected:
-        TypeInfo* targetType = nullptr;
+        static CE::HashMap<TypeId, ClassType*> drawerClassMap;
     };
 
 } // namespace CE::Editor
