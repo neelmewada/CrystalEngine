@@ -20,6 +20,7 @@ namespace CE::Editor
 		PluginManager::Get().Init();
 		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadEarliest);
 
+        CE::ModuleManager::Get().LoadModule("QtComponents");
 		CE::ModuleManager::Get().LoadModule("EditorCore");
 		CE::ModuleManager::Get().LoadModule("EditorSystem");
 
@@ -49,6 +50,7 @@ namespace CE::Editor
         
 		CE::ModuleManager::Get().UnloadModule("EditorSystem");
 		CE::ModuleManager::Get().UnloadModule("EditorCore");
+        CE::ModuleManager::Get().UnloadModule("QtComponents");
 
 		PluginManager::Get().UnloadAllPlugins();
 	}

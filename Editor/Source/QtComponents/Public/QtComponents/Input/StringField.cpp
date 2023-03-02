@@ -19,8 +19,16 @@ namespace CE::Editor::Qt
     void StringField::on_textInput_textEdited(const QString &arg1)
     {
         auto text = ui->textInput->text().toStdString();
+        String string = String(text.c_str());
 
-        emit OnValueChanged(String(text.c_str()));
+        emit OnValueChanged(string);
+        OnTextInputChanged(string);
     }
 
+    void StringField::SetValue(String value)
+    {
+        ui->textInput->setText(QString(value.GetCString()));
+    }
 }
+
+CE_RTTI_CLASS_IMPL(QTCOMPONENTS_API, CE::Editor::Qt, StringField)

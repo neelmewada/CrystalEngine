@@ -61,6 +61,11 @@ namespace CE
         String attribs = CleanupAttributeString(attributes);
         this->attributes.Clear();
 
+        if (name == "OnTextEdited")
+        {
+            0;
+        }
+        
         int startIdx = 0;
 
         for (int i = 0; i < attribs.GetLength(); i++)

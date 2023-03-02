@@ -8,6 +8,9 @@
 
 #include "RTTIDefines.h"
 
+#include "Math/Math.h"
+#include "Math/Vector.h"
+
 namespace CE
 {
 
@@ -60,6 +63,10 @@ namespace CE
 		Variant(s64 value) { SetInternalValue(value); }
 
 		Variant(bool value) { SetInternalValue(value); }
+        
+        Variant(Vec2  value) { SetInternalValue(value); }
+        Variant(Vec3  value) { SetInternalValue(value); }
+        Variant(Vec4  value) { SetInternalValue(value); }
 
 		Variant(const char* value) { StringValue = value; ValueTypeId = TYPEID(String); }
 		Variant(String value) { StringValue = value; ValueTypeId = TYPEID(String); }
@@ -173,6 +180,10 @@ namespace CE
 			f32    Float32Value;
 			f64    Float64Value;
 			void*  PtrValue;
+            
+            Vec2   Vec2Value;
+            Vec3   Vec3Value;
+            Vec4   Vec4Value;
 
 			CE::Array<u8> ArrayValue;
 			IO::Path PathValue;

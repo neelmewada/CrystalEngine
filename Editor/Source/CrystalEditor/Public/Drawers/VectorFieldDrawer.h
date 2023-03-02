@@ -13,7 +13,7 @@ namespace CE::Editor
         class Vec4Input;
     }
 
-    class CRYSTALEDITOR_API VectorFieldDrawer : public FieldDrawer, public Qt::IVec4InputListener
+    class CRYSTALEDITOR_API VectorFieldDrawer : public FieldDrawer
     {
         CE_CLASS(VectorFieldDrawer, FieldDrawer)
     protected:
@@ -25,8 +25,8 @@ namespace CE::Editor
 
         virtual void CreateGUI(QLayout* container) override;
 
-        virtual void OnValueChanged(Vec4 value) override;
-
+    private:
+        void OnValueChanged(Vec4 newValue);
 
     private:
         Qt::Vec4Input* vec4Field = nullptr;
@@ -39,5 +39,7 @@ CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, VectorFieldDrawer,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
+    CE_FUNCTION_LIST(
+        CE_FUNCTION(OnValueChanged, Event)
+    )
 )

@@ -5,7 +5,7 @@
 #include <any>
 
 #define LOG(x) std::cout << x << std::endl
-
+/*
 class ApplicationRequests
 {
 public:
@@ -47,10 +47,11 @@ CE_RTTI_CLASS(, , TestClass,
 )
 
 CE_RTTI_CLASS_IMPL(, , TestClass)
+*/
 
 int main(int argc, char* argv[])
 {
-    CE::ModuleManager::Get().LoadModule("Core");
+    /*CE::ModuleManager::Get().LoadModule("Core");
     CE::Logger::Initialize();
 
     CE_REGISTER_TYPES(TestClass);
@@ -75,7 +76,7 @@ int main(int argc, char* argv[])
     
     CE::Logger::Shutdown();
     CE::ModuleManager::Get().UnloadModule("Core");
-
+*/
     return 0;
 }
 

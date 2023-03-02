@@ -4,42 +4,53 @@
 
 #include <iostream>
 
-static CE::IO::MemoryStream GStream{};
 
-void Serialize()
-{
-    using namespace CE;
-    
-    Scene* scene = new Scene("Test Scene");
-    
-    CE_LOG(Info, All, "Is assignable: {}", scene->GetType()->IsAssignableTo(TYPEID(Object)));
-    
-    GameObject* go = new GameObject("Test GameObject");
-    
-    scene->AddGameObject(go);
-    
-    TransformComponent* transform = go->AddComponent<TransformComponent>();
-    
-    SerializedObject so = SerializedObject(scene);
-    so.Serialize(GStream);
-    
-    CE_LOG(Info, All, "Serialized Data:\n{}", GStream.GetRawPointer());
-    
-    delete scene;
-}
 
-void Deserialize()
+using namespace CE;
+
+class SenderClass : public CE::Object
 {
-    using namespace CE;
+    CE_CLASS(SenderClass, CE::Object)
+public:
     
-    Scene* scene = new Scene("New Scene");
-    
-    SerializedObject so = SerializedObject(scene);
-    so.Deserialize(GStream);
-    GStream.Free();
-    
-    delete scene;
-}
+    // Signals
+    CE_SIGNAL(OnTextEdited, CE::String, CE::f32);
+};
+
+CE_RTTI_CLASS(,, SenderClass,
+    CE_SUPER(CE::Object),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST(
+        // Signals
+        CE_FUNCTION(OnTextEdited, Signal)
+    )
+)
+
+CE_RTTI_CLASS_IMPL(,, SenderClass)
+
+class ReceiverClass : public CE::Object
+{
+    CE_CLASS(ReceiverClass, CE::Object)
+public:
+    void OnInputFieldEdited(CE::String string, CE::f32 f)
+    {
+        CE_LOG(Info, All, "Value changed: {} , {}", string, f);
+    }
+};
+
+CE_RTTI_CLASS(,, ReceiverClass,
+    CE_SUPER(CE::Object),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION(OnInputFieldEdited, Event)
+    )
+)
+
+CE_RTTI_CLASS_IMPL(,, ReceiverClass)
 
 int main(int argc, char** argv)
 {
@@ -49,9 +60,21 @@ int main(int argc, char** argv)
 	CE::ModuleManager::Get().LoadModule("Core");
 	CE::ModuleManager::Get().LoadModule("System");
     
-    Serialize();
+    CE_REGISTER_TYPES(SenderClass, ReceiverClass);
     
-    Deserialize();
+    SenderClass* s = new SenderClass;
+    
+    ReceiverClass* r = new ReceiverClass;
+    
+    auto result = s->Bind("OnTextEdited", r, "OnInputFieldEdited");
+    
+    s->OnTextEdited("Hello", 12.4124f);
+    
+    delete r;
+    
+    s->OnTextEdited("Hello", 12.4124f);
+    
+    delete s;
     
 	CE::ModuleManager::Get().UnloadModule("System");
 	CE::ModuleManager::Get().UnloadModule("Core");

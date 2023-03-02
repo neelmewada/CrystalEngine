@@ -197,7 +197,7 @@ namespace CE
 		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...), const char* attributes, std::index_sequence<Is...>)
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) = function;
-
+            
 			FunctionDelegate funcDelegate = [funcPtr](Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value

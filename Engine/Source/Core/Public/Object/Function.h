@@ -40,6 +40,7 @@ namespace CE
 		CE_INLINE const TypeInfo* GetOwner() const { return owner; }
 
 		bool IsEventFunction() const;
+        bool IsSignalFunction() const;
 
 		virtual TypeId GetTypeId() const override
 		{
@@ -51,7 +52,7 @@ namespace CE
 			return Next;
 		}
 
-		CE_INLINE CE::Variant Invoke(CE::Object* instance, Array<CE::Variant> params) const
+		CE_INLINE CE::Variant Invoke(CE::Object* instance, const Array<CE::Variant>& params) const
 		{
 			CE::Variant returnValue{};
 			delegateCallback(instance, params, returnValue);
@@ -63,7 +64,6 @@ namespace CE
 	protected:
 		TypeId returnType = 0;
 		Array<TypeId> paramTypes{};
-		String attributes = "";
 		FunctionDelegate delegateCallback;
 		FunctionType* Next = nullptr;
 		const TypeInfo* owner = nullptr;

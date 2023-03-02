@@ -10,6 +10,7 @@ namespace CE::Editor
 {
 
     class FieldDrawer;
+    class StringFieldDrawer;
 
     class CRYSTALEDITOR_API GameComponentDrawer : public DrawerBase, public IObjectUpdateListener<GameComponent>
     {
@@ -44,6 +45,8 @@ namespace CE::Editor
 
         ClassType* componentType = nullptr;
         GameComponent* targetComponent = nullptr;
+        
+        StringFieldDrawer* tempDrawer = nullptr;
 
         Array<FieldDrawer*> fieldDrawers{};
     };

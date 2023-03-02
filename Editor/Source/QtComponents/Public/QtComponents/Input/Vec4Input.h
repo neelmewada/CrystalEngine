@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QString>
 
+#include "CoreMinimal.h"
+
 namespace Ui {
 class Vec4Input;
 }
@@ -24,9 +26,10 @@ namespace CE::Editor::Qt
         virtual void OnValueChanged(Vec4 value) {}
     };
 
-    class QTCOMPONENTS_API Vec4Input : public QWidget
+    class QTCOMPONENTS_API Vec4Input : public QWidget, public CE::Object
     {
         Q_OBJECT
+        CE_CLASS(Vec4Input, CE::Object)
     public:
         explicit Vec4Input(QWidget* parent = nullptr);
         ~Vec4Input();
@@ -46,6 +49,8 @@ namespace CE::Editor::Qt
         Vec4Mode GetVecMode() { return vecMode; }
 
         bool IsIntegerMode() { return integerMode; }
+        
+        CE_SIGNAL(OnInputValueChanged, Vec4);
 
     signals:
         void OnValueChanged(f32 x, f32 y, f32 z, f32 w);
@@ -80,5 +85,15 @@ namespace CE::Editor::Qt
     };
 
 }
+
+CE_RTTI_CLASS(QTCOMPONENTS_API, CE::Editor::Qt, Vec4Input,
+    CE_SUPER(CE::Object),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION(OnInputValueChanged, Signal)
+    )
+)
 
 #endif // VEC4INPUT_H

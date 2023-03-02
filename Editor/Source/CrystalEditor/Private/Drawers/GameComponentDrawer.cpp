@@ -2,6 +2,8 @@
 #include "Drawers/GameComponentDrawer.h"
 #include "Drawers/FieldDrawer.h"
 
+#include "Drawers/StringFieldDrawer.h"
+
 #include <QWidget>
 #include <QLayout>
 
@@ -90,6 +92,11 @@ namespace CE::Editor
 			delete fieldDrawer;
 		}
 		fieldDrawers.Clear();
+        
+        delete tempDrawer;
+        tempDrawer = (StringFieldDrawer*)StringFieldDrawer::Type()->CreateDefaultInstance();
+        
+        tempDrawer->CreateGUI(container);
 
 		auto field = componentType->GetFirstField();
 

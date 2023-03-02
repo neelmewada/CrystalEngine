@@ -67,8 +67,8 @@ namespace CE::Editor
 		}
 
 		vec4Field = new Qt::Vec4Input(container->parentWidget());
-
-		//connect(vec4Field, &Qt::Vec4Input::OnValueChanged, this, &VectorFieldDrawer::OnFieldValueChanged);
+        
+        auto result = vec4Field->Bind("OnInputValueChanged", this, "OnValueChanged");
 
 		Qt::Vec4Mode mode{};
 		bool isInteger = false;
@@ -106,7 +106,7 @@ namespace CE::Editor
 		vec4Field->SetMode(mode, isInteger);
 		vec4Field->SetLabel(fieldType->GetDisplayName());
 
-		vec4Field->SetListener(this);
+		//vec4Field->SetListener(this);
 
 		container->addWidget(vec4Field);
 
@@ -143,8 +143,9 @@ namespace CE::Editor
 		{
 			fieldType->SetFieldValue<Vec2i>(targetInstance, Vec2i{ (s32)value.x, (s32)value.y });
 		}
+        
+        CE_LOG(Info, All, "OnValueChanged: {}", value);
 	}
-
 
 } // namespace CE::Editor
 

@@ -28,10 +28,9 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
-        PRIVATE
+        PUBLIC
             CE::Core
             CE::System
-        PUBLIC
             "Qt6::Core"
             "Qt6::Gui"
             "Qt6::Widgets"

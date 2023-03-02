@@ -10,10 +10,9 @@ namespace CE
         FunctionDelegate delegate, 
         const TypeInfo* owner, 
         String attributes)
-        : TypeInfo(name)
+        : TypeInfo(name, attributes)
         , returnType(returnType)
         , paramTypes(parameterTypes)
-        , attributes(attributes)
         , delegateCallback(delegate)
         , owner(owner)
     {
@@ -25,6 +24,14 @@ namespace CE
         return GetLocalAttributes().Exists([](const Attribute& attr) -> bool
             {
                 return attr.GetKey() == "Event";
+            });
+    }
+
+    bool FunctionType::IsSignalFunction() const
+    {
+        return GetLocalAttributes().Exists([](const Attribute& attr) -> bool
+            {
+                return attr.GetKey() == "Signal";
             });
     }
 

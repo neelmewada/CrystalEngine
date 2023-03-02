@@ -165,8 +165,6 @@ namespace CE
 
 } // namespace CE
 
-CE_RTTI_POD(CE, Matrix4x4)
-
 /// fmt user-defined Formatter for CE::Matrix4x4
 template <> struct fmt::formatter<CE::Matrix4x4> {
     // Parses format specifications of the form ['f' | 'e'].

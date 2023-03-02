@@ -13,6 +13,7 @@
 #include "Drawers/DrawerBase.h"
 #include "Drawers/FieldDrawer.h"
 #include "Drawers/VectorFieldDrawer.h"
+#include "Drawers/StringFieldDrawer.h"
 #include "Drawers/GameComponentDrawer.h"
 
 // Editor Buses

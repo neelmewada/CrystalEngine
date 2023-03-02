@@ -139,10 +139,9 @@ namespace CE::Editor::Qt
         ParseFloat(ui->inputY->text(), y);
         ParseFloat(ui->inputZ->text(), z);
         ParseFloat(ui->inputW->text(), w);
-
-        if (listener != nullptr)
-            listener->OnValueChanged(Vec4{ x, y, z, w });
+        
         //emit OnValueChanged(x, y, z, w);
+        OnInputValueChanged(Vec4{ x, y, z, w });
     }
 
     void Vec4Input::ParseFloat(QString string, f32& outFloat)
@@ -176,3 +175,5 @@ namespace CE::Editor::Qt
     }
 
 }
+
+CE_RTTI_CLASS_IMPL(QTCOMPONENTS_API, CE::Editor::Qt, Vec4Input)

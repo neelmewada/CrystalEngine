@@ -24,6 +24,10 @@ namespace CE::Editor
         virtual void OnValuesUpdated() override;
 
         virtual void CreateGUI(QLayout* container) override;
+        
+    private:
+        // Events
+        void OnStringFieldInputChanged(CE::String newText);
 
     private:
         Qt::StringField* stringField = nullptr;
@@ -36,5 +40,8 @@ CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, StringFieldDrawer,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
+    CE_FUNCTION_LIST(
+        // Events
+        CE_FUNCTION(OnStringFieldInputChanged, Event)
+    )
 )

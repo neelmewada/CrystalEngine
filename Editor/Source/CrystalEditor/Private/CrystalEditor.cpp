@@ -30,7 +30,8 @@ namespace CE::Editor
             DrawerBase,
             GameComponentDrawer,
             FieldDrawer,
-            VectorFieldDrawer
+            VectorFieldDrawer,
+            StringFieldDrawer
         );
 
         // Register Drawers
@@ -38,6 +39,7 @@ namespace CE::Editor
         
         // Register Field Drawers
         CE_REGISTER_FIELD_DRAWERS(VectorFieldDrawer, Vec2, Vec3, Vec4, Vec2i, Vec3i, Vec4i);
+        CE_REGISTER_FIELD_DRAWERS(StringFieldDrawer, String);
     }
 
 } // namespace CE::Editor

@@ -39,6 +39,7 @@
 #include "Math/Vector.h"
 #include "Math/Quaternion.h"
 #include "Math/Matrix.h"
+#include "Math/MathRTTI.h"
 
 // ******************************************************
 // Messaging
