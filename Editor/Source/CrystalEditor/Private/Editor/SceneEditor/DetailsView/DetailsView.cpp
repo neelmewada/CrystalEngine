@@ -96,7 +96,6 @@ namespace CE::Editor
             delete item;
         }
 
-
         if (selection.GetSize() > 1 || selection[0] == nullptr)
         {
             ui->nameInput->setText("-");

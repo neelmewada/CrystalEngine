@@ -74,11 +74,15 @@ namespace CE::Editor
 
     void SceneEditorWindow::OpenEmptyScene()
     {
+        sceneOutlinerView->ClearSelection();
+
         delete editorScene;
         editorScene = new Scene();
         scenePath = "";
         
         sceneOutlinerView->GetModel()->OnSceneOpened(editorScene);
+
+        detailsView->selection.Clear();
         
         sceneOutlinerView->Refresh();
         detailsView->Refresh();

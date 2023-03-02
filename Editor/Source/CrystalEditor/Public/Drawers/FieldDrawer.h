@@ -4,7 +4,7 @@
 
 #include "DrawerBase.h"
 
-#define CE_REGISTER_FIELD_DRAWER(drawerClass, targetType) CE::RegisterTypes<targetType>(); CE::Editor::FieldDrawer::RegisterFieldDrawer(TYPEID(targetType), drawerClass::Type())
+#define CE_REGISTER_FIELD_DRAWER(drawerClass, targetType) CE::RegisterTypes<drawerClass>(); CE::Editor::FieldDrawer::RegisterFieldDrawer(TYPEID(targetType), drawerClass::Type())
 #define CE_REGISTER_FIELD_DRAWERS(drawerClass, ...) CE::RegisterTypes<drawerClass>(); CE::Editor::FieldDrawer::RegisterFieldDrawers<__VA_ARGS__>(drawerClass::Type())
 
 namespace CE::Editor

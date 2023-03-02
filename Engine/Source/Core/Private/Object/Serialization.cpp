@@ -347,7 +347,7 @@ namespace CE
     bool SerializedObject::Deserialize(IO::FileStream& inStream)
     {
         if (type == nullptr || instance == nullptr)
-            return;
+            return false;
 
         auto size = inStream.GetLength();
 
@@ -364,7 +364,7 @@ namespace CE
     bool SerializedObject::Deserialize(IO::MemoryStream& inStream)
     {
         if (type == nullptr || instance == nullptr)
-            return;
+            return false;
         
         YAML::Node root = YAML::Load(inStream.GetRawPointer());
         

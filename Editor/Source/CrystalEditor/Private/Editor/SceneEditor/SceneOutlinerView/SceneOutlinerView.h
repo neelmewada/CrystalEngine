@@ -42,6 +42,8 @@ namespace CE::Editor
 
         void Refresh();
 
+        void ClearSelection();
+
     private slots:
         void ShowContextMenu(const QPoint& pos);
 

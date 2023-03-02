@@ -50,6 +50,11 @@ namespace CE::Editor
         this->model->modelReset({});
     }
 
+    void SceneOutlinerView::ClearSelection()
+    {
+        ui->treeWidget->clearSelection();
+    }
+
     void SceneOutlinerView::on_contextMenu_EmptyGameObject()
     {
         emit CreateEmptyGameObject();
@@ -78,7 +83,7 @@ namespace CE::Editor
     
     void SceneOutlinerView::OnSceneOpened(Scene* scene)
     {
-        if (model != nullptr && scene != nullptr)
+        if (model != nullptr)
         {
             model->OnSceneOpened(scene);
         }
@@ -86,6 +91,9 @@ namespace CE::Editor
 
     void SceneOutlinerView::ShowContextMenu(const QPoint& pos)
     {
+        if (model->GetScene() == nullptr)
+            return;
+
         QMenu contextMenu(tr("Context menu"), this);
 
         auto font = contextMenu.font();

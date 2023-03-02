@@ -5,8 +5,8 @@
 #include <QWidget>
 #include <QLayout>
 
-#define CE_REGISTER_DRAWER(drawerClass, targetType) CE::Editor::DrawerBase::RegisterDrawer(TYPEID(targetType), drawerClass::Type())
-#define CE_REGISTER_DRAWERS(drawerClass, ...) CE::Editor::DrawerBase::RegisterDrawers<__VA_ARGS__>(drawerClass::Type())
+#define CE_REGISTER_DRAWER(drawerClass, targetType) CE::RegisterTypes<drawerClass>(); CE::Editor::DrawerBase::RegisterDrawer(TYPEID(targetType), drawerClass::Type())
+#define CE_REGISTER_DRAWERS(drawerClass, ...) CE::RegisterTypes<drawerClass>(); CE::Editor::DrawerBase::RegisterDrawers<__VA_ARGS__>(drawerClass::Type())
 
 namespace CE::Editor
 {

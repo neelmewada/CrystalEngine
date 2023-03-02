@@ -43,6 +43,9 @@ namespace CE::Editor
 
     QVariant SceneOutlinerModel::data(const QModelIndex &index, int role) const
     {
+        if (currentScene == nullptr)
+            return QVariant();
+
         if (!index.isValid())
             return QVariant();
         if (role != ::Qt::DisplayRole)
@@ -88,6 +91,9 @@ namespace CE::Editor
 
     QModelIndex SceneOutlinerModel::parent(const QModelIndex &index) const
     {
+        if (currentScene == nullptr)
+            return QModelIndex();
+
         if (index.internalPointer() == nullptr)
             return QModelIndex();
         
@@ -104,7 +110,9 @@ namespace CE::Editor
             return 0;
         
         if (!parent.isValid())
+        {
             return currentScene->GetRootGameObjectCount();
+        }
         
         GameObject* go = (GameObject*)parent.internalPointer();
 

@@ -13,6 +13,7 @@ class DetailsView;
 namespace CE::Editor
 {
     class GameComponentDrawer;
+    class SceneEditorWindow;
 
     namespace Qt
     {
@@ -55,6 +56,8 @@ namespace CE::Editor
         Array<Qt::CardWidget*> cards{};
 
         CE::Array<CE::GameObject*> selection{};
+
+        friend class SceneEditorWindow;
     };
 }
 

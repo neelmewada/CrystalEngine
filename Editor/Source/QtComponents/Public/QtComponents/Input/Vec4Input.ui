@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
-    <height>28</height>
+    <width>353</width>
+    <height>36</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,7 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
+       <width>20</width>
        <height>20</height>
       </size>
      </property>
@@ -48,6 +48,12 @@
    </item>
    <item>
     <widget class="QLabel" name="labelX">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>10</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>15</width>
@@ -79,7 +85,7 @@
     <widget class="QLineEdit" name="inputX">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-       <horstretch>0</horstretch>
+       <horstretch>10</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
@@ -121,6 +127,12 @@
    </item>
    <item>
     <widget class="QLabel" name="labelY">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>10</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>15</width>
@@ -152,7 +164,7 @@
     <widget class="QLineEdit" name="inputY">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-       <horstretch>0</horstretch>
+       <horstretch>10</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
@@ -194,6 +206,12 @@
    </item>
    <item>
     <widget class="QLabel" name="labelZ">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>10</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>15</width>
@@ -225,7 +243,7 @@
     <widget class="QLineEdit" name="inputZ">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-       <horstretch>0</horstretch>
+       <horstretch>10</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
@@ -267,6 +285,12 @@
    </item>
    <item>
     <widget class="QLabel" name="labelW">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>10</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="minimumSize">
       <size>
        <width>15</width>
@@ -298,7 +322,7 @@
     <widget class="QLineEdit" name="inputW">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-       <horstretch>0</horstretch>
+       <horstretch>10</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
