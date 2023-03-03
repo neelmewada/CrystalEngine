@@ -46,6 +46,8 @@ namespace CE
         
         const TypeInfo* GetDeclarationType() const;
 
+        CE_INLINE TypeId GetDeclarationTypeId() const { return GetDeclarationType()->GetTypeId(); }
+
         template<typename T>
         T& GetFieldValue(void* instance)
         {
@@ -59,7 +61,7 @@ namespace CE
         }
         
         template<typename T>
-        void SetFieldValue(void* instance, T value)
+        void SetFieldValue(void* instance, const T& value)
         {
             *(T*)((SIZE_T)instance + offset) = value;
         }

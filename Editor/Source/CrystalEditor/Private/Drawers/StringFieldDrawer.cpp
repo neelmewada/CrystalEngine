@@ -17,7 +17,13 @@ namespace CE::Editor
 
 	void StringFieldDrawer::OnValuesUpdated()
 	{
+        if (targetInstance == nullptr || stringField == nullptr)
+            return;
+        if (fieldType->GetDeclarationTypeId() != TYPEID(String))
+            return;
 
+        String value = fieldType->GetFieldValue<String>(targetInstance);
+        stringField->SetValue(value);
 	}
 
 	void StringFieldDrawer::CreateGUI(QLayout* container)
@@ -37,7 +43,12 @@ namespace CE::Editor
 
     void StringFieldDrawer::OnStringFieldInputChanged(CE::String newText)
     {
-        CE_LOG(Info, All, "New Text: {}", newText);
+        if (targetInstance == nullptr || stringField == nullptr)
+            return;
+        if (fieldType->GetDeclarationTypeId() != TYPEID(String))
+            return;
+
+        fieldType->SetFieldValue<String>(targetInstance, newText);
     }
 }
 

@@ -21,8 +21,8 @@ namespace CE
 
 	void VulkanDevice::Initialize()
 	{
-		auto window = VulkanPlatform::GetActiveWindowHandle();
-		testSurface = VulkanPlatform::CreateSurface(instance, window);
+		VulkanTestWindow windowInfo{};
+		testSurface = VulkanPlatform::CreateTestSurface(instance, windowInfo);
 
 		SelectGpu();
 		InitGpu();
@@ -37,7 +37,8 @@ namespace CE
 			return;
 		}
 
-		vkDestroySurfaceKHR(instance, testSurface, nullptr);
+		//vkDestroySurfaceKHR(instance, testSurface, nullptr);
+		VulkanPlatform::DestroyTestSurface(instance, testSurface, windowInfo);
 		testSurface = nullptr;
 
 		isInitialized = true;
@@ -65,8 +66,8 @@ namespace CE
 		}
 		queueFamilyToCmdPool.Clear();
 
-		vmaDestroyAllocator(vmaAllocator);
-		vmaAllocator = nullptr;
+		//vmaDestroyAllocator(vmaAllocator);
+		//vmaAllocator = nullptr;
 
 		vkDestroyDevice(device, nullptr);
 		device = nullptr;
@@ -208,16 +209,16 @@ namespace CE
 		this->graphicsQueue = new VulkanQueue(this, queueFamilies.graphicsFamily, graphicsQueueIndex, gfxQueue);
 		this->presentQueue = new VulkanQueue(this, queueFamilies.presentFamily, presentQueueIndex, presentQueue);
 
-		VmaAllocatorCreateInfo allocatorCI{};
-		allocatorCI.instance = instance;
-		allocatorCI.device = device;
-		allocatorCI.physicalDevice = gpu;
+		//VmaAllocatorCreateInfo allocatorCI{};
+		//allocatorCI.instance = instance;
+		//allocatorCI.device = device;
+		//allocatorCI.physicalDevice = gpu;
 
-		if (vmaCreateAllocator(&allocatorCI, &vmaAllocator) != VK_SUCCESS)
-		{
-			CE_LOG(Error, All, "Failed to create Vulkan VmaAllocator!");
-			return;
-		}
+		//if (vmaCreateAllocator(&allocatorCI, &vmaAllocator) != VK_SUCCESS)
+		//{
+		//	CE_LOG(Error, All, "Failed to create Vulkan VmaAllocator!");
+		//	return;
+		//}
 
 		// Command Pools
 		for (const auto& familyIndex : queueFamilyIndices)

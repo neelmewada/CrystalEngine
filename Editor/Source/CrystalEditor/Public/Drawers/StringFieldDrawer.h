@@ -21,12 +21,14 @@ namespace CE::Editor
     public:
         virtual ~StringFieldDrawer();
 
+        // Value of the field changed
         virtual void OnValuesUpdated() override;
 
         virtual void CreateGUI(QLayout* container) override;
         
     private:
         // Events
+        // String text field edited
         void OnStringFieldInputChanged(CE::String newText);
 
     private:

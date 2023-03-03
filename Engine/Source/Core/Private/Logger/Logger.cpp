@@ -1,5 +1,6 @@
 
 #include "CoreTypes.h"
+#include "Containers/Array.h"
 
 #include "Logger/Logger.h"
 
@@ -22,7 +23,7 @@ namespace CE
     static std::shared_ptr<spdlog::logger> GConsoleLogger;
     static std::shared_ptr<spdlog::logger> GFileLogger;
 
-    static spdlog::logger* EditorLogger = nullptr;
+    static Array<spdlog::logger*> EditorLoggers{};
 
     static bool GIsLoggerInitialized = false;
     static CE::LogLevel GConsoleLogLevel = CE::LogLevel::Trace;
@@ -89,9 +90,12 @@ namespace CE
         {
             GConsoleLogger->log((spdlog::level::level_enum)level, message.GetCString());
 
-            if (EditorLogger != nullptr)
+            if (EditorLoggers.GetSize() > 0)
             {
-                EditorLogger->log((spdlog::level::level_enum)level, message.GetCString());
+                for (auto editorLogger : EditorLoggers)
+                {
+                    editorLogger->log((spdlog::level::level_enum)level, message.GetCString());
+                }
             }
         }
 
@@ -123,17 +127,14 @@ namespace CE
         return GConsoleLogger;
     }
 
-    void Logger::SetEditorLogger(spdlog::logger* logger)
+    void Logger::AddEditorLogger(spdlog::logger* logger)
     {
-        EditorLogger = logger;
+        EditorLoggers.Add(logger);
     }
 
-    void Logger::SetEditorLoggerPattern(String pattern)
+    void Logger::RemoveEditorLogger(spdlog::logger* logger)
     {
-        if (EditorLogger == nullptr)
-            return;
-
-        EditorLogger->set_pattern(pattern);
+        EditorLoggers.Add(logger);
     }
 
 } // namespace CE

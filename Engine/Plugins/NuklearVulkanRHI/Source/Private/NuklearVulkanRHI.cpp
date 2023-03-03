@@ -140,19 +140,26 @@ namespace CE
 
     void NuklearVulkanRHI::PostInitialize()
     {
-        //device = new VulkanDevice(vkInstance, this);
-        //device->Initialize();
+        device = new VulkanDevice(vkInstance, this);
+        device->Initialize();
     }
 
 	void NuklearVulkanRHI::PreShutdown()
 	{
-        //device->PreShutdown();
+        if (device != nullptr)
+        {
+            device->PreShutdown();
+        }
 	}
 
 	void NuklearVulkanRHI::Shutdown()
 	{
-        //device->Shutdown();
-        //delete device;
+        if (device != nullptr)
+        {
+            device->Shutdown();
+            delete device;
+            device = nullptr;
+        }
 
         if (VulkanPlatform::IsValidationEnabled())
         {

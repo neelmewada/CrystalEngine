@@ -72,16 +72,16 @@ namespace CE::Editor
         // Logger setup
         ConsoleSink = std::make_shared<EditorConsoleSinkMt>(this);
         EditorConsoleLogger = std::make_shared<spdlog::logger>("EditorConsole", spdlog::sinks_init_list{ ConsoleSink });
+        EditorConsoleLogger->set_pattern("[%^%l%$] %v");
 
-        CE::Logger::SetEditorLogger(EditorConsoleLogger.get());
-        CE::Logger::SetEditorLoggerPattern("[%^%l%$] %v");
+        CE::Logger::AddEditorLogger(EditorConsoleLogger.get());
     }
 
     ConsoleView::~ConsoleView()
     {
         delete ui;
 
-        CE::Logger::SetEditorLogger(nullptr);
+        CE::Logger::RemoveEditorLogger(nullptr);
 
         EditorConsoleLogger.reset();
         ConsoleSink.reset();
@@ -91,6 +91,8 @@ namespace CE::Editor
     {
         model->PushEntry(string);
         ui->consoleOutput->scrollToBottom();
+
+        emit OnLogPushed(string);
     }
 
     void ConsoleView::Flush()
@@ -130,6 +132,8 @@ namespace CE::Editor
     void ConsoleView::on_clearButton_clicked()
     {
         model->ClearLogs();
+
+        CE_LOG(Info, All, "Logs cleared");
     }
 
 }

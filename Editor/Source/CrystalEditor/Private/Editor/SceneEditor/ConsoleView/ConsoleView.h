@@ -36,6 +36,9 @@ namespace CE::Editor
 
         void on_clearButton_clicked();
 
+    signals:
+        void OnLogPushed(const String& string);
+
     private:
         Ui::ConsoleView *ui;
         ConsoleViewModel* model = nullptr;

@@ -34,6 +34,7 @@
     <addaction name="actionOpenScene"/>
     <addaction name="actionSaveScene"/>
     <addaction name="actionSaveSceneAs"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -47,10 +48,20 @@
      <string>Views</string>
     </property>
     <addaction name="actionConsole"/>
+    <addaction name="actionSceneOutliner"/>
+    <addaction name="actionDetails"/>
+    <addaction name="actionViewport"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuViews"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="font">
+    <font>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
   </widget>
   <action name="actionNewScene">
    <property name="text">
@@ -93,6 +104,26 @@
   <action name="actionConsole">
    <property name="text">
     <string>Console</string>
+   </property>
+  </action>
+  <action name="actionSceneOutliner">
+   <property name="text">
+    <string>Scene Outliner</string>
+   </property>
+  </action>
+  <action name="actionDetails">
+   <property name="text">
+    <string>Details</string>
+   </property>
+  </action>
+  <action name="actionViewport">
+   <property name="text">
+    <string>Viewport</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>

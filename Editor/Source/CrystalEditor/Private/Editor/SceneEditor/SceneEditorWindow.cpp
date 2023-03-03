@@ -33,14 +33,14 @@ namespace CE::Editor
         // **********************************
         // Viewport View
         viewportView = new ViewportView(this);
-        ads::CDockWidget* viewportViewDockWidget = new ads::CDockWidget(viewportView->windowTitle());
+        viewportViewDockWidget = new ads::CDockWidget(viewportView->windowTitle());
         viewportViewDockWidget->setWidget(viewportView);
         
         // **********************************
         // Scene Outliner View
         sceneOutlinerView = new SceneOutlinerView(this);
-        ads::CDockWidget* sceneOutlinerDockWidget = new ads::CDockWidget(sceneOutlinerView->windowTitle());
-        sceneOutlinerDockWidget->setWidget(sceneOutlinerView);
+        sceneOutlinerViewDockWidget = new ads::CDockWidget(sceneOutlinerView->windowTitle());
+        sceneOutlinerViewDockWidget->setWidget(sceneOutlinerView);
 
         // Scene Outliner connections
         connect(sceneOutlinerView, &SceneOutlinerView::CreateEmptyGameObject, this, &SceneEditorWindow::on_createEmptyGameObject_triggered);
@@ -52,7 +52,7 @@ namespace CE::Editor
         // **********************************
         // Details View
         detailsView = new DetailsView(this);
-        ads::CDockWidget* detailsViewDockWidget = new ads::CDockWidget(detailsView->windowTitle());
+        detailsViewDockWidget = new ads::CDockWidget(detailsView->windowTitle());
         detailsViewDockWidget->setWidget(detailsView);
 
         // Details View connections
@@ -65,10 +65,13 @@ namespace CE::Editor
         consoleViewDockWidget = new ads::CDockWidget(consoleView->windowTitle());
         consoleViewDockWidget->setWidget(consoleView);
 
+        // Console View connections
+        connect(consoleView, &ConsoleView::OnLogPushed, this, &SceneEditorWindow::OnLogPushedToConsole);
+
         // **********************************
         // Add the dock widget to the top dock widget area
         dockManager->addDockWidget(ads::CenterDockWidgetArea, viewportViewDockWidget);
-        dockManager->addDockWidget(ads::LeftDockWidgetArea, sceneOutlinerDockWidget);
+        dockManager->addDockWidget(ads::LeftDockWidgetArea, sceneOutlinerViewDockWidget);
         dockManager->addDockWidget(ads::RightDockWidgetArea, detailsViewDockWidget);
         dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
     }
@@ -167,6 +170,12 @@ namespace CE::Editor
 
     // SLOTS
 
+    void SceneEditorWindow::OnLogPushedToConsole(const String& string)
+    {
+        QString message = QString(string.GetCString());
+        ui->statusBar->showMessage(message);
+    }
+
     void SceneEditorWindow::on_createEmptyGameObject_triggered()
     {
         CreateEmptyGameObject();
@@ -222,13 +231,40 @@ namespace CE::Editor
         OpenScene(scenePath);
     }
 
+    void SceneEditorWindow::on_actionExit_triggered()
+    {
+        qApp->quit();
+    }
+
     void SceneEditorWindow::on_actionConsole_triggered()
     {
         if (!consoleViewDockWidget->isVisible())
         {
-            auto widget = dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
-            widget->titleBar()->show();
-            widget->setDockAreaFlag(ads::CDockAreaWidget::HideSingleWidgetTitleBar, false);
+            consoleViewDockWidget->toggleView(true);
+        }
+    }
+
+    void SceneEditorWindow::on_actionSceneOutliner_triggered()
+    {
+        if (!sceneOutlinerViewDockWidget->isVisible())
+        {
+            sceneOutlinerViewDockWidget->toggleView(true);
+        }
+    }
+
+    void SceneEditorWindow::on_actionDetails_triggered()
+    {
+        if (!detailsViewDockWidget->isVisible())
+        {
+            detailsViewDockWidget->toggleView(true);
+        }
+    }
+
+    void SceneEditorWindow::on_actionViewport_triggered()
+    {
+        if (!viewportViewDockWidget->isVisible())
+        {
+            viewportViewDockWidget->toggleView(true);
         }
     }
 

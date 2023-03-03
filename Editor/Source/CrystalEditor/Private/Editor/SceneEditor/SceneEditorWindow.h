@@ -37,7 +37,12 @@ namespace CE::Editor
         virtual void OpenScene(String sceneAssetPath) override;
         
     private slots:
+        void OnLogPushedToConsole(const String& string);
+
         void on_createEmptyGameObject_triggered();
+
+        // *****************************************
+        // File menu actions
 
         void on_actionNewScene_triggered();
 
@@ -47,10 +52,18 @@ namespace CE::Editor
 
         void on_actionOpenScene_triggered();
 
+        void on_actionExit_triggered();
+
         // *****************************************
-        // Menu actions
+        // View menu actions
 
         void on_actionConsole_triggered();
+
+        void on_actionSceneOutliner_triggered();
+
+        void on_actionDetails_triggered();
+
+        void on_actionViewport_triggered();
 
     private:
         Ui::SceneEditorWindow* ui;
@@ -61,8 +74,14 @@ namespace CE::Editor
 
         // Sub Views
         SceneOutlinerView* sceneOutlinerView = nullptr;
+        ads::CDockWidget* sceneOutlinerViewDockWidget = nullptr;
+
         ViewportView* viewportView = nullptr;
+        ads::CDockWidget* viewportViewDockWidget = nullptr;
+
         DetailsView* detailsView = nullptr;
+        ads::CDockWidget* detailsViewDockWidget = nullptr;
+
         ConsoleView* consoleView = nullptr;
         ads::CDockWidget* consoleViewDockWidget = nullptr;
     };

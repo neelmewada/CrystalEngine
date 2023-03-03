@@ -26,15 +26,17 @@ namespace CE
 
         CE_INLINE GameObject* GetOwner() const { return owner; }
 
-        void AddUpdateListener(IObjectUpdateListener<GameComponent>* listener);
-        void RemoveUpdateListener(IObjectUpdateListener<GameComponent>* listener);
+        //void AddUpdateListener(IObjectUpdateListener<GameComponent>* listener);
+        //void RemoveUpdateListener(IObjectUpdateListener<GameComponent>* listener);
+
+        CE_SIGNAL(OnComponentValuesUpdated);
         
     protected:
-        virtual void OnComponentValuesUpdated();
+        //virtual void OnComponentValuesUpdated();
 
         CE::GameObject* owner = nullptr;
 
-        Array<IObjectUpdateListener<GameComponent>*> updateListeners{};
+        //Array<IObjectUpdateListener<GameComponent>*> updateListeners{};
         
         friend class CE::GameObject;
     };
@@ -48,7 +50,10 @@ CE_RTTI_CLASS(SYSTEM_API, CE, GameComponent,
     CE_FIELD_LIST(
         CE_FIELD(owner, Hidden)
     ),
-    CE_FUNCTION_LIST()
+    CE_FUNCTION_LIST(
+        // Signals
+        CE_FUNCTION(OnComponentValuesUpdated, Signal)
+    )
 )
 
 

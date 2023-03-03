@@ -14,7 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew">
    <property name="text">
     <string>New...</string>

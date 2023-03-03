@@ -51,8 +51,8 @@ namespace CE
 
         static std::shared_ptr<spdlog::logger> GetConsoleLogger();
 
-        static void SetEditorLogger(spdlog::logger* logger);
-        static void SetEditorLoggerPattern(String pattern);
+        static void AddEditorLogger(spdlog::logger* logger);
+        static void RemoveEditorLogger(spdlog::logger* logger);
         
     private:
         

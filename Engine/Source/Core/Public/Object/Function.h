@@ -73,6 +73,18 @@ namespace CE
 		friend class StructType;
 		friend class ClassType;
     };
+
+	template<typename ReturnType, typename ClassOrStruct, typename... Args>
+	TypeId GetFunctionSignature(ReturnType(ClassOrStruct::* function)(Args...))
+	{
+		return GetCombinedHashes({ TYPEID(Args)... });
+	}
+
+	template<typename ReturnType, typename ClassOrStruct, typename... Args>
+	TypeId GetFunctionSignature(ReturnType(ClassOrStruct::* function)(Args...) const)
+	{
+		return GetCombinedHashes({ TYPEID(Args)... });
+	}
     
 } // namespace CE
 
