@@ -38,13 +38,12 @@ namespace CE::Editor
 
     CrystalEditorWindow::~CrystalEditorWindow()
     {
-        //for (auto dockWidget : dockWidgets)
-        {
-            //mainDockManager->removeDockWidget(dockWidget);
-            //delete dockWidget;
-        }
-
-        //delete mainDockManager;
+//        for (auto dockWidget : dockWidgets)
+//        {
+//            mainDockManager->removeDockWidget(dockWidget);
+//            delete dockWidget;
+//        }
+//        delete mainDockManager;
         delete ui;
     }
 

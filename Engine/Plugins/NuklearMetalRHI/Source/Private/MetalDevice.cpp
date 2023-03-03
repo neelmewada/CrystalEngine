@@ -23,6 +23,9 @@ namespace CE
     {
         device = MTL::CreateSystemDefaultDevice();
         
+        auto desc = MTL::RenderPipelineDescriptor::alloc()->init();
+        desc->release();
+        
         isInitialized = true;
         
         CE_LOG(Info, All, "Metal device initialized");
