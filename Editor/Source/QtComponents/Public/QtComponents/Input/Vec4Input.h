@@ -32,7 +32,7 @@ namespace CE::Editor::Qt
         CE_CLASS(Vec4Input, CE::Object)
     public:
         explicit Vec4Input(QWidget* parent = nullptr);
-        ~Vec4Input();
+        virtual ~Vec4Input();
 
         void SetMode(Vec4Mode mode, bool integerMode);
 

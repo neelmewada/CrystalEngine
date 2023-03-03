@@ -23,10 +23,18 @@ namespace CE
 		{
 			bus->RemoveSubscriber(this);
 		}
+
+        // Unbind all outgoing connections and remove destinations' incomingSignalBinders list
+        for (auto& [name, binding] : signalBindings)
+        {
+            if (binding.boundObject != nullptr)
+                binding.boundObject->incomingSignalBinders.Remove(this);
+        }
+        signalBindings.Clear();
         
+        // Unbind all incoming connections from 'incomingSignalBinders' because 'this' object is about to be destroyed
         for (auto incomingSignalObject : incomingSignalBinders)
         {
-            // Unbind all incoming connections from 'incomingSignalObject' because 'this' object is about to be destroyed
             incomingSignalObject->UnbindAll(this);
         }
 	}

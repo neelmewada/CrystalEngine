@@ -68,18 +68,17 @@ namespace CE::Editor
 
 	void GameComponentDrawer::OnEnable()
 	{
-		if (targetComponent == nullptr)
-			return;
-
-		targetComponent->AddUpdateListener(this);
+		
 	}
 
 	void GameComponentDrawer::OnDisable()
 	{
-		if (targetComponent == nullptr)
-			return;
-
-		targetComponent->RemoveUpdateListener(this);
+		for (auto fieldDrawer : fieldDrawers)
+		{
+			fieldDrawer->OnDisable();
+			delete fieldDrawer;
+		}
+		fieldDrawers.Clear();
 	}
 
 	void GameComponentDrawer::CreateGUI(QLayout* container)
@@ -89,6 +88,7 @@ namespace CE::Editor
 
 		for (auto fieldDrawer : fieldDrawers)
 		{
+			fieldDrawer->OnDisable();
 			delete fieldDrawer;
 		}
 		fieldDrawers.Clear();
@@ -138,6 +138,7 @@ namespace CE::Editor
 	{
 		for (auto fieldDrawer : fieldDrawers)
 		{
+			fieldDrawer->OnDisable();
 			delete fieldDrawer;
 		}
 		fieldDrawers.Clear();

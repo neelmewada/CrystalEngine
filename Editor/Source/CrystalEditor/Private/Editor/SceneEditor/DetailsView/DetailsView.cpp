@@ -80,6 +80,16 @@ namespace CE::Editor
             ui->componentsContainer->setVisible(false);
             ui->headerFrame->setVisible(false);
             ui->addComponentButton->setVisible(false);
+
+            for (auto drawer : drawers)
+            {
+                drawer->OnDisable();
+                delete drawer;
+            }
+            drawers.Clear();
+
+            cards.Clear();
+
             return;
         }
 
