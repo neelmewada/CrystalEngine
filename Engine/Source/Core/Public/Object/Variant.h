@@ -159,7 +159,7 @@ namespace CE
 		template<typename T>
 		CE_INLINE void SetInternalValue(T value)
 		{
-			memset(this, 0, sizeof(Variant));
+			memset(this, 0, sizeof(Variant)); // Initialze memory to 0
 			ValueTypeId = GetTypeId<T>();
 			*(T*)this = value;
 		}

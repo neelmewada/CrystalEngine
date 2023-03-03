@@ -22,7 +22,7 @@ namespace CE::Editor
 {
     class SceneOutlinerView :
         public EditorViewBase,
-        public SceneOutlinerViewBus::Handler
+        public SceneOutlinerViewBus::Interface
     {
         Q_OBJECT
 
@@ -31,8 +31,6 @@ namespace CE::Editor
     public:
         explicit SceneOutlinerView(QWidget *parent = nullptr);
         ~SceneOutlinerView();
-        
-        virtual void OnSceneOpened(Scene* scene) override;
         
         void SetModel(SceneOutlinerModel* model);
         
@@ -43,6 +41,11 @@ namespace CE::Editor
         void Refresh();
 
         void ClearSelection();
+
+        // ************************************************
+        // SceneOutlinerViewBus::Interface
+
+        virtual void OnSceneOpened(Scene* scene) override;
 
     private slots:
         void ShowContextMenu(const QPoint& pos);
@@ -72,7 +75,10 @@ CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, SceneOutlinerView,
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
+    CE_FUNCTION_LIST(
+        // SceneOutlinerViewBus::Interface
+        CE_FUNCTION(OnSceneOpened, Event)
+    )
 )
 
 #endif // SCENEOUTLINERVIEW_H

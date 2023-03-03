@@ -15,6 +15,8 @@ namespace CE::Editor
         , ui(new Ui::SceneOutlinerView)
     {
         ui->setupUi(this);
+
+        CE_CONNECT(SceneOutlinerViewBus, this);
         
         setWindowTitle("Scene Outliner");
         
@@ -28,6 +30,8 @@ namespace CE::Editor
 
     SceneOutlinerView::~SceneOutlinerView()
     {
+        CE_DISCONNECT(SceneOutlinerViewBus, this);
+
         delete ui;
     }
 

@@ -46,6 +46,7 @@
     <property name="title">
      <string>Views</string>
     </property>
+    <addaction name="actionConsole"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -87,6 +88,11 @@
   <action name="actionSaveSceneAs">
    <property name="text">
     <string>Save Scene as...</string>
+   </property>
+  </action>
+  <action name="actionConsole">
+   <property name="text">
+    <string>Console</string>
    </property>
   </action>
  </widget>

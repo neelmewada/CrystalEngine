@@ -173,7 +173,6 @@ namespace CE::Editor
 		{
 			fieldDrawer->OnValuesUpdated();
 		}
-		CE_LOG(Info, All, "Component Updated: {}", component->GetName());
 	}
 
 } // namespace CE::Editor

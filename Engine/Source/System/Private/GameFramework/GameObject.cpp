@@ -68,8 +68,6 @@ namespace CE
         
         component->Init();
         component->Activate();
-
-        CE_LOG(Info, All, "Added component: {}", component->GetName());
         
         return component;
 	}

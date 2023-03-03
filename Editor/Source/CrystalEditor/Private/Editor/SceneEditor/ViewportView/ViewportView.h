@@ -16,7 +16,7 @@ namespace CE::Editor
     class ViewportView : public EditorViewBase
     {
         Q_OBJECT
-
+        CE_CLASS(ViewportView, EditorViewBase)
     public:
         explicit ViewportView(QWidget* parent = nullptr);
         ~ViewportView();
@@ -26,5 +26,13 @@ namespace CE::Editor
     };
 
 }
+
+CE_RTTI_CLASS(CRYSTALEDITOR_API,CE::Editor, ViewportView,
+    CE_SUPER(CE::Editor::EditorViewBase),
+    CE_DONT_INSTANTIATE,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST()
+)
 
 #endif // VIEWPORTVIEW_H

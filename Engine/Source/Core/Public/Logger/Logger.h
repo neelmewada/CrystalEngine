@@ -4,6 +4,11 @@
 #include "Misc/CoreDefines.h"
 #include "Misc/EnumClass.h"
 
+namespace spdlog
+{
+    class logger;
+}
+
 namespace CE
 {
     class CORE_API StringView;
@@ -43,6 +48,11 @@ namespace CE
 
         static void Log(LogLevel level, StringView message, LogTarget target = LogTarget::All);
         static void Log(LogLevel level, StringView message, const char* fileName, int line, LogTarget target = LogTarget::All);
+
+        static std::shared_ptr<spdlog::logger> GetConsoleLogger();
+
+        static void SetEditorLogger(spdlog::logger* logger);
+        static void SetEditorLoggerPattern(String pattern);
         
     private:
         

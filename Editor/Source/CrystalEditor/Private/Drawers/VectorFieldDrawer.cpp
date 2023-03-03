@@ -143,8 +143,6 @@ namespace CE::Editor
 		{
 			fieldType->SetFieldValue<Vec2i>(targetInstance, Vec2i{ (s32)value.x, (s32)value.y });
 		}
-        
-        CE_LOG(Info, All, "OnValueChanged: {}", value);
 	}
 
 } // namespace CE::Editor

@@ -15,6 +15,7 @@ namespace CE::Editor
     class SceneOutlinerView;
     class ViewportView;
     class DetailsView;
+    class ConsoleView;
 
     class SceneEditorWindow
         : public EditorWindowBase
@@ -46,6 +47,11 @@ namespace CE::Editor
 
         void on_actionOpenScene_triggered();
 
+        // *****************************************
+        // Menu actions
+
+        void on_actionConsole_triggered();
+
     private:
         Ui::SceneEditorWindow* ui;
         
@@ -57,6 +63,8 @@ namespace CE::Editor
         SceneOutlinerView* sceneOutlinerView = nullptr;
         ViewportView* viewportView = nullptr;
         DetailsView* detailsView = nullptr;
+        ConsoleView* consoleView = nullptr;
+        ads::CDockWidget* consoleViewDockWidget = nullptr;
     };
 
 }

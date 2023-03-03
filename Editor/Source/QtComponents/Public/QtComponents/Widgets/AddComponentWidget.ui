@@ -87,6 +87,9 @@
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
         </property>
+        <property name="indentation">
+         <number>10</number>
+        </property>
         <property name="headerHidden">
          <bool>true</bool>
         </property>

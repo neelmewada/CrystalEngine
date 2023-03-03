@@ -2,6 +2,11 @@
 #include "CrystalEditor.h"
 
 #include "Editor/SceneEditor/SceneEditorWindow.h"
+// Scene Editor Views
+#include "Editor/SceneEditor/ViewportView/ViewportView.h"
+#include "Editor/SceneEditor/SceneOutlinerView/SceneOutlinerView.h"
+#include "Editor/SceneEditor/DetailsView/DetailsView.h"
+#include "Editor/SceneEditor/ConsoleView/ConsoleView.h"
 
 CE_IMPLEMENT_MODULE(CrystalEditor, CE::Editor::CrystalEditorModule)
 
@@ -20,10 +25,19 @@ namespace CE::Editor
 
     void CrystalEditorModule::RegisterTypes()
     {
+        // Editor Windows
         CE_REGISTER_TYPES(
             EditorWindowBase,
             SceneEditorWindow
-        )
+        );
+
+        // Scene Editor Views
+        CE_REGISTER_TYPES(
+            ViewportView,
+            SceneOutlinerView,
+            DetailsView,
+            ConsoleView
+        );
         
         // Drawer Classes
         CE_REGISTER_TYPES(

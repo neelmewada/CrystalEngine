@@ -1,3 +1,5 @@
 <RCC>
-    <qresource prefix="/Editor"/>
+    <qresource prefix="/Editor">
+        <file alias="Icons/bin-red">Resources/Icons/bin.png</file>
+    </qresource>
 </RCC>

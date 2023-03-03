@@ -3,6 +3,9 @@
 #include <QMainWindow>
 
 #include "DockManager.h"
+#include "DockAreaWidget.h"
+#include "DockAreaTitleBar.h"
+#include "DockAreaTabBar.h"
 
 namespace CE
 {

@@ -105,6 +105,9 @@ namespace CE::Editor::Qt
 
     void AddComponentWidgetModel::UpdateComponentRegistry()
     {
+        // Clear all entries
+        rootEntry->children.Clear();
+
         for (int i = 0; i < GameComponentRegistry::Get().GetSize(); i++)
         {
             auto componentEntry = GameComponentRegistry::Get().GetEntryAt(i);

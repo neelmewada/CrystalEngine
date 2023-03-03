@@ -41,9 +41,14 @@ namespace CE::Editor::Qt
         CE::Name name{};
         auto componentType = model->GetComponentTypeFromIndex(index, name);
 
+        ComponentEntry* entry = (ComponentEntry*)index.internalPointer();
+
         if (componentType == nullptr)
         {
-            CE_LOG(Info, All, "Failed to find component of name: {}", name);
+            if (entry == nullptr || entry->isTerminal)
+            {
+                CE_LOG(Info, All, "Failed to find component of name: {}", name);
+            }
             return;
         }
 

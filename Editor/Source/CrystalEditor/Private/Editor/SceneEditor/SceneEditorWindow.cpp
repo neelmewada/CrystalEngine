@@ -4,6 +4,7 @@
 #include "ViewportView/ViewportView.h"
 #include "SceneOutlinerView/SceneOutlinerView.h"
 #include "DetailsView/DetailsView.h"
+#include "ConsoleView/ConsoleView.h"
 
 #include <QFileDialog>
 
@@ -31,13 +32,13 @@ namespace CE::Editor
 
         // **********************************
         // Viewport View
-        viewportView = new ViewportView();
+        viewportView = new ViewportView(this);
         ads::CDockWidget* viewportViewDockWidget = new ads::CDockWidget(viewportView->windowTitle());
         viewportViewDockWidget->setWidget(viewportView);
         
         // **********************************
         // Scene Outliner View
-        sceneOutlinerView = new SceneOutlinerView();
+        sceneOutlinerView = new SceneOutlinerView(this);
         ads::CDockWidget* sceneOutlinerDockWidget = new ads::CDockWidget(sceneOutlinerView->windowTitle());
         sceneOutlinerDockWidget->setWidget(sceneOutlinerView);
 
@@ -50,7 +51,7 @@ namespace CE::Editor
 
         // **********************************
         // Details View
-        detailsView = new DetailsView();
+        detailsView = new DetailsView(this);
         ads::CDockWidget* detailsViewDockWidget = new ads::CDockWidget(detailsView->windowTitle());
         detailsViewDockWidget->setWidget(detailsView);
 
@@ -59,10 +60,17 @@ namespace CE::Editor
         connect(detailsView, &DetailsView::GameObjectEntriesNeedRefresh, sceneOutlinerView, &SceneOutlinerView::UpdateSelectedGameObjectEntries);
 
         // **********************************
+        // Console View
+        consoleView = new ConsoleView(this);
+        consoleViewDockWidget = new ads::CDockWidget(consoleView->windowTitle());
+        consoleViewDockWidget->setWidget(consoleView);
+
+        // **********************************
         // Add the dock widget to the top dock widget area
         dockManager->addDockWidget(ads::CenterDockWidgetArea, viewportViewDockWidget);
         dockManager->addDockWidget(ads::LeftDockWidgetArea, sceneOutlinerDockWidget);
         dockManager->addDockWidget(ads::RightDockWidgetArea, detailsViewDockWidget);
+        dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
     }
 
     SceneEditorWindow::~SceneEditorWindow()
@@ -213,6 +221,17 @@ namespace CE::Editor
     {
         OpenScene(scenePath);
     }
+
+    void SceneEditorWindow::on_actionConsole_triggered()
+    {
+        if (!consoleViewDockWidget->isVisible())
+        {
+            auto widget = dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
+            widget->titleBar()->show();
+            widget->setDockAreaFlag(ads::CDockAreaWidget::HideSingleWidgetTitleBar, false);
+        }
+    }
+
 }
 
 CE_RTTI_CLASS_IMPL(CRYSTALEDITOR_API, CE::Editor, SceneEditorWindow)

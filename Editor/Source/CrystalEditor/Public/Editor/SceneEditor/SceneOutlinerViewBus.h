@@ -14,13 +14,10 @@ namespace CE::Editor
     {
     public:
         
-        static constexpr MBusAddressPolicy AddressPolicy = MBusAddressPolicy::Single;
-
-        static constexpr MBusHandlerPolicy HandlerPolicy = MBusHandlerPolicy::Single;
-        
         virtual void OnSceneOpened(Scene* scene) = 0;
     };
 
-    using SceneOutlinerViewBus = CE::MessageBus<SceneOutlinerViewInterface>;
+    //using SceneOutlinerViewBus = CE::MessageBus<SceneOutlinerViewInterface>;
+    CE_EVENT_BUS(CRYSTALEDITOR_API, SceneOutlinerViewBus, SceneOutlinerViewInterface);
 
 } // namespace CE::Editor

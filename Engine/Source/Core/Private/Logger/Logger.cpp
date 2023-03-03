@@ -14,18 +14,19 @@
 #include "PAL/Common/PlatformDirectories.h"
 
 
-static std::shared_ptr<spdlog::sinks::stdout_color_sink_st> GSystemConsoleSink;
-static std::shared_ptr<spdlog::sinks::basic_file_sink_st> GLogFileSink;
-
-static std::shared_ptr<spdlog::logger> GConsoleLogger;
-static std::shared_ptr<spdlog::logger> GFileLogger;
-
-static bool GIsLoggerInitialized = false;
-static CE::LogLevel GConsoleLogLevel = CE::LogLevel::Trace;
-static CE::LogLevel GFileDumpLogLevel = CE::LogLevel::Trace;
-
 namespace CE
 {
+    static std::shared_ptr<spdlog::sinks::stdout_color_sink_st> GSystemConsoleSink;
+    static std::shared_ptr<spdlog::sinks::basic_file_sink_st> GLogFileSink;
+
+    static std::shared_ptr<spdlog::logger> GConsoleLogger;
+    static std::shared_ptr<spdlog::logger> GFileLogger;
+
+    static spdlog::logger* EditorLogger = nullptr;
+
+    static bool GIsLoggerInitialized = false;
+    static CE::LogLevel GConsoleLogLevel = CE::LogLevel::Trace;
+    static CE::LogLevel GFileDumpLogLevel = CE::LogLevel::Trace;
 
     void Logger::SetConsoleLogLevel(LogLevel level)
     {
@@ -63,8 +64,8 @@ namespace CE
 
         std::vector<spdlog::sink_ptr> consoleSinks{ GSystemConsoleSink };
         
-        GConsoleLogger = std::make_shared<spdlog::logger>("Log", consoleSinks.begin(), consoleSinks.end());
-        GFileLogger = std::make_shared<spdlog::logger>("LogFile", GLogFileSink);
+        GConsoleLogger = std::make_shared<spdlog::logger>("ConsoleLog", consoleSinks.begin(), consoleSinks.end());
+        GFileLogger = std::make_shared<spdlog::logger>("FileLog", GLogFileSink);
         
         GIsLoggerInitialized = true;
     }
@@ -87,6 +88,11 @@ namespace CE
         if (EnumHasAnyFlags(target, LogTarget::Console))
         {
             GConsoleLogger->log((spdlog::level::level_enum)level, message.GetCString());
+
+            if (EditorLogger != nullptr)
+            {
+                EditorLogger->log((spdlog::level::level_enum)level, message.GetCString());
+            }
         }
 
         if (EnumHasAnyFlags(target, LogTarget::LogFile))
@@ -110,6 +116,24 @@ namespace CE
 #endif
 
         Log(level, fullMsg, target);
+    }
+
+    std::shared_ptr<spdlog::logger> Logger::GetConsoleLogger()
+    {
+        return GConsoleLogger;
+    }
+
+    void Logger::SetEditorLogger(spdlog::logger* logger)
+    {
+        EditorLogger = logger;
+    }
+
+    void Logger::SetEditorLoggerPattern(String pattern)
+    {
+        if (EditorLogger == nullptr)
+            return;
+
+        EditorLogger->set_pattern(pattern);
     }
 
 } // namespace CE
