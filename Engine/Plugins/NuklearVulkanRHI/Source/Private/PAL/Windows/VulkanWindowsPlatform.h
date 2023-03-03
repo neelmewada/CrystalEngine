@@ -69,7 +69,10 @@ namespace CE
 
         static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow& windowInfo)
         {
-            vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
+            if (testSurface != nullptr)
+            {
+                vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
+            }
 
             DestroyTestVulkanWindow(windowInfo);
         }

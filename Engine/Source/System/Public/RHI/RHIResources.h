@@ -1,33 +1,16 @@
 #pragma once
 
+#include "RHIDefinitions.h"
+
 namespace CE
 {
-    enum class RHIGraphicsBackend
-    {
-        None,
-        Vulkan,
-        Metal
-    };
-
-    enum class RHIResourceType
-    {
-        None,
-        Buffer,
-    };
-
-    enum class RHIDeviceObjectType
-    {
-        None,
-        Buffer,
-        Texture
-    };
-
+    
     class SYSTEM_API RHIResource
     {
-    public:
+    protected:
         RHIResource(RHIResourceType resourceType) : resourceType(resourceType)
         {}
-        
+    public:
         virtual ~RHIResource() = default;
         
     private:
@@ -36,10 +19,10 @@ namespace CE
 
     class IRHIDeviceObject
     {
-    public:
+    protected:
         IRHIDeviceObject(RHIDeviceObjectType type) : deviceObjectType(type)
         {}
-        
+    public:
         virtual ~IRHIDeviceObject() {}
 
         virtual RHIDeviceObjectType GetDeviceObjectType() const
@@ -53,12 +36,14 @@ namespace CE
 
     class SYSTEM_API RHIBuffer : public RHIResource, public IRHIDeviceObject
     {
-    public:
+    protected:
         RHIBuffer() : RHIResource(RHIResourceType::Buffer), IRHIDeviceObject(RHIDeviceObjectType::Buffer)
         {}
-        
+
+    public:
         virtual ~RHIBuffer() = default;
         
     };
+    
     
 } // namespace CE

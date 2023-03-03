@@ -13,3 +13,5 @@ CE_RTTI_POD(CE, Vec4, TYPEID(CE::Vec2), TYPEID(CE::Vec3))
 CE_RTTI_POD(CE, Quat)
 
 CE_RTTI_POD(CE, Matrix4x4)
+
+CE_RTTI_POD(CE, Color)

@@ -25,5 +25,18 @@ namespace CE
     };
 
     SYSTEM_API extern DynamicRHI* gDynamicRHI;
+
+    /// The target used as a rendering output. Could be either a Window or an offscreen target
+    class SYSTEM_API RHIRenderTarget : public RHIResource
+    {
+    protected:
+        RHIRenderTarget() : RHIResource(RHIResourceType::RenderTarget)
+        {}
+    public:
+        virtual ~RHIRenderTarget() = default;
+
+        virtual RHIRenderTargetType GetRenderTargetType() = 0;
+
+    };
     
 } // namespace CE

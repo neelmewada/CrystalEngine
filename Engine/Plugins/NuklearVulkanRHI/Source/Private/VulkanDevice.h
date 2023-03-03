@@ -11,6 +11,7 @@
 namespace CE
 {
     class VulkanQueue;
+    class VulkanSwapChain;
 
     class VulkanDevice
     {

@@ -74,42 +74,6 @@ namespace CE
             return windowList.at(0);
         }
 
-        //static VulkanTestSurface CreateTestSurface(VkInstance vkInstance)
-        //{
-        //    VulkanTestSurface data{};
-
-        //    QVulkanInstance* instance = new QVulkanInstance;
-        //    instance->setVkInstance(vkInstance);
-
-        //    QVulkanWindow* testWindow = new QVulkanWindow;
-        //    testWindow->setSurfaceType(::QSurface::VulkanSurface);
-        //    testWindow->setVulkanInstance(instance);
-
-        //    testWindow->resize(1024, 768);
-        //    testWindow->show();
-
-        //    auto testSurface = instance->surfaceForWindow(testWindow);
-
-        //    data.instance = instance;
-        //    data.testWindow = testWindow;
-        //    data.testSurface = testSurface;
-
-        //    return data;
-        //}
-
-        //static void DestroyTestSurface(VulkanTestSurface& data, VkInstance vkInstance)
-        //{
-        //    data.testWindow->hide();
-
-        //    vkDestroySurfaceKHR(vkInstance, data.testSurface, nullptr);
-        //    delete data.testWindow;
-        //    delete data.instance;
-
-        //    data.testSurface = nullptr;
-        //    data.testWindow = nullptr;
-        //    data.instance = nullptr;
-        //}
-
         static VulkanTestWindow CreateTestVulkanWindow(VkInstance vkInstance)
         {
             if (vkInstance == nullptr)
