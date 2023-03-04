@@ -25,6 +25,7 @@ namespace CE
 
         String PluginList;
         String EnabledPlugins;
+        String SupportedPlugins;
 
         String LoadEarliest;
         String LoadOnPreInit;
@@ -47,6 +48,7 @@ CE_RTTI_STRUCT(SYSTEM_API, CE, PluginConfig,
     CE_FIELD_LIST(
         CE_FIELD(PluginList)
         CE_FIELD(EnabledPlugins)
+        CE_FIELD(SupportedPlugins)
 
         CE_FIELD(LoadEarliest)
         CE_FIELD(LoadOnPreInit)

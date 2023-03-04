@@ -26,7 +26,7 @@ namespace CE
 
     SYSTEM_API extern DynamicRHI* gDynamicRHI;
 
-    /// The target used as a rendering output. Could be either a Window or an offscreen target
+    /// A render target that is drawn to by GPU. It is automatically created for you in case of Viewport.
     class SYSTEM_API RHIRenderTarget : public RHIResource
     {
     protected:
@@ -35,7 +35,34 @@ namespace CE
     public:
         virtual ~RHIRenderTarget() = default;
 
-        virtual RHIRenderTargetType GetRenderTargetType() = 0;
+        // - Public API
+
+        virtual bool IsViewportRenderTarget() = 0;
+
+    };
+
+    /// A viewport used to draw & present from GPU. Usually only used in runtime builds than in editor.
+    class SYSTEM_API RHIViewport : public RHIResource
+    {
+    protected:
+        RHIViewport() : RHIResource(RHIResourceType::Viewport)
+        {}
+    public:
+        virtual ~RHIViewport() = default;
+
+        // - Public API
+
+        virtual RHIRenderTarget* GetRenderTarget() = 0;
+
+        virtual void SetClearColor(const Color& color) = 0;
+    };
+
+    /// Render pass
+    class SYSTEM_API RHIRenderPass : public RHIResource
+    {
+    protected:
+
+    public:
 
     };
     

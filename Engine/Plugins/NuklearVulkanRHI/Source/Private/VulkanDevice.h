@@ -25,6 +25,11 @@ namespace CE
             return isInitialized;
         }
 
+        CE_INLINE VkDevice GetHandle() const
+        {
+            return device;
+        }
+
         void Initialize();
         void PreShutdown();
         void Shutdown();
