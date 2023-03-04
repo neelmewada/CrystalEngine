@@ -16,6 +16,7 @@ namespace CE
         Buffer,
 
         RenderTarget,
+        RenderPass,
         Viewport
     };
 
@@ -57,7 +58,7 @@ namespace CE
         D32
     };
 
-    enum class RHIRenderTargetLoadAction : u8
+    enum class RHIRenderPassLoadAction : u8
     {
         // Contents are undefined and not preserved
         None,
@@ -69,7 +70,7 @@ namespace CE
         Clear
     };
 
-    enum class RHIRenderTargetStoreAction : u8
+    enum class RHIRenderPassStoreAction : u8
     {
         // Contents are not stored in the memory, i.e. they are discarded. For ex: depth/stencil buffer content doesn't need to be stored
         None,
@@ -81,13 +82,13 @@ namespace CE
     struct RHIRenderTargetColorOutputDesc
     {
         RHIColorRTFormat preferredFormat{};
-        RHIRenderTargetLoadAction loadAction{};
-        RHIRenderTargetStoreAction storeAction{};
+        RHIRenderPassLoadAction loadAction{};
+        RHIRenderPassStoreAction storeAction{};
     };
-    
-    struct RHIRenderTargetLayout
+
+    struct RHIRenderPassLayout
     {
-        u32 numRenderTargets = 0;
+        u32 numColorOutputs = 0;
         RHIRenderTargetColorOutputDesc colorOutputs[RHIMaxSimultaneousRenderOutputs] = {};
         RHIDepthStencilRTFormat depthStencilFormat = RHIDepthStencilRTFormat::Auto;
 

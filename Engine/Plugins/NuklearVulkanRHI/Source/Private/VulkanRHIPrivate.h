@@ -48,7 +48,7 @@ namespace CE
     };
 
     /// Vulkan Render Pass class
-    class VulkanRenderPass : public RHIRenderPass
+    class VulkanRenderPass
     {
     public:
 
