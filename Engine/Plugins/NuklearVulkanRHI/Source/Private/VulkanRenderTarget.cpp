@@ -6,7 +6,7 @@ namespace CE
     // ****************************************************
     // VulkanRenderTargetLayout
 
-    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderTargetLayout& rtLayout)
+    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderPassLayout& rtLayout)
     {
         this->width = width;
         this->height = height;

@@ -18,7 +18,7 @@ namespace CE
         ~VulkanRenderTargetLayout() = default;
 
         /// Offscreen render target layout
-        VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderTargetLayout& rtLayout);
+        VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderPassLayout& rtLayout);
 
         u32 width = 0, height = 0;
 

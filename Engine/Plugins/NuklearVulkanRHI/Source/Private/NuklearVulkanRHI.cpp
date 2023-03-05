@@ -124,6 +124,12 @@ namespace CE
             instanceCI.pNext = nullptr;
         }
         
+        u32 layerCount;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+        Array<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.GetData());
+        
         VkResult result = vkCreateInstance(&instanceCI, nullptr, &vkInstance);
         if (result != VK_SUCCESS)
         {
