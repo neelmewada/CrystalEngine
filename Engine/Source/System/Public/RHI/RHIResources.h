@@ -43,6 +43,7 @@ namespace CE
     public:
         virtual ~RHIBuffer() = default;
         
+        virtual RHIBufferBindFlags GetBindFlags() = 0;
     };
     
     

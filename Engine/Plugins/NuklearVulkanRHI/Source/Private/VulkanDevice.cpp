@@ -490,4 +490,20 @@ namespace CE
 		return false;
 	}
 
+	s32 VulkanDevice::FindMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties)
+	{
+		VkPhysicalDeviceMemoryProperties memProperties;
+		vkGetPhysicalDeviceMemoryProperties(gpu, &memProperties);
+
+		for (u32 i = 0; i < memProperties.memoryTypeCount; i++) 
+		{
+			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+			{
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
 } // namespace CE

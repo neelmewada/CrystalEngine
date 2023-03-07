@@ -101,4 +101,54 @@ namespace CE
         s32 presentationRTIndex = -1;
     };
 
+    // - Buffer -
+
+    enum class RHIBufferBindFlags
+    {
+        Undefined = 0,
+        VertexBuffer = BIT(0),
+        IndexBuffer = BIT(1),
+        UniformBuffer = BIT(2),
+        StorageBuffer = BIT(3),
+        // Internal usage only!
+        StagingBuffer = BIT(4),
+    };
+
+    ENUM_CLASS_FLAGS(RHIBufferBindFlags);
+
+    /// Features used by the buffer
+    enum class RHIBufferUsageFlags
+    {
+        Default = 0,
+        /// Buffer can be used with dynamic offset
+        DynamicOffset = BIT(0),
+        // TODO: Not implemented yet (Buffer can be resized dynamically)
+        DynamicSize = BIT(1),
+    };
+    ENUM_CLASS_FLAGS(RHIBufferUsageFlags);
+
+    enum class RHIBufferAllocFlags
+    {
+
+    };
+    ENUM_CLASS_FLAGS(RHIBufferAllocFlags);
+
+    struct RHIBufferData
+    {
+        u64 dataSize;
+        u64 startOffsetInBuffer;
+        const void* data = nullptr;
+    };
+
+    struct RHIBufferDesc
+    {
+        Name name{};
+        RHIBufferBindFlags bindFlags{};
+        RHIBufferUsageFlags usageFlags{};
+        u64 bufferSize = 0;
+        u64 structureByteStride = 0;
+
+        const RHIBufferData* initialData = nullptr;
+    };
+
 } // namespace CE

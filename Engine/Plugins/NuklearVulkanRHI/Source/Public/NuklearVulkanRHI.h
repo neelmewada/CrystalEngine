@@ -52,6 +52,11 @@ namespace CE
 
         virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) override;
 
+        // - Resources -
+
+        virtual RHIBuffer* CreateBuffer(const RHIBufferDesc& bufferDesc) override;
+        virtual void DestroyBuffer(RHIBuffer* buffer) override;
+
     private:
         VkInstance vkInstance = nullptr;
         VkDebugUtilsMessengerEXT vkMessenger = nullptr;

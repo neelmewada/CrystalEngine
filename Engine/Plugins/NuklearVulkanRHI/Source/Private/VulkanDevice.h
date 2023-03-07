@@ -42,6 +42,8 @@ namespace CE
 
         bool CheckSurfaceFormatSupport(VkFormat format);
 
+        s32 FindMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
+
     private:
 
         void SelectGpu();

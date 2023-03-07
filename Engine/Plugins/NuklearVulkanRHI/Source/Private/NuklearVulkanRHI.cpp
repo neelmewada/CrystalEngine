@@ -200,4 +200,14 @@ namespace CE
         delete renderTarget;
     }
 
+    RHIBuffer* NuklearVulkanRHI::CreateBuffer(const RHIBufferDesc& bufferDesc)
+    {
+        return nullptr;
+    }
+
+    void NuklearVulkanRHI::DestroyBuffer(RHIBuffer* buffer)
+    {
+
+    }
+
 } // namespace CE

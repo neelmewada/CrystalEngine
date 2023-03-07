@@ -35,6 +35,10 @@ namespace CE
 
         virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) = 0;
 
+        // - Resources -
+
+        virtual RHIBuffer* CreateBuffer(const RHIBufferDesc& bufferDesc) = 0;
+        virtual void DestroyBuffer(RHIBuffer* buffer) = 0;
 
     };
 
