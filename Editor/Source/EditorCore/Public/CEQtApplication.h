@@ -9,10 +9,9 @@
 namespace CE::Editor::Qt
 {
 
-    class EDITORCORE_API CEQtApplication : public QApplication, public Object
+    class EDITORCORE_API CEQtApplication : public QApplication, public CE::Object
     {
         Q_OBJECT
-
         CE_CLASS(CEQtApplication, Object)
     public:
 

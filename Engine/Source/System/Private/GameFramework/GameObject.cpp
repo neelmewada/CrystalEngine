@@ -135,6 +135,18 @@ namespace CE
 		}
 	}
 
+    GameComponent* GameObject::GetComponent(TypeId componentTypeId) const
+    {
+        for (int i = 0; i < components.GetSize(); i++)
+        {
+            if (components[i]->GetType()->GetTypeId() == componentTypeId)
+            {
+                return components[i];
+            }
+        }
+        return nullptr;
+    }
+
     void GameObject::AddChild(GameObject* go)
     {
         if (go == nullptr)

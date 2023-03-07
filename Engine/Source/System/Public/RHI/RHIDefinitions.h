@@ -37,10 +37,13 @@ namespace CE
 
         /// Max number of resource groups (aka no. of descriptor sets for vulkan)
         RHIMaxPipelineResourceGroups = 4,
+
+        /// Max number of subpasses in a single renderpass
+        RHIMaxSubpasses = 4,
     };
 
     /// Render Target Color Format: Always prefer using Auto
-    enum class RHIColorRTFormat
+    enum class RHIColorFormat
     {
         // Auto uses the same format as SwapChain. Always prefer using Auto over others.
         Auto,
@@ -49,7 +52,7 @@ namespace CE
     };
 
     /// Render Target Depth Format: Always prefer using Auto or None
-    enum class RHIDepthStencilRTFormat
+    enum class RHIDepthStencilFormat
     {
         None,
         Auto,
@@ -81,16 +84,17 @@ namespace CE
     
     struct RHIRenderTargetColorOutputDesc
     {
-        RHIColorRTFormat preferredFormat{};
+        RHIColorFormat preferredFormat{};
         RHIRenderPassLoadAction loadAction{};
         RHIRenderPassStoreAction storeAction{};
+        u32 sampleCount = 1;
     };
 
-    struct RHIRenderPassLayout
+    struct RHIRenderTargetLayout
     {
         u32 numColorOutputs = 0;
         RHIRenderTargetColorOutputDesc colorOutputs[RHIMaxSimultaneousRenderOutputs] = {};
-        RHIDepthStencilRTFormat depthStencilFormat = RHIDepthStencilRTFormat::Auto;
+        RHIDepthStencilFormat depthStencilFormat = RHIDepthStencilFormat::Auto;
 
         /// Index in renderOutputs[] of the render target that is going to be presented on screen.
         /// Or -1 if none are supposed to be consumed by SwapChain for presentation.

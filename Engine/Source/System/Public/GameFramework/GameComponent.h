@@ -26,9 +26,6 @@ namespace CE
 
         CE_INLINE GameObject* GetOwner() const { return owner; }
 
-        //void AddUpdateListener(IObjectUpdateListener<GameComponent>* listener);
-        //void RemoveUpdateListener(IObjectUpdateListener<GameComponent>* listener);
-
         CE_SIGNAL(OnComponentValuesUpdated);
         
     protected:

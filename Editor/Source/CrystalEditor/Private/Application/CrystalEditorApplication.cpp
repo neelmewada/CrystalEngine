@@ -65,10 +65,6 @@ namespace CE::Editor
         }
 
         EditorPrefs::Get().OnProjectChanged();
-
-        // Initialize RHI, device, etc
-        gDynamicRHI->Initialize();
-        gDynamicRHI->PostInitialize();
     }
 
     void CrystalEditorApplication::OnCreateProject(IO::Path projectDirectory, String projectName)

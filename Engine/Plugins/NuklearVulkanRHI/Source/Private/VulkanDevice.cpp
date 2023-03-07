@@ -414,4 +414,80 @@ namespace CE
 		return surfaceSupport;
 	}
 
+	VkFormat VulkanDevice::FindSupportedFormat(const Array<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+	{
+		for (const auto& format : candidates)
+		{
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties(gpu, format, &props);
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
+			{
+				return format;
+			}
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
+			{
+				return format;
+			}
+		}
+		return VK_FORMAT_UNDEFINED;
+	}
+
+	VkSurfaceFormatKHR VulkanDevice::FindAutoColorFormat()
+	{
+		bool formatSelected = false;
+		const auto& surfaceFormats = surfaceSupport.surfaceFormats;
+		VkSurfaceFormatKHR selectedSurfaceFormat{};
+
+		if (surfaceFormats.GetSize() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
+		{
+			selectedSurfaceFormat = { VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+			formatSelected = true;
+		}
+		else
+		{
+			// Find our preferred format first
+			for (const auto& surfaceFormat : surfaceFormats)
+			{
+				if (surfaceFormat.format == VK_FORMAT_R8G8B8A8_UNORM)
+				{
+					selectedSurfaceFormat = { surfaceFormat.format, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+					formatSelected = true;
+					break;
+				}
+			}
+
+			if (!formatSelected)
+			{
+				// RGBA-8 is first preferred and BGRA-8 is second preferred format
+				for (const auto& surfaceFormat : surfaceFormats)
+				{
+					if (surfaceFormat.format == VK_FORMAT_R8G8B8A8_UNORM || surfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM)
+					{
+						selectedSurfaceFormat = { surfaceFormat.format, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+						formatSelected = true;
+						break;
+					}
+				}
+			}
+		}
+
+		return surfaceFormats[0];
+	}
+
+	bool VulkanDevice::CheckSurfaceFormatSupport(VkFormat format)
+	{
+		const auto& surfaceFormats = surfaceSupport.surfaceFormats;
+
+		for (const auto& surfaceFormat : surfaceFormats)
+		{
+			if (surfaceFormat.format == format)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 } // namespace CE

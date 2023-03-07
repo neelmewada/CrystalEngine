@@ -18,7 +18,9 @@ namespace CE::Editor
 
 	void EditorCoreModule::RegisterTypes()
 	{
-		
+		CE_REGISTER_TYPES(
+			Qt::CEQtApplication
+		);
 	}
 
 } // namespace CE::Editor

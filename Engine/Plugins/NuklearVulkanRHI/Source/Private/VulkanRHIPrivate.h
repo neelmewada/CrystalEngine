@@ -18,7 +18,7 @@ namespace CE
         ~VulkanRenderTargetLayout() = default;
 
         /// Offscreen render target layout
-        VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderPassLayout& rtLayout);
+        VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderTargetLayout& rtLayout);
 
         u32 width = 0, height = 0;
 
@@ -42,17 +42,19 @@ namespace CE
             return hasDepthStencilAttachment;
         }
 
+        CE_INLINE bool IsValid() const
+        {
+            return isValid;
+        }
+
     private:
+        bool isValid = false;
         bool hasDepthStencilAttachment = false;
 
     };
 
     /// Vulkan Render Pass class
-    class VulkanRenderPass
-    {
-    public:
-
-    };
+    class VulkanRenderPass;
     
     /// Vulkan Render Target class
     class VulkanRenderTarget : public RHIRenderTarget
@@ -66,10 +68,20 @@ namespace CE
 
         virtual ~VulkanRenderTarget();
 
+        virtual bool IsViewportRenderTarget() override { return isViewportRenderTarget; }
+
+        virtual RHIRenderPass* GetRenderPass() override;
+
     private:
-        bool isViewportRT = false;
+        bool isViewportRenderTarget = false;
 
         VulkanDevice* device = nullptr;
+        VulkanRenderTargetLayout rtLayout{};
+        VulkanRenderPass* renderPass = nullptr;
+        u32 backBufferCount = 0; 
+        u32 simultaneousFrameDraws = 0;
+
+        u32 width = 0, height = 0;
     };
 
 } // namespace CE

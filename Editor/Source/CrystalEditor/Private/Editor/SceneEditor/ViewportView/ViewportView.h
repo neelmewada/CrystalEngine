@@ -6,6 +6,8 @@
 
 #include "Editor/EditorViewBase.h"
 
+#include "System.h"
+
 namespace Ui {
 class ViewportView;
 }
@@ -21,8 +23,14 @@ namespace CE::Editor
         explicit ViewportView(QWidget* parent = nullptr);
         ~ViewportView();
 
+    protected:
+        virtual void showEvent(QShowEvent* event) override;
+        virtual void hideEvent(QHideEvent* event) override;
+
     private:
         Ui::ViewportView* ui;
+
+        RHIRenderTarget* renderTarget = nullptr;
     };
 
 }

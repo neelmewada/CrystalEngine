@@ -99,13 +99,6 @@ namespace CE
 
         static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)
         {
-            //QVulkanInstance* instance = new QVulkanInstance;
-            //instance->setVkInstance(vkInstance);
-
-            //auto surface = instance->surfaceForWindow((QWindow*)windowHandle);
-
-            //delete instance;
-            //return surface;
             return nullptr;
         }
     };

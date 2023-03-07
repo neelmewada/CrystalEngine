@@ -51,6 +51,15 @@ namespace CE
         {
             return components[index];
         }
+
+        GameComponent* GetComponent(TypeId componentTypeId) const;
+
+        template<typename ComponentType>
+        CE_INLINE GameComponent* GetComponent()
+        {
+            TypeId componentTypeId = ComponentType::Type()->GetTypeId();
+            return GetComponent(componentTypeId);
+        }
         
         void AddChild(GameObject* child);
         void RemoveChild(GameObject* child);

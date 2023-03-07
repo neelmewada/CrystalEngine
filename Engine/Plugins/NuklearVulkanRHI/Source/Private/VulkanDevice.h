@@ -34,6 +34,14 @@ namespace CE
         void PreShutdown();
         void Shutdown();
 
+        // - Public API -
+
+        VkFormat FindSupportedFormat(const Array<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+        VkSurfaceFormatKHR FindAutoColorFormat();
+
+        bool CheckSurfaceFormatSupport(VkFormat format);
+
     private:
 
         void SelectGpu();

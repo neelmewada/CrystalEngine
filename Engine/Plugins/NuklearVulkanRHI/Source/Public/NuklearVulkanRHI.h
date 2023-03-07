@@ -41,6 +41,17 @@ namespace CE
         
         virtual RHIGraphicsBackend GetGraphicsBackend() override;
 
+        // ************************************************
+        // - Public API -
+
+        // - Render Target -
+
+        virtual RHIRenderTarget* CreateRenderTarget(u32 backBufferCount, u32 simultaneousFrameDraws, 
+            u32 width, u32 height, 
+            const RHIRenderTargetLayout& rtLayout) override;
+
+        virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) override;
+
     private:
         VkInstance vkInstance = nullptr;
         VkDebugUtilsMessengerEXT vkMessenger = nullptr;

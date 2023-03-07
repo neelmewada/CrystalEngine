@@ -27,8 +27,33 @@ namespace CE::Editor
 
     ViewportView::~ViewportView()
     {
-        //delete instance;
         delete ui;
+    }
+
+    void ViewportView::showEvent(QShowEvent* event)
+    {
+        Super::showEvent(event);
+
+        RHIRenderTargetLayout rtLayout{};
+        rtLayout.numColorOutputs = 1;
+        rtLayout.presentationRTIndex = -1;
+
+        rtLayout.colorOutputs[0].sampleCount = 1;
+        rtLayout.colorOutputs[0].preferredFormat = RHIColorFormat::Auto;
+        rtLayout.colorOutputs[0].loadAction = RHIRenderPassLoadAction::Clear;
+        rtLayout.colorOutputs[0].storeAction = RHIRenderPassStoreAction::Store;
+
+        rtLayout.depthStencilFormat = RHIDepthStencilFormat::None;
+
+        renderTarget = gDynamicRHI->CreateRenderTarget(2, 1, width(), height(), rtLayout);
+    }
+
+    void ViewportView::hideEvent(QHideEvent* event)
+    {
+        Super::hideEvent(event);
+
+        gDynamicRHI->DestroyRenderTarget(renderTarget);
+        renderTarget = nullptr;
     }
 
 }

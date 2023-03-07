@@ -186,4 +186,18 @@ namespace CE
 		return RHIGraphicsBackend::Vulkan;
 	}
 
+    // - Render Target -
+
+    RHIRenderTarget* NuklearVulkanRHI::CreateRenderTarget(u32 backBufferCount, u32 simultaneousFrameDraws, 
+        u32 width, u32 height, 
+        const RHIRenderTargetLayout& rtLayout)
+    {
+        return new VulkanRenderTarget(device, backBufferCount, simultaneousFrameDraws, VulkanRenderTargetLayout(device, width, height, rtLayout));
+    }
+
+    void NuklearVulkanRHI::DestroyRenderTarget(RHIRenderTarget* renderTarget)
+    {
+        delete renderTarget;
+    }
+
 } // namespace CE
