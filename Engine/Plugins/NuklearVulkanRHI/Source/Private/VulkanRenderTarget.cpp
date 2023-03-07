@@ -148,6 +148,15 @@ namespace CE
 
         // Create render pass
         renderPass = new VulkanRenderPass(device, rtLayout);
+
+        // Depth Buffer
+        if (rtLayout.HasDepthStencilAttachment())
+        {
+            CreateDepthBuffer();
+        }
+
+        // Color Buffers
+        CreateColorBuffers();
     }
 
     VulkanRenderTarget::VulkanRenderTarget(VulkanDevice* device, VulkanViewport* viewport, const VulkanRenderTargetLayout& rtLayout)
@@ -166,6 +175,26 @@ namespace CE
     RHIRenderPass* VulkanRenderTarget::GetRenderPass()
     {
         return renderPass;
+    }
+
+    void VulkanRenderTarget::CreateDepthBuffer()
+    {
+        auto imageFormat = rtLayout.depthFormat;
+
+    }
+
+    void VulkanRenderTarget::DestroyDepthBuffer()
+    {
+
+    }
+
+    void VulkanRenderTarget::CreateColorBuffers()
+    {
+    }
+
+    void VulkanRenderTarget::DestroyColorBuffers()
+    {
+
     }
 
 } // namespace CE

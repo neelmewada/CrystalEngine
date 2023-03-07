@@ -72,6 +72,12 @@ namespace CE
 
         virtual RHIRenderPass* GetRenderPass() override;
 
+    protected:
+        void CreateDepthBuffer();
+        void DestroyDepthBuffer();
+        void CreateColorBuffers();
+        void DestroyColorBuffers();
+
     private:
         bool isViewportRenderTarget = false;
 
