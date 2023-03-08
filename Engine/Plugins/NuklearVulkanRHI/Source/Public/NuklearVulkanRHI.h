@@ -37,7 +37,7 @@ namespace CE
         virtual void PreShutdown() override;
         virtual void Shutdown() override;
         
-        virtual void GetNativeHandle(void** outInstance) override;
+        virtual void* GetNativeHandle() override;
         
         virtual RHIGraphicsBackend GetGraphicsBackend() override;
 
@@ -46,11 +46,16 @@ namespace CE
 
         // - Render Target -
 
-        virtual RHIRenderTarget* CreateRenderTarget(u32 backBufferCount, u32 simultaneousFrameDraws, 
-            u32 width, u32 height, 
+        virtual RHIRenderTarget* CreateRenderTarget(u32 width, u32 height, 
             const RHIRenderTargetLayout& rtLayout) override;
 
         virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) override;
+
+        virtual RHIViewport* CreateViewport(void* windowHandle,
+            u32 width, u32 height, bool isFullscreen,
+            const RHIRenderTargetLayout& rtLayout) override;
+
+        virtual void DestroyViewport(RHIViewport* viewport) override;
 
         // - Resources -
 

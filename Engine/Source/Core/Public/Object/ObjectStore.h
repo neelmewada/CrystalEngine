@@ -58,7 +58,12 @@ namespace CE
         
         void RemoveObjectWithUuid(UUID uuid)
         {
+            if (!objects.KeyExists(uuid))
+                return;
+
+            auto objectRef = objects[uuid];
             objects.Remove(uuid);
+            objectsArray.Remove(objectRef);
         }
 
         void DestroyAll()
@@ -78,8 +83,6 @@ namespace CE
         
         auto begin() { return objects.begin(); }
         auto end() { return objects.end(); }
-        
-        
 
     private:
         HashMap<UUID, Object*> objects{};

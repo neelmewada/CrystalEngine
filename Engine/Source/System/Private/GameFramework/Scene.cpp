@@ -55,7 +55,6 @@ namespace CE
     {
         rootGameObjects.Remove(gameObject);
         objects.RemoveObject(gameObject);
-        gameObject->owner = nullptr;
         
         for (GameComponent* comp : gameObject->components)
         {

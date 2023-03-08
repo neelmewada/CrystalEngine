@@ -12,26 +12,11 @@ namespace CE
 
     GameComponent::~GameComponent()
     {
-
+        if (owner != nullptr)
+        {
+            owner->RemoveComponent(this);
+        }
     }
-
-    //void GameComponent::AddUpdateListener(IObjectUpdateListener<GameComponent>* listener)
-    //{
-    //    updateListeners.Add(listener);
-    //}
-
-    //void GameComponent::RemoveUpdateListener(IObjectUpdateListener<GameComponent>* listener)
-    //{
-    //    updateListeners.Remove(listener);
-    //}
-
-    //void GameComponent::OnComponentValuesUpdated()
-    //{
-    //    for (auto listener : updateListeners)
-    //    {
-    //        listener->OnObjectUpdated(this);
-    //    }
-    //}
 
 } // namespace CE
 

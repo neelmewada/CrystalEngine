@@ -45,15 +45,27 @@ namespace CE::Editor
 
         rtLayout.depthStencilFormat = RHIDepthStencilFormat::None;
 
-        renderTarget = gDynamicRHI->CreateRenderTarget(2, 1, width(), height(), rtLayout);
+        rtLayout.backBufferCount = 2;
+        rtLayout.simultaneousFrameDraws = 1;
+
+        //renderTarget = gDynamicRHI->CreateRenderTarget(width(), height(), rtLayout);
+
+        auto id = (void*)winId();
+
+        QWindow* window = this->windowHandle();
+        id = (void*)window->winId();
+        
+        viewportRHI = gDynamicRHI->CreateViewport(id, width(), height(), isFullScreen(), rtLayout);
     }
 
     void ViewportView::hideEvent(QHideEvent* event)
     {
         Super::hideEvent(event);
 
-        gDynamicRHI->DestroyRenderTarget(renderTarget);
-        renderTarget = nullptr;
+        gDynamicRHI->DestroyViewport(viewportRHI);
+        viewportRHI = nullptr;
+        //gDynamicRHI->DestroyRenderTarget(renderTarget);
+        //renderTarget = nullptr;
     }
 
 }

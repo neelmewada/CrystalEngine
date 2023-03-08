@@ -20,6 +20,9 @@ namespace CE
         /// Offscreen render target layout
         VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderTargetLayout& rtLayout);
 
+        /// Viewport render target layout
+        VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHIRenderTargetLayout& rtLayout);
+
         u32 width = 0, height = 0;
 
         Color clearColors[RHIMaxSimultaneousRenderOutputs] = {};
@@ -36,6 +39,8 @@ namespace CE
 
         // colorAttachmentCount + 1 depth attachment (if exists)
         u8 attachmentDescCount = 0;
+
+        u32 backBufferCount = 2, simultaneousFrameDraws = 1;
 
         CE_INLINE bool HasDepthStencilAttachment() const
         {
@@ -61,7 +66,7 @@ namespace CE
     {
     public:
         /// An offscreen render target
-        VulkanRenderTarget(VulkanDevice* device, u32 backBufferCount, u32 simultaneousFrameDraws, const VulkanRenderTargetLayout& rtLayout);
+        VulkanRenderTarget(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout);
 
         /// A viewport render target
         VulkanRenderTarget(VulkanDevice* device, VulkanViewport* viewport, const VulkanRenderTargetLayout& rtLayout);
@@ -72,6 +77,16 @@ namespace CE
 
         virtual RHIRenderPass* GetRenderPass() override;
 
+        // - Getters -
+
+        u32 GetBackBufferCount();
+
+        u32 GetSimultaneousFrameDrawCount();
+
+        u32 GetWidth();
+
+        u32 GetHeight();
+
     protected:
         void CreateDepthBuffer();
         void DestroyDepthBuffer();
@@ -80,7 +95,8 @@ namespace CE
 
     private:
         bool isViewportRenderTarget = false;
-
+        VulkanViewport* viewport = nullptr;
+        
         VulkanDevice* device = nullptr;
         VulkanRenderTargetLayout rtLayout{};
         VulkanRenderPass* renderPass = nullptr;

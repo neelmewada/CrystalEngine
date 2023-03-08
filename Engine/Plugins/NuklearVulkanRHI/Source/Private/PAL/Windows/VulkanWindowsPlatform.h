@@ -76,6 +76,28 @@ namespace CE
 
             DestroyTestVulkanWindow(windowInfo);
         }
+
+        static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)
+        {
+            VkWin32SurfaceCreateInfoKHR surfaceCI{};
+            surfaceCI.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+            surfaceCI.hinstance = GetModuleHandle(NULL);
+            surfaceCI.hwnd = (HWND)windowHandle;
+
+            auto func = (PFN_vkCreateWin32SurfaceKHR)vkGetInstanceProcAddr(vkInstance, "vkCreateWin32SurfaceKHR");
+            if (func == nullptr)
+            {
+                return nullptr;
+            }
+
+            VkSurfaceKHR surface = nullptr;
+            if (func(vkInstance, &surfaceCI, nullptr, &surface) != VK_SUCCESS)
+            {
+                return nullptr;
+            }
+
+            return surface;
+        }
     };
 
     typedef VulkanWindowsPlatform VulkanPlatform;

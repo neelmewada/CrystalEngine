@@ -14,6 +14,7 @@ namespace CE
     {
         None,
         Buffer,
+        Texture,
 
         RenderTarget,
         RenderPass,
@@ -99,6 +100,8 @@ namespace CE
         /// Index in renderOutputs[] of the render target that is going to be presented on screen.
         /// Or -1 if none are supposed to be consumed by SwapChain for presentation.
         s32 presentationRTIndex = -1;
+
+        u32 backBufferCount = 2, simultaneousFrameDraws = 1;
     };
 
     // - Buffer -
@@ -127,11 +130,13 @@ namespace CE
     };
     ENUM_CLASS_FLAGS(RHIBufferUsageFlags);
 
-    enum class RHIBufferAllocFlags
+    enum class RHIBufferAllocMode
     {
-
+        Default = 0,
+        SharedMemory,
+        GpuMemory,
     };
-    ENUM_CLASS_FLAGS(RHIBufferAllocFlags);
+    ENUM_CLASS_FLAGS(RHIBufferAllocMode);
 
     struct RHIBufferData
     {
@@ -145,10 +150,48 @@ namespace CE
         Name name{};
         RHIBufferBindFlags bindFlags{};
         RHIBufferUsageFlags usageFlags{};
+        RHIBufferAllocMode allocMode{};
         u64 bufferSize = 0;
         u64 structureByteStride = 0;
 
         const RHIBufferData* initialData = nullptr;
+    };
+
+    // - Texture -
+
+    enum class RHITextureDimension
+    {
+        Dim2D = 0,
+        Dim3D,
+        Dim1D
+    };
+
+    enum class RHITextureFormat
+    {
+        R8G8B8A8_SRGB = 0,
+        R8G8B8A8_UNORM,
+        R8G8B8A8_SNORM,
+    };
+
+    enum class RHITextureUsageFlags
+    {
+        ShaderSample = 0,
+        ColorAttachment = BIT(1),
+        DepthStencilAttachment = BIT(2),
+    };
+    ENUM_CLASS_FLAGS(RHITextureUsageFlags);
+
+    struct RHITextureDesc
+    {
+        Name name{};
+        u32 width = 128, height = 128, depth = 1;
+        RHITextureDimension dimension = RHITextureDimension::Dim2D;
+        RHITextureFormat format{};
+        u32 mipLevels = 1;
+        u32 sampleCount = 1;
+        RHITextureUsageFlags usageFlags = RHITextureUsageFlags::ShaderSample;
+
+        bool forceLinearLayout = false;
     };
 
 } // namespace CE

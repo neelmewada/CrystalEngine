@@ -25,11 +25,6 @@ namespace CE
             return isInitialized;
         }
 
-        CE_INLINE VkDevice GetHandle() const
-        {
-            return device;
-        }
-
         void Initialize();
         void PreShutdown();
         void Shutdown();
@@ -44,6 +39,18 @@ namespace CE
 
         s32 FindMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
 
+        VkImageView CreateImageView(VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags);
+
+        // - Getters -
+
+        CE_INLINE VulkanQueue* GetGraphicsQueue() { return graphicsQueue; }
+        CE_INLINE VulkanQueue* GetPresentQueue() { return presentQueue; }
+
+        CE_INLINE VkDevice GetHandle() { return device; }
+        CE_INLINE VkPhysicalDevice GetPhysicalHandle() { return gpu; }
+
+        CE_INLINE const SurfaceSupportInfo& GetSurfaceSupportInfo() const { return surfaceSupport; }
+
     private:
 
         void SelectGpu();
@@ -52,7 +59,7 @@ namespace CE
 
         VulkanQueueFamilies GetQueueFamilies(VkPhysicalDevice gpu);
         VkDeviceSize GetPhysicalDeviceLocalMemory(VkPhysicalDevice gpu);
-        SurfaceSupportInfo GetSurfaceSupportInfo(VkPhysicalDevice gpu);
+        SurfaceSupportInfo FetchSurfaceSupportInfo(VkPhysicalDevice gpu);
 
         bool isInitialized = false;
         VkInstance instance = nullptr;
@@ -68,8 +75,8 @@ namespace CE
         SurfaceSupportInfo surfaceSupport{};
 
         VkSurfaceKHR testSurface = nullptr;
-        VulkanQueue* graphicsQueue;
-        VulkanQueue* presentQueue;
+        VulkanQueue* graphicsQueue = nullptr;
+        VulkanQueue* presentQueue = nullptr;
         VkCommandPool gfxCommandPool = nullptr;
 
         HashMap<u32, VkCommandPool> queueFamilyToCmdPool{};

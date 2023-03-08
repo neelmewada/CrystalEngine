@@ -44,7 +44,23 @@ namespace CE
         virtual ~RHIBuffer() = default;
         
         virtual RHIBufferBindFlags GetBindFlags() = 0;
+
+        virtual void* GetHandle() = 0;
+
+        virtual void UploadData(const RHIBufferData& data) = 0;
+
     };
     
+    class SYSTEM_API RHITexture : public RHIResource, public IRHIDeviceObject
+    {
+    public:
+        RHITexture() : RHIResource(RHIResourceType::Texture), IRHIDeviceObject(RHIDeviceObjectType::Texture)
+        {}
+        
+    public:
+        virtual ~RHITexture() = default;
+
+        virtual void* GetHandle() = 0;
+    };
     
 } // namespace CE

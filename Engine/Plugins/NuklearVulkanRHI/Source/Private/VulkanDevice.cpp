@@ -136,7 +136,7 @@ namespace CE
 
 		// Store Queue Families & Surface Support Info for later use
 		queueFamilies = GetQueueFamilies(gpu);
-		surfaceSupport = GetSurfaceSupportInfo(gpu);
+		surfaceSupport = FetchSurfaceSupportInfo(gpu);
 
 		Array<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<int> queueFamilyIndices = { queueFamilies.graphicsFamily, queueFamilies.presentFamily };
@@ -285,7 +285,7 @@ namespace CE
 			}
 		}
 
-		auto surfaceSupportInfo = GetSurfaceSupportInfo(gpu);
+		auto surfaceSupportInfo = FetchSurfaceSupportInfo(gpu);
 		bool surfaceSupportsSwapChain = !surfaceSupportInfo.presentationModes.IsEmpty() && !surfaceSupportInfo.surfaceFormats.IsEmpty();
 		if (!surfaceSupportsSwapChain)
 			return false;
@@ -383,7 +383,7 @@ namespace CE
 		return 0;
 	}
 
-	SurfaceSupportInfo VulkanDevice::GetSurfaceSupportInfo(VkPhysicalDevice gpu)
+	SurfaceSupportInfo VulkanDevice::FetchSurfaceSupportInfo(VkPhysicalDevice gpu)
 	{
 		SurfaceSupportInfo surfaceSupport = {};
 
@@ -504,6 +504,37 @@ namespace CE
 		}
 
 		return -1;
+	}
+
+	VkImageView VulkanDevice::CreateImageView(VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags)
+	{
+		VkImageViewCreateInfo imageViewCI{};
+		imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewCI.image = image;
+		imageViewCI.viewType = imageViewType;
+		imageViewCI.format = format;
+
+		// Allows remapping of RGBA components to other channel values
+		imageViewCI.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		// Subresources allow the view to view only a part of an image
+		imageViewCI.subresourceRange.aspectMask = aspectFlags;  // Which aspect of the image to view (e.g. color bit for viewing color)
+		imageViewCI.subresourceRange.baseMipLevel = 0;          // Start mipmap level to view from
+		imageViewCI.subresourceRange.levelCount = 1;            // No. of mipmap levels to view
+		imageViewCI.subresourceRange.baseArrayLayer = 0;        // Start array layer to view from
+		imageViewCI.subresourceRange.layerCount = 1;            // No. of array layers to view
+
+		// CreateGraphicsPipeline image view and return it
+		VkImageView imageView;
+		if (vkCreateImageView(GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create Vulkan Image View!");
+			return nullptr;
+		}
+		return imageView;
 	}
 
 } // namespace CE

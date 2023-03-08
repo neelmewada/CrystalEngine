@@ -5,6 +5,9 @@
 #include "VulkanRHIPrivate.h"
 #include "PAL/Common/VulkanPlatform.h"
 
+#include "VulkanBuffer.h"
+#include "VulkanViewport.h"
+
 #include <vulkan/vulkan.h>
 
 CE_IMPLEMENT_PLUGIN(NuklearVulkanRHI, CE::NuklearVulkanRHIModule)
@@ -176,9 +179,9 @@ namespace CE
         vkInstance = nullptr;
 	}
 
-    void NuklearVulkanRHI::GetNativeHandle(void** outInstance)
+    void* NuklearVulkanRHI::GetNativeHandle()
     {
-        *outInstance = vkInstance;
+        return vkInstance;
     }
 
 	RHIGraphicsBackend NuklearVulkanRHI::GetGraphicsBackend()
@@ -188,11 +191,10 @@ namespace CE
 
     // - Render Target -
 
-    RHIRenderTarget* NuklearVulkanRHI::CreateRenderTarget(u32 backBufferCount, u32 simultaneousFrameDraws, 
-        u32 width, u32 height, 
+    RHIRenderTarget* NuklearVulkanRHI::CreateRenderTarget(u32 width, u32 height, 
         const RHIRenderTargetLayout& rtLayout)
     {
-        return new VulkanRenderTarget(device, backBufferCount, simultaneousFrameDraws, VulkanRenderTargetLayout(device, width, height, rtLayout));
+        return new VulkanRenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));
     }
 
     void NuklearVulkanRHI::DestroyRenderTarget(RHIRenderTarget* renderTarget)
@@ -200,14 +202,24 @@ namespace CE
         delete renderTarget;
     }
 
+    RHIViewport* NuklearVulkanRHI::CreateViewport(void* windowHandle, u32 width, u32 height, bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
+    {
+        return new VulkanViewport(this, device, windowHandle, width, height, isFullscreen, rtLayout);
+    }
+
+    void NuklearVulkanRHI::DestroyViewport(RHIViewport* viewport)
+    {
+        delete viewport;
+    }
+
     RHIBuffer* NuklearVulkanRHI::CreateBuffer(const RHIBufferDesc& bufferDesc)
     {
-        return nullptr;
+        return new VulkanBuffer(device, bufferDesc);
     }
 
     void NuklearVulkanRHI::DestroyBuffer(RHIBuffer* buffer)
     {
-
+        delete buffer;
     }
 
 } // namespace CE

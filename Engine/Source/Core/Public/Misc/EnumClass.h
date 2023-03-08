@@ -34,6 +34,12 @@ constexpr bool EnumHasAnyFlags(Enum Flags, Enum Contains)
 }
 
 template<typename Enum>
+constexpr bool EnumHasFlag(Enum flags, Enum contains)
+{
+	return (((__underlying_type(Enum))flags) & (__underlying_type(Enum))contains) != 0;
+}
+
+template<typename Enum>
 void EnumAddFlags(Enum& Flags, Enum FlagsToAdd)
 {
 	Flags |= FlagsToAdd;

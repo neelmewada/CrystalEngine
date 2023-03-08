@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>546</width>
-    <height>453</height>
+    <width>540</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -111,8 +111,8 @@
      <widget class="QWidget" name="tab_2">
       <property name="maximumSize">
        <size>
-        <width>624</width>
-        <height>444</height>
+        <width>16777215</width>
+        <height>16777215</height>
        </size>
       </property>
       <attribute name="title">

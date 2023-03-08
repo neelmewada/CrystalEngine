@@ -6,7 +6,9 @@
 
 namespace CE
 {
-    class RHIRenderTarget;
+    class SYSTEM_API RHIRenderTarget;
+    class SYSTEM_API RHIViewport;
+    class SYSTEM_API RHIRenderPass;
 
     class SYSTEM_API DynamicRHI
     {
@@ -20,7 +22,7 @@ namespace CE
         virtual void PreShutdown() = 0;
         virtual void Shutdown() = 0;
         
-        virtual void GetNativeHandle(void** outInstance) = 0;
+        virtual void* GetNativeHandle() = 0;
 
         virtual RHIGraphicsBackend GetGraphicsBackend() = 0;
 
@@ -29,11 +31,16 @@ namespace CE
 
         // - Render Target -
 
-        virtual RHIRenderTarget* CreateRenderTarget(u32 backBufferCount, u32 simultaneousFrameDraws, 
-            u32 width, u32 height, 
+        virtual RHIRenderTarget* CreateRenderTarget(u32 width, u32 height, 
             const RHIRenderTargetLayout& rtLayout) = 0;
 
         virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) = 0;
+
+        virtual RHIViewport* CreateViewport(void* windowHandle, 
+            u32 width, u32 height, bool isFullscreen,
+            const RHIRenderTargetLayout& rtLayout) = 0;
+
+        virtual void DestroyViewport(RHIViewport* viewport) = 0;
 
         // - Resources -
 

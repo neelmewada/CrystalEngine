@@ -30,7 +30,8 @@ namespace CE::Editor
     private:
         Ui::ViewportView* ui;
 
-        RHIRenderTarget* renderTarget = nullptr;
+        //RHIRenderTarget* renderTarget = nullptr;
+        RHIViewport* viewportRHI = nullptr;
     };
 
 }

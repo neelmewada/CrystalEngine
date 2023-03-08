@@ -25,7 +25,15 @@ namespace CE
 
 	GameObject::~GameObject()
 	{
-        
+        if (owner != nullptr)
+        {
+            for (auto component : components)
+            {
+                owner->RemoveObject(component);
+            }
+            components.Clear();
+            owner->RemoveObject(this);
+        }
 	}
 
     GameComponent* GameObject::AddComponent(GameComponent* component)
