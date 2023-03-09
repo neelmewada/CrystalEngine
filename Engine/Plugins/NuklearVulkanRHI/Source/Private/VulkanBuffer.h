@@ -18,6 +18,8 @@ namespace CE
             return buffer;
         }
 
+        VkBuffer GetBuffer() { return buffer; }
+
         virtual void UploadData(const RHIBufferData& bufferData) override;
 
     private:

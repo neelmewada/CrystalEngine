@@ -4,6 +4,8 @@
 
 namespace CE
 {
+    class VulkanBuffer;
+
     class VulkanTexture : public RHITexture
     {
     public:
@@ -15,9 +17,32 @@ namespace CE
             return image;
         }
 
+        CE_INLINE VkImage GetImage()
+        {
+            return image;
+        }
+
+        CE_INLINE VkImageView GetImageView()
+        {
+            return imageView;
+        }
+
+        virtual u32 GetWidth() override;
+        virtual u32 GetHeight() override;
+        virtual u32 GetDepth() override;
+        virtual u32 GetBytesPerChannel() override;
+        virtual u32 GetNumberOfChannels() override;
+
+        virtual void UploadData(const void* pixels) override;
+
+    protected:
+
+        void CopyPixelsFromBuffer(VulkanBuffer* srcBuffer);
+
     private:
         VulkanDevice* device = nullptr;
         VkImage image = nullptr;
+        VkDeviceMemory imageMemory = nullptr;
         VkImageView imageView = nullptr;
         RHITextureDimension dimension{};
 
@@ -26,8 +51,10 @@ namespace CE
         u32 mipLevels = 1;
         RHITextureFormat format{};
         VkFormat vkFormat{};
+        VkImageAspectFlags aspectMask{};
     };
     
     VkFormat RHITextureFormatToVkFormat(RHITextureFormat format);
+    u32 GetNumberOfChannelsForFormat(RHITextureFormat format, u32& outByteSizePerChannel);
 
 } // namespace CE

@@ -7,6 +7,7 @@
 namespace CE
 {
     class VulkanDevice;
+    class VulkanTexture;
 
     struct VulkanSwapChainImage
     {
@@ -40,6 +41,8 @@ namespace CE
         void CreateSwapChain();
         void CreateDepthBuffer();
 
+        void DestroyDepthBuffer();
+
     private:
         NuklearVulkanRHI* vulkanRHI = nullptr;
         VulkanDevice* device = nullptr;
@@ -62,9 +65,11 @@ namespace CE
         u32 height = 0;
 
         Array<VulkanSwapChainImage> swapChainColorImages{};
-        VulkanSwapChainImage swapChainDepthImage{};
+        VulkanTexture* swapChainDepthImage{};
 
         friend struct VulkanRenderTargetLayout;
+        friend class VulkanFrameBuffer;
+        friend class VulkanViewport;
     };
 
 } // namespace CE

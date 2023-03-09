@@ -18,7 +18,9 @@ namespace CE
 
         RenderTarget,
         RenderPass,
-        Viewport
+        Viewport,
+
+        CommandList
     };
 
     enum class RHIDeviceObjectType
@@ -104,7 +106,9 @@ namespace CE
         u32 backBufferCount = 2, simultaneousFrameDraws = 1;
     };
 
-    // - Buffer -
+    /*
+    *   Buffer
+    */
 
     enum class RHIBufferBindFlags
     {
@@ -157,27 +161,49 @@ namespace CE
         const RHIBufferData* initialData = nullptr;
     };
 
-    // - Texture -
+    /*
+    *   Texture
+    */
 
     enum class RHITextureDimension
     {
         Dim2D = 0,
         Dim3D,
-        Dim1D
+        Dim1D,
+        DimCUBE,
     };
 
     enum class RHITextureFormat
     {
-        R8G8B8A8_SRGB = 0,
+        R8_UNORM,
+        R8_SNORM,
+        R8_SRGB,
+        R8G8B8A8_SRGB,
         R8G8B8A8_UNORM,
         R8G8B8A8_SNORM,
+        R8G8B8_UNORM,
+        R8G8B8_SNORM,
+        R8G8B8_SRGB,
+        R16_UNORM,
+        R16_SNORM,
+        R16_SFLOAT,
+        R32_UINT,
+        R32_SINT,
+        R32_SFLOAT,
+        D32_SFLOAT,
+        D24_UNORM_S8_UINT,
+        D32_SFLOAT_S8_UINT,
     };
 
     enum class RHITextureUsageFlags
     {
-        ShaderSample = 0,
+        SampledImage = BIT(0),
         ColorAttachment = BIT(1),
         DepthStencilAttachment = BIT(2),
+        // For internal use only!
+        Staging = BIT(3),
+
+        Default = SampledImage,
     };
     ENUM_CLASS_FLAGS(RHITextureUsageFlags);
 
@@ -189,9 +215,20 @@ namespace CE
         RHITextureFormat format{};
         u32 mipLevels = 1;
         u32 sampleCount = 1;
-        RHITextureUsageFlags usageFlags = RHITextureUsageFlags::ShaderSample;
+        RHITextureUsageFlags usageFlags = RHITextureUsageFlags::Default;
 
         bool forceLinearLayout = false;
+    };
+
+    /*
+    *   Command List
+    */
+
+    enum class RHICommandListType
+    {
+        None = 0,
+        Graphics,
+        Compute,
     };
 
 } // namespace CE

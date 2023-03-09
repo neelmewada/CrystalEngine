@@ -79,6 +79,8 @@ namespace CE
         virtual bool IsViewportRenderTarget() = 0;
 
         virtual RHIRenderPass* GetRenderPass() = 0;
+
+        virtual void SetClearColor(u32 colorTargetIndex, const Color& color) = 0;
     };
 
     /// A viewport used to draw & present from GPU. Usually only used in runtime builds than in editor.
@@ -90,13 +92,50 @@ namespace CE
     public:
         virtual ~RHIViewport() = default;
 
-        // - Public API
+        // - Public API -
 
         virtual RHIRenderTarget* GetRenderTarget() = 0;
 
         virtual void SetClearColor(const Color& color) = 0;
     };
 
-    
+    /*
+    *   RHI Command List
+    */
+
+    class SYSTEM_API RHICommandList : public RHIResource
+    {
+    protected:
+        RHICommandList() : RHIResource(RHIResourceType::CommandList)
+        {}
+    public:
+        virtual ~RHICommandList() = default;
+
+        // - Public API -
+
+        virtual RHICommandListType GetCommandListType() = 0;
+
+
+
+    };
+
+    class SYSTEM_API RHIGraphicsCommandList : public RHICommandList
+    {
+    protected:
+        RHIGraphicsCommandList() : RHICommandList()
+        {}
+
+    public:
+        virtual ~RHIGraphicsCommandList() = default;
+
+        // - Public API -
+
+        virtual RHICommandListType GetCommandListType() override final { return RHICommandListType::Graphics; }
+
+        // - Command List API -
+
+        virtual void Begin() = 0;
+        virtual void End() = 0;
+    };
     
 } // namespace CE

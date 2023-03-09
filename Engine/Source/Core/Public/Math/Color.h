@@ -94,6 +94,27 @@ namespace CE
             return *this;
         }
 
+        inline f32 operator[](u32 index)
+        {
+            if (index == 0)
+            {
+                return r;
+            }
+            else if (index == 1)
+            {
+                return g;
+            }
+            else if (index == 2)
+            {
+                return b;
+            }
+            else if (index == 3)
+            {
+                return a;
+            }
+            return 0;
+        }
+
     public:
 
         union {

@@ -5,6 +5,8 @@
 
 #include "NuklearVulkanRHI.h"
 
+#include "vulkan/vulkan.h"
+
 #include "VulkanDevice.h"
 
 namespace CE
@@ -24,6 +26,7 @@ namespace CE
         VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHIRenderTargetLayout& rtLayout);
 
         u32 width = 0, height = 0;
+        u32 presentationRTIndex = -1;
 
         Color clearColors[RHIMaxSimultaneousRenderOutputs] = {};
 
@@ -58,6 +61,30 @@ namespace CE
 
     };
 
+    /*
+    *   Vulkan Frame Buffer
+    */
+
+    class VulkanSwapChain;
+
+    class VulkanFrameBuffer
+    {
+    public:
+        VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderTarget* renderTarget);
+        VulkanFrameBuffer(VulkanDevice* device, VkImageView attachments[RHIMaxSimultaneousRenderOutputs + 1], VulkanRenderTarget* renderTarget);
+
+        ~VulkanFrameBuffer();
+
+        inline VkFramebuffer GetHandle() const
+        {
+            return frameBuffer;
+        }
+
+    private:
+        VulkanDevice* device = nullptr;
+        VkFramebuffer frameBuffer = nullptr;
+    };
+
     /// Vulkan Render Pass class
     class VulkanRenderPass;
     
@@ -77,7 +104,11 @@ namespace CE
 
         virtual RHIRenderPass* GetRenderPass() override;
 
+        virtual void SetClearColor(u32 colorTargetIndex, const Color& color) override;
+
         // - Getters -
+
+        CE_INLINE VulkanRenderPass* GetVulkanRenderPass() { return renderPass; }
 
         u32 GetBackBufferCount();
 
@@ -86,6 +117,21 @@ namespace CE
         u32 GetWidth();
 
         u32 GetHeight();
+
+        u32 GetColorAttachmentCount()
+        {
+            return rtLayout.colorAttachmentCount;
+        }
+
+        u32 GetTotalAttachmentCount()
+        {
+            return rtLayout.attachmentDescCount;
+        }
+
+        bool HasDepthStencilAttachment() const
+        {
+            return rtLayout.HasDepthStencilAttachment();
+        }
 
     protected:
         void CreateDepthBuffer();
@@ -97,6 +143,7 @@ namespace CE
         bool isViewportRenderTarget = false;
         VulkanViewport* viewport = nullptr;
         
+        Color clearColors[RHIMaxSimultaneousRenderOutputs] = {};
         VulkanDevice* device = nullptr;
         VulkanRenderTargetLayout rtLayout{};
         VulkanRenderPass* renderPass = nullptr;
@@ -104,6 +151,43 @@ namespace CE
         u32 simultaneousFrameDraws = 0;
 
         u32 width = 0, height = 0;
+        friend class VulkanViewport;
+        friend class VulkanGraphicsCommandList;
+        friend class VulkanFrameBuffer;
+    };
+
+    /*
+    *   Graphics Command List
+    */
+
+    class VulkanGraphicsCommandList : public RHIGraphicsCommandList
+    {
+    public:
+        VulkanGraphicsCommandList(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport);
+        virtual ~VulkanGraphicsCommandList();
+
+        virtual void Begin() override;
+        virtual void End() override;
+
+    protected:
+        void CreateSyncObjects();
+        void DestroySyncObjects();
+
+    private:
+        NuklearVulkanRHI* vulkanRHI = nullptr;
+        VulkanDevice* device = nullptr;
+        VulkanRenderTarget* renderTarget = nullptr;
+        VulkanViewport* viewport = nullptr;
+
+        u32 numCommandBuffers = 1; // = BackBufferCount
+        u32 simultaneousFrameDraws = 1;
+
+        u32 currentImageIndex = 0;
+
+        Array<VkCommandBuffer> commandBuffers{};
+
+        Array<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
+        Array<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
     };
 
 } // namespace CE

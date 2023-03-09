@@ -1,5 +1,6 @@
 
 #include "VulkanSwapChain.h"
+#include "VulkanTexture.h"
 
 #include "PAL/Common/VulkanPlatform.h"
 #undef max
@@ -25,12 +26,15 @@ namespace CE
 		
 		CreateSurface();
 		CreateSwapChain();
+		CreateDepthBuffer();
 
 		CE_LOG(Info, All, "Created Vulkan SwapChain");
 	}
 
 	VulkanSwapChain::~VulkanSwapChain()
 	{
+		DestroyDepthBuffer();
+
 		for (const auto& swapChainImage : swapChainColorImages)
 		{
 			vkDestroyImageView(device->GetHandle(), swapChainImage.imageView, nullptr);
@@ -52,11 +56,6 @@ namespace CE
 	{
 		auto oldSwapChain = swapChain;
 		auto gpu = device->GetPhysicalHandle();
-
-		//const auto& surfaceSupportInfo = device->GetSurfaceSupportInfo();
-		//const auto& surfaceFormats = surfaceSupportInfo.surfaceFormats;
-		//const auto& surfaceCapabilities = surfaceSupportInfo.surfaceCapabilities;
-		//const auto& presentModes = surfaceSupportInfo.presentationModes;
 
 		// -- SURFACE SUPPORT INFO --
 
@@ -261,8 +260,6 @@ namespace CE
 	{
 		if (depthBufferFormat == RHIDepthStencilFormat::None)
 		{
-			swapChainDepthImage.image = nullptr;
-			swapChainDepthImage.imageView = nullptr;
 			return;
 		}
 
@@ -278,20 +275,42 @@ namespace CE
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
+		RHITextureFormat depthTextureFormat;
+
 		switch (swapChainDepthFormat)
 		{
 		case VK_FORMAT_D32_SFLOAT_S8_UINT:
 			depthBufferFormat = RHIDepthStencilFormat::D32_S8;
+			depthTextureFormat = RHITextureFormat::D32_SFLOAT_S8_UINT;
 			break;
 		case VK_FORMAT_D24_UNORM_S8_UINT:
 			depthBufferFormat = RHIDepthStencilFormat::D24_S8;
+			depthTextureFormat = RHITextureFormat::D24_UNORM_S8_UINT;
 			break;
 		case VK_FORMAT_D32_SFLOAT:
 			depthBufferFormat = RHIDepthStencilFormat::D32;
+			depthTextureFormat = RHITextureFormat::D32_SFLOAT;
 			break;
 		}
 
 		// TODO: Create depth texture
+		RHITextureDesc depthTextureDesc{};
+		depthTextureDesc.width = width;
+		depthTextureDesc.height = height;
+		depthTextureDesc.depth = 1;
+		depthTextureDesc.dimension = RHITextureDimension::Dim2D;
+		depthTextureDesc.format = depthTextureFormat;
+		depthTextureDesc.mipLevels = 1;
+		depthTextureDesc.sampleCount = 1;
+		depthTextureDesc.usageFlags = RHITextureUsageFlags::DepthStencilAttachment;
+		depthTextureDesc.forceLinearLayout = false;
+
+		swapChainDepthImage = new VulkanTexture(device, depthTextureDesc);
+	}
+
+	void VulkanSwapChain::DestroyDepthBuffer()
+	{
+		delete swapChainDepthImage;
 	}
 
 } // namespace CE

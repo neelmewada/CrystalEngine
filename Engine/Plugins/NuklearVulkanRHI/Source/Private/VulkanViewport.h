@@ -15,6 +15,8 @@ namespace CE
 
         virtual RHIRenderTarget* GetRenderTarget() override;
 
+        VulkanSwapChain* GetSwapChain() { return swapChain; }
+
         // - Setters -
 
         virtual void SetClearColor(const Color& color) override;
@@ -41,7 +43,17 @@ namespace CE
         VulkanRenderTarget* renderTarget = nullptr;
         VulkanSwapChain* swapChain = nullptr;
 
+        Array<VulkanFrameBuffer*> frameBuffers{};
+
+        // Sync Objects (Per simultaneous frame)
+        // Count = number of frames that are rendered simultaneously
+        Array<VkSemaphore> imageAcquiredSemaphore{};
+
+        u32 currentDrawFrameIndex = 0;
+        u32 currentImageIndex = 0;
+
         friend struct VulkanRenderTargetLayout;
+        friend class VulkanGraphicsCommandList;
     };
     
 } // namespace CE

@@ -3,6 +3,7 @@
 
 #include "VulkanRenderPass.h"
 #include "VulkanSwapChain.h"
+#include "VulkanTexture.h"
 
 namespace CE
 {
@@ -39,6 +40,20 @@ namespace CE
 
     VulkanViewport::~VulkanViewport()
     {
+        // - Sync Objects -
+        for (int i = 0; i < imageAcquiredSemaphore.GetSize(); ++i)
+        {
+            vkDestroySemaphore(device->GetHandle(), imageAcquiredSemaphore[i], nullptr);
+        }
+        imageAcquiredSemaphore.Clear();
+
+        // - Frame Buffers -
+        for (int i = 0; i < frameBuffers.GetSize(); i++)
+        {
+            delete frameBuffers[i];
+        }
+        frameBuffers.Clear();
+
         // - Render Target -
         delete renderTarget;
 
@@ -50,12 +65,33 @@ namespace CE
 
     void VulkanViewport::CreateFrameBuffers()
     {
+        frameBuffers.Resize(swapChain->GetBackBufferCount());
 
+        for (int i = 0; i < frameBuffers.GetSize(); i++)
+        {
+            VkImageView attachments[2] = {};
+            attachments[0] = swapChain->swapChainColorImages[i].imageView;
+            attachments[1] = swapChain->swapChainDepthImage->GetImageView();
+
+            frameBuffers[i] = new VulkanFrameBuffer(device, attachments, renderTarget);
+        }
     }
 
     void VulkanViewport::CreateSyncObjects()
     {
+        VkSemaphoreCreateInfo semaphoreCI = {};
+        semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
+        imageAcquiredSemaphore.Resize(GetBackBufferCount());
+
+        for (int i = 0; i < imageAcquiredSemaphore.GetSize(); ++i)
+        {
+            if (vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &imageAcquiredSemaphore[i]) != VK_SUCCESS)
+            {
+                CE_LOG(Error, All, "Failed to create sync objects for Vulkan Viewport");
+                return;
+            }
+        }
     }
 
     // - Setters -
@@ -63,6 +99,7 @@ namespace CE
     void VulkanViewport::SetClearColor(const Color& color)
     {
         this->clearColor = color;
+        this->renderTarget->SetClearColor(renderTarget->rtLayout.presentationRTIndex, color);
     }
 
     // - Getters -

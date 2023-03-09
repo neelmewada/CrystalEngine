@@ -36,7 +36,7 @@ namespace CE::Editor
 
         RHIRenderTargetLayout rtLayout{};
         rtLayout.numColorOutputs = 1;
-        rtLayout.presentationRTIndex = -1;
+        rtLayout.presentationRTIndex = 0;
 
         rtLayout.colorOutputs[0].sampleCount = 1;
         rtLayout.colorOutputs[0].preferredFormat = RHIColorFormat::Auto;
@@ -56,6 +56,7 @@ namespace CE::Editor
         id = (void*)window->winId();
         
         viewportRHI = gDynamicRHI->CreateViewport(id, width(), height(), isFullScreen(), rtLayout);
+        viewportRHI->SetClearColor(Color::Blue());
     }
 
     void ViewportView::hideEvent(QHideEvent* event)

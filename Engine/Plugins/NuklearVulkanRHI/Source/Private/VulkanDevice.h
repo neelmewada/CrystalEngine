@@ -12,6 +12,7 @@ namespace CE
 {
     class VulkanQueue;
     class VulkanSwapChain;
+    class VulkanTexture;
 
     class VulkanDevice
     {
@@ -41,7 +42,14 @@ namespace CE
 
         VkImageView CreateImageView(VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags);
 
+        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
+
+        VkCommandBuffer BeginSingleUseCommandBuffer();
+        void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
+
         // - Getters -
+
+        CE_INLINE VkCommandPool GetGraphicsCommandPool() { return gfxCommandPool; }
 
         CE_INLINE VulkanQueue* GetGraphicsQueue() { return graphicsQueue; }
         CE_INLINE VulkanQueue* GetPresentQueue() { return presentQueue; }
@@ -50,6 +58,8 @@ namespace CE
         CE_INLINE VkPhysicalDevice GetPhysicalHandle() { return gpu; }
 
         CE_INLINE const SurfaceSupportInfo& GetSurfaceSupportInfo() const { return surfaceSupport; }
+
+    protected:
 
     private:
 
