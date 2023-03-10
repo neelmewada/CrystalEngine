@@ -47,13 +47,14 @@ namespace CE
 
         // Sync Objects (Per simultaneous frame)
         // Count = number of frames that are rendered simultaneously
-        Array<VkSemaphore> imageAcquiredSemaphore{};
+        Vector<VkSemaphore> imageAcquiredSemaphore{};
 
         u32 currentDrawFrameIndex = 0;
         u32 currentImageIndex = 0;
 
         friend struct VulkanRenderTargetLayout;
         friend class VulkanGraphicsCommandList;
+        friend class NuklearVulkanRHI;
     };
     
 } // namespace CE

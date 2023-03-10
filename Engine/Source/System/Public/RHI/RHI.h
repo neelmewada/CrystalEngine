@@ -9,6 +9,8 @@ namespace CE
     class SYSTEM_API RHIRenderTarget;
     class SYSTEM_API RHIViewport;
     class SYSTEM_API RHIRenderPass;
+    class SYSTEM_API RHICommandList;
+    class SYSTEM_API RHIGraphicsCommandList;
 
     class SYSTEM_API DynamicRHI
     {
@@ -41,6 +43,16 @@ namespace CE
             const RHIRenderTargetLayout& rtLayout) = 0;
 
         virtual void DestroyViewport(RHIViewport* viewport) = 0;
+
+        // - Command List -
+
+        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIViewport* viewport) = 0;
+        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIRenderTarget* renderTarget) = 0;
+        virtual void DestroyCommandList(RHICommandList* commandList) = 0;
+
+        virtual void ExecuteCommandList(RHICommandList* commandList) = 0;
+
+        virtual void PresentViewport(RHIGraphicsCommandList* viewportCommandList) = 0;
 
         // - Resources -
 

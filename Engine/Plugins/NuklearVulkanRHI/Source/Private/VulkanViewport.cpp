@@ -69,11 +69,14 @@ namespace CE
 
         for (int i = 0; i < frameBuffers.GetSize(); i++)
         {
-            VkImageView attachments[2] = {};
-            attachments[0] = swapChain->swapChainColorImages[i].imageView;
-            attachments[1] = swapChain->swapChainDepthImage->GetImageView();
+            //VkImageView attachments[2] = {};
+            //attachments[0] = swapChain->swapChainColorImages[i].imageView;
+            //if (swapChain->HasDepthStencilAttachment())
+            //{
+            //    attachments[1] = swapChain->swapChainDepthImage->GetImageView();
+            //}
 
-            frameBuffers[i] = new VulkanFrameBuffer(device, attachments, renderTarget);
+            frameBuffers[i] = new VulkanFrameBuffer(device, swapChain, renderTarget);
         }
     }
 

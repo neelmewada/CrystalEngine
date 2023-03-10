@@ -66,6 +66,8 @@ namespace CE
     */
 
     class VulkanSwapChain;
+    class VulkanRenderTarget;
+    class VulkanTexture;
 
     class VulkanFrameBuffer
     {
@@ -87,6 +89,13 @@ namespace CE
 
     /// Vulkan Render Pass class
     class VulkanRenderPass;
+
+    struct VulkanFrame
+    {
+        Vector<VulkanTexture*> textures{};
+        Vector<VkSampler> samplers{};
+        VulkanFrameBuffer* framebuffer = nullptr;
+    };
     
     /// Vulkan Render Target class
     class VulkanRenderTarget : public RHIRenderTarget
@@ -109,6 +118,8 @@ namespace CE
         // - Getters -
 
         CE_INLINE VulkanRenderPass* GetVulkanRenderPass() { return renderPass; }
+
+        CE_INLINE VulkanViewport* GetViewport() { return viewport; }
 
         u32 GetBackBufferCount();
 
@@ -142,6 +153,7 @@ namespace CE
     private:
         bool isViewportRenderTarget = false;
         VulkanViewport* viewport = nullptr;
+        bool isFresh = true;
         
         Color clearColors[RHIMaxSimultaneousRenderOutputs] = {};
         VulkanDevice* device = nullptr;
@@ -151,9 +163,18 @@ namespace CE
         u32 simultaneousFrameDraws = 0;
 
         u32 width = 0, height = 0;
+
+        u32 currentDrawFrameIndex = 0;
+        u32 currentImageIndex = 0;
+
+        // Offscreen render targets
+        Array<VulkanFrame> colorFrames{};
+        VulkanFrame depthFrame{};
+
         friend class VulkanViewport;
         friend class VulkanGraphicsCommandList;
         friend class VulkanFrameBuffer;
+        friend class NuklearVulkanRHI;
     };
 
     /*
@@ -164,10 +185,26 @@ namespace CE
     {
     public:
         VulkanGraphicsCommandList(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport);
+        VulkanGraphicsCommandList(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget);
         virtual ~VulkanGraphicsCommandList();
 
         virtual void Begin() override;
         virtual void End() override;
+
+        CE_INLINE bool IsViewportTarget()
+        {
+            return viewport != nullptr;
+        }
+
+        CE_INLINE VulkanViewport* GetViewport()
+        {
+            return viewport;
+        }
+
+        CE_INLINE VulkanRenderTarget* GetRenderTarget()
+        {
+            return renderTarget;
+        }
 
     protected:
         void CreateSyncObjects();
@@ -184,10 +221,12 @@ namespace CE
 
         u32 currentImageIndex = 0;
 
-        Array<VkCommandBuffer> commandBuffers{};
+        Vector<VkCommandBuffer> commandBuffers{};
 
-        Array<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
-        Array<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
+        Vector<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
+        Vector<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
+
+        friend class NuklearVulkanRHI;
     };
 
 } // namespace CE

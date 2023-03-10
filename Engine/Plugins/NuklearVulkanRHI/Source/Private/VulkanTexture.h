@@ -55,6 +55,7 @@ namespace CE
     };
     
     VkFormat RHITextureFormatToVkFormat(RHITextureFormat format);
+    RHITextureFormat VkFormatToRHITextureFormat(VkFormat format);
     u32 GetNumberOfChannelsForFormat(RHITextureFormat format, u32& outByteSizePerChannel);
 
 } // namespace CE

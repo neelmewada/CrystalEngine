@@ -35,6 +35,8 @@ namespace CE
 
         CE_INLINE VkSwapchainKHR GetHandle() { return swapChain; }
 
+        CE_INLINE bool HasDepthStencilAttachment() { return depthBufferFormat != RHIDepthStencilFormat::None; }
+
     protected:
 
         void CreateSurface();

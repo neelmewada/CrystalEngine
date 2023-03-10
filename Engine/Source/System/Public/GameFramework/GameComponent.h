@@ -29,12 +29,8 @@ namespace CE
         CE_SIGNAL(OnComponentValuesUpdated);
         
     protected:
-        //virtual void OnComponentValuesUpdated();
-
         CE::GameObject* owner = nullptr;
 
-        //Array<IObjectUpdateListener<GameComponent>*> updateListeners{};
-        
         friend class CE::GameObject;
     };
     

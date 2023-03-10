@@ -15,12 +15,21 @@ namespace CE
             return VK_FORMAT_R8_SNORM;
         case RHITextureFormat::R8_SRGB:
             return VK_FORMAT_R8_SRGB;
+
         case RHITextureFormat::R8G8B8A8_SRGB:
             return VK_FORMAT_R8G8B8A8_SRGB;
         case RHITextureFormat::R8G8B8A8_UNORM:
             return VK_FORMAT_R8G8B8A8_UNORM;
         case RHITextureFormat::R8G8B8A8_SNORM:
             return VK_FORMAT_R8G8B8A8_SNORM;
+
+        case RHITextureFormat::B8G8R8A8_SRGB:
+            return VK_FORMAT_B8G8R8A8_SRGB;
+        case RHITextureFormat::B8G8R8A8_UNORM:
+            return VK_FORMAT_B8G8R8A8_UNORM;
+        case RHITextureFormat::B8G8R8A8_SNORM:
+            return VK_FORMAT_B8G8R8A8_SNORM;
+
         case RHITextureFormat::R8G8B8_UNORM:
             return VK_FORMAT_R8G8B8_UNORM;
         case RHITextureFormat::R8G8B8_SNORM:
@@ -32,7 +41,7 @@ namespace CE
         case RHITextureFormat::R16_SNORM:
             return VK_FORMAT_R16_SNORM;
         case RHITextureFormat::R16_SFLOAT:
-            return VK_FORMAT_R16_SNORM;
+            return VK_FORMAT_R16_SFLOAT;
         case RHITextureFormat::R32_UINT:
             return VK_FORMAT_R32_UINT;
         case RHITextureFormat::R32_SINT:
@@ -48,6 +57,62 @@ namespace CE
         }
         
         return VK_FORMAT_UNDEFINED;
+    }
+
+    RHITextureFormat VkFormatToRHITextureFormat(VkFormat format)
+    {
+        switch (format)
+        {
+        case VK_FORMAT_R8_UNORM:
+            return RHITextureFormat::R8_UNORM;
+        case VK_FORMAT_R8_SNORM:
+            return RHITextureFormat::R8_SNORM;
+        case VK_FORMAT_R8_SRGB:
+            return RHITextureFormat::R8_SRGB;
+
+        case VK_FORMAT_R8G8B8A8_SRGB:
+            return RHITextureFormat::R8G8B8A8_SRGB;
+        case VK_FORMAT_R8G8B8A8_UNORM:
+            return RHITextureFormat::R8G8B8A8_UNORM;
+        case VK_FORMAT_R8G8B8A8_SNORM:
+            return RHITextureFormat::R8G8B8A8_SNORM;
+
+        case VK_FORMAT_B8G8R8A8_SRGB:
+            return RHITextureFormat::B8G8R8A8_SRGB;
+        case VK_FORMAT_B8G8R8A8_UNORM:
+            return RHITextureFormat::B8G8R8A8_UNORM;
+        case VK_FORMAT_B8G8R8A8_SNORM:
+            return RHITextureFormat::B8G8R8A8_SNORM;
+
+        case VK_FORMAT_R8G8B8_UNORM:
+            return RHITextureFormat::R8G8B8_UNORM;
+        case VK_FORMAT_R8G8B8_SNORM:
+            return RHITextureFormat::R8G8B8_SNORM;
+        case VK_FORMAT_R8G8B8_SRGB:
+            return RHITextureFormat::R8G8B8_SRGB;
+
+        case VK_FORMAT_R16_UNORM:
+            return RHITextureFormat::R16_UNORM;
+        case VK_FORMAT_R16_SNORM:
+            return RHITextureFormat::R16_SNORM;
+        case VK_FORMAT_R16_SFLOAT:
+            return RHITextureFormat::R16_SFLOAT;
+
+        case VK_FORMAT_R32_UINT:
+            return RHITextureFormat::R32_UINT;
+        case VK_FORMAT_R32_SINT:
+            return RHITextureFormat::R32_SINT;
+        case VK_FORMAT_R32_SFLOAT:
+            return RHITextureFormat::R32_SFLOAT;
+
+        case VK_FORMAT_D32_SFLOAT:
+            return RHITextureFormat::D32_SFLOAT;
+        case VK_FORMAT_D32_SFLOAT_S8_UINT:
+            return RHITextureFormat::D32_SFLOAT_S8_UINT;
+        case VK_FORMAT_D24_UNORM_S8_UINT:
+            return RHITextureFormat::D24_UNORM_S8_UINT;
+        }
+        return RHITextureFormat::Undefined;
     }
 
     u32 GetNumberOfChannelsForFormat(RHITextureFormat format, u32& outByteSizePerChannel)
@@ -170,7 +235,13 @@ namespace CE
         }
 
         imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
+        imageCI.mipLevels = mipLevels;
+        imageCI.arrayLayers = 1;
         imageCI.flags = 0;
+
+        imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageCI.queueFamilyIndexCount = 0;
+        imageCI.pQueueFamilyIndices = nullptr;
         
         if (vkCreateImage(device->GetHandle(), &imageCI, nullptr, &image) != VK_SUCCESS)
         {

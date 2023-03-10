@@ -4,6 +4,7 @@
 #include "VulkanRenderPass.h"
 #include "VulkanViewport.h"
 #include "VulkanSwapChain.h"
+#include "VulkanTexture.h"
 
 namespace CE
 {
@@ -352,21 +353,124 @@ namespace CE
     {
         auto imageFormat = rtLayout.depthFormat;
 
+        RHITextureDesc textureDesc{};
+        textureDesc.name = "Depth Buffer";
+        textureDesc.width = width;
+        textureDesc.height = height;
+        textureDesc.depth = 1;
+        textureDesc.dimension = RHITextureDimension::Dim2D;
+        textureDesc.format = VkFormatToRHITextureFormat(rtLayout.depthFormat);
+        textureDesc.mipLevels = 1;
+        textureDesc.sampleCount = 1;
+        textureDesc.usageFlags = RHITextureUsageFlags::DepthStencilAttachment;
+        textureDesc.forceLinearLayout = false;
+
+        depthFrame.textures.Resize(1);
+        depthFrame.textures[0] = new VulkanTexture(device, textureDesc);
+
+        VkSamplerCreateInfo samplerCI = {};
+        samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        samplerCI.addressModeU = samplerCI.addressModeV = samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerCI.anisotropyEnable = VK_FALSE;
+        samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+        samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        samplerCI.minFilter = samplerCI.magFilter = VK_FILTER_LINEAR;
+        samplerCI.compareEnable = VK_FALSE;
+        samplerCI.minLod = 0.0f;
+        samplerCI.maxLod = 0.0f;
+        samplerCI.mipLodBias = 0.0f;
+        samplerCI.unnormalizedCoordinates = VK_FALSE;
+
+        depthFrame.samplers.Resize(1);
+        vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &depthFrame.samplers[0]);
+
+        depthFrame.framebuffer = nullptr;
     }
 
     void VulkanRenderTarget::DestroyDepthBuffer()
     {
-
+        if (depthFrame.textures.GetSize() > 0)
+            delete depthFrame.textures[0];
+        if (depthFrame.samplers.GetSize() > 0)
+            vkDestroySampler(device->GetHandle(), depthFrame.samplers[0], nullptr);
+        delete depthFrame.framebuffer;
     }
 
     void VulkanRenderTarget::CreateColorBuffers()
     {
+        for (int i = 0; i < backBufferCount; i++)
+        {
+            VulkanFrame frame{};
+            frame.textures.Resize(rtLayout.colorAttachmentCount);
+            frame.samplers.Resize(rtLayout.colorAttachmentCount);
 
+            VkImageView attachments[RHIMaxSimultaneousRenderOutputs + 1] = {};
+
+            for (int j = 0; j < rtLayout.colorAttachmentCount; j++)
+            {
+                auto imageFormat = rtLayout.colorFormats[j];
+
+                RHITextureDesc textureDesc{};
+                textureDesc.name = "Color Buffer";
+                textureDesc.width = GetWidth();
+                textureDesc.height = GetHeight();
+                textureDesc.depth = 1;
+                textureDesc.dimension = RHITextureDimension::Dim2D;
+                textureDesc.format = VkFormatToRHITextureFormat(imageFormat);
+                textureDesc.mipLevels = 1;
+                textureDesc.usageFlags = RHITextureUsageFlags::ColorAttachment | RHITextureUsageFlags::SampledImage;
+                textureDesc.sampleCount = 1;
+                textureDesc.forceLinearLayout = false;
+
+                frame.textures[j] = new VulkanTexture(device, textureDesc);
+
+                VkSamplerCreateInfo samplerCI{};
+                samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+                samplerCI.addressModeU = samplerCI.addressModeV = samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+                samplerCI.anisotropyEnable = VK_FALSE;
+                samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+                samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+                samplerCI.minFilter = samplerCI.magFilter = VK_FILTER_LINEAR;
+                samplerCI.compareEnable = VK_FALSE;
+                samplerCI.minLod = 0.0f;
+                samplerCI.maxLod = 0.0f;
+                samplerCI.mipLodBias = 0.0f;
+                samplerCI.unnormalizedCoordinates = VK_FALSE;
+
+                vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &frame.samplers[j]);
+
+                attachments[j] = frame.textures[j]->GetImageView();
+            }
+
+            if (rtLayout.HasDepthStencilAttachment())
+            {
+                attachments[rtLayout.colorAttachmentCount] = depthFrame.textures[0]->GetImageView();
+            }
+
+            frame.framebuffer = new VulkanFrameBuffer(device, attachments, this);
+
+            colorFrames.Add(frame);
+        }
     }
 
     void VulkanRenderTarget::DestroyColorBuffers()
     {
+        for (int i = 0; i < colorFrames.GetSize(); i++)
+        {
+            for (const auto& texture : colorFrames[i].textures)
+            {
+                delete texture;
+            }
+            colorFrames[i].textures.Clear();
 
+            for (const auto& sampler : colorFrames[i].samplers)
+            {
+                vkDestroySampler(device->GetHandle(), sampler, nullptr);
+            }
+
+            delete colorFrames[i].framebuffer;
+        }
+        colorFrames.Clear();
     }
 
 } // namespace CE

@@ -175,12 +175,16 @@ namespace CE
 
     enum class RHITextureFormat
     {
+        Undefined = 0,
         R8_UNORM,
         R8_SNORM,
         R8_SRGB,
         R8G8B8A8_SRGB,
         R8G8B8A8_UNORM,
         R8G8B8A8_SNORM,
+        B8G8R8A8_SRGB,
+        B8G8R8A8_UNORM,
+        B8G8R8A8_SNORM,
         R8G8B8_UNORM,
         R8G8B8_SNORM,
         R8G8B8_SRGB,

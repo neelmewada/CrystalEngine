@@ -262,7 +262,7 @@ namespace CE
 		{
 			return;
 		}
-
+		
 		Array<VkFormat> preferredDepthFormats{};
 		if (depthBufferFormat == RHIDepthStencilFormat::Auto || depthBufferFormat == RHIDepthStencilFormat::D32_S8)
 			preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT });
@@ -275,7 +275,7 @@ namespace CE
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
-		RHITextureFormat depthTextureFormat;
+		RHITextureFormat depthTextureFormat{};
 
 		switch (swapChainDepthFormat)
 		{

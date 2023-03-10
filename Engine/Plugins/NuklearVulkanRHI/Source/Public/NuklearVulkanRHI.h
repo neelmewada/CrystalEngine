@@ -9,12 +9,13 @@ typedef VkInstance_T* VkInstance;
 struct VkDebugUtilsMessengerEXT_T;
 typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 
-struct VmaAllocator_T;
-typedef VmaAllocator_T* VmaAllocator;
 
 namespace CE
 {
     class VulkanDevice;
+    class VulkanViewport;
+    class VulkanGraphicsCommandList;
+    class VulkanRenderTarget;
 
     class NUKLEARVULKANRHI_API NuklearVulkanRHIModule : public PluginModule
     {
@@ -57,10 +58,26 @@ namespace CE
 
         virtual void DestroyViewport(RHIViewport* viewport) override;
 
+        // - Command List -
+        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIViewport* viewport) override;
+
+        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIRenderTarget* renderTarget) override;
+
+        virtual void DestroyCommandList(RHICommandList* commandList) override;
+
+        virtual void ExecuteCommandList(RHICommandList* commandList) override;
+
+        virtual void PresentViewport(RHIGraphicsCommandList* viewportCommandList) override;
+
         // - Resources -
 
         virtual RHIBuffer* CreateBuffer(const RHIBufferDesc& bufferDesc) override;
         virtual void DestroyBuffer(RHIBuffer* buffer) override;
+
+    protected:
+
+        void ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport);
+        void ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget);
 
     private:
         VkInstance vkInstance = nullptr;

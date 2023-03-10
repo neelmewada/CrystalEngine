@@ -3,6 +3,7 @@
 
 #include <QWindow>
 #include <QWidget>
+#include <QVulkanWindow>
 
 #include "Editor/EditorViewBase.h"
 
@@ -27,11 +28,18 @@ namespace CE::Editor
         virtual void showEvent(QShowEvent* event) override;
         virtual void hideEvent(QHideEvent* event) override;
 
+    private slots:
+        void OnRenderLoop();
+
     private:
         Ui::ViewportView* ui;
 
-        //RHIRenderTarget* renderTarget = nullptr;
-        RHIViewport* viewportRHI = nullptr;
+        QTimer* renderLoopTimer = nullptr;
+        bool stopRenderLoop = false;
+
+        RHIRenderTarget* renderTarget = nullptr;
+        //RHIViewport* viewportRHI = nullptr;
+        RHIGraphicsCommandList* cmdList = nullptr;
     };
 
 }

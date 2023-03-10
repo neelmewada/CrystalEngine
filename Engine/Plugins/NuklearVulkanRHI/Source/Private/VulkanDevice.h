@@ -73,7 +73,6 @@ namespace CE
 
         bool isInitialized = false;
         VkInstance instance = nullptr;
-        VmaAllocator vmaAllocator = nullptr;
         NuklearVulkanRHI* vulkanRhi = nullptr;
 
         VkPhysicalDevice gpu = nullptr;
