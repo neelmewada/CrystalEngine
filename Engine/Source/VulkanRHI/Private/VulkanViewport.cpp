@@ -12,7 +12,7 @@
 namespace CE
 {
     
-    VulkanViewport::VulkanViewport(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, void* windowHandle,
+    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* windowHandle,
         u32 width, u32 height,
         bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(windowHandle), isFullscreen(isFullscreen)
@@ -43,7 +43,7 @@ namespace CE
     }
 
 #if PAL_TRAIT_QT_SUPPORTED
-    VulkanViewport::VulkanViewport(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RHIRenderTargetLayout& rtLayout)
+    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RHIRenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(qtWindowHandle), isQtWindow(true)
     {
         swapChain = nullptr;

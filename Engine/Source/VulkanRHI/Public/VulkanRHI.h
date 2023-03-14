@@ -17,11 +17,11 @@ namespace CE
     class VulkanGraphicsCommandList;
     class VulkanRenderTarget;
 
-    class NUKLEARVULKANRHI_API NuklearVulkanRHIModule : public PluginModule
+    class VULKANRHI_API VulkanRHIModule : public PluginModule
     {
     public:
-        NuklearVulkanRHIModule() {}
-        virtual ~NuklearVulkanRHIModule() {}
+        VulkanRHIModule() {}
+        virtual ~VulkanRHIModule() {}
 
         virtual void StartupModule() override;
         virtual void ShutdownModule() override;
@@ -29,9 +29,10 @@ namespace CE
         
     };
 
-    class NUKLEARVULKANRHI_API NuklearVulkanRHI : public DynamicRHI
+    class VULKANRHI_API VulkanRHI : public DynamicRHI
     {
     public:
+        virtual ~VulkanRHI() = default;
 
         virtual void Initialize() override;
         virtual void PostInitialize() override;

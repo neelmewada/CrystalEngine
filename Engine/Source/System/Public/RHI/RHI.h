@@ -42,6 +42,11 @@ namespace CE
             u32 width, u32 height, bool isFullscreen,
             const RHIRenderTargetLayout& rtLayout) = 0;
 
+#if PAL_TRAIT_QT_SUPPORTED
+        // - Qt Rendering API -
+        virtual RHIViewport* CreateQtViewport(void* qtWindow, const RHIRenderTargetLayout& rtLayout) = 0;
+#endif
+
         virtual void DestroyViewport(RHIViewport* viewport) = 0;
 
         // - Command List -

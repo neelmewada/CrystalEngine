@@ -8,11 +8,11 @@ namespace CE
     class VulkanViewport : public RHIViewport
     {
     public:
-        VulkanViewport(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, void* windowHandle,
+        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* windowHandle,
             u32 width, u32 height,
             bool isFullscreen, const RHIRenderTargetLayout& rtLayout);
 #if PAL_TRAIT_QT_SUPPORTED
-        VulkanViewport(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RHIRenderTargetLayout& rtLayout);
+        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RHIRenderTargetLayout& rtLayout);
 #endif
         virtual ~VulkanViewport();
 
@@ -42,7 +42,7 @@ namespace CE
         bool isQtWindow = false;
 
         void* windowHandle = nullptr;
-        NuklearVulkanRHI* vulkanRHI = nullptr;
+        VulkanRHI* vulkanRHI = nullptr;
         VulkanDevice* device = nullptr;
         VulkanRenderTarget* renderTarget = nullptr;
         VulkanSwapChain* swapChain = nullptr;
@@ -58,7 +58,7 @@ namespace CE
 
         friend struct VulkanRenderTargetLayout;
         friend class VulkanGraphicsCommandList;
-        friend class NuklearVulkanRHI;
+        friend class VulkanRHI;
     };
     
 } // namespace CE

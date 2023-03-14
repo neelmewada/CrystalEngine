@@ -3,7 +3,6 @@
 
 #include <QWindow>
 #include <QWidget>
-#include <QVulkanWindow>
 
 #include "Editor/EditorViewBase.h"
 
@@ -15,6 +14,7 @@ class ViewportView;
 
 namespace CE::Editor
 {
+    class RenderViewport;
 
     class ViewportView : public EditorViewBase
     {
@@ -37,9 +37,13 @@ namespace CE::Editor
         QTimer* renderLoopTimer = nullptr;
         bool stopRenderLoop = false;
 
-        RHIRenderTarget* renderTarget = nullptr;
-        //RHIViewport* viewportRHI = nullptr;
+        //RHIRenderTarget* renderTarget = nullptr;
+        RHIViewport* viewportRHI = nullptr;
         RHIGraphicsCommandList* cmdList = nullptr;
+
+        //QVulkanInstance* instance = nullptr;
+        //QVulkanWindow* vulkanWindow = nullptr;
+        RenderViewport* renderViewport = nullptr;
     };
 
 }

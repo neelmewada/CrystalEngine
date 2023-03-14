@@ -8,6 +8,9 @@ add_subdirectory(Config)
 # Engine Modules
 add_subdirectory(Source/Core)
 add_subdirectory(Source/System)
+if(${PAL_TRAIT_VULKAN_SUPPORTED})
+    add_subdirectory(Source/VulkanRHI)
+endif()
 
 add_subdirectory(Source/GameSystem)
 add_subdirectory(Source/GameLauncher)

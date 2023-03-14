@@ -1,7 +1,7 @@
 
 #include "CoreMinimal.h"
 
-#include "NuklearVulkanRHI.h"
+#include "VulkanRHI.h"
 #include "VulkanRHIPrivate.h"
 #include "PAL/Common/VulkanPlatform.h"
 #undef max
@@ -14,21 +14,21 @@
 
 #include <vulkan/vulkan.h>
 
-CE_IMPLEMENT_PLUGIN(NuklearVulkanRHI, CE::NuklearVulkanRHIModule)
+CE_IMPLEMENT_PLUGIN(VulkanRHI, CE::VulkanRHIModule)
 
 namespace CE
 {
-	void NuklearVulkanRHIModule::StartupModule()
+	void VulkanRHIModule::StartupModule()
 	{
-
+        gDynamicRHI = new VulkanRHI;
 	}
 
-	void NuklearVulkanRHIModule::ShutdownModule()
+	void VulkanRHIModule::ShutdownModule()
 	{
-
+        delete gDynamicRHI;
 	}
 
-	void NuklearVulkanRHIModule::RegisterTypes()
+	void VulkanRHIModule::RegisterTypes()
 	{
 
 	}
@@ -91,7 +91,7 @@ namespace CE
         }
     }
 
-	void NuklearVulkanRHI::Initialize()
+	void VulkanRHI::Initialize()
 	{
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -151,13 +151,13 @@ namespace CE
         }
 	}
 
-    void NuklearVulkanRHI::PostInitialize()
+    void VulkanRHI::PostInitialize()
     {
         device = new VulkanDevice(vkInstance, this);
         device->Initialize();
     }
 
-	void NuklearVulkanRHI::PreShutdown()
+	void VulkanRHI::PreShutdown()
 	{
         if (device != nullptr)
         {
@@ -165,7 +165,7 @@ namespace CE
         }
 	}
 
-	void NuklearVulkanRHI::Shutdown()
+	void VulkanRHI::Shutdown()
 	{
         if (device != nullptr)
         {
@@ -183,54 +183,54 @@ namespace CE
         vkInstance = nullptr;
 	}
 
-    void* NuklearVulkanRHI::GetNativeHandle()
+    void* VulkanRHI::GetNativeHandle()
     {
         return vkInstance;
     }
 
-	RHIGraphicsBackend NuklearVulkanRHI::GetGraphicsBackend()
+	RHIGraphicsBackend VulkanRHI::GetGraphicsBackend()
 	{
 		return RHIGraphicsBackend::Vulkan;
 	}
 
     // - Render Target -
 
-    RHIRenderTarget* NuklearVulkanRHI::CreateRenderTarget(u32 width, u32 height, 
+    RHIRenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height, 
         const RHIRenderTargetLayout& rtLayout)
     {
         return new VulkanRenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));
     }
 
-    void NuklearVulkanRHI::DestroyRenderTarget(RHIRenderTarget* renderTarget)
+    void VulkanRHI::DestroyRenderTarget(RHIRenderTarget* renderTarget)
     {
         delete renderTarget;
     } 
 
-    RHIViewport* NuklearVulkanRHI::CreateViewport(void* windowHandle, u32 width, u32 height, bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
+    RHIViewport* VulkanRHI::CreateViewport(void* windowHandle, u32 width, u32 height, bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
     {
         return new VulkanViewport(this, device, windowHandle, width, height, isFullscreen, rtLayout);
     }
 
 #if PAL_TRAIT_QT_SUPPORTED
-    RHIViewport* NuklearVulkanRHI::CreateQtViewport(void* qtWindow, const RHIRenderTargetLayout& rtLayout)
+    RHIViewport* VulkanRHI::CreateQtViewport(void* qtWindow, const RHIRenderTargetLayout& rtLayout)
     {
         return new VulkanViewport(this, device, qtWindow, rtLayout);
     }
 #endif
 
-    void NuklearVulkanRHI::DestroyViewport(RHIViewport* viewport)
+    void VulkanRHI::DestroyViewport(RHIViewport* viewport)
     {
         delete viewport;
     }
 
     // - Command List -
 
-    RHIGraphicsCommandList* NuklearVulkanRHI::CreateGraphicsCommandList(RHIViewport* viewport)
+    RHIGraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHIViewport* viewport)
     {
         return new VulkanGraphicsCommandList(this, device, (VulkanViewport*)viewport);
     }
 
-    RHIGraphicsCommandList* NuklearVulkanRHI::CreateGraphicsCommandList(RHIRenderTarget* renderTarget)
+    RHIGraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHIRenderTarget* renderTarget)
     {
         if (renderTarget->IsViewportRenderTarget())
         {
@@ -241,12 +241,12 @@ namespace CE
         return new VulkanGraphicsCommandList(this, device, (VulkanRenderTarget*)renderTarget);
     }
 
-    void NuklearVulkanRHI::DestroyCommandList(RHICommandList* commandList)
+    void VulkanRHI::DestroyCommandList(RHICommandList* commandList)
     {
         delete commandList;
     }
 
-    void NuklearVulkanRHI::ExecuteCommandList(RHICommandList* commandList)
+    void VulkanRHI::ExecuteCommandList(RHICommandList* commandList)
     {
         if (commandList->GetCommandListType() == RHICommandListType::Graphics)
         {
@@ -262,7 +262,7 @@ namespace CE
         }
     }
 
-    void NuklearVulkanRHI::PresentViewport(RHIGraphicsCommandList* viewportCommandList)
+    void VulkanRHI::PresentViewport(RHIGraphicsCommandList* viewportCommandList)
     {
         auto vulkanCommandList = (VulkanGraphicsCommandList*)viewportCommandList;
         if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
@@ -287,17 +287,17 @@ namespace CE
 
     // - Resources -
 
-    RHIBuffer* NuklearVulkanRHI::CreateBuffer(const RHIBufferDesc& bufferDesc)
+    RHIBuffer* VulkanRHI::CreateBuffer(const RHIBufferDesc& bufferDesc)
     {
         return new VulkanBuffer(device, bufferDesc);
     }
 
-    void NuklearVulkanRHI::DestroyBuffer(RHIBuffer* buffer)
+    void VulkanRHI::DestroyBuffer(RHIBuffer* buffer)
     {
         delete buffer;
     }
 
-    void NuklearVulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport)
+    void VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -339,7 +339,7 @@ namespace CE
         vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
     }
 
-    void NuklearVulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
+    void VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -463,7 +463,7 @@ namespace CE
      *  VulkanGraphicsCommandList
      */
 
-    VulkanGraphicsCommandList::VulkanGraphicsCommandList(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport)
+    VulkanGraphicsCommandList::VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport)
         : vulkanRHI(vulkanRHI)
         , device(device)
         , viewport(viewport)
@@ -489,7 +489,7 @@ namespace CE
         CreateSyncObjects();
     }
 
-    VulkanGraphicsCommandList::VulkanGraphicsCommandList(NuklearVulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget)
+    VulkanGraphicsCommandList::VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget)
         : vulkanRHI(vulkanRHI)
         , device(device)
         , renderTarget(renderTarget)

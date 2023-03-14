@@ -82,7 +82,7 @@ ce_set(PAL_HOST_PLATFORM_NAME_LOWERCASE ${PAL_HOST_PLATFORM_NAME_LOWERCASE})
 
 include(CMake/Platform/${PAL_PLATFORM_NAME}/PAL_${PAL_PLATFORM_NAME_LOWERCASE}.cmake)
 
-function(ce_exclude_platform_files FILES_LIST)
+function(ce_filter_platform_files FILES_LIST)
     if(NOT ${PAL_PLATFORM_NAME} STREQUAL "Windows")
         list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Windows/.*")
     endif()
@@ -105,4 +105,11 @@ function(ce_exclude_platform_files FILES_LIST)
 
     set(${FILES_LIST} ${${FILES_LIST}} PARENT_SCOPE)
 endfunction()
+
+# DEPRECATED: Use ce_filter_platform_files instead!
+function(ce_exclude_platform_files FILES_LIST)
+    ce_filter_platform_files("${FILES_LIST}")
+    set(${FILES_LIST} ${${FILES_LIST}} PARENT_SCOPE)
+endfunction()
+
 

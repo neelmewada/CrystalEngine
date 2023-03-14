@@ -16,6 +16,11 @@ namespace CE::Editor
 		CE::ModuleManager::Get().LoadModule("Core");
 		CE::ModuleManager::Get().LoadModule("System");
 
+		// Graphics API Selection
+#if PAL_TRAIT_VULKAN_SUPPORTED
+		CE::ModuleManager::Get().LoadModule("VulkanRHI");
+#endif
+
 		// Load Earliest plugins
 		PluginManager::Get().Init();
 		PluginManager::Get().LoadPlugins(CE::PluginLoadType::LoadEarliest);
@@ -59,6 +64,10 @@ namespace CE::Editor
 
 	void EditorLoop::Shutdown()
 	{
+#if PAL_TRAIT_VULKAN_SUPPORTED
+		CE::ModuleManager::Get().UnloadModule("VulkanRHI");
+#endif
+
 		CE::ModuleManager::Get().UnloadModule("System");
 		CE::ModuleManager::Get().UnloadModule("Core");
 		CE::Logger::Shutdown();

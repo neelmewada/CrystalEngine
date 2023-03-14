@@ -1,11 +1,11 @@
 #include "ViewportView.h"
 #include "ui_ViewportView.h"
 
+#include "Platform/Common/RenderViewport.h"
+
 #include "RHI/RHI.h"
 
 #include <QTimer>
-#include <QVulkanInstance>
-#include <QVulkanWindow>
 
 struct VkInstance_T;
 typedef VkInstance_T* VkInstance;
@@ -20,17 +20,23 @@ namespace CE::Editor
         ui->setupUi(this);
 
         setWindowTitle("Viewport");
+
+        renderViewport = new RenderViewport;
+        layout()->addWidget(QWidget::createWindowContainer(renderViewport));
         
         //instance = new QVulkanInstance();
-
-        //VkInstance vkInstance = nullptr;
-        //gDynamicRHI->GetNativeHandle((void**)&vkInstance);
-
+        //VkInstance vkInstance = (VkInstance)gDynamicRHI->GetNativeHandle();
         //instance->setVkInstance(vkInstance);
+
+        //vulkanWindow = new QVulkanWindow;
+        //vulkanWindow->setVulkanInstance(instance);
+
+        //layout()->addWidget(QWidget::createWindowContainer(vulkanWindow));
     }
 
     ViewportView::~ViewportView()
     {
+        delete renderViewport;
         delete ui;
     }
 
@@ -40,7 +46,7 @@ namespace CE::Editor
 
         RHIRenderTargetLayout rtLayout{};
         rtLayout.numColorOutputs = 1;
-        rtLayout.presentationRTIndex = -1;
+        rtLayout.presentationRTIndex = 0;
 
         rtLayout.colorOutputs[0].sampleCount = 1;
         rtLayout.colorOutputs[0].preferredFormat = RHIColorFormat::Auto;
@@ -52,12 +58,10 @@ namespace CE::Editor
         rtLayout.backBufferCount = 2;
         rtLayout.simultaneousFrameDraws = 1;
 
-        renderTarget = gDynamicRHI->CreateRenderTarget(width(), height(), rtLayout);
-        
         //viewportRHI = gDynamicRHI->CreateViewport(id, width(), height(), isFullScreen(), rtLayout);
         //viewportRHI->SetClearColor(Color::Blue());
 
-        cmdList = gDynamicRHI->CreateGraphicsCommandList(renderTarget);
+        //cmdList = gDynamicRHI->CreateGraphicsCommandList(viewportRHI);
 
         QTimer::singleShot(2000, this, &ViewportView::OnRenderLoop);
     }
@@ -66,24 +70,22 @@ namespace CE::Editor
     {
         Super::hideEvent(event);
 
-        gDynamicRHI->DestroyCommandList(cmdList);
-        cmdList = nullptr;
+        //gDynamicRHI->DestroyCommandList(cmdList);
+        //cmdList = nullptr;
 
         //gDynamicRHI->DestroyViewport(viewportRHI);
         //viewportRHI = nullptr;
-        gDynamicRHI->DestroyRenderTarget(renderTarget);
-        renderTarget = nullptr;
     }
 
     void ViewportView::OnRenderLoop()
     {
         CE_LOG(Info, All, "Render Loop");
 
-        cmdList->Begin();
+        //cmdList->Begin();
 
-        cmdList->End();
+        //cmdList->End();
 
-        gDynamicRHI->ExecuteCommandList(cmdList);
+        //gDynamicRHI->ExecuteCommandList(cmdList);
 
         //if (!stopRenderLoop)
         //    QTimer::singleShot(1000, this, &ViewportView::OnRenderLoop);
