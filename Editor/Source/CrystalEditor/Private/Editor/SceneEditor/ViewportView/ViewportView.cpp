@@ -23,15 +23,6 @@ namespace CE::Editor
         renderViewport = new ViewportWindow;
         renderViewportWidget = QWidget::createWindowContainer(renderViewport);
         layout()->addWidget(renderViewportWidget);
-        
-        //instance = new QVulkanInstance();
-        //VkInstance vkInstance = (VkInstance)gDynamicRHI->GetNativeHandle();
-        //instance->setVkInstance(vkInstance);
-
-        //vulkanWindow = new QVulkanWindow;
-        //vulkanWindow->setVulkanInstance(instance);
-
-        //layout()->addWidget(QWidget::createWindowContainer(vulkanWindow));
     }
 
     ViewportView::~ViewportView()
@@ -94,9 +85,9 @@ namespace CE::Editor
 
         if (!stopRenderLoop)
         {
-            QTimer::singleShot(1000, this, [this]() -> void
+            QTimer::singleShot(500, this, [this]() -> void
             {
-                CE_LOG(Info, All, "Update!");
+                
             });
         }
     }

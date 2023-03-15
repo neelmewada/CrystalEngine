@@ -35,21 +35,6 @@ namespace CE
 
         }
 
-        inline static Color Red()
-        {
-            return Color(1, 0, 0, 1);
-        }
-
-        inline static Color Green()
-        {
-            return Color(0, 1, 0, 1);
-        }
-
-        inline static Color Blue()
-        {
-            return Color(0, 0, 1, 1);
-        }
-
         inline Color operator*(s32 value) const
         {
             return Color(value * r, value * g, value * b, value * a);
@@ -113,6 +98,33 @@ namespace CE
                 return a;
             }
             return 0;
+        }
+
+        // - Preset Colors -
+
+        inline static Color Red()
+        {
+            return Color(1, 0, 0, 1);
+        }
+
+        inline static Color Green()
+        {
+            return Color(0, 1, 0, 1);
+        }
+
+        inline static Color Blue()
+        {
+            return Color(0, 0, 1, 1);
+        }
+
+        inline static Color Black()
+        {
+            return Color(0, 0, 0, 1);
+        }
+
+        inline static Color Yellow()
+        {
+            return Color(1, 1, 0, 1);
         }
 
     public:

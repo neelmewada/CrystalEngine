@@ -10,17 +10,18 @@ namespace CE::Editor
     class EDITORCORE_API ViewportWindow : public QWindow
     {
     public:
-        ViewportWindow(QWindow* parent = nullptr);
-        virtual ~ViewportWindow();
+        ViewportWindow(QWindow* parent = nullptr) : QWindow(parent)
+        {
+            setSurfaceType(QSurface::VulkanSurface);
+        }
+
+        virtual ~ViewportWindow() {}
 
         void* GetWindowHandle()
         {
             return (void*)winId();
         }
 
-    protected:
-        virtual void showEvent(QShowEvent* event) override;
-        virtual void hideEvent(QHideEvent* event) override;
 
     private:
     };

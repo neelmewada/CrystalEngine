@@ -37,12 +37,9 @@ namespace CE::Editor
         QTimer* renderLoopTimer = nullptr;
         bool stopRenderLoop = false;
 
-        //RHIRenderTarget* renderTarget = nullptr;
         RHIViewport* viewportRHI = nullptr;
         RHIGraphicsCommandList* cmdList = nullptr;
 
-        //QVulkanInstance* instance = nullptr;
-        //QVulkanWindow* vulkanWindow = nullptr;
         ViewportWindow* renderViewport = nullptr;
         QWidget* renderViewportWidget = nullptr;
     };
