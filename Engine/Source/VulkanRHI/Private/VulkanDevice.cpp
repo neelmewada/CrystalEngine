@@ -21,8 +21,8 @@ namespace CE
 
 	void VulkanDevice::Initialize()
 	{
-		VulkanTestWindow windowInfo{};
-		testSurface = VulkanPlatform::CreateTestSurface(instance, windowInfo);
+        VulkanTestWindow* windowInfo = nullptr;
+		testSurface = VulkanPlatform::CreateTestSurface(instance, &windowInfo);
 
 		SelectGpu();
 		InitGpu();

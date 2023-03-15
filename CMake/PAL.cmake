@@ -103,6 +103,15 @@ function(ce_filter_platform_files FILES_LIST)
         list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/iOS/.*")
     endif()
 
+    if(NOT ${PAL_TRAIT_QT_SUPPORTED})
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/Qt/.*")
+    endif()
+    
+    if(NOT ${PAL_TRAIT_SDL_SUPPORTED})
+        list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/SDL/.*")
+    endif()
+    
+
     set(${FILES_LIST} ${${FILES_LIST}} PARENT_SCOPE)
 endfunction()
 

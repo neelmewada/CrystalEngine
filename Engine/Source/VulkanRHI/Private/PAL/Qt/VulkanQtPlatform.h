@@ -14,10 +14,13 @@
 
 namespace CE
 {
-    struct VulkanTestWindow
+    class VulkanTestWindow : public QWindow
     {
-        void* qtWindowHandle;
-        void* nativeWindowHandle;
+    public:
+        VulkanTestWindow(QWindow* parent = nullptr) : QWindow(parent)
+        {
+            setSurfaceType(SurfaceType::VulkanSurface);
+        }
     };
 
     class VulkanQtPlatform
@@ -74,27 +77,19 @@ namespace CE
             return windowList.at(0);
         }
 
-        static VulkanTestWindow CreateTestVulkanWindow(VkInstance vkInstance)
+        static VulkanTestWindow* CreateTestVulkanWindow(VkInstance vkInstance)
         {
             if (vkInstance == nullptr)
-                return { nullptr, nullptr };
-
-            QMainWindow* testWindow = new QMainWindow;
-            testWindow->show();
-            return { testWindow, (void*)testWindow->winId() };
+                return nullptr;
+            
+            auto window = new VulkanTestWindow;
+            window->show();
+            return window;
         }
 
-        static void DestroyTestVulkanWindow(VulkanTestWindow& window)
+        static void DestroyTestVulkanWindow(VulkanTestWindow* window)
         {
-            if (window.qtWindowHandle == nullptr)
-                return;
-
-            QMainWindow* testWindow = (QMainWindow*)window.qtWindowHandle;
-            testWindow->hide();
-            delete testWindow;
-
-            window.qtWindowHandle = nullptr;
-            window.nativeWindowHandle = nullptr;
+            delete window;
         }
 
         static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)

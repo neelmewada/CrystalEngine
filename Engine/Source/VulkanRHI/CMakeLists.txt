@@ -16,6 +16,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     INCLUDE_DIRECTORIES
         PRIVATE
             Private/
+            ${Vulkan_INCLUDE_DIR}
         PUBLIC
             Public/
     COMPILE_DEFINITIONS
@@ -32,6 +33,8 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::Core
             CE::System
         TARGETS EngineConfig
+        MACFRAMEWORKS
+            QuartzCore
     RUNTIME_DEPENDENCIES
         
 )

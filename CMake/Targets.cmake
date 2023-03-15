@@ -221,15 +221,19 @@ function(ce_add_target NAME TARGET_TYPE)
     
     # BUILD_DEPENDENCIES
 
-    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS)
+    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS MACFRAMEWORKS)
     cmake_parse_arguments(ce_add_target_BUILD_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_target_BUILD_DEPENDENCIES})
 
     if(${PAL_PLATFORM_IS_MAC})
         list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c")
         list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "c++")
         list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "-framework CoreServices")
+        if(ce_add_target_BUILD_DEPENDENCIES_MACFRAMEWORKS)
+            foreach(framework ${ce_add_target_BUILD_DEPENDENCIES_MACFRAMEWORKS})
+                list(APPEND ce_add_target_BUILD_DEPENDENCIES_PRIVATE "-framework ${framework}")
+            endforeach()
+        endif()
     endif()
-    
 
     if(ce_add_target_BUILD_DEPENDENCIES_PRIVATE OR ce_add_target_BUILD_DEPENDENCIES_PUBLIC OR ce_add_target_BUILD_DEPENDENCIES_INTERFACE)
         target_link_libraries(${NAME}

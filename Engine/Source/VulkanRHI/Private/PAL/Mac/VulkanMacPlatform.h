@@ -17,7 +17,8 @@ namespace CE
             
             ext.AddRange({
                 VK_KHR_SURFACE_EXTENSION_NAME,
-                VK_MVK_MACOS_SURFACE_EXTENSION_NAME
+                VK_MVK_MACOS_SURFACE_EXTENSION_NAME,
+                VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
             });
 
             return ext;
@@ -37,40 +38,19 @@ namespace CE
             return layers;
         }
 
-        static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow& outWindowInfo)
-        {
-            outWindowInfo = CreateTestVulkanWindow(vkInstance);
-            
-            VkMacOSSurfaceCreateInfoMVK surfaceCI{};
-            surfaceCI.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
-            surfaceCI.pNext = nullptr;
-            surfaceCI.pView = outWindowInfo.nativeWindowHandle;
-            
-            auto func = (PFN_vkCreateMacOSSurfaceMVK)vkGetInstanceProcAddr(vkInstance, "vkCreateMacOSSurfaceMVK");
-            if (func == nullptr)
-            {
-                DestroyTestVulkanWindow(outWindowInfo);
-                return nullptr;
-            }
-            
-            VkSurfaceKHR surface = nullptr;
-            if (func(vkInstance, &surfaceCI, nullptr, &surface) != VK_SUCCESS)
-            {
-                return nullptr;
-            }
+        static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow** outTestWindow);
 
-            return surface;
-        }
-
-        static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow& windowInfo)
+        static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow* testWindow)
         {
             if (testSurface != nullptr)
             {
                 vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
             }
 
-            DestroyTestVulkanWindow(windowInfo);
+            DestroyTestVulkanWindow(testWindow);
         }
+
+        static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle);
     };
     
     typedef VulkanMacPlatform VulkanPlatform;
