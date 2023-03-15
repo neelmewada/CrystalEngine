@@ -10,6 +10,11 @@ namespace CE
     {
         CE_STATIC_CLASS(VulkanMacPlatform)
     public:
+        
+        static VkInstanceCreateFlags GetVulkanInstanceFlags()
+        {
+            return VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        }
 
         static CE::Array<const char*> GetRequiredInstanceExtensions()
         {

@@ -14,6 +14,10 @@ namespace CE
     {
         CE_STATIC_CLASS(VulkanWindowsPlatform)
     public:
+        static VkInstanceCreateFlags GetVulkanInstanceFlags()
+        {
+            return 0;
+        }
 
         static CE::Array<const char*> GetRequiredInstanceExtensions()
         {

@@ -33,6 +33,12 @@ namespace CE
             }
             components.Clear();
             owner->RemoveObject(this);
+            
+            for (auto child : children)
+            {
+                delete child;
+            }
+            children.Clear();
         }
 	}
 

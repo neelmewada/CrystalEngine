@@ -16,7 +16,7 @@ namespace CE
         VkMacOSSurfaceCreateInfoMVK surfaceCI{};
         surfaceCI.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
         surfaceCI.pNext = nullptr;
-        surfaceCI.pView = (NSView*)(*outTestWindow)->winId();
+        surfaceCI.pView = (void*)(*outTestWindow)->winId();
         
         auto func = (PFN_vkCreateMacOSSurfaceMVK)vkGetInstanceProcAddr(vkInstance, "vkCreateMacOSSurfaceMVK");
         if (func == nullptr)

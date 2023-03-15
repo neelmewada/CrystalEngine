@@ -108,7 +108,7 @@ namespace CE
         VkInstanceCreateInfo instanceCI{};
         instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCI.pApplicationInfo = &appInfo;
-        instanceCI.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+        instanceCI.flags = VulkanPlatform::GetVulkanInstanceFlags();
 
         VkDebugUtilsMessengerCreateInfoEXT debugCI{};
         debugCI.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -315,12 +315,12 @@ namespace CE
             1, &commandList->renderFinishedFence[viewport->currentImageIndex],
             VK_TRUE, u64Max);
 
+        vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
+            viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
+        
         // Manually reset (close) the fences
         vkResetFences(device->GetHandle(), 1,
             &commandList->renderFinishedFence[viewport->currentImageIndex]);
-
-        vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
-            viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
 
         // Submit to Queue
         VkSubmitInfo submitInfo = {};

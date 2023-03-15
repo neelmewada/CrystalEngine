@@ -18,13 +18,17 @@ namespace CE
 
 	Scene::~Scene()
 	{
-        // Clean up the object store
-        for (auto [uuid, object] : objects)
+        for (auto gameObject : rootGameObjects)
         {
-            delete object;
+            delete gameObject;
         }
+        // Clean up the object store
+//        for (auto [uuid, object] : objects)
+//        {
+//            delete object;
+//        }
         
-        objects.Clear();
+        //objects.Clear();
         rootGameObjects.Clear();
 	}
 

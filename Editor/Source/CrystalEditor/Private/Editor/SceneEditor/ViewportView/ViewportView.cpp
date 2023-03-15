@@ -85,10 +85,10 @@ namespace CE::Editor
 
         if (!stopRenderLoop)
         {
-            QTimer::singleShot(500, this, [this]() -> void
-            {
-                
-            });
+            viewportRHI->SetClearColor(Color::Green());
+            
+            QTimer::singleShot(1000, this, &ViewportView::OnRenderLoop);
+            stopRenderLoop = true;
         }
     }
 }

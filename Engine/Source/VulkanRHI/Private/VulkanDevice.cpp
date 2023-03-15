@@ -65,9 +65,6 @@ namespace CE
 		}
 		queueFamilyToCmdPool.Clear();
 
-		//vmaDestroyAllocator(vmaAllocator);
-		//vmaAllocator = nullptr;
-
 		vkDestroyDevice(device, nullptr);
 		device = nullptr;
 
