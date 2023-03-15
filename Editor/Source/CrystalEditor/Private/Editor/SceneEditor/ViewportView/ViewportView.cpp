@@ -1,7 +1,6 @@
 #include "ViewportView.h"
 #include "ui_ViewportView.h"
 
-#include "Platform/Common/RenderViewport.h"
 
 #include "RHI/RHI.h"
 
@@ -21,8 +20,9 @@ namespace CE::Editor
 
         setWindowTitle("Viewport");
 
-        renderViewport = new RenderViewport;
-        layout()->addWidget(QWidget::createWindowContainer(renderViewport));
+        renderViewport = new ViewportWindow;
+        renderViewportWidget = QWidget::createWindowContainer(renderViewport);
+        layout()->addWidget(renderViewportWidget);
         
         //instance = new QVulkanInstance();
         //VkInstance vkInstance = (VkInstance)gDynamicRHI->GetNativeHandle();
@@ -58,10 +58,12 @@ namespace CE::Editor
         rtLayout.backBufferCount = 2;
         rtLayout.simultaneousFrameDraws = 1;
 
-        //viewportRHI = gDynamicRHI->CreateViewport(id, width(), height(), isFullScreen(), rtLayout);
-        //viewportRHI->SetClearColor(Color::Blue());
+        renderViewport->show();
 
-        //cmdList = gDynamicRHI->CreateGraphicsCommandList(viewportRHI);
+        viewportRHI = gDynamicRHI->CreateViewport(renderViewport->GetWindowHandle(), width(), height(), isFullScreen(), rtLayout);
+        viewportRHI->SetClearColor(Color::Blue());
+
+        cmdList = gDynamicRHI->CreateGraphicsCommandList(viewportRHI);
 
         QTimer::singleShot(2000, this, &ViewportView::OnRenderLoop);
     }
@@ -70,25 +72,33 @@ namespace CE::Editor
     {
         Super::hideEvent(event);
 
-        //gDynamicRHI->DestroyCommandList(cmdList);
-        //cmdList = nullptr;
+        renderViewport->hide();
 
-        //gDynamicRHI->DestroyViewport(viewportRHI);
-        //viewportRHI = nullptr;
+        gDynamicRHI->DestroyCommandList(cmdList);
+        cmdList = nullptr;
+
+        gDynamicRHI->DestroyViewport(viewportRHI);
+        viewportRHI = nullptr;
     }
 
     void ViewportView::OnRenderLoop()
     {
         CE_LOG(Info, All, "Render Loop");
 
-        //cmdList->Begin();
+        cmdList->Begin();
 
-        //cmdList->End();
+        cmdList->End();
 
-        //gDynamicRHI->ExecuteCommandList(cmdList);
+        gDynamicRHI->ExecuteCommandList(cmdList);
+        gDynamicRHI->PresentViewport(cmdList);
 
-        //if (!stopRenderLoop)
-        //    QTimer::singleShot(1000, this, &ViewportView::OnRenderLoop);
+        if (!stopRenderLoop)
+        {
+            QTimer::singleShot(1000, this, [this]() -> void
+            {
+                CE_LOG(Info, All, "Update!");
+            });
+        }
     }
 }
 

@@ -5,6 +5,7 @@
 #include <QWidget>
 
 #include "Editor/EditorViewBase.h"
+#include "GUI/ViewportWindow.h"
 
 #include "System.h"
 
@@ -14,7 +15,6 @@ class ViewportView;
 
 namespace CE::Editor
 {
-    class RenderViewport;
 
     class ViewportView : public EditorViewBase
     {
@@ -43,7 +43,8 @@ namespace CE::Editor
 
         //QVulkanInstance* instance = nullptr;
         //QVulkanWindow* vulkanWindow = nullptr;
-        RenderViewport* renderViewport = nullptr;
+        ViewportWindow* renderViewport = nullptr;
+        QWidget* renderViewportWidget = nullptr;
     };
 
 }
