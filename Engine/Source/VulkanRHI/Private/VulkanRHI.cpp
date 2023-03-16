@@ -311,11 +311,11 @@ namespace CE
 
         // -- Waiting for Fences --
         // Wait until the rendering from previous call has been finished
-        vkWaitForFences(device->GetHandle(),
+        auto result = vkWaitForFences(device->GetHandle(),
             1, &commandList->renderFinishedFence[viewport->currentImageIndex],
             VK_TRUE, u64Max);
 
-        vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
+        result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
             viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
         
         // Manually reset (close) the fences
@@ -344,7 +344,7 @@ namespace CE
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
 
-        vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
+        result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
     }
 
     void VulkanRHI::PresentViewport(RHIGraphicsCommandList* viewportCommandList)
@@ -364,7 +364,7 @@ namespace CE
         presentInfo.pSwapchains = &swapChain;
         presentInfo.pImageIndices = &vulkanViewport->currentImageIndex;
 
-        vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
+        auto result = vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
 
         // Next frame index (if we're rendering 2 frames simultaneously for triple buffering)
         vulkanViewport->currentDrawFrameIndex = (vulkanViewport->currentDrawFrameIndex + 1) % vulkanViewport->GetSimultaneousFrameDrawCount();

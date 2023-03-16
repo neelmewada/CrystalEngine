@@ -15,6 +15,11 @@ namespace CE
         CE_STATIC_CLASS(VulkanWindowsPlatform)
     public:
 
+        static VkInstanceCreateFlags GetVulkanInstanceFlags()
+        {
+            return 0;
+        }
+
         static CE::Array<const char*> GetRequiredInstanceExtensions()
         {
             CE::Array<const char*> ext = VulkanAPIPlatform::GetRequiredInstanceExtensions();
@@ -42,19 +47,19 @@ namespace CE
             return layers;
         }
 
-        static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow& outWindowInfo)
+        static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow** outTestWindow)
         {
-            outWindowInfo = CreateTestVulkanWindow(vkInstance);
+            *outTestWindow = CreateTestVulkanWindow(vkInstance);
 
             VkWin32SurfaceCreateInfoKHR surfaceCI{};
             surfaceCI.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
             surfaceCI.hinstance = GetModuleHandle(NULL);
-            surfaceCI.hwnd = (HWND)outWindowInfo.nativeWindowHandle;
+            surfaceCI.hwnd = (HWND)((*outTestWindow)->winId());
             
             auto func = (PFN_vkCreateWin32SurfaceKHR)vkGetInstanceProcAddr(vkInstance, "vkCreateWin32SurfaceKHR");
             if (func == nullptr)
             {
-                DestroyTestVulkanWindow(outWindowInfo);
+                DestroyTestVulkanWindow(*outTestWindow);
                 return nullptr;
             }
 
@@ -67,14 +72,14 @@ namespace CE
             return surface;
         }
 
-        static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow& windowInfo)
+        static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow* testWindow)
         {
             if (testSurface != nullptr)
             {
                 vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
             }
 
-            DestroyTestVulkanWindow(windowInfo);
+            DestroyTestVulkanWindow(testWindow);
         }
 
         static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)
