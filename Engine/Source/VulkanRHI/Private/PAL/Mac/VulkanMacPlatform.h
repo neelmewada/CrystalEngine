@@ -56,6 +56,8 @@ namespace CE
         }
 
         static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle);
+        
+        static void GetWindowSize(void* windowHandle, u32* width, u32* height);
     };
     
     typedef VulkanMacPlatform VulkanPlatform;

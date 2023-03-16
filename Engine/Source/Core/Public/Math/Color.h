@@ -35,7 +35,7 @@ namespace CE
 
         }
 
-        static Color FromRGBA32(u8 r, u8 g, u8 b, u8 a = 255Ui8)
+        static Color FromRGBA32(u8 r, u8 g, u8 b, u8 a = (u8)255)
         {
             return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
         }

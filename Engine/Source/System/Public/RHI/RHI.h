@@ -111,6 +111,8 @@ namespace CE
         virtual void SetClearColor(const Color& color) = 0;
 
         virtual void Rebuild() = 0;
+        
+        virtual void OnResize() = 0;
     };
 
     /*

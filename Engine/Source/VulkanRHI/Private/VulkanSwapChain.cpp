@@ -309,8 +309,7 @@ namespace CE
 			depthTextureFormat = RHITextureFormat::D32_SFLOAT;
 			break;
 		}
-
-		// TODO: Create depth texture
+        
 		RHITextureDesc depthTextureDesc{};
 		depthTextureDesc.width = width;
 		depthTextureDesc.height = height;
@@ -327,6 +326,8 @@ namespace CE
 
 	void VulkanSwapChain::DestroyDepthBuffer()
 	{
+        vkDeviceWaitIdle(device->GetHandle());
+        
 		delete swapChainDepthImage;
 	}
 

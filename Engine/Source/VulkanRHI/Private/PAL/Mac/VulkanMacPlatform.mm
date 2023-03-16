@@ -63,4 +63,12 @@ namespace CE
         return surface;
     }
 
+    void VulkanMacPlatform::GetWindowSize(void* windowHandle, u32* width, u32* height)
+    {
+        NSView* view = (NSView*)windowHandle;
+        CGSize size = [view bounds].size;
+        *width = size.width;
+        *height = size.height;
+    }
+
 }

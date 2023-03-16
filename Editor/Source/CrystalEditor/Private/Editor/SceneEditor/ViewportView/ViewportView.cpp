@@ -73,6 +73,16 @@ namespace CE::Editor
         gDynamicRHI->DestroyViewport(viewportRHI);
         viewportRHI = nullptr;
     }
+    
+    void ViewportView::resizeEvent(QResizeEvent* event)
+    {
+        Super::resizeEvent(event);
+        
+        if (viewportRHI != nullptr)
+        {
+            viewportRHI->OnResize();
+        }
+    }
 
     void ViewportView::OnRenderLoop()
     {

@@ -19,6 +19,11 @@ namespace CE
         virtual RHIRenderTarget* GetRenderTarget() override;
 
         virtual void Rebuild() override;
+        
+        virtual void OnResize() override
+        {
+            Rebuild();
+        }
 
         // - Setters -
 
