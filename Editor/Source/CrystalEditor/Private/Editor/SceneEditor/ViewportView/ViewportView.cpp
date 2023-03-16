@@ -53,10 +53,10 @@ namespace CE::Editor
         renderViewport->show();
 
         viewportRHI = gDynamicRHI->CreateViewport(renderViewport->GetWindowHandle(), width(), height(), isFullScreen(), rtLayout);
-        viewportRHI->SetClearColor(Color::Blue());
+        viewportRHI->SetClearColor(Color::Green());
 
         cmdList = gDynamicRHI->CreateGraphicsCommandList(viewportRHI);
-
+        
         QTimer::singleShot(16, this, &ViewportView::OnRenderLoop);
     }
 

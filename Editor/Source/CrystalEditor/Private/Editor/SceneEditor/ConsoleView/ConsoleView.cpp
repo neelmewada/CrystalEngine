@@ -132,8 +132,6 @@ namespace CE::Editor
     void ConsoleView::on_clearButton_clicked()
     {
         model->ClearLogs();
-
-        CE_LOG(Info, All, "Logs cleared");
     }
 
 }
