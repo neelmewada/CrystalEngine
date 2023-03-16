@@ -90,7 +90,7 @@ namespace CE
             //    attachments[1] = swapChain->swapChainDepthImage->GetImageView();
             //}
 
-            frameBuffers[i] = new VulkanFrameBuffer(device, swapChain, renderTarget);
+            frameBuffers[i] = new VulkanFrameBuffer(device, swapChain, i, renderTarget);
         }
     }
 

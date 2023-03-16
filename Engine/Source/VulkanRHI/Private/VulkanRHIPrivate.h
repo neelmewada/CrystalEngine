@@ -72,7 +72,7 @@ namespace CE
     class VulkanFrameBuffer
     {
     public:
-        VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderTarget* renderTarget);
+        VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, VulkanRenderTarget* renderTarget);
         VulkanFrameBuffer(VulkanDevice* device, VkImageView attachments[RHIMaxSimultaneousRenderOutputs + 1], VulkanRenderTarget* renderTarget);
 
         ~VulkanFrameBuffer();

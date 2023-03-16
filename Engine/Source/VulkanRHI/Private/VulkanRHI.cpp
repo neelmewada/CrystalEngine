@@ -314,13 +314,12 @@ namespace CE
         auto result = vkWaitForFences(device->GetHandle(),
             1, &commandList->renderFinishedFence[viewport->currentImageIndex],
             VK_TRUE, u64Max);
-
+        
         result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
             viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
         
         // Manually reset (close) the fences
-        vkResetFences(device->GetHandle(), 1,
-            &commandList->renderFinishedFence[viewport->currentImageIndex]);
+        result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
 
         // Submit to Queue
         VkSubmitInfo submitInfo = {};
@@ -386,7 +385,7 @@ namespace CE
     *  VulkanFrameBuffer
     */
 
-    VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, VulkanRenderTarget* renderTarget)
+    VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, VulkanRenderTarget* renderTarget)
     {
         this->device = device;
         const auto& rtLayout = renderTarget->rtLayout;
@@ -397,10 +396,11 @@ namespace CE
         frameBufferCI.attachmentCount = rtLayout.colorAttachmentCount + (rtLayout.HasDepthStencilAttachment() ? 1 : 0);
         
         Vector<VkImageView> attachments{ frameBufferCI.attachmentCount };
-        for (int i = 0; i < attachments.GetSize(); i++)
-        {
-            attachments[i] = swapChain->swapChainColorImages[i].imageView;
-        }
+        attachments[rtLayout.presentationRTIndex] = swapChain->swapChainColorImages[swapChainImageIndex].imageView;
+//        for (int i = 0; i < attachments.GetSize(); i++)
+//        {
+//            attachments[i] = swapChain->swapChainColorImages[swapChainImageIndex].imageView;
+//        }
         if (rtLayout.HasDepthStencilAttachment())
         {
             attachments[attachments.GetSize() - 1] = swapChain->swapChainDepthImage->GetImageView();
