@@ -34,6 +34,7 @@ namespace CE::Editor
     void ViewportView::showEvent(QShowEvent* event)
     {
         Super::showEvent(event);
+        stopRenderLoop = false;
 
         RHIRenderTargetLayout rtLayout{};
         rtLayout.numColorOutputs = 1;
@@ -56,12 +57,13 @@ namespace CE::Editor
 
         cmdList = gDynamicRHI->CreateGraphicsCommandList(viewportRHI);
 
-        QTimer::singleShot(2000, this, &ViewportView::OnRenderLoop);
+        QTimer::singleShot(16, this, &ViewportView::OnRenderLoop);
     }
 
     void ViewportView::hideEvent(QHideEvent* event)
     {
         Super::hideEvent(event);
+        stopRenderLoop = true;
 
         renderViewport->hide();
 
@@ -74,21 +76,23 @@ namespace CE::Editor
 
     void ViewportView::OnRenderLoop()
     {
-        CE_LOG(Info, All, "Render Loop");
+        if (stopRenderLoop)
+            return;
 
         cmdList->Begin();
 
         cmdList->End();
 
-        gDynamicRHI->ExecuteCommandList(cmdList);
-        gDynamicRHI->PresentViewport(cmdList);
+        if (gDynamicRHI->ExecuteCommandList(cmdList))
+        {
+            gDynamicRHI->PresentViewport(cmdList);
+        }
 
         if (!stopRenderLoop)
         {
             viewportRHI->SetClearColor(Color::Green());
             
-            QTimer::singleShot(1000, this, &ViewportView::OnRenderLoop);
-            stopRenderLoop = true;
+            QTimer::singleShot(16, this, &ViewportView::OnRenderLoop);
         }
     }
 }

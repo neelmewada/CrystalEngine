@@ -212,13 +212,6 @@ namespace CE
         return new VulkanViewport(this, device, windowHandle, width, height, isFullscreen, rtLayout);
     }
 
-#if PAL_TRAIT_QT_SUPPORTED
-    RHIViewport* VulkanRHI::CreateQtViewport(void* qtWindow, const RHIRenderTargetLayout& rtLayout)
-    {
-        return new VulkanViewport(this, device, qtWindow, rtLayout);
-    }
-#endif
-
     void VulkanRHI::DestroyViewport(RHIViewport* viewport)
     {
         delete viewport;
@@ -247,23 +240,24 @@ namespace CE
         delete commandList;
     }
 
-    void VulkanRHI::ExecuteCommandList(RHICommandList* commandList)
+    bool VulkanRHI::ExecuteCommandList(RHICommandList* commandList)
     {
         if (commandList->GetCommandListType() == RHICommandListType::Graphics)
         {
             auto vulkanCommandList = (VulkanGraphicsCommandList*)commandList;
             if (vulkanCommandList->IsViewportTarget())
             {
-                ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetViewport());
+                return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetViewport());
             }
             else
             {
-                ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetRenderTarget());
+                return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetRenderTarget());
             }
         }
+        return false;
     }
 
-    void VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
+    bool VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -303,9 +297,10 @@ namespace CE
             commandList->renderFinishedFence[renderTarget->currentImageIndex]);
 
         renderTarget->isFresh = false;
+        return true;
     }
 
-    void VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport)
+    bool VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -317,6 +312,12 @@ namespace CE
         
         result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
             viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            viewport->Rebuild();
+            return false;
+        }
         
         // Manually reset (close) the fences
         result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
@@ -344,13 +345,15 @@ namespace CE
         submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
 
         result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
+
+        return true;
     }
 
-    void VulkanRHI::PresentViewport(RHIGraphicsCommandList* viewportCommandList)
+    bool VulkanRHI::PresentViewport(RHIGraphicsCommandList* viewportCommandList)
     {
         auto vulkanCommandList = (VulkanGraphicsCommandList*)viewportCommandList;
         if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
-            return;
+            return false;
 
         auto vulkanViewport = vulkanCommandList->GetViewport();
         auto swapChain = vulkanViewport->GetSwapChain()-> GetHandle();
@@ -364,9 +367,13 @@ namespace CE
         presentInfo.pImageIndices = &vulkanViewport->currentImageIndex;
 
         auto result = vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
+        if (result != VK_SUCCESS)
+            return false;
 
         // Next frame index (if we're rendering 2 frames simultaneously for triple buffering)
         vulkanViewport->currentDrawFrameIndex = (vulkanViewport->currentDrawFrameIndex + 1) % vulkanViewport->GetSimultaneousFrameDrawCount();
+
+        return true;
     }
 
     // - Resources -
@@ -420,8 +427,6 @@ namespace CE
             CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
             return;
         }
-
-        CE_LOG(Info, All, "Created Vulkan Frame Buffer");
     }
 
     VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, 
@@ -449,15 +454,11 @@ namespace CE
             CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
             return;
         }
-
-        CE_LOG(Info, All, "Created Vulkan Frame Buffer");
     }
 
     VulkanFrameBuffer::~VulkanFrameBuffer()
     {
         vkDestroyFramebuffer(device->GetHandle(), frameBuffer, nullptr);
-
-        CE_LOG(Info, All, "Destroyed Vulkan Frame Buffer");
     }
 
     /******************************************************************************

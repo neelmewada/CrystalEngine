@@ -37,6 +37,8 @@ namespace CE
 
         CE_INLINE bool HasDepthStencilAttachment() { return depthBufferFormat != RHIDepthStencilFormat::None; }
 
+        void RebuildSwapChain();
+
     protected:
 
         void CreateSurface();

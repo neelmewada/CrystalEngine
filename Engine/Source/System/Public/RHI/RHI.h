@@ -42,11 +42,6 @@ namespace CE
             u32 width, u32 height, bool isFullscreen,
             const RHIRenderTargetLayout& rtLayout) = 0;
 
-#if PAL_TRAIT_QT_SUPPORTED
-        // - Qt Rendering API -
-        virtual RHIViewport* CreateQtViewport(void* qtWindow, const RHIRenderTargetLayout& rtLayout) = 0;
-#endif
-
         virtual void DestroyViewport(RHIViewport* viewport) = 0;
 
         // - Command List -
@@ -55,9 +50,9 @@ namespace CE
         virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIRenderTarget* renderTarget) = 0;
         virtual void DestroyCommandList(RHICommandList* commandList) = 0;
 
-        virtual void ExecuteCommandList(RHICommandList* commandList) = 0;
+        virtual bool ExecuteCommandList(RHICommandList* commandList) = 0;
 
-        virtual void PresentViewport(RHIGraphicsCommandList* viewportCommandList) = 0;
+        virtual bool PresentViewport(RHIGraphicsCommandList* viewportCommandList) = 0;
 
         // - Resources -
 
@@ -114,6 +109,8 @@ namespace CE
         virtual RHIRenderTarget* GetRenderTarget() = 0;
 
         virtual void SetClearColor(const Color& color) = 0;
+
+        virtual void Rebuild() = 0;
     };
 
     /*

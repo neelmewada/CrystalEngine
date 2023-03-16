@@ -5,6 +5,8 @@
 #include "VulkanSwapChain.h"
 #include "VulkanTexture.h"
 
+#include "PAL/Common/VulkanPlatform.h"
+
 #if PAL_TRAIT_QT_SUPPORTED
 #include <QVulkanWindow>
 #endif
@@ -83,13 +85,6 @@ namespace CE
 
         for (int i = 0; i < frameBuffers.GetSize(); i++)
         {
-            //VkImageView attachments[2] = {};
-            //attachments[0] = swapChain->swapChainColorImages[i].imageView;
-            //if (swapChain->HasDepthStencilAttachment())
-            //{
-            //    attachments[1] = swapChain->swapChainDepthImage->GetImageView();
-            //}
-
             frameBuffers[i] = new VulkanFrameBuffer(device, swapChain, i, renderTarget);
         }
     }
@@ -124,6 +119,21 @@ namespace CE
     RHIRenderTarget* VulkanViewport::GetRenderTarget()
     {
         return renderTarget;
+    }
+
+    void VulkanViewport::Rebuild()
+    {
+        VulkanPlatform::GetWindowSize(windowHandle, &swapChain->width, &swapChain->height);
+
+        swapChain->RebuildSwapChain();
+
+        for (int i = 0; i < frameBuffers.GetSize(); i++)
+        {
+            delete frameBuffers[i];
+        }
+        frameBuffers.Clear();
+
+        CreateFrameBuffers();
     }
 
     u32 VulkanViewport::GetBackBufferCount()

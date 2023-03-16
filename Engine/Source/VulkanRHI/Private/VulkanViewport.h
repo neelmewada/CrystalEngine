@@ -18,13 +18,15 @@ namespace CE
 
         virtual RHIRenderTarget* GetRenderTarget() override;
 
-        VulkanSwapChain* GetSwapChain() { return swapChain; }
+        virtual void Rebuild() override;
 
         // - Setters -
 
         virtual void SetClearColor(const Color& color) override;
 
         // - Getters -
+
+        VulkanSwapChain* GetSwapChain() { return swapChain; }
 
         u32 GetBackBufferCount();
         u32 GetSimultaneousFrameDrawCount();

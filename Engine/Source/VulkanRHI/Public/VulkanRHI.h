@@ -57,11 +57,6 @@ namespace CE
             u32 width, u32 height, bool isFullscreen,
             const RHIRenderTargetLayout& rtLayout) override;
 
-#if PAL_TRAIT_QT_SUPPORTED
-        // - Qt Rendering API -
-        virtual RHIViewport* CreateQtViewport(void* qtWindow, const RHIRenderTargetLayout& rtLayout) override;
-#endif
-
         virtual void DestroyViewport(RHIViewport* viewport) override;
 
         // - Command List -
@@ -71,9 +66,9 @@ namespace CE
 
         virtual void DestroyCommandList(RHICommandList* commandList) override;
 
-        virtual void ExecuteCommandList(RHICommandList* commandList) override;
+        virtual bool ExecuteCommandList(RHICommandList* commandList) override;
 
-        virtual void PresentViewport(RHIGraphicsCommandList* viewportCommandList) override;
+        virtual bool PresentViewport(RHIGraphicsCommandList* viewportCommandList) override;
 
         // - Resources -
 
@@ -82,8 +77,8 @@ namespace CE
 
     protected:
 
-        void ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport);
-        void ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget);
+        bool ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport);
+        bool ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget);
 
     private:
         VkInstance vkInstance = nullptr;

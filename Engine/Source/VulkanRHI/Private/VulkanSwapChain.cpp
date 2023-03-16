@@ -47,6 +47,17 @@ namespace CE
 		CE_LOG(Info, All, "Destroyed Vulkan SwapChain");
 	}
 
+	void VulkanSwapChain::RebuildSwapChain()
+	{
+		CreateSwapChain();
+
+		if (depthBufferFormat != RHIDepthStencilFormat::None)
+		{
+			DestroyDepthBuffer();
+			CreateDepthBuffer();
+		}
+	}
+
 	void VulkanSwapChain::CreateSurface()
 	{
 		surface = VulkanPlatform::CreateSurface((VkInstance)vulkanRHI->GetNativeHandle(), windowHandle);
@@ -243,6 +254,12 @@ namespace CE
 		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, nullptr);
 		std::vector<VkImage> images(swapChainImageCount);
 		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, images.data());
+
+		// Destroy old image views
+		for (const auto& swapChainImage : swapChainColorImages)
+		{
+			vkDestroyImageView(device->GetHandle(), swapChainImage.imageView, nullptr);
+		}
 
 		swapChainColorImages.Clear();
 

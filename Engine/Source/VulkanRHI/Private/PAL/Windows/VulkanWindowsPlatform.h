@@ -103,6 +103,17 @@ namespace CE
 
             return surface;
         }
+
+        static void GetWindowSize(void* windowHandle, u32* width, u32* height)
+        {
+            HWND hWnd = (HWND)windowHandle;
+            RECT rect;
+            if (GetWindowRect(hWnd, &rect))
+            {
+                *width = rect.right - rect.left;
+                *height = rect.bottom - rect.top;
+            }
+        }
     };
 
     typedef VulkanWindowsPlatform VulkanPlatform;
