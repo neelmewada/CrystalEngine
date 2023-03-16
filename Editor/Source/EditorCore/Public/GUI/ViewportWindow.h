@@ -12,7 +12,14 @@ namespace CE::Editor
     public:
         ViewportWindow(QWindow* parent = nullptr) : QWindow(parent)
         {
-            setSurfaceType(QSurface::VulkanSurface);
+            if (gDynamicRHI == nullptr)
+                return;
+            if (gDynamicRHI->GetGraphicsBackend() == RHIGraphicsBackend::Vulkan)
+                setSurfaceType(QSurface::VulkanSurface);
+            else if (gDynamicRHI->GetGraphicsBackend() == RHIGraphicsBackend::DX12)
+                setSurfaceType(QSurface::Direct3DSurface);
+            else if (gDynamicRHI->GetGraphicsBackend() == RHIGraphicsBackend::Metal)
+                setSurfaceType(QSurface::MetalSurface);
         }
 
         virtual ~ViewportWindow() {}

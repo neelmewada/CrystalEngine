@@ -35,6 +35,21 @@ namespace CE
 
         }
 
+        static Color FromRGBA32(u8 r, u8 g, u8 b, u8 a = 255Ui8)
+        {
+            return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+        }
+
+        static Color FromRGBHex(u32 hex)
+        {
+            return FromRGBA32((u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
+        }
+
+        static Color FromRGBAHex(u32 hex)
+        {
+            return FromRGBA32((u8)(hex >> 24), (u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
+        }
+
         inline Color operator*(s32 value) const
         {
             return Color(value * r, value * g, value * b, value * a);

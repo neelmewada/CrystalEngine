@@ -9,15 +9,14 @@ namespace CE
 
     class CORE_API SystemObject : public Object
     {
-        CE_CLASS(SystemObject, Object);
-
+        CE_CLASS(SystemObject, Object)
     public:
         SystemObject();
         SystemObject(CE::Name name);
 
         ~SystemObject();
 
-        bool AddSystemComponent(SystemComponent* systemComponent);
+        virtual bool AddSystemComponent(SystemComponent* systemComponent);
 
         template<typename T> requires std::is_base_of<SystemComponent, T>::value
         T* AddSystemComponent()

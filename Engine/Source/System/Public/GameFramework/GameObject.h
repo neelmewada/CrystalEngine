@@ -60,6 +60,14 @@ namespace CE
             TypeId componentTypeId = ComponentType::Type()->GetTypeId();
             return GetComponent(componentTypeId);
         }
+
+        bool HasComponent(TypeId componentTypeId);
+
+        template<typename ComponentType>
+        CE_INLINE bool HasComponent()
+        {
+            return HasComponent(ComponentType::Type()->GetTypeId());
+        }
         
         void AddChild(GameObject* child);
         void RemoveChild(GameObject* child);

@@ -7,7 +7,8 @@ namespace CE
     {
         None,
         Vulkan,
-        Metal
+        Metal,
+        DX12,
     };
 
     enum class RHIResourceType

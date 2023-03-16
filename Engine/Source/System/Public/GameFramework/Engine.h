@@ -10,10 +10,10 @@ namespace CE
         class CrystalEditorApplication;
     }
 
-    /// The Engine class that manages the game engine and it's subsystems (i.e. components)
-    class SYSTEM_API Engine : public SystemObject
+    /// The Engine class that manages the game engine and it's subsystems
+    class SYSTEM_API Engine : public Object
     {
-        CE_CLASS(Engine, SystemObject);
+        CE_CLASS(Engine, Object);
 
     private:
         Engine();
@@ -26,8 +26,8 @@ namespace CE
 
         virtual void Tick(f32 deltaTime);
 
-        virtual void OnSystemComponentAdded(SystemComponent* component) override;
-        virtual void OnSystemComponentRemoved(SystemComponent* component) override;
+        //virtual void OnSystemComponentAdded(SystemComponent* component) override;
+        //virtual void OnSystemComponentRemoved(SystemComponent* component) override;
 
         friend class SystemModule;
         friend class Application;
@@ -37,7 +37,7 @@ namespace CE
 } // namespace CE
 
 CE_RTTI_CLASS(SYSTEM_API, CE, Engine,
-    CE_SUPER(CE::SystemObject),
+    CE_SUPER(CE::Object),
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
