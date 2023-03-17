@@ -46,7 +46,7 @@ namespace CE
         void DestroyObject(Object* object);
 
         void DestroyAll();
-
+        
     protected:
         ObjectStore objects{};
         

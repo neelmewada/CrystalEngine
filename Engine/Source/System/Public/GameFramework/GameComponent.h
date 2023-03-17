@@ -6,12 +6,6 @@ namespace CE
 {
     class GameObject;
 
-    class IComponentUpdateListener
-    {
-    public:
-        virtual void OnComponentUpdated(GameComponent* component) {}
-    };
-
     class SYSTEM_API GameComponent : public Component
     {
         CE_CLASS(GameComponent, Component)
