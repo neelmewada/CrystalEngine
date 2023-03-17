@@ -29,6 +29,9 @@ namespace CE::Editor
         virtual void hideEvent(QHideEvent* event) override;
         virtual void resizeEvent(QResizeEvent* event) override;
 
+        void CreateViewport();
+        void DestroyViewport();
+
     private slots:
         void OnRenderLoop();
 

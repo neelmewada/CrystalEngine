@@ -25,12 +25,15 @@ namespace CE
 		}
 
         // Unbind all outgoing connections and remove destinations' incomingSignalBinders list
-        for (auto& [name, binding] : signalBindings)
+        for (auto& [name, bindingArray] : signalNameToBindingsMap)
         {
-            if (binding.boundObject != nullptr)
-                binding.boundObject->incomingSignalBinders.Remove(this);
+            for (const auto& binding : bindingArray)
+            {
+                if (binding.boundObject != nullptr)
+                    binding.boundObject->incomingSignalBinders.Remove(this);
+            }
         }
-        signalBindings.Clear();
+        signalNameToBindingsMap.Clear();
         
         // Unbind all incoming connections from 'incomingSignalBinders' because 'this' object is about to be destroyed
         for (auto incomingSignalObject : incomingSignalBinders)
@@ -86,8 +89,11 @@ namespace CE
         binding.signalFuntion = sourceSignal;
         binding.boundObject = destinationObject;
         binding.boundFunction = destinationEvent;
-        
-        signalBindings.Add({ sourceSignal->GetName(), binding });
+
+        if (!signalNameToBindingsMap.KeyExists(sourceSignal->GetName()))
+            signalNameToBindingsMap.Add({ sourceSignal->GetName(), { binding } });
+        else
+            signalNameToBindingsMap[sourceSignal->GetName()].Add(binding);
         
         // flow: this -> destinationObject
         destinationObject->incomingSignalBinders.Add(this);
@@ -102,14 +108,20 @@ namespace CE
             return;
         }
         
-        if (signalBindings.KeyExists(sourceSignal->GetName()))
+        if (signalNameToBindingsMap.KeyExists(sourceSignal->GetName()))
         {
-            auto& binding = signalBindings[sourceSignal->GetName()];
-            if (binding.boundObject != nullptr)
+            auto& bindingArray = signalNameToBindingsMap[sourceSignal->GetName()];
+
+            for (int i = 0; i < bindingArray.GetSize(); i++)
             {
-                binding.boundObject->incomingSignalBinders.Remove(this);
+                const auto& binding = bindingArray[i];
+                if (binding.boundObject != nullptr)
+                {
+                    binding.boundObject->incomingSignalBinders.Remove(this);
+                }
             }
-            signalBindings.Remove(sourceSignal->GetName());
+            
+            signalNameToBindingsMap.Remove(sourceSignal->GetName());
         }
         
         return;
@@ -124,26 +136,31 @@ namespace CE
         
         Array<Name> bindingsToRemove{};
         
-        for (auto& [name, binding] : signalBindings)
+        for (auto& [name, bindingArray] : signalNameToBindingsMap)
         {
-            if (binding.boundObject == destinationObject)
+            for (const auto& binding : bindingArray)
             {
-                bindingsToRemove.Add(name);
+                if (binding.boundObject == destinationObject)
+                {
+                    bindingsToRemove.Add(name);
+                }
             }
         }
         
         for (auto name : bindingsToRemove)
         {
-            signalBindings.Remove(name);
+            signalNameToBindingsMap.Remove(name);
         }
     }
 
     void Object::FireSignal(Name signalName, const CE::Array<CE::Variant>& params)
     {
-        if (signalBindings.KeyExists(signalName))
+        if (signalNameToBindingsMap.KeyExists(signalName))
         {
-            auto& binding = signalBindings[signalName];
-            binding.boundFunction->Invoke(binding.boundObject, params);
+            for (const auto& binding : signalNameToBindingsMap[signalName])
+            {
+                binding.boundFunction->Invoke(binding.boundObject, params);
+            }
         }
     }
 }

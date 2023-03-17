@@ -35,6 +35,36 @@ namespace CE::Editor
     {
         Super::showEvent(event);
         stopRenderLoop = false;
+        
+        CreateViewport();
+        
+        QTimer::singleShot(16, this, &ViewportView::OnRenderLoop);
+    }
+
+    void ViewportView::hideEvent(QHideEvent* event)
+    {
+        Super::hideEvent(event);
+        stopRenderLoop = true;
+        
+        DestroyViewport();
+    }
+    
+    void ViewportView::resizeEvent(QResizeEvent* event)
+    {
+        Super::resizeEvent(event);
+        
+        if (viewportRHI != nullptr)
+        {
+            viewportRHI->OnResize();
+        }
+    }
+
+    void ViewportView::CreateViewport()
+    {
+        if (width() == 0 || height() == 0)
+        {
+            return;
+        }
 
         RHIRenderTargetLayout rtLayout{};
         rtLayout.numColorOutputs = 1;
@@ -56,15 +86,10 @@ namespace CE::Editor
         viewportRHI->SetClearColor(Color::FromRGBHex(0x3d84d4));
 
         cmdList = gDynamicRHI->CreateGraphicsCommandList(viewportRHI);
-        
-        QTimer::singleShot(16, this, &ViewportView::OnRenderLoop);
     }
 
-    void ViewportView::hideEvent(QHideEvent* event)
+    void ViewportView::DestroyViewport()
     {
-        Super::hideEvent(event);
-        stopRenderLoop = true;
-
         renderViewport->hide();
 
         gDynamicRHI->DestroyCommandList(cmdList);
@@ -73,29 +98,26 @@ namespace CE::Editor
         gDynamicRHI->DestroyViewport(viewportRHI);
         viewportRHI = nullptr;
     }
-    
-    void ViewportView::resizeEvent(QResizeEvent* event)
-    {
-        Super::resizeEvent(event);
-        
-        if (viewportRHI != nullptr)
-        {
-            viewportRHI->OnResize();
-        }
-    }
 
     void ViewportView::OnRenderLoop()
     {
         if (stopRenderLoop)
             return;
 
-        cmdList->Begin();
-
-        cmdList->End();
-
-        if (gDynamicRHI->ExecuteCommandList(cmdList))
+        if (cmdList != nullptr)
         {
-            gDynamicRHI->PresentViewport(cmdList);
+            cmdList->Begin();
+
+            cmdList->End();
+
+            if (gDynamicRHI->ExecuteCommandList(cmdList))
+            {
+                gDynamicRHI->PresentViewport(cmdList);
+            }
+        }
+        else
+        {
+            CreateViewport();
         }
 
         if (!stopRenderLoop)

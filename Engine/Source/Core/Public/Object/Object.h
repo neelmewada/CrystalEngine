@@ -82,7 +82,7 @@ namespace CE
         Array<EventBus*> subscribedBuses{};
         
         // Signal System
-        HashMap<Name, SignalBinding> signalBindings{};
+        HashMap<Name, Array<SignalBinding>> signalNameToBindingsMap{};
         Array<Object*> incomingSignalBinders{};
         
     protected:

@@ -77,7 +77,7 @@ namespace CE
         
         if (owner != nullptr)
         {
-            owner->objects.AddObject(component);
+            owner->AddObject(component);
         }
         
         component->Init();
@@ -94,7 +94,7 @@ namespace CE
         
         if (owner != nullptr)
         {
-            owner->objects.RemoveObject(component);
+            owner->RemoveObject(component);
         }
 	}
 
