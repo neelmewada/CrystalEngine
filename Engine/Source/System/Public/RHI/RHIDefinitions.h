@@ -16,6 +16,8 @@ namespace CE
         None,
         Buffer,
         Texture,
+        ShaderModule,
+        GraphicsPipelineState,
 
         RenderTarget,
         RenderPass,
@@ -235,5 +237,26 @@ namespace CE
         Graphics,
         Compute,
     };
+
+    /*
+    *   Shader
+    */
+
+    enum class RHIPipelineType
+    {
+        None = 0,
+        Graphics,
+        Compute
+    };
+
+    enum class RHIShaderStage
+    {
+        None = 0,
+        Vertex = BIT(0),
+        Fragment = BIT(1),
+    };
+    ENUM_CLASS_FLAGS(RHIShaderStage);
+
+    
 
 } // namespace CE

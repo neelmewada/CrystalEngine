@@ -16,6 +16,7 @@ namespace CE::Editor
     class ViewportView;
     class DetailsView;
     class ConsoleView;
+    class AssetsView;
 
     class SceneEditorWindow
         : public EditorWindowBase
@@ -27,7 +28,7 @@ namespace CE::Editor
         explicit SceneEditorWindow(QWidget* parent = nullptr);
         ~SceneEditorWindow();
 
-        ///////////////////////////////////////
+        // *****************************************
         // SceneEditorBus::Interface
 
         virtual void OpenEmptyScene() override;
@@ -84,6 +85,9 @@ namespace CE::Editor
 
         ConsoleView* consoleView = nullptr;
         ads::CDockWidget* consoleViewDockWidget = nullptr;
+
+        AssetsView* assetsView = nullptr;
+        ads::CDockWidget* assetsViewDockWidget = nullptr;
     };
 
 }

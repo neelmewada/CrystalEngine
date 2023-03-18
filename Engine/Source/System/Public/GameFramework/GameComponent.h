@@ -21,7 +21,6 @@ namespace CE
         CE_INLINE GameObject* GetOwner() const { return owner; }
 
         CE_SIGNAL(OnComponentValuesUpdated);
-        
     protected:
         CE::GameObject* owner = nullptr;
 

@@ -14,7 +14,6 @@ namespace CE
     struct CORE_API ProjectSettings
     {
         CE_STRUCT(ProjectSettings)
-
     private:
         ProjectSettings();
 

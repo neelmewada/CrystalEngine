@@ -46,7 +46,7 @@ namespace CE
         
         const TypeInfo* GetDeclarationType() const;
 
-        CE_INLINE TypeId GetDeclarationTypeId() const { return GetDeclarationType()->GetTypeId(); }
+        CE_INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
 
         template<typename T>
         T& GetFieldValue(void* instance)

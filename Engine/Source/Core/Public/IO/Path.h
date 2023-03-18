@@ -17,96 +17,96 @@ namespace CE::IO
         Path();
         ~Path();
 
-        inline Path(fs::path path) : Impl(path)
+        inline Path(fs::path path) : impl(path)
         {}
 
-        inline Path(String pathString) : Impl(pathString.GetCString())
+        inline Path(String pathString) : impl(pathString.GetCString())
         {}
 
-        inline Path(std::string pathString) : Impl(pathString)
+        inline Path(std::string pathString) : impl(pathString)
         {}
 
-        inline Path(const char* cString) : Impl(cString)
+        inline Path(const char* cString) : impl(cString)
         {}
 
         inline String GetString() const
         {
-            return Impl.string();
+            return impl.string();
         }
 
         inline bool IsRelative() const
         {
-            return Impl.is_relative();
+            return impl.is_relative();
         }
 
         inline bool IsAbsolute() const
         {
-            return Impl.is_absolute();
+            return impl.is_absolute();
         }
 
         inline friend Path operator/(const Path& lhs, const Path& rhs)
         {
-            return Path(lhs.Impl / rhs.Impl);
+            return Path(lhs.impl / rhs.impl);
         }
 
         inline friend Path operator/(const Path& lhs, const String& rhs)
         {
-            return Path(lhs.Impl / rhs.GetCString());
+            return Path(lhs.impl / rhs.GetCString());
         }
 
         inline friend Path operator/(const Path& lhs, const char* rhs)
         {
-            return Path(lhs.Impl / rhs);
+            return Path(lhs.impl / rhs);
         }
 
         inline friend bool operator==(const Path& lhs, const Path& rhs)
         {
-            return lhs.Impl == rhs.Impl;
+            return lhs.impl == rhs.impl;
         }
 
         inline friend bool operator!=(const Path& lhs, const Path& rhs)
         {
-            return lhs.Impl != rhs.Impl;
+            return lhs.impl != rhs.impl;
         }
 
         inline bool Exists() const
         {
-            return fs::exists(Impl);
+            return fs::exists(impl);
         }
 
         inline bool IsEmpty() const
         {
-            return Impl.empty();
+            return impl.empty();
         }
 
         inline bool IsDirectory() const
         {
-            return fs::is_directory(Impl);
+            return fs::is_directory(impl);
         }
 
         inline Path GetParentPath() const
         {
-            return Path(Impl.parent_path());
+            return Path(impl.parent_path());
         }
 
         static inline Path GetRelative(const Path& path, const Path& base)
         {
-            return fs::relative(path.Impl, base.Impl);
+            return fs::relative(path.impl, base.impl);
         }
 
         friend inline std::ostream& operator<<(std::ostream& os, const Path& path)
         {
-            os << path.Impl;
+            os << path.impl;
             return os;
         }
 
         inline static bool CreateDirectories(IO::Path path)
         {
-            return fs::create_directories(path.Impl);
+            return fs::create_directories(path.impl);
         }
 
     private:
-        fs::path Impl;
+        fs::path impl;
 
         friend class CE::IO::FileStream;
     };

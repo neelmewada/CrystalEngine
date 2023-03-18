@@ -1,7 +1,6 @@
 #include "ViewportView.h"
 #include "ui_ViewportView.h"
 
-
 #include "RHI/RHI.h"
 
 #include <QTimer>

@@ -1,12 +1,15 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "Events/EditorSystemEventBus.h"
 #include "Application/EditorQtApplication.h"
 
 // Data
 #include "Data/EditorPrefs.h"
 
-#include "Module/ModuleManager.h"
+// Assets
+#include "Assets/AssetDatabase.h"
 
 namespace CE::Editor
 {

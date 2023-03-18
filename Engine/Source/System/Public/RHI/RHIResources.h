@@ -53,7 +53,7 @@ namespace CE
     
     class SYSTEM_API RHITexture : public RHIResource, public IRHIDeviceObject
     {
-    public:
+    protected:
         RHITexture() : RHIResource(RHIResourceType::Texture), IRHIDeviceObject(RHIDeviceObjectType::Texture)
         {}
         
@@ -69,6 +69,32 @@ namespace CE
         virtual u32 GetNumberOfChannels() = 0;
 
         virtual void UploadData(const void* pixels) = 0;
+    };
+
+    /***********************************
+    *   Shader
+    */
+
+    class SYSTEM_API RHIShaderModule : public RHIResource
+    {
+    protected:
+        RHIShaderModule() : RHIResource(RHIResourceType::ShaderModule)
+        {}
+
+    public:
+        virtual ~RHIShaderModule() = default;
+
+        // - Public API -
+
+        virtual Name GetName() = 0;
+
+        virtual bool IsValidShader() = 0;
+
+        virtual RHIShaderStage GetShaderStage() = 0;
+
+        bool IsVertexShader() { return GetShaderStage() == RHIShaderStage::Vertex; }
+        bool IsFragmentShader() { return GetShaderStage() == RHIShaderStage::Fragment; }
+
     };
     
 } // namespace CE

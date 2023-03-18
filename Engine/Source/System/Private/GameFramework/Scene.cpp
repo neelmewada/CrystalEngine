@@ -22,13 +22,7 @@ namespace CE
         {
             delete gameObject;
         }
-        // Clean up the object store
-//        for (auto [uuid, object] : objects)
-//        {
-//            delete object;
-//        }
-        
-        //objects.Clear();
+
         rootGameObjects.Clear();
 	}
 
@@ -71,16 +65,35 @@ namespace CE
     void Scene::AddObject(Object* object)
     {
         objects.AddObject(object);
+        
+        auto typeId = object->GetType()->GetTypeId();
+
+        if (objectTypeToArrayMap.KeyExists(typeId))
+        {
+            objectTypeToArrayMap[typeId].Add(object);
+        }
+        else
+        {
+            objectTypeToArrayMap.Add({ typeId, { object } });
+        }
     }
 
     void Scene::RemoveObject(Object* object)
     {
         objects.RemoveObject(object);
+
+        auto typeId = object->GetType()->GetTypeId();
+
+        if (objectTypeToArrayMap.KeyExists(typeId))
+        {
+            objectTypeToArrayMap[typeId].Remove(object);
+        }
     }
 
     void Scene::DestroyObject(Object* object)
     {
-        objects.RemoveObject(object);
+        RemoveObject(object);
+
         delete object;
     }
 

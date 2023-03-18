@@ -112,7 +112,7 @@ namespace CE::Editor::Qt
         {
             auto componentEntry = GameComponentRegistry::Get().GetEntryAt(i);
 
-            if (componentEntry == nullptr)
+            if (componentEntry == nullptr || !componentEntry->CanBeInstantiated())
                 continue;
 
             auto name = componentEntry->GetName();

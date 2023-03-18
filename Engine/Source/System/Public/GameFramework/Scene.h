@@ -34,11 +34,20 @@ namespace CE
             return rootGameObjects[index];
         }
 
-        s32 GetRootGameObjectIndex(GameObject* go) const
+        CE_INLINE s32 GetRootGameObjectIndex(GameObject* go) const
         {
             if (go == nullptr)
                 return -1;
             return rootGameObjects.IndexOf(go);
+        }
+
+        CE_INLINE CE::Array<Object*> GetObjectsOfType(TypeId typeId)
+        {
+            if (!objectTypeToArrayMap.KeyExists(typeId))
+            {
+                return {};
+            }
+            return objectTypeToArrayMap[typeId];
         }
         
         void AddObject(Object* object);
@@ -49,6 +58,7 @@ namespace CE
         
     protected:
         ObjectStore objects{};
+        CE::HashMap<TypeId, CE::Array<Object*>> objectTypeToArrayMap{};
         
         CE::Array<GameObject*> rootGameObjects{};
         

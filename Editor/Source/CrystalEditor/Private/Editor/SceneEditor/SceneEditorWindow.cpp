@@ -6,6 +6,8 @@
 #include "DetailsView/DetailsView.h"
 #include "ConsoleView/ConsoleView.h"
 
+#include "Editor/CrystalEditor/AssetsView/AssetsView.h"
+
 #include <QFileDialog>
 
 namespace CE::Editor
@@ -69,11 +71,18 @@ namespace CE::Editor
         connect(consoleView, &ConsoleView::OnLogPushed, this, &SceneEditorWindow::OnLogPushedToConsole);
 
         // **********************************
+        // Assets View
+        assetsView = new AssetsView(this);
+        assetsViewDockWidget = new ads::CDockWidget(assetsView->windowTitle());
+        assetsViewDockWidget->setWidget(assetsView);
+
+        // **********************************
         // Add the dock widget to the top dock widget area
         dockManager->addDockWidget(ads::CenterDockWidgetArea, viewportViewDockWidget);
         dockManager->addDockWidget(ads::LeftDockWidgetArea, sceneOutlinerViewDockWidget);
         dockManager->addDockWidget(ads::RightDockWidgetArea, detailsViewDockWidget);
-        dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
+        auto consoleDockArea = dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
+        dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, assetsViewDockWidget);
     }
 
     SceneEditorWindow::~SceneEditorWindow()
