@@ -8,9 +8,6 @@
 // Data
 #include "Data/EditorPrefs.h"
 
-// Assets
-#include "Assets/AssetDatabase.h"
-
 namespace CE::Editor
 {
 
