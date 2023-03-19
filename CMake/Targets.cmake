@@ -47,7 +47,7 @@ endfunction()
 function(ce_add_target NAME TARGET_TYPE)
     string(TOUPPER ${NAME} NAME_UPPERCASE)
 
-    set(options GENERATED AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS)
+    set(options GENERATED AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS VS_STARTUP_PROJECT)
     set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY)
     set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
 
@@ -114,6 +114,11 @@ function(ce_add_target NAME TARGET_TYPE)
                 PROPERTIES ${PAL_EXECUTABLE_APPLICATION_FLAG} $<CONFIG:Release>
             )
         endif()
+
+        if(${ce_add_target_VS_STARTUP_PROJECT})
+            set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${NAME})
+        endif()
+        
         
     else()
         message(FATAL_ERROR "Invalid TARGET_TYPE passed: ${TARGET_TYPE}")

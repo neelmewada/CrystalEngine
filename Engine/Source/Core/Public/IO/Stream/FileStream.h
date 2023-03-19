@@ -28,7 +28,7 @@ namespace CE::IO
             {
                 Path::CreateDirectories(baseDir);
             }
-            fStream = std::fstream(filePath.Impl, (std::ios_base::openmode)fileMode);
+            fStream = std::fstream(filePath.impl, (std::ios_base::openmode)fileMode);
             valid = true;
         }
 

@@ -48,6 +48,7 @@ if (CE_STANDALONE)
 
         ce_set(CE_STANDALONE OFF)
         ce_set(PAL_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+        ce_set(PAL_HOST_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
         
     else()
         message(FATAL_ERROR "Invalid CE_STANDALONE platform passed: ${CE_STANDALONE}")

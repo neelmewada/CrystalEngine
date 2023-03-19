@@ -19,7 +19,7 @@ find_package(qtnodes REQUIRED)
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
-    find_package(Vulkan)
+    find_package(Vulkan REQUIRED)
     set(Vulkan_LIBRARIES ${Vulkan_LIBRARIES} PARENT_SCOPE)
 endif()
 
