@@ -283,7 +283,6 @@ function(ce_add_target NAME TARGET_TYPE)
         if(DEFINED ${runtime_dep}_RUNTIME_DEPS_DIRS)
             foreach(copy_dir ${${runtime_dep}_RUNTIME_DEPS_DIRS})
                 get_filename_component(dir_name ${copy_dir} NAME)
-                message("COMMAND: copy_directory ${copy_dir} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${dir_name}")
                 add_custom_command(TARGET ${NAME} POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy_directory ${copy_dir} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${dir_name}
                 )
