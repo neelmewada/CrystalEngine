@@ -80,6 +80,8 @@ namespace CE::Editor
             CE_DELETE(projectBrowser);
         }
 
+
+
         EditorPrefs::Get().OnProjectChanged();
     }
 

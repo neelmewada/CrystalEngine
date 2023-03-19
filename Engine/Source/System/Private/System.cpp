@@ -9,12 +9,12 @@ namespace CE
     
     void SystemModule::StartupModule()
     {
-        
+        AssetDatabase::Get().Initialize();
     }
 
     void SystemModule::ShutdownModule()
     {
-        
+        AssetDatabase::Get().Shutdown();
     }
 
     void SystemModule::RegisterTypes()

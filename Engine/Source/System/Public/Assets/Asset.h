@@ -8,6 +8,7 @@ namespace CE
     {
         None = 0,
         
+        Scene,
         Shader,
         Texture,
     };
@@ -24,7 +25,7 @@ namespace CE
         virtual AssetType GetAssetType() = 0;
 
     protected:
-        
+        IO::Path assetPath{};
 
     };
 

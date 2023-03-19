@@ -17,7 +17,6 @@ namespace CE::Game
         GameApplication(int argc, char** argv);
 
         virtual ~GameApplication();
-
     };
     
 } // namespace CE::Game

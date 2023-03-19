@@ -33,8 +33,15 @@ namespace CE::Editor
 		SerializedObject projectSettingsSO{ ProjectSettings::Type(), projectSettings };
 		projectSettingsSO.Serialize(projectPath);
 
+		// Game/Assets
+		IO::Path::CreateDirectories(projectDirectory / projectName / "Game/Assets");
+
+		projectSettings->editorProjectDirectory = projectDirectory / projectName;
+
 		loadedProjectPath = projectPath;
 		isLoaded = true;
+
+		AssetDatabase::Get().LoadDatabase();
 	}
 
 	void ProjectManager::LoadProject(IO::Path projectPath)
@@ -51,8 +58,12 @@ namespace CE::Editor
 		SerializedObject projectSettingsSO{ ProjectSettings::Type(), projectSettings };
 		projectSettingsSO.Deserialize(projectPath);
 
+		projectSettings->editorProjectDirectory = projectPath.GetParentPath();
+
 		loadedProjectPath = projectPath;
 		isLoaded = true;
+
+		AssetDatabase::Get().LoadDatabase();
 	}
 
 	void ProjectManager::UnloadProject()

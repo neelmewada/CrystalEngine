@@ -12,7 +12,7 @@ namespace CE::Editor
 
         setWindowTitle("Assets");
 
-        
+        ui->splitter->setSizes({ 200, 500 });
     }
 
     AssetsView::~AssetsView()

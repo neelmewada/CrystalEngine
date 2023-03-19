@@ -14,8 +14,7 @@ namespace CE
         : public ComponentApplication
         , public ApplicationBus::Interface
     {
-        CE_CLASS(Application, ComponentApplication);
-
+        CE_CLASS(Application, ComponentApplication)
     public:
 
         Application(int argc, char** argv);

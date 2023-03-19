@@ -42,8 +42,12 @@ namespace CE
         String engineVersion{};
 
 #if PAL_TRAIT_BUILD_EDITOR
+        IO::Path editorProjectDirectory{};
+
         friend class CE::Editor::ProjectManager;
 #endif
+
+        friend class AssetDatabase;
     };
     
 } // namespace CE
