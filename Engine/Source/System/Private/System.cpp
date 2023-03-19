@@ -38,6 +38,11 @@ namespace CE
             PluginConfig
         );
 
+        // Assets
+        CE_REGISTER_TYPES(
+            Asset
+        );
+
         // Register Game Components
         CE_REGISTER_GAMECOMPONENTS(
             TransformComponent
