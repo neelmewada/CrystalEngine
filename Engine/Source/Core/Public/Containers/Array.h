@@ -228,6 +228,8 @@ namespace CE
             friend bool operator== (const Iterator& A, const Iterator& B) { return A.Ptr == B.Ptr; };
             friend bool operator!= (const Iterator& A, const Iterator& B) { return A.Ptr != B.Ptr; };
 
+            inline operator pointer() const { return Ptr; }
+
         private:
             pointer Ptr;
         };
@@ -257,6 +259,8 @@ namespace CE
 
             friend bool operator== (const ConstIterator& A, const ConstIterator& B) { return A.Ptr == B.Ptr; };
             friend bool operator!= (const ConstIterator& A, const ConstIterator& B) { return A.Ptr != B.Ptr; };
+
+            inline operator pointer() const { return Ptr; }
 
         private:
             pointer Ptr;

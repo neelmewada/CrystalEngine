@@ -222,7 +222,7 @@ namespace CE
 
                 if (array.GetSize() > 0)
                 {
-                    const u8* ptr = &array[0];
+                    const u8* ptr = array.begin();
 
                     for (int i = 0; i < arrayElementCount; i++)
                     {
@@ -579,7 +579,7 @@ namespace CE
                 array.Clear();
                 array.Resize(numBytes);
 
-                const u8* ptr = &array[0];
+                const u8* ptr = array.begin();
 
                 for (int i = 0; i < arrayElementCount; i++)
                 {
