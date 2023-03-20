@@ -59,7 +59,7 @@ namespace CE::IO
 
         virtual ~MemoryStream()
         {
-            
+            Free();
         }
 
         bool        IsOpen() const override { return buffer != NULL; }

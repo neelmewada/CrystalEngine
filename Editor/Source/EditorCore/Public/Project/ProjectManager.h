@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Project/ProjectSettings.h"
+#include "CoreMinimal.h"
 
-#include "IO/Path.h"
+#include "EditorProjectSettings.h"
 
 namespace CE::Editor
 {
@@ -33,6 +33,8 @@ namespace CE::Editor
         ProjectSettings& GetCurrentProject();
 
     private:
+        EditorProjectSettings editorProjectSettings{};
+
         IO::Path loadedProjectPath{};
         bool isLoaded = false;
     };

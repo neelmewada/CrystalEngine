@@ -18,8 +18,9 @@
 #include "GameFramework/GameFramework.h"
 
 // Assets
-#include "Assets/Asset.h"
-#include "Assets/AssetDatabase.h"
+#include "Asset/AssetIO.h"
+#include "Asset/Asset.h"
+#include "Asset/AssetDatabase.h"
 
 namespace CE
 {

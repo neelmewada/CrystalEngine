@@ -6,8 +6,7 @@ namespace CE
 
 	void AssetDatabase::Initialize()
 	{
-		rootEntry = new AssetDatabaseEntry;
-		rootEntry->name = "Root";
+		
 	}
 
 	void AssetDatabase::Shutdown()
@@ -35,23 +34,27 @@ namespace CE
 		rootEntry = nullptr;
 	}
 
-#if PAL_TRAIT_BUILD_EDITOR
 	void AssetDatabase::LoadAssetDatabaseForEditor()
 	{
+		UnloadDatabase();
+
+		rootEntry = new AssetDatabaseEntry;
+		rootEntry->name = "Root";
+
 		const auto& projectSettings = ProjectSettings::Get();
-		auto engineAssetsDir = PlatformDirectories::GetEngineDir() / "Assets";
+		auto engineDir = PlatformDirectories::GetEngineDir();
 
-		auto projectDir = projectSettings.editorProjectDirectory;
+		auto gameDir = projectSettings.editorProjectDirectory / "Game";
 
-		if (projectDir.IsEmpty() || !projectDir.Exists())
+		if (gameDir.IsEmpty() || !gameDir.Exists())
 		{
-			CE_LOG(Error, All, "Failed to load asset database! Invalid project path: {}", projectDir);
+			CE_LOG(Error, All, "Failed to load asset database! Invalid project path: {}", gameDir);
 			return;
 		}
 
-		if (!engineAssetsDir.Exists())
+		if (!engineDir.Exists())
 		{
-			CE_LOG(Error, All, "Failed to load engine asset database! Invalid engine assets path: {}", engineAssetsDir);
+			CE_LOG(Error, All, "Failed to load engine asset database! Invalid engine assets path: {}", engineDir);
 			return;
 		}
 
@@ -59,13 +62,12 @@ namespace CE
 
 		assetsLoaded = true;
 	}
-#else
+
 	void AssetDatabase::LoadAssetDatabaseForRuntime()
 	{
 		// TODO: Runtime asset packaging system
 
 		assetsLoaded = true;
 	}
-#endif
 
 } // namespace CE

@@ -229,6 +229,7 @@ namespace CE
         Array<String> Split(char delimiter);
         String RemoveWhitespaces();
 
+
     private:
 
         void SetCString(const char* cString);

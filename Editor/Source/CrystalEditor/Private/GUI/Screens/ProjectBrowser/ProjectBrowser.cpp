@@ -41,7 +41,9 @@ namespace CE::Editor
 
     void ProjectBrowser::on_createProjectButtonBox_accepted()
     {
-        CE_PUBLISH(CrystalEditorEventBus, OnCreateProject, IO::Path(ui->projectFolderTextBox->text().toStdString()), String(ui->projectNameTextBox->text().toStdString()));
+        CE_PUBLISH(CrystalEditorEventBus, OnCreateProject, 
+            IO::Path(ui->projectFolderTextBox->text().toStdString()), 
+            String(ui->projectNameTextBox->text().toStdString()));
     }
 
     void ProjectBrowser::on_createProjectButtonBox_rejected()

@@ -9,13 +9,19 @@ find_package(yaml REQUIRED)
 find_package(mINI REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(efsw REQUIRED)
+#find_package(minizip REQUIRED)
+find_package(zip REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)
 
-include(FindQt.cmake)
-find_package(qads REQUIRED)
-find_package(qtnodes REQUIRED)
+# Qt
+if(${PAL_TRAIT_BUILD_HOST_TOOLS})
+    include(FindQt.cmake)
+    find_package(qads REQUIRED)
+    find_package(qtnodes REQUIRED) 
+endif()
+
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})

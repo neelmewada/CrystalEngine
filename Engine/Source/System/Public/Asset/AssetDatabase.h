@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Asset.h"
 
 namespace CE
 {
-    class Asset;
 
     class AssetDatabaseEntry
     {
@@ -26,10 +26,10 @@ namespace CE
 
         Name name{};
         Type entryType = Type::Directory;
-
-        Asset* asset = nullptr;
-
         CE::Array<AssetDatabaseEntry*> children{};
+
+        // In run-time build, assets are packed into several different archives.
+        u32 assetPackIndex = 0;
     };
 
     class SYSTEM_API AssetDatabase
@@ -55,11 +55,8 @@ namespace CE
 
     private:
 
-#if PAL_TRAIT_BUILD_EDITOR
         void LoadAssetDatabaseForEditor();
-#else
         void LoadAssetDatabaseForRuntime();
-#endif
 
         bool assetsLoaded = false;
         AssetDatabaseEntry* rootEntry = nullptr;

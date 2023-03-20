@@ -5,6 +5,7 @@
 #include "CEQtApplication.h"
 #include "Misc/QStringFmt.h"
 
+#include "Project/EditorProjectSettings.h"
 #include "Project/ProjectManager.h"
 
 namespace CE::Editor

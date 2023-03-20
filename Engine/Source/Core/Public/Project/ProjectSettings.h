@@ -8,6 +8,7 @@ namespace CE
     namespace Editor
     {
         class ProjectManager;
+        class EditorProjectSettings;
     }
 #endif
 
@@ -41,10 +42,12 @@ namespace CE
 
         String engineVersion{};
 
+        // Editor Project Settings
 #if PAL_TRAIT_BUILD_EDITOR
-        IO::Path editorProjectDirectory{};
+        CE::Editor::EditorProjectSettings* editorProjectSettings = nullptr;
 
         friend class CE::Editor::ProjectManager;
+        friend class CE::Editor::EditorProjectSettings;
 #endif
 
         friend class AssetDatabase;

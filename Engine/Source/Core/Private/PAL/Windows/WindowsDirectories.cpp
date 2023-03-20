@@ -33,6 +33,11 @@ namespace CE
 
     IO::Path WindowsDirectories::GetGameDir()
     {
+#if PAL_TRAIT_BUILD_EDITOR
+
+#else
+
+#endif
         return GetAppRootDir() / "Game";
     }
 

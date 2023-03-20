@@ -10,9 +10,8 @@ namespace CE
     
     class CORE_API WindowsDirectories
     {
+        CE_STATIC_CLASS(WindowsDirectories)
     public:
-        CE_STATIC_CLASS(WindowsDirectories);
-
         static IO::Path GetLaunchDir();
 
         static IO::Path GetAppRootDir();
