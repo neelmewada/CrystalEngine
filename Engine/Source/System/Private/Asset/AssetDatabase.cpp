@@ -44,7 +44,11 @@ namespace CE
 		const auto& projectSettings = ProjectSettings::Get();
 		auto engineDir = PlatformDirectories::GetEngineDir();
 
-		auto gameDir = projectSettings.editorProjectDirectory / "Game";
+#if PAL_TRAIT_BUILD_EDITOR
+		auto gameDir = projectSettings.editorProjectDirectory / "Game/Assets";
+#else
+		auto gameDir = PlatformDirectories::GetGameDir() / "Assets";
+#endif
 
 		if (gameDir.IsEmpty() || !gameDir.Exists())
 		{
