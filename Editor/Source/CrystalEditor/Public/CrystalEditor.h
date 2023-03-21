@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EditorCore.h"
+
 #include "Launch/EditorLoop.h"
 
 #include "Events/EditorSystemEventBus.h"
@@ -10,10 +12,6 @@
 #include "Editor/EditorViewBase.h"
 
 // Drawers
-#include "Drawers/DrawerBase.h"
-#include "Drawers/FieldDrawer.h"
-#include "Drawers/VectorFieldDrawer.h"
-#include "Drawers/StringFieldDrawer.h"
 #include "Drawers/GameComponentDrawer.h"
 
 // Editor Buses

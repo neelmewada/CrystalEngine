@@ -10,6 +10,7 @@ namespace fs = std::filesystem;
 namespace CE::IO
 {
     class FileStream;
+    using RecursiveDirectoryIterator = fs::recursive_directory_iterator;
     
     class CORE_API Path
     {
@@ -89,6 +90,28 @@ namespace CE::IO
             return Path(impl.parent_path());
         }
 
+        inline Path GetFilename() const
+        {
+            return impl.filename();
+        }
+
+        inline Path GetExtension() const
+        {
+            return impl.extension();
+        }
+
+        inline Path RemoveExtension() const
+        {
+            fs::path p = impl;
+            return p.replace_extension();
+        }
+
+        inline Path ReplaceExtension(const Path& path)
+        {
+            fs::path p = impl;
+            return p.replace_extension(path.impl);
+        }
+
         static inline Path GetRelative(const Path& path, const Path& base)
         {
             return fs::relative(path.impl, base.impl);
@@ -104,6 +127,15 @@ namespace CE::IO
         {
             return fs::create_directories(path.impl);
         }
+
+        void IterateChildren(std::function<void(const IO::Path& path)> func);
+        void RecursivelyIterateChildren(std::function<void(const IO::Path& path)> func);
+
+        auto begin() { return impl.begin(); }
+        auto end() { return impl.end(); }
+
+        const auto begin() const { return impl.begin(); }
+        const auto end() const { return impl.end(); }
 
     private:
         fs::path impl;

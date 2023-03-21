@@ -4,4 +4,4 @@ project(Tools)
 
 add_subdirectory(ProjectManager)
 
-
+add_subdirectory(AssetImporter)

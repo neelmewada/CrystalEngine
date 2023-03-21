@@ -418,7 +418,32 @@ Array<String> String::Split(char delimiter)
 
 String CE::String::RemoveWhitespaces()
 {
-    String result{ GetLength() };
+    char* result = new char[GetLength() + 1];
+    result[GetLength()] = 0;
+    bool isString = false;
+    int idx = 0;
+
+    for (int i = 0; i < GetLength(); i++)
+    {
+        if (Buffer[i] == '"')
+        {
+            isString = !isString;
+            continue;
+        }
+
+        if (Buffer[i] == ' ' && !isString)
+        {
+            continue;
+        }
+
+        result[idx++] = Buffer[i];
+    }
+
+    result[idx++] = 0;
+
+    return String(result);
+
+    /*String result{ GetLength() };
     int index = 0;
 
     for (int i = 0; i < GetLength(); i++)
@@ -432,7 +457,7 @@ String CE::String::RemoveWhitespaces()
     result[index++] = 0;
     result.StringLength = strlen(result.Buffer);
 
-    return result;
+    return result;*/
 }
 
 

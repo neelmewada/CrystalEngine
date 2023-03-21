@@ -25,6 +25,8 @@ namespace CE
         virtual AssetType GetAssetType() = 0;
 
     protected:
+        String assetName{};
+        String assetExtension{};
         IO::Path assetPath{};
 
     };
@@ -36,7 +38,8 @@ CE_RTTI_CLASS(SYSTEM_API, CE, Asset,
     CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        
+        CE_FIELD(assetName)
+        CE_FIELD(assetExtension)
     ),
     CE_FUNCTION_LIST()
 )

@@ -8,6 +8,16 @@
 #include "Project/EditorProjectSettings.h"
 #include "Project/ProjectManager.h"
 
+// Drawers
+#include "Drawers/DrawerBase.h"
+#include "Drawers/FieldDrawer.h"
+#include "Drawers/StringFieldDrawer.h"
+#include "Drawers/VectorFieldDrawer.h"
+
+// Asset Import Settings
+#include "Asset/AssetImportSettings.h"
+#include "Asset/TextureAssetImportSettings.h"
+
 namespace CE::Editor
 {
     

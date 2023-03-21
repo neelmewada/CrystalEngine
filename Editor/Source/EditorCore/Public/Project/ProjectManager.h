@@ -33,7 +33,6 @@ namespace CE::Editor
         ProjectSettings& GetCurrentProject();
 
     private:
-        EditorProjectSettings editorProjectSettings{};
 
         IO::Path loadedProjectPath{};
         bool isLoaded = false;

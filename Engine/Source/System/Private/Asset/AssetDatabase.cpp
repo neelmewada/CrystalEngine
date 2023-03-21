@@ -43,6 +43,7 @@ namespace CE
 
 		const auto& projectSettings = ProjectSettings::Get();
 		auto engineDir = PlatformDirectories::GetEngineDir();
+		auto editorDir = PlatformDirectories::GetEditorDir();
 
 #if PAL_TRAIT_BUILD_EDITOR
 		auto gameDir = projectSettings.editorProjectDirectory / "Game/Assets";
@@ -59,6 +60,12 @@ namespace CE
 		if (!engineDir.Exists())
 		{
 			CE_LOG(Error, All, "Failed to load engine asset database! Invalid engine assets path: {}", engineDir);
+			return;
+		}
+
+		if (!editorDir.Exists())
+		{
+			CE_LOG(Error, All, "Failed to load editor asset database! Invalid editor assets path: {}", editorDir);
 			return;
 		}
 

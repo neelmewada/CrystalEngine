@@ -4,7 +4,7 @@
 
 #include "QtComponents/Widgets/CardWidget.h"
 
-#include "DrawerBase.h"
+#include "Drawers/DrawerBase.h"
 
 namespace CE::Editor
 {

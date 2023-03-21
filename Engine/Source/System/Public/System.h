@@ -22,6 +22,8 @@
 #include "Asset/Asset.h"
 #include "Asset/AssetDatabase.h"
 
+#include "Asset/TextureAsset.h"
+
 namespace CE
 {
 
