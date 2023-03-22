@@ -106,8 +106,6 @@ namespace CE::Editor
 		vec4Field->SetMode(mode, isInteger);
 		vec4Field->SetLabel(fieldType->GetDisplayName());
 
-		//vec4Field->SetListener(this);
-
 		container->addWidget(vec4Field);
 
 		OnValuesUpdated();

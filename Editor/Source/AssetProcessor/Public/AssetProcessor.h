@@ -24,6 +24,11 @@ namespace CE::Editor
         AssetProcessor() = default;
     public:
 
+        static AssetProcessor& Get()
+        {
+            static AssetProcessor instance{};
+            return instance;
+        }
 
         
     };

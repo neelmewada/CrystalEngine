@@ -23,7 +23,7 @@ namespace CE::Editor
         //virtual void CreateGUI(QLayout* container);
         virtual void ClearGUI(QLayout* container);
 
-        virtual void SetTarget(TypeInfo* targetType, void* instance);
+        virtual void SetTarget(TypeInfo* targetType, void* instance) override;
         virtual TypeInfo* GetTargetType();
         virtual void* GetTargetInstance();
 

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 
 #include "AssetImporterFileModel.h"
+#include "AssetImporterFileFilterModel.h"
 
 namespace Ui {
 class AssetImporterWindow;
@@ -13,6 +14,7 @@ class AssetImporterWindow;
 
 namespace CE::Editor
 {
+    class FieldDrawer;
 
     class ASSETPROCESSOR_API AssetImporterWindow : public QMainWindow
     {
@@ -21,15 +23,32 @@ namespace CE::Editor
         explicit AssetImporterWindow(QWidget* parent = nullptr);
         ~AssetImporterWindow();
 
+    public:
+
+        void UpdateSelection();
+
+        void UpdateDetailsView();
+
     private slots:
+        void OnFileSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+
         void on_actionOpenFolder_triggered();
 
         void on_showTreeView_stateChanged(int checked);
+
+        void on_showUnprocessedFiles_stateChanged(int checked);
+
+        void on_showProcessedFiles_stateChanged(int checked);
 
     private:
         IO::Path currentDirectory{};
 
         AssetImporterFileModel* model = nullptr;
+        AssetImporterFileFilterModel* filterModel = nullptr;
+
+        Array<AssetImporterFileModelEntry*> selection{};
+
+        Array<FieldDrawer*> fieldDrawers{};
 
         Ui::AssetImporterWindow* ui;
     };

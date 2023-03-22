@@ -4,20 +4,37 @@
 namespace CE::Editor
 {
 
-	HashMap<Name, StructType*> AssetImportSettings::extensionToImportSettingsMap{};
+	HashMap<Name, ClassType*> AssetImportSettings::extensionToImportSettingsMap{};
 
+	HashMap<ClassType*, ClassType*> AssetImportSettings::importSettingsToAssetClassTypeMap{};
 
-	void AssetImportSettings::RegisterImportSettings(StructType* importSettingsStruct, String assetExtensions)
+	void AssetImportSettings::RegisterImportSettings(ClassType* importSettingsClass, ClassType* assetClass, String assetExtensions)
 	{
+		if (!importSettingsClass->CanBeInstantiated() || !assetClass->CanBeInstantiated())
+			return;
+
 		assetExtensions = assetExtensions.RemoveWhitespaces();
 		Array<String> list = assetExtensions.Split(',');
 
 		for (const auto& extension : list)
 		{
-			extensionToImportSettingsMap[extension] = importSettingsStruct;
+			extensionToImportSettingsMap[extension] = importSettingsClass;
 		}
+
+		importSettingsToAssetClassTypeMap[importSettingsClass] = assetClass;
+	}
+
+	ClassType* AssetImportSettings::GetImportSettingsClassFor(String assetExtension)
+	{
+		return extensionToImportSettingsMap[assetExtension];
+	}
+
+	ClassType* AssetImportSettings::GetAssetClassFor(ClassType* importSettings)
+	{
+		return importSettingsToAssetClassTypeMap[importSettings];
 	}
 
 }
 
-CE_RTTI_STRUCT_IMPL(EDITORCORE_API, CE::Editor, AssetImportSettings)
+CE_RTTI_CLASS_IMPL(EDITORCORE_API, CE::Editor, AssetImportSettings)
+

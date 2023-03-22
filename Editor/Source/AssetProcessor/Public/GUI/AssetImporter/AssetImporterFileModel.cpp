@@ -1,5 +1,7 @@
 #include "AssetImporterFileModel.h"
 
+#include <QSortFilterProxyModel>
+
 namespace CE::Editor
 {
 
@@ -21,6 +23,8 @@ namespace CE::Editor
         if (!path.Exists())
             return;
 
+        allFileEntries.Clear();
+
         path.RecursivelyIterateChildren([this](const IO::Path& path) -> void
         {
             if (!path.Exists())
@@ -32,12 +36,14 @@ namespace CE::Editor
             auto relPath = IO::Path::GetRelative(path, this->path);
 
             AssetImporterFileModelEntry* entry = root;
-            IO::Path curPath = "";
+            IO::Path curPath = this->path;
+            IO::Path curRelPath = "";
 
             for (auto it = relPath.begin(); it != relPath.end(); ++it)
             {
                 auto str = String((*it).string());
                 curPath = curPath / str;
+                curRelPath = curRelPath / str;
 
                 if (!entry->HasChild(str)) // Create child entry
                 {
@@ -46,6 +52,7 @@ namespace CE::Editor
                     entry = thisEntry;
 
                     entry->name = str;
+                    entry->relPath = curRelPath;
                     entry->fullPath = curPath;
                 }
                 else // Use existing child entry
@@ -54,8 +61,12 @@ namespace CE::Editor
                 }
             }
 
-            if (entry->IsTerminal() && entry != root)
+            if (!entry->fullPath.IsDirectory() && entry != root)
+            {
                 allFileEntries.Add(entry);
+
+                auto fullPath = entry->fullPath;
+            }
         });
 
         emit modelReset({});
@@ -69,7 +80,6 @@ namespace CE::Editor
     void AssetImporterFileModel::SetTreeView(bool set)
     {
         showTreeView = set;
-        emit modelReset({});
     }
 
     QVariant AssetImporterFileModel::headerData(int section, ::Qt::Orientation orientation, int role) const

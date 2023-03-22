@@ -14,11 +14,6 @@ namespace CE
 
 	}
 
-	AssetType TextureAsset::GetAssetType()
-	{
-		return AssetType::Texture;
-	}
-
 } // namespace CE
 
 CE_RTTI_CLASS_IMPL(SYSTEM_API, CE, TextureAsset)

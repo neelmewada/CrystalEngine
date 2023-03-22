@@ -33,8 +33,8 @@ namespace CE::Editor::Qt
         }
         else
         {
-            constexpr auto min = std::numeric_limits<double>::min();
-            constexpr auto max = std::numeric_limits<double>::max();
+            constexpr auto min = std::numeric_limits<f32>::min();
+            constexpr auto max = std::numeric_limits<f32>::max();
             int decimals = 4;
 
             ui->inputX->setValidator(new QDoubleValidator(min, max, decimals, this));

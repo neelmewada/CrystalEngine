@@ -92,6 +92,7 @@ CE_RTTI_CLASS(QTCOMPONENTS_API, CE::Editor::Qt, Vec4Input,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST(
+        // Signals
         CE_FUNCTION(OnInputValueChanged, Signal)
     )
 )

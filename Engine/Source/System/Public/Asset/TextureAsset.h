@@ -20,7 +20,6 @@ namespace CE
         TextureAsset();
         virtual ~TextureAsset();
 
-        virtual AssetType GetAssetType() override;
 
     protected:
 

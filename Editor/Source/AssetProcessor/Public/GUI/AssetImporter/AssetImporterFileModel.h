@@ -49,11 +49,25 @@ namespace CE::Editor
             return nullptr;
         }
 
+        bool IsProcessed()
+        {
+            if (fullPath.IsDirectory())
+                return false;
+            auto assetFile = fullPath.GetParentPath() / (fullPath.GetFilename().RemoveExtension().GetString() + ".casset");
+            return assetFile.Exists();
+        }
+
+        String GetExtension()
+        {
+            return fullPath.GetExtension().GetString();
+        }
+
     public:
         AssetImporterFileModelEntry* parent = nullptr;
 
         Name name{};
         IO::Path fullPath{};
+        IO::Path relPath{};
         Array<AssetImporterFileModelEntry*> children{};
     };
 
@@ -84,18 +98,16 @@ namespace CE::Editor
         QVariant data(const QModelIndex &index, int role = ::Qt::DisplayRole) const override;
 
     private:
-        Array<AssetImporterFileModelEntry*> unprocessedEntries{};
-        Array<AssetImporterFileModelEntry*> processedEntries{};
         Array<AssetImporterFileModelEntry*> allFileEntries{};
 
         AssetImporterFileModelEntry* root = nullptr;
         bool showTreeView = true;
-        bool showProcessedFiles = true;
-        bool showUnprocessedFiles = true;
+        bool hideProcessedFiles = true;
 
         IO::Path path{};
 
         friend class AssetImporterWindow;
+        friend class AssetImporterFileFilterModel;
     };
 }
 

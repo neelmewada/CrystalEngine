@@ -129,6 +129,30 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="incompatibleSelectionLabel">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(244, 76, 78);</string>
+          </property>
+          <property name="text">
+           <string>Invalid Selection! Please select assets of same type to edit their import settings</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QVBoxLayout" name="detailsPanelContent"/>
         </item>
         <item>

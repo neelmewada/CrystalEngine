@@ -39,7 +39,8 @@ namespace CE::Editor
 			TextureAssetImportSettings
 		);
 
-		CE_REGISTER_IMPORT_SETTINGS(TextureAssetImportSettings, jpg, jpeg, png);
+		// Register Import Settings
+		CE_REGISTER_IMPORT_SETTINGS(TextureAssetImportSettings, TextureAsset, jpg, jpeg, png);
 	}
 
 } // namespace CE::Editor
