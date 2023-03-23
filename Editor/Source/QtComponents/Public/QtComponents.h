@@ -7,6 +7,7 @@
 // Input Fields
 #include "QtComponents/Input/StringField.h"
 #include "QtComponents/Input/Vec4Input.h"
+#include "QtComponents/Input/EnumField.h"
 
 // Widgets
 #include "QtComponents/Widgets/CardWidget.h"

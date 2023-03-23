@@ -14,6 +14,16 @@ namespace CE
 
 	}
 
+	String EnumConstant::GetDisplayName() const
+	{
+		String displayAttrib = GetLocalAttributeValue("Display");
+
+		if (!displayAttrib.IsEmpty())
+			return displayAttrib;
+
+		return TypeInfo::GetDisplayName();
+	}
+
 	EnumType::EnumType(CE::Name name, CE::TypeId typeId, CE::TypeId underlyingTypeId, std::initializer_list<EnumConstant> constants, u32 size, const char* attributes)
 		: TypeInfo(name, attributes)
 		, typeId(typeId)
@@ -22,6 +32,21 @@ namespace CE
 		, size(size)
 	{
 		TypeInfo::RegisterType(this);
+	}
+
+	EnumType::~EnumType()
+	{
+		TypeInfo::DeregisterType(this);
+	}
+
+	String EnumType::GetDisplayName() const
+	{
+		String displayAttrib = GetLocalAttributeValue("Display");
+
+		if (!displayAttrib.IsEmpty())
+			return displayAttrib;
+
+		return TypeInfo::GetDisplayName();
 	}
 
 

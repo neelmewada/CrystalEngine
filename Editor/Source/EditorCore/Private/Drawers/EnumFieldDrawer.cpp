@@ -1,0 +1,71 @@
+
+#include "Drawers/EnumFieldDrawer.h"
+#include "QtComponents/Input/EnumField.h"
+
+namespace CE::Editor
+{   
+    
+    EnumFieldDrawer::EnumFieldDrawer() : FieldDrawer("EnumFieldDrawer")
+    {
+
+    }
+
+    EnumFieldDrawer::~EnumFieldDrawer()
+    {
+
+    }
+
+    void EnumFieldDrawer::OnValuesUpdated()
+    {
+        if (!IsValid())
+            return;
+
+        auto type = fieldType->GetDeclarationType();
+        if (!type->IsEnum())
+            return;
+
+        auto value = fieldType->GetFieldEnumValue(targetInstance);
+        enumField->SetValue(value);
+    }
+
+    void EnumFieldDrawer::CreateGUI(QLayout* container)
+    {
+        if (!IsValid())
+            return;
+
+        if (enumField != nullptr)
+        {
+            delete enumField;
+        }
+
+        auto declType = fieldType->GetDeclarationType();
+        if (declType == nullptr || !declType->IsEnum())
+            return;
+        auto enumType = (EnumType*)declType;
+
+        enumField = new Qt::EnumField(container->parentWidget());
+
+        auto result = enumField->Bind("OnInputValueChanged", this, "OnValueChanged");
+
+        enumField->SetEnumType(enumType);
+
+        container->addWidget(enumField);
+
+        OnValuesUpdated();
+    }
+
+    void EnumFieldDrawer::OnValueChanged(s64 newValue)
+    {
+        if (!IsValid())
+            return;
+
+        auto type = fieldType->GetDeclarationType();
+        if (!type->IsEnum())
+            return;
+
+        fieldType->SetFieldEnumValue(targetInstance, newValue);
+    }
+
+} // namespace CE::Editor
+
+CE_RTTI_CLASS_IMPL(EDITORCORE_API, CE::Editor, EnumFieldDrawer)

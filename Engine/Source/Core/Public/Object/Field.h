@@ -66,6 +66,9 @@ namespace CE
             *(T*)((SIZE_T)instance + offset) = value;
         }
 
+        s64 GetFieldEnumValue(void* instance);
+        void SetFieldEnumValue(void* instance, s64 value);
+
     private:
 
         TypeId fieldTypeId;

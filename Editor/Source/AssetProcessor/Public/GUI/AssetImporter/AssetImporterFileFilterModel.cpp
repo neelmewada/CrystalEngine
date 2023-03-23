@@ -54,5 +54,4 @@ namespace CE::Editor
     {
         return true;
     }
-
 }

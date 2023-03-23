@@ -13,6 +13,7 @@
 #include "Drawers/FieldDrawer.h"
 #include "Drawers/StringFieldDrawer.h"
 #include "Drawers/VectorFieldDrawer.h"
+#include "Drawers/EnumFieldDrawer.h"
 
 // Asset Import Settings
 #include "Asset/AssetImportSettings.h"

@@ -20,8 +20,9 @@ namespace CE::Editor::Qt
     {
         // Input Fields
         CE_REGISTER_TYPES(
+            Vec4Input,
             StringField,
-            Vec4Input
+            EnumField
         );
     }
     

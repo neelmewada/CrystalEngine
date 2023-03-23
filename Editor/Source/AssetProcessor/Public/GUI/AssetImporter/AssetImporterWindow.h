@@ -25,6 +25,11 @@ namespace CE::Editor
 
     public:
 
+        void SetImportOnlyMode(bool set);
+
+        void SetAssetsDirectory(IO::Path directory);
+        void SetAssetsPath(CE::Array<IO::Path> assetPaths);
+
         void UpdateSelection();
 
         void UpdateDetailsView();
@@ -41,7 +46,11 @@ namespace CE::Editor
         void on_showProcessedFiles_stateChanged(int checked);
 
     private:
+        bool importOnlyMode = false;
+
         IO::Path currentDirectory{};
+
+        CE::Array<IO::Path> targetAssetPaths{};
 
         AssetImporterFileModel* model = nullptr;
         AssetImporterFileFilterModel* filterModel = nullptr;
@@ -49,6 +58,9 @@ namespace CE::Editor
         Array<AssetImporterFileModelEntry*> selection{};
 
         Array<FieldDrawer*> fieldDrawers{};
+
+        // Import Settings
+        AssetImportSettings* importSettingInstance = nullptr;
 
         Ui::AssetImporterWindow* ui;
     };

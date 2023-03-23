@@ -35,6 +35,8 @@ namespace CE
 
     public:
 
+        virtual String GetDisplayName() const override;
+
         virtual bool IsEnumConstant() const { return true; }
 
         virtual TypeId GetTypeId() const override { return this->typeId; }
@@ -54,12 +56,14 @@ namespace CE
     {
     private:
         EnumType(CE::Name name, CE::TypeId typeId, CE::TypeId underlyingTypeId, std::initializer_list<EnumConstant> constants, u32 size, const char* attributes = "");
-        ~EnumType() = default;
+        ~EnumType();
 
         template<typename T>
         friend const TypeInfo* GetStaticType();
 
     public:
+
+        virtual String GetDisplayName() const override;
 
         virtual bool IsEnum() const override { return true; }
 
@@ -71,6 +75,9 @@ namespace CE
         virtual u32 GetSize() const override { return size; }
 
         CE_INLINE CE::TypeId GetUnderlyingTypeId() const { return underlyingTypeId; }
+
+        auto GetFirstConstant() { return constants.Begin(); }
+        auto GetLastConstant() { return constants.End(); }
 
     private:
         TypeId underlyingTypeId;
@@ -91,7 +98,7 @@ namespace CE\
     inline const TypeInfo* GetStaticType<Namespace::Enum>()\
     {\
         using Self = Namespace::Enum;\
-        static EnumType instance = EnumType{ #Namespace "::" #Enum, CE::GetTypeId<Namespace::Enum>(), CE::GetTypeId<__underlying_type(Namespace::Enum)>(), { __VA_ARGS__ }, sizeof(Namespace::Enum), #Attributes "" };\
+        static EnumType instance = EnumType{ #Namespace "::" #Enum, CE::GetTypeId<Namespace::Enum>(), CE::GetTypeId<__underlying_type(Namespace::Enum)>(), { __VA_ARGS__ }, sizeof(Namespace::Enum), CE_TOSTRING(Attributes) "" };\
 	    return &instance;\
     }\
     template<>\
@@ -102,6 +109,4 @@ namespace CE\
 }
 
 #define CE_RTTI_ENUM_IMPL(API, Namespace, Enum)
-
-
 

@@ -1,5 +1,6 @@
 
 #include "Drawers/FieldDrawer.h"
+#include "Drawers/EnumFieldDrawer.h"
 
 namespace CE::Editor
 {
@@ -53,6 +54,11 @@ namespace CE::Editor
 
     ClassType* FieldDrawer::GetFieldDrawerClassFor(TypeId fieldTypeId)
     {
+        auto type = GetTypeInfo(fieldTypeId);
+        if (type != nullptr && type->IsEnum())
+        {
+            return EnumFieldDrawer::Type();
+        }
         return fieldDrawerClassMap[fieldTypeId];
     }
 

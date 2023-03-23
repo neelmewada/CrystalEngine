@@ -8,8 +8,12 @@ namespace CE::Editor
 		if (targetAsset == nullptr || targetAsset->GetType()->GetTypeId() != TYPEID(TextureAsset))
 			return false;
 
-		return false;
+		TextureAsset* textureAsset = (TextureAsset*)targetAsset;
+
+		return true;
 	}
 }
+
+CE_RTTI_ENUM_IMPL(EDITORCORE_API, CE::Editor, TextureDataType)
 
 CE_RTTI_CLASS_IMPL(EDITORCORE_API, CE::Editor, TextureAssetImportSettings)

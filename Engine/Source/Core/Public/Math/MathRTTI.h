@@ -5,6 +5,9 @@
 #include "Quaternion.h"
 #include "Matrix.h"
 
+CE_RTTI_POD(CE, Vec2i, TYPEID(CE::Vec3i), TYPEID(CE::Vec4i))
+CE_RTTI_POD(CE, Vec3i, TYPEID(CE::Vec2i), TYPEID(CE::Vec4i))
+CE_RTTI_POD(CE, Vec4i, TYPEID(CE::Vec2i), TYPEID(CE::Vec3i))
 
 CE_RTTI_POD(CE, Vec2, TYPEID(CE::Vec3), TYPEID(CE::Vec4))
 CE_RTTI_POD(CE, Vec3, TYPEID(CE::Vec2), TYPEID(CE::Vec4))

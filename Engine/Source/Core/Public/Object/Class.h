@@ -63,6 +63,7 @@ namespace CE
 	protected:
 		StructType(String name, Internal::IStructTypeImpl* impl, u32 size, String attributes = "") : TypeInfo(name, attributes), Impl(impl), size(size)
 		{}
+		virtual ~StructType() {}
 
 		template<typename T>
 		friend const TypeInfo* GetStaticType();

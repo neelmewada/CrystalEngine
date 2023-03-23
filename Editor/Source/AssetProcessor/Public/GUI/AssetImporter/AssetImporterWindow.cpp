@@ -19,11 +19,63 @@ namespace CE::Editor
         ui->splitter->setSizes({ 200, 150 });
 
         ui->incompatibleSelectionLabel->setVisible(false);
+
+        ui->importButton->setVisible(false);
+        ui->resetButton->setVisible(false);
     }
 
     AssetImporterWindow::~AssetImporterWindow()
     {
+        delete importSettingInstance;
         delete ui;
+    }
+
+    void AssetImporterWindow::SetImportOnlyMode(bool set)
+    {
+        importOnlyMode = set;
+
+        ui->contentTreeView->clearSelection();
+        selection.Clear();
+
+        ui->contentTreeParent->setVisible(!importOnlyMode);
+        ui->menubar->setVisible(!importOnlyMode);
+        ui->incompatibleSelectionLabel->setVisible(false);
+    }
+
+    void AssetImporterWindow::SetAssetsDirectory(IO::Path directory)
+    {
+        this->currentDirectory = directory;
+
+        bool firstTime = false;
+
+        if (model == nullptr)
+        {
+            firstTime = true;
+            model = new AssetImporterFileModel(currentDirectory, this);
+        }
+
+        if (filterModel == nullptr)
+        {
+            filterModel = new AssetImporterFileFilterModel(this);
+        }
+
+        filterModel->setSourceModel(model);
+        ui->contentTreeView->setModel(filterModel);
+
+        model->SetTreeView(ui->showTreeView->isChecked());
+        model->SetDirectory(currentDirectory);
+        model->UpdateDirectoryData();
+
+        if (firstTime)
+        {
+            QObject::connect(ui->contentTreeView->selectionModel(), &QItemSelectionModel::selectionChanged,
+                this, &AssetImporterWindow::OnFileSelectionChanged);
+        }
+    }
+
+    void AssetImporterWindow::SetAssetsPath(CE::Array<IO::Path> assetPaths)
+    {
+        this->targetAssetPaths = assetPaths;
     }
 
     void AssetImporterWindow::UpdateSelection()
@@ -34,7 +86,9 @@ namespace CE::Editor
 
         for (int i = 0; i < list.size(); i++)
         {
-            const auto& index = list.at(i);
+            auto index = list.at(i);
+            if (filterModel != nullptr)
+                index = filterModel->mapToSource(index);
             if (index.internalPointer() == nullptr)
                 continue;
             
@@ -75,7 +129,11 @@ namespace CE::Editor
 
         for (auto entry : selection)
         {
-            auto curImportSettingsClass = AssetImportSettings::GetImportSettingsClassFor(entry->GetExtension());
+            auto extension = entry->GetExtension();
+            if (extension.IsEmpty())
+                return;
+            extension = extension.GetSubstring(1);
+            auto curImportSettingsClass = AssetImportSettings::GetImportSettingsClassFor(extension);
             if (importSettingsClass != nullptr && importSettingsClass != curImportSettingsClass)
             {
                 ui->incompatibleSelectionLabel->setVisible(true);
@@ -87,6 +145,17 @@ namespace CE::Editor
 
         if (importSettingsClass == nullptr)
             return;
+
+        if (importSettingInstance != nullptr && importSettingInstance->GetType()->GetTypeId() != importSettingsClass->GetTypeId())
+        {
+            delete importSettingInstance;
+            importSettingInstance = nullptr;
+        }
+
+        if (importSettingInstance == nullptr)
+        {
+            importSettingInstance = (AssetImportSettings*)importSettingsClass->CreateDefaultInstance();
+        }
 
         auto field = importSettingsClass->GetFirstField();
 
@@ -106,6 +175,12 @@ namespace CE::Editor
                 continue;
             }
 
+            if (!fieldDrawerType->CanBeInstantiated())
+            {
+                field = field->GetNext();
+                continue;
+            }
+
             FieldDrawer* fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateDefaultInstance();
 
             if (fieldDrawer == nullptr)
@@ -114,7 +189,7 @@ namespace CE::Editor
                 continue;
             }
 
-            fieldDrawer->SetTarget(field, nullptr);
+            fieldDrawer->SetTarget(field, importSettingInstance);
 
             fieldDrawers.Add(fieldDrawer);
 
@@ -141,32 +216,7 @@ namespace CE::Editor
             return;
         }
 
-        currentDirectory = folderPath.toStdString();
-        bool firstTime = false;
-
-        if (model == nullptr)
-        {
-            firstTime = true;
-            model = new AssetImporterFileModel(currentDirectory, this);
-        }
-
-        if (filterModel == nullptr)
-        {
-            filterModel = new AssetImporterFileFilterModel(this);
-        }
-
-        filterModel->setSourceModel(model);
-        ui->contentTreeView->setModel(filterModel);
-
-        model->SetTreeView(ui->showTreeView->isChecked());
-        model->SetDirectory(currentDirectory);
-        model->UpdateDirectoryData();
-
-        if (firstTime)
-        {
-            QObject::connect(ui->contentTreeView->selectionModel(), &QItemSelectionModel::selectionChanged,
-                this, &AssetImporterWindow::OnFileSelectionChanged);
-        }
+        SetAssetsDirectory(folderPath.toStdString());
     }
 
 

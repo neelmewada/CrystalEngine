@@ -15,9 +15,10 @@ int main(int argc, char** argv)
     CE::ModuleManager::Get().LoadModule("EditorCore");
     
     cxxopts::Options options("Asset Processor", "A command line and GUI tool to process Assets");
-
+    
     options.add_options()
         ("h,help", "Print this help info.")
+        ("d,dir", "Set assets directory", cxxopts::value<std::string>()->default_value(""))
         ;
 
     s32 retVal = 0;
@@ -32,10 +33,17 @@ int main(int argc, char** argv)
             return 0;
         }
 
+        std::string dir = "";
+        if (result.count("d") > 0)
+            dir = result["d"].as<std::string>();
+
         AssetProcessorApplication app{ argc, argv };
 
         AssetImporterWindow window{};
         window.show();
+
+        if (!dir.empty())
+            window.SetAssetsDirectory(dir);
 
         retVal = app.exec();
     }

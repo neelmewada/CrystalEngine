@@ -26,7 +26,8 @@ namespace CE::Editor
 		    DrawerBase,
 		    FieldDrawer,
 		    VectorFieldDrawer,
-		    StringFieldDrawer
+		    StringFieldDrawer,
+			EnumFieldDrawer
 		);
 
 		// Register Field Drawers
@@ -36,7 +37,7 @@ namespace CE::Editor
 		// Asset Import Settings
 		CE_REGISTER_TYPES(
 			AssetImportSettings,
-			TextureAssetImportSettings
+			TextureAssetImportSettings, TextureDataType
 		);
 
 		// Register Import Settings

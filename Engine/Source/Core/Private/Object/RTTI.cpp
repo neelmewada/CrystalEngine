@@ -60,11 +60,6 @@ namespace CE
         bool isString = false;
         String attribs = CleanupAttributeString(attributes);
         this->attributes.Clear();
-
-        if (name == "OnTextEdited")
-        {
-            0;
-        }
         
         int startIdx = 0;
 
@@ -94,6 +89,10 @@ namespace CE
 
                 for (int j = 0; j < attribString.GetSize(); j++)
                 {
+                    if (attribString[j] == '"')
+                    {
+                        continue;
+                    }
                     if (!keyFinished && attribString[j] == '=')
                     {
                         keyFinished = true;
