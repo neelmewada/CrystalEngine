@@ -41,7 +41,7 @@ namespace CE
         // Assets
         CE_REGISTER_TYPES(
             Asset,
-            TextureAsset
+            TextureAsset, TextureDataType
         );
 
         // Register Game Components

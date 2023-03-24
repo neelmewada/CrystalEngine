@@ -37,7 +37,7 @@ namespace CE::Editor
 		// Asset Import Settings
 		CE_REGISTER_TYPES(
 			AssetImportSettings,
-			TextureAssetImportSettings, TextureDataType
+			TextureAssetImportSettings
 		);
 
 		// Register Import Settings

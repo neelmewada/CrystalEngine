@@ -45,6 +45,10 @@ namespace CE::Editor
 
         void on_showProcessedFiles_stateChanged(int checked);
 
+        void on_importButton_clicked();
+
+        void on_resetButton_clicked();
+
     private:
         bool importOnlyMode = false;
 
@@ -60,6 +64,7 @@ namespace CE::Editor
         Array<FieldDrawer*> fieldDrawers{};
 
         // Import Settings
+        ClassType* importSettingsClass = nullptr;
         AssetImportSettings* importSettingInstance = nullptr;
 
         Ui::AssetImporterWindow* ui;

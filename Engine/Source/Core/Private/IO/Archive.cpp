@@ -76,7 +76,7 @@ namespace CE
 
 	SSIZE_T Archive::EntryReadAlloc(void** buffer, SIZE_T* bufferSize)
 	{
-		return zip_entry_read(handle, buffer, bufferSize);
+		return zip_entry_read(handle, buffer, (size_t*)bufferSize);
 	}
 
 	s32 Archive::EntryWrite(const void* buffer, SIZE_T bufferSize)

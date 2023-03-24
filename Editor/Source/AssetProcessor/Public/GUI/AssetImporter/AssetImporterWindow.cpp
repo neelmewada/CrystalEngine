@@ -104,6 +104,9 @@ namespace CE::Editor
 
     void AssetImporterWindow::UpdateDetailsView()
     {
+        ui->importButton->setVisible(false);
+        ui->resetButton->setVisible(false);
+        
         for (auto fieldDrawer : fieldDrawers)
         {
             fieldDrawer->OnDisable();
@@ -125,7 +128,7 @@ namespace CE::Editor
         if (selection.GetSize() == 0)
             return;
 
-        ClassType* importSettingsClass = nullptr;
+        importSettingsClass = nullptr;
 
         for (auto entry : selection)
         {
@@ -199,6 +202,9 @@ namespace CE::Editor
 
             field = field->GetNext();
         }
+        
+        ui->importButton->setVisible(true);
+        ui->resetButton->setVisible(true);
     }
 
     void AssetImporterWindow::OnFileSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
@@ -249,6 +255,26 @@ namespace CE::Editor
         filterModel->showProcessedFiles = checked;
         emit model->modelReset({});
         emit filterModel->modelReset({});
+    }
+
+
+    void AssetImporterWindow::on_importButton_clicked()
+    {
+        
+    }
+
+
+    void AssetImporterWindow::on_resetButton_clicked()
+    {
+        if (selection.GetSize() == 0 || importSettingsClass == nullptr || importSettingInstance == nullptr)
+            return;
+        
+        importSettingsClass->InitializeDefaults(importSettingInstance);
+        
+        for (auto fieldDrawer : fieldDrawers)
+        {
+            fieldDrawer->OnValuesUpdated();
+        }
     }
 
 }

@@ -4,16 +4,10 @@
 
 #include "AssetImportSettings.h"
 
+#include "Asset/TextureAsset.h"
+
 namespace CE::Editor
 {
-
-    enum class TextureDataType
-    {
-        ColorSRGB,
-        Color,
-        Grayscale,
-        NormalMap,
-    };
 
     class EDITORCORE_API TextureAssetImportSettings : public AssetImportSettings
     {
@@ -24,18 +18,10 @@ namespace CE::Editor
 
     protected:
         
-        TextureDataType textureType{};
+        CE::TextureDataType textureType{};
     };
 
 } // namespace CE::Editor
-
-CE_RTTI_ENUM(EDITORCORE_API, CE::Editor, TextureDataType,
-    CE_ATTRIBS(),
-    CE_CONST(ColorSRGB, Display = "Color SRGB"),
-    CE_CONST(Color, Display = "Color"),
-    CE_CONST(Grayscale, Display = "Grayscale"),
-    CE_CONST(NormalMap, Display = "Normal Map"),
-)
 
 CE_RTTI_CLASS(EDITORCORE_API, CE::Editor, TextureAssetImportSettings,
     CE_SUPER(CE::Editor::AssetImportSettings),

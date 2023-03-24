@@ -269,14 +269,14 @@ function(ce_add_target NAME TARGET_TYPE)
                 endif()
             endforeach()
         endif()
+        
         # Mac frameworks
         if(DEFINED ${runtime_dep}_RUNTIME_DEPS_FRAMEWORKS)
             foreach(copy_framework ${${runtime_dep}_RUNTIME_DEPS_FRAMEWORKS})
                 add_custom_command(TARGET ${NAME} POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${${runtime_dep}_BIN_DIR}/${copy_framework} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory ${${runtime_dep}_LIB_DIR}/${copy_framework} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${copy_framework}
                 )
             endforeach()
-            
         endif()
 
         # directories

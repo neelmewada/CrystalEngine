@@ -21,7 +21,7 @@ namespace CE::Editor::Qt
         virtual ~EnumField();
 
         void SetEnumType(EnumType* enumType);
-
+        void SetLabel(String label);
         void SetValue(s64 value);
 
         // Signals

@@ -67,8 +67,6 @@ namespace CE::Editor
 		}
 
 		vec4Field = new Qt::Vec4Input(container->parentWidget());
-        
-        auto result = vec4Field->Bind("OnInputValueChanged", this, "OnValueChanged");
 
 		Qt::Vec4Mode mode{};
 		bool isInteger = false;
@@ -109,6 +107,8 @@ namespace CE::Editor
 		container->addWidget(vec4Field);
 
 		OnValuesUpdated();
+        
+        auto result = vec4Field->Bind("OnInputValueChanged", this, "OnValueChanged");
 	}
 
 	void VectorFieldDrawer::OnValueChanged(Vec4 value)

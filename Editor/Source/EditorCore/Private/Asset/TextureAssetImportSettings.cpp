@@ -14,6 +14,4 @@ namespace CE::Editor
 	}
 }
 
-CE_RTTI_ENUM_IMPL(EDITORCORE_API, CE::Editor, TextureDataType)
-
 CE_RTTI_CLASS_IMPL(EDITORCORE_API, CE::Editor, TextureAssetImportSettings)

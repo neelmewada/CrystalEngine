@@ -17,6 +17,7 @@ if(NOT EXISTS ${QT_PATH})
 endif()
 
 set(${QT_PACKAGE_NAME}_BIN_DIR ${QT_PATH}/bin PARENT_SCOPE)
+set(${QT_PACKAGE_NAME}_LIB_DIR ${QT_PATH}/lib PARENT_SCOPE)
 
 # Force-set QtCore's version here to ensure CMake detects Qt's existence and allows AUTOMOC to work
 set(Qt6Core_VERSION_MAJOR "6" CACHE STRING "Qt's major version" FORCE)

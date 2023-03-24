@@ -33,6 +33,11 @@ namespace CE::Editor::Qt
         }
     }
 
+    void EnumField::SetLabel(String label)
+    {
+        ui->label->setText(label.GetCString());
+    }
+
     void EnumField::SetValue(s64 value)
     {
         int index = ui->comboBox->findData(QVariant(value));

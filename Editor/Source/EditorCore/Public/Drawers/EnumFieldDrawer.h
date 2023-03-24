@@ -22,7 +22,7 @@ namespace CE::Editor
         virtual void CreateGUI(QLayout* container) override;
 
     private:
-        void OnValueChanged(s64 newValue);
+        void OnInputValueChanged(s64 newValue);
 
     private:
         Qt::EnumField* enumField = nullptr;
@@ -36,6 +36,6 @@ CE_RTTI_CLASS(EDITORCORE_API, CE::Editor, EnumFieldDrawer,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST(
-        CE_FUNCTION(OnValueChanged, Event)
+        CE_FUNCTION(OnInputValueChanged, Event)
     )
 )

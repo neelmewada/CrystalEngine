@@ -9,7 +9,6 @@ find_package(yaml REQUIRED)
 find_package(mINI REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(efsw REQUIRED)
-#find_package(minizip REQUIRED)
 find_package(zip REQUIRED)
 
 # SDL2

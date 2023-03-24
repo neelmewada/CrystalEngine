@@ -45,16 +45,17 @@ namespace CE::Editor
 
         enumField = new Qt::EnumField(container->parentWidget());
 
-        auto result = enumField->Bind("OnInputValueChanged", this, "OnValueChanged");
-
         enumField->SetEnumType(enumType);
+        enumField->SetLabel(fieldType->GetDisplayName());
 
         container->addWidget(enumField);
 
         OnValuesUpdated();
+        
+        auto result = enumField->Bind("OnInputValueChanged", this, "OnInputValueChanged");
     }
 
-    void EnumFieldDrawer::OnValueChanged(s64 newValue)
+    void EnumFieldDrawer::OnInputValueChanged(s64 newValue)
     {
         if (!IsValid())
             return;
