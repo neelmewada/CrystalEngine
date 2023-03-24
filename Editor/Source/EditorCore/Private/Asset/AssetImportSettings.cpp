@@ -29,9 +29,9 @@ namespace CE::Editor
 		return extensionToImportSettingsMap[assetExtension];
 	}
 
-	ClassType* AssetImportSettings::GetAssetClassFor(ClassType* importSettings)
+	ClassType* AssetImportSettings::GetAssetClassFor(ClassType* importSettingsClass)
 	{
-		return importSettingsToAssetClassTypeMap[importSettings];
+		return importSettingsToAssetClassTypeMap[importSettingsClass];
 	}
 
 }

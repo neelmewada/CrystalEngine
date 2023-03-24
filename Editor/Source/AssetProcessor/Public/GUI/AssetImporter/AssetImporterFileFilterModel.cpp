@@ -25,17 +25,24 @@ namespace CE::Editor
         if (source == nullptr)
             return true;
 
-        const auto& children = source->allFileEntries;
-
-        if (parentEntry == nullptr && source->showTreeView)
+        auto children = &source->allFileEntries;
+        
+        if (source->showTreeView)
         {
-            parentEntry = source->root;
+            if (parentEntry == nullptr)
+                parentEntry = source->root;
+            children = &parentEntry->children;
         }
 
-        if (source_row >= children.GetSize())
+        if (source_row >= children->GetSize())
             return true;
 
-        auto entry = children[source_row];
+        auto entry = children->At(source_row);
+        
+        if (entry->fullPath.IsDirectory())
+        {
+            return true;
+        }
 
         if (showProcessedFiles && entry->IsProcessed())
         {

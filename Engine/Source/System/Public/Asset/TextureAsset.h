@@ -30,6 +30,8 @@ namespace CE
 
 
     protected:
+        
+        TextureDataType textureType{};
 
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::TextureAssetImportSettings;
@@ -55,7 +57,9 @@ CE_RTTI_CLASS(SYSTEM_API, CE, TextureAsset,
     CE_SUPER(CE::Asset),
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
-    CE_FIELD_LIST(),
+    CE_FIELD_LIST(
+        CE_FIELD(textureType)
+    ),
     CE_FUNCTION_LIST()
 )
 

@@ -139,7 +139,8 @@ namespace CE
 
     void SerializedObject::SerializeField(FieldType* fieldType, YAML::Emitter& emitter)
     {
-        if (fieldType == nullptr || instance == nullptr || !fieldType->IsSerialized())
+        if (fieldType == nullptr || instance == nullptr || !fieldType->IsSerialized() ||
+            fieldType->GetDeclarationType() == nullptr)
         {
             emitter << YAML::Null;
             return;
@@ -163,17 +164,22 @@ namespace CE
             
             emitter << YAML::EndSeq;
         }
-        else if (fieldType->GetTypeId() == TYPEID(String))
+        else if (fieldType->GetTypeId() == TYPEID(String)) // STRING Field
         {
             const auto& fieldValue = fieldType->GetFieldValue<String>(instance);
             emitter << fieldValue.GetCString();
         }
-        else if (fieldType->GetTypeId() == TYPEID(CE::Name))
+        else if (fieldType->GetTypeId() == TYPEID(CE::Name)) // NAME Field
         {
             const auto& fieldValue = fieldType->GetFieldValue<CE::Name>(instance);
             emitter << fieldValue.GetCString();
         }
-        else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>))
+        else if (fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
+        {
+            s64 enumValue = fieldType->GetFieldEnumValue(instance);
+            emitter << enumValue;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {
             const auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
             auto elementType = GetTypeInfo(array.GetElementTypeId());
@@ -215,7 +221,7 @@ namespace CE
             else if (elementType->IsStruct())
             {
                 u32 elementSize = elementType->GetSize();
-                int arrayElementCount = array.GetSize() / elementSize;
+                u32 arrayElementCount = array.GetSize() / elementSize;
 
                 emitter << YAML::BeginSeq;
                 emitter << elementType->GetName();
@@ -279,7 +285,7 @@ namespace CE
             SerializedObject serializedObj = SerializedObject(Object::Type(), object, this);
             serializedObj.Serialize(emitter);
         }
-        else if (fieldType->GetDeclarationType() == GetStaticType<UUID>())
+        else if (fieldType->GetDeclarationType() == GetStaticType<UUID>()) // UUID
         {
             const UUID& uuid = fieldType->GetFieldValue<UUID>(instance);
             
@@ -304,6 +310,30 @@ namespace CE
         else if (fieldType->GetTypeId() == TYPEID(Vec4))
         {
             const Vec4& vec = fieldType->GetFieldValue<Vec4>(instance);
+            
+            emitter << YAML::BeginSeq;
+            emitter << vec.x << vec.y << vec.z << vec.w;
+            emitter << YAML::EndSeq;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec2i))
+        {
+            const auto& vec = fieldType->GetFieldValue<Vec2i>(instance);
+            
+            emitter << YAML::BeginSeq;
+            emitter << vec.x << vec.y;
+            emitter << YAML::EndSeq;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec3i))
+        {
+            const auto& vec = fieldType->GetFieldValue<Vec3i>(instance);
+            
+            emitter << YAML::BeginSeq;
+            emitter << vec.x << vec.y << vec.z;
+            emitter << YAML::EndSeq;
+        }
+        else if (fieldType->GetTypeId() == TYPEID(Vec4i))
+        {
+            const auto& vec = fieldType->GetFieldValue<Vec4i>(instance);
             
             emitter << YAML::BeginSeq;
             emitter << vec.x << vec.y << vec.z << vec.w;
@@ -520,15 +550,19 @@ namespace CE
             
             fieldType->SetFieldValue<Object*>(instance, object);
         }
-        else if (fieldType->GetTypeId() == TYPEID(String))
+        else if (fieldType->GetTypeId() == TYPEID(String)) // STRING Field
         {
             fieldType->SetFieldValue<CE::String>(instance, node.as<std::string>());
         }
-        else if (fieldType->GetTypeId() == TYPEID(CE::Name))
+        else if (fieldType->GetTypeId() == TYPEID(CE::Name)) // NAME Field
         {
             fieldType->SetFieldValue<CE::Name>(instance, node.as<std::string>().c_str());
         }
-        else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>))
+        else if (fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
+        {
+            fieldType->SetFieldEnumValue(instance, node.as<s64>());
+        }
+        else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {
             auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
             auto elementType = GetTypeInfo(array.GetElementTypeId());
@@ -550,7 +584,7 @@ namespace CE
                 return;
             }
             
-            if (elementType->GetTypeId() == TYPEID(String))
+            if (elementType->GetTypeId() == TYPEID(String)) // STRING Elements
             {
                 Array<String>& stringArray = fieldType->GetFieldValue<Array<String>>(instance);
 

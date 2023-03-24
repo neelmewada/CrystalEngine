@@ -4,6 +4,12 @@
 
 namespace CE
 {
+#if PAL_TRAIT_BUILD_EDITOR
+    namespace Editor
+    {
+        class AssetProcessor;
+    }
+#endif
 
     class SYSTEM_API Asset : public Object
     {
@@ -13,12 +19,16 @@ namespace CE
         virtual ~Asset();
         
     public:
-
+        
+        Name GetAssetType();
 
     protected:
         String assetName{};
         String assetExtension{};
-
+        
+#if PAL_TRAIT_BUILD_EDITOR
+        friend class CE::Editor::AssetProcessor;
+#endif
     };
 
 } // namespace CE

@@ -20,7 +20,7 @@ namespace CE::Editor
         static void RegisterImportSettings(ClassType* importSettingsClass, ClassType* assetClass, String assetExtensions);
 
         static ClassType* GetImportSettingsClassFor(String assetExtension);
-        static ClassType* GetAssetClassFor(ClassType* importSettings);
+        static ClassType* GetAssetClassFor(ClassType* importSettingsClass);
 
         virtual bool ApplyImportSettings(Asset* targetAsset) = 0;
 

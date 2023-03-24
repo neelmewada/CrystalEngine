@@ -44,6 +44,17 @@ namespace CE::Editor
                 auto str = String((*it).string());
                 curPath = curPath / str;
                 curRelPath = curRelPath / str;
+                
+                if (!curPath.IsDirectory() && curPath.GetExtension() == ".casset")
+                {
+                    return;
+                }
+                
+                // file name should not start with a period '.'
+                if (!curPath.IsDirectory() && str.StartsWith("."))
+                {
+                    return;
+                }
 
                 if (!entry->HasChild(str)) // Create child entry
                 {

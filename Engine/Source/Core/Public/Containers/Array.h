@@ -54,6 +54,16 @@ namespace CE
         {
             return Impl[index];
         }
+        
+        const ElementType& At(SIZE_T index) const
+        {
+            return Impl[index];
+        }
+        
+        ElementType& At(SIZE_T index)
+        {
+            return Impl[index];
+        }
 
         ElementType& GetFirst()
         {

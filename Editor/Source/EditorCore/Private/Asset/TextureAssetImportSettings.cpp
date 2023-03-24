@@ -9,6 +9,8 @@ namespace CE::Editor
 			return false;
 
 		TextureAsset* textureAsset = (TextureAsset*)targetAsset;
+        
+        textureAsset->textureType = textureType;
 
 		return true;
 	}

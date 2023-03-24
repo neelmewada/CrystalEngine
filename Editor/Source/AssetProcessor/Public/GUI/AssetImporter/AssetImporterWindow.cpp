@@ -16,7 +16,7 @@ namespace CE::Editor
 
         setWindowTitle("Asset Importer");
 
-        ui->splitter->setSizes({ 200, 150 });
+        ui->splitter->setSizes({ 200, 180 });
 
         ui->incompatibleSelectionLabel->setVisible(false);
 
@@ -260,9 +260,25 @@ namespace CE::Editor
 
     void AssetImporterWindow::on_importButton_clicked()
     {
+        if (selection.GetSize() == 0 || importSettingsClass == nullptr || importSettingInstance == nullptr)
+            return;
         
+        for (auto entry : selection)
+        {
+            if (entry == nullptr)
+                continue;
+            
+            AssetProcessor::Get().ProcessAsset(entry->fullPath, importSettingInstance);
+        }
+        
+        ui->contentTreeView->clearSelection();
+        selection.Clear();
+        
+        emit model->modelReset({});
+        emit filterModel->modelReset({});
+        
+        UpdateDetailsView();
     }
-
 
     void AssetImporterWindow::on_resetButton_clicked()
     {

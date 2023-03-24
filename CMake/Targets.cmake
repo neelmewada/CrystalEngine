@@ -256,6 +256,7 @@ function(ce_add_target NAME TARGET_TYPE)
     # RUNTIME_DEPENDENCIES
 
     foreach(runtime_dep ${ce_add_target_RUNTIME_DEPENDENCIES})
+        # Dynamic libraries
         if(DEFINED ${runtime_dep}_BIN_DIR AND DEFINED ${runtime_dep}_RUNTIME_DEPS)
             foreach(copy_dll ${${runtime_dep}_RUNTIME_DEPS})
                 if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
@@ -269,7 +270,7 @@ function(ce_add_target NAME TARGET_TYPE)
                 endif()
             endforeach()
         endif()
-        
+
         # Mac frameworks
         if(DEFINED ${runtime_dep}_RUNTIME_DEPS_FRAMEWORKS)
             foreach(copy_framework ${${runtime_dep}_RUNTIME_DEPS_FRAMEWORKS})

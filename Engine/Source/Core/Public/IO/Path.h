@@ -127,6 +127,11 @@ namespace CE::IO
         {
             return fs::create_directories(path.impl);
         }
+        
+        inline static bool Remove(IO::Path path)
+        {
+            return fs::remove(path.impl);
+        }
 
         void IterateChildren(std::function<void(const IO::Path& path)> func);
         void RecursivelyIterateChildren(std::function<void(const IO::Path& path)> func);
