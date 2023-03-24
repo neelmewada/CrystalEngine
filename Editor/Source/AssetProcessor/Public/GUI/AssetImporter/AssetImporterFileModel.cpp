@@ -45,13 +45,15 @@ namespace CE::Editor
                 curPath = curPath / str;
                 curRelPath = curRelPath / str;
                 
-                if (!curPath.IsDirectory() && curPath.GetExtension() == ".casset")
+                if (!curPath.IsDirectory())
                 {
-                    return;
+                    auto extension = curPath.GetExtension().GetString().GetSubstring(1); // Remove the '.'
+                    if (!AssetImportSettings::IsValidAssetType(extension))
+                        return;
                 }
                 
                 // file name should not start with a period '.'
-                if (!curPath.IsDirectory() && str.StartsWith("."))
+                if (!curPath.IsDirectory() && (str.StartsWith(".")))
                 {
                     return;
                 }

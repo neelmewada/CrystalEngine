@@ -34,6 +34,8 @@ if(${PAL_TRAIT_BUILD_HOST_LIBRARIES})
     add_subdirectory(Libraries)
 endif()
 
+add_library(EditorTools INTERFACE)
+
 # Build Editor
 if(${PAL_TRAIT_BUILD_EDITOR})
     add_subdirectory(Editor)

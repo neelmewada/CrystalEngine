@@ -24,6 +24,11 @@ namespace CE::Editor
 		importSettingsToAssetClassTypeMap[importSettingsClass] = assetClass;
 	}
 
+    bool AssetImportSettings::IsValidAssetType(String assetExtension)
+    {
+        return extensionToImportSettingsMap.KeyExists(assetExtension);
+    }
+
 	ClassType* AssetImportSettings::GetImportSettingsClassFor(String assetExtension)
 	{
 		return extensionToImportSettingsMap[assetExtension];

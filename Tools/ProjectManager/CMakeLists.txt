@@ -19,3 +19,4 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
 
 )
 
+add_dependencies(EditorTools ${PROJECT_NAME})
