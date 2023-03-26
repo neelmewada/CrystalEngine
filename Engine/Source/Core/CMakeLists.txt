@@ -31,11 +31,10 @@ ce_add_target(Core SHARED
             ThirdParty::spdlog
             ThirdParty::yaml
             ThirdParty::efsw
-        TARGETS EngineConfig
+        TARGETS EngineConfig EngineAssets
     RUNTIME_DEPENDENCIES
         
 )
-
 
 if(${PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED})
     add_subdirectory(Tests)

@@ -87,6 +87,48 @@ namespace CE\
 	}\
 }
 
+#define CE_RTTI_POD3(Namespace, Type, ActualType, ...)\
+namespace Namespace\
+{\
+    class CE_##Type##_TypeInfo : public CE::TypeInfo\
+    {\
+    private:\
+        friend const TypeInfo* CE::GetStaticType<Namespace::ActualType>();\
+        CE_##Type##_TypeInfo() : TypeInfo(#Namespace "::" #Type)\
+        {\
+            CE::TypeInfo::RegisterType(this);\
+        }\
+    public:\
+        virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::ActualType); }\
+        virtual bool IsPOD() const { return true; }\
+        virtual bool IsAssignableTo(TypeId typeId) const override\
+        {\
+            std::initializer_list<TypeId> types = { __VA_ARGS__ };\
+            for (auto assignableType : types)\
+            {\
+                if (typeId == assignableType)\
+                {\
+                    return true;\
+                }\
+            }\
+            return typeId == this->GetTypeId();\
+        }\
+        virtual CE::u32 GetSize() const override\
+        {\
+            return (CE::u32)sizeof(Namespace::ActualType);\
+        }\
+    };\
+}\
+namespace CE\
+{\
+    template<>\
+    inline const TypeInfo* GetStaticType<Namespace::ActualType>()\
+    {\
+        static Namespace::CE_##Type##_TypeInfo instance{};\
+        return &instance;\
+    }\
+}
+
 #define CE_REGISTER_TYPES(...) CE::RegisterTypes<__VA_ARGS__>();
 
 namespace CE

@@ -164,3 +164,4 @@ CE_RTTI_POD(CE, String, TYPEID(const char*), TYPEID(char*))
 CE_RTTI_POD(CE, Name)
 CE_RTTI_POD(CE::IO, Path)
 
+CE_RTTI_POD3(CE, Array, Array<u8>)

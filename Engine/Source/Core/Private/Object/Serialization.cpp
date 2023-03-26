@@ -174,11 +174,6 @@ namespace CE
             const auto& fieldValue = fieldType->GetFieldValue<CE::Name>(instance);
             emitter << fieldValue.GetCString();
         }
-        else if (fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
-        {
-            s64 enumValue = fieldType->GetFieldEnumValue(instance);
-            emitter << enumValue;
-        }
         else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {
             const auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
@@ -346,6 +341,12 @@ namespace CE
             emitter << YAML::BeginSeq;
             emitter << quat.x << quat.y << quat.z << quat.w;
             emitter << YAML::EndSeq;
+        }
+        else if (fieldType->GetDeclarationType() != nullptr &&
+                 fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
+        {
+            s64 enumValue = fieldType->GetFieldEnumValue(instance);
+            emitter << enumValue;
         }
         else if TYPE_SERIALIZE(u8)
         else if TYPE_SERIALIZE(u16)
@@ -558,10 +559,6 @@ namespace CE
         {
             fieldType->SetFieldValue<CE::Name>(instance, node.as<std::string>().c_str());
         }
-        else if (fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
-        {
-            fieldType->SetFieldEnumValue(instance, node.as<s64>());
-        }
         else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {
             auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
@@ -654,6 +651,11 @@ namespace CE
         else if (fieldType->GetTypeId() == TYPEID(Quat))
         {
             fieldType->SetFieldValue<Quat>(instance, {node[0].as<f32>(), node[1].as<f32>(), node[2].as<f32>(), node[3].as<f32>()});
+        }
+        else if (fieldType->GetDeclarationType() != nullptr &&
+                 fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
+        {
+            fieldType->SetFieldEnumValue(instance, node.as<s64>());
         }
         else if TYPE_DESERIALIZE(u8)
         else if TYPE_DESERIALIZE(u16)

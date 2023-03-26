@@ -22,6 +22,7 @@ include(CMake/Configurations.cmake)
 include(CMake/OutputDirectory.cmake)
 include(CMake/Targets.cmake)
 include(CMake/ThirdParty.cmake)
+include(CMake/Assets.cmake)
 
 # Import 3rd Party libraries
 add_subdirectory(ThirdParty)

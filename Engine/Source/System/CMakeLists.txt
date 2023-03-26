@@ -26,7 +26,7 @@ ce_add_target(System SHARED
             ThirdParty::sdl
         PUBLIC
             CE::Core
-        TARGETS EngineConfig
+        TARGETS EngineConfig EngineAssets
     RUNTIME_DEPENDENCIES
         
 )
