@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(System CXX)
 
 ce_add_target(System SHARED
+    AUTORTTI
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER 

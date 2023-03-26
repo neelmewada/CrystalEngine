@@ -47,7 +47,7 @@ endfunction()
 function(ce_add_target NAME TARGET_TYPE)
     string(TOUPPER ${NAME} NAME_UPPERCASE)
 
-    set(options GENERATED AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS VS_STARTUP_PROJECT)
+    set(options AUTORTTI AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS VS_STARTUP_PROJECT)
     set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY)
     set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
 
@@ -129,7 +129,6 @@ function(ce_add_target NAME TARGET_TYPE)
     # OUTPUT_DIRECTORY
 
     if((${ce_add_target_OUTPUT_DIRECTORY}) AND (${TARGET_TYPE} STREQUAL "TOOL"))
-        message("Tool: ${NAME}")
         set_target_properties(${NAME}
             PROPERTIES
                 ARCHIVE_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
@@ -145,7 +144,6 @@ function(ce_add_target NAME TARGET_TYPE)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../Config ${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}/Config
         )
     endif()
-    
     
     # Qt AUTO*
 
@@ -214,8 +212,9 @@ function(ce_add_target NAME TARGET_TYPE)
     set(multiValueArgs PRIVATE PUBLIC INTERFACE)
     cmake_parse_arguments(ce_add_target_INCLUDE_DIRECTORIES "" "" "${multiValueArgs}" ${ce_add_target_INCLUDE_DIRECTORIES})
 
-    if(${ce_add_target_GENERATED})
-        list(APPEND ce_add_target_INCLUDE_DIRECTORIES_PUBLIC "Generated")
+    if(${ce_add_target_AUTORTTI})
+        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Generated")
+        list(APPEND ce_add_target_INCLUDE_DIRECTORIES_PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/Generated")
     endif()
 
     target_include_directories(${NAME}
@@ -223,6 +222,17 @@ function(ce_add_target NAME TARGET_TYPE)
         PUBLIC    ${ce_add_target_INCLUDE_DIRECTORIES_PUBLIC}
         INTERFACE ${ce_add_target_INCLUDE_DIRECTORIES_INTERFACE}
     )
+
+    # AUTORTTI
+
+    if(${ce_add_target_AUTORTTI})
+        set(AutoRttiCmd "AutoRTTI")
+        set(AutoRttiDep "AutoRTTI")
+        if(CE_STANDALONE)
+            
+        endif()
+        
+    endif()
     
     # BUILD_DEPENDENCIES
 
