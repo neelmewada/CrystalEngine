@@ -18,6 +18,7 @@ namespace CE
         { "class", TK_KW_CLASS },
         { "struct", TK_KW_STRUCT },
         { "enum", TK_KW_ENUM },
+        { "CE_CLASS", TK_CE_CLASS_BODY },
         { "CLASS", TK_CE_CLASS },
         { "STRUCT", TK_CE_STRUCT },
         { "ENUM", TK_CE_ENUM },
@@ -110,7 +111,7 @@ namespace CE
         while (cursor <= length)
         {
             char c = source[cursor];
-            std::string_view substring(source.begin() + cursor, source.end());
+            std::string_view substring(source.begin().base() + cursor, length - cursor - 1);
 
             switch (source[cursor])
             {
@@ -220,7 +221,7 @@ namespace CE
                 }
                 else if (c == '=')
                 {
-                    self->AddToken(TK_ASIGNMENT_OPERATOR, curLine, "=");
+                    self->AddToken(TK_ASSIGNMENT_OPERATOR, curLine, "=");
                     break;
                 }
 
@@ -312,13 +313,14 @@ namespace CE
                 if (endCursor > cursor)
                     endCursor--;
 
-                std::string_view TokenView(source.begin() + cursor, source.begin() + endCursor + 1);
+                std::string_view TokenView(source.begin().base() + cursor, endCursor - cursor + 1);
                 std::string TokenString = std::string(TokenView);
 
                 // Check for keywords first
                 if (tokenTypeMap.count(TokenString) > 0)
                 {
-                    self->AddToken(tokenTypeMap[TokenString], curLine, TokenString);
+                    auto type = tokenTypeMap[TokenString];
+                    self->AddToken(type, curLine, TokenString);
                 }
                 else if (TokenView == "include" && self->GetLastToken().type == TK_POUNDSIGN)
                 {
@@ -379,7 +381,7 @@ namespace CE
 
     void HeaderTokenizer::AddToken(TokenType type, int line, std::string lexeme)
     {
-        tokens.EmplaceBack(line, type, lexeme);
+        tokens.Add({line, type, lexeme});
     }
 
 } // namespace CE

@@ -180,7 +180,7 @@ namespace CE
     template<>
     inline SIZE_T GetHash<CE::IO::Path>(const CE::IO::Path& value)
     {
-        return std::hash<fs::path>{}(value.impl);
+        return fs::hash_value(value.impl);
     }
 
 }

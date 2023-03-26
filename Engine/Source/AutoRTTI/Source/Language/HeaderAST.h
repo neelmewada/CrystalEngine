@@ -4,6 +4,25 @@
 
 namespace CE
 {
+    struct FieldInfo
+    {
+        Name name{};
+        Array<String> attribs{};
+    };
+
+    struct StructInfo
+    {
+        Name nameSpace{};
+        Name name{};
+        Array<Name> superClasses;
+        Array<String> attribs{};
+        Array<FieldInfo> fields{};
+    };
+
+    struct ClassInfo : public StructInfo
+    {
+        
+    };
 
     class HeaderAST
     {
@@ -11,8 +30,10 @@ namespace CE
         HeaderAST();
     public:
         virtual ~HeaderAST();
-
-        HeaderTokenizer* tokens = nullptr;
+        
+        static HeaderAST* ProcessHeader(HeaderTokenizer* tokens);
+        
+        Array<ClassInfo> classes{};
 
         friend class ModuleAST;
     };

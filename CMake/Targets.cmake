@@ -222,31 +222,6 @@ function(ce_add_target NAME TARGET_TYPE)
         PUBLIC    ${ce_add_target_INCLUDE_DIRECTORIES_PUBLIC}
         INTERFACE ${ce_add_target_INCLUDE_DIRECTORIES_INTERFACE}
     )
-
-    # AUTORTTI
-
-    if(${ce_add_target_AUTORTTI})
-        set(AutoRttiCmd "AutoRTTI")
-        set(AutoRttiDep "AutoRTTI")
-
-        if(CE_STANDALONE)
-            set(AutoRttiCmd "${CE_EDITOR_PATH}/AutoRTTI")
-            set(AutoRttiDep "")
-        endif()
-
-        get_target_property(includes ${NAME} INCLUDE_DIRECTORIES)
-        set(include_cmds "")
-        foreach(inc ${includes})
-            list(APPEND include_cmds "-I '${inc}'")
-        endforeach()
-        message(${include_cmds})
-
-        add_custom_command(TARGET ${NAME} PRE_BUILD
-            COMMAND ${AutoRttiCmd} -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Public" ${include_cmds} -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
-            VERBATIM
-        )
-        
-    endif()
     
     # BUILD_DEPENDENCIES
 
@@ -276,6 +251,27 @@ function(ce_add_target NAME TARGET_TYPE)
         add_dependencies(${NAME} ${ce_add_target_BUILD_DEPENDENCIES_TARGETS})
     endif()
     
+    # AUTORTTI
+
+    if(${ce_add_target_AUTORTTI})
+        set(AutoRttiCmd "AutoRTTI")
+
+        if(CE_STANDALONE)
+            set(AutoRttiCmd "${CE_EDITOR_PATH}/AutoRTTI")
+        endif()
+
+        get_target_property(includes ${NAME} INCLUDE_DIRECTORIES)
+        set(include_cmds "")
+        foreach(inc ${includes})
+            list(APPEND include_cmds "-I '${inc}'")
+        endforeach()
+
+        add_custom_command(TARGET ${NAME} PRE_BUILD
+            COMMAND ${AutoRttiCmd} -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Public" ${include_cmds} -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
+            VERBATIM
+        )
+        
+    endif()
     
     # RUNTIME_DEPENDENCIES
 

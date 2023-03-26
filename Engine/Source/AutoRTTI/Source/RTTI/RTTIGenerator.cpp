@@ -21,8 +21,10 @@ namespace CE
 			{
 				continue; // TODO: Only for testing
 			}
+            
+            std::stringstream outStream{};
 
-			moduleAST.ProcessHeader(entry.path(), includeSearchPaths);
+			moduleAST.ProcessHeader(entry.path(), includeSearchPaths, outStream);
 		}
 	}
 

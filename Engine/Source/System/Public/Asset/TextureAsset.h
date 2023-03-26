@@ -13,6 +13,7 @@ namespace CE
     }
 #endif
 
+    ENUM(FlagBits = 32)
     enum class TextureDataType
     {
         ColorSRGB,
@@ -21,10 +22,10 @@ namespace CE
         NormalMap,
     };
 
-    CLASS()
-    class SYSTEM_API TextureAsset : public Asset
+    CLASS(MaxSize = 32, EditAnywhere, Display = "Test Array", meta = (SomeValue = 31, OtherValue = "Some Text"))
+    class SYSTEM_API TextureAsset : public CE::Asset
     {
-        CE_CLASS(TextureAsset, Asset)
+        CE_CLASS(TextureAsset, CE::Asset)
     public:
         TextureAsset();
         virtual ~TextureAsset();
@@ -33,9 +34,9 @@ namespace CE
         void TestFunction(s32 value);
 
         FIELD(Display = "Test String")
-        String testString;
+        String testString{};
 
-        FIELD(MaxSize = 32)
+        FIELD(MaxSize = 32, EditAnywhere, Display = "Test Array")
         Array<String> testArray;
 
     protected:

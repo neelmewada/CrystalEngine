@@ -15,7 +15,7 @@ namespace CE
 		TK_LITERAL_STRING, // "
 		TK_LITERAL_CHAR, // '
 		TK_LITERAL_NUMBER, // Integer, float, double, etc
-		TK_ASIGNMENT_OPERATOR, // =
+		TK_ASSIGNMENT_OPERATOR, // =
 		TK_ARTIHMETIC_OPERATOR, // +, -, +=, >=, <<, >>, &, |, ~, etc (arithmetic + bitwise)
 		TK_LOGICAL_OPERATOR, // &&, ||, !
 		TK_SCOPE_OPERATOR, // ::
@@ -29,6 +29,7 @@ namespace CE
 		TK_FUNCTION_BODY, // We don't care what's in the functions
 		TK_MACRO_BODY, // We don't care about macro bodies
 		// RTTI tokens
+        TK_CE_CLASS_BODY,
 		TK_CE_CLASS,
 		TK_CE_STRUCT,
 		TK_CE_FIELD,
