@@ -21,6 +21,7 @@ namespace CE
         NormalMap,
     };
 
+    CLASS()
     class SYSTEM_API TextureAsset : public Asset
     {
         CE_CLASS(TextureAsset, Asset)
@@ -28,6 +29,14 @@ namespace CE
         TextureAsset();
         virtual ~TextureAsset();
 
+        FUNCTION()
+        void TestFunction(s32 value);
+
+        FIELD(Display = "Test String")
+        String testString;
+
+        FIELD(MaxSize = 32)
+        Array<String> testArray;
 
     protected:
         
@@ -40,6 +49,7 @@ namespace CE
     
 } // namespace CE
 
+//#include "TextureAsset.rtti.h"
 
 // Texture Data Type
 
@@ -53,14 +63,14 @@ CE_RTTI_ENUM(SYSTEM_API, CE, TextureDataType,
 
 // Texture Asset
 
-CE_RTTI_CLASS(SYSTEM_API, CE, TextureAsset,
-    CE_SUPER(CE::Asset),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        CE_FIELD(textureType)
-    ),
-    CE_FUNCTION_LIST()
-)
+//CE_RTTI_CLASS(SYSTEM_API, CE, TextureAsset,
+//    CE_SUPER(CE::Asset),
+//    CE_NOT_ABSTRACT,
+//    CE_ATTRIBS(),
+//    CE_FIELD_LIST(
+//        CE_FIELD(textureType)
+//    ),
+//    CE_FUNCTION_LIST()
+//)
 
 

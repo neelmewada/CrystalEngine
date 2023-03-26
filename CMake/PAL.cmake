@@ -8,7 +8,6 @@ foreach(detection_file ${detection_files})
 endforeach()
 
 set(CE_EDITOR_PATH "${CMAKE_BINARY_DIR}/$<CONFIG>" CACHE STRING "Path to editor build folder, where all the editor binaries exist")
-message(STATUS "${CE_EDITOR_PATH}")
 
 if (CE_STANDALONE)
     

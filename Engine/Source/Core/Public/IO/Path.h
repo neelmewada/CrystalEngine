@@ -70,6 +70,11 @@ namespace CE::IO
             return lhs.impl != rhs.impl;
         }
 
+        inline operator fs::path() const
+        {
+            return impl;
+        }
+
         inline bool Exists() const
         {
             return fs::exists(impl);
@@ -146,6 +151,9 @@ namespace CE::IO
         fs::path impl;
 
         friend class CE::IO::FileStream;
+
+        template<typename T>
+        friend SIZE_T CE::GetHash(const T& value);
     };
 
 } // namespace CE::IO
@@ -167,3 +175,12 @@ template <> struct fmt::formatter<CE::IO::Path> {
     }
 };
 
+namespace CE
+{
+    template<>
+    inline SIZE_T GetHash<CE::IO::Path>(const CE::IO::Path& value)
+    {
+        return std::hash<fs::path>{}(value.impl);
+    }
+
+}

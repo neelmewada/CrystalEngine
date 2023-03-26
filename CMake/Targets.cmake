@@ -228,9 +228,23 @@ function(ce_add_target NAME TARGET_TYPE)
     if(${ce_add_target_AUTORTTI})
         set(AutoRttiCmd "AutoRTTI")
         set(AutoRttiDep "AutoRTTI")
+
         if(CE_STANDALONE)
-            
+            set(AutoRttiCmd "${CE_EDITOR_PATH}/AutoRTTI")
+            set(AutoRttiDep "")
         endif()
+
+        get_target_property(includes ${NAME} INCLUDE_DIRECTORIES)
+        set(include_cmds "")
+        foreach(inc ${includes})
+            list(APPEND include_cmds "-I '${inc}'")
+        endforeach()
+        message(${include_cmds})
+
+        add_custom_command(TARGET ${NAME} PRE_BUILD
+            COMMAND ${AutoRttiCmd} -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Public" ${include_cmds} -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
+            VERBATIM
+        )
         
     endif()
     

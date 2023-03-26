@@ -10,6 +10,7 @@
 #include "Types/CoreTypeDefs.h"
 
 #include "RTTIDefines.h"
+#include "AutoRTTI.h"
 
 #include "Types/Name.h"
 #include "Variant.h"
