@@ -7,7 +7,7 @@ ce_add_target(System SHARED
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER 
-        PUBLIC 
+        PRIVATE 
             Public/System.h
     FILES_CMAKE
         PRIVATE

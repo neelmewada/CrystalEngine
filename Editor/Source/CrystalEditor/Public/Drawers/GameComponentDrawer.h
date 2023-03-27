@@ -12,9 +12,10 @@ namespace CE::Editor
     class FieldDrawer;
     class StringFieldDrawer;
 
+    CLASS()
     class CRYSTALEDITOR_API GameComponentDrawer : public DrawerBase, public IObjectUpdateListener<GameComponent>
     {
-        CE_CLASS(GameComponentDrawer, DrawerBase)
+        CE_CLASS(GameComponentDrawer, CE::Editor::DrawerBase)
     protected:
         GameComponentDrawer();
     public:
@@ -53,10 +54,5 @@ namespace CE::Editor
 
 }
 
-CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, GameComponentDrawer,
-    CE_SUPER(CE::Editor::DrawerBase),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
-)
+#include "GameComponentDrawer.rtti.h"
+

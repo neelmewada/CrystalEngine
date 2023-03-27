@@ -3,6 +3,8 @@
 
 #include <QFileDialog>
 
+#include "EditorSystem.h"
+
 #include "Events/CrystalEditorEventBus.h"
 
 namespace CE::Editor

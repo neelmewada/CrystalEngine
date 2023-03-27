@@ -55,6 +55,11 @@ namespace CE::Editor
     ClassType* FieldDrawer::GetFieldDrawerClassFor(TypeId fieldTypeId)
     {
         auto type = GetTypeInfo(fieldTypeId);
+        if (type == nullptr)
+        {
+            type = GetStaticType<TextureDataType>();
+            return nullptr;
+        }
         if (type != nullptr && type->IsEnum())
         {
             return EnumFieldDrawer::Type();

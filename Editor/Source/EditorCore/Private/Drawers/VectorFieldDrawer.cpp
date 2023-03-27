@@ -145,4 +145,3 @@ namespace CE::Editor
 
 } // namespace CE::Editor
 
-CE_RTTI_CLASS_IMPL(EDITORCORE_API, CE::Editor, VectorFieldDrawer)

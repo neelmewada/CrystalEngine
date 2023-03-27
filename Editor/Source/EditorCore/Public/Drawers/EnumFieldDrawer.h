@@ -9,9 +9,10 @@ namespace CE::Editor
         class EnumField;
     }
 
+    CLASS()
     class EDITORCORE_API EnumFieldDrawer : public FieldDrawer
     {
-        CE_CLASS(EnumFieldDrawer, FieldDrawer)
+        CE_CLASS(EnumFieldDrawer, CE::Editor::FieldDrawer)
     protected:
         EnumFieldDrawer();
     public:
@@ -22,6 +23,7 @@ namespace CE::Editor
         virtual void CreateGUI(QLayout* container) override;
 
     private:
+        EVENT()
         void OnInputValueChanged(s64 newValue);
 
     private:
@@ -30,12 +32,4 @@ namespace CE::Editor
     
 } // namespace CE::Editor
 
-CE_RTTI_CLASS(EDITORCORE_API, CE::Editor, EnumFieldDrawer,
-    CE_SUPER(CE::Editor::FieldDrawer),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST(
-        CE_FUNCTION(OnInputValueChanged, Event)
-    )
-)
+#include "EnumFieldDrawer.rtti.h"

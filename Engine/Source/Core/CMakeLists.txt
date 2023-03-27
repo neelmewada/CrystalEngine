@@ -6,7 +6,7 @@ ce_add_target(Core SHARED
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER 
-        PUBLIC 
+        PRIVATE 
             Public/Core.h
             Public/CoreMinimal.h
     FILES_CMAKE

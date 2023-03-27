@@ -1,7 +1,8 @@
 
 #include "EditorCore.h"
 
-CE_IMPLEMENT_MODULE(EditorCore, CE::Editor::EditorCoreModule)
+#include "EditorCore.private.h"
+CE_IMPLEMENT_MODULE_AUTORTTI(EditorCore, CE::Editor::EditorCoreModule)
 
 namespace CE::Editor
 {

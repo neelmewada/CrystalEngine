@@ -3,7 +3,7 @@
 
 namespace CE
 {
-    String FieldType::GetDisplayName() const
+    String FieldType::GetDisplayName()
     {
         String displayAttrib = GetLocalAttributeValue("Display");
 

@@ -10,10 +10,10 @@ namespace CE
 {
     class GameObject;
 
-    class SYSTEM_API Scene : public Object
+    CLASS()
+    class SYSTEM_API Scene : public CE::Object
     {
-        CE_CLASS(Scene)
-
+        CE_CLASS(Scene, CE::Object)
     public:
         Scene();
         Scene(Name name);
@@ -57,23 +57,18 @@ namespace CE
         void DestroyAll();
         
     protected:
+        FIELD()
         ObjectStore objects{};
-        CE::HashMap<TypeId, CE::Array<Object*>> objectTypeToArrayMap{};
         
+        FIELD()
         CE::Array<GameObject*> rootGameObjects{};
+
+        CE::HashMap<TypeId, CE::Array<Object*>> objectTypeToArrayMap{};
         
         friend class GameObject;
     };
     
 } // namespace CE
 
-CE_RTTI_CLASS(SYSTEM_API, CE, Scene,
-    CE_SUPER(CE::Object),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        CE_FIELD(objects)
-        CE_FIELD(rootGameObjects)
-    ),
-    CE_FUNCTION_LIST()
-)
+#include "Scene.rtti.h"
+

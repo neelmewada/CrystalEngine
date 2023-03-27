@@ -11,6 +11,7 @@
 namespace CE::Editor
 {
     
+    CLASS(Abstract)
     class EDITORCORE_API DrawerBase : public CE::Object
     {
         CE_CLASS(DrawerBase, CE::Object)
@@ -55,10 +56,4 @@ namespace CE::Editor
 
 } // namespace CE::Editor
 
-CE_RTTI_CLASS(EDITORCORE_API, CE::Editor, DrawerBase,
-    CE_SUPER(CE::Object),
-    CE_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
-)
+#include "DrawerBase.rtti.h"

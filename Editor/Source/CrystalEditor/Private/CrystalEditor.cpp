@@ -8,7 +8,8 @@
 #include "Editor/SceneEditor/DetailsView/DetailsView.h"
 #include "Editor/SceneEditor/ConsoleView/ConsoleView.h"
 
-CE_IMPLEMENT_MODULE(CrystalEditor, CE::Editor::CrystalEditorModule)
+#include "CrystalEditor.private.h"
+CE_IMPLEMENT_MODULE_AUTORTTI(CrystalEditor, CE::Editor::CrystalEditorModule)
 
 namespace CE::Editor
 {

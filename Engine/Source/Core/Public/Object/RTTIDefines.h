@@ -10,7 +10,7 @@ namespace Namespace\
 	class CE_##Type##_TypeInfo : public CE::TypeInfo\
 	{\
 	private:\
-		friend const TypeInfo* CE::GetStaticType<Namespace::Type>();\
+		friend TypeInfo* CE::GetStaticType<Namespace::Type>();\
 		CE_##Type##_TypeInfo() : TypeInfo(#Namespace "::" #Type)\
 		{\
 			CE::TypeInfo::RegisterType(this);\
@@ -39,7 +39,7 @@ namespace Namespace\
 namespace CE\
 {\
 	template<>\
-	inline const TypeInfo* GetStaticType<Namespace::Type>()\
+	inline TypeInfo* GetStaticType<Namespace::Type>()\
 	{\
 		static Namespace::CE_##Type##_TypeInfo instance{};\
 		return &instance;\
@@ -52,7 +52,7 @@ namespace CE\
 class CE_##Type##_TypeInfo : public CE::TypeInfo\
 {\
 private:\
-	friend const TypeInfo* CE::GetStaticType<Type>();\
+	friend TypeInfo* CE::GetStaticType<Type>();\
 	CE_##Type##_TypeInfo() : TypeInfo(#Type)\
 	{\
 		CE::TypeInfo::RegisterType(this);\
@@ -80,7 +80,7 @@ public:\
 namespace CE\
 {\
 	template<>\
-	inline const TypeInfo* GetStaticType<Type>()\
+	inline TypeInfo* GetStaticType<Type>()\
 	{\
 		static CE_##Type##_TypeInfo instance{};\
 		return &instance;\
@@ -93,7 +93,7 @@ namespace Namespace\
     class CE_##Type##_TypeInfo : public CE::TypeInfo\
     {\
     private:\
-        friend const TypeInfo* CE::GetStaticType<Namespace::ActualType>();\
+        friend TypeInfo* CE::GetStaticType<Namespace::ActualType>();\
         CE_##Type##_TypeInfo() : TypeInfo(#Namespace "::" #Type)\
         {\
             CE::TypeInfo::RegisterType(this);\
@@ -122,7 +122,7 @@ namespace Namespace\
 namespace CE\
 {\
     template<>\
-    inline const TypeInfo* GetStaticType<Namespace::ActualType>()\
+    inline TypeInfo* GetStaticType<Namespace::ActualType>()\
     {\
         static Namespace::CE_##Type##_TypeInfo instance{};\
         return &instance;\

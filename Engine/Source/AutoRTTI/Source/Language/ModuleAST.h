@@ -13,7 +13,8 @@ namespace CE
         ModuleAST(String moduleName);
         ~ModuleAST();
 
-        void ProcessHeader(IO::Path headerPath, const Array<IO::Path>& includeSearchPaths, std::stringstream& outStream);
+        void ProcessHeader(IO::Path headerPath, const Array<IO::Path>& includeSearchPaths, 
+            std::stringstream& outStream, std::stringstream& implStream, CE::Array<String>& registrantList);
 
     private:
         Array<HeaderAST*> processedHeaders{};

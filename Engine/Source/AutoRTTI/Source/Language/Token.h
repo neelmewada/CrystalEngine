@@ -29,12 +29,16 @@ namespace CE
 		TK_FUNCTION_BODY, // We don't care what's in the functions
 		TK_MACRO_BODY, // We don't care about macro bodies
 		// RTTI tokens
-        TK_CE_CLASS_BODY,
+        TK_CE_CLASS_BODY, // CE_CLASS(...)
+		TK_CE_STRUCT_BODY, // CE_STRUCT(...)
 		TK_CE_CLASS,
 		TK_CE_STRUCT,
 		TK_CE_FIELD,
 		TK_CE_ENUM,
+		TK_CE_ECONST,
 		TK_CE_FUNCTION,
+		TK_CE_SIGNAL, // SIGNAL()
+		TK_CE_EVENT, // EVENT()
 
 		TK_LEFTANGLE, // <
 		TK_RIGHTANGLE, // >
@@ -46,6 +50,7 @@ namespace CE
 		TK_POUNDSIGN, // #
 		TK_ASTERISK, // *
 		TK_AMPERSAND, // &
+		TK_PERIOD, // .
 
 		TK_KW_INCLUDE,
 		TK_KW_DEFINE,
@@ -72,10 +77,10 @@ namespace CE
 		TK_KW_CONST,
 		TK_KW_AUTO,
 
-		TK_KW_VOID,
 		TK_KW_UNSIGNED,
 		TK_KW_SIGNED,
 		// Types
+		TK_KW_VOID,
 		TK_KW_INT,
 		TK_KW_SHORT,
 		TK_KW_LONG,

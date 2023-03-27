@@ -38,8 +38,10 @@ namespace CE
 #define __CE_ARG_LIST_8 a7, __CE_ARG_LIST_7
 #define __CE_ARG_LIST_9 a8, __CE_ARG_LIST_8
 
-#define CE_SIGNAL(SignalName, ...) inline void SignalName(CE_EXPAND(CE_CONCATENATE(__CE_ARG_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__))\
+#define CE_SIGNAL(SignalName, ...) inline void SignalName(CE_EXPAND(CE_EXPAND(CE_CONCATENATE(__CE_ARG_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)))\
 {\
     CE::Array<CE::Variant> args = { CE_EXPAND(CE_CONCATENATE(__CE_ARG_LIST_,CE_ARG_COUNT(__VA_ARGS__))) };\
     FireSignal(#SignalName, args);\
 }
+
+

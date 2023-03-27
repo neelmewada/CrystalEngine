@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 
         RTTIGenerator::GenerateRTTI(moduleName, modulePath, outPath);
 
-        CE_LOG(Info, All, "Generated RTTI for module: {}", moduleName);
+        CE_LOG(Info, All, "Automatic RTTI for module: {}", moduleName);
     }
     catch (std::exception exc)
     {

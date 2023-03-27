@@ -11,9 +11,10 @@ namespace CE
     }
 #endif
 
-    class SYSTEM_API Asset : public Object
+    CLASS(Abstract)
+    class SYSTEM_API Asset : public CE::Object
     {
-        CE_CLASS(Asset, Object)
+        CE_CLASS(Asset, CE::Object)
     protected:
         Asset(CE::Name name);
         virtual ~Asset();
@@ -23,7 +24,10 @@ namespace CE
         Name GetAssetType();
 
     protected:
+        FIELD(Hidden)
         String assetName{};
+
+        FIELD(Hidden)
         String assetExtension{};
         
 #if PAL_TRAIT_BUILD_EDITOR
@@ -33,13 +37,5 @@ namespace CE
 
 } // namespace CE
 
-CE_RTTI_CLASS(SYSTEM_API, CE, Asset,
-    CE_SUPER(CE::Object),
-    CE_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        CE_FIELD(assetName, Hidden)
-        CE_FIELD(assetExtension, Hidden)
-    ),
-    CE_FUNCTION_LIST()
-)
+#include "Asset.rtti.h"
+

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QString>
+#include <QItemSelection>
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameFramework.h"
@@ -18,7 +19,7 @@ namespace CE::Editor
     class ConsoleView : public EditorViewBase
     {
         Q_OBJECT
-        CE_CLASS(ConsoleView, EditorViewBase)
+        CE_CLASS(ConsoleView, CE::Editor::EditorViewBase)
     public:
         explicit ConsoleView(QWidget *parent = nullptr);
         ~ConsoleView();

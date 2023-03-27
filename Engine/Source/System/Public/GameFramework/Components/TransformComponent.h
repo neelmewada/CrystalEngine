@@ -10,10 +10,10 @@
 
 namespace CE
 {
-
+    CLASS(AllowMultiple = false, Display = Transform)
     class SYSTEM_API TransformComponent : public GameComponent
     {
-        CE_CLASS(TransformComponent, GameComponent)
+        CE_CLASS(TransformComponent, CE::GameComponent)
     public:
         
         TransformComponent() : GameComponent("Transform")
@@ -66,8 +66,13 @@ namespace CE
         }
         
     protected:
+        FIELD(Display = Position)
         Vec3 localPosition{0, 0, 0};
+
+        FIELD(Display = Rotation)
         Vec3 localRotation{0, 0, 0};
+
+        FIELD(Display = Scale)
         Vec3 localScale{1, 1, 1};
         
         friend class GameObject;
@@ -75,14 +80,5 @@ namespace CE
     
 } // namespace CE
 
-CE_RTTI_CLASS(SYSTEM_API, CE, TransformComponent,
-    CE_SUPER(CE::GameComponent),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(AllowMultiple = false, Display = Transform),
-    CE_FIELD_LIST(
-        CE_FIELD(localPosition, Display = Position)
-        CE_FIELD(localRotation, Display = Rotation)
-        CE_FIELD(localScale, Display = Scale)
-    ),
-    CE_FUNCTION_LIST()
-)
+
+#include "TransformComponent.rtti.h"

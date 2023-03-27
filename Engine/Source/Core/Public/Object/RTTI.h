@@ -65,7 +65,7 @@ namespace CE
 		const CE::Name& GetName() const { return name; }
 		const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
 
-		virtual String GetDisplayName() const { return name.GetString(); }
+		virtual String GetDisplayName();
 
 		String GetLocalAttributeValue(const String& key) const;
         
@@ -91,18 +91,19 @@ namespace CE
 
 	protected:
 		CE::Name name;
+		CE::String displayName{};
 		CE::Array<CE::Attribute> attributes{};
 
 	public:
 		// For internal use only!
-        static HashMap<CE::Name, const TypeInfo*> RegisteredTypes;
+        static HashMap<CE::Name, TypeInfo*> RegisteredTypes;
 		// For internal use only!
-		static HashMap<TypeId, const TypeInfo*> RegisteredTypeIds;
+		static HashMap<TypeId, TypeInfo*> RegisteredTypeIds;
 
         // For internal use only!
-        static void RegisterType(const TypeInfo* type);
+        static void RegisterType(TypeInfo* type);
 		// For internal use only!
-		static void DeregisterType(const TypeInfo* type);
+		static void DeregisterType(TypeInfo* type);
 		// For internal use only!
         CE_INLINE static u32 GetRegisteredCount()
         {
@@ -113,16 +114,16 @@ namespace CE
 	/// Default implementation always returns nullptr. Specialization will return the correct data.
 	/// Returns the type info of the specified type at compile time.
 	template<typename Type>
-	const TypeInfo* GetStaticType()
+	TypeInfo* GetStaticType()
 	{
 		return nullptr;
 	}
 
 	/// Returns dynamic type info of the type with specified name. Ex:  GetTypeInfo("ParentNamespace::ChildNamespace::SomeClass")
-    CORE_API const TypeInfo* GetTypeInfo(CE::Name name);
+    CORE_API TypeInfo* GetTypeInfo(CE::Name name);
 
 	/// Returns dynamic type info of the type with specified type id.
-	CORE_API const TypeInfo* GetTypeInfo(TypeId typeId);
+	CORE_API TypeInfo* GetTypeInfo(TypeId typeId);
 
 	// Specialization will contain the magic data.
 	template<typename T>

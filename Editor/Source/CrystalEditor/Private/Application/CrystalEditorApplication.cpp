@@ -2,6 +2,8 @@
 #include "CoreMinimal.h"
 #include "RHI/RHI.h"
 
+#include "EditorSystem.h"
+
 #include "Application/EditorQtApplication.h"
 #include "GUI/Screens/WelcomeScreen/WelcomeScreen.h"
 #include "GUI/Screens/ProjectBrowser/ProjectBrowser.h"

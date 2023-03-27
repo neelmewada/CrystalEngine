@@ -19,11 +19,15 @@ namespace CE
         { "struct", TK_KW_STRUCT },
         { "enum", TK_KW_ENUM },
         { "CE_CLASS", TK_CE_CLASS_BODY },
+        { "CE_STRUCT", TK_CE_STRUCT_BODY },
         { "CLASS", TK_CE_CLASS },
         { "STRUCT", TK_CE_STRUCT },
         { "ENUM", TK_CE_ENUM },
+        { "ECONST", TK_CE_ECONST },
         { "FIELD", TK_CE_FIELD },
         { "FUNCTION", TK_CE_FUNCTION },
+        { "CE_SIGNAL", TK_CE_SIGNAL },
+        { "EVENT", TK_CE_EVENT },
         { "true", TK_KW_TRUE },
         { "false", TK_KW_FALSE },
         { "nullptr", TK_KW_NULLPTR },
@@ -111,20 +115,28 @@ namespace CE
         while (cursor <= length)
         {
             char c = source[cursor];
-            std::string_view substring(source.begin().base() + cursor, length - cursor - 1);
+            std::string_view substring(source.c_str() + cursor, length - cursor - 1);
 
             switch (source[cursor])
             {
             case ' ': // No token (whitespace)
+                break;
+            case '.':
+                self->AddToken(TK_PERIOD, curLine, ".");
                 break;
             case '#':
                 self->AddToken(TK_POUNDSIGN, curLine);
                 break;
             case ':':
                 if (cursor < length - 1 && source[cursor + 1] == ':')
+                {
                     self->AddToken(TK_SCOPE_OPERATOR, curLine);
+                    cursor++;
+                }
                 else
+                {
                     self->AddToken(TK_COLON, curLine);
+                }
                 break;
             case ';':
                 self->AddToken(TK_SEMICOLON, curLine);
@@ -178,13 +190,13 @@ namespace CE
                 self->AddToken(TK_PAREN_CLOSE, curLine);
                 break;
             case '<':
-                self->AddToken(TK_LEFTANGLE, curLine);
+                self->AddToken(TK_LEFTANGLE, curLine, "<");
                 break;
             case '>':
-                self->AddToken(TK_RIGHTANGLE, curLine);
+                self->AddToken(TK_RIGHTANGLE, curLine, ">");
                 break;
             case '*':
-                self->AddToken(TK_ASTERISK, curLine);
+                self->AddToken(TK_ASTERISK, curLine, "*");
                 break;
             case '+':
             case '-':
@@ -313,8 +325,8 @@ namespace CE
                 if (endCursor > cursor)
                     endCursor--;
 
-                std::string_view TokenView(source.begin().base() + cursor, endCursor - cursor + 1);
-                std::string TokenString = std::string(TokenView);
+                std::string_view tokenView(source.c_str() + cursor, endCursor - cursor + 1);
+                std::string TokenString = std::string(tokenView);
 
                 // Check for keywords first
                 if (tokenTypeMap.count(TokenString) > 0)
@@ -322,15 +334,15 @@ namespace CE
                     auto type = tokenTypeMap[TokenString];
                     self->AddToken(type, curLine, TokenString);
                 }
-                else if (TokenView == "include" && self->GetLastToken().type == TK_POUNDSIGN)
+                else if (tokenView == "include" && self->GetLastToken().type == TK_POUNDSIGN)
                 {
                     self->AddToken(TK_KW_INCLUDE, curLine, TokenString);
                 }
-                else if (TokenView == "define" && self->GetLastToken().type == TK_POUNDSIGN) // Macro definition
+                else if (tokenView == "define" && self->GetLastToken().type == TK_POUNDSIGN) // Macro definition
                 {
                     self->AddToken(TK_KW_DEFINE, curLine, TokenString);
                 }
-                else if (TokenView == "defined" && (self->GetLastToken().type == TK_KW_IF))
+                else if (tokenView == "defined" && (self->GetLastToken().type == TK_KW_IF))
                 {
                     self->AddToken(TK_KW_DEFINED, curLine, TokenString);
                 }

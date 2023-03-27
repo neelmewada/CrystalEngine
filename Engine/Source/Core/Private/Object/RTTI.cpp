@@ -22,8 +22,8 @@ namespace CE
         }
     }
 
-    HashMap<Name, const TypeInfo*> TypeInfo::RegisteredTypes{};
-    HashMap<TypeId, const TypeInfo*> TypeInfo::RegisteredTypeIds{};
+    HashMap<Name, TypeInfo*> TypeInfo::RegisteredTypes{};
+    HashMap<TypeId, TypeInfo*> TypeInfo::RegisteredTypeIds{};
 
     String CleanupAttributeString(const String& inString)
     {
@@ -116,6 +116,35 @@ namespace CE
         }
     }
 
+    String TypeInfo::GetDisplayName()
+    {
+        if (!displayName.IsEmpty())
+            return displayName;
+
+        auto tempStr = name.GetString();
+        displayName = "";
+
+        for (int i = 0; i < tempStr.GetLength(); i++)
+        {
+            if (i == 0)
+            {
+                displayName.Append((char)std::toupper(tempStr[i]));
+                continue;
+            }
+            if (std::isupper(tempStr[i]) && !std::isupper(tempStr[i - 1]))
+            {
+                displayName.Append(' ');
+                displayName.Append(tempStr[i]);
+            }
+            else
+            {
+                displayName.Append(tempStr[i]);
+            }
+        }
+
+        return displayName;
+    }
+
     String TypeInfo::GetLocalAttributeValue(const String& key) const
     {
         for (int i = 0; i < attributes.GetSize(); i++)
@@ -134,7 +163,7 @@ namespace CE
         return IsClass() && IsAssignableTo(TYPEID(Component));
     }
 
-    void TypeInfo::RegisterType(const TypeInfo* type)
+    void TypeInfo::RegisterType(TypeInfo* type)
     {
         if (type == nullptr)
             return;
@@ -149,7 +178,7 @@ namespace CE
         }
     }
 
-    void TypeInfo::DeregisterType(const TypeInfo* type)
+    void TypeInfo::DeregisterType(TypeInfo* type)
     {
         if (type == nullptr)
             return;
@@ -158,7 +187,7 @@ namespace CE
         RegisteredTypeIds.Remove(type->GetTypeId());
     }
 
-    CORE_API const TypeInfo* GetTypeInfo(Name name)
+    CORE_API TypeInfo* GetTypeInfo(Name name)
     {
         if (TypeInfo::RegisteredTypes.KeyExists(name))
         {
@@ -167,7 +196,7 @@ namespace CE
         return nullptr;
     }
 
-    CORE_API const TypeInfo* GetTypeInfo(TypeId typeId)
+    CORE_API TypeInfo* GetTypeInfo(TypeId typeId)
     {
         if (TypeInfo::RegisteredTypeIds.KeyExists(typeId))
         {

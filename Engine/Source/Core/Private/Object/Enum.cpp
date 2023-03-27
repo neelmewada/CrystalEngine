@@ -14,7 +14,7 @@ namespace CE
 
 	}
 
-	String EnumConstant::GetDisplayName() const
+	String EnumConstant::GetDisplayName()
 	{
 		String displayAttrib = GetLocalAttributeValue("Display");
 
@@ -39,7 +39,7 @@ namespace CE
 		TypeInfo::DeregisterType(this);
 	}
 
-	String EnumType::GetDisplayName() const
+	String EnumType::GetDisplayName()
 	{
 		String displayAttrib = GetLocalAttributeValue("Display");
 

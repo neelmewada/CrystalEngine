@@ -141,6 +141,8 @@ namespace CE
         const char* GetCString() const;
         inline u32 GetLength() const { return StringLength; }
 
+        inline std::string ToStdString() const { return std::string(Buffer); }
+
         inline void Clear()
         {
             SetCString(nullptr);

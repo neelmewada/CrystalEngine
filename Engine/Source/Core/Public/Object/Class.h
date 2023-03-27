@@ -34,14 +34,14 @@ namespace CE
 
 	// Default implementation always returns nullptr. Specialization will return the correct data
 	template<typename Type>
-	const StructType* GetStaticStruct()
+	StructType* GetStaticStruct()
 	{
 		return nullptr;
 	}
 
 	// Default implementation always returns nullptr. Specialization will return the correct data
 	template<typename Type>
-	const ClassType* GetStaticClass()
+	ClassType* GetStaticClass()
 	{
 		return nullptr;
 	}
@@ -66,7 +66,7 @@ namespace CE
 		virtual ~StructType() {}
 
 		template<typename T>
-		friend const TypeInfo* GetStaticType();
+		friend TypeInfo* GetStaticType();
 
 		template<typename Struct>
 		friend struct CE::Internal::TypeInfoImpl;
@@ -312,7 +312,7 @@ namespace CE
 		{}
 
 		template<typename T>
-		friend const TypeInfo* GetStaticType();
+		friend TypeInfo* GetStaticType();
 
 		template<typename Class>
 		friend struct CE::Internal::TypeInfoImpl;
@@ -377,8 +377,7 @@ namespace CE
 		template<typename T>
 		struct TypeInfoImpl
 		{
-			//const TypeInfo TypeInfo;
-			//const StructTypeData<T> TypeData;
+
 		};
 
 		// Recursively populates the StructTypeData
@@ -520,6 +519,12 @@ namespace CE
 #define CE_FUNCTION_LIST(x) x
 #define CE_FUNCTION(FunctionName, ...) Type.AddFunction(#FunctionName, &Self::FunctionName, "" #__VA_ARGS__);
 
+#define CE_FUNCTION2(FunctionName, Signature, ...)\
+{\
+	auto (Self::*funcPtr)Signature = &Self::FunctionName;\
+	Type.AddFunction(#FunctionName, funcPtr, "" #__VA_ARGS__);\
+}
+
 #define __CE_RTTI_JOIN_CLASSES_0()
 #define __CE_RTTI_JOIN_CLASSES_1(...) , __VA_ARGS__
 #define __CE_RTTI_JOIN_CLASSES_2(...) , __VA_ARGS__
@@ -577,8 +582,8 @@ namespace CE\
             TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Namespace::Class> typeData) : Type(type), TypeData(typeData)\
             {\
                 TypeInfo::RegisterType(&Type);\
-                FieldList\
 				FunctionList\
+                FieldList\
 				Type.AddSuper<SuperClasses>();\
             }\
 			virtual ~TypeInfoImpl()\
@@ -604,13 +609,13 @@ namespace CE\
 		};\
 	}\
 	template<>\
-	inline const TypeInfo* GetStaticType<Namespace::Class>()\
+	inline TypeInfo* GetStaticType<Namespace::Class>()\
 	{\
         static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, sizeof(Namespace::Class), Attributes "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
 	}\
 	template<>\
-	inline const ClassType* GetStaticClass<Namespace::Class>()\
+	inline ClassType* GetStaticClass<Namespace::Class>()\
 	{\
 		return (ClassType*)GetStaticType<Namespace::Class>();\
 	}\
@@ -680,13 +685,13 @@ namespace CE\
 		};\
 	}\
 	template<>\
-	inline const TypeInfo* GetStaticType<Namespace::Struct>()\
+	inline TypeInfo* GetStaticType<Namespace::Struct>()\
 	{\
         static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), Attributes "" }, StructTypeData<Namespace::Struct>() };\
 		return &instance.Type;\
 	}\
 	template<>\
-	inline const StructType* GetStaticStruct<Namespace::Struct>()\
+	inline StructType* GetStaticStruct<Namespace::Struct>()\
 	{\
 		return (StructType*)GetStaticType<Namespace::Struct>();\
 	}\
@@ -705,20 +710,8 @@ public:\
     typedef Struct Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::StructType* Type();\
-    virtual const TypeInfo* GetType() const\
+    virtual TypeInfo* GetType() const\
     {\
         return Type();\
     }
-
-#define __CE_PROP_GETTER_(FieldName)
-#define __CE_PROP_GETTER_NULL(FieldName)
-#define __CE_PROP_GETTER_GET(FieldName) CE_INLINE decltype(FieldName) Get_##FieldName() const { return FieldName; }
-
-#define __CE_PROP_SETTER_(FieldName)
-#define __CE_PROP_SETTER_NULL(FieldName)
-#define __CE_PROP_SETTER_SET(FieldName) CE_INLINE void Set_##FieldName(const decltype(FieldName)& value) { FieldName = value; }
-
-#define CE_PROPERTY(FieldName, Getter, Setter)\
-CE_EXPAND(CE_CONCATENATE(__CE_PROP_GETTER_, Getter))(FieldName)\
-CE_EXPAND(CE_CONCATENATE(__CE_PROP_SETTER_, Setter))(FieldName)
 

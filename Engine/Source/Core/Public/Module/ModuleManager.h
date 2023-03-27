@@ -99,6 +99,17 @@ extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
     delete modulePtr;\
 }
 
+#define CE_IMPLEMENT_MODULE_AUTORTTI(ModuleName, ModuleImplClass)\
+extern "C" DLL_EXPORT CE::Module* CELoadModule()\
+{\
+    CERegisterModuleTypes();\
+    return new ModuleImplClass();\
+}\
+extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
+{\
+    delete modulePtr;\
+}
+
 #define CE_IMPLEMENT_PLUGIN(PluginName, PluginImplClass)\
 extern "C" DLL_EXPORT CE::Module* CELoadModule()\
 {\

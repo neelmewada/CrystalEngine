@@ -1,7 +1,8 @@
 
 #include "System.h"
 
-CE_IMPLEMENT_MODULE(System, CE::SystemModule)
+#include "System.private.h"
+CE_IMPLEMENT_MODULE_AUTORTTI(System, CE::SystemModule)
 
 namespace CE
 {
@@ -19,10 +20,6 @@ namespace CE
 
     void SystemModule::RegisterTypes()
     {
-        // Miscellaneous Types
-        CE_REGISTER_TYPES(
-            
-        );
 
         // Game Framework Types
         CE_REGISTER_TYPES(
@@ -36,12 +33,6 @@ namespace CE
         CE_REGISTER_TYPES(
             ConfigBase,
             PluginConfig
-        );
-
-        // Assets
-        CE_REGISTER_TYPES(
-            Asset,
-            TextureAsset, TextureDataType
         );
 
         // Register Game Components

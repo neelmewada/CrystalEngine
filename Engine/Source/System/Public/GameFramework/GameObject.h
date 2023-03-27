@@ -8,9 +8,10 @@ namespace CE
     class GameComponent;
     class Scene;
 
+    CLASS()
     class SYSTEM_API GameObject : public Object
     {
-        CE_CLASS(GameObject, Object);
+        CE_CLASS(GameObject, CE::Object)
     public:
         GameObject();
         GameObject(CE::Name name);
@@ -81,11 +82,16 @@ namespace CE
         s32 GetChildIndex(GameObject* child);
         
     protected:
+        FIELD()
         Scene* owner = nullptr;
         
+        FIELD()
         CE::Array<GameComponent*> components{};
+
+        FIELD()
         GameObject* parent = nullptr;
         
+        FIELD()
         CE::Array<GameObject*> children{};
         
         friend class Scene;
@@ -93,15 +99,4 @@ namespace CE
     
 } // namespace CE
 
-CE_RTTI_CLASS(SYSTEM_API, CE, GameObject,
-    CE_SUPER(CE::Object),
-    CE_NOT_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        CE_FIELD(owner)
-        CE_FIELD(components)
-        CE_FIELD(parent)
-        CE_FIELD(children)
-    ),
-    CE_FUNCTION_LIST()
-)
+#include "GameObject.rtti.h"

@@ -8,7 +8,7 @@ ce_add_target(${PROJECT_NAME} GUIAPP
     NAMESPACE CE
     FOLDER Editor
     PCHHEADER
-        PUBLIC
+        PRIVATE
             Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE

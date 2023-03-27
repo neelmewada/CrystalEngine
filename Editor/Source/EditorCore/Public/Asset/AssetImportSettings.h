@@ -9,7 +9,7 @@ namespace CE
 
 namespace CE::Editor
 {
-
+    CLASS(Abstract)
     class EDITORCORE_API AssetImportSettings
     {
         CE_CLASS(AssetImportSettings)
@@ -32,16 +32,9 @@ namespace CE::Editor
     
 } // namespace CE::Editor
 
-CE_RTTI_CLASS(EDITORCORE_API, CE::Editor, AssetImportSettings,
-    CE_SUPER(),
-    CE_ABSTRACT,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        
-    ),
-    CE_FUNCTION_LIST()
-)
-
 #define CE_REGISTER_IMPORT_SETTINGS(ImportSettingsClass, AssetClass, ...)\
 CE_REGISTER_TYPES(ImportSettingsClass)\
 CE::Editor::AssetImportSettings::RegisterImportSettings(ImportSettingsClass::Type(), AssetClass::Type(), #__VA_ARGS__)
+
+
+#include "AssetImportSettings.rtti.h"

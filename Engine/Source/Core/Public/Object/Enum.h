@@ -17,7 +17,7 @@ namespace CE
 
     // Default implementation always returns nullptr. Specialization will return the correct data
     template<typename Type>
-    const EnumType* GetStaticEnum()
+    EnumType* GetStaticEnum()
     {
         return nullptr;
     }
@@ -31,11 +31,11 @@ namespace CE
         EnumConstant(CE::Name name, CE::TypeId typeId, s64 value, u32 size, const char* attributes = "");
 
         template<typename T>
-        friend const TypeInfo* GetStaticType();
+        friend TypeInfo* GetStaticType();
 
     public:
 
-        virtual String GetDisplayName() const override;
+        virtual String GetDisplayName() override;
 
         virtual bool IsEnumConstant() const { return true; }
 
@@ -59,18 +59,18 @@ namespace CE
         ~EnumType();
 
         template<typename T>
-        friend const TypeInfo* GetStaticType();
+        friend TypeInfo* GetStaticType();
 
     public:
 
-        virtual String GetDisplayName() const override;
+        virtual String GetDisplayName() override;
 
         virtual bool IsEnum() const override { return true; }
 
         virtual TypeId GetTypeId() const override { return this->typeId; }
 
-        CE_INLINE u32 GetConstantsCount() const { return constants.GetSize(); }
-        CE_INLINE const EnumConstant* GetConstant(u32 index) const { return &constants[index]; }
+        CE_INLINE u32 GetConstantsCount() { return constants.GetSize(); }
+        CE_INLINE EnumConstant* GetConstant(u32 index) { return &constants[index]; }
 
         virtual u32 GetSize() const override { return size; }
 
@@ -95,14 +95,14 @@ namespace CE
 namespace CE\
 {\
     template<>\
-    inline const TypeInfo* GetStaticType<Namespace::Enum>()\
+    inline TypeInfo* GetStaticType<Namespace::Enum>()\
     {\
         using Self = Namespace::Enum;\
         static EnumType instance = EnumType{ #Namespace "::" #Enum, CE::GetTypeId<Namespace::Enum>(), CE::GetTypeId<__underlying_type(Namespace::Enum)>(), { __VA_ARGS__ }, sizeof(Namespace::Enum), CE_TOSTRING(Attributes) "" };\
 	    return &instance;\
     }\
     template<>\
-    inline const EnumType* GetStaticEnum<Namespace::Enum>()\
+    inline EnumType* GetStaticEnum<Namespace::Enum>()\
     {\
         return (EnumType*)GetStaticType<Namespace::Enum>();\
     }\
