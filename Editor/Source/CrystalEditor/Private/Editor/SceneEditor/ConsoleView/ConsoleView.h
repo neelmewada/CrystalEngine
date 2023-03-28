@@ -8,6 +8,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameFramework.h"
 
+#include <mutex>
+
 namespace Ui {
 class ConsoleView;
 }
@@ -43,6 +45,7 @@ namespace CE::Editor
     private:
         Ui::ConsoleView *ui;
         ConsoleViewModel* model = nullptr;
+        std::mutex mut{};
 
         template<typename Mutex>
         friend class EditorConsoleSink;

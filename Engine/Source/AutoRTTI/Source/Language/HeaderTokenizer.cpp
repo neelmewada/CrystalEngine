@@ -130,7 +130,7 @@ namespace CE
             case ':':
                 if (cursor < length - 1 && source[cursor + 1] == ':')
                 {
-                    self->AddToken(TK_SCOPE_OPERATOR, curLine);
+                    self->AddToken(TK_SCOPE_OPERATOR, curLine, "::");
                     cursor++;
                 }
                 else

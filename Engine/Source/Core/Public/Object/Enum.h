@@ -70,7 +70,14 @@ namespace CE
         virtual TypeId GetTypeId() const override { return this->typeId; }
 
         CE_INLINE u32 GetConstantsCount() { return constants.GetSize(); }
-        CE_INLINE EnumConstant* GetConstant(u32 index) { return &constants[index]; }
+        CE_INLINE EnumConstant* GetConstant(u32 index) 
+        { 
+            if (index >= GetConstantsCount())
+                return nullptr;
+            return &constants[index]; 
+        }
+
+        EnumConstant* FindConstantWithValue(s64 value);
 
         virtual u32 GetSize() const override { return size; }
 
@@ -106,7 +113,22 @@ namespace CE\
     {\
         return (EnumType*)GetStaticType<Namespace::Enum>();\
     }\
-}
+}\
+template <> struct fmt::formatter<Namespace::Enum> {\
+    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {\
+        return ctx.end();\
+    }\
+    template <typename FormatContext>\
+    auto format(const Namespace::Enum& value, FormatContext& ctx) const -> decltype(ctx.out()) {\
+        auto enumType = CE::GetStaticEnum<Namespace::Enum>();\
+        auto constant = enumType->FindConstantWithValue((CE::s64)value);\
+        if (constant == nullptr)\
+        {\
+            return fmt::format_to(ctx.out(), "{}", (CE::s64)value);\
+        }\
+        return fmt::format_to(ctx.out(), "{}", constant->GetName());\
+    }\
+};
 
 #define CE_RTTI_ENUM_IMPL(API, Namespace, Enum)
 

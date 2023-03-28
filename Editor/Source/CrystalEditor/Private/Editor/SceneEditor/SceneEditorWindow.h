@@ -18,12 +18,13 @@ namespace CE::Editor
     class ConsoleView;
     class AssetsView;
 
+    CLASS()
     class SceneEditorWindow
         : public EditorWindowBase
         , public SceneEditorBus::Interface
     {
         Q_OBJECT
-        CE_CLASS(SceneEditorWindow, EditorWindowBase)
+        CE_CLASS(SceneEditorWindow, CE::Editor::EditorWindowBase)
     public:
         explicit SceneEditorWindow(QWidget* parent = nullptr);
         ~SceneEditorWindow();
@@ -31,10 +32,13 @@ namespace CE::Editor
         // *****************************************
         // SceneEditorBus::Interface
 
+        EVENT()
         virtual void OpenEmptyScene() override;
 
+        EVENT()
         virtual void CreateEmptyGameObject() override;
 
+        EVENT()
         virtual void OpenScene(String sceneAssetPath) override;
         
     private slots:
@@ -92,18 +96,8 @@ namespace CE::Editor
 
 }
 
-CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, SceneEditorWindow,
-    CE_SUPER(CE::Editor::EditorWindowBase),
-    CE_DONT_INSTANTIATE,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST(
-        // SceneEditorBus::Interface
-        CE_FUNCTION(OpenEmptyScene, Event)
-        CE_FUNCTION(CreateEmptyGameObject, Event)
-        CE_FUNCTION(OpenScene, Event)
-    )
-)
+#include "SceneEditorWindow.rtti.h"
+
 
 #endif // SCENEEDITOR_H
 

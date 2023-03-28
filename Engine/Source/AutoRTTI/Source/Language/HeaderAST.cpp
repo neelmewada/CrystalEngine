@@ -599,7 +599,16 @@ namespace CE
                         copy.pop();
                     }
                     curClass->nameSpace = nameSpace;
-                    curClass->name = String(tokens->tokens[i - 1].lexeme);
+                    int backIdx = i - 1;
+                    while (backIdx > 0)
+                    {
+                        if (tokens->tokens[backIdx].type == TK_IDENTIFIER)
+                        {
+                            curClass->name = String(tokens->tokens[backIdx].lexeme);
+                            break;
+                        }
+                        backIdx--;
+                    }
                 }
                 else if (curStruct != nullptr && i > 0 && !curStruct->name.IsValid())
                 {
@@ -614,7 +623,16 @@ namespace CE
                         copy.pop();
                     }
                     curStruct->nameSpace = nameSpace;
-                    curStruct->name = String(tokens->tokens[i - 1].lexeme);
+                    int backIdx = i - 1;
+                    while (backIdx > 0)
+                    {
+                        if (tokens->tokens[backIdx].type == TK_IDENTIFIER)
+                        {
+                            curStruct->name = String(tokens->tokens[backIdx].lexeme);
+                            break;
+                        }
+                        backIdx--;
+                    }
                 }
             }
             else if (token.type == TK_CE_ENUM)

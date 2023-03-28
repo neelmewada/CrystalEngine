@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Asset.h"
 
+#include <mutex>
+
 namespace CE
 {
 
@@ -25,14 +27,15 @@ namespace CE
         };
 
         Name name{};
+        IO::Path virtualPath{};
         Type entryType = Type::Directory;
         CE::Array<AssetDatabaseEntry*> children{};
 
-        // In run-time build, assets are packed into several different archives.
+        // In run-time build, assets are packed into several archives.
         u32 assetPackIndex = 0;
     };
 
-    class SYSTEM_API AssetDatabase
+    class SYSTEM_API AssetDatabase : IO::IFileWatchListener
     {
     private:
         AssetDatabase() = default;
@@ -58,8 +61,17 @@ namespace CE
         void LoadAssetDatabaseForEditor();
         void LoadAssetDatabaseForRuntime();
 
+        IO::FileWatcher* watcher = nullptr;
+        IO::WatchID gameAssetsWatch{};
+
+        std::mutex mut{};
+
         bool assetsLoaded = false;
         AssetDatabaseEntry* rootEntry = nullptr;
+
+        // IFileWatchListener
+        virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName) override;
+
     };
 
 } // namespace CE

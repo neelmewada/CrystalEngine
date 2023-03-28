@@ -12,10 +12,11 @@ class AssetsView;
 namespace CE::Editor
 {
 
+    CLASS()
     class AssetsView : public EditorViewBase
     {
         Q_OBJECT
-        CE_CLASS(AssetsView, EditorViewBase)
+        CE_CLASS(AssetsView, CE::Editor::EditorViewBase)
     public:
         explicit AssetsView(QWidget *parent = nullptr);
         ~AssetsView();
@@ -26,14 +27,7 @@ namespace CE::Editor
 
 }
 
-
-CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, AssetsView,
-    CE_SUPER(CE::Editor::EditorViewBase),
-    CE_DONT_INSTANTIATE,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
-)
+#include "AssetsView.rtti.h"
 
 
 #endif // ASSETSVIEW_H

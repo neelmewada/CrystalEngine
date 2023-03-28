@@ -92,6 +92,7 @@ namespace CE::Editor
         model->PushEntry(string);
         ui->consoleOutput->scrollToBottom();
 
+        std::lock_guard<std::mutex> guard(mut);
         emit OnLogPushed(string);
     }
 

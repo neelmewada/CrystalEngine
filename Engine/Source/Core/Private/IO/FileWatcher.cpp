@@ -1,5 +1,5 @@
 
-#include "IO/FileWatcher.h"
+#include "CoreMinimal.h"
 
 #include "efsw/efsw.hpp"
 
@@ -39,7 +39,7 @@ namespace CE::IO
 
     FileWatcher::~FileWatcher()
     {
-        if (watchIdToListenerMap.GetSize() == 0)
+        if (watchIds.GetSize() == 0)
         {
             delete fileWatcherImpl;
             return;
@@ -83,3 +83,4 @@ namespace CE::IO
 
 } // namespace CE::IO
 
+CE_RTTI_ENUM_IMPL(CORE_API, CE::IO, FileAction)

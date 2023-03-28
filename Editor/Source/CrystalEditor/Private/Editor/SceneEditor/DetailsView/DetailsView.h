@@ -21,10 +21,11 @@ namespace CE::Editor
         class CardWidget;
     }
 
+    CLASS()
     class DetailsView : public EditorViewBase
     {
         Q_OBJECT
-        CE_CLASS(DetailsView, EditorViewBase)
+        CE_CLASS(DetailsView, CE::Editor::EditorViewBase)
     public:
         explicit DetailsView(QWidget* parent = nullptr);
         ~DetailsView();
@@ -61,12 +62,7 @@ namespace CE::Editor
     };
 }
 
-CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, DetailsView,
-    CE_SUPER(CE::Editor::EditorViewBase),
-    CE_DONT_INSTANTIATE,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(),
-    CE_FUNCTION_LIST()
-)
+#include "DetailsView.rtti.h"
+
 
 #endif // DETAILSVIEW_H

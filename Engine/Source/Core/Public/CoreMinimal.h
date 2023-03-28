@@ -17,7 +17,7 @@
 #include "IO/Stream/MemoryStream.h"
 #include "IO/Stream/FileStream.h"
 #include "IO/Archive.h"
-#include "IO/FileWatcher.h"
+
 // Module
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
@@ -29,6 +29,9 @@
 #include "Object/ObjectManager.h"
 #include "Object/Serialization.h"
 #include "Object/SystemObject.h"
+
+// IO::FileWatcher
+#include "IO/FileWatcher.h"
 
 // *****************************************************
 // Project

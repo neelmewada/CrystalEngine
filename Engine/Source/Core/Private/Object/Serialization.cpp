@@ -139,8 +139,7 @@ namespace CE
 
     void SerializedObject::SerializeField(FieldType* fieldType, YAML::Emitter& emitter)
     {
-        if (fieldType == nullptr || instance == nullptr || !fieldType->IsSerialized() ||
-            fieldType->GetDeclarationType() == nullptr)
+        if (fieldType == nullptr || instance == nullptr || !fieldType->IsSerialized())
         {
             emitter << YAML::Null;
             return;
@@ -488,7 +487,10 @@ namespace CE
                     YAML::Node fieldNode = root[fieldName.GetCString()];
                     
                     if (fieldNode.IsNull())
+                    {
+                        field = field->GetNext();
                         continue;
+                    }
                     
                     auto& objectStore = field->GetFieldValue<ObjectStore>(instance);
                     
@@ -496,6 +498,7 @@ namespace CE
                     {
                         CE_LOG(Error, All, "Serialization Error: Failed to deserialize object store of name {} in class of type {}.\n"
                                "The serialized text data is not a sequence.", fieldName, type->GetName());
+                        field = field->GetNext();
                         continue;
                     }
                     

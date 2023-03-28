@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace efsw
 {
     class FileWatcher;
@@ -43,9 +44,18 @@ namespace CE::IO
         void Watch();
 
     private:
+
         efsw::FileWatcher* fileWatcherImpl = nullptr;
         CE::Array<WatchID> watchIds{};
         HashMap<WatchID, FileWatchListernerImpl*> watchIdToListenerMap{};
     };
     
 } // namespace CE::IO
+
+CE_RTTI_ENUM(CORE_API, CE::IO, FileAction,
+    CE_ATTRIBS(),
+    CE_CONST(Add),
+    CE_CONST(Delete),
+    CE_CONST(Modified),
+    CE_CONST(Moved)
+)

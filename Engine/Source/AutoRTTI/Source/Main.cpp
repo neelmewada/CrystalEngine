@@ -19,7 +19,7 @@ int main(int argc, char** argv)
         ("m,module", "Module Name", cxxopts::value<std::string>())
         ("d,dir", "Module root path", cxxopts::value<std::string>())
         ("o,output", "Generated file output path", cxxopts::value<std::string>())
-        ("I,inc", "Include search directories", cxxopts::value<std::vector<std::string>>())
+        ("I,inc", "Include search directories", cxxopts::value<std::vector<std::string>>()->default_value(""))
         ;
 
     try
@@ -35,7 +35,6 @@ int main(int argc, char** argv)
         String moduleName = result["m"].as<std::string>();
         IO::Path modulePath = result["d"].as<std::string>();
         IO::Path outPath = result["o"].as<std::string>();
-        auto searchDirs = result["I"].as<std::vector<std::string>>();
 
         if (!outPath.Exists())
         {
@@ -48,10 +47,15 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        RTTIGenerator::includeSearchPaths.Clear();
-        for (auto dir : searchDirs)
+        if (result.count("I") > 0)
         {
-            RTTIGenerator::includeSearchPaths.Add(dir);
+            auto searchDirs = result["I"].as<std::vector<std::string>>();
+
+            RTTIGenerator::includeSearchPaths.Clear();
+            for (auto dir : searchDirs)
+            {
+                RTTIGenerator::includeSearchPaths.Add(dir);
+            }
         }
 
         RTTIGenerator::GenerateRTTI(moduleName, modulePath, outPath);

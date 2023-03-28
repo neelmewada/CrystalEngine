@@ -49,6 +49,19 @@ namespace CE
 		return TypeInfo::GetDisplayName();
 	}
 
+	EnumConstant* EnumType::FindConstantWithValue(s64 value)
+	{
+		for (int i = 0; i < GetConstantsCount(); i++)
+		{
+			auto constant = GetConstant(i);
+			if (constant == nullptr)
+				continue;
+			if (constant->GetValue() == value)
+				return constant;
+		}
+		return nullptr;
+	}
+
 
 } // namespace CE
 

@@ -11,6 +11,9 @@ namespace CE
 
 	void AssetDatabase::Shutdown()
 	{
+		delete watcher;
+		watcher = nullptr;
+
 		UnloadDatabase();
 	}
 
@@ -46,9 +49,9 @@ namespace CE
 		auto editorDir = PlatformDirectories::GetEditorDir();
 
 #if PAL_TRAIT_BUILD_EDITOR
-		auto gameDir = projectSettings.editorProjectDirectory / "Game/Assets";
+		auto gameDir = projectSettings.editorProjectDirectory / "Game";
 #else
-		auto gameDir = PlatformDirectories::GetGameDir() / "Assets";
+		auto gameDir = PlatformDirectories::GetGameDir();
 #endif
 
 		if (gameDir.IsEmpty() || !gameDir.Exists())
@@ -60,18 +63,24 @@ namespace CE
 		if (!engineDir.Exists())
 		{
 			CE_LOG(Error, All, "Failed to load engine asset database! Invalid engine assets path: {}", engineDir);
-			return;
 		}
 
 		if (!editorDir.Exists())
 		{
 			CE_LOG(Error, All, "Failed to load editor asset database! Invalid editor assets path: {}", editorDir);
-			return;
 		}
 
 		// Load Project Assets
 
 		assetsLoaded = true;
+
+		if (watcher == nullptr)
+		{
+			watcher = new IO::FileWatcher();
+			gameAssetsWatch = watcher->AddWatcher(gameDir, this, true);
+
+			watcher->Watch();
+		}
 	}
 
 	void AssetDatabase::LoadAssetDatabaseForRuntime()
@@ -79,6 +88,12 @@ namespace CE
 		// TODO: Runtime asset packaging system
 
 		assetsLoaded = true;
+	}
+
+	void AssetDatabase::HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName)
+	{
+		std::lock_guard<std::mutex> guard(mut);
+		CE_LOG(Info, All, "Watcher Action: {}/{}  || action: {}", directory, fileName, fileAction);
 	}
 
 } // namespace CE

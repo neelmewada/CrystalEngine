@@ -40,7 +40,18 @@ namespace CE
 				continue;
 			}
 
-			sourceHeaderPaths.Add(headerRelPath.string());
+			fs::path headerRelPathFinal{};
+			int idx = 0;
+			for (auto it = headerRelPath.begin(); it != headerRelPath.end(); ++it)
+			{
+				if (idx > 0 || (it->string() != "Public" && it->string() != "Private" && it->string() != "Sources"))
+				{
+					headerRelPathFinal /= *it;
+				}
+				idx++;
+			}
+
+			sourceHeaderPaths.Add(headerRelPathFinal.string());
             
             std::stringstream outStream{};
 
