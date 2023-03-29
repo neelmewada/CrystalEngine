@@ -24,6 +24,11 @@ int main(int argc, char** argv)
 
     try
     {
+        for (int i = 0; i < argc; i++)
+        {
+            CE_LOG(Info, All, "Arg{}: {}", i, argv[i]);
+        }
+        
         cxxopts::ParseResult result = options.parse(argc, argv);
 
         if (result["h"].as<bool>())
@@ -45,17 +50,6 @@ int main(int argc, char** argv)
         {
             CE_LOG(Error, All, "Failed to generate RTTI for module: {}\nGiven module path doesn't exist: {}", moduleName, modulePath);
             return 1;
-        }
-
-        if (result.count("I") > 0)
-        {
-            auto searchDirs = result["I"].as<std::vector<std::string>>();
-
-            RTTIGenerator::includeSearchPaths.Clear();
-            for (auto dir : searchDirs)
-            {
-                RTTIGenerator::includeSearchPaths.Add(dir);
-            }
         }
 
         RTTIGenerator::GenerateRTTI(moduleName, modulePath, outPath);

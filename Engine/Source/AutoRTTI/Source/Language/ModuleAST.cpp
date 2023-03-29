@@ -116,7 +116,7 @@ namespace CE
 				}
 				outStream << ")\n";
 			}
-			outStream << "\t)\n";
+			outStream << "\t),\n";
 
 			outStream << "\tCE_FUNCTION_LIST(\n";
 			for (int i = 0; i < classInfo.functions.GetSize(); i++)
