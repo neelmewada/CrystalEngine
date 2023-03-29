@@ -162,20 +162,6 @@ function(ce_add_target NAME TARGET_TYPE)
             PROPERTIES AUTORCC ON
         )
     endif()
-    
-
-    # PCH
-
-    if(ce_add_target_PCHHEADER)
-        set(multiValueArgs PRIVATE PUBLIC INTERFACE)
-        cmake_parse_arguments(ce_add_target_PCHHEADER "" "" "${multiValueArgs}" ${ce_add_target_PCHHEADER})
-
-        target_precompile_headers(${NAME}
-            PUBLIC    ${ce_add_target_PCHHEADER_PUBLIC}
-            PRIVATE   ${ce_add_target_PCHHEADER_PRIVATE}
-            INTERFACE ${ce_add_target_PCHHEADER_INTERFACE}
-        )
-    endif()
 
     # FOLDER
     
@@ -249,6 +235,19 @@ function(ce_add_target NAME TARGET_TYPE)
 
     if(ce_add_target_BUILD_DEPENDENCIES_TARGETS)
         add_dependencies(${NAME} ${ce_add_target_BUILD_DEPENDENCIES_TARGETS})
+    endif()
+
+    # PCH
+
+    if(ce_add_target_PCHHEADER)
+        set(multiValueArgs PRIVATE PUBLIC INTERFACE)
+        cmake_parse_arguments(ce_add_target_PCHHEADER "" "" "${multiValueArgs}" ${ce_add_target_PCHHEADER})
+
+        target_precompile_headers(${NAME}
+            PUBLIC    ${ce_add_target_PCHHEADER_PUBLIC}
+            PRIVATE   ${ce_add_target_PCHHEADER_PRIVATE}
+            INTERFACE ${ce_add_target_PCHHEADER_INTERFACE}
+        )
     endif()
     
     # AUTORTTI

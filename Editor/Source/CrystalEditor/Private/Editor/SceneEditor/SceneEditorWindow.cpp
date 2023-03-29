@@ -81,7 +81,7 @@ namespace CE::Editor
         dockManager->addDockWidget(ads::CenterDockWidgetArea, viewportViewDockWidget);
         dockManager->addDockWidget(ads::LeftDockWidgetArea, sceneOutlinerViewDockWidget);
         dockManager->addDockWidget(ads::RightDockWidgetArea, detailsViewDockWidget);
-        auto consoleDockArea = dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
+        dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
         dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, assetsViewDockWidget);
     }
 

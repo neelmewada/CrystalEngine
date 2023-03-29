@@ -10,9 +10,10 @@
 #include "spdlog/details/null_mutex.h"
 #include <mutex>
 
+#include <QAbstractEventDispatcher>
+
 namespace CE::Editor
 {
-
 
     template<typename Mutex>
     class EditorConsoleSink : public spdlog::sinks::base_sink<Mutex>
@@ -33,7 +34,6 @@ namespace CE::Editor
             spdlog::memory_buf_t formatted;
             spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
             auto str = fmt::to_string(formatted);
-
             if (owner != nullptr)
                 owner->Log(str);
         }
@@ -89,11 +89,15 @@ namespace CE::Editor
 
     void ConsoleView::Log(const String& string)
     {
-        model->PushEntry(string);
-        ui->consoleOutput->scrollToBottom();
-
         std::lock_guard<std::mutex> guard(mut);
-        emit OnLogPushed(string);
+
+        QMetaObject::invokeMethod(QAbstractEventDispatcher::instance(this->thread()), 
+            [this, string] 
+        {
+            model->PushEntry(string);
+            ui->consoleOutput->scrollToBottom();
+            OnLogPushed(string);
+        });
     }
 
     void ConsoleView::Flush()

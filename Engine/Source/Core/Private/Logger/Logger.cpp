@@ -17,8 +17,8 @@
 
 namespace CE
 {
-    static std::shared_ptr<spdlog::sinks::stdout_color_sink_st> GSystemConsoleSink;
-    static std::shared_ptr<spdlog::sinks::basic_file_sink_st> GLogFileSink;
+    static std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> GSystemConsoleSink;
+    static std::shared_ptr<spdlog::sinks::basic_file_sink_mt> GLogFileSink;
 
     static std::shared_ptr<spdlog::logger> GConsoleLogger;
     static std::shared_ptr<spdlog::logger> GFileLogger;
@@ -53,13 +53,13 @@ namespace CE
     {
         spdlog::init_thread_pool(8192, 1);
 
-        GSystemConsoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
+        GSystemConsoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         GSystemConsoleSink->set_level((spdlog::level::level_enum)GConsoleLogLevel);
         GSystemConsoleSink->set_pattern("[%^%l%$] %v");
 
         auto logPath = (PlatformDirectories::GetLogDir() / "log.txt").GetString();
 
-        GLogFileSink = std::make_shared<spdlog::sinks::basic_file_sink_st>(logPath.GetCString());
+        GLogFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logPath.GetCString());
         GLogFileSink->set_level((spdlog::level::level_enum)GFileDumpLogLevel);
         GLogFileSink->set_pattern("[%Y-%m-%d %T] [%l] %v");
 

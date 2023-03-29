@@ -41,7 +41,7 @@ namespace CE::Editor
 		loadedProjectPath = projectPath;
 		isLoaded = true;
 
-		AssetDatabase::Get().LoadDatabase();
+		AssetManager::Get().LoadEditorAssetDatabase();
 	}
 
 	void ProjectManager::LoadProject(IO::Path projectPath)
@@ -63,7 +63,7 @@ namespace CE::Editor
 		loadedProjectPath = projectPath;
 		isLoaded = true;
 
-		AssetDatabase::Get().LoadDatabase();
+		AssetManager::Get().LoadEditorAssetDatabase();
 	}
 
 	void ProjectManager::UnloadProject()

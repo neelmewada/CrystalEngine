@@ -23,6 +23,11 @@
       <layout class="QVBoxLayout" name="leftLayout">
        <item>
         <widget class="QTreeView" name="folderTreeView">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="styleSheet">
           <string notr="true">QTreeView {
 	background: rgb(53, 53, 53);
@@ -34,6 +39,9 @@
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
          </property>
+         <attribute name="headerVisible">
+          <bool>false</bool>
+         </attribute>
         </widget>
        </item>
       </layout>
@@ -42,6 +50,11 @@
       <layout class="QVBoxLayout" name="rightLayout">
        <item>
         <widget class="QTableView" name="assetsTableView">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="styleSheet">
           <string notr="true">QTableView {
 	background: rgb(42, 42, 42);

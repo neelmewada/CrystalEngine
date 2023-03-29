@@ -22,6 +22,10 @@
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
 
+// Threading
+#include "Threading/Mutex.h"
+#include "Threading/Thread.h"
+
 // ******************************************************
 // RTTI, Object & Serialization
 #include "Object/ObjectStore.h"

@@ -18,6 +18,7 @@
 // Asset Import Settings
 #include "Asset/AssetImportSettings.h"
 #include "Asset/TextureAssetImportSettings.h"
+#include "Asset/AssetManager.h"
 
 namespace CE::Editor
 {

@@ -13,10 +13,11 @@ namespace CE
     public:
         ~AssetDatabaseEntry()
         {
-            for (auto child : children)
-            {
-                delete child;
-            }
+            ClearChildren();
+        }
+
+        inline void ClearChildren()
+        {
             children.Clear();
         }
 
@@ -26,16 +27,38 @@ namespace CE
             Asset
         };
 
+        enum class Category
+        {
+            EngineAssets,
+            EngineShaders,
+            GameAssets,
+            GameShaders,
+            PluginAssets,
+            PluginShaders
+        };
+
+        bool IsRoot() { return virtualPath.IsEmpty() && children.GetSize() == 0 && parent == nullptr; }
+
         Name name{};
+        String extension{};
+        IO::Path virtualRelativePath{};
         IO::Path virtualPath{};
         Type entryType = Type::Directory;
-        CE::Array<AssetDatabaseEntry*> children{};
+        Category category = Category::EngineAssets;
+
+        CE::Array<AssetDatabaseEntry> children{};
+        AssetDatabaseEntry* parent = nullptr;
 
         // In run-time build, assets are packed into several archives.
         u32 assetPackIndex = 0;
     };
 
-    class SYSTEM_API AssetDatabase : IO::IFileWatchListener
+    namespace Editor
+    {
+        class AssetManager;
+    }
+
+    class SYSTEM_API AssetDatabase
     {
     private:
         AssetDatabase() = default;
@@ -53,25 +76,26 @@ namespace CE
 
         CE_INLINE bool IsLoaded() const { return assetsLoaded; }
 
+        CE_INLINE const AssetDatabaseEntry* GetRootEntry() const { return rootEntry; }
+
         void LoadDatabase();
+        void ClearDatabase();
         void UnloadDatabase();
+
+        const AssetDatabaseEntry* GetEntry(IO::Path virtualPath);
 
     private:
 
-        void LoadAssetDatabaseForEditor();
-        void LoadAssetDatabaseForRuntime();
+        const AssetDatabaseEntry* SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath);
 
-        IO::FileWatcher* watcher = nullptr;
-        IO::WatchID gameAssetsWatch{};
+        void LoadRuntimeAssetDatabase();
 
         std::mutex mut{};
 
         bool assetsLoaded = false;
         AssetDatabaseEntry* rootEntry = nullptr;
 
-        // IFileWatchListener
-        virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName) override;
-
+        friend class CE::Editor::AssetManager;
     };
 
 } // namespace CE

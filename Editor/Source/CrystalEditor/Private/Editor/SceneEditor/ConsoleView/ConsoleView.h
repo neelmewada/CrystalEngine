@@ -45,6 +45,8 @@ namespace CE::Editor
     private:
         Ui::ConsoleView *ui;
         ConsoleViewModel* model = nullptr;
+
+
         std::mutex mut{};
 
         template<typename Mutex>

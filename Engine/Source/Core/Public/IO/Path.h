@@ -30,6 +30,10 @@ namespace CE::IO
         inline Path(const char* cString) : impl(cString)
         {}
 
+        template<typename It>
+        inline Path(It first, It last) : impl(first, last)
+        {}
+
         inline String GetString() const
         {
             return impl.string();
@@ -120,6 +124,19 @@ namespace CE::IO
         static inline Path GetRelative(const Path& path, const Path& base)
         {
             return fs::relative(path.impl, base.impl);
+        }
+
+        static inline bool IsSubDirectory(Path path, Path root)
+        {
+            while (path != Path())
+            {
+                if (path == root)
+                {
+                    return true;
+                }
+                path = path.GetParentPath();
+            }
+            return false;
         }
 
         friend inline std::ostream& operator<<(std::ostream& os, const Path& path)

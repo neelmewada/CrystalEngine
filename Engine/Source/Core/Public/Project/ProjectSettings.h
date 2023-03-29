@@ -8,6 +8,7 @@ namespace CE
     namespace Editor
     {
         class ProjectManager;
+        class AssetManager;
     }
 #endif
 
@@ -46,6 +47,7 @@ namespace CE
         IO::Path editorProjectDirectory{};
 
         friend class CE::Editor::ProjectManager;
+        friend class CE::Editor::AssetManager;
 #endif
 
         friend class AssetDatabase;

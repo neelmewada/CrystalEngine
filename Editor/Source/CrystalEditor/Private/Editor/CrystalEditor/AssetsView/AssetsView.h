@@ -2,6 +2,7 @@
 #define ASSETSVIEW_H
 
 #include <QWidget>
+#include <QItemSelection>
 
 #include "Editor/EditorViewBase.h"
 
@@ -11,9 +12,11 @@ class AssetsView;
 
 namespace CE::Editor
 {
+    class AssetsViewFolderModel;
+    class AssetsViewContentModel;
 
     CLASS()
-    class AssetsView : public EditorViewBase
+    class CRYSTALEDITOR_API AssetsView : public EditorViewBase
     {
         Q_OBJECT
         CE_CLASS(AssetsView, CE::Editor::EditorViewBase)
@@ -21,7 +24,13 @@ namespace CE::Editor
         explicit AssetsView(QWidget *parent = nullptr);
         ~AssetsView();
 
+    private slots:
+        void OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+
     private:
+        AssetsViewFolderModel* folderModel = nullptr;
+        AssetsViewContentModel* contentModel = nullptr;
+
         Ui::AssetsView *ui;
     };
 

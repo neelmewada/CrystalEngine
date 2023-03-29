@@ -6,16 +6,15 @@ namespace CE
 
 	void AssetDatabase::Initialize()
 	{
-		
+		rootEntry = new AssetDatabaseEntry;
+		rootEntry->name = "Root";
 	}
 
 	void AssetDatabase::Shutdown()
 	{
-		delete watcher;
-		watcher = nullptr;
-
 		UnloadDatabase();
 	}
+	
 
 	void AssetDatabase::LoadDatabase()
 	{
@@ -23,10 +22,16 @@ namespace CE
 			return;
 
 #if PAL_TRAIT_BUILD_EDITOR
-		LoadAssetDatabaseForEditor();
+		//LoadAssetDatabaseForEditor();
 #else
-		LoadAssetDatabaseForRuntime();
+		LoadRuntimeAssetDatabase();
 #endif
+	}
+
+	void AssetDatabase::ClearDatabase()
+	{
+		if (rootEntry != nullptr)
+			rootEntry->ClearChildren();
 	}
 
 	void AssetDatabase::UnloadDatabase()
@@ -37,63 +42,61 @@ namespace CE
 		rootEntry = nullptr;
 	}
 
-	void AssetDatabase::LoadAssetDatabaseForEditor()
+	const AssetDatabaseEntry* AssetDatabase::GetEntry(IO::Path virtualPath)
 	{
-		UnloadDatabase();
-
-		rootEntry = new AssetDatabaseEntry;
-		rootEntry->name = "Root";
-
-		const auto& projectSettings = ProjectSettings::Get();
-		auto engineDir = PlatformDirectories::GetEngineDir();
-		auto editorDir = PlatformDirectories::GetEditorDir();
-
-#if PAL_TRAIT_BUILD_EDITOR
-		auto gameDir = projectSettings.editorProjectDirectory / "Game";
-#else
-		auto gameDir = PlatformDirectories::GetGameDir();
-#endif
-
-		if (gameDir.IsEmpty() || !gameDir.Exists())
-		{
-			CE_LOG(Error, All, "Failed to load asset database! Invalid project path: {}", gameDir);
-			return;
-		}
-
-		if (!engineDir.Exists())
-		{
-			CE_LOG(Error, All, "Failed to load engine asset database! Invalid engine assets path: {}", engineDir);
-		}
-
-		if (!editorDir.Exists())
-		{
-			CE_LOG(Error, All, "Failed to load editor asset database! Invalid editor assets path: {}", editorDir);
-		}
-
-		// Load Project Assets
-
-		assetsLoaded = true;
-
-		if (watcher == nullptr)
-		{
-			watcher = new IO::FileWatcher();
-			gameAssetsWatch = watcher->AddWatcher(gameDir, this, true);
-
-			watcher->Watch();
-		}
+		return SearchForEntry(rootEntry, virtualPath);
 	}
 
-	void AssetDatabase::LoadAssetDatabaseForRuntime()
+	const AssetDatabaseEntry* AssetDatabase::SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath)
 	{
+		if (searchRoot == nullptr || subVirtualPath.IsEmpty())
+			return searchRoot;
+
+		for (int i = 0; i < searchRoot->children.GetSize(); i++)
+		{
+			auto childPath = searchRoot->children[i].virtualRelativePath;
+			auto searchPath = subVirtualPath;
+
+			auto childIt = childPath.begin();
+			auto searchIt = searchPath.begin();
+
+			for (; childIt != childPath.end() && searchIt != searchPath.end(); ++childIt, ++searchIt)
+			{
+				if (*childIt != *searchIt)
+				{
+					break;
+				}
+			}
+
+			if (childIt == childPath.end()) // subVirtualPath is a SubPath of childPath
+			{
+				if (searchIt == searchPath.end())
+					return &searchRoot->children[i];
+				IO::Path finalPath{};
+				for (auto it = searchIt; it != searchPath.end(); ++it)
+				{
+					finalPath = finalPath / IO::Path((fs::path)*it);
+				}
+				return SearchForEntry(&searchRoot->children[i], finalPath);
+			}
+		}
+
+		return nullptr;
+	}
+
+	void AssetDatabase::LoadRuntimeAssetDatabase()
+	{
+		if (rootEntry == nullptr)
+		{
+			rootEntry = new AssetDatabaseEntry;
+			rootEntry->name = "Root";
+		}
+
+		ClearDatabase();
+
 		// TODO: Runtime asset packaging system
 
 		assetsLoaded = true;
-	}
-
-	void AssetDatabase::HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName)
-	{
-		std::lock_guard<std::mutex> guard(mut);
-		CE_LOG(Info, All, "Watcher Action: {}/{}  || action: {}", directory, fileName, fileAction);
 	}
 
 } // namespace CE
