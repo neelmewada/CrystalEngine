@@ -3,6 +3,11 @@
 
 #include <QAbstractItemModel>
 
+namespace CE
+{
+    class AssetDatabaseEntry;
+}
+
 namespace CE::Editor
 {
     class AssetsViewFolderModel;
@@ -12,7 +17,7 @@ namespace CE::Editor
         Q_OBJECT
 
     public:
-        explicit AssetsViewContentModel(QObject *parent = nullptr);
+        explicit AssetsViewContentModel(QWidget* sizeWidget, QObject *parent = nullptr);
 
         // Header:
         QVariant headerData(int section, ::Qt::Orientation orientation, int role = ::Qt::DisplayRole) const override;
@@ -27,8 +32,12 @@ namespace CE::Editor
 
         QVariant data(const QModelIndex &index, int role = ::Qt::DisplayRole) const override;
 
+        void SetDirectoryEntry(AssetDatabaseEntry* entry);
+
     private:
-        AssetsViewFolderModel* currentDirectory = nullptr;
+        QWidget* sizeWidget = nullptr;
+
+        AssetDatabaseEntry* currentDirectory = nullptr;
     };
 }
 

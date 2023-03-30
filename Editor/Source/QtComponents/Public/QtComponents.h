@@ -12,6 +12,7 @@
 // Widgets
 #include "QtComponents/Widgets/CardWidget.h"
 #include "QtComponents/Widgets/AddComponentWidget.h"
+#include "QtComponents/Widgets/GridWidget.h"
 
 namespace CE::Editor::Qt
 {

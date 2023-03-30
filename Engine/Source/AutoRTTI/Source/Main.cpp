@@ -23,12 +23,7 @@ int main(int argc, char** argv)
         ;
 
     try
-    {
-        for (int i = 0; i < argc; i++)
-        {
-            CE_LOG(Info, All, "Arg{}: {}", i, argv[i]);
-        }
-        
+    {   
         cxxopts::ParseResult result = options.parse(argc, argv);
 
         if (result["h"].as<bool>())

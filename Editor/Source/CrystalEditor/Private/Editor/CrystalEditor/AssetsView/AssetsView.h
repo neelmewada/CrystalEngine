@@ -13,7 +13,6 @@ class AssetsView;
 namespace CE::Editor
 {
     class AssetsViewFolderModel;
-    class AssetsViewContentModel;
 
     CLASS()
     class CRYSTALEDITOR_API AssetsView : public EditorViewBase
@@ -29,7 +28,6 @@ namespace CE::Editor
 
     private:
         AssetsViewFolderModel* folderModel = nullptr;
-        AssetsViewContentModel* contentModel = nullptr;
 
         Ui::AssetsView *ui;
     };

@@ -6,14 +6,29 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>444</height>
+    <width>732</width>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="leftMargin">
+    <number>4</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>4</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -49,29 +64,19 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <layout class="QVBoxLayout" name="rightLayout">
        <item>
-        <widget class="QTableView" name="assetsTableView">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
+        <widget class="CE::Editor::Qt::GridWidget" name="assetsGridView" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">QTableView {
-	background: rgb(42, 42, 42);
+          <string notr="true">#assetsGridView {
+	
+	background-color: rgb(49, 49, 49);
 }</string>
          </property>
-         <property name="showGrid">
-          <bool>true</bool>
-         </property>
-         <property name="gridStyle">
-          <enum>Qt::NoPen</enum>
-         </property>
-         <attribute name="horizontalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
-         <attribute name="verticalHeaderVisible">
-          <bool>false</bool>
-         </attribute>
         </widget>
        </item>
       </layout>
@@ -80,6 +85,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CE::Editor::Qt::GridWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QtComponents/Widgets/GridWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

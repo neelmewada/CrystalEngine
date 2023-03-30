@@ -17,13 +17,11 @@ namespace CE::Editor::Qt
 
     void ExWidget::focusInEvent(QFocusEvent* event)
     {
-        CE_LOG(Info, All, "Focus In");
         QWidget::focusInEvent(event);
     }
 
     void ExWidget::focusOutEvent(QFocusEvent* event)
     {
-        CE_LOG(Info, All, "Focus Out");
         QWidget::focusOutEvent(event);
     }
 

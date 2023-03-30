@@ -1,10 +1,10 @@
 #include "AssetsView.h"
 #include "ui_AssetsView.h"
 
-#include "AssetsViewFolderModel.h"
-#include "AssetsViewContentModel.h"
-
 #include "System.h"
+
+#include "AssetsViewFolderModel.h"
+#include "AssetViewItem.h"
 
 namespace CE::Editor
 {
@@ -18,16 +18,14 @@ namespace CE::Editor
         setWindowTitle("Assets");
 
         ui->splitter->setSizes({ 200, 500 });
+
+        auto rootEntry = (AssetDatabaseEntry*)(AssetDatabase::Get().GetRootEntry());
         
         // Folder Model
         folderModel = new AssetsViewFolderModel(this);
         ui->folderTreeView->setModel(folderModel);
         
         connect(ui->folderTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AssetsView::OnFolderSelectionChanged);
-
-        // Content Model
-        contentModel = new AssetsViewContentModel(this);
-        ui->assetsTableView->setModel(contentModel);
     }
 
     AssetsView::~AssetsView()
@@ -46,10 +44,18 @@ namespace CE::Editor
         if (!index.isValid() || index.internalPointer() == nullptr)
             return;
 
-        auto entry = (AssetDatabaseEntry*)index.internalPointer();
-        
-        auto search = AssetDatabase::Get().GetEntry(entry->virtualPath);
+        auto root = (AssetDatabaseEntry*)index.internalPointer();
 
+        ui->assetsGridView->ClearWidgets();
+        
+        for (auto& entry : root->children)
+        {
+            auto item = new AssetViewItem(this);
+            item->SetEntry(&entry);
+            ui->assetsGridView->AddWidget(item);
+        }
+
+        ui->assetsGridView->Update();
     }
 
 }

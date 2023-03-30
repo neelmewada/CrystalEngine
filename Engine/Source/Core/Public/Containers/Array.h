@@ -12,6 +12,9 @@ namespace CE
     class Variant;
 
     template<typename ElementType>
+    using InitializerList = std::initializer_list<ElementType>;
+
+    template<typename ElementType>
     class Array
     {
     public:
