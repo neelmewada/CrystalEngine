@@ -10,6 +10,7 @@ find_package(mINI REQUIRED)
 find_package(cxxopts REQUIRED)
 find_package(efsw REQUIRED)
 find_package(zip REQUIRED)
+find_package(crcpp REQUIRED)
 
 # SDL2
 find_package(sdl REQUIRED)

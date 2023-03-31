@@ -54,7 +54,7 @@ namespace CE::Editor::Qt
         if (numItems == 0)
             return;
 
-        int widthPerItem = Math::Min(minWidth, widgetList.at(0)->width());
+        int widthPerItem = Math::Max(minWidth, widgetList.at(0)->width());
 
         int maxNumItemsInRow = Math::Max(1, width() / widthPerItem);
         

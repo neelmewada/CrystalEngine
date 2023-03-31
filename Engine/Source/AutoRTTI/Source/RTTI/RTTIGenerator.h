@@ -8,6 +8,21 @@
 
 namespace CE
 {
+    struct HeaderCRC
+    {
+        CE_STRUCT(HeaderCRC)
+    public:
+        IO::Path headerPath{};
+        u32 crc = 0;
+    };
+
+    struct ModuleStamp
+    {
+        CE_STRUCT(ModuleStamp)
+    public:
+        CE::Array<HeaderCRC> headers{};
+    };
+    
 
     class RTTIGenerator
     {
@@ -15,9 +30,28 @@ namespace CE
         RTTIGenerator() = delete;
     public:
 
-        static void GenerateRTTI(String moduleName, IO::Path moduleHeaderRootPath, IO::Path outputPath);
+        static void GenerateRTTI(String moduleName, IO::Path moduleHeaderRootPath, IO::Path outputPath, ModuleStamp& moduleStamp);
 
         static Array<IO::Path> includeSearchPaths;
     };
     
 } // namespace CE
+
+CE_RTTI_STRUCT(, CE, HeaderCRC,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(headerPath)
+        CE_FIELD(crc)
+    )
+)
+
+
+CE_RTTI_STRUCT(, CE, ModuleStamp,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(headers)
+    )
+)
+

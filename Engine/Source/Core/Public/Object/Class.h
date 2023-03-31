@@ -710,7 +710,7 @@ public:\
     typedef Struct Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::StructType* Type();\
-    virtual TypeInfo* GetType() const\
+    virtual CE::TypeInfo* GetType() const\
     {\
         return Type();\
     }

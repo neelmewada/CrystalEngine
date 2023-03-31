@@ -6,7 +6,7 @@ namespace CE
 
 	Array<IO::Path> RTTIGenerator::includeSearchPaths{};
 
-	void RTTIGenerator::GenerateRTTI(String moduleName, IO::Path moduleHeaderRootPath, IO::Path outputPath)
+	void RTTIGenerator::GenerateRTTI(String moduleName, IO::Path moduleHeaderRootPath, IO::Path outputPath, ModuleStamp& moduleStamp)
 	{
 		fs::path modulePath = moduleHeaderRootPath;
 
@@ -39,6 +39,8 @@ namespace CE
 			{
 				continue;
 			}
+
+			auto crc = CE::CalculateCRC(inputHeaderFileContent.c_str(), inputHeaderFileContent.size());
 
 			fs::path headerRelPathFinal{};
 			int idx = 0;
@@ -96,3 +98,6 @@ namespace CE
 
 } // namespace CE
 
+CE_RTTI_STRUCT_IMPL(, CE, HeaderCRC)
+
+CE_RTTI_STRUCT_IMPL(, CE, ModuleStamp)

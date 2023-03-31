@@ -20,7 +20,7 @@ namespace CE
 
     /// Default implementation doesn't have any code. Specializations do all the work.
     template<typename T>
-    SIZE_T GetHash(const T& Value)
+    SIZE_T GetHash(const T& value)
     {
         constexpr bool isPointer = std::is_pointer_v<T>;
         
@@ -28,7 +28,7 @@ namespace CE
         
         if constexpr (isPointer)
         {
-            return (SIZE_T)(NotPtrType*)Value;
+            return (SIZE_T)(NotPtrType*)value;
         }
         else
         {
@@ -49,6 +49,8 @@ namespace CE
 		return hashA;
 	}
 
+	CORE_API u32 CalculateCRC(const void* data, SIZE_T size);
+	CORE_API u32 CalculateCRC(const void* data, SIZE_T size, u32 crc);
 	
 	CORE_API SIZE_T GetCombinedHashes(CE::Array<SIZE_T> hashes);
 
@@ -71,9 +73,9 @@ namespace CE
 	template<typename T>
 	struct HashFunc
 	{
-		SIZE_T operator()(const T& Value) const
+		SIZE_T operator()(const T& value) const
 		{
-			return CE::template GetHash(Value);
+			return CE::template GetHash(value);
 		}
 	};
 

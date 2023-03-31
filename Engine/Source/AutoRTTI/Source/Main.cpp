@@ -5,12 +5,16 @@
 
 #include "RTTI/RTTIGenerator.h"
 
+using namespace CE;
+
 int main(int argc, char** argv)
 {
     using namespace CE;
 
     CE::ModuleManager::Get().LoadModule("Core");
     CE::Logger::Initialize();
+
+    CE_REGISTER_TYPES(HeaderCRC, ModuleStamp);
 
     cxxopts::Options options("Auto RTTI Tool", "A command line tool to auto generate RTTI information for modules");
 
@@ -47,7 +51,15 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        RTTIGenerator::GenerateRTTI(moduleName, modulePath, outPath);
+        ModuleStamp moduleStamp{};
+        IO::Path moduleStampPath = outPath / (moduleName + ".stamp");
+        if (moduleStampPath.Exists())
+        {
+            CE::SerializedObject so{ ModuleStamp::Type(), &moduleStamp };
+            so.Deserialize(moduleStampPath);
+        }
+
+        RTTIGenerator::GenerateRTTI(moduleName, modulePath, outPath, moduleStamp);
 
         CE_LOG(Info, All, "Automatic RTTI for module: {}", moduleName);
     }

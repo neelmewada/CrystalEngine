@@ -64,19 +64,26 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <layout class="QVBoxLayout" name="rightLayout">
        <item>
-        <widget class="CE::Editor::Qt::GridWidget" name="assetsGridView" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>50</width>
-           <height>0</height>
-          </size>
-         </property>
+        <widget class="QScrollArea" name="scrollArea">
          <property name="styleSheet">
-          <string notr="true">#assetsGridView {
-	
-	background-color: rgb(49, 49, 49);
-}</string>
+          <string notr="true"/>
          </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="CE::Editor::Qt::GridWidget" name="assetsGridView">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>117</width>
+            <height>356</height>
+           </rect>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">#assetsGridView {\n	\n	background-color: rgb(42, 42, 42);\n}</string>
+          </property>
+         </widget>
         </widget>
        </item>
       </layout>

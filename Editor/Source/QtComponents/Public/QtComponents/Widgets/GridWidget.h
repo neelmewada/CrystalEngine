@@ -29,7 +29,7 @@ namespace CE::Editor::Qt
     private:
         QWidgetList widgetList{};
 
-        int minWidth = 128;
+        int minWidth = 100;
 
         Ui::GridWidget* ui;
     };
