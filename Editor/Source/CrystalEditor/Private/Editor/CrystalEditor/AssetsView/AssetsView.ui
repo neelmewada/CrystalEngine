@@ -71,12 +71,15 @@
          <property name="widgetResizable">
           <bool>true</bool>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+         </property>
          <widget class="CE::Editor::Qt::GridWidget" name="assetsGridView">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>117</width>
+            <width>119</width>
             <height>356</height>
            </rect>
           </property>

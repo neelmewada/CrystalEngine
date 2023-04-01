@@ -23,6 +23,8 @@ namespace CE::Editor
         explicit AssetsView(QWidget *parent = nullptr);
         ~AssetsView();
 
+        virtual void resizeEvent(QResizeEvent* event) override;
+
     private slots:
         void OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 

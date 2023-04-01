@@ -54,13 +54,15 @@ namespace CE::Editor::Qt
         if (numItems == 0)
             return;
 
-        int widthPerItem = Math::Max(minWidth, widgetList.at(0)->width());
+        int widthPerItem = 80;// Math::Max(minWidth, widgetList.at(0)->width());
 
         int maxNumItemsInRow = Math::Max(1, width() / widthPerItem);
         
-        int numCols = Math::Min(numItems / maxNumItemsInRow, maxNumItemsInRow);
+        int numCols = Math::Max(numItems / maxNumItemsInRow, maxNumItemsInRow);
         int numRows = numItems / numCols + 1;
         
+        CE_LOG(Info, All, "{},{} = {}", numRows, numCols, maxNumItemsInRow);
+
         for (int r = 0; r < numRows; r++)
         {
             for (int c = 0; c < numCols; c++)
