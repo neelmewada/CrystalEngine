@@ -13,6 +13,7 @@ class AssetsView;
 namespace CE::Editor
 {
     class AssetsViewFolderModel;
+    class AssetViewItem;
 
     CLASS()
     class CRYSTALEDITOR_API AssetsView : public EditorViewBase
@@ -25,11 +26,16 @@ namespace CE::Editor
 
         virtual void resizeEvent(QResizeEvent* event) override;
 
+    private:
+        void UpdateContentView();
+
     private slots:
         void OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
     private:
         AssetsViewFolderModel* folderModel = nullptr;
+
+        Array<AssetViewItem*> assetItems{};
 
         Ui::AssetsView *ui;
     };

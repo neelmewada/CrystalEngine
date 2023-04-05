@@ -64,29 +64,12 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <layout class="QVBoxLayout" name="rightLayout">
        <item>
-        <widget class="QScrollArea" name="scrollArea">
+        <widget class="QTableWidget" name="assetsContentWidget">
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true">#assetsContentWidget {
+	background-color: rgb(42, 42, 42);
+}</string>
          </property>
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-         </property>
-         <widget class="CE::Editor::Qt::GridWidget" name="assetsGridView">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>119</width>
-            <height>356</height>
-           </rect>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">#assetsGridView {\n	\n	background-color: rgb(42, 42, 42);\n}</string>
-          </property>
-         </widget>
         </widget>
        </item>
       </layout>
@@ -95,14 +78,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>CE::Editor::Qt::GridWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">QtComponents/Widgets/GridWidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

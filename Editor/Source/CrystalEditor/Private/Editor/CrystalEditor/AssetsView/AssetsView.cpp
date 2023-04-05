@@ -37,6 +37,11 @@ namespace CE::Editor
     {
         EditorViewBase::resizeEvent(event);
 
+        UpdateContentView();
+    }
+
+    void AssetsView::UpdateContentView()
+    {
         auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
         if (selection.size() == 0)
             return;
@@ -48,16 +53,27 @@ namespace CE::Editor
 
         auto root = (AssetDatabaseEntry*)index.internalPointer();
 
-        ui->assetsGridView->ClearWidgets();
-
-        for (auto& entry : root->children)
+        while (assetItems.GetSize() < root->children.GetSize())
         {
             auto item = new AssetViewItem(this);
-            item->SetEntry(&entry);
-            ui->assetsGridView->AddWidget(item);
+            assetItems.Add(item);
         }
 
-        ui->assetsGridView->Update();
+        int itemCount = root->children.GetSize();
+        const int itemWidth = 80;
+
+        int numCols = Math::Max(1, width() / itemWidth);
+        int numRows = itemCount / numCols + 1;
+
+        ui->assetsContentWidget->clear();
+
+        for (int i = 0; i < itemCount; i++)
+        {
+            int r = i / numRows;
+            int c = i % numCols;
+            ui->assetsContentWidget->setItem(r, c, assetItems[i]);
+            assetItems[i]->SetEntry(&root->children[i]);
+        }
     }
 
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
@@ -73,16 +89,7 @@ namespace CE::Editor
 
         auto root = (AssetDatabaseEntry*)index.internalPointer();
 
-        ui->assetsGridView->ClearWidgets();
         
-        for (auto& entry : root->children)
-        {
-            auto item = new AssetViewItem(this);
-            item->SetEntry(&entry);
-            ui->assetsGridView->AddWidget(item);
-        }
-        
-        ui->assetsGridView->Update();
     }
 
 }
