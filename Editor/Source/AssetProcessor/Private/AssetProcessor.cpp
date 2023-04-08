@@ -20,16 +20,10 @@ namespace CE::Editor
 
 	}
 
-    void AssetProcessor::ProcessAsset(IO::Path sourceAssetPath, AssetImportSettings* importSettings)
+    void AssetProcessor::ProcessAsset(IO::Path sourceAssetPath, Asset* asset)
     {
-        if (importSettings == nullptr || sourceAssetPath.IsDirectory())
+        if (sourceAssetPath.IsDirectory())
             return;
-        ClassType* assetClass = AssetImportSettings::GetAssetClassFor((ClassType*)importSettings->GetType());
-        if (assetClass == nullptr || !assetClass->CanBeInstantiated())
-            return;
-        
-        Asset* asset = (Asset*)assetClass->CreateDefaultInstance();
-        importSettings->ApplyImportSettings(asset);
         
         asset->assetName = sourceAssetPath.GetFilename().RemoveExtension().GetString();
         auto extension = sourceAssetPath.GetFilename().GetExtension().GetString();
@@ -45,8 +39,6 @@ namespace CE::Editor
         
         SerializedObject assetSO{ asset };
         assetSO.Serialize(outPath);
-        
-        assetClass->DestroyInstance(asset);
     }
 
 } // namespace CE::Editor

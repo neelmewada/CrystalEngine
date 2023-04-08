@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QItemSelection>
+#include <QItemDelegate>
 
 #include "Editor/EditorViewBase.h"
 
@@ -15,6 +16,18 @@ namespace CE::Editor
     class AssetsViewFolderModel;
     class AssetsViewContentModel;
     class AssetViewItem;
+
+    class CRYSTALEDITOR_API AssetsViewItemDelegate : public QItemDelegate
+    {
+        Q_OBJECT
+    public:
+        explicit AssetsViewItemDelegate(QObject* parent = nullptr);
+        ~AssetsViewItemDelegate();
+
+        QWidget* createEditor(QWidget* parent,
+            const QStyleOptionViewItem& option,
+            const QModelIndex& index) const override final;
+    };
 
     CLASS()
     class CRYSTALEDITOR_API AssetsView : public EditorViewBase
@@ -30,14 +43,18 @@ namespace CE::Editor
     private:
         void UpdateContentView();
 
+    signals:
+        
+
     private slots:
         void OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+        void OnAssetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
     private:
         AssetsViewFolderModel* folderModel = nullptr;
         AssetsViewContentModel* contentModel = nullptr;
 
-        Vector<AssetViewItem*> assetItems{};
+        Vector<AssetViewItem*> assetItemWidgets{};
 
         Ui::AssetsView *ui;
     };

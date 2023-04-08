@@ -173,6 +173,12 @@ namespace CE
             const auto& fieldValue = fieldType->GetFieldValue<CE::Name>(instance);
             emitter << fieldValue.GetCString();
         }
+        else if (fieldType->GetTypeId() == TYPEID(IO::Path)) // PATH Field
+        {
+            const auto& fieldValue = fieldType->GetFieldValue<IO::Path>(instance);
+            auto strValue = fieldValue.GetString();
+            emitter << strValue.GetCString();
+        }
         else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {
             const auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
@@ -561,6 +567,10 @@ namespace CE
         else if (fieldType->GetTypeId() == TYPEID(CE::Name)) // NAME Field
         {
             fieldType->SetFieldValue<CE::Name>(instance, node.as<std::string>().c_str());
+        }
+        else if (fieldType->GetTypeId() == TYPEID(IO::Path)) // PATH Field
+        {
+            fieldType->SetFieldValue<IO::Path>(instance, IO::Path(String(node.as<std::string>().c_str())));
         }
         else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {

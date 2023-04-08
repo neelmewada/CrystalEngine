@@ -61,6 +61,11 @@ int main(int argc, char** argv)
 
         RTTIGenerator::GenerateRTTI(moduleName, modulePath, outPath, moduleStamp);
 
+        {
+            SerializedObject so{ ModuleStamp::Type(), &moduleStamp };
+            so.Serialize(moduleStampPath);
+        }
+
         CE_LOG(Info, All, "Automatic RTTI for module: {}", moduleName);
     }
     catch (std::exception exc)

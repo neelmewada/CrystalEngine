@@ -12,6 +12,12 @@ namespace CE
     {
         CE_STRUCT(HeaderCRC)
     public:
+        HeaderCRC() = default;
+        HeaderCRC(IO::Path headerPath, u32 crc)
+            : headerPath(headerPath), crc(crc)
+        {}
+
+
         IO::Path headerPath{};
         u32 crc = 0;
     };

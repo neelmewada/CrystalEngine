@@ -159,14 +159,45 @@ namespace CE
             }
         }
 
-        CE_INLINE void Remove(const ElementType& item)
+        void Remove(const ElementType& item)
         {
-            for (int i = 0; i < Impl.size(); i++)
+            for (int i = 0; i < GetSize(); i++)
             {
                 if (Impl[i] == item)
                 {
                     Impl.erase(Impl.begin() + i);
                     return;
+                }
+            }
+        }
+
+        void RemoveAll(std::function<bool(const ElementType& item)> pred)
+        {
+            Array<u32> indicesToRemove{};
+            for (int i = GetSize() - 1; i >= 0; i--)
+            {
+                if (pred(Impl[i]))
+                {
+                    indicesToRemove.Add(i);
+                }
+            }
+
+            for (auto idx : indicesToRemove)
+            {
+                if (idx >= 0 && idx < GetSize())
+                    RemoveAt(idx);
+            }
+        }
+
+        void RemoveFirst(std::function<bool(const ElementType& item)> pred)
+        {
+            Array<u32> indicesToRemove{};
+            for (int i = 0; i < Impl.size(); i++)
+            {
+                if (pred(Impl[i]))
+                {
+                    RemoveAt(i);
+                    break;
                 }
             }
         }
@@ -324,11 +355,6 @@ namespace CE
 
         }
 
-        CE_INLINE TypeId GetElementTypeId() const
-        {
-            return ElementTypeId;
-        }
-
         ElementType& operator[](SIZE_T index)
         {
             return (ElementType&)Impl[index];
@@ -430,7 +456,7 @@ namespace CE
             }
         }
 
-        CE_INLINE void Remove(const ElementType& item)
+        void Remove(const ElementType& item)
         {
             for (int i = 0; i < Impl.size(); i++)
             {
@@ -438,6 +464,37 @@ namespace CE
                 {
                     Impl.erase(Impl.begin() + i);
                     return;
+                }
+            }
+        }
+
+        void RemoveAll(std::function<bool(const ElementType& item)> pred)
+        {
+            Array<u32> indicesToRemove{};
+            for (int i = Impl.size() - 1; i >= 0; i--)
+            {
+                if (pred(Impl[i]))
+                {
+                    indicesToRemove.Add(i);
+                }
+            }
+
+            for (auto idx : indicesToRemove)
+            {
+                if (idx >= 0 && idx < Impl.size() - 1)
+                    RemoveAt(idx);
+            }
+        }
+
+        void RemoveFirst(std::function<bool(const ElementType& item)> pred)
+        {
+            Array<u32> indicesToRemove{};
+            for (int i = 0; i < Impl.size(); i++)
+            {
+                if (pred(Impl[i]))
+                {
+                    RemoveAt(i);
+                    break;
                 }
             }
         }
@@ -556,7 +613,6 @@ namespace CE
         Iterator End() { return end(); }
 
     private:
-        TypeId ElementTypeId;
         std::vector<ElementType> Impl;
 
         friend class Variant;

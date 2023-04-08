@@ -2,6 +2,7 @@
 #define ASSETSVIEWCONTENTMODEL_H
 
 #include <QAbstractItemModel>
+#include <QTableView>
 
 namespace CE
 {
@@ -17,7 +18,9 @@ namespace CE::Editor
         Q_OBJECT
 
     public:
-        explicit AssetsViewContentModel(QObject *parent = nullptr);
+        explicit AssetsViewContentModel(QTableView* tableView, QObject *parent = nullptr);
+
+        QModelIndex CreateIndex(int row, int col, void* data);
 
         // Header:
         QVariant headerData(int section, ::Qt::Orientation orientation, int role = ::Qt::DisplayRole) const override;
@@ -32,9 +35,20 @@ namespace CE::Editor
 
         QVariant data(const QModelIndex &index, int role = ::Qt::DisplayRole) const override;
 
+        ::Qt::ItemFlags flags(const QModelIndex& index) const override;
+
         void SetDirectoryEntry(AssetDatabaseEntry* entry);
 
+        // Drag & Drop
+        ::Qt::DropActions supportedDropActions() const override;
+        QStringList mimeTypes() const override;
+        QMimeData* mimeData(const QModelIndexList& indexes) const override;
+        bool dropMimeData(const QMimeData* data, ::Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+
+        static constexpr int sizePerItem = 70;
+
     private:
+        QTableView* tableView = nullptr;
 
         AssetDatabaseEntry* currentDirectory = nullptr;
     };

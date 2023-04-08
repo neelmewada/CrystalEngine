@@ -39,6 +39,10 @@ namespace CE
         CE_REGISTER_GAMECOMPONENTS(
             TransformComponent
         );
+
+        // Register Asset Types
+        CE_REGISTER_ASSET_TYPE(TextureAsset, jpg, jpeg, png);
+
     }
 
 } // namespace CE

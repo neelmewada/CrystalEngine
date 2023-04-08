@@ -44,6 +44,9 @@ namespace CE::Editor
             ui->iconLabel->setPixmap(image);
         }
 
-        ui->label->setText(QString(entry->name.GetCString()));
+        auto text = QString(entry->name.GetCString());
+        QFontMetrics metrics(ui->label->font());
+        QString elidedText = metrics.elidedText(text, ::Qt::ElideRight, ui->label->width());
+        ui->label->setText(elidedText);
     }
 }

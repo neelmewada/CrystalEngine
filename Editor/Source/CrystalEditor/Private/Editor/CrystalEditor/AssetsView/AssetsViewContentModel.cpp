@@ -4,14 +4,21 @@
 
 #include "AssetsViewFolderModel.h"
 
+#include <QMimeData>
+
 namespace CE::Editor
 {
-    constexpr int sizePerItem = 128;
 
-    AssetsViewContentModel::AssetsViewContentModel(QObject *parent)
+    AssetsViewContentModel::AssetsViewContentModel(QTableView* tableView, QObject *parent)
         : QAbstractItemModel(parent)
+        , tableView(tableView)
     {
 
+    }
+
+    QModelIndex AssetsViewContentModel::CreateIndex(int row, int col, void* data)
+    {
+        return createIndex(row, col, data);
     }
 
     QVariant AssetsViewContentModel::headerData(int section, ::Qt::Orientation orientation, int role) const
@@ -24,8 +31,7 @@ namespace CE::Editor
         if (currentDirectory == nullptr)
             return QModelIndex();
 
-        auto width = sizePerItem;
-        int maxNumItemsInRow = Math::Max(1, width / sizePerItem);
+        int maxNumItemsInRow = Math::Max(1, tableView->width() / sizePerItem);
 
         int totalItemCount = currentDirectory->children.GetSize();
         int numCols = Math::Max(totalItemCount / maxNumItemsInRow, maxNumItemsInRow);
@@ -47,13 +53,12 @@ namespace CE::Editor
         if (parent.isValid() || currentDirectory == nullptr)
             return 0;
 
-        auto width = sizePerItem;
-        int maxNumItemsInRow = Math::Max(1, width / sizePerItem);
+        int maxNumItemsInRow = Math::Max(1, tableView->width() / sizePerItem);
 
         int totalItemCount = currentDirectory->children.GetSize();
 
         int numCols = Math::Max(totalItemCount / maxNumItemsInRow, maxNumItemsInRow);
-        int numRows = totalItemCount / numCols + totalItemCount % numCols;
+        int numRows = totalItemCount / numCols + 1;
 
         return numRows;
     }
@@ -63,8 +68,7 @@ namespace CE::Editor
         if (parent.isValid() || currentDirectory == nullptr)
             return 0;
 
-        auto width = sizePerItem;
-        int maxNumItemsInRow = Math::Max(1, width / sizePerItem);
+        int maxNumItemsInRow = Math::Max(1, tableView->width() / sizePerItem);
 
         int totalItemCount = currentDirectory->children.GetSize();
         
@@ -82,21 +86,71 @@ namespace CE::Editor
         
         if (role == ::Qt::DisplayRole)
         {
-            return QString(item->name.GetCString());
+            return QVariant();
+            //return QString(item->name.GetCString());
         }
         else if (role == ::Qt::DecorationRole)
         {
-            if (item->entryType == AssetDatabaseEntry::Type::Asset)
-                return QIcon(":/Editor/Icons/file");
-            return QIcon(":/Editor/Icons/folder");
+            return QVariant();
+        }
+        else if (role == ::Qt::SizeHintRole)
+        {
+            return QSize(70, 90);
         }
 
         return QVariant();
+    }
+
+    ::Qt::ItemFlags AssetsViewContentModel::flags(const QModelIndex& index) const
+    {
+        auto defaultFlags = QAbstractItemModel::flags(index);
+
+        if (index.isValid())
+            return ::Qt::ItemIsDragEnabled | ::Qt::ItemIsDropEnabled | defaultFlags;
+        else
+            return ::Qt::ItemIsDropEnabled | defaultFlags;
     }
 
     void AssetsViewContentModel::SetDirectoryEntry(AssetDatabaseEntry* entry)
     {
         this->currentDirectory = entry;
         emit modelReset({});
+    }
+
+    ::Qt::DropActions AssetsViewContentModel::supportedDropActions() const
+    {
+        return ::Qt::CopyAction | ::Qt::MoveAction | ::Qt::LinkAction;
+    }
+
+    QStringList AssetsViewContentModel::mimeTypes() const
+    {
+        QStringList types;
+        types << "ce-mime-format";
+        return types;
+    }
+
+    QMimeData* AssetsViewContentModel::mimeData(const QModelIndexList& indexes) const
+    {
+        QMimeData* mimeData = new QMimeData();
+        QByteArray encodedData;
+
+        QDataStream stream(&encodedData, QIODevice::WriteOnly);
+        
+        foreach(const QModelIndex & index, indexes) 
+        {
+            if (index.isValid()) 
+            {
+                QString text = data(index, ::Qt::DisplayRole).toString();
+                stream << text;
+            }
+        }
+
+        mimeData->setData("ce-mime-format", encodedData);
+        return mimeData;
+    }
+
+    bool AssetsViewContentModel::dropMimeData(const QMimeData* data, ::Qt::DropAction action, int row, int column, const QModelIndex& parent)
+    {
+        return false;
     }
 }

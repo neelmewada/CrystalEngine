@@ -2,6 +2,8 @@
 #include "Drawers/FieldDrawer.h"
 #include "Drawers/EnumFieldDrawer.h"
 
+#include "System.h"
+
 namespace CE::Editor
 {
 

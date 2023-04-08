@@ -16,9 +16,13 @@ namespace CE
 		CE::Array<String> registrantList{};
 		CE::Array<String> sourceHeaderPaths{};
 
+		CE::Array<IO::Path> filesToRemove{};
+
+		bool anyHeaderModified = false;
+
 		for (auto entry : fs::directory_iterator((fs::path)outputPath))
 		{
-			fs::remove(entry.path());
+			filesToRemove.Add(entry.path());
 		}
 
 		for (auto entry : fs::recursive_directory_iterator(modulePath))
@@ -40,7 +44,31 @@ namespace CE
 				continue;
 			}
 
+			// Do NOT delete this output header file
+			filesToRemove.RemoveAll([headerGeneratedPath](const IO::Path& p) -> bool
+			{
+				return p.GetFilename() == IO::Path(headerGeneratedPath).GetFilename();
+			});
+
 			auto crc = CE::CalculateCRC(inputHeaderFileContent.c_str(), inputHeaderFileContent.size());
+			bool skipHeaderGen = false;
+
+			if (fs::exists(headerGeneratedPath) && moduleStamp.headers.Exists([crc,headerPath](const HeaderCRC& hCrc) -> bool
+			{
+				return hCrc.crc == crc && hCrc.headerPath == IO::Path(headerPath);
+			}))
+			{
+				// Same CRC value => no changes found => skip this header
+				skipHeaderGen = true;
+			}
+			else
+			{
+				// Remove the entry since we'll be modifying it
+				moduleStamp.headers.RemoveAll([headerPath](const HeaderCRC& hCrc) -> bool
+				{
+					return hCrc.headerPath == IO::Path(headerPath);
+				});
+			}
 
 			fs::path headerRelPathFinal{};
 			int idx = 0;
@@ -58,6 +86,11 @@ namespace CE
             std::stringstream outStream{};
 
 			moduleAST.ProcessHeader(headerPath, includeSearchPaths, outStream, implStream, registrantList);
+
+			if (skipHeaderGen)
+				continue;
+
+			anyHeaderModified = true;
 			
 			std::ofstream outFile{ headerGeneratedPath, std::ios_base::out };
 			if (outFile.is_open())
@@ -65,34 +98,49 @@ namespace CE
 				outFile << outStream.str();
 				outFile.close();
 			}
+
+			moduleStamp.headers.Add({ IO::Path(headerPath), crc });
 		}
 
-		std::ofstream moduleImplFile{ (fs::path)outputPath / (moduleName.ToStdString() + ".private.h"), std::ios_base::out };
-		if (moduleImplFile.is_open())
+		// Remove unnecessary headers from outputPath
+		for (const auto& path : filesToRemove)
 		{
-			moduleImplFile << "#pragma once\n\n";
+			IO::Path::Remove(path);
+		}
+		filesToRemove.Clear();
 
-			moduleImplFile << "#include \"CoreMinimal.h\"\n";
+		fs::path moduleGenFilePath = (fs::path)outputPath / (moduleName.ToStdString() + ".private.h");
 
-			for (auto headerPath : sourceHeaderPaths)
+		// Generate module file ONLY if either a header was modified or if it doesn't exist
+		if (anyHeaderModified || !fs::exists(moduleGenFilePath))
+		{
+			std::ofstream moduleImplFile{ moduleGenFilePath, std::ios_base::out };
+			if (moduleImplFile.is_open())
 			{
-				moduleImplFile << "#include \"" << headerPath.GetCString() <<"\"\n";
+				moduleImplFile << "#pragma once\n\n";
+
+				moduleImplFile << "#include \"CoreMinimal.h\"\n";
+
+				for (auto headerPath : sourceHeaderPaths)
+				{
+					moduleImplFile << "#include \"" << headerPath.GetCString() << "\"\n";
+				}
+
+				moduleImplFile << implStream.str() << "\n";
+
+				moduleImplFile << "static void CERegisterModuleTypes()\n{\n";
+				moduleImplFile << "\tCE_REGISTER_TYPES(\n";
+				for (int i = 0; i < registrantList.GetSize(); i++)
+				{
+					moduleImplFile << "\t\t" << registrantList[i].GetCString();
+					if (i < registrantList.GetSize() - 1)
+						moduleImplFile << ",";
+					moduleImplFile << "\n";
+				}
+				moduleImplFile << "\t);\n}\n";
+
+				moduleImplFile.close();
 			}
-
-			moduleImplFile << implStream.str() << "\n";
-
-			moduleImplFile << "static void CERegisterModuleTypes()\n{\n";
-			moduleImplFile << "\tCE_REGISTER_TYPES(\n";
-			for (int i = 0; i < registrantList.GetSize(); i++)
-			{
-				moduleImplFile << "\t\t" << registrantList[i].GetCString();
-				if (i < registrantList.GetSize() - 1)
-					moduleImplFile << ",";
-				moduleImplFile << "\n";
-			}
-			moduleImplFile << "\t);\n}\n";
-
-			moduleImplFile.close();
 		}
 	}
 

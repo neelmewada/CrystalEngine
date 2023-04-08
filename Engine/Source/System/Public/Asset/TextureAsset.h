@@ -4,12 +4,6 @@
 
 namespace CE
 {
-#if PAL_TRAIT_BUILD_EDITOR
-    namespace Editor
-    {
-        class TextureAssetImportSettings;
-    }
-#endif
 
     ENUM()
     enum class TextureDataType
@@ -33,10 +27,6 @@ namespace CE
     protected:
         FIELD()
         TextureDataType textureType{};
-
-#if PAL_TRAIT_BUILD_EDITOR
-        friend class CE::Editor::TextureAssetImportSettings;
-#endif
     };
     
 } // namespace CE

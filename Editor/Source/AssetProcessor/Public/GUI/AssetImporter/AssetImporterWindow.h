@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "CoreMinimal.h"
+#include "System.h"
 
 #include "AssetImporterFileModel.h"
 #include "AssetImporterFileFilterModel.h"
@@ -64,8 +65,8 @@ namespace CE::Editor
         Array<FieldDrawer*> fieldDrawers{};
 
         // Import Settings
-        ClassType* importSettingsClass = nullptr;
-        AssetImportSettings* importSettingInstance = nullptr;
+        ClassType* assetClass = nullptr;
+        Asset* assetClassInstance = nullptr;
 
         Ui::AssetImporterWindow* ui;
     };

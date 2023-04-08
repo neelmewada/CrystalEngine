@@ -26,7 +26,7 @@ namespace CE::Editor
 
     AssetImporterWindow::~AssetImporterWindow()
     {
-        delete importSettingInstance;
+        delete assetClassInstance;
         delete ui;
     }
 
@@ -128,7 +128,7 @@ namespace CE::Editor
         if (selection.GetSize() == 0)
             return;
 
-        importSettingsClass = nullptr;
+        assetClass = nullptr;
 
         for (auto entry : selection)
         {
@@ -136,31 +136,31 @@ namespace CE::Editor
             if (extension.IsEmpty())
                 return;
             extension = extension.GetSubstring(1);
-            auto curImportSettingsClass = AssetImportSettings::GetImportSettingsClassFor(extension);
-            if (importSettingsClass != nullptr && importSettingsClass != curImportSettingsClass)
+            auto curAssetClass = Asset::GetAssetClassFor(extension);
+            if (assetClass != nullptr && assetClass != curAssetClass)
             {
                 ui->incompatibleSelectionLabel->setVisible(true);
                 return;
             }
 
-            importSettingsClass = curImportSettingsClass;
+            assetClass = curAssetClass;
         }
 
-        if (importSettingsClass == nullptr)
+        if (assetClass == nullptr)
             return;
 
-        if (importSettingInstance != nullptr && importSettingInstance->GetType()->GetTypeId() != importSettingsClass->GetTypeId())
+        if (assetClassInstance != nullptr && assetClassInstance->GetType()->GetTypeId() != assetClass->GetTypeId())
         {
-            delete importSettingInstance;
-            importSettingInstance = nullptr;
+            delete assetClassInstance;
+            assetClassInstance = nullptr;
         }
 
-        if (importSettingInstance == nullptr)
+        if (assetClassInstance == nullptr)
         {
-            importSettingInstance = (AssetImportSettings*)importSettingsClass->CreateDefaultInstance();
+            assetClassInstance = (Asset*)assetClass->CreateDefaultInstance();
         }
 
-        auto field = importSettingsClass->GetFirstField();
+        auto field = assetClass->GetFirstField();
 
         while (field != nullptr)
         {
@@ -192,7 +192,7 @@ namespace CE::Editor
                 continue;
             }
 
-            fieldDrawer->SetTarget(field, importSettingInstance);
+            fieldDrawer->SetTarget(field, assetClassInstance);
 
             fieldDrawers.Add(fieldDrawer);
 
@@ -260,7 +260,7 @@ namespace CE::Editor
 
     void AssetImporterWindow::on_importButton_clicked()
     {
-        if (selection.GetSize() == 0 || importSettingsClass == nullptr || importSettingInstance == nullptr)
+        if (selection.GetSize() == 0 || assetClass == nullptr || assetClassInstance == nullptr)
             return;
         
         for (auto entry : selection)
@@ -268,7 +268,7 @@ namespace CE::Editor
             if (entry == nullptr)
                 continue;
             
-            AssetProcessor::Get().ProcessAsset(entry->fullPath, importSettingInstance);
+            AssetProcessor::Get().ProcessAsset(entry->fullPath, assetClassInstance);
         }
         
         ui->contentTreeView->clearSelection();
@@ -282,10 +282,10 @@ namespace CE::Editor
 
     void AssetImporterWindow::on_resetButton_clicked()
     {
-        if (selection.GetSize() == 0 || importSettingsClass == nullptr || importSettingInstance == nullptr)
+        if (selection.GetSize() == 0 || assetClass == nullptr || assetClassInstance == nullptr)
             return;
         
-        importSettingsClass->InitializeDefaults(importSettingInstance);
+        assetClass->InitializeDefaults(assetClassInstance);
         
         for (auto fieldDrawer : fieldDrawers)
         {
