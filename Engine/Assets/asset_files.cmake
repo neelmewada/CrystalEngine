@@ -1,0 +1,6 @@
+
+file(GLOB_RECURSE FILES "*")
+
+list(FILTER FILES EXCLUDE REGEX "[a-zA-Z_0-9-].cmake")
+list(FILTER FILES EXCLUDE REGEX "CMakeLists.txt")
+list(FILTER FILES EXCLUDE REGEX ".DS_Store")

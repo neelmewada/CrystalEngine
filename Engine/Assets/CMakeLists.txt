@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.20)
+
+project(EngineAssets)
+
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
+
+ce_add_assets(${PROJECT_NAME}
+    ASSET_FILES
+        "asset_files.cmake"
+    OUTPUT_DIRECTORY "Engine/Assets"
+)

@@ -1,0 +1,47 @@
+
+ce_set(PAL_EXECUTABLE_APPLICATION_FLAG MACOSX_BUNDLE)
+
+if(${CE_STANDALONE})
+    ce_set(PAL_TRAIT_BUILD_EDITOR FALSE)
+    ce_set(PAL_TRAIT_BUILD_HOST_TOOLS FALSE)
+    ce_set(PAL_TRAIT_BUILD_HOST_LIBRARIES FALSE)
+    add_compile_definitions(PAL_TRAIT_BUILD_STANDALONE=1)
+else()
+    ce_set(PAL_TRAIT_BUILD_EDITOR TRUE)
+    ce_set(PAL_TRAIT_BUILD_HOST_TOOLS TRUE)
+    ce_set(PAL_TRAIT_BUILD_HOST_LIBRARIES TRUE)
+    add_compile_definitions(PAL_TRAIT_BUILD_EDITOR=1)
+endif()
+
+# Graphics APIs
+ce_set(PAL_TRAIT_VULKAN_SUPPORTED TRUE)
+ce_set(PAL_TRAIT_METAL_SUPPORTED TRUE)
+ce_set(PAL_TRAIT_SDL_SUPPORTED TRUE)
+
+add_compile_definitions(PAL_TRAIT_VULKAN_SUPPORTED=1)
+add_compile_definitions(PAL_TRAIT_METAL_SUPPORTED=1)
+add_compile_definitions(PAL_TRAIT_SDL_SUPPORTED=1)
+
+ce_set(PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED TRUE)
+ce_set(PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED TRUE)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    ce_set(PAL_TRAIT_COMPILER_ID Clang)
+    ce_set(PAL_TRAIT_COMPILER_ID_LOWERCASE clang)
+    add_compile_definitions(COMPILER_APPLECLANG=1)
+else()
+    message(FATAL_ERROR "Compiler ${CMAKE_CXX_COMPILER_ID} not supported in ${PAL_PLATFORM_NAME}")
+endif()
+
+# Set the deployment target for MacOS
+set(CE_MAC_DEPLOYMENT_TARGET "11.0" CACHE STRING "Mac Deployment Target")
+set(CMAKE_OSX_DEPLOYMENT_TARGET ${CE_MAC_DEPLOYMENT_TARGET})
+
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+
+ce_set(PAL_PLATFORM_IS_64_BIT TRUE)
+ce_set(PAL_PLATFORM_IS_MAC TRUE)
+
+add_compile_definitions(PLATFORM_MAC=1)
+add_compile_definitions(IS_64BIT=1)
+
