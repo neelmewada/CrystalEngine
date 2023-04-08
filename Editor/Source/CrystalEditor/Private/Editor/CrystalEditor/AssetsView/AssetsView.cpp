@@ -4,6 +4,7 @@
 #include "System.h"
 
 #include "AssetsViewFolderModel.h"
+#include "AssetsViewContentModel.h"
 #include "AssetViewItem.h"
 
 namespace CE::Editor
@@ -26,6 +27,10 @@ namespace CE::Editor
         ui->folderTreeView->setModel(folderModel);
         
         connect(ui->folderTreeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AssetsView::OnFolderSelectionChanged);
+        
+        // Content Model
+        contentModel = new AssetsViewContentModel(this);
+        ui->assetsContentView->setModel(contentModel);
     }
 
     AssetsView::~AssetsView()
@@ -44,52 +49,30 @@ namespace CE::Editor
     {
         auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
         if (selection.size() == 0)
+        {
+            contentModel->SetDirectoryEntry(nullptr);
+            emit contentModel->modelReset({});
             return;
+        }
 
         const auto& index = selection.at(0);
 
         if (!index.isValid() || index.internalPointer() == nullptr)
+        {
+            contentModel->SetDirectoryEntry(nullptr);
+            emit contentModel->modelReset({});
             return;
+        }
 
         auto root = (AssetDatabaseEntry*)index.internalPointer();
 
-        while (assetItems.GetSize() < root->children.GetSize())
-        {
-            auto item = new AssetViewItem(this);
-            assetItems.Add(item);
-        }
-
-        int itemCount = root->children.GetSize();
-        const int itemWidth = 80;
-
-        int numCols = Math::Max(1, width() / itemWidth);
-        int numRows = itemCount / numCols + 1;
-
-        ui->assetsContentWidget->clear();
-
-        for (int i = 0; i < itemCount; i++)
-        {
-            int r = i / numRows;
-            int c = i % numCols;
-            ui->assetsContentWidget->setItem(r, c, assetItems[i]);
-            assetItems[i]->SetEntry(&root->children[i]);
-        }
+        contentModel->SetDirectoryEntry(root);
+        emit contentModel->modelReset({});
     }
 
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
     {
-        auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
-        if (selection.size() == 0)
-            return;
-
-        const auto& index = selection.at(0);
-        
-        if (!index.isValid() || index.internalPointer() == nullptr)
-            return;
-
-        auto root = (AssetDatabaseEntry*)index.internalPointer();
-
-        
+        UpdateContentView();
     }
 
 }

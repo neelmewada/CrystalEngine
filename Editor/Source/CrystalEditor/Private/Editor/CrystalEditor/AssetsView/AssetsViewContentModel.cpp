@@ -6,11 +6,10 @@
 
 namespace CE::Editor
 {
-    constexpr int sizePerItem = 512;
+    constexpr int sizePerItem = 128;
 
-    AssetsViewContentModel::AssetsViewContentModel(QWidget* sizeWidget, QObject *parent)
+    AssetsViewContentModel::AssetsViewContentModel(QObject *parent)
         : QAbstractItemModel(parent)
-        , sizeWidget(sizeWidget)
     {
 
     }
@@ -25,7 +24,7 @@ namespace CE::Editor
         if (currentDirectory == nullptr)
             return QModelIndex();
 
-        auto width = sizeWidget->width();
+        auto width = sizePerItem;
         int maxNumItemsInRow = Math::Max(1, width / sizePerItem);
 
         int totalItemCount = currentDirectory->children.GetSize();
@@ -48,7 +47,7 @@ namespace CE::Editor
         if (parent.isValid() || currentDirectory == nullptr)
             return 0;
 
-        auto width = sizeWidget->width();
+        auto width = sizePerItem;
         int maxNumItemsInRow = Math::Max(1, width / sizePerItem);
 
         int totalItemCount = currentDirectory->children.GetSize();
@@ -64,7 +63,7 @@ namespace CE::Editor
         if (parent.isValid() || currentDirectory == nullptr)
             return 0;
 
-        auto width = sizeWidget->width();
+        auto width = sizePerItem;
         int maxNumItemsInRow = Math::Max(1, width / sizePerItem);
 
         int totalItemCount = currentDirectory->children.GetSize();

@@ -64,9 +64,9 @@
      <widget class="QWidget" name="verticalLayoutWidget_2">
       <layout class="QVBoxLayout" name="rightLayout">
        <item>
-        <widget class="QTableWidget" name="assetsContentWidget">
+        <widget class="QTableView" name="assetsContentView">
          <property name="styleSheet">
-          <string notr="true">#assetsContentWidget {
+          <string notr="true">#assetsContentView {
 	background-color: rgb(42, 42, 42);
 }</string>
          </property>

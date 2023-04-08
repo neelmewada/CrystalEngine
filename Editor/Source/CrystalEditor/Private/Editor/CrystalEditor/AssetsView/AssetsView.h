@@ -13,6 +13,7 @@ class AssetsView;
 namespace CE::Editor
 {
     class AssetsViewFolderModel;
+    class AssetsViewContentModel;
     class AssetViewItem;
 
     CLASS()
@@ -34,8 +35,9 @@ namespace CE::Editor
 
     private:
         AssetsViewFolderModel* folderModel = nullptr;
+        AssetsViewContentModel* contentModel = nullptr;
 
-        Array<AssetViewItem*> assetItems{};
+        Vector<AssetViewItem*> assetItems{};
 
         Ui::AssetsView *ui;
     };

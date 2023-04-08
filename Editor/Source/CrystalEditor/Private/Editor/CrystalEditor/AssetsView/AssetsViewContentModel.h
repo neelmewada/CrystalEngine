@@ -17,7 +17,7 @@ namespace CE::Editor
         Q_OBJECT
 
     public:
-        explicit AssetsViewContentModel(QWidget* sizeWidget, QObject *parent = nullptr);
+        explicit AssetsViewContentModel(QObject *parent = nullptr);
 
         // Header:
         QVariant headerData(int section, ::Qt::Orientation orientation, int role = ::Qt::DisplayRole) const override;
@@ -35,7 +35,6 @@ namespace CE::Editor
         void SetDirectoryEntry(AssetDatabaseEntry* entry);
 
     private:
-        QWidget* sizeWidget = nullptr;
 
         AssetDatabaseEntry* currentDirectory = nullptr;
     };
