@@ -44,6 +44,12 @@
        </property>
        <item>
         <widget class="QFrame" name="leftTopBar">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="styleSheet">
           <string notr="true">#leftTopBar {	
 	border: 0x solid gray;
@@ -64,19 +70,6 @@
           <property name="bottomMargin">
            <number>3</number>
           </property>
-          <item>
-           <widget class="QLineEdit" name="rightSearchInput_2">
-            <property name="maximumSize">
-             <size>
-              <width>200</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="placeholderText">
-             <string>Search...</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
@@ -128,6 +121,12 @@
        </property>
        <item>
         <widget class="QFrame" name="rightTopBar">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
          <property name="styleSheet">
           <string notr="true">#rightTopBar {
 	border: 0x solid gray;
@@ -161,6 +160,9 @@
             </property>
             <property name="placeholderText">
              <string>Search...</string>
+            </property>
+            <property name="clearButtonEnabled">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
