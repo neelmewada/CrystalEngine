@@ -20,7 +20,7 @@ namespace CE::Editor
     {
         auto root = AssetDatabase::Get().GetRootEntry();
         if (!parent.isValid())
-            return createIndex(row, column, &root->children[row]);
+            return createIndex(row, column, root->children[row]);
 
         auto entry = (AssetDatabaseEntry*)parent.internalPointer();
         if (entry == nullptr)
@@ -29,11 +29,11 @@ namespace CE::Editor
         int idx = 0;
         for (int i = 0; i < entry->children.GetSize(); i++)
         {
-            if (entry->children[i].entryType == AssetDatabaseEntry::Type::Directory)
+            if (entry->children[i]->entryType == AssetDatabaseEntry::Type::Directory)
             {
                 if (idx == row)
                 {
-                    return createIndex(row, column, &entry->children[row]);
+                    return createIndex(row, column, entry->children[row]);
                 }
                 idx++;
             }
@@ -61,11 +61,11 @@ namespace CE::Editor
         int idx = 0;
         for (int i = 0; i < parentsParent->children.GetSize(); i++)
         {
-            if (parentEntry == &parentsParent->children[i])
+            if (parentEntry == parentsParent->children[i])
             {
                 return createIndex(idx, 0, parentEntry);
             }
-            if (parentEntry->children[i].entryType == AssetDatabaseEntry::Type::Directory)
+            if (parentEntry->children[i]->entryType == AssetDatabaseEntry::Type::Directory)
             {
                 idx++;
             }
@@ -88,7 +88,7 @@ namespace CE::Editor
         int count = 0;
         for (int i = 0; i < entry->children.GetSize(); i++)
         {
-            if (entry->children[i].entryType == AssetDatabaseEntry::Type::Directory)
+            if (entry->children[i]->entryType == AssetDatabaseEntry::Type::Directory)
                 count++;
         }
 
@@ -105,6 +105,8 @@ namespace CE::Editor
         if (!index.isValid() || index.internalPointer() == nullptr)
             return QVariant();
 
+        AssetDatabaseEntry* entry = (AssetDatabaseEntry*)index.internalPointer();
+        
         if (role == ::Qt::DecorationRole)
         {
             return QIcon(":/Editor/Icons/folder");
@@ -112,8 +114,6 @@ namespace CE::Editor
 
         if (role != ::Qt::DisplayRole)
             return QVariant();
-        
-        AssetDatabaseEntry* entry = (AssetDatabaseEntry*)index.internalPointer();
 
         return QVariant(entry->name.GetCString());
     }

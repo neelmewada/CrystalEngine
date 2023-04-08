@@ -95,7 +95,7 @@ namespace CE::Editor
             int c = i % numCols;
             int r = i / numCols;
 
-            auto idx = contentModel->CreateIndex(r, c, &root->children[i]);
+            auto idx = contentModel->CreateIndex(r, c, root->children[i]);
             if (!ui->assetsContentView->isPersistentEditorOpen(idx))
             {
                 ui->assetsContentView->openPersistentEditor(idx);

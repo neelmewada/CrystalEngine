@@ -40,7 +40,7 @@ namespace CE::Editor
 
         if (index >= currentDirectory->children.GetSize())                
             return QModelIndex();
-        return createIndex(row, column, &currentDirectory->children[index]);
+        return createIndex(row, column, currentDirectory->children[index]);
     }
 
     QModelIndex AssetsViewContentModel::parent(const QModelIndex &index) const

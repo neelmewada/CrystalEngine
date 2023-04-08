@@ -54,7 +54,7 @@ namespace CE
 
 		for (int i = 0; i < searchRoot->children.GetSize(); i++)
 		{
-			auto childPath = searchRoot->children[i].virtualRelativePath;
+			auto childPath = searchRoot->children[i]->virtualRelativePath;
 			auto searchPath = subVirtualPath;
 
 			auto childIt = childPath.begin();
@@ -71,13 +71,13 @@ namespace CE
 			if (childIt == childPath.end()) // subVirtualPath is a SubPath of childPath
 			{
 				if (searchIt == searchPath.end())
-					return &searchRoot->children[i];
+					return searchRoot->children[i];
 				IO::Path finalPath{};
 				for (auto it = searchIt; it != searchPath.end(); ++it)
 				{
 					finalPath = finalPath / IO::Path((fs::path)*it);
 				}
-				return SearchForEntry(&searchRoot->children[i], finalPath);
+				return SearchForEntry(searchRoot->children[i], finalPath);
 			}
 		}
 

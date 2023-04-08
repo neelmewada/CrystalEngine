@@ -11,6 +11,7 @@ namespace CE
     class AssetDatabaseEntry
     {
     public:
+        AssetDatabaseEntry() = default;
         ~AssetDatabaseEntry()
         {
             ClearChildren();
@@ -18,6 +19,10 @@ namespace CE
 
         inline void ClearChildren()
         {
+            for (int i = 0; i < children.GetSize(); i++)
+            {
+                delete children[i];
+            }
             children.Clear();
         }
 
@@ -46,7 +51,7 @@ namespace CE
         Type entryType = Type::Directory;
         Category category = Category::EngineAssets;
 
-        CE::Array<AssetDatabaseEntry> children{};
+        CE::Array<AssetDatabaseEntry*> children{};
         AssetDatabaseEntry* parent = nullptr;
 
         // In run-time build, assets are packed into several archives.
