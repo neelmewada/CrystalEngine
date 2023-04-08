@@ -37,6 +37,7 @@ namespace CE::Editor
         
         // Content View Connections
         connect(ui->assetsContentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AssetsView::OnAssetSelectionChanged);
+        connect(ui->assetsContentView, &QAbstractItemView::doubleClicked, this, &AssetsView::OnAssetViewItemDoubleClicked);
     }
 
     AssetsView::~AssetsView()
@@ -113,13 +114,51 @@ namespace CE::Editor
             ui->selectedAssetLabel->setText(QString(entry->name.GetCString()));
             return;
         }
-        else if (selected.size() > 1)
+        else if (selection.size() > 1)
         {
-            ui->selectedAssetLabel->setText(QString("%1 files selected").arg(selected.size()));
+            ui->selectedAssetLabel->setText(QString("%1 files selected").arg(selection.size()));
             return;
         }
 
         ui->selectedAssetLabel->setText("");
+    }
+
+    void AssetsView::OnAssetViewItemDoubleClicked(const QModelIndex& index)
+    {
+        if (!index.isValid() || index.internalPointer() == nullptr)
+            return;
+
+        auto entry = (AssetDatabaseEntry*)index.internalPointer();
+
+        if (entry->entryType == AssetDatabaseEntry::Type::Asset)
+        {
+            // TODO: Asset double clicked
+            return;
+        }
+
+        auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
+        if (selection.size() == 0 || selection.at(0).internalPointer() == nullptr)
+        {
+            contentModel->SetDirectoryEntry(nullptr);
+            emit contentModel->modelReset({});
+            return;
+        }
+
+        auto currentDirectory = (AssetDatabaseEntry*)selection.at(0).internalPointer();
+
+        for (int i = 0; i < currentDirectory->children.GetSize(); i++)
+        {
+            if (currentDirectory->children[i] == entry)
+            {
+                ui->folderTreeView->selectionModel()->clearSelection();
+
+                auto idx = folderModel->GetIndex(entry);
+                ui->folderTreeView->selectionModel()->select(idx, QItemSelectionModel::Select);
+                break;
+            }
+        }
+
+        UpdateContentView();
     }
 
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)

@@ -44,12 +44,14 @@ namespace CE::Editor
 
     QModelIndex AssetsViewFolderModel::parent(const QModelIndex &index) const
     {
+        auto root = AssetDatabase::Get().GetRootEntry();
+
         AssetDatabaseEntry* entry = (AssetDatabaseEntry*)index.internalPointer();
         if (entry == nullptr)
             return QModelIndex();
 
         AssetDatabaseEntry* parentEntry = entry->parent;
-        if (parentEntry == nullptr)
+        if (parentEntry == nullptr || parentEntry == root)
             return QModelIndex();
 
         const AssetDatabaseEntry* parentsParent = parentEntry->parent;
@@ -117,4 +119,23 @@ namespace CE::Editor
 
         return QVariant(entry->name.GetCString());
     }
+
+    QModelIndex AssetsViewFolderModel::GetIndex(AssetDatabaseEntry* entry)
+    {
+        auto root = AssetDatabase::Get().GetRootEntry();
+
+        if (entry == nullptr || entry->parent == nullptr || entry == root)
+            return QModelIndex();
+
+        for (int i = 0; i < entry->parent->children.GetSize(); i++)
+        {
+            if (entry->parent->children[i] == entry)
+            {
+                return index(i, 0, GetIndex(entry->parent));
+            }
+        }
+
+        return QModelIndex();
+    }
+
 }

@@ -3,6 +3,10 @@
 
 #include <QAbstractItemModel>
 
+namespace CE
+{
+    class AssetDatabaseEntry;
+}
 
 namespace CE::Editor
 {
@@ -26,6 +30,8 @@ namespace CE::Editor
         int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
         QVariant data(const QModelIndex &index, int role = ::Qt::DisplayRole) const override;
+
+        QModelIndex GetIndex(AssetDatabaseEntry* entry);
 
     private:
 

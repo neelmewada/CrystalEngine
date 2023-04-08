@@ -50,6 +50,8 @@ namespace CE::Editor
         void OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
         void OnAssetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
+        void OnAssetViewItemDoubleClicked(const QModelIndex& index);
+
     private:
         AssetsViewFolderModel* folderModel = nullptr;
         AssetsViewContentModel* contentModel = nullptr;

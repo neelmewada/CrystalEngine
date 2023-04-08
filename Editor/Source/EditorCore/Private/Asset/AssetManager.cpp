@@ -70,6 +70,7 @@ namespace CE::Editor
 			gameAssetsRoot->entryType = AssetDatabaseEntry::Type::Directory;
 			gameAssetsRoot->virtualPath = "Game/Assets";
 			gameAssetsRoot->virtualRelativePath = gameAssetsRoot->virtualPath;
+			gameAssetsRoot->parent = root;
 
 			gameAssetsDir.RecursivelyIterateChildren([=](const IO::Path& path)
 			{
@@ -168,6 +169,7 @@ namespace CE::Editor
 			engineAssetsRoot->entryType = AssetDatabaseEntry::Type::Directory;
 			engineAssetsRoot->virtualPath = "Engine/Assets";
 			engineAssetsRoot->virtualRelativePath = engineAssetsRoot->virtualPath;
+			engineAssetsRoot->parent = root;
 
 			engineAssetsDir.RecursivelyIterateChildren([&](const IO::Path& path)
 			{

@@ -87,7 +87,6 @@ namespace CE::Editor
         if (role == ::Qt::DisplayRole)
         {
             return QVariant();
-            //return QString(item->name.GetCString());
         }
         else if (role == ::Qt::DecorationRole)
         {
