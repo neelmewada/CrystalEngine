@@ -25,6 +25,16 @@ namespace CE::Editor::Qt
         QWidget::focusOutEvent(event);
     }
 
+    void ExWidget::mousePressEvent(QMouseEvent* event)
+    {
+        QWidget::mousePressEvent(event);
+    }
+
+    void ExWidget::mouseReleaseEvent(QMouseEvent* event)
+    {
+        QWidget::mouseReleaseEvent(event);
+    }
+
     void ExWidget::showEvent(QShowEvent* event)
     {
         QWidget::showEvent(event);

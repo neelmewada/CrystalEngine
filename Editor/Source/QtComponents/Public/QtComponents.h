@@ -13,6 +13,7 @@
 #include "QtComponents/Widgets/CardWidget.h"
 #include "QtComponents/Widgets/AddComponentWidget.h"
 #include "QtComponents/Widgets/GridWidget.h"
+#include "QtComponents/Widgets/ContextMenuWidget/ContextMenuWidget.h"
 
 namespace CE::Editor::Qt
 {

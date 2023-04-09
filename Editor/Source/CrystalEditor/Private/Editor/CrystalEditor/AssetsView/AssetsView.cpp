@@ -7,6 +7,8 @@
 #include "AssetsViewContentModel.h"
 #include "AssetViewItem.h"
 
+#include "QtComponents.h"
+
 namespace CE::Editor
 {
 
@@ -34,8 +36,10 @@ namespace CE::Editor
         contentModel = new AssetsViewContentModel(ui->assetsContentView, this);
         ui->assetsContentView->setModel(contentModel);
         ui->assetsContentView->setItemDelegate(new AssetsViewItemDelegate(this));
+        ui->assetsContentView->setContextMenuPolicy(::Qt::CustomContextMenu);
         
         // Content View Connections
+        connect(ui->assetsContentView, &QTableView::customContextMenuRequested, this, &AssetsView::OnAssetViewItemContextMenuRequested);
         connect(ui->assetsContentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AssetsView::OnAssetSelectionChanged);
         connect(ui->assetsContentView, &QAbstractItemView::doubleClicked, this, &AssetsView::OnAssetViewItemDoubleClicked);
     }
@@ -83,7 +87,7 @@ namespace CE::Editor
 
         for (int c = 0; c < numCols; c++)
         {
-            ui->assetsContentView->setColumnWidth(c, 70);
+            ui->assetsContentView->setColumnWidth(c, AssetsViewContentModel::sizePerItem);
         }
 
         for (int r = 0; r < numRows; r++)
@@ -116,7 +120,7 @@ namespace CE::Editor
         }
         else if (selection.size() > 1)
         {
-            ui->selectedAssetLabel->setText(QString("%1 files selected").arg(selection.size()));
+            ui->selectedAssetLabel->setText(QString("%1 files selected").arg((int)selection.size()));
             return;
         }
 
@@ -159,6 +163,54 @@ namespace CE::Editor
         }
 
         UpdateContentView();
+    }
+
+    void AssetsView::OnAssetViewItemContextMenuRequested(const QPoint& pos)
+    {
+        auto selection = ui->assetsContentView->selectionModel()->selectedIndexes();
+
+        if (contextMenu == nullptr)
+        {
+            contextMenu = new Qt::ContextMenuWidget(this);
+        }
+
+        contextMenu->Clear();
+        contextMenu->AddCategoryLabel("Edit Options");
+        contextMenu->AddRegularItem("Copy");
+        contextMenu->AddRegularItem("Duplicate", ":/Editor/Icons/duplicate");
+
+        auto moveToItem = contextMenu->AddRegularItem("Move To");
+        moveToItem->SetSubmenuEnabled(true);
+        moveToItem->GetSubmenu()->AddCategoryLabel("Move Options");
+        moveToItem->GetSubmenu()->AddRegularItem("Within project")
+            ->BindMouseClickSignal([]() -> void { CE_LOG(Info, All, "Within project!"); });
+        moveToItem->GetSubmenu()->AddRegularItem("To another project");
+        
+        contextMenu->AddRegularItem("Delete", ":/Editor/Icons/bin-white")
+            ->BindMouseClickSignal(this, SLOT(OnContextMenuDeletePressed()));
+        contextMenu->AddCategoryLabel("Asset Options");
+        contextMenu->AddCategoryLabel("Misc Options");
+
+        auto globalPos = ui->assetsContentView->mapToGlobal(pos);
+        auto contextMenuSize = contextMenu->size();
+        auto screenSize = qApp->primaryScreen()->size();
+
+        if (globalPos.x() + contextMenuSize.width() > screenSize.width())
+        {
+            globalPos.setX(screenSize.width() - contextMenuSize.width() - 10);
+        }
+        if (globalPos.y() + contextMenuSize.height() > screenSize.height())
+        {
+            globalPos.setY(screenSize.height() - contextMenuSize.height() - 10);
+        }
+
+        contextMenu->move(globalPos);
+        contextMenu->show();
+    }
+
+    void AssetsView::OnContextMenuDeletePressed()
+    {
+        CE_LOG(Info, All, "Delete!");
     }
 
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)

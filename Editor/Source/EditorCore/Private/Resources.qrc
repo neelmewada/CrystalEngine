@@ -3,5 +3,7 @@
         <file alias="Icons/bin-red">Resources/Icons/bin.png</file>
         <file alias="Icons/folder">Resources/Icons/folder.png</file>
         <file alias="Icons/file">Resources/Icons/file.png</file>
+        <file alias="Icons/bin-white">Resources/Icons/bin-white.png</file>
+        <file alias="Icons/duplicate">Resources/Icons/duplicate.png</file>
     </qresource>
 </RCC>

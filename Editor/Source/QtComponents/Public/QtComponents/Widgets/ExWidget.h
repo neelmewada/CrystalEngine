@@ -19,6 +19,9 @@ namespace CE::Editor::Qt
         void focusInEvent(QFocusEvent* event) override;
         void focusOutEvent(QFocusEvent* event) override;
 
+        void mousePressEvent(QMouseEvent* event) override;
+        void mouseReleaseEvent(QMouseEvent* event) override;
+
         void showEvent(QShowEvent* event) override;
 
     };

@@ -191,6 +191,9 @@
        </item>
        <item>
         <widget class="QTableView" name="assetsContentView">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
          <property name="styleSheet">
           <string notr="true">#assetsContentView {
 	background-color: rgb(42, 42, 42);

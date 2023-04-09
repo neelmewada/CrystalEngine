@@ -62,18 +62,3 @@ namespace CE::Editor
 
 
 #include "CrystalEditorApplication.rtti.h"
-//CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, CrystalEditorApplication,
-//    CE_SUPER(CE::Editor::EditorQtApplication),
-//    CE_DONT_INSTANTIATE,
-//    CE_ATTRIBS(),
-//    CE_FIELD_LIST(),
-//    CE_FUNCTION_LIST(
-//        // EditorSystemEventBus::Interface
-//        CE_FUNCTION(OnWelcomeScreenTimeout, Event)
-//        CE_FUNCTION(OnOpenProject, Event)
-//        CE_FUNCTION(OnCreateProject, Event)
-//
-//        // CE::ApplicationBus::Interface
-//        CE_FUNCTION(GetEngineRef, Event)
-//    )
-//)

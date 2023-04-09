@@ -110,7 +110,7 @@ namespace CE::Editor
 
     void SceneEditorWindow::CreateEmptyGameObject()
     {
-        auto go = new GameObject("Empty");
+        auto go = new GameObject("GameObject");
         auto selection = sceneOutlinerView->GetTreeView()->selectionModel()->selectedIndexes();
 
         GameObject* parent = nullptr;

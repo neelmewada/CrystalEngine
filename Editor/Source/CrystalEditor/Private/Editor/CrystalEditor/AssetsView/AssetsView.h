@@ -13,6 +13,11 @@ class AssetsView;
 
 namespace CE::Editor
 {
+    namespace Qt
+    {
+        class ContextMenuWidget;
+    }
+
     class AssetsViewFolderModel;
     class AssetsViewContentModel;
     class AssetViewItem;
@@ -51,10 +56,14 @@ namespace CE::Editor
         void OnAssetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
         void OnAssetViewItemDoubleClicked(const QModelIndex& index);
+        void OnAssetViewItemContextMenuRequested(const QPoint& pos);
+
+        void OnContextMenuDeletePressed();
 
     private:
         AssetsViewFolderModel* folderModel = nullptr;
         AssetsViewContentModel* contentModel = nullptr;
+        Qt::ContextMenuWidget* contextMenu = nullptr;
 
         Vector<AssetViewItem*> assetItemWidgets{};
 
