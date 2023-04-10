@@ -176,7 +176,7 @@ namespace CE::Editor
 
     void AssetsView::OnAssetViewItemContextMenuRequested(const QPoint& pos)
     {
-        auto selection = ui->assetsContentView->selectionModel()->selectedIndexes();
+        QModelIndexList selection = ui->assetsContentView->selectionModel()->selectedIndexes();
 
         if (contextMenu == nullptr)
         {
@@ -198,10 +198,27 @@ namespace CE::Editor
         }
         else
         {
-            contextMenu->AddCategoryLabel("Edit Options");
-            contextMenu->AddRegularItem("Duplicate", ":/Editor/Icons/duplicate");
-            contextMenu->AddRegularItem("Delete", ":/Editor/Icons/bin-white")
-                ->BindMouseClickSignal(this, SLOT(OnContextMenuDeletePressed()));
+            bool canEdit = true;
+            for (const QModelIndex& idx : selection)
+            {
+                if (idx.internalPointer() != nullptr)
+                {
+                    AssetDatabaseEntry* entry = (AssetDatabaseEntry*)idx.internalPointer();
+                    if (entry->category != AssetDatabaseEntry::Category::GameAssets &&
+                        entry->category != AssetDatabaseEntry::Category::GameShaders)
+                    {
+                        canEdit = false;
+                        break;
+                    }
+                }
+            }
+            if (canEdit)
+            {
+                contextMenu->AddCategoryLabel("Edit Options");
+                contextMenu->AddRegularItem("Duplicate", ":/Editor/Icons/duplicate");
+                contextMenu->AddRegularItem("Delete", ":/Editor/Icons/bin-white")
+                    ->BindMouseClickSignal(this, SLOT(OnContextMenuDeletePressed()));
+            }
         }
 
         auto moveToItem = contextMenu->AddRegularItem("Move To");
@@ -252,7 +269,8 @@ namespace CE::Editor
         for (const QModelIndex& item : selection)
         {
             AssetDatabaseEntry* entry = (AssetDatabaseEntry*)item.internalPointer();
-            if (entry == nullptr)
+            if (entry == nullptr || (entry->category != AssetDatabaseEntry::Category::GameAssets &&
+                                     entry->category != AssetDatabaseEntry::Category::GameShaders))
                 continue;
             auto path = gameAssetsDir / entry->virtualPath;
             if (path.Exists())
