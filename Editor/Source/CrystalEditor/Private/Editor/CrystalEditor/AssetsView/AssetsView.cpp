@@ -245,13 +245,15 @@ namespace CE::Editor
 
     void AssetsView::OnAssetDatabaseUpdated()
     {
-        auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
-        if (selection.size() > 0)
-        {
-            emit folderModel->modelReset({});
-            ui->folderTreeView->selectionModel()->select(selection.at(0), QItemSelectionModel::Select);
-        }
-        UpdateContentView();
+        QMetaObject::invokeMethod(this, [=]{
+            auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
+            if (selection.size() > 0)
+            {
+                emit folderModel->modelReset({});
+                ui->folderTreeView->selectionModel()->select(selection.at(0), QItemSelectionModel::Select);
+            }
+            UpdateContentView();
+        });
     }
 
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
