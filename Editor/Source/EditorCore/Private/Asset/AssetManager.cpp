@@ -1,7 +1,6 @@
 
-#include "Asset/AssetManager.h"
-
 #include "System.h"
+#include "EditorCore.h"
 
 namespace CE::Editor
 {
@@ -23,11 +22,7 @@ namespace CE::Editor
 		auto engineAssetsDir = engineDir / "Assets";
 		auto editorDir = PlatformDirectories::GetEditorDir();
 
-#if PAL_TRAIT_BUILD_EDITOR
 		auto gameDir = projectSettings.editorProjectDirectory / "Game";
-#else
-		auto gameDir = PlatformDirectories::GetGameDir();
-#endif
 
 		auto gameAssetsDir = gameDir / "Assets";
 
@@ -264,7 +259,29 @@ namespace CE::Editor
 
 	void AssetManager::HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName)
 	{
+		const auto& projectSettings = ProjectSettings::Get();
 
+		auto projectDir = projectSettings.editorProjectDirectory;
+		auto relPath = IO::Path::GetRelative(directory, projectDir);
+		auto entry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath);
+		auto newFilePath = directory / fileName;
+
+		if (fileAction == IO::FileAction::Add)
+		{
+			if (newFilePath.IsDirectory())
+			{
+				auto dirEntry = new AssetDatabaseEntry();
+				dirEntry->name = fileName;
+				dirEntry->category = AssetDatabaseEntry::Category::GameAssets;
+				dirEntry->entryType = AssetDatabaseEntry::Type::Directory;
+				dirEntry->parent = entry;
+				dirEntry->virtualRelativePath = fileName;
+				dirEntry->virtualPath = relPath / fileName;
+				entry->children.Add(dirEntry);
+			}
+		}
+		OnAssetDatabaseUpdated();
+		//CE_LOG(Info, All, "File Change: {}/{} (old: {}) | action: {}", directory, fileName, oldFileName, fileAction);
 	}
 
 } // namespace CE::Editor

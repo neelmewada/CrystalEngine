@@ -29,6 +29,11 @@ namespace CE
         CE_INLINE const String& GetProjectVersionString() const { return projectVersion; }
         CE_INLINE const String& GetEngineVersion() const { return engineVersion; }
 
+        // Editor Project Settings
+#if PAL_TRAIT_BUILD_EDITOR
+        IO::Path GetEditorProjectDirectory() const { return editorProjectDirectory; }
+#endif
+
     private:
 
         static ProjectSettings currentProject;

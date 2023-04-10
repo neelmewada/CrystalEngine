@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Module/ModuleManager.h"
+#include "System.h"
 
 #include "CEQtApplication.h"
 #include "Misc/QStringFmt.h"

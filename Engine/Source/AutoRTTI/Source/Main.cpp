@@ -24,6 +24,7 @@ int main(int argc, char** argv)
         ("d,dir", "Module root path", cxxopts::value<std::string>())
         ("o,output", "Generated file output path", cxxopts::value<std::string>())
         ("I,inc", "Include search directories", cxxopts::value<std::vector<std::string>>()->default_value(""))
+        ("f,force", "Force update output headers")
         ;
 
     try
@@ -53,7 +54,10 @@ int main(int argc, char** argv)
 
         ModuleStamp moduleStamp{};
         IO::Path moduleStampPath = outPath / (moduleName + ".stamp");
-        if (moduleStampPath.Exists())
+
+        bool forceUpdate = result["f"].as<bool>();
+
+        if (moduleStampPath.Exists() && !forceUpdate)
         {
             CE::SerializedObject so{ ModuleStamp::Type(), &moduleStamp };
             so.Deserialize(moduleStampPath);

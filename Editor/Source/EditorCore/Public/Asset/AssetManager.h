@@ -4,9 +4,10 @@
 
 namespace CE::Editor
 {
-
-    class EDITORCORE_API AssetManager : IO::IFileWatchListener
+    CLASS()
+    class EDITORCORE_API AssetManager : public CE::Object, public IO::IFileWatchListener
     {
+        CE_CLASS(AssetManager, CE::Object)
     private:
         AssetManager();
     public:
@@ -20,6 +21,8 @@ namespace CE::Editor
 
         void LoadEditorAssetDatabase();
 
+        CE_SIGNAL(OnAssetDatabaseUpdated);
+
     private:
 
         // IFileWatchListener
@@ -30,3 +33,5 @@ namespace CE::Editor
     };
     
 } // namespace CE::Editor
+
+#include "AssetManager.rtti.h"

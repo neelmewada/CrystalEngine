@@ -348,6 +348,8 @@ namespace CE
                             curFunction.name = String(tokens->tokens[i].lexeme);
                             curFunction.signature += "(";
                             i++;
+                            if (tokens->tokens[i].type == TK_PAREN_CLOSE && signalScope == 1)
+                                continue;
                         }
                         else
                         {

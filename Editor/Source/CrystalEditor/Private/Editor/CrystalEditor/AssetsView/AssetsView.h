@@ -11,6 +11,11 @@ namespace Ui {
 class AssetsView;
 }
 
+namespace CE
+{
+    class AssetDatabaseEntry;
+}
+
 namespace CE::Editor
 {
     namespace Qt
@@ -48,19 +53,26 @@ namespace CE::Editor
     private:
         void UpdateContentView();
 
-    signals:
-        
+        void PopulateCreateContextEntries(Qt::ContextMenuWidget* contextMenu);
 
     private slots:
+
+        FUNCTION(Event)
+        void OnAssetDatabaseUpdated();
+
         void OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
         void OnAssetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
         void OnAssetViewItemDoubleClicked(const QModelIndex& index);
         void OnAssetViewItemContextMenuRequested(const QPoint& pos);
 
+        // Context Menu Actions
+        
+        void OnContextMenuNewFolderPressed();
         void OnContextMenuDeletePressed();
 
     private:
+        AssetDatabaseEntry* currentDirectory = nullptr;
         AssetsViewFolderModel* folderModel = nullptr;
         AssetsViewContentModel* contentModel = nullptr;
         Qt::ContextMenuWidget* contextMenu = nullptr;

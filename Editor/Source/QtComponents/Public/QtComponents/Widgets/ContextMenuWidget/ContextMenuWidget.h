@@ -28,6 +28,8 @@ namespace CE::Editor::Qt
 
         ContextMenuRegularItem* AddRegularItem(QString title, QString icon = "");
 
+        void ShowPopup(QPoint globalPos);
+
     private:
         Ui::ContextMenuWidget *ui;
 

@@ -42,6 +42,13 @@ namespace CE::Editor
         connect(ui->assetsContentView, &QTableView::customContextMenuRequested, this, &AssetsView::OnAssetViewItemContextMenuRequested);
         connect(ui->assetsContentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AssetsView::OnAssetSelectionChanged);
         connect(ui->assetsContentView, &QAbstractItemView::doubleClicked, this, &AssetsView::OnAssetViewItemDoubleClicked);
+
+        ui->folderTreeView->selectionModel()->select(folderModel->index(0, 0), QItemSelectionModel::Select);
+        UpdateContentView();
+
+        auto signal = AssetManager::Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
+        auto event = Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
+        Object::Bind(&AssetManager::Get(), signal, this, event);
     }
 
     AssetsView::~AssetsView()
@@ -57,6 +64,7 @@ namespace CE::Editor
     void AssetsView::UpdateContentView()
     {
         auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
+
         if (selection.size() == 0)
         {
             contentModel->SetDirectoryEntry(nullptr);
@@ -74,6 +82,7 @@ namespace CE::Editor
         }
 
         auto root = (AssetDatabaseEntry*)index.internalPointer();
+        currentDirectory = root;
 
         contentModel->SetDirectoryEntry(root);
         emit contentModel->modelReset({});
@@ -174,10 +183,26 @@ namespace CE::Editor
             contextMenu = new Qt::ContextMenuWidget(this);
         }
 
+        Array<AssetDatabaseEntry*> selected{};
+        for (const auto& item : selection)
+        {
+            if (item.isValid() && item.internalPointer() != nullptr)
+                selected.Add((AssetDatabaseEntry*)item.internalPointer());
+        }
+
         contextMenu->Clear();
-        contextMenu->AddCategoryLabel("Edit Options");
-        contextMenu->AddRegularItem("Copy");
-        contextMenu->AddRegularItem("Duplicate", ":/Editor/Icons/duplicate");
+
+        if (selection.size() == 0)
+        {
+            PopulateCreateContextEntries(contextMenu);
+        }
+        else
+        {
+            contextMenu->AddCategoryLabel("Edit Options");
+            contextMenu->AddRegularItem("Duplicate", ":/Editor/Icons/duplicate");
+            contextMenu->AddRegularItem("Delete", ":/Editor/Icons/bin-white")
+                ->BindMouseClickSignal(this, SLOT(OnContextMenuDeletePressed()));
+        }
 
         auto moveToItem = contextMenu->AddRegularItem("Move To");
         moveToItem->SetSubmenuEnabled(true);
@@ -186,31 +211,47 @@ namespace CE::Editor
             ->BindMouseClickSignal([]() -> void { CE_LOG(Info, All, "Within project!"); });
         moveToItem->GetSubmenu()->AddRegularItem("To another project");
         
-        contextMenu->AddRegularItem("Delete", ":/Editor/Icons/bin-white")
-            ->BindMouseClickSignal(this, SLOT(OnContextMenuDeletePressed()));
         contextMenu->AddCategoryLabel("Asset Options");
         contextMenu->AddCategoryLabel("Misc Options");
 
         auto globalPos = ui->assetsContentView->mapToGlobal(pos);
-        auto contextMenuSize = contextMenu->size();
-        auto screenSize = qApp->primaryScreen()->size();
+        contextMenu->ShowPopup(globalPos);
+    }
 
-        if (globalPos.x() + contextMenuSize.width() > screenSize.width())
-        {
-            globalPos.setX(screenSize.width() - contextMenuSize.width() - 10);
-        }
-        if (globalPos.y() + contextMenuSize.height() > screenSize.height())
-        {
-            globalPos.setY(screenSize.height() - contextMenuSize.height() - 10);
-        }
+    void AssetsView::PopulateCreateContextEntries(Qt::ContextMenuWidget* contextMenu)
+    {
+        contextMenu->AddCategoryLabel("Create");
+        contextMenu->AddRegularItem("New Folder", ":/Editor/Icons/add-folder")
+            ->BindMouseClickSignal(this, SLOT(OnContextMenuNewFolderPressed()));
+    }
 
-        contextMenu->move(globalPos);
-        contextMenu->show();
+    void AssetsView::OnContextMenuNewFolderPressed()
+    {
+        const auto& projectSettings = ProjectSettings::Get();
+        auto gameAssetsDir = projectSettings.GetEditorProjectDirectory();
+
+        if (!gameAssetsDir.Exists())
+            return;
+
+        auto newFolderPath = gameAssetsDir / currentDirectory->virtualPath / "New Folder";
+
+        IO::Path::CreateDirectories(newFolderPath);
     }
 
     void AssetsView::OnContextMenuDeletePressed()
     {
-        CE_LOG(Info, All, "Delete!");
+
+    }
+
+    void AssetsView::OnAssetDatabaseUpdated()
+    {
+        auto selection = ui->folderTreeView->selectionModel()->selectedIndexes();
+        if (selection.size() > 0)
+        {
+            emit folderModel->modelReset({});
+            ui->folderTreeView->selectionModel()->select(selection.at(0), QItemSelectionModel::Select);
+        }
+        UpdateContentView();
     }
 
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)

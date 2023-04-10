@@ -1,6 +1,8 @@
 #include "ContextMenuWidget.h"
 #include "ui_ContextMenuWidget.h"
 
+#include <QScreen>
+
 namespace CE::Editor::Qt
 {
 
@@ -49,6 +51,24 @@ namespace CE::Editor::Qt
 
         ui->containerLayout->addWidget(item);
         return item;
+    }
+
+    void ContextMenuWidget::ShowPopup(QPoint globalPos)
+    {
+        auto contextMenuSize = this->size();
+        auto screenSize = qApp->primaryScreen()->size();
+
+        if (globalPos.x() + contextMenuSize.width() > screenSize.width())
+        {
+            globalPos.setX(screenSize.width() - contextMenuSize.width() - 10);
+        }
+        if (globalPos.y() + contextMenuSize.height() > screenSize.height())
+        {
+            globalPos.setY(screenSize.height() - contextMenuSize.height() - 10);
+        }
+
+        this->move(globalPos);
+        this->show();
     }
 
 }
