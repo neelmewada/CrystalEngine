@@ -240,7 +240,26 @@ namespace CE::Editor
 
     void AssetsView::OnContextMenuDeletePressed()
     {
-
+        const auto& projectSettings = ProjectSettings::Get();
+        auto gameAssetsDir = projectSettings.GetEditorProjectDirectory();
+        auto selection = ui->assetsContentView->selectionModel()->selectedIndexes();
+        
+        if (selection.size() == 0 || !gameAssetsDir.Exists())
+        {
+            return;
+        }
+        
+        for (const QModelIndex& item : selection)
+        {
+            AssetDatabaseEntry* entry = (AssetDatabaseEntry*)item.internalPointer();
+            if (entry == nullptr)
+                continue;
+            auto path = gameAssetsDir / entry->virtualPath;
+            if (path.Exists())
+            {
+                IO::Path::RemoveRecursively(path);
+            }
+        }
     }
 
     void AssetsView::OnAssetDatabaseUpdated()

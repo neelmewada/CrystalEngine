@@ -264,6 +264,7 @@ namespace CE::Editor
 		auto projectDir = projectSettings.editorProjectDirectory;
 		auto relPath = IO::Path::GetRelative(directory, projectDir);
 		auto entry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath);
+        auto fileEntry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath / fileName);
 		auto newFilePath = directory / fileName;
 
 		if (fileAction == IO::FileAction::Add)
@@ -280,6 +281,14 @@ namespace CE::Editor
 				entry->children.Add(dirEntry);
 			}
 		}
+        else if (fileAction == IO::FileAction::Delete)
+        {
+            if (fileEntry != nullptr && fileEntry->parent != nullptr)
+            {
+                fileEntry->parent->children.Remove(fileEntry);
+                delete fileEntry;
+            }
+        }
 		OnAssetDatabaseUpdated();
 		//CE_LOG(Info, All, "File Change: {}/{} (old: {}) | action: {}", directory, fileName, oldFileName, fileAction);
 	}

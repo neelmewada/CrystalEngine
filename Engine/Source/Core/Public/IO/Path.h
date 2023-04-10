@@ -154,6 +154,11 @@ namespace CE::IO
         {
             return fs::remove(path.impl);
         }
+        
+        inline static u32 RemoveRecursively(IO::Path path)
+        {
+            return fs::remove_all(path.impl);
+        }
 
         void IterateChildren(std::function<void(const IO::Path& path)> func);
         void RecursivelyIterateChildren(std::function<void(const IO::Path& path)> func);
