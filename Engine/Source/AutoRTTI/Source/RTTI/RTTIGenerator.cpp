@@ -50,26 +50,6 @@ namespace CE
 				return p.GetFilename() == IO::Path(headerGeneratedPath).GetFilename();
 			});
 
-			auto crc = CE::CalculateCRC(inputHeaderFileContent.c_str(), inputHeaderFileContent.size());
-			bool skipHeaderGen = false;
-
-			if (fs::exists(headerGeneratedPath) && moduleStamp.headers.Exists([crc,headerPath](const HeaderCRC& hCrc) -> bool
-			{
-				return hCrc.crc == crc && hCrc.headerPath == IO::Path(headerPath);
-			}))
-			{
-				// Same CRC value => no changes found => skip this header
-				skipHeaderGen = true;
-			}
-			else
-			{
-				// Remove the entry since we'll be modifying it
-				moduleStamp.headers.RemoveAll([headerPath](const HeaderCRC& hCrc) -> bool
-				{
-					return hCrc.headerPath == IO::Path(headerPath);
-				});
-			}
-
 			fs::path headerRelPathFinal{};
 			int idx = 0;
 			for (auto it = headerRelPath.begin(); it != headerRelPath.end(); ++it)
@@ -87,6 +67,28 @@ namespace CE
 
 			moduleAST.ProcessHeader(headerPath, includeSearchPaths, outStream, implStream, registrantList);
 
+            auto outString = outStream.str();
+
+            auto crc = CE::CalculateCRC(outString.c_str(), outString.size());
+            bool skipHeaderGen = false;
+
+            if (fs::exists(headerGeneratedPath) && moduleStamp.headers.Exists([crc,headerPath](const HeaderCRC& hCrc) -> bool
+              {
+                  return hCrc.crc == crc && hCrc.headerPath == IO::Path(headerPath);
+              }))
+            {
+                // Same CRC value => no changes found => skip this header
+                skipHeaderGen = true;
+            }
+            else
+            {
+                // Remove the entry since we'll be modifying it
+                moduleStamp.headers.RemoveAll([headerPath](const HeaderCRC& hCrc) -> bool
+                  {
+                      return hCrc.headerPath == IO::Path(headerPath);
+                  });
+            }
+
 			if (skipHeaderGen)
 				continue;
 
@@ -95,7 +97,7 @@ namespace CE
 			std::ofstream outFile{ headerGeneratedPath, std::ios_base::out };
 			if (outFile.is_open())
 			{
-				outFile << outStream.str();
+				outFile << outString;
 				outFile.close();
 			}
 

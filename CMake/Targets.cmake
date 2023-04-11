@@ -255,20 +255,24 @@ function(ce_add_target NAME TARGET_TYPE)
     if(${ce_add_target_AUTORTTI})
         set(AutoRttiCmd "AutoRTTI")
 
-        if(CE_STANDALONE)
-            set(AutoRttiCmd "${CE_EDITOR_PATH}/AutoRTTI")
-        endif()
-
-        get_target_property(includes ${NAME} INCLUDE_DIRECTORIES)
-        set(include_cmds "")
-        foreach(inc ${includes})
-            list(APPEND include_cmds "-I '${inc}'")
+        foreach(src ${SOURCES})
+            cmake_path(GET src EXTENSION src_ext)
+            cmake_path(GET src FILENAME src_filename)
+            cmake_path(REMOVE_EXTENSION src_filename)
+            if(${src_ext} STREQUAL ".h")
+                file(READ ${src} src_content)
+                if("${src_content}" MATCHES "#include \"${src_filename}.rtti.h\"")
+                    file(TOUCH "${CMAKE_CURRENT_BINARY_DIR}/Generated/${src_filename}.rtti.h")
+                endif()
+            endif()
         endforeach()
 
         add_custom_command(TARGET ${NAME} PRE_BUILD
             COMMAND ${AutoRttiCmd} -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
+
+        message("AutoRTTI: COMMAND ${AutoRttiCmd} -m ${NAME} -d ${CMAKE_CURRENT_SOURCE_DIR}/ -o ${CMAKE_CURRENT_BINARY_DIR}/Generated")
         
     endif()
     
