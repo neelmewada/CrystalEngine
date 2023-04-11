@@ -26,17 +26,32 @@ namespace CE::Editor
     class AssetsViewFolderModel;
     class AssetsViewContentModel;
     class AssetViewItem;
+    class AssetsView;
 
     class CRYSTALEDITOR_API AssetsViewItemDelegate : public QItemDelegate
     {
         Q_OBJECT
     public:
-        explicit AssetsViewItemDelegate(QObject* parent = nullptr);
+        explicit AssetsViewItemDelegate(AssetsView* parent = nullptr);
         ~AssetsViewItemDelegate();
 
         QWidget* createEditor(QWidget* parent,
             const QStyleOptionViewItem& option,
             const QModelIndex& index) const override final;
+
+        void setEditorData(QWidget* editor, const QModelIndex& index) const override final;
+
+        void SetRenameItemIndex(const QModelIndex& index)
+        {
+            renameIndex = index;
+        }
+
+    private slots:
+        void OnNameInputEdited(QString newString);
+
+    private:
+        QModelIndex renameIndex{};
+        AssetsView* assetsView = nullptr;
     };
 
     CLASS()
@@ -69,6 +84,8 @@ namespace CE::Editor
         // Context Menu Actions
         
         void OnContextMenuNewFolderPressed();
+        void OnContextMenuRenamePressed();
+        void OnContextMenuDuplicatePressed();
         void OnContextMenuDeletePressed();
 
     private:
@@ -76,10 +93,13 @@ namespace CE::Editor
         AssetsViewFolderModel* folderModel = nullptr;
         AssetsViewContentModel* contentModel = nullptr;
         Qt::ContextMenuWidget* contextMenu = nullptr;
+        AssetsViewItemDelegate* itemDelegate = nullptr;
 
         Vector<AssetViewItem*> assetItemWidgets{};
 
         Ui::AssetsView *ui;
+
+        friend class AssetsViewItemDelegate;
     };
 
 }

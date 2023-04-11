@@ -99,8 +99,39 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="CE::Editor::Qt::ExLineEdit" name="renameInput">
+     <property name="maximumSize">
+      <size>
+       <width>64</width>
+       <height>16</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
   </layout>
+  <zorder>label</zorder>
+  <zorder>renameInput</zorder>
+  <zorder>iconLabel</zorder>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CE::Editor::Qt::ExLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">QtComponents/Widgets/ExLineEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

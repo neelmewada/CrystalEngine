@@ -63,8 +63,7 @@ namespace CE::Editor
 			gameAssetsRoot->name = "Game";
 			gameAssetsRoot->category = AssetDatabaseEntry::Category::GameAssets;
 			gameAssetsRoot->entryType = AssetDatabaseEntry::Type::Directory;
-			gameAssetsRoot->virtualPath = "Game/Assets";
-			gameAssetsRoot->virtualRelativePath = gameAssetsRoot->virtualPath;
+			gameAssetsRoot->virtualRelativePath = "Game/Assets";
 			gameAssetsRoot->parent = root;
 
 			gameAssetsDir.RecursivelyIterateChildren([=](const IO::Path& path)
@@ -84,7 +83,7 @@ namespace CE::Editor
 							auto str = String(it->string());
 							for (auto& childEntry : parentEntry->children)
 							{
-								if (childEntry->virtualPath.GetFilename() == str)
+								if (childEntry->virtualRelativePath.GetFilename() == str)
 								{
 									parentEntry = childEntry;
 									break;
@@ -97,9 +96,8 @@ namespace CE::Editor
 					auto dirEntry = parentEntry->children.GetLast();
 
 					dirEntry->name = path.GetFilename().GetString();
-					dirEntry->category = AssetDatabaseEntry::Category::EngineAssets;
+					dirEntry->category = AssetDatabaseEntry::Category::GameAssets;
 					dirEntry->entryType = AssetDatabaseEntry::Type::Directory;
-					dirEntry->virtualPath = parentEntry->virtualPath / relPath.GetFilename();
 					dirEntry->virtualRelativePath = relPath.GetFilename();
 					dirEntry->parent = parentEntry;
 				}
@@ -128,7 +126,7 @@ namespace CE::Editor
 							auto str = String(it->string());
 							for (auto childEntry : parentEntry->children)
 							{
-								if (childEntry->virtualPath.GetFilename() == str)
+								if (childEntry->virtualRelativePath.GetFilename() == str)
 								{
 									parentEntry = childEntry;
 									break;
@@ -144,7 +142,6 @@ namespace CE::Editor
 					assetEntry->extension = copyPath.GetExtension().GetString();
 					assetEntry->category = AssetDatabaseEntry::Category::GameAssets;
 					assetEntry->entryType = AssetDatabaseEntry::Type::Asset;
-					assetEntry->virtualPath = parentEntry->virtualPath / relPathWithFixedExtension.GetFilename();
 					assetEntry->virtualRelativePath = relPathWithFixedExtension.GetFilename();
 					assetEntry->parent = parentEntry;
 				}
@@ -162,8 +159,7 @@ namespace CE::Editor
 			engineAssetsRoot->name = "Engine";
 			engineAssetsRoot->category = AssetDatabaseEntry::Category::EngineAssets;
 			engineAssetsRoot->entryType = AssetDatabaseEntry::Type::Directory;
-			engineAssetsRoot->virtualPath = "Engine/Assets";
-			engineAssetsRoot->virtualRelativePath = engineAssetsRoot->virtualPath;
+			engineAssetsRoot->virtualRelativePath = "Engine/Assets";
 			engineAssetsRoot->parent = root;
 
 			engineAssetsDir.RecursivelyIterateChildren([&](const IO::Path& path)
@@ -187,7 +183,7 @@ namespace CE::Editor
 							auto str = String(it->string());
 							for (auto& childEntry : parentEntry->children)
 							{
-								if (childEntry->virtualPath.GetFilename() == str)
+								if (childEntry->virtualRelativePath.GetFilename() == str)
 								{
 									parentEntry = childEntry;
 									break;
@@ -196,7 +192,6 @@ namespace CE::Editor
 						}
 					}
 
-					dirEntry->virtualPath = parentEntry->virtualPath / relPath.GetFilename();
 					dirEntry->virtualRelativePath = relPath.GetFilename();
 					dirEntry->parent = parentEntry;
 					parentEntry->children.Add(dirEntry);
@@ -231,7 +226,7 @@ namespace CE::Editor
 							auto str = String(it->string());
 							for (auto& childEntry : parentEntry->children)
 							{
-								if (childEntry->virtualPath.GetFilename() == str)
+								if (childEntry->virtualRelativePath.GetFilename() == str)
 								{
 									parentEntry = childEntry;
 									break;
@@ -240,7 +235,6 @@ namespace CE::Editor
 						}
 					}
 
-					assetEntry->virtualPath = parentEntry->virtualPath / relPathWithFixedExtension.GetFilename();
 					assetEntry->virtualRelativePath = relPathWithFixedExtension.GetFilename();
 					assetEntry->parent = parentEntry;
 					parentEntry->children.Add(assetEntry);
@@ -267,9 +261,9 @@ namespace CE::Editor
         auto fileEntry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath / fileName);
 		auto newFilePath = directory / fileName;
 
-		if (fileAction == IO::FileAction::Add)
+		if (fileAction == IO::FileAction::Add && newFilePath.Exists())
 		{
-			if (newFilePath.IsDirectory())
+			if (newFilePath.IsDirectory()) // Directory
 			{
 				auto dirEntry = new AssetDatabaseEntry();
 				dirEntry->name = fileName;
@@ -277,8 +271,17 @@ namespace CE::Editor
 				dirEntry->entryType = AssetDatabaseEntry::Type::Directory;
 				dirEntry->parent = entry;
 				dirEntry->virtualRelativePath = fileName;
-				dirEntry->virtualPath = relPath / fileName;
 				entry->children.Add(dirEntry);
+			}
+			else if (newFilePath.GetExtension() == ".casset" || newFilePath.GetExtension() == ".cscene") // File
+			{
+				auto fileEntry = new AssetDatabaseEntry();
+				fileEntry->name = IO::Path(fileName).RemoveExtension().GetString();
+				fileEntry->category = AssetDatabaseEntry::Category::GameAssets;
+				fileEntry->entryType = AssetDatabaseEntry::Type::Asset;
+				fileEntry->parent = entry;
+				fileEntry->virtualRelativePath = fileName;
+				entry->children.Add(fileEntry);
 			}
 		}
         else if (fileAction == IO::FileAction::Delete)
@@ -289,8 +292,17 @@ namespace CE::Editor
                 delete fileEntry;
             }
         }
+		else if (fileAction == IO::FileAction::Moved)
+		{
+			auto oldEntry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath / oldFileName);
+			if (oldEntry != nullptr)
+			{
+				oldEntry->name = fileName;
+				oldEntry->virtualRelativePath = fileName;
+			}
+		}
+
 		OnAssetDatabaseUpdated();
-		//CE_LOG(Info, All, "File Change: {}/{} (old: {}) | action: {}", directory, fileName, oldFileName, fileAction);
 	}
 
 } // namespace CE::Editor

@@ -149,6 +149,11 @@ namespace CE::IO
         {
             return fs::create_directories(path.impl);
         }
+
+        inline static void Copy(IO::Path from, IO::Path to)
+        {
+            fs::copy(from.impl, to.impl, fs::copy_options::recursive);
+        }
         
         inline static bool Remove(IO::Path path)
         {
@@ -158,6 +163,11 @@ namespace CE::IO
         inline static u32 RemoveRecursively(IO::Path path)
         {
             return fs::remove_all(path.impl);
+        }
+
+        inline static void Rename(const IO::Path& from, const IO::Path& to)
+        {
+            fs::rename(from.impl, to.impl);
         }
 
         void IterateChildren(std::function<void(const IO::Path& path)> func);

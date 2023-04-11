@@ -8,7 +8,7 @@
 namespace CE
 {
 
-    class AssetDatabaseEntry
+    class SYSTEM_API AssetDatabaseEntry
     {
     public:
         AssetDatabaseEntry() = default;
@@ -42,12 +42,14 @@ namespace CE
             PluginShaders
         };
 
-        bool IsRoot() { return virtualPath.IsEmpty() && children.GetSize() == 0 && parent == nullptr; }
+        bool IsRoot() const;
+
+        IO::Path GetVirtualPath() const;
 
         Name name{};
         String extension{};
         IO::Path virtualRelativePath{};
-        IO::Path virtualPath{};
+        //IO::Path virtualPath{};
         Type entryType = Type::Directory;
         Category category = Category::EngineAssets;
 

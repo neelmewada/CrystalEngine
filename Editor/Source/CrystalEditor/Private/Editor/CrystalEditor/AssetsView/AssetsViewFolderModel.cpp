@@ -106,7 +106,7 @@ namespace CE::Editor
     {
         if (!index.isValid() || index.internalPointer() == nullptr)
             return QVariant();
-
+        
         AssetDatabaseEntry* entry = (AssetDatabaseEntry*)index.internalPointer();
         
         if (role == ::Qt::DecorationRole)

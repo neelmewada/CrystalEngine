@@ -3,6 +3,25 @@
 
 namespace CE
 {
+	bool AssetDatabaseEntry::IsRoot() const
+	{
+		return virtualRelativePath.IsEmpty() && children.GetSize() == 0 && parent == nullptr;
+	}
+
+	IO::Path AssetDatabaseEntry::GetVirtualPath() const
+	{
+		IO::Path path = virtualRelativePath;
+		auto parent = this->parent;
+
+		while (parent != nullptr)
+		{
+			path = parent->virtualRelativePath / path;
+
+			parent = parent->parent;
+		}
+
+		return path;
+	}
 
 	void AssetDatabase::Initialize()
 	{

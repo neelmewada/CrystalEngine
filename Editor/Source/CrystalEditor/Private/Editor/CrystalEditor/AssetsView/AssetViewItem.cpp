@@ -15,6 +15,10 @@ namespace CE::Editor
         ui->iconLabel->setBackgroundRole(QPalette::Base);
         ui->iconLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
         ui->iconLabel->setScaledContents(true);
+
+        SetRenameMode(false);
+
+        QObject::connect(ui->renameInput, SIGNAL(OnFocusOut()), this, SLOT(on_renameInput_focusOut()));
     }
 
     AssetViewItem::~AssetViewItem()
@@ -30,6 +34,7 @@ namespace CE::Editor
         {
             ui->iconLabel->setStyleSheet("");
             ui->label->setText("");
+            ui->renameInput->setText(ui->label->text());
             return;
         }
 
@@ -45,8 +50,34 @@ namespace CE::Editor
         }
 
         auto text = QString(entry->name.GetCString());
+        fullName = text;
         QFontMetrics metrics(ui->label->font());
         QString elidedText = metrics.elidedText(text, ::Qt::ElideRight, ui->label->width());
         ui->label->setText(elidedText);
+        ui->renameInput->setText(text);
     }
+
+    void AssetViewItem::SetRenameMode(bool enabled)
+    {
+        ui->renameInput->setVisible(enabled);
+        ui->label->setVisible(!enabled);
+        if (enabled)
+        {
+            ui->renameInput->setFocus();
+        }
+    }
+
+    void AssetViewItem::on_renameInput_focusOut()
+    {
+        SetRenameMode(false);
+    }
+
+    void AssetViewItem::on_renameInput_editingFinished()
+    {
+        if (ui->renameInput->text() == ui->label->text())
+            return;
+        emit OnNameInputEdited(ui->renameInput->text());
+        SetRenameMode(false);
+    }
+
 }

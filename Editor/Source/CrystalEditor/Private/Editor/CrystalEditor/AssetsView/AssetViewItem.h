@@ -24,8 +24,19 @@ namespace CE::Editor
 
         void SetEntry(AssetDatabaseEntry* entry);
 
+        void SetRenameMode(bool enabled);
+
+    signals:
+        void OnNameInputEdited(QString newText);
+
+    private slots:
+        void on_renameInput_editingFinished();
+
+        void on_renameInput_focusOut();
+
     private:
         AssetDatabaseEntry* entry = nullptr;
+        QString fullName = "";
 
         Ui::AssetViewItem* ui;
     };
