@@ -17,6 +17,17 @@ namespace CE
         {
             return "Windows";
         }
+
+        /*
+         * Display name for the OS provided file manager.
+         *  Windows: Explorer
+         *  Mac: Finder
+         *  Linux: File Manager
+         */
+        inline static String GetSystemFileExplorerDisplayName()
+        {
+            return "Explorer";
+        }
     };
 
     typedef WindowsMisc PlatformMisc;

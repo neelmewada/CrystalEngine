@@ -25,11 +25,16 @@ namespace CE
         
         void SerializeField(FieldType* fieldType, YAML::Emitter& emitter);
         void DeserializeField(FieldType* fieldType, YAML::Node& node);
-        
+
         bool Deserialize(IO::Path inFilePath);
         bool Deserialize(IO::FileStream& inFile);
         bool Deserialize(IO::MemoryStream& inStream);
         bool Deserialize(YAML::Node& root);
+
+        static Name DeserializeObjectName(IO::Path inFilePath);
+        static Name DeserializeObjectName(IO::FileStream& inFile);
+        static Name DeserializeObjectName(IO::MemoryStream& inStream);
+        static Name DeserializeObjectName(YAML::Node& root);
         
     protected:
         

@@ -260,6 +260,7 @@ namespace CE::Editor
 		auto entry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath);
         auto fileEntry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath / fileName);
 		auto newFilePath = directory / fileName;
+        auto newFilePathExtension = newFilePath.GetExtension();
 
 		if (fileAction == IO::FileAction::Add && newFilePath.Exists())
 		{
@@ -273,16 +274,53 @@ namespace CE::Editor
 				dirEntry->virtualRelativePath = fileName;
 				entry->children.Add(dirEntry);
 			}
-			else if (newFilePath.GetExtension() == ".casset" || newFilePath.GetExtension() == ".cscene") // File
-			{
-				auto fileEntry = new AssetDatabaseEntry();
-				fileEntry->name = IO::Path(fileName).RemoveExtension().GetString();
-				fileEntry->category = AssetDatabaseEntry::Category::GameAssets;
-				fileEntry->entryType = AssetDatabaseEntry::Type::Asset;
-				fileEntry->parent = entry;
-				fileEntry->virtualRelativePath = fileName;
-				entry->children.Add(fileEntry);
-			}
+            else if (newFilePath.GetExtension() == ".casset")
+            {
+                String ext = ".casset";
+                bool foundMultiple = false;
+
+                newFilePath.GetParentPath().IterateChildren([&ext, &foundMultiple, newFilePath](const IO::Path& p)
+                {
+                    if (!p.IsDirectory() &&
+                        p.GetFilename().RemoveExtension() == newFilePath.GetFilename().RemoveExtension() &&
+                        p.GetExtension() != ".casset")
+                    {
+                        if (ext == ".casset")
+                        {
+                            ext = p.GetExtension().GetString();
+                        }
+                        else
+                        {
+                            foundMultiple = true;
+                        }
+                    }
+                });
+
+                if (foundMultiple)
+                {
+                    CE_LOG(Error, All, "Found multiple assets with name {} at path {}", newFilePath.GetFilename().RemoveExtension(), newFilePath.GetParentPath());
+                }
+
+                auto assetEntry = new AssetDatabaseEntry();
+                assetEntry->name = IO::Path(fileName).RemoveExtension().GetString();
+                assetEntry->category = AssetDatabaseEntry::Category::GameAssets;
+                assetEntry->entryType = AssetDatabaseEntry::Type::Asset;
+                assetEntry->parent = entry;
+                assetEntry->virtualRelativePath = fileName;
+                assetEntry->extension = ext;
+                entry->children.Add(assetEntry);
+            }
+            else if (Asset::GetBuiltinAssetTypeFor(newFilePathExtension.GetString()) != BuiltinAssetType::None) // Asset
+            {
+                auto assetEntry = new AssetDatabaseEntry();
+                assetEntry->name = IO::Path(fileName).RemoveExtension().GetString();
+                assetEntry->category = AssetDatabaseEntry::Category::GameAssets;
+                assetEntry->entryType = AssetDatabaseEntry::Type::Asset;
+                assetEntry->parent = entry;
+                assetEntry->virtualRelativePath = fileName;
+                assetEntry->extension = assetEntry->virtualRelativePath.GetExtension().GetString();
+                entry->children.Add(assetEntry);
+            }
 		}
         else if (fileAction == IO::FileAction::Delete)
         {
@@ -297,12 +335,22 @@ namespace CE::Editor
 			auto oldEntry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relPath / oldFileName);
 			if (oldEntry != nullptr)
 			{
-				oldEntry->name = fileName;
+				oldEntry->name = IO::Path(fileName).RemoveExtension().GetString();
 				oldEntry->virtualRelativePath = fileName;
 			}
 		}
+        else if (fileAction == IO::FileAction::Modified)
+        {
+            QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+            {
+                OnAssetUpdated(newFilePath);
+            });
+        }
 
-		OnAssetDatabaseUpdated();
+        QMetaObject::invokeMethod(qApp, [this]()
+        {
+            OnAssetDatabaseUpdated();
+        });
 	}
 
 } // namespace CE::Editor

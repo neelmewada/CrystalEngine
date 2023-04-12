@@ -75,24 +75,56 @@
        </widget>
       </item>
       <item>
-       <widget class="QTreeView" name="treeView">
+       <widget class="QFrame" name="frame">
         <property name="styleSheet">
-         <string notr="true">#treeView {
-	background-color: rgba(0, 0, 0, 0);
+         <string notr="true">#frame {
+	background-color: rgb(30, 30, 30);
 }</string>
         </property>
         <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
+         <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
         </property>
-        <property name="indentation">
-         <number>10</number>
-        </property>
-        <property name="headerHidden">
-         <bool>true</bool>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QTreeView" name="treeView">
+           <property name="styleSheet">
+            <string notr="true">#treeView {
+	background-color: rgba(0, 0, 0, 0);
+}</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="indentation">
+            <number>10</number>
+           </property>
+           <property name="headerHidden">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>

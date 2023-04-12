@@ -9,6 +9,8 @@
 #include "Project/EditorProjectSettings.h"
 #include "Project/ProjectManager.h"
 
+#include "PAL/Common/EditorPlatformUtils.h"
+
 // Drawers
 #include "Drawers/DrawerBase.h"
 #include "Drawers/FieldDrawer.h"

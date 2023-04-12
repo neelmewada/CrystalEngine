@@ -73,7 +73,7 @@ namespace CE::Editor
         }
     }
 
-    void AssetImporterWindow::SetAssetsPath(CE::Array<IO::Path> assetPaths)
+    void AssetImporterWindow::SetAssets(CE::Array<IO::Path> assetPaths)
     {
         this->targetAssetPaths = assetPaths;
     }
@@ -125,25 +125,42 @@ namespace CE::Editor
 
         ui->incompatibleSelectionLabel->setVisible(false);
 
-        if (selection.GetSize() == 0)
+        if (!importOnlyMode && selection.GetSize() == 0)
             return;
 
         assetClass = nullptr;
 
-        for (auto entry : selection)
+        if (!importOnlyMode)
         {
-            auto extension = entry->GetExtension();
-            if (extension.IsEmpty())
-                return;
-            extension = extension.GetSubstring(1);
-            auto curAssetClass = Asset::GetAssetClassFor(extension);
-            if (assetClass != nullptr && assetClass != curAssetClass)
+            for (auto entry : selection)
             {
-                ui->incompatibleSelectionLabel->setVisible(true);
-                return;
-            }
+                auto extension = entry->GetExtension();
+                if (extension.IsEmpty())
+                    return;
+                extension = extension.GetSubstring(1);
+                auto curAssetClass = Asset::GetAssetClassFor(extension);
+                if (assetClass != nullptr && assetClass != curAssetClass)
+                {
+                    ui->incompatibleSelectionLabel->setVisible(true);
+                    return;
+                }
 
-            assetClass = curAssetClass;
+                assetClass = curAssetClass;
+            }
+        }
+        else
+        {
+            for (auto assetPath : targetAssetPaths)
+            {
+                if (assetPath.IsDirectory() || !assetPath.Exists())
+                    continue;
+
+                auto curAssetClass = Asset::GetAssetClassFor(assetPath.GetExtension().GetString());
+                if (assetClass != nullptr && curAssetClass != assetClass)
+                    return;
+
+                assetClass = curAssetClass;
+            }
         }
 
         if (assetClass == nullptr)
@@ -158,6 +175,20 @@ namespace CE::Editor
         if (assetClassInstance == nullptr)
         {
             assetClassInstance = (Asset*)assetClass->CreateDefaultInstance();
+        }
+
+        if (importOnlyMode)
+        {
+            for (auto assetPath : targetAssetPaths)
+            {
+                auto productAssetPath = assetPath.ReplaceExtension(".casset");
+                if (assetPath.IsDirectory() || !assetPath.Exists() || !productAssetPath.Exists())
+                    continue;
+
+                SerializedObject so{ assetClass, assetClassInstance };
+                so.Deserialize(productAssetPath);
+                break;
+            }
         }
 
         auto field = assetClass->GetFirstField();
@@ -184,7 +215,7 @@ namespace CE::Editor
                 continue;
             }
 
-            FieldDrawer* fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateDefaultInstance();
+            auto fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateDefaultInstance();
 
             if (fieldDrawer == nullptr)
             {
@@ -260,17 +291,32 @@ namespace CE::Editor
 
     void AssetImporterWindow::on_importButton_clicked()
     {
+        if (importOnlyMode && targetAssetPaths.GetSize() > 0)
+        {
+            for (auto entry : targetAssetPaths)
+            {
+                if (!entry.Exists() || entry.IsDirectory())
+                    continue;
+
+                AssetProcessor::Get().ProcessAsset(entry, assetClassInstance);
+            }
+
+            targetAssetPaths.Clear();
+            close();
+            return;
+        }
+
         if (selection.GetSize() == 0 || assetClass == nullptr || assetClassInstance == nullptr)
             return;
-        
+
         for (auto entry : selection)
         {
             if (entry == nullptr)
                 continue;
-            
+
             AssetProcessor::Get().ProcessAsset(entry->fullPath, assetClassInstance);
         }
-        
+
         ui->contentTreeView->clearSelection();
         selection.Clear();
         

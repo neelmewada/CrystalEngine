@@ -29,7 +29,7 @@ namespace CE::Editor
         void SetImportOnlyMode(bool set);
 
         void SetAssetsDirectory(IO::Path directory);
-        void SetAssetsPath(CE::Array<IO::Path> assetPaths);
+        void SetAssets(CE::Array<IO::Path> assetPaths);
 
         void UpdateSelection();
 

@@ -1,7 +1,9 @@
 
 #include "CrystalEditor.h"
 
+// Editor Windows
 #include "Editor/SceneEditor/SceneEditorWindow.h"
+
 // Scene Editor Views
 #include "Editor/SceneEditor/ViewportView/ViewportView.h"
 #include "Editor/SceneEditor/SceneOutlinerView/SceneOutlinerView.h"
@@ -37,19 +39,22 @@ namespace CE::Editor
             ViewportView,
             SceneOutlinerView,
             DetailsView,
-            ConsoleView
+            ConsoleView,
+            AssetsView
         );
 
         CE_REGISTER_TYPES(
             GameComponentDrawer
         );
 
+        // ********************************************
         // Register Drawers
         CE_REGISTER_DRAWER(GameComponentDrawer, GameComponent);
-        
-        // Register Field Drawers
-        //CE_REGISTER_FIELD_DRAWERS(VectorFieldDrawer, Vec2, Vec3, Vec4, Vec2i, Vec3i, Vec4i);
-        //CE_REGISTER_FIELD_DRAWERS(StringFieldDrawer, String);
+
+        // *********************************************
+        // Register Editor Window Classes
+        CE_REGISTER_BUILTIN_ASSET_EDITOR(SceneAsset, SceneEditorWindow); // Scene Editor
+
     }
 
 } // namespace CE::Editor

@@ -11,13 +11,20 @@ namespace CE
     }
 #endif
 
+    ENUM()
+    enum class BuiltinAssetType
+    {
+        None = 0,
+        SceneAsset
+    };
+
+    // Abstract: So it cannot be instantiated dynamically
     CLASS(Abstract)
     class SYSTEM_API Asset : public CE::Object
     {
         CE_CLASS(Asset, CE::Object)
-    protected:
-        Asset(CE::Name name);
     public:
+        Asset(CE::Name name);
         virtual ~Asset();
         
         Name GetAssetType();
@@ -26,8 +33,15 @@ namespace CE
         static bool IsValidAssetType(String assetExtension);
         static ClassType* GetAssetClassFor(String assetExtension);
 
+        static BuiltinAssetType GetBuiltinAssetTypeFor(String assetExtension);
+        static String GetAssetExtensionFor(BuiltinAssetType builtinAssetType);
+
+        inline String GetAssetName() const { return assetName; }
+
+        inline String GetAssetExtension() const { return assetExtension; }
+
     protected:
-        FIELD(Hidden)
+        FIELD(Hidden, NonSerialized)
         String assetName{};
 
         FIELD(Hidden)

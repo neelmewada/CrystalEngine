@@ -18,34 +18,30 @@
 
 namespace CE
 {
-        
+
     SerializedObject::SerializedObject(const CE::TypeInfo* type, void* instance, SerializedObject* parent)
-        : type(type)
-        , instance(instance)
-        , parent(parent)
+            : type(type), instance(instance), parent(parent)
     {
-        
+
     }
 
     SerializedObject::SerializedObject(Object* instance, SerializedObject* parent)
-        : type(instance != nullptr ? instance->GetType() : nullptr)
-        , instance(instance)
-        , parent(parent)
+            : type(instance != nullptr ? instance->GetType() : nullptr), instance(instance), parent(parent)
     {
-        
+
     }
 
     SerializedObject::~SerializedObject()
     {
-        
+
     }
 
     void SerializedObject::Serialize(IO::Path outFilePath)
     {
         if (type == nullptr || instance == nullptr)
             return;
-        
-        IO::FileStream fileStream{ outFilePath, IO::OpenMode::ModeWrite };
+
+        IO::FileStream fileStream{outFilePath, IO::OpenMode::ModeWrite};
         Serialize(fileStream);
     }
 
@@ -67,14 +63,14 @@ namespace CE
     {
         if (type == nullptr || instance == nullptr)
             return;
-        
+
         YAML::Emitter out{};
-        
+
         Serialize(out);
-        
+
         const char* data = out.c_str();
-        u32 dataSize = (u32)strlen(data) + 1;
-        
+        u32 dataSize = (u32) strlen(data) + 1;
+
         outStream = IO::MemoryStream(dataSize);
         outStream.Write(dataSize, data);
     }
@@ -83,18 +79,18 @@ namespace CE
     {
         if (type == nullptr || instance == nullptr)
             return;
-        
+
         emitter << YAML::BeginMap;
         objectStores.Clear();
-        
+
         if (type->IsStruct())
         {
-            auto structType = (StructType*)type;
-            
+            auto structType = (StructType*) type;
+
             // Store the TypeId of the struct
             emitter << YAML::Key << "_TypeId";
             emitter << YAML::Value << structType->GetName();
-            
+
             auto field = structType->GetFirstField();
 
             while (field != nullptr)
@@ -109,17 +105,16 @@ namespace CE
 
                 field = field->GetNext();
             }
-        }
-        else if (type->IsClass())
+        } else if (type->IsClass())
         {
-            auto classType = (ClassType*)type;
-            
+            auto classType = (ClassType*) type;
+
             // Store the TypeId of the class
             emitter << YAML::Key << "_TypeId";
             emitter << YAML::Value << classType->GetName();
-            
+
             auto field = classType->GetFirstField();
-            
+
             while (field != nullptr)
             {
                 if (field->IsSerialized())
@@ -129,11 +124,11 @@ namespace CE
                     emitter << YAML::Value;
                     SerializeField(field, emitter);
                 }
-                
+
                 field = field->GetNext();
             }
         }
-        
+
         emitter << YAML::EndMap;
     }
 
@@ -144,46 +139,42 @@ namespace CE
             emitter << YAML::Null;
             return;
         }
-        
+
         if (fieldType->IsObjectStoreType()) // Serialize an object store
         {
             auto& objectStore = fieldType->GetFieldValue<ObjectStore>(instance);
             objectStores.Add(fieldType);
-            
+
             emitter << YAML::BeginSeq;
-            
-            for (auto [uuid, object] : objectStore)
+
+            for (auto [uuid, object]: objectStore)
             {
                 if (object == nullptr)
                     continue;
-                
+
                 SerializedObject serializedObj = SerializedObject(object->GetType(), object, this);
                 serializedObj.Serialize(emitter);
             }
-            
+
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(String)) // STRING Field
+        } else if (fieldType->GetTypeId() == TYPEID(String)) // STRING Field
         {
             const auto& fieldValue = fieldType->GetFieldValue<String>(instance);
             emitter << fieldValue.GetCString();
-        }
-        else if (fieldType->GetTypeId() == TYPEID(CE::Name)) // NAME Field
+        } else if (fieldType->GetTypeId() == TYPEID(CE::Name)) // NAME Field
         {
             const auto& fieldValue = fieldType->GetFieldValue<CE::Name>(instance);
             emitter << fieldValue.GetCString();
-        }
-        else if (fieldType->GetTypeId() == TYPEID(IO::Path)) // PATH Field
+        } else if (fieldType->GetTypeId() == TYPEID(IO::Path)) // PATH Field
         {
             const auto& fieldValue = fieldType->GetFieldValue<IO::Path>(instance);
             auto strValue = fieldValue.GetString();
             emitter << strValue.GetCString();
-        }
-        else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
+        } else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {
-            const auto& array = fieldType->GetFieldValue<Array<u8>>(instance);
+            const auto& array = fieldType->GetFieldValue < Array < u8 >> (instance);
             auto elementType = GetTypeInfo(array.GetElementTypeId());
-            
+
             if (elementType == nullptr)
             {
                 emitter << YAML::Null;
@@ -192,7 +183,7 @@ namespace CE
 
             if (elementType->GetTypeId() == TYPEID(String))
             {
-                const Array<String>& stringArray = fieldType->GetFieldValue<Array<String>>(instance);
+                const Array <String>& stringArray = fieldType->GetFieldValue < Array < String >> (instance);
 
                 emitter << YAML::BeginSeq;
                 emitter << GetStaticType<String>()->GetName();
@@ -205,20 +196,18 @@ namespace CE
                 }
 
                 emitter << YAML::EndSeq;
-            }
-            else if (elementType->IsPOD() || elementType->IsEnum()) // Value types: can be serialized per byte
+            } else if (elementType->IsPOD() || elementType->IsEnum()) // Value types: can be serialized per byte
             {
                 emitter << YAML::BeginSeq;
                 emitter << elementType->GetName();
-                
+
                 for (int i = 0; array.GetSize(); i++)
                 {
                     emitter << array[i];
                 }
-                
+
                 emitter << YAML::EndSeq;
-            }
-            else if (elementType->IsStruct())
+            } else if (elementType->IsStruct())
             {
                 u32 elementSize = elementType->GetSize();
                 u32 arrayElementCount = array.GetSize() / elementSize;
@@ -232,128 +221,116 @@ namespace CE
 
                     for (int i = 0; i < arrayElementCount; i++)
                     {
-                        SerializedObject so{ elementType, (void*)(ptr + i * elementSize) };
+                        SerializedObject so{elementType, (void*) (ptr + i * elementSize)};
                         so.Serialize(emitter);
                     }
                 }
 
                 emitter << YAML::EndSeq;
-            }
-            else if (elementType->IsObject()) // Reference types: Objects are stored as pointers
+            } else if (elementType->IsObject()) // Reference types: Objects are stored as pointers
             {
-                Array<Object*>& objectArray = fieldType->GetFieldValue<Array<Object*>>(instance);
-                
+                Array < Object * > &objectArray = fieldType->GetFieldValue < Array < Object * >> (instance);
+
                 emitter << YAML::BeginSeq;
                 emitter << elementType->GetName();
-                
+
                 for (int i = 0; i < objectArray.GetSize(); i++)
                 {
                     Object* object = objectArray[i];
-                    
+
                     if (object == nullptr || object->GetUuid() == 0)
                     {
                         emitter << YAML::Null;
                         continue;
                     }
-                    
+
                     // Serialize only the Object fields: name, uuid
                     SerializedObject serializedObj = SerializedObject(Object::Type(), object);
                     serializedObj.Serialize(emitter);
                 }
-                
+
                 emitter << YAML::EndSeq;
             }
-        }
-        else if (fieldType->IsAssignableTo(TYPEID(Object))) // Serialize an object reference
+        } else if (fieldType->IsAssignableTo(TYPEID(Object))) // Serialize an object reference
         {
             Object* object = fieldType->GetFieldValue<Object*>(instance);
-            
+
             if (object == nullptr)
             {
                 emitter << YAML::Null;
                 return;
             }
-            
+
             if (object->GetType() == nullptr)
             {
                 CE_LOG(Error, All, "Object {} has nullptr TypeInfo", object->GetName());
                 emitter << YAML::Null;
                 return;
             }
-            
+
             // Serialize only the object reference
             SerializedObject serializedObj = SerializedObject(Object::Type(), object, this);
             serializedObj.Serialize(emitter);
-        }
-        else if (fieldType->GetDeclarationType() == GetStaticType<UUID>()) // UUID
+        } else if (fieldType->GetDeclarationType() == GetStaticType<UUID>()) // UUID
         {
             const UUID& uuid = fieldType->GetFieldValue<UUID>(instance);
-            
-            emitter << (u64)uuid;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(Vec2))
+
+            emitter << (u64) uuid;
+        } else if (fieldType->GetTypeId() == TYPEID(Vec2))
         {
             const Vec2& vec = fieldType->GetFieldValue<Vec2>(instance);
-            
+
             emitter << YAML::BeginSeq;
             emitter << vec.x << vec.y;
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(Vec3))
+        } else if (fieldType->GetTypeId() == TYPEID(Vec3))
         {
             const Vec3& vec = fieldType->GetFieldValue<Vec3>(instance);
-            
+
             emitter << YAML::BeginSeq;
             emitter << vec.x << vec.y << vec.z;
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(Vec4))
+        } else if (fieldType->GetTypeId() == TYPEID(Vec4))
         {
             const Vec4& vec = fieldType->GetFieldValue<Vec4>(instance);
-            
+
             emitter << YAML::BeginSeq;
             emitter << vec.x << vec.y << vec.z << vec.w;
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(Vec2i))
+        } else if (fieldType->GetTypeId() == TYPEID(Vec2i))
         {
             const auto& vec = fieldType->GetFieldValue<Vec2i>(instance);
-            
+
             emitter << YAML::BeginSeq;
             emitter << vec.x << vec.y;
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(Vec3i))
+        } else if (fieldType->GetTypeId() == TYPEID(Vec3i))
         {
             const auto& vec = fieldType->GetFieldValue<Vec3i>(instance);
-            
+
             emitter << YAML::BeginSeq;
             emitter << vec.x << vec.y << vec.z;
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(Vec4i))
+        } else if (fieldType->GetTypeId() == TYPEID(Vec4i))
         {
             const auto& vec = fieldType->GetFieldValue<Vec4i>(instance);
-            
+
             emitter << YAML::BeginSeq;
             emitter << vec.x << vec.y << vec.z << vec.w;
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetTypeId() == TYPEID(Quat))
+        } else if (fieldType->GetTypeId() == TYPEID(Quat))
         {
             const Quat& quat = fieldType->GetFieldValue<Quat>(instance);
-            
+
             emitter << YAML::BeginSeq;
             emitter << quat.x << quat.y << quat.z << quat.w;
             emitter << YAML::EndSeq;
-        }
-        else if (fieldType->GetDeclarationType() != nullptr &&
-                 fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
+        } else if (fieldType->GetDeclarationType() != nullptr &&
+                   fieldType->GetDeclarationType()->IsEnum()) // ENUM Field
         {
             s64 enumValue = fieldType->GetFieldEnumValue(instance);
             emitter << enumValue;
-        }
-        else if TYPE_SERIALIZE(u8)
+        } else if TYPE_SERIALIZE(u8)
         else if TYPE_SERIALIZE(u16)
         else if TYPE_SERIALIZE(u32)
         else if TYPE_SERIALIZE(u64)
@@ -369,6 +346,42 @@ namespace CE
             emitter << YAML::Null;
             return;
         }
+    }
+
+    Name SerializedObject::DeserializeObjectName(IO::Path inFilePath)
+    {
+        IO::FileStream fileStream{ inFilePath, IO::OpenMode::ModeRead };
+        return DeserializeObjectName(fileStream);
+    }
+
+    Name SerializedObject::DeserializeObjectName(IO::FileStream& inFile)
+    {
+        auto size = inFile.GetLength();
+
+        IO::MemoryStream memStream{ size };
+        inFile.Read(size, (void*)memStream.GetRawPointer());
+
+        Name val = DeserializeObjectName(memStream);
+
+        memStream.Free();
+        return val;
+    }
+
+    Name SerializedObject::DeserializeObjectName(IO::MemoryStream& inStream)
+    {
+        YAML::Node root = YAML::Load(inStream.GetRawPointer());
+
+        return DeserializeObjectName(root);
+    }
+
+    Name SerializedObject::DeserializeObjectName(YAML::Node& root)
+    {
+        if (!root.IsMap())
+            return {};
+        if (root["_TypeId"])
+            return String(root["_TypeId"].as<std::string>());
+
+        return {};
     }
 
     bool SerializedObject::Deserialize(IO::Path inFilePath)
@@ -460,7 +473,7 @@ namespace CE
             String classTypeName = root["_TypeId"].as<std::string>();
             auto typeInfo = CE::GetTypeInfo(CE::Name(classTypeName));
             
-            if (typeInfo == nullptr || typeInfo->GetTypeId() != type->GetTypeId())
+            if (typeInfo == nullptr || (typeInfo->GetTypeId() != type->GetTypeId()) && !typeInfo->IsAssignableTo(type->GetTypeId()))
             {
                 CE_LOG(Error, All, "Serialization Error: Failed to deserialize object of type {}.\n"
                     "The serialized text data is for an object of type name {} which either couldn't be found or is different!", type->GetName(), classTypeName);

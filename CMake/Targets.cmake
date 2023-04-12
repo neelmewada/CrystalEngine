@@ -271,8 +271,6 @@ function(ce_add_target NAME TARGET_TYPE)
             COMMAND ${AutoRttiCmd} -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
-
-        message("AutoRTTI: COMMAND ${AutoRttiCmd} -m ${NAME} -d ${CMAKE_CURRENT_SOURCE_DIR}/ -o ${CMAKE_CURRENT_BINARY_DIR}/Generated")
         
     endif()
     

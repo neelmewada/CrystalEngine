@@ -1,6 +1,8 @@
 #include "SceneEditorWindow.h"
 #include "ui_SceneEditorWindow.h"
 
+#include "CoreMinimal.h"
+
 #include "ViewportView/ViewportView.h"
 #include "SceneOutlinerView/SceneOutlinerView.h"
 #include "DetailsView/DetailsView.h"
@@ -92,6 +94,42 @@ namespace CE::Editor
         delete ui;
     }
 
+    bool SceneEditorWindow::CanOpenAsset(AssetDatabaseEntry* assetEntry)
+    {
+        if (assetEntry != nullptr &&
+            Asset::GetBuiltinAssetTypeFor(assetEntry->virtualRelativePath.GetExtension().GetString()) == BuiltinAssetType::SceneAsset &&
+            assetEntry->category == AssetDatabaseEntry::Category::GameAssets)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool SceneEditorWindow::OpenAsset(AssetDatabaseEntry* assetEntry)
+    {
+        if (assetEntry == nullptr || !CanOpenAsset(assetEntry))
+            return false;
+
+        auto basePath = ProjectSettings::Get().GetEditorProjectDirectory();
+        auto assetFullPath = basePath / assetEntry->GetVirtualPath();
+
+        if (!assetFullPath.Exists())
+            return false;
+
+        OpenScene(assetEntry->GetVirtualPath().GetString());
+        return true;
+    }
+
+    void SceneEditorWindow::OnSceneLoaded()
+    {
+        sceneOutlinerView->GetModel()->OnSceneOpened(editorScene);
+
+        detailsView->selection.Clear();
+
+        sceneOutlinerView->Refresh();
+        detailsView->Refresh();
+    }
+
     void SceneEditorWindow::OpenEmptyScene()
     {
         sceneOutlinerView->ClearSelection();
@@ -100,12 +138,7 @@ namespace CE::Editor
         editorScene = new Scene();
         scenePath = "";
         
-        sceneOutlinerView->GetModel()->OnSceneOpened(editorScene);
-
-        detailsView->selection.Clear();
-        
-        sceneOutlinerView->Refresh();
-        detailsView->Refresh();
+        OnSceneLoaded();
     }
 
     void SceneEditorWindow::CreateEmptyGameObject()
@@ -154,11 +187,26 @@ namespace CE::Editor
 
     void SceneEditorWindow::OpenScene(String sceneAssetPath)
     {
-        String openPath = (ProjectManager::Get().GetProjectBaseDirectory() / sceneAssetPath).GetString();
-        QString openPathQString = openPath.GetCString();
+        IO::Path openPath = (ProjectManager::Get().GetProjectBaseDirectory() / sceneAssetPath).GetString();
 
-        QFileDialog* openFileDialog = new QFileDialog(this);
-        QString openFileFinalPath = openFileDialog->getOpenFileName(this, "Open Scene", openPathQString, "*.cscene");
+        if (openPath.Exists() && Asset::GetBuiltinAssetTypeFor(openPath.GetExtension().GetString()) == BuiltinAssetType::SceneAsset)
+        {
+            OpenEmptyScene();
+
+            SerializedObject so{ editorScene };
+            so.Deserialize(openPath);
+
+            OnSceneLoaded();
+            scenePath = sceneAssetPath;
+
+            CE_LOG(Info, All, "Opening scene at path: {}", openPath);
+            return;
+        }
+
+        String openPathStr = openPath.GetString();
+        QString openPathQString = openPathStr.GetCString();
+
+        QString openFileFinalPath = QFileDialog::getOpenFileName(this, "Open Scene", openPathQString, "*.cscene");
 
         if (!openFileFinalPath.isEmpty())
         {
@@ -170,8 +218,8 @@ namespace CE::Editor
             SerializedObject so{ editorScene };
             so.Deserialize(IO::Path(openFileFinalPath.toStdString()));
 
-            sceneOutlinerView->Refresh();
-            detailsView->Refresh();
+            OnSceneLoaded();
+            scenePath = openFileFinalPath.toStdString();
 
             CE_LOG(Info, All, "Opening scene at path: {}", openFileFinalPath);
         }
@@ -220,8 +268,7 @@ namespace CE::Editor
         String savePath = (ProjectManager::Get().GetProjectBaseDirectory() / scenePath).GetString();
         QString savePathQString = savePath.GetCString();
 
-        QFileDialog* saveFileDialog = new QFileDialog(this);
-        QString saveFileFinalPath = saveFileDialog->getSaveFileName(this, "Save Scene As...", savePathQString, "*.cscene");
+        QString saveFileFinalPath = QFileDialog::getSaveFileName(this, "Save Scene As...", savePathQString, "*.cscene");
 
         if (!saveFileFinalPath.isEmpty())
         {

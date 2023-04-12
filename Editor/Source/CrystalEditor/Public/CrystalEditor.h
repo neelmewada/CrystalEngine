@@ -16,6 +16,7 @@
 
 // Editor Buses
 #include "Editor/SceneEditor/SceneOutlinerViewBus.h"
+#include "Editor/CrystalEditorBus.h"
 
 #include "Module/ModuleManager.h"
 

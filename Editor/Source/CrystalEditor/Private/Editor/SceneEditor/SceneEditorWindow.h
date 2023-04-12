@@ -29,16 +29,27 @@ namespace CE::Editor
         explicit SceneEditorWindow(QWidget* parent = nullptr);
         ~SceneEditorWindow();
 
+    public:
+        // Public API
+
+        void OnSceneLoaded();
+
+        // EditorWindowBase overrides
+
+        virtual bool CanOpenAsset(AssetDatabaseEntry* assetEntry) override;
+
+        virtual bool OpenAsset(AssetDatabaseEntry* assetEntry) override;
+
         // *****************************************
         // SceneEditorBus::Interface
 
-        EVENT()
+        FUNCTION(Event)
         virtual void OpenEmptyScene() override;
 
-        EVENT()
+        FUNCTION(Event)
         virtual void CreateEmptyGameObject() override;
 
-        EVENT()
+        FUNCTION(Event)
         virtual void OpenScene(String sceneAssetPath) override;
         
     private slots:

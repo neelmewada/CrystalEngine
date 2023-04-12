@@ -16,6 +16,3 @@ namespace CE
 
 } // namespace CE
 
-//CE_RTTI_ENUM_IMPL(SYSTEM_API, CE, TextureDataType)
-
-//CE_RTTI_CLASS_IMPL(SYSTEM_API, CE, TextureAsset)

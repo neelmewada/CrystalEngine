@@ -18,4 +18,3 @@ namespace CE::Editor
 
 }
 
-CE_RTTI_CLASS_IMPL(CRYSTALEDITOR_API, CE::Editor, EditorWindowBase)

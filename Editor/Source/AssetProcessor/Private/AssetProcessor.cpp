@@ -22,9 +22,9 @@ namespace CE::Editor
 
     void AssetProcessor::ProcessAsset(IO::Path sourceAssetPath, Asset* asset)
     {
-        if (sourceAssetPath.IsDirectory())
+        if (sourceAssetPath.IsDirectory() || sourceAssetPath.GetExtension() == ".casset")
             return;
-        
+
         asset->assetName = sourceAssetPath.GetFilename().RemoveExtension().GetString();
         auto extension = sourceAssetPath.GetFilename().GetExtension().GetString();
         if (!extension.IsEmpty())

@@ -86,7 +86,12 @@ namespace CE::Editor
         void OnContextMenuNewFolderPressed();
         void OnContextMenuRenamePressed();
         void OnContextMenuDuplicatePressed();
+        void OnContextMenuMoveToPressed();
         void OnContextMenuDeletePressed();
+
+        // Misc
+
+        void ReimportAssets(Array<AssetDatabaseEntry*> assetsToReimport);
 
     private:
         AssetDatabaseEntry* currentDirectory = nullptr;

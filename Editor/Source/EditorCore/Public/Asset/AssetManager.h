@@ -23,6 +23,8 @@ namespace CE::Editor
 
         CE_SIGNAL(OnAssetDatabaseUpdated);
 
+        CE_SIGNAL(OnAssetUpdated, IO::Path);
+
     private:
 
         // IFileWatchListener

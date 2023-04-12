@@ -7,5 +7,9 @@
         <file alias="Icons/duplicate">Resources/Icons/duplicate.png</file>
         <file alias="Icons/add-folder">Resources/Icons/add-folder.png</file>
         <file alias="Icons/rename">Resources/Icons/rename.png</file>
+        <file alias="Icons/move">Resources/Icons/move.png</file>
+        <file alias="Icons/download">Resources/Icons/download.png</file>
+        <file alias="Icons/explorer-windows">Resources/Icons/explorer-windows.png</file>
+        <file alias="Icons/explorer-mac">Resources/Icons/explorer-mac.png</file>
     </qresource>
 </RCC>
