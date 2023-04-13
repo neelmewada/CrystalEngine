@@ -752,12 +752,12 @@ namespace CE
             if (!classType->CanBeInstantiated())
             {
                 CE_LOG(Error, All, "Serialization Error: Failed to deserialize object store in class of type {}.\n"
-                                   "Object store item at index {} is of type that can't be instantiated",
-                       type->GetName(), i);
+                                   "Object store item at index {} is of type {} that can't be instantiated",
+                       type->GetName(), i, classType->GetName());
                 continue;
             }
 
-            Object* instance = (Object*) classType->CreateDefaultInstance();
+            auto instance = (Object*)classType->CreateDefaultInstance();
 
             FieldType* uuidField = classType->FindFieldWithName("uuid");
             if (uuidField != nullptr)

@@ -37,6 +37,7 @@ namespace CE
         static String GetAssetExtensionFor(BuiltinAssetType builtinAssetType);
 
         inline String GetAssetName() const { return assetName; }
+        inline void SetAssetName(const String& assetName) { this->assetName = assetName; }
 
         inline String GetAssetExtension() const { return assetExtension; }
 
@@ -52,13 +53,13 @@ namespace CE
 
         FIELD(Hidden)
         Array<Asset*> childAssets{};
-        
-#if PAL_TRAIT_BUILD_EDITOR
-        friend class CE::Editor::AssetProcessor;
-#endif
 
     private:
         static HashMap<Name, ClassType*> extensionToAssetClassMap;
+
+#if PAL_TRAIT_BUILD_EDITOR
+        friend class CE::Editor::AssetProcessor;
+#endif
     };
 
 } // namespace CE
