@@ -57,8 +57,13 @@ namespace CE
         {
             return uuid;
         }
+
+        CE_INLINE TypeId GetTypeId() const
+        {
+            return GetType()->GetTypeId();
+        }
         
-    public: // Signals
+    public: // Signal-Event API
         
         static bool Bind(Object* sourceObject, FunctionType* sourceSignal,
                          Object* destinationObject, FunctionType* destinationEvent);
