@@ -84,9 +84,6 @@ namespace CE
         // Signal System
         HashMap<Name, Array<SignalBinding>> signalNameToBindingsMap{};
         Array<Object*> incomingSignalBinders{};
-        
-    protected:
-        //CE::Array<Component*> components{};
     };
     
 } // namespace CE

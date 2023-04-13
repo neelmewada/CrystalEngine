@@ -22,7 +22,7 @@ namespace CE::Editor
 
     void AssetProcessor::ProcessAsset(IO::Path sourceAssetPath, Asset* asset)
     {
-        if (sourceAssetPath.IsDirectory() || sourceAssetPath.GetExtension() == ".casset")
+        if (asset == nullptr || sourceAssetPath.IsDirectory() || sourceAssetPath.GetExtension() == ".casset")
             return;
 
         asset->assetName = sourceAssetPath.GetFilename().RemoveExtension().GetString();
@@ -36,9 +36,16 @@ namespace CE::Editor
         {
             IO::Path::Remove(outPath);
         }
+
+        PostProcessAsset(asset);
         
         SerializedObject assetSO{ asset };
         assetSO.Serialize(outPath);
+    }
+
+    void AssetProcessor::PostProcessAsset(Asset* assetInstance)
+    {
+
     }
 
 } // namespace CE::Editor

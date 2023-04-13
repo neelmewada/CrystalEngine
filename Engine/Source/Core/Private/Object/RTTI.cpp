@@ -158,6 +158,19 @@ namespace CE
         return "";
     }
 
+    bool TypeInfo::HasLocalAttribute(const String& key) const
+    {
+        for (int i = 0; i < attributes.GetSize(); i++)
+        {
+            if (attributes[i].GetKey() == key)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     bool TypeInfo::IsComponent() const
     {
         return IsClass() && IsAssignableTo(TYPEID(Component));

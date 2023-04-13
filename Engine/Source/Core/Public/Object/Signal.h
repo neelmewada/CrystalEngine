@@ -9,7 +9,7 @@ namespace CE
     struct SignalBinding
     {
     public:
-        FunctionType* signalFuntion;
+        FunctionType* signalFunction;
         FunctionType* boundFunction;
         Object* boundObject;
     };

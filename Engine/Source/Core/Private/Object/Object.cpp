@@ -86,7 +86,7 @@ namespace CE
         }
         
         SignalBinding binding{};
-        binding.signalFuntion = sourceSignal;
+        binding.signalFunction = sourceSignal;
         binding.boundObject = destinationObject;
         binding.boundFunction = destinationEvent;
 

@@ -165,7 +165,11 @@
          </widget>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="detailsPanelContent"/>
+         <layout class="QVBoxLayout" name="detailsPanelContent">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+         </layout>
         </item>
         <item>
          <widget class="QWidget" name="detailsPanelButtonParent" native="true">
@@ -212,7 +216,7 @@
      <x>0</x>
      <y>0</y>
      <width>597</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="font">

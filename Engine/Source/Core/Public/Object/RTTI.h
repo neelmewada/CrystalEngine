@@ -68,6 +68,7 @@ namespace CE
 		virtual String GetDisplayName();
 
 		String GetLocalAttributeValue(const String& key) const;
+        bool HasLocalAttribute(const String& key) const;
         
 		virtual bool IsClass() const { return false; }
 		virtual bool IsStruct() const { return false; }

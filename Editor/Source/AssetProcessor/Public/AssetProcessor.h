@@ -31,7 +31,8 @@ namespace CE::Editor
         }
 
         void ProcessAsset(IO::Path sourceAssetPath, Asset* assetInstance);
-        
+
+        void PostProcessAsset(Asset* assetInstance);
     };
 
 } // namespace CE::Editor

@@ -143,7 +143,6 @@ namespace CE
             {
                 auto structType = (StructType*)type;
                 structType->CacheAllFunctions();
-                //cachedFunctions.AddRange(structType->cachedFunctions);
 
                 for (const auto& func : structType->cachedFunctions)
                 {
@@ -160,7 +159,6 @@ namespace CE
             {
                 auto classType = (ClassType*)type;
                 classType->CacheAllFunctions();
-                //cachedFunctions.AddRange(classType->cachedFunctions);
 
                 for (const auto& func : classType->cachedFunctions)
                 {

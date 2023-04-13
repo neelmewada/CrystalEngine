@@ -46,6 +46,12 @@ namespace CE
 
         FIELD(Hidden)
         String assetExtension{};
+
+        FIELD(Hidden)
+        ObjectStore assetObjectStore{};
+
+        FIELD(Hidden)
+        Array<Asset*> childAssets{};
         
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::AssetProcessor;

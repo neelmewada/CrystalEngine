@@ -15,6 +15,13 @@ namespace CE
         NormalMap,
     };
 
+    ENUM()
+    enum class TextureWrapMode
+    {
+        Clamped = 0,
+        Repeat,
+    };
+
     CLASS()
     class SYSTEM_API TextureAsset : public CE::Asset
     {
@@ -27,6 +34,9 @@ namespace CE
     protected:
         FIELD()
         TextureDataType textureType{};
+
+        FIELD()
+        TextureWrapMode wrapMode{};
     };
     
 } // namespace CE
