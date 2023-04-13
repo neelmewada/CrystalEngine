@@ -10,11 +10,11 @@ namespace CE
         class CrystalEditorApplication;
     }
 
-    /// The Engine class that manages the game engine and it's subsystems
+    /// The class that manages the game engine and it's subsystems
+    CLASS(Abstract)
     class SYSTEM_API Engine : public Object
     {
-        CE_CLASS(Engine, Object);
-
+        CE_CLASS(Engine, CE::Object);
     private:
         Engine();
         virtual ~Engine();
@@ -36,13 +36,5 @@ namespace CE
     
 } // namespace CE
 
-CE_RTTI_CLASS(SYSTEM_API, CE, Engine,
-    CE_SUPER(CE::Object),
-    CE_DONT_INSTANTIATE,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        
-    ),
-    CE_FUNCTION_LIST()
-)
 
+#include "Engine.rtti.h"
