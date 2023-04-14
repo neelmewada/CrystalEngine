@@ -254,6 +254,14 @@ namespace CE::Editor
 	void AssetManager::HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName)
 	{
 		const auto& projectSettings = ProjectSettings::Get();
+        auto gameDir = projectSettings.editorProjectDirectory / "Game";
+
+        auto relative = IO::Path::GetRelative(directory, gameDir);
+        if (relative.begin() == relative.end())
+            return;
+        auto it = relative.begin();
+        if (it->string() != "Assets" && it->string() != "Shaders")
+            return;
 
 		auto projectDir = projectSettings.editorProjectDirectory;
 		auto relPath = IO::Path::GetRelative(directory, projectDir);
@@ -264,6 +272,8 @@ namespace CE::Editor
 
 		if (fileAction == IO::FileAction::Add && newFilePath.Exists())
 		{
+            ClassType* assetClass = nullptr;
+
 			if (newFilePath.IsDirectory()) // Directory
 			{
 				auto dirEntry = new AssetDatabaseEntry();
@@ -320,6 +330,17 @@ namespace CE::Editor
                 assetEntry->virtualRelativePath = fileName;
                 assetEntry->extension = assetEntry->virtualRelativePath.GetExtension().GetString();
                 entry->children.Add(assetEntry);
+            }
+            else if ((assetClass = Asset::GetAssetClassFor(newFilePathExtension.GetString())) != nullptr)
+            {
+                auto productExtension = Asset::GetProductAssetExtensionFor(assetClass);
+                if (!productExtension.IsEmpty() && !newFilePath.ReplaceExtension(productExtension).Exists())
+                {
+                    QMetaObject::invokeMethod(qApp, [this, newFilePath]
+                    {
+                        fire OnNewSourceAssetAdded(newFilePath);
+                    });
+                }
             }
 		}
         else if (fileAction == IO::FileAction::Delete)

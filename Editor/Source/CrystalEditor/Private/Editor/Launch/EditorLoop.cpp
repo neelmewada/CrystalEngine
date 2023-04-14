@@ -14,6 +14,7 @@ namespace CE::Editor
 	{
 		CE::Logger::Initialize();
 		CE::ModuleManager::Get().LoadModule("Core");
+        CE::ModuleManager::Get().LoadModule("CoreMedia");
 		CE::ModuleManager::Get().LoadModule("System");
 
 		// Graphics API Selection
@@ -69,6 +70,7 @@ namespace CE::Editor
 #endif
 
 		CE::ModuleManager::Get().UnloadModule("System");
+        CE::ModuleManager::Get().UnloadModule("CoreMedia");
 		CE::ModuleManager::Get().UnloadModule("Core");
 		CE::Logger::Shutdown();
 	}

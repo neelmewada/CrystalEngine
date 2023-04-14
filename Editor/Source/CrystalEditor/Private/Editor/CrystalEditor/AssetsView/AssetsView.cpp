@@ -58,6 +58,10 @@ namespace CE::Editor
         auto signal = AssetManager::Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
         auto event = Self::Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
         Object::Bind(&AssetManager::Get(), signal, this, event);
+
+        signal = AssetManager::Type()->FindFunctionWithName("OnNewSourceAssetAdded");
+        event = Self::Type()->FindFunctionWithName("OnNewSourceAssetAdded");
+        Object::Bind(&AssetManager::Get(), signal, this, event);
     }
 
     AssetsView::~AssetsView()
@@ -348,7 +352,13 @@ namespace CE::Editor
             assetPaths.Add(srcAssetPath);
         }
 
-        auto assetImporterWindow = new AssetImporterWindow(this);
+        if (assetImporterWindow != nullptr)
+        {
+            delete assetImporterWindow;
+            assetImporterWindow = nullptr;
+        }
+
+        assetImporterWindow = new AssetImporterWindow(this);
         assetImporterWindow->setWindowFlag(::Qt::Tool, true);
         assetImporterWindow->SetImportOnlyMode(true);
         assetImporterWindow->SetAssets(assetPaths);
@@ -558,6 +568,37 @@ namespace CE::Editor
         });
     }
 
+    void AssetsView::OnNewSourceAssetAdded(IO::Path path)
+    {
+        return; // TODO: Do nothing for now
+        if (path.Exists() && !path.ReplaceExtension(".casset").Exists())
+        {
+            if (assetImporterWindow != nullptr && assetImporterWindow->IsImportOnlyMode())
+            {
+                delete assetImporterWindow;
+                assetImporterWindow = nullptr;
+            }
+
+            if (assetImporterWindow == nullptr)
+            {
+                assetImporterWindow = new AssetImporterWindow(this);
+            }
+
+            assetImporterWindow->SetAssetsDirectory(ProjectSettings::Get().GetEditorProjectDirectory() / "Game/Assets");
+            assetImporterWindow->UpdateDetailsView();
+
+            assetImporterWindow->show();
+            assetImporterWindow->SetFiltersVisible(false);
+            assetImporterWindow->ShowTreeView(false);
+            assetImporterWindow->ShowProcessedFiles(false);
+            assetImporterWindow->ShowUnprocessedFiles(true);
+            assetImporterWindow->SetMenuBarVisible(false);
+            assetImporterWindow->SetAutoClose(true);
+
+            assetImporterWindow->setFocus();
+        }
+    }
+
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
     {
         UpdateContentView();
@@ -596,9 +637,11 @@ namespace CE::Editor
                 if (!oldPath.IsDirectory())
                     extension = oldPath.GetExtension().GetString();
 
-                auto newPath = oldPath.GetParentPath() / (String(newName.toStdString()) + extension);
-
                 assetsView->itemDelegate->renameIndex = {};
+
+                auto newPath = oldPath.GetParentPath() / (String(newName.toStdString()) + extension);
+                if (oldPath == newPath || newPath.Exists())
+                    return;
 
                 if (!oldPath.IsDirectory() && oldPath.GetExtension() == ".casset")
                 {

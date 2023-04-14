@@ -24,8 +24,20 @@ namespace CE::Editor
         if (!type->IsEnum())
             return;
 
-        auto value = fieldType->GetFieldEnumValue(targetInstance);
-        enumField->SetValue(value);
+        if (targetInstance == nullptr && multipleTargetInstances.GetSize() == 0)
+            return;
+
+        if (multipleTargetInstances.GetSize() == 0)
+        {
+            auto value = fieldType->GetFieldEnumValue(targetInstance);
+            enumField->SetValue(value);
+        }
+        else
+        {
+            auto value = fieldType->GetFieldEnumValue(multipleTargetInstances[0]);
+            enumField->SetValue(value);
+        }
+
     }
 
     void EnumFieldDrawer::CreateGUI(QLayout* container)
@@ -64,7 +76,13 @@ namespace CE::Editor
         if (!type->IsEnum())
             return;
 
-        fieldType->SetFieldEnumValue(targetInstance, newValue);
+        if (targetInstance != nullptr)
+            fieldType->SetFieldEnumValue(targetInstance, newValue);
+
+        for (auto inst : multipleTargetInstances)
+        {
+            fieldType->SetFieldEnumValue(inst, newValue);
+        }
     }
 
 } // namespace CE::Editor

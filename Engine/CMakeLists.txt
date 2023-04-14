@@ -13,6 +13,7 @@ add_subdirectory(Source/Core)
 if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     add_subdirectory(Source/AutoRTTI)
 endif()
+add_subdirectory(Source/CoreMedia)
 
 add_subdirectory(Source/System)
 

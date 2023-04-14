@@ -115,7 +115,7 @@ namespace CE::IO
             return p.replace_extension();
         }
 
-        inline Path ReplaceExtension(const Path& path)
+        inline Path ReplaceExtension(const Path& path) const
         {
             fs::path p = impl;
             return p.replace_extension(path.impl);

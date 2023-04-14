@@ -40,6 +40,8 @@ int main(int argc, char** argv)
         AssetProcessorApplication app{ argc, argv };
 
         AssetImporterWindow window{};
+        window.setWindowFlag(::Qt::Tool, false);
+        window.setWindowFlag(::Qt::Window, true);
         window.show();
 
         if (!dir.empty())
@@ -47,13 +49,12 @@ int main(int argc, char** argv)
 
         retVal = app.exec();
     }
-    catch (std::exception exc)
+    catch (const std::exception& exc)
     {
         CE_LOG(Error, All, "Failed to parse input arguments: {}", exc.what());
         retVal = 1;
     }
 
-    
     CE::ModuleManager::Get().UnloadModule("EditorCore");
     CE::ModuleManager::Get().UnloadModule("QtComponents");
     CE::ModuleManager::Get().UnloadModule("System");

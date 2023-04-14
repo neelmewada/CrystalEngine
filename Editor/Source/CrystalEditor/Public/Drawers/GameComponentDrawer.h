@@ -32,6 +32,7 @@ namespace CE::Editor
         virtual void ClearGUI(QLayout* container) override;
 
         virtual void SetTarget(TypeInfo* targetType, void* instance) override;
+        virtual void SetTargets(TypeInfo* targetType, Array<void*> instances) override;
         virtual TypeInfo* GetTargetType() override;
         virtual void* GetTargetInstance() override;
 
@@ -46,7 +47,8 @@ namespace CE::Editor
 
         ClassType* componentType = nullptr;
         GameComponent* targetComponent = nullptr;
-        
+        Array<GameComponent*> multipleTargetComponents{};
+
         StringFieldDrawer* tempDrawer = nullptr;
 
         Array<FieldDrawer*> fieldDrawers{};

@@ -23,6 +23,7 @@ namespace CE::Editor
         class ContextMenuWidget;
     }
 
+    class AssetImporterWindow;
     class AssetsViewFolderModel;
     class AssetsViewContentModel;
     class AssetViewItem;
@@ -75,6 +76,9 @@ namespace CE::Editor
         FUNCTION(Event)
         void OnAssetDatabaseUpdated();
 
+        FUNCTION(Event)
+        void OnNewSourceAssetAdded(IO::Path path);
+
         void OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
         void OnAssetSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
@@ -101,6 +105,8 @@ namespace CE::Editor
         AssetsViewItemDelegate* itemDelegate = nullptr;
 
         Vector<AssetViewItem*> assetItemWidgets{};
+
+        AssetImporterWindow* assetImporterWindow = nullptr;
 
         Ui::AssetsView *ui;
 

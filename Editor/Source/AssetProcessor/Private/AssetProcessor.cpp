@@ -1,7 +1,8 @@
 
 #include "AssetProcessor.h"
 
-CE_IMPLEMENT_MODULE(AssetProcessor, CE::Editor::AssetProcessorModule)
+#include "AssetProcessor.private.h"
+CE_IMPLEMENT_MODULE_AUTORTTI(AssetProcessor, CE::Editor::AssetProcessorModule)
 
 namespace CE::Editor
 {

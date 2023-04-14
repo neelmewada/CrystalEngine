@@ -27,6 +27,7 @@ ce_add_target(System SHARED
             ThirdParty::sdl
         PUBLIC
             CE::Core
+            CE::CoreMedia
         TARGETS EngineConfig EngineAssets
     RUNTIME_DEPENDENCIES
         

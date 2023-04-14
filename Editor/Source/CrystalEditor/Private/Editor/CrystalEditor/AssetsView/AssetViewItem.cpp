@@ -64,18 +64,18 @@ namespace CE::Editor
         if (enabled)
         {
             ui->renameInput->setFocus();
+            ui->renameInput->selectAll();
         }
     }
 
     void AssetViewItem::on_renameInput_focusOut()
     {
-        SetRenameMode(false);
+        on_renameInput_editingFinished();
     }
 
     void AssetViewItem::on_renameInput_editingFinished()
     {
-        if (ui->renameInput->text() == ui->label->text())
-            return;
+        fullName = ui->renameInput->text();
         emit OnNameInputEdited(ui->renameInput->text());
         SetRenameMode(false);
     }

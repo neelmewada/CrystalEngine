@@ -27,7 +27,7 @@ namespace CE::Editor
         virtual void CreateGUI(QLayout* container) override;
 
     private:
-        EVENT()
+        FUNCTION(Event)
         void OnValueChanged(Vec4 newValue);
 
     private:

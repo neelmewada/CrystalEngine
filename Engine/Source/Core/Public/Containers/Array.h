@@ -151,7 +151,7 @@ namespace CE
             }
         }
 
-        CE_INLINE void AddRange(CE::Array<ElementType> elements)
+        CE_INLINE void AddRange(const CE::Array<ElementType>& elements)
         {
             for (auto it = elements.begin(); it != elements.end(); ++it)
             {
@@ -313,8 +313,8 @@ namespace CE
         Iterator begin() { return Iterator{ Impl.data() }; }
         Iterator end() { return Iterator{ Impl.data() + Impl.size() }; }
 
-        const ConstIterator begin() const { return ConstIterator{ &Impl[0]}; }
-        const ConstIterator end() const { return ConstIterator{ &Impl[0] + Impl.size() }; }
+        const ConstIterator begin() const { return ConstIterator{ Impl.data() }; }
+        const ConstIterator end() const { return ConstIterator{ Impl.data() + Impl.size() }; }
 
         Iterator Begin() { return begin(); }
         Iterator End() { return end(); }

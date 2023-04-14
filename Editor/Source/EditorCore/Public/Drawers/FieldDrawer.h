@@ -24,6 +24,7 @@ namespace CE::Editor
         virtual void ClearGUI(QLayout* container);
 
         virtual void SetTarget(TypeInfo* targetType, void* instance) override;
+        virtual void SetTargets(TypeInfo* targetType, Array<void*> instances) override;
         virtual TypeInfo* GetTargetType();
         virtual void* GetTargetInstance();
 
@@ -47,6 +48,7 @@ namespace CE::Editor
     protected:
         FieldType* fieldType = nullptr;
         void* targetInstance = nullptr;
+        Array<void*> multipleTargetInstances{};
     };
 
 }

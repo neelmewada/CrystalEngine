@@ -39,6 +39,23 @@ namespace CE::Editor
         this->targetInstance = instance;
     }
 
+    void FieldDrawer::SetTargets(TypeInfo* targetType, Array<void*> instances)
+    {
+        if (targetType == nullptr || !targetType->IsField())
+            return;
+
+        this->fieldType = (FieldType*)targetType;
+        this->targetInstance = nullptr;
+
+        if (instances.GetSize() == 0)
+        {
+            multipleTargetInstances.Clear();
+            return;
+        }
+
+        multipleTargetInstances.AddRange(instances);
+    }
+
     TypeInfo* FieldDrawer::GetTargetType()
     {
         return fieldType;
@@ -51,7 +68,7 @@ namespace CE::Editor
 
     bool FieldDrawer::IsValid()
     {
-        return fieldType != nullptr && targetInstance != nullptr;
+        return fieldType != nullptr && (targetInstance != nullptr || multipleTargetInstances.GetSize() > 0);
     }
 
     ClassType* FieldDrawer::GetFieldDrawerClassFor(TypeId fieldTypeId)

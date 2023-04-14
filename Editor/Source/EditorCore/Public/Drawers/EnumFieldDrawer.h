@@ -23,7 +23,7 @@ namespace CE::Editor
         virtual void CreateGUI(QLayout* container) override;
 
     private:
-        EVENT()
+        FUNCTION(Event)
         void OnInputValueChanged(s64 newValue);
 
     private:

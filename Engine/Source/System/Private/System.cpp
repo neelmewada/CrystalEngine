@@ -41,8 +41,7 @@ namespace CE
         );
 
         // Register Asset Types
-        CE_REGISTER_ASSET_TYPE(TextureAsset, jpg, jpeg, png);
-
+        CE_REGISTER_ASSET_TYPE(TextureAsset, casset, jpg, jpeg, png);
     }
 
 } // namespace CE

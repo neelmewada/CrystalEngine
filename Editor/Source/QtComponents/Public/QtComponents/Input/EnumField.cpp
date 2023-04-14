@@ -41,10 +41,7 @@ namespace CE::Editor::Qt
     void EnumField::SetValue(s64 value)
     {
         int index = ui->comboBox->findData(QVariant(value));
-        if (index != -1)
-        {
-            ui->comboBox->setCurrentIndex(index);
-        }
+        ui->comboBox->setCurrentIndex(index);
     }
 
 

@@ -19,41 +19,50 @@ namespace CE::Editor
 	void VectorFieldDrawer::OnValuesUpdated()
 	{
 		auto typeId = fieldType->GetDeclarationType()->GetTypeId();
-		if (targetInstance == nullptr || vec4Field == nullptr)
+		if ((targetInstance == nullptr && multipleTargetInstances.GetSize() == 0) || vec4Field == nullptr)
 			return;
 
-		if (typeId == TYPEID(Vec4))
-		{
-			Vec4 value = fieldType->GetFieldValue<Vec4>(targetInstance);
-			vec4Field->SetValue(value);
-		}
-		else if (typeId == TYPEID(Vec3))
-		{
-			Vec4 value = fieldType->GetFieldValue<Vec3>(targetInstance);
-			value.w = 0;
-			vec4Field->SetValue(value);
-		}
-		else if (typeId == TYPEID(Vec2))
-		{
-			Vec4 value = fieldType->GetFieldValue<Vec2>(targetInstance);
-			value.z = value.w = 0;
-			vec4Field->SetValue(value);
-		}
-		else if (typeId == TYPEID(Vec4i))
-		{
-			Vec4i value = fieldType->GetFieldValue<Vec4i>(targetInstance);
-			vec4Field->SetValue(Vec4i{ value.x, value.y, value.z, value.w });
-		}
-		else if (typeId == TYPEID(Vec3i))
-		{
-			Vec4i value = fieldType->GetFieldValue<Vec3i>(targetInstance);
-			vec4Field->SetValue(Vec4i{ value.x, value.y, value.z, 0 });
-		}
-		else if (typeId == TYPEID(Vec2i))
-		{
-			Vec4i value = fieldType->GetFieldValue<Vec2i>(targetInstance);
-			vec4Field->SetValue(Vec4i{ value.x, value.y, 0, 0 });
-		}
+        int i = 0;
+
+        do
+        {
+            auto inst = targetInstance != nullptr ? targetInstance : multipleTargetInstances[i];
+
+            if (typeId == TYPEID(Vec4))
+            {
+                Vec4 value = fieldType->GetFieldValue<Vec4>(inst);
+                vec4Field->SetValue(value);
+            }
+            else if (typeId == TYPEID(Vec3))
+            {
+                Vec4 value = fieldType->GetFieldValue<Vec3>(inst);
+                value.w = 0;
+                vec4Field->SetValue(value);
+            }
+            else if (typeId == TYPEID(Vec2))
+            {
+                Vec4 value = fieldType->GetFieldValue<Vec2>(inst);
+                value.z = value.w = 0;
+                vec4Field->SetValue(value);
+            }
+            else if (typeId == TYPEID(Vec4i))
+            {
+                Vec4i value = fieldType->GetFieldValue<Vec4i>(inst);
+                vec4Field->SetValue(Vec4i{ value.x, value.y, value.z, value.w });
+            }
+            else if (typeId == TYPEID(Vec3i))
+            {
+                Vec4i value = fieldType->GetFieldValue<Vec3i>(inst);
+                vec4Field->SetValue(Vec4i{ value.x, value.y, value.z, 0 });
+            }
+            else if (typeId == TYPEID(Vec2i))
+            {
+                Vec4i value = fieldType->GetFieldValue<Vec2i>(inst);
+                vec4Field->SetValue(Vec4i{ value.x, value.y, 0, 0 });
+            }
+
+            i++;
+        } while (targetInstance == nullptr && i < multipleTargetInstances.GetSize());
 	}
 
 	void VectorFieldDrawer::CreateGUI(QLayout* container)
@@ -114,33 +123,42 @@ namespace CE::Editor
 	void VectorFieldDrawer::OnValueChanged(Vec4 value)
 	{
 		auto typeId = fieldType->GetDeclarationType()->GetTypeId();
-		if (targetInstance == nullptr || vec4Field == nullptr)
+		if ((targetInstance == nullptr && multipleTargetInstances.GetSize() == 0) || vec4Field == nullptr)
 			return;
 
-		if (typeId == TYPEID(Vec4))
-		{
-			fieldType->SetFieldValue<Vec4>(targetInstance, value);
-		}
-		else if (typeId == TYPEID(Vec3))
-		{
-			fieldType->SetFieldValue<Vec3>(targetInstance, value);
-		}
-		else if (typeId == TYPEID(Vec2))
-		{
-			fieldType->SetFieldValue<Vec2>(targetInstance, value);
-		}
-		else if (typeId == TYPEID(Vec4i))
-		{
-			fieldType->SetFieldValue<Vec4i>(targetInstance, Vec4i{ (s32)value.x, (s32)value.y, (s32)value.z, (s32)value.w });
-		}
-		else if (typeId == TYPEID(Vec3i))
-		{
-			fieldType->SetFieldValue<Vec3i>(targetInstance, Vec3i{ (s32)value.x, (s32)value.y, (s32)value.z });
-		}
-		else if (typeId == TYPEID(Vec2i))
-		{
-			fieldType->SetFieldValue<Vec2i>(targetInstance, Vec2i{ (s32)value.x, (s32)value.y });
-		}
+        int i = 0;
+
+        do
+        {
+            auto inst = targetInstance != nullptr ? targetInstance : multipleTargetInstances[i];
+
+            if (typeId == TYPEID(Vec4))
+            {
+                fieldType->SetFieldValue<Vec4>(inst, value);
+            }
+            else if (typeId == TYPEID(Vec3))
+            {
+                fieldType->SetFieldValue<Vec3>(inst, value);
+            }
+            else if (typeId == TYPEID(Vec2))
+            {
+                fieldType->SetFieldValue<Vec2>(inst, value);
+            }
+            else if (typeId == TYPEID(Vec4i))
+            {
+                fieldType->SetFieldValue<Vec4i>(inst, Vec4i{ (s32)value.x, (s32)value.y, (s32)value.z, (s32)value.w });
+            }
+            else if (typeId == TYPEID(Vec3i))
+            {
+                fieldType->SetFieldValue<Vec3i>(inst, Vec3i{ (s32)value.x, (s32)value.y, (s32)value.z });
+            }
+            else if (typeId == TYPEID(Vec2i))
+            {
+                fieldType->SetFieldValue<Vec2i>(inst, Vec2i{ (s32)value.x, (s32)value.y });
+            }
+
+            i++;
+        } while (targetInstance == nullptr && i < multipleTargetInstances.GetSize());
 	}
 
 } // namespace CE::Editor

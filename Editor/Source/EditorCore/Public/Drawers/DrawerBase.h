@@ -45,6 +45,7 @@ namespace CE::Editor
         virtual void ClearGUI(QLayout* container) = 0;
 
         virtual void SetTarget(TypeInfo* targetType, void* instance) = 0;
+        virtual void SetTargets(TypeInfo* targetType, Array<void*> instances) = 0;
         virtual TypeInfo* GetTargetType() = 0;
         virtual void* GetTargetInstance() = 0;
 

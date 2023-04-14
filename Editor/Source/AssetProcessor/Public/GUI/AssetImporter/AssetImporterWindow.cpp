@@ -13,6 +13,7 @@ namespace CE::Editor
         ui(new Ui::AssetImporterWindow)
     {
         ui->setupUi(this);
+        setWindowFlag(::Qt::Tool, true);
 
         setWindowTitle("Asset Importer");
 
@@ -26,7 +27,12 @@ namespace CE::Editor
 
     AssetImporterWindow::~AssetImporterWindow()
     {
-        delete assetClassInstance;
+        for (auto asset : assetClassInstances)
+        {
+            delete asset;
+        }
+        assetClassInstances.Clear();
+        //delete assetClassInstance;
         delete ui;
     }
 
@@ -71,6 +77,8 @@ namespace CE::Editor
             QObject::connect(ui->contentTreeView->selectionModel(), &QItemSelectionModel::selectionChanged,
                 this, &AssetImporterWindow::OnFileSelectionChanged);
         }
+
+        TryClosingIfNoUnprocessedFiles();
     }
 
     void AssetImporterWindow::SetAssets(CE::Array<IO::Path> assetPaths)
@@ -163,35 +171,81 @@ namespace CE::Editor
             }
         }
 
+        if (importOnlyMode && assetClassInstances.GetSize() > 0)
+        {
+            for (auto inst : assetClassInstances)
+            {
+                delete inst;
+            }
+            assetClassInstances.Clear();
+        }
+
         if (assetClass == nullptr)
             return;
 
-        if (assetClassInstance != nullptr && assetClassInstance->GetType()->GetTypeId() != assetClass->GetTypeId())
+        /*if (assetClassInstance != nullptr && assetClassInstance->GetType()->GetTypeId() != assetClass->GetTypeId())
         {
             delete assetClassInstance;
             assetClassInstance = nullptr;
-        }
+        }*/
 
-        if (assetClassInstance == nullptr)
+        /*if (assetClassInstance == nullptr)
         {
             assetClassInstance = (Asset*)assetClass->CreateDefaultInstance();
-        }
+        }*/
 
         if (importOnlyMode)
         {
-            for (auto assetPath : targetAssetPaths)
+            for (int i = 0; i < targetAssetPaths.GetSize(); i++)
             {
+                while (i >= assetClassInstances.GetSize())
+                    assetClassInstances.Add((Asset*)assetClass->CreateDefaultInstance());
+
+                auto assetPath = targetAssetPaths[i];
                 auto productAssetPath = assetPath.ReplaceExtension(".casset");
                 if (assetPath.IsDirectory() || !assetPath.Exists() || !productAssetPath.Exists())
                     continue;
 
-                SerializedObject so{ assetClass, assetClassInstance };
+                SerializedObject so{ assetClass, assetClassInstances[i] };
                 so.Deserialize(productAssetPath);
                 break;
             }
         }
+        else
+        {
+            for (auto entry : selection)
+            {
+                auto extension = entry->GetExtension();
+                if (extension.IsEmpty())
+                    return;
+                extension = extension.GetSubstring(1);
+                auto curAssetClass = Asset::GetAssetClassFor(extension);
+                if (assetClass != nullptr && assetClass != curAssetClass)
+                {
+                    ui->incompatibleSelectionLabel->setVisible(true);
+                    return;
+                }
+
+                auto inst = (Asset*)assetClass->CreateDefaultInstance();
+                assetClassInstances.Add(inst);
+
+                auto assetPath = entry->fullPath;
+                auto productAssetPath = assetPath.ReplaceExtension(".casset");
+                if (!productAssetPath.Exists())
+                    continue;
+
+                SerializedObject so{ assetClass, inst };
+                so.Deserialize(productAssetPath);
+            }
+        }
 
         auto field = assetClass->GetFirstField();
+
+        Array<void*> instanceArray{};
+        for (auto inst : assetClassInstances)
+        {
+            instanceArray.Add(inst);
+        }
 
         while (field != nullptr)
         {
@@ -223,7 +277,7 @@ namespace CE::Editor
                 continue;
             }
 
-            fieldDrawer->SetTarget(field, assetClassInstance);
+            fieldDrawer->SetTargets(field, instanceArray);
 
             fieldDrawers.Add(fieldDrawer);
 
@@ -236,6 +290,79 @@ namespace CE::Editor
         
         ui->importButton->setVisible(true);
         ui->resetButton->setVisible(true);
+    }
+
+    void AssetImporterWindow::SetFiltersVisible(bool visible)
+    {
+        ui->showTreeView->setVisible(visible);
+        ui->showProcessedFiles->setVisible(visible);
+        ui->showUnprocessedFiles->setVisible(visible);
+    }
+
+    void AssetImporterWindow::SetAutoClose(bool autoClose)
+    {
+        this->autoClose = autoClose;
+    }
+
+    void AssetImporterWindow::ShowTreeView(bool treeView)
+    {
+        if (model == nullptr)
+            return;
+
+        model->SetTreeView(treeView);
+        model->modelReset({});
+    }
+
+    void AssetImporterWindow::ShowUnprocessedFiles(bool show)
+    {
+        if (filterModel == nullptr)
+            return;
+
+        filterModel->showUnprocessedFiles = show;
+        emit model->modelReset({});
+        emit filterModel->modelReset({});
+    }
+
+    void AssetImporterWindow::ShowProcessedFiles(bool show)
+    {
+        if (filterModel == nullptr)
+            return;
+
+        filterModel->showProcessedFiles = show;
+        emit model->modelReset({});
+        emit filterModel->modelReset({});
+    }
+
+    void AssetImporterWindow::SetMenuBarVisible(bool visible)
+    {
+        ui->menubar->setVisible(visible);
+    }
+
+    void AssetImporterWindow::TryClosingIfNoUnprocessedFiles()
+    {
+        if (importOnlyMode || model == nullptr || !autoClose)
+            return;
+
+        if (model->allFileEntries.GetSize() == 0)
+        {
+            close();
+            return;
+        }
+
+        int numUnprocessedFiles = 0;
+
+        for (auto entry : model->allFileEntries)
+        {
+            if (!entry->IsProcessed())
+            {
+                numUnprocessedFiles++;
+            }
+        }
+
+        if (numUnprocessedFiles == 0)
+        {
+            close();
+        }
     }
 
     void AssetImporterWindow::OnFileSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
@@ -259,46 +386,33 @@ namespace CE::Editor
 
     void AssetImporterWindow::on_showTreeView_stateChanged(int checked)
     {
-        if (model == nullptr)
-            return;
-
-        model->SetTreeView(checked);
-        model->modelReset({});
+        ShowTreeView(checked);
     }
 
 
     void AssetImporterWindow::on_showUnprocessedFiles_stateChanged(int checked)
     {
-        if (filterModel == nullptr)
-            return;
-
-        filterModel->showUnprocessedFiles = checked;
-        emit model->modelReset({});
-        emit filterModel->modelReset({});
+        ShowUnprocessedFiles(checked);
     }
 
 
     void AssetImporterWindow::on_showProcessedFiles_stateChanged(int checked)
     {
-        if (filterModel == nullptr)
-            return;
-
-        filterModel->showProcessedFiles = checked;
-        emit model->modelReset({});
-        emit filterModel->modelReset({});
+        ShowProcessedFiles(checked);
     }
 
 
     void AssetImporterWindow::on_importButton_clicked()
     {
-        if (importOnlyMode && targetAssetPaths.GetSize() > 0)
+        if (importOnlyMode && targetAssetPaths.GetSize() > 0 && assetClassInstances.GetSize() > 0)
         {
-            for (auto entry : targetAssetPaths)
+            for (int i = 0; i < targetAssetPaths.GetSize(); i++)
             {
-                if (!entry.Exists() || entry.IsDirectory())
+                auto entry = targetAssetPaths[i];
+                if (!entry.Exists() || entry.IsDirectory() || i >= assetClassInstances.GetSize())
                     continue;
 
-                AssetProcessor::Get().ProcessAsset(entry, assetClassInstance);
+                AssetProcessor::Get().ProcessAsset(entry, assetClassInstances[i]);
             }
 
             targetAssetPaths.Clear();
@@ -306,15 +420,16 @@ namespace CE::Editor
             return;
         }
 
-        if (selection.GetSize() == 0 || assetClass == nullptr || assetClassInstance == nullptr)
+        if (selection.GetSize() == 0 || assetClass == nullptr || assetClassInstances.GetSize() == 0)
             return;
 
-        for (auto entry : selection)
+        for (int i = 0; i < selection.GetSize(); i++)
         {
+            auto entry = selection[i];
             if (entry == nullptr)
                 continue;
 
-            AssetProcessor::Get().ProcessAsset(entry->fullPath, assetClassInstance);
+            AssetProcessor::Get().ProcessAsset(entry->fullPath, assetClassInstances[i]);
         }
 
         ui->contentTreeView->clearSelection();
@@ -324,19 +439,54 @@ namespace CE::Editor
         emit filterModel->modelReset({});
         
         UpdateDetailsView();
+
+        if (CanAutoClose())
+        {
+            close();
+        }
     }
 
     void AssetImporterWindow::on_resetButton_clicked()
     {
-        if (selection.GetSize() == 0 || assetClass == nullptr || assetClassInstance == nullptr)
+        if (selection.GetSize() == 0 || assetClass == nullptr || assetClassInstances.GetSize() == 0)
             return;
-        
-        assetClass->InitializeDefaults(assetClassInstance);
+
+        for (auto inst : assetClassInstances)
+        {
+            assetClass->InitializeDefaults(inst);
+        }
         
         for (auto fieldDrawer : fieldDrawers)
         {
             fieldDrawer->OnValuesUpdated();
         }
+
+        if (importOnlyMode && targetAssetPaths.GetSize() > 0)
+        {
+            for (auto path : targetAssetPaths)
+            {
+                if (path.ReplaceExtension(".casset").Exists())
+                {
+                    IO::Path::Remove(path.ReplaceExtension(".casset"));
+                }
+            }
+            targetAssetPaths.Clear();
+        }
+        else if (selection.GetSize() > 0)
+        {
+            for (auto entry : selection)
+            {
+                if (entry->fullPath.ReplaceExtension(".casset").Exists())
+                {
+                    IO::Path::Remove(entry->fullPath.ReplaceExtension(".casset"));
+                }
+            }
+        }
+
+        ui->contentTreeView->clearSelection();
+        selection.Clear();
+
+        UpdateDetailsView();
     }
 
 }

@@ -53,7 +53,11 @@ namespace CE::Editor
         {
             if (fullPath.IsDirectory())
                 return false;
-            auto assetFile = fullPath.GetParentPath() / (fullPath.GetFilename().RemoveExtension().GetString() + ".casset");
+            String ext = fullPath.GetExtension().GetString();
+            auto productExt = Asset::GetProductAssetExtensionFor(ext);
+            if (productExt.IsEmpty())
+                productExt = ".casset";
+            auto assetFile = fullPath.GetParentPath() / (fullPath.GetFilename().RemoveExtension().GetString() + productExt);
             return assetFile.Exists();
         }
 

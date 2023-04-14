@@ -155,7 +155,28 @@ namespace CE::Editor
 
 		this->componentType = targetClass;
 		this->targetComponent = (GameComponent*)instance;
+
+        multipleTargetComponents.Clear();
 	}
+
+    void GameComponentDrawer::SetTargets(TypeInfo* targetType, Array<void*> instances)
+    {
+        if (targetType == nullptr || instances.GetSize() == 0 || !targetType->IsClass())
+            return;
+
+        ClassType* targetClass = (ClassType*)targetType;
+        if (!targetClass->IsAssignableTo(TYPEID(GameComponent))) // targetClass should derive from GameComponent class
+            return;
+
+        this->componentType = targetClass;
+        this->targetComponent = nullptr;
+
+        multipleTargetComponents.Clear();
+        for (auto inst : instances)
+        {
+            multipleTargetComponents.Add((GameComponent*)inst);
+        }
+    }
 
 	TypeInfo* GameComponentDrawer::GetTargetType()
 	{

@@ -5,7 +5,8 @@
 
 namespace CE
 {
-	HashMap<Name, ClassType*> Asset::extensionToAssetClassMap{};
+	HashMap<Name, ClassType*> Asset::sourceExtensionToAssetClassMap{};
+    HashMap<ClassType*, Name> Asset::assetClassToProductExtensionMap{};
 
 	Asset::Asset(CE::Name name) : Object(name)
 	{
@@ -22,7 +23,7 @@ namespace CE
         return Self::Type()->GetName();
     }
 
-	void Asset::RegisterAssetClass(ClassType* assetClass, String assetExtensions)
+	void Asset::RegisterAssetClass(ClassType* assetClass, String productAssetExtension, String assetExtensions)
 	{
 		if (!assetClass->CanBeInstantiated())
 			return;
@@ -35,8 +36,13 @@ namespace CE
             if (!extension.StartsWith("."))
                 extension = "." + extension;
 
-			extensionToAssetClassMap[extension] = assetClass;
+            sourceExtensionToAssetClassMap[extension] = assetClass;
 		}
+
+        if (!productAssetExtension.StartsWith("."))
+            productAssetExtension = "." + productAssetExtension;
+
+        assetClassToProductExtensionMap[assetClass] = productAssetExtension;
 	}
 
 	bool Asset::IsValidAssetType(String assetExtension)
@@ -44,16 +50,38 @@ namespace CE
         if (!assetExtension.StartsWith("."))
             assetExtension = "." + assetExtension;
 
-		return extensionToAssetClassMap.KeyExists(assetExtension);
+		return sourceExtensionToAssetClassMap.KeyExists(assetExtension) || GetBuiltinAssetTypeFor(assetExtension) != BuiltinAssetType::None;
 	}
 
 	ClassType* Asset::GetAssetClassFor(String assetExtension)
 	{
         if (!assetExtension.StartsWith("."))
             assetExtension = "." + assetExtension;
+        if (!sourceExtensionToAssetClassMap.KeyExists(assetExtension))
+            return nullptr;
 
-		return extensionToAssetClassMap[Name(assetExtension)];
+		return sourceExtensionToAssetClassMap[Name(assetExtension)];
 	}
+
+    String Asset::GetProductAssetExtensionFor(ClassType* assetClass)
+    {
+        if (assetClass == nullptr || !assetClassToProductExtensionMap.KeyExists(assetClass))
+            return "";
+
+        return assetClassToProductExtensionMap[assetClass].GetString();
+    }
+
+    String Asset::GetProductAssetExtensionFor(String sourceAssetExtension)
+    {
+        if (!sourceAssetExtension.StartsWith("."))
+            sourceAssetExtension = "." + sourceAssetExtension;
+
+        auto assetClass = GetAssetClassFor(sourceAssetExtension);
+        if (assetClass == nullptr)
+            return "";
+
+        return GetProductAssetExtensionFor(assetClass);
+    }
 
     BuiltinAssetType Asset::GetBuiltinAssetTypeFor(String assetExtension)
     {

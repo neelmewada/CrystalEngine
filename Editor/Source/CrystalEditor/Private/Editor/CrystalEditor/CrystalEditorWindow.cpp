@@ -58,7 +58,7 @@ namespace CE::Editor
 
     void CrystalEditorWindow::OnAssetUpdated(IO::Path assetPath)
     {
-        CE_LOG(Info, All, "OnAssetUpdated: {}", assetPath);
+
     }
 
     void CrystalEditorBus::Interface::RegisterEditorWindowClassForBuiltinAsset(ClassType* editorWindowClass, BuiltinAssetType builtinAssetType)

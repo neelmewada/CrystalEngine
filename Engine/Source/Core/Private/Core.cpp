@@ -9,7 +9,7 @@ namespace CE
 
     void CoreModule::StartupModule()
     {
-        
+
     }
 
     void CoreModule::ShutdownModule()

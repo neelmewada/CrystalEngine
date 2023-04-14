@@ -47,8 +47,10 @@ namespace CE::Editor
                 
                 if (!curPath.IsDirectory())
                 {
-                    auto extension = curPath.GetExtension().GetString().GetSubstring(1); // Remove the '.'
+                    auto extension = curPath.GetExtension().GetString();
                     if (!Asset::IsValidAssetType(extension))
+                        return;
+                    if (Asset::GetBuiltinAssetTypeFor(extension) != BuiltinAssetType::None)
                         return;
                 }
                 

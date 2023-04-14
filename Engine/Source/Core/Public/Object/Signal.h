@@ -44,4 +44,6 @@ namespace CE
     FireSignal(#SignalName, args);\
 }
 
+#define fire
+#define FIRE
 

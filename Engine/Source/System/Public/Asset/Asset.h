@@ -29,9 +29,11 @@ namespace CE
         
         Name GetAssetType();
 
-        static void RegisterAssetClass(ClassType* assetClass, String assetExtensions);
+        static void RegisterAssetClass(ClassType* assetClass, String productAssetExtension, String assetExtensions);
         static bool IsValidAssetType(String assetExtension);
         static ClassType* GetAssetClassFor(String assetExtension);
+        static String GetProductAssetExtensionFor(ClassType* assetClass);
+        static String GetProductAssetExtensionFor(String sourceAssetExtension);
 
         static BuiltinAssetType GetBuiltinAssetTypeFor(String assetExtension);
         static String GetAssetExtensionFor(BuiltinAssetType builtinAssetType);
@@ -55,7 +57,8 @@ namespace CE
         Array<Asset*> childAssets{};
 
     private:
-        static HashMap<Name, ClassType*> extensionToAssetClassMap;
+        static HashMap<Name, ClassType*> sourceExtensionToAssetClassMap;
+        static HashMap<ClassType*, Name> assetClassToProductExtensionMap;
 
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::AssetProcessor;
@@ -66,6 +69,6 @@ namespace CE
 
 #include "Asset.rtti.h"
 
-#define CE_REGISTER_ASSET_TYPE(AssetClass, ...)\
+#define CE_REGISTER_ASSET_TYPE(AssetClass, ProductAssetExtension, ...)\
 CE_REGISTER_TYPES(AssetClass)\
-CE::Asset::RegisterAssetClass(AssetClass::Type(), "" #__VA_ARGS__)
+CE::Asset::RegisterAssetClass(AssetClass::Type(), #ProductAssetExtension, "" #__VA_ARGS__)
