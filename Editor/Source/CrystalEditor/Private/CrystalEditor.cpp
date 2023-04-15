@@ -3,6 +3,7 @@
 
 // Editor Windows
 #include "Editor/SceneEditor/SceneEditorWindow.h"
+#include "Editor/TextureEditor/TextureEditorWindow.h"
 
 // Scene Editor Views
 #include "Editor/SceneEditor/ViewportView/ViewportView.h"
@@ -54,7 +55,7 @@ namespace CE::Editor
         // *********************************************
         // Register Editor Window Classes
         CE_REGISTER_BUILTIN_ASSET_EDITOR(SceneAsset, SceneEditorWindow); // Scene Editor
-
+        CE_REGISTER_ASSET_EDITOR(TextureAsset, TextureEditorWindow); // Texture Editor
     }
 
 } // namespace CE::Editor

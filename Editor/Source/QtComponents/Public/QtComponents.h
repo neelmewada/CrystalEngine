@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreMedia.h"
 
 #include "QtComponents/StyleManager.h"
 
@@ -15,6 +16,7 @@
 #include "QtComponents/Widgets/GridWidget.h"
 #include "QtComponents/Widgets/ContextMenuWidget/ContextMenuWidget.h"
 #include "QtComponents/Widgets/WaitingWidgetSpinner.h"
+#include "QtComponents/Widgets/ImageCanvas/ImageCanvas.h"
 
 namespace CE::Editor::Qt
 {

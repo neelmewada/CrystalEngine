@@ -129,62 +129,72 @@ namespace CE::Editor
 
         auto builtinAssetType = Asset::GetBuiltinAssetTypeFor(assetPath.GetExtension().GetString());
 
-        if (builtinAssetType != BuiltinAssetType::None)
+        auto editorWindowClass = GetBuiltinAssetEditorWindow(builtinAssetType);
+
+        if (editorWindowClass == nullptr)
         {
-            auto editorWindowClass = GetBuiltinAssetEditorWindow(builtinAssetType);
-            if (editorWindowClass == nullptr)
+            auto assetClass = Asset::GetAssetClassFor(assetEntry->extension);
+            if (assetClass == nullptr)
                 return;
+            editorWindowClass = GetAssetEditorWindow(assetClass);
+        }
 
-            bool windowFound = false;
+        if (editorWindowClass == nullptr)
+            return;
 
-            for (auto editorWindow: editorWindows)
+        bool windowFound = false;
+        int idx = 0;
+
+        for (auto editorWindow: editorWindows)
+        {
+            if (editorWindow->GetType()->GetTypeId() == editorWindowClass->GetTypeId())
             {
-                if (editorWindow->GetType()->GetTypeId() == editorWindowClass->GetTypeId())
+                windowFound = true;
+                if (editorWindow->OpenAsset(assetEntry))
                 {
-                    windowFound = true;
-                    if (editorWindow->OpenAsset(assetEntry))
-                    {
-                        return;
-                    }
+                    if (idx < dockWidgets.GetSize())
+                        dockWidgets[idx]->toggleView(true);
+                    return;
                 }
             }
+            idx++;
+        }
 
-            if (!windowFound && editorWindowClass->CanBeInstantiated())
+        if (!windowFound && editorWindowClass->CanBeInstantiated())
+        {
+            auto editorWindowClassInstance = (EditorWindowBase*)editorWindowClass->CreateDefaultInstance();
+
+            if (editorWindowClassInstance->CanOpenAsset(assetEntry))
             {
-                auto editorWindowClassInstance = (EditorWindowBase*)editorWindowClass->CreateDefaultInstance();
+                auto dockWidget = new ads::CDockWidget(editorWindowClassInstance->windowTitle());
+                dockWidget->setWidget(editorWindowClassInstance);
+                editorWindows.Add(editorWindowClassInstance);
+                dockWidgets.Add(dockWidget);
 
-                if (editorWindowClassInstance->CanOpenAsset(assetEntry))
+                mainDockManager->addDockWidgetTab(ads::TopDockWidgetArea, dockWidget);
+
+                if (!editorWindowClassInstance->OpenAsset(assetEntry))
                 {
-                    auto dockWidget = new ads::CDockWidget(editorWindowClassInstance->windowTitle());
-                    dockWidget->setWidget(editorWindowClassInstance);
-                    editorWindows.Add(editorWindowClassInstance);
-                    dockWidgets.Add(dockWidget);
+                    // Failed to open asset in editor
+                    mainDockManager->removeDockWidget(dockWidget);
 
-                    mainDockManager->addDockWidgetTab(ads::TopDockWidgetArea, dockWidget);
+                    dockWidgets.Remove(dockWidget);
+                    editorWindows.Remove(editorWindowClassInstance);
 
-                    if (!editorWindowClassInstance->OpenAsset(assetEntry))
-                    {
-                        // Failed to open asset in editor
-                        mainDockManager->removeDockWidget(dockWidget);
+                    editorWindowClassInstance->close();
 
-                        dockWidgets.Remove(dockWidget);
-                        editorWindows.Remove(editorWindowClassInstance);
-
-                        editorWindowClassInstance->close();
-
-                        editorWindowClass->DestroyInstance(editorWindowClassInstance);
-                        editorWindowClassInstance = nullptr;
-                        CE_LOG(Error, All, "Failed to open asset at path: {}", assetPath);
-                        return;
-                    }
-                }
-                else
-                {
                     editorWindowClass->DestroyInstance(editorWindowClassInstance);
                     editorWindowClassInstance = nullptr;
                     CE_LOG(Error, All, "Failed to open asset at path: {}", assetPath);
                     return;
                 }
+            }
+            else
+            {
+                editorWindowClass->DestroyInstance(editorWindowClassInstance);
+                editorWindowClassInstance = nullptr;
+                CE_LOG(Error, All, "Failed to open asset at path: {}", assetPath);
+                return;
             }
         }
     }

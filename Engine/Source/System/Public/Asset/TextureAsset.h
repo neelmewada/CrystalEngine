@@ -32,10 +32,10 @@ namespace CE
 
 
     protected:
-        FIELD()
+        FIELD(ImportSetting)
         TextureDataType textureType{};
 
-        FIELD()
+        FIELD(ImportSetting)
         TextureWrapMode wrapMode{};
     };
     

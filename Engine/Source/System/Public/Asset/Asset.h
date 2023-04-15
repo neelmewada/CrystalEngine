@@ -50,12 +50,6 @@ namespace CE
         FIELD(Hidden)
         String assetExtension{};
 
-        FIELD(Hidden)
-        ObjectStore assetObjectStore{};
-
-        FIELD(Hidden)
-        Array<Asset*> childAssets{};
-
     private:
         static HashMap<Name, ClassType*> sourceExtensionToAssetClassMap;
         static HashMap<ClassType*, Name> assetClassToProductExtensionMap;

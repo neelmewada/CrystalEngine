@@ -284,7 +284,7 @@ namespace CE::Editor
 				dirEntry->virtualRelativePath = fileName;
 				entry->children.Add(dirEntry);
 			}
-            else if (newFilePath.GetExtension() == ".casset")
+            else if (newFilePath.GetExtension() == ".casset") // Product Asset
             {
                 String ext = ".casset";
                 bool foundMultiple = false;
@@ -319,8 +319,13 @@ namespace CE::Editor
                 assetEntry->virtualRelativePath = fileName;
                 assetEntry->extension = ext;
                 entry->children.Add(assetEntry);
+
+                QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+                {
+                    OnAssetUpdated(newFilePath);
+                });
             }
-            else if (Asset::GetBuiltinAssetTypeFor(newFilePathExtension.GetString()) != BuiltinAssetType::None) // Asset
+            else if (Asset::GetBuiltinAssetTypeFor(newFilePathExtension.GetString()) != BuiltinAssetType::None) // Builtin Asset
             {
                 auto assetEntry = new AssetDatabaseEntry();
                 assetEntry->name = IO::Path(fileName).RemoveExtension().GetString();
@@ -330,17 +335,11 @@ namespace CE::Editor
                 assetEntry->virtualRelativePath = fileName;
                 assetEntry->extension = assetEntry->virtualRelativePath.GetExtension().GetString();
                 entry->children.Add(assetEntry);
-            }
-            else if ((assetClass = Asset::GetAssetClassFor(newFilePathExtension.GetString())) != nullptr)
-            {
-                auto productExtension = Asset::GetProductAssetExtensionFor(assetClass);
-                if (!productExtension.IsEmpty() && !newFilePath.ReplaceExtension(productExtension).Exists())
+
+                QMetaObject::invokeMethod(qApp, [this, newFilePath]()
                 {
-                    QMetaObject::invokeMethod(qApp, [this, newFilePath]
-                    {
-                        fire OnNewSourceAssetAdded(newFilePath);
-                    });
-                }
+                    OnAssetUpdated(newFilePath);
+                });
             }
 		}
         else if (fileAction == IO::FileAction::Delete)
