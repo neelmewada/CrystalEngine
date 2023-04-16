@@ -39,6 +39,32 @@ namespace CE::Editor
         FUNCTION(Event)
         void OpenAsset(AssetDatabaseEntry* assetEntry) override;
 
+        FUNCTION(Event)
+        void BrowseToAsset(AssetDatabaseEntry* assetEntry) override;
+
+        // ******************************************
+        // Public API
+
+        EditorWindowBase* GetEditorWindow(ClassType* editorWindowType);
+
+        ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType);
+
+        template<typename TEditorWindowClass>
+        TEditorWindowClass* GetEditorWindow()
+        {
+            return (TEditorWindowClass*)GetEditorWindow(TEditorWindowClass::Type());
+        }
+
+        template<typename TEditorWindowClass>
+        ads::CDockWidget* GetEditorWindowDockWidget()
+        {
+            return GetEditorWindowDockWidget(TEditorWindowClass::Type());
+        }
+
+    private:
+
+        void CreateSceneEditorWindow();
+
     private slots:
         void on_actionExit_triggered();
 

@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "CoreMedia.h"
+
 #include "Editor/EditorWindowBase.h"
 
 namespace Ui {
@@ -30,10 +32,15 @@ namespace CE::Editor
 
         bool OpenAsset(AssetDatabaseEntry* assetEntry) override;
 
+        bool BrowseToAsset(CE::AssetDatabaseEntry* assetEntry) override;
+
         // Public API
 
         void SetTextureAsset(IO::Path assetPath);
         void SetTextureAsset(AssetDatabaseEntry* assetEntry);
+
+    private slots:
+        void on_toolActionBrowse_triggered();
 
     private:
 
@@ -45,6 +52,13 @@ namespace CE::Editor
         ads::CDockManager* dockManager = nullptr;
 
         AssetDatabaseEntry* assetEntry = nullptr;
+
+        CMImage targetImage{};
+
+        // View Settings Popup
+        QToolButton* viewSettingsBtn = nullptr;
+        QAction* showPreviewView = nullptr;
+        QAction* showDetailsView = nullptr;
 
         // Sub Views
         TexturePreviewView* previewView = nullptr;

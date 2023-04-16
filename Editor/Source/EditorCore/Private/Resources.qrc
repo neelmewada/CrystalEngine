@@ -12,5 +12,7 @@
         <file alias="Icons/explorer-windows">Resources/Icons/explorer-windows.png</file>
         <file alias="Icons/explorer-mac">Resources/Icons/explorer-mac.png</file>
         <file alias="Icons/save-colored">Resources/Icons/save-colored.png</file>
+        <file alias="Icons/settings">Resources/Icons/settings.png</file>
+        <file alias="Icons/search-folder">Resources/Icons/search-folder.png</file>
     </qresource>
 </RCC>

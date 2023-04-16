@@ -18,6 +18,8 @@ namespace CE::Editor
 
         virtual void OpenAsset(AssetDatabaseEntry* assetEntry) = 0;
 
+        virtual void BrowseToAsset(AssetDatabaseEntry* assetEntry) = 0;
+
         static void RegisterEditorWindowClassForBuiltinAsset(ClassType* editorWindowClass, BuiltinAssetType builtinAssetType);
         static void RegisterEditorWindowClassForAsset(ClassType* editorWindowClass, ClassType* assetClass);
 

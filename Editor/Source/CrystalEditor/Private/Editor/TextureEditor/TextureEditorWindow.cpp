@@ -4,7 +4,7 @@
 #include "TexturePreviewView/TexturePreviewView.h"
 #include "TextureDetailsView/TextureDetailsView.h"
 
-#include "CoreMedia.h"
+#include <QToolButton>
 
 namespace CE::Editor
 {
@@ -46,11 +46,37 @@ namespace CE::Editor
         // ***********************************
         // ToolBar
         ui->toolActionSave->setIcon(QIcon(":/Editor/Icons/save-colored"));
+        ui->toolActionBrowse->setIcon(QIcon(":/Editor/Icons/search-folder"));
 
+        // Horizontal Spacer
+        auto spacer = new QWidget();
+        spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        ui->toolBar->addWidget(spacer);
+
+        ui->toolBar->addSeparator();
+
+        // View Settings
+        auto viewSettingsAction = ui->toolBar->addAction(QIcon(":/Editor/Icons/settings"), "View Settings");
+        viewSettingsBtn = qobject_cast<QToolButton*>(ui->toolBar->widgetForAction(viewSettingsAction));
+        if (viewSettingsBtn != nullptr)
+        {
+            viewSettingsBtn->setPopupMode(QToolButton::InstantPopup);
+            viewSettingsBtn->removeAction(viewSettingsAction);
+            showPreviewView = viewSettingsBtn->addAction("Show Preview", [this]
+            {
+                previewViewDockWidget->toggleView(true);
+            });
+            showDetailsView = viewSettingsBtn->addAction("Show Details", [this]
+            {
+                detailsViewDockWidget->toggleView(true);
+            });
+        }
     }
 
     TextureEditorWindow::~TextureEditorWindow()
     {
+        targetImage.Free();
+
         delete ui;
     }
 
@@ -72,6 +98,11 @@ namespace CE::Editor
             return false;
         SetTextureAsset(assetEntry);
         return true;
+    }
+
+    bool TextureEditorWindow::BrowseToAsset(CE::AssetDatabaseEntry* assetEntry)
+    {
+        return false;
     }
 
     void TextureEditorWindow::SetTextureAsset(IO::Path assetPath)
@@ -97,8 +128,9 @@ namespace CE::Editor
             auto texturePath = basePath / assetEntry->GetVirtualPath().ReplaceExtension(assetEntry->extension);
             if (texturePath.Exists())
             {
-                CMImage image = CMImage::LoadFromFile(texturePath);
-                previewView->SetImage(image);
+                targetImage.Free();
+                targetImage = CMImage::LoadFromFile(texturePath);
+                previewView->SetImage(targetImage);
                 previewView->Recenter();
             }
         }
@@ -108,6 +140,14 @@ namespace CE::Editor
     {
         EditorWindowBase::resizeEvent(event);
         previewView->RefreshPreview();
+    }
+
+    void TextureEditorWindow::on_toolActionBrowse_triggered()
+    {
+        if (assetEntry == nullptr)
+            return;
+
+        CE_PUBLISH(CrystalEditorBus, BrowseToAsset, assetEntry);
     }
 
 }

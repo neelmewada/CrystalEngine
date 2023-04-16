@@ -5,8 +5,9 @@
 namespace CE
 {
 
-    
-    
+    CE::HashMap<TypeId, StructType*> StructType::registeredStructs{};
+    CE::HashMap<Name, StructType*> StructType::registeredStructsByName{};
+
     bool StructType::IsAssignableTo(TypeId typeId) const
     {
         if (typeId == this->GetTypeId())
@@ -36,6 +37,48 @@ namespace CE
         }
 
         return false;
+    }
+
+    const CE::Array<CE::Attribute>& StructType::GetAttributes()
+    {
+        if (!attributesCached)
+        {
+            CacheAllAttributes();
+        }
+
+        return cachedAttributes;
+    }
+
+    bool StructType::HasAttribute(const String& key)
+    {
+        if (!attributesCached)
+        {
+            CacheAllAttributes();
+        }
+
+        for (int i = 0; i < cachedAttributes.GetSize(); i++)
+        {
+            if (cachedAttributes[i].GetKey() == key)
+                return true;
+        }
+
+        return false;
+    }
+
+    String StructType::GetAttributeValue(const CE::String& key)
+    {
+        if (!attributesCached)
+        {
+            CacheAllAttributes();
+        }
+
+        for (int i = 0; i < cachedAttributes.GetSize(); i++)
+        {
+            if (cachedAttributes[i].GetKey() == key)
+                return cachedAttributes[i].GetValue();
+        }
+
+        return "";
     }
 
     FieldType* StructType::GetFirstField()
@@ -78,12 +121,65 @@ namespace CE
         return cachedFunctionMap[name];
     }
 
+    void StructType::CacheAllAttributes()
+    {
+        if (attributesCached)
+            return;
+
+        attributesCached = true;
+        cachedAttributes.Clear();
+
+        for (int i = 0; i < superTypeIds.GetSize(); i++)
+        {
+            auto superTypeId = superTypeIds[i];
+            auto superType = GetTypeInfo(superTypeId);
+            if (superType == nullptr)
+                continue;
+
+            if (superType->IsStruct())
+            {
+                auto superStruct = (StructType*)superType;
+                superStruct->CacheAllAttributes();
+                MergeAttributes(superStruct->cachedAttributes);
+            }
+            else if (superType->IsClass())
+            {
+                auto superClass = (ClassType*)superType;
+                superClass->CacheAllAttributes();
+                MergeAttributes(superClass->cachedAttributes);
+            }
+        }
+
+        MergeAttributes(attributes);
+    }
+
+    void StructType::MergeAttributes(const CE::Array<Attribute>& attribs)
+    {
+        for (int i = 0; i < attribs.GetSize(); i++)
+        {
+            const auto& attribToAdd = attribs[i];
+            auto index = cachedAttributes.IndexOf([attribToAdd](const Attribute& a) -> bool
+                    {
+                        return a.GetKey() == attribToAdd.GetKey();
+                    });
+            if (index >= 0)
+            {
+                cachedAttributes[index].value = attribToAdd.value;
+            }
+            else
+            {
+                cachedAttributes.Add(attribToAdd);
+            }
+        }
+    }
+
     void StructType::CacheAllFields()
     {
         if (fieldsCached)
             return;
 
         fieldsCached = true;
+        cachedFields.Clear();
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
@@ -131,6 +227,7 @@ namespace CE
             return;
 
         functionsCached = true;
+        cachedFunctions.Clear();
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
@@ -188,6 +285,41 @@ namespace CE
         }
     }
 
+    void StructType::RegisterStruct(StructType* type)
+    {
+        if (type == nullptr || registeredStructs.KeyExists(type->GetTypeId()))
+            return;
+
+        registeredStructs.Add({type->GetTypeId(), type});
+    }
+
+    void StructType::DeregisterStruct(StructType* type)
+    {
+        if (type == nullptr || !registeredStructs.KeyExists(type->GetTypeId()))
+            return;
+
+        registeredStructs.Remove(type->GetTypeId());
+    }
+
+    StructType* StructType::FindStructByName(Name structName)
+    {
+        if (!structName.IsValid() || !registeredStructsByName.KeyExists(structName))
+            return nullptr;
+
+        return registeredStructsByName[structName];
+    }
+
+    StructType* StructType::FindStructByTypeId(TypeId structTypeId)
+    {
+        if (structTypeId == 0 || !registeredStructs.KeyExists(structTypeId))
+            return nullptr;
+
+        return registeredStructs[structTypeId];
+    }
+
+    CE::HashMap<TypeId, ClassType*> ClassType::registeredClasses{};
+    CE::HashMap<Name, ClassType*> ClassType::registeredClassesByName{};
+    CE::HashMap<TypeId, Array<TypeId>> ClassType::derivedClassesMap{};
 
     bool ClassType::IsObject()
     {
@@ -223,6 +355,70 @@ namespace CE
 
             superTypes.Add((ClassType*)type);
         }
+    }
+
+    void ClassType::AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath)
+    {
+        if (derivedClass == nullptr || parentSearchPath == nullptr)
+            return;
+
+        for (int i = 0; i < parentSearchPath->GetSuperTypesCount(); i++)
+        {
+            auto parentTypeId = parentSearchPath->GetSuperType(i);
+            auto parentType = GetTypeInfo(parentTypeId);
+            if (parentType == nullptr || !parentType->IsClass())
+                continue;
+
+            if (!derivedClassesMap.KeyExists(parentTypeId))
+                derivedClassesMap.Add({ parentTypeId, {} });
+            derivedClassesMap[parentTypeId].Add(derivedClass->GetTypeId());
+
+            AddDerivedClassToMap(derivedClass, (ClassType*)parentType);
+        }
+    }
+
+    void ClassType::RegisterClass(ClassType* type)
+    {
+        if (type == nullptr || registeredClasses.KeyExists(type->GetTypeId()))
+            return;
+
+        registeredClasses.Add({type->GetTypeId(), type});
+        registeredClassesByName.Add({ type->GetName(), type });
+
+        if (!derivedClassesMap.KeyExists(type->GetTypeId()))
+        {
+            derivedClassesMap.Add({type->GetTypeId(), {}});
+        }
+
+        type->CacheSuperTypes();
+        AddDerivedClassToMap(type, type);
+    }
+
+    void ClassType::DeregisterClass(ClassType* type)
+    {
+        if (type == nullptr || !registeredClasses.KeyExists(type->GetTypeId()))
+            return;
+
+        registeredClasses.Remove(type->GetTypeId());
+        registeredClassesByName.Remove(type->GetName());
+
+        type->CacheSuperTypes();
+    }
+
+    ClassType* ClassType::FindClassByName(Name className)
+    {
+        if (!className.IsValid() || !registeredClassesByName.KeyExists(className))
+            return nullptr;
+
+        return registeredClassesByName[className];
+    }
+
+    ClassType* ClassType::FindClassByTypeId(TypeId classTypeId)
+    {
+        if (classTypeId == 0 || !registeredClasses.KeyExists(classTypeId))
+            return nullptr;
+
+        return registeredClasses[classTypeId];
     }
 
 } // namespace CE

@@ -45,9 +45,15 @@ namespace CE
 		CE_INLINE const String& GetKey() const { return key; }
 		CE_INLINE const String& GetValue() const { return value; }
 
+        static void Parse(String attributes, CE::Array<Attribute>& outResult);
+
 	private:
 		String key{};
 		String value{};
+
+        friend class TypeInfo;
+        friend class StructType;
+        friend class ClassType;
 	};
 
 	// **********************************************************
@@ -65,10 +71,15 @@ namespace CE
 		const CE::Name& GetName() const { return name; }
 		const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
 
+        virtual const CE::Array<CE::Attribute>& GetAttributes();
+
 		virtual String GetDisplayName();
 
 		String GetLocalAttributeValue(const String& key) const;
         bool HasLocalAttribute(const String& key) const;
+
+        virtual String GetAttributeValue(const String& key);
+        virtual bool HasAttribute(const String& key);
         
 		virtual bool IsClass() const { return false; }
 		virtual bool IsStruct() const { return false; }

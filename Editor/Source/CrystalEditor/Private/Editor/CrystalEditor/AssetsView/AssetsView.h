@@ -66,6 +66,8 @@ namespace CE::Editor
 
         virtual void resizeEvent(QResizeEvent* event) override;
 
+        void SelectAsset(AssetDatabaseEntry* assetEntry);
+
     private:
         void UpdateContentView();
 

@@ -61,11 +61,22 @@
     <bool>false</bool>
    </attribute>
    <addaction name="toolActionSave"/>
+   <addaction name="toolActionBrowse"/>
    <addaction name="separator"/>
   </widget>
   <action name="toolActionSave">
    <property name="text">
     <string>Save</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="toolActionBrowse">
+   <property name="text">
+    <string>Browse</string>
    </property>
    <property name="font">
     <font>

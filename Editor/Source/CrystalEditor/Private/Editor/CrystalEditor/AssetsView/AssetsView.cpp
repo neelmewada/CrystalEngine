@@ -57,11 +57,13 @@ namespace CE::Editor
 
         auto signal = AssetManager::Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
         auto event = Self::Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
-        Object::Bind(&AssetManager::Get(), signal, this, event);
+        if (signal != nullptr && event != nullptr)
+            Object::Bind(&AssetManager::Get(), signal, this, event);
 
         signal = AssetManager::Type()->FindFunctionWithName("OnNewSourceAssetAdded");
         event = Self::Type()->FindFunctionWithName("OnNewSourceAssetAdded");
-        Object::Bind(&AssetManager::Get(), signal, this, event);
+        if (signal != nullptr && event != nullptr)
+            Object::Bind(&AssetManager::Get(), signal, this, event);
     }
 
     AssetsView::~AssetsView()
@@ -72,6 +74,42 @@ namespace CE::Editor
     void AssetsView::resizeEvent(QResizeEvent* event)
     {
         EditorViewBase::resizeEvent(event);
+    }
+
+    void AssetsView::SelectAsset(AssetDatabaseEntry* assetEntry)
+    {
+        if (assetEntry == nullptr || assetEntry->parent == nullptr)
+            return;
+
+        auto index = folderModel->GetIndex(assetEntry->parent);
+        if (!index.isValid())
+            return;
+
+        ui->folderTreeView->selectionModel()->clearSelection();
+        ui->folderTreeView->selectionModel()->select(index, QItemSelectionModel::Select);
+        ui->assetsContentView->selectionModel()->clearSelection();
+
+        int rowCount = contentModel->rowCount();
+        int colCount = contentModel->columnCount();
+
+        for (int r = 0; r < rowCount; r++)
+        {
+            for (int c = 0; c < colCount; c++)
+            {
+                int i = r * colCount + c;
+                auto idx = contentModel->index(r, c);
+                if (!idx.isValid())
+                    continue;
+                auto entry = (AssetDatabaseEntry*)idx.internalPointer();
+                if (entry == nullptr)
+                    continue;
+                if (entry == assetEntry)
+                {
+                    ui->assetsContentView->selectionModel()->select(idx, QItemSelectionModel::Select);
+                    return;
+                }
+            }
+        }
     }
 
     void AssetsView::UpdateContentView()

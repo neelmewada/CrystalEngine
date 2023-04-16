@@ -25,7 +25,7 @@ namespace CE
     HashMap<Name, TypeInfo*> TypeInfo::RegisteredTypes{};
     HashMap<TypeId, TypeInfo*> TypeInfo::RegisteredTypeIds{};
 
-    String CleanupAttributeString(const String& inString)
+    static String CleanupAttributeString(const String& inString)
     {
         char* result = new char[inString.GetLength() + 1];
         result[inString.GetLength()] = 0;
@@ -51,6 +51,68 @@ namespace CE
         result[idx++] = 0;
         
         return String(result);
+    }
+
+    void Attribute::Parse(String attributes, CE::Array<Attribute>& outResult)
+    {
+        outResult.Clear();
+        int curScope = 0;
+        bool isString = false;
+        attributes = CleanupAttributeString(attributes);
+
+        int startIdx = 0;
+
+        for (int i = 0; i < attributes.GetLength(); i++)
+        {
+            if (attributes[i] == '(' || attributes[i] == '[' || attributes[i] == '{')
+            {
+                curScope++;
+                continue;
+            }
+            else if (attributes[i] == ')' || attributes[i] == ']' || attributes[i] == '}')
+            {
+                curScope--;
+                continue;
+            }
+
+            bool isLast = i == attributes.GetLength() - 1;
+
+            if ((attributes[i] == ',' && curScope <= 0) || isLast)
+            {
+                auto attribString = attributes.GetSubstringView(startIdx, i - startIdx + (isLast ? 1 : 0));
+
+                String attribKey = "";
+                String attribValue = "";
+                bool keyFinished = false;
+                int innerScope = 0;
+
+                for (int j = 0; j < attribString.GetSize(); j++)
+                {
+                    if (attribString[j] == '"')
+                    {
+                        continue;
+                    }
+                    if (!keyFinished && attribString[j] == '=')
+                    {
+                        keyFinished = true;
+                        continue;
+                    }
+
+                    if (!keyFinished)
+                    {
+                        attribKey.Append(attribString[j]);
+                    }
+                    else
+                    {
+                        attribValue.Append(attribString[j]);
+                    }
+                }
+
+                outResult.Add(Attribute(attribKey, attribValue));
+
+                startIdx = i + 1;
+            }
+        }
     }
 
     TypeInfo::TypeInfo(CE::Name name, CE::String attributes)
@@ -145,6 +207,11 @@ namespace CE
         return displayName;
     }
 
+    const CE::Array<CE::Attribute>& TypeInfo::GetAttributes()
+    {
+        return GetLocalAttributes();
+    }
+
     String TypeInfo::GetLocalAttributeValue(const String& key) const
     {
         for (int i = 0; i < attributes.GetSize(); i++)
@@ -169,6 +236,16 @@ namespace CE
         }
 
         return false;
+    }
+
+    String TypeInfo::GetAttributeValue(const String& key)
+    {
+        return GetLocalAttributeValue(key);
+    }
+
+    bool TypeInfo::HasAttribute(const String& key)
+    {
+        return HasLocalAttribute(key);
     }
 
     bool TypeInfo::IsComponent() const

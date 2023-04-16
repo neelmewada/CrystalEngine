@@ -85,6 +85,12 @@ namespace CE
 
 		virtual bool IsAssignableTo(TypeId typeId) const override;
 
+        const CE::Array<CE::Attribute>& GetAttributes() override;
+
+        bool HasAttribute(const CE::String& key) override;
+
+        String GetAttributeValue(const CE::String& key) override;
+
 		IntPtr TryCast(IntPtr ptr, TypeId castToType) const
 		{
 			const u8* data = GetRawTypeData();
@@ -180,7 +186,21 @@ namespace CE
 			return size;
 		}
 
+        // For internal use only!
+        static void RegisterStruct(StructType* type);
+        // For internal use only!
+        static void DeregisterStruct(StructType* type);
+
+        static StructType* FindStructByName(Name structName);
+        static StructType* FindStructByTypeId(TypeId structTypeId);
+
 	protected:
+
+        virtual void CacheAllAttributes();
+
+        void MergeAttributes(const CE::Array<Attribute>& attribs);
+
+        void CacheAttributesInternal(const CE::Array<Attribute> cachedAttribs);
 
 		virtual void CacheAllFields();
 
@@ -264,24 +284,27 @@ namespace CE
 		}
 
 		template<>
-		CE_INLINE void AddSuper<>()
-		{
-			
-		}
+		CE_INLINE void AddSuper<>() {}
 
 		// Inherited + Local fields
 		CE::Array<FieldType> cachedFields{};
         CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
-		CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionMap{};
         
 		CE::Array<FunctionType> cachedFunctions{};
+        CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionMap{};
+
+        CE::Array<Attribute> cachedAttributes{};
 
 		CE::Array<FieldType> localFields{};
 		CE::Array<TypeId> superTypeIds{};
 		CE::Array<FunctionType> localFunctions{};
 		bool fieldsCached = false;
 		bool functionsCached = false;
+        bool attributesCached = false;
 		u32 size = 0;
+
+        static CE::HashMap<TypeId, StructType*> registeredStructs;
+        static CE::HashMap<Name, StructType*> registeredStructsByName;
 
 	private:
 		Internal::IStructTypeImpl* Impl = nullptr;
@@ -360,13 +383,28 @@ namespace CE
 			return Impl->InitializeDefaults(instance);
 		}
 
+        // For internal use only!
+        static void RegisterClass(ClassType* type);
+        // For internal use only!
+        static void DeregisterClass(ClassType* type);
+
+        static ClassType* FindClassByName(Name className);
+        static ClassType* FindClassByTypeId(TypeId classTypeId);
+
 	private:
+        static void AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath);
+
 		void CacheSuperTypes();
 
 		Internal::IClassTypeImpl* Impl = nullptr;
 
 		bool superTypesCached = false;
 		Array<ClassType*> superTypes{};
+
+        static CE::HashMap<TypeId, ClassType*> registeredClasses;
+        static CE::HashMap<Name, ClassType*> registeredClassesByName;
+
+        static CE::HashMap<TypeId, Array<TypeId>> derivedClassesMap;
 	};
 
 #pragma pack(push, 1)
@@ -581,14 +619,16 @@ namespace CE\
 			const CE::StructTypeData<Namespace::Class> TypeData;\
             TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Namespace::Class> typeData) : Type(type), TypeData(typeData)\
             {\
-                TypeInfo::RegisterType(&Type);\
+                TypeInfo::RegisterType(&Type);                                                             \
+                ClassType::RegisterClass(&Type);                                                            \
 				FunctionList\
                 FieldList\
 				Type.AddSuper<SuperClasses>();\
             }\
 			virtual ~TypeInfoImpl()\
 			{\
-				TypeInfo::DeregisterType(&Type);\
+				TypeInfo::DeregisterType(&Type);                                                           \
+                ClassType::DeregisterClass(&Type);                                                          \
 			}\
 			virtual bool CanInstantiate() const override\
 			{\
@@ -600,7 +640,7 @@ namespace CE\
 			}\
 			virtual void DestroyInstance(void* instance) const override\
 			{\
-				if (instance != nullptr) delete (Namespace::Class*)instance;\
+				delete (Namespace::Class*)instance;\
 			}\
 			virtual void InitializeDefaults(void* instance) const override\
 			{\
@@ -671,12 +711,14 @@ namespace CE\
             TypeInfoImpl(CE::StructType type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
             {\
                 TypeInfo::RegisterType(&Type);\
+                StructType::RegisterStruct(&Type);\
                 FieldList\
 				Type.AddSuper<SuperStructs>();\
             }\
 			virtual ~TypeInfoImpl()\
 			{\
 				TypeInfo::DeregisterType(&Type);\
+                StructType::DeregisterStruct(&Type);\
 			}\
 			virtual void InitializeDefaults(void* instance) const override\
 			{\

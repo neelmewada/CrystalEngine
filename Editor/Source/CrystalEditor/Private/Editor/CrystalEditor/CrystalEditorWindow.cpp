@@ -41,13 +41,7 @@ namespace CE::Editor
         mainDockManager = new ads::CDockManager(this);
 
         // Scene Editor Window
-        auto sceneEditor = new SceneEditorWindow();
-        auto dockWidget = new ads::CDockWidget(sceneEditor->windowTitle());
-        dockWidget->setWidget(sceneEditor);
-        editorWindows.Add(sceneEditor);
-        dockWidgets.Add(dockWidget);
-        
-        mainDockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
+        CreateSceneEditorWindow();
     }
 
     CrystalEditorWindow::~CrystalEditorWindow()
@@ -55,6 +49,41 @@ namespace CE::Editor
         CE_DISCONNECT(CrystalEditorBus, this);
 
         delete ui;
+    }
+
+    EditorWindowBase* CrystalEditorWindow::GetEditorWindow(ClassType* editorWindowType)
+    {
+        for (auto editorWindow : editorWindows)
+        {
+            if (editorWindow != nullptr && editorWindow->GetTypeId() == editorWindowType->GetTypeId())
+                return editorWindow;
+        }
+
+        return nullptr;
+    }
+
+    ads::CDockWidget* CrystalEditorWindow::GetEditorWindowDockWidget(ClassType* editorWindowType)
+    {
+        int idx = 0;
+        for (auto editorWindow : editorWindows)
+        {
+            if (editorWindow != nullptr && editorWindow->GetTypeId() == editorWindowType->GetTypeId())
+                return dockWidgets[idx];
+            idx++;
+        }
+
+        return nullptr;
+    }
+
+    void CrystalEditorWindow::CreateSceneEditorWindow()
+    {
+        auto sceneEditor = new SceneEditorWindow();
+        auto dockWidget = new ads::CDockWidget(sceneEditor->windowTitle());
+        dockWidget->setWidget(sceneEditor);
+        editorWindows.Add(sceneEditor);
+        dockWidgets.Add(dockWidget);
+
+        mainDockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
     }
 
     void CrystalEditorWindow::OnAssetUpdated(IO::Path assetPath)
@@ -198,6 +227,25 @@ namespace CE::Editor
                 return;
             }
         }
+    }
+
+    void CrystalEditorWindow::BrowseToAsset(AssetDatabaseEntry* assetEntry)
+    {
+        if (assetEntry == nullptr)
+            return;
+
+        auto sceneEditorWindow = GetEditorWindow<SceneEditorWindow>();
+        if (sceneEditorWindow == nullptr)
+            CreateSceneEditorWindow();
+        sceneEditorWindow = GetEditorWindow<SceneEditorWindow>();
+        auto dockWidget = GetEditorWindowDockWidget<SceneEditorWindow>();
+        if (sceneEditorWindow == nullptr || dockWidget == nullptr)
+            return;
+
+        dockWidget->setAsCurrentTab();
+        dockWidget->setFocus();
+        sceneEditorWindow->setFocus();
+        sceneEditorWindow->BrowseToAsset(assetEntry);
     }
 
     void CrystalEditorWindow::on_actionExit_triggered()

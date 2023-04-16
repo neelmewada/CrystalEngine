@@ -29,6 +29,9 @@ namespace CE::Editor
 
         FUNCTION()
         virtual bool OpenAsset(AssetDatabaseEntry* assetEntry) = 0;
+
+        FUNCTION()
+        virtual bool BrowseToAsset(AssetDatabaseEntry* assetEntry) = 0;
         
     protected:
         Scene* editorScene = nullptr;

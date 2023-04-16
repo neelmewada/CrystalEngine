@@ -124,6 +124,24 @@ namespace CE::Editor
         return true;
     }
 
+    bool SceneEditorWindow::BrowseToAsset(AssetDatabaseEntry* assetEntry)
+    {
+        if (assetEntry == nullptr)
+            return false;
+
+        auto basePath = ProjectSettings::Get().GetEditorProjectDirectory();
+        if (assetEntry->category == AssetDatabaseEntry::Category::EngineAssets ||
+            assetEntry->category == AssetDatabaseEntry::Category::EngineShaders)
+            basePath = PlatformDirectories::GetEngineDir().GetParentPath();
+
+        auto fullPath = basePath / assetEntry->GetVirtualPath();
+        if (!fullPath.Exists())
+            return false;
+
+        assetsView->SelectAsset(assetEntry);
+        return true;
+    }
+
     void SceneEditorWindow::OnSceneLoaded()
     {
         sceneOutlinerView->GetModel()->OnSceneOpened(editorScene);

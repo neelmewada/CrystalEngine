@@ -40,6 +40,8 @@ namespace CE::Editor
 
         virtual bool OpenAsset(AssetDatabaseEntry* assetEntry) override;
 
+        bool BrowseToAsset(AssetDatabaseEntry *assetEntry) override;
+
         // *****************************************
         // SceneEditorBus::Interface
 
