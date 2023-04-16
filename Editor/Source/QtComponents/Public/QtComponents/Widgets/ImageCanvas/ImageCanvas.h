@@ -5,6 +5,8 @@
 #include <QGraphicsView>
 #include <QImage>
 
+#include "CoreMedia.h"
+
 namespace Ui {
 class ImageCanvas;
 }
@@ -19,9 +21,9 @@ namespace CE::Editor::Qt
         explicit ImageCanvas(QWidget *parent = nullptr);
         ~ImageCanvas();
 
-        QGraphicsView* GetGraphicsView();
-
         void SetImage(const CMImage& image);
+
+        void Recenter();
 
         void paintEvent(QPaintEvent *event) override;
 
@@ -29,7 +31,9 @@ namespace CE::Editor::Qt
         CMImage image{};
         QImage qtImage{};
 
-        Ui::ImageCanvas *ui;
+        QRectF drawRect{};
+
+        Ui::ImageCanvas* ui;
     };
 
 }

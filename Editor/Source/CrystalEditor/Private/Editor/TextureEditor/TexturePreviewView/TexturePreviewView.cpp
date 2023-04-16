@@ -20,4 +20,26 @@ namespace CE::Editor
         delete ui;
     }
 
+    void TexturePreviewView::SetImage(const CMImage& image)
+    {
+        ui->imageCanvas->SetImage(image);
+    }
+
+    void TexturePreviewView::Recenter()
+    {
+        ui->imageCanvas->Recenter();
+    }
+
+    void TexturePreviewView::RefreshPreview()
+    {
+        Recenter();
+        //ui->imageCanvas->repaint();
+    }
+
+    void TexturePreviewView::resizeEvent(QResizeEvent *event)
+    {
+        EditorViewBase::resizeEvent(event);
+        RefreshPreview();
+    }
+
 }

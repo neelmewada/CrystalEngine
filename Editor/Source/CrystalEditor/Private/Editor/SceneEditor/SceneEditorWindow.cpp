@@ -85,6 +85,10 @@ namespace CE::Editor
         dockManager->addDockWidget(ads::RightDockWidgetArea, detailsViewDockWidget);
         dockManager->addDockWidget(ads::BottomDockWidgetArea, consoleViewDockWidget);
         dockManager->addDockWidgetTab(ads::BottomDockWidgetArea, assetsViewDockWidget);
+
+        // **********************************
+        // Tool Bar
+        ui->actionSaveScene->setIcon(QIcon(":/Editor/Icons/save-colored"));
     }
 
     SceneEditorWindow::~SceneEditorWindow()

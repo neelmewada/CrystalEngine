@@ -14,54 +14,43 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>622</width>
-     <height>19</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 10pt &quot;Segoe UI&quot;;</string>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionNewScene"/>
-    <addaction name="actionOpenScene"/>
-    <addaction name="actionSaveScene"/>
-    <addaction name="actionSaveSceneAs"/>
-    <addaction name="actionExit"/>
-   </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-    <addaction name="actionCopy"/>
-    <addaction name="actionPaste"/>
-   </widget>
-   <widget class="QMenu" name="menuViews">
-    <property name="title">
-     <string>Views</string>
-    </property>
-    <addaction name="actionConsole"/>
-    <addaction name="actionSceneOutliner"/>
-    <addaction name="actionDetails"/>
-    <addaction name="actionViewport"/>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
-   <addaction name="menuViews"/>
-  </widget>
   <widget class="QStatusBar" name="statusBar">
    <property name="font">
     <font>
      <pointsize>8</pointsize>
     </font>
    </property>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="contextMenuPolicy">
+    <enum>Qt::PreventContextMenu</enum>
+   </property>
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::TopToolBarArea</set>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionSaveScene"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actionNewScene">
    <property name="text">
@@ -93,7 +82,12 @@
   </action>
   <action name="actionSaveScene">
    <property name="text">
-    <string>Save Scene</string>
+    <string>Save</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+    </font>
    </property>
   </action>
   <action name="actionSaveSceneAs">

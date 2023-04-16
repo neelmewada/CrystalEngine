@@ -4,6 +4,7 @@
 #include "Editor/SceneEditor/SceneEditorWindow.h"
 
 #include <QLabel>
+#include <QFileDialog>
 
 namespace CE::Editor
 {
@@ -197,6 +198,33 @@ namespace CE::Editor
                 return;
             }
         }
+    }
+
+    void CrystalEditorWindow::on_actionExit_triggered()
+    {
+        qApp->quit();
+    }
+
+
+    void CrystalEditorWindow::on_actionOpen_triggered()
+    {
+        auto projectPath = ProjectSettings::Get().GetEditorProjectDirectory().GetString();
+        QString projectPathQStr = QString(projectPath.GetCString());
+
+        QString openFileFinalPath = QFileDialog::getOpenFileName(this, "Open Asset", projectPathQStr);
+
+        if (openFileFinalPath.isEmpty())
+            return;
+
+        IO::Path assetPath = openFileFinalPath.toStdString();
+        if (!assetPath.Exists())
+            return;
+
+        auto assetEntry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(IO::Path::GetRelative(assetPath, projectPath));
+        if (assetEntry == nullptr)
+            return;
+
+        OpenAsset(assetEntry);
     }
 
 }

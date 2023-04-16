@@ -19,11 +19,6 @@ namespace CE::Editor::Qt
         delete ui;
     }
 
-    QGraphicsView* ImageCanvas::GetGraphicsView()
-    {
-        return ui->graphicsView;
-    }
-
     void ImageCanvas::SetImage(const CMImage& image)
     {
         this->image = image;
@@ -51,7 +46,7 @@ namespace CE::Editor::Qt
         }
 
         qtImage = QImage(image.GetDataPtr(), image.GetWidth(), image.GetHeight(), imageFormat);
-        repaint();
+        Recenter();
     }
 
     void ImageCanvas::paintEvent(QPaintEvent* event)
@@ -62,8 +57,27 @@ namespace CE::Editor::Qt
             return;
 
         QPainter painter(this);
+        painter.setBackgroundMode(::Qt::OpaqueMode);
+        painter.setBrush(QBrush(QColor(10, 10, 10)));
+        painter.setPen(::Qt::NoPen);
+        painter.drawRect(0, 0, width(), height());
 
-        painter.drawImage(QPoint(0, 0), qtImage);
+        painter.drawImage(drawRect, qtImage);
+    }
+
+    void ImageCanvas::Recenter()
+    {
+        if (qtImage.isNull())
+            return;
+
+        auto maxImageSize = Math::Min((f32)this->width(), (f32)this->height()) * 0.75f;
+        auto actualImageSize = Math::Max((f32)qtImage.width(), (f32)qtImage.height());
+        f32 scale = maxImageSize / actualImageSize;
+
+        drawRect.setTopLeft(QPointF((f32)this->width() / 2.0f - qtImage.width() * scale / 2.0f, (f32)this->height() / 2.0f - qtImage.height() * scale / 2.0f));
+        drawRect.setSize(QSizeF(qtImage.width() * scale, qtImage.height() * scale));
+
+        repaint();
     }
 
 }

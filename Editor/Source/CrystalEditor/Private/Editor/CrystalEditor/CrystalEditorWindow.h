@@ -39,6 +39,11 @@ namespace CE::Editor
         FUNCTION(Event)
         void OpenAsset(AssetDatabaseEntry* assetEntry) override;
 
+    private slots:
+        void on_actionExit_triggered();
+
+        void on_actionOpen_triggered();
+
     private:
         Ui::CrystalEditorWindow* ui;
 

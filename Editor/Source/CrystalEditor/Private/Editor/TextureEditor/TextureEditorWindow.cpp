@@ -2,6 +2,9 @@
 #include "ui_TextureEditorWindow.h"
 
 #include "TexturePreviewView/TexturePreviewView.h"
+#include "TextureDetailsView/TextureDetailsView.h"
+
+#include "CoreMedia.h"
 
 namespace CE::Editor
 {
@@ -29,8 +32,21 @@ namespace CE::Editor
         previewViewDockWidget->setWidget(previewView);
 
         // **********************************
+        // Texture Details View
+        detailsView = new TextureDetailsView(this);
+        detailsViewDockWidget = new CDockWidget(detailsView->windowTitle());
+        detailsViewDockWidget->setWidget(detailsView);
+        detailsView->resize(200, detailsView->height());
+
+        // **********************************
         // Add the dock widget to the dock manager
         dockManager->addDockWidget(ads::CenterDockWidgetArea, previewViewDockWidget);
+        dockManager->addDockWidget(ads::RightDockWidgetArea, detailsViewDockWidget);
+
+        // ***********************************
+        // ToolBar
+        ui->toolActionSave->setIcon(QIcon(":/Editor/Icons/save-colored"));
+
     }
 
     TextureEditorWindow::~TextureEditorWindow()
@@ -81,9 +97,17 @@ namespace CE::Editor
             auto texturePath = basePath / assetEntry->GetVirtualPath().ReplaceExtension(assetEntry->extension);
             if (texturePath.Exists())
             {
-                
+                CMImage image = CMImage::LoadFromFile(texturePath);
+                previewView->SetImage(image);
+                previewView->Recenter();
             }
         }
+    }
+
+    void TextureEditorWindow::resizeEvent(QResizeEvent *event)
+    {
+        EditorWindowBase::resizeEvent(event);
+        previewView->RefreshPreview();
     }
 
 }

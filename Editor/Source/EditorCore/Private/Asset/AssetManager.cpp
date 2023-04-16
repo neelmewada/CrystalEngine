@@ -349,6 +349,11 @@ namespace CE::Editor
                 fileEntry->parent->children.Remove(fileEntry);
                 delete fileEntry;
             }
+
+            QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+            {
+                OnAssetUpdated(newFilePath);
+            });
         }
 		else if (fileAction == IO::FileAction::Moved)
 		{
@@ -358,6 +363,11 @@ namespace CE::Editor
 				oldEntry->name = IO::Path(fileName).RemoveExtension().GetString();
 				oldEntry->virtualRelativePath = fileName;
 			}
+
+            QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+            {
+                OnAssetUpdated(newFilePath);
+            });
 		}
         else if (fileAction == IO::FileAction::Modified)
         {

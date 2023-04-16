@@ -5,6 +5,8 @@
 
 #include "Editor/EditorViewBase.h"
 
+#include "CoreMedia.h"
+
 namespace Ui {
 class TexturePreviewView;
 }
@@ -20,6 +22,14 @@ namespace CE::Editor
     public:
         explicit TexturePreviewView(QWidget* parent = nullptr);
         ~TexturePreviewView();
+
+        void SetImage(const CMImage& image);
+
+        void Recenter();
+
+        void RefreshPreview();
+
+        void resizeEvent(QResizeEvent *event) override;
 
     private:
         Ui::TexturePreviewView* ui;

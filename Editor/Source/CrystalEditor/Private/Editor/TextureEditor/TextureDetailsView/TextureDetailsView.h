@@ -1,0 +1,31 @@
+#ifndef TEXTUREDETAILSVIEW_H
+#define TEXTUREDETAILSVIEW_H
+
+#include <QWidget>
+
+#include "Editor/EditorViewBase.h"
+
+namespace Ui {
+class TextureDetailsView;
+}
+
+namespace CE::Editor
+{
+    CLASS()
+    class TextureDetailsView : public EditorViewBase
+    {
+        Q_OBJECT
+        CE_CLASS(TextureDetailsView, CE::Editor::EditorViewBase)
+    public:
+        explicit TextureDetailsView(QWidget* parent = nullptr);
+        ~TextureDetailsView();
+
+    private:
+        Ui::TextureDetailsView* ui;
+    };
+
+}
+
+#include "TextureDetailsView.rtti.h"
+
+#endif // TEXTUREDETAILSVIEW_H

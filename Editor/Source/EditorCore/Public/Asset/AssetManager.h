@@ -24,7 +24,7 @@ namespace CE::Editor
         CE_SIGNAL(OnAssetDatabaseUpdated);
 
         CE_SIGNAL(OnAssetUpdated, IO::Path);
-
+        
         CE_SIGNAL(OnNewSourceAssetAdded, IO::Path);
 
     private:

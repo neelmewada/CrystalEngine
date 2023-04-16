@@ -254,6 +254,11 @@ namespace CE::Editor
                 field = field->GetNext();
                 continue;
             }
+            if (!field->HasLocalAttribute("ImportSetting"))
+            {
+                field = field->GetNext();
+                continue;
+            }
 
             auto fieldDrawerType = FieldDrawer::GetFieldDrawerClassFor(field->GetTypeId());
 

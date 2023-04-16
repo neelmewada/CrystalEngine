@@ -12,6 +12,7 @@ class TextureEditorWindow;
 namespace CE::Editor
 {
     class TexturePreviewView;
+    class TextureDetailsView;
 
     CLASS()
     class TextureEditorWindow
@@ -35,6 +36,10 @@ namespace CE::Editor
         void SetTextureAsset(AssetDatabaseEntry* assetEntry);
 
     private:
+
+        void resizeEvent(QResizeEvent *event) override;
+
+    private:
         Ui::TextureEditorWindow *ui;
 
         ads::CDockManager* dockManager = nullptr;
@@ -44,6 +49,9 @@ namespace CE::Editor
         // Sub Views
         TexturePreviewView* previewView = nullptr;
         ads::CDockWidget* previewViewDockWidget = nullptr;
+
+        TextureDetailsView* detailsView = nullptr;
+        ads::CDockWidget* detailsViewDockWidget = nullptr;
     };
 
 }
