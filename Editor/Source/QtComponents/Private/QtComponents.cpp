@@ -1,7 +1,8 @@
 
 #include "QtComponents.h"
 
-CE_IMPLEMENT_MODULE(QtComponents, CE::Editor::Qt::QtComponentsModule)
+#include "QtComponents.private.h"
+CE_IMPLEMENT_MODULE_AUTORTTI(QtComponents, CE::Editor::Qt::QtComponentsModule)
 
 namespace CE::Editor::Qt
 {

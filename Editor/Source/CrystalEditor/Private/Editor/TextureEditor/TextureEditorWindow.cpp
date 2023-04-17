@@ -25,6 +25,8 @@ namespace CE::Editor
 
         dockManager = new CDockManager(this);
 
+        dockManager->setStyleSheet(dockManager->styleSheet() + "\n" + qApp->styleSheet());
+
         // **********************************
         // Texture Preview View
         previewView = new TexturePreviewView(this);
@@ -148,6 +150,42 @@ namespace CE::Editor
             return;
 
         CE_PUBLISH(CrystalEditorBus, BrowseToAsset, assetEntry);
+    }
+
+    void TextureEditorWindow::on_toolActionRedChannel_triggered()
+    {
+        auto flags = previewView->GetImageCanvasChannelFlags();
+        if (ui->toolActionRedChannel->isChecked())
+            previewView->SetImageCanvasChannel(flags | Qt::ImageCanvasChannel::Red);
+        else
+            previewView->SetImageCanvasChannel(flags & ~Qt::ImageCanvasChannel::Red);
+    }
+
+    void TextureEditorWindow::on_toolActionGreenChannel_triggered()
+    {
+        auto flags = previewView->GetImageCanvasChannelFlags();
+        if (ui->toolActionGreenChannel->isChecked())
+            previewView->SetImageCanvasChannel(flags | Qt::ImageCanvasChannel::Green);
+        else
+            previewView->SetImageCanvasChannel(flags & ~Qt::ImageCanvasChannel::Green);
+    }
+
+    void TextureEditorWindow::on_toolActionBlueChannel_triggered()
+    {
+        auto flags = previewView->GetImageCanvasChannelFlags();
+        if (ui->toolActionBlueChannel->isChecked())
+            previewView->SetImageCanvasChannel(flags | Qt::ImageCanvasChannel::Blue);
+        else
+            previewView->SetImageCanvasChannel(flags & ~Qt::ImageCanvasChannel::Blue);
+    }
+
+    void TextureEditorWindow::on_toolActionAlphaChannel_triggered()
+    {
+        auto flags = previewView->GetImageCanvasChannelFlags();
+        if (ui->toolActionAlphaChannel->isChecked())
+            previewView->SetImageCanvasChannel(flags | Qt::ImageCanvasChannel::Alpha);
+        else
+            previewView->SetImageCanvasChannel(flags & ~Qt::ImageCanvasChannel::Alpha);
     }
 
 }

@@ -34,6 +34,8 @@ namespace CE::Editor
 
         dockManager = new CDockManager(this);
 
+        dockManager->setStyleSheet(dockManager->styleSheet() + "\n" + qApp->styleSheet());
+
         // **********************************
         // Viewport View
         viewportView = new ViewportView(this);

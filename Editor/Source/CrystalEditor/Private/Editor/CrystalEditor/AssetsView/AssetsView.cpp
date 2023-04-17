@@ -608,33 +608,7 @@ namespace CE::Editor
 
     void AssetsView::OnNewSourceAssetAdded(IO::Path path)
     {
-        return; // TODO: Do nothing for now
-        if (path.Exists() && !path.ReplaceExtension(".casset").Exists())
-        {
-            if (assetImporterWindow != nullptr && assetImporterWindow->IsImportOnlyMode())
-            {
-                delete assetImporterWindow;
-                assetImporterWindow = nullptr;
-            }
 
-            if (assetImporterWindow == nullptr)
-            {
-                assetImporterWindow = new AssetImporterWindow(this);
-            }
-
-            assetImporterWindow->SetAssetsDirectory(ProjectSettings::Get().GetEditorProjectDirectory() / "Game/Assets");
-            assetImporterWindow->UpdateDetailsView();
-
-            assetImporterWindow->show();
-            assetImporterWindow->SetFiltersVisible(false);
-            assetImporterWindow->ShowTreeView(false);
-            assetImporterWindow->ShowProcessedFiles(false);
-            assetImporterWindow->ShowUnprocessedFiles(true);
-            assetImporterWindow->SetMenuBarVisible(false);
-            assetImporterWindow->SetAutoClose(true);
-
-            assetImporterWindow->setFocus();
-        }
     }
 
     void AssetsView::OnFolderSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)

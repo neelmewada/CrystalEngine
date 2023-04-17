@@ -42,4 +42,14 @@ namespace CE::Editor
         RefreshPreview();
     }
 
+    void TexturePreviewView::SetImageCanvasChannel(Qt::ImageCanvasChannel channelFlags)
+    {
+        ui->imageCanvas->SetChannelFilter(channelFlags);
+    }
+
+    Qt::ImageCanvasChannel TexturePreviewView::GetImageCanvasChannelFlags()
+    {
+        return ui->imageCanvas->GetChannelFilter();
+    }
+
 }

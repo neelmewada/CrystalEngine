@@ -18,6 +18,8 @@ namespace CE::Editor
 
         setWindowTitle("Details");
 
+        this->setStyleSheet("#" + this->objectName() + "{ background-color: palette(alternate-base); }");
+
         auto spacer = new QSpacerItem(0, 0, QSizePolicy::Fixed, QSizePolicy::Expanding);
         layout()->addItem(spacer);
 

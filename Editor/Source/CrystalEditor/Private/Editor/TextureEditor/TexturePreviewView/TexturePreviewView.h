@@ -6,6 +6,7 @@
 #include "Editor/EditorViewBase.h"
 
 #include "CoreMedia.h"
+#include "QtComponents.h"
 
 namespace Ui {
 class TexturePreviewView;
@@ -30,6 +31,10 @@ namespace CE::Editor
         void RefreshPreview();
 
         void resizeEvent(QResizeEvent *event) override;
+
+        void SetImageCanvasChannel(Qt::ImageCanvasChannel channelFlags);
+
+        Qt::ImageCanvasChannel GetImageCanvasChannelFlags();
 
     private:
         Ui::TexturePreviewView* ui;

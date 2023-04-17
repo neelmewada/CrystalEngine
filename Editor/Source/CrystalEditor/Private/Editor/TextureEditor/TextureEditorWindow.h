@@ -42,6 +42,14 @@ namespace CE::Editor
     private slots:
         void on_toolActionBrowse_triggered();
 
+        void on_toolActionRedChannel_triggered();
+
+        void on_toolActionGreenChannel_triggered();
+
+        void on_toolActionBlueChannel_triggered();
+
+        void on_toolActionAlphaChannel_triggered();
+
     private:
 
         void resizeEvent(QResizeEvent *event) override;

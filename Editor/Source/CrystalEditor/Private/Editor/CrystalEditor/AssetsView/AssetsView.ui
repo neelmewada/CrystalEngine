@@ -31,6 +31,11 @@
    </property>
    <item>
     <widget class="QSplitter" name="splitter">
+     <property name="styleSheet">
+      <string notr="true">#splitter {
+	background: palette(alternate-base);
+}</string>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -40,52 +45,17 @@
         <number>0</number>
        </property>
        <property name="leftMargin">
-        <number>0</number>
+        <number>6</number>
        </property>
-       <item>
-        <widget class="QFrame" name="leftTopBar">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">#leftTopBar {	
-	border: 0x solid gray;
-	border-bottom: 1px solid gray;
-	background-color: rgb(60, 60, 60);
-}</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-       </item>
+       <property name="topMargin">
+        <number>30</number>
+       </property>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <property name="bottomMargin">
+        <number>6</number>
+       </property>
        <item>
         <widget class="QTreeView" name="folderTreeView">
          <property name="font">
@@ -95,11 +65,12 @@
          </property>
          <property name="styleSheet">
           <string notr="true">QTreeView {
-	background: rgb(53, 53, 53);
+	background: palette(base);
+	border: 2px solid rgb(45, 45, 45);
 }</string>
          </property>
          <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+          <enum>QFrame::Box</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Plain</enum>
@@ -120,7 +91,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QFrame" name="rightTopBar">
+        <widget class="QWidget" name="rightTopBar" native="true">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -129,16 +100,8 @@
          </property>
          <property name="styleSheet">
           <string notr="true">#rightTopBar {
-	border: 0x solid gray;
-	border-bottom: 1px solid gray;
-	background-color: rgb(60, 60, 60);
+	background-color: palette(alternate-base);
 }</string>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <property name="leftMargin">
@@ -152,11 +115,27 @@
           </property>
           <item>
            <widget class="QLineEdit" name="rightSearchInput">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>22</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>200</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QLineEdit {
+	background: rgb(15, 15, 15);
+	border-radius: 10px;
+	border: 1px solid rgb(40, 40, 40);
+}</string>
+            </property>
+            <property name="cursorPosition">
+             <number>0</number>
             </property>
             <property name="placeholderText">
              <string>Search...</string>
@@ -179,13 +158,6 @@
             </property>
            </spacer>
           </item>
-          <item>
-           <widget class="QToolButton" name="toolButton">
-            <property name="text">
-             <string>...</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -196,7 +168,7 @@
          </property>
          <property name="styleSheet">
           <string notr="true">#assetsContentView {
-	background-color: rgb(42, 42, 42);
+	background-color: palette(alternate-base);
 }</string>
          </property>
          <property name="dragEnabled">
@@ -232,7 +204,7 @@
         <widget class="QFrame" name="assetSelectionFrame">
          <property name="styleSheet">
           <string notr="true">#assetSelectionFrame {
-	background-color: rgb(53, 53, 53);
+	background-color: palette(alternate-base);
 }</string>
          </property>
          <property name="frameShape">

@@ -62,6 +62,27 @@ namespace CE::Editor::Qt
         painter.setPen(::Qt::NoPen);
         painter.drawRect(0, 0, width(), height());
 
+        QColor color = QColor(0, 0, 0, 255);
+
+        if (EnumHasFlag(channels, ImageCanvasChannel::Red))
+            color.setRed(255);
+        if (EnumHasFlag(channels, ImageCanvasChannel::Green))
+            color.setGreen(255);
+        if (EnumHasFlag(channels, ImageCanvasChannel::Blue))
+            color.setBlue(255);
+        if (EnumHasFlag(channels, ImageCanvasChannel::Alpha))
+        {
+            color.setAlpha(255);
+            if (channels == ImageCanvasChannel::Alpha)
+                color = QColor(255, 255, 255, 255);
+        }
+
+        painter.fillRect(drawRect, color);
+
+        if (channels == ImageCanvasChannel::None)
+            return;
+
+        painter.setCompositionMode(QPainter::CompositionMode_Multiply);
         painter.drawImage(drawRect, qtImage);
     }
 
@@ -77,6 +98,12 @@ namespace CE::Editor::Qt
         drawRect.setTopLeft(QPointF((f32)this->width() / 2.0f - qtImage.width() * scale / 2.0f, (f32)this->height() / 2.0f - qtImage.height() * scale / 2.0f));
         drawRect.setSize(QSizeF(qtImage.width() * scale, qtImage.height() * scale));
 
+        repaint();
+    }
+
+    void ImageCanvas::SetChannelFilter(ImageCanvasChannel channels)
+    {
+        this->channels = channels;
         repaint();
     }
 

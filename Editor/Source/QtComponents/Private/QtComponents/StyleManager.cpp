@@ -29,14 +29,14 @@ namespace CE::Editor::Qt
 
         QPalette palette;
 
-        QColor darkGray(53, 53, 53);
+        QColor darkGray(36, 36, 36); // Color!
         QColor gray(128, 128, 128);
-        QColor black(25, 25, 25);
+        QColor black(26, 26, 26);
         QColor blue(42, 130, 218);
 
         // ezEditor styling
         palette.setColor(QPalette::WindowText, QColor(200, 200, 200, 255));
-        palette.setColor(QPalette::Button, QColor(100, 100, 100, 255));
+        palette.setColor(QPalette::Button, QColor(60, 60, 60, 255));
         palette.setColor(QPalette::Light, QColor(97, 97, 97, 255));
         //palette.setColor(QPalette::Light, QColor(37, 37, 37, 255));
         palette.setColor(QPalette::Midlight, QColor(59, 59, 59, 255));
@@ -59,21 +59,20 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::ToolTipText, QColor(0, 0, 0, 255));
 
         palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(128, 128, 128, 255));
-        palette.setColor(QPalette::Disabled, QPalette::Button, QColor(80, 80, 80, 255));
+        palette.setColor(QPalette::Disabled, QPalette::Button, QColor(32, 32, 32, 255));
         palette.setColor(QPalette::Disabled, QPalette::Text, QColor(105, 105, 105, 255));
         palette.setColor(QPalette::Disabled, QPalette::BrightText, QColor(255, 255, 255, 255));
         palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(128, 128, 128, 255));
         palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(86, 117, 148, 255));
         
         // purple highlight theme override
-        palette.setColor(QPalette::Window, QColor(53, 53, 53));
+        palette.setColor(QPalette::Window, darkGray);
         palette.setColor(QPalette::WindowText, ::Qt::white);
-        palette.setColor(QPalette::Base, QColor(15, 15, 15));
-        palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+        palette.setColor(QPalette::AlternateBase, darkGray);
         palette.setColor(QPalette::ToolTipBase, ::Qt::white);
         palette.setColor(QPalette::ToolTipText, ::Qt::white);
         palette.setColor(QPalette::Text, ::Qt::white);
-        palette.setColor(QPalette::Button, QColor(53, 53, 53));
+        palette.setColor(QPalette::Button, darkGray);
         palette.setColor(QPalette::ButtonText, ::Qt::white);
         palette.setColor(QPalette::BrightText, ::Qt::red);
 
@@ -81,14 +80,14 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::HighlightedText, ::Qt::black);
 
         // New Theme
-        palette.setColor(QPalette::Window, QColor(53, 53, 53));
+        palette.setColor(QPalette::Window, QColor(21, 21, 21));
         palette.setColor(QPalette::WindowText, ::Qt::white);
-        palette.setColor(QPalette::Base, QColor(25, 25, 25));
-        palette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+        palette.setColor(QPalette::Base, black);
+        palette.setColor(QPalette::AlternateBase, darkGray);
         palette.setColor(QPalette::ToolTipBase, ::Qt::white);
         palette.setColor(QPalette::ToolTipText, ::Qt::white);
         palette.setColor(QPalette::Text, ::Qt::white);
-        palette.setColor(QPalette::Button, QColor(53, 53, 53));
+        palette.setColor(QPalette::Button, darkGray);
         palette.setColor(QPalette::ButtonText, ::Qt::white);
         palette.setColor(QPalette::BrightText, ::Qt::red);
         palette.setColor(QPalette::Link, QColor(42, 130, 218));
@@ -96,13 +95,37 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::HighlightedText, ::Qt::black);
 
         palette.setColor(QPalette::PlaceholderText, gray);
-        palette.setColor(QPalette::Active, QPalette::Button, gray.darker());
+        palette.setColor(QPalette::Active, QPalette::Button, darkGray);
         palette.setColor(QPalette::Disabled, QPalette::ButtonText, gray);
         palette.setColor(QPalette::Disabled, QPalette::WindowText, gray);
         palette.setColor(QPalette::Disabled, QPalette::Text, gray);
         palette.setColor(QPalette::Disabled, QPalette::Light, darkGray);
 
-        app->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+        app->setStyleSheet(R"(
+            QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }
+            ads--CDockWidgetTab {
+                background: palette(window);
+                border-top-left-radius: 5px;
+                border-top-right-radius: 5px;
+                border: 0px;
+                padding: 3px 0px;
+            }
+            ads--CDockWidgetTab[activeTab="true"] {
+                background: palette(alternate-base);
+            }
+            ads--CDockWidget {
+                border: 0px;
+            }
+            ads--CDockWidget > QWidget {
+                background: palette(alternate-base);
+                border: 0px;
+            }
+            ads--CDockWidgetTab QLabel {
+                min-height: 16px;
+                min-width: 40px;
+                color: white;
+            }
+        )");
 
         app->setPalette(palette);
     }

@@ -44,7 +44,6 @@ namespace CE::Editor::Qt
         ui->comboBox->setCurrentIndex(index);
     }
 
-
     void EnumField::on_comboBox_currentIndexChanged(int index)
     {
         OnInputValueChanged((s64)ui->comboBox->currentIndex());

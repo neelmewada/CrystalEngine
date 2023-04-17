@@ -32,8 +32,10 @@
     <string>toolBar</string>
    </property>
    <property name="styleSheet">
-    <string notr="true">QToolButton {
-	
+    <string notr="true">QToolBar {
+	background-color: rgb(36, 36, 36);
+	border: 0px;
+	border-bottom: 2px solid palette(base);
 }</string>
    </property>
    <property name="movable">
@@ -63,6 +65,10 @@
    <addaction name="toolActionSave"/>
    <addaction name="toolActionBrowse"/>
    <addaction name="separator"/>
+   <addaction name="toolActionRedChannel"/>
+   <addaction name="toolActionGreenChannel"/>
+   <addaction name="toolActionBlueChannel"/>
+   <addaction name="toolActionAlphaChannel"/>
   </widget>
   <action name="toolActionSave">
    <property name="text">
@@ -81,6 +87,74 @@
    <property name="font">
     <font>
      <pointsize>12</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="toolActionRedChannel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>R</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+  </action>
+  <action name="toolActionGreenChannel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>G</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+  </action>
+  <action name="toolActionBlueChannel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>B</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+  </action>
+  <action name="toolActionAlphaChannel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>A</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
     </font>
    </property>
   </action>

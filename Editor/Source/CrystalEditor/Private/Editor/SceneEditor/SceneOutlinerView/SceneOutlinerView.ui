@@ -14,8 +14,8 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QTreeView {
-	background: rgb(53, 53, 53);
+   <string notr="true">QTreeWidget {
+	background-color: palette(base);
 }</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
