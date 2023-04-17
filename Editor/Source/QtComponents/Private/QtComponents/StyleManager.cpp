@@ -125,7 +125,7 @@ namespace CE::Editor::Qt
                 min-width: 40px;
                 color: white;
             }
-            QToolBar {
+            QMainWindow > QToolBar {
                 padding: 0px 10px;
                 background-color: rgb(36, 36, 36);
 	            border: 0px;
