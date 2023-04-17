@@ -125,6 +125,26 @@ namespace CE::Editor::Qt
                 min-width: 40px;
                 color: white;
             }
+            QToolBar {
+                padding: 0px 10px;
+                background-color: rgb(36, 36, 36);
+	            border: 0px;
+	            border-bottom: 2px solid palette(base);
+            }
+            QToolBar > QToolButton {
+                border: 0px;
+                border-radius: 3px;
+                padding: 3px 3px;
+            }
+            QToolBar > QToolButton:hover {
+                background: rgb(60, 60, 60);
+            }
+            QToolBar > QToolButton:pressed {
+                background: rgb(80, 80, 80);
+            }
+            QToolBar > QToolButton:checked {
+                background: rgb(80, 80, 80);
+            }
         )");
 
         app->setPalette(palette);

@@ -40,7 +40,11 @@ namespace CE::Editor
 
         mainDockManager = new ads::CDockManager(this);
 
-        mainDockManager->setStyleSheet(mainDockManager->styleSheet() + "\n" + qApp->styleSheet());
+        mainDockManager->setStyleSheet(mainDockManager->styleSheet() + "\n" + qApp->styleSheet() + R"(
+            ads--CDockWidgetTab {
+                padding: 5px 0px;
+            }
+        )");
 
         // Scene Editor Window
         CreateSceneEditorWindow();

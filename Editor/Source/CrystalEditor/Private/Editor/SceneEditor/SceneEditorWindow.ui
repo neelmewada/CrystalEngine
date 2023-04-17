@@ -29,11 +29,7 @@
     <string>toolBar</string>
    </property>
    <property name="styleSheet">
-    <string notr="true">QToolBar {
-	background-color: rgb(36, 36, 36);
-	border: 0px;
-	border-bottom: 2px solid palette(base);
-}</string>
+    <string notr="true"/>
    </property>
    <property name="movable">
     <bool>false</bool>
