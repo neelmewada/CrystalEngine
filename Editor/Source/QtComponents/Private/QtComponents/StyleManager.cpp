@@ -5,7 +5,7 @@
 #include <QStyleFactory>
 #include <QPointer>
 #include <QStyle>
-
+#include <QMenu>
 
 namespace CE::Editor::Qt
 {
@@ -113,6 +113,9 @@ namespace CE::Editor::Qt
             ads--CDockWidgetTab[activeTab="true"] {
                 background: palette(alternate-base);
             }
+            ads--CDockWidgetTab[activeTab="true"] > #tabCloseButton {
+                qproperty-icon: url(:/Editor/Icons/close);
+            }
             ads--CDockWidget {
                 border: 0px;
             }
@@ -120,13 +123,20 @@ namespace CE::Editor::Qt
                 background: palette(alternate-base);
                 border: 0px;
             }
+            EditorViewBase {
+                background: palette(alternate-base);
+                border: 0px;
+            }
+            #dockAreaCloseButton {
+                icon: url(:/Editor/Icons/close);
+            }
             ads--CDockWidgetTab QLabel {
                 min-height: 16px;
                 min-width: 40px;
                 color: white;
             }
             QMainWindow > QToolBar {
-                padding: 0px 10px;
+                padding: 0px 5px;
                 background-color: rgb(36, 36, 36);
 	            border: 0px;
 	            border-bottom: 2px solid palette(base);
@@ -144,6 +154,14 @@ namespace CE::Editor::Qt
             }
             QToolBar > QToolButton:checked {
                 background: rgb(80, 80, 80);
+            }
+            QMenu {
+                background-color: rgb(56, 56, 56);
+	            border: 1px solid rgb(80, 80, 80);
+            }
+            QMenu::item:selected {
+                color: white;
+                background-color: rgb(0, 112, 224);
             }
         )");
 

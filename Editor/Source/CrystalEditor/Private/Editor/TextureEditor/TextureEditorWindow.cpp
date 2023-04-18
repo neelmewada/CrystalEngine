@@ -5,6 +5,8 @@
 #include "TextureDetailsView/TextureDetailsView.h"
 
 #include <QToolButton>
+#include <QMenu>
+#include <QMetaObject>
 
 namespace CE::Editor
 {
@@ -62,6 +64,7 @@ namespace CE::Editor
         viewSettingsBtn = qobject_cast<QToolButton*>(ui->toolBar->widgetForAction(viewSettingsAction));
         if (viewSettingsBtn != nullptr)
         {
+            viewSettingsBtn->setFont(ui->toolActionSave->font());
             viewSettingsBtn->setPopupMode(QToolButton::InstantPopup);
             viewSettingsBtn->removeAction(viewSettingsAction);
             showPreviewView = viewSettingsBtn->addAction("Show Preview", [this]

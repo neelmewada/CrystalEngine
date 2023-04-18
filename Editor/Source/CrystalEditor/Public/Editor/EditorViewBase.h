@@ -14,6 +14,8 @@ namespace CE::Editor
     public:
         explicit EditorViewBase(QWidget* parent = nullptr);
         virtual ~EditorViewBase();
+
+        void paintEvent(QPaintEvent *event) override;
         
     };
     

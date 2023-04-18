@@ -14,5 +14,6 @@
         <file alias="Icons/save-colored">Resources/Icons/save-colored.png</file>
         <file alias="Icons/settings">Resources/Icons/settings.png</file>
         <file alias="Icons/search-folder">Resources/Icons/search-folder.png</file>
+        <file alias="Icons/close">Resources/Icons/close.png</file>
     </qresource>
 </RCC>
