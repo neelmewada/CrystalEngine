@@ -5,6 +5,7 @@
 #include "AssetProcessor.h"
 
 #include <QFileDialog>
+#include <QPainter>
 
 namespace CE::Editor
 {
@@ -341,6 +342,16 @@ namespace CE::Editor
     void AssetImporterWindow::SetMenuBarVisible(bool visible)
     {
         ui->menubar->setVisible(visible);
+    }
+
+    void AssetImporterWindow::paintEvent(QPaintEvent* event)
+    {
+        QPainter p(this);
+        p.setPen(::Qt::NoPen);
+        p.setBrush(QBrush(qApp->palette().color(QPalette::AlternateBase)));
+        p.drawRect(this->rect());
+
+        QMainWindow::paintEvent(event);
     }
 
     void AssetImporterWindow::TryClosingIfNoUnprocessedFiles()

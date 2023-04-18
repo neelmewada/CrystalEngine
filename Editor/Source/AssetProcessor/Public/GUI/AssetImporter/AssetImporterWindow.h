@@ -48,6 +48,8 @@ namespace CE::Editor
 
     private:
 
+        void paintEvent(QPaintEvent *event) override;
+
         void TryClosingIfNoUnprocessedFiles();
 
     private slots:

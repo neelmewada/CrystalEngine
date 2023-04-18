@@ -90,7 +90,7 @@ namespace CE::Editor
 
         // **********************************
         // Tool Bar
-        ui->actionSaveScene->setIcon(QIcon(":/Editor/Icons/save-colored"));
+        ui->actionSaveScene->setIcon(QIcon(":/Editor/Icons/save"));
     }
 
     SceneEditorWindow::~SceneEditorWindow()

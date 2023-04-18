@@ -49,7 +49,7 @@ namespace CE::Editor
 
         // ***********************************
         // ToolBar
-        ui->toolActionSave->setIcon(QIcon(":/Editor/Icons/save-colored"));
+        ui->toolActionSave->setIcon(QIcon(":/Editor/Icons/save"));
         ui->toolActionBrowse->setIcon(QIcon(":/Editor/Icons/search-folder"));
 
         // Horizontal Spacer
@@ -151,7 +151,7 @@ namespace CE::Editor
     {
         if (assetEntry == nullptr)
             return;
-        
+
         CE_PUBLISH(CrystalEditorBus, BrowseToAsset, assetEntry);
     }
 

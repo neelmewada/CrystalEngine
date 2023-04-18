@@ -44,11 +44,21 @@
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuTools">
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
     <property name="title">
      <string>Tools</string>
     </property>
@@ -71,6 +81,11 @@
   <action name="actionAssetImporter">
    <property name="text">
     <string>Asset Importer</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>9</pointsize>
+    </font>
    </property>
   </action>
  </widget>

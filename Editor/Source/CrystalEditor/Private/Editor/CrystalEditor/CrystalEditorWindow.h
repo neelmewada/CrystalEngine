@@ -18,6 +18,7 @@ class CrystalEditorWindow;
 namespace CE::Editor
 {
     class SceneEditorWindow;
+    class AssetImporterWindow;
 
     CLASS()
     class CrystalEditorWindow : public QMainWindow, public CE::Object, public CrystalEditorBus::Interface
@@ -76,6 +77,7 @@ namespace CE::Editor
         Ui::CrystalEditorWindow* ui;
 
         ads::CDockManager* mainDockManager = nullptr;
+        AssetImporterWindow* assetImporterWindow = nullptr;
 
         Array<ads::CDockWidget*> dockWidgets{};
         Vector<EditorWindowBase*> editorWindows{};

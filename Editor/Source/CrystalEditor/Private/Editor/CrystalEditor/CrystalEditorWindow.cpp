@@ -286,12 +286,12 @@ namespace CE::Editor
 
     void CrystalEditorWindow::on_actionAssetImporter_triggered()
     {
-        AssetImporterWindow* window = new AssetImporterWindow(this);
-        window->setWindowFlag(::Qt::Tool, true);
-        window->show();
+        assetImporterWindow = new AssetImporterWindow(this);
+        assetImporterWindow->setWindowFlag(::Qt::Tool, true);
+        assetImporterWindow->show();
 
         auto projectPath = ProjectSettings::Get().GetEditorProjectDirectory() / "Game";
-        window->SetAssetsDirectory(projectPath);
+        assetImporterWindow->SetAssetsDirectory(projectPath);
     }
 
 }
