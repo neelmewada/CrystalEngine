@@ -391,6 +391,9 @@ namespace CE
         static ClassType* FindClassByName(Name className);
         static ClassType* FindClassByTypeId(TypeId classTypeId);
 
+        Array<TypeId> GetDerivedClassesTypeId() const;
+        Array<ClassType*> GetDerivedClasses() const;
+
 	private:
         static void AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath);
 
@@ -619,11 +622,11 @@ namespace CE\
 			const CE::StructTypeData<Namespace::Class> TypeData;\
             TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Namespace::Class> typeData) : Type(type), TypeData(typeData)\
             {\
-                TypeInfo::RegisterType(&Type);                                                             \
-                ClassType::RegisterClass(&Type);                                                            \
+                TypeInfo::RegisterType(&Type);\
+                Type.AddSuper<SuperClasses>();\
+                ClassType::RegisterClass(&Type);\
 				FunctionList\
                 FieldList\
-				Type.AddSuper<SuperClasses>();\
             }\
 			virtual ~TypeInfoImpl()\
 			{\
@@ -711,9 +714,9 @@ namespace CE\
             TypeInfoImpl(CE::StructType type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
             {\
                 TypeInfo::RegisterType(&Type);\
+                Type.AddSuper<SuperStructs>();\
                 StructType::RegisterStruct(&Type);\
                 FieldList\
-				Type.AddSuper<SuperStructs>();\
             }\
 			virtual ~TypeInfoImpl()\
 			{\

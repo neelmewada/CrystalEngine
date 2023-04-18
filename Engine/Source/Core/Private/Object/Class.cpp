@@ -421,4 +421,30 @@ namespace CE
         return registeredClasses[classTypeId];
     }
 
+    Array<TypeId> ClassType::GetDerivedClassesTypeId() const
+    {
+        if (!derivedClassesMap.KeyExists(GetTypeId()))
+            return {};
+
+        return derivedClassesMap[GetTypeId()];
+    }
+
+    Array<ClassType*> ClassType::GetDerivedClasses() const
+    {
+        auto typeIdArray = GetDerivedClassesTypeId();
+
+        Array<ClassType*> result{};
+
+        for (int i = 0; i < typeIdArray.GetSize(); i++)
+        {
+            auto type = GetTypeInfo(typeIdArray[i]);
+            if (type == nullptr || !type->IsClass())
+                continue;
+
+            result.Add((ClassType*)type);
+        }
+
+        return result;
+    }
+
 } // namespace CE

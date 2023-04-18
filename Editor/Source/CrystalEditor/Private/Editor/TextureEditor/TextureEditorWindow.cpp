@@ -151,7 +151,7 @@ namespace CE::Editor
     {
         if (assetEntry == nullptr)
             return;
-
+        
         CE_PUBLISH(CrystalEditorBus, BrowseToAsset, assetEntry);
     }
 

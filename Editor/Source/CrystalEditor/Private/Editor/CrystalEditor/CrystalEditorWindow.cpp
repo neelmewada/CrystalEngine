@@ -3,6 +3,8 @@
 
 #include "Editor/SceneEditor/SceneEditorWindow.h"
 
+#include "AssetProcessor.h"
+
 #include <QLabel>
 #include <QFileDialog>
 
@@ -279,6 +281,17 @@ namespace CE::Editor
             return;
 
         OpenAsset(assetEntry);
+    }
+
+
+    void CrystalEditorWindow::on_actionAssetImporter_triggered()
+    {
+        AssetImporterWindow* window = new AssetImporterWindow(this);
+        window->setWindowFlag(::Qt::Tool, true);
+        window->show();
+
+        auto projectPath = ProjectSettings::Get().GetEditorProjectDirectory() / "Game";
+        window->SetAssetsDirectory(projectPath);
     }
 
 }

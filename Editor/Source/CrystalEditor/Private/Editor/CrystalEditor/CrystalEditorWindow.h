@@ -70,6 +70,8 @@ namespace CE::Editor
 
         void on_actionOpen_triggered();
 
+        void on_actionAssetImporter_triggered();
+
     private:
         Ui::CrystalEditorWindow* ui;
 

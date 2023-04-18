@@ -7,6 +7,70 @@
 #include <QStyle>
 #include <QMenu>
 
+const char* globalStyleSheetText = R"(
+QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }
+ads--CDockWidgetTab {
+    background: palette(window);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border: 0px;
+    padding: 3px 0px;
+}
+ads--CDockWidgetTab[activeTab="true"] {
+    background: palette(alternate-base);
+}
+ads--CDockWidgetTab[activeTab="true"] > #tabCloseButton {
+    qproperty-icon: url(:/Editor/Icons/close);
+}
+ads--CDockWidget {
+    border: 0px;
+}
+ads--CDockWidget > QWidget {
+    background: palette(alternate-base);
+    border: 0px;
+}
+EditorViewBase {
+    background: palette(alternate-base);
+    border: 0px;
+}
+#dockAreaCloseButton {
+    icon: url(:/Editor/Icons/close);
+}
+ads--CDockWidgetTab QLabel {
+    min-height: 16px;
+    min-width: 40px;
+    color: white;
+}
+QMainWindow > QToolBar {
+    padding: 0px 5px;
+    background-color: rgb(36, 36, 36);
+    border: 0px;
+    border-bottom: 2px solid palette(base);
+}
+QToolBar > QToolButton {
+    border: 0px;
+    border-radius: 3px;
+    padding: 3px 3px;
+}
+QToolBar > QToolButton:hover {
+    background: rgb(60, 60, 60);
+}
+QToolBar > QToolButton:pressed {
+    background: rgb(80, 80, 80);
+}
+QToolBar > QToolButton:checked {
+    background: rgb(80, 80, 80);
+}
+QMenu {
+    background-color: rgb(56, 56, 56);
+    border: 1px solid rgb(80, 80, 80);
+}
+QMenu::item:selected {
+    color: white;
+    background-color: rgb(0, 112, 224);
+}
+)";
+
 namespace CE::Editor::Qt
 {
 
@@ -101,69 +165,7 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::Disabled, QPalette::Text, gray);
         palette.setColor(QPalette::Disabled, QPalette::Light, darkGray);
 
-        app->setStyleSheet(R"(
-            QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }
-            ads--CDockWidgetTab {
-                background: palette(window);
-                border-top-left-radius: 5px;
-                border-top-right-radius: 5px;
-                border: 0px;
-                padding: 3px 0px;
-            }
-            ads--CDockWidgetTab[activeTab="true"] {
-                background: palette(alternate-base);
-            }
-            ads--CDockWidgetTab[activeTab="true"] > #tabCloseButton {
-                qproperty-icon: url(:/Editor/Icons/close);
-            }
-            ads--CDockWidget {
-                border: 0px;
-            }
-            ads--CDockWidget > QWidget {
-                background: palette(alternate-base);
-                border: 0px;
-            }
-            EditorViewBase {
-                background: palette(alternate-base);
-                border: 0px;
-            }
-            #dockAreaCloseButton {
-                icon: url(:/Editor/Icons/close);
-            }
-            ads--CDockWidgetTab QLabel {
-                min-height: 16px;
-                min-width: 40px;
-                color: white;
-            }
-            QMainWindow > QToolBar {
-                padding: 0px 5px;
-                background-color: rgb(36, 36, 36);
-	            border: 0px;
-	            border-bottom: 2px solid palette(base);
-            }
-            QToolBar > QToolButton {
-                border: 0px;
-                border-radius: 3px;
-                padding: 3px 3px;
-            }
-            QToolBar > QToolButton:hover {
-                background: rgb(60, 60, 60);
-            }
-            QToolBar > QToolButton:pressed {
-                background: rgb(80, 80, 80);
-            }
-            QToolBar > QToolButton:checked {
-                background: rgb(80, 80, 80);
-            }
-            QMenu {
-                background-color: rgb(56, 56, 56);
-	            border: 1px solid rgb(80, 80, 80);
-            }
-            QMenu::item:selected {
-                color: white;
-                background-color: rgb(0, 112, 224);
-            }
-        )");
+        app->setStyleSheet(globalStyleSheetText);
 
         app->setPalette(palette);
     }
