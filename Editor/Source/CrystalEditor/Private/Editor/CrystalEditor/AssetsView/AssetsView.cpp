@@ -21,7 +21,7 @@ namespace CE::Editor
 {
 
     AssetsView::AssetsView(QWidget *parent) :
-        EditorViewBase(parent),
+        EditorView(parent),
         ui(new Ui::AssetsView)
     {
         ui->setupUi(this);
@@ -30,7 +30,7 @@ namespace CE::Editor
 
         ui->splitter->setSizes({ 200, 500 });
 
-        auto rootEntry = (AssetDatabaseEntry*)(AssetDatabase::Get().GetRootEntry());
+        auto rootEntry = const_cast<AssetDatabaseEntry*>(AssetDatabase::Get().GetRootEntry());
         
         // Folder View/Model
         folderModel = new AssetsViewFolderModel(this);
@@ -73,7 +73,7 @@ namespace CE::Editor
 
     void AssetsView::resizeEvent(QResizeEvent* event)
     {
-        EditorViewBase::resizeEvent(event);
+        EditorView::resizeEvent(event);
     }
 
     void AssetsView::SelectAsset(AssetDatabaseEntry* assetEntry)

@@ -22,10 +22,10 @@ namespace CE::Editor
     }
 
     CLASS()
-    class DetailsView : public EditorViewBase
+    class DetailsView : public EditorView
     {
         Q_OBJECT
-        CE_CLASS(DetailsView, CE::Editor::EditorViewBase)
+        CE_CLASS(DetailsView, CE::Editor::EditorView)
     public:
         explicit DetailsView(QWidget* parent = nullptr);
         ~DetailsView();

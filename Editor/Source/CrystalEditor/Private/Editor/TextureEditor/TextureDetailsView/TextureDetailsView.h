@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "Editor/EditorViewBase.h"
+#include "Editor/EditorView.h"
 
 namespace Ui {
 class TextureDetailsView;
@@ -12,10 +12,10 @@ class TextureDetailsView;
 namespace CE::Editor
 {
     CLASS()
-    class TextureDetailsView : public EditorViewBase
+    class TextureDetailsView : public EditorView
     {
         Q_OBJECT
-        CE_CLASS(TextureDetailsView, CE::Editor::EditorViewBase)
+        CE_CLASS(TextureDetailsView, CE::Editor::EditorView)
     public:
         explicit TextureDetailsView(QWidget* parent = nullptr);
         ~TextureDetailsView();

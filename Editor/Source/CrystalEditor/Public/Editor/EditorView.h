@@ -7,13 +7,13 @@
 namespace CE::Editor
 {
     CLASS()
-    class EditorViewBase : public QWidget, public CE::Object
+    class CRYSTALEDITOR_API EditorView : public QWidget, public CE::Object
     {
         Q_OBJECT
-        CE_CLASS(EditorViewBase, CE::Object)
+        CE_CLASS(EditorView, CE::Object)
     public:
-        explicit EditorViewBase(QWidget* parent = nullptr);
-        virtual ~EditorViewBase();
+        explicit EditorView(QWidget* parent = nullptr);
+        virtual ~EditorView();
 
         void paintEvent(QPaintEvent *event) override;
         
@@ -21,4 +21,4 @@ namespace CE::Editor
     
 } // namespace CE::Editor
 
-#include "EditorViewBase.rtti.h"
+#include "EditorView.rtti.h"

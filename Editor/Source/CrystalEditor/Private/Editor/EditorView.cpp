@@ -1,5 +1,5 @@
 
-#include "Editor/EditorViewBase.h"
+#include "Editor/EditorView.h"
 
 #include <QStyleOption>
 #include <QPainter>
@@ -7,17 +7,17 @@
 namespace CE::Editor
 {
 
-    EditorViewBase::EditorViewBase(QWidget* parent) : QWidget(parent)
+    EditorView::EditorView(QWidget* parent) : QWidget(parent)
     {
-        setObjectName("EditorViewBase");
+        setObjectName("EditorView");
     }
 
-    EditorViewBase::~EditorViewBase()
+    EditorView::~EditorView()
     {
 
     }
 
-    void EditorViewBase::paintEvent(QPaintEvent* event)
+    void EditorView::paintEvent(QPaintEvent* event)
     {
         QPainter p(this);
         p.setPen(::Qt::NoPen);

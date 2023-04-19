@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QTreeView>
 
-#include "Editor/EditorViewBase.h"
+#include "Editor/EditorView.h"
 #include "Editor/SceneEditor/SceneOutlinerViewBus.h"
 
 #include "SceneOutlinerModel.h"
@@ -21,12 +21,12 @@ namespace CE
 namespace CE::Editor
 {
     class SceneOutlinerView :
-        public EditorViewBase,
+        public EditorView,
         public SceneOutlinerViewBus::Interface
     {
         Q_OBJECT
 
-        CE_CLASS(SceneOutlinerView, EditorViewBase)
+        CE_CLASS(SceneOutlinerView, EditorView)
 
     public:
         explicit SceneOutlinerView(QWidget *parent = nullptr);
@@ -71,7 +71,7 @@ namespace CE::Editor
 }
 
 CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, SceneOutlinerView,
-    CE_SUPER(CE::Editor::EditorViewBase),
+    CE_SUPER(CE::Editor::EditorView),
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),

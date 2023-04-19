@@ -4,7 +4,7 @@
 #include <QWindow>
 #include <QWidget>
 
-#include "Editor/EditorViewBase.h"
+#include "Editor/EditorView.h"
 #include "GUI/ViewportWindow.h"
 
 #include "System.h"
@@ -16,10 +16,10 @@ class ViewportView;
 namespace CE::Editor
 {
 
-    class ViewportView : public EditorViewBase
+    class ViewportView : public EditorView
     {
         Q_OBJECT
-        CE_CLASS(ViewportView, EditorViewBase)
+        CE_CLASS(ViewportView, EditorView)
     public:
         explicit ViewportView(QWidget* parent = nullptr);
         ~ViewportView();
@@ -51,7 +51,7 @@ namespace CE::Editor
 }
 
 CE_RTTI_CLASS(CRYSTALEDITOR_API,CE::Editor, ViewportView,
-    CE_SUPER(CE::Editor::EditorViewBase),
+    CE_SUPER(CE::Editor::EditorView),
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),

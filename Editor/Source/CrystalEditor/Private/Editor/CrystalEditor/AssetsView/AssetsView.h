@@ -5,7 +5,7 @@
 #include <QItemSelection>
 #include <QItemDelegate>
 
-#include "Editor/EditorViewBase.h"
+#include "Editor/EditorView.h"
 
 namespace Ui {
 class AssetsView;
@@ -56,10 +56,10 @@ namespace CE::Editor
     };
 
     CLASS()
-    class CRYSTALEDITOR_API AssetsView : public EditorViewBase
+    class CRYSTALEDITOR_API AssetsView : public EditorView
     {
         Q_OBJECT
-        CE_CLASS(AssetsView, CE::Editor::EditorViewBase)
+        CE_CLASS(AssetsView, CE::Editor::EditorView)
     public:
         explicit AssetsView(QWidget *parent = nullptr);
         ~AssetsView();

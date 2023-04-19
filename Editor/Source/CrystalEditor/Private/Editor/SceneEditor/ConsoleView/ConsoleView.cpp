@@ -54,7 +54,7 @@ namespace CE::Editor
     static std::shared_ptr<spdlog::logger> EditorConsoleLogger{};
 
     ConsoleView::ConsoleView(QWidget *parent) :
-        EditorViewBase(parent),
+        EditorView(parent),
         ui(new Ui::ConsoleView)
     {
         ui->setupUi(this);

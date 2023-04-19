@@ -11,7 +11,7 @@
 namespace CE::Editor
 {
     DetailsView::DetailsView(QWidget* parent) :
-        EditorViewBase(parent),
+        EditorView(parent),
         ui(new Ui::DetailsView)
     {
         ui->setupUi(this);
@@ -224,7 +224,7 @@ namespace CE::Editor
 
     void DetailsView::focusInEvent(QFocusEvent* event)
     {
-        EditorViewBase::focusInEvent(event);
+        EditorView::focusInEvent(event);
     }
 
 }

@@ -11,7 +11,7 @@ namespace CE::Editor
 {
 
     SceneOutlinerView::SceneOutlinerView(QWidget *parent)
-        : EditorViewBase(parent)
+        : EditorView(parent)
         , ui(new Ui::SceneOutlinerView)
     {
         ui->setupUi(this);

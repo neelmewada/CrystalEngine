@@ -12,7 +12,7 @@ namespace CE::Editor
 {
 
     ViewportView::ViewportView(QWidget* parent)
-        : EditorViewBase(parent)
+        : EditorView(parent)
         , ui(new Ui::ViewportView)
     {
         ui->setupUi(this);

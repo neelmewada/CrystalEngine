@@ -4,7 +4,7 @@
 namespace CE::Editor
 {
     TextureDetailsView::TextureDetailsView(QWidget* parent)
-        : EditorViewBase(parent)
+        : EditorView(parent)
         , ui(new Ui::TextureDetailsView)
     {
         ui->setupUi(this);

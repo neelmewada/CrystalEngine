@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "Editor/EditorViewBase.h"
+#include "Editor/EditorView.h"
 
 #include "CoreMedia.h"
 #include "QtComponents.h"
@@ -16,10 +16,10 @@ namespace CE::Editor
 {
 
     CLASS()
-    class TexturePreviewView : public EditorViewBase
+    class TexturePreviewView : public EditorView
     {
         Q_OBJECT
-        CE_CLASS(TexturePreviewView, CE::Editor::EditorViewBase)
+        CE_CLASS(TexturePreviewView, CE::Editor::EditorView)
     public:
         explicit TexturePreviewView(QWidget* parent = nullptr);
         ~TexturePreviewView();

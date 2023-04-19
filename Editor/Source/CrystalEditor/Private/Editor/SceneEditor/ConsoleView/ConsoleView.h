@@ -18,10 +18,10 @@ namespace CE::Editor
 {
     class ConsoleViewModel;
 
-    class ConsoleView : public EditorViewBase
+    class ConsoleView : public EditorView
     {
         Q_OBJECT
-        CE_CLASS(ConsoleView, CE::Editor::EditorViewBase)
+        CE_CLASS(ConsoleView, CE::Editor::EditorView)
     public:
         explicit ConsoleView(QWidget *parent = nullptr);
         ~ConsoleView();
@@ -57,7 +57,7 @@ namespace CE::Editor
 
 
 CE_RTTI_CLASS(CRYSTALEDITOR_API, CE::Editor, ConsoleView,
-    CE_SUPER(CE::Editor::EditorViewBase),
+    CE_SUPER(CE::Editor::EditorView),
     CE_DONT_INSTANTIATE,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),

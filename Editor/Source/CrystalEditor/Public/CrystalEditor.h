@@ -9,7 +9,7 @@
 #include "Application/CrystalEditorApplication.h"
 
 #include "Editor/EditorWindow.h"
-#include "Editor/EditorViewBase.h"
+#include "Editor/EditorView.h"
 
 // Drawers
 #include "Drawers/GameComponentDrawer.h"
