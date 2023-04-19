@@ -13,16 +13,14 @@ namespace CE::Editor
     }
 
     EditorView::~EditorView()
-    {
-
-    }
+    = default;
 
     void EditorView::paintEvent(QPaintEvent* event)
     {
-        QPainter p(this);
-        p.setPen(::Qt::NoPen);
-        p.setBrush(QBrush(qApp->palette().color(QPalette::AlternateBase)));
-        p.drawRect(this->rect());
+        QPainter painter(this);
+        painter.setPen(::Qt::NoPen);
+        painter.setBrush(QBrush(qApp->palette().color(QPalette::AlternateBase)));
+        painter.drawRect(this->rect());
 
         QWidget::paintEvent(event);
     }
