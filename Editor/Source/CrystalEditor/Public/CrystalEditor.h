@@ -8,7 +8,7 @@
 #include "Application/EditorQtApplication.h"
 #include "Application/CrystalEditorApplication.h"
 
-#include "Editor/EditorWindowBase.h"
+#include "Editor/EditorWindow.h"
 #include "Editor/EditorViewBase.h"
 
 // Drawers

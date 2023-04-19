@@ -12,7 +12,7 @@ namespace CE::Editor
 {
 
     TextureEditorWindow::TextureEditorWindow(QWidget *parent)
-        : EditorWindowBase(parent)
+        : EditorWindow(parent)
         , ui(new Ui::TextureEditorWindow)
     {
         ui->setupUi(this);
@@ -143,7 +143,7 @@ namespace CE::Editor
 
     void TextureEditorWindow::resizeEvent(QResizeEvent *event)
     {
-        EditorWindowBase::resizeEvent(event);
+        EditorWindow::resizeEvent(event);
         previewView->RefreshPreview();
     }
 

@@ -31,7 +31,7 @@ namespace CE::Editor
     {
         // Editor Windows
         CE_REGISTER_TYPES(
-            EditorWindowBase,
+            EditorWindow,
             SceneEditorWindow
         );
 

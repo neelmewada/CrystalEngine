@@ -16,13 +16,13 @@ namespace CE::Editor
 {
 
     CLASS(Abstract)
-    class CRYSTALEDITOR_API EditorWindowBase : public QMainWindow, public CE::Object
+    class CRYSTALEDITOR_API EditorWindow : public QMainWindow, public CE::Object
     {
         Q_OBJECT
-        CE_CLASS(EditorWindowBase, CE::Object)
+        CE_CLASS(EditorWindow, CE::Object)
     public:
-        explicit EditorWindowBase(QWidget* parent = nullptr);
-        virtual ~EditorWindowBase();
+        explicit EditorWindow(QWidget* parent = nullptr);
+        virtual ~EditorWindow();
 
         FUNCTION()
         virtual bool CanOpenAsset(AssetDatabaseEntry* assetEntry) = 0;
@@ -39,5 +39,5 @@ namespace CE::Editor
     
 } // namespace CE
 
-#include "EditorWindowBase.rtti.h"
+#include "EditorWindow.rtti.h"
 

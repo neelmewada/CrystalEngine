@@ -5,7 +5,7 @@
 
 #include "CoreMedia.h"
 
-#include "Editor/EditorWindowBase.h"
+#include "Editor/EditorWindow.h"
 
 namespace Ui {
 class TextureEditorWindow;
@@ -18,10 +18,10 @@ namespace CE::Editor
 
     CLASS()
     class TextureEditorWindow
-            : public EditorWindowBase
+            : public EditorWindow
     {
         Q_OBJECT
-        CE_CLASS(TextureEditorWindow, CE::Editor::EditorWindowBase)
+        CE_CLASS(TextureEditorWindow, CE::Editor::EditorWindow)
     public:
         explicit TextureEditorWindow(QWidget *parent = nullptr);
         ~TextureEditorWindow();

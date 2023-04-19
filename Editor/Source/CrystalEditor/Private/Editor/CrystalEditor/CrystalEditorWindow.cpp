@@ -59,7 +59,7 @@ namespace CE::Editor
         delete ui;
     }
 
-    EditorWindowBase* CrystalEditorWindow::GetEditorWindow(ClassType* editorWindowType)
+    EditorWindow* CrystalEditorWindow::GetEditorWindow(ClassType* editorWindowType)
     {
         for (auto editorWindow : editorWindows)
         {
@@ -102,8 +102,8 @@ namespace CE::Editor
     void CrystalEditorBus::Interface::RegisterEditorWindowClassForBuiltinAsset(ClassType* editorWindowClass, BuiltinAssetType builtinAssetType)
     {
         if (builtinAssetType == BuiltinAssetType::None || editorWindowClass == nullptr ||
-            !editorWindowClass->IsAssignableTo(TYPEID(EditorWindowBase)) ||
-            editorWindowClass->GetTypeId() == TYPEID(EditorWindowBase))
+            !editorWindowClass->IsAssignableTo(TYPEID(EditorWindow)) ||
+            editorWindowClass->GetTypeId() == TYPEID(EditorWindow))
             return;
 
         builtinAssetEditors[builtinAssetType] = editorWindowClass;
@@ -112,8 +112,8 @@ namespace CE::Editor
     void CrystalEditorBus::Interface::RegisterEditorWindowClassForAsset(ClassType* editorWindowClass, ClassType* assetClass)
     {
         if (editorWindowClass == nullptr || assetClass == nullptr ||
-            !editorWindowClass->IsAssignableTo(TYPEID(EditorWindowBase)) ||
-            editorWindowClass->GetTypeId() == TYPEID(EditorWindowBase) ||
+            !editorWindowClass->IsAssignableTo(TYPEID(EditorWindow)) ||
+            editorWindowClass->GetTypeId() == TYPEID(EditorWindow) ||
             !assetClass->IsAssignableTo(TYPEID(Asset)) ||
             assetClass->GetTypeId() == TYPEID(Asset))
             return;
@@ -200,7 +200,7 @@ namespace CE::Editor
 
         if (!windowFound && editorWindowClass->CanBeInstantiated())
         {
-            auto editorWindowClassInstance = (EditorWindowBase*)editorWindowClass->CreateDefaultInstance();
+            auto editorWindowClassInstance = (EditorWindow*)editorWindowClass->CreateDefaultInstance();
 
             if (editorWindowClassInstance->CanOpenAsset(assetEntry))
             {
@@ -276,7 +276,7 @@ namespace CE::Editor
         if (!assetPath.Exists())
             return;
 
-        auto assetEntry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(IO::Path::GetRelative(assetPath, projectPath));
+        auto assetEntry = const_cast<AssetDatabaseEntry*>(AssetDatabase::Get().GetEntry(IO::Path::GetRelative(assetPath, projectPath)));
         if (assetEntry == nullptr)
             return;
 
@@ -288,6 +288,7 @@ namespace CE::Editor
     {
         assetImporterWindow = new AssetImporterWindow(this);
         assetImporterWindow->setWindowFlag(::Qt::Tool, true);
+        assetImporterWindow->SetMenuBarVisible(false);
         assetImporterWindow->show();
 
         auto projectPath = ProjectSettings::Get().GetEditorProjectDirectory() / "Game";

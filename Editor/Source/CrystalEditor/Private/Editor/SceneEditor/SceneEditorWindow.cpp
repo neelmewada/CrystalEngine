@@ -16,7 +16,7 @@ namespace CE::Editor
 {
 
     SceneEditorWindow::SceneEditorWindow(QWidget* parent)
-        : EditorWindowBase(parent)
+        : EditorWindow(parent)
         , ui(new Ui::SceneEditorWindow)
     {
         CE_CONNECT(SceneEditorBus, this);

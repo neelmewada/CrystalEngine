@@ -46,7 +46,7 @@ namespace CE::Editor
         // ******************************************
         // Public API
 
-        EditorWindowBase* GetEditorWindow(ClassType* editorWindowType);
+        EditorWindow* GetEditorWindow(ClassType* editorWindowType);
 
         ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType);
 
@@ -80,7 +80,7 @@ namespace CE::Editor
         AssetImporterWindow* assetImporterWindow = nullptr;
 
         Array<ads::CDockWidget*> dockWidgets{};
-        Vector<EditorWindowBase*> editorWindows{};
+        Vector<EditorWindow*> editorWindows{};
     };
 }
 

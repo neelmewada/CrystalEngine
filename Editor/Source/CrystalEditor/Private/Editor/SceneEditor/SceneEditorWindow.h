@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "Editor/EditorWindowBase.h"
+#include "Editor/EditorWindow.h"
 #include "Editor/SceneEditor/SceneEditorBus.h"
 
 namespace Ui {
@@ -20,11 +20,11 @@ namespace CE::Editor
 
     CLASS()
     class SceneEditorWindow
-        : public EditorWindowBase
+        : public EditorWindow
         , public SceneEditorBus::Interface
     {
         Q_OBJECT
-        CE_CLASS(SceneEditorWindow, CE::Editor::EditorWindowBase)
+        CE_CLASS(SceneEditorWindow, CE::Editor::EditorWindow)
     public:
         explicit SceneEditorWindow(QWidget* parent = nullptr);
         ~SceneEditorWindow();
@@ -34,7 +34,7 @@ namespace CE::Editor
 
         void OnSceneLoaded();
 
-        // EditorWindowBase overrides
+        // EditorWindow overrides
 
         virtual bool CanOpenAsset(AssetDatabaseEntry* assetEntry) override;
 
