@@ -31,6 +31,8 @@ namespace CE::Editor
         static ClassType* GetAssetEditorWindow(TypeId assetClassType);
         static ClassType* GetAssetEditorWindow(ClassType* assetClass);
 
+        static CrystalEditorRequests* Get();
+
     protected:
         static HashMap<BuiltinAssetType, ClassType*> builtinAssetEditors;
         static HashMap<TypeId, ClassType*> assetEditors;

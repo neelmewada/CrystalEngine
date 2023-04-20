@@ -152,6 +152,7 @@ void String::Reserve(u32 reserveCharacterCount)
     {
         Capacity = reserveCharacterCount;
         Buffer = (char*)StaticBufferAllocator.Allocate();
+        Buffer[0] = 0;
         bIsUsingDynamicBuffer = false;
     }
 }

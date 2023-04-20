@@ -36,9 +36,9 @@ namespace CE::Editor
 
         // EditorWindow overrides
 
-        virtual bool CanOpenAsset(AssetDatabaseEntry* assetEntry) override;
+        bool CanOpenAsset(AssetDatabaseEntry* assetEntry) override;
 
-        virtual bool OpenAsset(AssetDatabaseEntry* assetEntry) override;
+        bool OpenAsset(AssetDatabaseEntry* assetEntry) override;
 
         bool BrowseToAsset(AssetDatabaseEntry *assetEntry) override;
 
@@ -46,13 +46,13 @@ namespace CE::Editor
         // SceneEditorBus::Interface
 
         FUNCTION(Event)
-        virtual void OpenEmptyScene() override;
+        void OpenEmptyScene() override;
 
         FUNCTION(Event)
-        virtual void CreateEmptyGameObject() override;
+        void CreateEmptyGameObject() override;
 
         FUNCTION(Event)
-        virtual void OpenScene(String sceneAssetPath) override;
+        void OpenScene(String sceneAssetPath) override;
         
     private slots:
         void OnLogPushedToConsole(const String& string);

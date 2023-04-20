@@ -50,20 +50,15 @@ namespace CE::Editor
 
         FUNCTION(Event)
         void BrowseToAsset(AssetDatabaseEntry* assetEntry) override;
-        
+
+        FUNCTION(Event)
         CE::Editor::EditorWindow* GetEditorWindow(ClassType* editorWindowType) override;
 
+        FUNCTION(Event)
         ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType) override;
 
         // ******************************************
         // Public API
-
-        void Test()
-        {
-            using _t = decltype(&Self::GetEditorWindowDockWidget)::type;
-            
-            ads::CDockWidget* (CrystalEditorWindow:: * funcPtr)(ClassType*) = &Self::GetEditorWindowDockWidget;
-        }
 
         template<typename TEditorWindowClass>
         TEditorWindowClass* GetEditorWindow()
@@ -96,6 +91,9 @@ namespace CE::Editor
 
         Array<ads::CDockWidget*> dockWidgets{};
         Vector<EditorWindow*> editorWindows{};
+
+    public:
+        static CrystalEditorWindow* instance;
     };
 }
 

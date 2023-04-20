@@ -467,13 +467,52 @@ namespace CE
                             curFunction.signature += "(";
                         parenScope++;
                         if (!curFunction.name.IsValid())
-                            curFunction.name = String(tokens->tokens[i - 1].lexeme);
-
-                        int backIdx = i - 1;
-                        while (backIdx > 1)
                         {
-                            
-                            backIdx--;
+	                        curFunction.name = String(tokens->tokens[i - 1].lexeme);
+
+                            String returnType{};
+
+                            // Find return type
+                            int backIdx = i - 2;
+                            while (backIdx > 1 && tokens->tokens[backIdx].type != TK_SCOPE_CLOSE &&
+                                tokens->tokens[backIdx].type != TK_SEMICOLON &&
+                                tokens->tokens[backIdx].type != TK_NEWLINE)
+                            {
+                                if (tokens->tokens[backIdx].type == TK_KW_VOID ||
+                                    tokens->tokens[backIdx].type == TK_KW_INLINE ||
+                                    tokens->tokens[backIdx].type == TK_KW_VIRTUAL)
+                                {
+                                    returnType = "void";
+                                    break;
+                                }
+
+                                if (tokens->tokens[backIdx].type == TK_ASTERISK)
+                                    returnType = "*" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_LEFTANGLE)
+                                    returnType = "<" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_RIGHTANGLE)
+                                    returnType = ">" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_SCOPE_OPERATOR)
+                                    returnType = "::" + returnType;
+                                else if ((tokens->tokens[backIdx].type == TK_IDENTIFIER && tokens->tokens[backIdx].lexeme != curFunction.name.GetCString()) ||
+                                    (tokens->tokens[backIdx].type >= TK_KW_INT && tokens->tokens[backIdx].type <= TK_KW_VEC4))
+                                {
+	                                returnType = String(tokens->tokens[backIdx].lexeme) + returnType;
+                                    if (tokens->tokens[backIdx - 1].type != TK_SCOPE_OPERATOR &&
+                                        tokens->tokens[backIdx - 1].type != TK_LEFTANGLE &&
+                                        tokens->tokens[backIdx - 1].type != TK_RIGHTANGLE)
+                                        break;
+                                }
+                                else if (tokens->tokens[backIdx].type == TK_AMPERSAND)
+                                    returnType = "&" + returnType;
+                                else if (tokens->tokens[backIdx].type == TK_KW_ARRAY)
+                                    returnType = "Array" + returnType;
+
+                                backIdx--;
+                            }
+
+                            if (!returnType.IsEmpty())
+                                curFunction.returnType = returnType;
                         }
                     }
                     else if (tokens->tokens[i].type == TK_PAREN_CLOSE)

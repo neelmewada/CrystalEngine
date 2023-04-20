@@ -14,7 +14,7 @@ namespace CE
     {
         Name name{};
         String signature{};
-        String returnType{};
+        String returnType = "auto";
         bool isSignal = false;
         bool isEvent = false;
         Array<String> attribs{};

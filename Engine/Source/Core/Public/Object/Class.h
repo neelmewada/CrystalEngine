@@ -560,9 +560,9 @@ namespace CE
 #define CE_FUNCTION_LIST(x) x
 #define CE_FUNCTION(FunctionName, ...) Type.AddFunction(#FunctionName, &Self::FunctionName, "" #__VA_ARGS__);
 
-#define CE_FUNCTION2(FunctionName, Signature, ...)\
+#define CE_FUNCTION2(FunctionName, ReturnType, Signature, ...)\
 {\
-	auto (Self::*funcPtr)Signature = &Self::FunctionName;\
+	ReturnType (Self::*funcPtr)Signature = &Self::FunctionName;\
 	Type.AddFunction(#FunctionName, funcPtr, "" #__VA_ARGS__);\
 }
 

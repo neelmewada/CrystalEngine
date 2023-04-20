@@ -121,7 +121,9 @@ namespace CE
 			outStream << "\tCE_FUNCTION_LIST(\n";
 			for (int i = 0; i < classInfo.functions.GetSize(); i++)
 			{
-				outStream << "\t\tCE_FUNCTION2(" << classInfo.functions[i].name.GetCString() << ", " << classInfo.functions[i].signature.GetCString();
+				outStream << "\t\tCE_FUNCTION2(" << classInfo.functions[i].name.GetCString()
+					<< ", " << (classInfo.functions[i].returnType.IsEmpty() ? "auto" : classInfo.functions[i].returnType.GetCString())
+					<< ", " << classInfo.functions[i].signature.GetCString();
 				for (int j = 0; j < classInfo.functions[i].attribs.GetSize(); j++)
 				{
 					outStream << ", " <<  classInfo.functions[i].attribs[j].GetCString();

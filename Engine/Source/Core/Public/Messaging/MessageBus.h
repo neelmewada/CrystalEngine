@@ -132,8 +132,10 @@ namespace CE
     public:
 
         template<typename... Args>
-        void Publish(Name eventName, Args... args)
+        CE::Variant Publish(Name eventName, Args... args)
         {
+            CE::Variant result{};
+
             for (auto subscriber : subscribers)
             {
                 if (subscriber == nullptr)
@@ -159,7 +161,7 @@ namespace CE
                     {
                         try
                         {
-                            auto result = function->Invoke(subscriber, { args... });
+                            result = function->Invoke(subscriber, { args... });
                             funcFound = true;
                         }
                         catch (...)
@@ -176,11 +178,15 @@ namespace CE
                         eventName, subscriber->GetName(), eventName, signature);
                 }
             }
+
+            return result;
         }
 
         template<typename... Args>
-        void Publish(UUID messageTarget, Name eventName, Args... args)
+        CE::Variant Publish(UUID messageTarget, Name eventName, Args... args)
         {
+            CE::Variant result{};
+
             for (auto subscriber : subscribers)
             {
                 if (subscriber == nullptr || subscriber->GetUuid() != messageTarget)
@@ -206,7 +212,7 @@ namespace CE
                     {
                         try
                         {
-                            auto result = function->Invoke(subscriber, { args... });
+                            result = function->Invoke(subscriber, { args... });
                             if (result.HasValue() && result.GetValueTypeId() == TYPEID(EventResult))
                             {
                                 auto value = result.template GetValue<EventResult>();
@@ -231,6 +237,8 @@ namespace CE
                         eventName, subscriber->GetName(), eventName, signature);
                 }
             }
+
+            return result;
         }
 
         void AddSubscriber(Object* object)

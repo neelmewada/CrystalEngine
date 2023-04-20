@@ -31,6 +31,7 @@ namespace CE
         { "true", TK_KW_TRUE },
         { "false", TK_KW_FALSE },
         { "nullptr", TK_KW_NULLPTR },
+        { "inline", TK_KW_INLINE },
         { "virtual", TK_KW_VIRTUAL },
         { "override", TK_KW_OVERRIDE },
         { "typedef", TK_KW_TYPEDEF },
@@ -62,11 +63,11 @@ namespace CE
         { "s16", TK_KW_INT16 },
         { "s32", TK_KW_INT32 },
         { "s64", TK_KW_INT64 },
-        { "String", TK_KW_FSTRING },
-        { "Array", TK_KW_TARRAY },
-        { "Vec2", TK_KW_FVEC2 },
-        { "Vec3", TK_KW_FVEC3 },
-        { "Vec4", TK_KW_FVEC4 },
+        { "String", TK_KW_STRING },
+        { "Array", TK_KW_ARRAY },
+        { "Vec2", TK_KW_VEC2 },
+        { "Vec3", TK_KW_VEC3 },
+        { "Vec4", TK_KW_VEC4 },
     };
 
     inline bool IsAlphabet(char Character)
