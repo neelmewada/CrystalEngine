@@ -40,6 +40,8 @@ namespace CE::Editor
         void SetTextureAsset(AssetDatabaseEntry* assetEntry);
 
     private slots:
+        void on_toolActionSave_triggered();
+
         void on_toolActionBrowse_triggered();
 
         void on_toolActionRedChannel_triggered();

@@ -147,6 +147,12 @@ namespace CE::Editor
         previewView->RefreshPreview();
     }
 
+    void TextureEditorWindow::on_toolActionSave_triggered()
+    {
+        auto childTypes = GetStaticClass<Object>()->GetDerivedClasses();
+        CE_LOG(Info, All, "Derived: {}", childTypes);
+    }
+
     void TextureEditorWindow::on_toolActionBrowse_triggered()
     {
         if (assetEntry == nullptr)
