@@ -5,6 +5,7 @@
 #include "System.h"
 
 #include "Editor/CrystalEditorBus.h"
+#include "Editor/EditorWindow.h"
 
 #include <QWindow>
 #include <QMainWindow>
@@ -15,10 +16,17 @@ namespace Ui {
 class CrystalEditorWindow;
 }
 
+namespace ads
+{
+    class CDockWidget;
+}
+
 namespace CE::Editor
 {
     class SceneEditorWindow;
     class AssetImporterWindow;
+
+    class EditorWindow;
 
     CLASS()
     class CrystalEditorWindow : public QMainWindow, public CE::Object, public CrystalEditorBus::Interface
@@ -42,13 +50,20 @@ namespace CE::Editor
 
         FUNCTION(Event)
         void BrowseToAsset(AssetDatabaseEntry* assetEntry) override;
+        
+        CE::Editor::EditorWindow* GetEditorWindow(ClassType* editorWindowType) override;
+
+        ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType) override;
 
         // ******************************************
         // Public API
 
-        EditorWindow* GetEditorWindow(ClassType* editorWindowType);
-
-        ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType);
+        void Test()
+        {
+            using _t = decltype(&Self::GetEditorWindowDockWidget)::type;
+            
+            ads::CDockWidget* (CrystalEditorWindow:: * funcPtr)(ClassType*) = &Self::GetEditorWindowDockWidget;
+        }
 
         template<typename TEditorWindowClass>
         TEditorWindowClass* GetEditorWindow()
@@ -85,7 +100,5 @@ namespace CE::Editor
 }
 
 #include "CrystalEditorWindow.rtti.h"
-
-
 
 #endif // CRYSTALEDITORWINDOW_H

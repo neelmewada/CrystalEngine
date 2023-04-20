@@ -20,6 +20,10 @@ namespace CE::Editor
 
         virtual void BrowseToAsset(AssetDatabaseEntry* assetEntry) = 0;
 
+        virtual EditorWindow* GetEditorWindow(ClassType* editorWindowType) = 0;
+
+        virtual ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType) = 0;
+
         static void RegisterEditorWindowClassForBuiltinAsset(ClassType* editorWindowClass, BuiltinAssetType builtinAssetType);
         static void RegisterEditorWindowClassForAsset(ClassType* editorWindowClass, ClassType* assetClass);
 

@@ -49,7 +49,7 @@ namespace CE
 
 		CE_INLINE FunctionType* GetNext() const
 		{
-			return Next;
+			return next;
 		}
 
 		CE_INLINE CE::Variant Invoke(CE::Object* instance, const Array<CE::Variant>& params) const
@@ -65,7 +65,7 @@ namespace CE
 		TypeId returnType = 0;
 		Array<TypeId> paramTypes{};
 		FunctionDelegate delegateCallback;
-		FunctionType* Next = nullptr;
+		FunctionType* next = nullptr;
 		const TypeInfo* owner = nullptr;
 
 		Array<Attribute> attributeList{};

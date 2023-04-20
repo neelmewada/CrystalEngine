@@ -108,8 +108,8 @@ namespace CE
         if (!functionsCached)
             CacheAllFunctions();
 
-        if (cachedFunctionMap.KeyExists(name) && cachedFunctionMap[name].GetSize() > 0)
-            return cachedFunctionMap[name][0];
+        if (cachedFunctionsMap.KeyExists(name) && cachedFunctionsMap[name].GetSize() > 0)
+            return cachedFunctionsMap[name][0];
 
         return nullptr;
     }
@@ -118,7 +118,7 @@ namespace CE
     {
         if (!functionsCached)
             CacheAllFunctions();
-        return cachedFunctionMap[name];
+        return cachedFunctionsMap[name];
     }
 
     void StructType::CacheAllAttributes()
@@ -268,19 +268,26 @@ namespace CE
                     }
                 }
             }
-        }
 
-        cachedFunctions.AddRange(localFunctions);
+            cachedFunctions.AddRange(localFunctions);
 
-        for (int i = 0; i < cachedFunctions.GetSize(); i++)
-        {
-            if (!cachedFunctionMap.KeyExists(cachedFunctions[i].GetName()))
+            for (int i = 0; i < cachedFunctions.GetSize(); i++)
             {
-                cachedFunctionMap.Add({ cachedFunctions[i].GetName(), { &cachedFunctions[i] } });
-            }
-            else
-            {
-                cachedFunctionMap[cachedFunctions[i].GetName()].Add(&cachedFunctions[i]);
+                cachedFunctions[i].owner = this;
+
+                if (i == cachedFunctions.GetSize() - 1)
+                {
+                    cachedFunctions[i].next = nullptr;
+                }
+                else
+                {
+                    cachedFunctions[i].next = &cachedFunctions[i + 1];
+                }
+
+                if (cachedFunctionsMap.KeyExists(cachedFunctions[i].GetName()))
+                    cachedFunctionsMap[cachedFunctions[i].GetName()].Add(&cachedFunctions[i]);
+                else
+                    cachedFunctionsMap.Add({ cachedFunctions[i].GetName(), { &cachedFunctions[i] } });
             }
         }
     }

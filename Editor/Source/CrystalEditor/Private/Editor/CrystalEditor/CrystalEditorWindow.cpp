@@ -1,3 +1,6 @@
+
+#include "CrystalEditor.h"
+
 #include "CrystalEditorWindow.h"
 #include "ui_CrystalEditorWindow.h"
 

@@ -291,7 +291,7 @@ namespace CE
         CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
         
 		CE::Array<FunctionType> cachedFunctions{};
-        CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionMap{};
+        CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionsMap{};
 
         CE::Array<Attribute> cachedAttributes{};
 
