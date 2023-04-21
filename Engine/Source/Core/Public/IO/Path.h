@@ -19,20 +19,30 @@ namespace CE::IO
         ~Path();
 
         inline Path(fs::path path) : impl(path)
-        {}
+        {
+            EvaluateVirtualPath();
+        }
 
         inline Path(String pathString) : impl(pathString.GetCString())
-        {}
+        {
+            EvaluateVirtualPath();
+        }
 
         inline Path(std::string pathString) : impl(pathString)
-        {}
+        {
+            EvaluateVirtualPath();
+        }
 
         inline Path(const char* cString) : impl(cString)
-        {}
+        {
+            EvaluateVirtualPath();
+        }
 
         template<typename It>
         inline Path(It first, It last) : impl(first, last)
-        {}
+        {
+            EvaluateVirtualPath();
+        }
 
         inline String GetString() const
         {
@@ -121,12 +131,12 @@ namespace CE::IO
             return p.replace_extension(path.impl);
         }
 
-        static inline Path GetRelative(const Path& path, const Path& base)
+        inline static Path GetRelative(const Path& path, const Path& base)
         {
             return fs::relative(path.impl, base.impl);
         }
 
-        static inline bool IsSubDirectory(Path path, Path root)
+        inline static bool IsSubDirectory(Path path, Path root)
         {
             while (path != Path())
             {
@@ -178,6 +188,8 @@ namespace CE::IO
 
         const auto begin() const { return impl.begin(); }
         const auto end() const { return impl.end(); }
+
+        void EvaluateVirtualPath();
 
     private:
         fs::path impl;

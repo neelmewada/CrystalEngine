@@ -41,7 +41,7 @@ namespace CE
 			return;
 
 #if PAL_TRAIT_BUILD_EDITOR
-		//LoadAssetDatabaseForEditor();
+		
 #else
 		LoadRuntimeAssetDatabase();
 #endif
@@ -64,6 +64,59 @@ namespace CE
 	const AssetDatabaseEntry* AssetDatabase::GetEntry(IO::Path virtualPath)
 	{
 		return SearchForEntry(rootEntry, virtualPath);
+	}
+
+	Asset* AssetDatabase::LoadAssetAt(IO::Path virtualPath)
+	{
+#if PAL_TRAIT_BUILD_STANDALONE
+		return LoadRuntimeAssetAt(virtualPath);
+#else
+
+		auto entry = GetEntry(virtualPath);
+		if (entry == nullptr)
+			return nullptr;
+
+		auto basePath = ProjectSettings::Get().GetEditorProjectDirectory();
+
+		if (entry->category == AssetDatabaseEntry::Category::EngineAssets ||
+			entry->category == AssetDatabaseEntry::Category::EngineShaders)
+		{
+			basePath = PlatformDirectories::GetEngineDir().GetParentPath();
+		}
+		else if (entry->category == AssetDatabaseEntry::Category::GameAssets ||
+			entry->category == AssetDatabaseEntry::Category::GameShaders)
+		{
+			
+		}
+		else
+		{
+			return nullptr;
+		}
+
+		auto fullPath = basePath / virtualPath;
+
+		if (!fullPath.Exists())
+			return nullptr;
+
+		auto className = SerializedObject::DeserializeObjectName(fullPath);
+		if (!className.IsValid())
+			return nullptr;
+
+		auto assetClass = ClassType::FindClassByName(className);
+		if (assetClass == nullptr || !assetClass->IsAssignableTo(TYPEID(Asset)) || !assetClass->CanBeInstantiated())
+			return nullptr;
+
+		auto asset = (Asset*)assetClass->CreateDefaultInstance();
+		asset->databaseEntry = const_cast<AssetDatabaseEntry*>(entry);
+		
+		return asset;
+#endif
+	}
+
+	Asset* AssetDatabase::LoadRuntimeAssetAt(IO::Path virtualPath)
+	{
+		// TODO: Runtime asset packaging system
+		return nullptr;
 	}
 
 	const AssetDatabaseEntry* AssetDatabase::SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath)

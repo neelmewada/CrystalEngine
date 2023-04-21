@@ -20,8 +20,41 @@
 
 #include "Module/ModuleManager.h"
 
+namespace ads
+{
+    class CDockWidget;
+}
+
 namespace CE::Editor
 {
+    class CrystalEditorWindow;
+
+    class CRYSTALEDITOR_API CrystalEditor
+    {
+    public:
+        CrystalEditor() = delete;
+
+        static EditorWindow* GetEditorWindow(ClassType* editorWindowType);
+
+        static ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType);
+
+        template<typename TEditorWindowClass>
+        CE_INLINE static TEditorWindowClass* GetEditorWindow()
+        {
+            return static_cast<TEditorWindowClass*>(GetEditorWindow(TEditorWindowClass::Type()));
+        }
+
+        template<typename TEditorWindowClass>
+        CE_INLINE static ads::CDockWidget* GetEditorWindowDockWidget()
+        {
+            return GetEditorWindowDockWidget(TEditorWindowClass::Type());
+        }
+
+    private:
+        static CrystalEditorWindow* window;
+
+        friend class CrystalEditorWindow;
+    };
 
     class CRYSTALEDITOR_API CrystalEditorModule : public Module
     {

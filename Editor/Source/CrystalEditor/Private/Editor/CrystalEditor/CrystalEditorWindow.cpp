@@ -16,14 +16,12 @@ namespace CE::Editor
     HashMap<BuiltinAssetType, ClassType*> CrystalEditorBus::Interface::builtinAssetEditors{};
     HashMap<TypeId, ClassType*> CrystalEditorBus::Interface::assetEditors{};
 
-    CrystalEditorWindow* CrystalEditorWindow::instance = nullptr;
-
     CrystalEditorWindow::CrystalEditorWindow(QWidget* parent)
         : QMainWindow(parent)
         , CE::Object("CrystalEditorWindow")
         , ui(new Ui::CrystalEditorWindow)
     {
-        instance = this;
+        CrystalEditor::window = this;
 
         CE_CONNECT(CrystalEditorBus, this);
 
@@ -61,7 +59,8 @@ namespace CE::Editor
 
     CrystalEditorWindow::~CrystalEditorWindow()
     {
-        instance = nullptr;
+        if (CrystalEditor::window == this)
+            CrystalEditor::window = nullptr;
 
         CE_DISCONNECT(CrystalEditorBus, this);
 
@@ -149,11 +148,6 @@ namespace CE::Editor
         if (assetClass == nullptr || !assetEditors.KeyExists(assetClass->GetTypeId()))
             return nullptr;
         return assetEditors[assetClass->GetTypeId()];
-    }
-
-    CrystalEditorBus::Interface* CrystalEditorBus::Interface::Get()
-    {
-        return CrystalEditorWindow::instance;
     }
 
     void CrystalEditorWindow::LoadProject(IO::Path projectPath)

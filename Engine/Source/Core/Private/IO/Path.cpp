@@ -31,5 +31,53 @@ namespace CE::IO
 		}
 	}
 
+	void Path::EvaluateVirtualPath()
+	{
+		//if (begin() == end())
+			return;
+
+		auto it = begin();
+		fs::path basePath{};
+
+		if (it->string() == "@Engine")
+		{
+			basePath = PlatformDirectories::GetEngineDir();
+		}
+#if PAL_TRAIT_BUILD_EDITOR
+		else if (it->string() == "@Editor")
+		{
+			basePath = PlatformDirectories::GetEditorDir();
+		}
+#endif
+		else if (it->string() == "@Game")
+		{
+#if PAL_TRAIT_BUILD_EDITOR
+			basePath = ProjectSettings::Get().GetEditorProjectDirectory() / "Game";
+#else
+			basePath = PlatformDirectories::GetGameDir();
+#endif
+		}
+		else
+		{
+			return;
+		}
+
+		if (basePath.empty())
+			return;
+
+		fs::path evalPath{};
+		evalPath = basePath;
+
+		for (it = begin(); it != end(); ++it)
+		{
+			if (it == begin())
+				continue;
+
+			evalPath = evalPath / *it;
+		}
+
+		this->impl = evalPath;
+	}
+
 } // namespace CE::IO
 

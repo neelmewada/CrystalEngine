@@ -16,6 +16,23 @@ CE_IMPLEMENT_MODULE_AUTORTTI(CrystalEditor, CE::Editor::CrystalEditorModule)
 
 namespace CE::Editor
 {
+    CrystalEditorWindow* CrystalEditor::window = nullptr;
+
+    EditorWindow* CrystalEditor::GetEditorWindow(ClassType* editorWindowType)
+    {
+        if (window == nullptr)
+            return nullptr;
+
+        return window->GetEditorWindow(editorWindowType);
+    }
+
+    ads::CDockWidget* CrystalEditor::GetEditorWindowDockWidget(ClassType* editorWindowType)
+    {
+        if (window == nullptr)
+			return nullptr;
+
+        return window->GetEditorWindowDockWidget(editorWindowType);
+    }
 
     void CrystalEditorModule::StartupModule()
     {

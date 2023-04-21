@@ -42,6 +42,9 @@ namespace CE
 
         // Register Asset Types
         CE_REGISTER_ASSET_TYPE(TextureAsset, casset, jpg, jpeg, png);
+
+        // Register Resource Classes
+        CE_REGISTER_RESOURCE_CLASS(TextureAsset, Texture);
     }
 
 } // namespace CE

@@ -18,6 +18,15 @@ namespace CE
         }
     }
 
+    void GameComponent::Activate()
+    {
+        Super::Activate();
+    }
+
+    void GameComponent::Deactivate()
+    {
+        Super::Deactivate();
+    }
+
 } // namespace CE
 
-CE_RTTI_CLASS_IMPL(SYSTEM_API, CE, GameComponent)

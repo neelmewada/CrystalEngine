@@ -115,7 +115,7 @@ namespace CE::Editor
         IO::Path basePath = ProjectSettings::Get().GetEditorProjectDirectory();
         auto relativePath = IO::Path::GetRelative(assetPath, basePath);
 
-        auto entry = (AssetDatabaseEntry*)AssetDatabase::Get().GetEntry(relativePath);
+        auto entry = const_cast<AssetDatabaseEntry*>(AssetDatabase::Get().GetEntry(relativePath));
         if (entry == nullptr)
             return;
 

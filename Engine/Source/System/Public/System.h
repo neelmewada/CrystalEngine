@@ -24,6 +24,10 @@
 
 #include "Asset/TextureAsset.h"
 
+// Resources
+#include "GameFramework/ResourceObject.h"
+#include "GameFramework/Resources/Texture.h"
+
 namespace CE
 {
 

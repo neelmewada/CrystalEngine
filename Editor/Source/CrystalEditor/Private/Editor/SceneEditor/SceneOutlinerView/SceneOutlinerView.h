@@ -25,9 +25,7 @@ namespace CE::Editor
         public SceneOutlinerViewBus::Interface
     {
         Q_OBJECT
-
         CE_CLASS(SceneOutlinerView, EditorView)
-
     public:
         explicit SceneOutlinerView(QWidget *parent = nullptr);
         ~SceneOutlinerView();
@@ -65,7 +63,7 @@ namespace CE::Editor
     private:
         SceneOutlinerModel* model = nullptr;
         
-        Ui::SceneOutlinerView *ui;
+        Ui::SceneOutlinerView* ui;
     };
 
 }

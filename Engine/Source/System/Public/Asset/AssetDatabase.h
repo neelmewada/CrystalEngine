@@ -91,7 +91,11 @@ namespace CE
 
         const AssetDatabaseEntry* GetEntry(IO::Path virtualPath);
 
+        Asset* LoadAssetAt(IO::Path virtualPath);
+
     private:
+
+        Asset* LoadRuntimeAssetAt(IO::Path virtualPath);
 
         const AssetDatabaseEntry* SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath);
 

@@ -20,18 +20,12 @@ namespace CE::Editor
 
         virtual void BrowseToAsset(AssetDatabaseEntry* assetEntry) = 0;
 
-        virtual EditorWindow* GetEditorWindow(ClassType* editorWindowType) = 0;
-
-        virtual ads::CDockWidget* GetEditorWindowDockWidget(ClassType* editorWindowType) = 0;
-
         static void RegisterEditorWindowClassForBuiltinAsset(ClassType* editorWindowClass, BuiltinAssetType builtinAssetType);
         static void RegisterEditorWindowClassForAsset(ClassType* editorWindowClass, ClassType* assetClass);
 
         static ClassType* GetBuiltinAssetEditorWindow(BuiltinAssetType builtinAssetType);
         static ClassType* GetAssetEditorWindow(TypeId assetClassType);
         static ClassType* GetAssetEditorWindow(ClassType* assetClass);
-
-        static CrystalEditorRequests* Get();
 
     protected:
         static HashMap<BuiltinAssetType, ClassType*> builtinAssetEditors;

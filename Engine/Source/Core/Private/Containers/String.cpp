@@ -123,6 +123,7 @@ void String::Reserve(u32 reserveCharacterCount)
         {
             Capacity = reserveCharacterCount;
             Buffer = new char[Capacity];
+            Buffer[0] = 0;
         }
         else if (!bIsUsingDynamicBuffer && Buffer != nullptr) // If we were using static buffer earlier
         {
@@ -132,6 +133,8 @@ void String::Reserve(u32 reserveCharacterCount)
             Buffer = new char[Capacity];
             if (StringLength > 0)
                 memcpy(Buffer, oldBuffer, StringLength + 1);
+            else
+                Buffer[0] = 0;
 
             StaticBufferAllocator.Free(oldBuffer); // Release the previously used static buffer
         }
@@ -140,6 +143,8 @@ void String::Reserve(u32 reserveCharacterCount)
             auto stagingBuffer = new char[reserveCharacterCount];
             if (StringLength > 0)
                 memcpy(stagingBuffer, Buffer, StringLength + 1);
+            else
+                Buffer[0] = 0;
 
             Capacity = reserveCharacterCount;
             delete[] Buffer;

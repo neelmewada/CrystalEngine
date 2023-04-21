@@ -11,12 +11,16 @@ namespace CE
     }
 #endif
 
+    class ResourceObject;
+
     ENUM()
     enum class BuiltinAssetType
     {
         None = 0,
         SceneAsset
     };
+
+    class AssetDatabaseEntry;
 
     // Abstract: So it cannot be instantiated dynamically
     CLASS(Abstract)
@@ -43,7 +47,11 @@ namespace CE
 
         inline String GetAssetExtension() const { return assetExtension; }
 
+        virtual ResourceObject* InstantiateResource() = 0;
+
     protected:
+        AssetDatabaseEntry* databaseEntry = nullptr;
+
         FIELD(Hidden, NonSerialized)
         String assetName{};
 
@@ -57,6 +65,8 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::AssetProcessor;
 #endif
+
+        friend class AssetDatabase;
     };
 
 } // namespace CE

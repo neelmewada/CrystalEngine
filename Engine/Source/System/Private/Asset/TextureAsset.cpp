@@ -1,5 +1,5 @@
 
-#include "Asset/TextureAsset.h"
+#include "System.h"
 
 namespace CE
 {
@@ -12,6 +12,11 @@ namespace CE
 	TextureAsset::~TextureAsset()
 	{
 
+	}
+
+	ResourceObject* TextureAsset::InstantiateResource()
+	{
+		return new Texture(this);
 	}
 
 } // namespace CE

@@ -30,6 +30,7 @@ namespace CE
         TextureAsset();
         virtual ~TextureAsset();
 
+        ResourceObject* InstantiateResource() override;
 
     protected:
         FIELD(ImportSetting)
