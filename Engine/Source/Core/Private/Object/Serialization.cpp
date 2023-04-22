@@ -490,7 +490,7 @@ namespace CE
         }
         else if (type->IsClass())
         {
-            auto classType = (ClassType*) type;
+            auto classType = (ClassType*)type;
 
             String classTypeName = root["_TypeId"].as<std::string>();
             auto typeInfo = CE::GetTypeInfo(CE::Name(classTypeName));

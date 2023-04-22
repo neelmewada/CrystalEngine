@@ -35,6 +35,8 @@ namespace CE
         static Name DeserializeObjectName(IO::FileStream& inFile);
         static Name DeserializeObjectName(IO::MemoryStream& inStream);
         static Name DeserializeObjectName(YAML::Node& root);
+
+
         
     protected:
         

@@ -384,12 +384,12 @@ namespace CE
 		}
 
         // For internal use only!
-        static void RegisterClass(ClassType* type);
+        static void RegisterClassType(ClassType* type);
         // For internal use only!
-        static void DeregisterClass(ClassType* type);
+        static void DeregisterClassType(ClassType* type);
 
         static ClassType* FindClassByName(Name className);
-        static ClassType* FindClassByTypeId(TypeId classTypeId);
+        static ClassType* FindClassByTypeId(TypeId classId);
 
         Array<TypeId> GetDerivedClassesTypeId() const;
         Array<ClassType*> GetDerivedClasses() const;
@@ -548,7 +548,33 @@ namespace CE
 
 #pragma pack(pop)
 
-	
+	/*
+	 *	Casting
+	 */
+
+	template<typename TCastTo, typename TCastFrom>
+	CE_FORCE_INLINE TCastTo ConstCast(TCastFrom& from)
+	{
+		return const_cast<TCastTo>(from);
+	}
+
+	template<typename TCastTo, typename TCastFrom>
+	CE_FORCE_INLINE TCastTo StaticCast(const TCastFrom& from)
+	{
+		return static_cast<TCastTo>(from);
+	}
+
+	template<typename TCastTo, typename TCastFrom>
+	CE_FORCE_INLINE TCastTo* DynamicCast(TCastFrom* from)
+	{
+		if constexpr (std::is_void_v<TCastFrom>)
+		{
+			return static_cast<TCastTo*>(from);
+		}
+		StructType* castFrom = TCastFrom::Type();
+		StructType* castTo = TCastTo::Type();
+		return (TCastTo*)castFrom->TryCast(from, castTo);
+	}
 
 }
 
@@ -624,14 +650,14 @@ namespace CE\
             {\
                 TypeInfo::RegisterType(&Type);\
                 Type.AddSuper<SuperClasses>();\
-                ClassType::RegisterClass(&Type);\
+                ClassType::RegisterClassType(&Type);\
 				FunctionList\
                 FieldList\
             }\
 			virtual ~TypeInfoImpl()\
 			{\
-				TypeInfo::DeregisterType(&Type);                                                           \
-                ClassType::DeregisterClass(&Type);                                                          \
+				TypeInfo::DeregisterType(&Type);\
+                ClassType::DeregisterClassType(&Type);\
 			}\
 			virtual bool CanInstantiate() const override\
 			{\

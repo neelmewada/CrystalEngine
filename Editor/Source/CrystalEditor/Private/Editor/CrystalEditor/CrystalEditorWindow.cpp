@@ -17,12 +17,12 @@ namespace CE::Editor
     HashMap<TypeId, ClassType*> CrystalEditorBus::Interface::assetEditors{};
 
     CrystalEditorWindow::CrystalEditorWindow(QWidget* parent)
-        : QMainWindow(parent)
+        : QMainWindow(parent)//, QColor(21, 21, 21))
         , CE::Object("CrystalEditorWindow")
         , ui(new Ui::CrystalEditorWindow)
     {
         CrystalEditor::window = this;
-
+		
         CE_CONNECT(CrystalEditorBus, this);
 
         ui->setupUi(this);
@@ -233,6 +233,10 @@ namespace CE::Editor
                     editorWindowClassInstance = nullptr;
                     CE_LOG(Error, All, "Failed to open asset at path: {}", assetPath);
                     return;
+                }
+                else
+                {
+	                // Opened successfully
                 }
             }
             else

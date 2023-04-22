@@ -106,12 +106,12 @@ namespace CE::Editor
 					auto copyPath = path;
 					if (copyPath.GetExtension() == ".casset")
 						return;
-					if (copyPath.GetExtension() != ".cscene" &&
+					if (copyPath.GetExtension() != Asset::GetAssetExtensionFor(BuiltinAssetType::SceneAsset) &&
 						!copyPath.ReplaceExtension(".casset").Exists())
 						return;
 
 					auto relPathWithFixedExtension = relPath;
-					if (copyPath.GetExtension() != ".cscene")
+					if (copyPath.GetExtension() != Asset::GetAssetExtensionFor(BuiltinAssetType::SceneAsset))
 					{
 						relPathWithFixedExtension = relPath.ReplaceExtension(".casset");
 					}
@@ -144,6 +144,29 @@ namespace CE::Editor
 					assetEntry->entryType = AssetDatabaseEntry::Type::Asset;
 					assetEntry->virtualRelativePath = relPathWithFixedExtension.GetFilename();
 					assetEntry->parent = parentEntry;
+
+					auto builtinAssetType = Asset::GetBuiltinAssetTypeFor(relPathWithFixedExtension.GetExtension().GetString());
+					assetEntry->builtinAssetType = builtinAssetType;
+					assetEntry->assetClassId = 0;
+
+					Object obj{ "Temp" };
+					SerializedObject so{ Object::Type(), &obj };
+					if (so.Deserialize(projectSettings.editorProjectDirectory / assetEntry->GetVirtualPath()))
+					{
+						assetEntry->uuid = obj.GetUuid();
+						AssetDatabase::Get().uuidToAssetEntryMap[obj.GetUuid()] = assetEntry;
+					}
+
+					if (builtinAssetType == BuiltinAssetType::None) // NOT a Builtin Asset
+					{
+						auto assetClassName = SerializedObject::DeserializeObjectName(projectSettings.editorProjectDirectory / assetEntry->GetVirtualPath());
+						if (!assetClassName.IsValid())
+							return;
+						auto assetClass = ClassType::FindClassByName(assetClassName);
+						if (assetClass == nullptr)
+							return;
+						assetEntry->assetClassId = assetClass->GetTypeId();
+					}
 				}
 			});
 		}
@@ -238,9 +261,34 @@ namespace CE::Editor
 					assetEntry->virtualRelativePath = relPathWithFixedExtension.GetFilename();
 					assetEntry->parent = parentEntry;
 					parentEntry->children.Add(assetEntry);
+
+					auto builtinAssetType = Asset::GetBuiltinAssetTypeFor(relPathWithFixedExtension.GetExtension().GetString());
+					assetEntry->builtinAssetType = builtinAssetType;
+					assetEntry->assetClassId = 0;
+
+					Object obj{ "Temp" };
+					SerializedObject so{ Object::Type(), &obj };
+					if (so.Deserialize(engineDir.GetParentPath() / assetEntry->GetVirtualPath()) && obj.GetUuid() != 0)
+					{
+						assetEntry->uuid = obj.GetUuid();
+						AssetDatabase::Get().uuidToAssetEntryMap[obj.GetUuid()] = assetEntry;
+					}
+
+					if (builtinAssetType == BuiltinAssetType::None) // NOT a Builtin Asset
+					{
+						auto assetClassName = SerializedObject::DeserializeObjectName(engineDir.GetParentPath() / assetEntry->GetVirtualPath());
+						if (!assetClassName.IsValid())
+							return;
+						auto assetClass = ClassType::FindClassByName(assetClassName);
+						if (assetClass == nullptr)
+							return;
+						assetEntry->assetClassId = assetClass->GetTypeId();
+					}
 				}
 			});
 		}
+
+		AssetDatabase::Get().assetsLoaded = true;
 
 		if (watcher == nullptr)
 		{

@@ -45,3 +45,9 @@
 
 #endif
 
+#if PAL_TRAIT_BUILD_STANDALONE
+#define ENGINE_CONST const
+#else
+#define ENGINE_CONST
+#endif
+

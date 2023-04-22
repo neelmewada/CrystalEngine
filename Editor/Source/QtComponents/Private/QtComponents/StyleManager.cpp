@@ -82,7 +82,7 @@ namespace CE::Editor::Qt
 
     StyleManager::~StyleManager()
     {
-
+        
     }
 
     void StyleManager::Initialize(QApplication* app)

@@ -29,7 +29,7 @@ namespace CE::Editor
     class EditorWindow;
 
     CLASS()
-    class CrystalEditorWindow : public QMainWindow, public CE::Object, public CrystalEditorBus::Interface
+    class CRYSTALEDITOR_API CrystalEditorWindow : public QMainWindow, public CE::Object, public CrystalEditorBus::Interface
     {
         Q_OBJECT
         CE_CLASS(CrystalEditorWindow, CE::Object)

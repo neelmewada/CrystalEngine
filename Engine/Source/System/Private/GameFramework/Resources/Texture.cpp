@@ -11,8 +11,13 @@ namespace CE
 	Texture::Texture(TextureAsset* textureAsset) : ResourceObject(textureAsset != nullptr ? textureAsset->GetName() : "Texture")
 	{
 		isValid = false;
-		if (textureAsset == nullptr)
+		if (textureAsset == nullptr || textureAsset->GetDatabaseEntry() == nullptr)
 			return;
+
+		auto entry = textureAsset->GetDatabaseEntry();
+		if (entry == nullptr)
+			return;
+
 
 	}
 

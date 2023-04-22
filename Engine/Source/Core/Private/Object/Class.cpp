@@ -384,7 +384,7 @@ namespace CE
         }
     }
 
-    void ClassType::RegisterClass(ClassType* type)
+    void ClassType::RegisterClassType(ClassType* type)
     {
         if (type == nullptr || registeredClasses.KeyExists(type->GetTypeId()))
             return;
@@ -401,7 +401,7 @@ namespace CE
         AddDerivedClassToMap(type, type);
     }
 
-    void ClassType::DeregisterClass(ClassType* type)
+    void ClassType::DeregisterClassType(ClassType* type)
     {
         if (type == nullptr || !registeredClasses.KeyExists(type->GetTypeId()))
             return;

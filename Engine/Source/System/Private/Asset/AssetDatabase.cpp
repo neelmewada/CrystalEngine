@@ -25,6 +25,8 @@ namespace CE
 
 	void AssetDatabase::Initialize()
 	{
+		UnloadDatabase();
+
 		rootEntry = new AssetDatabaseEntry;
 		rootEntry->name = "Root";
 	}
@@ -61,9 +63,16 @@ namespace CE
 		rootEntry = nullptr;
 	}
 
-	const AssetDatabaseEntry* AssetDatabase::GetEntry(IO::Path virtualPath)
+	ENGINE_CONST AssetDatabaseEntry* AssetDatabase::GetEntry(IO::Path virtualPath)
 	{
 		return SearchForEntry(rootEntry, virtualPath);
+	}
+
+	ENGINE_CONST AssetDatabaseEntry* AssetDatabase::GetEntry(UUID assetUuid)
+	{
+		if (!uuidToAssetEntryMap.KeyExists(assetUuid))
+			return nullptr;
+		return uuidToAssetEntryMap[assetUuid];
 	}
 
 	Asset* AssetDatabase::LoadAssetAt(IO::Path virtualPath)
@@ -116,10 +125,16 @@ namespace CE
 	Asset* AssetDatabase::LoadRuntimeAssetAt(IO::Path virtualPath)
 	{
 		// TODO: Runtime asset packaging system
+		auto entry = GetEntry(virtualPath);
+		if (entry == nullptr)
+			return nullptr;
+
+		auto assetsDir = PlatformDirectories::GetGameDir() / "Assets" / (String("shared") + entry->assetPackIndex + ".cpf");
+
 		return nullptr;
 	}
 
-	const AssetDatabaseEntry* AssetDatabase::SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath)
+	AssetDatabaseEntry* AssetDatabase::SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath)
 	{
 		if (searchRoot == nullptr || subVirtualPath.IsEmpty())
 			return searchRoot;

@@ -45,9 +45,13 @@ namespace CE
         inline String GetAssetName() const { return assetName; }
         inline void SetAssetName(const String& assetName) { this->assetName = assetName; }
 
+        inline UUID GetAssetUuid() const { return this->GetUuid(); }
+
         inline String GetAssetExtension() const { return assetExtension; }
 
-        virtual ResourceObject* InstantiateResource() = 0;
+        virtual ResourceObject* InstantiateResource() { return nullptr; }
+
+        AssetDatabaseEntry* GetDatabaseEntry() const { return databaseEntry; }
 
     protected:
         AssetDatabaseEntry* databaseEntry = nullptr;

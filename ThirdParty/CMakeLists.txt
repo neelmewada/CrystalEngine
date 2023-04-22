@@ -20,7 +20,7 @@ find_package(sdl REQUIRED)
 if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     include(FindQt.cmake)
     find_package(qads REQUIRED)
-    find_package(qtnodes REQUIRED) 
+    find_package(qtnodes REQUIRED)
 endif()
 
 

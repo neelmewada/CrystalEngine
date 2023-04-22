@@ -126,6 +126,20 @@ namespace CE::Editor
     {
         IO::Path basePath = ProjectSettings::Get().GetEditorProjectDirectory();
 
+        IO::Path assetPath = basePath / assetEntry->GetVirtualPath();
+        if (!assetPath.Exists())
+            return;
+
+    	Name assetClassName = SerializedObject::DeserializeObjectName(assetPath);
+        if (!assetClassName.IsValid())
+            return;
+
+        ClassType* assetClass = ClassType::FindClassByName(assetClassName);
+        if (assetClass == nullptr)
+            return;
+		if (!assetClass->IsAssignableTo(TYPEID(TextureAsset)))
+            return;
+
         this->assetEntry = assetEntry;
 
         if (assetEntry != nullptr)

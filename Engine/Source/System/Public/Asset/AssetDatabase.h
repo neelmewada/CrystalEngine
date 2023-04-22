@@ -34,6 +34,8 @@ namespace CE
 
         enum class Category
         {
+            EditorAssets,
+            EditorShaders,
             EngineAssets,
             EngineShaders,
             GameAssets,
@@ -49,9 +51,12 @@ namespace CE
         Name name{};
         String extension{};
         IO::Path virtualRelativePath{};
-        //IO::Path virtualPath{};
         Type entryType = Type::Directory;
         Category category = Category::EngineAssets;
+        UUID uuid{};
+
+        BuiltinAssetType builtinAssetType = BuiltinAssetType::None;
+        TypeId assetClassId = 0;
 
         CE::Array<AssetDatabaseEntry*> children{};
         AssetDatabaseEntry* parent = nullptr;
@@ -89,7 +94,9 @@ namespace CE
         void ClearDatabase();
         void UnloadDatabase();
 
-        const AssetDatabaseEntry* GetEntry(IO::Path virtualPath);
+		ENGINE_CONST AssetDatabaseEntry* GetEntry(IO::Path virtualPath);
+
+		ENGINE_CONST AssetDatabaseEntry* GetEntry(UUID assetUuid);
 
         Asset* LoadAssetAt(IO::Path virtualPath);
 
@@ -97,7 +104,7 @@ namespace CE
 
         Asset* LoadRuntimeAssetAt(IO::Path virtualPath);
 
-        const AssetDatabaseEntry* SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath);
+        AssetDatabaseEntry* SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath);
 
         void LoadRuntimeAssetDatabase();
 
@@ -105,6 +112,8 @@ namespace CE
 
         bool assetsLoaded = false;
         AssetDatabaseEntry* rootEntry = nullptr;
+
+        HashMap<UUID, AssetDatabaseEntry*> uuidToAssetEntryMap{};
 
         friend class CE::Editor::AssetManager;
     };
