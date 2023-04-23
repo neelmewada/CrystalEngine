@@ -142,6 +142,47 @@ namespace CE
 #endif
 	}
 
+	UUID AssetDatabase::GetAssetUuid(IO::Path virtualPath)
+	{
+#if PAL_TRAIT_BUILD_STANDALONE
+		return GetRuntimeAssetUuid(virtualPath);
+#else
+		auto entry = GetEntry(virtualPath);
+		if (entry == nullptr)
+			return 0;
+
+		auto basePath = ProjectSettings::Get().GetEditorProjectDirectory();
+
+		if (entry->category == AssetDatabaseEntry::Category::EngineAssets ||
+			entry->category == AssetDatabaseEntry::Category::EngineShaders)
+		{
+			basePath = PlatformDirectories::GetEngineDir().GetParentPath();
+		}
+		else if (entry->category == AssetDatabaseEntry::Category::GameAssets ||
+			entry->category == AssetDatabaseEntry::Category::GameShaders)
+		{
+
+		}
+		else
+		{
+			return 0;
+		}
+
+		auto fullPath = basePath / virtualPath;
+
+		if (!fullPath.Exists())
+			return 0;
+
+		Object obj{ "Temp" };
+		SerializedObject so{ &obj };
+		if (so.Deserialize(fullPath))
+		{
+			return obj.GetUuid();
+		}
+		return 0;
+#endif
+	}
+
 	Asset* AssetDatabase::LoadRuntimeAssetAt(IO::Path virtualPath)
 	{
 		// TODO: Runtime asset packaging system
@@ -150,8 +191,21 @@ namespace CE
 			return nullptr;
 
 		auto assetsDir = PlatformDirectories::GetGameDir() / "Assets" / (String("shared") + entry->assetPackIndex + ".cpf");
+		auto shadersDir = PlatformDirectories::GetGameDir() / "Shaders" / (String("shaders") + entry->assetPackIndex + ".cpf");
 
 		return nullptr;
+	}
+
+	UUID AssetDatabase::GetRuntimeAssetUuid(IO::Path virtualPath)
+	{
+		// TODO: Runtime asset packaging system
+		auto entry = GetEntry(virtualPath);
+		if (entry == nullptr)
+			return {};
+
+		auto assetsDir = PlatformDirectories::GetGameDir() / "Assets" / (String("shared") + entry->assetPackIndex + ".cpf");
+
+		return {};
 	}
 
 	AssetDatabaseEntry* AssetDatabase::SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath)

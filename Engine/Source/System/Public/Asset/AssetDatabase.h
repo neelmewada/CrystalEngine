@@ -91,6 +91,8 @@ namespace CE
         void Initialize();
         void Shutdown();
 
+        // - Internal API -
+
         CE_INLINE bool IsLoaded() const { return assetsLoaded; }
 
         CE_INLINE const AssetDatabaseEntry* GetRootEntry() const { return rootEntry; }
@@ -103,11 +105,17 @@ namespace CE
 
 		ENGINE_CONST AssetDatabaseEntry* GetEntry(UUID assetUuid);
 
+        // - Public API -
+
         Asset* LoadAssetAt(IO::Path virtualPath);
+
+        UUID GetAssetUuid(IO::Path virtualPath);
 
     private:
 
         Asset* LoadRuntimeAssetAt(IO::Path virtualPath);
+
+        UUID GetRuntimeAssetUuid(IO::Path virtualPath);
 
         AssetDatabaseEntry* SearchForEntry(AssetDatabaseEntry* searchRoot, IO::Path subVirtualPath);
 
