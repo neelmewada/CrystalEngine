@@ -21,7 +21,7 @@ namespace CE::Editor
 
 	}
 
-    void AssetProcessor::ProcessAsset(IO::Path sourceAssetPath, Asset* asset)
+    void AssetProcessor::ImportAsset(IO::Path sourceAssetPath, Asset* asset)
     {
         if (asset == nullptr || sourceAssetPath.IsDirectory() || sourceAssetPath.GetExtension() == ".casset")
             return;

@@ -83,6 +83,25 @@ namespace CE
         return GetProductAssetExtensionFor(assetClass);
     }
 
+    bool Asset::IsValidBuiltinAssetExtension(String builtinAssetExtension)
+    {
+        return GetBuiltinAssetTypeFor(builtinAssetExtension) != BuiltinAssetType::None;
+    }
+
+    bool Asset::IsValidProductAssetExtension(String productAssetExtension)
+    {
+        if (!productAssetExtension.StartsWith("."))
+            productAssetExtension = "." + productAssetExtension;
+
+        for (auto [a, productExtension] : assetClassToProductExtensionMap)
+        {
+	        if (productAssetExtension == productExtension.GetString())
+                return true;
+        }
+
+        return false;
+    }
+
     BuiltinAssetType Asset::GetBuiltinAssetTypeFor(String assetExtension)
     {
         if (!assetExtension.StartsWith("."))

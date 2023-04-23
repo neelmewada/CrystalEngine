@@ -21,16 +21,26 @@ namespace CE::Editor
 
         void LoadEditorAssetDatabase();
 
+        CE_SIGNAL(OnRequestDeselectAssets);
+
         CE_SIGNAL(OnAssetDatabaseUpdated);
 
         CE_SIGNAL(OnAssetUpdated, IO::Path);
         
         CE_SIGNAL(OnNewSourceAssetAdded, IO::Path);
 
+        // - Public API -
+
+        void MoveAssetEntryToDirectory(AssetDatabaseEntry* entry, const IO::Path& directoryRelativePath);
+
+        void DeleteAssetDatabaseEntry(AssetDatabaseEntry* entry);
+
+        bool ImportExternalAssets(Array<IO::Path> externalPaths, AssetDatabaseEntry* directoryEntry);
+
     private:
 
         // IFileWatchListener
-        virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName) override;
+        void HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName) override;
 
         IO::FileWatcher* watcher = nullptr;
         IO::WatchID gameAssetsWatch{};

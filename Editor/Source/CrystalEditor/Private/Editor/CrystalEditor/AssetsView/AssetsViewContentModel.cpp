@@ -5,6 +5,7 @@
 #include "AssetsViewFolderModel.h"
 
 #include <QMimeData>
+#include <QMimeDatabase>
 
 namespace CE::Editor
 {
@@ -118,38 +119,95 @@ namespace CE::Editor
 
     ::Qt::DropActions AssetsViewContentModel::supportedDropActions() const
     {
-        return ::Qt::CopyAction | ::Qt::MoveAction | ::Qt::LinkAction;
+        return ::Qt::CopyAction | ::Qt::MoveAction | ::Qt::LinkAction | ::Qt::TargetMoveAction;
     }
 
     QStringList AssetsViewContentModel::mimeTypes() const
     {
         QStringList types;
-        types << "ce-mime-format";
+        // TODO: accepted mime types
+        types << "engine/asset-database-entry";
+        types << "inode/directory";
+        types << "text/plain";
         return types;
     }
 
     QMimeData* AssetsViewContentModel::mimeData(const QModelIndexList& indexes) const
     {
-        QMimeData* mimeData = new QMimeData();
+        // TODO: currently dragged mime type
+        auto mimeData = new QMimeData();
         QByteArray encodedData;
 
         QDataStream stream(&encodedData, QIODevice::WriteOnly);
         
         foreach(const QModelIndex & index, indexes) 
         {
-            if (index.isValid()) 
+            if (index.isValid() && index.internalPointer() != nullptr) 
             {
+                auto entry = (AssetDatabaseEntry*)index.internalPointer();
+                
                 QString text = data(index, ::Qt::DisplayRole).toString();
+                stream << (qsizetype)entry;
                 stream << text;
             }
         }
 
-        mimeData->setData("ce-mime-format", encodedData);
+        mimeData->setData("engine/asset-database-entry", encodedData);
         return mimeData;
     }
 
     bool AssetsViewContentModel::dropMimeData(const QMimeData* data, ::Qt::DropAction action, int row, int column, const QModelIndex& parent)
     {
+        Array<IO::Path> localFilePaths{};
+        for (auto url : data->urls())
+        {
+            if (!url.isLocalFile())
+                continue;
+            IO::Path path = url.path().toStdString().substr(1);
+            if (path.Exists())
+                localFilePaths.Add(path);
+        }
+
+        if (localFilePaths.GetSize() > 0)
+        {
+            if (currentDirectory == nullptr)
+                return false;
+            return AssetManager::Get().ImportExternalAssets(localFilePaths, currentDirectory);
+        }
+
+        for (const auto& formatStr : data->formats())
+        {
+            // TODO: Internal content dropped
+            CE_LOG(Info, All, "Drop Format: {}", String(formatStr.toStdString()));
+        }
+
+        return false;
+    }
+
+    bool AssetsViewContentModel::canDropMimeData(const QMimeData* data, ::Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+    {
+        Array<IO::Path> localFilePaths{};
+        for (auto url : data->urls())
+        {
+            if (!url.isLocalFile())
+                continue;
+            IO::Path path = url.path().toStdString().substr(1);
+            if (path.Exists())
+				localFilePaths.Add(path);
+        }
+
+        if (localFilePaths.GetSize() > 0)
+        {
+            // External content dropped
+            return true;
+        }
+
+        if (!data->formats().empty())
+        {
+            // Internal content dropped
+            return true;
+        }
+
         return false;
     }
 }

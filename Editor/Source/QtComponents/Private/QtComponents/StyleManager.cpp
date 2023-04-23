@@ -69,6 +69,31 @@ QMenu::item:selected {
     color: white;
     background-color: rgb(0, 112, 224);
 }
+
+QPushButton {
+	background-color: rgb(56, 56, 56);
+	border-radius: 3px;
+	border: 2px solid rgb(32, 32, 32);
+	padding-left: 12px;
+	padding-top: 3px;
+	padding-right: 12px;
+	padding-bottom: 3px;
+}
+QPushButton:focus {
+	border: 2px solid palette(highlight);
+}
+QPushButton:hover {
+	background-color: rgb(50, 50, 50);
+}
+QPushButton:pressed {
+	background-color: rgb(40, 40, 40);
+}
+QPushButton:disabled {
+	color: rgb(80, 80, 80);
+	background-color: rgb(45, 45, 45);
+}
+
+
 )";
 
 namespace CE::Editor::Qt
@@ -151,7 +176,7 @@ namespace CE::Editor::Qt
         palette.setColor(QPalette::ToolTipBase, ::Qt::white);
         palette.setColor(QPalette::ToolTipText, ::Qt::white);
         palette.setColor(QPalette::Text, ::Qt::white);
-        palette.setColor(QPalette::Button, darkGray);
+        palette.setColor(QPalette::Button, QColor(56, 56, 56));
         palette.setColor(QPalette::ButtonText, ::Qt::white);
         palette.setColor(QPalette::BrightText, ::Qt::red);
         palette.setColor(QPalette::Link, QColor(42, 130, 218));

@@ -48,6 +48,11 @@ namespace CE
 
         IO::Path GetVirtualPath() const;
 
+        bool IsEditorContentEntry() const;
+        bool IsEngineContentEntry() const;
+        bool IsGameContentEntry() const;
+        bool IsPluginContentEntry() const;
+
         Name name{};
         String extension{};
         IO::Path virtualRelativePath{};

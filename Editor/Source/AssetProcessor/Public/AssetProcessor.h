@@ -30,7 +30,7 @@ namespace CE::Editor
             return instance;
         }
 
-        void ProcessAsset(IO::Path sourceAssetPath, Asset* assetInstance);
+        void ImportAsset(IO::Path sourceAssetPath, Asset* assetInstance);
 
         void PostProcessAsset(Asset* assetInstance);
     };

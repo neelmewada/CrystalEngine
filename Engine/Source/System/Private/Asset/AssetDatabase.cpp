@@ -23,6 +23,26 @@ namespace CE
 		return path;
 	}
 
+	bool AssetDatabaseEntry::IsEditorContentEntry() const
+	{
+		return category == Category::EditorAssets || category == Category::EditorShaders;
+	}
+
+	bool AssetDatabaseEntry::IsEngineContentEntry() const
+	{
+		return category == Category::EngineAssets || category == Category::EngineShaders;
+	}
+
+	bool AssetDatabaseEntry::IsGameContentEntry() const
+	{
+		return category == Category::GameAssets || category == Category::GameShaders;
+	}
+
+	bool AssetDatabaseEntry::IsPluginContentEntry() const
+	{
+		return category == Category::PluginAssets || category == Category::PluginShaders;
+	}
+
 	void AssetDatabase::Initialize()
 	{
 		UnloadDatabase();
@@ -116,7 +136,7 @@ namespace CE
 			return nullptr;
 
 		auto asset = (Asset*)assetClass->CreateDefaultInstance();
-		asset->databaseEntry = const_cast<AssetDatabaseEntry*>(entry);
+		asset->databaseEntry = entry;
 		
 		return asset;
 #endif

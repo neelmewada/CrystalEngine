@@ -32,11 +32,12 @@ namespace CE::Editor
     private slots:
         void on_renameInput_editingFinished();
 
-        void on_renameInput_focusOut();
+        void OnRenameInputFocusOut();
 
     private:
         AssetDatabaseEntry* entry = nullptr;
         QString fullName = "";
+        bool focusOutConnected = false;
 
         Ui::AssetViewItem* ui;
     };

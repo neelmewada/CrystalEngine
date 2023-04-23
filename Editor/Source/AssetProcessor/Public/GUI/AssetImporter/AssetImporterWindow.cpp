@@ -428,7 +428,7 @@ namespace CE::Editor
                 if (!entry.Exists() || entry.IsDirectory() || i >= assetClassInstances.GetSize())
                     continue;
 
-                AssetProcessor::Get().ProcessAsset(entry, assetClassInstances[i]);
+                AssetProcessor::Get().ImportAsset(entry, assetClassInstances[i]);
             }
 
             targetAssetPaths.Clear();
@@ -445,7 +445,7 @@ namespace CE::Editor
             if (entry == nullptr)
                 continue;
 
-            AssetProcessor::Get().ProcessAsset(entry->fullPath, assetClassInstances[i]);
+            AssetProcessor::Get().ImportAsset(entry->fullPath, assetClassInstances[i]);
         }
 
         ui->contentTreeView->clearSelection();

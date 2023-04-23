@@ -76,6 +76,9 @@ namespace CE::Editor
     private slots:
 
         FUNCTION(Event)
+    	void OnRequestDeselectAssets();
+
+        FUNCTION(Event)
         void OnAssetDatabaseUpdated();
 
         FUNCTION(Event)
@@ -98,6 +101,10 @@ namespace CE::Editor
         // Misc
 
         void ReimportAssets(Array<AssetDatabaseEntry*> assetsToReimport);
+
+        // UI Events
+
+        void on_addButton_clicked();
 
     private:
         AssetDatabaseEntry* currentDirectory = nullptr;

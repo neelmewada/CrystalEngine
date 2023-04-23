@@ -17,8 +17,6 @@ namespace CE::Editor
         ui->iconLabel->setScaledContents(true);
 
         SetRenameMode(false);
-
-        QObject::connect(ui->renameInput, SIGNAL(OnFocusOut()), this, SLOT(on_renameInput_focusOut()));
     }
 
     AssetViewItem::~AssetViewItem()
@@ -65,10 +63,16 @@ namespace CE::Editor
         {
             ui->renameInput->setFocus();
             ui->renameInput->selectAll();
+
+            if (!focusOutConnected)
+            {
+                focusOutConnected = true;
+                connect(ui->renameInput, &Qt::ExLineEdit::OnFocusOut, this, &AssetViewItem::OnRenameInputFocusOut);
+            }
         }
     }
 
-    void AssetViewItem::on_renameInput_focusOut()
+    void AssetViewItem::OnRenameInputFocusOut()
     {
         on_renameInput_editingFinished();
     }

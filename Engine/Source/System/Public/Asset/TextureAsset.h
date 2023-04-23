@@ -10,7 +10,7 @@ namespace CE
     {
         ECONST(Display = "Color sRGB")
         ColorSRGB,
-        Color,
+        Data,
         Grayscale,
         NormalMap,
     };
@@ -22,6 +22,15 @@ namespace CE
         Repeat,
     };
 
+    ENUM()
+    enum class TextureFileFormat
+    {
+	    Undefined = 0,
+        PNG,
+        JPG,
+        TIFF
+    };
+
     CLASS()
     class SYSTEM_API TextureAsset : public CE::Asset
     {
@@ -31,6 +40,8 @@ namespace CE
         virtual ~TextureAsset();
 
         ResourceObject* InstantiateResource() override;
+
+        TextureFileFormat GetFileFormat();
 
     protected:
         FIELD(ImportSetting)

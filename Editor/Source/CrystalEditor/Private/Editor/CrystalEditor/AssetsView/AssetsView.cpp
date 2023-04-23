@@ -14,6 +14,7 @@
 
 #include <QFileDialog>
 #include <QDesktopServices>
+#include <QMimeDatabase>
 
 #include <QProcessEnvironment>
 
@@ -31,6 +32,9 @@ namespace CE::Editor
         ui->splitter->setSizes({ 200, 500 });
 
         auto rootEntry = const_cast<AssetDatabaseEntry*>(AssetDatabase::Get().GetRootEntry());
+
+        // UI Setup
+        ui->addButton->setIcon(QIcon(":/Editor/Icons/add"));
         
         // Folder View/Model
         folderModel = new AssetsViewFolderModel(this);
@@ -55,6 +59,8 @@ namespace CE::Editor
         ui->folderTreeView->selectionModel()->select(folderModel->index(0, 0), QItemSelectionModel::Select);
         UpdateContentView();
 
+        // Bind: Signals -> Events
+
         auto signal = AssetManager::Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
         auto event = Self::Type()->FindFunctionWithName("OnAssetDatabaseUpdated");
         if (signal != nullptr && event != nullptr)
@@ -62,6 +68,11 @@ namespace CE::Editor
 
         signal = AssetManager::Type()->FindFunctionWithName("OnNewSourceAssetAdded");
         event = Self::Type()->FindFunctionWithName("OnNewSourceAssetAdded");
+        if (signal != nullptr && event != nullptr)
+            Object::Bind(&AssetManager::Get(), signal, this, event);
+
+        signal = AssetManager::Type()->FindFunctionWithName("OnRequestDeselectAssets");
+        event = Self::Type()->FindFunctionWithName("OnRequestDeselectAssets");
         if (signal != nullptr && event != nullptr)
             Object::Bind(&AssetManager::Get(), signal, this, event);
     }
@@ -138,12 +149,10 @@ namespace CE::Editor
         contentModel->SetDirectoryEntry(root);
         emit contentModel->modelReset({});
         
-        int maxNumItemsInRow = Math::Max(1, ui->assetsContentView->width() / AssetsViewContentModel::sizePerItem);
+        //int maxNumItemsInRow = Math::Max(1, ui->assetsContentView->width() / AssetsViewContentModel::sizePerItem);
 
-        int totalItemCount = root->children.GetSize();
-
-        int numCols = Math::Max(totalItemCount / maxNumItemsInRow, maxNumItemsInRow);
-        int numRows = totalItemCount / numCols + 1;
+        int numCols = contentModel->columnCount();//Math::Max(totalItemCount / maxNumItemsInRow, maxNumItemsInRow);
+        int numRows = contentModel->rowCount();//totalItemCount / numCols + 1;
 
         for (int c = 0; c < numCols; c++)
         {
@@ -160,7 +169,7 @@ namespace CE::Editor
             int c = i % numCols;
             int r = i / numCols;
 
-            auto idx = contentModel->CreateIndex(r, c, root->children[i]);
+            auto idx = contentModel->index(r, c);//contentModel->CreateIndex(r, c, root->children[i]);
             if (!ui->assetsContentView->isPersistentEditorOpen(idx))
             {
                 ui->assetsContentView->openPersistentEditor(idx);
@@ -218,6 +227,14 @@ namespace CE::Editor
 
                 auto idx = folderModel->GetIndex(entry);
                 ui->folderTreeView->selectionModel()->select(idx, QItemSelectionModel::Select);
+
+                idx = folderModel->parent(idx);
+                while (idx.isValid())
+                {
+                    ui->folderTreeView->setExpanded(idx, true);
+                    idx = folderModel->parent(idx);
+                }
+
                 break;
             }
         }
@@ -228,9 +245,13 @@ namespace CE::Editor
     void AssetsView::OnAssetViewItemContextMenuRequested(const QPoint& pos)
     {
         QModelIndexList selection = ui->assetsContentView->selectionModel()->selectedIndexes();
+        QModelIndexList folderSelection = ui->folderTreeView->selectionModel()->selectedIndexes();
 
         const auto& projectSettings = ProjectSettings::Get();
         auto projectPath = projectSettings.GetEditorProjectDirectory();
+
+        if (folderSelection.size() == 0)
+            return;
 
         if (contextMenu == nullptr)
         {
@@ -248,7 +269,13 @@ namespace CE::Editor
 
         if (selection.size() == 0)
         {
-            PopulateCreateContextEntries(contextMenu);
+            AssetDatabaseEntry* entry = (AssetDatabaseEntry*)folderSelection[0].internalPointer();
+            if (entry->category == AssetDatabaseEntry::Category::GameAssets ||
+                entry->category == AssetDatabaseEntry::Category::GameShaders)
+            {
+                contextMenu->AddCategoryLabel("Create");
+				PopulateCreateContextEntries(contextMenu);
+            }
         }
         else
         {
@@ -336,30 +363,38 @@ namespace CE::Editor
             }
         }
 
-        if (selected.GetSize() > 0)
-        {
-            contextMenu->AddCategoryLabel("Asset Options");
-            if (canShowAssetOptions && customAssetClass != nullptr)
-            {
-                contextMenu->AddRegularItem("Reimport", ":/Editor/Icons/download")
-                        ->BindMouseClickSignal([this,selected]
-                                               {
-                                                   this->ReimportAssets(selected);
-                                               });
-            }
+        // Reimport, Show in Explorer, etc
+	    {
+		    contextMenu->AddCategoryLabel("Asset Options");
+        	if (selected.GetSize() > 0 && canShowAssetOptions && customAssetClass != nullptr)
+        	{
+        		contextMenu->AddRegularItem("Reimport", ":/Editor/Icons/download")
+						->BindMouseClickSignal([this,selected]
+											   {
+												   this->ReimportAssets(selected);
+											   });
+        	}
 
-            auto assetPath = projectPath / selected.At(0)->GetVirtualPath();
-            auto platformNameLowercase = PlatformMisc::GetPlatformName().ToLower();
-            contextMenu->AddRegularItem(QString("Show in %1").arg(PlatformMisc::GetSystemFileExplorerDisplayName().GetCString()),
-                                        QString(":/Editor/Icons/explorer-%1").arg(platformNameLowercase.GetCString()))
-                ->BindMouseClickSignal([this,assetPath]()
-                                       {
-                                            if (!assetPath.Exists())
-                                                return;
-                                            auto assetPathDir = assetPath.GetString();
-                                            EditorPlatformUtils::RevealInFileExplorer(QString(assetPathDir.GetCString()));
-                                       });
-        }
+            auto entry = selected.GetSize() > 0 ? selected.At(0) : (AssetDatabaseEntry*)folderSelection[0].internalPointer();
+
+        	auto basePath = projectPath;
+        	if (entry->IsEngineContentEntry())
+        		basePath = PlatformDirectories::GetEngineDir().GetParentPath();
+        	else if (entry->IsEditorContentEntry())
+        		basePath = PlatformDirectories::GetEditorDir().GetParentPath();
+
+        	auto assetPath = basePath / entry->GetVirtualPath();
+        	auto platformNameLowercase = PlatformMisc::GetPlatformName().ToLower();
+        	contextMenu->AddRegularItem(QString("Show in %1").arg(PlatformMisc::GetSystemFileExplorerDisplayName().GetCString()),
+										QString(":/Editor/Icons/explorer-%1").arg(platformNameLowercase.GetCString()))
+				->BindMouseClickSignal([this,assetPath]()
+									   {
+											if (!assetPath.Exists())
+												return;
+											auto assetPathDir = assetPath.GetString();
+											EditorPlatformUtils::RevealInFileExplorer(QString(assetPathDir.GetCString()));
+									   });
+	    }
 
         auto globalPos = ui->assetsContentView->mapToGlobal(pos);
         contextMenu->ShowPopup(globalPos);
@@ -412,7 +447,6 @@ namespace CE::Editor
 
     void AssetsView::PopulateCreateContextEntries(Qt::ContextMenuWidget* contextMenu)
     {
-        contextMenu->AddCategoryLabel("Create");
         contextMenu->AddRegularItem("New Folder", ":/Editor/Icons/add-folder")
             ->BindMouseClickSignal(this, SLOT(OnContextMenuNewFolderPressed()));
     }
@@ -502,59 +536,82 @@ namespace CE::Editor
     void AssetsView::OnContextMenuMoveToPressed()
     {
         const auto& projectSettings = ProjectSettings::Get();
-        auto gameAssetsDir = projectSettings.GetEditorProjectDirectory();
+        auto projectDir = projectSettings.GetEditorProjectDirectory();
         auto selection = ui->assetsContentView->selectionModel()->selectedIndexes();
 
-        if (selection.size() == 0 || !gameAssetsDir.Exists())
+        if (selection.size() == 0 || !projectDir.Exists())
         {
             return;
         }
 
         auto firstItem = (AssetDatabaseEntry*)selection.at(0).internalPointer();
 
-        auto dir = (gameAssetsDir / firstItem->GetVirtualPath()).GetParentPath().GetString();
+        auto dir = (projectDir / firstItem->GetVirtualPath()).GetParentPath().GetString();
         QString dirStr = QString(dir.GetCString());
-        auto moveDirectoryStr = QFileDialog::getExistingDirectory(this, "Select a folder for new project", dirStr);
+        auto moveDirectoryStr = QFileDialog::getExistingDirectory(this, "Select a folder to move assets to", dirStr);
 
         if (moveDirectoryStr.isEmpty())
             return;
 
         IO::Path moveDirectory = IO::Path(moveDirectoryStr.toStdString());
 
+        if (!IO::Path::IsSubDirectory(moveDirectory, projectDir))
+            return;
+
         for (const QModelIndex& item : selection)
         {
             AssetDatabaseEntry* entry = (AssetDatabaseEntry*)item.internalPointer();
             if (entry == nullptr || (entry->category != AssetDatabaseEntry::Category::GameAssets &&
                                      entry->category != AssetDatabaseEntry::Category::GameShaders))
                 continue;
-            auto path = gameAssetsDir / entry->GetVirtualPath();
-            if (!path.Exists())
+            auto assetPath = projectDir / entry->GetVirtualPath();
+            if (!assetPath.Exists())
                 continue;
-
-            if (path.GetExtension() == ".casset")
+            
+            if (assetPath.GetExtension() == ".casset")
             {
-                path.GetParentPath().IterateChildren([&](const IO::Path& p)
+                // Move Source Asset if exists
+                Asset tempAsset{ "Temp" };
+                SerializedObject so{ Asset::Type(), &tempAsset };
+                if (so.Deserialize(assetPath))
                 {
-                    if (path.GetFilename().RemoveExtension() == p.GetFilename().RemoveExtension())
+                    auto extension = tempAsset.GetAssetExtension();
+                    auto sourceAssetPath = assetPath.ReplaceExtension(extension);
+                    if (extension != assetPath.GetExtension() && sourceAssetPath.Exists())
                     {
-                        IO::Path::Rename(p, moveDirectory / p.GetFilename());
+                        IO::Path::Rename(sourceAssetPath, moveDirectory / assetPath.GetFilename().ReplaceExtension(extension));
                     }
-                });
+                }
+
+                // Move Product Asset
+                IO::Path::Rename(assetPath, moveDirectory / assetPath.GetFilename());
+                auto entry = AssetDatabase::Get().GetEntry(IO::Path::GetRelative(assetPath, projectDir));
+                if (entry != nullptr)
+                {
+                    AssetManager::Get().MoveAssetEntryToDirectory(entry, IO::Path::GetRelative(moveDirectory, projectDir));
+                }
             }
             else
             {
-                IO::Path::Rename(path, moveDirectory / path.GetFilename());
+                IO::Path::Rename(assetPath, moveDirectory / assetPath.GetFilename());
+                auto entry = AssetDatabase::Get().GetEntry(IO::Path::GetRelative(assetPath, projectDir));
+                if (entry != nullptr)
+                {
+                    AssetManager::Get().MoveAssetEntryToDirectory(entry, moveDirectory);
+                }
             }
         }
+
+        UpdateContentView();
     }
 
     void AssetsView::OnContextMenuDeletePressed()
     {
         const auto& projectSettings = ProjectSettings::Get();
-        auto gameAssetsDir = projectSettings.GetEditorProjectDirectory();
+        auto projectDir = projectSettings.GetEditorProjectDirectory();
         auto selection = ui->assetsContentView->selectionModel()->selectedIndexes();
         
-        if (selection.size() == 0 || !gameAssetsDir.Exists())
+        if (selection.size() == 0 || !projectDir.Exists())
         {
             return;
         }
@@ -565,29 +622,54 @@ namespace CE::Editor
             if (entry == nullptr || (entry->category != AssetDatabaseEntry::Category::GameAssets &&
                                      entry->category != AssetDatabaseEntry::Category::GameShaders))
                 continue;
-            auto path = gameAssetsDir / entry->GetVirtualPath();
-            if (!path.Exists())
+            auto assetPath = projectDir / entry->GetVirtualPath();
+            if (!assetPath.Exists())
                 continue;
-            if (path.IsDirectory())
+            if (assetPath.IsDirectory())
             {
-                IO::Path::RemoveRecursively(path);
+                IO::Path::RemoveRecursively(assetPath);
+                AssetManager::Get().DeleteAssetDatabaseEntry(entry);
             }
             else
             {
-                Array<IO::Path> pathsToRemove{};
-                path.GetParentPath().IterateChildren([&](const IO::Path& p)
+                // Delete Source Asset if exists
+                if (assetPath.GetExtension() == ".casset")
                 {
-                    if (path.GetFilename().RemoveExtension() == p.GetFilename().RemoveExtension() && !p.IsDirectory())
+                    Asset tempAsset{ "Temp" };
+                    SerializedObject so{ Asset::Type(), &tempAsset };
+                    if (so.Deserialize(assetPath))
                     {
-                        pathsToRemove.Add(p);
+                        auto extension = tempAsset.GetAssetExtension();
+                        if (!extension.IsEmpty())
+                        {
+                            auto sourceAssetPath = assetPath.ReplaceExtension(extension);
+                            if (extension != assetPath.GetExtension() && sourceAssetPath.Exists())
+                            {
+                                IO::Path::Remove(sourceAssetPath);
+                            }
+                        }
                     }
-                });
-                for (const auto& p : pathsToRemove)
+                }
+
+                // Delete Product Asset
+                IO::Path::Remove(assetPath);
+                auto entry = AssetDatabase::Get().GetEntry(IO::Path::GetRelative(assetPath, projectDir));
+                if (entry != nullptr)
                 {
-                    IO::Path::Remove(p);
+                    AssetManager::Get().DeleteAssetDatabaseEntry(entry);
                 }
             }
         }
+
+        UpdateContentView();
+    }
+
+    void AssetsView::OnRequestDeselectAssets()
+    {
+        QMetaObject::invokeMethod(this, [=]
+        {
+            emit ui->assetsContentView->selectionModel()->clearSelection();
+        });
     }
 
     void AssetsView::OnAssetDatabaseUpdated()
@@ -693,6 +775,18 @@ namespace CE::Editor
     void AssetsViewItemDelegate::OnNameInputEdited(QString newString)
     {
         
+    }
+
+
+    void AssetsView::on_addButton_clicked()
+    {
+        QString path = QFileDialog::getExistingDirectory(this, "Select directory");
+
+        if (path.isEmpty())
+            return;
+
+        auto mimeName = QMimeDatabase().mimeTypeForFile(path).name();
+        CE_LOG(Info, All, "Mime: {}", String(mimeName.toStdString()));
     }
 
 }

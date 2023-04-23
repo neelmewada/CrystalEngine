@@ -38,6 +38,8 @@ namespace CE
         static ClassType* GetAssetClassFor(String assetExtension);
         static String GetProductAssetExtensionFor(ClassType* assetClass);
         static String GetProductAssetExtensionFor(String sourceAssetExtension);
+        static bool IsValidBuiltinAssetExtension(String builtinAssetExtension);
+        static bool IsValidProductAssetExtension(String productAssetExtension);
 
         static BuiltinAssetType GetBuiltinAssetTypeFor(String assetExtension);
         static String GetAssetExtensionFor(BuiltinAssetType builtinAssetType);
@@ -54,6 +56,7 @@ namespace CE
         AssetDatabaseEntry* GetDatabaseEntry() const { return databaseEntry; }
 
     protected:
+        FIELD(Hidden, NonSerialized)
         AssetDatabaseEntry* databaseEntry = nullptr;
 
         FIELD(Hidden, NonSerialized)

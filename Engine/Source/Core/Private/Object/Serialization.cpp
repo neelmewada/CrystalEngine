@@ -560,15 +560,20 @@ namespace CE
 
             while (field != nullptr)
             {
-                const auto& fieldName = field->GetName().GetCString();
+                String fieldName = field->GetName().GetString();
 
-                if (!root[fieldName].IsDefined())
+                if (!root[fieldName.GetCString()].IsDefined())
                 {
-                    field = field->GetNext();
-                    continue;
+                    String formerKey = field->GetAttributeValue("FormerlySerializedAs");
+                    if (formerKey.IsEmpty() || !root[formerKey.GetCString()].IsDefined())
+                    {
+                        field = field->GetNext();
+                        continue;
+                    }
+                    fieldName = formerKey;
                 }
 
-                YAML::Node fieldNode = root[fieldName];
+                YAML::Node fieldNode = root[fieldName.GetCString()];
 
                 DeserializeField(field, fieldNode);
 

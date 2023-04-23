@@ -203,7 +203,7 @@ namespace CE::Editor
 
     void DetailsView::on_addComponentButton_clicked()
     {
-        addComponentMenu->move(mapToGlobal(ui->addComponentButton->pos()) + QPoint(0, 25));
+        addComponentMenu->move(mapToGlobal(ui->addComponentButton->pos()) + QPoint(0, 30));
         addComponentMenu->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         addComponentMenu->setFixedSize(ui->addComponentButton->size().width(), 300);
         addComponentMenu->show();

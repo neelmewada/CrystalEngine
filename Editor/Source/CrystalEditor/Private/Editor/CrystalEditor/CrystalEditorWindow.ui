@@ -83,9 +83,7 @@
     <string>Asset Importer</string>
    </property>
    <property name="font">
-    <font>
-     <pointsize>9</pointsize>
-    </font>
+    <font/>
    </property>
   </action>
  </widget>

@@ -1,6 +1,8 @@
 
 #include "System.h"
 #include "EditorCore.h"
+#include "Asset/AssetManager.h"
+
 
 namespace CE::Editor
 {
@@ -288,19 +290,66 @@ namespace CE::Editor
 			});
 		}
 
+		auto gameEntry = AssetDatabase::Get().rootEntry->children[0];
 		AssetDatabase::Get().assetsLoaded = true;
 
-		if (watcher == nullptr)
-		{
-			watcher = new IO::FileWatcher();
-			gameAssetsWatch = watcher->AddWatcher(gameDir, this, true);
+		//if (watcher == nullptr)
+		//{
+		//	watcher = new IO::FileWatcher();
+		//	gameAssetsWatch = watcher->AddWatcher(gameDir, this, true);
+		//	watcher->Watch();
+		//}
+	}
 
-			watcher->Watch();
+	void AssetManager::MoveAssetEntryToDirectory(AssetDatabaseEntry* entry, const IO::Path& directoryRelativePath)
+	{
+		auto targetDirEntry = AssetDatabase::Get().GetEntry(directoryRelativePath);
+		if (targetDirEntry == nullptr)
+			return;
+		targetDirEntry->children.Add(entry);
+		entry->parent->children.Remove(entry);
+		entry->parent = targetDirEntry;
+	}
+
+	void AssetManager::DeleteAssetDatabaseEntry(AssetDatabaseEntry* entry)
+	{
+		if (entry == nullptr)
+			return;
+		if (entry->parent != nullptr)
+			entry->parent->children.Remove(entry);
+		delete entry;
+	}
+
+	bool AssetManager::ImportExternalAssets(Array<IO::Path> externalPaths, AssetDatabaseEntry* directoryEntry)
+	{
+		if (directoryEntry == nullptr)
+			return false;
+		if (externalPaths.IsEmpty())
+			return false;
+
+		auto basePath = ProjectSettings::Get().GetEditorProjectDirectory();
+		if (directoryEntry->IsEngineContentEntry())
+			basePath = PlatformDirectories::GetEngineDir().GetParentPath();
+		else if (directoryEntry->IsEditorContentEntry())
+			basePath = PlatformDirectories::GetEditorDir().GetParentPath();
+
+		auto dirPath = basePath / directoryEntry->GetVirtualPath();
+
+		for (const auto& path : externalPaths)
+		{
+			IO::Path::Copy(path, dirPath / path.GetFilename());
 		}
+
+		return true;
 	}
 
 	void AssetManager::HandleFileAction(IO::WatchID watchId, IO::Path directory, String fileName, IO::FileAction fileAction, String oldFileName)
 	{
+		QMetaObject::invokeMethod(qApp, [this]
+		{
+			fire OnRequestDeselectAssets();
+		});
+
 		const auto& projectSettings = ProjectSettings::Get();
         auto gameDir = projectSettings.editorProjectDirectory / "Game";
 
@@ -368,9 +417,9 @@ namespace CE::Editor
                 assetEntry->extension = ext;
                 entry->children.Add(assetEntry);
 
-                QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+                QMetaObject::invokeMethod(qApp, [this, newFilePath]
                 {
-                    OnAssetUpdated(newFilePath);
+					fire OnAssetUpdated(newFilePath);
                 });
             }
             else if (Asset::GetBuiltinAssetTypeFor(newFilePathExtension.GetString()) != BuiltinAssetType::None) // Builtin Asset
@@ -384,9 +433,9 @@ namespace CE::Editor
                 assetEntry->extension = assetEntry->virtualRelativePath.GetExtension().GetString();
                 entry->children.Add(assetEntry);
 
-                QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+                QMetaObject::invokeMethod(qApp, [this, newFilePath]
                 {
-                    OnAssetUpdated(newFilePath);
+					fire OnAssetUpdated(newFilePath);
                 });
             }
 		}
@@ -398,9 +447,9 @@ namespace CE::Editor
                 delete fileEntry;
             }
 
-            QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+            QMetaObject::invokeMethod(qApp, [this, newFilePath]
             {
-                OnAssetUpdated(newFilePath);
+				fire OnAssetUpdated(newFilePath);
             });
         }
 		else if (fileAction == IO::FileAction::Moved)
@@ -412,22 +461,22 @@ namespace CE::Editor
 				oldEntry->virtualRelativePath = fileName;
 			}
 
-            QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+            QMetaObject::invokeMethod(qApp, [this, newFilePath]
             {
-                OnAssetUpdated(newFilePath);
+				fire OnAssetUpdated(newFilePath);
             });
 		}
         else if (fileAction == IO::FileAction::Modified)
         {
-            QMetaObject::invokeMethod(qApp, [this, newFilePath]()
+            QMetaObject::invokeMethod(qApp, [this, newFilePath]
             {
-                OnAssetUpdated(newFilePath);
+                fire OnAssetUpdated(newFilePath);
             });
         }
 
-        QMetaObject::invokeMethod(qApp, [this]()
+        QMetaObject::invokeMethod(qApp, [this]
         {
-            OnAssetDatabaseUpdated();
+            fire OnAssetDatabaseUpdated();
         });
 	}
 
