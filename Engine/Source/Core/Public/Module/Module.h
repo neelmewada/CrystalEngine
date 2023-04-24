@@ -25,6 +25,7 @@ namespace CE
         virtual void ShutdownModule() = 0;
 
         virtual void RegisterTypes() {}
+        virtual void DeregisterTypes() {}
 
         virtual bool IsPluginModule() { return false; }
         virtual bool IsGameModule() { return false; }

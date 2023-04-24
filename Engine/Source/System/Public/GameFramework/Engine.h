@@ -33,6 +33,8 @@ namespace CE
         friend class Application;
         friend class CE::Editor::CrystalEditorApplication;
     };
+
+    SYSTEM_API extern Engine* gEngine;
     
 } // namespace CE
 

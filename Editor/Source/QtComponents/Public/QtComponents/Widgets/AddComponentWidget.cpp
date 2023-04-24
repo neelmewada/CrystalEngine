@@ -41,7 +41,7 @@ namespace CE::Editor::Qt
         CE::Name name{};
         auto componentType = model->GetComponentTypeFromIndex(index, name);
 
-        ComponentEntry* entry = (ComponentEntry*)index.internalPointer();
+        auto entry = (ComponentEntry*)index.internalPointer();
 
         if (componentType == nullptr)
         {

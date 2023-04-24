@@ -45,17 +45,12 @@ namespace CE::Editor
         ///////////////////////////////////////////
         // CE::ApplicationBus::Interface
 
-        EVENT()
-        virtual void GetEngineRef(Engine** outEngineRef) override;
-
 
     private:
 
         WelcomeScreen* welcomeScreen = nullptr;
         ProjectBrowser* projectBrowser = nullptr;
         CrystalEditorWindow* editorWindow = nullptr;
-
-        Engine* engineRef = nullptr;
     };
     
 } // namespace CE::Editor

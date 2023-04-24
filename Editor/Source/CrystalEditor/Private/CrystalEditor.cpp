@@ -16,6 +16,8 @@ CE_IMPLEMENT_MODULE_AUTORTTI(CrystalEditor, CE::Editor::CrystalEditorModule)
 
 namespace CE::Editor
 {
+    CRYSTALEDITOR_API EditorEngine* gEditorEngine = nullptr;
+
     CrystalEditorWindow* CrystalEditor::window = nullptr;
 
     EditorWindow* CrystalEditor::GetEditorWindow(ClassType* editorWindowType)

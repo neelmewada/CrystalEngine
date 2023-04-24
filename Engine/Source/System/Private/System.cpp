@@ -35,11 +35,6 @@ namespace CE
             PluginConfig
         );
 
-        // Register Game Components
-        CE_REGISTER_GAMECOMPONENTS(
-            TransformComponent
-        );
-
         // Register Asset Types
         CE_REGISTER_ASSET_TYPE(TextureAsset, casset, jpg, jpeg, png);
 

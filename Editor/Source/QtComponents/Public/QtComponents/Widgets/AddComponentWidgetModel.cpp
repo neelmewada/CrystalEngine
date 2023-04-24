@@ -108,9 +108,11 @@ namespace CE::Editor::Qt
         // Clear all entries
         rootEntry->children.Clear();
 
-        for (int i = 0; i < GameComponentRegistry::Get().GetSize(); i++)
+        Array<ClassType*> gameComponentSubclasses = GameComponent::Type()->GetDerivedClasses();
+
+        for (int i = 0; i < gameComponentSubclasses.GetSize(); i++)
         {
-            auto componentEntry = GameComponentRegistry::Get().GetEntryAt(i);
+            auto componentEntry = gameComponentSubclasses[i];
 
             if (componentEntry == nullptr || !componentEntry->CanBeInstantiated())
                 continue;

@@ -7,5 +7,5 @@
 
 // Components
 #include "GameComponentRegistry.h"
-#include "Components/TransformComponent.h"
+#include "Components/SceneComponent.h"
 

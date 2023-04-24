@@ -2,6 +2,7 @@
 
 #include "EditorCore.h"
 
+#include "Engine/EditorEngine.h"
 #include "Launch/EditorLoop.h"
 
 #include "Events/EditorSystemEventBus.h"
@@ -28,6 +29,8 @@ namespace ads
 namespace CE::Editor
 {
     class CrystalEditorWindow;
+
+    CRYSTALEDITOR_API extern EditorEngine* gEditorEngine;
 
     class CRYSTALEDITOR_API CrystalEditor
     {

@@ -5,6 +5,8 @@
 
 namespace CE
 {
+    SYSTEM_API Engine* gEngine = nullptr;
+
     Engine::Engine()
     {
 

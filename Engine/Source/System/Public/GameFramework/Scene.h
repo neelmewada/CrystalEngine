@@ -57,10 +57,10 @@ namespace CE
         void DestroyAll();
         
     protected:
-        FIELD()
+        FIELD(Hidden)
         ObjectStore objects{};
         
-        FIELD()
+        FIELD(Hidden)
         CE::Array<GameObject*> rootGameObjects{};
 
         CE::HashMap<TypeId, CE::Array<Object*>> objectTypeToArrayMap{};

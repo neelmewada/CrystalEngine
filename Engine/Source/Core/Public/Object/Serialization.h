@@ -9,6 +9,19 @@
 
 namespace CE
 {
+    class SerializedObject;
+
+    class CORE_API ICustomSerializer
+    {
+    public:
+        virtual TypeId GetTargetTypeId() = 0;
+
+        //virtual bool CanSerializeField(FieldType* fieldType) = 0;
+        virtual bool TrySerializeField(FieldType* fieldType, YAML::Emitter& emitter, void* instance, SerializedObject* caller) = 0;
+
+        //virtual bool CanDeserializeField(FieldType* fieldType) = 0;
+        virtual bool TryDeserializeField(FieldType* fieldType, YAML::Node& node, void* instance, SerializedObject* caller) = 0;
+    };
     
     class CORE_API SerializedObject
     {
@@ -36,9 +49,17 @@ namespace CE
         static Name DeserializeObjectName(IO::MemoryStream& inStream);
         static Name DeserializeObjectName(YAML::Node& root);
 
+		// - Custom Serializer API -
 
+        static void RegisterCustomSerializer(TypeId targetTypeId, ICustomSerializer* serializer);
+        static void DeregisterCustomSerializer(ICustomSerializer* serializer);
         
     protected:
+
+        bool HasCustomSerializerFor(TypeId targetTypeId)
+        {
+            return customSerializers.KeyExists(targetTypeId) && customSerializers[targetTypeId].GetSize() > 0;
+        }
         
         void DeserializeObjectStore(YAML::Node& seqNode, ObjectStore& store);
         
@@ -49,6 +70,8 @@ namespace CE
         void* instance;
         
         CE::Array<FieldType*> objectStores{};
+
+        static HashMap<TypeId, Array<ICustomSerializer*>> customSerializers;
     };
 
 } // namespace CE
@@ -62,4 +85,10 @@ CE_RTTI_CLASS(CORE_API, CE, SerializedObject,
     ),
     CE_FUNCTION_LIST()
 )
+
+#define CE_REGISTER_SERIALIZER(TargetTypeId, CustomSerializerClass)\
+CE::SerializedObject::RegisterCustomSerializer(TargetTypeId, &CustomSerializerClass::Get())
+
+#define CE_DEREGISTER_SERIALIZER(CustomSerializerClass)\
+CE::SerializedObject::DeregisterCustomSerializer(&CustomSerializerClass::Get())
 

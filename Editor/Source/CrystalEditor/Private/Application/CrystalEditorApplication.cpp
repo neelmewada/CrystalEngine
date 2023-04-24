@@ -23,7 +23,8 @@ namespace CE::Editor
         CE_CONNECT(CrystalEditorEventBus, this);
         CE_CONNECT(ApplicationBus, this);
 
-        engineRef = new Engine;
+        gEditorEngine = new EditorEngine;
+        gEngine = gEditorEngine;
     }
 
     CrystalEditorApplication::~CrystalEditorApplication()
@@ -32,7 +33,9 @@ namespace CE::Editor
         CE_DISCONNECT(ApplicationBus, this);
         EditorSystemEventBus::BusDisconnect(this);
 
-        delete engineRef;
+        delete gEditorEngine;
+        gEngine = nullptr;
+    	gEditorEngine = nullptr;
 
         delete welcomeScreen;
         delete projectBrowser;
@@ -83,17 +86,6 @@ namespace CE::Editor
         }
 
         EditorPrefs::Get().OnProjectChanged();
-    }
-
-    void CrystalEditorApplication::GetEngineRef(Engine** outEngineRef)
-    {
-        if (outEngineRef == nullptr)
-            return;
-        if (engineRef == nullptr)
-        {
-            engineRef = new Engine;
-        }
-        *outEngineRef = engineRef;
     }
 
 } // namespace CE::Editor

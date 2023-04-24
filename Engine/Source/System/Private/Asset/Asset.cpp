@@ -93,7 +93,7 @@ namespace CE
         if (!productAssetExtension.StartsWith("."))
             productAssetExtension = "." + productAssetExtension;
 
-        for (auto [a, productExtension] : assetClassToProductExtensionMap)
+        for (auto [assetClass, productExtension] : assetClassToProductExtensionMap)
         {
 	        if (productAssetExtension == productExtension.GetString())
                 return true;

@@ -18,11 +18,12 @@
 
 namespace CE
 {
+    HashMap<TypeId, Array<ICustomSerializer*>> SerializedObject::customSerializers{};
 
     SerializedObject::SerializedObject(const CE::TypeInfo* type, void* instance, SerializedObject* parent)
             : type(type), instance(instance), parent(parent)
     {
-
+        
     }
 
     SerializedObject::SerializedObject(Object* instance, SerializedObject* parent)
@@ -139,6 +140,22 @@ namespace CE
         {
             emitter << YAML::Null;
             return;
+        }
+
+        if (HasCustomSerializerFor(fieldType->GetTypeId()))
+        {
+            const auto& customSerializers = Self::customSerializers[fieldType->GetTypeId()];
+
+            for (int i = customSerializers.GetSize() - 1; i >= 0; i--)
+            {
+                if (customSerializers[i] == nullptr)
+                    return;
+
+                if (customSerializers[i]->TrySerializeField(fieldType, emitter, instance, this))
+                {
+                    return; // Success
+                }
+            }
         }
 
         if (fieldType->IsObjectStoreType()) // Serialize object store
@@ -403,6 +420,28 @@ namespace CE
         return {};
     }
 
+    void SerializedObject::RegisterCustomSerializer(TypeId targetTypeId, ICustomSerializer* serializer)
+    {
+        if (targetTypeId == 0 || serializer == nullptr)
+            return;
+
+        if (!customSerializers.KeyExists(targetTypeId))
+            customSerializers.Add({ targetTypeId, {} });
+
+        customSerializers[targetTypeId].Add(serializer);
+    }
+
+    void SerializedObject::DeregisterCustomSerializer(ICustomSerializer* serializer)
+    {
+        if (serializer == nullptr)
+            return;
+        auto targetTypeId = serializer->GetTargetTypeId();
+        if (targetTypeId == 0 || !customSerializers.KeyExists(targetTypeId))
+            return;
+
+        customSerializers[targetTypeId].Remove(serializer);
+    }
+
     bool SerializedObject::Deserialize(IO::Path inFilePath)
     {
         if (type == nullptr || instance == nullptr)
@@ -588,6 +627,22 @@ namespace CE
     {
         if (fieldType == nullptr || instance == nullptr || !fieldType->IsSerialized())
             return;
+
+        if (HasCustomSerializerFor(fieldType->GetTypeId()))
+        {
+            const auto& customSerializers = Self::customSerializers[fieldType->GetTypeId()];
+
+            for (int i = customSerializers.GetSize() - 1; i >= 0; i--)
+            {
+                if (customSerializers[i] == nullptr)
+                    return;
+
+                if (customSerializers[i]->TryDeserializeField(fieldType, node, instance, this))
+                {
+                    return; // Success
+                }
+            }
+        }
 
         if (fieldType->IsObject()) // Deserialize object reference
         {

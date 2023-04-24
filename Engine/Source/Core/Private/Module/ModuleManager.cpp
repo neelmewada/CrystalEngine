@@ -70,6 +70,9 @@ namespace CE
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
 
+		// Deregister types
+		info->moduleImpl->DeregisterTypes();
+
 		// Unload module
 		info->isLoaded = false;
 		info->unloadFuncPtr(info->moduleImpl);
@@ -140,6 +143,9 @@ namespace CE
 
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
+
+		// Deregister types
+		info->moduleImpl->DeregisterTypes();
 
 		// Unload module
 		info->isLoaded = false;

@@ -27,7 +27,7 @@
 
 #define TEXT(x) #x
 
-#define NAME(x) CE::Name(#x)
+#define NAMEOF(x) CE::Name(#x)
 
 #define CE_INLINE inline
 

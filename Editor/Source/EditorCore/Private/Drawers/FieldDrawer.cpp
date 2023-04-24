@@ -76,10 +76,9 @@ namespace CE::Editor
         auto type = GetTypeInfo(fieldTypeId);
         if (type == nullptr)
         {
-            type = GetStaticType<TextureDataType>();
             return nullptr;
         }
-        if (type != nullptr && type->IsEnum())
+        if (type != nullptr && type->IsEnum() && !fieldDrawerClassMap.KeyExists(fieldTypeId))
         {
             return EnumFieldDrawer::Type();
         }

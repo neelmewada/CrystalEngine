@@ -9,10 +9,8 @@ namespace CE
     class ApplicationRequests
     {
     public:
-        virtual void GetEngineRef(Engine** outEngineRef) {}
+        
     };
-
-    //using ApplicationBus = MessageBus<ApplicationRequests>;
 
     CE_EVENT_BUS(SYSTEM_API, ApplicationBus, ApplicationRequests);
 

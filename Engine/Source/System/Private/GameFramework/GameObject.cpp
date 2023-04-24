@@ -5,7 +5,7 @@
 
 namespace CE
 {
-	GameObject::GameObject()
+	GameObject::GameObject() : Object("GameObject")
 	{
 
 	}
@@ -15,7 +15,7 @@ namespace CE
 
 	}
 
-    GameObject::GameObject(Scene* scene) : Object()
+    GameObject::GameObject(Scene* scene, Name name) : Object(name)
     {
         if (scene != nullptr)
         {
@@ -27,11 +27,11 @@ namespace CE
 	{
         if (owner != nullptr)
         {
-            for (auto component : components)
+            while (components.GetSize() > 0)
             {
-                owner->RemoveObject(component);
+                RemoveComponent(components[0]);
             }
-            components.Clear();
+            
             owner->RemoveObject(this);
             
             for (auto child : children)
@@ -91,6 +91,7 @@ namespace CE
         if (component->IsActive())
             component->Deactivate();
 		components.Remove(component);
+        component->OnParentComponentRemoved();
         
         if (owner != nullptr)
         {
@@ -136,6 +137,36 @@ namespace CE
 		auto classType = (ClassType*)typeInfo;
         return AddComponent(classType);
 	}
+
+    void GameObject::RemoveComponent(ClassType* componentClass)
+    {
+        for (int i = 0; i < components.GetSize(); i++)
+        {
+            if (components[i] == nullptr)
+                continue;
+            if (components[i]->GetType() == componentClass)
+            {
+                RemoveComponent(components[i]);
+                components.RemoveAt(i);
+                return;
+            }
+        }
+    }
+
+    void GameObject::RemoveComponent(TypeId componentTypeId)
+    {
+        for (int i = 0; i < components.GetSize(); i++)
+        {
+	        if (components[i] == nullptr)
+                continue;;
+            if (components[i]->GetTypeId() == componentTypeId)
+            {
+                RemoveComponent(components[i]);
+                components.RemoveAt(i);
+	            return;
+            }
+        }
+    }
 
 	void GameObject::Tick(f32 deltaTime)
 	{
@@ -220,6 +251,22 @@ namespace CE
             i++;
         }
         return -1;
+    }
+
+    void GameObject::OnSubComponentAdded(GameComponent* subComponent)
+    {
+        if (owner != nullptr)
+        {
+            owner->AddObject(subComponent);
+        }
+    }
+
+    void GameObject::OnSubComponentRemoved(GameComponent* subComponent)
+    {
+        if (owner != nullptr)
+        {
+            owner->RemoveObject(subComponent);
+        }
     }
 
 } // namespace CE

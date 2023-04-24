@@ -15,21 +15,31 @@ namespace CE
     public:
         GameObject();
         GameObject(CE::Name name);
-        GameObject(Scene* scene);
+        GameObject(Scene* scene, CE::Name name = TEXT(GameObject));
         
         virtual ~GameObject();
 
         GameComponent* AddComponent(GameComponent* component);
         void RemoveComponent(GameComponent* component);
         
-        template<typename T> requires std::is_base_of<GameComponent, T>::value
-        T* AddComponent()
+        template<typename TComponent> requires std::is_base_of<GameComponent, TComponent>::value
+        TComponent* AddComponent()
         {
-            return (T*)AddComponent(TYPEID(T));
+            return (TComponent*)AddComponent(TComponent::Type());
         }
 
-        GameComponent* AddComponent(ClassType* componentType);
-        GameComponent* AddComponent(TypeId typeId);
+        GameComponent* AddComponent(ClassType* componentClass);
+        GameComponent* AddComponent(TypeId componentTypeId);
+
+        void RemoveComponent(ClassType* componentClass);
+        void RemoveComponent(TypeId componentTypeId);
+
+        template<typename TComponent> requires std::is_base_of<GameComponent, TComponent>::value
+        void RemoveComponent()
+        {
+            RemoveComponent(TComponent::Type());
+        }
+
 
         virtual void Tick(f32 deltaTime);
 
@@ -80,21 +90,28 @@ namespace CE
         
         s32 GetIndexInParent();
         s32 GetChildIndex(GameObject* child);
+
+        Scene* GetOwner() const { return owner; }
         
     protected:
+
+        void OnSubComponentAdded(GameComponent* subComponent);
+        void OnSubComponentRemoved(GameComponent* subComponent);
+
         FIELD()
         Scene* owner = nullptr;
         
         FIELD()
-        CE::Array<GameComponent*> components{};
+        Array<GameComponent*> components{};
 
         FIELD()
         GameObject* parent = nullptr;
         
         FIELD()
-        CE::Array<GameObject*> children{};
+        Array<GameObject*> children{};
         
         friend class Scene;
+        friend class GameComponent;
     };
     
 } // namespace CE
