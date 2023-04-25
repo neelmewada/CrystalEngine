@@ -85,6 +85,27 @@
     </widget>
    </item>
    <item>
+    <widget class="QListView" name="componentListView">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>80</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QListView {
+	background-color: palette(window);
+}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="addComponentButton">
      <property name="text">
       <string>Add Component</string>

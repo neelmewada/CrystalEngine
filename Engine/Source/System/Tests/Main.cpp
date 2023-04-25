@@ -23,6 +23,14 @@ int main(int argc, char** argv)
 	rootComp->AddSubComponent<SceneComponent>()->SetName("Child 1");
 	rootComp->AddSubComponent<SceneComponent>()->SetName("Child 2");
 
+	SerializedObject so{ scene };
+	IO::MemoryStream memStream{};
+	so.Serialize(memStream);
+
+	std::cout << memStream.GetBuffer() << std::endl;
+
+	memStream.Free();
+
 	delete go;
 	delete scene;
 
