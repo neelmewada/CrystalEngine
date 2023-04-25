@@ -32,7 +32,7 @@ namespace CE
                 RemoveComponent(components[0]);
             }
             
-            owner->RemoveObject(this);
+            owner->RemoveGameObject(this);
             
             for (auto child : children)
             {

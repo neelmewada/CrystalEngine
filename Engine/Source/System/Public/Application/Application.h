@@ -14,7 +14,7 @@ namespace CE
         : public ComponentApplication
         , public ApplicationBus::Interface
     {
-        CE_CLASS(Application, ComponentApplication)
+        CE_CLASS(Application, CE::ComponentApplication)
     public:
 
         Application(int argc, char** argv);
@@ -24,7 +24,6 @@ namespace CE
         virtual void Tick() override;
 
     private: // ApplicationBus::Interface
-        virtual void GetEngineRef(Engine** outEngineRef) override;
 
     protected:
         bool exitMainLoopRequested = false;
@@ -40,7 +39,5 @@ CE_RTTI_CLASS(SYSTEM_API, CE, Application,
     CE_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(),
-    CE_FUNCTION_LIST(
-        CE_FUNCTION(GetEngineRef, Event)
-    )
+    CE_FUNCTION_LIST()
 )

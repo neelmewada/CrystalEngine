@@ -22,6 +22,11 @@ namespace CE
         virtual void Tick(f32 deltaTime);
         
         void AddGameObject(GameObject* gameObject);
+
+        /// Only removes the game object from the scene but does not destroy it
+        void RemoveGameObject(GameObject* gameObject);
+
+        /// Destroys and removes the game object from the scene
         void DestroyGameObject(GameObject* gameObject);
         
         CE_INLINE u32 GetRootGameObjectCount() const

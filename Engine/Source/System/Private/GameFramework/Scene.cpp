@@ -49,15 +49,23 @@ namespace CE
         }
     }
 
-    void Scene::DestroyGameObject(GameObject* gameObject)
+    void Scene::RemoveGameObject(GameObject* gameObject)
     {
         rootGameObjects.Remove(gameObject);
         objects.RemoveObject(gameObject);
-        
+
         for (GameComponent* comp : gameObject->components)
         {
             objects.RemoveObject(comp);
         }
+    }
+
+    void Scene::DestroyGameObject(GameObject* gameObject)
+    {
+        if (gameObject == nullptr)
+            return;
+
+        RemoveGameObject(gameObject);
         
         delete gameObject;
     }

@@ -20,17 +20,6 @@ namespace CE
         delete engineRef;
     }
 
-    void Application::GetEngineRef(Engine** outEngineRef)
-    {
-        if (outEngineRef == nullptr)
-            return;
-        if (engineRef == nullptr)
-        {
-            engineRef = new Engine;
-        }
-        *outEngineRef = engineRef;
-    }
-
     /*void Application::RunMainLoop()
     {
         while (!exitMainLoopRequested)
