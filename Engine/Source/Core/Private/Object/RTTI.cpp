@@ -253,6 +253,12 @@ namespace CE
         return IsClass() && IsAssignableTo(TYPEID(Component));
     }
 
+    Name TypeInfo::GenerateInstanceName(UUID uuid) const
+    {
+        String typeName = GetName().GetString();
+        return String::Format("{0}_{1:x}", typeName, uuid);
+    }
+
     void TypeInfo::RegisterType(TypeInfo* type)
     {
         if (type == nullptr)

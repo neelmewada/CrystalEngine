@@ -23,6 +23,8 @@ namespace CE
 		TK_SCOPE_CLOSE, // }
 		TK_PAREN_OPEN, // (
 		TK_PAREN_CLOSE, // )
+		TK_SQUARE_BRACE_OPEN, // [
+		TK_SQUARE_BRACE_CLOSE, // ]
 		TK_ACCESS_SPECIFIER, // public, private, protected
 
 		// Custom tokens

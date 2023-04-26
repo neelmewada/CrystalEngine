@@ -6,15 +6,19 @@
 
 namespace CE
 {
+    Object::Object() : name("Object"), uuid(UUID())
+    {
+	    
+    }
 
-	Object::Object(UUID uuid) : name(""), uuid(uuid)
+	Object::Object(UUID uuid) : name("Object"), uuid(uuid)
 	{
 		
 	}
 
 	Object::Object(CE::Name name, UUID uuid) : name(name), uuid(uuid)
 	{
-		
+        
 	}
 
 	Object::~Object()
@@ -40,7 +44,24 @@ namespace CE
         {
             incomingSignalObject->UnbindAll(this);
         }
+        
+        // Delete all attached subobjects
+        for (auto [_, subobject] : objectsAttached)
+        {
+            delete subobject;
+        }
+        objectsAttached.Clear();
 	}
+
+    void Object::AttachSubobject(Object* subobject)
+    {
+        objectsAttached.AddObject(subobject);
+    }
+
+    void Object::DetachSubobject(Object* subobject)
+    {
+        objectsAttached.RemoveObject(subobject);
+    }
 
     bool Object::Bind(Object* sourceObject, FunctionType* sourceSignal,
                       Object* destinationObject, FunctionType* destinationEvent)

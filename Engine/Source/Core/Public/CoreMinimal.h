@@ -28,8 +28,9 @@
 
 // ******************************************************
 // RTTI, Object & Serialization
-#include "Object/ObjectStore.h"
 #include "Object/Object.h"
+#include "Object/Package.h"
+#include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
 #include "Object/Serialization.h"
 #include "Object/SystemObject.h"

@@ -13,6 +13,8 @@
 
 #include "ConfigParser.h"
 
+#include "ObjectStore.h"
+
 namespace CE
 {
 
@@ -37,7 +39,8 @@ namespace CE
     {
         CE_CLASS(Object)
     public:
-        Object(UUID uuid = UUID());
+        Object();
+        Object(UUID uuid);
         Object(CE::Name name, UUID uuid = UUID());
 
         virtual ~Object();
@@ -62,8 +65,11 @@ namespace CE
         {
             return GetType()->GetTypeId();
         }
-        
-    public: // Signal-Event API
+
+        void AttachSubobject(Object* subobject);
+        void DetachSubobject(Object* subobject);
+
+		// Signal-Event API
         
         static bool Bind(Object* sourceObject, FunctionType* sourceSignal,
                          Object* destinationObject, FunctionType* destinationEvent);
@@ -76,7 +82,11 @@ namespace CE
         void UnbindAll(Object* destinationObject);
         
         void FireSignal(Name signalName, const CE::Array<CE::Variant>& params);
-        
+
+        // - Public API -
+
+        virtual bool IsAsset() { return false; }
+
     private:
         friend class EventBus;
 
@@ -89,19 +99,21 @@ namespace CE
         // Signal System
         HashMap<Name, Array<SignalBinding>> signalNameToBindingsMap{};
         Array<Object*> incomingSignalBinders{};
+
+        // Object Lifecycle
+		ObjectStore objectsAttached{};
     };
-
-
     
 } // namespace CE
 
 CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_SUPER(),
-    CE_ABSTRACT,
+    CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(name, Hidden)
         CE_FIELD(uuid, Hidden)
+        CE_FIELD(objectsAttached, Hidden)
     ),
     CE_FUNCTION_LIST(
         

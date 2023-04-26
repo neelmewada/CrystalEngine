@@ -614,7 +614,7 @@ namespace CE
                         continue;
                     }
                     if (tokens->tokens[i].type == TK_SCOPE_OPEN || tokens->tokens[i].type == TK_ASSIGNMENT_OPERATOR ||
-                        tokens->tokens[i].type == TK_SEMICOLON)
+                        tokens->tokens[i].type == TK_SEMICOLON || tokens->tokens[i].type == TK_COLON || tokens->tokens[i].type == TK_SQUARE_BRACE_OPEN)
                     {
                         curField.name = String(tokens->tokens[i - 1].lexeme);
                         structPtr->fields.Add(curField);

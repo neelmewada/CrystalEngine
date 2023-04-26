@@ -101,6 +101,8 @@ namespace CE
         virtual bool IsObject() const { return IsClass() && IsAssignableTo(TYPEID(Object)); }
 		virtual bool IsComponent() const;
 
+		Name GenerateInstanceName(UUID uuid) const;
+
 	protected:
 		CE::Name name;
 		CE::String displayName{};
@@ -153,17 +155,17 @@ namespace CE
 	{
 
 	}
-
+	
 } // namespace CE
 
 // Simple data types
 
 CE_RTTI_POD2(bool, TYPEID(CE::s8), TYPEID(CE::u8))
 
-CE_RTTI_POD(CE, s8,  TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8), TYPEID(u16), TYPEID(u32), TYPEID(u64))
-CE_RTTI_POD(CE, s16, TYPEID(s8),  TYPEID(s32), TYPEID(s64), TYPEID(u8), TYPEID(u16), TYPEID(u32), TYPEID(u64))
-CE_RTTI_POD(CE, s32, TYPEID(s8),  TYPEID(s16), TYPEID(s64), TYPEID(u8), TYPEID(u16), TYPEID(u32), TYPEID(u64))
-CE_RTTI_POD(CE, s64, TYPEID(s8),  TYPEID(s16), TYPEID(s32), TYPEID(u8), TYPEID(u16), TYPEID(u32), TYPEID(u64))
+CE_RTTI_POD(CE, s8,  TYPEID(u8))
+CE_RTTI_POD(CE, s16, TYPEID(u16))
+CE_RTTI_POD(CE, s32, TYPEID(u32))
+CE_RTTI_POD(CE, s64, TYPEID(u64))
 
 CE_RTTI_POD(CE, u8,  TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u16), TYPEID(u32), TYPEID(u64))
 CE_RTTI_POD(CE, u16, TYPEID(s8), TYPEID(s16), TYPEID(s32), TYPEID(s64), TYPEID(u8),  TYPEID(u32), TYPEID(u64))

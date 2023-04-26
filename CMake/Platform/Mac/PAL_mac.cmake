@@ -5,12 +5,16 @@ if(${CE_STANDALONE})
     ce_set(PAL_TRAIT_BUILD_EDITOR FALSE)
     ce_set(PAL_TRAIT_BUILD_HOST_TOOLS FALSE)
     ce_set(PAL_TRAIT_BUILD_HOST_LIBRARIES FALSE)
+
     add_compile_definitions(PAL_TRAIT_BUILD_STANDALONE=1)
 else()
     ce_set(PAL_TRAIT_BUILD_EDITOR TRUE)
     ce_set(PAL_TRAIT_BUILD_HOST_TOOLS TRUE)
     ce_set(PAL_TRAIT_BUILD_HOST_LIBRARIES TRUE)
+
     add_compile_definitions(PAL_TRAIT_BUILD_EDITOR=1)
+    add_compile_definitions(PAL_TRAIT_QT_SUPPORTED=1)
+    add_compile_definitions(PAL_TRAIT_WITH_EDITOR_DATA=1)
 endif()
 
 # Graphics APIs

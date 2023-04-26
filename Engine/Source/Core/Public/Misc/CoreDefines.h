@@ -25,9 +25,9 @@
 
 #define BIT(x) (1 << x)
 
-#define TEXT(x) #x
+#define TEXT(x) x
 
-#define NAMEOF(x) CE::Name(#x)
+#define NAMEOF(x) (CE::GetStaticType<x>() != nullptr ? CE::GetStaticType<x>()->GetName() : "")
 
 #define CE_INLINE inline
 

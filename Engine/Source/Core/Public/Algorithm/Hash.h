@@ -18,7 +18,7 @@ namespace CE
 	
 	CORE_API SIZE_T CalculateHash(const void* data, SIZE_T length);
 
-    /// Default implementation doesn't have any code. Specializations do all the work.
+    /// Default implementation does not have any 'special' code other than for pointers. Specializations do all the work.
     template<typename T>
     SIZE_T GetHash(const T& value)
     {

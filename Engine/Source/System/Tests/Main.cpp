@@ -18,10 +18,7 @@ int main(int argc, char** argv)
 
 	GameObject* go = new GameObject(scene);
 
-	auto rootComp = go->AddComponent<SceneComponent>();
-	rootComp->SetName("Root");
-	rootComp->AddSubComponent<SceneComponent>()->SetName("Child 1");
-	rootComp->AddSubComponent<SceneComponent>()->SetName("Child 2");
+	
 
 	SerializedObject so{ scene };
 	IO::MemoryStream memStream{};

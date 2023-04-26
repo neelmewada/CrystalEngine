@@ -5,16 +5,17 @@ CE_IMPLEMENT_MODULE(Core, CE::CoreModule)
 
 namespace CE
 {
-
+    Package* gTransientPackage = nullptr;
 
     void CoreModule::StartupModule()
     {
-
+        gTransientPackage = NewObject<Package>(nullptr, TEXT("Engine::Transient"));
     }
 
     void CoreModule::ShutdownModule()
     {
-
+        delete gTransientPackage;
+        gTransientPackage = nullptr;
     }
 
     void CoreModule::RegisterTypes()
@@ -40,7 +41,8 @@ namespace CE
             Object,
             SystemObject,
             Component,
-            SystemComponent
+            SystemComponent,
+            Package
         );
     }
 

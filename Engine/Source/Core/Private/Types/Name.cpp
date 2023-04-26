@@ -26,6 +26,13 @@ namespace CE
 		if (length >= 2 && name[length - 1] == ':' && name[length - 2] == ':') // remove "::" from suffix
 			length -= 2;
 
+		if (i >= length)
+		{
+			value = "";
+			hashValue = 0;
+			return;
+		}
+
 		value = name.GetSubstringView(i, length);
 
 		String hashString = "";
@@ -55,9 +62,9 @@ namespace CE
 					len++;
 				}
 
+				if (!hashString.IsEmpty())
+					hashString += "::";
 				hashString += String(value.GetSubstringView(startIdx, len));
-
-				//Components.Add(value.GetSubstringView(startIdx, len));
 
 				i = startIdx + len;
 			}
@@ -65,7 +72,8 @@ namespace CE
 			i++;
 		}
 
-		hashValue = GetHash(hashString);
+		this->value = hashString;
+		this->hashValue = GetHash(hashString);
 	}
 
 	Name::Name(const char* name) : Name(String(name))

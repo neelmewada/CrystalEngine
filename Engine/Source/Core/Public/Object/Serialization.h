@@ -25,8 +25,9 @@ namespace CE
     
     class CORE_API SerializedObject
     {
-        CE_CLASS(SerializedObject)
     public:
+        typedef SerializedObject Self;
+
         SerializedObject(const TypeInfo* type, void* instance, SerializedObject* parent = nullptr);
         SerializedObject(Object* instance, SerializedObject* parent = nullptr);
         virtual ~SerializedObject();
@@ -36,8 +37,8 @@ namespace CE
         void Serialize(IO::MemoryStream& outStream);
         void Serialize(YAML::Emitter& emitter);
         
-        void SerializeField(FieldType* fieldType, YAML::Emitter& emitter);
-        void DeserializeField(FieldType* fieldType, YAML::Node& node);
+        virtual void SerializeField(FieldType* fieldType, YAML::Emitter& emitter);
+        virtual void DeserializeField(FieldType* fieldType, YAML::Node& node);
 
         bool Deserialize(IO::Path inFilePath);
         bool Deserialize(IO::FileStream& inFile);
@@ -76,15 +77,6 @@ namespace CE
 
 } // namespace CE
 
-CE_RTTI_CLASS(CORE_API, CE, SerializedObject,
-    CE_SUPER(),
-    CE_DONT_INSTANTIATE,
-    CE_ATTRIBS(),
-    CE_FIELD_LIST(
-        
-    ),
-    CE_FUNCTION_LIST()
-)
 
 #define CE_REGISTER_SERIALIZER(TargetTypeId, CustomSerializerClass)\
 CE::SerializedObject::RegisterCustomSerializer(TargetTypeId, &CustomSerializerClass::Get())

@@ -18,6 +18,7 @@ else()
 
     add_compile_definitions(PAL_TRAIT_BUILD_EDITOR=1)
     add_compile_definitions(PAL_TRAIT_QT_SUPPORTED=1)
+    add_compile_definitions(PAL_TRAIT_WITH_EDITOR_DATA=1)
 endif()
 
 # Graphics APIs

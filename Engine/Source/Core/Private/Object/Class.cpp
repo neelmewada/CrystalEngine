@@ -328,9 +328,9 @@ namespace CE
     CE::HashMap<Name, ClassType*> ClassType::registeredClassesByName{};
     CE::HashMap<TypeId, Array<TypeId>> ClassType::derivedClassesMap{};
 
-    bool ClassType::IsObject()
+    bool ClassType::IsSubclassOf(TypeId classTypeId)
     {
-        if (this->GetTypeId() == TYPEID(CE::Object))
+        if (this->GetTypeId() == classTypeId)
             return true;
 
         if (!superTypesCached)
@@ -340,11 +340,16 @@ namespace CE
 
         for (int i = 0; i < superTypes.GetSize(); i++)
         {
-            if (superTypes[i]->IsObject())
+            if (superTypes[i]->IsSubclassOf(classTypeId))
                 return true;
         }
 
         return false;
+    }
+
+    bool ClassType::IsObject()
+    {
+        return IsSubclassOf(TYPEID(Object));
     }
 
     void ClassType::CacheSuperTypes()

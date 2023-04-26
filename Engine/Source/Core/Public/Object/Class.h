@@ -353,6 +353,21 @@ namespace CE
 		virtual bool IsStruct() const override { return false; }
 		virtual bool IsClass() const override { return true; }
 
+		bool IsSubclassOf(TypeId baseClassId);
+
+		bool IsSubclassOf(ClassType* baseClass)
+		{
+			if (baseClass == nullptr)
+				return false;
+			return IsSubclassOf(baseClass->GetTypeId());
+		}
+
+		template<typename TBaseClass>
+		inline bool IsSubclassOf()
+		{
+			return IsSubclassOf(TBaseClass::Type());
+		}
+
 		virtual bool IsObject();
 
 		virtual void* CreateDefaultInstance() const
@@ -376,7 +391,7 @@ namespace CE
 			return Impl->CanInstantiate();
 		}
 
-		virtual void InitializeDefaults(void* instance) const
+		virtual void InitializeDefaults(void* instance) const override
 		{
 			if (Impl == nullptr || instance == nullptr)
 				return;

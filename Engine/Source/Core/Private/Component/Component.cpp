@@ -8,7 +8,7 @@ namespace CE
 
 	Component::Component(CE::Name name) : Object(name)
 	{
-
+		
 	}
 
 	Component::~Component()

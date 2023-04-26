@@ -194,7 +194,7 @@ namespace CE
         }
         else if (fieldType->GetTypeId() == TYPEID(CE::Array<u8>)) // ARRAY Field
         {
-            const auto& array = fieldType->GetFieldValue < Array < u8 >> (instance);
+            const auto& array = fieldType->GetFieldValue<Array<u8>> (instance);
             auto elementType = GetTypeInfo(array.GetElementTypeId());
 
             if (elementType == nullptr)
@@ -205,7 +205,7 @@ namespace CE
 
             if (elementType->GetTypeId() == TYPEID(String))
             {
-                const Array <String>& stringArray = fieldType->GetFieldValue < Array < String >> (instance);
+                const Array<String>& stringArray = fieldType->GetFieldValue<Array<String>>(instance);
 
                 emitter << YAML::BeginSeq;
                 emitter << GetStaticType<String>()->GetName();
@@ -213,6 +213,22 @@ namespace CE
                 for (int i = 0; i < stringArray.GetSize(); i++)
                 {
                     const String& str = stringArray[i];
+
+                    emitter << str;
+                }
+
+                emitter << YAML::EndSeq;
+            }
+            if (elementType->GetTypeId() == TYPEID(Name))
+            {
+                const Array<Name>& nameArray = fieldType->GetFieldValue<Array<Name>>(instance);
+
+                emitter << YAML::BeginSeq;
+                emitter << GetStaticType<Name>()->GetName();
+
+                for (int i = 0; i < nameArray.GetSize(); i++)
+                {
+                    const Name& str = nameArray[i];
 
                     emitter << str;
                 }
@@ -889,7 +905,6 @@ namespace CE
 
 } // namespace CE
 
-CE_RTTI_CLASS_IMPL(CORE_API, CE, SerializedObject)
 
 
 

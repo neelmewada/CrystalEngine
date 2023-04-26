@@ -13,7 +13,7 @@ namespace CE
 {
     class Object;
 
-    class ObjectStore
+    class CORE_API ObjectStore
     {
     public:
         ObjectStore()
@@ -36,57 +36,21 @@ namespace CE
             return objects.KeyExists(uuid);
         }
         
-        void AddObject(Object* object)
-        {
-            if (object == nullptr)
-                return;
-            if (objects.KeyExists(object->GetUuid()))
-                return;
-            
-            objects.Add({object->GetUuid(), object});
-            objectsArray.Add(object);
-        }
+        void AddObject(Object* object);
         
-        void RemoveObject(Object* object)
-        {
-            if (object == nullptr)
-                return;
-            
-            objects.Remove(object->GetUuid());
-            objectsArray.Remove(object);
-        }
+        void RemoveObject(Object* object);
         
-        void RemoveObjectWithUuid(UUID uuid)
-        {
-            if (!objects.KeyExists(uuid))
-                return;
+        void RemoveObjectWithUuid(UUID uuid);
 
-            auto objectRef = objects[uuid];
-            objects.Remove(uuid);
-            objectsArray.Remove(objectRef);
-        }
-
-        void DestroyAll()
-        {
-            for (auto object : objectsArray)
-            {
-                delete object;
-            }
-            Clear();
-        }
+        void DestroyAll();
         
-        void Clear()
-        {
-            objects.Clear();
-            objectsArray.Clear();
-        }
+        void Clear();
         
         auto begin() { return objects.begin(); }
         auto end() { return objects.end(); }
 
     private:
         HashMap<UUID, Object*> objects{};
-        CE::Array<Object*> objectsArray{};
     };
     
 } // namespace CE

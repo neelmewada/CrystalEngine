@@ -190,6 +190,12 @@ namespace CE
             case ')':
                 self->AddToken(TK_PAREN_CLOSE, curLine);
                 break;
+            case '[':
+                self->AddToken(TK_SQUARE_BRACE_OPEN, curLine);
+                break;
+            case ']':
+                self->AddToken(TK_SQUARE_BRACE_CLOSE, curLine);
+                break;
             case '<':
                 self->AddToken(TK_LEFTANGLE, curLine, "<");
                 break;

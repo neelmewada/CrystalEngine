@@ -15,31 +15,9 @@ namespace CE
     public:
         GameObject();
         GameObject(CE::Name name);
-        GameObject(Scene* scene, CE::Name name = TEXT(GameObject));
+        GameObject(Scene* scene, CE::Name name = "GameObject");
         
         virtual ~GameObject();
-
-        GameComponent* AddComponent(GameComponent* component);
-        void RemoveComponent(GameComponent* component);
-        
-        template<typename TComponent> requires std::is_base_of<GameComponent, TComponent>::value
-        TComponent* AddComponent()
-        {
-            return (TComponent*)AddComponent(TComponent::Type());
-        }
-
-        GameComponent* AddComponent(ClassType* componentClass);
-        GameComponent* AddComponent(TypeId componentTypeId);
-
-        void RemoveComponent(ClassType* componentClass);
-        void RemoveComponent(TypeId componentTypeId);
-
-        template<typename TComponent> requires std::is_base_of<GameComponent, TComponent>::value
-        void RemoveComponent()
-        {
-            RemoveComponent(TComponent::Type());
-        }
-
 
         virtual void Tick(f32 deltaTime);
 
@@ -51,33 +29,6 @@ namespace CE
         CE_INLINE GameObject* GetChildAt(u32 index) const
         {
             return children[index];
-        }
-
-        CE_INLINE u32 GetComponentCount() const
-        {
-            return components.GetSize();
-        }
-
-        CE_INLINE GameComponent* GetComponentAt(u32 index) const
-        {
-            return components[index];
-        }
-
-        GameComponent* GetComponent(TypeId componentTypeId) const;
-
-        template<typename ComponentType>
-        CE_INLINE GameComponent* GetComponent()
-        {
-            TypeId componentTypeId = ComponentType::Type()->GetTypeId();
-            return GetComponent(componentTypeId);
-        }
-
-        bool HasComponent(TypeId componentTypeId);
-
-        template<typename ComponentType>
-        CE_INLINE bool HasComponent()
-        {
-            return HasComponent(ComponentType::Type()->GetTypeId());
         }
         
         void AddChild(GameObject* child);
@@ -94,9 +45,6 @@ namespace CE
         Scene* GetOwner() const { return owner; }
         
     protected:
-
-        void OnSubComponentAdded(GameComponent* subComponent);
-        void OnSubComponentRemoved(GameComponent* subComponent);
 
         FIELD()
         Scene* owner = nullptr;

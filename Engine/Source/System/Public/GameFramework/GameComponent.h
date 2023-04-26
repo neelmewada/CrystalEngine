@@ -26,35 +26,15 @@ namespace CE
 
         CE_SIGNAL(OnComponentValuesUpdated);
 
-        GameComponent* AddSubComponent(ClassType* componentClass);
-        GameComponent* AddSubComponent(TypeId typeId);
-
-        void RemoveSubComponent(ClassType* componentClass);
-        void RemoveSubComponent(TypeId componentTypeId);
-
-        GameComponent* AddSubComponent(GameComponent* subComponent);
-        void RemoveSubComponent(GameComponent* subComponent);
-
-        template<typename TComponent> requires std::is_base_of<GameComponent, TComponent>::value
-        TComponent* AddSubComponent()
-        {
-            return (TComponent*)AddSubComponent(TComponent::Type());
-        }
-
-        template<typename TComponent> requires std::is_base_of<GameComponent, TComponent>::value
-        void RemoveSubComponent()
-        {
-            RemoveSubComponent(TComponent::Type());
-        }
+        
 
     protected:
-        void OnParentComponentRemoved();
 
         FIELD(Hidden)
         CE::GameObject* owner = nullptr;
 
         FIELD(Hidden)
-    	Array<GameComponent*> subComponents{};
+    	Array<GameComponent*> attachments{};
 
         FIELD(Hidden)
     	GameComponent* parent = nullptr;
