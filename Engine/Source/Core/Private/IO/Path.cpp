@@ -41,20 +41,20 @@ namespace CE::IO
 
 		if (it->string() == "@Engine")
 		{
-			basePath = PlatformDirectories::GetEngineDir();
+			basePath = (fs::path)PlatformDirectories::GetEngineDir();
 		}
 #if PAL_TRAIT_BUILD_EDITOR
 		else if (it->string() == "@Editor")
 		{
-			basePath = PlatformDirectories::GetEditorDir();
+			basePath = (fs::path)PlatformDirectories::GetEditorDir();
 		}
 #endif
 		else if (it->string() == "@Game")
 		{
 #if PAL_TRAIT_BUILD_EDITOR
-			basePath = ProjectSettings::Get().GetEditorProjectDirectory() / "Game";
+			basePath = (fs::path)ProjectSettings::Get().GetEditorProjectDirectory() / "Game";
 #else
-			basePath = PlatformDirectories::GetGameDir();
+			basePath = (fs::path)PlatformDirectories::GetGameDir();
 #endif
 		}
 		else

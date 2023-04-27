@@ -35,7 +35,7 @@ namespace CE
 
         auto GetTarget() const
         {
-            return Internal::DelegateBase<T>::impl.target<T>();
+            return Internal::DelegateBase<T>::impl.template target<T>();
         }
 
         inline bool operator==(const Delegate<T>& other)

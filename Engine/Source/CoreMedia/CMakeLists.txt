@@ -10,7 +10,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     AUTOUIC
     AUTORCC
     NAMESPACE CE
-    FOLDER Engine
+    FOLDER Engine/Source
     PCHHEADER
         PRIVATE
             Public/${PROJECT_NAME}.h
