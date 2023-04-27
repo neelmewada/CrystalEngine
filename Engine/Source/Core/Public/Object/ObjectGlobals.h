@@ -37,5 +37,4 @@ namespace CE
 		params.name = objectName;
 		return static_cast<TClass*>(Internal::StaticConstructObject(params));
 	}
-    
 }

@@ -208,7 +208,7 @@ namespace CE::Editor
 
         if (!windowFound && editorWindowClass->CanBeInstantiated())
         {
-            auto editorWindowClassInstance = (EditorWindow*)editorWindowClass->CreateDefaultInstance();
+            auto editorWindowClassInstance = (EditorWindow*)editorWindowClass->CreateInstance();
 
             if (editorWindowClassInstance->CanOpenAsset(assetEntry))
             {

@@ -89,6 +89,11 @@ namespace CE::IO
             return impl;
         }
 
+        inline operator std::string() const
+        {
+            return impl.string();
+        }
+
         inline bool Exists() const
         {
             return fs::exists(impl);

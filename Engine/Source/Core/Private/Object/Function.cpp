@@ -1,5 +1,5 @@
 
-#include "Object/Function.h"
+#include "CoreMinimal.h"
 
 namespace CE
 {

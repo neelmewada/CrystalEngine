@@ -161,7 +161,7 @@ namespace CE::Editor
             if (drawerClass == nullptr)
                 continue;
 
-            GameComponentDrawer* drawer = (GameComponentDrawer*)drawerClass->CreateDefaultInstance();
+            GameComponentDrawer* drawer = (GameComponentDrawer*)drawerClass->CreateInstance();
             if (drawer == nullptr)
                 continue;
 

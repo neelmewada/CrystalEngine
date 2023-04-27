@@ -27,7 +27,12 @@
 #include "Threading/Thread.h"
 
 // ******************************************************
-// RTTI, Object & Serialization
+// Delegates, RTTI, Object & Serialization
+#include "RTTI/RTTIDefines.h"
+#include "Delegates/Delegate.h"
+#include "Delegates/MultiCastDelegate.h"
+
+#include "RTTI/RTTI.h"
 #include "Object/Object.h"
 #include "Object/Package.h"
 #include "Object/ObjectGlobals.h"

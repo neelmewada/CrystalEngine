@@ -8,6 +8,7 @@
 
 namespace CE
 {
+    CORE_API u64 GenerateRandomU64();
 
     class CORE_API UUID
     {

@@ -192,7 +192,7 @@ namespace CE::Editor
 
         /*if (assetClassInstance == nullptr)
         {
-            assetClassInstance = (Asset*)assetClass->CreateDefaultInstance();
+            assetClassInstance = (Asset*)assetClass->CreateInstance();
         }*/
 
         if (importOnlyMode)
@@ -200,7 +200,7 @@ namespace CE::Editor
             for (int i = 0; i < targetAssetPaths.GetSize(); i++)
             {
                 while (i >= assetClassInstances.GetSize())
-                    assetClassInstances.Add((Asset*)assetClass->CreateDefaultInstance());
+                    assetClassInstances.Add((Asset*)assetClass->CreateInstance());
 
                 auto assetPath = targetAssetPaths[i];
                 auto productAssetPath = assetPath.ReplaceExtension(".casset");
@@ -227,7 +227,7 @@ namespace CE::Editor
                     return;
                 }
 
-                auto inst = (Asset*)assetClass->CreateDefaultInstance();
+                auto inst = (Asset*)assetClass->CreateInstance();
                 assetClassInstances.Add(inst);
 
                 auto assetPath = entry->fullPath;
@@ -275,7 +275,7 @@ namespace CE::Editor
                 continue;
             }
 
-            auto fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateDefaultInstance();
+            auto fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateInstance();
 
             if (fieldDrawer == nullptr)
             {

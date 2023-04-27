@@ -51,7 +51,7 @@ namespace CE
         if (componentClass == nullptr || !componentClass->IsAssignableTo(TYPEID(GameComponent)) ||
             !componentClass->CanBeInstantiated())
             return nullptr;
-        GameComponent* subComponent = (GameComponent*)componentClass->CreateDefaultInstance();
+        GameComponent* subComponent = (GameComponent*)componentClass->CreateInstance();
         if (subComponent == nullptr)
             nullptr;
         return AddSubComponent(subComponent);

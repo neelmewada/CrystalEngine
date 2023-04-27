@@ -2,7 +2,7 @@
 
 #include "Types/CoreTypeDefs.h"
 
-#include "Object/RTTIDefines.h"
+#include "RTTI/RTTIDefines.h"
 
 #include <vector>
 #include <functional>

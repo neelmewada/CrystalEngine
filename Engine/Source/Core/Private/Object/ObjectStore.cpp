@@ -15,7 +15,7 @@ namespace CE
 	{
 		if (object == nullptr)
 			return;
-
+		
 		objects.Remove(object->GetUuid());
 	}
 

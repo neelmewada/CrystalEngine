@@ -46,21 +46,21 @@ namespace CE
         }
         
         // Delete all attached subobjects
-        for (auto [_, subobject] : objectsAttached)
+        for (auto [_, subobject] : attachedObjects)
         {
             delete subobject;
         }
-        objectsAttached.Clear();
+        attachedObjects.Clear();
 	}
 
     void Object::AttachSubobject(Object* subobject)
     {
-        objectsAttached.AddObject(subobject);
+        attachedObjects.AddObject(subobject);
     }
 
     void Object::DetachSubobject(Object* subobject)
     {
-        objectsAttached.RemoveObject(subobject);
+        attachedObjects.RemoveObject(subobject);
     }
 
     bool Object::Bind(Object* sourceObject, FunctionType* sourceSignal,

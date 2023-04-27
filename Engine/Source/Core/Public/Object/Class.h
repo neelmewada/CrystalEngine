@@ -1,8 +1,5 @@
 #pragma once
 
-#include "RTTI.h"
-#include "TypeTraits.h"
-#include "Variant.h"
 
 #include "Field.h"
 #include "Function.h"
@@ -319,7 +316,7 @@ namespace CE
 		class CORE_API IClassTypeImpl
 		{
 		public:
-			virtual void* CreateDefaultInstance() const = 0;
+			virtual void* CreateInstance() const = 0;
 			virtual void DestroyInstance(void* instance) const = 0;
 			
 			virtual void InitializeDefaults(void* instance) const = 0;
@@ -370,11 +367,11 @@ namespace CE
 
 		virtual bool IsObject();
 
-		virtual void* CreateDefaultInstance() const
+		virtual void* CreateInstance() const
 		{
 			if (Impl == nullptr)
 				return nullptr;
-			return Impl->CreateDefaultInstance();
+			return Impl->CreateInstance();
 		}
 
 		virtual void DestroyInstance(void* instance) const
@@ -678,7 +675,7 @@ namespace CE\
 			{\
 				return CE_EXPAND(CE_CONCATENATE(__CE_CAN_INSTANTIATE_,CE_FIRST_ARG(IsAbstract)))();\
 			}\
-			virtual void* CreateDefaultInstance() const override\
+			virtual void* CreateInstance() const override\
 			{\
 				return CE_EXPAND(CE_CONCATENATE(__CE_NEW_INSTANCE_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
 			}\

@@ -3,7 +3,6 @@
 #include "Algorithm/Hash.h"
 #include "Containers/String.h"
 #include "Containers/StringView.h"
-#include "Containers/Array.h"
 
 #define YAML_CPP_API
 #include "yaml-cpp/yaml.h"
@@ -12,6 +11,9 @@ namespace CE
 {
     class String;
     class StringView;
+
+    template<typename ElementType>
+    class Array;
 
     /// A type used to define path to Reflected c++ types & members
     /// Ex: ParentNamespace::ChildNamespace::SomeClass

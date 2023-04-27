@@ -5,12 +5,12 @@
 
 namespace CE
 {
-    static std::random_device GRandomDevice;
-    static std::mt19937_64 GRandomEngine(GRandomDevice());
-    static std::uniform_int_distribution<u64> GUniformDistribution;
+    static std::random_device gRandomDevice;
+    static std::mt19937_64 gRandomEngine(gRandomDevice());
+    static std::uniform_int_distribution<u64> gUniformDistribution;
 
     UUID::UUID()
-        : uuid(GUniformDistribution(GRandomEngine))
+        : uuid(gUniformDistribution(gRandomEngine))
     {
         
     }
@@ -20,4 +20,9 @@ namespace CE
         
     }
     
+    CORE_API u64 GenerateRandomU64()
+    {
+        return gUniformDistribution(gRandomEngine);
+    }
+
 } // namespace CE

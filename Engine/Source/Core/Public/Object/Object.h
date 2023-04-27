@@ -4,8 +4,8 @@
 #include "Containers/String.h"
 
 #include "ObjectMacros.h"
-#include "RTTI.h"
-#include "Variant.h"
+#include "RTTI/RTTI.h"
+#include "RTTI/Variant.h"
 #include "Class.h"
 #include "Enum.h"
 #include "Field.h"
@@ -66,6 +66,8 @@ namespace CE
             return GetType()->GetTypeId();
         }
 
+        // Subobject API
+
         void AttachSubobject(Object* subobject);
         void DetachSubobject(Object* subobject);
 
@@ -101,7 +103,7 @@ namespace CE
         Array<Object*> incomingSignalBinders{};
 
         // Object Lifecycle
-		ObjectStore objectsAttached{};
+		ObjectStore attachedObjects{};
     };
     
 } // namespace CE
@@ -113,7 +115,7 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_FIELD_LIST(
         CE_FIELD(name, Hidden)
         CE_FIELD(uuid, Hidden)
-        CE_FIELD(objectsAttached, Hidden)
+        CE_FIELD(attachedObjects, Hidden)
     ),
     CE_FUNCTION_LIST(
         

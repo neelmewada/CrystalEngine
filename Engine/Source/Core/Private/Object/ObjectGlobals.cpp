@@ -11,7 +11,7 @@ namespace CE
 			if (params.objectClass == nullptr || !params.objectClass->CanBeInstantiated() || !params.objectClass->IsObject())
 				return nullptr;
 
-			auto instance = (Object*)params.objectClass->CreateDefaultInstance();
+			auto instance = (Object*)params.objectClass->CreateInstance();
 			if (instance == nullptr)
 				return nullptr;
 

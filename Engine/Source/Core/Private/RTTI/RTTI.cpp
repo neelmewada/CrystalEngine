@@ -1,8 +1,5 @@
 
-#include "Object/RTTI.h"
-
-#include "Containers/Array.h"
-#include "Object/ObjectStore.h"
+#include "CoreMinimal.h"
 
 namespace CE
 {

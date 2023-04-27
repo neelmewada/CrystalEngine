@@ -24,6 +24,7 @@ include(CMake/CompilerOptions.cmake)
 include(CMake/Targets.cmake)
 include(CMake/ThirdParty.cmake)
 include(CMake/Assets.cmake)
+include(CMake/Tests.cmake)
 
 # Import 3rd Party libraries
 add_subdirectory(ThirdParty)

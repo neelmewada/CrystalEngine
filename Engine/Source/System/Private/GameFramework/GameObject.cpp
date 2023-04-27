@@ -119,7 +119,7 @@ namespace CE
             return nullptr;
         }
 
-        auto instance = (GameComponent*)componentType->CreateDefaultInstance();
+        auto instance = (GameComponent*)componentType->CreateInstance();
         auto result = AddComponent(instance);
         if (result == nullptr)
         {

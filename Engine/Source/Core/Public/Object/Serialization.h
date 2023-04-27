@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RTTI.h"
+#include "RTTI/RTTI.h"
 #include "IO/Stream/MemoryStream.h"
 
 #define YAML_CPP_API

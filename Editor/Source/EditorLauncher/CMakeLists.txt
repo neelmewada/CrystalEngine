@@ -35,7 +35,3 @@ ce_add_target(${PROJECT_NAME} GUIAPP
 )
 
 
-if(${PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED})
-    add_subdirectory(Tests)
-endif()
-

@@ -18,7 +18,7 @@ function(ce_validate_package PACKAGE_NAME PACKAGE_SHORT_NAME)
         return()
     endif()
     
-    set(package_url "https://sourceforge.net/projects/crystalengine/files/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_NAME}.zip/download")
+    set(package_url "https://gitlab.com/neelrmewada/crystalengine-thirdparty/-/raw/main/ThirdParty/${PAL_PLATFORM_NAME}/${PACKAGE_NAME}.zip?inline=false")
     set(package_local_zip_path "${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_NAME}.zip")
 
     if(NOT EXISTS "${package_local_zip_path}")

@@ -1,6 +1,5 @@
 
-#include "CoreTypes.h"
-#include "Object/Serialization.h"
+#include "CoreMinimal.h"
 
 #include <iostream>
 
@@ -833,7 +832,7 @@ namespace CE
                 continue;
             }
 
-            auto instance = (Object*)classType->CreateDefaultInstance();
+            auto instance = (Object*)classType->CreateInstance();
 
             FieldType* uuidField = classType->FindFieldWithName("uuid");
             if (uuidField != nullptr)

@@ -135,7 +135,7 @@ namespace CE
 		if (assetClass == nullptr || !assetClass->IsAssignableTo(TYPEID(Asset)) || !assetClass->CanBeInstantiated())
 			return nullptr;
 
-		auto asset = (Asset*)assetClass->CreateDefaultInstance();
+		auto asset = (Asset*)assetClass->CreateInstance();
 		asset->databaseEntry = entry;
 		
 		return asset;

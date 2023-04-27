@@ -1,5 +1,5 @@
 
-#include "Object/Class.h"
+#include "CoreMinimal.h"
 
 
 namespace CE

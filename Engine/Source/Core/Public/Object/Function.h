@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Containers/Array.h"
-#include "RTTI.h"
+#include "RTTI/RTTI.h"
 
 #include <functional>
 
@@ -11,10 +11,7 @@ namespace CE
 	class ClassType;
 	class Object;
 
-	template<class _Fty>
-	using Function = std::function<_Fty>;
-
-	using FunctionDelegate = Function<void(CE::Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue)>;
+	using FunctionDelegate = Delegate<void(CE::Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue)>;
 
     class CORE_API FunctionType : public TypeInfo
     {
@@ -52,7 +49,7 @@ namespace CE
 			return next;
 		}
 
-		CE_INLINE CE::Variant Invoke(CE::Object* instance, const Array<CE::Variant>& params) const
+		CE_INLINE CE::Variant Invoke(CE::Object* instance, const Array<CE::Variant>& params)
 		{
 			CE::Variant returnValue{};
 			delegateCallback(instance, params, returnValue);

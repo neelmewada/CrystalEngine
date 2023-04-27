@@ -94,7 +94,7 @@ namespace CE::Editor
 		fieldDrawers.Clear();
         
         delete tempDrawer;
-        tempDrawer = (StringFieldDrawer*)StringFieldDrawer::Type()->CreateDefaultInstance();
+        tempDrawer = (StringFieldDrawer*)StringFieldDrawer::Type()->CreateInstance();
         
         tempDrawer->CreateGUI(container);
 
@@ -116,7 +116,7 @@ namespace CE::Editor
 				continue;
 			}
 
-			FieldDrawer* fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateDefaultInstance();
+			FieldDrawer* fieldDrawer = (FieldDrawer*)fieldDrawerType->CreateInstance();
 
 			if (fieldDrawer == nullptr)
 			{
