@@ -4,7 +4,7 @@
 #include "CoreTypes.h"
 
 // ******************************************************
-// Common headers
+// Basic headers
 #include "Memory/Memory.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
@@ -18,19 +18,25 @@
 #include "IO/Stream/FileStream.h"
 #include "IO/Archive.h"
 
-// Module
-#include "Module/Module.h"
-#include "Module/ModuleManager.h"
+// *********************************
 
 // Threading
 #include "Threading/Mutex.h"
 #include "Threading/Thread.h"
 
-// ******************************************************
-// Delegates, RTTI, Object & Serialization
+// Module
+#include "Module/Module.h"
+#include "Module/ModuleManager.h"
+
+
+// Delegates
 #include "RTTI/RTTIDefines.h"
 #include "Delegates/Delegate.h"
 #include "Delegates/MultiCastDelegate.h"
+#include "Delegates/CoreDelegates.h"
+
+// ******************************************************
+// RTTI, Object & Serialization
 
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
