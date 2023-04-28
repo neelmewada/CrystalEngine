@@ -23,6 +23,7 @@ namespace CE
 		if (info != nullptr && info->isLoaded)
 		{
 			result = ModuleLoadResult::AlreadyLoaded;
+			CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
 			return info->moduleImpl;
 		}
 
@@ -32,6 +33,7 @@ namespace CE
 
 			if (info == nullptr)
 			{
+				CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
 				return nullptr;
 			}
 		}
@@ -41,8 +43,11 @@ namespace CE
 		if (modulePtr == nullptr)
 		{
 			result = ModuleLoadResult::InvalidModulePtr;
+			CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
 			return nullptr;
 		}
+
+		CoreDelegates::onBeforeModuleLoad.Broadcast(info);
 
 		info->isLoaded = true;
 		info->moduleImpl = modulePtr;
@@ -54,6 +59,8 @@ namespace CE
 		modulePtr->StartupModule();
 
 		CE_LOG(Info, All, "Loaded Module: {}", moduleName);
+
+		CoreDelegates::onAfterModuleLoad.Broadcast(info);
 
 		return modulePtr;
 	}
@@ -67,6 +74,8 @@ namespace CE
 			return;
 		}
 
+		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
+
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
 
@@ -76,7 +85,11 @@ namespace CE
 		// Unload module
 		info->isLoaded = false;
 		info->unloadFuncPtr(info->moduleImpl);
+
+		CoreDelegates::onAfterModuleUnload.Broadcast(info);
+
 		PlatformProcess::UnloadDll(info->dllHandle);
+		info->dllHandle = nullptr;
 
 		// Remove module
 		ModuleMap.Remove(moduleName);
@@ -118,6 +131,8 @@ namespace CE
 			return nullptr;
 		}
 
+		CoreDelegates::onBeforeModuleLoad.Broadcast(info);
+
 		info->isLoaded = true;
 		info->moduleImpl = modulePtr;
 
@@ -128,6 +143,8 @@ namespace CE
 		modulePtr->StartupModule();
 
 		CE_LOG(Info, All, "Loaded Plugin: {}", moduleName);
+
+		CoreDelegates::onAfterModuleLoad.Broadcast(info);
 
 		return modulePtr;
 	}
@@ -141,6 +158,8 @@ namespace CE
 			return;
 		}
 
+		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
+
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
 
@@ -150,7 +169,11 @@ namespace CE
 		// Unload module
 		info->isLoaded = false;
 		info->unloadFuncPtr(info->moduleImpl);
+
+		CoreDelegates::onAfterModuleUnload.Broadcast(info);
+
 		PlatformProcess::UnloadDll(info->dllHandle);
+		info->dllHandle = nullptr;
 
 		// Remove module
 		ModuleMap.Remove(moduleName);
@@ -183,7 +206,7 @@ namespace CE
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
 	{
 		IO::Path moduleDllPath = PlatformProcess::GetModuleDllPath(moduleName);
-		if (moduleDllPath.IsEmpty())
+		if (moduleDllPath.IsEmpty() || !moduleDllPath.Exists())
 		{
 			result = ModuleLoadResult::DllNotFound;
 			return nullptr;
@@ -231,7 +254,7 @@ namespace CE
 		String dllName = PlatformProcess::GetDllDecoratedName(moduleName);
 		IO::Path pluginDllPath = PlatformDirectories::GetLaunchDir() / dllName;
 
-		if (!pluginDllPath.Exists())
+		if (!pluginDllPath.Exists() || !pluginDllPath.Exists())
 		{
 			result = ModuleLoadResult::DllNotFound;
 			return nullptr;

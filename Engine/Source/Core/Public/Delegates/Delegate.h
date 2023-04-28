@@ -59,21 +59,10 @@ namespace CE
         }
     };
 
-    namespace Internal
-    {
-        template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
-        inline Delegate<ReturnType(Args...)> MemberDelegate(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance, std::index_sequence<Is...>)
-        {
-            auto list = { (Is + 1)... };
-            return {};
-        }
-    }
-
     template<typename ReturnType, typename ClassOrStruct, typename... Args>
     inline Delegate<ReturnType(Args...)> MemberDelegate(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance)
     {
         return Delegate<ReturnType(Args...)>(function, instance);
-        //return Internal::MemberDelegate(function, instance, std::make_index_sequence<sizeof...(Args)>());
     }
 
 } // namespace CE

@@ -13,40 +13,6 @@
 
 using namespace CE;
 
-MultiCastDelegate<void(int,String)> testDelegate{};
-
-class MyClass
-{
-public:
-    MyClass()
-    {
-        auto delegate = MemberDelegate(&MyClass::MemberFunction, this);
-        memberFunctionDelegate = testDelegate.AddDelegateInstance(delegate);
-    }
-
-    ~MyClass()
-    {
-        testDelegate.RemoveDelegateInstance(memberFunctionDelegate);
-    }
-
-    static void TestFunc(int i, String v)
-    {
-        LOG("TestFunc: " << i << " | " << v.GetCString());
-    }
-
-    static void TestFunc2(int i, String v)
-    {
-        LOG("TestFunc2: " << i << " | " << v.GetCString());
-    }
-
-    void MemberFunction(int i, String v)
-    {
-        LOG("MemberFunction: " << i << " | " << v.GetCString());
-    }
-
-private:
-    DelegateHandle memberFunctionDelegate{};
-};
 
 /**********************************************
 *   Delegates
@@ -149,4 +115,49 @@ TEST(Core_Delegates, MultiCast)
     TEST_END;
 }
 
+/// Module Load/Unload Events
+
+String Core_Delegates_Module_Events_Message = "";
+
+void Core_Delegates_OnModuleLoaded(ModuleInfo* info)
+{
+    Core_Delegates_Module_Events_Message = "Loaded:" + info->moduleName + (info->isPlugin ? ",true" : ",false") + (info->isLoaded ? ",true" : ",false");
+}
+
+void Core_Delegates_OnModuleUnloaded(ModuleInfo* info)
+{
+    Core_Delegates_Module_Events_Message = "Unloaded:" + info->moduleName + (info->isPlugin ? ",true" : ",false") + (info->isLoaded ? ",true" : ",false");
+}
+
+void Core_Delegates_OnModuleFailedToLoad(const String& moduleName, ModuleLoadResult result)
+{
+    Core_Delegates_Module_Events_Message = String::Format("Failed:{},{}", moduleName, (int)result);
+}
+
+TEST(Core_Delegates, Module_Events)
+{
+    Core_Delegates_Module_Events_Message = "";
+
+    CoreDelegates::onAfterModuleLoad.AddDelegateInstance(&Core_Delegates_OnModuleLoaded);
+    CoreDelegates::onAfterModuleUnload.AddDelegateInstance(&Core_Delegates_OnModuleUnloaded);
+    CoreDelegates::onModuleFailedToLoad.AddDelegateInstance(&Core_Delegates_OnModuleFailedToLoad);
+
+    ModuleManager::Get().LoadModule("Core");
+    EXPECT_EQ(Core_Delegates_Module_Events_Message, "Loaded:Core,false,true");
+
+    ModuleManager::Get().LoadModule("Core");
+    EXPECT_EQ(Core_Delegates_Module_Events_Message, String::Format("Failed:Core,{}", (int)ModuleLoadResult::AlreadyLoaded));
+
+    ModuleManager::Get().LoadModule("ModuleThatDoesNotExist");
+    EXPECT_EQ(Core_Delegates_Module_Events_Message, String::Format("Failed:ModuleThatDoesNotExist,{}", (int)ModuleLoadResult::DllNotFound));
+
+    ModuleManager::Get().UnloadModule("Core");
+    EXPECT_EQ(Core_Delegates_Module_Events_Message, "Unloaded:Core,false,false");
+
+    CoreDelegates::onAfterModuleLoad.ClearAll();
+    CoreDelegates::onAfterModuleUnload.ClearAll();
+    CoreDelegates::onModuleFailedToLoad.ClearAll();
+
+    Core_Delegates_Module_Events_Message = "";
+}
 

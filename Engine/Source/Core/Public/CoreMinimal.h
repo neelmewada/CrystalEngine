@@ -33,7 +33,7 @@
 #include "RTTI/RTTIDefines.h"
 #include "Delegates/Delegate.h"
 #include "Delegates/MultiCastDelegate.h"
-#include "Delegates/CoreDelegates.h"
+#include "Misc/CoreDelegates.h"
 
 // ******************************************************
 // RTTI, Object & Serialization

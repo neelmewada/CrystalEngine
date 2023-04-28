@@ -7,9 +7,11 @@ project(${TEST_NAME})
 
 enable_testing()
 
+file(GLOB_RECURSE SRCS "*.cpp" "*.h")
+
 ce_add_test(${PROJECT_NAME}
     TARGET Core
     FOLDER "Tests/Engine"
     SOURCES
-        "Main.cpp"
+        ${SRCS}
 )
