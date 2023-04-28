@@ -43,26 +43,83 @@ namespace CE
 	// **********************************************************
 	// Attribute
 
+	struct AttributeTable;
+
 	struct CORE_API Attribute
 	{
 	public:
 		Attribute()
-		{}
-		Attribute(String key, String value = "") : key(key), value(value)
-		{}
+		{
+			Clear();
+		}
 
-		CE_INLINE const String& GetKey() const { return key; }
-		CE_INLINE const String& GetValue() const { return value; }
+		Attribute(String str)
+		{
+			Clear();
+			isString = true;
+			stringValue = str;
+		}
 
-        static void Parse(String attributes, CE::Array<Attribute>& outResult);
+		Attribute(const HashMap<Name, Attribute>& tableRef)
+		{
+			Clear();
+			isAttributeTable = true;
+			subTable = tableRef;
+		}
+
+		~Attribute()
+		{
+
+		}
+
+		bool IsString() const;
+		bool IsAttributeTable() const;
+
+		String GetStringValue() const
+		{
+			if (!isString)
+				return "";
+			return stringValue;
+		}
 
 	private:
-		String key{};
-		String value{};
 
-        friend class TypeInfo;
-        friend class StructType;
-        friend class ClassType;
+		void Clear()
+		{
+			memset(this, 0, sizeof(Attribute));
+		}
+
+		union {
+			String stringValue{};
+			HashMap<Name, Attribute> subTable;
+		};
+
+		bool isString = false;
+		bool isAttributeTable = false;
+
+		friend class TypeInfo;
+		friend class StructType;
+		friend class ClassType;
+	};
+
+	struct CORE_API AttributeTable
+	{
+	public:
+		AttributeTable()
+		{}
+
+		static void Parse(String attributeString, AttributeTable& outTable);
+		static String CleanupAttributeString(const String& inString);
+
+		void Clear()
+		{
+			map.Clear();
+			array.Clear();
+		}
+
+	private:
+		HashMap<Name, Attribute> map{};
+		Array<Attribute> array{};
 	};
 
 	// **********************************************************
@@ -78,14 +135,14 @@ namespace CE
 
 	public:
 		const CE::Name& GetName() const { return name; }
-		const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
+		//const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
 
         virtual const CE::Array<CE::Attribute>& GetAttributes();
 
 		virtual String GetDisplayName();
 
-		String GetLocalAttributeValue(const String& key) const;
-        bool HasLocalAttribute(const String& key) const;
+		//String GetLocalAttributeValue(const String& key) const;
+        //bool HasLocalAttribute(const String& key) const;
 
         virtual String GetAttributeValue(const String& key);
         virtual bool HasAttribute(const String& key);
@@ -115,7 +172,8 @@ namespace CE
 	protected:
 		CE::Name name;
 		CE::String displayName{};
-		CE::Array<CE::Attribute> attributes{};
+		//CE::Array<CE::Attribute> attributes{};
+		AttributeTable attributeTable{};
 
 	public:
 		// For internal use only!
@@ -174,9 +232,21 @@ namespace CE
 
 	template<>
 	CE_INLINE void RegisterTypes()
-	{
+	{}
 
+	template<typename... Args>
+	CE_INLINE void DeregisterTypes()
+	{
+		std::initializer_list<TypeInfo*> types = { GetStaticType<Args>()... };
+		for (auto typeInfo : types)
+		{
+			TypeInfo::DeregisterType(typeInfo);
+		}
 	}
+
+	template<>
+	CE_INLINE void DeregisterTypes()
+	{}
 	
 } // namespace CE
 

@@ -670,7 +670,7 @@ namespace CE\
             typedef Namespace::Class Self;\
             CE::ClassType Type;\
 			const CE::StructTypeData<Namespace::Class> TypeData;\
-            TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Namespace::Class> typeData) : Type(type), TypeData(typeData)\
+            TypeInfoImpl(CE::ClassType&& type, CE::StructTypeData<Namespace::Class> typeData) : Type(type), TypeData(typeData)\
             {\
 				Type.AddSuper<SuperClasses>();\
                 TypeInfo::RegisterType(&Type);\
@@ -767,7 +767,7 @@ namespace CE\
             typedef Namespace::Struct Self;\
             CE::StructType Type;\
 			const CE::StructTypeData<Namespace::Struct> TypeData;\
-            TypeInfoImpl(CE::StructType type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
+            TypeInfoImpl(CE::StructType&& type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
             {\
 				Type.AddSuper<SuperStructs>();\
                 TypeInfo::RegisterType(&Type);\

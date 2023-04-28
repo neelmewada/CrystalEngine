@@ -18,6 +18,9 @@ namespace CE
 	using RemoveConstVolatileFromType = std::remove_cv_t<T>;
 
 	template<typename T>
+	using RemoveReferenceFromType = std::remove_reference_t<T>;
+
+	template<typename T>
 	class Array;
 
 	template<typename T>

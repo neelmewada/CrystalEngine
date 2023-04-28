@@ -154,6 +154,7 @@ namespace CE\
 }
 
 #define CE_REGISTER_TYPES(...) CE::RegisterTypes<__VA_ARGS__>();
+#define CE_DEREGISTER_TYPES(...) CE::DeregisterTypes<__VA_ARGS__>();
 
 namespace CE
 {

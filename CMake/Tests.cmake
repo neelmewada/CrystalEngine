@@ -17,7 +17,7 @@ target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
 
 function(ce_add_test NAME)
-    set(options "")
+    set(options AUTORTTI)
     set(oneValueArgs TARGET FOLDER)
     set(multiValueArgs SOURCES)
 

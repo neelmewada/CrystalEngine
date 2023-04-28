@@ -25,11 +25,12 @@ namespace CE
     Name TypeInfo::currentlyLoadingModule{};
     HashMap<Name, Array<TypeInfo*>> TypeInfo::registeredTypesByModuleName{};
 
-    static String CleanupAttributeString(const String& inString)
+    String AttributeTable::CleanupAttributeString(const String& inString)
     {
         char* result = new char[inString.GetLength() + 1];
         result[inString.GetLength()] = 0;
         bool isString = false;
+        int curParenScope = 0;
         int idx = 0;
         
         for (int i = 0; i < inString.GetLength(); i++)
@@ -44,18 +45,48 @@ namespace CE
             {
                 continue;
             }
+
+            if (!isString && idx == 0 && inString[i] == '(')
+            {
+                continue;
+            }
+            if (!isString && curParenScope == 0 && inString[i] == ')')
+            {
+                continue;
+            }
+
+            if (!isString && inString[i] == '(')
+            {
+                curParenScope++;
+            }
+            if (!isString && inString[i] == ')')
+            {
+                curParenScope--;
+            }
             
             result[idx++] = inString[i];
         }
 
-        result[idx++] = 0;
-        
-        return String(result);
+        result[idx++] = 0; // terminating char
+
+        auto str = String(result);
+        delete result;
+        return str;
     }
 
-    void Attribute::Parse(String attributes, CE::Array<Attribute>& outResult)
+    bool Attribute::IsString() const
     {
-        outResult.Clear();
+        return isString;
+    }
+
+    bool Attribute::IsAttributeTable() const
+    {
+        return isAttributeTable;
+    }
+
+    void AttributeTable::Parse(String attributes, AttributeTable& outTable)
+    {
+        outTable.Clear();
         int curScope = 0;
         bool isString = false;
         attributes = CleanupAttributeString(attributes);
@@ -108,7 +139,7 @@ namespace CE
                     }
                 }
 
-                outResult.Add(Attribute(attribKey, attribValue));
+                outTable.map.Add({ attribKey, Attribute(attribValue) });
 
                 startIdx = i + 1;
             }
@@ -120,10 +151,12 @@ namespace CE
     {
         int curScope = 0;
         bool isString = false;
-        String attribs = CleanupAttributeString(attributes);
-        this->attributes.Clear();
+        String attribs = AttributeTable::CleanupAttributeString(attributes);
+        //this->attributes.Clear();
+
+        AttributeTable::Parse(attribs, attributeTable);
         
-        int startIdx = 0;
+        /*int startIdx = 0;
 
         for (int i = 0; i < attribs.GetLength(); i++)
         {
@@ -175,7 +208,7 @@ namespace CE
 
                 startIdx = i + 1;
             }
-        }
+        }*/
     }
 
     String TypeInfo::GetDisplayName()
@@ -210,32 +243,6 @@ namespace CE
     const CE::Array<CE::Attribute>& TypeInfo::GetAttributes()
     {
         return GetLocalAttributes();
-    }
-
-    String TypeInfo::GetLocalAttributeValue(const String& key) const
-    {
-        for (int i = 0; i < attributes.GetSize(); i++)
-        {
-            if (attributes[i].GetKey() == key)
-            {
-                return attributes[i].GetValue();
-            }
-        }
-
-        return "";
-    }
-
-    bool TypeInfo::HasLocalAttribute(const String& key) const
-    {
-        for (int i = 0; i < attributes.GetSize(); i++)
-        {
-            if (attributes[i].GetKey() == key)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     String TypeInfo::GetAttributeValue(const String& key)

@@ -24,14 +24,14 @@ namespace CE
 	class CORE_API VariantCastException : public std::runtime_error
 	{
 	public:
-		VariantCastException(const char* message) : std::runtime_error(message)
+		VariantCastException(String message) : std::runtime_error(message.ToStdString())
 		{}
 	};
 
 	class CORE_API Variant
 	{
 	public:
-		Variant() : ValueTypeId(0)
+		Variant() : valueTypeId(0)
 		{
 			memset(this, 0, sizeof(Variant));
 		}
@@ -69,8 +69,7 @@ namespace CE
         Variant(Vec3  value) { SetInternalValue(value); }
         Variant(Vec4  value) { SetInternalValue(value); }
 
-		Variant(const char* value) { StringValue = value; ValueTypeId = TYPEID(String); }
-		Variant(String value) { StringValue = value; ValueTypeId = TYPEID(String); }
+		Variant(String value) { StringValue = value; valueTypeId = TYPEID(String); }
 
 		Variant(IO::Path value) 
 		{
@@ -83,54 +82,129 @@ namespace CE
 		}
 
 		template<typename ElementType>
-		Variant(CE::Array<ElementType> value)
+		Variant(const CE::Array<ElementType>& value)
 		{
 			memset(this, 0, sizeof(Variant));
-			ArrayValue = Array<u8>(value.GetSize() * sizeof(ElementType));
+			rawArrayValue = Array<u8>(value.GetSize() * sizeof(ElementType));
 
 			for (int i = 0; i < value.GetSize(); i++)
 			{
-				ElementType* dest = (ElementType*)(&*ArrayValue.Begin() + i * sizeof(ElementType));
+				ElementType* dest = (ElementType*)(&*rawArrayValue.Begin() + i * sizeof(ElementType));
 				*dest = value[i];
 			}
 
-			ArrayValue.ElementTypeId = TYPEID(ElementType);
-			ValueTypeId = TYPEID(CE::Array<ElementType>);
+			rawArrayValue.ElementTypeId = TYPEID(ElementType);
+			valueTypeId = TYPEID(CE::Array<ElementType>);
+			arrayElementTypeId = TYPEID(ElementType);
+			isArray = true;
+		}
+
+		template<>
+		Variant(const CE::Array<String>& value)
+		{
+			memset(this, 0, sizeof(Variant));
+
+			stringArrayValue = value;
+			valueTypeId = TYPEID(CE::Array<String>);
+			arrayElementTypeId = TYPEID(String);
+			isArray = true;
+		}
+
+		template<>
+		Variant(const CE::Array<Name>& value)
+		{
+			memset(this, 0, sizeof(Variant));
+
+			nameArrayValue = value;
+			valueTypeId = TYPEID(CE::Array<Name>);
+			arrayElementTypeId = TYPEID(Name);
+			isArray = true;
+		}
+
+		template<>
+		Variant(const CE::Array<IO::Path>& value)
+		{
+			memset(this, 0, sizeof(Variant));
+
+			pathArrayValue = value;
+			valueTypeId = TYPEID(CE::Array<IO::Path>);
+			arrayElementTypeId = TYPEID(IO::Path);
+			isArray = true;
 		}
 
 		template<typename PtrType>
-		Variant(PtrType* ptr) : ValueTypeId(GetTypeId<PtrType*>()), PtrValue(ptr)
-		{}
+		Variant(PtrType* ptr) : valueTypeId(TYPEID(PtrType)), PtrValue(ptr)
+		{
+			isPointer = true;
+		}
+
+		template<typename PtrType>
+		Variant(const PtrType* ptr) : valueTypeId(TYPEID(PtrType)), PtrValue((void*)ptr)
+		{
+			isPointer = true;
+		}
+
+		template<>
+		Variant(char* value)
+		{
+			Clear();
+			StringValue = value;
+			valueTypeId = TYPEID(String);
+		}
+
+		template<>
+		Variant(const char* value)
+		{
+			Clear();
+			StringValue = value; 
+			valueTypeId = TYPEID(String);
+		}
 
 		template<typename T> requires std::is_enum<T>::value
 		Variant(T enumValue)
 		{
 			SetInternalValue((std::underlying_type_t<T>)enumValue);
-			ValueTypeId = TYPEID(T);
+			valueTypeId = TYPEID(T);
 		}
 
 		CE_INLINE bool HasValue() const
 		{
-			return ValueTypeId > 0;
+			return valueTypeId > 0;
 		}
 
 		template<typename T>
 		CE_INLINE bool IsOfType() const
 		{
-			return ValueTypeId == TYPEID(T);
+			return valueTypeId == TYPEID(T);
 		}
 
 		CE_INLINE TypeId GetValueTypeId() const
 		{
-			return ValueTypeId;
+			return valueTypeId;
+		}
+
+		CE_INLINE bool IsPointer() const
+		{
+			return isPointer;
+		}
+
+		CE_INLINE bool IsArray() const
+		{
+			return isArray;
+		}
+
+		template<typename T>
+		CE_INLINE bool IsArrayElementOfType() const
+		{
+			return arrayElementTypeId == TYPEID(T);
 		}
 
 		template<typename T>
 		CE_INLINE T GetValue() const
 		{
-			if (ValueTypeId != GetTypeId<T>())
+			if (valueTypeId != GetTypeId<T>())
 			{
-				throw VariantCastException("Failed to cast Variant to the return type!");
+				throw VariantCastException(String::Format("Failed to cast Variant to the return type"));
 			}
 
 			if constexpr (std::is_reference_v<T>)
@@ -144,9 +218,62 @@ namespace CE
 			}
 		}
 
+		template<>
+		CE_INLINE Array<String> GetValue() const
+		{
+			if (valueTypeId != TYPEID(Array<String>))
+			{
+				throw VariantCastException("Failed to cast Variant to the return type of Array<String> because it is not an array");
+			}
+			if (arrayElementTypeId != TYPEID(String))
+			{
+				throw VariantCastException("Failed to cast Variant to the return type of Array<String> because of Element Type");
+			}
+
+			return stringArrayValue;
+		}
+
+		template<>
+		CE_INLINE Array<Name> GetValue() const
+		{
+			if (valueTypeId != TYPEID(Array<Name>))
+			{
+				throw VariantCastException("Failed to cast Variant to the return type of Array<Name> because it is not an array");
+			}
+			if (arrayElementTypeId != TYPEID(Name))
+			{
+				throw VariantCastException("Failed to cast Variant to the return type of Array<Name> because of Element Type");
+			}
+
+			return nameArrayValue;
+		}
+
+		template<>
+		CE_INLINE Array<IO::Path> GetValue() const
+		{
+			if (valueTypeId != TYPEID(Array<IO::Path>))
+			{
+				throw VariantCastException("Failed to cast Variant to the return type of Array<IO::Path> because it is not an array");
+			}
+			if (arrayElementTypeId != TYPEID(IO::Path))
+			{
+				throw VariantCastException("Failed to cast Variant to the return type of Array<IO::Path> because of Element Type");
+			}
+
+			return pathArrayValue;
+		}
+
 		CE_INLINE void* GetRawPtrValue() const
 		{
 			return PtrValue;
+		}
+
+		template<typename PtrType>
+		CE_INLINE PtrType* TryGetPointerValue() const
+		{
+			if (TYPEID(PtrType) != valueTypeId)
+				return nullptr;
+			return (PtrType*)PtrValue;
 		}
 
 		template<typename PtrType>
@@ -158,11 +285,17 @@ namespace CE
 	private:
 
 		template<typename T>
-		CE_INLINE void SetInternalValue(T value)
+		CE_INLINE void SetInternalValue(const T& value)
 		{
 			memset(this, 0, sizeof(Variant)); // Initialze memory to 0
-			ValueTypeId = GetTypeId<T>();
+			valueTypeId = TYPEID(T);
 			*(T*)this = value;
+		}
+
+		/// Initializes/sets the memory block to zero
+		void Clear()
+		{
+			memset(this, 0, sizeof(Variant)); // Initialze memory to 0
 		}
 
 		union
@@ -186,12 +319,20 @@ namespace CE
             Vec3   Vec3Value;
             Vec4   Vec4Value;
 
-			CE::Array<u8> ArrayValue;
-			IO::Path PathValue;
-			CE::Name NameValue;
+			IO::Path pathValue;
+			CE::Name nameValue;
+
+			// Arrays
+			CE::Array<u8> rawArrayValue;
+			CE::Array<String> stringArrayValue;
+			CE::Array<Name> nameArrayValue;
+			CE::Array<IO::Path> pathArrayValue;
 		};
 
-		TypeId ValueTypeId = 0;
+		TypeId valueTypeId = 0;
+		TypeId arrayElementTypeId = 0;
+		bool isPointer = false;
+		bool isArray = false;
 	};
 
 } // namespace CE
