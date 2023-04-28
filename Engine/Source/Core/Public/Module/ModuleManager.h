@@ -13,7 +13,7 @@ namespace CE
 
     struct ModuleInfo
     {
-        String moduleName;
+        Name moduleName;
         
         void* dllHandle;
         LoadModuleFunc loadFuncPtr;
@@ -69,7 +69,7 @@ namespace CE
 
         PluginModule* LoadPluginModule(String moduleName);
 
-        String GetLoadedModuleName(Module* modulePtr);
+        Name GetLoadedModuleName(Module* modulePtr);
 
     private:
 
@@ -78,13 +78,14 @@ namespace CE
 
         ModuleInfo* FindModuleInfo(String moduleName);
 
-        HashMap<String, ModuleInfo> ModuleMap{};
+        HashMap<Name, ModuleInfo> ModuleMap{};
     };
 
 } // namespace CE
 
-#if IS_MONOLITHIC
+#if PAL_TRAIT_BUILD_MONOLITHIC
 
+// TODO: Monolithic implementation
 #define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)
 
 #else

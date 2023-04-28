@@ -59,7 +59,7 @@ namespace CE
 
     GameComponent* GameComponent::AddSubComponent(TypeId typeId)
     {
-        ClassType* componentClass = ClassType::FindClassByTypeId(typeId);
+        ClassType* componentClass = ClassType::FindClassById(typeId);
         return AddSubComponent(componentClass);
     }
 

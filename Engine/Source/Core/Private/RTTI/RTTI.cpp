@@ -19,8 +19,11 @@ namespace CE
         }
     }
 
-    HashMap<Name, TypeInfo*> TypeInfo::RegisteredTypes{};
-    HashMap<TypeId, TypeInfo*> TypeInfo::RegisteredTypeIds{};
+    HashMap<Name, TypeInfo*> TypeInfo::registeredTypesByName{};
+    HashMap<TypeId, TypeInfo*> TypeInfo::registeredTypeById{};
+
+    Name TypeInfo::currentlyLoadingModule{};
+    HashMap<Name, Array<TypeInfo*>> TypeInfo::registeredTypesByModuleName{};
 
     static String CleanupAttributeString(const String& inString)
     {
@@ -258,16 +261,34 @@ namespace CE
 
     void TypeInfo::RegisterType(TypeInfo* type)
     {
-        if (type == nullptr)
+        if (type == nullptr || registeredTypeById.KeyExists(type->GetTypeId()))
             return;
         
-        if (!RegisteredTypes.KeyExists(type->name))
+        registeredTypesByName.Add({ type->name, type });
+        registeredTypeById.Add({ type->GetTypeId(), type });
+
+        if (currentlyLoadingModule.IsValid())
         {
-            RegisteredTypes.Add({ type->name, type });
+            if (!registeredTypesByModuleName.KeyExists(currentlyLoadingModule))
+                registeredTypesByModuleName.Add({ currentlyLoadingModule, {} });
+
+            registeredTypesByModuleName[currentlyLoadingModule].Add(type);
         }
-        if (!RegisteredTypeIds.KeyExists(type->GetTypeId()))
+
+        if (type->IsStruct())
         {
-            RegisteredTypeIds.Add({ type->GetTypeId(), type });
+            auto structType = (StructType*)type;
+            StructType::RegisterStructType(structType);
+        }
+        else if (type->IsClass())
+        {
+            auto classType = (ClassType*)type;
+            ClassType::RegisterClassType(classType);
+        }
+        else if (type->IsEnum())
+        {
+            auto enumType = (EnumType*)type;
+            EnumType::RegisterEnumType(enumType);
         }
     }
 
@@ -276,24 +297,61 @@ namespace CE
         if (type == nullptr)
             return;
 
-        RegisteredTypes.Remove(type->name);
-        RegisteredTypeIds.Remove(type->GetTypeId());
+        registeredTypesByName.Remove(type->name);
+        registeredTypeById.Remove(type->GetTypeId());
+    }
+
+    void TypeInfo::DeregisterTypesForModule(ModuleInfo* moduleInfo)
+    {
+        if (moduleInfo == nullptr || !moduleInfo->moduleName.IsValid())
+            return;
+        if (!registeredTypesByModuleName.KeyExists(moduleInfo->moduleName))
+            return;
+
+        auto& types = registeredTypesByModuleName[moduleInfo->moduleName];
+
+        for (const TypeInfo* typeInfo : types)
+        {
+            if (typeInfo == nullptr)
+                continue;
+
+            registeredTypesByName.Remove(typeInfo->GetName());
+            registeredTypeById.Remove(typeInfo->GetTypeId());
+
+            if (typeInfo->IsStruct())
+            {
+                auto structType = (StructType*)typeInfo;
+                StructType::DeregisterStructType(structType);
+            }
+            else if (typeInfo->IsClass())
+            {
+                auto classType = (ClassType*)typeInfo;
+                ClassType::DeregisterClassType(classType);
+            }
+            else if (typeInfo->IsEnum())
+            {
+                auto enumType = (EnumType*)typeInfo;
+                EnumType::DeregisterEnumType(enumType);
+            }
+        }
+
+        types.Clear();
     }
 
     CORE_API TypeInfo* GetTypeInfo(Name name)
     {
-        if (TypeInfo::RegisteredTypes.KeyExists(name))
+        if (TypeInfo::registeredTypesByName.KeyExists(name))
         {
-            return TypeInfo::RegisteredTypes[name];
+            return TypeInfo::registeredTypesByName[name];
         }
         return nullptr;
     }
 
     CORE_API TypeInfo* GetTypeInfo(TypeId typeId)
     {
-        if (TypeInfo::RegisteredTypeIds.KeyExists(typeId))
+        if (TypeInfo::registeredTypeById.KeyExists(typeId))
         {
-            return TypeInfo::RegisteredTypeIds[typeId];
+            return TypeInfo::registeredTypeById[typeId];
         }
         return nullptr;
     }

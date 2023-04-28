@@ -20,7 +20,6 @@ namespace CE
 
     void SystemModule::RegisterTypes()
     {
-
         // Game Framework Types
         CE_REGISTER_TYPES(
             Engine,

@@ -7,6 +7,8 @@
 #define YAML_CPP_API
 #include "yaml-cpp/yaml.h"
 
+#define NAME_None CE::Name()
+
 namespace CE
 {
     class String;
@@ -26,6 +28,8 @@ namespace CE
         Name(String name);
         Name(const char* name);
         ~Name() = default;
+
+        Name(const Name& copy);
 
         CE_INLINE bool IsValid() const
         {

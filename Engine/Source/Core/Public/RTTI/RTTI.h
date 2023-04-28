@@ -23,12 +23,21 @@ namespace CE
 	template<typename ElementType>
 	class Array;
 
-	class CORE_API Name;
+	class Name;
+	struct ModuleInfo;
+	class CoreModule;
 
 	namespace Internal
 	{
 		template<typename Struct>
 		struct TypeInfoImpl;
+	}
+
+	template<typename Type>
+	CE::Name GetTypeName()
+	{
+		// Specialization contains the magical data
+		return "";
 	}
 
 	// **********************************************************
@@ -110,9 +119,9 @@ namespace CE
 
 	public:
 		// For internal use only!
-        static HashMap<CE::Name, TypeInfo*> RegisteredTypes;
+        static HashMap<CE::Name, TypeInfo*> registeredTypesByName;
 		// For internal use only!
-		static HashMap<TypeId, TypeInfo*> RegisteredTypeIds;
+		static HashMap<TypeId, TypeInfo*> registeredTypeById;
 
         // For internal use only!
         static void RegisterType(TypeInfo* type);
@@ -121,8 +130,17 @@ namespace CE
 		// For internal use only!
         CE_INLINE static u32 GetRegisteredCount()
         {
-            return (u32)RegisteredTypes.GetSize();
+            return (u32)registeredTypesByName.GetSize();
         }
+
+	private:
+		friend class ModuleManager;
+		friend class CE::CoreModule;
+
+		static void DeregisterTypesForModule(ModuleInfo* moduleInfo);
+
+		static Name currentlyLoadingModule;
+		static HashMap<Name, Array<TypeInfo*>> registeredTypesByModuleName;
 	};
 
 	/// Default implementation always returns nullptr. Specialization will return the correct data.
@@ -147,7 +165,11 @@ namespace CE
 	template<typename... Args>
     CE_INLINE void RegisterTypes()
 	{
-		const TypeInfo* types[] = { GetStaticType<Args>()... };
+		std::initializer_list<TypeInfo*> types = { GetStaticType<Args>()... };
+		for (auto typeInfo : types)
+		{
+			TypeInfo::RegisterType(typeInfo);
+		}
 	}
 
 	template<>

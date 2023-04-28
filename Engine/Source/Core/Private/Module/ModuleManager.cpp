@@ -18,12 +18,16 @@ namespace CE
 
 	Module* ModuleManager::LoadModule(String moduleName, ModuleLoadResult& result)
 	{
+		TypeInfo::currentlyLoadingModule = moduleName;
+
 		auto info = FindModuleInfo(moduleName);
 
 		if (info != nullptr && info->isLoaded)
 		{
 			result = ModuleLoadResult::AlreadyLoaded;
 			CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
+
+			TypeInfo::currentlyLoadingModule = NAME_None;
 			return info->moduleImpl;
 		}
 
@@ -34,6 +38,8 @@ namespace CE
 			if (info == nullptr)
 			{
 				CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
+
+				TypeInfo::currentlyLoadingModule = NAME_None;
 				return nullptr;
 			}
 		}
@@ -44,6 +50,8 @@ namespace CE
 		{
 			result = ModuleLoadResult::InvalidModulePtr;
 			CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
+
+			TypeInfo::currentlyLoadingModule = NAME_None;
 			return nullptr;
 		}
 
@@ -62,6 +70,7 @@ namespace CE
 
 		CoreDelegates::onAfterModuleLoad.Broadcast(info);
 
+		TypeInfo::currentlyLoadingModule = NAME_None;
 		return modulePtr;
 	}
 
@@ -105,11 +114,15 @@ namespace CE
 
 	PluginModule* ModuleManager::LoadPluginModule(String moduleName, ModuleLoadResult& result)
 	{
+		TypeInfo::currentlyLoadingModule = moduleName;
+
 		auto info = FindModuleInfo(moduleName);
 
 		if (info != nullptr && info->isLoaded)
 		{
 			result = ModuleLoadResult::AlreadyLoaded;
+
+			TypeInfo::currentlyLoadingModule = NAME_None;
 			return (PluginModule*)info->moduleImpl;
 		}
 
@@ -119,6 +132,7 @@ namespace CE
 
 			if (info == nullptr)
 			{
+				TypeInfo::currentlyLoadingModule = NAME_None;
 				return nullptr;
 			}
 		}
@@ -128,6 +142,8 @@ namespace CE
 		if (modulePtr == nullptr)
 		{
 			result = ModuleLoadResult::InvalidModulePtr;
+
+			TypeInfo::currentlyLoadingModule = NAME_None;
 			return nullptr;
 		}
 
@@ -146,6 +162,7 @@ namespace CE
 
 		CoreDelegates::onAfterModuleLoad.Broadcast(info);
 
+		TypeInfo::currentlyLoadingModule = NAME_None;
 		return modulePtr;
 	}
 
@@ -187,7 +204,7 @@ namespace CE
 		return LoadPluginModule(moduleName, result);
 	}
 
-	String ModuleManager::GetLoadedModuleName(Module* modulePtr)
+	Name ModuleManager::GetLoadedModuleName(Module* modulePtr)
 	{
 		if (modulePtr == nullptr)
 			return "";
@@ -200,7 +217,7 @@ namespace CE
 			}
 		}
 
-		return "";
+		return NAME_None;
 	}
 
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)

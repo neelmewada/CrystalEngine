@@ -10,16 +10,28 @@ namespace CE
     void CoreModule::StartupModule()
     {
         gTransientPackage = NewObject<Package>(nullptr, TEXT("Engine::Transient"));
+
+        delegateHandlesToRemove.AddRange({
+            CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule)
+        });
     }
 
     void CoreModule::ShutdownModule()
     {
         delete gTransientPackage;
         gTransientPackage = nullptr;
+
+        while (delegateHandlesToRemove.GetSize() > 0)
+        {
+            CoreDelegates::onBeforeModuleUnload.RemoveDelegateInstance(delegateHandlesToRemove[0]);
+            delegateHandlesToRemove.RemoveAt(0);
+        }
     }
 
     void CoreModule::RegisterTypes()
     {
+        auto regCount = TypeInfo::GetRegisteredCount();
+
         // Register Data types
         CE_REGISTER_TYPES(bool, CE::s8, CE::s16, CE::s32, CE::s64,
             CE::u8, CE::u16, CE::u32, CE::u64, CE::f32, CE::f64,
@@ -44,6 +56,17 @@ namespace CE
             SystemComponent,
             Package
         );
+        
+        regCount = TypeInfo::GetRegisteredCount();
+        auto objectClass = GetStaticClass<Object>();
+        auto packageClass = GetStaticClass<Package>();
+        auto enumType = EnumType::FindEnumByName("CE::EventResult");
+        auto enumName = TYPENAME(EventResult);
+        if (objectClass != nullptr)
+        {
+            auto derivedClasses = objectClass->GetDerivedClasses();
+            derivedClasses.GetSize();
+        }
     }
 
 }

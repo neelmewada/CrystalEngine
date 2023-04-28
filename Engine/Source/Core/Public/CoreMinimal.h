@@ -28,12 +28,19 @@
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
 
-
 // Delegates
 #include "RTTI/RTTIDefines.h"
 #include "Delegates/Delegate.h"
 #include "Delegates/MultiCastDelegate.h"
 #include "Misc/CoreDelegates.h"
+
+// ******************************************************
+// Math
+#include "Math/Math.h"
+#include "Math/Vector.h"
+#include "Math/Quaternion.h"
+#include "Math/Matrix.h"
+#include "Math/Color.h"
 
 // ******************************************************
 // RTTI, Object & Serialization
@@ -46,21 +53,13 @@
 #include "Object/Serialization.h"
 #include "Object/SystemObject.h"
 
-// IO::FileWatcher
+// RTTI Dependents
+#include "Math/MathRTTI.h"
 #include "IO/FileWatcher.h"
 
 // *****************************************************
 // Project
 #include "Project/ProjectSettings.h"
-
-// ******************************************************
-// Math
-#include "Math/Math.h"
-#include "Math/Vector.h"
-#include "Math/Quaternion.h"
-#include "Math/Matrix.h"
-#include "Math/Color.h"
-#include "Math/MathRTTI.h"
 
 // ******************************************************
 // Messaging

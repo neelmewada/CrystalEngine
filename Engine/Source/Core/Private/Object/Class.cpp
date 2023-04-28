@@ -92,6 +92,22 @@ namespace CE
         return &cachedFields[0];
     }
 
+    u32 StructType::GetFieldCount()
+    {
+        if (!fieldsCached)
+            CacheAllFields();
+
+        return cachedFields.GetSize();
+    }
+
+    FieldType* StructType::GetFieldAt(u32 index)
+    {
+        if (!fieldsCached)
+            CacheAllFields();
+
+        return index < GetFieldCount() ? &cachedFields[index] : nullptr;
+    }
+
     FieldType* StructType::FindFieldWithName(Name name)
     {
         if (!fieldsCached)
@@ -292,20 +308,26 @@ namespace CE
         }
     }
 
-    void StructType::RegisterStruct(StructType* type)
+    void StructType::RegisterStructType(StructType* type)
     {
         if (type == nullptr || registeredStructs.KeyExists(type->GetTypeId()))
             return;
 
         registeredStructs.Add({type->GetTypeId(), type});
+        registeredStructsByName.Add({ type->GetName(), type });
+
+        CoreObjectDelegates::onStructRegistered.Broadcast(type);
     }
 
-    void StructType::DeregisterStruct(StructType* type)
+    void StructType::DeregisterStructType(StructType* type)
     {
         if (type == nullptr || !registeredStructs.KeyExists(type->GetTypeId()))
             return;
 
+        CoreObjectDelegates::onStructDeregistered.Broadcast(type);
+
         registeredStructs.Remove(type->GetTypeId());
+        registeredStructsByName.Remove(type->GetName());
     }
 
     StructType* StructType::FindStructByName(Name structName)
@@ -404,6 +426,8 @@ namespace CE
 
         type->CacheSuperTypes();
         AddDerivedClassToMap(type, type);
+
+        CoreObjectDelegates::onClassRegistered.Broadcast(type);
     }
 
     void ClassType::DeregisterClassType(ClassType* type)
@@ -411,10 +435,10 @@ namespace CE
         if (type == nullptr || !registeredClasses.KeyExists(type->GetTypeId()))
             return;
 
+        CoreObjectDelegates::onClassDeregistered.Broadcast(type);
+
         registeredClasses.Remove(type->GetTypeId());
         registeredClassesByName.Remove(type->GetName());
-
-        type->CacheSuperTypes();
     }
 
     ClassType* ClassType::FindClassByName(Name className)
@@ -425,7 +449,7 @@ namespace CE
         return registeredClassesByName[className];
     }
 
-    ClassType* ClassType::FindClassByTypeId(TypeId classTypeId)
+    ClassType* ClassType::FindClassById(TypeId classTypeId)
     {
         if (classTypeId == 0 || !registeredClasses.KeyExists(classTypeId))
             return nullptr;

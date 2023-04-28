@@ -13,5 +13,8 @@ namespace CE
         void ShutdownModule() override;
 
         void RegisterTypes() override;
+
+    private:
+        Array<DelegateHandle> delegateHandlesToRemove{};
     };
 }

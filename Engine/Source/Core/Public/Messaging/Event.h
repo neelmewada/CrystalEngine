@@ -20,3 +20,4 @@ CE_RTTI_ENUM(CORE_API, CE, EventResult,
     CE_CONST(HandleAndPropagate),
     CE_CONST(HandleAndStopPropagation)
 )
+

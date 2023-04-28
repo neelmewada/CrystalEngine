@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Field.h"
 #include "Function.h"
 
@@ -159,12 +158,15 @@ namespace CE
 			return superTypeIds.GetSize();
 		}
 
-		CE_INLINE TypeId GetSuperType(s32 index) const
+		CE_INLINE TypeId GetSuperType(u32 index) const
 		{
 			return superTypeIds[index];
 		}
 
 		FieldType* GetFirstField();
+
+		u32 GetFieldCount();
+		FieldType* GetFieldAt(u32 index);
         
         FieldType* FindFieldWithName(Name name);
 
@@ -184,9 +186,9 @@ namespace CE
 		}
 
         // For internal use only!
-        static void RegisterStruct(StructType* type);
+        static void RegisterStructType(StructType* type);
         // For internal use only!
-        static void DeregisterStruct(StructType* type);
+        static void DeregisterStructType(StructType* type);
 
         static StructType* FindStructByName(Name structName);
         static StructType* FindStructByTypeId(TypeId structTypeId);
@@ -401,7 +403,17 @@ namespace CE
         static void DeregisterClassType(ClassType* type);
 
         static ClassType* FindClassByName(Name className);
-        static ClassType* FindClassByTypeId(TypeId classId);
+        static ClassType* FindClassById(TypeId classId);
+
+		inline static ClassType* FindClass(Name className)
+		{
+			return FindClassByName(className);
+		}
+
+		inline static ClassType* FindClass(TypeId classId)
+		{
+			return FindClassById(classId);
+		}
 
         Array<TypeId> GetDerivedClassesTypeId() const;
         Array<ClassType*> GetDerivedClasses() const;
@@ -660,8 +672,8 @@ namespace CE\
 			const CE::StructTypeData<Namespace::Class> TypeData;\
             TypeInfoImpl(CE::ClassType type, CE::StructTypeData<Namespace::Class> typeData) : Type(type), TypeData(typeData)\
             {\
+				Type.AddSuper<SuperClasses>();\
                 TypeInfo::RegisterType(&Type);\
-                Type.AddSuper<SuperClasses>();\
                 ClassType::RegisterClassType(&Type);\
 				FunctionList\
                 FieldList\
@@ -694,6 +706,12 @@ namespace CE\
 	{\
         static Internal::TypeInfoImpl<Namespace::Class> instance{ ClassType{ #Namespace "::" #Class, &instance, sizeof(Namespace::Class), Attributes "" }, StructTypeData<Namespace::Class>() };\
 		return &instance.Type;\
+	}\
+	template<>\
+	inline CE::Name GetTypeName<Namespace::Class>()\
+	{\
+		static Name name = Name(#Namespace "::" #Class);\
+		return name;\
 	}\
 	template<>\
 	inline ClassType* GetStaticClass<Namespace::Class>()\
@@ -751,15 +769,15 @@ namespace CE\
 			const CE::StructTypeData<Namespace::Struct> TypeData;\
             TypeInfoImpl(CE::StructType type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
             {\
+				Type.AddSuper<SuperStructs>();\
                 TypeInfo::RegisterType(&Type);\
-                Type.AddSuper<SuperStructs>();\
-                StructType::RegisterStruct(&Type);\
+                StructType::RegisterStructType(&Type);\
                 FieldList\
             }\
 			virtual ~TypeInfoImpl()\
 			{\
 				TypeInfo::DeregisterType(&Type);\
-                StructType::DeregisterStruct(&Type);\
+                StructType::DeregisterStructType(&Type);\
 			}\
 			virtual void InitializeDefaults(void* instance) const override\
 			{\
@@ -772,6 +790,12 @@ namespace CE\
 	{\
         static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), Attributes "" }, StructTypeData<Namespace::Struct>() };\
 		return &instance.Type;\
+	}\
+	template<>\
+	inline CE::Name GetTypeName<Namespace::Struct>()\
+	{\
+		static Name name = Name(#Namespace "::" #Struct);\
+		return name;\
 	}\
 	template<>\
 	inline StructType* GetStaticStruct<Namespace::Struct>()\

@@ -71,6 +71,16 @@ namespace CE
                 }
             }
 
+            u32 GetInvocationListCount() const
+            {
+                return (u32)list.GetSize();
+            }
+
+            const InvocationListType& GetInvocationList() const
+            {
+                return list;
+            }
+
         protected:
             InvocationListType list{};
         };

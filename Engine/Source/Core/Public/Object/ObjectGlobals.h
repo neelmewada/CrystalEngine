@@ -4,6 +4,12 @@
 
 namespace CE
 {
+	class EnumType;
+	class ClassType;
+	class StructType;
+	class FieldType;
+	class FunctionType;
+
 	namespace Internal
 	{
 
@@ -37,4 +43,24 @@ namespace CE
 		params.name = objectName;
 		return static_cast<TClass*>(Internal::StaticConstructObject(params));
 	}
+
+	struct CORE_API CoreObjectDelegates
+	{
+		CoreObjectDelegates() = delete;
+
+		typedef MultiCastDelegate<void(ClassType*)> ClassRegistrationDelegate;
+
+		static ClassRegistrationDelegate onClassRegistered;
+		static ClassRegistrationDelegate onClassDeregistered;
+
+		typedef MultiCastDelegate<void(StructType*)> StructRegistrationDelegate;
+
+		static StructRegistrationDelegate onStructRegistered;
+		static StructRegistrationDelegate onStructDeregistered;
+
+#if PAL_TRAIT_WITH_EDITOR_DATA
+
+#endif
+	};
+
 }

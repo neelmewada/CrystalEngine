@@ -45,5 +45,15 @@ namespace CE
 		}
 
 	}
+
+	/* ***************************************
+	*	Core Object Delegates
+	*/
+
+	CoreObjectDelegates::ClassRegistrationDelegate CoreObjectDelegates::onClassRegistered{};
+	CoreObjectDelegates::ClassRegistrationDelegate CoreObjectDelegates::onClassDeregistered{};
+
+	CoreObjectDelegates::StructRegistrationDelegate CoreObjectDelegates::onStructRegistered{};
+	CoreObjectDelegates::StructRegistrationDelegate CoreObjectDelegates::onStructDeregistered{};
     
 } // namespace CE

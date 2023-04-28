@@ -4,6 +4,7 @@
 #include "Containers/String.h"
 
 #include "ObjectMacros.h"
+#include "RTTI/RTTIDefines.h"
 #include "RTTI/RTTI.h"
 #include "RTTI/Variant.h"
 #include "Class.h"
@@ -121,3 +122,5 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
         
     )
 )
+
+

@@ -13,10 +13,113 @@
 
 using namespace CE;
 
+/**********************************************
+*   Performance
+*/
+
+#pragma region Core Performance
+
+TEST(Core_Performance, Module_Load_10x)
+{
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+
+    ModuleManager::Get().LoadModule("Core");
+    ModuleManager::Get().UnloadModule("Core");
+}
+
+#pragma endregion
+
+/**********************************************
+*   Reflection
+*/
+
+#pragma region Core Reflection
+
+TEST(Core_Reflection, RTTI_Registry_Testing)
+{
+    // 1. Test Loading & Unloading
+
+    auto registeredCount = TypeInfo::GetRegisteredCount();
+    EXPECT_EQ(registeredCount, 0); // == 0
+
+    ModuleManager::Get().LoadModule("Core");
+    registeredCount = TypeInfo::GetRegisteredCount();
+    EXPECT_GT(registeredCount, 0); // > 0
+
+    ModuleManager::Get().UnloadModule("Core");
+    EXPECT_EQ(TypeInfo::GetRegisteredCount(), 0); // == 0
+
+    ModuleManager::Get().LoadModule("Core");
+    EXPECT_EQ(TypeInfo::GetRegisteredCount(), registeredCount); // should be equal
+
+    // 2. Test Object class
+
+    auto objectClass = ClassType::FindClass(TYPENAME(Object));
+    EXPECT_NE(objectClass, nullptr);
+    if (objectClass != nullptr)
+    {
+        EXPECT_EQ(objectClass->GetName(), TYPENAME(Object)); // equal
+        EXPECT_GE(objectClass->GetFieldCount(), 2); // >= 2
+
+        auto derivedCount = objectClass->GetDerivedClasses();
+        EXPECT_GT(derivedCount.GetSize(), 0); // > 0
+    }
+
+    ModuleManager::Get().UnloadModule("Core");
+    EXPECT_EQ(TypeInfo::GetRegisteredCount(), 0);
+}
+
+#pragma endregion
+
+
+
+/**********************************************
+*   Serialization
+*/
+
+#pragma region Core Serialization
+
+TEST(Core_Serialization, Empty)
+{
+    TEST_BEGIN;
+
+
+
+    TEST_END;
+}
+
+#pragma endregion
 
 /**********************************************
 *   Delegates
 */
+
+#pragma region Core Delegates
 
 class DelegateTestClass
 {
@@ -117,47 +220,53 @@ TEST(Core_Delegates, MultiCast)
 
 /// Module Load/Unload Events
 
-String Core_Delegates_Module_Events_Message = "";
+String Core_Delegates_Modules_Message = "";
 
 void Core_Delegates_OnModuleLoaded(ModuleInfo* info)
 {
-    Core_Delegates_Module_Events_Message = "Loaded:" + info->moduleName + (info->isPlugin ? ",true" : ",false") + (info->isLoaded ? ",true" : ",false");
+    Core_Delegates_Modules_Message = "Loaded:" + info->moduleName.GetString() + (info->isPlugin ? ",true" : ",false") + (info->isLoaded ? ",true" : ",false");
 }
 
 void Core_Delegates_OnModuleUnloaded(ModuleInfo* info)
 {
-    Core_Delegates_Module_Events_Message = "Unloaded:" + info->moduleName + (info->isPlugin ? ",true" : ",false") + (info->isLoaded ? ",true" : ",false");
+    Core_Delegates_Modules_Message = "Unloaded:" + info->moduleName.GetString() + (info->isPlugin ? ",true" : ",false") + (info->isLoaded ? ",true" : ",false");
 }
 
 void Core_Delegates_OnModuleFailedToLoad(const String& moduleName, ModuleLoadResult result)
 {
-    Core_Delegates_Module_Events_Message = String::Format("Failed:{},{}", moduleName, (int)result);
+    Core_Delegates_Modules_Message = String::Format("Failed:{},{}", moduleName, (int)result);
 }
 
-TEST(Core_Delegates, Module_Events)
+TEST(Core_Delegates, Modules)
 {
-    Core_Delegates_Module_Events_Message = "";
+    Core_Delegates_Modules_Message = "";
 
-    CoreDelegates::onAfterModuleLoad.AddDelegateInstance(&Core_Delegates_OnModuleLoaded);
-    CoreDelegates::onAfterModuleUnload.AddDelegateInstance(&Core_Delegates_OnModuleUnloaded);
-    CoreDelegates::onModuleFailedToLoad.AddDelegateInstance(&Core_Delegates_OnModuleFailedToLoad);
-
-    ModuleManager::Get().LoadModule("Core");
-    EXPECT_EQ(Core_Delegates_Module_Events_Message, "Loaded:Core,false,true");
+    auto id1 = CoreDelegates::onAfterModuleLoad.AddDelegateInstance(&Core_Delegates_OnModuleLoaded);
+    auto id2 = CoreDelegates::onAfterModuleUnload.AddDelegateInstance(&Core_Delegates_OnModuleUnloaded);
+    auto id3 = CoreDelegates::onModuleFailedToLoad.AddDelegateInstance(&Core_Delegates_OnModuleFailedToLoad);
 
     ModuleManager::Get().LoadModule("Core");
-    EXPECT_EQ(Core_Delegates_Module_Events_Message, String::Format("Failed:Core,{}", (int)ModuleLoadResult::AlreadyLoaded));
+    EXPECT_EQ(Core_Delegates_Modules_Message, "Loaded:Core,false,true");
+
+    ModuleManager::Get().LoadModule("Core");
+    EXPECT_EQ(Core_Delegates_Modules_Message, String::Format("Failed:Core,{}", (int)ModuleLoadResult::AlreadyLoaded));
 
     ModuleManager::Get().LoadModule("ModuleThatDoesNotExist");
-    EXPECT_EQ(Core_Delegates_Module_Events_Message, String::Format("Failed:ModuleThatDoesNotExist,{}", (int)ModuleLoadResult::DllNotFound));
+    EXPECT_EQ(Core_Delegates_Modules_Message, String::Format("Failed:ModuleThatDoesNotExist,{}", (int)ModuleLoadResult::DllNotFound));
 
     ModuleManager::Get().UnloadModule("Core");
-    EXPECT_EQ(Core_Delegates_Module_Events_Message, "Unloaded:Core,false,false");
+    EXPECT_EQ(Core_Delegates_Modules_Message, "Unloaded:Core,false,false");
 
-    CoreDelegates::onAfterModuleLoad.ClearAll();
-    CoreDelegates::onAfterModuleUnload.ClearAll();
-    CoreDelegates::onModuleFailedToLoad.ClearAll();
+    CoreDelegates::onAfterModuleLoad.RemoveDelegateInstance(id1);
+    CoreDelegates::onAfterModuleUnload.RemoveDelegateInstance(id2);
+    CoreDelegates::onModuleFailedToLoad.RemoveDelegateInstance(id3);
 
-    Core_Delegates_Module_Events_Message = "";
+    EXPECT_TRUE(CoreDelegates::onAfterModuleLoad.GetInvocationListCount() == 0);
+    EXPECT_TRUE(CoreDelegates::onAfterModuleUnload.GetInvocationListCount() == 0);
+    EXPECT_TRUE(CoreDelegates::onModuleFailedToLoad.GetInvocationListCount() == 0);
+
+    Core_Delegates_Modules_Message = "";
 }
+
+#pragma endregion
 

@@ -5,6 +5,7 @@
 #include "Containers/String.h"
 #include "Containers/Array.h"
 #include "Containers/HashMap.h"
+#include "CoreTypes.h"
 
 #include "RTTIDefines.h"
 
