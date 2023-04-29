@@ -75,6 +75,22 @@ TEST(Containers, String)
     EXPECT_EQ(components[2], "Qt");
     EXPECT_EQ(components[3], "StyleManager");
 
+
+    str = "::::::CE::Editor";
+    components.Clear();
+    str.Split("::", components);
+
+    EXPECT_EQ(components.GetSize(), 2);
+    EXPECT_EQ(components[0], "CE");
+    EXPECT_EQ(components[1], "Editor");
+
+
+    str = "::";
+    components.Clear();
+    str.Split("::", components);
+
+    EXPECT_EQ(components.GetSize(), 0);
+
     TEST_END;
 }
 
@@ -156,6 +172,24 @@ TEST(Containers, Variant)
 
 #pragma region Reflection
 
+TEST(Reflection, TypeId)
+{
+    TEST_BEGIN;
+
+    // 1. Pointers & References
+
+    EXPECT_EQ(TYPEID(Object*), TYPEID(Object));
+    EXPECT_EQ(TYPEID(f32), TYPEID(f32*));
+
+    EXPECT_EQ(TYPEID(Object&), TYPEID(Object));
+    EXPECT_EQ(TYPEID(s32&), TYPEID(s32));
+
+    // 2. Arrays
+
+    EXPECT_EQ(TYPEID(Array<String>), TYPEID(Array<u8>));
+
+    TEST_END;
+}
 TEST(Reflection, RTTI_Registry_Testing)
 {
     // 1. Test Loading & Unloading

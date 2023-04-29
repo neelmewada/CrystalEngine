@@ -454,17 +454,23 @@ void CE::String::Split(String delimiter, Array<String>& outArray)
 
     for (int i = 0; i < StringLength; i++)
     {
+        char ch = Buffer[i];
+
         StringView view = StringView(Buffer + i);
         
-        if (view.StartsWith(delimiter))
+        bool isLast = (i == StringLength - 1);
+        if (view.StartsWith(delimiter) || isLast)
         {
+            if (isLast)
+                i++;
+
             if (startIdx != i)
             {
-                outArray.Add(GetSubstringView(startIdx, i));
+                outArray.Add(GetSubstringView(startIdx, i - startIdx));
             }
 
-            startIdx = i + delimiter.GetLength() + 1;
-            i += delimiter.GetLength();
+            startIdx = i + delimiter.GetLength();
+            i += delimiter.GetLength() - 1;
         }
     }
 }
