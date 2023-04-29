@@ -241,6 +241,7 @@ namespace CE
                 registeredTypesByModuleName.Add({ currentlyLoadingModule, {} });
 
             registeredTypesByModuleName[currentlyLoadingModule].Add(type);
+            type->registeredModuleName = currentlyLoadingModule;
         }
 
         if (type->IsStruct())

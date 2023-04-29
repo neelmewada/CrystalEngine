@@ -193,6 +193,7 @@ namespace CE
 		CE::String displayName{};
 		//CE::Array<CE::Attribute> attributes{};
 		Attribute attributes{};
+        Name registeredModuleName{};
 
 	public:
 		// For internal use only!

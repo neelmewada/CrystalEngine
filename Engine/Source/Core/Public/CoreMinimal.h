@@ -42,6 +42,9 @@
 #include "Math/Matrix.h"
 #include "Math/Color.h"
 
+// Config
+#include "Config/ConfigFile.h"
+
 // ******************************************************
 // RTTI, Object & Serialization
 

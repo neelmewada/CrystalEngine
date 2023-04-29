@@ -277,6 +277,53 @@ TEST(Reflection, Attribute_Parsing)
 #pragma endregion
 
 
+/**********************************************
+*   Config
+*/
+
+#pragma region Config
+
+TEST(Config, ReadWrite)
+{
+    TEST_BEGIN;
+    
+    auto configPath = PlatformDirectories::GetLaunchDir() / "Config" / "TestConfig.ini";
+    if (configPath.Exists())
+        IO::Path::Remove(configPath);
+    
+    IO::FileStream file(configPath, IO::OpenMode::ModeWrite);
+    if (!file.IsOpen())
+    {
+        FAIL();
+        return;
+    }
+    
+    std::stringstream stream{};
+    stream << "[CE::GeneralSettings]\n";
+    stream << "ExampleBool=false\n";
+    stream << "Bindings=(Name=\"Q\",Command=\"Foo\")\n";
+    stream << ".Bindings=(Name=\"E\",Command=\"Foo\")";
+    
+    std::string str = stream.str();
+    file.Write(str.size(), str.data());
+    file.Close();
+    
+    ConfigFile configFile{};
+    configFile.Read("TestConfig.ini");
+    
+    EXPECT_EQ(configFile.GetSize(), 1);
+    EXPECT_EQ(configFile["CE::GeneralSettings"].GetSize(), 3);
+    EXPECT_EQ(configFile["CE::GeneralSettings"]["ExampleBool"].GetStringValue(), "false");
+    EXPECT_EQ(configFile["CE::GeneralSettings"]["Bindings"].GetStringValue(), "(Name=\"Q\",Command=\"Foo\")");
+    EXPECT_EQ(configFile["CE::GeneralSettings"][".Bindings"].GetStringValue(), "(Name=\"E\",Command=\"Foo\")");
+    
+    IO::Path::Remove(configPath);
+    
+    TEST_END;
+}
+
+#pragma endregion
+
 
 /**********************************************
 *   Serialization

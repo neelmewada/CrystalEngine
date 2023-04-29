@@ -31,6 +31,8 @@ namespace CE
         
         Name(String name);
         Name(const char* name);
+        Name(const std::string& str) : Name(String(str))
+        {}
         ~Name() = default;
 
         Name(const Name& copy);
