@@ -66,6 +66,8 @@ TEST(Containers, Name)
     TEST_BEGIN;
 
     Name name = TYPENAME(Object);
+    EXPECT_EQ(name, "CE::Object");
+    EXPECT_EQ(name.GetString(), "CE::Object");
     EXPECT_EQ(name.GetLastComponent(), "Object");
 
     Array<String> components{};
@@ -85,6 +87,12 @@ TEST(Containers, Name)
     EXPECT_EQ(Name("::CE::Object").GetString(),   "CE::Object");
     EXPECT_EQ(Name("::CE::Object::").GetString(), "CE::Object");
     EXPECT_FALSE(Name("::").IsValid());
+
+    // Tricky situations
+    EXPECT_NE(Name("CE::Object:"), "CE::Object");
+    EXPECT_EQ(Name("CE::Object:"), "CE::Object:");
+    EXPECT_NE(Name(":CE::Object:"), "CE::Object");
+    EXPECT_EQ(Name(":CE::Object:"), ":CE::Object:");
 
     TEST_END;
 }

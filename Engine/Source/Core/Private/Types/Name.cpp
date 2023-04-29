@@ -44,27 +44,26 @@ namespace CE
 				i += 2;
 				continue;
 			}
-			else if (value[i] == ':')
-			{
-				i++;
-				continue;
-			}
 			else
 			{
 				int startIdx = i;
 				int len = 0;
 
-				while (value[i] != ':' && i < length)
+				while (i < length)
 				{
 					i++;
 					len++;
+
+					if (i < length - 1 && value[i] == ':' && value[i + 1] == ':')
+					{
+						i++;
+						break;
+					}
 				}
 
 				if (!hashString.IsEmpty())
 					hashString += "::";
 				hashString += String(value.GetSubstringView(startIdx, len));
-
-				i = startIdx + len;
 			}
 
 			i++;
@@ -99,25 +98,24 @@ namespace CE
 				i += 2;
 				continue;
 			}
-			else if (value[i] == ':')
-			{
-				i++;
-				continue;
-			}
 			else
 			{
 				int startIdx = i;
 				int len = 0;
 
-				while (value[i] != ':' && i < length)
+				while (i < length)
 				{
 					i++;
 					len++;
+
+					if (i < length - 1 && value[i] == ':' && value[i + 1] == ':')
+					{
+						i++;
+						break;
+					}
 				}
 
 				components.Add(value.GetSubstringView(startIdx, len));
-
-				i = startIdx + len;
 			}
 
 			i++;
