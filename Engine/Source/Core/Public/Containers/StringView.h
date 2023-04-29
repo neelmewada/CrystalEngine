@@ -17,10 +17,10 @@ namespace CE
 		StringView() : Impl()
 		{}
 
-		StringView(const char* const cString) : Impl(cString)
+		StringView(const char* cString) : Impl(cString)
 		{}
 
-		StringView(const char* const cString, const SIZE_T count) : Impl(cString, count)
+		StringView(const char* cString, const SIZE_T count) : Impl(cString, count)
 		{}
 
 		StringView(const String& string);

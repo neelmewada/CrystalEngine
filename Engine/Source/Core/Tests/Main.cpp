@@ -61,6 +61,23 @@ TEST(Performance, Module_Load_10x)
 
 #pragma region Containers
 
+TEST(Containers, String)
+{
+    TEST_BEGIN;
+
+    String str = "CE::Editor::Qt::StyleManager";
+    Array<String> components{};
+    str.Split("::", components);
+
+    EXPECT_EQ(components.GetSize(), 4);
+    EXPECT_EQ(components[0], "CE");
+    EXPECT_EQ(components[1], "Editor");
+    EXPECT_EQ(components[2], "Qt");
+    EXPECT_EQ(components[3], "StyleManager");
+
+    TEST_END;
+}
+
 TEST(Containers, Name)
 {
     TEST_BEGIN;
@@ -93,7 +110,7 @@ TEST(Containers, Name)
     EXPECT_EQ(Name("ce::object"), "CE::OBJECT");
     EXPECT_EQ(Name("::ce::object:"), "cE::objEcT:");
 
-    // Tricky situations
+    // Edge cases
     EXPECT_NE(Name("CE::Object:"), "CE::Object");
     EXPECT_EQ(Name("CE::Object:"), "CE::Object:");
     EXPECT_NE(Name(":CE::Object:"), "CE::Object");

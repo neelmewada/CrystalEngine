@@ -448,6 +448,27 @@ Array<String> String::Split(char delimiter)
     return result;
 }
 
+void CE::String::Split(String delimiter, Array<String>& outArray)
+{
+    int startIdx = 0;
+
+    for (int i = 0; i < StringLength; i++)
+    {
+        StringView view = StringView(Buffer + i);
+        
+        if (view.StartsWith(delimiter))
+        {
+            if (startIdx != i)
+            {
+                outArray.Add(GetSubstringView(startIdx, i));
+            }
+
+            startIdx = i + delimiter.GetLength() + 1;
+            i += delimiter.GetLength();
+        }
+    }
+}
+
 String CE::String::RemoveWhitespaces()
 {
     char* result = new char[GetLength() + 1];
@@ -473,23 +494,9 @@ String CE::String::RemoveWhitespaces()
 
     result[idx++] = 0;
 
-    return String(result);
-
-    /*String result{ GetLength() };
-    int index = 0;
-
-    for (int i = 0; i < GetLength(); i++)
-    {
-        if (Buffer[i] != ' ')
-        {
-            result[index++] = Buffer[i];
-        }
-    }
-
-    result[index++] = 0;
-    result.StringLength = strlen(result.Buffer);
-
-    return result;*/
+    auto str = String(result);
+    delete result;
+    return str;
 }
 
 
