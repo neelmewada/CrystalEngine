@@ -88,6 +88,11 @@ TEST(Containers, Name)
     EXPECT_EQ(Name("::CE::Object::").GetString(), "CE::Object");
     EXPECT_FALSE(Name("::").IsValid());
 
+    // Case-Insensitive tests
+    EXPECT_EQ(Name("cE::oBjeCt"), "CE::Object");
+    EXPECT_EQ(Name("ce::object"), "CE::OBJECT");
+    EXPECT_EQ(Name("::ce::object:"), "cE::objEcT:");
+
     // Tricky situations
     EXPECT_NE(Name("CE::Object:"), "CE::Object");
     EXPECT_EQ(Name("CE::Object:"), "CE::Object:");

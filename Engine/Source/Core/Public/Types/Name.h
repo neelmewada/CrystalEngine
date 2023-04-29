@@ -16,9 +16,13 @@ namespace CE
 
     template<typename ElementType>
     class Array;
-
-    /// A type used to define path to Reflected c++ types & members
-    /// Ex: ParentNamespace::ChildNamespace::SomeClass
+    
+    /*
+    * Names are Case-Insensitive identifiers that offer fast comparison using hash codes.
+    * It follows the C++ scope pattern where the scope operator '::' is used for scope.
+    * Scope operator at the front and/or back of string has no value and will be ignored.
+    * Ex: '::ParentNamespace::SomeClass' is the same as 'ParentNamespace::SomeClass'
+    */
     class CORE_API Name
     {
     public:

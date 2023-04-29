@@ -34,6 +34,7 @@ namespace CE
 		value = name.GetSubstringView(i, length);
 
 		String hashString = "";
+		String hashStringLowercase = "";
 
 		i = 0;
 		
@@ -69,8 +70,9 @@ namespace CE
 			i++;
 		}
 
+		hashStringLowercase = hashString.ToLower();
 		this->value = hashString;
-		this->hashValue = GetHash(hashString);
+		this->hashValue = GetHash(hashStringLowercase);
 	}
 
 	Name::Name(const char* name) : Name(String(name))
