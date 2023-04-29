@@ -50,21 +50,34 @@ namespace CE
 	public:
 		Attribute()
 		{
-			Clear();
+			
 		}
 
 		Attribute(String str)
 		{
-			Clear();
 			isString = true;
 			stringValue = str;
 		}
 
 		Attribute(const HashMap<Name, Attribute>& tableRef)
 		{
-			Clear();
-			isAttributeTable = true;
-			subTable = tableRef;
+			isMap = true;
+			tableValue = tableRef;
+		}
+
+		Attribute(const Attribute& copy)
+		{
+			isString = copy.isString;
+			isMap = copy.isMap;
+			
+			if (isString)
+			{
+				stringValue = copy.stringValue;
+			}
+			else if (isMap)
+			{
+				tableValue = copy.tableValue;
+			}
 		}
 
 		~Attribute()
@@ -72,54 +85,60 @@ namespace CE
 
 		}
 
+		inline Attribute operator=(const Attribute& copy)
+		{
+			return Attribute(copy);
+		}
+
 		bool IsString() const;
-		bool IsAttributeTable() const;
+		bool IsMap() const;
+
+		inline operator String() const
+		{
+			return GetStringValue();
+		}
 
 		String GetStringValue() const
 		{
-			if (!isString)
+			if (!IsString())
 				return "";
 			return stringValue;
 		}
 
-	private:
-
-		void Clear()
+		HashMap<Name, Attribute>& GetTableValue()
 		{
-			memset(this, 0, sizeof(Attribute));
+			return tableValue;
 		}
 
-		union {
-			String stringValue{};
-			HashMap<Name, Attribute> subTable;
-		};
+		const HashMap<Name, Attribute>& GetTableValue() const
+		{
+			return tableValue;
+		}
+
+		bool HasKey(const Name& key) const
+		{
+			return tableValue.KeyExists(key);
+		}
+
+		Attribute& GetKeyValue(const Name& key)
+		{
+			return tableValue[key];
+		}
+
+		static void Parse(String attributes, Attribute& outAttrib, bool cleanup = true);
+		static String CleanupAttributeString(const String& inString);
+
+	private:
+
+		String stringValue{};
+		HashMap<Name, Attribute> tableValue{};
 
 		bool isString = false;
-		bool isAttributeTable = false;
+		bool isMap = false;
 
 		friend class TypeInfo;
 		friend class StructType;
 		friend class ClassType;
-	};
-
-	struct CORE_API AttributeTable
-	{
-	public:
-		AttributeTable()
-		{}
-
-		static void Parse(String attributeString, AttributeTable& outTable);
-		static String CleanupAttributeString(const String& inString);
-
-		void Clear()
-		{
-			map.Clear();
-			array.Clear();
-		}
-
-	private:
-		HashMap<Name, Attribute> map{};
-		Array<Attribute> array{};
 	};
 
 	// **********************************************************
@@ -137,14 +156,14 @@ namespace CE
 		const CE::Name& GetName() const { return name; }
 		//const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
 
-        virtual const CE::Array<CE::Attribute>& GetAttributes();
+        virtual const Attribute& GetAttributes();
 
 		virtual String GetDisplayName();
 
 		//String GetLocalAttributeValue(const String& key) const;
         //bool HasLocalAttribute(const String& key) const;
 
-        virtual String GetAttributeValue(const String& key);
+        virtual Attribute GetAttributeValue(const String& key);
         virtual bool HasAttribute(const String& key);
         
 		virtual bool IsClass() const { return false; }
@@ -173,7 +192,7 @@ namespace CE
 		CE::Name name;
 		CE::String displayName{};
 		//CE::Array<CE::Attribute> attributes{};
-		AttributeTable attributeTable{};
+		Attribute attributes{};
 
 	public:
 		// For internal use only!

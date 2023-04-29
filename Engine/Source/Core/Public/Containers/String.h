@@ -214,6 +214,9 @@ namespace CE
         bool StartsWith(const String& string) const;
         bool StartsWith(const char* cString) const;
 
+        bool EndsWith(const String& string) const;
+        bool EndsWith(const char* cString) const;
+
         bool Contains(const String& string) const;
         bool Contains(const char* string) const;
 

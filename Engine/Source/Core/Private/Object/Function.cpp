@@ -19,20 +19,14 @@ namespace CE
 
     }
 
-    bool FunctionType::IsEventFunction() const
+    bool FunctionType::IsEventFunction()
     {
-        return GetLocalAttributes().Exists([](const Attribute& attr) -> bool
-            {
-                return attr.GetKey() == "Event";
-            });
+        return HasAttribute("Event");
     }
 
-    bool FunctionType::IsSignalFunction() const
+    bool FunctionType::IsSignalFunction()
     {
-        return GetLocalAttributes().Exists([](const Attribute& attr) -> bool
-            {
-                return attr.GetKey() == "Signal";
-            });
+        return HasAttribute("Signal");
     }
 
 } // namespace CE

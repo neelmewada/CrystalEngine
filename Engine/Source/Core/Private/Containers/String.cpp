@@ -271,6 +271,31 @@ bool String::StartsWith(const char* cString) const
     return true;
 }
 
+bool CE::String::EndsWith(const String& string) const
+{
+    int thisIdx = GetLength() - 1;
+    int otherIdx = string.GetLength() - 1;
+
+    if (GetLength() < string.GetLength())
+        return false;
+
+    while (thisIdx >= 0 && otherIdx >= 0)
+    {
+        if (Buffer[thisIdx] != string[otherIdx])
+            return false;
+
+        thisIdx--;
+        otherIdx--;
+    }
+
+    return true;
+}
+
+bool CE::String::EndsWith(const char* cString) const
+{
+    return EndsWith(String(cString));
+}
+
 bool CE::String::Contains(const String& string) const
 {
     int thisIndex = 0;

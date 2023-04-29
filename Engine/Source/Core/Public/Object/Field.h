@@ -41,8 +41,8 @@ namespace CE
         virtual bool IsAssignableTo(TypeId typeId) const override;
         virtual bool IsObject() const override { return IsAssignableTo(TYPEID(Object)); }
 
-        bool IsSerialized() const;
-        bool IsHidden() const;
+        bool IsSerialized();
+        bool IsHidden();
         
         const TypeInfo* GetDeclarationType() const;
 

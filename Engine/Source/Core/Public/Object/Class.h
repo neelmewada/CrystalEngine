@@ -81,11 +81,11 @@ namespace CE
 
 		virtual bool IsAssignableTo(TypeId typeId) const override;
 
-        const CE::Array<CE::Attribute>& GetAttributes() override;
+        const Attribute& GetAttributes() override;
 
         bool HasAttribute(const CE::String& key) override;
 
-        String GetAttributeValue(const CE::String& key) override;
+        Attribute GetAttributeValue(const CE::String& key) override;
 
 		IntPtr TryCast(IntPtr ptr, TypeId castToType) const
 		{
@@ -197,9 +197,7 @@ namespace CE
 
         virtual void CacheAllAttributes();
 
-        void MergeAttributes(const CE::Array<Attribute>& attribs);
-
-        void CacheAttributesInternal(const CE::Array<Attribute> cachedAttribs);
+        void MergeAttributes(const Attribute& attribs);
 
 		virtual void CacheAllFields();
 
@@ -292,7 +290,7 @@ namespace CE
 		CE::Array<FunctionType> cachedFunctions{};
         CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionsMap{};
 
-        CE::Array<Attribute> cachedAttributes{};
+        Attribute cachedAttributes{};
 
 		CE::Array<FieldType> localFields{};
 		CE::Array<TypeId> superTypeIds{};

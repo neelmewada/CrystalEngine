@@ -36,8 +36,8 @@ namespace CE
 
 		CE_INLINE const TypeInfo* GetOwner() const { return owner; }
 
-		bool IsEventFunction() const;
-        bool IsSignalFunction() const;
+		bool IsEventFunction();
+        bool IsSignalFunction();
 
 		virtual TypeId GetTypeId() const override
 		{

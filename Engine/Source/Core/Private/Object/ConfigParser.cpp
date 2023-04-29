@@ -30,16 +30,13 @@ namespace CE
 
         while (field != nullptr)
         {
-            const auto& attribs = field->GetLocalAttributes();
+            const auto& attribs = field->GetAttributes();
 
             String category = "General";
 
-            for (int i = 0; i < attribs.GetSize(); i++)
+            if (field->HasAttribute("Category"))
             {
-                if (attribs[i].GetKey() == "Category" || attribs[i].GetKey() == "category")
-                {
-                    category = attribs[i].GetValue();
-                }
+                category = field->GetAttributeValue("Category").GetStringValue();
             }
 
             auto fieldType = field->GetDeclarationType();

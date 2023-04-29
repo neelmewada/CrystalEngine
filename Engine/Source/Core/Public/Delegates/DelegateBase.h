@@ -68,6 +68,27 @@ namespace CE
                 return impl != nullptr;
             }
 
+            TRetType Invoke(TArgs... args) const
+            {
+                return impl(args...);
+            }
+
+            TRetType InvokeIfValid(TArgs... args) const
+            {
+                if (!IsValid())
+                {
+                    if constexpr (std::is_same_v<TRetType, void>)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        return {};
+                    }
+                }
+                return impl(args...);
+            }
+
         protected:
 
             template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>

@@ -25,8 +25,11 @@ namespace CE
     Name TypeInfo::currentlyLoadingModule{};
     HashMap<Name, Array<TypeInfo*>> TypeInfo::registeredTypesByModuleName{};
 
-    String AttributeTable::CleanupAttributeString(const String& inString)
+    String Attribute::CleanupAttributeString(const String& inString)
     {
+        if (inString.GetLength() == 0)
+            return "";
+
         char* result = new char[inString.GetLength() + 1];
         result[inString.GetLength()] = 0;
         bool isString = false;
@@ -79,17 +82,21 @@ namespace CE
         return isString;
     }
 
-    bool Attribute::IsAttributeTable() const
+    bool Attribute::IsMap() const
     {
-        return isAttributeTable;
+        return isMap;
     }
 
-    void AttributeTable::Parse(String attributes, AttributeTable& outTable)
+    void Attribute::Parse(String attributes, Attribute& outAttrib, bool cleanup)
     {
-        outTable.Clear();
+        outAttrib = Attribute();
+        outAttrib.isMap = true;
+        outAttrib.tableValue = {};
+
         int curScope = 0;
         bool isString = false;
-        attributes = CleanupAttributeString(attributes);
+        if (cleanup)
+            attributes = CleanupAttributeString(attributes);
 
         int startIdx = 0;
 
@@ -103,7 +110,8 @@ namespace CE
             else if (attributes[i] == ')' || attributes[i] == ']' || attributes[i] == '}')
             {
                 curScope--;
-                continue;
+                if (i < attributes.GetLength() - 1)
+                    continue;
             }
 
             bool isLast = i == attributes.GetLength() - 1;
@@ -139,7 +147,16 @@ namespace CE
                     }
                 }
 
-                outTable.map.Add({ attribKey, Attribute(attribValue) });
+                if (attribValue.StartsWith("(") && attribValue.EndsWith(")"))
+                {
+                    Attribute subAttrib;
+                    Parse(attribValue.GetSubstringView(1, attribValue.GetLength() - 2), subAttrib, false);
+                    outAttrib.tableValue.Add({ attribKey, subAttrib });
+                }
+                else
+                {
+                    outAttrib.tableValue.Add({ attribKey, Attribute(attribValue) });
+                }
 
                 startIdx = i + 1;
             }
@@ -151,64 +168,8 @@ namespace CE
     {
         int curScope = 0;
         bool isString = false;
-        String attribs = AttributeTable::CleanupAttributeString(attributes);
-        //this->attributes.Clear();
 
-        AttributeTable::Parse(attribs, attributeTable);
-        
-        /*int startIdx = 0;
-
-        for (int i = 0; i < attribs.GetLength(); i++)
-        {
-            if (attribs[i] == '(' || attribs[i] == '[' || attribs[i] == '{')
-            {
-                curScope++;
-                continue;
-            }
-            else if (attribs[i] == ')' || attribs[i] == ']' || attribs[i] == '}')
-            {
-                curScope--;
-                continue;
-            }
-
-            bool isLast = i == attribs.GetLength() - 1;
-
-            if ((attribs[i] == ',' && curScope <= 0) || isLast)
-            {
-                auto attribString = attribs.GetSubstringView(startIdx, i - startIdx + (isLast ? 1 : 0));
-                
-                String attribKey = "";
-                String attribValue = "";
-                bool keyFinished = false;
-                int innerScope = 0;
-
-                for (int j = 0; j < attribString.GetSize(); j++)
-                {
-                    if (attribString[j] == '"')
-                    {
-                        continue;
-                    }
-                    if (!keyFinished && attribString[j] == '=')
-                    {
-                        keyFinished = true;
-                        continue;
-                    }
-
-                    if (!keyFinished)
-                    {
-                        attribKey.Append(attribString[j]);
-                    }
-                    else
-                    {
-                        attribValue.Append(attribString[j]);
-                    }
-                }
-
-                this->attributes.Add(Attribute(attribKey, attribValue));
-
-                startIdx = i + 1;
-            }
-        }*/
+        Attribute::Parse(attributes, this->attributes);
     }
 
     String TypeInfo::GetDisplayName()
@@ -240,19 +201,19 @@ namespace CE
         return displayName;
     }
 
-    const CE::Array<CE::Attribute>& TypeInfo::GetAttributes()
+    const Attribute& TypeInfo::GetAttributes()
     {
-        return GetLocalAttributes();
+        return attributes;
     }
 
-    String TypeInfo::GetAttributeValue(const String& key)
+    Attribute TypeInfo::GetAttributeValue(const String& key)
     {
-        return GetLocalAttributeValue(key);
+        return attributes.HasKey(key) ? attributes.GetKeyValue(key) : Attribute();
     }
 
     bool TypeInfo::HasAttribute(const String& key)
     {
-        return HasLocalAttribute(key);
+        return attributes.HasKey(key);
     }
 
     bool TypeInfo::IsComponent() const

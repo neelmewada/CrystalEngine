@@ -172,7 +172,7 @@ public:
 CE_RTTI_CLASS(, , Core_Reflection_Attribute_Test_Class,
     CE_SUPER(CE::Object),
     CE_NOT_ABSTRACT,
-    CE_ATTRIBS(Display = "My Class Display Name", meta = (Id = 4124, FormerName = "Old_Class_Name"), CustomArray = [12, 42, 335]),
+    CE_ATTRIBS(Display = "My Class Display Name", meta = (Id = 4124, Tooltip = "A tooltip description"), Redirects = (SomeOldName, "Old Name")),
     CE_FIELD_LIST(),
     CE_FUNCTION_LIST()
 )
@@ -187,7 +187,22 @@ TEST(Reflection, Attribute_Parsing)
     EXPECT_NE(GetTypeInfo(TYPEID(Core_Reflection_Attribute_Test_Class)), nullptr);
 
     auto classType = GetStaticClass<Core_Reflection_Attribute_Test_Class>();
+    auto attrib = classType->GetAttributes();
+    EXPECT_TRUE(attrib.HasKey("Display"));
+    EXPECT_TRUE(classType->GetAttributeValue("Display").IsString());
+    EXPECT_EQ(classType->GetAttributeValue("Display").GetStringValue(), "My Class Display Name");
 
+    EXPECT_TRUE(classType->HasAttribute("meta"));
+    EXPECT_TRUE(classType->GetAttributeValue("meta").IsMap());
+    EXPECT_EQ(classType->GetAttributeValue("meta").GetKeyValue("Id").GetStringValue(), "4124");
+    EXPECT_EQ(classType->GetAttributeValue("meta").GetKeyValue("Tooltip").GetStringValue(), "A tooltip description");
+
+    EXPECT_TRUE(classType->HasAttribute("Redirects"));
+    EXPECT_TRUE(classType->GetAttributeValue("Redirects").IsMap());
+    EXPECT_TRUE(classType->GetAttributeValue("Redirects").HasKey("SomeOldName"));
+    EXPECT_EQ(classType->GetAttributeValue("Redirects").GetKeyValue("SomeOldName").GetStringValue(), "");
+    EXPECT_TRUE(classType->GetAttributeValue("Redirects").HasKey("Old Name"));
+    EXPECT_EQ(classType->GetAttributeValue("Redirects").GetKeyValue("Old Name").GetStringValue(), "");
 
     CE_DEREGISTER_TYPES(Core_Reflection_Attribute_Test_Class);
     EXPECT_EQ(GetTypeInfo(TYPEID(Core_Reflection_Attribute_Test_Class)), nullptr);
@@ -338,16 +353,26 @@ void Core_Delegates_OnModuleFailedToLoad(const String& moduleName, ModuleLoadRes
     Core_Delegates_Modules_Message = String::Format("Failed:{},{}", moduleName, (int)result);
 }
 
+int Core_Delegates_OnClassRegistered_Count = 0;
+
+void Core_Delegates_OnClassRegistered(ClassType* classType)
+{
+    Core_Delegates_OnClassRegistered_Count++;
+}
+
 TEST(Delegates, ModuleCallbacks)
 {
     Core_Delegates_Modules_Message = "";
+    Core_Delegates_OnClassRegistered_Count = 0;
 
     auto id1 = CoreDelegates::onAfterModuleLoad.AddDelegateInstance(&Core_Delegates_OnModuleLoaded);
     auto id2 = CoreDelegates::onAfterModuleUnload.AddDelegateInstance(&Core_Delegates_OnModuleUnloaded);
     auto id3 = CoreDelegates::onModuleFailedToLoad.AddDelegateInstance(&Core_Delegates_OnModuleFailedToLoad);
+    auto id4 = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&Core_Delegates_OnClassRegistered);
 
     ModuleManager::Get().LoadModule("Core");
     EXPECT_EQ(Core_Delegates_Modules_Message, "Loaded:Core,false,true");
+    EXPECT_GT(Core_Delegates_OnClassRegistered_Count, 0); // > 0
 
     ModuleManager::Get().LoadModule("Core");
     EXPECT_EQ(Core_Delegates_Modules_Message, String::Format("Failed:Core,{}", (int)ModuleLoadResult::AlreadyLoaded));
@@ -361,12 +386,14 @@ TEST(Delegates, ModuleCallbacks)
     CoreDelegates::onAfterModuleLoad.RemoveDelegateInstance(id1);
     CoreDelegates::onAfterModuleUnload.RemoveDelegateInstance(id2);
     CoreDelegates::onModuleFailedToLoad.RemoveDelegateInstance(id3);
+    CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(id4);
 
     EXPECT_TRUE(CoreDelegates::onAfterModuleLoad.GetInvocationListCount() == 0);
     EXPECT_TRUE(CoreDelegates::onAfterModuleUnload.GetInvocationListCount() == 0);
     EXPECT_TRUE(CoreDelegates::onModuleFailedToLoad.GetInvocationListCount() == 0);
 
     Core_Delegates_Modules_Message = "";
+    Core_Delegates_OnClassRegistered_Count = 0;
 }
 
 #pragma endregion

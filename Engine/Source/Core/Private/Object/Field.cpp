@@ -5,7 +5,7 @@ namespace CE
 {
     String FieldType::GetDisplayName()
     {
-        String displayAttrib = GetLocalAttributeValue("Display");
+        String displayAttrib = GetAttributeValue("Display").GetStringValue();
 
         if (!displayAttrib.IsEmpty())
             return displayAttrib;
@@ -26,22 +26,14 @@ namespace CE
         return false;
     }
 
-    bool FieldType::IsSerialized() const
+    bool FieldType::IsSerialized()
     {
-        return !attributes.Exists([](const CE::Attribute& attr) -> bool
-            {
-                return attr.GetKey() == "NonSerialized";
-            }
-        );
+        return !HasAttribute("NonSerialized");
     }
 
-    bool FieldType::IsHidden() const
+    bool FieldType::IsHidden()
     {
-        return attributes.Exists([](const CE::Attribute& attr) -> bool
-            {
-                return attr.GetKey() == "Hidden";
-            }
-        );
+        return HasAttribute("Hidden");
     }
 
     const TypeInfo* FieldType::GetDeclarationType() const

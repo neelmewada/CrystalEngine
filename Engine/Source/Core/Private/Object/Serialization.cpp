@@ -618,7 +618,10 @@ namespace CE
 
                 if (!root[fieldName.GetCString()].IsDefined())
                 {
-                    String formerKey = field->GetAttributeValue("FormerlySerializedAs");
+                    String formerKey = "";
+                    if (field->HasAttribute("FormerlySerializedAs"))
+                        formerKey = field->GetAttributeValue("FormerlySerializedAs").GetStringValue();
+
                     if (formerKey.IsEmpty() || !root[formerKey.GetCString()].IsDefined())
                     {
                         field = field->GetNext();

@@ -35,6 +35,11 @@ namespace CE
 
         }
 
+        ~HashMap()
+        {
+
+        }
+
         inline SIZE_T GetSize() const
         {
             return Impl.size();
@@ -51,6 +56,11 @@ namespace CE
         }
 
         inline ValueType& operator[](const KeyType& key)
+        {
+            return Impl[key];
+        }
+
+        inline const ValueType& operator[](const KeyType& key) const
         {
             return Impl[key];
         }
@@ -78,6 +88,9 @@ namespace CE
 
         inline auto begin() { return Impl.begin(); }
         inline auto end() { return Impl.end(); }
+
+        inline const auto begin() const { return Impl.begin(); }
+        inline const auto end() const { return Impl.end(); }
 
         inline auto Begin() { return begin(); }
         inline auto End() { return end(); }

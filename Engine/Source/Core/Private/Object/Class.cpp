@@ -39,7 +39,7 @@ namespace CE
         return false;
     }
 
-    const CE::Array<CE::Attribute>& StructType::GetAttributes()
+    const Attribute& StructType::GetAttributes()
     {
         if (!attributesCached)
         {
@@ -56,29 +56,20 @@ namespace CE
             CacheAllAttributes();
         }
 
-        for (int i = 0; i < cachedAttributes.GetSize(); i++)
-        {
-            if (cachedAttributes[i].GetKey() == key)
-                return true;
-        }
-
-        return false;
+        return cachedAttributes.IsMap() && cachedAttributes.HasKey(Name(key));
     }
 
-    String StructType::GetAttributeValue(const CE::String& key)
+    Attribute StructType::GetAttributeValue(const CE::String& key)
     {
         if (!attributesCached)
         {
             CacheAllAttributes();
         }
 
-        for (int i = 0; i < cachedAttributes.GetSize(); i++)
-        {
-            if (cachedAttributes[i].GetKey() == key)
-                return cachedAttributes[i].GetValue();
-        }
+        if (HasAttribute(key))
+            return cachedAttributes.GetKeyValue(Name(key));
 
-        return "";
+        return {};
     }
 
     FieldType* StructType::GetFirstField()
@@ -143,7 +134,8 @@ namespace CE
             return;
 
         attributesCached = true;
-        cachedAttributes.Clear();
+        cachedAttributes.isMap = true;
+        cachedAttributes.tableValue = {};
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
@@ -169,22 +161,22 @@ namespace CE
         MergeAttributes(attributes);
     }
 
-    void StructType::MergeAttributes(const CE::Array<Attribute>& attribs)
+    void StructType::MergeAttributes(const Attribute& attribs)
     {
-        for (int i = 0; i < attribs.GetSize(); i++)
+        if (!attribs.IsMap())
+            return;
+
+        auto& table = attribs.GetTableValue();
+
+        for (const auto& [name, attr] : table)
         {
-            const auto& attribToAdd = attribs[i];
-            auto index = cachedAttributes.IndexOf([attribToAdd](const Attribute& a) -> bool
-                    {
-                        return a.GetKey() == attribToAdd.GetKey();
-                    });
-            if (index >= 0)
+            if (cachedAttributes.HasKey(name))
             {
-                cachedAttributes[index].value = attribToAdd.value;
+                cachedAttributes.GetTableValue()[name] = attr;
             }
             else
             {
-                cachedAttributes.Add(attribToAdd);
+                cachedAttributes.GetTableValue().Add({ name, attr });
             }
         }
     }
