@@ -61,9 +61,11 @@ namespace CE
     void Object::ConstructInternal(ObjectInitializer* initializer)
     {
         CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
-
+        
+        this->creationThreadId = Thread::GetCurrentThreadId();
         this->objectFlags = initializer->GetObjectFlags();
-        this->uuid = initializer->uuid;
+        if (initializer->uuid != 0)
+            this->uuid = initializer->uuid;
         this->name = initializer->name;
     }
 

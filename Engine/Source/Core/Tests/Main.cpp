@@ -456,11 +456,48 @@ TEST(Object, Lifecycle)
     CE_REGISTER_TYPES(ObjectLifecycleTestClass);
 
     ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
+    
+    // 1. Basic object creation
 
-    auto instance = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient | OF_TemplateInstance);
-    EXPECT_EQ(instance->GetFlags(), OF_Transient | OF_TemplateInstance);
+    auto instance = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient);
+    EXPECT_EQ(instance->GetFlags(), OF_Transient);
+    EXPECT_EQ(instance->GetName(), "MyObject");
 
     delete instance;
+    instance = nullptr;
+    
+    ObjectLifecycleTestClass* i1 = nullptr, *i2 = nullptr;
+    
+    // 2. Objects in different threads
+    
+    Thread t1 = Thread([&]
+    {
+        i1 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj1", OF_Transient);
+    });
+    
+    Thread t2 = Thread([&]
+    {
+        i2 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj2", OF_Transient);
+    });
+    
+    auto t1Id = t1.GetId();
+    auto t2Id = t2.GetId();
+    
+    if (t1.IsJoinable())
+        t1.Join();
+    if (t2.IsJoinable())
+        t2.Join();
+    
+    EXPECT_EQ(i1->GetFlags(), OF_Transient);
+    EXPECT_EQ(i1->GetName(), "Obj1");
+    EXPECT_EQ(i1->GetCreationThreadId(), t1.GetId());
+    EXPECT_EQ(i2->GetFlags(), OF_Transient);
+    EXPECT_EQ(i2->GetName(), "Obj2");
+    EXPECT_EQ(i2->GetCreationThreadId(), t2.GetId());
+    
+    delete i1; delete i2;
+    i1 = nullptr;
+    i2 = nullptr;
 
     ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
 

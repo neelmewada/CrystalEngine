@@ -193,7 +193,17 @@ namespace CE
         static void DeregisterStructType(StructType* type);
 
         static StructType* FindStructByName(Name structName);
-        static StructType* FindStructByTypeId(TypeId structTypeId);
+        static StructType* FindStructById(TypeId structTypeId);
+        
+        inline static StructType* FindStruct(Name className)
+        {
+            return FindStructByName(className);
+        }
+
+        inline static StructType* FindStruct(TypeId classId)
+        {
+            return FindStructById(classId);
+        }
 
 	protected:
 

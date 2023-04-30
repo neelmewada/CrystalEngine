@@ -78,6 +78,11 @@ namespace CE
         {
             return GetType()->GetTypeId();
         }
+        
+        INLINE ThreadId GetCreationThreadId() const
+        {
+            return creationThreadId;
+        }
 
         ObjectFlags GetFlags() const
         {
@@ -133,7 +138,9 @@ namespace CE
         void LoadConfig(ClassType* configClass = NULL, String fileName = "");
 
     private:
+        
         friend class EventBus;
+        friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);
 
         CE::String name;
         CE::UUID uuid;
@@ -151,6 +158,8 @@ namespace CE
 		ObjectStore attachedObjects{};
         
         Object* outer = nullptr;
+        
+        ThreadId creationThreadId{};
     };
     
 } // namespace CE

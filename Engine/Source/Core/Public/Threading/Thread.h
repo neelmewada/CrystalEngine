@@ -11,10 +11,14 @@ namespace CE
     {
     public:
         Thread() : thread({})
-        {}
+        {
+            threadId = thread.get_id();
+        }
 
         Thread(auto func) : thread(func)
-        {}
+        {
+            threadId = thread.get_id();
+        }
 
         inline static ThreadId GetCurrentThreadId()
         {
@@ -28,7 +32,7 @@ namespace CE
 
         ThreadId GetId() const
         {
-            return thread.get_id();
+            return threadId;
         }
 
         bool IsJoinable() const
@@ -47,6 +51,7 @@ namespace CE
         }
         
     private:
+        ThreadId threadId{};
         std::thread thread{};
     };
     

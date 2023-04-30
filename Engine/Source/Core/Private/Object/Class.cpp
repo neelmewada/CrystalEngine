@@ -330,7 +330,7 @@ namespace CE
         return registeredStructsByName[structName];
     }
 
-    StructType* StructType::FindStructByTypeId(TypeId structTypeId)
+    StructType* StructType::FindStructById(TypeId structTypeId)
     {
         if (structTypeId == 0 || !registeredStructs.KeyExists(structTypeId))
             return nullptr;

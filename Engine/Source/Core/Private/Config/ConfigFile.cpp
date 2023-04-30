@@ -30,6 +30,11 @@ namespace CE
         if (!configPath.Exists())
             return;
         
+        ReadInternal(configPath);
+    }
+
+    void ConfigFile::ReadInternal(const IO::Path& configPath)
+    {
         IO::FileStream inFile = IO::FileStream(configPath.GetString(), IO::OpenMode::ModeRead);
         if (!inFile.IsOpen())
             return;
@@ -53,10 +58,11 @@ namespace CE
                     startIdx = i + 1;
                     continue;
                 }
-
+                
                 if (view.StartsWith("[")) // [Section]
                 {
                     currentSection = String(view.GetSubstringView(1, view.GetLength() - 2));
+                    
                     if (!this->KeyExists(currentSection))
                         this->Add({ currentSection, {} });
                 }

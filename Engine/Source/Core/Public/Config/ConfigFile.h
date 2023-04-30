@@ -103,15 +103,17 @@ namespace CE
     public:
         ConfigFile();
         virtual ~ConfigFile();
-        
-        void Read(const String& fileName);
 
         bool SectionExists(const Name& sectionName)
         {
             return this->KeyExists(sectionName);
         }
         
+        void Read(const String& fileName);
+        
     private:
+        
+        void ReadInternal(const IO::Path& configPath);
         
     };
     
