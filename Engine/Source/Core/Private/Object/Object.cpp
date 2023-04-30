@@ -37,6 +37,11 @@ namespace CE
             incomingSignalObject->UnbindAll(this);
         }
         
+        if (outer != nullptr)
+        {
+            outer->DetachSubobject(this);
+        }
+        
         // Delete all attached subobjects
         for (auto [_, subobject] : attachedObjects)
         {
@@ -64,11 +69,17 @@ namespace CE
 
     void Object::AttachSubobject(Object* subobject)
     {
+        if (subobject == nullptr)
+            return;
         attachedObjects.AddObject(subobject);
+        subobject->outer = this;
     }
 
     void Object::DetachSubobject(Object* subobject)
     {
+        if (subobject == nullptr)
+            return;
+        subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);
     }
 

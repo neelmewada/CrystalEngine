@@ -149,6 +149,8 @@ namespace CE
 
         // Object Lifecycle
 		ObjectStore attachedObjects{};
+        
+        Object* outer = nullptr;
     };
     
 } // namespace CE
