@@ -59,18 +59,8 @@ namespace CE
         {
             return Impl[key];
         }
-
-        inline const ValueType& operator[](const KeyType& key) const
-        {
-            return Impl[key];
-        }
         
         inline ValueType& Get(const KeyType& key)
-        {
-            return Impl[key];
-        }
-        
-        inline const ValueType& Get(const KeyType& key) const
         {
             return Impl[key];
         }

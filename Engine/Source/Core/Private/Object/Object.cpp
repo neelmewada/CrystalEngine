@@ -184,6 +184,13 @@ namespace CE
             }
         }
     }
+
+    void Object::LoadConfig(ClassType* configClass/*=NULL*/, String fileName/*=""*/)
+    {
+        if (configClass == NULL)
+            configClass = GetClass();
+
+    }
 }
 
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Object)

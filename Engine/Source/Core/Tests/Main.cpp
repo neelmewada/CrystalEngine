@@ -179,9 +179,14 @@ TEST(Reflection, TypeId)
     // 1. Pointers & References
 
     EXPECT_EQ(TYPEID(Object*), TYPEID(Object));
+    EXPECT_EQ(TYPEID(const Object*), TYPEID(Object));
+    EXPECT_EQ(TYPEID(const Object*), TYPEID(const Object));
+    EXPECT_EQ(TYPEID(const Object const*), TYPEID(Object));
+
     EXPECT_EQ(TYPEID(f32), TYPEID(f32*));
 
     EXPECT_EQ(TYPEID(Object&), TYPEID(Object));
+    EXPECT_EQ(TYPEID(const Object&), TYPEID(Object));
     EXPECT_EQ(TYPEID(s32&), TYPEID(s32));
 
     // 2. Arrays
@@ -196,10 +201,15 @@ TEST(Reflection, RTTI_Registry_Testing)
 
     auto registeredCount = TypeInfo::GetRegisteredCount();
     EXPECT_EQ(registeredCount, 0); // == 0
+    EXPECT_EQ(ClassType::GetTotalRegisteredClasses(), 0); // == 0
+    EXPECT_EQ(ClassType::FindClass(TYPEID(Object)), nullptr);
+
+    auto staticObjectClass = GetStaticType<Object>();
 
     ModuleManager::Get().LoadModule("Core");
     registeredCount = TypeInfo::GetRegisteredCount();
     EXPECT_GT(registeredCount, 0); // > 0
+    EXPECT_NE(ClassType::FindClass(TYPEID(Object)), nullptr);
 
     ModuleManager::Get().UnloadModule("Core");
     EXPECT_EQ(TypeInfo::GetRegisteredCount(), 0); // == 0
@@ -211,6 +221,8 @@ TEST(Reflection, RTTI_Registry_Testing)
 
     auto objectClass = ClassType::FindClass(TYPENAME(Object));
     EXPECT_NE(objectClass, nullptr);
+    EXPECT_EQ(objectClass, GetStaticType<Object>());
+
     if (objectClass != nullptr)
     {
         EXPECT_EQ(objectClass->GetName(), TYPENAME(Object)); // equal
@@ -220,11 +232,12 @@ TEST(Reflection, RTTI_Registry_Testing)
         EXPECT_GT(derivedCount.GetSize(), 0); // > 0
     }
 
+    DeregisterTypes<Object>();
+    EXPECT_NE(ClassType::FindClass(TYPEID(Object)), nullptr); // You cannot deregister automatically registered objects on your own
+
     ModuleManager::Get().UnloadModule("Core");
     EXPECT_EQ(TypeInfo::GetRegisteredCount(), 0);
 }
-
-
 
 class Core_Reflection_Attribute_Test_Class : public CE::Object
 {
@@ -283,11 +296,12 @@ TEST(Reflection, Attribute_Parsing)
 
 #pragma region Config
 
-TEST(Config, ReadWrite)
+TEST(Config, FileParsing)
 {
     TEST_BEGIN;
     
-    auto configPath = PlatformDirectories::GetLaunchDir() / "Config" / "TestConfig.ini";
+    String fileName = "CoreTestConfig.ini";
+    auto configPath = PlatformDirectories::GetLaunchDir() / "Config" / fileName;
     if (configPath.Exists())
         IO::Path::Remove(configPath);
     
@@ -302,23 +316,55 @@ TEST(Config, ReadWrite)
     stream << "[CE::GeneralSettings]\n";
     stream << "ExampleBool=false\n";
     stream << "Bindings=(Name=\"Q\",Command=\"Foo\")\n";
-    stream << ".Bindings=(Name=\"E\",Command=\"Foo\")";
+    stream << "+Bindings=(Name=\"E\",Command=\"Too\")\n";
+    stream << "!Bindings=Clear\n";
+    stream << "+Bindings=(Name=\"A\",Command=\"Foo\")\n";
+    stream << "+Bindings=(Name=\"B\",Command=\"Too\")\n";
+    stream << "-Bindings=(Name=\"A\",Command=\"Foo\")\n";
     
     std::string str = stream.str();
     file.Write(str.size(), str.data());
     file.Close();
     
     ConfigFile configFile{};
-    configFile.Read("TestConfig.ini");
+    configFile.Read(fileName);
     
     EXPECT_EQ(configFile.GetSize(), 1);
-    EXPECT_EQ(configFile["CE::GeneralSettings"].GetSize(), 3);
+    EXPECT_EQ(configFile["CE::GeneralSettings"].GetSize(), 2);
     EXPECT_EQ(configFile["CE::GeneralSettings"]["ExampleBool"].GetStringValue(), "false");
-    EXPECT_EQ(configFile["CE::GeneralSettings"]["Bindings"].GetStringValue(), "(Name=\"Q\",Command=\"Foo\")");
-    EXPECT_EQ(configFile["CE::GeneralSettings"][".Bindings"].GetStringValue(), "(Name=\"E\",Command=\"Foo\")");
+    auto& bindingsArray = configFile["CE::GeneralSettings"]["Bindings"].GetArray();
+    EXPECT_EQ(bindingsArray.GetSize(), 1);
+    EXPECT_EQ(bindingsArray[0], "(Name=\"B\",Command=\"Too\")");
     
     IO::Path::Remove(configPath);
     
+    TEST_END;
+}
+
+#pragma endregion
+
+
+/**********************************************
+*   Object
+*/
+
+#pragma region Object
+
+class ObjectConfigTestClass : public Object
+{
+    CE_CLASS(ObjectConfigTestClass, Object)
+public:
+
+};
+
+
+
+TEST(Object, Config)
+{
+    TEST_BEGIN;
+
+
+
     TEST_END;
 }
 

@@ -397,7 +397,8 @@ namespace CE
 
             if (!derivedClassesMap.KeyExists(parentTypeId))
                 derivedClassesMap.Add({ parentTypeId, {} });
-            derivedClassesMap[parentTypeId].Add(derivedClass->GetTypeId());
+            if (!derivedClassesMap[parentTypeId].Exists(derivedClass->GetTypeId()))
+                derivedClassesMap[parentTypeId].Add(derivedClass->GetTypeId());
 
             AddDerivedClassToMap(derivedClass, (ClassType*)parentType);
         }

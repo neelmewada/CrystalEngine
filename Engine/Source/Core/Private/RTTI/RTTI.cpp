@@ -23,6 +23,8 @@ namespace CE
     HashMap<TypeId, TypeInfo*> TypeInfo::registeredTypeById{};
 
     Name TypeInfo::currentlyLoadingModule{};
+    Name TypeInfo::currentlyUnloadingModule{};
+
     HashMap<Name, Array<TypeInfo*>> TypeInfo::registeredTypesByModuleName{};
 
     String Attribute::CleanupAttributeString(const String& inString)
@@ -227,6 +229,11 @@ namespace CE
         return String::Format("{0}_{1:x}", typeName, uuid);
     }
 
+    Name TypeInfo::GetOwnerModuleName() const
+    {
+        return registeredModuleName;
+    }
+
     void TypeInfo::RegisterType(TypeInfo* type)
     {
         if (type == nullptr || registeredTypeById.KeyExists(type->GetTypeId()))
@@ -266,8 +273,36 @@ namespace CE
         if (type == nullptr)
             return;
 
+        if ((!currentlyUnloadingModule.IsValid() && type->registeredModuleName.IsValid()) ||
+            (currentlyUnloadingModule.IsValid() && currentlyUnloadingModule == type->registeredModuleName))
+        {
+            return;
+        }
+
         registeredTypesByName.Remove(type->name);
         registeredTypeById.Remove(type->GetTypeId());
+
+        if (type->registeredModuleName.IsValid() &&
+            registeredTypesByModuleName.KeyExists(type->registeredModuleName))
+        {
+            registeredTypesByModuleName[type->registeredModuleName].Remove(type);
+        }
+
+        if (type->IsStruct())
+        {
+            auto structType = (StructType*)type;
+            StructType::DeregisterStructType(structType);
+        }
+        else if (type->IsClass())
+        {
+            auto classType = (ClassType*)type;
+            ClassType::DeregisterClassType(classType);
+        }
+        else if (type->IsEnum())
+        {
+            auto enumType = (EnumType*)type;
+            EnumType::DeregisterEnumType(enumType);
+        }
     }
 
     void TypeInfo::DeregisterTypesForModule(ModuleInfo* moduleInfo)
@@ -330,4 +365,25 @@ namespace CE
 // POD Types
 
 
+CE_RTTI_POD_IMPL(CE, b8)
+
+CE_RTTI_POD_IMPL(CE, s8)
+CE_RTTI_POD_IMPL(CE, s16)
+CE_RTTI_POD_IMPL(CE, s32)
+CE_RTTI_POD_IMPL(CE, s64)
+
+CE_RTTI_POD_IMPL(CE, u8)
+CE_RTTI_POD_IMPL(CE, u16)
+CE_RTTI_POD_IMPL(CE, u32)
+CE_RTTI_POD_IMPL(CE, u64)
+CE_RTTI_POD_IMPL(CE, UUID)
+
+CE_RTTI_POD_IMPL(CE, f32)
+CE_RTTI_POD_IMPL(CE, f64)
+
+CE_RTTI_POD_IMPL(CE, String)
+CE_RTTI_POD_IMPL(CE, Name)
+CE_RTTI_POD_IMPL(CE::IO, Path)
+
+CE_RTTI_POD_IMPL(CE, Array<CE::u8>)
 

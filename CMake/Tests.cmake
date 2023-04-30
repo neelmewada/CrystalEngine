@@ -17,6 +17,11 @@ target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
 
 function(ce_add_test NAME)
+    if(NOT ${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
+        return()
+    endif()
+    
+
     set(options AUTORTTI)
     set(oneValueArgs TARGET FOLDER)
     set(multiValueArgs SOURCES)

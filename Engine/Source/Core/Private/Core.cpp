@@ -58,14 +58,11 @@ namespace CE
         );
         
         regCount = TypeInfo::GetRegisteredCount();
-        auto objectClass = GetStaticClass<Object>();
-        auto packageClass = GetStaticClass<Package>();
-        auto enumType = EnumType::FindEnumByName("CE::EventResult");
-        auto enumName = TYPENAME(EventResult);
-        if (objectClass != nullptr)
+        auto objectClassStatic = GetStaticClass<Object>();
+        auto objectClass = ClassType::FindClass(TYPEID(Object));
+        if (objectClass != objectClassStatic)
         {
-            auto derivedClasses = objectClass->GetDerivedClasses();
-            derivedClasses.GetSize();
+            CE_LOG(Error, All, "Object classes unequal!");
         }
     }
 

@@ -7,18 +7,57 @@
 
 #define TYPENAME(type) CE::GetTypeName<type>()
 
-#define CE_RTTI_POD(Namespace, Type, ...)\
+#define CE_RTTI_POD(API, Namespace, Type, ...)\
+namespace CE::Internal\
+{\
+	template<>\
+	struct TypeInfoImpl<Namespace::Type> : public CE::TypeInfo\
+	{\
+	private:\
+		TypeInfoImpl<Namespace::Type>() : TypeInfo(#Namespace "::" #Type)\
+		{}\
+	public:\
+		API static CE::TypeInfo* StaticType();\
+		virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::Type); }\
+		virtual bool IsPOD() const { return true; }\
+		virtual bool IsAssignableTo(TypeId typeId) const override\
+		{\
+			std::initializer_list<TypeId> types = { __VA_ARGS__ };\
+			for (auto assignableType : types)\
+			{\
+				if (typeId == assignableType)\
+				{\
+					return true;\
+				}\
+			}\
+			return typeId == this->GetTypeId();\
+		}\
+		virtual CE::u32 GetSize() const override\
+		{\
+			return (CE::u32)sizeof(Namespace::Type);\
+		}\
+	};\
+}
+
+#define CE_RTTI_POD_IMPL(Namespace, Type)\
+CE::TypeInfo* CE::Internal::TypeInfoImpl<Namespace::Type>::StaticType()\
+{\
+	static CE::Internal::TypeInfoImpl<Namespace::Type> instance{};\
+	return &instance;\
+}
+
+#define __CE_RTTI_POD(API, Namespace, Type, ...)\
 namespace Namespace::Internal\
 {\
-	class CE_##Type##_TypeInfo : public CE::TypeInfo\
+	class API CE_##Type##_TypeInfo : public CE::TypeInfo\
 	{\
 	private:\
 		friend TypeInfo* CE::GetStaticType<Namespace::Type>();\
 		CE_##Type##_TypeInfo() : TypeInfo(#Namespace "::" #Type)\
 		{\
-			CE::TypeInfo::RegisterType(this);\
 		}\
 	public:\
+		static CE::TypeInfo* StaticType();\
 		virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::Type); }\
 		virtual bool IsPOD() const { return true; }\
 		virtual bool IsAssignableTo(TypeId typeId) const override\
@@ -44,8 +83,7 @@ namespace CE\
 	template<>\
 	inline TypeInfo* GetStaticType<Namespace::Type>()\
 	{\
-		static Namespace::Internal::CE_##Type##_TypeInfo instance{};\
-		return &instance;\
+        return Namespace::Internal::CE_##Type##_TypeInfo::StaticType();\
 	}\
 	template<>\
 	inline CE::Name GetTypeName<Namespace::Type>()\
@@ -55,68 +93,50 @@ namespace CE\
 	}\
 }
 
-
-
-#define CE_RTTI_POD2(Type, ...)\
-namespace CE\
+#define CE_RTTI_POD2(API, Namespace, Type, DisplayTypeName, ...)\
+namespace CE::Internal\
 {\
-	namespace Internal\
+	template<>\
+	struct TypeInfoImpl<Namespace::Type> : public CE::TypeInfo\
 	{\
-		class CE_##Type##_TypeInfo : public CE::TypeInfo\
+	private:\
+		TypeInfoImpl<Namespace::Type>() : TypeInfo(#Namespace "::" #DisplayTypeName)\
+		{}\
+	public:\
+		API static CE::TypeInfo* StaticType();\
+		virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::Type); }\
+		virtual bool IsPOD() const { return true; }\
+		virtual bool IsAssignableTo(TypeId typeId) const override\
 		{\
-		private:\
-			friend TypeInfo* CE::GetStaticType<Type>();\
-			CE_##Type##_TypeInfo() : TypeInfo(#Type)\
+			std::initializer_list<TypeId> types = { __VA_ARGS__ };\
+			for (auto assignableType : types)\
 			{\
-				CE::TypeInfo::RegisterType(this);\
-			}\
-		public:\
-			virtual CE::TypeId GetTypeId() const { return TYPEID(Type); }\
-			virtual bool IsPOD() const { return true; }\
-			virtual bool IsAssignableTo(CE::TypeId typeId) const override\
-			{\
-				std::initializer_list<CE::TypeId> types = { __VA_ARGS__ };\
-				for (auto assignableType : types)\
+				if (typeId == assignableType)\
 				{\
-					if (typeId == assignableType)\
-					{\
-						return true;\
-					}\
+					return true;\
 				}\
-				return typeId == this->GetTypeId();\
 			}\
-			virtual CE::u32 GetSize() const override\
-			{\
-				return (CE::u32)sizeof(Type);\
-			}\
-		};\
-	}\
-	template<>\
-	inline TypeInfo* GetStaticType<Type>()\
-	{\
-		static CE::Internal::CE_##Type##_TypeInfo instance{};\
-		return &instance;\
-	}\
-	template<>\
-	inline CE::Name GetTypeName<Type>()\
-	{\
-		static Name name = Name(#Type);\
-		return name;\
-	}\
+			return typeId == this->GetTypeId();\
+		}\
+		virtual CE::u32 GetSize() const override\
+		{\
+			return (CE::u32)sizeof(Namespace::Type);\
+		}\
+	};\
 }
 
-#define CE_RTTI_POD3(Namespace, Type, ActualType, ...)\
+#define __CE_RTTI_POD2(API, Namespace, Type, ActualType, ...)\
 namespace Namespace::Internal\
 {\
-    class CE_##Type##_TypeInfo : public CE::TypeInfo\
+    class API CE_##Type##_TypeInfo : public CE::TypeInfo\
     {\
     private:\
         friend TypeInfo* CE::GetStaticType<Namespace::ActualType>();\
         CE_##Type##_TypeInfo() : TypeInfo(#Namespace "::" #Type)\
         {\
-            CE::TypeInfo::RegisterType(this);\
         }\
     public:\
+		static CE::TypeInfo* StaticType();\
         virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::ActualType); }\
         virtual bool IsPOD() const { return true; }\
         virtual bool IsAssignableTo(TypeId typeId) const override\
@@ -142,8 +162,7 @@ namespace CE\
     template<>\
     inline TypeInfo* GetStaticType<Namespace::ActualType>()\
     {\
-        static Namespace::Internal::CE_##Type##_TypeInfo instance{};\
-        return &instance;\
+        return Namespace::Internal::CE_##Type##_TypeInfo::StaticType();\
     }\
 	template<>\
 	inline CE::Name GetTypeName<Namespace::ActualType>()\
@@ -207,7 +226,14 @@ namespace CE
 		}
 		else if constexpr (isPointer) // a pointer type
 		{
-			return (TypeId)typeid(FinalType).hash_code(); // always ignore pointers for TypeId. i.e. TYPEID(Object) = TYPEID(Object*)
+			if constexpr (std::is_same_v<char, FinalType>)
+			{
+				return (TypeId)typeid(char*).hash_code(); // special case: TYPEID(char) != TYPEID(char*)
+			}
+			else
+			{
+				return (TypeId)typeid(FinalType).hash_code(); // always ignore pointers for TypeId. Ex: TYPEID(Object) == TYPEID(Object*)
+			}
 		}
 		else // a plain data type
 		{

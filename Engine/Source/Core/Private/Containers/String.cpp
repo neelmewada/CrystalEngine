@@ -196,7 +196,7 @@ void String::SetCString(const char* cString)
 
 void String::CopyCString(const char* cString, u32 copyStringLength)
 {
-    Reserve(copyStringLength);
+    Reserve(copyStringLength); // reserve: copyStringLength + 1
 
     if (cString == nullptr) // Clear the string
     {

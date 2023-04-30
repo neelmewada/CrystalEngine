@@ -83,6 +83,8 @@ namespace CE
 			return;
 		}
 
+		TypeInfo::currentlyUnloadingModule = moduleName;
+
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 
 		// Shutdown module
@@ -104,6 +106,8 @@ namespace CE
 		ModuleMap.Remove(moduleName);
 
 		CE_LOG(Info, All, "Unloaded Module: {}", moduleName);
+
+		TypeInfo::currentlyUnloadingModule = NAME_None;
 	}
 
 	Module* ModuleManager::LoadModule(String moduleName)
@@ -175,6 +179,8 @@ namespace CE
 			return;
 		}
 
+		TypeInfo::currentlyUnloadingModule = moduleName;
+
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 
 		// Shutdown module
@@ -196,6 +202,8 @@ namespace CE
 		ModuleMap.Remove(moduleName);
 
 		CE_LOG(Info, All, "Unloaded Plugin: {}", moduleName);
+
+		TypeInfo::currentlyUnloadingModule = NAME_None;
 	}
 
 	PluginModule* ModuleManager::LoadPluginModule(String moduleName)

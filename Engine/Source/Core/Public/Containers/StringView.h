@@ -25,6 +25,11 @@ namespace CE
 
 		StringView(const String& string);
 
+		StringView(const std::string_view& view) : Impl(view)
+		{
+
+		}
+
 		auto begin() { return Impl.begin(); }
 		auto end() { return Impl.end(); }
 
@@ -74,6 +79,8 @@ namespace CE
 		// Helper / Utility Functions
 
 		bool StartsWith(StringView str);
+
+		StringView GetSubstringView(int startIndex, int length = -1) const;
 
 	private:
 		std::string_view Impl;

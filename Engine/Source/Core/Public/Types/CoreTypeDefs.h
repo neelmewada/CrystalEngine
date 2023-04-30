@@ -20,6 +20,7 @@ namespace CE
     typedef double f64;
 
     typedef char c8;
+    typedef bool b8;
     
     typedef intptr_t IntPtr;
     typedef uintptr_t UintPtr;

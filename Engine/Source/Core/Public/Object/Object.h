@@ -12,8 +12,6 @@
 #include "Field.h"
 #include "Signal.h"
 
-#include "ConfigParser.h"
-
 #include "ObjectStore.h"
 
 namespace CE
@@ -21,6 +19,10 @@ namespace CE
 
     class CORE_API Component;
     class CORE_API EventBus;
+
+    class ClassType;
+    class FieldType;
+    class FunctionType;
 
     template<typename TObject>
     class IObjectUpdateListener
@@ -90,11 +92,18 @@ namespace CE
 
         virtual bool IsAsset() { return false; }
 
+
+        // - Config API -
+
+        void LoadConfig(ClassType* configClass = NULL, String fileName = "");
+
     private:
         friend class EventBus;
 
         CE::Name name;
         CE::UUID uuid;
+
+        ObjectFlags objectFlags = ObjectFlags::None;
 
         // Event System
         Array<EventBus*> subscribedBuses{};
@@ -122,5 +131,4 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
         
     )
 )
-
 

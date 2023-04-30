@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>CE RTTI Class</Title>
+            <Description>Creates RTTI meta for class</Description>
+            <Shortcut>ceclass</Shortcut>
+        </Header>
+        <Snippet>
+            <Code Language="CPP">
+                <![CDATA[CE_RTTI_CLASS($API$, $NAMESPACE$, $CLASS$,
+                    CE_SUPER($SUPER$),
+                    CE_ATTRIBS(),
+                    CE_FIELD_LIST()
+                    CE_FUNCTION_LIST()
+                )
+                CE_RTTI_CLASS_IMPL($API$, $NAMESPACE$, $CLASS$)
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

@@ -23,4 +23,11 @@ namespace CE
 		return Impl.starts_with(str.Impl);
 	}
 
+	StringView StringView::GetSubstringView(int startIndex, int length) const
+	{
+		if (length < 0)
+			length = Impl.size() - startIndex;
+		return StringView(Impl.substr(startIndex, length));
+	}
+
 } // namespace CE

@@ -8,14 +8,17 @@ namespace CE
     struct CORE_API ConfigValue
     {
     public:
-        ConfigValue() : stringValue("")
+        ConfigValue() : arrayValue(Array<String>({""})), isArrayValue(false)
         {}
         
-        ConfigValue(const String& string) : stringValue(string)
+        ConfigValue(const String& string) : arrayValue(Array<String>({ string })), isArrayValue(false)
+        {}
+
+        ConfigValue(const Array<String>& array) : arrayValue(array), isArrayValue(true)
         {}
         
         ConfigValue(const ConfigValue& copy)
-            : stringValue(copy.stringValue)
+            : arrayValue(copy.arrayValue)
         {}
         
         ConfigValue operator=(const ConfigValue& copy)
@@ -25,21 +28,63 @@ namespace CE
         
         inline operator String() const
         {
-            return stringValue;
+            return arrayValue[0];
         }
         
         String& GetStringValue()
         {
-            return stringValue;
+            return arrayValue[0];
         }
         
         const String& GetStringValue() const
         {
-            return stringValue;
+            return arrayValue[0];
+        }
+
+        Array<String>& GetArray()
+        {
+            return arrayValue;
+        }
+
+        const Array<String>& GetArray() const
+        {
+            return arrayValue;
+        }
+
+        bool IsValid() const
+        {
+            return arrayValue.GetSize() > 0;
+        }
+
+        bool IsArrayValue() const
+        {
+            return isArrayValue;
+        }
+
+        void SetAsString()
+        {
+            isArrayValue = false;
+        }
+
+        void SetAsArray()
+        {
+            isArrayValue = true;
+        }
+
+        void AddValue(const String& value)
+        {
+            arrayValue.Add(value);
+        }
+
+        void RemoveValue(const String& value)
+        {
+            arrayValue.Remove(value);
         }
         
     private:
-        String stringValue;
+        bool isArrayValue = false;
+
+        Array<String> arrayValue{};
     };
 
     typedef HashMap<String, ConfigValue> ConfigSectionMap;
@@ -60,6 +105,11 @@ namespace CE
         virtual ~ConfigFile();
         
         void Read(const String& fileName);
+
+        bool SectionExists(const Name& sectionName)
+        {
+            return this->KeyExists(sectionName);
+        }
         
     private:
         
