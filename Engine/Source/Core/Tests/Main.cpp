@@ -56,6 +56,68 @@ TEST(Performance, Module_Load_10x)
 
 
 /**********************************************
+*   Performance
+*/
+
+#pragma region Threading
+
+int ThreadingTestSingletonCounter = 0;
+
+class ThreadingTestSingleton : public ThreadSingleton<ThreadingTestSingleton>
+{
+public:
+    ThreadingTestSingleton() : ThreadSingleton<ThreadingTestSingleton>()
+    {
+        ThreadingTestSingletonCounter++;
+    }
+
+};
+
+void Threading_Test_Func1()
+{
+    
+}
+
+TEST(Threading, ThreadSingleton)
+{
+    TEST_BEGIN;
+    ThreadingTestSingletonCounter = 0;
+
+    ThreadingTestSingleton::Get();
+    ThreadingTestSingleton::Get();
+
+    Thread t1([]
+        {
+            ThreadingTestSingleton::Get();
+            ThreadingTestSingleton::Get();
+            ThreadingTestSingleton::Get();
+            ThreadingTestSingleton::Get();
+        });
+
+    Thread t2([]
+        {
+            ThreadingTestSingleton::Get();
+            ThreadingTestSingleton::Get();
+        });
+    
+    if (t1.IsJoinable())
+        t1.Join();
+    if (t2.IsJoinable())
+        t2.Join();
+
+    ThreadingTestSingleton::DestroyAll();
+
+    EXPECT_EQ(ThreadingTestSingletonCounter, 3);
+
+    ThreadingTestSingletonCounter = 0;
+    TEST_END;
+}
+
+#pragma endregion
+
+
+
+/**********************************************
 *   Containers
 */
 
@@ -204,8 +266,6 @@ TEST(Reflection, RTTI_Registry_Testing)
     EXPECT_EQ(ClassType::GetTotalRegisteredClasses(), 0); // == 0
     EXPECT_EQ(ClassType::FindClass(TYPEID(Object)), nullptr);
 
-    auto staticObjectClass = GetStaticType<Object>();
-
     ModuleManager::Get().LoadModule("Core");
     registeredCount = TypeInfo::GetRegisteredCount();
     EXPECT_GT(registeredCount, 0); // > 0
@@ -217,7 +277,14 @@ TEST(Reflection, RTTI_Registry_Testing)
     ModuleManager::Get().LoadModule("Core");
     EXPECT_EQ(TypeInfo::GetRegisteredCount(), registeredCount); // should be equal
 
-    // 2. Test Object class
+    // 2. POD Testing
+
+    auto name = TYPENAME(Array<String>);
+
+    EXPECT_EQ(TYPENAME(s32), "CE::s32");
+    EXPECT_EQ(TYPENAME(Array<String>), "CE::Array");
+
+    // 3. Test Object class
 
     auto objectClass = ClassType::FindClass(TYPENAME(Object));
     EXPECT_NE(objectClass, nullptr);
@@ -228,16 +295,24 @@ TEST(Reflection, RTTI_Registry_Testing)
         EXPECT_EQ(objectClass->GetName(), TYPENAME(Object)); // equal
         EXPECT_GE(objectClass->GetFieldCount(), 2); // >= 2
 
-        auto derivedCount = objectClass->GetDerivedClasses();
-        EXPECT_GT(derivedCount.GetSize(), 0); // > 0
+        auto derivedClasses = objectClass->GetDerivedClasses();
+        Array<TypeId> loopedClasses{};
+
+        for (auto derivedClass : derivedClasses) // Make sure no duplicates exist
+        {
+            EXPECT_NE(derivedClass, nullptr);
+            EXPECT_FALSE(loopedClasses.Exists(derivedClass->GetTypeId()));
+            loopedClasses.Add(derivedClass->GetTypeId());
+        }
     }
 
     DeregisterTypes<Object>();
-    EXPECT_NE(ClassType::FindClass(TYPEID(Object)), nullptr); // You cannot deregister automatically registered objects on your own
+    EXPECT_NE(ClassType::FindClass(TYPEID(Object)), nullptr); // You cannot deregister objects that were automatically registered
 
     ModuleManager::Get().UnloadModule("Core");
     EXPECT_EQ(TypeInfo::GetRegisteredCount(), 0);
 }
+
 
 class Core_Reflection_Attribute_Test_Class : public CE::Object
 {
@@ -266,20 +341,20 @@ TEST(Reflection, Attribute_Parsing)
     auto classType = GetStaticClass<Core_Reflection_Attribute_Test_Class>();
     auto attrib = classType->GetAttributes();
     EXPECT_TRUE(attrib.HasKey("Display"));
-    EXPECT_TRUE(classType->GetAttributeValue("Display").IsString());
-    EXPECT_EQ(classType->GetAttributeValue("Display").GetStringValue(), "My Class Display Name");
+    EXPECT_TRUE(classType->GetAttribute("Display").IsString());
+    EXPECT_EQ(classType->GetAttribute("Display").GetString(), "My Class Display Name");
 
     EXPECT_TRUE(classType->HasAttribute("meta"));
-    EXPECT_TRUE(classType->GetAttributeValue("meta").IsMap());
-    EXPECT_EQ(classType->GetAttributeValue("meta").GetKeyValue("Id").GetStringValue(), "4124");
-    EXPECT_EQ(classType->GetAttributeValue("meta").GetKeyValue("Tooltip").GetStringValue(), "A tooltip description");
+    EXPECT_TRUE(classType->GetAttribute("meta").IsMap());
+    EXPECT_EQ(classType->GetAttribute("meta")["Id"].GetString(), "4124");
+    EXPECT_EQ(classType->GetAttribute("meta")["Tooltip"].GetString(), "A tooltip description");
 
     EXPECT_TRUE(classType->HasAttribute("Redirects"));
-    EXPECT_TRUE(classType->GetAttributeValue("Redirects").IsMap());
-    EXPECT_TRUE(classType->GetAttributeValue("Redirects").HasKey("SomeOldName"));
-    EXPECT_EQ(classType->GetAttributeValue("Redirects").GetKeyValue("SomeOldName").GetStringValue(), "");
-    EXPECT_TRUE(classType->GetAttributeValue("Redirects").HasKey("Old Name"));
-    EXPECT_EQ(classType->GetAttributeValue("Redirects").GetKeyValue("Old Name").GetStringValue(), "");
+    EXPECT_TRUE(classType->GetAttribute("Redirects").IsMap());
+    EXPECT_TRUE(classType->GetAttribute("Redirects").HasKey("SomeOldName"));
+    EXPECT_EQ(classType->GetAttribute("Redirects")["SomeOldName"].GetString(), "");
+    EXPECT_TRUE(classType->GetAttribute("Redirects").HasKey("Old Name"));
+    EXPECT_EQ(classType->GetAttribute("Redirects")["Old Name"].GetString(), "");
 
     CE_DEREGISTER_TYPES(Core_Reflection_Attribute_Test_Class);
     EXPECT_EQ(GetTypeInfo(TYPEID(Core_Reflection_Attribute_Test_Class)), nullptr);
@@ -350,23 +425,49 @@ TEST(Config, FileParsing)
 
 #pragma region Object
 
-class ObjectConfigTestClass : public Object
+ObjectFlags ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
+
+class ObjectLifecycleTestClass : public Object
 {
-    CE_CLASS(ObjectConfigTestClass, Object)
+    CE_CLASS(ObjectLifecycleTestClass, Object)
 public:
+   
+
+    ObjectLifecycleTestClass() : Object()
+    {
+        ObjectLifecycleTestClass_InitFlags = GetFlags();
+    }
 
 };
 
+CE_RTTI_CLASS(, , ObjectLifecycleTestClass,
+    CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(, , ObjectLifecycleTestClass)
 
 
-TEST(Object, Config)
+TEST(Object, Lifecycle)
 {
-    TEST_BEGIN;
+    TEST_BEGIN
+    CE_REGISTER_TYPES(ObjectLifecycleTestClass);
 
+    ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
 
+    auto instance = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient | OF_TemplateInstance);
+    EXPECT_EQ(instance->GetFlags(), OF_Transient | OF_TemplateInstance);
 
+    delete instance;
+
+    ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
+
+    CE_DEREGISTER_TYPES(ObjectLifecycleTestClass);
     TEST_END;
 }
+
 
 #pragma endregion
 

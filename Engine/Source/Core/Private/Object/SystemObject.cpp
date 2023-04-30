@@ -11,11 +11,6 @@ namespace CE
 
     }
 
-    SystemObject::SystemObject(CE::Name name) : Object(name)
-    {
-
-    }
-
     SystemObject::~SystemObject()
     {
 

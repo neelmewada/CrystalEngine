@@ -10,44 +10,66 @@ namespace CE
 		{
 			if (params.objectClass == nullptr || !params.objectClass->CanBeInstantiated() || !params.objectClass->IsObject())
 				return nullptr;
+			
+			ObjectInitializer init = ObjectInitializer();
+			init.objectFlags = params.objectFlags;
+			init.name = params.name;
 
-			auto instance = (Object*)params.objectClass->CreateInstance();
+			ObjectThreadContext::Get().PushInitializer(&init);
+
+			auto instance = params.objectClass->CreateInstance();
 			if (instance == nullptr)
 				return nullptr;
 
 			if (params.templateObject != nullptr)
 			{
-				ConstructFromTemplate(params.templateObject, instance);
+				// TODO: Construct from template
 			}
 
-			Name name = params.name;
-			if (!name.IsValid())
-				name = params.objectClass->GenerateInstanceName(instance->GetUuid());
+			String name = params.name;
+			if (instance->GetName().IsEmpty())
+				name = params.objectClass->GenerateInstanceName(instance->GetUuid()).GetString();
 			instance->SetName(name);
 
 			if (params.owner != nullptr)
 				params.owner->AttachSubobject(instance);
 			return instance;
 		}
+		
+	}
 
-		CORE_API void ConstructFromTemplate(Object* templateObject, Object* destObject)
-		{
-			if (templateObject == nullptr || destObject == nullptr)
-				return;
+	/*
+	*	Global Function
+	*/
 
-			auto templateClass = (ClassType*)templateObject->GetType();
-			auto destClass = (ClassType*)destObject->GetType();
+	extern Package* gTransientPackage;
 
-			if (!destClass->IsSubclassOf(templateClass) && !templateClass->IsSubclassOf(destClass))
-				return;
+	CORE_API Package* GetTransientPackage()
+	{
+		return gTransientPackage;
+	}
 
-			// TODO: Loading from template object
-		}
+	/*
+	*	Object Initializer
+	*/
+
+	ObjectInitializer::ObjectInitializer()
+	{
+		Initialize();
+	}
+
+	ObjectInitializer::ObjectInitializer(ObjectFlags flags) : objectFlags(flags)
+	{
+		Initialize();
+	}
+
+	void ObjectInitializer::Initialize()
+	{
 
 	}
 
 	/* ***************************************
-	*	Core Object Delegates
+	*	Delegates
 	*/
 
 	CoreObjectDelegates::ClassRegistrationDelegate CoreObjectDelegates::onClassRegistered{};
@@ -55,5 +77,5 @@ namespace CE
 
 	CoreObjectDelegates::StructRegistrationDelegate CoreObjectDelegates::onStructRegistered{};
 	CoreObjectDelegates::StructRegistrationDelegate CoreObjectDelegates::onStructDeregistered{};
-    
+
 } // namespace CE

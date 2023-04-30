@@ -3,12 +3,6 @@
 
 namespace CE
 {
-	extern Package* gTransientPackage;
-
-	CORE_API Package* GetTransientPackage()
-	{
-		return gTransientPackage;
-	}
 
 	Package::~Package()
 	{

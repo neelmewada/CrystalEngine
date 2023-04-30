@@ -30,8 +30,15 @@
 #define NAMEOF(x) (CE::GetStaticType<x>() != nullptr ? CE::GetStaticType<x>()->GetName() : "")
 
 #define CE_INLINE inline
+#define INLINE inline
 
-#define CE_FORCE_INLINE __forceinline
+#if PLATFORM_WINDOWS
+#	define CE_FORCE_INLINE __forceinline
+#	define FORCE_INLINE __forceinline
+#else
+#	define CE_FORCE_INLINE inline
+#	define FORCE_INLINE inline
+#endif
 
 #define CE_DELETE(ptr) delete ptr; ptr = nullptr
 

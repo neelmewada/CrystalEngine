@@ -5,13 +5,13 @@
 namespace CE
 {
 
-	enum class ObjectFlags
+	enum ObjectFlags
 	{
-		None = 0,
+		OF_NoFlags = 0,
 
-		Transient = BIT(0),
-		ClassDefaultInstance = BIT(1),
-		TemplateInstance = BIT(2)
+		OF_Transient = BIT(0),
+		OF_ClassDefaultInstance = BIT(1),
+		OF_TemplateInstance = BIT(2)
 	};
 	ENUM_CLASS_FLAGS(ObjectFlags);
 

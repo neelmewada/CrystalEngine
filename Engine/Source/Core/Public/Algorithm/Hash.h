@@ -6,9 +6,9 @@
 
 #define DECL_HASH(Type)\
 template<>\
-inline SIZE_T GetHash<Type>(const Type& Value)\
+inline SIZE_T GetHash<Type>(const Type& value)\
 {\
-	return std::hash<Type>()(Value);\
+	return std::hash<Type>()(value);\
 }
 
 namespace CE
@@ -32,8 +32,7 @@ namespace CE
         }
         else
         {
-            // Do nothing : Specialization handles it
-			return 0;
+			return std::hash<T>()(value);
         }
     }
 

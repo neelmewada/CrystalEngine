@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Package.h"
-
 namespace CE
 {
 	class EnumType;
@@ -9,6 +7,15 @@ namespace CE
 	class StructType;
 	class FieldType;
 	class FunctionType;
+	class Package;
+
+	/* **********************************
+	*	Global Functions
+	*/
+
+	/// Transient Package: Same lifetime as Core Module.
+	///	Used to store temporary objects that are not saved to disk.
+	CORE_API Package* GetTransientPackage();
 
 	namespace Internal
 	{
@@ -22,18 +29,21 @@ namespace CE
 
 			Object* owner = nullptr;
 			ClassType* objectClass = nullptr;
-			Name name{};
+			String name{};
 			Object* templateObject = nullptr;
+			ObjectFlags objectFlags{};
 		};
 
 		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params);
 
-		CORE_API void ConstructFromTemplate(Object* templateObject, Object* destObject);
-
 	}
 
 	template<typename TClass> requires std::is_base_of<Object, TClass>::value
-	TClass* NewObject(Object* owner = (Object*)GetTransientPackage(), Name objectName = "", ClassType* objectClass = TClass::Type())
+	TClass* NewObject(Object* owner = (Object*)GetTransientPackage(), 
+		String objectName = "", 
+		ObjectFlags flags = OF_NoFlags,
+		ClassType* objectClass = TClass::Type(), 
+		Object* templateObject = NULL)
 	{
 		if (objectClass == nullptr || !objectClass->IsSubclassOf(TClass::Type()))
 			return nullptr;
@@ -41,8 +51,44 @@ namespace CE
 		Internal::ConstructObjectParams params{ objectClass };
 		params.owner = owner;
 		params.name = objectName;
+		params.templateObject = templateObject;
+		params.objectFlags = flags;
 		return static_cast<TClass*>(Internal::StaticConstructObject(params));
 	}
+
+	/* *************************************
+	*	Object Initializer
+	*/
+
+	class CORE_API ObjectInitializer
+	{
+	public:
+		friend class Object;
+
+		friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);
+
+		/// Default constructor.
+		ObjectInitializer();
+
+		ObjectInitializer(ObjectFlags flags);
+
+
+		ObjectFlags GetObjectFlags() const
+		{
+			return objectFlags;
+		}
+
+	private:
+		void Initialize();
+
+		ObjectFlags objectFlags{};
+		String name{};
+		UUID uuid{};
+	};
+
+	/* ***********************************
+	*	Delegates
+	*/
 
 	struct CORE_API CoreObjectDelegates
 	{

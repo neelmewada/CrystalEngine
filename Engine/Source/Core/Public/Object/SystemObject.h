@@ -12,7 +12,6 @@ namespace CE
         CE_CLASS(SystemObject, Object)
     public:
         SystemObject();
-        SystemObject(CE::Name name);
 
         ~SystemObject();
 

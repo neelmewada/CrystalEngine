@@ -36,6 +36,11 @@ namespace CE
 	template<typename Type>
 	CE::Name GetTypeName()
 	{
+		if (TYPEID(Type) == TYPEID(Array<u8>))
+		{
+			return GetTypeName<Array<u8>>();
+		}
+
 		// Specialization contains the magical data
 		return "";
 	}
@@ -90,15 +95,20 @@ namespace CE
 			return Attribute(copy);
 		}
 
+		inline Attribute& operator[](const Name& key)
+		{
+			return tableValue[key];
+		}
+
 		bool IsString() const;
 		bool IsMap() const;
 
 		inline operator String() const
 		{
-			return GetStringValue();
+			return GetString();
 		}
 
-		String GetStringValue() const
+		String GetString() const
 		{
 			if (!IsString())
 				return "";
@@ -163,7 +173,7 @@ namespace CE
 		//String GetLocalAttributeValue(const String& key) const;
         //bool HasLocalAttribute(const String& key) const;
 
-        virtual Attribute GetAttributeValue(const String& key);
+        virtual Attribute GetAttribute(const String& key);
         virtual bool HasAttribute(const String& key);
         
 		virtual bool IsClass() const { return false; }
@@ -230,6 +240,11 @@ namespace CE
 	template<typename Type>
 	TypeInfo* GetStaticType()
 	{
+		if (TYPEID(Type) == TYPEID(Array<u8>))
+		{
+			return GetStaticType<Array<u8>>();
+		}
+
 		return nullptr;
 	}
 
@@ -296,6 +311,6 @@ CE_RTTI_POD(CORE_API, CE, String)
 CE_RTTI_POD(CORE_API, CE, Name)
 CE_RTTI_POD(CORE_API, CE::IO, Path)
 
-CE_RTTI_POD2(CORE_API, CE, Array<u8>, Array)
+CE_RTTI_POD_TEMPLATE(CORE_API, CE, Array, u8)
 
 

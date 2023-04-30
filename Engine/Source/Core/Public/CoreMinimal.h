@@ -5,6 +5,8 @@
 
 // ******************************************************
 // Basic headers
+#include "Misc/Exception.h"
+#include "Misc/Assert.h"
 #include "Memory/Memory.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
@@ -23,6 +25,7 @@
 // Threading
 #include "Threading/Mutex.h"
 #include "Threading/Thread.h"
+#include "Threading/ThreadSingleton.h"
 
 // Module
 #include "Module/Module.h"

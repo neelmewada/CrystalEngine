@@ -77,5 +77,11 @@ namespace CE
     private:
         u64 uuid;
     };
+
+    template<>
+    inline SIZE_T GetHash<UUID>(const UUID& value)\
+    {
+        return (u64)value;
+    }
     
 } // namespace CE

@@ -1,25 +1,17 @@
 
-#include "Object/Object.h"
-#include "Messaging/MessageBus.h"
-
-#include "Object/ObjectManager.h"
+#include "CoreMinimal.h"
 
 namespace CE
 {
     Object::Object() : name("Object"), uuid(UUID())
     {
-	    
+        ConstructInternal();
     }
 
-	Object::Object(UUID uuid) : name("Object"), uuid(uuid)
-	{
-		
-	}
-
-	Object::Object(CE::Name name, UUID uuid) : name(name), uuid(uuid)
-	{
-        
-	}
+    Object::Object(const ObjectInitializer& initializer)
+    {
+        ConstructInternal(const_cast<ObjectInitializer*>(&initializer));
+    }
 
 	Object::~Object()
 	{
@@ -52,6 +44,23 @@ namespace CE
         }
         attachedObjects.Clear();
 	}
+
+    void Object::ConstructInternal()
+    {
+        auto initializer = ObjectThreadContext::Get().TopInitializer();
+        CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+        ObjectThreadContext::Get().PopInitializer();
+        ConstructInternal(initializer);
+    }
+
+    void Object::ConstructInternal(ObjectInitializer* initializer)
+    {
+        CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+
+        this->objectFlags = initializer->GetObjectFlags();
+        this->uuid = initializer->uuid;
+        this->name = initializer->name;
+    }
 
     void Object::AttachSubobject(Object* subobject)
     {

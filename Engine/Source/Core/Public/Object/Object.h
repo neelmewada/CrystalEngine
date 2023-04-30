@@ -12,6 +12,8 @@
 #include "Field.h"
 #include "Signal.h"
 
+#include "ObjectThreadContext.h"
+#include "ObjectGlobals.h"
 #include "ObjectStore.h"
 
 namespace CE
@@ -23,6 +25,7 @@ namespace CE
     class ClassType;
     class FieldType;
     class FunctionType;
+    class Package;
 
     template<typename TObject>
     class IObjectUpdateListener
@@ -43,18 +46,25 @@ namespace CE
         CE_CLASS(Object)
     public:
         Object();
-        Object(UUID uuid);
-        Object(CE::Name name, UUID uuid = UUID());
+
+        Object(const ObjectInitializer& initializer);
 
         virtual ~Object();
 
+    private:
+
+        void ConstructInternal();
+        void ConstructInternal(ObjectInitializer* initializer);
+
+    public:
+
         // - Getters & Setters -
-        CE_INLINE CE::Name GetName() const
+        CE_INLINE CE::String GetName() const
         {
             return name;
         }
 
-        CE_INLINE void SetName(CE::Name newName)
+        CE_INLINE void SetName(CE::String newName)
         {
             this->name = newName;
         }
@@ -67,6 +77,31 @@ namespace CE
         CE_INLINE TypeId GetTypeId() const
         {
             return GetType()->GetTypeId();
+        }
+
+        ObjectFlags GetFlags() const
+        {
+            return objectFlags;
+        }
+
+        bool HasAllFlags(ObjectFlags flags) const
+        {
+            return (objectFlags & flags) == flags;
+        }
+
+        bool HasAnyFlag(ObjectFlags flags) const
+        {
+            return (objectFlags & flags) != 0;
+        }
+
+        void EnableFlags(ObjectFlags flags)
+        {
+            objectFlags = (ObjectFlags)(objectFlags | flags);
+        }
+
+        void DisableFlags(ObjectFlags flags)
+        {
+            objectFlags = (ObjectFlags)(objectFlags & ~flags);
         }
 
         // Subobject API
@@ -100,10 +135,10 @@ namespace CE
     private:
         friend class EventBus;
 
-        CE::Name name;
+        CE::String name;
         CE::UUID uuid;
 
-        ObjectFlags objectFlags = ObjectFlags::None;
+        ObjectFlags objectFlags = OF_NoFlags;
 
         // Event System
         Array<EventBus*> subscribedBuses{};

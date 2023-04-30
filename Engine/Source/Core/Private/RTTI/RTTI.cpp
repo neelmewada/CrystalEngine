@@ -208,7 +208,7 @@ namespace CE
         return attributes;
     }
 
-    Attribute TypeInfo::GetAttributeValue(const String& key)
+    Attribute TypeInfo::GetAttribute(const String& key)
     {
         return attributes.HasKey(key) ? attributes.GetKeyValue(key) : Attribute();
     }
@@ -385,5 +385,22 @@ CE_RTTI_POD_IMPL(CE, String)
 CE_RTTI_POD_IMPL(CE, Name)
 CE_RTTI_POD_IMPL(CE::IO, Path)
 
-CE_RTTI_POD_IMPL(CE, Array<CE::u8>)
+CE_RTTI_POD_TEMPLATE_IMPL(CE, Array, CE::u8)
+
+
+// Math RTTI
+
+CE_RTTI_POD_IMPL(CE, Vec2i)
+CE_RTTI_POD_IMPL(CE, Vec3i)
+CE_RTTI_POD_IMPL(CE, Vec4i)
+
+CE_RTTI_POD_IMPL(CE, Vec2)
+CE_RTTI_POD_IMPL(CE, Vec3)
+CE_RTTI_POD_IMPL(CE, Vec4)
+
+CE_RTTI_POD_IMPL(CE, Quat)
+
+CE_RTTI_POD_IMPL(CE, Matrix4x4)
+
+CE_RTTI_POD_IMPL(CE, Color)
 

@@ -14,10 +14,6 @@ namespace CE
 		virtual ~Package();
 
 	};
-	
-	/// Transient Package: Same lifetime as Core Module.
-	///	Used to store temporary objects that are not saved to disk.
-	CORE_API Package* GetTransientPackage();
 
 } // namespace CE
 

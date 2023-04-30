@@ -20,6 +20,9 @@ namespace CE
 	template<typename T>
 	using RemoveReferenceFromType = std::remove_reference_t<T>;
 
+	template<class TBase, class TDerived>
+	using IsBaseClassOf = std::is_base_of<TBase, TDerived>;
+
 	template<typename T>
 	class Array;
 

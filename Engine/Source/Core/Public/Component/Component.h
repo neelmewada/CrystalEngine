@@ -12,7 +12,7 @@ namespace CE
         CE_CLASS(Component, CE::Object)
     public:
 
-        Component(CE::Name name);
+        Component();
         virtual ~Component();
         
         virtual void Init() = 0;
