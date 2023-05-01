@@ -48,6 +48,16 @@ namespace CE
         return fieldFlags & FIELD_Hidden;
     }
 
+    bool FieldType::IsArrayField() const
+    {
+        return GetDeclarationTypeId() == TYPEID(Array<u8>);
+    }
+
+    bool FieldType::IsStringField() const
+    {
+        return GetDeclarationTypeId() == TYPEID(String);
+    }
+
     const TypeInfo* FieldType::GetDeclarationType() const
     {
         return GetTypeInfo(fieldTypeId);
@@ -103,6 +113,16 @@ namespace CE
         {
             SetFieldValue<u64>(instance, value);
         }
+    }
+
+    bool FieldType::TransferValue(void* fromInstance, void* toInstance, FieldType* toFieldType)
+    {
+        if (fromInstance == nullptr || toInstance == nullptr || toFieldType == nullptr)
+            return false;
+        
+        
+        
+        return true;
     }
 
 }

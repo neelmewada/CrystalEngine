@@ -89,39 +89,39 @@ namespace CE
             return objectFlags;
         }
 
-        INLINE bool HasAllFlags(ObjectFlags flags) const
+        INLINE bool HasAllObjectFlags(ObjectFlags flags) const
         {
             return (objectFlags & flags) == flags;
         }
 
-        INLINE bool HasAnyFlag(ObjectFlags flags) const
+        INLINE bool HasAnyObjectFlags(ObjectFlags flags) const
         {
             return (objectFlags & flags) != 0;
         }
 
-        INLINE void EnableFlags(ObjectFlags flags)
+        INLINE void EnableObjectFlags(ObjectFlags flags)
         {
             objectFlags = objectFlags | flags;
         }
 
-        INLINE void DisableFlags(ObjectFlags flags)
+        INLINE void DisableObjectFlags(ObjectFlags flags)
         {
             objectFlags = objectFlags & ~flags;
         }
 
         INLINE bool IsDefaultInstance() const
         {
-            return HasAnyFlag(OF_ClassDefaultInstance);
+            return HasAnyObjectFlags(OF_ClassDefaultInstance);
         }
 
         INLINE bool IsTemplate() const
         {
-            return HasAnyFlag(OF_TemplateInstance);
+            return HasAnyObjectFlags(OF_TemplateInstance);
         }
 
         INLINE bool IsTransient() const
         {
-            return HasAnyFlag(OF_Transient);
+            return HasAnyObjectFlags(OF_Transient);
         }
 
         // Lifecycle
@@ -162,6 +162,10 @@ namespace CE
 
         template<typename T>
         friend struct Internal::TypeInfoImpl;
+        
+        /*
+         *  Fields
+         */
 
         CE::String name;
         CE::UUID uuid;

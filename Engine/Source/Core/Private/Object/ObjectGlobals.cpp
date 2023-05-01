@@ -15,12 +15,16 @@ namespace CE
 			init.objectFlags = params.objectFlags;
 			init.name = params.name;
 			init.uuid = 0;
+            init.objectClass = params.objectClass;
 
 			ObjectThreadContext::Get().PushInitializer(&init);
 
 			auto instance = params.objectClass->CreateInstance();
 			if (instance == nullptr)
-				return nullptr;
+            {
+                ObjectThreadContext::Get().PopInitializer();
+                return nullptr;
+            }
 
 			String name = params.name;
 			if (instance->GetName().IsEmpty())

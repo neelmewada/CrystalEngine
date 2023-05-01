@@ -82,6 +82,7 @@ namespace CE
 	private:
 		void Initialize();
 
+        ClassType* objectClass = nullptr;
 		ObjectFlags objectFlags{};
 		String name{};
 		UUID uuid{};

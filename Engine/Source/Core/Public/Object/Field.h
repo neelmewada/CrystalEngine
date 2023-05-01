@@ -53,13 +53,16 @@ namespace CE
         
         virtual bool IsAssignableTo(TypeId typeId) const override;
         virtual bool IsObject() const override { return IsAssignableTo(TYPEID(Object)); }
+        
+        bool IsArrayField() const;
+        bool IsStringField() const;
 
-        bool HasAnyFlag(FieldFlags flags) const
+        bool HasAnyFieldFlags(FieldFlags flags) const
         {
             return (fieldFlags & flags) != 0;
         }
 
-        bool HasAllFlags(FieldFlags flags) const
+        bool HasAllFieldFlags(FieldFlags flags) const
         {
             return (fieldFlags & flags) == flags;
         }
@@ -91,6 +94,8 @@ namespace CE
 
         s64 GetFieldEnumValue(void* instance);
         void SetFieldEnumValue(void* instance, s64 value);
+        
+        bool TransferValue(void* fromInstance, void* toInstance, FieldType* toFieldType);
 
     private:
         FieldFlags fieldFlags = FIELD_NoFlags;

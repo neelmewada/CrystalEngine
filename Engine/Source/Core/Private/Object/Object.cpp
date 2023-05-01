@@ -61,6 +61,7 @@ namespace CE
     void Object::ConstructInternal(ObjectInitializer* initializer)
     {
         CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+        CE_ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
         
         this->creationThreadId = Thread::GetCurrentThreadId();
         this->objectFlags = initializer->GetObjectFlags();
@@ -219,7 +220,39 @@ namespace CE
         
         if (fileName.IsEmpty())
         {
+            if (configClass->HasAttribute("Config"))
+            {
+                fileName = configClass->GetAttribute("Config").GetStringValue();
+            }
+        }
+        
+        if (fileName.IsEmpty())
+            return;
+        
+        auto config = gConfigCache->GetConfigFile(ConfigType(fileName));
+        auto className = configClass->GetName();
+        
+        if (config == nullptr)
+            return;
+        if (!config->SectionExists(className))
+            return;
+        
+        FieldType* field = configClass->GetFirstField();
+        
+        while (field != nullptr)
+        {
+            if (!field->HasAnyFieldFlags(FIELD_Config))
+                continue;
             
+            auto fieldTypeId = field->GetDeclarationTypeId();
+            auto value = config->Get(className).GetString();
+            
+            if (fieldTypeId == TYPEID(String))
+            {
+                // TODO: Fetch values...
+            }
+            
+            field = field->GetNext();
         }
     }
 }
