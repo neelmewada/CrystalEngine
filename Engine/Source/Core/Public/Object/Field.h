@@ -9,6 +9,15 @@
 namespace CE
 {
 
+    enum FieldFlags
+    {
+        FIELD_NoFlags = 0,
+        FIELD_Hidden = BIT(0),
+        FIELD_Serializable = BIT(1),
+        FIELD_Config = BIT(2)
+    };
+    ENUM_CLASS_FLAGS(FieldFlags);
+    
     class CORE_API FieldType : public TypeInfo
     {
     private:
@@ -16,22 +25,26 @@ namespace CE
             , fieldTypeId(fieldTypeId)
             , size(size), offset(offset)
             , owner(owner)
-        {}
+        {
+            ConstructInternal();
+        }
+
+        void ConstructInternal();
 
     public:
 
-        virtual String GetDisplayName() override;
+        String GetDisplayName() override;
+        
+        bool IsField() const override { return true; }
 
-        virtual bool IsField() const override { return true; }
+        INLINE FieldType* GetNext() const { return next; }
 
-        CE_INLINE FieldType* GetNext() const { return next; }
-
-        virtual TypeId GetTypeId() const override
+        TypeId GetTypeId() const override
         {
             return fieldTypeId;
         }
 
-        CE_INLINE SIZE_T GetOffset() const { return offset; }
+        INLINE SIZE_T GetOffset() const { return offset; }
 
         virtual u32 GetSize() const override { return (u32)size; }
 
@@ -41,12 +54,22 @@ namespace CE
         virtual bool IsAssignableTo(TypeId typeId) const override;
         virtual bool IsObject() const override { return IsAssignableTo(TYPEID(Object)); }
 
-        bool IsSerialized();
-        bool IsHidden();
+        bool HasAnyFlag(FieldFlags flags) const
+        {
+            return (fieldFlags & flags) != 0;
+        }
+
+        bool HasAllFlags(FieldFlags flags) const
+        {
+            return (fieldFlags & flags) == flags;
+        }
+
+        bool IsSerialized() const;
+        bool IsHidden() const;
         
         const TypeInfo* GetDeclarationType() const;
 
-        CE_INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
+        INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
 
         template<typename T>
         T& GetFieldValue(void* instance)
@@ -70,7 +93,8 @@ namespace CE
         void SetFieldEnumValue(void* instance, s64 value);
 
     private:
-
+        FieldFlags fieldFlags = FIELD_NoFlags;
+        
         TypeId fieldTypeId;
 
         SIZE_T offset;

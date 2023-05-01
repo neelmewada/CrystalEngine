@@ -85,6 +85,11 @@ namespace CE
         attachedObjects.RemoveObject(subobject);
     }
 
+    void Object::RequestDestroy()
+    {
+        delete this;
+    }
+
     bool Object::Bind(Object* sourceObject, FunctionType* sourceSignal,
                       Object* destinationObject, FunctionType* destinationEvent)
     {
@@ -211,7 +216,11 @@ namespace CE
     {
         if (configClass == NULL)
             configClass = GetClass();
-
+        
+        if (fileName.IsEmpty())
+        {
+            
+        }
     }
 }
 

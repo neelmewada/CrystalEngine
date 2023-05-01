@@ -51,3 +51,14 @@
 #define ENGINE_CONST
 #endif
 
+namespace CE::Internal
+{
+    template<typename T, size_t N>
+    inline size_t _CountOf(T (&arr)[N])
+    {
+        return N;
+    }
+}
+
+#define COUNTOF(x) CE::Internal::_CountOf(x)
+

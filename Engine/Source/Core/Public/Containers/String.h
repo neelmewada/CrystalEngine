@@ -199,8 +199,14 @@ namespace CE
             return String(std::to_string(value));
         }
 
+	    template<typename  T>
+        static auto Arg(const char* name, const T& arg)
+        {
+            return fmt::arg(name, arg);
+        }
+	    
         template<typename... Args>
-        static inline String Format(String str, Args... args)
+        static String Format(String str, Args... args)
         {
             return String(fmt::vformat(str.Buffer, fmt::make_format_args(args...)));
         }

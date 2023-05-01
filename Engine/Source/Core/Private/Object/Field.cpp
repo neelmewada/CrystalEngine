@@ -3,9 +3,21 @@
 
 namespace CE
 {
+    void FieldType::ConstructInternal()
+    {
+        fieldFlags = FIELD_NoFlags;
+
+        if (!HasAttribute("NonSerialized"))
+            fieldFlags |= FIELD_Serializable;
+        if (HasAttribute("Hidden"))
+            fieldFlags |= FIELD_Hidden;
+        if (HasAttribute("Config"))
+            fieldFlags |= FIELD_Config;
+    }
+
     String FieldType::GetDisplayName()
     {
-        String displayAttrib = GetAttribute("Display").GetString();
+        String displayAttrib = GetAttribute("Display").GetStringValue();
 
         if (!displayAttrib.IsEmpty())
             return displayAttrib;
@@ -26,14 +38,14 @@ namespace CE
         return false;
     }
 
-    bool FieldType::IsSerialized()
+    bool FieldType::IsSerialized() const
     {
-        return !HasAttribute("NonSerialized");
+        return fieldFlags & FIELD_Serializable;
     }
 
-    bool FieldType::IsHidden()
+    bool FieldType::IsHidden() const
     {
-        return HasAttribute("Hidden");
+        return fieldFlags & FIELD_Hidden;
     }
 
     const TypeInfo* FieldType::GetDeclarationType() const

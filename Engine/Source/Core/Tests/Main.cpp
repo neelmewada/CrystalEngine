@@ -6,8 +6,12 @@
 
 #include <gtest/gtest.h>
 
-#define TEST_BEGIN CE::ModuleManager::Get().LoadModule("Core");
-#define TEST_END CE::ModuleManager::Get().UnloadModule("Core");
+#define TEST_BEGIN\
+    CE::gProjectPath = PlatformDirectories::GetLaunchDir();\
+    CE::ModuleManager::Get().LoadModule("Core");
+
+#define TEST_END\
+    CE::ModuleManager::Get().UnloadModule("Core");
 
 #define LOG(x) std::cout << x << std::endl
 
@@ -21,7 +25,7 @@ using namespace CE;
 
 TEST(Performance, Module_Load_10x)
 {
-    ModuleManager::Get().LoadModule("Core");
+    TEST_BEGIN;
     ModuleManager::Get().UnloadModule("Core");
 
     ModuleManager::Get().LoadModule("Core");
@@ -49,7 +53,7 @@ TEST(Performance, Module_Load_10x)
     ModuleManager::Get().UnloadModule("Core");
 
     ModuleManager::Get().LoadModule("Core");
-    ModuleManager::Get().UnloadModule("Core");
+    TEST_END;
 }
 
 #pragma endregion
@@ -127,32 +131,41 @@ TEST(Containers, String)
 {
     TEST_BEGIN;
 
+    // 1. Split tests
+
     String str = "CE::Editor::Qt::StyleManager";
     Array<String> components{};
     str.Split("::", components);
-
     EXPECT_EQ(components.GetSize(), 4);
     EXPECT_EQ(components[0], "CE");
     EXPECT_EQ(components[1], "Editor");
     EXPECT_EQ(components[2], "Qt");
     EXPECT_EQ(components[3], "StyleManager");
-
-
+    
     str = "::::::CE::Editor";
     components.Clear();
     str.Split("::", components);
-
     EXPECT_EQ(components.GetSize(), 2);
     EXPECT_EQ(components[0], "CE");
     EXPECT_EQ(components[1], "Editor");
 
-
     str = "::";
     components.Clear();
     str.Split("::", components);
-
     EXPECT_EQ(components.GetSize(), 0);
 
+    // 2. Format Tests
+    
+    EXPECT_EQ(String::Format("{1} - {0} - {2}", 12, "Str", 45.12f), "Str - 12 - 45.12");
+    EXPECT_EQ(String::Format("Base{NAME} - {}", 12, String::Arg("NAME", "Project")), "BaseProject - 12");
+
+    const String platformName = PlatformMisc::GetPlatformName();
+    EXPECT_EQ(String::Format("{ENGINE}/Config/{PLATFORM}{TYPE}.ini",
+        String::Arg("ENGINE", "@EnginePath"),
+        String::Arg("PLATFORM", platformName),
+        String::Arg("TYPE", "ProjectSettings")),
+        "@EnginePath/Config/" + platformName + "ProjectSettings.ini");
+    
     TEST_END;
 }
 
@@ -243,7 +256,6 @@ TEST(Reflection, TypeId)
     EXPECT_EQ(TYPEID(Object*), TYPEID(Object));
     EXPECT_EQ(TYPEID(const Object*), TYPEID(Object));
     EXPECT_EQ(TYPEID(const Object*), TYPEID(const Object));
-    EXPECT_EQ(TYPEID(const Object const*), TYPEID(Object));
 
     EXPECT_EQ(TYPEID(f32), TYPEID(f32*));
 
@@ -342,19 +354,19 @@ TEST(Reflection, Attribute_Parsing)
     auto attrib = classType->GetAttributes();
     EXPECT_TRUE(attrib.HasKey("Display"));
     EXPECT_TRUE(classType->GetAttribute("Display").IsString());
-    EXPECT_EQ(classType->GetAttribute("Display").GetString(), "My Class Display Name");
+    EXPECT_EQ(classType->GetAttribute("Display").GetStringValue(), "My Class Display Name");
 
     EXPECT_TRUE(classType->HasAttribute("meta"));
     EXPECT_TRUE(classType->GetAttribute("meta").IsMap());
-    EXPECT_EQ(classType->GetAttribute("meta")["Id"].GetString(), "4124");
-    EXPECT_EQ(classType->GetAttribute("meta")["Tooltip"].GetString(), "A tooltip description");
+    EXPECT_EQ(classType->GetAttribute("meta")["Id"].GetStringValue(), "4124");
+    EXPECT_EQ(classType->GetAttribute("meta")["Tooltip"].GetStringValue(), "A tooltip description");
 
     EXPECT_TRUE(classType->HasAttribute("Redirects"));
     EXPECT_TRUE(classType->GetAttribute("Redirects").IsMap());
     EXPECT_TRUE(classType->GetAttribute("Redirects").HasKey("SomeOldName"));
-    EXPECT_EQ(classType->GetAttribute("Redirects")["SomeOldName"].GetString(), "");
+    EXPECT_EQ(classType->GetAttribute("Redirects")["SomeOldName"].GetStringValue(), "");
     EXPECT_TRUE(classType->GetAttribute("Redirects").HasKey("Old Name"));
-    EXPECT_EQ(classType->GetAttribute("Redirects")["Old Name"].GetString(), "");
+    EXPECT_EQ(classType->GetAttribute("Redirects")["Old Name"].GetStringValue(), "");
 
     CE_DEREGISTER_TYPES(Core_Reflection_Attribute_Test_Class);
     EXPECT_EQ(GetTypeInfo(TYPEID(Core_Reflection_Attribute_Test_Class)), nullptr);
@@ -371,11 +383,11 @@ TEST(Reflection, Attribute_Parsing)
 
 #pragma region Config
 
-TEST(Config, FileParsing)
+TEST(Config, BasicParsing)
 {
     TEST_BEGIN;
     
-    String fileName = "CoreTestConfig.ini";
+    String fileName = "CoreTemporaryConfig.ini";
     auto configPath = PlatformDirectories::GetLaunchDir() / "Config" / fileName;
     if (configPath.Exists())
         IO::Path::Remove(configPath);
@@ -396,22 +408,50 @@ TEST(Config, FileParsing)
     stream << "+Bindings=(Name=\"A\",Command=\"Foo\")\n";
     stream << "+Bindings=(Name=\"B\",Command=\"Too\")\n";
     stream << "-Bindings=(Name=\"A\",Command=\"Foo\")\n";
+    stream << "ExampleString=This is an example of long string\n";
     
     std::string str = stream.str();
     file.Write(str.size(), str.data());
     file.Close();
     
     ConfigFile configFile{};
-    configFile.Read(fileName);
+    configFile.Read(configPath);
     
     EXPECT_EQ(configFile.GetSize(), 1);
-    EXPECT_EQ(configFile["CE::GeneralSettings"].GetSize(), 2);
-    EXPECT_EQ(configFile["CE::GeneralSettings"]["ExampleBool"].GetStringValue(), "false");
+    EXPECT_EQ(configFile["CE::GeneralSettings"].GetSize(), 3);
+    EXPECT_EQ(configFile["CE::GeneralSettings"]["ExampleBool"].GetString(), "false");
     auto& bindingsArray = configFile["CE::GeneralSettings"]["Bindings"].GetArray();
     EXPECT_EQ(bindingsArray.GetSize(), 1);
     EXPECT_EQ(bindingsArray[0], "(Name=\"B\",Command=\"Too\")");
+    EXPECT_TRUE(configFile["CE::GeneralSettings"].KeyExists("ExampleString"));
+    EXPECT_EQ(configFile["CE::GeneralSettings"]["ExampleString"].GetString(), "This is an example of long string");
     
     IO::Path::Remove(configPath);
+    
+    TEST_END;
+}
+
+TEST(Config, HierarchicalParsing)
+{
+    TEST_BEGIN;
+
+    auto engineConfig = gConfigCache->GetConfigFile(CFG_Test);
+
+    EXPECT_TRUE(engineConfig->SectionExists("Test::0"));
+    auto test0Section = engineConfig->Get("Test::0");
+    
+    EXPECT_EQ(test0Section.GetSize(), 4);
+    EXPECT_TRUE(test0Section.KeyExists("boolValue"));
+    EXPECT_TRUE(test0Section.KeyExists("floatValue"));
+    EXPECT_TRUE(test0Section.KeyExists("stringValue"));
+    EXPECT_TRUE(test0Section.KeyExists("arrayValue"));
+
+    EXPECT_EQ(test0Section["boolValue"].GetString(), "true");
+    EXPECT_EQ(test0Section["stringValue"].GetString(), "An even longer string value. This can be a description text.");
+    EXPECT_EQ(test0Section["floatValue"].GetString(), "12.24");
+    EXPECT_TRUE(test0Section["arrayValue"].IsArray());
+    EXPECT_TRUE(test0Section["arrayValue"].GetArray().GetSize(), 2);
+    EXPECT_EQ(test0Section["arrayValue"].GetArray()[0], "Item1");
     
     TEST_END;
 }
@@ -431,8 +471,7 @@ class ObjectLifecycleTestClass : public Object
 {
     CE_CLASS(ObjectLifecycleTestClass, Object)
 public:
-   
-
+    
     ObjectLifecycleTestClass() : Object()
     {
         ObjectLifecycleTestClass_InitFlags = GetFlags();
@@ -460,13 +499,14 @@ TEST(Object, Lifecycle)
     // 1. Basic object creation
 
     auto instance = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient);
+    EXPECT_EQ(ObjectLifecycleTestClass_InitFlags, OF_Transient);
     EXPECT_EQ(instance->GetFlags(), OF_Transient);
     EXPECT_EQ(instance->GetName(), "MyObject");
 
     delete instance;
     instance = nullptr;
     
-    ObjectLifecycleTestClass* i1 = nullptr, *i2 = nullptr;
+    ObjectLifecycleTestClass* i1 = nullptr,* i2 = nullptr;
     
     // 2. Objects in different threads
     
@@ -505,6 +545,15 @@ TEST(Object, Lifecycle)
     TEST_END;
 }
 
+
+TEST(Object, CDI)
+{
+    TEST_BEGIN;
+
+    
+    
+    TEST_END;
+}
 
 #pragma endregion
 

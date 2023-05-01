@@ -32,7 +32,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PUBLIC
             CE::Core
             CE::System
-        TARGETS EngineConfig
+        TARGETS Config
         MACFRAMEWORKS
             QuartzCore
     RUNTIME_DEPENDENCIES

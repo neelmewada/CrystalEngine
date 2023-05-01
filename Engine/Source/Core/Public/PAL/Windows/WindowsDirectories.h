@@ -16,6 +16,12 @@ namespace CE
 
         static IO::Path GetAppRootDir();
 
+        // Returns the root directory of the engine installation
+        static IO::Path GetEngineRootDir();
+
+        // Returns the root directory of the game installation
+        static IO::Path GetGameRootDir();
+
         static IO::Path GetEngineDir();
         static IO::Path GetEditorDir();
         static IO::Path GetGameDir();

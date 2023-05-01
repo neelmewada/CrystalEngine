@@ -26,6 +26,8 @@ namespace CE
     typedef uintptr_t UintPtr;
 
     typedef intptr_t PtrDiff;
+
+    typedef char CHAR;
 }
 
 #if IS_64BIT

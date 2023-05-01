@@ -105,10 +105,10 @@ namespace CE
 
 		inline operator String() const
 		{
-			return GetString();
+			return GetStringValue();
 		}
 
-		String GetString() const
+		String GetStringValue() const
 		{
 			if (!IsString())
 				return "";

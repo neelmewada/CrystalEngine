@@ -59,8 +59,7 @@ namespace CE\
 {\
 	template<>\
 	struct StructTypeData<Namespace::Class> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Class, SuperClasses)>\
-	{\
-	};\
+	{};\
 	namespace Internal\
 	{\
 		template<>\
@@ -87,10 +86,6 @@ namespace CE\
 			virtual Object* CreateInstance() const override\
 			{\
 				return CE_EXPAND(CE_CONCATENATE(__CE_NEW_INSTANCE_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
-			}\
-			virtual void DestroyInstance(Object* instance) const override\
-			{\
-				delete (Namespace::Class*)instance;\
 			}\
 			virtual void InitializeDefaults(void* instance) const override\
 			{\
@@ -138,6 +133,7 @@ CE::ClassType* Namespace::Class::Type()\
 #define __CE_RTTI_SUPERCLASS_8(SuperClass, ...) __CE_RTTI_SUPERCLASS_1(SuperClass);
 
 #define __CE_RTTI_SUPERCLASS(...) CE_MACRO_EXPAND(CE_CONCATENATE(__CE_RTTI_SUPERCLASS_, CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
+
 
 #define CE_CLASS(Class, ...)\
 public:\

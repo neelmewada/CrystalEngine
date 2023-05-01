@@ -31,12 +31,12 @@ namespace CE
             return arrayValue[0];
         }
         
-        String& GetStringValue()
+        String& GetString()
         {
             return arrayValue[0];
         }
         
-        const String& GetStringValue() const
+        const String& GetString() const
         {
             return arrayValue[0];
         }
@@ -56,7 +56,7 @@ namespace CE
             return arrayValue.GetSize() > 0;
         }
 
-        bool IsArrayValue() const
+        bool IsArray() const
         {
             return isArrayValue;
         }
@@ -64,6 +64,13 @@ namespace CE
         void SetAsString()
         {
             isArrayValue = false;
+        }
+
+        void SetAsString(String value)
+        {
+            isArrayValue = false;
+            arrayValue.Clear();
+            arrayValue.Add(value);
         }
 
         void SetAsArray()
@@ -92,6 +99,11 @@ namespace CE
     class CORE_API ConfigSection : public ConfigSectionMap
     {
     public:
+
+        bool ValueExists(const String& configKey) const
+        {
+            return KeyExists(configKey);
+        }
         
     private:
         friend class ConfigFile;
@@ -101,6 +113,8 @@ namespace CE
     class CORE_API ConfigFile : public HashMap<Name, ConfigSection>
     {
     public:
+        typedef HashMap<Name, ConfigSection> Super;
+        
         ConfigFile();
         virtual ~ConfigFile();
 
@@ -108,13 +122,35 @@ namespace CE
         {
             return this->KeyExists(sectionName);
         }
-        
-        void Read(const String& fileName);
+
+        void Read(const IO::Path& configPath);
         
     private:
         
-        void ReadInternal(const IO::Path& configPath);
+    };
+
+    class CORE_API ConfigCache
+    {
+    public:
+        ConfigCache();
+        virtual ~ConfigCache();
+
+        String FindBaseConfigFileName(ConfigType type);
+        String FindBaseConfigFileName(ConfigType type, String platform);
+
+        void LoadStartupConfigs();
         
+        void LoadConfig(const ConfigType& type);
+
+        Array<IO::Path> GetConfigPaths(const ConfigType& type);
+        
+        ConfigFile* GetConfigFile(const ConfigType& type);
+
+        void Clear();
+        
+    private:
+        // Map: ConfigType -> ConfigFile
+        HashMap<ConfigType, ConfigFile*> cache{};
     };
     
 } // namespace CE

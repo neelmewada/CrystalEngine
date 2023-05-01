@@ -9,11 +9,21 @@ namespace CE
 
     void CoreModule::StartupModule()
     {
-        gTransientPackage = NewObject<Package>(nullptr, TEXT("Engine::Transient"));
+#if PAL_TRAIT_BUILD_EDITOR
+        if (gProjectPath.IsEmpty()) // Editor: gProjectPath should be set before loading Core
+            gProjectPath = PlatformDirectories::GetEngineRootDir();
+#else
+        // Runtime
+        gProjectPath = PlatformDirectories::GetGameRootDir();
+#endif
 
-        delegateHandlesToRemove.AddRange({
-            CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule)
-        });
+        // Load Configs 
+        gConfigCache = new ConfigCache;
+        gConfigCache->LoadStartupConfigs();
+    
+        gTransientPackage = NewObject<Package>(nullptr, TEXT("Engine::Transient"));
+        
+        onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }
 
     void CoreModule::ShutdownModule()
@@ -21,11 +31,12 @@ namespace CE
         delete gTransientPackage;
         gTransientPackage = nullptr;
 
-        while (delegateHandlesToRemove.GetSize() > 0)
-        {
-            CoreDelegates::onBeforeModuleUnload.RemoveDelegateInstance(delegateHandlesToRemove[0]);
-            delegateHandlesToRemove.RemoveAt(0);
-        }
+        delete gConfigCache;
+        gConfigCache = nullptr;
+
+        gProjectPath = "";
+        
+        CoreDelegates::onBeforeModuleUnload.RemoveDelegateInstance(onBeforeModuleUnloadHandle);
     }
 
     void CoreModule::RegisterTypes()
@@ -56,14 +67,6 @@ namespace CE
             SystemComponent,
             Package
         );
-        
-        regCount = TypeInfo::GetRegisteredCount();
-        auto objectClassStatic = GetStaticClass<Object>();
-        auto objectClass = ClassType::FindClass(TYPEID(Object));
-        if (objectClass != objectClassStatic)
-        {
-            CE_LOG(Error, All, "Object classes unequal!");
-        }
     }
 
 }

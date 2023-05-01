@@ -28,7 +28,7 @@ ce_add_target(System SHARED
         PUBLIC
             CE::Core
             CE::CoreMedia
-        TARGETS EngineConfig EngineAssets
+        TARGETS Config EngineAssets
     RUNTIME_DEPENDENCIES
         
 )

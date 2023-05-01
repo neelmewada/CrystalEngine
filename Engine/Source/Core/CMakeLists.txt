@@ -32,7 +32,7 @@ ce_add_target(Core SHARED
             ThirdParty::spdlog
             ThirdParty::yaml
             ThirdParty::efsw
-        TARGETS EngineConfig EngineAssets
+        TARGETS Config EngineAssets
     RUNTIME_DEPENDENCIES
         
 )

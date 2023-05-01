@@ -329,7 +329,6 @@ namespace CE
 		{
 		public:
 			virtual Object* CreateInstance() const = 0;
-			virtual void DestroyInstance(Object* instance) const = 0;
 			
 			virtual void InitializeDefaults(void* instance) const = 0;
 
@@ -384,13 +383,6 @@ namespace CE
 			if (Impl == nullptr)
 				return nullptr;
 			return Impl->CreateInstance();
-		}
-
-		virtual void DestroyInstance(Object* instance) const
-		{
-			if (Impl == nullptr)
-				return;
-			return Impl->DestroyInstance(instance);
 		}
 
 		virtual bool CanBeInstantiated() const

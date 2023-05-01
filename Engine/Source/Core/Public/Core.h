@@ -15,6 +15,6 @@ namespace CE
         void RegisterTypes() override;
 
     private:
-        Array<DelegateHandle> delegateHandlesToRemove{};
+        DelegateHandle onBeforeModuleUnloadHandle{};
     };
 }

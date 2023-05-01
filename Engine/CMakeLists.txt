@@ -6,7 +6,7 @@ project(Engine)
 add_subdirectory(Assets)
 
 # Engine Config
-add_subdirectory(Config)
+#add_subdirectory(Config)
 
 # Engine Modules
 add_subdirectory(Source/Core)

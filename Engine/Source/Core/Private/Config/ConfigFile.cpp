@@ -17,23 +17,7 @@ namespace CE
         
     }
 
-    void ConfigFile::Read(const String& fileName)
-    {
-#if PAL_TRAIT_BUILD_EDITOR
-        IO::Path configPath = ProjectSettings::Get().GetEditorProjectDirectory() / "Config" / fileName;
-#else
-        IO::Path configPath = PlatformDirectories::GetAppRootDir() / "Config" / fileName;
-#endif
-
-        if (!configPath.Exists())
-            configPath = PlatformDirectories::GetAppRootDir() / "Config" / fileName;
-        if (!configPath.Exists())
-            return;
-        
-        ReadInternal(configPath);
-    }
-
-    void ConfigFile::ReadInternal(const IO::Path& configPath)
+    void ConfigFile::Read(const IO::Path& configPath)
     {
         IO::FileStream inFile = IO::FileStream(configPath.GetString(), IO::OpenMode::ModeRead);
         if (!inFile.IsOpen())
@@ -50,10 +34,13 @@ namespace CE
 
         for (int i = 0; i < len; i++)
         {
-            if (buffer[i] == '\n')
+            bool isLast = i == len - 1;
+            if (buffer[i] == '\n' || (!isLast && buffer[i] == '\r' && buffer[i + 1] == '\n') || isLast)
             {
+                if (isLast && buffer[i] != '\n' && buffer[i] != '\r') i++;
+                
                 auto view = StringView(buffer + startIdx, i - startIdx);
-                if (view.IsEmpty())
+                if (view.IsEmpty() || view.StartsWith(";")) // ; Comment
                 {
                     startIdx = i + 1;
                     continue;
@@ -85,7 +72,7 @@ namespace CE
                         
                         if (currentSection.IsValid() && this->SectionExists(currentSection))
                         {
-                            auto& section = this->Get(currentSection);
+                            auto& section = Super::operator[](currentSection);
 
                             bool isPlus = keyView.StartsWith("+");
                             bool isMinus = keyView.StartsWith("-");
@@ -139,7 +126,11 @@ namespace CE
                                 if (!keyAlreadyExists)
                                     section.Add({ String(keyView), ConfigValue(valueView) });
                                 else
-                                    section[keyView] = ConfigValue(valueView);
+                                {
+                                    section[keyView].SetAsString();
+                                    section[keyView].GetArray().Clear();
+                                    section[keyView].GetArray().Add(valueView);
+                                }
                             }
                         }
                     }
@@ -154,5 +145,143 @@ namespace CE
         delete bufferPtr;
     }
 
+    /*
+     *  Config Cache
+     */
+
+    ConfigCache::ConfigCache()
+    {
+        
+    }
+
+    ConfigCache::~ConfigCache()
+    {
+        Clear();
+    }
+
+    String ConfigCache::FindBaseConfigFileName(ConfigType type)
+    {
+        int count = COUNTOF(gConfigLayers);
+        auto engineRootDir = PlatformDirectories::GetEngineRootDir();
+        
+        for (int i = 0; i < count; i++)
+        {
+            if (gConfigLayers[i].displayName == "Base")
+            {
+                return String::Format(gConfigLayers[i].relativePath,
+                    String::Arg("ENGINE", engineRootDir),
+                    String::Arg("TYPE", type.name.GetString()));
+            }
+        }
+        
+        return "";
+    }
+
+    String ConfigCache::FindBaseConfigFileName(ConfigType type, String platform)
+    {
+        int count = COUNTOF(gConfigLayers);
+        auto engineRootDir = PlatformDirectories::GetEngineRootDir();
+        
+        for (int i = 0; i < count; i++)
+        {
+            if (gConfigLayers[i].displayName == "BasePlatform")
+            {
+                return String::Format(gConfigLayers[i].relativePath,
+                    String::Arg("ENGINE", engineRootDir),
+                    String::Arg("TYPE", type.name.GetString()),
+                    String::Arg("PLATFORM", platform));
+            }
+        }
+        
+        return "";
+    }
+
+    void ConfigCache::LoadStartupConfigs()
+    {
+        gConfigCache->LoadConfig(CFG_Engine);
+        gConfigCache->LoadConfig(CFG_Game);
+#if PAL_TRAIT_BUILD_EDITOR
+        gConfigCache->LoadConfig(CFG_Editor);
+#endif
+#if PAL_TRAIT_BUILD_TESTS
+        gConfigCache->LoadConfig(CFG_Test);
+#endif
+    }
+
+    void ConfigCache::LoadConfig(const ConfigType& type)
+    {
+        if (cache.KeyExists(type))
+            return;
+
+        auto engineRootDir = PlatformDirectories::GetEngineRootDir();
+        auto projectRootDir = gProjectPath;
+        auto platformName = PlatformMisc::GetPlatformName();
+
+        int layerCount = COUNTOF(gConfigLayers);
+
+        ConfigFile* file = new ConfigFile;
+
+        for (int i = 0; i < layerCount; i++)
+        {
+            IO::Path configPath = String::Format(gConfigLayers[i].relativePath,
+                String::Arg("ENGINE", engineRootDir),
+                String::Arg("TYPE", type.name.GetString()),
+                String::Arg("PLATFORM", platformName),
+                String::Arg("PROJECT", projectRootDir));
+
+            if (!configPath.Exists())
+                continue;
+            file->Read(configPath);
+        }
+
+        cache.Add({ type, file });
+    }
+
+    Array<IO::Path> ConfigCache::GetConfigPaths(const ConfigType& type)
+    {
+        int layerCount = COUNTOF(gConfigLayers);
+        Array<IO::Path> result{};
+
+        auto engineRootDir = PlatformDirectories::GetEngineRootDir();
+        auto projectRootDir = gProjectPath;
+        auto platformName = PlatformMisc::GetPlatformName();
+        
+        for (int i = 0; i < layerCount; i++)
+        {
+            IO::Path configPath = String::Format(gConfigLayers[i].relativePath,
+                String::Arg("ENGINE", engineRootDir),
+                String::Arg("TYPE", type.name.GetString()),
+                String::Arg("PLATFORM", platformName),
+                String::Arg("PROJECT", projectRootDir));
+
+            result.Add(configPath);
+        }
+
+        return result;
+    }
+
+    void ConfigCache::Clear()
+    {
+        for (auto [configType, configFile] : cache)
+        {
+            delete configFile;
+        }
+        
+        cache.Clear();
+    }
+
+    ConfigFile* ConfigCache::GetConfigFile(const ConfigType& type)
+    {
+        if (!cache.KeyExists(type))
+        {
+            LoadConfig(type);
+        }
+
+        if (!cache.KeyExists(type))
+            return nullptr;
+
+        return cache[type];
+    }
+    
 } // namespace CE
 

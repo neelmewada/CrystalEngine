@@ -2,6 +2,7 @@
 
 // Basic headers
 #include "CoreTypes.h"
+#include "CoreGlobals.h"
 
 // ******************************************************
 // Basic headers
@@ -46,6 +47,8 @@
 #include "Math/Color.h"
 
 // Config
+#include "Config/ConfigTypes.h"
+#include "Config/ConfigLayers.h"
 #include "Config/ConfigFile.h"
 
 // ******************************************************

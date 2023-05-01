@@ -34,8 +34,9 @@ namespace CE
 			ObjectFlags objectFlags{};
 		};
 
+		/// For internal use only
 		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params);
-
+		
 	}
 
 	template<typename TClass> requires std::is_base_of<Object, TClass>::value

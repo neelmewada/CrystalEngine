@@ -25,9 +25,12 @@ include(CMake/Targets.cmake)
 include(CMake/ThirdParty.cmake)
 include(CMake/Assets.cmake)
 include(CMake/Tests.cmake)
+include(CMake/ConfigIni.cmake)
 
 # Import 3rd Party libraries
 add_subdirectory(ThirdParty)
+
+add_subdirectory(Config)
 
 # Build Engine
 add_subdirectory(Engine)

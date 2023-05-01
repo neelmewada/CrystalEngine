@@ -24,7 +24,7 @@ function(ce_add_test NAME)
 
     set(options AUTORTTI)
     set(oneValueArgs TARGET FOLDER)
-    set(multiValueArgs SOURCES)
+    set(multiValueArgs SOURCES BUILD_DEPENDENCIES)
 
     cmake_parse_arguments(ce_add_test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -43,6 +43,34 @@ function(ce_add_test NAME)
 
     if(${PAL_PLATFORM_IS_MAC})
         target_link_libraries(${NAME} PRIVATE "c" "c++")
+    endif()
+
+    # BUILD_DEPENDENCIES
+
+    set(multiValueArgs PRIVATE PUBLIC INTERFACE TARGETS MACFRAMEWORKS)
+    cmake_parse_arguments(ce_add_test_BUILD_DEPENDENCIES "" "" "${multiValueArgs}" ${ce_add_test_BUILD_DEPENDENCIES})
+
+    if(${PAL_PLATFORM_IS_MAC})
+        list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "c")
+        list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "c++")
+        list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "-framework CoreServices")
+        if(ce_add_test_BUILD_DEPENDENCIES_MACFRAMEWORKS)
+            foreach(framework ${ce_add_test_BUILD_DEPENDENCIES_MACFRAMEWORKS})
+                list(APPEND ce_add_test_BUILD_DEPENDENCIES_PRIVATE "-framework ${framework}")
+            endforeach()
+        endif()
+    endif()
+
+    if(ce_add_test_BUILD_DEPENDENCIES_PRIVATE OR ce_add_test_BUILD_DEPENDENCIES_PUBLIC OR ce_add_test_BUILD_DEPENDENCIES_INTERFACE)
+        target_link_libraries(${NAME}
+            PRIVATE   ${ce_add_test_BUILD_DEPENDENCIES_PRIVATE}
+            PUBLIC    ${ce_add_test_BUILD_DEPENDENCIES_PUBLIC}
+            INTERFACE ${ce_add_test_BUILD_DEPENDENCIES_INTERFACE}
+        )
+    endif()
+
+    if(ce_add_test_BUILD_DEPENDENCIES_TARGETS)
+        add_dependencies(${NAME} ${ce_add_test_BUILD_DEPENDENCIES_TARGETS})
     endif()
 
     add_test(${NAME} ${NAME})

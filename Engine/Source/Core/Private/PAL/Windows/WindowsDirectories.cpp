@@ -4,19 +4,29 @@
 #include <Windows.h>
 #include <ShlObj_core.h>
 
-#define MAX_PATH 512
+#define MAX_PATH_SIZE 512
 
 namespace CE
 {
 
     IO::Path WindowsDirectories::GetLaunchDir()
     {
-        static char buffer[MAX_PATH];
-        GetModuleFileNameA(NULL, buffer, MAX_PATH);
+        static char buffer[MAX_PATH_SIZE];
+        GetModuleFileNameA(NULL, buffer, MAX_PATH_SIZE);
         return IO::Path(String(buffer)).GetParentPath();
     }
 
     IO::Path WindowsDirectories::GetAppRootDir()
+    {
+        return GetLaunchDir();
+    }
+
+    IO::Path WindowsDirectories::GetEngineRootDir()
+    {
+        return GetLaunchDir();
+    }
+
+    IO::Path WindowsDirectories::GetGameRootDir()
     {
         return GetLaunchDir();
     }

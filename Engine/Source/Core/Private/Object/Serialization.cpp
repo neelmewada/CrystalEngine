@@ -620,7 +620,7 @@ namespace CE
                 {
                     String formerKey = "";
                     if (field->HasAttribute("FormerlySerializedAs"))
-                        formerKey = field->GetAttribute("FormerlySerializedAs").GetString();
+                        formerKey = field->GetAttribute("FormerlySerializedAs").GetStringValue();
 
                     if (formerKey.IsEmpty() || !root[formerKey.GetCString()].IsDefined())
                     {

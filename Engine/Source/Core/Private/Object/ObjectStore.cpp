@@ -32,7 +32,7 @@ namespace CE
 	{
 		for (auto [uuid, object] : objects)
 		{
-			delete object;
+			object->RequestDestroy();
 		}
 		Clear();
 	}

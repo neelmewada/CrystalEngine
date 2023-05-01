@@ -214,9 +214,7 @@ template <> struct fmt::formatter<CE::IO::Path> {
         // Return an iterator past the end of the parsed range:
         return ctx.end();
     }
-
-    // Formats the point p using the parsed format specification (presentation)
-    // stored in this formatter.
+    
     template <typename FormatContext>
     auto format(const CE::IO::Path& path, FormatContext& ctx) const -> decltype(ctx.out()) {
         // ctx.out() is an output iterator to write to.
@@ -227,7 +225,7 @@ template <> struct fmt::formatter<CE::IO::Path> {
 namespace CE
 {
     template<>
-    inline SIZE_T GetHash<CE::IO::Path>(const CE::IO::Path& value)
+    inline SIZE_T GetHash<IO::Path>(const IO::Path& value)
     {
         return fs::hash_value(value.impl);
     }

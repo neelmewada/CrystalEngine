@@ -14,4 +14,6 @@ ce_add_test(${PROJECT_NAME}
     FOLDER "Tests/Engine"
     SOURCES
         ${SRCS}
+    BUILD_DEPENDENCIES
+        TARGETS Config
 )

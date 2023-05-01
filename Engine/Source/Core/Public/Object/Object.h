@@ -44,11 +44,11 @@ namespace CE
     class CORE_API Object
     {
         CE_CLASS(Object)
-    public:
+    protected:
         Object();
 
         Object(const ObjectInitializer& initializer);
-
+        
         virtual ~Object();
 
     private:
@@ -59,22 +59,22 @@ namespace CE
     public:
 
         // - Getters & Setters -
-        CE_INLINE CE::String GetName() const
+        INLINE CE::String GetName() const
         {
             return name;
         }
 
-        CE_INLINE void SetName(CE::String newName)
+        INLINE void SetName(CE::String newName)
         {
             this->name = newName;
         }
         
-        CE_INLINE UUID GetUuid() const
+        INLINE UUID GetUuid() const
         {
             return uuid;
         }
 
-        CE_INLINE TypeId GetTypeId() const
+        INLINE TypeId GetTypeId() const
         {
             return GetType()->GetTypeId();
         }
@@ -84,35 +84,53 @@ namespace CE
             return creationThreadId;
         }
 
-        ObjectFlags GetFlags() const
+        INLINE ObjectFlags GetFlags() const
         {
             return objectFlags;
         }
 
-        bool HasAllFlags(ObjectFlags flags) const
+        INLINE bool HasAllFlags(ObjectFlags flags) const
         {
             return (objectFlags & flags) == flags;
         }
 
-        bool HasAnyFlag(ObjectFlags flags) const
+        INLINE bool HasAnyFlag(ObjectFlags flags) const
         {
             return (objectFlags & flags) != 0;
         }
 
-        void EnableFlags(ObjectFlags flags)
+        INLINE void EnableFlags(ObjectFlags flags)
         {
-            objectFlags = (ObjectFlags)(objectFlags | flags);
+            objectFlags = objectFlags | flags;
         }
 
-        void DisableFlags(ObjectFlags flags)
+        INLINE void DisableFlags(ObjectFlags flags)
         {
-            objectFlags = (ObjectFlags)(objectFlags & ~flags);
+            objectFlags = objectFlags & ~flags;
         }
 
-        // Subobject API
+        INLINE bool IsDefaultInstance() const
+        {
+            return HasAnyFlag(OF_ClassDefaultInstance);
+        }
+
+        INLINE bool IsTemplate() const
+        {
+            return HasAnyFlag(OF_TemplateInstance);
+        }
+
+        INLINE bool IsTransient() const
+        {
+            return HasAnyFlag(OF_Transient);
+        }
+
+        // Lifecycle
 
         void AttachSubobject(Object* subobject);
+        
         void DetachSubobject(Object* subobject);
+
+        void RequestDestroy();
 
 		// Signal-Event API
         
@@ -126,7 +144,7 @@ namespace CE
         void Unbind(FunctionType* sourceSignal);
         void UnbindAll(Object* destinationObject);
         
-        void FireSignal(Name signalName, const CE::Array<CE::Variant>& params);
+        void FireSignal(Name signalName, const Array<Variant>& params);
 
         // - Public API -
 
@@ -141,6 +159,9 @@ namespace CE
         
         friend class EventBus;
         friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);
+
+        template<typename T>
+        friend struct Internal::TypeInfoImpl;
 
         CE::String name;
         CE::UUID uuid;
