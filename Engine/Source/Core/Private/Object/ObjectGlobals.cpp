@@ -22,11 +22,6 @@ namespace CE
 			if (instance == nullptr)
 				return nullptr;
 
-			if (params.templateObject != nullptr)
-			{
-				// TODO: Construct from template
-			}
-
 			String name = params.name;
 			if (instance->GetName().IsEmpty())
 				name = params.objectClass->GenerateInstanceName(instance->GetUuid()).GetString();

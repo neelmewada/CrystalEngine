@@ -44,6 +44,11 @@ namespace CE
             map.Clear();
         }
 
+        static HashMap<ThreadId, T*>& GetMap()
+        {
+            return map;
+        }
+
     private:
 
         ThreadId threadId;

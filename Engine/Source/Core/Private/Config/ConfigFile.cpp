@@ -203,9 +203,6 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
         gConfigCache->LoadConfig(CFG_Editor);
 #endif
-#if PAL_TRAIT_BUILD_TESTS
-        gConfigCache->LoadConfig(CFG_Test);
-#endif
     }
 
     void ConfigCache::LoadConfig(const ConfigType& type)

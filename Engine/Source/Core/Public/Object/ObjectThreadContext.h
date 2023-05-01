@@ -28,7 +28,7 @@ namespace CE
             return objectInitializerStack.IsEmpty() ? nullptr : objectInitializerStack.GetLast();
         }
 
-    private:
+    public:// TODO: Change to private after finish debugging
         friend class ThreadSingleton<ObjectThreadContext>;
 
         Array<ObjectInitializer*> objectInitializerStack{};

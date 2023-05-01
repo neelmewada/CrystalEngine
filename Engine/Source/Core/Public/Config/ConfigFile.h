@@ -33,11 +33,19 @@ namespace CE
         
         String& GetString()
         {
+            static String emptyString{};
+            if (arrayValue.GetSize() == 0)
+                return emptyString;
+            
             return arrayValue[0];
         }
         
         const String& GetString() const
         {
+            static String emptyString{};
+            if (arrayValue.GetSize() == 0)
+                return emptyString;
+            
             return arrayValue[0];
         }
 

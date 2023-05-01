@@ -42,6 +42,7 @@ function(ce_add_assets NAME)
     add_custom_target(${NAME}
         DEPENDS ${DEST_ASSET_FILES}
         VERBATIM
+        SOURCES ${ASSET_FILES}
     )
 
 endfunction()

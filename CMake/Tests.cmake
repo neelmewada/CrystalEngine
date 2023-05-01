@@ -27,7 +27,7 @@ function(ce_add_test NAME)
     set(multiValueArgs SOURCES BUILD_DEPENDENCIES)
 
     cmake_parse_arguments(ce_add_test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
+    
     add_executable(${NAME} ${ce_add_test_SOURCES})
 
     set_target_properties(${NAME} 

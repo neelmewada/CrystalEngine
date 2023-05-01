@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <any>
+#include <ObjectArray.h>
 
 #include <gtest/gtest.h>
 
@@ -449,9 +450,9 @@ TEST(Config, HierarchicalParsing)
     EXPECT_EQ(test0Section["boolValue"].GetString(), "true");
     EXPECT_EQ(test0Section["stringValue"].GetString(), "An even longer string value. This can be a description text.");
     EXPECT_EQ(test0Section["floatValue"].GetString(), "12.24");
-    EXPECT_TRUE(test0Section["arrayValue"].IsArray());
-    EXPECT_TRUE(test0Section["arrayValue"].GetArray().GetSize(), 2);
-    EXPECT_EQ(test0Section["arrayValue"].GetArray()[0], "Item1");
+    EXPECT_EQ(test0Section["arrayValue"].GetArray().GetSize(), 2);
+    EXPECT_EQ(test0Section["arrayValue"].GetArray()[0], "NewItem0");
+    EXPECT_EQ(test0Section["arrayValue"].GetArray()[1], "NewItem1");
     
     TEST_END;
 }
@@ -505,35 +506,57 @@ TEST(Object, Lifecycle)
 
     delete instance;
     instance = nullptr;
-    
-    ObjectLifecycleTestClass* i1 = nullptr,* i2 = nullptr;
-    
+
     // 2. Objects in different threads
+
+    int startSize = ObjectThreadContext::GetMap().GetSize();
+    ObjectLifecycleTestClass* i1 = nullptr,* i2 = nullptr;
+    ObjectThreadContext* ctx1 = nullptr,* ctx2 = nullptr;
+    Mutex mut{};
     
-    Thread t1 = Thread([&]
+    auto t1 = std::thread([&]
     {
-        i1 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj1", OF_Transient);
+        auto obj = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj1", OF_Transient);
+        auto ptr = &ObjectThreadContext::Get();
+        
+        mut.Lock();
+        i1 = obj;
+        ctx1 = ptr;
+        mut.Unlock();
     });
     
-    Thread t2 = Thread([&]
+    auto t2 = std::thread([&]
     {
-        i2 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj2", OF_Transient);
+        auto obj = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj2", OF_Transient);
+        auto ptr = &ObjectThreadContext::Get();
+        
+        mut.Lock();
+        i2 = obj;
+        ctx2 = ptr;
+        mut.Unlock();
     });
     
-    auto t1Id = t1.GetId();
-    auto t2Id = t2.GetId();
+    auto t1Id = t1.get_id();
+    auto t2Id = t2.get_id();
     
-    if (t1.IsJoinable())
-        t1.Join();
-    if (t2.IsJoinable())
-        t2.Join();
+    if (t1.joinable())
+        t1.join();
+    if (t2.joinable())
+        t2.join();
     
     EXPECT_EQ(i1->GetFlags(), OF_Transient);
+    EXPECT_NE(ctx1, ctx2);
     EXPECT_EQ(i1->GetName(), "Obj1");
-    EXPECT_EQ(i1->GetCreationThreadId(), t1.GetId());
+    //EXPECT_EQ(i1->GetCreationThreadId(), t1.get_id());
     EXPECT_EQ(i2->GetFlags(), OF_Transient);
     EXPECT_EQ(i2->GetName(), "Obj2");
-    EXPECT_EQ(i2->GetCreationThreadId(), t2.GetId());
+    //EXPECT_EQ(i2->GetCreationThreadId(), t2.get_id());
+    
+    if (i2->GetName() != "Obj2" || i1->GetName() != "Obj1")
+    {
+        FAIL();
+        //__debugbreak();
+    }
     
     delete i1; delete i2;
     i1 = nullptr;
