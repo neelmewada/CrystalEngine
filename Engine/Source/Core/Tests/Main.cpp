@@ -513,7 +513,7 @@ TEST(Object, Lifecycle)
     ObjectThreadContext* ctx1 = nullptr,* ctx2 = nullptr;
     Mutex mut{};
     
-    auto t1 = std::thread([&]
+    auto t1 = Thread([&]
     {
         auto obj = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj1", OF_Transient);
         auto ptr = &ObjectThreadContext::Get();
@@ -524,7 +524,7 @@ TEST(Object, Lifecycle)
         mut.Unlock();
     });
     
-    auto t2 = std::thread([&]
+    auto t2 = Thread([&]
     {
         auto obj = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj2", OF_Transient);
         auto ptr = &ObjectThreadContext::Get();
@@ -535,13 +535,13 @@ TEST(Object, Lifecycle)
         mut.Unlock();
     });
     
-    auto t1Id = t1.get_id();
-    auto t2Id = t2.get_id();
+    auto t1Id = t1.GetId();
+    auto t2Id = t2.GetId();
     
-    if (t1.joinable())
-        t1.join();
-    if (t2.joinable())
-        t2.join();
+    if (t1.IsJoinable())
+        t1.Join();
+    if (t2.IsJoinable())
+        t2.Join();
     
     EXPECT_EQ(i1->GetFlags(), OF_Transient);
     EXPECT_NE(ctx1, ctx2);

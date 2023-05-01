@@ -62,7 +62,7 @@ namespace CE
     {
         CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
         
-        this->creationThreadId = std::this_thread::get_id();
+        this->creationThreadId = Thread::GetCurrentThreadId();
         this->objectFlags = initializer->GetObjectFlags();
         if (initializer->uuid != 0)
             this->uuid = initializer->uuid;
