@@ -38,6 +38,8 @@ function(ce_add_configs NAME)
     #     SOURCES ${ce_add_configs_CONFIGS}
     # )
 
+    ce_group_sources_by_folder(${NAME})
+
     set_target_properties(${NAME} 
         PROPERTIES
             FOLDER "${ce_add_configs_FOLDER}"

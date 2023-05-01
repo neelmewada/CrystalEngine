@@ -31,6 +31,16 @@ namespace CE
         return GetLaunchDir();
     }
 
+    IO::Path MacDirectories::GetEngineRootDir()
+    {
+        return GetLaunchDir();
+    }
+
+    IO::Path MacDirectories::GetGameRootDir()
+    {
+        return GetLaunchDir();
+    }
+
     IO::Path MacDirectories::GetEngineDir()
     {
         return GetAppRootDir() / "Engine";
