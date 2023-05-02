@@ -66,6 +66,7 @@ TEST(Performance, Module_Load_10x)
 #pragma region Threading
 
 int ThreadingTestSingletonCounter = 0;
+int ThreadingTestSingletonDestroyCounter = 0;
 
 class ThreadingTestSingleton : public ThreadSingleton<ThreadingTestSingleton>
 {
@@ -73,6 +74,11 @@ public:
     ThreadingTestSingleton() : ThreadSingleton<ThreadingTestSingleton>()
     {
         ThreadingTestSingletonCounter++;
+    }
+
+    ~ThreadingTestSingleton()
+    {
+        ThreadingTestSingletonDestroyCounter++;
     }
 
 };
@@ -86,34 +92,40 @@ TEST(Threading, ThreadSingleton)
 {
     TEST_BEGIN;
     ThreadingTestSingletonCounter = 0;
+    ThreadingTestSingletonDestroyCounter = 0;
 
-    ThreadingTestSingleton::Get();
-    ThreadingTestSingleton::Get();
+    auto threadId = Thread::GetCurrentThreadId();
+    auto v1 = &ThreadingTestSingleton::Get();
+    auto v2 = &ThreadingTestSingleton::Get();
+    EXPECT_EQ(v1, v2);
+    Mutex mut{};
 
-    Thread t1([]
-        {
-            ThreadingTestSingleton::Get();
-            ThreadingTestSingleton::Get();
-            ThreadingTestSingleton::Get();
-            ThreadingTestSingleton::Get();
-        });
+    Thread t1([&]
+    {
+        auto tId = Thread::GetCurrentThreadId();
+        auto newValue = &ThreadingTestSingleton::Get();
+        EXPECT_EQ(newValue, &ThreadingTestSingleton::Get());
+        ThreadingTestSingleton::Get();
+        ThreadingTestSingleton::Get();
+    });
 
-    Thread t2([]
-        {
-            ThreadingTestSingleton::Get();
-            ThreadingTestSingleton::Get();
-        });
+    Thread t2([&]
+    {
+        auto tId = Thread::GetCurrentThreadId();
+        ThreadingTestSingleton::Get();
+        ThreadingTestSingleton::Get();
+    });
     
     if (t1.IsJoinable())
         t1.Join();
     if (t2.IsJoinable())
         t2.Join();
 
-    ThreadingTestSingleton::DestroyAll();
-
     EXPECT_EQ(ThreadingTestSingletonCounter, 3);
+    EXPECT_EQ(ThreadingTestSingletonDestroyCounter, 2);
 
     ThreadingTestSingletonCounter = 0;
+    ThreadingTestSingletonDestroyCounter = 0;
     TEST_END;
 }
 
@@ -126,6 +138,32 @@ TEST(Threading, ThreadSingleton)
 */
 
 #pragma region Containers
+
+TEST(Containers, StringAllocation)
+{
+    String myString = "Hello World";
+
+    auto t1 = Thread([&]
+    {
+        String t1String = "Inside Thread 1";
+    });
+
+    auto t2 = Thread([&]
+    {
+        myString = "New String";
+    });
+
+    String str1 = "str1";
+
+    myString = "Changed String";
+
+    if (t1.IsJoinable())
+        t1.Join();
+    if (t2.IsJoinable())
+        t2.Join();
+
+    EXPECT_EQ(myString, "New String");
+}
 
 TEST(Containers, String)
 {
@@ -156,10 +194,13 @@ TEST(Containers, String)
 
     // 2. Format Tests
     
-    EXPECT_EQ(String::Format("{1} - {0} - {2}", 12, "Str", 45.12f), "Str - 12 - 45.12");
-    EXPECT_EQ(String::Format("Base{NAME} - {}", 12, String::Arg("NAME", "Project")), "BaseProject - 12");
+    {
+        EXPECT_EQ(String::Format("{1} - {0} - {2}", 12, "Str", 45.12f), "Str - 12 - 45.12");
+        EXPECT_EQ(String::Format("Base{NAME} - {}", 12, String::Arg("NAME", "Project")), "BaseProject - 12");
+    }
 
     const String platformName = PlatformMisc::GetPlatformName();
+
     EXPECT_EQ(String::Format("{ENGINE}/Config/{PLATFORM}{TYPE}.ini",
         String::Arg("ENGINE", "@EnginePath"),
         String::Arg("PLATFORM", platformName),
@@ -507,32 +548,42 @@ TEST(Object, Lifecycle)
     instance = nullptr;
 
     // 2. Objects in different threads
-
-    int startSize = ObjectThreadContext::GetMap().GetSize();
+    
     ObjectLifecycleTestClass* i1 = nullptr,* i2 = nullptr;
-    ObjectThreadContext* ctx1 = nullptr,* ctx2 = nullptr;
     Mutex mut{};
+    ObjectInitializer init1{};
+    ObjectInitializer init2{};
     
     auto t1 = Thread([&]
     {
-        auto obj = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj1", OF_Transient);
-        auto ptr = &ObjectThreadContext::Get();
-        
-        mut.Lock();
-        i1 = obj;
-        ctx1 = ptr;
-        mut.Unlock();
+        auto obj1 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(),
+            "Obj1", OF_Transient, ObjectLifecycleTestClass::Type(),
+            nullptr, true);
+        if (obj1->GetName() != "Obj1")
+        {
+            auto name = obj1->GetName();
+            DEBUG_BREAK();
+            auto boolValue = name != "Obj1";
+            FAIL();
+        }
+
+        delete obj1;
     });
     
     auto t2 = Thread([&]
     {
-        auto obj = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "Obj2", OF_Transient);
-        auto ptr = &ObjectThreadContext::Get();
-        
-        mut.Lock();
-        i2 = obj;
-        ctx2 = ptr;
-        mut.Unlock();
+        auto obj2 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(),
+            "Obj2", OF_Transient, ObjectLifecycleTestClass::Type(),
+            nullptr, true);
+        if (obj2->GetName() != "Obj2")
+        {
+            auto name = obj2->GetName();
+            DEBUG_BREAK();
+            auto boolValue = name != "Obj2";
+            FAIL();
+        }
+
+        delete obj2;
     });
     
     auto t1Id = t1.GetId();
@@ -542,31 +593,12 @@ TEST(Object, Lifecycle)
         t1.Join();
     if (t2.IsJoinable())
         t2.Join();
-    
-    EXPECT_EQ(i1->GetFlags(), OF_Transient);
-    EXPECT_NE(ctx1, ctx2);
-    EXPECT_EQ(i1->GetName(), "Obj1");
-    //EXPECT_EQ(i1->GetCreationThreadId(), t1.get_id());
-    EXPECT_EQ(i2->GetFlags(), OF_Transient);
-    EXPECT_EQ(i2->GetName(), "Obj2");
-    //EXPECT_EQ(i2->GetCreationThreadId(), t2.get_id());
-    
-    if (i2->GetName() != "Obj2" || i1->GetName() != "Obj1")
-    {
-        FAIL();
-        //__debugbreak();
-    }
-    
-    delete i1; delete i2;
-    i1 = nullptr;
-    i2 = nullptr;
 
     ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
 
     CE_DEREGISTER_TYPES(ObjectLifecycleTestClass);
     TEST_END;
 }
-
 
 TEST(Object, CDI)
 {

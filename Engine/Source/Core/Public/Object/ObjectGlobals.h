@@ -19,7 +19,8 @@ namespace CE
 
 	namespace Internal
 	{
-
+		extern CORE_API bool gIsDebugObject;
+		
 		struct CORE_API ConstructObjectParams
 		{
 			ConstructObjectParams() = default;
@@ -32,6 +33,7 @@ namespace CE
 			String name{};
 			Object* templateObject = nullptr;
 			ObjectFlags objectFlags{};
+			bool isDebug = false;
 		};
 
 		/// For internal use only
@@ -44,7 +46,8 @@ namespace CE
 		String objectName = "", 
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 
-		Object* templateObject = NULL)
+		Object* templateObject = NULL,
+		bool isDebug = false)
 	{
 		if (objectClass == nullptr || !objectClass->IsSubclassOf(TClass::Type()))
 			return nullptr;
@@ -54,6 +57,8 @@ namespace CE
 		params.name = objectName;
 		params.templateObject = templateObject;
 		params.objectFlags = flags;
+		params.isDebug = isDebug;
+		
 		return static_cast<TClass*>(Internal::StaticConstructObject(params));
 	}
 
@@ -66,7 +71,7 @@ namespace CE
 	public:
 		friend class Object;
 
-		friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);
+		friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams&);
 
 		/// Default constructor.
 		ObjectInitializer();
@@ -77,6 +82,21 @@ namespace CE
 		ObjectFlags GetObjectFlags() const
 		{
 			return objectFlags;
+		}
+
+		String GetName() const
+		{
+			return name;
+		}
+
+		UUID GetUuid() const
+		{
+			return uuid;
+		}
+
+		ClassType* GetObjectClass() const
+		{
+			return objectClass;
 		}
 
 	private:

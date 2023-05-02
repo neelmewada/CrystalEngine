@@ -14,6 +14,8 @@
 #include "PAL/Common/PlatformMisc.h"
 #include "PAL/Common/PlatformDirectories.h"
 #include "PAL/Common/PlatformProcess.h"
+#include "PAL/Common/PlatformTLS.h"
+
 // IO
 #include "IO/Path.h"
 #include "IO/Stream/GenericStream.h"

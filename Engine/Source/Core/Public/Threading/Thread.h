@@ -5,24 +5,24 @@
 namespace CE
 {
 
-    using ThreadId = std::thread::id;
+    typedef SIZE_T ThreadId;
 
     class CORE_API Thread
     {
     public:
         Thread() : thread({})
         {
-            threadId = thread.get_id();
+            threadId = std::hash<std::thread::id>{}(thread.get_id());
         }
 
         Thread(auto func) : thread(func)
         {
-            threadId = thread.get_id();
+            threadId = std::hash<std::thread::id>{}(thread.get_id());
         }
 
         inline static ThreadId GetCurrentThreadId()
         {
-            return std::this_thread::get_id();
+            return std::hash<std::thread::id>{}(std::this_thread::get_id());
         }
 
         inline static void SleepFor(SIZE_T milliSeconds)

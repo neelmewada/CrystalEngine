@@ -245,7 +245,6 @@ namespace CE
                 continue;
             
             auto fieldTypeId = field->GetDeclarationTypeId();
-            auto value = config->Get(className).GetString();
             
             if (fieldTypeId == TYPEID(String))
             {

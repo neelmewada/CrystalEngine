@@ -45,6 +45,10 @@ namespace CE
             DelegateBase(TRetType(* func)(TArgs...)) : impl(func), handle(GenerateRandomU64())
             {}
 
+            template<typename F>
+            DelegateBase(const F& lamda) : impl(lamda), handle(GenerateRandomU64())
+            {}
+
             template<typename ReturnType, typename ClassOrStruct, typename... Args>
             DelegateBase(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance) 
                 : DelegateBase(function, instance, std::make_index_sequence<sizeof...(Args)>())

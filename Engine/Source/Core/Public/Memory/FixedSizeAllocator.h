@@ -18,6 +18,25 @@ namespace CE
             }
         }
 
+        // WARNING: This will free all the memory allocated by this free list allocator. Use with caution.
+        void FreeAll()
+        {
+            if (MallocNodeList == nullptr)
+                return;
+
+            while (MallocNodeList != nullptr)
+            {
+                auto ptr = MallocNodeList;
+                Memory::Free(ptr->Pointer);
+                MallocNodeList = MallocNodeList->NextNode;
+                Memory::Free(ptr);
+            }
+
+            FreeList = nullptr;
+            NumFreeListNodes = 0;
+            NumLiveBlocks = 0;
+        }
+
         // Allocates one element from the FreeList. Call Free() to return it.
         void* Allocate()
         {
@@ -58,6 +77,7 @@ namespace CE
             SIZE_T actualBlockSize = BlockSize + sizeof(FreeListNode);
 
             u8* rawMemory = (u8*)Memory::Malloc(actualBlockSize * numBlocks);
+            memset(rawMemory, 0, actualBlockSize * numBlocks);
 
             FreeListNode* newNode = (FreeListNode*)rawMemory;
             FreeListMallocNode* mallocNode = new FreeListMallocNode;
@@ -111,9 +131,9 @@ namespace CE
         FreeListNode* FreeList = nullptr;
         FreeListMallocNode* MallocNodeList = nullptr;
 
-        u32 NumFreeListNodes;
+        u32 NumFreeListNodes = 0;
 
         // Number of Blocks that are currently allocated and are not present in FreeList
-        u32 NumLiveBlocks;
+        u32 NumLiveBlocks = 0;
     };
 }

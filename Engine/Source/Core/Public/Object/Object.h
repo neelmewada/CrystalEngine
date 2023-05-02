@@ -185,6 +185,7 @@ namespace CE
         Object* outer = nullptr;
         
         ThreadId creationThreadId{};
+        Mutex mutex{};
     };
     
 } // namespace CE

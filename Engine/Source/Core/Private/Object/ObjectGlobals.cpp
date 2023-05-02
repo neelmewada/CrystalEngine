@@ -5,6 +5,7 @@ namespace CE
 {
 	namespace Internal
 	{
+		CORE_API bool gIsDebugObject = false;
 
 		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params)
 		{
@@ -17,6 +18,16 @@ namespace CE
 			init.uuid = 0;
             init.objectClass = params.objectClass;
 
+			if (params.isDebug)
+			{
+				gIsDebugObject = true;
+				
+				if (init.name != "Obj1" && init.name != "Obj2")
+				{
+					DEBUG_BREAK();
+				}
+			}
+
 			ObjectThreadContext::Get().PushInitializer(&init);
 
 			auto instance = params.objectClass->CreateInstance();
@@ -26,13 +37,19 @@ namespace CE
                 return nullptr;
             }
 
-			String name = params.name;
-			if (instance->GetName().IsEmpty())
-				name = params.objectClass->GenerateInstanceName(instance->GetUuid()).GetString();
-			instance->SetName(name);
+			if (params.isDebug)
+			{
+				gIsDebugObject = false;
+				
+				if (instance->GetName() != "Obj1" && instance->GetName() != "Obj2")
+				{
+					DEBUG_BREAK();
+				}
+			}
 
-			if (params.owner != nullptr)
-				params.owner->AttachSubobject(instance);
+			// TODO: Add it later
+			//if (params.owner != nullptr)
+			//	params.owner->AttachSubobject(instance);
 			return instance;
 		}
 		

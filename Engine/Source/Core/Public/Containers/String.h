@@ -3,8 +3,6 @@
 #include "Algorithm/Hash.h"
 #include "Containers/Array.h"
 
-#include "Memory/FixedSizeAllocator.h"
-
 #include "spdlog/fmt/fmt.h"
 
 #ifndef STRING_BUFFER_SIZE
@@ -254,7 +252,7 @@ namespace CE
 		bool bIsUsingDynamicBuffer = false;
 		u32 StringLength = 0;
 
-		static FixedSizeFreeListAllocator<STRING_BUFFER_SIZE, STRING_BUFFER_GROW_COUNT> StaticBufferAllocator;
+        SIZE_T threadId{};
 	};
 
     template<>

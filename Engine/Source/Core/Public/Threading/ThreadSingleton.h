@@ -2,12 +2,33 @@
 
 #include "Mutex.h"
 #include "Thread.h"
+#include "Delegates/Delegate.h"
 
 namespace CE
 {
+
+    class CORE_API TlsAutoCleanup
+    {
+    public:
+        virtual ~TlsAutoCleanup()
+        {}
+
+        void RegisterForAutoCleanup();
+
+    protected:
+        u32 slotIndex = 0;
+    };
+
+    class CORE_API TlsInitializer
+    {
+    public:
+
+        static TlsAutoCleanup* Get(std::function<TlsAutoCleanup*()> createInstance, u32& tlsSlot);
+        
+    };
     
     template<class T>
-    class ThreadSingleton
+    class ThreadSingleton : public TlsAutoCleanup
     {
     protected:
         ThreadSingleton() : threadId(Thread::GetCurrentThreadId())
@@ -20,44 +41,28 @@ namespace CE
 
         FORCE_INLINE static T& Get()
         {
-            LockGuard<Mutex> lock{ mutex };
-            auto currentThreadId = Thread::GetCurrentThreadId();
-
-            if (!map.KeyExists(currentThreadId))
-                map.Add({ currentThreadId, new T });
-
-            return *map[currentThreadId];
+            return *(T*)TlsInitializer::Get([]{ return (TlsAutoCleanup*)new T(); }, tlsSlotIndex);
         }
 
         ThreadId GetThreadId() const
         {
             return threadId;
         }
-
-        static void DestroyAll()
-        {
-            LockGuard<Mutex> lock{ mutex };
-            for (auto [threadId, instance] : map)
-            {
-                delete instance;
-            }
-            map.Clear();
-        }
-
-        static HashMap<ThreadId, T*>& GetMap()
-        {
-            return map;
-        }
+    
 
     private:
 
+        u32 slotIndex;
         ThreadId threadId;
 
+        static u32 tlsSlotIndex;
         static Mutex mutex;
-        static HashMap<ThreadId, T*> map;
     };
 
-    template<typename T> Mutex ThreadSingleton<T>::mutex{};
-    template<typename T> HashMap<ThreadId, T*> ThreadSingleton<T>::map{};
+    template<typename T>
+    u32 ThreadSingleton<T>::tlsSlotIndex = 0xFFFFFFFF;
+
+    template<typename T>
+    Mutex ThreadSingleton<T>::mutex{};
 
 } // namespace CE

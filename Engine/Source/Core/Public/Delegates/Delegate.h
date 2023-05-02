@@ -12,13 +12,15 @@ namespace CE
         Delegate() : Internal::DelegateBase<T>(nullptr)
         {}
 
-        Delegate(const auto& func) : Internal::DelegateBase<T>(func)
+        Delegate(const std::function<T>& func) : Internal::DelegateBase<T>(func)
+        {}
+
+        template<typename F>
+        Delegate(const F& lambda) : Internal::DelegateBase<T>(lambda)
         {}
 
         Delegate(const Delegate<T>& copy) : Internal::DelegateBase<T>((const Internal::DelegateBase<T>&)copy)
-        {
-
-        }
+        {}
 
         template<class ReturnType, class ClassOrStruct, typename... Args>
         Delegate(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance) : Internal::DelegateBase<T>(function, instance)
