@@ -1,4 +1,6 @@
 
+#include <regex>
+
 #include "CoreMinimal.h"
 
 using namespace CE;
@@ -246,6 +248,16 @@ namespace CE
      *  Helper/Utility
      */
 
+    bool String::RegexMatch(const String& sourceString, const String& regex)
+    {
+        return std::regex_match(sourceString.GetCString(), std::regex(regex.GetCString()));
+    }
+
+    bool String::RegexMatch(const String& sourceString, const char* regex)
+    {
+        return std::regex_match(sourceString.GetCString(), std::regex(regex));
+    }
+
     void CE::String::Append(char c)
     {
         char copyStr[] = { c, '\0' };
@@ -353,6 +365,17 @@ namespace CE
             }
 
             thisIndex++;
+        }
+
+        return false;
+    }
+
+    bool String::Contains(char character) const
+    {
+        for (int i = 0; i < GetLength(); i++)
+        {
+            if (Buffer[i] == character)
+                return true;
         }
 
         return false;
@@ -500,7 +523,7 @@ namespace CE
         }
     }
 
-    String CE::String::RemoveWhitespaces()
+    String String::RemoveWhitespaces()
     {
         char* result = new char[GetLength() + 1];
         result[GetLength()] = 0;
@@ -530,6 +553,123 @@ namespace CE
         return str;
     }
 
+    bool String::TryParse(const String& string, u8& outValue)
+    {
+        s64 value = 0;
+        if (TryParseInteger(string, value))
+        {
+            outValue = StaticCast<u8>(value);
+            return true;
+        }
+        return false;
+    }
+
+    bool String::TryParse(const String& string, s8& outValue)
+    {
+        s64 value = 0;
+        if (TryParseInteger(string, value))
+        {
+            outValue = StaticCast<s8>(value);
+            return true;
+        }
+        return false;
+    }
+
+    bool String::TryParse(const String& string, u32& outValue)
+    {
+        s64 value = 0;
+        if (TryParseInteger(string, value))
+        {
+            outValue = StaticCast<u32>(value);
+            return true;
+        }
+        return false;
+    }
+
+    bool String::TryParse(const String& string, s32& outValue)
+    {
+        s64 value = 0;
+        if (TryParseInteger(string, value))
+        {
+            outValue = StaticCast<s32>(value);
+            return true;
+        }
+        return false;
+    }
+
+    bool String::TryParse(const String& string, f32& outValue)
+    {
+        f32 value = 0;
+        if (TryParseFloat(string, value))
+        {
+            outValue = value;
+            return true;
+        }
+        return false;
+    }
+
+    void String::Internal_ThrowParseException(const char* message)
+    {
+        throw ParseFailedException(message);
+    }
+
+    bool String::TryParseInteger(String value, s64& outValue)
+    {
+        if (value.IsEmpty())
+            return false;
+        
+        value = value.RemoveWhitespaces();
+        
+        if (value.Contains('.') || value.Contains('f'))
+            return false;
+
+        s64 result = 0;
+
+        int length = value.GetLength();
+        bool isNegative = false;
+
+        for (int i = length - 1; i >= 0; i--)
+        {
+            if (i > 0)
+            {
+                if (!IsNumeric(value[i]))
+                    return false;
+            }
+            else
+            {
+                if (!IsNumeric(value[i]) && value[i] != '+' && value[i] != '-')
+                    return false;
+                if (value[i] == '+' || value[i] == '-')
+                {
+                    isNegative = value[i] == '-';
+                    continue;
+                }
+            }
+            
+            result += Math::Pow((s64)10, length - 1 - i) * CharToNumber(value[i]);
+        }
+
+        if (isNegative)
+            result *= -1;
+
+        outValue = result;
+        
+        return true;
+    }
+
+    bool String::TryParseFloat(String value, f32& outValue)
+    {
+        if (value.IsEmpty())
+            return false;
+        
+        value = value.RemoveWhitespaces();
+
+        if (!RegexMatch(value, "[0-9]*[.]?[0-9]*[f]?"))
+            return false;
+        outValue = std::stof(value.ToStdString());
+        return true;
+    }
+    
 }
 
 

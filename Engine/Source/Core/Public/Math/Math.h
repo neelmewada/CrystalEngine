@@ -38,6 +38,9 @@ namespace CE
 
         CE_INLINE static f32 Sqrt(f32 value) { return sqrt(value); }
 
+        template<typename T1, typename T2>
+        INLINE static auto Pow(T1 base, T2 power) { return pow(base, power); }
+
         template<typename T>
         CE_INLINE static T Min(std::initializer_list<T> list)
         {

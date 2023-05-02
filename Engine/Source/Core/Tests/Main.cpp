@@ -206,6 +206,19 @@ TEST(Containers, String)
         String::Arg("PLATFORM", platformName),
         String::Arg("TYPE", "ProjectSettings")),
         "@EnginePath/Config/" + platformName + "ProjectSettings.ini");
+
+    // 3. Parse Tests
+
+    EXPECT_EQ(String::Parse<s32>("1234567890"), 1234567890);
+    EXPECT_EQ(String::Parse<s32>("-1234567890"), -1234567890);
+    EXPECT_EQ(String::Parse<s32>("0001234"), 1234);
+    EXPECT_EQ(String::Parse<s32>("-0001234"), -1234);
+    
+    EXPECT_EQ(String::Parse<f32>("12.242f"), 12.242f);
+    EXPECT_EQ(String::Parse<f32>("12.242"), 12.242f);
+    EXPECT_EQ(String::Parse<f32>("12"), 12);
+    EXPECT_EQ(String::Parse<f32>("12f"), 12.f);
+    EXPECT_EQ(String::Parse<f32>("12.f"), 12.f);
     
     TEST_END;
 }
@@ -292,7 +305,9 @@ TEST(Reflection, TypeId)
 {
     TEST_BEGIN;
 
-    // 1. Pointers & References
+    // 1. Basics
+
+    // 2. Pointers & References
 
     EXPECT_EQ(TYPEID(Object*), TYPEID(Object));
     EXPECT_EQ(TYPEID(const Object*), TYPEID(Object));
@@ -304,7 +319,7 @@ TEST(Reflection, TypeId)
     EXPECT_EQ(TYPEID(const Object&), TYPEID(Object));
     EXPECT_EQ(TYPEID(s32&), TYPEID(s32));
 
-    // 2. Arrays
+    // 3. Arrays
 
     EXPECT_EQ(TYPEID(Array<String>), TYPEID(Array<u8>));
 

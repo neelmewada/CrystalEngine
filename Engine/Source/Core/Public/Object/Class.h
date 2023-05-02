@@ -590,12 +590,6 @@ namespace CE
 	}
 
 	template<typename TCastTo, typename TCastFrom>
-    CE_INLINE TCastTo StaticCast(const TCastFrom& from)
-	{
-		return static_cast<TCastTo>(from);
-	}
-
-	template<typename TCastTo, typename TCastFrom>
     CE_INLINE TCastTo* DynamicCast(TCastFrom* from)
 	{
 		if constexpr (std::is_void_v<TCastFrom>)

@@ -23,5 +23,15 @@ namespace CE
     private:
         String message{};
     };
+
+    class CORE_API ParseFailedException : public Exception
+    {
+    public:
+        ParseFailedException() : Exception("Failed to parse given input")
+        {}
+
+        ParseFailedException(const String& message) : Exception(message)
+        {}
+    };
     
 } // namespace CE

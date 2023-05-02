@@ -236,19 +236,32 @@ namespace CE
             return;
         if (!config->SectionExists(className))
             return;
-        
+
+        auto& configSection = config->Get(className);
         FieldType* field = configClass->GetFirstField();
         
         while (field != nullptr)
         {
             if (!field->HasAnyFieldFlags(FIELD_Config))
+            {
+                field = field->GetNext();
                 continue;
+            }
             
             auto fieldTypeId = field->GetDeclarationTypeId();
+            auto fieldName = field->GetName().GetString();
+
+            if (!configSection.KeyExists(fieldName) || !configSection[fieldName].IsValid())
+            {
+                field = field->GetNext();
+                continue;
+            }
+
+            auto stringValue = configSection[fieldName].GetString();
             
             if (fieldTypeId == TYPEID(String))
             {
-                // TODO: Fetch values...
+                field->SetFieldValue<String>(this, stringValue);
             }
             
             field = field->GetNext();

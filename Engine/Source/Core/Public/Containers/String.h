@@ -209,6 +209,9 @@ namespace CE
             return String(fmt::vformat(str.Buffer, fmt::make_format_args(args...)));
         }
 
+	    static bool RegexMatch(const String& sourceString, const String& regex);
+	    static bool RegexMatch(const String& sourceString, const char* regex);
+
         void Append(char c);
 
         void Concatenate(const String& string);
@@ -223,6 +226,7 @@ namespace CE
 
         bool Contains(const String& string) const;
         bool Contains(const char* string) const;
+	    bool Contains(char character) const;
 
         bool Search(const String& string) const;
         bool Search(const char* string) const;
@@ -240,8 +244,56 @@ namespace CE
 
         String RemoveWhitespaces();
 
+	    // Character Utils
+
+	    INLINE static bool IsNumeric(char c)
+	    {
+	        return c >= '0' && c <= '9';
+	    }
+
+	    INLINE static u8 CharToNumber(char c)
+	    {
+	        if (!IsNumeric(c))
+	            return 0;
+	        return (u8)(c - '0');
+	    }
+
+	    INLINE static bool IsAlphabet(char c)
+	    {
+	        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+	    }
+
+	    // Parsing
+
+	    template<typename T>
+	    static bool TryParse(const String& string, T& outValue)
+	    {
+	        return TryParse(string, outValue);
+	    }
+
+	    static bool TryParse(const String& string, u8& outValue);
+	    static bool TryParse(const String& string, s8& outValue);
+	    static bool TryParse(const String& string, u32& outValue);
+	    static bool TryParse(const String& string, s32& outValue);
+	    static bool TryParse(const String& string, f32& outValue);
+
+	    template<typename T>
+	    static T Parse(const String& string)
+	    {
+	        T retVal{};
+	        if (!TryParse(string, retVal))
+	            Internal_ThrowParseException("Failed to parse string");
+	        return retVal;
+	    }
 
     private:
+
+        static void Internal_ThrowParseException(const char* message);
+	    
+        static bool TryParseInteger(String value, s64& outValue);
+	    static bool TryParseFloat(String value, f32& outValue);
+	    
+	    // Internals
 
         void SetCString(const char* cString);
         void CopyCString(const char* cString, u32 copyStringLength);

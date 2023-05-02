@@ -46,3 +46,5 @@
 #define NULL 0
 #endif
 
+#define StaticCast static_cast
+
