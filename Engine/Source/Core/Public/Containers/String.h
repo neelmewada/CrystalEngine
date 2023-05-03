@@ -21,7 +21,8 @@
 
 namespace CE
 {
-    class CORE_API StringView;
+    class StringView;
+    class Stream;
 
     template<typename T>
     class Array;
@@ -312,6 +313,9 @@ namespace CE
     {
         return CalculateHash(Value.GetCString(), Value.GetLength());
     }
+
+    
+    
 }
 
 /// fmt user-defined Formatter for CE::String

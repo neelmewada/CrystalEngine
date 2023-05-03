@@ -96,7 +96,7 @@ namespace CE::IO
 
     SIZE_T FileStream::GetLength() const
     {
-        return std::filesystem::file_size(filePath.impl);
+        return fs::file_size(filePath.impl);
     }
 
     bool FileStream::ReOpen()

@@ -675,7 +675,7 @@ TEST(Object, CDI)
 
 #pragma region Serialization
 
-TEST(Serialization, Empty)
+TEST(Serialization, Streams)
 {
     TEST_BEGIN;
 
