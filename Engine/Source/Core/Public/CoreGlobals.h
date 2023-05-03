@@ -19,5 +19,5 @@ namespace CE
     extern CORE_API IO::Path gProjectPath;
     
     extern CORE_API ConfigCache* gConfigCache;
-    
+ 
 }

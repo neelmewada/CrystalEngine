@@ -11,7 +11,7 @@ namespace CE
 
     static Mutex stringAllocMutex{};
 
-    static ThreadId globalThreadId = Thread::GetCurrentThreadId();
+    static ThreadId gMainThreadId = Thread::GetCurrentThreadId();
 
     namespace Internal
     {
@@ -21,6 +21,12 @@ namespace CE
             StaticStringBlockAllocator() {}
             virtual ~StaticStringBlockAllocator()
             {
+                if (Thread::GetCurrentThreadId() == gMainThreadId)
+                {
+                    // Do NOT clean up string buffers on main thread.
+                    // Sometimes, static/global destructors will be called after thread singleton is destroyed!
+                    return;
+                }
                 staticBufferAllocator.FreeAll();
             }
         
