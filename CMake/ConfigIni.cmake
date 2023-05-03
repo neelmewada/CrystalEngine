@@ -44,7 +44,6 @@ function(ce_add_configs NAME)
         PROPERTIES
             FOLDER "${ce_add_configs_FOLDER}"
     )
-
     
 endfunction()
 
