@@ -18,16 +18,6 @@ namespace CE
 			init.uuid = 0;
             init.objectClass = params.objectClass;
 
-			if (params.isDebug)
-			{
-				gIsDebugObject = true;
-				
-				if (init.name != "Obj1" && init.name != "Obj2")
-				{
-					DEBUG_BREAK();
-				}
-			}
-
 			ObjectThreadContext::Get().PushInitializer(&init);
 
 			auto instance = params.objectClass->CreateInstance();
@@ -36,20 +26,9 @@ namespace CE
                 ObjectThreadContext::Get().PopInitializer();
                 return nullptr;
             }
-
-			if (params.isDebug)
-			{
-				gIsDebugObject = false;
-				
-				if (instance->GetName() != "Obj1" && instance->GetName() != "Obj2")
-				{
-					DEBUG_BREAK();
-				}
-			}
-
-			// TODO: Add it later
-			//if (params.owner != nullptr)
-			//	params.owner->AttachSubobject(instance);
+			
+			if (params.owner != nullptr)
+				params.owner->AttachSubobject(instance);
 			return instance;
 		}
 		

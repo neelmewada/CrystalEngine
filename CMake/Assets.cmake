@@ -45,5 +45,7 @@ function(ce_add_assets NAME)
         SOURCES ${ASSET_FILES}
     )
 
+    ce_group_sources_by_folder(${NAME})
+
 endfunction()
 

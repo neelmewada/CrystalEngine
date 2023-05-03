@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include "RTTI/RTTI.h"
 #include "IO/Stream/MemoryStream.h"
 
@@ -84,3 +84,4 @@ CE::SerializedObject::RegisterCustomSerializer(TargetTypeId, &CustomSerializerCl
 #define CE_DEREGISTER_SERIALIZER(CustomSerializerClass)\
 CE::SerializedObject::DeregisterCustomSerializer(&CustomSerializerClass::Get())
 
+*/

@@ -564,7 +564,10 @@ CE_RTTI_CLASS_IMPL(, , ObjectLifecycleTestClass)
 TEST(Object, Lifecycle)
 {
     TEST_BEGIN
+    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
+    
     CE_REGISTER_TYPES(ObjectLifecycleTestClass);
+    EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
 
     ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
     
@@ -589,12 +592,11 @@ TEST(Object, Lifecycle)
     {
         auto obj1 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(),
             "Obj1", OF_Transient, ObjectLifecycleTestClass::Type(),
-            nullptr, true);
+            nullptr);
         if (obj1->GetName() != "Obj1")
         {
             auto name = obj1->GetName();
             DEBUG_BREAK();
-            auto boolValue = name != "Obj1";
             FAIL();
         }
 
@@ -605,12 +607,11 @@ TEST(Object, Lifecycle)
     {
         auto obj2 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(),
             "Obj2", OF_Transient, ObjectLifecycleTestClass::Type(),
-            nullptr, true);
+            nullptr);
         if (obj2->GetName() != "Obj2")
         {
             auto name = obj2->GetName();
             DEBUG_BREAK();
-            auto boolValue = name != "Obj2";
             FAIL();
         }
 
@@ -627,14 +628,39 @@ TEST(Object, Lifecycle)
 
     ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
 
+    EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
     CE_DEREGISTER_TYPES(ObjectLifecycleTestClass);
+    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
+    
     TEST_END;
+    EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
 }
+
+
+namespace ObjectTest
+{
+    CLASS(Config = Test)
+    class CDITest : public Object
+    {
+        CE_CLASS(CDITest, Object)
+    public:
+        
+    };
+}
+
+CE_RTTI_CLASS(, ObjectTest, CDITest,
+    CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(Config = Test),
+    CE_FIELD_LIST(),
+    CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(, ObjectTest, CDITest)
 
 TEST(Object, CDI)
 {
     TEST_BEGIN;
-
+    
     
     
     TEST_END;

@@ -17,7 +17,7 @@ target_link_libraries(GTest::GTest INTERFACE gtest_main)
 
 
 function(ce_add_test NAME)
-    if(NOT ${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
+    if(NOT ${CE_BUILD_TESTS})
         return()
     endif()
     
@@ -43,6 +43,18 @@ function(ce_add_test NAME)
 
     if(${PAL_PLATFORM_IS_MAC})
         target_link_libraries(${NAME} PRIVATE "c" "c++")
+    endif()
+
+    # AUTORTTI
+
+    if(${ce_add_test_AUTORTTI})
+        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Generated")
+        target_link_directories(${NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Generated")
+
+        add_custom_command(TARGET ${NAME} PRE_BUILD
+            COMMAND "AutoRTTI" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
+            VERBATIM
+        )
     endif()
 
     # BUILD_DEPENDENCIES

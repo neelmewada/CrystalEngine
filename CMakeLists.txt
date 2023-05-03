@@ -17,6 +17,7 @@ ce_set(CE_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 # Initialize
 ################################################################################
 include(CMake/GeneralSettings.cmake)
+include(CMake/Options.cmake)
 include(CMake/PAL.cmake)
 include(CMake/Configurations.cmake)
 include(CMake/OutputDirectory.cmake)

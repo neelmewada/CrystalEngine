@@ -18,6 +18,9 @@ namespace CE
     };
     ENUM_CLASS_FLAGS(ArchiveMode);
 
+    /**
+     * \brief A low level API for handling ZIP archives
+     */
     class CORE_API Archive
     {
     public:
