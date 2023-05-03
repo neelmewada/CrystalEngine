@@ -305,7 +305,16 @@ TEST(Reflection, TypeId)
 {
     TEST_BEGIN;
 
-    // 1. Basics
+    // 1. Templates
+    
+    static_assert(IsTemplate<Array<String>>::value);
+    static_assert(!IsTemplate<String>::value);
+    
+    static_assert(IsSameType<TemplateType<Array<String>>::DefaultArg, u8>::value);
+    
+    EXPECT_NE(TYPE(Array<String>), nullptr);
+    EXPECT_EQ(GetStaticType<Array<String>>(), GetStaticType<Array<u8>>());
+    EXPECT_EQ(GetStaticType<Array<String>>(), GetStaticType<Array<Object*>>());
 
     // 2. Pointers & References
 
@@ -326,6 +335,7 @@ TEST(Reflection, TypeId)
 
     TEST_END;
 }
+
 TEST(Reflection, RTTI_Registry_Testing)
 {
     // 1. Test Loading & Unloading

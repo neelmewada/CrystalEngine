@@ -38,6 +38,12 @@ namespace CE
 	template<typename T>
 	struct IsSameType<T, T> : TTTrueType {};
 
+    template<typename T>
+    struct IsTemplate : TTFalseType {};
+
+    template<typename T, template <typename> class U>
+    struct IsTemplate<U<T>> : TTTrueType {};
+
 	template<typename T>
 	class Array;
 

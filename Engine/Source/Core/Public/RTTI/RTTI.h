@@ -236,15 +236,29 @@ namespace CE
 		static HashMap<Name, Array<TypeInfo*>> registeredTypesByModuleName;
 	};
 
+    template <typename T>
+    struct TemplateType : TTFalseType
+    {
+        typedef void DefaultArg;
+        typedef T DefaultTemplate;
+    };
+
+    template <typename T, template <typename> class U>
+    struct TemplateType<U<T>> : TTTrueType
+    {
+        typedef T DefaultArg;
+        typedef U<T> DefaultTemplate;
+    };
+
 	/// Default implementation always returns nullptr. Specialization will return the correct data.
 	/// Returns the type info of the specified type at compile time.
 	template<typename Type>
 	TypeInfo* GetStaticType()
 	{
-		if (TYPEID(Type) == TYPEID(Array<u8>))
-		{
-			return GetStaticType<Array<u8>>();
-		}
+        if constexpr (TemplateType<Type>::value)
+        {
+            return GetStaticType<typename TemplateType<Type>::DefaultTemplate>();
+        }
 
 		return nullptr;
 	}

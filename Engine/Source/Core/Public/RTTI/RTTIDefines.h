@@ -7,6 +7,8 @@
 
 #define TYPENAME(type) CE::GetTypeName<type>()
 
+#define TYPE(type) CE::GetStaticType<type>()
+
 #define CE_RTTI_POD(API, Namespace, Type, ...)\
 namespace CE::Internal\
 {\
@@ -18,8 +20,8 @@ namespace CE::Internal\
 		{}\
 	public:\
 		API static CE::TypeInfo* StaticType();\
-		virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::Type); }\
-		virtual bool IsPOD() const { return true; }\
+		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type); }\
+		virtual bool IsPOD() const override { return true; }\
 		virtual bool IsAssignableTo(TypeId typeId) const override\
 		{\
 			std::initializer_list<TypeId> types = { __VA_ARGS__ };\
@@ -72,8 +74,8 @@ namespace CE::Internal\
 		{}\
 	public:\
 		API static CE::TypeInfo* StaticType();\
-		virtual CE::TypeId GetTypeId() const { return TYPEID(Namespace::Type<DefaultArgType>); }\
-		virtual bool IsPOD() const { return true; }\
+		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type<DefaultArgType>); }\
+		virtual bool IsPOD() const override { return true; }\
 		virtual bool IsTemplatedPOD() const { return true; }\
 		virtual bool IsAssignableTo(TypeId typeId) const override\
 		{\
@@ -106,6 +108,12 @@ namespace CE\
 		static Name name = Name(#Namespace "::" #Type);\
 		return name;\
 	}\
+    template<typename T>\
+    struct TemplateType<Namespace::Type<T>> : TTTrueType\
+    {\
+        typedef DefaultArgType DefaultArg;\
+        typedef Namespace::Type<DefaultArg> DefaultTemplate;\
+    };\
 }
 
 #define CE_RTTI_POD_TEMPLATE_IMPL(Namespace, Type, DefaultArgType)\
