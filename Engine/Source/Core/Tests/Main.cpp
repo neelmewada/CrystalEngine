@@ -312,6 +312,7 @@ TEST(Reflection, TypeId)
     EXPECT_EQ(TYPEID(Object*), TYPEID(Object));
     EXPECT_EQ(TYPEID(const Object*), TYPEID(Object));
     EXPECT_EQ(TYPEID(const Object*), TYPEID(const Object));
+    EXPECT_EQ(TYPEID(const Object* const), TYPEID(const Object));
 
     EXPECT_EQ(TYPEID(f32), TYPEID(f32*));
 
@@ -349,10 +350,14 @@ TEST(Reflection, RTTI_Registry_Testing)
 
     auto name = TYPENAME(Array<String>);
 
-    EXPECT_EQ(TYPENAME(s32), "CE::s32");
+    EXPECT_EQ(TYPENAME(s32), "s32");
     EXPECT_EQ(TYPENAME(Array<String>), "CE::Array");
+    
+    // 3. Containers RTTI
+    
+    EXPECT_EQ(TYPEID(Array<String>), TYPEID(Array<Object*>));
 
-    // 3. Test Object class
+    // 4. Test Object class
 
     auto objectClass = ClassType::FindClass(TYPENAME(Object));
     EXPECT_NE(objectClass, nullptr);

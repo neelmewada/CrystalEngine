@@ -13,6 +13,8 @@ namespace CE
             fieldFlags |= FIELD_Hidden;
         if (HasAttribute("Config"))
             fieldFlags |= FIELD_Config;
+        if (HasAttribute("ReadOnly"))
+            fieldFlags |= FIELD_ReadOnly;
     }
 
     String FieldType::GetDisplayName()
@@ -46,6 +48,11 @@ namespace CE
     bool FieldType::IsHidden() const
     {
         return fieldFlags & FIELD_Hidden;
+    }
+
+    bool FieldType::IsReadOnly() const
+    {
+        return fieldFlags & FIELD_ReadOnly;
     }
 
     bool FieldType::IsArrayField() const

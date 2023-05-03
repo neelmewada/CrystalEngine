@@ -13,16 +13,18 @@ namespace CE
     {
         FIELD_NoFlags = 0,
         FIELD_Hidden = BIT(0),
-        FIELD_Serializable = BIT(1),
-        FIELD_Config = BIT(2)
+        FIELD_ReadOnly = BIT(1),
+        FIELD_Serializable = BIT(2),
+        FIELD_Config = BIT(3)
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
     class CORE_API FieldType : public TypeInfo
     {
     private:
-        FieldType(String name, TypeId fieldTypeId, SIZE_T size, SIZE_T offset, String attributes, const TypeInfo* owner = nullptr) : TypeInfo(name, attributes)
+        FieldType(String name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes, const TypeInfo* owner = nullptr) : TypeInfo(name, attributes)
             , fieldTypeId(fieldTypeId)
+            , underlyingTypeId(underlyingTypeId)
             , size(size), offset(offset)
             , owner(owner)
         {
@@ -47,9 +49,6 @@ namespace CE
         INLINE SIZE_T GetOffset() const { return offset; }
 
         virtual u32 GetSize() const override { return (u32)size; }
-
-        // TypeData is always NULL for field types
-        //virtual const u8* GetRawTypeData() const { return nullptr; }
         
         virtual bool IsAssignableTo(TypeId typeId) const override;
         virtual bool IsObject() const override { return IsAssignableTo(TYPEID(Object)); }
@@ -69,6 +68,9 @@ namespace CE
 
         bool IsSerialized() const;
         bool IsHidden() const;
+        bool IsReadOnly() const;
+        
+        virtual CE::TypeId GetUnderlyingTypeId() const override { return underlyingTypeId; }
         
         const TypeInfo* GetDeclarationType() const;
 
@@ -101,6 +103,7 @@ namespace CE
         FieldFlags fieldFlags = FIELD_NoFlags;
         
         TypeId fieldTypeId;
+        TypeId underlyingTypeId;
 
         SIZE_T offset;
         SIZE_T size;

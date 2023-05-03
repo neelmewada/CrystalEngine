@@ -3,7 +3,7 @@
 namespace CE::IO
 {
     
-    enum class OpenMode : CE::u32
+    enum class OpenMode : u32
     {
         Invalid = 0,
         ModeRead = std::ios::in,

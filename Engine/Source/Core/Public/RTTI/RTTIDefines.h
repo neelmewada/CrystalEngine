@@ -32,9 +32,9 @@ namespace CE::Internal\
 			}\
 			return typeId == this->GetTypeId();\
 		}\
-		virtual CE::u32 GetSize() const override\
+		virtual u32 GetSize() const override\
 		{\
-			return (CE::u32)sizeof(Namespace::Type);\
+			return (u32)sizeof(Namespace::Type);\
 		}\
 	};\
 }\
@@ -87,9 +87,9 @@ namespace CE::Internal\
 			}\
 			return typeId == this->GetTypeId();\
 		}\
-		virtual CE::u32 GetSize() const override\
+		virtual u32 GetSize() const override\
 		{\
-			return (CE::u32)sizeof(Namespace::Type<DefaultArgType>);\
+			return (u32)sizeof(Namespace::Type<DefaultArgType>);\
 		}\
 	};\
 }\

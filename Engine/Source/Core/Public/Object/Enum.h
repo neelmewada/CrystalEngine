@@ -84,7 +84,7 @@ namespace CE
 
         virtual u32 GetSize() const override { return size; }
 
-        CE_INLINE CE::TypeId GetUnderlyingTypeId() const { return underlyingTypeId; }
+        virtual CE::TypeId GetUnderlyingTypeId() const override { return underlyingTypeId; }
 
         auto GetFirstConstant() { return constants.Begin(); }
         auto GetLastConstant() { return constants.End(); }
@@ -109,7 +109,7 @@ namespace CE
 } // namespace name
 
 #define CE_ENUM_CONSTANTS(...) __VA_ARGS__
-#define CE_CONST(Name, ...) CE::EnumConstant(#Name, CE::GetTypeId<Self>(), (CE::s64)Self::Name, sizeof(Self), "" #__VA_ARGS__)
+#define CE_CONST(Name, ...) CE::EnumConstant(#Name, CE::GetTypeId<Self>(), (s64)Self::Name, sizeof(Self), "" #__VA_ARGS__)
 
 #define CE_RTTI_ENUM(API, Namespace, Enum, Attributes, ...)\
 namespace CE\
@@ -124,13 +124,9 @@ namespace CE\
             TypeInfoImpl(CE::EnumType&& enumTypeRef)\
                 : enumType(enumTypeRef)\
             {\
-                TypeInfo::RegisterType(&enumType);\
-                EnumType::RegisterEnumType(&enumType);\
             }\
 			virtual ~TypeInfoImpl()\
 			{\
-				TypeInfo::DeregisterType(&enumType);\
-                EnumType::DeregisterEnumType(&enumType);\
 			}\
         };\
     }\
@@ -160,10 +156,10 @@ template <> struct fmt::formatter<Namespace::Enum> {\
     template <typename FormatContext>\
     auto format(const Namespace::Enum& value, FormatContext& ctx) const -> decltype(ctx.out()) {\
         auto enumType = CE::GetStaticEnum<Namespace::Enum>();\
-        auto constant = enumType->FindConstantWithValue((CE::s64)value);\
+        auto constant = enumType->FindConstantWithValue((s64)value);\
         if (constant == nullptr)\
         {\
-            return fmt::format_to(ctx.out(), "{}", (CE::s64)value);\
+            return fmt::format_to(ctx.out(), "{}", (s64)value);\
         }\
         return fmt::format_to(ctx.out(), "{}", constant->GetName());\
     }\

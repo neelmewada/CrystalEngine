@@ -182,7 +182,7 @@ namespace CE
 			return Impl->InitializeDefaults(instance);
 		}
 
-		virtual CE::u32 GetSize() const override
+		virtual u32 GetSize() const override
 		{
 			return size;
 		}
@@ -218,7 +218,19 @@ namespace CE
 		template<typename Struct, typename Field>
 		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
 		{
-			localFields.Add(FieldType(name, CE::GetTypeId<Field>(), sizeof(Field), offset, attributes, this));
+            TypeId underlyingTypeId = 0;
+            if constexpr (CE::IsArrayType<Field>::value)
+            {
+                underlyingTypeId = TYPEID(CE::IsArrayType<Field>::ElementType);
+            }
+            else if constexpr (CE::IsEnumType<Field>::value)
+            {
+                underlyingTypeId = TYPEID(CE::EnumUnderlyingType<Field>::type);
+            }
+			localFields.Add(FieldType(name,
+                                      CE::GetTypeId<Field>(),
+                                      underlyingTypeId,
+                                      sizeof(Field), offset, attributes, this));
 		}
 
 	private:

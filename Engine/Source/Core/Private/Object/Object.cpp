@@ -218,12 +218,9 @@ namespace CE
         if (configClass == NULL)
             configClass = GetClass();
         
-        if (fileName.IsEmpty())
+        if (fileName.IsEmpty() && configClass->HasAttribute("Config"))
         {
-            if (configClass->HasAttribute("Config"))
-            {
-                fileName = configClass->GetAttribute("Config").GetStringValue();
-            }
+            fileName = configClass->GetAttribute("Config").GetStringValue();
         }
         
         if (fileName.IsEmpty())
@@ -256,12 +253,25 @@ namespace CE
                 field = field->GetNext();
                 continue;
             }
-
+            
+            auto& configValue = configSection[fieldName];
             auto stringValue = configSection[fieldName].GetString();
             
             if (fieldTypeId == TYPEID(String))
             {
                 field->SetFieldValue<String>(this, stringValue);
+            }
+            else if (fieldTypeId == TYPEID(IO::Path))
+            {
+                field->SetFieldValue<IO::Path>(this, IO::Path(stringValue));
+            }
+            else if (fieldTypeId == TYPEID(Name))
+            {
+                field->SetFieldValue<Name>(this, Name(stringValue));
+            }
+            else if (field->IsArrayType() && configValue.IsValid())
+            {
+                
             }
             
             field = field->GetNext();

@@ -57,12 +57,22 @@ namespace CE
 
         inline ValueType& operator[](const KeyType& key)
         {
-            return Impl[key];
+            return Impl.at(key);
+        }
+        
+        inline const ValueType& operator[](const KeyType& key) const
+        {
+            return Impl.at(key);
         }
         
         inline ValueType& Get(const KeyType& key)
         {
-            return Impl[key];
+            return Impl.at(key);
+        }
+        
+        inline const ValueType& Get(const KeyType& key) const
+        {
+            return Impl.at(key);
         }
 
         inline void Add(const Pair<KeyType, ValueType>& pair)

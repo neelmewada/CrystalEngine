@@ -53,6 +53,11 @@ namespace CE
 		typedef T ElementType;
 	};
 
+    template<typename T>
+    struct IsEnumType : std::is_enum<T> {};
+
+    template<typename T>
+    struct EnumUnderlyingType : std::underlying_type<T> {};
 
 	class ObjectStore;
     

@@ -1,13 +1,12 @@
 #pragma once
 
+#include "Types/CoreTypeDefs.h"
 #include "Misc/CoreDefines.h"
 #include "Misc/CoreMacros.h"
 #include "Containers/Array.h"
 #include "Containers/HashMap.h"
 #include "Containers/String.h"
 #include "IO/Path.h"
-
-#include "Types/CoreTypeDefs.h"
 
 #include "RTTIDefines.h"
 #include "AutoRTTI.h"
@@ -189,6 +188,8 @@ namespace CE
 
 		virtual TypeId GetTypeId() const = 0;
 		virtual u32 GetSize() const = 0;
+        
+        virtual CE::TypeId GetUnderlyingTypeId() const { return 0; }
 
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }
         virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectStore); }
@@ -291,21 +292,21 @@ namespace CE
 
 // Simple data types
 
-CE_RTTI_POD(CORE_API, CE, b8, TYPEID(CE::s8), TYPEID(CE::u8))
+CE_RTTI_POD(CORE_API, , b8, TYPEID(s8), TYPEID(u8))
 
-CE_RTTI_POD(CORE_API, CE, s8, TYPEID(u8))
-CE_RTTI_POD(CORE_API, CE, s16, TYPEID(u16))
-CE_RTTI_POD(CORE_API, CE, s32, TYPEID(u32))
-CE_RTTI_POD(CORE_API, CE, s64, TYPEID(u64))
+CE_RTTI_POD(CORE_API, , s8, TYPEID(u8))
+CE_RTTI_POD(CORE_API, , s16, TYPEID(u16))
+CE_RTTI_POD(CORE_API, , s32, TYPEID(u32))
+CE_RTTI_POD(CORE_API, , s64, TYPEID(u64))
 
-CE_RTTI_POD(CORE_API, CE, u8, TYPEID(s8))
-CE_RTTI_POD(CORE_API, CE, u16, TYPEID(s16))
-CE_RTTI_POD(CORE_API, CE, u32, TYPEID(s32))
-CE_RTTI_POD(CORE_API, CE, u64, TYPEID(s64))
+CE_RTTI_POD(CORE_API, , u8, TYPEID(s8))
+CE_RTTI_POD(CORE_API, , u16, TYPEID(s16))
+CE_RTTI_POD(CORE_API, , u32, TYPEID(s32))
+CE_RTTI_POD(CORE_API, , u64, TYPEID(s64))
 CE_RTTI_POD(CORE_API, CE, UUID, TYPEID(u64), TYPEID(s64))
 
-CE_RTTI_POD(CORE_API, CE, f32)
-CE_RTTI_POD(CORE_API, CE, f64)
+CE_RTTI_POD(CORE_API, , f32)
+CE_RTTI_POD(CORE_API, , f64)
 
 CE_RTTI_POD(CORE_API, CE, String)
 CE_RTTI_POD(CORE_API, CE, Name)
