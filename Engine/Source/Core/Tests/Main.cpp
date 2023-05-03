@@ -390,7 +390,8 @@ TEST(Reflection, RTTI_Registry_Testing)
     }
 
     DeregisterTypes<Object>();
-    EXPECT_NE(ClassType::FindClass(TYPEID(Object)), nullptr); // You cannot deregister objects that were automatically registered
+    // You cannot manually deregister types that were automatically registered
+    EXPECT_NE(ClassType::FindClass(TYPEID(Object)), nullptr);
 
     ModuleManager::Get().UnloadModule("Core");
     EXPECT_EQ(TypeInfo::GetRegisteredCount(), 0);
