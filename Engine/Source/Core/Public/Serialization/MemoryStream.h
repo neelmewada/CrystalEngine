@@ -9,6 +9,7 @@ namespace CE
     {
     public:
         MemoryStream(u32 sizeToAllocate);
+        MemoryStream(void* data, u32 length, Permissions permissions = Permissions::ReadOnly);
 
         virtual ~MemoryStream();
 
@@ -39,7 +40,7 @@ namespace CE
         
         s32 offset = 0;
 
-        StreamMode permissions = StreamMode::Default;
+        Permissions permissions = Permissions::ReadOnly;
         bool isAllocated = false;
         
     };

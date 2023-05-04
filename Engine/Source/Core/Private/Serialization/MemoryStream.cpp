@@ -6,7 +6,7 @@ namespace CE
 
     MemoryStream::MemoryStream(u32 sizeToAllocate)
     {
-        ASSERT(sizeToAllocate < 2_GB, "Memory Streams only support streams of size up to 2 GB.");
+        ASSERT(sizeToAllocate < 2_GB, "Memory Streams only support size up to 2 GB.");
         if (sizeToAllocate == 0)
             return;
         
@@ -15,15 +15,31 @@ namespace CE
         data[0] = 0;
         
         isAllocated = true;
-        permissions = StreamMode::ReadWrite;
+        permissions = Permissions::ReadWrite;
         offset = 0;
         isLoading = false; // set to writing mode
     }
 
+    MemoryStream::MemoryStream(void* data, u32 length, Permissions permissions)
+    {
+        ASSERT(length < 2_GB, "Memory Streams only support size up to 2 GB.");
+
+        bufferSize = length;
+        this->data = (u8*)data;
+
+        isAllocated = false;
+        this->permissions = permissions;
+        offset = 0;
+        isLoading = true; // set to reading mode
+    }
+
     MemoryStream::~MemoryStream()
     {
-        if (MemoryStream::IsOpen())
-            MemoryStream::Close();
+        if (isAllocated)
+            delete data;
+        data = nullptr;
+        dataSize = bufferSize = 0;
+        offset = 0;
     }
 
     void MemoryStream::Serialize(void* value, u64 length)
@@ -31,14 +47,14 @@ namespace CE
         if (offset >= bufferSize)
             return;
         
-        if (IsLoading()) // Reading
+        if (IsLoading() && CanRead()) // Reading
         {
             if (offset + length > bufferSize)
                 length = bufferSize - offset;
             memcpy(value, data + offset, length);
             offset += length;
         }
-        else // Writing
+        else if (CanWrite()) // Writing
         {
             if (offset + length > bufferSize)
                 length = bufferSize - offset;
@@ -64,12 +80,12 @@ namespace CE
 
     bool MemoryStream::CanRead()
     {
-        return Stream::CanRead();
+        return permissions == Permissions::ReadOnly || permissions == Permissions::ReadWrite;
     }
 
     bool MemoryStream::CanWrite()
     {
-        return Stream::CanWrite();
+        return permissions == Permissions::WriteOnly || permissions == Permissions::ReadWrite;
     }
 
     u64 MemoryStream::GetLength()

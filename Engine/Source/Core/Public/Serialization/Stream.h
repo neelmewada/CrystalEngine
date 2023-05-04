@@ -6,15 +6,6 @@ namespace CE
 {
 
     class Object;
-    
-    enum class StreamMode
-    {
-        Default = 0,
-        ReadOnly = 1,
-        WriteOnly = 2,
-        ReadWrite = 3,
-    };
-    ENUM_CLASS_FLAGS(StreamMode);
 
     /*
      *  Base class for all types of streams used to load and save different type of data.
@@ -23,6 +14,15 @@ namespace CE
     class CORE_API Stream
     {
     public:
+        enum class Permissions
+        {
+            None = 0,
+            ReadOnly = 1,
+            WriteOnly = 2,
+            ReadWrite = 3,
+        };
+        ENUM_CLASS_FLAGS(Permissions);
+        
         Stream() = default;
         Stream(const Stream&) = default;
         Stream& operator=(const Stream&) = default;
@@ -78,6 +78,11 @@ namespace CE
                 return *this;
             }
             SerializeInSwappedByteOrder(value, length);
+        }
+
+        virtual void* GetRawDataPtr() const
+        {
+            return nullptr;
         }
 
         //////////////////////////////////////////////////////////////
