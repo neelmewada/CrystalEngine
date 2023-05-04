@@ -307,10 +307,10 @@ TEST(Reflection, TypeId)
 
     // 1. Templates
     
-    static_assert(IsTemplate<Array<String>>::value);
-    static_assert(!IsTemplate<String>::value);
+    static_assert(TIsTemplate<Array<String>>::Value);
+    static_assert(!TIsTemplate<String>::Value);
     
-    static_assert(IsSameType<TemplateType<Array<String>>::DefaultArg, u8>::value);
+    static_assert(TIsSameType<TemplateType<Array<String>>::DefaultArg, u8>::Value);
     
     EXPECT_NE(TYPE(Array<String>), nullptr);
     EXPECT_EQ(GetStaticType<Array<String>>(), GetStaticType<Array<u8>>());
@@ -679,7 +679,30 @@ TEST(Serialization, Streams)
 {
     TEST_BEGIN;
 
+    // 1. Memory Stream
+    MemoryStream memoryStream = MemoryStream(128);
+    EXPECT_TRUE(memoryStream.IsOpen());
 
+    String str = "Hello";
+    memoryStream << str;
+
+    u32 i = 12;
+    memoryStream << i;
+
+    str = "";
+    i = 0;
+
+    memoryStream.Seek(0);
+    memoryStream.SetIsLoading(true);
+    
+    memoryStream << str;
+    memoryStream << i;
+
+    EXPECT_EQ(str, "Hello");
+    EXPECT_EQ(i, 12);
+
+    memoryStream.Close();
+    EXPECT_FALSE(memoryStream.IsOpen());
 
     TEST_END;
 }

@@ -247,21 +247,31 @@ namespace CE
 
 	    // Character Utils
 
-	    INLINE static bool IsNumeric(char c)
+	    FORCE_INLINE static bool IsNumeric(char c)
 	    {
 	        return c >= '0' && c <= '9';
 	    }
 
-	    INLINE static u8 CharToNumber(char c)
+	    FORCE_INLINE static u8 CharToNumber(char c)
 	    {
 	        if (!IsNumeric(c))
 	            return 0;
 	        return (u8)(c - '0');
 	    }
 
-	    INLINE static bool IsAlphabet(char c)
+	    FORCE_INLINE static bool IsAlphabet(char c)
 	    {
 	        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+	    }
+
+	    FORCE_INLINE static bool IsUpper(char c)
+	    {
+	        return c >= 'A' && c <= 'Z';
+	    }
+
+	    FORCE_INLINE static bool IsLower(char c)
+	    {
+	        return c >= 'a' && c <= 'z';
 	    }
 
 	    // Parsing
@@ -288,6 +298,7 @@ namespace CE
 	    }
 
     private:
+	    friend class Stream;
 
         static void Internal_ThrowParseException(const char* message);
 	    
@@ -305,7 +316,7 @@ namespace CE
 		bool bIsUsingDynamicBuffer = false;
 		u32 StringLength = 0;
 
-        SIZE_T threadId{};
+        SIZE_T threadId = 0;
 	};
 
     template<>

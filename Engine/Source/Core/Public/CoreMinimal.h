@@ -2,6 +2,9 @@
 
 // Basic headers
 #include "CoreTypes.h"
+#include "CoreTemplates.h"
+#include "CoreContainers.h"
+
 #include "CoreGlobals.h"
 
 // ******************************************************
@@ -56,15 +59,16 @@
 // ******************************************************
 // RTTI, Object & Serialization
 
+// Serialization
+#include "Serialization/Stream.h"
+#include "Serialization/MemoryStream.h"
+
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
 #include "Object/Package.h"
 #include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"
-
-// Serialization
-#include "Serialization/Stream.h"
 
 // RTTI Dependents
 #include "Math/MathRTTI.h"

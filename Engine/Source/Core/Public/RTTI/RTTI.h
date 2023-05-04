@@ -237,14 +237,14 @@ namespace CE
 	};
 
     template <typename T>
-    struct TemplateType : TTFalseType
+    struct TemplateType : TFalseType
     {
         typedef void DefaultArg;
         typedef T DefaultTemplate;
     };
 
     template <typename T, template <typename> class U>
-    struct TemplateType<U<T>> : TTTrueType
+    struct TemplateType<U<T>> : TTrueType
     {
         typedef T DefaultArg;
         typedef U<T> DefaultTemplate;
@@ -255,7 +255,7 @@ namespace CE
 	template<typename Type>
 	TypeInfo* GetStaticType()
 	{
-        if constexpr (TemplateType<Type>::value)
+        if constexpr (TemplateType<Type>::Value)
         {
             return GetStaticType<typename TemplateType<Type>::DefaultTemplate>();
         }

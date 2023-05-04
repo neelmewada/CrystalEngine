@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TypeTraits.h"
+#include "Templates/TypeTraits.h"
 #include "Types/Name.h"
 
 #define TYPEID(type) CE::GetTypeId<type>()
@@ -109,7 +109,7 @@ namespace CE\
 		return name;\
 	}\
     template<typename T>\
-    struct TemplateType<Namespace::Type<T>> : TTTrueType\
+    struct TemplateType<Namespace::Type<T>> : TTrueType\
     {\
         typedef DefaultArgType DefaultArg;\
         typedef Namespace::Type<DefaultArg> DefaultTemplate;\
@@ -162,8 +162,8 @@ namespace CE
 	TypeId GetTypeId()
 	{
 		constexpr const bool isPointer = std::is_pointer_v<Type>;
-		constexpr const bool isArray = IsArrayType<Type>::value;
-		constexpr const bool isObjectStore = IsObjectStoreType<Type>::value;
+		constexpr const bool isArray = TIsArray<Type>::Value;
+		constexpr const bool isObjectStore = IsObjectStoreType<Type>::Value;
 		
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;

@@ -219,13 +219,13 @@ namespace CE
 		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
 		{
             TypeId underlyingTypeId = 0;
-            if constexpr (CE::IsArrayType<Field>::value)
+            if constexpr (CE::TIsArray<Field>::Value)
             {
-                underlyingTypeId = TYPEID(CE::IsArrayType<Field>::ElementType);
+                underlyingTypeId = TYPEID(CE::TIsArray<Field>::ElementType);
             }
-            else if constexpr (CE::IsEnumType<Field>::value)
+            else if constexpr (CE::TIsEnum<Field>::Value)
             {
-                underlyingTypeId = TYPEID(CE::EnumUnderlyingType<Field>::type);
+                underlyingTypeId = TYPEID(CE::TEnumUnderlyingType<Field>::type);
             }
 			localFields.Add(FieldType(name,
                                       CE::GetTypeId<Field>(),

@@ -40,7 +40,7 @@ namespace CE
 		
 	}
 
-	template<typename TClass> requires std::is_base_of<Object, TClass>::value
+	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
 	TClass* NewObject(Object* owner = (Object*)GetTransientPackage(), 
 		String objectName = "", 
 		ObjectFlags flags = OF_NoFlags,

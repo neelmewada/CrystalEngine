@@ -17,7 +17,7 @@ namespace CE
 
         virtual bool AddSystemComponent(SystemComponent* systemComponent);
 
-        template<typename T> requires std::is_base_of<SystemComponent, T>::value
+        template<typename T> requires std::is_base_of<SystemComponent, T>::Value
         T* AddSystemComponent()
         {
             T* instance = new T;
