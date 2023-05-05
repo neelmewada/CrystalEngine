@@ -83,6 +83,12 @@ namespace CE
 
 } // namespace CE
 
+#if AUTORTTI
+#   define __CE_AUTORTTI_REGISTER() CERegisterModuleTypes()
+#else
+#   define __CE_AUTORTTI_REGISTER()
+#endif
+
 #if PAL_TRAIT_BUILD_MONOLITHIC
 
 // TODO: Monolithic implementation
@@ -93,6 +99,7 @@ namespace CE
 #define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
 extern "C" DLL_EXPORT CE::Module* CELoadModule()\
 {\
+    __CE_AUTORTTI_REGISTER();\
     return new ModuleImplClass();\
 }\
 extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\

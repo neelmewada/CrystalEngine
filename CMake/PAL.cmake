@@ -45,15 +45,19 @@ if (CE_STANDALONE)
         ce_set(CMAKE_SYSTEM_NAME "iOS")
         ce_set(CE_STANDALONE ON)
         ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
-
-    elseif(${CE_STANDALONE} STREQUAL "OFF")
-
-        ce_set(CE_STANDALONE OFF)
-        ce_set(PAL_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
-        ce_set(PAL_HOST_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
         
     else()
-        message(FATAL_ERROR "Invalid CE_STANDALONE platform passed: ${CE_STANDALONE}")
+
+        ce_set(CE_STANDALONE ON)
+        ce_set(PAL_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+        ce_set(PAL_HOST_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+
+    endif()
+
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        set(PAL_HOST_PLATFORM_NAME "Mac")
+    else()
+        set(PAL_HOST_PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
     endif()
 
 else()

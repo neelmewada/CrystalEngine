@@ -37,6 +37,7 @@ namespace CE
         gProjectPath = "";
         
         CoreDelegates::onBeforeModuleUnload.RemoveDelegateInstance(onBeforeModuleUnloadHandle);
+        onBeforeModuleUnloadHandle = 0;
     }
 
     void CoreModule::RegisterTypes()
@@ -49,10 +50,6 @@ namespace CE
             CE::String, CE::UUID, CE::Name, CE::Array<u8>,
             CE::Vec2, CE::Vec3, CE::Vec4, CE::Vec2i, CE::Vec3i, CE::Vec4i,
             CE::Quat, CE::Matrix4x4);
-
-        CE_REGISTER_TYPES(
-            ProjectSettings
-        );
 
         // Enums
         CE_REGISTER_TYPES(

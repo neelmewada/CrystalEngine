@@ -62,6 +62,7 @@
 // Serialization
 #include "Serialization/Stream.h"
 #include "Serialization/MemoryStream.h"
+#include "Serialization/FileStream.h"
 
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
@@ -73,10 +74,6 @@
 // RTTI Dependents
 #include "Math/MathRTTI.h"
 #include "IO/FileWatcher.h"
-
-// *****************************************************
-// Project
-#include "Project/ProjectSettings.h"
 
 // ******************************************************
 // Messaging

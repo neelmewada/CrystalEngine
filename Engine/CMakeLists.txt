@@ -5,9 +5,6 @@ project(Engine)
 # Assets
 add_subdirectory(Assets)
 
-# Engine Config
-#add_subdirectory(Config)
-
 # Engine Modules
 add_subdirectory(Source/Core)
 if(${PAL_TRAIT_BUILD_HOST_TOOLS})
@@ -24,6 +21,7 @@ endif()
 add_subdirectory(Source/GameSystem)
 add_subdirectory(Source/GameLauncher)
 
-# Engine Plugins
-add_library(EnginePlugins INTERFACE)
-add_subdirectory(Plugins)
+# Sandbox
+if(${CE_BUILD_TESTS})
+    add_subdirectory(Source/Sandbox)
+endif()

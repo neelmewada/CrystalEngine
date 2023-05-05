@@ -253,19 +253,9 @@ function(ce_add_target NAME TARGET_TYPE)
     # AUTORTTI
 
     if(${ce_add_target_AUTORTTI})
-        set(AutoRttiCmd "AutoRTTI")
+        target_compile_definitions(${NAME} PRIVATE AUTORTTI=1)
 
-        # foreach(src ${SOURCES})
-        #     cmake_path(GET src EXTENSION src_ext)
-        #     cmake_path(GET src FILENAME src_filename)
-        #     cmake_path(REMOVE_EXTENSION src_filename)
-        #     if(${src_ext} STREQUAL ".h")
-        #         file(READ ${src} src_content)
-        #         if("${src_content}" MATCHES "#include \"${src_filename}.rtti.h\"")
-        #             file(TOUCH "${CMAKE_CURRENT_BINARY_DIR}/Generated/${src_filename}.rtti.h")
-        #         endif()
-        #     endif()
-        # endforeach()
+        set(AutoRttiCmd "AutoRTTI")
 
         add_custom_command(TARGET ${NAME} PRE_BUILD
             COMMAND ${AutoRttiCmd} -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"

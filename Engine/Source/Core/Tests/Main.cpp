@@ -681,6 +681,7 @@ TEST(Serialization, Streams)
 
     // 1. Memory Stream
     MemoryStream memoryStream = MemoryStream(128);
+    memoryStream.SetAsBinarySerialization(true);
     EXPECT_TRUE(memoryStream.IsOpen());
 
     String str = "Hello";
@@ -689,17 +690,23 @@ TEST(Serialization, Streams)
     u32 i = 12;
     memoryStream << i;
 
+    Name name = "CE::Object";
+    memoryStream << name;
+
     str = "";
     i = 0;
+    name = NAME_None;
 
     memoryStream.Seek(0);
-    memoryStream.SetIsLoading(true);
+    memoryStream.SetIsReading(true);
     
     memoryStream << str;
     memoryStream << i;
+    memoryStream << name;
 
     EXPECT_EQ(str, "Hello");
     EXPECT_EQ(i, 12);
+    EXPECT_EQ(name, "CE::Object");
 
     memoryStream.Close();
     EXPECT_FALSE(memoryStream.IsOpen());

@@ -137,7 +137,7 @@ namespace CE
          // Reserves space for the given number of characters in string.
         void Reserve(u32 reserveCharacterCount);
 
-        const char* GetCString() const;
+        char* GetCString() const;
         inline u32 GetLength() const { return StringLength; }
 
         inline std::string ToStdString() const { return std::string(Buffer); }

@@ -194,7 +194,7 @@ namespace CE
         }
     }
 
-    const char* String::GetCString() const
+    char* String::GetCString() const
     {
         return Buffer;
     }

@@ -44,6 +44,7 @@ endif()
 add_library(EditorTools INTERFACE)
 
 # Build Editor
+
 if(${PAL_TRAIT_BUILD_EDITOR})
     add_subdirectory(Editor)
 endif()

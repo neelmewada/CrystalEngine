@@ -2,11 +2,13 @@
 #include "System.h"
 
 #include "System.private.h"
-CE_IMPLEMENT_MODULE_AUTORTTI(System, CE::SystemModule)
+CE_IMPLEMENT_MODULE(System, CE::SystemModule)
 
 namespace CE
 {
-    
+#if AUTORTTI
+    int i = 0;
+#endif
     
     void SystemModule::StartupModule()
     {

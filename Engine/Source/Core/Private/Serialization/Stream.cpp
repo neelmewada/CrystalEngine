@@ -3,77 +3,30 @@
 
 namespace CE
 {
-    Stream& Stream::operator<<(String& string)
+    Stream& Stream::operator<<(u16& value)
     {
-        if (IsLoading()) // Reading
+        if (IsBinarySerialization()) // Binary
         {
-            u32 length = 0;
-            *this << length;
-            if (length > 0)
+            Serialize(&value, sizeof(u16));
+        }
+        else // ASCII
+        {
+            if (IsReading()) // Reading
             {
-                string = String(length);
-                Serialize(const_cast<char*>(string.GetCString()), length);
-                string.StringLength = length;
-                string.Buffer[length] = 0; // Add null terminator
+                
             }
-            else
+            else // Writing
             {
-                string = "";
+                auto str = String::Format("{}", value);
+                Serialize(str);
             }
-        }
-        else // Writing
-        {
-            u32 length = string.GetLength();
-            if (length > 0)
-            {
-                *this << length;
-                Serialize(const_cast<char*>(string.GetCString()), length);
-            }
-        }
-        return *this;
-    }
-
-    Stream& Stream::operator<<(char& ch)
-    {
-        Serialize(&ch, 1);
-        return *this;
-    }
-
-    Stream& Stream::operator<<(UUID& uuid)
-    {
-        if (IsLoading()) // Reading
-        {
-            u64 value = 0;
-            *this << value;
-            uuid = value;
-        }
-        else // Writing
-        {
-            u64 value = uuid;
-            *this << value;
-        }
-        return *this;
-    }
-
-    Stream& Stream::operator<<(Name& name)
-    {
-        if (IsLoading()) // Reading
-        {
-            String stringValue = "";
-            *this << stringValue;
-            name = stringValue;
-        }
-        else // Writing
-        {
-            String stringValue = name.GetString();
-            *this << stringValue;
         }
         return *this;
     }
 
     Stream& Stream::SerializeInSwappedByteOrder(void* value, u32 length)
     {
-        if (IsLoading()) // Reading
+        if (IsReading()) // Reading
         {
             Serialize(value, length);
             SwapBytes(value, length);

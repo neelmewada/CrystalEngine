@@ -14,6 +14,8 @@ namespace CE
         virtual ~MemoryStream();
 
         void Serialize(void* value, u64 length) override;
+        void Serialize(u8& byte) override;
+        void Serialize(String& string) override;
         
         bool IsOpen() override;
         void Close() override;
@@ -23,14 +25,24 @@ namespace CE
         u64 GetMaximumSize() override;
         bool HasHardSizeLimit() override;
 
+        void* GetRawDataPtr() const override
+        {
+            return data;
+        }
+
         u32 GetCurrentPosition() const
         {
             return offset;
         }
 
-        void Seek(u32 seekPos)
+        void Seek(u32 seekPos, SeekMode seekMode = SeekMode::Begin)
         {
-            offset = seekPos;
+            switch (seekMode)
+            {
+            case SeekMode::Begin: offset = seekPos; break;
+            case SeekMode::Current: offset += seekPos; break;
+            case SeekMode::End: offset = GetMaximumSize() - 1 - seekPos; break;
+            }
         }
 
     private:
@@ -38,7 +50,7 @@ namespace CE
         u32 bufferSize = 0;
         u32 dataSize = 0;
         
-        s32 offset = 0;
+        u32 offset = 0;
 
         Permissions permissions = Permissions::ReadOnly;
         bool isAllocated = false;
