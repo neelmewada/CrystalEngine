@@ -63,6 +63,7 @@
 #include "Serialization/Stream.h"
 #include "Serialization/MemoryStream.h"
 #include "Serialization/FileStream.h"
+#include "Serialization/StructuredStream.h"
 
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
