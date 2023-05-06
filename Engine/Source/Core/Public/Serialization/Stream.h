@@ -34,23 +34,6 @@ namespace CE
         Stream& operator=(const Stream&) = default;
         virtual ~Stream() = default;
 
-        virtual Stream& operator<<(const String& string) = 0;
-        virtual Stream& operator>>(String& string) = 0;
-
-        FORCE_INLINE Stream& operator<<(const char* cString)
-        {
-            return *this << String(cString);
-        }
-
-        virtual Stream& operator<<(const u8& integer) = 0;
-        virtual Stream& operator<<(const u16& integer) = 0;
-        virtual Stream& operator<<(const u32& integer) = 0;
-        virtual Stream& operator<<(const u64& integer) = 0;
-        virtual Stream& operator<<(const s8& integer) = 0;
-        virtual Stream& operator<<(const s16& integer) = 0;
-        virtual Stream& operator<<(const s32& integer) = 0;
-        virtual Stream& operator<<(const s64& integer) = 0;
-
         virtual Stream& operator++()
         {
             Seek(1, SeekMode::Current);
@@ -62,6 +45,36 @@ namespace CE
             Seek(-1, SeekMode::Current);
             return *this;
         }
+
+        virtual Stream& operator<<(const String& string);
+        virtual Stream& operator>>(String& string);
+
+        virtual Stream& operator<<(const u8& integer);
+        virtual Stream& operator>>(u8& integer);
+        
+        virtual Stream& operator<<(const u16& integer);
+        virtual Stream& operator>>(u16& integer);
+        
+        virtual Stream& operator<<(const u32& integer);
+        virtual Stream& operator>>(u32& integer);
+        
+        virtual Stream& operator<<(const u64& integer);
+        virtual Stream& operator>>(u64& integer);
+
+        virtual Stream& operator<<(const s8& integer);
+        virtual Stream& operator>>(s8& integer);
+        
+        virtual Stream& operator<<(const s16& integer);
+        virtual Stream& operator>>(s16& integer);
+        
+        virtual Stream& operator<<(const s32& integer);
+        virtual Stream& operator>>(s32& integer);
+        
+        virtual Stream& operator<<(const s64& integer);
+        virtual Stream& operator>>(s64& integer);
+
+        virtual Stream& operator<<(const f32& single);
+        virtual Stream& operator>>(f32& single);
 
     public:
         
@@ -94,6 +107,8 @@ namespace CE
         {
             return GetCurrentPosition() >= GetCapacity();
         }
+
+        virtual void SetOutOfBounds() = 0;
 
         //////////////////////////////////////////////////////////////
         // State & Traits
@@ -132,10 +147,26 @@ namespace CE
          * True if there is a hard limit to the size of this stream, ex: A memory stream.
          */
         virtual bool HasHardSizeLimit() { return false; }
-        
-        virtual bool IsAsciiStream() const = 0;
 
-        virtual bool IsBinaryStream() const = 0;
+        virtual bool IsBinaryMode() const
+        {
+            return isBinaryMode;
+        }
+
+        virtual void SetBinaryMode(bool setBinaryMode)
+        {
+            isBinaryMode = setBinaryMode;
+        }
+
+        virtual bool IsAsciiMode() const
+        {
+            return !IsBinaryMode();
+        }
+
+        virtual void SetAsciiMode(bool setAsciiMode)
+        {
+            SetBinaryMode(!setAsciiMode);
+        }
 
         /**
          * \brief Returns true if bytes need to be swapped in case of little endian system
@@ -174,6 +205,8 @@ namespace CE
         // State Variables
 
         b8 forceByteSwapping = false;
+
+        b8 isBinaryMode = false;
     };
 
     ENUM_CLASS_FLAGS(Stream::Permissions);

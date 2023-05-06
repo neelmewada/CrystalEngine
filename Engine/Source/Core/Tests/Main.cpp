@@ -675,12 +675,15 @@ TEST(Object, CDI)
 
 #pragma region Serialization
 
-TEST(Serialization, Streams)
+TEST(Serialization, BasicStreams)
 {
     TEST_BEGIN;
 
+    auto launchDir = PlatformDirectories::GetLaunchDir();
+
     // 1. Memory Stream (Binary)
-    auto memBinStream = MemoryBinaryStream(256);
+    auto memBinStream = MemoryStream(256);
+    memBinStream.SetBinaryMode(true);
     EXPECT_TRUE(memBinStream.IsOpen());
     
     memBinStream << "Hello";
@@ -703,7 +706,8 @@ TEST(Serialization, Streams)
 
     // 2. Memory Stream (Ascii)
 
-    auto memAsciiStream = MemoryAsciiStream(256);
+    auto memAsciiStream = MemoryStream(256);
+    memAsciiStream.SetAsciiMode(true);
     EXPECT_TRUE(memAsciiStream.IsOpen());
 
     memAsciiStream << "This is a String! Integer = ";
@@ -720,19 +724,74 @@ TEST(Serialization, Streams)
 
     // 3. File Stream (Binary)
 
-    auto path = IO::Path("TestFile.bin");
+    // Write
+    auto path = launchDir / "TestFile.bin";
     if (path.Exists())
         IO::Path::Remove(path);
     
-    auto fileBinStream = FileBinaryStream(path,Stream::Permissions::ReadWrite);
+    auto fileBinStream = FileStream(path,Stream::Permissions::ReadWrite);
+    fileBinStream.SetBinaryMode(true);
     EXPECT_TRUE(fileBinStream.IsOpen());
 
     fileBinStream << "This is a string";
     fileBinStream << (u8)250;
     fileBinStream << "New String";
-
+    
     fileBinStream.Close();
     EXPECT_FALSE(fileBinStream.IsOpen());
+
+    std::fstream impl = std::fstream(".awfw");
+    impl.close();
+
+    // Read
+    auto newFileBinStream = FileStream(path, Stream::Permissions::ReadOnly);
+    newFileBinStream.SetBinaryMode(true);
+    EXPECT_TRUE(newFileBinStream.IsOpen());
+
+    str = ""; u8 byte = 0;
+    newFileBinStream >> str;
+    EXPECT_EQ(str, "This is a string");
+    newFileBinStream >> byte;
+    EXPECT_EQ(byte, 250);
+    newFileBinStream >> str;
+    EXPECT_EQ(str, "New String");
+    EXPECT_TRUE(newFileBinStream.IsOutOfBounds());
+
+    newFileBinStream.Close();
+    EXPECT_FALSE(newFileBinStream.IsOpen());
+    
+    IO::Path::Remove(path);
+
+    // 4. File Stream (Ascii)
+    auto fileAsciiStream = FileStream(path, Stream::Permissions::ReadWrite);
+    fileAsciiStream.SetAsciiMode(true);
+    EXPECT_TRUE(fileAsciiStream.IsOpen());
+
+    fileAsciiStream << "This is an ascii file!";
+    fileAsciiStream << " A new sentence\n";
+    fileAsciiStream << "1234;\r\n";
+    fileAsciiStream << "Last line!";
+
+    fileAsciiStream.Close();
+    EXPECT_FALSE(fileAsciiStream.IsOpen());
+
+    auto newFileAsciiStream = FileStream(path, Stream::Permissions::ReadOnly);
+    newFileAsciiStream.SetAsciiMode(true);
+    EXPECT_TRUE(newFileAsciiStream.IsOpen());
+
+    str = "";
+    newFileAsciiStream >> str;
+    EXPECT_EQ(str, "This is an ascii file! A new sentence");
+    newFileAsciiStream >> str;
+    EXPECT_EQ(str, "1234;");
+    newFileAsciiStream >> str;
+    EXPECT_EQ(str, "Last line!");
+    EXPECT_TRUE(newFileAsciiStream.IsOutOfBounds());
+    
+    newFileAsciiStream.Close();
+    EXPECT_FALSE(newFileAsciiStream.IsOpen());
+
+    IO::Path::Remove(path);
 
     TEST_END;
 }

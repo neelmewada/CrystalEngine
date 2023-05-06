@@ -12,6 +12,8 @@ public:
 
     void Init();
 
+    void PostInit();
+
     void PreShutdown();
     void Shutdown();
 };

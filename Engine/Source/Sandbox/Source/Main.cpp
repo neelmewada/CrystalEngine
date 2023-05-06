@@ -10,6 +10,8 @@ int main(int argc, const char** argv)
 
     loop.Init();
 
+    loop.PostInit();
+
     loop.PreShutdown();
     loop.Shutdown();
     return 0;
