@@ -153,10 +153,6 @@ TEST(Containers, StringAllocation)
         myString = "New String";
     });
 
-    String str1 = "str1";
-
-    myString = "Changed String";
-
     if (t1.IsJoinable())
         t1.Join();
     if (t2.IsJoinable())
@@ -689,17 +685,21 @@ TEST(Serialization, BasicStreams)
     memBinStream << "Hello";
     memBinStream << (s32)-521221;
     memBinStream << "New String";
+    memBinStream << 12.425f;
 
     memBinStream.Seek(0);
 
     String str = "";
-    s32 integer;
+    s32 integer = 0;
+    f32 single = 0;
     memBinStream >> str;
     EXPECT_EQ(str, "Hello");
     memBinStream >> integer;
     EXPECT_EQ(integer, -521221);
     memBinStream >> str;
     EXPECT_EQ(str, "New String");
+    memBinStream >> single;
+    EXPECT_EQ(single, 12.425f);
 
     memBinStream.Close();
     EXPECT_FALSE(memBinStream.IsOpen());
@@ -713,11 +713,16 @@ TEST(Serialization, BasicStreams)
     memAsciiStream << "This is a String! Integer = ";
     memAsciiStream << 123;
     memAsciiStream << ";\n";
+    memAsciiStream << "float = ";
+    memAsciiStream << 12.452f;
 
     memAsciiStream.Seek(0);
     String line = "";
     memAsciiStream >> line;
     EXPECT_EQ(line, "This is a String! Integer = 123;");
+    memAsciiStream >> line;
+    EXPECT_EQ(line, "float = 12.452");
+    EXPECT_TRUE(memAsciiStream.IsOutOfBounds());
     
     memAsciiStream.Close();
     EXPECT_FALSE(memAsciiStream.IsOpen());

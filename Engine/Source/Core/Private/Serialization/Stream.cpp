@@ -81,24 +81,24 @@ namespace CE
         return *this;
     }
 
-    Stream& Stream::operator<<(const u8& integer)
+    Stream& Stream::operator<<(const u8& byte)
     {
         if (IsBinaryMode())
         {
-            Write(&integer, sizeof(integer));
+            Write(&byte, sizeof(byte));
         }
         else if (IsAsciiMode())
         {
-            *this << String::Format("{}", integer);
+            *this << String::Format("{}", (int)byte);
         }
         return *this;
     }
 
-    Stream& Stream::operator>>(u8& integer)
+    Stream& Stream::operator>>(u8& byte)
     {
         if (IsBinaryMode())
         {
-            Read(&integer, sizeof(integer));
+            Read(&byte, sizeof(byte));
         }
         else if (IsAsciiMode())
         {
@@ -193,7 +193,7 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            *this << String::Format("{}", integer);
+            *this << String::Format("{}", (int)integer);
         }
         return *this;
     }

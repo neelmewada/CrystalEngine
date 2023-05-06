@@ -30,6 +30,7 @@ namespace CE
             return offset;
         }
 
+        bool IsOutOfBounds() override;
         void SetOutOfBounds() override;
 
         void Seek(s64 seekPos, SeekMode seekMode = SeekMode::Begin) override;

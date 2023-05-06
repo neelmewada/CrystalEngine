@@ -81,6 +81,11 @@ namespace CE
         return true;
     }
 
+    bool MemoryStream::IsOutOfBounds()
+    {
+        return Stream::IsOutOfBounds() || offset >= dataSize;
+    }
+
     void MemoryStream::SetOutOfBounds()
     {
         offset = bufferSize;
@@ -100,13 +105,13 @@ namespace CE
     {
         memcpy(data + offset, inData, length);
         offset += length;
+        dataSize = Math::Max(dataSize, offset);
     }
 
     void MemoryStream::Read(void* outData, u64 length)
     {
         memcpy(outData, data + offset, length);
         offset += length;
-        dataSize = Math::Max(dataSize, offset);
     }
 
 } // namespace CE
