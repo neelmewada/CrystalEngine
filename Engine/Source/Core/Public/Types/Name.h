@@ -44,7 +44,7 @@ namespace CE
 
         CE_INLINE SIZE_T GetHashValue() const { return hashValue; }
 
-        CE_INLINE String GetString() const { return value; }
+        CE_INLINE const String& GetString() const { return value; }
         
         CE_INLINE const char* GetCString() const
         {

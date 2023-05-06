@@ -91,7 +91,6 @@ void Threading_Test_Func1()
 TEST(Threading, ThreadSingleton)
 {
     TEST_BEGIN;
-    ThreadingTestSingletonCounter = 0;
     ThreadingTestSingletonDestroyCounter = 0;
 
     auto threadId = Thread::GetCurrentThreadId();
@@ -99,6 +98,8 @@ TEST(Threading, ThreadSingleton)
     auto v2 = &ThreadingTestSingleton::Get();
     EXPECT_EQ(v1, v2);
     Mutex mut{};
+
+    ThreadingTestSingletonCounter = 0;
 
     Thread t1([&]
     {
@@ -120,8 +121,8 @@ TEST(Threading, ThreadSingleton)
         t1.Join();
     if (t2.IsJoinable())
         t2.Join();
-
-    EXPECT_EQ(ThreadingTestSingletonCounter, 3);
+    
+    EXPECT_EQ(ThreadingTestSingletonCounter, 2);
     EXPECT_EQ(ThreadingTestSingletonDestroyCounter, 2);
 
     ThreadingTestSingletonCounter = 0;

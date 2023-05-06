@@ -49,6 +49,14 @@ namespace CE
         virtual Stream& operator<<(const String& string);
         virtual Stream& operator>>(String& string);
 
+        virtual Stream& operator<<(const Name& name);
+        virtual Stream& operator>>(Name& name);
+
+        virtual Stream& operator<<(const char* cString);
+
+        virtual Stream& operator<<(const UUID& uuid);
+        virtual Stream& operator>>(UUID& uuid);
+
         virtual Stream& operator<<(const u8& byte);
         virtual Stream& operator>>(u8& byte);
         

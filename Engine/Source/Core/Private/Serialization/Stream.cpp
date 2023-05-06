@@ -81,6 +81,37 @@ namespace CE
         return *this;
     }
 
+    Stream& Stream::operator<<(const Name& name)
+    {
+        return *this << name.GetString();
+    }
+
+    Stream& Stream::operator>>(Name& name)
+    {
+        String str = "";
+        *this >> str;
+        name = str;
+        return *this;
+    }
+
+    Stream& Stream::operator<<(const char* cString)
+    {
+        return *this << String(cString);
+    }
+
+    Stream& Stream::operator<<(const UUID& uuid)
+    {
+        return *this << (u64)uuid;
+    }
+
+    Stream& Stream::operator>>(UUID& uuid)
+    {
+        u64 value = 0;
+        *this >> value;
+        uuid = value;
+        return *this;
+    }
+
     Stream& Stream::operator<<(const u8& byte)
     {
         if (IsBinaryMode())
