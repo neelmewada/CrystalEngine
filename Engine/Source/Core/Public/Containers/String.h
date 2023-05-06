@@ -35,7 +35,7 @@ namespace CE
         String();
         String(std::string string);
         String(StringView stringView);
-        String(u32 reservedSize);
+        explicit String(u32 reservedSize);
         String(const char* value);
         String(const char* cStringA, const char* cStringB);
         String(Iterator begin, Iterator end);

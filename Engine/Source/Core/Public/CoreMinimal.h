@@ -61,6 +61,8 @@
 
 // Serialization
 #include "Serialization/Stream.h"
+#include "Serialization/BinaryStream.h"
+#include "Serialization/AsciiStream.h"
 #include "Serialization/MemoryStream.h"
 #include "Serialization/FileStream.h"
 

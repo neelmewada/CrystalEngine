@@ -679,37 +679,60 @@ TEST(Serialization, Streams)
 {
     TEST_BEGIN;
 
-    // 1. Memory Stream
-    MemoryStream memoryStream = MemoryStream(128);
-    memoryStream.SetAsBinarySerialization(true);
-    EXPECT_TRUE(memoryStream.IsOpen());
-
-    String str = "Hello";
-    memoryStream << str;
-
-    u32 i = 12;
-    memoryStream << i;
-
-    Name name = "CE::Object";
-    memoryStream << name;
-
-    str = "";
-    i = 0;
-    name = NAME_None;
-
-    memoryStream.Seek(0);
-    memoryStream.SetIsReading(true);
+    // 1. Memory Stream (Binary)
+    auto memBinStream = MemoryBinaryStream(256);
+    EXPECT_TRUE(memBinStream.IsOpen());
     
-    memoryStream << str;
-    memoryStream << i;
-    memoryStream << name;
+    memBinStream << "Hello";
+    memBinStream << (s32)-521221;
+    memBinStream << "New String";
 
+    memBinStream.Seek(0);
+
+    String str = "";
+    s32 integer;
+    memBinStream >> str;
     EXPECT_EQ(str, "Hello");
-    EXPECT_EQ(i, 12);
-    EXPECT_EQ(name, "CE::Object");
+    memBinStream >> integer;
+    EXPECT_EQ(integer, -521221);
+    memBinStream >> str;
+    EXPECT_EQ(str, "New String");
 
-    memoryStream.Close();
-    EXPECT_FALSE(memoryStream.IsOpen());
+    memBinStream.Close();
+    EXPECT_FALSE(memBinStream.IsOpen());
+
+    // 2. Memory Stream (Ascii)
+
+    auto memAsciiStream = MemoryAsciiStream(256);
+    EXPECT_TRUE(memAsciiStream.IsOpen());
+
+    memAsciiStream << "This is a String! Integer = ";
+    memAsciiStream << 123;
+    memAsciiStream << ";\n";
+
+    memAsciiStream.Seek(0);
+    String line = "";
+    memAsciiStream >> line;
+    EXPECT_EQ(line, "This is a String! Integer = 123;");
+    
+    memAsciiStream.Close();
+    EXPECT_FALSE(memAsciiStream.IsOpen());
+
+    // 3. File Stream (Binary)
+
+    auto path = IO::Path("TestFile.bin");
+    if (path.Exists())
+        IO::Path::Remove(path);
+    
+    auto fileBinStream = FileBinaryStream(path,Stream::Permissions::ReadWrite);
+    EXPECT_TRUE(fileBinStream.IsOpen());
+
+    fileBinStream << "This is a string";
+    fileBinStream << (u8)250;
+    fileBinStream << "New String";
+
+    fileBinStream.Close();
+    EXPECT_FALSE(fileBinStream.IsOpen());
 
     TEST_END;
 }

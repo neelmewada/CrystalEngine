@@ -34,39 +34,65 @@ namespace CE
         Stream& operator=(const Stream&) = default;
         virtual ~Stream() = default;
 
-        virtual Stream& operator<<(u8& value)
+        virtual Stream& operator<<(const String& string) = 0;
+        virtual Stream& operator>>(String& string) = 0;
+
+        FORCE_INLINE Stream& operator<<(const char* cString)
         {
-            Serialize(value);
+            return *this << String(cString);
+        }
+
+        virtual Stream& operator<<(const u8& integer) = 0;
+        virtual Stream& operator<<(const u16& integer) = 0;
+        virtual Stream& operator<<(const u32& integer) = 0;
+        virtual Stream& operator<<(const u64& integer) = 0;
+        virtual Stream& operator<<(const s8& integer) = 0;
+        virtual Stream& operator<<(const s16& integer) = 0;
+        virtual Stream& operator<<(const s32& integer) = 0;
+        virtual Stream& operator<<(const s64& integer) = 0;
+
+        virtual Stream& operator++()
+        {
+            Seek(1, SeekMode::Current);
             return *this;
         }
 
-        virtual Stream& operator<<(u16& value);
-
-        virtual Stream& operator<<(String& string)
+        virtual Stream& operator--()
         {
-            Serialize(string);
+            Seek(-1, SeekMode::Current);
             return *this;
-        }
-
-        virtual Stream& operator<<(Name& name)
-        {
-            auto str = name.GetString();
-            return *this << str;
         }
 
     public:
-        /**
-         * \brief Low level function that reads or writes raw byte data to/from the stream depending on the mode
-         */
-        virtual void Serialize(void* value, u64 length) = 0;
-
-        virtual void Serialize(u8& byte) = 0;
-
-        virtual void Serialize(String& string) = 0;
+        
+        virtual void Write(const void* inData, u64 length) = 0;
+        
+        virtual void Write(u8 inByte)
+        {
+            Write(&inByte, 1);
+        }
+        
+        virtual void Read(void* outData, u64 length) = 0;
+        
+        virtual u8 Read()
+        {
+            u8 byte = 0;
+            Read(&byte, 1);
+            return byte;
+        }
 
         virtual void* GetRawDataPtr() const
         {
             return nullptr;
+        }
+
+        virtual u64 GetCurrentPosition() = 0;
+
+        virtual void Seek(s64 seekPos, SeekMode seekMode = SeekMode::Begin) = 0;
+
+        virtual bool IsOutOfBounds()
+        {
+            return GetCurrentPosition() >= GetCapacity();
         }
 
         //////////////////////////////////////////////////////////////
@@ -97,43 +123,19 @@ namespace CE
         /**
          * \brief Returns the maximum amount of data that can be stored in this stream
          */
-        virtual u64 GetMaximumSize() = 0;
+        virtual u64 GetCapacity() = 0;
 
-        virtual bool CanResize() { return false; }
+        virtual bool CanResize() const { return false; }
 
         /**
          * \brief Returns false if there is no hard limit to the size of this stream, ex: A file output stream.
          * True if there is a hard limit to the size of this stream, ex: A memory stream.
          */
         virtual bool HasHardSizeLimit() { return false; }
+        
+        virtual bool IsAsciiStream() const = 0;
 
-        virtual bool IsReading() { return isReading; }
-
-        virtual void SetIsReading(b8 isReading)
-        {
-            this->isReading = isReading;
-        }
-
-        virtual bool IsWriting() { return !IsReading(); }
-
-        virtual void SetIsWriting(b8 isWriting)
-        {
-            SetIsReading(!isWriting);
-        }
-
-        virtual bool IsBinarySerialization() { return isBinarySerialization; }
-
-        virtual void SetAsBinarySerialization(b8 setAsBinary)
-        {
-            this->isBinarySerialization = true;
-        }
-
-        virtual bool IsASCIISerialization() { return !IsBinarySerialization(); }
-
-        virtual void SetAsASCIISerialization(b8 setAsASCII)
-        {
-            SetAsBinarySerialization(!setAsASCII);
-        }
+        virtual bool IsBinaryStream() const = 0;
 
         /**
          * \brief Returns true if bytes need to be swapped in case of little endian system
@@ -149,11 +151,7 @@ namespace CE
 
     protected:
 
-        virtual void ReadInteger(u16& out) = 0;
-        virtual void ReadInteger(u32& out) = 0;
-        virtual void ReadInteger(u64& out) = 0;
-
-        template<typename T>
+        /*template<typename T>
         Stream& SerializeInByteOrder(T& value)
         {
             static_assert(!TIsSameType<T, u8>::Value, "Function SerializeInOrder should not be used for 8 bit integers");
@@ -161,27 +159,21 @@ namespace CE
 
             if (!RequiresByteSwapping())
             {
-                Serialize(&value, sizeof(T));
+                SerializeBinary(&value, sizeof(T));
                 return *this;
             }
             
             return SerializeInSwappedByteOrder(&value, sizeof(T));
-        }
+        }*/
 
-        Stream& SerializeInSwappedByteOrder(void* value, u32 length);
+        //Stream& SerializeInSwappedByteOrder(void* value, u32 length);
 
         void SwapBytes(void* value, u32 length);
 
     protected:
         // State Variables
-        
-        u32 nextReadCount = 0;
-
-        b8 isReading = false;
 
         b8 forceByteSwapping = false;
-
-        b8 isBinarySerialization = true;
     };
 
     ENUM_CLASS_FLAGS(Stream::Permissions);

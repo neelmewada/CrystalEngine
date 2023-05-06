@@ -6,6 +6,25 @@
 
 namespace CE
 {
+	template<typename T>
+	struct TIsIntegralType : TFalseType {};
+
+	template<>
+	struct TIsIntegralType<u8> : TTrueType {};
+	template<>
+	struct TIsIntegralType<u16> : TTrueType {};
+	template<>
+	struct TIsIntegralType<u32> : TTrueType {};
+	template<>
+	struct TIsIntegralType<u64> : TTrueType {};
+	template<>
+	struct TIsIntegralType<s8> : TTrueType {};
+	template<>
+	struct TIsIntegralType<s16> : TTrueType {};
+	template<>
+	struct TIsIntegralType<s32> : TTrueType {};
+	template<>
+	struct TIsIntegralType<s64> : TTrueType {};
 
 	template <class, template <class> class>
 	struct TypeIsInstanceOf : TFalseType {};
