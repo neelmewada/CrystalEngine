@@ -18,7 +18,7 @@ namespace CE
     struct TTrueType : TBoolConst<true> {};
 
     template<typename T>
-    FORCE_INLINE RemoveReference<T>::Type&& MoveTemp(T&& value)
+    FORCE_INLINE typename RemoveReference<T>::Type&& MoveTemp(T&& value)
     {
         return static_cast<typename RemoveReference<T>::Type&&>(value);
     }

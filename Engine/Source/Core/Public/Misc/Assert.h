@@ -19,5 +19,5 @@
         if (!(Condition)) { CE_LOG(Critical, All, Message "", ##__VA_ARGS__); assert(false); }
 #endif
 
-#define ASSERT(Condition, Message, ...) CE_ASSERT(Condition, Message, __VA_ARGS__)
+#define ASSERT(Condition, Message, ...) CE_ASSERT(Condition, Message, ##__VA_ARGS__)
 

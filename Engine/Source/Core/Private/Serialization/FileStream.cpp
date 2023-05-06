@@ -5,7 +5,7 @@ namespace CE
 {
     FileStream::FileStream(const IO::Path& filePath, Permissions openMode)
     {
-        ASSERT(openMode != Permissions::None, "FileAsciiStream constructed with openMode as None!")
+        ASSERT(openMode != Permissions::None, "FileAsciiStream constructed with openMode as None!");
 
         this->filePath = filePath;
 
