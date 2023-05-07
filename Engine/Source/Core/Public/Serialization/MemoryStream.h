@@ -7,7 +7,7 @@ namespace CE
     class CORE_API MemoryStream : public Stream
     {
     public:
-        MemoryStream(u32 sizeToAllocate);
+        MemoryStream(u32 sizeToAllocate, b8 autoResize = true);
         MemoryStream(void* data, u32 length, Permissions permissions = Permissions::ReadOnly);
 
         virtual ~MemoryStream();
@@ -43,12 +43,17 @@ namespace CE
             Write(&inByte, 1);
         }
 
+        bool CanResize() const override;
+
+        bool Resize(u32 newSize);
+
     private:
         u8* data = nullptr;
         u32 bufferSize = 0;
         u32 dataSize = 0;
         
         u32 offset = 0;
+        b8 autoResize = false;
 
         Stream::Permissions permissions = Stream::Permissions::ReadOnly;
         bool isAllocated = false;

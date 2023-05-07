@@ -88,6 +88,11 @@ namespace CE
             return Impl[GetSize() - 1];
         }
 
+        const ElementType& Top() const
+        {
+            return GetLast();
+        }
+
         CE_INLINE bool IsEmpty() const
         {
             return Impl.empty();

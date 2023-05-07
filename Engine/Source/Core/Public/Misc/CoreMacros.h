@@ -53,8 +53,9 @@
 
 namespace CE::Internal
 {
+
     template<typename T, SIZE_T N>
-    inline SIZE_T _CountOf(T (&arr)[N])
+    inline SIZE_T _CountOf(const T (&arr)[N])
     {
         return N;
     }

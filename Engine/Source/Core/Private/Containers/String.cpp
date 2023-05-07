@@ -24,7 +24,7 @@ namespace CE
                 if (Thread::GetCurrentThreadId() == gMainThreadId)
                 {
                     // Do NOT clean up string buffers on main thread.
-                    // Sometimes, static/global destructors will be called after thread singleton is destroyed!
+                    // Sometimes, static/global destructors are be called after thread singleton is destroyed, which can cause crash on app exit
                     return;
                 }
                 staticBufferAllocator.FreeAll();
@@ -265,7 +265,7 @@ namespace CE
         return std::regex_match(sourceString.GetCString(), std::regex(regex));
     }
 
-    void CE::String::Append(char c)
+    void String::Append(char c)
     {
         char copyStr[] = { c, '\0' };
         ConcatenateCString(copyStr);

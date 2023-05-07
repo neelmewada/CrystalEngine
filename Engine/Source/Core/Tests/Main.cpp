@@ -671,7 +671,7 @@ TEST(Object, CDI)
 
 #pragma region JSON
 
-constexpr const char* JSON_Writer_Test1_Comparison = R"({
+const char JSON_Writer_Test1_Comparison[] = R"({
 	"prop1": 4212.212,
 	"name": "Some Name",
 	"child": 
@@ -696,7 +696,7 @@ constexpr const char* JSON_Writer_Test1_Comparison = R"({
 	"prop2": 52635
 })";
 
-const char* JSON_Writer_Test2_Comparison = R"([
+const char JSON_Writer_Test2_Comparison[] = R"([
 	{
 		"some_array": 
 		[
@@ -794,6 +794,80 @@ TEST(JSON, Writer)
     stream.Write('\0');
     comp = std::strcmp((char*)stream.GetRawDataPtr(), JSON_Writer_Test2_Comparison);
     EXPECT_EQ(comp, 0);
+
+    stream.Close();
+    
+    TEST_END;
+}
+
+
+TEST(JSON, TokenParser)
+{
+    TEST_BEGIN;
+
+    auto stream = MemoryStream((void*)JSON_Writer_Test2_Comparison, COUNTOF(JSON_Writer_Test2_Comparison), Stream::Permissions::ReadOnly);
+    stream.SetAsciiMode(true);
+
+    struct TokenPair
+    {
+        JsonToken token;
+        String lexeme;
+    };
+
+    // 1. Token Parser
+    JsonReader reader = JsonReader::Create(&stream);
+    
+    Array<TokenPair> tokenArray{};
+
+    while (reader.NextAvailable())
+    {
+        JsonToken token = JsonToken::None;
+        String lexeme = "";
+        auto value = reader.ParseNextToken(token, lexeme);
+        if (value)
+        {
+            tokenArray.Add({token, lexeme});
+        }
+        (void)0;
+    }
+
+    EXPECT_EQ(tokenArray.GetSize(), 23);
+    EXPECT_EQ(tokenArray[0].token, JsonToken::SquareOpen);
+    {
+        EXPECT_EQ(tokenArray[1].token, JsonToken::CurlyOpen);
+        {
+            EXPECT_EQ(tokenArray[2].token, JsonToken::Identifier); EXPECT_EQ(tokenArray[2].lexeme, "some_array");
+            EXPECT_EQ(tokenArray[3].token, JsonToken::Colon);
+        
+            EXPECT_EQ(tokenArray[4].token, JsonToken::SquareOpen);
+            {
+                EXPECT_EQ(tokenArray[5].token, JsonToken::String); EXPECT_EQ(tokenArray[5].lexeme, "child0");
+                EXPECT_EQ(tokenArray[6].token, JsonToken::Comma);
+                EXPECT_EQ(tokenArray[7].token, JsonToken::Number); EXPECT_EQ(tokenArray[7].lexeme, "123");
+                EXPECT_EQ(tokenArray[8].token, JsonToken::Comma);
+                EXPECT_EQ(tokenArray[9].token, JsonToken::Number); EXPECT_EQ(tokenArray[9].lexeme, "42.212");
+                EXPECT_EQ(tokenArray[10].token, JsonToken::Comma);
+                EXPECT_EQ(tokenArray[11].token, JsonToken::False);
+            }
+            EXPECT_EQ(tokenArray[12].token, JsonToken::SquareClose);
+
+            EXPECT_EQ(tokenArray[13].token, JsonToken::Comma);
+
+            EXPECT_EQ(tokenArray[14].token, JsonToken::Identifier); EXPECT_EQ(tokenArray[14].lexeme, "name");
+            EXPECT_EQ(tokenArray[15].token, JsonToken::Colon);
+            EXPECT_EQ(tokenArray[16].token, JsonToken::String); EXPECT_EQ(tokenArray[16].lexeme, "Some name");
+        }
+        EXPECT_EQ(tokenArray[17].token, JsonToken::CurlyClose);
+
+        EXPECT_EQ(tokenArray[18].token, JsonToken::Comma);
+
+        EXPECT_EQ(tokenArray[19].token, JsonToken::String); EXPECT_EQ(tokenArray[19].lexeme, "item0");
+
+        EXPECT_EQ(tokenArray[20].token, JsonToken::Comma);
+
+        EXPECT_EQ(tokenArray[21].token, JsonToken::Number); EXPECT_EQ(tokenArray[21].lexeme, "42.212");
+    }
+    EXPECT_EQ(tokenArray[22].token, JsonToken::SquareClose);
 
     stream.Close();
     

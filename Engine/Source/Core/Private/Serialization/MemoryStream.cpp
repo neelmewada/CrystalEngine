@@ -8,7 +8,7 @@ namespace CE
      *  Memory Ascii Stream
      */
 
-    MemoryStream::MemoryStream(u32 sizeToAllocate)
+    MemoryStream::MemoryStream(u32 sizeToAllocate, b8 autoResize)
     {
         ASSERT(sizeToAllocate < 2_GB, "Memory Streams only support size up to 2 GB.");
         
@@ -21,6 +21,7 @@ namespace CE
         data[0] = 0;
         
         isAllocated = true;
+        this->autoResize = autoResize;
         permissions = Permissions::ReadWrite;
         offset = 0;
     }
@@ -34,6 +35,7 @@ namespace CE
         this->data = (u8*)data;
 
         isAllocated = false;
+        autoResize = false;
         this->permissions = permissions;
         offset = 0;
     }
@@ -104,6 +106,10 @@ namespace CE
 
     void MemoryStream::Write(const void* inData, u64 length)
     {
+        if (autoResize && CanResize() && offset + length >= bufferSize)
+        {
+            Resize(offset + length + 32);
+        }
         memcpy(data + offset, inData, length);
         offset += length;
         dataSize = Math::Max(dataSize, offset);
@@ -115,4 +121,27 @@ namespace CE
         offset += length;
     }
 
+    bool MemoryStream::CanResize() const
+    {
+        return isAllocated;
+    }
+
+    bool MemoryStream::Resize(u32 newSize)
+    {
+        if (!CanResize())
+            return false;
+
+        // Allocate new buffer
+        u8* newBuffer = new u8[newSize];
+
+        // Copy old data & free old buffer
+        memcpy(newBuffer, data, bufferSize);
+        delete[] data;
+
+        // Update variables
+        data = newBuffer;
+        bufferSize = newSize;
+        dataSize = Math::Min(dataSize, bufferSize);
+    }
+    
 } // namespace CE

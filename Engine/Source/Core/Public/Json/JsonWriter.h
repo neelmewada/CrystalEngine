@@ -22,6 +22,7 @@ namespace CE
                 case '\n': escapedString += "\\\n"; break;
                 case '\r': escapedString += "\\\r"; break;
                 case '\t': escapedString += "\\\t"; break;
+                case '\b': escapedString += "\\\b"; break;
                 default:
                     escapedString.Append(ch);
                     break;
@@ -134,6 +135,30 @@ namespace CE
             prevToken = JsonToken::SquareClose;
         }
 
+        void WriteNull()
+        {
+            if (!CanWriteValueWithoutIdentifier())
+                return;
+
+            WriteCommaIfNeeded();
+
+            if (prevToken != JsonToken::Colon && prevToken != JsonToken::SquareOpen)
+            {
+                WritePolicy::WriteLineEnding(stream);
+                WritePolicy::WriteLineTabs(stream, indentLevel);
+            }
+
+            WritePolicy::WriteString(stream, "null");
+
+            prevToken = JsonToken::Null;
+        }
+
+        void WriteNull(const String& identifier)
+        {
+            WriteIdentifier(identifier);
+            WriteNull();
+        }
+
         void WriteValue(const String& value)
         {
             if (!CanWriteValueWithoutIdentifier())
@@ -152,15 +177,15 @@ namespace CE
             prevToken = JsonToken::String;
         }
 
-        void WriteValue(const char* value)
-        {
-            WriteValue(String(value));
-        }
-
         void WriteValue(const String& identifier, const String& value)
         {
             WriteIdentifier(identifier);
             WriteValue(value);
+        }
+
+        void WriteValue(const char* value)
+        {
+            WriteValue(String(value));
         }
 
         void WriteValue(const String& identifier, const char* value)
