@@ -70,6 +70,8 @@ namespace CE
         PluginModule* LoadPluginModule(String moduleName);
 
         Name GetLoadedModuleName(Module* modulePtr);
+        
+        bool IsModuleLoaded(String moduleName);
 
     private:
 

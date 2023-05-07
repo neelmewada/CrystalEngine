@@ -1150,7 +1150,9 @@ TEST(Delegates, ModuleCallbacks)
     auto id3 = CoreDelegates::onModuleFailedToLoad.AddDelegateInstance(&Core_Delegates_OnModuleFailedToLoad);
     auto id4 = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&Core_Delegates_OnClassRegistered);
 
+    EXPECT_FALSE(ModuleManager::Get().IsModuleLoaded("Core"));
     ModuleManager::Get().LoadModule("Core");
+    EXPECT_TRUE(ModuleManager::Get().IsModuleLoaded("Core"));
     EXPECT_EQ(Core_Delegates_Modules_Message, "Loaded:Core,false,true");
     EXPECT_GT(Core_Delegates_OnClassRegistered_Count, 0); // > 0
 
@@ -1160,7 +1162,9 @@ TEST(Delegates, ModuleCallbacks)
     ModuleManager::Get().LoadModule("ModuleThatDoesNotExist");
     EXPECT_EQ(Core_Delegates_Modules_Message, String::Format("Failed:ModuleThatDoesNotExist,{}", (int)ModuleLoadResult::DllNotFound));
 
+    EXPECT_TRUE(ModuleManager::Get().IsModuleLoaded("Core"));
     ModuleManager::Get().UnloadModule("Core");
+    EXPECT_FALSE(ModuleManager::Get().IsModuleLoaded("Core"));
     EXPECT_EQ(Core_Delegates_Modules_Message, "Unloaded:Core,false,false");
 
     CoreDelegates::onAfterModuleLoad.RemoveDelegateInstance(id1);

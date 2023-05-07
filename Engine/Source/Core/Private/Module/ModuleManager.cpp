@@ -228,6 +228,15 @@ namespace CE
 		return NAME_None;
 	}
 
+    bool ModuleManager::IsModuleLoaded(String moduleName)
+    {
+        auto info = FindModuleInfo(moduleName);
+        if (info == nullptr)
+            return false;
+        
+        return info->isLoaded;
+    }
+
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
 	{
 		IO::Path moduleDllPath = PlatformProcess::GetModuleDllPath(moduleName);
