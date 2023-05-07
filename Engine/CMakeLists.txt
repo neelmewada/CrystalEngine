@@ -5,18 +5,24 @@ project(Engine)
 # Assets
 add_subdirectory(Assets)
 
-# Engine Modules
+######################################
+# Core Modules
+
 add_subdirectory(Source/Core)
-if(${PAL_TRAIT_BUILD_HOST_TOOLS})
-    add_subdirectory(Source/AutoRTTI)
-endif()
+add_subdirectory(Source/AutoRTTI)
+
 add_subdirectory(Source/CoreMedia)
 
-add_subdirectory(Source/System)
-
+# RHI Modules
+add_subdirectory(Source/CoreRHI)
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
     add_subdirectory(Source/VulkanRHI)
 endif()
+
+######################################
+# System Modules
+
+add_subdirectory(Source/System)
 
 add_subdirectory(Source/GameSystem)
 add_subdirectory(Source/GameLauncher)

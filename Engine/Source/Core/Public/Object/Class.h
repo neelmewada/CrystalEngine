@@ -1,5 +1,8 @@
 #pragma once
 
+#include "RTTI/RTTIDefines.h"
+#include "RTTI/RTTI.h"
+
 #include "Field.h"
 #include "Function.h"
 
@@ -221,11 +224,12 @@ namespace CE
             TypeId underlyingTypeId = 0;
             if constexpr (CE::TIsArray<Field>::Value)
             {
-                underlyingTypeId = TYPEID(CE::TIsArray<Field>::ElementType);
+                // TODO: Fix error in below line
+                //underlyingTypeId = CE::GetTypeId<Field::Type>();
             }
             else if constexpr (CE::TIsEnum<Field>::Value)
             {
-                underlyingTypeId = TYPEID(CE::TEnumUnderlyingType<Field>::type);
+                underlyingTypeId = TYPEID(CE::TEnumUnderlyingType<Field>::Type);
             }
 			localFields.Add(FieldType(name,
                                       CE::GetTypeId<Field>(),

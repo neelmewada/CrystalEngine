@@ -18,6 +18,8 @@ namespace CE
     class Array
     {
     public:
+        using Type = ElementType;
+        
         Array() : Impl(), ElementTypeId(GetTypeId<ElementType>())
         {
             

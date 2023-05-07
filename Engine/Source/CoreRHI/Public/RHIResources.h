@@ -5,7 +5,7 @@
 namespace CE
 {
     
-    class SYSTEM_API RHIResource
+    class CORERHI_API RHIResource
     {
     protected:
         RHIResource(RHIResourceType resourceType) : resourceType(resourceType)
@@ -34,7 +34,7 @@ namespace CE
         RHIDeviceObjectType deviceObjectType = RHIDeviceObjectType::None;
     };
 
-    class SYSTEM_API RHIBuffer : public RHIResource, public IRHIDeviceObject
+    class CORERHI_API RHIBuffer : public RHIResource, public IRHIDeviceObject
     {
     protected:
         RHIBuffer() : RHIResource(RHIResourceType::Buffer), IRHIDeviceObject(RHIDeviceObjectType::Buffer)
@@ -51,7 +51,7 @@ namespace CE
 
     };
     
-    class SYSTEM_API RHITexture : public RHIResource, public IRHIDeviceObject
+    class CORERHI_API RHITexture : public RHIResource, public IRHIDeviceObject
     {
     protected:
         RHITexture() : RHIResource(RHIResourceType::Texture), IRHIDeviceObject(RHIDeviceObjectType::Texture)
@@ -75,7 +75,7 @@ namespace CE
     *   Shader
     */
 
-    class SYSTEM_API RHIShaderModule : public RHIResource
+    class CORERHI_API RHIShaderModule : public RHIResource
     {
     protected:
         RHIShaderModule() : RHIResource(RHIResourceType::ShaderModule)

@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Messaging/MessageBus.h"
+#include "CoreMinimal.h"
 
 #include "RHIResources.h"
 
 namespace CE
 {
-    class SYSTEM_API RHIRenderTarget;
-    class SYSTEM_API RHIViewport;
-    class SYSTEM_API RHIRenderPass;
-    class SYSTEM_API RHICommandList;
-    class SYSTEM_API RHIGraphicsCommandList;
+    class RHIRenderTarget;
+    class RHIViewport;
+    class RHIRenderPass;
+    class RHICommandList;
+    class RHIGraphicsCommandList;
 
-    class SYSTEM_API DynamicRHI
+    class CORERHI_API DynamicRHI
     {
     public:
         
@@ -61,9 +61,9 @@ namespace CE
 
     };
 
-    SYSTEM_API extern DynamicRHI* gDynamicRHI;
+    CORERHI_API extern DynamicRHI* gDynamicRHI;
 
-    class SYSTEM_API RHIRenderPass : public RHIResource
+    class CORERHI_API RHIRenderPass : public RHIResource
     {
     protected:
         RHIRenderPass() : RHIResource(RHIResourceType::RenderPass)
@@ -78,7 +78,7 @@ namespace CE
     };
 
     /// A render target that is drawn to by GPU. It is automatically created for you in case of Viewport.
-    class SYSTEM_API RHIRenderTarget : public RHIResource
+    class CORERHI_API RHIRenderTarget : public RHIResource
     {
     protected:
         RHIRenderTarget() : RHIResource(RHIResourceType::RenderTarget)
@@ -96,7 +96,7 @@ namespace CE
     };
 
     /// A viewport used to draw & present from GPU. Usually only used in runtime builds than in editor.
-    class SYSTEM_API RHIViewport : public RHIResource
+    class CORERHI_API RHIViewport : public RHIResource
     {
     protected:
         RHIViewport() : RHIResource(RHIResourceType::Viewport)
@@ -119,7 +119,7 @@ namespace CE
     *   RHI Command List
     */
 
-    class SYSTEM_API RHICommandList : public RHIResource
+    class CORERHI_API RHICommandList : public RHIResource
     {
     protected:
         RHICommandList() : RHIResource(RHIResourceType::CommandList)
@@ -135,7 +135,7 @@ namespace CE
 
     };
 
-    class SYSTEM_API RHIGraphicsCommandList : public RHICommandList
+    class CORERHI_API RHIGraphicsCommandList : public RHICommandList
     {
     protected:
         RHIGraphicsCommandList() : RHICommandList()
@@ -155,3 +155,4 @@ namespace CE
     };
     
 } // namespace CE
+

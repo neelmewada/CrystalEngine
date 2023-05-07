@@ -26,12 +26,8 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ThirdParty::sdl
             ${Vulkan_LIBRARIES}
-            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Core>
-            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Gui>
-            $<$<BOOL:${PAL_TRAIT_BUILD_EDITOR}>:Qt6::Widgets>
         PUBLIC
             CE::Core
-            CE::System
         TARGETS Config
         MACFRAMEWORKS
             QuartzCore

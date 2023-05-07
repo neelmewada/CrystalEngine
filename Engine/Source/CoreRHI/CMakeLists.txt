@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(%(Name)s CXX)
+project(CoreRHI CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
-    %(AutoRTTI)s
+    AUTORTTI
     AUTOMOC
     AUTOUIC
     AUTORCC
@@ -31,7 +31,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
-            CE::System
+        TARGETS Config
     RUNTIME_DEPENDENCIES
 
 )

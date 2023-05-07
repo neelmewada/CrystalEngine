@@ -47,7 +47,7 @@ namespace CE
         String& operator=(const char* cString);
 
         // Concatenate operators
-        inline String operator+(const String& other)
+        inline String operator+(const String& other) const
         {
             String result = String(*this);
             result.Concatenate(other);
@@ -59,7 +59,7 @@ namespace CE
             this->Concatenate(other);
             return *this;
         }
-        inline String operator+(const char* cString)
+        inline String operator+(const char* cString) const
         {
             String result = String(*this);
             result.ConcatenateCString(cString);

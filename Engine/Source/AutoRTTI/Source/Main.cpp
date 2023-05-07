@@ -56,18 +56,47 @@ int main(int argc, char** argv)
         IO::Path moduleStampPath = outPath / (moduleName + ".stamp");
 
         bool forceUpdate = result["f"].as<bool>();
-
-        if (moduleStampPath.Exists() && !forceUpdate)
+        
+        if (!forceUpdate)
         {
-            CE::SerializedObject so{ ModuleStamp::Type(), &moduleStamp };
-            so.Deserialize(moduleStampPath);
+            outPath.IterateChildren([&](const IO::Path& child){
+                if (child.GetExtension() == ".stamp")
+                {
+                    FileStream fileStream{child, Stream::Permissions::ReadOnly};
+                    fileStream.SetBinaryMode(true);
+                    if (fileStream.IsOpen())
+                    {
+                        String fileName = "";
+                        fileStream >> fileName;
+                        u32 crc = 0;
+                        fileStream >> crc;
+                        auto fullFilePath = child.GetParentPath() / fileName;
+                        if (fullFilePath.Exists() && crc != 0)
+                            moduleStamp.headers.Add(HeaderCRC(fullFilePath, crc));
+                        fileStream.Close();
+                    }
+                }
+            });
         }
+        
 
         RTTIGenerator::GenerateRTTI(moduleName, modulePath, outPath, moduleStamp);
 
+        for (const HeaderCRC& header : moduleStamp.headers)
         {
-            SerializedObject so{ ModuleStamp::Type(), &moduleStamp };
-            so.Serialize(moduleStampPath);
+            if (!header.headerPath.Exists())
+                continue;
+            IO::Path stampFilePath = header.headerPath.GetString() + ".stamp";
+            if (stampFilePath.Exists())
+                IO::Path::Remove(stampFilePath);
+            FileStream fileStream{stampFilePath, Stream::Permissions::WriteOnly};
+            if (fileStream.IsOpen())
+            {
+                String fileName = header.headerPath.GetFilename().GetString();
+                fileStream << fileName;
+                fileStream << header.crc;
+                fileStream.Close();
+            }
         }
 
         CE_LOG(Info, All, "Automatic RTTI for module: {}", moduleName);

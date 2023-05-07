@@ -37,9 +37,9 @@ def main():
                         help='Output directory for generated content')
     args = parser.parse_args()
     templatePath = Path(__file__).parent.absolute().joinpath('../Templates/' + args.templateName)
-    outDir = Path(__file__).parent.absolute().joinpath(args.outDir)
+    outDir = Path(os.getcwd()).absolute().joinpath(args.outDir)
     print('Template: ' + str(templatePath))
-    print('Out Dir: ' + str(outDir))
+    print('Output Dir: ' + str(outDir))
 
     templateArgs = dict()
     for tArg in args.tArgs:
@@ -62,6 +62,7 @@ def main():
     if not "AutoRTTI" in templateArgs:
         templateArgs["AutoRTTI"] = ""
 
+    print("Generating from template with following args:")
     print(templateArgs)
 
     topLevelFiles = []
@@ -73,6 +74,7 @@ def main():
             shutil.copytree(src, dst)
             process_template(dst, templateArgs)
 
+    print("Successfuly generated from template at: " + str(outDir))
     return 0
 
 

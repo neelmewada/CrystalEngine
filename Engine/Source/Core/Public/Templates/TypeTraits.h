@@ -62,13 +62,13 @@ namespace CE
 	template<typename T>
 	struct TIsArray : TFalseType
 	{
-		typedef void ElementType;
+        using ElementType = void;
 	};
 
 	template<typename T>
 	struct TIsArray<Array<T>> : TTrueType
 	{
-		typedef T ElementType;
+		using ElementType = T;
 	};
 
     template<typename T>
