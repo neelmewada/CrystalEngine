@@ -10,7 +10,7 @@ namespace CE
 
     MemoryStream::MemoryStream(u32 sizeToAllocate)
     {
-        ASSERT(sizeToAllocate < 2_GB, "Memory Streams only support size up to 2 GB.", 0);
+        ASSERT(sizeToAllocate < 2_GB, "Memory Streams only support size up to 2 GB.");
         
         if (sizeToAllocate == 0)
             return;
@@ -27,7 +27,7 @@ namespace CE
 
     MemoryStream::MemoryStream(void* data, u32 length, Permissions permissions)
     {
-        ASSERT(length < 2_GB, "Memory Streams only support size up to 2 GB.", 0);
+        ASSERT(length < 2_GB, "Memory Streams only support size up to 2 GB.");
 
         dataSize = length;
         bufferSize = length;
@@ -51,7 +51,7 @@ namespace CE
     void MemoryStream::Close()
     {
         if (isAllocated)
-            delete data;
+            delete[] data;
         data = nullptr;
         dataSize = bufferSize = 0;
         offset = 0;

@@ -83,17 +83,18 @@ namespace CE
     }
 
     String::String(String&& move) noexcept
-        : bIsUsingDynamicBuffer(move.bIsUsingDynamicBuffer),
-        StringLength(move.StringLength),
-        Capacity(move.Capacity),
-        Buffer(move.Buffer),
-        threadId(Thread::GetCurrentThreadId())
+        : Buffer(move.Buffer)
+        , Capacity(move.Capacity)
+        , bIsUsingDynamicBuffer(move.bIsUsingDynamicBuffer)
+        , StringLength(move.StringLength)
+        , threadId(Thread::GetCurrentThreadId())
     {
         // Zero out Move
         move.Buffer = nullptr;
         move.Capacity = 0;
         move.StringLength = 0;
         move.bIsUsingDynamicBuffer = false;
+        move.threadId = 0;
     }
 
     String::String(const String& copy) : threadId(Thread::GetCurrentThreadId())

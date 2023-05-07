@@ -51,7 +51,7 @@
 #include "Math/Matrix.h"
 #include "Math/Color.h"
 
-// Config
+// Config INI
 #include "Config/ConfigTypes.h"
 #include "Config/ConfigLayers.h"
 #include "Config/ConfigFile.h"
@@ -63,8 +63,13 @@
 #include "Serialization/Stream.h"
 #include "Serialization/MemoryStream.h"
 #include "Serialization/FileStream.h"
+
+// Json
+#include "Json/Json.h"
+
 #include "Serialization/StructuredStream.h"
 
+// RTTI & Object
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
 #include "Object/Package.h"

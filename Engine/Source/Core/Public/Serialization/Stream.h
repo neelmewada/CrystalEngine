@@ -85,6 +85,11 @@ namespace CE
         virtual Stream& operator>>(f32& single);
 
     public:
+
+        void Write(const String& string)
+        {
+            *this << string;
+        }
         
         virtual void Write(const void* inData, u64 length) = 0;
         

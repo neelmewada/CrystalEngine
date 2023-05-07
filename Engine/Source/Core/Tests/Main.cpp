@@ -665,6 +665,142 @@ TEST(Object, CDI)
 
 #pragma endregion
 
+/**********************************************
+*   JSON
+*/
+
+#pragma region JSON
+
+constexpr const char* JSON_Writer_Test1_Comparison = R"({
+	"prop1": 4212.212,
+	"name": "Some Name",
+	"child": 
+	{
+		"float": 12.21,
+		"name": "Child Name",
+		"child_array": 
+		[
+			"My String",
+			-1244,
+			{
+				"float": 12.21,
+				"name": "Child Name",
+				"int1": 41224,
+				"int2": -41224
+			},
+			123.123
+		],
+		"int1": 41224,
+		"int2": -41224
+	},
+	"prop2": 52635
+})";
+
+const char* JSON_Writer_Test2_Comparison = R"([
+	{
+		"some_array": 
+		[
+			"child0",
+			123,
+			42.212,
+			false
+		],
+		"name": "Some name"
+	},
+	"item0",
+	42.212
+])";
+
+TEST(JSON, Writer)
+{
+    TEST_BEGIN;
+
+    auto stream = MemoryStream(2048);
+    stream.SetAsciiMode(true);
+
+    // 1. Object Start
+    auto writer = PrettyJsonWriter::Create(&stream);
+
+    if (writer.WriteObjectStart())
+    {
+        writer.WriteValue("prop1", 4212.212f);
+        writer.WriteValue("name", "Some Name");
+
+        if (writer.WriteObjectStart("child"))
+        {
+            writer.WriteValue("float", 12.21f);
+            writer.WriteValue("name", "Child Name");
+
+            if (writer.WriteArrayStart("child_array"))
+            {
+                writer.WriteValue("My String");
+                writer.WriteValue(-1244);
+                if (writer.WriteObjectStart())
+                {
+                    writer.WriteValue("float", 12.21f);
+                    writer.WriteValue("name", "Child Name");
+                    writer.WriteValue<u32>("int1", 41224);
+                    writer.WriteValue<s32>("int2", -41224);
+
+                    writer.WriteObjectClose();
+                }
+                writer.WriteValue(123.123f);
+
+                writer.WriteArrayClose();
+            }
+
+            writer.WriteValue<u32>("int1", 41224);
+            writer.WriteValue<s32>("int2", -41224);
+
+            writer.WriteObjectClose();
+        }
+        
+        writer.WriteValue("prop2", 52635);
+
+        writer.WriteObjectClose();
+    }
+    
+    stream.Write('\0');
+    auto comp = std::strcmp((char*)stream.GetRawDataPtr(), JSON_Writer_Test1_Comparison);
+    EXPECT_EQ(comp, 0);
+
+    // 2. Array Start
+    stream.Seek(0);
+    writer = PrettyJsonWriter::Create(&stream);
+
+    if (writer.WriteArrayStart())
+    {
+        if (writer.WriteObjectStart())
+        {
+            if (writer.WriteArrayStart("some_array"))
+            {
+                writer.WriteValue("child0");
+                writer.WriteValue(123);
+                writer.WriteValue(42.212f);
+                writer.WriteValue(false);
+                
+                writer.WriteArrayClose();
+            }
+            writer.WriteValue("name", "Some name");
+            
+            writer.WriteObjectClose();
+        }
+        writer.WriteValue("item0");
+        writer.WriteValue(42.212f);
+        
+        writer.WriteArrayClose();
+    }
+
+    stream.Write('\0');
+    comp = std::strcmp((char*)stream.GetRawDataPtr(), JSON_Writer_Test2_Comparison);
+    EXPECT_EQ(comp, 0);
+
+    stream.Close();
+    
+    TEST_END;
+}
+
+#pragma endregion
 
 /**********************************************
 *   Serialization
@@ -745,9 +881,6 @@ TEST(Serialization, BasicStreams)
     
     fileBinStream.Close();
     EXPECT_FALSE(fileBinStream.IsOpen());
-
-    std::fstream impl = std::fstream(".awfw");
-    impl.close();
 
     // Read
     auto newFileBinStream = FileStream(path, Stream::Permissions::ReadOnly);

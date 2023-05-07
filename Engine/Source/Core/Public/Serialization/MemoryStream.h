@@ -38,6 +38,11 @@ namespace CE
         void Write(const void* inData, u64 length) override;
         void Read(void* outData, u64 length) override;
 
+        void Write(u8 inByte) override
+        {
+            Write(&inByte, 1);
+        }
+
     private:
         u8* data = nullptr;
         u32 bufferSize = 0;

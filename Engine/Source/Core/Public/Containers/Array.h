@@ -113,6 +113,16 @@ namespace CE
             Impl.push_back(item);
         }
 
+        void Push(const ElementType& item)
+        {
+            Impl.push_back(item);
+        }
+
+        void Pop()
+        {
+            Impl.pop_back();
+        }
+
         s32 IndexOf(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)
