@@ -1,7 +1,5 @@
 
-#include "Module/ModuleManager.h"
-
-#include "PAL/Common/PlatformProcess.h"
+#include "CoreMinimal.h"
 
 namespace CE
 {
@@ -18,7 +16,7 @@ namespace CE
 
 	Module* ModuleManager::LoadModule(String moduleName, ModuleLoadResult& result)
 	{
-		TypeInfo::currentlyLoadingModule = moduleName;
+		TypeInfo::currentlyLoadingModuleStack.Push(moduleName);
 
 		auto info = FindModuleInfo(moduleName);
 
@@ -27,7 +25,7 @@ namespace CE
 			result = ModuleLoadResult::AlreadyLoaded;
 			CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
 
-			TypeInfo::currentlyLoadingModule = NAME_None;
+			TypeInfo::currentlyLoadingModuleStack.Pop();
 			return info->moduleImpl;
 		}
 
@@ -39,7 +37,7 @@ namespace CE
 			{
 				CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
 
-				TypeInfo::currentlyLoadingModule = NAME_None;
+				TypeInfo::currentlyLoadingModuleStack.Pop();
 				return nullptr;
 			}
 		}
@@ -51,7 +49,7 @@ namespace CE
 			result = ModuleLoadResult::InvalidModulePtr;
 			CoreDelegates::onModuleFailedToLoad.Broadcast(moduleName, result);
 
-			TypeInfo::currentlyLoadingModule = NAME_None;
+			TypeInfo::currentlyLoadingModuleStack.Pop();
 			return nullptr;
 		}
 
@@ -70,7 +68,7 @@ namespace CE
 
 		CoreDelegates::onAfterModuleLoad.Broadcast(info);
 
-		TypeInfo::currentlyLoadingModule = NAME_None;
+		TypeInfo::currentlyLoadingModuleStack.Pop();
 		return modulePtr;
 	}
 
@@ -83,7 +81,7 @@ namespace CE
 			return;
 		}
 
-		TypeInfo::currentlyUnloadingModule = moduleName;
+		TypeInfo::currentlyUnloadingModuleStack.Push(moduleName);
 
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 
@@ -107,7 +105,7 @@ namespace CE
 
 		CE_LOG(Info, All, "Unloaded Module: {}", moduleName);
 
-		TypeInfo::currentlyUnloadingModule = NAME_None;
+		TypeInfo::currentlyUnloadingModuleStack.Pop();
 	}
 
 	Module* ModuleManager::LoadModule(String moduleName)
@@ -118,7 +116,7 @@ namespace CE
 
 	PluginModule* ModuleManager::LoadPluginModule(String moduleName, ModuleLoadResult& result)
 	{
-		TypeInfo::currentlyLoadingModule = moduleName;
+		TypeInfo::currentlyLoadingModuleStack.Push(moduleName);
 
 		auto info = FindModuleInfo(moduleName);
 
@@ -126,7 +124,7 @@ namespace CE
 		{
 			result = ModuleLoadResult::AlreadyLoaded;
 
-			TypeInfo::currentlyLoadingModule = NAME_None;
+			TypeInfo::currentlyLoadingModuleStack.Pop();
 			return (PluginModule*)info->moduleImpl;
 		}
 
@@ -136,7 +134,7 @@ namespace CE
 
 			if (info == nullptr)
 			{
-				TypeInfo::currentlyLoadingModule = NAME_None;
+				TypeInfo::currentlyLoadingModuleStack.Pop();
 				return nullptr;
 			}
 		}
@@ -147,7 +145,7 @@ namespace CE
 		{
 			result = ModuleLoadResult::InvalidModulePtr;
 
-			TypeInfo::currentlyLoadingModule = NAME_None;
+			TypeInfo::currentlyLoadingModuleStack.Pop();
 			return nullptr;
 		}
 
@@ -166,7 +164,7 @@ namespace CE
 
 		CoreDelegates::onAfterModuleLoad.Broadcast(info);
 
-		TypeInfo::currentlyLoadingModule = NAME_None;
+		TypeInfo::currentlyLoadingModuleStack.Pop();
 		return modulePtr;
 	}
 
@@ -179,7 +177,7 @@ namespace CE
 			return;
 		}
 
-		TypeInfo::currentlyUnloadingModule = moduleName;
+		TypeInfo::currentlyUnloadingModuleStack.Push(moduleName);
 
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 
@@ -203,7 +201,7 @@ namespace CE
 
 		CE_LOG(Info, All, "Unloaded Plugin: {}", moduleName);
 
-		TypeInfo::currentlyUnloadingModule = NAME_None;
+		TypeInfo::currentlyUnloadingModuleStack.Pop();
 	}
 
 	PluginModule* ModuleManager::LoadPluginModule(String moduleName)

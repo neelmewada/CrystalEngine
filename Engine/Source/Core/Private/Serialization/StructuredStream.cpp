@@ -8,6 +8,16 @@ namespace CE
     {
         
     }
+
+    bool StructuredStream::CanRead() const
+    {
+        return formatter.CanRead();
+    }
+
+    bool StructuredStream::CanWrite() const
+    {
+        return formatter.CanWrite();
+    }
     
 } // namespace CE
 

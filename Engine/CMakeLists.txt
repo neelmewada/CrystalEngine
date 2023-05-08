@@ -12,9 +12,10 @@ add_subdirectory(Source/Core)
 add_subdirectory(Source/AutoRTTI)
 
 add_subdirectory(Source/CoreMedia)
-
-# RHI Modules
 add_subdirectory(Source/CoreRHI)
+add_subdirectory(Source/CoreGUI)
+
+# Core Dependencies
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
     add_subdirectory(Source/VulkanRHI)
 endif()
@@ -22,12 +23,14 @@ endif()
 ######################################
 # System Modules
 
-add_subdirectory(Source/System)
+#add_subdirectory(Source/System)
 
-add_subdirectory(Source/GameSystem)
-add_subdirectory(Source/GameLauncher)
+#add_subdirectory(Source/GameSystem)
+#add_subdirectory(Source/GameLauncher)
 
-# Sandbox
+######################################
+# Sandbox & Testing
+
 if(${CE_BUILD_TESTS})
     add_subdirectory(Source/Sandbox)
 endif()

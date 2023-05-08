@@ -38,6 +38,9 @@ def main():
     args = parser.parse_args()
     templatePath = Path(__file__).parent.absolute().joinpath('../Templates/' + args.templateName)
     outDir = Path(os.getcwd()).absolute().joinpath(args.outDir)
+    if not templatePath.exists():
+        print('Error: Could not find template with at path: ' + templatePath)
+        return
     print('Template: ' + str(templatePath))
     print('Output Dir: ' + str(outDir))
 

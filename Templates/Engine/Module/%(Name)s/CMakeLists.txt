@@ -6,9 +6,6 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
     %(AutoRTTI)s
-    AUTOMOC
-    AUTOUIC
-    AUTORCC
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER
@@ -31,7 +28,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
-            CE::System
     RUNTIME_DEPENDENCIES
 
 )

@@ -4,14 +4,25 @@ namespace CE::StructuredStreamPrivate
 {
     class StructuredStream;
 
+    struct EntryKey
+    {
+        EntryKey(int index) : index(index), isInteger(true)
+        {}
+
+        EntryKey(String key) : key(key), isInteger(false)
+        {}
+        
+        bool isInteger = false;
+        int index = 0;
+        String key = "";
+    };
+
     class EntryPosition
     {
     public:
-        EntryPosition(s32 depth, u32 id) : depth(depth), id(id)
-        {}
-        
-        s32 depth;
-        u32 id;
+
+    protected:
+        Array<EntryKey> positionStack{};
 
         friend class StructuredStream;
     };
@@ -19,8 +30,7 @@ namespace CE::StructuredStreamPrivate
     class EntryBase : protected EntryPosition
     {
     public:
-        EntryBase(StructuredStream& stream, s32 depth, u32 id)
-            : EntryPosition(depth, id), stream(stream)
+        EntryBase(StructuredStream& stream) : stream(stream)
         {}
 
     protected:

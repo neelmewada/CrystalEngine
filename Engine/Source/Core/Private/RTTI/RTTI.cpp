@@ -22,8 +22,8 @@ namespace CE
     HashMap<Name, TypeInfo*> TypeInfo::registeredTypesByName{};
     HashMap<TypeId, TypeInfo*> TypeInfo::registeredTypeById{};
 
-    Name TypeInfo::currentlyLoadingModule{};
-    Name TypeInfo::currentlyUnloadingModule{};
+    Array<Name> TypeInfo::currentlyLoadingModuleStack{};
+    Array<Name> TypeInfo::currentlyUnloadingModuleStack{};
 
     HashMap<Name, Array<TypeInfo*>> TypeInfo::registeredTypesByModuleName{};
 
@@ -242,13 +242,13 @@ namespace CE
         registeredTypesByName.Add({ type->name, type });
         registeredTypeById.Add({ type->GetTypeId(), type });
 
-        if (currentlyLoadingModule.IsValid())
+        if (currentlyLoadingModuleStack.NonEmpty())
         {
-            if (!registeredTypesByModuleName.KeyExists(currentlyLoadingModule))
-                registeredTypesByModuleName.Add({ currentlyLoadingModule, {} });
+            if (!registeredTypesByModuleName.KeyExists(currentlyLoadingModuleStack.Top()))
+                registeredTypesByModuleName.Add({ currentlyLoadingModuleStack.Top(), {} });
 
-            registeredTypesByModuleName[currentlyLoadingModule].Add(type);
-            type->registeredModuleName = currentlyLoadingModule;
+            registeredTypesByModuleName[currentlyLoadingModuleStack.Top()].Add(type);
+            type->registeredModuleName = currentlyLoadingModuleStack.Top();
         }
 
         if (type->IsStruct())
@@ -273,8 +273,8 @@ namespace CE
         if (type == nullptr)
             return;
 
-        if ((!currentlyUnloadingModule.IsValid() && type->registeredModuleName.IsValid()) ||
-            (currentlyUnloadingModule.IsValid() && currentlyUnloadingModule == type->registeredModuleName))
+        if ((currentlyUnloadingModuleStack.IsEmpty() && type->registeredModuleName.IsValid()) ||
+            (currentlyUnloadingModuleStack.NonEmpty() && currentlyUnloadingModuleStack.Top() == type->registeredModuleName))
         {
             return;
         }

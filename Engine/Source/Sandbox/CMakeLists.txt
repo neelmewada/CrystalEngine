@@ -15,10 +15,11 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             Source/
     BUILD_DEPENDENCIES
         PRIVATE
+            # Core Modules
             CE::Core
             CE::CoreMedia
             CE::CoreRHI
-            $<$<BOOL:${PAL_TRAIT_VULKAN_SUPPORTED}>:CE::VulkanRHI>
+            $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
     RUNTIME_DEPENDENCIES
 
 )

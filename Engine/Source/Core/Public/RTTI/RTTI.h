@@ -230,8 +230,8 @@ namespace CE
 
 		static void DeregisterTypesForModule(ModuleInfo* moduleInfo);
 
-		static Name currentlyLoadingModule;
-		static Name currentlyUnloadingModule;
+		static Array<Name> currentlyLoadingModuleStack;
+		static Array<Name> currentlyUnloadingModuleStack;
 
 		static HashMap<Name, Array<TypeInfo*>> registeredTypesByModuleName;
 	};

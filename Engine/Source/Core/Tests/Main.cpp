@@ -60,7 +60,7 @@ TEST(Performance, Module_Load_10x)
 
 
 /**********************************************
-*   Performance
+*   Threading
 */
 
 #pragma region Threading

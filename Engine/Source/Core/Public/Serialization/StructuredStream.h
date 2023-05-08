@@ -10,8 +10,12 @@ namespace CE
     {
     public:
         using Entry = StructuredStreamEntry;
+        using Array = StructuredStreamArray;
         
         StructuredStream(StructuredStreamFormatter& formatter);
+
+        bool CanRead() const;
+        bool CanWrite() const;
 
     private:
         StructuredStreamFormatter& formatter;
