@@ -800,7 +800,6 @@ TEST(JSON, Writer)
     TEST_END;
 }
 
-
 TEST(JSON, TokenParser)
 {
     TEST_BEGIN;
@@ -813,8 +812,7 @@ TEST(JSON, TokenParser)
         JsonToken token;
         String lexeme;
     };
-
-    // 1. Token Parser
+    
     JsonReader reader = JsonReader::Create(&stream);
     
     Array<TokenPair> tokenArray{};
@@ -824,11 +822,10 @@ TEST(JSON, TokenParser)
         JsonToken token = JsonToken::None;
         String lexeme = "";
         auto value = reader.ParseNextToken(token, lexeme);
-        if (value)
+        if (token != JsonToken::None)
         {
             tokenArray.Add({token, lexeme});
         }
-        (void)0;
     }
 
     EXPECT_EQ(tokenArray.GetSize(), 23);
@@ -868,8 +865,63 @@ TEST(JSON, TokenParser)
         EXPECT_EQ(tokenArray[21].token, JsonToken::Number); EXPECT_EQ(tokenArray[21].lexeme, "42.212");
     }
     EXPECT_EQ(tokenArray[22].token, JsonToken::SquareClose);
+    
+    TEST_END;
+}
 
+TEST(JSON, Serializer)
+{
+    TEST_BEGIN;
+
+    auto stream = MemoryStream((void*)JSON_Writer_Test2_Comparison, COUNTOF(JSON_Writer_Test2_Comparison), Stream::Permissions::ReadOnly);
+    stream.SetAsciiMode(true);
+
+    // 1. Deserialize JSON_Writer_Test2_Comparison
+
+    auto root = JsonSerializer::Deserialize(&stream);
+    auto& rootRef = *root;
     stream.Close();
+
+    EXPECT_TRUE(rootRef.IsArrayValue());
+    EXPECT_EQ(rootRef.GetSize(), 3);
+    {
+        EXPECT_TRUE(rootRef[0].IsObjectValue());
+        {
+            EXPECT_EQ(rootRef[0].GetSize(), 2);
+            EXPECT_TRUE(rootRef[0].KeyExists("some_array"));
+            EXPECT_TRUE(rootRef[0].KeyExists("name"));
+        
+            EXPECT_TRUE(rootRef[0]["some_array"].IsArrayValue());
+            {
+                EXPECT_EQ(rootRef[0]["some_array"].GetSize(), 4);
+                EXPECT_TRUE(rootRef[0]["some_array"][0].IsStringValue());
+                EXPECT_EQ(rootRef[0]["some_array"][0].GetStringValue(), "child0");
+                EXPECT_TRUE(rootRef[0]["some_array"][1].IsNumberValue());
+                EXPECT_EQ(rootRef[0]["some_array"][1].GetNumberValue(), 123);
+                EXPECT_TRUE(rootRef[0]["some_array"][2].IsNumberValue());
+                EXPECT_EQ(rootRef[0]["some_array"][2].GetNumberValue(), 42.212);
+                EXPECT_TRUE(rootRef[0]["some_array"][3].IsBoolValue());
+                EXPECT_EQ(rootRef[0]["some_array"][3].GetBoolValue(), false);
+            }
+
+            EXPECT_TRUE(rootRef[0]["name"].IsStringValue());
+            EXPECT_EQ(rootRef[0]["name"].GetStringValue(), "Some name");
+        }
+
+        EXPECT_TRUE(rootRef[1].IsStringValue());
+        EXPECT_EQ(rootRef[1].GetStringValue(), "item0");
+        EXPECT_TRUE(rootRef[2].IsNumberValue());
+        EXPECT_EQ(rootRef[2].GetNumberValue(), 42.212);
+    }
+
+    auto copyStream = MemoryStream(2048);
+    copyStream.SetAsciiMode(true);
+
+    JsonSerializer::Serialize(&copyStream, root);
+    
+    copyStream.Close();
+
+    delete root;
     
     TEST_END;
 }

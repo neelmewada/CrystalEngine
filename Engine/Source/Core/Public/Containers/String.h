@@ -287,6 +287,7 @@ namespace CE
 	    static bool TryParse(const String& string, u32& outValue);
 	    static bool TryParse(const String& string, s32& outValue);
 	    static bool TryParse(const String& string, f32& outValue);
+		static bool TryParse(const String& string, f64& outValue);
 
 	    template<typename T>
 	    static T Parse(const String& string)
@@ -304,6 +305,7 @@ namespace CE
 	    
         static bool TryParseInteger(String value, s64& outValue);
 	    static bool TryParseFloat(String value, f32& outValue);
+		static bool TryParseFloat(String value, f64& outValue);
 	    
 	    // Internals
 

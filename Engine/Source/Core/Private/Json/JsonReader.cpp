@@ -3,6 +3,235 @@
 
 namespace CE
 {
+    bool JsonReader::ParseNext(JsonReadInstruction& instruction)
+    {
+        if (!NextAvailable())
+            return false;
+
+        auto curState = JsonValueType::None;
+
+        if (parserStack.NonEmpty())
+        {
+            curState = parserStack.Top();
+        }
+
+        bool success = false;
+        JsonToken token = JsonToken::None;
+        String lexeme = "";
+
+        switch (curState)
+        {
+        case JsonValueType::Array:
+             success = ParseNextInArray(instruction);
+            break;
+        case JsonValueType::Object:
+            success = ParseNextInObject(instruction);
+            break;
+        default:
+            success = ParseNextToken(token, lexeme);
+            if (token == JsonToken::CurlyOpen)
+            {
+                instruction = JsonReadInstruction::ObjectStart;
+            }
+            else if (token == JsonToken::SquareOpen)
+            {
+                instruction = JsonReadInstruction::ArrayStart;
+            }
+            else if (token == JsonToken::CurlyClose)
+            {
+                instruction = JsonReadInstruction::ObjectEnd;
+            }
+            else if (token == JsonToken::SquareClose)
+            {
+                instruction = JsonReadInstruction::ArrayEnd;
+            }
+            else
+            {
+                return false;
+            }
+            break;
+        }
+        
+        return success;
+    }
+
+    bool JsonReader::ParseNextInObject(JsonReadInstruction& instruction)
+    {
+        JsonToken token = JsonToken::None;
+        String lexeme = "";
+
+        if (!ParseNextToken(token, lexeme))
+        {
+            return false;
+        }
+
+        if (token == JsonToken::Comma) // Skip comma because they are separators
+        {
+            token = JsonToken::None;
+            lexeme = "";
+            if (!ParseNextToken(token, lexeme))
+            {
+                return false;
+            }
+        }
+
+        if (token == JsonToken::None)
+        {
+            parseError = JsonParseError::InvalidObject;
+            errorMessage = "Invalid token in object";
+            return false;
+        }
+
+        if (token == JsonToken::CurlyClose) // End Of Object
+        {
+            instruction = JsonReadInstruction::ObjectEnd;
+            return true;
+        }
+
+        if (token != JsonToken::Identifier)
+        {
+            parseError = JsonParseError::InvalidObject;
+            errorMessage = "Identifier not found in object";
+            return false;
+        }
+
+        identifier = lexeme;
+
+        token = JsonToken::None;
+        lexeme = "";
+        if (!ParseNextToken(token, lexeme))
+        {
+            return false;
+        }
+
+        if (token != JsonToken::Colon)
+        {
+            parseError = JsonParseError::InvalidObject;
+            errorMessage = "Identifier not followed by a colon";
+            return false;
+        }
+
+        token = JsonToken::None;
+        lexeme = "";
+        if (!ParseNextToken(token, lexeme))
+        {
+            return false;
+        }
+
+        if (token == JsonToken::CurlyOpen)
+        {
+            instruction = JsonReadInstruction::ObjectStart;
+            return true;
+        }
+        if (token == JsonToken::SquareOpen)
+        {
+            instruction = JsonReadInstruction::ArrayStart;
+            return true;
+        }
+        if (token == JsonToken::String)
+        {
+            stringValue = lexeme;
+            instruction = JsonReadInstruction::String;
+            return true;
+        }
+        if (token == JsonToken::Number)
+        {
+            if (!String::TryParse(lexeme, numberValue))
+                return false;
+            instruction = JsonReadInstruction::Number;
+            return true;
+        }
+        if (token == JsonToken::True || token == JsonToken::False)
+        {
+            boolValue = token == JsonToken::True ? true : false;
+            instruction = JsonReadInstruction::Boolean;
+            return true;
+        }
+        if (token == JsonToken::Null)
+        {
+            instruction = JsonReadInstruction::Null;
+            return true;
+        }
+
+        parseError = JsonParseError::InvalidObject;
+        errorMessage = "Failed to parse an entry: " + identifier;
+        return false;
+    }
+
+    bool JsonReader::ParseNextInArray(JsonReadInstruction& instruction)
+    {
+        JsonToken token = JsonToken::None;
+        String lexeme = "";
+
+        if (!ParseNextToken(token, lexeme))
+        {
+            return false;
+        }
+
+        if (token == JsonToken::Comma) // Skip comma because they are just separators
+        {
+            token = JsonToken::None;
+            lexeme = "";
+            if (!ParseNextToken(token, lexeme))
+            {
+                return false;
+            }
+        }
+
+        if (token == JsonToken::None)
+        {
+            parseError = JsonParseError::InvalidArray;
+            errorMessage = "Invalid token in array";
+            return false;
+        }
+        
+        if (token == JsonToken::SquareClose) // End Of Array
+        {
+            instruction = JsonReadInstruction::ArrayEnd;
+            return true;
+        }
+
+        // Item Values
+        if (token == JsonToken::CurlyOpen)
+        {
+            instruction = JsonReadInstruction::ObjectStart;
+            return true;
+        }
+        if (token == JsonToken::SquareOpen)
+        {
+            instruction = JsonReadInstruction::ArrayStart;
+            return true;
+        }
+        if (token == JsonToken::String)
+        {
+            stringValue = lexeme;
+            instruction = JsonReadInstruction::String;
+            return true;
+        }
+        if (token == JsonToken::Number)
+        {
+            if (!String::TryParse(lexeme, numberValue))
+                return false;
+            instruction = JsonReadInstruction::Number;
+            return true;
+        }
+        if (token == JsonToken::True || token == JsonToken::False)
+        {
+            boolValue = token == JsonToken::True ? true : false;
+            instruction = JsonReadInstruction::Boolean;
+            return true;
+        }
+        if (token == JsonToken::Null)
+        {
+            instruction = JsonReadInstruction::Null;
+            return true;
+        }
+        
+        parseError = JsonParseError::InvalidArray;
+        errorMessage = "Failed to parse an entry: " + identifier;
+        return false;
+    }
+
     bool JsonReader::ParseNextToken(JsonToken& outToken, String& outLexeme)
     {
         if (stream->IsOutOfBounds())
@@ -20,7 +249,9 @@ namespace CE
             CHAR cur = stream->Read();
 
             if (cur == '\0')
-                return false;
+            {
+                return true;
+            }
 
             switch (cur)
             {
@@ -51,6 +282,8 @@ namespace CE
                     currentToken = outToken;
                     return true;
                 }
+                parseError = JsonParseError::EmptyStack;
+                errorMessage = "SquareClose token found at wrong position";
                 return false;
             case ':':
                 outToken = JsonToken::Colon;

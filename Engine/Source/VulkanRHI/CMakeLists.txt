@@ -28,6 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${Vulkan_LIBRARIES}
         PUBLIC
             CE::Core
+            CE::CoreRHI
         TARGETS Config
         MACFRAMEWORKS
             QuartzCore

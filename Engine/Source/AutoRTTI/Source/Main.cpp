@@ -86,10 +86,11 @@ int main(int argc, char** argv)
         {
             if (!header.headerPath.Exists())
                 continue;
-            IO::Path stampFilePath = header.headerPath.GetString() + ".stamp";
+            IO::Path stampFilePath = outPath / (header.headerPath.GetFilename().GetString() + ".stamp");
             if (stampFilePath.Exists())
                 IO::Path::Remove(stampFilePath);
             FileStream fileStream{stampFilePath, Stream::Permissions::WriteOnly};
+            fileStream.SetBinaryMode(true);
             if (fileStream.IsOpen())
             {
                 String fileName = header.headerPath.GetFilename().GetString();

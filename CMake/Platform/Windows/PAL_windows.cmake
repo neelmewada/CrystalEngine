@@ -14,10 +14,10 @@ else()
     ce_set(PAL_TRAIT_BUILD_HOST_TOOLS TRUE)
     ce_set(PAL_TRAIT_BUILD_HOST_LIBRARIES TRUE)
     ce_set(PAL_TRAIT_BUILD_STANDALONE FALSE)
-    ce_set(PAL_TRAIT_QT_SUPPORTED TRUE)
+    ce_set(PAL_TRAIT_QT_SUPPORTED FALSE)
 
     add_compile_definitions(PAL_TRAIT_BUILD_EDITOR=1)
-    add_compile_definitions(PAL_TRAIT_QT_SUPPORTED=1)
+    #add_compile_definitions(PAL_TRAIT_QT_SUPPORTED=1)
     add_compile_definitions(PAL_TRAIT_WITH_EDITOR_DATA=1)
 endif()
 

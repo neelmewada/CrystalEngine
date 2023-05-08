@@ -615,6 +615,17 @@ namespace CE
         return false;
     }
 
+    bool String::TryParse(const String& string, f64& outValue)
+    {
+        f64 value = 0;
+        if (TryParseFloat(string, value))
+        {
+            outValue = value;
+            return true;
+        }
+        return false;
+    }
+
     void String::Internal_ThrowParseException(const char* message)
     {
         throw ParseFailedException(message);
@@ -671,12 +682,36 @@ namespace CE
         
         value = value.RemoveWhitespaces();
 
-        if (!RegexMatch(value, "[0-9]*[.]?[0-9]*[f]?"))
+        try
+        {
+            outValue = std::stof(value.ToStdString());
+        }
+        catch (...)
+        {
             return false;
-        outValue = std::stof(value.ToStdString());
+        }
+        
         return true;
     }
-    
+
+    bool String::TryParseFloat(String value, f64& outValue)
+    {
+        if (value.IsEmpty())
+            return false;
+        
+        value = value.RemoveWhitespaces();
+        
+        try
+        {
+            outValue = std::stod(value.ToStdString());
+        }
+        catch (...)
+        {
+            return false;
+        }
+        
+        return true;
+    }
 }
 
 

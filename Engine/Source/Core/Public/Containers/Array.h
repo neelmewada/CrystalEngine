@@ -100,6 +100,11 @@ namespace CE
             return Impl.empty();
         }
 
+        INLINE bool NonEmpty() const
+        {
+            return !IsEmpty();
+        }
+
         CE_INLINE ElementType* GetData()
         {
             return Impl.data();

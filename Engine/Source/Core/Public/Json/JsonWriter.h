@@ -193,7 +193,7 @@ namespace CE
             WriteValue(identifier, String(value));
         }
 
-        void WriteValue(f32 value)
+        void WriteValue(f64 value)
         {
             if (!CanWriteValueWithoutIdentifier())
                 return;
@@ -211,7 +211,7 @@ namespace CE
             prevToken = JsonToken::Number;
         }
 
-        void WriteValue(const String& identifier, f32 value)
+        void WriteValue(const String& identifier, f64 value)
         {
             WriteIdentifier(identifier);
             WriteValue(value);
@@ -340,9 +340,9 @@ namespace CE
             WritePolicy::WriteString(stream, Json::GetJsonEscapedString(string));
         }
 
-        FORCE_INLINE void WriteFloatValue(f32 value)
+        FORCE_INLINE void WriteFloatValue(f64 value)
         {
-            WritePolicy::WriteString(stream, String::Format("{}", value));
+            WritePolicy::WriteString(stream, String::Format("{}", (f32)value));
         }
 
         FORCE_INLINE void WriteBoolValue(b8 boolean)
@@ -367,5 +367,6 @@ namespace CE
     };
 
     using PrettyJsonWriter = JsonWriter<JsonPrettyPrintPolicy>;
+    using CondensedJsonWriter = JsonWriter<JsonCondensedPrintPolicy>;
     
 } // namespace CE

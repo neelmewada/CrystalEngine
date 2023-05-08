@@ -44,23 +44,24 @@ namespace CE
 
         Number,
         String,
-        True,
-        False,
+        Boolean,
         Null
     };
 
     class JsonValue;
-    typedef HashMap<String, JsonValue> JsonObject;
-    typedef Array<JsonValue> JsonArray;
+    
+    typedef HashMap<String, JsonValue*> JsonObject;
+    typedef Array<JsonValue*> JsonArray;
 
     class CORE_API JsonValue
     {
     public:
+        // Null value constructor
+        explicit JsonValue();
+        
         explicit JsonValue(const String& string);
         explicit JsonValue(bool boolValue);
-        explicit JsonValue(u64 unsignedValue);
-        explicit JsonValue(s64 signedValue);
-        explicit JsonValue(f32 floatValue);
+        explicit JsonValue(f64 numberValue);
         explicit JsonValue(JsonObject jsonObject);
         explicit JsonValue(JsonArray jsonArray);
 
@@ -81,12 +82,79 @@ namespace CE
             memset(&move, 0, sizeof(JsonValue));
         }
 
-        ~JsonValue()
-        {
-            Clear();
-        }
+        ~JsonValue();
 
         JsonValueType GetValueType() const { return valueType; }
+
+        JsonArray& GetArrayValue() { return arrayValue; }
+        const JsonArray& GetArrayValue() const { return arrayValue; }
+
+        JsonObject& GetObjectValue() { return objectValue; }
+        const JsonObject& GetObjectValue() const { return objectValue; }
+
+        bool& GetBoolValue() { return boolValue; }
+        bool GetBoolValue() const { return boolValue; }
+
+        f64& GetNumberValue() { return numberValue; }
+        f64 GetNumberValue() const { return numberValue; }
+
+        String& GetStringValue() { return stringValue; }
+        const String& GetStringValue() const { return stringValue; }
+
+        FORCE_INLINE bool IsArrayValue() const { return valueType == JsonValueType::Array; }
+        FORCE_INLINE bool IsObjectValue() const { return valueType == JsonValueType::Object; }
+        FORCE_INLINE bool IsStringValue() const { return valueType == JsonValueType::String; }
+        FORCE_INLINE bool IsNumberValue() const { return valueType == JsonValueType::Number; }
+        FORCE_INLINE bool IsBoolValue() const { return valueType == JsonValueType::Boolean; }
+        FORCE_INLINE bool IsNullValue() const { return valueType == JsonValueType::Null; }
+
+        FORCE_INLINE bool IsContainerType() const
+        {
+            return IsArrayValue() || IsObjectValue();
+        }
+
+        FORCE_INLINE bool IsTerminalType() const
+        {
+            return !IsContainerType();
+        }
+
+        FORCE_INLINE JsonValue& operator[](u32 index)
+        {
+            return *arrayValue[index];
+        }
+
+        FORCE_INLINE JsonValue& operator[](const String& key)
+        {
+            return *objectValue[key];
+        }
+
+        FORCE_INLINE const JsonValue& operator[](u32 index) const
+        {
+            return *arrayValue[index];
+        }
+
+        FORCE_INLINE const JsonValue& operator[](const String& key) const
+        {
+            return *objectValue[key];
+        }
+
+        FORCE_INLINE bool KeyExists(const String& key) const
+        {
+            return IsObjectValue() && objectValue.KeyExists(key);
+        }
+
+        FORCE_INLINE u32 GetSize() const
+        {
+            if (IsArrayValue())
+            {
+                return arrayValue.GetSize();
+            }
+            if (IsObjectValue())
+            {
+                return objectValue.GetSize();
+            }
+            return 0;
+        }
 
     private:
         void Copy(const JsonValue& copy)
@@ -115,9 +183,7 @@ namespace CE
         {
             String stringValue;
             bool boolValue;
-            u64 unsignedValue;
-            s64 signedValue;
-            f32 floatValue;
+            f64 numberValue;
             JsonObject objectValue;
             JsonArray arrayValue;
         };

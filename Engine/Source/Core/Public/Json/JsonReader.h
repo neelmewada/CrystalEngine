@@ -12,6 +12,8 @@ namespace CE
         InvalidKeyword,
         EmptyStack,
         OutOfBounds,
+        InvalidObject,
+        InvalidArray,
     };
 
     class CORE_API JsonReader
@@ -22,15 +24,25 @@ namespace CE
             return JsonReader(stream);
         }
 
-        bool ReadNext(JsonReadInstruction& instruction)
-        {
-            if (stream == nullptr)
-            {
-                return false;
-            }
-            
-            return false;
-        }
+        // - Public API -
+
+        bool ParseNext(JsonReadInstruction& instruction);
+
+        // - Internal API -
+
+        // Internal use only
+        bool ParseNextInObject(JsonReadInstruction& instruction);
+
+        // Internal use only
+        bool ParseNextInArray(JsonReadInstruction& instruction);
+
+        // Internal use only
+        bool ParseNextToken(JsonToken& outToken, String& outLexeme);
+        
+        // Internal use only
+        bool NextAvailable();
+
+        // - Getters & Setters -
 
         const String& GetErrorMessage() const
         {
@@ -42,11 +54,27 @@ namespace CE
             return parseError;
         }
 
-    public:
+        const String& GetIdentifier() const
+        {
+            return identifier;
+        }
 
-        bool ParseNextToken(JsonToken& outToken, String& outLexeme);
+        const String& GetStringValue() const
+        {
+            return stringValue;
+        }
 
-        bool NextAvailable();
+        f64 GetNumberValue() const
+        {
+            return numberValue;
+        }
+
+        bool GetBoolValue() const
+        {
+            return boolValue;
+        }
+
+    protected:
 
         JsonReader()
         {}
@@ -54,6 +82,14 @@ namespace CE
         JsonReader(Stream* inStream)
             : stream(inStream)
         {}
+
+        // Read variables
+        String identifier = "";
+        String stringValue = "";
+        f64 numberValue = 0;
+        bool boolValue = false;
+
+        // State variables
         
         JsonToken currentToken = JsonToken::None;
         JsonToken previousToken = JsonToken::None;

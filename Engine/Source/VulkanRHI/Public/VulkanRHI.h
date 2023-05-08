@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RHI/RHI.h"
+#include "CoreRHI.h"
 
 struct VkInstance_T;
 typedef VkInstance_T* VkInstance;

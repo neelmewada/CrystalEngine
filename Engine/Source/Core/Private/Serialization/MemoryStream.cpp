@@ -142,6 +142,7 @@ namespace CE
         data = newBuffer;
         bufferSize = newSize;
         dataSize = Math::Min(dataSize, bufferSize);
+        return true;
     }
     
 } // namespace CE
