@@ -363,6 +363,7 @@ namespace CE
         stagingBufferDesc.usageFlags = RHIBufferUsageFlags::Default;
         stagingBufferDesc.bufferSize = totalSize;
         stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
+        stagingBufferDesc.initialData = &stagingBufferData;
 
         VulkanBuffer* stagingBuffer = new VulkanBuffer(device, stagingBufferDesc);
 

@@ -123,7 +123,7 @@ namespace CE
 
     void VulkanViewport::Rebuild()
     {
-        VulkanPlatform::GetWindowSize(windowHandle, &swapChain->width, &swapChain->height);
+        VulkanPlatform::GetDrawableWindowSize(windowHandle, &swapChain->width, &swapChain->height);
 
         swapChain->RebuildSwapChain();
 

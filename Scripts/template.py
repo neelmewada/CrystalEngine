@@ -56,6 +56,7 @@ def main():
         else:
             if tArg == "AutoRTTI":
                 templateArgs[tArg] = "AUTORTTI"
+                templateArgs["UsesAutoRTTI"] = True
             else:
                 templateArgs[tArg] = True
     if "AutoRTTI" in templateArgs:

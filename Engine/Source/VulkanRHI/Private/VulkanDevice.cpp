@@ -21,8 +21,8 @@ namespace CE
 
 	void VulkanDevice::Initialize()
 	{
-        VulkanTestWindow* windowInfo = nullptr;
-		testSurface = VulkanPlatform::CreateTestSurface(instance, &windowInfo);
+		// TODO: pass window handle
+		testSurface = VulkanPlatform::CreateSurface(instance, nullptr);
 
 		SelectGpu();
 		InitGpu();
@@ -37,7 +37,7 @@ namespace CE
 			return;
 		}
 
-		VulkanPlatform::DestroyTestSurface(instance, testSurface, windowInfo);
+		VulkanPlatform::DestroySurface(instance, testSurface);
 		testSurface = nullptr;
 
 		isInitialized = true;

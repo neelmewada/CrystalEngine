@@ -8,7 +8,7 @@ namespace CE
 {
     void CoreGUIModule::StartupModule()
     {
-
+        
     }
 
     void CoreGUIModule::ShutdownModule()

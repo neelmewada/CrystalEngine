@@ -1,7 +1,5 @@
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "SDL.h"
 #include "SDL_vulkan.h"
 
@@ -11,9 +9,9 @@
 namespace CE
 {
     
-    class VulkanSDLPlatform
+    class VulkanSDLPlatform : public VulkanOSPlatform
     {
-        CE_STATIC_CLASS(VulkanSDLPlatform)
+        
     public:
 
         static bool IsValidationEnabled()
@@ -34,22 +32,21 @@ namespace CE
 #endif
         }
 
-        static CE::Array<const char*> GetRequiredInstanceExtensions()
+        static Array<const char*> GetRequiredInstanceExtensions()
         {
+            auto extensions = VulkanOSPlatform::GetRequiredInstanceExtensions();
 #if CE_BUILD_DEBUG
-            return
-            {
+            extensions.AddRange({
                 VK_EXT_DEBUG_UTILS_EXTENSION_NAME
-            };
+            });
 #else
-            return
-            {
-
-            };
+            
 #endif
+            
+            return extensions;
         }
 
-        static CE::Array<const char*> GetValidationLayers()
+        static Array<const char*> GetValidationLayers()
         {
             return
             {
@@ -63,8 +60,21 @@ namespace CE
             SDL_Vulkan_CreateSurface((SDL_Window*)windowHandle, vkInstance, &surface);
             return surface;
         }
+
+        static void DestroySurface(VkInstance vkInstance, VkSurfaceKHR surface)
+        {
+            vkDestroySurfaceKHR(vkInstance, surface, nullptr);
+        }
+
+        static void GetDrawableWindowSize(void* sdlWindow, u32* width, u32* height)
+        {
+            int w = 0, h = 0;
+            SDL_Vulkan_GetDrawableSize((SDL_Window*)sdlWindow, &w, &h);
+            *width = (u32)w;
+            *height = (u32)h;
+        }
     };
 
-    typedef VulkanSDLPlatform VulkanAPIPlatform;
+    typedef VulkanSDLPlatform VulkanPlatform;
 
 } // namespace CE

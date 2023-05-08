@@ -10,7 +10,7 @@
 namespace CE
 {
     
-    class VulkanWindowsPlatform : public VulkanAPIPlatform
+    class VulkanWindowsPlatform
     {
         CE_STATIC_CLASS(VulkanWindowsPlatform)
     public:
@@ -20,93 +20,26 @@ namespace CE
             return 0;
         }
 
-        static CE::Array<const char*> GetRequiredInstanceExtensions()
+        static Array<const char*> GetRequiredInstanceExtensions()
         {
-            CE::Array<const char*> ext = VulkanAPIPlatform::GetRequiredInstanceExtensions();
-            
-            ext.AddRange({
+            return {
                 VK_KHR_SURFACE_EXTENSION_NAME,
                 VK_KHR_WIN32_SURFACE_EXTENSION_NAME
-            });
-
-            return ext;
+            };
         }
 
-        static CE::Array<const char*> GetRequiredVulkanDeviceExtensions()
+        static Array<const char*> GetRequiredVulkanDeviceExtensions()
         {
             return
             {
                 VK_KHR_SWAPCHAIN_EXTENSION_NAME
             };
         }
-
-        static CE::Array<const char*> GetValidationLayers()
+        
+        
+        static void GetNativeWindowSize(void* nativeWindowHandle, u32* width, u32* height)
         {
-            CE::Array<const char*> layers = VulkanAPIPlatform::GetValidationLayers();
-            
-            return layers;
-        }
-
-        static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow** outTestWindow)
-        {
-            *outTestWindow = CreateTestVulkanWindow(vkInstance);
-
-            VkWin32SurfaceCreateInfoKHR surfaceCI{};
-            surfaceCI.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-            surfaceCI.hinstance = GetModuleHandle(NULL);
-            surfaceCI.hwnd = (HWND)((*outTestWindow)->winId());
-            
-            auto func = (PFN_vkCreateWin32SurfaceKHR)vkGetInstanceProcAddr(vkInstance, "vkCreateWin32SurfaceKHR");
-            if (func == nullptr)
-            {
-                DestroyTestVulkanWindow(*outTestWindow);
-                return nullptr;
-            }
-
-            VkSurfaceKHR surface = nullptr;
-            if (func(vkInstance, &surfaceCI, nullptr, &surface) != VK_SUCCESS)
-            {
-                return nullptr;
-            }
-
-            return surface;
-        }
-
-        static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow* testWindow)
-        {
-            if (testSurface != nullptr)
-            {
-                vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
-            }
-
-            DestroyTestVulkanWindow(testWindow);
-        }
-
-        static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)
-        {
-            VkWin32SurfaceCreateInfoKHR surfaceCI{};
-            surfaceCI.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-            surfaceCI.hinstance = GetModuleHandle(NULL);
-            surfaceCI.hwnd = (HWND)windowHandle;
-
-            auto func = (PFN_vkCreateWin32SurfaceKHR)vkGetInstanceProcAddr(vkInstance, "vkCreateWin32SurfaceKHR");
-            if (func == nullptr)
-            {
-                return nullptr;
-            }
-
-            VkSurfaceKHR surface = nullptr;
-            if (func(vkInstance, &surfaceCI, nullptr, &surface) != VK_SUCCESS)
-            {
-                return nullptr;
-            }
-
-            return surface;
-        }
-
-        static void GetWindowSize(void* windowHandle, u32* width, u32* height)
-        {
-            HWND hWnd = (HWND)windowHandle;
+            HWND hWnd = (HWND)nativeWindowHandle;
             RECT rect;
             if (GetWindowRect(hWnd, &rect))
             {
@@ -116,6 +49,6 @@ namespace CE
         }
     };
 
-    typedef VulkanWindowsPlatform VulkanPlatform;
+    typedef VulkanWindowsPlatform VulkanOSPlatform;
     
 } // namespace CE

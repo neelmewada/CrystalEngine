@@ -2,7 +2,7 @@
 
 #include "VulkanRHIPrivate.h"
 
-namespace CE::Editor
+namespace CE
 {
 
     class VulkanPipeline

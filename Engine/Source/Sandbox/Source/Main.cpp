@@ -2,7 +2,7 @@
 #include "Core.h"
 #include "SandboxLoop.h"
 
-SandboxLoop loop{};
+static SandboxLoop loop{};
 
 int main(int argc, const char** argv)
 {
@@ -11,6 +11,8 @@ int main(int argc, const char** argv)
     loop.Init();
 
     loop.PostInit();
+
+    loop.RunLoop();
 
     loop.PreShutdown();
     loop.Shutdown();

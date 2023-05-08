@@ -98,12 +98,12 @@ namespace CE
         appInfo.apiVersion = VK_API_VERSION_1_1;
         appInfo.pEngineName = CE_ENGINE_NAME_STRING;
         appInfo.engineVersion = VK_MAKE_VERSION(CE_VERSION_MAJOR, CE_VERSION_MINOR, CE_VERSION_PATCH);
-        appInfo.pApplicationName = ProjectSettings::Get().GetProjectName().GetCString();
+        appInfo.pApplicationName = "";//ProjectSettings::Get().GetProjectName().GetCString();
         appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
         
-        CE::Array<const char*> validationLayers = VulkanPlatform::GetValidationLayers();
+        Array<const char*> validationLayers = VulkanPlatform::GetValidationLayers();
         bool enableValidation = VulkanPlatform::IsValidationEnabled();
-        CE::Array<const char*> instanceExtensions = VulkanPlatform::GetRequiredInstanceExtensions();
+        Array<const char*> instanceExtensions = VulkanPlatform::GetRequiredInstanceExtensions();
 
         VkInstanceCreateInfo instanceCI{};
         instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

@@ -17,12 +17,12 @@ namespace CE
             return image;
         }
 
-        CE_INLINE VkImage GetImage()
+        FORCE_INLINE VkImage GetImage() const
         {
             return image;
         }
 
-        CE_INLINE VkImageView GetImageView()
+        FORCE_INLINE VkImageView GetImageView() const
         {
             return imageView;
         }

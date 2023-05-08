@@ -85,11 +85,9 @@ namespace CE
 
 } // namespace CE
 
-#if AUTORTTI
-#   define __CE_AUTORTTI_REGISTER() CERegisterModuleTypes()
-#else
-#   define __CE_AUTORTTI_REGISTER()
-#endif
+
+#define __CE_AUTORTTI_REGISTER_0()
+#define __CE_AUTORTTI_REGISTER_1() CERegisterModuleTypes()
 
 #if PAL_TRAIT_BUILD_MONOLITHIC
 
@@ -101,7 +99,7 @@ namespace CE
 #define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
 extern "C" DLL_EXPORT CE::Module* CELoadModule()\
 {\
-    __CE_AUTORTTI_REGISTER();\
+    CE_EXPAND(CE_CONCATENATE(__CE_AUTORTTI_REGISTER_, _AUTORTTI))();\
     return new ModuleImplClass();\
 }\
 extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\

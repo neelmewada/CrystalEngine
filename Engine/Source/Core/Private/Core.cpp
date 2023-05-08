@@ -42,8 +42,6 @@ namespace CE
 
     void CoreModule::RegisterTypes()
     {
-        auto regCount = TypeInfo::GetRegisteredCount();
-
         // Register Data types
         CE_REGISTER_TYPES(b8, s8, s16, s32, s64,
             u8, u16, u32, u64, f32, f64,

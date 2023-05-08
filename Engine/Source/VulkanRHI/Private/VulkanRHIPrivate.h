@@ -4,10 +4,9 @@
 #include "RHI/RHI.h"
 
 #include "VulkanRHI.h"
+#include "VulkanDevice.h"
 
 #include "vulkan/vulkan.h"
-
-#include "VulkanDevice.h"
 
 namespace CE
 {

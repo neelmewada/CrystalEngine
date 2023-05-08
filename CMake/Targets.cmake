@@ -147,21 +147,21 @@ function(ce_add_target NAME TARGET_TYPE)
     
     # Qt AUTO*
 
-    if(ce_add_target_AUTOMOC)
-        set_target_properties(${NAME} 
-            PROPERTIES AUTOMOC ON
-        )
-    endif()
-    if(ce_add_target_AUTOUIC)
-        set_target_properties(${NAME} 
-            PROPERTIES AUTOUIC ON
-        )
-    endif()
-    if(ce_add_target_AUTORCC)
-        set_target_properties(${NAME} 
-            PROPERTIES AUTORCC ON
-        )
-    endif()
+    # if(ce_add_target_AUTOMOC)
+    #     set_target_properties(${NAME} 
+    #         PROPERTIES AUTOMOC ON
+    #     )
+    # endif()
+    # if(ce_add_target_AUTOUIC)
+    #     set_target_properties(${NAME} 
+    #         PROPERTIES AUTOUIC ON
+    #     )
+    # endif()
+    # if(ce_add_target_AUTORCC)
+    #     set_target_properties(${NAME} 
+    #         PROPERTIES AUTORCC ON
+    #     )
+    # endif()
 
     # FOLDER
     
@@ -171,27 +171,6 @@ function(ce_add_target NAME TARGET_TYPE)
                 FOLDER "${ce_add_target_FOLDER}"
         )
     endif()
-    
-    
-    # COMPILE_DEFINITIONS
-
-    set(multiValueArgs PRIVATE PUBLIC INTERFACE)
-    cmake_parse_arguments(ce_add_target_COMPILE_DEFINITIONS "" "" "${multiValueArgs}" ${ce_add_target_COMPILE_DEFINITIONS})
-    
-    if(${TARGET_TYPE_${TARGET_TYPE}_IS_SHAREDLIB})
-        if(${PAL_PLATFORM_IS_WINDOWS})
-            list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE "${NAME_UPPERCASE}_API=__declspec(dllexport)")
-            list(APPEND ce_add_target_COMPILE_DEFINITIONS_INTERFACE  "${NAME_UPPERCASE}_API=__declspec(dllimport)")
-        else()
-            list(APPEND ce_add_target_COMPILE_DEFINITIONS_PUBLIC "${NAME_UPPERCASE}_API=")
-        endif()
-    endif()
-
-    target_compile_definitions(${NAME} 
-        PRIVATE   ${ce_add_target_COMPILE_DEFINITIONS_PRIVATE} 
-        PUBLIC    ${ce_add_target_COMPILE_DEFINITIONS_PUBLIC}
-        INTERFACE ${ce_add_target_COMPILE_DEFINITIONS_INTERFACE}
-    )
 
     # INCLUDE_DIRECTORIES
 
@@ -240,8 +219,13 @@ function(ce_add_target NAME TARGET_TYPE)
     # PCH
 
     if(ce_add_target_PCHHEADER)
+        set(oneValueArgs REUSE_FROM)
         set(multiValueArgs PRIVATE PUBLIC INTERFACE)
-        cmake_parse_arguments(ce_add_target_PCHHEADER "" "" "${multiValueArgs}" ${ce_add_target_PCHHEADER})
+        cmake_parse_arguments(ce_add_target_PCHHEADER "" "${oneValueArgs}" "${multiValueArgs}" ${ce_add_target_PCHHEADER})
+
+        if(ce_add_target_PCHHEADER_REUSE_FROM)
+            target_precompile_headers(${NAME} REUSE_FROM ${ce_add_target_PCHHEADER_REUSE_FROM})
+        endif()
 
         target_precompile_headers(${NAME}
             PUBLIC    ${ce_add_target_PCHHEADER_PUBLIC}
@@ -249,11 +233,31 @@ function(ce_add_target NAME TARGET_TYPE)
             INTERFACE ${ce_add_target_PCHHEADER_INTERFACE}
         )
     endif()
+
+    # COMPILE_DEFINITIONS
+
+    set(multiValueArgs PRIVATE PUBLIC INTERFACE)
+    cmake_parse_arguments(ce_add_target_COMPILE_DEFINITIONS "" "" "${multiValueArgs}" ${ce_add_target_COMPILE_DEFINITIONS})
+    
+    if(${TARGET_TYPE_${TARGET_TYPE}_IS_SHAREDLIB})
+        if(${PAL_PLATFORM_IS_WINDOWS})
+            list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE "${NAME_UPPERCASE}_API=__declspec(dllexport)")
+            list(APPEND ce_add_target_COMPILE_DEFINITIONS_INTERFACE  "${NAME_UPPERCASE}_API=__declspec(dllimport)")
+        else()
+            list(APPEND ce_add_target_COMPILE_DEFINITIONS_PUBLIC "${NAME_UPPERCASE}_API=")
+        endif()
+    endif()
+
+    target_compile_definitions(${NAME} 
+        PRIVATE   ${ce_add_target_COMPILE_DEFINITIONS_PRIVATE} 
+        PUBLIC    ${ce_add_target_COMPILE_DEFINITIONS_PUBLIC}
+        INTERFACE ${ce_add_target_COMPILE_DEFINITIONS_INTERFACE}
+    )
     
     # AUTORTTI
 
     if(${ce_add_target_AUTORTTI})
-        target_compile_definitions(${NAME} PRIVATE AUTORTTI=1)
+        target_compile_definitions(${NAME} PRIVATE _AUTORTTI=1)
 
         set(AutoRttiCmd "AutoRTTI")
 
@@ -261,7 +265,9 @@ function(ce_add_target NAME TARGET_TYPE)
             COMMAND "AutoRTTI" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
-        
+
+    else()
+        target_compile_definitions(${NAME} PRIVATE _AUTORTTI=0)
     endif()
     
     # RUNTIME_DEPENDENCIES

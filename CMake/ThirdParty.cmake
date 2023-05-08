@@ -45,7 +45,9 @@ function(ce_validate_package PACKAGE_NAME PACKAGE_SHORT_NAME)
 
 endfunction()
 
-include("${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FindQt.cmake")
+# We don't need Qt anymore
+
+#include("${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FindQt.cmake")
 
 # set(QT6_COMPONENTS
 #     Core
@@ -56,5 +58,5 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FindQt.cmake")
 #     Xml
 # )
 
-find_package(Qt6 REQUIRED COMPONENTS ${QT6_COMPONENTS})
+#find_package(Qt6 REQUIRED COMPONENTS ${QT6_COMPONENTS})
 

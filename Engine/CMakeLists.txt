@@ -11,6 +11,7 @@ add_subdirectory(Assets)
 add_subdirectory(Source/Core)
 add_subdirectory(Source/AutoRTTI)
 
+add_subdirectory(Source/CoreApplication)
 add_subdirectory(Source/CoreMedia)
 add_subdirectory(Source/CoreRHI)
 add_subdirectory(Source/CoreGUI)
