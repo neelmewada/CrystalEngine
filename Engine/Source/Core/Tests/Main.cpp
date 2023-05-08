@@ -914,10 +914,13 @@ TEST(JSON, Serializer)
         EXPECT_EQ(rootRef[2].GetNumberValue(), 42.212);
     }
 
+    // 2. Serialize JSON_Writer_Test2_Comparison
+
     auto copyStream = MemoryStream(2048);
     copyStream.SetAsciiMode(true);
 
     JsonSerializer::Serialize(&copyStream, root);
+    EXPECT_EQ(strcmp(JSON_Writer_Test2_Comparison, (char*)copyStream.GetRawDataPtr()), 0);
     
     copyStream.Close();
 
