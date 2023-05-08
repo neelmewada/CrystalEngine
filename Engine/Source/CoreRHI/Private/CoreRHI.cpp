@@ -9,7 +9,7 @@ namespace CE
     
     void CoreRHIModule::StartupModule()
     {
-        
+
     }
 
     void CoreRHIModule::ShutdownModule()

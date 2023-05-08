@@ -10,11 +10,11 @@ namespace CE
     {
     public:
 
-        static PlatformApplication* Create();
+        static PlatformApplication* Get();
 
         PlatformApplication() = default;
 
-        virtual ~PlatformApplication() = default;
+        virtual ~PlatformApplication();
 
         virtual void SetMessageHandler(ApplicationMessageHandler* handler)
         {
@@ -37,6 +37,8 @@ namespace CE
         virtual PlatformWindow* GetMainWindow() = 0;
 
     protected:
+
+        static PlatformApplication* instance;
 
         ApplicationMessageHandler* messageHandler = nullptr;
     };

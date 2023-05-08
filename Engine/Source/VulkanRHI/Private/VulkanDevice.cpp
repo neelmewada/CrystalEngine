@@ -22,7 +22,8 @@ namespace CE
 	void VulkanDevice::Initialize()
 	{
 		// TODO: pass window handle
-		testSurface = VulkanPlatform::CreateSurface(instance, nullptr);
+		auto mainWindow = VulkanPlatform::GetMainPlatformWindow();
+		testSurface = VulkanPlatform::CreateSurface(instance, mainWindow);
 
 		SelectGpu();
 		InitGpu();
@@ -230,6 +231,9 @@ namespace CE
 				CE_LOG(Error, All, "Failed to create Vulkan Command Pool!");
 				return;
 			}
+
+			if (!queueFamilyToCmdPool.KeyExists(familyIndex))
+				queueFamilyToCmdPool.Add({ (u32)familyIndex, nullptr });
 
 			queueFamilyToCmdPool[familyIndex] = commandPool;
 		}

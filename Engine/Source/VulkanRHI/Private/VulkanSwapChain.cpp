@@ -60,7 +60,7 @@ namespace CE
 
 	void VulkanSwapChain::CreateSurface()
 	{
-		surface = VulkanPlatform::CreateSurface((VkInstance)vulkanRHI->GetNativeHandle(), windowHandle);
+		surface = VulkanPlatform::CreateSurface((VkInstance)vulkanRHI->GetNativeHandle(), (PlatformWindow*)windowHandle);
 	}
 
 	void VulkanSwapChain::CreateSwapChain()

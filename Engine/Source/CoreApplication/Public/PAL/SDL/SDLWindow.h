@@ -20,6 +20,8 @@ namespace CE
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) override;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) override;
 
+        VkSurfaceKHR CreateVulkanSurface(VkInstance instance) override;
+
     protected:
 
         friend class SDLApplication;

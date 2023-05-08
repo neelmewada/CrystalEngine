@@ -6,6 +6,7 @@
 
 namespace CE
 {
+    class PlatformWindow;
     class VulkanDevice;
     class VulkanTexture;
 

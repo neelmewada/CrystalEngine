@@ -1,5 +1,11 @@
 #pragma once
 
+struct VkInstance_T;
+typedef VkInstance_T* VkInstance;
+
+struct VkSurfaceKHR_T;
+typedef VkSurfaceKHR_T* VkSurfaceKHR;
+
 namespace CE
 {
     
@@ -20,6 +26,8 @@ namespace CE
 
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) = 0;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) = 0;
+
+        virtual VkSurfaceKHR CreateVulkanSurface(VkInstance instance) = 0;
 
     protected:
     };

@@ -135,7 +135,7 @@ namespace CE
 
         FORCE_INLINE const JsonValue& operator[](const String& key) const
         {
-            return *objectValue[key];
+            return *objectValue.Get(key);
         }
 
         FORCE_INLINE bool KeyExists(const String& key) const

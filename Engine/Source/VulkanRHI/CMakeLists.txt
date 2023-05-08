@@ -5,6 +5,9 @@ project(VulkanRHI CXX)
 ce_add_target(${PROJECT_NAME} SHARED
     NAMESPACE CE
     FOLDER Engine/Source
+    PCHHEADER
+        PRIVATE
+            Public/VulkanRHI.h
     FILES_CMAKE
         PRIVATE
             vulkanrhi_private_files.cmake
@@ -25,6 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${Vulkan_LIBRARIES}
         PUBLIC
             CE::Core
+            CE::CoreApplication
             CE::CoreRHI
             CE::CoreMedia
         TARGETS Config

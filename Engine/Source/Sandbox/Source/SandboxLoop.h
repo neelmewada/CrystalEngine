@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "CoreApplication.h"
+#include "CoreRHI.h"
 
 class SandboxLoop
 {

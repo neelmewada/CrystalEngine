@@ -46,12 +46,31 @@ void SandboxLoop::PostInit()
     // Load non-important modules
     LoadCoreModules();
 
+    // Load Rendering modules
+    ModuleManager::Get().LoadModule("CoreRHI");
+#if PAL_TRAIT_VULKAN_SUPPORTED
+    ModuleManager::Get().LoadModule("VulkanRHI");
+#endif
+
+    gDynamicRHI->Initialize();
+
     AppInit();
+
+    gDynamicRHI->PostInitialize();
 }
 
 void SandboxLoop::PreShutdown()
 {
+    gDynamicRHI->PreShutdown();
+
     AppPreShutdown();
+
+    gDynamicRHI->Shutdown();
+
+#if PAL_TRAIT_VULKAN_SUPPORTED
+    ModuleManager::Get().UnloadModule("VulkanRHI");
+#endif
+    ModuleManager::Get().UnloadModule("CoreRHI");
 
     ModuleManager::Get().UnloadModule("CoreMedia");
 }
@@ -69,7 +88,7 @@ void SandboxLoop::Shutdown()
 
 void SandboxLoop::AppPreInit()
 {
-    app = PlatformApplication::Create();
+    app = PlatformApplication::Get();
 }
 
 void SandboxLoop::AppInit()

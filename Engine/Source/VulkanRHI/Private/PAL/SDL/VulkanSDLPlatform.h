@@ -6,6 +6,8 @@
 #include "vulkan/vulkan.h"
 #include "vma/vk_mem_alloc.h"
 
+#include "CoreApplication.h"
+
 namespace CE
 {
     
@@ -54,11 +56,16 @@ namespace CE
             };
         }
 
-        static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle)
+        static PlatformWindow* GetMainPlatformWindow()
         {
-            VkSurfaceKHR surface = nullptr;
-            SDL_Vulkan_CreateSurface((SDL_Window*)windowHandle, vkInstance, &surface);
-            return surface;
+            if (PlatformApplication::Get()->GetMainWindow() == nullptr)
+                return nullptr;
+            return PlatformApplication::Get()->GetMainWindow();
+        }
+
+        static VkSurfaceKHR CreateSurface(VkInstance vkInstance, PlatformWindow* platformWindow)
+        {
+            return platformWindow->CreateVulkanSurface(vkInstance);
         }
 
         static void DestroySurface(VkInstance vkInstance, VkSurfaceKHR surface)

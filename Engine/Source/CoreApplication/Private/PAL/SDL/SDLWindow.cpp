@@ -43,6 +43,13 @@ namespace CE
 		*outHeight = (u32)h;
 	}
 
+	VkSurfaceKHR SDLPlatformWindow::CreateVulkanSurface(VkInstance instance)
+	{
+		VkSurfaceKHR surface = nullptr;
+		SDL_Vulkan_CreateSurface(handle, instance, &surface);
+		return surface;
+	}
+
 	SDLPlatformWindow::~SDLPlatformWindow()
 	{
 		if (handle != nullptr)

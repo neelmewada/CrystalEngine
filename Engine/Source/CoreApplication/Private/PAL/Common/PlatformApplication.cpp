@@ -3,9 +3,18 @@
 
 namespace CE
 {
-	PlatformApplication* PlatformApplication::Create()
+	PlatformApplication* PlatformApplication::instance = nullptr;
+
+	PlatformApplication* PlatformApplication::Get()
 	{
-		return PlatformApplicationImpl::Create();
+		if (instance == nullptr)
+			instance = PlatformApplicationImpl::Create();
+		return instance;
+	}
+
+	PlatformApplication::~PlatformApplication()
+	{
+		instance = nullptr;
 	}
 
 	void PlatformApplication::Initialize()
