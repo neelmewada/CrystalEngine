@@ -143,6 +143,12 @@ namespace CE
             return rtLayout.HasDepthStencilAttachment();
         }
 
+        // - ImGui API -
+
+        virtual void InitImGui() override;
+
+        virtual void ShutdownImGui() override;
+
     protected:
         void CreateDepthBuffer();
         void DestroyDepthBuffer();

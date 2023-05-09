@@ -61,10 +61,6 @@ namespace CE
         virtual RHIBuffer* CreateBuffer(const RHIBufferDesc& bufferDesc) = 0;
         virtual void DestroyBuffer(RHIBuffer* buffer) = 0;
 
-        // - ImGui -
-
-
-
     };
 
     CORERHI_API extern DynamicRHI* gDynamicRHI;
@@ -84,7 +80,7 @@ namespace CE
     };
 
     /// A render target that is drawn to by GPU. It is automatically created for you in case of Viewport.
-    class CORERHI_API RHIRenderTarget : public RHIResource
+    class CORERHI_API RHIRenderTarget : public RHIResource, public IImGuiRenderer
     {
     protected:
         RHIRenderTarget() : RHIResource(RHIResourceType::RenderTarget)

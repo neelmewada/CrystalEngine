@@ -73,6 +73,7 @@ namespace CE
             vkDestroySurfaceKHR(vkInstance, surface, nullptr);
         }
 
+        CE_DEPRECATED(0.1, "Do not use any SDL functions in VulkanRHI library. Use CoreApplication APIs instead")
         static void GetDrawableWindowSize(void* sdlWindow, u32* width, u32* height)
         {
             int w = 0, h = 0;
