@@ -22,6 +22,8 @@ namespace CE
 
         VkSurfaceKHR CreateVulkanSurface(VkInstance instance) override;
 
+        u32 GetWindowId() override;
+
     protected:
 
         friend class SDLApplication;

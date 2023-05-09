@@ -19,7 +19,7 @@ namespace CE
     class VulkanSwapChain
     {
     public:
-        VulkanSwapChain(VulkanRHI* vulkanRHI, void* windowHandle, VulkanDevice* device,
+        VulkanSwapChain(VulkanRHI* vulkanRHI, PlatformWindow* windowHandle, VulkanDevice* device,
             u32 desiredBackBufferCount, u32 simultaneousFrameDraws,
             u32 width, u32 height, bool isFullscreen, 
             RHIColorFormat colorFormat = RHIColorFormat::Auto, 
@@ -51,7 +51,7 @@ namespace CE
     private:
         VulkanRHI* vulkanRHI = nullptr;
         VulkanDevice* device = nullptr;
-        void* windowHandle = nullptr;
+        PlatformWindow* windowHandle = nullptr;
         bool isFullscreen = false;
 
         VkSwapchainKHR swapChain = nullptr;

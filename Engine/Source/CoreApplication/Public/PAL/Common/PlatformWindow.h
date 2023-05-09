@@ -14,10 +14,9 @@ namespace CE
     protected:
         PlatformWindow();
 
-    public:
-
         virtual ~PlatformWindow();
 
+    public:
 
         virtual void* GetUnderlyingHandle() = 0;
 
@@ -28,6 +27,8 @@ namespace CE
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) = 0;
 
         virtual VkSurfaceKHR CreateVulkanSurface(VkInstance instance) = 0;
+
+        virtual u32 GetWindowId() = 0;
 
     protected:
     };

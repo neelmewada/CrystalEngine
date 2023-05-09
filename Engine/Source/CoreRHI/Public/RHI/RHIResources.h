@@ -12,6 +12,11 @@ namespace CE
         {}
     public:
         virtual ~RHIResource() = default;
+
+        RHIResourceType GetResourceType() const 
+        {
+            return resourceType;
+        }
         
     private:
         RHIResourceType resourceType = RHIResourceType::None;
@@ -94,6 +99,34 @@ namespace CE
 
         bool IsVertexShader() { return GetShaderStage() == RHIShaderStage::Vertex; }
         bool IsFragmentShader() { return GetShaderStage() == RHIShaderStage::Fragment; }
+
+    };
+
+    /***********************************
+    *   Pipeline
+    */
+
+    class CORERHI_API RHIPipelineState : public RHIResource
+    {
+    protected:
+        RHIPipelineState(RHIResourceType type) : RHIResource(type)
+        {}
+
+    public:
+        virtual ~RHIPipelineState() = default;
+
+        // - Public API -
+
+        virtual bool IsGraphicsPipelineState() 
+        {
+            return GetResourceType() == RHIResourceType::GraphicsPipelineState; 
+        }
+
+        virtual bool IsComputePipelineState()
+        {
+            return GetResourceType() == RHIResourceType::ComputePipelineState;
+        }
+
 
     };
     

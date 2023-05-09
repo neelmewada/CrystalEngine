@@ -33,4 +33,7 @@ private:
     // Application
     CE::PlatformApplication* app = nullptr;
 
+    // RHI
+    CE::RHIViewport* viewport = nullptr;
+    CE::RHIGraphicsCommandList* cmdList = nullptr;
 };

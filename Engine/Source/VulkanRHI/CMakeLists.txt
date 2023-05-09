@@ -25,6 +25,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::sdl
+            ThirdParty::imgui
             ${Vulkan_LIBRARIES}
         PUBLIC
             CE::Core
@@ -35,7 +36,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         MACFRAMEWORKS
             QuartzCore
     RUNTIME_DEPENDENCIES
-        
+        Vulkan
 )
 
 

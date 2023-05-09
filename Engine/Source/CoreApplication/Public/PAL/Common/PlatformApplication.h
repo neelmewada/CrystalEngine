@@ -5,6 +5,14 @@
 namespace CE
 {
     class PlatformWindow;
+
+    typedef MultiCastDelegate<void(u32, u32)> WindowResizeDelegate;
+
+    enum class PlatformBackend
+    {
+        None = 0,
+        SDL
+    };
     
     class COREAPPLICATION_API PlatformApplication
     {
@@ -16,14 +24,19 @@ namespace CE
 
         virtual ~PlatformApplication();
 
-        virtual void SetMessageHandler(ApplicationMessageHandler* handler)
+        virtual void AddMessageHandler(ApplicationMessageHandler* handler)
         {
-            this->messageHandler = handler;
+            this->messageHandlers.Add(handler);
         }
 
-        virtual ApplicationMessageHandler* GetMessageHandler()
+        virtual void RemoveMessageHandler(ApplicationMessageHandler* handler)
         {
-            return messageHandler;
+            this->messageHandlers.Remove(handler);
+        }
+
+        virtual const Array<ApplicationMessageHandler*>& GetMessageHandlers() const
+        {
+            return messageHandlers;
         }
 
         virtual void Initialize();
@@ -32,15 +45,24 @@ namespace CE
 
         virtual void Tick();
 
+        virtual PlatformBackend GetBackend() = 0;
+
         virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) = 0;
 
         virtual PlatformWindow* GetMainWindow() = 0;
+
+        virtual PlatformWindow* CreatePlatformWindow(const String& title) = 0;
+        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) = 0;
+
+        virtual void DestroyWindow(PlatformWindow* window) = 0;
+
+        WindowResizeDelegate onMainWindowResized{};
 
     protected:
 
         static PlatformApplication* instance;
 
-        ApplicationMessageHandler* messageHandler = nullptr;
+        Array<ApplicationMessageHandler*> messageHandlers{};
     };
 
 } // namespace CE

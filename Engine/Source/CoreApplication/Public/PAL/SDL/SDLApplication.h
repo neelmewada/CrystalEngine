@@ -1,7 +1,10 @@
 #pragma once
 
+union SDL_Event;
+
 namespace CE
 {
+    class SDLPlatformWindow;
 
     class COREAPPLICATION_API SDLApplication : public PlatformApplication
     {
@@ -9,6 +12,8 @@ namespace CE
         typedef PlatformApplication Super;
 
         static SDLApplication* Create();
+
+        static SDLApplication* Get();
 
         virtual ~SDLApplication();
 
@@ -18,17 +23,38 @@ namespace CE
 
         void Shutdown() override;
 
+        PlatformBackend GetBackend() override
+        {
+            return PlatformBackend::SDL;
+        }
+
         PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) override;
 
         PlatformWindow* GetMainWindow() override;
 
+        virtual PlatformWindow* CreatePlatformWindow(const String& title) override;
+        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) override;
+
+        void DestroyWindow(PlatformWindow* window) override;
+
         void Tick() override;
+
+    public:
+        Mutex mutex{};
+
+        bool mainWindowForceResizing = false;
 
     protected:
 
+        void ProcessWindowEvents(SDL_Event& event);
+
+        void ProcessWindowResizeEvent(SDLPlatformWindow* window);
+
         SDLApplication();
 
-        PlatformWindow* mainWindow = nullptr;
+        SDLPlatformWindow* mainWindow = nullptr;
+
+        Array<SDLPlatformWindow*> windowList{};
     };
 
     typedef SDLApplication PlatformApplicationImpl;

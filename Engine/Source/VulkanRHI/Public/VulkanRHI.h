@@ -53,7 +53,7 @@ namespace CE
 
         virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) override;
 
-        virtual RHIViewport* CreateViewport(void* windowHandle,
+        virtual RHIViewport* CreateViewport(PlatformWindow* window,
             u32 width, u32 height, bool isFullscreen,
             const RHIRenderTargetLayout& rtLayout) override;
 

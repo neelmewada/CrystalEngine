@@ -5,10 +5,16 @@
 
 namespace CE
 {
+	static int ResizingEventWatch(void* data, SDL_Event* event);
 
 	SDLApplication* SDLApplication::Create()
 	{
 		return new SDLApplication();
+	}
+
+	SDLApplication* SDLApplication::Get()
+	{
+		return (SDLApplication*)PlatformApplication::Get();
 	}
 
 	SDLApplication::SDLApplication()
@@ -34,6 +40,8 @@ namespace CE
 	void SDLApplication::PreShutdown()
 	{
 		Super::PreShutdown();
+
+		DestroyWindow(mainWindow);
 	}
 
 	void SDLApplication::Shutdown()
@@ -46,7 +54,12 @@ namespace CE
 	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen)
 	{
 		if (mainWindow == nullptr)
+		{
 			mainWindow = new SDLPlatformWindow(title, width, height, maximised, fullscreen);
+			windowList.Add(mainWindow);
+
+			SDL_AddEventWatch(ResizingEventWatch, mainWindow->handle);
+		}
 		return mainWindow;
 	}
 
@@ -55,15 +68,57 @@ namespace CE
 		return mainWindow;
 	}
 
+	PlatformWindow* SDLApplication::CreatePlatformWindow(const String& title)
+	{
+		if (mainWindow == nullptr)
+		{
+			return InitMainWindow(title, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+		}
+		auto window = new SDLPlatformWindow(title, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+		windowList.Add(window);
+		return window;
+	}
+
+	PlatformWindow* SDLApplication::CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen)
+	{
+		if (mainWindow == nullptr)
+		{
+			return InitMainWindow(title, width, height, maximised, fullscreen);
+		}
+		auto window = new SDLPlatformWindow(title, width, height, maximised, fullscreen);
+		windowList.Add(window);
+		return window;
+	}
+
+	void SDLApplication::DestroyWindow(PlatformWindow* window)
+	{
+		if (window == nullptr)
+			return;
+
+		auto sdlWindow = (SDLPlatformWindow*)window;
+
+		if (sdlWindow == mainWindow)
+		{
+			SDL_DelEventWatch(ResizingEventWatch, mainWindow->handle);
+			this->mainWindow = nullptr;
+		}
+
+		windowList.Remove(sdlWindow);
+		delete sdlWindow;
+	}
+
 	void SDLApplication::Tick()
 	{
 		// Handle SDL Events
 		SDL_Event sdlEvent;
 		while (SDL_PollEvent(&sdlEvent))
 		{
-			if (messageHandler != nullptr)
+			for (auto handler : messageHandlers)
 			{
-				//messageHandler->PreprocessNativeEvent(&SDLEvent);
+				if (handler != nullptr)
+				{
+
+				}
 			}
 
 			if (sdlEvent.type == SDL_QUIT)
@@ -74,7 +129,7 @@ namespace CE
 
 			if (sdlEvent.type == SDL_WINDOWEVENT)
 			{
-				
+				ProcessWindowEvents(sdlEvent);
 			}
 
 			
@@ -83,4 +138,41 @@ namespace CE
 		Super::Tick();
 	}
 
+	void SDLApplication::ProcessWindowEvents(SDL_Event& event)
+	{
+		if (event.window.event == SDL_WINDOWEVENT_RESIZED && event.window.windowID == mainWindow->GetWindowId())
+		{
+			ProcessWindowResizeEvent(mainWindow);
+		}
+	}
+
+	void SDLApplication::ProcessWindowResizeEvent(SDLPlatformWindow* window)
+	{
+		u32 w = 0, h = 0;
+		mainWindow->GetDrawableWindowSize(&w, &h);
+
+		if (w != 0 && h != 0)
+		{
+			for (auto handler : messageHandlers)
+			{
+				if (handler != nullptr)
+					handler->OnMainWindowDrawableSizeChanged(w, h);
+			}
+			onMainWindowResized.Broadcast(w, h);
+		}
+	}
+
+	int ResizingEventWatch(void* data, SDL_Event* event)
+	{
+		if (event->type == SDL_WINDOWEVENT &&
+			event->window.event == SDL_WINDOWEVENT_RESIZED) 
+		{
+			SDL_Window* sdlWindow = SDL_GetWindowFromID(event->window.windowID);
+			if (sdlWindow == (SDL_Window*)data)
+			{
+
+			}
+		}
+		return 0;
+	}
 }

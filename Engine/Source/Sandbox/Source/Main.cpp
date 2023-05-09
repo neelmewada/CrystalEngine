@@ -1,5 +1,4 @@
 
-#include "Core.h"
 #include "SandboxLoop.h"
 
 static SandboxLoop loop{};

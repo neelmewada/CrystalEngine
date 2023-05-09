@@ -16,8 +16,11 @@ find_package(stb REQUIRED)
 # SDL2
 find_package(sdl REQUIRED)
 
+# ImGui
+find_package(imgui REQUIRED)
+
 # Qt
-if(${PAL_TRAIT_BUILD_HOST_TOOLS})
+if(${PAL_TRAIT_BUILD_HOST_TOOLS} AND ${PAL_TRAIT_QT_SUPPORTED})
     include(FindQt.cmake)
     find_package(qads REQUIRED)
     find_package(qtnodes REQUIRED)
@@ -28,6 +31,14 @@ endif()
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
     find_package(Vulkan REQUIRED)
     set(Vulkan_LIBRARIES ${Vulkan_LIBRARIES} PARENT_SCOPE)
+
+    if(${PAL_PLATFORM_IS_WINDOWS})
+        set(Vulkan_BIN_DIR "$ENV{VULKAN_SDK}/Bin")
+        set(Vulkan_BIN_DIR ${Vulkan_BIN_DIR} PARENT_SCOPE)
+        set(Vulkan_RUNTIME_DEPS "VkLayer_khronos_validation.dll")
+        set(Vulkan_RUNTIME_DEPS ${Vulkan_RUNTIME_DEPS} PARENT_SCOPE)
+    endif()
+    
 endif()
 
 # Metal

@@ -12,6 +12,8 @@ namespace CE
     class RHICommandList;
     class RHIGraphicsCommandList;
 
+    class PlatformWindow;
+
     class CORERHI_API DynamicRHI
     {
     public:
@@ -38,7 +40,7 @@ namespace CE
 
         virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) = 0;
 
-        virtual RHIViewport* CreateViewport(void* windowHandle, 
+        virtual RHIViewport* CreateViewport(PlatformWindow* window,
             u32 width, u32 height, bool isFullscreen,
             const RHIRenderTargetLayout& rtLayout) = 0;
 
@@ -58,6 +60,10 @@ namespace CE
 
         virtual RHIBuffer* CreateBuffer(const RHIBufferDesc& bufferDesc) = 0;
         virtual void DestroyBuffer(RHIBuffer* buffer) = 0;
+
+        // - ImGui -
+
+
 
     };
 

@@ -50,6 +50,11 @@ namespace CE
 		return surface;
 	}
 
+	u32 SDLPlatformWindow::GetWindowId()
+	{
+		return SDL_GetWindowID(handle);
+	}
+
 	SDLPlatformWindow::~SDLPlatformWindow()
 	{
 		if (handle != nullptr)

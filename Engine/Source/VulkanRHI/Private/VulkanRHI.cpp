@@ -207,9 +207,9 @@ namespace CE
         delete renderTarget;
     } 
 
-    RHIViewport* VulkanRHI::CreateViewport(void* windowHandle, u32 width, u32 height, bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
+    RHIViewport* VulkanRHI::CreateViewport(PlatformWindow* window, u32 width, u32 height, bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
     {
-        return new VulkanViewport(this, device, windowHandle, width, height, isFullscreen, rtLayout);
+        return new VulkanViewport(this, device, window, width, height, isFullscreen, rtLayout);
     }
 
     void VulkanRHI::DestroyViewport(RHIViewport* viewport)

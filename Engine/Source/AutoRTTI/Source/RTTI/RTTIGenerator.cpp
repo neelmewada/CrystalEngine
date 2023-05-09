@@ -141,6 +141,17 @@ namespace CE
 				}
 				moduleImplFile << "\t);\n}\n";
 
+				moduleImplFile << "static void CEDeregisterModuleTypes()\n{\n";
+				moduleImplFile << "\tCE_DEREGISTER_TYPES(\n";
+				for (int i = 0; i < registrantList.GetSize(); i++)
+				{
+					moduleImplFile << "\t\t" << registrantList[i].GetCString();
+					if (i < registrantList.GetSize() - 1)
+						moduleImplFile << ",";
+					moduleImplFile << "\n";
+				}
+				moduleImplFile << "\t);\n}\n";
+
 				moduleImplFile.close();
 			}
 		}

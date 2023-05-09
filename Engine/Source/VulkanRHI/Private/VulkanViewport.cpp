@@ -14,7 +14,7 @@
 namespace CE
 {
     
-    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* windowHandle,
+    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
         u32 width, u32 height,
         bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(windowHandle), isFullscreen(isFullscreen)

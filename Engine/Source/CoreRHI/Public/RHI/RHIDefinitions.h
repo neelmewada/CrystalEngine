@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ImGui/ImGuiDefinitions.h"
+
 namespace CE
 {
 
@@ -17,6 +19,7 @@ namespace CE
         Buffer,
         Texture,
         ShaderModule,
+        ComputePipelineState,
         GraphicsPipelineState,
 
         RenderTarget,
@@ -257,6 +260,11 @@ namespace CE
     };
     ENUM_CLASS_FLAGS(RHIShaderStage);
 
-    
+
+    /*
+    *   Graphics Pipeline
+    */
+
+
 
 } // namespace CE

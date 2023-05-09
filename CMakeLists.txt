@@ -36,11 +36,6 @@ add_subdirectory(Config)
 # Build Engine
 add_subdirectory(Engine)
 
-# Build Host Libraries (independent from all Editor DLLs)
-if(${PAL_TRAIT_BUILD_HOST_LIBRARIES})
-    add_subdirectory(Libraries)
-endif()
-
 add_library(EditorTools INTERFACE)
 
 # Build Editor

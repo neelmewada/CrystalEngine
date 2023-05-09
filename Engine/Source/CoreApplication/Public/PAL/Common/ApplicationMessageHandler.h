@@ -89,6 +89,17 @@ namespace CE
         {
 
         }
+
+        virtual void OnMainWindowDrawableSizeChanged(u32 width, u32 height)
+        {
+
+        }
+
+        virtual void ProcessNativeEvents(void* nativeEvent)
+        {
+
+        }
+
     };
     
 } // namespace CE

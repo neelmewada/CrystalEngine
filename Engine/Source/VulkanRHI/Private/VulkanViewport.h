@@ -8,7 +8,7 @@ namespace CE
     class VulkanViewport : public RHIViewport
     {
     public:
-        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* windowHandle,
+        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
             u32 width, u32 height,
             bool isFullscreen, const RHIRenderTargetLayout& rtLayout);
 #if PAL_TRAIT_QT_SUPPORTED

@@ -8,7 +8,7 @@
 namespace CE
 {
 
-	VulkanSwapChain::VulkanSwapChain(VulkanRHI* vulkanRHI, void* windowHandle, VulkanDevice* device,
+	VulkanSwapChain::VulkanSwapChain(VulkanRHI* vulkanRHI, PlatformWindow* windowHandle, VulkanDevice* device,
 		u32 desiredBackBufferCount, u32 simultaneousFrameDraws, 
 		u32 width, u32 height, bool isFullscreen, 
 		RHIColorFormat colorFormat, RHIDepthStencilFormat depthBufferFormat)
@@ -28,7 +28,7 @@ namespace CE
 		CreateSwapChain();
 		CreateDepthBuffer();
 
-		CE_LOG(Info, All, "Created Vulkan SwapChain");
+		CE_LOG(Info, All, "Vulkan SwapChain created");
 	}
 
 	VulkanSwapChain::~VulkanSwapChain()
@@ -44,7 +44,7 @@ namespace CE
 
 		vkDestroySurfaceKHR((VkInstance)vulkanRHI->GetNativeHandle(), surface, nullptr);
 
-		CE_LOG(Info, All, "Destroyed Vulkan SwapChain");
+		CE_LOG(Info, All, "Vulkan SwapChain destroyed");
 	}
 
 	void VulkanSwapChain::RebuildSwapChain()
