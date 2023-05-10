@@ -80,7 +80,7 @@ namespace CE
     };
 
     /// A render target that is drawn to by GPU. It is automatically created for you in case of Viewport.
-    class CORERHI_API RHIRenderTarget : public RHIResource, public IImGuiRenderer
+    class CORERHI_API RHIRenderTarget : public RHIResource
     {
     protected:
         RHIRenderTarget() : RHIResource(RHIResourceType::RenderTarget)
@@ -138,7 +138,7 @@ namespace CE
 
     };
 
-    class CORERHI_API RHIGraphicsCommandList : public RHICommandList
+    class CORERHI_API RHIGraphicsCommandList : public RHICommandList, public IImGuiRenderer
     {
     protected:
         RHIGraphicsCommandList() : RHICommandList()

@@ -32,7 +32,9 @@ namespace CE
 
         // - Getters -
 
-        VulkanSwapChain* GetSwapChain() { return swapChain; }
+        VulkanSwapChain* GetSwapChain() const { return swapChain; }
+
+        PlatformWindow* GetWindowHandle() const { return windowHandle; }
 
         u32 GetBackBufferCount();
         u32 GetSimultaneousFrameDrawCount();
@@ -49,7 +51,6 @@ namespace CE
     private:
         Color clearColor{};
         bool isFullscreen = false;
-        bool isQtWindow = false;
 
         PlatformWindow* windowHandle = nullptr;
         VulkanRHI* vulkanRHI = nullptr;

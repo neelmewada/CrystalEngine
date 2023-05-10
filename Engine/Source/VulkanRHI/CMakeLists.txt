@@ -37,6 +37,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             QuartzCore
     RUNTIME_DEPENDENCIES
         Vulkan
+        sdl
 )
 
 

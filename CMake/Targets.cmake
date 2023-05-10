@@ -144,24 +144,6 @@ function(ce_add_target NAME TARGET_TYPE)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/../Config ${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}/Config
         )
     endif()
-    
-    # Qt AUTO*
-
-    # if(ce_add_target_AUTOMOC)
-    #     set_target_properties(${NAME} 
-    #         PROPERTIES AUTOMOC ON
-    #     )
-    # endif()
-    # if(ce_add_target_AUTOUIC)
-    #     set_target_properties(${NAME} 
-    #         PROPERTIES AUTOUIC ON
-    #     )
-    # endif()
-    # if(ce_add_target_AUTORCC)
-    #     set_target_properties(${NAME} 
-    #         PROPERTIES AUTORCC ON
-    #     )
-    # endif()
 
     # FOLDER
     
@@ -272,6 +254,7 @@ function(ce_add_target NAME TARGET_TYPE)
     
     # RUNTIME_DEPENDENCIES
 
+    # Manual dependencies
     foreach(runtime_dep ${ce_add_target_RUNTIME_DEPENDENCIES})
         # Dynamic libraries
         if(DEFINED ${runtime_dep}_BIN_DIR AND DEFINED ${runtime_dep}_RUNTIME_DEPS)
@@ -311,4 +294,18 @@ function(ce_add_target NAME TARGET_TYPE)
 
 endfunction()
 
+
+function(ce_add_runtime_dependencies NAME)
+    string(TOUPPER ${NAME} NAME_UPPERCASE)
+
+    set(options AUTORTTI)
+    set(oneValueArgs OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY)
+    set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
+
+    cmake_parse_arguments(ce_add_runtime_dependencies "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    add_library(${NAME} SHARED IMPORTED)
+    
+    
+endfunction()
 

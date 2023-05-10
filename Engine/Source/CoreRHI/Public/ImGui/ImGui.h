@@ -9,9 +9,11 @@ namespace CE
     {
     public:
 
-        virtual void InitImGui() {}
+        virtual ~IImGuiRenderer() {}
 
-        virtual void ShutdownImGui() {}
+        virtual bool InitImGui(IMGUIFontPreloadConfig* preloadFonts = nullptr) = 0;
+
+        virtual void ShutdownImGui() = 0;
 
     };
     

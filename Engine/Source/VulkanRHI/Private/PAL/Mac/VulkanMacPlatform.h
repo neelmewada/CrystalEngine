@@ -37,28 +37,6 @@ namespace CE
         {
             
         }
-
-        // static CE::Array<const char*> GetValidationLayers()
-        // {
-        //     CE::Array<const char*> layers = VulkanAPIPlatform::GetValidationLayers();
-        //     return layers;
-        // }
-
-        // static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow** outTestWindow);
-
-        // static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow* testWindow)
-        // {
-        //     if (testSurface != nullptr)
-        //     {
-        //         vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
-        //     }
-
-        //     DestroyTestVulkanWindow(testWindow);
-        // }
-
-        // static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle);
-        
-        // static void GetWindowSize(void* windowHandle, u32* width, u32* height);
     };
     
     typedef VulkanMacPlatform VulkanOSPlatform;

@@ -81,6 +81,10 @@ namespace CE
             *width = (u32)w;
             *height = (u32)h;
         }
+
+        static void InitVulkanForWindow(PlatformWindow* window);
+
+        static void ShutdownVulkanForWindow();
     };
 
     typedef VulkanSDLPlatform VulkanPlatform;

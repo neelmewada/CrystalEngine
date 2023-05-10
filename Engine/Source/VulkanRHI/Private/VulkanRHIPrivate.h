@@ -145,9 +145,6 @@ namespace CE
 
         // - ImGui API -
 
-        virtual void InitImGui() override;
-
-        virtual void ShutdownImGui() override;
 
     protected:
         void CreateDepthBuffer();
@@ -193,6 +190,8 @@ namespace CE
         VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget);
         virtual ~VulkanGraphicsCommandList();
 
+        // - Rendering API -
+
         virtual void Begin() override;
         virtual void End() override;
 
@@ -210,6 +209,12 @@ namespace CE
         {
             return renderTarget;
         }
+
+        // - ImGui API -
+
+        bool InitImGui(IMGUIFontPreloadConfig* preloadFonts = nullptr) override;
+
+        void ShutdownImGui() override;
 
     protected:
         void CreateSyncObjects();
@@ -230,6 +235,10 @@ namespace CE
 
         Vector<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
         Vector<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
+
+        // ImGui
+        b8 isImGuiEnabled = false;
+        VkDescriptorPool imGuiDescriptorPool;
 
         friend class VulkanRHI;
     };

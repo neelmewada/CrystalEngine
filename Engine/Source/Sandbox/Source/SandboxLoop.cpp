@@ -78,10 +78,14 @@ void SandboxLoop::PostInit()
     viewport = gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
 
     cmdList = gDynamicRHI->CreateGraphicsCommandList(viewport);
+
+    cmdList->InitImGui();
 }
 
 void SandboxLoop::PreShutdown()
 {
+    cmdList->ShutdownImGui();
+
     gDynamicRHI->DestroyCommandList(cmdList);
     gDynamicRHI->DestroyViewport(viewport);
 

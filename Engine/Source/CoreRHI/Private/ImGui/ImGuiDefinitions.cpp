@@ -4,7 +4,7 @@
 namespace CE
 {
 
-	ImGuiStyle::ImGuiStyle()
+    IMGUIStyle::IMGUIStyle()
 	{
         alpha = 1.0f;             // Global alpha applies to everything in Dear ImGui.
         disabledAlpha = 0.60f;            // Additional alpha multiplier applied by BeginDisabled(). Multiply over current value of Alpha.
@@ -13,7 +13,7 @@ namespace CE
         windowBorderSize = 1.0f;             // Thickness of border around windows. Generally set to 0.0f or 1.0f. Other values not well tested.
         windowMinSize = Vec2(32, 32);    // Minimum window size
         windowTitleAlign = Vec2(0.0f, 0.5f);// Alignment for title bar text
-        windowMenuButtonPosition = ImGuiDir::Left;    // Position of the collapsing/docking button in the title bar (left/right). Defaults to ImGuiDir_Left.
+        windowMenuButtonPosition = IMGUIDir::Left;    // Position of the collapsing/docking button in the title bar (left/right). Defaults to ImGuiDir_Left.
         childRounding = 0.0f;             // Radius of child window corners rounding. Set to 0.0f to have rectangular child windows
         childBorderSize = 1.0f;             // Thickness of border around child windows. Generally set to 0.0f or 1.0f. Other values not well tested.
         popupRounding = 0.0f;             // Radius of popup window corners rounding. Set to 0.0f to have rectangular child windows
@@ -35,7 +35,7 @@ namespace CE
         tabRounding = 4.0f;             // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
         tabBorderSize = 0.0f;             // Thickness of border around tabs.
         tabMinWidthForCloseButton = 0.0f;           // Minimum width for close button to appear on an unselected tab when hovered. Set to 0.0f to always show when hovering, set to FLT_MAX to never show close button unless selected.
-        colorButtonPosition = ImGuiDir::Right;   // Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right.
+        colorButtonPosition = IMGUIDir::Right;   // Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right.
         buttonTextAlign = Vec2(0.5f, 0.5f);// Alignment of button text when button is larger than text.
         selectableTextAlign = Vec2(0.0f, 0.0f);// Alignment of selectable text. Defaults to (0.0f, 0.0f) (top-left aligned). It's generally important to keep this left-aligned if you want to lay multiple items on a same line.
         separatorTextBorderSize = 3.0f;             // Thickkness of border in SeparatorText()

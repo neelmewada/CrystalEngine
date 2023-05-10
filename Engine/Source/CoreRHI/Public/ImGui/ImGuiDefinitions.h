@@ -2,9 +2,9 @@
 
 namespace CE
 {
-    typedef unsigned int ImGuiID;
+    typedef unsigned int IMGUIID;
 
-    enum class ImGuiWindowFlags
+    enum class IMGUIWindowFlags
     {
         None = 0,
         NoTitleBar = 1 << 0,   // Disable title-bar
@@ -18,7 +18,7 @@ namespace CE
         NoSavedSettings = 1 << 8,   // Never load/save settings in .ini file
         NoMouseInputs = 1 << 9,   // Disable catching mouse, hovering test with pass through.
         MenuBar = 1 << 10,  // Has a menu-bar
-        HorizontalScrollbar = 1 << 11,  // Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(Vec2(width,0.0f)); prior to calling Begin() to specify width. Read code in imgui_demo in the "Horizontal Scrolling" section.
+        HorizontalScrollbar = 1 << 11,  // Allow horizontal scrollbar to appear (off by default). You may use SetNextWindowContentSize(Vec2(width,0.0f)); prior to calling Begin() to specify width. Read code in IMGUI_demo in the "Horizontal Scrolling" section.
         NoFocusOnAppearing = 1 << 12,  // Disable taking focus when transitioning from hidden to visible state
         NoBringToFrontOnFocus = 1 << 13,  // Disable bringing window to front when taking focus (e.g. clicking on it or programmatically giving it focus)
         AlwaysVerticalScrollbar = 1 << 14,  // Always show vertical scrollbar (even if ContentSize.y < Size.y)
@@ -42,9 +42,9 @@ namespace CE
         ChildMenu = 1 << 28,  // Don't use! For internal use by BeginMenu()
         DockNodeHost = 1 << 29,  // Don't use! For internal use by Begin()/NewFrame()
     };
-    ENUM_CLASS_FLAGS(ImGuiWindowFlags);
+    ENUM_CLASS_FLAGS(IMGUIWindowFlags);
 
-    enum class ImGuiColor
+    enum class IMGUIColor
     {
         Text,
         TextDisabled,
@@ -103,10 +103,10 @@ namespace CE
         ModalWindowDimBg,      // Darken/colorize entire screen behind a modal window, when one is active
         COUNT
     };
-    ENUM_CLASS_FLAGS(ImGuiColor);
+    ENUM_CLASS_FLAGS(IMGUIColor);
 
 
-    enum class ImGuiDir
+    enum class IMGUIDir
     {
         None = -1,
         Left = 0,
@@ -115,9 +115,9 @@ namespace CE
         Down = 3,
         COUNT
     };
-    ENUM_CLASS_FLAGS(ImGuiDir);
+    ENUM_CLASS_FLAGS(IMGUIDir);
 
-    struct ImGuiFontDesc
+    struct IMGUIFontDesc
     {
         void* rawData = nullptr;
         SIZE_T byteSize = 0;
@@ -126,22 +126,22 @@ namespace CE
         void* outFontHandle = nullptr;
     };
 
-    struct ImGuiFontPreloadConfig
+    struct IMGUIFontPreloadConfig
     {
         u32 preloadFontCount = 0;
-        ImGuiFontDesc* preloadFonts = nullptr;
+        IMGUIFontDesc* preloadFonts = nullptr;
     };
 
-    struct CORERHI_API ImGuiStyle
+    struct CORERHI_API IMGUIStyle
     {
-        float       alpha;                      // Global alpha applies to everything in Dear ImGui.
+        float       alpha;                      // Global alpha applies to everything in Dear IMGUI.
         float       disabledAlpha;              // Additional alpha multiplier applied by BeginDisabled(). Multiply over current value of Alpha.
         Vec2        windowPadding;              // Padding within a window.
         float       windowRounding;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows. Large values tend to lead to variety of artifacts and are not recommended.
         float       windowBorderSize;           // Thickness of border around windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
         Vec2        windowMinSize;              // Minimum window size. This is a global setting. If you want to constrain individual windows, use SetNextWindowSizeConstraints().
         Vec2        windowTitleAlign;           // Alignment for title bar text. Defaults to (0.0f,0.5f) for left-aligned,vertically centered.
-        ImGuiDir    windowMenuButtonPosition;   // Side of the collapsing/docking button in the title bar (None/Left/Right). Defaults to ImGuiDir_Left.
+        IMGUIDir    windowMenuButtonPosition;   // Side of the collapsing/docking button in the title bar (None/Left/Right). Defaults to IMGUIDir_Left.
         float       childRounding;              // Radius of child window corners rounding. Set to 0.0f to have rectangular windows.
         float       childBorderSize;            // Thickness of border around child windows. Generally set to 0.0f or 1.0f. (Other values are not well tested and more CPU/GPU costly).
         float       popupRounding;              // Radius of popup window corners rounding. (Note that tooltip windows use WindowRounding)
@@ -163,7 +163,7 @@ namespace CE
         float       tabRounding;                // Radius of upper corners of a tab. Set to 0.0f to have rectangular tabs.
         float       tabBorderSize;              // Thickness of border around tabs.
         float       tabMinWidthForCloseButton;  // Minimum width for close button to appear on an unselected tab when hovered. Set to 0.0f to always show when hovering, set to FLT_MAX to never show close button unless selected.
-        ImGuiDir    colorButtonPosition;        // Side of the color button in the ColorEdit4 widget (left/right). Defaults to ImGuiDir_Right.
+        IMGUIDir    colorButtonPosition;        // Side of the color button in the ColorEdit4 widget (left/right). Defaults to IMGUIDir_Right.
         Vec2        buttonTextAlign;            // Alignment of button text when button is larger than text. Defaults to (0.5f, 0.5f) (centered).
         Vec2        selectableTextAlign;        // Alignment of selectable text. Defaults to (0.0f, 0.0f) (top-left aligned). It's generally important to keep this left-aligned if you want to lay multiple items on a same line.
         float       separatorTextBorderSize;    // Thickkness of border in SeparatorText()
@@ -178,10 +178,10 @@ namespace CE
         float       curveTessellationTol;       // Tessellation tolerance when using PathBezierCurveTo() without a specific number of segments. Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality.
         float       circleTessellationMaxError; // Maximum error (in pixels) allowed when using AddCircle()/AddCircleFilled() or drawing rounded corner rectangles with no explicit segment count specified. Decrease for higher quality but more geometry.
 
-        ImGuiStyle();
+        IMGUIStyle();
     };
 
-    enum class ImGuiTreeNodeFlags
+    enum class IMGUITreeNodeFlags
     {
         None = 0,
         Selected = 1 << 0,   // Draw as selected
@@ -202,10 +202,10 @@ namespace CE
         CollapsingHeader = Framed | NoTreePushOnOpen | NoAutoOpenOnLog,
         LeafFlags = Leaf | NoTreePushOnOpen,
     };
-    ENUM_CLASS_FLAGS(ImGuiTreeNodeFlags);
+    ENUM_CLASS_FLAGS(IMGUITreeNodeFlags);
 
 
-    enum class ImGuiHoveredFlags
+    enum class IMGUIHoveredFlags
     {
         None = 0,        // Return true if directly over the item/window, not obstructed by another window, not obstructed by an active popup or modal blocking inputs under them.
         ChildWindows = 1 << 0,   // IsWindowHovered() only: Return true if any children of the window is hovered
@@ -227,18 +227,18 @@ namespace CE
         DelayShort = 1 << 12,  // Return true after io.HoverDelayShort elapsed (~0.10 sec)
         NoSharedDelay = 1 << 13,  // Disable shared delay system where moving from one item to the next keeps the previous timer for a short time (standard for tooltips with long delays)
     };
-    ENUM_CLASS_FLAGS(ImGuiHoveredFlags);
+    ENUM_CLASS_FLAGS(IMGUIHoveredFlags);
 
-    enum class ImGuiMouseButton
+    enum class IMGUIMouseButton
     {
         Left = 0,
         Right = 1,
         Middle = 2,
         COUNT = 5
     };
-    ENUM_CLASS_FLAGS(ImGuiMouseButton);
+    ENUM_CLASS_FLAGS(IMGUIMouseButton);
 
-    enum class ImGuiStyleVar
+    enum class IMGUIStyleVar
     {
         Alpha,               // float     Alpha
         DisabledAlpha,       // float     DisabledAlpha
@@ -270,9 +270,9 @@ namespace CE
         SeparatorTextPadding,// Vec2    SeparatorTextPadding
         COUNT
     };
-    ENUM_CLASS_FLAGS(ImGuiStyleVar);
+    ENUM_CLASS_FLAGS(IMGUIStyleVar);
 
-    enum class ImGuiButtonFlags
+    enum class IMGUIButtonFlags
     {
         None = 0,
         MouseButtonLeft = 1 << 0,   // React on left mouse button (default)
@@ -283,9 +283,9 @@ namespace CE
         MouseButtonMask_ = MouseButtonLeft | MouseButtonRight | MouseButtonMiddle,
         MouseButtonDefault_ = MouseButtonLeft,
     };
-    ENUM_CLASS_FLAGS(ImGuiButtonFlags);
+    ENUM_CLASS_FLAGS(IMGUIButtonFlags);
 
-    enum class ImGuiCond
+    enum class IMGUICond
     {
         None = 0,        // No condition (always set the variable), same as _Always
         Always = 1 << 0,   // No condition (always set the variable), same as _None
@@ -293,11 +293,11 @@ namespace CE
         FirstUseEver = 1 << 2,   // Set the variable if the object/window has no persistently saved data (no entry in .ini file)
         Appearing = 1 << 3,   // Set the variable if the object/window is appearing after being hidden/inactive (or the first time)
     };
-    ENUM_CLASS_FLAGS(ImGuiCond);
+    ENUM_CLASS_FLAGS(IMGUICond);
 
     // Resizing callback data to apply custom constraint. As enabled by SetNextWindowSizeConstraints(). Callback is called during the next Begin().
 // NB: For basic min/max size constraint on each axis you don't need to use the callback! The SetNextWindowSizeConstraints() parameters are enough.
-    struct ImGuiSizeCallbackData
+    struct IMGUISizeCallbackData
     {
         void* userData;       // Read-only.   What user passed to SetNextWindowSizeConstraints()
         Vec2  pos;            // Read-only.   Window position, for reference.
@@ -305,46 +305,46 @@ namespace CE
         Vec2  desiredSize;    // Read-write.  Desired size, based on user's mouse position. Write to this field to restrain resizing.
     };
 
-    typedef void (*FImGuiSizeCallback)(ImGuiSizeCallbackData* Data); // Callback function for ImGuiSetNextWindowSizeConstraints()
+    typedef void (*IMGUISizeCallback)(IMGUISizeCallbackData* Data); // Callback function for IMGUISetNextWindowSizeConstraints()
 
 #ifndef ImTextureID
     typedef void* ImTextureID;          // Default: store a pointer or an integer fitting in a pointer (most renderer backends are ok with that)
 #endif
 
 
-    // Flags stored in ImGuiViewport::Flags, giving indications to the platform backends.
-    enum class ImGuiViewportFlags
+    // Flags stored in IMGUIViewport::Flags, giving indications to the platform backends.
+    enum class IMGUIViewportFlags
     {
         None = 0,
         IsPlatformWindow = 1 << 0,   // Represent a Platform Window
         IsPlatformMonitor = 1 << 1,   // Represent a Platform Monitor (unused yet)
         OwnedByApp = 1 << 2,   // Platform Window: Was created/managed by the user application? (rather than our backend)
-        NoDecoration = 1 << 3,   // Platform Window: Disable platform decorations: title bar, borders, etc. (generally set all windows, but if ImGuiConfigFlags_ViewportsDecoration is set we only set this on popups/tooltips)
-        NoTaskBarIcon = 1 << 4,   // Platform Window: Disable platform task bar icon (generally set on popups/tooltips, or all windows if ImGuiConfigFlags_ViewportsNoTaskBarIcon is set)
+        NoDecoration = 1 << 3,   // Platform Window: Disable platform decorations: title bar, borders, etc. (generally set all windows, but if IMGUIConfigFlags_ViewportsDecoration is set we only set this on popups/tooltips)
+        NoTaskBarIcon = 1 << 4,   // Platform Window: Disable platform task bar icon (generally set on popups/tooltips, or all windows if IMGUIConfigFlags_ViewportsNoTaskBarIcon is set)
         NoFocusOnAppearing = 1 << 5,   // Platform Window: Don't take focus when created.
         NoFocusOnClick = 1 << 6,   // Platform Window: Don't take focus when clicked on.
         NoInputs = 1 << 7,   // Platform Window: Make mouse pass through so we can drag this window while peaking behind it.
         NoRendererClear = 1 << 8,   // Platform Window: Renderer doesn't need to clear the framebuffer ahead (because we will fill it entirely).
-        NoAutoMerge = 1 << 9,   // Platform Window: Avoid merging this window into another host window. This can only be set via ImGuiWindowClass viewport flags override (because we need to now ahead if we are going to create a viewport in the first place!).
+        NoAutoMerge = 1 << 9,   // Platform Window: Avoid merging this window into another host window. This can only be set via IMGUIWindowClass viewport flags override (because we need to now ahead if we are going to create a viewport in the first place!).
         TopMost = 1 << 10,  // Platform Window: Display on top (for tooltips only).
-        CanHostOtherWindows = 1 << 11,  // Viewport can host multiple imgui windows (secondary viewports are associated to a single window). // FIXME: In practice there's still probably code making the assumption that this is always and only on the MainViewport. Will fix once we add support for "no main viewport".
+        CanHostOtherWindows = 1 << 11,  // Viewport can host multiple IMGUI windows (secondary viewports are associated to a single window). // FIXME: In practice there's still probably code making the assumption that this is always and only on the MainViewport. Will fix once we add support for "no main viewport".
 
         // Output status flags (from Platform)
         IsMinimized = 1 << 12,  // Platform Window: Window is minimized, can skip render. When minimized we tend to avoid using the viewport pos/size for clipping window or testing if they are contained in the viewport.
         IsFocused = 1 << 13,  // Platform Window: Window is focused (last call to Platform_GetWindowFocus() returned true)
     };
-    ENUM_CLASS_FLAGS(ImGuiViewportFlags);
+    ENUM_CLASS_FLAGS(IMGUIViewportFlags);
 
-    struct ImGuiViewport
+    struct IMGUIViewport
     {
-        ImGuiID             id;                     // Unique identifier for the viewport
-        ImGuiViewportFlags  flags;                  // See ImGuiViewportFlags_
-        Vec2              pos;                    // Main Area: Position of the viewport (Dear ImGui coordinates are the same as OS desktop/native coordinates)
+        IMGUIID             id;                     // Unique identifier for the viewport
+        IMGUIViewportFlags  flags;                  // See IMGUIViewportFlags_
+        Vec2              pos;                    // Main Area: Position of the viewport (Dear IMGUI coordinates are the same as OS desktop/native coordinates)
         Vec2              size;                   // Main Area: Size of the viewport.
         Vec2              workPos;                // Work Area: Position of the viewport minus task bars, menus bars, status bars (>= Pos)
         Vec2              workSize;               // Work Area: Size of the viewport minus task bars, menu bars, status bars (<= Size)
         float               dpiScale;               // 1.0f = 96 DPI = No extra scale.
-        ImGuiID             parentViewportId;       // (Advanced) 0: no parent. Instruct the platform backend to setup a parent/child relationship between platform windows.
+        IMGUIID             parentViewportId;       // (Advanced) 0: no parent. Instruct the platform backend to setup a parent/child relationship between platform windows.
         void* drawData;               // The ImDrawData corresponding to this viewport. Valid after Render() and until the next call to NewFrame().
 
         // Platform/Backend Dependent Data
@@ -361,8 +361,8 @@ namespace CE
         bool                platformRequestResize;  // Platform window requested resize (e.g. window was resized by the OS / host window manager, authoritative size will be OS window size)
         bool                platformRequestClose;   // Platform window requested closure (e.g. window was moved by the OS / host window manager, e.g. pressing ALT-F4)
 
-        ImGuiViewport() { memset(this, 0, sizeof(*this)); }
-        ~ImGuiViewport() {  }
+        IMGUIViewport() { memset(this, 0, sizeof(*this)); }
+        ~IMGUIViewport() {  }
 
         // Helpers
         Vec2              GetCenter() const { return Vec2(pos.x + size.x * 0.5f, pos.y + size.y * 0.5f); }
