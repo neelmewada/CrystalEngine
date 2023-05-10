@@ -6,7 +6,7 @@ namespace CE
 {
     class PlatformWindow;
 
-    typedef MultiCastDelegate<void(u32, u32)> WindowResizeDelegate;
+    typedef MultiCastDelegate<void(PlatformWindow*, u32, u32)> WindowResizeDelegate;
 
     enum class PlatformBackend
     {
@@ -56,7 +56,7 @@ namespace CE
 
         virtual void DestroyWindow(PlatformWindow* window) = 0;
 
-        WindowResizeDelegate onMainWindowResized{};
+        WindowResizeDelegate onWindowResized{};
 
     protected:
 

@@ -21,6 +21,9 @@ namespace CE
     {
         auto backBufferCount = rtLayout.backBufferCount;
         auto simultaneousFrameDraws = rtLayout.simultaneousFrameDraws;
+        
+        windowResizeDelegateHandle =
+            PlatformApplication::Get()->onWindowResized.AddDelegateInstance(MemberDelegate(&VulkanViewport::OnWindowResized, this));
 
         if (simultaneousFrameDraws > backBufferCount - 1)
             simultaneousFrameDraws = backBufferCount - 1;
@@ -56,6 +59,8 @@ namespace CE
 
     VulkanViewport::~VulkanViewport()
     {
+        PlatformApplication::Get()->onWindowResized.RemoveDelegateInstance(windowResizeDelegateHandle);
+        
         // - Sync Objects -
         for (int i = 0; i < imageAcquiredSemaphore.GetSize(); ++i)
         {
@@ -104,6 +109,11 @@ namespace CE
                 return;
             }
         }
+    }
+
+    void VulkanViewport::OnWindowResized(PlatformWindow* window, u32 width, u32 height)
+    {
+        Rebuild();
     }
 
     // - Setters -

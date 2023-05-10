@@ -6,7 +6,7 @@
 
 namespace CE
 {
-    class VulkanMacPlatform : public VulkanAPIPlatform
+    class VulkanMacPlatform
     {
         CE_STATIC_CLASS(VulkanMacPlatform)
     public:
@@ -18,15 +18,11 @@ namespace CE
 
         static CE::Array<const char*> GetRequiredInstanceExtensions()
         {
-            CE::Array<const char*> ext = VulkanAPIPlatform::GetRequiredInstanceExtensions();
-            
-            ext.AddRange({
+            return {
                 VK_KHR_SURFACE_EXTENSION_NAME,
                 VK_MVK_MACOS_SURFACE_EXTENSION_NAME,
                 VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME
-            });
-
-            return ext;
+            };
         }
 
         static CE::Array<const char*> GetRequiredVulkanDeviceExtensions()
@@ -37,29 +33,34 @@ namespace CE
             };
         }
 
-        static CE::Array<const char*> GetValidationLayers()
+        static void GetNativeWindowSize(void* nativeWindowHandle, u32* width, u32* height)
         {
-            CE::Array<const char*> layers = VulkanAPIPlatform::GetValidationLayers();
-            return layers;
+            
         }
 
-        static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow** outTestWindow);
+        // static CE::Array<const char*> GetValidationLayers()
+        // {
+        //     CE::Array<const char*> layers = VulkanAPIPlatform::GetValidationLayers();
+        //     return layers;
+        // }
 
-        static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow* testWindow)
-        {
-            if (testSurface != nullptr)
-            {
-                vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
-            }
+        // static VkSurfaceKHR CreateTestSurface(VkInstance vkInstance, VulkanTestWindow** outTestWindow);
 
-            DestroyTestVulkanWindow(testWindow);
-        }
+        // static void DestroyTestSurface(VkInstance vkInstance, VkSurfaceKHR testSurface, VulkanTestWindow* testWindow)
+        // {
+        //     if (testSurface != nullptr)
+        //     {
+        //         vkDestroySurfaceKHR(vkInstance, testSurface, nullptr);
+        //     }
 
-        static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle);
+        //     DestroyTestVulkanWindow(testWindow);
+        // }
+
+        // static VkSurfaceKHR CreateSurface(VkInstance vkInstance, void* windowHandle);
         
-        static void GetWindowSize(void* windowHandle, u32* width, u32* height);
+        // static void GetWindowSize(void* windowHandle, u32* width, u32* height);
     };
     
-    typedef VulkanMacPlatform VulkanPlatform;
+    typedef VulkanMacPlatform VulkanOSPlatform;
 
 } // namespace CE

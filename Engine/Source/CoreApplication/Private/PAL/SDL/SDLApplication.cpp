@@ -33,7 +33,7 @@ namespace CE
 
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
 		{
-			CE_LOG(Error, All, "Failed to initialize SDL Video! " + String(SDL_GetError()));
+			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! " + String(SDL_GetError()));
 		}
 	}
 
@@ -97,7 +97,7 @@ namespace CE
 
 		auto sdlWindow = (SDLPlatformWindow*)window;
 
-		if (sdlWindow == mainWindow)
+		if (sdlWindow->GetWindowId() == mainWindow->GetWindowId())
 		{
 			SDL_DelEventWatch(ResizingEventWatch, mainWindow->handle);
 			this->mainWindow = nullptr;
@@ -140,25 +140,39 @@ namespace CE
 
 	void SDLApplication::ProcessWindowEvents(SDL_Event& event)
 	{
-		if (event.window.event == SDL_WINDOWEVENT_RESIZED && event.window.windowID == mainWindow->GetWindowId())
+		if (event.window.event == SDL_WINDOWEVENT_RESIZED)
 		{
-			ProcessWindowResizeEvent(mainWindow);
+            if (event.window.windowID == mainWindow->GetWindowId())
+            {
+                ProcessWindowResizeEvent(mainWindow);
+            }
+            else
+            {
+                for (PlatformWindow* window : windowList)
+                {
+                    if (event.window.windowID == window->GetWindowId())
+                    {
+                        ProcessWindowResizeEvent((SDLPlatformWindow*)window);
+                        break;
+                    }
+                }
+            }
 		}
 	}
 
 	void SDLApplication::ProcessWindowResizeEvent(SDLPlatformWindow* window)
 	{
 		u32 w = 0, h = 0;
-		mainWindow->GetDrawableWindowSize(&w, &h);
+        window->GetDrawableWindowSize(&w, &h);
 
 		if (w != 0 && h != 0)
 		{
 			for (auto handler : messageHandlers)
 			{
-				if (handler != nullptr)
+				if (handler != nullptr && window->GetWindowId() == mainWindow->GetWindowId())
 					handler->OnMainWindowDrawableSizeChanged(w, h);
 			}
-			onMainWindowResized.Broadcast(w, h);
+            onWindowResized.Broadcast(window, w, h);
 		}
 	}
 

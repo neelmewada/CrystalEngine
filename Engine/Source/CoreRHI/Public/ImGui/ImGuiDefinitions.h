@@ -362,7 +362,7 @@ namespace CE
         bool                platformRequestClose;   // Platform window requested closure (e.g. window was moved by the OS / host window manager, e.g. pressing ALT-F4)
 
         ImGuiViewport() { memset(this, 0, sizeof(*this)); }
-        ~ImGuiViewport() { ASSERT(platformUserData == NULL && rendererUserData == NULL); }
+        ~ImGuiViewport() {  }
 
         // Helpers
         Vec2              GetCenter() const { return Vec2(pos.x + size.x * 0.5f, pos.y + size.y * 0.5f); }

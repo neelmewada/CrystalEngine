@@ -95,9 +95,10 @@ namespace CE
         virtual RHIRenderPass* GetRenderPass() = 0;
 
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) = 0;
+        
     };
 
-    /// A viewport used to draw & present from GPU. Usually only used in runtime builds than in editor.
+    /// A viewport used to draw to & present from.
     class CORERHI_API RHIViewport : public RHIResource
     {
     protected:

@@ -52,6 +52,27 @@ target_include_directories(${TARGET_WITH_NAMESPACE}
         ${${LIB_NAME}_INCLUDE_DIR}
 )
 
+if(${PAL_PLATFORM_IS_MAC})
+    target_link_libraries(${TARGET_WITH_NAMESPACE}
+        INTERFACE
+            "-framework Cocoa"
+            "-framework CoreAudio"
+            "-framework Carbon"
+            "-framework AudioToolbox"
+            "-framework AVFoundation"
+            "-framework Metal"
+            "-framework MetalKit"
+            "-framework IOKit"
+            "-framework CoreGraphics"
+            "-framework CoreVideo"
+            "-framework CoreHaptics"
+            "-framework GameController"
+            "-framework ForceFeedback"
+            "iconv"
+    )
+endif()
+
+
 set(${LIB_NAME}_FOUND True)
 
 

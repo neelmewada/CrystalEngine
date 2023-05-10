@@ -4,6 +4,7 @@
 
 namespace CE
 {
+    class PlatformWindow;
 
     class VulkanViewport : public RHIViewport
     {
@@ -42,13 +43,15 @@ namespace CE
 
         void CreateFrameBuffers();
         void CreateSyncObjects();
+        
+        void OnWindowResized(PlatformWindow* window, u32 width, u32 height);
 
     private:
         Color clearColor{};
         bool isFullscreen = false;
         bool isQtWindow = false;
 
-        void* windowHandle = nullptr;
+        PlatformWindow* windowHandle = nullptr;
         VulkanRHI* vulkanRHI = nullptr;
         VulkanDevice* device = nullptr;
         VulkanRenderTarget* renderTarget = nullptr;
@@ -62,6 +65,8 @@ namespace CE
 
         u32 currentDrawFrameIndex = 0;
         u32 currentImageIndex = 0;
+        
+        DelegateHandle windowResizeDelegateHandle = 0;
 
         friend struct VulkanRenderTargetLayout;
         friend class VulkanGraphicsCommandList;

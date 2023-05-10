@@ -20,7 +20,7 @@ find_package(sdl REQUIRED)
 find_package(imgui REQUIRED)
 
 # Qt
-if(${PAL_TRAIT_BUILD_HOST_TOOLS} AND ${PAL_TRAIT_QT_SUPPORTED})
+if(${PAL_TRAIT_QT_SUPPORTED})
     include(FindQt.cmake)
     find_package(qads REQUIRED)
     find_package(qtnodes REQUIRED)
