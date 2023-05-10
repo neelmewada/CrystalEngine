@@ -152,6 +152,10 @@ void SandboxLoop::RunLoop()
 
         cmdList->Begin();
 
+        cmdList->ImGuiNewFrame();
+
+        cmdList->ImGuiRender();
+
         cmdList->End();
 
         if (gDynamicRHI->ExecuteCommandList(cmdList))

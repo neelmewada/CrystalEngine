@@ -77,27 +77,108 @@ namespace CE
             style.Colors[ImGuiCol_WindowBg].w = 1.0f;
         }
 
-        if (IsViewportTarget())
+        ASSERT(IsViewportTarget(), "ImGui is only supported on viewport render targets at this moment!");
+
+        VulkanPlatform::InitVulkanForWindow(viewport->GetWindowHandle());
+
+        ImGui_ImplVulkan_InitInfo initInfo{};
+        initInfo.PhysicalDevice = device->GetPhysicalHandle();
+        initInfo.Device = device->GetHandle();
+        initInfo.DescriptorPool = imGuiDescriptorPool;
+        initInfo.Instance = vulkanRHI->GetInstanceHandle();
+        initInfo.ImageCount = viewport->swapChain->GetBackBufferCount();
+        initInfo.MinImageCount = 2;
+        initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+        initInfo.Queue = device->GetGraphicsQueue()->GetHandle();
+        initInfo.QueueFamily = device->GetGraphicsQueue()->GetFamilyIndex();
+        ImGui_ImplVulkan_Init(&initInfo, viewport->renderTarget->renderPass->GetHandle());
+
+        // Upload fonts
         {
-            VulkanPlatform::InitVulkanForWindow(viewport->GetWindowHandle());
+            VkCommandPool cmdPool = device->GetGraphicsCommandPool();
+            VkCommandBuffer cmdBuffer = commandBuffers[viewport->currentDrawFrameIndex];
+
+            vkResetCommandPool(device->GetHandle(), cmdPool, 0);
+            VkCommandBufferBeginInfo beginInfo = {};
+            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            beginInfo.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+            vkBeginCommandBuffer(cmdBuffer, &beginInfo);
+
+            ImGui_ImplVulkan_CreateFontsTexture(cmdBuffer);
+
+            VkSubmitInfo endInfo = {};
+            endInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            endInfo.commandBufferCount = 1;
+            endInfo.pCommandBuffers = &cmdBuffer;
+            vkEndCommandBuffer(cmdBuffer);
+            vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &endInfo, VK_NULL_HANDLE);
+
+            vkDeviceWaitIdle(device->GetHandle());
+            ImGui_ImplVulkan_DestroyFontUploadObjects();
         }
 
         isImGuiEnabled = true;
+
+        PlatformApplication::Get()->AddMessageHandler(this);
         return true;
     }
 
     void VulkanGraphicsCommandList::ShutdownImGui()
     {
-        if (IsViewportTarget())
-        {
-            VulkanPlatform::ShutdownVulkanForWindow();
-        }
+        PlatformApplication::Get()->RemoveMessageHandler(this);
+
+        vkDeviceWaitIdle(device->GetHandle());
+
+        ImGui_ImplVulkan_Shutdown();
+        VulkanPlatform::ShutdownVulkanForWindow();
+        ImGui::DestroyContext();
 
         // Destroy Descriptor Pool
         vkDestroyDescriptorPool(device->GetHandle(), imGuiDescriptorPool, nullptr);
         imGuiDescriptorPool = nullptr;
 
         isImGuiEnabled = false;
+    }
+
+    void VulkanGraphicsCommandList::ImGuiNewFrame()
+    {
+        ImGui_ImplVulkan_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+
+        static bool showDemoWindow = true;
+        if (showDemoWindow)
+            ImGui::ShowDemoWindow(&showDemoWindow);
+    }
+
+    void VulkanGraphicsCommandList::ImGuiRender()
+    {
+        ImGui::Render();
+        ImDrawData* imGuiDrawData = ImGui::GetDrawData();
+
+        for (int i = 0; i < commandBuffers.GetSize(); i++)
+        {
+            ImGui_ImplVulkan_RenderDrawData(imGuiDrawData, commandBuffers[i]);
+        }
+
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+        // Update and Render additional Platform Windows
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
+    }
+
+    void VulkanGraphicsCommandList::ProcessNativeEvents(void* nativeEvent)
+    {
+        if (isImGuiEnabled)
+        {
+#if PAL_TRAIT_SDL_SUPPORTED
+            ImGui_ImplSDL2_ProcessEvent((SDL_Event*)nativeEvent);
+#endif
+        }
     }
     
 } // namespace CE
@@ -109,5 +190,8 @@ namespace CE
 #include "imgui_draw.cpp"
 #include "imgui_tables.cpp"
 #include "imgui_widgets.cpp"
+
+#if PAL_TRAIT_SDL_SUPPORTED
 #include "backends/imgui_impl_sdl2.cpp"
+#endif
 #include "backends/imgui_impl_vulkan.cpp"

@@ -322,6 +322,13 @@ namespace CE
         this->clearColors[colorTargetIndex] = color;
     }
 
+    VkRenderPass VulkanRenderTarget::GetVulkanRenderPassHandle() const
+    {
+        if (renderPass == nullptr)
+            return nullptr;
+        return renderPass->GetHandle();
+    }
+
     u32 VulkanRenderTarget::GetBackBufferCount()
     {
         if (IsViewportRenderTarget())

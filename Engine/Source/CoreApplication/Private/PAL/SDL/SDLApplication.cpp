@@ -117,7 +117,7 @@ namespace CE
 			{
 				if (handler != nullptr)
 				{
-
+					handler->ProcessNativeEvents(&sdlEvent);
 				}
 			}
 

@@ -40,6 +40,11 @@ namespace CE
         virtual void Shutdown() override;
         
         virtual void* GetNativeHandle() override;
+
+        VkInstance GetInstanceHandle() const
+        {
+            return vkInstance;
+        }
         
         virtual RHIGraphicsBackend GetGraphicsBackend() override;
 

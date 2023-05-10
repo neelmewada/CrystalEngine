@@ -15,6 +15,9 @@ namespace CE
 
         virtual void ShutdownImGui() = 0;
 
+        virtual void ImGuiNewFrame() = 0;
+
+        virtual void ImGuiRender() = 0;
     };
     
 } // namespace CE

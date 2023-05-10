@@ -1,7 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RHI/RHI.h"
+#include "CoreApplication.h"
+#include "CoreRHI.h"
 
 #include "VulkanRHI.h"
 #include "VulkanDevice.h"
@@ -120,6 +121,8 @@ namespace CE
 
         CE_INLINE VulkanViewport* GetViewport() { return viewport; }
 
+        VkRenderPass GetVulkanRenderPassHandle() const;
+
         u32 GetBackBufferCount();
 
         u32 GetSimultaneousFrameDrawCount();
@@ -142,8 +145,6 @@ namespace CE
         {
             return rtLayout.HasDepthStencilAttachment();
         }
-
-        // - ImGui API -
 
 
     protected:
@@ -183,7 +184,7 @@ namespace CE
     *   Graphics Command List
     */
 
-    class VulkanGraphicsCommandList : public RHIGraphicsCommandList
+    class VulkanGraphicsCommandList : public RHIGraphicsCommandList, public ApplicationMessageHandler
     {
     public:
         VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport);
@@ -216,6 +217,11 @@ namespace CE
 
         void ShutdownImGui() override;
 
+        virtual void ImGuiNewFrame() override;
+        virtual void ImGuiRender() override;
+
+        void ProcessNativeEvents(void* nativeEvent) override;
+
     protected:
         void CreateSyncObjects();
         void DestroySyncObjects();
@@ -241,6 +247,7 @@ namespace CE
         VkDescriptorPool imGuiDescriptorPool;
 
         friend class VulkanRHI;
+
     };
 
 } // namespace CE
