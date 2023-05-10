@@ -15,3 +15,8 @@ macro(ce_set name)
     endif()
 endmacro()
 
+macro(ce_set_parent name)
+    set(${name} "${ARGN}")
+    set(${name} "${ARGN}" PARENT_SCOPE)
+endmacro()
+
