@@ -4,6 +4,7 @@
 
 base_dir=$(pwd)
 cmake_subdir=$2
+cmake_args=$3
 
 cd $1
 
@@ -89,7 +90,7 @@ BuildCMake() {
     
     cd cmake-build
 
-    cmake -E env CXXFLAGS="${CxxFlags}" ${MacFlags} cmake ${CMakeBuildSystem} -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=$BuildType ../${CmakeRootDir}
+    cmake -E env CXXFLAGS="${CxxFlags}" ${MacFlags} cmake ${CMakeBuildSystem} -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=$BuildType ${cmake_args} ../${CmakeRootDir}
     
     cmake -E env CXXFLAGS="${CxxFlags}" cmake --build . -j 8 ${CMakeBuildFlags}
     
