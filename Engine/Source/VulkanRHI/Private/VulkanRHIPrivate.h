@@ -220,6 +220,8 @@ namespace CE
         virtual void ImGuiNewFrame() override;
         virtual void ImGuiRender() override;
 
+        void ImGuiPlatformUpdate() override;
+
         void ProcessNativeEvents(void* nativeEvent) override;
 
     protected:

@@ -73,7 +73,7 @@ void SandboxLoop::PostInit()
     rtLayout.numColorOutputs = 1;
     rtLayout.colorOutputs[0] = colorDesc;
     rtLayout.presentationRTIndex = 0;
-    rtLayout.depthStencilFormat = RHIDepthStencilFormat::Auto;
+    rtLayout.depthStencilFormat = RHIDepthStencilFormat::None;
 
     viewport = gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
 
@@ -157,6 +157,8 @@ void SandboxLoop::RunLoop()
         cmdList->ImGuiRender();
 
         cmdList->End();
+
+        cmdList->ImGuiPlatformUpdate();
 
         if (gDynamicRHI->ExecuteCommandList(cmdList))
         {

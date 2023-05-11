@@ -98,7 +98,7 @@ namespace CE
         appInfo.apiVersion = VK_API_VERSION_1_1;
         appInfo.pEngineName = CE_ENGINE_NAME_STRING;
         appInfo.engineVersion = VK_MAKE_VERSION(CE_VERSION_MAJOR, CE_VERSION_MINOR, CE_VERSION_PATCH);
-        appInfo.pApplicationName = "";//ProjectSettings::Get().GetProjectName().GetCString();
+        appInfo.pApplicationName = gProjectName.GetCString();
         appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
         
         Array<const char*> validationLayers = VulkanPlatform::GetValidationLayers();

@@ -18,6 +18,8 @@ namespace CE
         virtual void ImGuiNewFrame() = 0;
 
         virtual void ImGuiRender() = 0;
+
+        virtual void ImGuiPlatformUpdate() = 0;
     };
     
 } // namespace CE

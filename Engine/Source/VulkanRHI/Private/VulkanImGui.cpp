@@ -81,6 +81,8 @@ namespace CE
 
         VulkanPlatform::InitVulkanForWindow(viewport->GetWindowHandle());
 
+        gPersistentRenderPass = viewport->renderTarget->renderPass->GetHandle();
+
         ImGui_ImplVulkan_InitInfo initInfo{};
         initInfo.PhysicalDevice = device->GetPhysicalHandle();
         initInfo.Device = device->GetHandle();
@@ -91,7 +93,7 @@ namespace CE
         initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         initInfo.Queue = device->GetGraphicsQueue()->GetHandle();
         initInfo.QueueFamily = device->GetGraphicsQueue()->GetFamilyIndex();
-        ImGui_ImplVulkan_Init(&initInfo, viewport->renderTarget->renderPass->GetHandle());
+        ImGui_ImplVulkan_Init(&initInfo, gPersistentRenderPass);
 
         // Upload fonts
         {
@@ -137,6 +139,7 @@ namespace CE
         vkDestroyDescriptorPool(device->GetHandle(), imGuiDescriptorPool, nullptr);
         imGuiDescriptorPool = nullptr;
 
+        gPersistentRenderPass = nullptr;
         isImGuiEnabled = false;
     }
 
@@ -160,7 +163,10 @@ namespace CE
         {
             ImGui_ImplVulkan_RenderDrawData(imGuiDrawData, commandBuffers[i]);
         }
+    }
 
+    void VulkanGraphicsCommandList::ImGuiPlatformUpdate()
+    {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 
         // Update and Render additional Platform Windows
