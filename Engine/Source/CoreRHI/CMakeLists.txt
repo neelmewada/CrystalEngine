@@ -26,6 +26,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            ThirdParty::imgui
         PUBLIC
             CE::Core
         TARGETS Config

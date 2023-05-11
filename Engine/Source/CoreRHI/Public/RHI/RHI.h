@@ -138,7 +138,7 @@ namespace CE
 
     };
 
-    class CORERHI_API RHIGraphicsCommandList : public RHICommandList, public IImGuiRenderer
+    class CORERHI_API RHIGraphicsCommandList : public RHICommandList
     {
     protected:
         RHIGraphicsCommandList() : RHICommandList()
@@ -155,6 +155,19 @@ namespace CE
 
         virtual void Begin() = 0;
         virtual void End() = 0;
+
+        // - ImGui Setup -
+
+        virtual bool InitImGui(RHIFontPreloadConfig* preloadFonts = nullptr) = 0;
+
+        virtual void ShutdownImGui() = 0;
+
+        virtual void ImGuiNewFrame() = 0;
+
+        virtual void ImGuiRender() = 0;
+
+        virtual void ImGuiPlatformUpdate() = 0;
+
     };
     
 } // namespace CE

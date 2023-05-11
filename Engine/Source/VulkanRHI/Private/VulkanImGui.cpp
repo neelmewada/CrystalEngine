@@ -13,6 +13,9 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 
+// Explort ImGui Impl
+#define IMGUI_API DLL_EXPORT
+
 #include "imgui.h"
 #if PAL_TRAIT_SDL_SUPPORTED
 #include "backends/imgui_impl_sdl2.h"
@@ -22,7 +25,7 @@
 namespace CE
 {
 
-    bool VulkanGraphicsCommandList::InitImGui(IMGUIFontPreloadConfig* preloadFonts)
+    bool VulkanGraphicsCommandList::InitImGui(RHIFontPreloadConfig* preloadFontConfig)
     {
         VkResult result = VK_SUCCESS;
 
@@ -67,6 +70,16 @@ namespace CE
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+
+        if (preloadFontConfig != nullptr && preloadFontConfig->preloadFontCount > 0 && preloadFontConfig->preloadFonts != nullptr)
+        {
+            for (int i = 0; i < preloadFontConfig->preloadFontCount; i++)
+            {
+                auto numBytes = preloadFontConfig->preloadFonts[i].byteSize;
+                char* fontData = new char[numBytes];
+                memcpy(fontData, preloadFontConfig->preloadFonts[i].fontData, numBytes);
+            }
+        }
 
         ImGui::StyleColorsDark();
 
@@ -148,16 +161,12 @@ namespace CE
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
-
-        static bool showDemoWindow = true;
-        if (showDemoWindow)
-            ImGui::ShowDemoWindow(&showDemoWindow);
     }
 
     void VulkanGraphicsCommandList::ImGuiRender()
     {
         ImGui::Render();
-        ImDrawData* imGuiDrawData = ImGui::GetDrawData();
+        ImDrawData* imGuiDrawData = ::ImGui::GetDrawData();
 
         for (int i = 0; i < commandBuffers.GetSize(); i++)
         {
@@ -190,7 +199,6 @@ namespace CE
 } // namespace CE
 
 
-// ImGui Impl
 #include "imgui.cpp"
 #include "imgui_demo.cpp"
 #include "imgui_draw.cpp"

@@ -1,17 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreRHI.h"
+
+#include "GUI/GUIDefinitions.h"
+#include "GUI/GUI.h"
 
 namespace CE
 {
-    class COREGUI_API CoreGUIModule : public CE::Module
-    {
-    public:
-        virtual void StartupModule() override;
-
-        virtual void ShutdownModule() override;
-
-        virtual void RegisterTypes() override;
-        
-    };
+    
 }

@@ -112,6 +112,21 @@ namespace CE
         u32 backBufferCount = 2, simultaneousFrameDraws = 1;
     };
 
+    struct RHIFontDesc
+    {
+        void* rawData = nullptr;
+        SIZE_T byteSize = 0;
+        u32 pointSize = 14;
+
+        void* fontData = nullptr;
+    };
+
+    struct RHIFontPreloadConfig
+    {
+        u32 preloadFontCount = 0;
+        RHIFontDesc* preloadFonts = nullptr;
+    };
+
     /*
     *   Buffer
     */

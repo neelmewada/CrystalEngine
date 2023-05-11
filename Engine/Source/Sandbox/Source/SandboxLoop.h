@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "CoreApplication.h"
 #include "CoreRHI.h"
+#include "CoreGUI.h"
 
 class SandboxLoop
 {

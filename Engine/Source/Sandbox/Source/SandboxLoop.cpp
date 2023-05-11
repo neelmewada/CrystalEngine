@@ -108,7 +108,7 @@ void SandboxLoop::PreShutdown()
 void SandboxLoop::Shutdown()
 {
     AppShutdown();
-    
+
     // Unload most important modules at last
     ModuleManager::Get().UnloadModule("CoreApplication");
     ModuleManager::Get().UnloadModule("Core");
@@ -151,11 +151,37 @@ void SandboxLoop::RunLoop()
         viewport->SetClearColor(Color::FromRGBA32(26, 184, 107));
 
         cmdList->Begin();
-
         cmdList->ImGuiNewFrame();
 
-        cmdList->ImGuiRender();
+        //GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(0, 0));
+        GUI::BeginWindow("DockSpaceWindow", nullptr, GUI::WF_FullScreen | GUI::WF_MenuBar | GUI::WF_NoPadding);
+        //GUI::PopStyleVar(1);
+        {
+            GUI::DockSpace("MainDockSpace");
 
+            if (GUI::BeginMenuBar())
+            {
+                if (GUI::BeginMenu("File"))
+                {
+                    GUI::MenuItem("New");
+                    GUI::MenuItem("Open");
+
+                    GUI::EndMenu();
+                }
+
+                GUI::EndMenuBar();
+            }
+
+            static bool shown1 = true;
+            if (GUI::BeginWindow("My Window", &shown1))
+            {
+
+                GUI::EndWindow();
+            }
+        }
+        GUI::EndWindow();
+
+        cmdList->ImGuiRender();
         cmdList->End();
 
         cmdList->ImGuiPlatformUpdate();

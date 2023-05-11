@@ -211,9 +211,11 @@ namespace CE
             return renderTarget;
         }
 
+        void ProcessNativeEvents(void* nativeEvent) override;
+
         // - ImGui API -
 
-        bool InitImGui(IMGUIFontPreloadConfig* preloadFonts = nullptr) override;
+        bool InitImGui(RHIFontPreloadConfig* preloadFonts = nullptr) override;
 
         void ShutdownImGui() override;
 
@@ -221,8 +223,6 @@ namespace CE
         virtual void ImGuiRender() override;
 
         void ImGuiPlatformUpdate() override;
-
-        void ProcessNativeEvents(void* nativeEvent) override;
 
     protected:
         void CreateSyncObjects();

@@ -5,4 +5,5 @@
 namespace CE
 {
 	CORERHI_API DynamicRHI* gDynamicRHI = nullptr;
+
 }
