@@ -117,6 +117,7 @@ namespace CE
         void* rawData = nullptr;
         SIZE_T byteSize = 0;
         u32 pointSize = 14;
+        String fontName = "";
 
         void* fontData = nullptr;
     };

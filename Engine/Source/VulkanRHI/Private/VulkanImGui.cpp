@@ -78,6 +78,7 @@ namespace CE
                 auto numBytes = preloadFontConfig->preloadFonts[i].byteSize;
                 char* fontData = new char[numBytes];
                 memcpy(fontData, preloadFontConfig->preloadFonts[i].fontData, numBytes);
+                io.Fonts->AddFontFromMemoryCompressedTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
             }
         }
 
