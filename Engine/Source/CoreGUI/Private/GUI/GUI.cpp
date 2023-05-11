@@ -117,5 +117,14 @@ namespace CE::GUI
         ImGui::PopStyleColor(count);
     }
 
+#pragma region Widgets
+
+    COREGUI_API bool Button(const String& label, const Vec2& size, ButtonFlags flags)
+    {
+        return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
+    }
+
+#pragma endregion
+
 } // namespace CE
 

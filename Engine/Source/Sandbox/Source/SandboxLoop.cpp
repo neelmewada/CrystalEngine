@@ -173,9 +173,15 @@ void SandboxLoop::RunLoop()
             }
 
             static bool shown1 = true;
-            if (GUI::BeginWindow("My Window", &shown1))
+            if (shown1)
             {
-
+                GUI::BeginWindow("My Window", &shown1);
+                
+                if (GUI::Button("Click Me"))
+                {
+                    CE_LOG(Info, All, "Clicked!");
+                }
+                
                 GUI::EndWindow();
             }
         }

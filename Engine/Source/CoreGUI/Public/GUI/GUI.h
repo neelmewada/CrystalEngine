@@ -40,7 +40,7 @@ namespace CE::GUI
 
 #pragma region Widgets
 
-    
+    COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
 #pragma endregion
 
