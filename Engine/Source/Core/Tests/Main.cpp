@@ -1121,6 +1121,10 @@ TEST(Serialization, StructuredStream)
     outStream << StructuredStream::EndMap;
     memoryStream.Write('\0'); // Null terminator
     
+    memoryStream.Seek(0); // Reset to start
+    JsonStreamInputFormatter inFormatter{memoryStream}; // Json Input
+    StructuredStream inStream{inFormatter};
+    
     memoryStream.Close();
     
     TEST_END;

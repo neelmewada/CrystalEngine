@@ -1,6 +1,10 @@
 
 include_guard(GLOBAL)
 
+# Set defaults before loading any PAL_*.cmake
+ce_set(PAL_PLATFORM_IS_MAC 0)
+ce_set(PAL_PLATFORM_IS_WINDOWS 0)
+
 # Get platform name maps
 file(GLOB detection_files "CMake/Platform/*/PALDetection_*.cmake")
 foreach(detection_file ${detection_files})
