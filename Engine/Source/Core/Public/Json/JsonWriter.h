@@ -284,20 +284,6 @@ namespace CE
             return !valueStack.IsEmpty() && valueStack.GetLast() == JsonValueType::Array;
         }
         
-    protected:
-
-        bool WriteCommaIfNeeded()
-        {
-            if (prevToken == JsonToken::CurlyClose || prevToken == JsonToken::SquareClose ||
-                prevToken == JsonToken::Number || prevToken == JsonToken::String || prevToken == JsonToken::True ||
-                prevToken == JsonToken::False || prevToken == JsonToken::Null)
-            {
-                WritePolicy::WriteChar(stream, ',');
-                return true;
-            }
-            return false;
-        }
-
         bool WriteIdentifier(const String& identifier)
         {
             if (!valueStack.IsEmpty() && valueStack.GetLast() != JsonValueType::Object)
@@ -315,6 +301,20 @@ namespace CE
 
             prevToken = JsonToken::Colon;
             return true;
+        }
+        
+    protected:
+
+        bool WriteCommaIfNeeded()
+        {
+            if (prevToken == JsonToken::CurlyClose || prevToken == JsonToken::SquareClose ||
+                prevToken == JsonToken::Number || prevToken == JsonToken::String || prevToken == JsonToken::True ||
+                prevToken == JsonToken::False || prevToken == JsonToken::Null)
+            {
+                WritePolicy::WriteChar(stream, ',');
+                return true;
+            }
+            return false;
         }
 
         FORCE_INLINE bool CanWriteObjectStartWithoutIdentifier() const

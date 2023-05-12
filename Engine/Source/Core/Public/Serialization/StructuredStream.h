@@ -46,6 +46,7 @@ namespace CE
     private:
         StructuredStreamFormatter& formatter;
         
+        StructuredStreamInstruction pendingInstruction = Null;
     };
 
     // Exceptions

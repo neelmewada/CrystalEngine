@@ -1104,6 +1104,17 @@ TEST(Serialization, StructuredStream)
             outStream << "StringVal";
             outStream << false;
             outStream << 12345;
+            
+            outStream << StructuredStream::BeginMap;
+            {
+                outStream << StructuredStream::Key << "item0";
+                outStream << StructuredStream::Value << "some value";
+                outStream << StructuredStream::Key << "item1";
+                outStream << StructuredStream::Null;
+                outStream << StructuredStream::Key << "item2";
+                outStream << StructuredStream::Value << true;
+            }
+            outStream << StructuredStream::EndMap;
         }
         outStream << StructuredStream::EndArray;
     }

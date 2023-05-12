@@ -42,17 +42,54 @@ namespace CE
         return true;
     }
 
-    void JsonStreamOutputFormatter::EnterMap(const String& identifier)
+    void JsonStreamOutputFormatter::EnterMap()
     {
-        if (identifier.IsEmpty())
-            writer.WriteObjectStart();
-        else
-            writer.WriteObjectStart(identifier);
+        writer.WriteObjectStart();
     }
 
     void JsonStreamOutputFormatter::ExitMap()
     {
         writer.WriteObjectClose();
+    }
+
+    void JsonStreamOutputFormatter::EnterArray()
+    {
+        writer.WriteArrayStart();
+    }
+
+    void JsonStreamOutputFormatter::ExitArray()
+    {
+        writer.WriteArrayClose();
+    }
+
+    void JsonStreamOutputFormatter::EnterField(const String& identifier)
+    {
+        writer.WriteIdentifier(identifier);
+    }
+
+    void JsonStreamOutputFormatter::ExitField()
+    {
+        
+    }
+
+    void JsonStreamOutputFormatter::EnterStringValue(const String& value)
+    {
+        writer.WriteValue(value);
+    }
+
+    void JsonStreamOutputFormatter::EnterNumberValue(f64 value)
+    {
+        writer.WriteValue(value);
+    }
+
+    void JsonStreamOutputFormatter::EnterBoolValue(bool value)
+    {
+        writer.WriteValue(value);
+    }
+
+    void JsonStreamOutputFormatter::EnterNullValue()
+    {
+        writer.WriteNull();
     }
     
 } // namespace CE
