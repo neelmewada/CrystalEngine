@@ -5,7 +5,7 @@ namespace CE
 {
 
     JsonStreamOutputFormatter::JsonStreamOutputFormatter(Stream& stream)
-        : stream(stream), currentEntry({}), writer(PrettyJsonWriter::Create(&stream))
+        : stream(stream), writer(PrettyJsonWriter::Create(&stream))
     {
         if (!stream.CanWrite())
             throw StructuredStreamFormatterException("JsonStreamOutputFormatter passed with a stream that cannot be written to!");
@@ -39,12 +39,20 @@ namespace CE
 
     bool JsonStreamOutputFormatter::IsRoot()
     {
-        return currentEntry.IsRootEntry();
+        return true;
     }
 
     void JsonStreamOutputFormatter::EnterMap(const String& identifier)
     {
-        
+        if (identifier.IsEmpty())
+            writer.WriteObjectStart();
+        else
+            writer.WriteObjectStart(identifier);
+    }
+
+    void JsonStreamOutputFormatter::ExitMap()
+    {
+        writer.WriteObjectClose();
     }
     
 } // namespace CE

@@ -2,6 +2,12 @@
 #include "EditorCore.h"
 
 #include <PAL/Common/PlatformSystemIncludes.h>
+
+#if PLATFORM_WINDOWS
+#else
+#   define __EMULATE_UUID
+#endif
+
 #include <dxc/dxcapi.h>
 
 #include <locale>

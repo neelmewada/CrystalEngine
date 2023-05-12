@@ -30,8 +30,7 @@ namespace CE
         virtual bool IsRoot() = 0;
 
         virtual void EnterMap(const String& identifier = "") = 0;
-        
-        virtual void Exit() = 0;
+        virtual void ExitMap() = 0;
     };
 
     class CORE_API StructuredStreamFormatterException : public Exception

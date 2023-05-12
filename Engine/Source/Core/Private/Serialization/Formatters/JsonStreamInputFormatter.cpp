@@ -5,7 +5,7 @@ namespace CE
 {
     
     JsonStreamInputFormatter::JsonStreamInputFormatter(Stream& stream)
-        : stream(stream), currentEntry({})
+        : stream(stream)
     {
         if (!stream.CanRead())
             throw StructuredStreamFormatterException("JsonStreamInputFormatter passed with a stream that cannot be written to!");
@@ -41,8 +41,9 @@ namespace CE
 
     bool JsonStreamInputFormatter::IsRoot()
     {
-        currentEntry = StructuredStream::Array({});
-        return currentEntry.IsRootEntry();
+        return true;
+        //currentEntry = StructuredStream::Array({});
+        //return currentEntry.IsRootEntry();
     }
     
 }

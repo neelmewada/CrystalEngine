@@ -57,6 +57,7 @@ endif()
 
 ce_set(PAL_PLATFORM_IS_64_BIT 1)
 ce_set(PAL_PLATFORM_IS_WINDOWS 1)
+ce_set(PAL_PLATFORM_IS_MAC 0)
 
 add_compile_definitions(PLATFORM_WINDOWS=1)
 add_compile_definitions(IS_64BIT=1)

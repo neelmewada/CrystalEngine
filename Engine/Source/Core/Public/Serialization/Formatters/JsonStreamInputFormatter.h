@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 namespace CE
 {
@@ -22,7 +22,7 @@ namespace CE
     private:
         Stream& stream;
         JsonValue* internalValue = nullptr;
-        StructuredStreamEntry& currentEntry;
+        //StructuredStreamEntry& currentEntry;
     };
 
     

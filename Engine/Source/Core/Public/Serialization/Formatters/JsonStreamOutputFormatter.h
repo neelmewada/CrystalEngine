@@ -20,12 +20,12 @@ namespace CE
         bool IsRoot() override;
 
         void EnterMap(const String& identifier) override;
+        void ExitMap() override;
 
     private:
         PrettyJsonWriter writer;
         
         Stream& stream;
-        StructuredStreamEntry& currentEntry;
     };
 
     

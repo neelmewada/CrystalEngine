@@ -37,7 +37,7 @@ namespace CE
         switch (writeInstruction)
         {
         case BeginMap: formatter.EnterMap(); break;
-        case EndMap: break;
+        case EndMap: formatter.ExitMap(); break;
         case BeginArray: break;
         case EndArray: break;
         }

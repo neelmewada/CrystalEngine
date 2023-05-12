@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "StructuredStreamEntryPrivate.h"
 
@@ -35,6 +35,9 @@ namespace CE
         StructuredStreamField()
             : isNull(true)
         {}
+        
+        ~StructuredStreamField()
+        {}
 
         bool IsField() override
         {
@@ -44,12 +47,11 @@ namespace CE
     protected:
         void Clear()
         {
-            memset(this, 0, sizeof(*this));
+            memset((void*)&stringValue, 0, sizeof(String) + 4 * sizeof(bool));
         }
 
         void Copy(const StructuredStreamField& copy)
         {
-            Clear();
             this->identifier = copy.identifier;
             if (copy.isString)
                 this->stringValue = copy.stringValue;

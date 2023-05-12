@@ -11,6 +11,7 @@ namespace CE
     public:
         enum StructuredStreamInstruction
         {
+            Null,
             BeginMap,
             EndMap,
             BeginArray,
