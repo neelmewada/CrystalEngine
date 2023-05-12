@@ -29,6 +29,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ThirdParty::dxcompiler
         PUBLIC
             CE::Core
+            CE::System
     RUNTIME_DEPENDENCIES
         dxcompiler
 )

@@ -81,6 +81,10 @@ namespace CE::Editor
 			wcharArgs.Add(arg.data());
 		}
 
+		wcharArgs.AddRange({
+			L"-spirv"
+		});
+
 		CComPtr<IDxcResult> results;
 		impl->compiler->Compile(
 			&buffer,                // Source buffer.

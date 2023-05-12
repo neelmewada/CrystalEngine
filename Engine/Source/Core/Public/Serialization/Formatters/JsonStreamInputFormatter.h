@@ -1,15 +1,15 @@
-#pragma once
+﻿#pragma once
 
 namespace CE
 {
-    class Stream;
+    class JsonValue;
     class StructuredStream;
 
-    class CORE_API JsonStreamOutputFormatter : public StructuredStreamFormatter
+    class CORE_API JsonStreamInputFormatter : public StructuredStreamFormatter
     {
     public:
-        JsonStreamOutputFormatter(Stream& stream);
-        ~JsonStreamOutputFormatter();
+        JsonStreamInputFormatter(Stream& stream);
+        ~JsonStreamInputFormatter();
         
         Stream& GetUnderlyingStream() override;
         bool CanRead() override;
@@ -18,15 +18,12 @@ namespace CE
         bool IsValid() override;
 
         bool IsRoot() override;
-
-        void EnterMap(const String& identifier) override;
-
-    private:
-        PrettyJsonWriter writer;
         
+    private:
         Stream& stream;
+        JsonValue* internalValue = nullptr;
         StructuredStreamEntry& currentEntry;
     };
 
     
-} // namespace CE
+}

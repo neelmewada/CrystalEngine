@@ -53,7 +53,7 @@ namespace CE
     typedef HashMap<String, JsonValue*> JsonObject;
     typedef Array<JsonValue*> JsonArray;
 
-    class CORE_API JsonValue
+    class CORE_API JsonValue final
     {
     public:
         // Null value constructor

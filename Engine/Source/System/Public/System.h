@@ -2,46 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Application/Application.h"
 
-// Configs
-#include "Config/ConfigBase.h"
-#include "Config/PluginConfig.h"
-#include "Config/ConfigManager.h"
-
-#include "Plugin/PluginManager.h"
-
-// RHI
-#include "RHI/RHI.h"
-
-// Game Framework
-#include "GameFramework/GameFramework.h"
-
-// Assets
-#include "Asset/AssetIO.h"
-#include "Asset/Asset.h"
-#include "Asset/AssetDatabase.h"
-
-#include "Asset/TextureAsset.h"
-
-// Resources
-#include "GameFramework/ResourceObject.h"
-#include "GameFramework/Resources/Texture.h"
-
-namespace CE
-{
-
-    class SYSTEM_API SystemModule : public Module
-    {
-    public:
-
-        void StartupModule() override;
-
-        void ShutdownModule() override;
-
-        void RegisterTypes() override;
-
-    };
-    
-} // namespace CE
+#include "Engine/Asset.h"
+#include "Engine/Shader.h"
 

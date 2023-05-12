@@ -1064,6 +1064,57 @@ TEST(Serialization, BasicStreams)
     TEST_END;
 }
 
+const char Serialization_StructuredStream_Test_Json[] = R"([
+	{
+		"some_array": 
+		[
+			"child0",
+			123,
+			42.212,
+			false
+		],
+		"name": "Some name"
+	},
+	"item0",
+	42.212
+])";
+TEST(Serialization, StructuredStream)
+{
+    TEST_BEGIN;
+
+    auto memoryStream = MemoryStream(2048);
+    memoryStream.SetAsciiMode(true);
+
+    // 1. Write
+    JsonStreamOutputFormatter outFormatter{memoryStream}; // Json Output
+    StructuredStream outStream{outFormatter};
+
+    outStream << StructuredStream::BeginMap;
+    {
+        outStream << StructuredStream::Key << "name";
+        outStream << StructuredStream::Value << "Some Name";
+
+        outStream << StructuredStream::Key << "number";
+        outStream << StructuredStream::Value << 1242.42;
+
+        outStream << StructuredStream::Key << "array";
+        outStream << StructuredStream::Value;
+        outStream << StructuredStream::BeginArray;
+        {
+            outStream << "StringVal";
+            outStream << false;
+            outStream << 12345;
+        }
+        outStream << StructuredStream::EndArray;
+    }
+    outStream << StructuredStream::EndMap;
+    memoryStream.Write('\0'); // Null terminator
+    
+    memoryStream.Close();
+    
+    TEST_END;
+}
+
 #pragma endregion
 
 /**********************************************

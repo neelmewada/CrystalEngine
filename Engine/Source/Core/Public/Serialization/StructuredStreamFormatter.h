@@ -24,7 +24,21 @@ namespace CE
 
         virtual bool CanRead() = 0;
         virtual bool CanWrite() = 0;
+
+        virtual bool IsValid() = 0;
+
+        virtual bool IsRoot() = 0;
+
+        virtual void EnterMap(const String& identifier = "") = 0;
         
+        virtual void Exit() = 0;
+    };
+
+    class CORE_API StructuredStreamFormatterException : public Exception
+    {
+    public:
+        StructuredStreamFormatterException(const String& message) : Exception(message)
+        {}
     };
     
 } // namespace CE

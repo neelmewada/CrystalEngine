@@ -27,7 +27,7 @@ endif()
 ######################################
 # System Modules
 
-#add_subdirectory(Source/System)
+add_subdirectory(Source/System)
 
 #add_subdirectory(Source/GameSystem)
 #add_subdirectory(Source/GameLauncher)

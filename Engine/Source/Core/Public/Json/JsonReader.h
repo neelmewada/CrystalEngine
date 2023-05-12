@@ -3,6 +3,7 @@
 
 namespace CE
 {
+    class Stream;
 
     enum class JsonParseError
     {

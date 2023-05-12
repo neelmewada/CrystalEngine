@@ -17,24 +17,23 @@ namespace CE::StructuredStreamPrivate
         String key = "";
     };
 
-    class EntryPosition
+    class EntryBase
     {
     public:
-
-    protected:
-        Array<EntryKey> positionStack{};
-
-        friend class StructuredStream;
-    };
-
-    class EntryBase : protected EntryPosition
-    {
-    public:
-        EntryBase(StructuredStream& stream) : stream(stream)
+        EntryBase()
+        {}
+        virtual ~EntryBase()
         {}
 
+        bool IsRootEntry() const
+        {
+            return positionStack.IsEmpty();
+        }
+
     protected:
-        StructuredStream& stream;
+        friend class StructuredStream;
+        
+        Array<EntryKey> positionStack{};
     };
     
 }

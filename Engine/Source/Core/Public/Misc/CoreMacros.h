@@ -55,11 +55,11 @@ namespace CE::Internal
 {
 
     template<typename T, SIZE_T N>
-    inline SIZE_T _CountOf(const T (&arr)[N])
+    inline SIZE_T CountOf(const T (&arr)[N])
     {
         return N;
     }
 }
 
-#define COUNTOF(x) CE::Internal::_CountOf(x)
+#define COUNTOF(x) CE::Internal::CountOf(x)
 

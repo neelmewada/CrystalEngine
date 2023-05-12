@@ -64,10 +64,12 @@
 #include "Serialization/MemoryStream.h"
 #include "Serialization/FileStream.h"
 
-// Json
+// Structured Streams
 #include "Json/Json.h"
-
 #include "Serialization/StructuredStream.h"
+#include "Serialization/Formatters/JsonStreamOutputFormatter.h"
+#include "Serialization/Formatters/JsonStreamInputFormatter.h"
+
 
 // RTTI & Object
 #include "RTTI/RTTI.h"

@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ShaderCompiler/ShaderCompiler.h"
+#include "Shader/ShaderCompiler.h"
 
 namespace CE::Editor
 {
