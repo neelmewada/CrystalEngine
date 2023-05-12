@@ -45,18 +45,49 @@ function(ce_validate_package PACKAGE_NAME PACKAGE_SHORT_NAME)
 
 endfunction()
 
-# We don't need Qt anymore
+#############################################
+# Find Packages
 
-#include("${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/FindQt.cmake")
+# Utils
+find_package(xxHash REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(yaml REQUIRED)
+find_package(mINI REQUIRED)
+find_package(cxxopts REQUIRED)
+find_package(efsw REQUIRED)
+find_package(zip REQUIRED)
+find_package(crcpp REQUIRED)
+find_package(stb REQUIRED)
 
-# set(QT6_COMPONENTS
-#     Core
-#     Concurrent
-#     Gui
-#     Svg
-#     Widgets
-#     Xml
-# )
+# SDL2
+find_package(sdl REQUIRED)
 
-#find_package(Qt6 REQUIRED COMPONENTS ${QT6_COMPONENTS})
+# ImGui
+find_package(imgui REQUIRED)
+
+# Vulkan
+if(${PAL_TRAIT_VULKAN_SUPPORTED})
+    find_package(Vulkan REQUIRED 
+        COMPONENTS dxc
+    )
+
+    cmake_path(GET Vulkan_dxc_LIBRARY FILENAME Vulkan_dxc_lib)
+
+    set(Vulkan_RUNTIME_DEPS "")
+
+    if(${PAL_PLATFORM_IS_WINDOWS})
+        set(Vulkan_BIN_DIR "$ENV{VULKAN_SDK}/Bin")
+        list(APPEND Vulkan_RUNTIME_DEPS "VkLayer_khronos_validation.dll")
+    elseif(${PAL_PLATFORM_IS_MAC})
+        set(Vulkan_BIN_DIR "$ENV{VULKAN_SDK}/macOS/lib")
+    endif()
+
+    #list(APPEND Vulkan_RUNTIME_DEPS ${Vulkan_dxc_lib})
+    
+endif()
+
+# Metal
+if(${PAL_TRAIT_METAL_SUPPORTED})
+    find_package(metalcpp)
+endif()
 

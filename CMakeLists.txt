@@ -27,10 +27,12 @@ include(CMake/ThirdParty.cmake)
 include(CMake/Assets.cmake)
 include(CMake/Tests.cmake)
 include(CMake/ConfigIni.cmake)
+include(CMake/Shader.cmake)
 
 # Import 3rd Party libraries
 add_subdirectory(ThirdParty)
 
+# Setup Config Targets
 add_subdirectory(Config)
 
 # Build Engine
@@ -39,7 +41,6 @@ add_subdirectory(Engine)
 add_library(EditorTools INTERFACE)
 
 # Build Editor
-
 if(${PAL_TRAIT_BUILD_EDITOR})
     add_subdirectory(Editor)
 endif()

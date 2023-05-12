@@ -5,6 +5,9 @@ project(Engine)
 # Assets
 add_subdirectory(Assets)
 
+# Shaders
+add_subdirectory(Shaders)
+
 ######################################
 # Core Modules
 
