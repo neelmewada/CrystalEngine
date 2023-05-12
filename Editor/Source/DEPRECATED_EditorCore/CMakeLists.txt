@@ -1,14 +1,18 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(EditorLauncher CXX)
+project(EditorCore CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
-ce_add_target(${PROJECT_NAME} GUIAPP
+ce_add_target(${PROJECT_NAME} SHARED
+    AUTORTTI
+    AUTOMOC
+    AUTOUIC
+    AUTORCC
     NAMESPACE CE
     FOLDER Editor
-    PCHHEADER
-        PRIVATE
+    PCHHEADER 
+        PRIVATE 
             Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
@@ -26,11 +30,16 @@ ce_add_target(${PROJECT_NAME} GUIAPP
     BUILD_DEPENDENCIES
         PRIVATE
         PUBLIC
-            CE::EditorCore
-            CE::EditorSystem
-            CE::CrystalEditor
+            CE::QtComponents
+            CE::Core
+            CE::System
+            "ThirdParty::yaml"
     RUNTIME_DEPENDENCIES
-        qt
+        
 )
 
+
+if(${PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED})
+    add_subdirectory(Tests)
+endif()
 

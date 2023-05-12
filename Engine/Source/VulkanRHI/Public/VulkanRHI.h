@@ -29,7 +29,7 @@ namespace CE
         
     };
 
-    class VULKANRHI_API VulkanRHI : public DynamicRHI
+    class VULKANRHI_API VulkanRHI : public RHI::DynamicRHI
     {
     public:
         virtual ~VulkanRHI() = default;
@@ -46,39 +46,39 @@ namespace CE
             return vkInstance;
         }
         
-        virtual RHIGraphicsBackend GetGraphicsBackend() override;
+        virtual RHI::GraphicsBackend GetGraphicsBackend() override;
 
         // ************************************************
         // - Public API -
 
         // - Render Target -
 
-        virtual RHIRenderTarget* CreateRenderTarget(u32 width, u32 height, 
-            const RHIRenderTargetLayout& rtLayout) override;
+        virtual RHI::RenderTarget* CreateRenderTarget(u32 width, u32 height,
+            const RHI::RenderTargetLayout& rtLayout) override;
 
-        virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) override;
+        virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) override;
 
-        virtual RHIViewport* CreateViewport(PlatformWindow* window,
+        virtual RHI::Viewport* CreateViewport(PlatformWindow* window,
             u32 width, u32 height, bool isFullscreen,
-            const RHIRenderTargetLayout& rtLayout) override;
+            const RHI::RenderTargetLayout& rtLayout) override;
 
-        virtual void DestroyViewport(RHIViewport* viewport) override;
+        virtual void DestroyViewport(RHI::Viewport* viewport) override;
 
         // - Command List -
-        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIViewport* viewport) override;
+        virtual RHI::GraphicsCommandList* CreateGraphicsCommandList(RHI::Viewport* viewport) override;
 
-        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIRenderTarget* renderTarget) override;
+        virtual RHI::GraphicsCommandList* CreateGraphicsCommandList(RHI::RenderTarget* renderTarget) override;
 
-        virtual void DestroyCommandList(RHICommandList* commandList) override;
+        virtual void DestroyCommandList(RHI::CommandList* commandList) override;
 
-        virtual bool ExecuteCommandList(RHICommandList* commandList) override;
+        virtual bool ExecuteCommandList(RHI::CommandList* commandList) override;
 
-        virtual bool PresentViewport(RHIGraphicsCommandList* viewportCommandList) override;
+        virtual bool PresentViewport(RHI::GraphicsCommandList* viewportCommandList) override;
 
         // - Resources -
 
-        virtual RHIBuffer* CreateBuffer(const RHIBufferDesc& bufferDesc) override;
-        virtual void DestroyBuffer(RHIBuffer* buffer) override;
+        virtual RHI::Buffer* CreateBuffer(const RHI::BufferDesc& bufferDesc) override;
+        virtual void DestroyBuffer(RHI::Buffer* buffer) override;
 
     protected:
 

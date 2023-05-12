@@ -6,13 +6,16 @@
 
 namespace CE
 {
-    class RHIRenderTarget;
-    class RHIViewport;
-    class RHIRenderPass;
-    class RHICommandList;
-    class RHIGraphicsCommandList;
-
     class PlatformWindow;
+}
+
+namespace CE::RHI
+{
+    class RenderTarget;
+    class Viewport;
+    class RenderPass;
+    class CommandList;
+    class GraphicsCommandList;
 
     class CORERHI_API DynamicRHI
     {
@@ -28,50 +31,50 @@ namespace CE
         
         virtual void* GetNativeHandle() = 0;
 
-        virtual RHIGraphicsBackend GetGraphicsBackend() = 0;
+        virtual GraphicsBackend GetGraphicsBackend() = 0;
 
         // *******************************************
         // - Public API -
 
         // - Render Target -
 
-        virtual RHIRenderTarget* CreateRenderTarget(u32 width, u32 height, 
-            const RHIRenderTargetLayout& rtLayout) = 0;
+        virtual RenderTarget* CreateRenderTarget(u32 width, u32 height, 
+            const RenderTargetLayout& rtLayout) = 0;
 
-        virtual void DestroyRenderTarget(RHIRenderTarget* renderTarget) = 0;
+        virtual void DestroyRenderTarget(RenderTarget* renderTarget) = 0;
 
-        virtual RHIViewport* CreateViewport(PlatformWindow* window,
+        virtual RHI::Viewport* CreateViewport(PlatformWindow* window,
             u32 width, u32 height, bool isFullscreen,
-            const RHIRenderTargetLayout& rtLayout) = 0;
+            const RHI::RenderTargetLayout& rtLayout) = 0;
 
-        virtual void DestroyViewport(RHIViewport* viewport) = 0;
+        virtual void DestroyViewport(Viewport* viewport) = 0;
 
         // - Command List -
 
-        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIViewport* viewport) = 0;
-        virtual RHIGraphicsCommandList* CreateGraphicsCommandList(RHIRenderTarget* renderTarget) = 0;
-        virtual void DestroyCommandList(RHICommandList* commandList) = 0;
+        virtual GraphicsCommandList* CreateGraphicsCommandList(Viewport* viewport) = 0;
+        virtual GraphicsCommandList* CreateGraphicsCommandList(RenderTarget* renderTarget) = 0;
+        virtual void DestroyCommandList(CommandList* commandList) = 0;
 
-        virtual bool ExecuteCommandList(RHICommandList* commandList) = 0;
+        virtual bool ExecuteCommandList(CommandList* commandList) = 0;
 
-        virtual bool PresentViewport(RHIGraphicsCommandList* viewportCommandList) = 0;
+        virtual bool PresentViewport(GraphicsCommandList* viewportCommandList) = 0;
 
         // - Resources -
 
-        virtual RHIBuffer* CreateBuffer(const RHIBufferDesc& bufferDesc) = 0;
-        virtual void DestroyBuffer(RHIBuffer* buffer) = 0;
+        virtual Buffer* CreateBuffer(const BufferDesc& bufferDesc) = 0;
+        virtual void DestroyBuffer(Buffer* buffer) = 0;
 
     };
 
     CORERHI_API extern DynamicRHI* gDynamicRHI;
 
-    class CORERHI_API RHIRenderPass : public RHIResource
+    class CORERHI_API RenderPass : public Resource
     {
     protected:
-        RHIRenderPass() : RHIResource(RHIResourceType::RenderPass)
+        RenderPass() : Resource(ResourceType::RenderPass)
         {}
     public:
-        virtual ~RHIRenderPass() = default;
+        virtual ~RenderPass() = default;
 
         // - Public API -
 
@@ -80,36 +83,36 @@ namespace CE
     };
 
     /// A render target that is drawn to by GPU. It is automatically created for you in case of Viewport.
-    class CORERHI_API RHIRenderTarget : public RHIResource
+    class CORERHI_API RenderTarget : public Resource
     {
     protected:
-        RHIRenderTarget() : RHIResource(RHIResourceType::RenderTarget)
+        RenderTarget() : Resource(ResourceType::RenderTarget)
         {}
     public:
-        virtual ~RHIRenderTarget() = default;
+        virtual ~RenderTarget() = default;
 
         // - Public API -
 
         virtual bool IsViewportRenderTarget() = 0;
 
-        virtual RHIRenderPass* GetRenderPass() = 0;
+        virtual RenderPass* GetRenderPass() = 0;
 
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) = 0;
         
     };
 
     /// A viewport used to draw to & present from.
-    class CORERHI_API RHIViewport : public RHIResource
+    class CORERHI_API Viewport : public Resource
     {
     protected:
-        RHIViewport() : RHIResource(RHIResourceType::Viewport)
+        Viewport() : Resource(ResourceType::Viewport)
         {}
     public:
-        virtual ~RHIViewport() = default;
+        virtual ~Viewport() = default;
 
         // - Public API -
 
-        virtual RHIRenderTarget* GetRenderTarget() = 0;
+        virtual RenderTarget* GetRenderTarget() = 0;
 
         virtual void SetClearColor(const Color& color) = 0;
 
@@ -122,34 +125,34 @@ namespace CE
     *   RHI Command List
     */
 
-    class CORERHI_API RHICommandList : public RHIResource
+    class CORERHI_API CommandList : public Resource
     {
     protected:
-        RHICommandList() : RHIResource(RHIResourceType::CommandList)
+        CommandList() : Resource(ResourceType::CommandList)
         {}
     public:
-        virtual ~RHICommandList() = default;
+        virtual ~CommandList() = default;
 
         // - Public API -
 
-        virtual RHICommandListType GetCommandListType() = 0;
+        virtual CommandListType GetCommandListType() = 0;
 
 
 
     };
 
-    class CORERHI_API RHIGraphicsCommandList : public RHICommandList
+    class CORERHI_API GraphicsCommandList : public CommandList
     {
     protected:
-        RHIGraphicsCommandList() : RHICommandList()
+        GraphicsCommandList() : CommandList()
         {}
 
     public:
-        virtual ~RHIGraphicsCommandList() = default;
+        virtual ~GraphicsCommandList() = default;
 
         // - Public API -
 
-        virtual RHICommandListType GetCommandListType() override final { return RHICommandListType::Graphics; }
+        virtual CommandListType GetCommandListType() override final { return CommandListType::Graphics; }
 
         // - Command List API -
 
@@ -158,7 +161,7 @@ namespace CE
 
         // - ImGui Setup -
 
-        virtual bool InitImGui(RHIFontPreloadConfig* preloadFonts = nullptr) = 0;
+        virtual bool InitImGui(FontPreloadConfig* preloadFonts = nullptr) = 0;
 
         virtual void ShutdownImGui() = 0;
 

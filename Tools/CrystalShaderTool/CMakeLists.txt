@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(ShaderCompiler)
+project(CrystalShaderTool)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
@@ -12,10 +12,10 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
         PRIVATE ${PROJECT_NAME_LOWERCASE}_sources.cmake
     BUILD_DEPENDENCIES
         PRIVATE
-            CE::Core
-            CE::System
+            CE::EditorCore
             ThirdParty::cxxopts
     RUNTIME_DEPENDENCIES
-
+        
 )
+
 

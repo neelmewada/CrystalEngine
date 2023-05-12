@@ -6,18 +6,18 @@ namespace CE
 {
     class PlatformWindow;
 
-    class VulkanViewport : public RHIViewport
+    class VulkanViewport : public RHI::Viewport
     {
     public:
         VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
             u32 width, u32 height,
-            bool isFullscreen, const RHIRenderTargetLayout& rtLayout);
+            bool isFullscreen, const RHI::RenderTargetLayout& rtLayout);
 #if PAL_TRAIT_QT_SUPPORTED
-        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RHIRenderTargetLayout& rtLayout);
+        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RenderTargetLayout& rtLayout);
 #endif
         virtual ~VulkanViewport();
 
-        virtual RHIRenderTarget* GetRenderTarget() override;
+        virtual RHI::RenderTarget* GetRenderTarget() override;
 
         virtual void Rebuild() override;
         

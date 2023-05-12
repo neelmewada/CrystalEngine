@@ -52,32 +52,32 @@ void SandboxLoop::PostInit()
     // Load non-important modules
     LoadCoreModules();
 
-    gDynamicRHI->Initialize();
+    RHI::gDynamicRHI->Initialize();
 
     AppInit();
 
-    gDynamicRHI->PostInitialize();
+    RHI::gDynamicRHI->PostInitialize();
 
     auto mainWindow = PlatformApplication::Get()->GetMainWindow();
     u32 width = 0, height = 0;
     mainWindow->GetDrawableWindowSize(&width, &height);
 
-    RHIRenderTargetColorOutputDesc colorDesc{};
-    colorDesc.loadAction = RHIRenderPassLoadAction::Clear;
-    colorDesc.storeAction = RHIRenderPassStoreAction::Store;
+    RHI::RenderTargetColorOutputDesc colorDesc{};
+    colorDesc.loadAction = RHI::RenderPassLoadAction::Clear;
+    colorDesc.storeAction = RHI::RenderPassStoreAction::Store;
     colorDesc.sampleCount = 1;
-    colorDesc.preferredFormat = RHIColorFormat::Auto;
+    colorDesc.preferredFormat = RHI::ColorFormat::Auto;
 
-    RHIRenderTargetLayout rtLayout{};
+    RHI::RenderTargetLayout rtLayout{};
     rtLayout.backBufferCount = 2;
     rtLayout.numColorOutputs = 1;
     rtLayout.colorOutputs[0] = colorDesc;
     rtLayout.presentationRTIndex = 0;
-    rtLayout.depthStencilFormat = RHIDepthStencilFormat::None;
+    rtLayout.depthStencilFormat = RHI::DepthStencilFormat::None;
 
-    viewport = gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
+    viewport = RHI::gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
 
-    cmdList = gDynamicRHI->CreateGraphicsCommandList(viewport);
+    cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 
     cmdList->InitImGui();
 }
@@ -86,14 +86,14 @@ void SandboxLoop::PreShutdown()
 {
     cmdList->ShutdownImGui();
 
-    gDynamicRHI->DestroyCommandList(cmdList);
-    gDynamicRHI->DestroyViewport(viewport);
+    RHI::gDynamicRHI->DestroyCommandList(cmdList);
+    RHI::gDynamicRHI->DestroyViewport(viewport);
 
-    gDynamicRHI->PreShutdown();
+    RHI::gDynamicRHI->PreShutdown();
 
     AppPreShutdown();
 
-    gDynamicRHI->Shutdown();
+    RHI::gDynamicRHI->Shutdown();
 
     // Unload modules
 
@@ -153,9 +153,7 @@ void SandboxLoop::RunLoop()
         cmdList->Begin();
         cmdList->ImGuiNewFrame();
 
-        //GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(0, 0));
         GUI::BeginWindow("DockSpaceWindow", nullptr, GUI::WF_FullScreen | GUI::WF_MenuBar | GUI::WF_NoPadding);
-        //GUI::PopStyleVar(1);
         {
             GUI::DockSpace("MainDockSpace");
 
@@ -192,9 +190,9 @@ void SandboxLoop::RunLoop()
 
         cmdList->ImGuiPlatformUpdate();
 
-        if (gDynamicRHI->ExecuteCommandList(cmdList))
+        if (RHI::gDynamicRHI->ExecuteCommandList(cmdList))
         {
-            gDynamicRHI->PresentViewport(cmdList);
+            RHI::gDynamicRHI->PresentViewport(cmdList);
         }
     }
 }

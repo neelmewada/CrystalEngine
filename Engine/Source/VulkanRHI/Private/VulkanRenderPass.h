@@ -5,7 +5,7 @@
 namespace CE
 {
     
-    class VulkanRenderPass : public RHIRenderPass
+    class VulkanRenderPass : public RHI::RenderPass
     {
     public:
         VulkanRenderPass(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout);

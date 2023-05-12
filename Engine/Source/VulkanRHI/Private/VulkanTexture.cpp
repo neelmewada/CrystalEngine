@@ -5,172 +5,172 @@
 
 namespace CE
 {
-    VkFormat RHITextureFormatToVkFormat(RHITextureFormat format)
+    VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
     {
         switch (format)
         {
-        case RHITextureFormat::R8_UNORM:
+        case RHI::TextureFormat::R8_UNORM:
             return VK_FORMAT_R8_UNORM;
-        case RHITextureFormat::R8_SNORM:
+        case RHI::TextureFormat::R8_SNORM:
             return VK_FORMAT_R8_SNORM;
-        case RHITextureFormat::R8_SRGB:
+        case RHI::TextureFormat::R8_SRGB:
             return VK_FORMAT_R8_SRGB;
 
-        case RHITextureFormat::R8G8B8A8_SRGB:
+        case RHI::TextureFormat::R8G8B8A8_SRGB:
             return VK_FORMAT_R8G8B8A8_SRGB;
-        case RHITextureFormat::R8G8B8A8_UNORM:
+        case RHI::TextureFormat::R8G8B8A8_UNORM:
             return VK_FORMAT_R8G8B8A8_UNORM;
-        case RHITextureFormat::R8G8B8A8_SNORM:
+        case RHI::TextureFormat::R8G8B8A8_SNORM:
             return VK_FORMAT_R8G8B8A8_SNORM;
 
-        case RHITextureFormat::B8G8R8A8_SRGB:
+        case RHI::TextureFormat::B8G8R8A8_SRGB:
             return VK_FORMAT_B8G8R8A8_SRGB;
-        case RHITextureFormat::B8G8R8A8_UNORM:
+        case RHI::TextureFormat::B8G8R8A8_UNORM:
             return VK_FORMAT_B8G8R8A8_UNORM;
-        case RHITextureFormat::B8G8R8A8_SNORM:
+        case RHI::TextureFormat::B8G8R8A8_SNORM:
             return VK_FORMAT_B8G8R8A8_SNORM;
 
-        case RHITextureFormat::R8G8B8_UNORM:
+        case RHI::TextureFormat::R8G8B8_UNORM:
             return VK_FORMAT_R8G8B8_UNORM;
-        case RHITextureFormat::R8G8B8_SNORM:
+        case RHI::TextureFormat::R8G8B8_SNORM:
             return VK_FORMAT_R8G8B8_SNORM;
-        case RHITextureFormat::R8G8B8_SRGB:
+        case RHI::TextureFormat::R8G8B8_SRGB:
             return VK_FORMAT_R8G8B8_SRGB;
-        case RHITextureFormat::R16_UNORM:
+        case RHI::TextureFormat::R16_UNORM:
             return VK_FORMAT_R16_UNORM;
-        case RHITextureFormat::R16_SNORM:
+        case RHI::TextureFormat::R16_SNORM:
             return VK_FORMAT_R16_SNORM;
-        case RHITextureFormat::R16_SFLOAT:
+        case RHI::TextureFormat::R16_SFLOAT:
             return VK_FORMAT_R16_SFLOAT;
-        case RHITextureFormat::R32_UINT:
+        case RHI::TextureFormat::R32_UINT:
             return VK_FORMAT_R32_UINT;
-        case RHITextureFormat::R32_SINT:
+        case RHI::TextureFormat::R32_SINT:
             return VK_FORMAT_R32_SINT;
-        case RHITextureFormat::R32_SFLOAT:
+        case RHI::TextureFormat::R32_SFLOAT:
             return VK_FORMAT_R32_SFLOAT;
-        case RHITextureFormat::D32_SFLOAT:
+        case RHI::TextureFormat::D32_SFLOAT:
             return VK_FORMAT_D32_SFLOAT;
-        case RHITextureFormat::D32_SFLOAT_S8_UINT:
+        case RHI::TextureFormat::D32_SFLOAT_S8_UINT:
             return VK_FORMAT_D32_SFLOAT_S8_UINT;
-        case RHITextureFormat::D24_UNORM_S8_UINT:
+        case RHI::TextureFormat::D24_UNORM_S8_UINT:
             return VK_FORMAT_D24_UNORM_S8_UINT;
         }
         
         return VK_FORMAT_UNDEFINED;
     }
 
-    RHITextureFormat VkFormatToRHITextureFormat(VkFormat format)
+    RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format)
     {
         switch (format)
         {
         case VK_FORMAT_R8_UNORM:
-            return RHITextureFormat::R8_UNORM;
+            return RHI::TextureFormat::R8_UNORM;
         case VK_FORMAT_R8_SNORM:
-            return RHITextureFormat::R8_SNORM;
+            return RHI::TextureFormat::R8_SNORM;
         case VK_FORMAT_R8_SRGB:
-            return RHITextureFormat::R8_SRGB;
+            return RHI::TextureFormat::R8_SRGB;
 
         case VK_FORMAT_R8G8B8A8_SRGB:
-            return RHITextureFormat::R8G8B8A8_SRGB;
+            return RHI::TextureFormat::R8G8B8A8_SRGB;
         case VK_FORMAT_R8G8B8A8_UNORM:
-            return RHITextureFormat::R8G8B8A8_UNORM;
+            return RHI::TextureFormat::R8G8B8A8_UNORM;
         case VK_FORMAT_R8G8B8A8_SNORM:
-            return RHITextureFormat::R8G8B8A8_SNORM;
+            return RHI::TextureFormat::R8G8B8A8_SNORM;
 
         case VK_FORMAT_B8G8R8A8_SRGB:
-            return RHITextureFormat::B8G8R8A8_SRGB;
+            return RHI::TextureFormat::B8G8R8A8_SRGB;
         case VK_FORMAT_B8G8R8A8_UNORM:
-            return RHITextureFormat::B8G8R8A8_UNORM;
+            return RHI::TextureFormat::B8G8R8A8_UNORM;
         case VK_FORMAT_B8G8R8A8_SNORM:
-            return RHITextureFormat::B8G8R8A8_SNORM;
+            return RHI::TextureFormat::B8G8R8A8_SNORM;
 
         case VK_FORMAT_R8G8B8_UNORM:
-            return RHITextureFormat::R8G8B8_UNORM;
+            return RHI::TextureFormat::R8G8B8_UNORM;
         case VK_FORMAT_R8G8B8_SNORM:
-            return RHITextureFormat::R8G8B8_SNORM;
+            return RHI::TextureFormat::R8G8B8_SNORM;
         case VK_FORMAT_R8G8B8_SRGB:
-            return RHITextureFormat::R8G8B8_SRGB;
+            return RHI::TextureFormat::R8G8B8_SRGB;
 
         case VK_FORMAT_R16_UNORM:
-            return RHITextureFormat::R16_UNORM;
+            return RHI::TextureFormat::R16_UNORM;
         case VK_FORMAT_R16_SNORM:
-            return RHITextureFormat::R16_SNORM;
+            return RHI::TextureFormat::R16_SNORM;
         case VK_FORMAT_R16_SFLOAT:
-            return RHITextureFormat::R16_SFLOAT;
+            return RHI::TextureFormat::R16_SFLOAT;
 
         case VK_FORMAT_R32_UINT:
-            return RHITextureFormat::R32_UINT;
+            return RHI::TextureFormat::R32_UINT;
         case VK_FORMAT_R32_SINT:
-            return RHITextureFormat::R32_SINT;
+            return RHI::TextureFormat::R32_SINT;
         case VK_FORMAT_R32_SFLOAT:
-            return RHITextureFormat::R32_SFLOAT;
+            return RHI::TextureFormat::R32_SFLOAT;
 
         case VK_FORMAT_D32_SFLOAT:
-            return RHITextureFormat::D32_SFLOAT;
+            return RHI::TextureFormat::D32_SFLOAT;
         case VK_FORMAT_D32_SFLOAT_S8_UINT:
-            return RHITextureFormat::D32_SFLOAT_S8_UINT;
+            return RHI::TextureFormat::D32_SFLOAT_S8_UINT;
         case VK_FORMAT_D24_UNORM_S8_UINT:
-            return RHITextureFormat::D24_UNORM_S8_UINT;
+            return RHI::TextureFormat::D24_UNORM_S8_UINT;
         }
-        return RHITextureFormat::Undefined;
+        return RHI::TextureFormat::Undefined;
     }
 
-    u32 GetNumberOfChannelsForFormat(RHITextureFormat format, u32& outByteSizePerChannel)
+    u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
     {
         switch (format)
         {
-        case RHITextureFormat::R8_UNORM:
+        case RHI::TextureFormat::R8_UNORM:
             outByteSizePerChannel = 1;
             return 1;
-        case RHITextureFormat::R8_SNORM:
+        case RHI::TextureFormat::R8_SNORM:
             outByteSizePerChannel = 1;
             return 1;
-        case RHITextureFormat::R8_SRGB:
+        case RHI::TextureFormat::R8_SRGB:
             outByteSizePerChannel = 1;
             return 1;
-        case RHITextureFormat::R8G8B8A8_SRGB:
-            outByteSizePerChannel = 1;
-            return 4;
-        case RHITextureFormat::R8G8B8A8_UNORM:
+        case RHI::TextureFormat::R8G8B8A8_SRGB:
             outByteSizePerChannel = 1;
             return 4;
-        case RHITextureFormat::R8G8B8A8_SNORM:
+        case RHI::TextureFormat::R8G8B8A8_UNORM:
             outByteSizePerChannel = 1;
             return 4;
-        case RHITextureFormat::R8G8B8_UNORM:
+        case RHI::TextureFormat::R8G8B8A8_SNORM:
+            outByteSizePerChannel = 1;
+            return 4;
+        case RHI::TextureFormat::R8G8B8_UNORM:
             outByteSizePerChannel = 1;
             return 3;
-        case RHITextureFormat::R8G8B8_SNORM:
+        case RHI::TextureFormat::R8G8B8_SNORM:
             outByteSizePerChannel = 1;
             return 3;
-        case RHITextureFormat::R8G8B8_SRGB:
+        case RHI::TextureFormat::R8G8B8_SRGB:
             outByteSizePerChannel = 1;
             return 3;
-        case RHITextureFormat::R16_UNORM:
+        case RHI::TextureFormat::R16_UNORM:
             outByteSizePerChannel = 2;
             return 1;
-        case RHITextureFormat::R16_SNORM:
+        case RHI::TextureFormat::R16_SNORM:
             outByteSizePerChannel = 2;
             return 1;
-        case RHITextureFormat::R16_SFLOAT:
+        case RHI::TextureFormat::R16_SFLOAT:
             outByteSizePerChannel = 2;
             return 1;
-        case RHITextureFormat::R32_UINT:
+        case RHI::TextureFormat::R32_UINT:
             outByteSizePerChannel = 4;
             return 1;
-        case RHITextureFormat::R32_SINT:
+        case RHI::TextureFormat::R32_SINT:
             outByteSizePerChannel = 4;
             return 1;
-        case RHITextureFormat::R32_SFLOAT:
+        case RHI::TextureFormat::R32_SFLOAT:
             outByteSizePerChannel = 4;
             return 1;
-        case RHITextureFormat::D32_SFLOAT:
+        case RHI::TextureFormat::D32_SFLOAT:
             outByteSizePerChannel = 4;
             return 1;
-        case RHITextureFormat::D32_SFLOAT_S8_UINT:
+        case RHI::TextureFormat::D32_SFLOAT_S8_UINT:
             outByteSizePerChannel = 5;
             return 1;
-        case RHITextureFormat::D24_UNORM_S8_UINT:
+        case RHI::TextureFormat::D24_UNORM_S8_UINT:
             outByteSizePerChannel = 4;
             return 1;
         }
@@ -178,7 +178,7 @@ namespace CE
         return 0;
     }
 
-    VulkanTexture::VulkanTexture(VulkanDevice* device, const RHITextureDesc& desc)
+    VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc)
         : device(device)
     {
         this->width = desc.width;
@@ -194,16 +194,16 @@ namespace CE
         imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         switch (desc.dimension)
         {
-        case RHITextureDimension::Dim2D:
+        case RHI::TextureDimension::Dim2D:
             imageCI.imageType = VK_IMAGE_TYPE_2D;
             break;
-        case RHITextureDimension::Dim3D:
+        case RHI::TextureDimension::Dim3D:
             imageCI.imageType = VK_IMAGE_TYPE_3D;
             break;
-        case RHITextureDimension::Dim1D:
+        case RHI::TextureDimension::Dim1D:
             imageCI.imageType = VK_IMAGE_TYPE_1D;
             break;
-        case RHITextureDimension::DimCUBE:
+        case RHI::TextureDimension::DimCUBE:
             imageCI.imageType = VK_IMAGE_TYPE_2D;
         }
         
@@ -218,17 +218,17 @@ namespace CE
 
         this->vkFormat = imageCI.format;
         
-        if (EnumHasFlag(desc.usageFlags, RHITextureUsageFlags::SampledImage))
+        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::SampledImage))
         {
             imageCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
             aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
         }
-        if (EnumHasFlag(desc.usageFlags, RHITextureUsageFlags::ColorAttachment))
+        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::ColorAttachment))
         {
             imageCI.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
             aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
         }
-        if (EnumHasFlag(desc.usageFlags, RHITextureUsageFlags::DepthStencilAttachment))
+        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::DepthStencilAttachment))
         {
             imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -277,16 +277,16 @@ namespace CE
 
         switch (dimension)
         {
-        case RHITextureDimension::Dim2D:
+        case RHI::TextureDimension::Dim2D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
             break;
-        case RHITextureDimension::Dim3D:
+        case RHI::TextureDimension::Dim3D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_3D;
             break;
-        case RHITextureDimension::Dim1D:
+        case RHI::TextureDimension::Dim1D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
             break;
-        case RHITextureDimension::DimCUBE:
+        case RHI::TextureDimension::DimCUBE:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
             break;
         }
@@ -351,16 +351,16 @@ namespace CE
         u32 numChannels = GetNumberOfChannelsForFormat(format, bytesPerChannel);
         u64 totalSize = (u64)width * (u64)height * (u64)depth * bytesPerChannel * numChannels;
 
-        RHIBufferData stagingBufferData{};
+        RHI::BufferData stagingBufferData{};
         stagingBufferData.startOffsetInBuffer = 0;
         stagingBufferData.data = pixels;
         stagingBufferData.dataSize = totalSize;
 
-        RHIBufferDesc stagingBufferDesc{};
+        RHI::BufferDesc stagingBufferDesc{};
         stagingBufferDesc.name = "Staging Texture Buffer";
-        stagingBufferDesc.bindFlags = RHIBufferBindFlags::StagingBuffer;
-        stagingBufferDesc.allocMode = RHIBufferAllocMode::SharedMemory;
-        stagingBufferDesc.usageFlags = RHIBufferUsageFlags::Default;
+        stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+        stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
+        stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
         stagingBufferDesc.bufferSize = totalSize;
         stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
         stagingBufferDesc.initialData = &stagingBufferData;

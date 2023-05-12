@@ -6,10 +6,10 @@ namespace CE
 {
     class VulkanBuffer;
 
-    class VulkanTexture : public RHITexture
+    class VulkanTexture : public RHI::Texture
     {
     public:
-        VulkanTexture(VulkanDevice* device, const RHITextureDesc& desc);
+        VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc);
         virtual ~VulkanTexture();
 
         virtual void* GetHandle() override
@@ -44,18 +44,18 @@ namespace CE
         VkImage image = nullptr;
         VkDeviceMemory imageMemory = nullptr;
         VkImageView imageView = nullptr;
-        RHITextureDimension dimension{};
+        RHI::TextureDimension dimension{};
 
         u32 width = 0, height = 0, depth = 0;
         u32 sampleCount = 0;
         u32 mipLevels = 1;
-        RHITextureFormat format{};
+        RHI::TextureFormat format{};
         VkFormat vkFormat{};
         VkImageAspectFlags aspectMask{};
     };
     
-    VkFormat RHITextureFormatToVkFormat(RHITextureFormat format);
-    RHITextureFormat VkFormatToRHITextureFormat(VkFormat format);
-    u32 GetNumberOfChannelsForFormat(RHITextureFormat format, u32& outByteSizePerChannel);
+    VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format);
+    RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format);
+    u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel);
 
 } // namespace CE

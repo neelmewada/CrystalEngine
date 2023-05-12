@@ -1,27 +1,30 @@
+
+#include "VulkanRHI.h"
+
 #include "VulkanBuffer.h"
 
 namespace CE
 {
-	static VkBufferUsageFlags VkBufferUsageFlagsFromBufferBindFlags(RHIBufferBindFlags bindFlags)
+	static VkBufferUsageFlags VkBufferUsageFlagsFromBufferBindFlags(RHI::BufferBindFlags bindFlags)
 	{
 		VkBufferUsageFlags bufferUsageFlags = 0;
-		if (EnumHasFlag(bindFlags, RHIBufferBindFlags::VertexBuffer))
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::VertexBuffer))
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		}
-		if (EnumHasFlag(bindFlags, RHIBufferBindFlags::IndexBuffer))
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::IndexBuffer))
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 		}
-		if (EnumHasFlag(bindFlags, RHIBufferBindFlags::UniformBuffer))
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::UniformBuffer))
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		}
-		if (EnumHasFlag(bindFlags, RHIBufferBindFlags::StorageBuffer))
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::StorageBuffer))
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		}
-		if (EnumHasFlag(bindFlags, RHIBufferBindFlags::StagingBuffer))
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::StagingBuffer))
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		}
@@ -29,7 +32,7 @@ namespace CE
 		return bufferUsageFlags;
 	}
 
-	VulkanBuffer::VulkanBuffer(VulkanDevice* device, const RHIBufferDesc& desc)
+	VulkanBuffer::VulkanBuffer(VulkanDevice* device, const RHI::BufferDesc& desc)
 		: device(device)
 		, bindFlags(desc.bindFlags)
 		, usageFlags(desc.usageFlags)
@@ -58,7 +61,7 @@ namespace CE
 		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);
 
 		VkMemoryPropertyFlags memoryFlags{};
-		if (allocMode == RHIBufferAllocMode::Default || allocMode == RHIBufferAllocMode::SharedMemory)
+		if (allocMode == RHI::BufferAllocMode::Default || allocMode == RHI::BufferAllocMode::SharedMemory)
 		{
 			memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		}
@@ -97,14 +100,14 @@ namespace CE
 		}
 	}
 
-	RHIBufferBindFlags VulkanBuffer::GetBindFlags()
+	RHI::BufferBindFlags VulkanBuffer::GetBindFlags()
 	{
 		return bindFlags;
 	}
 
-	void VulkanBuffer::UploadData(const RHIBufferData& bufferData)
+	void VulkanBuffer::UploadData(const RHI::BufferData& bufferData)
 	{
-		if (allocMode == RHIBufferAllocMode::Default || allocMode == RHIBufferAllocMode::SharedMemory)
+		if (allocMode == RHI::BufferAllocMode::Default || allocMode == RHI::BufferAllocMode::SharedMemory)
 		{
 			// Shared Memory
 			void* ptr;
@@ -119,9 +122,9 @@ namespace CE
 		}
 	}
 
-	void VulkanBuffer::UploadDataToGPU(const RHIBufferData& bufferData)
+	void VulkanBuffer::UploadDataToGPU(const RHI::BufferData& bufferData)
 	{
-		if (allocMode != RHIBufferAllocMode::GpuMemory)
+		if (allocMode != RHI::BufferAllocMode::GpuMemory)
 			return;
 
 		if (!uploadContextExists)
@@ -167,17 +170,17 @@ namespace CE
 			return;
 		}
 
-		RHIBufferData stagingBufferData{};
+		RHI::BufferData stagingBufferData{};
 		stagingBufferData.data = bufferData.data;
 		stagingBufferData.dataSize = bufferData.dataSize;
 		stagingBufferData.startOffsetInBuffer = 0;
 
-		RHIBufferDesc stagingBufferDesc{};
+		RHI::BufferDesc stagingBufferDesc{};
 		stagingBufferDesc.name = "Staging Buffer";
-		stagingBufferDesc.bindFlags = RHIBufferBindFlags::StagingBuffer;
-		stagingBufferDesc.allocMode = RHIBufferAllocMode::SharedMemory;
+		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
 		stagingBufferDesc.bufferSize = bufferData.dataSize;
-		stagingBufferDesc.usageFlags = RHIBufferUsageFlags::Default;
+		stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
 		stagingBufferDesc.structureByteStride = bufferData.dataSize;
 		stagingBufferDesc.initialData = &stagingBufferData;
 

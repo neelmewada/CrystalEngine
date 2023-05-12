@@ -254,9 +254,44 @@ function(ce_add_target NAME TARGET_TYPE)
     
     # RUNTIME_DEPENDENCIES
 
-    # Manual dependencies
     foreach(runtime_dep ${ce_add_target_RUNTIME_DEPENDENCIES})
-        # Dynamic libraries
+        # NEW Loading
+        if(TARGET ${runtime_dep}_RT)
+            get_target_property(root_path ${runtime_dep}_RT ROOT_PATH)
+            get_target_property(copy_dirs ${runtime_dep}_RT COPY_DIRS)
+            get_target_property(copy_libs ${runtime_dep}_RT COPY_LIBS)
+            get_target_property(copy_files ${runtime_dep}_RT COPY_FILES)
+
+            if(copy_libs)
+                foreach(copy_lib ${copy_libs})
+                    ce_decorated_lib_name(${copy_lib} copy_lib)
+                    if(NOT (IS_ABSOLUTE ${copy_lib}))
+                        set(copy_lib "${root_path}/${copy_lib}")
+                    endif()
+                    
+                    add_custom_command(TARGET ${NAME} POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${copy_lib} "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+                    )
+                endforeach()
+            endif()
+
+            if(copy_files)
+                foreach(copy_file ${copy_files})
+                    if(NOT (IS_ABSOLUTE ${copy_file}))
+                        set(copy_file "${root_path}/${copy_file}")
+                    endif()
+                    
+                    add_custom_command(TARGET ${NAME} POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${copy_file} "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+                    )
+                endforeach()
+            endif()
+
+            return()
+        endif()
+        
+
+        # OLD Loading: Dynamic libraries
         if(DEFINED ${runtime_dep}_BIN_DIR AND DEFINED ${runtime_dep}_RUNTIME_DEPS)
             foreach(copy_dll ${${runtime_dep}_RUNTIME_DEPS})
                 if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
@@ -295,17 +330,4 @@ function(ce_add_target NAME TARGET_TYPE)
 endfunction()
 
 
-function(ce_add_runtime_dependencies NAME)
-    string(TOUPPER ${NAME} NAME_UPPERCASE)
-
-    set(options AUTORTTI)
-    set(oneValueArgs OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY)
-    set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
-
-    cmake_parse_arguments(ce_add_runtime_dependencies "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    add_library(${NAME} SHARED IMPORTED)
-    
-    
-endfunction()
 

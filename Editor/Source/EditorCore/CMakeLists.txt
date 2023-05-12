@@ -6,9 +6,6 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
     AUTORTTI
-    AUTOMOC
-    AUTOUIC
-    AUTORCC
     NAMESPACE CE
     FOLDER Editor
     PCHHEADER 
@@ -29,13 +26,11 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            ThirdParty::dxcompiler
         PUBLIC
-            CE::QtComponents
             CE::Core
-            CE::System
-            "ThirdParty::yaml"
     RUNTIME_DEPENDENCIES
-        
+        dxcompiler
 )
 
 

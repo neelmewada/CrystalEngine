@@ -2,10 +2,10 @@
 
 #include "ImGui/ImGuiDefinitions.h"
 
-namespace CE
+namespace CE::RHI
 {
 
-    enum class RHIGraphicsBackend
+    enum class GraphicsBackend
     {
         None,
         Vulkan,
@@ -13,7 +13,7 @@ namespace CE
         DX12,
     };
 
-    enum class RHIResourceType
+    enum class ResourceType
     {
         None,
         Buffer,
@@ -29,30 +29,30 @@ namespace CE
         CommandList
     };
 
-    enum class RHIDeviceObjectType
+    enum class DeviceObjectType
     {
         None,
         Buffer,
         Texture
     };
-
-    enum RHIConstants
+    
+    enum Constants
     {
-        /// Max number of color render outputs per RHIRenderTarget
-        RHIMaxSimultaneousRenderOutputs = 4,
+        /// Max number of color render outputs per RenderTarget
+        MaxSimultaneousRenderOutputs = 4,
 
         /// Max number of vertex attributes
-        RHIMaxVertexAttribs = 8,
+        MaxVertexAttribs = 8,
 
-        /// Max number of resource groups (aka no. of descriptor sets for vulkan)
-        RHIMaxPipelineResourceGroups = 4,
+        /// Max number of shader resource groups (aka no. of descriptor sets for vulkan)
+        MaxShaderResourceGroups = 4,
 
         /// Max number of subpasses in a single renderpass
-        RHIMaxSubpasses = 4,
+        MaxSubpasses = 4,
     };
 
     /// Render Target Color Format: Always prefer using Auto
-    enum class RHIColorFormat
+    enum class ColorFormat
     {
         // Auto uses the same format as SwapChain. Always prefer using Auto over others.
         Auto,
@@ -61,7 +61,7 @@ namespace CE
     };
 
     /// Render Target Depth Format: Always prefer using Auto or None
-    enum class RHIDepthStencilFormat
+    enum class DepthStencilFormat
     {
         None,
         Auto,
@@ -70,7 +70,7 @@ namespace CE
         D32
     };
 
-    enum class RHIRenderPassLoadAction : u8
+    enum class RenderPassLoadAction : u8
     {
         // Contents are undefined and not preserved
         None,
@@ -82,7 +82,7 @@ namespace CE
         Clear
     };
 
-    enum class RHIRenderPassStoreAction : u8
+    enum class RenderPassStoreAction : u8
     {
         // Contents are not stored in the memory, i.e. they are discarded. For ex: depth/stencil buffer content doesn't need to be stored
         None,
@@ -91,19 +91,19 @@ namespace CE
         Store,
     };
     
-    struct RHIRenderTargetColorOutputDesc
+    struct RenderTargetColorOutputDesc
     {
-        RHIColorFormat preferredFormat{};
-        RHIRenderPassLoadAction loadAction{};
-        RHIRenderPassStoreAction storeAction{};
+        ColorFormat preferredFormat{};
+        RenderPassLoadAction loadAction{};
+        RenderPassStoreAction storeAction{};
         u32 sampleCount = 1;
     };
 
-    struct RHIRenderTargetLayout
+    struct RenderTargetLayout
     {
         u32 numColorOutputs = 0;
-        RHIRenderTargetColorOutputDesc colorOutputs[RHIMaxSimultaneousRenderOutputs] = {};
-        RHIDepthStencilFormat depthStencilFormat = RHIDepthStencilFormat::Auto;
+        RenderTargetColorOutputDesc colorOutputs[RHI::MaxSimultaneousRenderOutputs] = {};
+        DepthStencilFormat depthStencilFormat = DepthStencilFormat::Auto;
 
         /// Index in renderOutputs[] of the render target that is going to be presented on screen.
         /// Or -1 if none are supposed to be consumed by SwapChain for presentation.
@@ -112,7 +112,7 @@ namespace CE
         u32 backBufferCount = 2, simultaneousFrameDraws = 1;
     };
 
-    struct RHIFontDesc
+    struct FontDesc
     {
         void* rawData = nullptr;
         SIZE_T byteSize = 0;
@@ -122,17 +122,17 @@ namespace CE
         void* fontData = nullptr;
     };
 
-    struct RHIFontPreloadConfig
+    struct FontPreloadConfig
     {
         u32 preloadFontCount = 0;
-        RHIFontDesc* preloadFonts = nullptr;
+        FontDesc* preloadFonts = nullptr;
     };
 
     /*
     *   Buffer
     */
 
-    enum class RHIBufferBindFlags
+    enum class BufferBindFlags
     {
         Undefined = 0,
         VertexBuffer = BIT(0),
@@ -143,10 +143,10 @@ namespace CE
         StagingBuffer = BIT(4),
     };
 
-    ENUM_CLASS_FLAGS(RHIBufferBindFlags);
+    ENUM_CLASS_FLAGS(BufferBindFlags);
 
     /// Features used by the buffer
-    enum class RHIBufferUsageFlags
+    enum class BufferUsageFlags
     {
         Default = 0,
         /// Buffer can be used with dynamic offset
@@ -154,40 +154,40 @@ namespace CE
         // TODO: Not implemented yet (Buffer can be resized dynamically)
         DynamicSize = BIT(1),
     };
-    ENUM_CLASS_FLAGS(RHIBufferUsageFlags);
+    ENUM_CLASS_FLAGS(BufferUsageFlags);
 
-    enum class RHIBufferAllocMode
+    enum class BufferAllocMode
     {
         Default = 0,
         SharedMemory,
         GpuMemory,
     };
-    ENUM_CLASS_FLAGS(RHIBufferAllocMode);
+    ENUM_CLASS_FLAGS(BufferAllocMode);
 
-    struct RHIBufferData
+    struct BufferData
     {
         u64 dataSize;
         u64 startOffsetInBuffer;
         const void* data = nullptr;
     };
 
-    struct RHIBufferDesc
+    struct BufferDesc
     {
         Name name{};
-        RHIBufferBindFlags bindFlags{};
-        RHIBufferUsageFlags usageFlags{};
-        RHIBufferAllocMode allocMode{};
+        BufferBindFlags bindFlags{};
+        BufferUsageFlags usageFlags{};
+        BufferAllocMode allocMode{};
         u64 bufferSize = 0;
         u64 structureByteStride = 0;
 
-        const RHIBufferData* initialData = nullptr;
+        const BufferData* initialData = nullptr;
     };
 
     /*
     *   Texture
     */
 
-    enum class RHITextureDimension
+    enum class TextureDimension
     {
         Dim2D = 0,
         Dim3D,
@@ -195,7 +195,7 @@ namespace CE
         DimCUBE,
     };
 
-    enum class RHITextureFormat
+    enum class TextureFormat
     {
         Undefined = 0,
         R8_UNORM,
@@ -221,7 +221,7 @@ namespace CE
         D32_SFLOAT_S8_UINT,
     };
 
-    enum class RHITextureUsageFlags
+    enum class TextureUsageFlags
     {
         SampledImage = BIT(0),
         ColorAttachment = BIT(1),
@@ -231,17 +231,17 @@ namespace CE
 
         Default = SampledImage,
     };
-    ENUM_CLASS_FLAGS(RHITextureUsageFlags);
+    ENUM_CLASS_FLAGS(TextureUsageFlags);
 
-    struct RHITextureDesc
+    struct TextureDesc
     {
         Name name{};
         u32 width = 128, height = 128, depth = 1;
-        RHITextureDimension dimension = RHITextureDimension::Dim2D;
-        RHITextureFormat format{};
+        TextureDimension dimension = TextureDimension::Dim2D;
+        TextureFormat format{};
         u32 mipLevels = 1;
         u32 sampleCount = 1;
-        RHITextureUsageFlags usageFlags = RHITextureUsageFlags::Default;
+        TextureUsageFlags usageFlags = TextureUsageFlags::Default;
 
         bool forceLinearLayout = false;
     };
@@ -250,7 +250,7 @@ namespace CE
     *   Command List
     */
 
-    enum class RHICommandListType
+    enum class CommandListType
     {
         None = 0,
         Graphics,
@@ -261,20 +261,20 @@ namespace CE
     *   Shader
     */
 
-    enum class RHIPipelineType
+    enum class PipelineType
     {
         None = 0,
         Graphics,
         Compute
     };
 
-    enum class RHIShaderStage
+    enum class ShaderStage
     {
         None = 0,
         Vertex = BIT(0),
         Fragment = BIT(1),
     };
-    ENUM_CLASS_FLAGS(RHIShaderStage);
+    ENUM_CLASS_FLAGS(ShaderStage);
 
 
     /*

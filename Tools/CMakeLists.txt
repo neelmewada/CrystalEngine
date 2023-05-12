@@ -4,6 +4,4 @@ project(Tools)
 
 add_dependencies(EditorTools "CE::CrystalEditor")
 
-add_subdirectory(ProjectManager)
-
-add_subdirectory(AssetImporter)
+add_subdirectory(CrystalShaderTool)

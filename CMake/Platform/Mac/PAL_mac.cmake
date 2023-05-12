@@ -52,9 +52,20 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET ${CE_MAC_DEPLOYMENT_TARGET})
 
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 
-ce_set(PAL_PLATFORM_IS_64_BIT TRUE)
-ce_set(PAL_PLATFORM_IS_MAC TRUE)
+ce_set(PAL_PLATFORM_IS_64_BIT 1)
+ce_set(PAL_PLATFORM_IS_MAC 1)
 
 add_compile_definitions(PLATFORM_MAC=1)
 add_compile_definitions(IS_64BIT=1)
 
+
+#########################################
+# Platform Utils
+
+macro(ce_decorated_lib_name LIB_NAME OUT_NAME)
+    if(${LIB_NAME} MATCHES ".dylib$")
+        set(${OUT_NAME} "${LIB_NAME}")
+    else()
+        set(${OUT_NAME} "lib${LIB_NAME}.dylib")
+    endif()
+endmacro()

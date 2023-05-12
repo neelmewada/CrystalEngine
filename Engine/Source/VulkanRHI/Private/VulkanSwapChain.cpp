@@ -11,7 +11,7 @@ namespace CE
 	VulkanSwapChain::VulkanSwapChain(VulkanRHI* vulkanRHI, PlatformWindow* windowHandle, VulkanDevice* device,
 		u32 desiredBackBufferCount, u32 simultaneousFrameDraws, 
 		u32 width, u32 height, bool isFullscreen, 
-		RHIColorFormat colorFormat, RHIDepthStencilFormat depthBufferFormat)
+		RHI::ColorFormat colorFormat, RHI::DepthStencilFormat depthBufferFormat)
 		: vulkanRHI(vulkanRHI)
 		, windowHandle(windowHandle)
 		, device(device)
@@ -51,7 +51,7 @@ namespace CE
 	{
 		CreateSwapChain();
 
-		if (depthBufferFormat != RHIDepthStencilFormat::None)
+		if (depthBufferFormat != RHI::DepthStencilFormat::None)
 		{
 			DestroyDepthBuffer();
 			CreateDepthBuffer();
@@ -86,7 +86,7 @@ namespace CE
 		VkSurfaceFormatKHR selectedSurfaceFormat{};
 
 		VkFormat preferredColorFormat = VK_FORMAT_R8G8B8A8_UNORM;
-		if (colorBufferFormat == RHIColorFormat::BGRA32)
+		if (colorBufferFormat == RHI::ColorFormat::BGRA32)
 			preferredColorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 
 		if (surfaceFormats.GetSize() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
@@ -130,15 +130,15 @@ namespace CE
 
 		if (selectedSurfaceFormat.format == VK_FORMAT_R8G8B8A8_UNORM)
 		{
-			colorBufferFormat = RHIColorFormat::RGBA32;
+			colorBufferFormat = RHI::ColorFormat::RGBA32;
 		}
 		else if (selectedSurfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM)
 		{
-			colorBufferFormat = RHIColorFormat::BGRA32;
+			colorBufferFormat = RHI::ColorFormat::BGRA32;
 		}
 		else
 		{
-			colorBufferFormat = RHIColorFormat::Auto;
+			colorBufferFormat = RHI::ColorFormat::Auto;
 		}
 
 		swapChainColorFormat = selectedSurfaceFormat;
@@ -275,50 +275,50 @@ namespace CE
 
 	void VulkanSwapChain::CreateDepthBuffer()
 	{
-		if (depthBufferFormat == RHIDepthStencilFormat::None)
+		if (depthBufferFormat == RHI::DepthStencilFormat::None)
 		{
 			return;
 		}
 		
 		Array<VkFormat> preferredDepthFormats{};
-		if (depthBufferFormat == RHIDepthStencilFormat::Auto || depthBufferFormat == RHIDepthStencilFormat::D32_S8)
+		if (depthBufferFormat == RHI::DepthStencilFormat::Auto || depthBufferFormat == RHI::DepthStencilFormat::D32_S8)
 			preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT });
-		else if (depthBufferFormat == RHIDepthStencilFormat::D24_S8)
+		else if (depthBufferFormat == RHI::DepthStencilFormat::D24_S8)
 			preferredDepthFormats.AddRange({ VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT });
-		else if (depthBufferFormat == RHIDepthStencilFormat::D32)
+		else if (depthBufferFormat == RHI::DepthStencilFormat::D32)
 			preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT });
 
 		swapChainDepthFormat = device->FindSupportedFormat(preferredDepthFormats,
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
-		RHITextureFormat depthTextureFormat{};
+		RHI::TextureFormat depthTextureFormat{};
 
 		switch (swapChainDepthFormat)
 		{
 		case VK_FORMAT_D32_SFLOAT_S8_UINT:
-			depthBufferFormat = RHIDepthStencilFormat::D32_S8;
-			depthTextureFormat = RHITextureFormat::D32_SFLOAT_S8_UINT;
+			depthBufferFormat = RHI::DepthStencilFormat::D32_S8;
+			depthTextureFormat = RHI::TextureFormat::D32_SFLOAT_S8_UINT;
 			break;
 		case VK_FORMAT_D24_UNORM_S8_UINT:
-			depthBufferFormat = RHIDepthStencilFormat::D24_S8;
-			depthTextureFormat = RHITextureFormat::D24_UNORM_S8_UINT;
+			depthBufferFormat = RHI::DepthStencilFormat::D24_S8;
+			depthTextureFormat = RHI::TextureFormat::D24_UNORM_S8_UINT;
 			break;
 		case VK_FORMAT_D32_SFLOAT:
-			depthBufferFormat = RHIDepthStencilFormat::D32;
-			depthTextureFormat = RHITextureFormat::D32_SFLOAT;
+			depthBufferFormat = RHI::DepthStencilFormat::D32;
+			depthTextureFormat = RHI::TextureFormat::D32_SFLOAT;
 			break;
 		}
         
-		RHITextureDesc depthTextureDesc{};
+		RHI::TextureDesc depthTextureDesc{};
 		depthTextureDesc.width = width;
 		depthTextureDesc.height = height;
 		depthTextureDesc.depth = 1;
-		depthTextureDesc.dimension = RHITextureDimension::Dim2D;
+		depthTextureDesc.dimension = RHI::TextureDimension::Dim2D;
 		depthTextureDesc.format = depthTextureFormat;
 		depthTextureDesc.mipLevels = 1;
 		depthTextureDesc.sampleCount = 1;
-		depthTextureDesc.usageFlags = RHITextureUsageFlags::DepthStencilAttachment;
+		depthTextureDesc.usageFlags = RHI::TextureUsageFlags::DepthStencilAttachment;
 		depthTextureDesc.forceLinearLayout = false;
 
 		swapChainDepthImage = new VulkanTexture(device, depthTextureDesc);

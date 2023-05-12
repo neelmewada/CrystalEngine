@@ -25,7 +25,7 @@
 namespace CE
 {
 
-    bool VulkanGraphicsCommandList::InitImGui(RHIFontPreloadConfig* preloadFontConfig)
+    bool VulkanGraphicsCommandList::InitImGui(RHI::FontPreloadConfig* preloadFontConfig)
     {
         VkResult result = VK_SUCCESS;
 

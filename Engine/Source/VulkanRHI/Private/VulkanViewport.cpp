@@ -16,7 +16,7 @@ namespace CE
     
     VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
         u32 width, u32 height,
-        bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
+        bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(windowHandle), isFullscreen(isFullscreen)
     {
         auto backBufferCount = rtLayout.backBufferCount;
@@ -48,7 +48,7 @@ namespace CE
     }
 
 #if PAL_TRAIT_QT_SUPPORTED
-    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RHIRenderTargetLayout& rtLayout)
+    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(qtWindowHandle), isQtWindow(true)
     {
         swapChain = nullptr;
@@ -126,7 +126,7 @@ namespace CE
 
     // - Getters -
 
-    RHIRenderTarget* VulkanViewport::GetRenderTarget()
+    RHI::RenderTarget* VulkanViewport::GetRenderTarget()
     {
         return renderTarget;
     }

@@ -22,8 +22,8 @@ namespace CE
         VulkanSwapChain(VulkanRHI* vulkanRHI, PlatformWindow* windowHandle, VulkanDevice* device,
             u32 desiredBackBufferCount, u32 simultaneousFrameDraws,
             u32 width, u32 height, bool isFullscreen, 
-            RHIColorFormat colorFormat = RHIColorFormat::Auto, 
-            RHIDepthStencilFormat depthBufferFormat = RHIDepthStencilFormat::Auto);
+            RHI::ColorFormat colorFormat = RHI::ColorFormat::Auto,
+            RHI::DepthStencilFormat depthBufferFormat = RHI::DepthStencilFormat::Auto);
         virtual ~VulkanSwapChain();
 
         // - Getters -
@@ -36,7 +36,7 @@ namespace CE
 
         CE_INLINE VkSwapchainKHR GetHandle() { return swapChain; }
 
-        CE_INLINE bool HasDepthStencilAttachment() { return depthBufferFormat != RHIDepthStencilFormat::None; }
+        CE_INLINE bool HasDepthStencilAttachment() { return depthBufferFormat != RHI::DepthStencilFormat::None; }
 
         void RebuildSwapChain();
 
@@ -61,8 +61,8 @@ namespace CE
         VkSurfaceFormatKHR swapChainColorFormat{};
         VkFormat swapChainDepthFormat = VK_FORMAT_UNDEFINED;
 
-        RHIColorFormat colorBufferFormat{};
-        RHIDepthStencilFormat depthBufferFormat{};
+        RHI::ColorFormat colorBufferFormat{};
+        RHI::DepthStencilFormat depthBufferFormat{};
 
         u32 backBufferCount = 0;
         u32 simultaneousFrameDraws = 0;

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
+return()
+
 project(AssetImporter)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)

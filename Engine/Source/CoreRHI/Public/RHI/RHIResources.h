@@ -2,68 +2,68 @@
 
 #include "RHIDefinitions.h"
 
-namespace CE
+namespace CE::RHI
 {
     
-    class CORERHI_API RHIResource
+    class CORERHI_API Resource
     {
     protected:
-        RHIResource(RHIResourceType resourceType) : resourceType(resourceType)
+        Resource(ResourceType resourceType) : resourceType(resourceType)
         {}
     public:
-        virtual ~RHIResource() = default;
+        virtual ~Resource() = default;
 
-        RHIResourceType GetResourceType() const 
+        ResourceType GetResourceType() const 
         {
             return resourceType;
         }
         
     private:
-        RHIResourceType resourceType = RHIResourceType::None;
+        ResourceType resourceType = ResourceType::None;
     };
 
-    class IRHIDeviceObject
+    class IDeviceObject
     {
     protected:
-        IRHIDeviceObject(RHIDeviceObjectType type) : deviceObjectType(type)
+        IDeviceObject(DeviceObjectType type) : deviceObjectType(type)
         {}
     public:
-        virtual ~IRHIDeviceObject() {}
+        virtual ~IDeviceObject() {}
 
-        virtual RHIDeviceObjectType GetDeviceObjectType() const
+        virtual DeviceObjectType GetDeviceObjectType() const
         {
             return deviceObjectType;
         }
         
     private:
-        RHIDeviceObjectType deviceObjectType = RHIDeviceObjectType::None;
+        DeviceObjectType deviceObjectType = DeviceObjectType::None;
     };
 
-    class CORERHI_API RHIBuffer : public RHIResource, public IRHIDeviceObject
+    class CORERHI_API Buffer : public Resource, public IDeviceObject
     {
     protected:
-        RHIBuffer() : RHIResource(RHIResourceType::Buffer), IRHIDeviceObject(RHIDeviceObjectType::Buffer)
+        Buffer() : Resource(ResourceType::Buffer), IDeviceObject(DeviceObjectType::Buffer)
         {}
 
     public:
-        virtual ~RHIBuffer() = default;
+        virtual ~Buffer() = default;
         
-        virtual RHIBufferBindFlags GetBindFlags() = 0;
+        virtual BufferBindFlags GetBindFlags() = 0;
 
         virtual void* GetHandle() = 0;
 
-        virtual void UploadData(const RHIBufferData& data) = 0;
+        virtual void UploadData(const BufferData& data) = 0;
 
     };
     
-    class CORERHI_API RHITexture : public RHIResource, public IRHIDeviceObject
+    class CORERHI_API Texture : public Resource, public IDeviceObject
     {
     protected:
-        RHITexture() : RHIResource(RHIResourceType::Texture), IRHIDeviceObject(RHIDeviceObjectType::Texture)
+        Texture() : Resource(ResourceType::Texture), IDeviceObject(DeviceObjectType::Texture)
         {}
         
     public:
-        virtual ~RHITexture() = default;
+        virtual ~Texture() = default;
 
         virtual void* GetHandle() = 0;
 
@@ -80,14 +80,14 @@ namespace CE
     *   Shader
     */
 
-    class CORERHI_API RHIShaderModule : public RHIResource
+    class CORERHI_API ShaderModule : public Resource
     {
     protected:
-        RHIShaderModule() : RHIResource(RHIResourceType::ShaderModule)
+        ShaderModule() : Resource(ResourceType::ShaderModule)
         {}
 
     public:
-        virtual ~RHIShaderModule() = default;
+        virtual ~ShaderModule() = default;
 
         // - Public API -
 
@@ -95,10 +95,10 @@ namespace CE
 
         virtual bool IsValidShader() = 0;
 
-        virtual RHIShaderStage GetShaderStage() = 0;
+        virtual ShaderStage GetShaderStage() = 0;
 
-        bool IsVertexShader() { return GetShaderStage() == RHIShaderStage::Vertex; }
-        bool IsFragmentShader() { return GetShaderStage() == RHIShaderStage::Fragment; }
+        bool IsVertexShader() { return GetShaderStage() == ShaderStage::Vertex; }
+        bool IsFragmentShader() { return GetShaderStage() == ShaderStage::Fragment; }
 
     };
 
@@ -106,25 +106,25 @@ namespace CE
     *   Pipeline
     */
 
-    class CORERHI_API RHIPipelineState : public RHIResource
+    class CORERHI_API PipelineState : public Resource
     {
     protected:
-        RHIPipelineState(RHIResourceType type) : RHIResource(type)
+        PipelineState(ResourceType type) : Resource(type)
         {}
 
     public:
-        virtual ~RHIPipelineState() = default;
+        virtual ~PipelineState() = default;
 
         // - Public API -
 
         virtual bool IsGraphicsPipelineState() 
         {
-            return GetResourceType() == RHIResourceType::GraphicsPipelineState; 
+            return GetResourceType() == ResourceType::GraphicsPipelineState; 
         }
 
         virtual bool IsComputePipelineState()
         {
-            return GetResourceType() == RHIResourceType::ComputePipelineState;
+            return GetResourceType() == ResourceType::ComputePipelineState;
         }
 
 

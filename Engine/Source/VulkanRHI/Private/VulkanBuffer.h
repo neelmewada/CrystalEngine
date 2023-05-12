@@ -5,13 +5,13 @@
 namespace CE
 {
     
-    class VulkanBuffer : public RHIBuffer
+    class VulkanBuffer : public RHI::Buffer
     {
     public:
-        VulkanBuffer(VulkanDevice* device, const RHIBufferDesc& desc);
+        VulkanBuffer(VulkanDevice* device, const RHI::BufferDesc& desc);
         virtual ~VulkanBuffer();
 
-        virtual RHIBufferBindFlags GetBindFlags() override;
+        virtual RHI::BufferBindFlags GetBindFlags() override;
 
         virtual void* GetHandle() override
         {
@@ -20,16 +20,16 @@ namespace CE
 
         VkBuffer GetBuffer() { return buffer; }
 
-        virtual void UploadData(const RHIBufferData& bufferData) override;
+        virtual void UploadData(const RHI::BufferData& bufferData) override;
 
     private:
-        void UploadDataToGPU(const RHIBufferData& bufferData);
+        void UploadDataToGPU(const RHI::BufferData& bufferData);
 
     private:
         Name name{};
-        RHIBufferBindFlags bindFlags{};
-        RHIBufferUsageFlags usageFlags{};
-        RHIBufferAllocMode allocMode{};
+        RHI::BufferBindFlags bindFlags{};
+        RHI::BufferUsageFlags usageFlags{};
+        RHI::BufferAllocMode allocMode{};
 
         u64 bufferSize = 0, structureByteStride = 0;
 

@@ -20,12 +20,12 @@ namespace CE
 {
 	void VulkanRHIModule::StartupModule()
 	{
-        gDynamicRHI = new VulkanRHI();
+        RHI::gDynamicRHI = new VulkanRHI();
 	}
 
 	void VulkanRHIModule::ShutdownModule()
 	{
-        delete gDynamicRHI;
+        delete RHI::gDynamicRHI;
 	}
 
 	void VulkanRHIModule::RegisterTypes()
@@ -189,42 +189,42 @@ namespace CE
         return vkInstance;
     }
 
-	RHIGraphicsBackend VulkanRHI::GetGraphicsBackend()
+    RHI::GraphicsBackend VulkanRHI::GetGraphicsBackend()
 	{
-		return RHIGraphicsBackend::Vulkan;
+		return RHI::GraphicsBackend::Vulkan;
 	}
 
     // - Render Target -
 
-    RHIRenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height, 
-        const RHIRenderTargetLayout& rtLayout)
+    RHI::RenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height,
+        const RHI::RenderTargetLayout& rtLayout)
     {
         return new VulkanRenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));
     }
 
-    void VulkanRHI::DestroyRenderTarget(RHIRenderTarget* renderTarget)
+    void VulkanRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
     {
         delete renderTarget;
     } 
 
-    RHIViewport* VulkanRHI::CreateViewport(PlatformWindow* window, u32 width, u32 height, bool isFullscreen, const RHIRenderTargetLayout& rtLayout)
+    RHI::Viewport* VulkanRHI::CreateViewport(PlatformWindow* window, u32 width, u32 height, bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
     {
         return new VulkanViewport(this, device, window, width, height, isFullscreen, rtLayout);
     }
 
-    void VulkanRHI::DestroyViewport(RHIViewport* viewport)
+    void VulkanRHI::DestroyViewport(RHI::Viewport* viewport)
     {
         delete viewport;
     }
 
     // - Command List -
 
-    RHIGraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHIViewport* viewport)
+    RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::Viewport* viewport)
     {
         return new VulkanGraphicsCommandList(this, device, (VulkanViewport*)viewport);
     }
 
-    RHIGraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHIRenderTarget* renderTarget)
+    RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::RenderTarget* renderTarget)
     {
         if (renderTarget->IsViewportRenderTarget())
         {
@@ -235,14 +235,14 @@ namespace CE
         return new VulkanGraphicsCommandList(this, device, (VulkanRenderTarget*)renderTarget);
     }
 
-    void VulkanRHI::DestroyCommandList(RHICommandList* commandList)
+    void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)
     {
         delete commandList;
     }
 
-    bool VulkanRHI::ExecuteCommandList(RHICommandList* commandList)
+    bool VulkanRHI::ExecuteCommandList(RHI::CommandList* commandList)
     {
-        if (commandList->GetCommandListType() == RHICommandListType::Graphics)
+        if (commandList->GetCommandListType() == RHI::CommandListType::Graphics)
         {
             auto vulkanCommandList = (VulkanGraphicsCommandList*)commandList;
             if (vulkanCommandList->IsViewportTarget())
@@ -349,7 +349,7 @@ namespace CE
         return true;
     }
 
-    bool VulkanRHI::PresentViewport(RHIGraphicsCommandList* viewportCommandList)
+    bool VulkanRHI::PresentViewport(RHI::GraphicsCommandList* viewportCommandList)
     {
         auto vulkanCommandList = (VulkanGraphicsCommandList*)viewportCommandList;
         if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
@@ -378,12 +378,12 @@ namespace CE
 
     // - Resources -
 
-    RHIBuffer* VulkanRHI::CreateBuffer(const RHIBufferDesc& bufferDesc)
+    RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDesc& bufferDesc)
     {
         return new VulkanBuffer(device, bufferDesc);
     }
 
-    void VulkanRHI::DestroyBuffer(RHIBuffer* buffer)
+    void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
     {
         delete buffer;
     }
@@ -430,7 +430,7 @@ namespace CE
     }
 
     VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, 
-        VkImageView attachments[RHIMaxSimultaneousRenderOutputs + 1], 
+        VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1], 
         VulkanRenderTarget* renderTarget)
     {
         this->device = device;
@@ -586,7 +586,7 @@ namespace CE
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = extent;
         
-        VkClearValue clearValues[RHIMaxSimultaneousRenderOutputs + 1] = {};
+        VkClearValue clearValues[RHI::MaxSimultaneousRenderOutputs + 1] = {};
         for (int i = 0; i < renderTarget->GetColorAttachmentCount(); ++i)
         {
             for (int j = 0; j < 4; ++j)

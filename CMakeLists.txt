@@ -29,7 +29,9 @@ include(CMake/Tests.cmake)
 include(CMake/ConfigIni.cmake)
 include(CMake/Shader.cmake)
 
+
 # Import 3rd Party libraries
+include(CMake/ThirdPartyPackages.cmake)
 add_subdirectory(ThirdParty)
 
 # Setup Config Targets

@@ -20,23 +20,23 @@ namespace CE
         ~VulkanRenderTargetLayout() = default;
 
         /// Offscreen render target layout
-        VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderTargetLayout& rtLayout);
+        VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHI::RenderTargetLayout& rtLayout);
 
         /// Viewport render target layout
-        VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHIRenderTargetLayout& rtLayout);
+        VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHI::RenderTargetLayout& rtLayout);
 
         u32 width = 0, height = 0;
         u32 presentationRTIndex = -1;
 
-        Color clearColors[RHIMaxSimultaneousRenderOutputs] = {};
+        Color clearColors[RHI::MaxSimultaneousRenderOutputs] = {};
 
-        VkFormat colorFormats[RHIMaxSimultaneousRenderOutputs] = {};
+        VkFormat colorFormats[RHI::MaxSimultaneousRenderOutputs] = {};
         VkFormat depthFormat = {};
 
-        VkAttachmentReference colorReferences[RHIMaxSimultaneousRenderOutputs] = {};
+        VkAttachmentReference colorReferences[RHI::MaxSimultaneousRenderOutputs] = {};
         VkAttachmentReference depthStencilReference = {};
 
-        VkAttachmentDescription attachmentDesc[RHIMaxSimultaneousRenderOutputs + 1]; // countof(ColorAttachments) + 1 depth attachment
+        VkAttachmentDescription attachmentDesc[RHI::MaxSimultaneousRenderOutputs + 1]; // countof(ColorAttachments) + 1 depth attachment
 
         u8 colorAttachmentCount = 0;
 
@@ -73,7 +73,7 @@ namespace CE
     {
     public:
         VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, VulkanRenderTarget* renderTarget);
-        VulkanFrameBuffer(VulkanDevice* device, VkImageView attachments[RHIMaxSimultaneousRenderOutputs + 1], VulkanRenderTarget* renderTarget);
+        VulkanFrameBuffer(VulkanDevice* device, VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1], VulkanRenderTarget* renderTarget);
 
         ~VulkanFrameBuffer();
 
@@ -98,7 +98,7 @@ namespace CE
     };
     
     /// Vulkan Render Target class
-    class VulkanRenderTarget : public RHIRenderTarget
+    class VulkanRenderTarget : public RHI::RenderTarget
     {
     public:
         /// An offscreen render target
@@ -111,7 +111,7 @@ namespace CE
 
         virtual bool IsViewportRenderTarget() override { return isViewportRenderTarget; }
 
-        virtual RHIRenderPass* GetRenderPass() override;
+        virtual RHI::RenderPass* GetRenderPass() override;
 
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) override;
 
@@ -158,7 +158,7 @@ namespace CE
         VulkanViewport* viewport = nullptr;
         bool isFresh = true;
         
-        Color clearColors[RHIMaxSimultaneousRenderOutputs] = {};
+        Color clearColors[RHI::MaxSimultaneousRenderOutputs] = {};
         VulkanDevice* device = nullptr;
         VulkanRenderTargetLayout rtLayout{};
         VulkanRenderPass* renderPass = nullptr;
@@ -184,7 +184,7 @@ namespace CE
     *   Graphics Command List
     */
 
-    class VulkanGraphicsCommandList : public RHIGraphicsCommandList, public ApplicationMessageHandler
+    class VulkanGraphicsCommandList : public RHI::GraphicsCommandList, public ApplicationMessageHandler
     {
     public:
         VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport);
@@ -215,7 +215,7 @@ namespace CE
 
         // - ImGui API -
 
-        bool InitImGui(RHIFontPreloadConfig* preloadFonts = nullptr) override;
+        bool InitImGui(RHI::FontPreloadConfig* preloadFonts = nullptr) override;
 
         void ShutdownImGui() override;
 

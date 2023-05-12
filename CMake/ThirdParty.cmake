@@ -45,49 +45,41 @@ function(ce_validate_package PACKAGE_NAME PACKAGE_SHORT_NAME)
 
 endfunction()
 
-#############################################
-# Find Packages
+# function to setup a runtime dependency target
+function(ce_add_rt_deps NAME)
+    set(target "${NAME}_RT")
 
-# Utils
-find_package(xxHash REQUIRED)
-find_package(spdlog REQUIRED)
-find_package(yaml REQUIRED)
-find_package(mINI REQUIRED)
-find_package(cxxopts REQUIRED)
-find_package(efsw REQUIRED)
-find_package(zip REQUIRED)
-find_package(crcpp REQUIRED)
-find_package(stb REQUIRED)
+    set(options AUTORTTI)
+    set(oneValueArgs OUTPUT_SUBDIRECTORY FOLDER ROOT_PATH OUTPUT_DIRECTORY)
+    set(multiValueArgs COPY_DIRS COPY_FILES COPY_LIBS INCLUDE_DIRECTORIES BIN_DIRS)
 
-# SDL2
-find_package(sdl REQUIRED)
+    cmake_parse_arguments(ce_add_rt_deps "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-# ImGui
-find_package(imgui REQUIRED)
+    add_custom_target(${target})
 
-# Vulkan
-if(${PAL_TRAIT_VULKAN_SUPPORTED})
-    find_package(Vulkan REQUIRED 
-        COMPONENTS dxc
-    )
+    if(NOT ce_add_rt_deps_ROOT_PATH)
+        message(FATAL_ERROR "ROOT_PATH not supplied to ce_add_rt_deps ${NAME}")
+    endif()
+    
+    set_target_properties(${target} PROPERTIES ROOT_PATH "${ce_add_rt_deps_ROOT_PATH}")
 
-    cmake_path(GET Vulkan_dxc_LIBRARY FILENAME Vulkan_dxc_lib)
-
-    set(Vulkan_RUNTIME_DEPS "")
-
-    if(${PAL_PLATFORM_IS_WINDOWS})
-        set(Vulkan_BIN_DIR "$ENV{VULKAN_SDK}/Bin")
-        list(APPEND Vulkan_RUNTIME_DEPS "VkLayer_khronos_validation.dll")
-    elseif(${PAL_PLATFORM_IS_MAC})
-        set(Vulkan_BIN_DIR "$ENV{VULKAN_SDK}/macOS/lib")
+    if(ce_add_rt_deps_COPY_DIRS)
+        set_target_properties(${target} PROPERTIES COPY_DIRS "${ce_add_rt_deps_COPY_DIRS}")
+    endif()
+    
+    if(ce_add_rt_deps_BIN_DIRS)
+        set_target_properties(${target} PROPERTIES BIN_DIRS "${ce_add_rt_deps_BIN_DIRS}")
+    endif()
+    
+    if(ce_add_rt_deps_COPY_LIBS)
+        set_target_properties(${target} PROPERTIES COPY_LIBS "${ce_add_rt_deps_COPY_LIBS}")
     endif()
 
-    #list(APPEND Vulkan_RUNTIME_DEPS ${Vulkan_dxc_lib})
+    if(ce_add_rt_deps_COPY_FILES)
+        set_target_properties(${target} PROPERTIES COPY_FILES "${ce_add_rt_deps_COPY_FILES}")
+    endif()
     
-endif()
+    
+endfunction()
 
-# Metal
-if(${PAL_TRAIT_METAL_SUPPORTED})
-    find_package(metalcpp)
-endif()
 

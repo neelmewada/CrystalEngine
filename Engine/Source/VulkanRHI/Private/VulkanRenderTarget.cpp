@@ -9,11 +9,14 @@
 
 namespace CE
 {
+
     // ****************************************************
     // VulkanRenderTargetLayout
 
-    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHIRenderTargetLayout& rtLayout)
+    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHI::RenderTargetLayout& rtLayout)
     {
+        using namespace CE::RHI;
+
         this->width = width;
         this->height = height;
         this->backBufferCount = rtLayout.backBufferCount;
@@ -25,16 +28,16 @@ namespace CE
         attachmentDescCount = rtLayout.numColorOutputs;
         hasDepthStencilAttachment = false;
 
-        if (rtLayout.depthStencilFormat != RHIDepthStencilFormat::None) // Depth Stencil Attachment
+        if (rtLayout.depthStencilFormat != RHI::DepthStencilFormat::None) // Depth Stencil Attachment
         {
             hasDepthStencilAttachment = true;
 
             Array<VkFormat> preferredDepthFormats{};
-            if (rtLayout.depthStencilFormat == RHIDepthStencilFormat::Auto || rtLayout.depthStencilFormat == RHIDepthStencilFormat::D32_S8)
+            if (rtLayout.depthStencilFormat == RHI::DepthStencilFormat::Auto || rtLayout.depthStencilFormat == RHI::DepthStencilFormat::D32_S8)
                 preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT });
-            else if (rtLayout.depthStencilFormat == RHIDepthStencilFormat::D24_S8)
+            else if (rtLayout.depthStencilFormat == RHI::DepthStencilFormat::D24_S8)
                 preferredDepthFormats.AddRange({ VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT });
-            else if (rtLayout.depthStencilFormat == RHIDepthStencilFormat::D32)
+            else if (rtLayout.depthStencilFormat == RHI::DepthStencilFormat::D32)
                 preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT });
 
             auto depthFormat = device->FindSupportedFormat(preferredDepthFormats, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
@@ -51,16 +54,16 @@ namespace CE
 
                 switch (rtLayout.depthStencilFormat)
                 {
-                case RHIDepthStencilFormat::Auto:
+                case DepthStencilFormat::Auto:
                     depthAttachment.format = depthFormat;
                     break;
-                case RHIDepthStencilFormat::D32_S8:
+                case DepthStencilFormat::D32_S8:
                     depthAttachment.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
                     break;
-                case RHIDepthStencilFormat::D24_S8:
+                case DepthStencilFormat::D24_S8:
                     depthAttachment.format = VK_FORMAT_D24_UNORM_S8_UINT;
                     break;
-                case RHIDepthStencilFormat::D32:
+                case DepthStencilFormat::D32:
                     depthAttachment.format = VK_FORMAT_D32_SFLOAT;
                     break;
                 }
@@ -89,16 +92,16 @@ namespace CE
 
             switch (rtLayout.colorOutputs[i].preferredFormat)
             {
-            case RHIColorFormat::Auto:
+            case ColorFormat::Auto:
                 attachment.format = device->FindAutoColorFormat().format;
                 break;
-            case RHIColorFormat::RGBA32:
+            case ColorFormat::RGBA32:
                 if (device->CheckSurfaceFormatSupport(VK_FORMAT_R8G8B8A8_UNORM))
                     attachment.format = VK_FORMAT_R8G8B8A8_UNORM;
                 else
                     attachment.format = device->FindAutoColorFormat().format;
                 break;
-            case RHIColorFormat::BGRA32:
+            case ColorFormat::BGRA32:
                 if (device->CheckSurfaceFormatSupport(VK_FORMAT_B8G8R8A8_UNORM))
                     attachment.format = VK_FORMAT_B8G8R8A8_UNORM;
                 else
@@ -110,16 +113,16 @@ namespace CE
 
             attachment.samples = (VkSampleCountFlagBits)rtLayout.colorOutputs[i].sampleCount;
 
-            if (rtLayout.colorOutputs[i].loadAction == RHIRenderPassLoadAction::Clear)
+            if (rtLayout.colorOutputs[i].loadAction == RenderPassLoadAction::Clear)
                 attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            else if (rtLayout.colorOutputs[i].loadAction == RHIRenderPassLoadAction::Load)
+            else if (rtLayout.colorOutputs[i].loadAction == RenderPassLoadAction::Load)
                 attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-            else if (rtLayout.colorOutputs[i].loadAction == RHIRenderPassLoadAction::None)
+            else if (rtLayout.colorOutputs[i].loadAction == RenderPassLoadAction::None)
                 attachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 
-            if (rtLayout.colorOutputs[i].storeAction == RHIRenderPassStoreAction::None)
+            if (rtLayout.colorOutputs[i].storeAction == RenderPassStoreAction::None)
                 attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            else if (rtLayout.colorOutputs[i].storeAction == RHIRenderPassStoreAction::Store)
+            else if (rtLayout.colorOutputs[i].storeAction == RenderPassStoreAction::Store)
                 attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
             attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -141,8 +144,10 @@ namespace CE
         }
     }
 
-    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHIRenderTargetLayout& rtLayout)
+    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHI::RenderTargetLayout& rtLayout)
     {
+        using namespace CE::RHI;
+
         this->width = viewport->GetWidth();
         this->height = viewport->GetHeight();
         this->backBufferCount = viewport->GetBackBufferCount();
@@ -154,16 +159,16 @@ namespace CE
         attachmentDescCount = rtLayout.numColorOutputs;
         hasDepthStencilAttachment = false;
 
-        if (rtLayout.depthStencilFormat != RHIDepthStencilFormat::None) // Depth Stencil Attachment
+        if (rtLayout.depthStencilFormat != DepthStencilFormat::None) // Depth Stencil Attachment
         {
             hasDepthStencilAttachment = true;
 
             Array<VkFormat> preferredDepthFormats{};
-            if (rtLayout.depthStencilFormat == RHIDepthStencilFormat::Auto || rtLayout.depthStencilFormat == RHIDepthStencilFormat::D32_S8)
+            if (rtLayout.depthStencilFormat == DepthStencilFormat::Auto || rtLayout.depthStencilFormat == DepthStencilFormat::D32_S8)
                 preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT });
-            else if (rtLayout.depthStencilFormat == RHIDepthStencilFormat::D24_S8)
+            else if (rtLayout.depthStencilFormat == DepthStencilFormat::D24_S8)
                 preferredDepthFormats.AddRange({ VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT });
-            else if (rtLayout.depthStencilFormat == RHIDepthStencilFormat::D32)
+            else if (rtLayout.depthStencilFormat == DepthStencilFormat::D32)
                 preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT });
 
             auto depthFormat = viewport->swapChain->swapChainDepthFormat;
@@ -212,16 +217,16 @@ namespace CE
             {
                 switch (rtLayout.colorOutputs[i].preferredFormat)
                 {
-                case RHIColorFormat::Auto:
+                case ColorFormat::Auto:
                     attachment.format = device->FindAutoColorFormat().format;
                     break;
-                case RHIColorFormat::RGBA32:
+                case ColorFormat::RGBA32:
                     if (device->CheckSurfaceFormatSupport(VK_FORMAT_R8G8B8A8_UNORM))
                         attachment.format = VK_FORMAT_R8G8B8A8_UNORM;
                     else
                         attachment.format = device->FindAutoColorFormat().format;
                     break;
-                case RHIColorFormat::BGRA32:
+                case ColorFormat::BGRA32:
                     if (device->CheckSurfaceFormatSupport(VK_FORMAT_B8G8R8A8_UNORM))
                         attachment.format = VK_FORMAT_B8G8R8A8_UNORM;
                     else
@@ -234,16 +239,16 @@ namespace CE
 
             attachment.samples = (VkSampleCountFlagBits)rtLayout.colorOutputs[i].sampleCount;
 
-            if (rtLayout.colorOutputs[i].loadAction == RHIRenderPassLoadAction::Clear)
+            if (rtLayout.colorOutputs[i].loadAction == RenderPassLoadAction::Clear)
                 attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-            else if (rtLayout.colorOutputs[i].loadAction == RHIRenderPassLoadAction::Load)
+            else if (rtLayout.colorOutputs[i].loadAction == RenderPassLoadAction::Load)
                 attachment.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
-            else if (rtLayout.colorOutputs[i].loadAction == RHIRenderPassLoadAction::None)
+            else if (rtLayout.colorOutputs[i].loadAction == RenderPassLoadAction::None)
                 attachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 
-            if (rtLayout.colorOutputs[i].storeAction == RHIRenderPassStoreAction::None)
+            if (rtLayout.colorOutputs[i].storeAction == RenderPassStoreAction::None)
                 attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-            else if (rtLayout.colorOutputs[i].storeAction == RHIRenderPassStoreAction::Store)
+            else if (rtLayout.colorOutputs[i].storeAction == RenderPassStoreAction::Store)
                 attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
             attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -312,7 +317,7 @@ namespace CE
         delete renderPass;
     }
 
-    RHIRenderPass* VulkanRenderTarget::GetRenderPass()
+    RHI::RenderPass* VulkanRenderTarget::GetRenderPass()
     {
         return renderPass;
     }
@@ -361,16 +366,16 @@ namespace CE
     {
         auto imageFormat = rtLayout.depthFormat;
 
-        RHITextureDesc textureDesc{};
+        RHI::TextureDesc textureDesc{};
         textureDesc.name = "Depth Buffer";
         textureDesc.width = width;
         textureDesc.height = height;
         textureDesc.depth = 1;
-        textureDesc.dimension = RHITextureDimension::Dim2D;
+        textureDesc.dimension = RHI::TextureDimension::Dim2D;
         textureDesc.format = VkFormatToRHITextureFormat(rtLayout.depthFormat);
         textureDesc.mipLevels = 1;
         textureDesc.sampleCount = 1;
-        textureDesc.usageFlags = RHITextureUsageFlags::DepthStencilAttachment;
+        textureDesc.usageFlags = RHI::TextureUsageFlags::DepthStencilAttachment;
         textureDesc.forceLinearLayout = false;
 
         depthFrame.textures.Resize(1);
@@ -412,21 +417,21 @@ namespace CE
             frame.textures.Resize(rtLayout.colorAttachmentCount);
             frame.samplers.Resize(rtLayout.colorAttachmentCount);
 
-            VkImageView attachments[RHIMaxSimultaneousRenderOutputs + 1] = {};
+            VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1] = {};
 
             for (int j = 0; j < rtLayout.colorAttachmentCount; j++)
             {
                 auto imageFormat = rtLayout.colorFormats[j];
 
-                RHITextureDesc textureDesc{};
+                RHI::TextureDesc textureDesc{};
                 textureDesc.name = "Color Buffer";
                 textureDesc.width = GetWidth();
                 textureDesc.height = GetHeight();
                 textureDesc.depth = 1;
-                textureDesc.dimension = RHITextureDimension::Dim2D;
+                textureDesc.dimension = RHI::TextureDimension::Dim2D;
                 textureDesc.format = VkFormatToRHITextureFormat(imageFormat);
                 textureDesc.mipLevels = 1;
-                textureDesc.usageFlags = RHITextureUsageFlags::ColorAttachment | RHITextureUsageFlags::SampledImage;
+                textureDesc.usageFlags = RHI::TextureUsageFlags::ColorAttachment | RHI::TextureUsageFlags::SampledImage;
                 textureDesc.sampleCount = 1;
                 textureDesc.forceLinearLayout = false;
 
