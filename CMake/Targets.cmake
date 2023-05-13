@@ -257,6 +257,7 @@ function(ce_add_target NAME TARGET_TYPE)
     foreach(runtime_dep ${ce_add_target_RUNTIME_DEPENDENCIES})
         # NEW Loading
         if(TARGET ${runtime_dep}_RT)
+            set(target_runtime_deps "")
             get_target_property(root_path ${runtime_dep}_RT ROOT_PATH)
             get_target_property(copy_dirs ${runtime_dep}_RT COPY_DIRS)
             get_target_property(copy_libs ${runtime_dep}_RT COPY_LIBS)
@@ -272,8 +273,15 @@ function(ce_add_target NAME TARGET_TYPE)
                     add_custom_command(TARGET ${NAME} POST_BUILD
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${copy_lib} "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
                     )
+                    list(APPEND target_runtime_deps "${copy_lib}")
                 endforeach()
             endif()
+
+            set_target_properties(${NAME} 
+                PROPERTIES
+                    DLL_DEPS "${target_runtime_deps}"
+            )
+            set(target_runtime_deps "")
 
             if(copy_files)
                 foreach(copy_file ${copy_files})
@@ -284,9 +292,10 @@ function(ce_add_target NAME TARGET_TYPE)
                     add_custom_command(TARGET ${NAME} POST_BUILD
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${copy_file} "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
                     )
+                    list(APPEND target_runtime_deps "${copy_file}")
                 endforeach()
             endif()
-
+            
             continue()
         endif()
         

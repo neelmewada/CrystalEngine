@@ -66,7 +66,7 @@ add_compile_definitions(IS_64BIT=1)
 # Platform Utils
 
 macro(ce_decorated_lib_name LIB_NAME OUT_NAME)
-    if(${LIB_NAME} MATCHES ".dll$")
+    if((${LIB_NAME} MATCHES ".dll$") OR (${LIB_NAME} MATCHES ">$"))
         set(${OUT_NAME} "${LIB_NAME}")
     else()
         set(${OUT_NAME} "${LIB_NAME}.dll")

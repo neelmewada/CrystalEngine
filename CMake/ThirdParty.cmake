@@ -50,7 +50,7 @@ function(ce_add_rt_deps NAME)
     set(target "${NAME}_RT")
 
     set(options AUTORTTI)
-    set(oneValueArgs OUTPUT_SUBDIRECTORY FOLDER ROOT_PATH OUTPUT_DIRECTORY)
+    set(oneValueArgs OUTPUT_SUBDIRECTORY FOLDER ROOT_PATH MAC_ROOT_PATH)
     set(multiValueArgs COPY_DIRS COPY_FILES COPY_LIBS INCLUDE_DIRECTORIES BIN_DIRS)
 
     cmake_parse_arguments(ce_add_rt_deps "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -59,6 +59,10 @@ function(ce_add_rt_deps NAME)
 
     if(NOT ce_add_rt_deps_ROOT_PATH)
         message(FATAL_ERROR "ROOT_PATH not supplied to ce_add_rt_deps ${NAME}")
+    endif()
+
+    if(ce_add_rt_deps_MAC_ROOT_PATH)
+        set(ce_add_rt_deps_ROOT_PATH "${ce_add_rt_deps_MAC_ROOT_PATH}")
     endif()
     
     set_target_properties(${target} PROPERTIES ROOT_PATH "${ce_add_rt_deps_ROOT_PATH}")

@@ -39,8 +39,10 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
 
     ce_add_rt_deps(SpirvTools
         ROOT_PATH "$ENV{VULKAN_SDK}/Bin"
-        COPY_FILES
+        MAC_ROOT_PATH "$ENV{VULKAN_SDK}/lib"
+        COPY_LIBS
             $<${PAL_PLATFORM_IS_WINDOWS}:SPIRV-Tools-shared$<$<CONFIG:Debug>:d>.dll>
+            $<${PAL_PLATFORM_IS_MAC}:libSPIRV-Tools-shared.dylib>
     )
     
 endif()
