@@ -104,10 +104,10 @@ namespace CE
             case JsonReadInstruction::ObjectStart:
                 {
                     if (rootValue == nullptr) // Root entry
-                        {
+                    {
                         rootValue = new JsonValue(JsonObject());
                         stack.Push(rootValue);
-                        }
+                    }
                     else if (stack.NonEmpty())
                     {
                         auto objectValue = new JsonValue(JsonObject());

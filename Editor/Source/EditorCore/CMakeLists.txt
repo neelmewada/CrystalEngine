@@ -27,11 +27,13 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::dxcompiler
+            SpirvTools
         PUBLIC
             CE::Core
             CE::System
     RUNTIME_DEPENDENCIES
         dxcompiler
+        SpirvTools
 )
 
 

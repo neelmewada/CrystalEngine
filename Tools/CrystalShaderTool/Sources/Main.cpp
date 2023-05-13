@@ -12,12 +12,13 @@ int main(int argc, const char** argv)
 	using namespace CE;
 	Logger::Initialize();
 
-	cxxopts::Options options("CrystalShaderTool", "Crystal Engine's shader compilation tool. Compiles HLSL code into a Crystal Shader unit with reflection");
+	cxxopts::Options options("CrystalShaderTool", "Crystal Engine's shader compilation tool. Compiles HLSL code into a Crystal Shader binary package with reflection");
 	
 	options.add_options()
 		("h,help", "Show this help text")
-		("i,input", "List of input HLSL files to compile", cxxopts::value<std::vector<std::string>>())
-		("o,output", "Output binary shader package", cxxopts::value<std::string>());
+		("i,input", "List of input HLSL files to compile", cxxopts::value<std::string>())
+		("o,output", "Output binary shader package", cxxopts::value<std::string>())
+		("spirv", "Build spirv binary", cxxopts::value<bool>()->default_value("true"))
 	;
 
 	options.allow_unrecognised_options();
@@ -35,13 +36,38 @@ int main(int argc, const char** argv)
 		if (result["input"].count() == 0)
 		{
 			LOG_ERROR("No input HLSL files passed");
-			return 0;
+			return 1;
+		}
+
+		IO::Path inputFile = result["input"].as<std::string>();
+		if (!inputFile.Exists())
+		{
+			LOG_ERROR("Input file does not exist")
+			return 2;
+		}
+
+		IO::Path outputFile = result["output"].as<std::string>();
+		if (outputFile.Exists())
+		{
+			IO::Path::Remove(outputFile);
 		}
 		
 		using namespace Editor;
 
-		ShaderCompiler compiler{ };
-		
+		ShaderProcessor processor{};
+
+		ShaderBuildConfig config{};
+		config.debugName = "TestShader";
+		config.vertEntry = "VertMain";
+		config.fragEntry = "FragMain";
+
+		auto code = processor.ProcessHLSL(inputFile, outputFile, config);
+
+		if (code != ShaderProcessor::ERR_Success)
+		{
+			LOG_ERROR("Compilation failed. Error:\n" << processor.GetErrorMessage().ToStdString());
+			return 3;
+		}
 	}
 	catch (std::exception exc)
 	{

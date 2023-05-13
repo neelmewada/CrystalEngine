@@ -102,5 +102,25 @@ namespace CE
         
         Array<JsonValueType> parserStack{};
     };
+
+    class JsonStringReader : public JsonReader
+    {
+    public:
+        static JsonStringReader Create(const String& string)
+        {
+            return JsonStringReader(new MemoryStream(string.GetCString(), string.GetLength() + 1, Stream::Permissions::ReadOnly));
+        }
+
+        ~JsonStringReader()
+        {
+            delete underlyingStream;
+        }
+
+    private:
+        JsonStringReader(MemoryStream* memoryStream) : JsonReader(memoryStream), underlyingStream(memoryStream)
+        {}
+
+        MemoryStream* underlyingStream;
+    };
     
 } // namespace CE

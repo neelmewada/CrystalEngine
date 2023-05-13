@@ -18,6 +18,10 @@ namespace CE
         bool IsValid() override;
 
         bool IsRoot() override;
+
+        bool TryEnterMap() override;
+        bool TryEnterArray() override;
+        bool TryEnterField(const String& identifier = "") override;
         
         void EnterMap() override;
         void ExitMap() override;
@@ -32,15 +36,24 @@ namespace CE
         void EnterNumberValue(f64 value) override;
         void EnterBoolValue(bool value) override;
         void EnterNullValue() override;
-        
+
+        StructuredStreamEntry& GetRootEntry() override;
+
+        StructuredStreamEntry& GetEntryAt(StructuredStreamPosition position) override;
+        StructuredStreamEntry::Type GetNextEntryType() override;
+
     private:
         Stream& stream;
         
         String currentIdentifier = "";
         int currentArrayIndex = 0;
         
-        JsonValue* rootValue = nullptr;
+        JsonValue* rootJson = nullptr;
         Array<JsonValue*> valueStack{};
+        Array<StructuredStreamPrivate::EntryKey> positionStack{};
+
+        StructuredStreamEntry& rootEntry;
+        StructuredStreamEntry& currentEntry;
     };
 
     

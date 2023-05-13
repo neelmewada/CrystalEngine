@@ -127,5 +127,46 @@ namespace CE
         }
         return *this;
     }
+
+    static StructuredStreamEntry invalidEntry{};
+    
+    StructuredStreamEntry& StructuredStreamEntry::operator[](u32 index)
+    {
+        return invalidEntry;
+    }
+
+    StructuredStreamEntry& StructuredStreamEntry::operator[](const String& key)
+    {
+        return invalidEntry;
+    }
+
+    StructuredStreamArray::~StructuredStreamArray()
+    {
+        for (auto entry : array)
+        {
+            delete entry;
+        }
+        array.Clear();
+    }
+
+    StructuredStreamEntry& StructuredStreamArray::operator[](u32 index)
+    {
+        return *array[index];
+    }
+
+    StructuredStreamMap::~StructuredStreamMap()
+    {
+        for (auto [_, entry] : map)
+        {
+            delete entry;
+        }
+        map.Clear();
+    }
+
+    StructuredStreamEntry& StructuredStreamMap::operator[](const String& key)
+    {
+        return *map.Get(key);
+    }
+    
 } // namespace CE
 

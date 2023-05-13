@@ -1122,9 +1122,47 @@ TEST(Serialization, StructuredStream)
     memoryStream.Write('\0'); // Null terminator
     
     memoryStream.Seek(0); // Reset to start
-    JsonStreamInputFormatter inFormatter{memoryStream}; // Json Input
-    StructuredStream inStream{inFormatter};
+
+    auto rootJsonValuePtr = JsonSerializer::Deserialize(&memoryStream);
+    const auto& jsonValue = *rootJsonValuePtr;
+
+    EXPECT_TRUE(jsonValue.IsObjectValue());
+    {
+        EXPECT_TRUE(jsonValue.KeyExists("name"));
+        EXPECT_TRUE(jsonValue["name"].IsStringValue());
+        EXPECT_EQ(jsonValue["name"].GetStringValue(), "Some Name");
+
+        EXPECT_TRUE(jsonValue.KeyExists("number"));
+        EXPECT_TRUE(jsonValue["number"].IsNumberValue());
+        EXPECT_EQ(jsonValue["number"].GetNumberValue(), 1242.42);
+
+        EXPECT_TRUE(jsonValue.KeyExists("array"));
+        EXPECT_TRUE(jsonValue["array"].IsArrayValue());
+        EXPECT_EQ(jsonValue["array"].GetSize(), 4);
+        {
+            EXPECT_TRUE(jsonValue["array"][0].IsStringValue());
+            EXPECT_EQ(jsonValue["array"][0].GetStringValue(), "StringVal");
+
+            EXPECT_TRUE(jsonValue["array"][1].IsBoolValue());
+            EXPECT_EQ(jsonValue["array"][1].GetBoolValue(), false);
+
+            EXPECT_TRUE(jsonValue["array"][2].IsNumberValue());
+            EXPECT_EQ(jsonValue["array"][2].GetNumberValue(), 12345);
+
+            EXPECT_TRUE(jsonValue["array"][3].IsObjectValue());
+            {
+                EXPECT_TRUE(jsonValue["array"][3]["item0"].IsStringValue());
+                EXPECT_EQ(jsonValue["array"][3]["item0"].GetStringValue(), "some value");
+
+                EXPECT_TRUE(jsonValue["array"][3]["item1"].IsNullValue());
+
+                EXPECT_TRUE(jsonValue["array"][3]["item2"].IsBoolValue());
+                EXPECT_EQ(jsonValue["array"][3]["item2"].GetBoolValue(), true);
+            }
+        }
+    }
     
+    delete rootJsonValuePtr;
     memoryStream.Close();
     
     TEST_END;

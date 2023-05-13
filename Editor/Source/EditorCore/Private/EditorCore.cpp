@@ -10,7 +10,7 @@ namespace CE::Editor
 
         void StartupModule() override
         {
-
+            
         }
 
         void ShutdownModule() override

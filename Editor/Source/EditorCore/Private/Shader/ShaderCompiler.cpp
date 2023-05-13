@@ -53,9 +53,6 @@ namespace CE::Editor
 
 		// Create default include handler
 		impl->utils->CreateDefaultIncludeHandler(&impl->includeHandler);
-
-		CComPtr<IDxcBlobEncoding> source = nullptr;
-		
 	}
 
 	ShaderCompiler::~ShaderCompiler()
@@ -64,22 +61,30 @@ namespace CE::Editor
 		delete impl;
 	}
 
-	ShaderCompiler::ErrorCode ShaderCompiler::Compile(IO::Path filePath, Array<std::wstring> args)
+	ShaderCompiler::ErrorCode ShaderCompiler::Compile(const IO::Path& filePath, Array<std::wstring>& args, void** outByteCode, u32* outByteCodeSize)
 	{
 		if (!filePath.Exists())
 			return ERR_FileNotFound;
 		if (filePath.IsDirectory())
 			return ERR_InvalidFile;
 
+		HRESULT status;
+
 		CComPtr<IDxcBlobEncoding> source = nullptr;
 		std::wstring str = ToWString(filePath.GetString());
 		std::wstring fileNameStr = ToWString(filePath.GetFilename().GetString());
 
-		impl->utils->LoadFile(str.data(), nullptr, &source);
+		status = impl->utils->LoadFile(str.data(), nullptr, &source);
+		if (!SUCCEEDED(status))
+		{
+			this->errorMessage = "Failed to load source file";
+			return ERR_FailedToLoadFile;
+		}
+
 		DxcBuffer buffer;
 		buffer.Ptr = source->GetBufferPointer();
 		buffer.Size = source->GetBufferSize();
-		buffer.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
+		buffer.Encoding = DXC_CP_UTF8;//DXC_CP_ACP; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
 
 		Array<const wchar_t*> wcharArgs{};
 		for (const auto& arg : args)
@@ -88,11 +93,11 @@ namespace CE::Editor
 		}
 
 		wcharArgs.AddRange({
-			L"-spirv"
+			fileNameStr.data()
 		});
 
 		CComPtr<IDxcResult> results;
-		impl->compiler->Compile(
+		status = impl->compiler->Compile(
 			&buffer,                // Source buffer.
 			wcharArgs.GetData(),                // Array of pointers to arguments.
 			wcharArgs.GetSize(),      // Number of arguments.
@@ -100,6 +105,29 @@ namespace CE::Editor
 			IID_PPV_ARGS(&results) // Compiler output status, buffer, and errors.
 		);
 
+		results->GetStatus(&status);
+
+		if (!SUCCEEDED(status))
+		{
+			CComPtr<IDxcBlobEncoding> error;
+			results->GetErrorBuffer(&error);
+			char* message = (char*)error->GetBufferPointer();
+			auto size = error->GetBufferSize();
+			this->errorMessage = message;
+			return ERR_CompilationFailure;
+		}
+
+		CComPtr<IDxcBlob> blob;
+		status = results->GetResult(&blob);
+
+		if (!SUCCEEDED(status))
+		{
+			return ERR_CompilationFailure;
+		}
+
+		*outByteCodeSize = blob->GetBufferSize();
+		*outByteCode = Memory::Malloc(*outByteCodeSize);
+		memcpy(*outByteCode, blob->GetBufferPointer(), *outByteCodeSize);
 
 		return ERR_Success;
 	}

@@ -19,7 +19,8 @@ namespace CE
             Key,
             Value
         };
-        
+
+        using Position = Array<StructuredStreamPrivate::EntryKey>;
         using Entry = StructuredStreamEntry;
         using Array = StructuredStreamArray;
         
@@ -32,6 +33,8 @@ namespace CE
 
         Stream& GetUnderlyingStream();
 
+        // Write Ops
+
         virtual StructuredStream& operator<<(StructuredStreamInstruction writeInstruction);
         virtual StructuredStream& operator<<(const String& stringValue);
         virtual StructuredStream& operator<<(const char* cString)
@@ -42,6 +45,43 @@ namespace CE
         virtual StructuredStream& operator<<(s32 numberValue);
         virtual StructuredStream& operator<<(s64 numberValue);
         virtual StructuredStream& operator<<(bool boolValue);
+
+        bool TryEnterMap()
+        {
+            return formatter.TryEnterMap();
+        }
+
+        void ExitMap()
+        {
+            formatter.ExitMap();
+        }
+
+        bool TryEnterArray()
+        {
+            return formatter.TryEnterArray();
+        }
+
+        void ExitArray()
+        {
+            return formatter.ExitArray();
+        }
+
+        bool TryEnterField(const String& identifier)
+        {
+            return formatter.TryEnterField(identifier);
+        }
+
+        void ExitField()
+        {
+            formatter.ExitField();
+        }
+        
+        // Read Ops
+
+        const Entry& GetRoot() const
+        {
+            return formatter.GetRootEntry();
+        }
 
     private:
         StructuredStreamFormatter& formatter;

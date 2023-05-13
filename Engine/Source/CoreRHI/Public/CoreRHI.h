@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 
 #include "RHI/RHIDefinitions.h"
-#include "ImGui/ImGui.h"
 #include "RHI/RHIResources.h"
 #include "RHI/RHI.h"
 

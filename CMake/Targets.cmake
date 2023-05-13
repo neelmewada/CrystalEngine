@@ -287,7 +287,7 @@ function(ce_add_target NAME TARGET_TYPE)
                 endforeach()
             endif()
 
-            return()
+            continue()
         endif()
         
 

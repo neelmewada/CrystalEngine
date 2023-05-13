@@ -31,6 +31,7 @@ typedef uintptr_t UintPtr;
 typedef intptr_t PtrDiff;
 
 typedef char CHAR;
+typedef wchar_t WCHAR;
 
 #if IS_64BIT
     typedef u64 SIZE_T;
@@ -39,4 +40,3 @@ typedef char CHAR;
     typedef u32 SIZE_T;
     typedef s32 SSIZE_T;
 #endif
-

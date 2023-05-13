@@ -20,7 +20,9 @@ find_package(imgui REQUIRED)
 
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
-    find_package(Vulkan REQUIRED)
+    find_package(Vulkan REQUIRED
+        COMPONENTS SPIRV-Tools
+    )
 
     set(Vulkan_RUNTIME_DEPS "")
 
@@ -31,6 +33,15 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
         set(Vulkan_BIN_DIR "$ENV{VULKAN_SDK}/macOS/lib")
         set(Vulkan_LIB_DIR "$ENV{VULKAN_SDK}/macOS/lib")
     endif()
+
+    # Vulkan SpirV Tools
+    add_library(SpirvTools ALIAS Vulkan::SPIRV-Tools)
+
+    ce_add_rt_deps(SpirvTools
+        ROOT_PATH "$ENV{VULKAN_SDK}/Bin"
+        COPY_FILES
+            $<${PAL_PLATFORM_IS_WINDOWS}:SPIRV-Tools-shared$<$<CONFIG:Debug>:d>.dll>
+    )
     
 endif()
 
