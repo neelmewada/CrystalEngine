@@ -22,19 +22,24 @@ struct MyBuffer
     float3 cameraPos;
 };
 
-SRG(0, 1)
-ConstantBuffer<MyBuffer> buff;
+
+ConstantBuffer<MyBuffer> buff : register(b0, space0);
+ConstantBuffer<MyBuffer> buff2 : register(b1, space0);
+
+Texture2D texture : register(t0, space1);
+SamplerState textureSampler : register(t1, space1);
 
 // vertex shader function
 v2p VertMain(VertexInfo input)
 {
     v2p output;
-    output.position = float4(input.position * buff.cameraPos, 1.0);
+    output.position = float4(input.position * buff.cameraPos * buff2.cameraPos, 1.0);
     return output;
 }
 
 // pixel shader function
 float4 FragMain(v2p input) : SV_TARGET
 {
-    return float4(buff.lightColor, 0.0);
+    float4 col = texture.Sample(textureSampler, float2(0, 0));
+    return float4(buff.lightColor * col.rgb, 0.0);
 }

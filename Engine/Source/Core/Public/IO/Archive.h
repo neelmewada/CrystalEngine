@@ -32,7 +32,6 @@ namespace CE
         // - Public API -
 
         void Open(IO::Path archivePath, ArchiveMode mode);
-        void Open(IO::GenericStream* stream, ArchiveMode mode);
         void Close();
 
         CE_INLINE ArchiveMode GetMode() { return mode; }

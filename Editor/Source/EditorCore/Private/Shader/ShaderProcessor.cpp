@@ -64,6 +64,9 @@ namespace CE::Editor
 			baseArgs.Add(L"-I");
 			baseArgs.Add(ToWString(includePath));
 		}
+        
+        Archive shaderArchive{};
+        shaderArchive.Open(outPath, ArchiveMode::Write);
 		
 		Array<std::wstring> vertArgs{};
 		vertArgs.AddRange(baseArgs);
@@ -75,20 +78,27 @@ namespace CE::Editor
 
 		void* byteCode = nullptr;
 		u32 byteSize = 0;
-		// TODO: temporary code!
-		if (compiler.Compile(filePath, vertArgs, &byteCode, &byteSize) == ShaderCompiler::ERR_Success)
-		{
-			std::fstream fileStream{ outPath, std::ios::out | std::ios::binary };
-			fileStream.write((char*)byteCode, byteSize);
-			fileStream.close();
-			Memory::Free(byteCode);
-		}
-		else
-		{
-			errorMessage = compiler.GetErrorMessage();
-			return ERR_VertexFail;
-		}
-		return ERR_Success;
+        
+        auto result = compiler.Compile(filePath, vertArgs, &byteCode, &byteSize);
+        
+        if (result != ShaderCompiler::ERR_Success)
+        {
+            errorMessage = compiler.GetErrorMessage();
+            shaderArchive.Close();
+            IO::Path::Remove(outPath);
+            return ERR_VertexFail;
+        }
+        
+        // Write Vertex binary
+        shaderArchive.OpenEntry("bytecode0_vert.spv");
+        {
+            shaderArchive.EntryWrite(byteCode, byteSize);
+        }
+        shaderArchive.CloseEntry();
+        
+        Memory::Free(byteCode);
+        byteCode = nullptr;
+        byteSize = 0;
 
 		Array<std::wstring> fragArgs{};
 		fragArgs.AddRange(baseArgs);
@@ -97,6 +107,28 @@ namespace CE::Editor
 			L"-T", L"ps_6_0",
 			L"-D", L"FRAGMENT=1"
 		});
+        
+        result = compiler.Compile(filePath, fragArgs, &byteCode, &byteSize);
+        
+        if (result != ShaderCompiler::ERR_Success)
+        {
+            errorMessage = compiler.GetErrorMessage();
+            shaderArchive.Close();
+            IO::Path::Remove(outPath);
+            return ERR_FragmentFail;
+        }
+        
+        shaderArchive.OpenEntry("bytecode0_frag.spv");
+        {
+            shaderArchive.EntryWrite(byteCode, byteSize);
+        }
+        shaderArchive.CloseEntry();
+        
+        Memory::Free(byteCode);
+        byteCode = nullptr;
+        byteSize = 0;
+        
+        shaderArchive.Close();
 
 		return ERR_Success;
 	}

@@ -25,6 +25,9 @@ ce_add_target(System SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::sdl
+            CE::CoreApplication
+            CE::CoreGUI
+            CE::CoreRHI
         PUBLIC
             CE::Core
             CE::CoreMedia

@@ -100,19 +100,6 @@ namespace CE
 		handle = zip_open(path.GetCString(), ZIP_DEFAULT_COMPRESSION_LEVEL, (char)mode);
 	}
 
-	void Archive::Open(IO::GenericStream* stream, ArchiveMode mode)
-	{
-		if (IsOpen())
-			return;
-
-		streamSize = stream->GetLength();
-		this->stream = new char[streamSize];
-
-		stream->Read(streamSize, this->stream);
-
-		handle = zip_stream_open(this->stream, this->streamSize, ZIP_DEFAULT_COMPRESSION_LEVEL, (char)mode);
-	}
-
 	void Archive::Close()
 	{
 		if (!IsOpen())
