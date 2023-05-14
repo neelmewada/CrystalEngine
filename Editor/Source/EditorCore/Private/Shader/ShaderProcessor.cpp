@@ -51,9 +51,10 @@ namespace CE::Editor
 		includeSearchPaths.Clear();
 	}
 
-	ShaderProcessor::ErrorCode ShaderProcessor::ProcessHLSL(const IO::Path& filePath, const IO::Path& outPath, const ShaderBuildConfig& buildConfig)
+	ShaderProcessor::ErrorCode ShaderProcessor::ProcessHLSL(const IO::Path& filePath, IO::Path outPath, const ShaderBuildConfig& buildConfig)
 	{
 		ShaderCompiler compiler{};
+		ShaderReflector reflector{};
 
 		Array<std::wstring> baseArgs{
 			L"-spirv"
@@ -63,6 +64,16 @@ namespace CE::Editor
 		{
 			baseArgs.Add(L"-I");
 			baseArgs.Add(ToWString(includePath));
+		}
+
+		if (outPath.GetExtension().IsEmpty()) // outPath has no extension, add .csbin to end
+		{
+			outPath = outPath.GetString() + ".csbin";
+		}
+
+		if (!outPath.GetParentPath().Exists())
+		{
+			IO::Path::CreateDirectories(outPath.GetParentPath());
 		}
         
         Archive shaderArchive{};
@@ -95,6 +106,9 @@ namespace CE::Editor
             shaderArchive.EntryWrite(byteCode, byteSize);
         }
         shaderArchive.CloseEntry();
+
+		// Vertex Reflection
+
         
         Memory::Free(byteCode);
         byteCode = nullptr;
@@ -118,11 +132,14 @@ namespace CE::Editor
             return ERR_FragmentFail;
         }
         
+		// Write Fragment binary
         shaderArchive.OpenEntry("bytecode0_frag.spv");
         {
             shaderArchive.EntryWrite(byteCode, byteSize);
         }
         shaderArchive.CloseEntry();
+
+		// Fragment Reflection
         
         Memory::Free(byteCode);
         byteCode = nullptr;

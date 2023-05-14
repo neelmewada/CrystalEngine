@@ -15,7 +15,7 @@ namespace CE
 			ObjectInitializer init = ObjectInitializer();
 			init.objectFlags = params.objectFlags;
 			init.name = params.name;
-			init.uuid = 0;
+			init.uuid = params.uuid;
             init.objectClass = params.objectClass;
 
 			ObjectThreadContext::Get().PushInitializer(&init);

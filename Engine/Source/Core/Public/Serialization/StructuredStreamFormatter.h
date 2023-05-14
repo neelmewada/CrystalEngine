@@ -57,18 +57,16 @@ namespace CE
         virtual void EnterBoolValue(bool value) = 0;
         virtual void EnterNullValue() = 0;
 
-        virtual StructuredStreamEntry& GetRootEntry()
+        virtual StructuredStreamEntry* GetRootEntry()
         {
-            static StructuredStreamEntry empty{};
-            return empty;
+            return nullptr;
         }
 
         // Read Ops
 
-        virtual StructuredStreamEntry& GetEntryAt(StructuredStreamPosition position)
+        virtual StructuredStreamEntry* GetEntryAt(StructuredStreamPosition position)
         {
-            static StructuredStreamEntry empty{};
-            return empty;
+            return nullptr;
         }
     };
 

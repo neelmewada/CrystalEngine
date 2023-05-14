@@ -33,6 +33,7 @@ namespace CE
 			String name{};
 			Object* templateObject = nullptr;
 			ObjectFlags objectFlags{};
+			UUID uuid = 0;
 		};
 
 		/// For internal use only

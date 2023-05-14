@@ -78,7 +78,7 @@ namespace CE
         
         // Read Ops
 
-        const Entry& GetRoot() const
+        Entry* GetRoot() const
         {
             return formatter.GetRootEntry();
         }

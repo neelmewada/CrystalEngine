@@ -1078,7 +1078,7 @@ const char Serialization_StructuredStream_Test_Json[] = R"([
 	"item0",
 	42.212
 ])";
-TEST(Serialization, StructuredStream)
+TEST(Serialization, StructuredStreamWrite)
 {
     TEST_BEGIN;
 
@@ -1123,7 +1123,48 @@ TEST(Serialization, StructuredStream)
     
     memoryStream.Seek(0); // Reset to start
 
-    auto rootJsonValuePtr = JsonSerializer::Deserialize(&memoryStream);
+    JsonStreamInputFormatter inFormatter{ memoryStream }; // Json Input
+    StructuredStream inStream{ inFormatter };
+
+    auto& rootEntry = *inStream.GetRoot();
+
+    EXPECT_TRUE(rootEntry.IsMap());
+    {
+        EXPECT_TRUE(rootEntry.KeyExists("name"));
+        EXPECT_TRUE(rootEntry["name"].IsString());
+        EXPECT_EQ(rootEntry["name"].GetStringValue(), "Some Name");
+
+        EXPECT_TRUE(rootEntry.KeyExists("number"));
+        EXPECT_TRUE(rootEntry["number"].IsNumber());
+        EXPECT_TRUE(rootEntry["number"].GetNumberValue(), 1242.42);
+
+        EXPECT_TRUE(rootEntry.KeyExists("array"));
+        EXPECT_TRUE(rootEntry["array"].IsArray());
+        EXPECT_EQ(rootEntry["array"].GetArraySize(), 4);
+        {
+            EXPECT_TRUE(rootEntry["array"][0].IsString());
+            EXPECT_EQ(rootEntry["array"][0].GetStringValue(), "StringVal");
+
+            EXPECT_TRUE(rootEntry["array"][1].IsBool());
+            EXPECT_EQ(rootEntry["array"][1].GetBoolValue(), false);
+
+            EXPECT_TRUE(rootEntry["array"][2].IsNumber());
+            EXPECT_EQ(rootEntry["array"][2].GetNumberValue(), 12345);
+
+            EXPECT_TRUE(rootEntry["array"][3].IsMap());
+            {
+                EXPECT_TRUE(rootEntry["array"][3]["item0"].IsString());
+                EXPECT_EQ(rootEntry["array"][3]["item0"].GetStringValue(), "some value");
+
+                EXPECT_TRUE(rootEntry["array"][3]["item1"].IsNull());
+
+                EXPECT_TRUE(rootEntry["array"][3]["item2"].IsBool());
+                EXPECT_EQ(rootEntry["array"][3]["item2"].GetBoolValue(), true);
+            }
+        }
+    }
+
+    /*auto rootJsonValuePtr = JsonSerializer::Deserialize(&memoryStream);
     const auto& jsonValue = *rootJsonValuePtr;
 
     EXPECT_TRUE(jsonValue.IsObjectValue());
@@ -1161,10 +1202,19 @@ TEST(Serialization, StructuredStream)
             }
         }
     }
-    
-    delete rootJsonValuePtr;
+    delete rootJsonValuePtr;*/
     memoryStream.Close();
     
+    TEST_END;
+}
+
+
+TEST(Serialization, Struct)
+{
+    TEST_BEGIN;
+
+
+
     TEST_END;
 }
 

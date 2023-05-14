@@ -9,6 +9,7 @@ namespace CE::Editor
         enum ErrorCode
         {
             ERR_Success,
+            ERR_InputFileNotFound,
             ERR_VertexFail,
             ERR_FragmentFail,
         };
@@ -20,7 +21,7 @@ namespace CE::Editor
         void RemoveIncludeSearchPath(const IO::Path& includePath);
         void ClearIncludeSearchPaths();
 
-        ErrorCode ProcessHLSL(const IO::Path& filePath, const IO::Path& outPath, const ShaderBuildConfig& buildConfig);
+        ErrorCode ProcessHLSL(const IO::Path& filePath, IO::Path outPath, const ShaderBuildConfig& buildConfig);
 
         const String& GetErrorMessage() const
         {

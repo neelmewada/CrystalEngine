@@ -23,13 +23,33 @@ namespace CE
         virtual bool IsField() { return false; }
         virtual bool IsArray() { return false; }
         virtual bool IsMap() { return false; }
+        virtual bool IsString() { return false; }
+        virtual bool IsNumber() { return false; }
+        virtual bool IsBool() { return false; }
+        virtual bool IsNull() { return false; }
 
         virtual bool IsValid() { return false; }
+
+        virtual String GetStringValue() { return ""; }
+        virtual bool GetBoolValue() { return false; }
+        virtual f64 GetNumberValue() { return 0; }
 
         virtual Type GetType() { return Type::None; }
 
         virtual StructuredStreamEntry& operator[](u32 index);
         virtual StructuredStreamEntry& operator[](const String& key);
+
+        virtual bool IndexExists(u32 index)
+        {
+            return false;
+        }
+
+        virtual bool KeyExists(const String& key)
+        {
+            return false;
+        }
+
+        virtual u32 GetArraySize() { return 0; }
         
         StructuredStreamFormatter* formatter = nullptr;
         String identifier = "";
@@ -79,6 +99,15 @@ namespace CE
         {
             return Type::Field;
         }
+
+        virtual bool IsString() override { return isString; }
+        virtual bool IsNumber() override { return isNumber; }
+        virtual bool IsBool() override { return isBool; }
+        virtual bool IsNull() override { return isNull; }
+
+        virtual String GetStringValue() { return stringValue; }
+        virtual bool GetBoolValue() { return boolValue; }
+        virtual f64 GetNumberValue() { return numberValue; }
 
     protected:
         void Clear()
@@ -134,6 +163,16 @@ namespace CE
             return Type::Array;
         }
 
+        bool IndexExists(u32 index) override
+        {
+            return 0 <= index && index < array.GetSize();
+        }
+
+        u32 GetArraySize() override
+        {
+            return array.GetSize(); 
+        }
+
         StructuredStreamEntry& operator[](u32 index) override;
         
         Array<StructuredStreamEntry*> array{};
@@ -160,6 +199,11 @@ namespace CE
         Type GetType() override
         {
             return Type::Map;
+        }
+
+        bool KeyExists(const String& key) override
+        {
+            return map.KeyExists(key);
         }
         
         StructuredStreamEntry& operator[](const String& key) override;

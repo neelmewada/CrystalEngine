@@ -39,44 +39,82 @@ namespace CE
         }
     }
 
-    static void PopulateStructures(JsonValue& rootJson, StructuredStreamEntry& rootEntry)
+    static void PopulateStructures(JsonValue& rootJson, StructuredStreamEntry* rootEntry)
     {
-        if (rootJson.IsArrayValue() && rootEntry.IsArray())
+        if (rootJson.IsArrayValue() && rootEntry->IsArray())
         {
-            auto& arrayStructure = static_cast<StructuredStreamArray&>(rootEntry);
+            auto arrayStructure = dynamic_cast<StructuredStreamArray*>(rootEntry);
             for (int i = 0; i < rootJson.GetArrayValue().GetSize(); i++)
             {
                 auto& item = *rootJson.GetArrayValue()[i];
                 if (item.IsStringValue())
                 {
-                    arrayStructure.array.Add(new StructuredStreamField(item.GetStringValue()));
+                    arrayStructure->array.Add(new StructuredStreamField(item.GetStringValue()));
                 }
                 else if (item.IsNumberValue())
                 {
-                    arrayStructure.array.Add(new StructuredStreamField(item.GetNumberValue()));
+                    arrayStructure->array.Add(new StructuredStreamField(item.GetNumberValue()));
                 }
                 else if (item.IsBoolValue())
                 {
-                    arrayStructure.array.Add(new StructuredStreamField(item.GetBoolValue()));
+                    arrayStructure->array.Add(new StructuredStreamField(item.GetBoolValue()));
                 }
                 else if (item.IsNullValue())
                 {
-                    arrayStructure.array.Add(new StructuredStreamField());
+                    arrayStructure->array.Add(new StructuredStreamField());
                 }
                 else if (item.IsArrayValue())
                 {
-                    
+                    arrayStructure->array.Add(new StructuredStreamArray());
+                    PopulateStructures(item, arrayStructure->array.GetLast());
+                }
+                else if (item.IsObjectValue())
+                {
+                    arrayStructure->array.Add(new StructuredStreamMap());
+                    PopulateStructures(item, arrayStructure->array.GetLast());
                 }
             }
         }
-        else if (rootJson.IsObjectValue())
+        else if (rootJson.IsObjectValue() && rootEntry->IsMap())
         {
-            
+            auto mapStructure = dynamic_cast<StructuredStreamMap*>(rootEntry);
+            for (const auto& [identifier, value] : rootJson.GetObjectValue())
+            {
+                auto& item = *value;
+                if (item.IsStringValue())
+                {
+                    mapStructure->map.Add({ identifier, new StructuredStreamField(item.GetStringValue()) });
+                }
+                else if (item.IsNumberValue())
+                {
+                    mapStructure->map.Add({ identifier, new StructuredStreamField(item.GetNumberValue()) });
+                }
+                else if (item.IsBoolValue())
+                {
+                    mapStructure->map.Add({ identifier, new StructuredStreamField(item.GetBoolValue()) });
+                }
+                else if (item.IsNullValue())
+                {
+                    mapStructure->map.Add({ identifier, new StructuredStreamField() });
+                }
+                else if (item.IsArrayValue())
+                {
+                    auto arrayEntry = new StructuredStreamArray();
+                    mapStructure->map.Add({ identifier, arrayEntry });
+                    PopulateStructures(item, arrayEntry);
+                }
+                else if (item.IsObjectValue())
+                {
+                    auto mapEntry = new StructuredStreamMap();
+                    mapStructure->map.Add({ identifier, mapEntry });
+                    PopulateStructures(item, mapEntry);
+                }
+            }
         }
     }
     
     JsonStreamInputFormatter::JsonStreamInputFormatter(Stream& stream)
-        : stream(stream), rootEntry(invalidRoot), currentEntry(invalidRoot)
+        : stream(stream), rootEntry(nullptr), currentEntry(nullptr)
     {
         if (!stream.CanRead())
             throw StructuredStreamFormatterException("JsonStreamInputFormatter passed with a stream that cannot be written to!");
@@ -86,21 +124,26 @@ namespace CE
 
         if (rootJson->IsArrayValue())
         {
-            rootEntry = StructuredStreamArray();
-            rootEntry.formatter = this;
+            rootEntry = new StructuredStreamArray();
+            rootEntry->formatter = this;
         }
         else if (rootJson->IsObjectValue())
         {
-            rootEntry = StructuredStreamMap();
-            rootEntry.formatter = this;
+            rootEntry = new StructuredStreamMap();
+            rootEntry->formatter = this;
+        }
+        else
+        {
+            throw StructuredStreamException("JsonStreamInputFormatter passed with a json value that does not start with either array or object!");
         }
         
-        //PopulateStructures(*rootValue, rootEntry);
+        PopulateStructures(*rootJson, rootEntry);
         currentEntry = rootEntry;
     }
 
     JsonStreamInputFormatter::~JsonStreamInputFormatter()
     {
+        delete rootEntry;
         delete rootJson;
     }
 
@@ -240,17 +283,16 @@ namespace CE
         
     }
 
-    StructuredStreamEntry& JsonStreamInputFormatter::GetRootEntry()
+    StructuredStreamEntry* JsonStreamInputFormatter::GetRootEntry()
     {
         return rootEntry;
     }
 
-    StructuredStreamEntry& JsonStreamInputFormatter::GetEntryAt(StructuredStreamPosition position)
+    StructuredStreamEntry* JsonStreamInputFormatter::GetEntryAt(StructuredStreamPosition position)
     {
-        static StructuredStreamEntry invalid{};
-        
-        auto& jsonEntry = *rootJson;
-        auto& structureEntry = rootEntry;
+        return nullptr;
+        /*auto& jsonEntry = *rootJson;
+        auto structureEntry = rootEntry;
         Array<StructuredStreamPrivate::EntryKey> curPosStack{};
         
         for (int i = 0; i < position.GetSize(); i++)
@@ -273,19 +315,19 @@ namespace CE
             }
         }
 
-        return structureEntry;
+        return structureEntry;*/
     }
 
     StructuredStreamEntry::Type JsonStreamInputFormatter::GetNextEntryType()
     {
-        if (!currentEntry.IsValid())
+        if (currentEntry == nullptr || !currentEntry->IsValid())
             return StructuredStreamEntry::Type::None;
 
-        if (currentEntry.IsArray())
+        if (currentEntry->IsArray())
             return StructuredStreamEntry::Type::Array;
-        if (currentEntry.IsMap())
+        if (currentEntry->IsMap())
             return StructuredStreamEntry::Type::Map;
-        if (currentEntry.IsField())
+        if (currentEntry->IsField())
             return StructuredStreamEntry::Type::Field;
         
         return StructuredStreamEntry::Type::None;

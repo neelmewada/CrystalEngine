@@ -37,9 +37,9 @@ namespace CE
         void EnterBoolValue(bool value) override;
         void EnterNullValue() override;
 
-        StructuredStreamEntry& GetRootEntry() override;
+        StructuredStreamEntry* GetRootEntry() override;
 
-        StructuredStreamEntry& GetEntryAt(StructuredStreamPosition position) override;
+        StructuredStreamEntry* GetEntryAt(StructuredStreamPosition position) override;
         StructuredStreamEntry::Type GetNextEntryType() override;
 
     private:
@@ -52,8 +52,8 @@ namespace CE
         Array<JsonValue*> valueStack{};
         Array<StructuredStreamPrivate::EntryKey> positionStack{};
 
-        StructuredStreamEntry& rootEntry;
-        StructuredStreamEntry& currentEntry;
+        StructuredStreamEntry* rootEntry;
+        StructuredStreamEntry* currentEntry;
     };
 
     
