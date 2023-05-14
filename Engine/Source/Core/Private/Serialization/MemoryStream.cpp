@@ -108,17 +108,18 @@ namespace CE
     {
         if (autoResize && CanResize() && offset + length >= bufferSize)
         {
-            Resize(offset + length + 32);
+            Resize(offset + length + autoResizeIncrement);
         }
         memcpy(data + offset, inData, length);
         offset += length;
         dataSize = Math::Max(dataSize, offset);
     }
 
-    void MemoryStream::Read(void* outData, u64 length)
+    s64 MemoryStream::Read(void* outData, u64 length)
     {
         memcpy(outData, data + offset, length);
         offset += length;
+        return length;
     }
 
     bool MemoryStream::CanResize() const

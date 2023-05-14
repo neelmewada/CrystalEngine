@@ -49,10 +49,11 @@ namespace CE
         offset += length;
     }
 
-    void FileStream::Read(void* outData, u64 length)
+    s64 FileStream::Read(void* outData, u64 length)
     {
         impl.read(static_cast<char*>(outData), length);
         offset += length;
+        return length;
     }
 
     u64 FileStream::GetCurrentPosition()

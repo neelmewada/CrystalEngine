@@ -36,7 +36,7 @@ namespace CE
         void Seek(s64 seekPos, SeekMode seekMode = SeekMode::Begin) override;
 
         void Write(const void* inData, u64 length) override;
-        void Read(void* outData, u64 length) override;
+        s64 Read(void* outData, u64 length) override;
 
         void Write(u8 inByte) override
         {
@@ -54,6 +54,7 @@ namespace CE
         
         u32 offset = 0;
         b8 autoResize = false;
+        u32 autoResizeIncrement = 128;
 
         Stream::Permissions permissions = Stream::Permissions::ReadOnly;
         bool isAllocated = false;

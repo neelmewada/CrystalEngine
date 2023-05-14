@@ -255,7 +255,6 @@ namespace CE
             {
                 if (subscribers[i] == object)
                 {
-                    object->subscribedBuses.Remove(this);
                     subscribers.RemoveAt(i);
                     break;
                 }

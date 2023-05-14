@@ -71,6 +71,7 @@ namespace CE
 
 	SSIZE_T Archive::EntryRead(void* buffer, SIZE_T bufferSize)
 	{
+		
 		return zip_entry_noallocread(handle, buffer, bufferSize);
 	}
 

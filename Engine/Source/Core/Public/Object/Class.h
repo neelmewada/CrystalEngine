@@ -225,7 +225,7 @@ namespace CE
             if constexpr (CE::TIsArray<Field>::Value)
             {
                 // TODO: Fix error in below line
-                //underlyingTypeId = CE::GetTypeId<Field::Type>();
+                underlyingTypeId = CE::GetTypeId<CE::TIsArray<Field>::ElementType>();
             }
             else if constexpr (CE::TIsEnum<Field>::Value)
             {

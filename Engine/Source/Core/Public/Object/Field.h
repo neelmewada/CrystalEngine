@@ -56,6 +56,11 @@ namespace CE
         bool IsArrayField() const;
         bool IsStringField() const;
 
+        bool IsIntegerField() const;
+        bool IsDecimalField() const;
+
+        bool IsObjectField() const;
+
         bool HasAnyFieldFlags(FieldFlags flags) const
         {
             return (fieldFlags & flags) != 0;

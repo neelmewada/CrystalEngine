@@ -65,6 +65,23 @@ namespace CE
         return GetDeclarationTypeId() == TYPEID(String);
     }
 
+    bool FieldType::IsIntegerField() const
+    {
+        return fieldTypeId == TYPEID(u8) || fieldTypeId == TYPEID(u16) || fieldTypeId == TYPEID(u32) || fieldTypeId == TYPEID(u64) ||
+            fieldTypeId == TYPEID(s8) || fieldTypeId == TYPEID(s16) || fieldTypeId == TYPEID(s32) || fieldTypeId == TYPEID(s64);
+    }
+
+    bool FieldType::IsDecimalField() const
+    {
+        return fieldTypeId == TYPEID(f32) || fieldTypeId == TYPEID(f64);
+    }
+
+    bool FieldType::IsObjectField() const
+    {
+        auto classType = ClassType::FindClass(fieldTypeId);
+        return classType != nullptr && classType->IsObject();
+    }
+
     const TypeInfo* FieldType::GetDeclarationType() const
     {
         return GetTypeInfo(fieldTypeId);

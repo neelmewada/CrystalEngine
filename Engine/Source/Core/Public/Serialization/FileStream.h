@@ -16,7 +16,7 @@ namespace CE
         
         void Write(const void* inData, u64 length) override;
         
-        void Read(void* outData, u64 length) override;
+        s64 Read(void* outData, u64 length) override;
         
         u64 GetCurrentPosition() override;
         

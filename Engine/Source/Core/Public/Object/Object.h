@@ -132,20 +132,6 @@ namespace CE
 
         void RequestDestroy();
 
-		// Signal-Event API
-        
-        static bool Bind(Object* sourceObject, FunctionType* sourceSignal,
-                         Object* destinationObject, FunctionType* destinationEvent);
-        
-        bool Bind(FunctionType* sourceSignal, Object* destinationObject, FunctionType* destinationEvent);
-        
-        bool Bind(Name sourceSignal, Object* destinationObject, Name destinationEvent);
-        
-        void Unbind(FunctionType* sourceSignal);
-        void UnbindAll(Object* destinationObject);
-        
-        void FireSignal(Name signalName, const Array<Variant>& params);
-
         // - Public API -
 
         virtual bool IsAsset() { return false; }
@@ -172,13 +158,6 @@ namespace CE
 
         ObjectFlags objectFlags = OF_NoFlags;
 
-        // Event System
-        Array<EventBus*> subscribedBuses{};
-        
-        // Signal System
-        HashMap<Name, Array<SignalBinding>> signalNameToBindingsMap{};
-        Array<Object*> incomingSignalBinders{};
-
         // Object Lifecycle
 		ObjectStore attachedObjects{};
         
@@ -197,7 +176,6 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_FIELD_LIST(
         CE_FIELD(name, Hidden)
         CE_FIELD(uuid, Hidden)
-        CE_FIELD(attachedObjects, Hidden)
     ),
     CE_FUNCTION_LIST(
         

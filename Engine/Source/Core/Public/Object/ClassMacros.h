@@ -142,6 +142,7 @@ public:\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::ClassType* Type();\
+	constexpr static bool IsClass() { return true; }\
     virtual const CE::TypeInfo* GetType() const\
     {\
         return Type();\
@@ -214,6 +215,7 @@ public:\
     typedef Struct Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::StructType* Type();\
+	constexpr static bool IsStruct() { return true; }\
     virtual CE::TypeInfo* GetType() const\
     {\
         return Type();\

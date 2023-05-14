@@ -63,6 +63,7 @@
 #include "Serialization/Stream.h"
 #include "Serialization/MemoryStream.h"
 #include "Serialization/FileStream.h"
+#include "Serialization/ArchiveStream.h"
 
 // Structured Streams
 #include "Json/Json.h"

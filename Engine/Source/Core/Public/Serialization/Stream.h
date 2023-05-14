@@ -6,6 +6,9 @@ namespace CE
 {
 
     class Object;
+    class TypeInfo;
+    class ClassType;
+    class StructType;
 
     enum class SeekMode
     {
@@ -98,7 +101,7 @@ namespace CE
             Write(&inByte, 1);
         }
         
-        virtual void Read(void* outData, u64 length) = 0;
+        virtual s64 Read(void* outData, u64 length) = 0;
         
         virtual u8 Read()
         {

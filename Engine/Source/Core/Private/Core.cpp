@@ -1,10 +1,22 @@
 
 #include "Core.h"
 
-CE_IMPLEMENT_MODULE(Core, CE::CoreModule)
-
 namespace CE
 {
+    // Module Class
+    class CoreModule : public Module
+    {
+    public:
+        void StartupModule() override;
+        void ShutdownModule() override;
+
+        void RegisterTypes() override;
+
+    private:
+        DelegateHandle onBeforeModuleUnloadHandle{};
+    };
+
+
     Package* gTransientPackage = nullptr;
 
     void CoreModule::StartupModule()
@@ -17,11 +29,11 @@ namespace CE
         gProjectPath = PlatformDirectories::GetGameRootDir();
 #endif
 
-        // Load Configs 
+        // Load Configs cache
         gConfigCache = new ConfigCache;
         gConfigCache->LoadStartupConfigs();
     
-        gTransientPackage = NewObject<Package>(nullptr, TEXT("Engine::Transient"));
+        gTransientPackage = NewObject<Package>(nullptr, TEXT("Engine::Transient"), OF_Transient);
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }
@@ -65,3 +77,6 @@ namespace CE
     }
 
 }
+
+
+CE_IMPLEMENT_MODULE(Core, CE::CoreModule)
