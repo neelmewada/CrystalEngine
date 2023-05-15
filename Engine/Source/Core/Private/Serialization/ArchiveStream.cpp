@@ -69,7 +69,7 @@ namespace CE
 
     s64 ArchiveStream::ReadEntryDataAlloc(void** buffer, SIZE_T* bufferSize)
     {
-        return zip_entry_read(handle, buffer, bufferSize);
+        return (s64)zip_entry_read((struct zip_t*)handle, buffer, (size_t*)bufferSize);
     }
 
     s32 ArchiveStream::WriteEntryData(const void* buffer, SIZE_T bufferSize)

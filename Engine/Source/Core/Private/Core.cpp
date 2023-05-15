@@ -69,10 +69,10 @@ namespace CE
         // Register Objects
         CE_REGISTER_TYPES(
             Object,
+            Package,
             SystemObject,
             Component,
-            SystemComponent,
-            Package
+            SystemComponent
         );
     }
 
