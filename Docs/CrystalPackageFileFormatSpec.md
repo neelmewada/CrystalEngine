@@ -17,7 +17,7 @@ Spec tables with little endian format
 | +0C | 4B | `00 00 00 00` | File checksum only for the actual data |
 | +10 | 4B | `00 00 00 00` | Data start offset (from start of file) |
 | +xx | xx | | Newly added header fields |
-| +xx | xx | | **Actual data. List of [Object Entries](#object-entry-1)** |
+| +xx | xx | | **Actual data. List of [Object Entries](#object-entry)** |
 | +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. |
 
 ## **Object Entry**
