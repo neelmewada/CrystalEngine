@@ -1189,7 +1189,10 @@ TEST(Package, Writing)
 
     Package* writePackage = NewObject<Package>(nullptr, "TestPackage");
     
+    
 
+    writePackage->RequestDestroy();
+    
     TEST_END;
 }
 

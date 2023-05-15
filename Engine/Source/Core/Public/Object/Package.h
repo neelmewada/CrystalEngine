@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object.h"
+#include "Package/SavePackage.h"
 
 namespace CE
 {

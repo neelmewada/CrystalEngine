@@ -75,10 +75,10 @@
 // RTTI & Object
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
-#include "Object/Package.h"
 #include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"
+#include "Object/Package.h"
 
 // RTTI Dependents
 #include "Math/MathRTTI.h"
