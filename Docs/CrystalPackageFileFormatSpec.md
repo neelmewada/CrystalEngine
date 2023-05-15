@@ -16,9 +16,10 @@ Spec tables with little endian format
 | +08 | 4B | `00 00 01 00` | Version number: Major.Minor (2 bytes each) |
 | +0C | 4B | `00 00 00 00` | File checksum only for the actual data |
 | +10 | 4B | `00 00 00 00` | Data start offset (from start of file) |
+| +14 | \0 | `AssetPackageName\0` | Name of Package object. |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual data. List of [Object Entries](#object-entry)** |
-| +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. |
+| +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. (EOF) |
 
 ## **Object Entry**
 | Offset | Size | Value | Description |

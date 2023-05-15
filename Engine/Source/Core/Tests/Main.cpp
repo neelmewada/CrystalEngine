@@ -1175,17 +1175,24 @@ TEST(Serialization, StructuredStream)
     TEST_END;
 }
 
+#pragma endregion
 
-TEST(Serialization, Objects)
+
+/**********************************************
+* Packages
+*/
+
+
+TEST(Package, Writing)
 {
     TEST_BEGIN;
 
+    Package* writePackage = NewObject<Package>(nullptr, "TestPackage");
     
 
     TEST_END;
 }
 
-#pragma endregion
 
 /**********************************************
 *   Delegates

@@ -12,8 +12,9 @@ namespace CE
 	public:
 		Package();
 		virtual ~Package();
-
-
+        
+    private:
+        
 	};
 
 } // namespace CE
