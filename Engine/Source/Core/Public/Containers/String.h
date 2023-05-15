@@ -286,11 +286,14 @@ namespace CE
 	    static bool TryParse(const String& string, s8& outValue);
 	    static bool TryParse(const String& string, u32& outValue);
 	    static bool TryParse(const String& string, s32& outValue);
+        static bool TryParse(const String& string, u64& outValue);
+        static bool TryParse(const String& string, s64& outValue);
 	    static bool TryParse(const String& string, f32& outValue);
 		static bool TryParse(const String& string, f64& outValue);
+        static bool TryParse(const String& string, b8& outValue);
 
 	    template<typename T>
-	    static T Parse(const String& string)
+	    INLINE static T Parse(const String& string)
 	    {
 	        T retVal{};
 	        if (!TryParse(string, retVal))

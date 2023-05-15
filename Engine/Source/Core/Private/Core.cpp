@@ -40,7 +40,7 @@ namespace CE
 
     void CoreModule::ShutdownModule()
     {
-        delete gTransientPackage;
+        gTransientPackage->RequestDestroy();
         gTransientPackage = nullptr;
 
         delete gConfigCache;

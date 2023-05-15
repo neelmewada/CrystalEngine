@@ -39,6 +39,7 @@ namespace CE
         void AddObject(Object* object);
         
         void RemoveObject(Object* object);
+        void DestroyObject(Object* object);
         
         void RemoveObjectWithUuid(UUID uuid);
 

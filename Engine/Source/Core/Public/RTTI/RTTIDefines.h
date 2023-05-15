@@ -161,6 +161,7 @@ namespace CE
 	template<typename Type>
 	TypeId GetTypeId()
 	{
+		constexpr const bool isVoid = std::is_void_v<Type>;
 		constexpr const bool isPointer = std::is_pointer_v<Type>;
 		constexpr const bool isArray = TIsArray<Type>::Value;
 		constexpr const bool isObjectStore = IsObjectStoreType<Type>::Value;
@@ -168,7 +169,11 @@ namespace CE
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;
 		
-		if constexpr (isObjectStore) // object store type
+		if constexpr (isVoid)
+		{
+			return 0;
+		}
+		else if constexpr (isObjectStore) // object store type
 		{
             return Internal::GetObjectStoreTypeId();
 		}

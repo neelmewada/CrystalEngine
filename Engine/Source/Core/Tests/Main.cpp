@@ -1179,7 +1179,7 @@ TEST(Serialization, Objects)
 {
     TEST_BEGIN;
 
-
+    
 
     TEST_END;
 }

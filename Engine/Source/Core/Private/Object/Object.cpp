@@ -15,6 +15,7 @@ namespace CE
 
 	Object::~Object()
 	{
+        // Detach this object from outer
         if (outer != nullptr)
         {
             outer->DetachSubobject(this);
@@ -31,15 +32,15 @@ namespace CE
     void Object::ConstructInternal()
     {
         auto initializer = ObjectThreadContext::Get().TopInitializer();
-        CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+        ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
         ObjectThreadContext::Get().PopInitializer();
         ConstructInternal(initializer);
     }
 
     void Object::ConstructInternal(ObjectInitializer* initializer)
     {
-        CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
-        CE_ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
+        ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+        ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
         
         this->creationThreadId = Thread::GetCurrentThreadId();
         this->objectFlags = initializer->GetObjectFlags();
@@ -133,9 +134,47 @@ namespace CE
                     field->SetFieldValue<UUID>(this, UUID(uuid));
                 }
             }
-            if (field->IsIntegerField())
+            else if (field->IsIntegerField())
             {
-
+                s64 value = 0;
+                if (String::TryParse(stringValue, value))
+                {
+                    if (fieldTypeId == TYPEID(u8))
+                        field->SetFieldValue<u8>(this, (u8)value);
+                    else if (fieldTypeId == TYPEID(u16))
+                        field->SetFieldValue<u16>(this, (u16)value);
+                    else if (fieldTypeId == TYPEID(u32))
+                        field->SetFieldValue<u32>(this, (u32)value);
+                    else if (fieldTypeId == TYPEID(u64))
+                        field->SetFieldValue<u64>(this, (u64)value);
+                    else if (fieldTypeId == TYPEID(s8))
+                        field->SetFieldValue<s8>(this, (s8)value);
+                    else if (fieldTypeId == TYPEID(s16))
+                        field->SetFieldValue<s16>(this, (s16)value);
+                    else if (fieldTypeId == TYPEID(s32))
+                        field->SetFieldValue<s32>(this, (s32)value);
+                    else if (fieldTypeId == TYPEID(s64))
+                        field->SetFieldValue<s64>(this, (s64)value);
+                }
+            }
+            else if (field->IsDecimalField())
+            {
+                f32 value = 0;
+                if (String::TryParse(stringValue, value))
+                {
+                    if (fieldTypeId == TYPEID(f32))
+                        field->SetFieldValue<f32>(this, value);
+                    else if (fieldTypeId == TYPEID(f64))
+                        field->SetFieldValue<f64>(this, value);
+                }
+            }
+            else if (fieldTypeId == TYPEID(bool))
+            {
+                bool value = false;
+                if (String::TryParse(stringValue, value))
+                {
+                    field->SetFieldValue<bool>(this, value);
+                }
             }
             else if (field->IsArrayType() && configValue.IsValid())
             {

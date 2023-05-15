@@ -86,6 +86,13 @@ namespace CE
 		this->hashValue = copy.hashValue;
 	}
 
+	Name& Name::operator=(const Name& copy)
+	{
+		this->value = copy.value;
+		this->hashValue = copy.hashValue;
+		return *this;
+	}
+
 	void Name::GetComponents(CE::Array<String>& components) const
 	{
 		components.Clear();

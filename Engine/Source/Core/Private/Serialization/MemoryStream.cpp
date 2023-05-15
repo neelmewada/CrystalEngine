@@ -127,6 +127,11 @@ namespace CE
         return isAllocated;
     }
 
+    void MemoryStream::SetAutoResizeIncrement(u32 increment)
+    {
+        this->autoResizeIncrement = increment;
+    }
+
     bool MemoryStream::Resize(u32 newSize)
     {
         if (!CanResize())

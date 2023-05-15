@@ -4,14 +4,15 @@
 
 namespace CE
 {
+	class SavePackage;
 
 	class CORE_API Package : public Object
 	{
 		CE_CLASS(Package, CE::Object)
 	public:
-		Package()
-		{}
+		Package();
 		virtual ~Package();
+
 
 	};
 

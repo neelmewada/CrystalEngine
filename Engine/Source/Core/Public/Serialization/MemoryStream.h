@@ -45,6 +45,8 @@ namespace CE
 
         bool CanResize() const override;
 
+        void SetAutoResizeIncrement(u32 increment) override;
+
         bool Resize(u32 newSize);
 
     private:

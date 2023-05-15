@@ -158,6 +158,8 @@ namespace CE
 
         virtual bool CanResize() const { return false; }
 
+        virtual void SetAutoResizeIncrement(u32 increment) {}
+
         /**
          * \brief Returns false if there is no hard limit to the size of this stream, ex: A file output stream.
          * True if there is a hard limit to the size of this stream, ex: A memory stream.

@@ -219,18 +219,8 @@ namespace CE
 		virtual void CacheAllFunctions();
 
 		template<typename Struct, typename Field>
-		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes)
+		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes, TypeId underlyingTypeId = 0)
 		{
-            TypeId underlyingTypeId = 0;
-            if constexpr (CE::TIsArray<Field>::Value)
-            {
-                // TODO: Fix error in below line
-                underlyingTypeId = CE::GetTypeId<CE::TIsArray<Field>::ElementType>();
-            }
-            else if constexpr (CE::TIsEnum<Field>::Value)
-            {
-                underlyingTypeId = TYPEID(CE::TEnumUnderlyingType<Field>::Type);
-            }
 			localFields.Add(FieldType(name,
                                       CE::GetTypeId<Field>(),
                                       underlyingTypeId,

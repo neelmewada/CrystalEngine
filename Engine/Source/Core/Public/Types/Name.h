@@ -36,6 +36,7 @@ namespace CE
         ~Name() = default;
 
         Name(const Name& copy);
+        Name& operator=(const Name& copy);
 
         CE_INLINE bool IsValid() const
         {

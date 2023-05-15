@@ -3,6 +3,10 @@
 
 namespace CE
 {
+	Package::Package()
+	{
+
+	}
 
 	Package::~Package()
 	{

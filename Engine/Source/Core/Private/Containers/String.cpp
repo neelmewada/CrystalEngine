@@ -604,6 +604,28 @@ namespace CE
         return false;
     }
 
+    bool String::TryParse(const String& string, u64& outValue)
+    {
+        s64 value = 0;
+        if (TryParseInteger(string, value))
+        {
+            outValue = StaticCast<u64>(value);
+            return true;
+        }
+        return false;
+    }
+
+    bool String::TryParse(const String& string, s64& outValue)
+    {
+        s64 value = 0;
+        if (TryParseInteger(string, value))
+        {
+            outValue = StaticCast<s64>(value);
+            return true;
+        }
+        return false;
+    }
+
     bool String::TryParse(const String& string, f32& outValue)
     {
         f32 value = 0;
@@ -623,6 +645,29 @@ namespace CE
             outValue = value;
             return true;
         }
+        return false;
+    }
+
+    bool String::TryParse(const String& string, b8& outValue)
+    {
+        if (string == "true" || string == "True")
+        {
+            outValue = true;
+            return true;
+        }
+        else if (string == "false" || string == "False")
+        {
+            outValue = false;
+            return true;
+        }
+
+        s64 value = 0;
+        if (TryParseInteger(string, value))
+        {
+            outValue = value > 0;
+            return true;
+        }
+
         return false;
     }
 

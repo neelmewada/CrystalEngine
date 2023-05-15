@@ -86,6 +86,24 @@ namespace CE
 		typedef __underlying_type(T) Type;
 	};
 
+	template<typename T, bool IsEnum = TIsEnum<T>::Value, bool IsArray = TIsArray<T>::Value>
+	struct TGetUnderlyingType : TFalseType
+	{
+		typedef void Type;
+	};
+
+	template<typename T>
+	struct TGetUnderlyingType<T, true, false> : TTrueType // ENUM
+	{
+		typedef __underlying_type(T) Type;
+	};
+
+	template<typename T>
+	struct TGetUnderlyingType<Array<T>, false, true> : TTrueType // Array<T>
+	{
+		typedef T Type;
+	};
+
 	class ObjectStore;
     
 	template<typename T>

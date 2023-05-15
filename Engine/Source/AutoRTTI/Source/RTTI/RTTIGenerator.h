@@ -40,6 +40,7 @@ namespace CE
 
         static Array<IO::Path> includeSearchPaths;
     };
+
     
 } // namespace CE
 
@@ -60,4 +61,3 @@ CE_RTTI_STRUCT(, CE, ModuleStamp,
         CE_FIELD(headers)
     )
 )
-

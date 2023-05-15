@@ -207,13 +207,13 @@ function(ce_add_target NAME TARGET_TYPE)
 
         if(ce_add_target_PCHHEADER_REUSE_FROM)
             target_precompile_headers(${NAME} REUSE_FROM ${ce_add_target_PCHHEADER_REUSE_FROM})
+        else()
+            target_precompile_headers(${NAME}
+                PUBLIC    ${ce_add_target_PCHHEADER_PUBLIC}
+                PRIVATE   ${ce_add_target_PCHHEADER_PRIVATE}
+                INTERFACE ${ce_add_target_PCHHEADER_INTERFACE}
+            )
         endif()
-
-        target_precompile_headers(${NAME}
-            PUBLIC    ${ce_add_target_PCHHEADER_PUBLIC}
-            PRIVATE   ${ce_add_target_PCHHEADER_PRIVATE}
-            INTERFACE ${ce_add_target_PCHHEADER_INTERFACE}
-        )
     endif()
 
     # COMPILE_DEFINITIONS
