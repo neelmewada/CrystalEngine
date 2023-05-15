@@ -36,8 +36,35 @@ Spec tables with little endian format
 ## **Object Entry Field List**
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | \0 | `fieldName\0` | Name of the field. |
+| +00 | 4B | `xx xx xx xx` | Total number of fields |
+| +04 | \0 | `fieldName\0` | Name of the field. |
 | +xx | \0 | `CE::Array\0` | Full type name of the field |
 | +xx | 4B | `xx xx xx xx` | Field Data Size in bytes. `0` is a valid size. |
-| +04 | xx | | Field Data |
+| +04 | xx | | Field Data | 
+| ... | ... | ... | ... |
+
+## **Field Data**
+
+Plain Old Data types are stored in their native formats. Ex: u32, f64, String, etc.
+
+| Field Type | Size | Format |
+|---|---|---|
+| u32 | 4B | `00 00 00 00` |
+| String | \0 | StringValue\0 |
+
+### Array Field Data
+
+Each array element is saved as a Field Data itself, making a recursive data structure.
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | \0 | | Full type name of array elements |
+| +xx | 4B | N | Number of elements |
+| +xx | xx | | Array element 0. Recursive **Field Data**. |
+| ... | ... | ... | ... |
+
+### Struct Field Data
+
+When a field value is a struct type, then it is stored in the same format as [Object Entry Field List](#object-entry-field-list).
+
 
