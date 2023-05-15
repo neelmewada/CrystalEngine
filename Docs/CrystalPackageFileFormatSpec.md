@@ -63,12 +63,12 @@ A boolean (0 or 1) denoting if this object is an asset
 
 ### Virtual Asset Path (String) (IF asset == 1)
 
-Only exists if IsAsset (previous byte) is true!
+Valid only if IsAsset (previous byte) is true! Otherwise a `00` byte.
 It is a string denoting the virtual path to the asset. Example:
 
 `2f` `45` `6e` `67` `69` `6e` ... `72` `65` `00`
 
-/Engine/Assets/Texture
+/Engine/Assets/Texture.asset
 
 ### Object Class TypeName (String)
 
@@ -115,13 +115,35 @@ A null `00` terminated string that stores the full type name of the field.
 
 Spec tables with little endian format
 
-### File Header
+### **Overview**
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 8B | `00 43 50 41 4b 00 00 0a` | Magic Number: `.CPAK.\n` |
+| +00 | 8B | `00 43 50 41 4b 00 00 0a` | Magic Number: `. C P A K . \n` |
 | +08 | 4B | `00 00 01 00` | Version number: Major.Minor (2 bytes each) |
 | +0C | 4B | `00 00 00 00` | File checksum only for the actual data |
 | +10 | 4B | `00 00 00 00` | Data start offset (from start of file) |
-| +xx | xx | `xx` | Newly added header fields |
+| +xx | xx | | Newly added header fields |
+| +xx | xx | | **Actual data. List of [Object Entries](#object-entry-1)** |
+| +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. |
+
+### **Object Entry**
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 8B | `00 4f 42 4a 45 43 54 00` | Magic Number: `. O B J E C T .` |
+| +08 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
+| +10 | 1B | `01` | Is Asset? `0` or `1` |
+| +11 | \0 | `/Engine/Assets/MyTexture.asset\0` | Virtual path to asset. Null `00` if not asset. |
+| +xx | \0 | `CE::Texture\0` | Object class TypeName |
+| +xx | 4B | `xx xx xx xx` | Length of actual data only. `0` is valid. |
+| +04 | xx |  | **Data: List of [Field Entries](#object-entry-field-list)** |
+| +xx | 4B | `00 00 00 00` | End Of Field Entries List |
+| +xx | 4B | `xx xx xx xx` | Data CRC checksum. `0` if no data. |
+
+### **Object Entry Field List**
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | \0 | `fieldName\0` | Name of the field. |
+| +xx | \0 | `CE::Array` | Full type name of the field |
+| +xx | 4B | `xx xx xx xx` | Entry Size in bytes. `0` is a valid size. |
 
 
