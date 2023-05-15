@@ -144,6 +144,6 @@ Spec tables with little endian format
 |---|---|---|---|
 | +00 | \0 | `fieldName\0` | Name of the field. |
 | +xx | \0 | `CE::Array\0` | Full type name of the field |
-| +xx | 4B | `xx xx xx xx` | Entry Size in bytes. `0` is a valid size. |
+| +xx | 4B | `xx xx xx xx` | Field Data Size in bytes. `0` is a valid size. |
 | +04 | xx | | Field Data |
 
