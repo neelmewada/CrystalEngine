@@ -143,6 +143,8 @@ namespace CE
 
     private:
         
+        friend class Package;
+        
         friend class EventBus;
         friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);
 

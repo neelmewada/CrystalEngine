@@ -12,7 +12,7 @@ Spec tables with little endian format
 ## **Overview**
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 8B | `00 43 50 41 4b 00 00 0a` | Magic Number: `. C P A K . \n` |
+| +00 | 8B | `00 43 50 41 4b 00 00 0a` | Magic Number: `. C P A K . . \n` |
 | +08 | 4B | `00 00 01 00` | Version number: Major.Minor (2 bytes each) |
 | +0C | 4B | `00 00 00 00` | File checksum only for the actual data |
 | +10 | 4B | `00 00 00 00` | Data start offset (from start of file) |

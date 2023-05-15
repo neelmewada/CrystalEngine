@@ -14,6 +14,11 @@ namespace CE
 		Package();
 		virtual ~Package();
         
+        static SavePackageResult SavePackage(Package* outer,
+                                             Object* object,
+                                             const String& fileName,
+                                             const SavePackageArgs& args);
+        
     private:
         
 	};
