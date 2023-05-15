@@ -1,4 +1,3 @@
-
 # Crystal Package File Format Specification
 
 The `Package` class is used by the engine to store & load assets & serialized objects. It stores the data in a binary file with `.cpak` extension. cpak files are loaded by engine in 2 steps. In 1st step, a table of content is populated storing each entry with it's location. In 2nd step, the data is fully loaded.
@@ -8,12 +7,9 @@ This document describes the file format specification of `.cpak` files.
 
 # Format Specification
 
-
-## **Spec Tables**
-
 Spec tables with little endian format
 
-### **Overview**
+## **Overview**
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 8B | `00 43 50 41 4b 00 00 0a` | Magic Number: `. C P A K . \n` |
@@ -24,7 +20,7 @@ Spec tables with little endian format
 | +xx | xx | | **Actual data. List of [Object Entries](#object-entry-1)** |
 | +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. |
 
-### **Object Entry**
+## **Object Entry**
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 8B | `00 4f 42 4a 45 43 54 00` | Magic Number: `. O B J E C T .` |
@@ -37,7 +33,7 @@ Spec tables with little endian format
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
 | +xx | 4B | `xx xx xx xx` | Data CRC checksum. `0` if no data. |
 
-### **Object Entry Field List**
+## **Object Entry Field List**
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | \0 | `fieldName\0` | Name of the field. |
