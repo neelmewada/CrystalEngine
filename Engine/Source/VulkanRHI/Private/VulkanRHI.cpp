@@ -402,7 +402,7 @@ namespace CE
         
         frameBufferCI.attachmentCount = rtLayout.colorAttachmentCount + (rtLayout.HasDepthStencilAttachment() ? 1 : 0);
         
-        Vector<VkImageView> attachments{ frameBufferCI.attachmentCount };
+        List<VkImageView> attachments{ frameBufferCI.attachmentCount };
         attachments[rtLayout.presentationRTIndex] = swapChain->swapChainColorImages[swapChainImageIndex].imageView;
 //        for (int i = 0; i < attachments.GetSize(); i++)
 //        {

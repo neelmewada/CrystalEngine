@@ -92,8 +92,8 @@ namespace CE
 
     struct VulkanFrame
     {
-        Vector<VulkanTexture*> textures{};
-        Vector<VkSampler> samplers{};
+        List<VulkanTexture*> textures{};
+        List<VkSampler> samplers{};
         VulkanFrameBuffer* framebuffer = nullptr;
     };
     
@@ -239,10 +239,10 @@ namespace CE
 
         u32 currentImageIndex = 0;
 
-        Vector<VkCommandBuffer> commandBuffers{};
+        List<VkCommandBuffer> commandBuffers{};
 
-        Vector<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
-        Vector<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
+        List<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
+        List<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
 
         // ImGui
         b8 isImGuiEnabled = false;

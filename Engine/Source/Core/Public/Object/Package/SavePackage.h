@@ -2,6 +2,13 @@
 
 namespace CE
 {
+    enum class LoadPackageResult
+    {
+        Success = 0,
+        PackageNotFound,
+        InvalidPackage,
+    };
+
     enum class SavePackageResult
     {
         Success = 0,

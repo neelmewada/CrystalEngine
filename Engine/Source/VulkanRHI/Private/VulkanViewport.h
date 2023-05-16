@@ -62,7 +62,7 @@ namespace CE
 
         // Sync Objects (Per simultaneous frame)
         // Count = number of frames that are rendered simultaneously
-        Vector<VkSemaphore> imageAcquiredSemaphore{};
+        List<VkSemaphore> imageAcquiredSemaphore{};
 
         u32 currentDrawFrameIndex = 0;
         u32 currentImageIndex = 0;

@@ -15,4 +15,10 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(ObjectFlags);
 
+	enum LoadFlags
+	{
+		LOAD_Default = 0,
+	};
+	ENUM_CLASS_FLAGS(LoadFlags);
+
 }

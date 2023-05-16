@@ -3,9 +3,6 @@
 #include "Object.h"
 #include "Package/SavePackage.h"
 
-#define __FILE_ID__ Core_Package_h
-
-#define GENERATED_BODY()
 
 namespace CE
 {
@@ -17,27 +14,49 @@ namespace CE
 	public:
 		Package();
 		virtual ~Package();
-        
-        /// Saves the object itself and all other objects it references from the outer package, in a cpak file.
-        static SavePackageResult SavePackage(Package* outer,
-                                             Object* object,
-                                             const String& fileName,
-                                             const SavePackageArgs& args);
+
+		// - Static API -
+
+		static Package* LoadPackage(const IO::Path& fullPackagePath, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
+
         
     private:
-        bool isFullyLoaded = false;
+		bool isLoaded = false;
+
+		// Internal Data
+
+		struct FieldEntryHeader
+		{
+			u32 offset = 0;
+			String fieldName;
+			Name fieldTypeName;
+			u32 fieldDataSize;
+		};
+
+		struct ObjectEntryHeader
+		{
+			u32 offset = 0;
+			UUID instanceUuid = 0;
+			b8 isAsset = false;
+			IO::Path virtualAssetPath{};
+			Name objectClassName{};
+
+			Array<FieldEntryHeader> fieldEntries{};
+		};
+
+		Array<ObjectEntryHeader> objectEntries{};
 	};
 
 } // namespace CE
 
-#undef __FILE_ID__
 
 CE_RTTI_CLASS(CORE_API, CE, Package,
 	CE_SUPER(CE::Object),
 	CE_NOT_ABSTRACT,
 	CE_ATTRIBS(),
 	CE_FIELD_LIST(
-        CE_FIELD(isFullyLoaded, NonSerialized)
+
     ),
 	CE_FUNCTION_LIST()
 )

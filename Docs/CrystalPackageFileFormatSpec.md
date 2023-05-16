@@ -4,6 +4,11 @@ The `Package` class is used by the engine to store & load assets & serialized ob
 
 This document describes the file format specification of `.cpak` files.
 
+### Terminology
+
+| Column | Value | Description |
+|---|---|---|
+| Size | \0 | A null terminated string. |
 
 # Format Specification
 
