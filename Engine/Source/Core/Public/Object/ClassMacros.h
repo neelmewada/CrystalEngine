@@ -55,9 +55,15 @@
 #define CE_DONT_INSTANTIATE Abstract
 #define CE_INSTANTIATE NotAbstract
 
+#define __CE_USING_NAMESPACE_IMPL_0()
+#define __CE_USING_NAMESPACE_IMPL_1(...) using namespace __VA_ARGS__;
+
+#define CE_USING_NAMESPACE(Namespace) CE_EXPAND(CE_CONCATENATE(__CE_USING_NAMESPACE_IMPL_,CE_ARG_COUNT(Namespace)))(Namespace)
+
 #define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, IsAbstract, Attributes, FieldList, FunctionList)\
 namespace CE\
 {\
+	CE_USING_NAMESPACE(Namespace);\
 	template<>\
 	struct StructTypeData<Namespace::Class> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Class, SuperClasses)>\
 	{};\
@@ -158,6 +164,7 @@ public:\
 #define CE_RTTI_STRUCT(API, Namespace, Struct, SuperStructs, Attributes, FieldList)\
 namespace CE\
 {\
+	CE_USING_NAMESPACE(Namespace);\
 	template<>\
 	struct StructTypeData<Namespace::Struct> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Struct, SuperStructs)>\
 	{\

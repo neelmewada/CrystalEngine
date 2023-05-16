@@ -6,6 +6,9 @@
 
 namespace CE
 {
+    // Globals
+
+    extern bool gShouldEmitApiMacro;
 
     class ModuleAST
     {

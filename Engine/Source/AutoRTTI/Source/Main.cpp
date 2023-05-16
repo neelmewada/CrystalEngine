@@ -24,6 +24,7 @@ int main(int argc, char** argv)
         ("d,dir", "Module root path", cxxopts::value<std::string>())
         ("o,output", "Generated file output path", cxxopts::value<std::string>())
         ("I,inc", "Include search directories", cxxopts::value<std::vector<std::string>>()->default_value(""))
+        ("n,noapi", "Do not use X_API export macros")
         ("f,force", "Force update output headers")
         ;
 
@@ -56,6 +57,9 @@ int main(int argc, char** argv)
         IO::Path moduleStampPath = outPath / (moduleName + ".stamp");
 
         bool forceUpdate = result["f"].as<bool>();
+        bool noApi = result["noapi"].as<bool>();
+
+        gShouldEmitApiMacro = !noApi;
         
         if (!forceUpdate)
         {

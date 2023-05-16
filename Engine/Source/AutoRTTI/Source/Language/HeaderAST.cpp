@@ -43,10 +43,31 @@ namespace CE
         for (int i = 0; i < size; i++)
         {
             const auto& token = tokens->tokens[i];
+            TokenType prevToken = TK_WHITESPACE;
+            if (i > 0)
+                prevToken = tokens->tokens[i - 1].type;
             
-            if (token.type == TK_KW_NAMESPACE)
+            if (token.type == TK_KW_NAMESPACE && prevToken != TK_KW_USING) // Make sure it is a valid namespace entry
             {
-                namespaceNameInProgress = true;
+                int fwdIdx = i;
+                bool isValidNamespace = true;
+                while (fwdIdx < size)
+                {
+                    if (tokens->tokens[fwdIdx].type == TK_SEMICOLON)
+                    {
+                        isValidNamespace = false;
+                        i = fwdIdx;
+                        break;
+                    }
+                    else if (tokens->tokens[fwdIdx].type == TK_SCOPE_OPEN)
+                    {
+                        isValidNamespace = true;
+                        break; // valid namespace
+                    }
+                    fwdIdx++;
+                }
+                if (isValidNamespace)
+                    namespaceNameInProgress = true;
             }
             else if (token.type == TK_SCOPE_OPEN)
             {

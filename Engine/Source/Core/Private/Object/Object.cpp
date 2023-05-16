@@ -41,7 +41,7 @@ namespace CE
     {
         ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
         ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
-        
+
         this->creationThreadId = Thread::GetCurrentThreadId();
         this->objectFlags = initializer->GetObjectFlags();
         if (initializer->uuid != 0)
@@ -55,12 +55,14 @@ namespace CE
             return;
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
+        subobject->ownerPackage = this->ownerPackage;
     }
 
     void Object::DetachSubobject(Object* subobject)
     {
         if (subobject == nullptr)
             return;
+        subobject->ownerPackage = nullptr;
         subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);
     }

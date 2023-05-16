@@ -33,6 +33,25 @@ namespace CE
 		return nullptr;
 	}
 
+	SavePackageResult Package::SavePackage(Package* package, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs)
+	{
+		if (package == nullptr)
+		{
+			CE_LOG(Error, All, "SavePackage passed with nullptr package!");
+			return SavePackageResult::UnknownError;
+		}
+		if (fullPackagePath.IsDirectory())
+		{
+			CE_LOG(Error, All, "SavePackage passed with a package path that is a directory");
+			return SavePackageResult::InvalidPath;
+		}
+
+		
+
+		return SavePackageResult::Success;
+	}
+	
+
 } // namespace CE
 
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Package)

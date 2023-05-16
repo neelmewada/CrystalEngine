@@ -8,6 +8,11 @@
 
 namespace CE
 {
+
+    // Globals
+
+    extern bool gShouldEmitApiMacro;
+
     struct HeaderCRC
     {
         CE_STRUCT(HeaderCRC)

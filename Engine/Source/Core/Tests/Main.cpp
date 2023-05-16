@@ -1,6 +1,10 @@
 
 #include "Core.h"
 
+#include "Include.h"
+
+#include "Core_Test.private.h"
+
 #include <iostream>
 #include <any>
 
@@ -15,6 +19,7 @@
     CE::ModuleManager::Get().UnloadModule("Core");
 
 #define LOG(x) std::cout << x << std::endl
+#define LOG_ERR(x) std::cerr << x << std::endl;
 
 using namespace CE;
 
@@ -571,7 +576,7 @@ TEST(Object, Lifecycle)
     
     // 1. Basic object creation
 
-    auto instance = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient);
+    auto instance = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient);
     EXPECT_EQ(ObjectLifecycleTestClass_InitFlags, OF_Transient);
     EXPECT_EQ(instance->GetFlags(), OF_Transient);
     EXPECT_EQ(instance->GetName(), "MyObject");
@@ -588,7 +593,7 @@ TEST(Object, Lifecycle)
     
     auto t1 = Thread([&]
     {
-        auto obj1 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(),
+        auto obj1 = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(),
             "Obj1", OF_Transient, ObjectLifecycleTestClass::Type(),
             nullptr);
         if (obj1->GetName() != "Obj1")
@@ -603,7 +608,7 @@ TEST(Object, Lifecycle)
     
     auto t2 = Thread([&]
     {
-        auto obj2 = NewObject<ObjectLifecycleTestClass>(GetTransientPackage(),
+        auto obj2 = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(),
             "Obj2", OF_Transient, ObjectLifecycleTestClass::Type(),
             nullptr);
         if (obj2->GetName() != "Obj2")
@@ -1186,13 +1191,24 @@ TEST(Serialization, StructuredStream)
 TEST(Package, Writing)
 {
     TEST_BEGIN;
+    using namespace PackageTests;
+    CERegisterModuleTypes();
 
-    Package* writePackage = NewObject<Package>(nullptr, "TestPackage");
+    Package* writePackage = CreateObject<Package>(nullptr, "TestPackage");
     
-    
+    auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
+    auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
 
+    obj1->objPtr = obj2;
+    obj1->stringValue = "My String Value";
+    obj1->stringArray = { "item0", "item1", "item2" };
+    obj2->objectArray.Add(obj1);
+
+    obj1->RequestDestroy();
+    obj2->RequestDestroy();
     writePackage->RequestDestroy();
     
+    CEDeregisterModuleTypes();
     TEST_END;
 }
 

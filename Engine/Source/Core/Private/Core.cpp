@@ -33,7 +33,7 @@ namespace CE
         gConfigCache = new ConfigCache;
         gConfigCache->LoadStartupConfigs();
     
-        gTransientPackage = NewObject<Package>(nullptr, TEXT("Engine::Transient"), OF_Transient);
+        gTransientPackage = CreateObject<Package>(nullptr, TEXT("Engine::Transient"), OF_Transient);
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }

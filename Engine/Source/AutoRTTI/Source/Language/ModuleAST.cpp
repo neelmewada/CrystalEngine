@@ -28,6 +28,10 @@ namespace CE
         outStream << "#pragma once\n\n";
 
 		std::string apiName = moduleName.ToUpper() + "_API";
+		if (!gShouldEmitApiMacro)
+		{
+			apiName = "";
+		}
         
         auto ast = HeaderAST::ProcessHeader(tokens);
 

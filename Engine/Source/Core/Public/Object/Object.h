@@ -136,6 +136,7 @@ namespace CE
 
         virtual bool IsAsset() { return false; }
 
+        virtual bool IsPackage() { return false; }
 
         // - Config API -
 
@@ -160,10 +161,11 @@ namespace CE
 
         ObjectFlags objectFlags = OF_NoFlags;
 
-        // Object Lifecycle
+        // Subobject Lifecycle
 		ObjectStore attachedObjects{};
         
         Object* outer = nullptr;
+        Package* ownerPackage = nullptr;
         
         ThreadId creationThreadId{};
         Mutex mutex{};
@@ -183,4 +185,3 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
         
     )
 )
-

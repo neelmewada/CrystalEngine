@@ -42,7 +42,7 @@ namespace CE
 	}
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	TClass* NewObject(Object* owner = (Object*)GetTransientPackage(), 
+	TClass* CreateObject(Object* owner = (Object*)GetTransientPackage(), 
 		String objectName = "", 
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 

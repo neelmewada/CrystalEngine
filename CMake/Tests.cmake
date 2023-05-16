@@ -49,10 +49,10 @@ function(ce_add_test NAME)
 
     if(${ce_add_test_AUTORTTI})
         file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Generated")
-        target_link_directories(${NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Generated")
+        target_include_directories(${NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Generated")
 
         add_custom_command(TARGET ${NAME} PRE_BUILD
-            COMMAND "AutoRTTI" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
+            COMMAND "AutoRTTI" -m ${NAME} --noapi -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
     endif()

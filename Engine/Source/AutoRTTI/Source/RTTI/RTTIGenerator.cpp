@@ -3,6 +3,7 @@
 
 namespace CE
 {
+	bool gShouldEmitApiMacro = true;
 
 	Array<IO::Path> RTTIGenerator::includeSearchPaths{};
 

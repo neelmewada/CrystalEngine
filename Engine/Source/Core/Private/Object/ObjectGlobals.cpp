@@ -20,13 +20,15 @@ namespace CE
 
 			ObjectThreadContext::Get().PushInitializer(&init);
 
-			auto instance = params.objectClass->CreateInstance();
+			auto instance = params.objectClass->CreateInstance(); // The constructor automatically pops ObjectInitializer from stack
 			if (instance == nullptr)
             {
                 ObjectThreadContext::Get().PopInitializer();
                 return nullptr;
             }
 			
+			if (params.owner != nullptr && params.owner->IsPackage())
+				instance->ownerPackage = (Package*)params.owner;
 			if (params.owner != nullptr)
 				params.owner->AttachSubobject(instance);
 			return instance;
