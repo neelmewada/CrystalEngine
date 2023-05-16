@@ -10,6 +10,7 @@ namespace CE
         : archivePath(archivePath), mode(mode)
     {
         String path = archivePath.GetString();
+
         handle = zip_open(path.GetCString(), ZIP_DEFAULT_COMPRESSION_LEVEL, (char)mode);
     }
 
