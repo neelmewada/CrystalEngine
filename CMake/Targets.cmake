@@ -126,6 +126,18 @@ function(ce_add_target NAME TARGET_TYPE)
     
     ce_group_sources_by_folder(${NAME})
 
+    # Per Source Definitions
+
+    # foreach(source_file ${SOURCES})
+    #     cmake_path(GET source_file FILENAME source_filename)
+    #     cmake_path(REPLACE_EXTENSION source_filename LAST_ONLY ".h")
+    #     string(REPLACE "." "_" source_filename_modified "${source_filename}")
+    #     string(PREPEND source_filename_modified "${NAME}_")
+        
+    #     #set_source_files_properties(${source_file} PROPERTIES COMPILE_DEFINITIONS -D__FILE_ID__=${source_filename_modified})
+    # endforeach()
+    
+
     # OUTPUT_DIRECTORY
 
     if((${ce_add_target_OUTPUT_DIRECTORY}) AND (${TARGET_TYPE} STREQUAL "TOOL"))

@@ -10,6 +10,14 @@
 
 namespace CE
 {
-    
+
+    SavePackageResult Package::SavePackage(Package *outer,
+                                           Object *object,
+                                           const String& fileName,
+                                           const SavePackageArgs& args)
+    {
+        return SavePackageResult::Success;
+    }
+
 } // namespace CE
 

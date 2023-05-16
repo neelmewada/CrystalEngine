@@ -33,7 +33,7 @@ Spec tables with little endian format
 | +xx | 4B | `xx xx xx xx` | Length of actual data only. `0` is valid. |
 | +04 | xx |  | **Data: List of [Field Entries](#object-entry-field-list)** |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
-| +xx | 4B | `xx xx xx xx` | Data CRC checksum. `0` if no data. |
+| +xx | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
 
 ## **Object Entry Field List**
 | Offset | Size | Value | Description |
@@ -60,10 +60,11 @@ Each array element is saved as a Field Data itself, making a recursive data stru
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | \0 | | Full type name of array elements |
+| +00 | \0 | `CE::String\0` | Full type name of array elements |
 | +xx | 4B | N | Number of elements |
-| +xx | xx | | Array element 0. Recursive **Field Data**. |
+| +04 | xx | | Array element 0. Recursive **Field Data**. |
 | ... | ... | ... | ... |
+| +xx | xx | | Array element N - 1. Recursive **Field Data**. |
 
 ### Struct Field Data
 
