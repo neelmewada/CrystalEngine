@@ -55,14 +55,12 @@ namespace CE
             return;
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
-        subobject->ownerPackage = this->ownerPackage;
     }
 
     void Object::DetachSubobject(Object* subobject)
     {
         if (subobject == nullptr)
             return;
-        subobject->ownerPackage = nullptr;
         subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);
     }
@@ -70,6 +68,22 @@ namespace CE
     void Object::RequestDestroy()
     {
         delete this;
+    }
+
+    Package* Object::GetPackage()
+    {
+        auto outerObject = outer;
+        if (outerObject == nullptr)
+            return nullptr;
+        
+        while (outerObject != nullptr)
+        {
+            if (outerObject->GetClass()->IsSubclassOf(TYPEID(Package)))
+                return (Package*)outerObject;
+            outerObject = outerObject->outer;
+        }
+        
+        return nullptr;
     }
 
     void Object::LoadConfig(ClassType* configClass/*=NULL*/, String fileName/*=""*/)

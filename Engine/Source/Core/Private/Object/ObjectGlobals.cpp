@@ -26,11 +26,9 @@ namespace CE
                 ObjectThreadContext::Get().PopInitializer();
                 return nullptr;
             }
-			
-			if (params.owner != nullptr && params.owner->IsPackage())
-				instance->ownerPackage = (Package*)params.owner;
-			if (params.owner != nullptr)
-				params.owner->AttachSubobject(instance);
+            
+			if (params.outer != nullptr)
+				params.outer->AttachSubobject(instance);
 			return instance;
 		}
 		
@@ -53,17 +51,12 @@ namespace CE
 
 	ObjectInitializer::ObjectInitializer()
 	{
-		Initialize();
+		
 	}
 
 	ObjectInitializer::ObjectInitializer(ObjectFlags flags) : objectFlags(flags)
 	{
-		Initialize();
-	}
-
-	void ObjectInitializer::Initialize()
-	{
-
+		
 	}
 
 	/* ***************************************

@@ -1184,36 +1184,6 @@ TEST(Serialization, StructuredStream)
 
 
 /**********************************************
-* Packages
-*/
-
-
-TEST(Package, Writing)
-{
-    TEST_BEGIN;
-    using namespace PackageTests;
-    CERegisterModuleTypes();
-
-    Package* writePackage = CreateObject<Package>(nullptr, "TestPackage");
-    
-    auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
-    auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
-
-    obj1->objPtr = obj2;
-    obj1->stringValue = "My String Value";
-    obj1->stringArray = { "item0", "item1", "item2" };
-    obj2->objectArray.Add(obj1);
-
-    obj1->RequestDestroy();
-    obj2->RequestDestroy();
-    writePackage->RequestDestroy();
-    
-    CEDeregisterModuleTypes();
-    TEST_END;
-}
-
-
-/**********************************************
 *   Delegates
 */
 
@@ -1384,3 +1354,43 @@ TEST(Delegates, ModuleCallbacks)
 
 #pragma endregion
 
+
+/**********************************************
+* Packages
+*/
+
+#pragma region Package
+
+
+TEST(Package, Writing)
+{
+    TEST_BEGIN;
+    using namespace PackageTests;
+    CERegisterModuleTypes();
+    
+    IO::Path launchDir = PlatformDirectories::GetLaunchDir();
+
+    Package* writePackage = CreateObject<Package>(nullptr, "/Game/TestPackage");
+    EXPECT_EQ(writePackage->GetName(), "/Game/TestPackage");
+    
+    auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
+    auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
+    
+    EXPECT_EQ(obj1->GetPackage(), writePackage);
+    EXPECT_EQ(obj2->GetPackage(), writePackage);
+    EXPECT_EQ(writePackage->objectEntries.GetSize(), 2);
+
+    obj1->objPtr = obj2;
+    obj1->stringValue = "My String Value";
+    obj1->stringArray = { "item0", "item1", "item2" };
+    obj2->objectArray.Add(obj1);
+
+    obj1->RequestDestroy();
+    obj2->RequestDestroy();
+    writePackage->RequestDestroy();
+    
+    CEDeregisterModuleTypes();
+    TEST_END;
+}
+
+#pragma endregion

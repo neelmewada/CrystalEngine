@@ -126,9 +126,9 @@ namespace CE
 
         // Lifecycle
 
-        void AttachSubobject(Object* subobject);
+        virtual void AttachSubobject(Object* subobject);
         
-        void DetachSubobject(Object* subobject);
+        virtual void DetachSubobject(Object* subobject);
 
         void RequestDestroy();
 
@@ -137,6 +137,8 @@ namespace CE
         virtual bool IsAsset() { return false; }
 
         virtual bool IsPackage() { return false; }
+        
+        Package* GetPackage();
 
         // - Config API -
 
@@ -165,7 +167,6 @@ namespace CE
 		ObjectStore attachedObjects{};
         
         Object* outer = nullptr;
-        Package* ownerPackage = nullptr;
         
         ThreadId creationThreadId{};
         Mutex mutex{};

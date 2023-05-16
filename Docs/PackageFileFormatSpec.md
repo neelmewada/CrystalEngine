@@ -17,12 +17,12 @@ Spec tables with little endian format
 ## **Overview**
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 8B | `00 43 50 41 4b 00 00 0a` | Magic Number: `. C P A K . . \n` |
+| +00 | 8B | `00 50 41 43 4b 00 00 0a` | Magic Number: `. P A C K . . \n` |
 | +08 | 4B | `00 00 01 00` | Version number: Major.Minor (2 bytes each) |
 | +0C | 4B | `00 00 00 00` | File checksum only for the actual data |
 | +10 | 4B | `00 00 00 00` | Data start offset (from start of file) |
 | +14 | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |
-| +1C | \0 | `AssetPackageName\0` | Name of Package object. |
+| +1C | \0 | `/Engine/Assets/SomeAsset\0` | Path/name of Package. |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual data. List of [Object Entries](#object-entry)** |
 | +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. (EOF) |

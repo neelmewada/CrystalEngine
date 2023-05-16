@@ -20,9 +20,6 @@ namespace CE
     template<typename ElementType>
     class List
     {
-        template<typename ElementType>
-        friend class Array;
-
     public:
         List() : Impl()
         {
@@ -164,7 +161,7 @@ namespace CE
 
         void RemoveAll(std::function<bool(const ElementType& item)> pred)
         {
-            Array<u32> indicesToRemove{};
+            List<u32> indicesToRemove{};
             for (int i = Impl.size() - 1; i >= 0; i--)
             {
                 if (pred(Impl[i]))
@@ -182,7 +179,7 @@ namespace CE
 
         void RemoveFirst(std::function<bool(const ElementType& item)> pred)
         {
-            Array<u32> indicesToRemove{};
+            List<u32> indicesToRemove{};
             for (int i = 0; i < Impl.size(); i++)
             {
                 if (pred(Impl[i]))
@@ -313,7 +310,7 @@ namespace CE
     };
 
     template<typename ElementType>
-    class Array : private List<ElementType>
+    class Array : public List<ElementType>
     {
     public:
         using Type = ElementType;
@@ -522,8 +519,9 @@ namespace CE
                 }
             }
 
-            for (auto idx : indicesToRemove)
+            for (int i = 0; i < indicesToRemove.GetSize(); i++)
             {
+                u32 idx = indicesToRemove[i];
                 if (idx >= 0 && idx < GetSize())
                     RemoveAt(idx);
             }

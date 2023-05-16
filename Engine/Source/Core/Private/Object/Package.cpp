@@ -27,8 +27,8 @@ namespace CE
 			CE_LOG(Error, All, "Package not found at: {}", fullPackagePath);
 			return nullptr;
 		}
-
-
+        
+        
 
 		return nullptr;
 	}
@@ -46,11 +46,24 @@ namespace CE
 			return SavePackageResult::InvalidPath;
 		}
 
-		
-
 		return SavePackageResult::Success;
 	}
 	
+    void Package::AttachSubobject(Object* subobject)
+    {
+        if (subobject == nullptr)
+            return;
+        Super::AttachSubobject(subobject);
+        objectEntries.Add({ subobject->GetUuid(), subobject });
+    }
+
+    void Package::DetachSubobject(Object* subobject)
+    {
+        if (subobject == nullptr)
+            return;
+        Super::DetachSubobject(subobject);
+        objectEntries.Remove(subobject->GetUuid());
+    }
 
 } // namespace CE
 

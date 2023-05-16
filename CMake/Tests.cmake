@@ -25,6 +25,7 @@ function(ce_add_test NAME)
     set(options AUTORTTI)
     set(oneValueArgs TARGET FOLDER)
     set(multiValueArgs SOURCES BUILD_DEPENDENCIES)
+    set(include_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
 
     cmake_parse_arguments(ce_add_test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     
@@ -49,13 +50,17 @@ function(ce_add_test NAME)
 
     if(${ce_add_test_AUTORTTI})
         file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Generated")
-        target_include_directories(${NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Generated")
+        list(APPEND include_dirs "${CMAKE_CURRENT_BINARY_DIR}/Generated")
 
         add_custom_command(TARGET ${NAME} PRE_BUILD
             COMMAND "AutoRTTI" -m ${NAME} --noapi -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
     endif()
+
+    target_include_directories(${NAME} 
+        PRIVATE ${include_dirs}
+    )
 
     # BUILD_DEPENDENCIES
 

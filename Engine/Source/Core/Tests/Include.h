@@ -2,13 +2,12 @@
 
 #include "CoreMinimal.h"
 
-
 namespace PackageTests
 {
 	using namespace CE;
 
 	namespace SomeNamespace = CE; // Used to test AutoRTTI namespace detection
-
+    
 	class WritingTestObj1;
 	class WritingTestObj2;
 

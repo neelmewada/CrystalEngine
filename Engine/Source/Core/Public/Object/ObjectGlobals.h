@@ -28,7 +28,7 @@ namespace CE
 				: objectClass(objectClass)
 			{}
 
-			Object* owner = nullptr;
+			Object* outer = nullptr;
 			ClassType* objectClass = nullptr;
 			String name{};
 			Object* templateObject = nullptr;
@@ -42,8 +42,8 @@ namespace CE
 	}
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	TClass* CreateObject(Object* owner = (Object*)GetTransientPackage(), 
-		String objectName = "", 
+	TClass* CreateObject(Object* outer = (Object*)GetTransientPackage(),
+		String objectName = "",
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 
 		Object* templateObject = NULL)
@@ -52,7 +52,7 @@ namespace CE
 			return nullptr;
 
 		Internal::ConstructObjectParams params{ objectClass };
-		params.owner = owner;
+		params.outer = outer;
 		params.name = objectName;
 		params.templateObject = templateObject;
 		params.objectFlags = flags;
@@ -98,12 +98,13 @@ namespace CE
 		}
 
 	private:
-		void Initialize();
+		
 
         ClassType* objectClass = nullptr;
 		ObjectFlags objectFlags{};
 		String name{};
 		UUID uuid{};
+        Package* package = nullptr;
 	};
 
 	/* ***********************************

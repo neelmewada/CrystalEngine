@@ -3,6 +3,9 @@
 #include "Object.h"
 #include "Package/SavePackage.h"
 
+#if PAL_TRAIT_BUILD_TESTS
+class Package_Writing_Test;
+#endif
 
 namespace CE
 {
@@ -26,10 +29,27 @@ namespace CE
 
 		bool IsPackage() override { return true; }
         
+        String GetPackageName()
+        {
+            return name;
+        }
+        
+        void AttachSubobject(Object* subobject) override;
+        
+        void DetachSubobject(Object* subobject) override;
+        
     private:
+        
+#if PAL_TRAIT_BUILD_TESTS
+        friend class ::Package_Writing_Test;
+#endif
+        
 		bool isLoaded = false;
 
-		// Internal Data
+        /// Objects added to this package
+        HashMap<UUID, Object*> objectEntries{};
+        
+		// Loading Data
 
 		struct FieldEntryHeader
 		{
