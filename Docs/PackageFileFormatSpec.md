@@ -75,4 +75,13 @@ Each array element is saved as a Field Data itself, making a recursive data stru
 
 When a field value is a struct type, then it is stored in the same format as [Object Entry Field List](#object-entry-field-list).
 
+### Object Field Data
+
+An object is always stored as a reference. i.e. we store the object's uuid, type name & the package name it belongs it (if it exists outside this package)
+
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
+| +08 | \0 | `CE::SomeClassName\0` | Object type name |
+| +xx | \0 | `/Engine/MyAsset\0` | Package name it belongs to. `00` if object is stored within this package. |
 
