@@ -142,6 +142,9 @@ namespace CE
 
 	Name Object::GetPathInPackage()
 	{
+        if (IsPackage())
+            return "";
+        
 		String path = name;
 		
 		auto outerObject = outer;

@@ -33,7 +33,7 @@ Spec tables with little endian format
 | +00 | 8B | `00 4f 42 4a 45 43 54 00` | Magic Number: `. O B J E C T .` |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
 | +10 | 1B | `01` | Is Asset? `0` or `1` |
-| +11 | \0 | `TextureAtlas.Noise.MyNoiseTexture\0` | Virtual path to asset within the package. |
+| +11 | \0 | `TextureAtlas.Noise.MyNoiseTexture\0` | Virtual path to object within the package. |
 | +xx | \0 | `CE::Texture\0` | Object class TypeName |
 | +xx | 4B | `xx xx xx xx` | Length of actual data only. `0` is valid. |
 | +04 | 4B | `xx xx xx xx` | Total number of fields |
@@ -41,8 +41,7 @@ Spec tables with little endian format
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
 | +xx | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
 
-## **Object Entry Field List**
-Every row except the 1st one are repeated for every entry.
+## **Field List Entry**
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | \0 | `fieldName\0` | Name of the field. |
@@ -74,15 +73,17 @@ Each array element is saved as a Field Data itself, making a recursive data stru
 
 ### Struct Field Data
 
-When a field value is a struct type, then it is stored in the same format as [Object Entry Field List](#object-entry-field-list).
+When a field value is a struct type, then it is stored in the same format as [Field List Entry](#field-list-entry).
 
 ### Object Field Data
 
-An object is always stored as a reference. i.e. we store the object's uuid, type name & the package name it belongs it (if it exists outside this package)
+An object is always stored as a reference. i.e. we store the object's uuid, type name & the package name it belongs it (if it exists outside this package). If the object is NULL, then the UUID field will be 0 and all other fields would be omitted.
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
 | +08 | \0 | `CE::SomeClassName\0` | Object type name |
-| +xx | \0 | `/Engine/MyAsset\0` | Package name it belongs to. `00` if object is stored within this package. |
+| +xx | \0 | `/Engine/MyAsset\0` | Package name it belongs to. |
+| +xx | \0 | `TextureAtlas.Noise.PerlinMap\0` | Path within the package this object belongs to. |
+
 

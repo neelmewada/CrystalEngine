@@ -80,6 +80,7 @@
 #include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"
+#include "Component/Component.h"
 #include "Object/Package.h"
 
 // RTTI Dependents

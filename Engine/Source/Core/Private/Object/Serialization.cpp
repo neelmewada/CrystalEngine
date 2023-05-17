@@ -4,7 +4,8 @@
 namespace CE
 {
 
-	FieldSerializer::FieldSerializer(FieldType* fieldChain, void* instance) : rawInstance(instance)
+	FieldSerializer::FieldSerializer(FieldType* fieldChain, void* instance)
+        : rawInstance(instance)
 	{
 		fields.Clear();
 
@@ -13,11 +14,13 @@ namespace CE
 		while (field != nullptr)
 		{
 			fields.Add(field);
-			field = fieldChain->GetNext();
+            
+			field = field->GetNext();
 		}
 	}
 
-	FieldSerializer::FieldSerializer(Array<FieldType*> fieldList, void* instance) : rawInstance(instance), fields(fieldList)
+	FieldSerializer::FieldSerializer(Array<FieldType*> fieldList, void* instance)
+        : rawInstance(instance), fields(fieldList)
 	{
 
 	}
@@ -32,9 +35,23 @@ namespace CE
 		if (stream == nullptr || !stream->CanWrite() || rawInstance == nullptr || !HasNext())
 			return false;
 
-		FieldType* field = fields.Top();
+        FieldType* field = fields[0];
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
 		TypeInfo* fieldDeclarationType = field->GetDeclarationType();
+        
+        if (fieldDeclarationType == nullptr || fieldTypeId == 0 || !field->IsSerialized())
+        {
+            fields.Pop();
+            return false;
+        }
+        
+        *stream << field->GetName();
+        *stream << field->GetDeclarationType()->GetName();
+        
+        auto dataSizePos = stream->GetCurrentPosition();
+        *stream << (u32)0; // Set 0 size for now
+        
+        auto dataStartPos = stream->GetCurrentPosition();
 		
 		if (field->IsIntegerField())
 		{
@@ -105,6 +122,29 @@ namespace CE
 				}
 			}
 		}
+        else if (field->IsObjectField())
+        {
+            Object* object = field->GetFieldValue<Object*>(rawInstance);
+            
+            if (object != nullptr && !object->IsTransient()) // non-temporary object
+            {
+                *stream << object->GetUuid();
+                *stream << object->GetClass()->GetName();
+                
+                auto package = object->GetPackage();
+                
+                if (package != nullptr)
+                    *stream << package->GetName();
+                else
+                    *stream << "\0";
+                
+                *stream << object->GetPathInPackage();
+            }
+            else
+            {
+                *stream << (u64)0; // A Uuid of 0 means NULL object
+            }
+        }
 		else if (fieldDeclarationType->IsStruct())
 		{
 			StructType* structType = (StructType*)fieldDeclarationType;
@@ -118,8 +158,15 @@ namespace CE
 				fieldSerializer.WriteNext(stream);
 			}
 		}
+        
+        u64 curPos = stream->GetCurrentPosition();
+        auto dataSize = (u32)(stream->GetCurrentPosition() - dataStartPos);
+        
+        stream->Seek(dataSizePos);
+        *stream << dataSize;
+        stream->Seek(curPos);
 
-		fields.Pop();
+		fields.RemoveAt(0);
 		return true;
 	}
 
@@ -128,7 +175,7 @@ namespace CE
 		if (!HasNext())
 			return nullptr;
 
-		return fields.Top();
+        return fields[0];
 	}
 
 }

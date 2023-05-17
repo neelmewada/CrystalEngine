@@ -50,7 +50,7 @@ namespace CE
 		{
 			if (objectInstance == nullptr || objectUuid == 0)
 				continue;
-
+            
 			*stream << PACKAGE_OBJECT_MAGIC_NUMBER;
 			*stream << objectInstance->GetUuid();
 			*stream << (objectInstance->IsAsset() ? (u8)1 : (u8)0);
@@ -65,8 +65,18 @@ namespace CE
 			*stream << (u32)0; // 0 data size. updated later
 
 			*stream << (u32)0; // Number of field entries
-
-			// TODO: Field Entries
+            
+            ClassType* objectClass = objectInstance->GetClass();
+            FieldType* firstField = objectClass->GetFirstField();
+            if (firstField != nullptr)
+            {
+                FieldSerializer fieldSerializer{ firstField, objectInstance };
+                
+                while (fieldSerializer.HasNext())
+                {
+                    fieldSerializer.WriteNext(stream);
+                }
+            }
 
 			*stream << (u32)0; // End of Field Entries
 
