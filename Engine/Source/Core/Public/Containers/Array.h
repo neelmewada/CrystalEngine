@@ -475,7 +475,7 @@ namespace CE
         }
 
 		template<typename T>
-		Array<T> Transform(std::function<T(ElementType&)> selector) const
+		Array<T> Transform(std::function<T(ElementType&)> selector)
 		{
 			Array<T> result{};
 			for (int i = 0; i < Super::Impl.size(); i++)
