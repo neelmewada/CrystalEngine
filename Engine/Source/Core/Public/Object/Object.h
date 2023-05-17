@@ -14,7 +14,11 @@
 
 #include "ObjectThreadContext.h"
 #include "ObjectGlobals.h"
-#include "ObjectStore.h"
+#include "ObjectMap.h"
+
+#if PAL_TRAIT_BUILD_TESTS
+class Package_Writing_Test;
+#endif
 
 namespace CE
 {
@@ -59,12 +63,12 @@ namespace CE
     public:
 
         // - Getters & Setters -
-        INLINE CE::String GetName() const
+        virtual CE::String GetName() const
         {
             return name;
         }
 
-        INLINE void SetName(CE::String newName)
+        virtual void SetName(const String& newName)
         {
             this->name = newName;
         }
@@ -130,6 +134,10 @@ namespace CE
         
         virtual void DetachSubobject(Object* subobject);
 
+		virtual bool HasSubobject(Object* subobject);
+
+		bool ObjectPresentInHierarchy(Object* searchObject);
+
         void RequestDestroy();
 
         // - Public API -
@@ -137,16 +145,27 @@ namespace CE
         virtual bool IsAsset() { return false; }
 
         virtual bool IsPackage() { return false; }
+
+		virtual Name GetPathInPackage();
         
+		// Returns the package this object belongs to.
         Package* GetPackage();
+
+		// Internal use only! Returns a list of all objects that this object and it's subobjects reference to.
+		void FetchObjectReferences(HashMap<UUID, Object*>& outReferences);
 
         // - Config API -
 
         void LoadConfig(ClassType* configClass = NULL, String fileName = "");
 
     private:
+
+#if PAL_TRAIT_BUILD_TESTS
+		friend class ::Package_Writing_Test;
+#endif
         
         friend class Package;
+		friend class SavePackageContext;
         
         friend class EventBus;
         friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);
@@ -158,18 +177,18 @@ namespace CE
          *  Fields
          */
 
-        CE::String name;
-        CE::UUID uuid;
+        String name;
+        UUID uuid;
 
         ObjectFlags objectFlags = OF_NoFlags;
 
         // Subobject Lifecycle
-		ObjectStore attachedObjects{};
+		ObjectMap attachedObjects{};
         
         Object* outer = nullptr;
         
         ThreadId creationThreadId{};
-        Mutex mutex{};
+        //Mutex mutex{};
     };
     
 } // namespace CE

@@ -11,6 +11,7 @@
 // Basic headers
 #include "Misc/Exception.h"
 #include "Misc/Assert.h"
+#include "Misc/ByteUtils.h"
 #include "Memory/Memory.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
@@ -75,6 +76,7 @@
 // RTTI & Object
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
+#include "Object/Serialization.h"
 #include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"

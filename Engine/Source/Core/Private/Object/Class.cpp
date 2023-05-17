@@ -8,7 +8,7 @@ namespace CE
     CE::HashMap<TypeId, StructType*> StructType::registeredStructs{};
     CE::HashMap<Name, StructType*> StructType::registeredStructsByName{};
 
-    bool StructType::IsAssignableTo(TypeId typeId) const
+    bool StructType::IsAssignableTo(TypeId typeId)
     {
         if (typeId == this->GetTypeId())
             return true;
@@ -81,6 +81,24 @@ namespace CE
             return nullptr;
 
         return &cachedFields[0];
+    }
+
+    Array<FieldType*> StructType::FetchObjectFields()
+    {
+		Array<FieldType*> result{};
+
+		auto field = GetFirstField();
+
+		while (field != nullptr)
+		{
+			if (field->IsObjectField())
+			{
+				result.Add(field);
+			}
+			field = field->GetNext();
+		}
+
+        return result;
     }
 
     u32 StructType::GetFieldCount()

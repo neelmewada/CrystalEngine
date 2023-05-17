@@ -59,7 +59,6 @@ namespace CE
     u64 FileStream::GetCurrentPosition()
     {
         return offset;
-        //return impl.tellp();
     }
 
     void FileStream::Seek(s64 seekPos, SeekMode seekMode)
@@ -74,14 +73,6 @@ namespace CE
         if (impl.eof())
             impl.clear();
         impl.seekg(offset, std::ios::beg);
-        /*if (IsOutOfBounds())
-            impl.clear();
-        switch (seekMode)
-        {
-        case SeekMode::Begin: impl.seekg(seekPos, std::ios::beg); break;
-        case SeekMode::Current: impl.seekg(seekPos, std::ios::cur); break;
-        case SeekMode::End: impl.seekg(seekPos, std::ios::end); break;
-        }*/
     }
 
     bool FileStream::IsOpen()
@@ -117,7 +108,7 @@ namespace CE
         offset = 0;
         offset = GetLength();
         impl.seekg(0, std::ios::end);
-        Stream::Read();
+		Stream::Read();
     }
     
 } // namespace CE

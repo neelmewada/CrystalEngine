@@ -1,11 +1,13 @@
 
 #include "CoreMinimal.h"
 
+
+
 namespace CE
 {
 	Package::Package()
 	{
-        
+		this->packageName = name;
 	}
 
 	Package::~Package()
@@ -33,37 +35,34 @@ namespace CE
 		return nullptr;
 	}
 
-	SavePackageResult Package::SavePackage(Package* package, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs)
+	SavePackageResult Package::SavePackage(Package* package, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs)
 	{
 		if (package == nullptr)
 		{
-			CE_LOG(Error, All, "SavePackage passed with nullptr package!");
+			CE_LOG(Error, All, "SavePackage() passed with nullptr package!");
 			return SavePackageResult::UnknownError;
 		}
 		if (fullPackagePath.IsDirectory())
 		{
-			CE_LOG(Error, All, "SavePackage passed with a package path that is a directory");
+			CE_LOG(Error, All, "SavePackage() passed with a package path that is a directory!");
 			return SavePackageResult::InvalidPath;
 		}
+		if (asset != nullptr && asset->GetPackage() != package)
+		{
+			CE_LOG(Error, All, "SavePackage() passed with an asset object that is not part of the package!");
+			return SavePackageResult::AssetNotInPackage;
+		}
 
-		return SavePackageResult::Success;
+		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadWrite);
+		//MemoryStream stream = MemoryStream(1024);
+
+		return SavePackage(package, asset, &stream, saveArgs);
 	}
-	
-    void Package::AttachSubobject(Object* subobject)
-    {
-        if (subobject == nullptr)
-            return;
-        Super::AttachSubobject(subobject);
-        objectEntries.Add({ subobject->GetUuid(), subobject });
-    }
 
-    void Package::DetachSubobject(Object* subobject)
-    {
-        if (subobject == nullptr)
-            return;
-        Super::DetachSubobject(subobject);
-        objectEntries.Remove(subobject->GetUuid());
-    }
+	bool Package::ContainsObject(Object* object)
+	{
+		return ObjectPresentInHierarchy(object);
+	}
 
 } // namespace CE
 

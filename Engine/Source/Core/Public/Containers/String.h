@@ -138,6 +138,7 @@ namespace CE
         void Reserve(u32 reserveCharacterCount);
 
         char* GetCString() const;
+		char* GetData() const;
         inline u32 GetLength() const { return StringLength; }
 
         inline std::string ToStdString() const { return std::string(Buffer); }

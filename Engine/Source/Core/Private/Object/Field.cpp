@@ -27,7 +27,7 @@ namespace CE
         return TypeInfo::GetDisplayName();
     }
 
-    bool FieldType::IsAssignableTo(TypeId typeId) const
+    bool FieldType::IsAssignableTo(TypeId typeId)
     {
         const auto declType = GetDeclarationType();
         
@@ -54,6 +54,11 @@ namespace CE
     {
         return fieldFlags & FIELD_ReadOnly;
     }
+
+	TypeInfo* FieldType::GetOwnerType()
+	{
+		return const_cast<TypeInfo*>(owner);
+	}
 
     bool FieldType::IsArrayField() const
     {
@@ -82,9 +87,22 @@ namespace CE
         return classType != nullptr && classType->IsObject();
     }
 
-    const TypeInfo* FieldType::GetDeclarationType() const
+	TypeInfo* FieldType::GetUnderlyingType()
+	{
+		if (underlyingTypeInfo == nullptr && underlyingTypeId != 0)
+		{
+			underlyingTypeInfo = GetTypeInfo(underlyingTypeId);
+		}
+		return underlyingTypeInfo;
+	}
+
+	TypeInfo* FieldType::GetDeclarationType()
     {
-        return GetTypeInfo(fieldTypeId);
+		if (declarationType == nullptr)
+		{
+			declarationType = GetTypeInfo(fieldTypeId);
+		}
+		return declarationType;
     }
 
     s64 FieldType::GetFieldEnumValue(void* instance)
@@ -139,14 +157,21 @@ namespace CE
         }
     }
 
-    bool FieldType::TransferValue(void* fromInstance, void* toInstance, FieldType* toFieldType)
-    {
-        if (fromInstance == nullptr || toInstance == nullptr || toFieldType == nullptr)
-            return false;
-        
-        
-        
-        return true;
-    }
+	u32 FieldType::GetArraySize(void* instance)
+	{
+		if (!IsArrayField())
+			return 0;
+
+		const auto& array = GetFieldValue<Array<u8>>(instance);
+		TypeId underlyingTypeId = GetUnderlyingTypeId();
+		if (underlyingTypeId == 0)
+			return 0;
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return 0;
+
+		return array.GetSize() / underlyingType->GetSize();
+	}
 
 }

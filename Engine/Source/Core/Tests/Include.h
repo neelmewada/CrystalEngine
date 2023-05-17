@@ -21,7 +21,7 @@ namespace PackageTests
 		String stringValue = "struct default";
 
 		FIELD()
-		Object* someObject = nullptr;
+		Object* owner = nullptr;
 	};
 
 	STRUCT()
@@ -58,6 +58,9 @@ namespace PackageTests
 	{
 		CE_CLASS(WritingTestObj2, CE::Object);
 	public:
+
+		FIELD()
+		WritingTestStruct1 testStruct{};
 
 		FIELD()
 		Array<Object*> objectArray{};

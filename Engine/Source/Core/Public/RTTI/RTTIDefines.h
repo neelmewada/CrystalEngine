@@ -22,7 +22,7 @@ namespace CE::Internal\
 		API static CE::TypeInfo* StaticType();\
 		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type); }\
 		virtual bool IsPOD() const override { return true; }\
-		virtual bool IsAssignableTo(TypeId typeId) const override\
+		virtual bool IsAssignableTo(TypeId typeId) override\
 		{\
 			std::initializer_list<TypeId> types = { __VA_ARGS__ };\
 			for (auto assignableType : types)\
@@ -77,7 +77,7 @@ namespace CE::Internal\
 		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type<DefaultArgType>); }\
 		virtual bool IsPOD() const override { return true; }\
 		virtual bool IsTemplatedPOD() const { return true; }\
-		virtual bool IsAssignableTo(TypeId typeId) const override\
+		virtual bool IsAssignableTo(TypeId typeId) override\
 		{\
 			std::initializer_list<TypeId> types = { __VA_ARGS__ };\
 			for (auto assignableType : types)\
@@ -133,7 +133,7 @@ namespace CE
 
 	class Object;
 
-	class ObjectStore;
+	class ObjectMap;
 
     template<typename T>
     class Array;

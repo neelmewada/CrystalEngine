@@ -200,6 +200,11 @@ namespace CE
         return Buffer;
     }
 
+	char* String::GetData() const
+	{
+		return Buffer;
+	}
+
     StringView CE::String::ToStringView() const
     {
         return StringView(*this);

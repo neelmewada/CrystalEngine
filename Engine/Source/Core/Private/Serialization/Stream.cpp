@@ -112,7 +112,7 @@ namespace CE
         return *this;
     }
 
-    Stream& Stream::operator<<(const u8& byte)
+    Stream& Stream::operator<<(u8 byte)
     {
         if (IsBinaryMode())
         {
@@ -133,12 +133,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(byte);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const u16& integer)
+    Stream& Stream::operator<<(u16 integer)
     {
         if (IsBinaryMode())
         {
@@ -159,12 +159,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(integer);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const u32& integer)
+    Stream& Stream::operator<<(u32 integer)
     {
         if (IsBinaryMode())
         {
@@ -185,12 +185,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(integer);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const u64& integer)
+    Stream& Stream::operator<<(u64 integer)
     {
         if (IsBinaryMode())
         {
@@ -211,12 +211,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(integer);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const s8& integer)
+    Stream& Stream::operator<<(s8 integer)
     {
         if (IsBinaryMode())
         {
@@ -237,12 +237,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(integer);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const s16& integer)
+    Stream& Stream::operator<<(s16 integer)
     {
         if (IsBinaryMode())
         {
@@ -263,12 +263,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(integer);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const s32& integer)
+    Stream& Stream::operator<<(s32 integer)
     {
         if (IsBinaryMode())
         {
@@ -289,12 +289,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(integer);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const s64& integer)
+    Stream& Stream::operator<<(s64 integer)
     {
         if (IsBinaryMode())
         {
@@ -315,12 +315,12 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(integer);
         }
         return *this;
     }
 
-    Stream& Stream::operator<<(const f32& single)
+    Stream& Stream::operator<<(f32 single)
     {
         if (IsBinaryMode())
         {
@@ -341,7 +341,7 @@ namespace CE
         }
         else if (IsAsciiMode())
         {
-            
+			ReadNumberFromAscii(single);
         }
         return *this;
     }

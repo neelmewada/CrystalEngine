@@ -26,6 +26,30 @@ namespace CE
 	template<>
 	struct TIsIntegralType<s64> : TTrueType {};
 
+	template<typename T>
+	struct TIsNumericType : TFalseType {};
+
+	template<>
+	struct TIsNumericType<u8> : TTrueType {};
+	template<>
+	struct TIsNumericType<u16> : TTrueType {};
+	template<>
+	struct TIsNumericType<u32> : TTrueType {};
+	template<>
+	struct TIsNumericType<u64> : TTrueType {};
+	template<>
+	struct TIsNumericType<s8> : TTrueType {};
+	template<>
+	struct TIsNumericType<s16> : TTrueType {};
+	template<>
+	struct TIsNumericType<s32> : TTrueType {};
+	template<>
+	struct TIsNumericType<s64> : TTrueType {};
+	template<>
+	struct TIsNumericType<f32> : TTrueType {};
+	template<>
+	struct TIsNumericType<f64> : TTrueType {};
+
 	template <class, template <class> class>
 	struct TypeIsInstanceOf : TFalseType {};
 
@@ -104,13 +128,13 @@ namespace CE
 		typedef T Type;
 	};
 
-	class ObjectStore;
+	class ObjectMap;
     
 	template<typename T>
 	struct IsObjectStoreType : TFalseType {};
 
 	template<>
-	struct IsObjectStoreType<ObjectStore> : TTrueType {};
+	struct IsObjectStoreType<ObjectMap> : TTrueType {};
 
 	template<typename T>
 	struct TIsAbstract : TBoolConst<__is_abstract(T)> {};

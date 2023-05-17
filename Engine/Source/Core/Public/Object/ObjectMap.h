@@ -13,10 +13,10 @@ namespace CE
 {
     class Object;
 
-    class CORE_API ObjectStore
+    class CORE_API ObjectMap
     {
     public:
-        ObjectStore()
+        ObjectMap()
         {
 
         }
@@ -26,12 +26,12 @@ namespace CE
             return (u32)objects.GetSize();
         }
         
-        CE_INLINE Object* GetObjectWithUuid(UUID uuid)
+        CE_INLINE Object* FindObject(UUID uuid)
         {
             return objects[uuid];
         }
         
-        CE_INLINE bool ObjectExistsWithUuid(UUID uuid) const
+        CE_INLINE bool ObjectExists(UUID uuid) const
         {
             return objects.KeyExists(uuid);
         }
@@ -39,13 +39,10 @@ namespace CE
         void AddObject(Object* object);
         
         void RemoveObject(Object* object);
-        void DestroyObject(Object* object);
         
-        void RemoveObjectWithUuid(UUID uuid);
+        void RemoveObject(UUID uuid);
 
-        void DestroyAll();
-        
-        void Clear();
+        void RemoveAll();
         
         auto begin() { return objects.begin(); }
         auto end() { return objects.end(); }

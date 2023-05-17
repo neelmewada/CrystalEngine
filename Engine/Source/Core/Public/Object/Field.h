@@ -50,8 +50,8 @@ namespace CE
 
         virtual u32 GetSize() const override { return (u32)size; }
         
-        virtual bool IsAssignableTo(TypeId typeId) const override;
-        virtual bool IsObject() const override { return IsAssignableTo(TYPEID(Object)); }
+        virtual bool IsAssignableTo(CE::TypeId typeId) override;
+        virtual bool IsObject() override { return IsAssignableTo(TYPEID(Object)); }
         
         bool IsArrayField() const;
         bool IsStringField() const;
@@ -74,10 +74,14 @@ namespace CE
         bool IsSerialized() const;
         bool IsHidden() const;
         bool IsReadOnly() const;
+
+		TypeInfo* GetOwnerType();
         
         virtual CE::TypeId GetUnderlyingTypeId() const override { return underlyingTypeId; }
+
+		TypeInfo* GetUnderlyingType() override;
         
-        const TypeInfo* GetDeclarationType() const;
+        TypeInfo* GetDeclarationType();
 
         INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
 
@@ -101,14 +105,30 @@ namespace CE
 
         s64 GetFieldEnumValue(void* instance);
         void SetFieldEnumValue(void* instance, s64 value);
-        
-        bool TransferValue(void* fromInstance, void* toInstance, FieldType* toFieldType);
+
+		// - Array API -
+
+		u32 GetArraySize(void* instance);
+
+		template<typename T>
+		const T& GetArrayElementAt(u32 index, void* instance)
+		{
+			if (!IsArrayField())
+				return {};
+
+			const auto& array = GetFieldValue<Array<u8>>(instance);
+			const u8* address = array.begin() + index;
+			return *(T*)address;
+		}
 
     private:
         FieldFlags fieldFlags = FIELD_NoFlags;
         
         TypeId fieldTypeId;
         TypeId underlyingTypeId;
+
+		TypeInfo* declarationType = nullptr;
+		TypeInfo* underlyingTypeInfo = nullptr;
 
         SIZE_T offset;
         SIZE_T size;

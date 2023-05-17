@@ -15,7 +15,7 @@ namespace CE
     
         CORE_API TypeId GetObjectStoreTypeId()
         {
-            return (TypeId)typeid(CE::ObjectStore).hash_code();
+            return (TypeId)typeid(CE::ObjectMap).hash_code();
         }
     }
 
@@ -216,11 +216,6 @@ namespace CE
     bool TypeInfo::HasAttribute(const String& key)
     {
         return attributes.HasKey(key);
-    }
-
-    bool TypeInfo::IsComponent() const
-    {
-        return IsClass() && IsAssignableTo(TYPEID(Component));
     }
 
     Name TypeInfo::GenerateInstanceName(UUID uuid) const

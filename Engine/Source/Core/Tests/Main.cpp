@@ -986,13 +986,20 @@ TEST(Serialization, BasicStreams)
     memAsciiStream << "This is a String! Integer = ";
     memAsciiStream << 123;
     memAsciiStream << ";\n";
+	memAsciiStream << 412 << "\n";
+	memAsciiStream << 14.124f << "\n";
     memAsciiStream << "float = ";
     memAsciiStream << 12.452f;
 
     memAsciiStream.Seek(0);
-    String line = "";
+	String line = ""; f32 floatVal = 0;
     memAsciiStream >> line;
     EXPECT_EQ(line, "This is a String! Integer = 123;");
+	int number = 0;
+	memAsciiStream >> number;
+	EXPECT_EQ(number, 412);
+	memAsciiStream >> floatVal;
+	EXPECT_EQ(floatVal, 14.124f);
     memAsciiStream >> line;
     EXPECT_EQ(line, "float = 12.452");
     EXPECT_TRUE(memAsciiStream.IsOutOfBounds());
@@ -1015,6 +1022,8 @@ TEST(Serialization, BasicStreams)
     fileBinStream << (u8)250;
     fileBinStream << 41212.42f;
     fileBinStream << "New String";
+	UUID uuid = UUID();
+	fileBinStream << uuid;
     
     fileBinStream.Close();
     EXPECT_FALSE(fileBinStream.IsOpen());
@@ -1024,7 +1033,7 @@ TEST(Serialization, BasicStreams)
     newFileBinStream.SetBinaryMode(true);
     EXPECT_TRUE(newFileBinStream.IsOpen());
 
-    str = ""; u8 byte = 0; single = 0;
+	str = ""; u8 byte = 0; single = 0; u64 longNum = 0;
     newFileBinStream >> str;
     EXPECT_EQ(str, "This is a string");
     newFileBinStream >> byte;
@@ -1033,6 +1042,8 @@ TEST(Serialization, BasicStreams)
     EXPECT_EQ(single, 41212.42f);
     newFileBinStream >> str;
     EXPECT_EQ(str, "New String");
+	newFileBinStream >> longNum;
+	//EXPECT_EQ(longNum, (u64)0xfe0000efac0000ca);
     EXPECT_TRUE(newFileBinStream.IsOutOfBounds());
 
     newFileBinStream.Close();
@@ -1375,20 +1386,34 @@ TEST(Package, Writing)
     
     auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
     auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
+	auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
+	auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1")); // Outside package
     
     EXPECT_EQ(obj1->GetPackage(), writePackage);
     EXPECT_EQ(obj2->GetPackage(), writePackage);
-    EXPECT_EQ(writePackage->objectEntries.GetSize(), 2);
+    EXPECT_EQ(writePackage->attachedObjects.GetObjectCount(), 2);
 
     obj1->objPtr = obj2;
     obj1->stringValue = "My String Value";
     obj1->stringArray = { "item0", "item1", "item2" };
-    obj2->objectArray.Add(obj1);
 
-    obj1->RequestDestroy();
+    obj2->objectArray.Add(obj1);
+	obj2->testStruct.owner = obj2;
+	obj2->testStruct.obj1Ptr = obj1_0;
+
+	obj1_0->objPtr = obj1_1;
+
+	HashMap<UUID, Object*> references{};
+	writePackage->FetchObjectReferences(references);
+	EXPECT_EQ(references.GetSize(), 4);
+
+	SavePackageArgs saveArgs{};
+	auto result = Package::SavePackage(writePackage, nullptr, launchDir / "TestPackage.casset", saveArgs);
+
+    obj1->RequestDestroy(); // Automatically destroys children
     obj2->RequestDestroy();
     writePackage->RequestDestroy();
-    
+	
     CEDeregisterModuleTypes();
     TEST_END;
 }

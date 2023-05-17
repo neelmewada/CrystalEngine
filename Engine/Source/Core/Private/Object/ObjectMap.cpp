@@ -4,14 +4,14 @@
 namespace CE
 {
 
-	void ObjectStore::AddObject(Object* object)
+	void ObjectMap::AddObject(Object* object)
 	{
         if (object == nullptr || objects.KeyExists(object->GetUuid()))
             return;
         objects.Add({ object->GetUuid(), object });
 	}
 
-	void ObjectStore::RemoveObject(Object* object)
+	void ObjectMap::RemoveObject(Object* object)
 	{
 		if (object == nullptr)
 			return;
@@ -19,7 +19,7 @@ namespace CE
 		objects.Remove(object->GetUuid());
 	}
 
-	void ObjectStore::RemoveObjectWithUuid(UUID uuid)
+	void ObjectMap::RemoveObject(UUID uuid)
 	{
 		if (!objects.KeyExists(uuid))
 			return;
@@ -28,16 +28,7 @@ namespace CE
 		objects.Remove(uuid);
 	}
 
-	void ObjectStore::DestroyAll()
-	{
-		for (auto [uuid, object] : objects)
-		{
-			object->RequestDestroy();
-		}
-		Clear();
-	}
-
-	void ObjectStore::Clear()
+	void ObjectMap::RemoveAll()
 	{
 		objects.Clear();
 	}

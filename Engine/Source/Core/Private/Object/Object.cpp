@@ -22,11 +22,15 @@ namespace CE
         }
         
         // Delete all attached subobjects
-        for (auto [_, subobject] : attachedObjects)
-        {
-            delete subobject;
-        }
-        attachedObjects.Clear();
+		if (attachedObjects.GetObjectCount() > 0)
+		{
+			for (auto [_, subobject] : attachedObjects)
+			{
+				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
+				delete subobject;
+			}
+		}
+        attachedObjects.RemoveAll();
 	}
 
     void Object::ConstructInternal()
@@ -65,8 +69,58 @@ namespace CE
         attachedObjects.RemoveObject(subobject);
     }
 
+	bool Object::HasSubobject(Object* subobject)
+	{
+		if (subobject == nullptr)
+			return false;
+		if (attachedObjects.ObjectExists(subobject->GetUuid()))
+		{
+			return true;
+		}
+		return false;
+	}
+
+    bool Object::ObjectPresentInHierarchy(Object* searchObject)
+    {
+		if (searchObject == nullptr)
+			return false;
+		if (searchObject == this)
+			return true;
+
+		if (HasSubobject(searchObject))
+		{
+			return true;
+		}
+
+		for (auto [_, subobject] : attachedObjects)
+		{
+			if (subobject->HasSubobject(searchObject))
+				return true;
+		}
+
+        return false;
+    }
+
     void Object::RequestDestroy()
     {
+		// Detach this object from outer
+		if (outer != nullptr)
+		{
+			outer->DetachSubobject(this);
+		}
+		outer = nullptr;
+
+		// Delete all attached subobjects
+		if (attachedObjects.GetObjectCount() > 0)
+		{
+			for (auto [_, subobject] : attachedObjects)
+			{
+				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
+				delete subobject;
+			}
+		}
+		attachedObjects.RemoveAll();
+
         delete this;
     }
 
@@ -86,7 +140,49 @@ namespace CE
         return nullptr;
     }
 
-    void Object::LoadConfig(ClassType* configClass/*=NULL*/, String fileName/*=""*/)
+	Name Object::GetPathInPackage()
+	{
+		String path = name;
+		
+		auto outerObject = outer;
+
+		while (outerObject != nullptr && !outerObject->IsPackage())
+		{
+			auto outerPathName = outerObject->GetName();
+			if (!outerPathName.IsEmpty())
+				path = outerPathName + "." + path;
+			outerObject = outerObject->outer;
+		}
+
+		return path;
+	}
+
+	void Object::FetchObjectReferences(HashMap<UUID, Object*>& outReferences)
+	{
+		for (const auto& [uuid, subobject] : attachedObjects)
+		{
+			if (subobject == nullptr || uuid == 0)
+				continue;
+
+			if (!outReferences.KeyExists(uuid))
+				outReferences.Add({ uuid, subobject });
+			subobject->FetchObjectReferences(outReferences);
+		}
+
+		auto objectFields = GetClass()->FetchObjectFields();
+
+		for (auto field : objectFields)
+		{
+			auto object = field->GetFieldValue<Object*>(this);
+			if (object != nullptr)
+			{
+				if (!outReferences.KeyExists(object->GetUuid()))
+					outReferences.Add({ object->GetUuid(), object });
+			}
+		}
+	}
+
+    void Object::LoadConfig(ClassType* configClass, String fileName)
     {
         if (configClass == NULL)
             configClass = GetClass();

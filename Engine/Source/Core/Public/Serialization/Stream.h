@@ -60,32 +60,80 @@ namespace CE
         virtual Stream& operator<<(const UUID& uuid);
         virtual Stream& operator>>(UUID& uuid);
 
-        virtual Stream& operator<<(const u8& byte);
+        virtual Stream& operator<<(u8 byte);
         virtual Stream& operator>>(u8& byte);
         
-        virtual Stream& operator<<(const u16& integer);
+        virtual Stream& operator<<(u16 integer);
         virtual Stream& operator>>(u16& integer);
         
-        virtual Stream& operator<<(const u32& integer);
+        virtual Stream& operator<<(u32 integer);
         virtual Stream& operator>>(u32& integer);
         
-        virtual Stream& operator<<(const u64& integer);
+        virtual Stream& operator<<(u64 integer);
         virtual Stream& operator>>(u64& integer);
 
-        virtual Stream& operator<<(const s8& integer);
+        virtual Stream& operator<<(s8 integer);
         virtual Stream& operator>>(s8& integer);
         
-        virtual Stream& operator<<(const s16& integer);
+        virtual Stream& operator<<(s16 integer);
         virtual Stream& operator>>(s16& integer);
         
-        virtual Stream& operator<<(const s32& integer);
+        virtual Stream& operator<<(s32 integer);
         virtual Stream& operator>>(s32& integer);
         
-        virtual Stream& operator<<(const s64& integer);
+        virtual Stream& operator<<(s64 integer);
         virtual Stream& operator>>(s64& integer);
 
-        virtual Stream& operator<<(const f32& single);
+        virtual Stream& operator<<(f32 single);
         virtual Stream& operator>>(f32& single);
+
+	private:
+
+		template<typename TInt> requires TIsNumericType<TInt>::Value
+		void ReadNumberFromAscii(TInt& out)
+		{
+			String readStr = String(30);
+			bool isFloat = false;
+
+			auto cur = Read();
+			if (cur == '-')
+			{
+				readStr.Append(cur);
+				cur = Read();
+			}
+			if (cur == '+')
+				cur = Read();
+			if (cur == '.')
+			{
+				isFloat = true;
+				readStr.Append(cur);
+				cur = Read();
+			}
+
+			while (cur != '\r' && cur != '\n' && cur != '\0' && (String::IsNumeric(cur) || cur == '.'))
+			{
+				if (cur == '.')
+					isFloat = true;
+				readStr.Append(cur);
+				cur = Read();
+			}
+
+			if (cur == '\r')
+			{
+				cur = Read();
+			}
+
+			f32 floatValue = 0;
+			s64 intValue = 0;
+			if (isFloat && String::TryParseFloat(readStr, floatValue))
+			{
+				out = static_cast<TInt>(floatValue);
+			}
+			else if (!isFloat && String::TryParseInteger(readStr, intValue))
+			{
+				out = static_cast<TInt>(intValue);
+			}
+		}
 
     public:
 

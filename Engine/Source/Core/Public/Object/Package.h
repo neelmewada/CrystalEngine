@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Object.h"
-#include "Package/SavePackage.h"
 
 #if PAL_TRAIT_BUILD_TESTS
 class Package_Writing_Test;
@@ -10,6 +9,27 @@ class Package_Writing_Test;
 namespace CE
 {
 	class SavePackage;
+
+	enum class LoadPackageResult
+	{
+		Success = 0,
+		PackageNotFound,
+		InvalidPackage,
+	};
+
+	enum class SavePackageResult
+	{
+		Success = 0,
+		UnknownError,
+		InvalidPath,
+		InvalidPackage,
+		AssetNotInPackage,
+	};
+
+	struct SavePackageArgs
+	{
+
+	};
 
 	class CORE_API Package : public Object
 	{
@@ -23,33 +43,52 @@ namespace CE
 		static Package* LoadPackage(const IO::Path& fullPackagePath, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
 
-		static SavePackageResult SavePackage(Package* package, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* package, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs);
+
+		static SavePackageResult SavePackage(Package* package, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs);
 
 		// - Public API -
 
 		bool IsPackage() override { return true; }
+
+		virtual void SetName(const String& newName) override
+		{
+			this->packageName = newName;
+			Super::SetName(newName);
+		}
         
-        String GetPackageName()
+        Name GetPackageName()
         {
-            return name;
+            return packageName;
         }
+
+		UUID GetPackageUuid()
+		{
+			return uuid;
+		}
+
+		void SetPackageName(const Name& name)
+		{
+			this->packageName = name;
+		}
         
-        void AttachSubobject(Object* subobject) override;
+        //void AttachSubobject(Object* subobject) override;
         
-        void DetachSubobject(Object* subobject) override;
+        //void DetachSubobject(Object* subobject) override;
+
+		// Returns true if this package contains the given object
+		bool ContainsObject(Object* object);
         
     private:
+		Name packageName{};
         
 #if PAL_TRAIT_BUILD_TESTS
         friend class ::Package_Writing_Test;
 #endif
         
 		bool isLoaded = false;
-
-        /// Objects added to this package
-        HashMap<UUID, Object*> objectEntries{};
         
-		// Loading Data
+		// Loading Only Data
 
 		struct FieldEntryHeader
 		{
@@ -64,7 +103,7 @@ namespace CE
 			u32 offsetInFile = 0;
 			UUID instanceUuid = 0;
 			b8 isAsset = false;
-			IO::Path virtualAssetPath{};
+			IO::Path assetPathInPackage{};
 			Name objectClassName{};
 			u32 objectDataSize = 0;
 

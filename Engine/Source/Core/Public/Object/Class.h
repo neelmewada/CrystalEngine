@@ -84,7 +84,7 @@ namespace CE
 
 		virtual bool IsStruct() const override { return true; }
 
-		virtual bool IsAssignableTo(TypeId typeId) const override;
+		virtual bool IsAssignableTo(TypeId typeId) override;
 
         const Attribute& GetAttributes() override;
 
@@ -169,6 +169,9 @@ namespace CE
 		}
 
 		FieldType* GetFirstField();
+
+		// Returns a list of all fields that are an Object Pointer
+		Array<FieldType*> FetchObjectFields();
 
 		u32 GetFieldCount();
 		FieldType* GetFieldAt(u32 index);

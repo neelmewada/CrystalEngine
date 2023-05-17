@@ -12,8 +12,12 @@ namespace CE
         Asset();
         virtual ~Asset();
 
+	public:
+
         bool IsAsset() override;
 
+	private:
+		Name fullAssetPath;
     };
     
 } // namespace CE

@@ -184,18 +184,19 @@ namespace CE
 
 		virtual bool IsPOD() const { return false; }
 
-		virtual bool IsAssignableTo(TypeId typeId) const { return false; }
+		virtual bool IsAssignableTo(TypeId typeId) { return false; }
 
 		virtual TypeId GetTypeId() const = 0;
 		virtual u32 GetSize() const = 0;
         
         virtual CE::TypeId GetUnderlyingTypeId() const { return 0; }
 
+		virtual TypeInfo* GetUnderlyingType() { return nullptr; }
+
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }
-        virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectStore); }
+        virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectMap); }
         
-        virtual bool IsObject() const { return IsClass() && IsAssignableTo(TYPEID(Object)); }
-		virtual bool IsComponent() const;
+        virtual bool IsObject() { return IsClass() && IsAssignableTo(TYPEID(Object)); }
 
 		Name GenerateInstanceName(UUID uuid) const;
 
@@ -204,7 +205,6 @@ namespace CE
 	protected:
 		CE::Name name;
 		CE::String displayName{};
-		//CE::Array<CE::Attribute> attributes{};
 		Attribute attributes{};
         Name registeredModuleName{};
 
