@@ -174,4 +174,27 @@ namespace CE
 		return array.GetSize() / underlyingType->GetSize();
 	}
 
+	Array<FieldType> FieldType::GetArrayFieldList(void* instance)
+	{
+		if (!IsArrayField())
+			return {};
+
+		u32 arraySize = GetArraySize(instance);
+		if (arraySize == 0)
+			return {};
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return {};
+
+		Array<FieldType> array{};
+
+		for (int i = 0; i < arraySize; i++)
+		{
+			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 0, underlyingType->GetSize(), i * underlyingType->GetSize(), "", this));
+		}
+
+		return array;
+	}
+
 }

@@ -17,6 +17,11 @@ namespace CE
 		}
 	}
 
+	FieldSerializer::FieldSerializer(Array<FieldType*> fieldList, void* instance) : rawInstance(instance), fields(fieldList)
+	{
+
+	}
+
 	bool FieldSerializer::HasNext()
 	{
 		return fields.NonEmpty();
@@ -24,11 +29,12 @@ namespace CE
 
 	bool FieldSerializer::WriteNext(Stream* stream)
 	{
-		if (stream == nullptr || !stream->CanWrite() || rawInstance == nullptr)
+		if (stream == nullptr || !stream->CanWrite() || rawInstance == nullptr || !HasNext())
 			return false;
 
 		FieldType* field = fields.Top();
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
+		TypeInfo* fieldDeclarationType = field->GetDeclarationType();
 		
 		if (field->IsIntegerField())
 		{
@@ -74,9 +80,43 @@ namespace CE
 		}
 		else if (field->IsArrayField())
 		{
-			//const auto& array = field->GetFieldValue<Array<u8>>(rawInstance).GetSize();
-			auto underlyingType = field->GetUnderlyingType();
+			auto& array = field->GetFieldValue<Array<u8>>(rawInstance);
 			
+			auto underlyingType = field->GetUnderlyingType();
+			u32 arraySize = field->GetArraySize(rawInstance);
+
+			*stream << underlyingType->GetName();
+			*stream << arraySize;
+
+			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
+			Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& item)-> FieldType*
+			{
+				return &item;
+			});
+
+			if (arraySize > 0)
+			{
+				void* arrayInstance = &array[0];
+
+				FieldSerializer fieldSerializer{ fieldListPtr, arrayInstance };
+				while (fieldSerializer.HasNext())
+				{
+					fieldSerializer.WriteNext(stream);
+				}
+			}
+		}
+		else if (fieldDeclarationType->IsStruct())
+		{
+			StructType* structType = (StructType*)fieldDeclarationType;
+			auto structInstance = field->GetFieldInstance(rawInstance);
+
+			auto firstField = structType->GetFirstField();
+
+			FieldSerializer fieldSerializer{ firstField, structInstance };
+			while (fieldSerializer.HasNext())
+			{
+				fieldSerializer.WriteNext(stream);
+			}
 		}
 
 		fields.Pop();

@@ -8,6 +8,7 @@ namespace CE
 	{
 	public:
 		FieldSerializer(FieldType* fieldChain, void* instance);
+		FieldSerializer(Array<FieldType*> fieldList, void* instance);
 
 		bool HasNext();
 

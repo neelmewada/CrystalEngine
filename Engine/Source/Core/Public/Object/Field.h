@@ -91,6 +91,12 @@ namespace CE
             return *(T*)((SIZE_T)instance + offset);
         }
 
+		// Returns pointer to the field itself
+		void* GetFieldInstance(void* instance)
+		{
+			return (void*)((SIZE_T)instance + offset);
+		}
+
         template<typename T>
         const T& GetFieldValue(void* instance) const
         {
@@ -120,6 +126,8 @@ namespace CE
 			const u8* address = array.begin() + index;
 			return *(T*)address;
 		}
+
+		Array<FieldType> GetArrayFieldList(void* instance);
 
     private:
         FieldFlags fieldFlags = FIELD_NoFlags;

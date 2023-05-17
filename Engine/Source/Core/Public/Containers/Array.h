@@ -474,6 +474,17 @@ namespace CE
             return -1;
         }
 
+		template<typename T>
+		Array<T> Transform(std::function<T(ElementType&)> selector) const
+		{
+			Array<T> result{};
+			for (int i = 0; i < Super::Impl.size(); i++)
+			{
+				result.Add(selector(Super::Impl[i]));
+			}
+			return result;
+		}
+
         template<typename... Args>
         CE_INLINE void EmplaceBack(Args... args)
         {
