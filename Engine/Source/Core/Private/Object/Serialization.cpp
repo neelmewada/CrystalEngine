@@ -38,7 +38,7 @@ namespace CE
         FieldType* field = fields[0];
 		TypeId fieldTypeId = field->GetDeclarationTypeId();
 		TypeInfo* fieldDeclarationType = field->GetDeclarationType();
-        
+		
         if (fieldDeclarationType == nullptr || fieldTypeId == 0 || !field->IsSerialized())
         {
             fields.RemoveAt(0);
@@ -48,7 +48,7 @@ namespace CE
 		if (!skipHeader)
 		{
 			*stream << field->GetName();
-			*stream << field->GetDeclarationType()->GetName();
+			*stream << field->GetDeclarationType()->GetTypeName();
 		}
         
         auto dataSizePos = stream->GetCurrentPosition();

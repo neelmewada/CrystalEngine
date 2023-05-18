@@ -15,13 +15,13 @@ namespace CE
 
 	}
 
-	Package* Package::LoadPackage(const IO::Path& fullPackagePath, LoadFlags loadFlags)
+	Package* Package::LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadFlags loadFlags)
 	{
 		LoadPackageResult result{};
-		return LoadPackage(fullPackagePath, result, loadFlags);
+		return LoadPackage(outer, fullPackagePath, result, loadFlags);
 	}
 
-	Package* Package::LoadPackage(const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
+	Package* Package::LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
 		if (!fullPackagePath.Exists())
 		{
@@ -29,10 +29,16 @@ namespace CE
 			CE_LOG(Error, All, "Package not found at: {}", fullPackagePath);
 			return nullptr;
 		}
+		if (fullPackagePath.IsDirectory())
+		{
+			outResult = LoadPackageResult::PackageNotFound;
+			CE_LOG(Error, All, "Package path passed is a directory: {}", fullPackagePath);
+			return nullptr;
+		}
         
-        
+		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
 
-		return nullptr;
+		return LoadPackage(outer, &stream, outResult, loadFlags);
 	}
 
 	SavePackageResult Package::SavePackage(Package* package, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs)

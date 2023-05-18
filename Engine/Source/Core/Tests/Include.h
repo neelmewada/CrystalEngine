@@ -37,7 +37,7 @@ namespace PackageTests
 	CLASS()
 	class WritingTestObj1 : public CE::Object
 	{
-		CE_CLASS(WritingTestObj1, CE::Object);
+		CE_CLASS(WritingTestObj1, CE::Object)
 	public:
 
 		FIELD()
@@ -56,7 +56,7 @@ namespace PackageTests
 	CLASS()
 	class WritingTestObj2 : public CE::Object
 	{
-		CE_CLASS(WritingTestObj2, CE::Object);
+		CE_CLASS(WritingTestObj2, CE::Object)
 	public:
 
 		FIELD()

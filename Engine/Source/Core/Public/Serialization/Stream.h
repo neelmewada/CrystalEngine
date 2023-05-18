@@ -17,6 +17,14 @@ namespace CE
         End = 2
     };
 
+	class StreamOutOfBoundException : public Exception
+	{
+	public:
+		StreamOutOfBoundException(const String& message) : Exception(message)
+		{}
+
+	};
+
     /*
      *  Base class for all types of streams used to load and save different type of data.
      *  Ex: memory stream, file stream, structured stream, etc

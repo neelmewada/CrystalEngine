@@ -29,6 +29,7 @@ namespace CE
                 string.Reserve(count);
                 Seek(startPos, SeekMode::Begin);
                 Read(string.GetCString(), count);
+				string.UpdateLength();
             }
         }
         else if (IsAsciiMode())

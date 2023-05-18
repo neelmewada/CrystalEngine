@@ -246,6 +246,8 @@ namespace CE
 
         String RemoveWhitespaces();
 
+		void UpdateLength();
+
 	    // Character Utils
 
 	    FORCE_INLINE static bool IsNumeric(char c)

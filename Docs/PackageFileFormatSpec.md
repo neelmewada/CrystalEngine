@@ -34,12 +34,14 @@ Spec tables with little endian format
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
 | +10 | 1B | `01` | Is Asset? `0` or `1` |
 | +11 | \0 | `TextureAtlas.Noise.MyNoiseTexture\0` | Virtual path to object within the package. |
-| +xx | \0 | `CE::Texture\0` | Object class TypeName |
-| +xx | 4B | `xx xx xx xx` | Length of actual data only. `0` is valid. |
+| +xx | \0 | `/Engine/Core.CE::Texture\0` | Object class TypeName |
+| +xx | 4B | `xx xx xx xx` | Length of **data list** in bytes. `0` is valid. |
 | +04 | 4B | `xx xx xx xx` | Total number of fields |
-| +08 | xx |  | **Data: List of [Field Entries](#object-entry-field-list)** |
+| +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
+| +10 | xx | | Newly added header fields |
+| +xx | xx | | **Data: List of [Field Entries](#object-entry-field-list)** |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
-| +xx | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
+| +04 | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
 
 ## **Field List Entry**
 | Offset | Size | Value | Description |

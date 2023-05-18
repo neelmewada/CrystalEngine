@@ -1360,47 +1360,59 @@ TEST(Delegates, ModuleCallbacks)
 #pragma region Package
 
 
-TEST(Package, Writing)
+TEST(Package, WriteRead)
 {
     TEST_BEGIN;
     using namespace PackageTests;
     CERegisterModuleTypes();
-	"/Engine/Core_Test.PackageTests::WritingTestObj1";
     
-    IO::Path launchDir = PlatformDirectories::GetLaunchDir();
+    IO::Path packagePath = PlatformDirectories::GetLaunchDir() / "TestPackage.casset";
 
-    Package* writePackage = CreateObject<Package>(nullptr, "/Game/TestPackage");
-    EXPECT_EQ(writePackage->GetName(), "/Game/TestPackage");
-    
-    auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
-    auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
-	auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
-	auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1")); // Outside package
-    
-    EXPECT_EQ(obj1->GetPackage(), writePackage);
-    EXPECT_EQ(obj2->GetPackage(), writePackage);
-    EXPECT_EQ(writePackage->attachedObjects.GetObjectCount(), 2);
+	// Write
+	{
+		Package* writePackage = CreateObject<Package>(nullptr, "/Game/TestPackage");
+		EXPECT_EQ(writePackage->GetName(), "/Game/TestPackage");
 
-    obj1->objPtr = obj2;
-    obj1->stringValue = "My String Value";
-    obj1->stringArray = { "item0", "item1", "item2" };
+		auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
+		auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
+		auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
+		auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1")); // Outside package
 
-    obj2->objectArray.Add(obj1);
-	obj2->testStruct.owner = obj2;
-	obj2->testStruct.obj1Ptr = obj1_0;
+		EXPECT_EQ(obj1->GetPackage(), writePackage);
+		EXPECT_EQ(obj2->GetPackage(), writePackage);
+		EXPECT_EQ(writePackage->attachedObjects.GetObjectCount(), 2);
 
-	obj1_0->objPtr = obj1_1;
+		obj1->objPtr = obj2;
+		obj1->stringValue = "My String Value";
+		obj1->stringArray = { "item0", "item1", "item2" };
 
-	HashMap<UUID, Object*> references{};
-	writePackage->FetchObjectReferences(references);
-	EXPECT_EQ(references.GetSize(), 4);
+		obj2->objectArray.Add(obj1);
+		obj2->testStruct.owner = obj2;
+		obj2->testStruct.obj1Ptr = obj1_0;
 
-	SavePackageArgs saveArgs{};
-	auto result = Package::SavePackage(writePackage, nullptr, launchDir / "TestPackage.casset", saveArgs);
+		obj1_0->objPtr = obj1_1;
 
-    obj1->RequestDestroy(); // Automatically destroys children
-    obj2->RequestDestroy();
-    writePackage->RequestDestroy();
+		HashMap<UUID, Object*> references{};
+		writePackage->FetchObjectReferences(references);
+		EXPECT_EQ(references.GetSize(), 4);
+
+		SavePackageArgs saveArgs{};
+		auto result = Package::SavePackage(writePackage, nullptr, packagePath, saveArgs);
+
+		obj1->RequestDestroy(); // Automatically destroys children
+		obj2->RequestDestroy();
+		writePackage->RequestDestroy();
+	}
+
+	// Read
+	{
+		auto readPackage = Package::LoadPackage(nullptr, packagePath, LOAD_Default);
+		EXPECT_NE(readPackage, nullptr);
+
+
+
+		readPackage->RequestDestroy();
+	}
 	
     CEDeregisterModuleTypes();
     TEST_END;

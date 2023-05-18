@@ -13,6 +13,7 @@ namespace CE
 	enum class LoadPackageResult
 	{
 		Success = 0,
+		UnknownError,
 		PackageNotFound,
 		InvalidPackage,
 	};
@@ -40,12 +41,12 @@ namespace CE
 
 		// - Static API -
 
-		static Package* LoadPackage(const IO::Path& fullPackagePath, LoadFlags loadFlags = LOAD_Default);
-		static Package* LoadPackage(const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(Package* outer, Stream* inStream, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
 
-		static SavePackageResult SavePackage(Package* package, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs);
-
-		static SavePackageResult SavePackage(Package* package, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* outer, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* outer, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs);
 
 		// - Public API -
 
@@ -103,7 +104,7 @@ namespace CE
 			u32 offsetInFile = 0;
 			UUID instanceUuid = 0;
 			b8 isAsset = false;
-			IO::Path assetPathInPackage{};
+			String pathInPackage{};
 			Name objectClassName{};
 			u32 objectDataSize = 0;
 

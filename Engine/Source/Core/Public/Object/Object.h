@@ -17,7 +17,7 @@
 #include "ObjectMap.h"
 
 #if PAL_TRAIT_BUILD_TESTS
-class Package_Writing_Test;
+class Package_WriteRead_Test;
 #endif
 
 namespace CE
@@ -161,7 +161,7 @@ namespace CE
     private:
 
 #if PAL_TRAIT_BUILD_TESTS
-		friend class ::Package_Writing_Test;
+		friend class ::Package_WriteRead_Test;
 #endif
         
         friend class Package;

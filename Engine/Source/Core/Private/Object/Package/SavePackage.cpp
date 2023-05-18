@@ -2,12 +2,12 @@
 
 #include "CoreMinimal.h"
 
-#define PACKAGE_MAGIC_NUMBER FROM_BIG_ENDIAN((u64)0x005041434b00000a) // .PACK..\n
+#define PACKAGE_MAGIC_NUMBER CE::FromBigEndian((u64)0x005041434b00000a) // .PACK..\n
 
 #define PACKAGE_VERSION_MAJOR (u16)0
 #define PACKAGE_VERSION_MINOR (u16)1
 
-#define PACKAGE_OBJECT_MAGIC_NUMBER FROM_BIG_ENDIAN((u64)0x004f424a45435400) // .OBJECT.
+#define PACKAGE_OBJECT_MAGIC_NUMBER CE::FromBigEndian((u64)0x004f424a45435400) // .OBJECT.
 
 namespace CE
 {
@@ -17,6 +17,15 @@ namespace CE
 		if (package == nullptr)
 		{
 			return SavePackageResult::InvalidPackage;
+		}
+		if (package->IsTransient())
+		{
+			CE_LOG(Error, All, "SavePackage() passed with a transient package!");
+			return SavePackageResult::InvalidPackage;
+		}
+		if (stream == nullptr)
+		{
+			return SavePackageResult::UnknownError;
 		}
 		if (asset == nullptr)
 			asset = package;
@@ -31,14 +40,16 @@ namespace CE
 		*stream << PACKAGE_VERSION_MAJOR;
 		*stream << PACKAGE_VERSION_MINOR;
 
-		u32 fileCrcPos = stream->GetCurrentPosition();
+		u64 fileCrcPos = stream->GetCurrentPosition();
 		*stream << (u32)0; // 0 CRC
 
-		u32 dataStartOffsetValuePos = stream->GetCurrentPosition();
+		u64 dataStartOffsetValuePos = stream->GetCurrentPosition();
 		*stream << (u64)0; // Data Start Offset
 
 		*stream << package->GetPackageUuid();
 		*stream << package->GetPackageName();
+
+		// Data Start
 
 		u64 curPos = stream->GetCurrentPosition();
 		stream->Seek(dataStartOffsetValuePos);
@@ -50,6 +61,8 @@ namespace CE
 		{
 			if (objectInstance == nullptr || objectUuid == 0)
 				continue;
+			if (objectInstance->IsTransient())
+				continue;
             
 			*stream << PACKAGE_OBJECT_MAGIC_NUMBER;
 			*stream << objectInstance->GetUuid();
@@ -58,12 +71,15 @@ namespace CE
 				*stream << "";
 			else
 				*stream << objectInstance->GetPathInPackage();
-			*stream << objectInstance->GetClass()->GetName();
+			*stream << objectInstance->GetClass()->GetTypeName();
 
 			u64 dataSizeValuePos = stream->GetCurrentPosition();
 			*stream << (u32)0; // 0 data size. updated later
 
 			*stream << (u32)0; // Number of field entries
+
+			curPos = stream->GetCurrentPosition();
+			*stream << (u64)(curPos + sizeof(u64)); // Data Start Offset (excluding itself)
 
 			u64 dataStartPos = stream->GetCurrentPosition();
 			u32 numEntries = 0;
@@ -106,6 +122,89 @@ namespace CE
 		*stream << (u64)0; // EOF
 
 		return SavePackageResult::Success;
+	}
+
+	Package* Package::LoadPackage(Package* outer, Stream* stream, LoadPackageResult& outResult, LoadFlags loadFlags)
+	{
+		if (stream == nullptr)
+		{
+			return nullptr;
+		}
+
+		Package* package = CreateObject<Package>(outer, String::Format("/Temp/Loading_{}", GenerateRandomU64()));
+
+		stream->SetBinaryMode(true);
+
+		u64 magicNumber = 0;
+		u16 majorVersion = 0, minorVersion = 0;
+		*stream >> magicNumber;
+		if (magicNumber != PACKAGE_MAGIC_NUMBER)
+		{
+			outResult = LoadPackageResult::InvalidPackage;
+			package->RequestDestroy();
+			return nullptr;
+		}
+
+		*stream >> majorVersion;
+		*stream >> minorVersion;
+
+		if (majorVersion > PACKAGE_VERSION_MAJOR)
+		{
+			outResult = LoadPackageResult::InvalidPackage;
+			package->RequestDestroy();
+			return nullptr;
+		}
+
+		u32 fileCrc = 0;
+		*stream >> fileCrc;
+		u64 dataStartOffset;
+		*stream >> dataStartOffset;
+
+		UUID packageUuid = 0;
+		*stream >> packageUuid;
+		String packageName = "";
+		*stream >> packageName;
+
+		stream->Seek(dataStartOffset);
+
+		u64 magicObjectNumber = 0;
+		*stream >> magicObjectNumber;
+
+		while (magicObjectNumber == PACKAGE_OBJECT_MAGIC_NUMBER)
+		{
+			u64 objectUuid = 0;
+			*stream >> objectUuid;
+
+			u8 isAsset = 0;
+			*stream >> isAsset;
+
+			String pathInPackage{};
+			*stream >> pathInPackage;
+
+			Name objectTypeName{};
+			*stream >> objectTypeName;
+
+			u32 dataByteSize = 0;
+			*stream >> dataByteSize;
+
+			u32 numFields = 0;
+			*stream >> numFields;
+
+			u64 dataStartOffset = 0;
+			*stream >> dataStartOffset;
+
+			stream->Seek(dataStartOffset);
+			stream->Seek(dataByteSize, SeekMode::Current); // Skip data for now
+
+			u32 crc = 0;
+			*stream >> crc; // End marker, ignored
+			*stream >> crc; // Actual crc, unused
+
+			*stream >> magicObjectNumber; // magic number is 0 if end of file
+		}
+
+		outResult = LoadPackageResult::Success;
+		return package;
 	}
     
 } // namespace CE

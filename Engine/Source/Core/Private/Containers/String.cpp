@@ -569,6 +569,11 @@ namespace CE
         return str;
     }
 
+	void String::UpdateLength()
+	{
+		StringLength = Math::Min((u32)std::strlen(Buffer), Capacity);
+	}
+
     bool String::TryParse(const String& string, u8& outValue)
     {
         s64 value = 0;
