@@ -191,4 +191,16 @@ namespace CE
 		this->skipHeader = skip;
 	}
 
+    FieldDeserializer::FieldDeserializer(Array<FieldType*> fieldList, void* instance)
+        : fields(fieldList), rawInstance(instance), skipHeader(false)
+    {
+        
+    }
+
+    bool FieldDeserializer::ReadNext(Stream* stream)
+    {
+        
+        return stream;
+    }
+
 }

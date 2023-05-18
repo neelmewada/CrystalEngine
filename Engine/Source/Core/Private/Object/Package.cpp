@@ -36,6 +36,8 @@ namespace CE
 			return nullptr;
 		}
         
+        this->fullPackagePath = fullPackagePath;
+        
 		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
 
 		return LoadPackage(outer, &stream, outResult, loadFlags);
@@ -58,6 +60,8 @@ namespace CE
 			CE_LOG(Error, All, "SavePackage() passed with an asset object that is not part of the package!");
 			return SavePackageResult::AssetNotInPackage;
 		}
+        
+        this->fullPackagePath = fullPackagePath;
 
 		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadWrite);
 
@@ -73,4 +77,4 @@ namespace CE
 
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Package)
 
-using namespace CE;
+

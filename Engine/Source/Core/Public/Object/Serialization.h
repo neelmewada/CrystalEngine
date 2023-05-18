@@ -25,5 +25,24 @@ namespace CE
 
 		bool skipHeader = false;
 	};
+
+    class CORE_API FieldDeserializer
+    {
+    public:
+        FieldDeserializer(Array<FieldType*> fieldList, void* instance);
+        
+        void SkipHeader(bool skip)
+        {
+            skipHeader = skip;
+        }
+        
+        bool ReadNext(Stream* stream);
+        
+    private:
+        Array<FieldType*> fields{};
+        void* rawInstance = nullptr;
+        
+        bool skipHeader = false;
+    };
 	
 }

@@ -3,7 +3,7 @@
 #include "Object.h"
 
 #if PAL_TRAIT_BUILD_TESTS
-class Package_Writing_Test;
+class Package_WriteRead_Test;
 #endif
 
 namespace CE
@@ -43,6 +43,8 @@ namespace CE
 
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
+        
+        // Always prefer using paths than streams
 		static Package* LoadPackage(Package* outer, Stream* inStream, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
 
 		static SavePackageResult SavePackage(Package* outer, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs);
@@ -73,9 +75,18 @@ namespace CE
 			this->packageName = name;
 		}
         
-        //void AttachSubobject(Object* subobject) override;
+        bool IsLoaded() const
+        {
+            return isLoaded;
+        }
         
-        //void DetachSubobject(Object* subobject) override;
+        bool IsFullyLoaded() const
+        {
+            return isFullyLoaded;
+        }
+        
+        void LoadFully();
+        void LoadFully(Stream* originalStream);
 
 		// Returns true if this package contains the given object
 		bool ContainsObject(Object* object);
@@ -84,34 +95,27 @@ namespace CE
 		Name packageName{};
         
 #if PAL_TRAIT_BUILD_TESTS
-        friend class ::Package_Writing_Test;
+        friend class ::Package_WriteRead_Test;
 #endif
         
-		bool isLoaded = false;
+		bool isLoaded = true;
+        bool isFullyLoaded = true;
         
 		// Loading Only Data
-
-		struct FieldEntryHeader
-		{
-			u32 offsetInFile = 0;
-			String fieldName{};
-			Name fieldTypeName{};
-			u32 fieldDataSize = 0;
-		};
-
+        
 		struct ObjectEntryHeader
 		{
-			u32 offsetInFile = 0;
+			u64 offsetInFile = 0;
 			UUID instanceUuid = 0;
 			b8 isAsset = false;
 			String pathInPackage{};
 			Name objectClassName{};
 			u32 objectDataSize = 0;
-
-			Array<FieldEntryHeader> fieldEntries{};
 		};
 
 		HashMap<UUID, ObjectEntryHeader> objectUuidToEntryMap{};
+        
+        IO::Path fullPackagePath;
 	};
 
 } // namespace CE

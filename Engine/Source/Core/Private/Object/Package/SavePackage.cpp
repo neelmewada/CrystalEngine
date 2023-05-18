@@ -131,7 +131,7 @@ namespace CE
 			return nullptr;
 		}
 
-		Package* package = CreateObject<Package>(outer, String::Format("/Temp/Loading_{}", GenerateRandomU64()));
+		Package* package = CreateObject<Package>(outer, String::Format("/Temp/{}", GenerateRandomU64()));
 
 		stream->SetBinaryMode(true);
 
@@ -164,11 +164,15 @@ namespace CE
 		*stream >> packageUuid;
 		String packageName = "";
 		*stream >> packageName;
+        
+        package->SetPackageName(packageName);
 
 		stream->Seek(dataStartOffset);
 
 		u64 magicObjectNumber = 0;
 		*stream >> magicObjectNumber;
+        
+        package->objectUuidToEntryMap.Clear();
 
 		while (magicObjectNumber == PACKAGE_OBJECT_MAGIC_NUMBER)
 		{
@@ -195,6 +199,16 @@ namespace CE
 
 			stream->Seek(dataStartOffset);
 			stream->Seek(dataByteSize, SeekMode::Current); // Skip data for now
+            
+            package->objectUuidToEntryMap[objectUuid] = ObjectEntryHeader();
+            
+            ObjectEntryHeader& objectEntry = package->objectUuidToEntryMap[objectUuid];
+            objectEntry.instanceUuid = objectUuid;
+            objectEntry.isAsset = isAsset > 0 ? true : false;
+            objectEntry.objectClassName = objectTypeName;
+            objectEntry.pathInPackage = pathInPackage;
+            objectEntry.offsetInFile = dataStartOffset;
+            objectEntry.objectDataSize = dataByteSize;
 
 			u32 crc = 0;
 			*stream >> crc; // End marker, ignored
@@ -202,9 +216,44 @@ namespace CE
 
 			*stream >> magicObjectNumber; // magic number is 0 if end of file
 		}
+        
+        package->isFullyLoaded = false;
+        package->isLoaded = true;
+        
+        if (loadFlags & LOAD_Full)
+        {
+            package->LoadFully();
+        }
 
 		outResult = LoadPackageResult::Success;
 		return package;
 	}
+
+    void Package::LoadFully()
+    {
+        if (isFullyLoaded)
+            return;
+        if (!fullPackagePath.Exists() || fullPackagePath.IsDirectory())
+            return;
+        
+        FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+        LoadFully(&stream);
+    }
+
+    void Package::LoadFully(Stream* stream)
+    {
+        if (isFullyLoaded || originalStream == nullptr)
+            return;
+        
+        HashMap<UUID, Object*> objects{};
+        
+        for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
+        {
+            u64 offset = objectEntry.offsetInFile;
+            stream->Seek(offset);
+            
+            
+        }
+    }
     
 } // namespace CE

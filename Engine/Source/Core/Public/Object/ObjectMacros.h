@@ -18,7 +18,7 @@ namespace CE
 	enum LoadFlags
 	{
 		LOAD_Default = 0,
-		LOAD_Fully = BIT(0),
+		LOAD_Full = BIT(0),
 	};
 	ENUM_CLASS_FLAGS(LoadFlags);
 
