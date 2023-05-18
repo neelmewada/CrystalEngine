@@ -17,6 +17,18 @@ namespace CE
             fieldFlags |= FIELD_ReadOnly;
     }
 
+    const CE::Name& FieldType::GetTypeName()
+    {
+		if (!typeName.IsValid())
+		{
+			if (owner != nullptr)
+				typeName = owner->GetTypeName().GetString() + "::" + name.GetString();
+			else
+				typeName = name;
+		}
+		return typeName;
+    }
+
     String FieldType::GetDisplayName()
     {
         String displayAttrib = GetAttribute("Display").GetStringValue();

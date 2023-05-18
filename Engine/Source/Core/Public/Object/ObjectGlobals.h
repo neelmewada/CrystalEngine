@@ -19,7 +19,6 @@ namespace CE
 
 	namespace Internal
 	{
-		extern CORE_API bool gIsDebugObject;
 		
 		struct CORE_API ConstructObjectParams
 		{
@@ -40,6 +39,8 @@ namespace CE
 		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params);
 		
 	}
+
+	CORE_API bool IsValidObjectName(const String& name);
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
 	TClass* CreateObject(Object* outer = (Object*)GetTransientPackage(),

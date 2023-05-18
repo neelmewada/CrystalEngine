@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 project(Engine)
+set(CURRENT_PACKAGE_CATEGORY "Engine")
 
 # Assets
 add_subdirectory(Assets)

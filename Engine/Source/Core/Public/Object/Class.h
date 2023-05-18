@@ -56,6 +56,7 @@ namespace CE
 		{
 		public:
 			virtual void InitializeDefaults(void* instance) const = 0;
+			virtual const CE::Name& GetTypeName() const = 0;
 		};
 	}
 
@@ -76,6 +77,8 @@ namespace CE
 
 		// TypeData is always located AFTER TypeInfo in memory
 		virtual const u8* GetRawTypeData() const { return (u8*)(this + 1); }
+
+		const CE::Name& GetTypeName() override { return Impl->GetTypeName(); }
 
 		virtual TypeId GetTypeId() const override
 		{
@@ -342,6 +345,8 @@ namespace CE
 			virtual void InitializeDefaults(void* instance) const = 0;
 
 			virtual bool CanInstantiate() const = 0;
+
+			virtual const CE::Name& GetTypeName() const = 0;
 		};
 	}
 
@@ -358,6 +363,8 @@ namespace CE
 		friend struct CE::Internal::TypeInfoImpl;
 
 	public:
+
+		const CE::Name& GetTypeName() override { return Impl->GetTypeName(); }
 
 		// TypeData is always located AFTER TypeInfo in memory
 		virtual const u8* GetRawTypeData() const override { return (u8*)(this + 1); }

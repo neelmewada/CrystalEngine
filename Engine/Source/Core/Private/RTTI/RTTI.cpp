@@ -234,7 +234,7 @@ namespace CE
         if (type == nullptr || registeredTypeById.KeyExists(type->GetTypeId()))
             return;
         
-        registeredTypesByName.Add({ type->name, type });
+        registeredTypesByName.Add({ type->GetTypeName(), type});
         registeredTypeById.Add({ type->GetTypeId(), type });
 
         if (currentlyLoadingModuleStack.NonEmpty())
@@ -274,7 +274,7 @@ namespace CE
             return;
         }
 
-        registeredTypesByName.Remove(type->name);
+        registeredTypesByName.Remove(type->GetTypeName());
         registeredTypeById.Remove(type->GetTypeId());
 
         if (type->registeredModuleName.IsValid() &&
@@ -309,12 +309,12 @@ namespace CE
 
         auto& types = registeredTypesByModuleName[moduleInfo->moduleName];
 
-        for (const TypeInfo* typeInfo : types)
+        for (TypeInfo* typeInfo : types)
         {
             if (typeInfo == nullptr)
                 continue;
 
-            registeredTypesByName.Remove(typeInfo->GetName());
+            registeredTypesByName.Remove(typeInfo->GetTypeName());
             registeredTypeById.Remove(typeInfo->GetTypeId());
 
             if (typeInfo->IsStruct())

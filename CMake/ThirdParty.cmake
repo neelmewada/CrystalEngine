@@ -83,6 +83,10 @@ function(ce_add_rt_deps NAME)
         set_target_properties(${target} PROPERTIES COPY_FILES "${ce_add_rt_deps_COPY_FILES}")
     endif()
     
+    set_target_properties(${target} 
+        PROPERTIES
+            FOLDER "Dependencies"
+    )
     
 endfunction()
 

@@ -5,12 +5,18 @@ namespace CE
 {
 	namespace Internal
 	{
-		CORE_API bool gIsDebugObject = false;
 
 		CORE_API Object* StaticConstructObject(const ConstructObjectParams& params)
 		{
 			if (params.objectClass == nullptr || !params.objectClass->CanBeInstantiated() || !params.objectClass->IsObject())
 				return nullptr;
+
+			const auto& objectName = params.name;
+			if (!IsValidObjectName(objectName))
+			{
+				CE_LOG(Error, All, "Failed to create object. Invalid name passed: {}", objectName);
+				return nullptr;
+			}
 			
 			ObjectInitializer init = ObjectInitializer();
 			init.objectFlags = params.objectFlags;
@@ -43,6 +49,22 @@ namespace CE
 	CORE_API Package* GetTransientPackage()
 	{
 		return gTransientPackage;
+	}
+
+	CORE_API bool IsValidObjectName(const String& name)
+	{
+		if (name.IsEmpty())
+			return false;
+
+		for (int i = 0; i < name.GetLength(); i++)
+		{
+			char ch = name[i];
+			if (ch == '.' || ch == ' ' || ch == '-')
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/*

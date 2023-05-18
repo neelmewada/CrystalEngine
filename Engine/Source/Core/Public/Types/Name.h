@@ -4,10 +4,17 @@
 #include "Containers/String.h"
 #include "Containers/StringView.h"
 
-#define YAML_CPP_API
-#include "yaml-cpp/yaml.h"
-
 #define NAME_None CE::Name()
+
+#define __NAME_PACKAGE_0()
+#define __NAME_PACKAGE_1(Package) Package "."
+
+#define __NAME_NAMESPACE_0()
+#define __NAME_NAMESPACE_1(Namespace) #Namespace "::"
+
+#define MAKE_NAME(Package, Namespace, Type)\
+	CE_EXPAND(CE_CONCATENATE(__NAME_PACKAGE_, CE_ARG_COUNT(Package)))(Package) CE_EXPAND(CE_CONCATENATE(__NAME_NAMESPACE_, CE_ARG_COUNT(Namespace)))(Namespace) #Type
+
 
 namespace CE
 {
@@ -18,10 +25,10 @@ namespace CE
     class Array;
     
     /*
-    * Names are Case-Insensitive identifiers that offer fast comparison using hash codes.
+    * Names are Case-Sensitive identifiers that offer fast comparison using hash codes.
+	* Format: {PackagePath}.{ShortTypeName}
     * It follows the C++ scope pattern where the scope operator '::' is used for scope.
-    * Scope operator at the front and/or back of string has no value and will be ignored.
-    * Ex: '::ParentNamespace::SomeClass' is the same as 'ParentNamespace::SomeClass'
+	* Full names include a package path in the front. Ex: /Engine/Core.CE::Object
     */
     class CORE_API Name
     {
@@ -37,6 +44,7 @@ namespace CE
 
         Name(const Name& copy);
         Name& operator=(const Name& copy);
+		Name(Name&& move);
 
         CE_INLINE bool IsValid() const
         {
@@ -72,9 +80,9 @@ namespace CE
     };
 
     template<>
-    inline SIZE_T GetHash(const Name& Value)
+    inline SIZE_T GetHash(const Name& value)
     {
-        return Value.GetHashValue();
+        return value.GetHashValue();
     }
     
 } // namespace CE

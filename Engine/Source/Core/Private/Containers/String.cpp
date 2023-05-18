@@ -145,6 +145,7 @@ namespace CE
             // Reset string to defaults
             Capacity = 0;
             Buffer = nullptr;
+			return;
         }
 
         reserveCharacterCount++; // Add extra byte for null terminator
@@ -238,7 +239,7 @@ namespace CE
 
         if (cString == nullptr) // Clear the string
         {
-            if (Capacity > 0) Buffer[0] = 0;
+            if (Capacity > 0 && Buffer != nullptr) Buffer[0] = 0;
             return;
         }
 
@@ -246,14 +247,17 @@ namespace CE
 
         if (StringLength == 0) // Clear the string
         {
-            if (Capacity > 0) 
+            if (Capacity > 0 && Buffer != nullptr) 
                 Buffer[0] = 0;
             return;
         }
 
         Reserve(StringLength);
-        memcpy(Buffer, cString, StringLength);
-        Buffer[StringLength] = 0;
+		if (Buffer != nullptr)
+		{
+			memcpy(Buffer, cString, StringLength);
+			Buffer[StringLength] = 0;
+		}
     }
 
     /*

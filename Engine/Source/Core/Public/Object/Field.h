@@ -22,11 +22,12 @@ namespace CE
     class CORE_API FieldType : public TypeInfo
     {
     private:
-        FieldType(String name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes, const TypeInfo* owner = nullptr) : TypeInfo(name, attributes)
+        FieldType(String name, TypeId fieldTypeId, TypeId underlyingTypeId, SIZE_T size, SIZE_T offset, String attributes, const TypeInfo* owner = nullptr) 
+			: TypeInfo(name, attributes)
             , fieldTypeId(fieldTypeId)
             , underlyingTypeId(underlyingTypeId)
             , size(size), offset(offset)
-            , owner(owner)
+			, owner(const_cast<TypeInfo*>(owner))
         {
             ConstructInternal();
         }
@@ -34,6 +35,8 @@ namespace CE
         void ConstructInternal();
 
     public:
+
+		virtual const CE::Name& GetTypeName() override;
 
         String GetDisplayName() override;
         
@@ -132,6 +135,7 @@ namespace CE
     private:
         FieldFlags fieldFlags = FIELD_NoFlags;
         
+		Name typeName{};
         TypeId fieldTypeId;
         TypeId underlyingTypeId;
 
@@ -142,7 +146,7 @@ namespace CE
         SIZE_T size;
 
         FieldType* next = nullptr;
-        const TypeInfo* owner = nullptr;
+        TypeInfo* owner = nullptr;
 
         friend class StructType;
         friend class ClassType;

@@ -41,15 +41,19 @@ namespace CE
         
         if (fieldDeclarationType == nullptr || fieldTypeId == 0 || !field->IsSerialized())
         {
-            fields.Pop();
+            fields.RemoveAt(0);
             return false;
         }
         
-        *stream << field->GetName();
-        *stream << field->GetDeclarationType()->GetName();
+		if (!skipHeader)
+		{
+			*stream << field->GetName();
+			*stream << field->GetDeclarationType()->GetName();
+		}
         
         auto dataSizePos = stream->GetCurrentPosition();
-        *stream << (u32)0; // Set 0 size for now
+		if (!skipHeader)
+			*stream << (u32)0; // Set 0 size for now
         
         auto dataStartPos = stream->GetCurrentPosition();
 		
@@ -116,6 +120,7 @@ namespace CE
 				void* arrayInstance = &array[0];
 
 				FieldSerializer fieldSerializer{ fieldListPtr, arrayInstance };
+				fieldSerializer.SkipHeader(true);
 				while (fieldSerializer.HasNext())
 				{
 					fieldSerializer.WriteNext(stream);
@@ -162,9 +167,12 @@ namespace CE
         u64 curPos = stream->GetCurrentPosition();
         auto dataSize = (u32)(stream->GetCurrentPosition() - dataStartPos);
         
-        stream->Seek(dataSizePos);
-        *stream << dataSize;
-        stream->Seek(curPos);
+		if (!skipHeader)
+		{
+			stream->Seek(dataSizePos);
+			*stream << dataSize;
+			stream->Seek(curPos);
+		}
 
 		fields.RemoveAt(0);
 		return true;
@@ -176,6 +184,11 @@ namespace CE
 			return nullptr;
 
         return fields[0];
+	}
+
+	void FieldSerializer::SkipHeader(bool skip)
+	{
+		this->skipHeader = skip;
 	}
 
 }

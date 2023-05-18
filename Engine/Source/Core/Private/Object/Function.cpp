@@ -14,9 +14,18 @@ namespace CE
         , returnType(returnType)
         , paramTypes(parameterTypes)
         , delegateCallback(delegate)
-        , owner(owner)
+		, owner(const_cast<TypeInfo*>(owner))
     {
 
+    }
+
+    const Name& FunctionType::GetTypeName()
+    {
+		if (!typeName.IsValid())
+		{
+			typeName = owner->GetTypeName().GetString() + "::" + name.GetString();
+		}
+		return typeName;
     }
 
     bool FunctionType::IsEventFunction()

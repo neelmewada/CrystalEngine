@@ -45,6 +45,11 @@ function(ce_add_assets NAME)
         SOURCES ${ASSET_FILES}
     )
 
+    set_target_properties(${NAME} 
+        PROPERTIES
+            FOLDER "Assets"
+    )
+
     ce_group_sources_by_folder(${NAME})
 
 endfunction()

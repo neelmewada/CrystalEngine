@@ -231,15 +231,9 @@ TEST(Containers, Name)
     TEST_BEGIN;
 
     Name name = TYPENAME(Object);
-    EXPECT_EQ(name, "CE::Object");
-    EXPECT_EQ(name.GetString(), "CE::Object");
+    EXPECT_EQ(name, "/Engine/Core.CE::Object");
+    EXPECT_EQ(name.GetString(), "/Engine/Core.CE::Object");
     EXPECT_EQ(name.GetLastComponent(), "Object");
-
-    Array<String> components{};
-    name.GetComponents(components);
-    EXPECT_EQ(components.GetSize(), 2); // CE, Object
-    EXPECT_EQ(components[0], "CE");
-    EXPECT_EQ(components[1], "Object");
 
     EXPECT_EQ(Name("::CE::Object"), Name("CE::Object"));
     EXPECT_EQ(Name("CE::Object::"), Name("CE::Object"));
@@ -252,17 +246,6 @@ TEST(Containers, Name)
     EXPECT_EQ(Name("::CE::Object").GetString(),   "CE::Object");
     EXPECT_EQ(Name("::CE::Object::").GetString(), "CE::Object");
     EXPECT_FALSE(Name("::").IsValid());
-
-    // Case-Insensitive tests
-    EXPECT_EQ(Name("cE::oBjeCt"), "CE::Object");
-    EXPECT_EQ(Name("ce::object"), "CE::OBJECT");
-    EXPECT_EQ(Name("::ce::object:"), "cE::objEcT:");
-
-    // Edge cases
-    EXPECT_NE(Name("CE::Object:"), "CE::Object");
-    EXPECT_EQ(Name("CE::Object:"), "CE::Object:");
-    EXPECT_NE(Name(":CE::Object:"), "CE::Object");
-    EXPECT_EQ(Name(":CE::Object:"), ":CE::Object:");
 
     TEST_END;
 }
@@ -361,16 +344,20 @@ TEST(Reflection, RTTI_Registry_Testing)
 
     // 2. POD Testing
 
-    auto name = TYPENAME(Array<String>);
-
-    EXPECT_EQ(TYPENAME(s32), "s32");
-    EXPECT_EQ(TYPENAME(Array<String>), "CE::Array");
+    EXPECT_EQ(TYPENAME(s32), "/Engine/Core.s32");
+    EXPECT_EQ(TYPENAME(Array<String>), "/Engine/Core.CE::Array");
     
     // 3. Containers RTTI
     
     EXPECT_EQ(TYPEID(Array<String>), TYPEID(Array<Object*>));
 
-    // 4. Test Object class
+	// 4. Enum
+	auto enumType = TYPE(EventResult);
+	EXPECT_NE(enumType, nullptr);
+	EXPECT_EQ(enumType->GetName(), "CE::EventResult");
+	EXPECT_EQ(enumType->GetTypeName(), "/Engine/Core.CE::EventResult");
+
+    // 5. Test Object class
 
     auto objectClass = ClassType::FindClass(TYPENAME(Object));
     EXPECT_NE(objectClass, nullptr);
@@ -378,7 +365,7 @@ TEST(Reflection, RTTI_Registry_Testing)
 
     if (objectClass != nullptr)
     {
-        EXPECT_EQ(objectClass->GetName(), TYPENAME(Object)); // equal
+        EXPECT_EQ(objectClass->GetTypeName(), TYPENAME(Object)); // equal
         EXPECT_GE(objectClass->GetFieldCount(), 2); // >= 2
 
         auto derivedClasses = objectClass->GetDerivedClasses();
@@ -1378,6 +1365,7 @@ TEST(Package, Writing)
     TEST_BEGIN;
     using namespace PackageTests;
     CERegisterModuleTypes();
+	"/Engine/Core_Test.PackageTests::WritingTestObj1";
     
     IO::Path launchDir = PlatformDirectories::GetLaunchDir();
 

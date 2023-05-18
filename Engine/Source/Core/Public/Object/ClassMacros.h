@@ -74,6 +74,7 @@ namespace CE\
 		{\
             typedef Namespace::Class Self;\
             CE::ClassType Type;\
+			API static const CE::Name& FullTypeName();\
 			const CE::StructTypeData<Namespace::Class> TypeData;\
             TypeInfoImpl(const char* fullName, Internal::IClassTypeImpl* impl, u32 size, CE::StructTypeData<Namespace::Class> typeData)\
 				: Type(fullName, impl, size, Attributes "")\
@@ -98,6 +99,7 @@ namespace CE\
 			{\
 				CE_EXPAND(CE_CONCATENATE(__CE_INIT_DEFAULTS_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
 			}\
+			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
 		};\
 	}\
 	template<>\
@@ -108,8 +110,7 @@ namespace CE\
 	template<>\
 	inline CE::Name GetTypeName<Namespace::Class>()\
 	{\
-		static Name name = Name(#Namespace "::" #Class);\
-		return name;\
+		return CE::Internal::TypeInfoImpl<Namespace::Class>::FullTypeName();\
 	}\
 	template<>\
 	inline ClassType* GetStaticClass<Namespace::Class>()\
@@ -127,6 +128,11 @@ CE::ClassType* Namespace::Class::Type()\
 			StructTypeData<Namespace::Class>()\
 	};\
 	return &instance.Type;\
+}\
+const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Class>::FullTypeName()\
+{\
+	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Class);\
+	return name;\
 }
 
 #define __CE_RTTI_SUPERCLASS_0(...) typedef void Super;
@@ -177,6 +183,7 @@ namespace CE\
             typedef Namespace::Struct Self;\
             CE::StructType Type;\
 			const CE::StructTypeData<Namespace::Struct> TypeData;\
+			API static const CE::Name& FullTypeName();\
             TypeInfoImpl(CE::StructType&& type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
             {\
 				Type.AddSuper<SuperStructs>();\
@@ -189,6 +196,7 @@ namespace CE\
 			{\
 				new(instance) Namespace::Struct;\
 			}\
+			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
 		};\
 	}\
 	template<>\
@@ -200,8 +208,7 @@ namespace CE\
 	template<>\
 	inline CE::Name GetTypeName<Namespace::Struct>()\
 	{\
-		static Name name = Name(#Namespace "::" #Struct);\
-		return name;\
+		return CE::Internal::TypeInfoImpl<Namespace::Struct>::FullTypeName();\
 	}\
 	template<>\
 	inline StructType* GetStaticStruct<Namespace::Struct>()\
@@ -214,6 +221,11 @@ namespace CE\
 CE::StructType* Namespace::Struct::Type()\
 {\
 	return (CE::StructType*)(CE::template GetStaticType<Self>());\
+}\
+const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Struct>::FullTypeName()\
+{\
+	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Struct);\
+	return name;\
 }
 
 #define CE_STRUCT(Struct, ...)\

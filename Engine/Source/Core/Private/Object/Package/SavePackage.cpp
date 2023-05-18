@@ -60,11 +60,13 @@ namespace CE
 				*stream << objectInstance->GetPathInPackage();
 			*stream << objectInstance->GetClass()->GetName();
 
-			auto dataSizeValuePos = stream->GetCurrentPosition();
-
+			u64 dataSizeValuePos = stream->GetCurrentPosition();
 			*stream << (u32)0; // 0 data size. updated later
 
 			*stream << (u32)0; // Number of field entries
+
+			u64 dataStartPos = stream->GetCurrentPosition();
+			u32 numEntries = 0;
             
             ClassType* objectClass = objectInstance->GetClass();
             FieldType* firstField = objectClass->GetFirstField();
@@ -74,13 +76,31 @@ namespace CE
                 
                 while (fieldSerializer.HasNext())
                 {
-                    fieldSerializer.WriteNext(stream);
+					if (fieldSerializer.WriteNext(stream))
+					{
+						numEntries++;
+					}
                 }
             }
 
-			*stream << (u32)0; // End of Field Entries
+			u64 dataEndPos = stream->GetCurrentPosition();
 
-			*stream << (u32)0; // CRC checksum
+			stream->Seek(dataSizeValuePos);
+			u32 dataSize = (u32)(dataEndPos - dataStartPos);
+			*stream << dataSize;
+			*stream << numEntries;
+
+			u32 crc = 0;
+			//char* dataPtr = new char[dataSize];
+			//{
+			//	stream->Read(dataPtr, dataSize);
+			//	crc = CalculateCRC(dataPtr, dataSize);
+			//}
+			//delete[] dataPtr; dataPtr = nullptr;
+
+			stream->Seek(dataEndPos);
+			*stream << (u32)0; // End of Field Entries
+			*stream << crc; // Object CRC checksum
 		}
 
 		*stream << (u64)0; // EOF

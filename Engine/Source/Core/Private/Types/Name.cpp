@@ -19,10 +19,15 @@ namespace CE
 		int i = 0;
 		int length = name.GetLength();
 
-		if (length >= 2 && name[0] == ':' && name[1] == ':') // remove "::" from prefix
-			i += 2;
-		if (length >= 2 && name[length - 1] == ':' && name[length - 2] == ':') // remove "::" from suffix
-			length -= 2;
+		while (i < length && (name[i] == ':' || name[i] == '.')) // Remove all ':' or '.' from prefix
+		{
+			i++;
+		}
+
+		while (length > i && (name[length - 1] == ':' || name[length - 1] == '.')) // Remove all ':' or '.' from suffix
+		{
+			length--;
+		}
 
 		if (i >= length)
 		{
@@ -91,6 +96,11 @@ namespace CE
 		this->value = copy.value;
 		this->hashValue = copy.hashValue;
 		return *this;
+	}
+
+	Name::Name(Name&& move)
+	{
+		
 	}
 
 	void Name::GetComponents(CE::Array<String>& components) const

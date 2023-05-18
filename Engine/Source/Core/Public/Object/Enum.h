@@ -28,12 +28,17 @@ namespace CE
     class CORE_API EnumConstant : public TypeInfo
     {
     private:
-        EnumConstant(CE::Name name, CE::TypeId typeId, s64 value, u32 size, const char* attributes = "");
+        EnumConstant(const CE::Name& name, const CE::Name& enumFullName, CE::TypeId typeId, s64 value, u32 size, const char* attributes = "");
 
         template<typename T>
         friend TypeInfo* GetStaticType();
 
+		template<typename Enum>
+		friend struct CE::Internal::TypeInfoImpl;
+
     public:
+
+		virtual const CE::Name& GetTypeName() override;
 
         virtual String GetDisplayName() override;
 
@@ -45,6 +50,8 @@ namespace CE
         virtual u32 GetSize() const override { return size; }
 
     private:
+		Name enumFullName;
+		Name constantFullName;
         TypeId typeId;
         s64 value;
         u32 size;
@@ -109,7 +116,7 @@ namespace CE
 } // namespace name
 
 #define CE_ENUM_CONSTANTS(...) __VA_ARGS__
-#define CE_CONST(Name, ...) CE::EnumConstant(#Name, CE::GetTypeId<Self>(), (s64)Self::Name, sizeof(Self), "" #__VA_ARGS__)
+#define CE_CONST(Name, ...) CE::EnumConstant(#Name, FullTypeName(), CE::GetTypeId<Self>(), (s64)Self::Name, sizeof(Self), "" #__VA_ARGS__)
 
 #define CE_RTTI_ENUM(API, Namespace, Enum, Attributes, ...)\
 namespace CE\
@@ -117,12 +124,13 @@ namespace CE\
     namespace Internal\
     {\
         template<>\
-		struct TypeInfoImpl<Namespace::Enum>\
+		struct TypeInfoImpl<Namespace::Enum> : public EnumType\
         {\
             typedef Namespace::Enum Self;\
-            CE::EnumType enumType;\
-            TypeInfoImpl(CE::EnumType&& enumTypeRef)\
-                : enumType(enumTypeRef)\
+			API static const CE::Name& FullTypeName();\
+			const CE::Name& GetTypeName() override { return FullTypeName(); }\
+            TypeInfoImpl()\
+                : EnumType(#Namespace "::" #Enum, CE::GetTypeId<Namespace::Enum>(), CE::GetTypeId<__underlying_type(Namespace::Enum)>(), { __VA_ARGS__ }, sizeof(Namespace::Enum), CE_TOSTRING(Attributes) "")\
             {\
             }\
 			virtual ~TypeInfoImpl()\
@@ -134,8 +142,8 @@ namespace CE\
     inline TypeInfo* GetStaticType<Namespace::Enum>()\
     {\
         typedef Namespace::Enum Self;\
-        static Internal::TypeInfoImpl<Namespace::Enum> instance{ EnumType{ #Namespace "::" #Enum, CE::GetTypeId<Namespace::Enum>(), CE::GetTypeId<__underlying_type(Namespace::Enum)>(), { __VA_ARGS__ }, sizeof(Namespace::Enum), CE_TOSTRING(Attributes) "" } };\
-	    return &instance.enumType;\
+        static Internal::TypeInfoImpl<Namespace::Enum> instance{};\
+	    return &instance;\
     }\
     template<>\
     inline EnumType* GetStaticEnum<Namespace::Enum>()\
@@ -145,8 +153,7 @@ namespace CE\
     template<>\
 	inline CE::Name GetTypeName<Namespace::Enum>()\
 	{\
-		static Name name = Name(#Namespace "::" #Enum);\
-		return name;\
+		return CE::Internal::TypeInfoImpl<Namespace::Enum>::FullTypeName();\
 	}\
 }\
 template <> struct fmt::formatter<Namespace::Enum> {\
@@ -165,5 +172,10 @@ template <> struct fmt::formatter<Namespace::Enum> {\
     }\
 };
 
-#define CE_RTTI_ENUM_IMPL(API, Namespace, Enum)
+#define CE_RTTI_ENUM_IMPL(API, Namespace, Enum)\
+const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Enum>::FullTypeName()\
+{\
+	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Enum);\
+	return name;\
+}
 

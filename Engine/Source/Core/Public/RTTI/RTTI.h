@@ -165,6 +165,8 @@ namespace CE
 		const CE::Name& GetName() const { return name; }
 		//const CE::Array<CE::Attribute>& GetLocalAttributes() const { return attributes; }
 
+		virtual const CE::Name& GetTypeName() = 0;
+
         virtual const Attribute& GetAttributes();
 
 		virtual String GetDisplayName();
@@ -327,5 +329,4 @@ CE_RTTI_POD(CORE_API, CE, Name)
 CE_RTTI_POD(CORE_API, CE::IO, Path)
 
 CE_RTTI_POD_TEMPLATE(CORE_API, CE, Array, u8)
-
 

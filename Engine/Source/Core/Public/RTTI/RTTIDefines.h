@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Templates/TypeTraits.h"
-#include "Types/Name.h"
 
 #define TYPEID(type) CE::GetTypeId<type>()
 
@@ -19,7 +18,9 @@ namespace CE::Internal\
 		TypeInfoImpl<Namespace::Type>() : TypeInfo(#Namespace "::" #Type)\
 		{}\
 	public:\
+		API static const CE::Name& FullTypeName();\
 		API static CE::TypeInfo* StaticType();\
+		const CE::Name& GetTypeName() override { return FullTypeName(); }\
 		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type); }\
 		virtual bool IsPOD() const override { return true; }\
 		virtual bool IsAssignableTo(TypeId typeId) override\
@@ -50,8 +51,7 @@ namespace CE\
 	template<>\
 	inline CE::Name GetTypeName<Namespace::Type>()\
 	{\
-		static Name name = Name(#Namespace "::" #Type);\
-		return name;\
+		return CE::Internal::TypeInfoImpl<Namespace::Type>::FullTypeName();\
 	}\
 }
 
@@ -60,6 +60,11 @@ CE::TypeInfo* CE::Internal::TypeInfoImpl<Namespace::Type>::StaticType()\
 {\
 	static CE::Internal::TypeInfoImpl<Namespace::Type> instance{};\
 	return &instance;\
+}\
+const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type>::FullTypeName()\
+{\
+	static Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Type);\
+	return name;\
 }
 
 
@@ -73,7 +78,9 @@ namespace CE::Internal\
 		TypeInfoImpl() : TypeInfo(#Namespace "::" #Type)\
 		{}\
 	public:\
+		API static const CE::Name& FullTypeName();\
 		API static CE::TypeInfo* StaticType();\
+		const CE::Name& GetTypeName() override { return FullTypeName(); }\
 		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type<DefaultArgType>); }\
 		virtual bool IsPOD() const override { return true; }\
 		virtual bool IsTemplatedPOD() const { return true; }\
@@ -105,8 +112,7 @@ namespace CE\
 	template<>\
 	inline CE::Name GetTypeName<Namespace::Type<DefaultArgType>>()\
 	{\
-		static Name name = Name(#Namespace "::" #Type);\
-		return name;\
+		return CE::Internal::TypeInfoImpl<Namespace::Type<DefaultArgType>>::FullTypeName();\
 	}\
     template<typename T>\
     struct TemplateType<Namespace::Type<T>> : TTrueType\
@@ -121,6 +127,11 @@ CE::TypeInfo* CE::Internal::TypeInfoImpl<Namespace::Type<DefaultArgType>>::Stati
 {\
 	static CE::Internal::TypeInfoImpl<Namespace::Type<DefaultArgType>> instance{};\
 	return &instance;\
+}\
+const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type<DefaultArgType>>::FullTypeName()\
+{\
+	static Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Type);\
+	return name;\
 }
 
 

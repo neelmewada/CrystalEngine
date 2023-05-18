@@ -324,7 +324,7 @@ namespace CE
             return;
 
         registeredStructs.Add({type->GetTypeId(), type});
-        registeredStructsByName.Add({ type->GetName(), type });
+        registeredStructsByName.Add({ type->GetTypeName(), type });
 
         CoreObjectDelegates::onStructRegistered.Broadcast(type);
     }
@@ -337,7 +337,7 @@ namespace CE
         CoreObjectDelegates::onStructDeregistered.Broadcast(type);
 
         registeredStructs.Remove(type->GetTypeId());
-        registeredStructsByName.Remove(type->GetName());
+        registeredStructsByName.Remove(type->GetTypeName());
     }
 
     StructType* StructType::FindStructByName(Name structName)
@@ -426,9 +426,9 @@ namespace CE
     {
         if (type == nullptr || registeredClasses.KeyExists(type->GetTypeId()))
             return;
-
+		
         registeredClasses.Add({type->GetTypeId(), type});
-        registeredClassesByName.Add({ type->GetName(), type });
+        registeredClassesByName.Add({ type->GetTypeName(), type });
 
         if (!derivedClassesMap.KeyExists(type->GetTypeId()))
         {
@@ -449,7 +449,7 @@ namespace CE
         CoreObjectDelegates::onClassDeregistered.Broadcast(type);
 
         registeredClasses.Remove(type->GetTypeId());
-        registeredClassesByName.Remove(type->GetName());
+        registeredClassesByName.Remove(type->GetTypeName());
     }
 
     ClassType* ClassType::FindClassByName(Name className)

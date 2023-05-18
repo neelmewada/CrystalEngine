@@ -7,13 +7,19 @@ namespace CE
 	CE::HashMap<TypeId, EnumType*> EnumType::registeredEnumsById{};
 	CE::HashMap<Name, EnumType*> EnumType::registeredEnumsByName{};
 
-	EnumConstant::EnumConstant(CE::Name name, CE::TypeId typeId, s64 value, u32 size, const char* attributes)
+	EnumConstant::EnumConstant(const CE::Name& name, const CE::Name& enumFullName, CE::TypeId typeId, s64 value, u32 size, const char* attributes)
 		: TypeInfo(name, attributes)
 		, typeId(typeId)
 		, value(value)
 		, size(size)
+		, enumFullName(enumFullName)
 	{
+		constantFullName = enumFullName.GetString() + "::" + name.GetString();
+	}
 
+	const CE::Name& EnumConstant::GetTypeName()
+	{
+		return constantFullName;
 	}
 
 	String EnumConstant::GetDisplayName()
@@ -70,7 +76,7 @@ namespace CE
 			return;
 
 		registeredEnumsById.Add({ enumType->GetTypeId(), enumType });
-		registeredEnumsByName.Add({ enumType->GetName(), enumType });
+		registeredEnumsByName.Add({ enumType->GetTypeName(), enumType });
 	}
 
 	void EnumType::DeregisterEnumType(EnumType* enumType)
@@ -79,7 +85,7 @@ namespace CE
 			return;
 
 		registeredEnumsById.Remove(enumType->GetTypeId());
-		registeredEnumsByName.Remove(enumType->GetName());
+		registeredEnumsByName.Remove(enumType->GetTypeName());
 	}
 
 	EnumType* EnumType::FindEnumByName(Name enumName)

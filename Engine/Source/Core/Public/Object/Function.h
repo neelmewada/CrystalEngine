@@ -21,6 +21,8 @@ namespace CE
 
 	public:
 
+		virtual const Name& GetTypeName() override;
+
 		virtual bool IsFunction() const override { return true; }
 
 		CE_INLINE TypeId GetReturnTypeId() const { return returnType; }
@@ -59,11 +61,12 @@ namespace CE
 		virtual u32 GetSize() const override { return 0; }
 
 	protected:
+		Name typeName{};
 		TypeId returnType = 0;
 		Array<TypeId> paramTypes{};
 		FunctionDelegate delegateCallback;
 		FunctionType* next = nullptr;
-		const TypeInfo* owner = nullptr;
+		TypeInfo* owner = nullptr;
 
 		Array<Attribute> attributeList{};
 

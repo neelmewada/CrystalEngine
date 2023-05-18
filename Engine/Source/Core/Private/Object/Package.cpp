@@ -54,7 +54,6 @@ namespace CE
 		}
 
 		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadWrite);
-		//MemoryStream stream = MemoryStream(1024);
 
 		return SavePackage(package, asset, &stream, saveArgs);
 	}

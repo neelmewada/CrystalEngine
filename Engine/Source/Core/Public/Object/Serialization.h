@@ -16,10 +16,14 @@ namespace CE
 
 		FieldType* GetNext();
 
+		void SkipHeader(bool skip);
+
 	private:
 		
 		Array<FieldType*> fields{};
 		void* rawInstance = nullptr;
+
+		bool skipHeader = false;
 	};
 	
 }
