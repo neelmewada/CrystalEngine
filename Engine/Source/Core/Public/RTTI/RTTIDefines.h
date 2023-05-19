@@ -67,7 +67,6 @@ const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type>::FullTypeName()\
 	return name;\
 }
 
-
 #define CE_RTTI_POD_TEMPLATE(API, Namespace, Type, DefaultArgType, ...)\
 namespace CE::Internal\
 {\

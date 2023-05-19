@@ -53,7 +53,7 @@ namespace CE
         
         auto dataSizePos = stream->GetCurrentPosition();
 		if (!skipHeader)
-			*stream << (u32)0; // Set 0 size for now
+			*stream << (u32)0; // Set 0 size for now. Updated later
         
         auto dataStartPos = stream->GetCurrentPosition();
 		
@@ -83,13 +83,13 @@ namespace CE
 			else if (fieldTypeId == TYPEID(f64))
 				*stream << (f32)field->GetFieldValue<f64>(rawInstance);
 		}
-		else if (fieldTypeId == TYPEID(String))
-		{
-			*stream << field->GetFieldValue<String>(rawInstance);
-		}
 		else if (fieldTypeId == TYPEID(UUID))
 		{
 			*stream << field->GetFieldValue<UUID>(rawInstance);
+		}
+		else if (fieldTypeId == TYPEID(String))
+		{
+			*stream << field->GetFieldValue<String>(rawInstance);
 		}
 		else if (fieldTypeId == TYPEID(Name))
 		{
@@ -109,6 +109,9 @@ namespace CE
 			*stream << underlyingType->GetTypeName();
 			*stream << arraySize;
 
+			u64 dataSizePos = stream->GetCurrentPosition();
+			*stream << (u32)0; // Total data byte size, excluding itself
+
 			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
 			Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& item)-> FieldType*
 			{
@@ -126,8 +129,13 @@ namespace CE
 					fieldSerializer.WriteNext(stream);
 				}
 			}
+
+			u64 curPos = stream->GetCurrentPosition();
+			stream->Seek(dataSizePos);
+			*stream << (u32)(curPos - dataSizePos - sizeof(u32)); // subtract the size of the "Data Byte Size" field itself
+			stream->Seek(curPos);
 		}
-		else if (fieldTypeId == TYPEID(ObjectMap))
+		else if (fieldTypeId == TYPEID(ObjectMap)) // ObjectMaps are stored just like arrays
 		{
 			const auto& map = field->GetFieldValue<ObjectMap>(rawInstance);
 
@@ -136,6 +144,9 @@ namespace CE
 			*stream << TYPENAME(Object);
 			*stream << mapSize;
 
+			u64 dataSizePos = stream->GetCurrentPosition();
+			*stream << (u32)0; // Total data byte size, excluding itself
+
 			for (const auto& [uuid, object] : map)
 			{
 				if (object == nullptr)
@@ -143,6 +154,11 @@ namespace CE
 
 				WriteObjectReference(stream, object);
 			}
+
+			u64 curPos = stream->GetCurrentPosition();
+			stream->Seek(dataSizePos);
+			*stream << (u32)(curPos - dataSizePos - sizeof(u32)); // subtract the size of the "Data Byte Size" field itself
+			stream->Seek(curPos);
 		}
         else if (field->IsObjectField())
         {
@@ -188,7 +204,7 @@ namespace CE
 			auto package = objectRef->GetPackage();
 
 			if (package != nullptr)
-				*stream << package->GetName();
+				*stream << package->GetPackageName();
 			else
 				*stream << "\0";
 
@@ -214,16 +230,224 @@ namespace CE
 		this->skipHeader = skip;
 	}
 
-    FieldDeserializer::FieldDeserializer(Array<FieldType*> fieldList, void* instance)
-        : fields(fieldList), rawInstance(instance), skipHeader(false)
+	FieldDeserializer::FieldDeserializer(FieldType* fieldChain, void* instance, Package* currentPackage)
+		: rawInstance(instance), skipHeader(false), currentPackage(currentPackage)
+	{
+		fields.Clear();
+
+		FieldType* field = fieldChain;
+
+		while (field != nullptr)
+		{
+			fields.Add(field);
+
+			field = field->GetNext();
+		}
+	}
+
+	FieldDeserializer::FieldDeserializer(Array<FieldType*> fieldList, void* instance, Package* currentPackage)
+        : fields(fieldList), rawInstance(instance), skipHeader(false), currentPackage(currentPackage)
     {
         
     }
 
-    bool FieldDeserializer::ReadNext(Stream* stream)
+	bool FieldDeserializer::HasNext()
+	{
+		return fields.NonEmpty();
+	}
+
+	bool FieldDeserializer::ReadNext(Stream* stream)
     {
-        
-        return stream;
+		String fieldName = "";
+		Name fieldTypeName = "";
+		u32 fieldDataSize = 0;
+
+		FieldType* field = nullptr;
+
+		if (!skipHeader)
+		{
+			*stream >> fieldName;
+			if (fieldName.IsEmpty())
+			{
+				fields.Clear(); // Reached end of list
+				return false;
+			}
+
+			*stream >> fieldTypeName;
+			*stream >> fieldDataSize;
+
+			s32 index = fields.IndexOf([&](FieldType* field) { return field->GetName() == fieldName; });
+
+			if (index < 0 || index >= fields.GetSize() || fieldDataSize == 0)
+			{
+				stream->Seek(fieldDataSize, SeekMode::Current); // skip this field entry
+				return false;
+			}
+
+			field = fields[index];
+			fields.RemoveAt(index);
+
+			if (field == nullptr) // Field found in serialized data but not actually present in class/struct
+			{
+				stream->Seek(fieldDataSize, SeekMode::Current);
+				return false;
+			}
+			if (!fieldTypeName.IsValid()) // Invalid serialized type name
+			{
+				stream->Seek(fieldDataSize, SeekMode::Current);
+				return false;
+			}
+			if (fieldTypeName != field->GetTypeName()) // Type mismatch
+			{
+				stream->Seek(fieldDataSize, SeekMode::Current);
+				return false;
+			}
+		}
+		else
+		{
+			field = fields[0];
+			fields.RemoveAt(0);
+		}
+
+		TypeId fieldTypeId = field->GetTypeId();
+
+		if (field->IsIntegerField())
+		{
+			if (fieldTypeId == TYPEID(u8))
+				*stream >> field->GetFieldValue<u8>(rawInstance);
+			else if (fieldTypeId == TYPEID(u16))
+				*stream >> field->GetFieldValue<u16>(rawInstance);
+			else if (fieldTypeId == TYPEID(u32))
+				*stream >> field->GetFieldValue<u32>(rawInstance);
+			else if (fieldTypeId == TYPEID(u64))
+				*stream >> field->GetFieldValue<u64>(rawInstance);
+			else if (fieldTypeId == TYPEID(s8))
+				*stream >> field->GetFieldValue<s8>(rawInstance);
+			else if (fieldTypeId == TYPEID(s16))
+				*stream >> field->GetFieldValue<s16>(rawInstance);
+			else if (fieldTypeId == TYPEID(s32))
+				*stream >> field->GetFieldValue<s32>(rawInstance);
+			else if (fieldTypeId == TYPEID(s64))
+				*stream >> field->GetFieldValue<s64>(rawInstance);
+		}
+		else if (field->IsDecimalField())
+		{
+			f32 value = 0;
+			*stream >> value;
+			if (fieldTypeId == TYPEID(f32))
+				field->SetFieldValue<f32>(rawInstance, value);
+			else if (fieldTypeId == TYPEID(f64))
+				field->SetFieldValue<f64>(rawInstance, value);
+		}
+		else if (fieldTypeId == TYPEID(UUID))
+		{
+			*stream >> field->GetFieldValue<UUID>(rawInstance);
+		}
+		else if (fieldTypeId == TYPEID(String))
+		{
+			*stream >> field->GetFieldValue<String>(rawInstance);
+		}
+		else if (fieldTypeId == TYPEID(Name))
+		{
+			*stream >> field->GetFieldValue<Name>(rawInstance);
+		}
+		else if (fieldTypeId == TYPEID(IO::Path))
+		{
+			String pathString{};
+			*stream >> pathString;
+			field->SetFieldValue<IO::Path>(rawInstance, pathString);
+		}
+		else if (field->IsArrayField())
+		{
+			auto& array = field->GetFieldValue<Array<u8>>(rawInstance);
+			auto underlyingType = field->GetUnderlyingType();
+
+			Name serializedUnderlyingTypeName{};
+			u32 numElements = 0;
+			u32 dataSize = 0;
+
+			*stream >> serializedUnderlyingTypeName;
+			*stream >> numElements;
+			*stream >> dataSize;
+
+			if (underlyingType->GetName() != serializedUnderlyingTypeName) // Underlying type mismatch
+			{
+				stream->Seek(dataSize, SeekMode::Current);
+				return false;
+			}
+			
+			array.Clear();
+
+			if (numElements > 0)
+			{
+				field->ResizeArray(rawInstance, numElements);
+
+				Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
+				Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& item)-> FieldType*
+					{
+						return &item;
+					});
+
+				void* arrayInstance = &array[0];
+
+				FieldDeserializer fieldDeserializer{ fieldListPtr, arrayInstance, currentPackage };
+				fieldDeserializer.SkipHeader(true);
+				while (fieldDeserializer.HasNext())
+				{
+					fieldDeserializer.ReadNext(stream);
+				}
+			}
+		}
+		else if (fieldTypeId == TYPEID(ObjectMap))
+		{
+			auto& map = field->GetFieldValue<ObjectMap>(rawInstance);
+
+			Name serializedUnderlyingTypeName{};
+			u32 numElements = 0;
+			u32 dataSize = 0;
+
+			*stream >> serializedUnderlyingTypeName;
+			*stream >> numElements;
+			*stream >> dataSize;
+
+			map.RemoveAll();
+
+			if (numElements > 0)
+			{
+				for (int i = 0; i < numElements; i++)
+				{
+					u64 uuid = 0;
+					*stream >> uuid;
+					if (uuid == 0) // Uuid of 0 means nullptr, skip this entry
+					{
+						map.AddObject(nullptr);
+						continue;
+					}
+
+					Name objectTypeName{};
+					*stream >> objectTypeName;
+					Name packageName{};
+					*stream >> packageName;
+					Name pathInPackage{};
+					*stream >> pathInPackage;
+					
+					if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
+					{
+						Object* objectRef = currentPackage->ResolveObjectReference(uuid);
+						if (objectRef != nullptr)
+						{
+							map.AddObject(objectRef);
+						}
+					}
+					else
+					{
+						// TODO: Loading references from external packages
+					}
+				}
+			}
+		}
+
+        return true;
     }
 
 }

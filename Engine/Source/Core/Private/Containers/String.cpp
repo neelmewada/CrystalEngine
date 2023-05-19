@@ -34,7 +34,7 @@ namespace CE
         };
     }
 
-    String::String() : threadId(Thread::GetCurrentThreadId())
+    String::String()
     {
         Reserve(STRING_BUFFER_SIZE - 1);
     }
@@ -50,12 +50,12 @@ namespace CE
         CopyCString(stringView.GetCString(), stringView.GetSize());
     }
 
-    String::String(u32 reservedSize) : threadId(Thread::GetCurrentThreadId())
+    String::String(u32 reservedSize)
     {
         Reserve(reservedSize);
     }
 
-    String::String(const char* value) : threadId(Thread::GetCurrentThreadId())
+    String::String(const char* value)
     {
         if (value == nullptr)
         {
@@ -68,14 +68,14 @@ namespace CE
         SetCString(value);
     }
 
-    String::String(const char* cStringA, const char* cStringB) : threadId(Thread::GetCurrentThreadId())
+    String::String(const char* cStringA, const char* cStringB)
     {
         Reserve(strlen(cStringA) + strlen(cStringB));
         SetCString(cStringA);
         ConcatenateCString(cStringB);
     }
 
-    String::String(Iterator begin, Iterator end) : threadId(Thread::GetCurrentThreadId())
+    String::String(Iterator begin, Iterator end)
     {
         auto length = end.Ptr - begin.Ptr;
         Reserve(length);
@@ -87,17 +87,15 @@ namespace CE
         , Capacity(move.Capacity)
         , bIsUsingDynamicBuffer(move.bIsUsingDynamicBuffer)
         , StringLength(move.StringLength)
-        , threadId(Thread::GetCurrentThreadId())
     {
-        // Zero out Move
+        // Zero out 'move'
         move.Buffer = nullptr;
         move.Capacity = 0;
         move.StringLength = 0;
         move.bIsUsingDynamicBuffer = false;
-        move.threadId = 0;
     }
 
-    String::String(const String& copy) : threadId(Thread::GetCurrentThreadId())
+    String::String(const String& copy)
     {
         CopyCString(copy.GetCString(), copy.StringLength);
     }

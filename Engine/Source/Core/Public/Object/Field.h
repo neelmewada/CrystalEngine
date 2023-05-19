@@ -128,6 +128,8 @@ namespace CE
 
 		u32 GetArraySize(void* instance);
 
+		virtual void ResizeArray(void* instance, u32 numElements);
+
 		template<typename T>
 		const T& GetArrayElementAt(u32 index, void* instance)
 		{

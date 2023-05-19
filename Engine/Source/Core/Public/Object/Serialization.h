@@ -32,16 +32,21 @@ namespace CE
     class CORE_API FieldDeserializer
     {
     public:
-        FieldDeserializer(Array<FieldType*> fieldList, void* instance);
+		FieldDeserializer(FieldType* fieldChain, void* instance, Package* currentPackage);
+        FieldDeserializer(Array<FieldType*> fieldList, void* instance, Package* currentPackage);
         
         void SkipHeader(bool skip)
         {
             skipHeader = skip;
         }
+
+		bool HasNext();
         
         bool ReadNext(Stream* stream);
         
     private:
+		Package* currentPackage = nullptr;
+
         Array<FieldType*> fields{};
         void* rawInstance = nullptr;
         

@@ -193,11 +193,28 @@ namespace CE
 		return array.GetSize() / underlyingType->GetSize();
 	}
 
+	void FieldType::ResizeArray(void* instance, u32 numElements)
+	{
+		if (!IsArrayField())
+			return;
+
+		auto& array = GetFieldValue<Array<u8>>(instance);
+		TypeId underlyingTypeId = GetUnderlyingTypeId();
+		if (underlyingTypeId == 0)
+			return;
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return;
+
+		array.Resize(numElements * underlyingType->GetSize());
+	}
+
 	Array<FieldType> FieldType::GetArrayFieldList(void* instance)
 	{
 		if (!IsArrayField())
 			return {};
-
+		
 		u32 arraySize = GetArraySize(instance);
 		if (arraySize == 0)
 			return {};

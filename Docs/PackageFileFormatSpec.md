@@ -38,7 +38,8 @@ Spec tables with little endian format
 | +xx | 4B | `xx xx xx xx` | Length of **data list** in bytes. `0` is valid. |
 | +04 | 4B | `xx xx xx xx` | Total number of fields |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
-| +10 | xx | | Newly added header fields |
+| +10 | \0 | 'SomeObjectName' | Object name |
+| +xx | xx | | Newly added header fields |
 | +xx | xx | | **Data: List of [Field Entries](#field-list-entry)** |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
 | +04 | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
@@ -67,9 +68,10 @@ Each array element is saved as a Field Data itself, making a recursive data stru
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | \0 | `CE::String\0` | Full type name of array elements |
+| +00 | \0 | `/Engine/Core.CE::String\0` | Full type name of array elements |
 | +xx | 4B | N | Number of elements |
-| +04 | xx | | Array element 0. Recursive **Field Data**. |
+| +04 | 4B | | Total data byte size. |
+| +08 | xx | | Array element 0. Recursive **Field Data**. |
 | ... | ... | ... | ... |
 | +xx | xx | | Array element N - 1. Recursive **Field Data**. |
 

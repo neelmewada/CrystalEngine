@@ -90,13 +90,17 @@ namespace CE
 
 		// Returns true if this package contains the given object
 		bool ContainsObject(Object* object);
+
+		Object* ResolveObjectReference(UUID objectUuid);
         
     private:
-		Name packageName{};
+		friend class Object;
         
 #if PAL_TRAIT_BUILD_TESTS
         friend class ::Package_WriteRead_Test;
 #endif
+
+		Name packageName{};
         
 		bool isLoaded = true;
         bool isFullyLoaded = true;
@@ -114,8 +118,10 @@ namespace CE
 		};
 
 		HashMap<UUID, ObjectEntryHeader> objectUuidToEntryMap{};
+
+		HashMap<UUID, Object*> loadedSubobjects{};
         
-        IO::Path fullPackagePath;
+		IO::Path fullPackagePath{};
 	};
 
 } // namespace CE

@@ -59,6 +59,11 @@ namespace CE
             return;
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
+		auto package = GetPackage();
+		if (package != nullptr)
+		{
+			package->loadedSubobjects[subobject->GetUuid()] = subobject;
+		}
     }
 
     void Object::DetachSubobject(Object* subobject)
@@ -67,6 +72,11 @@ namespace CE
             return;
         subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);
+		auto package = GetPackage();
+		if (package != nullptr)
+		{
+			package->loadedSubobjects.Remove(subobject->GetUuid());
+		}
     }
 
 	bool Object::HasSubobject(Object* subobject)

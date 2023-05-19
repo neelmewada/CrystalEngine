@@ -64,13 +64,20 @@ namespace CE
         package->fullPackagePath = fullPackagePath;
 
 		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadWrite);
-
+		
 		return SavePackage(package, asset, &stream, saveArgs);
 	}
 
 	bool Package::ContainsObject(Object* object)
 	{
 		return ObjectPresentInHierarchy(object);
+	}
+
+	Object* Package::ResolveObjectReference(UUID objectUuid)
+	{
+		if (!loadedSubobjects.KeyExists(objectUuid))
+			return nullptr;
+		return loadedSubobjects[objectUuid];
 	}
 
 } // namespace CE

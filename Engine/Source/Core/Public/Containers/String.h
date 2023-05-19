@@ -323,8 +323,6 @@ namespace CE
 
 		bool bIsUsingDynamicBuffer = false;
 		u32 StringLength = 0;
-
-        SIZE_T threadId = 0;
 	};
 
     template<>

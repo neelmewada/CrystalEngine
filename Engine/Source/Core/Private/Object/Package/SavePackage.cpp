@@ -245,19 +245,26 @@ namespace CE
         if (isFullyLoaded || stream == nullptr)
             return;
         
-        HashMap<UUID, Object*> objects{};
-        
         for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
         {
             u64 dataOffset = objectEntry.offsetInFile;
 			u32 dataSize = objectEntry.objectDataSize;
             stream->Seek(dataOffset);
-
-			if (dataSize == 0)
+			if (!objectEntry.objectClassName.IsValid())
 				continue;
 
-			FieldDeserializer deserializer{ 0, 0 };
+			ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
+
+			if (dataSize == 0 || objectClass == nullptr)
+				continue;
+
+			Object* objectInstance = CreateObject<Object>(this, "TempName", OF_NoFlags, objectClass);
+			loadedSubobjects[uuid] = objectInstance;
+
+			//FieldDeserializer deserializer{ 0, 0 };
         }
+
+		isFullyLoaded = true;
     }
     
 } // namespace CE
