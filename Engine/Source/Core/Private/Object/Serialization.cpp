@@ -106,7 +106,7 @@ namespace CE
 			auto underlyingType = field->GetUnderlyingType();
 			u32 arraySize = field->GetArraySize(rawInstance);
 
-			*stream << underlyingType->GetName();
+			*stream << underlyingType->GetTypeName();
 			*stream << arraySize;
 
 			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
@@ -127,28 +127,28 @@ namespace CE
 				}
 			}
 		}
+		else if (fieldTypeId == TYPEID(ObjectMap))
+		{
+			const auto& map = field->GetFieldValue<ObjectMap>(rawInstance);
+
+			u32 mapSize = map.GetObjectCount();
+
+			*stream << TYPENAME(Object);
+			*stream << mapSize;
+
+			for (const auto& [uuid, object] : map)
+			{
+				if (object == nullptr)
+					continue;
+
+				WriteObjectReference(stream, object);
+			}
+		}
         else if (field->IsObjectField())
         {
             Object* object = field->GetFieldValue<Object*>(rawInstance);
             
-            if (object != nullptr && !object->IsTransient()) // non-temporary object
-            {
-                *stream << object->GetUuid();
-                *stream << object->GetClass()->GetName();
-                
-                auto package = object->GetPackage();
-                
-                if (package != nullptr)
-                    *stream << package->GetName();
-                else
-                    *stream << "\0";
-                
-                *stream << object->GetPathInPackage();
-            }
-            else
-            {
-                *stream << (u64)0; // A Uuid of 0 means NULL object
-            }
+			WriteObjectReference(stream, object);
         }
 		else if (fieldDeclarationType->IsStruct())
 		{
@@ -177,6 +177,29 @@ namespace CE
 		fields.RemoveAt(0);
 		return true;
 	}
+
+	void FieldSerializer::WriteObjectReference(Stream* stream, Object* objectRef)
+	{
+		if (objectRef != nullptr && !objectRef->IsTransient()) // non-temporary object
+		{
+			*stream << objectRef->GetUuid();
+			*stream << objectRef->GetClass()->GetTypeName();
+
+			auto package = objectRef->GetPackage();
+
+			if (package != nullptr)
+				*stream << package->GetName();
+			else
+				*stream << "\0";
+
+			*stream << objectRef->GetPathInPackage();
+		}
+		else
+		{
+			*stream << (u64)0; // A Uuid of 0 means NULL object
+		}
+	}
+
 
 	FieldType* FieldSerializer::GetNext()
 	{

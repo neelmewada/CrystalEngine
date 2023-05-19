@@ -39,7 +39,7 @@ Spec tables with little endian format
 | +04 | 4B | `xx xx xx xx` | Total number of fields |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
 | +10 | xx | | Newly added header fields |
-| +xx | xx | | **Data: List of [Field Entries](#object-entry-field-list)** |
+| +xx | xx | | **Data: List of [Field Entries](#field-list-entry)** |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
 | +04 | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
 

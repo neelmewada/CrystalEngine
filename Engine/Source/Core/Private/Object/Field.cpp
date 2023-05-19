@@ -148,26 +148,33 @@ namespace CE
     {
         if (!GetDeclarationType()->IsEnum())
             return;
+		if (IsReadOnly())
+			return;
 
-        auto enumType = GetDeclarationType();
-
-        if (enumType->GetSize() == sizeof(u8))
-        {
-            SetFieldValue<u8>(instance, value);
-        }
-        else if (enumType->GetSize() == sizeof(u16))
-        {
-            SetFieldValue<u16>(instance, value);
-        }
-        else if (enumType->GetSize() == sizeof(u32))
-        {
-            SetFieldValue<u32>(instance, value);
-        }
-        else if (enumType->GetSize() == sizeof(u64))
-        {
-            SetFieldValue<u64>(instance, value);
-        }
+		ForceSetFieldEnumValue(instance, value);
     }
+
+	void FieldType::ForceSetFieldEnumValue(void* instance, s64 value)
+	{
+		auto enumType = GetDeclarationType();
+
+		if (enumType->GetSize() == sizeof(u8))
+		{
+			SetFieldValue<u8>(instance, value);
+		}
+		else if (enumType->GetSize() == sizeof(u16))
+		{
+			SetFieldValue<u16>(instance, value);
+		}
+		else if (enumType->GetSize() == sizeof(u32))
+		{
+			SetFieldValue<u32>(instance, value);
+		}
+		else if (enumType->GetSize() == sizeof(u64))
+		{
+			SetFieldValue<u64>(instance, value);
+		}
+	}
 
 	u32 FieldType::GetArraySize(void* instance)
 	{

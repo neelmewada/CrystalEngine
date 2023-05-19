@@ -200,8 +200,11 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_FIELD_LIST(
         CE_FIELD(name, Hidden)
         CE_FIELD(uuid, Hidden)
+		CE_FIELD(attachedObjects, Hidden, ReadOnly)
+		CE_FIELD(outer, Hidden, ReadOnly)
     ),
     CE_FUNCTION_LIST(
         
     )
 )
+

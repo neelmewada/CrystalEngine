@@ -42,6 +42,7 @@
 #include "RTTI/RTTIDefines.h"
 #include "Delegates/Delegate.h"
 #include "Delegates/MultiCastDelegate.h"
+#include "Delegates/DelegateRTTI.h"
 #include "Misc/CoreDelegates.h"
 
 // ******************************************************

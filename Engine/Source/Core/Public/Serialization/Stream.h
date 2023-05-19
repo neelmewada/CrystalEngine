@@ -68,6 +68,9 @@ namespace CE
         virtual Stream& operator<<(const UUID& uuid);
         virtual Stream& operator>>(UUID& uuid);
 
+		virtual Stream& operator<<(char ch);
+		virtual Stream& operator>>(char& ch);
+
         virtual Stream& operator<<(u8 byte);
         virtual Stream& operator>>(u8& byte);
         

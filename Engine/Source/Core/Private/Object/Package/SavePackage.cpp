@@ -242,17 +242,21 @@ namespace CE
 
     void Package::LoadFully(Stream* stream)
     {
-        if (isFullyLoaded || originalStream == nullptr)
+        if (isFullyLoaded || stream == nullptr)
             return;
         
         HashMap<UUID, Object*> objects{};
         
         for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
         {
-            u64 offset = objectEntry.offsetInFile;
-            stream->Seek(offset);
-            
-            
+            u64 dataOffset = objectEntry.offsetInFile;
+			u32 dataSize = objectEntry.objectDataSize;
+            stream->Seek(dataOffset);
+
+			if (dataSize == 0)
+				continue;
+
+			FieldDeserializer deserializer{ 0, 0 };
         }
     }
     

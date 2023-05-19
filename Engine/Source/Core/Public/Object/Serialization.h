@@ -3,6 +3,7 @@
 namespace CE
 {
 	class FieldType;
+	class ObjectMap;
 
 	class CORE_API FieldSerializer
 	{
@@ -13,6 +14,8 @@ namespace CE
 		bool HasNext();
 
 		bool WriteNext(Stream* stream);
+
+		void WriteObjectReference(Stream* stream, Object* objectRef);
 
 		FieldType* GetNext();
 

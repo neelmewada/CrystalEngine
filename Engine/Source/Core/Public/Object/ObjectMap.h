@@ -13,7 +13,7 @@ namespace CE
 {
     class Object;
 
-    class CORE_API ObjectMap
+    struct CORE_API ObjectMap
     {
     public:
         ObjectMap()
@@ -47,8 +47,13 @@ namespace CE
         auto begin() { return objects.begin(); }
         auto end() { return objects.end(); }
 
+		const auto begin() const { return objects.begin(); }
+		const auto end() const { return objects.end(); }
+
     private:
         HashMap<UUID, Object*> objects{};
     };
     
 } // namespace CE
+
+CE_RTTI_POD(CORE_API, CE, ObjectMap)

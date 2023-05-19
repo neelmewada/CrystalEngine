@@ -36,7 +36,7 @@ namespace CE
 			return nullptr;
 		}
         
-        this->fullPackagePath = fullPackagePath;
+        outer->fullPackagePath = fullPackagePath;
         
 		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
 
@@ -61,7 +61,7 @@ namespace CE
 			return SavePackageResult::AssetNotInPackage;
 		}
         
-        this->fullPackagePath = fullPackagePath;
+        package->fullPackagePath = fullPackagePath;
 
 		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadWrite);
 

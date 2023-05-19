@@ -109,11 +109,20 @@ namespace CE
         template<typename T>
         void SetFieldValue(void* instance, const T& value)
         {
-            *(T*)((SIZE_T)instance + offset) = value;
+			if (IsReadOnly())
+				return;
+			ForceSetFieldValue(instance, value);
         }
+
+		template<typename T>
+		INLINE void ForceSetFieldValue(void* instance, const T& value)
+		{
+			*(T*)((SIZE_T)instance + offset) = value;
+		}
 
         s64 GetFieldEnumValue(void* instance);
         void SetFieldEnumValue(void* instance, s64 value);
+		void ForceSetFieldEnumValue(void* instance, s64 value);
 
 		// - Array API -
 

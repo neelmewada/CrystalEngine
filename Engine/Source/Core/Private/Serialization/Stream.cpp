@@ -113,6 +113,16 @@ namespace CE
         return *this;
     }
 
+	Stream& Stream::operator<<(char ch)
+	{
+		return *this << (u8)ch;
+	}
+
+	Stream& Stream::operator>>(char& ch)
+	{
+		return *this >> (u8&)ch;
+	}
+
     Stream& Stream::operator<<(u8 byte)
     {
         if (IsBinaryMode())

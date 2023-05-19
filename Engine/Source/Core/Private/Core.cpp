@@ -59,7 +59,8 @@ namespace CE
             u8, u16, u32, u64, f32, f64,
             CE::String, CE::UUID, CE::Name, CE::Array<u8>,
             CE::Vec2, CE::Vec3, CE::Vec4, CE::Vec2i, CE::Vec3i, CE::Vec4i,
-            CE::Quat, CE::Matrix4x4);
+            CE::Quat, CE::Matrix4x4,
+			CE::ObjectMap);
 
         // Enums
         CE_REGISTER_TYPES(

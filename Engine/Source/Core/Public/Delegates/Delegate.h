@@ -19,14 +19,14 @@ namespace CE
         Delegate(const F& lambda) : Internal::DelegateBase<T>(lambda)
         {}
 
-        Delegate(const Delegate<T>& copy) : Internal::DelegateBase<T>((const Internal::DelegateBase<T>&)copy)
+        Delegate(const Delegate<T>& copy) 
+			: Internal::DelegateBase<T>((const Internal::DelegateBase<T>&)copy)
         {}
 
         template<class ReturnType, class ClassOrStruct, typename... Args>
-        Delegate(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance) : Internal::DelegateBase<T>(function, instance)
-        {
-
-        }
+        Delegate(ReturnType(ClassOrStruct::* function)(Args...), ClassOrStruct* instance) 
+			: Internal::DelegateBase<T>(function, instance)
+        {}
 
         TypeId GetTargetType() const 
         {
