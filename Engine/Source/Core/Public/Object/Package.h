@@ -54,7 +54,7 @@ namespace CE
 
 		bool IsPackage() override { return true; }
 
-		virtual void SetName(const String& newName) override
+		virtual void SetName(const Name& newName) override
 		{
 			this->packageName = newName;
 			Super::SetName(newName);
@@ -87,13 +87,18 @@ namespace CE
         
         void LoadFully();
         void LoadFully(Stream* originalStream);
+        
+        Object* LoadObject(UUID objectUuid);
 
-		// Returns true if this package contains the given object
+		// Returns true if this package contains the given object. Note that the object has to be fully loaded.
 		bool ContainsObject(Object* object);
 
 		Object* ResolveObjectReference(UUID objectUuid);
         
     private:
+        
+        Object* LoadObjectFromEntry(Stream* originalStream, UUID objectUuid);
+        
 		friend class Object;
         
 #if PAL_TRAIT_BUILD_TESTS
@@ -115,6 +120,8 @@ namespace CE
 			String pathInPackage{};
 			Name objectClassName{};
 			u32 objectDataSize = 0;
+            
+            b8 isLoaded = false;
 		};
 
 		HashMap<UUID, ObjectEntryHeader> objectUuidToEntryMap{};

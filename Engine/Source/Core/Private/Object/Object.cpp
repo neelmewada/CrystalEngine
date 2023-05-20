@@ -155,15 +155,15 @@ namespace CE
         if (IsPackage())
             return "";
         
-		String path = name;
+		String path = name.GetString();
 		
 		auto outerObject = outer;
 
 		while (outerObject != nullptr && !outerObject->IsPackage())
 		{
 			auto outerPathName = outerObject->GetName();
-			if (!outerPathName.IsEmpty())
-				path = outerPathName + "." + path;
+			if (outerPathName.IsValid())
+				path = outerPathName.GetString() + "." + path;
 			outerObject = outerObject->outer;
 		}
 

@@ -44,6 +44,8 @@ namespace CE
         
         bool ReadNext(Stream* stream);
         
+        Object* ReadObjectReference(Stream* stream);
+        
     private:
 		Package* currentPackage = nullptr;
 

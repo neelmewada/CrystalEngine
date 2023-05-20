@@ -63,12 +63,12 @@ namespace CE
     public:
 
         // - Getters & Setters -
-        virtual CE::String GetName() const
+        virtual Name GetName() const
         {
             return name;
         }
 
-        virtual void SetName(const String& newName)
+        virtual void SetName(const Name& newName)
         {
             this->name = newName;
         }
@@ -177,7 +177,7 @@ namespace CE
          *  Fields
          */
 
-        String name;
+        Name name;
         UUID uuid;
 
         ObjectFlags objectFlags = OF_NoFlags;
