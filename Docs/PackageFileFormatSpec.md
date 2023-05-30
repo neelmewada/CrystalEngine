@@ -64,7 +64,7 @@ Plain Old Data types are stored in their native formats. Ex: u32, f64, String, e
 
 ### Array Field Data
 
-Each array element is saved as a Field Data itself, making a recursive data structure.
+Each array element is saved as a **Field Data** itself, making a recursive data structure.
 
 | Offset | Size | Value | Description |
 |---|---|---|---|

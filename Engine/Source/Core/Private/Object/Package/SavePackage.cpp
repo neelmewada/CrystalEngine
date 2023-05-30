@@ -200,7 +200,7 @@ namespace CE
 			String pathInPackage{};
 			*stream >> pathInPackage;
 
-			Name objectTypeName{};
+			String objectTypeName{};
 			*stream >> objectTypeName;
 
 			u32 dataByteSize = 0;
@@ -212,7 +212,7 @@ namespace CE
 			u64 dataStartOffset = 0;
 			*stream >> dataStartOffset;
 
-			Name objectName{};
+			String objectName{};
 			*stream >> objectName;
 
 			stream->Seek(dataStartOffset);
@@ -238,7 +238,7 @@ namespace CE
         
         package->isFullyLoaded = false;
         package->isLoaded = true;
-
+        
 		loadedPackages[packageName] = package;
         
         if (loadFlags & LOAD_Full)
@@ -258,6 +258,7 @@ namespace CE
             return;
         
         FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+        stream.SetBinaryMode(true);
         LoadFully(&stream);
     }
 
@@ -282,6 +283,7 @@ namespace CE
             return nullptr;
         
         FileStream fileStream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+        fileStream.SetBinaryMode(true);
         return LoadObjectFromEntry(&fileStream, objectUuid);
     }
 

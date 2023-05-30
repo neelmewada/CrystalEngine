@@ -400,7 +400,7 @@ namespace CE
 		}
 		else if (fieldTypeId == TYPEID(ObjectMap))
 		{
-			auto& map = field->GetFieldValue<ObjectMap>(rawInstance);
+			ObjectMap& map = field->GetFieldValue<ObjectMap>(rawInstance);
 
 			Name serializedUnderlyingTypeName{};
 			u32 numElements = 0;
@@ -416,13 +416,16 @@ namespace CE
 			{
 				for (int i = 0; i < numElements; i++)
 				{
-					
+                    Object* object = ReadObjectReference(stream);
+                    if (object == nullptr)
+                        continue;
+                    map.AddObject(object);
 				}
 			}
 		}
 		else if (field->IsObjectField())
 		{
-
+            field->SetFieldValue(rawInstance, ReadObjectReference(stream));
 		}
 
         return true;
@@ -459,7 +462,10 @@ namespace CE
 	Object* FieldDeserializer::ResolveObjectReference(UUID objectUuid, Name packageName, Name pathInPackage)
 	{
 		Package* package = Package::LoadPackage(nullptr, packageName);
-		return nullptr;
+        if (package == nullptr)
+            return nullptr;
+        
+        return package->LoadObject(objectUuid);
 	}
 
 }

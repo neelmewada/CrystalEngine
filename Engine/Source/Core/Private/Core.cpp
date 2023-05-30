@@ -25,8 +25,7 @@ namespace CE
         if (gProjectPath.IsEmpty()) // Editor: gProjectPath should be set before loading Core
             gProjectPath = PlatformDirectories::GetEngineRootDir();
 #else
-        // Runtime
-        gProjectPath = PlatformDirectories::GetGameRootDir();
+        gProjectPath = PlatformDirectories::GetGameRootDir(); // Runtime: gProjectPath is always the install directory
 #endif
 
         // Load Configs cache
