@@ -455,4 +455,34 @@ namespace CE
 		}
 	}
 
+        return true;
+    }
+
+    Object* FieldDeserializer::ReadObjectReference(Stream* stream)
+    {
+        u64 uuid = 0;
+        *stream >> uuid;
+        if (uuid == 0) // Uuid of 0 means nullptr, skip this entry
+        {
+            return nullptr;
+        }
+
+        Name objectTypeName{};
+        *stream >> objectTypeName;
+        Name packageName{};
+        *stream >> packageName;
+        Name pathInPackage{};
+        *stream >> pathInPackage;
+        
+        if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
+        {
+            return currentPackage->ResolveObjectReference(uuid);
+        }
+        else
+        {
+            // TODO: Loading references from external packages
+            return nullptr;
+        }
+    }
+
 }

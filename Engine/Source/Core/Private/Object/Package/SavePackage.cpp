@@ -138,6 +138,7 @@ namespace CE
 		u64 magicNumber = 0;
 		u16 majorVersion = 0, minorVersion = 0;
 		*stream >> magicNumber;
+        
 		if (magicNumber != PACKAGE_MAGIC_NUMBER)
 		{
 			outResult = LoadPackageResult::InvalidPackage;
@@ -247,41 +248,62 @@ namespace CE
         
         for (auto& [uuid, objectEntry] : objectUuidToEntryMap)
         {
-			if (loadedSubobjects.KeyExists(uuid)) // Skip already loaded objects
-				continue;
-
-            u64 dataOffset = objectEntry.offsetInFile;
-			u32 dataSize = objectEntry.objectDataSize;
-            stream->Seek(dataOffset);
-			if (!objectEntry.objectClassName.IsValid())
-				continue;
-
-			ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
-
-			if (dataSize == 0 || objectClass == nullptr)
-				continue;
-
-			const auto& pathInPackage = objectEntry.pathInPackage;
-			Array<String> components{};
-			pathInPackage.Split(".", components);
-			String objectName = "";
-			if (components.NonEmpty())
-				objectName = components.GetLast();
-
-			Object* objectInstance = CreateObject<Object>(this, objectName, OF_NoFlags, objectClass);
-			loadedSubobjects[uuid] = objectInstance;
-
-			objectEntry.isLoaded = true;
-
-			FieldDeserializer fieldDeserializer{ objectClass->GetFirstField(), objectInstance, this };
-
-			while (fieldDeserializer.HasNext())
-			{
-				fieldDeserializer.ReadNext(stream);
-			}
+            LoadObjectFromEntry(stream, uuid);
         }
-
+        
 		isFullyLoaded = true;
+    }
+
+    Object* Package::LoadObject(UUID objectUuid)
+    {
+        if (objectUuid != 0 && loadedSubobjects.KeyExists(objectUuid))
+            return loadedSubobjects[objectUuid];
+        if (!fullPackagePath.Exists() || fullPackagePath.IsDirectory() || objectUuid == 0)
+            return nullptr;
+        
+        FileStream fileStream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+        return LoadObjectFromEntry(&fileStream, objectUuid);
+    }
+
+    Object* Package::LoadObjectFromEntry(Stream* stream, UUID objectUuid)
+    {
+        if (loadedSubobjects.KeyExists(objectUuid))
+            return loadedSubobjects[objectUuid];
+        if (!objectUuidToEntryMap.KeyExists(objectUuid))
+            return nullptr;
+        ObjectEntryHeader& entry = objectUuidToEntryMap[objectUuid];
+        
+        u64 dataOffset = entry.offsetInFile;
+        u32 dataSize = entry.objectDataSize;
+        stream->Seek(dataOffset);
+        if (!entry.objectClassName.IsValid())
+            return nullptr;
+        
+        ClassType* objectClass = ClassType::FindClass(entry.objectClassName);
+
+        if (dataSize == 0 || objectClass == nullptr)
+            return nullptr;
+        
+        String name = "Temp";
+        Array<String> components = entry.pathInPackage.Split('.');
+        if (components.NonEmpty())
+        {
+            name = components.GetLast();
+        }
+        
+        Object* objectInstance = CreateObject<Object>(this, "TempName", OF_NoFlags, objectClass);
+        loadedSubobjects[uuid] = objectInstance;
+        
+        entry.isLoaded = true;
+        
+        FieldDeserializer fieldDeserializer{ objectClass->GetFirstField(), objectInstance, this };
+        
+        while (fieldDeserializer.HasNext())
+        {
+            fieldDeserializer.ReadNext(stream);
+        }
+        
+        return objectInstance;
     }
     
 } // namespace CE

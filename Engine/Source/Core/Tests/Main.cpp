@@ -194,6 +194,14 @@ TEST(Containers, String)
     components.Clear();
     str.Split("::", components);
     EXPECT_EQ(components.GetSize(), 0);
+    
+    String str2 = "Obj1.Obj2.Obj3.";
+    components.Clear();
+    components = str2.Split('.');
+    EXPECT_EQ(components.GetSize(), 3);
+    EXPECT_EQ(components[0], "Obj1");
+    EXPECT_EQ(components[1], "Obj2");
+    EXPECT_EQ(components[2], "Obj3");
 
     // 2. Format Tests
     
