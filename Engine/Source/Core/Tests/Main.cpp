@@ -1418,6 +1418,8 @@ TEST(Package, WriteRead)
 		EXPECT_NE(readPackage, nullptr);
         EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 5);
 
+		readPackage->LoadFully();
+
 		readPackage->RequestDestroy();
 	}
 	

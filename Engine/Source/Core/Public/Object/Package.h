@@ -41,20 +41,23 @@ namespace CE
 
 		// - Static API -
 
+		static IO::Path GetPackagePath(const Name& packageName);
+
+		static Package* LoadPackage(Package* outer, Name packageName, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
         
         // Always prefer using paths than streams
-		static Package* LoadPackage(Package* outer, Stream* inStream, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(Package* outer, Stream* inStream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
 
-		static SavePackageResult SavePackage(Package* outer, Object* asset, const IO::Path& fullPackageFilePath, const SavePackageArgs& saveArgs);
-		static SavePackageResult SavePackage(Package* outer, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* package, Object* asset, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* package, Object* asset, const IO::Path& fullPackageFilePath, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* package, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs);
 
 		// - Public API -
 
 		bool IsPackage() override { return true; }
 
-		virtual void SetName(const Name& newName) override
 		virtual void SetName(const Name& newName) override
 		{
 			this->packageName = newName;
@@ -120,6 +123,7 @@ namespace CE
 			b8 isAsset = false;
 			String pathInPackage{};
 			Name objectClassName{};
+			Name objectName{};
 			u32 objectDataSize = 0;
             
             b8 isLoaded = false;
@@ -130,6 +134,8 @@ namespace CE
 		HashMap<UUID, Object*> loadedSubobjects{};
         
 		IO::Path fullPackagePath{};
+
+		static HashMap<Name, Package*> loadedPackages;
 	};
 
 } // namespace CE

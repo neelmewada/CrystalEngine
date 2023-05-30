@@ -20,7 +20,7 @@ namespace CE
 		}
 		if (package->IsTransient())
 		{
-			CE_LOG(Error, All, "SavePackage() passed with a transient package!");
+			CE_LOG(Error, All, "Could not save a transient package: {}", package->GetPackageName());
 			return SavePackageResult::InvalidPackage;
 		}
 		if (stream == nullptr)
@@ -79,10 +79,16 @@ namespace CE
 			*stream << (u32)0; // Number of field entries
 
 			curPos = stream->GetCurrentPosition();
-			*stream << (u64)(curPos + sizeof(u64)); // Data Start Offset (excluding itself)
+			*stream << (u64)(0); // Data Start Offset (excluding itself). Set empty at first
+
+			*stream << objectInstance->GetName(); // Object Name
 
 			u64 dataStartPos = stream->GetCurrentPosition();
 			u32 numEntries = 0;
+
+			stream->Seek(curPos);
+			*stream << (u64)(dataStartPos); // Data Start Offset (excluding itself)
+			stream->Seek(dataStartPos);
             
             ClassType* objectClass = objectInstance->GetClass();
             FieldType* firstField = objectClass->GetFirstField();
@@ -124,7 +130,7 @@ namespace CE
 		return SavePackageResult::Success;
 	}
 
-	Package* Package::LoadPackage(Package* outer, Stream* stream, LoadPackageResult& outResult, LoadFlags loadFlags)
+	Package* Package::LoadPackage(Package* outer, Stream* stream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
 		if (stream == nullptr)
 		{
@@ -132,6 +138,7 @@ namespace CE
 		}
 
 		Package* package = CreateObject<Package>(outer, String::Format("/Temp/{}", GenerateRandomU64()));
+		package->fullPackagePath = fullPackagePath;
 
 		stream->SetBinaryMode(true);
 
@@ -165,6 +172,13 @@ namespace CE
 		*stream >> packageUuid;
 		String packageName = "";
 		*stream >> packageName;
+
+		if (loadedPackages.KeyExists(packageName))
+		{
+			outResult = LoadPackageResult::Success;
+			package->RequestDestroy();
+			return loadedPackages[packageName];
+		}
         
         package->SetPackageName(packageName);
 
@@ -198,6 +212,9 @@ namespace CE
 			u64 dataStartOffset = 0;
 			*stream >> dataStartOffset;
 
+			Name objectName{};
+			*stream >> objectName;
+
 			stream->Seek(dataStartOffset);
 			stream->Seek(dataByteSize, SeekMode::Current); // Skip data for now
             
@@ -210,6 +227,7 @@ namespace CE
             objectEntry.pathInPackage = pathInPackage;
             objectEntry.offsetInFile = dataStartOffset;
             objectEntry.objectDataSize = dataByteSize;
+			objectEntry.objectName = objectName;
 
 			u32 crc = 0;
 			*stream >> crc; // End marker, ignored
@@ -220,6 +238,8 @@ namespace CE
         
         package->isFullyLoaded = false;
         package->isLoaded = true;
+
+		loadedPackages[packageName] = package;
         
         if (loadFlags & LOAD_Full)
         {
@@ -271,7 +291,7 @@ namespace CE
             return loadedSubobjects[objectUuid];
         if (!objectUuidToEntryMap.KeyExists(objectUuid))
             return nullptr;
-        ObjectEntryHeader& entry = objectUuidToEntryMap[objectUuid];
+        ObjectEntryMetaData& entry = objectUuidToEntryMap[objectUuid];
         
         u64 dataOffset = entry.offsetInFile;
         u32 dataSize = entry.objectDataSize;
@@ -284,14 +304,7 @@ namespace CE
         if (dataSize == 0 || objectClass == nullptr)
             return nullptr;
         
-        String name = "Temp";
-        Array<String> components = entry.pathInPackage.Split('.');
-        if (components.NonEmpty())
-        {
-            name = components.GetLast();
-        }
-        
-        Object* objectInstance = CreateObject<Object>(this, "TempName", OF_NoFlags, objectClass);
+        Object* objectInstance = CreateObject<Object>(this, entry.objectName.GetString(), OF_NoFlags, objectClass);
         loadedSubobjects[uuid] = objectInstance;
         
         entry.isLoaded = true;

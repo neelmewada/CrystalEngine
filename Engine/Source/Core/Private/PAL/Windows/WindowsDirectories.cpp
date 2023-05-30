@@ -43,7 +43,12 @@ namespace CE
 
     IO::Path WindowsDirectories::GetGameDir()
     {
+#if PAL_TRAIT_BUILD_EDITOR
+		ASSERT(!gProjectPath.IsEmpty(), "GetGameDir() called while project path is NOT set!");
+		return gProjectPath;
+#else
         return GetAppRootDir() / "Game";
+#endif
     }
 
     IO::Path WindowsDirectories::GetModuleDir()

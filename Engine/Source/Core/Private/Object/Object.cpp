@@ -178,7 +178,7 @@ namespace CE
 				continue;
 
 			if (!outReferences.KeyExists(uuid))
-				outReferences.Add({ uuid, subobject });
+				outReferences[uuid] = subobject;
 			subobject->FetchObjectReferences(outReferences);
 		}
 
@@ -190,7 +190,7 @@ namespace CE
 			if (object != nullptr)
 			{
 				if (!outReferences.KeyExists(object->GetUuid()))
-					outReferences.Add({ object->GetUuid(), object });
+					outReferences[object->GetUuid()] = object;
 			}
 		}
 	}

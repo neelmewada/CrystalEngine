@@ -428,7 +428,7 @@ namespace CE
         return true;
     }
 
-	Object* FieldDeserializer::ResolveObjectReference(Stream* stream)
+	Object* FieldDeserializer::ReadObjectReference(Stream* stream)
 	{
 		u64 uuid = 0;
 		*stream >> uuid;
@@ -451,38 +451,15 @@ namespace CE
 		else
 		{
 			// TODO: Loading references from external packages
+			ResolveObjectReference(uuid, packageName, pathInPackage);
 			return nullptr;
 		}
 	}
 
-        return true;
-    }
-
-    Object* FieldDeserializer::ReadObjectReference(Stream* stream)
-    {
-        u64 uuid = 0;
-        *stream >> uuid;
-        if (uuid == 0) // Uuid of 0 means nullptr, skip this entry
-        {
-            return nullptr;
-        }
-
-        Name objectTypeName{};
-        *stream >> objectTypeName;
-        Name packageName{};
-        *stream >> packageName;
-        Name pathInPackage{};
-        *stream >> pathInPackage;
-        
-        if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
-        {
-            return currentPackage->ResolveObjectReference(uuid);
-        }
-        else
-        {
-            // TODO: Loading references from external packages
-            return nullptr;
-        }
-    }
+	Object* FieldDeserializer::ResolveObjectReference(UUID objectUuid, Name packageName, Name pathInPackage)
+	{
+		Package* package = Package::LoadPackage(nullptr, packageName);
+		return nullptr;
+	}
 
 }

@@ -38,7 +38,7 @@ Spec tables with little endian format
 | +xx | 4B | `xx xx xx xx` | Length of **data list** in bytes. `0` is valid. |
 | +04 | 4B | `xx xx xx xx` | Total number of fields |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
-| +10 | \0 | 'SomeObjectName' | Object name |
+| +10 | \0 | 'SomeObjectName' | Object name (CE::Name) |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Data: List of [Field Entries](#field-list-entry)** |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |

@@ -63,7 +63,7 @@ namespace CE
     public:
 
         // - Getters & Setters -
-        virtual Name GetName() const
+        virtual const Name& GetName() const
         {
             return name;
         }
@@ -146,6 +146,8 @@ namespace CE
 
         virtual bool IsPackage() { return false; }
 
+		bool IsFullyLoaded() { return isFullyLoaded; }
+
 		virtual Name GetPathInPackage();
         
 		// Returns the package this object belongs to.
@@ -179,6 +181,8 @@ namespace CE
 
         Name name;
         UUID uuid;
+
+		b8 isFullyLoaded = true;
 
         ObjectFlags objectFlags = OF_NoFlags;
 

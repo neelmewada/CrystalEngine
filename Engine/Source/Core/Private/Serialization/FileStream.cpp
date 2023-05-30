@@ -4,13 +4,13 @@
 namespace CE
 {
     FileStream::FileStream(const IO::Path& filePath, Permissions openMode)
+		: filePath(filePath)
     {
         ASSERT(openMode != Permissions::None, "FileAsciiStream constructed with openMode as None!");
 
-        this->filePath = filePath;
-
         this->openMode = openMode;
         std::ios::openmode mode = 0;
+
         if (openMode == Permissions::ReadOnly)
         {
             mode = std::ios::in;

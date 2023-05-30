@@ -44,11 +44,12 @@ namespace CE
         
         bool ReadNext(Stream* stream);
 
-		Object* ResolveObjectReference(Stream* stream);
-        
-        Object* ReadObjectReference(Stream* stream);
+		Object* ReadObjectReference(Stream* stream);
         
     private:
+
+		Object* ResolveObjectReference(UUID objectUuid, Name packageName, Name pathInPackage);
+
 		Package* currentPackage = nullptr;
 
         Array<FieldType*> fields{};
