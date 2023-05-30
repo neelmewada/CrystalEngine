@@ -1406,11 +1406,11 @@ TEST(Package, WriteRead)
 
 	// Read
 	{
-		//auto readPackage = Package::LoadPackage(nullptr, packagePath, LOAD_Default);
-		//EXPECT_NE(readPackage, nullptr);
-        //EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 5);
+		auto readPackage = Package::LoadPackage(nullptr, packagePath, LOAD_Default);
+		EXPECT_NE(readPackage, nullptr);
+        EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 5);
 
-		//readPackage->RequestDestroy();
+		readPackage->RequestDestroy();
 	}
 	
     CEDeregisterModuleTypes();

@@ -416,38 +416,43 @@ namespace CE
 			{
 				for (int i = 0; i < numElements; i++)
 				{
-					u64 uuid = 0;
-					*stream >> uuid;
-					if (uuid == 0) // Uuid of 0 means nullptr, skip this entry
-					{
-						map.AddObject(nullptr);
-						continue;
-					}
-
-					Name objectTypeName{};
-					*stream >> objectTypeName;
-					Name packageName{};
-					*stream >> packageName;
-					Name pathInPackage{};
-					*stream >> pathInPackage;
 					
-					if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
-					{
-						Object* objectRef = currentPackage->ResolveObjectReference(uuid);
-						if (objectRef != nullptr)
-						{
-							map.AddObject(objectRef);
-						}
-					}
-					else
-					{
-						// TODO: Loading references from external packages
-					}
 				}
 			}
+		}
+		else if (field->IsObjectField())
+		{
+
 		}
 
         return true;
     }
+
+	Object* FieldDeserializer::ResolveObjectReference(Stream* stream)
+	{
+		u64 uuid = 0;
+		*stream >> uuid;
+		if (uuid == 0) // Uuid of 0 means nullptr, skip this entry
+		{
+			return nullptr;
+		}
+
+		Name objectTypeName{};
+		*stream >> objectTypeName;
+		Name packageName{};
+		*stream >> packageName;
+		Name pathInPackage{};
+		*stream >> pathInPackage;
+
+		if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
+		{
+			return currentPackage->ResolveObjectReference(uuid);
+		}
+		else
+		{
+			// TODO: Loading references from external packages
+			return nullptr;
+		}
+	}
 
 }

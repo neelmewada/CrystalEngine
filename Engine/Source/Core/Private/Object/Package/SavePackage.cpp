@@ -200,9 +200,9 @@ namespace CE
 			stream->Seek(dataStartOffset);
 			stream->Seek(dataByteSize, SeekMode::Current); // Skip data for now
             
-            package->objectUuidToEntryMap[objectUuid] = ObjectEntryHeader();
+            package->objectUuidToEntryMap[objectUuid] = ObjectEntryMetaData();
             
-            ObjectEntryHeader& objectEntry = package->objectUuidToEntryMap[objectUuid];
+            ObjectEntryMetaData& objectEntry = package->objectUuidToEntryMap[objectUuid];
             objectEntry.instanceUuid = objectUuid;
             objectEntry.isAsset = isAsset > 0 ? true : false;
             objectEntry.objectClassName = objectTypeName;
@@ -242,11 +242,14 @@ namespace CE
 
     void Package::LoadFully(Stream* stream)
     {
-        if (isFullyLoaded || stream == nullptr)
+        if (stream == nullptr)
             return;
         
-        for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
+        for (auto& [uuid, objectEntry] : objectUuidToEntryMap)
         {
+			if (loadedSubobjects.KeyExists(uuid)) // Skip already loaded objects
+				continue;
+
             u64 dataOffset = objectEntry.offsetInFile;
 			u32 dataSize = objectEntry.objectDataSize;
             stream->Seek(dataOffset);
@@ -258,10 +261,24 @@ namespace CE
 			if (dataSize == 0 || objectClass == nullptr)
 				continue;
 
-			Object* objectInstance = CreateObject<Object>(this, "TempName", OF_NoFlags, objectClass);
+			const auto& pathInPackage = objectEntry.pathInPackage;
+			Array<String> components{};
+			pathInPackage.Split(".", components);
+			String objectName = "";
+			if (components.NonEmpty())
+				objectName = components.GetLast();
+
+			Object* objectInstance = CreateObject<Object>(this, objectName, OF_NoFlags, objectClass);
 			loadedSubobjects[uuid] = objectInstance;
 
-			//FieldDeserializer deserializer{ 0, 0 };
+			objectEntry.isLoaded = true;
+
+			FieldDeserializer fieldDeserializer{ objectClass->GetFirstField(), objectInstance, this };
+
+			while (fieldDeserializer.HasNext())
+			{
+				fieldDeserializer.ReadNext(stream);
+			}
         }
 
 		isFullyLoaded = true;

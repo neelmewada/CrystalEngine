@@ -41,20 +41,20 @@ namespace CE
 
 		// - Static API -
 
-		static Package* LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadFlags loadFlags = LOAD_Default);
-		static Package* LoadPackage(Package* outer, const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
         
         // Always prefer using paths than streams
 		static Package* LoadPackage(Package* outer, Stream* inStream, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
 
-		static SavePackageResult SavePackage(Package* outer, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* outer, Object* asset, const IO::Path& fullPackageFilePath, const SavePackageArgs& saveArgs);
 		static SavePackageResult SavePackage(Package* outer, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs);
 
 		// - Public API -
 
 		bool IsPackage() override { return true; }
 
-		virtual void SetName(const String& newName) override
+		virtual void SetName(const Name& newName) override
 		{
 			this->packageName = newName;
 			Super::SetName(newName);
@@ -88,6 +88,8 @@ namespace CE
         void LoadFully();
         void LoadFully(Stream* originalStream);
 
+		
+
 		// Returns true if this package contains the given object
 		bool ContainsObject(Object* object);
 
@@ -107,7 +109,7 @@ namespace CE
         
 		// Loading Only Data
         
-		struct ObjectEntryHeader
+		struct ObjectEntryMetaData
 		{
 			u64 offsetInFile = 0;
 			UUID instanceUuid = 0;
@@ -115,9 +117,11 @@ namespace CE
 			String pathInPackage{};
 			Name objectClassName{};
 			u32 objectDataSize = 0;
+			
+			b8 isLoaded = false;
 		};
 
-		HashMap<UUID, ObjectEntryHeader> objectUuidToEntryMap{};
+		HashMap<UUID, ObjectEntryMetaData> objectUuidToEntryMap{};
 
 		HashMap<UUID, Object*> loadedSubobjects{};
         

@@ -241,8 +241,8 @@ namespace CE
 
         StringView ToStringView() const;
 
-        Array<String> Split(char delimiter);
-        void Split(String delimiter, Array<String>& outArray);
+        Array<String> Split(char delimiter) const;
+        void Split(String delimiter, Array<String>& outArray) const;
 
         String RemoveWhitespaces();
 

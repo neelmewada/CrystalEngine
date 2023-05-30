@@ -481,7 +481,7 @@ namespace CE
         return StringView(GetCString() + startIndex, length);
     }
 
-    Array<String> String::Split(char delimiter)
+    Array<String> String::Split(char delimiter) const
     {
         int startIdx = 0;
         int endIdx = 0;
@@ -510,7 +510,7 @@ namespace CE
         return result;
     }
 
-    void CE::String::Split(String delimiter, Array<String>& outArray)
+    void CE::String::Split(String delimiter, Array<String>& outArray) const
     {
         int startIdx = 0;
 

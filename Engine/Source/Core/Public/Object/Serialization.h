@@ -43,6 +43,8 @@ namespace CE
 		bool HasNext();
         
         bool ReadNext(Stream* stream);
+
+		Object* ResolveObjectReference(Stream* stream);
         
     private:
 		Package* currentPackage = nullptr;
