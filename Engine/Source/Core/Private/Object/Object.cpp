@@ -225,8 +225,9 @@ namespace CE
         if (!config->SectionExists(className))
             return;
 
-        auto& configSection = config->Get(className);
+        ConfigSection& configSection = config->Get(className);
         FieldType* field = configClass->GetFirstField();
+        config->SectionExists("");
         
         while (field != nullptr)
         {
@@ -245,8 +246,8 @@ namespace CE
                 continue;
             }
             
-            auto& configValue = configSection[fieldName];
-            auto stringValue = configSection[fieldName].GetString();
+            ConfigValue& configValue = configSection[fieldName];
+            String stringValue = configSection[fieldName].GetString();
             
             if (fieldTypeId == TYPEID(String))
             {
@@ -312,10 +313,128 @@ namespace CE
             }
             else if (field->IsArrayType() && configValue.IsValid())
             {
-                
+                Array<String>& array = configValue.GetArray();
+                if (array.IsEmpty())
+                {
+                    auto& arrayValue = field->GetFieldValue<Array<u8>>(this);
+                    arrayValue.Clear();
+                }
+                else
+                {
+                    Array<u8>& arrayValue = field->GetFieldValue<Array<u8>>(this);
+                    bool isMap = false;
+                    isMap = array[0].StartsWith("(");
+                    
+                    TypeInfo* underlyingType = field->GetUnderlyingType();
+                    field->ResizeArray(this, array.GetSize());
+                    int idx = -1;
+                    
+                    for (const String& value : array)
+                    {
+                        idx++;
+                        
+                        if (isMap)
+                        {
+                            if (underlyingType != nullptr && underlyingType->IsStruct())
+                            {
+                                StructType* structType = (StructType*)underlyingType;
+                                void* structInstance = &arrayValue[0] + idx * structType->GetSize();
+                                
+                                ConfigParseStruct(value, structInstance, structType);
+                            }
+                        }
+                        else
+                        {
+                            
+                        }
+                    }
+                }
             }
             
             field = field->GetNext();
+        }
+    }
+
+    void Object::ConfigParseStruct(const String& value, void* instance, StructType* structType)
+    {
+        Array<String> split = value.Split(',');
+        for (const String& item : split)
+        {
+            Array<String> valueSplit = item.Split('=');
+            if (valueSplit.GetSize() >= 2)
+            {
+                const String& lhs = valueSplit[0];
+                const String& rhs = valueSplit[1];
+                
+                FieldType* field = structType->FindFieldWithName(lhs);
+                if (field == nullptr)
+                    continue;
+                
+                if (field->IsPOD())
+                {
+                    ConfigParsePOD(rhs, instance, field);
+                }
+                
+            }
+        }
+    }
+
+    void Object::ConfigParsePOD(const String& value, void* instance, FieldType* field)
+    {
+        if (field == nullptr || instance == nullptr)
+            return;
+        
+        TypeId fieldTypeId = field->GetTypeId();
+        
+        if (field->IsStringField())
+        {
+            field->SetFieldValue(instance, value);
+        }
+        else if (field->GetTypeId() == TYPEID(Name))
+        {
+            field->SetFieldValue(instance, Name(value));
+        }
+        else if (field->GetTypeId() == TYPEID(UUID))
+        {
+            u64 intValue = 0;
+            if (String::TryParse(value, intValue))
+            {
+                field->SetFieldValue(instance, UUID(intValue));
+            }
+        }
+        else if (field->IsIntegerField())
+        {
+            s64 intValue = 0;
+            if (String::TryParse(value, intValue))
+            {
+                if (fieldTypeId == TYPEID(u8))
+                    field->SetFieldValue<u8>(instance, (u8)intValue);
+                else if (fieldTypeId == TYPEID(u16))
+                    field->SetFieldValue<u16>(instance, (u16)intValue);
+                else if (fieldTypeId == TYPEID(u32))
+                    field->SetFieldValue<u32>(instance, (u32)intValue);
+                else if (fieldTypeId == TYPEID(u64))
+                    field->SetFieldValue<u64>(instance, (u64)intValue);
+                else if (fieldTypeId == TYPEID(s8))
+                    field->SetFieldValue<s8>(instance, (s8)intValue);
+                else if (fieldTypeId == TYPEID(s16))
+                    field->SetFieldValue<s16>(instance, (s16)intValue);
+                else if (fieldTypeId == TYPEID(s32))
+                    field->SetFieldValue<s32>(instance, (s32)intValue);
+                else if (fieldTypeId == TYPEID(s64))
+                    field->SetFieldValue<s64>(instance, (s64)intValue);
+            }
+        }
+        else if (field->IsDecimalField())
+        {
+            f32 decimalValue = 0;
+            if (String::TryParse(value, decimalValue))
+            {
+                if (fieldTypeId == TYPEID(f32))
+                    field->SetFieldValue<f32>(instance, decimalValue);
+                else if (fieldTypeId == TYPEID(f64))
+                    field->SetFieldValue<f64>(instance, decimalValue);
+            }
         }
     }
 }
