@@ -58,7 +58,6 @@ ce_set(PAL_PLATFORM_IS_MAC 1)
 add_compile_definitions(PLATFORM_MAC=1)
 add_compile_definitions(IS_64BIT=1)
 
-
 #########################################
 # Platform Utils
 

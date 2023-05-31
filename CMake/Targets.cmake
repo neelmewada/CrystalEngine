@@ -148,7 +148,7 @@ function(ce_add_target NAME TARGET_TYPE)
 
     # OUTPUT_DIRECTORY
 
-    if((${ce_add_target_OUTPUT_DIRECTORY}) AND (${TARGET_TYPE} STREQUAL "TOOL"))
+    if(${ce_add_target_OUTPUT_DIRECTORY})
         set_target_properties(${NAME}
             PROPERTIES
                 ARCHIVE_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
