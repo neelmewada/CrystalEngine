@@ -100,11 +100,6 @@ namespace CE
 			CE_LOG(Error, All, "SavePackage() passed with a transient package named: {}", package->GetPackageName());
 			return SavePackageResult::InvalidPackage;
 		}
-		if (!fullPackagePath.Exists())
-		{
-			CE_LOG(Error, All, "SavePackage() passed with a package path that does not exist!");
-			return SavePackageResult::InvalidPath;
-		}
 		if (fullPackagePath.IsDirectory())
 		{
 			CE_LOG(Error, All, "SavePackage() passed with a package path that is a directory!");
