@@ -1480,6 +1480,11 @@ TEST(Package, WriteRead)
 
 		readPackage->RequestDestroy();
 	}
+    
+    if (packagePath.Exists())
+    {
+        IO::Path::Remove(packagePath);
+    }
 	
     CEDeregisterModuleTypes();
     TEST_END;
