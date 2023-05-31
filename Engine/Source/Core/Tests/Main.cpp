@@ -1454,11 +1454,13 @@ TEST(Package, WriteRead)
 		EXPECT_NE(obj1->objPtr, nullptr);
 		EXPECT_EQ(obj1->objPtr->GetUuid(), obj2Uuid);
 
+		// Child0_TestObj1
 		WritingTestObj1* obj1_0 = (WritingTestObj1*)readPackage->LoadObject(obj1_0Uuid);
 		EXPECT_NE(obj1_0, nullptr);
 		EXPECT_EQ(obj1_0->GetName(), "Child0_TestObj1");
 		EXPECT_EQ(obj1_0->outer, obj1);
 
+		// TestObj2
 		WritingTestObj2* obj2 = (WritingTestObj2*)readPackage->attachedObjects.FindObject(obj2Uuid);
 		EXPECT_NE(obj2, nullptr);
 		EXPECT_EQ(obj2->GetName(), "TestObj2");
@@ -1471,6 +1473,10 @@ TEST(Package, WriteRead)
 		EXPECT_EQ(obj2->testStruct.owner, obj2);
 		EXPECT_EQ(obj2->testStruct.stringValue, "New string value");
 		EXPECT_EQ(obj2->testStruct.obj1Ptr, obj1_0);
+
+		EXPECT_TRUE(readPackage->loadedObjects.KeyExists(obj1_0Uuid));
+		obj1_0->RequestDestroy();
+		EXPECT_FALSE(readPackage->loadedObjects.KeyExists(obj1_0Uuid));
 
 		readPackage->RequestDestroy();
 	}

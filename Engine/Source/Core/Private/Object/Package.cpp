@@ -135,6 +135,13 @@ namespace CE
 		return loadedObjects[objectUuid];
 	}
 
+	void Package::OnObjectUnloaded(Object* object)
+	{
+		if (object == nullptr)
+			return;
+		loadedObjects.Remove(object->GetUuid());
+	}
+
 } // namespace CE
 
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Package)

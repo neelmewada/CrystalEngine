@@ -113,6 +113,12 @@ namespace CE
 
     void Object::RequestDestroy()
     {
+		auto package = GetPackage();
+		if (package != nullptr)
+		{
+			package->OnObjectUnloaded(this); // Mark the object as 'unloaded'
+		}
+
 		// Detach this object from outer
 		if (outer != nullptr)
 		{

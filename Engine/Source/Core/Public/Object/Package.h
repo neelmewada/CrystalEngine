@@ -102,6 +102,9 @@ namespace CE
     private:
         
         Object* LoadObjectFromEntry(Stream* originalStream, UUID objectUuid);
+
+		// Internal use only! Marks the passed object as 'unloaded'
+		void OnObjectUnloaded(Object* object);
         
 		friend class Object;
         
