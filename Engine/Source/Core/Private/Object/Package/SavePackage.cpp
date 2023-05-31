@@ -137,9 +137,6 @@ namespace CE
 			return nullptr;
 		}
 
-		Package* package = CreateObject<Package>(outer, String::Format("/Temp/{}", GenerateRandomU64()));
-		package->fullPackagePath = fullPackagePath;
-
 		stream->SetBinaryMode(true);
 
 		u64 magicNumber = 0;
@@ -149,7 +146,6 @@ namespace CE
 		if (magicNumber != PACKAGE_MAGIC_NUMBER)
 		{
 			outResult = LoadPackageResult::InvalidPackage;
-			package->RequestDestroy();
 			return nullptr;
 		}
 
@@ -159,7 +155,6 @@ namespace CE
 		if (majorVersion > PACKAGE_VERSION_MAJOR)
 		{
 			outResult = LoadPackageResult::InvalidPackage;
-			package->RequestDestroy();
 			return nullptr;
 		}
 
@@ -176,18 +171,26 @@ namespace CE
 		if (loadedPackages.KeyExists(packageName))
 		{
 			outResult = LoadPackageResult::Success;
-			package->RequestDestroy();
 			return loadedPackages[packageName];
 		}
-        
-        package->SetPackageName(packageName);
+
+		Internal::ConstructObjectParams params{ Package::Type() };
+		params.name = packageName;
+		params.uuid = packageUuid;
+		params.templateObject = nullptr;
+		params.objectFlags = OF_NoFlags;
+		params.outer = nullptr;
+
+		Package* package = (Package*)Internal::StaticConstructObject(params);
+		//package->loadedSubobjects[packageUuid] = package;
+		package->fullPackagePath = fullPackagePath;
+		package->isFullyLoaded = false;
+		package->objectUuidToEntryMap.Clear();
 
 		stream->Seek(dataStartOffset);
 
 		u64 magicObjectNumber = 0;
 		*stream >> magicObjectNumber;
-        
-        package->objectUuidToEntryMap.Clear();
 
 		while (magicObjectNumber == PACKAGE_OBJECT_MAGIC_NUMBER)
 		{
@@ -277,8 +280,8 @@ namespace CE
 
     Object* Package::LoadObject(UUID objectUuid)
     {
-        if (objectUuid != 0 && loadedSubobjects.KeyExists(objectUuid))
-            return loadedSubobjects[objectUuid];
+        if (objectUuid != 0 && loadedObjects.KeyExists(objectUuid))
+            return loadedObjects[objectUuid];
         if (!fullPackagePath.Exists() || fullPackagePath.IsDirectory() || objectUuid == 0)
             return nullptr;
         
@@ -289,8 +292,8 @@ namespace CE
 
     Object* Package::LoadObjectFromEntry(Stream* stream, UUID objectUuid)
     {
-        if (loadedSubobjects.KeyExists(objectUuid))
-            return loadedSubobjects[objectUuid];
+        if (loadedObjects.KeyExists(objectUuid))
+            return loadedObjects[objectUuid];
         if (!objectUuidToEntryMap.KeyExists(objectUuid))
             return nullptr;
         ObjectEntryMetaData& entry = objectUuidToEntryMap[objectUuid];
@@ -305,9 +308,26 @@ namespace CE
 
         if (dataSize == 0 || objectClass == nullptr)
             return nullptr;
-        
-        Object* objectInstance = CreateObject<Object>(this, entry.objectName.GetString(), OF_NoFlags, objectClass);
-        loadedSubobjects[uuid] = objectInstance;
+
+		Object* objectInstance = nullptr;
+
+		if (objectUuid == this->GetPackageUuid() && objectClass->IsSubclassOf<Package>())
+		{
+			objectInstance = this;
+		}
+		else
+		{
+			Internal::ConstructObjectParams params{ objectClass };
+			params.outer = nullptr;
+			params.name = entry.objectName.GetString();
+			params.templateObject = nullptr;
+			params.objectFlags = OF_NoFlags;
+			params.uuid = objectUuid;
+
+			objectInstance = Internal::StaticConstructObject(params);
+		}
+
+        loadedObjects[objectUuid] = objectInstance;
         
         entry.isLoaded = true;
         

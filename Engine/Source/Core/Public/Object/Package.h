@@ -131,7 +131,7 @@ namespace CE
 
 		HashMap<UUID, ObjectEntryMetaData> objectUuidToEntryMap{};
 
-		HashMap<UUID, Object*> loadedSubobjects{};
+		HashMap<UUID, Object*> loadedObjects{};
         
 		IO::Path fullPackagePath{};
 

@@ -93,6 +93,11 @@ namespace CE
             return objectFlags;
         }
 
+		INLINE Object* GetOuter() const
+		{
+			return outer;
+		}
+
         INLINE bool HasAllObjectFlags(ObjectFlags flags) const
         {
             return (objectFlags & flags) == flags;

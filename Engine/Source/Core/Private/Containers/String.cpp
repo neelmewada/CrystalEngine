@@ -184,7 +184,7 @@ namespace CE
 
             bIsUsingDynamicBuffer = true;
         }
-        else if (!bIsUsingDynamicBuffer && Buffer == nullptr) // If static buffer is enough
+        else if (!bIsUsingDynamicBuffer && Buffer == nullptr) // If static buffer is enough, and it is not yet created
         {
             Capacity = reserveCharacterCount;
             Buffer = (char*)Internal::StaticStringBlockAllocator::Get().staticBufferAllocator.Allocate();
@@ -192,6 +192,10 @@ namespace CE
             Buffer[0] = 0;
             bIsUsingDynamicBuffer = false;
         }
+		else if (!bIsUsingDynamicBuffer && Buffer != nullptr && reserveCharacterCount > Capacity) // If static buffer is enough, but we need more capacity
+		{
+			Capacity = reserveCharacterCount;
+		}
     }
 
     char* String::GetCString() const
@@ -569,7 +573,7 @@ namespace CE
 
 	void String::UpdateLength()
 	{
-		StringLength = Math::Min((u32)std::strlen(Buffer), Capacity);
+		StringLength = (u32)std::strlen(Buffer);
 	}
 
     bool String::TryParse(const String& string, u8& outValue)

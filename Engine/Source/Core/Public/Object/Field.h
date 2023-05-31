@@ -28,6 +28,7 @@ namespace CE
             , underlyingTypeId(underlyingTypeId)
             , size(size), offset(offset)
 			, owner(const_cast<TypeInfo*>(owner))
+			, instanceOwner(const_cast<TypeInfo*>(owner))
         {
             ConstructInternal();
         }
@@ -79,11 +80,12 @@ namespace CE
         bool IsReadOnly() const;
 
 		TypeInfo* GetOwnerType();
+		TypeInfo* GetInstanceOwnerType();
         
         virtual CE::TypeId GetUnderlyingTypeId() const override { return underlyingTypeId; }
 
 		TypeInfo* GetUnderlyingType() override;
-        
+
         TypeInfo* GetDeclarationType();
 
         INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
@@ -158,6 +160,7 @@ namespace CE
 
         FieldType* next = nullptr;
         TypeInfo* owner = nullptr;
+		TypeInfo* instanceOwner = nullptr;
 
         friend class StructType;
         friend class ClassType;

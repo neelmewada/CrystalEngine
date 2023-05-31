@@ -297,7 +297,7 @@ namespace CE
 				stream->Seek(fieldDataSize, SeekMode::Current);
 				return false;
 			}
-			if (fieldTypeName != field->GetTypeName()) // Type mismatch
+			if (fieldTypeName != field->GetDeclarationType()->GetTypeName()) // Type mismatch
 			{
 				stream->Seek(fieldDataSize, SeekMode::Current);
 				return false;
@@ -335,9 +335,9 @@ namespace CE
 			f32 value = 0;
 			*stream >> value;
 			if (fieldTypeId == TYPEID(f32))
-				field->SetFieldValue<f32>(rawInstance, value);
+				field->ForceSetFieldValue<f32>(rawInstance, value);
 			else if (fieldTypeId == TYPEID(f64))
-				field->SetFieldValue<f64>(rawInstance, value);
+				field->ForceSetFieldValue<f64>(rawInstance, value);
 		}
 		else if (fieldTypeId == TYPEID(UUID))
 		{
@@ -355,7 +355,7 @@ namespace CE
 		{
 			String pathString{};
 			*stream >> pathString;
-			field->SetFieldValue<IO::Path>(rawInstance, pathString);
+			field->ForceSetFieldValue<IO::Path>(rawInstance, pathString);
 		}
 		else if (field->IsArrayField())
 		{
@@ -370,7 +370,7 @@ namespace CE
 			*stream >> numElements;
 			*stream >> dataSize;
 
-			if (underlyingType->GetName() != serializedUnderlyingTypeName) // Underlying type mismatch
+			if (underlyingType->GetTypeName() != serializedUnderlyingTypeName) // Underlying type mismatch
 			{
 				stream->Seek(dataSize, SeekMode::Current);
 				return false;
@@ -425,7 +425,30 @@ namespace CE
 		}
 		else if (field->IsObjectField())
 		{
-            field->SetFieldValue(rawInstance, ReadObjectReference(stream));
+			Object* objectRef = ReadObjectReference(stream);
+			field->ForceSetFieldValue(rawInstance, objectRef);
+
+			if (field->GetName() == "outer" && field->GetOwnerType() == TYPE(Object) && objectRef != nullptr)
+			{
+				objectRef->AttachSubobject((Object*)rawInstance);
+			}
+		}
+		else if (field->GetDeclarationType()->IsStruct())
+		{
+			auto structInstance = field->GetFieldInstance(rawInstance);
+			StructType* structType = (StructType*)field->GetDeclarationType();
+
+			auto firstField = structType->GetFirstField();
+
+			if (firstField != nullptr)
+			{
+				FieldDeserializer deserializer{ firstField, structInstance, currentPackage };
+
+				while (deserializer.HasNext())
+				{
+					deserializer.ReadNext(stream);
+				}
+			}
 		}
 
         return true;
@@ -447,15 +470,17 @@ namespace CE
 		Name pathInPackage{};
 		*stream >> pathInPackage;
 
-		if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
+		if (objectTypeName == TYPENAME(Package))
 		{
-			return currentPackage->ResolveObjectReference(uuid);
+			return Package::LoadPackage(nullptr, packageName);
+		}
+		else if (currentPackage != nullptr && packageName == currentPackage->GetPackageName())
+		{
+			return currentPackage->LoadObject(uuid);
 		}
 		else
 		{
-			// TODO: Loading references from external packages
-			ResolveObjectReference(uuid, packageName, pathInPackage);
-			return nullptr;
+			return ResolveObjectReference(uuid, packageName, pathInPackage);
 		}
 	}
 

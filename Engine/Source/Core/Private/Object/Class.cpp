@@ -232,7 +232,7 @@ namespace CE
 
         for (int i = 0; i < cachedFields.GetSize(); i++)
         {
-            cachedFields[i].owner = this;
+            cachedFields[i].instanceOwner = this;
 
             if (i == cachedFields.GetSize() - 1)
             {

@@ -195,6 +195,8 @@ namespace CE
 
 		virtual TypeInfo* GetUnderlyingType() { return nullptr; }
 
+		virtual u32 GetFieldSize();
+
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }
         virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectMap); }
         

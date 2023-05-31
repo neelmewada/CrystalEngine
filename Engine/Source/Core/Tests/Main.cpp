@@ -1376,15 +1376,23 @@ TEST(Package, WriteRead)
     
     IO::Path packagePath = PlatformDirectories::GetLaunchDir() / "TestPackage.casset";
 
+	UUID obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, packageUuid;
+
 	// Write
 	{
-		Package* writePackage = CreateObject<Package>(nullptr, "/Game/TestPackage");
-		EXPECT_EQ(writePackage->GetName(), "/Game/TestPackage");
+		Package* writePackage = CreateObject<Package>(nullptr, "/TestPackage");
+		EXPECT_EQ(writePackage->GetName(), "/TestPackage");
 
 		auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
 		auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
 		auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
 		auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1")); // Outside package
+
+		packageUuid = writePackage->GetUuid();
+		obj1Uuid = obj1->GetUuid();
+		obj2Uuid = obj2->GetUuid();
+		obj1_0Uuid = obj1_0->GetUuid();
+		obj1_1Uuid = obj1_1->GetUuid();
 
 		EXPECT_EQ(obj1->GetPackage(), writePackage);
 		EXPECT_EQ(obj2->GetPackage(), writePackage);
@@ -1393,10 +1401,13 @@ TEST(Package, WriteRead)
 		obj1->objPtr = obj2;
 		obj1->stringValue = "My String Value";
 		obj1->stringArray = { "item0", "item1", "item2" };
+		obj1->floatValue = 51.212f;
 
 		obj2->objectArray.Add(obj1);
+		obj2->testStruct.stringValue = "New string value";
 		obj2->testStruct.owner = obj2;
 		obj2->testStruct.obj1Ptr = obj1_0;
+		obj2->value = 4612;
 
 		obj1_0->objPtr = obj1_1;
 
@@ -1416,9 +1427,50 @@ TEST(Package, WriteRead)
 	{
 		auto readPackage = Package::LoadPackage(nullptr, packagePath, LOAD_Default);
 		EXPECT_NE(readPackage, nullptr);
+		EXPECT_EQ(readPackage->GetPackageName(), "/TestPackage");
         EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 5);
 
 		readPackage->LoadFully();
+
+		EXPECT_EQ(readPackage->loadedObjects.GetSize(), 5);
+		EXPECT_EQ(readPackage->attachedObjects.GetObjectCount(), 2);
+		EXPECT_TRUE(readPackage->attachedObjects.ObjectExists(obj1Uuid));
+		EXPECT_TRUE(readPackage->attachedObjects.ObjectExists(obj2Uuid));
+
+		// TestObj1
+		WritingTestObj1* obj1 = (WritingTestObj1*)readPackage->attachedObjects.FindObject(obj1Uuid);
+		EXPECT_NE(obj1, nullptr);
+		EXPECT_EQ(obj1->GetName(), "TestObj1");
+		EXPECT_EQ(obj1->outer, readPackage);
+		EXPECT_EQ(obj1->attachedObjects.GetObjectCount(), 1);
+		EXPECT_TRUE(obj1->attachedObjects.ObjectExists(obj1_0Uuid));
+
+		EXPECT_EQ(obj1->stringValue, "My String Value");
+		EXPECT_EQ(obj1->stringArray.GetSize(), 3);
+		EXPECT_EQ(obj1->stringArray[0], "item0");
+		EXPECT_EQ(obj1->stringArray[1], "item1");
+		EXPECT_EQ(obj1->stringArray[2], "item2");
+
+		EXPECT_NE(obj1->objPtr, nullptr);
+		EXPECT_EQ(obj1->objPtr->GetUuid(), obj2Uuid);
+
+		WritingTestObj1* obj1_0 = (WritingTestObj1*)readPackage->LoadObject(obj1_0Uuid);
+		EXPECT_NE(obj1_0, nullptr);
+		EXPECT_EQ(obj1_0->GetName(), "Child0_TestObj1");
+		EXPECT_EQ(obj1_0->outer, obj1);
+
+		WritingTestObj2* obj2 = (WritingTestObj2*)readPackage->attachedObjects.FindObject(obj2Uuid);
+		EXPECT_NE(obj2, nullptr);
+		EXPECT_EQ(obj2->GetName(), "TestObj2");
+		EXPECT_EQ(obj2->outer, readPackage);
+		EXPECT_EQ(obj2->attachedObjects.GetObjectCount(), 0);
+		EXPECT_EQ(obj2->objectArray.GetSize(), 1);
+		EXPECT_EQ(obj2->value, 4612);
+		EXPECT_EQ(obj1->floatValue, 51.212f);
+
+		EXPECT_EQ(obj2->testStruct.owner, obj2);
+		EXPECT_EQ(obj2->testStruct.stringValue, "New string value");
+		EXPECT_EQ(obj2->testStruct.obj1Ptr, obj1_0);
 
 		readPackage->RequestDestroy();
 	}

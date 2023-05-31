@@ -77,7 +77,7 @@ Each array element is saved as a **Field Data** itself, making a recursive data 
 
 ### Struct Field Data
 
-When a field value is a struct type, then it is stored in the same format as [Field List Entry](#field-list-entry).
+When a field value is a struct type, then it's sub-fields are stored in the same format as [Field List Entry](#field-list-entry).
 
 ### Object Field Data
 

@@ -72,6 +72,11 @@ namespace CE
 		return const_cast<TypeInfo*>(owner);
 	}
 
+	TypeInfo* FieldType::GetInstanceOwnerType()
+	{
+		return const_cast<TypeInfo*>(instanceOwner);
+	}
+
     bool FieldType::IsArrayField() const
     {
         return GetDeclarationTypeId() == TYPEID(Array<u8>);
@@ -189,8 +194,14 @@ namespace CE
 		TypeInfo* underlyingType = GetUnderlyingType();
 		if (underlyingType == nullptr)
 			return 0;
+		auto underlyingTypeSize = underlyingType->GetSize();
 
-		return array.GetSize() / underlyingType->GetSize();
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*);
+		}
+
+		return array.GetSize() / underlyingTypeSize;
 	}
 
 	void FieldType::ResizeArray(void* instance, u32 numElements)
@@ -207,7 +218,14 @@ namespace CE
 		if (underlyingType == nullptr)
 			return;
 
-		array.Resize(numElements * underlyingType->GetSize());
+		auto underlyingTypeSize = underlyingType->GetSize();
+
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*);
+		}
+
+		array.Resize(numElements * underlyingTypeSize);
 	}
 
 	Array<FieldType> FieldType::GetArrayFieldList(void* instance)
@@ -223,11 +241,18 @@ namespace CE
 		if (underlyingType == nullptr)
 			return {};
 
+		auto underlyingTypeSize = underlyingType->GetSize();
+
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*);
+		}
+
 		Array<FieldType> array{};
 
 		for (int i = 0; i < arraySize; i++)
 		{
-			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 0, underlyingType->GetSize(), i * underlyingType->GetSize(), "", this));
+			array.Add(FieldType(name.GetString() + "_" + i, underlyingType->GetTypeId(), 0, underlyingTypeSize, i * underlyingTypeSize, "", this));
 		}
 
 		return array;

@@ -47,22 +47,27 @@ namespace CE
 
 	Package* Package::LoadPackage(Package* package, const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
-		if (!fullPackagePath.Exists())
+		auto path = fullPackagePath;
+		if (path.GetExtension().IsEmpty())
+		{
+			path = path.GetString() + ".casset";
+		}
+		if (!path.Exists())
 		{
 			outResult = LoadPackageResult::PackageNotFound;
-			CE_LOG(Error, All, "Package not found at: {}", fullPackagePath);
+			CE_LOG(Error, All, "Package not found at: {}", path);
 			return nullptr;
 		}
-		if (fullPackagePath.IsDirectory())
+		if (path.IsDirectory())
 		{
 			outResult = LoadPackageResult::PackageNotFound;
-			CE_LOG(Error, All, "Package path passed is a directory: {}", fullPackagePath);
+			CE_LOG(Error, All, "Package path passed is a directory: {}", path);
 			return nullptr;
 		}
         
-		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
-
-		return LoadPackage(package, &stream, fullPackagePath, outResult, loadFlags);
+		FileStream stream = FileStream(path, Stream::Permissions::ReadOnly);
+		stream.SetBinaryMode(true);
+		return LoadPackage(package, &stream, path, outResult, loadFlags);
 	}
 
 	SavePackageResult Package::SavePackage(Package* package, Object* asset, const SavePackageArgs& saveArgs)
@@ -125,9 +130,9 @@ namespace CE
 
 	Object* Package::ResolveObjectReference(UUID objectUuid)
 	{
-		if (!loadedSubobjects.KeyExists(objectUuid))
+		if (!loadedObjects.KeyExists(objectUuid))
 			return nullptr;
-		return loadedSubobjects[objectUuid];
+		return loadedObjects[objectUuid];
 	}
 
 } // namespace CE

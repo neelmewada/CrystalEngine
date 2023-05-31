@@ -218,7 +218,17 @@ namespace CE
         return attributes.HasKey(key);
     }
 
-    Name TypeInfo::GenerateInstanceName(UUID uuid) const
+	u32 TypeInfo::GetFieldSize()
+	{
+		if (IsClass()) // Classes are always pointers
+		{
+			return sizeof(Object*);
+		}
+
+		return GetSize();
+	}
+
+	Name TypeInfo::GenerateInstanceName(UUID uuid) const
     {
         String typeName = GetName().GetString();
         return String::Format("{0}_{1:x}", typeName, uuid);

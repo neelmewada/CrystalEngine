@@ -62,7 +62,7 @@ namespace CE
 		auto package = GetPackage();
 		if (package != nullptr)
 		{
-			package->loadedSubobjects[subobject->GetUuid()] = subobject;
+			package->loadedObjects[subobject->GetUuid()] = subobject;
 		}
     }
 
@@ -75,7 +75,7 @@ namespace CE
 		auto package = GetPackage();
 		if (package != nullptr)
 		{
-			package->loadedSubobjects.Remove(subobject->GetUuid());
+			package->loadedObjects.Remove(subobject->GetUuid());
 		}
     }
 
@@ -136,13 +136,16 @@ namespace CE
 
     Package* Object::GetPackage()
     {
+		if (GetClass()->IsSubclassOf<Package>())
+			return (Package*)this;
+
         auto outerObject = outer;
         if (outerObject == nullptr)
             return nullptr;
         
         while (outerObject != nullptr)
         {
-            if (outerObject->GetClass()->IsSubclassOf(TYPEID(Package)))
+            if (outerObject->GetClass()->IsSubclassOf<Package>())
                 return (Package*)outerObject;
             outerObject = outerObject->outer;
         }
