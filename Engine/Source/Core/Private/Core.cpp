@@ -72,7 +72,8 @@ namespace CE
             Package,
             SystemObject,
             Component,
-            SystemComponent
+            SystemComponent,
+			Asset
         );
     }
 
