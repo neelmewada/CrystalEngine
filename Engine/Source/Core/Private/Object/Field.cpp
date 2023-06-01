@@ -15,6 +15,8 @@ namespace CE
             fieldFlags |= FIELD_Config;
         if (HasAttribute("ReadOnly"))
             fieldFlags |= FIELD_ReadOnly;
+        if (HasAttribute("ImportSetting"))
+            fieldFlags |= FIELD_ImportSetting;
     }
 
     const CE::Name& FieldType::GetTypeName()

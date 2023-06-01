@@ -15,7 +15,8 @@ namespace CE
         FIELD_Hidden = BIT(0),
         FIELD_ReadOnly = BIT(1),
         FIELD_Serializable = BIT(2),
-        FIELD_Config = BIT(3)
+        FIELD_Config = BIT(3),
+        FIELD_ImportSetting = BIT(4),
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
@@ -80,7 +81,10 @@ namespace CE
         bool IsHidden() const;
         bool IsReadOnly() const;
 
+        /// The strict owner of this field, which remains same for all derived classes.
 		TypeInfo* GetOwnerType();
+        
+        /// The struct/class's instance that this field belongs to, even if it is inherited from a base class.
 		TypeInfo* GetInstanceOwnerType();
         
         virtual CE::TypeId GetUnderlyingTypeId() const override { return underlyingTypeId; }

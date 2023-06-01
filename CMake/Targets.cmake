@@ -139,11 +139,7 @@ function(ce_add_target NAME TARGET_TYPE)
 
     # PACKAGE
 
-    if(ce_add_target_PACKAGE)
-        target_compile_definitions(${NAME} PRIVATE PACKAGE_NAME="${ce_add_target_PACKAGE}")
-    elseif(CURRENT_PACKAGE_CATEGORY)
-        target_compile_definitions(${NAME} PRIVATE PACKAGE_NAME="/${CURRENT_PACKAGE_CATEGORY}/${NAME}")
-    endif()
+    target_compile_definitions(${NAME} PRIVATE PACKAGE_NAME="/Code/${NAME}")
     
 
     # OUTPUT_DIRECTORY

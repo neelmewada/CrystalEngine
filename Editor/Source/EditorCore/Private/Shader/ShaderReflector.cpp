@@ -16,14 +16,7 @@ namespace CE::Editor
 
     }
 
-    void ShaderReflector::Test()
-    {
-        spirv_cross::CompilerReflection reflection{ std::vector<u32>{} };
-        auto id = reflection.get_shader_resources().uniform_buffers[0].id;
-        reflection.get_decoration(id, spv::DecorationDescriptorSet);
-
-
-    }
+    
 
 } // namespace CE::Editor
 

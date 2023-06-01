@@ -239,8 +239,8 @@ TEST(Containers, Name)
     TEST_BEGIN;
 
     Name name = TYPENAME(Object);
-    EXPECT_EQ(name, "/Engine/Core.CE::Object");
-    EXPECT_EQ(name.GetString(), "/Engine/Core.CE::Object");
+    EXPECT_EQ(name, "/Code/Core.CE::Object");
+    EXPECT_EQ(name.GetString(), "/Code/Core.CE::Object");
     EXPECT_EQ(name.GetLastComponent(), "Object");
 
     EXPECT_EQ(Name("::CE::Object"), Name("CE::Object"));
@@ -352,8 +352,8 @@ TEST(Reflection, RTTI_Registry_Testing)
 
     // 2. POD Testing
 
-    EXPECT_EQ(TYPENAME(s32), "/Engine/Core.s32");
-    EXPECT_EQ(TYPENAME(Array<String>), "/Engine/Core.CE::Array");
+    EXPECT_EQ(TYPENAME(s32), "/Code/Core.s32");
+    EXPECT_EQ(TYPENAME(Array<String>), "/Code/Core.CE::Array");
     
     // 3. Containers RTTI
     
@@ -363,7 +363,7 @@ TEST(Reflection, RTTI_Registry_Testing)
 	auto enumType = TYPE(EventResult);
 	EXPECT_NE(enumType, nullptr);
 	EXPECT_EQ(enumType->GetName(), "CE::EventResult");
-	EXPECT_EQ(enumType->GetTypeName(), "/Engine/Core.CE::EventResult");
+	EXPECT_EQ(enumType->GetTypeName(), "/Code/Core.CE::EventResult");
 
     // 5. Test Object class
 
@@ -1440,7 +1440,8 @@ TEST(Package, WriteRead)
 		auto obj1 = CreateObject<WritingTestObj1>(writePackage, TEXT("TestObj1"));
 		auto obj2 = CreateObject<WritingTestObj2>(writePackage, TEXT("TestObj2"));
 		auto obj1_0 = CreateObject<WritingTestObj1>(obj1, TEXT("Child0_TestObj1"));
-		auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1")); // Outside package
+        // Outside the package & transient
+		auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1"));
 
 		packageUuid = writePackage->GetUuid();
 		obj1Uuid = obj1->GetUuid();

@@ -13,7 +13,7 @@ namespace CE
 
 	Package::~Package()
 	{
-
+        loadedPackages.Remove(packageName);
 	}
 
 	IO::Path Package::GetPackagePath(const Name& packageName)
@@ -22,7 +22,7 @@ namespace CE
 			return {};
 		String packageNameStr = packageName.GetString();
 
-		if (packageNameStr.StartsWith("/Engine")) // Example: /Engine/Textures/Noise/Perlin/Atlas01.TexMap09
+		if (packageNameStr.StartsWith("/Engine")) // Example: /Engine/Assets/Textures/Noise/Perlin/Perlin04
 		{
 			return PlatformDirectories::GetEngineRootDir() / packageNameStr.GetSubstring(1);
 		}

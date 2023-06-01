@@ -34,8 +34,21 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
         set(Vulkan_LIB_DIR "$ENV{VULKAN_SDK}/macOS/lib")
     endif()
 
+    link_directories(AFTER $ENV{VULKAN_SDK}/lib)
+
     # Vulkan SpirV Tools
     add_library(SpirvTools ALIAS Vulkan::SPIRV-Tools)
+
+    target_link_libraries(Vulkan::SPIRV-Tools
+        INTERFACE 
+            "SPIRV" 
+            "SPIRV-Tools" 
+            "spirv-cross-reflect" 
+            "spirv-cross-core" 
+            "spirv-cross-cpp"
+            "spirv-cross-glsl"
+            "spirv-cross-hlsl"
+    )
 
     ce_add_rt_deps(SpirvTools
         ROOT_PATH "$ENV{VULKAN_SDK}/Bin"
