@@ -10,6 +10,8 @@ namespace CE
         Fragment = BIT(1),
     };
     ENUM_CLASS_FLAGS(ShaderStage);
+    
+    
 
     CLASS()
     class SYSTEM_API Shader : public Asset
@@ -17,6 +19,13 @@ namespace CE
         CE_CLASS(Shader, CE::Asset)
     public:
 
+        
+    private:
+        
+        FIELD()
+        ShaderStage stageFlags = ShaderStage::Vertex | ShaderStage::Fragment;
+        
+        
     };
     
 } // namespace CE
