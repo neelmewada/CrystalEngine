@@ -29,7 +29,7 @@ namespace CE
 		}
 		if (asset == nullptr)
 			asset = package;
-
+		
 		HashMap<UUID, Object*> objectsToSerialize{};
 		objectsToSerialize.Add({ asset->GetUuid(), asset });
 		asset->FetchObjectReferences(objectsToSerialize);
@@ -62,6 +62,8 @@ namespace CE
 			if (objectInstance == nullptr || objectUuid == 0)
 				continue;
 			if (objectInstance->IsTransient())
+				continue;
+			if (package != objectInstance->GetPackage()) // Don't serialize objects outside of `this` package
 				continue;
             
 			*stream << PACKAGE_OBJECT_MAGIC_NUMBER;

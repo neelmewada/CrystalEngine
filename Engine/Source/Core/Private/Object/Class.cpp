@@ -360,7 +360,18 @@ namespace CE
     CE::HashMap<Name, ClassType*> ClassType::registeredClassesByName{};
     CE::HashMap<TypeId, Array<TypeId>> ClassType::derivedClassesMap{};
 
-    bool ClassType::IsSubclassOf(TypeId classTypeId)
+	ClassType::ClassType(String name, Internal::IClassTypeImpl* impl, u32 size, String attributes) 
+		: StructType(name, nullptr, size, attributes), Impl(impl)
+	{
+		ConstructInternal();
+	}
+
+	void ClassType::ConstructInternal()
+	{
+
+	}
+
+	bool ClassType::IsSubclassOf(TypeId classTypeId)
     {
         if (this->GetTypeId() == classTypeId)
             return true;
@@ -421,6 +432,15 @@ namespace CE
             AddDerivedClassToMap(derivedClass, (ClassType*)parentType);
         }
     }
+
+	const Object* ClassType::GetDefaultInstance()
+	{
+		if (defaultInstance == nullptr)
+		{
+			defaultInstance = CreateObject<Object>(GetTransientPackage(), "CDI", OF_ClassDefaultInstance, this, nullptr);
+		}
+		return defaultInstance;
+	}
 
     void ClassType::RegisterClassType(ClassType* type)
     {

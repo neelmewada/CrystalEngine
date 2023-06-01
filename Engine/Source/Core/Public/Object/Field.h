@@ -57,6 +57,7 @@ namespace CE
         virtual bool IsAssignableTo(CE::TypeId typeId) override;
         virtual bool IsObject() override { return IsAssignableTo(TYPEID(Object)); }
         
+		bool IsPODField();
         bool IsArrayField() const;
         bool IsStringField() const;
 
@@ -96,7 +97,7 @@ namespace CE
             return *(T*)((SIZE_T)instance + offset);
         }
 
-		// Returns pointer to the field itself
+		// Returns pointer to the field's location in memory itself
 		void* GetFieldInstance(void* instance)
 		{
 			return (void*)((SIZE_T)instance + offset);
@@ -121,6 +122,8 @@ namespace CE
 		{
 			*(T*)((SIZE_T)instance + offset) = value;
 		}
+
+		bool CopyTo(void* srcInstance, FieldType* destField, void* destInstance);
 
         s64 GetFieldEnumValue(void* instance);
         void SetFieldEnumValue(void* instance, s64 value);

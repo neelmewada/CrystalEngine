@@ -535,7 +535,6 @@ TEST(Config, HierarchicalParsing)
 
 #pragma region Object
 
-ObjectFlags ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
 
 class ObjectLifecycleTestClass : public Object
 {
@@ -544,7 +543,7 @@ public:
     
     ObjectLifecycleTestClass() : Object()
     {
-        ObjectLifecycleTestClass_InitFlags = GetFlags();
+
     }
 
 };
@@ -567,12 +566,10 @@ TEST(Object, Lifecycle)
     CE_REGISTER_TYPES(ObjectLifecycleTestClass);
     EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
 
-    ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
     
     // 1. Basic object creation
 
     auto instance = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(), "MyObject", OF_Transient);
-    EXPECT_EQ(ObjectLifecycleTestClass_InitFlags, OF_Transient);
     EXPECT_EQ(instance->GetFlags(), OF_Transient);
     EXPECT_EQ(instance->GetName(), "MyObject");
 
@@ -624,8 +621,6 @@ TEST(Object, Lifecycle)
     if (t2.IsJoinable())
         t2.Join();
 
-    ObjectLifecycleTestClass_InitFlags = OF_NoFlags;
-
     EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
     CE_DEREGISTER_TYPES(ObjectLifecycleTestClass);
     EXPECT_EQ(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
@@ -637,20 +632,51 @@ TEST(Object, Lifecycle)
 
 namespace ObjectTest
 {
+	STRUCT()
+	struct CDIStruct
+	{
+		CE_STRUCT(CDIStruct)
+	public:
+		String name = "";
+		u32 value = 0;
+	};
+
     CLASS(Config = Test)
     class CDITest : public Object
     {
         CE_CLASS(CDITest, Object)
     public:
         
+		f32 floatValue = 1.21f;
+		String stringValue = "none";
+		Array<String> arrayValue{};
+		bool boolValue = false;
+
+		Array<CDIStruct> dictionary{};
     };
 }
+
+CE_RTTI_STRUCT(, ObjectTest, CDIStruct,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(name)
+		CE_FIELD(value)
+	)
+)
+CE_RTTI_STRUCT_IMPL(, ObjectTest, CDIStruct)
 
 CE_RTTI_CLASS(, ObjectTest, CDITest,
     CE_SUPER(CE::Object),
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(Config = Test),
-    CE_FIELD_LIST(),
+    CE_FIELD_LIST(
+		CE_FIELD(floatValue, Config)
+		CE_FIELD(stringValue, Config)
+		CE_FIELD(arrayValue, Config)
+		CE_FIELD(boolValue, Config)
+		CE_FIELD(dictionary, Config)
+	),
     CE_FUNCTION_LIST()
 )
 CE_RTTI_CLASS_IMPL(, ObjectTest, CDITest)
@@ -658,9 +684,37 @@ CE_RTTI_CLASS_IMPL(, ObjectTest, CDITest)
 TEST(Object, CDI)
 {
     TEST_BEGIN;
+	CE_REGISTER_TYPES(CDITest, CDIStruct);
+
+	CDITest* cdi = (CDITest*)CDITest::Type()->GetDefaultInstance();
+	EXPECT_NE(cdi, nullptr);
+	EXPECT_EQ(cdi->floatValue, 42.21f);
+	EXPECT_EQ(cdi->stringValue, "A sample string value");
+	EXPECT_EQ(cdi->boolValue, true);
+
+	EXPECT_EQ(cdi->arrayValue.GetSize(), 3);
+	EXPECT_EQ(cdi->arrayValue[0], "Entry0");
+	EXPECT_EQ(cdi->arrayValue[1], "Entry1");
+	EXPECT_EQ(cdi->arrayValue[2], "Entry2");
+
+	EXPECT_EQ(cdi->dictionary.GetSize(), 3);
+	EXPECT_EQ(cdi->dictionary[0].name, "id0");
+	EXPECT_EQ(cdi->dictionary[0].value, 31);
+	EXPECT_EQ(cdi->dictionary[1].name, "id1");
+	EXPECT_EQ(cdi->dictionary[1].value, 35);
+	EXPECT_EQ(cdi->dictionary[2].name, "id2");
+	EXPECT_EQ(cdi->dictionary[2].value, 43);
+
+	cdi->stringValue = "This is a modified string";
     
+	CDITest* testObject = CreateObject<CDITest>(nullptr, "TestObj", OF_Transient);
+	EXPECT_EQ(testObject->floatValue, 42.21f);
+	EXPECT_EQ(testObject->stringValue, "This is a modified string");
+	EXPECT_EQ(testObject->boolValue, true);
+
+	testObject->RequestDestroy();
     
-    
+	CE_DEREGISTER_TYPES(CDITest, CDIStruct);
     TEST_END;
 }
 
@@ -1428,11 +1482,11 @@ TEST(Package, WriteRead)
 		auto readPackage = Package::LoadPackage(nullptr, packagePath, LOAD_Default);
 		EXPECT_NE(readPackage, nullptr);
 		EXPECT_EQ(readPackage->GetPackageName(), "/TestPackage");
-        EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 5);
+        EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 4);
 
 		readPackage->LoadFully();
 
-		EXPECT_EQ(readPackage->loadedObjects.GetSize(), 5);
+		EXPECT_EQ(readPackage->loadedObjects.GetSize(), 4);
 		EXPECT_EQ(readPackage->attachedObjects.GetObjectCount(), 2);
 		EXPECT_TRUE(readPackage->attachedObjects.ObjectExists(obj1Uuid));
 		EXPECT_TRUE(readPackage->attachedObjects.ObjectExists(obj2Uuid));
@@ -1473,6 +1527,8 @@ TEST(Package, WriteRead)
 		EXPECT_EQ(obj2->testStruct.owner, obj2);
 		EXPECT_EQ(obj2->testStruct.stringValue, "New string value");
 		EXPECT_EQ(obj2->testStruct.obj1Ptr, obj1_0);
+
+		EXPECT_EQ(readPackage->LoadObject(obj1_1Uuid), nullptr);
 
 		EXPECT_TRUE(readPackage->loadedObjects.KeyExists(obj1_0Uuid));
 		obj1_0->RequestDestroy();

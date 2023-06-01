@@ -32,6 +32,20 @@ namespace CE
                 ObjectThreadContext::Get().PopInitializer();
                 return nullptr;
             }
+
+			if (instance->HasAnyObjectFlags(OF_ClassDefaultInstance)) // Class Default Instance
+			{
+				instance->LoadDefaults();
+			}
+			else // Load default values from CDI
+			{
+				instance->LoadFromTemplate(const_cast<Object*>(instance->GetClass()->GetDefaultInstance()));
+			}
+
+			if (params.templateObject != nullptr)
+			{
+				instance->LoadFromTemplate(params.templateObject);
+			}
             
 			if (params.outer != nullptr)
 				params.outer->AttachSubobject(instance);

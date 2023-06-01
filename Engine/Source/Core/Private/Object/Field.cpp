@@ -77,7 +77,12 @@ namespace CE
 		return const_cast<TypeInfo*>(instanceOwner);
 	}
 
-    bool FieldType::IsArrayField() const
+	bool FieldType::IsPODField()
+	{
+		return GetDeclarationType()->IsPOD();
+	}
+
+	bool FieldType::IsArrayField() const
     {
         return GetDeclarationTypeId() == TYPEID(Array<u8>);
     }
@@ -122,7 +127,94 @@ namespace CE
 		return declarationType;
     }
 
-    s64 FieldType::GetFieldEnumValue(void* instance)
+	bool FieldType::CopyTo(void* srcInstance, FieldType* destField, void* destInstance)
+	{
+		if (destField == nullptr || destField->fieldTypeId != fieldTypeId || srcInstance == nullptr || destInstance == nullptr)
+			return false;
+		if (destField->IsReadOnly())
+			return false;
+
+		if (GetDeclarationType()->IsPOD())
+		{
+			if (fieldTypeId == TYPEID(String))
+			{
+				const String& value = GetFieldValue<String>(srcInstance);
+				destField->SetFieldValue(destInstance, value);
+			}
+			else if (fieldTypeId == TYPEID(Name))
+			{
+				const Name& value = GetFieldValue<Name>(srcInstance);
+				destField->SetFieldValue(destInstance, value);
+			}
+			else if (fieldTypeId == TYPEID(IO::Path))
+			{
+				const IO::Path& value = GetFieldValue<IO::Path>(srcInstance);
+				destField->SetFieldValue(destInstance, value);
+			}
+			else if (fieldTypeId == TYPEID(UUID))
+			{
+				const UUID& value = GetFieldValue<UUID>(srcInstance);
+				destField->SetFieldValue(destInstance, value);
+			}
+			else if (IsArrayField())
+			{
+				auto underlyingType = this->GetUnderlyingType();
+				if (underlyingType != nullptr && underlyingType == destField->GetUnderlyingType())
+				{
+					u32 srcArraySize = this->GetArraySize(srcInstance);
+					destField->ResizeArray(destInstance, srcArraySize);
+
+					if (srcArraySize > 0)
+					{
+						Array<FieldType> arrayFields = this->GetArrayFieldList(srcInstance);
+						u8* srcArrayInstance = &this->GetFieldValue<Array<u8>>(srcInstance)[0];
+						u8* destArrayInstance = &this->GetFieldValue<Array<u8>>(destInstance)[0];
+
+						for (int i = 0; i < arrayFields.GetSize(); i++)
+						{
+							arrayFields[i].CopyTo(srcArrayInstance, &arrayFields[i], destArrayInstance);
+						}
+					}
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else if (IsIntegerField() || IsDecimalField() || fieldTypeId == TYPEID(bool)) // Numeric types
+			{
+				memcpy(destField->GetFieldInstance(destInstance), GetFieldInstance(srcInstance), this->GetFieldSize());
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else if (GetDeclarationType()->IsStruct())
+		{
+			auto structType = (StructType*)GetDeclarationType();
+			void* srcStructInstance = this->GetFieldInstance(srcInstance);
+			void* destStructInstance = destField->GetFieldInstance(destInstance);
+
+			for (auto field = structType->GetFirstField(); field != nullptr; field = field->GetNext())
+			{
+				field->CopyTo(srcStructInstance, field, destStructInstance);
+			}
+		}
+		else if (GetDeclarationType()->IsClass())
+		{
+			Object* objectPtr = this->GetFieldValue<Object*>(srcInstance);
+			destField->SetFieldValue(destInstance, objectPtr);
+		}
+		else
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	s64 FieldType::GetFieldEnumValue(void* instance)
     {
         if (!GetDeclarationType()->IsEnum())
             return 0;
@@ -245,7 +337,7 @@ namespace CE
 
 		if (underlyingType->IsClass())
 		{
-			underlyingTypeSize = sizeof(Object*);
+			underlyingTypeSize = sizeof(Object*); // Classes are always stored as object pointers
 		}
 
 		Array<FieldType> array{};

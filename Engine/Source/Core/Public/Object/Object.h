@@ -128,10 +128,7 @@ namespace CE
             return HasAnyObjectFlags(OF_TemplateInstance);
         }
 
-        INLINE bool IsTransient() const
-        {
-            return HasAnyObjectFlags(OF_Transient);
-        }
+		bool IsTransient();
 
         // Lifecycle
 
@@ -163,12 +160,14 @@ namespace CE
 
         // - Config API -
 
-        void LoadConfig(ClassType* configClass = NULL, String fileName = "");
+        void LoadConfig(ClassType* configClass, String fileName);
         
     protected:
+
+		void LoadFromTemplate(Object* templateObject);
         
-        // Config Methods
-        
+		void LoadDefaults();
+
         void ConfigParseStruct(const String& value, void* instance, StructType* structType);
         
         void ConfigParsePOD(const String& value, void* instance, FieldType* field);
@@ -217,8 +216,8 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(name, Hidden)
-        CE_FIELD(uuid, Hidden)
+        CE_FIELD(name, Hidden, ReadOnly) // name cannot be modified directly
+        CE_FIELD(uuid, Hidden, ReadOnly) // uuid cannot be modified directly
 		CE_FIELD(attachedObjects, Hidden, ReadOnly)
 		CE_FIELD(outer, Hidden, ReadOnly)
     ),

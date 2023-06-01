@@ -231,7 +231,7 @@ namespace CE
             file->Read(configPath);
         }
 
-        cache.Add({ type, file });
+        cache[type] = file;
     }
 
     Array<IO::Path> ConfigCache::GetConfigPaths(const ConfigType& type)

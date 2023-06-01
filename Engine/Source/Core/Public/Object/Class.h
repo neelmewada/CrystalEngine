@@ -353,14 +353,16 @@ namespace CE
 	class CORE_API ClassType : public StructType
 	{
 	protected:
-		ClassType(String name, Internal::IClassTypeImpl* impl, u32 size, String attributes = "") : StructType(name, nullptr, size, attributes), Impl(impl)
-		{}
+		ClassType(String name, Internal::IClassTypeImpl* impl, u32 size, String attributes = "");
 
 		template<typename T>
 		friend TypeInfo* GetStaticType();
 
 		template<typename Class>
 		friend struct CE::Internal::TypeInfoImpl;
+
+	private:
+		void ConstructInternal();
 
 	public:
 
@@ -415,6 +417,8 @@ namespace CE
 			return Impl->InitializeDefaults(instance);
 		}
 
+		const Object* GetDefaultInstance();
+
         // For internal use only!
         static void RegisterClassType(ClassType* type);
         // For internal use only!
@@ -438,6 +442,20 @@ namespace CE
 			return FindClassById(classId);
 		}
 
+		ClassType* GetSuperClass(u32 index)
+		{
+			if (!superTypesCached)
+				CacheSuperTypes();
+			return (index >= 0 && index < superTypes.GetSize()) ? superTypes[index] : nullptr;
+		}
+
+		u32 GetSuperClassCount()
+		{
+			if (!superTypesCached)
+				CacheSuperTypes();
+			return superTypes.GetSize();
+		}
+
         Array<TypeId> GetDerivedClassesTypeId() const;
         Array<ClassType*> GetDerivedClasses() const;
 
@@ -447,6 +465,8 @@ namespace CE
 		void CacheSuperTypes();
 
 		Internal::IClassTypeImpl* Impl = nullptr;
+
+		Object* defaultInstance = nullptr;
 
 		bool superTypesCached = false;
 		Array<ClassType*> superTypes{};
@@ -594,6 +614,19 @@ namespace CE
 	} // namespace Internal
 
 #pragma pack(pop)
+
+	/*
+	*	Utils
+	*/
+
+	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
+	FORCE_INLINE const Object* GetDefaults()
+	{
+		ClassType* classType = TClass::Type();
+		if (classType == nullptr)
+			return nullptr;
+		return classType->GetDefaultInstance();
+	}
 
 	/*
 	 *	Casting

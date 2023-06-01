@@ -139,5 +139,11 @@ namespace CE
 	template<typename T>
 	struct TIsAbstract : TBoolConst<__is_abstract(T)> {};
 
+	template<typename T>
+	struct TIsClass : TBoolConst<__is_class(T) && T::IsClass()> {};
+
+	template<typename T>
+	struct TIsStruct : TBoolConst<__is_class(T) && T::IsStruct()> {};
+
 } // namespace CE::Traits
 

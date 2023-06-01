@@ -140,6 +140,14 @@ namespace CE
         delete this;
     }
 
+	bool Object::IsTransient()
+	{
+		Package* package = GetPackage();
+		if (package != nullptr && package != this && package->IsTransient())
+			return true;
+		return HasAnyObjectFlags(OF_Transient);
+	}
+
     Package* Object::GetPackage()
     {
 		if (GetClass()->IsSubclassOf<Package>())
@@ -208,46 +216,58 @@ namespace CE
     {
         if (configClass == NULL)
             configClass = GetClass();
+		if (!GetClass()->IsSubclassOf(configClass)) // `this` class should always be same as or a subclass of `configClass`
+			return;
         
-        if (fileName.IsEmpty() && configClass->HasAttribute("Config"))
-        {
-            fileName = configClass->GetAttribute("Config").GetStringValue();
-        }
-        
-        if (fileName.IsEmpty())
-            return;
+        //if (fileName.IsEmpty() && configClass->HasAttribute("Config"))
+        //{
+        //    fileName = configClass->GetAttribute("Config").GetStringValue();
+        //}
+        //if (fileName.IsEmpty())
+        //    return;
         
         auto config = gConfigCache->GetConfigFile(ConfigType(fileName));
-        auto className = configClass->GetName();
+        auto classTypeName = configClass->GetTypeName();
         
         if (config == nullptr)
             return;
-        if (!config->SectionExists(className))
+        if (!config->SectionExists(classTypeName))
             return;
 
-        ConfigSection& configSection = config->Get(className);
-        FieldType* field = configClass->GetFirstField();
+        ConfigSection& configSection = config->Get(classTypeName);
+        FieldType* configField = configClass->GetFirstField();
         config->SectionExists("");
         
-        while (field != nullptr)
+        while (configField != nullptr)
         {
-            if (!field->HasAnyFieldFlags(FIELD_Config))
+            if (!configField->HasAnyFieldFlags(FIELD_Config))
             {
-                field = field->GetNext();
+				configField = configField->GetNext();
                 continue;
             }
+
+			auto field = GetClass()->FindFieldWithName(configField->GetName());
+			if (field->GetTypeId() != configField->GetTypeId())
+			{
+				configField = configField->GetNext();
+				continue;
+			}
             
             auto fieldTypeId = field->GetDeclarationTypeId();
             auto fieldName = field->GetName().GetString();
 
             if (!configSection.KeyExists(fieldName) || !configSection[fieldName].IsValid())
             {
-                field = field->GetNext();
+				configField = configField->GetNext();
                 continue;
             }
             
             ConfigValue& configValue = configSection[fieldName];
             String stringValue = configSection[fieldName].GetString();
+			if (stringValue.StartsWith("\""))
+				stringValue = stringValue.GetSubstringView(1);
+			if (stringValue.EndsWith("\""))
+				stringValue = stringValue.GetSubstringView(0, stringValue.GetLength() - 1);
             
             if (fieldTypeId == TYPEID(String))
             {
@@ -340,22 +360,81 @@ namespace CE
                                 StructType* structType = (StructType*)underlyingType;
                                 void* structInstance = &arrayValue[0] + idx * structType->GetSize();
                                 
-                                ConfigParseStruct(value, structInstance, structType);
+                                ConfigParseStruct(value.GetSubstringView(1, value.GetLength() - 2), structInstance, structType);
                             }
                         }
                         else
                         {
-                            
+							Array<FieldType> arrayFieldList = field->GetArrayFieldList(this);
+
+							void* arrayInstance = arrayValue.Begin();
+
+							for (int i = 0; i < arrayFieldList.GetSize(); i++)
+							{
+								FieldType* field = &arrayFieldList[i];
+								ConfigParsePOD(array[i], arrayInstance, field);
+							}
                         }
                     }
                 }
             }
             
-            field = field->GetNext();
+			configField = configField->GetNext();
         }
     }
 
-    void Object::ConfigParseStruct(const String& value, void* instance, StructType* structType)
+	void Object::LoadFromTemplate(Object* templateObject)
+	{
+		if (templateObject == nullptr)
+			return;
+
+		auto templateClass = templateObject->GetClass();
+		auto thisClass = this->GetClass();
+
+		if (!thisClass->IsSubclassOf(templateClass))
+			return;
+
+		for (auto field = templateClass->GetFirstField(); field != nullptr; field = field->GetNext())
+		{
+			auto destField = thisClass->FindFieldWithName(field->GetName());
+			if (destField->GetTypeId() != field->GetTypeId()) // Type mismatch
+				continue;
+			if (destField->IsReadOnly())
+				continue;
+
+			field->CopyTo(templateObject, destField, this);
+		}
+	}
+
+	void Object::LoadDefaults()
+	{
+		// Load Base.ini into Object class
+		LoadConfig(Object::Type(), "");
+
+		Array<ClassType*> superChain{};
+		
+		ClassType* super = GetClass();
+
+		while (super != nullptr)
+		{
+			superChain.Add(super);
+			if (super->GetSuperClassCount() > 0)
+				super = super->GetSuperClass(0);
+			else
+				super = nullptr;
+		}
+
+		for (int i = superChain.GetSize() - 1; i >= 0; i--)
+		{
+			if (superChain[i]->GetTypeId() == TYPEID(Object))
+				continue;
+
+			auto fileName = superChain[i]->GetAttribute("Config").GetStringValue();
+			LoadConfig(superChain[i], fileName);
+		}
+	}
+
+	void Object::ConfigParseStruct(const String& value, void* instance, StructType* structType)
     {
         Array<String> split = value.Split(',');
         for (const String& item : split)
@@ -363,14 +442,19 @@ namespace CE
             Array<String> valueSplit = item.Split('=');
             if (valueSplit.GetSize() >= 2)
             {
-                const String& lhs = valueSplit[0];
-                const String& rhs = valueSplit[1];
+                String& lhs = valueSplit[0];
+                String& rhs = valueSplit[1];
+
+				if (rhs.StartsWith("\""))
+					rhs = rhs.GetSubstringView(1);
+				if (rhs.EndsWith("\""))
+					rhs = rhs.GetSubstringView(0, rhs.GetLength() - 1);
                 
                 FieldType* field = structType->FindFieldWithName(lhs);
                 if (field == nullptr)
                     continue;
                 
-                if (field->IsPOD())
+                if (field->GetDeclarationType()->IsPOD())
                 {
                     ConfigParsePOD(rhs, instance, field);
                 }
@@ -436,6 +520,14 @@ namespace CE
                     field->SetFieldValue<f64>(instance, decimalValue);
             }
         }
+		else if (field->GetTypeId() == TYPEID(bool))
+		{
+			bool boolValue = false;
+			if (String::TryParse(value, boolValue))
+			{
+				field->SetFieldValue<bool>(instance, boolValue);
+			}
+		}
     }
 }
 
