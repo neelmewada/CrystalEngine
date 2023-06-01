@@ -222,7 +222,7 @@ namespace CE
 
 		if (underlyingType->IsClass())
 		{
-			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+			underlyingTypeSize = sizeof(Object*);
 		}
 
 		array.Resize(numElements * underlyingTypeSize);

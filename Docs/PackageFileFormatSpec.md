@@ -23,7 +23,6 @@ Spec tables with little endian format
 | +10 | 8B | `00 00 00 00 00 00 00 00` | Data start offset (from start of file) |
 | +18 | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |
 | +20 | \0 | `/Engine/Assets/SomeAsset\0` | Path/name of Package. |
-| +xx | \0 | `.png` | Extension of source asset. Could be empty. |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual data. List of [Object Entries](#object-entry)** |
 | +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. (EOF) |

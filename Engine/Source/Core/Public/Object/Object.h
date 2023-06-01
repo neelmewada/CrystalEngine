@@ -164,16 +164,6 @@ namespace CE
         // - Config API -
 
         void LoadConfig(ClassType* configClass = NULL, String fileName = "");
-        
-    protected:
-        
-        // Config Methods
-        
-        void ConfigParseStruct(const String& value, void* instance, StructType* structType);
-        
-        void ConfigParsePOD(const String& value, void* instance, FieldType* field);
-        
-        virtual void OnAfterConfigLoad() {}
 
     private:
 
