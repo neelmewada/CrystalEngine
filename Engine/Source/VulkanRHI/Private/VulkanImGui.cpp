@@ -68,6 +68,9 @@ namespace CE
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleFonts;
+		io.ConfigFlags |= ImGuiConfigFlags_DpiEnableScaleViewports;
+		
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
         //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
@@ -78,7 +81,14 @@ namespace CE
                 auto numBytes = preloadFontConfig->preloadFonts[i].byteSize;
                 char* fontData = new char[numBytes];
                 memcpy(fontData, preloadFontConfig->preloadFonts[i].fontData, numBytes);
-                io.Fonts->AddFontFromMemoryCompressedTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
+				if (preloadFontConfig->preloadFonts[i].isCompressed)
+				{
+					io.Fonts->AddFontFromMemoryCompressedTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
+				}
+				else
+				{
+					io.Fonts->AddFontFromMemoryTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
+				}
             }
         }
 
@@ -160,7 +170,8 @@ namespace CE
     void VulkanGraphicsCommandList::ImGuiNewFrame()
     {
         ImGui_ImplVulkan_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
+		if (IsViewportTarget())
+			ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
     }
 

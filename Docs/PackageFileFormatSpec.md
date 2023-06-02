@@ -18,12 +18,11 @@ Spec tables with little endian format
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 8B | `00 50 41 43 4b 00 00 0a` | Magic Number: `. P A C K . . \n` |
-| +08 | 4B | `00 00 01 00` | Version number: Major.Minor (2 bytes each) |
-| +0C | 4B | `00 00 00 00` | File checksum only for the actual data |
-| +10 | 8B | `00 00 00 00 00 00 00 00` | Data start offset (from start of file) |
-| +18 | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |
-| +20 | \0 | `/Engine/Assets/SomeAsset\0` | Path/name of Package. |
-| +xx | \0 | `.png` | Extension of source asset. Could be empty. |
+| +08 | 8B | `00 00 01 00 00 00 00 00` | Version number: Major(u32) . Minor(u16) . Patch(u16) |
+| +10 | 4B | `00 00 00 00` | File checksum only for the actual data |
+| +14 | 8B | `00 00 00 00 00 00 00 00` | Data start offset (from start of file) |
+| +1C | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |
+| +24 | \0 | `/Engine/Assets/SomeAsset\0` | Path/name of Package. |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual data. List of [Object Entries](#object-entry)** |
 | +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. (EOF) |
@@ -40,6 +39,7 @@ Spec tables with little endian format
 | +04 | 4B | `xx xx xx xx` | Total number of fields |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
 | +10 | \0 | 'SomeObjectName' | Object name (CE::Name) |
+| +xx | \0 | `../SomeTexture.png` | Source asset relative path (only if an asset) |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Data: List of [Field Entries](#field-list-entry)** |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |

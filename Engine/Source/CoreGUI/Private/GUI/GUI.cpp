@@ -15,7 +15,7 @@ namespace CE::GUI
         {
             return false;
         }
-
+		
         if (flags & GUI::WF_FullScreen)
         {
             const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -25,7 +25,7 @@ namespace CE::GUI
             ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         }
-
+		
         if (flags & GUI::WF_NoPadding)
         {
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -123,6 +123,11 @@ namespace CE::GUI
     {
         return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
     }
+
+	COREGUI_API void SameLine(f32 offsetFromStart, f32 spacing)
+	{
+		ImGui::SameLine(offsetFromStart, spacing);
+	}
 
 #pragma endregion
 

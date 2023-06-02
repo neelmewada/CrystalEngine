@@ -4,8 +4,9 @@
 
 #define PACKAGE_MAGIC_NUMBER CE::FromBigEndian((u64)0x005041434b00000a) // .PACK..\n
 
-#define PACKAGE_VERSION_MAJOR (u16)0
-#define PACKAGE_VERSION_MINOR (u16)1
+#define PACKAGE_VERSION_MAJOR (u32)1
+#define PACKAGE_VERSION_MINOR (u16)0
+#define PACKAGE_VERSION_PATCH (u16)0
 
 #define PACKAGE_OBJECT_MAGIC_NUMBER CE::FromBigEndian((u64)0x004f424a45435400) // .OBJECT.
 
@@ -39,6 +40,7 @@ namespace CE
 		*stream << PACKAGE_MAGIC_NUMBER;
 		*stream << PACKAGE_VERSION_MAJOR;
 		*stream << PACKAGE_VERSION_MINOR;
+		*stream << PACKAGE_VERSION_PATCH;
 
 		u64 fileCrcPos = stream->GetCurrentPosition();
 		*stream << (u32)0; // 0 CRC
@@ -84,6 +86,15 @@ namespace CE
 			*stream << (u64)(0); // Data Start Offset (excluding itself). Set empty at first
 
 			*stream << objectInstance->GetName(); // Object Name
+
+			if (objectInstance->IsAsset())
+			{
+				*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath().GetString();
+			}
+			else
+			{
+				*stream << "";
+			}
 
 			u64 dataStartPos = stream->GetCurrentPosition();
 			u32 numEntries = 0;
@@ -142,7 +153,9 @@ namespace CE
 		stream->SetBinaryMode(true);
 
 		u64 magicNumber = 0;
-		u16 majorVersion = 0, minorVersion = 0;
+		u32 majorVersion = 0; 
+		u16 minorVersion = 0;
+		u16 patchVersion = 0;
 		*stream >> magicNumber;
         
 		if (magicNumber != PACKAGE_MAGIC_NUMBER)
@@ -153,6 +166,7 @@ namespace CE
 
 		*stream >> majorVersion;
 		*stream >> minorVersion;
+		*stream >> patchVersion;
 
 		if (majorVersion > PACKAGE_VERSION_MAJOR)
 		{
@@ -220,6 +234,9 @@ namespace CE
 			String objectName{};
 			*stream >> objectName;
 
+			String sourceAssetRelativePath{};
+			*stream >> sourceAssetRelativePath;
+
 			stream->Seek(dataStartOffset);
 			stream->Seek(dataByteSize, SeekMode::Current); // Skip data for now
             
@@ -233,6 +250,7 @@ namespace CE
             objectEntry.offsetInFile = dataStartOffset;
             objectEntry.objectDataSize = dataByteSize;
 			objectEntry.objectName = objectName;
+			objectEntry.sourceAssetRelativePath = sourceAssetRelativePath;
 
 			u32 crc = 0;
 			*stream >> crc; // End marker, ignored

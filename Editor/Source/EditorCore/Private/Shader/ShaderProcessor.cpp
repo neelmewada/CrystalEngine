@@ -82,7 +82,7 @@ namespace CE::Editor
 		Array<std::wstring> vertArgs{};
 		vertArgs.AddRange(baseArgs);
 		vertArgs.AddRange({
-			L"-E", ToWString(buildConfig.vertEntry),
+			L"-E", L"vert",
 			L"-T", L"vs_6_0",
 			L"-D", L"VERTEX=1"
 		});
@@ -117,7 +117,7 @@ namespace CE::Editor
 		Array<std::wstring> fragArgs{};
 		fragArgs.AddRange(baseArgs);
 		fragArgs.AddRange({
-			L"-E", ToWString(buildConfig.fragEntry),
+			L"-E", L"frag",
 			L"-T", L"ps_6_0",
 			L"-D", L"FRAGMENT=1"
 		});

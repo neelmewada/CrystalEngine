@@ -12,15 +12,18 @@ namespace CE::Editor
     struct ShaderBuildConfig
     {
         String debugName = "";
-        String vertEntry = "vert";
-        String fragEntry = "frag";
-        ShaderStage stages = ShaderStage::Vertex | ShaderStage::Fragment;
+        String entry = "vert";
+        ShaderStage stage = ShaderStage::Vertex;
 
         u32 maxPermutations = 1024;
+		Array<String> globalDefines{};
+
         // Define flags to build multiple permutations of the shader
         Array<String> featurePermutationDefines{};
-        // Flags to strip from compilation
+        // Define flags to strip from compilation
         Array<String> unusedDefines{};
+
+		Array<IO::Path> includeSearchPaths{};
     };
 
     /*
@@ -35,12 +38,17 @@ namespace CE::Editor
             ERR_FileNotFound,
             ERR_InvalidFile,
             ERR_FailedToLoadFile,
-            ERR_CompilationFailure
+            ERR_CompilationFailure,
+			ERR_InvalidArgs,
         };
 
         ShaderCompiler();
         ~ShaderCompiler();
 
+		// It allocates memory to the *outByteCode location which you will have to manually release after use
+		ErrorCode Build(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+
+		// Fully custom compilation
         ErrorCode Compile(const IO::Path& filePath, Array<std::wstring>& args, void** outByteCode, u32* outByteCodeSize);
 
         const String& GetErrorMessage() const

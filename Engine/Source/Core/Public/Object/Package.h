@@ -128,6 +128,7 @@ namespace CE
 			Name objectClassName{};
 			Name objectName{};
 			u32 objectDataSize = 0;
+			String sourceAssetRelativePath{};
             
             b8 isLoaded = false;
 		};

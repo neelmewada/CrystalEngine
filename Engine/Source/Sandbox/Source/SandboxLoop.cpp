@@ -1,5 +1,6 @@
 
 #include "SandboxLoop.h"
+#include "OpenSans.h"
 
 using namespace CE;
 
@@ -79,7 +80,17 @@ void SandboxLoop::PostInit()
 
     cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 
-    cmdList->InitImGui();
+	RHI::FontDesc openSans{};
+	openSans.fontName = "Open Sans";
+	openSans.byteSize = OpenSans_VariableFont_len;
+	openSans.fontData = OpenSans_VariableFont_ttf;
+	openSans.pointSize = 16;
+
+	RHI::FontPreloadConfig fontConfig{};
+	fontConfig.preloadFontCount = 1;
+	fontConfig.preloadFonts = &openSans;
+
+    cmdList->InitImGui(&fontConfig);
 }
 
 void SandboxLoop::PreShutdown()
@@ -179,6 +190,12 @@ void SandboxLoop::RunLoop()
                 {
                     CE_LOG(Info, All, "Clicked!");
                 }
+
+				{
+					GUI::Button("HStack 0"); GUI::SameLine();
+					GUI::Button("HStack 1"); GUI::SameLine();
+					GUI::Button("HStack 2");
+				}
                 
                 GUI::EndWindow();
             }

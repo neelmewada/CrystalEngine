@@ -114,10 +114,10 @@ namespace CE::RHI
 
     struct FontDesc
     {
-        void* rawData = nullptr;
         SIZE_T byteSize = 0;
         u32 pointSize = 14;
         String fontName = "";
+		b8 isCompressed = false;
 
         void* fontData = nullptr;
     };
