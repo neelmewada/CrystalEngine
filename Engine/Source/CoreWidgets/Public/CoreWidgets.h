@@ -5,7 +5,11 @@
 
 // Widgets
 #include "Widgets/Definitions.h"
-#include "Widgets/Widget.h"
+#include "Widgets/CWidget.h"
+#include "Widgets/WidgetManager.h"
+#include "Widgets/CWindow.h"
+
+#include "Widgets/CLabel.h"
 
 namespace CE::Widgets
 {
@@ -48,8 +52,8 @@ namespace CE::Widgets
 		};
 	}
 
-	template<typename TWidget> requires TIsBaseClassOf<Widget, TWidget>::Value
-	TWidget* CreateWidget(Widget* owner = nullptr,
+	template<typename TWidget> requires TIsBaseClassOf<CWidget, TWidget>::Value
+	TWidget* CreateWidget(Object* owner = nullptr,
 		String widgetName = "Widget",
 		WidgetFlags widgetFlags = WidgetFlags::None,
 		ClassType* widgetClass = TWidget::Type(),
@@ -60,7 +64,7 @@ namespace CE::Widgets
 			ownerObject = GetWidgetsTransientPackage();
 		if (!widgetClass->CanBeInstantiated()) // widgetClass should NOT be the `Widget` class itself & it shouldn't be abstract
 			return nullptr;
-		if (!widgetClass->IsSubclassOf(Widget::Type()))
+		if (!widgetClass->IsSubclassOf(CWidget::Type()))
 			return nullptr;
 
 		Internal::WidgetInitializer init{};
@@ -68,7 +72,7 @@ namespace CE::Widgets
 
 		Internal::WidgetThreadContext::Get().PushInitializer(&init);
 
-		Widget* widget = CreateObject<TWidget>(ownerObject, widgetName, objectFlags, widgetClass);
+		CWidget* widget = CreateObject<TWidget>(ownerObject, widgetName, objectFlags, widgetClass);
 
 		if (widget == nullptr) // Failed to create widget
 		{

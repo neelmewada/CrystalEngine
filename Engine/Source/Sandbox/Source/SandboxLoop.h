@@ -22,6 +22,8 @@ public:
     void Shutdown();
 
 private:
+    
+    void SetupGUI();
 
     void AppPreInit();
     void AppInit();
@@ -38,4 +40,7 @@ private:
     // RHI
     CE::RHI::Viewport* viewport = nullptr;
     CE::RHI::GraphicsCommandList* cmdList = nullptr;
+    
+    // Widgets
+    CE::Widgets::CWindow* window = nullptr;
 };

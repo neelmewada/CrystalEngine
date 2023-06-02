@@ -32,6 +32,9 @@ void SandboxLoop::LoadStartupCoreModules()
 #if PAL_TRAIT_VULKAN_SUPPORTED
     ModuleManager::Get().LoadModule("VulkanRHI");
 #endif
+    
+    ModuleManager::Get().LoadModule("CoreGUI");
+    ModuleManager::Get().LoadModule("CoreWidgets");
 }
 
 void SandboxLoop::LoadCoreModules()
@@ -91,10 +94,26 @@ void SandboxLoop::PostInit()
 	fontConfig.preloadFonts = &openSans;
 
     cmdList->InitImGui(&fontConfig);
+    
+    // Setup GUI
+    using namespace CE::Widgets;
+    
+    window = CreateObject<CWindow>(nullptr, "TestWindow");
+    window->SetWidgetFlags(WidgetFlags::None);
+    window->SetTitle("Test Window");
+    
+    CLabel* label = CreateObject<CLabel>(window, "MyLabel");
+    label->SetText("Label Text");
+    
+    CLabel* label2 = CreateObject<CLabel>(window, "MyLabel2");
+    label2->SetText("Second Label");
 }
 
 void SandboxLoop::PreShutdown()
 {
+    window->RequestDestroy();
+    window = nullptr;
+    
     cmdList->ShutdownImGui();
 
     RHI::gDynamicRHI->DestroyCommandList(cmdList);
@@ -107,6 +126,9 @@ void SandboxLoop::PreShutdown()
     RHI::gDynamicRHI->Shutdown();
 
     // Unload modules
+    
+    ModuleManager::Get().UnloadModule("CoreWidgets");
+    ModuleManager::Get().UnloadModule("CoreGUI");
 
     ModuleManager::Get().UnloadModule("CoreMedia");
 
@@ -150,6 +172,11 @@ void SandboxLoop::AppShutdown()
 
     delete app;
     app = nullptr;
+}
+
+void SandboxLoop::SetupGUI()
+{
+    
 }
 
 void SandboxLoop::RunLoop()
@@ -212,6 +239,8 @@ void SandboxLoop::RunLoop()
 			{
 				GUI::ShowDemoWindow(&demoWindow);
 			}
+            
+            window->RenderGUI();
         }
         GUI::EndWindow();
 
