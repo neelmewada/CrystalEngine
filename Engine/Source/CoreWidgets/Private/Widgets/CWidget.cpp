@@ -41,7 +41,7 @@ namespace CE::Widgets
 	}
 
 	void CWidget::RenderGUI()
-	{
+	{        
 		OnDrawGUI();
 
 		isFocused = GUI::IsItemFocused();
