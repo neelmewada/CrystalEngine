@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(%(Name)s CXX)
+project(CoreWidgets CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
-    %(AutoRTTI)s
+    AUTORTTI
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER
@@ -28,6 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
+            CE::CoreGUI
     RUNTIME_DEPENDENCIES
 
 )

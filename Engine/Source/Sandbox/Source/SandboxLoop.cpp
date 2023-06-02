@@ -166,7 +166,7 @@ void SandboxLoop::RunLoop()
 
         GUI::BeginWindow("DockSpaceWindow", nullptr, GUI::WF_FullScreen | GUI::WF_MenuBar | GUI::WF_NoPadding);
         {
-            GUI::DockSpace("MainDockSpace");
+            auto dockSpaceId = GUI::DockSpace("MainDockSpace");
 
             if (GUI::BeginMenuBar())
             {
@@ -192,13 +192,26 @@ void SandboxLoop::RunLoop()
                 }
 
 				{
+					GUI::BeginGroup();
 					GUI::Button("HStack 0"); GUI::SameLine();
 					GUI::Button("HStack 1"); GUI::SameLine();
-					GUI::Button("HStack 2");
+					GUI::BeginGroup();
+					GUI::Button("HStack 2 v0");
+					GUI::Button("HStack 2 v1");
+					GUI::Text("My Text");
+					GUI::EndGroup(); GUI::SameLine();
+					GUI::Button("HStack 3");
+					GUI::EndGroup();
 				}
                 
                 GUI::EndWindow();
             }
+
+			static bool demoWindow = true;
+			if (demoWindow)
+			{
+				GUI::ShowDemoWindow(&demoWindow);
+			}
         }
         GUI::EndWindow();
 

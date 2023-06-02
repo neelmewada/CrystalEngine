@@ -24,6 +24,7 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::CoreMedia
             CE::CoreRHI
             CE::CoreGUI
+            CE::CoreWidgets
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
     RUNTIME_DEPENDENCIES
 

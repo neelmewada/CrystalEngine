@@ -4,6 +4,7 @@
 #include "CoreApplication.h"
 #include "CoreRHI.h"
 #include "CoreGUI.h"
+#include "CoreWidgets.h"
 
 class SandboxLoop
 {

@@ -65,7 +65,7 @@ namespace CE\
 {\
 	CE_USING_NAMESPACE(Namespace);\
 	template<>\
-	struct StructTypeData<Namespace::Class> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Class, SuperClasses)>\
+	struct StructTypeData<Namespace::Class> : public CE::Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Class, SuperClasses)>\
 	{};\
 	namespace Internal\
 	{\
@@ -76,7 +76,7 @@ namespace CE\
             CE::ClassType Type;\
 			API static const CE::Name& FullTypeName();\
 			const CE::StructTypeData<Namespace::Class> TypeData;\
-            TypeInfoImpl(const char* fullName, Internal::IClassTypeImpl* impl, u32 size, CE::StructTypeData<Namespace::Class> typeData)\
+            TypeInfoImpl(const char* fullName, CE::Internal::IClassTypeImpl* impl, u32 size, CE::StructTypeData<Namespace::Class> typeData)\
 				: Type(fullName, impl, size, Attributes "")\
 				, TypeData(typeData)\
             {\
@@ -122,7 +122,7 @@ namespace CE\
 #define CE_RTTI_CLASS_IMPL(API, Namespace, Class)\
 CE::ClassType* Namespace::Class::Type()\
 {\
-	static Internal::TypeInfoImpl<Namespace::Class> instance{\
+	static CE::Internal::TypeInfoImpl<Namespace::Class> instance{\
 			#Namespace "::" #Class,\
 			&instance, sizeof(Namespace::Class),\
 			StructTypeData<Namespace::Class>()\
@@ -173,7 +173,7 @@ namespace CE\
 {\
 	CE_USING_NAMESPACE(Namespace);\
 	template<>\
-	struct StructTypeData<Namespace::Struct> : public Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Struct, SuperStructs)>\
+	struct StructTypeData<Namespace::Struct> : public CE::Internal::TypeDataImpl<__CE_RTTI_JOIN_CLASSES(Namespace::Struct, SuperStructs)>\
 	{\
 	};\
 	namespace Internal\
@@ -203,7 +203,7 @@ namespace CE\
 	template<>\
 	inline TypeInfo* GetStaticType<Namespace::Struct>()\
 	{\
-        static Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), Attributes "" }, StructTypeData<Namespace::Struct>() };\
+        static CE::Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), Attributes "" }, StructTypeData<Namespace::Struct>() };\
 		return &instance.Type;\
 	}\
 	template<>\

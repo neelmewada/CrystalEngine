@@ -6,10 +6,31 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include "misc/cpp/imgui_stdlib.h"
+
 namespace CE::GUI
 {
+	COREGUI_API ID GetID(const char* strId)
+	{
+		return ImGui::GetID(strId);
+	}
 
-    COREGUI_API bool BeginWindow(const String& name, bool* isShown, WindowFlags flags)
+	COREGUI_API ID GetID(const String& strId)
+	{
+		return ImGui::GetID(strId.GetCString());
+	}
+
+	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition, const Vec2& pivot)
+	{
+		ImGui::SetNextWindowPos(ImVec2(pos.x, pos.y), (int)condition, ImVec2(pivot.x, pivot.y));
+	}
+
+	COREGUI_API void SetNextWindowSize(const Vec2& size, Cond condition)
+	{
+		ImGui::SetNextWindowSize(ImVec2(size.x, size.y), (int)condition);
+	}
+
+	COREGUI_API bool BeginWindow(const String& name, bool* isShown, WindowFlags flags)
     {
         if (isShown != nullptr && !(*isShown))
         {
@@ -119,14 +140,88 @@ namespace CE::GUI
 
 #pragma region Widgets
 
-    COREGUI_API bool Button(const String& label, const Vec2& size, ButtonFlags flags)
+	COREGUI_API void ShowDemoWindow(bool* open)
+	{
+		ImGui::ShowDemoWindow(open);
+	}
+
+	COREGUI_API void Text(const char* text)
+	{
+		ImGui::Text(text);
+	}
+
+	COREGUI_API void Text(const String& text)
+	{
+		ImGui::Text(text.GetCString());
+	}
+
+	COREGUI_API void TextColored(const char* text, const Color& color)
+	{
+		ImGui::TextColored(ImVec4(color.r, color.g, color.b, color.a), text);
+	}
+
+	COREGUI_API void TextColored(const String& text, const Color& color)
+	{
+		ImGui::TextColored(ImVec4(color.r, color.g, color.b, color.a), text.GetCString());
+	}
+
+	COREGUI_API bool Button(const String& label, const Vec2& size, ButtonFlags flags)
     {
         return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
     }
 
+#pragma endregion
+
+#pragma region Layout
+
 	COREGUI_API void SameLine(f32 offsetFromStart, f32 spacing)
 	{
 		ImGui::SameLine(offsetFromStart, spacing);
+	}
+
+	COREGUI_API void BeginGroup()
+	{
+		ImGui::BeginGroup();
+	}
+
+	COREGUI_API void EndGroup()
+	{
+		ImGui::EndGroup();
+	}
+
+#pragma endregion
+
+#pragma region Events
+
+	COREGUI_API bool IsWindowHovered(HoveredFlags flags)
+	{
+		return ImGui::IsWindowHovered(flags);
+	}
+
+	COREGUI_API bool IsItemHovered(HoveredFlags flags)
+	{
+		return ImGui::IsItemHovered(flags);
+	}
+
+	COREGUI_API bool IsItemClicked(MouseButton button)
+	{
+		return ImGui::IsItemClicked((int)button);
+	}
+
+	COREGUI_API bool IsItemFocused()
+	{
+		ImGui::GetID("");
+		return ImGui::IsItemFocused();
+	}
+
+	COREGUI_API bool IsItemVisible()
+	{
+		return ImGui::IsItemVisible();
+	}
+
+	COREGUI_API bool IsItemActive()
+	{
+		return ImGui::IsItemActive();
 	}
 
 #pragma endregion

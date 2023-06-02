@@ -107,7 +107,6 @@ namespace CE::GUI
         StyleCol_ModalWindowDimBg,      // Darken/colorize entire screen behind a modal window, when one is active
         StyleCol_COUNT
     };
-    ENUM_CLASS_FLAGS(StyleCol);
 
 
     enum Dir

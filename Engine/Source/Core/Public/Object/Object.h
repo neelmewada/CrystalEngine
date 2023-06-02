@@ -133,8 +133,12 @@ namespace CE
         // Lifecycle
 
         virtual void AttachSubobject(Object* subobject);
+
+		virtual void OnSubobjectAttached(Object* subobject) {}
         
         virtual void DetachSubobject(Object* subobject);
+
+		virtual void OnSubobjectDetached(Object* subobject) {}
 
 		virtual bool HasSubobject(Object* subobject);
 

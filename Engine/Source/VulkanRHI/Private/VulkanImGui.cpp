@@ -22,6 +22,8 @@
 #endif
 #include "backends/imgui_impl_vulkan.h"
 
+#include "misc/cpp/imgui_stdlib.h"
+
 namespace CE
 {
 
@@ -221,3 +223,5 @@ namespace CE
 #include "backends/imgui_impl_sdl2.cpp"
 #endif
 #include "backends/imgui_impl_vulkan.cpp"
+
+#include "misc/cpp/imgui_stdlib.cpp"

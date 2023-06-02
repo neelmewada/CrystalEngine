@@ -4,6 +4,13 @@
 
 namespace CE::GUI
 {
+	COREGUI_API ID GetID(const char* strId);
+
+	COREGUI_API ID GetID(const String& strId);
+
+	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition = Cond::None, const Vec2& pivot = Vec2(0, 0));
+
+	COREGUI_API void SetNextWindowSize(const Vec2& size, Cond condition = Cond::None);
 
     COREGUI_API bool BeginWindow(const String& name, bool* isShown, WindowFlags flags = WF_None);
 
@@ -40,6 +47,14 @@ namespace CE::GUI
 
 #pragma region Widgets
 
+	COREGUI_API void ShowDemoWindow(bool* open = nullptr);
+
+	COREGUI_API void Text(const char* text);
+	COREGUI_API void Text(const String& text);
+
+	COREGUI_API void TextColored(const char* text, const Color& color);
+	COREGUI_API void TextColored(const String& text, const Color& color);
+
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
 #pragma endregion
@@ -47,6 +62,25 @@ namespace CE::GUI
 #pragma region Layout
 
 	COREGUI_API void SameLine(f32 offsetFromStart = 0, f32 spacing = -1.0f);
+
+	COREGUI_API void BeginGroup();
+	COREGUI_API void EndGroup();
+
+#pragma endregion
+
+#pragma region Events/States
+
+	COREGUI_API bool IsWindowHovered(HoveredFlags flags = Hovered_None);
+
+	COREGUI_API bool IsItemHovered(HoveredFlags flags = Hovered_None);
+
+	COREGUI_API bool IsItemClicked(MouseButton button = MouseButton::Left);
+
+	COREGUI_API bool IsItemFocused();
+
+	COREGUI_API bool IsItemVisible();
+
+	COREGUI_API bool IsItemActive();
 
 #pragma endregion
     

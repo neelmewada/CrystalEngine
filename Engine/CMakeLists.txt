@@ -19,6 +19,7 @@ add_subdirectory(Source/CoreApplication)
 add_subdirectory(Source/CoreMedia)
 add_subdirectory(Source/CoreRHI)
 add_subdirectory(Source/CoreGUI)
+add_subdirectory(Source/CoreWidgets)
 
 # Core Dependencies
 if(${PAL_TRAIT_VULKAN_SUPPORTED})

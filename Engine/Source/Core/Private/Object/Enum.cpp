@@ -39,12 +39,18 @@ namespace CE
 		, constants(constants)
 		, size(size)
 	{
-
+		ConstructInternal();
 	}
 
 	EnumType::~EnumType()
 	{
 
+	}
+
+	void EnumType::ConstructInternal()
+	{
+		if (HasAttribute("Flags"))
+			enumFlags |= ENUM_FlagsEnum;
 	}
 
 	String EnumType::GetDisplayName()

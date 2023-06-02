@@ -59,6 +59,13 @@ namespace CE
         friend class EnumType;
     };
 
+	enum EnumFlags
+	{
+		ENUM_NoFlags = 0,
+		ENUM_FlagsEnum = BIT(0),
+	};
+	ENUM_CLASS_FLAGS(EnumFlags);
+
     class CORE_API EnumType : public TypeInfo
     {
     private:
@@ -71,6 +78,8 @@ namespace CE
         template<typename Enum>
         friend struct CE::Internal::TypeInfoImpl;
 
+		void ConstructInternal();
+
     public:
 
         virtual String GetDisplayName() override;
@@ -78,6 +87,16 @@ namespace CE
         virtual bool IsEnum() const override { return true; }
 
         virtual TypeId GetTypeId() const override { return this->typeId; }
+
+		bool HasAnyEnumFlags(EnumFlags flags) const
+		{
+			return (enumFlags & flags) != 0;
+		}
+
+		bool HasAllEnumFlags(EnumFlags flags) const
+		{
+			return (enumFlags & flags) == flags;
+		}
 
         CE_INLINE u32 GetConstantsCount() { return constants.GetSize(); }
         CE_INLINE EnumConstant* GetConstant(u32 index) 
@@ -108,6 +127,8 @@ namespace CE
         TypeId typeId;
         u32 size;
         CE::Array<EnumConstant> constants{};
+
+		EnumFlags enumFlags = ENUM_NoFlags;
 
         static CE::HashMap<TypeId, EnumType*> registeredEnumsById;
         static CE::HashMap<Name, EnumType*> registeredEnumsByName;
@@ -142,7 +163,7 @@ namespace CE\
     inline TypeInfo* GetStaticType<Namespace::Enum>()\
     {\
         typedef Namespace::Enum Self;\
-        static Internal::TypeInfoImpl<Namespace::Enum> instance{};\
+        static CE::Internal::TypeInfoImpl<Namespace::Enum> instance{};\
 	    return &instance;\
     }\
     template<>\

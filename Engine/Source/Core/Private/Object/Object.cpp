@@ -64,6 +64,7 @@ namespace CE
 		{
 			package->loadedObjects[subobject->GetUuid()] = subobject;
 		}
+		OnSubobjectAttached(subobject);
     }
 
     void Object::DetachSubobject(Object* subobject)
@@ -77,6 +78,7 @@ namespace CE
 		{
 			package->loadedObjects.Remove(subobject->GetUuid());
 		}
+		OnSubobjectDetached(subobject);
     }
 
 	bool Object::HasSubobject(Object* subobject)
