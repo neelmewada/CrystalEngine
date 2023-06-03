@@ -8,6 +8,9 @@ namespace CE::GUI
 
 	COREGUI_API ID GetID(const String& strId);
 
+    COREGUI_API Vec2 GetCursorPos();
+    COREGUI_API void SetCursorPos(const Vec2& pos);
+
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition = Cond::None, const Vec2& pivot = Vec2(0, 0));
 
 	COREGUI_API void SetNextWindowSize(const Vec2& size, Cond condition = Cond::None);
@@ -57,6 +60,8 @@ namespace CE::GUI
 
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
+    COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
+
 #pragma endregion
 
 #pragma region Layout
@@ -65,6 +70,9 @@ namespace CE::GUI
 
 	COREGUI_API void BeginGroup();
 	COREGUI_API void EndGroup();
+
+    COREGUI_API Vec2 CalculateTextSize(const char* text);
+    COREGUI_API Vec2 CalculateTextSize(const String& text);
 
 #pragma endregion
 

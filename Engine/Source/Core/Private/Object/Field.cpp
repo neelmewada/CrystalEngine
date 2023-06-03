@@ -133,7 +133,7 @@ namespace CE
 	{
 		if (destField == nullptr || destField->fieldTypeId != fieldTypeId || srcInstance == nullptr || destInstance == nullptr)
 			return false;
-		if (destField->IsReadOnly())
+		if (destField->IsReadOnly() || GetDeclarationType() == nullptr)
 			return false;
 
 		if (GetDeclarationType()->IsPOD())

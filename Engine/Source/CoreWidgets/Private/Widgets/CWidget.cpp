@@ -40,8 +40,22 @@ namespace CE::Widgets
         
 	}
 
+    void CWidget::BeginStyle()
+    {
+        
+    }
+
+    void CWidget::EndStyle()
+    {
+        if (pushedVars > 0)
+            GUI::PopStyleVar(pushedVars);
+        if (pushedColors > 0)
+            GUI::PopStyleColor(pushedColors);
+    }
+
 	void CWidget::RenderGUI()
-	{        
+	{
+        BeginStyle();
 		OnDrawGUI();
 
 		isFocused = GUI::IsItemFocused();
@@ -49,6 +63,8 @@ namespace CE::Widgets
 		isLeftClicked = GUI::IsItemClicked(GUI::MouseButton::Left);
 		isRightClicked = GUI::IsItemClicked(GUI::MouseButton::Right);
 		isMiddleClicked = GUI::IsItemClicked(GUI::MouseButton::Middle);
+        
+        EndStyle();
     }
 
     void CWidget::SetWidgetFlags(WidgetFlags flags)

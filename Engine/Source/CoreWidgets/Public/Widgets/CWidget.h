@@ -19,6 +19,8 @@ namespace CE::Widgets
 
         // For internal use only!
 		virtual void RenderGUI();
+        
+        virtual bool IsWindow() { return false; }
 
 		bool IsFocused() const { return isFocused; }
 		bool IsLeftClicked() const { return isLeftClicked; }
@@ -27,6 +29,16 @@ namespace CE::Widgets
         void SetWidgetFlags(WidgetFlags flags);
         
         WidgetFlags GetWidgetFlags() const;
+        
+        CStyle& GetStyle()
+        {
+            return style;
+        }
+        
+        void SetStyle(const CStyle& style)
+        {
+            this->style = style;
+        }
 
 	protected:
 
@@ -40,8 +52,11 @@ namespace CE::Widgets
 		virtual void OnAttachedTo(CWidget* parent) {}
 		virtual void OnDetachedFrom(CWidget* parent) {}
 
-		/// Abstract method. Override it to call low level GUI functions.
+		/// Abstract method. Must be overriden to call low level GUI draw functions.
 		virtual void OnDrawGUI() = 0;
+        
+        virtual void BeginStyle();
+        virtual void EndStyle();
 
 	private:
 
@@ -55,10 +70,19 @@ namespace CE::Widgets
 
 		FIELD()
 		Array<CWidget*> attachedWidgets{};
+        
+        FIELD()
+        CStyle style{};
+        
+    private:
 
 		b8 isHovered = false;
 		b8 isFocused = false;
 		b8 isLeftClicked = false, isRightClicked = false, isMiddleClicked = false;
+        
+        u32 pushedColors = 0;
+        u32 pushedVars = 0;
+        
 	};
     
 } // namespace CE::Widgets

@@ -19,6 +19,8 @@ namespace CE::Widgets
             return isShown;
         }
         
+        virtual bool IsWindow() override { return true; }
+        
         void Show();
         void Hide();
         

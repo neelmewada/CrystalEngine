@@ -32,7 +32,12 @@ namespace CE
     public:
         HashMap() : Impl({})
         {
-
+            
+        }
+        
+        HashMap(std::initializer_list<std::pair<const KeyType, ValueType>> list) : Impl(list)
+        {
+            
         }
 
         ~HashMap()

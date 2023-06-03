@@ -20,6 +20,17 @@ namespace CE::GUI
 		return ImGui::GetID(strId.GetCString());
 	}
 
+    COREGUI_API Vec2 GetCursorPos()
+    {
+        ImVec2 pos = ImGui::GetCursorPos();
+        return Vec2(pos.x, pos.y);
+    }
+
+    COREGUI_API void SetCursorPos(const Vec2& pos)
+    {
+        ImGui::SetCursorPos(ImVec2(pos.x, pos.y));
+    }
+
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition, const Vec2& pivot)
 	{
 		ImGui::SetNextWindowPos(ImVec2(pos.x, pos.y), (int)condition, ImVec2(pivot.x, pivot.y));
@@ -170,6 +181,11 @@ namespace CE::GUI
         return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
     }
 
+    COREGUI_API void InvisibleButton(const String& id, const Vec2& size)
+    {
+        ImGui::InvisibleButton(id.GetCString(), ImVec2(size.x, size.y));
+    }
+
 #pragma endregion
 
 #pragma region Layout
@@ -188,6 +204,17 @@ namespace CE::GUI
 	{
 		ImGui::EndGroup();
 	}
+
+    COREGUI_API Vec2 CalculateTextSize(const char* text)
+    {
+        ImVec2 size = ImGui::CalcTextSize(text);
+        return Vec2(size.x, size.y);
+    }
+
+    COREGUI_API Vec2 CalculateTextSize(const String& text)
+    {
+        return CalculateTextSize(text.GetCString());
+    }
 
 #pragma endregion
 

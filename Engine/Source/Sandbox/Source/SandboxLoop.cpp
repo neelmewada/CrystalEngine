@@ -100,13 +100,8 @@ void SandboxLoop::PostInit()
     
     window = CreateObject<CWindow>(nullptr, "TestWindow");
     window->SetWidgetFlags(WidgetFlags::None);
-    window->SetTitle("Test Window");
     
-    CLabel* label = CreateObject<CLabel>(window, "MyLabel");
-    label->SetText("Label Text");
-    
-    CLabel* label2 = CreateObject<CLabel>(window, "MyLabel2");
-    label2->SetText("Second Label");
+    SetupGUI();
 }
 
 void SandboxLoop::PreShutdown()
@@ -176,7 +171,16 @@ void SandboxLoop::AppShutdown()
 
 void SandboxLoop::SetupGUI()
 {
+    using namespace CE::Widgets;
     
+    window->SetTitle("Test Window");
+    
+    CLabel* label = CreateObject<CLabel>(window, "MyLabel");
+    label->SetText("Label Text");
+    
+    CLabel* label2 = CreateObject<CLabel>(window, "MyLabel2");
+    label2->SetText("Label Text");
+    label2->GetStyle().AddStyleVar(CStyleVarType::Padding, Vec4(5, 5, 5, 5));
 }
 
 void SandboxLoop::RunLoop()
