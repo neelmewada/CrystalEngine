@@ -31,6 +31,12 @@ namespace CE::GUI
         ImGui::SetCursorPos(ImVec2(pos.x, pos.y));
     }
 
+    COREGUI_API Vec2 GetCursorScreenPos()
+    {
+        ImVec2 vec = ImGui::GetCursorScreenPos();
+        return Vec2(vec.x, vec.y);
+    }
+
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition, const Vec2& pivot)
 	{
 		ImGui::SetNextWindowPos(ImVec2(pos.x, pos.y), (int)condition, ImVec2(pivot.x, pivot.y));
@@ -278,13 +284,56 @@ namespace CE::GUI
 
 #pragma endregion
 
-    namespace BG
+#pragma region Custom Drawing
+
+    COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding)
     {
-        COREGUI_API void AddRectFilled(const Vec4& rect, const Color& color, f32 rounding)
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        if (drawList == nullptr)
+            return;
+        
+        if (rounding.x < 0.5f && rounding.y < 0.5f && rounding.z < 0.5f && rounding.w < 0.5f)
         {
-            ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(rect.x, rect.y), ImVec2(rect.z, rect.w), color.ToU32(), rounding);
+            drawList->AddRect(ImVec2(rect.x, rect.y), ImVec2(rect.z, rect.w), color.ToU32());
+            return;
         }
+        
+        const float roundingTL = rounding.x;
+        const float roundingTR = rounding.y;
+        const float roundingBR = rounding.z;
+        const float roundingBL = rounding.w;
+        drawList->PathArcToFast(ImVec2(rect.x + roundingTL, rect.y + roundingTL), roundingTL, 6, 9);
+        drawList->PathArcToFast(ImVec2(rect.z - roundingTR, rect.y + roundingTR), roundingTR, 9, 12);
+        drawList->PathArcToFast(ImVec2(rect.z - roundingBR, rect.w - roundingBR), roundingBR, 0, 3);
+        drawList->PathArcToFast(ImVec2(rect.x + roundingBL, rect.w - roundingBL), roundingBL, 3, 6);
+        drawList->PathStroke(color.ToU32());
     }
+    
+    COREGUI_API void FillRect(const Vec4& rect, const Color& color, Vec4 rounding)
+    {
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        if (drawList == nullptr)
+            return;
+        
+        if (rounding.x < 0.5f && rounding.y < 0.5f && rounding.z < 0.5f && rounding.w < 0.5f)
+        {
+            drawList->PrimReserve(6, 4);
+            drawList->PrimRect(ImVec2(rect.x, rect.y), ImVec2(rect.z, rect.w), color.ToU32());
+            return;
+        }
+        
+        const float roundingTL = rounding.x;
+        const float roundingTR = rounding.y;
+        const float roundingBR = rounding.z;
+        const float roundingBL = rounding.w;
+        drawList->PathArcToFast(ImVec2(rect.x + roundingTL, rect.y + roundingTL), roundingTL, 6, 9);
+        drawList->PathArcToFast(ImVec2(rect.z - roundingTR, rect.y + roundingTR), roundingTR, 9, 12);
+        drawList->PathArcToFast(ImVec2(rect.z - roundingBR, rect.w - roundingBR), roundingBR, 0, 3);
+        drawList->PathArcToFast(ImVec2(rect.x + roundingBL, rect.w - roundingBL), roundingBL, 3, 6);
+        drawList->PathFillConvex(color.ToU32());
+    }
+
+#pragma endregion
 
 } // namespace CE
 

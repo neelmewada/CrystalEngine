@@ -10,6 +10,7 @@ namespace CE::Widgets
         Padding,
         ForegroundColor,
         BackgroundColor,
+        BorderRadius,
     };
     
     STRUCT()

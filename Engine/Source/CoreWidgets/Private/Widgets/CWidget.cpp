@@ -40,6 +40,15 @@ namespace CE::Widgets
         
 	}
 
+    void CWidget::BuildWidget()
+    {
+        if (isBuilt)
+            return;
+        
+        Build();
+        isBuilt = true;
+    }
+
     void CWidget::BeginStyle()
     {
         for (const auto& [variable, value] : style.styles)

@@ -16,6 +16,8 @@ namespace CE::Widgets
 		virtual ~CWidget();
 
 		// - Public API -
+        
+        void BuildWidget();
 
         // For internal use only!
 		virtual void RenderGUI();
@@ -55,6 +57,9 @@ namespace CE::Widgets
 		/// Abstract method. Must be overriden to call low level GUI draw functions.
 		virtual void OnDrawGUI() = 0;
         
+        /// Override this method to build child widget hierarchy
+        virtual void Build() {}
+        
         virtual void BeginStyle();
         virtual void EndStyle();
 
@@ -76,6 +81,7 @@ namespace CE::Widgets
         
     private:
 
+        b8 isBuilt = false;
 		b8 isHovered = false;
 		b8 isFocused = false;
 		b8 isLeftClicked = false, isRightClicked = false, isMiddleClicked = false;

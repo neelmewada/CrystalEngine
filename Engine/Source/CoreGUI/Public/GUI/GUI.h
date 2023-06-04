@@ -10,6 +10,7 @@ namespace CE::GUI
 
     COREGUI_API Vec2 GetCursorPos();
     COREGUI_API void SetCursorPos(const Vec2& pos);
+    COREGUI_API Vec2 GetCursorScreenPos();
 
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition = Cond::None, const Vec2& pivot = Vec2(0, 0));
 
@@ -96,10 +97,13 @@ namespace CE::GUI
 
 #pragma endregion
 
-    namespace BG
-    {
-        COREGUI_API void AddRectFilled(const Vec4& rect, const Color& color, f32 rounding = 0);
-    }
+#pragma region Custom Drawing
+
+    COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
+
+    COREGUI_API void FillRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
+
+#pragma endregion
     
 } // namespace CE
 
