@@ -410,6 +410,8 @@ namespace CE
 
             superTypes.Add((ClassType*)type);
         }
+
+		AddDerivedClassToMap(this, this);
     }
 
     void ClassType::AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath)
@@ -455,8 +457,8 @@ namespace CE
             derivedClassesMap.Add({type->GetTypeId(), {}});
         }
 
-        type->CacheSuperTypes();
-        AddDerivedClassToMap(type, type);
+        //type->CacheSuperTypes();
+        //AddDerivedClassToMap(type, type);
 
         CoreObjectDelegates::onClassRegistered.Broadcast(type);
     }
