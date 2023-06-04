@@ -3,11 +3,13 @@
 namespace CE::Widgets
 {
 
-    enum class CStyleVarType
+    enum class CStyleVariable
     {
         None = 0,
         Alpha,
         Padding,
+        ForegroundColor,
+        BackgroundColor,
     };
     
     STRUCT()
@@ -56,14 +58,14 @@ namespace CE::Widgets
         CStyle();
         virtual ~CStyle();
         
-        static GUI::StyleVar GetStyleVar(CStyleVarType variable);
-        static GUI::StyleCol GetStyleColorVar(CStyleVarType variable);
+        static Array<GUI::StyleVar> GetStyleVar(CStyleVariable variable);
+        static Array<GUI::StyleCol> GetStyleColorVar(CStyleVariable variable);
         
-        void AddStyleVar(CStyleVarType variableType, const CStyleValue& styleVar);
-        void RemoveStyleVar(CStyleVarType variableType);
+        void AddStyleVar(CStyleVariable variableType, const CStyleValue& styleVar);
+        void RemoveStyleVar(CStyleVariable variableType);
         
         FIELD()
-        HashMap<CStyleVarType, CStyleValue> styles{};
+        HashMap<CStyleVariable, CStyleValue> styles{};
     };
 
 } // namespace CE::Widgets

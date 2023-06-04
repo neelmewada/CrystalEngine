@@ -23,6 +23,11 @@ namespace CE::Widgets
         isShown = false;
     }
 
+    void CWindow::SetTitle(const String& title)
+    {
+        this->windowTitle = String::Format(title + "##{}", GetName());
+    }
+
     void CWindow::OnDrawGUI()
     {
         if (isShown)

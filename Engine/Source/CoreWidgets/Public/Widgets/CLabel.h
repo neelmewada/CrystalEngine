@@ -16,6 +16,9 @@ namespace CE::Widgets
         
         const String& GetText();
         
+        virtual void BeginStyle() override;
+        virtual void EndStyle() override;
+        
     protected:
         
         void OnDrawGUI() override;

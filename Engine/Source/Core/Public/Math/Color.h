@@ -141,6 +141,11 @@ namespace CE
         {
             return Color(1, 1, 0, 1);
         }
+        
+        inline u32 ToU32() const
+        {
+            return (u32)(r * 255) << 24 + (u32)(g * 255) << 16 + (u32)(b * 255) << 8 + (u32)(a * 255);
+        }
 
     public:
 

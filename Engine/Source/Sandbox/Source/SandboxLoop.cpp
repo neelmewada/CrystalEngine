@@ -174,13 +174,17 @@ void SandboxLoop::SetupGUI()
     using namespace CE::Widgets;
     
     window->SetTitle("Test Window");
+    window->GetStyle().AddStyleVar(CStyleVariable::BackgroundColor, Color(0.5f, 0, 0.5f, 1.0f));
     
     CLabel* label = CreateObject<CLabel>(window, "MyLabel");
     label->SetText("Label Text");
+    label->GetStyle().AddStyleVar(CStyleVariable::ForegroundColor, Color(1.0f, 1.0f, 0.0f, 1.0f));
+    label->GetStyle().AddStyleVar(CStyleVariable::BackgroundColor, Color(1.0f, 0.0f, 0.0f, 1.0f));
     
     CLabel* label2 = CreateObject<CLabel>(window, "MyLabel2");
     label2->SetText("Label Text");
-    label2->GetStyle().AddStyleVar(CStyleVarType::Padding, Vec4(5, 5, 5, 5));
+    label2->GetStyle().AddStyleVar(CStyleVariable::Padding, Vec4(5, 5, 5, 5));
+    label2->GetStyle().AddStyleVar(CStyleVariable::Alpha, 0.5f);
 }
 
 void SandboxLoop::RunLoop()

@@ -24,13 +24,23 @@ namespace CE::Widgets
         return text;
     }
 
+    void CLabel::BeginStyle()
+    {
+        
+    }
+
+    void CLabel::EndStyle()
+    {
+        
+    }
+
     void CLabel::OnDrawGUI()
     {
         Vec4 padding{};
         bool hasPadding = false;
-        if (style.styles.KeyExists(CStyleVarType::Padding))
+        if (style.styles.KeyExists(CStyleVariable::Padding))
         {
-            padding = style.styles[CStyleVarType::Padding].vector;
+            padding = style.styles[CStyleVariable::Padding].vector;
         }
         
         if (padding.x > 0 || padding.y > 0 || padding.z > 0 || padding.w > 0)

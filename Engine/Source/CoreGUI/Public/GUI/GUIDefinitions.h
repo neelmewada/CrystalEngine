@@ -346,7 +346,7 @@ namespace CE::GUI
         Vec2              workSize;               // Work Area: Size of the viewport minus task bars, menu bars, status bars (<= Size)
         float               dpiScale;               // 1.0f = 96 DPI = No extra scale.
         ID             parentViewportId;       // (Advanced) 0: no parent. Instruct the platform backend to setup a parent/child relationship between platform windows.
-        void* drawData;               // The ImDrawData corresponding to this viewport. Valid after Render() and until the next call to NewFrame().
+        void* drawData;               // The ImDrawData corresponding to this viewport. Valid after Render() and until the next call to NewFrame().D
 
         // Platform/Backend Dependent Data
         // Our design separate the Renderer and Platform backends to facilitate combining default backends with each others.

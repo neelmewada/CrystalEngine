@@ -35,6 +35,8 @@ namespace CE::GUI
 
 #pragma region Style
 
+    COREGUI_API bool IsStyleVarOfVectorType(StyleVar var);
+
     COREGUI_API void PushStyleVar(StyleVar var, f32 value);
 
     COREGUI_API void PushStyleVar(StyleVar var, Vec2 value);
@@ -74,6 +76,8 @@ namespace CE::GUI
     COREGUI_API Vec2 CalculateTextSize(const char* text);
     COREGUI_API Vec2 CalculateTextSize(const String& text);
 
+    COREGUI_API Vec2 GetItemRectSize();
+
 #pragma endregion
 
 #pragma region Events/States
@@ -91,6 +95,11 @@ namespace CE::GUI
 	COREGUI_API bool IsItemActive();
 
 #pragma endregion
+
+    namespace BG
+    {
+        COREGUI_API void AddRectFilled(const Vec4& rect, const Color& color, f32 rounding = 0);
+    }
     
 } // namespace CE
 

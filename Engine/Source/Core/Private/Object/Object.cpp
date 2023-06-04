@@ -403,7 +403,7 @@ namespace CE
 				continue;
 			if (destField->IsReadOnly())
 				continue;
-
+            
 			field->CopyTo(templateObject, destField, this);
 		}
 	}

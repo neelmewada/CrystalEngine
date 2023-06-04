@@ -24,10 +24,7 @@ namespace CE::Widgets
         void Show();
         void Hide();
         
-        void SetTitle(const String& title)
-        {
-            windowTitle = title;
-        }
+        void SetTitle(const String& title);
         
         const String& GetTitle() const
         {

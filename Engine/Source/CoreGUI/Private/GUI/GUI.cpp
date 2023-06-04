@@ -124,6 +124,25 @@ namespace CE::GUI
     /////////////////////////////////////////////////////////////////////
     // Style
 
+    COREGUI_API bool IsStyleVarOfVectorType(StyleVar var)
+    {
+        static HashMap<StyleVar, bool> vectorTypes{
+            { StyleVar_WindowPadding, true },
+            { StyleVar_WindowMinSize, true },
+            { StyleVar_WindowTitleAlign, true },
+            { StyleVar_FramePadding, true },
+            { StyleVar_ItemSpacing, true },
+            { StyleVar_ItemInnerSpacing, true },
+            { StyleVar_CellPadding, true },
+            { StyleVar_ButtonTextAlign, true },
+            { StyleVar_SelectableTextAlign, true },
+            { StyleVar_SeparatorTextAlign, true },
+            { StyleVar_SeparatorTextPadding, true }
+        };
+        
+        return vectorTypes.KeyExists(var) && vectorTypes[var];
+    }
+
     COREGUI_API void PushStyleVar(StyleVar var, f32 value)
     {
         ImGui::PushStyleVar(var, value);
@@ -216,6 +235,12 @@ namespace CE::GUI
         return CalculateTextSize(text.GetCString());
     }
 
+    COREGUI_API Vec2 GetItemRectSize()
+    {
+        ImVec2 vec = ImGui::GetItemRectSize();
+        return Vec2(vec.x, vec.y);
+    }
+
 #pragma endregion
 
 #pragma region Events
@@ -252,6 +277,14 @@ namespace CE::GUI
 	}
 
 #pragma endregion
+
+    namespace BG
+    {
+        COREGUI_API void AddRectFilled(const Vec4& rect, const Color& color, f32 rounding)
+        {
+            ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(rect.x, rect.y), ImVec2(rect.z, rect.w), color.ToU32(), rounding);
+        }
+    }
 
 } // namespace CE
 

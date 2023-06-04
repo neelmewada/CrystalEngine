@@ -28,36 +28,38 @@ namespace CE::Widgets
         
     }
 
-    GUI::StyleVar CStyle::GetStyleVar(CStyleVarType variable)
+    Array<GUI::StyleVar> CStyle::GetStyleVar(CStyleVariable variable)
     {
-        static HashMap<CStyleVarType, GUI::StyleVar> map{
-            { CStyleVarType::Alpha, GUI::StyleVar_Alpha }
+        static HashMap<CStyleVariable, Array<GUI::StyleVar>> map{
+            { CStyleVariable::Alpha, { GUI::StyleVar_Alpha } }
         };
         
         if (!map.KeyExists(variable))
-            return GUI::StyleVar_COUNT;
+            return {};
         
         return map[variable];
     }
 
-    GUI::StyleCol CStyle::GetStyleColorVar(CStyleVarType variable)
+    Array<GUI::StyleCol> CStyle::GetStyleColorVar(CStyleVariable variable)
     {
-        static HashMap<CStyleVarType, GUI::StyleCol> map{
-            
+        static HashMap<CStyleVariable, Array<GUI::StyleCol>> map{
+            { CStyleVariable::ForegroundColor, { GUI::StyleCol_Text } },
+            { CStyleVariable::BackgroundColor,
+                { GUI::StyleCol_FrameBg, GUI::StyleCol_WindowBg, GUI::StyleCol_MenuBarBg, GUI::StyleCol_ChildBg } },
         };
         
         if (!map.KeyExists(variable))
-            return GUI::StyleCol_COUNT;
+            return {};
         
         return map[variable];
     }
 
-    void CStyle::AddStyleVar(CStyleVarType variableType, const CStyleValue& styleVar)
+    void CStyle::AddStyleVar(CStyleVariable variableType, const CStyleValue& styleVar)
     {
         styles[variableType] = styleVar;
     }
 
-    void CStyle::RemoveStyleVar(CStyleVarType variableType)
+    void CStyle::RemoveStyleVar(CStyleVariable variableType)
     {
         styles.Remove(variableType);
     }
