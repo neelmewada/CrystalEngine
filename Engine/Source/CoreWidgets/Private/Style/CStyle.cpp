@@ -17,6 +17,16 @@ namespace CE::Widgets
     {
         
     }
+
+	CStyleValue::CStyleValue(std::initializer_list<Gradient::Key> gradient)
+		: isGradient(true), gradient(gradient)
+	{
+	}
+
+	CStyleValue::CStyleValue(const Gradient& gradient)
+		: isGradient(true), gradient(gradient)
+	{
+	}
     
     CStyle::CStyle()
     {

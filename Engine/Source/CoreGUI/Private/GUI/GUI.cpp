@@ -8,6 +8,11 @@
 
 #include "misc/cpp/imgui_stdlib.h"
 
+#define IM_NORMALIZE2F_OVER_ZERO(VX,VY)     { float d2 = VX*VX + VY*VY; if (d2 > 0.0f) { float inv_len = ImRsqrt(d2); VX *= inv_len; VY *= inv_len; } } (void)0
+#define IM_FIXNORMAL2F_MAX_INVLEN2          100.0f // 500.0f (see #4053, #3366)
+#define IM_FIXNORMAL2F(VX,VY)               { float d2 = VX*VX + VY*VY; if (d2 > 0.000001f) { float inv_len2 = 1.0f / d2; if (inv_len2 > IM_FIXNORMAL2F_MAX_INVLEN2) inv_len2 = IM_FIXNORMAL2F_MAX_INVLEN2; VX *= inv_len2; VY *= inv_len2; } } (void)0
+
+
 namespace CE::GUI
 {
 	COREGUI_API ID GetID(const char* strId)
@@ -332,6 +337,114 @@ namespace CE::GUI
         drawList->PathArcToFast(ImVec2(rect.x + roundingBL, rect.w - roundingBL), roundingBL, 3, 6);
         drawList->PathFillConvex(color.ToU32());
     }
+
+	COREGUI_API void FillRect(const Vec4& rect, const Gradient& gradient, Vec4 rounding)
+	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		if (drawList == nullptr)
+			return;
+
+		ImVec2 uv = drawList->_Data->TexUvWhitePixel;
+
+		f32 width = abs(rect.z - rect.x);
+		f32 height = abs(rect.w - rect.y);
+
+		const float roundingTL = rounding.x;
+		const float roundingTR = rounding.y;
+		const float roundingBR = rounding.z;
+		const float roundingBL = rounding.w;
+
+		enum PointType
+		{
+			TopLeft, TopSegment, TopRight, RightSegment, BottomRight, BottomSegment, BottomLeft, LeftSegment
+		};
+
+		Array<PointType> pointsMeta{};
+
+		drawList->PathArcToFast(ImVec2(rect.x + roundingTL, rect.y + roundingTL), roundingTL, 6, 9);
+		u32 topLeftPathSize = drawList->_Path.Size;
+		for (int i = 0; i < topLeftPathSize; i++)
+		{
+			pointsMeta.Add(TopLeft);
+		}
+		
+		// LeftToRight
+		u32 topPathSize = 0;
+		if (gradient.GetDirection() == Gradient::LeftToRight)
+		{
+			for (int i = 0; i < gradient.GetNumKeys(); i++)
+			{
+				const auto& key = gradient.GetKeyAt(i);
+				f32 localX = width * key.position;
+				drawList->PathLineTo(ImVec2(rect.x + localX, rect.y));
+				topPathSize++;
+				pointsMeta.Add(TopSegment);
+			}
+		}
+
+		drawList->PathArcToFast(ImVec2(rect.z - roundingTR, rect.y + roundingTR), roundingTR, 9, 12);
+		u32 topRightPathSize = drawList->_Path.Size;
+		for (int i = pointsMeta.GetSize(); i < topRightPathSize; i++)
+		{
+			pointsMeta.Add(TopRight);
+		}
+
+		// LeftToRight
+		u32 rightPathSize = 0;
+		if (gradient.GetDirection() == Gradient::TopToBottom)
+		{
+			for (int i = 0; i < gradient.GetNumKeys(); i++)
+			{
+				const auto& key = gradient.GetKeyAt(i);
+				f32 localY = height * key.position;
+				drawList->PathLineTo(ImVec2(rect.z, rect.y + localY));
+				rightPathSize++;
+				pointsMeta.Add(RightSegment);
+			}
+		}
+
+		drawList->PathArcToFast(ImVec2(rect.z - roundingBR, rect.w - roundingBR), roundingBR, 0, 3);
+		u32 bottomRightPathSize = drawList->_Path.Size;
+		for (int i = pointsMeta.GetSize(); i < bottomRightPathSize; i++)
+		{
+			pointsMeta.Add(BottomRight);
+		}
+
+		drawList->PathArcToFast(ImVec2(rect.x + roundingBL, rect.w - roundingBL), roundingBL, 3, 6);
+		u32 bottomLeftPathSize = drawList->_Path.Size;
+		for (int i = pointsMeta.GetSize(); i < bottomLeftPathSize; i++)
+		{
+			pointsMeta.Add(BottomLeft);
+		}
+
+		// Fill
+
+		{
+			// Non Anti-aliased Fill
+			const int idx_count = (drawList->_Path.Size - 2) * 3;
+			const int vtx_count = drawList->_Path.Size;
+			drawList->PrimReserve(idx_count, vtx_count);
+			for (int i = 0; i < vtx_count; i++)
+			{
+				drawList->_VtxWritePtr[0].pos = drawList->_Path.Data[i]; 
+				drawList->_VtxWritePtr[0].uv = uv; 
+				drawList->_VtxWritePtr[0].col = col;
+				drawList->_VtxWritePtr++;
+			}
+			for (int i = 2; i < drawList->_Path.Size; i++)
+			{
+				drawList->_IdxWritePtr[0] = (ImDrawIdx)(drawList->_VtxCurrentIdx);
+				drawList->_IdxWritePtr[1] = (ImDrawIdx)(drawList->_VtxCurrentIdx + i - 1);
+				drawList->_IdxWritePtr[2] = (ImDrawIdx)(drawList->_VtxCurrentIdx + i);
+				drawList->_IdxWritePtr += 3;
+			}
+			drawList->_VtxCurrentIdx += (ImDrawIdx)vtx_count;
+		}
+		
+		//drawList->AddConvexPolyFilled(drawList->_Path.Data, drawList->_Path.Size, 0); 
+		//drawList->_Path.Size = 0;
+		//drawList->PathFillConvex(color.ToU32());
+	}
 
 #pragma endregion
 

@@ -185,6 +185,7 @@ namespace CE
 		virtual bool IsEnumConstant() const { return false; }
 
 		virtual bool IsPOD() const { return false; }
+		virtual void CopyConstructor(void* source, void* destination) {}
 
 		virtual bool IsAssignableTo(TypeId typeId) { return false; }
 
@@ -333,3 +334,5 @@ CE_RTTI_POD(CORE_API, CE::IO, Path)
 
 CE_RTTI_POD_TEMPLATE(CORE_API, CE, Array, u8)
 
+CE_RTTI_POD(CORE_API, CE, Color)
+CE_RTTI_POD(CORE_API, CE, Gradient)

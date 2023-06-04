@@ -103,6 +103,8 @@ namespace CE::GUI
 
     COREGUI_API void FillRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
 
+	COREGUI_API void FillRect(const Vec4& rect, const Gradient& gradient, Vec4 rounding = { 0, 0, 0, 0 });
+
 #pragma endregion
     
 } // namespace CE

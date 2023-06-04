@@ -144,6 +144,11 @@ namespace CE
         
         u32 ToU32() const;
 
+		inline static Color Lerp(const Color& from, const Color& to, f32 t)
+		{
+			return Color(Math::Lerp(from.r, to.r, t), Math::Lerp(from.g, to.g, t), Math::Lerp(from.b, to.b, t), Math::Lerp(from.a, to.a, t));
+		}
+
     public:
 
         union {
@@ -155,3 +160,4 @@ namespace CE
     };
 
 } // namespace CE
+

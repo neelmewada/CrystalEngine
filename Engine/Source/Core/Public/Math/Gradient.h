@@ -11,13 +11,48 @@ namespace CE
             f32 position{};
             Color value{};
         };
+
+		enum Direction
+		{
+			LeftToRight = 0,
+			TopToBottom
+		};
         
         Gradient();
         Gradient(std::initializer_list<Key> list);
         
+		Direction GetDirection() const { return direction; }
+
+		void SetDirection(Direction direction)
+		{
+			this->direction = direction;
+		}
+
+		u32 GetNumKeys() const
+		{
+			return keys.GetSize();
+		}
+
+		const Key& GetKeyAt(u32 index) const
+		{
+			return keys[index];
+		}
+
+		Key& GetKeyAt(u32 index)
+		{
+			return keys[index];
+		}
+
+		Color Evaluate(f32 position) const;
+
     private:
+
         Array<Key> keys{};
+
+		Direction direction{};
     };
     
 } // namespace CE
+
+
 

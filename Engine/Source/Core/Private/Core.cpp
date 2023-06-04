@@ -59,6 +59,7 @@ namespace CE
             CE::String, CE::UUID, CE::Name, CE::Array<u8>,
             CE::Vec2, CE::Vec3, CE::Vec4, CE::Vec2i, CE::Vec3i, CE::Vec4i,
             CE::Quat, CE::Matrix4x4,
+			CE::Color, CE::Gradient,
 			CE::ObjectMap);
 
         // Enums

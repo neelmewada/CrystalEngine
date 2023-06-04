@@ -23,6 +23,7 @@ namespace CE::Internal\
 		const CE::Name& GetTypeName() override { return FullTypeName(); }\
 		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type); }\
 		virtual bool IsPOD() const override { return true; }\
+		virtual void CopyConstructor(void* source, void* destination) override { *(Namespace::Type*)destination = *(Namespace::Type*)source; }\
 		virtual bool IsAssignableTo(TypeId typeId) override\
 		{\
 			std::initializer_list<TypeId> types = { __VA_ARGS__ };\

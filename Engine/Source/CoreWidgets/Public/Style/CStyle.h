@@ -26,6 +26,10 @@ namespace CE::Widgets
         CStyleValue(const Vec4& vector);
         
         CStyleValue(const Color& color);
+
+		CStyleValue(std::initializer_list<Gradient::Key> gradient);
+
+		CStyleValue(const Gradient& gradient);
         
         union
         {
@@ -36,6 +40,9 @@ namespace CE::Widgets
             
             Color color;
         };
+
+		FIELD()
+		Gradient gradient{};
         
         FIELD()
         b8 isSingle = false;
@@ -45,6 +52,9 @@ namespace CE::Widgets
         
         FIELD()
         b8 isColor = false;
+
+		FIELD()
+		b8 isGradient = false;
         
     private:
         GUI::StyleVar varName = GUI::StyleVar_COUNT;
@@ -67,6 +77,8 @@ namespace CE::Widgets
         
         FIELD()
         HashMap<CStyleVariable, CStyleValue> styles{};
+
+
     };
 
 } // namespace CE::Widgets
