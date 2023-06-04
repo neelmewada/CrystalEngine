@@ -52,6 +52,7 @@
 #include "Math/Quaternion.h"
 #include "Math/Matrix.h"
 #include "Math/Color.h"
+#include "Math/Gradient.h"
 
 // Config INI
 #include "Config/ConfigTypes.h"
