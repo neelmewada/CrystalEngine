@@ -36,6 +36,8 @@ namespace CE::Widgets
         
     protected:
         virtual void OnDrawGUI() override;
+
+		void HandleEvent(CEvent* event) override;
         
         FIELD()
         String windowTitle{};

@@ -198,6 +198,22 @@ namespace CE
 		}
     }
 
+    void String::Free()
+    {
+		if (!bIsUsingDynamicBuffer && Buffer != nullptr)
+		{
+			Internal::StaticStringBlockAllocator::Get().staticBufferAllocator.Free(Buffer);
+		}
+		else
+		{
+			delete[] Buffer;
+		}
+
+		Buffer = nullptr;
+		Capacity = StringLength = 0;
+		bIsUsingDynamicBuffer = false;
+    }
+
     char* String::GetCString() const
     {
         return Buffer;

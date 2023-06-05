@@ -137,6 +137,11 @@ namespace CE
             return Color(0, 0, 0, 1);
         }
 
+		inline static Color White()
+		{
+			return Color(1, 1, 1, 1);
+		}
+
         inline static Color Yellow()
         {
             return Color(1, 1, 0, 1);
@@ -153,7 +158,7 @@ namespace CE
 
         union {
             struct {
-                f32 r, g, b, a;
+				f32 a, b, g, r;
             };
             f32 rgba[4] = { 0, 0, 0, 0 };
         };

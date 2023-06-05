@@ -6,13 +6,22 @@ namespace CE
     class ClassType;
     class Object;
 
-    struct SignalBinding
-    {
-    public:
-        FunctionType* signalFunction;
-        FunctionType* boundFunction;
-        Object* boundObject;
-    };
+    //struct SignalBinding
+    //{
+    //public:
+    //    FunctionType* signalFunction;
+    //    FunctionType* boundFunction;
+    //    Object* boundObject;
+    //};
+
+	struct SignalBinding
+	{
+		FunctionType* signalFunction = nullptr;
+		FunctionType* boundFunction = nullptr;
+
+		void* signalInstance = nullptr;
+		void* boundInstance = nullptr;
+	};
 
 } // namespace CE
 

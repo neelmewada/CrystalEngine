@@ -254,6 +254,7 @@ namespace CE
 
         functionsCached = true;
         cachedFunctions.Clear();
+		cachedFunctionsMap.Clear();
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
@@ -269,13 +270,12 @@ namespace CE
 
                 for (const auto& func : structType->cachedFunctions)
                 {
-                    if (!cachedFunctions.Exists([&](const FunctionType& f) -> bool
-                        {
-                            return (func.GetFunctionSignature() == f.GetFunctionSignature()) && func.GetName() == f.GetName();
-                        }))
-                    {
-                        cachedFunctions.Add(func);
-                    }
+                    //cachedFunctions.RemoveAll([&](const FunctionType& f) -> bool
+                    //    {
+                    //        return (func.GetFunctionSignature() == f.GetFunctionSignature()) && func.GetName() == f.GetName();
+                    //    });
+
+					cachedFunctions.Add(func);
                 }
             }
             else if (type->IsClass())
@@ -285,13 +285,12 @@ namespace CE
 
                 for (const auto& func : classType->cachedFunctions)
                 {
-                    if (!cachedFunctions.Exists([&](const FunctionType& f) -> bool
-                        {
-                            return (func.GetFunctionSignature() == f.GetFunctionSignature()) && func.GetName() == f.GetName();
-                        }))
-                    {
-                        cachedFunctions.Add(func);
-                    }
+					//cachedFunctions.RemoveAll([&](const FunctionType& f) -> bool
+					//	{
+					//		return (func.GetFunctionSignature() == f.GetFunctionSignature()) && func.GetName() == f.GetName();
+					//	});
+
+                    cachedFunctions.Add(func);
                 }
             }
 
@@ -299,7 +298,7 @@ namespace CE
 
             for (int i = 0; i < cachedFunctions.GetSize(); i++)
             {
-                cachedFunctions[i].owner = this;
+                cachedFunctions[i].instanceOwner = this;
 
                 if (i == cachedFunctions.GetSize() - 1)
                 {

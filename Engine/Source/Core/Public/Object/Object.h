@@ -152,8 +152,6 @@ namespace CE
 
         virtual bool IsPackage() { return false; }
 
-		bool IsFullyLoaded() { return isFullyLoaded; }
-
 		virtual Name GetPathInPackage();
         
 		// Returns the package this object belongs to.
@@ -178,6 +176,14 @@ namespace CE
         
         virtual void OnAfterConfigLoad() {}
 
+		void FireSignal(const String& name, const Array<Variant>& args);
+
+	public:
+
+		static void FireSignal(void* signalInstance, const String& name, const Array<Variant>& args);
+
+		static bool Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction);
+
     private:
 
 #if PAL_TRAIT_BUILD_TESTS
@@ -200,8 +206,6 @@ namespace CE
         Name name;
         UUID uuid;
 
-		b8 isFullyLoaded = true;
-
         ObjectFlags objectFlags = OF_NoFlags;
 
         // Subobject Lifecycle
@@ -211,6 +215,9 @@ namespace CE
         
         ThreadId creationThreadId{};
         //Mutex mutex{};
+
+		static HashMap<void*, Array<SignalBinding>> outgoingBindingsMap;
+		static HashMap<void*, Array<SignalBinding>> incomingBindingsMap;
     };
     
 } // namespace CE

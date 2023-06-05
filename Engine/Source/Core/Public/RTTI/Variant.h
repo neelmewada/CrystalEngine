@@ -38,17 +38,24 @@ namespace CE
 
 		Variant(const Variant& copy)
 		{
-			memcpy(this, &copy, sizeof(Variant));
+			Free();
+			CopyFrom(copy);
 		}
 
 		CE::Variant& operator=(const CE::Variant& copy)
 		{
-			memcpy(this, &copy, sizeof(Variant));
+			Free();
+			CopyFrom(copy);
 			return *this;
 		}
 
-		~Variant()
-		{}
+		~Variant();
+
+		// Internal use only!
+		void CopyFrom(const Variant& copy);
+
+		// Internal use only! Frees up memory used by subvalues
+		void Free();
 
 		Variant(f32 value) { SetInternalValue(value); }
 		Variant(f64 value) { SetInternalValue(value); }
@@ -302,7 +309,7 @@ namespace CE
 		{
 			// Simple types
 			bool   BoolValue;
-			String StringValue{};
+			String StringValue;
 			s8	   Int8Value;
 			s16    Int16Value;
 			s32    Int32Value;

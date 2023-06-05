@@ -240,7 +240,7 @@ namespace CE
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) = function;
             
-			FunctionDelegate funcDelegate = [funcPtr](Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{
@@ -262,7 +262,7 @@ namespace CE
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) const = function;
 
-			FunctionDelegate funcDelegate = [funcPtr](Object* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
+			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
 				{
@@ -641,7 +641,7 @@ namespace CE
 		}
 		StructType* castFrom = TCastFrom::Type();
 		StructType* castTo = TCastTo::Type();
-		return (TCastTo*)castFrom->TryCast(from, castTo);
+		return (TCastTo*)castFrom->TryCast((SIZE_T)from, castTo->GetTypeId());
 	}
 
 }

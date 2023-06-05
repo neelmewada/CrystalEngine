@@ -125,7 +125,7 @@ CE::ClassType* Namespace::Class::Type()\
 	static CE::Internal::TypeInfoImpl<Namespace::Class> instance{\
 			#Namespace "::" #Class,\
 			&instance, sizeof(Namespace::Class),\
-			StructTypeData<Namespace::Class>()\
+			CE::StructTypeData<Namespace::Class>()\
 	};\
 	return &instance.Type;\
 }\
@@ -168,7 +168,7 @@ public:\
 
 
 
-#define CE_RTTI_STRUCT(API, Namespace, Struct, SuperStructs, Attributes, FieldList)\
+#define CE_RTTI_STRUCT(API, Namespace, Struct, SuperStructs, Attributes, FieldList, FunctionList)\
 namespace CE\
 {\
 	CE_USING_NAMESPACE(Namespace);\
@@ -189,6 +189,7 @@ namespace CE\
             {\
 				Type.AddSuper<SuperStructs>();\
 				FieldList\
+				FunctionList\
             }\
 			virtual ~TypeInfoImpl()\
 			{\

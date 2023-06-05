@@ -7,6 +7,8 @@ namespace CE::Widgets
 		struct WidgetInitializer;
 	}
 
+	class CWindow;
+
 	CLASS(Abstract)
 	class COREWIDGETS_API CWidget : public Object
 	{
@@ -23,10 +25,9 @@ namespace CE::Widgets
 		virtual void RenderGUI();
         
         virtual bool IsWindow() { return false; }
+		virtual bool IsContainer() { return IsWindow(); }
 
 		bool IsFocused() const { return isFocused; }
-		bool IsLeftClicked() const { return isLeftClicked; }
-		bool IsRightClicked() const { return isRightClicked; }
         
         void SetWidgetFlags(WidgetFlags flags);
         
@@ -42,9 +43,20 @@ namespace CE::Widgets
             this->style = style;
         }
 
+		CWidget* GetOwner();
+
+		CWindow* GetOwnerWindow();
+
 	protected:
 
 		CWidget();
+
+		// Events
+
+		virtual void HandleEvent(CEvent* event);
+
+		virtual void OnMouseClicked(int mouseButton) {}
+		virtual void OnMouseDoubleClicked(int mouseButton) {}
 
 		// Protected API
 
@@ -62,6 +74,9 @@ namespace CE::Widgets
         
         virtual void BeginStyle();
         virtual void EndStyle();
+
+		/// Must be called at the end of all GUI draw calls
+		virtual void PollEvents();
 
 	private:
 
@@ -83,9 +98,12 @@ namespace CE::Widgets
 
         b8 isBuilt = false;
 		b8 isHovered = false;
+		Vec2 prevHoverPos{};
+
 		b8 isFocused = false;
-		b8 isLeftClicked = false, isRightClicked = false, isMiddleClicked = false;
+		b8 isLeftMouseDown = false;
         
+	private:
         u32 pushedColors = 0;
         u32 pushedVars = 0;
         

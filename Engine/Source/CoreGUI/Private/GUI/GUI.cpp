@@ -42,6 +42,25 @@ namespace CE::GUI
         return Vec2(vec.x, vec.y);
     }
 
+	COREGUI_API Vec2 GetWindowPos()
+	{
+		ImVec2 pos = ImGui::GetWindowPos();
+		return Vec2(pos.x, pos.y);
+	}
+
+	COREGUI_API Vec2 GetWindowSize()
+	{
+		ImVec2 pos = ImGui::GetWindowSize();
+		return Vec2(pos.x, pos.y);
+	}
+
+	COREGUI_API Vec4 GetWindowRect()
+	{
+		auto pos = GetWindowPos();
+		auto size = GetWindowSize();
+		return Vec4(pos.x, pos.y, pos.x + size.x, pos.y + size.y);
+	}
+
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition, const Vec2& pivot)
 	{
 		ImGui::SetNextWindowPos(ImVec2(pos.x, pos.y), (int)condition, ImVec2(pivot.x, pivot.y));
@@ -256,9 +275,21 @@ namespace CE::GUI
 
 #pragma region Events
 
+	COREGUI_API Vec4 GetItemRect()
+	{
+		ImVec2 min = ImGui::GetItemRectMin();
+		ImVec2 max = ImGui::GetItemRectMax();
+		return Vec4(min.x, min.y, max.x, max.y);
+	}
+
 	COREGUI_API bool IsWindowHovered(HoveredFlags flags)
 	{
-		return ImGui::IsWindowHovered(flags);
+		return ImGui::IsWindowHovered((int)flags);
+	}
+
+	COREGUI_API bool IsWindowFocused(FocusFlags flags)
+	{
+		return ImGui::IsWindowFocused((int)flags);
 	}
 
 	COREGUI_API bool IsItemHovered(HoveredFlags flags)
@@ -266,14 +297,23 @@ namespace CE::GUI
 		return ImGui::IsItemHovered(flags);
 	}
 
+	COREGUI_API bool IsMouseDown(MouseButton button)
+	{
+		return ImGui::IsMouseDown((int)button);
+	}
+
 	COREGUI_API bool IsItemClicked(MouseButton button)
 	{
 		return ImGui::IsItemClicked((int)button);
 	}
 
+	COREGUI_API bool IsItemDoubleClicked(MouseButton button)
+	{
+		return ImGui::IsMouseDoubleClicked((int)button) && ImGui::IsItemHovered();
+	}
+
 	COREGUI_API bool IsItemFocused()
 	{
-		ImGui::GetID("");
 		return ImGui::IsItemFocused();
 	}
 
@@ -285,6 +325,27 @@ namespace CE::GUI
 	COREGUI_API bool IsItemActive()
 	{
 		return ImGui::IsItemActive();
+	}
+
+	COREGUI_API void SetWantMouseCapture(bool value)
+	{
+		ImGui::GetIO().WantCaptureMouse = value;
+	}
+
+	COREGUI_API bool IsMouseClicked(MouseButton button)
+	{
+		return ImGui::IsMouseClicked((int)button);
+	}
+
+	COREGUI_API bool IsMouseDoubleClicked(MouseButton button)
+	{
+		return ImGui::IsMouseDoubleClicked((int)button);
+	}
+
+	COREGUI_API Vec2 GetMousePos()
+	{
+		ImVec2 pos = ImGui::GetMousePos();
+		return Vec2(pos.x, pos.y);
 	}
 
 #pragma endregion
@@ -354,71 +415,106 @@ namespace CE::GUI
 		const float roundingBR = rounding.z;
 		const float roundingBL = rounding.w;
 
-		enum PointType
-		{
-			TopLeft, TopSegment, TopRight, RightSegment, BottomRight, BottomSegment, BottomLeft, LeftSegment
-		};
-
-		Array<PointType> pointsMeta{};
-
 		drawList->PathArcToFast(ImVec2(rect.x + roundingTL, rect.y + roundingTL), roundingTL, 6, 9);
-		u32 topLeftPathSize = drawList->_Path.Size;
-		for (int i = 0; i < topLeftPathSize; i++)
-		{
-			pointsMeta.Add(TopLeft);
-		}
-		
-		// LeftToRight
-		u32 topPathSize = 0;
-		if (gradient.GetDirection() == Gradient::LeftToRight)
-		{
-			for (int i = 0; i < gradient.GetNumKeys(); i++)
-			{
-				const auto& key = gradient.GetKeyAt(i);
-				f32 localX = width * key.position;
-				drawList->PathLineTo(ImVec2(rect.x + localX, rect.y));
-				topPathSize++;
-				pointsMeta.Add(TopSegment);
-			}
-		}
-
 		drawList->PathArcToFast(ImVec2(rect.z - roundingTR, rect.y + roundingTR), roundingTR, 9, 12);
-		u32 topRightPathSize = drawList->_Path.Size;
-		for (int i = pointsMeta.GetSize(); i < topRightPathSize; i++)
-		{
-			pointsMeta.Add(TopRight);
-		}
-
-		// LeftToRight
-		u32 rightPathSize = 0;
-		if (gradient.GetDirection() == Gradient::TopToBottom)
-		{
-			for (int i = 0; i < gradient.GetNumKeys(); i++)
-			{
-				const auto& key = gradient.GetKeyAt(i);
-				f32 localY = height * key.position;
-				drawList->PathLineTo(ImVec2(rect.z, rect.y + localY));
-				rightPathSize++;
-				pointsMeta.Add(RightSegment);
-			}
-		}
-
 		drawList->PathArcToFast(ImVec2(rect.z - roundingBR, rect.w - roundingBR), roundingBR, 0, 3);
-		u32 bottomRightPathSize = drawList->_Path.Size;
-		for (int i = pointsMeta.GetSize(); i < bottomRightPathSize; i++)
-		{
-			pointsMeta.Add(BottomRight);
-		}
-
 		drawList->PathArcToFast(ImVec2(rect.x + roundingBL, rect.w - roundingBL), roundingBL, 3, 6);
-		u32 bottomLeftPathSize = drawList->_Path.Size;
-		for (int i = pointsMeta.GetSize(); i < bottomLeftPathSize; i++)
-		{
-			pointsMeta.Add(BottomLeft);
-		}
 
 		// Fill
 
+		if (drawList->Flags & ImDrawListFlags_AntiAliasedFill)
+		{
+			// Anti-aliased Fill
+			const float AA_SIZE = drawList->_FringeScale;
+			//const ImU32 col_trans = col & ~IM_COL32_A_MASK;
+			const int idx_count = (drawList->_Path.Size - 2) * 3 + drawList->_Path.Size * 6;
+			const int vtx_count = (drawList->_Path.Size * 2);
+			drawList->PrimReserve(idx_count, vtx_count);
+
+			// Add indexes for fill
+			unsigned int vtx_inner_idx = drawList->_VtxCurrentIdx;
+			unsigned int vtx_outer_idx = drawList->_VtxCurrentIdx + 1;
+			for (int i = 2; i < drawList->_Path.Size; i++)
+			{
+				drawList->_IdxWritePtr[0] = (ImDrawIdx)(vtx_inner_idx); 
+				drawList->_IdxWritePtr[1] = (ImDrawIdx)(vtx_inner_idx + ((i - 1) << 1));
+				drawList->_IdxWritePtr[2] = (ImDrawIdx)(vtx_inner_idx + (i << 1));
+				drawList->_IdxWritePtr += 3;
+			}
+
+			// Compute normals
+			drawList->_Data->TempBuffer.reserve_discard(drawList->_Path.Size);
+			ImVec2* temp_normals = drawList->_Data->TempBuffer.Data;
+			for (int i0 = drawList->_Path.Size - 1, i1 = 0; i1 < drawList->_Path.Size; i0 = i1++)
+			{
+				const ImVec2& p0 = drawList->_Path[i0];
+				const ImVec2& p1 = drawList->_Path[i1];
+				float dx = p1.x - p0.x;
+				float dy = p1.y - p0.y;
+				IM_NORMALIZE2F_OVER_ZERO(dx, dy);
+				temp_normals[i0].x = dy;
+				temp_normals[i0].y = -dx;
+			}
+
+			for (int i0 = drawList->_Path.Size - 1, i1 = 0; i1 < drawList->_Path.Size; i0 = i1++)
+			{
+				// Average normals
+				const ImVec2& n0 = temp_normals[i0];
+				const ImVec2& n1 = temp_normals[i1];
+				float dm_x = (n0.x + n1.x) * 0.5f;
+				float dm_y = (n0.y + n1.y) * 0.5f;
+				IM_FIXNORMAL2F(dm_x, dm_y);
+				dm_x *= AA_SIZE * 0.5f;
+				dm_y *= AA_SIZE * 0.5f;
+
+				// Add vertices
+				drawList->_VtxWritePtr[0].pos.x = (drawList->_Path[i1].x - dm_x); 
+				drawList->_VtxWritePtr[0].pos.y = (drawList->_Path[i1].y - dm_y); 
+
+				ImVec2 pos0 = drawList->_VtxWritePtr[0].pos;
+				f32 ratio0 = 0;
+				if (gradient.GetDirection() == Gradient::LeftToRight)
+				{
+					ratio0 = Math::Clamp01((pos0.x - rect.x) / (rect.z - rect.x));
+				}
+				else
+				{
+					ratio0 = Math::Clamp01((pos0.y - rect.y) / (rect.w - rect.y));
+				}
+
+				drawList->_VtxWritePtr[0].uv = uv; 
+				drawList->_VtxWritePtr[0].col = gradient.Evaluate(ratio0).ToU32(); // Inner
+
+				drawList->_VtxWritePtr[1].pos.x = (drawList->_Path[i1].x + dm_x); 
+				drawList->_VtxWritePtr[1].pos.y = (drawList->_Path[i1].y + dm_y); 
+
+				ImVec2 pos1 = drawList->_VtxWritePtr[1].pos;
+				f32 ratio1 = 0;
+				if (gradient.GetDirection() == Gradient::TopToBottom)
+				{
+					ratio1 = Math::Clamp01((pos1.x - rect.x) / (rect.z - rect.x));
+				}
+				else
+				{
+					ratio1 = Math::Clamp01((pos1.y - rect.y) / (rect.w - rect.y));
+				}
+
+				drawList->_VtxWritePtr[1].uv = uv; 
+				drawList->_VtxWritePtr[1].col = gradient.Evaluate(ratio1).ToU32() & ~IM_COL32_A_MASK;  // Outer
+				drawList->_VtxWritePtr += 2;
+
+				// Add indexes for fringes
+				drawList->_IdxWritePtr[0] = (ImDrawIdx)(vtx_inner_idx + (i1 << 1)); 
+				drawList->_IdxWritePtr[1] = (ImDrawIdx)(vtx_inner_idx + (i0 << 1)); 
+				drawList->_IdxWritePtr[2] = (ImDrawIdx)(vtx_outer_idx + (i0 << 1));
+				drawList->_IdxWritePtr[3] = (ImDrawIdx)(vtx_outer_idx + (i0 << 1)); 
+				drawList->_IdxWritePtr[4] = (ImDrawIdx)(vtx_outer_idx + (i1 << 1)); 
+				drawList->_IdxWritePtr[5] = (ImDrawIdx)(vtx_inner_idx + (i1 << 1));
+				drawList->_IdxWritePtr += 6;
+			}
+			drawList->_VtxCurrentIdx += (ImDrawIdx)vtx_count;
+		}
+		else
 		{
 			// Non Anti-aliased Fill
 			const int idx_count = (drawList->_Path.Size - 2) * 3;
@@ -426,9 +522,20 @@ namespace CE::GUI
 			drawList->PrimReserve(idx_count, vtx_count);
 			for (int i = 0; i < vtx_count; i++)
 			{
-				drawList->_VtxWritePtr[0].pos = drawList->_Path.Data[i]; 
+				ImVec2 pos = drawList->_Path.Data[i];
+				f32 ratio = 0;
+				if (gradient.GetDirection() == Gradient::LeftToRight)
+				{
+					ratio = Math::Clamp01((pos.x - rect.x) / (rect.z - rect.x));
+				}
+				else
+				{
+					ratio = Math::Clamp01((pos.y - rect.y) / (rect.w - rect.y));
+				}
+
+				drawList->_VtxWritePtr[0].pos = pos;
 				drawList->_VtxWritePtr[0].uv = uv; 
-				drawList->_VtxWritePtr[0].col = col;
+				drawList->_VtxWritePtr[0].col = gradient.Evaluate(ratio).ToU32();
 				drawList->_VtxWritePtr++;
 			}
 			for (int i = 2; i < drawList->_Path.Size; i++)
@@ -440,10 +547,8 @@ namespace CE::GUI
 			}
 			drawList->_VtxCurrentIdx += (ImDrawIdx)vtx_count;
 		}
-		
-		//drawList->AddConvexPolyFilled(drawList->_Path.Data, drawList->_Path.Size, 0); 
-		//drawList->_Path.Size = 0;
-		//drawList->PathFillConvex(color.ToU32());
+
+		drawList->_Path.Size = 0;
 	}
 
 #pragma endregion

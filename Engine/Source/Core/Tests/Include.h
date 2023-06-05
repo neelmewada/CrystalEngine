@@ -70,6 +70,35 @@ namespace PackageTests
 	};
 }
 
+namespace ObjectTests
+{
+	using namespace CE;
+
+	CLASS()
+	class Sender : public CE::Object
+	{
+		CE_CLASS(Sender, CE::Object)
+	public:
+
+		CE_SIGNAL(MySignal1, String);
+
+	};
+
+	CLASS()
+	class Receiver : public CE::Object
+	{
+		CE_CLASS(Receiver, CE::Object)
+	public:
+
+		FUNCTION()
+		void PrintString(String string)
+		{
+			printValue = string;
+		}
+
+		String printValue{};
+	};
+}
 
 #include "Include.rtti.h"
 

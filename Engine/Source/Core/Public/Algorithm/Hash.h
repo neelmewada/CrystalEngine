@@ -24,11 +24,11 @@ namespace CE
     {
         constexpr bool isPointer = std::is_pointer_v<T>;
         
-        typedef std::remove_pointer_t<T> NotPtrType;
+        typedef std::remove_pointer_t<T> WithoutPtrType;
         
         if constexpr (isPointer)
         {
-            return (SIZE_T)(NotPtrType*)value;
+            return (SIZE_T)(WithoutPtrType*)value;
         }
         else
         {

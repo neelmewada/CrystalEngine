@@ -273,6 +273,18 @@ namespace CE::GUI
     };
     ENUM_CLASS_FLAGS(ButtonFlags);
 
+	enum FocusFlags
+	{
+		FOCUS_None = 0,
+		FOCUS_ChildWindows = 1 << 0,   // Return true if any children of the window is focused
+		FOCUS_RootWindow = 1 << 1,   // Test from root window (top most parent of the current hierarchy)
+		FOCUS_AnyWindow = 1 << 2,   // Return true if any window is focused. Important: If you are trying to tell how to dispatch your low-level inputs, do NOT use this. Use 'io.WantCaptureMouse' instead! Please read the FAQ!
+		FOCUS_NoPopupHierarchy = 1 << 3,   // Do not consider popup hierarchy (do not treat popup emitter as parent of popup) (when used with _ChildWindows or _RootWindow)
+		FOCUS_DockHierarchy = 1 << 4,   // Consider docking hierarchy (treat dockspace host as parent of docked window) (when used with _ChildWindows or _RootWindow)
+		FOCUS_RootAndChildWindows = FOCUS_RootWindow | FOCUS_ChildWindows,
+	};
+	ENUM_CLASS_FLAGS(FocusFlags);
+
     enum class Cond
     {
         None = 0,        // No condition (always set the variable), same as _Always

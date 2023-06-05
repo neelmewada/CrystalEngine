@@ -12,6 +12,10 @@ namespace CE::GUI
     COREGUI_API void SetCursorPos(const Vec2& pos);
     COREGUI_API Vec2 GetCursorScreenPos();
 
+	COREGUI_API Vec2 GetWindowPos();
+	COREGUI_API Vec2 GetWindowSize();
+	COREGUI_API Vec4 GetWindowRect();
+
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition = Cond::None, const Vec2& pivot = Vec2(0, 0));
 
 	COREGUI_API void SetNextWindowSize(const Vec2& size, Cond condition = Cond::None);
@@ -83,17 +87,31 @@ namespace CE::GUI
 
 #pragma region Events/States
 
+	COREGUI_API Vec4 GetItemRect();
+
 	COREGUI_API bool IsWindowHovered(HoveredFlags flags = Hovered_None);
+
+	COREGUI_API bool IsWindowFocused(FocusFlags flags = FOCUS_None);
 
 	COREGUI_API bool IsItemHovered(HoveredFlags flags = Hovered_None);
 
+	COREGUI_API bool IsMouseDown(MouseButton button = MouseButton::Left);
+
 	COREGUI_API bool IsItemClicked(MouseButton button = MouseButton::Left);
+	COREGUI_API bool IsItemDoubleClicked(MouseButton button = MouseButton::Left);
 
 	COREGUI_API bool IsItemFocused();
 
 	COREGUI_API bool IsItemVisible();
 
 	COREGUI_API bool IsItemActive();
+
+	COREGUI_API void SetWantMouseCapture(bool value);
+
+	COREGUI_API bool IsMouseClicked(MouseButton button = MouseButton::Left);
+	COREGUI_API bool IsMouseDoubleClicked(MouseButton button = MouseButton::Left);
+
+	COREGUI_API Vec2 GetMousePos();
 
 #pragma endregion
 

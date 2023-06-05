@@ -718,6 +718,16 @@ TEST(Object, CDI)
     TEST_END;
 }
 
+
+TEST(Object, Signals)
+{
+	TEST_BEGIN;
+
+
+
+	TEST_END;
+}
+
 #pragma endregion
 
 /**********************************************

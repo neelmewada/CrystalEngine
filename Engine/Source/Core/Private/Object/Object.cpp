@@ -531,6 +531,70 @@ namespace CE
 			}
 		}
     }
+
+	// - Bindings API -
+
+	HashMap<void*, Array<SignalBinding>> Object::outgoingBindingsMap{};
+	HashMap<void*, Array<SignalBinding>> Object::incomingBindingsMap{};
+
+	void Object::FireSignal(const String& name, const Array<Variant>& args)
+	{
+		Object::FireSignal(this, name, args);
+	}
+
+	void Object::FireSignal(void* signalInstance, const String& name, const Array<Variant>& args)
+	{
+		if (!outgoingBindingsMap.KeyExists(signalInstance))
+			return;
+
+		Array<TypeId> argHashes{};
+		for (const Variant& arg : args)
+		{
+			argHashes.Add(arg.GetValueTypeId());
+		}
+		TypeId signature = (TypeId)GetCombinedHashes(argHashes);
+
+		const Array<SignalBinding>& bindings = outgoingBindingsMap[signalInstance];
+
+		for (const auto& binding : bindings)
+		{
+			if (binding.boundFunction == nullptr ||
+				binding.signalFunction == nullptr ||
+				binding.signalInstance == nullptr ||
+				binding.boundInstance == nullptr)
+				continue;
+
+			if (binding.signalFunction->IsSignalFunction() &&
+				binding.signalFunction->GetName() == name &&
+				binding.signalFunction->GetFunctionSignature() == signature &&
+				binding.boundFunction->GetFunctionSignature() == signature)
+			{
+				binding.boundFunction->Invoke(binding.boundInstance, args);
+			}
+		}
+	}
+
+	bool Object::Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction)
+	{
+		if (sourceInstance == nullptr || sourceFunction == nullptr || destinationInstance == nullptr || destinationFunction == nullptr)
+			return false;
+
+		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
+		auto& incomingBindings = incomingBindingsMap[destinationInstance];
+
+		SignalBinding binding{};
+		binding.signalInstance = sourceInstance;
+		binding.signalFunction = sourceFunction;
+		binding.boundInstance = destinationInstance;
+		binding.boundFunction = destinationFunction;
+
+		outgoingBindings.Add(binding);
+		incomingBindings.Add(binding);
+
+		
+
+		return true;
+	}
 }
 
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Object)

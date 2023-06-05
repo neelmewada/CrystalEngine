@@ -41,7 +41,7 @@ namespace CE::Widgets
     Array<GUI::StyleVar> CStyle::GetStyleVar(CStyleVariable variable)
     {
         static HashMap<CStyleVariable, Array<GUI::StyleVar>> map{
-            { CStyleVariable::Alpha, { GUI::StyleVar_Alpha } }
+            { CStyleVariable::Opacity, { GUI::StyleVar_Alpha } }
         };
         
         if (!map.KeyExists(variable))

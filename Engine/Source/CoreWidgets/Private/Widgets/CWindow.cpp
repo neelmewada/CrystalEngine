@@ -40,8 +40,20 @@ namespace CE::Widgets
             }
             
             GUI::EndWindow();
+
+			PollEvents();
         }
     }
+
+	void CWindow::HandleEvent(CEvent* event)
+	{
+		if (event->GetEventType() == CEventType::FocusChanged)
+		{
+
+		}
+
+		Super::HandleEvent(event);
+	}
 
     void CWindow::AddSubWidget(CWidget* subWidget)
     {

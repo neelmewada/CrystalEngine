@@ -19,7 +19,7 @@ namespace CE
 		};
         
         Gradient();
-        Gradient(std::initializer_list<Key> list);
+        Gradient(std::initializer_list<Key> list, Direction dir = LeftToRight);
         
 		Direction GetDirection() const { return direction; }
 

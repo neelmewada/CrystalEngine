@@ -137,6 +137,9 @@ namespace CE
          // Reserves space for the given number of characters in string.
         void Reserve(u32 reserveCharacterCount);
 
+		// Warning: Internal use only! This function frees the memory used by this string.
+		void Free();
+
         char* GetCString() const;
 		char* GetData() const;
         inline u32 GetLength() const { return StringLength; }

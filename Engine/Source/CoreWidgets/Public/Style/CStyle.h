@@ -6,10 +6,11 @@ namespace CE::Widgets
     enum class CStyleVariable
     {
         None = 0,
-        Alpha,
+        Opacity,
         Padding,
         ForegroundColor,
         BackgroundColor,
+		BackgroundColor_Hovered,
         BorderRadius,
     };
     

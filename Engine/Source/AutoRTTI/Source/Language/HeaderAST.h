@@ -27,11 +27,12 @@ namespace CE
         Array<Name> superClasses;
         Array<String> attribs{};
         Array<FieldInfo> fields{};
+		Array<FunctionInfo> functions{};
     };
 
     struct ClassInfo : public StructInfo
     {
-        Array<FunctionInfo> functions{};
+        
     };
 
     struct EnumConstInfo

@@ -6,6 +6,8 @@
 // Widgets
 #include "Widgets/Definitions.h"
 #include "Style/CStyle.h"
+#include "Event/CEvent.h"
+
 #include "Widgets/CWidget.h"
 #include "Widgets/WidgetManager.h"
 #include "Widgets/CWindow.h"

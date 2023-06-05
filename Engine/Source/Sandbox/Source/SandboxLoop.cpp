@@ -183,8 +183,8 @@ void SandboxLoop::SetupGUI()
     label2->SetText("Label Text");
     label2->GetStyle().AddStyleVar(CStyleVariable::Padding, Vec4(15, 15, 5, 5));
     //label2->GetStyle().AddStyleVar(CStyleVariable::Alpha, 0.5f);
-    label2->GetStyle().AddStyleVar(CStyleVariable::ForegroundColor, Color::Black());
-    label2->GetStyle().AddStyleVar(CStyleVariable::BackgroundColor, Color(1.0f, 0.0f, 1.0f, 1.0f));
+    label2->GetStyle().AddStyleVar(CStyleVariable::ForegroundColor, Color(0, 0, 0, 1));
+	label2->GetStyle().AddStyleVar(CStyleVariable::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
     label2->GetStyle().AddStyleVar(CStyleVariable::BorderRadius, Vec4(10, 5, 5, 5));
 }
 
@@ -243,7 +243,7 @@ void SandboxLoop::RunLoop()
                 GUI::EndWindow();
             }
 
-			static bool demoWindow = true;
+			static bool demoWindow = false;
 			if (demoWindow)
 			{
 				GUI::ShowDemoWindow(&demoWindow);

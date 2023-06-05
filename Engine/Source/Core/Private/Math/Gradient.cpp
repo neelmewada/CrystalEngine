@@ -7,7 +7,7 @@ namespace CE
 
 	}
 
-	Gradient::Gradient(std::initializer_list<Key> list) : keys(list)
+	Gradient::Gradient(std::initializer_list<Key> list, Direction dir) : keys(list), direction(dir)
 	{
 
 	}
