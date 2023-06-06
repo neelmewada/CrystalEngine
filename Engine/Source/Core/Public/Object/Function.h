@@ -27,9 +27,11 @@ namespace CE
 
 		INLINE TypeId GetReturnTypeId() const { return returnType; }
 
-		INLINE TypeId GetFunctionSignature() const
+		INLINE TypeId GetFunctionSignature()
 		{
-			return GetCombinedHashes(paramTypes);
+			if (signature == 0)
+				signature = GetCombinedHashes(paramTypes);
+			return signature;
 		}
 		
 		INLINE u32 GetParameterCount() const { return paramTypes.GetSize(); }
@@ -70,6 +72,8 @@ namespace CE
 		FunctionType* next = nullptr;
 		TypeInfo* owner = nullptr;
 		TypeInfo* instanceOwner = nullptr;
+
+		TypeId signature = 0;
 
 		Array<Attribute> attributeList{};
 

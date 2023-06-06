@@ -179,10 +179,46 @@ namespace CE
 		u32 GetFieldCount();
 		FieldType* GetFieldAt(u32 index);
         
-        FieldType* FindFieldWithName(Name name);
+        FieldType* FindFieldWithName(const Name& name);
 
-		FunctionType* FindFunctionWithName(Name name);
-		CE::Array<FunctionType*> FindAllFunctionsWithName(Name name);
+		FunctionType* FindFunctionWithName(const Name& name);
+		CE::Array<FunctionType*> FindAllFunctionsWithName(const Name& name);
+
+		template<typename ReturnType, typename ClassOrStruct, typename... Args>
+		FunctionType* FindFunction(const Name& name, ReturnType(ClassOrStruct::* function)(Args...))
+		{
+			auto functions = FindAllFunctionsWithName(name);
+			
+			TypeId signature = CE::GetFunctionSignature(function);
+
+			for (auto funcType : functions)
+			{
+				if (funcType->GetFunctionSignature() == signature && funcType->GetName() == name)
+				{
+					return funcType;
+				}
+			}
+
+			return nullptr;
+		}
+
+		template<typename ReturnType, typename ClassOrStruct, typename... Args>
+		FunctionType* FindFunction(const Name& name, ReturnType(ClassOrStruct::* function)(Args...) const)
+		{
+			auto functions = FindAllFunctionsWithName(name);
+
+			TypeId signature = CE::GetFunctionSignature(function);
+
+			for (auto funcType : functions)
+			{
+				if (funcType->GetFunctionSignature() == signature && funcType->GetName() == name)
+				{
+					return funcType;
+				}
+			}
+
+			return nullptr;
+		}
 
 		virtual void InitializeDefaults(void* instance) const
 		{

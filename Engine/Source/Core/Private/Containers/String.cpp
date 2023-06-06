@@ -146,6 +146,9 @@ namespace CE
 			return;
         }
 
+		if (Buffer == nullptr)
+			bIsUsingDynamicBuffer = false;
+
         reserveCharacterCount++; // Add extra byte for null terminator
 
         if (reserveCharacterCount > STRING_BUFFER_SIZE) // Use dynamic buffer

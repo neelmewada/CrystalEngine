@@ -184,7 +184,14 @@ namespace CE
 
 		static bool Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction);
 
+		static void UnbindAllSignals(void* instance);
+
+		static void UnbindSignals(void* toInstance, void* fromInstance);
+
     private:
+
+		static void UnbindAllIncomingSignals(void* toInstance);
+		static void UnbindAllOutgoingSignals(void* fromInstance);
 
 #if PAL_TRAIT_BUILD_TESTS
 		friend class ::Package_WriteRead_Test;

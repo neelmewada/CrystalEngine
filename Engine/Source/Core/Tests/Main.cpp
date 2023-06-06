@@ -722,9 +722,46 @@ TEST(Object, CDI)
 TEST(Object, Signals)
 {
 	TEST_BEGIN;
+	CERegisterModuleTypes();
 
+	auto senderFunc = MEMBER_FUNCTION(ObjectTests::Sender, MySignal1);
+	EXPECT_NE(senderFunc, nullptr);
+	EXPECT_EQ(senderFunc->GetName(), "MySignal1");
+	EXPECT_TRUE(senderFunc->IsSignalFunction());
 
+	auto receiverFunc = MEMBER_FUNCTION(ObjectTests::Receiver, PrintString);
+	EXPECT_NE(receiverFunc, nullptr);
+	EXPECT_EQ(receiverFunc->GetName(), "PrintString");
 
+	Sender* sender = CreateObject<Sender>(GetTransientPackage(), "Sender");
+	Receiver* receiver = CreateObject<Receiver>(GetTransientPackage(), "Receiver");
+
+	Object::Bind(sender, senderFunc, receiver, receiverFunc);
+
+	EXPECT_EQ(receiver->printValue, "");
+	sender->MySignal1("Test String");
+	EXPECT_EQ(receiver->printValue, "Test String");
+	receiver->printValue = "";
+
+	{
+		SenderStruct senderStruct{};
+		ReceiverStruct receiverStruct{};
+
+		auto receiverFunc2 = MEMBER_FUNCTION(ObjectTests::ReceiverStruct, PrintStringValue);
+
+		Object::Bind(sender, senderFunc, &receiverStruct, receiverFunc2);
+
+		EXPECT_EQ(receiver->printValue, "");
+		sender->MySignal1("2nd Test Call");
+		EXPECT_EQ(receiver->printValue, "2nd Test Call");
+		EXPECT_EQ(receiverStruct.stringValue, "2nd Test Call");
+		receiver->printValue = "";
+	}
+
+	sender->RequestDestroy();
+	receiver->RequestDestroy();
+
+	CEDeregisterModuleTypes();
 	TEST_END;
 }
 

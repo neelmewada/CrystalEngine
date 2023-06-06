@@ -117,7 +117,7 @@ namespace CE
         return index < GetFieldCount() ? &cachedFields[index] : nullptr;
     }
 
-    FieldType* StructType::FindFieldWithName(Name name)
+    FieldType* StructType::FindFieldWithName(const Name& name)
     {
         if (!fieldsCached)
             CacheAllFields();
@@ -128,7 +128,7 @@ namespace CE
         return nullptr;
     }
 
-    FunctionType* StructType::FindFunctionWithName(Name name)
+    FunctionType* StructType::FindFunctionWithName(const Name& name)
     {
         if (!functionsCached)
             CacheAllFunctions();
@@ -139,7 +139,7 @@ namespace CE
         return nullptr;
     }
 
-    CE::Array<FunctionType*> StructType::FindAllFunctionsWithName(Name name)
+    CE::Array<FunctionType*> StructType::FindAllFunctionsWithName(const Name& name)
     {
         if (!functionsCached)
             CacheAllFunctions();
@@ -293,28 +293,28 @@ namespace CE
                     cachedFunctions.Add(func);
                 }
             }
-
-            cachedFunctions.AddRange(localFunctions);
-
-            for (int i = 0; i < cachedFunctions.GetSize(); i++)
-            {
-                cachedFunctions[i].instanceOwner = this;
-
-                if (i == cachedFunctions.GetSize() - 1)
-                {
-                    cachedFunctions[i].next = nullptr;
-                }
-                else
-                {
-                    cachedFunctions[i].next = &cachedFunctions[i + 1];
-                }
-
-                if (cachedFunctionsMap.KeyExists(cachedFunctions[i].GetName()))
-                    cachedFunctionsMap[cachedFunctions[i].GetName()].Add(&cachedFunctions[i]);
-                else
-                    cachedFunctionsMap.Add({ cachedFunctions[i].GetName(), { &cachedFunctions[i] } });
-            }
         }
+
+		cachedFunctions.AddRange(localFunctions);
+
+		for (int i = 0; i < cachedFunctions.GetSize(); i++)
+		{
+			cachedFunctions[i].instanceOwner = this;
+
+			if (i == cachedFunctions.GetSize() - 1)
+			{
+				cachedFunctions[i].next = nullptr;
+			}
+			else
+			{
+				cachedFunctions[i].next = &cachedFunctions[i + 1];
+			}
+
+			if (cachedFunctionsMap.KeyExists(cachedFunctions[i].GetName()))
+				cachedFunctionsMap[cachedFunctions[i].GetName()].Add(&cachedFunctions[i]);
+			else
+				cachedFunctionsMap.Add({ cachedFunctions[i].GetName(), { &cachedFunctions[i] } });
+		}
     }
 
     void StructType::RegisterStructType(StructType* type)

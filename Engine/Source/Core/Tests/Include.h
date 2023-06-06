@@ -96,7 +96,37 @@ namespace ObjectTests
 			printValue = string;
 		}
 
+		FIELD()
 		String printValue{};
+	};
+
+	STRUCT()
+	struct SenderStruct
+	{
+		CE_STRUCT(SenderStruct)
+	public:
+
+		CE_SIGNAL(StructSignal1, String);
+
+	};
+
+	STRUCT()
+	struct ReceiverStruct
+	{
+		CE_STRUCT(ReceiverStruct)
+	public:
+
+		FUNCTION()
+		void PrintStringValue(String string)
+		{
+			stringValue = string;
+		}
+
+		FIELD()
+		String stringValue{};
+
+		FIELD()
+		Array<String> arrayValue{};
 	};
 }
 

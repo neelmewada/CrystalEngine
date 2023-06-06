@@ -15,6 +15,9 @@ namespace CE
 
 	Object::~Object()
 	{
+		// Unbind signals
+		UnbindAllSignals(this);
+
         // Detach this object from outer
         if (outer != nullptr)
         {
@@ -579,6 +582,9 @@ namespace CE
 		if (sourceInstance == nullptr || sourceFunction == nullptr || destinationInstance == nullptr || destinationFunction == nullptr)
 			return false;
 
+		if (sourceFunction->GetFunctionSignature() != destinationFunction->GetFunctionSignature())
+			return false;
+
 		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
 		auto& incomingBindings = incomingBindingsMap[destinationInstance];
 
@@ -591,10 +597,72 @@ namespace CE
 		outgoingBindings.Add(binding);
 		incomingBindings.Add(binding);
 
-		
-
 		return true;
 	}
+
+	void Object::UnbindSignals(void* toInstance, void* fromInstance)
+	{
+		auto& incoming = incomingBindingsMap[toInstance];
+
+		for (int i = incoming.GetSize() - 1; i >= 0; i--)
+		{
+			if (incoming[i].signalInstance == fromInstance)
+				incoming.RemoveAt(i);
+		}
+	}
+
+	void Object::UnbindAllIncomingSignals(void* toInstance)
+	{
+		auto& incoming = incomingBindingsMap[toInstance];
+
+		for (int i = incoming.GetSize() - 1; i >= 0; i--)
+		{
+			incoming.RemoveAt(i);
+		}
+	}
+
+	void Object::UnbindAllOutgoingSignals(void* fromInstance)
+	{
+		auto& outgoing = outgoingBindingsMap[fromInstance];
+
+		for (int i = outgoing.GetSize() - 1; i >= 0; i--)
+		{
+			outgoing.RemoveAt(i);
+		}
+	}
+
+	void Object::UnbindAllSignals(void* instance)
+	{
+		auto& outgoing = outgoingBindingsMap[instance];
+		for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING
+		{
+			auto& binding = outgoing[i];
+
+			UnbindSignals(binding.boundInstance, instance);
+		}
+
+		outgoing.Clear();
+		outgoingBindingsMap.Remove(instance);
+
+
+		auto& incoming = incomingBindingsMap[instance];
+		for (int i = incoming.GetSize() - 1; i >= 0; i--) // INCOMING
+		{
+			auto& binding = incoming[i];
+
+			auto& outgoingFrom = outgoingBindingsMap[binding.signalInstance];
+
+			for (int j = outgoingFrom.GetSize() - 1; j >= 0; j--)
+			{
+				if (outgoingFrom[j].boundInstance == instance)
+					outgoingFrom.RemoveAt(j);
+			}
+		}
+
+		incoming.Clear();
+		incomingBindingsMap.Remove(instance);
+	}
+
 }
 
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Object)
