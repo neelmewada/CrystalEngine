@@ -746,6 +746,7 @@ TEST(Object, Signals)
 	{
 		SenderStruct senderStruct{};
 		ReceiverStruct receiverStruct{};
+		String localValue = "";
 
 		auto senderFunc2 = MEMBER_FUNCTION(ObjectTests::SenderStruct, StructSignal1);
 		EXPECT_NE(senderFunc2, nullptr);
@@ -762,11 +763,32 @@ TEST(Object, Signals)
 		receiver->printValue = "";
 		receiverStruct.stringValue = "";
 
+		Delegate<void(String)> f = [](String string) {};
+		
 		Object::Bind(&senderStruct, senderFunc2, &receiverStruct, receiverFunc2);
+		//Object::Bind(&senderStruct, senderFunc2, Delegate<void(String)>([&localValue](String string) -> void
+		//	{
+		//		localValue = "Changed from lamda";
+		//	}));
+		Object::Bind(&senderStruct, senderFunc2, [&localValue](String string) -> void
+			{
+				localValue = "Changed from lamda";
+			});
+
+		EXPECT_EQ(localValue, "");
 		EXPECT_EQ(receiverStruct.stringValue, "");
 		senderStruct.StructSignal1("Call from struct");
 		EXPECT_EQ(receiverStruct.stringValue, "Call from struct");
+		EXPECT_EQ(localValue, "Changed from lamda");
+
+		localValue = "";
 		receiverStruct.stringValue = "";
+
+		Object::UnbindAllSignals(&senderStruct);
+
+		senderStruct.StructSignal1("Call from struct");
+		EXPECT_EQ(localValue, "");
+		EXPECT_EQ(receiverStruct.stringValue, "");
 	}
 
 	sender->RequestDestroy();

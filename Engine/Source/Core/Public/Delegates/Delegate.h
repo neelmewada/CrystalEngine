@@ -67,4 +67,22 @@ namespace CE
         return Delegate<ReturnType(Args...)>(function, instance);
     }
 
+	template<typename T, typename ReturnType = void>
+	struct MakeDelegateType : TFalseType
+	{
+
+	};
+
+	template<typename... Args, typename ReturnType>
+	struct MakeDelegateType<std::tuple<Args...>, ReturnType> : TTrueType
+	{
+		typedef Delegate<ReturnType(Args...)> DelegateType;
+	};
+
+	template<typename... Args>
+	struct MakeDelegateType<std::tuple<Args...>, void> : TTrueType
+	{
+		typedef Delegate<void(Args...)> DelegateType;
+	};
+
 } // namespace CE

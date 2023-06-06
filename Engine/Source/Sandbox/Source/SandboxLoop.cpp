@@ -189,6 +189,10 @@ void SandboxLoop::SetupGUI()
 	label2->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
 	label2->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor_Hovered, Gradient({ {0, Color::Yellow()}, {1, Color::Green()} }, Gradient::TopToBottom));
     label2->GetStyle().AddStyleProperty(CStyleProperty::BorderRadius, Vec4(10, 5, 5, 5));
+
+	CButton* button = CreateObject<CButton>(window, "MyButton");
+	button->SetText("Click Me!");
+	
 }
 
 void SandboxLoop::RunLoop()

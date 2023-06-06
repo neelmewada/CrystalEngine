@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "CoreGUI.h"
 
-// Widgets
+
 #include "Widgets/Definitions.h"
 #include "Style/CStyle.h"
 #include "Event/CEvent.h"
@@ -12,7 +12,9 @@
 #include "Widgets/WidgetManager.h"
 #include "Widgets/CWindow.h"
 
+// Widgets
 #include "Widgets/CLabel.h"
+#include "Widgets/CButton.h"
 
 namespace CE::Widgets
 {

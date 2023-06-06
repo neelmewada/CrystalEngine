@@ -25,7 +25,7 @@ namespace CE::Widgets
     private:
         
         FIELD()
-        String text;
+        String text{};
         
         String invisibleButtonId{};
     };

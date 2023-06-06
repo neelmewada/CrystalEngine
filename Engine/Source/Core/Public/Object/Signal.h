@@ -21,6 +21,8 @@ namespace CE
 
 		void* signalInstance = nullptr;
 		void* boundInstance = nullptr;
+
+		Delegate<void(const Array<Variant>& args)> boundDelegate{};
 	};
 
 } // namespace CE
@@ -55,4 +57,5 @@ namespace CE
 
 #define fire
 #define FIRE
-
+#define emit
+#define EMIT

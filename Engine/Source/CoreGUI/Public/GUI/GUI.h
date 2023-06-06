@@ -67,6 +67,8 @@ namespace CE::GUI
 
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
+	COREGUI_API bool Button(const String& label, const Vec4& padding, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
+
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 
 #pragma endregion

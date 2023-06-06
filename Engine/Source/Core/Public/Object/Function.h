@@ -92,6 +92,12 @@ namespace CE
 	{
 		return GetCombinedHashes({ TYPEID(Args)... });
 	}
+
+	template<typename... Args>
+	TypeId GetFunctionSignature()
+	{
+		return GetCombinedHashes({ TYPEID(Args)... });
+	}
     
 } // namespace CE
 

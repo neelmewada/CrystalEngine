@@ -558,9 +558,16 @@ namespace CE
 
 		for (const auto& binding : bindings)
 		{
+			if (binding.signalFunction == nullptr ||
+				binding.signalInstance == nullptr)
+				continue;
+
+			if (binding.boundDelegate.IsValid())
+			{
+				binding.boundDelegate.Invoke(args);
+			}
+
 			if (binding.boundFunction == nullptr ||
-				binding.signalFunction == nullptr ||
-				binding.signalInstance == nullptr ||
 				binding.boundInstance == nullptr)
 				continue;
 
@@ -635,7 +642,10 @@ namespace CE
 		{
 			auto& binding = outgoing[i];
 
-			UnbindSignals(binding.boundInstance, instance);
+			if (binding.boundInstance != nullptr)
+			{
+				UnbindSignals(binding.boundInstance, instance);
+			}
 		}
 
 		outgoing.Clear();

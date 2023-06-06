@@ -1,6 +1,8 @@
 
 #include "CoreGUI.h"
 
+#define IMGUI_DEFINE_MATH_OPERATORS
+
 // Import Dear ImGui from VulkanRHI
 #define IMGUI_API DLL_IMPORT
 #include "imgui.h"
@@ -229,6 +231,54 @@ namespace CE::GUI
     {
         return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
     }
+
+	COREGUI_API bool Button(const String& label, const Vec4& padding, const Vec2& sizeVec, ButtonFlags buttonFlags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		int flags = (int)buttonFlags;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+		const ImGuiID id = window->GetID(label.GetCString());
+		const ImVec2 label_size = ImGui::CalcTextSize(label.GetCString(), NULL, true);
+
+		ImVec2 pos = window->DC.CursorPos;
+		if (((int)flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
+			pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+		ImVec2 size = ImGui::CalcItemSize(ImVec2(sizeVec.x, sizeVec.y), label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+
+		const ImRect bb(pos, pos + size);
+		ImGui::ItemSize(size, style.FramePadding.y);
+		if (!ImGui::ItemAdd(bb, id))
+			return false;
+
+		if (g.LastItemData.InFlags & ImGuiItemFlags_ButtonRepeat)
+			flags |= ImGuiButtonFlags_Repeat;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
+
+		// Render
+		const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+		ImGui::RenderNavHighlight(bb, id);
+		ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+
+		if (g.LogEnabled)
+			ImGui::LogSetNextTextDecoration("[", "]");
+		ImGui::RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label.GetCString(), NULL, &label_size, style.ButtonTextAlign, &bb);
+
+		// Automatically close popups
+		//if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
+		//    CloseCurrentPopup();
+
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(), g.LastItemData.StatusFlags);
+		return pressed;
+
+		return false;
+	}
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size)
     {

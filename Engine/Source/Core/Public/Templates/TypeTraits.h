@@ -145,5 +145,31 @@ namespace CE
 	template<typename T>
 	struct TIsStruct : TBoolConst<__is_class(T) && T::IsStruct()> {};
 
+	// Function
+
+	template <typename T>
+	struct FunctionTraits : public FunctionTraits<decltype(&T::operator())>
+	{};
+
+	// For generic types, directly use the result of the signature of its 'operator()'
+
+	template <typename TClassType, typename TReturnType, typename... Args>
+	struct FunctionTraits<TReturnType(TClassType::*)(Args...) const> // we specialize for pointers to member function
+	{
+		enum { NumArgs = sizeof...(Args) };
+
+		typedef TReturnType ReturnType;
+
+		typedef std::tuple<Args...> Tuple;
+
+		template <SIZE_T i>
+		struct Arg
+		{
+			typedef typename std::tuple_element<i, std::tuple<Args...>>::type Type;
+			// the i-th argument is equivalent to the i-th tuple element of a tuple
+			// composed of those arguments.
+		};
+	};
+
 } // namespace CE::Traits
 

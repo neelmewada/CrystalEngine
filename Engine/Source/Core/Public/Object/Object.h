@@ -178,11 +178,66 @@ namespace CE
 
 		void FireSignal(const String& name, const Array<Variant>& args);
 
+	private:
+
+		static bool BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate)
+		{
+			if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
+				return false;
+
+			auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
+
+			outgoingBindings.Add({});
+			auto& binding = outgoingBindings.Top();
+
+			binding.signalInstance = sourceInstance;
+			binding.signalFunction = sourceFunction;
+			binding.boundInstance = nullptr;
+			binding.boundFunction = nullptr;
+
+			binding.boundDelegate = delegate;
+
+			return true;
+		}
+
+		template<typename ReturnType, typename... Args, std::size_t... Is>
+		inline static bool BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<ReturnType(Args...)> delegate, std::index_sequence<Is...>)
+		{
+			if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
+				return false;
+
+			if (sourceFunction->GetFunctionSignature() != GetFunctionSignature<Args...>())
+				return false;
+
+			return BindInternal(sourceInstance, sourceFunction, Delegate<void(const Array<Variant>&)>([delegate](const Array<Variant>& args)
+				{
+					delegate.InvokeIfValid(((args.begin() + Is)->GetValue<Args>())...);
+				}));
+		}
+
 	public:
 
 		static void FireSignal(void* signalInstance, const String& name, const Array<Variant>& args);
 
 		static bool Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction);
+
+		template<typename... Args>
+		inline static bool Bind(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(Args...)> delegate)
+		{
+			return BindInternal<void, Args...>(sourceInstance, sourceFunction, delegate, std::make_index_sequence<sizeof...(Args)>());
+		}
+
+		template<typename TLambda>
+		inline static bool Bind(void* sourceInstance, FunctionType* sourceFunction, TLambda lambda)
+		{
+			typedef FunctionTraits<TLambda> Traits;
+			typedef Traits::Tuple TupleType;
+			typedef Traits::ReturnType ReturnType;
+			typedef MakeDelegateType<TupleType, ReturnType>::DelegateType DelegateType;
+
+			return Bind(sourceInstance, sourceFunction, DelegateType(lambda));
+		}
+
 
 		static void UnbindAllSignals(void* instance);
 
