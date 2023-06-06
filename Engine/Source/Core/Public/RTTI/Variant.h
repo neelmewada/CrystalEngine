@@ -76,7 +76,7 @@ namespace CE
         Variant(Vec3  value) { SetInternalValue(value); }
         Variant(Vec4  value) { SetInternalValue(value); }
 
-		Variant(String value) { StringValue = value; valueTypeId = TYPEID(String); }
+        Variant(String value) { Clear(); StringValue = value; valueTypeId = TYPEID(String); }
 
 		Variant(IO::Path value) 
 		{

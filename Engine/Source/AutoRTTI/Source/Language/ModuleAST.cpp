@@ -179,12 +179,12 @@ namespace CE
 				}
 				outStream << ")\n";
 			}
-			outStream << "\t)\n";
+			outStream << "\t),\n";
 
 			outStream << "\tCE_FUNCTION_LIST(\n";
 			for (int i = 0; i < structInfo.functions.GetSize(); i++)
 			{
-				outStream << "\t\tCE_FUNCTION(" << structInfo.functions[i].name.GetCString()
+				outStream << "\t\tCE_FUNCTION2(" << structInfo.functions[i].name.GetCString()
 					<< ", " << (structInfo.functions[i].returnType.IsEmpty() ? "auto" : structInfo.functions[i].returnType.GetCString())
 					<< ", " << structInfo.functions[i].signature.GetCString();
 				for (int j = 0; j < structInfo.functions[i].attribs.GetSize(); j++)

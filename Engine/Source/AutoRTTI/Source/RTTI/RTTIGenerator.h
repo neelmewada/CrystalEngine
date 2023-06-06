@@ -55,7 +55,8 @@ CE_RTTI_STRUCT(, CE, HeaderCRC,
     CE_FIELD_LIST(
         CE_FIELD(headerPath)
         CE_FIELD(crc)
-    )
+    ),
+    CE_FUNCTION_LIST()
 )
 
 
@@ -64,5 +65,6 @@ CE_RTTI_STRUCT(, CE, ModuleStamp,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
         CE_FIELD(headers)
-    )
+    ),
+    CE_FUNCTION_LIST()
 )

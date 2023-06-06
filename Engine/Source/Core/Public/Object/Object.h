@@ -231,9 +231,9 @@ namespace CE
 		inline static bool Bind(void* sourceInstance, FunctionType* sourceFunction, TLambda lambda)
 		{
 			typedef FunctionTraits<TLambda> Traits;
-			typedef Traits::Tuple TupleType;
-			typedef Traits::ReturnType ReturnType;
-			typedef MakeDelegateType<TupleType, ReturnType>::DelegateType DelegateType;
+            typedef typename Traits::Tuple TupleType;
+			typedef typename Traits::ReturnType ReturnType;
+			typedef typename MakeDelegateType<TupleType, ReturnType>::DelegateType DelegateType;
 
 			return Bind(sourceInstance, sourceFunction, DelegateType(lambda));
 		}

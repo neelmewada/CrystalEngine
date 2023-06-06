@@ -662,7 +662,8 @@ CE_RTTI_STRUCT(, ObjectTest, CDIStruct,
 	CE_FIELD_LIST(
 		CE_FIELD(name)
 		CE_FIELD(value)
-	)
+	),
+    CE_FUNCTION_LIST()
 )
 CE_RTTI_STRUCT_IMPL(, ObjectTest, CDIStruct)
 
