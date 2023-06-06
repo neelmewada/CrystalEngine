@@ -747,7 +747,11 @@ TEST(Object, Signals)
 		SenderStruct senderStruct{};
 		ReceiverStruct receiverStruct{};
 
+		auto senderFunc2 = MEMBER_FUNCTION(ObjectTests::SenderStruct, StructSignal1);
+		EXPECT_NE(senderFunc2, nullptr);
+
 		auto receiverFunc2 = MEMBER_FUNCTION(ObjectTests::ReceiverStruct, PrintStringValue);
+		EXPECT_NE(receiverFunc2, nullptr);
 
 		Object::Bind(sender, senderFunc, &receiverStruct, receiverFunc2);
 
@@ -756,6 +760,13 @@ TEST(Object, Signals)
 		EXPECT_EQ(receiver->printValue, "2nd Test Call");
 		EXPECT_EQ(receiverStruct.stringValue, "2nd Test Call");
 		receiver->printValue = "";
+		receiverStruct.stringValue = "";
+
+		Object::Bind(&senderStruct, senderFunc2, &receiverStruct, receiverFunc2);
+		EXPECT_EQ(receiverStruct.stringValue, "");
+		senderStruct.StructSignal1("Call from struct");
+		EXPECT_EQ(receiverStruct.stringValue, "Call from struct");
+		receiverStruct.stringValue = "";
 	}
 
 	sender->RequestDestroy();
