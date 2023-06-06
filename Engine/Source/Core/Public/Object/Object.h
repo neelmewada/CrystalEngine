@@ -180,10 +180,10 @@ namespace CE
 
 	private:
 
-		static bool BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate)
+		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate)
 		{
 			if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
-				return false;
+				return 0;
 
 			auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
 
@@ -197,11 +197,11 @@ namespace CE
 
 			binding.boundDelegate = delegate;
 
-			return true;
+			return delegate.GetHandle();
 		}
 
 		template<typename ReturnType, typename... Args, std::size_t... Is>
-		inline static bool BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<ReturnType(Args...)> delegate, std::index_sequence<Is...>)
+		inline static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<ReturnType(Args...)> delegate, std::index_sequence<Is...>)
 		{
 			if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
 				return false;
@@ -222,13 +222,13 @@ namespace CE
 		static bool Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction);
 
 		template<typename... Args>
-		inline static bool Bind(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(Args...)> delegate)
+		inline static DelegateHandle Bind(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(Args...)> delegate)
 		{
 			return BindInternal<void, Args...>(sourceInstance, sourceFunction, delegate, std::make_index_sequence<sizeof...(Args)>());
 		}
 
 		template<typename TLambda>
-		inline static bool Bind(void* sourceInstance, FunctionType* sourceFunction, TLambda lambda)
+		inline static DelegateHandle Bind(void* sourceInstance, FunctionType* sourceFunction, TLambda lambda)
 		{
 			typedef FunctionTraits<TLambda> Traits;
             typedef typename Traits::Tuple TupleType;
@@ -240,6 +240,8 @@ namespace CE
 
 
 		static void UnbindAllSignals(void* instance);
+        
+        static void Unbind(void* instance, DelegateHandle delegateInstance);
 
 		static void UnbindSignals(void* toInstance, void* fromInstance);
 

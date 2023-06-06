@@ -670,6 +670,20 @@ namespace CE
 		incomingBindingsMap.Remove(instance);
 	}
 
+    void Object::Unbind(void* instance, DelegateHandle delegateInstance)
+    {
+        auto& outgoing = outgoingBindingsMap[instance];
+        for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING
+        {
+            auto& binding = outgoing[i];
+
+            if (binding.boundDelegate.IsValid() && binding.boundDelegate.GetHandle() == delegateInstance)
+            {
+                binding.RemoveAt(i);
+            }
+        }
+    }
+
 }
 
 CE_RTTI_CLASS_IMPL(CORE_API, CE, Object)
