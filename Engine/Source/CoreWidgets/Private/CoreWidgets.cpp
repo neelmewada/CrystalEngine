@@ -10,6 +10,8 @@ namespace CE::Widgets
 
 	COREWIDGETS_API Package* gWidgetsTransientPackage = nullptr;
 
+	COREWIDGETS_API CStyleManager* gStyleManager = nullptr;
+
 	COREWIDGETS_API Package* GetWidgetsTransientPackage()
 	{
 		return gWidgetsTransientPackage;
@@ -23,10 +25,15 @@ namespace CE::Widgets
         virtual void StartupModule() override
         {
 			gWidgetsTransientPackage = CreateObject<Package>(nullptr, TEXT("/CoreWidgets/Transient"), OF_Transient);
+
+			gStyleManager = CreateObject<CStyleManager>(gWidgetsTransientPackage, TEXT("StyleManager"), OF_Transient);
         }
 
         virtual void ShutdownModule() override
         {
+			gStyleManager->RequestDestroy();
+			gStyleManager = nullptr;
+
 			gWidgetsTransientPackage->RequestDestroy();
 			gWidgetsTransientPackage = nullptr;
         }

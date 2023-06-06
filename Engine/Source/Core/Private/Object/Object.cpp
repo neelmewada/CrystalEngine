@@ -547,9 +547,6 @@ namespace CE
 
 	void Object::FireSignal(void* signalInstance, const String& name, const Array<Variant>& args)
 	{
-		if (!outgoingBindingsMap.KeyExists(signalInstance))
-			return;
-
 		Array<TypeId> argHashes{};
 		for (const Variant& arg : args)
 		{

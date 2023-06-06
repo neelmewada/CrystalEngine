@@ -10,7 +10,7 @@ namespace CE::Widgets
 
     CWindow::~CWindow()
     {
-        CE_LOG(Info, All, "Window Widget Destroyed");
+
     }
 
     void CWindow::Show()
@@ -32,12 +32,18 @@ namespace CE::Widgets
     {
         if (isShown)
         {
+			PushStyle();
             GUI::BeginWindow(windowTitle, &isShown);
-            
+			PopStyle();
+
+			PushStyle(CStylePropertyFlags::Inherited); // Push inheritable properties for sub-widgets
+
             for (CWidget* subWidget : attachedWidgets)
             {
                 subWidget->RenderGUI();
             }
+
+			PopStyle();
             
             GUI::EndWindow();
 

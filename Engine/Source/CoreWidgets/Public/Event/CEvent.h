@@ -26,7 +26,6 @@ namespace CE::Widgets
 	public:
 
 		CEvent() = default;
-		virtual ~CEvent() = default;
 
 		inline void MarkHandled()
 		{
@@ -79,6 +78,8 @@ namespace CE::Widgets
 		FIELD()
 		int mouseButton{}; // 0 = left click | 1 = right click | 2 = middle click
 
+		FIELD()
+		b8 isInside = false; // If mouse is inside the sender's bounds
 	};
 
 	STRUCT()

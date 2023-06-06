@@ -174,18 +174,21 @@ void SandboxLoop::SetupGUI()
     using namespace CE::Widgets;
     
     window->SetTitle("Test Window");
+	//window->GetStyle().AddStyleProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
     
     CLabel* label = CreateObject<CLabel>(window, "MyLabel");
     label->SetText("Label Text");
-    label->GetStyle().AddStyleVar(CStyleVariable::ForegroundColor, Color(1.0f, 1.0f, 0.0f, 1.0f));
+    label->GetStyle().AddStyleProperty(CStyleProperty::ForegroundColor, Color::White());
+	label->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
+	label->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor_Hovered, Color(0.0f, 1.0f, 0.0f, 1.0f));
+	label->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor_Pressed, Color(0.0f, 0.0f, 1.0f, 1.0f));
     
     CLabel* label2 = CreateObject<CLabel>(window, "MyLabel2");
-    label2->SetText("Label Text");
-    label2->GetStyle().AddStyleVar(CStyleVariable::Padding, Vec4(15, 15, 5, 5));
-    //label2->GetStyle().AddStyleVar(CStyleVariable::Alpha, 0.5f);
-    label2->GetStyle().AddStyleVar(CStyleVariable::ForegroundColor, Color(0, 0, 0, 1));
-	label2->GetStyle().AddStyleVar(CStyleVariable::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
-    label2->GetStyle().AddStyleVar(CStyleVariable::BorderRadius, Vec4(10, 5, 5, 5));
+    label2->SetText("Label Text 2");
+    label2->GetStyle().AddStyleProperty(CStyleProperty::Padding, Vec4(15, 15, 5, 5));
+	label2->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
+	label2->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor_Hovered, Gradient({ {0, Color::Yellow()}, {1, Color::Green()} }, Gradient::TopToBottom));
+    label2->GetStyle().AddStyleProperty(CStyleProperty::BorderRadius, Vec4(10, 5, 5, 5));
 }
 
 void SandboxLoop::RunLoop()

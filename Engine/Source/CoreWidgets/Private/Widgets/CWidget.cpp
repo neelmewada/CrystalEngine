@@ -37,22 +37,20 @@ namespace CE::Widgets
     
 	CWidget::~CWidget()
 	{
-        
+		
 	}
 
-    void CWidget::BuildWidget()
+    void CWidget::PushStyle(CStylePropertyFlags flags)
     {
-        if (isBuilt)
-            return;
-        
-        Build();
-        isBuilt = true;
-    }
+		pushedPropertiesStack.Push({});
 
-    void CWidget::BeginStyle()
-    {
-        for (const auto& [variable, value] : style.styles)
+        for (const auto& [variable, value] : style.styleMap)
         {
+			if ((int)(flags & CStyle::GetStylePropertyFlags(variable)) == 0)
+			{
+				continue;
+			}
+			
             auto styleVars = CStyle::GetStyleVar(variable);
             for (GUI::StyleVar styleVar : styleVars)
             {
@@ -62,7 +60,7 @@ namespace CE::Widgets
                         GUI::PushStyleVar(styleVar, (Vec2)value.vector);
                     else
                         GUI::PushStyleVar(styleVar, value.single);
-                    pushedVars++;
+					pushedPropertiesStack.Top().pushedVars++;
                 }
             }
             auto styleColors = CStyle::GetStyleColorVar(variable);
@@ -71,25 +69,34 @@ namespace CE::Widgets
                 if (styleCol != GUI::StyleCol_COUNT)
                 {
                     GUI::PushStyleColor(styleCol, value.color);
-                    pushedColors++;
+					pushedPropertiesStack.Top().pushedColors++;
                 }
             }
         }
     }
 
-    void CWidget::EndStyle()
+    void CWidget::PopStyle()
     {
-        if (pushedVars > 0)
-            GUI::PopStyleVar(pushedVars);
-        if (pushedColors > 0)
-            GUI::PopStyleColor(pushedColors);
+		if (pushedPropertiesStack.IsEmpty())
+			return;
+
+		const PushedProperties& pushedProps = pushedPropertiesStack.Top();
         
-        pushedVars = pushedColors = 0;
+		if (pushedProps.pushedVars > 0)
+			GUI::PopStyleVar(pushedProps.pushedVars);
+		if (pushedProps.pushedColors > 0)
+			GUI::PopStyleColor(pushedProps.pushedColors);
+
+		pushedPropertiesStack.Pop();
     }
 
 	void CWidget::PollEvents()
 	{
-		bool focused = IsWindow() ? GUI::IsWindowFocused(GUI::FOCUS_ChildWindows | GUI::FOCUS_DockHierarchy) : GUI::IsItemFocused();
+		CWindow* thisWindow = nullptr;
+		if (IsWindow())
+			thisWindow = (CWindow*)this;
+
+		bool focused = IsWindow() ? GUI::IsWindowFocused(thisWindow->GetTitle(), GUI::FOCUS_ChildWindows | GUI::FOCUS_DockHierarchy) : GUI::IsItemFocused();
 
 		if (focused != isFocused) // Focus changed
 		{
@@ -109,11 +116,13 @@ namespace CE::Widgets
 
 			// Mouse: Press, Release
 
-			b8 leftMouse = GUI::IsMouseDown(GUI::MouseButton::Left) && hovered;
+			b8 leftMouseDown = GUI::IsMouseDown(GUI::MouseButton::Left);
 
-			if (isLeftMouseDown != leftMouse)
+			if (leftMouseDown != prevLeftMouseDown && hovered) // Left mouse state changed within bounds
 			{
-				if (leftMouse) // Press
+				isLeftMousePressedInside = leftMouseDown && hovered;
+
+				if (isLeftMousePressedInside) // Press inside
 				{
 					CMouseEvent event{};
 					event.name = "MousePress";
@@ -121,12 +130,13 @@ namespace CE::Widgets
 					event.mousePos = GUI::GetMousePos();
 					event.mouseButton = 0; // Left = 0
 					event.prevMousePos = prevHoverPos;
+					event.isInside = true;
 					event.sender = this;
 
 					HandleEvent(&event);
 					prevHoverPos = event.mousePos;
 				}
-				else // Release
+				else // Release inside
 				{
 					CMouseEvent event{};
 					event.name = "MouseRelease";
@@ -134,14 +144,31 @@ namespace CE::Widgets
 					event.mousePos = GUI::GetMousePos();
 					event.mouseButton = 0; // Left = 0
 					event.prevMousePos = prevHoverPos;
+					event.isInside = true;
 					event.sender = this;
 
 					HandleEvent(&event);
 					prevHoverPos = event.mousePos;
 				}
-
-				isLeftMouseDown = leftMouse;
 			}
+			else if (isLeftMousePressedInside && !leftMouseDown && !hovered) // Release outside
+			{
+				isLeftMousePressedInside = false;
+
+				CMouseEvent event{};
+				event.name = "MouseRelease";
+				event.type = CEventType::MouseRelease;
+				event.mousePos = GUI::GetMousePos();
+				event.mouseButton = 0; // Left = 0
+				event.prevMousePos = prevHoverPos;
+				event.isInside = false;
+				event.sender = this;
+
+				HandleEvent(&event);
+				prevHoverPos = event.mousePos;
+			}
+
+			prevLeftMouseDown = GUI::IsMouseDown(GUI::MouseButton::Left);
 
 			// Mouse: Enter, Move, Leave
 			
@@ -203,7 +230,6 @@ namespace CE::Widgets
 					event.prevMousePos = event.mousePos;
 					event.sender = this;
 					HandleEvent(&event);
-					OnMouseClicked(event.mouseButton);
 				}
 			}
 
@@ -223,12 +249,13 @@ namespace CE::Widgets
 					event.prevMousePos = event.mousePos;
 					event.sender = this;
 					HandleEvent(&event);
-					OnMouseDoubleClicked(event.mouseButton);
 				}
 			}
 		}
 		else // Window
 		{
+			thisWindow = (CWindow*)this;
+
 			// Mouse Click:
 
 			bool isLeftClicked = GUI::IsMouseClicked(GUI::MouseButton::Left);
@@ -237,7 +264,7 @@ namespace CE::Widgets
 			
 			if (isLeftClicked || isRightClicked || isMiddleClicked)
 			{
-				bool isWindowHovered = GUI::IsWindowHovered(GUI::Hovered_AnyWindow);
+				bool isWindowHovered = GUI::IsWindowHovered(thisWindow->GetTitle(), GUI::Hovered_ChildWindows | GUI::Hovered_DockHierarchy | GUI::Hovered_NoPopupHierarchy);
 				if (isWindowHovered)
 				{
 					CMouseEvent event{};
@@ -248,7 +275,6 @@ namespace CE::Widgets
 					event.prevMousePos = event.mousePos;
 					event.sender = this;
 					HandleEvent(&event);
-					OnMouseClicked(event.mouseButton);
 				}
 			}
 
@@ -258,7 +284,7 @@ namespace CE::Widgets
 
 			if (isLeftDblClicked || isRightDblClicked || isMiddleDblClicked)
 			{
-				bool isWindowHovered = GUI::IsWindowHovered(GUI::Hovered_AnyWindow);
+				bool isWindowHovered = GUI::IsWindowHovered(thisWindow->GetTitle(), GUI::Hovered_ChildWindows | GUI::Hovered_DockHierarchy | GUI::Hovered_NoPopupHierarchy);
 				if (isWindowHovered)
 				{
 					CMouseEvent event{};
@@ -269,7 +295,6 @@ namespace CE::Widgets
 					event.prevMousePos = event.mousePos;
 					event.sender = this;
 					HandleEvent(&event);
-					OnMouseDoubleClicked(event.mouseButton);
 				}
 			}
 		}
@@ -277,9 +302,7 @@ namespace CE::Widgets
 
 	void CWidget::RenderGUI()
 	{
-        BeginStyle();
 		OnDrawGUI();
-        EndStyle();
     }
 
     void CWidget::SetWidgetFlags(WidgetFlags flags)
@@ -315,6 +338,12 @@ namespace CE::Widgets
     {
 		if (event->isHandled && event->stopPropagation)
 			return;
+
+		if (event->GetEventType() == CEventType::MouseButtonClick)
+		{
+			CMouseEvent* mouseEvent = (CMouseEvent*)event;
+			fire OnMouseClick(mouseEvent);
+		}
 
 		for (CWidget* parent = GetOwner(); parent != nullptr; parent = parent->GetOwner())
 		{

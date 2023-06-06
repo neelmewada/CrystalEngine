@@ -284,12 +284,28 @@ namespace CE::GUI
 
 	COREGUI_API bool IsWindowHovered(HoveredFlags flags)
 	{
+		auto w1 = ImGui::GetCurrentWindow();
+		auto w2 = GImGui->HoveredWindow;
+		auto w3 = GImGui->CurrentWindow;
+		auto w4 = GImGui->HoveredId;
 		return ImGui::IsWindowHovered((int)flags);
+	}
+
+	COREGUI_API bool IsWindowHovered(const String& windowId, HoveredFlags flags)
+	{
+		return IsWindowHovered(flags) && windowId == GImGui->HoveredWindow->Name;
 	}
 
 	COREGUI_API bool IsWindowFocused(FocusFlags flags)
 	{
 		return ImGui::IsWindowFocused((int)flags);
+	}
+
+	COREGUI_API bool IsWindowFocused(const String& windowId, FocusFlags flags)
+	{
+		if (GImGui->WindowsFocusOrder.Size == 0)
+			return ImGui::IsWindowFocused((int)flags);
+		return windowId == GImGui->WindowsFocusOrder[GImGui->WindowsFocusOrder.Size - 1]->Name && ImGui::IsWindowFocused((int)flags);
 	}
 
 	COREGUI_API bool IsItemHovered(HoveredFlags flags)

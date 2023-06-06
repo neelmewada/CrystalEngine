@@ -18,16 +18,12 @@ namespace CE::Widgets
 		virtual ~CWidget();
 
 		// - Public API -
-        
-        void BuildWidget();
 
         // For internal use only!
 		virtual void RenderGUI();
         
         virtual bool IsWindow() { return false; }
 		virtual bool IsContainer() { return IsWindow(); }
-
-		bool IsFocused() const { return isFocused; }
         
         void SetWidgetFlags(WidgetFlags flags);
         
@@ -47,6 +43,11 @@ namespace CE::Widgets
 
 		CWindow* GetOwnerWindow();
 
+		bool IsHovered() const { return isHovered; }
+		bool IsFocused() const { return isFocused; }
+
+		bool IsLeftMouseHeld() const { return isLeftMousePressedInside; }
+
 	protected:
 
 		CWidget();
@@ -54,9 +55,6 @@ namespace CE::Widgets
 		// Events
 
 		virtual void HandleEvent(CEvent* event);
-
-		virtual void OnMouseClicked(int mouseButton) {}
-		virtual void OnMouseDoubleClicked(int mouseButton) {}
 
 		// Protected API
 
@@ -72,11 +70,15 @@ namespace CE::Widgets
         /// Override this method to build child widget hierarchy
         virtual void Build() {}
         
-        virtual void BeginStyle();
-        virtual void EndStyle();
+        virtual void PushStyle(CStylePropertyFlags flags = CStylePropertyFlags::All);
+        virtual void PopStyle();
 
 		/// Must be called at the end of all GUI draw calls
 		virtual void PollEvents();
+
+	public: // Signals
+
+		CE_SIGNAL(OnMouseClick, CMouseEvent*);
 
 	private:
 
@@ -96,16 +98,24 @@ namespace CE::Widgets
         
     private:
 
-        b8 isBuilt = false;
+		// States
 		b8 isHovered = false;
-		Vec2 prevHoverPos{};
-
 		b8 isFocused = false;
-		b8 isLeftMouseDown = false;
+		b8 isLeftMousePressedInside = false;
+
+		// Internals
+		Vec2 prevHoverPos{};
+		b8 prevLeftMouseDown = false;
         
 	private:
-        u32 pushedColors = 0;
-        u32 pushedVars = 0;
+
+		struct PushedProperties
+		{
+			u32 pushedColors = 0;
+			u32 pushedVars = 0;
+		};
+
+		Array<PushedProperties> pushedPropertiesStack{};
         
 	};
     

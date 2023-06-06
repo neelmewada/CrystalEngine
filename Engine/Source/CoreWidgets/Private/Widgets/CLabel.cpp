@@ -26,19 +26,24 @@ namespace CE::Widgets
 
     void CLabel::OnDrawGUI()
     {
+		PushStyle();
+
         Vec4 padding{};
         Vec4 borderRadius{};
         
         bool hasPadding = false;
-        bool hasBackground = style.styles.KeyExists(CStyleVariable::BackgroundColor);
-        if (style.styles.KeyExists(CStyleVariable::BorderRadius))
+        bool hasBackground = style.styleMap.KeyExists(CStyleProperty::BackgroundColor);
+		bool hasBackgroundHovered = style.styleMap.KeyExists(CStyleProperty::BackgroundColor_Hovered);
+		bool hasBackgroudPressed = style.styleMap.KeyExists(CStyleProperty::BackgroundColor_Pressed);
+
+        if (style.styleMap.KeyExists(CStyleProperty::BorderRadius))
         {
-            borderRadius = style.styles[CStyleVariable::BorderRadius].vector;
+            borderRadius = style.styleMap[CStyleProperty::BorderRadius].vector;
         }
         
-        if (style.styles.KeyExists(CStyleVariable::Padding))
+        if (style.styleMap.KeyExists(CStyleProperty::Padding))
         {
-            padding = style.styles[CStyleVariable::Padding].vector;
+            padding = style.styleMap[CStyleProperty::Padding].vector;
         }
         
         if (padding.x > 0 || padding.y > 0 || padding.z > 0 || padding.w > 0)
@@ -51,7 +56,16 @@ namespace CE::Widgets
             
             if (hasBackground)
             {
-				auto& bgColorValue = style.styles[CStyleVariable::BackgroundColor];
+				auto bgColorValue = style.styleMap[CStyleProperty::BackgroundColor];
+				if (IsLeftMouseHeld() && IsHovered() && hasBackgroudPressed)
+				{
+					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Pressed];
+				}
+				else if (IsHovered() && hasBackgroundHovered)
+				{
+					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Hovered];
+				}
+
 				if (bgColorValue.isColor)
 				{
 					const Color& color = bgColorValue.color;
@@ -60,7 +74,7 @@ namespace CE::Widgets
 				}
 				else if (bgColorValue.isGradient)
 				{
-					const Gradient& gradient = bgColorValue.gradient;
+					Gradient gradient = bgColorValue.gradient;
 					GUI::FillRect(Vec4(pos.x, pos.y, pos.x + size.x + padding.x + padding.z,
 						pos.y + size.y + padding.y + padding.w), gradient, borderRadius);
 				}
@@ -86,7 +100,17 @@ namespace CE::Widgets
             {
                 Vec2 size = GUI::CalculateTextSize(text);
                 Vec2 pos = GUI::GetCursorScreenPos();
-				auto& bgColorValue = style.styles[CStyleVariable::BackgroundColor];
+				
+				auto bgColorValue = style.styleMap[CStyleProperty::BackgroundColor];
+				if (IsLeftMouseHeld() && IsHovered() && hasBackgroudPressed)
+				{
+					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Pressed];
+				}
+				else if (IsHovered() && hasBackgroundHovered)
+				{
+					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Hovered];
+				}
+
 				if (bgColorValue.isColor)
 				{
 					const Color& color = bgColorValue.color;
@@ -94,7 +118,7 @@ namespace CE::Widgets
 				}
 				else if (bgColorValue.isGradient)
 				{
-					const Gradient& gradient = bgColorValue.gradient;
+					Gradient gradient = bgColorValue.gradient;
 					GUI::FillRect(Vec4(pos.x, pos.y, pos.x + size.x, pos.y + size.y), gradient, borderRadius);
 				}
             }
@@ -102,6 +126,8 @@ namespace CE::Widgets
             GUI::Text(text);
 			PollEvents();
         }
+
+		PopStyle();
     }
 
 	void CLabel::HandleEvent(CEvent* event)

@@ -405,6 +405,11 @@ namespace CE
             return Super::Impl[GetSize() - 1];
         }
 
+		ElementType& Top()
+		{
+			return GetLast();
+		}
+
         const ElementType& Top() const
         {
             return GetLast();

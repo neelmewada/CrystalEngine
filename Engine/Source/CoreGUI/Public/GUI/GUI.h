@@ -91,7 +91,11 @@ namespace CE::GUI
 
 	COREGUI_API bool IsWindowHovered(HoveredFlags flags = Hovered_None);
 
+	COREGUI_API bool IsWindowHovered(const String& windowId, HoveredFlags flags = Hovered_None);
+
 	COREGUI_API bool IsWindowFocused(FocusFlags flags = FOCUS_None);
+
+	COREGUI_API bool IsWindowFocused(const String& windowId, FocusFlags flags = FOCUS_None);
 
 	COREGUI_API bool IsItemHovered(HoveredFlags flags = Hovered_None);
 

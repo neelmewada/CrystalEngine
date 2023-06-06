@@ -12,7 +12,7 @@ namespace CE
 				return nullptr;
 
 			const auto& objectName = params.name;
-			if (!IsValidObjectName(objectName))
+			if (!IsValidObjectName(objectName) && !params.objectClass->IsSubclassOf<Package>())
 			{
 				CE_LOG(Error, All, "Failed to create object. Invalid name passed: {}", objectName);
 				return nullptr;
@@ -73,7 +73,7 @@ namespace CE
 		for (int i = 0; i < name.GetLength(); i++)
 		{
 			char ch = name[i];
-			if (ch == '.' || ch == ' ' || ch == '-')
+			if (ch == '.' || ch == ' ' || ch == '-' || ch == '/')
 			{
 				return false;
 			}

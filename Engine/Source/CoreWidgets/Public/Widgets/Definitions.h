@@ -7,6 +7,20 @@ namespace CE::Widgets
 	{
 		None = 0,
 	};
+	ENUM_CLASS_FLAGS(WidgetFlags);
+
+	
+	/*
+	*	Forward Decls
+	*/
+
+	class CStyleManager;
+
+	/*
+	*	Global Variables
+	*/
+
+	COREWIDGETS_API extern CStyleManager* gStyleManager;
     
 } // namespace CE::Widgets
 

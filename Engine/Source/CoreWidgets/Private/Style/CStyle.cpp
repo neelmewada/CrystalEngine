@@ -33,15 +33,21 @@ namespace CE::Widgets
         
     }
 
-    CStyle::~CStyle()
-    {
-        
-    }
+	CStylePropertyFlags CStyle::GetStylePropertyFlags(CStyleProperty property)
+	{
+		static std::unordered_set<CStyleProperty> inheritedProperties{
+			CStyleProperty::ForegroundColor,
+			CStyleProperty::ForegroundColor_Disabled,
+		};
 
-    Array<GUI::StyleVar> CStyle::GetStyleVar(CStyleVariable variable)
+		return inheritedProperties.contains(property) ? CStylePropertyFlags::Inherited : CStylePropertyFlags::NonInherited;
+	}
+
+    Array<GUI::StyleVar> CStyle::GetStyleVar(CStyleProperty variable)
     {
-        static HashMap<CStyleVariable, Array<GUI::StyleVar>> map{
-            { CStyleVariable::Opacity, { GUI::StyleVar_Alpha } }
+        static HashMap<CStyleProperty, Array<GUI::StyleVar>> map{
+            { CStyleProperty::Opacity, { GUI::StyleVar_Alpha } },
+			{ CStyleProperty::DisabledOpacity, { GUI::StyleVar_DisabledAlpha } }
         };
         
         if (!map.KeyExists(variable))
@@ -50,12 +56,15 @@ namespace CE::Widgets
         return map[variable];
     }
 
-    Array<GUI::StyleCol> CStyle::GetStyleColorVar(CStyleVariable variable)
+    Array<GUI::StyleCol> CStyle::GetStyleColorVar(CStyleProperty variable)
     {
-        static HashMap<CStyleVariable, Array<GUI::StyleCol>> map{
-            { CStyleVariable::ForegroundColor, { GUI::StyleCol_Text } },
-            { CStyleVariable::BackgroundColor,
-                { GUI::StyleCol_FrameBg, GUI::StyleCol_WindowBg, GUI::StyleCol_MenuBarBg, GUI::StyleCol_ChildBg } },
+        static HashMap<CStyleProperty, Array<GUI::StyleCol>> map{
+            { CStyleProperty::ForegroundColor, { GUI::StyleCol_Text } },
+            { CStyleProperty::BackgroundColor,
+				{ GUI::StyleCol_FrameBg, GUI::StyleCol_WindowBg, GUI::StyleCol_MenuBarBg, GUI::StyleCol_ChildBg, GUI::StyleCol_Button } },
+			{ CStyleProperty::BackgroundColor_Hovered, { GUI::StyleCol_ButtonHovered } },
+			{ CStyleProperty::BackgroundColor_Pressed, { GUI::StyleCol_ButtonActive } },
+			{ CStyleProperty::ForegroundColor_Disabled, { GUI::StyleCol_TextDisabled } },
         };
         
         if (!map.KeyExists(variable))
@@ -64,14 +73,30 @@ namespace CE::Widgets
         return map[variable];
     }
 
-    void CStyle::AddStyleVar(CStyleVariable variableType, const CStyleValue& styleVar)
+    void CStyle::AddStyleProperty(CStyleProperty variableType, const CStyleValue& styleVar)
     {
-        styles[variableType] = styleVar;
+        styleMap[variableType] = styleVar;
     }
 
-    void CStyle::RemoveStyleVar(CStyleVariable variableType)
+    void CStyle::RemoveStyleProperty(CStyleProperty variableType)
     {
-        styles.Remove(variableType);
+        styleMap.Remove(variableType);
     }
+
+	void CStyle::ApplyStyle(const CStyle& style)
+	{
+		for (const auto& [property, value] : style.styleMap)
+		{
+			this->styleMap[property] = value;
+		}
+	}
+
+	CStyleManager::CStyleManager()
+	{
+	}
+
+	CStyleManager::~CStyleManager()
+	{
+	}
 
 } // namespace CE::Widgets
