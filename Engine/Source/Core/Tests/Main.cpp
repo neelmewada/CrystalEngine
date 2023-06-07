@@ -767,11 +767,8 @@ TEST(Object, Signals)
 		Delegate<void(String)> f = [](String string) {};
 		
 		Object::Bind(&senderStruct, senderFunc2, &receiverStruct, receiverFunc2);
-		//Object::Bind(&senderStruct, senderFunc2, Delegate<void(String)>([&localValue](String string) -> void
-		//	{
-		//		localValue = "Changed from lamda";
-		//	}));
-		Object::Bind(&senderStruct, senderFunc2, [&localValue](String string) -> void
+
+		auto handle = Object::Bind(&senderStruct, senderFunc2, [&localValue](String string) -> void
 			{
 				localValue = "Changed from lamda";
 			});

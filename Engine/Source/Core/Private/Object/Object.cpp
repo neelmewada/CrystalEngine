@@ -679,7 +679,7 @@ namespace CE
 
             if (binding.boundDelegate.IsValid() && binding.boundDelegate.GetHandle() == delegateInstance)
             {
-                binding.RemoveAt(i);
+                outgoing.RemoveAt(i);
             }
         }
     }
