@@ -8,6 +8,11 @@ namespace CE::Widgets
         
     }
 
+	CStyleValue::CStyleValue(const Vec2& vector) : isVector(true), vector(Vec4(vector.x, vector.y, 0, 0))
+	{
+
+	}
+
     CStyleValue::CStyleValue(const Vec4& vector) : isVector(true), vector(vector)
     {
         
@@ -38,6 +43,7 @@ namespace CE::Widgets
 		static std::unordered_set<CStyleProperty> inheritedProperties{
 			CStyleProperty::ForegroundColor,
 			CStyleProperty::ForegroundColor_Disabled,
+			CStyleProperty::TextAlignment,
 		};
 
 		return inheritedProperties.contains(property) ? CStylePropertyFlags::Inherited : CStylePropertyFlags::NonInherited;
@@ -73,15 +79,20 @@ namespace CE::Widgets
         return map[variable];
     }
 
-    void CStyle::AddStyleProperty(CStyleProperty variableType, const CStyleValue& styleVar)
+    void CStyle::AddProperty(CStyleProperty property, const CStyleValue& styleVar)
     {
-        styleMap[variableType] = styleVar;
+        styleMap[property] = styleVar;
     }
 
-    void CStyle::RemoveStyleProperty(CStyleProperty variableType)
+    void CStyle::RemoveProperty(CStyleProperty property)
     {
-        styleMap.Remove(variableType);
+        styleMap.Remove(property);
     }
+
+	CStyleValue& CStyle::GetProperty(CStyleProperty property)
+	{
+		return styleMap[property];
+	}
 
 	void CStyle::ApplyStyle(const CStyle& style)
 	{

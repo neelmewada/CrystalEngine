@@ -16,7 +16,7 @@
 	Type.AddFunction(#FunctionName, funcPtr, "" #__VA_ARGS__);\
 }
 
-#define MEMBER_FUNCTION(ClassOrStruct, FunctionName) ClassOrStruct::Type()->FindFunction(#FunctionName, &ClassOrStruct::FunctionName);
+#define MEMBER_FUNCTION(ClassOrStruct, FunctionName) ClassOrStruct::Type()->FindFunction(#FunctionName, &ClassOrStruct::FunctionName)
 
 #define __CE_RTTI_JOIN_CLASSES_0()
 #define __CE_RTTI_JOIN_CLASSES_1(...) , __VA_ARGS__

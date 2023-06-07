@@ -29,17 +29,30 @@ namespace CE::Widgets
 		
 		Vec4 padding{};
 		Vec4 borderRadius{};
+		Alignment textAlignment = Alignment::Inherited;
+		Vec2 preferredSize = {};
 
-		bool hasPadding = false;
 		if (style.styleMap.KeyExists(CStyleProperty::Padding))
 		{
 			padding = style.styleMap[CStyleProperty::Padding].vector;
 		}
 
-		if (padding.x > 0.1f || padding.y > 0.1f || padding.z > 0.1f || padding.w > 0.1f)
-			hasPadding = true;
+		if (style.styleMap.KeyExists(CStyleProperty::Size))
+		{
+			preferredSize = style.styleMap[CStyleProperty::Size].vector;
+		}
 
-		if (GUI::Button(text, padding))
+		if (style.styleMap.KeyExists(CStyleProperty::TextAlignment))
+		{
+			textAlignment = (Alignment)style.styleMap[CStyleProperty::TextAlignment].enumValue;
+		}
+
+		if (style.styleMap.KeyExists(CStyleProperty::BorderRadius))
+		{
+			borderRadius = style.styleMap[CStyleProperty::BorderRadius].vector;
+		}
+
+		if (GUI::ButtonEx(text, padding, preferredSize, borderRadius, (GUI::TextAlign)textAlignment))
 		{
 			emit OnButtonClicked();
 		}

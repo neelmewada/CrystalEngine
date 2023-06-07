@@ -232,25 +232,42 @@ namespace CE::GUI
         return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
     }
 
-	COREGUI_API bool Button(const String& label, const Vec4& padding, const Vec2& sizeVec, ButtonFlags buttonFlags)
+	COREGUI_API bool ButtonEx(const String& label, const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding, TextAlign textAlign, ButtonFlags buttonFlags)
+	{
+		return ButtonEx(label, {}, {}, {}, padding, sizeVec, rounding, textAlign, buttonFlags);
+	}
+
+	COREGUI_API bool ButtonEx(const String& label, 
+		const StyleColor& normalColor, const StyleColor& hoveredColor, const StyleColor& pressedColor, 
+		const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding,
+		TextAlign textAlign, ButtonFlags buttonFlags)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
 			return false;
 
-		int flags = (int)buttonFlags;
-
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
+
+		ImVec4 finalPadding{ padding.x, padding.y, padding.z, padding.w };
+		finalPadding.x = ImMax(padding.x, style.FramePadding.x);
+		finalPadding.y = ImMax(padding.y, style.FramePadding.y);
+		finalPadding.z = ImMax(padding.z, style.FramePadding.x);
+		finalPadding.w = ImMax(padding.w, style.FramePadding.y);
+
+		int flags = (int)buttonFlags;
+
 		const ImGuiID id = window->GetID(label.GetCString());
 		const ImVec2 label_size = ImGui::CalcTextSize(label.GetCString(), NULL, true);
 
 		ImVec2 pos = window->DC.CursorPos;
 		if (((int)flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
 			pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
-		ImVec2 size = ImGui::CalcItemSize(ImVec2(sizeVec.x, sizeVec.y), label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+		ImVec2 size = ImGui::CalcItemSize(ImVec2(sizeVec.x, sizeVec.y),
+			label_size.x + style.FramePadding.x * 2.0f,
+			label_size.y + style.FramePadding.y * 2.0f);
 
-		const ImRect bb(pos, pos + size);
+		const ImRect bb(pos, pos + size + ImVec2(padding.x + padding.z, padding.y + padding.w));
 		ImGui::ItemSize(size, style.FramePadding.y);
 		if (!ImGui::ItemAdd(bb, id))
 			return false;
@@ -262,13 +279,68 @@ namespace CE::GUI
 		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
 
 		// Render
-		const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+		//const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
-		ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+		//ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+
+		const StyleColor& colorValue = (held && hovered) ? pressedColor : hovered ? hoveredColor : normalColor;
+		if (colorValue.IsEmpty())
+		{
+			const ImVec4& col = ImGui::GetStyleColorVec4((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+			GUI::FillRect(Vec4(bb.Min.x, bb.Min.y, bb.Max.x, bb.Max.y), Color(col.x, col.y, col.z, col.w), rounding);
+		}
+		else if (colorValue.isColor)
+		{
+			GUI::FillRect(Vec4(bb.Min.x, bb.Min.y, bb.Max.x, bb.Max.y), colorValue.color, rounding);
+		}
+		else if (colorValue.isGradient)
+		{
+			GUI::FillRect(Vec4(bb.Min.x, bb.Min.y, bb.Max.x, bb.Max.y), colorValue.gradient, rounding);
+		}
+
+		ImVec2 align = style.ButtonTextAlign;
+		if (textAlign == TextAlign_TopLeft)
+		{
+			align = ImVec2(0, 0);
+		}
+		else if (textAlign == TextAlign_TopCenter)
+		{
+			align = ImVec2(0.5f, 0);
+		}
+		else if (textAlign == TextAlign_TopRight)
+		{
+			align = ImVec2(1, 0);
+		}
+		else if (textAlign == TextAlign_MiddleLeft)
+		{
+			align = ImVec2(0, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleCenter)
+		{
+			align = ImVec2(0.5f, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleRight)
+		{
+			align = ImVec2(1, 0.5f);
+		}
+		else if (textAlign == TextAlign_BottomLeft)
+		{
+			align = ImVec2(0, 1);
+		}
+		else if (textAlign == TextAlign_BottomCenter)
+		{
+			align = ImVec2(0.5f, 1);
+		}
+		else if (textAlign == TextAlign_BottomRight)
+		{
+			align = ImVec2(1, 1);
+		}
 
 		if (g.LogEnabled)
 			ImGui::LogSetNextTextDecoration("[", "]");
-		ImGui::RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label.GetCString(), NULL, &label_size, style.ButtonTextAlign, &bb);
+		ImGui::RenderTextClipped(bb.Min + style.FramePadding + ImVec2(padding.x, padding.y),
+			bb.Max - style.FramePadding - ImVec2(padding.z, padding.y),
+			label.GetCString(), NULL, &label_size, align, &bb);
 
 		// Automatically close popups
 		//if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
@@ -276,8 +348,6 @@ namespace CE::GUI
 
 		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(), g.LastItemData.StatusFlags);
 		return pressed;
-
-		return false;
 	}
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size)

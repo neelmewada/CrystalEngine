@@ -15,7 +15,18 @@ namespace CE::Widgets
 		BackgroundColor_Hovered,
 		BackgroundColor_Pressed,
         BorderRadius,
+		TextAlignment, // Inherited
+		Size,
     };
+
+	ENUM()
+	enum class Alignment
+	{
+		Inherited,
+		TopLeft, TopCenter, TopRight,
+		MiddleLeft, MiddleCenter, MiddleRight,
+		BottomLeft, BottomCenter, BottomRight
+	};
 
 	ENUM(Flags)
 	enum class CStylePropertyFlags
@@ -34,8 +45,17 @@ namespace CE::Widgets
     public:
         CStyleValue()
         {}
+
+		template<typename T> requires TIsEnum<T>::Value
+		CStyleValue(T enumValue)
+		{
+			this->enumValue = (s64)enumValue;
+			isEnum = true;
+		}
         
         CStyleValue(f32 single);
+
+		CStyleValue(const Vec2& vector);
         
         CStyleValue(const Vec4& vector);
         
@@ -47,6 +67,8 @@ namespace CE::Widgets
         
         union
         {
+			s64 enumValue;
+
             f32 single;
             
             FIELD()
@@ -57,6 +79,9 @@ namespace CE::Widgets
 
 		FIELD()
 		Gradient gradient{};
+
+		FIELD()
+		b8 isEnum = false;
         
         FIELD()
         b8 isSingle = false;
@@ -87,8 +112,9 @@ namespace CE::Widgets
         static Array<GUI::StyleVar> GetStyleVar(CStyleProperty variable);
         static Array<GUI::StyleCol> GetStyleColorVar(CStyleProperty variable);
         
-        void AddStyleProperty(CStyleProperty variableType, const CStyleValue& styleVar);
-        void RemoveStyleProperty(CStyleProperty variableType);
+        void AddProperty(CStyleProperty property, const CStyleValue& styleVar);
+        void RemoveProperty(CStyleProperty property);
+		CStyleValue& GetProperty(CStyleProperty property);
         
         FIELD()
         HashMap<CStyleProperty, CStyleValue> styleMap{};

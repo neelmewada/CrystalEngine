@@ -772,7 +772,7 @@ TEST(Object, Signals)
 			{
 				localValue = "Changed from lamda";
 			});
-
+		
 		EXPECT_EQ(localValue, "");
 		EXPECT_EQ(receiverStruct.stringValue, "");
 		senderStruct.StructSignal1("Call from struct");

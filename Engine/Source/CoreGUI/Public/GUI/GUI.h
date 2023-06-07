@@ -67,7 +67,12 @@ namespace CE::GUI
 
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
-	COREGUI_API bool Button(const String& label, const Vec4& padding, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
+	COREGUI_API bool ButtonEx(const String& label, const Vec4& padding = {}, const Vec2& size = Vec2(0, 0), const Vec4& rounding = {},
+		TextAlign textAlign = TextAlign_Inherited, ButtonFlags flags = ButtonFlags::None);
+
+	COREGUI_API bool ButtonEx(const String& label, const StyleColor& normal, const StyleColor& hovered, const StyleColor& pressed, 
+		const Vec4& padding = {}, const Vec2& size = Vec2(0, 0), const Vec4& rounding = {},
+		TextAlign textAlign = TextAlign_Inherited, ButtonFlags flags = ButtonFlags::None);
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 

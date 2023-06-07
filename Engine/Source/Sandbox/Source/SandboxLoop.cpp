@@ -174,25 +174,33 @@ void SandboxLoop::SetupGUI()
     using namespace CE::Widgets;
     
     window->SetTitle("Test Window");
-	//window->GetStyle().AddStyleProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
+	//window->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
     
     CLabel* label = CreateObject<CLabel>(window, "MyLabel");
     label->SetText("Label Text");
-    label->GetStyle().AddStyleProperty(CStyleProperty::ForegroundColor, Color::White());
-	label->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
-	label->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor_Hovered, Color(0.0f, 1.0f, 0.0f, 1.0f));
-	label->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor_Pressed, Color(0.0f, 0.0f, 1.0f, 1.0f));
+    label->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color::White());
+	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
+	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Color(0.0f, 1.0f, 0.0f, 1.0f));
+	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Pressed, Color(0.0f, 0.0f, 1.0f, 1.0f));
     
     CLabel* label2 = CreateObject<CLabel>(window, "MyLabel2");
     label2->SetText("Label Text 2");
-    label2->GetStyle().AddStyleProperty(CStyleProperty::Padding, Vec4(15, 15, 5, 5));
-	label2->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
-	label2->GetStyle().AddStyleProperty(CStyleProperty::BackgroundColor_Hovered, Gradient({ {0, Color::Yellow()}, {1, Color::Green()} }, Gradient::TopToBottom));
-    label2->GetStyle().AddStyleProperty(CStyleProperty::BorderRadius, Vec4(10, 5, 5, 5));
+    label2->GetStyle().AddProperty(CStyleProperty::Padding, Vec4(15, 15, 5, 5));
+	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
+	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Gradient({ {0, Color::Yellow()}, {1, Color::Green()} }, Gradient::TopToBottom));
+    label2->GetStyle().AddProperty(CStyleProperty::BorderRadius, Vec4(10, 5, 5, 5));
 
 	CButton* button = CreateObject<CButton>(window, "MyButton");
 	button->SetText("Click Me!");
+	button->GetStyle().AddProperty(CStyleProperty::BorderRadius, Vec4(5, 5, 5, 5));
+	button->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
+	button->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Color(0.0f, 1.0f, 0.0f, 1.0f));
+	button->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Pressed, Color(0.0f, 0.0f, 1.0f, 1.0f));
 	
+	Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []()
+		{
+			CE_LOG(Info, All, "Button Clicked from lambda!");
+		});
 }
 
 void SandboxLoop::RunLoop()

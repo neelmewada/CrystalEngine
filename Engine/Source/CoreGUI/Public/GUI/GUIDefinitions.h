@@ -295,6 +295,21 @@ namespace CE::GUI
     };
     ENUM_CLASS_FLAGS(ButtonFlags);
 
+	enum TextAlign
+	{
+		TextAlign_Inherited,
+		TextAlign_TopLeft,
+		TextAlign_TopCenter,
+		TextAlign_TopRight,
+		TextAlign_MiddleLeft,
+		TextAlign_MiddleCenter,
+		TextAlign_MiddleRight,
+		TextAlign_BottomLeft,
+		TextAlign_BottomCenter,
+		TextAlign_BottomRight,
+	};
+	ENUM_CLASS_FLAGS(TextAlign);
+
 	enum FocusFlags
 	{
 		FOCUS_None = 0,
@@ -404,7 +419,28 @@ namespace CE::GUI
         Vec2              GetWorkCenter() const { return Vec2(workPos.x + workSize.x * 0.5f, workPos.y + workSize.y * 0.5f); }
     };
 
+	struct StyleColor
+	{
+		StyleColor() 
+		{}
 
+		StyleColor(const Color& color) : isColor(true), color(color)
+		{}
+
+		StyleColor(const Gradient& gradient) : isGradient(true), gradient(gradient)
+		{}
+
+		bool IsEmpty() const
+		{
+			return !isColor && !isGradient;
+		}
+
+		Color color;
+		b8 isColor = false;
+
+		Gradient gradient;
+		b8 isGradient = false;
+	};
     
 } // namespace CE
 
