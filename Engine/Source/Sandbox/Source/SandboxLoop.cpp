@@ -100,8 +100,6 @@ void SandboxLoop::PostInit()
     
     window = CreateObject<CWindow>(nullptr, "TestWindow");
     window->SetWidgetFlags(WidgetFlags::None);
-
-	gStyleManager->PushGlobal();
     
     SetupGUI();
 }
@@ -176,6 +174,8 @@ void SandboxLoop::AppShutdown()
 void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
+
+	gStyleManager->PushGlobal();
     
     window->SetTitle("Test Window");
 	//window->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
@@ -196,7 +196,7 @@ void SandboxLoop::SetupGUI()
 	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
 	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Gradient({ {0, Color::Yellow()}, {1, Color::Green()} }, Gradient::TopToBottom));
     label2->GetStyle().AddProperty(CStyleProperty::BorderRadius, Vec4(10, 5, 5, 5));
-
+	
 	CStackLayout* vertical = CreateObject<CStackLayout>(horizontal, "Vertical");
 	vertical->SetDirection(CStackDirection::Vertical);
 

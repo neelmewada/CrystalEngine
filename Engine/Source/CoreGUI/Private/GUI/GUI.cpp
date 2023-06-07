@@ -359,6 +359,11 @@ namespace CE::GUI
 
 #pragma region Layout
 
+	COREGUI_API void Spacing()
+	{
+		ImGui::Spacing();
+	}
+
 	COREGUI_API void SameLine(f32 offsetFromStart, f32 spacing)
 	{
 		ImGui::SameLine(offsetFromStart, spacing);

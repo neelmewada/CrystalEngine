@@ -6,7 +6,12 @@ namespace CE::Widgets
 
 	CWidget::CWidget()
 	{
-		style.ApplyStyle(gStyleManager->GetGlobalStyle());
+		ConstructInternal();
+	}
+
+	void CWidget::ConstructInternal()
+	{
+
 	}
 
 	void CWidget::OnSubobjectAttached(Object* subobject)
@@ -330,6 +335,16 @@ namespace CE::Widgets
 			if (owner->IsWindow())
 				return (CWindow*)owner;
 			owner = owner->GetOwner();
+		}
+		return nullptr;
+	}
+
+	CWidget* CWidget::FindSubWidget(const Name& name)
+	{
+		for (auto subWidget : attachedWidgets)
+		{
+			if (subWidget != nullptr && subWidget->GetName() == name)
+				return subWidget;
 		}
 		return nullptr;
 	}

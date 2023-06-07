@@ -2,6 +2,8 @@
 
 namespace CE::Widgets
 {
+	class CWidget;
+
 	ENUM()
     enum class CStyleProperty
     {
@@ -125,7 +127,15 @@ namespace CE::Widgets
 
     };
 
+	struct COREWIDGETS_API CStyleSelector
+	{
+	public:
 
+		String selectorString{};
+
+	private:
+
+	};
 
 	CLASS()
 	class COREWIDGETS_API CStyleManager : public Object
@@ -136,16 +146,12 @@ namespace CE::Widgets
 		CStyleManager();
 		virtual ~CStyleManager();
 
-		const CStyle& GetGlobalStyle() const { return globalStyle; }
-		CStyle& GetGlobalStyle() { return globalStyle; }
-
 		void PushGlobal();
 
 		void PopGlobal();
 
 	private:
 
-		FIELD()
 		CStyle globalStyle{};
 
 		u32 pushedColors = 0;
@@ -153,5 +159,14 @@ namespace CE::Widgets
 	};
 
 } // namespace CE::Widgets
+
+namespace CE
+{
+	template<>
+	inline SIZE_T GetHash<CE::Widgets::CStyleSelector>(const CE::Widgets::CStyleSelector& value)
+	{
+		return GetHash<String>(value.selectorString);
+	}
+}
 
 #include "CStyle.rtti.h"

@@ -80,6 +80,8 @@ namespace CE::GUI
 
 #pragma region Layout
 
+	COREGUI_API void Spacing();
+
 	COREGUI_API void SameLine(f32 offsetFromStart = 0, f32 spacing = -1.0f);
 
 	COREGUI_API void BeginGroup();
