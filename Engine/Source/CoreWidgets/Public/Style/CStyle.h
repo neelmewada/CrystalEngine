@@ -116,18 +116,19 @@ namespace CE::Widgets
         void RemoveProperty(CStyleProperty property);
 		CStyleValue& GetProperty(CStyleProperty property);
         
+		void ApplyStyle(const CStyle& style);
+
+	public: // Fields
+
         FIELD()
         HashMap<CStyleProperty, CStyleValue> styleMap{};
-
-
-		void ApplyStyle(const CStyle& style);
 
     };
 
 
 
 	CLASS()
-	class CStyleManager : public Object
+	class COREWIDGETS_API CStyleManager : public Object
 	{
 		CE_CLASS(CStyleManager, CE::Object)
 	public:
@@ -135,10 +136,20 @@ namespace CE::Widgets
 		CStyleManager();
 		virtual ~CStyleManager();
 
+		const CStyle& GetGlobalStyle() const { return globalStyle; }
+		CStyle& GetGlobalStyle() { return globalStyle; }
+
+		void PushGlobal();
+
+		void PopGlobal();
+
 	private:
 
 		FIELD()
 		CStyle globalStyle{};
+
+		u32 pushedColors = 0;
+		u32 pushedVars = 0;
 	};
 
 } // namespace CE::Widgets

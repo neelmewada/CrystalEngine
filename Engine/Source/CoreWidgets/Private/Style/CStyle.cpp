@@ -110,4 +110,41 @@ namespace CE::Widgets
 	{
 	}
 
+	void CStyleManager::PushGlobal()
+	{
+		for (const auto& [variable, value] : globalStyle.styleMap)
+		{
+			auto styleVars = CStyle::GetStyleVar(variable);
+			for (GUI::StyleVar styleVar : styleVars)
+			{
+				if (styleVar != GUI::StyleVar_COUNT)
+				{
+					if (GUI::IsStyleVarOfVectorType(styleVar))
+						GUI::PushStyleVar(styleVar, (Vec2)value.vector);
+					else
+						GUI::PushStyleVar(styleVar, value.single);
+					pushedVars++;
+				}
+			}
+			auto styleColors = CStyle::GetStyleColorVar(variable);
+			for (GUI::StyleCol styleCol : styleColors)
+			{
+				if (styleCol != GUI::StyleCol_COUNT)
+				{
+					GUI::PushStyleColor(styleCol, value.color);
+					pushedColors++;
+				}
+			}
+		}
+	}
+
+	void CStyleManager::PopGlobal()
+	{
+		if (pushedColors > 0)
+			GUI::PopStyleColor(pushedColors);
+		if (pushedVars > 0)
+			GUI::PopStyleVar(pushedVars);
+		pushedColors = pushedVars = 0;
+	}
+
 } // namespace CE::Widgets

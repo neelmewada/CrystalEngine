@@ -176,7 +176,7 @@ namespace CE
         
         virtual void OnAfterConfigLoad() {}
 
-		void FireSignal(const String& name, const Array<Variant>& args);
+		void EmitSignal(const String& name, const Array<Variant>& args);
 
 	private:
 
@@ -217,7 +217,7 @@ namespace CE
 
 	public:
 
-		static void FireSignal(void* signalInstance, const String& name, const Array<Variant>& args);
+		static void EmitSignal(void* signalInstance, const String& name, const Array<Variant>& args);
 
 		static bool Bind(void* sourceInstance, FunctionType* sourceFunction, void* destinationInstance, FunctionType* destinationFunction);
 

@@ -20,6 +20,8 @@ namespace CE::Widgets
 
 		void HandleEvent(CEvent* event) override;
 
+		virtual void OnClick() {}
+
 	public: // Signals
 
 		CE_SIGNAL(OnButtonClicked);

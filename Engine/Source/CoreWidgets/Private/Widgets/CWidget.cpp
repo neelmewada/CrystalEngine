@@ -6,7 +6,7 @@ namespace CE::Widgets
 
 	CWidget::CWidget()
 	{
-		
+		style.ApplyStyle(gStyleManager->GetGlobalStyle());
 	}
 
 	void CWidget::OnSubobjectAttached(Object* subobject)

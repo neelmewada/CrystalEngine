@@ -15,6 +15,7 @@
 // Widgets
 #include "Widgets/CLabel.h"
 #include "Widgets/CButton.h"
+#include "Widgets/CStackLayout.h"
 
 namespace CE::Widgets
 {

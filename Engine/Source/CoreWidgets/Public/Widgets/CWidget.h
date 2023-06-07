@@ -94,7 +94,7 @@ namespace CE::Widgets
 		Array<CWidget*> attachedWidgets{};
         
         FIELD()
-        CStyle style{};
+        CStyle style{}; // Final computed style after inheritance, etc
         
     private:
 

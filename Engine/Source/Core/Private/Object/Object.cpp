@@ -540,12 +540,12 @@ namespace CE
 	HashMap<void*, Array<SignalBinding>> Object::outgoingBindingsMap{};
 	HashMap<void*, Array<SignalBinding>> Object::incomingBindingsMap{};
 
-	void Object::FireSignal(const String& name, const Array<Variant>& args)
+	void Object::EmitSignal(const String& name, const Array<Variant>& args)
 	{
-		Object::FireSignal(this, name, args);
+		Object::EmitSignal(this, name, args);
 	}
 
-	void Object::FireSignal(void* signalInstance, const String& name, const Array<Variant>& args)
+	void Object::EmitSignal(void* signalInstance, const String& name, const Array<Variant>& args)
 	{
 		Array<TypeId> argHashes{};
 		for (const Variant& arg : args)
@@ -562,7 +562,9 @@ namespace CE
 				binding.signalInstance == nullptr)
 				continue;
 
-			if (binding.boundDelegate.IsValid())
+			if (binding.signalFunction->IsSignalFunction() &&
+				binding.signalFunction->GetName() == name &&
+				binding.boundDelegate.IsValid())
 			{
 				binding.boundDelegate.Invoke(args);
 			}

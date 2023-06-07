@@ -6,14 +6,6 @@ namespace CE
     class ClassType;
     class Object;
 
-    //struct SignalBinding
-    //{
-    //public:
-    //    FunctionType* signalFunction;
-    //    FunctionType* boundFunction;
-    //    Object* boundObject;
-    //};
-
 	struct SignalBinding
 	{
 		FunctionType* signalFunction = nullptr;
@@ -52,7 +44,7 @@ namespace CE
 #define CE_SIGNAL(SignalName, ...) FORCE_INLINE void SignalName(CE_EXPAND(CE_EXPAND(CE_CONCATENATE(__CE_ARG_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)))\
 {\
     CE::Array<CE::Variant> args = { CE_EXPAND(CE_CONCATENATE(__CE_ARG_LIST_,CE_ARG_COUNT(__VA_ARGS__))) };\
-    CE::Object::FireSignal(this, #SignalName, args);\
+    CE::Object::EmitSignal(this, #SignalName, args);\
 }
 
 #define fire

@@ -100,12 +100,16 @@ void SandboxLoop::PostInit()
     
     window = CreateObject<CWindow>(nullptr, "TestWindow");
     window->SetWidgetFlags(WidgetFlags::None);
+
+	gStyleManager->PushGlobal();
     
     SetupGUI();
 }
 
 void SandboxLoop::PreShutdown()
 {
+	gStyleManager->PopGlobal();
+
     window->RequestDestroy();
     window = nullptr;
     
@@ -175,22 +179,34 @@ void SandboxLoop::SetupGUI()
     
     window->SetTitle("Test Window");
 	//window->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
+
+	CStackLayout* horizontal = CreateObject<CStackLayout>(window, "Horizontal");
+	horizontal->SetDirection(CStackDirection::Horizontal);
     
-    CLabel* label = CreateObject<CLabel>(window, "MyLabel");
+    CLabel* label = CreateObject<CLabel>(horizontal, "MyLabel");
     label->SetText("Label Text");
     label->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color::White());
 	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
 	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Color(0.0f, 1.0f, 0.0f, 1.0f));
 	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Pressed, Color(0.0f, 0.0f, 1.0f, 1.0f));
     
-    CLabel* label2 = CreateObject<CLabel>(window, "MyLabel2");
+    CLabel* label2 = CreateObject<CLabel>(horizontal, "MyLabel2");
     label2->SetText("Label Text 2");
     label2->GetStyle().AddProperty(CStyleProperty::Padding, Vec4(15, 15, 5, 5));
 	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
 	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Gradient({ {0, Color::Yellow()}, {1, Color::Green()} }, Gradient::TopToBottom));
     label2->GetStyle().AddProperty(CStyleProperty::BorderRadius, Vec4(10, 5, 5, 5));
 
-	CButton* button = CreateObject<CButton>(window, "MyButton");
+	CStackLayout* vertical = CreateObject<CStackLayout>(horizontal, "Vertical");
+	vertical->SetDirection(CStackDirection::Vertical);
+
+	CLabel* vertLabel = CreateObject<CLabel>(vertical, "VertLabel");
+	vertLabel->SetText("Vert Label");
+
+	CButton* vertButton = CreateObject<CButton>(vertical, "VertButton");
+	vertButton->SetText("Vert Button");
+
+	CButton* button = CreateObject<CButton>(horizontal, "MyButton");
 	button->SetText("Click Me!");
 	button->GetStyle().AddProperty(CStyleProperty::BorderRadius, Vec4(5, 5, 5, 5));
 	button->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
@@ -201,6 +217,9 @@ void SandboxLoop::SetupGUI()
 		{
 			CE_LOG(Info, All, "Button Clicked from lambda!");
 		});
+
+	CLabel* newLineLabel = CreateObject<CLabel>(window, "NewLine");
+	newLineLabel->SetText("New Line");
 }
 
 void SandboxLoop::RunLoop()
@@ -228,6 +247,14 @@ void SandboxLoop::RunLoop()
 
                     GUI::EndMenu();
                 }
+
+				if (GUI::BeginMenu("Edit"))
+				{
+					GUI::MenuItem("Copy");
+					GUI::MenuItem("Paste");
+
+					GUI::EndMenu();
+				}
 
                 GUI::EndMenuBar();
             }

@@ -51,11 +51,16 @@ namespace CE::Widgets
 		{
 			borderRadius = style.styleMap[CStyleProperty::BorderRadius].vector;
 		}
+		
+		bool clicked = GUI::ButtonEx(text, padding, preferredSize, borderRadius, (GUI::TextAlign)textAlignment);
 
-		if (GUI::ButtonEx(text, padding, preferredSize, borderRadius, (GUI::TextAlign)textAlignment))
+		if (clicked)
 		{
+			OnClick();
 			emit OnButtonClicked();
 		}
+
+		PollEvents();
 
 		PopStyle();
 	}
