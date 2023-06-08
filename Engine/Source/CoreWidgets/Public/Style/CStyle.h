@@ -96,10 +96,6 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isGradient = false;
-        
-    private:
-        GUI::StyleVar varName = GUI::StyleVar_COUNT;
-        GUI::StyleCol colorName = GUI::StyleCol_COUNT;
     };
     
     STRUCT()

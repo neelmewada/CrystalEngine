@@ -177,7 +177,7 @@ void SandboxLoop::SetupGUI()
 
 	gStyleManager->PushGlobal();
     
-    window->SetTitle("Test Window");
+    /*window->SetTitle("Test Window");
 	//window->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
 
 	CStackLayout* horizontal = CreateObject<CStackLayout>(window, "Horizontal");
@@ -219,7 +219,7 @@ void SandboxLoop::SetupGUI()
 		});
 
 	CLabel* newLineLabel = CreateObject<CLabel>(window, "NewLine");
-	newLineLabel->SetText("New Line");
+	newLineLabel->SetText("New Line");*/
 }
 
 void SandboxLoop::RunLoop()
@@ -291,7 +291,8 @@ void SandboxLoop::RunLoop()
 				GUI::ShowDemoWindow(&demoWindow);
 			}
             
-            window->RenderGUI();
+			if (window != nullptr)
+				window->RenderGUI();
         }
         GUI::EndWindow();
 
