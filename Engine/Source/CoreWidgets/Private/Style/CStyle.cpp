@@ -38,15 +38,30 @@ namespace CE::Widgets
         
     }
 
-	CStylePropertyFlags CStyle::GetStylePropertyFlags(CStyleProperty property)
-	{
-		static std::unordered_set<CStyleProperty> inheritedProperties{
+	static std::unordered_set<CStyleProperty> gInheritedProperties{
 			CStyleProperty::ForegroundColor,
 			CStyleProperty::ForegroundColor_Disabled,
 			CStyleProperty::TextAlignment,
-		};
+	};
 
-		return inheritedProperties.contains(property) ? CStylePropertyFlags::Inherited : CStylePropertyFlags::NonInherited;
+	static std::unordered_set<CStyleProperty> gAutoInitializedProperties{
+			
+	};
+
+	CStylePropertyFlags CStyle::GetStylePropertyFlags(CStyleProperty property)
+	{
+		CStylePropertyFlags flags = CStylePropertyFlags::None;
+		if (gInheritedProperties.contains(property))
+			flags |= CStylePropertyFlags::Inherited;
+		else
+			flags |= CStylePropertyFlags::NonInherited;
+
+		return flags;
+	}
+
+	CStyleProperty CStyle::GetAllProperties(CStylePropertyFlags flags)
+	{
+		return CStyleProperty();
 	}
 
     Array<GUI::StyleVar> CStyle::GetStyleVar(CStyleProperty variable)
@@ -92,6 +107,11 @@ namespace CE::Widgets
 	CStyleValue& CStyle::GetProperty(CStyleProperty property)
 	{
 		return styleMap[property];
+	}
+
+	bool CStyle::HasProperty(CStyleProperty property)
+	{
+		return styleMap.KeyExists(property);
 	}
 
 	void CStyle::ApplyStyle(const CStyle& style)

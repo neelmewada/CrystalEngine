@@ -14,6 +14,21 @@ namespace CE::Widgets
 
 	}
 
+	void CWidget::OnAttachedTo(CWidget* parent)
+	{
+		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once
+			return;
+
+
+
+		inheritedPropertiesInitialized = true;
+	}
+
+	void CWidget::OnDetachedFrom(CWidget* parent)
+	{
+
+	}
+
 	void CWidget::OnSubobjectAttached(Object* subobject)
 	{
 		if (subobject == nullptr)
@@ -22,7 +37,7 @@ namespace CE::Widgets
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Add(subWidget);
-			OnWidgetAttached(subWidget);
+			OnSubWidgetAttached(subWidget);
 			subWidget->OnAttachedTo(this);
 		}
 	}
@@ -35,7 +50,7 @@ namespace CE::Widgets
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Remove(subWidget);
-			OnWidgetDetached(subWidget);
+			OnSubWidgetDetached(subWidget);
 			subWidget->OnDetachedFrom(this);
 		}
 	}

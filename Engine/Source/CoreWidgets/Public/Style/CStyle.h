@@ -36,7 +36,7 @@ namespace CE::Widgets
 		None = 0,
 		Inherited = BIT(0),
 		NonInherited = BIT(1),
-		All = Inherited | NonInherited
+		All = Inherited | NonInherited,
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyFlags);
     
@@ -110,6 +110,7 @@ namespace CE::Widgets
         CStyle();
         
 		static CStylePropertyFlags GetStylePropertyFlags(CStyleProperty styleVar);
+		static CStyleProperty GetAllProperties(CStylePropertyFlags flags);
 
         static Array<GUI::StyleVar> GetStyleVar(CStyleProperty variable);
         static Array<GUI::StyleCol> GetStyleColorVar(CStyleProperty variable);
@@ -117,6 +118,7 @@ namespace CE::Widgets
         void AddProperty(CStyleProperty property, const CStyleValue& styleVar);
         void RemoveProperty(CStyleProperty property);
 		CStyleValue& GetProperty(CStyleProperty property);
+		bool HasProperty(CStyleProperty property);
         
 		void ApplyStyle(const CStyle& style);
 

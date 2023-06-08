@@ -64,11 +64,11 @@ namespace CE::Widgets
 
 		// Protected API
 
-		virtual void OnWidgetAttached(CWidget* widget) {}
-		virtual void OnWidgetDetached(CWidget* widget) {}
+		virtual void OnSubWidgetAttached(CWidget* widget) {}
+		virtual void OnSubWidgetDetached(CWidget* widget) {}
 
-		virtual void OnAttachedTo(CWidget* parent) {}
-		virtual void OnDetachedFrom(CWidget* parent) {}
+		virtual void OnAttachedTo(CWidget* parent);
+		virtual void OnDetachedFrom(CWidget* parent);
 
 		/// Abstract method. Must be overriden to call low level GUI draw functions.
 		virtual void OnDrawGUI() = 0;
@@ -103,6 +103,8 @@ namespace CE::Widgets
         CStyle style{}; // Final computed style after inheritance, etc
         
     private:
+
+		b8 inheritedPropertiesInitialized = false;
 
 		// States
 		b8 isHovered = false;
