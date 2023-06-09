@@ -4,6 +4,103 @@ namespace CE::Widgets
 {
 	class CWidget;
 
+	ENUM(Flags)
+	enum class CStateFlag
+	{
+		Default = 0,
+		On = BIT(0),
+		Off = BIT(1),
+		Hovered = BIT(2),
+		Pressed = BIT(3),
+		Focused = BIT(4),
+		Horizontal = BIT(5),
+		Vertical = BIT(6),
+		Disabled = BIT(7),
+		Enabled = BIT(8),
+		Window = BIT(9),
+	};
+	ENUM_CLASS_FLAGS(CStateFlag);
+
+	ENUM()
+	enum class CSubControl
+	{
+		None = 0,
+
+	};
+	ENUM_CLASS_FLAGS(CSubControl);
+
+	ENUM()
+	enum class CStylePropertyType
+	{
+		None = 0,
+		Opacity,
+		Padding,
+		ForegroundColor, // Inherited
+		Background,
+		BorderRadius,
+		BorderWidth,
+		BorderColor,
+		Width,
+		Height,
+		TextAlign, // Inherited
+	};
+	ENUM_CLASS_FLAGS(CStylePropertyType);
+
+	ENUM()
+	enum class Alignment
+	{
+		Inherited,
+		TopLeft, TopCenter, TopRight,
+		MiddleLeft, MiddleCenter, MiddleRight,
+		BottomLeft, BottomCenter, BottomRight
+	};
+
+	STRUCT()
+	struct COREWIDGETS_API CStyleValue
+	{
+		CE_STRUCT(CStyleValue)
+	public:
+
+		enum ValueType
+		{
+			None = 0,
+			Enum,
+			Single,
+			Vector,
+			Color,
+			Gradient
+		};
+
+		enum EnumValue
+		{
+			Auto = 0,
+			Inherited,
+			Initial,
+			PixelSize,
+			PercentSize
+		};
+
+		FIELD()
+		CStateFlag state{};
+
+		FIELD()
+		CSubControl subControl{};
+
+		
+	};
+
+	STRUCT()
+	struct COREWIDGETS_API CStyle
+	{
+		CE_STRUCT(CStyle)
+	public:
+
+		FIELD()
+		HashMap<CStylePropertyType, Array<CStyleValue>> styleMap{};
+
+	};
+
+	/*
 	ENUM()
     enum class CStyleProperty
     {
@@ -19,6 +116,8 @@ namespace CE::Widgets
         BorderRadius,
 		TextAlignment, // Inherited
 		Size,
+		Width,
+		Height,
     };
 
 	ENUM()
@@ -154,10 +253,10 @@ namespace CE::Widgets
 
 		u32 pushedColors = 0;
 		u32 pushedVars = 0;
-	};
+	};*/
 
 } // namespace CE::Widgets
-
+/*
 namespace CE
 {
 	template<>
@@ -165,6 +264,6 @@ namespace CE
 	{
 		return GetHash<String>(value.selectorString);
 	}
-}
+}*/
 
 #include "CStyle.rtti.h"

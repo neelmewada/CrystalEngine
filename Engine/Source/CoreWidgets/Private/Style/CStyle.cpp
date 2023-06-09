@@ -3,7 +3,8 @@
 namespace CE::Widgets
 {
 
-    CStyleValue::CStyleValue(f32 single) : isSingle(true), single(single)
+	
+	/*CStyleValue::CStyleValue(f32 single) : isSingle(true), single(single)
     {
         
     }
@@ -165,6 +166,6 @@ namespace CE::Widgets
 		if (pushedVars > 0)
 			GUI::PopStyleVar(pushedVars);
 		pushedColors = pushedVars = 0;
-	}
+	}*/
 
 } // namespace CE::Widgets
