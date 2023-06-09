@@ -26,7 +26,7 @@ namespace CE::Widgets
 
     void CLabel::OnDrawGUI()
     {
-		PushStyle();
+		/*PushStyle();
 
         Vec4 padding{};
         Vec4 borderRadius{};
@@ -127,7 +127,7 @@ namespace CE::Widgets
 			PollEvents();
         }
 
-		PopStyle();
+		PopStyle();*/
     }
 
 	void CLabel::HandleEvent(CEvent* event)

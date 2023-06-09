@@ -75,9 +75,6 @@ namespace CE::Widgets
         
         /// Override this method to build child widget hierarchy
         virtual void Build() {}
-        
-        virtual void PushStyle(CStylePropertyFlags flags = CStylePropertyFlags::All);
-        virtual void PopStyle();
 
 		/// Must be called at the end of all GUI draw calls
 		virtual void PollEvents();

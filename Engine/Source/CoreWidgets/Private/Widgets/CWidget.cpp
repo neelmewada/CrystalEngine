@@ -60,55 +60,6 @@ namespace CE::Widgets
 		
 	}
 
-    void CWidget::PushStyle(CStylePropertyFlags flags)
-    {
-		pushedPropertiesStack.Push({});
-
-        for (const auto& [variable, value] : style.styleMap)
-        {
-			if ((int)(flags & CStyle::GetStylePropertyFlags(variable)) == 0)
-			{
-				continue;
-			}
-			
-            auto styleVars = CStyle::GetStyleVar(variable);
-            for (GUI::StyleVar styleVar : styleVars)
-            {
-                if (styleVar != GUI::StyleVar_COUNT)
-                {
-                    if (GUI::IsStyleVarOfVectorType(styleVar))
-                        GUI::PushStyleVar(styleVar, (Vec2)value.vector);
-                    else
-                        GUI::PushStyleVar(styleVar, value.single);
-					pushedPropertiesStack.Top().pushedVars++;
-                }
-            }
-            auto styleColors = CStyle::GetStyleColorVar(variable);
-            for (GUI::StyleCol styleCol : styleColors)
-            {
-                if (styleCol != GUI::StyleCol_COUNT)
-                {
-                    GUI::PushStyleColor(styleCol, value.color);
-					pushedPropertiesStack.Top().pushedColors++;
-                }
-            }
-        }
-    }
-
-    void CWidget::PopStyle()
-    {
-		if (pushedPropertiesStack.IsEmpty())
-			return;
-
-		const PushedProperties& pushedProps = pushedPropertiesStack.Top();
-        
-		if (pushedProps.pushedVars > 0)
-			GUI::PopStyleVar(pushedProps.pushedVars);
-		if (pushedProps.pushedColors > 0)
-			GUI::PopStyleColor(pushedProps.pushedColors);
-
-		pushedPropertiesStack.Pop();
-    }
 
 	void CWidget::PollEvents()
 	{

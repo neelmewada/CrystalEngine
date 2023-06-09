@@ -45,6 +45,14 @@ namespace CE
 
 		Color Evaluate(f32 position) const;
 
+		void Clear();
+
+		void AddKey(const Key& key);
+
+		void AddKey(f32 position, const Color& color);
+
+		void RemoveKeyAt(u32 index);
+
     private:
 
         Array<Key> keys{};

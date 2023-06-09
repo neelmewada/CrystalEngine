@@ -32,6 +32,26 @@ namespace CE
 		return position < 0 ? keys[0].value : keys.GetLast().value;
 	}
 
+	void Gradient::Clear()
+	{
+		keys.Clear();
+	}
+
+	void Gradient::AddKey(const Key& key)
+	{
+		keys.Add(key);
+	}
+
+	void Gradient::AddKey(f32 position, const Color& color)
+	{
+		keys.Add({ position, color });
+	}
+
+	void Gradient::RemoveKeyAt(u32 index)
+	{
+		keys.RemoveAt(index);
+	}
+
 } // namespace CE
 
 

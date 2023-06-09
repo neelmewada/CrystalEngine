@@ -25,7 +25,7 @@ namespace CE::Widgets
 	enum class CSubControl
 	{
 		None = 0,
-
+		Icon,
 	};
 	ENUM_CLASS_FLAGS(CSubControl);
 
@@ -61,32 +61,61 @@ namespace CE::Widgets
 		CE_STRUCT(CStyleValue)
 	public:
 
-		enum ValueType
+		enum ValueType : int
 		{
-			None = 0,
-			Enum,
-			Single,
-			Vector,
-			Color,
-			Gradient
+			Type_None = 0,
+			Type_Enum,
+			Type_Single,
+			Type_Vector,
+			Type_Color,
+			Type_Gradient,
+			Type_Asset
 		};
 
-		enum EnumValue
+		enum EnumValue : int
 		{
 			Auto = 0,
 			Inherited,
 			Initial,
-			PixelSize,
+			PointSize,
 			PercentSize
 		};
 
-		FIELD()
-		CStateFlag state{};
+		CStyleValue();
 
-		FIELD()
-		CSubControl subControl{};
-
+		CStyleValue(EnumValue enumValue);
 		
+
+		CStyleValue(const CStyleValue& copy);
+
+		// Called upon destruction
+		void Release();
+
+		bool IsValid() const { return valueType != Type_None; }
+		
+
+		FIELD()
+		CStateFlag states{}; // Style for specific states (multiple states possible)
+
+		FIELD()
+		CSubControl subControl{}; // Style for a specific subcontrol
+
+		FIELD()
+		int enumValue{}; // enum EnumValue
+
+		FIELD()
+		int valueType{}; // enum ValueType
+
+		union
+		{
+			f32 single;
+			Vec4 vector{};
+			Color color;
+			Gradient gradient;
+			Name assetPath;
+		};
+
+
 	};
 
 	STRUCT()
@@ -99,161 +128,6 @@ namespace CE::Widgets
 		HashMap<CStylePropertyType, Array<CStyleValue>> styleMap{};
 
 	};
-
-	/*
-	ENUM()
-    enum class CStyleProperty
-    {
-        None = 0,
-        Opacity,
-		DisabledOpacity,
-        Padding,
-        ForegroundColor, // Inherited
-		ForegroundColor_Disabled, // Inherited
-        BackgroundColor,
-		BackgroundColor_Hovered,
-		BackgroundColor_Pressed,
-        BorderRadius,
-		TextAlignment, // Inherited
-		Size,
-		Width,
-		Height,
-    };
-
-	ENUM()
-	enum class Alignment
-	{
-		Inherited,
-		TopLeft, TopCenter, TopRight,
-		MiddleLeft, MiddleCenter, MiddleRight,
-		BottomLeft, BottomCenter, BottomRight
-	};
-
-	ENUM(Flags)
-	enum class CStylePropertyFlags
-	{
-		None = 0,
-		Inherited = BIT(0),
-		NonInherited = BIT(1),
-		All = Inherited | NonInherited,
-	};
-	ENUM_CLASS_FLAGS(CStylePropertyFlags);
-    
-    STRUCT()
-    struct COREWIDGETS_API CStyleValue
-    {
-        CE_STRUCT(CStyleValue)
-    public:
-        CStyleValue()
-        {}
-
-		template<typename T> requires TIsEnum<T>::Value
-		CStyleValue(T enumValue)
-		{
-			this->enumValue = (s64)enumValue;
-			isEnum = true;
-		}
-        
-        CStyleValue(f32 single);
-
-		CStyleValue(const Vec2& vector);
-        
-        CStyleValue(const Vec4& vector);
-        
-        CStyleValue(const Color& color);
-
-		CStyleValue(std::initializer_list<Gradient::Key> gradient);
-
-		CStyleValue(const Gradient& gradient);
-        
-        union
-        {
-			s64 enumValue;
-
-            f32 single;
-            
-            FIELD()
-            Vec4 vector{};
-            
-            Color color;
-        };
-
-		FIELD()
-		Gradient gradient{};
-
-		FIELD()
-		b8 isEnum = false;
-        
-        FIELD()
-        b8 isSingle = false;
-        
-        FIELD()
-        b8 isVector = false;
-        
-        FIELD()
-        b8 isColor = false;
-
-		FIELD()
-		b8 isGradient = false;
-    };
-    
-    STRUCT()
-    struct COREWIDGETS_API CStyle
-    {
-        CE_STRUCT(CStyle)
-    public:
-        CStyle();
-        
-		static CStylePropertyFlags GetStylePropertyFlags(CStyleProperty styleVar);
-		static CStyleProperty GetAllProperties(CStylePropertyFlags flags);
-
-        static Array<GUI::StyleVar> GetStyleVar(CStyleProperty variable);
-        static Array<GUI::StyleCol> GetStyleColorVar(CStyleProperty variable);
-        
-        void AddProperty(CStyleProperty property, const CStyleValue& styleVar);
-        void RemoveProperty(CStyleProperty property);
-		CStyleValue& GetProperty(CStyleProperty property);
-		bool HasProperty(CStyleProperty property);
-        
-		void ApplyStyle(const CStyle& style);
-
-	public: // Fields
-
-        FIELD()
-        HashMap<CStyleProperty, CStyleValue> styleMap{};
-
-    };
-
-	struct COREWIDGETS_API CStyleSelector
-	{
-	public:
-
-		String selectorString{};
-
-	private:
-
-	};
-
-	CLASS()
-	class COREWIDGETS_API CStyleManager : public Object
-	{
-		CE_CLASS(CStyleManager, CE::Object)
-	public:
-
-		CStyleManager();
-		virtual ~CStyleManager();
-
-		void PushGlobal();
-
-		void PopGlobal();
-
-	private:
-
-		CStyle globalStyle{};
-
-		u32 pushedColors = 0;
-		u32 pushedVars = 0;
-	};*/
 
 } // namespace CE::Widgets
 /*

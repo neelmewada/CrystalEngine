@@ -241,7 +241,14 @@ public:\
     static CE::StructType* Type();\
 	constexpr static bool IsClass() { return false; }\
 	constexpr static bool IsStruct() { return true; }\
-	~Struct() { CE::Object::UnbindAllSignals(this); }\
+	~Struct()\
+	{\
+		CE::Object::UnbindAllSignals(this);\
+		if constexpr (TStructReleaseFunction<Struct>::Value)\
+		{\
+			TStructReleaseFunction<Struct>::Release(this);\
+		}\
+	}\
     virtual CE::TypeInfo* GetType() const\
     {\
         return Type();\
@@ -250,5 +257,4 @@ public:\
 	{\
 		return Type();\
 	}
-
 

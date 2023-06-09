@@ -171,5 +171,21 @@ namespace CE
 		};
 	};
 
+
+	template<typename T, typename = void>
+	struct TStructReleaseFunction : TFalseType
+	{
+		static void Release(T* instance) {} // Do nothing
+	};
+
+	template<typename T>
+	struct TStructReleaseFunction<T, std::void_t<decltype(std::declval<T>().Release())>> : TTrueType
+	{
+		static void Release(T* instance)
+		{
+			instance->T::Release(); // Release function exists
+		}
+	};
+
 } // namespace CE::Traits
 

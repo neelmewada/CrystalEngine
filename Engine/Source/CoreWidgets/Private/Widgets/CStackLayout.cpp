@@ -25,12 +25,9 @@ namespace CE::Widgets
 
 	void CStackLayout::OnDrawGUI()
 	{
-		PushStyle();
 		GUI::BeginGroup();
-		PopStyle();
 
 		{
-			PushStyle(CStylePropertyFlags::Inherited);
 
 			for (int i = 0; i < attachedWidgets.GetSize(); i++)
 			{
@@ -41,12 +38,9 @@ namespace CE::Widgets
 				}
 			}
 
-			PopStyle();
 		}
 
-		PushStyle();
 		GUI::EndGroup();
-		PopStyle();
 
 		PollEvents();
 	}
