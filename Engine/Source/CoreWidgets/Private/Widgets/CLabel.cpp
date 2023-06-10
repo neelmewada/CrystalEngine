@@ -26,55 +26,79 @@ namespace CE::Widgets
 
     void CLabel::OnDrawGUI()
     {
-		/*PushStyle();
+		style.Push();
 
         Vec4 padding{};
         Vec4 borderRadius{};
         
         bool hasPadding = false;
-        bool hasBackground = style.styleMap.KeyExists(CStyleProperty::BackgroundColor);
-		bool hasBackgroundHovered = style.styleMap.KeyExists(CStyleProperty::BackgroundColor_Hovered);
-		bool hasBackgroudPressed = style.styleMap.KeyExists(CStyleProperty::BackgroundColor_Pressed);
+		CStyleValue* background = nullptr;
+		CStyleValue* backgroundHovered = nullptr;
+		CStyleValue* backgroundPressed = nullptr;
 
-        if (style.styleMap.KeyExists(CStyleProperty::BorderRadius))
-        {
-            borderRadius = style.styleMap[CStyleProperty::BorderRadius].vector;
-        }
+		for (auto& [property, array] : style.styleMap)
+		{
+			for (auto& styleValue : array)
+			{
+				if (property == CStylePropertyType::Padding)
+				{
+					hasPadding = true;
+					padding = styleValue.vector;
+				}
+				else if (property == CStylePropertyType::Background)
+				{
+					if ((styleValue.state & CStateFlag::Hovered) != 0)
+					{
+						backgroundHovered = &styleValue;
+					}
+					if ((styleValue.state & CStateFlag::Pressed) != 0)
+					{
+						backgroundPressed = &styleValue;
+					}
+					if (styleValue.state == CStateFlag::Default)
+					{
+						background = &styleValue;
+					}
+				}
+				else if (property == CStylePropertyType::BorderRadius)
+				{
+					borderRadius = styleValue.vector;
+				}
+			}
+		}
+
         
-        if (style.styleMap.KeyExists(CStyleProperty::Padding))
-        {
-            padding = style.styleMap[CStyleProperty::Padding].vector;
-        }
-        
-        if (padding.x > 0 || padding.y > 0 || padding.z > 0 || padding.w > 0)
-            hasPadding = true;
+		if (padding.x > 0 || padding.y > 0 || padding.z > 0 || padding.w > 0)
+			hasPadding = true;
+		else
+			hasPadding = false;
         
         if (hasPadding)
         {
             Vec2 size = GUI::CalculateTextSize(text);
             Vec2 pos = GUI::GetCursorScreenPos();
             
-            if (hasBackground)
+            if (background != nullptr)
             {
-				auto bgColorValue = style.styleMap[CStyleProperty::BackgroundColor];
-				if (IsLeftMouseHeld() && IsHovered() && hasBackgroudPressed)
+				auto* bgColorValue = background;
+				if (IsLeftMouseHeld() && IsHovered() && backgroundPressed != nullptr)
 				{
-					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Pressed];
+					bgColorValue = backgroundPressed;
 				}
-				else if (IsHovered() && hasBackgroundHovered)
+				else if (IsHovered() && backgroundHovered != nullptr)
 				{
-					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Hovered];
+					bgColorValue = backgroundHovered;
 				}
 
-				if (bgColorValue.isColor)
+				if (bgColorValue->valueType == CStyleValue::Type_Color)
 				{
-					const Color& color = bgColorValue.color;
+					const Color& color = bgColorValue->color;
 					GUI::FillRect(Vec4(pos.x, pos.y, pos.x + size.x + padding.x + padding.z,
 						pos.y + size.y + padding.y + padding.w), color, borderRadius);
 				}
-				else if (bgColorValue.isGradient)
+				else if (bgColorValue->valueType == CStyleValue::Type_Gradient)
 				{
-					Gradient gradient = bgColorValue.gradient;
+					Gradient gradient = bgColorValue->gradient;
 					GUI::FillRect(Vec4(pos.x, pos.y, pos.x + size.x + padding.x + padding.z,
 						pos.y + size.y + padding.y + padding.w), gradient, borderRadius);
 				}
@@ -96,29 +120,29 @@ namespace CE::Widgets
         }
         else
         {
-            if (hasBackground)
+            if (background != nullptr)
             {
                 Vec2 size = GUI::CalculateTextSize(text);
                 Vec2 pos = GUI::GetCursorScreenPos();
 				
-				auto bgColorValue = style.styleMap[CStyleProperty::BackgroundColor];
-				if (IsLeftMouseHeld() && IsHovered() && hasBackgroudPressed)
+				auto* bgColorValue = background;
+				if (IsLeftMouseHeld() && IsHovered() && backgroundPressed != nullptr)
 				{
-					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Pressed];
+					bgColorValue = backgroundPressed;
 				}
-				else if (IsHovered() && hasBackgroundHovered)
+				else if (IsHovered() && backgroundHovered != nullptr)
 				{
-					bgColorValue = style.styleMap[CStyleProperty::BackgroundColor_Hovered];
+					bgColorValue = backgroundHovered;
 				}
 
-				if (bgColorValue.isColor)
+				if (bgColorValue->valueType == CStyleValue::Type_Color)
 				{
-					const Color& color = bgColorValue.color;
+					const Color& color = bgColorValue->color;
 					GUI::FillRect(Vec4(pos.x, pos.y, pos.x + size.x, pos.y + size.y), color, borderRadius);
 				}
-				else if (bgColorValue.isGradient)
+				else if (bgColorValue->valueType == CStyleValue::Type_Gradient)
 				{
-					Gradient gradient = bgColorValue.gradient;
+					Gradient gradient = bgColorValue->gradient;
 					GUI::FillRect(Vec4(pos.x, pos.y, pos.x + size.x, pos.y + size.y), gradient, borderRadius);
 				}
             }
@@ -127,7 +151,7 @@ namespace CE::Widgets
 			PollEvents();
         }
 
-		PopStyle();*/
+		style.Pop();
     }
 
 	void CLabel::HandleEvent(CEvent* event)

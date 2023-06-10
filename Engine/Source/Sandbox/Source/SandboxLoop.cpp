@@ -175,29 +175,21 @@ void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
 
-	gStyleManager->PushGlobal();
     
-    /*window->SetTitle("Test Window");
+    window->SetTitle("Test Window");
 	//window->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
 
-	CStackLayout* horizontal = CreateObject<CStackLayout>(window, "Horizontal");
-	horizontal->SetDirection(CStackDirection::Horizontal);
+	//CStackLayout* horizontal = CreateObject<CStackLayout>(window, "Horizontal");
+	//horizontal->SetDirection(CStackDirection::Horizontal);
     
-    CLabel* label = CreateObject<CLabel>(horizontal, "MyLabel");
+    CLabel* label = CreateObject<CLabel>(window, "MyLabel");
     label->SetText("Label Text");
-    label->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color::White());
-	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
-	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Color(0.0f, 1.0f, 0.0f, 1.0f));
-	label->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Pressed, Color(0.0f, 0.0f, 1.0f, 1.0f));
-    
-    CLabel* label2 = CreateObject<CLabel>(horizontal, "MyLabel2");
-    label2->SetText("Label Text 2");
-    label2->GetStyle().AddProperty(CStyleProperty::Padding, Vec4(15, 15, 5, 5));
-	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Gradient({ {0, Color::Red()}, {1, Color::Green()}}, Gradient::TopToBottom));
-	label2->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Gradient({ {0, Color::Yellow()}, {1, Color::Green()} }, Gradient::TopToBottom));
-    label2->GetStyle().AddProperty(CStyleProperty::BorderRadius, Vec4(10, 5, 5, 5));
+    label->GetStyle().AddProperty(CStylePropertyType::ForegroundColor, Color::White());
+	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.0f, 1.0f));
+	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 1.0f, 0.0f, 1.0f), CStateFlag::Hovered);
+	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 1.0f, 1.0f), CStateFlag::Pressed);
 	
-	CStackLayout* vertical = CreateObject<CStackLayout>(horizontal, "Vertical");
+	/*CStackLayout* vertical = CreateObject<CStackLayout>(horizontal, "Vertical");
 	vertical->SetDirection(CStackDirection::Vertical);
 
 	CLabel* vertLabel = CreateObject<CLabel>(vertical, "VertLabel");

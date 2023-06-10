@@ -10,8 +10,32 @@ namespace CE::Widgets
 		
 	}
 
-	CStyleValue::CStyleValue(EnumValue enumValue)
-		: enumValue(enumValue), valueType(Type_Enum)
+	CStyleValue::CStyleValue(f32 single, bool isPercent)
+		: valueType(Type_Single), single(single), isPercent(isPercent)
+	{
+
+	}
+
+	CStyleValue::CStyleValue(const Vec4& vector, bool isPercent)
+		: valueType(Type_Vector), vector(vector), isPercent(isPercent)
+	{
+
+	}
+
+	CStyleValue::CStyleValue(const Color& color)
+		: valueType(Type_Color), color(color)
+	{
+		
+	}
+
+	CStyleValue::CStyleValue(const Gradient& gradient)
+		: valueType(Type_Gradient), gradient(gradient)
+	{
+
+	}
+
+	CStyleValue::CStyleValue(const Name& path)
+		: valueType(Type_Asset), assetPath(path)
 	{
 
 	}
@@ -21,7 +45,7 @@ namespace CE::Widgets
 		valueType = copy.valueType;
 		enumValue = copy.enumValue;
 
-		states = copy.states;
+		state = copy.state;
 		subControl = copy.subControl;
 
 		if (valueType == Type_Single)
@@ -46,6 +70,38 @@ namespace CE::Widgets
 		}
 	}
 
+	CStyleValue& CStyleValue::operator=(const CStyleValue& copy)
+	{
+		valueType = copy.valueType;
+		enumValue = copy.enumValue;
+
+		state = copy.state;
+		subControl = copy.subControl;
+
+		if (valueType == Type_Single)
+		{
+			single = copy.single;
+		}
+		else if (valueType == Type_Color)
+		{
+			color = copy.color;
+		}
+		else if (valueType == Type_Vector)
+		{
+			vector = copy.vector;
+		}
+		else if (valueType == Type_Gradient)
+		{
+			gradient = copy.gradient;
+		}
+		else if (valueType == Type_Asset)
+		{
+			assetPath = copy.assetPath;
+		}
+
+		return *this;
+	}
+
 	void CStyleValue::Release()
 	{
 		if (valueType == Type_Gradient)
@@ -53,43 +109,146 @@ namespace CE::Widgets
 			gradient.Clear();
 			gradient.~Gradient();
 		}
+		else if (valueType == Type_Asset)
+		{
+			assetPath.~Name();
+		}
 	}
+
+	Array<CStylePropertyType> CStyle::GetInheritedProperties()
+	{
+		static Array<CStylePropertyType> inheritedProperties{
+			CStylePropertyType::ForegroundColor,
+			CStylePropertyType::TextAlign,
+		};
+
+		return inheritedProperties;
+	}
+
+	CStylePropertyTypeFlags CStyle::GetPropertyTypeFlags(CStylePropertyType type)
+	{
+		static Array<CStylePropertyType> inheritedProperties = GetInheritedProperties();
+		CStylePropertyTypeFlags flags{};
+
+		if (inheritedProperties.Exists(type))
+			flags |= CStylePropertyTypeFlags::Inherited;
+
+		return flags;
+	}
+
+	bool CStyle::IsInheritedProperty(CStylePropertyType property)
+	{
+		return GetInheritedProperties().Exists(property);
+	}
+
+	void CStyle::AddProperty(CStylePropertyType property, const CStyleValue& value, CStateFlag state, CSubControl subControl)
+	{
+		auto& arr = styleMap[property];
+
+		for (int i = arr.GetSize() - 1; i >= 0; i--)
+		{
+			// Remove 'duplicate-like' states, because they will be fully overriden anyways.
+			if (arr[i].state == value.state &&
+				arr[i].subControl == value.subControl && 
+				arr[i].valueType == value.valueType)
+			{
+				arr.RemoveAt(i);
+			}
+		}
+
+		arr.Add(value);
+		arr.Top().state = state;
+		arr.Top().subControl = subControl;
+	}
+
+	Array<CStyleValue>& CStyle::GetProperties(CStylePropertyType property)
+	{
+		return styleMap[property];
+	}
+
+	CStyleValue& CStyle::GetProperty(CStylePropertyType property, CStateFlag forState, CSubControl forSubControl)
+	{
+		static CStyleValue invalid{};
+		auto& arr = styleMap[property];
+
+		for (auto& value : arr)
+		{
+			if (value.subControl == forSubControl && value.state == forState)
+				return value;
+		}
+
+		return invalid;
+	}
+
+	void CStyle::Push(CStylePropertyTypeFlags flags)
+	{
+		PushedData pushedData{};
+
+		for (auto& [property, array] : styleMap)
+		{
+			if ((GetPropertyTypeFlags(property) & flags) == 0) // Flags mismatch
+				continue;
+
+			for (const auto& styleValue : array)
+			{
+				if (property == CStylePropertyType::Background && styleValue.valueType == CStyleValue::Type_Color)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						GUI::PushStyleColor(GUI::StyleCol_FrameBg, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_MenuBarBg, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_ChildBg, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_Tab, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_Button, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
+						pushedData.pushedColors += 7;
+					}
+					else if (styleValue.state == CStateFlag::Hovered)
+					{
+						GUI::PushStyleColor(GUI::StyleCol_FrameBgHovered, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_ButtonHovered, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_TabHovered, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
+						pushedData.pushedColors += 4;
+					}
+					else if (styleValue.state == CStateFlag::Pressed)
+					{
+						GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_ButtonActive, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_TabActive, styleValue.color);
+						GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
+						pushedData.pushedColors += 4;
+					}
+					else if (styleValue.state == CStateFlag::Disabled)
+					{
+						GUI::PushStyleVar(GUI::StyleVar_DisabledAlpha, styleValue.color.a);
+						pushedData.pushedVars += 1;
+					}
+				}
+				else if (property == CStylePropertyType::ForegroundColor && styleValue.valueType == CStyleValue::Type_Color)
+				{
+					GUI::PushStyleColor(GUI::StyleCol_Text, styleValue.color);
+					pushedData.pushedColors += 1;
+				}
+			}
+		}
+
+		pushedStack.Push(pushedData);
+	}
+
+	void CStyle::Pop()
+	{
+		if (pushedStack.IsEmpty())
+			return;
+
+		GUI::PopStyleColor(pushedStack.Top().pushedColors);
+		GUI::PopStyleVar(pushedStack.Top().pushedVars);
+		pushedStack.Pop();
+	}
+
 	
-	/*CStyleValue::CStyleValue(f32 single) : isSingle(true), single(single)
-    {
-        
-    }
-
-	CStyleValue::CStyleValue(const Vec2& vector) : isVector(true), vector(Vec4(vector.x, vector.y, 0, 0))
-	{
-
-	}
-
-    CStyleValue::CStyleValue(const Vec4& vector) : isVector(true), vector(vector)
-    {
-        
-    }
-
-    CStyleValue::CStyleValue(const Color& color) : isColor(true), color(color)
-    {
-        
-    }
-
-	CStyleValue::CStyleValue(std::initializer_list<Gradient::Key> gradient)
-		: isGradient(true), gradient(gradient)
-	{
-	}
-
-	CStyleValue::CStyleValue(const Gradient& gradient)
-		: isGradient(true), gradient(gradient)
-	{
-	}
-    
-    CStyle::CStyle()
-    {
-        
-    }
-
+	/*
 	static std::unordered_set<CStyleProperty> gInheritedProperties{
 			CStyleProperty::ForegroundColor,
 			CStyleProperty::ForegroundColor_Disabled,
@@ -221,157 +380,3 @@ namespace CE::Widgets
 
 } // namespace CE::Widgets
 
-/*
-	ENUM()
-	enum class CStyleProperty
-	{
-		None = 0,
-		Opacity,
-		DisabledOpacity,
-		Padding,
-		ForegroundColor, // Inherited
-		ForegroundColor_Disabled, // Inherited
-		BackgroundColor,
-		BackgroundColor_Hovered,
-		BackgroundColor_Pressed,
-		BorderRadius,
-		TextAlignment, // Inherited
-		Size,
-		Width,
-		Height,
-	};
-
-	ENUM()
-	enum class Alignment
-	{
-		Inherited,
-		TopLeft, TopCenter, TopRight,
-		MiddleLeft, MiddleCenter, MiddleRight,
-		BottomLeft, BottomCenter, BottomRight
-	};
-
-	ENUM(Flags)
-	enum class CStylePropertyFlags
-	{
-		None = 0,
-		Inherited = BIT(0),
-		NonInherited = BIT(1),
-		All = Inherited | NonInherited,
-	};
-	ENUM_CLASS_FLAGS(CStylePropertyFlags);
-
-	STRUCT()
-	struct COREWIDGETS_API CStyleValue
-	{
-		CE_STRUCT(CStyleValue)
-	public:
-		CStyleValue()
-		{}
-
-		template<typename T> requires TIsEnum<T>::Value
-		CStyleValue(T enumValue)
-		{
-			this->enumValue = (s64)enumValue;
-			isEnum = true;
-		}
-
-		CStyleValue(f32 single);
-
-		CStyleValue(const Vec2& vector);
-
-		CStyleValue(const Vec4& vector);
-
-		CStyleValue(const Color& color);
-
-		CStyleValue(std::initializer_list<Gradient::Key> gradient);
-
-		CStyleValue(const Gradient& gradient);
-
-		union
-		{
-			s64 enumValue;
-
-			f32 single;
-
-			FIELD()
-			Vec4 vector{};
-
-			Color color;
-		};
-
-		FIELD()
-		Gradient gradient{};
-
-		FIELD()
-		b8 isEnum = false;
-
-		FIELD()
-		b8 isSingle = false;
-
-		FIELD()
-		b8 isVector = false;
-
-		FIELD()
-		b8 isColor = false;
-
-		FIELD()
-		b8 isGradient = false;
-	};
-
-	STRUCT()
-	struct COREWIDGETS_API CStyle
-	{
-		CE_STRUCT(CStyle)
-	public:
-		CStyle();
-
-		static CStylePropertyFlags GetStylePropertyFlags(CStyleProperty styleVar);
-		static CStyleProperty GetAllProperties(CStylePropertyFlags flags);
-
-		static Array<GUI::StyleVar> GetStyleVar(CStyleProperty variable);
-		static Array<GUI::StyleCol> GetStyleColorVar(CStyleProperty variable);
-
-		void AddProperty(CStyleProperty property, const CStyleValue& styleVar);
-		void RemoveProperty(CStyleProperty property);
-		CStyleValue& GetProperty(CStyleProperty property);
-		bool HasProperty(CStyleProperty property);
-
-		void ApplyStyle(const CStyle& style);
-
-	public: // Fields
-
-		FIELD()
-		HashMap<CStyleProperty, CStyleValue> styleMap{};
-
-	};
-
-	struct COREWIDGETS_API CStyleSelector
-	{
-	public:
-
-		String selectorString{};
-
-	private:
-
-	};
-
-	CLASS()
-	class COREWIDGETS_API CStyleManager : public Object
-	{
-		CE_CLASS(CStyleManager, CE::Object)
-	public:
-
-		CStyleManager();
-		virtual ~CStyleManager();
-
-		void PushGlobal();
-
-		void PopGlobal();
-
-	private:
-
-		CStyle globalStyle{};
-
-		u32 pushedColors = 0;
-		u32 pushedVars = 0;
-	};*/

@@ -19,7 +19,26 @@ namespace CE::Widgets
 		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once
 			return;
 
+		for (auto& [property, array] : style.styleMap)
+		{
+			for (auto& value : array)
+			{
+				if (value.enumValue == CStyleValue::Inherited && value.valueType == CStyleValue::Type_Enum)
+				{
+					auto& parentArray = parent->style.styleMap[property];
+					for (const auto& parentValue : parentArray)
+					{
+						if (parentValue.state == CStateFlag::Default)
+						{
+							value = parentValue;
+							break;
+						}
+					}
+				}
 
+
+			}
+		}
 
 		inheritedPropertiesInitialized = true;
 	}
