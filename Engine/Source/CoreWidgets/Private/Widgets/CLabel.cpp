@@ -24,6 +24,27 @@ namespace CE::Widgets
         return text;
     }
 
+	Vec2 CLabel::CalculateEstimateSize()
+	{
+		Vec4 padding{};
+		Vec2 size = GUI::CalculateTextSize(text);
+
+		for (auto& [property, array] : style.styleMap)
+		{
+			for (auto& styleValue : array)
+			{
+				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default)
+				{
+					padding = styleValue.vector;
+				}
+			}
+		}
+
+		size = Vec2(size.x + padding.x + padding.z, size.y + padding.y + padding.w);
+
+		return size;
+	}
+
     void CLabel::OnDrawGUI()
     {
 		style.Push();
@@ -40,7 +61,7 @@ namespace CE::Widgets
 		{
 			for (auto& styleValue : array)
 			{
-				if (property == CStylePropertyType::Padding)
+				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default)
 				{
 					hasPadding = true;
 					padding = styleValue.vector;
@@ -60,7 +81,7 @@ namespace CE::Widgets
 						background = &styleValue;
 					}
 				}
-				else if (property == CStylePropertyType::BorderRadius)
+				else if (property == CStylePropertyType::BorderRadius && styleValue.state == CStateFlag::Default)
 				{
 					borderRadius = styleValue.vector;
 				}

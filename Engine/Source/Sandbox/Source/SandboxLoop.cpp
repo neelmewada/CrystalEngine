@@ -188,6 +188,9 @@ void SandboxLoop::SetupGUI()
 	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.0f, 1.0f));
 	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 1.0f, 0.0f, 1.0f), CStateFlag::Hovered);
 	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 1.0f, 1.0f), CStateFlag::Pressed);
+
+	CLabel* label2 = CreateObject<CLabel>(window, "Label2");
+	label2->SetText("This is a long form label widget!")
 	
 	/*CStackLayout* vertical = CreateObject<CStackLayout>(horizontal, "Vertical");
 	vertical->SetDirection(CStackDirection::Vertical);
@@ -196,21 +199,22 @@ void SandboxLoop::SetupGUI()
 	vertLabel->SetText("Vert Label");
 
 	CButton* vertButton = CreateObject<CButton>(vertical, "VertButton");
-	vertButton->SetText("Vert Button");
+	vertButton->SetText("Vert Button");*/
 
-	CButton* button = CreateObject<CButton>(horizontal, "MyButton");
+	CButton* button = CreateObject<CButton>(window, "MyButton");
 	button->SetText("Click Me!");
-	button->GetStyle().AddProperty(CStyleProperty::BorderRadius, Vec4(5, 5, 5, 5));
-	button->GetStyle().AddProperty(CStyleProperty::BackgroundColor, Color(0.5f, 0.5f, 0.0f, 1.0f));
-	button->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Hovered, Color(0.0f, 1.0f, 0.0f, 1.0f));
-	button->GetStyle().AddProperty(CStyleProperty::BackgroundColor_Pressed, Color(0.0f, 0.0f, 1.0f, 1.0f));
+	button->GetStyle().AddProperty(CStylePropertyType::BorderRadius, Vec4(5, 5, 5, 5));
+	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.0f, 1.0f));
+	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 1.0f, 0.0f, 1.0f), CStateFlag::Hovered);
+	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 1.0f, 1.0f), CStateFlag::Pressed);
+	button->GetStyle().AddProperty(CStylePropertyType::Width, CStyleValue(50, true));
 	
 	Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []()
 		{
 			CE_LOG(Info, All, "Button Clicked from lambda!");
 		});
 
-	CLabel* newLineLabel = CreateObject<CLabel>(window, "NewLine");
+	/*CLabel* newLineLabel = CreateObject<CLabel>(window, "NewLine");
 	newLineLabel->SetText("New Line");*/
 }
 

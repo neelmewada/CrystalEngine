@@ -15,6 +15,8 @@ namespace CE::Widgets
         void SetText(const String& text);
         
         const String& GetText();
+
+		Vec2 CalculateEstimateSize() override;
         
     protected:
         

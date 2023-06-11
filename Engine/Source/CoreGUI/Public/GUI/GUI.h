@@ -68,11 +68,11 @@ namespace CE::GUI
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
 	COREGUI_API bool ButtonEx(const String& label, const Vec4& padding = {}, const Vec2& size = Vec2(0, 0), const Vec4& rounding = {},
-		TextAlign textAlign = TextAlign_Inherited, ButtonFlags flags = ButtonFlags::None);
+		TextAlign textAlign = TextAlign_Inherited, Vec2 minSize = {}, Vec2 maxSize = {}, ButtonFlags flags = ButtonFlags::None);
 
 	COREGUI_API bool ButtonEx(const String& label, const StyleColor& normal, const StyleColor& hovered, const StyleColor& pressed, 
 		const Vec4& padding = {}, const Vec2& size = Vec2(0, 0), const Vec4& rounding = {},
-		TextAlign textAlign = TextAlign_Inherited, ButtonFlags flags = ButtonFlags::None);
+		TextAlign textAlign = TextAlign_Inherited, Vec2 minSize = {}, Vec2 maxSize = {}, ButtonFlags flags = ButtonFlags::None);
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 
@@ -91,6 +91,12 @@ namespace CE::GUI
     COREGUI_API Vec2 CalculateTextSize(const String& text);
 
     COREGUI_API Vec2 GetItemRectSize();
+
+	COREGUI_API Vec2 GetContentRegionAvailableSpace();
+
+	COREGUI_API f32 GetTextLineHeight();
+
+	COREGUI_API f32 GetTextLineHeightWithSpacing();
 
 #pragma endregion
 

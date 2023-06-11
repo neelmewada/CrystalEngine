@@ -24,6 +24,8 @@ namespace CE::Widgets
         
         virtual bool IsWindow() { return false; }
 		virtual bool IsContainer() { return IsWindow(); }
+
+		virtual Vec2 CalculateEstimateSize() { return Vec2(); }
         
         void SetWidgetFlags(WidgetFlags flags);
         

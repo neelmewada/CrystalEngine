@@ -41,9 +41,13 @@ namespace CE::Widgets
 		BorderRadius,
 		BorderWidth,
 		BorderColor,
+		TextAlign, // Inherited
 		Width,
 		Height,
-		TextAlign, // Inherited
+		MinWidth,
+		MinHeight,
+		MaxWidth,
+		MaxHeight,
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyType);
 
@@ -61,7 +65,7 @@ namespace CE::Widgets
 	ENUM()
 	enum class Alignment : int
 	{
-		Inherited,
+		Inherited = 0,
 		TopLeft, TopCenter, TopRight,
 		MiddleLeft, MiddleCenter, MiddleRight,
 		BottomLeft, BottomCenter, BottomRight
@@ -120,6 +124,9 @@ namespace CE::Widgets
 		void Release();
 
 		bool IsValid() const { return valueType != Type_None; }
+
+		bool IsColor() const { return valueType == Type_Color; }
+		bool IsGradient() const { return valueType == Type_Gradient; }
 		
 
 		FIELD()
@@ -166,6 +173,8 @@ namespace CE::Widgets
 
 		void Push(CStylePropertyTypeFlags flags = CStylePropertyTypeFlags::All);
 		void Pop();
+
+		void ApplyStyle(const CStyle& from);
 		
 		HashMap<CStylePropertyType, Array<CStyleValue>> styleMap{};
 
@@ -181,14 +190,6 @@ namespace CE::Widgets
 	};
 
 } // namespace CE::Widgets
-/*
-namespace CE
-{
-	template<>
-	inline SIZE_T GetHash<CE::Widgets::CStyleSelector>(const CE::Widgets::CStyleSelector& value)
-	{
-		return GetHash<String>(value.selectorString);
-	}
-}*/
+
 
 #include "CStyle.rtti.h"

@@ -25,10 +25,12 @@ namespace CE::Widgets
 
 	void CStackLayout::OnDrawGUI()
 	{
+		style.Push();
 		GUI::BeginGroup();
+		style.Pop();
 
+		style.Push(CStylePropertyTypeFlags::Inherited);
 		{
-
 			for (int i = 0; i < attachedWidgets.GetSize(); i++)
 			{
 				attachedWidgets[i]->RenderGUI();
@@ -37,8 +39,8 @@ namespace CE::Widgets
 					GUI::SameLine();
 				}
 			}
-
 		}
+		style.Pop();
 
 		GUI::EndGroup();
 

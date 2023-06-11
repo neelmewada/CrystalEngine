@@ -23,36 +23,104 @@ namespace CE::Widgets
 		this->text = text;
 	}
 
+	Vec2 CButton::CalculateEstimateSize()
+	{
+		return Vec2();
+	}
+
 	void CButton::OnDrawGUI()
 	{
-		/*PushStyle();
+		style.Push();
 		
 		Vec4 padding{};
 		Vec4 borderRadius{};
 		Alignment textAlignment = Alignment::Inherited;
 		Vec2 preferredSize = {};
+		Vec2 maxSize = {};
+		Vec2 minSize = {};
 
-		if (style.styleMap.KeyExists(CStyleProperty::Padding))
+		for (auto& [property, array] : style.styleMap)
 		{
-			padding = style.styleMap[CStyleProperty::Padding].vector;
-		}
-
-		if (style.styleMap.KeyExists(CStyleProperty::Size))
-		{
-			preferredSize = style.styleMap[CStyleProperty::Size].vector;
-		}
-
-		if (style.styleMap.KeyExists(CStyleProperty::TextAlignment))
-		{
-			textAlignment = (Alignment)style.styleMap[CStyleProperty::TextAlignment].enumValue;
-		}
-
-		if (style.styleMap.KeyExists(CStyleProperty::BorderRadius))
-		{
-			borderRadius = style.styleMap[CStyleProperty::BorderRadius].vector;
+			for (auto& styleValue : array)
+			{
+				if (property == CStylePropertyType::Padding)
+				{
+					if (styleValue.state == CStateFlag::Default)
+						padding = styleValue.vector;
+				}
+				else if (property == CStylePropertyType::BorderRadius)
+				{
+					borderRadius = styleValue.vector;
+				}
+				else if (property == CStylePropertyType::Width)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							preferredSize.x = styleValue.single;
+						else
+							preferredSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
+					}
+				}
+				else if (property == CStylePropertyType::Height)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							preferredSize.y = styleValue.single;
+						else
+							preferredSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
+					}
+				}
+				else if (property == CStylePropertyType::MaxWidth)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							maxSize.x = styleValue.single;
+						else
+							maxSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
+					}
+				}
+				else if (property == CStylePropertyType::MaxHeight)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							maxSize.y = styleValue.single;
+						else
+							maxSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
+					}
+				}
+				else if (property == CStylePropertyType::MinWidth)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							minSize.x = styleValue.single;
+						else
+							minSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
+					}
+				}
+				else if (property == CStylePropertyType::MinHeight)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							minSize.y = styleValue.single;
+						else
+							minSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
+					}
+				}
+				else if (property == CStylePropertyType::TextAlign)
+				{
+					if (styleValue.state == CStateFlag::Default)
+						textAlignment = (Alignment)styleValue.enumValue;
+				}
+			}
 		}
 		
-		bool clicked = GUI::ButtonEx(text, padding, preferredSize, borderRadius, (GUI::TextAlign)textAlignment);
+		bool clicked = GUI::ButtonEx(text, padding, preferredSize, borderRadius, (GUI::TextAlign)textAlignment, minSize, maxSize);
 
 		if (clicked)
 		{
@@ -62,7 +130,7 @@ namespace CE::Widgets
 
 		PollEvents();
 
-		PopStyle();*/
+		style.Pop();
 	}
 
 	void CButton::HandleEvent(CEvent* event)

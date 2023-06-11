@@ -32,16 +32,18 @@ namespace CE::Widgets
     {
         if (isShown)
         {
+			style.Push();
             GUI::BeginWindow(windowTitle, &isShown);
+			style.Pop();
 
-			//PushStyle(CStylePropertyFlags::Inherited); // Push inheritable properties for sub-widgets
+			style.Push(CStylePropertyTypeFlags::Inherited); // Push inheritable properties for sub-widgets
 
             for (CWidget* subWidget : attachedWidgets)
             {
                 subWidget->RenderGUI();
             }
 
-			//PopStyle();
+			style.Pop();
             
             GUI::EndWindow();
 

@@ -6,6 +6,7 @@
 
 #include "Widgets/Definitions.h"
 #include "Style/CStyle.h"
+#include "Style/CStyleManager.h"
 #include "Event/CEvent.h"
 
 #include "Widgets/CWidget.h"

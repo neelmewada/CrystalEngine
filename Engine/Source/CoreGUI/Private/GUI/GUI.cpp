@@ -232,15 +232,16 @@ namespace CE::GUI
         return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
     }
 
-	COREGUI_API bool ButtonEx(const String& label, const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding, TextAlign textAlign, ButtonFlags buttonFlags)
+	COREGUI_API bool ButtonEx(const String& label, const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding, 
+		TextAlign textAlign, Vec2 minSize, Vec2 maxSize, ButtonFlags buttonFlags)
 	{
-		return ButtonEx(label, {}, {}, {}, padding, sizeVec, rounding, textAlign, buttonFlags);
+		return ButtonEx(label, {}, {}, {}, padding, sizeVec, rounding, textAlign, minSize, maxSize, buttonFlags);
 	}
 
 	COREGUI_API bool ButtonEx(const String& label, 
 		const StyleColor& normalColor, const StyleColor& hoveredColor, const StyleColor& pressedColor, 
 		const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding,
-		TextAlign textAlign, ButtonFlags buttonFlags)
+		TextAlign textAlign, Vec2 minSize, Vec2 maxSize, ButtonFlags buttonFlags)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -263,9 +264,19 @@ namespace CE::GUI
 		ImVec2 pos = window->DC.CursorPos;
 		if (((int)flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
 			pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+		
 		ImVec2 size = ImGui::CalcItemSize(ImVec2(sizeVec.x, sizeVec.y),
 			label_size.x + style.FramePadding.x * 2.0f,
 			label_size.y + style.FramePadding.y * 2.0f);
+
+		if (maxSize.x > 0 && size.x > maxSize.x)
+			size.x = maxSize.x;
+		if (maxSize.y > 0 && size.y > maxSize.y)
+			size.y = maxSize.y;
+		if (minSize.x > 0 && size.x < minSize.x)
+			size.x = minSize.x;
+		if (minSize.y > 0 && size.y < minSize.y)
+			size.y = minSize.y;
 
 		const ImRect bb(pos, pos + size + ImVec2(padding.x + padding.z, padding.y + padding.w));
 		ImGui::ItemSize(size, style.FramePadding.y);
@@ -279,9 +290,7 @@ namespace CE::GUI
 		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
 
 		// Render
-		//const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
-		//ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
 
 		const StyleColor& colorValue = (held && hovered) ? pressedColor : hovered ? hoveredColor : normalColor;
 		if (colorValue.IsEmpty())
@@ -396,6 +405,22 @@ namespace CE::GUI
         return Vec2(vec.x, vec.y);
     }
 
+	COREGUI_API Vec2 GetContentRegionAvailableSpace()
+	{
+		ImVec2 space = ImGui::GetContentRegionAvail();
+		return Vec2(space.x, space.y);
+	}
+
+	COREGUI_API f32 GetTextLineHeight()
+	{
+		return ImGui::GetTextLineHeight();
+	}
+
+	COREGUI_API f32 GetTextLineHeightWithSpacing()
+	{
+		return ImGui::GetTextLineHeightWithSpacing();
+	}
+
 #pragma endregion
 
 #pragma region Events
@@ -409,10 +434,6 @@ namespace CE::GUI
 
 	COREGUI_API bool IsWindowHovered(HoveredFlags flags)
 	{
-		auto w1 = ImGui::GetCurrentWindow();
-		auto w2 = GImGui->HoveredWindow;
-		auto w3 = GImGui->CurrentWindow;
-		auto w4 = GImGui->HoveredId;
 		return ImGui::IsWindowHovered((int)flags);
 	}
 

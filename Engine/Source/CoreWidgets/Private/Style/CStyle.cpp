@@ -44,6 +44,7 @@ namespace CE::Widgets
 	{
 		valueType = copy.valueType;
 		enumValue = copy.enumValue;
+		isPercent = copy.isPercent;
 
 		state = copy.state;
 		subControl = copy.subControl;
@@ -74,6 +75,7 @@ namespace CE::Widgets
 	{
 		valueType = copy.valueType;
 		enumValue = copy.enumValue;
+		isPercent = copy.isPercent;
 
 		state = copy.state;
 		subControl = copy.subControl;
@@ -132,6 +134,8 @@ namespace CE::Widgets
 
 		if (inheritedProperties.Exists(type))
 			flags |= CStylePropertyTypeFlags::Inherited;
+		else
+			flags |= CStylePropertyTypeFlags::NonInherited;
 
 		return flags;
 	}
@@ -143,6 +147,10 @@ namespace CE::Widgets
 
 	void CStyle::AddProperty(CStylePropertyType property, const CStyleValue& value, CStateFlag state, CSubControl subControl)
 	{
+		CStyleValue& modValue = const_cast<CStyleValue&>(value);
+		modValue.state = state;
+		modValue.subControl = subControl;
+
 		auto& arr = styleMap[property];
 
 		for (int i = arr.GetSize() - 1; i >= 0; i--)
@@ -157,8 +165,6 @@ namespace CE::Widgets
 		}
 
 		arr.Add(value);
-		arr.Top().state = state;
-		arr.Top().subControl = subControl;
 	}
 
 	Array<CStyleValue>& CStyle::GetProperties(CStylePropertyType property)
@@ -245,6 +251,36 @@ namespace CE::Widgets
 		GUI::PopStyleColor(pushedStack.Top().pushedColors);
 		GUI::PopStyleVar(pushedStack.Top().pushedVars);
 		pushedStack.Pop();
+	}
+
+	void CStyle::ApplyStyle(const CStyle& from)
+	{
+		for (const auto& [property, fromArray] : from.styleMap)
+		{
+			auto& thisArray = styleMap[property];
+
+			for (const auto& fromStyle : fromArray)
+			{
+				bool matchFound = false;
+
+				for (int i = thisArray.GetSize() - 1; i >= 0; i--)
+				{
+					auto& thisStyle = thisArray[i];
+
+					if (thisStyle.valueType == fromStyle.valueType && thisStyle.state == fromStyle.state && thisStyle.subControl == fromStyle.subControl)
+					{
+						matchFound = true;
+						thisStyle = fromStyle;
+						break;
+					}
+				}
+
+				if (!matchFound)
+				{
+					thisArray.Add(fromStyle);
+				}
+			}
+		}
 	}
 
 	

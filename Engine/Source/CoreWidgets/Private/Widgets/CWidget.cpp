@@ -11,7 +11,13 @@ namespace CE::Widgets
 
 	void CWidget::ConstructInternal()
 	{
-
+		for (const auto& styleGroup : gStyleManager->styleGroups)
+		{
+			if (styleGroup.selector.TestSelector(this))
+			{
+				style.ApplyStyle(styleGroup.style);
+			}
+		}
 	}
 
 	void CWidget::OnAttachedTo(CWidget* parent)
@@ -21,8 +27,11 @@ namespace CE::Widgets
 
 		for (auto& [property, array] : style.styleMap)
 		{
+			bool foundDefaultState = false;
 			for (auto& value : array)
 			{
+				if (value.state == CStateFlag::Default)
+					foundDefaultState = true;
 				if (value.enumValue == CStyleValue::Inherited && value.valueType == CStyleValue::Type_Enum)
 				{
 					auto& parentArray = parent->style.styleMap[property];
@@ -35,8 +44,19 @@ namespace CE::Widgets
 						}
 					}
 				}
+			}
 
-
+			if (!foundDefaultState && CStyle::IsInheritedProperty(property)) // If property is auto-inheritable
+			{
+				auto& parentArray = parent->style.styleMap[property];
+				for (const auto& parentValue : parentArray)
+				{
+					if (parentValue.state == CStateFlag::Default)
+					{
+						array.Add(parentValue);
+						break;
+					}
+				}
 			}
 		}
 
