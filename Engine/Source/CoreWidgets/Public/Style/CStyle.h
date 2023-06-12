@@ -5,7 +5,7 @@ namespace CE::Widgets
 	class CWidget;
 
 	ENUM(Flags)
-	enum class CStateFlag
+	enum class CStateFlag : u32
 	{
 		Default = 0,
 		On = BIT(0),
@@ -18,6 +18,9 @@ namespace CE::Widgets
 		Disabled = BIT(7),
 		Enabled = BIT(8),
 		Window = BIT(9),
+		Unfocused = BIT(10),
+		Active = BIT(11),
+		Inactive = BIT(12),
 	};
 	ENUM_CLASS_FLAGS(CStateFlag);
 
@@ -99,13 +102,13 @@ namespace CE::Widgets
 		CStyleValue();
 
 		template<typename TEnum> requires TIsEnum<TEnum>::Value
-		CStyleValue(TEnum enumValue) : enumValue(enumValue), valueType(Type_Enum)
+		CStyleValue(TEnum enumValue) : enumValue((int)enumValue), valueType(Type_Enum)
 		{
 
 		}
 
 		template<>
-		CStyleValue(EnumValue value) : enumValue(value), valueType(Type_Enum)
+		CStyleValue(EnumValue value) : enumValue((int)value), valueType(Type_Enum)
 		{
 
 		}

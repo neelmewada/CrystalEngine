@@ -190,7 +190,7 @@ void SandboxLoop::SetupGUI()
 	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 1.0f, 1.0f), CStateFlag::Pressed);
 
 	CLabel* label2 = CreateObject<CLabel>(window, "Label2");
-	label2->SetText("This is a long form label widget!")
+	label2->SetText("This is a long form label widget! And this is another sentence in the same label.");
 	
 	/*CStackLayout* vertical = CreateObject<CStackLayout>(horizontal, "Vertical");
 	vertical->SetDirection(CStackDirection::Vertical);
@@ -208,6 +208,7 @@ void SandboxLoop::SetupGUI()
 	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 1.0f, 0.0f, 1.0f), CStateFlag::Hovered);
 	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 1.0f, 1.0f), CStateFlag::Pressed);
 	button->GetStyle().AddProperty(CStylePropertyType::Width, CStyleValue(50, true));
+	button->GetStyle().AddProperty(CStylePropertyType::MinHeight, 50);
 	
 	Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []()
 		{

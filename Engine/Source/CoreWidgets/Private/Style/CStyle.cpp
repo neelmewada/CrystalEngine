@@ -199,7 +199,7 @@ namespace CE::Widgets
 			{
 				if (property == CStylePropertyType::Background && styleValue.valueType == CStyleValue::Type_Color)
 				{
-					if (styleValue.state == CStateFlag::Default)
+					if ((styleValue.state & CStateFlag::Default) != 0)
 					{
 						GUI::PushStyleColor(GUI::StyleCol_FrameBg, styleValue.color);
 						GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
@@ -210,7 +210,7 @@ namespace CE::Widgets
 						GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
 						pushedData.pushedColors += 7;
 					}
-					else if (styleValue.state == CStateFlag::Hovered)
+					else if ((styleValue.state & CStateFlag::Hovered) != 0)
 					{
 						GUI::PushStyleColor(GUI::StyleCol_FrameBgHovered, styleValue.color);
 						GUI::PushStyleColor(GUI::StyleCol_ButtonHovered, styleValue.color);
@@ -218,7 +218,7 @@ namespace CE::Widgets
 						GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
 						pushedData.pushedColors += 4;
 					}
-					else if (styleValue.state == CStateFlag::Pressed)
+					else if ((styleValue.state & CStateFlag::Pressed) != 0)
 					{
 						GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
 						GUI::PushStyleColor(GUI::StyleCol_ButtonActive, styleValue.color);
@@ -226,9 +226,15 @@ namespace CE::Widgets
 						GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
 						pushedData.pushedColors += 4;
 					}
-					else if (styleValue.state == CStateFlag::Disabled)
+					else if ((styleValue.state & CStateFlag::Disabled) != 0)
 					{
 						GUI::PushStyleVar(GUI::StyleVar_DisabledAlpha, styleValue.color.a);
+						pushedData.pushedVars += 1;
+					}
+					
+					if ((styleValue.state & CStateFlag::Unfocused) != 0)
+					{
+						GUI::PushStyleColor(GUI::StyleCol_TabUnfocused, styleValue.color);
 						pushedData.pushedVars += 1;
 					}
 				}
