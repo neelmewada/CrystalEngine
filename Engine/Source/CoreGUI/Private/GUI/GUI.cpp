@@ -374,6 +374,11 @@ namespace CE::GUI
 		ImGui::EndTable();
 	}
 
+	COREGUI_API void TableSetupColumn(const String& label, TableColumnFlags flags)
+	{
+		ImGui::TableSetupColumn(label.GetCString(), flags);
+	}
+
 #pragma endregion
 
 #pragma region Layout

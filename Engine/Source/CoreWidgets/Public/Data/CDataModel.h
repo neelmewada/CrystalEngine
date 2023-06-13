@@ -42,12 +42,16 @@ namespace CE::Widgets
 		CE_CLASS(CDataModel, Object)
 	public:
 
-		virtual u32 GetRowCount(const CModelIndex& index) = 0;
-		virtual u32 GetColumnCount(const CModelIndex& index) = 0;
+		virtual bool HasHeader() { return false; }
+
+		virtual String GetHeaderTitle(u32 row) { return ""; }
+
+		virtual u32 GetRowCount(const CModelIndex& parent) = 0;
+		virtual u32 GetColumnCount(const CModelIndex& parent) = 0;
 
 		virtual CModelIndex GetParent(const CModelIndex& index) = 0;
 
-		virtual CModelIndex GetIndex(u32 row, u32 col, const CModelIndex& index = {}) = 0;
+		virtual CModelIndex GetIndex(u32 row, u32 col, const CModelIndex& parent = {}) = 0;
 
 		/// The widget class to use for the cell/item
 		virtual ClassType* GetWidgetClass(const CModelIndex& index) = 0;

@@ -20,6 +20,8 @@ namespace CE::Widgets
 
 	private:
 		CDataModel* model = nullptr;
+
+		String id = "";
 	};
     
 } // namespace CE::Widgets
