@@ -6,11 +6,13 @@ namespace CE::Widgets
 
 	CWidget::CWidget()
 	{
-		ConstructInternal();
+
 	}
 
 	void CWidget::ConstructInternal()
 	{
+		style.ApplyStyle(gStyleManager->globalStyle);
+
 		for (const auto& styleGroup : gStyleManager->styleGroups)
 		{
 			if (styleGroup.selector.TestSelector(this))

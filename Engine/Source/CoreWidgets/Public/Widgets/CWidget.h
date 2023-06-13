@@ -52,8 +52,7 @@ namespace CE::Widgets
 
 		CWidget* FindSubWidget(const Name& name);
 
-	private:
-
+		// For internal use only!
 		void ConstructInternal();
 
 	protected:

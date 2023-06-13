@@ -21,6 +21,7 @@ namespace CE::Widgets
 		Unfocused = BIT(10),
 		Active = BIT(11),
 		Inactive = BIT(12),
+		Collapsed = BIT(13),
 	};
 	ENUM_CLASS_FLAGS(CStateFlag);
 
@@ -30,6 +31,8 @@ namespace CE::Widgets
 		None = 0,
 		Icon,
 		Tab,
+		TitleBar,
+		MenuBar,
 	};
 	ENUM_CLASS_FLAGS(CSubControl);
 

@@ -199,34 +199,90 @@ namespace CE::Widgets
 			{
 				if (property == CStylePropertyType::Background && styleValue.valueType == CStyleValue::Type_Color)
 				{
-					if ((styleValue.state & CStateFlag::Default) != 0)
+					if (styleValue.state == CStateFlag::Default)
 					{
-						GUI::PushStyleColor(GUI::StyleCol_FrameBg, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_MenuBarBg, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_ChildBg, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_Tab, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_Button, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
-						pushedData.pushedColors += 7;
+						if (styleValue.subControl == CSubControl::Tab)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_Tab, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else if (styleValue.subControl == CSubControl::TitleBar)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TitleBg, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else if (styleValue.subControl == CSubControl::MenuBar)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_MenuBarBg, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else
+						{
+							GUI::PushStyleColor(GUI::StyleCol_FrameBg, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_MenuBarBg, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_ChildBg, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_Button, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
+							pushedData.pushedColors += 6;
+						}
 					}
 					else if ((styleValue.state & CStateFlag::Hovered) != 0)
 					{
-						GUI::PushStyleColor(GUI::StyleCol_FrameBgHovered, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_ButtonHovered, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_TabHovered, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
-						pushedData.pushedColors += 4;
+						if (styleValue.subControl == CSubControl::Tab)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TabHovered, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else
+						{
+							GUI::PushStyleColor(GUI::StyleCol_FrameBgHovered, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_ButtonHovered, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
+							pushedData.pushedColors += 3;
+						}
 					}
 					else if ((styleValue.state & CStateFlag::Pressed) != 0)
 					{
-						GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_ButtonActive, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_TabActive, styleValue.color);
-						GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
-						pushedData.pushedColors += 4;
+						if (styleValue.subControl == CSubControl::Tab)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TabActive, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else
+						{
+							GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_ButtonActive, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
+							pushedData.pushedColors += 3;
+						}
 					}
-					else if ((styleValue.state & CStateFlag::Disabled) != 0)
+
+					if ((styleValue.state & CStateFlag::Collapsed) != 0)
+					{
+						if (styleValue.subControl == CSubControl::TitleBar)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TitleBgCollapsed, styleValue.color);
+							pushedData.pushedColors++;
+						}
+					}
+
+					if ((styleValue.state & CStateFlag::Active) != 0)
+					{
+						if (styleValue.subControl == CSubControl::TitleBar)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TitleBgActive, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else if (styleValue.subControl == CSubControl::Tab)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TabActive, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_TabUnfocusedActive, styleValue.color);
+							pushedData.pushedColors += 2;
+						}
+					}
+					
+					if ((styleValue.state & CStateFlag::Disabled) != 0)
 					{
 						GUI::PushStyleVar(GUI::StyleVar_DisabledAlpha, styleValue.color.a);
 						pushedData.pushedVars += 1;
@@ -234,8 +290,11 @@ namespace CE::Widgets
 					
 					if ((styleValue.state & CStateFlag::Unfocused) != 0)
 					{
-						GUI::PushStyleColor(GUI::StyleCol_TabUnfocused, styleValue.color);
-						pushedData.pushedVars += 1;
+						if (styleValue.subControl == CSubControl::Tab)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TabUnfocused, styleValue.color);
+							pushedData.pushedColors += 1;
+						}
 					}
 				}
 				else if (property == CStylePropertyType::ForegroundColor && styleValue.valueType == CStyleValue::Type_Color)

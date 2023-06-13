@@ -66,27 +66,9 @@ namespace CE::Widgets
 		ClassType* widgetClass = TWidget::Type(),
 		ObjectFlags objectFlags = OF_NoFlags)
 	{
-		Object* ownerObject = owner;
-		if (ownerObject == nullptr)
-			ownerObject = GetWidgetsTransientPackage();
-		if (!widgetClass->CanBeInstantiated()) // widgetClass should NOT be the `Widget` class itself & it shouldn't be abstract
-			return nullptr;
-		if (!widgetClass->IsSubclassOf(CWidget::Type()))
-			return nullptr;
-
-		Internal::WidgetInitializer init{};
-		init.flags = widgetFlags;
-
-		Internal::WidgetThreadContext::Get().PushInitializer(&init);
-
-		CWidget* widget = CreateObject<TWidget>(ownerObject, widgetName, objectFlags, widgetClass);
-
-		if (widget == nullptr) // Failed to create widget
-		{
-			Internal::WidgetThreadContext::Get().PopInitializer(); // Only pop when failed, because the Widget class auto-pops initializer on success
-		}
-		
-		return (TWidget*)widget;
+		TWidget* widget = CreateObject<TWidget>(owner, widgetName, objectFlags, widgetClass);
+		widget->ConstructInternal();
+		return widget;
 	}
 
 }

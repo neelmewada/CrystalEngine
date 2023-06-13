@@ -98,7 +98,7 @@ void SandboxLoop::PostInit()
     // Setup GUI
     using namespace CE::Widgets;
     
-    window = CreateObject<CWindow>(nullptr, "TestWindow");
+    window = CreateWidget<CWindow>(nullptr, "TestWindow");
     window->SetWidgetFlags(WidgetFlags::None);
     
     SetupGUI();
@@ -175,33 +175,51 @@ void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
 
-    
-    window->SetTitle("Test Window");
-	//window->GetStyle().AddProperty(CStyleProperty::ForegroundColor, Color(0, 0, 1, 1));
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.08f, 0.08f, 0.09f, 0.83f), CStateFlag::Default, CSubControl::Tab);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.33f, 0.34f, 0.36f, 0.83f), CStateFlag::Hovered, CSubControl::Tab);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.23f, 0.23f, 0.24f, 1.00f), CStateFlag::Active, CSubControl::Tab);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.08f, 0.08f, 0.09f, 1.00f), CStateFlag::Unfocused, CSubControl::Tab);
 
-	//CStackLayout* horizontal = CreateObject<CStackLayout>(window, "Horizontal");
-	//horizontal->SetDirection(CStackDirection::Horizontal);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.08f, 0.08f, 0.09f, 1.00f), CStateFlag::Default, CSubControl::TitleBar);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.08f, 0.08f, 0.09f, 1.00f), CStateFlag::Active, CSubControl::TitleBar);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.51f), CStateFlag::Collapsed, CSubControl::TitleBar);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::ForegroundColor, Color::White());
+
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::BorderRadius, Vec4(2.3f, 2.3f, 2.3f, 2.3f));
+
+	auto& buttonSelector = gStyleManager->AddStyleGroup("CButton");
+	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.25f, 0.25f, 0.25f, 1.00f), CStateFlag::Default);
+	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.38f, 0.38f, 0.38f, 1.00f), CStateFlag::Hovered);
+	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.67f, 0.67f, 0.67f, 0.39f), CStateFlag::Pressed);
+
+	auto& groups = gStyleManager->styleGroups;
+
+    window->SetTitle("Test Window");
+	window->GetStyle().AddProperty(CStylePropertyType::ForegroundColor, Color::White());
+
+	CStackLayout* horizontal = CreateWidget<CStackLayout>(window, "Horizontal");
+	horizontal->SetDirection(CStackDirection::Horizontal);
     
-    CLabel* label = CreateObject<CLabel>(window, "MyLabel");
+    CLabel* label = CreateWidget<CLabel>(horizontal, "MyLabel");
     label->SetText("Label Text");
     label->GetStyle().AddProperty(CStylePropertyType::ForegroundColor, Color::White());
 	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.0f, 1.0f));
 	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 1.0f, 0.0f, 1.0f), CStateFlag::Hovered);
 	label->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 1.0f, 1.0f), CStateFlag::Pressed);
 
-	CLabel* label2 = CreateObject<CLabel>(window, "Label2");
+	CLabel* label2 = CreateWidget<CLabel>(horizontal, "Label2");
 	label2->SetText("This is a long form label widget! And this is another sentence in the same label.");
 	
-	/*CStackLayout* vertical = CreateObject<CStackLayout>(horizontal, "Vertical");
+	CStackLayout* vertical = CreateWidget<CStackLayout>(horizontal, "Vertical");
 	vertical->SetDirection(CStackDirection::Vertical);
 
-	CLabel* vertLabel = CreateObject<CLabel>(vertical, "VertLabel");
+	CLabel* vertLabel = CreateWidget<CLabel>(vertical, "VertLabel");
 	vertLabel->SetText("Vert Label");
 
-	CButton* vertButton = CreateObject<CButton>(vertical, "VertButton");
-	vertButton->SetText("Vert Button");*/
+	CButton* vertButton = CreateWidget<CButton>(vertical, "VertButton");
+	vertButton->SetText("Vert Button");
 
-	CButton* button = CreateObject<CButton>(window, "MyButton");
+	CButton* button = CreateWidget<CButton>(window, "MyButton");
 	button->SetText("Click Me!");
 	button->GetStyle().AddProperty(CStylePropertyType::BorderRadius, Vec4(5, 5, 5, 5));
 	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.0f, 1.0f));
@@ -215,7 +233,7 @@ void SandboxLoop::SetupGUI()
 			CE_LOG(Info, All, "Button Clicked from lambda!");
 		});
 
-	/*CLabel* newLineLabel = CreateObject<CLabel>(window, "NewLine");
+	/*CLabel* newLineLabel = CreateWidget<CLabel>(window, "NewLine");
 	newLineLabel->SetText("New Line");*/
 }
 
@@ -230,6 +248,8 @@ void SandboxLoop::RunLoop()
 
         cmdList->Begin();
         cmdList->ImGuiNewFrame();
+
+		gStyleManager->PushGlobal();
 
         GUI::BeginWindow("DockSpaceWindow", nullptr, GUI::WF_FullScreen | GUI::WF_MenuBar | GUI::WF_NoPadding);
         {
@@ -292,6 +312,8 @@ void SandboxLoop::RunLoop()
 				window->RenderGUI();
         }
         GUI::EndWindow();
+
+		gStyleManager->PopGlobal();
 
         cmdList->ImGuiRender();
         cmdList->End();

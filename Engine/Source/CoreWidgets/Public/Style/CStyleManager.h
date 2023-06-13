@@ -14,11 +14,26 @@ namespace CE::Widgets
 			CSubControl subControl = CSubControl::None;
 		};
 
+		enum EntryType
+		{
+			Entry_None,
+			Entry_Element,
+			Entry_Name,
+			Entry_State,
+			Entry_SubControl
+		};
+
 	public:
+
+		CStyleSelector();
+
+		CStyleSelector(const String& selector);
 
 		bool TestSelector(CWidget* widget, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) const;
 
 		Array<Rule> selectorRules{};
+
+		bool operator==(const CStyleSelector& other);
 	};
 
 	struct CStyleGroup
@@ -35,6 +50,11 @@ namespace CE::Widgets
 
 		void PushGlobal(CStylePropertyTypeFlags flags = CStylePropertyTypeFlags::All);
 		void PopGlobal();
+
+		CStyle& AddStyleGroup(const String& selector);
+
+		// Finds or creates a style group
+		CStyle& GetStyleGroup(const String& selector);
 
 		CStyle globalStyle{};
 
