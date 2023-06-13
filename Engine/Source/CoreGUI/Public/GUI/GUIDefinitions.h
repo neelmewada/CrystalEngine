@@ -441,6 +441,99 @@ namespace CE::GUI
 		Gradient gradient;
 		b8 isGradient = false;
 	};
+
+	enum TableFlags
+	{
+		// Features
+		TableFlags_None = 0,
+		TableFlags_Resizable = 1 << 0,   // Enable resizing columns.
+		TableFlags_Reorderable = 1 << 1,   // Enable reordering columns in header row (need calling TableSetupColumn() + TableHeadersRow() to display headers)
+		TableFlags_Hideable = 1 << 2,   // Enable hiding/disabling columns in context menu.
+		TableFlags_Sortable = 1 << 3,   // Enable sorting. Call TableGetSortSpecs() to obtain sort specs. Also see TableFlags_SortMulti and TableFlags_SortTristate.
+		TableFlags_NoSavedSettings = 1 << 4,   // Disable persisting columns order, width and sort settings in the .ini file.
+		TableFlags_ContextMenuInBody = 1 << 5,   // Right-click on columns body/contents will display table context menu. By default it is available in TableHeadersRow().
+		// Decorations
+		TableFlags_RowBg = 1 << 6,   // Set each RowBg color with ImGuiCol_TableRowBg or ImGuiCol_TableRowBgAlt (equivalent of calling TableSetBgColor with ImGuiTableBgFlags_RowBg0 on each row manually)
+		TableFlags_BordersInnerH = 1 << 7,   // Draw horizontal borders between rows.
+		TableFlags_BordersOuterH = 1 << 8,   // Draw horizontal borders at the top and bottom.
+		TableFlags_BordersInnerV = 1 << 9,   // Draw vertical borders between columns.
+		TableFlags_BordersOuterV = 1 << 10,  // Draw vertical borders on the left and right sides.
+		TableFlags_BordersH = TableFlags_BordersInnerH | TableFlags_BordersOuterH, // Draw horizontal borders.
+		TableFlags_BordersV = TableFlags_BordersInnerV | TableFlags_BordersOuterV, // Draw vertical borders.
+		TableFlags_BordersInner = TableFlags_BordersInnerV | TableFlags_BordersInnerH, // Draw inner borders.
+		TableFlags_BordersOuter = TableFlags_BordersOuterV | TableFlags_BordersOuterH, // Draw outer borders.
+		TableFlags_Borders = TableFlags_BordersInner | TableFlags_BordersOuter,   // Draw all borders.
+		TableFlags_NoBordersInBody = 1 << 11,  // [ALPHA] Disable vertical borders in columns Body (borders will always appear in Headers). -> May move to style
+		TableFlags_NoBordersInBodyUntilResize = 1 << 12,  // [ALPHA] Disable vertical borders in columns Body until hovered for resize (borders will always appear in Headers). -> May move to style
+		// Sizing Policy (read above for defaults)
+		TableFlags_SizingFixedFit = 1 << 13,  // Columns default to _WidthFixed or _WidthAuto (if resizable or not resizable), matching contents width.
+		TableFlags_SizingFixedSame = 2 << 13,  // Columns default to _WidthFixed or _WidthAuto (if resizable or not resizable), matching the maximum contents width of all columns. Implicitly enable TableFlags_NoKeepColumnsVisible.
+		TableFlags_SizingStretchProp = 3 << 13,  // Columns default to _WidthStretch with default weights proportional to each columns contents widths.
+		TableFlags_SizingStretchSame = 4 << 13,  // Columns default to _WidthStretch with default weights all equal, unless overridden by TableSetupColumn().
+		// Sizing Extra Options
+		TableFlags_NoHostExtendX = 1 << 16,  // Make outer width auto-fit to columns, overriding outer_size.x value. Only available when ScrollX/ScrollY are disabled and Stretch columns are not used.
+		TableFlags_NoHostExtendY = 1 << 17,  // Make outer height stop exactly at outer_size.y (prevent auto-extending table past the limit). Only available when ScrollX/ScrollY are disabled. Data below the limit will be clipped and not visible.
+		TableFlags_NoKeepColumnsVisible = 1 << 18,  // Disable keeping column always minimally visible when ScrollX is off and table gets too small. Not recommended if columns are resizable.
+		TableFlags_PreciseWidths = 1 << 19,  // Disable distributing remainder width to stretched columns (width allocation on a 100-wide table with 3 columns: Without this flag: 33,33,34. With this flag: 33,33,33). With larger number of columns, resizing will appear to be less smooth.
+		// Clipping
+		TableFlags_NoClip = 1 << 20,  // Disable clipping rectangle for every individual columns (reduce draw command count, items will be able to overflow into other columns). Generally incompatible with TableSetupScrollFreeze().
+		// Padding
+		TableFlags_PadOuterX = 1 << 21,  // Default if BordersOuterV is on. Enable outermost padding. Generally desirable if you have headers.
+		TableFlags_NoPadOuterX = 1 << 22,  // Default if BordersOuterV is off. Disable outermost padding.
+		TableFlags_NoPadInnerX = 1 << 23,  // Disable inner padding between columns (double inner padding if BordersOuterV is on, single inner padding if BordersOuterV is off).
+		// Scrolling
+		TableFlags_ScrollX = 1 << 24,  // Enable horizontal scrolling. Require 'outer_size' parameter of BeginTable() to specify the container size. Changes default sizing policy. Because this creates a child window, ScrollY is currently generally recommended when using ScrollX.
+		TableFlags_ScrollY = 1 << 25,  // Enable vertical scrolling. Require 'outer_size' parameter of BeginTable() to specify the container size.
+		// Sorting
+		TableFlags_SortMulti = 1 << 26,  // Hold shift when clicking headers to sort on multiple column. TableGetSortSpecs() may return specs where (SpecsCount > 1).
+		TableFlags_SortTristate = 1 << 27,  // Allow no sorting, disable default sorting. TableGetSortSpecs() may return specs where (SpecsCount == 0).
+
+		// [Internal] Combinations and masks
+		TableFlags_SizingMask_ = TableFlags_SizingFixedFit | TableFlags_SizingFixedSame | TableFlags_SizingStretchProp | TableFlags_SizingStretchSame,
+	};
+
+	enum TableColumnFlags
+	{
+		// Input configuration flags
+		TableColumnFlags_None = 0,
+		TableColumnFlags_Disabled = 1 << 0,   // Overriding/master disable flag: hide column, won't show in context menu (unlike calling TableSetColumnEnabled() which manipulates the user accessible state)
+		TableColumnFlags_DefaultHide = 1 << 1,   // Default as a hidden/disabled column.
+		TableColumnFlags_DefaultSort = 1 << 2,   // Default as a sorting column.
+		TableColumnFlags_WidthStretch = 1 << 3,   // Column will stretch. Preferable with horizontal scrolling disabled (default if table sizing policy is _SizingStretchSame or _SizingStretchProp).
+		TableColumnFlags_WidthFixed = 1 << 4,   // Column will not stretch. Preferable with horizontal scrolling enabled (default if table sizing policy is _SizingFixedFit and table is resizable).
+		TableColumnFlags_NoResize = 1 << 5,   // Disable manual resizing.
+		TableColumnFlags_NoReorder = 1 << 6,   // Disable manual reordering this column, this will also prevent other columns from crossing over this column.
+		TableColumnFlags_NoHide = 1 << 7,   // Disable ability to hide/disable this column.
+		TableColumnFlags_NoClip = 1 << 8,   // Disable clipping for this column (all NoClip columns will render in a same draw command).
+		TableColumnFlags_NoSort = 1 << 9,   // Disable ability to sort on this field (even if ImGuiTableFlags_Sortable is set on the table).
+		TableColumnFlags_NoSortAscending = 1 << 10,  // Disable ability to sort in the ascending direction.
+		TableColumnFlags_NoSortDescending = 1 << 11,  // Disable ability to sort in the descending direction.
+		TableColumnFlags_NoHeaderLabel = 1 << 12,  // TableHeadersRow() will not submit label for this column. Convenient for some small columns. Name will still appear in context menu.
+		TableColumnFlags_NoHeaderWidth = 1 << 13,  // Disable header text width contribution to automatic column width.
+		TableColumnFlags_PreferSortAscending = 1 << 14,  // Make the initial sort direction Ascending when first sorting on this column (default).
+		TableColumnFlags_PreferSortDescending = 1 << 15,  // Make the initial sort direction Descending when first sorting on this column.
+		TableColumnFlags_IndentEnable = 1 << 16,  // Use current Indent value when entering cell (default for column 0).
+		TableColumnFlags_IndentDisable = 1 << 17,  // Ignore current Indent value when entering cell (default for columns > 0). Indentation changes _within_ the cell will still be honored.
+
+		// Output status flags, read-only via TableGetColumnFlags()
+		TableColumnFlags_IsEnabled = 1 << 24,  // Status: is enabled == not hidden by user/api (referred to as "Hide" in _DefaultHide and _NoHide) flags.
+		TableColumnFlags_IsVisible = 1 << 25,  // Status: is visible == is enabled AND not clipped by scrolling.
+		TableColumnFlags_IsSorted = 1 << 26,  // Status: is currently part of the sort specs
+		TableColumnFlags_IsHovered = 1 << 27,  // Status: is hovered by mouse
+
+		// [Internal] Combinations and masks
+		TableColumnFlags_WidthMask_ = TableColumnFlags_WidthStretch | TableColumnFlags_WidthFixed,
+		TableColumnFlags_IndentMask_ = TableColumnFlags_IndentEnable | TableColumnFlags_IndentDisable,
+		TableColumnFlags_StatusMask_ = TableColumnFlags_IsEnabled | TableColumnFlags_IsVisible | TableColumnFlags_IsSorted | TableColumnFlags_IsHovered,
+		TableColumnFlags_NoDirectResize_ = 1 << 30,  // [Internal] Disable user resizing this column directly (it may however we resized indirectly from its left edge)
+
+	};
+
+	enum TableRowFlags
+	{
+		TableRowFlags_None = 0,
+		TableRowFlags_Headers = 1 << 0,   // Identify header row (set default background color + width of its contents accounted differently for auto column width)
+	};
     
 } // namespace CE
 

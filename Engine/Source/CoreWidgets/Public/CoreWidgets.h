@@ -3,8 +3,11 @@
 #include "CoreMinimal.h"
 #include "CoreGUI.h"
 
-
 #include "Widgets/Definitions.h"
+
+#include "Data/CVariant.h"
+#include "Data/CDataModel.h"
+
 #include "Style/CStyle.h"
 #include "Style/CStyleManager.h"
 #include "Event/CEvent.h"
@@ -17,6 +20,7 @@
 #include "Widgets/CLabel.h"
 #include "Widgets/CButton.h"
 #include "Widgets/CStackLayout.h"
+#include "Widgets/CTableView.h"
 
 namespace CE::Widgets
 {

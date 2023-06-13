@@ -302,7 +302,7 @@ void SandboxLoop::RunLoop()
                 GUI::EndWindow();
             }
 
-			static bool demoWindow = false;
+			static bool demoWindow = true;
 			if (demoWindow)
 			{
 				GUI::ShowDemoWindow(&demoWindow);

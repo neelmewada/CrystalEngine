@@ -40,7 +40,7 @@ namespace CE::Widgets
 
         virtual void RegisterTypes() override
         {
-
+			CE_REGISTER_TYPES(CVariant);
         }
     };
 	

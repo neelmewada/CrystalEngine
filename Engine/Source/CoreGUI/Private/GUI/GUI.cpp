@@ -364,6 +364,16 @@ namespace CE::GUI
         ImGui::InvisibleButton(id.GetCString(), ImVec2(size.x, size.y));
     }
 
+	COREGUI_API bool BeginTable(const String& label, int columnCount, TableFlags flags, const Vec2& outerSize, f32 innerWidth)
+	{
+		return ImGui::BeginTable(label.GetCString(), columnCount, flags, ImVec2(outerSize.x, outerSize.y), innerWidth);
+	}
+
+	COREGUI_API void EndTable()
+	{
+		ImGui::EndTable();
+	}
+
 #pragma endregion
 
 #pragma region Layout

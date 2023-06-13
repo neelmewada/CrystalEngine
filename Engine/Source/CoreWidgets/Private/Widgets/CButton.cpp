@@ -20,7 +20,7 @@ namespace CE::Widgets
 
 	void CButton::SetText(const String& text)
 	{
-		this->text = text;
+		this->text = String::Format(text + "##{}", GetUuid());
 	}
 
 	Vec2 CButton::CalculateEstimateSize()
