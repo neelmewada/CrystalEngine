@@ -266,6 +266,15 @@ void SandboxLoop::SetupGUI()
 	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.38f, 0.38f, 0.38f, 1.00f), CStateFlag::Hovered);
 	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.67f, 0.67f, 0.67f, 0.39f), CStateFlag::Pressed);
 
+	auto& tableSelector = gStyleManager->GetStyleGroup("CTableView");
+	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.20f, 0.20f, 0.20f, 1.0f), CStateFlag::Default, CSubControl::Header);
+	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.23f, 0.23f, 0.23f, 1.0f), CStateFlag::Hovered, CSubControl::Header);
+	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.26f, 0.26f, 0.26f, 1.0f), CStateFlag::Pressed, CSubControl::Header);
+	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.00f), CStateFlag::Default, CSubControl::TableRowEven);
+	tableSelector.AddProperty(CStylePropertyType::Background, Color(1.00f, 1.00f, 1.00f, 0.06f), CStateFlag::Default, CSubControl::TableRowOdd);
+	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.52f), CStateFlag::Default, CSubControl::TableBorder);
+	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.28f, 0.28f, 0.28f, 0.29f), CStateFlag::Default, CSubControl::TableBorderSecondary);
+
 	auto& groups = gStyleManager->styleGroups;
 
     window->SetTitle("Test Window");

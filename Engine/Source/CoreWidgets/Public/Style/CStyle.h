@@ -33,6 +33,13 @@ namespace CE::Widgets
 		Tab,
 		TitleBar,
 		MenuBar,
+		Header,
+
+		// Table SubControls
+		TableRowEven,
+		TableRowOdd,
+		TableBorder, // Primary edge
+		TableBorderSecondary, // Secondary edge
 	};
 	ENUM_CLASS_FLAGS(CSubControl);
 
