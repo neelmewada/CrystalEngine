@@ -308,6 +308,13 @@ public:
         return "Tree Node";
     }
     
+    int GetIndentLevel(const CModelIndex &index) override
+    {
+        if (index.GetColumn() == 0)
+            return 1;
+        return 0;
+    }
+    
     Entry* root = nullptr;
 };
 

@@ -558,6 +558,11 @@ namespace CE::GUI
 		ImGui::TreePop();
     }
 
+    COREGUI_API bool CollapsibleHeader(const String& label, TreeNodeFlags flags)
+    {
+        return ImGui::CollapsingHeader(label.GetCString(), flags);
+    }
+
 #pragma endregion
 
 #pragma region Table
@@ -657,6 +662,16 @@ namespace CE::GUI
 	{
 		return ImGui::GetTextLineHeightWithSpacing();
 	}
+
+    COREGUI_API void Indent(f32 indent)
+    {
+        ImGui::Indent(indent);
+    }
+
+    COREGUI_API void Unindent(f32 indent)
+    {
+        ImGui::Unindent(indent);
+    }
 
 #pragma endregion
 

@@ -63,6 +63,8 @@ namespace CE::Widgets
 		virtual void SetData(const CModelIndex& index, CWidget* itemWidget) = 0;
 
 		virtual String GetText(const CModelIndex& index) { return ""; }
+        
+        virtual int GetIndentLevel(const CModelIndex& index) { return 0; }
 
 		CModelIndex CreateIndex(u32 row, u32 col, void* data = nullptr);
 

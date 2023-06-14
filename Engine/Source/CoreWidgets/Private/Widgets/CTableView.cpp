@@ -164,8 +164,20 @@ namespace CE::Widgets
 					widget = widgetMap[cellIndex];
 				
 				model->SetData(cellIndex, widget);
+                
+                int indentLevel = model->GetIndentLevel(cellIndex);
+                
+                for (int i = 0; i < indentLevel; i++)
+                {
+                    GUI::Indent();
+                }
 
 				widget->RenderGUI(); // Render widget
+                
+                for (int i = 0; i < indentLevel; i++)
+                {
+                    GUI::Unindent();
+                }
 			}
 
 			if (open)

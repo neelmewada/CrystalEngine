@@ -82,6 +82,8 @@ namespace CE::GUI
 
 	COREGUI_API void TreePop();
 
+    COREGUI_API bool CollapsibleHeader(const String& label, TreeNodeFlags flags = TNF_None);
+
 #pragma endregion
 
 #pragma region Table
@@ -118,6 +120,9 @@ namespace CE::GUI
 	COREGUI_API f32 GetTextLineHeight();
 
 	COREGUI_API f32 GetTextLineHeightWithSpacing();
+
+    COREGUI_API void Indent(f32 indent = 0);
+    COREGUI_API void Unindent(f32 indent = 0);
 
 #pragma endregion
 
