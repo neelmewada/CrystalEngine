@@ -47,6 +47,18 @@ namespace CE::Widgets
 		{
 			valueTypeId = TYPEID(T);
 			*(T*)this = value;
+			if constexpr (std::is_pointer_v<T>)
+			{
+				isPointer = true;
+			}
+		}
+
+		template<typename T>
+		void SetInternalValue(T* value)
+		{
+			valueTypeId = TYPEID(T);
+			isPointer = true;
+			ptrValue = value;
 		}
 
 		void Copy(const CVariant& copy);
@@ -75,9 +87,11 @@ namespace CE::Widgets
 			Vec4 vec4Value;
 
 			Color colorValue;
+			void* ptrValue;
 		};
 
 		TypeId valueTypeId = 0;
+		b8 isPointer = false;
 	};
     
 } // namespace CE::Widgets

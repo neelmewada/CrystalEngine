@@ -1,7 +1,6 @@
 
 #include "CoreGUI.h"
 
-#include "CoreGUI.private.h"
 
 namespace CE
 {

@@ -171,6 +171,80 @@ void SandboxLoop::AppShutdown()
     app = nullptr;
 }
 
+class MyTableModel : public CE::Widgets::CDataModel
+{
+	CE_CLASS(MyTableModel, CE::Widgets::CDataModel)
+public:
+
+
+	// Inherited via CDataModel
+	virtual u32 GetRowCount(const CModelIndex& parent) override
+	{
+		if (!parent.IsValid())
+		{
+			return 8; // 8 rows
+		}
+		return 0;
+	}
+
+	virtual u32 GetColumnCount(const CModelIndex& parent) override
+	{
+		if (!parent.IsValid())
+		{
+			return 3; // 3 cols
+		}
+		return 0;
+	}
+
+	virtual CModelIndex GetParent(const CModelIndex& index) override
+	{
+		return CModelIndex(); // No parents
+	}
+
+	virtual CModelIndex GetIndex(u32 row, u32 col, const CModelIndex& parent) override
+	{
+		return CreateIndex(row, col);
+	}
+
+	virtual ClassType* GetWidgetClass(const CModelIndex& index) override
+	{
+		return GetStaticClass<CLabel>();
+	}
+
+	virtual void SetData(const CModelIndex& index, CWidget* itemWidget) override
+	{
+		if (itemWidget->GetClass()->IsSubclassOf<CLabel>())
+		{
+			CLabel* label = (CLabel*)itemWidget;
+			label->SetText(String::Format("Cell Entry: {},{}", index.GetRow(), index.GetColumn()));
+		}
+	}
+
+	virtual bool HasHeader() override { return true; }
+
+	virtual String GetHeaderTitle(u32 col) override
+	{
+		if (col == 0)
+			return "Col 0";
+		else if (col == 1)
+			return "Col 1";
+		else if (col == 2)
+			return "Col 2";
+
+		return "";
+	}
+};
+
+CE_RTTI_CLASS(, , MyTableModel,
+	CE_SUPER(CE::Widgets::CDataModel),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST()
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(, , MyTableModel)
+
+
 void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
@@ -233,8 +307,10 @@ void SandboxLoop::SetupGUI()
 			CE_LOG(Info, All, "Button Clicked from lambda!");
 		});
 
-	/*CLabel* newLineLabel = CreateWidget<CLabel>(window, "NewLine");
-	newLineLabel->SetText("New Line");*/
+	CTableView* table = CreateWidget<CTableView>(window, "MyTable");
+	MyTableModel* model = CreateObject<MyTableModel>(table, "TableModel");
+	table->SetModel(model);
+	table->SetTableFlags(CTableFlags::ResizeableColumns);
 }
 
 void SandboxLoop::RunLoop()

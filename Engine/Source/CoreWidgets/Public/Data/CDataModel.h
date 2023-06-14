@@ -22,6 +22,9 @@ namespace CE::Widgets
 		int GetColumn() const { return col; }
 		void* GetInternalData() const { return data; }
 
+		bool operator==(const CModelIndex& other) const;
+		bool operator!=(const CModelIndex& other) const;
+
 	private:
 
 		friend class CDataModel;
@@ -44,7 +47,7 @@ namespace CE::Widgets
 
 		virtual bool HasHeader() { return false; }
 
-		virtual String GetHeaderTitle(u32 row) { return ""; }
+		virtual String GetHeaderTitle(u32 col) { return ""; }
 
 		virtual u32 GetRowCount(const CModelIndex& parent) = 0;
 		virtual u32 GetColumnCount(const CModelIndex& parent) = 0;
@@ -57,7 +60,9 @@ namespace CE::Widgets
 		virtual ClassType* GetWidgetClass(const CModelIndex& index) = 0;
 
 		/// Override this function to set data for an item widget
-		virtual void SetData(const CModelIndex& index, CWidget* widget) = 0;
+		virtual void SetData(const CModelIndex& index, CWidget* itemWidget) = 0;
+
+		virtual String GetText(const CModelIndex& index) { return ""; }
 
 		CModelIndex CreateIndex(u32 row, u32 col, void* data = nullptr);
 
@@ -65,5 +70,13 @@ namespace CE::Widgets
     
 } // namespace CE::Widgets
 
+namespace CE
+{
+	template<>
+	inline SIZE_T GetHash<Widgets::CModelIndex>(const Widgets::CModelIndex& value)
+	{
+		return GetCombinedHashes({ (SIZE_T)value.GetRow(), (SIZE_T)value.GetColumn(), (SIZE_T)value.GetInternalData() });
+	}
+}
 
 #include "CDataModel.rtti.h"

@@ -66,7 +66,6 @@ namespace CE::Widgets
 	template<typename TWidget> requires TIsBaseClassOf<CWidget, TWidget>::Value
 	TWidget* CreateWidget(Object* owner = nullptr,
 		String widgetName = "Widget",
-		WidgetFlags widgetFlags = WidgetFlags::None,
 		ClassType* widgetClass = TWidget::Type(),
 		ObjectFlags objectFlags = OF_NoFlags)
 	{

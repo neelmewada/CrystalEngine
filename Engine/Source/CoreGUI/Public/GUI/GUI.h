@@ -76,12 +76,22 @@ namespace CE::GUI
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 
+	// Tree Node
+
+	COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags = TNF_None);
+
+	COREGUI_API void TreePop();
+
 	// Table
 
 	COREGUI_API bool BeginTable(const String& label, int columnCount, TableFlags flags = TableFlags_None, const Vec2& outerSize = {0, 0}, f32 innerWidth = 0);
 	COREGUI_API void EndTable();
 
 	COREGUI_API void TableSetupColumn(const String& label, TableColumnFlags flags = TableColumnFlags_None);
+	COREGUI_API void TableHeadersRow();
+
+	COREGUI_API void TableNextRow(TableRowFlags flags = TableRowFlags_None, f32 minHeight = 0);
+	COREGUI_API bool TableNextColumn();
 
 #pragma endregion
 

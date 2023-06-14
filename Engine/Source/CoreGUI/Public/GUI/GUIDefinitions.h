@@ -491,6 +491,7 @@ namespace CE::GUI
 		// [Internal] Combinations and masks
 		TableFlags_SizingMask_ = TableFlags_SizingFixedFit | TableFlags_SizingFixedSame | TableFlags_SizingStretchProp | TableFlags_SizingStretchSame,
 	};
+	ENUM_CLASS_FLAGS(TableFlags);
 
 	enum TableColumnFlags
 	{
@@ -528,6 +529,7 @@ namespace CE::GUI
 		TableColumnFlags_NoDirectResize_ = 1 << 30,  // [Internal] Disable user resizing this column directly (it may however we resized indirectly from its left edge)
 
 	};
+	ENUM_CLASS_FLAGS(TableColumnFlags);
 
 	enum TableRowFlags
 	{

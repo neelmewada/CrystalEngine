@@ -20,6 +20,16 @@ namespace CE::Widgets
 		return model->GetParent(*this);
 	}
 
+	bool CModelIndex::operator==(const CModelIndex& other) const
+	{
+		return row == other.row && col == other.col && model == other.model && data == other.data;
+	}
+
+	bool CModelIndex::operator!=(const CModelIndex& other) const
+	{
+		return !(*this == other);
+	}
+
 	CModelIndex CDataModel::CreateIndex(u32 row, u32 col, void* data)
 	{
 		return CModelIndex(row, col, this, data);
