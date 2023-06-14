@@ -558,6 +558,10 @@ namespace CE::GUI
 		ImGui::TreePop();
     }
 
+#pragma endregion
+
+#pragma region Table
+
 	COREGUI_API bool BeginTable(const String& label, int columnCount, TableFlags flags, const Vec2& outerSize, f32 innerWidth)
 	{
 		return ImGui::BeginTable(label.GetCString(), columnCount, flags, ImVec2(outerSize.x, outerSize.y), innerWidth);
@@ -586,6 +590,15 @@ namespace CE::GUI
 	COREGUI_API bool TableNextColumn()
 	{
 		return ImGui::TableNextColumn();
+	}
+
+	COREGUI_API Vec4 GetTableClipRect()
+	{
+		auto table = GImGui->CurrentTable;
+		if (table == nullptr)
+			return {};
+
+		return Vec4(table->OuterRect.Min.x, table->OuterRect.Min.y, table->OuterRect.Max.x, table->OuterRect.Max.y);
 	}
 
 #pragma endregion

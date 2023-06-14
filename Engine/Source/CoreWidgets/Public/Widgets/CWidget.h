@@ -55,6 +55,8 @@ namespace CE::Widgets
 		// For internal use only!
 		void ConstructInternal();
 
+		virtual void UpdateStyle();
+
 	protected:
 
 		CWidget();

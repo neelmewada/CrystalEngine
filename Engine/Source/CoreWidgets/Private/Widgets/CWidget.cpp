@@ -22,6 +22,11 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::UpdateStyle()
+	{
+		style.SetDirty(true);
+	}
+
 	void CWidget::OnAttachedTo(CWidget* parent)
 	{
 		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once

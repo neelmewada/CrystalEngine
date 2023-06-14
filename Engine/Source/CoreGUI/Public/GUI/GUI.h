@@ -82,7 +82,9 @@ namespace CE::GUI
 
 	COREGUI_API void TreePop();
 
-	// Table
+#pragma endregion
+
+#pragma region Table
 
 	COREGUI_API bool BeginTable(const String& label, int columnCount, TableFlags flags = TableFlags_None, const Vec2& outerSize = {0, 0}, f32 innerWidth = 0);
 	COREGUI_API void EndTable();
@@ -92,6 +94,8 @@ namespace CE::GUI
 
 	COREGUI_API void TableNextRow(TableRowFlags flags = TableRowFlags_None, f32 minHeight = 0);
 	COREGUI_API bool TableNextColumn();
+
+	COREGUI_API Vec4 GetTableClipRect();
 
 #pragma endregion
 

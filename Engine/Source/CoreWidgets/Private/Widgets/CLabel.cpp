@@ -45,6 +45,11 @@ namespace CE::Widgets
 		return size;
 	}
 
+	void CLabel::UpdateStyle()
+	{
+
+	}
+
     void CLabel::OnDrawGUI()
     {
 		style.Push();
@@ -61,12 +66,12 @@ namespace CE::Widgets
 		{
 			for (auto& styleValue : array)
 			{
-				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default)
+				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default && styleValue.subControl == CSubControl::None)
 				{
 					hasPadding = true;
 					padding = styleValue.vector;
 				}
-				else if (property == CStylePropertyType::Background)
+				else if (property == CStylePropertyType::Background && styleValue.subControl == CSubControl::None)
 				{
 					if ((styleValue.state & CStateFlag::Hovered) != 0)
 					{
@@ -81,7 +86,7 @@ namespace CE::Widgets
 						background = &styleValue;
 					}
 				}
-				else if (property == CStylePropertyType::BorderRadius && styleValue.state == CStateFlag::Default)
+				else if (property == CStylePropertyType::BorderRadius && styleValue.state == CStateFlag::Default && styleValue.subControl == CSubControl::None)
 				{
 					borderRadius = styleValue.vector;
 				}

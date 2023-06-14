@@ -8,6 +8,9 @@ namespace CE::Widgets
 		None = 0,
 		ResizeableColumns = BIT(0),
 		ReorderableColumns = BIT(1),
+		RowBackground = BIT(2),
+		ScrollX = BIT(3),
+		ScrollY = BIT(4),
 	};
 	ENUM_CLASS_FLAGS(CTableFlags);
 
@@ -38,6 +41,7 @@ namespace CE::Widgets
 
 		void DrawTableContents(const CModelIndex& parent);
 
+		FIELD()
 		CTableFlags tableFlags{};
 
 		FIELD()
@@ -45,6 +49,9 @@ namespace CE::Widgets
 
 		FIELD()
 		String id = "";
+
+		FIELD()
+		Vec2 tableSize{};
 
 		HashMap<TypeId, Array<CWidget*>> freeWidgetMap{};
 

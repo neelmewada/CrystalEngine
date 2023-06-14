@@ -18,6 +18,8 @@ namespace CE::Widgets
 
 		Vec2 CalculateEstimateSize() override;
         
+		void UpdateStyle() override;
+
     protected:
         
         void OnDrawGUI() override;

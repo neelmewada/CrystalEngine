@@ -7,6 +7,36 @@ namespace CE::Widgets
 	{
 		style.Push();
 
+		if (style.IsDirty())
+		{
+			Vec2 availSpace = GUI::GetContentRegionAvailableSpace();
+
+			auto& widthProperty = style.GetProperty(CStylePropertyType::Width);
+			if (widthProperty.IsValid())
+			{
+				tableSize.x = Math::Min(widthProperty.single * (widthProperty.isPercent ? availSpace.x / 100.0f : 1), availSpace.x);
+			}
+			auto& heightProperty = style.GetProperty(CStylePropertyType::Height);
+			if (heightProperty.IsValid())
+			{
+				tableSize.y = Math::Min(heightProperty.single * (heightProperty.isPercent ? availSpace.y / 100.0f : 1), availSpace.y);
+			}
+
+			auto& maxWidthProperty = style.GetProperty(CStylePropertyType::MaxWidth);
+			if (maxWidthProperty.IsValid())
+			{
+				tableSize.x = Math::Min(maxWidthProperty.single * (maxWidthProperty.isPercent ? availSpace.x / 100.0f : 1), tableSize.x);
+			}
+
+			auto& maxHeightProperty = style.GetProperty(CStylePropertyType::MaxHeight);
+			if (maxHeightProperty.IsValid())
+			{
+				tableSize.y = Math::Min(maxHeightProperty.single * (maxHeightProperty.isPercent ? availSpace.y / 100.0f : 1), tableSize.y);
+			}
+
+			style.SetDirty(false);
+		}
+
 		if (id.IsEmpty())
 		{
 			id = String::Format("{}", GetUuid());
@@ -17,10 +47,16 @@ namespace CE::Widgets
 			tableFlags |= GUI::TableFlags_Resizable;
 		if (HasAnyTableFlags(CTableFlags::ReorderableColumns))
 			tableFlags |= GUI::TableFlags_Reorderable;
+		if (HasAnyTableFlags(CTableFlags::RowBackground))
+			tableFlags |= GUI::TableFlags_RowBg;
+		if (HasAnyTableFlags(CTableFlags::ScrollX))
+			tableFlags |= GUI::TableFlags_ScrollX;
+		if (HasAnyTableFlags(CTableFlags::ScrollY))
+			tableFlags |= GUI::TableFlags_ScrollY;
 
 		if (model == nullptr)
 		{
-			if (GUI::BeginTable(id, 0, tableFlags))
+			if (GUI::BeginTable(id, 0, tableFlags, tableSize))
 			{
 				GUI::EndTable();
 				PollEvents();
@@ -28,7 +64,7 @@ namespace CE::Widgets
 		}
 		else
 		{
-			if (GUI::BeginTable(id, model->GetColumnCount(CModelIndex()), tableFlags))
+			if (GUI::BeginTable(id, model->GetColumnCount(CModelIndex()), tableFlags, tableSize))
 			{
 				if (model->HasHeader())
 				{
@@ -63,6 +99,16 @@ namespace CE::Widgets
 		for (int r = 0; r < model->GetRowCount(parent); r++)
 		{
 			GUI::TableNextRow();
+
+			auto rect = GUI::GetTableClipRect();
+			auto curPos = GUI::GetCursorScreenPos();
+			bool clipped = false;
+
+			if (rect.w < 1'000'000'000'000.0f && (curPos.y < rect.y - 60 || curPos.y > rect.w + 60))
+			{
+				clipped = true;
+			}
+
 			if (model->GetColumnCount(parent) == 0)
 				continue;
 
@@ -82,10 +128,26 @@ namespace CE::Widgets
 				}
 
 				CWidget* widget = nullptr;
+				ClassType* widgetClass = model->GetWidgetClass(cellIndex);
+
+				if (clipped)
+				{
+					if (widgetMap.KeyExists(cellIndex))
+					{
+						widget = widgetMap[cellIndex];
+						widgetMap.Remove(cellIndex);
+
+						auto& widgetList = freeWidgetMap[widgetClass->GetTypeId()];
+						if (widget != nullptr)
+							widgetList.Add(widget);
+					}
+
+					GUI::Text("");
+					continue;
+				}
 
 				if (!widgetMap.KeyExists(cellIndex))
 				{
-					ClassType* widgetClass = model->GetWidgetClass(cellIndex);
 					if (widgetClass == nullptr || !widgetClass->IsSubclassOf<CWidget>() || !widgetClass->CanBeInstantiated())
 						continue;
 

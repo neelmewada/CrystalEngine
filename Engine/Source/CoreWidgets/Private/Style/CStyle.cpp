@@ -222,6 +222,12 @@ namespace CE::Widgets
 							GUI::PushStyleColor(GUI::StyleCol_TableHeaderBg, styleValue.color);
 							pushedData.pushedColors += 2;
 						}
+						else if (styleValue.subControl == CSubControl::TableRow)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_TableRowBg, styleValue.color);
+							GUI::PushStyleColor(GUI::StyleCol_TableRowBgAlt, styleValue.color);
+							pushedData.pushedColors += 2;
+						}
 						else if (styleValue.subControl == CSubControl::TableRowEven)
 						{
 							GUI::PushStyleColor(GUI::StyleCol_TableRowBg, styleValue.color);
@@ -242,14 +248,17 @@ namespace CE::Widgets
 							GUI::PushStyleColor(GUI::StyleCol_TableBorderLight, styleValue.color);
 							pushedData.pushedColors++;
 						}
+						else if (styleValue.subControl == CSubControl::Window)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
+							pushedData.pushedColors++;
+						}
 						else
 						{
 							GUI::PushStyleColor(GUI::StyleCol_FrameBg, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_MenuBarBg, styleValue.color);
 							GUI::PushStyleColor(GUI::StyleCol_ChildBg, styleValue.color);
 							GUI::PushStyleColor(GUI::StyleCol_Button, styleValue.color);
-							pushedData.pushedColors += 5;
+							pushedData.pushedColors += 3;
 						}
 					}
 					else if ((styleValue.state & CStateFlag::Hovered) != 0)

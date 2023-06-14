@@ -34,8 +34,10 @@ namespace CE::Widgets
 		TitleBar,
 		MenuBar,
 		Header,
+		Window,
 
 		// Table SubControls
+		TableRow,
 		TableRowEven,
 		TableRowOdd,
 		TableBorder, // Primary edge
@@ -189,9 +191,15 @@ namespace CE::Widgets
 
 		void ApplyStyle(const CStyle& from);
 		
+		inline bool IsDirty() const { return isDirty; }
+
+		inline void SetDirty(bool dirty) { this->isDirty = dirty; }
+
 		HashMap<CStylePropertyType, Array<CStyleValue>> styleMap{};
 
 	private:
+
+		b8 isDirty = true;
 
 		struct PushedData
 		{

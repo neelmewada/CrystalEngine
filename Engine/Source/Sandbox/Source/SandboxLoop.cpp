@@ -98,9 +98,6 @@ void SandboxLoop::PostInit()
     // Setup GUI
     using namespace CE::Widgets;
     
-    window = CreateWidget<CWindow>(nullptr, "TestWindow");
-    window->SetWidgetFlags(WidgetFlags::None);
-    
     SetupGUI();
 }
 
@@ -182,7 +179,7 @@ public:
 	{
 		if (!parent.IsValid())
 		{
-			return 8; // 8 rows
+			return 1024; // 8 rows
 		}
 		return 0;
 	}
@@ -249,6 +246,8 @@ void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
 
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36, 255), CStateFlag::Default, CSubControl::Window);
+
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.08f, 0.08f, 0.09f, 0.83f), CStateFlag::Default, CSubControl::Tab);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.33f, 0.34f, 0.36f, 0.83f), CStateFlag::Hovered, CSubControl::Tab);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.23f, 0.23f, 0.24f, 1.00f), CStateFlag::Active, CSubControl::Tab);
@@ -274,9 +273,11 @@ void SandboxLoop::SetupGUI()
 	tableSelector.AddProperty(CStylePropertyType::Background, Color(1.00f, 1.00f, 1.00f, 0.06f), CStateFlag::Default, CSubControl::TableRowOdd);
 	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.52f), CStateFlag::Default, CSubControl::TableBorder);
 	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.28f, 0.28f, 0.28f, 0.29f), CStateFlag::Default, CSubControl::TableBorderSecondary);
-
+	
 	auto& groups = gStyleManager->styleGroups;
 
+	window = CreateWidget<CWindow>(nullptr, "TestWindow");
+	window->SetWidgetFlags(WidgetFlags::None);
     window->SetTitle("Test Window");
 	window->GetStyle().AddProperty(CStylePropertyType::ForegroundColor, Color::White());
 
@@ -309,7 +310,7 @@ void SandboxLoop::SetupGUI()
 	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 1.0f, 0.0f, 1.0f), CStateFlag::Hovered);
 	button->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 1.0f, 1.0f), CStateFlag::Pressed);
 	button->GetStyle().AddProperty(CStylePropertyType::Width, CStyleValue(50, true));
-	button->GetStyle().AddProperty(CStylePropertyType::MinHeight, 50);
+	button->GetStyle().AddProperty(CStylePropertyType::MinHeight, 30);
 	
 	Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []()
 		{
@@ -319,7 +320,8 @@ void SandboxLoop::SetupGUI()
 	CTableView* table = CreateWidget<CTableView>(window, "MyTable");
 	MyTableModel* model = CreateObject<MyTableModel>(table, "TableModel");
 	table->SetModel(model);
-	table->SetTableFlags(CTableFlags::ResizeableColumns);
+	table->SetTableFlags(CTableFlags::ResizeableColumns | CTableFlags::ScrollY);
+	table->GetStyle().AddProperty(CStylePropertyType::Height, 200);
 }
 
 void SandboxLoop::RunLoop()
