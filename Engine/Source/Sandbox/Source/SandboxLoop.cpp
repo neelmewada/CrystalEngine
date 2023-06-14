@@ -172,6 +172,48 @@ class MyTableModel : public CE::Widgets::CDataModel
 {
 	CE_CLASS(MyTableModel, CE::Widgets::CDataModel)
 public:
+    
+    struct Entry
+    {
+        ~Entry()
+        {
+            for (auto child : children)
+            {
+                delete child;
+            }
+            children.Clear();
+        }
+        
+        String name{};
+        Entry* parent = nullptr;
+        Array<Entry*> children{};
+    };
+    
+    MyTableModel()
+    {
+        root = new Entry();
+        
+        for (int i = 0; i < 20; i++)
+        {
+            Entry* e = new Entry();
+            e->name = String("Entry: ") + i;
+            if (i == 4)
+            {
+                Entry* c1 = new Entry();
+                Entry* c2 = new Entry();
+                Entry* c3 = new Entry();
+                Entry* c4 = new Entry();
+                
+                e->children.Add(c1);
+                e->children.Add(c2);
+                e->children.Add(c3);
+                e->children.Add(c4);
+            }
+            root->children.Add(e);
+        }
+    }
+    
+    virtual ~MyTableModel() { delete root; }
 
 
 	// Inherited via CDataModel
@@ -179,28 +221,58 @@ public:
 	{
 		if (!parent.IsValid())
 		{
-			return 1024; // 8 rows
+			return root->children.GetSize();
 		}
-		return 0;
+        Entry* parentEntry = (Entry*)parent.GetInternalData();
+        if (parentEntry == nullptr)
+            return 0;
+        return parentEntry->children.GetSize();
 	}
 
 	virtual u32 GetColumnCount(const CModelIndex& parent) override
 	{
-		if (!parent.IsValid())
-		{
-			return 3; // 3 cols
-		}
-		return 0;
+		return 3;
 	}
 
 	virtual CModelIndex GetParent(const CModelIndex& index) override
 	{
-		return CModelIndex(); // No parents
+        if (!index.IsValid())
+            return CModelIndex();
+        
+        Entry* data = (Entry*)index.GetInternalData();
+        if (data == nullptr || data->parent == nullptr)
+            return CModelIndex();
+        
+        Entry* parentsParent = nullptr;
+        if (data->parent->parent == nullptr)
+            parentsParent = root;
+        else
+            parentsParent = data->parent->parent;
+        
+        u32 row = parentsParent->children.IndexOf(data->parent);
+        
+        return CreateIndex(row, index.GetColumn(), data->parent);
 	}
 
 	virtual CModelIndex GetIndex(u32 row, u32 col, const CModelIndex& parent) override
 	{
-		return CreateIndex(row, col);
+        Entry* parentEntry = root;
+        
+        if (!parent.IsValid())
+        {
+            parentEntry = root;
+        }
+        else
+        {
+            parentEntry = (Entry*)parent.GetInternalData();
+        }
+        
+        if (parentEntry == nullptr)
+            return CModelIndex();
+        if (row >= parentEntry->children.GetSize())
+            return CModelIndex();
+        
+		return CreateIndex(row, col, parentEntry->children[row]);
 	}
 
 	virtual ClassType* GetWidgetClass(const CModelIndex& index) override
@@ -230,6 +302,13 @@ public:
 
 		return "";
 	}
+    
+    String GetText(const CModelIndex& index) override
+    {
+        return "Tree Node";
+    }
+    
+    Entry* root = nullptr;
 };
 
 CE_RTTI_CLASS(, , MyTableModel,
