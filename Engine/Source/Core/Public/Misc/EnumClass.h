@@ -10,8 +10,10 @@
 	inline constexpr Enum  operator^ (Enum  Lhs, Enum Rhs) { return (Enum)((__underlying_type(Enum))Lhs ^ (__underlying_type(Enum))Rhs); } \
 	inline constexpr bool  operator! (Enum  E)             { return !(__underlying_type(Enum))E; } \
 	inline constexpr Enum  operator~ (Enum  E)             { return (Enum)~(__underlying_type(Enum))E; }\
-	inline			 bool  operator==(Enum E, __underlying_type(Enum) Rhs) { return E == (Enum)Rhs; }\
-	inline			 bool  operator!=(Enum E, __underlying_type(Enum) Rhs) { return E != (Enum)Rhs; }
+	inline			 bool  operator==(Enum E, s32 Rhs) { return E == (Enum)Rhs; }\
+	inline			 bool  operator!=(Enum E, s32 Rhs) { return E != (Enum)Rhs; }\
+    inline           bool  operator==(Enum E, s64 Rhs) { return E == (Enum)Rhs; }\
+    inline           bool  operator!=(Enum E, s64 Rhs) { return E != (Enum)Rhs; }
 
 #define FRIEND_ENUM_CLASS_FLAGS(Enum) \
 	friend           Enum& operator|=(Enum& Lhs, Enum Rhs); \

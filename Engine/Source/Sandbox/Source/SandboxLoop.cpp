@@ -236,9 +236,10 @@ CE_RTTI_CLASS(, , MyTableModel,
 	CE_SUPER(CE::Widgets::CDataModel),
 	CE_NOT_ABSTRACT,
 	CE_ATTRIBS(),
-	CE_FIELD_LIST()
+	CE_FIELD_LIST(),
 	CE_FUNCTION_LIST()
 )
+
 CE_RTTI_CLASS_IMPL(, , MyTableModel)
 
 
