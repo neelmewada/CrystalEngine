@@ -79,6 +79,8 @@
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"
 #include "Object/Serialization.h"
+#include "Object/FieldSerializer.h"
+#include "Object/JsonSerializer.h"
 #include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"
