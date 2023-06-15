@@ -371,8 +371,8 @@ namespace CE
         TVector4(T x, T y, T z) : x(x), y(y), z(z), w(0)
         {}
 
-        TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
-        {}
+		TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w)
+		{}
 
         TVector4(TVector2<T> vec2);
         TVector4(TVector3<T> vec3);
@@ -381,6 +381,15 @@ namespace CE
             struct {
                 T x, y, z, w;
             };
+			struct {
+				T left, top, right, bottom;
+			};
+			struct {
+				TVector2<T> min, max;
+			};
+			struct {
+				TVector2<T> pos, size;
+			};
             T xyzw[4];
         };
 

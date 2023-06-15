@@ -281,11 +281,11 @@ namespace CE::GUI
 		FlattenChildren = 1 << 11,  // allow interactions even if a child window is overlapping
 		AllowItemOverlap = 1 << 12,  // require previous frame HoveredId to either match id or be null before being usable, use along with SetItemAllowOverlap()
 		DontClosePopups = 1 << 13,  // disable automatically closing parent popup on press // [UNUSED]
-		//Disabled             = 1 << 14,  // disable interactions -> use BeginDisabled() or ImGuiItemFlags_Disabled
+		//Disabled             = 1 << 14,  // disable interactions -> use BeginDisabled() or ItemFlags_Disabled
 		AlignTextBaseLine = 1 << 15,  // vertically align button to match text baseline - ButtonEx() only // FIXME: Should be removed and handled by SmallButton(), not possible currently because of DC.CursorPosPrevLine
 		NoKeyModifiers = 1 << 16,  // disable mouse interaction if a key modifier is held
 		NoHoldingActiveId = 1 << 17,  // don't set ActiveId while holding the mouse (PressedOnClick only)
-		NoNavFocus = 1 << 18,  // don't override navigation focus when activated (FIXME: this is essentially used everytime an item uses ImGuiItemFlags_NoNav, but because legacy specs don't requires LastItemData to be set ButtonBehavior(), we can't poll g.LastItemData.InFlags)
+		NoNavFocus = 1 << 18,  // don't override navigation focus when activated (FIXME: this is essentially used everytime an item uses ItemFlags_NoNav, but because legacy specs don't requires LastItemData to be set ButtonBehavior(), we can't poll g.LastItemData.InFlags)
 		NoHoveredOnFocus = 1 << 19,  // don't report as hovered when nav focus is on this item
 		NoSetKeyOwner = 1 << 20,  // don't set key/input owner on the initial click (note: mouse buttons are keys! often, the key in question will be ImGuiKey_MouseLeft!)
 		NoTestKeyOwner = 1 << 21,  // don't test key/input owner when polling the key (note: mouse buttons are keys! often, the key in question will be ImGuiKey_MouseLeft!)
@@ -536,6 +536,40 @@ namespace CE::GUI
 		TableRowFlags_None = 0,
 		TableRowFlags_Headers = 1 << 0,   // Identify header row (set default background color + width of its contents accounted differently for auto column width)
 	};
+
+	enum NavHighlightFlags
+	{
+		NavHighlightFlags_None = 0,
+		NavHighlightFlags_TypeDefault = 1 << 0,
+		NavHighlightFlags_TypeThin = 1 << 1,
+		NavHighlightFlags_AlwaysDraw = 1 << 2,       // Draw rectangular highlight if (g.NavId == id) _even_ when using the mouse.
+		NavHighlightFlags_NoRounding = 1 << 3,
+	};
+	ENUM_CLASS_FLAGS(NavHighlightFlags);
+
+	// Flags used by upcoming items
+	// - input: PushItemFlag() manipulates g.CurrentItemFlags, ItemAdd() calls may add extra flags.
+	// - output: stored in g.LastItemData.InFlags
+	// Current window shared by all windows.
+	// This is going to be exposed in imgui.h when stabilized enough.
+	enum ItemFlags
+	{
+		// Controlled by user
+		ItemFlags_None = 0,
+		ItemFlags_NoTabStop = 1 << 0,  // false     // Disable keyboard tabbing. This is a "lighter" version of ItemFlags_NoNav.
+		ItemFlags_ButtonRepeat = 1 << 1,  // false     // Button() will return true multiple times based on io.KeyRepeatDelay and io.KeyRepeatRate settings.
+		ItemFlags_Disabled = 1 << 2,  // false     // Disable interactions but doesn't affect visuals. See BeginDisabled()/EndDisabled(). See github.com/ocornut/imgui/issues/211
+		ItemFlags_NoNav = 1 << 3,  // false     // Disable any form of focusing (keyboard/gamepad directional navigation and SetKeyboardFocusHere() calls)
+		ItemFlags_NoNavDefaultFocus = 1 << 4,  // false     // Disable item being a candidate for default focus (e.g. used by title bar items)
+		ItemFlags_SelectableDontClosePopup = 1 << 5,  // false     // Disable MenuItem/Selectable() automatically closing their popup window
+		ItemFlags_MixedValue = 1 << 6,  // false     // [BETA] Represent a mixed/indeterminate value, generally multi-selection where values differ. Currently only supported by Checkbox() (later should support all sorts of widgets)
+		ItemFlags_ReadOnly = 1 << 7,  // false     // [ALPHA] Allow hovering interactions but underlying value is not changed.
+		ItemFlags_NoWindowHoverableCheck = 1 << 8,  // false     // Disable hoverable check in ItemHoverable()
+
+		// Controlled by widget code
+		ItemFlags_Inputable = 1 << 10, // false     // [WIP] Auto-activate input mode when tab focused. Currently only used and supported by a few items before it becomes a generic feature.
+	};
+	ENUM_CLASS_FLAGS(ItemFlags);
     
 } // namespace CE
 

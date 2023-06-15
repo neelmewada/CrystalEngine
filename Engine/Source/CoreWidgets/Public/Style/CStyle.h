@@ -35,13 +35,17 @@ namespace CE::Widgets
 		MenuBar,
 		Header,
 		Window,
+		Frame,
+		CheckMark,
 
 		// Table SubControls
 		TableRow,
 		TableRowEven,
 		TableRowOdd,
-		TableBorder, // Primary edge
-		TableBorderSecondary, // Secondary edge
+		TableBorder, // Outer borders
+		TableBorderInner, // Inner borders
+
+		Any,
 	};
 	ENUM_CLASS_FLAGS(CSubControl);
 
@@ -186,7 +190,7 @@ namespace CE::Widgets
 
 		CStyleValue& GetProperty(CStylePropertyType property, CStateFlag forState = CStateFlag::Default, CSubControl forSubControl = CSubControl::None);
 
-		void Push(CStylePropertyTypeFlags flags = CStylePropertyTypeFlags::All);
+		void Push(CStylePropertyTypeFlags flags = CStylePropertyTypeFlags::All, CSubControl subControl = CSubControl::Any);
 		void Pop();
 
 		void ApplyStyle(const CStyle& from);

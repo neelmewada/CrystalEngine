@@ -21,6 +21,11 @@
 #include "Widgets/CButton.h"
 #include "Widgets/CStackLayout.h"
 #include "Widgets/CTableView.h"
+#include "Widgets/CCollapsibleSection.h"
+
+// Input Widgets
+#include "Widgets/CCheckbox.h"
+
 
 namespace CE::Widgets
 {

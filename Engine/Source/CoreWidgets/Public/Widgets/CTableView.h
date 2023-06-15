@@ -11,6 +11,10 @@ namespace CE::Widgets
 		RowBackground = BIT(2),
 		ScrollX = BIT(3),
 		ScrollY = BIT(4),
+		BordersInnerH = BIT(5),   // Draw horizontal borders between rows.
+		BordersOuterH = BIT(6),   // Draw horizontal borders at the top and bottom.
+		BordersInnerV = BIT(7),   // Draw vertical borders between columns.
+		BordersOuterV = BIT(8),  // Draw vertical borders on the left and right sides.
 	};
 	ENUM_CLASS_FLAGS(CTableFlags);
 

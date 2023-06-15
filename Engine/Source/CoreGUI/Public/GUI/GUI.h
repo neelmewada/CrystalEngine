@@ -76,13 +76,17 @@ namespace CE::GUI
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 
+	COREGUI_API bool Checkbox(const String& label, bool* value);
+
+	COREGUI_API bool CheckboxTriState(ID id, s8* value, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0);
+
 	// Tree Node
 
 	COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags = TNF_None);
 
 	COREGUI_API void TreePop();
 
-    COREGUI_API bool CollapsibleHeader(const String& label, TreeNodeFlags flags = TNF_None);
+    COREGUI_API bool CollapsibleHeader(const String& label, Vec4* padding = nullptr, Vec4* borderRadius = nullptr, f32* borderSize = nullptr, TreeNodeFlags flags = TNF_None);
 
 #pragma endregion
 
@@ -124,6 +128,8 @@ namespace CE::GUI
     COREGUI_API void Indent(f32 indent = 0);
     COREGUI_API void Unindent(f32 indent = 0);
 
+	COREGUI_API Vec4 GetDefaultPadding();
+
 #pragma endregion
 
 #pragma region Events/States
@@ -162,11 +168,18 @@ namespace CE::GUI
 
 #pragma region Custom Drawing
 
-    COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
+    COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 }, f32 thickness = 1.0f);
+	COREGUI_API void DrawRect(const Vec4& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 }, f32 thickness = 1.0f);
 
     COREGUI_API void FillRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
+	COREGUI_API void FillRect(const Vec4& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 });
 
 	COREGUI_API void FillRect(const Vec4& rect, const Gradient& gradient, Vec4 rounding = { 0, 0, 0, 0 });
+
+	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });
+	COREGUI_API void RenderFrame(const Vec4& rect, u32 color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });
+
+	COREGUI_API void RenderNavHighlight(const Vec4& rect, ID id, f32 thickness = 1.0f, Vec4 rounding = { 0, 0, 0, 0 }, NavHighlightFlags flags = NavHighlightFlags_TypeDefault);
 
 #pragma endregion
     

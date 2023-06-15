@@ -5,7 +5,7 @@ namespace CE::Widgets
 
 	CButton::CButton()
 	{
-
+		SetText(GetName().GetString());
 	}
 
 	CButton::~CButton()

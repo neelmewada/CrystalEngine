@@ -53,6 +53,14 @@ namespace CE::Widgets
 			tableFlags |= GUI::TableFlags_ScrollX;
 		if (HasAnyTableFlags(CTableFlags::ScrollY))
 			tableFlags |= GUI::TableFlags_ScrollY;
+		if (HasAnyTableFlags(CTableFlags::BordersInnerH))
+			tableFlags |= GUI::TableFlags_BordersInnerH;
+		if (HasAnyTableFlags(CTableFlags::BordersInnerV))
+			tableFlags |= GUI::TableFlags_BordersInnerV;
+		if (HasAnyTableFlags(CTableFlags::BordersOuterH))
+			tableFlags |= GUI::TableFlags_BordersOuterH;
+		if (HasAnyTableFlags(CTableFlags::BordersOuterV))
+			tableFlags |= GUI::TableFlags_BordersOuterV;
 
 		if (model == nullptr)
 		{

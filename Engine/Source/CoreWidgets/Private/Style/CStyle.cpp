@@ -186,7 +186,7 @@ namespace CE::Widgets
 		return invalid;
 	}
 
-	void CStyle::Push(CStylePropertyTypeFlags flags)
+	void CStyle::Push(CStylePropertyTypeFlags flags, CSubControl subControl)
 	{
 		PushedData pushedData{};
 
@@ -197,6 +197,9 @@ namespace CE::Widgets
 
 			for (const auto& styleValue : array)
 			{
+				if (subControl != CSubControl::Any && styleValue.subControl != subControl)
+					continue;
+
 				if (property == CStylePropertyType::Background && styleValue.valueType == CStyleValue::Type_Color)
 				{
 					if (styleValue.state == CStateFlag::Default)
@@ -243,7 +246,7 @@ namespace CE::Widgets
 							GUI::PushStyleColor(GUI::StyleCol_TableBorderStrong, styleValue.color);
 							pushedData.pushedColors++;
 						}
-						else if (styleValue.subControl == CSubControl::TableBorderSecondary)
+						else if (styleValue.subControl == CSubControl::TableBorderInner)
 						{
 							GUI::PushStyleColor(GUI::StyleCol_TableBorderLight, styleValue.color);
 							pushedData.pushedColors++;
@@ -253,12 +256,21 @@ namespace CE::Widgets
 							GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
 							pushedData.pushedColors++;
 						}
-						else
+						else if (styleValue.subControl == CSubControl::Frame)
 						{
 							GUI::PushStyleColor(GUI::StyleCol_FrameBg, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else if (styleValue.subControl == CSubControl::CheckMark)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_CheckMark, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else
+						{
 							GUI::PushStyleColor(GUI::StyleCol_ChildBg, styleValue.color);
 							GUI::PushStyleColor(GUI::StyleCol_Button, styleValue.color);
-							pushedData.pushedColors += 3;
+							pushedData.pushedColors += 2;
 						}
 					}
 					else if ((styleValue.state & CStateFlag::Hovered) != 0)
@@ -273,11 +285,15 @@ namespace CE::Widgets
 							GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
 							pushedData.pushedColors++;
 						}
-						else
+						else if (styleValue.subControl == CSubControl::Frame)
 						{
 							GUI::PushStyleColor(GUI::StyleCol_FrameBgHovered, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else
+						{
 							GUI::PushStyleColor(GUI::StyleCol_ButtonHovered, styleValue.color);
-							pushedData.pushedColors += 2;
+							pushedData.pushedColors++;
 						}
 					}
 					else if ((styleValue.state & CStateFlag::Pressed) != 0)
@@ -292,11 +308,15 @@ namespace CE::Widgets
 							GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
 							pushedData.pushedColors++;
 						}
-						else
+						else if (styleValue.subControl == CSubControl::Frame)
 						{
 							GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else
+						{
 							GUI::PushStyleColor(GUI::StyleCol_ButtonActive, styleValue.color);
-							pushedData.pushedColors += 2;
+							pushedData.pushedColors += 1;
 						}
 					}
 
@@ -327,6 +347,11 @@ namespace CE::Widgets
 							GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
 							pushedData.pushedColors++;
 						}
+						else if (styleValue.subControl == CSubControl::Frame)
+						{
+							GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
+							pushedData.pushedColors++;
+						}
 					}
 					
 					if ((styleValue.state & CStateFlag::Disabled) != 0)
@@ -348,6 +373,34 @@ namespace CE::Widgets
 				{
 					GUI::PushStyleColor(GUI::StyleCol_Text, styleValue.color);
 					pushedData.pushedColors += 1;
+				}
+				else if (property == CStylePropertyType::Padding && styleValue.valueType == CStyleValue::Type_Single)
+				{
+					if (styleValue.subControl == CSubControl::Window)
+					{
+						GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.single, styleValue.single));
+						pushedData.pushedVars++;
+					}
+					GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.single, styleValue.single));
+					pushedData.pushedVars++;
+				}
+				else if (property == CStylePropertyType::BorderWidth && styleValue.valueType == CStyleValue::Type_Single && styleValue.subControl == CSubControl::None)
+				{
+					GUI::PushStyleVar(GUI::StyleVar_FrameBorderSize, styleValue.single);
+					pushedData.pushedVars++;
+				}
+				else if (property == CStylePropertyType::BorderColor && styleValue.IsColor())
+				{
+					GUI::PushStyleColor(GUI::StyleCol_Border, styleValue.color);
+					pushedData.pushedColors++;
+				}
+				else if (property == CStylePropertyType::BorderRadius && styleValue.valueType == CStyleValue::Type_Single)
+				{
+					if (styleValue.subControl == CSubControl::Frame)
+					{
+						GUI::PushStyleVar(GUI::StyleVar_FrameRounding, styleValue.single);
+						pushedData.pushedVars++;
+					}
 				}
 			}
 		}

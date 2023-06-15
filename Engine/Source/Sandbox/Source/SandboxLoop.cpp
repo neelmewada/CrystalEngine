@@ -333,8 +333,21 @@ void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
 
-	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36, 255), CStateFlag::Default, CSubControl::Window);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(47, 47, 47), CStateFlag::Default, CSubControl::Header);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(60, 60, 60), CStateFlag::Hovered, CSubControl::Header);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(70, 70, 70), CStateFlag::Pressed, CSubControl::Header);
+
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(15, 15, 15), CStateFlag::Default, CSubControl::Frame);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(28, 28, 28), CStateFlag::Hovered, CSubControl::Frame);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(40, 40, 40), CStateFlag::Pressed, CSubControl::Frame);
+
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::BorderWidth, 1.5f, CStateFlag::Default, CSubControl::None);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::BorderRadius, 1.0f, CStateFlag::Default, CSubControl::Frame);
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(45, 45, 45), CStateFlag::Default, CSubControl::None);
+
+	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::White(), CStateFlag::Default, CSubControl::CheckMark);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.08f, 0.08f, 0.09f, 0.83f), CStateFlag::Default, CSubControl::Tab);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.33f, 0.34f, 0.36f, 0.83f), CStateFlag::Hovered, CSubControl::Tab);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.23f, 0.23f, 0.24f, 1.00f), CStateFlag::Active, CSubControl::Tab);
@@ -345,7 +358,7 @@ void SandboxLoop::SetupGUI()
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.51f), CStateFlag::Collapsed, CSubControl::TitleBar);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::ForegroundColor, Color::White());
 
-	gStyleManager->globalStyle.AddProperty(CStylePropertyType::BorderRadius, Vec4(2.3f, 2.3f, 2.3f, 2.3f));
+	//gStyleManager->globalStyle.AddProperty(CStylePropertyType::BorderRadius, Vec4(2.3f, 2.3f, 2.3f, 2.3f));
 
 	auto& buttonSelector = gStyleManager->AddStyleGroup("CButton");
 	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.25f, 0.25f, 0.25f, 1.00f), CStateFlag::Default);
@@ -358,10 +371,12 @@ void SandboxLoop::SetupGUI()
 	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.26f, 0.26f, 0.26f, 1.0f), CStateFlag::Pressed, CSubControl::Header);
 	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.00f), CStateFlag::Default, CSubControl::TableRowEven);
 	tableSelector.AddProperty(CStylePropertyType::Background, Color(1.00f, 1.00f, 1.00f, 0.06f), CStateFlag::Default, CSubControl::TableRowOdd);
-	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.52f), CStateFlag::Default, CSubControl::TableBorder);
-	tableSelector.AddProperty(CStylePropertyType::Background, Color(0.28f, 0.28f, 0.28f, 0.29f), CStateFlag::Default, CSubControl::TableBorderSecondary);
+	tableSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(30, 30, 30), CStateFlag::Default, CSubControl::TableBorderInner);
 	
-	auto& groups = gStyleManager->styleGroups;
+	auto& collapsibleSelector = gStyleManager->GetStyleGroup("CCollapsibleSection");
+	collapsibleSelector.AddProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(30, 30, 30), CStateFlag::Default, CSubControl::Header);
+	collapsibleSelector.AddProperty(CStylePropertyType::Padding, Vec4(4, 4, 4, 4), CStateFlag::Default, CSubControl::Header);
+	collapsibleSelector.AddProperty(CStylePropertyType::BorderRadius, Vec4(), CStateFlag::Default, CSubControl::Header);
 
 	window = CreateWidget<CWindow>(nullptr, "TestWindow");
 	window->SetWidgetFlags(WidgetFlags::None);
@@ -404,11 +419,32 @@ void SandboxLoop::SetupGUI()
 			CE_LOG(Info, All, "Button Clicked from lambda!");
 		});
 
-	CTableView* table = CreateWidget<CTableView>(window, "MyTable");
+	// Collapsible
+	CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(window, "MySection");
+	section->SetTitle("MY SECTION");
+	section->SetIndent(1);
+
+	CTableView* table = CreateWidget<CTableView>(section, "MyTable");
 	MyTableModel* model = CreateObject<MyTableModel>(table, "TableModel");
 	table->SetModel(model);
-	table->SetTableFlags(CTableFlags::ResizeableColumns | CTableFlags::ScrollY);
+	table->SetTableFlags(CTableFlags::ResizeableColumns | CTableFlags::ScrollY | CTableFlags::BordersInnerV);
 	table->GetStyle().AddProperty(CStylePropertyType::Height, 200);
+
+	CButton* childBtn0 = CreateWidget<CButton>(section, "Button0");
+	childBtn0->SetText("Btn 0");
+	CButton* childBtn1 = CreateWidget<CButton>(section, "Button1");
+	childBtn1->SetText("Btn 1");
+	CButton* childBtn2 = CreateWidget<CButton>(section, "Button2");
+	childBtn2->SetText("Btn 2");
+	CButton* childBtn3 = CreateWidget<CButton>(section, "Button3");
+	childBtn3->SetText("Btn 3");
+
+	CCheckbox* checkbox = CreateWidget<CCheckbox>(window, "Check0");
+	
+	Object::Bind(checkbox, MEMBER_FUNCTION(CCheckbox, OnValueChanged), [](s8 newValue)
+		{
+			CE_LOG(Info, All, "Checkbox changed: {}", newValue);
+		});
 }
 
 void SandboxLoop::RunLoop()
