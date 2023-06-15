@@ -440,6 +440,7 @@ void SandboxLoop::SetupGUI()
 	childBtn3->SetText("Btn 3");
 
 	CCheckbox* checkbox = CreateWidget<CCheckbox>(window, "Check0");
+	checkbox->SetMixedState();
 	
 	Object::Bind(checkbox, MEMBER_FUNCTION(CCheckbox, OnValueChanged), [](s8 newValue)
 		{
