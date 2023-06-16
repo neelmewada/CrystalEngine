@@ -47,6 +47,11 @@ namespace CE
 
         // - Public API -
 
+		FORCE_INLINE Stream* GetStream()
+		{
+			return stream;
+		}
+
         bool WriteObjectStart()
         {
             if (!CanWriteObjectStartWithoutIdentifier())

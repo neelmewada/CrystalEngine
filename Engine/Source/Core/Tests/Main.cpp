@@ -1063,6 +1063,80 @@ TEST(JSON, Serializer)
     TEST_END;
 }
 
+TEST(JSON, FieldSerializer)
+{
+	TEST_BEGIN;
+	CERegisterModuleTypes();
+
+	using namespace JsonTests;
+
+	MemoryStream stream{ 1024 };
+
+	{
+		SerializedData data{};
+		data.strVal = "My String";
+		data.strArray = { "Item0", "Item1", "Item2", "Item3" };
+		data.inner.value = "Inner struct";
+		data.inner.myInt = 412;
+		data.innerArray = Array<InnerStruct>{ { "i0", 120 }, { "i1", 121 }, { "i2", 122 }, { "i3", 123 }, { "i4", 124 } };
+		data.innerArray[2].nextInner = Array<InnerStruct>{ { "c0", 0 }, { "c1", 1 }, { "c2", 2 }, { "c3", 3 } };
+
+		JsonFieldSerializer fieldSerializer{ SerializedData::Type(), &data };
+
+		while (fieldSerializer.HasNext())
+		{
+			fieldSerializer.WriteNext(&stream);
+		}
+	}
+
+	stream.Write('\0');
+	stream.Seek(0);
+
+	{
+		SerializedData data{};
+
+		JsonFieldDeserializer fieldDeserializer{ SerializedData::Type(), &data };
+
+		while (fieldDeserializer.HasNext())
+		{
+			fieldDeserializer.ReadNext(&stream);
+		}
+
+		EXPECT_EQ(data.strVal, "My String");
+		EXPECT_EQ(data.strArray.GetSize(), 4);
+		{
+			EXPECT_EQ(data.strArray[0], "Item0");
+			EXPECT_EQ(data.strArray[1], "Item1");
+			EXPECT_EQ(data.strArray[2], "Item2");
+			EXPECT_EQ(data.strArray[3], "Item3");
+		}
+		EXPECT_EQ(data.inner.value, "Inner struct");
+		EXPECT_EQ(data.inner.myInt, 412);
+
+		EXPECT_EQ(data.innerArray.GetSize(), 5);
+		{
+			EXPECT_EQ(data.innerArray[0].value, "i0");
+			EXPECT_EQ(data.innerArray[0].myInt, 120);
+			EXPECT_EQ(data.innerArray[1].value, "i1");
+			EXPECT_EQ(data.innerArray[1].myInt, 121);
+			EXPECT_EQ(data.innerArray[2].value, "i2");
+			EXPECT_EQ(data.innerArray[2].myInt, 122);
+			{
+				EXPECT_EQ(data.innerArray[2].nextInner.GetSize(), 4);
+			}
+			EXPECT_EQ(data.innerArray[3].value, "i3");
+			EXPECT_EQ(data.innerArray[3].myInt, 123);
+			EXPECT_EQ(data.innerArray[4].value, "i4");
+			EXPECT_EQ(data.innerArray[4].myInt, 124);
+		}
+	}
+
+	stream.Close();
+
+	CEDeregisterModuleTypes();
+	TEST_END;
+}
+
 #pragma endregion
 
 /**********************************************

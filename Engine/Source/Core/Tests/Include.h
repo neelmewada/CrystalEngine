@@ -130,5 +130,51 @@ namespace ObjectTests
 	};
 }
 
+namespace JsonTests
+{
+	using namespace CE;
+
+	STRUCT()
+	struct InnerStruct
+	{
+		CE_STRUCT(InnerStruct)
+	public:
+
+		InnerStruct()
+		{}
+
+		InnerStruct(const String& str, u32 i) : value(str), myInt(i)
+		{}
+
+		FIELD()
+		String value{};
+
+		FIELD()
+		u32 myInt{};
+
+		FIELD()
+		Array<InnerStruct> nextInner{};
+	};
+
+	STRUCT()
+	struct SerializedData
+	{
+		CE_STRUCT(SerializedData)
+	public:
+
+		FIELD()
+		String strVal{};
+
+		FIELD()
+		Array<String> strArray{};
+
+		FIELD()
+		InnerStruct inner{};
+
+		FIELD()
+		Array<InnerStruct> innerArray{};
+	};
+}
+
 #include "Include.rtti.h"
 
