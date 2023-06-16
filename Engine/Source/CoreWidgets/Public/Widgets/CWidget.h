@@ -101,7 +101,7 @@ namespace CE::Widgets
         
         FIELD()
         CStyle style{}; // Final computed style after inheritance, etc
-        
+
     private:
 
 		b8 inheritedPropertiesInitialized = false;

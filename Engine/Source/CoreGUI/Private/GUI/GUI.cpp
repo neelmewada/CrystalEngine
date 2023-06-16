@@ -431,6 +431,23 @@ namespace CE::GUI
 		return pressed;
 	}
 
+	COREGUI_API bool InputTextEx(ID id, const String& hint, String& inputText, const Vec2& size, const Vec4& padding, const Vec4& rounding, f32 borderThickness, Vec2 minSize, Vec2 maxSize, TextInputFlags flags, TextInputCallback callback, void* callback_user_data)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		IM_ASSERT(!((flags & ImGuiInputTextFlags_CallbackHistory) && (flags & ImGuiInputTextFlags_Multiline)));        // Can't use both together (they both use up/down keys)
+		IM_ASSERT(!((flags & ImGuiInputTextFlags_CallbackCompletion) && (flags & ImGuiInputTextFlags_AllowTabInput))); // Can't use both together (they both use tab key)
+
+		ImGuiContext& g = *GImGui;
+		ImGuiIO& io = g.IO;
+		const ImGuiStyle& style = g.Style;
+
+		return false;
+	}
+
+
     COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags)
     {
 		ImGuiWindow* window = ImGui::GetCurrentWindow();

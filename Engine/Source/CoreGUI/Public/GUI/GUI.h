@@ -80,6 +80,10 @@ namespace CE::GUI
 
 	COREGUI_API bool CheckboxTriState(ID id, s8* value, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0);
 
+	COREGUI_API bool InputTextEx(ID id, const String& hint, String& inputText,
+		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0, Vec2 minSize = {}, Vec2 maxSize = {},
+		TextInputFlags flags = TextInputFlags_None, TextInputCallback callback = nullptr, void* callback_user_data = nullptr);
+
 	// Tree Node
 
 	COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags = TNF_None);
