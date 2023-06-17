@@ -5,4 +5,7 @@ set(CURRENT_PACKAGE_CATEGORY "Editor")
 
 # Editor Modules
 add_subdirectory(Source/EditorCore)
+add_subdirectory(Source/EditorWidgets)
 
+# Editor Executables
+add_subdirectory(Source/ProjectBrowser)
