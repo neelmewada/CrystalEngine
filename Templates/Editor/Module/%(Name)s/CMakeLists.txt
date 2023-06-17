@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(EditorCore CXX)
+project(%(Name)s CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
-    AUTORTTI
+    %(AutoRTTI)s
     NAMESPACE CE
     FOLDER Editor/Source
-    PCHHEADER 
-        PRIVATE 
+    PCHHEADER
+        PRIVATE
             Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
@@ -26,21 +26,16 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            ThirdParty::dxcompiler
-            SpirvTools
         PUBLIC
             CE::Core
-            CE::CoreRHI
-            CE::CoreGUI
-            $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
-            CE::System
+            CE::CoreWidgets
+            CE::EditorCore
     RUNTIME_DEPENDENCIES
-        dxcompiler
-        SpirvTools
+
 )
 
 
-if(${PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED})
+if(${PAL_TRAIT_BUILD_TESTS})
     add_subdirectory(Tests)
 endif()
 
