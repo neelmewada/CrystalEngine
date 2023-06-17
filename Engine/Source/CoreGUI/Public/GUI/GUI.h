@@ -89,6 +89,11 @@ namespace CE::GUI
 		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0, Vec2 minSize = {}, Vec2 maxSize = {},
 		TextInputFlags flags = TextInputFlags_None, TextInputCallback callback = nullptr, void* callback_user_data = nullptr);
 
+	COREGUI_API bool DragScalar(ID id, DataType dataType, void* data, float speed = 1.0f, 
+		const void* min = nullptr, const void* max = nullptr, const char* format = nullptr, 
+		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0,
+		SliderFlags flags = SliderFlags_None);
+
 	// Tree Node
 
 	COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags = TNF_None);

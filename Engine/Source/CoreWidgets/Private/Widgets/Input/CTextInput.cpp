@@ -106,15 +106,25 @@ namespace CE::Widgets
 			}
 		}
 
-		GUI::TextInputFlags flags = GUI::TextInputFlags_EnterReturnsTrue | GUI::TextInputFlags_CallbackResize;
+		GUI::TextInputFlags flags = GUI::TextInputFlags_EnterReturnsTrue | GUI::TextInputFlags_CallbackResize | GUI::TextInputFlags_CallbackCharFilter;
 		if (isPassword)
 			flags |= GUI::TextInputFlags_Password;
 		if (isMultiline)
 			flags |= GUI::TextInputFlags_Multiline;
 
-		bool inputChanged = GUI::InputTextEx(id, hint, value, preferredSize, padding, borderRadius, borderThickness, minSize, maxSize, flags);
-		PollEvents();
+		GUI::TextInputCallback callback = [](GUI::TextInputCallbackData* data) -> int
+		{
+			auto thisPtr = (CTextInput*)data->userData;
+			if (data->eventFlag == GUI::TextInputFlags_CallbackCharFilter && thisPtr->GetInputValidator().IsValid())
+			{
+				data->eventChar = thisPtr->GetInputValidator().Invoke(thisPtr->value, data->eventChar, data->cursorPos);
+			}
+			return 0;
+		};
 
+		bool inputChanged = GUI::InputTextEx(id, hint, value, preferredSize, padding, borderRadius, borderThickness, minSize, maxSize, flags, callback, this);
+		PollEvents();
+		
 		if (inputChanged)
 		{
 			emit OnValueChanged(value);
@@ -127,6 +137,36 @@ namespace CE::Widgets
 	{
 
 		Super::HandleEvent(event);
+	}
+
+	COREWIDGETS_API u16 CFloatInputValidator(const String& input, u16 appendChar, int cursorPos)
+	{
+		if (String::IsNumeric(appendChar))
+			return appendChar;
+		if (appendChar == '-' && (input.IsEmpty() || cursorPos == 0))
+			return appendChar;
+
+		if (appendChar == '.')
+		{
+			for (int i = 0; i <= input.GetLength(); i++)
+			{
+				if (input[i] == '.')
+					return 0;
+			}
+			return appendChar;
+		}
+
+		return 0;
+	}
+
+	COREWIDGETS_API u16 CIntegerInputValidator(const String& input, u16 appendChar, int cursorPos)
+	{
+		if (String::IsNumeric(appendChar))
+			return appendChar;
+		if (appendChar == '-' && (input.IsEmpty() || cursorPos == 0))
+			return appendChar;
+
+		return 0;
 	}
 
 } // namespace CE::Widgets

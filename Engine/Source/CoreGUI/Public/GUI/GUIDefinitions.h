@@ -48,6 +48,23 @@ namespace CE::GUI
     };
     ENUM_CLASS_FLAGS(WindowFlags);
 
+	// A primary data type
+	enum class DataType
+	{
+		S8,       // signed char / char (with sensible compilers)
+		U8,       // unsigned char
+		S16,      // short
+		U16,      // unsigned short
+		S32,      // int
+		U32,      // unsigned int
+		S64,      // long long / __int64
+		U64,      // unsigned long long / unsigned __int64
+		Float,    // float
+		Double,   // double
+		COUNT
+	};
+	ENUM_CLASS_FLAGS(DataType);
+
     enum Dir
     {
         Dir_None = -1,
@@ -626,6 +643,18 @@ namespace CE::GUI
 	};
 
 	typedef int (*TextInputCallback)(TextInputCallbackData* data);
+
+	enum SliderFlags
+	{
+		SliderFlags_None = 0,
+		SliderFlags_AlwaysClamp = 1 << 4,       // Clamp value to min/max bounds when input manually with CTRL+Click. By default CTRL+Click allows going out of bounds.
+		SliderFlags_Logarithmic = 1 << 5,       // Make the widget logarithmic (linear otherwise). Consider using SliderFlags_NoRoundToFormat with this if using a format-string with small amount of digits.
+		SliderFlags_NoRoundToFormat = 1 << 6,       // Disable rounding underlying value to match precision of the display format string (e.g. %.3f values are rounded to those 3 digits)
+		SliderFlags_NoInput = 1 << 7,       // Disable CTRL+Click or Enter key allowing to input text directly into the widget
+		SliderFlags_InvalidMask_ = 0x7000000F,   // [Internal] We treat using those bits as being potentially a 'float power' argument from the previous API that has got miscast to this enum, and will trigger an assert if needed.
+	};
+	ENUM_CLASS_FLAGS(SliderFlags);
+
     
 } // namespace CE
 

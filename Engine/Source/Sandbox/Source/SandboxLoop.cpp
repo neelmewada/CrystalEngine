@@ -377,7 +377,9 @@ void SandboxLoop::SetupGUI()
 	collapsibleSelector.AddProperty(CStylePropertyType::BorderRadius, Vec4(), CStateFlag::Default, CSubControl::Header);
 
 	auto& textInputSelector = gStyleManager->GetStyleGroup("CTextInput");
-	textInputSelector.AddProperty(CStylePropertyType::Padding, Vec4(5, 7, 5, 7));
+	textInputSelector.AddProperty(CStylePropertyType::Padding, Vec4(5, 6, 5, 6));
+	textInputSelector.AddProperty(CStylePropertyType::Width, CStyleValue(100, true));
+	textInputSelector.AddProperty(CStylePropertyType::BorderRadius, Vec4(1, 1, 1, 1) * 1.5f);
 
 	window = CreateWidget<CWindow>(nullptr, "TestWindow");
 	window->SetWidgetFlags(WidgetFlags::None);

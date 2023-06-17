@@ -2,6 +2,12 @@
 
 namespace CE::Widgets
 {
+	typedef Delegate<u16(const String& string, u16 appendChar, int cursorPos)> CInputValidator;
+
+	COREWIDGETS_API u16 CFloatInputValidator(const String& input, u16 appendChar, int cursorPos);
+	COREWIDGETS_API u16 CIntegerInputValidator(const String& input, u16 appendChar, int cursorPos);
+
+
 	CLASS()
 	class COREWIDGETS_API CTextInput : public CWidget
 	{
@@ -41,6 +47,16 @@ namespace CE::Widgets
 			isMultiline = set;
 		}
 
+		const CInputValidator& GetInputValidator() const
+		{
+			return validator;
+		}
+
+		void SetInputValidator(CInputValidator validator)
+		{
+			this->validator = validator;
+		}
+
 	protected:
 
 		void OnDrawGUI() override;
@@ -66,6 +82,8 @@ namespace CE::Widgets
 		b8 isMultiline = false;
 
 		u32 id = 0;
+
+		CInputValidator validator{};
 	};
     
 } // namespace CE::Widgets

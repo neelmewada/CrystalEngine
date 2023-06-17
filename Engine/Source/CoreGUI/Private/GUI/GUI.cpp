@@ -845,7 +845,9 @@ namespace CE::GUI
 	}
 
 
-	COREGUI_API bool InputTextEx(ID id, const String& hint, String& inputText, const Vec2& baseSize, const Vec4& padding, const Vec4& rounding, f32 borderThickness, Vec2 minSize, Vec2 maxSize, TextInputFlags flags, TextInputCallback callback, void* callback_user_data)
+	COREGUI_API bool InputTextEx(ID id, const String& hint, String& inputText, const Vec2& baseSize, 
+		const Vec4& padding, const Vec4& rounding, f32 borderThickness, Vec2 minSize, Vec2 maxSize, 
+		TextInputFlags flags, TextInputCallback callback, void* callback_user_data)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -931,7 +933,7 @@ namespace CE::GUI
         else
         {
             // Support for internal ImGuiInputTextFlags_MergedItem flag, which could be redesigned as an ItemFlags if needed (with test performed in ItemAdd)
-            ImGui::ItemSize(total_bb, style.FramePadding.y);
+            ImGui::ItemSize(total_bb, padding.top);
             if (!(flags & ImGuiInputTextFlags_MergedItem))
                 if (!ImGui::ItemAdd(total_bb, id, &frame_bb, ImGuiItemFlags_Inputable))
                     return false;
@@ -1782,6 +1784,96 @@ namespace CE::GUI
             return value_changed || validated;
         else
             return value_changed;
+	}
+
+	COREGUI_API bool DragScalar(ID id, DataType dataType, void* data, float speed, const void* min, const void* max, const char* format, 
+		const Vec2& size, const Vec4& padding, const Vec4& rounding, f32 borderThickness,
+		SliderFlags flags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+		float w = ImGui::CalcItemWidth();
+		if (size.x > 0)
+			w = size.x;
+
+		//const ImVec2 label_size = ImGui::CalcTextSize("label", NULL, true);
+		const f32 labelHeight = ImGui::CalcTextSize("label", NULL, true).y;
+		const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, ImMax(size.y, labelHeight) + padding.top + padding.bottom));
+		const ImRect total_bb(frame_bb.Min, frame_bb.Max);
+
+		const bool temp_input_allowed = (flags & ImGuiSliderFlags_NoInput) == 0;
+		ImGui::ItemSize(total_bb, padding.top);
+		if (!ImGui::ItemAdd(total_bb, id, &frame_bb, temp_input_allowed ? ImGuiItemFlags_Inputable : 0))
+			return false;
+
+		// Default format string when passing NULL
+		if (format == NULL)
+			format = ImGui::DataTypeGetInfo((ImGuiDataType)dataType)->PrintFmt;
+
+		const bool hovered = ImGui::ItemHoverable(frame_bb, id);
+		bool temp_input_is_active = temp_input_allowed && ImGui::TempInputIsActive(id);
+		if (!temp_input_is_active)
+		{
+			// Tabbing or CTRL-clicking on Drag turns it into an InputText
+			const bool input_requested_by_tabbing = temp_input_allowed && (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_FocusedByTabbing) != 0;
+			const bool clicked = hovered && ImGui::IsMouseClicked(0, id);
+			const bool double_clicked = (hovered && g.IO.MouseClickedCount[0] == 2 && ImGui::TestKeyOwner(ImGuiKey_MouseLeft, id));
+			const bool make_active = (input_requested_by_tabbing || clicked || double_clicked || g.NavActivateId == id);
+			if (make_active && (clicked || double_clicked))
+				ImGui::SetKeyOwner(ImGuiKey_MouseLeft, id);
+			if (make_active && temp_input_allowed)
+				if (input_requested_by_tabbing || (clicked && g.IO.KeyCtrl) || double_clicked || (g.NavActivateId == id && (g.NavActivateFlags & ImGuiActivateFlags_PreferInput)))
+					temp_input_is_active = true;
+
+			// (Optional) simple click (without moving) turns Drag into an InputText
+			if (g.IO.ConfigDragClickToInputText && temp_input_allowed && !temp_input_is_active)
+				if (g.ActiveId == id && hovered && g.IO.MouseReleased[0] && !ImGui::IsMouseDragPastThreshold(0, g.IO.MouseDragThreshold * 0.5f))
+				{
+					g.NavActivateId = id;
+					g.NavActivateFlags = ImGuiActivateFlags_PreferInput;
+					temp_input_is_active = true;
+				}
+
+			if (make_active && !temp_input_is_active)
+			{
+				ImGui::SetActiveID(id, window);
+				ImGui::SetFocusID(id, window);
+				ImGui::FocusWindow(window);
+				g.ActiveIdUsingNavDirMask = (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
+			}
+		}
+
+		if (temp_input_is_active)
+		{
+			// Only clamp CTRL+Click input when ImGuiSliderFlags_AlwaysClamp is set
+			const bool is_clamp_input = (flags & ImGuiSliderFlags_AlwaysClamp) != 0 && 
+				(min == NULL || max == NULL || ImGui::DataTypeCompare((ImGuiDataType)dataType, min, max) < 0);
+			return ImGui::TempInputScalar(frame_bb, id, "", (ImGuiDataType)dataType, data, format, is_clamp_input ? min : NULL, is_clamp_input ? max : NULL);
+		}
+
+		// Draw frame
+		const ImU32 frame_col = ImGui::GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+		ImGui::RenderNavHighlight(frame_bb, id);
+		ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, style.FrameRounding);
+
+		// Drag behavior
+		const bool value_changed = ImGui::DragBehavior(id, (ImGuiDataType)dataType, data, speed, min, max, format, flags);
+		if (value_changed)
+			ImGui::MarkItemEdited(id);
+
+		// Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
+		char value_buf[64];
+		const char* value_buf_end = value_buf + ImGui::DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), (ImGuiDataType)dataType, data, format);
+		if (g.LogEnabled)
+			ImGui::LogSetNextTextDecoration("{", "}");
+		ImGui::RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
+
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (temp_input_allowed ? ImGuiItemStatusFlags_Inputable : 0));
+		return value_changed;
 	}
 
 
