@@ -869,6 +869,8 @@ namespace CE::GUI
 			size.x = maxSize.x;
 		if (maxSize.y > 0 && size.y > maxSize.y)
 			size.y = maxSize.y;
+
+		flags |= TextInputFlags_CallbackResize;
         
         const bool RENDER_SELECTION_WHEN_INACTIVE = false;
         const bool is_multiline = (flags & ImGuiInputTextFlags_Multiline) != 0;

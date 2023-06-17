@@ -27,6 +27,7 @@
 #include "Widgets/Input/CCheckbox.h"
 #include "Widgets/Input/CTextInput.h"
 #include "Widgets/Input/CFloatInput.h"
+#include "Widgets/Input/CIntInput.h"
 
 namespace CE::Widgets
 {

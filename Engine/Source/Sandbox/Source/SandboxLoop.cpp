@@ -459,12 +459,12 @@ void SandboxLoop::SetupGUI()
 		});
 
 	CFloatInput* floatInput = CreateWidget<CFloatInput>(window, "FloatInput");
-	
-	Object::Bind(floatInput, MEMBER_FUNCTION(CFloatInput, OnValueChanged), [](f32 value)
-		{
-			CE_LOG(Info, All, "FloatInput changed: {}", value);
-		});
+	CIntInput* intInput = CreateWidget<CIntInput>(window, "IntInput");
 
+	Object::Bind(intInput, MEMBER_FUNCTION(CIntInput, OnValueChanged), [](s64 newValue)
+		{
+			CE_LOG(Info, All, "CIntInput changed: {}", newValue);
+		});
 }
 
 void SandboxLoop::RunLoop()
