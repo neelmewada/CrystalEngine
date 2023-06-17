@@ -41,6 +41,31 @@ namespace CE::Widgets
             this->style = style;
         }
 
+		inline u32 GetStyleClassesCount() const
+		{
+			return styleClasses.GetSize();
+		}
+
+		inline const String& GetStyleClass(u32 index) const
+		{
+			return styleClasses[index];
+		}
+
+		inline void AddStyleClass(const String& styleClass)
+		{
+			styleClasses.Add(styleClass);
+		}
+
+		inline void RemoveStyleClass(const String& styleClass)
+		{
+			styleClasses.Remove(styleClass);
+		}
+
+		inline bool StyleClassExists(const String& styleClass) const
+		{
+			return styleClasses.Exists(styleClass);
+		}
+
 		CWidget* GetOwner();
 
 		CWindow* GetOwnerWindow();
@@ -101,6 +126,9 @@ namespace CE::Widgets
         
         FIELD()
         CStyle style{}; // Final computed style after inheritance, etc
+
+		FIELD()
+		Array<String> styleClasses{};
 
     private:
 

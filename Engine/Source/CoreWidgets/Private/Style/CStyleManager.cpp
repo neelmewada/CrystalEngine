@@ -27,6 +27,11 @@ namespace CE::Widgets
 					type = Entry_Name;
 					continue;
 				}
+				if (entry[i] == '.')
+				{
+					type = Entry_StyleClass;
+					continue;
+				}
 				else if (entry[i] == ':')
 				{
 					if (i < entry.GetLength() - 1 && entry[i + 1] == ':')
@@ -65,6 +70,18 @@ namespace CE::Widgets
 					i--;
 
 					rule.objectName = name;
+				}
+				else if (type == Entry_StyleClass)
+				{
+					String styleClass = "";
+					while ((String::IsAlphabet(entry[i]) || String::IsNumeric(entry[i]) || entry[i] == '-' || entry[i] == '_') && i < entry.GetLength())
+					{
+						styleClass.Append(entry[i]);
+						i++;
+					}
+					i--;
+
+					rule.styleClass = styleClass;
 				}
 				else if (type == Entry_State)
 				{
@@ -110,7 +127,7 @@ namespace CE::Widgets
 				}
 			}
 
-			if (!rule.objectName.IsEmpty() || rule.shortTypeName.IsValid())
+			if (!rule.objectName.IsEmpty() || rule.shortTypeName.IsValid() || !rule.styleClass.IsEmpty())
 				selectorRules.Add(rule);
 		}
 	}
@@ -132,13 +149,22 @@ namespace CE::Widgets
 
 			auto widgetClass = widget->GetClass();
 
-			Name className = widget->GetClass()->GetName();
-			String shortName = className.GetLastComponent();
-
-			if ((rule.shortTypeName == className || rule.shortTypeName == shortName) && 
-				(rule.objectName.IsEmpty() || rule.objectName == widget->GetName()))
+			while (widgetClass != nullptr)
 			{
-				return true;
+				Name className = widget->GetClass()->GetName();
+				String shortName = className.GetLastComponent();
+
+				if ((!rule.shortTypeName.IsValid() || rule.shortTypeName == className || rule.shortTypeName == shortName) &&
+					(rule.objectName.IsEmpty() || rule.objectName == widget->GetName()) &&
+					(rule.styleClass.IsEmpty() || widget->StyleClassExists(rule.styleClass)))
+				{
+					return true;
+				}
+
+				if (widgetClass->GetSuperClassCount() == 0)
+					break;
+
+				widgetClass = widgetClass->GetSuperClass(0);
 			}
 		}
 		return false;

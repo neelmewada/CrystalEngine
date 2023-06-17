@@ -10,6 +10,7 @@ namespace CE::Widgets
 		{
 			Name shortTypeName{};
 			String objectName{};
+			String styleClass{};
 			CStateFlag state = CStateFlag::Default;
 			CSubControl subControl = CSubControl::None;
 		};
@@ -18,6 +19,7 @@ namespace CE::Widgets
 		{
 			Entry_None,
 			Entry_Element,
+			Entry_StyleClass,
 			Entry_Name,
 			Entry_State,
 			Entry_SubControl
@@ -28,6 +30,9 @@ namespace CE::Widgets
 		CStyleSelector();
 
 		CStyleSelector(const String& selector);
+
+		CStyleSelector(const char* selector) : CStyleSelector(String(selector))
+		{}
 
 		bool TestSelector(CWidget* widget, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) const;
 

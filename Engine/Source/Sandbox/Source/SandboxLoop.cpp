@@ -376,7 +376,7 @@ void SandboxLoop::SetupGUI()
 	collapsibleSelector.AddProperty(CStylePropertyType::Padding, Vec4(4, 4, 4, 4), CStateFlag::Default, CSubControl::Header);
 	collapsibleSelector.AddProperty(CStylePropertyType::BorderRadius, Vec4(), CStateFlag::Default, CSubControl::Header);
 
-	auto& textInputSelector = gStyleManager->GetStyleGroup("CTextInput");
+	auto& textInputSelector = gStyleManager->GetStyleGroup(".TextField");
 	textInputSelector.AddProperty(CStylePropertyType::Padding, Vec4(5, 6, 5, 6));
 	textInputSelector.AddProperty(CStylePropertyType::Width, CStyleValue(100, true));
 	textInputSelector.AddProperty(CStylePropertyType::BorderRadius, Vec4(1, 1, 1, 1) * 1.5f);
@@ -450,13 +450,21 @@ void SandboxLoop::SetupGUI()
 			CE_LOG(Info, All, "Checkbox changed: {}", newValue);
 		});
 
-	CTextInput* textInput = CreateWidget<CTextInput>(window, "Text");
+	CTextInput* textInput = CreateWidget<CTextInput>(window, "TextInput");
 	textInput->SetHint("Type here...");
 
 	Object::Bind(textInput, MEMBER_FUNCTION(CTextInput, OnValueChanged), [](String string)
 		{
 			CE_LOG(Info, All, "TextInput changed: {}", string);
 		});
+
+	CFloatInput* floatInput = CreateWidget<CFloatInput>(window, "FloatInput");
+	
+	Object::Bind(floatInput, MEMBER_FUNCTION(CFloatInput, OnValueChanged), [](f32 value)
+		{
+			CE_LOG(Info, All, "FloatInput changed: {}", value);
+		});
+
 }
 
 void SandboxLoop::RunLoop()

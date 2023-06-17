@@ -1786,10 +1786,83 @@ namespace CE::GUI
             return value_changed;
 	}
 
+	static inline TextInputFlags InputScalar_DefaultCharsFilter(ImGuiDataType data_type, const char* format)
+	{
+		if (data_type == ImGuiDataType_Float || data_type == ImGuiDataType_Double)
+			return TextInputFlags_CharsScientific;
+		const char format_last_char = format[0] ? format[strlen(format) - 1] : 0;
+		return (format_last_char == 'x' || format_last_char == 'X') ? TextInputFlags_CharsHexadecimal : TextInputFlags_CharsDecimal;
+	}
+
+	COREGUI_API bool TempInputText(const Vec4& rect, ID id, String& text, TextInputFlags flags,
+		const Vec2& size, const Vec4& padding, const Vec4& rounding, f32 borderThickness)
+	{
+		// On the first frame, g.TempInputTextId == 0, then on subsequent frames it becomes == id.
+		// We clear ActiveID on the first frame to allow the InputText() taking it back.
+		ImGuiContext& g = *GImGui;
+		const bool init = (g.TempInputId != id);
+		if (init)
+			ImGui::ClearActiveID();
+
+		g.CurrentWindow->DC.CursorPos = ImVec2(rect.min.x, rect.min.y);
+		//Vec2 size = rect.max - rect.min;
+
+		bool value_changed = InputTextEx(id, "", text, size, padding, rounding, borderThickness, {}, {}, flags | TextInputFlags_MergedItem);
+		if (init)
+		{
+			// First frame we started displaying the InputText widget, we expect it to take the active id.
+			IM_ASSERT(g.ActiveId == id);
+			g.TempInputId = g.ActiveId;
+		}
+		return value_changed;
+	}
+
+	COREGUI_API bool TempInputScalar(const Vec4& rect, ID id, DataType data_type, void* data, const char* format, const void* clampMin, const void* clampMax,
+		const Vec2& size, const Vec4& padding, const Vec4& rounding, f32 borderThickness)
+	{
+		char fmt_buf[32];
+		char data_buf[32];
+		format = ImParseFormatTrimDecorations(format, fmt_buf, IM_ARRAYSIZE(fmt_buf));
+		ImGui::DataTypeFormatString(data_buf, IM_ARRAYSIZE(data_buf), (ImGuiDataType)data_type, data, format);
+		ImStrTrimBlanks(data_buf);
+		String str = data_buf;
+
+		TextInputFlags flags = TextInputFlags_AutoSelectAll | TextInputFlags_NoMarkEdited;
+		flags |= InputScalar_DefaultCharsFilter((ImGuiDataType)data_type, format);
+
+		bool value_changed = false;
+		if (TempInputText(rect, id, str, flags, size, padding, rounding, borderThickness))
+		{
+			memcpy(data_buf, str.GetCString(), str.GetLength() + 1);
+
+			// Backup old value
+			size_t data_type_size = ImGui::DataTypeGetInfo((ImGuiDataType)data_type)->Size;
+			ImGuiDataTypeTempStorage data_backup;
+			memcpy(&data_backup, data, data_type_size);
+
+			// Apply new value (or operations) then clamp
+			ImGui::DataTypeApplyFromText(data_buf, (ImGuiDataType)data_type, data, format);
+			if (clampMin || clampMax)
+			{
+				if (clampMin && clampMax && ImGui::DataTypeCompare((ImGuiDataType)data_type, clampMin, clampMax) > 0)
+					ImSwap(clampMin, clampMax);
+				ImGui::DataTypeClamp((ImGuiDataType)data_type, data, clampMin, clampMax);
+			}
+
+			// Only mark as edited if new value is different
+			value_changed = memcmp(&data_backup, data, data_type_size) != 0;
+			if (value_changed)
+				ImGui::MarkItemEdited(id);
+		}
+		return value_changed;
+	}
+
 	COREGUI_API bool DragScalar(ID id, DataType dataType, void* data, float speed, const void* min, const void* max, const char* format, 
 		const Vec2& size, const Vec4& padding, const Vec4& rounding, f32 borderThickness,
 		SliderFlags flags)
 	{
+		//return ImGui::DragScalar("label", (ImGuiDataType)dataType, data, speed, min, max, format, (ImGuiSliderFlags)flags);
+
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
 			return false;
@@ -1852,13 +1925,19 @@ namespace CE::GUI
 			// Only clamp CTRL+Click input when ImGuiSliderFlags_AlwaysClamp is set
 			const bool is_clamp_input = (flags & ImGuiSliderFlags_AlwaysClamp) != 0 && 
 				(min == NULL || max == NULL || ImGui::DataTypeCompare((ImGuiDataType)dataType, min, max) < 0);
-			return ImGui::TempInputScalar(frame_bb, id, "", (ImGuiDataType)dataType, data, format, is_clamp_input ? min : NULL, is_clamp_input ? max : NULL);
+			return TempInputScalar(Vec4(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Max.x, frame_bb.Max.y),
+				id, dataType, data, format, is_clamp_input ? min : NULL, is_clamp_input ? max : NULL,
+				size, padding, rounding, borderThickness);
 		}
 
 		// Draw frame
 		const ImU32 frame_col = ImGui::GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-		ImGui::RenderNavHighlight(frame_bb, id);
-		ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, style.FrameRounding);
+		//ImGui::RenderNavHighlight(frame_bb, id);
+		//ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, style.FrameRounding);
+
+		Vec4 frameRect = Vec4(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Max.x, frame_bb.Max.y);
+		RenderNavHighlight(frameRect + Vec4(1, 1, -1, -1), id, borderThickness, rounding);
+		RenderFrame(frameRect, frame_col, borderThickness, rounding);
 
 		// Drag behavior
 		const bool value_changed = ImGui::DragBehavior(id, (ImGuiDataType)dataType, data, speed, min, max, format, flags);

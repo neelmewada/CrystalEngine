@@ -89,6 +89,12 @@ namespace CE::GUI
 		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0, Vec2 minSize = {}, Vec2 maxSize = {},
 		TextInputFlags flags = TextInputFlags_None, TextInputCallback callback = nullptr, void* callback_user_data = nullptr);
 
+	COREGUI_API bool TempInputText(const Vec4& rect, ID id, String& text, TextInputFlags flags,
+		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0);
+
+	COREGUI_API bool TempInputScalar(const Vec4& rect, ID id, DataType data_type, void* data, const char* format, const void* clampMin, const void* clampMax,
+		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0);
+
 	COREGUI_API bool DragScalar(ID id, DataType dataType, void* data, float speed = 1.0f, 
 		const void* min = nullptr, const void* max = nullptr, const char* format = nullptr, 
 		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0,
