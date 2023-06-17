@@ -358,8 +358,6 @@ void SandboxLoop::SetupGUI()
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.51f), CStateFlag::Collapsed, CSubControl::TitleBar);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::ForegroundColor, Color::White());
 
-	//gStyleManager->globalStyle.AddProperty(CStylePropertyType::BorderRadius, Vec4(2.3f, 2.3f, 2.3f, 2.3f));
-
 	auto& buttonSelector = gStyleManager->AddStyleGroup("CButton");
 	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.25f, 0.25f, 0.25f, 1.00f), CStateFlag::Default);
 	buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.38f, 0.38f, 0.38f, 1.00f), CStateFlag::Hovered);
@@ -377,6 +375,9 @@ void SandboxLoop::SetupGUI()
 	collapsibleSelector.AddProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(30, 30, 30), CStateFlag::Default, CSubControl::Header);
 	collapsibleSelector.AddProperty(CStylePropertyType::Padding, Vec4(4, 4, 4, 4), CStateFlag::Default, CSubControl::Header);
 	collapsibleSelector.AddProperty(CStylePropertyType::BorderRadius, Vec4(), CStateFlag::Default, CSubControl::Header);
+
+	auto& textInputSelector = gStyleManager->GetStyleGroup("CTextInput");
+	textInputSelector.AddProperty(CStylePropertyType::Padding, Vec4(5, 7, 5, 7));
 
 	window = CreateWidget<CWindow>(nullptr, "TestWindow");
 	window->SetWidgetFlags(WidgetFlags::None);
@@ -445,6 +446,14 @@ void SandboxLoop::SetupGUI()
 	Object::Bind(checkbox, MEMBER_FUNCTION(CCheckbox, OnValueChanged), [](s8 newValue)
 		{
 			CE_LOG(Info, All, "Checkbox changed: {}", newValue);
+		});
+
+	CTextInput* textInput = CreateWidget<CTextInput>(window, "Text");
+	textInput->SetHint("Type here...");
+
+	Object::Bind(textInput, MEMBER_FUNCTION(CTextInput, OnValueChanged), [](String string)
+		{
+			CE_LOG(Info, All, "TextInput changed: {}", string);
 		});
 }
 

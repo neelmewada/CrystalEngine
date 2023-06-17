@@ -595,6 +595,12 @@ namespace CE::GUI
 		TextInputFlags_CallbackResize = 1 << 18,  // Callback on buffer capacity changes request (beyond 'buf_size' parameter value), allowing the string to grow. Notify when the string wants to be resized (for string types which hold a cache of their Size). You will be provided a new BufSize in the callback and NEED to honor it. (see misc/cpp/imgui_stdlib.h for an example of using this)
 		TextInputFlags_CallbackEdit = 1 << 19,  // Callback on any edit (note that InputText() already returns true on edit, the callback is useful mainly to manipulate the underlying buffer while focus is active)
 		TextInputFlags_EscapeClearsAll = 1 << 20,  // Escape key clears content if not empty, and deactivate otherwise (contrast to default behavior of Escape to revert)
+		
+		
+		TextInputFlags_Multiline = 1 << 26,  // For internal use by InputTextMultiline()
+		TextInputFlags_NoMarkEdited = 1 << 27,  // For internal use by functions using InputText() before reformatting data
+		TextInputFlags_MergedItem = 1 << 28,  // For internal use by TempInputText(), will skip calling ItemAdd(). Require bounding-box to strictly match.
+
 	};
 	ENUM_CLASS_FLAGS(TextInputFlags);
 

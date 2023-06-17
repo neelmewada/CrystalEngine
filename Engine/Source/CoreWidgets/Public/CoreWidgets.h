@@ -24,8 +24,8 @@
 #include "Widgets/CCollapsibleSection.h"
 
 // Input Widgets
-#include "Widgets/CCheckbox.h"
-
+#include "Widgets/Input/CCheckbox.h"
+#include "Widgets/Input/CTextInput.h"
 
 namespace CE::Widgets
 {

@@ -8,18 +8,16 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
-#include "misc/cpp/imgui_stdlib.h"
-
-#include "imstb_textedit.h"
-#include "imstb_rectpack.h"
-
 #define IM_NORMALIZE2F_OVER_ZERO(VX,VY)     { float d2 = VX*VX + VY*VY; if (d2 > 0.0f) { float inv_len = ImRsqrt(d2); VX *= inv_len; VY *= inv_len; } } (void)0
 #define IM_FIXNORMAL2F_MAX_INVLEN2          100.0f // 500.0f (see #4053, #3366)
 #define IM_FIXNORMAL2F(VX,VY)               { float d2 = VX*VX + VY*VY; if (d2 > 0.000001f) { float inv_len2 = 1.0f / d2; if (inv_len2 > IM_FIXNORMAL2F_MAX_INVLEN2) inv_len2 = IM_FIXNORMAL2F_MAX_INVLEN2; VX *= inv_len2; VY *= inv_len2; } } (void)0
 
+#include "misc/cpp/imgui_stdlib.h"
 
 namespace CE::GUI
 {
+	using namespace ImStb;
+
 	COREGUI_API ID GetID(const char* strId)
 	{
 		return ImGui::GetID(strId);
@@ -30,22 +28,22 @@ namespace CE::GUI
 		return ImGui::GetID(strId.GetCString());
 	}
 
-    COREGUI_API Vec2 GetCursorPos()
-    {
-        ImVec2 pos = ImGui::GetCursorPos();
-        return Vec2(pos.x, pos.y);
-    }
+	COREGUI_API Vec2 GetCursorPos()
+	{
+		ImVec2 pos = ImGui::GetCursorPos();
+		return Vec2(pos.x, pos.y);
+	}
 
-    COREGUI_API void SetCursorPos(const Vec2& pos)
-    {
-        ImGui::SetCursorPos(ImVec2(pos.x, pos.y));
-    }
+	COREGUI_API void SetCursorPos(const Vec2& pos)
+	{
+		ImGui::SetCursorPos(ImVec2(pos.x, pos.y));
+	}
 
-    COREGUI_API Vec2 GetCursorScreenPos()
-    {
-        ImVec2 vec = ImGui::GetCursorScreenPos();
-        return Vec2(vec.x, vec.y);
-    }
+	COREGUI_API Vec2 GetCursorScreenPos()
+	{
+		ImVec2 vec = ImGui::GetCursorScreenPos();
+		return Vec2(vec.x, vec.y);
+	}
 
 	COREGUI_API Vec2 GetWindowPos()
 	{
@@ -77,131 +75,191 @@ namespace CE::GUI
 	}
 
 	COREGUI_API bool BeginWindow(const String& name, bool* isShown, WindowFlags flags)
-    {
-        if (isShown != nullptr && !(*isShown))
-        {
-            return false;
-        }
-		
-        if (flags & GUI::WF_FullScreen)
-        {
-            const ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->WorkPos);
-            ImGui::SetNextWindowSize(viewport->WorkSize);
-            ImGui::SetNextWindowViewport(viewport->ID);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        }
-		
-        if (flags & GUI::WF_NoPadding)
-        {
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        }
+	{
+		if (isShown != nullptr && !(*isShown))
+		{
+			return false;
+		}
 
-        auto retVal = ImGui::Begin(name.GetCString(), isShown, (ImGuiWindowFlags)flags);
+		if (flags & GUI::WF_FullScreen)
+		{
+			const ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->WorkPos);
+			ImGui::SetNextWindowSize(viewport->WorkSize);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		}
 
-        if (flags & GUI::WF_NoPadding)
-        {
-            ImGui::PopStyleVar(1);
-        }
+		if (flags & GUI::WF_NoPadding)
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		}
 
-        if (flags & GUI::WF_FullScreen)
-        {
-            ImGui::PopStyleVar(2);
-        }
+		auto retVal = ImGui::Begin(name.GetCString(), isShown, (ImGuiWindowFlags)flags);
 
-        return retVal;
-    }
+		if (flags & GUI::WF_NoPadding)
+		{
+			ImGui::PopStyleVar(1);
+		}
 
-    COREGUI_API ID DockSpace(const String& id, Vec2 size, DockFlags dockFlags)
-    {
-        GUI::ID imguiID = ImGui::GetID(id.GetCString());
-        return ImGui::DockSpace(imguiID, ImVec2(size.x, size.y), (ImGuiDockNodeFlags)dockFlags);
-    }
+		if (flags & GUI::WF_FullScreen)
+		{
+			ImGui::PopStyleVar(2);
+		}
 
-    COREGUI_API void EndWindow()
-    {
-        ImGui::End();
-    }
+		return retVal;
+	}
 
-    COREGUI_API bool BeginMenuBar()
-    {
-        return ImGui::BeginMenuBar();
-    }
+	COREGUI_API ID DockSpace(const String& id, Vec2 size, DockFlags dockFlags)
+	{
+		GUI::ID imguiID = ImGui::GetID(id.GetCString());
+		return ImGui::DockSpace(imguiID, ImVec2(size.x, size.y), (ImGuiDockNodeFlags)dockFlags);
+	}
 
-    COREGUI_API void EndMenuBar()
-    {
-        ImGui::EndMenuBar();
-    }
+	COREGUI_API void EndWindow()
+	{
+		ImGui::End();
+	}
 
-    COREGUI_API bool BeginMenu(const String& label, bool enabled, const char* icon)
-    {
-        if (icon != nullptr)
-            return ImGui::BeginMenuEx(label.GetCString(), icon, enabled);
-        return ImGui::BeginMenu(label.GetCString(), enabled);
-    }
+	COREGUI_API bool BeginMenuBar()
+	{
+		return ImGui::BeginMenuBar();
+	}
 
-    COREGUI_API bool MenuItem(const String& label, const String& shortcut, bool selected, bool enabled)
-    {
-        return ImGui::MenuItem(label.GetCString(), shortcut.GetCString(), selected, enabled);
-    }
+	COREGUI_API void EndMenuBar()
+	{
+		ImGui::EndMenuBar();
+	}
 
-    COREGUI_API bool MenuItem(const String& label, const String& shortcut, bool* selected, bool enabled)
-    {
-        return ImGui::MenuItem(label.GetCString(), shortcut.GetCString(), selected, enabled);
-    }
+	COREGUI_API bool BeginMenu(const String& label, bool enabled, const char* icon)
+	{
+		if (icon != nullptr)
+			return ImGui::BeginMenuEx(label.GetCString(), icon, enabled);
+		return ImGui::BeginMenu(label.GetCString(), enabled);
+	}
 
-    COREGUI_API void EndMenu()
-    {
-        ImGui::EndMenu();
-    }
+	COREGUI_API bool MenuItem(const String& label, const String& shortcut, bool selected, bool enabled)
+	{
+		return ImGui::MenuItem(label.GetCString(), shortcut.GetCString(), selected, enabled);
+	}
 
-    /////////////////////////////////////////////////////////////////////
-    // Style
+	COREGUI_API bool MenuItem(const String& label, const String& shortcut, bool* selected, bool enabled)
+	{
+		return ImGui::MenuItem(label.GetCString(), shortcut.GetCString(), selected, enabled);
+	}
 
-    COREGUI_API bool IsStyleVarOfVectorType(StyleVar var)
-    {
-        static HashMap<StyleVar, bool> vectorTypes{
-            { StyleVar_WindowPadding, true },
-            { StyleVar_WindowMinSize, true },
-            { StyleVar_WindowTitleAlign, true },
-            { StyleVar_FramePadding, true },
-            { StyleVar_ItemSpacing, true },
-            { StyleVar_ItemInnerSpacing, true },
-            { StyleVar_CellPadding, true },
-            { StyleVar_ButtonTextAlign, true },
-            { StyleVar_SelectableTextAlign, true },
-            { StyleVar_SeparatorTextAlign, true },
-            { StyleVar_SeparatorTextPadding, true }
-        };
-        
-        return vectorTypes.KeyExists(var) && vectorTypes[var];
-    }
+	COREGUI_API void EndMenu()
+	{
+		ImGui::EndMenu();
+	}
 
-    COREGUI_API void PushStyleVar(StyleVar var, f32 value)
-    {
-        ImGui::PushStyleVar(var, value);
-    }
+	COREGUI_API bool BeginChild(const String& name, ID id, const Vec2& sizeArg, f32 borderThickness,
+		const Vec2& minSize, const Vec2& maxSize, WindowFlags flags)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* parent_window = g.CurrentWindow;
 
-    COREGUI_API void PushStyleVar(StyleVar var, Vec2 value)
-    {
-        ImGui::PushStyleVar(var, ImVec2(value.x, value.y));
-    }
+		flags |= WF_NoTitleBar | WF_NoResize | WF_NoSavedSettings | WF_ChildWindow | WF_NoDocking;
+		flags |= ((WindowFlags)parent_window->Flags & WF_NoMove);  // Inherit the NoMove flag
 
-    COREGUI_API void PopStyleVar(int count)
-    {
-        ImGui::PopStyleVar(count);
-    }
+		// Size
+		const ImVec2 contentAvail = ImGui::GetContentRegionAvail();
+		ImVec2 size = ImFloor(ImVec2(sizeArg.x, sizeArg.y));
+		const int auto_fit_axises = ((size.x == 0.0f) ? (1 << ImGuiAxis_X) : 0x00) | ((size.y == 0.0f) ? (1 << ImGuiAxis_Y) : 0x00);
+		if (size.x <= 0.0f)
+			size.x = ImMax(contentAvail.x + size.x, 4.0f); // Arbitrary minimum child size (0.0f causing too many issues)
+		if (size.y <= 0.0f)
+			size.y = ImMax(contentAvail.y + size.y, 4.0f);
+		if (minSize.x > 0 && size.x < minSize.x)
+			size.x = minSize.x;
 
-    COREGUI_API void PushStyleColor(StyleCol color, const Color& value)
-    {
-        ImGui::PushStyleColor(color, ImVec4(value.r, value.g, value.b, value.a));
-    }
+		ImGui::SetNextWindowSize(size);
 
-    COREGUI_API void PopStyleColor(int count)
-    {
-        ImGui::PopStyleColor(count);
-    }
+		// Build up name. If you need to append to a same child from multiple location in the ID stack, use BeginChild(ImGuiID id) with a stable value.
+		const char* temp_window_name;
+		if (!name.IsEmpty())
+			ImFormatStringToTempBuffer(&temp_window_name, NULL, "%s/%s_%08X", parent_window->Name, name, id);
+		else
+			ImFormatStringToTempBuffer(&temp_window_name, NULL, "%s/%08X", parent_window->Name, id);
+
+		const float backup_border_size = g.Style.ChildBorderSize;
+		g.Style.ChildBorderSize = borderThickness;
+		bool ret = ImGui::Begin(temp_window_name, NULL, flags);
+		g.Style.ChildBorderSize = backup_border_size;
+
+		ImGuiWindow* child_window = g.CurrentWindow;
+		child_window->ChildId = id;
+		child_window->AutoFitChildAxises = (ImS8)auto_fit_axises;
+
+		// Set the cursor to handle case where the user called SetNextWindowPos()+BeginChild() manually.
+		// While this is not really documented/defined, it seems that the expected thing to do.
+		if (child_window->BeginCount == 1)
+			parent_window->DC.CursorPos = child_window->Pos;
+
+		// Process navigation-in immediately so NavInit can run on first frame
+		// Can enter a child if (A) it has navigatable items or (B) it can be scrolled.
+		if (g.NavActivateId == id && !(flags & WF_NavFlattened) && (child_window->DC.NavLayersActiveMask != 0 || child_window->DC.NavWindowHasScrollY))
+		{
+			ImGui::FocusWindow(child_window);
+			ImGui::NavInitWindow(child_window, false);
+			ImGui::SetActiveID(id + 1, child_window); // Steal ActiveId with another arbitrary id so that key-press won't activate child item
+			g.ActiveIdSource = g.NavInputSource;
+		}
+		return ret;
+	}
+
+	COREGUI_API void EndChild()
+	{
+		ImGui::EndChild();
+	}
+
+	/////////////////////////////////////////////////////////////////////
+	// Style
+
+	COREGUI_API bool IsStyleVarOfVectorType(StyleVar var)
+	{
+		static HashMap<StyleVar, bool> vectorTypes{
+			{ StyleVar_WindowPadding, true },
+			{ StyleVar_WindowMinSize, true },
+			{ StyleVar_WindowTitleAlign, true },
+			{ StyleVar_FramePadding, true },
+			{ StyleVar_ItemSpacing, true },
+			{ StyleVar_ItemInnerSpacing, true },
+			{ StyleVar_CellPadding, true },
+			{ StyleVar_ButtonTextAlign, true },
+			{ StyleVar_SelectableTextAlign, true },
+			{ StyleVar_SeparatorTextAlign, true },
+			{ StyleVar_SeparatorTextPadding, true }
+		};
+
+		return vectorTypes.KeyExists(var) && vectorTypes[var];
+	}
+
+	COREGUI_API void PushStyleVar(StyleVar var, f32 value)
+	{
+		ImGui::PushStyleVar(var, value);
+	}
+
+	COREGUI_API void PushStyleVar(StyleVar var, Vec2 value)
+	{
+		ImGui::PushStyleVar(var, ImVec2(value.x, value.y));
+	}
+
+	COREGUI_API void PopStyleVar(int count)
+	{
+		ImGui::PopStyleVar(count);
+	}
+
+	COREGUI_API void PushStyleColor(StyleCol color, const Color& value)
+	{
+		ImGui::PushStyleColor(color, ImVec4(value.r, value.g, value.b, value.a));
+	}
+
+	COREGUI_API void PopStyleColor(int count)
+	{
+		ImGui::PopStyleColor(count);
+	}
 
 #pragma region Widgets
 
@@ -231,18 +289,18 @@ namespace CE::GUI
 	}
 
 	COREGUI_API bool Button(const String& label, const Vec2& size, ButtonFlags flags)
-    {
-        return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
-    }
+	{
+		return ImGui::ButtonEx(label.GetCString(), ImVec2(size.x, size.y), (ImGuiButtonFlags)flags);
+	}
 
-	COREGUI_API bool ButtonEx(const String& label, const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding, 
+	COREGUI_API bool ButtonEx(const String& label, const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding,
 		TextAlign textAlign, Vec2 minSize, Vec2 maxSize, ButtonFlags buttonFlags)
 	{
 		return ButtonEx(label, {}, {}, {}, padding, sizeVec, rounding, textAlign, minSize, maxSize, buttonFlags);
 	}
 
-	COREGUI_API bool ButtonEx(const String& label, 
-		const StyleColor& normalColor, const StyleColor& hoveredColor, const StyleColor& pressedColor, 
+	COREGUI_API bool ButtonEx(const String& label,
+		const StyleColor& normalColor, const StyleColor& hoveredColor, const StyleColor& pressedColor,
 		const Vec4& padding, const Vec2& sizeVec, const Vec4& rounding,
 		TextAlign textAlign, Vec2 minSize, Vec2 maxSize, ButtonFlags buttonFlags)
 	{
@@ -267,7 +325,7 @@ namespace CE::GUI
 		ImVec2 pos = window->DC.CursorPos;
 		if (((int)flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
 			pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
-		
+
 		ImVec2 size = ImGui::CalcItemSize(ImVec2(sizeVec.x, sizeVec.y),
 			label_size.x + style.FramePadding.x * 2.0f,
 			label_size.y + style.FramePadding.y * 2.0f);
@@ -362,10 +420,10 @@ namespace CE::GUI
 		return pressed;
 	}
 
-    COREGUI_API void InvisibleButton(const String& id, const Vec2& size)
-    {
-        ImGui::InvisibleButton(id.GetCString(), ImVec2(size.x, size.y));
-    }
+	COREGUI_API void InvisibleButton(const String& id, const Vec2& size)
+	{
+		ImGui::InvisibleButton(id.GetCString(), ImVec2(size.x, size.y));
+	}
 
 	COREGUI_API bool Checkbox(const String& label, bool* value)
 	{
@@ -383,7 +441,7 @@ namespace CE::GUI
 
 		const float square_sz = g.FontSize + padding.top + padding.bottom;
 		const ImVec2 pos = window->DC.CursorPos;
-		const ImRect total_bb(pos, 
+		const ImRect total_bb(pos,
 			pos + ImVec2(square_sz, square_sz + padding.top + padding.bottom));
 		ImGui::ItemSize(total_bb, padding.y);
 		if (!ImGui::ItemAdd(total_bb, id))
@@ -406,11 +464,11 @@ namespace CE::GUI
 
 		//ImGui::RenderNavHighlight(total_bb, id);
 		//ImGui::RenderFrame(check_bb.Min, check_bb.Max, ImGui::GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), true, style.FrameRounding);
-		
+
 		RenderNavHighlight(mainRect, id, borderThickness, rounding);
 		RenderFrame(mainRect, ImGui::GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), borderThickness, rounding);
 
-		
+
 		ImU32 check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
 		bool mixed_value = (g.LastItemData.InFlags & ImGuiItemFlags_MixedValue) != 0;
 		if (*v < 0) // Mixed state
@@ -434,66 +492,360 @@ namespace CE::GUI
 		return pressed;
 	}
 
-    static int InputTextCalcTextLenAndLineCount(const char* text_begin, const char** out_text_end)
-    {
-        int line_count = 0;
-        const char* s = text_begin;
-        while (char c = *s++) // We are only matching for \n so we can ignore UTF-8 decoding
-            if (c == '\n')
-                line_count++;
-        s--;
-        if (s[0] != '\n' && s[0] != '\r')
-            line_count++;
-        *out_text_end = s;
-        return line_count;
-    }
+	static ImVec2 InputTextCalcTextSizeW(ImGuiContext* ctx, const ImWchar* text_begin, const ImWchar* text_end, const ImWchar** remaining = NULL, ImVec2* out_offset = NULL, bool stop_on_new_line = false);
+	static int    InputTextCalcTextLenAndLineCount(const char* text_begin, const char** out_text_end);
 
-    static ImVec2 InputTextCalcTextSizeW(ImGuiContext* ctx, const ImWchar* text_begin, const ImWchar* text_end, const ImWchar** remaining, ImVec2* out_offset, bool stop_on_new_line)
-    {
-        ImGuiContext& g = *ctx;
-        ImFont* font = g.Font;
-        const float line_height = g.FontSize;
-        const float scale = line_height / font->FontSize;
+	static ImVec2 InputTextCalcTextSizeW(ImGuiContext* ctx, const ImWchar* text_begin, const ImWchar* text_end, const ImWchar** remaining, ImVec2* out_offset, bool stop_on_new_line)
+	{
+		ImGuiContext& g = *ctx;
+		ImFont* font = g.Font;
+		const float line_height = g.FontSize;
+		const float scale = line_height / font->FontSize;
 
-        ImVec2 text_size = ImVec2(0, 0);
-        float line_width = 0.0f;
+		ImVec2 text_size = ImVec2(0, 0);
+		float line_width = 0.0f;
 
-        const ImWchar* s = text_begin;
-        while (s < text_end)
-        {
-            unsigned int c = (unsigned int)(*s++);
-            if (c == '\n')
-            {
-                text_size.x = ImMax(text_size.x, line_width);
-                text_size.y += line_height;
-                line_width = 0.0f;
-                if (stop_on_new_line)
-                    break;
-                continue;
-            }
-            if (c == '\r')
-                continue;
+		const ImWchar* s = text_begin;
+		while (s < text_end)
+		{
+			unsigned int c = (unsigned int)(*s++);
+			if (c == '\n')
+			{
+				text_size.x = ImMax(text_size.x, line_width);
+				text_size.y += line_height;
+				line_width = 0.0f;
+				if (stop_on_new_line)
+					break;
+				continue;
+			}
+			if (c == '\r')
+				continue;
 
-            const float char_width = font->GetCharAdvance((ImWchar)c) * scale;
-            line_width += char_width;
-        }
+			const float char_width = font->GetCharAdvance((ImWchar)c) * scale;
+			line_width += char_width;
+		}
 
-        if (text_size.x < line_width)
-            text_size.x = line_width;
+		if (text_size.x < line_width)
+			text_size.x = line_width;
 
-        if (out_offset)
-            *out_offset = ImVec2(line_width, text_size.y + line_height);  // offset allow for the possibility of sitting after a trailing \n
+		if (out_offset)
+			*out_offset = ImVec2(line_width, text_size.y + line_height);  // offset allow for the possibility of sitting after a trailing \n
 
-        if (line_width > 0 || text_size.y == 0.0f)                        // whereas size.y will ignore the trailing \n
-            text_size.y += line_height;
+		if (line_width > 0 || text_size.y == 0.0f)                        // whereas size.y will ignore the trailing \n
+			text_size.y += line_height;
 
-        if (remaining)
-            *remaining = s;
+		if (remaining)
+			*remaining = s;
 
-        return text_size;
-    }
+		return text_size;
+	}
 
-	COREGUI_API bool InputTextEx(ID id, const String& hint, String& inputText, const Vec2& size, const Vec4& padding, const Vec4& rounding, f32 borderThickness, Vec2 minSize, Vec2 maxSize, TextInputFlags flags, TextInputCallback callback, void* callback_user_data)
+	static int InputTextCalcTextLenAndLineCount(const char* text_begin, const char** out_text_end)
+	{
+		int line_count = 0;
+		const char* s = text_begin;
+		while (char c = *s++) // We are only matching for \n so we can ignore UTF-8 decoding
+			if (c == '\n')
+				line_count++;
+		s--;
+		if (s[0] != '\n' && s[0] != '\r')
+			line_count++;
+		*out_text_end = s;
+		return line_count;
+	}
+}
+
+#pragma region ImStb_TextEdit
+
+// Wrapper for stb_textedit.h to edit text (our wrapper is for: statically sized buffer, single-line, wchar characters. InputText converts between UTF-8 and wchar)
+
+#include "imstb_textedit.h"
+
+
+static int     STB_TEXTEDIT_STRINGLEN(const ImGuiInputTextState* obj) { return obj->CurLenW; }
+static ImWchar STB_TEXTEDIT_GETCHAR(const ImGuiInputTextState* obj, int idx) { return obj->TextW[idx]; }
+static float   STB_TEXTEDIT_GETWIDTH(ImGuiInputTextState* obj, int line_start_idx, int char_idx) { ImWchar c = obj->TextW[line_start_idx + char_idx]; if (c == '\n') return STB_TEXTEDIT_GETWIDTH_NEWLINE; ImGuiContext& g = *obj->Ctx; return g.Font->GetCharAdvance(c) * (g.FontSize / g.Font->FontSize); }
+static int     STB_TEXTEDIT_KEYTOTEXT(int key) { return key >= 0x200000 ? 0 : key; }
+static ImWchar STB_TEXTEDIT_NEWLINE = '\n';
+static void    STB_TEXTEDIT_LAYOUTROW(ImStb::StbTexteditRow* r, ImGuiInputTextState* obj, int line_start_idx)
+{
+	const ImWchar* text = obj->TextW.Data;
+	const ImWchar* text_remaining = NULL;
+	const ImVec2 size = ::CE::GUI::InputTextCalcTextSizeW(obj->Ctx, text + line_start_idx, text + obj->CurLenW, &text_remaining, NULL, true);
+	r->x0 = 0.0f;
+	r->x1 = size.x;
+	r->baseline_y_delta = size.y;
+	r->ymin = 0.0f;
+	r->ymax = size.y;
+	r->num_chars = (int)(text_remaining - (text + line_start_idx));
+}
+
+static bool is_separator(unsigned int c)
+{
+	return c == ',' || c == ';' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']' || c == '|' || c == '\n' || c == '\r' || c == '.' || c == '!';
+}
+
+static int is_word_boundary_from_right(ImGuiInputTextState* obj, int idx)
+{
+	// When ImGuiInputTextFlags_Password is set, we don't want actions such as CTRL+Arrow to leak the fact that underlying data are blanks or separators.
+	if ((obj->Flags & ImGuiInputTextFlags_Password) || idx <= 0)
+		return 0;
+
+	bool prev_white = ImCharIsBlankW(obj->TextW[idx - 1]);
+	bool prev_separ = is_separator(obj->TextW[idx - 1]);
+	bool curr_white = ImCharIsBlankW(obj->TextW[idx]);
+	bool curr_separ = is_separator(obj->TextW[idx]);
+	return ((prev_white || prev_separ) && !(curr_separ || curr_white)) || (curr_separ && !prev_separ);
+}
+static int is_word_boundary_from_left(ImGuiInputTextState* obj, int idx)
+{
+	if ((obj->Flags & ImGuiInputTextFlags_Password) || idx <= 0)
+		return 0;
+
+	bool prev_white = ImCharIsBlankW(obj->TextW[idx]);
+	bool prev_separ = is_separator(obj->TextW[idx]);
+	bool curr_white = ImCharIsBlankW(obj->TextW[idx - 1]);
+	bool curr_separ = is_separator(obj->TextW[idx - 1]);
+	return ((prev_white) && !(curr_separ || curr_white)) || (curr_separ && !prev_separ);
+}
+static int  STB_TEXTEDIT_MOVEWORDLEFT_IMPL(ImGuiInputTextState* obj, int idx) { idx--; while (idx >= 0 && !is_word_boundary_from_right(obj, idx)) idx--; return idx < 0 ? 0 : idx; }
+static int  STB_TEXTEDIT_MOVEWORDRIGHT_MAC(ImGuiInputTextState* obj, int idx) { idx++; int len = obj->CurLenW; while (idx < len && !is_word_boundary_from_left(obj, idx)) idx++; return idx > len ? len : idx; }
+static int  STB_TEXTEDIT_MOVEWORDRIGHT_WIN(ImGuiInputTextState* obj, int idx) { idx++; int len = obj->CurLenW; while (idx < len && !is_word_boundary_from_right(obj, idx)) idx++; return idx > len ? len : idx; }
+static int  STB_TEXTEDIT_MOVEWORDRIGHT_IMPL(ImGuiInputTextState* obj, int idx) { ImGuiContext& g = *obj->Ctx; if (g.IO.ConfigMacOSXBehaviors) return STB_TEXTEDIT_MOVEWORDRIGHT_MAC(obj, idx); else return STB_TEXTEDIT_MOVEWORDRIGHT_WIN(obj, idx); }
+#define STB_TEXTEDIT_MOVEWORDLEFT   STB_TEXTEDIT_MOVEWORDLEFT_IMPL  // They need to be #define for stb_textedit.h
+#define STB_TEXTEDIT_MOVEWORDRIGHT  STB_TEXTEDIT_MOVEWORDRIGHT_IMPL
+
+#define STB_TEXT_HAS_SELECTION(s)   ((s)->select_start != (s)->select_end)
+
+static void STB_TEXTEDIT_DELETECHARS(ImGuiInputTextState* obj, int pos, int n)
+{
+	ImWchar* dst = obj->TextW.Data + pos;
+
+	// We maintain our buffer length in both UTF-8 and wchar formats
+	obj->Edited = true;
+	obj->CurLenA -= ImTextCountUtf8BytesFromStr(dst, dst + n);
+	obj->CurLenW -= n;
+
+	// Offset remaining text (FIXME-OPT: Use memmove)
+	const ImWchar* src = obj->TextW.Data + pos + n;
+	while (ImWchar c = *src++)
+		*dst++ = c;
+	*dst = '\0';
+}
+
+static bool STB_TEXTEDIT_INSERTCHARS(ImGuiInputTextState* obj, int pos, const ImWchar* new_text, int new_text_len)
+{
+	const bool is_resizable = (obj->Flags & ImGuiInputTextFlags_CallbackResize) != 0;
+	const int text_len = obj->CurLenW;
+	IM_ASSERT(pos <= text_len);
+
+	const int new_text_len_utf8 = ImTextCountUtf8BytesFromStr(new_text, new_text + new_text_len);
+	if (!is_resizable && (new_text_len_utf8 + obj->CurLenA + 1 > obj->BufCapacityA))
+		return false;
+
+	// Grow internal buffer if needed
+	if (new_text_len + text_len + 1 > obj->TextW.Size)
+	{
+		if (!is_resizable)
+			return false;
+		IM_ASSERT(text_len < obj->TextW.Size);
+		obj->TextW.resize(text_len + ImClamp(new_text_len * 4, 32, ImMax(256, new_text_len)) + 1);
+	}
+
+	ImWchar* text = obj->TextW.Data;
+	if (pos != text_len)
+		memmove(text + pos + new_text_len, text + pos, (size_t)(text_len - pos) * sizeof(ImWchar));
+	memcpy(text + pos, new_text, (size_t)new_text_len * sizeof(ImWchar));
+
+	obj->Edited = true;
+	obj->CurLenW += new_text_len;
+	obj->CurLenA += new_text_len_utf8;
+	obj->TextW[obj->CurLenW] = '\0';
+
+	return true;
+}
+
+
+	// We don't use an enum so we can build even with conflicting symbols (if another user of stb_textedit.h leak their STB_TEXTEDIT_K_* symbols)
+#define STB_TEXTEDIT_K_LEFT         0x200000 // keyboard input to move cursor left
+#define STB_TEXTEDIT_K_RIGHT        0x200001 // keyboard input to move cursor right
+#define STB_TEXTEDIT_K_UP           0x200002 // keyboard input to move cursor up
+#define STB_TEXTEDIT_K_DOWN         0x200003 // keyboard input to move cursor down
+#define STB_TEXTEDIT_K_LINESTART    0x200004 // keyboard input to move cursor to start of line
+#define STB_TEXTEDIT_K_LINEEND      0x200005 // keyboard input to move cursor to end of line
+#define STB_TEXTEDIT_K_TEXTSTART    0x200006 // keyboard input to move cursor to start of text
+#define STB_TEXTEDIT_K_TEXTEND      0x200007 // keyboard input to move cursor to end of text
+#define STB_TEXTEDIT_K_DELETE       0x200008 // keyboard input to delete selection or character under cursor
+#define STB_TEXTEDIT_K_BACKSPACE    0x200009 // keyboard input to delete selection or character left of cursor
+#define STB_TEXTEDIT_K_UNDO         0x20000A // keyboard input to perform undo
+#define STB_TEXTEDIT_K_REDO         0x20000B // keyboard input to perform redo
+#define STB_TEXTEDIT_K_WORDLEFT     0x20000C // keyboard input to move cursor left one word
+#define STB_TEXTEDIT_K_WORDRIGHT    0x20000D // keyboard input to move cursor right one word
+#define STB_TEXTEDIT_K_PGUP         0x20000E // keyboard input to move cursor up a page
+#define STB_TEXTEDIT_K_PGDOWN       0x20000F // keyboard input to move cursor down a page
+#define STB_TEXTEDIT_K_SHIFT        0x400000
+
+using namespace ImStb;
+
+#define STB_TEXTEDIT_IMPLEMENTATION
+#include "imstb_textedit.h"
+
+// stb_textedit internally allows for a single undo record to do addition and deletion, but somehow, calling
+// the stb_textedit_paste() function creates two separate records, so we perform it manually. (FIXME: Report to nothings/stb?)
+static void stb_textedit_replace(ImGuiInputTextState* str, STB_TexteditState* state, const STB_TEXTEDIT_CHARTYPE* text, int text_len)
+{
+	stb_text_makeundo_replace(str, state, 0, str->CurLenW, text_len);
+	STB_TEXTEDIT_DELETECHARS(str, 0, str->CurLenW);
+	state->cursor = state->select_start = state->select_end = 0;
+	if (text_len <= 0)
+		return;
+	if (STB_TEXTEDIT_INSERTCHARS(str, 0, text, text_len))
+	{
+		state->cursor = state->select_start = state->select_end = text_len;
+		state->has_preferred_x = 0;
+		return;
+	}
+	IM_ASSERT(0); // Failed to insert character, normally shouldn't happen because of how we currently use stb_textedit_replace()
+}
+
+static void InputTextReconcileUndoStateAfterUserCallback(ImGuiInputTextState* state, const char* new_buf_a, int new_length_a)
+{
+	ImGuiContext& g = *GImGui;
+	const ImWchar* old_buf = state->TextW.Data;
+	const int old_length = state->CurLenW;
+	const int new_length = ImTextCountCharsFromUtf8(new_buf_a, new_buf_a + new_length_a);
+	g.TempBuffer.reserve_discard((new_length + 1) * sizeof(ImWchar));
+	ImWchar* new_buf = (ImWchar*)(void*)g.TempBuffer.Data;
+	ImTextStrFromUtf8(new_buf, new_length + 1, new_buf_a, new_buf_a + new_length_a);
+
+	const int shorter_length = ImMin(old_length, new_length);
+	int first_diff;
+	for (first_diff = 0; first_diff < shorter_length; first_diff++)
+		if (old_buf[first_diff] != new_buf[first_diff])
+			break;
+	if (first_diff == old_length && first_diff == new_length)
+		return;
+
+	int old_last_diff = old_length - 1;
+	int new_last_diff = new_length - 1;
+	for (; old_last_diff >= first_diff && new_last_diff >= first_diff; old_last_diff--, new_last_diff--)
+		if (old_buf[old_last_diff] != new_buf[new_last_diff])
+			break;
+
+	const int insert_len = new_last_diff - first_diff + 1;
+	const int delete_len = old_last_diff - first_diff + 1;
+	if (insert_len > 0 || delete_len > 0)
+		if (STB_TEXTEDIT_CHARTYPE* p = stb_text_createundo(&state->Stb.undostate, first_diff, delete_len, insert_len))
+			for (int i = 0; i < delete_len; i++)
+				p[i] = STB_TEXTEDIT_GETCHAR(state, first_diff + i);
+}
+
+#pragma endregion
+
+namespace CE::GUI
+{
+	using namespace ImStb;
+
+	static bool InputTextFilterCharacter(unsigned int* p_char, ImGuiInputTextFlags flags, TextInputCallback callback, void* user_data, ImGuiInputSource input_source)
+	{
+		IM_ASSERT(input_source == ImGuiInputSource_Keyboard || input_source == ImGuiInputSource_Clipboard);
+		unsigned int c = *p_char;
+
+		// Filter non-printable (NB: isprint is unreliable! see #2467)
+		bool apply_named_filters = true;
+		if (c < 0x20)
+		{
+			bool pass = false;
+			pass |= (c == '\n' && (flags & ImGuiInputTextFlags_Multiline)); // Note that an Enter KEY will emit \r and be ignored (we poll for KEY in InputText() code)
+			pass |= (c == '\t' && (flags & ImGuiInputTextFlags_AllowTabInput));
+			if (!pass)
+				return false;
+			apply_named_filters = false; // Override named filters below so newline and tabs can still be inserted.
+		}
+
+		if (input_source != ImGuiInputSource_Clipboard)
+		{
+			// We ignore Ascii representation of delete (emitted from Backspace on OSX, see #2578, #2817)
+			if (c == 127)
+				return false;
+
+			// Filter private Unicode range. GLFW on OSX seems to send private characters for special keys like arrow keys (FIXME)
+			if (c >= 0xE000 && c <= 0xF8FF)
+				return false;
+		}
+
+		// Filter Unicode ranges we are not handling in this build
+		if (c > IM_UNICODE_CODEPOINT_MAX)
+			return false;
+
+		// Generic named filters
+		if (apply_named_filters && (flags & (ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CharsScientific)))
+		{
+			// The libc allows overriding locale, with e.g. 'setlocale(LC_NUMERIC, "de_DE.UTF-8");' which affect the output/input of printf/scanf to use e.g. ',' instead of '.'.
+			// The standard mandate that programs starts in the "C" locale where the decimal point is '.'.
+			// We don't really intend to provide widespread support for it, but out of empathy for people stuck with using odd API, we support the bare minimum aka overriding the decimal point.
+			// Change the default decimal_point with:
+			//   ImGui::GetCurrentContext()->PlatformLocaleDecimalPoint = *localeconv()->decimal_point;
+			// Users of non-default decimal point (in particular ',') may be affected by word-selection logic (is_word_boundary_from_right/is_word_boundary_from_left) functions.
+			ImGuiContext& g = *GImGui;
+			const unsigned c_decimal_point = (unsigned int)g.PlatformLocaleDecimalPoint;
+
+			// Full-width -> half-width conversion for numeric fields (https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
+			// While this is mostly convenient, this has the side-effect for uninformed users accidentally inputting full-width characters that they may
+			// scratch their head as to why it works in numerical fields vs in generic text fields it would require support in the font.
+			if (flags & (ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_CharsScientific | ImGuiInputTextFlags_CharsHexadecimal))
+				if (c >= 0xFF01 && c <= 0xFF5E)
+					c = c - 0xFF01 + 0x21;
+
+			// Allow 0-9 . - + * /
+			if (flags & ImGuiInputTextFlags_CharsDecimal)
+				if (!(c >= '0' && c <= '9') && (c != c_decimal_point) && (c != '-') && (c != '+') && (c != '*') && (c != '/'))
+					return false;
+
+			// Allow 0-9 . - + * / e E
+			if (flags & ImGuiInputTextFlags_CharsScientific)
+				if (!(c >= '0' && c <= '9') && (c != c_decimal_point) && (c != '-') && (c != '+') && (c != '*') && (c != '/') && (c != 'e') && (c != 'E'))
+					return false;
+
+			// Allow 0-9 a-F A-F
+			if (flags & ImGuiInputTextFlags_CharsHexadecimal)
+				if (!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f') && !(c >= 'A' && c <= 'F'))
+					return false;
+
+			// Turn a-z into A-Z
+			if (flags & ImGuiInputTextFlags_CharsUppercase)
+				if (c >= 'a' && c <= 'z')
+					c += (unsigned int)('A' - 'a');
+
+			if (flags & ImGuiInputTextFlags_CharsNoBlank)
+				if (ImCharIsBlankW(c))
+					return false;
+
+			*p_char = c;
+		}
+
+		// Custom callback filter
+		if (flags & ImGuiInputTextFlags_CallbackCharFilter && callback != nullptr)
+		{
+			ImGuiContext& g = *GImGui;
+			TextInputCallbackData callback_data;
+			callback_data.ctx = &g;
+			callback_data.eventFlag = (TextInputFlags)ImGuiInputTextFlags_CallbackCharFilter;
+			callback_data.eventChar = (ImWchar)c;
+			callback_data.flags = (TextInputFlags)flags;
+			callback_data.userData = user_data;
+			if (callback(&callback_data) != 0)
+				return false;
+			*p_char = callback_data.eventChar;
+			if (!callback_data.eventChar)
+				return false;
+		}
+
+		return true;
+	}
+
+
+	COREGUI_API bool InputTextEx(ID id, const String& hint, String& inputText, const Vec2& baseSize, const Vec4& padding, const Vec4& rounding, f32 borderThickness, Vec2 minSize, Vec2 maxSize, TextInputFlags flags, TextInputCallback callback, void* callback_user_data)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -505,20 +857,30 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		ImGuiIO& io = g.IO;
 		const ImGuiStyle& style = g.Style;
+
+		Vec2 size = baseSize;
+		if (minSize.x > 0 && size.x < minSize.x)
+			size.x = minSize.x;
+		if (minSize.y > 0 && size.y < minSize.y)
+			size.y = minSize.y;
+		if (maxSize.x > 0 && size.x > maxSize.x)
+			size.x = maxSize.x;
+		if (maxSize.y > 0 && size.y > maxSize.y)
+			size.y = maxSize.y;
         
         const bool RENDER_SELECTION_WHEN_INACTIVE = false;
         const bool is_multiline = (flags & ImGuiInputTextFlags_Multiline) != 0;
         const bool is_readonly = (flags & ImGuiInputTextFlags_ReadOnly) != 0;
         const bool is_password = (flags & ImGuiInputTextFlags_Password) != 0;
         const bool is_undoable = (flags & ImGuiInputTextFlags_NoUndoRedo) == 0;
-        const bool is_resizable = (flags & ImGuiInputTextFlags_CallbackResize) != 0;
-        if (is_resizable)
-            IM_ASSERT(callback != NULL); // Must provide a callback if you set the ImGuiInputTextFlags_CallbackResize flag!
+		const bool is_resizable = true;//(flags & ImGuiInputTextFlags_CallbackResize) != 0;
+        //if (is_resizable)
+        //    IM_ASSERT(callback != NULL); // Must provide a callback if you set the ImGuiInputTextFlags_CallbackResize flag!
 
         if (is_multiline) // Open group before calling GetID() because groups tracks id created within their scope (including the scrollbar)
-            BeginGroup();
+            ImGui::BeginGroup();
         
-        const ImVec2 label_size = ImGui::CalcTextSize("Ignore", NULL, true);
+        const ImVec2 label_size = ImGui::CalcTextSize("ignore", NULL, true);
         ImVec2 size_arg = ImVec2(size.x, size.y);
         
         const ImVec2 frame_size = ImGui::CalcItemSize(size_arg, ImGui::CalcItemWidth(),
@@ -535,10 +897,10 @@ namespace CE::GUI
         if (is_multiline)
         {
             ImVec2 backup_pos = window->DC.CursorPos;
-            ImGui::ItemSize(total_bb, style.FramePadding.y);
+            ImGui::ItemSize(total_bb, padding.top);
             if (!ImGui::ItemAdd(total_bb, id, &frame_bb, ImGuiItemFlags_Inputable))
             {
-                EndGroup();
+				ImGui::EndGroup();
                 return false;
             }
             item_status_flags = g.LastItemData.StatusFlags;
@@ -552,17 +914,18 @@ namespace CE::GUI
             ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, style.FrameBorderSize);
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0)); // Ensure no clip rect so mouse hover can reach FramePadding edges
             bool child_visible = ImGui::BeginChildEx(nullptr, id, frame_bb.GetSize(), true, ImGuiWindowFlags_NoMove);
-            PopStyleVar(3);
-            PopStyleColor();
+            ImGui::PopStyleVar(3);
+			ImGui::PopStyleColor();
+			
             if (!child_visible)
             {
                 ImGui::EndChild();
-                EndGroup();
+				ImGui::EndGroup();
                 return false;
             }
             draw_window = g.CurrentWindow; // Child window
             draw_window->DC.NavLayersActiveMaskNext |= (1 << draw_window->DC.NavLayerCurrent); // This is to ensure that EndChild() will display a navigation highlight so we can "enter" into it.
-            draw_window->DC.CursorPos += style.FramePadding;
+            draw_window->DC.CursorPos += ImVec2(padding.left, padding.top);
             inner_size.x -= draw_window->ScrollbarSizes.x;
         }
         else
@@ -593,7 +956,7 @@ namespace CE::GUI
         float scroll_y = is_multiline ? draw_window->Scroll.y : FLT_MAX;
         
         char* buf = inputText.GetCString();
-        int buf_size = inputText.GetLength();
+        int buf_size = inputText.GetLength() + 1;
 
         const bool init_changed_specs = (state != NULL && state->Stb.single_line != !is_multiline); // state != NULL means its our state.
         const bool init_make_active = (user_clicked || user_scroll_finish || input_requested_by_nav || input_requested_by_tabbing);
@@ -609,7 +972,7 @@ namespace CE::GUI
 
             // Take a copy of the initial buffer value (both in original UTF-8 format and converted to wchar)
             // From the moment we focused we are ignoring the content of 'buf' (unless we are in read-only mode)
-            const int buf_len = inputText.GetCapacity();
+			const int buf_len = buf_size;
             
             state->InitialTextA.resize(buf_len + 1);    // UTF-8. we use +1 to make sure that .Data is always pointing to at least an empty string.
             memcpy(state->InitialTextA.Data, buf, buf_len + 1);
@@ -727,7 +1090,7 @@ namespace CE::GUI
             password_font->FallbackGlyph = glyph;
             password_font->FallbackAdvanceX = glyph->AdvanceX;
             IM_ASSERT(password_font->Glyphs.empty() && password_font->IndexAdvanceX.empty() && password_font->IndexLookup.empty());
-            PushFont(password_font);
+            ImGui::PushFont(password_font);
         }
 
         // Process mouse inputs and character inputs
@@ -762,20 +1125,20 @@ namespace CE::GUI
                     // Double-click: Select word
                     // We always use the "Mac" word advance for double-click select vs CTRL+Right which use the platform dependent variant:
                     // FIXME: There are likely many ways to improve this behavior, but there's no "right" behavior (depends on use-case, software, OS)
-                    const bool is_bol = (state->Stb.cursor == 0) || ImStb::STB_TEXTEDIT_GETCHAR(state, state->Stb.cursor - 1) == '\n';
+                    const bool is_bol = (state->Stb.cursor == 0) || STB_TEXTEDIT_GETCHAR(state, state->Stb.cursor - 1) == '\n';
                     if (STB_TEXT_HAS_SELECTION(&state->Stb) || !is_bol)
                         state->OnKeyPressed(STB_TEXTEDIT_K_WORDLEFT);
                     //state->OnKeyPressed(STB_TEXTEDIT_K_WORDRIGHT | STB_TEXTEDIT_K_SHIFT);
                     if (!STB_TEXT_HAS_SELECTION(&state->Stb))
-                        ImStb::stb_textedit_prep_selection_at_cursor(&state->Stb);
-                    state->Stb.cursor = ImStb::STB_TEXTEDIT_MOVEWORDRIGHT_MAC(state, state->Stb.cursor);
+                        stb_textedit_prep_selection_at_cursor(&state->Stb);
+                    state->Stb.cursor = STB_TEXTEDIT_MOVEWORDRIGHT_MAC(state, state->Stb.cursor);
                     state->Stb.select_end = state->Stb.cursor;
-                    ImStb::stb_textedit_clamp(state, &state->Stb);
+                    stb_textedit_clamp(state, &state->Stb);
                 }
                 else
                 {
                     // Triple-click: Select line
-                    const bool is_eol = ImStb::STB_TEXTEDIT_GETCHAR(state, state->Stb.cursor) == '\n';
+                    const bool is_eol = STB_TEXTEDIT_GETCHAR(state, state->Stb.cursor) == '\n';
                     state->OnKeyPressed(STB_TEXTEDIT_K_LINESTART);
                     state->OnKeyPressed(STB_TEXTEDIT_K_LINEEND | STB_TEXTEDIT_K_SHIFT);
                     state->OnKeyPressed(STB_TEXTEDIT_K_RIGHT | STB_TEXTEDIT_K_SHIFT);
@@ -810,7 +1173,7 @@ namespace CE::GUI
 
             // We expect backends to emit a Tab key but some also emit a Tab character which we ignore (#2467, #1336)
             // (For Tab and Enter: Win32/SFML/Allegro are sending both keys and chars, GLFW and SDL are only sending keys. For Space they all send all threes)
-            if ((flags & ImGuiInputTextFlags_AllowTabInput) && Shortcut(ImGuiKey_Tab, id) && !is_readonly)
+            if ((flags & ImGuiInputTextFlags_AllowTabInput) && ImGui::Shortcut(ImGuiKey_Tab, id) && !is_readonly)
             {
                 unsigned int c = '\t'; // Insert TAB
                 if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard))
@@ -874,7 +1237,7 @@ namespace CE::GUI
             if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow)) { state->OnKeyPressed((is_startend_key_down ? STB_TEXTEDIT_K_LINESTART : is_wordmove_key_down ? STB_TEXTEDIT_K_WORDLEFT : STB_TEXTEDIT_K_LEFT) | k_mask); }
             else if (ImGui::IsKeyPressed(ImGuiKey_RightArrow))                  { state->OnKeyPressed((is_startend_key_down ? STB_TEXTEDIT_K_LINEEND : is_wordmove_key_down ? STB_TEXTEDIT_K_WORDRIGHT : STB_TEXTEDIT_K_RIGHT) | k_mask); }
             else if (ImGui::IsKeyPressed(ImGuiKey_UpArrow) && is_multiline)     { if (io.KeyCtrl) ImGui::SetScrollY(draw_window, ImMax(draw_window->Scroll.y - g.FontSize, 0.0f)); else state->OnKeyPressed((is_startend_key_down ? STB_TEXTEDIT_K_TEXTSTART : STB_TEXTEDIT_K_UP) | k_mask); }
-            else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && is_multiline)   { if (io.KeyCtrl) ImGui::SetScrollY(draw_window, ImMin(draw_window->Scroll.y + g.FontSize, GetScrollMaxY())); else state->OnKeyPressed((is_startend_key_down ? STB_TEXTEDIT_K_TEXTEND : STB_TEXTEDIT_K_DOWN) | k_mask); }
+            else if (ImGui::IsKeyPressed(ImGuiKey_DownArrow) && is_multiline)   { if (io.KeyCtrl) ImGui::SetScrollY(draw_window, ImMin(draw_window->Scroll.y + g.FontSize, ImGui::GetScrollMaxY())); else state->OnKeyPressed((is_startend_key_down ? STB_TEXTEDIT_K_TEXTEND : STB_TEXTEDIT_K_DOWN) | k_mask); }
             else if (ImGui::IsKeyPressed(ImGuiKey_PageUp) && is_multiline)      { state->OnKeyPressed(STB_TEXTEDIT_K_PGUP | k_mask); scroll_y -= row_count_per_page * g.FontSize; }
             else if (ImGui::IsKeyPressed(ImGuiKey_PageDown) && is_multiline)    { state->OnKeyPressed(STB_TEXTEDIT_K_PGDOWN | k_mask); scroll_y += row_count_per_page * g.FontSize; }
             else if (ImGui::IsKeyPressed(ImGuiKey_Home))                        { state->OnKeyPressed(io.KeyCtrl ? STB_TEXTEDIT_K_TEXTSTART | k_mask : STB_TEXTEDIT_K_LINESTART | k_mask); }
@@ -959,8 +1322,8 @@ namespace CE::GUI
                     const int clipboard_data_len = ImTextCountUtf8BytesFromStr(state->TextW.Data + ib, state->TextW.Data + ie) + 1;
                     char* clipboard_data = (char*)IM_ALLOC(clipboard_data_len * sizeof(char));
                     ImTextStrToUtf8(clipboard_data, clipboard_data_len, state->TextW.Data + ib, state->TextW.Data + ie);
-                    SetClipboardText(clipboard_data);
-                    MemFree(clipboard_data);
+					ImGui::SetClipboardText(clipboard_data);
+					ImGui::MemFree(clipboard_data);
                 }
                 if (is_cut)
                 {
@@ -972,7 +1335,7 @@ namespace CE::GUI
             }
             else if (is_paste)
             {
-                if (const char* clipboard = GetClipboardText())
+                if (const char* clipboard = ImGui::GetClipboardText())
                 {
                     // Filter pasted buffer
                     const int clipboard_len = (int)strlen(clipboard);
@@ -1052,6 +1415,11 @@ namespace CE::GUI
                 // FIXME: We actually always render 'buf' when calling DrawList->AddText, making the comment above incorrect.
                 // FIXME-OPT: CPU waste to do this every time the widget is active, should mark dirty state from the stb_textedit callbacks.
 
+				if (state->Edited)
+				{
+					inputText = state->TextA.Data;
+				}
+
                 // User callback
                 if ((flags & (ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory | ImGuiInputTextFlags_CallbackEdit | ImGuiInputTextFlags_CallbackAlways)) != 0)
                 {
@@ -1084,55 +1452,55 @@ namespace CE::GUI
                         event_flag = ImGuiInputTextFlags_CallbackAlways;
                     }
 
-                    if (event_flag)
+                    if (event_flag && callback != nullptr)
                     {
-                        ImGuiInputTextCallbackData callback_data;
-                        callback_data.Ctx = &g;
-                        callback_data.EventFlag = event_flag;
-                        callback_data.Flags = flags;
-                        callback_data.UserData = callback_user_data;
+                        TextInputCallbackData callback_data;
+                        callback_data.ctx = &g;
+                        callback_data.eventFlag = (TextInputFlags)event_flag;
+                        callback_data.flags = flags;
+                        callback_data.userData = callback_user_data;
 
                         char* callback_buf = is_readonly ? buf : state->TextA.Data;
-                        callback_data.EventKey = event_key;
-                        callback_data.Buf = callback_buf;
-                        callback_data.BufTextLen = state->CurLenA;
-                        callback_data.BufSize = state->BufCapacityA;
-                        callback_data.BufDirty = false;
+                        callback_data.eventKey = event_key;
+                        callback_data.buf = callback_buf;
+                        callback_data.bufTextLen = state->CurLenA;
+                        callback_data.bufSize = state->BufCapacityA;
+                        callback_data.bufDirty = false;
 
                         // We have to convert from wchar-positions to UTF-8-positions, which can be pretty slow (an incentive to ditch the ImWchar buffer, see https://github.com/nothings/stb/issues/188)
                         ImWchar* text = state->TextW.Data;
-                        const int utf8_cursor_pos = callback_data.CursorPos = ImTextCountUtf8BytesFromStr(text, text + state->Stb.cursor);
-                        const int utf8_selection_start = callback_data.SelectionStart = ImTextCountUtf8BytesFromStr(text, text + state->Stb.select_start);
-                        const int utf8_selection_end = callback_data.SelectionEnd = ImTextCountUtf8BytesFromStr(text, text + state->Stb.select_end);
+                        const int utf8_cursor_pos = callback_data.cursorPos = ImTextCountUtf8BytesFromStr(text, text + state->Stb.cursor);
+                        const int utf8_selection_start = callback_data.selectionStart = ImTextCountUtf8BytesFromStr(text, text + state->Stb.select_start);
+                        const int utf8_selection_end = callback_data.selectionEnd = ImTextCountUtf8BytesFromStr(text, text + state->Stb.select_end);
 
                         // Call user code
                         callback(&callback_data);
 
                         // Read back what user may have modified
                         callback_buf = is_readonly ? buf : state->TextA.Data; // Pointer may have been invalidated by a resize callback
-                        IM_ASSERT(callback_data.Buf == callback_buf);         // Invalid to modify those fields
-                        IM_ASSERT(callback_data.BufSize == state->BufCapacityA);
-                        IM_ASSERT(callback_data.Flags == flags);
-                        const bool buf_dirty = callback_data.BufDirty;
-                        if (callback_data.CursorPos != utf8_cursor_pos || buf_dirty)            { state->Stb.cursor = ImTextCountCharsFromUtf8(callback_data.Buf, callback_data.Buf + callback_data.CursorPos); state->CursorFollow = true; }
-                        if (callback_data.SelectionStart != utf8_selection_start || buf_dirty)  { state->Stb.select_start = (callback_data.SelectionStart == callback_data.CursorPos) ? state->Stb.cursor : ImTextCountCharsFromUtf8(callback_data.Buf, callback_data.Buf + callback_data.SelectionStart); }
-                        if (callback_data.SelectionEnd != utf8_selection_end || buf_dirty)      { state->Stb.select_end = (callback_data.SelectionEnd == callback_data.SelectionStart) ? state->Stb.select_start : ImTextCountCharsFromUtf8(callback_data.Buf, callback_data.Buf + callback_data.SelectionEnd); }
+                        IM_ASSERT(callback_data.buf == callback_buf);         // Invalid to modify those fields
+                        IM_ASSERT(callback_data.bufSize == state->BufCapacityA);
+                        IM_ASSERT(callback_data.flags == flags);
+                        const bool buf_dirty = callback_data.bufDirty;
+                        if (callback_data.cursorPos != utf8_cursor_pos || buf_dirty)            { state->Stb.cursor = ImTextCountCharsFromUtf8(callback_data.buf, callback_data.buf + callback_data.cursorPos); state->CursorFollow = true; }
+                        if (callback_data.selectionStart != utf8_selection_start || buf_dirty)  { state->Stb.select_start = (callback_data.selectionStart == callback_data.cursorPos) ? state->Stb.cursor : ImTextCountCharsFromUtf8(callback_data.buf, callback_data.buf + callback_data.selectionStart); }
+                        if (callback_data.selectionEnd != utf8_selection_end || buf_dirty)      { state->Stb.select_end = (callback_data.selectionEnd == callback_data.selectionStart) ? state->Stb.select_start : ImTextCountCharsFromUtf8(callback_data.buf, callback_data.buf + callback_data.selectionEnd); }
                         if (buf_dirty)
                         {
                             IM_ASSERT((flags & ImGuiInputTextFlags_ReadOnly) == 0);
-                            IM_ASSERT(callback_data.BufTextLen == (int)strlen(callback_data.Buf)); // You need to maintain BufTextLen if you change the text!
-                            InputTextReconcileUndoStateAfterUserCallback(state, callback_data.Buf, callback_data.BufTextLen); // FIXME: Move the rest of this block inside function and rename to InputTextReconcileStateAfterUserCallback() ?
-                            if (callback_data.BufTextLen > backup_current_text_length && is_resizable)
-                                state->TextW.resize(state->TextW.Size + (callback_data.BufTextLen - backup_current_text_length)); // Worse case scenario resize
-                            state->CurLenW = ImTextStrFromUtf8(state->TextW.Data, state->TextW.Size, callback_data.Buf, NULL);
-                            state->CurLenA = callback_data.BufTextLen;  // Assume correct length and valid UTF-8 from user, saves us an extra strlen()
+                            IM_ASSERT(callback_data.bufTextLen == (int)strlen(callback_data.buf)); // You need to maintain BufTextLen if you change the text!
+                            InputTextReconcileUndoStateAfterUserCallback(state, callback_data.buf, callback_data.bufTextLen); // FIXME: Move the rest of this block inside function and rename to InputTextReconcileStateAfterUserCallback() ?
+                            if (callback_data.bufTextLen > backup_current_text_length && is_resizable)
+                                state->TextW.resize(state->TextW.Size + (callback_data.bufTextLen - backup_current_text_length)); // Worse case scenario resize
+                            state->CurLenW = ImTextStrFromUtf8(state->TextW.Data, state->TextW.Size, callback_data.buf, NULL);
+                            state->CurLenA = callback_data.bufTextLen;  // Assume correct length and valid UTF-8 from user, saves us an extra strlen()
                             state->CursorAnimReset();
                         }
                     }
                 }
 
                 // Will copy result string if modified
-                if (!is_readonly && strcmp(state->TextA.Data, buf) != 0)
+				if (!is_readonly && (state->Edited || strcmp(state->TextA.Data, buf) != 0))
                 {
                     apply_new_text = state->TextA.Data;
                     apply_new_text_length = state->CurLenA;
@@ -1144,7 +1512,7 @@ namespace CE::GUI
         // Handle reapplying final data on deactivation (see InputTextDeactivateHook() for details)
         if (g.InputTextDeactivatedState.ID == id)
         {
-            if (g.ActiveId != id && IsItemDeactivatedAfterEdit() && !is_readonly)
+            if (g.ActiveId != id && ImGui::IsItemDeactivatedAfterEdit() && !is_readonly)
             {
                 apply_new_text = g.InputTextDeactivatedState.TextA.Data;
                 apply_new_text_length = g.InputTextDeactivatedState.TextA.Size - 1;
@@ -1154,51 +1522,25 @@ namespace CE::GUI
             g.InputTextDeactivatedState.ID = 0;
         }
 
-        // Copy result to user buffer. This can currently only happen when (g.ActiveId == id)
-        if (apply_new_text != NULL)
-        {
-            // We cannot test for 'backup_current_text_length != apply_new_text_length' here because we have no guarantee that the size
-            // of our owned buffer matches the size of the string object held by the user, and by design we allow InputText() to be used
-            // without any storage on user's side.
-            IM_ASSERT(apply_new_text_length >= 0);
-            if (is_resizable)
-            {
-                ImGuiInputTextCallbackData callback_data;
-                callback_data.Ctx = &g;
-                callback_data.EventFlag = ImGuiInputTextFlags_CallbackResize;
-                callback_data.Flags = flags;
-                callback_data.Buf = buf;
-                callback_data.BufTextLen = apply_new_text_length;
-                callback_data.BufSize = ImMax(buf_size, apply_new_text_length + 1);
-                callback_data.UserData = callback_user_data;
-                callback(&callback_data);
-                buf = callback_data.Buf;
-                buf_size = callback_data.BufSize;
-                apply_new_text_length = ImMin(callback_data.BufTextLen, buf_size - 1);
-                IM_ASSERT(apply_new_text_length <= buf_size);
-            }
-            //IMGUI_DEBUG_PRINT("InputText(\"%s\"): apply_new_text length %d\n", label, apply_new_text_length);
-
-            // If the underlying buffer resize was denied or not carried to the next frame, apply_new_text_length+1 may be >= buf_size.
-            ImStrncpy(buf, apply_new_text, ImMin(apply_new_text_length + 1, buf_size));
-        }
-
         // Release active ID at the end of the function (so e.g. pressing Return still does a final application of the value)
         // Otherwise request text input ahead for next frame.
         if (g.ActiveId == id && clear_active_id)
-            ClearActiveID();
+			ImGui::ClearActiveID();
         else if (g.ActiveId == id)
             g.WantTextInputNextFrame = 1;
 
         // Render frame
         if (!is_multiline)
         {
-            RenderNavHighlight(frame_bb, id);
-            ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
+			//ImGui::RenderNavHighlight(frame_bb, id);
+            //ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, ImGui::GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
+			Vec4 frameRect{ frame_bb.Min.x, frame_bb.Min.y, frame_bb.Max.x, frame_bb.Max.y };
+			GUI::RenderNavHighlight(frameRect, id, borderThickness, rounding);
+			GUI::RenderFrame(frameRect, ImGui::GetColorU32(ImGuiCol_FrameBg), borderThickness, rounding);
         }
 
         const ImVec4 clip_rect(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Min.x + inner_size.x, frame_bb.Min.y + inner_size.y); // Not using frame_bb.Max because we have adjusted size
-        ImVec2 draw_pos = is_multiline ? draw_window->DC.CursorPos : frame_bb.Min + style.FramePadding;
+        ImVec2 draw_pos = is_multiline ? draw_window->DC.CursorPos : frame_bb.Min + ImVec2(padding.left, padding.top);
         ImVec2 text_size(0.0f, 0.0f);
 
         // Set upper limit of single-line InputTextEx() at 2 million characters strings. The current pathological worst case is a long line
@@ -1207,10 +1549,10 @@ namespace CE::GUI
         const int buf_display_max_length = 2 * 1024 * 1024;
         const char* buf_display = buf_display_from_state ? state->TextA.Data : buf; //-V595
         const char* buf_display_end = NULL; // We have specialized paths below for setting the length
-        if (is_displaying_hint)
+        if (is_displaying_hint && !hint.IsEmpty())
         {
-            buf_display = hint;
-            buf_display_end = hint + strlen(hint);
+            buf_display = hint.GetCString();
+            buf_display_end = hint.GetCString() + hint.GetLength();
         }
 
         // Render text. We currently only render selection when the widget is active or while scrolling.
@@ -1323,7 +1665,7 @@ namespace CE::GUI
                 const ImWchar* text_selected_begin = text_begin + ImMin(state->Stb.select_start, state->Stb.select_end);
                 const ImWchar* text_selected_end = text_begin + ImMax(state->Stb.select_start, state->Stb.select_end);
 
-                ImU32 bg_color = GetColorU32(ImGuiCol_TextSelectedBg, render_cursor ? 1.0f : 0.6f); // FIXME: current code flow mandate that render_cursor is always true here, we are leaving the transparent one for tests.
+                ImU32 bg_color = ImGui::GetColorU32(ImGuiCol_TextSelectedBg, render_cursor ? 1.0f : 0.6f); // FIXME: current code flow mandate that render_cursor is always true here, we are leaving the transparent one for tests.
                 float bg_offy_up = is_multiline ? 0.0f : -1.0f;    // FIXME: those offsets should be part of the style? they don't play so well with multi-line selection.
                 float bg_offy_dn = is_multiline ? 0.0f : 2.0f;
                 ImVec2 rect_pos = draw_pos + select_start_offset - draw_scroll;
@@ -1356,7 +1698,7 @@ namespace CE::GUI
             // We test for 'buf_display_max_length' as a way to avoid some pathological cases (e.g. single-line 1 MB string) which would make ImDrawList crash.
             if (is_multiline || (buf_display_end - buf_display) < buf_display_max_length)
             {
-                ImU32 col = GetColorU32(is_displaying_hint ? ImGuiCol_TextDisabled : ImGuiCol_Text);
+                ImU32 col = ImGui::GetColorU32(is_displaying_hint ? ImGuiCol_TextDisabled : ImGuiCol_Text);
                 draw_window->DrawList->AddText(g.Font, g.FontSize, draw_pos - draw_scroll, col, buf_display, buf_display_end, 0.0f, is_multiline ? NULL : &clip_rect);
             }
 
@@ -1368,7 +1710,7 @@ namespace CE::GUI
                 ImVec2 cursor_screen_pos = ImFloor(draw_pos + cursor_offset - draw_scroll);
                 ImRect cursor_screen_rect(cursor_screen_pos.x, cursor_screen_pos.y - g.FontSize + 0.5f, cursor_screen_pos.x + 1.0f, cursor_screen_pos.y - 1.5f);
                 if (cursor_is_visible && cursor_screen_rect.Overlaps(clip_rect))
-                    draw_window->DrawList->AddLine(cursor_screen_rect.Min, cursor_screen_rect.GetBL(), GetColorU32(ImGuiCol_Text));
+                    draw_window->DrawList->AddLine(cursor_screen_rect.Min, cursor_screen_rect.GetBL(), ImGui::GetColorU32(ImGuiCol_Text));
 
                 // Notify OS of text input position for advanced IME (-1 x offset so that Windows IME can cover our cursor. Bit of an extra nicety.)
                 if (!is_readonly)
@@ -1384,7 +1726,7 @@ namespace CE::GUI
         {
             // Render text only (no selection, no cursor)
             if (is_multiline)
-                text_size = ImVec2(inner_size.x, ImGui::InputTextCalcTextLenAndLineCount(buf_display, &buf_display_end) * g.FontSize); // We don't need width
+                text_size = ImVec2(inner_size.x, InputTextCalcTextLenAndLineCount(buf_display, &buf_display_end) * g.FontSize); // We don't need width
             else if (!is_displaying_hint && g.ActiveId == id)
                 buf_display_end = buf_display + state->CurLenA;
             else if (!is_displaying_hint)
@@ -1398,15 +1740,15 @@ namespace CE::GUI
         }
 
         if (is_password && !is_displaying_hint)
-            PopFont();
+			ImGui::PopFont();
 
         if (is_multiline)
         {
             // For focus requests to work on our multiline we need to ensure our child ItemAdd() call specifies the ImGuiItemFlags_Inputable (ref issue #4761)...
-            Dummy(ImVec2(text_size.x, text_size.y + style.FramePadding.y));
+			ImGui::Dummy(ImVec2(text_size.x, text_size.y + style.FramePadding.y));
             ImGuiItemFlags backup_item_flags = g.CurrentItemFlags;
             g.CurrentItemFlags |= ImGuiItemFlags_Inputable | ImGuiItemFlags_NoTabStop;
-            EndChild();
+			ImGui::EndChild();
             item_data_backup.StatusFlags |= (g.LastItemData.StatusFlags & ImGuiItemStatusFlags_HoveredWindow);
             g.CurrentItemFlags = backup_item_flags;
 
@@ -1428,15 +1770,16 @@ namespace CE::GUI
             ImGui::LogRenderedText(&draw_pos, buf_display, buf_display_end);
         }
 
-        if (label_size.x > 0)
-            RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label);
+		// Do NOT draw label
+        //if (label_size.x > 0)
+		//	ImGui::RenderText(ImVec2(frame_bb.Max.x + style.ItemInnerSpacing.x, frame_bb.Min.y + style.FramePadding.y), label.GetCString());
 
         if (value_changed && !(flags & ImGuiInputTextFlags_NoMarkEdited))
-            MarkItemEdited(id);
+			ImGui::MarkItemEdited(id);
 
         IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | ImGuiItemStatusFlags_Inputable);
         if ((flags & ImGuiInputTextFlags_EnterReturnsTrue) != 0)
-            return validated;
+            return value_changed || validated;
         else
             return value_changed;
 	}
