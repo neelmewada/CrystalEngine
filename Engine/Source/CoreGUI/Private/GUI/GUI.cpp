@@ -1863,8 +1863,6 @@ namespace CE::GUI
 		const Vec2& size, const Vec4& padding, const Vec4& rounding, f32 borderThickness,
 		SliderFlags flags)
 	{
-		//return ImGui::DragScalar("label", (ImGuiDataType)dataType, data, speed, min, max, format, (ImGuiSliderFlags)flags);
-
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
 			return false;
@@ -1951,7 +1949,8 @@ namespace CE::GUI
 		const char* value_buf_end = value_buf + ImGui::DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), (ImGuiDataType)dataType, data, format);
 		if (g.LogEnabled)
 			ImGui::LogSetNextTextDecoration("{", "}");
-		ImGui::RenderTextClipped(frame_bb.Min, frame_bb.Max, value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
+		ImGui::RenderTextClipped(frame_bb.Min + ImVec2(padding.left, 0), frame_bb.Max - ImVec2(padding.right, 0), 
+			value_buf, value_buf_end, NULL, ImVec2(0.5f, 0.5f));
 
 		IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | (temp_input_allowed ? ImGuiItemStatusFlags_Inputable : 0));
 		return value_changed;
