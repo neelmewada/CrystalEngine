@@ -18,6 +18,7 @@ namespace CE
 
 
     Package* gTransientPackage = nullptr;
+    Package* gSettingsPackage = nullptr;
 
     void CoreModule::StartupModule()
     {
@@ -33,12 +34,16 @@ namespace CE
         gConfigCache->LoadStartupConfigs();
     
         gTransientPackage = CreateObject<Package>(nullptr, TEXT("/Engine/Transient"), OF_Transient);
+        gSettingsPackage = CreateObject<Package>(nullptr, TEXT("/Settings"));
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }
 
     void CoreModule::ShutdownModule()
     {
+        gSettingsPackage->RequestDestroy();
+        gSettingsPackage = nullptr;
+        
         gTransientPackage->RequestDestroy();
         gTransientPackage = nullptr;
 
@@ -71,6 +76,8 @@ namespace CE
         CE_REGISTER_TYPES(
             Object,
             Package,
+            SettingsBase,
+            ProjectSettings,
             SystemObject,
             Component,
             SystemComponent,

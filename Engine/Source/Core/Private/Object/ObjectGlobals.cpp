@@ -59,11 +59,17 @@ namespace CE
 	*/
 
 	extern Package* gTransientPackage;
+    extern Package* gSettingsPackage;
 
 	CORE_API Package* GetTransientPackage()
 	{
 		return gTransientPackage;
 	}
+
+    CORE_API Package* GetSettingsPackage()
+    {
+        return gSettingsPackage;
+    }
 
 	CORE_API bool IsValidObjectName(const String& name)
 	{
@@ -73,7 +79,7 @@ namespace CE
 		for (int i = 0; i < name.GetLength(); i++)
 		{
 			char ch = name[i];
-			if (ch == '.' || ch == ' ' || ch == '-' || ch == '/')
+			if (ch == '.' || ch == ' ' || ch == '-' || ch == '/' || ch == '\\')
 			{
 				return false;
 			}

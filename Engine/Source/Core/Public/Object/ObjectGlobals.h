@@ -17,6 +17,8 @@ namespace CE
 	///	Used to store temporary objects that are not saved to disk.
 	CORE_API Package* GetTransientPackage();
 
+    CORE_API Package* GetSettingsPackage();
+
 	namespace Internal
 	{
 		
