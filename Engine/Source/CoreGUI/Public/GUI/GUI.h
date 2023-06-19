@@ -24,6 +24,8 @@ namespace CE::GUI
 
     COREGUI_API ID DockSpace(const String& id, Vec2 size = Vec2(0, 0), DockFlags dockFlags = DockFlags_None);
 
+	COREGUI_API ID DockSpace(ID id, Vec2 size = Vec2(0, 0), DockFlags dockFlags = DockFlags_None);
+
     COREGUI_API void EndWindow();
 
     COREGUI_API bool BeginMenuBar();
@@ -107,6 +109,16 @@ namespace CE::GUI
 	COREGUI_API void TreePop();
 
     COREGUI_API bool CollapsibleHeader(const String& label, Vec4* padding = nullptr, Vec4* borderRadius = nullptr, f32* borderSize = nullptr, TreeNodeFlags flags = TNF_None);
+
+	// Tab Bar
+
+	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags = TabBarFlags_None);
+
+	COREGUI_API bool BeginTabItem(const String& label, bool* open = nullptr, TabItemFlags flags = TabItemFlags_None);
+
+	COREGUI_API void EndTabItem();
+
+	COREGUI_API void EndTabBar();
 
 #pragma endregion
 

@@ -51,11 +51,11 @@ namespace CE
 		SDL_Quit();
 	}
 
-	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen)
+	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
 	{
 		if (mainWindow == nullptr)
 		{
-			mainWindow = new SDLPlatformWindow(title, width, height, maximised, fullscreen);
+			mainWindow = new SDLPlatformWindow(title, width, height, maximised, fullscreen, resizable);
 			windowList.Add(mainWindow);
 
 			SDL_AddEventWatch(ResizingEventWatch, mainWindow->handle);

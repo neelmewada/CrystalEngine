@@ -47,7 +47,7 @@ namespace CE
 
         virtual PlatformBackend GetBackend() = 0;
 
-        virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) = 0;
+        virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) = 0;
 
         virtual PlatformWindow* GetMainWindow() = 0;
 

@@ -10,17 +10,13 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
     FOLDER Editor/Source
     PCHHEADER
         PRIVATE
-            Public/${PROJECT_NAME}.h
+            Sources/Main.h
     FILES_CMAKE
         PRIVATE
-            ${PROJECT_NAME_LOWERCASE}_private_files.cmake
-        PUBLIC
-            ${PROJECT_NAME_LOWERCASE}_public_files.cmake
+            ${PROJECT_NAME_LOWERCASE}_source_files.cmake
     INCLUDE_DIRECTORIES
         PRIVATE
-            Private/
-        PUBLIC
-            Public/
+            Sources/
     COMPILE_DEFINITIONS
         PRIVATE
             ${PROJECT_NAME}_EXPORTS
@@ -32,6 +28,7 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::CoreGUI
             CE::CoreWidgets
             CE::EditorCore
+            CE::EditorWidgets
     RUNTIME_DEPENDENCIES
 
 )

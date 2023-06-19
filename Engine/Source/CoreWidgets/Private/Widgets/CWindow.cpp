@@ -32,8 +32,12 @@ namespace CE::Widgets
     {
         if (isShown)
         {
+			GUI::WindowFlags windowFlags = GUI::WF_None;
+			if (isFullscreen)
+				windowFlags |= GUI::WF_FullScreen | GUI::WF_NoPadding;
+
 			style.Push();
-            GUI::BeginWindow(windowTitle, &isShown);
+            GUI::BeginWindow(windowTitle, &isShown, windowFlags);
 			style.Pop();
 
 			style.Push(CStylePropertyTypeFlags::Inherited); // Push inheritable properties for sub-widgets

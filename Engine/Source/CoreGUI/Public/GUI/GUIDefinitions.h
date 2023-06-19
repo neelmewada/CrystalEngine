@@ -655,6 +655,37 @@ namespace CE::GUI
 	};
 	ENUM_CLASS_FLAGS(SliderFlags);
 
+	// Flags for BeginTabBar()
+	enum TabBarFlags
+	{
+		TabBarFlags_None = 0,
+		TabBarFlags_Reorderable = 1 << 0,   // Allow manually dragging tabs to re-order them + New tabs are appended at the end of list
+		TabBarFlags_AutoSelectNewTabs = 1 << 1,   // Automatically select new tabs when they appear
+		TabBarFlags_TabListPopupButton = 1 << 2,   // Disable buttons to open the tab list popup
+		TabBarFlags_NoCloseWithMiddleMouseButton = 1 << 3,   // Disable behavior of closing tabs (that are submitted with p_open != NULL) with middle mouse button. You can still repro this behavior on user's side with if (IsItemHovered() && IsMouseClicked(2)) *p_open = false.
+		TabBarFlags_NoTabListScrollingButtons = 1 << 4,   // Disable scrolling buttons (apply when fitting policy is TabBarFlags_FittingPolicyScroll)
+		TabBarFlags_NoTooltip = 1 << 5,   // Disable tooltips when hovering a tab
+		TabBarFlags_FittingPolicyResizeDown = 1 << 6,   // Resize tabs when they don't fit
+		TabBarFlags_FittingPolicyScroll = 1 << 7,   // Add scroll buttons when tabs don't fit
+		TabBarFlags_FittingPolicyMask_ = TabBarFlags_FittingPolicyResizeDown | TabBarFlags_FittingPolicyScroll,
+		TabBarFlags_FittingPolicyDefault_ = TabBarFlags_FittingPolicyResizeDown,
+	};
+	ENUM_CLASS_FLAGS(TabBarFlags);
+
+	// Flags for BeginTabItem()
+	enum TabItemFlags
+	{
+		TabItemFlags_None = 0,
+		TabItemFlags_UnsavedDocument = 1 << 0,   // Display a dot next to the title + tab is selected when clicking the X + closure is not assumed (will wait for user to stop submitting the tab). Otherwise closure is assumed when pressing the X, so if you keep submitting the tab may reappear at end of tab bar.
+		TabItemFlags_SetSelected = 1 << 1,   // Trigger flag to programmatically make the tab selected when calling BeginTabItem()
+		TabItemFlags_NoCloseWithMiddleMouseButton = 1 << 2,   // Disable behavior of closing tabs (that are submitted with p_open != NULL) with middle mouse button. You can still repro this behavior on user's side with if (IsItemHovered() && IsMouseClicked(2)) *p_open = false.
+		TabItemFlags_NoPushId = 1 << 3,   // Don't call PushID(tab->ID)/PopID() on BeginTabItem()/EndTabItem()
+		TabItemFlags_NoTooltip = 1 << 4,   // Disable tooltip for the given tab
+		TabItemFlags_NoReorder = 1 << 5,   // Disable reordering this tab or having another tab cross over this tab
+		TabItemFlags_Leading = 1 << 6,   // Enforce the tab position to the left of the tab bar (after the tab list popup button)
+		TabItemFlags_Trailing = 1 << 7,   // Enforce the tab position to the right of the tab bar (before the scrolling buttons)
+	};
+	ENUM_CLASS_FLAGS(TabItemFlags);
     
 } // namespace CE
 

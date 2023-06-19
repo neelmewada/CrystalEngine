@@ -4,7 +4,7 @@
 #include "EditorWidgets.private.h"
 
 
-namespace CE
+namespace CE::Editor
 {
     class EditorWidgetsModule : public CE::Module
     {
@@ -26,4 +26,4 @@ namespace CE
     };
 }
 
-CE_IMPLEMENT_MODULE(EditorWidgets, CE::EditorWidgetsModule)
+CE_IMPLEMENT_MODULE(EditorWidgets, CE::Editor::EditorWidgetsModule)

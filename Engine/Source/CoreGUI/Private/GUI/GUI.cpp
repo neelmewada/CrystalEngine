@@ -117,6 +117,11 @@ namespace CE::GUI
 		return ImGui::DockSpace(imguiID, ImVec2(size.x, size.y), (ImGuiDockNodeFlags)dockFlags);
 	}
 
+	COREGUI_API ID DockSpace(ID id, Vec2 size, DockFlags dockFlags)
+	{
+		return ImGui::DockSpace(id, ImVec2(size.x, size.y), (ImGuiDockNodeFlags)dockFlags);
+	}
+
 	COREGUI_API void EndWindow()
 	{
 		ImGui::End();
@@ -2358,6 +2363,26 @@ namespace CE::GUI
 		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(), g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
 		return is_open;
     }
+
+	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags)
+	{
+		return ImGui::BeginTabBar(id.GetCString(), flags);
+	}
+
+	COREGUI_API bool BeginTabItem(const String& label, bool* open, TabItemFlags flags)
+	{
+		return ImGui::BeginTabItem(label.GetCString(), open, flags);
+	}
+
+	COREGUI_API void EndTabItem()
+	{
+		ImGui::EndTabItem();
+	}
+
+	COREGUI_API void EndTabBar()
+	{
+		ImGui::EndTabBar();
+	}
 
 #pragma endregion
 

@@ -20,6 +20,8 @@ namespace CE
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) override;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) override;
 
+		virtual void SetResizable(bool resizable) override;
+
         VkSurfaceKHR CreateVulkanSurface(VkInstance instance) override;
 
         u32 GetWindowId() override;
@@ -28,7 +30,7 @@ namespace CE
 
         friend class SDLApplication;
         
-        SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen);
+        SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true);
 
         SDL_Window* handle = nullptr;
 

@@ -15,12 +15,14 @@
 #include "Widgets/CWidget.h"
 #include "Widgets/WidgetManager.h"
 #include "Widgets/CWindow.h"
+#include "Widgets/CDockContainer.h"
 
 // Widgets
 #include "Widgets/CLabel.h"
 #include "Widgets/CButton.h"
 #include "Widgets/CStackLayout.h"
 #include "Widgets/CTableView.h"
+#include "Widgets/CTabView.h"
 #include "Widgets/CCollapsibleSection.h"
 
 // Input Widgets
@@ -77,7 +79,7 @@ namespace CE::Widgets
 		ObjectFlags objectFlags = OF_NoFlags)
 	{
 		TWidget* widget = CreateObject<TWidget>(owner, widgetName, objectFlags, widgetClass);
-		widget->ConstructInternal();
+		widget->Construct();
 		return widget;
 	}
 

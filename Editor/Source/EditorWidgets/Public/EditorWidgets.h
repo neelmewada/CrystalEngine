@@ -4,7 +4,6 @@
 #include "CoreWidgets.h"
 #include "EditorCore.h"
 
-namespace CE
-{
-    
-}
+// Editor Widgets headers
+#include "EditorStyles.h"
+

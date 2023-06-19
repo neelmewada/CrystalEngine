@@ -9,7 +9,7 @@ namespace CE::Widgets
 
 	}
 
-	void CWidget::ConstructInternal()
+	void CWidget::Construct()
 	{
 		style.ApplyStyle(gStyleManager->globalStyle);
 

@@ -44,6 +44,9 @@ namespace CE::Widgets
         
         FIELD()
         b8 isShown = true;
+
+		FIELD()
+		b8 isFullscreen = false;
     };
     
 } // namespace CE::Widgets

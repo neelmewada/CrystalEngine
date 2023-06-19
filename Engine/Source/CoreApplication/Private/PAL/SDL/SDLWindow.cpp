@@ -9,9 +9,11 @@
 namespace CE
 {
 
-	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen)
+	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
 	{
-		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
+		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI;
+		if (resizable)
+			flags |= SDL_WINDOW_RESIZABLE;
 #if PAL_TRAIT_VULKAN_SUPPORTED
 		flags |= SDL_WINDOW_VULKAN;
 #endif
@@ -41,6 +43,11 @@ namespace CE
 #endif
 		*outWidth = (u32)w;
 		*outHeight = (u32)h;
+	}
+
+	void SDLPlatformWindow::SetResizable(bool resizable)
+	{
+		SDL_SetWindowResizable(handle, resizable ? SDL_TRUE : SDL_FALSE);
 	}
 
 	VkSurfaceKHR SDLPlatformWindow::CreateVulkanSurface(VkInstance instance)

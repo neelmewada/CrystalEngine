@@ -237,13 +237,11 @@ function(ce_add_target NAME TARGET_TYPE)
     set(multiValueArgs PRIVATE PUBLIC INTERFACE)
     cmake_parse_arguments(ce_add_target_COMPILE_DEFINITIONS "" "" "${multiValueArgs}" ${ce_add_target_COMPILE_DEFINITIONS})
     
-    if(${TARGET_TYPE_${TARGET_TYPE}_IS_SHAREDLIB})
-        if(${PAL_PLATFORM_IS_WINDOWS})
-            list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE "${NAME_UPPERCASE}_API=__declspec(dllexport)")
-            list(APPEND ce_add_target_COMPILE_DEFINITIONS_INTERFACE  "${NAME_UPPERCASE}_API=__declspec(dllimport)")
-        else()
-            list(APPEND ce_add_target_COMPILE_DEFINITIONS_PUBLIC "${NAME_UPPERCASE}_API=")
-        endif()
+    if((${PAL_PLATFORM_IS_WINDOWS}) EQUAL 1 AND (${TARGET_TYPE_${TARGET_TYPE}_IS_SHAREDLIB}) EQUAL 1)
+        list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE "${NAME_UPPERCASE}_API=__declspec(dllexport)")
+        list(APPEND ce_add_target_COMPILE_DEFINITIONS_INTERFACE  "${NAME_UPPERCASE}_API=__declspec(dllimport)")
+    else()
+        list(APPEND ce_add_target_COMPILE_DEFINITIONS_PUBLIC "${NAME_UPPERCASE}_API=")
     endif()
 
     target_compile_definitions(${NAME} 

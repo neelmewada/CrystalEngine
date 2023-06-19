@@ -76,9 +76,8 @@ namespace CE::Widgets
 		bool IsLeftMouseHeld() const { return isLeftMousePressedInside; }
 
 		CWidget* FindSubWidget(const Name& name);
-
-		// For internal use only!
-		void ConstructInternal();
+		
+		virtual void Construct();
 
 		virtual void UpdateStyle();
 

@@ -165,6 +165,7 @@ namespace CE::Widgets
 		}
 
 		arr.Add(value);
+		isDirty = true;
 	}
 
 	Array<CStyleValue>& CStyle::GetProperties(CStylePropertyType property)
@@ -374,15 +375,34 @@ namespace CE::Widgets
 					GUI::PushStyleColor(GUI::StyleCol_Text, styleValue.color);
 					pushedData.pushedColors += 1;
 				}
-				else if (property == CStylePropertyType::Padding && styleValue.valueType == CStyleValue::Type_Single)
+				else if (property == CStylePropertyType::Padding)
 				{
-					if (styleValue.subControl == CSubControl::Window)
+					if (styleValue.valueType == CStyleValue::Type_Single)
 					{
-						GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.single, styleValue.single));
-						pushedData.pushedVars++;
+						if (styleValue.subControl == CSubControl::Window)
+						{
+							GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.single, styleValue.single));
+							pushedData.pushedVars++;
+						}
+						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame)
+						{
+							GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.single, styleValue.single));
+							pushedData.pushedVars++;
+						}
 					}
-					GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.single, styleValue.single));
-					pushedData.pushedVars++;
+					else if (styleValue.valueType == CStyleValue::Type_Vector)
+					{
+						if (styleValue.subControl == CSubControl::Window)
+						{
+							GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.vector.x, styleValue.vector.y));
+							pushedData.pushedVars++;
+						}
+						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame)
+						{
+							GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.vector.x, styleValue.vector.y));
+							pushedData.pushedVars++;
+						}
+					}
 				}
 				else if (property == CStylePropertyType::BorderWidth && styleValue.valueType == CStyleValue::Type_Single && styleValue.subControl == CSubControl::None)
 				{
@@ -446,6 +466,8 @@ namespace CE::Widgets
 				}
 			}
 		}
+
+		isDirty = true;
 	}
 
 } // namespace CE::Widgets

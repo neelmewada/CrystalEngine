@@ -28,6 +28,8 @@ namespace CE
 
         virtual VkSurfaceKHR CreateVulkanSurface(VkInstance instance) = 0;
 
+		virtual void SetResizable(bool resizable) = 0;
+
         virtual u32 GetWindowId() = 0;
 
     protected:
