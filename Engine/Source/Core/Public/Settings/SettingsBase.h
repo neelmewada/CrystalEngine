@@ -22,6 +22,10 @@ namespace CE
 		return (TSettings*)SettingsBase::LoadSettings(TSettings::Type());
 	}
     
+	FORCE_INLINE void SaveSettings()
+	{
+		SettingsBase::SaveSettings();
+	}
 }
 
 
