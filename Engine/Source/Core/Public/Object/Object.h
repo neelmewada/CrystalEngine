@@ -82,11 +82,6 @@ namespace CE
         {
             return GetType()->GetTypeId();
         }
-        
-        INLINE ThreadId GetCreationThreadId() const
-        {
-            return creationThreadId;
-        }
 
         INLINE ObjectFlags GetFlags() const
         {

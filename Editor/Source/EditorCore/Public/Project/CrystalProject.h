@@ -11,8 +11,9 @@ namespace CE::Editor
 
 		FIELD()
 		String projectName{};
-
-		
+        
+        FIELD()
+        String engineVersion = "0.1.0";
 	};
 
 } // namespace CE::Editor

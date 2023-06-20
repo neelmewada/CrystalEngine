@@ -17,7 +17,7 @@ namespace CE
 				CE_LOG(Error, All, "Failed to create object. Invalid name passed: {}", objectName);
 				return nullptr;
 			}
-			
+            
 			ObjectInitializer init = ObjectInitializer();
 			init.objectFlags = params.objectFlags;
 			init.name = params.name;

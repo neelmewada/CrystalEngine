@@ -12,7 +12,6 @@ namespace CE
 
 		String projectName = "Untitled";
 		String projectVersion = "0.0.1";
-		
 
     };
 }

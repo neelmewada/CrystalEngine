@@ -15,7 +15,10 @@ namespace CE::Editor
 			return instance;
 		}
 
-
+        bool LoadProject(const IO::Path& projectFilePath);
+        
+        bool CreateEmptyProject(const IO::Path& projectFolder, const String& projectName);
+        
 	};
 }
 
