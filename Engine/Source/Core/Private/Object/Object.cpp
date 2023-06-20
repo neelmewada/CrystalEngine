@@ -49,7 +49,6 @@ namespace CE
         ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
         ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
 
-        this->creationThreadId = Thread::GetCurrentThreadId();
         this->objectFlags = initializer->GetObjectFlags();
         if (initializer->uuid != 0)
             this->uuid = initializer->uuid;

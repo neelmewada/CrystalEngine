@@ -34,15 +34,17 @@ namespace CE
         gConfigCache->LoadStartupConfigs();
     
         gTransientPackage = CreateObject<Package>(nullptr, TEXT("/Engine/Transient"), OF_Transient);
-        gSettingsPackage = CreateObject<Package>(nullptr, TEXT("/Settings"));
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }
 
     void CoreModule::ShutdownModule()
     {
-        gSettingsPackage->RequestDestroy();
-        gSettingsPackage = nullptr;
+		if (gSettingsPackage != nullptr)
+		{
+			gSettingsPackage->RequestDestroy();
+			gSettingsPackage = nullptr;
+		}
         
         gTransientPackage->RequestDestroy();
         gTransientPackage = nullptr;

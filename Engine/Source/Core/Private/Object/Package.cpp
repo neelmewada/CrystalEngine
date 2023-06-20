@@ -16,7 +16,7 @@ namespace CE
         loadedPackages.Remove(packageName);
 	}
 
-	IO::Path Package::GetPackagePath(const Name& packageName)
+	IO::Path Package::GetPackagePath(const PackagePath& packageName)
 	{
 		if (!packageName.IsValid())
 			return {};
@@ -28,13 +28,13 @@ namespace CE
 		}
 		else if (packageNameStr.StartsWith("/Game"))
 		{
-			return PlatformDirectories::GetGameDir().GetParentPath();
+			return PlatformDirectories::GetGameDir().GetParentPath() / packageNameStr.GetSubstring(1);
 		}
 
 		return PlatformDirectories::GetAppRootDir() / packageNameStr.GetSubstring(1);
 	}
 
-	Package* Package::LoadPackage(Package* outer, Name packageName, LoadFlags loadFlags)
+	Package* Package::LoadPackage(Package* outer, const PackagePath& packageName, LoadFlags loadFlags)
 	{
 		return LoadPackage(outer, GetPackagePath(packageName), loadFlags);
 	}
@@ -84,12 +84,21 @@ namespace CE
 		}
 
 		IO::Path packagePath = GetPackagePath(package->GetPackageName());
+		if (packagePath.GetExtension().IsEmpty())
+		{
+			packagePath = packagePath.GetString() + ".casset";
+		}
 
 		return SavePackage(package, asset, packagePath, saveArgs);
 	}
 
 	SavePackageResult Package::SavePackage(Package* package, Object* asset, const IO::Path& fullPackagePath, const SavePackageArgs& saveArgs)
 	{
+		auto path = fullPackagePath;
+		if (path.GetExtension().IsEmpty())
+		{
+			path = path.GetString() + ".casset";
+		}
 		if (package == nullptr)
 		{
 			CE_LOG(Error, All, "SavePackage() passed with NULL package!");
@@ -100,7 +109,7 @@ namespace CE
 			CE_LOG(Error, All, "SavePackage() passed with a transient package named: {}", package->GetPackageName());
 			return SavePackageResult::InvalidPackage;
 		}
-		if (fullPackagePath.IsDirectory())
+		if (path.IsDirectory())
 		{
 			CE_LOG(Error, All, "SavePackage() passed with a package path that is a directory!");
 			return SavePackageResult::InvalidPath;
@@ -111,9 +120,9 @@ namespace CE
 			return SavePackageResult::AssetNotInPackage;
 		}
         
-        package->fullPackagePath = fullPackagePath;
+        package->fullPackagePath = path;
 
-		FileStream stream = FileStream(fullPackagePath, Stream::Permissions::ReadWrite);
+		FileStream stream = FileStream(path, Stream::Permissions::ReadWrite);
 		
 		return SavePackage(package, asset, &stream, saveArgs);
 	}

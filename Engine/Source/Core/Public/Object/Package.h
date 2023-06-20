@@ -32,6 +32,8 @@ namespace CE
 
 	};
 
+	typedef Name PackagePath;
+
 	class CORE_API Package : public Object
 	{
 		CE_CLASS(Package, CE::Object)
@@ -41,18 +43,18 @@ namespace CE
 
 		// - Static API -
 
-		static IO::Path GetPackagePath(const Name& packageName);
+		static IO::Path GetPackagePath(const PackagePath& packageName);
 
-		static Package* LoadPackage(Package* outer, Name packageName, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackage(Package* outer, const PackagePath& packageName, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
         
         // Always prefer using paths than streams
 		static Package* LoadPackage(Package* outer, Stream* inStream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
 
-		static SavePackageResult SavePackage(Package* package, Object* asset, const SavePackageArgs& saveArgs);
-		static SavePackageResult SavePackage(Package* package, Object* asset, const IO::Path& fullPackageFilePath, const SavePackageArgs& saveArgs);
-		static SavePackageResult SavePackage(Package* package, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs);
+		static SavePackageResult SavePackage(Package* package, Object* asset, const SavePackageArgs& saveArgs = {});
+		static SavePackageResult SavePackage(Package* package, Object* asset, const IO::Path& fullPackageFilePath, const SavePackageArgs& saveArgs = {});
+		static SavePackageResult SavePackage(Package* package, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs = {});
 
 		// - Public API -
 
@@ -93,6 +95,7 @@ namespace CE
         void LoadFully(Stream* originalStream);
         
         Object* LoadObject(UUID objectUuid);
+		Object* LoadObject(const Name& objectClassName);
 
 		// Returns true if this package contains the given object. Note that the object has to be fully loaded.
 		bool ContainsObject(Object* object);

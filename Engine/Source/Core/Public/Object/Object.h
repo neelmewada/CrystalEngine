@@ -276,9 +276,6 @@ namespace CE
 		ObjectMap attachedObjects{};
         
         Object* outer = nullptr;
-        
-        ThreadId creationThreadId{};
-        //Mutex mutex{};
 
 		static HashMap<void*, Array<SignalBinding>> outgoingBindingsMap;
 		static HashMap<void*, Array<SignalBinding>> incomingBindingsMap;

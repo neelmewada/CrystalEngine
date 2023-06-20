@@ -66,8 +66,19 @@ namespace CE
 		return gTransientPackage;
 	}
 
+	static Package* LoadSettingsPackage()
+	{
+		return Package::LoadPackage(nullptr, PackagePath("/Game/Settings"));
+	}
+
     CORE_API Package* GetSettingsPackage()
     {
+		if (gSettingsPackage == nullptr)
+			gSettingsPackage = LoadSettingsPackage();
+
+		if (gSettingsPackage == nullptr)
+			gSettingsPackage = CreateObject<Package>(nullptr, TEXT("/Game/Settings"));
+
         return gSettingsPackage;
     }
 

@@ -2,6 +2,7 @@
 
 namespace CE
 {
+
     class CORE_API SettingsBase : public Object
     {
         CE_CLASS(SettingsBase, Object)
@@ -9,11 +10,17 @@ namespace CE
         
         SettingsBase() = default;
         
-        SettingsBase* LoadSettings(ClassType* settingsClass, String settingsName = "");
+        static SettingsBase* LoadSettings(ClassType* settingsClass, String settingsName = "");
+
+		static void SaveSettings();
         
     };
 
-    
+	template<typename TSettings> requires TIsBaseClassOf<SettingsBase, TSettings>::Value
+	TSettings* GetSettings()
+	{
+		return (TSettings*)SettingsBase::LoadSettings(TSettings::Type());
+	}
     
 }
 

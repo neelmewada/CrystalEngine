@@ -184,24 +184,29 @@ namespace CE
 		String packageName = "";
 		*stream >> packageName;
 
+		Package* package = nullptr;
+
 		if (loadedPackages.KeyExists(packageName))
 		{
-			outResult = LoadPackageResult::Success;
-			return loadedPackages[packageName];
+			package = loadedPackages[packageName];
+			//outResult = LoadPackageResult::Success;
+			//return loadedPackages[packageName];
 		}
+		else
+		{
+			Internal::ConstructObjectParams params{ Package::Type() };
+			params.name = packageName;
+			params.uuid = packageUuid;
+			params.templateObject = nullptr;
+			params.objectFlags = OF_NoFlags;
+			params.outer = nullptr;
 
-		Internal::ConstructObjectParams params{ Package::Type() };
-		params.name = packageName;
-		params.uuid = packageUuid;
-		params.templateObject = nullptr;
-		params.objectFlags = OF_NoFlags;
-		params.outer = nullptr;
-
-		Package* package = (Package*)Internal::StaticConstructObject(params);
-		//package->loadedSubobjects[packageUuid] = package;
-		package->fullPackagePath = fullPackagePath;
-		package->isFullyLoaded = false;
-		package->objectUuidToEntryMap.Clear();
+			package = (Package*)Internal::StaticConstructObject(params);
+			//package->loadedSubobjects[packageUuid] = package;
+			package->fullPackagePath = fullPackagePath;
+			package->isFullyLoaded = false;
+			package->objectUuidToEntryMap.Clear();
+		}
 
 		stream->Seek(dataStartOffset);
 
@@ -309,6 +314,21 @@ namespace CE
         fileStream.SetBinaryMode(true);
         return LoadObjectFromEntry(&fileStream, objectUuid);
     }
+
+	Object* Package::LoadObject(const Name& objectClassName)
+	{
+		for (const auto& [uuid, entry] : objectUuidToEntryMap)
+		{
+			if (entry.objectClassName == objectClassName)
+			{
+				FileStream fileStream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
+				fileStream.SetBinaryMode(true);
+				return LoadObjectFromEntry(&fileStream, uuid);
+			}
+		}
+
+		return nullptr;
+	}
 
     Object* Package::LoadObjectFromEntry(Stream* stream, UUID objectUuid)
     {
