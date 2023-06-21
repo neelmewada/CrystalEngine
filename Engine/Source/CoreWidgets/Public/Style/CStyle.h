@@ -67,6 +67,7 @@ namespace CE::Widgets
 		MinHeight,
 		MaxWidth,
 		MaxHeight,
+		Spacing,
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyType);
 

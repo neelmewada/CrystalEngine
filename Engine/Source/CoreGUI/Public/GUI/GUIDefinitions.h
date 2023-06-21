@@ -686,6 +686,18 @@ namespace CE::GUI
 		TabItemFlags_Trailing = 1 << 7,   // Enforce the tab position to the right of the tab bar (before the scrolling buttons)
 	};
 	ENUM_CLASS_FLAGS(TabItemFlags);
+
+	enum SelectableFlags
+	{
+		SelectableFlags_None = 0,
+		SelectableFlags_DontClosePopups = 1 << 0,   // Clicking this doesn't close parent popup window
+		SelectableFlags_SpanAllColumns = 1 << 1,   // Selectable frame can span all columns (text will still fit in current column)
+		SelectableFlags_AllowDoubleClick = 1 << 2,   // Generate press events on double clicks too
+		SelectableFlags_Disabled = 1 << 3,   // Cannot be selected, display grayed out text
+		SelectableFlags_AllowItemOverlap = 1 << 4,   // (WIP) Hit testing to allow subsequent widgets to overlap this one
+	};
+	ENUM_CLASS_FLAGS(SelectableFlags);
+
     
 } // namespace CE
 

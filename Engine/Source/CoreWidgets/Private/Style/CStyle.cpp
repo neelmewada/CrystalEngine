@@ -422,9 +422,22 @@ namespace CE::Widgets
 						pushedData.pushedVars++;
 					}
 				}
+				else if (property == CStylePropertyType::Spacing)
+				{
+					if (styleValue.valueType == CStyleValue::Type_Single)
+					{
+						GUI::PushStyleVar(GUI::StyleVar_ItemSpacing, Vec2(styleValue.single, styleValue.single));
+						pushedData.pushedVars++;
+					}
+					else if (styleValue.valueType == CStyleValue::Type_Vector)
+					{
+						GUI::PushStyleVar(GUI::StyleVar_ItemSpacing, Vec2(styleValue.vector.x, styleValue.vector.y));
+						pushedData.pushedVars++;
+					}
+				}
 			}
 		}
-
+		
 		pushedStack.Push(pushedData);
 	}
 

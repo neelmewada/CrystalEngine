@@ -24,6 +24,8 @@
 #include "Widgets/CTableView.h"
 #include "Widgets/CTabView.h"
 #include "Widgets/CCollapsibleSection.h"
+#include "Widgets/CGridLayout.h"
+#include "Widgets/CSelectableWidget.h"
 
 // Input Widgets
 #include "Widgets/Input/CCheckbox.h"

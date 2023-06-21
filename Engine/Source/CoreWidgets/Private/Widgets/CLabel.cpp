@@ -173,7 +173,9 @@ namespace CE::Widgets
 				}
             }
             
+			auto cursorPos = GUI::GetCursorPos();
             GUI::Text(text);
+			cursorPos = GUI::GetCursorPos();
 			PollEvents();
         }
 

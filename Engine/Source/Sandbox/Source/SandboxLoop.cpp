@@ -465,6 +465,14 @@ void SandboxLoop::SetupGUI()
 		{
 			CE_LOG(Info, All, "CIntInput changed: {}", newValue);
 		});
+
+	CGridLayout* gridLayout = CreateWidget<CGridLayout>(window, "GridView");
+
+	for (int i = 0; i < 32; i++)
+	{
+		CButton* gridBtn = CreateWidget<CButton>(gridLayout, "GridButton");
+		gridBtn->SetText(String::Format("Label: {}", i));
+	}
 }
 
 void SandboxLoop::RunLoop()

@@ -26,6 +26,8 @@ namespace CE::Editor
             return false;
         if (!projectFolder.Exists())
             IO::Path::CreateDirectories(projectFolder);
+		if (!projectName.EndsWith(".cproj"))
+			projectName;
         
         CrystalProject project{};
         project.projectName = projectName;
@@ -40,7 +42,20 @@ namespace CE::Editor
         {
             serializer.WriteNext(&stream);
         }
-        
+
+		if (!(projectFolder / "Game").Exists())
+		{
+			IO::Path::CreateDirectories(projectFolder / "Game");
+		}
+		if (!(projectFolder / "Config").Exists())
+		{
+			IO::Path::CreateDirectories(projectFolder / "Config");
+		}
+		if (!(projectFolder / "Logs").Exists())
+		{
+			IO::Path::CreateDirectories(projectFolder / "Logs");
+		}
+		
         return true;
     }
 }

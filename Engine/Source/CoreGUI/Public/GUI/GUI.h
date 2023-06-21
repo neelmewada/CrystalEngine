@@ -81,6 +81,8 @@ namespace CE::GUI
 		const Vec4& padding = {}, const Vec2& size = Vec2(0, 0), const Vec4& rounding = {},
 		TextAlign textAlign = TextAlign_Inherited, Vec2 minSize = {}, Vec2 maxSize = {}, ButtonFlags flags = ButtonFlags::None);
 
+	COREGUI_API bool SelectableEx(ID id, bool selected, SelectableFlags flags, const Vec2& size = {});
+
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 
 	COREGUI_API bool Checkbox(const String& label, bool* value);
