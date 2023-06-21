@@ -384,7 +384,8 @@ namespace CE::Widgets
 							GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.single, styleValue.single));
 							pushedData.pushedVars++;
 						}
-						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame)
+						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame ||
+                                 styleValue.subControl == CSubControl::None)
 						{
 							GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.single, styleValue.single));
 							pushedData.pushedVars++;
@@ -397,7 +398,8 @@ namespace CE::Widgets
 							GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.vector.x, styleValue.vector.y));
 							pushedData.pushedVars++;
 						}
-						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame)
+						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame ||
+                                 styleValue.subControl == CSubControl::None)
 						{
 							GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.vector.x, styleValue.vector.y));
 							pushedData.pushedVars++;

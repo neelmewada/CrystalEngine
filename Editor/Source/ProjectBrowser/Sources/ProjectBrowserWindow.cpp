@@ -11,14 +11,14 @@ void ProjectBrowserWindow::Construct()
 
 	createContent = CreateWidget<CStackLayout>(tabView, "CreateProjectContent");
 	createContent->SetDirection(CStackDirection::Vertical);
-	createContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 10));
 
-	auto label1 = CreateWidget<CLabel>(createContent, "Label1");
-	label1->SetText("This is the first tab. And this is a long label");
+	//auto label1 = CreateWidget<CLabel>(createContent, "Label1");
+	//label1->SetText("This is the first tab. And this is a long label");
+    auto btn1 = CreateWidget<CButton>(createContent, "Button1");
+    btn1->SetText("Button Title");
 
 	openContent = CreateWidget<CStackLayout>(tabView, "OpenProjectContent");
 	openContent->SetDirection(CStackDirection::Vertical);
-	openContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 10));
 
 	auto label2 = CreateWidget<CLabel>(openContent, "Label2");
 	label2->SetText("This is the second tab.");

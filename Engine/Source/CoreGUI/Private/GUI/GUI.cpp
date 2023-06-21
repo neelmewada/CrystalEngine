@@ -434,11 +434,11 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
 
-		Vec2 size = sizeVec;
+		//Vec2 size = sizeVec;
 
 		// Submit label or explicit size to ItemSize(), whereas ItemAdd() will submit a larger/spanning rectangle.
 		ImVec2 label_size = ImGui::CalcTextSize("", NULL, true);
-		ImVec2 size(size.x != 0.0f ? size.x : label_size.x, size.y != 0.0f ? size.y : label_size.y);
+		ImVec2 size(sizeVec.x != 0.0f ? sizeVec.x : label_size.x, sizeVec.y != 0.0f ? sizeVec.y : label_size.y);
 		ImVec2 pos = window->DC.CursorPos;
 		pos.y += window->DC.CurrLineTextBaseOffset;
 		ImGui::ItemSize(ImVec2(size.x, size.y), 0.0f);
