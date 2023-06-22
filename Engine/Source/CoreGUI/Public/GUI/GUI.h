@@ -146,7 +146,7 @@ namespace CE::GUI
 	COREGUI_API void SameLine(f32 offsetFromStart = 0, f32 spacing = -1.0f);
 
 	COREGUI_API void BeginGroup();
-	COREGUI_API void EndGroup();
+	COREGUI_API void EndGroup(const Vec4& padding = {});
 
     COREGUI_API Vec2 CalculateTextSize(const char* text);
     COREGUI_API Vec2 CalculateTextSize(const String& text);

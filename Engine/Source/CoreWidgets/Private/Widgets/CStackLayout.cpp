@@ -25,9 +25,22 @@ namespace CE::Widgets
 
 	void CStackLayout::OnDrawGUI()
 	{
-		style.Push();
+		Vec4 padding{};
+
+		for (auto& [property, array] : style.styleMap)
+		{
+			for (auto& styleValue : array)
+			{
+				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default)
+				{
+					padding = styleValue.vector;
+				}
+			}
+		}
+
+		GUI::SetCursorPos(GUI::GetCursorPos() + Vec2(padding.left, padding.top));
+
 		GUI::BeginGroup();
-		style.Pop();
 
 		style.Push(CStylePropertyTypeFlags::Inherited);
 		{
@@ -42,7 +55,9 @@ namespace CE::Widgets
 		}
 		style.Pop();
 
-		GUI::EndGroup();
+		style.Push();
+		GUI::EndGroup(padding);
+		style.Pop();
 
 		PollEvents();
 	}

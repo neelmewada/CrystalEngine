@@ -18,6 +18,8 @@ namespace CE::Widgets
 
 		void HandleEvent(CEvent* event) override;
 
+		FIELD()
+		b8 isSelected = false;
 	};
     
 } // namespace CE::Widgets

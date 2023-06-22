@@ -34,7 +34,7 @@ namespace CE::Editor
 		gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.51f), CStateFlag::Collapsed, CSubControl::TitleBar);
 		gStyleManager->globalStyle.AddProperty(CStylePropertyType::ForegroundColor, Color::White());
 
-		gStyleManager->globalStyle.AddProperty(CStylePropertyType::Padding, Vec4(10, 5), CStateFlag::Default, CSubControl::Tab);
+		gStyleManager->globalStyle.AddProperty(CStylePropertyType::Padding, Vec4(10, 5, 10, 5), CStateFlag::Default, CSubControl::Tab);
 
 		auto& buttonSelector = gStyleManager->AddStyleGroup("CButton");
 		buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.25f, 0.25f, 0.25f, 1.00f), CStateFlag::Default);

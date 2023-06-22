@@ -14,8 +14,6 @@ namespace CE::Widgets
 
 	void CSelectableWidget::OnDrawGUI()
 	{
-		style.Push();
-
 		Vec4 padding{};
 		Vec4 borderRadius{};
 		Vec2 preferredSize = {};
@@ -98,9 +96,45 @@ namespace CE::Widgets
 			}
 		}
 
+		style.Push(CStylePropertyTypeFlags::Inherited);
+		
+		auto cursorPos = GUI::GetCursorPos();
 
+		Vec2 childSize{};
+		if (attachedWidgets.NonEmpty())
+		{
+			childSize = GUI::GetItemRectSize();
+			if (childSize.x <= 0 || childSize.y <= 0)
+			{
+				childSize = attachedWidgets[0]->CalculateEstimateSize();
+			}
+		}
 
+		if (minSize.x > 0 && preferredSize.x > minSize.x)
+			preferredSize.x = minSize.x;
+		if (minSize.y > 0 && preferredSize.y > minSize.y)
+			preferredSize.y = minSize.y;
+		if (maxSize.x > 0 && preferredSize.x < maxSize.x)
+			preferredSize.x = maxSize.x;
+		if (maxSize.y > 0 && preferredSize.y < maxSize.y)
+			preferredSize.y = maxSize.y;
+		
 		style.Pop();
+
+		style.Push();
+		if (GUI::SelectableEx(GetUuid(), isSelected, GUI::SelectableFlags_AllowItemOverlap))
+		{
+			isSelected = true;
+		}
+		style.Pop();
+		PollEvents();
+
+		GUI::SetCursorPos(cursorPos);
+
+		if (attachedWidgets.NonEmpty())
+		{
+			attachedWidgets[0]->RenderGUI();
+		}
 	}
 
 	void CSelectableWidget::HandleEvent(CEvent* event)

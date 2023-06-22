@@ -15,9 +15,7 @@ namespace CE::Widgets
 
 	void CGridLayout::OnDrawGUI()
 	{
-		style.Push();
 		GUI::BeginGroup();
-		style.Pop();
 		Vec2 prevSize{};
 
 		style.Push(CStylePropertyTypeFlags::Inherited);
@@ -43,7 +41,9 @@ namespace CE::Widgets
 		}
 		style.Pop();
 
+		style.Push();
 		GUI::EndGroup();
+		style.Pop();
 
 		PollEvents();
 	}

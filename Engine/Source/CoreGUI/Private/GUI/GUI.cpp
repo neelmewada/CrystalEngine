@@ -2591,9 +2591,67 @@ namespace CE::GUI
 		ImGui::BeginGroup();
 	}
 
-	COREGUI_API void EndGroup()
+	COREGUI_API void EndGroup(const Vec4& padding)
 	{
-		ImGui::EndGroup();
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		IM_ASSERT(g.GroupStack.Size > 0); // Mismatched BeginGroup()/EndGroup() calls
+
+		ImGuiGroupData& group_data = g.GroupStack.back();
+		IM_ASSERT(group_data.WindowID == window->ID); // EndGroup() in wrong window?
+
+		if (window->DC.IsSetPos)
+			ImGui::ErrorCheckUsingSetCursorPosToExtendParentBoundaries();
+
+		ImRect group_bb(group_data.BackupCursorPos, 
+			ImMax(window->DC.CursorMaxPos, group_data.BackupCursorPos) - ImVec2(padding.right, padding.bottom));
+
+		window->DC.CursorPos = group_data.BackupCursorPos ;
+		window->DC.CursorMaxPos = ImMax(group_data.BackupCursorMaxPos, window->DC.CursorMaxPos);
+		window->DC.Indent = group_data.BackupIndent;
+		window->DC.GroupOffset = group_data.BackupGroupOffset;
+		window->DC.CurrLineSize = group_data.BackupCurrLineSize;
+		window->DC.CurrLineTextBaseOffset = group_data.BackupCurrLineTextBaseOffset;
+		if (g.LogEnabled)
+			g.LogLinePosY = -FLT_MAX; // To enforce a carriage return
+
+		if (!group_data.EmitItem)
+		{
+			g.GroupStack.pop_back();
+			return;
+		}
+
+		window->DC.CurrLineTextBaseOffset = ImMax(window->DC.PrevLineTextBaseOffset, group_data.BackupCurrLineTextBaseOffset);      // FIXME: Incorrect, we should grab the base offset from the *first line* of the group but it is hard to obtain now.
+		ImGui::ItemSize(group_bb.GetSize());
+		ImGui::ItemAdd(group_bb, 0, NULL, ImGuiItemFlags_NoTabStop);
+
+		// If the current ActiveId was declared within the boundary of our group, we copy it to LastItemId so IsItemActive(), IsItemDeactivated() etc. will be functional on the entire group.
+		// It would be neater if we replaced window.DC.LastItemId by e.g. 'bool LastItemIsActive', but would put a little more burden on individual widgets.
+		// Also if you grep for LastItemId you'll notice it is only used in that context.
+		// (The two tests not the same because ActiveIdIsAlive is an ID itself, in order to be able to handle ActiveId being overwritten during the frame.)
+		const bool group_contains_curr_active_id = (group_data.BackupActiveIdIsAlive != g.ActiveId) && (g.ActiveIdIsAlive == g.ActiveId) && g.ActiveId;
+		const bool group_contains_prev_active_id = (group_data.BackupActiveIdPreviousFrameIsAlive == false) && (g.ActiveIdPreviousFrameIsAlive == true);
+		if (group_contains_curr_active_id)
+			g.LastItemData.ID = g.ActiveId;
+		else if (group_contains_prev_active_id)
+			g.LastItemData.ID = g.ActiveIdPreviousFrame;
+		g.LastItemData.Rect = group_bb;
+
+		// Forward Hovered flag
+		const bool group_contains_curr_hovered_id = (group_data.BackupHoveredIdIsAlive == false) && g.HoveredId != 0;
+		if (group_contains_curr_hovered_id)
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HoveredWindow;
+
+		// Forward Edited flag
+		if (group_contains_curr_active_id && g.ActiveIdHasBeenEditedThisFrame)
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_Edited;
+
+		// Forward Deactivated flag
+		g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HasDeactivated;
+		if (group_contains_prev_active_id && g.ActiveId != g.ActiveIdPreviousFrame)
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_Deactivated;
+
+		g.GroupStack.pop_back();
 	}
 
     COREGUI_API Vec2 CalculateTextSize(const char* text)
