@@ -32,6 +32,8 @@ namespace CE::Widgets
 
 	private:
 
+		String id = "";
+
 		FIELD()
 		CStackDirection direction{};
 	};

@@ -41,7 +41,7 @@ namespace CE::GUI
     COREGUI_API void EndMenu();
 
 	COREGUI_API bool BeginChild(const String& name, ID id, const Vec2& size = {}, f32 borderThickness = 0, 
-		const Vec2& minSize = {}, const Vec2& maxSize = {}, WindowFlags flags = WF_None);
+		const Vec2& minSize = {}, const Vec2& maxSize = {}, const Vec4& padding = {}, WindowFlags flags = WF_None);
 
 	COREGUI_API void EndChild();
 

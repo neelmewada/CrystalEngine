@@ -31,16 +31,16 @@ namespace CE::Widgets
 		{
 			for (auto& styleValue : array)
 			{
-				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default)
+				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default && styleValue.subControl == CSubControl::None)
 				{
 					padding = styleValue.vector;
 				}
 			}
 		}
 
-		GUI::SetCursorPos(GUI::GetCursorPos() + Vec2(padding.left, padding.top));
-
-		GUI::BeginGroup();
+		style.Push();
+		GUI::BeginChild("", GetUuid(), {}, 0.0f, {}, {}, padding, GUI::WF_NoMove);
+		style.Pop();
 
 		style.Push(CStylePropertyTypeFlags::Inherited);
 		{
@@ -56,7 +56,7 @@ namespace CE::Widgets
 		style.Pop();
 
 		style.Push();
-		GUI::EndGroup(padding);
+		GUI::EndChild();
 		style.Pop();
 
 		PollEvents();

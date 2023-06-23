@@ -160,10 +160,12 @@ namespace CE::GUI
 	}
 
 	COREGUI_API bool BeginChild(const String& name, ID id, const Vec2& sizeArg, f32 borderThickness,
-		const Vec2& minSize, const Vec2& maxSize, WindowFlags flags)
+		const Vec2& minSize, const Vec2& maxSize, const Vec4& padding, WindowFlags flags)
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* parent_window = g.CurrentWindow;
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(padding.left, padding.right));
 
 		flags |= WF_NoTitleBar | WF_NoResize | WF_NoSavedSettings | WF_ChildWindow | WF_NoDocking;
 		flags |= ((WindowFlags)parent_window->Flags & WF_NoMove);  // Inherit the NoMove flag
@@ -180,6 +182,7 @@ namespace CE::GUI
 			size.x = minSize.x;
 
 		ImGui::SetNextWindowSize(size);
+		ImGui::SetNextWindowContentSize(size - ImVec2(padding.left + padding.right, padding.top + padding.bottom));
 
 		// Build up name. If you need to append to a same child from multiple location in the ID stack, use BeginChild(ImGuiID id) with a stable value.
 		const char* temp_window_name;
@@ -196,12 +199,14 @@ namespace CE::GUI
 		ImGuiWindow* child_window = g.CurrentWindow;
 		child_window->ChildId = id;
 		child_window->AutoFitChildAxises = (ImS8)auto_fit_axises;
+		child_window->DC.CursorStartPos += ImVec2(padding.left, padding.top);
+		child_window->DC.CursorPos += ImVec2(padding.left, padding.top);
 
 		// Set the cursor to handle case where the user called SetNextWindowPos()+BeginChild() manually.
 		// While this is not really documented/defined, it seems that the expected thing to do.
 		if (child_window->BeginCount == 1)
-			parent_window->DC.CursorPos = child_window->Pos;
-
+			parent_window->DC.CursorPos = child_window->Pos + ImVec2(padding.left, padding.top);
+		
 		// Process navigation-in immediately so NavInit can run on first frame
 		// Can enter a child if (A) it has navigatable items or (B) it can be scrolled.
 		if (g.NavActivateId == id && !(flags & WF_NavFlattened) && (child_window->DC.NavLayersActiveMask != 0 || child_window->DC.NavWindowHasScrollY))
@@ -211,12 +216,15 @@ namespace CE::GUI
 			ImGui::SetActiveID(id + 1, child_window); // Steal ActiveId with another arbitrary id so that key-press won't activate child item
 			g.ActiveIdSource = g.NavInputSource;
 		}
+
 		return ret;
 	}
 
 	COREGUI_API void EndChild()
 	{
 		ImGui::EndChild();
+
+		ImGui::PopStyleVar(1);
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -2588,7 +2596,29 @@ namespace CE::GUI
 
 	COREGUI_API void BeginGroup()
 	{
-		ImGui::BeginGroup();
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+
+		g.GroupStack.resize(g.GroupStack.Size + 1);
+		ImGuiGroupData& group_data = g.GroupStack.back();
+		group_data.WindowID = window->ID;
+		group_data.BackupCursorPos = window->DC.CursorPos;
+		group_data.BackupCursorMaxPos = window->DC.CursorMaxPos;
+		group_data.BackupIndent = window->DC.Indent;
+		group_data.BackupGroupOffset = window->DC.GroupOffset;
+		group_data.BackupCurrLineSize = window->DC.CurrLineSize;
+		group_data.BackupCurrLineTextBaseOffset = window->DC.CurrLineTextBaseOffset;
+		group_data.BackupActiveIdIsAlive = g.ActiveIdIsAlive;
+		group_data.BackupHoveredIdIsAlive = g.HoveredId != 0;
+		group_data.BackupActiveIdPreviousFrameIsAlive = g.ActiveIdPreviousFrameIsAlive;
+		group_data.EmitItem = true;
+
+		window->DC.GroupOffset.x = window->DC.CursorPos.x - window->Pos.x - window->DC.ColumnsOffset.x;
+		window->DC.Indent = window->DC.GroupOffset;
+		window->DC.CursorMaxPos = window->DC.CursorPos;
+		window->DC.CurrLineSize = ImVec2(0.0f, 0.0f);
+		if (g.LogEnabled)
+			g.LogLinePosY = -FLT_MAX; // To enforce a carriage return
 	}
 
 	COREGUI_API void EndGroup(const Vec4& padding)
