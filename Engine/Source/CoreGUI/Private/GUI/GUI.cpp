@@ -18,6 +18,8 @@ namespace CE::GUI
 {
 	using namespace ImStb;
 
+	COREGUI_API Array<Vec4> gPaddingStack{};
+
 	COREGUI_API ID GetID(const char* strId)
 	{
 		return ImGui::GetID(strId);
@@ -193,19 +195,19 @@ namespace CE::GUI
 
 		const float backup_border_size = g.Style.ChildBorderSize;
 		g.Style.ChildBorderSize = borderThickness;
+
 		bool ret = ImGui::Begin(temp_window_name, NULL, flags);
+		
 		g.Style.ChildBorderSize = backup_border_size;
 
 		ImGuiWindow* child_window = g.CurrentWindow;
 		child_window->ChildId = id;
 		child_window->AutoFitChildAxises = (ImS8)auto_fit_axises;
-		child_window->DC.CursorStartPos += ImVec2(padding.left, padding.top);
-		child_window->DC.CursorPos += ImVec2(padding.left, padding.top);
 
 		// Set the cursor to handle case where the user called SetNextWindowPos()+BeginChild() manually.
 		// While this is not really documented/defined, it seems that the expected thing to do.
 		if (child_window->BeginCount == 1)
-			parent_window->DC.CursorPos = child_window->Pos + ImVec2(padding.left, padding.top);
+			parent_window->DC.CursorPos = child_window->Pos;
 		
 		// Process navigation-in immediately so NavInit can run on first frame
 		// Can enter a child if (A) it has navigatable items or (B) it can be scrolled.
@@ -441,6 +443,10 @@ namespace CE::GUI
 
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
+
+		Vec4 padding{};
+		if (gPaddingStack.NonEmpty())
+			padding = gPaddingStack.Top();
 
 		//Vec2 size = sizeVec;
 

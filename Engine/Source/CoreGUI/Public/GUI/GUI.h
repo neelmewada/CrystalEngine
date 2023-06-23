@@ -45,6 +45,8 @@ namespace CE::GUI
 
 	COREGUI_API void EndChild();
 
+	extern COREGUI_API Array<Vec4> gPaddingStack;
+
 #pragma region Style
 
     COREGUI_API bool IsStyleVarOfVectorType(StyleVar var);
