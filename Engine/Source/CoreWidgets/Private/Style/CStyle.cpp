@@ -269,9 +269,10 @@ namespace CE::Widgets
 						}
 						else
 						{
+							GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
 							GUI::PushStyleColor(GUI::StyleCol_ChildBg, styleValue.color);
 							GUI::PushStyleColor(GUI::StyleCol_Button, styleValue.color);
-							pushedData.pushedColors += 2;
+							pushedData.pushedColors += 3;
 						}
 					}
 					else if ((styleValue.state & CStateFlag::Hovered) != 0)
@@ -293,8 +294,9 @@ namespace CE::Widgets
 						}
 						else
 						{
+							GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
 							GUI::PushStyleColor(GUI::StyleCol_ButtonHovered, styleValue.color);
-							pushedData.pushedColors++;
+							pushedData.pushedColors += 2;
 						}
 					}
 					else if ((styleValue.state & CStateFlag::Pressed) != 0)
@@ -316,8 +318,9 @@ namespace CE::Widgets
 						}
 						else
 						{
+							GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
 							GUI::PushStyleColor(GUI::StyleCol_ButtonActive, styleValue.color);
-							pushedData.pushedColors += 1;
+							pushedData.pushedColors += 2;
 						}
 					}
 
@@ -351,6 +354,11 @@ namespace CE::Widgets
 						else if (styleValue.subControl == CSubControl::Frame)
 						{
 							GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
+							pushedData.pushedColors++;
+						}
+						else
+						{
+							GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
 							pushedData.pushedColors++;
 						}
 					}

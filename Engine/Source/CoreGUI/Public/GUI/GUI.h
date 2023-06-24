@@ -41,11 +41,11 @@ namespace CE::GUI
     COREGUI_API void EndMenu();
 
 	COREGUI_API bool BeginChild(const String& name, ID id, const Vec2& size = {}, f32 borderThickness = 0, 
-		const Vec2& minSize = {}, const Vec2& maxSize = {}, const Vec4& padding = {}, WindowFlags flags = WF_None);
+		const Vec2& minSize = {}, const Vec2& maxSize = {}, const Vec4& padding = {}, const Color& background = {}, WindowFlags flags = WF_None);
 
 	COREGUI_API void EndChild();
 
-	extern COREGUI_API Array<Vec4> gPaddingStack;
+	extern COREGUI_API Array<f32> gPaddingXStack;
 
 #pragma region Style
 

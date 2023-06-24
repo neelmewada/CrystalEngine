@@ -18,7 +18,7 @@ namespace CE::GUI
 {
 	using namespace ImStb;
 
-	COREGUI_API Array<Vec4> gPaddingStack{};
+	COREGUI_API Array<f32> gPaddingXStack{};
 
 	COREGUI_API ID GetID(const char* strId)
 	{
@@ -162,12 +162,10 @@ namespace CE::GUI
 	}
 
 	COREGUI_API bool BeginChild(const String& name, ID id, const Vec2& sizeArg, f32 borderThickness,
-		const Vec2& minSize, const Vec2& maxSize, const Vec4& padding, WindowFlags flags)
+		const Vec2& minSize, const Vec2& maxSize, const Vec4& padding, const Color& background, WindowFlags flags)
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* parent_window = g.CurrentWindow;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(padding.left, padding.right));
 
 		flags |= WF_NoTitleBar | WF_NoResize | WF_NoSavedSettings | WF_ChildWindow | WF_NoDocking;
 		flags |= ((WindowFlags)parent_window->Flags & WF_NoMove);  // Inherit the NoMove flag
@@ -182,9 +180,15 @@ namespace CE::GUI
 			size.y = ImMax(contentAvail.y + size.y, 4.0f);
 		if (minSize.x > 0 && size.x < minSize.x)
 			size.x = minSize.x;
+		if (minSize.y > 0 && size.y < minSize.y)
+			size.y = minSize.y;
+		if (maxSize.x > 0 && size.x > maxSize.x)
+			size.x = maxSize.x;
+		if (maxSize.y > 0 && size.y > maxSize.y)
+			size.y = maxSize.y;
 
 		ImGui::SetNextWindowSize(size);
-		ImGui::SetNextWindowContentSize(size - ImVec2(padding.left + padding.right, padding.top + padding.bottom));
+		ImGui::SetNextWindowContentSize(size - ImVec2(padding.right, padding.bottom));
 
 		// Build up name. If you need to append to a same child from multiple location in the ID stack, use BeginChild(ImGuiID id) with a stable value.
 		const char* temp_window_name;
@@ -196,13 +200,18 @@ namespace CE::GUI
 		const float backup_border_size = g.Style.ChildBorderSize;
 		g.Style.ChildBorderSize = borderThickness;
 
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, background.ToU32());
+
 		bool ret = ImGui::Begin(temp_window_name, NULL, flags);
+
+		ImGui::PopStyleColor(1);
 		
 		g.Style.ChildBorderSize = backup_border_size;
 
 		ImGuiWindow* child_window = g.CurrentWindow;
 		child_window->ChildId = id;
 		child_window->AutoFitChildAxises = (ImS8)auto_fit_axises;
+		child_window->DC.CursorPos.y += padding.top;
 
 		// Set the cursor to handle case where the user called SetNextWindowPos()+BeginChild() manually.
 		// While this is not really documented/defined, it seems that the expected thing to do.
@@ -219,6 +228,11 @@ namespace CE::GUI
 			g.ActiveIdSource = g.NavInputSource;
 		}
 
+		if (padding.left > 0)
+		{
+			gPaddingXStack.Push(padding.left);
+		}
+
 		return ret;
 	}
 
@@ -226,7 +240,10 @@ namespace CE::GUI
 	{
 		ImGui::EndChild();
 
-		ImGui::PopStyleVar(1);
+		if (gPaddingXStack.NonEmpty())
+		{
+			gPaddingXStack.Pop();
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -285,12 +302,122 @@ namespace CE::GUI
 
 	COREGUI_API void Text(const char* text)
 	{
-		ImGui::Text(text);
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+		ImGuiContext& g = *GImGui;
+
+		const char* text_end = NULL;
+
+		// Accept null ranges
+		if (text == text_end)
+			text = text_end = "";
+		ImGuiTextFlags flags = ImGuiTextFlags_None;
+
+		f32 paddingX = 0;
+		if (gPaddingXStack.NonEmpty())
+			paddingX = gPaddingXStack.Top();
+
+		// Calculate length
+		const char* text_begin = text;
+		if (text_end == NULL)
+			text_end = text + strlen(text); // FIXME-OPT
+
+		const ImVec2 text_pos(window->DC.CursorPos.x + paddingX, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+		const float wrap_pos_x = window->DC.TextWrapPos;
+		const bool wrap_enabled = (wrap_pos_x >= 0.0f);
+		if (text_end - text <= 2000 || wrap_enabled)
+		{
+			// Common case
+			const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
+			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false, wrap_width);
+
+			ImRect bb(text_pos, text_pos + text_size);
+			ImGui::ItemSize(text_size, 0.0f);
+			if (!ImGui::ItemAdd(bb, 0))
+				return;
+
+			// Render (we don't hide text after ## in this end-user function)
+			ImGui::RenderTextWrapped(bb.Min, text_begin, text_end, wrap_width);
+		}
+		else
+		{
+			// Long text!
+			// Perform manual coarse clipping to optimize for long multi-line text
+			// - From this point we will only compute the width of lines that are visible. Optimization only available when word-wrapping is disabled.
+			// - We also don't vertically center the text within the line full height, which is unlikely to matter because we are likely the biggest and only item on the line.
+			// - We use memchr(), pay attention that well optimized versions of those str/mem functions are much faster than a casually written loop.
+			const char* line = text;
+			const float line_height = GetTextLineHeight();
+			ImVec2 text_size(0, 0);
+
+			// Lines to skip (can't skip when logging text)
+			ImVec2 pos = text_pos;
+			if (!g.LogEnabled)
+			{
+				int lines_skippable = (int)((window->ClipRect.Min.y - text_pos.y) / line_height);
+				if (lines_skippable > 0)
+				{
+					int lines_skipped = 0;
+					while (line < text_end && lines_skipped < lines_skippable)
+					{
+						const char* line_end = (const char*)memchr(line, '\n', text_end - line);
+						if (!line_end)
+							line_end = text_end;
+						if ((flags & ImGuiTextFlags_NoWidthForLargeClippedText) == 0)
+							text_size.x = ImMax(text_size.x, ImGui::CalcTextSize(line, line_end).x);
+						line = line_end + 1;
+						lines_skipped++;
+					}
+					pos.y += lines_skipped * line_height;
+				}
+			}
+
+			// Lines to render
+			if (line < text_end)
+			{
+				ImRect line_rect(pos, pos + ImVec2(FLT_MAX, line_height));
+				while (line < text_end)
+				{
+					if (ImGui::IsClippedEx(line_rect, 0))
+						break;
+
+					const char* line_end = (const char*)memchr(line, '\n', text_end - line);
+					if (!line_end)
+						line_end = text_end;
+					text_size.x = ImMax(text_size.x, ImGui::CalcTextSize(line, line_end).x);
+					ImGui::RenderText(pos, line, line_end, false);
+					line = line_end + 1;
+					line_rect.Min.y += line_height;
+					line_rect.Max.y += line_height;
+					pos.y += line_height;
+				}
+
+				// Count remaining lines
+				int lines_skipped = 0;
+				while (line < text_end)
+				{
+					const char* line_end = (const char*)memchr(line, '\n', text_end - line);
+					if (!line_end)
+						line_end = text_end;
+					if ((flags & ImGuiTextFlags_NoWidthForLargeClippedText) == 0)
+						text_size.x = ImMax(text_size.x, ImGui::CalcTextSize(line, line_end).x);
+					line = line_end + 1;
+					lines_skipped++;
+				}
+				pos.y += lines_skipped * line_height;
+			}
+			text_size.y = (pos - text_pos).y;
+
+			ImRect bb(text_pos, text_pos + text_size);
+			ImGui::ItemSize(text_size, 0.0f);
+			ImGui::ItemAdd(bb, 0);
+		}
 	}
 
 	COREGUI_API void Text(const String& text)
 	{
-		ImGui::Text(text.GetCString());
+		Text(text.GetCString());
 	}
 
 	COREGUI_API void TextColored(const char* text, const Color& color)
@@ -445,10 +572,10 @@ namespace CE::GUI
 		const ImGuiStyle& style = g.Style;
 
 		Vec4 padding{};
-		if (gPaddingStack.NonEmpty())
-			padding = gPaddingStack.Top();
+		if (gPaddingXStack.NonEmpty())
+			padding.x = gPaddingXStack.Top();
 
-		//Vec2 size = sizeVec;
+		window->DC.CursorPos += ImVec2(padding.x, 0);
 
 		// Submit label or explicit size to ItemSize(), whereas ItemAdd() will submit a larger/spanning rectangle.
 		ImVec2 label_size = ImGui::CalcTextSize("", NULL, true);

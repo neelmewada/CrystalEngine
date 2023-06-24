@@ -33,7 +33,7 @@ namespace CE::Widgets
 		{
 			for (auto& styleValue : array)
 			{
-				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default)
+				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default && styleValue.subControl == CSubControl::None)
 				{
 					padding = styleValue.vector;
 				}

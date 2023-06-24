@@ -122,7 +122,7 @@ namespace CE::Widgets
 		style.Pop();
 
 		style.Push();
-		if (GUI::SelectableEx(GetUuid(), isSelected, GUI::SelectableFlags_AllowItemOverlap))
+		if (GUI::SelectableEx(GetUuid(), isSelected, GUI::SelectableFlags_AllowItemOverlap, childSize))
 		{
 			isSelected = true;
 		}
