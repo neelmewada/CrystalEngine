@@ -68,8 +68,8 @@ namespace CE::GUI
 
 	COREGUI_API void ShowDemoWindow(bool* open = nullptr);
 
-	COREGUI_API void Text(const char* text);
-	COREGUI_API void Text(const String& text);
+	COREGUI_API void Text(const char* text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
+	COREGUI_API void Text(const String& text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
 
 	COREGUI_API void TextColored(const char* text, const Color& color);
 	COREGUI_API void TextColored(const String& text, const Color& color);
@@ -83,7 +83,9 @@ namespace CE::GUI
 		const Vec4& padding = {}, const Vec2& size = Vec2(0, 0), const Vec4& rounding = {},
 		TextAlign textAlign = TextAlign_Inherited, Vec2 minSize = {}, Vec2 maxSize = {}, ButtonFlags flags = ButtonFlags::None);
 
-	COREGUI_API bool SelectableEx(ID id, bool selected, SelectableFlags flags, const Vec2& size = {});
+	COREGUI_API bool SelectableEx(ID id, bool selected, SelectableFlags flags, const Vec2& size = {},
+		f32 borderThickness = 0, const Color& hoveredCol = {}, const Color& pressedCol = {}, const Color& activeCol = {},
+		const Color& hoveredBorderCol = {}, const Color& pressedBorderCol = {}, const Color& activeBorderCol = {});
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 
@@ -214,6 +216,8 @@ namespace CE::GUI
 
 	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });
 	COREGUI_API void RenderFrame(const Vec4& rect, u32 color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });
+
+	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, const Color& borderColor, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });
 
 	COREGUI_API void RenderNavHighlight(const Vec4& rect, ID id, f32 thickness = 1.0f, Vec4 rounding = { 0, 0, 0, 0 }, NavHighlightFlags flags = NavHighlightFlags_TypeDefault);
 

@@ -56,6 +56,9 @@ namespace CE::Widgets
 
         Vec4 padding{};
         Vec4 borderRadius{};
+		Vec2 preferredSize{};
+		Vec2 minSize{};
+		Vec2 maxSize{};
         
         bool hasPadding = false;
 		CStyleValue* background = nullptr;
@@ -90,8 +93,79 @@ namespace CE::Widgets
 				{
 					borderRadius = styleValue.vector;
 				}
+				if (property == CStylePropertyType::Width)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							preferredSize.x = styleValue.single;
+						else
+							preferredSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
+					}
+				}
+				else if (property == CStylePropertyType::Height)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							preferredSize.y = styleValue.single;
+						else
+							preferredSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
+					}
+				}
+				else if (property == CStylePropertyType::MaxWidth)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							maxSize.x = styleValue.single;
+						else
+							maxSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
+					}
+				}
+				else if (property == CStylePropertyType::MaxHeight)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							maxSize.y = styleValue.single;
+						else
+							maxSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
+					}
+				}
+				else if (property == CStylePropertyType::MinWidth)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							minSize.x = styleValue.single;
+						else
+							minSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
+					}
+				}
+				else if (property == CStylePropertyType::MinHeight)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						if (!styleValue.isPercent)
+							minSize.y = styleValue.single;
+						else
+							minSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
+					}
+				}
 			}
 		}
+
+		if (minSize.x > 0 && preferredSize.x < minSize.x)
+			preferredSize.x = minSize.x;
+		if (minSize.y > 0 && preferredSize.y < minSize.y)
+			preferredSize.y = minSize.y;
+		if (maxSize.x > 0 && preferredSize.x > maxSize.x)
+			preferredSize.x = maxSize.x;
+		if (maxSize.y > 0 && preferredSize.y > maxSize.y)
+			preferredSize.y = maxSize.y;
+
+		bool fixedSize = preferredSize.x > 0 || preferredSize.y > 0;
 
         
 		if (padding.x > 0 || padding.y > 0 || padding.z > 0 || padding.w > 0)
@@ -141,7 +215,14 @@ namespace CE::Widgets
 			
             Vec2 finalCursorPos = GUI::GetCursorPos();
             GUI::SetCursorPos(cursor + Vec2(padding.x, padding.y));
-            GUI::Text(text);
+			if (fixedSize)
+			{
+				GUI::Text(text, preferredSize);
+			}
+			else
+			{
+				GUI::Text(text);
+			}
             GUI::SetCursorPos(finalCursorPos);
         }
         else
@@ -174,7 +255,14 @@ namespace CE::Widgets
             }
             
 			auto cursorPos = GUI::GetCursorPos();
-            GUI::Text(text);
+			if (fixedSize)
+			{
+				GUI::Text(text, preferredSize);
+			}
+			else
+			{
+				GUI::Text(text);
+			}
 			cursorPos = GUI::GetCursorPos();
 			PollEvents();
         }

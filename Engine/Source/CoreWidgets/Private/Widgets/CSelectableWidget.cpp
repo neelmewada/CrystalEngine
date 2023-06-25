@@ -19,6 +19,13 @@ namespace CE::Widgets
 		Vec2 preferredSize = {};
 		Vec2 maxSize = {};
 		Vec2 minSize = {};
+		f32 borderThickness = 0;
+		Color hoverColor = {};
+		Color pressedColor = {};
+		Color activeColor = {};
+		Color hoverBorderColor = {};
+		Color pressedBorderColor = {};
+		Color activeBorderColor = {};
 
 		for (auto& [property, array] : style.styleMap)
 		{
@@ -32,6 +39,28 @@ namespace CE::Widgets
 				else if (property == CStylePropertyType::BorderRadius)
 				{
 					borderRadius = styleValue.vector;
+				}
+				else if (property == CStylePropertyType::BorderWidth)
+				{
+					borderThickness = styleValue.single;
+				}
+				else if (property == CStylePropertyType::BorderColor)
+				{
+					if (styleValue.state == CStateFlag::Pressed)
+						pressedBorderColor = styleValue.color;
+					else if (styleValue.state == CStateFlag::Active)
+						activeBorderColor = styleValue.color;
+					else if (styleValue.state == CStateFlag::Hovered)
+						hoverBorderColor = styleValue.color;
+				}
+				else if (property == CStylePropertyType::Background)
+				{
+					if (styleValue.state == CStateFlag::Pressed)
+						pressedColor = styleValue.color;
+					else if (styleValue.state == CStateFlag::Active)
+						activeColor = styleValue.color;
+					else if (styleValue.state == CStateFlag::Hovered)
+						hoverColor = styleValue.color;
 				}
 				else if (property == CStylePropertyType::Width)
 				{
@@ -110,19 +139,20 @@ namespace CE::Widgets
 			}
 		}
 
-		if (minSize.x > 0 && preferredSize.x > minSize.x)
+		if (minSize.x > 0 && preferredSize.x < minSize.x)
 			preferredSize.x = minSize.x;
-		if (minSize.y > 0 && preferredSize.y > minSize.y)
+		if (minSize.y > 0 && preferredSize.y < minSize.y)
 			preferredSize.y = minSize.y;
-		if (maxSize.x > 0 && preferredSize.x < maxSize.x)
+		if (maxSize.x > 0 && preferredSize.x > maxSize.x)
 			preferredSize.x = maxSize.x;
-		if (maxSize.y > 0 && preferredSize.y < maxSize.y)
+		if (maxSize.y > 0 && preferredSize.y > maxSize.y)
 			preferredSize.y = maxSize.y;
 		
 		style.Pop();
 
 		style.Push();
-		if (GUI::SelectableEx(GetUuid(), isSelected, GUI::SelectableFlags_AllowItemOverlap, childSize))
+		if (GUI::SelectableEx(GetUuid(), isSelected, GUI::SelectableFlags_AllowItemOverlap, preferredSize, borderThickness,
+			hoverColor, pressedColor, activeColor, hoverBorderColor, pressedBorderColor, activeBorderColor))
 		{
 			isSelected = true;
 		}

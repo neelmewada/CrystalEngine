@@ -58,6 +58,15 @@ namespace CE::Editor
 		textInputSelector.AddProperty(CStylePropertyType::Padding, Vec4(5, 6, 5, 6));
 		textInputSelector.AddProperty(CStylePropertyType::Width, CStyleValue(100, true));
 		textInputSelector.AddProperty(CStylePropertyType::BorderRadius, Vec4(1, 1, 1, 1) * 1.5f);
+
+		auto& selectableWidgetSelector = gStyleManager->GetStyleGroup("CSelectableWidget");
+		selectableWidgetSelector.AddProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(0, 145, 197, 100), CStateFlag::Hovered);
+		selectableWidgetSelector.AddProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(0, 145, 197, 180), CStateFlag::Pressed);
+		selectableWidgetSelector.AddProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(0, 145, 197, 70), CStateFlag::Active);
+
+		selectableWidgetSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 80), CStateFlag::Hovered);
+		selectableWidgetSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 150), CStateFlag::Pressed);
+		selectableWidgetSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 50), CStateFlag::Active);
 	}
 
 	void EditorStyles::GetDefaultFont(unsigned char** outFont, unsigned int* outLength)

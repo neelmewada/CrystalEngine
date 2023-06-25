@@ -6,28 +6,30 @@ void ProjectBrowserWindow::Construct()
 	isFullscreen = true;
 
 	Super::Construct();
-
-	auto& selectorStyle = gStyleManager->GetStyleGroup("CSelectableWidget#TemplateItem");
-	selectorStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 80), CStateFlag::Hovered);
-	selectorStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 180), CStateFlag::Pressed);
-	selectorStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 50), CStateFlag::Active);
 	
 	auto tabView = CreateWidget<CTabView>(this, "TabView");
 
 	createContent = CreateWidget<CStackLayout>(tabView, "CreateProjectContent");
 	createContent->SetDirection(CStackDirection::Vertical);
-	createContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 5, 10, 10));
-	createContent->GetStyle().AddProperty(CStylePropertyType::MaxHeight, 200);
-	createContent->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 0.0f, 0.25f));
+	createContent->GetStyle().AddProperty(CStylePropertyType::Height, CStyleValue(100, true));
+	createContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 50, 10, 10));
 
-	auto createGridLayout = CreateWidget<CGridLayout>(createContent, "CreateTemplates");
-	createGridLayout->GetStyle().AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 0, 0, 255));
+	auto templateContent = CreateWidget<CStackLayout>(createContent, "Templates");
+	templateContent->SetDirection(CStackDirection::Vertical);
+	templateContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
+	templateContent->GetStyle().AddProperty(CStylePropertyType::MaxHeight, 250);
+	templateContent->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 0.0f, 0.25f));
+
+	//auto createGridLayout = CreateWidget<CGridLayout>(templateContent, "CreateTemplates");
+	//createGridLayout->GetStyle().AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 0, 0, 255));
 
 	// selectable: rgb(0, 145, 197, 180)
-	auto selectable0 = CreateWidget<CSelectableWidget>(createGridLayout, "TemplateItem");
+	auto selectable0 = CreateWidget<CSelectableWidget>(templateContent, "TemplateItem");
+	selectable0->GetStyle().AddProperty(CStylePropertyType::MinHeight, 40);
 
 	auto subLabel = CreateWidget<CLabel>(selectable0, "SubLabel");
-	subLabel->SetText("3D Template");
+	subLabel->SetText("Empty Project");
+	subLabel->GetStyle().AddProperty(CStylePropertyType::Height, 40);
 
 	openContent = CreateWidget<CStackLayout>(tabView, "OpenProjectContent");
 	openContent->SetDirection(CStackDirection::Vertical);
@@ -40,5 +42,5 @@ void ProjectBrowserWindow::Construct()
 	tabView->SetTabTitle(openContent, "Open Project");
 
 	tabView->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(20, 10, 20, 10), CStateFlag::Default, CSubControl::Tab);
-	tabView->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(0, 10), CStateFlag::Default);
 }
+

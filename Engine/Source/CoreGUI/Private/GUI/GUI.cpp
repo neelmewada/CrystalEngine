@@ -211,7 +211,7 @@ namespace CE::GUI
 		ImGuiWindow* child_window = g.CurrentWindow;
 		child_window->ChildId = id;
 		child_window->AutoFitChildAxises = (ImS8)auto_fit_axises;
-		child_window->DC.CursorPos.y += padding.top;
+		child_window->DC.CursorPos += ImVec2(padding.left, padding.top);
 
 		// Set the cursor to handle case where the user called SetNextWindowPos()+BeginChild() manually.
 		// While this is not really documented/defined, it seems that the expected thing to do.
@@ -300,7 +300,7 @@ namespace CE::GUI
 		ImGui::ShowDemoWindow(open);
 	}
 
-	COREGUI_API void Text(const char* text)
+	COREGUI_API void Text(const char* text, const Vec2& size, TextAlign textAlign)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -318,10 +318,50 @@ namespace CE::GUI
 		if (gPaddingXStack.NonEmpty())
 			paddingX = gPaddingXStack.Top();
 
+		bool fixedSize = size.x > 0 || size.y > 0;
+
 		// Calculate length
 		const char* text_begin = text;
 		if (text_end == NULL)
 			text_end = text + strlen(text); // FIXME-OPT
+
+		ImVec2 align = ImVec2(0.5f, 0.5f);
+		if (textAlign == TextAlign_TopLeft)
+		{
+			align = ImVec2(0, 0);
+		}
+		else if (textAlign == TextAlign_TopCenter)
+		{
+			align = ImVec2(0.5f, 0);
+		}
+		else if (textAlign == TextAlign_TopRight)
+		{
+			align = ImVec2(1, 0);
+		}
+		else if (textAlign == TextAlign_MiddleLeft)
+		{
+			align = ImVec2(0, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleCenter)
+		{
+			align = ImVec2(0.5f, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleRight)
+		{
+			align = ImVec2(1, 0.5f);
+		}
+		else if (textAlign == TextAlign_BottomLeft)
+		{
+			align = ImVec2(0, 1);
+		}
+		else if (textAlign == TextAlign_BottomCenter)
+		{
+			align = ImVec2(0.5f, 1);
+		}
+		else if (textAlign == TextAlign_BottomRight)
+		{
+			align = ImVec2(1, 1);
+		}
 
 		const ImVec2 text_pos(window->DC.CursorPos.x + paddingX, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
 		const float wrap_pos_x = window->DC.TextWrapPos;
@@ -331,14 +371,27 @@ namespace CE::GUI
 			// Common case
 			const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
 			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false, wrap_width);
+			
+			if (fixedSize)
+			{
+				ImVec2 bbSize = ImVec2(size.x > 0 ? size.x : text_size.x, size.y > 0 ? size.y : text_size.y);
+				ImRect bb(text_pos, text_pos + bbSize);
+				ImGui::ItemSize(bbSize, 0.0f);
+				if (!ImGui::ItemAdd(bb, 0))
+					return;
 
-			ImRect bb(text_pos, text_pos + text_size);
-			ImGui::ItemSize(text_size, 0.0f);
-			if (!ImGui::ItemAdd(bb, 0))
-				return;
+				ImGui::RenderTextClipped(bb.Min, bb.Max, text_begin, text_end, &text_size, align, &bb);
+			}
+			else
+			{
+				ImRect bb(text_pos, text_pos + text_size);
+				ImGui::ItemSize(text_size, 0.0f);
+				if (!ImGui::ItemAdd(bb, 0))
+					return;
 
-			// Render (we don't hide text after ## in this end-user function)
-			ImGui::RenderTextWrapped(bb.Min, text_begin, text_end, wrap_width);
+				// Render (we don't hide text after ## in this end-user function)
+				ImGui::RenderTextWrapped(bb.Min, text_begin, text_end, wrap_width);
+			}
 		}
 		else
 		{
@@ -415,9 +468,9 @@ namespace CE::GUI
 		}
 	}
 
-	COREGUI_API void Text(const String& text)
+	COREGUI_API void Text(const String& text, const Vec2& size, TextAlign align)
 	{
-		Text(text.GetCString());
+		Text(text.GetCString(), size, align);
 	}
 
 	COREGUI_API void TextColored(const char* text, const Color& color)
@@ -562,7 +615,9 @@ namespace CE::GUI
 		return pressed;
 	}
 
-	COREGUI_API bool SelectableEx(ID id, bool selected, SelectableFlags flags, const Vec2& sizeVec)
+	COREGUI_API bool SelectableEx(ID id, bool selected, SelectableFlags flags, const Vec2& sizeVec,
+		f32 borderThickness, const Color& hoveredCol, const Color& pressedCol, const Color& activeCol,
+		const Color& hoveredBorderCol, const Color& pressedBorderCol, const Color& activeBorderCol)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -609,6 +664,8 @@ namespace CE::GUI
 			bb.Max.x += (spacing_x - spacing_L);
 			bb.Max.y += (spacing_y - spacing_U);
 		}
+
+		Vec4 bbRect{ bb.Min.x, bb.Min.y, bb.Max.x, bb.Max.y };
 		//if (g.IO.KeyCtrl) { GetForegroundDrawList()->AddRect(bb.Min, bb.Max, IM_COL32(0, 255, 0, 255)); }
 
 		// Modify ClipRect for the ItemAdd(), faster than doing a PushColumnsBackground/PushTableBackground for every Selectable..
@@ -688,8 +745,11 @@ namespace CE::GUI
 		// Render
 		if (hovered || selected)
 		{
-			const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
-			ImGui::RenderFrame(bb.Min, bb.Max, col, false, 0.0f);
+			//const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+			//ImGui::RenderFrame(bb.Min, bb.Max, col, false, 0.0f);
+			Color col = (held && hovered) ? pressedCol : hovered ? hoveredCol : activeCol;
+			Color borderCol = (held && hovered) ? pressedBorderCol : hovered ? hoveredBorderCol : activeBorderCol;
+			GUI::RenderFrame(bbRect, col, borderCol, borderThickness);
 		}
 		ImGui::RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
 
@@ -3186,6 +3246,22 @@ namespace CE::GUI
 		{
 			DrawRect(rect + Vec4(1, 1, 1, 1), ImGui::GetColorU32(ImGuiCol_BorderShadow), rounding, borderSize);
 			DrawRect(rect, ImGui::GetColorU32(ImGuiCol_Border), rounding, borderSize);
+		}
+	}
+
+	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, const Color& borderColor, f32 borderSize, Vec4 rounding)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		FillRect(rect, color, rounding);
+
+		ImVec2 p_min = ImVec2(rect.x, rect.y);
+		ImVec2 p_max = ImVec2(rect.z, rect.w);
+
+		if (borderSize > 0.1f)
+		{
+			DrawRect(rect + Vec4(1, 1, 1, 1), Color(borderColor.r, borderColor.g, borderColor.b, borderColor.a / 2.f), rounding, borderSize);
+			DrawRect(rect, borderColor.ToU32(), rounding, borderSize);
 		}
 	}
 
