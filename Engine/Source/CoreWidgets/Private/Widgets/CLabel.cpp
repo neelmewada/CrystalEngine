@@ -59,6 +59,7 @@ namespace CE::Widgets
 		Vec2 preferredSize{};
 		Vec2 minSize{};
 		Vec2 maxSize{};
+		GUI::TextAlign align = GUI::TextAlign_MiddleCenter;
         
         bool hasPadding = false;
 		CStyleValue* background = nullptr;
@@ -153,6 +154,13 @@ namespace CE::Widgets
 							minSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
 					}
 				}
+				else if (property == CStylePropertyType::TextAlign)
+				{
+					if (styleValue.state == CStateFlag::Default)
+					{
+						align = (GUI::TextAlign)styleValue.enumValue;
+					}
+				}
 			}
 		}
 
@@ -217,11 +225,11 @@ namespace CE::Widgets
             GUI::SetCursorPos(cursor + Vec2(padding.x, padding.y));
 			if (fixedSize)
 			{
-				GUI::Text(text, preferredSize);
+				GUI::Text(text, preferredSize, align);
 			}
 			else
 			{
-				GUI::Text(text);
+				GUI::Text(text, {}, align);
 			}
             GUI::SetCursorPos(finalCursorPos);
         }
@@ -257,11 +265,11 @@ namespace CE::Widgets
 			auto cursorPos = GUI::GetCursorPos();
 			if (fixedSize)
 			{
-				GUI::Text(text, preferredSize);
+				GUI::Text(text, preferredSize, align);
 			}
 			else
 			{
-				GUI::Text(text);
+				GUI::Text(text, {}, align);
 			}
 			cursorPos = GUI::GetCursorPos();
 			PollEvents();

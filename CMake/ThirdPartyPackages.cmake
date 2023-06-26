@@ -12,6 +12,9 @@ find_package(crcpp REQUIRED)
 find_package(stb REQUIRED)
 find_package(dxcompiler REQUIRED)
 
+# Yoga
+find_package(yoga REQUIRED)
+
 # SDL2
 find_package(sdl REQUIRED)
 

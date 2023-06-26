@@ -1,8 +1,8 @@
 
 #include "CoreWidgets.h"
+#include "CoreLayout.h"
 
 #include "CoreWidgets.private.h"
-
 
 namespace CE::Widgets
 {

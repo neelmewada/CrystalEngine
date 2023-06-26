@@ -57,6 +57,16 @@ namespace CE::Widgets
 			this->validator = validator;
 		}
 
+		inline const String& GetText() const
+		{
+			return value;
+		}
+
+		inline void SetText(const String& text)
+		{
+			this->value = text;
+		}
+
 	protected:
 
 		void OnDrawGUI() override;

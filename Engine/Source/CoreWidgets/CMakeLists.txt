@@ -11,6 +11,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     PCHHEADER
         PRIVATE
             Public/${PROJECT_NAME}.h
+            Private/CoreLayout.h
     FILES_CMAKE
         PRIVATE
             ${PROJECT_NAME_LOWERCASE}_private_files.cmake
@@ -26,6 +27,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            ThirdParty::yoga
         PUBLIC
             CE::Core
             CE::CoreGUI

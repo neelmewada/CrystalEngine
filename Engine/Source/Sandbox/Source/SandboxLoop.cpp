@@ -92,8 +92,10 @@ void SandboxLoop::PostInit()
 	RHI::FontPreloadConfig fontConfig{};
 	fontConfig.preloadFontCount = 1;
 	fontConfig.preloadFonts = &openSans;
+	
+	Array<void*> fontHandles{};
 
-    cmdList->InitImGui(&fontConfig);
+	cmdList->InitImGui(&fontConfig, fontHandles);
     
     // Setup GUI
     using namespace CE::Widgets;
@@ -333,7 +335,9 @@ void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
 
-	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
+
+
+	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(47, 47, 47), CStateFlag::Default, CSubControl::Header);
 	gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(60, 60, 60), CStateFlag::Hovered, CSubControl::Header);
@@ -472,7 +476,7 @@ void SandboxLoop::SetupGUI()
 	{
 		CButton* gridBtn = CreateWidget<CButton>(gridLayout, "GridButton");
 		gridBtn->SetText(String::Format("Label: {}", i));
-	}
+	}*/
 }
 
 void SandboxLoop::RunLoop()

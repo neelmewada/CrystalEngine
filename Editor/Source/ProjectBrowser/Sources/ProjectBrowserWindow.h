@@ -14,6 +14,9 @@ private:
 
 	CStackLayout* createContent = nullptr;
 	CStackLayout* openContent = nullptr;
+
+	CTextInput* folderPathInput = nullptr;
+	CTextInput* projectNameInput = nullptr;
 };
 
 

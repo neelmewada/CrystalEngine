@@ -1,12 +1,18 @@
 
 #include "CoreWidgets.h"
+#include "CoreLayout.h"
 
 namespace CE::Widgets
 {
 
 	CWidget::CWidget()
 	{
-
+		YGStyle style;
+		YGNodeStyleSetWidth(nullptr, 120);
+		YGNode node;
+		const auto& val = node.getStyle().margin();
+		auto v1 = (YGValue)val[YGEdgeLeft];
+		
 	}
 
 	void CWidget::Construct()

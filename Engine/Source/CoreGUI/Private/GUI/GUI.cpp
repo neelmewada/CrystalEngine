@@ -228,6 +228,12 @@ namespace CE::GUI
 
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, background.ToU32());
 
+		if (gPaddingXStack.NonEmpty())
+		{
+			auto avail = ImGui::GetContentRegionAvail();
+			ImGui::SetNextWindowSizeConstraints(ImVec2(-1, -1), ImVec2(avail.x - gPaddingXStack.Top().top, -1));
+		}
+
 		bool ret = ImGui::Begin(temp_window_name, NULL, flags);
 
 		ImGui::PopStyleColor(1);
