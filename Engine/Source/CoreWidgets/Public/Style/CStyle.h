@@ -68,6 +68,8 @@ namespace CE::Widgets
 		MaxWidth,
 		MaxHeight,
 		Spacing,
+		FontSize, // Inherited
+		FontName, // Inherited
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyType);
 
@@ -134,7 +136,7 @@ namespace CE::Widgets
 		CStyleValue(const Vec4& vector, bool isPercent = false);
 		CStyleValue(const Color& color);
 		CStyleValue(const Gradient& gradient);
-		CStyleValue(const Name& assetPath);
+		CStyleValue(const Name& nameValue);
 
 		CStyleValue(const CStyleValue& copy);
 
@@ -170,7 +172,7 @@ namespace CE::Widgets
 			Vec4 vector{};
 			Color color;
 			Gradient gradient;
-			Name assetPath;
+			Name name;
 		};
 
 

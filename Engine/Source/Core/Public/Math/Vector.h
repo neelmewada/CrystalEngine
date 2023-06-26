@@ -37,6 +37,15 @@ namespace CE
             struct {
                 T x, y;
             };
+			struct {
+				T left, right;
+			};
+			struct {
+				T top, bottom;
+			};
+			struct {
+				T width, height;
+			};
             T xy[2];
         };
 

@@ -18,7 +18,7 @@ namespace CE::GUI
 {
 	using namespace ImStb;
 
-	COREGUI_API Array<f32> gPaddingXStack{};
+	COREGUI_API Array<Vec2> gPaddingXStack{};
 
 	COREGUI_API ID GetID(const char* strId)
 	{
@@ -64,6 +64,33 @@ namespace CE::GUI
 		auto pos = GetWindowPos();
 		auto size = GetWindowSize();
 		return Vec4(pos.x, pos.y, pos.x + size.x, pos.y + size.y);
+	}
+
+	COREGUI_API void SetWindowFontScale(f32 scale)
+	{
+		ImGui::SetWindowFontScale(scale);
+	}
+
+	COREGUI_API f32 GetWindowFontScale()
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		return window->FontWindowScale;
+	}
+
+	COREGUI_API void PushFont(void* fontHandle)
+	{
+		ImGui::PushFont((ImFont*)fontHandle);
+	}
+
+	COREGUI_API void PopFont()
+	{
+		ImGui::PopFont();
+	}
+
+	COREGUI_API void SetCurrentFont(void* fontHandle)
+	{
+		ImGui::SetCurrentFont((ImFont*)fontHandle);
 	}
 
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition, const Vec2& pivot)
@@ -166,7 +193,7 @@ namespace CE::GUI
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* parent_window = g.CurrentWindow;
-
+		
 		flags |= WF_NoTitleBar | WF_NoResize | WF_NoSavedSettings | WF_ChildWindow | WF_NoDocking;
 		flags |= ((WindowFlags)parent_window->Flags & WF_NoMove);  // Inherit the NoMove flag
 
@@ -188,7 +215,6 @@ namespace CE::GUI
 			size.y = maxSize.y;
 
 		ImGui::SetNextWindowSize(size);
-		ImGui::SetNextWindowContentSize(size - ImVec2(padding.right, padding.bottom));
 
 		// Build up name. If you need to append to a same child from multiple location in the ID stack, use BeginChild(ImGuiID id) with a stable value.
 		const char* temp_window_name;
@@ -211,7 +237,7 @@ namespace CE::GUI
 		ImGuiWindow* child_window = g.CurrentWindow;
 		child_window->ChildId = id;
 		child_window->AutoFitChildAxises = (ImS8)auto_fit_axises;
-		child_window->DC.CursorPos += ImVec2(padding.left, padding.top);
+		child_window->DC.CursorPos += ImVec2(0, padding.top);
 
 		// Set the cursor to handle case where the user called SetNextWindowPos()+BeginChild() manually.
 		// While this is not really documented/defined, it seems that the expected thing to do.
@@ -230,7 +256,7 @@ namespace CE::GUI
 
 		if (padding.left > 0)
 		{
-			gPaddingXStack.Push(padding.left);
+			gPaddingXStack.Push(Vec2(padding.left, padding.right));
 		}
 
 		return ret;
@@ -239,7 +265,6 @@ namespace CE::GUI
 	COREGUI_API void EndChild()
 	{
 		ImGui::EndChild();
-
 		if (gPaddingXStack.NonEmpty())
 		{
 			gPaddingXStack.Pop();
@@ -314,9 +339,11 @@ namespace CE::GUI
 			text = text_end = "";
 		ImGuiTextFlags flags = ImGuiTextFlags_None;
 
-		f32 paddingX = 0;
+		Vec2 paddingX = {};
 		if (gPaddingXStack.NonEmpty())
+		{
 			paddingX = gPaddingXStack.Top();
+		}
 
 		bool fixedSize = size.x > 0 || size.y > 0;
 
@@ -363,7 +390,7 @@ namespace CE::GUI
 			align = ImVec2(1, 1);
 		}
 
-		const ImVec2 text_pos(window->DC.CursorPos.x + paddingX, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+		const ImVec2 text_pos(window->DC.CursorPos.x + paddingX.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
 		const float wrap_pos_x = window->DC.TextWrapPos;
 		const bool wrap_enabled = (wrap_pos_x >= 0.0f);
 		if (text_end - text <= 2000 || wrap_enabled)
@@ -626,15 +653,24 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
 
-		Vec4 padding{};
+		Vec4 containerPadding{};
 		if (gPaddingXStack.NonEmpty())
-			padding.x = gPaddingXStack.Top();
+		{
+			containerPadding.left = gPaddingXStack.Top().left;
+			containerPadding.right = gPaddingXStack.Top().right;
+		}
 
-		window->DC.CursorPos += ImVec2(padding.x, 0);
+		window->DC.CursorPos += ImVec2(containerPadding.x, 0);
 
 		// Submit label or explicit size to ItemSize(), whereas ItemAdd() will submit a larger/spanning rectangle.
 		ImVec2 label_size = ImGui::CalcTextSize("", NULL, true);
 		ImVec2 size(sizeVec.x != 0.0f ? sizeVec.x : label_size.x, sizeVec.y != 0.0f ? sizeVec.y : label_size.y);
+		if (size.x > 0)
+		{
+			size.x -= containerPadding.right;
+			containerPadding.right = 0;
+		}
+
 		ImVec2 pos = window->DC.CursorPos;
 		pos.y += window->DC.CurrLineTextBaseOffset;
 		ImGui::ItemSize(ImVec2(size.x, size.y), 0.0f);
@@ -645,7 +681,11 @@ namespace CE::GUI
 		const float min_x = span_all_columns ? window->ParentWorkRect.Min.x : pos.x;
 		const float max_x = span_all_columns ? window->ParentWorkRect.Max.x : window->WorkRect.Max.x;
 		if (size.x == 0.0f || (flags & ImGuiSelectableFlags_SpanAvailWidth))
+		{
 			size.x = ImMax(label_size.x, max_x - min_x);
+			size.x -= containerPadding.right;
+			containerPadding.right = 0;
+		}
 
 		// Text stays at the submission position, but bounding box may be extended on both sides
 		const ImVec2 text_min = pos;

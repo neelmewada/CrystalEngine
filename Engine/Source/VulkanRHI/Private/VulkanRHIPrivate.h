@@ -215,7 +215,7 @@ namespace CE
 
         // - ImGui API -
 
-        bool InitImGui(RHI::FontPreloadConfig* preloadFonts = nullptr) override;
+        bool InitImGui(RHI::FontPreloadConfig* preloadFonts, Array<void*>& outFontHandles) override;
 
         void ShutdownImGui() override;
 

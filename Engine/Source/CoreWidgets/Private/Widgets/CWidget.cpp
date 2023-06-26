@@ -11,15 +11,7 @@ namespace CE::Widgets
 
 	void CWidget::Construct()
 	{
-		style.ApplyStyle(gStyleManager->globalStyle);
-
-		for (const auto& styleGroup : gStyleManager->styleGroups)
-		{
-			if (styleGroup.selector.TestSelector(this))
-			{
-				style.ApplyStyle(styleGroup.style);
-			}
-		}
+		ComputeStyles();
 	}
 
 	void CWidget::UpdateStyle()
@@ -359,6 +351,19 @@ namespace CE::Widgets
 				return subWidget;
 		}
 		return nullptr;
+	}
+
+	void CWidget::ComputeStyles()
+	{
+		style.ApplyStyle(gStyleManager->globalStyle);
+
+		for (const auto& styleGroup : gStyleManager->styleGroups)
+		{
+			if (styleGroup.selector.TestSelector(this))
+			{
+				style.ApplyStyle(styleGroup.style);
+			}
+		}
 	}
 
 	void CWidget::HandleEvent(CEvent* event)

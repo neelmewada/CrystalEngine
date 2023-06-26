@@ -11,6 +11,15 @@ namespace CE::Widgets
 		CSelectableWidget();
 		virtual ~CSelectableWidget();
 
+		inline bool IsSelected() const
+		{
+			return isSelected;
+		}
+		
+		inline void Select(bool select)
+		{
+			isSelected = select;
+		}
 
 	protected:
 

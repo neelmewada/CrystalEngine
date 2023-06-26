@@ -161,7 +161,7 @@ namespace CE::RHI
 
         // - ImGui Setup -
 
-        virtual bool InitImGui(FontPreloadConfig* preloadFonts = nullptr) = 0;
+        virtual bool InitImGui(FontPreloadConfig* preloadFonts, Array<void*>& outFontHandles) = 0;
 
         virtual void ShutdownImGui() = 0;
 

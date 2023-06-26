@@ -12,24 +12,29 @@ void ProjectBrowserWindow::Construct()
 	createContent = CreateWidget<CStackLayout>(tabView, "CreateProjectContent");
 	createContent->SetDirection(CStackDirection::Vertical);
 	createContent->GetStyle().AddProperty(CStylePropertyType::Height, CStyleValue(100, true));
-	createContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 50, 10, 10));
+	createContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
 
-	auto templateContent = CreateWidget<CStackLayout>(createContent, "Templates");
+	auto header = CreateWidget<CLabel>(createContent, "HeaderLabel");
+	header->SetText("Select Template");
+	header->GetStyle().AddProperty(CStylePropertyType::FontSize, 20);
+	header->GetStyle().AddProperty(CStylePropertyType::Height, 30);
+
+	auto templateContent = CreateWidget<CSelectableGroup>(createContent, "Templates");
 	templateContent->SetDirection(CStackDirection::Vertical);
 	templateContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
 	templateContent->GetStyle().AddProperty(CStylePropertyType::MaxHeight, 250);
+	templateContent->GetStyle().AddProperty(CStylePropertyType::FontSize, 18);
 	templateContent->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 0.0f, 0.25f));
 
-	//auto createGridLayout = CreateWidget<CGridLayout>(templateContent, "CreateTemplates");
-	//createGridLayout->GetStyle().AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 0, 0, 255));
+	for (int i = 0; i < 1; i++)
+	{
+		auto selectable = CreateWidget<CSelectableWidget>(templateContent, "TemplateItem");
+		selectable->GetStyle().AddProperty(CStylePropertyType::MinHeight, 40);
 
-	// selectable: rgb(0, 145, 197, 180)
-	auto selectable0 = CreateWidget<CSelectableWidget>(templateContent, "TemplateItem");
-	selectable0->GetStyle().AddProperty(CStylePropertyType::MinHeight, 40);
-
-	auto subLabel = CreateWidget<CLabel>(selectable0, "SubLabel");
-	subLabel->SetText("Empty Project");
-	subLabel->GetStyle().AddProperty(CStylePropertyType::Height, 40);
+		auto subLabel = CreateWidget<CLabel>(selectable, "SubLabel");
+		subLabel->SetText(String::Format("Empty Project", i));
+		subLabel->GetStyle().AddProperty(CStylePropertyType::Height, 40);
+	}
 
 	openContent = CreateWidget<CStackLayout>(tabView, "OpenProjectContent");
 	openContent->SetDirection(CStackDirection::Vertical);

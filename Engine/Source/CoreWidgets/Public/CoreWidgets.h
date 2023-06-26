@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreRHI.h"
 #include "CoreGUI.h"
 
 #include "Widgets/Definitions.h"
@@ -9,6 +10,7 @@
 #include "Data/CDataModel.h"
 
 #include "Style/CStyle.h"
+#include "Style/CFontManager.h"
 #include "Style/CStyleManager.h"
 #include "Event/CEvent.h"
 
@@ -26,6 +28,7 @@
 #include "Widgets/CCollapsibleSection.h"
 #include "Widgets/CGridLayout.h"
 #include "Widgets/CSelectableWidget.h"
+#include "Widgets/CSelectableGroup.h"
 
 // Input Widgets
 #include "Widgets/Input/CCheckbox.h"

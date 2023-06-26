@@ -16,6 +16,13 @@ namespace CE::GUI
 	COREGUI_API Vec2 GetWindowSize();
 	COREGUI_API Vec4 GetWindowRect();
 
+	COREGUI_API void SetWindowFontScale(f32 scale);
+	COREGUI_API f32 GetWindowFontScale();
+
+	COREGUI_API void PushFont(void* fontHandle);
+	COREGUI_API void PopFont();
+	COREGUI_API void SetCurrentFont(void* fontHandle);
+
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition = Cond::None, const Vec2& pivot = Vec2(0, 0));
 
 	COREGUI_API void SetNextWindowSize(const Vec2& size, Cond condition = Cond::None);
@@ -45,7 +52,7 @@ namespace CE::GUI
 
 	COREGUI_API void EndChild();
 
-	extern COREGUI_API Array<f32> gPaddingXStack;
+	extern COREGUI_API Array<Vec2> gPaddingXStack;
 
 #pragma region Style
 

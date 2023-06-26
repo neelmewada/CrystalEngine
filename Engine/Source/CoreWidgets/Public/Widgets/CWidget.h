@@ -7,6 +7,15 @@ namespace CE::Widgets
 		struct WidgetInitializer;
 	}
 
+	class CWidgetException : public std::exception
+	{
+	public:
+
+		CWidgetException(const String& message) : std::exception(message.GetCString())
+		{}
+
+	};
+
 	class CWindow;
 
 	CLASS(Abstract)
@@ -54,11 +63,19 @@ namespace CE::Widgets
 		inline void AddStyleClass(const String& styleClass)
 		{
 			styleClasses.Add(styleClass);
+			ComputeStyles();
+		}
+
+		inline void AddStyleClasses(const Array<String>& styleClasses)
+		{
+			this->styleClasses.AddRange(styleClasses);
+			ComputeStyles();
 		}
 
 		inline void RemoveStyleClass(const String& styleClass)
 		{
 			styleClasses.Remove(styleClass);
+			ComputeStyles();
 		}
 
 		inline bool StyleClassExists(const String& styleClass) const
@@ -76,6 +93,8 @@ namespace CE::Widgets
 		bool IsLeftMouseHeld() const { return isLeftMousePressedInside; }
 
 		CWidget* FindSubWidget(const Name& name);
+		
+		void ComputeStyles();
 		
 		virtual void Construct();
 

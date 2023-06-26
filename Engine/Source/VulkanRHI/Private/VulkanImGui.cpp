@@ -27,7 +27,7 @@
 namespace CE
 {
 
-    bool VulkanGraphicsCommandList::InitImGui(RHI::FontPreloadConfig* preloadFontConfig)
+    bool VulkanGraphicsCommandList::InitImGui(RHI::FontPreloadConfig* preloadFontConfig, Array<void*>& outFontHandles)
     {
         VkResult result = VK_SUCCESS;
 
@@ -85,11 +85,13 @@ namespace CE
                 memcpy(fontData, preloadFontConfig->preloadFonts[i].fontData, numBytes);
 				if (preloadFontConfig->preloadFonts[i].isCompressed)
 				{
-					io.Fonts->AddFontFromMemoryCompressedTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
+					void* fontHandle = io.Fonts->AddFontFromMemoryCompressedTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
+					outFontHandles.Add(fontHandle);
 				}
 				else
 				{
-					io.Fonts->AddFontFromMemoryTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
+					void* fontHandle = io.Fonts->AddFontFromMemoryTTF(fontData, numBytes, preloadFontConfig->preloadFonts[i].pointSize);
+					outFontHandles.Add(fontHandle);
 				}
             }
         }

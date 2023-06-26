@@ -34,8 +34,8 @@ namespace CE::Widgets
 
 	}
 
-	CStyleValue::CStyleValue(const Name& path)
-		: valueType(Type_Asset), assetPath(path)
+	CStyleValue::CStyleValue(const Name& nameValue)
+		: valueType(Type_Asset), name(nameValue)
 	{
 
 	}
@@ -67,7 +67,7 @@ namespace CE::Widgets
 		}
 		else if (valueType == Type_Asset)
 		{
-			assetPath = copy.assetPath;
+			name = copy.name;
 		}
 	}
 
@@ -98,7 +98,7 @@ namespace CE::Widgets
 		}
 		else if (valueType == Type_Asset)
 		{
-			assetPath = copy.assetPath;
+			name = copy.name;
 		}
 
 		return *this;
@@ -113,7 +113,7 @@ namespace CE::Widgets
 		}
 		else if (valueType == Type_Asset)
 		{
-			assetPath.~Name();
+			name.~Name();
 		}
 	}
 
@@ -122,6 +122,8 @@ namespace CE::Widgets
 		static Array<CStylePropertyType> inheritedProperties{
 			CStylePropertyType::ForegroundColor,
 			CStylePropertyType::TextAlign,
+			CStylePropertyType::FontSize,
+			CStylePropertyType::FontName
 		};
 
 		return inheritedProperties;
@@ -190,6 +192,8 @@ namespace CE::Widgets
 	void CStyle::Push(CStylePropertyTypeFlags flags, CSubControl subControl)
 	{
 		PushedData pushedData{};
+		u32 fontSize = 0;
+		Name fontName = "";
 
 		for (auto& [property, array] : styleMap)
 		{
@@ -445,8 +449,18 @@ namespace CE::Widgets
 						pushedData.pushedVars++;
 					}
 				}
+				else if (property == CStylePropertyType::FontSize)
+				{
+					fontSize = (u32)styleValue.single;
+				}
+				else if (property == CStylePropertyType::FontName)
+				{
+					fontName = styleValue.name;
+				}
 			}
 		}
+
+		CFontManager::Get().PushFont(fontSize, fontName);
 		
 		pushedStack.Push(pushedData);
 	}
@@ -455,6 +469,8 @@ namespace CE::Widgets
 	{
 		if (pushedStack.IsEmpty())
 			return;
+
+		CFontManager::Get().PopFont();
 
 		GUI::PopStyleColor(pushedStack.Top().pushedColors);
 		GUI::PopStyleVar(pushedStack.Top().pushedVars);

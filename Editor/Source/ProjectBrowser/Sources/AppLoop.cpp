@@ -109,22 +109,33 @@ void AppLoop::PostInit()
 
 	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 
-	unsigned char* defualtFont = nullptr;
+	unsigned char* defaultFont = nullptr;
 	unsigned int defaultFontByteSize = 0;
-	EditorStyles::Get().GetDefaultFont(&defualtFont, &defaultFontByteSize);
+	EditorStyles::Get().GetDefaultFont(&defaultFont, &defaultFontByteSize);
 
-	RHI::FontDesc openSans{};
-	openSans.fontName = "Open Sans";
-	openSans.byteSize = defaultFontByteSize;
-	openSans.fontData = defualtFont;
-	openSans.pointSize = 16;
+	Array<RHI::FontDesc> fontList{};
+
+	fontList.Add({ defaultFontByteSize, 16, "Open Sans", false, defaultFont }); // Default Font & Size
+
+	fontList.AddRange({ 
+		{ defaultFontByteSize, 14, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 15, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 17, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 18, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 20, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },
+	});
 
 	RHI::FontPreloadConfig fontConfig{};
-	fontConfig.preloadFontCount = 1;
-	fontConfig.preloadFonts = &openSans;
+	fontConfig.preloadFontCount = fontList.GetSize();
+	fontConfig.preloadFonts = fontList.GetData();
 
-	cmdList->InitImGui(&fontConfig);
+	Array<void*> fontHandles{};
 
+	cmdList->InitImGui(&fontConfig, fontHandles);
+
+	CFontManager::Get().Initialize(fontList, fontHandles);
 	EditorStyles::Get().InitDefaultStyle();
 
 	gStyleManager->PushGlobal();
