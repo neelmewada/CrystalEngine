@@ -19,40 +19,26 @@ namespace CE::Widgets
         this->text = text;
     }
 
-    const String& CLabel::GetText()
+    const String& CLabel::GetText() const
     {
         return text;
     }
 
-	Vec2 CLabel::CalculateEstimateSize()
+	Vec2 CLabel::CalculateIntrinsicContentSize()
 	{
-		Vec4 padding{};
-		Vec2 size = GUI::CalculateTextSize(text);
-
-		for (auto& [property, array] : style.styleMap)
-		{
-			for (auto& styleValue : array)
-			{
-				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default && styleValue.subControl == CSubControl::None)
-				{
-					padding = styleValue.vector;
-				}
-			}
-		}
-
-		size = Vec2(size.x + padding.x + padding.z, size.y + padding.y + padding.w);
-
-		return size;
+		return GUI::CalculateTextSize(text);
 	}
 
 	void CLabel::UpdateStyle()
 	{
-
+		
 	}
 
     void CLabel::OnDrawGUI()
     {
-		style.Push();
+		GUI::Text(text);
+
+		/*style.Push();
 
         Vec4 padding{};
         Vec4 borderRadius{};
@@ -62,107 +48,7 @@ namespace CE::Widgets
 		GUI::TextAlign align = GUI::TextAlign_MiddleCenter;
         
         bool hasPadding = false;
-		CStyleValue* background = nullptr;
-		CStyleValue* backgroundHovered = nullptr;
-		CStyleValue* backgroundPressed = nullptr;
-
-		for (auto& [property, array] : style.styleMap)
-		{
-			for (auto& styleValue : array)
-			{
-				if (property == CStylePropertyType::Padding && styleValue.state == CStateFlag::Default && styleValue.subControl == CSubControl::None)
-				{
-					hasPadding = true;
-					padding = styleValue.vector;
-				}
-				else if (property == CStylePropertyType::Background && styleValue.subControl == CSubControl::None)
-				{
-					if ((styleValue.state & CStateFlag::Hovered) != 0)
-					{
-						backgroundHovered = &styleValue;
-					}
-					if ((styleValue.state & CStateFlag::Pressed) != 0)
-					{
-						backgroundPressed = &styleValue;
-					}
-					if (styleValue.state == CStateFlag::Default)
-					{
-						background = &styleValue;
-					}
-				}
-				else if (property == CStylePropertyType::BorderRadius && styleValue.state == CStateFlag::Default && styleValue.subControl == CSubControl::None)
-				{
-					borderRadius = styleValue.vector;
-				}
-				if (property == CStylePropertyType::Width)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						if (!styleValue.isPercent)
-							preferredSize.x = styleValue.single;
-						else
-							preferredSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
-					}
-				}
-				else if (property == CStylePropertyType::Height)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						if (!styleValue.isPercent)
-							preferredSize.y = styleValue.single;
-						else
-							preferredSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
-					}
-				}
-				else if (property == CStylePropertyType::MaxWidth)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						if (!styleValue.isPercent)
-							maxSize.x = styleValue.single;
-						else
-							maxSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
-					}
-				}
-				else if (property == CStylePropertyType::MaxHeight)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						if (!styleValue.isPercent)
-							maxSize.y = styleValue.single;
-						else
-							maxSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
-					}
-				}
-				else if (property == CStylePropertyType::MinWidth)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						if (!styleValue.isPercent)
-							minSize.x = styleValue.single;
-						else
-							minSize.x = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().x;
-					}
-				}
-				else if (property == CStylePropertyType::MinHeight)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						if (!styleValue.isPercent)
-							minSize.y = styleValue.single;
-						else
-							minSize.y = styleValue.single / 100.0f * GUI::GetContentRegionAvailableSpace().y;
-					}
-				}
-				else if (property == CStylePropertyType::TextAlign)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						align = (GUI::TextAlign)styleValue.enumValue;
-					}
-				}
-			}
-		}
+		
 
 		if (minSize.x > 0 && preferredSize.x < minSize.x)
 			preferredSize.x = minSize.x;
@@ -275,7 +161,7 @@ namespace CE::Widgets
 			PollEvents();
         }
 
-		style.Pop();
+		style.Pop();*/
     }
 
 	void CLabel::HandleEvent(CEvent* event)

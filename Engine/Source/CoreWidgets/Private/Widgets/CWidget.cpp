@@ -1,18 +1,19 @@
 
 #include "CoreWidgets.h"
-#include "CoreLayout.h"
 
 namespace CE::Widgets
 {
 
 	CWidget::CWidget()
 	{
-		YGStyle style;
-		YGNodeStyleSetWidth(nullptr, 120);
-		YGNode node;
-		const auto& val = node.getStyle().margin();
-		auto v1 = (YGValue)val[YGEdgeLeft];
-		
+		node = YGNodeNew();
+		YGNodeSetContext(node, this);
+	}
+
+	CWidget::~CWidget()
+	{
+		YGNodeFree(node);
+		node = nullptr;
 	}
 
 	void CWidget::Construct()
@@ -20,9 +21,33 @@ namespace CE::Widgets
 		ComputeStyles();
 	}
 
-	void CWidget::UpdateStyle()
+	void CWidget::ComputeStyles()
 	{
-		style.SetDirty(true);
+		
+	}
+
+	void CWidget::UpdateStylesIfNeeded()
+	{
+		if (!needsStyle)
+			return;
+
+		node->setStyle({});
+
+		for (auto& [property, variants] : style.properties)
+		{
+			if (property == CStylePropertyType::Background)
+			{
+				YGJustify;
+			}
+		}
+	}
+
+	void CWidget::UpdateLayoutIfNeeded()
+	{
+		if (!needsLayout)
+			return;
+
+
 	}
 
 	void CWidget::OnAttachedTo(CWidget* parent)
@@ -30,40 +55,40 @@ namespace CE::Widgets
 		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once
 			return;
 
-		for (auto& [property, array] : style.styleMap)
-		{
-			bool foundDefaultState = false;
-			for (auto& value : array)
-			{
-				if (value.state == CStateFlag::Default)
-					foundDefaultState = true;
-				if (value.enumValue == CStyleValue::Inherited && value.valueType == CStyleValue::Type_Enum)
-				{
-					auto& parentArray = parent->style.styleMap[property];
-					for (const auto& parentValue : parentArray)
-					{
-						if (parentValue.state == CStateFlag::Default)
-						{
-							value = parentValue;
-							break;
-						}
-					}
-				}
-			}
+		//for (auto& [property, array] : style.styleMap)
+		//{
+		//	bool foundDefaultState = false;
+		//	for (auto& value : array)
+		//	{
+		//		if (value.state == CStateFlag::Default)
+		//			foundDefaultState = true;
+		//		if (value.enumValue == CStyleValue::Inherited && value.valueType == CStyleValue::Type_Enum)
+		//		{
+		//			auto& parentArray = parent->style.styleMap[property];
+		//			for (const auto& parentValue : parentArray)
+		//			{
+		//				if (parentValue.state == CStateFlag::Default)
+		//				{
+		//					value = parentValue;
+		//					break;
+		//				}
+		//			}
+		//		}
+		//	}
 
-			if (!foundDefaultState && CStyle::IsInheritedProperty(property)) // If property is auto-inheritable
-			{
-				auto& parentArray = parent->style.styleMap[property];
-				for (const auto& parentValue : parentArray)
-				{
-					if (parentValue.state == CStateFlag::Default)
-					{
-						array.Add(parentValue);
-						break;
-					}
-				}
-			}
-		}
+		//	if (!foundDefaultState && CStyle::IsInheritedProperty(property)) // If property is auto-inheritable
+		//	{
+		//		auto& parentArray = parent->style.styleMap[property];
+		//		for (const auto& parentValue : parentArray)
+		//		{
+		//			if (parentValue.state == CStateFlag::Default)
+		//			{
+		//				array.Add(parentValue);
+		//				break;
+		//			}
+		//		}
+		//	}
+		//}
 
 		inheritedPropertiesInitialized = true;
 	}
@@ -98,12 +123,30 @@ namespace CE::Widgets
 			subWidget->OnDetachedFrom(this);
 		}
 	}
-    
-	CWidget::~CWidget()
-	{
-		
-	}
 
+	void CWidget::RenderGUI()
+	{
+		if (style.IsDirty())
+		{
+			needsStyle = true;
+			needsLayout = true;
+		}
+
+		if (needsStyle)
+		{
+			UpdateStylesIfNeeded();
+			needsLayout = true;
+			needsStyle = false;
+		}
+
+		if (needsLayout)
+		{
+			UpdateLayoutIfNeeded();
+			needsLayout = false;
+		}
+
+		OnDrawGUI();
+	}
 
 	void CWidget::PollEvents()
 	{
@@ -276,6 +319,8 @@ namespace CE::Widgets
 			bool isLeftClicked = GUI::IsMouseClicked(GUI::MouseButton::Left);
 			bool isRightClicked = GUI::IsMouseClicked(GUI::MouseButton::Right);
 			bool isMiddleClicked = GUI::IsMouseClicked(GUI::MouseButton::Middle);
+
+			
 			
 			if (isLeftClicked || isRightClicked || isMiddleClicked)
 			{
@@ -315,11 +360,6 @@ namespace CE::Widgets
 		}
 	}
 
-	void CWidget::RenderGUI()
-	{
-		OnDrawGUI();
-    }
-
     void CWidget::SetWidgetFlags(WidgetFlags flags)
     {
         this->widgetFlags = flags;
@@ -357,19 +397,6 @@ namespace CE::Widgets
 				return subWidget;
 		}
 		return nullptr;
-	}
-
-	void CWidget::ComputeStyles()
-	{
-		style.ApplyStyle(gStyleManager->globalStyle);
-
-		for (const auto& styleGroup : gStyleManager->styleGroups)
-		{
-			if (styleGroup.selector.TestSelector(this))
-			{
-				style.ApplyStyle(styleGroup.style);
-			}
-		}
 	}
 
 	void CWidget::HandleEvent(CEvent* event)

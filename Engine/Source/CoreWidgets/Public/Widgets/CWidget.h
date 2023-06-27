@@ -28,6 +28,19 @@ namespace CE::Widgets
 
 		// - Public API -
 
+		void ComputeStyles();
+
+		void UpdateLayoutIfNeeded();
+		void UpdateStylesIfNeeded();
+
+		inline bool NeedsLayout() const { return needsLayout; }
+		inline bool NeedsStyle() const { return needsStyle; }
+
+		inline void SetNeedsLayout() { needsLayout = true; }
+		inline void SetNeedsStyle() { needsStyle = true; }
+
+		virtual void Construct();
+
         // For internal use only!
 		virtual void RenderGUI();
         
@@ -35,20 +48,17 @@ namespace CE::Widgets
 		virtual bool IsContainer() { return IsWindow(); }
 
 		virtual Vec2 CalculateEstimateSize() { return Vec2(); }
+
+		virtual Vec2 CalculateIntrinsicContentSize() { return Vec2(); }
         
         void SetWidgetFlags(WidgetFlags flags);
         
         WidgetFlags GetWidgetFlags() const;
         
-        CStyle& GetStyle()
-        {
-            return style;
-        }
-        
-        void SetStyle(const CStyle& style)
-        {
-            this->style = style;
-        }
+		inline CStyle& GetStyle()
+		{
+			return style;
+		}
 
 		inline u32 GetStyleClassesCount() const
 		{
@@ -93,12 +103,6 @@ namespace CE::Widgets
 		bool IsLeftMouseHeld() const { return isLeftMousePressedInside; }
 
 		CWidget* FindSubWidget(const Name& name);
-		
-		void ComputeStyles();
-		
-		virtual void Construct();
-
-		virtual void UpdateStyle();
 
 	protected:
 
@@ -141,14 +145,19 @@ namespace CE::Widgets
 
 		FIELD()
 		Array<CWidget*> attachedWidgets{};
-        
-        FIELD()
-        CStyle style{}; // Final computed style after inheritance, etc
 
 		FIELD()
 		Array<String> styleClasses{};
 
+		FIELD()
+		CStyle style{};
+
+		YGNodeRef node{};
+
     private:
+
+		b8 needsLayout = true;
+		b8 needsStyle = true;
 
 		b8 inheritedPropertiesInitialized = false;
 

@@ -1,6 +1,5 @@
 
 #include "CoreWidgets.h"
-#include "CoreLayout.h"
 
 #include "CoreWidgets.private.h"
 
@@ -10,7 +9,7 @@ namespace CE::Widgets
 
 	COREWIDGETS_API Package* gWidgetsTransientPackage = nullptr;
 
-	COREWIDGETS_API CStyleManager* gStyleManager = nullptr;
+	//COREWIDGETS_API CStyleManager* gStyleManager = nullptr;
 
 	COREWIDGETS_API Package* GetWidgetsTransientPackage()
 	{
@@ -26,13 +25,13 @@ namespace CE::Widgets
         {
 			gWidgetsTransientPackage = CreateObject<Package>(nullptr, TEXT("/CoreWidgets/Transient"), OF_Transient);
 
-			gStyleManager = CreateObject<CStyleManager>(gWidgetsTransientPackage, TEXT("StyleManager"), OF_Transient);
+			//gStyleManager = CreateObject<CStyleManager>(gWidgetsTransientPackage, TEXT("StyleManager"), OF_Transient);
         }
 
         virtual void ShutdownModule() override
         {
-			gStyleManager->RequestDestroy();
-			gStyleManager = nullptr;
+			//gStyleManager->RequestDestroy();
+			//gStyleManager = nullptr;
 
 			gWidgetsTransientPackage->RequestDestroy();
 			gWidgetsTransientPackage = nullptr;
@@ -40,7 +39,9 @@ namespace CE::Widgets
 
         virtual void RegisterTypes() override
         {
-			CE_REGISTER_TYPES(CVariant);
+			CE_REGISTER_TYPES(
+				CVariant
+			);
         }
     };
 	

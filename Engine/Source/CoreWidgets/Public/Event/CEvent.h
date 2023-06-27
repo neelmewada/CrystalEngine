@@ -8,6 +8,8 @@ namespace CE::Widgets
 	enum class CEventType
 	{
 		Undefined = 0,
+		CustomEvent,
+
 		MouseEnter,
 		MouseMove,
 		MouseLeave,
@@ -15,7 +17,8 @@ namespace CE::Widgets
 		MouseRelease,
 		MouseButtonClick,
 		MouseButtonDoubleClick,
-		FocusChanged
+		FocusChanged,
+		ResizeEvent,
 	};
 	ENUM_CLASS_FLAGS(CEventType);
 
@@ -61,6 +64,19 @@ namespace CE::Widgets
 
 		FIELD()
 		CWidget* sender = nullptr;
+	};
+
+	STRUCT()
+	struct COREWIDGETS_API CResizeEvent : public CEvent
+	{
+		CE_STRUCT(CResizeEvent, CEvent)
+	public:
+
+		FIELD()
+		Vec2 oldSize{};
+
+		FIELD()
+		Vec2 newSize{};
 	};
 
 	STRUCT()

@@ -2,119 +2,108 @@
 
 namespace CE::Widgets
 {
+
 	CStyleValue::CStyleValue()
 	{
-		enumValue = Auto;
-		valueType = Type_None;
 
-		
-	}
-
-	CStyleValue::CStyleValue(f32 single, bool isPercent)
-		: valueType(Type_Single), single(single), isPercent(isPercent)
-	{
-
-	}
-
-	CStyleValue::CStyleValue(const Vec4& vector, bool isPercent)
-		: valueType(Type_Vector), vector(vector), isPercent(isPercent)
-	{
-
-	}
-
-	CStyleValue::CStyleValue(const Color& color)
-		: valueType(Type_Color), color(color)
-	{
-		
-	}
-
-	CStyleValue::CStyleValue(const Gradient& gradient)
-		: valueType(Type_Gradient), gradient(gradient)
-	{
-
-	}
-
-	CStyleValue::CStyleValue(const Name& nameValue)
-		: valueType(Type_Asset), name(nameValue)
-	{
-
-	}
-
-	CStyleValue::CStyleValue(const CStyleValue& copy)
-	{
-		valueType = copy.valueType;
-		enumValue = copy.enumValue;
-		isPercent = copy.isPercent;
-
-		state = copy.state;
-		subControl = copy.subControl;
-
-		if (valueType == Type_Single)
-		{
-			single = copy.single;
-		}
-		else if (valueType == Type_Color)
-		{
-			color = copy.color;
-		}
-		else if (valueType == Type_Vector)
-		{
-			vector = copy.vector;
-		}
-		else if (valueType == Type_Gradient)
-		{
-			gradient = copy.gradient;
-		}
-		else if (valueType == Type_Asset)
-		{
-			name = copy.name;
-		}
-	}
-
-	CStyleValue& CStyleValue::operator=(const CStyleValue& copy)
-	{
-		valueType = copy.valueType;
-		enumValue = copy.enumValue;
-		isPercent = copy.isPercent;
-
-		state = copy.state;
-		subControl = copy.subControl;
-
-		if (valueType == Type_Single)
-		{
-			single = copy.single;
-		}
-		else if (valueType == Type_Color)
-		{
-			color = copy.color;
-		}
-		else if (valueType == Type_Vector)
-		{
-			vector = copy.vector;
-		}
-		else if (valueType == Type_Gradient)
-		{
-			gradient = copy.gradient;
-		}
-		else if (valueType == Type_Asset)
-		{
-			name = copy.name;
-		}
-
-		return *this;
 	}
 
 	void CStyleValue::Release()
 	{
-		if (valueType == Type_Gradient)
+		if (IsGradient())
 		{
-			gradient.Clear();
 			gradient.~Gradient();
 		}
-		else if (valueType == Type_Asset)
+		else if (IsString())
 		{
-			name.~Name();
+			string.~String();
 		}
+
+		memset(this, 0, sizeof(Self));
+	}
+
+	CStyleValue::CStyleValue(f32 single, bool isPercent)
+		: single(single), valueType(Type_Single)
+	{
+		if (isPercent)
+			enumValue = Percent;
+	}
+
+	CStyleValue::CStyleValue(const Vec4& vector, bool isPercent)
+		: vector(vector), valueType(Type_Vector)
+	{
+		if (isPercent)
+			enumValue = Percent;
+	}
+
+	CStyleValue::CStyleValue(const Color& color)
+		: color(color), valueType(Type_Color)
+	{
+
+	}
+
+	CStyleValue::CStyleValue(const Gradient& gradient)
+		: gradient(gradient), valueType(Type_Gradient)
+	{
+	}
+
+	CStyleValue::CStyleValue(const String& string)
+		: string(string), valueType(Type_String)
+	{
+		
+	}
+
+	CStyleValue::CStyleValue(const CStyleValue& copy)
+	{
+		CopyFrom(copy);
+	}
+
+	CStyleValue& CStyleValue::operator=(const CStyleValue& copy)
+	{
+		CopyFrom(copy);
+		return *this;
+	}
+
+	void CStyleValue::CopyFrom(const CStyleValue& copy)
+	{
+		if (valueType != copy.valueType)
+			Release();
+
+		state = copy.state;
+		subControl = copy.subControl;
+		valueType = copy.valueType;
+		enumValue = copy.enumValue;
+		
+		if (IsSingle())
+		{
+			single = copy.single;
+		}
+		else if (IsVector())
+		{
+			vector = copy.vector;
+		}
+		else if (IsColor())
+		{
+			color = copy.color;
+		}
+		else if (IsGradient())
+		{
+			gradient = copy.gradient;
+		}
+		else if (IsString())
+		{
+			string = copy.string;
+		}
+	}
+
+	CStyle::CStyle()
+	{
+
+	}
+
+	void CStyle::Release()
+	{
+		
 	}
 
 	Array<CStylePropertyType> CStyle::GetInheritedProperties()
@@ -142,372 +131,35 @@ namespace CE::Widgets
 		return flags;
 	}
 
+	CStyleValue& CStyle::AddProperty(CStylePropertyType propertyType, const CStyleValue& value)
+	{
+		auto& styleVariants = properties[propertyType];
+
+		for (int i = styleVariants.GetSize() - 1; i >= 0; i--)
+		{
+			// Remove 'duplicate-like' states, because they will be fully overriden anyways.
+			if (styleVariants[i].state == value.state &&
+				styleVariants[i].subControl == value.subControl &&
+				styleVariants[i].valueType == value.valueType)
+			{
+				styleVariants.RemoveAt(i);
+			}
+		}
+
+		styleVariants.Add(value);
+		return styleVariants.Top();
+	}
+
+	CStyleValue& CStyle::GetProperty(CStylePropertyType propertyType, CStateFlag forState, CSubControl forSubControl)
+	{
+		return properties[propertyType].Get(forState, forSubControl);
+	}
+
 	bool CStyle::IsInheritedProperty(CStylePropertyType property)
 	{
 		return GetInheritedProperties().Exists(property);
 	}
 
-	void CStyle::AddProperty(CStylePropertyType property, const CStyleValue& value, CStateFlag state, CSubControl subControl)
-	{
-		CStyleValue& modValue = const_cast<CStyleValue&>(value);
-		modValue.state = state;
-		modValue.subControl = subControl;
-
-		auto& arr = styleMap[property];
-
-		for (int i = arr.GetSize() - 1; i >= 0; i--)
-		{
-			// Remove 'duplicate-like' states, because they will be fully overriden anyways.
-			if (arr[i].state == value.state &&
-				arr[i].subControl == value.subControl && 
-				arr[i].valueType == value.valueType)
-			{
-				arr.RemoveAt(i);
-			}
-		}
-
-		arr.Add(value);
-		isDirty = true;
-	}
-
-	Array<CStyleValue>& CStyle::GetProperties(CStylePropertyType property)
-	{
-		return styleMap[property];
-	}
-
-	CStyleValue& CStyle::GetProperty(CStylePropertyType property, CStateFlag forState, CSubControl forSubControl)
-	{
-		static CStyleValue invalid{};
-		auto& arr = styleMap[property];
-
-		for (auto& value : arr)
-		{
-			if (value.subControl == forSubControl && value.state == forState)
-				return value;
-		}
-
-		return invalid;
-	}
-
-	void CStyle::Push(CStylePropertyTypeFlags flags, CSubControl subControl)
-	{
-		PushedData pushedData{};
-		u32 fontSize = 0;
-		Name fontName = "";
-
-		for (auto& [property, array] : styleMap)
-		{
-			if ((GetPropertyTypeFlags(property) & flags) == 0) // Flags mismatch
-				continue;
-
-			for (const auto& styleValue : array)
-			{
-				if (subControl != CSubControl::Any && styleValue.subControl != subControl)
-					continue;
-
-				if (property == CStylePropertyType::Background && styleValue.valueType == CStyleValue::Type_Color)
-				{
-					if (styleValue.state == CStateFlag::Default)
-					{
-						if (styleValue.subControl == CSubControl::Tab)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_Tab, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::TitleBar)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TitleBg, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::MenuBar)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_MenuBarBg, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Header)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_TableHeaderBg, styleValue.color);
-							pushedData.pushedColors += 2;
-						}
-						else if (styleValue.subControl == CSubControl::TableRow)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TableRowBg, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_TableRowBgAlt, styleValue.color);
-							pushedData.pushedColors += 2;
-						}
-						else if (styleValue.subControl == CSubControl::TableRowEven)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TableRowBg, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::TableRowOdd)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TableRowBgAlt, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::TableBorder)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TableBorderStrong, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::TableBorderInner)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TableBorderLight, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Window)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_WindowBg, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Frame)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_FrameBg, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::CheckMark)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_CheckMark, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else
-						{
-							GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_ChildBg, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_Button, styleValue.color);
-							pushedData.pushedColors += 3;
-						}
-					}
-					else if ((styleValue.state & CStateFlag::Hovered) != 0)
-					{
-						if (styleValue.subControl == CSubControl::Tab)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TabHovered, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Header)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Frame)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_FrameBgHovered, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else
-						{
-							GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_ButtonHovered, styleValue.color);
-							pushedData.pushedColors += 2;
-						}
-					}
-					else if ((styleValue.state & CStateFlag::Pressed) != 0)
-					{
-						if (styleValue.subControl == CSubControl::Tab)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TabActive, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Header)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Frame)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else
-						{
-							GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_ButtonActive, styleValue.color);
-							pushedData.pushedColors += 2;
-						}
-					}
-
-					if ((styleValue.state & CStateFlag::Collapsed) != 0)
-					{
-						if (styleValue.subControl == CSubControl::TitleBar)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TitleBgCollapsed, styleValue.color);
-							pushedData.pushedColors++;
-						}
-					}
-
-					if ((styleValue.state & CStateFlag::Active) != 0)
-					{
-						if (styleValue.subControl == CSubControl::TitleBar)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TitleBgActive, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Tab)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TabActive, styleValue.color);
-							GUI::PushStyleColor(GUI::StyleCol_TabUnfocusedActive, styleValue.color);
-							pushedData.pushedColors += 2;
-						}
-						else if (styleValue.subControl == CSubControl::Header)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_HeaderActive, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else if (styleValue.subControl == CSubControl::Frame)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_FrameBgActive, styleValue.color);
-							pushedData.pushedColors++;
-						}
-						else
-						{
-							GUI::PushStyleColor(GUI::StyleCol_Header, styleValue.color);
-							pushedData.pushedColors++;
-						}
-					}
-					
-					if ((styleValue.state & CStateFlag::Disabled) != 0)
-					{
-						GUI::PushStyleVar(GUI::StyleVar_DisabledAlpha, styleValue.color.a);
-						pushedData.pushedVars += 1;
-					}
-					
-					if ((styleValue.state & CStateFlag::Unfocused) != 0)
-					{
-						if (styleValue.subControl == CSubControl::Tab)
-						{
-							GUI::PushStyleColor(GUI::StyleCol_TabUnfocused, styleValue.color);
-							pushedData.pushedColors += 1;
-						}
-					}
-				}
-				else if (property == CStylePropertyType::ForegroundColor && styleValue.valueType == CStyleValue::Type_Color)
-				{
-					GUI::PushStyleColor(GUI::StyleCol_Text, styleValue.color);
-					pushedData.pushedColors += 1;
-				}
-				else if (property == CStylePropertyType::Padding)
-				{
-					if (styleValue.valueType == CStyleValue::Type_Single)
-					{
-						if (styleValue.subControl == CSubControl::Window)
-						{
-							GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.single, styleValue.single));
-							pushedData.pushedVars++;
-						}
-						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame ||
-                                 styleValue.subControl == CSubControl::None)
-						{
-							GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.single, styleValue.single));
-							pushedData.pushedVars++;
-						}
-					}
-					else if (styleValue.valueType == CStyleValue::Type_Vector)
-					{
-						if (styleValue.subControl == CSubControl::Window)
-						{
-							GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2(styleValue.vector.x, styleValue.vector.y));
-							pushedData.pushedVars++;
-						}
-						else if (styleValue.subControl == CSubControl::Tab || styleValue.subControl == CSubControl::Frame ||
-                                 styleValue.subControl == CSubControl::None)
-						{
-							GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(styleValue.vector.x, styleValue.vector.y));
-							pushedData.pushedVars++;
-						}
-					}
-				}
-				else if (property == CStylePropertyType::BorderWidth && styleValue.valueType == CStyleValue::Type_Single && styleValue.subControl == CSubControl::None)
-				{
-					GUI::PushStyleVar(GUI::StyleVar_FrameBorderSize, styleValue.single);
-					pushedData.pushedVars++;
-				}
-				else if (property == CStylePropertyType::BorderColor && styleValue.IsColor())
-				{
-					GUI::PushStyleColor(GUI::StyleCol_Border, styleValue.color);
-					pushedData.pushedColors++;
-				}
-				else if (property == CStylePropertyType::BorderRadius && styleValue.valueType == CStyleValue::Type_Single)
-				{
-					if (styleValue.subControl == CSubControl::Frame)
-					{
-						GUI::PushStyleVar(GUI::StyleVar_FrameRounding, styleValue.single);
-						pushedData.pushedVars++;
-					}
-				}
-				else if (property == CStylePropertyType::Spacing)
-				{
-					if (styleValue.valueType == CStyleValue::Type_Single)
-					{
-						GUI::PushStyleVar(GUI::StyleVar_ItemSpacing, Vec2(styleValue.single, styleValue.single));
-						pushedData.pushedVars++;
-					}
-					else if (styleValue.valueType == CStyleValue::Type_Vector)
-					{
-						GUI::PushStyleVar(GUI::StyleVar_ItemSpacing, Vec2(styleValue.vector.x, styleValue.vector.y));
-						pushedData.pushedVars++;
-					}
-				}
-				else if (property == CStylePropertyType::FontSize)
-				{
-					fontSize = (u32)styleValue.single;
-				}
-				else if (property == CStylePropertyType::FontName)
-				{
-					fontName = styleValue.name;
-				}
-			}
-		}
-
-		CFontManager::Get().PushFont(fontSize, fontName);
-		
-		pushedStack.Push(pushedData);
-	}
-
-	void CStyle::Pop()
-	{
-		if (pushedStack.IsEmpty())
-			return;
-
-		CFontManager::Get().PopFont();
-
-		GUI::PopStyleColor(pushedStack.Top().pushedColors);
-		GUI::PopStyleVar(pushedStack.Top().pushedVars);
-		pushedStack.Pop();
-	}
-
-	void CStyle::ApplyStyle(const CStyle& from)
-	{
-		for (const auto& [property, fromArray] : from.styleMap)
-		{
-			auto& thisArray = styleMap[property];
-
-			for (const auto& fromStyle : fromArray)
-			{
-				bool matchFound = false;
-
-				for (int i = thisArray.GetSize() - 1; i >= 0; i--)
-				{
-					auto& thisStyle = thisArray[i];
-
-					if (thisStyle.valueType == fromStyle.valueType && thisStyle.state == fromStyle.state && thisStyle.subControl == fromStyle.subControl)
-					{
-						matchFound = true;
-						thisStyle = fromStyle;
-						break;
-					}
-				}
-
-				if (!matchFound)
-				{
-					thisArray.Add(fromStyle);
-				}
-			}
-		}
-
-		isDirty = true;
-	}
-
 } // namespace CE::Widgets
+
 

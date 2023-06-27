@@ -105,7 +105,7 @@ void SandboxLoop::PostInit()
 
 void SandboxLoop::PreShutdown()
 {
-	gStyleManager->PopGlobal();
+	//gStyleManager->PopGlobal();
 
     window->RequestDestroy();
     window = nullptr;
@@ -335,7 +335,15 @@ void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
 
+	window = CreateWidget<CWindow>(nullptr, "TestWindow");
+	window->SetWidgetFlags(WidgetFlags::None);
+	window->SetTitle("Test Window");
 
+	for (int i = 0; i < 8; i++)
+	{
+		auto label = CreateWidget<CLabel>(window, "Label");
+
+	}
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 
@@ -491,7 +499,7 @@ void SandboxLoop::RunLoop()
         cmdList->Begin();
         cmdList->ImGuiNewFrame();
 
-		gStyleManager->PushGlobal();
+		//gStyleManager->PushGlobal();
 
         GUI::BeginWindow("DockSpaceWindow", nullptr, GUI::WF_FullScreen | GUI::WF_MenuBar | GUI::WF_NoPadding);
         {
@@ -557,7 +565,7 @@ void SandboxLoop::RunLoop()
         }
         GUI::EndWindow();
 
-		gStyleManager->PopGlobal();
+		//gStyleManager->PopGlobal();
 
         cmdList->ImGuiRender();
         cmdList->End();

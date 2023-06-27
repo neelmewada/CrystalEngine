@@ -14,9 +14,9 @@ namespace CE::Widgets
         
         void SetText(const String& text);
         
-        const String& GetText();
+        const String& GetText() const;
 
-		Vec2 CalculateEstimateSize() override;
+		Vec2 CalculateIntrinsicContentSize() override;
         
 		void UpdateStyle() override;
 

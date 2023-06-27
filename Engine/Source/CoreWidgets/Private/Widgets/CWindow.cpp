@@ -36,20 +36,29 @@ namespace CE::Widgets
 			if (isFullscreen)
 				windowFlags |= GUI::WF_FullScreen | GUI::WF_NoPadding;
 
-			style.Push();
             GUI::BeginWindow(windowTitle, &isShown, windowFlags);
-			style.Pop();
-
-			style.Push(CStylePropertyTypeFlags::Inherited); // Push inheritable properties for sub-widgets
 
             for (CWidget* subWidget : attachedWidgets)
             {
                 subWidget->RenderGUI();
             }
-
-			style.Pop();
             
+			auto winSize = GUI::GetWindowSize();
+
             GUI::EndWindow();
+
+			if (windowSize.x > 0 && windowSize.y > 0 && windowSize != winSize)
+			{
+				CResizeEvent event{};
+				event.name = "WindowResized";
+				event.type = CEventType::ResizeEvent;
+				event.oldSize = windowSize;
+				event.newSize = winSize;
+				event.sender = this;
+				HandleEvent(&event);
+			}
+
+			this->windowSize = winSize;
 
 			PollEvents();
         }
@@ -57,9 +66,10 @@ namespace CE::Widgets
 
 	void CWindow::HandleEvent(CEvent* event)
 	{
-		if (event->GetEventType() == CEventType::FocusChanged)
+		if (event->GetEventType() == CEventType::ResizeEvent)
 		{
-
+			CResizeEvent* resizeEvent = (CResizeEvent*)event;
+			emit OnWindowResized(resizeEvent->oldSize, resizeEvent->newSize);
 		}
 
 		Super::HandleEvent(event);

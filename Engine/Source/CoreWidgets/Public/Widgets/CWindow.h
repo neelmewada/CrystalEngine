@@ -33,6 +33,11 @@ namespace CE::Widgets
         
         void AddSubWidget(CWidget* subWidget);
         void RemoveSubWidget(CWidget* subWidget);
+
+	public:
+
+		// Params: Old Size, New Size
+		CE_SIGNAL(OnWindowResized, Vec2, Vec2);
         
     protected:
         virtual void OnDrawGUI() override;
@@ -47,6 +52,10 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isFullscreen = false;
+
+		FIELD()
+		Vec2 windowSize{};
+
     };
     
 } // namespace CE::Widgets

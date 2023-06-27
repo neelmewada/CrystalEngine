@@ -4,78 +4,44 @@
 #include "CoreRHI.h"
 #include "CoreGUI.h"
 
+#include "yoga/Yoga.h"
+#include "yoga/YGNode.h"
+#include "yoga/YGStyle.h"
+
 #include "Widgets/Definitions.h"
 
 #include "Data/CVariant.h"
 #include "Data/CDataModel.h"
 
 #include "Style/CStyle.h"
-#include "Style/CFontManager.h"
-#include "Style/CStyleManager.h"
 #include "Event/CEvent.h"
 
 #include "Widgets/CWidget.h"
-#include "Widgets/WidgetManager.h"
 #include "Widgets/CWindow.h"
-#include "Widgets/CDockContainer.h"
+//#include "Widgets/CDockContainer.h"
 
 // Widgets
 #include "Widgets/CLabel.h"
-#include "Widgets/CButton.h"
-#include "Widgets/CStackLayout.h"
-#include "Widgets/CTableView.h"
-#include "Widgets/CTabView.h"
-#include "Widgets/CCollapsibleSection.h"
-#include "Widgets/CGridLayout.h"
-#include "Widgets/CSelectableWidget.h"
-#include "Widgets/CSelectableGroup.h"
+//#include "Widgets/CButton.h"
+//#include "Widgets/CStackLayout.h"
+//#include "Widgets/CTableView.h"
+//#include "Widgets/CTabView.h"
+//#include "Widgets/CCollapsibleSection.h"
+//#include "Widgets/CGridLayout.h"
+//#include "Widgets/CSelectableWidget.h"
+//#include "Widgets/CSelectableGroup.h"
 
 // Input Widgets
-#include "Widgets/Input/CCheckbox.h"
-#include "Widgets/Input/CTextInput.h"
-#include "Widgets/Input/CFloatInput.h"
-#include "Widgets/Input/CIntInput.h"
+//#include "Widgets/Input/CCheckbox.h"
+//#include "Widgets/Input/CTextInput.h"
+//#include "Widgets/Input/CFloatInput.h"
+//#include "Widgets/Input/CIntInput.h"
 
 namespace CE::Widgets
 {
     
 	COREWIDGETS_API Package* GetWidgetsTransientPackage();
 
-	namespace Internal
-	{
-		struct WidgetInitializer
-		{
-			WidgetFlags flags = WidgetFlags::None;
-		};
-
-		class WidgetThreadContext : public ThreadSingleton<WidgetThreadContext>
-		{
-		public:
-			WidgetThreadContext() {}
-			virtual ~WidgetThreadContext() {}
-
-			void PushInitializer(WidgetInitializer* initializer)
-			{
-				widgetInitializerStack.Add(initializer);
-			}
-
-			void PopInitializer()
-			{
-				if (!widgetInitializerStack.IsEmpty())
-					widgetInitializerStack.RemoveAt(widgetInitializerStack.GetSize() - 1);
-			}
-
-			WidgetInitializer* TopInitializer()
-			{
-				return widgetInitializerStack.IsEmpty() ? nullptr : widgetInitializerStack.GetLast();
-			}
-
-		private:
-			friend class ThreadSingleton<ObjectThreadContext>;
-
-			Array<WidgetInitializer*> widgetInitializerStack{};
-		};
-	}
 
 	template<typename TWidget> requires TIsBaseClassOf<CWidget, TWidget>::Value
 	TWidget* CreateWidget(Object* owner = nullptr,
