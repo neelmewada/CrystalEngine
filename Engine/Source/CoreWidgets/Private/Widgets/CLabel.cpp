@@ -6,7 +6,7 @@ namespace CE::Widgets
 
     CLabel::CLabel()
     {
-		
+        YGNodeSetNodeType(node, YGNodeTypeText);
     }
 
     CLabel::~CLabel()

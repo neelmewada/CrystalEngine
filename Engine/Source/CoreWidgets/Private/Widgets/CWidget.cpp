@@ -272,7 +272,15 @@ namespace CE::Widgets
 	{
 		if (!needsLayout)
 			return;
-
+        
+        if (GetOwner() == nullptr)
+        {
+            YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
+        }
+        else
+        {
+            
+        }
 
 		needsLayout = false;
 	}
