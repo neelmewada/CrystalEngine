@@ -55,6 +55,8 @@ namespace CE::Widgets
 		None = 0,
 		Opacity,
 		Padding,
+		Margin,
+		Position,
 		ForegroundColor, // Inherited
 		Background,
 		BorderRadius,
@@ -74,7 +76,18 @@ namespace CE::Widgets
 		// FlexBox properties
 		AlignContent,
 		AlignItems,
-		AlignSelf
+		AlignSelf,
+		JustifyContent,
+		Flex,
+		FlexBasis,
+		FlexFlow,
+		FlexWrap,
+		FlexGrow,
+		FlexShrink,
+		FlexDirection,
+		FlexOrder,
+		RowGap,
+		ColumnGap,
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyType);
 
@@ -119,23 +132,31 @@ namespace CE::Widgets
 
 		enum EnumValue : int
 		{
-			Auto = 0,
+			None = 0,
+			Auto,
 			Inherited,
 			Initial,
 			Percent,
+			Absolute,
 		};
 
 		CStyleValue();
 		void Release();
 
 		template<typename TEnum> requires TIsEnum<TEnum>::Value
-			CStyleValue(TEnum enumValue) : enumValue((int)enumValue), valueType(Type_Enum)
+			CStyleValue(TEnum enumValue) : enumValue(Vec4i(1, 1, 1, 1) * (int)enumValue), valueType(Type_Enum)
 		{
 
 		}
 
+		template<typename TEnum> requires TIsEnum<TEnum>::Value
+		CStyleValue(TVector4<TEnum> enumValue4) : enumValue(Vec4i(enumValue4.x, enumValue4.y, enumValue4.z, enumValue4.w)), valueType(Type_Enum)
+		{
+			
+		}
+
 		template<>
-		CStyleValue(EnumValue value) : enumValue((int)value), valueType(Type_Enum)
+		CStyleValue(EnumValue value) : enumValue(Vec4i(1, 1, 1, 1) * (int)value), valueType(Type_Enum)
 		{
 
 		}
@@ -154,7 +175,11 @@ namespace CE::Widgets
 
 		inline bool IsOfType(ValueType checkType) const { return valueType == checkType; }
 
+		inline bool IsPercentValue() const { return enumValue == Vec4i(1, 1, 1, 1) * Percent; }
+		inline bool IsAutoValue() const { return IsEnum() && enumValue == Vec4i(1, 1, 1, 1) * Auto; }
+
 		inline bool IsValid() const { return valueType != Type_None; }
+		inline bool IsEnum() const { return IsOfType(Type_Enum); }
 		inline bool IsSingle() const { return IsOfType(Type_Single); }
 		inline bool IsVector() const { return IsOfType(Type_Vector); }
 		inline bool IsColor() const { return IsOfType(Type_Color); }
@@ -163,9 +188,39 @@ namespace CE::Widgets
 
 		// Modifiers
 
+		CStyleValue& AsAbsolute()
+		{
+			enumValue = Vec4i(Absolute, Absolute, Absolute, Absolute);
+			return *this;
+		}
+
 		CStyleValue& AsPercent()
 		{
-			enumValue = EnumValue::Percent;
+			enumValue = Vec4i(Percent, Percent, Percent, Percent);
+			return *this;
+		}
+
+		CStyleValue& AsPercent(bool maskX, bool maskY, bool maskZ, bool maskW)
+		{
+			if (maskX) enumValue.x = Percent;
+			if (maskY) enumValue.y = Percent;
+			if (maskZ) enumValue.z = Percent;
+			if (maskW) enumValue.w = Percent;
+			return *this;
+		}
+
+		CStyleValue& AsAuto()
+		{
+			enumValue = Vec4i(Auto, Auto, Auto, Auto);
+			return *this;
+		}
+
+		CStyleValue& AsAuto(bool maskX, bool maskY, bool maskZ, bool maskW)
+		{
+			if (maskX) enumValue.x = Auto;
+			if (maskY) enumValue.y = Auto;
+			if (maskZ) enumValue.z = Auto;
+			if (maskW) enumValue.w = Auto;
 			return *this;
 		}
 
@@ -202,7 +257,7 @@ namespace CE::Widgets
 		int valueType = 0;
 
 		FIELD()
-		int enumValue = 0;
+		Vec4i enumValue{};
 
 	};
 

@@ -31,7 +31,7 @@ namespace CE::Widgets
 		void ComputeStyles();
 
 		void UpdateLayoutIfNeeded();
-		void UpdateStylesIfNeeded();
+		void UpdateStyleIfNeeded();
 
 		inline bool NeedsLayout() const { return needsLayout; }
 		inline bool NeedsStyle() const { return needsStyle; }
@@ -91,6 +91,11 @@ namespace CE::Widgets
 		inline bool StyleClassExists(const String& styleClass) const
 		{
 			return styleClasses.Exists(styleClass);
+		}
+
+		inline CStyleValue& AddStyleProperty(CStylePropertyType property, const CStyleValue& value)
+		{
+			return style.AddProperty(property, value);
 		}
 
 		CWidget* GetOwner();

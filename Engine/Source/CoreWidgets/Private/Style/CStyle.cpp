@@ -26,14 +26,14 @@ namespace CE::Widgets
 		: single(single), valueType(Type_Single)
 	{
 		if (isPercent)
-			enumValue = Percent;
+			enumValue = Vec4i(1, 1, 1, 1) * Percent;
 	}
 
 	CStyleValue::CStyleValue(const Vec4& vector, bool isPercent)
 		: vector(vector), valueType(Type_Vector)
 	{
 		if (isPercent)
-			enumValue = Percent;
+			enumValue = Vec4i(1, 1, 1, 1) * Percent;
 	}
 
 	CStyleValue::CStyleValue(const Color& color)

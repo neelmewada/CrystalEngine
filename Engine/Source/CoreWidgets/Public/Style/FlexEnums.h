@@ -29,6 +29,24 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CJustify);
 
+	ENUM()
+	enum class CFlexDirection
+	{
+		Column,
+		ColumnReverse,
+		Row,
+		RowReverse
+	};
+	ENUM_CLASS_FLAGS(CFlexDirection);
+
+	ENUM()
+	enum class CFlexWrap
+	{
+		NoWrap,
+		Wrap,
+		WrapReverse
+	};
+	ENUM_CLASS_FLAGS(CFlexWrap);
 
 } // namespace CE::Widgets
 
