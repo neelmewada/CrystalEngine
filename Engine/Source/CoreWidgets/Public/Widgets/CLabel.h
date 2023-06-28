@@ -6,7 +6,7 @@ namespace CE::Widgets
     CLASS()
     class COREWIDGETS_API CLabel : public CWidget
     {
-        CE_CLASS(CLabel, CE::Widgets::CWidget)
+        CE_CLASS(CLabel, CWidget)
     public:
         
         CLabel();
@@ -16,9 +16,14 @@ namespace CE::Widgets
         
         const String& GetText() const;
 
-		Vec2 CalculateIntrinsicContentSize() override;
-        
-		void UpdateStyle() override;
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
+		inline bool IsDisabled() const { return isDisabled; }
+		inline void SetEnabled() { isDisabled = false; }
+		inline void SetDisabled() { isDisabled = true; }
+
+		inline bool IsInteractable() const { return isInteractable; }
+		inline void SetInteractable(bool interactable) { isInteractable = interactable; }
 
     protected:
         
@@ -30,8 +35,15 @@ namespace CE::Widgets
         
         FIELD()
         String text{};
+
+		FIELD()
+		b8 isDisabled = false;
+
+		FIELD()
+		b8 isInteractable = false;
         
         String invisibleButtonId{};
+
     };
     
 } // namespace CE::Widgets

@@ -3,11 +3,21 @@
 
 namespace CE::Widgets
 {
+	YGSize CWidget::MeasureFunctionCallback(YGNodeRef nodeRef, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
+	{
+		CWidget* widget = (CWidget*)YGNodeGetContext(nodeRef);
+		if (widget == nullptr)
+			return YGSize();
+
+		auto size = widget->CalculateIntrinsicContentSize(width, height);
+		return YGSize(size.x, size.y);
+	}
 
 	CWidget::CWidget()
 	{
 		node = YGNodeNew();
 		YGNodeSetContext(node, this);
+		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
 	}
 
 	CWidget::~CWidget()
@@ -18,12 +28,38 @@ namespace CE::Widgets
 
 	void CWidget::Construct()
 	{
-		ComputeStyles();
+		
 	}
 
-	void CWidget::ComputeStyles()
+	void CWidget::LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState)
 	{
-		
+		if (property == CStylePropertyType::Background && styleValue.IsColor())
+		{
+			outState.background = styleValue.color;
+		}
+		else if (property == CStylePropertyType::ForegroundColor && styleValue.IsColor())
+		{
+			outState.foreground = styleValue.color;
+		}
+		else if (property == CStylePropertyType::BorderRadius)
+		{
+			if (styleValue.IsSingle())
+				outState.borderRadius = Vec4(1, 1, 1, 1) * styleValue.single;
+			else if (styleValue.IsVector())
+				outState.borderRadius = styleValue.vector;
+		}
+		else if (property == CStylePropertyType::BorderColor && styleValue.IsColor())
+		{
+			outState.borderColor = styleValue.color;
+		}
+		else if (property == CStylePropertyType::BorderWidth && styleValue.IsSingle())
+		{
+			outState.borderThickness = styleValue.single;
+		}
+		else if (property == CStylePropertyType::TextAlign && styleValue.IsEnum())
+		{
+			outState.textAlign = (GUI::TextAlign)styleValue.enumValue.x;
+		}
 	}
 
 	void CWidget::UpdateStyleIfNeeded()
@@ -36,9 +72,37 @@ namespace CE::Widgets
 		for (auto& [property, variants] : style.properties)
 		{
 			const auto& value = variants.Get();
+
+			// Non-Yoga properties
+			if (value.IsValid()) // Default state
+			{
+				LoadGuiStyleStateProperty(property, value, defaultStyleState);
+			}
+
+			const auto& hoveredState = variants.Get(CStateFlag::Hovered);
+			if (hoveredState.IsValid())
+			{
+				LoadGuiStyleStateProperty(property, hoveredState, hoveredStyleState);
+			}
+			else
+			{
+				LoadGuiStyleStateProperty(property, value, hoveredStyleState);
+			}
+
+			const auto& pressedState = variants.Get(CStateFlag::Pressed);
+			if (pressedState.IsValid())
+			{
+				LoadGuiStyleStateProperty(property, pressedState, pressedStyleState);
+			}
+			else
+			{
+				LoadGuiStyleStateProperty(property, value, pressedStyleState);
+			}
+
 			if (!value.IsValid())
 				continue;
-			
+
+			// Yoga Properties
 			if (property == CStylePropertyType::AlignContent && value.IsEnum())
 			{
 				YGNodeStyleSetAlignContent(node, (YGAlign)value.enumValue.x);
@@ -172,9 +236,9 @@ namespace CE::Widgets
 						YGNodeStyleSetPadding(node, YGEdgeRight, value.vector.z);
 					// Bottom
 					if (value.enumValue.w == CStyleValue::Percent)
-						YGNodeStyleSetPadding(node, YGEdgeTop, value.vector.w);
+						YGNodeStyleSetPadding(node, YGEdgeBottom, value.vector.w);
 					else
-						YGNodeStyleSetPadding(node, YGEdgeTop, value.vector.w);
+						YGNodeStyleSetPadding(node, YGEdgeBottom, value.vector.w);
 				}
 			}
 			else if (property == CStylePropertyType::BorderWidth)
@@ -259,13 +323,25 @@ namespace CE::Widgets
 						YGNodeStyleSetMaxHeight(node, value.single);
 				}
 			}
-			
 		}
+
+		OnComputeStyle();
 
 		needsStyle = false;
 		needsLayout = true;
 
 		style.SetDirty(false);
+
+		if (IsContainer())
+		{
+			for (CWidget* subWidget : attachedWidgets)
+			{
+				if (subWidget == nullptr || subWidget == this)
+					continue;
+				subWidget->SetNeedsStyle();
+				subWidget->UpdateStyleIfNeeded();
+			}
+		}
 	}
 
 	void CWidget::UpdateLayoutIfNeeded()
@@ -277,10 +353,6 @@ namespace CE::Widgets
         {
             YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
         }
-        else
-        {
-            
-        }
 
 		needsLayout = false;
 	}
@@ -290,40 +362,37 @@ namespace CE::Widgets
 		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once
 			return;
 
-		//for (auto& [property, array] : style.styleMap)
-		//{
-		//	bool foundDefaultState = false;
-		//	for (auto& value : array)
-		//	{
-		//		if (value.state == CStateFlag::Default)
-		//			foundDefaultState = true;
-		//		if (value.enumValue == CStyleValue::Inherited && value.valueType == CStyleValue::Type_Enum)
-		//		{
-		//			auto& parentArray = parent->style.styleMap[property];
-		//			for (const auto& parentValue : parentArray)
-		//			{
-		//				if (parentValue.state == CStateFlag::Default)
-		//				{
-		//					value = parentValue;
-		//					break;
-		//				}
-		//			}
-		//		}
-		//	}
+		for (auto& [property, variants] : style.properties)
+		{
+			auto& defaultState = variants.Get();
 
-		//	if (!foundDefaultState && CStyle::IsInheritedProperty(property)) // If property is auto-inheritable
-		//	{
-		//		auto& parentArray = parent->style.styleMap[property];
-		//		for (const auto& parentValue : parentArray)
-		//		{
-		//			if (parentValue.state == CStateFlag::Default)
-		//			{
-		//				array.Add(parentValue);
-		//				break;
-		//			}
-		//		}
-		//	}
-		//}
+			if (defaultState.IsValid())
+			{
+				if (defaultState.enumValue.x == CStyleValue::Inherited)
+				{
+					const auto& parentVariants = parent->style.properties[property];
+					const auto& parentDefaultState = parentVariants.Get();
+
+					if (parentDefaultState.IsValid())
+					{
+						defaultState = parentDefaultState;
+						continue;
+					}
+				}
+			}
+			else if (CStyle::IsInheritedProperty(property)) // If default state does not exist but property is auto-inheritable
+			{
+				const auto& parentVariants = parent->style.properties[property];
+				const auto& parentDefaultState = parentVariants.Get();
+
+				if (parentDefaultState.IsValid())
+				{
+					variants.Add(parentDefaultState);
+				}
+			}
+		}
+
+		SetNeedsStyle();
 
 		inheritedPropertiesInitialized = true;
 	}
@@ -343,6 +412,8 @@ namespace CE::Widgets
 			attachedWidgets.Add(subWidget);
 			OnSubWidgetAttached(subWidget);
 			subWidget->OnAttachedTo(this);
+
+			YGNodeSetMeasureFunc(node, nullptr);
 
 			auto childCount = YGNodeGetChildCount(node);
 			YGNodeInsertChild(node, subWidget->node, childCount);
@@ -370,6 +441,12 @@ namespace CE::Widgets
 					YGNodeRemoveChild(node, childNodeRef);
 					break;
 				}
+			}
+
+			childCount = YGNodeGetChildCount(node);
+			if (childCount == 0)
+			{
+				YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
 			}
 		}
 	}

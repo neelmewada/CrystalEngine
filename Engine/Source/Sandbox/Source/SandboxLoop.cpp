@@ -336,14 +336,37 @@ void SandboxLoop::SetupGUI()
     using namespace CE::Widgets;
 
 	window = CreateWidget<CWindow>(nullptr, "TestWindow");
+	window->SetAsDockSpaceWindow(true);
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
+	window->AddStyleProperty(CStylePropertyType::FlexDirection, CFlexDirection::Row);
+
+	auto subWindow = CreateWidget<CWindow>(window, "ChildWindow0");
+	subWindow->AddStyleProperty(CStylePropertyType::Padding, Vec4(5, 25, 5, 5));
+	subWindow->SetTitle("Sub Window");
 
 	for (int i = 0; i < 8; i++)
 	{
-		auto label = CreateWidget<CLabel>(window, "Label");
-
+		auto label = CreateWidget<CLabel>(subWindow, "Label");
+		label->SetInteractable(true);
+		label->SetText("This is a label");
+		label->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
+		label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0, 1), CStateFlag::Hovered);
+		label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.5f, 1), CStateFlag::Pressed);
+		label->AddStyleProperty(CStylePropertyType::MinHeight, 25);
 	}
+
+	auto button = CreateWidget<CButton>(subWindow, "Button");
+	button->SetText("Click Me");
+	button->AddStyleProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
+	button->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
+	button->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0, 1), CStateFlag::Hovered);
+	button->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.5f, 1), CStateFlag::Pressed);
+
+	Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []
+		{
+			CE_LOG(Info, All, "Button clicked!");
+		});
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 

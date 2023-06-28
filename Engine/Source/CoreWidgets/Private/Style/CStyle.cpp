@@ -131,9 +131,12 @@ namespace CE::Widgets
 		return flags;
 	}
 
-	CStyleValue& CStyle::AddProperty(CStylePropertyType propertyType, const CStyleValue& value)
+	CStyleValue& CStyle::AddProperty(CStylePropertyType propertyType, const CStyleValue& value, CStateFlag state, CSubControl subControl)
 	{
 		auto& styleVariants = properties[propertyType];
+		CStyleValue& modValue = const_cast<CStyleValue&>(value);
+		modValue.state = state;
+		modValue.subControl = subControl;
 
 		for (int i = styleVariants.GetSize() - 1; i >= 0; i--)
 		{
@@ -146,6 +149,7 @@ namespace CE::Widgets
 			}
 		}
 
+		isDirty = true;
 		styleVariants.Add(value);
 		return styleVariants.Top();
 	}

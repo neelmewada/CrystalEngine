@@ -6,7 +6,7 @@ namespace CE::Widgets
     CLASS()
     class COREWIDGETS_API CWindow : public CWidget
     {
-        CE_CLASS(CWindow, CE::Widgets::CWidget)
+        CE_CLASS(CWindow, CWidget)
     public:
         
         CWindow();
@@ -34,6 +34,11 @@ namespace CE::Widgets
         void AddSubWidget(CWidget* subWidget);
         void RemoveSubWidget(CWidget* subWidget);
 
+		virtual void OnComputeStyle() override;
+
+		inline bool IsDockSpaceWindow() const { return isDockSpaceWindow; }
+		inline void SetAsDockSpaceWindow(bool set) { isDockSpaceWindow = set; }
+
 	public:
 
 		// Params: Old Size, New Size
@@ -55,6 +60,14 @@ namespace CE::Widgets
 
 		FIELD()
 		Vec2 windowSize{};
+
+		FIELD()
+		b8 isDockSpaceWindow{};
+		String dockSpaceId{};
+
+
+		// Styling
+
 
     };
     

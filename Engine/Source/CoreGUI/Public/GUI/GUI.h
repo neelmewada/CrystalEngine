@@ -15,6 +15,7 @@ namespace CE::GUI
 	COREGUI_API Vec2 GetWindowPos();
 	COREGUI_API Vec2 GetWindowSize();
 	COREGUI_API Vec4 GetWindowRect();
+	COREGUI_API Vec2 GetWindowScroll();
 
 	COREGUI_API void SetWindowFontScale(f32 scale);
 	COREGUI_API f32 GetWindowFontScale();
@@ -22,6 +23,11 @@ namespace CE::GUI
 	COREGUI_API void PushFont(void* fontHandle);
 	COREGUI_API void PopFont();
 	COREGUI_API void SetCurrentFont(void* fontHandle);
+
+	/// Converts a rect from window space to global space
+	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow);
+	/// Converts a rect from global space to window space
+	COREGUI_API Vec4 GlobalRectToWindowRect(const Vec4& globalRect);
 
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition = Cond::None, const Vec2& pivot = Vec2(0, 0));
 
@@ -75,11 +81,17 @@ namespace CE::GUI
 
 	COREGUI_API void ShowDemoWindow(bool* open = nullptr);
 
+	COREGUI_API void Text(const Rect& rect, const String& text, const GuiStyleState& style);
+	COREGUI_API void Text(const Rect& rect, const char* text, const GuiStyleState& style);
+
 	COREGUI_API void Text(const char* text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
 	COREGUI_API void Text(const String& text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
 
 	COREGUI_API void TextColored(const char* text, const Color& color);
 	COREGUI_API void TextColored(const String& text, const Color& color);
+
+	COREGUI_API bool Button(const Rect& rect, const String& label, 
+		const GuiStyleState& normal, const GuiStyleState& hovered, const GuiStyleState& pressed, const Vec4& padding = {}, ButtonFlags flags = ButtonFlags::None);
 
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
@@ -173,7 +185,7 @@ namespace CE::GUI
     COREGUI_API void Indent(f32 indent = 0);
     COREGUI_API void Unindent(f32 indent = 0);
 
-	COREGUI_API Vec4 GetDefaultPadding();
+	COREGUI_API Vec4 GetDefaultFramePadding();
 
 #pragma endregion
 

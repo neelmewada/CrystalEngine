@@ -24,19 +24,59 @@ namespace CE::Widgets
         return text;
     }
 
-	Vec2 CLabel::CalculateIntrinsicContentSize()
+	Vec2 CLabel::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return GUI::CalculateTextSize(text);
-	}
-
-	void CLabel::UpdateStyle()
-	{
-		
+		return GUI::CalculateTextSize(text) + Vec2(6, 3);
 	}
 
     void CLabel::OnDrawGUI()
     {
-		GUI::Text(text);
+		auto top = YGNodeLayoutGetTop(node);
+		auto left = YGNodeLayoutGetLeft(node);
+		auto width = YGNodeLayoutGetWidth(node);
+		auto height = YGNodeLayoutGetHeight(node);
+		
+		Vec2 rectPos = Vec2(left, top);
+		Vec2 rectSize = Vec2(width, height);
+		Vec4 rect = Vec4(rectPos, rectPos + rectSize);
+
+		GUI::GuiStyleState* curState = &defaultStyleState;
+
+		if (IsLeftMouseHeld() && IsHovered()) // Pressed
+		{
+			curState = &pressedStyleState;
+		}
+		else if (IsHovered()) // Hovered
+		{
+			curState = &hoveredStyleState;
+		}
+
+		GUI::SetCursorPos(rectPos);
+		auto windowPos = GUI::GetWindowPos();
+
+		if (curState->background.a > 0)
+		{
+			GUI::FillRect(GUI::WindowRectToGlobalRect(rect), curState->background, curState->borderRadius);
+		}
+		if (curState->borderThickness > 0 && curState->borderColor.a > 0)
+		{
+			GUI::DrawRect(GUI::WindowRectToGlobalRect(rect), curState->borderColor, curState->borderRadius, curState->borderThickness);
+		}
+
+		if (invisibleButtonId.IsEmpty())
+		{
+			invisibleButtonId = String::Format("CLabel_InvisibleButton##{}", GetUuid());
+		}
+
+		if (IsInteractable())
+		{
+			GUI::InvisibleButton(invisibleButtonId, rectSize);
+			PollEvents();
+		}
+
+		GUI::Text(rect, text, *curState);
+
+		//GUI::Text(Rect(left, top, right, bottom), text);
 
 		/*style.Push();
 

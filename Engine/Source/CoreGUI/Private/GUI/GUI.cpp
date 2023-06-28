@@ -66,6 +66,14 @@ namespace CE::GUI
 		return Vec4(pos.x, pos.y, pos.x + size.x, pos.y + size.y);
 	}
 
+	COREGUI_API Vec2 GetWindowScroll()
+	{
+		ImGuiWindow* window = GImGui->CurrentWindow;
+		if (window == nullptr)
+			return {};
+		return Vec2(window->Scroll.x, window->Scroll.y);
+	}
+
 	COREGUI_API void SetWindowFontScale(f32 scale)
 	{
 		ImGui::SetWindowFontScale(scale);
@@ -91,6 +99,20 @@ namespace CE::GUI
 	COREGUI_API void SetCurrentFont(void* fontHandle)
 	{
 		ImGui::SetCurrentFont((ImFont*)fontHandle);
+	}
+
+	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow)
+	{
+		Vec2 windowPos = GetWindowPos();
+		Vec2 scroll = GetWindowScroll();
+		return rectInWindow + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y);
+	}
+
+	COREGUI_API Vec4 GlobalRectToWindowRect(const Vec4& globalRect)
+	{
+		Vec2 windowPos = GetWindowPos();
+		Vec2 scroll = GetWindowScroll();
+		return globalRect - Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y);
 	}
 
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition, const Vec2& pivot)
@@ -331,6 +353,94 @@ namespace CE::GUI
 		ImGui::ShowDemoWindow(open);
 	}
 
+	COREGUI_API void Text(const Rect& rect, const String& text, const GuiStyleState& style)
+	{
+		GUI::Text(rect, text.GetCString(), style);
+	}
+
+	COREGUI_API void Text(const Rect& rect, const char* text, const GuiStyleState& style)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+		ImGuiContext& g = *GImGui;
+
+		const char* text_end = NULL;
+
+		// Accept null ranges
+		if (text == text_end)
+			text = text_end = "";
+		ImGuiTextFlags flags = ImGuiTextFlags_None;
+
+		// Calculate length
+		const char* text_begin = text;
+		if (text_end == NULL)
+			text_end = text + strlen(text); // FIXME-OPT
+
+		auto textAlign = style.textAlign;
+		ImVec2 align = ImVec2(0.5f, 0.5f);
+
+		if (textAlign == TextAlign_TopLeft)
+		{
+			align = ImVec2(0, 0);
+		}
+		else if (textAlign == TextAlign_TopCenter)
+		{
+			align = ImVec2(0.5f, 0);
+		}
+		else if (textAlign == TextAlign_TopRight)
+		{
+			align = ImVec2(1, 0);
+		}
+		else if (textAlign == TextAlign_MiddleLeft)
+		{
+			align = ImVec2(0, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleCenter)
+		{
+			align = ImVec2(0.5f, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleRight)
+		{
+			align = ImVec2(1, 0.5f);
+		}
+		else if (textAlign == TextAlign_BottomLeft)
+		{
+			align = ImVec2(0, 1);
+		}
+		else if (textAlign == TextAlign_BottomCenter)
+		{
+			align = ImVec2(0.5f, 1);
+		}
+		else if (textAlign == TextAlign_BottomRight)
+		{
+			align = ImVec2(1, 1);
+		}
+
+		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
+
+		ImVec2 inSize = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+		
+		const ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+		const float wrap_pos_x = window->DC.TextWrapPos;
+		const bool wrap_enabled = (wrap_pos_x >= 0.0f);
+		//if (text_end - text <= 2000)
+		{
+			// Common case
+			//const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
+			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);// , wrap_width);
+
+			ImRect bb(text_pos, text_pos + inSize);
+			ImGui::ItemSize(inSize, 0.0f);
+			if (!ImGui::ItemAdd(bb, 0))
+				return;
+
+			ImGui::PushStyleColor(StyleCol_Text, style.foreground.ToU32());
+			ImGui::RenderTextClipped(bb.Min, bb.Max, text_begin, text_end, &text_size, align);
+			ImGui::PopStyleColor(1);
+		}
+	}
+
 	COREGUI_API void Text(const char* text, const Vec2& size, TextAlign textAlign)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -514,6 +624,101 @@ namespace CE::GUI
 	COREGUI_API void TextColored(const String& text, const Color& color)
 	{
 		ImGui::TextColored(ImVec4(color.r, color.g, color.b, color.a), text.GetCString());
+	}
+
+	COREGUI_API bool Button(const Rect& rect, const String& label, 
+		const GuiStyleState& normalState, const GuiStyleState& hoveredState, const GuiStyleState& pressedState, 
+		const Vec4& padding, ButtonFlags buttonFlags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+
+		int flags = (int)buttonFlags;
+
+		const ImGuiID id = window->GetID(label.GetCString());
+		const ImVec2 label_size = ImGui::CalcTextSize(label.GetCString(), NULL, true);
+
+		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
+
+		ImVec2 pos = window->DC.CursorPos;
+		if (((int)flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
+			pos.y += window->DC.CurrLineTextBaseOffset - padding.top;//style.FramePadding.y;
+
+		ImVec2 size = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+
+		const ImRect bb(pos, pos + size);
+		const ImRect bbInner(bb.Min.x + padding.x, bb.Min.y + padding.y, bb.Max.x - padding.z, bb.Max.y - padding.w);
+		Rect innerRect{ bb.Min.x + padding.x, bb.Min.y + padding.y, bb.Max.x - padding.z, bb.Max.y - padding.w };
+
+		ImGui::ItemSize(bb, padding.y);
+		if (!ImGui::ItemAdd(bb, id))
+			return false;
+
+		if (g.LastItemData.InFlags & ImGuiItemFlags_ButtonRepeat)
+			flags |= ImGuiButtonFlags_Repeat;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
+
+		// Render highlight
+		ImGui::RenderNavHighlight(bb, id);
+
+		const GUI::GuiStyleState& curState = (held && hovered) ? pressedState : hovered ? hoveredState : normalState;
+		GUI::FillRect(WindowRectToGlobalRect(rect), curState.background, curState.borderRadius);
+
+		auto textAlign = curState.textAlign;
+		ImVec2 align = style.ButtonTextAlign;
+		if (textAlign == TextAlign_TopLeft)
+		{
+			align = ImVec2(0, 0);
+		}
+		else if (textAlign == TextAlign_TopCenter)
+		{
+			align = ImVec2(0.5f, 0);
+		}
+		else if (textAlign == TextAlign_TopRight)
+		{
+			align = ImVec2(1, 0);
+		}
+		else if (textAlign == TextAlign_MiddleLeft)
+		{
+			align = ImVec2(0, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleCenter)
+		{
+			align = ImVec2(0.5f, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleRight)
+		{
+			align = ImVec2(1, 0.5f);
+		}
+		else if (textAlign == TextAlign_BottomLeft)
+		{
+			align = ImVec2(0, 1);
+		}
+		else if (textAlign == TextAlign_BottomCenter)
+		{
+			align = ImVec2(0.5f, 1);
+		}
+		else if (textAlign == TextAlign_BottomRight)
+		{
+			align = ImVec2(1, 1);
+		}
+
+		if (g.LogEnabled)
+			ImGui::LogSetNextTextDecoration("[", "]");
+		ImGui::RenderTextClipped(bbInner.Min, bbInner.Max, label.GetCString(), NULL, &label_size, align, &bb);
+
+		// Automatically close popups
+		//if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
+		//    CloseCurrentPopup();
+
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(), g.LastItemData.StatusFlags);
+		return pressed;
 	}
 
 	COREGUI_API bool Button(const String& label, const Vec2& size, ButtonFlags flags)
@@ -2925,7 +3130,7 @@ namespace CE::GUI
 
     COREGUI_API Vec2 CalculateTextSize(const char* text)
     {
-        ImVec2 size = ImGui::CalcTextSize(text);
+        ImVec2 size = ImGui::CalcTextSize(text, 0, true);
         return Vec2(size.x, size.y);
     }
 
@@ -2966,7 +3171,7 @@ namespace CE::GUI
         ImGui::Unindent(indent);
     }
 
-	COREGUI_API Vec4 GetDefaultPadding()
+	COREGUI_API Vec4 GetDefaultFramePadding()
 	{
 		auto padding = ImGui::GetStyle().FramePadding;
 		return Vec4(padding.x, padding.y, padding.x, padding.y);

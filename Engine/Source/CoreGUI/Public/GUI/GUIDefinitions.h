@@ -698,6 +698,18 @@ namespace CE::GUI
 	};
 	ENUM_CLASS_FLAGS(SelectableFlags);
 
+	struct COREGUI_API GuiStyleState
+	{
+		// Border
+		Vec4 borderRadius{};
+		f32 borderThickness = 0;
+		Color borderColor{};
+		// Color
+		Color background{};
+		Color foreground = Color::White();
+		// Text
+		TextAlign textAlign = TextAlign_MiddleCenter;
+	};
     
 } // namespace CE
 

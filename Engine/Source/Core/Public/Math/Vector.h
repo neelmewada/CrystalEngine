@@ -15,9 +15,13 @@ namespace CE
     typedef TVector3<f32> Vec3;
     typedef TVector4<f32> Vec4;
 
+	typedef Vec4 Rect;
+
     typedef TVector2<s32> Vec2i;
     typedef TVector3<s32> Vec3i;
     typedef TVector4<s32> Vec4i;
+
+	typedef Vec4i RectInt;
 
     template<typename T>
     class TVector2
@@ -384,6 +388,7 @@ namespace CE
 		{}
 
         TVector4(TVector2<T> vec2);
+		TVector4(TVector2<T> xy, TVector2<T> zw);
         TVector4(TVector3<T> vec3);
 
         union {
@@ -392,6 +397,9 @@ namespace CE
             };
 			struct {
 				T left, top, right, bottom;
+			};
+			struct {
+				T topLeft, topRight, bottomRight, bottomLeft;
 			};
 			struct {
 				TVector2<T> min, max;
@@ -584,6 +592,10 @@ namespace CE
     template<typename T>
     TVector4<T>::TVector4(TVector2<T> vec2) : x(vec2.x), y(vec2.y), z(0), w(0)
     {}
+
+	template<typename T>
+	TVector4<T>::TVector4(TVector2<T> xy, TVector2<T> zw) : x(xy.x), y(xy.y), z(zw.x), w(zw.y)
+	{}
 
     template<typename T>
     TVector4<T>::TVector4(TVector3<T> vec3) : x(vec3.x), y(vec3.y), z(vec3.z), w(0)

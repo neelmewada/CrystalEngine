@@ -28,10 +28,10 @@ namespace CE::Widgets
 
 		// - Public API -
 
-		void ComputeStyles();
-
 		void UpdateLayoutIfNeeded();
 		void UpdateStyleIfNeeded();
+
+		virtual void OnComputeStyle() {}
 
 		inline bool NeedsLayout() const { return needsLayout; }
 		inline bool NeedsStyle() const { return needsStyle; }
@@ -45,11 +45,13 @@ namespace CE::Widgets
 		virtual void RenderGUI();
         
         virtual bool IsWindow() { return false; }
+
+		/// Should return true if a widget can contain & render subwidgets
 		virtual bool IsContainer() { return IsWindow(); }
 
 		virtual Vec2 CalculateEstimateSize() { return Vec2(); }
 
-		virtual Vec2 CalculateIntrinsicContentSize() { return Vec2(); }
+		virtual Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) { return Vec2(); }
         
         void SetWidgetFlags(WidgetFlags flags);
         
@@ -73,19 +75,19 @@ namespace CE::Widgets
 		inline void AddStyleClass(const String& styleClass)
 		{
 			styleClasses.Add(styleClass);
-			ComputeStyles();
+			SetNeedsStyle();
 		}
 
 		inline void AddStyleClasses(const Array<String>& styleClasses)
 		{
 			this->styleClasses.AddRange(styleClasses);
-			ComputeStyles();
+			SetNeedsStyle();
 		}
 
 		inline void RemoveStyleClass(const String& styleClass)
 		{
 			styleClasses.Remove(styleClass);
-			ComputeStyles();
+			SetNeedsStyle();
 		}
 
 		inline bool StyleClassExists(const String& styleClass) const
@@ -93,9 +95,9 @@ namespace CE::Widgets
 			return styleClasses.Exists(styleClass);
 		}
 
-		inline CStyleValue& AddStyleProperty(CStylePropertyType property, const CStyleValue& value)
+		inline CStyleValue& AddStyleProperty(CStylePropertyType property, const CStyleValue& value, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None)
 		{
-			return style.AddProperty(property, value);
+			return style.AddProperty(property, value, state, subControl);
 		}
 
 		CWidget* GetOwner();
@@ -112,6 +114,8 @@ namespace CE::Widgets
 	protected:
 
 		CWidget();
+
+		void LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState);
 
 		// Events
 
@@ -140,6 +144,8 @@ namespace CE::Widgets
 
 	private:
 
+		static YGSize MeasureFunctionCallback(YGNodeRef nodeRef, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
+
 		virtual void OnSubobjectAttached(Object* subobject) override;
 		virtual void OnSubobjectDetached(Object* subobject) override;
 
@@ -159,6 +165,12 @@ namespace CE::Widgets
 
 		YGNodeRef node{};
 
+		// Style states
+
+		GUI::GuiStyleState defaultStyleState{};
+		GUI::GuiStyleState hoveredStyleState{};
+		GUI::GuiStyleState pressedStyleState{};
+
     private:
 
 		b8 needsLayout = true;
@@ -177,13 +189,6 @@ namespace CE::Widgets
         
 	private:
 
-		struct PushedProperties
-		{
-			u32 pushedColors = 0;
-			u32 pushedVars = 0;
-		};
-
-		Array<PushedProperties> pushedPropertiesStack{};
         
 	};
     

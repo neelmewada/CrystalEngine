@@ -279,6 +279,20 @@ namespace CE::Widgets
 			return invalid;
 		}
 
+		const CStyleValue& Get(CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) const
+		{
+			static CStyleValue invalid{};
+
+			for (int i = this->GetSize() - 1; i >= 0; i--)
+			{
+				auto& item = At(i);
+				if (item.state == state && (item.subControl == CSubControl::Any || item.subControl == subControl))
+					return item;
+			}
+
+			return invalid;
+		}
+
 	};
 
 	STRUCT()
@@ -294,7 +308,7 @@ namespace CE::Widgets
 		static bool IsInheritedProperty(CStylePropertyType property);
 		static CStylePropertyTypeFlags GetPropertyTypeFlags(CStylePropertyType property);
 
-		CStyleValue& AddProperty(CStylePropertyType property, const CStyleValue& value);
+		CStyleValue& AddProperty(CStylePropertyType property, const CStyleValue& value, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None);
 
 		CStyleValue& GetProperty(CStylePropertyType property, CStateFlag forState = CStateFlag::Default, CSubControl forSubControl = CSubControl::None);
 

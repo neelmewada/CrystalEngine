@@ -28,15 +28,32 @@ namespace CE::Widgets
         this->windowTitle = String::Format(title + "###{}", GetName());
     }
 
+	void CWindow::OnComputeStyle()
+	{
+		for (const auto& [property, variants] : style.properties)
+		{
+			
+		}
+	}
+
     void CWindow::OnDrawGUI()
     {
         if (isShown)
         {
-			GUI::WindowFlags windowFlags = GUI::WF_None;
+			GUI::WindowFlags windowFlags = GUI::WF_None | GUI::WF_HorizontalScrollbar;
 			if (isFullscreen)
 				windowFlags |= GUI::WF_FullScreen | GUI::WF_NoPadding;
+			if (IsDockSpaceWindow())
+				windowFlags |= GUI::WF_NoPadding;
 
             GUI::BeginWindow(windowTitle, &isShown, windowFlags);
+
+			if (IsDockSpaceWindow())
+			{
+				if (dockSpaceId.IsEmpty())
+					dockSpaceId = String::Format("DockSpace##{}", GetUuid());
+				GUI::DockSpace(dockSpaceId);
+			}
 
             for (CWidget* subWidget : attachedWidgets)
             {
