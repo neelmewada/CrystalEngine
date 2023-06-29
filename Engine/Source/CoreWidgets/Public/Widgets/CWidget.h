@@ -11,9 +11,16 @@ namespace CE::Widgets
 	{
 	public:
 
-		CWidgetException(const String& message) : std::exception(message.GetCString())
+		CWidgetException(const String& message) : message(message)
 		{}
+        
+        virtual const char* what() const noexcept override
+        {
+            return message.GetCString();
+        }
 
+    private:
+        String message{};
 	};
 
 	class CWindow;

@@ -10,7 +10,7 @@ namespace CE::Widgets
 			return YGSize();
 
 		auto size = widget->CalculateIntrinsicContentSize(width, height);
-		return YGSize(size.x, size.y);
+        return YGSize{size.x, size.y};
 	}
 
 	CWidget::CWidget()
