@@ -70,11 +70,11 @@ int main(int argc, char** argv)
                     fileStream.SetBinaryMode(true);
                     if (fileStream.IsOpen())
                     {
-                        String fileName = "";
-                        fileStream >> fileName;
+                        String filePath = "";
+                        fileStream >> filePath;
                         u32 crc = 0;
                         fileStream >> crc;
-                        auto fullFilePath = child.GetParentPath() / fileName;
+                        auto fullFilePath = IO::Path(filePath);
                         if (fullFilePath.Exists() && crc != 0)
                             moduleStamp.headers.Add(HeaderCRC(fullFilePath, crc));
                         fileStream.Close();
@@ -97,8 +97,8 @@ int main(int argc, char** argv)
             fileStream.SetBinaryMode(true);
             if (fileStream.IsOpen())
             {
-                String fileName = header.headerPath.GetFilename().GetString();
-                fileStream << fileName;
+                //String fileName = header.headerPath.GetFilename().GetString();
+                fileStream << header.headerPath.GetString();
                 fileStream << header.crc;
                 fileStream.Close();
             }

@@ -640,6 +640,7 @@ namespace CE::GUI
 		int            cursorPos;      //                                      // Read-write   // [Completion,History,Always]
 		int            selectionStart; //                                      // Read-write   // [Completion,History,Always] == to SelectionEnd when no selection)
 		int            selectionEnd;   //       
+
 	};
 
 	typedef int (*TextInputCallback)(TextInputCallbackData* data);

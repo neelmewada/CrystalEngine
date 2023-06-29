@@ -72,7 +72,6 @@ namespace CE::Widgets
 		FIELD()
 		b8 isDockSpaceWindow{};
 		String dockSpaceId{};
-
     };
     
 } // namespace CE::Widgets

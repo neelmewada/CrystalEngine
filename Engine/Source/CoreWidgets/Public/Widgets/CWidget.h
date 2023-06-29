@@ -123,6 +123,16 @@ namespace CE::Widgets
 			return Rect(pos, pos + size);
 		}
 
+		inline Vec4 GetComputedLayoutPadding() const
+		{
+			Vec4 padding{};
+			padding.left = YGNodeLayoutGetPadding(node, YGEdgeLeft);
+			padding.top = YGNodeLayoutGetPadding(node, YGEdgeTop);
+			padding.right = YGNodeLayoutGetPadding(node, YGEdgeRight);
+			padding.bottom = YGNodeLayoutGetPadding(node, YGEdgeBottom);
+			return padding;
+		}
+
 	protected:
 
 		CWidget();
@@ -180,8 +190,17 @@ namespace CE::Widgets
 		// Style states
 
 		GUI::GuiStyleState defaultStyleState{};
-		GUI::GuiStyleState hoveredStyleState{};
-		GUI::GuiStyleState pressedStyleState{};
+
+
+		union {
+			GUI::GuiStyleState hoveredStyleState{};
+			GUI::GuiStyleState disabledStyleState;
+		};
+
+		union {
+			GUI::GuiStyleState pressedStyleState{};
+			GUI::GuiStyleState activeStyleState;
+		};
 
     private:
 

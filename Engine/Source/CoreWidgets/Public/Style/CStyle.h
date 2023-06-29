@@ -31,6 +31,7 @@ namespace CE::Widgets
 		None = 0,
 		Icon,
 		Tab,
+		Selection,
 		TitleBar,
 		MenuBar,
 		Header,

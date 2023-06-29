@@ -53,7 +53,15 @@ namespace CE::Widgets
 			if (IsDockSpaceWindow())
 				windowFlags |= GUI::WF_NoPadding;
 
+			auto color = defaultStyleState.background;
+			
+			if (color.a > 0)
+				GUI::PushStyleColor(GUI::StyleCol_WindowBg, color);
+
             GUI::BeginWindow(windowTitle, &isShown, windowFlags);
+
+			if (color.a > 0)
+				GUI::PopStyleColor();
 
 			if (IsDockSpaceWindow())
 			{

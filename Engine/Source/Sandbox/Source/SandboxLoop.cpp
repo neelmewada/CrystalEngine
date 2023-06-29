@@ -3,6 +3,7 @@
 #include "OpenSans.h"
 
 using namespace CE;
+using namespace CE::Widgets;
 
 void SandboxLoop::PreInit(int argc, const char** argv)
 {
@@ -336,20 +337,18 @@ void SandboxLoop::SetupGUI()
     using namespace CE::Widgets;
 
 	window = CreateWidget<CWindow>(nullptr, "TestWindow");
-	window->SetAsDockSpaceWindow(true);
+	//window->SetAsDockSpaceWindow(true);
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
-
-	auto subWindow = CreateWidget<CWindow>(window, "SubWindow");
-	subWindow->SetTitle("Sub Window");
-	subWindow->AddStyleProperty(CStylePropertyType::Padding, Vec4(5, 25, 5, 5));
-	subWindow->AddStyleProperty(CStylePropertyType::FlexDirection, CFlexDirection::Column);
-	subWindow->AddStyleProperty(CStylePropertyType::AlignItems, CAlign::FlexStart);
-	subWindow->SetAllowHorizontalScroll(true);
+	window->AddStyleProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36));
+	window->AddStyleProperty(CStylePropertyType::Padding, Vec4(5, 25, 5, 5));
+	window->AddStyleProperty(CStylePropertyType::FlexDirection, CFlexDirection::Column);
+	window->AddStyleProperty(CStylePropertyType::AlignItems, CAlign::FlexStart);
+	window->SetAllowHorizontalScroll(true);
 
 	for (int i = 0; i < 8; i++)
 	{
-		auto label = CreateWidget<CLabel>(subWindow, "Label");
+		auto label = CreateWidget<CLabel>(window, "Label");
 		label->SetInteractable(true);
 		label->SetText("This is a label");
 		label->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
@@ -358,7 +357,7 @@ void SandboxLoop::SetupGUI()
 		label->AddStyleProperty(CStylePropertyType::MinHeight, 25);
 	}
 
-	auto button = CreateWidget<CButton>(subWindow, "Button");
+	auto button = CreateWidget<CButton>(window, "Button");
 	button->SetText("Click Me");
 	button->AddStyleProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
 	button->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
@@ -369,6 +368,16 @@ void SandboxLoop::SetupGUI()
 		{
 			CE_LOG(Info, All, "Button clicked!");
 		});
+
+	auto inputField = CreateWidget<CTextInput>(window, "TextInput");
+	inputField->SetHint("Type here...");
+	inputField->AddStyleProperty(CStylePropertyType::Background, Color::FromRGBA32(15, 15, 15));
+	inputField->AddStyleProperty(CStylePropertyType::BorderWidth, 1);
+	inputField->AddStyleProperty(CStylePropertyType::BorderRadius, Vec4(1, 1, 1, 1));
+	inputField->AddStyleProperty(CStylePropertyType::Padding, Vec4(1, 1, 1, 1) * 3);
+	inputField->AddStyleProperty(CStylePropertyType::Height, 30);
+	inputField->AddStyleProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(42, 42, 42));
+	inputField->AddStyleProperty(CStylePropertyType::ForegroundColor, Color::White());
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 
