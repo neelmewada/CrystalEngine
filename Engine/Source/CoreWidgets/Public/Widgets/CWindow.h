@@ -20,6 +20,11 @@ namespace CE::Widgets
         }
         
         virtual bool IsWindow() override { return true; }
+
+		virtual Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
+		inline bool AllowHorizontalScroll() const { return allowHorizontalScroll; }
+		inline void SetAllowHorizontalScroll(bool value) { allowHorizontalScroll = value; }
         
         void Show();
         void Hide();
@@ -59,15 +64,14 @@ namespace CE::Widgets
 		b8 isFullscreen = false;
 
 		FIELD()
+		b8 allowHorizontalScroll = false;
+
+		FIELD()
 		Vec2 windowSize{};
 
 		FIELD()
 		b8 isDockSpaceWindow{};
 		String dockSpaceId{};
-
-
-		// Styling
-
 
     };
     

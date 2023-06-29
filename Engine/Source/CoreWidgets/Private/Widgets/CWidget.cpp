@@ -98,7 +98,7 @@ namespace CE::Widgets
 			{
 				LoadGuiStyleStateProperty(property, value, pressedStyleState);
 			}
-
+			
 			if (!value.IsValid())
 				continue;
 
@@ -349,9 +349,16 @@ namespace CE::Widgets
 		if (!needsLayout)
 			return;
         
-        if (GetOwner() == nullptr)
+        if (IsWindow())
         {
-            YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
+			CWindow* window = (CWindow*)this;
+			if (!window->IsDockSpaceWindow())
+			{
+				Vec2 size = CalculateIntrinsicContentSize(YGUndefined, YGUndefined);
+				if (size.x <= 0) size.x = YGUndefined;
+				if (size.y <= 0) size.y = YGUndefined;
+				YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
+			}
         }
 
 		needsLayout = false;
@@ -459,10 +466,10 @@ namespace CE::Widgets
 			needsLayout = true;
 		}
 
+		OnDrawGUI();
+
 		UpdateStyleIfNeeded();
 		UpdateLayoutIfNeeded();
-
-		OnDrawGUI();
 	}
 
 	void CWidget::PollEvents()

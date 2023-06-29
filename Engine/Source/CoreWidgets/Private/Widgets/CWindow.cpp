@@ -5,7 +5,7 @@ namespace CE::Widgets
 
     CWindow::CWindow()
     {
-        windowTitle = GetName().GetString();
+		SetTitle(GetName().GetCString());
     }
 
     CWindow::~CWindow()
@@ -13,7 +13,12 @@ namespace CE::Widgets
 
     }
 
-    void CWindow::Show()
+	Vec2 CWindow::CalculateIntrinsicContentSize(f32 width, f32 height)
+	{
+		return Vec2(windowSize.x, YGUndefined);
+	}
+
+	void CWindow::Show()
     {
         isShown = true;
     }
@@ -40,7 +45,9 @@ namespace CE::Widgets
     {
         if (isShown)
         {
-			GUI::WindowFlags windowFlags = GUI::WF_None | GUI::WF_HorizontalScrollbar;
+			GUI::WindowFlags windowFlags = GUI::WF_None;
+			if (allowHorizontalScroll)
+				windowFlags |= GUI::WF_HorizontalScrollbar;
 			if (isFullscreen)
 				windowFlags |= GUI::WF_FullScreen | GUI::WF_NoPadding;
 			if (IsDockSpaceWindow())
@@ -87,6 +94,8 @@ namespace CE::Widgets
 		{
 			CResizeEvent* resizeEvent = (CResizeEvent*)event;
 			emit OnWindowResized(resizeEvent->oldSize, resizeEvent->newSize);
+
+			SetNeedsLayout();
 		}
 
 		Super::HandleEvent(event);

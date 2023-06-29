@@ -111,6 +111,18 @@ namespace CE::Widgets
 
 		CWidget* FindSubWidget(const Name& name);
 
+		// Calculated Layout
+
+		inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
+		inline Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
+
+		inline Rect GetComputedLayoutRect() const
+		{
+			Vec2 pos = GetComputedLayoutTopLeft();
+			Vec2 size = GetComputedLayoutSize();
+			return Rect(pos, pos + size);
+		}
+
 	protected:
 
 		CWidget();

@@ -339,11 +339,13 @@ void SandboxLoop::SetupGUI()
 	window->SetAsDockSpaceWindow(true);
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
-	window->AddStyleProperty(CStylePropertyType::FlexDirection, CFlexDirection::Row);
 
-	auto subWindow = CreateWidget<CWindow>(window, "ChildWindow0");
-	subWindow->AddStyleProperty(CStylePropertyType::Padding, Vec4(5, 25, 5, 5));
+	auto subWindow = CreateWidget<CWindow>(window, "SubWindow");
 	subWindow->SetTitle("Sub Window");
+	subWindow->AddStyleProperty(CStylePropertyType::Padding, Vec4(5, 25, 5, 5));
+	subWindow->AddStyleProperty(CStylePropertyType::FlexDirection, CFlexDirection::Column);
+	subWindow->AddStyleProperty(CStylePropertyType::AlignItems, CAlign::FlexStart);
+	subWindow->SetAllowHorizontalScroll(true);
 
 	for (int i = 0; i < 8; i++)
 	{
