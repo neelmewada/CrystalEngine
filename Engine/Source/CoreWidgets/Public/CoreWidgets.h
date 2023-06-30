@@ -14,6 +14,8 @@
 #include "Data/CDataModel.h"
 
 #include "Style/CStyle.h"
+#include "Style/StyleParser.h"
+#include "Style/CStyleManager.h"
 #include "Event/CEvent.h"
 
 #include "Widgets/CWidget.h"
