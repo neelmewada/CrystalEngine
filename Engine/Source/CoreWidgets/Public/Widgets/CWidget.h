@@ -190,7 +190,7 @@ namespace CE::Widgets
 		Array<String> styleClasses{};
 
 		FIELD()
-		CStyle style{};
+		CStyle style{}; // Final computed style
 
 		YGNodeRef node{};
 

@@ -64,6 +64,12 @@ namespace CE::Widgets
 		return *this;
 	}
 
+    CStyleValue::CStyleValue(CStyleValue&& move)
+    {
+		CopyFrom(move);
+		memset(&move, 0, sizeof(Self));
+    }
+
 	void CStyleValue::CopyFrom(const CStyleValue& copy)
 	{
 		if (valueType != copy.valueType)

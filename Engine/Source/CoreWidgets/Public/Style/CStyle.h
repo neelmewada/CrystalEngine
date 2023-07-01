@@ -172,6 +172,8 @@ namespace CE::Widgets
 
 		CStyleValue& operator=(const CStyleValue& copy);
 
+		CStyleValue(CStyleValue&& move);
+
 		void CopyFrom(const CStyleValue& copy);
 
 		inline bool IsOfType(ValueType checkType) const { return valueType == checkType; }

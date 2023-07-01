@@ -14,7 +14,11 @@
 #include "Data/CDataModel.h"
 
 #include "Style/CStyle.h"
-#include "Style/StyleParser.h"
+
+#include "Style/Parser/CSSParserToken.h"
+#include "Style/Parser/CSSTokenizer.h"
+#include "Style/Parser/CSSParser.h"
+
 #include "Style/CStyleManager.h"
 #include "Event/CEvent.h"
 

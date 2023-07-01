@@ -52,24 +52,32 @@ CLabel::hovered {
 }
 )";
 
-TEST(Style, TokenParser)
+TEST(Style, Tokenizer)
 {
     TEST_BEGIN;
 
-	StyleParser parser{};
-	parser.ParseTokens(css1);
+	MemoryStream stream{ css1.GetCString(), css1.GetLength() + 1, Stream::Permissions::ReadOnly };
+	stream.SetAsciiMode(true); // Set as text mode
 
-	auto tokens = parser.GetTokens();
+	CSSTokenizer tokenizer{ &stream };
 
-	EXPECT_EQ(tokens[0].type, CSSTokenType::Identifier); EXPECT_EQ(tokens[0].lexeme, "CLabel");
-	EXPECT_EQ(tokens[1].type, CSSTokenType::Colon); EXPECT_EQ(tokens[2].type, CSSTokenType::Colon);
-	EXPECT_EQ(tokens[3].type, CSSTokenType::Identifier); EXPECT_EQ(tokens[3].lexeme, "hovered");
-	EXPECT_EQ(tokens[4].type, CSSTokenType::Whitespace);
-	EXPECT_EQ(tokens[5].type, CSSTokenType::CurlyOpen);
-	EXPECT_EQ(tokens[6].type, CSSTokenType::Identifier);
-	EXPECT_EQ(tokens[7].type, CSSTokenType::Colon);
-	EXPECT_EQ(tokens[8].type, CSSTokenType::Identifier); EXPECT_EQ(tokens[8].lexeme, "rgba");
-	EXPECT_EQ(tokens[9].type, CSSTokenType::ParenOpen);
+	Array<CSSParserToken> tokens{};
+
+	while (tokenizer.HasNextToken())
+	{
+		tokens.Add(tokenizer.NextToken());
+	}
+
+	EXPECT_EQ(tokens[0].type, IdentifierToken); EXPECT_EQ(tokens[0].lexeme, "CLabel");
+	EXPECT_EQ(tokens[1].type, ColonToken);
+	EXPECT_EQ(tokens[2].type, ColonToken);
+	EXPECT_EQ(tokens[3].type, IdentifierToken); EXPECT_EQ(tokens[3].lexeme, "hovered");
+	EXPECT_EQ(tokens[4].type, WhitespaceToken);
+	EXPECT_EQ(tokens[5].type, CurlyOpenToken);
+	EXPECT_EQ(tokens[6].type, IdentifierToken);
+	EXPECT_EQ(tokens[7].type, ColonToken);
+	EXPECT_EQ(tokens[8].type, IdentifierToken); EXPECT_EQ(tokens[8].lexeme, "rgba");
+	EXPECT_EQ(tokens[9].type, ParenOpenToken);
     
     TEST_END;
 }
