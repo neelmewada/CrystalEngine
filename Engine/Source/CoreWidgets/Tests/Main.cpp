@@ -46,11 +46,30 @@ void EndTest()
 *   Performance
 */
 
-TEST(Style, Parser)
+static String css1 = R"(
+CLabel::hovered {
+	background-color: rgba(120, 120, 120, 255);
+}
+)";
+
+TEST(Style, TokenParser)
 {
     TEST_BEGIN;
-    
-    
+
+	StyleParser parser{};
+	parser.ParseTokens(css1);
+
+	auto tokens = parser.GetTokens();
+
+	EXPECT_EQ(tokens[0].type, CSSTokenType::Identifier); EXPECT_EQ(tokens[0].lexeme, "CLabel");
+	EXPECT_EQ(tokens[1].type, CSSTokenType::Colon); EXPECT_EQ(tokens[2].type, CSSTokenType::Colon);
+	EXPECT_EQ(tokens[3].type, CSSTokenType::Identifier); EXPECT_EQ(tokens[3].lexeme, "hovered");
+	EXPECT_EQ(tokens[4].type, CSSTokenType::Whitespace);
+	EXPECT_EQ(tokens[5].type, CSSTokenType::CurlyOpen);
+	EXPECT_EQ(tokens[6].type, CSSTokenType::Identifier);
+	EXPECT_EQ(tokens[7].type, CSSTokenType::Colon);
+	EXPECT_EQ(tokens[8].type, CSSTokenType::Identifier); EXPECT_EQ(tokens[8].lexeme, "rgba");
+	EXPECT_EQ(tokens[9].type, CSSTokenType::ParenOpen);
     
     TEST_END;
 }

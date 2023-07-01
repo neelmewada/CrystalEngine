@@ -9,6 +9,9 @@ namespace CE::Widgets
         Identifier,
         Colon,
         SemiColon,
+		Comma,
+		HashSign,
+		EqualSign,
         CurlyOpen, CurlyClose,
         SquareOpen, SquareClose,
         ParenOpen, ParenClose,
@@ -32,6 +35,8 @@ namespace CE::Widgets
         ~StyleParser();
         
         void ParseTokens(const String& css);
+
+		inline const Array<CSSToken>& GetTokens() const { return tokens; }
         
     private:
         
