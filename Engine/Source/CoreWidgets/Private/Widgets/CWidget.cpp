@@ -37,7 +37,7 @@ namespace CE::Widgets
 		{
 			outState.background = styleValue.color;
 		}
-		else if (property == CStylePropertyType::ForegroundColor && styleValue.IsColor())
+		else if (property == CStylePropertyType::Foreground && styleValue.IsColor())
 		{
 			outState.foreground = styleValue.color;
 		}
@@ -68,6 +68,7 @@ namespace CE::Widgets
 			return;
 
 		node->setStyle({}); // Clear style
+		
 
 		for (auto& [property, variants] : style.properties)
 		{
@@ -564,6 +565,8 @@ namespace CE::Widgets
 				HandleEvent(&event);
 				isHovered = hovered;
 				prevHoverPos = event.mousePos;
+
+				stateFlags |= CStateFlag::Hovered;
 			}
 			else if (hovered && isHovered)
 			{
@@ -682,6 +685,20 @@ namespace CE::Widgets
 				}
 			}
 		}
+
+		if (IsLeftMouseHeld() && IsHovered())
+		{
+			EnumAddFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed);
+		}
+		else if (IsHovered())
+		{
+			EnumAddFlags(stateFlags, CStateFlag::Hovered);
+			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
+		}
+		else
+		{
+			EnumRemoveFlags(stateFlags, CStateFlag::Pressed | CStateFlag::Hovered);
+		}
 	}
 
     void CWidget::SetWidgetFlags(WidgetFlags flags)
@@ -694,6 +711,16 @@ namespace CE::Widgets
         return widgetFlags;
     }
 	
+	void CWidget::SetStyleSheet(CStyleSheet* stylesheet)
+	{
+		if (this->stylesheet != nullptr)
+		{
+			this->stylesheet->RequestDestroy();
+		}
+
+		this->stylesheet = stylesheet;
+	}
+
 	CWidget* CWidget::GetOwner()
 	{
 		if (GetOuter() == nullptr)
@@ -713,6 +740,21 @@ namespace CE::Widgets
 		return nullptr;
 	}
 
+	int CWidget::GetSubWidgetIndex(CWidget* subWidget)
+	{
+		for (int i = 0; i < attachedWidgets.GetSize(); i++)
+		{
+			if (attachedWidgets[i] == subWidget)
+				return i;
+		}
+		return -1;
+	}
+
+	int CWidget::GetSubWidgetCount()
+	{
+		return attachedWidgets.GetSize();
+	}
+
 	CWidget* CWidget::FindSubWidget(const Name& name)
 	{
 		for (auto subWidget : attachedWidgets)
@@ -722,6 +764,14 @@ namespace CE::Widgets
 		}
 		return nullptr;
 	}
+
+	CWidget* CWidget::GetSubWidgetAt(int index)
+	{
+		if (index < 0 || index >= attachedWidgets.GetSize())
+			return nullptr;
+		return attachedWidgets[index];
+	}
+	
 
 	void CWidget::HandleEvent(CEvent* event)
     {

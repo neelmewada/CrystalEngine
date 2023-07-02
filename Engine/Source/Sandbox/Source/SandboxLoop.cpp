@@ -346,7 +346,7 @@ void SandboxLoop::SetupGUI()
 	window->AddStyleProperty(CStylePropertyType::AlignItems, CAlign::FlexStart);
 	window->SetAllowHorizontalScroll(true);
 
-	for (int i = 0; i < 8; i++)
+	/*for (int i = 0; i < 8; i++)
 	{
 		auto label = CreateWidget<CLabel>(window, "Label");
 		label->SetInteractable(true);
@@ -377,7 +377,7 @@ void SandboxLoop::SetupGUI()
 	inputField->AddStyleProperty(CStylePropertyType::Padding, Vec4(1, 1, 1, 1) * 3);
 	inputField->AddStyleProperty(CStylePropertyType::Height, 30);
 	inputField->AddStyleProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(42, 42, 42));
-	inputField->AddStyleProperty(CStylePropertyType::ForegroundColor, Color::White());
+	inputField->AddStyleProperty(CStylePropertyType::ForegroundColor, Color::White());*/
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 

@@ -106,7 +106,17 @@ namespace CE
             return &constants[index]; 
         }
 
+		EnumConstant* FindConstantWithName(const Name& constantName);
         EnumConstant* FindConstantWithValue(s64 value);
+		s64 GetConstantValue(const Name& constantName);
+
+		template<typename TEnum> requires TIsEnum<TEnum>::Value
+		FORCE_INLINE TEnum GetConstantValue(const Name& constantName)
+		{
+			if (CE::GetStaticEnum<TEnum>() != this)
+				return {};
+			return (TEnum)GetConstantValue(constantName);
+		}
 
         virtual u32 GetSize() const override { return size; }
 
@@ -175,6 +185,11 @@ namespace CE\
 	inline CE::Name GetTypeName<Namespace::Enum>()\
 	{\
 		return CE::Internal::TypeInfoImpl<Namespace::Enum>::FullTypeName();\
+	}\
+	template<>\
+	inline SIZE_T GetHash<Namespace::Enum>(const Namespace::Enum& enumValue)\
+	{\
+		return (__underlying_type(Namespace::Enum))enumValue;\
 	}\
 }\
 template <> struct fmt::formatter<Namespace::Enum> {\

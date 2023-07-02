@@ -3,6 +3,20 @@
 namespace CE::Widgets
 {
 
+	COREWIDGETS_API CStateFlag StateFlagsFromString(const String& string)
+	{
+		String pascalCase = string.ToPascalCase();
+
+		return GetStaticEnum<CStateFlag>()->GetConstantValue<CStateFlag>(pascalCase);
+	}
+
+	COREWIDGETS_API CSubControl SubControlFromString(const String& string)
+	{
+		String pascalCase = string.ToPascalCase();
+
+		return GetStaticEnum<CSubControl>()->GetConstantValue<CSubControl>(pascalCase);
+	}
+
 	CStyleValue::CStyleValue()
 	{
 
@@ -115,7 +129,7 @@ namespace CE::Widgets
 	Array<CStylePropertyType> CStyle::GetInheritedProperties()
 	{
 		static Array<CStylePropertyType> inheritedProperties{
-			CStylePropertyType::ForegroundColor,
+			CStylePropertyType::Foreground,
 			CStylePropertyType::TextAlign,
 			CStylePropertyType::FontSize,
 			CStylePropertyType::FontName
@@ -168,6 +182,66 @@ namespace CE::Widgets
 	bool CStyle::IsInheritedProperty(CStylePropertyType property)
 	{
 		return GetInheritedProperties().Exists(property);
+	}
+
+	static HashMap<String, CStylePropertyType> stringToStylePropertyTypeMap{
+		{ "opacity", CStylePropertyType::Opacity },
+		{ "padding", CStylePropertyType::Padding },
+		{ "margin", CStylePropertyType::Margin },
+		{ "padding", CStylePropertyType::Padding },
+		{ "foreground", CStylePropertyType::Foreground },
+		{ "background", CStylePropertyType::Background },
+		{ "border-radius", CStylePropertyType::BorderRadius },
+		{ "border-width", CStylePropertyType::BorderWidth },
+		{ "border-color", CStylePropertyType::BorderColor },
+		{ "text-align", CStylePropertyType::TextAlign },
+		{ "width", CStylePropertyType::Width },
+		{ "height", CStylePropertyType::Height },
+		{ "min-width", CStylePropertyType::MinWidth },
+		{ "min-height", CStylePropertyType::MinHeight },
+		{ "max-width", CStylePropertyType::MaxWidth },
+		{ "max-height", CStylePropertyType::MaxHeight },
+		{ "font-size", CStylePropertyType::FontSize },
+		{ "font-name", CStylePropertyType::FontName},
+
+		{ "align-content", CStylePropertyType::AlignContent },
+		{ "align-items", CStylePropertyType::AlignItems },
+		{ "align-self", CStylePropertyType::AlignSelf },
+		{ "justify-content", CStylePropertyType::JustifyContent },
+		{ "flex", CStylePropertyType::Flex },
+		{ "flex-basis", CStylePropertyType::FlexBasis },
+		{ "flex-wrap", CStylePropertyType::FlexWrap },
+		{ "flex-grow", CStylePropertyType::FlexGrow },
+		{ "flex-shrink", CStylePropertyType::FlexShrink },
+		{ "flex-direction", CStylePropertyType::FlexDirection },
+		{ "flex-order", CStylePropertyType::FlexOrder },
+		{ "row-gap", CStylePropertyType::RowGap },
+		{ "col-gap", CStylePropertyType::ColumnGap }, { "column-gap", CStylePropertyType::ColumnGap },
+	};
+
+	COREWIDGETS_API CStylePropertyType StringToStylePropertyType(const String& in)
+    {
+		if (!stringToStylePropertyTypeMap.KeyExists(in))
+			return {};
+		return stringToStylePropertyTypeMap[in];
+	}
+
+	static HashMap<String, Alignment> stringToAlignmentMap{
+		{ "inherited", Alignment::Inherited },
+		{ "top-left", Alignment::TopLeft },
+		{ "top-center", Alignment::TopCenter },
+		{ "top-right", Alignment::TopRight },
+		{ "middle-left", Alignment::MiddleLeft },
+		{ "middle-center", Alignment::MiddleCenter },
+		{ "middle-right", Alignment::MiddleRight },
+		{ "bottom-left", Alignment::BottomLeft },
+		{ "bottom-center", Alignment::BottomCenter },
+		{ "bottom-right", Alignment::BottomRight },
+	};
+
+	COREWIDGETS_API Alignment StringToAlignment(const String& string)
+	{
+		return stringToAlignmentMap[string];
 	}
 
 } // namespace CE::Widgets

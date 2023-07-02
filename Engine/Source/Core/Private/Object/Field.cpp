@@ -129,6 +129,108 @@ namespace CE
 		return declarationType;
     }
 
+	String FieldType::GetFieldValueAsString(void* instance)
+	{
+		if (GetDeclarationType() == nullptr)
+			return "";
+
+		auto declTypeId = GetDeclarationTypeId();
+		auto declType = GetDeclarationType();
+
+		if (declType->IsPOD())
+		{
+			if (declTypeId == TYPEID(String))
+			{
+				return GetFieldValue<String>(instance);
+			}
+			else if (declTypeId == TYPEID(Name))
+			{
+				return GetFieldValue<Name>(instance).GetString();
+			}
+			else if (declTypeId == TYPEID(IO::Path))
+			{
+				return GetFieldValue<IO::Path>(instance).GetString();
+			}
+			else if (fieldTypeId == TYPEID(UUID))
+			{
+				return String::Format("{}", (u64)GetFieldValue<UUID>(instance));
+			}
+			else if (fieldTypeId == TYPEID(UUID32))
+			{
+				return String::Format("{}", (u32)GetFieldValue<UUID32>(instance));
+			}
+			else if (fieldTypeId == TYPEID(u8))
+			{
+				return String::Format("{}", GetFieldValue<u8>(instance));
+			}
+			else if (fieldTypeId == TYPEID(s8))
+			{
+				return String::Format("{}", GetFieldValue<s8>(instance));
+			}
+			else if (fieldTypeId == TYPEID(u16))
+			{
+				return String::Format("{}", GetFieldValue<u16>(instance));
+			}
+			else if (fieldTypeId == TYPEID(s16))
+			{
+				return String::Format("{}", GetFieldValue<s16>(instance));
+			}
+			else if (fieldTypeId == TYPEID(u32))
+			{
+				return String::Format("{}", GetFieldValue<u32>(instance));
+			}
+			else if (fieldTypeId == TYPEID(s32))
+			{
+				return String::Format("{}", GetFieldValue<s32>(instance));
+			}
+			else if (fieldTypeId == TYPEID(u64))
+			{
+				return String::Format("{}", GetFieldValue<u64>(instance));
+			}
+			else if (fieldTypeId == TYPEID(s64))
+			{
+				return String::Format("{}", GetFieldValue<s64>(instance));
+			}
+			else if (fieldTypeId == TYPEID(bool))
+			{
+				return GetFieldValue<bool>(instance) ? "true" : "false";
+			}
+			else if (fieldTypeId == TYPEID(f32))
+			{
+				return String::Format("{}", GetFieldValue<f32>(instance));
+			}
+			else if (fieldTypeId == TYPEID(f64))
+			{
+				return String::Format("{}", GetFieldValue<f64>(instance));
+			}
+			else if (IsArrayField())
+			{
+				auto underlyingType = this->GetUnderlyingType();
+				if (underlyingType != nullptr && underlyingType->IsPOD() && !underlyingType->IsArrayType())
+				{
+					auto arrayList = GetArrayFieldList(instance);
+					u32 arraySize = arrayList.GetSize();
+					void* arrayFieldInstance = GetFieldInstance(instance);
+
+					if (arraySize > 0)
+					{
+						String result = "";
+						for (int i = 0; i < arraySize; i++)
+						{
+							auto str = arrayList[i].GetFieldValueAsString(arrayFieldInstance);
+							if (result.NonEmpty())
+								result += ",";
+							result += str;
+						}
+						return result;
+					}
+				}
+			}
+		}
+
+		return "";
+	}
+
 	bool FieldType::CopyTo(void* srcInstance, FieldType* destField, void* destInstance)
 	{
 		if (destField == nullptr || destField->fieldTypeId != fieldTypeId || srcInstance == nullptr || destInstance == nullptr)
@@ -156,6 +258,11 @@ namespace CE
 			else if (fieldTypeId == TYPEID(UUID))
 			{
 				const UUID& value = GetFieldValue<UUID>(srcInstance);
+				destField->SetFieldValue(destInstance, value);
+			}
+			else if (fieldTypeId == TYPEID(UUID32))
+			{
+				const UUID32& value = GetFieldValue<UUID32>(srcInstance);
 				destField->SetFieldValue(destInstance, value);
 			}
 			else if (IsArrayField())

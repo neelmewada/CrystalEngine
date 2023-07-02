@@ -47,8 +47,11 @@ void EndTest()
 */
 
 static String css1 = R"(
-CLabel::hovered {
+CLabel:hovered {
 	background-color: rgba(120, 120, 120, 255);
+}
+CLabel#name.class:hovered {
+	
 }
 )";
 
@@ -65,20 +68,62 @@ TEST(Style, Tokenizer)
 
 	while (tokenizer.HasNextToken())
 	{
-		tokens.Add(tokenizer.NextToken());
+		auto token = tokenizer.NextToken();
+		if (token.type == WhitespaceToken && !tokens.IsEmpty() && tokens.Top().type == IdentifierToken)
+			tokens.Add(token);
+		else if (token.type != WhitespaceToken)
+			tokens.Add(token);
 	}
 
-	EXPECT_EQ(tokens[0].type, IdentifierToken); EXPECT_EQ(tokens[0].lexeme, "CLabel");
-	EXPECT_EQ(tokens[1].type, ColonToken);
-	EXPECT_EQ(tokens[2].type, ColonToken);
-	EXPECT_EQ(tokens[3].type, IdentifierToken); EXPECT_EQ(tokens[3].lexeme, "hovered");
-	EXPECT_EQ(tokens[4].type, WhitespaceToken);
-	EXPECT_EQ(tokens[5].type, CurlyOpenToken);
-	EXPECT_EQ(tokens[6].type, IdentifierToken);
-	EXPECT_EQ(tokens[7].type, ColonToken);
-	EXPECT_EQ(tokens[8].type, IdentifierToken); EXPECT_EQ(tokens[8].lexeme, "rgba");
-	EXPECT_EQ(tokens[9].type, ParenOpenToken);
-    
+	int i = 0;
+
+	EXPECT_EQ(tokens[i].type, IdentifierToken); EXPECT_EQ(tokens[i++].lexeme, "CLabel");
+	EXPECT_EQ(tokens[i++].type, ColonToken);
+	EXPECT_EQ(tokens[i].type, IdentifierToken); EXPECT_EQ(tokens[i++].lexeme, "hovered");
+	EXPECT_EQ(tokens[i++].type, WhitespaceToken);
+	EXPECT_EQ(tokens[i++].type, CurlyOpenToken);
+	EXPECT_EQ(tokens[i++].type, IdentifierToken);
+	EXPECT_EQ(tokens[i++].type, ColonToken);
+	EXPECT_EQ(tokens[i].type, IdentifierToken); EXPECT_EQ(tokens[i++].lexeme, "rgba");
+	EXPECT_EQ(tokens[i++].type, ParenOpenToken);
+	EXPECT_EQ(tokens[i].type, NumberToken); EXPECT_EQ(tokens[i++].lexeme, "120");
+	EXPECT_EQ(tokens[i++].type, CommaToken);
+	EXPECT_EQ(tokens[i].type, NumberToken); EXPECT_EQ(tokens[i++].lexeme, "120");
+	EXPECT_EQ(tokens[i++].type, CommaToken);
+	EXPECT_EQ(tokens[i].type, NumberToken); EXPECT_EQ(tokens[i++].lexeme, "120");
+	EXPECT_EQ(tokens[i++].type, CommaToken);
+	EXPECT_EQ(tokens[i].type, NumberToken); EXPECT_EQ(tokens[i++].lexeme, "255");
+	EXPECT_EQ(tokens[i++].type, ParenCloseToken);
+	EXPECT_EQ(tokens[i++].type, SemiColonToken);
+	EXPECT_EQ(tokens[i++].type, CurlyCloseToken);
+	EXPECT_EQ(tokens[i].type, IdentifierToken); EXPECT_EQ(tokens[i++].lexeme, "CLabel");
+	EXPECT_EQ(tokens[i++].type, HashSignToken);
+	EXPECT_EQ(tokens[i].type, IdentifierToken); EXPECT_EQ(tokens[i++].lexeme, "name");
+	EXPECT_EQ(tokens[i++].type, PeriodToken);
+
     TEST_END;
+}
+
+static String cssSheet = R"(
+CLabel:hovered, CLabel:pressed {
+	background: rgba(120, 120, 120, 255);
+}
+CLabel {
+	background: rgba(200, 200, 200, 255);
+}
+)";
+
+TEST(Style, StyleSheet)
+{
+	TEST_BEGIN;
+
+	CStyleSheet* stylesheet = CSSParser::ParseStyleSheet(cssSheet);
+
+	
+
+	stylesheet->RequestDestroy();
+	stylesheet = nullptr;
+
+	TEST_END;
 }
 

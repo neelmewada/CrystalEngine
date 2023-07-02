@@ -17,6 +17,8 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CAlign);
 
+	COREWIDGETS_API CAlign StringToAlign(const String& string);
+
 	ENUM()
 	enum class CJustify
 	{
@@ -29,6 +31,8 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CJustify);
 
+	COREWIDGETS_API CJustify StringToJustify(const String& string);
+
 	ENUM()
 	enum class CFlexDirection
 	{
@@ -39,6 +43,8 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CFlexDirection);
 
+	COREWIDGETS_API CFlexDirection StringToFlexDirection(const String& string);
+
 	ENUM()
 	enum class CFlexWrap
 	{
@@ -47,6 +53,8 @@ namespace CE::Widgets
 		WrapReverse
 	};
 	ENUM_CLASS_FLAGS(CFlexWrap);
+
+	COREWIDGETS_API CFlexWrap StringToFlexWrap(const String& string);
 
 } // namespace CE::Widgets
 

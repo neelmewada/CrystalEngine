@@ -7,11 +7,14 @@ namespace CE::Widgets
 	{
 		WhitespaceToken = 0,
 		IdentifierToken,
+		DoubleColonToken,
 		ColonToken,
 		SemiColonToken,
 		CommaToken,
 		HashSignToken,
 		EqualSignToken,
+		AsteriskToken,
+		PeriodToken,
 		PlusSignToken, MinusSignToken,
 		PercentageToken,
 		CurlyOpenToken, CurlyCloseToken,
@@ -27,6 +30,8 @@ namespace CE::Widgets
 	{
 		CSSParserTokenType type{};
 		String lexeme{};
+		int line = 0;
+		int position = 0;
 	};
     
 } // namespace CE::Widgets

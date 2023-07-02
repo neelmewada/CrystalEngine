@@ -145,6 +145,9 @@ namespace CE
         inline u32 GetLength() const { return StringLength; }
         inline u32 GetCapacity() const { return Capacity; }
 
+		inline char GetFirst() const { return GetLength() == 0 ? 0 : Buffer[0]; }
+		inline char GetLast() const { return GetLength() == 0 ? 0 : Buffer[GetLength() - 1]; }
+
         inline std::string ToStdString() const { return std::string(Buffer); }
 
         inline void Clear()
@@ -152,7 +155,8 @@ namespace CE
             SetCString(nullptr);
         }
 
-        bool IsEmpty() const { return StringLength == 0; }
+        inline bool IsEmpty() const { return StringLength == 0; }
+		inline bool NonEmpty() const { return StringLength > 0; }
 
         /*
          *  Iterators
@@ -239,6 +243,11 @@ namespace CE
 
         String ToLower() const;
         String ToUpper() const;
+
+		String ToKebabCase() const;
+		String ToSnakeCase() const;
+		String ToCamelCase() const;
+		String ToPascalCase() const;
 
         String GetSubstring(int startIndex, int length = -1);
         StringView GetSubstringView(int startIndex, int length = -1) const;

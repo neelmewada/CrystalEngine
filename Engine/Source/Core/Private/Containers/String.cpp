@@ -474,6 +474,132 @@ namespace CE
         return result;
     }
 
+	String String::ToKebabCase() const
+	{
+		String result{};
+
+		for (int i = 0; i < GetLength(); i++)
+		{
+			if (i == 0)
+			{
+				if (String::IsAlphabet(Buffer[i]))
+					result.Append((char)std::tolower(Buffer[i]));
+				else
+					result.Append(Buffer[i]);
+				continue;
+			}
+			if (Buffer[i] == '_')
+			{
+				continue;
+			}
+
+			if (String::IsAlphabet(Buffer[i]) && (Buffer[i - 1] == '_' || std::isupper(Buffer[i])))
+			{
+				result.Append('-');
+				result.Append((char)std::tolower(Buffer[i]));
+				continue;
+			}
+
+			result.Append(Buffer[i]);
+		}
+
+		return result;
+	}
+
+	String String::ToSnakeCase() const
+	{
+		String result{};
+
+		for (int i = 0; i < GetLength(); i++)
+		{
+			if (i == 0)
+			{
+				if (String::IsAlphabet(Buffer[i]))
+					result.Append((char)std::tolower(Buffer[i]));
+				else
+					result.Append(Buffer[i]);
+				continue;
+			}
+			if (Buffer[i] == '-')
+			{
+				continue;
+			}
+
+			if (String::IsAlphabet(Buffer[i]) && (Buffer[i - 1] == '-' || std::isupper(Buffer[i])))
+			{
+				result.Append('_');
+				result.Append((char)std::tolower(Buffer[i]));
+				continue;
+			}
+			
+			result.Append(Buffer[i]);
+		}
+
+		return result;
+	}
+
+	String String::ToCamelCase() const
+	{
+		String result{};
+
+		for (int i = 0; i < GetLength(); i++)
+		{
+			if (i == 0)
+			{
+				if (String::IsAlphabet(Buffer[i]))
+					result.Append((char)std::tolower(Buffer[i]));
+				else
+					result.Append(Buffer[i]);
+				continue;
+			}
+			if (Buffer[i] == '-' || Buffer[i] == '_')
+			{
+				continue;
+			}
+
+			if (String::IsAlphabet(Buffer[i]) && (Buffer[i - 1] == '-' || Buffer[i - 1] == '_' || std::isupper(Buffer[i])))
+			{
+				result.Append((char)std::toupper(Buffer[i]));
+				continue;
+			}
+
+			result.Append(Buffer[i]);
+		}
+
+		return result;
+	}
+
+	String String::ToPascalCase() const
+	{
+		String result{};
+
+		for (int i = 0; i < GetLength(); i++)
+		{
+			if (i == 0)
+			{
+				if (String::IsAlphabet(Buffer[i]))
+					result.Append((char)std::toupper(Buffer[i]));
+				else
+					result.Append(Buffer[i]);
+				continue;
+			}
+			if (Buffer[i] == '-' || Buffer[i] == '_')
+			{
+				continue;
+			}
+
+			if (String::IsAlphabet(Buffer[i]) && (Buffer[i - 1] == '-' || Buffer[i - 1] == '_' || std::isupper(Buffer[i])))
+			{
+				result.Append((char)std::toupper(Buffer[i]));
+				continue;
+			}
+
+			result.Append(Buffer[i]);
+		}
+
+		return result;
+	}
+
     String String::GetSubstring(int startIndex, int length)
     {
         if (length == -1)

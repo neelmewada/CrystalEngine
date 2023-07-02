@@ -63,6 +63,10 @@ namespace CE::Widgets
         void SetWidgetFlags(WidgetFlags flags);
         
         WidgetFlags GetWidgetFlags() const;
+
+		inline CStateFlag GetStateFlags() const { return stateFlags; }
+
+		// - Style API -
         
 		inline CStyle& GetStyle()
 		{
@@ -107,16 +111,26 @@ namespace CE::Widgets
 			return style.AddProperty(property, value, state, subControl);
 		}
 
-		CWidget* GetOwner();
-
-		CWindow* GetOwnerWindow();
+		void SetStyleSheet(CStyleSheet* stylesheet);
 
 		bool IsHovered() const { return isHovered; }
 		bool IsFocused() const { return isFocused; }
 
 		bool IsLeftMouseHeld() const { return isLeftMousePressedInside; }
 
+		// Hierarchy API
+
+		CWidget* GetOwner();
+
+		CWindow* GetOwnerWindow();
+
+		int GetSubWidgetIndex(CWidget* siblingWidget);
+
+		int GetSubWidgetCount();
+
 		CWidget* FindSubWidget(const Name& name);
+
+		CWidget* GetSubWidgetAt(int index);
 
 		// Calculated Layout
 
@@ -191,6 +205,12 @@ namespace CE::Widgets
 
 		FIELD()
 		CStyle style{}; // Final computed style
+
+		FIELD()
+		CStateFlag stateFlags{};
+
+		
+		CStyleSheet* stylesheet = nullptr;
 
 		YGNodeRef node{};
 

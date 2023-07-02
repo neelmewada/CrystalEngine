@@ -95,6 +95,8 @@ namespace CE
 
         INLINE TypeId GetDeclarationTypeId() const { return fieldTypeId; }
 
+		String GetFieldValueAsString(void* instance);
+
         template<typename T>
         T& GetFieldValue(void* instance)
         {

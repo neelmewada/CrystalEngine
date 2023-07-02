@@ -18,6 +18,9 @@ namespace CE::Widgets
 		Stream* stream = nullptr;
 
 		CSSParserToken prevToken{};
+
+		int line = 0;
+		int positionInLine = 0;
 	};
     
 } // namespace CE::Widgets

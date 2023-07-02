@@ -44,13 +44,13 @@ constexpr bool EnumHasFlag(Enum Flags, Enum Contains)
 }
 
 template<typename Enum>
-void EnumAddFlags(Enum& Flags, Enum FlagsToAdd)
+constexpr void EnumAddFlags(Enum& Flags, Enum FlagsToAdd)
 {
 	Flags |= FlagsToAdd;
 }
 
 template<typename Enum>
-void EnumRemoveFlags(Enum& Flags, Enum FlagsToRemove)
+constexpr void EnumRemoveFlags(Enum& Flags, Enum FlagsToRemove)
 {
 	Flags &= ~FlagsToRemove;
 }

@@ -230,7 +230,38 @@ TEST(Containers, String)
     EXPECT_EQ(String::Parse<f32>("12"), 12);
     EXPECT_EQ(String::Parse<f32>("12f"), 12.f);
     EXPECT_EQ(String::Parse<f32>("12.f"), 12.f);
+
+	// 4. Case Change Tests
     
+	String camelCase = "thisIsAString";
+	String pascalCase = "ThisIsAString";
+	String kebabCase = "this-is-a-string";
+	String snakeCase = "this_is_a_string";
+
+	// CamelCase
+	EXPECT_EQ(camelCase.ToCamelCase(), camelCase);
+	EXPECT_EQ(pascalCase.ToCamelCase(), camelCase);
+	EXPECT_EQ(kebabCase.ToCamelCase(), camelCase);
+	EXPECT_EQ(snakeCase.ToCamelCase(), camelCase);
+
+	// pascalCase
+	EXPECT_EQ(camelCase.ToPascalCase(), pascalCase);
+	EXPECT_EQ(pascalCase.ToPascalCase(), pascalCase);
+	EXPECT_EQ(kebabCase.ToPascalCase(), pascalCase);
+	EXPECT_EQ(snakeCase.ToPascalCase(), pascalCase);
+
+	// kebab-case
+	EXPECT_EQ(camelCase.ToKebabCase(), kebabCase);
+	EXPECT_EQ(pascalCase.ToKebabCase(), kebabCase);
+	EXPECT_EQ(kebabCase.ToKebabCase(), kebabCase);
+	EXPECT_EQ(snakeCase.ToKebabCase(), kebabCase);
+
+	// snake_case
+	EXPECT_EQ(camelCase.ToSnakeCase(), snakeCase);
+	EXPECT_EQ(pascalCase.ToSnakeCase(), snakeCase);
+	EXPECT_EQ(kebabCase.ToSnakeCase(), snakeCase);
+	EXPECT_EQ(snakeCase.ToSnakeCase(), snakeCase);
+
     TEST_END;
 }
 

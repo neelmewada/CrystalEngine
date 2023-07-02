@@ -25,6 +25,8 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CStateFlag);
 
+	COREWIDGETS_API CStateFlag StateFlagsFromString(const String& string);
+
 	ENUM()
 	enum class CSubControl
 	{
@@ -37,18 +39,13 @@ namespace CE::Widgets
 		Header,
 		Window,
 		Frame,
-		CheckMark,
-
-		// Table SubControls
-		TableRow,
-		TableRowEven,
-		TableRowOdd,
-		TableBorder, // Outer borders
-		TableBorderInner, // Inner borders
+		Check,
 
 		Any,
 	};
 	ENUM_CLASS_FLAGS(CSubControl);
+
+	COREWIDGETS_API CSubControl SubControlFromString(const String& string);
 
 	ENUM()
 	enum class CStylePropertyType
@@ -58,7 +55,7 @@ namespace CE::Widgets
 		Padding,
 		Margin,
 		Position,
-		ForegroundColor, // Inherited
+		Foreground, // Inherited
 		Background,
 		BorderRadius,
 		BorderWidth,
@@ -92,6 +89,8 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyType);
 
+	COREWIDGETS_API CStylePropertyType StringToStylePropertyType(const String& string);
+
 	ENUM()
 	enum class CStylePropertyTypeFlags
 	{
@@ -113,6 +112,7 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(Alignment);
 
+	COREWIDGETS_API Alignment StringToAlignment(const String& string);
 
 	STRUCT()
 	struct COREWIDGETS_API CStyleValue
@@ -317,11 +317,11 @@ namespace CE::Widgets
 
 		inline bool IsDirty() const { return isDirty; }
 		inline void SetDirty(bool dirty = true) { isDirty = dirty; }
+
 		
 		// Fields
 
 		HashMap<CStylePropertyType, CStyleValueVariants> properties{};
-
 
 	private:
 

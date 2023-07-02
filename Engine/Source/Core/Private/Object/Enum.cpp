@@ -63,6 +63,19 @@ namespace CE
 		return TypeInfo::GetDisplayName();
 	}
 
+	EnumConstant* EnumType::FindConstantWithName(const Name& name)
+	{
+		for (int i = 0; i < GetConstantsCount(); i++)
+		{
+			auto constant = GetConstant(i);
+			if (constant == nullptr)
+				continue;
+			if (constant->GetName() == name)
+				return constant;
+		}
+		return nullptr;
+	}
+
 	EnumConstant* EnumType::FindConstantWithValue(s64 value)
 	{
 		for (int i = 0; i < GetConstantsCount(); i++)
@@ -74,6 +87,16 @@ namespace CE
 				return constant;
 		}
 		return nullptr;
+	}
+
+	s64 EnumType::GetConstantValue(const Name& constantName)
+	{
+		EnumConstant* constant = FindConstantWithName(constantName);
+		
+		if (constant != nullptr)
+			return constant->GetValue();
+
+		return 0;
 	}
 
 	void EnumType::RegisterEnumType(EnumType* enumType)
