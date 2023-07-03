@@ -40,7 +40,7 @@ namespace CE::Widgets
 		if (id == 0)
 			id = UUID32();
 
-		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, defaultStyleState, activeStyleState, disabledStyleState, padding, flags, callback, this);
+		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, defaultStyleState, defaultStyleState, defaultStyleState, padding, flags, callback, this);
 		PollEvents();
 
 		if (inputChanged)

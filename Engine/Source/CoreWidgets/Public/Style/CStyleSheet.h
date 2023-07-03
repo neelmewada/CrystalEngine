@@ -15,6 +15,12 @@ namespace CE::Widgets
 		inline bool IsDirty() const { return isDirty; }
 		inline void SetDirty(bool set = true) { isDirty = set; }
 
+		inline CStyleSheet* GetParent() const { return parent; }
+
+		virtual Array<CSSRule> GetMatchingRules(CWidget* widget, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) = 0;
+
+		void SetParentStyleSheet(CStyleSheet* parent);
+
 	protected:
 
 		FIELD()
@@ -22,6 +28,8 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isDirty = false;
+
+		friend class CWidget;
 	};
     
 } // namespace CE::Widgets

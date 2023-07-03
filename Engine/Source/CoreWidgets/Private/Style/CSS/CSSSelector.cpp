@@ -105,6 +105,8 @@ namespace CE::Widgets
 
 	SIZE_T CSSSelector::CalculateHash(const MatchCond& rule, SIZE_T hash)
 	{	
+		hash = GetCombinedHash(hash, (SIZE_T)rule.matches);
+
 		if (EnumHasAnyFlags(rule.matches, Tag))
 			hash = GetCombinedHash(hash, CE::GetHash<String>(rule.tag));
 		if (EnumHasAnyFlags(rule.matches, Id))

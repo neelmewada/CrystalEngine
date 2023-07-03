@@ -106,9 +106,9 @@ namespace CE::Widgets
 			return styleClasses.Exists(styleClass);
 		}
 
-		inline CStyleValue& AddStyleProperty(CStylePropertyType property, const CStyleValue& value, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None)
+		inline CStyleValue& AddStyleProperty(CStylePropertyType property, const CStyleValue& value)
 		{
-			return style.AddProperty(property, value, state, subControl);
+			return style.AddProperty(property, value);
 		}
 
 		void SetStyleSheet(CStyleSheet* stylesheet);
@@ -203,12 +203,11 @@ namespace CE::Widgets
 		FIELD()
 		Array<String> styleClasses{};
 
-		FIELD()
+		FIELD(NonSerialized)
 		CStyle style{}; // Final computed style
 
 		FIELD()
 		CStateFlag stateFlags{};
-
 		
 		CStyleSheet* stylesheet = nullptr;
 
@@ -216,18 +215,19 @@ namespace CE::Widgets
 
 		// Style states
 
+		//HashMap<CStateFlag, GUI::GuiStyleState> cachedStyleStates{};
+
 		GUI::GuiStyleState defaultStyleState{};
 
+		//union {
+		//	GUI::GuiStyleState hoveredStyleState{};
+		//	GUI::GuiStyleState disabledStyleState;
+		//};
 
-		union {
-			GUI::GuiStyleState hoveredStyleState{};
-			GUI::GuiStyleState disabledStyleState;
-		};
-
-		union {
-			GUI::GuiStyleState pressedStyleState{};
-			GUI::GuiStyleState activeStyleState;
-		};
+		//union {
+		//	GUI::GuiStyleState pressedStyleState{};
+		//	GUI::GuiStyleState activeStyleState;
+		//};
 
     private:
 

@@ -68,11 +68,9 @@ namespace CE::Widgets
 			return;
 
 		node->setStyle({}); // Clear style
-		
 
-		for (auto& [property, variants] : style.properties)
+		for (auto& [property, value] : style.properties)
 		{
-			const auto& value = variants.Get();
 
 			// Non-Yoga properties
 			if (value.IsValid()) // Default state
@@ -80,7 +78,7 @@ namespace CE::Widgets
 				LoadGuiStyleStateProperty(property, value, defaultStyleState);
 			}
 
-			const auto& hoveredState = variants.Get(CStateFlag::Hovered);
+			/*const auto& hoveredState = variants.Get(CStateFlag::Hovered);
 			if (hoveredState.IsValid())
 			{
 				LoadGuiStyleStateProperty(property, hoveredState, hoveredStyleState);
@@ -98,7 +96,7 @@ namespace CE::Widgets
 			else
 			{
 				LoadGuiStyleStateProperty(property, value, pressedStyleState);
-			}
+			}*/
 			
 			if (!value.IsValid())
 				continue;
@@ -370,35 +368,35 @@ namespace CE::Widgets
 		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once
 			return;
 
-		for (auto& [property, variants] : style.properties)
-		{
-			auto& defaultState = variants.Get();
+		//for (auto& [property, variants] : style.properties)
+		//{
+		//	auto& defaultState = variants.Get();
 
-			if (defaultState.IsValid())
-			{
-				if (defaultState.enumValue.x == CStyleValue::Inherited)
-				{
-					const auto& parentVariants = parent->style.properties[property];
-					const auto& parentDefaultState = parentVariants.Get();
+		//	if (defaultState.IsValid())
+		//	{
+		//		if (defaultState.enumValue.x == CStyleValue::Inherited)
+		//		{
+		//			const auto& parentVariants = parent->style.properties[property];
+		//			const auto& parentDefaultState = parentVariants.Get();
 
-					if (parentDefaultState.IsValid())
-					{
-						defaultState = parentDefaultState;
-						continue;
-					}
-				}
-			}
-			else if (CStyle::IsInheritedProperty(property)) // If default state does not exist but property is auto-inheritable
-			{
-				const auto& parentVariants = parent->style.properties[property];
-				const auto& parentDefaultState = parentVariants.Get();
+		//			if (parentDefaultState.IsValid())
+		//			{
+		//				defaultState = parentDefaultState;
+		//				continue;
+		//			}
+		//		}
+		//	}
+		//	else if (CStyle::IsInheritedProperty(property)) // If default state does not exist but property is auto-inheritable
+		//	{
+		//		const auto& parentVariants = parent->style.properties[property];
+		//		const auto& parentDefaultState = parentVariants.Get();
 
-				if (parentDefaultState.IsValid())
-				{
-					variants.Add(parentDefaultState);
-				}
-			}
-		}
+		//		if (parentDefaultState.IsValid())
+		//		{
+		//			variants.Add(parentDefaultState);
+		//		}
+		//	}
+		//}
 
 		SetNeedsStyle();
 

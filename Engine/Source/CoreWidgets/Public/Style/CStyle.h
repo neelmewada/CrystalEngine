@@ -89,7 +89,8 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyType);
 
-	COREWIDGETS_API CStylePropertyType StringToStylePropertyType(const String& string);
+	COREWIDGETS_API CStylePropertyType StylePropertyTypeFromString(const String& string);
+	COREWIDGETS_API EnumType* GetEnumTypeForProperty(CStylePropertyType property);
 
 	ENUM()
 	enum class CStylePropertyTypeFlags
@@ -311,9 +312,9 @@ namespace CE::Widgets
 		static bool IsInheritedProperty(CStylePropertyType property);
 		static CStylePropertyTypeFlags GetPropertyTypeFlags(CStylePropertyType property);
 
-		CStyleValue& AddProperty(CStylePropertyType property, const CStyleValue& value, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None);
+		CStyleValue& AddProperty(CStylePropertyType property, const CStyleValue& value);
 
-		CStyleValue& GetProperty(CStylePropertyType property, CStateFlag forState = CStateFlag::Default, CSubControl forSubControl = CSubControl::None);
+		CStyleValue& GetProperty(CStylePropertyType property);
 
 		inline bool IsDirty() const { return isDirty; }
 		inline void SetDirty(bool dirty = true) { isDirty = dirty; }
@@ -321,7 +322,7 @@ namespace CE::Widgets
 		
 		// Fields
 
-		HashMap<CStylePropertyType, CStyleValueVariants> properties{};
+		HashMap<CStylePropertyType, CStyleValue> properties{};
 
 	private:
 

@@ -151,32 +151,16 @@ namespace CE::Widgets
 		return flags;
 	}
 
-	CStyleValue& CStyle::AddProperty(CStylePropertyType propertyType, const CStyleValue& value, CStateFlag state, CSubControl subControl)
+	CStyleValue& CStyle::AddProperty(CStylePropertyType propertyType, const CStyleValue& value)
 	{
-		auto& styleVariants = properties[propertyType];
-		CStyleValue& modValue = const_cast<CStyleValue&>(value);
-		modValue.state = state;
-		modValue.subControl = subControl;
+		properties[propertyType] = value;
 
-		for (int i = styleVariants.GetSize() - 1; i >= 0; i--)
-		{
-			// Remove 'duplicate-like' states, because they will be fully overriden anyways.
-			if (styleVariants[i].state == value.state &&
-				styleVariants[i].subControl == value.subControl &&
-				styleVariants[i].valueType == value.valueType)
-			{
-				styleVariants.RemoveAt(i);
-			}
-		}
-
-		isDirty = true;
-		styleVariants.Add(value);
-		return styleVariants.Top();
+		return properties[propertyType];
 	}
 
-	CStyleValue& CStyle::GetProperty(CStylePropertyType propertyType, CStateFlag forState, CSubControl forSubControl)
+	CStyleValue& CStyle::GetProperty(CStylePropertyType propertyType)
 	{
-		return properties[propertyType].Get(forState, forSubControl);
+		return properties[propertyType];
 	}
 
 	bool CStyle::IsInheritedProperty(CStylePropertyType property)
@@ -190,7 +174,9 @@ namespace CE::Widgets
 		{ "margin", CStylePropertyType::Margin },
 		{ "padding", CStylePropertyType::Padding },
 		{ "foreground", CStylePropertyType::Foreground },
+		{ "foreground-color", CStylePropertyType::Foreground },
 		{ "background", CStylePropertyType::Background },
+		{ "background-color", CStylePropertyType::Background },
 		{ "border-radius", CStylePropertyType::BorderRadius },
 		{ "border-width", CStylePropertyType::BorderWidth },
 		{ "border-color", CStylePropertyType::BorderColor },
@@ -219,11 +205,29 @@ namespace CE::Widgets
 		{ "col-gap", CStylePropertyType::ColumnGap }, { "column-gap", CStylePropertyType::ColumnGap },
 	};
 
-	COREWIDGETS_API CStylePropertyType StringToStylePropertyType(const String& in)
+	COREWIDGETS_API CStylePropertyType StylePropertyTypeFromString(const String& in)
     {
 		if (!stringToStylePropertyTypeMap.KeyExists(in))
-			return {};
+		{
+			String pascalCase = in.ToPascalCase();
+			return GetStaticEnum<CStylePropertyType>()->GetConstantValue<CStylePropertyType>(pascalCase);
+		}
 		return stringToStylePropertyTypeMap[in];
+	}
+
+	static HashMap<CStylePropertyType, EnumType*> propertyTypeToEnumMap{
+		{ CStylePropertyType::TextAlign, GetStaticEnum<Alignment>() },
+		{ CStylePropertyType::AlignContent, GetStaticEnum<CAlign>() },
+		{ CStylePropertyType::AlignItems, GetStaticEnum<CAlign>() },
+		{ CStylePropertyType::AlignSelf, GetStaticEnum<CAlign>() },
+		{ CStylePropertyType::JustifyContent, GetStaticEnum<CJustify>() },
+		{ CStylePropertyType::FlexWrap, GetStaticEnum<CFlexWrap>() },
+		{ CStylePropertyType::FlexDirection, GetStaticEnum<CFlexDirection>() },
+	};
+
+	COREWIDGETS_API EnumType* GetEnumTypeForProperty(CStylePropertyType property)
+	{
+		return propertyTypeToEnumMap[property];
 	}
 
 	static HashMap<String, Alignment> stringToAlignmentMap{

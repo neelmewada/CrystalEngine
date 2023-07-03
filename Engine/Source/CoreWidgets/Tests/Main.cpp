@@ -105,15 +105,25 @@ TEST(Style, Tokenizer)
 }
 
 static String cssSheet = R"(
-CLabel:hovered, CLabel:pressed {
-	background: rgba(120, 120, 120, 255);
+* {
+	padding: 5 5 5 5;
+}
+* CLabel {
+
 }
 CLabel {
-	background: rgba(200, 200, 200, 255);
+	background: rgba(30, 30, 30, 255);
+	foreground: #f0f0f0ff;
+	text-align: middle-center;
+	border-radius: 3 3 3 3;
+}
+CLabel:hovered, CLabel:pressed {
+	background: rgba(120, 120, 120, 255);
+	border-radius: 3;
 }
 )";
 
-TEST(Style, StyleSheet)
+TEST(Style, StyleSheetParsing)
 {
 	TEST_BEGIN;
 

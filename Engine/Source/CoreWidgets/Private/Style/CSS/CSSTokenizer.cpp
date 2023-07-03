@@ -17,8 +17,6 @@ namespace CE::Widgets
 
 	CSSParserToken CSSTokenizer::NextToken()
 	{
-		// Regular Expressions
-		std::regex identifierRegex = std::regex("[a-zA-Z_][a-zA-Z0-9_-]*");
 
 		if (!HasNextToken())
 			return {};
@@ -67,7 +65,7 @@ namespace CE::Widgets
 				line++;
 				positionInLine = 0;
 			}
-			if (prevToken.type == IdentifierToken)
+			if (prevToken.type == IdentifierToken || prevToken.type == AsteriskToken)
 				return prevToken = { WhitespaceToken, "", line, positionInLine };
 			break;
 		case '%':
@@ -95,7 +93,7 @@ namespace CE::Widgets
 			if (String::IsNumeric(c) || c == '-' || c == '+') // Numeric literal
 			{
 				char nextChar = stream->Read();
-				if (!String::IsNumeric(nextChar))
+				if (!String::IsNumeric(nextChar) && (nextChar == '-' || nextChar == '+'))
 				{
 					stream->Seek(-2, SeekMode::Current);
 					if (c == '-')
@@ -128,6 +126,7 @@ namespace CE::Widgets
 			{
 				char nextChar = c;
 				std::string identifier{};
+				std::regex identifierRegex = std::regex("[a-zA-Z_][a-zA-Z0-9_-]*");
 
 				while (!stream->IsOutOfBounds())
 				{

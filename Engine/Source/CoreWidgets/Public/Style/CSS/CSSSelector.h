@@ -45,7 +45,10 @@ namespace CE::Widgets
 
 		SIZE_T CalculateHash();
 
-		inline SIZE_T GetHash() const { return hash; }
+		inline SIZE_T GetHash() const 
+		{
+			return hash; 
+		}
 
 	private:
 
@@ -92,22 +95,30 @@ namespace CE::Widgets
 	{
 	public:
 
-		SIZE_T GetHash() const
+		SIZE_T CalculateHash()
 		{
 			if (GetSize() == 0)
 				return 0;
 
 			Array<SIZE_T> hashes{};
-			for (const auto& selector : *this)
+			for (auto& selector : *this)
 			{
-				hashes.Add(selector.GetHash());
+				hashes.Add(selector.CalculateHash());
 			}
 
-			return GetCombinedHashes(hashes);
+			cachedHash = GetCombinedHashes(hashes);
+			return cachedHash;
+		}
+
+		SIZE_T GetHash() const
+		{
+			return cachedHash;
 		}
 
 		bool TestWidget(CWidget* widget, CStateFlag curStates = CStateFlag::Default, CSubControl subControl = CSubControl::None);
 
+	private:
+		SIZE_T cachedHash = 0;
 	};
     
 } // namespace CE::Widgets
@@ -115,7 +126,7 @@ namespace CE::Widgets
 namespace CE
 {
 	template<>
-	inline SIZE_T GetHash<CSSSelectorList>(const CSSSelectorList& value)
+	inline SIZE_T GetHash<CE::Widgets::CSSSelectorList>(const CE::Widgets::CSSSelectorList& value)
 	{
 		return value.GetHash();
 	}

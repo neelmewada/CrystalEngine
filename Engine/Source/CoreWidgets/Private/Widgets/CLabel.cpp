@@ -44,11 +44,11 @@ namespace CE::Widgets
 
 		if (IsLeftMouseHeld() && IsHovered()) // Pressed
 		{
-			curState = &pressedStyleState;
+			//curState = &pressedStyleState;
 		}
 		else if (IsHovered()) // Hovered
 		{
-			curState = &hoveredStyleState;
+			//curState = &hoveredStyleState;
 		}
 
 		GUI::SetCursorPos(rectPos);

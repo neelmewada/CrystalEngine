@@ -46,7 +46,7 @@ namespace CE::Widgets
 		padding.right = YGNodeLayoutGetPadding(node, YGEdgeRight);
 		padding.bottom = YGNodeLayoutGetPadding(node, YGEdgeBottom);
 
-		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hoveredStyleState, pressedStyleState, padding);
+		bool pressed = GUI::Button(rect, internalText, defaultStyleState, defaultStyleState, defaultStyleState, padding);
 		PollEvents();
 
 		if (pressed)

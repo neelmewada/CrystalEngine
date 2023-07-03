@@ -13,6 +13,7 @@ namespace CE::Widgets
 		CommaToken,
 		HashSignToken,
 		EqualSignToken,
+		GreaterThanSign,
 		AsteriskToken,
 		PeriodToken,
 		PlusSignToken, MinusSignToken,

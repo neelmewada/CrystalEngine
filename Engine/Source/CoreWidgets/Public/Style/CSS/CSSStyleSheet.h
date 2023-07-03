@@ -17,6 +17,7 @@ namespace CE::Widgets
 		CSSStyleSheet();
 		virtual ~CSSStyleSheet();
 
+		Array<CSSRule> GetMatchingRules(CWidget* widget, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) override;
 
 	private:
 
