@@ -10,10 +10,25 @@ namespace CE::Widgets
         
         CStyleManager();
         virtual ~CStyleManager();
+
+		inline CStyleSheet* GetGlobalStyleSheet() const
+		{
+			return globalStyleSheet;
+		}
+
+		inline const String& GetGlobalStyleSheetText() const
+		{
+			return globalStyleSheetText;
+		}
+
+		void SetGlobalStyleSheet(const String& stylesheet);
         
     protected:
         
-        
+		CStyleSheet* globalStyleSheet = nullptr;
+		String globalStyleSheetText = "";
+
+		friend class CWidget;
     };
     
 } // namespace CE::Widgets

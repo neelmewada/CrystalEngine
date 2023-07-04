@@ -19,6 +19,8 @@ namespace CE::Widgets
 
 		Array<CSSRule> GetMatchingRules(CWidget* widget, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) override;
 
+		void Clear() override;
+
 	private:
 
 		Array<CSSRule> rules{};

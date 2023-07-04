@@ -73,6 +73,11 @@ namespace CE::Widgets
 			return style;
 		}
 
+		inline const CStyle& GetComputedStyle()
+		{
+			return computedStyle;
+		}
+
 		inline u32 GetStyleClassesCount() const
 		{
 			return styleClasses.GetSize();
@@ -111,7 +116,9 @@ namespace CE::Widgets
 			return style.AddProperty(property, value);
 		}
 
-		void SetStyleSheet(CStyleSheet* stylesheet);
+		void SetStyleSheet(const String& stylesheet);
+
+		const String& GetStyleSheet() const;
 
 		bool IsHovered() const { return isHovered; }
 		bool IsFocused() const { return isFocused; }
@@ -204,30 +211,21 @@ namespace CE::Widgets
 		Array<String> styleClasses{};
 
 		FIELD(NonSerialized)
-		CStyle style{}; // Final computed style
+		CStyle style{}; // Override local styles
 
 		FIELD()
 		CStateFlag stateFlags{};
 		
 		CStyleSheet* stylesheet = nullptr;
+		String stylesheetText = "";
 
 		YGNodeRef node{};
 
 		// Style states
 
-		//HashMap<CStateFlag, GUI::GuiStyleState> cachedStyleStates{};
+		CStyle computedStyle{};
 
 		GUI::GuiStyleState defaultStyleState{};
-
-		//union {
-		//	GUI::GuiStyleState hoveredStyleState{};
-		//	GUI::GuiStyleState disabledStyleState;
-		//};
-
-		//union {
-		//	GUI::GuiStyleState pressedStyleState{};
-		//	GUI::GuiStyleState activeStyleState;
-		//};
 
     private:
 

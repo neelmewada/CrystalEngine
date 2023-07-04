@@ -34,6 +34,10 @@ namespace CE::Widgets
 		return result;
 	}
 
+	void CSSStyleSheet::Clear()
+	{
+		rules.Clear();
+	}
 	
 
 } // namespace CE::Widgets

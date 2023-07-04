@@ -35,10 +35,7 @@ namespace CE::Widgets
 
 	void CWindow::OnComputeStyle()
 	{
-		for (const auto& [property, variants] : style.properties)
-		{
-			
-		}
+		
 	}
 
     void CWindow::OnDrawGUI()

@@ -18,6 +18,8 @@ namespace CE::Widgets
 		node = YGNodeNew();
 		YGNodeSetContext(node, this);
 		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+
+		this->stylesheet = CreateObject<CSSStyleSheet>(this, "StyleSheet");
 	}
 
 	CWidget::~CWidget()
@@ -28,7 +30,14 @@ namespace CE::Widgets
 
 	void CWidget::Construct()
 	{
-		
+		if (GetOwner() != nullptr)
+		{
+			this->stylesheet->parent = GetOwner()->stylesheet;
+		}
+		else
+		{
+			this->stylesheet->parent = GetStyleManager()->GetGlobalStyleSheet();
+		}
 	}
 
 	void CWidget::LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState)
@@ -64,12 +73,21 @@ namespace CE::Widgets
 
 	void CWidget::UpdateStyleIfNeeded()
 	{
-		if (!needsStyle && !style.IsDirty())
+		if (!needsStyle && !stylesheet->IsDirty())
 			return;
 
 		node->setStyle({}); // Clear style
 
-		for (auto& [property, value] : style.properties)
+		computedStyle = {};
+		computedStyle.ApplyProperties(style);
+
+		auto rules = stylesheet->GetMatchingRules(this, stateFlags);
+		for (const auto& rule : rules)
+		{
+			computedStyle.ApplyProperties(rule.style);
+		}
+		
+		for (auto& [property, value] : computedStyle.properties)
 		{
 
 			// Non-Yoga properties
@@ -329,7 +347,7 @@ namespace CE::Widgets
 		needsStyle = false;
 		needsLayout = true;
 
-		style.SetDirty(false);
+		stylesheet->SetDirty(false);
 
 		if (IsContainer())
 		{
@@ -708,15 +726,36 @@ namespace CE::Widgets
     {
         return widgetFlags;
     }
-	
-	void CWidget::SetStyleSheet(CStyleSheet* stylesheet)
+
+	void CWidget::SetStyleSheet(const String& stylesheetText)
 	{
-		if (this->stylesheet != nullptr)
+		this->stylesheetText = stylesheetText;
+
+		CSSStyleSheet* parentStylesheet = nullptr;
+		auto owner = GetOwner();
+
+		while (owner != nullptr)
 		{
-			this->stylesheet->RequestDestroy();
+			if (owner->stylesheet != nullptr)
+			{
+				parentStylesheet = (CSSStyleSheet*)owner->stylesheet;
+				break;
+			}
+			owner = owner->GetOwner();
 		}
 
-		this->stylesheet = stylesheet;
+		if (parentStylesheet == nullptr)
+		{
+			parentStylesheet = (CSSStyleSheet*)GetStyleManager()->globalStyleSheet;
+		}
+
+		CSSParser::ParseStyleSheet(stylesheetText, (CSSStyleSheet*)stylesheet);
+		stylesheet->parent = parentStylesheet;
+	}
+
+	const String& CWidget::GetStyleSheet() const
+	{
+		return stylesheetText;
 	}
 
 	CWidget* CWidget::GetOwner()

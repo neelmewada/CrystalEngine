@@ -9,12 +9,7 @@ namespace CE::Widgets
 			return;
 
 		CStyleSheet* subStylesheet = (CStyleSheet*)subObject;
-		subStylesheet->SetParentStyleSheet(this);
-	}
-
-	void CStyleSheet::SetParentStyleSheet(CStyleSheet* parent)
-	{
-		this->parent = parent;
+		subStylesheet->parent = this;
 	}
 
 } // namespace CE::Widgets

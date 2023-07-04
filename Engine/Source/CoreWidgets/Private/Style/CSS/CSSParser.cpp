@@ -28,16 +28,37 @@ namespace CE::Widgets
 
 	}
 
-	CSSStyleSheet* CSSParser::ParseStyleSheet(const String& css, CSSStyleSheet* parent)
+	CSSStyleSheet* CSSParser::ParseStyleSheet(const String& css, Object* owner)
 	{
 		MemoryStream stream{ css.GetCString(), css.GetLength(), Stream::Permissions::ReadOnly };
 		stream.SetAsciiMode(true);
 		CSSParser parser{ &stream };
 
-		return parser.ParseStyleSheet(parent);
+		return parser.ParseStyleSheetAlloc(owner);
 	}
 
-	CSSStyleSheet* CSSParser::ParseStyleSheet(CSSStyleSheet* parent)
+	CSSStyleSheet* CSSParser::ParseStyleSheet(CSSStyleSheet* original, const String& css)
+	{
+		MemoryStream stream{ css.GetCString(), css.GetLength(), Stream::Permissions::ReadOnly };
+		stream.SetAsciiMode(true);
+		CSSParser parser{ &stream };
+
+		parser.ParseStyleSheet(original);
+		return original;
+	}
+
+	CSSStyleSheet* CSSParser::ParseStyleSheetAlloc(Object* owner)
+	{
+		CSSStyleSheet* stylesheet = CreateObject<CSSStyleSheet>(owner, "StyleSheet");
+		if (!ParseStyleSheet(stylesheet))
+		{
+			stylesheet->RequestDestroy();
+			return nullptr;
+		}
+		return stylesheet;
+	}
+
+	bool CSSParser::ParseStyleSheet(CSSStyleSheet* stylesheet)
 	{
 		CSSSelector::MatchCond curMatchCond{};
 		CSSSelector curSelector{};
@@ -54,13 +75,11 @@ namespace CE::Widgets
 		bool insideSquareBraces = false;
 		//bool primaryCondSet = false;
 
-		CSSStyleSheet* stylesheet = CreateObject<CSSStyleSheet>(parent, "StyleSheet");
+		stylesheet->Clear();
 
 		auto returnFailure = [&](const String& msg, const CSSParserToken& token)
 		{
 			CE_LOG(Error, All, "CSS Parse Error [line {} position {}]: {}", token.line, token.position, msg);
-			stylesheet->RequestDestroy();
-			stylesheet = nullptr;
 		};
 
 		while (cursor < tokens.GetSize())
@@ -131,11 +150,11 @@ namespace CE::Widgets
 					}
 					break;
 				case PeriodToken:
-					if (tokenStack.NonEmpty() && 
+					if (tokenStack.NonEmpty() &&
 						tokenStack.Top().type != IdentifierToken && tokenStack.Top().type != WhitespaceToken && tokenStack.Top().type != SquareCloseToken)
 					{
 						returnFailure("Illegal period", token);
-						return nullptr;
+						return false;
 					}
 					tokenStack.Push(token);
 					break;
@@ -144,7 +163,7 @@ namespace CE::Widgets
 						tokenStack.Top().type != IdentifierToken && tokenStack.Top().type != WhitespaceToken && tokenStack.Top().type != SquareCloseToken)
 					{
 						returnFailure("Illegal hash sign #", token);
-						return nullptr;
+						return false;
 					}
 					tokenStack.Push(token);
 					break;
@@ -153,7 +172,7 @@ namespace CE::Widgets
 						tokenStack.Top().type != IdentifierToken && tokenStack.Top().type != WhitespaceToken && tokenStack.Top().type != SquareCloseToken)
 					{
 						returnFailure("Illegal colon", token);
-						return nullptr;
+						return false;
 					}
 					tokenStack.Push(token);
 					break;
@@ -162,7 +181,7 @@ namespace CE::Widgets
 						tokenStack.Top().type != IdentifierToken && tokenStack.Top().type != WhitespaceToken && tokenStack.Top().type != SquareCloseToken)
 					{
 						returnFailure("Illegal double colon", token);
-						return nullptr;
+						return false;
 					}
 					tokenStack.Push(token);
 					break;
@@ -270,7 +289,7 @@ namespace CE::Widgets
 					curPropertyValue = {};
 					curSelectorList = {};
 				}
-					break;
+				break;
 				case IdentifierToken:
 					if (tokenStack.IsEmpty() && curProperty == CStylePropertyType::None)
 					{
@@ -289,7 +308,7 @@ namespace CE::Widgets
 					curProperty = {};
 					curPropertyValue = {};
 				}
-					break;
+				break;
 				case SemiColonToken:
 					tokenStack.Clear();
 					curProperty = {};
@@ -305,6 +324,20 @@ namespace CE::Widgets
 
 		return stylesheet;
 	}
+
+	static HashMap<String, Color> colorIdentifiersMap{
+		{ "white", Color::White() },
+		{ "black", Color::Black() },
+		{ "red", Color::Red() },
+		{ "green", Color::Green() },
+		{ "blue", Color::Blue() },
+		{ "yellow", Color::FromRGBA32(255, 255, 0) },
+		{ "cyan", Color::FromRGBA32(0, 255, 255) },
+		{ "pink", Color::FromRGBA32(255, 0, 255) },
+		{ "orange", Color::FromRGBA32(255, 128, 0) },
+		{ "teal", Color::FromRGBA32(0, 128, 128) },
+		{ "gray", Color::FromRGBA32(128, 128, 128) },
+	};
 
 	void CSSParser::ParsePropertyValue(int& cursor, CStylePropertyType property, CStyleValue& outValue)
 	{
@@ -376,19 +409,38 @@ namespace CE::Widgets
 
 				if (startCursor < endCursor)
 				{
-					Vec4 vec{};
-					ParseVector(startCursor, endCursor, vec);
+					Vec4 vec{ 0, 0, 0, 1 };
+					int idx = 0;
+					for (int cursor = startCursor; cursor <= endCursor && idx < 4; cursor++)
+					{
+						if (tokens[cursor].type == NumberToken)
+						{
+							vec.xyzw[idx++] = String::Parse<f32>(tokens[cursor].lexeme) / 255.0f;
+						}
+					}
 					outValue = Color(vec.x, vec.y, vec.z, vec.w);
 				}
 			}
-			else // Enum value
+			else // Enum value or color
 			{
-				EnumType* enumType = GetEnumTypeForProperty(property);
-				if (enumType != nullptr)
+				if (colorIdentifiersMap.KeyExists(current->lexeme))
 				{
-					String pascalCase = current->lexeme.ToPascalCase();
-					outValue.enumValue = Vec4i(1, 1, 1, 1) * (s32)enumType->GetConstantValue(pascalCase);
+					outValue = colorIdentifiersMap[current->lexeme];
+				}
+				else if (current->lexeme == "auto")
+				{
+					outValue.enumValue = Vec4i(1, 1, 1, 1) * CStyleValue::Auto;
 					outValue.valueType = CStyleValue::Type_Enum;
+				}
+				else
+				{
+					EnumType* enumType = GetEnumTypeForProperty(property);
+					if (enumType != nullptr)
+					{
+						String pascalCase = current->lexeme.ToPascalCase();
+						outValue.enumValue = Vec4i(1, 1, 1, 1) * (s32)enumType->GetConstantValue(pascalCase);
+						outValue.valueType = CStyleValue::Type_Enum;
+					}
 				}
 			}
 		}
@@ -413,31 +465,58 @@ namespace CE::Widgets
 			int startCursor = cursor;
 			int endCursor = cursor;
 
-			while (current->type == NumberToken)
+			while (cursor < tokens.GetSize())
 			{
+				if (tokens[cursor].type == SemiColonToken)
+				{
+					endCursor = cursor - 1;
+					break;
+				}
 				cursor++;
 				current = &tokens[cursor];
 			}
 
-			endCursor = cursor - 1;
+			Vec4 value{};
+			int count = 0;
+			bool isPercent = false;
+			Vec4i enumValue{};
+			int curIdx = 0;
 
-			if (startCursor == endCursor) // Single
+			for (int i = startCursor; i <= endCursor; i++)
 			{
-				outValue = CStyleValue(String::Parse<f32>(tokens[startCursor].lexeme));
+				if (tokens[i].type == WhitespaceToken)
+					continue;
+
+				if (tokens[i].type == NumberToken && curIdx < 4)
+				{
+					value.xyzw[curIdx++] = String::Parse<f32>(tokens[i].lexeme);
+				}
+				else if (tokens[i].type == IdentifierToken && tokens[i].lexeme == "auto" && curIdx < 4)
+				{
+					enumValue[curIdx] = CStyleValue::Auto;
+				}
+				else if (tokens[i].type == PercentageToken && curIdx > 0 && curIdx <= 4)
+				{
+					isPercent = true;
+					enumValue.xyzw[curIdx - 1] = CStyleValue::Percent;
+				}
 			}
-			else if (startCursor + 1 == endCursor) // Vec2
+
+			if (curIdx == 1) // Single
 			{
-				f32 horizontal = String::Parse<f32>(tokens[startCursor].lexeme); 
-				f32 vertical = String::Parse<f32>(tokens[endCursor].lexeme);
+				outValue = CStyleValue(value.x, isPercent);
+			}
+			else if (curIdx == 2) // Vec2
+			{
+				f32 horizontal = value.x;
+				f32 vertical = value.y;
 				outValue = Vec4(horizontal, vertical, horizontal, vertical);
+				outValue.enumValue = enumValue;
 			}
-			else if (startCursor + 3 == endCursor) // Vec4
+			else if (curIdx == 4) // Vec4
 			{
-				f32 x = String::Parse<f32>(tokens[startCursor].lexeme);
-				f32 y = String::Parse<f32>(tokens[startCursor + 1].lexeme);
-				f32 z = String::Parse<f32>(tokens[startCursor + 2].lexeme);
-				f32 w = String::Parse<f32>(tokens[startCursor + 3].lexeme);
-				outValue = Vec4(x, y, z, w);
+				outValue = value;
+				outValue.enumValue = enumValue;
 			}
 		}
 	}

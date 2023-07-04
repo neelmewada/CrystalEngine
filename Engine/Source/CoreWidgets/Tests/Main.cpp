@@ -129,10 +129,13 @@ TEST(Style, StyleSheetParsing)
 
 	CStyleSheet* stylesheet = CSSParser::ParseStyleSheet(cssSheet);
 
-	
+	CLabel* label = CreateWidget<CLabel>(nullptr, "Label");
+	label->SetText("My Label");
 
-	stylesheet->RequestDestroy();
-	stylesheet = nullptr;
+	auto rules = stylesheet->GetMatchingRules(label);
+
+	label->RequestDestroy(); label = nullptr;
+	stylesheet->RequestDestroy(); stylesheet = nullptr;
 
 	TEST_END;
 }

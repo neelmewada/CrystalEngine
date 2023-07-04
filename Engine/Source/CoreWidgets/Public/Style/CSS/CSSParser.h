@@ -45,11 +45,14 @@ namespace CE::Widgets
 		CSSParser(Stream* stream);
 		~CSSParser();
 
-		static CSSStyleSheet* ParseStyleSheet(const String& css, CSSStyleSheet* parent = nullptr);
+		static CSSStyleSheet* ParseStyleSheet(const String& css, Object* owner = nullptr);
+
+		static CSSStyleSheet* ParseStyleSheet(CSSStyleSheet* original, const String& css);
         
 		inline const Array<CSSParserToken>& GetTokens() const { return tokens; }
 
-		CSSStyleSheet* ParseStyleSheet(CSSStyleSheet* parent = nullptr);
+		CSSStyleSheet* ParseStyleSheetAlloc(Object* owner = nullptr);
+		bool ParseStyleSheet(CSSStyleSheet* original);
 
     private:
 

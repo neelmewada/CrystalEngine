@@ -135,17 +135,18 @@ namespace CE::Widgets
 		if (!rule.IsValid())
 			return false;
 
+		if (rule.matches == Any)
+			return true;
+
 		auto widgetClass = widget->GetClass();
 		auto widgetClassName = widgetClass->GetName().GetLastComponent();
 		auto widgetId = widget->GetName().GetString();
-		if (!widgetClassName.StartsWith("."))
-			widgetClassName = "." + widgetClassName;
 
 		if (EnumHasAnyFlags(rule.matches, Tag) && rule.tag != widgetClassName)
 			return false;
 		if (EnumHasAnyFlags(rule.matches, Id) && rule.id != widgetId)
 			return false;
-		if (EnumHasAnyFlags(rule.matches, Class) && !widget->StyleClassExists(widgetClassName))
+		if (EnumHasAnyFlags(rule.matches, Class) && !widget->StyleClassExists(rule.clazz))
 			return false;
 		if (EnumHasAnyFlags(rule.matches, State) && !EnumHasAllFlags(curStates, rule.states))
 			return false;

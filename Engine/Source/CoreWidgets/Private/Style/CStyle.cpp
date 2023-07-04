@@ -163,6 +163,14 @@ namespace CE::Widgets
 		return properties[propertyType];
 	}
 
+    void CStyle::ApplyProperties(const CStyle& from)
+    {
+		for (const auto& [property, value] : from.properties)
+		{
+			properties[property] = value;
+		}
+    }
+
 	bool CStyle::IsInheritedProperty(CStylePropertyType property)
 	{
 		return GetInheritedProperties().Exists(property);

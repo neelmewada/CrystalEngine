@@ -14,11 +14,13 @@ namespace CE::Widgets
 	*	Forward Decls
 	*/
 
+	class CStyleManager;
 
 	/*
 	*	Global Variables
 	*/
 
+	COREWIDGETS_API CStyleManager* GetStyleManager();
     
 } // namespace CE::Widgets
 

@@ -319,6 +319,7 @@ namespace CE::Widgets
 		inline bool IsDirty() const { return isDirty; }
 		inline void SetDirty(bool dirty = true) { isDirty = dirty; }
 
+		void ApplyProperties(const CStyle& from);
 		
 		// Fields
 

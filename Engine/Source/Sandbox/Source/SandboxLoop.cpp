@@ -331,33 +331,46 @@ CE_RTTI_CLASS(, , MyTableModel,
 
 CE_RTTI_CLASS_IMPL(, , MyTableModel)
 
+static const String stylesheet = R"(
+CWindow {
+	background: rgb(36, 36, 36);
+	padding: 5 25 5 5;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+CLabel {
+	background: rgb(120, 0, 0);
+	foreground: white;
+	min-height: 50;
+	min-width: 50%;
+	text-align: middle-center;
+}
+)";
 
 void SandboxLoop::SetupGUI()
 {
     using namespace CE::Widgets;
 
+	GetStyleManager()->SetGlobalStyleSheet(stylesheet);
+
 	window = CreateWidget<CWindow>(nullptr, "TestWindow");
-	//window->SetAsDockSpaceWindow(true);
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
-	window->AddStyleProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36));
-	window->AddStyleProperty(CStylePropertyType::Padding, Vec4(5, 25, 5, 5));
-	window->AddStyleProperty(CStylePropertyType::FlexDirection, CFlexDirection::Column);
-	window->AddStyleProperty(CStylePropertyType::AlignItems, CAlign::FlexStart);
 	window->SetAllowHorizontalScroll(true);
 
-	/*for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		auto label = CreateWidget<CLabel>(window, "Label");
 		label->SetInteractable(true);
 		label->SetText("This is a label");
-		label->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
-		label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0, 1), CStateFlag::Hovered);
-		label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.5f, 1), CStateFlag::Pressed);
-		label->AddStyleProperty(CStylePropertyType::MinHeight, 25);
+		//label->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
+		//label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0, 1), CStateFlag::Hovered);
+		//label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.5f, 1), CStateFlag::Pressed);
+		//label->AddStyleProperty(CStylePropertyType::MinHeight, 25);
 	}
 
-	auto button = CreateWidget<CButton>(window, "Button");
+	/*auto button = CreateWidget<CButton>(window, "Button");
 	button->SetText("Click Me");
 	button->AddStyleProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
 	button->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
