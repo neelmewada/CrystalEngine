@@ -8,7 +8,6 @@ namespace CE::Widgets
 	class COREWIDGETS_API CSSSelector
 	{
 	public:
-		struct MatchCond;
 
 		enum Match : int
 		{
@@ -51,6 +50,8 @@ namespace CE::Widgets
 		}
 
 	private:
+        
+        struct MatchCond;
 
 		SIZE_T CalculateHash(const MatchCond& rule, SIZE_T hash = 0);
 

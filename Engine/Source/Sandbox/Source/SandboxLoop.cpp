@@ -358,7 +358,7 @@ void SandboxLoop::SetupGUI()
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
 	window->SetAllowHorizontalScroll(true);
-
+    
 	for (int i = 0; i < 8; i++)
 	{
 		auto label = CreateWidget<CLabel>(window, "Label");

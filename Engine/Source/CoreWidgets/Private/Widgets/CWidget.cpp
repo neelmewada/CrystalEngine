@@ -611,6 +611,8 @@ namespace CE::Widgets
 				HandleEvent(&event);
 				isHovered = hovered;
 				prevHoverPos = event.mousePos;
+                
+                EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
 			}
 
 			// Mouse Click:
@@ -704,15 +706,21 @@ namespace CE::Widgets
 
 		if (IsLeftMouseHeld() && IsHovered())
 		{
+            if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
+                SetNeedsStyle();
 			EnumAddFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed);
 		}
 		else if (IsHovered())
 		{
+            if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
+                SetNeedsStyle();
 			EnumAddFlags(stateFlags, CStateFlag::Hovered);
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
 		}
 		else
 		{
+            if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
+                SetNeedsStyle();
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed | CStateFlag::Hovered);
 		}
 	}
