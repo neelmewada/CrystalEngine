@@ -150,7 +150,8 @@ namespace CE::Widgets
 			return false;
 		if (EnumHasAnyFlags(rule.matches, State) && !EnumHasAllFlags(curStates, rule.states))
 			return false;
-		if (EnumHasAnyFlags(rule.matches, SubControl) && (rule.subControl != CSubControl::Any && subControl != CSubControl::Any && rule.subControl != subControl))
+		if ((EnumHasAnyFlags(rule.matches, SubControl) && rule.subControl != CSubControl::Any && subControl != CSubControl::Any && rule.subControl != subControl) ||
+			(!EnumHasAnyFlags(rule.matches, SubControl) && subControl != CSubControl::None && subControl != CSubControl::Any))
 			return false;
 		
 		for (const auto& attribMatchRule : rule.attributeMatches)

@@ -19,6 +19,8 @@ namespace CE::Widgets
 
 		virtual Array<CSSRule> GetMatchingRules(CWidget* widget, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) = 0;
 
+		virtual CStyle SelectStyle(CWidget* widget, CStateFlag state = CStateFlag::Default, CSubControl subControl = CSubControl::None) = 0;
+
 		virtual void Clear() = 0;
 
 	protected:

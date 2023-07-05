@@ -670,6 +670,11 @@ namespace CE::GUI
 		TabBarFlags_FittingPolicyScroll = 1 << 7,   // Add scroll buttons when tabs don't fit
 		TabBarFlags_FittingPolicyMask_ = TabBarFlags_FittingPolicyResizeDown | TabBarFlags_FittingPolicyScroll,
 		TabBarFlags_FittingPolicyDefault_ = TabBarFlags_FittingPolicyResizeDown,
+
+		TabBarFlags_DockNode = 1 << 20,  // Part of a dock node [we don't use this in the master branch but it facilitate branch syncing to keep this around]
+		TabBarFlags_IsFocused = 1 << 21,
+		TabBarFlags_SaveSettings = 1 << 22,  // FIXME: Settings are handled by the docking system, this only request the tab bar to mark settings dirty when reordering tabs
+
 	};
 	ENUM_CLASS_FLAGS(TabBarFlags);
 

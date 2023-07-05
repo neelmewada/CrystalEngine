@@ -627,7 +627,7 @@ namespace CE::GUI
 	}
 
 	COREGUI_API bool Button(const Rect& rect, const String& label, 
-		const GuiStyleState& normalState, const GuiStyleState& hoveredState, const GuiStyleState& pressedState, 
+		const GuiStyleState& styleState, bool& isHovered, bool& isHeld,
 		const Vec4& padding, ButtonFlags buttonFlags)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -661,13 +661,12 @@ namespace CE::GUI
 		if (g.LastItemData.InFlags & ImGuiItemFlags_ButtonRepeat)
 			flags |= ImGuiButtonFlags_Repeat;
 
-		bool hovered, held;
-		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
+		bool pressed = ImGui::ButtonBehavior(bb, id, &isHovered, &isHeld, flags);
 
 		// Render highlight
 		ImGui::RenderNavHighlight(bb, id);
 
-		const GUI::GuiStyleState& curState = (held && hovered) ? pressedState : hovered ? hoveredState : normalState;
+		const GUI::GuiStyleState& curState = styleState;
 		GUI::FillRect(WindowRectToGlobalRect(rect), curState.background, curState.borderRadius);
 
 		auto textAlign = curState.textAlign;
@@ -1348,7 +1347,8 @@ namespace CE::GUI
 {
 	using namespace ImStb;
 
-	static bool InputTextFilterCharacter(unsigned int* p_char, ImGuiInputTextFlags flags, TextInputCallback callback, void* user_data, ImGuiInputSource input_source)
+	static bool InputTextFilterCharacter(unsigned int* p_char, ImGuiInputTextFlags flags, TextInputCallback callback, void* user_data, ImGuiInputSource input_source,
+		int cursor = 0)
 	{
 		IM_ASSERT(input_source == ImGuiInputSource_Keyboard || input_source == ImGuiInputSource_Clipboard);
 		unsigned int c = *p_char;
@@ -1436,6 +1436,7 @@ namespace CE::GUI
 			callback_data.eventChar = (ImWchar)c;
 			callback_data.flags = (TextInputFlags)flags;
 			callback_data.userData = user_data;
+			callback_data.cursorPos = cursor;
 			if (callback(&callback_data) != 0)
 				return false;
 			*p_char = callback_data.eventChar;
@@ -1806,7 +1807,7 @@ namespace CE::GUI
 			if ((flags & ImGuiInputTextFlags_AllowTabInput) && ImGui::Shortcut(ImGuiKey_Tab, id) && !is_readonly)
 			{
 				unsigned int c = '\t'; // Insert TAB
-				if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard))
+				if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard, state->Stb.cursor))
 					state->OnKeyPressed((int)c);
 			}
 
@@ -1822,7 +1823,7 @@ namespace CE::GUI
 						unsigned int c = (unsigned int)io.InputQueueCharacters[n];
 						if (c == '\t') // Skip Tab, see above.
 							continue;
-						if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard))
+						if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard, state->Stb.cursor))
 							state->OnKeyPressed((int)c);
 					}
 
@@ -1908,7 +1909,7 @@ namespace CE::GUI
 				else if (!is_readonly)
 				{
 					unsigned int c = '\n'; // Insert new line
-					if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard))
+					if (InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Keyboard, state->Stb.cursor))
 						state->OnKeyPressed((int)c);
 				}
 			}
@@ -1975,7 +1976,7 @@ namespace CE::GUI
 					{
 						unsigned int c;
 						s += ImTextCharFromUtf8(&c, s, NULL);
-						if (!InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Clipboard))
+						if (!InputTextFilterCharacter(&c, flags, callback, callback_user_data, ImGuiInputSource_Clipboard, state->Stb.cursor))
 							continue;
 						clipboard_filtered[clipboard_filtered_len++] = (ImWchar)c;
 					}
@@ -2296,10 +2297,17 @@ namespace CE::GUI
 				const ImWchar* text_selected_begin = text_begin + ImMin(state->Stb.select_start, state->Stb.select_end);
 				const ImWchar* text_selected_end = text_begin + ImMax(state->Stb.select_start, state->Stb.select_end);
 
+				ImVec2 offset = {};
+				if (!is_multiline)
+				{
+					offset.x = align.x * abs(clip_rect.z - clip_rect.x - (padding.left + padding.right)) - (g.FontSize - 2.0f) * align.x;
+					offset.y = align.y * abs(clip_rect.w - clip_rect.y - (padding.top + padding.bottom)) - (g.FontSize - 2.0f) * align.y;
+				}
+
 				ImU32 bg_color = ImGui::GetColorU32(ImGuiCol_TextSelectedBg, render_cursor ? 1.0f : 0.6f); // FIXME: current code flow mandate that render_cursor is always true here, we are leaving the transparent one for tests.
 				float bg_offy_up = is_multiline ? 0.0f : -1.0f;    // FIXME: those offsets should be part of the style? they don't play so well with multi-line selection.
 				float bg_offy_dn = is_multiline ? 0.0f : 2.0f;
-				ImVec2 rect_pos = draw_pos + select_start_offset - draw_scroll;
+				ImVec2 rect_pos = draw_pos + select_start_offset - draw_scroll + offset;
 				for (const ImWchar* p = text_selected_begin; p < text_selected_end; )
 				{
 					if (rect_pos.y > clip_rect.w + g.FontSize)
@@ -3546,6 +3554,13 @@ namespace CE::GUI
 		return value_changed;
 	}
 
+	COREGUI_API bool DragScalar(const Rect& rect, ID id, DataType dataType, void* data, float speed, const void* min, const void* max, const char* format, 
+		GuiStyleState normalState, GuiStyleState activeState, SliderFlags flags)
+	{
+
+		return false;
+	}
+
 
     COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags)
     {
@@ -3949,6 +3964,384 @@ namespace CE::GUI
 		return is_open;
     }
 
+
+	struct ImGuiTabBarSection
+	{
+		int                 TabCount;               // Number of tabs in this section.
+		float               Width;                  // Sum of width of tabs in this section (after shrinking down)
+		float               Spacing;                // Horizontal spacing at the end of the section.
+
+		ImGuiTabBarSection() { memset(this, 0, sizeof(*this)); }
+	};
+
+	namespace Internal
+	{
+		static void             TabBarLayout(ImGuiTabBar* tab_bar);
+		static ImU32            TabBarCalcTabID(ImGuiTabBar* tab_bar, const char* label, ImGuiWindow* docked_window);
+		static float            TabBarCalcMaxTabWidth();
+		static float            TabBarScrollClamp(ImGuiTabBar* tab_bar, float scrolling);
+		static void             TabBarScrollToTab(ImGuiTabBar* tab_bar, ImGuiID tab_id, ImGuiTabBarSection* sections);
+		static ImGuiTabItem* TabBarScrollingButtons(ImGuiTabBar* tab_bar);
+		static ImGuiTabItem* TabBarTabListPopupButton(ImGuiTabBar* tab_bar);
+
+		static void TabBarLayout(ImGuiTabBar* tab_bar)
+		{
+
+		}
+	}
+
+	static inline int TabItemGetSectionIdx(const ImGuiTabItem* tab)
+	{
+		return (tab->Flags & ImGuiTabItemFlags_Leading) ? 0 : (tab->Flags & ImGuiTabItemFlags_Trailing) ? 2 : 1;
+	}
+
+	static int IMGUI_CDECL TabItemComparerBySection(const void* lhs, const void* rhs)
+	{
+		const ImGuiTabItem* a = (const ImGuiTabItem*)lhs;
+		const ImGuiTabItem* b = (const ImGuiTabItem*)rhs;
+		const int a_section = TabItemGetSectionIdx(a);
+		const int b_section = TabItemGetSectionIdx(b);
+		if (a_section != b_section)
+			return a_section - b_section;
+		return (int)(a->IndexDuringLayout - b->IndexDuringLayout);
+	}
+
+	static int IMGUI_CDECL TabItemComparerByBeginOrder(const void* lhs, const void* rhs)
+	{
+		const ImGuiTabItem* a = (const ImGuiTabItem*)lhs;
+		const ImGuiTabItem* b = (const ImGuiTabItem*)rhs;
+		return (int)(a->BeginOrder - b->BeginOrder);
+	}
+
+	static ImGuiTabBar* GetTabBarFromTabBarRef(const ImGuiPtrOrIndex& ref)
+	{
+		ImGuiContext& g = *GImGui;
+		return ref.Ptr ? (ImGuiTabBar*)ref.Ptr : g.TabBars.GetByIndex(ref.Index);
+	}
+
+	static ImGuiPtrOrIndex GetTabBarRefFromTabBar(ImGuiTabBar* tab_bar)
+	{
+		ImGuiContext& g = *GImGui;
+		if (g.TabBars.Contains(tab_bar))
+			return ImGuiPtrOrIndex(g.TabBars.GetIndex(tab_bar));
+		return ImGuiPtrOrIndex(tab_bar);
+	}
+
+	static void TabBarLayout(ImGuiTabBar* tab_bar)
+	{
+		ImGuiContext& g = *GImGui;
+		tab_bar->WantLayout = false;
+
+		// Garbage collect by compacting list
+		// Detect if we need to sort out tab list (e.g. in rare case where a tab changed section)
+		int tab_dst_n = 0;
+		bool need_sort_by_section = false;
+		ImGuiTabBarSection sections[3]; // Layout sections: Leading, Central, Trailing
+		for (int tab_src_n = 0; tab_src_n < tab_bar->Tabs.Size; tab_src_n++)
+		{
+			ImGuiTabItem* tab = &tab_bar->Tabs[tab_src_n];
+			if (tab->LastFrameVisible < tab_bar->PrevFrameVisible || tab->WantClose)
+			{
+				// Remove tab
+				if (tab_bar->VisibleTabId == tab->ID) { tab_bar->VisibleTabId = 0; }
+				if (tab_bar->SelectedTabId == tab->ID) { tab_bar->SelectedTabId = 0; }
+				if (tab_bar->NextSelectedTabId == tab->ID) { tab_bar->NextSelectedTabId = 0; }
+				continue;
+			}
+			if (tab_dst_n != tab_src_n)
+				tab_bar->Tabs[tab_dst_n] = tab_bar->Tabs[tab_src_n];
+
+			tab = &tab_bar->Tabs[tab_dst_n];
+			tab->IndexDuringLayout = (ImS16)tab_dst_n;
+
+			// We will need sorting if tabs have changed section (e.g. moved from one of Leading/Central/Trailing to another)
+			int curr_tab_section_n = TabItemGetSectionIdx(tab);
+			if (tab_dst_n > 0)
+			{
+				ImGuiTabItem* prev_tab = &tab_bar->Tabs[tab_dst_n - 1];
+				int prev_tab_section_n = TabItemGetSectionIdx(prev_tab);
+				if (curr_tab_section_n == 0 && prev_tab_section_n != 0)
+					need_sort_by_section = true;
+				if (prev_tab_section_n == 2 && curr_tab_section_n != 2)
+					need_sort_by_section = true;
+			}
+
+			sections[curr_tab_section_n].TabCount++;
+			tab_dst_n++;
+		}
+		if (tab_bar->Tabs.Size != tab_dst_n)
+			tab_bar->Tabs.resize(tab_dst_n);
+
+		if (need_sort_by_section)
+			ImQsort(tab_bar->Tabs.Data, tab_bar->Tabs.Size, sizeof(ImGuiTabItem), TabItemComparerBySection);
+
+		// Calculate spacing between sections
+		sections[0].Spacing = sections[0].TabCount > 0 && (sections[1].TabCount + sections[2].TabCount) > 0 ? g.Style.ItemInnerSpacing.x : 0.0f;
+		sections[1].Spacing = sections[1].TabCount > 0 && sections[2].TabCount > 0 ? g.Style.ItemInnerSpacing.x : 0.0f;
+
+		// Setup next selected tab
+		ImGuiID scroll_to_tab_id = 0;
+		if (tab_bar->NextSelectedTabId)
+		{
+			tab_bar->SelectedTabId = tab_bar->NextSelectedTabId;
+			tab_bar->NextSelectedTabId = 0;
+			scroll_to_tab_id = tab_bar->SelectedTabId;
+		}
+
+		// Process order change request (we could probably process it when requested but it's just saner to do it in a single spot).
+		if (tab_bar->ReorderRequestTabId != 0)
+		{
+			if (ImGui::TabBarProcessReorder(tab_bar))
+				if (tab_bar->ReorderRequestTabId == tab_bar->SelectedTabId)
+					scroll_to_tab_id = tab_bar->ReorderRequestTabId;
+			tab_bar->ReorderRequestTabId = 0;
+		}
+
+		// Tab List Popup (will alter tab_bar->BarRect and therefore the available width!)
+		const bool tab_list_popup_button = (tab_bar->Flags & ImGuiTabBarFlags_TabListPopupButton) != 0;
+		if (tab_list_popup_button)
+			if (ImGuiTabItem* tab_to_select = Internal::TabBarTabListPopupButton(tab_bar)) // NB: Will alter BarRect.Min.x!
+				scroll_to_tab_id = tab_bar->SelectedTabId = tab_to_select->ID;
+
+		// Leading/Trailing tabs will be shrink only if central one aren't visible anymore, so layout the shrink data as: leading, trailing, central
+		// (whereas our tabs are stored as: leading, central, trailing)
+		int shrink_buffer_indexes[3] = { 0, sections[0].TabCount + sections[2].TabCount, sections[0].TabCount };
+		g.ShrinkWidthBuffer.resize(tab_bar->Tabs.Size);
+
+		// Compute ideal tabs widths + store them into shrink buffer
+		ImGuiTabItem* most_recently_selected_tab = NULL;
+		int curr_section_n = -1;
+		bool found_selected_tab_id = false;
+		for (int tab_n = 0; tab_n < tab_bar->Tabs.Size; tab_n++)
+		{
+			ImGuiTabItem* tab = &tab_bar->Tabs[tab_n];
+			IM_ASSERT(tab->LastFrameVisible >= tab_bar->PrevFrameVisible);
+
+			if ((most_recently_selected_tab == NULL || most_recently_selected_tab->LastFrameSelected < tab->LastFrameSelected) && !(tab->Flags & ImGuiTabItemFlags_Button))
+				most_recently_selected_tab = tab;
+			if (tab->ID == tab_bar->SelectedTabId)
+				found_selected_tab_id = true;
+			if (scroll_to_tab_id == 0 && g.NavJustMovedToId == tab->ID)
+				scroll_to_tab_id = tab->ID;
+
+			// Refresh tab width immediately, otherwise changes of style e.g. style.FramePadding.x would noticeably lag in the tab bar.
+			// Additionally, when using TabBarAddTab() to manipulate tab bar order we occasionally insert new tabs that don't have a width yet,
+			// and we cannot wait for the next BeginTabItem() call. We cannot compute this width within TabBarAddTab() because font size depends on the active window.
+			const char* tab_name = ImGui::TabBarGetTabName(tab_bar, tab);
+			const bool has_close_button_or_unsaved_marker = (tab->Flags & ImGuiTabItemFlags_NoCloseButton) == 0 || (tab->Flags & ImGuiTabItemFlags_UnsavedDocument);
+			tab->ContentWidth = (tab->RequestedWidth >= 0.0f) ? tab->RequestedWidth : ImGui::TabItemCalcSize(tab_name, has_close_button_or_unsaved_marker).x;
+
+			int section_n = TabItemGetSectionIdx(tab);
+			ImGuiTabBarSection* section = &sections[section_n];
+			section->Width += tab->ContentWidth + (section_n == curr_section_n ? g.Style.ItemInnerSpacing.x : 0.0f);
+			curr_section_n = section_n;
+
+			// Store data so we can build an array sorted by width if we need to shrink tabs down
+			IM_MSVC_WARNING_SUPPRESS(6385);
+			ImGuiShrinkWidthItem* shrink_width_item = &g.ShrinkWidthBuffer[shrink_buffer_indexes[section_n]++];
+			shrink_width_item->Index = tab_n;
+			shrink_width_item->Width = shrink_width_item->InitialWidth = tab->ContentWidth;
+			tab->Width = ImMax(tab->ContentWidth, 1.0f);
+		}
+
+		// Compute total ideal width (used for e.g. auto-resizing a window)
+		tab_bar->WidthAllTabsIdeal = 0.0f;
+		for (int section_n = 0; section_n < 3; section_n++)
+			tab_bar->WidthAllTabsIdeal += sections[section_n].Width + sections[section_n].Spacing;
+
+		// Horizontal scrolling buttons
+		// (note that TabBarScrollButtons() will alter BarRect.Max.x)
+		if ((tab_bar->WidthAllTabsIdeal > tab_bar->BarRect.GetWidth() && tab_bar->Tabs.Size > 1) && !(tab_bar->Flags & ImGuiTabBarFlags_NoTabListScrollingButtons) && (tab_bar->Flags & ImGuiTabBarFlags_FittingPolicyScroll))
+			if (ImGuiTabItem* scroll_and_select_tab = Internal::TabBarScrollingButtons(tab_bar))
+			{
+				scroll_to_tab_id = scroll_and_select_tab->ID;
+				if ((scroll_and_select_tab->Flags & ImGuiTabItemFlags_Button) == 0)
+					tab_bar->SelectedTabId = scroll_to_tab_id;
+			}
+
+		// Shrink widths if full tabs don't fit in their allocated space
+		float section_0_w = sections[0].Width + sections[0].Spacing;
+		float section_1_w = sections[1].Width + sections[1].Spacing;
+		float section_2_w = sections[2].Width + sections[2].Spacing;
+		bool central_section_is_visible = (section_0_w + section_2_w) < tab_bar->BarRect.GetWidth();
+		float width_excess;
+		if (central_section_is_visible)
+			width_excess = ImMax(section_1_w - (tab_bar->BarRect.GetWidth() - section_0_w - section_2_w), 0.0f); // Excess used to shrink central section
+		else
+			width_excess = (section_0_w + section_2_w) - tab_bar->BarRect.GetWidth(); // Excess used to shrink leading/trailing section
+
+		// With ImGuiTabBarFlags_FittingPolicyScroll policy, we will only shrink leading/trailing if the central section is not visible anymore
+		if (width_excess >= 1.0f && ((tab_bar->Flags & ImGuiTabBarFlags_FittingPolicyResizeDown) || !central_section_is_visible))
+		{
+			int shrink_data_count = (central_section_is_visible ? sections[1].TabCount : sections[0].TabCount + sections[2].TabCount);
+			int shrink_data_offset = (central_section_is_visible ? sections[0].TabCount + sections[2].TabCount : 0);
+			ImGui::ShrinkWidths(g.ShrinkWidthBuffer.Data + shrink_data_offset, shrink_data_count, width_excess);
+
+			// Apply shrunk values into tabs and sections
+			for (int tab_n = shrink_data_offset; tab_n < shrink_data_offset + shrink_data_count; tab_n++)
+			{
+				ImGuiTabItem* tab = &tab_bar->Tabs[g.ShrinkWidthBuffer[tab_n].Index];
+				float shrinked_width = IM_FLOOR(g.ShrinkWidthBuffer[tab_n].Width);
+				if (shrinked_width < 0.0f)
+					continue;
+
+				shrinked_width = ImMax(1.0f, shrinked_width);
+				int section_n = TabItemGetSectionIdx(tab);
+				sections[section_n].Width -= (tab->Width - shrinked_width);
+				tab->Width = shrinked_width;
+			}
+		}
+
+		// Layout all active tabs
+		int section_tab_index = 0;
+		float tab_offset = 0.0f;
+		tab_bar->WidthAllTabs = 0.0f;
+		for (int section_n = 0; section_n < 3; section_n++)
+		{
+			ImGuiTabBarSection* section = &sections[section_n];
+			if (section_n == 2)
+				tab_offset = ImMin(ImMax(0.0f, tab_bar->BarRect.GetWidth() - section->Width), tab_offset);
+
+			for (int tab_n = 0; tab_n < section->TabCount; tab_n++)
+			{
+				ImGuiTabItem* tab = &tab_bar->Tabs[section_tab_index + tab_n];
+				tab->Offset = tab_offset;
+				tab->NameOffset = -1;
+				tab_offset += tab->Width + (tab_n < section->TabCount - 1 ? g.Style.ItemInnerSpacing.x : 0.0f);
+			}
+			tab_bar->WidthAllTabs += ImMax(section->Width + section->Spacing, 0.0f);
+			tab_offset += section->Spacing;
+			section_tab_index += section->TabCount;
+		}
+
+		// Clear name buffers
+		tab_bar->TabsNames.Buf.resize(0);
+
+		// If we have lost the selected tab, select the next most recently active one
+		if (found_selected_tab_id == false)
+			tab_bar->SelectedTabId = 0;
+		if (tab_bar->SelectedTabId == 0 && tab_bar->NextSelectedTabId == 0 && most_recently_selected_tab != NULL)
+			scroll_to_tab_id = tab_bar->SelectedTabId = most_recently_selected_tab->ID;
+
+		// Lock in visible tab
+		tab_bar->VisibleTabId = tab_bar->SelectedTabId;
+		tab_bar->VisibleTabWasSubmitted = false;
+
+		// CTRL+TAB can override visible tab temporarily
+		if (g.NavWindowingTarget != NULL && g.NavWindowingTarget->DockNode && g.NavWindowingTarget->DockNode->TabBar == tab_bar)
+			tab_bar->VisibleTabId = scroll_to_tab_id = g.NavWindowingTarget->TabId;
+
+		// Apply request requests
+		if (scroll_to_tab_id != 0)
+			Internal::TabBarScrollToTab(tab_bar, scroll_to_tab_id, sections);
+		else if ((tab_bar->Flags & ImGuiTabBarFlags_FittingPolicyScroll) && ImGui::IsMouseHoveringRect(tab_bar->BarRect.Min, tab_bar->BarRect.Max, true) && 
+			ImGui::IsWindowContentHoverable(g.CurrentWindow))
+		{
+			const float wheel = g.IO.MouseWheelRequestAxisSwap ? g.IO.MouseWheel : g.IO.MouseWheelH;
+			const ImGuiKey wheel_key = g.IO.MouseWheelRequestAxisSwap ? ImGuiKey_MouseWheelY : ImGuiKey_MouseWheelX;
+			if (ImGui::TestKeyOwner(wheel_key, tab_bar->ID) && wheel != 0.0f)
+			{
+				const float scroll_step = wheel * ImGui::TabBarCalcScrollableWidth(tab_bar, sections) / 3.0f;
+				tab_bar->ScrollingTargetDistToVisibility = 0.0f;
+				tab_bar->ScrollingTarget = Internal::TabBarScrollClamp(tab_bar, tab_bar->ScrollingTarget - scroll_step);
+			}
+			ImGui::SetKeyOwner(wheel_key, tab_bar->ID);
+		}
+
+		// Update scrolling
+		tab_bar->ScrollingAnim = Internal::TabBarScrollClamp(tab_bar, tab_bar->ScrollingAnim);
+		tab_bar->ScrollingTarget = Internal::TabBarScrollClamp(tab_bar, tab_bar->ScrollingTarget);
+		if (tab_bar->ScrollingAnim != tab_bar->ScrollingTarget)
+		{
+			// Scrolling speed adjust itself so we can always reach our target in 1/3 seconds.
+			// Teleport if we are aiming far off the visible line
+			tab_bar->ScrollingSpeed = ImMax(tab_bar->ScrollingSpeed, 70.0f * g.FontSize);
+			tab_bar->ScrollingSpeed = ImMax(tab_bar->ScrollingSpeed, ImFabs(tab_bar->ScrollingTarget - tab_bar->ScrollingAnim) / 0.3f);
+			const bool teleport = (tab_bar->PrevFrameVisible + 1 < g.FrameCount) || (tab_bar->ScrollingTargetDistToVisibility > 10.0f * g.FontSize);
+			tab_bar->ScrollingAnim = teleport ? tab_bar->ScrollingTarget : ImLinearSweep(tab_bar->ScrollingAnim, tab_bar->ScrollingTarget, g.IO.DeltaTime * tab_bar->ScrollingSpeed);
+		}
+		else
+		{
+			tab_bar->ScrollingSpeed = 0.0f;
+		}
+		tab_bar->ScrollingRectMinX = tab_bar->BarRect.Min.x + sections[0].Width + sections[0].Spacing;
+		tab_bar->ScrollingRectMaxX = tab_bar->BarRect.Max.x - sections[2].Width - sections[1].Spacing;
+
+		// Actual layout in host window (we don't do it in BeginTabBar() so as not to waste an extra frame)
+		ImGuiWindow* window = g.CurrentWindow;
+		window->DC.CursorPos = tab_bar->BarRect.Min;
+		ImGui::ItemSize(ImVec2(tab_bar->WidthAllTabs, tab_bar->BarRect.GetHeight()), tab_bar->FramePadding.y);
+		window->DC.IdealMaxPos.x = ImMax(window->DC.IdealMaxPos.x, tab_bar->BarRect.Min.x + tab_bar->WidthAllTabsIdeal);
+	}
+
+	COREGUI_API bool BeginTabBar(const Rect& rect, ID id, const Vec4& padding, TabBarFlags flags)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		if (window->SkipItems)
+			return false;
+
+		ImGui::SetCursorPos(ImVec2(rect.x, rect.y));
+
+		ImGuiTabBar* tab_bar = g.TabBars.GetOrAddByKey((ImGuiID)id);
+		ImRect tab_bar_bb = ImRect(window->DC.CursorPos.x, window->DC.CursorPos.y, rect.max.x, window->DC.CursorPos.y + g.FontSize + padding.top + padding.bottom);
+		tab_bar->ID = id;
+
+		flags |= TabBarFlags_IsFocused;
+
+		if ((flags & TabBarFlags_DockNode) == 0)
+			ImGui::PushOverrideID(tab_bar->ID);
+
+		// Add to stack
+		g.CurrentTabBarStack.push_back(GetTabBarRefFromTabBar(tab_bar));
+		g.CurrentTabBar = tab_bar;
+
+		// Append with multiple BeginTabBar()/EndTabBar() pairs.
+		tab_bar->BackupCursorPos = window->DC.CursorPos;
+		if (tab_bar->CurrFrameVisible == g.FrameCount)
+		{
+			window->DC.CursorPos = ImVec2(tab_bar->BarRect.Min.x, tab_bar->BarRect.Max.y + tab_bar->ItemSpacingY);
+			tab_bar->BeginCount++;
+			return true;
+		}
+
+		// Ensure correct ordering when toggling TabBarFlags_Reorderable flag, or when a new tab was added while being not reorderable
+		if ((flags & TabBarFlags_Reorderable) != (tab_bar->Flags & TabBarFlags_Reorderable) || (tab_bar->TabsAddedNew && !(flags & TabBarFlags_Reorderable)))
+			if ((flags & TabBarFlags_DockNode) == 0) // FIXME: TabBar with DockNode can now be hybrid
+				ImQsort(tab_bar->Tabs.Data, tab_bar->Tabs.Size, sizeof(ImGuiTabItem), TabItemComparerByBeginOrder);
+		tab_bar->TabsAddedNew = false;
+
+		// Flags
+		if ((flags & TabBarFlags_FittingPolicyMask_) == 0)
+			flags |= TabBarFlags_FittingPolicyDefault_;
+
+		tab_bar->Flags = flags;
+		tab_bar->BarRect = tab_bar_bb;
+		tab_bar->WantLayout = true; // Layout will be done on the first call to ItemTab()
+		tab_bar->PrevFrameVisible = tab_bar->CurrFrameVisible;
+		tab_bar->CurrFrameVisible = g.FrameCount;
+		tab_bar->PrevTabsContentsHeight = tab_bar->CurrTabsContentsHeight;
+		tab_bar->CurrTabsContentsHeight = 0.0f;
+		tab_bar->ItemSpacingY = g.Style.ItemSpacing.y;
+		tab_bar->FramePadding = g.Style.FramePadding;
+		tab_bar->TabsActiveCount = 0;
+		tab_bar->LastTabItemIdx = -1;
+		tab_bar->BeginCount = 1;
+
+		// Set cursor pos in a way which only be used in the off-chance the user erroneously submits item before BeginTabItem(): items will overlap
+		window->DC.CursorPos = ImVec2(tab_bar->BarRect.Min.x, tab_bar->BarRect.Max.y + tab_bar->ItemSpacingY);
+
+		// Draw separator
+		const ImU32 col = ImGui::GetColorU32((flags & TabBarFlags_IsFocused) ? ImGuiCol_TabActive : ImGuiCol_TabUnfocusedActive);
+		const float y = tab_bar->BarRect.Max.y - 1.0f;
+		{
+			const float separator_min_x = tab_bar->BarRect.Min.x - IM_FLOOR(window->WindowPadding.x * 0.5f);
+			const float separator_max_x = tab_bar->BarRect.Max.x + IM_FLOOR(window->WindowPadding.x * 0.5f);
+			window->DrawList->AddLine(ImVec2(separator_min_x, y), ImVec2(separator_max_x, y), col, 1.0f);
+		}
+		return true;
+	}
+
 	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags)
 	{
 		return ImGui::BeginTabBar(id.GetCString(), flags);
@@ -3966,7 +4359,42 @@ namespace CE::GUI
 
 	COREGUI_API void EndTabBar()
 	{
-		ImGui::EndTabBar();
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		if (window->SkipItems)
+			return;
+
+		ImGuiTabBar* tab_bar = g.CurrentTabBar;
+		if (tab_bar == NULL)
+		{
+			IM_ASSERT_USER_ERROR(tab_bar != NULL, "Mismatched BeginTabBar()/EndTabBar()!");
+			return;
+		}
+
+		// Fallback in case no TabItem have been submitted
+		if (tab_bar->WantLayout)
+			Internal::TabBarLayout(tab_bar);
+
+		// Restore the last visible height if no tab is visible, this reduce vertical flicker/movement when a tabs gets removed without calling SetTabItemClosed().
+		const bool tab_bar_appearing = (tab_bar->PrevFrameVisible + 1 < g.FrameCount);
+		if (tab_bar->VisibleTabWasSubmitted || tab_bar->VisibleTabId == 0 || tab_bar_appearing)
+		{
+			tab_bar->CurrTabsContentsHeight = ImMax(window->DC.CursorPos.y - tab_bar->BarRect.Max.y, tab_bar->CurrTabsContentsHeight);
+			window->DC.CursorPos.y = tab_bar->BarRect.Max.y + tab_bar->CurrTabsContentsHeight;
+		}
+		else
+		{
+			window->DC.CursorPos.y = tab_bar->BarRect.Max.y + tab_bar->PrevTabsContentsHeight;
+		}
+		if (tab_bar->BeginCount > 1)
+			window->DC.CursorPos = tab_bar->BackupCursorPos;
+
+		tab_bar->LastTabItemIdx = -1;
+		if ((tab_bar->Flags & ImGuiTabBarFlags_DockNode) == 0)
+			ImGui::PopID();
+
+		g.CurrentTabBarStack.pop_back();
+		g.CurrentTabBar = g.CurrentTabBarStack.empty() ? NULL : GetTabBarFromTabBarRef(g.CurrentTabBarStack.back());
 	}
 
 #pragma endregion

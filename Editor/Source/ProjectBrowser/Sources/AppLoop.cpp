@@ -138,8 +138,6 @@ void AppLoop::PostInit()
 	CFontManager::Get().Initialize(fontList, fontHandles);
 	EditorStyles::Get().InitDefaultStyle();
 
-	gStyleManager->PushGlobal();
-
 	projectBrowser = CreateWidget<ProjectBrowserWindow>(nullptr, "ProjectBrowser");
 }
 
@@ -180,8 +178,6 @@ void AppLoop::PreShutdown()
 {
 	projectBrowser->RequestDestroy();
 	projectBrowser = nullptr;
-
-	gStyleManager->PopGlobal();
 
 	cmdList->ShutdownImGui();
 

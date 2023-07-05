@@ -39,7 +39,7 @@ namespace CE::Widgets
         void AddSubWidget(CWidget* subWidget);
         void RemoveSubWidget(CWidget* subWidget);
 
-		virtual void OnComputeStyle() override;
+		virtual void OnBeforeComputeStyle() override;
 
 		inline bool IsDockSpaceWindow() const { return isDockSpaceWindow; }
 		inline void SetAsDockSpaceWindow(bool set) { isDockSpaceWindow = set; }

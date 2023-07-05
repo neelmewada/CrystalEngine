@@ -38,13 +38,18 @@ namespace CE::Widgets
 		void UpdateLayoutIfNeeded();
 		void UpdateStyleIfNeeded();
 
-		virtual void OnComputeStyle() {}
+		virtual void OnBeforeComputeStyle() {}
+		virtual void OnAfterComputeStyle() {}
 
 		inline bool NeedsLayout() const { return needsLayout; }
 		inline bool NeedsStyle() const { return needsStyle; }
 
 		inline void SetNeedsLayout() { needsLayout = true; }
 		inline void SetNeedsStyle() { needsStyle = true; }
+
+		inline bool IsEnabled() const { return !isDisabled; }
+		inline bool IsDisabled() const { return isDisabled; }
+		inline void SetEnabled(bool enabled) { isDisabled = !enabled; }
 
 		virtual void Construct();
 
@@ -201,6 +206,8 @@ namespace CE::Widgets
 
 	protected: // Fields
 
+		void HandleBasicMouseEvents(bool hovered, bool leftMouseHeld);
+
 		FIELD()
 		WidgetFlags widgetFlags{};
 
@@ -215,6 +222,12 @@ namespace CE::Widgets
 
 		FIELD()
 		CStateFlag stateFlags{};
+
+		FIELD()
+		CSubControl subControl = CSubControl::None;
+
+		FIELD()
+		b8 isDisabled = false;
 		
 		CStyleSheet* stylesheet = nullptr;
 		String stylesheetText = "";
@@ -226,8 +239,6 @@ namespace CE::Widgets
 		CStyle computedStyle{};
 
 		GUI::GuiStyleState defaultStyleState{};
-
-    private:
 
 		b8 needsLayout = true;
 		b8 needsStyle = true;
@@ -242,9 +253,6 @@ namespace CE::Widgets
 		// Internals
 		Vec2 prevHoverPos{};
 		b8 prevLeftMouseDown = false;
-        
-	private:
-
         
 	};
     

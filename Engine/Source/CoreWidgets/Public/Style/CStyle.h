@@ -40,6 +40,8 @@ namespace CE::Widgets
 		Window,
 		Frame,
 		Check,
+		Hint,
+		Alternate,
 
 		Any,
 	};

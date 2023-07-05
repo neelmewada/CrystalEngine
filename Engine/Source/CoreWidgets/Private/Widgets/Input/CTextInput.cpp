@@ -16,6 +16,22 @@ namespace CE::Widgets
 		return Vec2(100, 18);
 	}
 
+	void CTextInput::OnAfterComputeStyle()
+	{
+		Super::OnAfterComputeStyle();
+
+		disabledState = defaultStyleState;
+
+		auto rules = stylesheet->GetMatchingRules(this, stateFlags, CSubControl::Hint);
+		for (const auto& rule : rules)
+		{
+			for (const auto& [property, styleValue] : rule.style.properties)
+			{
+				LoadGuiStyleStateProperty(property, styleValue, disabledState);
+			}
+		}
+	}
+
 	void CTextInput::OnDrawGUI()
 	{
 		auto rect = GetComputedLayoutRect();
@@ -40,7 +56,7 @@ namespace CE::Widgets
 		if (id == 0)
 			id = UUID32();
 
-		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, defaultStyleState, defaultStyleState, defaultStyleState, padding, flags, callback, this);
+		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, defaultStyleState, defaultStyleState, disabledState, padding, flags, callback, this);
 		PollEvents();
 
 		if (inputChanged)
@@ -58,18 +74,27 @@ namespace CE::Widgets
 	COREWIDGETS_API u16 CFloatInputValidator(const String& input, u16 appendChar, int cursorPos)
 	{
 		if (String::IsNumeric(appendChar))
-			return appendChar;
-		if (appendChar == '-' && (input.IsEmpty() || cursorPos == 0))
-			return appendChar;
-
-		if (appendChar == '.')
 		{
-			for (int i = 0; i <= input.GetLength(); i++)
+			for (int i = cursorPos; i < input.GetLength(); i++)
 			{
-				if (input[i] == '.')
+				if (input[i] == '-')
 					return 0;
 			}
 			return appendChar;
+		}
+
+		switch (appendChar)
+		{
+		case '-':
+			if (input.IsEmpty())
+				return appendChar;
+			if (cursorPos == 0 && !input.Contains('-'))
+				return appendChar;
+			break;
+		case '.':
+			if (!input.Contains('.'))
+				return appendChar;
+			break;
 		}
 
 		return 0;
@@ -78,9 +103,24 @@ namespace CE::Widgets
 	COREWIDGETS_API u16 CIntegerInputValidator(const String& input, u16 appendChar, int cursorPos)
 	{
 		if (String::IsNumeric(appendChar))
+		{
+			for (int i = cursorPos; i < input.GetLength(); i++)
+			{
+				if (input[i] == '-')
+					return 0;
+			}
 			return appendChar;
-		if (appendChar == '-' && (input.IsEmpty() || cursorPos == 0))
-			return appendChar;
+		}
+
+		switch (appendChar)
+		{
+		case '-':
+			if (input.IsEmpty())
+				return appendChar;
+			if (cursorPos == 0 && !input.Contains('-'))
+				return appendChar;
+			break;
+		}
 
 		return 0;
 	}

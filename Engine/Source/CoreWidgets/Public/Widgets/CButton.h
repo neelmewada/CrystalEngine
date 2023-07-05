@@ -12,10 +12,16 @@ namespace CE::Widgets
 		CButton();
 		virtual ~CButton();
 
+		void Construct() override;
+
 		void SetText(const String& text);
 		const String& GetText() const;
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
+		inline bool IsAlternateStyle() const { return isAlternateStyleButton; }
+
+		void SetAsAlternateStyle(bool set);
 
 	public: // Signals
 
@@ -33,6 +39,9 @@ namespace CE::Widgets
 
 		FIELD()
 		String text{};
+
+		FIELD()
+		b8 isAlternateStyleButton = false;
 
 		String internalText{};
 	};

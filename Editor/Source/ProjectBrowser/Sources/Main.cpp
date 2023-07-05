@@ -11,7 +11,11 @@ int main(int argc, const char** argv)
 
 	gLoop.PostInit();
 
+	CERegisterModuleTypes();
+
 	gLoop.RunLoop();
+
+	CEDeregisterModuleTypes();
 
 	gLoop.PreShutdown();
 	gLoop.Shutdown();

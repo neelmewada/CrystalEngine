@@ -76,16 +76,21 @@ namespace CE::Widgets
 		if (!needsStyle && !stylesheet->IsDirty())
 			return;
 
+		needsStyle = false;
+
 		node->setStyle({}); // Clear style
 
 		computedStyle = {};
 		computedStyle.ApplyProperties(style);
+		defaultStyleState = {};
 
-		auto rules = stylesheet->GetMatchingRules(this, stateFlags);
+		auto rules = stylesheet->GetMatchingRules(this, stateFlags, subControl);
 		for (const auto& rule : rules)
 		{
 			computedStyle.ApplyProperties(rule.style);
 		}
+
+		OnBeforeComputeStyle();
 		
 		for (auto& [property, value] : computedStyle.properties)
 		{
@@ -95,26 +100,6 @@ namespace CE::Widgets
 			{
 				LoadGuiStyleStateProperty(property, value, defaultStyleState);
 			}
-
-			/*const auto& hoveredState = variants.Get(CStateFlag::Hovered);
-			if (hoveredState.IsValid())
-			{
-				LoadGuiStyleStateProperty(property, hoveredState, hoveredStyleState);
-			}
-			else
-			{
-				LoadGuiStyleStateProperty(property, value, hoveredStyleState);
-			}
-
-			const auto& pressedState = variants.Get(CStateFlag::Pressed);
-			if (pressedState.IsValid())
-			{
-				LoadGuiStyleStateProperty(property, pressedState, pressedStyleState);
-			}
-			else
-			{
-				LoadGuiStyleStateProperty(property, value, pressedStyleState);
-			}*/
 			
 			if (!value.IsValid())
 				continue;
@@ -230,7 +215,7 @@ namespace CE::Widgets
 				if (value.IsSingle())
 				{
 					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetPadding(node, YGEdgeAll, value.single);
+						YGNodeStyleSetPaddingPercent(node, YGEdgeAll, value.single);
 					else
 						YGNodeStyleSetPadding(node, YGEdgeAll, value.single);
 				}
@@ -238,22 +223,22 @@ namespace CE::Widgets
 				{
 					// Left
 					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetPadding(node, YGEdgeLeft, value.vector.x);
+						YGNodeStyleSetPaddingPercent(node, YGEdgeLeft, value.vector.x);
 					else
 						YGNodeStyleSetPadding(node, YGEdgeLeft, value.vector.x);
 					// Top
 					if (value.enumValue.y == CStyleValue::Percent)
-						YGNodeStyleSetPadding(node, YGEdgeTop, value.vector.y);
+						YGNodeStyleSetPaddingPercent(node, YGEdgeTop, value.vector.y);
 					else
 						YGNodeStyleSetPadding(node, YGEdgeTop, value.vector.y);
 					// Right
 					if (value.enumValue.z == CStyleValue::Percent)
-						YGNodeStyleSetPadding(node, YGEdgeRight, value.vector.z);
+						YGNodeStyleSetPaddingPercent(node, YGEdgeRight, value.vector.z);
 					else
 						YGNodeStyleSetPadding(node, YGEdgeRight, value.vector.z);
 					// Bottom
 					if (value.enumValue.w == CStyleValue::Percent)
-						YGNodeStyleSetPadding(node, YGEdgeBottom, value.vector.w);
+						YGNodeStyleSetPaddingPercent(node, YGEdgeBottom, value.vector.w);
 					else
 						YGNodeStyleSetPadding(node, YGEdgeBottom, value.vector.w);
 				}
@@ -342,7 +327,7 @@ namespace CE::Widgets
 			}
 		}
 
-		OnComputeStyle();
+		OnAfterComputeStyle();
 
 		needsStyle = false;
 		needsLayout = true;
@@ -475,14 +460,117 @@ namespace CE::Widgets
 		}
 	}
 
-	void CWidget::RenderGUI()
+	void CWidget::HandleBasicMouseEvents(bool hovered, bool leftMouseHeld)
 	{
-		if (style.IsDirty())
+		if (isHovered != hovered)
 		{
-			needsStyle = true;
-			needsLayout = true;
+			isHovered = hovered;
+			SetNeedsStyle();
+
+			if (isHovered) // Mouse Enter
+			{
+				CMouseEvent event{};
+				event.name = "MouseEnter";
+				event.type = CEventType::MouseEnter;
+				event.mousePos = GUI::GetMousePos();
+				event.sender = this;
+				HandleEvent(&event);
+
+				isHovered = hovered;
+				prevHoverPos = event.mousePos;
+			}
+			else // Mouse Leave
+			{
+				CMouseEvent event{};
+				event.name = "MouseLeave";
+				event.type = CEventType::MouseLeave;
+				event.mousePos = GUI::GetMousePos();
+				event.prevMousePos = prevHoverPos;
+				event.sender = this;
+				HandleEvent(&event);
+
+				isHovered = hovered;
+				prevHoverPos = event.mousePos;
+			}
 		}
 
+		if (isLeftMousePressedInside != (isHovered && leftMouseHeld))
+		{
+			isLeftMousePressedInside = isHovered && leftMouseHeld;
+			SetNeedsStyle();
+
+			if (isLeftMousePressedInside) // Press inside
+			{
+				CMouseEvent event{};
+				event.name = "MousePress";
+				event.type = CEventType::MousePress;
+				event.mousePos = GUI::GetMousePos();
+				event.mouseButton = 0; // Left = 0
+				event.prevMousePos = prevHoverPos;
+				event.isInside = true;
+				event.sender = this;
+				HandleEvent(&event);
+
+				prevHoverPos = event.mousePos;
+			}
+			else if (isHovered && !leftMouseHeld) // Release inside
+			{
+				CMouseEvent event{};
+				event.name = "MouseRelease";
+				event.type = CEventType::MouseRelease;
+				event.mousePos = GUI::GetMousePos();
+				event.mouseButton = 0; // Left = 0
+				event.prevMousePos = prevHoverPos;
+				event.isInside = true;
+				event.sender = this;
+				HandleEvent(&event);
+
+				prevHoverPos = event.mousePos;
+			}
+			else if (!leftMouseHeld) // Release outside
+			{
+				CMouseEvent event{};
+				event.name = "MouseRelease";
+				event.type = CEventType::MouseRelease;
+				event.mousePos = GUI::GetMousePos();
+				event.mouseButton = 0; // Left = 0
+				event.prevMousePos = prevHoverPos;
+				event.isInside = false;
+				event.sender = this;
+				HandleEvent(&event);
+
+				prevHoverPos = event.mousePos;
+			}
+		}
+
+		if (isLeftMousePressedInside)
+		{
+			if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
+				SetNeedsStyle();
+
+			EnumAddFlags(stateFlags, CStateFlag::Pressed);
+			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
+		}
+		else if (isHovered)
+		{
+			if (EnumHasAnyFlags(stateFlags, CStateFlag::Pressed) || !EnumHasAnyFlags(stateFlags, CStateFlag::Hovered))
+				SetNeedsStyle();
+
+			EnumAddFlags(stateFlags, CStateFlag::Hovered);
+			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
+		}
+		else
+		{
+			if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed))
+				SetNeedsStyle();
+
+			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
+			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
+		}
+	}
+
+	void CWidget::RenderGUI()
+	{
 		OnDrawGUI();
 
 		UpdateStyleIfNeeded();
@@ -583,6 +671,7 @@ namespace CE::Widgets
 				prevHoverPos = event.mousePos;
 
 				stateFlags |= CStateFlag::Hovered;
+				SetNeedsStyle();
 			}
 			else if (hovered && isHovered)
 			{
@@ -613,6 +702,7 @@ namespace CE::Widgets
 				prevHoverPos = event.mousePos;
                 
                 EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
+				SetNeedsStyle();
 			}
 
 			// Mouse Click:

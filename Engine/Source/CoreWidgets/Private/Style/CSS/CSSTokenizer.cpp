@@ -90,7 +90,7 @@ namespace CE::Widgets
 			break;
 		default:
 		{
-			if (String::IsNumeric(c) || c == '-' || c == '+') // Numeric literal
+			if (prevToken.type != HashSignToken && (String::IsNumeric(c) || c == '-' || c == '+')) // Numeric literal
 			{
 				char nextChar = stream->Read();
 				if (!String::IsNumeric(nextChar) && (nextChar == '-' || nextChar == '+'))
@@ -119,14 +119,16 @@ namespace CE::Widgets
 				return prevToken = { NumberToken, numberLiteral, line, positionInLine };
 			}
 
-			if (!String::IsAlphabet(c) && c != '_') // NOT an identifier
+			if (prevToken.type != HashSignToken && !String::IsAlphabet(c) && c != '_') // NOT an identifier
+				break;
+			if (prevToken.type == HashSignToken && !String::IsNumeric(c) && !String::IsAlphabet(c)) // NOT a color value
 				break;
 
 			// Identifier
 			{
 				char nextChar = c;
 				std::string identifier{};
-				std::regex identifierRegex = std::regex("[a-zA-Z_][a-zA-Z0-9_-]*");
+				std::regex identifierRegex = std::regex("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
 				while (!stream->IsOutOfBounds())
 				{

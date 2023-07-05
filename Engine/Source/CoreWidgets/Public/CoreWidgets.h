@@ -14,6 +14,7 @@
 #include "Data/CDataModel.h"
 
 #include "Style/CStyle.h"
+#include "Style/CFontManager.h"
 #include "Style/CStyleSheet.h"
 
 #include "Style/CSS/CSSParserToken.h"
@@ -34,7 +35,7 @@
 #include "Widgets/CButton.h"
 #include "Widgets/CStackLayout.h"
 #include "Widgets/CTableView.h"
-//#include "Widgets/CTabView.h"
+#include "Widgets/CTabWidget.h"
 //#include "Widgets/CCollapsibleSection.h"
 //#include "Widgets/CGridLayout.h"
 //#include "Widgets/CSelectableWidget.h"

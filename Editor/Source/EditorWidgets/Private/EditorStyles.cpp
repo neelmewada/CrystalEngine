@@ -2,6 +2,37 @@
 
 #include "OpenSans.h"
 
+static CE::String globalStyleSheet = R"(
+CWindow {
+	foreground: white;
+	background: rgb(36, 36, 36);
+	padding: 5 25 5 5;
+	flex-direction: column;
+	align-items: flex-start;
+}
+CButton {
+	background: rgb(64, 64, 64);
+}
+CButton:hovered {
+	background: rgb(96, 96, 96);
+}
+CButton:pressed {
+	background: rgba(170, 170, 170, 100);
+}
+
+CTextInput {
+	background: rgb(15, 15, 15);
+	border-width: 1;
+	border-radius: 1 1 1 1;
+	border-color: rgb(42, 42, 42);
+	padding: 3 3 3 3;
+}
+CTextInput::hint {
+	foreground: rgba(255, 255, 255, 120);
+}
+
+)";
+
 namespace CE::Editor
 {
 
@@ -9,7 +40,9 @@ namespace CE::Editor
 	{
 		using namespace CE::Widgets;
 
-		gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
+		GetStyleManager()->SetGlobalStyleSheet(globalStyleSheet);
+
+		/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 
 		gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(47, 47, 47), CStateFlag::Default, CSubControl::Header);
 		gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(60, 60, 60), CStateFlag::Hovered, CSubControl::Header);
@@ -41,14 +74,6 @@ namespace CE::Editor
 		buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.38f, 0.38f, 0.38f, 1.00f), CStateFlag::Hovered);
 		buttonSelector.AddProperty(CStylePropertyType::Background, Color(0.67f, 0.67f, 0.67f, 0.39f), CStateFlag::Pressed);
 
-		auto& tableSelector = gStyleManager->GetStyleGroup("CTableView");
-		tableSelector.AddProperty(CStylePropertyType::Background, Color(0.20f, 0.20f, 0.20f, 1.0f), CStateFlag::Default, CSubControl::Header);
-		tableSelector.AddProperty(CStylePropertyType::Background, Color(0.23f, 0.23f, 0.23f, 1.0f), CStateFlag::Hovered, CSubControl::Header);
-		tableSelector.AddProperty(CStylePropertyType::Background, Color(0.26f, 0.26f, 0.26f, 1.0f), CStateFlag::Pressed, CSubControl::Header);
-		tableSelector.AddProperty(CStylePropertyType::Background, Color(0.00f, 0.00f, 0.00f, 0.00f), CStateFlag::Default, CSubControl::TableRowEven);
-		tableSelector.AddProperty(CStylePropertyType::Background, Color(1.00f, 1.00f, 1.00f, 0.06f), CStateFlag::Default, CSubControl::TableRowOdd);
-		tableSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(30, 30, 30), CStateFlag::Default, CSubControl::TableBorderInner);
-
 		auto& collapsibleSelector = gStyleManager->GetStyleGroup("CCollapsibleSection");
 		collapsibleSelector.AddProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(30, 30, 30), CStateFlag::Default, CSubControl::Header);
 		collapsibleSelector.AddProperty(CStylePropertyType::Padding, Vec4(4, 4, 4, 4), CStateFlag::Default, CSubControl::Header);
@@ -67,6 +92,7 @@ namespace CE::Editor
 		selectableWidgetSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 80), CStateFlag::Hovered);
 		selectableWidgetSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 150), CStateFlag::Pressed);
 		selectableWidgetSelector.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(0, 145, 197, 50), CStateFlag::Active);
+		*/
 	}
 
 	void EditorStyles::GetDefaultFont(unsigned char** outFont, unsigned int* outLength)

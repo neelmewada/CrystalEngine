@@ -7,7 +7,7 @@ void ProjectBrowserWindow::Construct()
 
 	Super::Construct();
 	
-	auto tabView = CreateWidget<CTabView>(this, "TabView");
+	/*auto tabView = CreateWidget<CTabView>(this, "TabView");
 
 	createContent = CreateWidget<CStackLayout>(tabView, "CreateProjectContent");
 	createContent->SetDirection(CStackDirection::Vertical);
@@ -75,5 +75,6 @@ void ProjectBrowserWindow::Construct()
 	tabView->SetTabTitle(openContent, "Open Project");
 
 	tabView->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(20, 10, 20, 10), CStateFlag::Default, CSubControl::Tab);
+	*/
 }
 

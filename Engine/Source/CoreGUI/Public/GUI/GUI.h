@@ -91,7 +91,7 @@ namespace CE::GUI
 	COREGUI_API void TextColored(const String& text, const Color& color);
 
 	COREGUI_API bool Button(const Rect& rect, const String& label, 
-		const GuiStyleState& normal, const GuiStyleState& hovered, const GuiStyleState& pressed, const Vec4& padding = {}, ButtonFlags flags = ButtonFlags::None);
+		const GuiStyleState& style, bool& isHovered, bool& isHeld, const Vec4& padding = {}, ButtonFlags flags = ButtonFlags::None);
 
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);
 
@@ -131,6 +131,11 @@ namespace CE::GUI
 		const Vec2& size = {}, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0,
 		SliderFlags flags = SliderFlags_None);
 
+	COREGUI_API bool DragScalar(const Rect& rect, ID id, DataType dataType, void* data, float speed = 1.0f,
+		const void* min = nullptr, const void* max = nullptr, const char* format = nullptr,
+		GuiStyleState normalState = {}, GuiStyleState activeState = {},
+		SliderFlags flags = SliderFlags_None);
+
 	// Tree Node
 
 	COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags = TNF_None);
@@ -140,6 +145,8 @@ namespace CE::GUI
     COREGUI_API bool CollapsibleHeader(const String& label, Vec4* padding = nullptr, Vec4* borderRadius = nullptr, f32* borderSize = nullptr, TreeNodeFlags flags = TNF_None);
 
 	// Tab Bar
+
+	COREGUI_API bool BeginTabBar(const Rect& rect, ID id, const Vec4& padding = {}, TabBarFlags flags = TabBarFlags_None);
 
 	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags = TabBarFlags_None);
 

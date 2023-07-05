@@ -33,7 +33,7 @@ namespace CE::Widgets
         this->windowTitle = String::Format(title + "###{}", GetName());
     }
 
-	void CWindow::OnComputeStyle()
+	void CWindow::OnBeforeComputeStyle()
 	{
 		
 	}

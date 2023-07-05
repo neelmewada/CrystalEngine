@@ -283,7 +283,7 @@ namespace CE::Widgets
 				{
 					insideRule = false;
 					stylesheet->rules.Top().style = curStyle;
-
+					tokenStack.Clear();
 					curStyle = {};
 					curProperty = {};
 					curPropertyValue = {};

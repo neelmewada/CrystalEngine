@@ -19,6 +19,8 @@ void SandboxLoop::PreInit(int argc, const char** argv)
     }
 
     // Initialize logging
+	Logger::SetConsoleLogLevel(LogLevel::Trace);
+	Logger::SetFileDumpLogLevel(LogLevel::Trace);
     Logger::Initialize();
 }
 
@@ -333,19 +335,50 @@ CE_RTTI_CLASS_IMPL(, , MyTableModel)
 
 static const String stylesheet = R"(
 CWindow {
+	foreground: white;
 	background: rgb(36, 36, 36);
 	padding: 5 25 5 5;
 	flex-direction: column;
 	align-items: flex-start;
+	row-gap: 5px;
 }
 
 CLabel {
-	background: rgb(120, 0, 0);
-	foreground: white;
-	min-height: 50;
-	min-width: 50%;
 	text-align: middle-center;
 }
+
+CButton {
+	padding: 10px 5px;
+	background: rgb(64, 64, 64);
+}
+CButton:hovered {
+	background: rgb(96, 96, 96);
+}
+CButton:pressed {
+	background: rgba(170, 170, 170, 100);
+}
+
+CTextInput {
+	background: rgb(15, 15, 15);
+	border-width: 1;
+	border-radius: 1 1 1 1;
+	border-color: rgb(42, 42, 42);
+	padding: 3 3 3 3;
+}
+CTextInput::hint {
+	foreground: rgba(255, 255, 255, 120);
+}
+
+CTabWidget {
+	width: 100%;
+	height: 100%;
+	padding: 10 10 10 10;
+}
+
+CTabWidget::tab {
+	padding: 10 5 10 5;
+}
+
 )";
 
 void SandboxLoop::SetupGUI()
@@ -358,39 +391,34 @@ void SandboxLoop::SetupGUI()
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
 	window->SetAllowHorizontalScroll(true);
-    
-	for (int i = 0; i < 8; i++)
+
+	//auto button = CreateWidget<CButton>(window, "Button");
+	//button->SetText("Click Me");
+
+	//Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []
+	//	{
+	//		CE_LOG(Info, All, "Button clicked!");
+	//	});
+
+	//auto inputField = CreateWidget<CTextInput>(window, "TextInput");
+	//inputField->SetHint("Type here...");
+
+	CTabWidget* tabWidget = CreateWidget<CTabWidget>(window, "TabWidget");
+
+	for (int i = 0; i < 2; i++)
 	{
-		auto label = CreateWidget<CLabel>(window, "Label");
-		label->SetInteractable(true);
-		label->SetText("This is a label");
-		//label->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
-		//label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0, 1), CStateFlag::Hovered);
-		//label->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.5f, 1), CStateFlag::Pressed);
-		//label->AddStyleProperty(CStylePropertyType::MinHeight, 25);
-	}
-
-	/*auto button = CreateWidget<CButton>(window, "Button");
-	button->SetText("Click Me");
-	button->AddStyleProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
-	button->AddStyleProperty(CStylePropertyType::Background, Color(0, 0.5f, 0, 1));
-	button->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0, 1), CStateFlag::Hovered);
-	button->AddStyleProperty(CStylePropertyType::Background, Color(0.5f, 0.5f, 0.5f, 1), CStateFlag::Pressed);
-
-	Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []
+		auto container = tabWidget->GetOrAddTab(i == 0 ? "Create Project" : "Open Project");
+		
+		for (int i = 0; i < 4; i++)
 		{
-			CE_LOG(Info, All, "Button clicked!");
-		});
+			auto label = CreateWidget<CLabel>(container, "Label");
+			label->SetInteractable(true);
+			label->SetText("This is a label");
+		}
 
-	auto inputField = CreateWidget<CTextInput>(window, "TextInput");
-	inputField->SetHint("Type here...");
-	inputField->AddStyleProperty(CStylePropertyType::Background, Color::FromRGBA32(15, 15, 15));
-	inputField->AddStyleProperty(CStylePropertyType::BorderWidth, 1);
-	inputField->AddStyleProperty(CStylePropertyType::BorderRadius, Vec4(1, 1, 1, 1));
-	inputField->AddStyleProperty(CStylePropertyType::Padding, Vec4(1, 1, 1, 1) * 3);
-	inputField->AddStyleProperty(CStylePropertyType::Height, 30);
-	inputField->AddStyleProperty(CStylePropertyType::BorderColor, Color::FromRGBA32(42, 42, 42));
-	inputField->AddStyleProperty(CStylePropertyType::ForegroundColor, Color::White());*/
+		auto label2 = CreateWidget<CLabel>(container, "Label");
+		label2->SetText(i == 0 ? "Create Project" : "Open Project");
+	}
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);
 

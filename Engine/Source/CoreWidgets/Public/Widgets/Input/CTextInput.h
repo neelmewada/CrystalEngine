@@ -46,6 +46,8 @@ namespace CE::Widgets
 
     protected:
 
+		void OnAfterComputeStyle() override;
+
         void OnDrawGUI() override;
 
         void HandleEvent(CEvent* event) override;
@@ -66,6 +68,8 @@ namespace CE::Widgets
 		b8 isMultiline = false;
 
 		UUID32 id = 0;
+
+		GUI::GuiStyleState disabledState{};
 
         CInputValidator validator{};
     };
