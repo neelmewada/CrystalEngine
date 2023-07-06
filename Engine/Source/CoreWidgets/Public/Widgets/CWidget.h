@@ -41,11 +41,11 @@ namespace CE::Widgets
 		virtual void OnBeforeComputeStyle() {}
 		virtual void OnAfterComputeStyle() {}
 
-		inline bool NeedsLayout() const { return needsLayout; }
-		inline bool NeedsStyle() const { return needsStyle; }
+		bool NeedsLayout();
+		bool NeedsStyle();
 
-		inline void SetNeedsLayout() { needsLayout = true; }
-		inline void SetNeedsStyle() { needsStyle = true; }
+		void SetNeedsLayout(bool set = true);
+		void SetNeedsStyle(bool set = true);
 
 		inline bool IsEnabled() const { return !isDisabled; }
 		inline bool IsDisabled() const { return isDisabled; }

@@ -107,6 +107,7 @@ namespace CE::GUI
 		const Color& hoveredBorderCol = {}, const Color& pressedBorderCol = {}, const Color& activeBorderCol = {});
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
+	COREGUI_API bool InvisibleButton(const Rect& rect, ID id, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
 
 	COREGUI_API bool Checkbox(const String& label, bool* value);
 
@@ -146,7 +147,7 @@ namespace CE::GUI
 
 	// Tab Bar
 
-	COREGUI_API bool BeginTabBar(const Rect& rect, ID id, const Vec4& padding = {}, TabBarFlags flags = TabBarFlags_None);
+	COREGUI_API bool BeginTabBar(const Rect& rect, ID id, const Vec4& tabBarPadding = {}, TabBarFlags flags = TabBarFlags_None);
 
 	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags = TabBarFlags_None);
 

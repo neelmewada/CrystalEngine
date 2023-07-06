@@ -36,7 +36,7 @@ namespace CE::Widgets
 		}
 		else
 		{
-			this->stylesheet->parent = GetStyleManager()->GetGlobalStyleSheet();
+			//this->stylesheet->parent = GetStyleManager()->GetGlobalStyleSheet();
 		}
 	}
 
@@ -330,7 +330,7 @@ namespace CE::Widgets
 		OnAfterComputeStyle();
 
 		needsStyle = false;
-		needsLayout = true;
+		SetNeedsLayout();
 
 		stylesheet->SetDirty(false);
 
@@ -346,9 +346,51 @@ namespace CE::Widgets
 		}
 	}
 
+	inline bool CWidget::NeedsLayout()
+	{
+		for (auto child : attachedWidgets)
+		{
+			if (child->NeedsLayout())
+				return true;
+		}
+
+		return needsLayout;
+	}
+
+	bool CWidget::NeedsStyle()
+	{
+		for (auto child : attachedWidgets)
+		{
+			if (child->NeedsStyle())
+				return true;
+		}
+
+		return needsStyle;
+	}
+
+	void CWidget::SetNeedsLayout(bool set)
+	{
+		for (auto child : attachedWidgets)
+		{
+			child->SetNeedsLayout(set);
+		}
+
+		needsLayout = set;
+	}
+
+	void CWidget::SetNeedsStyle(bool set)
+	{
+		for (auto child : attachedWidgets)
+		{
+			child->SetNeedsStyle(set);
+		}
+
+		needsStyle = set;
+	}
+
 	void CWidget::UpdateLayoutIfNeeded()
 	{
-		if (!needsLayout)
+		if (!NeedsLayout())
 			return;
         
         if (IsWindow())
@@ -360,6 +402,8 @@ namespace CE::Widgets
 				if (size.x <= 0) size.x = YGUndefined;
 				if (size.y <= 0) size.y = YGUndefined;
 				YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
+
+				SetNeedsLayout(false);
 			}
         }
 
@@ -847,7 +891,7 @@ namespace CE::Widgets
 			parentStylesheet = (CSSStyleSheet*)GetStyleManager()->globalStyleSheet;
 		}
 
-		CSSParser::ParseStyleSheet(stylesheetText, (CSSStyleSheet*)stylesheet);
+		CSSParser::ParseStyleSheet((CSSStyleSheet*)stylesheet, stylesheetText);
 		stylesheet->parent = parentStylesheet;
 	}
 

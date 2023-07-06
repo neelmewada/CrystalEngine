@@ -4,12 +4,32 @@ namespace CE::Widgets
 {
 	CTabContainerWidget::CTabContainerWidget()
 	{
-
+		SetTabTitle("Tab");
 	}
 
 	void CTabContainerWidget::SetTabTitle(const String& title)
 	{
-		this->title = title;
+		this->title = String::Format("{}##{}", title, GetUuid());
+	}
+
+	Vec2 CTabContainerWidget::CalculateIntrinsicContentSize(f32 width, f32 height)
+	{
+		return Vec2(width, height);
+	}
+
+	void CTabContainerWidget::OnAfterComputeStyle()
+	{
+		Super::OnAfterComputeStyle();
+
+		auto paddingTop = YGNodeStyleGetPadding(node, YGEdgeTop);
+		if (paddingTop.unit == YGUnitPoint)
+		{
+			//YGNodeStyleSetPadding(node, YGEdgeTop, 20 + paddingTop.value);
+		}
+		else if (paddingTop.unit == YGUnitUndefined)
+		{
+			//YGNodeStyleSetPadding(node, YGEdgeTop, 20);
+		}
 	}
 
 	void CTabContainerWidget::OnDrawGUI()
@@ -75,6 +95,16 @@ namespace CE::Widgets
 				tabItemPadding = value.vector;
 			}
 		}
+
+		auto paddingTop = YGNodeStyleGetPadding(node, YGEdgeTop);
+		if (paddingTop.unit == YGUnitPoint)
+		{
+			YGNodeStyleSetPadding(node, YGEdgeTop, 20 + paddingTop.value);
+		}
+		else if (paddingTop.unit == YGUnitUndefined)
+		{
+			YGNodeStyleSetPadding(node, YGEdgeTop, 20);
+		}
 	}
 
 	Vec2 CTabWidget::CalculateIntrinsicContentSize(f32 width, f32 height)
@@ -90,18 +120,27 @@ namespace CE::Widgets
 		if (localId == 0)
 			localId = GenerateRandomU32();
 
-		GUI::PushStyleVar(GUI::StyleVar_FramePadding, (Vec2)tabItemPadding);
+		//GUI::PushStyleVar(GUI::StyleVar_FramePadding, (Vec2)tabItemPadding);
 		
-		bool ret = GUI::BeginTabBar(rect, localId, tabItemPadding);
+		bool ret = GUI::BeginTabBar(rect, localId, tabItemPadding, GUI::TabBarFlags_FittingPolicyScroll);
 
-		GUI::PopStyleVar(1);
+		//GUI::PopStyleVar(1);
 
 		if (ret)
 		{
-			for (auto item : items)
+			for (int i = 0; i < items.GetSize(); i++)
 			{
+				auto item = items[i];
+
 				if (GUI::BeginTabItem(item->GetTabTitle()))
 				{
+					if (curTabIndex != i)
+					{
+						curTabIndex = i;
+						item->SetNeedsStyle();
+						item->SetNeedsLayout();
+					}
+
 					item->RenderGUI();
 					GUI::EndTabItem();
 				}

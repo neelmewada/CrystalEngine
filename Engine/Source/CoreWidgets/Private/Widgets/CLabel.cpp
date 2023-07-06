@@ -70,7 +70,7 @@ namespace CE::Widgets
 
 		if (IsInteractable())
 		{
-			GUI::InvisibleButton(invisibleButtonId, rectSize);
+			GUI::InvisibleButton(rect, GetUuid());
 			PollEvents();
 		}
 

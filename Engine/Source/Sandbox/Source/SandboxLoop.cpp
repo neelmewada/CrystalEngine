@@ -345,6 +345,7 @@ CWindow {
 
 CLabel {
 	text-align: middle-center;
+	background: rgb(120, 0, 0);
 }
 
 CButton {
@@ -372,11 +373,10 @@ CTextInput::hint {
 CTabWidget {
 	width: 100%;
 	height: 100%;
-	padding: 10 10 10 10;
 }
 
-CTabWidget::tab {
-	padding: 10 5 10 5;
+CTabContainerWidget {
+	padding: 3 0 3 0;
 }
 
 )";
@@ -400,8 +400,8 @@ void SandboxLoop::SetupGUI()
 	//		CE_LOG(Info, All, "Button clicked!");
 	//	});
 
-	//auto inputField = CreateWidget<CTextInput>(window, "TextInput");
-	//inputField->SetHint("Type here...");
+	auto inputField = CreateWidget<CTextInput>(window, "TextInput");
+	inputField->SetHint("Type here...");
 
 	CTabWidget* tabWidget = CreateWidget<CTabWidget>(window, "TabWidget");
 
@@ -416,8 +416,8 @@ void SandboxLoop::SetupGUI()
 			label->SetText("This is a label");
 		}
 
-		auto label2 = CreateWidget<CLabel>(container, "Label");
-		label2->SetText(i == 0 ? "Create Project" : "Open Project");
+		auto btn = CreateWidget<CButton>(container, "Label");
+		btn->SetText(i == 0 ? "Create Project" : "Open Project");
 	}
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);

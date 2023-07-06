@@ -24,6 +24,10 @@ namespace CE::Widgets
 		{
 			result = parent->GetMatchingRules(widget, state, subControl);
 		}
+		else if (parent == nullptr && GetStyleManager()->GetGlobalStyleSheet() != this)
+		{
+			result = GetStyleManager()->GetGlobalStyleSheet()->GetMatchingRules(widget, state, subControl);
+		}
 
 		for (auto& rule : rules)
 		{
@@ -44,6 +48,10 @@ namespace CE::Widgets
 		if (parent != nullptr && parent != this)
 		{
 			result.ApplyProperties(parent->SelectStyle(widget, state, subControl));
+		}
+		else if (parent == nullptr && GetStyleManager()->GetGlobalStyleSheet() != this)
+		{
+			result.ApplyProperties(GetStyleManager()->GetGlobalStyleSheet()->SelectStyle(widget, state, subControl));
 		}
 
 		for (auto& rule : rules)

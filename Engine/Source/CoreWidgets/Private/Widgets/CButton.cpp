@@ -45,14 +45,9 @@ namespace CE::Widgets
 
 	void CButton::OnDrawGUI()
 	{
-		auto top = YGNodeLayoutGetTop(node);
-		auto left = YGNodeLayoutGetLeft(node);
-		auto width = YGNodeLayoutGetWidth(node);
-		auto height = YGNodeLayoutGetHeight(node);
+		Vec4 rect = GetComputedLayoutRect();
 
-		Vec2 rectPos = Vec2(left, top);
-		Vec2 rectSize = Vec2(width, height);
-		Vec4 rect = Vec4(rectPos, rectPos + rectSize);
+		auto styleMatch = stylesheet->SelectStyle(this);
 
 		Vec4 padding{};
 		padding.left = YGNodeLayoutGetPadding(node, YGEdgeLeft);
@@ -64,46 +59,6 @@ namespace CE::Widgets
 		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding);
 
 		HandleBasicMouseEvents(hovered, held || pressed);
-		
-		/*if (hovered != isHovered)
-		{
-			isHovered = hovered;
-			SetNeedsStyle();
-		}
-
-		if (held != isHeld)
-		{
-			isHeld = held;
-			SetNeedsStyle();
-		}
-
-		if (isHovered && isHeld)
-		{
-			if (!EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-				SetNeedsStyle();
-			if (!isLeftMousePressedInside)
-			{
-				isLeftMousePressedInside = true;
-				stateFlags = CStateFlag::Pressed;
-				SetNeedsStyle();
-			}
-		}
-		else if (isHovered && !isHeld)
-		{
-			if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered))
-				SetNeedsStyle();
-
-			stateFlags = CStateFlag::Hovered;
-			isLeftMousePressedInside = false;
-		}
-		else
-		{
-			if (stateFlags != CStateFlag::Default)
-			{
-				stateFlags = CStateFlag::Default;
-				SetNeedsStyle();
-			}
-		}*/
 
 		if (pressed)
 		{

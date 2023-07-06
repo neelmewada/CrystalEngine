@@ -17,6 +17,10 @@ namespace CE::Widgets
 
 		bool IsContainer() override { return true; }
 
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
+		void OnAfterComputeStyle() override;
+
 	protected:
 
 		void OnDrawGUI() override;
@@ -63,6 +67,8 @@ namespace CE::Widgets
 		GUI::ID localId = 0;
 
 		Vec4 tabItemPadding = { 10, 5, 10, 5 };
+
+		int curTabIndex = -1;
 
 		FIELD()
 		Array<CTabContainerWidget*> items{};
