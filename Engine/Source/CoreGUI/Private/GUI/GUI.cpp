@@ -4478,6 +4478,11 @@ namespace CE::GUI
 		return ImGuiPtrOrIndex(tab_bar);
 	}
 
+	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags)
+	{
+		return ImGui::BeginTabBar(id.GetCString(), flags);
+	}
+
 	COREGUI_API bool BeginTabBar(const Rect& rect, ID id, const Vec4& tabBarPadding, TabBarFlags flags)
 	{
 		ImGuiContext& g = *GImGui;
@@ -4488,7 +4493,7 @@ namespace CE::GUI
 		ImGui::SetCursorPos(ImVec2(rect.x, rect.y));
 
 		Rect contentSpaceRect = rect;
-		contentSpaceRect.top += 30;
+		contentSpaceRect.top += 30 + ImGui::GetStyle().FramePadding.y;
 
 		ImGuiTabBar* tab_bar = g.TabBars.GetOrAddByKey((ImGuiID)id);
 		ImRect tab_bar_bb = ImRect(window->DC.CursorPos.x, window->DC.CursorPos.y, 
@@ -4552,12 +4557,7 @@ namespace CE::GUI
 		return true;
 	}
 
-	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags)
-	{
-		return ImGui::BeginTabBar(id.GetCString(), flags);
-	}
-
-	static bool TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, ImGuiTabItemFlags flags, ImGuiWindow* docked_window)
+	static bool TabItemEx(ImGuiTabBar* tab_bar, const char* label, bool* p_open, ImGuiTabItemFlags flags, ImGuiWindow* docked_window, const Vec4& padding = {})
 	{
 		// Layout whole tab bar if not already done
 		ImGuiContext& g = *GImGui;
@@ -4843,7 +4843,7 @@ namespace CE::GUI
 		return tab_contents_visible;
 	}
 
-	COREGUI_API bool BeginTabItem(const String& labelString, bool* open, TabItemFlags flags)
+	COREGUI_API bool BeginTabItem(const String& labelString, const Vec4& padding, bool* open, TabItemFlags flags)
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* window = g.CurrentWindow;
@@ -4860,7 +4860,7 @@ namespace CE::GUI
 		}
 		IM_ASSERT((flags & ImGuiTabItemFlags_Button) == 0);             // BeginTabItem() Can't be used with button flags, use TabItemButton() instead!
 
-		bool ret = ImGui::TabItemEx(tab_bar, label, open, flags, NULL);
+		bool ret = TabItemEx(tab_bar, label, open, flags, NULL, padding);
 		if (ret && !(flags & ImGuiTabItemFlags_NoPushId))
 		{
 			ImGuiTabItem* tab = &tab_bar->Tabs[tab_bar->LastTabItemIdx];

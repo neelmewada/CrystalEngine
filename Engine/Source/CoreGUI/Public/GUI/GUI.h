@@ -151,7 +151,7 @@ namespace CE::GUI
 
 	COREGUI_API bool BeginTabBar(const String& id, TabBarFlags flags = TabBarFlags_None);
 
-	COREGUI_API bool BeginTabItem(const String& label, bool* open = nullptr, TabItemFlags flags = TabItemFlags_None);
+	COREGUI_API bool BeginTabItem(const String& label, const Vec4& padding = {}, bool* open = nullptr, TabItemFlags flags = TabItemFlags_None);
 
 	COREGUI_API void EndTabItem();
 

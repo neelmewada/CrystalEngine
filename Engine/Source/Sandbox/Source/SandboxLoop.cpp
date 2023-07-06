@@ -375,6 +375,10 @@ CTabWidget {
 	height: 100%;
 }
 
+CTabWidget::tab {
+	padding: 10 10 10 10;
+}
+
 CTabContainerWidget {
 	padding: 3 0 3 0;
 }
