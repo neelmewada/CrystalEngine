@@ -176,6 +176,12 @@ namespace CE::GUI
 
 #pragma region Layout
 
+	COREGUI_API Rect ToGlobalCoordinateSpace(const Rect& localRect);
+
+	COREGUI_API void PushChildCoordinateSpace(const Rect& rect, const Vec4& padding = {});
+
+	COREGUI_API void PopChildCoordinateSpace();
+
 	COREGUI_API void Spacing();
 
 	COREGUI_API void SameLine(f32 offsetFromStart = 0, f32 spacing = -1.0f);

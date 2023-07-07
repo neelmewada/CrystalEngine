@@ -81,7 +81,14 @@ namespace CE::Widgets
 	{
 		Super::OnAfterComputeStyle();
 
-		const auto selectedStyle = stylesheet->SelectStyle(this, stateFlags, CSubControl::Tab);
+		auto selectedStyle = stylesheet->SelectStyle(this, CStateFlag::Default, CSubControl::Tab);
+		{
+			const auto& value = selectedStyle.properties[CStylePropertyType::Background];
+			if (value.IsColor())
+			{
+				tab = value.color;
+			}
+		}
 		
 		if (selectedStyle.properties.KeyExists(CStylePropertyType::Padding))
 		{
@@ -105,6 +112,33 @@ namespace CE::Widgets
 		{
 			YGNodeStyleSetPadding(node, YGEdgeTop, tabItemPadding.top + 20);
 		}
+
+		auto hoveredTabStyle = stylesheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Tab);
+		{
+			const auto& value = hoveredTabStyle.properties[CStylePropertyType::Background];
+			if (value.IsColor())
+			{
+				tabHovered = value.color;
+			}
+		}
+
+		auto activeTabStyle = stylesheet->SelectStyle(this, CStateFlag::Active, CSubControl::Tab);
+		{
+			const auto& value = activeTabStyle.properties[CStylePropertyType::Background];
+			if (value.IsColor())
+			{
+				tabActive = value.color;
+			}
+		}
+
+		auto unfocusedTabStyle = stylesheet->SelectStyle(this, CStateFlag::Unfocused, CSubControl::Tab);
+		{
+			const auto& value = unfocusedTabStyle.properties[CStylePropertyType::Background];
+			if (value.IsColor())
+			{
+				tabUnfocused = value.color;
+			}
+		}
 	}
 
 	Vec2 CTabWidget::CalculateIntrinsicContentSize(f32 width, f32 height)
@@ -121,6 +155,29 @@ namespace CE::Widgets
 			localId = GenerateRandomU32();
 
 		GUI::PushStyleVar(GUI::StyleVar_FramePadding, (Vec2)tabItemPadding);
+
+		int pushColors = 0;
+		if (tab.a > 0)
+		{
+			GUI::PushStyleColor(GUI::StyleCol_Tab, tab);
+			pushColors++;
+		}
+		if (tabHovered.a > 0)
+		{
+			GUI::PushStyleColor(GUI::StyleCol_TabHovered, tabHovered);
+			pushColors++;
+		}
+		if (tabActive.a > 0)
+		{
+			GUI::PushStyleColor(GUI::StyleCol_TabActive, tabActive);
+			GUI::PushStyleColor(GUI::StyleCol_TabUnfocusedActive, tabActive);
+			pushColors += 2;
+		}
+		if (tabUnfocused.a > 0)
+		{
+			GUI::PushStyleColor(GUI::StyleCol_TabUnfocused, tabUnfocused);
+			pushColors++;
+		}
 		
 		bool ret = GUI::BeginTabBar(rect, localId, tabItemPadding, GUI::TabBarFlags_FittingPolicyScroll);
 
@@ -152,6 +209,9 @@ namespace CE::Widgets
 
 			GUI::EndTabBar();
 		}
+
+		if (pushColors > 0)
+			GUI::PopStyleColor(pushColors);
 	}
 
 	void CTabWidget::HandleEvent(CEvent* event)

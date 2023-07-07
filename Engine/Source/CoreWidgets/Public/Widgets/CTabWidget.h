@@ -64,6 +64,11 @@ namespace CE::Widgets
 
 	private:
 
+		Color tab{};
+		Color tabHovered{};
+		Color tabActive{};
+		Color tabUnfocused{};
+
 		GUI::ID localId = 0;
 
 		Vec4 tabItemPadding = { 10, 5, 10, 5 };

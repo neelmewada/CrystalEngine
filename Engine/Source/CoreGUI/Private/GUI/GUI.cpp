@@ -118,7 +118,7 @@ namespace CE::GUI
 	{
 		Vec2 windowPos = GetWindowPos();
 		Vec2 scroll = GetWindowScroll();
-		return ToGlobalSpace(rectInWindow + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y));
+		return ToGlobalCoordinateSpace(rectInWindow + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y));
 	}
 
 	COREGUI_API Vec4 GlobalRectToWindowRect(const Vec4& globalRect)
@@ -378,7 +378,7 @@ namespace CE::GUI
 			return;
 		ImGuiContext& g = *GImGui;
 
-		Rect rect = ToGlobalSpace(localRect);
+		Rect rect = ToGlobalCoordinateSpace(localRect);
 
 		const char* text_end = NULL;
 
@@ -652,7 +652,7 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
 
-		Rect rect = ToGlobalSpace(localRect);
+		Rect rect = ToGlobalCoordinateSpace(localRect);
 
 		int flags = (int)buttonFlags;
 
@@ -1050,7 +1050,7 @@ namespace CE::GUI
 		if (window->SkipItems)
 			return false;
 
-		auto rect = ToGlobalSpace(localRect);
+		auto rect = ToGlobalCoordinateSpace(localRect);
 
 		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
 
@@ -4962,6 +4962,41 @@ namespace CE::GUI
 #pragma endregion
 
 #pragma region Layout
+
+	static Rect ToParentCoordinateSpace(const Rect& localSpaceRect, const Rect& parentSpace)
+	{
+		auto originalSize = localSpaceRect.max - localSpaceRect.min;
+
+		return Rect(parentSpace.min + localSpaceRect.min, parentSpace.min + localSpaceRect.min + originalSize);
+	}
+
+	COREGUI_API Rect ToGlobalCoordinateSpace(const Rect& localSpaceRect)
+	{
+		if (coordinateSpaceStack.IsEmpty())
+			return localSpaceRect;
+
+		auto rect = localSpaceRect;
+
+		for (int i = coordinateSpaceStack.GetSize() - 1; i >= 0; i--)
+		{
+			rect = ToParentCoordinateSpace(rect, coordinateSpaceStack[i]);
+		}
+
+		return rect;
+	}
+
+	COREGUI_API void PushChildCoordinateSpace(const Rect& rect, const Vec4& padding)
+	{
+		Rect contentSpaceRect = rect;
+		contentSpaceRect.min += padding.min;
+		contentSpaceRect.max -= padding.max;
+		coordinateSpaceStack.Push(contentSpaceRect);
+	}
+
+	COREGUI_API void PopChildCoordinateSpace()
+	{
+		coordinateSpaceStack.Pop();
+	}
 
 	COREGUI_API void Spacing()
 	{

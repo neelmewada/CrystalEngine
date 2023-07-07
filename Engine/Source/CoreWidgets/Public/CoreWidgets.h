@@ -36,10 +36,11 @@
 #include "Widgets/CStackLayout.h"
 #include "Widgets/CTableView.h"
 #include "Widgets/CTabWidget.h"
+#include "Widgets/CSelectableWidget.h"
+#include "Widgets/CSelectableGroup.h"
+
 //#include "Widgets/CCollapsibleSection.h"
 //#include "Widgets/CGridLayout.h"
-//#include "Widgets/CSelectableWidget.h"
-//#include "Widgets/CSelectableGroup.h"
 
 // Input Widgets
 //#include "Widgets/Input/CCheckbox.h"

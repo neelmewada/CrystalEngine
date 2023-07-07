@@ -377,6 +377,19 @@ CTabWidget {
 
 CTabWidget::tab {
 	padding: 10 10 10 10;
+	background: rgba(22, 22, 22, 210);
+}
+
+CTabWidget::tab:hovered {
+	background: rgba(90, 90, 90, 210);
+}
+
+CTabWidget::tab:active {
+	background: rgba(60, 60, 60, 255);
+}
+
+CTabWidget::tab:unfocused {
+	background: rgba(22, 22, 22, 255);
 }
 
 CTabContainerWidget {
