@@ -389,11 +389,24 @@ CTabWidget::tab:active {
 }
 
 CTabWidget::tab:unfocused {
-	background: rgba(22, 22, 22, 255);
+	background: rgba(22, 22, 22);
 }
 
 CTabContainerWidget {
 	padding: 3 0 3 0;
+}
+
+#SelectableGroup {
+	width: 100%;
+	height: 200px;
+	background: rgb(20, 24, 27);
+	padding: 10 10 10 10;
+}
+
+#SelectableGroup > CSelectableWidget {
+	width: 100%;
+	height: 30px;
+	background: rgb(120, 120, 0);
 }
 
 )";
@@ -408,14 +421,6 @@ void SandboxLoop::SetupGUI()
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
 	window->SetAllowHorizontalScroll(true);
-
-	//auto button = CreateWidget<CButton>(window, "Button");
-	//button->SetText("Click Me");
-
-	//Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), []
-	//	{
-	//		CE_LOG(Info, All, "Button clicked!");
-	//	});
 
 	auto inputField = CreateWidget<CTextInput>(window, "TextInput");
 	inputField->SetHint("Type here...");
@@ -435,6 +440,19 @@ void SandboxLoop::SetupGUI()
 
 		auto btn = CreateWidget<CButton>(container, "Label");
 		btn->SetText(i == 0 ? "Create Project" : "Open Project");
+
+		if (i != 0)
+			continue;
+
+		auto selectableGroup = CreateWidget<CSelectableGroup>(container, "SelectableGroup");
+
+		for (int j = 0; j < 4; j++)
+		{
+			auto selectableWidget = CreateWidget<CSelectableWidget>(selectableGroup, String::Format("Selectable{}", j));
+			
+
+		}
+
 	}
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);

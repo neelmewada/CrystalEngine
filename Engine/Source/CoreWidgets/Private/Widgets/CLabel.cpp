@@ -54,14 +54,7 @@ namespace CE::Widgets
 		GUI::SetCursorPos(rectPos);
 		auto windowPos = GUI::GetWindowPos();
 
-		if (curState->background.a > 0)
-		{
-			GUI::FillRect(GUI::WindowRectToGlobalRect(rect), curState->background, curState->borderRadius);
-		}
-		if (curState->borderThickness > 0 && curState->borderColor.a > 0)
-		{
-			GUI::DrawRect(GUI::WindowRectToGlobalRect(rect), curState->borderColor, curState->borderRadius, curState->borderThickness);
-		}
+		DrawBackground(*curState);
 
 		if (invisibleButtonId.IsEmpty())
 		{

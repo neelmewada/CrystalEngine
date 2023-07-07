@@ -14,7 +14,19 @@ namespace CE::Widgets
 
 	void CSelectableWidget::OnDrawGUI()
 	{
+		auto rect = GetComputedLayoutRect();
+		auto padding = GetComputedLayoutPadding();
 
+		DrawDefaultBackground();
+
+		GUI::PushChildCoordinateSpace(rect);
+
+		for (auto child : attachedWidgets)
+		{
+			child->RenderGUI();
+		}
+
+		GUI::PopChildCoordinateSpace();
 	}
 
 } // namespace CE::Widgets

@@ -172,6 +172,15 @@ namespace CE::Widgets
 
 		void LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState);
 
+		// Draw Helpers
+
+		void DrawBackground(const GUI::GuiStyleState& styleState);
+		
+		inline void DrawDefaultBackground()
+		{
+			DrawBackground(defaultStyleState);
+		}
+
 		// Events
 
 		virtual void HandleEvent(CEvent* event);

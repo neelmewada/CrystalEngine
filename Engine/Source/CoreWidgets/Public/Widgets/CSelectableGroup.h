@@ -3,13 +3,15 @@
 namespace CE::Widgets
 {
     CLASS()
-	class CSelectableGroup : public CWidget
+	class COREWIDGETS_API CSelectableGroup : public CWidget
 	{
 		CE_CLASS(CSelectableGroup, CWidget)
 	public:
 
 		CSelectableGroup();
 		virtual ~CSelectableGroup();
+
+		bool IsContainer() override { return true; }
 
 	protected:
 

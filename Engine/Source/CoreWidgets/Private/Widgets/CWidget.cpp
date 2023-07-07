@@ -71,6 +71,22 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState)
+	{
+		auto rect = GetComputedLayoutRect();
+
+		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
+
+		if (styleState.background.a > 0)
+		{
+			GUI::FillRect(globalRect, styleState.background, styleState.borderRadius);
+		}
+		if (styleState.borderThickness > 0 && styleState.borderColor.a > 0)
+		{
+			GUI::DrawRect(globalRect, styleState.borderColor, styleState.borderRadius, styleState.borderThickness);
+		}
+	}
+
 	void CWidget::UpdateStyleIfNeeded()
 	{
 		if (!needsStyle && !stylesheet->IsDirty())
@@ -904,7 +920,9 @@ namespace CE::Widgets
 	{
 		if (GetOuter() == nullptr)
 			return nullptr;
-		return DynamicCast<CWidget>(GetOuter());
+		if (GetOuter()->GetClass()->IsSubclassOf<CWidget>())
+			return (CWidget*)GetOuter();
+		return nullptr;
 	}
 
 	CWindow* CWidget::GetOwnerWindow()
