@@ -401,12 +401,15 @@ CTabContainerWidget {
 	height: 200px;
 	background: rgb(20, 24, 27);
 	padding: 10 10 10 10;
+    row-gap: 10px;
 }
 
 #SelectableGroup > CSelectableWidget {
 	width: 100%;
-	height: 30px;
+	height: 35px;
 	background: rgb(120, 120, 0);
+    padding: 0;
+    border-radius: 2;
 }
 
 )";
