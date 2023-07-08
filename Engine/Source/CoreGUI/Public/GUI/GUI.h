@@ -58,6 +58,8 @@ namespace CE::GUI
 
 	COREGUI_API void EndChild();
 
+	COREGUI_API bool BeginChild(const Rect& rect, ID id, const String& title, const Vec4& padding = {}, const GuiStyleState& styleState = {}, WindowFlags flags = WF_None);
+
 	extern COREGUI_API Array<Vec2> gPaddingXStack;
 
 #pragma region Style
@@ -105,6 +107,10 @@ namespace CE::GUI
 	COREGUI_API bool SelectableEx(ID id, bool selected, SelectableFlags flags, const Vec2& size = {},
 		f32 borderThickness = 0, const Color& hoveredCol = {}, const Color& pressedCol = {}, const Color& activeCol = {},
 		const Color& hoveredBorderCol = {}, const Color& pressedBorderCol = {}, const Color& activeBorderCol = {});
+
+	COREGUI_API bool Selectable(const Rect& localRect, ID id, bool selected, 
+		const GuiStyleState& hoveredState, const GuiStyleState& pressedState, const GuiStyleState& selectedState,
+		SelectableFlags flags = SelectableFlags_None);
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 	COREGUI_API bool InvisibleButton(const Rect& rect, ID id, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
@@ -176,9 +182,10 @@ namespace CE::GUI
 
 #pragma region Layout
 
-	COREGUI_API Rect ToGlobalCoordinateSpace(const Rect& localRect);
+	COREGUI_API Rect ToWindowCoordinateSpace(const Rect& localRect);
 
 	COREGUI_API void PushChildCoordinateSpace(const Rect& rect, const Vec4& padding = {});
+	COREGUI_API void PushZeroingChildCoordinateSpace();
 
 	COREGUI_API void PopChildCoordinateSpace();
 
@@ -242,6 +249,9 @@ namespace CE::GUI
 #pragma endregion
 
 #pragma region Custom Drawing
+
+	COREGUI_API bool PushClipRectLocal(const Rect& localRect, bool intersectWithCurrentClipRect = true);
+	COREGUI_API void PopClipRect();
 
     COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 }, f32 thickness = 1.0f);
 	COREGUI_API void DrawRect(const Vec4& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 }, f32 thickness = 1.0f);

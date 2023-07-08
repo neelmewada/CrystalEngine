@@ -432,6 +432,11 @@ namespace CE::Widgets
 					outValue.enumValue = Vec4i(1, 1, 1, 1) * CStyleValue::Auto;
 					outValue.valueType = CStyleValue::Type_Enum;
 				}
+				else if (current->lexeme == "none")
+				{
+					outValue.enumValue = Vec4i(1, 1, 1, 1) * CStyleValue::None;
+					outValue.valueType = CStyleValue::Type_Enum;
+				}
 				else
 				{
 					EnumType* enumType = GetEnumTypeForProperty(property);

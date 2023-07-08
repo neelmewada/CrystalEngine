@@ -400,16 +400,37 @@ CTabContainerWidget {
 	width: 100%;
 	height: 200px;
 	background: rgb(20, 24, 27);
-	padding: 10 10 10 10;
+	padding: 10px 10px 20px 10px;
     row-gap: 10px;
 }
 
 #SelectableGroup > CSelectableWidget {
 	width: 100%;
 	height: 35px;
-	background: rgb(120, 120, 0);
     padding: 0;
     border-radius: 2;
+}
+
+.Selectable {
+	padding: 10px 0px;
+	border-width: 2.5px;
+	border-color: none;
+}
+
+.Selectable:hovered {
+	background: rgb(236, 192, 117, 140);
+	border-color: rgb(143, 131, 105);
+	foreground: black;
+}
+.Selectable:pressed, .Selectable:active {
+	background: rgb(236, 192, 117);
+	foreground: black;
+}
+
+.Selectable > CLabel {
+	background: none;
+	height: 100%;
+	text-align: middle-left;
 }
 
 )";
@@ -449,13 +470,15 @@ void SandboxLoop::SetupGUI()
 
 		auto selectableGroup = CreateWidget<CSelectableGroup>(container, "SelectableGroup");
 
-		for (int j = 0; j < 4; j++)
+		for (int j = 0; j < 8; j++)
 		{
 			auto selectableWidget = CreateWidget<CSelectableWidget>(selectableGroup, String::Format("Selectable{}", j));
-			
+			auto label = CreateWidget<CLabel>(selectableWidget, "Label");
+			label->SetText("Empty Project");
 
 		}
 
+		selectableGroup->SelectItemAt(0);
 	}
 
 	/*gStyleManager->globalStyle.AddProperty(CStylePropertyType::Background, Color::FromRGBA32(36, 36, 36), CStateFlag::Default, CSubControl::Window);

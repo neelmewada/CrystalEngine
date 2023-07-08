@@ -118,7 +118,7 @@ namespace CE::GUI
 	{
 		Vec2 windowPos = GetWindowPos();
 		Vec2 scroll = GetWindowScroll();
-		return ToGlobalCoordinateSpace(rectInWindow + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y));
+		return ToWindowCoordinateSpace(rectInWindow + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y));
 	}
 
 	COREGUI_API Vec4 GlobalRectToWindowRect(const Vec4& globalRect)
@@ -295,21 +295,58 @@ namespace CE::GUI
 			g.ActiveIdSource = g.NavInputSource;
 		}
 
-		if (padding.left > 0)
-		{
-			gPaddingXStack.Push(Vec2(padding.left, padding.right));
-		}
-
 		return ret;
 	}
 
 	COREGUI_API void EndChild()
 	{
 		ImGui::EndChild();
-		if (gPaddingXStack.NonEmpty())
+	}
+
+	COREGUI_API bool BeginChild(const Rect& localRect, ID id, const String& title, const Vec4& padding, const GuiStyleState& styleState, WindowFlags windowFlags)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* parent_window = g.CurrentWindow;
+		
+		ImGuiWindowFlags flags = windowFlags;
+
+		flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_ChildWindow | ImGuiWindowFlags_NoDocking;
+		flags |= (parent_window->Flags & ImGuiWindowFlags_NoMove);  // Inherit the NoMove flag
+
+		auto rect = WindowRectToGlobalRect(localRect);
+
+		SetNextWindowPos(rect.min);
+		SetNextWindowSize(rect.max - rect.min);
+
+		// Build up name. If you need to append to a same child from multiple location in the ID stack, use BeginChild(ImGuiID id) with a stable value.
+		const char* temp_window_name;
+		if (!title.IsEmpty())
+			ImFormatStringToTempBuffer(&temp_window_name, NULL, "%s/%s_%08X", parent_window->Name, title.GetCString(), id);
+		else
+			ImFormatStringToTempBuffer(&temp_window_name, NULL, "%s/%08X", parent_window->Name, id);
+		
+		const float backup_border_size = g.Style.ChildBorderSize;
+		bool ret = ImGui::Begin(temp_window_name, NULL, flags);
+
+		ImGuiWindow* child_window = g.CurrentWindow;
+		child_window->ChildId = id;
+
+		// Set the cursor to handle case where the user called SetNextWindowPos()+BeginChild() manually.
+		// While this is not really documented/defined, it seems that the expected thing to do.
+		if (child_window->BeginCount == 1)
+			parent_window->DC.CursorPos = child_window->Pos;
+
+		// Process navigation-in immediately so NavInit can run on first frame
+		// Can enter a child if (A) it has navigatable items or (B) it can be scrolled.
+		if (g.NavActivateId == id && !(flags & ImGuiWindowFlags_NavFlattened) && (child_window->DC.NavLayersActiveMask != 0 || child_window->DC.NavWindowHasScrollY))
 		{
-			gPaddingXStack.Pop();
+			ImGui::FocusWindow(child_window);
+			ImGui::NavInitWindow(child_window, false);
+			ImGui::SetActiveID(id + 1, child_window); // Steal ActiveId with another arbitrary id so that key-press won't activate child item
+			g.ActiveIdSource = g.NavInputSource;
 		}
+
+		return ret;
 	}
 
 	/////////////////////////////////////////////////////////////////////
@@ -378,7 +415,7 @@ namespace CE::GUI
 			return;
 		ImGuiContext& g = *GImGui;
 
-		Rect rect = ToGlobalCoordinateSpace(localRect);
+		Rect rect = ToWindowCoordinateSpace(localRect);
 
 		const char* text_end = NULL;
 
@@ -652,7 +689,7 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
 
-		Rect rect = ToGlobalCoordinateSpace(localRect);
+		Rect rect = ToWindowCoordinateSpace(localRect);
 
 		int flags = (int)buttonFlags;
 
@@ -1038,6 +1075,149 @@ namespace CE::GUI
 		return pressed; //-V1020
 	}
 
+	COREGUI_API bool Selectable(const Rect& localRect, ID id, bool selected, 
+		const GuiStyleState& hoveredState, const GuiStyleState& pressedState, const GuiStyleState& selectedState, 
+		SelectableFlags flags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+
+		auto rect = ToWindowCoordinateSpace(localRect);
+		auto rectSize = rect.max - rect.min;
+
+		auto globalRect = GUI::WindowRectToGlobalRect(localRect);
+
+		GUI::SetCursorPos(rect.min);
+
+		// Submit label or explicit size to ItemSize(), whereas ItemAdd() will submit a larger/spanning rectangle.
+		//ImVec2 label_size = ImGui::CalcTextSize("label", NULL, true);
+		ImVec2 size(rectSize.x, rectSize.y);
+		ImVec2 pos = window->DC.CursorPos;
+		//pos.y += window->DC.CurrLineTextBaseOffset;
+		ImGui::ItemSize(size, 0.0f);
+
+		// Fill horizontal space
+		// We don't support (size < 0.0f) in Selectable() because the ItemSpacing extension would make explicitly right-aligned sizes not visibly match other widgets.
+		const bool span_all_columns = (flags & ImGuiSelectableFlags_SpanAllColumns) != 0;
+		const float min_x = span_all_columns ? window->ParentWorkRect.Min.x : pos.x;
+		const float max_x = span_all_columns ? window->ParentWorkRect.Max.x : window->WorkRect.Max.x;
+		//if (size_arg.x == 0.0f || (flags & ImGuiSelectableFlags_SpanAvailWidth))
+		//	size.x = ImMax(label_size.x, max_x - min_x);
+
+		// Text stays at the submission position, but bounding box may be extended on both sides
+		//const ImVec2 text_min = pos;
+		//const ImVec2 text_max(min_x + size.x, pos.y + size.y);
+
+		// Selectables are meant to be tightly packed together with no click-gap, so we extend their box to cover spacing between selectable.
+		ImRect bb(pos.x, pos.y, pos.x + size.x, pos.y + size.y);
+		//if (g.IO.KeyCtrl) { GetForegroundDrawList()->AddRect(bb.Min, bb.Max, IM_COL32(0, 255, 0, 255)); }
+
+		// Modify ClipRect for the ItemAdd(), faster than doing a PushColumnsBackground/PushTableBackground for every Selectable..
+		const float backup_clip_rect_min_x = window->ClipRect.Min.x;
+		const float backup_clip_rect_max_x = window->ClipRect.Max.x;
+		if (span_all_columns)
+		{
+			window->ClipRect.Min.x = window->ParentWorkRect.Min.x;
+			window->ClipRect.Max.x = window->ParentWorkRect.Max.x;
+		}
+
+		const bool disabled_item = (flags & ImGuiSelectableFlags_Disabled) != 0;
+		const bool item_add = ImGui::ItemAdd(bb, id, NULL, disabled_item ? ImGuiItemFlags_Disabled : ImGuiItemFlags_None);
+		if (span_all_columns)
+		{
+			window->ClipRect.Min.x = backup_clip_rect_min_x;
+			window->ClipRect.Max.x = backup_clip_rect_max_x;
+		}
+
+		if (!item_add)
+			return false;
+
+		const bool disabled_global = (g.CurrentItemFlags & ImGuiItemFlags_Disabled) != 0;
+		if (disabled_item && !disabled_global) // Only testing this as an optimization
+			ImGui::BeginDisabled();
+
+		// FIXME: We can standardize the behavior of those two, we could also keep the fast path of override ClipRect + full push on render only,
+		// which would be advantageous since most selectable are not selected.
+		if (span_all_columns && window->DC.CurrentColumns)
+			ImGui::PushColumnsBackground();
+		else if (span_all_columns && g.CurrentTable)
+			ImGui::TablePushBackgroundChannel();
+
+		// We use NoHoldingActiveID on menus so user can click and _hold_ on a menu then drag to browse child entries
+		ImGuiButtonFlags button_flags = 0;
+		if (flags & ImGuiSelectableFlags_NoHoldingActiveID) { button_flags |= ImGuiButtonFlags_NoHoldingActiveId; }
+		if (flags & ImGuiSelectableFlags_NoSetKeyOwner) { button_flags |= ImGuiButtonFlags_NoSetKeyOwner; }
+		if (flags & ImGuiSelectableFlags_SelectOnClick) { button_flags |= ImGuiButtonFlags_PressedOnClick; }
+		if (flags & ImGuiSelectableFlags_SelectOnRelease) { button_flags |= ImGuiButtonFlags_PressedOnRelease; }
+		if (flags & ImGuiSelectableFlags_AllowDoubleClick) { button_flags |= ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick; }
+		if (flags & ImGuiSelectableFlags_AllowItemOverlap) { button_flags |= ImGuiButtonFlags_AllowItemOverlap; }
+
+		const bool was_selected = selected;
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, button_flags);
+
+		const GuiStyleState* curState = nullptr;
+		if (hovered) curState = &hoveredState;
+		if (held) curState = &pressedState;
+		if (was_selected) curState = &selectedState;
+
+		// Auto-select when moved into
+		// - This will be more fully fleshed in the range-select branch
+		// - This is not exposed as it won't nicely work with some user side handling of shift/control
+		// - We cannot do 'if (g.NavJustMovedToId != id) { selected = false; pressed = was_selected; }' for two reasons
+		//   - (1) it would require focus scope to be set, need exposing PushFocusScope() or equivalent (e.g. BeginSelection() calling PushFocusScope())
+		//   - (2) usage will fail with clipped items
+		//   The multi-select API aim to fix those issues, e.g. may be replaced with a BeginSelection() API.
+		if ((flags & ImGuiSelectableFlags_SelectOnNav) && g.NavJustMovedToId != 0 && g.NavJustMovedToFocusScopeId == g.CurrentFocusScopeId)
+			if (g.NavJustMovedToId == id)
+				selected = pressed = true;
+
+		// Update NavId when clicking or when Hovering (this doesn't happen on most widgets), so navigation can be resumed with gamepad/keyboard
+		if (pressed || (hovered && (flags & ImGuiSelectableFlags_SetNavIdOnHover)))
+		{
+			if (!g.NavDisableMouseHover && g.NavWindow == window && g.NavLayer == window->DC.NavLayerCurrent)
+			{
+				ImGui::SetNavID(id, window->DC.NavLayerCurrent, g.CurrentFocusScopeId, ImGui::WindowRectAbsToRel(window, bb)); // (bb == NavRect)
+				g.NavDisableHighlight = true;
+			}
+		}
+		if (pressed)
+			ImGui::MarkItemEdited(id);
+
+		if (flags & ImGuiSelectableFlags_AllowItemOverlap)
+			ImGui::SetItemAllowOverlap();
+
+		// In this branch, Selectable() cannot toggle the selection so this will never trigger.
+		if (selected != was_selected) //-V547
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
+
+		// Render
+		if (curState != nullptr)
+		{
+			GUI::RenderFrame(globalRect, curState->background, curState->borderThickness, curState->borderRadius);
+		}
+		ImGui::RenderNavHighlight(bb, id, ImGuiNavHighlightFlags_TypeThin | ImGuiNavHighlightFlags_NoRounding);
+
+		if (span_all_columns && window->DC.CurrentColumns)
+			ImGui::PopColumnsBackground();
+		else if (span_all_columns && g.CurrentTable)
+			ImGui::TablePopBackgroundChannel();
+
+		// Automatically close popups
+		if (pressed && (window->Flags & ImGuiWindowFlags_Popup) && !(flags & ImGuiSelectableFlags_DontClosePopups) && !(g.LastItemData.InFlags & ImGuiItemFlags_SelectableDontClosePopup))
+			ImGui::CloseCurrentPopup();
+
+		if (disabled_item && !disabled_global)
+			ImGui::EndDisabled();
+
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags);
+		return pressed; //-V1020
+	}
+
 	COREGUI_API void InvisibleButton(const String& id, const Vec2& size)
 	{
 		ImGui::InvisibleButton(id.GetCString(), ImVec2(size.x, size.y));
@@ -1050,7 +1230,7 @@ namespace CE::GUI
 		if (window->SkipItems)
 			return false;
 
-		auto rect = ToGlobalCoordinateSpace(localRect);
+		auto rect = ToWindowCoordinateSpace(localRect);
 
 		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
 
@@ -4970,7 +5150,7 @@ namespace CE::GUI
 		return Rect(parentSpace.min + localSpaceRect.min, parentSpace.min + localSpaceRect.min + originalSize);
 	}
 
-	COREGUI_API Rect ToGlobalCoordinateSpace(const Rect& localSpaceRect)
+	COREGUI_API Rect ToWindowCoordinateSpace(const Rect& localSpaceRect)
 	{
 		if (coordinateSpaceStack.IsEmpty())
 			return localSpaceRect;
@@ -4988,9 +5168,21 @@ namespace CE::GUI
 	COREGUI_API void PushChildCoordinateSpace(const Rect& rect, const Vec4& padding)
 	{
 		Rect contentSpaceRect = rect;
-		contentSpaceRect.min += padding.min;
-		contentSpaceRect.max -= padding.max;
+		//contentSpaceRect.min += padding.min;
+		//contentSpaceRect.max -= padding.max;
 		coordinateSpaceStack.Push(contentSpaceRect);
+	}
+
+	COREGUI_API void PushZeroingChildCoordinateSpace()
+	{
+		Rect rect = {};
+
+		for (int i = coordinateSpaceStack.GetSize() - 1; i >= 0; i--)
+		{
+			rect -= coordinateSpaceStack[i];
+		}
+
+		coordinateSpaceStack.Push(rect);
 	}
 
 	COREGUI_API void PopChildCoordinateSpace()
@@ -5240,7 +5432,21 @@ namespace CE::GUI
 
 #pragma region Custom Drawing
 
-    COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding, f32 thickness)
+	COREGUI_API bool PushClipRectLocal(const Rect& localRect, bool intersectWithCurrentClipRect)
+	{
+		if (isnan(localRect.z) || isnan(localRect.w))
+			return false;
+		auto rect = WindowRectToGlobalRect(localRect);
+		ImGui::PushClipRect(ImVec2(rect.min.x, rect.min.y), ImVec2(rect.max.x, rect.max.y), intersectWithCurrentClipRect);
+		return true;
+	}
+
+	COREGUI_API void PopClipRect()
+	{
+		ImGui::PopClipRect();
+	}
+
+	COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding, f32 thickness)
     {
 		DrawRect(rect, color.ToU32(), rounding, thickness);
     }

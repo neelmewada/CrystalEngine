@@ -310,7 +310,7 @@ namespace CE::Widgets
 		CStyle();
 		void Release();
 		
-		static Array<CStylePropertyType> GetInheritedProperties();
+		static const Array<CStylePropertyType>& GetInheritedProperties();
 		static bool IsInheritedProperty(CStylePropertyType property);
 		static CStylePropertyTypeFlags GetPropertyTypeFlags(CStylePropertyType property);
 

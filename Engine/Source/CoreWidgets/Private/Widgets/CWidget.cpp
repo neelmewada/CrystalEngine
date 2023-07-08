@@ -42,9 +42,12 @@ namespace CE::Widgets
 
 	void CWidget::LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState)
 	{
-		if (property == CStylePropertyType::Background && styleValue.IsColor())
+		if (property == CStylePropertyType::Background)
 		{
-			outState.background = styleValue.color;
+			if (styleValue.IsColor())
+				outState.background = styleValue.color;
+			else if (styleValue.IsEnum() && styleValue.enumValue.x == CStyleValue::None)
+				outState.background = Color(0, 0, 0, 0);
 		}
 		else if (property == CStylePropertyType::Foreground && styleValue.IsColor())
 		{
@@ -76,14 +79,15 @@ namespace CE::Widgets
 		auto rect = GetComputedLayoutRect();
 
 		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
+		f32 borderWidth = styleState.borderThickness;
 
 		if (styleState.background.a > 0)
 		{
 			GUI::FillRect(globalRect, styleState.background, styleState.borderRadius);
 		}
-		if (styleState.borderThickness > 0 && styleState.borderColor.a > 0)
+		if (borderWidth > 0 && styleState.borderColor.a > 0)
 		{
-			GUI::DrawRect(globalRect, styleState.borderColor, styleState.borderRadius, styleState.borderThickness);
+			GUI::DrawRect(globalRect + Rect(borderWidth, borderWidth, -borderWidth, -borderWidth), styleState.borderColor, styleState.borderRadius, borderWidth);
 		}
 	}
 
@@ -356,7 +360,7 @@ namespace CE::Widgets
 			{
 				if (subWidget == nullptr || subWidget == this)
 					continue;
-				subWidget->SetNeedsStyle();
+				subWidget->needsStyle = true;
 				subWidget->UpdateStyleIfNeeded();
 			}
 		}
@@ -375,12 +379,6 @@ namespace CE::Widgets
 
 	bool CWidget::NeedsStyle()
 	{
-		for (auto child : attachedWidgets)
-		{
-			if (child->NeedsStyle())
-				return true;
-		}
-
 		return needsStyle;
 	}
 
@@ -475,7 +473,8 @@ namespace CE::Widgets
 	{
 		if (subobject == nullptr)
 			return;
-		if (subobject->GetClass()->IsSubclassOf<CWidget>())
+		if (subobject->GetClass()->IsSubclassOf<CWidget>() && 
+			IsSubWidgetAllowed(subobject->GetClass()))
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Add(subWidget);
@@ -967,6 +966,11 @@ namespace CE::Widgets
 		if (index < 0 || index >= attachedWidgets.GetSize())
 			return nullptr;
 		return attachedWidgets[index];
+	}
+
+	bool CWidget::IsSubWidgetAllowed(ClassType* subWidgetClass)
+	{
+		return subWidgetClass->IsSubclassOf<CWidget>();
 	}
 	
 

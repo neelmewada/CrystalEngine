@@ -144,6 +144,8 @@ namespace CE::Widgets
 
 		CWidget* GetSubWidgetAt(int index);
 
+		virtual bool IsSubWidgetAllowed(ClassType* subWidgetClass);
+
 		// Calculated Layout
 
 		inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }

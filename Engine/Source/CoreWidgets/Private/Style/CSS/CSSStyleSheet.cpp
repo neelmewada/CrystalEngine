@@ -32,7 +32,13 @@ namespace CE::Widgets
 		for (auto& rule : rules)
 		{
 			if (rule.selectorList.TestWidget(widget, state, subControl))
+			{
 				result.Add(rule);
+			}
+			else
+			{
+
+			}
 		}
 
 		return result;

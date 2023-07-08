@@ -126,7 +126,7 @@ namespace CE::Widgets
 		
 	}
 
-	Array<CStylePropertyType> CStyle::GetInheritedProperties()
+	const Array<CStylePropertyType>& CStyle::GetInheritedProperties()
 	{
 		static Array<CStylePropertyType> inheritedProperties{
 			CStylePropertyType::Foreground,
@@ -239,6 +239,7 @@ namespace CE::Widgets
 	}
 
 	static HashMap<String, Alignment> stringToAlignmentMap{
+		{ "auto", Alignment::Inherited },
 		{ "inherited", Alignment::Inherited },
 		{ "top-left", Alignment::TopLeft },
 		{ "top-center", Alignment::TopCenter },
