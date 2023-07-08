@@ -86,19 +86,32 @@ void SandboxLoop::PostInit()
 
     cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 
-	RHI::FontDesc openSans{};
-	openSans.fontName = "Open Sans";
-	openSans.byteSize = OpenSans_VariableFont_len;
-	openSans.fontData = OpenSans_VariableFont_ttf;
-	openSans.pointSize = 16;
+	Array<RHI::FontDesc> fontList{};
+
+	auto defaultFontByteSize = OpenSans_VariableFont_len;
+	void* defaultFont = OpenSans_VariableFont_ttf;
+
+	fontList.Add({ defaultFontByteSize, 16, "Open Sans", false, defaultFont }); // Default Font & Size
+
+	fontList.AddRange({
+		{ defaultFontByteSize, 14, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 15, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 17, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 18, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 20, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },
+	});
 
 	RHI::FontPreloadConfig fontConfig{};
-	fontConfig.preloadFontCount = 1;
-	fontConfig.preloadFonts = &openSans;
-	
+	fontConfig.preloadFontCount = fontList.GetSize();
+	fontConfig.preloadFonts = fontList.GetData();
+
 	Array<void*> fontHandles{};
 
 	cmdList->InitImGui(&fontConfig, fontHandles);
+
+	CFontManager::Get().Initialize(fontList, fontHandles);
     
     // Setup GUI
     using namespace CE::Widgets;
@@ -349,14 +362,17 @@ CLabel {
 }
 
 CButton {
-	padding: 10px 5px;
+	padding: 10px 3px;
+	border-radius: 1.5px;
+	border-width: 1px;
+	border-color: rgb(30, 30, 30);
 	background: rgb(64, 64, 64);
 }
 CButton:hovered {
-	background: rgb(96, 96, 96);
+	background: rgb(80, 80, 80);
 }
 CButton:pressed {
-	background: rgba(170, 170, 170, 100);
+	background: rgba(100, 100, 100);
 }
 
 CTextInput {
@@ -399,32 +415,27 @@ CTabContainerWidget {
 #SelectableGroup {
 	width: 100%;
 	height: 200px;
-	background: rgb(20, 24, 27);
-	padding: 10px 10px 20px 10px;
-    row-gap: 10px;
+	background: rgb(26, 26, 26);
+	padding: 0px 0px;
 }
 
 #SelectableGroup > CSelectableWidget {
 	width: 100%;
 	height: 35px;
     padding: 0;
-    border-radius: 2;
 }
 
 .Selectable {
 	padding: 10px 0px;
-	border-width: 2.5px;
-	border-color: none;
+	foreground: white;
+	font-size: 18;
 }
 
 .Selectable:hovered {
-	background: rgb(236, 192, 117, 140);
-	border-color: rgb(143, 131, 105);
-	foreground: black;
+	background: rgb(43, 50, 58);
 }
 .Selectable:pressed, .Selectable:active {
-	background: rgb(236, 192, 117);
-	foreground: black;
+	background: rgb(65, 87, 111);
 }
 
 .Selectable > CLabel {
@@ -432,7 +443,6 @@ CTabContainerWidget {
 	height: 100%;
 	text-align: middle-left;
 }
-
 )";
 
 void SandboxLoop::SetupGUI()
@@ -475,7 +485,6 @@ void SandboxLoop::SetupGUI()
 			auto selectableWidget = CreateWidget<CSelectableWidget>(selectableGroup, String::Format("Selectable{}", j));
 			auto label = CreateWidget<CLabel>(selectableWidget, "Label");
 			label->SetText("Empty Project");
-
 		}
 
 		selectableGroup->SelectItemAt(0);

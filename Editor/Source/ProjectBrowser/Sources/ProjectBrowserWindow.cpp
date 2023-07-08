@@ -1,80 +1,80 @@
 
 #include "Main.h"
 
+
+static const String css = R"(
+ProjectBrowserWindow {
+	padding: 0px 0px;
+	align-items: flex-start;
+}
+
+#SelectableGroup {
+	width: 100%;
+	height: 200px;
+	background: rgb(26, 26, 26);
+	padding: 0px 0px;
+}
+
+#SelectableGroup > CSelectableWidget {
+	width: 100%;
+	height: 35px;
+    padding: 0;
+}
+
+.Selectable {
+	padding: 10px 0px;
+	foreground: white;
+	font-size: 18;
+}
+
+.Selectable:hovered {
+	background: rgb(43, 50, 58);
+}
+.Selectable:pressed, .Selectable:active {
+	background: rgb(65, 87, 111);
+}
+
+.Selectable > CLabel {
+	background: none;
+	height: 100%;
+	text-align: middle-left;
+}
+)";
+
 void ProjectBrowserWindow::Construct()
 {
 	isFullscreen = true;
 
 	Super::Construct();
 	
-	/*auto tabView = CreateWidget<CTabView>(this, "TabView");
-
-	createContent = CreateWidget<CStackLayout>(tabView, "CreateProjectContent");
-	createContent->SetDirection(CStackDirection::Vertical);
-	createContent->GetStyle().AddProperty(CStylePropertyType::Height, CStyleValue(100, true));
-	createContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
+	SetStyleSheet(css);
+	
+	CTabWidget* tabWidget = CreateWidget<CTabWidget>(this, "TabWidget");
 
 	// Create Project Tab
 	{
-		auto header = CreateWidget<CLabel>(createContent, "HeaderLabel");
-		header->SetText("Select Template");
-		header->GetStyle().AddProperty(CStylePropertyType::FontSize, 20);
-		header->GetStyle().AddProperty(CStylePropertyType::Height, 30);
+		auto container = tabWidget->GetOrAddTab("Create Project" );
 
-		auto templateContent = CreateWidget<CSelectableGroup>(createContent, "Templates");
-		templateContent->SetDirection(CStackDirection::Vertical);
-		templateContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 10, 10, 10));
-		templateContent->GetStyle().AddProperty(CStylePropertyType::MaxHeight, 250);
-		templateContent->GetStyle().AddProperty(CStylePropertyType::FontSize, 18);
-		templateContent->GetStyle().AddProperty(CStylePropertyType::Background, Color(0.0f, 0.0f, 0.0f, 0.25f));
+		auto label = CreateWidget<CLabel>(container, "Label");
+		label->SetText("Select Template");
 
-		for (int i = 0; i < 1; i++)
+		auto selectableGroup = CreateWidget<CSelectableGroup>(container, "SelectableGroup");
+
+		for (int j = 0; j < 1; j++)
 		{
-			auto selectable = CreateWidget<CSelectableWidget>(templateContent, "TemplateItem");
-			selectable->GetStyle().AddProperty(CStylePropertyType::MinHeight, 40);
-			if (i == 0)
-				selectable->Select(true);
-
-			auto subLabel = CreateWidget<CLabel>(selectable, "SubLabel");
-			subLabel->SetText(String::Format("Empty Project", i));
-			subLabel->GetStyle().AddProperty(CStylePropertyType::Height, 40);
+			auto selectableWidget = CreateWidget<CSelectableWidget>(selectableGroup, String::Format("Selectable{}", j));
+			auto label = CreateWidget<CLabel>(selectableWidget, "Label");
+			label->SetText("Empty Project");
 		}
 
-		auto projectPathStack = CreateWidget<CStackLayout>(createContent, "ProjectPathStackLayout");
-		projectPathStack->SetDirection(CStackDirection::Horizontal);
-
-		auto projectPathLabel = CreateWidget<CLabel>(projectPathStack, "ProjectPathLabel");
-		projectPathLabel->SetText("Project Folder");
-		projectPathLabel->GetStyle().AddProperty(CStylePropertyType::Height, 30);
-		projectPathLabel->GetStyle().AddProperty(CStylePropertyType::MinWidth, 100);
-		projectPathLabel->GetStyle().AddProperty(CStylePropertyType::TextAlign, Alignment::MiddleLeft);
-
-		folderPathInput = CreateWidget<CTextInput>(projectPathStack, "ProjectPathInput");
-		folderPathInput->SetHint("Project folder path...");
-		folderPathInput->GetStyle().AddProperty(CStylePropertyType::Width, CStyleValue(90, true));
-
-		Object::Bind(folderPathInput, MEMBER_FUNCTION(CTextInput, OnValueChanged), [](String string)
-			{
-				CE_LOG(Info, All, "Text: " + string);
-			});
-
-		auto folderPathButton = CreateWidget<CButton>(projectPathStack, "ProjectPathButton");
-		folderPathButton->SetText("Open");
-		folderPathButton->GetStyle().AddProperty(CStylePropertyType::MinHeight, 15);
-		folderPathButton->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(5, 2.5f, 5, 2.5f));
+		selectableGroup->SelectItemAt(0);
 	}
 
-	openContent = CreateWidget<CStackLayout>(tabView, "OpenProjectContent");
-	openContent->SetDirection(CStackDirection::Vertical);
-	openContent->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(10, 5, 10, 10));
+	// Open Project Tab
+	{
+		auto container = tabWidget->GetOrAddTab("Open Project");
 
-	auto label2 = CreateWidget<CLabel>(openContent, "Label2");
-	label2->SetText("This is the second tab.");
+	}
 
-	tabView->SetTabTitle(createContent, "Create Project");
-	tabView->SetTabTitle(openContent, "Open Project");
-
-	tabView->GetStyle().AddProperty(CStylePropertyType::Padding, Vec4(20, 10, 20, 10), CStateFlag::Default, CSubControl::Tab);
-	*/
 }
 

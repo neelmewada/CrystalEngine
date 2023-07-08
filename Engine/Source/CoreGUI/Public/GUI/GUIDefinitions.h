@@ -715,6 +715,8 @@ namespace CE::GUI
 		Color foreground = Color::White();
 		// Text
 		TextAlign textAlign = TextAlign_MiddleCenter;
+		u32 fontSize = 16;
+		Name fontName{};
 	};
     
 } // namespace CE

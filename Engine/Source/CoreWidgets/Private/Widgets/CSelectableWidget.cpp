@@ -23,9 +23,9 @@ namespace CE::Widgets
 	{
 		Super::OnAfterComputeStyle();
 
-		hoveredState = {};
-		pressedState = {};
-		activeState = {};
+		hoveredState = defaultStyleState;
+		pressedState = defaultStyleState;
+		activeState = defaultStyleState;
 
 		auto hoveredStyle = stylesheet->SelectStyle(this, CStateFlag::Hovered);
 		for (const auto& [property, styleValue] : hoveredStyle.properties)

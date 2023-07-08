@@ -72,11 +72,6 @@ namespace CE::Widgets
 		inline CStateFlag GetStateFlags() const { return stateFlags; }
 
 		// - Style API -
-        
-		inline CStyle& GetStyle()
-		{
-			return style;
-		}
 
 		inline const CStyle& GetComputedStyle()
 		{
@@ -114,11 +109,6 @@ namespace CE::Widgets
 		inline bool StyleClassExists(const String& styleClass) const
 		{
 			return styleClasses.Exists(styleClass);
-		}
-
-		inline CStyleValue& AddStyleProperty(CStylePropertyType property, const CStyleValue& value)
-		{
-			return style.AddProperty(property, value);
 		}
 
 		void SetStyleSheet(const String& stylesheet);
@@ -227,9 +217,6 @@ namespace CE::Widgets
 
 		FIELD()
 		Array<String> styleClasses{};
-
-		FIELD(NonSerialized)
-		CStyle style{}; // Override local styles
 
 		FIELD()
 		CStateFlag stateFlags{};

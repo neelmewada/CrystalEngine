@@ -34,10 +34,6 @@ namespace CE::Widgets
 		{
 			this->stylesheet->parent = GetOwner()->stylesheet;
 		}
-		else
-		{
-			//this->stylesheet->parent = GetStyleManager()->GetGlobalStyleSheet();
-		}
 	}
 
 	void CWidget::LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState)
@@ -72,6 +68,14 @@ namespace CE::Widgets
 		{
 			outState.textAlign = (GUI::TextAlign)styleValue.enumValue.x;
 		}
+		else if (property == CStylePropertyType::FontSize && styleValue.IsSingle())
+		{
+			outState.fontSize = (u32)styleValue.single;
+		}
+		else if (property == CStylePropertyType::FontName && styleValue.IsString())
+		{
+			outState.fontName = styleValue.string;
+		}
 	}
 
 	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState)
@@ -101,8 +105,21 @@ namespace CE::Widgets
 		node->setStyle({}); // Clear style
 
 		computedStyle = {};
-		computedStyle.ApplyProperties(style);
+		//computedStyle.ApplyProperties(style);
 		defaultStyleState = {};
+
+		if (GetOwner() != nullptr)
+		{
+			const auto& parentComputedStyle = GetOwner()->computedStyle;
+			const auto& inheritedProperties = CStyle::GetInheritedProperties();
+			for (auto property : inheritedProperties)
+			{
+				if (parentComputedStyle.properties.KeyExists(property))
+				{
+					computedStyle.properties[property] = parentComputedStyle.properties.Get(property);
+				}
+			}
+		}
 
 		auto rules = stylesheet->GetMatchingRules(this, stateFlags, subControl);
 		for (const auto& rule : rules)
@@ -630,7 +647,9 @@ namespace CE::Widgets
 
 	void CWidget::RenderGUI()
 	{
+		CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
 		OnDrawGUI();
+		CFontManager::Get().PopFont();
 
 		UpdateStyleIfNeeded();
 		UpdateLayoutIfNeeded();
@@ -813,8 +832,6 @@ namespace CE::Widgets
 			bool isLeftClicked = GUI::IsMouseClicked(GUI::MouseButton::Left);
 			bool isRightClicked = GUI::IsMouseClicked(GUI::MouseButton::Right);
 			bool isMiddleClicked = GUI::IsMouseClicked(GUI::MouseButton::Middle);
-
-			
 			
 			if (isLeftClicked || isRightClicked || isMiddleClicked)
 			{

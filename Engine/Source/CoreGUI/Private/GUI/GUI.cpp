@@ -723,6 +723,11 @@ namespace CE::GUI
 		const GUI::GuiStyleState& curState = styleState;
 		GUI::FillRect(WindowRectToGlobalRect(localRect), curState.background, curState.borderRadius);
 
+		if (curState.borderThickness > 0 && curState.borderColor.a > 0)
+		{
+			GUI::DrawRect(WindowRectToGlobalRect(localRect), curState.borderColor, curState.borderRadius, curState.borderThickness);
+		}
+
 		auto textAlign = curState.textAlign;
 		ImVec2 align = style.ButtonTextAlign;
 		if (textAlign == TextAlign_TopLeft)

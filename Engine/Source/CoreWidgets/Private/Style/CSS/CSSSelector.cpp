@@ -85,49 +85,6 @@ namespace CE::Widgets
 		return false;
 	}
 
-	bool CSSSelector::operator==(const CSSSelector& other) const
-	{
-		return hash == other.hash;
-	}
-
-	SIZE_T CSSSelector::CalculateHash()
-	{
-		hash = 0;
-		hash = CalculateHash(primary, hash);
-		if (HasSecondRule())
-		{
-			hash = GetCombinedHash(hash, (int)relation);
-			hash = CalculateHash(secondary, hash);
-		}
-		
-		return hash;
-	}
-
-	SIZE_T CSSSelector::CalculateHash(const MatchCond& rule, SIZE_T hash)
-	{	
-		hash = GetCombinedHash(hash, (SIZE_T)rule.matches);
-
-		if (EnumHasAnyFlags(rule.matches, Tag))
-			hash = GetCombinedHash(hash, CE::GetHash<String>(rule.tag));
-		if (EnumHasAnyFlags(rule.matches, Id))
-			hash = GetCombinedHash(hash, CE::GetHash<String>(rule.id));
-		if (EnumHasAnyFlags(rule.matches, Class))
-			hash = GetCombinedHash(hash, CE::GetHash<String>(rule.clazz));
-		if (EnumHasAnyFlags(rule.matches, State))
-			hash = GetCombinedHash(hash, CE::GetHash<CStateFlag>(rule.states));
-		if (EnumHasAnyFlags(rule.matches, SubControl))
-			hash = GetCombinedHash(hash, CE::GetHash<CSubControl>(rule.subControl));
-
-		for (const auto& attribMatchRule : rule.attributeMatches)
-		{
-			hash = GetCombinedHash(hash, CE::GetHash<String>(attribMatchRule.attribName));
-			hash = GetCombinedHash(hash, CE::GetHash((int)attribMatchRule.attributeMatch));
-			hash = GetCombinedHash(hash, CE::GetHash<String>(attribMatchRule.attribValue));
-		}
-		
-		return hash;
-	}
-
 	bool CSSSelector::TestMatch(CWidget* widget, const MatchCond& rule, CStateFlag curStates, CSubControl subControl)
 	{
 		if (widget == nullptr)
@@ -141,6 +98,17 @@ namespace CE::Widgets
 		auto widgetClass = widget->GetClass();
 		auto widgetClassName = widgetClass->GetName().GetLastComponent();
 		auto widgetId = widget->GetName().GetString();
+
+		while (widgetClass != nullptr && EnumHasAnyFlags(rule.matches, Tag))
+		{
+			widgetClassName = widgetClass->GetName().GetLastComponent();
+			if (widgetClassName == rule.tag)
+				break;
+
+			if (widgetClass->GetSuperClassCount() == 0)
+				break;
+			widgetClass = widgetClass->GetSuperClass(0);
+		}
 
 		if (EnumHasAnyFlags(rule.matches, Tag) && rule.tag != widgetClassName)
 			return false;
@@ -219,5 +187,48 @@ namespace CE::Widgets
 		}
         return false;
     }
+
+	bool CSSSelector::operator==(const CSSSelector& other) const
+	{
+		return hash == other.hash;
+	}
+
+	SIZE_T CSSSelector::CalculateHash()
+	{
+		hash = 0;
+		hash = CalculateHash(primary, hash);
+		if (HasSecondRule())
+		{
+			hash = GetCombinedHash(hash, (int)relation);
+			hash = CalculateHash(secondary, hash);
+		}
+
+		return hash;
+	}
+
+	SIZE_T CSSSelector::CalculateHash(const MatchCond& rule, SIZE_T hash)
+	{
+		hash = GetCombinedHash(hash, (SIZE_T)rule.matches);
+
+		if (EnumHasAnyFlags(rule.matches, Tag))
+			hash = GetCombinedHash(hash, CE::GetHash<String>(rule.tag));
+		if (EnumHasAnyFlags(rule.matches, Id))
+			hash = GetCombinedHash(hash, CE::GetHash<String>(rule.id));
+		if (EnumHasAnyFlags(rule.matches, Class))
+			hash = GetCombinedHash(hash, CE::GetHash<String>(rule.clazz));
+		if (EnumHasAnyFlags(rule.matches, State))
+			hash = GetCombinedHash(hash, CE::GetHash<CStateFlag>(rule.states));
+		if (EnumHasAnyFlags(rule.matches, SubControl))
+			hash = GetCombinedHash(hash, CE::GetHash<CSubControl>(rule.subControl));
+
+		for (const auto& attribMatchRule : rule.attributeMatches)
+		{
+			hash = GetCombinedHash(hash, CE::GetHash<String>(attribMatchRule.attribName));
+			hash = GetCombinedHash(hash, CE::GetHash((int)attribMatchRule.attributeMatch));
+			hash = GetCombinedHash(hash, CE::GetHash<String>(attribMatchRule.attribValue));
+		}
+
+		return hash;
+	}
 
 } // namespace CE::Widgets

@@ -33,7 +33,6 @@
 // Widgets
 #include "Widgets/CLabel.h"
 #include "Widgets/CButton.h"
-#include "Widgets/CStackLayout.h"
 #include "Widgets/CTableView.h"
 #include "Widgets/CTabWidget.h"
 #include "Widgets/CSelectableWidget.h"

@@ -2,22 +2,32 @@
 
 #include "OpenSans.h"
 
-static CE::String globalStyleSheet = R"(
+static const CE::String globalStyleSheet = R"(
 CWindow {
 	foreground: white;
 	background: rgb(36, 36, 36);
 	padding: 5 25 5 5;
 	flex-direction: column;
 	align-items: flex-start;
+	row-gap: 5px;
 }
+
+CLabel {
+	text-align: middle-center;
+}
+
 CButton {
+	padding: 10px 3px;
+	border-radius: 1.5px;
+	border-width: 1px;
+	border-color: rgb(30, 30, 30);
 	background: rgb(64, 64, 64);
 }
 CButton:hovered {
-	background: rgb(96, 96, 96);
+	background: rgb(80, 80, 80);
 }
 CButton:pressed {
-	background: rgba(170, 170, 170, 100);
+	background: rgba(100, 100, 100);
 }
 
 CTextInput {
@@ -29,6 +39,32 @@ CTextInput {
 }
 CTextInput::hint {
 	foreground: rgba(255, 255, 255, 120);
+}
+
+CTabWidget {
+	width: 100%;
+	height: 100%;
+}
+
+CTabWidget::tab {
+	padding: 10 10 10 10;
+	background: rgba(22, 22, 22, 210);
+}
+
+CTabWidget::tab:hovered {
+	background: rgba(90, 90, 90, 210);
+}
+
+CTabWidget::tab:active {
+	background: rgba(60, 60, 60, 255);
+}
+
+CTabWidget::tab:unfocused {
+	background: rgba(22, 22, 22);
+}
+
+CTabContainerWidget {
+	padding: 3 0 3 0;
 }
 
 )";

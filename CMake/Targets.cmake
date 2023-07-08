@@ -82,10 +82,6 @@ function(ce_add_target NAME TARGET_TYPE)
         list(APPEND PUBLIC_FILES ${FILES})
     endforeach()
 
-    if(${ce_add_target_GENERATED})
-        file(GLOB GENERATED_FILES "Generated/*")
-    endif()
-
     # EXE_FLAG
 
     if(${TARGET_TYPE} STREQUAL "GUIAPP")
@@ -96,7 +92,6 @@ function(ce_add_target NAME TARGET_TYPE)
 
     set(SOURCES ${PRIVATE_FILES})
     list(APPEND SOURCES ${PUBLIC_FILES})
-    list(APPEND SOURCES ${GENERATED_FILES})
     list(APPEND SOURCES ${CMAKE_FILES})
     
     if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
@@ -126,21 +121,7 @@ function(ce_add_target NAME TARGET_TYPE)
     
     ce_group_sources_by_folder(${NAME})
 
-    # Per Source Definitions
-
-    # foreach(source_file ${SOURCES})
-    #     cmake_path(GET source_file FILENAME source_filename)
-    #     cmake_path(REPLACE_EXTENSION source_filename LAST_ONLY ".h")
-    #     string(REPLACE "." "_" source_filename_modified "${source_filename}")
-    #     string(PREPEND source_filename_modified "${NAME}_")
-        
-    #     #set_source_files_properties(${source_file} PROPERTIES COMPILE_DEFINITIONS -D__FILE_ID__=${source_filename_modified})
-    # endforeach()
-
-    # PACKAGE
-
     target_compile_definitions(${NAME} PRIVATE PACKAGE_NAME="/Code/${NAME}")
-    
 
     # OUTPUT_DIRECTORY
 
