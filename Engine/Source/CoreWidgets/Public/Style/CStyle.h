@@ -57,6 +57,7 @@ namespace CE::Widgets
 		Padding,
 		Margin,
 		Position,
+		Left, Top, Right, Bottom,
 		Foreground, // Inherited
 		Background,
 		BorderRadius,

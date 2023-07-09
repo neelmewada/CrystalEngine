@@ -1,6 +1,6 @@
 #pragma once
 
-#define CE_MAKE_VERSION(major, minor, patch, build) (u64)build | ((u64)patch << 16) | ((u64)minor << (16*16)) | ((u64)major << (16*16*16))
+#define CE_MAKE_VERSION(major, minor, patch, build) (u64)build | ((u64)patch << 16) | ((u64)minor << (16*2)) | ((u64)major << (16*3))
 
 #define CE_ENGINE_VERSION CE_MAKE_VERSION(CE_VERSION_MAJOR, CE_VERSION_MINOR, CE_VERSION_PATCH, CE_VERSION_BUILD)
 

@@ -13,6 +13,7 @@ namespace CE::Widgets
         return YGSize{size.x, size.y};
 	}
 
+
 	CWidget::CWidget()
 	{
 		node = YGNodeNew();
@@ -142,7 +143,39 @@ namespace CE::Widgets
 				continue;
 
 			// Yoga Properties
-			if (property == CStylePropertyType::AlignContent && value.IsEnum())
+			if (property == CStylePropertyType::Position && value.IsEnum())
+			{
+				YGNodeStyleSetPositionType(node, (YGPositionType)value.enumValue.x);
+			}
+			else if (property == CStylePropertyType::Left && value.IsSingle())
+			{
+				if (value.IsPercentValue())
+					YGNodeStyleSetPositionPercent(node, YGEdgeLeft, value.single);
+				else
+					YGNodeStyleSetPosition(node, YGEdgeLeft, value.single);
+			}
+			else if (property == CStylePropertyType::Top && value.IsSingle())
+			{
+				if (value.IsPercentValue())
+					YGNodeStyleSetPositionPercent(node, YGEdgeTop, value.single);
+				else
+					YGNodeStyleSetPosition(node, YGEdgeTop, value.single);
+			}
+			else if (property == CStylePropertyType::Right && value.IsSingle())
+			{
+				if (value.IsPercentValue())
+					YGNodeStyleSetPositionPercent(node, YGEdgeRight, value.single);
+				else
+					YGNodeStyleSetPosition(node, YGEdgeRight, value.single);
+			}
+			else if (property == CStylePropertyType::Bottom && value.IsSingle())
+			{
+				if (value.IsPercentValue())
+					YGNodeStyleSetPositionPercent(node, YGEdgeBottom, value.single);
+				else
+					YGNodeStyleSetPosition(node, YGEdgeBottom, value.single);
+			}
+			else if (property == CStylePropertyType::AlignContent && value.IsEnum())
 			{
 				YGNodeStyleSetAlignContent(node, (YGAlign)value.enumValue.x);
 			}

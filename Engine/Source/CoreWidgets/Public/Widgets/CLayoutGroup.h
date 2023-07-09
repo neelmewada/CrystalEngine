@@ -10,9 +10,11 @@ namespace CE::Widgets
 		CLayoutGroup();
 		virtual ~CLayoutGroup();
 
+		bool IsContainer() override { return true; }
+
 	protected:
 
-
+		void OnDrawGUI() override;
 
 	};
     

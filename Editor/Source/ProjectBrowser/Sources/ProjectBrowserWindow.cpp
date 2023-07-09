@@ -15,7 +15,7 @@ ProjectBrowserWindow {
 
 #SelectableGroup {
 	width: 100%;
-	height: 200px;
+	height: 220px;
 	background: rgb(26, 26, 26);
 	padding: 0px 5px;
 	margin: 0 0 0 40px;
@@ -46,15 +46,43 @@ ProjectBrowserWindow {
 	text-align: middle-left;
 }
 
+#ProjectFieldLayout {
+	width: 100%;
+	align-items: center;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	margin: 0 0 0 10px;
+	padding: 0 0 10px 0;
+}
+
+#ButtonLayoutGroup {
+	width: 100%;
+	justify-content: flex-end;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	padding: 0 0 10px 0;
+	column-gap: 5px;
+}
+
 #ProjectFolderLabel, #ProjectNameLabel {
-	width: 120px;
-	flex-wrap: wrap;
+	width: 15%;
+	height: 100%;
 	text-align: middle-left;
 	margin: 10px 0 0 0;
 }
 
-#FolderPathInput, #ProjectNameInput {
-	width: 300px;
+#FolderPathInput {
+	width: 80%;
+}
+
+#OpenFolderButton {
+	margin: 5px 0 0 0;
+	width: 3%;
+	height: 25px;
+}
+
+#ProjectNameInput {
+	width: 83.5%;
 }
 
 
@@ -93,18 +121,48 @@ void ProjectBrowserWindow::Construct()
 
 		// Project Folder
 		{
-			auto label = CreateWidget<CLabel>(container, "ProjectFolderLabel");
+			auto layoutGroup = CreateWidget<CLayoutGroup>(container, "ProjectFieldLayout");
+			
+			auto label = CreateWidget<CLabel>(layoutGroup, "ProjectFolderLabel");
 			label->SetText("Project Folder");
-			folderPathInput = CreateWidget<CTextInput>(container, "FolderPathInput");
-			folderPathInput->AddStyleClass("Horizontal");
+			folderPathInput = CreateWidget<CTextInput>(layoutGroup, "FolderPathInput");
+			folderPathInput->SetText("");
+
+			auto openButton = CreateWidget<CButton>(layoutGroup, "OpenFolderButton");
+			openButton->SetText("...");
+			
+			Object::Bind(openButton, MEMBER_FUNCTION(CButton, OnButtonClicked), [&]
+				{
+					auto path = EditorPlatform::ShowSelectDirectoryDialog(folderPathInput->GetText());
+					if (!path.IsEmpty())
+						folderPathInput->SetText(path.GetString());
+				});
 		}
 
 		// Project Name
 		{
-			//auto label = CreateWidget<CLabel>(container, "ProjectNameLabel");
-			//label->SetText("Project Name");
-			//projectNameInput = CreateWidget<CTextInput>(container, "ProjectNameInput");
-			//projectNameInput->AddStyleClass("Horizontal");
+			auto layoutGroup = CreateWidget<CLayoutGroup>(container, "ProjectFieldLayout");
+
+			auto label = CreateWidget<CLabel>(layoutGroup, "ProjectNameLabel");
+			label->SetText("Project Name");
+			projectNameInput = CreateWidget<CTextInput>(layoutGroup, "ProjectNameInput");
+			projectNameInput->SetText("");
+		}
+
+		// Button Group
+		{
+			auto layoutGroup = CreateWidget<CLayoutGroup>(container, "ButtonLayoutGroup");
+
+			auto cancelButton = CreateWidget<CButton>(layoutGroup, "CancelButton");
+			cancelButton->SetText("Cancel");
+			Object::Bind(cancelButton, MEMBER_FUNCTION(CButton, OnButtonClicked), []
+				{
+					RequestEngineExit("ProjectBrowserClosed");
+				});
+
+			auto createButton = CreateWidget<CButton>(layoutGroup, "CreateButton");
+			createButton->SetText("Create");
+			createButton->SetAsAlternateStyle(true);
 		}
 	}
 

@@ -20,6 +20,8 @@ namespace CE
 
         virtual void* GetUnderlyingHandle() = 0;
 
+		virtual void* GetOSNativeHandle() = 0;
+
         virtual void Show() = 0;
         virtual void Hide() = 0;
 

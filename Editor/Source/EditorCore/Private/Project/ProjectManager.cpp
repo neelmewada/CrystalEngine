@@ -7,7 +7,7 @@ namespace CE::Editor
     {
         if (!projectFilePath.Exists() || projectFilePath.GetExtension().GetString() != ".cproj")
             return false;
-        
+
         CrystalProject project{};
         JsonFieldDeserializer deserializer = JsonFieldDeserializer(CrystalProject::Type(), &project);
         
@@ -16,8 +16,13 @@ namespace CE::Editor
         
         while (deserializer.HasNext())
         {
-            deserializer.ReadNext(&stream);
+            bool result = deserializer.ReadNext(&stream);
         }
+
+		isProjectOpen = true;
+		currentProject = project;
+		
+		return true;
     }
 
     bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, const String& projectName)
@@ -27,7 +32,7 @@ namespace CE::Editor
         if (!projectFolder.Exists())
             IO::Path::CreateDirectories(projectFolder);
 		if (!projectName.EndsWith(".cproj"))
-			projectName;
+			const_cast<String&>(projectName) += ".cproj";
         
         CrystalProject project{};
         project.projectName = projectName;
@@ -54,6 +59,11 @@ namespace CE::Editor
 		if (!(projectFolder / "Logs").Exists())
 		{
 			IO::Path::CreateDirectories(projectFolder / "Logs");
+		}
+
+		// Config files
+		{
+
 		}
 		
         return true;

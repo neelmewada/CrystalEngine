@@ -17,17 +17,33 @@ CLabel {
 }
 
 CButton {
-	padding: 10px 3px;
-	border-radius: 1.5px;
-	border-width: 1px;
-	border-color: rgb(30, 30, 30);
+	padding: 10px 1px;
+	border-radius: 2px;
+	border-width: 1.5px;
+	border-color: rgb(25, 25, 25);
 	background: rgb(64, 64, 64);
 }
 CButton:hovered {
-	background: rgb(80, 80, 80);
+	background: rgb(90, 90, 90);
 }
 CButton:pressed {
-	background: rgba(100, 100, 100);
+	background: rgba(50, 50, 50);
+}
+
+CButton::alternate {
+	padding: 10px 1px;
+	border-radius: 2px;
+	border-width: 1.5px;
+	border-color: rgb(25, 25, 25);
+	background: rgb(0, 112, 224);
+}
+
+CButton::alternate:hovered {
+	background: rgb(14, 134, 255);
+}
+
+CButton::alternate:pressed {
+	background: rgb(9, 93, 178);
 }
 
 CTextInput {

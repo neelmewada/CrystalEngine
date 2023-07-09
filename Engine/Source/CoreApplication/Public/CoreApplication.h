@@ -8,7 +8,7 @@
 #if PAL_TRAIT_SDL_SUPPORTED
 #include "PAL/SDL/SDLApplication.h"
 #include "PAL/SDL/SDLWindow.h"
-#elif PLATFORM_WINDOWS
+#else
 #error SDL not supported! Currently, the engine only supports SDL as the application & windowing platform.
 #endif
 

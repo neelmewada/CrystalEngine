@@ -15,6 +15,8 @@ void AppLoop::PreInit(int argc, const char** argv)
 
 	// Initialize logging
 	Logger::Initialize();
+	Logger::SetConsoleLogLevel(LogLevel::Trace);
+	Logger::SetFileDumpLogLevel(LogLevel::Trace);
 
 	gProgramArguments.Clear();
 	for (int i = 0; i < argc; i++)
@@ -91,6 +93,7 @@ void AppLoop::PostInit()
 	auto mainWindow = PlatformApplication::Get()->GetMainWindow();
 	u32 width = 0, height = 0;
 	mainWindow->GetDrawableWindowSize(&width, &height);
+	mainWindow->GetUnderlyingHandle();
 
 	RHI::RenderTargetColorOutputDesc colorDesc{};
 	colorDesc.loadAction = RHI::RenderPassLoadAction::Clear;

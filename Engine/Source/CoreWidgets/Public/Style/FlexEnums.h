@@ -2,6 +2,16 @@
 
 namespace CE::Widgets
 {
+	ENUM()
+	enum class CPosition
+	{
+		Static = 0,
+		Relative,
+		Absolute,
+	};
+	ENUM_CLASS_FLAGS(CPosition);
+
+	COREWIDGETS_API CPosition StringToPosition(const String& string);
     
 	ENUM()
 	enum class CAlign

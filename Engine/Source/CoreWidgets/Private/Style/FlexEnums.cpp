@@ -2,6 +2,17 @@
 
 namespace CE::Widgets
 {
+	static HashMap<String, CPosition> stringToPositionMap{
+		{ "auto", CPosition::Static },
+		{ "static", CPosition::Static },
+		{ "absolute", CPosition::Absolute },
+		{ "relative", CPosition::Relative }
+	};
+
+	COREWIDGETS_API CPosition StringToPosition(const String& string)
+	{
+		return stringToPositionMap[string];
+	}
 
 	static HashMap<String, CAlign> stringToAlignMap{
 		{ "auto", CAlign::Auto },
@@ -14,7 +25,7 @@ namespace CE::Widgets
 		{ "stretch", CAlign::Stretch },
 	};
 
-	COREWIDGETS_API CAlign StringToAlign(const String& string)
+    COREWIDGETS_API CAlign StringToAlign(const String& string)
 	{
 		return stringToAlignMap[string];
 	}
