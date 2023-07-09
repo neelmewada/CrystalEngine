@@ -13,5 +13,5 @@ namespace CE::Editor
 #if PLATFORM_WINDOWS
 #include "PAL/Windows/WindowsEditorPlatform.h"
 #elif PLATFORM_MAC
-#include "PAL/Windows/MacEditorPlatform.h"
+#include "PAL/Mac/MacEditorPlatform.h"
 #endif

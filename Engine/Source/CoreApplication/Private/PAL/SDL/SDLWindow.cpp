@@ -6,11 +6,7 @@
 #include <SDL_vulkan.h>
 #endif
 
-#if PLATFORM_WINDOWS
 #include <SDL_syswm.h>
-#elif PLATFORM_MAC
-
-#endif
 
 namespace CE
 {
@@ -82,15 +78,15 @@ namespace CE
 
 	void* SDLPlatformWindow::GetOSNativeHandle()
 	{
+        SDL_SysWMinfo wmInfo;
+        SDL_VERSION(&wmInfo.version);
+        SDL_GetWindowWMInfo(handle, &wmInfo);
 #if PLATFORM_WINDOWS
-		SDL_SysWMinfo wmInfo;
-		SDL_VERSION(&wmInfo.version);
-		SDL_GetWindowWMInfo(handle, &wmInfo);
 		return wmInfo.info.win.window;
 #elif PLATFORM_MAC
-#error Platform window handle not specified for Mac
+        return wmInfo.info.cocoa.window;
 #else
-#error Platform window handle not specified
+#   error Platform window handle not specified
 #endif
 	}
 
