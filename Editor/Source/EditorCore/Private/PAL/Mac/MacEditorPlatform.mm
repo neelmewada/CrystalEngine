@@ -1,6 +1,9 @@
-#include "EditorCore.h"
 
+#import <Foundation/Foundation.h>
+#import <CoreFoundation/CoreFoundation.h>
 #import <Cocoa/Cocoa.h>
+
+#include "EditorCore.h"
 
 #include <string>
 
