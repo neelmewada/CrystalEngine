@@ -37,6 +37,7 @@
 #include "Widgets/CTabWidget.h"
 #include "Widgets/CSelectableWidget.h"
 #include "Widgets/CSelectableGroup.h"
+#include "Widgets/CLayoutGroup.h"
 
 //#include "Widgets/CCollapsibleSection.h"
 //#include "Widgets/CGridLayout.h"

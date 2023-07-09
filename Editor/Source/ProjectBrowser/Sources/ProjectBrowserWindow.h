@@ -14,6 +14,9 @@ private:
 
 	CTextInput* folderPathInput = nullptr;
 	CTextInput* projectNameInput = nullptr;
+
+	String projectFolder = "";
+	String projectName = "";
 };
 
 

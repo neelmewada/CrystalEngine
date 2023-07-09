@@ -22,6 +22,9 @@ namespace CE::Widgets
 		bool IsItemSelectedAt(u32 index);
 		bool SelectItemAt(u32 index);
 
+		inline bool AlwaysShowVerticalScroll() const { return alwaysShowVerticalScroll; }
+		inline void SetAlwaysShowVerticalScroll(bool set) { alwaysShowVerticalScroll = set; }
+
 	protected:
 
 		void OnDrawGUI() override;
@@ -32,6 +35,9 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 allowMultiSelection = false;
+
+		FIELD()
+		b8 alwaysShowVerticalScroll = false;
 
 		friend class CSelectableWidget;
 	};

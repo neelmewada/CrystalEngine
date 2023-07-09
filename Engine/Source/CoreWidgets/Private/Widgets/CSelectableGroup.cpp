@@ -50,7 +50,11 @@ namespace CE::Widgets
 
 		DrawDefaultBackground();
 
-		bool result = GUI::BeginChild(rect, GetUuid(), "", {}, {}, GUI::WF_NoMove | GUI::WF_NoBackground);
+		GUI::WindowFlags flags = GUI::WF_NoMove | GUI::WF_NoBackground;
+		if (AlwaysShowVerticalScroll())
+			flags |= GUI::WF_AlwaysVerticalScrollbar;
+
+		bool result = GUI::BeginChild(rect, GetUuid(), "", {}, {}, flags);
 
 		if (result)
 		{

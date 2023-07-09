@@ -1673,7 +1673,7 @@ namespace CE::GUI
 		return true;
 	}
 
-	COREGUI_API bool InputText(const Rect& rect, ID id, const String& hint, String& inputText, 
+	COREGUI_API bool InputText(const Rect& localRect, ID id, const String& hint, String& inputText, 
 		const GuiStyleState& normalState, const GuiStyleState& activeState, const GuiStyleState& disabledState, 
 		const Vec4& padding, TextInputFlags flags, TextInputCallback callback, void* callback_user_data)
 	{
@@ -1690,6 +1690,8 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		ImGuiIO& io = g.IO;
 		const ImGuiStyle& style = g.Style;
+
+		Rect rect = ToWindowCoordinateSpace(localRect);
 
 		flags |= TextInputFlags_CallbackResize;
 

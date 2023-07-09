@@ -123,8 +123,10 @@ void AppLoop::PostInit()
 		{ defaultFontByteSize, 17, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 18, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 20, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 22, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 32, "Open Sans", false, defaultFont },
 	});
 
 	RHI::FontPreloadConfig fontConfig{};
