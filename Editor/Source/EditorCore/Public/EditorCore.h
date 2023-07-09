@@ -6,11 +6,14 @@
 // Platform
 #include "PAL/Common/EditorPlatform.h"
 
+// Editor Prefs
+#include "Editor/EditorPrefs.h"
+
 // Project
 #include "Project/CrystalProject.h"
 #include "Project/ProjectManager.h"
 
-// Shader helpers
+// Shader
 #include "Shader/ShaderCompiler.h"
 #include "Shader/ShaderReflector.h"
 #include "Shader/ShaderProcessor.h"

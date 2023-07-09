@@ -68,7 +68,7 @@ namespace CE
 
         IO::Path appDataPath{ path };
 
-        appDataPath = appDataPath / "CrystalEngine";
+		appDataPath = appDataPath / (gProjectName.IsEmpty() ? "CrystalEngine" : gProjectName);
         
         CoTaskMemFree(path);
         return appDataPath;

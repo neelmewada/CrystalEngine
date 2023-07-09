@@ -31,6 +31,9 @@ private:
 	void LoadStartupCoreModules();
 	void LoadCoreModules();
 
+	void LoadEditorModules();
+	void UnloadEditorModules();
+
 	// Application
 	CE::PlatformApplication* app = nullptr;
 

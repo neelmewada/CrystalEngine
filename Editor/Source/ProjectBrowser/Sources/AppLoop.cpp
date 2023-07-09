@@ -7,7 +7,7 @@ void AppLoop::PreInit(int argc, const char** argv)
 	// Setup before loading any module
 
 	// Set Core Globals before loading Core
-	gProjectName = "Project Browser";
+	gProjectName = "CrystalEngine";
 	gProjectPath = PlatformDirectories::GetLaunchDir();
 
 	gDefaultWindowWidth = 854;
@@ -69,6 +69,18 @@ void AppLoop::LoadCoreModules()
 	ModuleManager::Get().LoadModule("CoreMedia");
 }
 
+void AppLoop::LoadEditorModules()
+{
+	ModuleManager::Get().LoadModule("EditorCore");
+	ModuleManager::Get().LoadModule("EditorWidgets");
+}
+
+void AppLoop::UnloadEditorModules()
+{
+	ModuleManager::Get().UnloadModule("EditorWidgets");
+	ModuleManager::Get().UnloadModule("EditorCore");
+}
+
 void AppLoop::Init()
 {
 	// Load most important core modules for startup
@@ -89,6 +101,9 @@ void AppLoop::PostInit()
 	AppInit();
 
 	RHI::gDynamicRHI->PostInitialize();
+
+	// Load editor modules
+	LoadEditorModules();
 
 	auto mainWindow = PlatformApplication::Get()->GetMainWindow();
 	u32 width = 0, height = 0;
@@ -185,6 +200,9 @@ void AppLoop::PreShutdown()
 	projectBrowser = nullptr;
 
 	cmdList->ShutdownImGui();
+
+	// Load editor modules
+	UnloadEditorModules();
 
 	RHI::gDynamicRHI->DestroyCommandList(cmdList);
 	RHI::gDynamicRHI->DestroyViewport(viewport);

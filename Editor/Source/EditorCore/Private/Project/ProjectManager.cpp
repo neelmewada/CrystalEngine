@@ -29,8 +29,9 @@ namespace CE::Editor
     {
         if (!projectFolder.IsDirectory() || projectName.IsEmpty())
             return false;
-        if (!projectFolder.Exists())
-            IO::Path::CreateDirectories(projectFolder);
+		if (projectFolder.Exists()) 
+			IO::Path::RemoveRecursively(projectFolder);
+		IO::Path::CreateDirectories(projectFolder);
 		if (!projectName.EndsWith(".cproj"))
 			const_cast<String&>(projectName) += ".cproj";
         
@@ -63,7 +64,26 @@ namespace CE::Editor
 
 		// Config files
 		{
+			{
+				FileStream defaultEngineIni{ projectFolder / "Config" / "DefaultEngine.ini", Stream::Permissions::WriteOnly };
+				defaultEngineIni.SetAsciiMode(true);
+				defaultEngineIni << "; Default engine settings for project\n\n";
+				defaultEngineIni.Close();
+			}
 
+			{
+				FileStream defaultEditorIni = FileStream(projectFolder / "Config" / "DefaultEditor.ini", Stream::Permissions::WriteOnly);
+				defaultEditorIni.SetAsciiMode(true);
+				defaultEditorIni << "; Default editor settings for project\n\n";
+				defaultEditorIni.Close();
+			}
+
+			{
+				FileStream defaultProjectIni = FileStream(projectFolder / "Config" / "DefaultGame.ini", Stream::Permissions::WriteOnly);
+				defaultProjectIni.SetAsciiMode(true);
+				defaultProjectIni << "; Default game/project settings for project\n\n";
+				defaultProjectIni.Close();
+			}
 		}
 		
         return true;
