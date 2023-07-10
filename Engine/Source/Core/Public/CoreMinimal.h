@@ -68,8 +68,10 @@
 #include "Serialization/FileStream.h"
 #include "Serialization/ArchiveStream.h"
 
-// Structured Streams
+// Json
 #include "Json/Json.h"
+
+// Structured Streams
 #include "Serialization/StructuredStream.h"
 #include "Serialization/Formatters/JsonStreamOutputFormatter.h"
 #include "Serialization/Formatters/JsonStreamInputFormatter.h"
@@ -84,6 +86,7 @@
 #include "Object/ObjectGlobals.h"
 #include "Object/ObjectManager.h"
 #include "Object/SystemObject.h"
+#include "Object/BasePrefs.h"
 #include "Component/Component.h"
 #include "Object/Package.h"
 

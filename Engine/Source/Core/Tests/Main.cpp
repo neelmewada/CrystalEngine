@@ -1168,6 +1168,36 @@ TEST(JSON, FieldSerializer)
 	TEST_END;
 }
 
+class JsonTestPrefs : public CE::BasePrefs
+{
+public:
+	typedef CE::BasePrefs Super;
+
+	JsonTestPrefs()
+	{}
+
+	void LoadPrefs()
+	{
+		auto path = PlatformDirectories::GetAppDataDir() / "TestPrefs.json";
+		Super::LoadPrefs(path);
+	}
+
+	void SavePrefs()
+	{
+		auto path = PlatformDirectories::GetAppDataDir() / "TestPrefs.json";
+		Super::SavePrefs(path);
+	}
+};
+
+TEST(JSON, Prefs)
+{
+	TEST_BEGIN;
+
+	
+
+	TEST_END;
+}
+
 #pragma endregion
 
 /**********************************************

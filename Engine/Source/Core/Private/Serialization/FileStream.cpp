@@ -3,7 +3,7 @@
 
 namespace CE
 {
-    FileStream::FileStream(const IO::Path& filePath, Permissions openMode)
+    FileStream::FileStream(const IO::Path& filePath, Permissions openMode, bool isBinary)
 		: filePath(filePath)
     {
         ASSERT(openMode != Permissions::None, "FileAsciiStream constructed with openMode as None!");
@@ -26,7 +26,8 @@ namespace CE
                 mode |= std::ios::in;
         }
 
-        mode |= std::ios::binary;
+		if (isBinary)
+			mode |= std::ios::binary;
 
         if ((!filePath.Exists() && (mode & openMode == Permissions::ReadOnly) != 0) || filePath.IsDirectory())
         {

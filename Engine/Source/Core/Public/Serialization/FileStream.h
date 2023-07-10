@@ -6,13 +6,20 @@ namespace CE
     class CORE_API FileStream : public Stream
     {
     public:
-        FileStream(const IO::Path& filePath, Permissions openMode = Permissions::ReadWrite);
+        FileStream(const IO::Path& filePath, Permissions openMode = Permissions::ReadWrite, bool isBinary = true);
 
         virtual ~FileStream();
 
         // File streams cannot be copied
         FileStream(const FileStream&) = delete;
         FileStream& operator=(const FileStream&) = delete;
+
+		bool CanRead() override { return openMode == Permissions::ReadOnly || openMode == Permissions::ReadWrite; }
+
+		/**
+		 * \brief Some stream types do not support writing
+		 */
+		bool CanWrite() override { return openMode == Permissions::WriteOnly || openMode == Permissions::ReadWrite; }
         
         void Write(const void* inData, u64 length) override;
         

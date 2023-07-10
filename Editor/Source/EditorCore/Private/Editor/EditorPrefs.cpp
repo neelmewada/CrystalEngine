@@ -36,7 +36,11 @@ namespace CE::Editor
 
 		FileStream fileStream = FileStream(editorPrefsPath, Stream::Permissions::ReadOnly);
 		fileStream.SetAsciiMode(true);
+		bool canRead = fileStream.CanRead();
 		rootJson = JsonSerializer::Deserialize(&fileStream);
+		
+		if (rootJson == nullptr)
+			rootJson = new JsonValue(JsonObject());
 	}
 
 	void EditorPrefs::SavePrefs()
@@ -49,7 +53,7 @@ namespace CE::Editor
 		if (editorPrefsPath.Exists())
 			IO::Path::Remove(editorPrefsPath);
 
-		FileStream fileStream = FileStream(editorPrefsPath, Stream::Permissions::WriteOnly);
+		FileStream fileStream = FileStream(editorPrefsPath, Stream::Permissions::WriteOnly, false);
 		fileStream.SetAsciiMode(true);
 		JsonSerializer::Serialize(&fileStream, rootJson);
 	}

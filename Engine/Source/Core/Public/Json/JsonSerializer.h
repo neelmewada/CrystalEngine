@@ -40,7 +40,8 @@ namespace CE
                 writer.WriteArrayClose();
             }
 
-            stream->Write('\0');
+			if (stream->IsBinaryMode())
+				stream->Write('\0');
         }
         
     private:

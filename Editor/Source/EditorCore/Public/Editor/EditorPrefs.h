@@ -16,7 +16,6 @@ namespace CE::Editor
 		}
 
 		void LoadPrefs();
-
 		void SavePrefs();
 
 	private:

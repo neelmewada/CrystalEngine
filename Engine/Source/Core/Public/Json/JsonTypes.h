@@ -84,22 +84,22 @@ namespace CE
 
         ~JsonValue();
 
-        JsonValueType GetValueType() const { return valueType; }
+		FORCE_INLINE JsonValueType GetValueType() const { return valueType; }
 
-        JsonArray& GetArrayValue() { return arrayValue; }
-        const JsonArray& GetArrayValue() const { return arrayValue; }
+		FORCE_INLINE JsonArray& GetArrayValue() { return arrayValue; }
+		FORCE_INLINE const JsonArray& GetArrayValue() const { return arrayValue; }
 
-        JsonObject& GetObjectValue() { return objectValue; }
-        const JsonObject& GetObjectValue() const { return objectValue; }
+		FORCE_INLINE JsonObject& GetObjectValue() { return objectValue; }
+		FORCE_INLINE const JsonObject& GetObjectValue() const { return objectValue; }
 
-        bool& GetBoolValue() { return boolValue; }
-        bool GetBoolValue() const { return boolValue; }
+		FORCE_INLINE bool& GetBoolValue() { return boolValue; }
+		FORCE_INLINE bool GetBoolValue() const { return boolValue; }
 
-        f64& GetNumberValue() { return numberValue; }
-        f64 GetNumberValue() const { return numberValue; }
+		FORCE_INLINE f64& GetNumberValue() { return numberValue; }
+		FORCE_INLINE f64 GetNumberValue() const { return numberValue; }
 
-        String& GetStringValue() { return stringValue; }
-        const String& GetStringValue() const { return stringValue; }
+		FORCE_INLINE String& GetStringValue() { return stringValue; }
+		FORCE_INLINE const String& GetStringValue() const { return stringValue; }
 
         FORCE_INLINE bool IsArrayValue() const { return valueType == JsonValueType::Array; }
         FORCE_INLINE bool IsObjectValue() const { return valueType == JsonValueType::Object; }

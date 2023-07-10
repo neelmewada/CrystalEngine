@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(EditorCore CXX OBJC)
+if(PAL_PLATFORM_IS_MAC)
+    project(EditorCore CXX OBJC)
+else()
+    project(EditorCore CXX)
+endif()
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
