@@ -15,6 +15,8 @@ namespace CE
 
         bool WriteNext(Stream* stream);
 
+		bool WriteNext(JsonValue* json);
+
         FieldType* GetNext();
         
         inline bool IsValid() const
@@ -32,6 +34,8 @@ namespace CE
         bool isFirstWrite = true;
         bool isMap = false;
         bool isArray = false;
+
+		int curIndex = -1;
     };
 
 
@@ -52,9 +56,11 @@ namespace CE
 			return (isMap || isArray) && rawInstance != nullptr;
 		}
 
-	private:
+		bool ReadNextField(JsonValue* jsonValue);
 
 		bool ReadField(FieldType* field, JsonValue* jsonValue);
+
+	private:
 
 		JsonValue* rootJson = nullptr;
 

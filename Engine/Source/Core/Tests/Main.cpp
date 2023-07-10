@@ -1176,27 +1176,62 @@ public:
 	JsonTestPrefs()
 	{}
 
-	void LoadPrefs()
+	void LoadPrefs() override
 	{
 		auto path = PlatformDirectories::GetAppDataDir() / "TestPrefs.json";
 		Super::LoadPrefs(path);
 	}
 
-	void SavePrefs()
+	void SavePrefs() override
 	{
 		auto path = PlatformDirectories::GetAppDataDir() / "TestPrefs.json";
 		Super::SavePrefs(path);
 	}
 };
 
+struct JsonTestStruct
+{
+	CE_STRUCT(JsonTestStruct)
+public:
+
+	String stringValue{};
+
+	f32 numberValue = 0;
+
+	b8 boolValue = false;
+};
+
+CE_RTTI_STRUCT(, , JsonTestStruct,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(stringValue)
+		CE_FIELD(numberValue)
+		CE_FIELD(boolValue)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(, , JsonTestStruct)
+
 TEST(JSON, Prefs)
 {
 	TEST_BEGIN;
-
+	CE_REGISTER_TYPES(JsonTestStruct);
 	
+	JsonTestStruct jsonStruct{};
+	jsonStruct.stringValue = "This is a string";
+	jsonStruct.numberValue = 12.42f;
+	jsonStruct.boolValue = true;
 
+	JsonTestPrefs prefs{};
+	//prefs.SetStruct("testStruct", &jsonStruct);
+
+	//prefs.SavePrefs();
+
+	CE_DEREGISTER_TYPES(JsonTestStruct);
 	TEST_END;
 }
+
 
 #pragma endregion
 

@@ -46,24 +46,87 @@ namespace CE
 
     JsonValue::~JsonValue()
     {
-        if (IsObjectValue())
-        {
-            for (auto [_, object] : objectValue)
-            {
-                delete object;
-            }
-            objectValue.Clear();
-        }
-        else if (IsArrayValue())
-        {
-            for (auto object : arrayValue)
-            {
-                delete object;
-            }
-            arrayValue.Clear();
-        }
-        
-        Clear();
+		Cleanup();
+    }
+
+	void JsonValue::Cleanup()
+	{
+		if (IsObjectValue())
+		{
+			for (auto [_, object] : objectValue)
+			{
+				delete object;
+			}
+			objectValue.Clear();
+		}
+		else if (IsArrayValue())
+		{
+			for (auto object : arrayValue)
+			{
+				delete object;
+			}
+			arrayValue.Clear();
+		}
+
+		Clear();
+	}
+
+	void JsonValue::Clear()
+	{
+		if (valueType == JsonValueType::String)
+		{
+			stringValue.~String();
+		}
+		else if (valueType == JsonValueType::Object)
+		{
+			objectValue.~JsonObject();
+		}
+		else if (valueType == JsonValueType::Array)
+		{
+			arrayValue.~JsonArray();
+		}
+
+		memset(this, 0, sizeof(JsonValue));
+	}
+
+	void JsonValue::Copy(const JsonValue& copy)
+    {
+		if (valueType == JsonValueType::String)
+		{
+			stringValue.~String();
+		}
+		else if (valueType == JsonValueType::Object)
+		{
+			objectValue.~JsonObject();
+		}
+		else if (valueType == JsonValueType::Array)
+		{
+			arrayValue.~JsonArray();
+		}
+
+		Clear();
+
+		this->valueType = copy.valueType;
+		if (copy.valueType == JsonValueType::Array)
+		{
+			this->arrayValue = JsonArray(copy.arrayValue);
+		}
+		else if (copy.valueType == JsonValueType::Object)
+		{
+			this->objectValue = JsonObject(copy.objectValue);
+		}
+		else if (copy.valueType == JsonValueType::String)
+		{
+			this->stringValue = copy.stringValue;
+		}
+		else if (copy.valueType == JsonValueType::Number)
+		{
+			this->numberValue = copy.numberValue;
+		}
+		else if (copy.valueType == JsonValueType::Boolean)
+		{
+			this->boolValue = copy.boolValue;
+		}
     }
 
     /* ****************************************

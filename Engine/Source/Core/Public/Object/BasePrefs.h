@@ -1,5 +1,7 @@
 #pragma once
 
+using json = nlohmann::json;
+
 namespace CE
 {
 
@@ -24,14 +26,36 @@ namespace CE
 
 		JsonValueType GetValueType(const String& key);
 
-		bool LoadObject(const String& key, StructType* type, void* instance);
+		bool GetStruct(const String& key, StructType* type, void* instance);
+		bool SetStruct(const String& key, StructType* type, void* instance);
+
+		template<typename TStruct>
+		inline bool GetStruct(const String& key, TStruct* instance)
+		{
+			return GetStruct(key, TStruct::Type(), instance);
+		}
+
+		template<typename TStruct>
+		inline bool SetStruct(const String& key, TStruct* instance)
+		{
+			return SetStruct(key, TStruct::Type(), instance);
+		}
+
+		virtual void LoadPrefs() = 0;
+		virtual void SavePrefs() = 0;
+
+		virtual void ClearPrefs();
 
 	protected:
 
+		void ReadField(const json& jsonData, FieldType* field, void* instance);
+		void WriteField(json& jsonData, FieldType* field, void* instance);
+
 		virtual void LoadPrefs(const IO::Path& prefsPath);
 		virtual void SavePrefs(const IO::Path& prefsPath);
+		virtual void ClearPrefs(const IO::Path& prefsPath);
 
-		JsonValue* rootJson = nullptr;
+		json data{};
 	};
 
 } // namespace CE

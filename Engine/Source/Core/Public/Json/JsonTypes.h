@@ -84,6 +84,8 @@ namespace CE
 
         ~JsonValue();
 
+		void Cleanup();
+
 		FORCE_INLINE JsonValueType GetValueType() const { return valueType; }
 
 		FORCE_INLINE JsonArray& GetArrayValue() { return arrayValue; }
@@ -156,28 +158,10 @@ namespace CE
             return 0;
         }
 
+		void Clear();
+
     private:
-        void Copy(const JsonValue& copy)
-        {
-            memcpy(this, &copy, sizeof(JsonValue));
-            if (copy.valueType == JsonValueType::Array)
-            {
-                this->arrayValue = JsonArray(copy.arrayValue);
-            }
-            else if (copy.valueType == JsonValueType::Object)
-            {
-                this->objectValue = JsonObject(copy.objectValue);
-            }
-            else if (copy.valueType == JsonValueType::String)
-            {
-                this->stringValue = copy.stringValue;
-            }
-        }
-        
-        void Clear()
-        {
-            memset(this, 0, sizeof(JsonValue));
-        }
+		void Copy(const JsonValue& copy);
         
         union
         {
@@ -192,5 +176,139 @@ namespace CE
 
         friend class JsonSerializer;
     };
+
+
+	// New Json API
+
+	class JValue;
+
+	typedef HashMap<String, JValue> JObject;
+	typedef Array<JValue> JArray;
+
+	class CORE_API JValue final
+	{
+	public:
+
+		// Null value constructor
+		JValue();
+
+		JValue(const String& string);
+		JValue(const char* string);
+		JValue(bool boolValue);
+		JValue(f64 numberValue);
+		JValue(int numberValue);
+		JValue(JObject jsonObject);
+		JValue(JArray jsonArray);
+
+		JValue(const JValue& copy)
+		{
+			Copy(copy);
+		}
+
+		JValue& operator=(const JValue& copy)
+		{
+			Copy(copy);
+			return *this;
+		}
+
+		JValue(JValue&& move)
+		{
+			memcpy(this, &move, sizeof(JValue));
+			memset(&move, 0, sizeof(JValue));
+		}
+
+		~JValue();
+
+		FORCE_INLINE JsonValueType GetValueType() const { return valueType; }
+
+		FORCE_INLINE JArray& GetArrayValue() { return arrayValue; }
+		FORCE_INLINE const JArray& GetArrayValue() const { return arrayValue; }
+
+		FORCE_INLINE JObject& GetObjectValue() { return objectValue; }
+		FORCE_INLINE const JObject& GetObjectValue() const { return objectValue; }
+
+		FORCE_INLINE bool& GetBoolValue() { return boolValue; }
+		FORCE_INLINE bool GetBoolValue() const { return boolValue; }
+
+		FORCE_INLINE f64& GetNumberValue() { return numberValue; }
+		FORCE_INLINE f64 GetNumberValue() const { return numberValue; }
+
+		FORCE_INLINE String& GetStringValue() { return stringValue; }
+		FORCE_INLINE const String& GetStringValue() const { return stringValue; }
+
+		FORCE_INLINE bool IsArrayValue() const { return valueType == JsonValueType::Array; }
+		FORCE_INLINE bool IsObjectValue() const { return valueType == JsonValueType::Object; }
+		FORCE_INLINE bool IsStringValue() const { return valueType == JsonValueType::String; }
+		FORCE_INLINE bool IsNumberValue() const { return valueType == JsonValueType::Number; }
+		FORCE_INLINE bool IsBoolValue() const { return valueType == JsonValueType::Boolean; }
+		FORCE_INLINE bool IsNullValue() const { return valueType == JsonValueType::Null; }
+
+		FORCE_INLINE void Insert(const JValue& arrayItem)
+		{
+			if (IsArrayValue())
+				arrayValue.Add(arrayItem);
+		}
+
+		FORCE_INLINE bool IsContainerType() const
+		{
+			return IsArrayValue() || IsObjectValue();
+		}
+
+		FORCE_INLINE bool IsTerminalType() const
+		{
+			return !IsContainerType();
+		}
+
+		FORCE_INLINE JValue& operator[](u32 index)
+		{
+			if (index >= arrayValue.GetSize())
+				arrayValue.Resize(index + 1);
+			return arrayValue[index];
+		}
+
+		FORCE_INLINE JValue& operator[](const String& key)
+		{
+			if (!objectValue.KeyExists(key))
+				objectValue.Add({ key, JValue() });
+			return objectValue[key];
+		}
+
+		FORCE_INLINE bool KeyExists(const String& key) const
+		{
+			return IsObjectValue() && objectValue.KeyExists(key);
+		}
+
+		FORCE_INLINE u32 GetSize() const
+		{
+			if (IsArrayValue())
+			{
+				return arrayValue.GetSize();
+			}
+			if (IsObjectValue())
+			{
+				return objectValue.GetSize();
+			}
+			return 0;
+		}
+
+		void Clear();
+
+	private:
+
+		void Copy(const JValue& copy);
+
+		union
+		{
+			String stringValue;
+			bool boolValue;
+			f64 numberValue;
+			JObject objectValue;
+			JArray arrayValue;
+		};
+
+		JsonValueType valueType = JsonValueType::None;
+
+		friend class JsonSerializer;
+	};
     
 } // namespace CE

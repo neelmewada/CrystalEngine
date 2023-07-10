@@ -106,7 +106,7 @@ namespace CE
                 else if (item.IsObjectValue())
                 {
                     auto mapEntry = new StructuredStreamMap();
-                    mapStructure->map.Add({ identifier, mapEntry });
+                    mapStructure->map.Add({ identifier, mapEntry});
                     PopulateStructures(item, mapEntry);
                 }
             }
