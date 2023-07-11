@@ -2,6 +2,8 @@
 
 AppLoop gLoop{};
 
+IO::Path gOpenProjectPath{};
+
 void AppLoop::PreInit(int argc, const char** argv)
 {
 	// Setup before loading any module

@@ -90,7 +90,8 @@ namespace CE
 		for (int i = 0; i < name.GetLength(); i++)
 		{
 			char ch = name[i];
-			if (ch == '.' || ch == ' ' || ch == '-' || ch == '/' || ch == '\\')
+			//if (ch == '.' || ch == ' ' || ch == '-' || ch == '/' || ch == '\\' || ch == ',' || ch == '+' || ch == ':' || ch == ';')
+			if (!String::IsAlphabet(ch) && !String::IsNumeric(ch) && ch != '_')
 			{
 				return false;
 			}

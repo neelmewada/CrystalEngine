@@ -43,7 +43,7 @@ CButton::alternate:hovered {
 }
 
 CButton::alternate:pressed {
-	background: rgb(9, 93, 178);
+	background: rgb(6, 66, 126);
 }
 
 CTextInput {

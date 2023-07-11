@@ -85,6 +85,10 @@ ProjectBrowserWindow {
 	width: 83.5%;
 }
 
+#ErrorLabel {
+	foreground: red;
+	margin: 0 0 10px 0;
+}
 
 )";
 
@@ -129,6 +133,10 @@ void ProjectBrowserWindow::Construct()
 			label->SetText("Project Folder");
 			folderPathInput = CreateWidget<CTextInput>(layoutGroup, "FolderPathInput");
 			folderPathInput->SetText(cache.lastProjectFolder);
+			Object::Bind(folderPathInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), [&](String text)
+				{
+					errorLabel->SetText("");
+				});
 
 			auto openButton = CreateWidget<CButton>(layoutGroup, "OpenFolderButton");
 			openButton->SetText("...");
@@ -149,11 +157,18 @@ void ProjectBrowserWindow::Construct()
 			label->SetText("Project Name");
 			projectNameInput = CreateWidget<CTextInput>(layoutGroup, "ProjectNameInput");
 			projectNameInput->SetText(cache.lastProjectName);
+			Object::Bind(projectNameInput, MEMBER_FUNCTION(CTextInput, OnTextEdited), [&](String text)
+				{
+					errorLabel->SetText("");
+				});
 		}
 
 		// Button Group
 		{
 			auto layoutGroup = CreateWidget<CLayoutGroup>(container, "ButtonLayoutGroup");
+
+			errorLabel = CreateWidget<CLabel>(layoutGroup, "ErrorLabel");
+			errorLabel->SetText("");
 
 			auto cancelButton = CreateWidget<CButton>(layoutGroup, "CancelButton");
 			cancelButton->SetText("Cancel");
@@ -187,20 +202,33 @@ void ProjectBrowserWindow::OnCreateProjectClicked()
 	IO::Path folderPath = folderPathInput->GetText();
 	if (!folderPath.Exists())
 	{
-		CE_LOG(Error, All, "Invalid project folder path: {}", folderPath);
+		errorLabel->SetText("Entered folder path does not exist");
 		return;
 	}
 
 	String projectName = projectNameInput->GetText();
 	if (projectName.IsEmpty() || !IsValidObjectName(projectName))
 	{
-		CE_LOG(Error, All, "Invalid project name: {}", projectName);
+		errorLabel->SetText("Project name should not contain any special characters");
 		return;
 	}
+
+	IO::Path projectPath = folderPath / projectName;
+	if (projectPath.Exists())
+	{
+		errorLabel->SetText("Project already exists at given location");
+		return;
+	}
+
+	errorLabel->SetText("");
 
 	cache.lastProjectFolder = folderPath.GetString();
 	cache.lastProjectName = projectName;
 	SaveCache();
+
+	ProjectManager::Get().CreateEmptyProject(projectPath, projectName);
+
+	gOpenProjectPath = projectPath / (projectName + ".cproject");
 
 	RequestEngineExit("ProjectBrowserClosed");
 }

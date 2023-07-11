@@ -17,6 +17,8 @@ namespace CE::Widgets
     void CLabel::SetText(const String& text)
     {
         this->text = text;
+		SetNeedsStyle();
+		SetNeedsLayout();
     }
 
     const String& CLabel::GetText() const
@@ -31,14 +33,7 @@ namespace CE::Widgets
 
     void CLabel::OnDrawGUI()
     {
-		auto top = YGNodeLayoutGetTop(node);
-		auto left = YGNodeLayoutGetLeft(node);
-		auto width = YGNodeLayoutGetWidth(node);
-		auto height = YGNodeLayoutGetHeight(node);
-		
-		Vec2 rectPos = Vec2(left, top);
-		Vec2 rectSize = Vec2(width, height);
-		Vec4 rect = Vec4(rectPos, rectPos + rectSize);
+		Vec4 rect = GetComputedLayoutRect();
 
 		GUI::GuiStyleState* curState = &defaultStyleState;
 
@@ -51,7 +46,7 @@ namespace CE::Widgets
 			//curState = &hoveredStyleState;
 		}
 
-		GUI::SetCursorPos(rectPos);
+		GUI::SetCursorPos(rect.min);
 		auto windowPos = GUI::GetWindowPos();
 
 		DrawBackground(*curState);

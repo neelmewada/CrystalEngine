@@ -47,3 +47,5 @@ private:
 };
 
 extern AppLoop gLoop;
+
+extern IO::Path gOpenProjectPath;

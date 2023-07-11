@@ -27,13 +27,16 @@ namespace CE::Editor
 
     bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, const String& projectName)
     {
-        if (!projectFolder.IsDirectory() || projectName.IsEmpty())
-            return false;
-		if (projectFolder.Exists()) 
+		String extension = GetProjectFileExtension();
+
+		if (projectFolder.Exists())
 			IO::Path::RemoveRecursively(projectFolder);
 		IO::Path::CreateDirectories(projectFolder);
-		if (!projectName.EndsWith(".cproj"))
-			const_cast<String&>(projectName) += ".cproj";
+
+        if (!projectFolder.IsDirectory() || projectName.IsEmpty())
+            return false;
+		if (!projectName.EndsWith(extension))
+			const_cast<String&>(projectName) += extension;
         
         CrystalProject project{};
         project.projectName = projectName;
@@ -49,18 +52,11 @@ namespace CE::Editor
             serializer.WriteNext(&stream);
         }
 
-		if (!(projectFolder / "Game").Exists())
-		{
-			IO::Path::CreateDirectories(projectFolder / "Game");
-		}
-		if (!(projectFolder / "Config").Exists())
-		{
-			IO::Path::CreateDirectories(projectFolder / "Config");
-		}
-		if (!(projectFolder / "Logs").Exists())
-		{
-			IO::Path::CreateDirectories(projectFolder / "Logs");
-		}
+		IO::Path::CreateDirectories(projectFolder / "Game");
+		IO::Path::CreateDirectories(projectFolder / "Game" / "Assets");
+
+		IO::Path::CreateDirectories(projectFolder / "Config");
+		IO::Path::CreateDirectories(projectFolder / "Logs");
 
 		// Config files
 		{

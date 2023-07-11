@@ -202,7 +202,10 @@ namespace CE
 				return false;
 
 			if (sourceFunction->GetFunctionSignature() != GetFunctionSignature<Args...>())
+			{
+				CE_LOG(Error, All, "Cannot bind signal: Function signature mismatch");
 				return false;
+			}
 
 			return BindInternal(sourceInstance, sourceFunction, Delegate<void(const Array<Variant>&)>([delegate](const Array<Variant>& args)
 				{

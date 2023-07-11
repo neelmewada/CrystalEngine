@@ -33,6 +33,8 @@ private:
 	CTextInput* folderPathInput = nullptr;
 	CTextInput* projectNameInput = nullptr;
 
+	CLabel* errorLabel = nullptr;
+
 	FIELD()
 	ProjectBrowserCache cache{};
 

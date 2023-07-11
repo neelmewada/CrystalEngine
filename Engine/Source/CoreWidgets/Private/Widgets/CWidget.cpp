@@ -98,7 +98,7 @@ namespace CE::Widgets
 
 	void CWidget::UpdateStyleIfNeeded()
 	{
-		if (!needsStyle && !stylesheet->IsDirty())
+		if (!NeedsStyle() && !stylesheet->IsDirty())
 			return;
 
 		needsStyle = false;
@@ -459,6 +459,9 @@ namespace CE::Widgets
         
         if (IsWindow())
         {
+			SetNeedsStyle(); // Force update style
+			UpdateStyleIfNeeded();
+
 			CWindow* window = (CWindow*)this;
 			if (!window->IsDockSpaceWindow())
 			{
@@ -680,9 +683,12 @@ namespace CE::Widgets
 
 	void CWidget::RenderGUI()
 	{
-		CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
-		OnDrawGUI();
-		CFontManager::Get().PopFont();
+		if (IsVisible())
+		{
+			CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
+			OnDrawGUI();
+			CFontManager::Get().PopFont();
+		}
 
 		UpdateStyleIfNeeded();
 		UpdateLayoutIfNeeded();

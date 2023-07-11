@@ -20,6 +20,8 @@ namespace CE::Editor
         
 		/// Creates an empty project without opening it
         bool CreateEmptyProject(const IO::Path& projectFolder, const String& projectName);
+
+		inline String GetProjectFileExtension() const { return ".cproject"; }
         
 	private:
 

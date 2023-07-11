@@ -51,6 +51,9 @@ namespace CE::Widgets
 		inline bool IsDisabled() const { return isDisabled; }
 		inline void SetEnabled(bool enabled) { isDisabled = !enabled; }
 
+		inline bool IsVisible() const { return isVisible; }
+		inline void SetVisible(bool visible) { isVisible = visible; }
+
 		virtual void Construct();
 
         // For internal use only!
@@ -226,6 +229,9 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isDisabled = false;
+
+		FIELD()
+		b8 isVisible = true;
 		
 		CStyleSheet* stylesheet = nullptr;
 		String stylesheetText = "";
