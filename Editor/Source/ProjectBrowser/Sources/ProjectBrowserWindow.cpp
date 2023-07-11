@@ -98,6 +98,8 @@ void ProjectBrowserWindow::Construct()
 	
 	CTabWidget* tabWidget = CreateWidget<CTabWidget>(this, "ProjectBrowserTabWidget");
 
+	EditorPrefs::Get().GetStruct("ProjectBrowser.Cache", &cache);
+
 	// Create Project Tab
 	{
 		auto container = tabWidget->GetOrAddTab("Create Project");
@@ -163,6 +165,7 @@ void ProjectBrowserWindow::Construct()
 			auto createButton = CreateWidget<CButton>(layoutGroup, "CreateButton");
 			createButton->SetText("Create");
 			createButton->SetAsAlternateStyle(true);
+			Object::Bind(createButton, MEMBER_FUNCTION(CButton, OnButtonClicked), this, MEMBER_FUNCTION(Self, OnCreateProjectClicked));
 		}
 	}
 
@@ -172,5 +175,33 @@ void ProjectBrowserWindow::Construct()
 
 	}
 
+}
+
+void ProjectBrowserWindow::SaveCache()
+{
+	EditorPrefs::Get().SetStruct("ProjectBrowser.Cache", &cache);
+}
+
+void ProjectBrowserWindow::OnCreateProjectClicked()
+{
+	IO::Path folderPath = folderPathInput->GetText();
+	if (!folderPath.Exists())
+	{
+		CE_LOG(Error, All, "Invalid project folder path: {}", folderPath);
+		return;
+	}
+
+	String projectName = projectNameInput->GetText();
+	if (projectName.IsEmpty() || !IsValidObjectName(projectName))
+	{
+		CE_LOG(Error, All, "Invalid project name: {}", projectName);
+		return;
+	}
+
+	cache.lastProjectFolder = folderPath.GetString();
+	cache.lastProjectName = projectName;
+	SaveCache();
+
+	RequestEngineExit("ProjectBrowserClosed");
 }
 

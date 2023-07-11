@@ -1292,6 +1292,7 @@ TEST(JSON, Prefs)
 
 		JsonTestPrefs prefs{};
 		prefs.SetStruct("testStruct", &jsonStruct);
+
 		prefs.SetBool("boolValue", true);
 		prefs.SetString("stringValue", "My String");
 		prefs.SetFloat("floatValue", 12.12f);
@@ -1330,6 +1331,9 @@ TEST(JSON, Prefs)
 		{
 			EXPECT_EQ(jsonStruct.subarray[0].stringArray[i], String::Format("entry{}", i));
 		}
+
+		prefs.ClearPrefs();
+
 	}
 
 	IO::Path::Remove(path);

@@ -2,6 +2,19 @@
 
 using namespace CE::Widgets;
 
+STRUCT()
+struct ProjectBrowserCache
+{
+	CE_STRUCT(ProjectBrowserCache)
+public:
+
+	FIELD()
+	String lastProjectFolder{};
+
+	FIELD()
+	String lastProjectName{};
+};
+
 CLASS()
 class ProjectBrowserWindow : public CWindow
 {
@@ -10,12 +23,20 @@ public:
 
 	virtual void Construct() override;
 
+	void SaveCache();
+
 private:
+
+	FUNCTION()
+	void OnCreateProjectClicked();
 
 	CTextInput* folderPathInput = nullptr;
 	CTextInput* projectNameInput = nullptr;
 
-	String projectName = "";
+	FIELD()
+	ProjectBrowserCache cache{};
+
+	//String projectName = "";
 };
 
 

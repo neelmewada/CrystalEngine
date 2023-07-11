@@ -54,10 +54,17 @@ namespace CE
 			return SetStruct(key, TStruct::Type(), instance);
 		}
 
+		/// Loads prefs from disk
 		virtual void LoadPrefs() = 0;
+
+		/// Saves prefs to disk
 		virtual void SavePrefs() = 0;
 
-		virtual void ClearPrefs();
+		/// Clears and saves empty prefs to disk
+		void DeletePrefs();
+
+		/// Clears all prefs in memory. Changes won't be saved to disk automatically.
+		void ClearAll();
 
 	protected:
 

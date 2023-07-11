@@ -3,11 +3,12 @@
 namespace CE::Editor
 {
 
-	class EDITORCORE_API EditorPrefs
+	class EDITORCORE_API EditorPrefs : public BasePrefs
 	{
 		EditorPrefs();
 		~EditorPrefs();
 	public:
+		typedef BasePrefs Super;
 
 		static EditorPrefs& Get()
 		{
@@ -15,12 +16,11 @@ namespace CE::Editor
 			return instance;
 		}
 
-		void LoadPrefs();
-		void SavePrefs();
+		void LoadPrefs() override;
+		void SavePrefs() override;
 
 	private:
 
-		JsonValue* rootJson = nullptr;
 	};
 
 } // namespace CE::Editor

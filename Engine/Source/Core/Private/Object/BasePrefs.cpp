@@ -217,9 +217,15 @@ namespace CE
 		return true;
 	}
 
-	void BasePrefs::ClearPrefs()
+	void BasePrefs::DeletePrefs()
 	{
+		ClearAll();
 		SavePrefs();
+	}
+
+	void BasePrefs::ClearAll()
+	{
+		json = JValue(JObject());
 	}
 
 
