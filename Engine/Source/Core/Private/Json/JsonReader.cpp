@@ -304,7 +304,10 @@ namespace CE
                             if (cur == 'n')
                                 outLexeme.Append('\n');
                             else if (cur == '\\')
-                                outLexeme.Append('\\');
+							{
+								outLexeme.Append('\\');
+								prev = cur = 0; // Do not set prev to '\' otherwise next character will be skipped
+							}
                             else if (cur == 't')
                                 outLexeme.Append('\t');
                             else if (cur == 'r')

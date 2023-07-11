@@ -128,7 +128,7 @@ void ProjectBrowserWindow::Construct()
 			auto label = CreateWidget<CLabel>(layoutGroup, "ProjectFolderLabel");
 			label->SetText("Project Folder");
 			folderPathInput = CreateWidget<CTextInput>(layoutGroup, "FolderPathInput");
-			folderPathInput->SetText("");
+			folderPathInput->SetText(cache.lastProjectFolder);
 
 			auto openButton = CreateWidget<CButton>(layoutGroup, "OpenFolderButton");
 			openButton->SetText("...");
@@ -148,7 +148,7 @@ void ProjectBrowserWindow::Construct()
 			auto label = CreateWidget<CLabel>(layoutGroup, "ProjectNameLabel");
 			label->SetText("Project Name");
 			projectNameInput = CreateWidget<CTextInput>(layoutGroup, "ProjectNameInput");
-			projectNameInput->SetText("");
+			projectNameInput->SetText(cache.lastProjectName);
 		}
 
 		// Button Group
