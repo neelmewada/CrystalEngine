@@ -2,7 +2,7 @@
 
 namespace CE
 {
-	BasePrefs::BasePrefs()
+	BasePrefs::BasePrefs() : json(JObject())
 	{
 
 	}
@@ -14,91 +14,162 @@ namespace CE
 
 	bool BasePrefs::KeyExists(const String& key)
 	{
-		return data.is_object() && data.find(key.ToStdString()) != data.end();
+		return json.IsObjectValue() && json.KeyExists(key);
 	}
 
 	bool BasePrefs::GetStringValue(const String& key, String& outString)
 	{
-		std::string keyStr = key.ToStdString();
-
 		if (!KeyExists(key))
 			return false;
-		if (!data[keyStr].is_string())
+		if (!json[key].IsStringValue())
 			return false;
 
-		outString = data[keyStr].get<std::string>();
+		outString = json[key].GetStringValue();
 		return true;
 	}
 
 	bool BasePrefs::GetNumberValue(const String& key, f32& outNumber)
 	{
-		std::string keyStr = key.ToStdString();
-
 		if (!KeyExists(key))
 			return false;
-		if (!data[keyStr].is_number())
+		if (!json[key].IsNumberValue())
 			return false;
 
-		outNumber = data[keyStr].get<f32>();
+		outNumber = (f32)json[key].GetNumberValue();
 		return true;
 	}
 
 	bool BasePrefs::GetBooleanValue(const String& key, bool& outBoolean)
 	{
-		std::string keyStr = key.ToStdString();
-
 		if (!KeyExists(key))
 			return false;
-		if (!data[keyStr].is_boolean())
+		if (!json[key].IsBoolValue())
 			return false;
 
-		outBoolean = data[keyStr].get<bool>();
+		outBoolean = json[key].GetBoolValue();
 		return true;
 	}
 
 	bool BasePrefs::IsNullValue(const String& key)
 	{
-		std::string keyStr = key.ToStdString();
 		if (!KeyExists(key))
 			return false;
 
-		return data[keyStr].is_null();
+		return json[key].IsNullValue();
+	}
+
+	void BasePrefs::SetString(const String& key, const String& string)
+	{
+		json[key] = JValue(string);
+	}
+
+	void BasePrefs::SetFloat(const String& key, f32 number)
+	{
+		json[key] = JValue(number);
+	}
+
+	void BasePrefs::SetInt(const String& key, int number)
+	{
+		json[key] = JValue(number);
+	}
+
+	void BasePrefs::SetBool(const String& key, bool boolean)
+	{
+		json[key] = JValue(boolean);
+	}
+
+	void BasePrefs::SetNull(const String& key)
+	{
+		json[key] = JValue(nullptr);
+	}
+
+	String BasePrefs::GetString(const String& key, const String& defaultValue)
+	{
+		if (!KeyExists(key))
+			return defaultValue;
+		if (!json[key].IsStringValue())
+			return defaultValue;
+		return json[key].GetStringValue();
+	}
+
+	f32 BasePrefs::GetFloat(const String& key, f32 defaultValue)
+	{
+		if (!KeyExists(key))
+			return defaultValue;
+		if (!json[key].IsNumberValue())
+			return defaultValue;
+		return json[key].GetNumberValue();
+	}
+
+	int BasePrefs::GetInt(const String& key, int defaultValue)
+	{
+		if (!KeyExists(key))
+			return defaultValue;
+		if (!json[key].IsNumberValue())
+			return defaultValue;
+		return (int)json[key].GetNumberValue();
+	}
+
+	bool BasePrefs::GetBool(const String& key, bool defaultValue)
+	{
+		if (!KeyExists(key))
+			return defaultValue;
+		if (!json[key].IsBoolValue())
+			return defaultValue;
+		return json[key].GetBoolValue();
+	}
+
+	bool BasePrefs::IsStringValue(const String& key)
+	{
+		if (!KeyExists(key))
+			return false;
+		return json[key].IsStringValue();
+	}
+
+	bool BasePrefs::IsNumberValue(const String& key)
+	{
+		if (!KeyExists(key))
+			return false;
+		return json[key].IsNumberValue();
+	}
+
+	bool BasePrefs::IsBooleanValue(const String& key)
+	{
+		if (!KeyExists(key))
+			return false;
+		return json[key].IsBoolValue();
 	}
 
 	bool BasePrefs::IsObjectValue(const String& key)
 	{
-		std::string keyStr = key.ToStdString();
-
 		if (!KeyExists(key))
 			return false;
-		return data[keyStr].is_object();
+		return json[key].IsObjectValue();
 	}
 
 	bool BasePrefs::IsArrayValue(const String& key)
 	{
-		std::string keyStr = key.ToStdString();
 		if (!KeyExists(key))
 			return false;
-		return data[keyStr].is_array();
+		return json[key].IsArrayValue();
 	}
 
 	JsonValueType BasePrefs::GetValueType(const String& key)
 	{
-		std::string keyStr = key.ToStdString();
 		if (!KeyExists(key))
 			return JsonValueType::None;
 
-		if (data[keyStr].is_number())
+		if (json[key].IsNumberValue())
 			return JsonValueType::Number;
-		else if (data[keyStr].is_boolean())
+		else if (json[key].IsBoolValue())
 			return JsonValueType::Boolean;
-		else if (data[keyStr].is_string())
+		else if (json[key].IsStringValue())
 			return JsonValueType::String;
-		else if (data[keyStr].is_array())
+		else if (json[key].IsArrayValue())
 			return JsonValueType::Array;
-		else if (data[keyStr].is_object())
+		else if (json[key].IsObjectValue())
 			return JsonValueType::Object;
-		else if (data[keyStr].is_null())
+		else if (json[key].IsNullValue())
 			return JsonValueType::Null;
 		
 		return JsonValueType::None;
@@ -106,21 +177,41 @@ namespace CE
 
 	bool BasePrefs::GetStruct(const String& key, StructType* type, void* instance)
 	{
-		
+		if (key.IsEmpty())
+			return false;
+		if (!json.KeyExists(key))
+			return false;
+
+		const JValue& value = json[key];
+
+		JsonFieldDeserializer deserializer{ type, instance };
+
+		while (deserializer.HasNext())
+		{
+			deserializer.ReadNext(value);
+		}
 
 		return true;
 	}
 
 	bool BasePrefs::SetStruct(const String& key, StructType* type, void* instance)
 	{
-		auto field = type->GetFirstField();
-		auto keyStr = key.ToStdString();
+		if (key.IsEmpty())
+			return false;
 
-		while (field != nullptr)
+		if (json.KeyExists(key))
 		{
-			WriteField(data[keyStr], field, instance);
+			json.GetObjectValue().Remove(key);
+		}
 
-			field = field->GetNext();
+		json.GetObjectValue().Add({ key, JObject() });
+		JValue& value = json[key];
+
+		JsonFieldSerializer serializer{ type, instance };
+
+		while (serializer.HasNext())
+		{
+			serializer.WriteNext(value);
 		}
 
 		return true;
@@ -131,66 +222,20 @@ namespace CE
 		SavePrefs();
 	}
 
-	void BasePrefs::ReadField(const json& jsonData, FieldType* field, void* instance)
-	{
-		if (field == nullptr || instance == nullptr)
-			return;
 
-
-	}
-
-	void BasePrefs::WriteField(json& jsonData, FieldType* field, void* instance)
-	{
-		if (field == nullptr || instance == nullptr)
-			return;
-
-		auto fieldDeclType = field->GetDeclarationType();
-		auto fieldTypeId = field->GetDeclarationTypeId();
-
-		auto fieldName = field->GetName().GetString().ToStdString();
-
-		if (field->IsIntegerField())
-		{
-			if (fieldTypeId == TYPEID(u8))
-				jsonData[fieldName] = field->GetFieldValue<u8>(instance);
-			else if (fieldTypeId == TYPEID(u16))
-				jsonData[fieldName] = field->GetFieldValue<u16>(instance);
-			else if (fieldTypeId == TYPEID(u32))
-				jsonData[fieldName] = field->GetFieldValue<u32>(instance);
-			else if (fieldTypeId == TYPEID(u64))
-				jsonData[fieldName] = field->GetFieldValue<u64>(instance);
-			else if (fieldTypeId == TYPEID(s8))
-				jsonData[fieldName] = field->GetFieldValue<u8>(instance);
-			else if (fieldTypeId == TYPEID(s16))
-				jsonData[fieldName] = field->GetFieldValue<s16>(instance);
-			else if (fieldTypeId == TYPEID(s32))
-				jsonData[fieldName] = field->GetFieldValue<s32>(instance);
-			else if (fieldTypeId == TYPEID(s64))
-				jsonData[fieldName] = field->GetFieldValue<s64>(instance);
-		}
-		else if (field->IsDecimalField())
-		{
-			if (fieldTypeId == TYPEID(f32))
-				jsonData[fieldName] = field->GetFieldValue<f32>(instance);
-			else if (fieldTypeId == TYPEID(f64))
-				jsonData[fieldName] = field->GetFieldValue<f64>(instance);
-		}
-		else if (fieldTypeId == TYPEID(bool))
-		{
-			jsonData[fieldName] = field->GetFieldValue<bool>(instance);
-		}
-	}
-
-	void BasePrefs::LoadPrefs(const IO::Path& prefsPath)
+	bool BasePrefs::LoadPrefs(const IO::Path& prefsPath)
 	{
 		if (!prefsPath.Exists())
 		{
-			data = json::parse("{}");
-			return;
+			json = JObject();
+			return false;
 		}
 
-		std::ifstream stream(prefsPath);
-		data = json::parse(stream);
+		FileStream fileStream = FileStream(prefsPath, Stream::Permissions::ReadOnly);
+		bool success = JsonSerializer::Deserialize2(&fileStream, json);
+		fileStream.Close();
+
+		return success;
 	}
 
 	void BasePrefs::SavePrefs(const IO::Path& prefsPath)
@@ -200,18 +245,23 @@ namespace CE
 			IO::Path::Remove(prefsPath);
 		}
 
+		auto parentPath = prefsPath.GetParentPath();
+		if (!parentPath.Exists())
+		{
+			IO::Path::CreateDirectories(parentPath);
+		}
+
 		FileStream fileStream = FileStream(prefsPath, Stream::Permissions::WriteOnly, false);
 		fileStream.SetAsciiMode(true);
-		std::string jsonString = data.dump(4);
 
-		std::ofstream stream(prefsPath);
-		stream << jsonString;
-		stream << "\n";
+		JsonSerializer::Serialize2(&fileStream, json);
+
+		fileStream.Close();
 	}
 
 	void BasePrefs::ClearPrefs(const IO::Path& prefsPath)
 	{
-		data = json::parse("{}");
+		json = JObject();
 		SavePrefs(prefsPath);
 	}
 

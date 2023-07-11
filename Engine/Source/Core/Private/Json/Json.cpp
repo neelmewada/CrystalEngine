@@ -336,5 +336,198 @@ namespace CE
         return rootValue;
     }
 
+    bool JsonSerializer::Deserialize2(Stream* stream, JValue& out)
+    {
+		if (stream == nullptr)
+		{
+			CE_LOG(Error, All, "JSON Deserialize: Input stream is null");
+			return false;
+		}
+
+		if (!stream->CanRead())
+		{
+			CE_LOG(Error, All, "JSON Deserialize: Input stream cannot be read!");
+			return false;
+		}
+
+		out = nullptr;
+
+		auto reader = JsonReader::Create(stream);
+		JsonReadInstruction instruction = JsonReadInstruction::None;
+
+		Array<JValue*> stack{};
+
+		while (reader.ParseNext(instruction))
+        {
+            if (reader.GetError() != JsonParseError::None)
+            {
+                CE_LOG(Error, All, "JSON Deserialize: Failed to deserialize JSON: {}", reader.GetErrorMessage());
+                return false;
+            }
+            
+            switch (instruction)
+            {
+            case JsonReadInstruction::ObjectStart:
+                {
+                    if (out.IsNullValue()) // Root entry
+                    {
+						out = JValue(JObject());
+                        stack.Push(&out);
+                    }
+                    else if (stack.NonEmpty())
+                    {
+                        auto objectValue = JValue(JObject());
+                        if (stack.Top()->IsObjectValue())
+                        {
+                            stack.Top()->GetObjectValue().Add({ reader.GetIdentifier(), objectValue });
+							stack.Push(&stack.Top()->GetObjectValue()[reader.GetIdentifier()]);
+                        }
+                        else if (stack.Top()->IsArrayValue())
+                        {
+                            stack.Top()->GetArrayValue().Add(objectValue);
+							stack.Push(&stack.Top()->GetArrayValue().GetLast());
+                        }
+                        else
+                        {
+                            CE_LOG(Error, All, "JSON Deserialize: Failed to add object to stack!");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        CE_LOG(Error, All, "JSON Deserialize: Failed to open object!");
+                        return false;
+                    }
+                }
+                break;
+            case JsonReadInstruction::ObjectEnd:
+                {
+                    if (stack.IsEmpty() || !stack.Top()->IsObjectValue())
+                    {
+                        CE_LOG(Error, All, "JSON Deserialize: Failed to close object. Stack empty or invalid!");
+                        return false;
+                    }
+                    stack.Pop();
+                }
+                break;
+            case JsonReadInstruction::ArrayStart:
+                {
+                    if (out.IsNullValue()) // Root entry
+                    {
+						out = JValue(JArray());
+                        stack.Push(&out);
+                    }
+                    else if (stack.NonEmpty())
+                    {
+                        auto arrayValue = JValue(JArray());
+                        if (stack.Top()->IsObjectValue())
+                        {
+                            stack.Top()->GetObjectValue().Add({ reader.GetIdentifier(), arrayValue });
+							stack.Push(&stack.Top()->GetObjectValue()[reader.GetIdentifier()]);
+                        }
+                        else if (stack.Top()->IsArrayValue())
+                        {
+                            stack.Top()->GetArrayValue().Add(arrayValue);
+							stack.Push(&stack.Top()->GetArrayValue().GetLast());
+                        }
+                        else
+                        {
+                            CE_LOG(Error, All, "JSON Deserialize: Failed to add object to stack!");
+                            return false;
+                        }
+                    }
+                }
+                break;
+            case JsonReadInstruction::ArrayEnd:
+                {
+                    if (stack.IsEmpty() || !stack.Top()->IsArrayValue())
+                    {
+                        CE_LOG(Error, All, "JSON Deserialize: Failed to close array. Stack empty or invalid!");
+                        return false;
+                    }
+                    stack.Pop();
+                }
+                break;
+            case JsonReadInstruction::String:
+                {
+                    if (stack.IsEmpty() || !stack.Top()->IsContainerType())
+					{
+                        CE_LOG(Error, All, "JSON Deserialize: Failed to add string value. Stack empty or invalid!");
+                        return false;
+                    }
+                    auto stringValue = JValue(reader.GetStringValue());
+                    if (stack.Top()->IsObjectValue())
+                    {
+                        stack.Top()->GetObjectValue().Add({ reader.GetIdentifier(), stringValue });
+                    }
+                    else if (stack.Top()->IsArrayValue())
+                    {
+                        stack.Top()->GetArrayValue().Add(stringValue);
+                    }
+                }
+                break;
+            case JsonReadInstruction::Boolean:
+                {
+                    if (stack.IsEmpty() || !stack.Top()->IsContainerType())
+                    {
+                        CE_LOG(Error, All, "JSON Deserialize: Failed to add boolean value. Stack empty or invalid!");
+                        return false;
+                    }
+                    auto boolValue = JValue(reader.GetBoolValue());
+                    if (stack.Top()->IsObjectValue())
+                    {
+                        stack.Top()->GetObjectValue().Add({ reader.GetIdentifier(), boolValue });
+                    }
+                    else if (stack.Top()->IsArrayValue())
+                    {
+                        stack.Top()->GetArrayValue().Add(boolValue);
+                    }
+                }
+                break;
+            case JsonReadInstruction::Number:
+                {
+                    if (stack.IsEmpty() || !stack.Top()->IsContainerType())
+                    {
+                        CE_LOG(Error, All, "JSON Deserialize: Failed to add number value. Stack empty or invalid!");
+                        return false;
+                    }
+                    auto numberValue = JValue(reader.GetNumberValue());
+                    if (stack.Top()->IsObjectValue())
+                    {
+                        stack.Top()->GetObjectValue().Add({ reader.GetIdentifier(), numberValue });
+                    }
+                    else if (stack.Top()->IsArrayValue())
+                    {
+                        stack.Top()->GetArrayValue().Add(numberValue);
+                    }
+                }
+                break;
+            case JsonReadInstruction::Null:
+                {
+                    if (stack.IsEmpty() || !stack.Top()->IsContainerType())
+                    {
+                        CE_LOG(Error, All, "JSON Deserialize: Failed to add null value. Stack empty or invalid!");
+                        return false;
+                    }
+                    auto nullValue = JValue();
+                    if (stack.Top()->IsObjectValue())
+                    {
+                        stack.Top()->GetObjectValue().Add({ reader.GetIdentifier(), nullValue });
+                    }
+                    else if (stack.Top()->IsArrayValue())
+                    {
+                        stack.Top()->GetArrayValue().Add(nullValue);
+                    }
+                }
+                break;
+            case JsonReadInstruction::None:
+                CE_LOG(Error, All, "JSON Deserialize: Invalid instruction found: JsonReadInstruction::None");
+                return false;
+            }
+        }
+
+		return true;
+    }
+
 } // namespace CE
 

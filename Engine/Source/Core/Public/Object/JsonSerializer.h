@@ -17,6 +17,8 @@ namespace CE
 
 		bool WriteNext(JsonValue* json);
 
+		bool WriteNext(JValue& json);
+
         FieldType* GetNext();
         
         inline bool IsValid() const
@@ -50,6 +52,8 @@ namespace CE
 		bool HasNext();
 
 		bool ReadNext(Stream* stream);
+
+		bool ReadNext(const JValue& json);
 
 		inline bool IsValid() const
 		{

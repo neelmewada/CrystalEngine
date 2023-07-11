@@ -380,6 +380,217 @@ namespace CE
 		return true;
 	}
 
+	bool JsonFieldSerializer::WriteNext(JValue& parentJson)
+	{
+		FieldType* field = GetNext();
+		curIndex++;
+
+		if (!IsValid() || !HasNext() || parentJson.IsNullValue())
+			return false;
+
+		fields.RemoveAt(0);
+
+		if (!parentJson.IsObjectValue() && !parentJson.IsArrayValue())
+			return false;
+		if (isMap && !parentJson.IsObjectValue())
+			return false;
+		if (isArray && !parentJson.IsArrayValue())
+			return false;
+		if (!isMap && !isArray)
+			return false;
+
+		if (field->GetDeclarationType() == nullptr || !field->IsSerialized())
+		{
+			return false;
+		}
+
+		TypeInfo* fieldDeclType = field->GetDeclarationType();
+		TypeId fieldTypeId = fieldDeclType->GetTypeId();
+		String fieldName = field->GetName().GetString();
+
+		if (field->IsIntegerField())
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue(0) });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(0));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			if (fieldTypeId == TYPEID(u8))
+				*json = JValue((f64)field->GetFieldValue<u8>(rawInstance));
+			else if (fieldTypeId == TYPEID(u16))
+				*json = JValue((f64)field->GetFieldValue<u16>(rawInstance));
+			else if (fieldTypeId == TYPEID(u32))
+				*json = JValue((f64)field->GetFieldValue<u32>(rawInstance));
+			else if (fieldTypeId == TYPEID(u64))
+				*json = JValue((f64)field->GetFieldValue<u64>(rawInstance));
+			else if (fieldTypeId == TYPEID(s8))
+				*json = JValue((f64)field->GetFieldValue<s8>(rawInstance));
+			else if (fieldTypeId == TYPEID(s16))
+				*json = JValue((f64)field->GetFieldValue<s16>(rawInstance));
+			else if (fieldTypeId == TYPEID(s32))
+				*json = JValue((f64)field->GetFieldValue<s32>(rawInstance));
+			else if (fieldTypeId == TYPEID(s64))
+				*json = JValue((f64)field->GetFieldValue<s64>(rawInstance));
+		}
+		else if (field->IsDecimalField())
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue(0) });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(0));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			if (fieldTypeId == TYPEID(f32))
+				*json = JValue((f64)field->GetFieldValue<f32>(rawInstance));
+			else if (fieldTypeId == TYPEID(f64))
+				*json = JValue((f64)field->GetFieldValue<f64>(rawInstance));
+		}
+		else if (fieldTypeId == TYPEID(UUID))
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue(0) });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(0));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			*json = JValue((f64)(u64)field->GetFieldValue<UUID>(rawInstance));
+		}
+		else if (fieldTypeId == TYPEID(bool))
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue(false) });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(false));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			*json = JValue(field->GetFieldValue<bool>(rawInstance));
+		}
+		else if (fieldTypeId == TYPEID(String))
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue("") });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(""));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			const String& string = field->GetFieldValue<String>(rawInstance);
+			*json = JValue(string);
+		}
+		else if (fieldTypeId == TYPEID(Name))
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue("") });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(""));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			*json = JValue(field->GetFieldValue<Name>(rawInstance).GetString());
+		}
+		else if (fieldDeclType->IsStruct())
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue(JObject()) });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(JObject()));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			StructType* structType = (StructType*)fieldDeclType;
+
+			JsonFieldSerializer serializer{ structType, field->GetFieldInstance(rawInstance) };
+
+			while (serializer.HasNext())
+			{
+				serializer.WriteNext(*json);
+			}
+		}
+		else if (field->IsArrayField())
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue(JArray()) });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(JArray()));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			Array<FieldType> fieldsList = field->GetArrayFieldList(rawInstance);
+			Array<FieldType*> fieldListPtr = fieldsList.Transform<FieldType*>([](FieldType& in) { return &in; });
+
+			Array<u8> array = field->GetFieldValue<Array<u8>>(rawInstance);
+
+			if (!fieldListPtr.IsEmpty())
+			{
+				JsonFieldSerializer serializer = JsonFieldSerializer(fieldListPtr, &array[0]);
+
+				while (serializer.HasNext())
+				{
+					serializer.WriteNext(*json);
+				}
+			}
+		}
+
+		if (fields.IsEmpty())
+		{
+			if (isMap)
+			{
+				writer.WriteObjectClose();
+			}
+			else if (isArray)
+			{
+				writer.WriteArrayClose();
+			}
+		}
+
+		return true;
+	}
+
     FieldType* JsonFieldSerializer::GetNext()
 	{
         if (!HasNext())
@@ -481,6 +692,150 @@ namespace CE
 		return true;
 	}
 
+	bool JsonFieldDeserializer::ReadNext(const JValue& parentJson)
+	{
+		if (fields.IsEmpty())
+			return false;
+
+		auto field = fields[0];
+		fields.RemoveAt(0);
+		auto fieldName = field->GetName().GetString();
+
+		if (isMap && !parentJson.KeyExists(fieldName))
+			return false;
+		if (isArray && !parentJson.IndexExists(arrayIndex))
+			return false;
+
+		const auto& json = isMap ? parentJson.GetObjectValue().Get(fieldName) : parentJson.GetArrayValue()[arrayIndex++];
+
+		if (field == nullptr || json.IsNullValue() || field->GetDeclarationType() == nullptr)
+			return false;
+
+		auto fieldDeclType = field->GetDeclarationType();
+		auto fieldTypeId = field->GetDeclarationTypeId();
+
+		if (json.IsNumberValue() && (field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(UUID)))
+		{
+			if (fieldTypeId == TYPEID(s8))
+				field->SetFieldValue<s8>(rawInstance, (s8)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(s16))
+				field->SetFieldValue<s16>(rawInstance, (s16)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(s32))
+				field->SetFieldValue<s32>(rawInstance, (s32)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(s64))
+				field->SetFieldValue<s64>(rawInstance, (s64)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(u8))
+				field->SetFieldValue<u8>(rawInstance, (u8)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(u16))
+				field->SetFieldValue<u16>(rawInstance, (u16)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(u32))
+				field->SetFieldValue<u32>(rawInstance, (u32)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(u64))
+				field->SetFieldValue<u64>(rawInstance, (u64)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(f32))
+				field->SetFieldValue<f32>(rawInstance, (f32)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(f64))
+				field->SetFieldValue<f64>(rawInstance, (f64)json.GetNumberValue());
+			else if (fieldTypeId == TYPEID(UUID))
+				field->SetFieldValue<UUID>(rawInstance, UUID((u64)json.GetNumberValue()));
+			else
+				return false;
+
+			return true;
+		}
+		else if (json.IsBoolValue())
+		{
+			if (fieldTypeId == TYPEID(bool))
+				field->SetFieldValue<bool>(rawInstance, (bool)json.GetBoolValue());
+			else if (fieldTypeId == TYPEID(b8))
+				field->SetFieldValue<b8>(rawInstance, (b8)json.GetBoolValue());
+			else
+				return false;
+
+			return true;
+		}
+		else if (json.IsStringValue())
+		{
+			if (fieldTypeId == TYPEID(String))
+				field->SetFieldValue<String>(rawInstance, json.GetStringValue());
+			else if (fieldTypeId == TYPEID(Name))
+				field->SetFieldValue<Name>(rawInstance, json.GetStringValue());
+			else if (fieldTypeId == TYPEID(IO::Path))
+				field->SetFieldValue<IO::Path>(rawInstance, IO::Path(json.GetStringValue()));
+			else
+				return false;
+
+			return true;
+		}
+		else if (json.IsObjectValue() && fieldDeclType->IsStruct())
+		{
+			void* structInstance = field->GetFieldInstance(rawInstance);
+
+			auto structType = (StructType*)fieldDeclType;
+			structType->InitializeDefaults(structInstance);
+
+			JsonFieldDeserializer deserializer{ structType, structInstance };
+			deserializer.isFirstRead = false;
+			deserializer.isMap = true;
+			deserializer.isArray = false;
+
+			while (deserializer.HasNext())
+			{
+				deserializer.ReadNext(json);
+			}
+
+			return true;
+		}
+		else if (json.IsObjectValue() && fieldDeclType->IsObject())
+		{
+			Object* object = field->GetFieldValue<Object*>(rawInstance);
+			if (object == nullptr)
+				return false;
+
+			JsonFieldDeserializer deserializer{ (StructType*)fieldDeclType, object };
+			deserializer.isMap = true;
+			deserializer.isArray = false;
+
+			while (deserializer.HasNext())
+			{
+				deserializer.ReadNext(json);
+			}
+
+			return true;
+		}
+		else if (json.IsArrayValue() && fieldDeclType->IsArrayType())
+		{
+			if (json.GetArrayValue().IsEmpty())
+			{
+				field->ResizeArray(rawInstance, 0);
+				return true;
+			}
+
+			field->ResizeArray(rawInstance, json.GetArrayValue().GetSize());
+			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
+			Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& f) { return &f; });
+
+			auto arrayInstance = &field->GetFieldValue<Array<u8>>(rawInstance)[0];
+
+			JsonFieldDeserializer deserializer{ fieldListPtr, arrayInstance };
+			deserializer.isMap = false;
+			deserializer.isArray = true;
+
+			while (deserializer.HasNext())
+			{
+				deserializer.ReadNext(json);
+			}
+
+			return true;
+		}
+		else if (json.IsNullValue())
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	bool JsonFieldDeserializer::ReadNextField(JsonValue* jsonValue)
 	{
 		if (fields.IsEmpty())
@@ -557,7 +912,10 @@ namespace CE
 		{
 			void* structInstance = field->GetFieldInstance(rawInstance);
 
-			JsonFieldDeserializer deserializer{ (StructType*)fieldDeclType, structInstance };
+			auto structType = (StructType*)fieldDeclType;
+			structType->InitializeDefaults(structInstance);
+
+			JsonFieldDeserializer deserializer{ structType, structInstance };
 			deserializer.isFirstRead = false;
 			deserializer.rootJson = jsonValue;
 			deserializer.isMap = true;

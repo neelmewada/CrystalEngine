@@ -1078,19 +1078,69 @@ TEST(JSON, Serializer)
         EXPECT_EQ(rootRef[2].GetNumberValue(), 42.212);
     }
 
-    // 2. Serialize JSON_Writer_Test2_Comparison
+	// 2. Serialize JSON_Writer_Test2_Comparison
 
-    auto copyStream = MemoryStream(2048);
-    copyStream.SetAsciiMode(true);
+	auto copyStream = MemoryStream(2048);
+	copyStream.SetAsciiMode(true);
 
-    JsonSerializer::Serialize(&copyStream, root);
-    // Order can be different
-    //EXPECT_EQ(strcmp(JSON_Writer_Test2_Comparison, (char*)copyStream.GetRawDataPtr()), 0);
+	JsonSerializer::Serialize(&copyStream, root);
+	// Order can be different
+	//EXPECT_EQ(strcmp(JSON_Writer_Test2_Comparison, (char*)copyStream.GetRawDataPtr()), 0);
+
+	copyStream.Close();
+
+	delete root;
+
+	// 3. Deserialize2 method
+
+	auto stream2 = MemoryStream((void*)JSON_Writer_Test2_Comparison, COUNTOF(JSON_Writer_Test2_Comparison), Stream::Permissions::ReadOnly);
+	stream2.SetAsciiMode(true);
+
+	JValue json = nullptr;
+	JsonSerializer::Deserialize2(&stream2, json);
+	stream2.Close();
+
+	EXPECT_TRUE(json.IsArrayValue());
+	EXPECT_EQ(json.GetSize(), 3);
+	{
+		EXPECT_TRUE(json[0].IsObjectValue());
+		{
+			EXPECT_EQ(json[0].GetSize(), 2);
+			EXPECT_TRUE(json[0].KeyExists("some_array"));
+			EXPECT_TRUE(json[0].KeyExists("name"));
+
+			EXPECT_TRUE(json[0]["some_array"].IsArrayValue());
+			{
+				EXPECT_EQ(json[0]["some_array"].GetSize(), 4);
+				EXPECT_TRUE(json[0]["some_array"][0].IsStringValue());
+				EXPECT_EQ(json[0]["some_array"][0].GetStringValue(), "child0");
+				EXPECT_TRUE(json[0]["some_array"][1].IsNumberValue());
+				EXPECT_EQ(json[0]["some_array"][1].GetNumberValue(), 123);
+				EXPECT_TRUE(json[0]["some_array"][2].IsNumberValue());
+				EXPECT_EQ(json[0]["some_array"][2].GetNumberValue(), 42.212);
+				EXPECT_TRUE(json[0]["some_array"][3].IsBoolValue());
+				EXPECT_EQ(json[0]["some_array"][3].GetBoolValue(), false);
+			}
+
+			EXPECT_TRUE(json[0]["name"].IsStringValue());
+			EXPECT_EQ(json[0]["name"].GetStringValue(), "Some name");
+		}
+
+		EXPECT_TRUE(json[1].IsStringValue());
+		EXPECT_EQ(json[1].GetStringValue(), "item0");
+		EXPECT_TRUE(json[2].IsNumberValue());
+		EXPECT_EQ(json[2].GetNumberValue(), 42.212);
+	}
     
-    copyStream.Close();
+	// 4. Serialize2 method
 
-    delete root;
-    
+	auto copyStream2 = MemoryStream(2048);
+	copyStream2.SetAsciiMode(true);
+
+	JsonSerializer::Serialize2(&copyStream2, json);
+
+	copyStream2.Close();
+
     TEST_END;
 }
 
@@ -1178,13 +1228,13 @@ public:
 
 	void LoadPrefs() override
 	{
-		auto path = PlatformDirectories::GetAppDataDir() / "TestPrefs.json";
+		auto path = PlatformDirectories::GetLaunchDir() / "TestPrefs.json";
 		Super::LoadPrefs(path);
 	}
 
 	void SavePrefs() override
 	{
-		auto path = PlatformDirectories::GetAppDataDir() / "TestPrefs.json";
+		auto path = PlatformDirectories::GetLaunchDir() / "TestPrefs.json";
 		Super::SavePrefs(path);
 	}
 };
@@ -1199,6 +1249,10 @@ public:
 	f32 numberValue = 0;
 
 	b8 boolValue = false;
+
+	Array<String> stringArray{};
+
+	Array<JsonTestStruct> subarray{};
 };
 
 CE_RTTI_STRUCT(, , JsonTestStruct,
@@ -1208,6 +1262,8 @@ CE_RTTI_STRUCT(, , JsonTestStruct,
 		CE_FIELD(stringValue)
 		CE_FIELD(numberValue)
 		CE_FIELD(boolValue)
+		CE_FIELD(stringArray)
+		CE_FIELD(subarray)
 	),
 	CE_FUNCTION_LIST()
 )
@@ -1217,21 +1273,101 @@ TEST(JSON, Prefs)
 {
 	TEST_BEGIN;
 	CE_REGISTER_TYPES(JsonTestStruct);
+
+	auto path = PlatformDirectories::GetLaunchDir() / "TestPrefs.json";
 	
-	JsonTestStruct jsonStruct{};
-	jsonStruct.stringValue = "This is a string";
-	jsonStruct.numberValue = 12.42f;
-	jsonStruct.boolValue = true;
+	{
+		JsonTestStruct jsonStruct{};
+		jsonStruct.stringValue = "This is a string";
+		jsonStruct.numberValue = 12.42f;
+		jsonStruct.boolValue = true;
+		jsonStruct.stringArray = { "item0", "item1", "item2", "item3" };
 
-	JsonTestPrefs prefs{};
-	//prefs.SetStruct("testStruct", &jsonStruct);
+		jsonStruct.subarray.Resize(1);
+		jsonStruct.subarray[0].stringValue = "child0";
+		jsonStruct.subarray[0].numberValue = 3;
+		jsonStruct.subarray[0].boolValue = false;
+		jsonStruct.subarray[0].stringArray = { "entry0", "entry1", "entry2" };
+		jsonStruct.subarray[0].subarray = {};
 
-	//prefs.SavePrefs();
+		JsonTestPrefs prefs{};
+		prefs.SetStruct("testStruct", &jsonStruct);
+		prefs.SetBool("boolValue", true);
+		prefs.SetString("stringValue", "My String");
+		prefs.SetFloat("floatValue", 12.12f);
+		prefs.SetNull("nullValue");
+
+		prefs.SavePrefs();
+	}
+
+	{
+		JsonTestStruct jsonStruct{};
+		
+		JsonTestPrefs prefs{};
+		prefs.LoadPrefs();
+
+		EXPECT_EQ(prefs.GetString("stringValue"), "My String");
+		EXPECT_EQ(prefs.GetBool("boolValue"), true);
+		EXPECT_EQ(prefs.IsNullValue("nullValue"), true);
+		EXPECT_EQ(prefs.GetFloat("floatValue"), 12.12f);
+
+		prefs.GetStruct("testStruct", &jsonStruct);
+		EXPECT_EQ(jsonStruct.stringValue, "This is a string");
+		EXPECT_EQ(jsonStruct.numberValue, 12.42f);
+		EXPECT_EQ(jsonStruct.boolValue, true);
+		EXPECT_EQ(jsonStruct.stringArray.GetSize(), 4);
+		for (int i = 0; i < 4; i++)
+		{
+			EXPECT_EQ(jsonStruct.stringArray[i], String::Format("item{}", i));
+		}
+
+		EXPECT_EQ(jsonStruct.subarray.GetSize(), 1);
+		EXPECT_EQ(jsonStruct.subarray[0].stringValue, "child0");
+		EXPECT_EQ(jsonStruct.subarray[0].numberValue, 3);
+		EXPECT_EQ(jsonStruct.subarray[0].boolValue, false);
+		EXPECT_EQ(jsonStruct.subarray[0].stringArray.GetSize(), 3);
+		for (int i = 0; i < 3; i++)
+		{
+			EXPECT_EQ(jsonStruct.subarray[0].stringArray[i], String::Format("entry{}", i));
+		}
+	}
+
+	IO::Path::Remove(path);
 
 	CE_DEREGISTER_TYPES(JsonTestStruct);
 	TEST_END;
 }
 
+
+TEST(JSON, Manipulation)
+{
+	TEST_BEGIN;
+
+	{
+		JValue val = JValue();
+	}
+
+	JValue root = JObject();
+	root["item0"] = 12.12f;
+	root["item1"] = "String Value";
+	root["item2"] = true;
+
+	root["array"] = JArray();
+	root["array"][0] = 123;
+	root["array"][1] = "Item String";
+
+	root["child"] = JObject();
+	root["child"]["number"] = 43.21f;
+	root["child"]["bool"] = true;
+	root["child"]["string"] = "child string";
+
+	JValue test = 12.42f;
+	test = "String Value";
+	test = JArray({ 12.42f, "string", true });
+	test = JObject({ { "key0", true }, { "key1", "string" }});
+
+	TEST_END;
+}
 
 #pragma endregion
 

@@ -1,6 +1,5 @@
 #pragma once
 
-using json = nlohmann::json;
 
 namespace CE
 {
@@ -21,6 +20,20 @@ namespace CE
 		bool GetBooleanValue(const String& key, bool& outBoolean);
 		bool IsNullValue(const String& key);
 
+		void SetString(const String& key, const String& string);
+		void SetFloat(const String& key, f32 number);
+		void SetInt(const String& key, int number);
+		void SetBool(const String& key, bool boolean);
+		void SetNull(const String& key);
+
+		String GetString(const String& key, const String& defaultValue = "");
+		f32 GetFloat(const String& key, f32 defaultValue = 0);
+		int GetInt(const String& key, int defaultValue = 0);
+		bool GetBool(const String& key, bool defaultValue = false);
+
+		bool IsStringValue(const String& key);
+		bool IsNumberValue(const String& key);
+		bool IsBooleanValue(const String& key);
 		bool IsObjectValue(const String& key);
 		bool IsArrayValue(const String& key);
 
@@ -29,13 +42,13 @@ namespace CE
 		bool GetStruct(const String& key, StructType* type, void* instance);
 		bool SetStruct(const String& key, StructType* type, void* instance);
 
-		template<typename TStruct>
+		template<typename TStruct> requires std::is_class_v<TStruct>
 		inline bool GetStruct(const String& key, TStruct* instance)
 		{
 			return GetStruct(key, TStruct::Type(), instance);
 		}
 
-		template<typename TStruct>
+		template<typename TStruct> requires std::is_class_v<TStruct>
 		inline bool SetStruct(const String& key, TStruct* instance)
 		{
 			return SetStruct(key, TStruct::Type(), instance);
@@ -48,14 +61,11 @@ namespace CE
 
 	protected:
 
-		void ReadField(const json& jsonData, FieldType* field, void* instance);
-		void WriteField(json& jsonData, FieldType* field, void* instance);
-
-		virtual void LoadPrefs(const IO::Path& prefsPath);
+		virtual bool LoadPrefs(const IO::Path& prefsPath);
 		virtual void SavePrefs(const IO::Path& prefsPath);
 		virtual void ClearPrefs(const IO::Path& prefsPath);
 
-		json data{};
+		JValue json;
 	};
 
 } // namespace CE

@@ -4,7 +4,11 @@ namespace CE
 {
 	JValue::JValue()
 	{
-		Clear();
+		valueType = JsonValueType::Null;
+	}
+
+	JValue::JValue(std::nullptr_t nullValue)
+	{
 		valueType = JsonValueType::Null;
 	}
 
@@ -62,25 +66,13 @@ namespace CE
 
 	void JValue::Clear()
 	{
-		if (valueType == JsonValueType::String)
-		{
-			stringValue.~String();
-		}
-		else if (valueType == JsonValueType::Object)
-		{
-			objectValue.~JObject();
-		}
-		else if (valueType == JsonValueType::Array)
-		{
-			arrayValue.~JArray();
-		}
-
-		memset(this, 0, sizeof(JValue));
+		
 	}
 
 	void JValue::Copy(const JValue& copy)
 	{
-		Clear();
+		if (valueType != copy.valueType)
+			Clear();
 
 		valueType = copy.valueType;
 		if (IsNumberValue())

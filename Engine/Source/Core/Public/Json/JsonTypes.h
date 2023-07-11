@@ -192,10 +192,18 @@ namespace CE
 		// Null value constructor
 		JValue();
 
+		JValue(std::nullptr_t nullValue);
+
 		JValue(const String& string);
 		JValue(const char* string);
 		JValue(bool boolValue);
 		JValue(f64 numberValue);
+
+		//JValue(u64 numberValue) : JValue((f64)numberValue) {}
+		//JValue(s64 numberValue) : JValue((f64)numberValue) {}
+		//JValue(u32 numberValue) : JValue((f64)numberValue) {}
+		//JValue(s32 numberValue) : JValue((f64)numberValue) {}
+
 		JValue(int numberValue);
 		JValue(JObject jsonObject);
 		JValue(JArray jsonArray);
@@ -209,12 +217,6 @@ namespace CE
 		{
 			Copy(copy);
 			return *this;
-		}
-
-		JValue(JValue&& move)
-		{
-			memcpy(this, &move, sizeof(JValue));
-			memset(&move, 0, sizeof(JValue));
 		}
 
 		~JValue();
@@ -242,6 +244,7 @@ namespace CE
 		FORCE_INLINE bool IsNumberValue() const { return valueType == JsonValueType::Number; }
 		FORCE_INLINE bool IsBoolValue() const { return valueType == JsonValueType::Boolean; }
 		FORCE_INLINE bool IsNullValue() const { return valueType == JsonValueType::Null; }
+
 
 		FORCE_INLINE void Insert(const JValue& arrayItem)
 		{
@@ -278,6 +281,11 @@ namespace CE
 			return IsObjectValue() && objectValue.KeyExists(key);
 		}
 
+		FORCE_INLINE bool IndexExists(int index) const
+		{
+			return IsArrayValue() && index >= 0 && index < arrayValue.GetSize();
+		}
+
 		FORCE_INLINE u32 GetSize() const
 		{
 			if (IsArrayValue())
@@ -297,14 +305,11 @@ namespace CE
 
 		void Copy(const JValue& copy);
 
-		union
-		{
-			String stringValue;
-			bool boolValue;
-			f64 numberValue;
-			JObject objectValue;
-			JArray arrayValue;
-		};
+		String stringValue{};
+		bool boolValue{};
+		f64 numberValue{};
+		JObject objectValue{};
+		JArray arrayValue{};
 
 		JsonValueType valueType = JsonValueType::None;
 

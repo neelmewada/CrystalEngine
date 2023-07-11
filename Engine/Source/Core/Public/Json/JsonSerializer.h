@@ -12,6 +12,8 @@ namespace CE
 
         static JsonValue* Deserialize(Stream* stream);
 
+		static bool Deserialize2(Stream* stream, JValue& out);
+
         template<typename WritePolicy = JsonPrettyPrintPolicy>
         static void Serialize(Stream* stream, const JsonValue* json)
         {
@@ -43,6 +45,41 @@ namespace CE
 			if (stream->IsBinaryMode())
 				stream->Write('\0');
         }
+
+		template<typename WritePolicy = JsonPrettyPrintPolicy>
+		static void Serialize2(Stream* stream, const JValue& json)
+		{
+			if (stream == nullptr || !stream->CanWrite() || !stream->IsAsciiMode())
+			{
+				CE_LOG(Error, All, "Invalid stream! Stream must be writeable and in ascii mode");
+				return;
+			}
+			if (json.IsNullValue() || !json.IsContainerType())
+				return;
+
+			auto writer = JsonWriter<WritePolicy>::Create(stream);
+			const bool isObject = json.IsObjectValue();
+
+			if (json.IsObjectValue())
+			{
+				writer.WriteObjectStart();
+				{
+					SerializeInternal2(writer, json);
+				}
+				writer.WriteObjectClose();
+			}
+			else if (json.IsArrayValue())
+			{
+				writer.WriteArrayStart();
+				{
+					SerializeInternal2(writer, json);
+				}
+				writer.WriteArrayClose();
+			}
+
+			if (stream->IsBinaryMode())
+				stream->Write('\0');
+		}
         
     private:
 
@@ -129,6 +166,90 @@ namespace CE
                 }
             }
         }
+
+		template<typename WritePolicy = JsonPrettyPrintPolicy>
+		static void SerializeInternal2(JsonWriter<WritePolicy>& writer, const JValue& parent)
+		{
+			if (parent.IsNullValue() || !parent.IsContainerType())
+				return;
+
+			if (parent.IsObjectValue())
+			{
+				for (const auto& [identifier, json] : parent.objectValue)
+				{
+					if (json.IsObjectValue())
+					{
+						writer.WriteObjectStart(identifier);
+						{
+							SerializeInternal2(writer, json);
+						}
+						writer.WriteObjectClose();
+					}
+					else if (json.IsArrayValue())
+					{
+						writer.WriteArrayStart(identifier);
+						{
+							SerializeInternal2(writer, json);
+						}
+						writer.WriteArrayClose();
+					}
+					else if (json.IsStringValue())
+					{
+						writer.WriteValue(identifier, json.stringValue);
+					}
+					else if (json.IsBoolValue())
+					{
+						writer.WriteValue(identifier, json.boolValue);
+					}
+					else if (json.IsNumberValue())
+					{
+						writer.WriteValue(identifier, json.numberValue);
+					}
+					else if (json.IsNullValue())
+					{
+						writer.WriteNull(identifier);
+					}
+				}
+			}
+			else if (parent.IsArrayValue())
+			{
+				for (const auto& json : parent.arrayValue)
+				{
+					if (json.IsObjectValue())
+					{
+						writer.WriteObjectStart();
+						{
+							SerializeInternal2(writer, json);
+						}
+						writer.WriteObjectClose();
+					}
+					else if (json.IsArrayValue())
+					{
+						writer.WriteArrayStart();
+						{
+							SerializeInternal2(writer, json);
+						}
+						writer.WriteArrayClose();
+					}
+					else if (json.IsStringValue())
+					{
+						writer.WriteValue(json.stringValue);
+					}
+					else if (json.IsBoolValue())
+					{
+						writer.WriteValue(json.boolValue);
+					}
+					else if (json.IsNumberValue())
+					{
+						writer.WriteValue(json.numberValue);
+					}
+					else if (json.IsNullValue())
+					{
+						writer.WriteNull();
+					}
+				}
+			}
+		}
         
     };
     
