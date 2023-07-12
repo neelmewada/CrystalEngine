@@ -5,7 +5,14 @@ namespace CE::Editor
 
 	class EDITORCORE_API EditorPlatformBase
 	{
-		
+	public:
+
+		struct FileType
+		{
+			String desc{};
+			Array<String> extensions{};
+		};
+
 	};
 
 }

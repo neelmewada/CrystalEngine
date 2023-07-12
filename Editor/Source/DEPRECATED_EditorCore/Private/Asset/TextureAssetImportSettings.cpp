@@ -1,3 +1,0 @@
-
-#include "Asset/TextureAssetImportSettings.h"
-

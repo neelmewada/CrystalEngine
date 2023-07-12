@@ -12,6 +12,8 @@ namespace CE::Widgets
 		CButton();
 		virtual ~CButton();
 
+		bool IsContainer() override { return true; }
+
 		void Construct() override;
 
 		void SetText(const String& text);

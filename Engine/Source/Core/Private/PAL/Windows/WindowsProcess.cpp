@@ -35,4 +35,21 @@ namespace CE
 		return baseName + ".dll";
 	}
 
+    bool WindowsProcess::LaunchProcess(const IO::Path& executablePath, const String& args)
+    {
+		String command = "\"" + executablePath.GetString() + "\" " + args;
+
+		STARTUPINFO startupInfo;
+		PROCESS_INFORMATION processInfo;
+
+		ZeroMemory(&startupInfo, sizeof(startupInfo));
+		startupInfo.cb = sizeof(startupInfo);
+		ZeroMemory(&processInfo, sizeof(processInfo));
+
+		CreateProcessA(NULL, command.GetCString(), NULL, NULL, NULL,
+			NULL, NULL, NULL, &startupInfo, &processInfo);
+		
+		return true;
+    }
+
 }

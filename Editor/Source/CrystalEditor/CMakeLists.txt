@@ -5,13 +5,9 @@ project(CrystalEditor CXX)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
-    VS_STARTUP_PROJECT
     AUTORTTI
-    AUTOMOC
-    AUTOUIC
-    AUTORCC
     NAMESPACE CE
-    FOLDER Editor
+    FOLDER Editor/Source
     PCHHEADER
         PRIVATE
             Public/${PROJECT_NAME}.h
@@ -30,16 +26,19 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            ThirdParty::cxxopts
         PUBLIC
+            CE::Core
+            CE::CoreGUI
+            CE::CoreWidgets
             CE::EditorCore
-            CE::AssetProcessor
-            CE::EditorSystem
-            $<$<BOOL:${PAL_TRAIT_VULKAN_SUPPORTED}>:CE::VulkanRHI>
+            CE::EditorWidgets
     RUNTIME_DEPENDENCIES
+
 )
 
 
-if(${PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED})
+if(${PAL_TRAIT_BUILD_TESTS})
     add_subdirectory(Tests)
 endif()
 

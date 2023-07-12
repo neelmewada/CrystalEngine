@@ -123,6 +123,12 @@ function(ce_add_target NAME TARGET_TYPE)
 
     target_compile_definitions(${NAME} PRIVATE PACKAGE_NAME="/Code/${NAME}")
 
+    if(${TARGET_TYPE} STREQUAL "GUIAPP")
+        target_compile_definitions(${NAME} PRIVATE IS_GUI_APP=1)
+    elseif(${TARGET_TYPE} STREQUAL "CONSOLEAPP")
+        target_compile_definitions(${NAME} PRIVATE IS_CONSOLE_APP=1)
+    endif()
+
     # OUTPUT_DIRECTORY
 
     if(${ce_add_target_OUTPUT_DIRECTORY})

@@ -25,7 +25,7 @@ namespace CE::Editor
 		return true;
     }
 
-    bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, const String& projectName)
+    bool ProjectManager::CreateEmptyProject(const IO::Path& projectFolder, String projectName)
     {
 		String extension = GetProjectFileExtension();
 
@@ -36,7 +36,7 @@ namespace CE::Editor
         if (!projectFolder.IsDirectory() || projectName.IsEmpty())
             return false;
 		if (!projectName.EndsWith(extension))
-			const_cast<String&>(projectName) += extension;
+			projectName += extension;
         
         CrystalProject project{};
         project.projectName = projectName;

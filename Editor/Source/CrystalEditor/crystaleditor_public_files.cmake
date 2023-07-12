@@ -1,4 +1,4 @@
 
-file(GLOB_RECURSE FILES "Public/*.h" "Public/*.cpp" "Public/*.ui" "Public/*.qrc")
+file(GLOB_RECURSE FILES "Public/*.h" "Public/*.cpp")
 
-ce_exclude_platform_files(FILES)
+ce_filter_platform_files(FILES)

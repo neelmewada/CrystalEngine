@@ -10,6 +10,8 @@ namespace CE::Editor
 		
 		static IO::Path ShowSelectDirectoryDialog(const IO::Path& defaultPath);
 
+		static IO::Path ShowFileSelectionDialog(const IO::Path& defaultPath, const Array<FileType>& fileTypes);
+
 	};
 
 	typedef WindowsEditorPlatform EditorPlatform;

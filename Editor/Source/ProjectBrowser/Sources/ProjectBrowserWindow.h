@@ -13,6 +13,9 @@ public:
 
 	FIELD()
 	String lastProjectName{};
+
+	FIELD()
+	Array<String> recentProjects{};
 };
 
 CLASS()
@@ -30,10 +33,18 @@ private:
 	FUNCTION()
 	void OnCreateProjectClicked();
 
+	FUNCTION()
+	void OnOpenProjectClicked();
+
+	void OpenProject(const IO::Path& projectPath);
+
 	CTextInput* folderPathInput = nullptr;
 	CTextInput* projectNameInput = nullptr;
 
+	CTextInput* openProjectPathInput = nullptr;
+
 	CLabel* errorLabel = nullptr;
+	CLabel* openErrorLabel = nullptr;
 
 	FIELD()
 	ProjectBrowserCache cache{};

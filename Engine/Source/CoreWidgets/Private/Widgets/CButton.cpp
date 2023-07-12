@@ -49,16 +49,21 @@ namespace CE::Widgets
 
 		auto styleMatch = stylesheet->SelectStyle(this);
 
-		Vec4 padding{};
-		padding.left = YGNodeLayoutGetPadding(node, YGEdgeLeft);
-		padding.top = YGNodeLayoutGetPadding(node, YGEdgeTop);
-		padding.right = YGNodeLayoutGetPadding(node, YGEdgeRight);
-		padding.bottom = YGNodeLayoutGetPadding(node, YGEdgeBottom);
+		Vec4 padding = GetComputedLayoutPadding();
 
 		bool hovered = false, held = false;
 		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding);
 
 		HandleBasicMouseEvents(hovered, held || pressed);
+
+		GUI::PushChildCoordinateSpace(rect);
+
+		for (auto child : attachedWidgets)
+		{
+			child->RenderGUI();
+		}
+
+		GUI::PopChildCoordinateSpace();
 
 		if (pressed)
 		{

@@ -123,7 +123,7 @@ namespace CE
 
 			if (sdlEvent.type == SDL_QUIT)
 			{
-				RequestEngineExit("USER_QUIT");
+				RequestEngineExit("APP_QUIT");
 				break;
 			}
 

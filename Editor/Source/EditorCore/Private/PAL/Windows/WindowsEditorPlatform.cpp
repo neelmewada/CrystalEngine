@@ -65,4 +65,66 @@ namespace CE::Editor
 		return result;
 	}
 
+	IO::Path WindowsEditorPlatform::ShowFileSelectionDialog(const IO::Path& defaultPath, const Array<FileType>& inFileTypes)
+	{
+		IO::Path result{};
+		if (inFileTypes.IsEmpty())
+			return result;
+
+		IFileDialog* pfd = nullptr;
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd))))
+		{
+			Array<COMDLG_FILTERSPEC> fileTypes{};
+			Array<std::wstring> descStore{};
+			Array<std::wstring> extStore{};
+
+			for (const auto& inFileType : inFileTypes)
+			{
+				descStore.Add(ToWString(inFileType.desc));
+				std::string ext = "";
+				for (int i = 0; i < inFileType.extensions.GetSize(); i++)
+				{
+					if (inFileType.extensions[i].StartsWith("*"))
+						ext += inFileType.extensions[i].ToStdString();
+					else
+						ext += "*" + inFileType.extensions[i].ToStdString();
+
+					if (i < inFileType.extensions.GetSize() - 1) // Not last element
+						ext += ";";
+				}
+				extStore.Add(ToWString(ext));
+			}
+
+			for (int i = 0; i < descStore.GetSize(); i++)
+			{
+				fileTypes.Add({ descStore[i].c_str(), extStore[i].c_str() });
+			}
+			
+			if (SUCCEEDED(pfd->SetFileTypes(fileTypes.GetSize(), fileTypes.GetData())))
+			{
+				if (SUCCEEDED(pfd->Show(NULL)))
+				{
+					IShellItem* psi;
+					if (SUCCEEDED(pfd->GetResult(&psi)))
+					{
+						LPWSTR pathString{};
+						if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pathString)))
+						{
+							std::wstring wideString = std::wstring(pathString);
+							result = ToString(wideString);
+
+							if (pathString)
+								CoTaskMemFree(pathString);
+						}
+						psi->Release();
+					}
+				}
+			}
+
+			pfd->Release();
+		}
+
+		return result;
+	}
+
 } // namespace CE::Editor

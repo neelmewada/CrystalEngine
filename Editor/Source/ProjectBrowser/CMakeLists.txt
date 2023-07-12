@@ -17,18 +17,16 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
     INCLUDE_DIRECTORIES
         PRIVATE
             Sources/
-    COMPILE_DEFINITIONS
-        PRIVATE
-            ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::cxxopts
-        PUBLIC
             CE::Core
             CE::CoreGUI
             CE::CoreWidgets
             CE::EditorCore
             CE::EditorWidgets
+        TARGETS
+            EditorLauncher
     RUNTIME_DEPENDENCIES
 
 )
