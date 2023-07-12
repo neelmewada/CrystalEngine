@@ -45,7 +45,7 @@ namespace CE
     {
 #if PAL_TRAIT_BUILD_EDITOR
 		ASSERT(!gProjectPath.IsEmpty(), "GetGameDir() called while project path is NOT set!");
-		return gProjectPath;
+		return gProjectPath / "Game";
 #else
         return GetAppRootDir() / "Game";
 #endif
@@ -73,6 +73,23 @@ namespace CE
         CoTaskMemFree(path);
         return appDataPath;
     }
+
+#if PAL_TRAIT_BUILD_EDITOR
+
+	IO::Path WindowsDirectories::GetEditorAppDataDir()
+	{
+		PWSTR path = NULL;
+		SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &path);
+
+		IO::Path appDataPath{ path };
+
+		appDataPath = appDataPath / "CrystalEngine";
+
+		CoTaskMemFree(path);
+		return appDataPath;
+	}
+
+#endif
 
 }
 

@@ -2,13 +2,16 @@
 
 EditorLoop gEditorLoop{};
 
+extern const CE::String css;
+
+//rgb(21, 21, 21)
+
 void EditorLoop::PreInit(int argc, char** argv)
 {
 	// Setup before loading any module
 
 	// Set Core Globals before loading Core
 	gProjectName = "CrystalEngine";
-	gProjectPath = PlatformDirectories::GetLaunchDir();
 
 	gDefaultWindowWidth = 1280;
 	gDefaultWindowHeight = 720;
@@ -48,7 +51,11 @@ void EditorLoop::PreInit(int argc, char** argv)
 		{
 			PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
 			exit(0);
+			return;
 		}
+
+		gProjectPath = projectPath.GetParentPath();
+		gProjectName = projectPath.GetFilename().RemoveExtension().GetString();
 	}
 	catch (std::exception exc)
 	{
@@ -99,6 +106,10 @@ void EditorLoop::Init()
 	// Load most important core modules for startup
 	LoadStartupCoreModules();
 
+	// Load Project
+	LoadProject();
+
+	// Load application
 	AppPreInit();
 }
 
@@ -172,6 +183,11 @@ void EditorLoop::PostInit()
 	EditorStyles::Get().InitDefaultStyle();
 
 	InitStyles();
+
+	rootWindow = CreateWidget<CWindow>(nullptr, "RootWindow");
+	rootWindow->SetAsDockSpaceWindow(true);
+	rootWindow->SetTitle("Crystal Editor");
+	rootWindow->SetFullscreen(true);
 }
 
 void EditorLoop::InitStyles()
@@ -189,12 +205,12 @@ void EditorLoop::RunLoop()
 		app->Tick();
 
 		// Render
-		viewport->SetClearColor(Color::FromRGBA32(26, 184, 107));
+		viewport->SetClearColor(Color::Black());
 
 		cmdList->Begin();
 		cmdList->ImGuiNewFrame();
 
-		//projectBrowser->RenderGUI();
+		rootWindow->RenderGUI();
 
 		cmdList->ImGuiRender();
 		cmdList->End();
@@ -210,6 +226,8 @@ void EditorLoop::RunLoop()
 
 void EditorLoop::PreShutdown()
 {
+	rootWindow->RequestDestroy();
+	rootWindow = nullptr;
 
 	cmdList->ShutdownImGui();
 
@@ -240,6 +258,10 @@ void EditorLoop::PreShutdown()
 
 void EditorLoop::Shutdown()
 {
+	// Unload project
+	UnloadProject();
+
+	// Shutdown application
 	AppShutdown();
 
 	// Unload most important modules at last
@@ -247,6 +269,20 @@ void EditorLoop::Shutdown()
 	ModuleManager::Get().UnloadModule("Core");
 
 	Logger::Shutdown();
+}
+
+void EditorLoop::LoadProject()
+{
+	if (!ProjectManager::Get().LoadProject(projectPath))
+	{
+		PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
+		RequestEngineExit("INVALID_PROJECT");
+	}
+}
+
+void EditorLoop::UnloadProject()
+{
+	// Do nothing for now
 }
 
 void EditorLoop::AppPreInit()

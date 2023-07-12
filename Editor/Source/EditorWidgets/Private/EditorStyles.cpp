@@ -12,6 +12,10 @@ CWindow {
 	row-gap: 5px;
 }
 
+CWindow.DockSpace {
+	background: rgb(21, 21, 21);
+}
+
 CLabel {
 	text-align: middle-center;
 }

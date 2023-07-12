@@ -239,7 +239,10 @@ void ProjectBrowserWindow::Construct()
 		{
 			IO::Path projectPath = cache.recentProjects[i];
 			if (!projectPath.Exists() || projectPath.GetExtension() != ProjectManager::Get().GetProjectFileExtension())
+			{
+				cache.recentProjects.RemoveAt(i);
 				continue;
+			}
 
 			String projectName = projectPath.GetFilename().RemoveExtension().GetString();
 

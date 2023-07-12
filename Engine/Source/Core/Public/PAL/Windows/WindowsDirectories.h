@@ -31,6 +31,10 @@ namespace CE
         static IO::Path GetLogDir();
 
         static IO::Path GetAppDataDir();
+
+#if PAL_TRAIT_BUILD_EDITOR
+		static IO::Path GetEditorAppDataDir();
+#endif
     };
 
     typedef WindowsDirectories PlatformDirectories;

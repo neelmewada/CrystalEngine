@@ -25,6 +25,9 @@ namespace CE::Widgets
 
 		inline bool AllowHorizontalScroll() const { return allowHorizontalScroll; }
 		inline void SetAllowHorizontalScroll(bool value) { allowHorizontalScroll = value; }
+
+		inline bool IsFullscreen() const { return isFullscreen; }
+		inline void SetFullscreen(bool value) { isFullscreen = value; }
         
         void Show();
         void Hide();
@@ -42,7 +45,7 @@ namespace CE::Widgets
 		virtual void OnBeforeComputeStyle() override;
 
 		inline bool IsDockSpaceWindow() const { return isDockSpaceWindow; }
-		inline void SetAsDockSpaceWindow(bool set) { isDockSpaceWindow = set; }
+		void SetAsDockSpaceWindow(bool set);
 
 	public:
 

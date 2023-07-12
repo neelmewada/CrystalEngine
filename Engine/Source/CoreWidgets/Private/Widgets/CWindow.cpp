@@ -38,6 +38,20 @@ namespace CE::Widgets
 		
 	}
 
+	void CWindow::SetAsDockSpaceWindow(bool set)
+	{
+		isDockSpaceWindow = set;
+
+		if (isDockSpaceWindow && !StyleClassExists("DockSpace"))
+		{
+			AddStyleClass("DockSpace");
+		}
+		else if (!isDockSpaceWindow && StyleClassExists("DockSpace"))
+		{
+			RemoveStyleClass("DockSpace");
+		}
+	}
+
     void CWindow::OnDrawGUI()
     {
         if (isShown)
@@ -53,19 +67,22 @@ namespace CE::Widgets
 			auto color = defaultStyleState.background;
 			
 			if (color.a > 0)
+			{
 				GUI::PushStyleColor(GUI::StyleCol_WindowBg, color);
+				GUI::PushStyleColor(GUI::StyleCol_DockingEmptyBg, color);
+			}
 
             GUI::BeginWindow(windowTitle, &isShown, windowFlags);
-
-			if (color.a > 0)
-				GUI::PopStyleColor();
 
 			if (IsDockSpaceWindow())
 			{
 				if (dockSpaceId.IsEmpty())
-					dockSpaceId = String::Format("DockSpace##{}", GetUuid());
+					dockSpaceId = String::Format("DockSpace##{}", GetName());
 				GUI::DockSpace(dockSpaceId);
 			}
+
+			if (color.a > 0)
+				GUI::PopStyleColor(2);
 
             for (CWidget* subWidget : attachedWidgets)
             {

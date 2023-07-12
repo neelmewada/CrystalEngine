@@ -1,5 +1,6 @@
 #pragma once
 
+using namespace CE::Widgets;
 
 class EditorLoop
 {
@@ -15,6 +16,10 @@ public:
 	void Shutdown();
 
 private:
+
+	void LoadProject();
+
+	void UnloadProject();
 
 	void InitStyles();
 
@@ -38,6 +43,8 @@ private:
 	CE::RHI::GraphicsCommandList* cmdList = nullptr;
 
 	IO::Path projectPath{};
+
+	CWindow* rootWindow = nullptr;
 };
 
 extern EditorLoop gEditorLoop;

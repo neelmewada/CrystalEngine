@@ -15,7 +15,7 @@ namespace CE::Editor
 
 	void EditorPrefs::LoadPrefs()
 	{
-		auto appDataPath = PlatformDirectories::GetAppDataDir();
+		auto appDataPath = PlatformDirectories::GetEditorAppDataDir();
 		if (!appDataPath.Exists())
 			IO::Path::CreateDirectories(appDataPath);
 
@@ -26,7 +26,7 @@ namespace CE::Editor
 
 	void EditorPrefs::SavePrefs()
 	{
-		auto appDataPath = PlatformDirectories::GetAppDataDir();
+		auto appDataPath = PlatformDirectories::GetEditorAppDataDir();
 		if (!appDataPath.Exists())
 			IO::Path::CreateDirectories(appDataPath);
 

@@ -68,7 +68,7 @@ namespace CE
 
 	static Package* LoadSettingsPackage()
 	{
-		return Package::LoadPackage(nullptr, PackagePath("/Game/Settings"));
+		return Package::LoadPackage(nullptr, PackagePath("/Game/Settings"), LOAD_Full);
 	}
 
     CORE_API Package* GetSettingsPackage()
@@ -90,7 +90,6 @@ namespace CE
 		for (int i = 0; i < name.GetLength(); i++)
 		{
 			char ch = name[i];
-			//if (ch == '.' || ch == ' ' || ch == '-' || ch == '/' || ch == '\\' || ch == ',' || ch == '+' || ch == ':' || ch == ';')
 			if (!String::IsAlphabet(ch) && !String::IsNumeric(ch) && ch != '_')
 			{
 				return false;
