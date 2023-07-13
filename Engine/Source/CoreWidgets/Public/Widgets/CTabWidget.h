@@ -51,6 +51,10 @@ namespace CE::Widgets
 
 		void OnAfterComputeStyle() override;
 
+		bool IsContainer() override { return true; }
+
+		bool IsSubWidgetAllowed(ClassType* subWidgetClass) override;
+
 	protected:
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;

@@ -43,6 +43,8 @@ namespace CE::Widgets
 		Hint,
 		Alternate,
 
+		Cell,
+
 		Any,
 	};
 	ENUM_CLASS_FLAGS(CSubControl);

@@ -19,4 +19,34 @@
             </Code>
         </Snippet>
     </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>Widget Class</Title>
+            <Description>Creates Widget class</Description>
+            <Shortcut>cewidget</Shortcut>
+        </Header>
+        <Snippet>
+            <Code Language="CPP">
+                <![CDATA[
+                CLASS()
+                class $API$ $CLASS$ : public $PARENT$
+                {
+                    CE_CLASS($CLASS$, $PARENT$)
+                public:
+
+                    $CLASS$();
+                    virtual ~$CLASS$();
+
+                protected:
+
+                    void Construct() override;
+
+                    void OnDrawGUI() override;
+
+                };
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
 </CodeSnippets>

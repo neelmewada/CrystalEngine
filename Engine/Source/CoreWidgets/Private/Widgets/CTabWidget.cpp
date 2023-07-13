@@ -141,6 +141,14 @@ namespace CE::Widgets
 		}
 	}
 
+	bool CTabWidget::IsSubWidgetAllowed(ClassType* subWidgetClass)
+	{
+		if (subWidgetClass == nullptr)
+			return false;
+
+		return subWidgetClass->IsSubclassOf<CTabContainerWidget>();
+	}
+
 	Vec2 CTabWidget::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
 		return Vec2(YGUndefined, YGUndefined);

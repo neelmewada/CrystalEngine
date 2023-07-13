@@ -4,6 +4,7 @@ namespace CE::Widgets
 {
 	class CDataModel;
 	class CWidget;
+	class CAbstractItemCell;
 
 	struct COREWIDGETS_API CModelIndex
 	{
@@ -40,7 +41,7 @@ namespace CE::Widgets
 	typedef Array<CModelIndex> CModelIndexList;
 
 	CLASS(Abstract)
-	class COREWIDGETS_API CDataModel : public Object
+		class COREWIDGETS_API CDataModel : public Object
 	{
 		CE_CLASS(CDataModel, Object)
 	public:
@@ -57,14 +58,16 @@ namespace CE::Widgets
 		virtual CModelIndex GetIndex(u32 row, u32 col, const CModelIndex& parent = {}) = 0;
 
 		/// The widget class to use for the cell/item
-		virtual ClassType* GetWidgetClass(const CModelIndex& index) = 0;
+		virtual ClassType* GetWidgetClass(const CModelIndex& index);
 
 		/// Override this function to set data for an item widget
-		virtual void SetData(const CModelIndex& index, CWidget* itemWidget) = 0;
+		virtual void SetData(const CModelIndex& index, CAbstractItemCell* itemWidget) = 0;
 
 		virtual String GetText(const CModelIndex& index) { return ""; }
         
         virtual int GetIndentLevel(const CModelIndex& index) { return 0; }
+
+		virtual f32 GetCellHeight(const CModelIndex& index) { return 20; }
 
 		CModelIndex CreateIndex(u32 row, u32 col, void* data = nullptr);
 

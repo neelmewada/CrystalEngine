@@ -46,15 +46,12 @@ namespace CE::Widgets
 	void CButton::OnDrawGUI()
 	{
 		Vec4 rect = GetComputedLayoutRect();
-
-		auto styleMatch = stylesheet->SelectStyle(this);
-
 		Vec4 padding = GetComputedLayoutPadding();
 
 		bool hovered = false, held = false;
 		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding);
 
-		HandleBasicMouseEvents(hovered, held || pressed);
+		PollBasicMouseEvents(hovered, held || pressed, this->stateFlags);
 
 		GUI::PushChildCoordinateSpace(rect);
 

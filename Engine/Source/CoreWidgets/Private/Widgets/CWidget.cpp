@@ -96,6 +96,21 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState, const Rect& rect)
+	{
+		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
+		f32 borderWidth = styleState.borderThickness;
+
+		if (styleState.background.a > 0)
+		{
+			GUI::FillRect(globalRect, styleState.background, styleState.borderRadius);
+		}
+		if (borderWidth > 0 && styleState.borderColor.a > 0)
+		{
+			GUI::DrawRect(globalRect + Rect(borderWidth, borderWidth, -borderWidth, -borderWidth), styleState.borderColor, styleState.borderRadius, borderWidth);
+		}
+	}
+
 	void CWidget::UpdateStyleIfNeeded()
 	{
 		if (!NeedsStyle() && !stylesheet->IsDirty())
@@ -473,6 +488,18 @@ namespace CE::Widgets
 				SetNeedsLayout(false);
 			}
         }
+		else if (IsContainer() && GetOwner() == nullptr) // Container but not a window
+		{
+			SetNeedsStyle(); // Force update style
+			UpdateStyleIfNeeded();
+
+			//Vec2 size = CalculateIntrinsicContentSize(YGUndefined, YGUndefined);
+			//if (size.x <= 0) size.x = YGUndefined;
+			//if (size.y <= 0) size.y = YGUndefined;
+			YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
+
+			SetNeedsLayout(false);
+		}
 
 		needsLayout = false;
 	}
@@ -526,12 +553,13 @@ namespace CE::Widgets
 	{
 		if (subobject == nullptr)
 			return;
-		if (subobject->GetClass()->IsSubclassOf<CWidget>() && 
+		if (IsContainer() && subobject->GetClass()->IsSubclassOf<CWidget>() && 
 			IsSubWidgetAllowed(subobject->GetClass()))
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Add(subWidget);
 			OnSubWidgetAttached(subWidget);
+			subWidget->parent = this;
 			subWidget->OnAttachedTo(this);
 
 			YGNodeSetMeasureFunc(node, nullptr);
@@ -572,7 +600,7 @@ namespace CE::Widgets
 		}
 	}
 
-	void CWidget::HandleBasicMouseEvents(bool hovered, bool leftMouseHeld)
+	void CWidget::PollBasicMouseEvents(bool hovered, bool leftMouseHeld, CStateFlag& stateFlags)
 	{
 		if (isHovered != hovered)
 		{
@@ -678,6 +706,25 @@ namespace CE::Widgets
 
 			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
+		}
+	}
+
+	void CWidget::ClearChildNodes()
+	{
+		YGNodeRemoveAllChildren(node);
+		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+	}
+
+	void CWidget::ReAddChildNodes()
+	{
+		ClearChildNodes();
+
+		YGNodeSetMeasureFunc(node, nullptr);
+
+		for (auto subWidget : attachedWidgets)
+		{
+			auto childCount = YGNodeGetChildCount(node);
+			YGNodeInsertChild(node, subWidget->node, childCount);
 		}
 	}
 
@@ -973,6 +1020,8 @@ namespace CE::Widgets
 
 	CWidget* CWidget::GetOwner()
 	{
+		return parent;
+
 		if (GetOuter() == nullptr)
 			return nullptr;
 		if (GetOuter()->GetClass()->IsSubclassOf<CWidget>())

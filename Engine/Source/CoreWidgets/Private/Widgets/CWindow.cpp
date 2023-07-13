@@ -5,7 +5,7 @@ namespace CE::Widgets
 
     CWindow::CWindow()
     {
-		SetTitle(GetName().GetCString());
+		SetTitle(GetName().GetString());
     }
 
     CWindow::~CWindow()

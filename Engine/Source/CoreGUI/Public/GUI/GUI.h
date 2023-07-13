@@ -146,10 +146,14 @@ namespace CE::GUI
 	// Tree Node
 
 	COREGUI_API bool TreeNode(const String& label, TreeNodeFlags flags = TNF_None);
+	COREGUI_API bool TableTreeNode(ID id, TreeNodeFlags flags = TNF_None);
 
 	COREGUI_API void TreePop();
 
     COREGUI_API bool CollapsibleHeader(const String& label, Vec4* padding = nullptr, Vec4* borderRadius = nullptr, f32* borderSize = nullptr, TreeNodeFlags flags = TNF_None);
+
+	COREGUI_API bool CollapsibleHeader(const Rect& localRect, const String& label, ID id, const GuiStyleState& style, bool& hovered, bool& held,
+		const Vec4& headerPadding = {}, const Vec4& contentPadding = {}, TreeNodeFlags flags = TNF_None);
 
 	// Tab Bar
 
@@ -167,7 +171,9 @@ namespace CE::GUI
 
 #pragma region Table
 
+	COREGUI_API bool BeginTable(const Rect& localRect, ID id, const String& label, int columnCount, TableFlags flags = TableFlags_None);
 	COREGUI_API bool BeginTable(const String& label, int columnCount, TableFlags flags = TableFlags_None, const Vec2& outerSize = {0, 0}, f32 innerWidth = 0);
+
 	COREGUI_API void EndTable();
 
 	COREGUI_API void TableSetupColumn(const String& label, TableColumnFlags flags = TableColumnFlags_None);

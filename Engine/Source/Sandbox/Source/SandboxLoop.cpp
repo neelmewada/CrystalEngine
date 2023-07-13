@@ -211,7 +211,7 @@ public:
     {
         root = new Entry();
         
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 100; i++)
         {
             Entry* e = new Entry();
             e->name = String("Entry: ") + i;
@@ -295,16 +295,12 @@ public:
 
 	virtual ClassType* GetWidgetClass(const CModelIndex& index) override
 	{
-		return GetStaticClass<CLabel>();
+		return GetStaticClass<CAbstractItemCell>();
 	}
 
-	virtual void SetData(const CModelIndex& index, CWidget* itemWidget) override
+	virtual void SetData(const CModelIndex& index, CAbstractItemCell* itemWidget) override
 	{
-		if (itemWidget->GetClass()->IsSubclassOf<CLabel>())
-		{
-			CLabel* label = (CLabel*)itemWidget;
-			label->SetText(String::Format("Cell Entry: {},{}", index.GetRow(), index.GetColumn()));
-		}
+		itemWidget->SetText(String::Format("Cell Entry: {},{}", index.GetRow(), index.GetColumn()));
 	}
 
 	virtual bool HasHeader() override { return true; }
@@ -350,29 +346,48 @@ static const String stylesheet = R"(
 CWindow {
 	foreground: white;
 	background: rgb(36, 36, 36);
-	padding: 5 25 5 5;
+	padding: 8 25 8 10;
 	flex-direction: column;
-	align-items: flex-start;
+	align-items: stretch;
 	row-gap: 5px;
+}
+
+CWindow.DockSpace {
+	background: rgb(21, 21, 21);
 }
 
 CLabel {
 	text-align: middle-center;
-	background: rgb(120, 0, 0);
 }
 
 CButton {
-	padding: 10px 3px;
-	border-radius: 1.5px;
-	border-width: 1px;
-	border-color: rgb(30, 30, 30);
+	padding: 10px 1px;
+	border-radius: 2px;
+	border-width: 1.5px;
+	border-color: rgb(25, 25, 25);
 	background: rgb(64, 64, 64);
 }
 CButton:hovered {
-	background: rgb(80, 80, 80);
+	background: rgb(90, 90, 90);
 }
 CButton:pressed {
-	background: rgba(100, 100, 100);
+	background: rgba(50, 50, 50);
+}
+
+CButton::alternate {
+	padding: 10px 1px;
+	border-radius: 2px;
+	border-width: 1.5px;
+	border-color: rgb(25, 25, 25);
+	background: rgb(0, 112, 224);
+}
+
+CButton::alternate:hovered {
+	background: rgb(14, 134, 255);
+}
+
+CButton::alternate:pressed {
+	background: rgb(6, 66, 126);
 }
 
 CTextInput {
@@ -386,63 +401,23 @@ CTextInput::hint {
 	foreground: rgba(255, 255, 255, 120);
 }
 
-CTabWidget {
-	width: 100%;
-	height: 100%;
+CCollapsibleSection {
+	padding: 20px 0 0 0;
 }
 
-CTabWidget::tab {
-	padding: 10 10 10 10;
-	background: rgba(22, 22, 22, 210);
+CCollapsibleSection::header {
+	font-size: 18px;
+	background: rgb(47, 47, 47);
+	border-width: 1px;
+	border-color: rgb(30, 30, 30);
+	padding: 3px 3px;
+	border-radius: 0px;
 }
 
-CTabWidget::tab:hovered {
-	background: rgba(90, 90, 90, 210);
+#TableView {
+	height: 250px;
 }
 
-CTabWidget::tab:active {
-	background: rgba(60, 60, 60, 255);
-}
-
-CTabWidget::tab:unfocused {
-	background: rgba(22, 22, 22);
-}
-
-CTabContainerWidget {
-	padding: 3 0 3 0;
-}
-
-#SelectableGroup {
-	width: 100%;
-	height: 200px;
-	background: rgb(26, 26, 26);
-	padding: 0px 0px;
-}
-
-#SelectableGroup > CSelectableWidget {
-	width: 100%;
-	height: 35px;
-    padding: 0;
-}
-
-.Selectable {
-	padding: 10px 0px;
-	foreground: white;
-	font-size: 18;
-}
-
-.Selectable:hovered {
-	background: rgb(43, 50, 58);
-}
-.Selectable:pressed, .Selectable:active {
-	background: rgb(65, 87, 111);
-}
-
-.Selectable > CLabel {
-	background: none;
-	height: 100%;
-	text-align: middle-left;
-}
 )";
 
 void SandboxLoop::SetupGUI()
@@ -456,7 +431,23 @@ void SandboxLoop::SetupGUI()
 	window->SetTitle("Test Window");
 	window->SetAllowHorizontalScroll(true);
 
+	auto section = CreateWidget<CCollapsibleSection>(window, "CollapsibleSection");
+	section->SetTitle("Header Title");
+
+	{
+		auto label = CreateWidget<CLabel>(section, "LabelInside");
+		label->SetText("This is a sub-label");
+
+		auto button = CreateWidget<CButton>(section, "ButtonInside");
+		button->SetText("Click me");
+
+		auto table = CreateWidget<CTableView>(section, "TableView");
+		auto tableModel = CreateObject<MyTableModel>(table, "TableModel");
+		table->SetModel(tableModel);
+	}
 	
+	auto testLabel = CreateWidget<CLabel>(window, "TestLabel");
+	testLabel->SetText("This is a test label");
 }
 
 void SandboxLoop::RunLoop()

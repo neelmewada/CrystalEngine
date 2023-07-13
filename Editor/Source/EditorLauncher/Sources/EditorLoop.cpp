@@ -92,10 +92,14 @@ void EditorLoop::LoadEditorModules()
 {
 	ModuleManager::Get().LoadModule("EditorCore");
 	ModuleManager::Get().LoadModule("EditorWidgets");
+
+	ModuleManager::Get().LoadModule("CrystalEditor");
 }
 
 void EditorLoop::UnloadEditorModules()
 {
+	ModuleManager::Get().UnloadModule("CrystalEditor");
+
 	ModuleManager::Get().UnloadModule("EditorWidgets");
 	ModuleManager::Get().UnloadModule("EditorCore");
 }

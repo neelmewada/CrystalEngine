@@ -3,7 +3,6 @@
 
 #include "CrystalEditor.private.h"
 
-
 namespace CE
 {
     class CrystalEditorModule : public CE::Module

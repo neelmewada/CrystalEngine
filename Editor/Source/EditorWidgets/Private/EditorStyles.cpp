@@ -6,7 +6,7 @@ static const CE::String globalStyleSheet = R"(
 CWindow {
 	foreground: white;
 	background: rgb(36, 36, 36);
-	padding: 5 25 5 5;
+	padding: 8 25 8 5;
 	flex-direction: column;
 	align-items: flex-start;
 	row-gap: 5px;

@@ -3979,6 +3979,193 @@ namespace CE::GUI
 		return is_open;
     }
 
+	COREGUI_API bool TableTreeNode(ID id, TreeNodeFlags flags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+		const bool display_frame = (flags & ImGuiTreeNodeFlags_Framed) != 0;
+		const ImVec2 padding = (display_frame || (flags & ImGuiTreeNodeFlags_FramePadding)) ? style.FramePadding : ImVec2(style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
+
+		//auto label_end = ImGui::FindRenderedTextEnd(label.GetCString());
+		const ImVec2 label_size = ImGui::CalcTextSize("label");
+
+		// We vertically grow up to current line height up the typical widget height.
+		const float frame_height = ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2), label_size.y + padding.y * 2);
+		ImRect frame_bb;
+		frame_bb.Min.x = (flags & ImGuiTreeNodeFlags_SpanFullWidth) ? window->WorkRect.Min.x : window->DC.CursorPos.x;
+		frame_bb.Min.y = window->DC.CursorPos.y;
+		frame_bb.Max.x = window->WorkRect.Max.x;
+		frame_bb.Max.y = window->DC.CursorPos.y + frame_height;
+		if (display_frame)
+		{
+			// Framed header expand a little outside the default padding, to the edge of InnerClipRect
+			// (FIXME: May remove this at some point and make InnerClipRect align with WindowPadding.x instead of WindowPadding.x*0.5f)
+			frame_bb.Min.x -= IM_FLOOR(window->WindowPadding.x * 0.5f - 1.0f);
+			frame_bb.Max.x += IM_FLOOR(window->WindowPadding.x * 0.5f);
+		}
+
+		const float text_offset_x = g.FontSize + (display_frame ? padding.x * 3 : padding.x * 2);           // Collapser arrow width + Spacing
+		const float text_offset_y = ImMax(padding.y, window->DC.CurrLineTextBaseOffset);                    // Latch before ItemSize changes it
+		const float text_width = g.FontSize + (label_size.x > 0.0f ? label_size.x + padding.x * 2 : 0.0f);  // Include collapser
+		ImVec2 text_pos(window->DC.CursorPos.x + text_offset_x, window->DC.CursorPos.y + text_offset_y);
+		ImGui::ItemSize(ImVec2(text_width, frame_height), padding.y);
+
+		// For regular tree nodes, we arbitrary allow to click past 2 worth of ItemSpacing
+		ImRect interact_bb = frame_bb;
+		//if (!display_frame && (flags & (ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth)) == 0)
+		//	interact_bb.Max.x = frame_bb.Min.x + text_width + style.ItemSpacing.x * 2.0f;
+
+		// Store a flag for the current depth to tell if we will allow closing this node when navigating one of its child.
+		// For this purpose we essentially compare if g.NavIdIsAlive went from 0 to 1 between TreeNode() and TreePop().
+		// This is currently only support 32 level deep and we are fine with (1 << Depth) overflowing into a zero.
+		const bool is_leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
+		bool is_open = ImGui::TreeNodeUpdateNextOpen(id, flags);
+		if (is_open && !g.NavIdIsAlive && (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+			window->DC.TreeJumpToParentOnPopMask |= (1 << window->DC.TreeDepth);
+
+		bool item_add = ImGui::ItemAdd(interact_bb, id);
+		g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HasDisplayRect;
+		g.LastItemData.DisplayRect = frame_bb;
+
+		if (!item_add)
+		{
+			if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+				ImGui::TreePushOverrideID(id);
+			IMGUI_TEST_ENGINE_ITEM_INFO(g.LastItemData.ID, label, g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+			return is_open;
+		}
+
+		ImGuiButtonFlags button_flags = ImGuiTreeNodeFlags_None;
+		if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)
+			button_flags |= ImGuiButtonFlags_AllowItemOverlap;
+		if (!is_leaf)
+			button_flags |= ImGuiButtonFlags_PressedOnDragDropHold;
+
+		// We allow clicking on the arrow section with keyboard modifiers held, in order to easily
+		// allow browsing a tree while preserving selection with code implementing multi-selection patterns.
+		// When clicking on the rest of the tree node we always disallow keyboard modifiers.
+		const float arrow_hit_x1 = (text_pos.x - text_offset_x) - style.TouchExtraPadding.x;
+		const float arrow_hit_x2 = (text_pos.x - text_offset_x) + (g.FontSize + padding.x * 2.0f) + style.TouchExtraPadding.x;
+		const bool is_mouse_x_over_arrow = (g.IO.MousePos.x >= arrow_hit_x1 && g.IO.MousePos.x < arrow_hit_x2);
+		if (window != g.HoveredWindow || !is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_NoKeyModifiers;
+
+		// Open behaviors can be altered with the _OpenOnArrow and _OnOnDoubleClick flags.
+		// Some alteration have subtle effects (e.g. toggle on MouseUp vs MouseDown events) due to requirements for multi-selection and drag and drop support.
+		// - Single-click on label = Toggle on MouseUp (default, when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=1)
+		// - Double-click on label = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1)
+		// - Double-click on arrow = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1 and _OpenOnArrow=0)
+		// It is rather standard that arrow click react on Down rather than Up.
+		// We set ImGuiButtonFlags_PressedOnClickRelease on OpenOnDoubleClick because we want the item to be active on the initial MouseDown in order for drag and drop to work.
+		if (is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_PressedOnClick;
+		else if (flags & ImGuiTreeNodeFlags_OpenOnDoubleClick)
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick;
+		else
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease;
+
+		bool selected = (flags & ImGuiTreeNodeFlags_Selected) != 0;
+		const bool was_selected = selected;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(interact_bb, id, &hovered, &held, button_flags);
+		bool toggled = false;
+		if (!is_leaf)
+		{
+			if (pressed && g.DragDropHoldJustPressedId != id)
+			{
+				if ((flags & (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) == 0 || (g.NavActivateId == id))
+					toggled = true;
+				if (flags & ImGuiTreeNodeFlags_OpenOnArrow)
+					toggled |= is_mouse_x_over_arrow && !g.NavDisableMouseHover; // Lightweight equivalent of IsMouseHoveringRect() since ButtonBehavior() already did the job
+				if ((flags & ImGuiTreeNodeFlags_OpenOnDoubleClick) && g.IO.MouseClickedCount[0] == 2)
+					toggled = true;
+			}
+			else if (pressed && g.DragDropHoldJustPressedId == id)
+			{
+				IM_ASSERT(button_flags & ImGuiButtonFlags_PressedOnDragDropHold);
+				if (!is_open) // When using Drag and Drop "hold to open" we keep the node highlighted after opening, but never close it again.
+					toggled = true;
+			}
+
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && is_open)
+			{
+				toggled = true;
+				ImGui::NavMoveRequestCancel();
+			}
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Right && !is_open) // If there's something upcoming on the line we may want to give it the priority?
+			{
+				toggled = true;
+				ImGui::NavMoveRequestCancel();
+			}
+
+			if (toggled)
+			{
+				is_open = !is_open;
+				window->DC.StateStorage->SetInt(id, is_open);
+				g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
+			}
+		}
+		if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)
+			ImGui::SetItemAllowOverlap();
+
+		// In this branch, TreeNodeBehavior() cannot toggle the selection so this will never trigger.
+		if (selected != was_selected) //-V547
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
+
+		// Render
+		const ImU32 text_col = ImGui::GetColorU32(ImGuiCol_Text);
+		ImGuiNavHighlightFlags nav_highlight_flags = ImGuiNavHighlightFlags_TypeThin;
+		if (display_frame)
+		{
+			// Framed type
+			const ImU32 bg_col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+			ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, bg_col, true, style.FrameRounding);
+			ImGui::RenderNavHighlight(frame_bb, id, nav_highlight_flags);
+			if (flags & ImGuiTreeNodeFlags_Bullet)
+				ImGui::RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.60f, text_pos.y + g.FontSize * 0.5f), text_col);
+			else if (!is_leaf)
+				ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y), text_col, is_open ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
+			else // Leaf without bullet, left-adjusted text
+				text_pos.x -= text_offset_x;
+			if (flags & ImGuiTreeNodeFlags_ClipLabelForTrailingButton)
+				frame_bb.Max.x -= g.FontSize + style.FramePadding.x;
+
+			if (g.LogEnabled)
+				ImGui::LogSetNextTextDecoration("###", "###");
+			//ImGui::RenderTextClipped(text_pos, frame_bb.Max, label.GetCString(), label_end, &label_size);
+		}
+		else
+		{
+			// Unframed typed for tree nodes
+			if (hovered || selected)
+			{
+				const ImU32 bg_col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+				ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, bg_col, false);
+			}
+			ImGui::RenderNavHighlight(frame_bb, id, nav_highlight_flags);
+			if (flags & ImGuiTreeNodeFlags_Bullet)
+				ImGui::RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.5f, text_pos.y + g.FontSize * 0.5f), text_col);
+			else if (!is_leaf)
+				ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f), text_col, is_open ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
+			if (g.LogEnabled)
+				ImGui::LogSetNextTextDecoration(">", NULL);
+			//ImGui::RenderText(text_pos, label.GetCString(), label_end, false);
+		}
+
+		if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+			ImGui::TreePushOverrideID(id);
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(),
+			g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+		return is_open;
+	}
+
     COREGUI_API void TreePop()
     {
 		ImGui::TreePop();
@@ -4191,6 +4378,211 @@ namespace CE::GUI
 		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(), g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
 		return is_open;
     }
+
+	COREGUI_API bool CollapsibleHeader(const Rect& localRect, const String& label, ID id, const GuiStyleState& styleState, bool& hovered, bool& held, const Vec4& headerPadding, const Vec4& contentPadding, TreeNodeFlags flags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		Rect rect = ToWindowCoordinateSpace(localRect);
+		auto rectSize = rect.max - rect.min;
+
+		GUI::SetCursorPos(rect.min);
+
+		flags |= TNF_CollapsingHeader;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+		const bool display_frame = (flags & ImGuiTreeNodeFlags_Framed) != 0;
+		//const ImVec2 defaultPadding = (display_frame || (flags & ImGuiTreeNodeFlags_FramePadding)) ? style.FramePadding : ImVec2(style.FramePadding.x, ImMin(window->DC.CurrLineTextBaseOffset, style.FramePadding.y));
+
+		ImVec4 padding = ImVec4(headerPadding.x, headerPadding.y, headerPadding.z, headerPadding.w);
+
+		auto label_end = ImGui::FindRenderedTextEnd(label.GetCString());
+		const ImVec2 label_size = ImGui::CalcTextSize(label.GetCString(), label_end, false);
+
+		// We vertically grow up to current line height up the typical widget height.
+		const float frame_height = ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + headerPadding.top + headerPadding.bottom), label_size.y + padding.y + padding.w);
+		ImRect frame_bb;
+		frame_bb.Min.x = (flags & ImGuiTreeNodeFlags_SpanFullWidth) ? window->WorkRect.Min.x : window->DC.CursorPos.x;
+		frame_bb.Min.y = window->DC.CursorPos.y;
+		frame_bb.Max.x = frame_bb.Min.x + rectSize.width;
+		frame_bb.Max.y = window->DC.CursorPos.y + frame_height;
+		if (display_frame)
+		{
+			// Framed header expand a little outside the default padding, to the edge of InnerClipRect
+			// (FIXME: May remove this at some point and make InnerClipRect align with WindowPadding.x instead of WindowPadding.x*0.5f)
+			//frame_bb.Min.x -= IM_FLOOR(window->WindowPadding.x * 0.5f - 1.0f);
+			//frame_bb.Max.x += IM_FLOOR(window->WindowPadding.x * 0.5f);
+		}
+
+		// Collapser arrow width + Spacing
+		const float text_offset_x = g.FontSize + (display_frame ? (padding.x + padding.z + (padding.x + padding.z) / 2.f) : (padding.x + padding.z));
+		const float text_offset_y = ImMax(padding.y, window->DC.CurrLineTextBaseOffset);                    // Latch before ItemSize changes it
+		const float text_width = g.FontSize + (label_size.x > 0.0f ? label_size.x + padding.x * 2 : 0.0f);  // Include collapser
+		ImVec2 text_pos(window->DC.CursorPos.x + text_offset_x, window->DC.CursorPos.y + text_offset_y);
+		ImGui::ItemSize(ImVec2(text_width, frame_height), padding.y);
+
+		// For regular tree nodes, we arbitrary allow to click past 2 worth of ItemSpacing
+		ImRect interact_bb = frame_bb;
+		if (!display_frame && (flags & (ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth)) == 0)
+			interact_bb.Max.x = frame_bb.Min.x + text_width + style.ItemSpacing.x * 2.0f;
+
+		// Store a flag for the current depth to tell if we will allow closing this node when navigating one of its child.
+		// For this purpose we essentially compare if g.NavIdIsAlive went from 0 to 1 between TreeNode() and TreePop().
+		// This is currently only support 32 level deep and we are fine with (1 << Depth) overflowing into a zero.
+		const bool is_leaf = (flags & ImGuiTreeNodeFlags_Leaf) != 0;
+		bool is_open = ImGui::TreeNodeUpdateNextOpen(id, flags);
+		if (is_open && !g.NavIdIsAlive && (flags & ImGuiTreeNodeFlags_NavLeftJumpsBackHere) && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+			window->DC.TreeJumpToParentOnPopMask |= (1 << window->DC.TreeDepth);
+
+		bool item_add = ImGui::ItemAdd(interact_bb, id);
+		g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HasDisplayRect;
+		g.LastItemData.DisplayRect = frame_bb;
+
+		if (!item_add)
+		{
+			if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+				ImGui::TreePushOverrideID(id);
+			IMGUI_TEST_ENGINE_ITEM_INFO(g.LastItemData.ID, label, g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+			return is_open;
+		}
+
+		ImGuiButtonFlags button_flags = ImGuiTreeNodeFlags_None;
+		if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)
+			button_flags |= ImGuiButtonFlags_AllowItemOverlap;
+		if (!is_leaf)
+			button_flags |= ImGuiButtonFlags_PressedOnDragDropHold;
+
+		// We allow clicking on the arrow section with keyboard modifiers held, in order to easily
+		// allow browsing a tree while preserving selection with code implementing multi-selection patterns.
+		// When clicking on the rest of the tree node we always disallow keyboard modifiers.
+		const float arrow_hit_x1 = (text_pos.x - text_offset_x) - style.TouchExtraPadding.x;
+		const float arrow_hit_x2 = (text_pos.x - text_offset_x) + (g.FontSize + padding.x + padding.z) + style.TouchExtraPadding.x;
+		const bool is_mouse_x_over_arrow = (g.IO.MousePos.x >= arrow_hit_x1 && g.IO.MousePos.x < arrow_hit_x2);
+		if (window != g.HoveredWindow || !is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_NoKeyModifiers;
+
+		// Open behaviors can be altered with the _OpenOnArrow and _OnOnDoubleClick flags.
+		// Some alteration have subtle effects (e.g. toggle on MouseUp vs MouseDown events) due to requirements for multi-selection and drag and drop support.
+		// - Single-click on label = Toggle on MouseUp (default, when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=1)
+		// - Double-click on label = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1)
+		// - Double-click on arrow = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1 and _OpenOnArrow=0)
+		// It is rather standard that arrow click react on Down rather than Up.
+		// We set ImGuiButtonFlags_PressedOnClickRelease on OpenOnDoubleClick because we want the item to be active on the initial MouseDown in order for drag and drop to work.
+		if (is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_PressedOnClick;
+		else if (flags & ImGuiTreeNodeFlags_OpenOnDoubleClick)
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick;
+		else
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease;
+
+		bool selected = (flags & ImGuiTreeNodeFlags_Selected) != 0;
+		const bool was_selected = selected;
+
+		bool pressed = ImGui::ButtonBehavior(interact_bb, id, &hovered, &held, button_flags);
+		bool toggled = false;
+		if (!is_leaf)
+		{
+			if (pressed && g.DragDropHoldJustPressedId != id)
+			{
+				if ((flags & (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) == 0 || (g.NavActivateId == id))
+					toggled = true;
+				if (flags & ImGuiTreeNodeFlags_OpenOnArrow)
+					toggled |= is_mouse_x_over_arrow && !g.NavDisableMouseHover; // Lightweight equivalent of IsMouseHoveringRect() since ButtonBehavior() already did the job
+				if ((flags & ImGuiTreeNodeFlags_OpenOnDoubleClick) && g.IO.MouseClickedCount[0] == 2)
+					toggled = true;
+			}
+			else if (pressed && g.DragDropHoldJustPressedId == id)
+			{
+				IM_ASSERT(button_flags & ImGuiButtonFlags_PressedOnDragDropHold);
+				if (!is_open) // When using Drag and Drop "hold to open" we keep the node highlighted after opening, but never close it again.
+					toggled = true;
+			}
+
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && is_open)
+			{
+				toggled = true;
+				ImGui::NavMoveRequestCancel();
+			}
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Right && !is_open) // If there's something upcoming on the line we may want to give it the priority?
+			{
+				toggled = true;
+				ImGui::NavMoveRequestCancel();
+			}
+
+			if (toggled)
+			{
+				is_open = !is_open;
+				window->DC.StateStorage->SetInt(id, is_open);
+				g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
+			}
+		}
+		if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)
+			ImGui::SetItemAllowOverlap();
+
+		// In this branch, TreeNodeBehavior() cannot toggle the selection so this will never trigger.
+		if (selected != was_selected) //-V547
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
+
+		// Render
+		const ImU32 text_col = styleState.foreground.ToU32();
+		ImGui::PushStyleColor(ImGuiCol_Text, text_col);
+		ImGuiNavHighlightFlags nav_highlight_flags = ImGuiNavHighlightFlags_TypeThin;
+		if (display_frame)
+		{
+			// Framed type
+			//ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+
+			Vec4 frameRect = Vec4(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Max.x, frame_bb.Max.y);
+			GUI::RenderFrame(frameRect, styleState.background, styleState.borderColor,
+				styleState.borderThickness,
+				styleState.borderRadius);
+			GUI::RenderNavHighlight(frameRect, id, nav_highlight_flags, styleState.borderRadius);
+
+			if (flags & ImGuiTreeNodeFlags_Bullet)
+				ImGui::RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.60f, text_pos.y + g.FontSize * 0.5f), text_col);
+			else if (!is_leaf)
+				ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y), text_col, is_open ? ImGuiDir_Down : ImGuiDir_Right, 1.0f);
+			else // Leaf without bullet, left-adjusted text
+				text_pos.x -= text_offset_x;
+			if (flags & ImGuiTreeNodeFlags_ClipLabelForTrailingButton)
+				frame_bb.Max.x -= g.FontSize + style.FramePadding.x;
+
+			if (g.LogEnabled)
+				ImGui::LogSetNextTextDecoration("###", "###");
+			ImGui::RenderTextClipped(text_pos, frame_bb.Max, label.GetCString(), label_end, &label_size);
+		}
+		else
+		{
+			// Unframed typed for tree nodes
+			if (hovered || selected)
+			{
+				//const ImU32 bg_col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+				
+				Vec4 frameRect = Vec4(frame_bb.Min.x, frame_bb.Min.y, frame_bb.Max.x, frame_bb.Max.y);
+
+				GUI::RenderFrame(frameRect, styleState.background, styleState.borderColor, styleState.borderThickness, styleState.borderRadius);
+			}
+			ImGui::RenderNavHighlight(frame_bb, id, nav_highlight_flags);
+			if (flags & ImGuiTreeNodeFlags_Bullet)
+				ImGui::RenderBullet(window->DrawList, ImVec2(text_pos.x - text_offset_x * 0.5f, text_pos.y + g.FontSize * 0.5f), text_col);
+			else if (!is_leaf)
+				ImGui::RenderArrow(window->DrawList, ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f), text_col, is_open ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
+			if (g.LogEnabled)
+				ImGui::LogSetNextTextDecoration(">", NULL);
+			ImGui::RenderText(text_pos, label.GetCString(), label_end, false);
+		}
+		ImGui::PopStyleColor(1);
+
+		if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+			ImGui::TreePushOverrideID(id);
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(), g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+		return is_open;
+	}
 
 
 	struct ImGuiTabBarSection
@@ -5106,6 +5498,336 @@ namespace CE::GUI
 #pragma endregion
 
 #pragma region Table
+
+	static const int TABLE_DRAW_CHANNEL_BG0 = 0;
+	static const int TABLE_DRAW_CHANNEL_BG2_FROZEN = 1;
+	static const int TABLE_DRAW_CHANNEL_NOCLIP = 2;                     // When using ImGuiTableFlags_NoClip (this becomes the last visible channel)
+	static const float TABLE_BORDER_SIZE = 1.0f;    // FIXME-TABLE: Currently hard-coded because of clipping assumptions with outer borders rendering.
+	static const float TABLE_RESIZE_SEPARATOR_HALF_THICKNESS = 4.0f;    // Extend outside inner borders.
+	static const float TABLE_RESIZE_SEPARATOR_FEEDBACK_TIMER = 0.06f;   // Delay/timer before making the hover feedback (color+cursor) visible because tables/columns tends to be more cramped.
+
+
+	inline ImGuiTableFlags TableFixFlags(ImGuiTableFlags flags, ImGuiWindow* outer_window)
+	{
+		// Adjust flags: set default sizing policy
+		if ((flags & ImGuiTableFlags_SizingMask_) == 0)
+			flags |= ((flags & ImGuiTableFlags_ScrollX) || (outer_window->Flags & ImGuiWindowFlags_AlwaysAutoResize)) ? ImGuiTableFlags_SizingFixedFit : ImGuiTableFlags_SizingStretchSame;
+
+		// Adjust flags: enable NoKeepColumnsVisible when using ImGuiTableFlags_SizingFixedSame
+		if ((flags & ImGuiTableFlags_SizingMask_) == ImGuiTableFlags_SizingFixedSame)
+			flags |= ImGuiTableFlags_NoKeepColumnsVisible;
+
+		// Adjust flags: enforce borders when resizable
+		if (flags & ImGuiTableFlags_Resizable)
+			flags |= ImGuiTableFlags_BordersInnerV;
+
+		// Adjust flags: disable NoHostExtendX/NoHostExtendY if we have any scrolling going on
+		if (flags & (ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY))
+			flags &= ~(ImGuiTableFlags_NoHostExtendX | ImGuiTableFlags_NoHostExtendY);
+
+		// Adjust flags: NoBordersInBodyUntilResize takes priority over NoBordersInBody
+		if (flags & ImGuiTableFlags_NoBordersInBodyUntilResize)
+			flags &= ~ImGuiTableFlags_NoBordersInBody;
+
+		// Adjust flags: disable saved settings if there's nothing to save
+		if ((flags & (ImGuiTableFlags_Resizable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable)) == 0)
+			flags |= ImGuiTableFlags_NoSavedSettings;
+
+		// Inherit _NoSavedSettings from top-level window (child windows always have _NoSavedSettings set)
+		if (outer_window->RootWindow->Flags & ImGuiWindowFlags_NoSavedSettings)
+			flags |= ImGuiTableFlags_NoSavedSettings;
+
+		return flags;
+	}
+
+	COREGUI_API bool BeginTable(const Rect& localRect, ID id, const String& label, int columnCount, TableFlags tableFlags)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* outer_window = ImGui::GetCurrentWindow();
+		if (outer_window->SkipItems) // Consistent with other tables + beneficial side effect that assert on miscalling EndTable() will be more visible.
+			return false;
+
+		Rect rect = ToWindowCoordinateSpace(localRect);
+		Vec2 rectSize = rect.max - rect.min;
+		ImVec2 outer_size = ImVec2(rectSize.x, rectSize.y);
+
+		f32 inner_width = rect.right - rect.left;
+		int columns_count = columnCount;
+		const char* name = label.GetCString();
+
+		ImGuiTableFlags flags = (ImGuiTabBarFlags)tableFlags;
+
+		// Sanity checks
+		IM_ASSERT(columns_count > 0 && columns_count < IMGUI_TABLE_MAX_COLUMNS);
+		if (flags & ImGuiTableFlags_ScrollX)
+			IM_ASSERT(inner_width >= 0.0f);
+
+		GUI::SetCursorPos(rect.min);
+
+		// If an outer size is specified ahead we will be able to early out when not visible. Exact clipping rules may evolve.
+		const bool use_child_window = (flags & (ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY)) != 0;
+		const ImVec2 avail_size = ImGui::GetContentRegionAvail();
+		ImVec2 actual_outer_size = ImVec2(rectSize.x, rectSize.y);
+		//ImVec2 actual_outer_size = ImGui::CalcItemSize(outer_size, ImMax(avail_size.x, 1.0f), use_child_window ? ImMax(avail_size.y, 1.0f) : 0.0f);
+		ImRect outer_rect(outer_window->DC.CursorPos, outer_window->DC.CursorPos + actual_outer_size);
+		if (use_child_window && ImGui::IsClippedEx(outer_rect, 0))
+		{
+			ImGui::ItemSize(outer_rect);
+			return false;
+		}
+
+		// Acquire storage for the table
+		ImGuiTable* table = g.Tables.GetOrAddByKey(id);
+		const ImGuiTableFlags table_last_flags = table->Flags;
+
+		// Acquire temporary buffers
+		const int table_idx = g.Tables.GetIndex(table);
+		if (++g.TablesTempDataStacked > g.TablesTempData.Size)
+			g.TablesTempData.resize(g.TablesTempDataStacked, ImGuiTableTempData());
+		ImGuiTableTempData* temp_data = table->TempData = &g.TablesTempData[g.TablesTempDataStacked - 1];
+		temp_data->TableIndex = table_idx;
+		table->DrawSplitter = &table->TempData->DrawSplitter;
+		table->DrawSplitter->Clear();
+
+		// Fix flags
+		table->IsDefaultSizingPolicy = (flags & ImGuiTableFlags_SizingMask_) == 0;
+		flags = TableFixFlags(flags, outer_window);
+
+		// Initialize
+		const int instance_no = (table->LastFrameActive != g.FrameCount) ? 0 : table->InstanceCurrent + 1;
+		table->ID = id;
+		table->Flags = flags;
+		table->LastFrameActive = g.FrameCount;
+		table->OuterWindow = table->InnerWindow = outer_window;
+		table->ColumnsCount = columns_count;
+		table->IsLayoutLocked = false;
+		table->InnerWidth = inner_width;
+		temp_data->UserOuterSize = outer_size;
+
+		// Instance data (for instance 0, TableID == TableInstanceID)
+		ImGuiID instance_id;
+		table->InstanceCurrent = (ImS16)instance_no;
+		if (instance_no > 0)
+		{
+			IM_ASSERT(table->ColumnsCount == columns_count && "BeginTable(): Cannot change columns count mid-frame while preserving same ID");
+			if (table->InstanceDataExtra.Size < instance_no)
+				table->InstanceDataExtra.push_back(ImGuiTableInstanceData());
+			instance_id = ImGui::GetIDWithSeed(instance_no, ImGui::GetIDWithSeed("##Instances", NULL, id)); // Push "##Instance" followed by (int)instance_no in ID stack.
+		}
+		else
+		{
+			instance_id = id;
+		}
+		ImGuiTableInstanceData* table_instance = ImGui::TableGetInstanceData(table, table->InstanceCurrent);
+		table_instance->TableInstanceID = instance_id;
+
+		// When not using a child window, WorkRect.Max will grow as we append contents.
+		if (use_child_window)
+		{
+			// Ensure no vertical scrollbar appears if we only want horizontal one, to make flag consistent
+			// (we have no other way to disable vertical scrollbar of a window while keeping the horizontal one showing)
+			ImVec2 override_content_size(FLT_MAX, FLT_MAX);
+			if ((flags & ImGuiTableFlags_ScrollX) && !(flags & ImGuiTableFlags_ScrollY))
+				override_content_size.y = FLT_MIN;
+
+			// Ensure specified width (when not specified, Stretched columns will act as if the width == OuterWidth and
+			// never lead to any scrolling). We don't handle inner_width < 0.0f, we could potentially use it to right-align
+			// based on the right side of the child window work rect, which would require knowing ahead if we are going to
+			// have decoration taking horizontal spaces (typically a vertical scrollbar).
+			if ((flags & ImGuiTableFlags_ScrollX) && inner_width > 0.0f)
+				override_content_size.x = inner_width;
+
+			if (override_content_size.x != FLT_MAX || override_content_size.y != FLT_MAX)
+				ImGui::SetNextWindowContentSize(ImVec2(override_content_size.x != FLT_MAX ? override_content_size.x : 0.0f, override_content_size.y != FLT_MAX ? override_content_size.y : 0.0f));
+
+			// Reset scroll if we are reactivating it
+			if ((table_last_flags & (ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY)) == 0)
+				ImGui::SetNextWindowScroll(ImVec2(0.0f, 0.0f));
+
+			// Create scrolling region (without border and zero window padding)
+			ImGuiWindowFlags child_flags = (flags & ImGuiTableFlags_ScrollX) ? ImGuiWindowFlags_HorizontalScrollbar : ImGuiWindowFlags_None;
+			ImGui::BeginChildEx(name, instance_id, outer_rect.GetSize(), false, child_flags);
+			table->InnerWindow = g.CurrentWindow;
+			table->WorkRect = table->InnerWindow->WorkRect;
+			table->OuterRect = table->InnerWindow->Rect();
+			table->InnerRect = table->InnerWindow->InnerRect;
+			IM_ASSERT(table->InnerWindow->WindowPadding.x == 0.0f && table->InnerWindow->WindowPadding.y == 0.0f && table->InnerWindow->WindowBorderSize == 0.0f);
+
+			// When using multiple instances, ensure they have the same amount of horizontal decorations (aka vertical scrollbar) so stretched columns can be aligned)
+			if (instance_no == 0)
+			{
+				table->HasScrollbarYPrev = table->HasScrollbarYCurr;
+				table->HasScrollbarYCurr = false;
+			}
+			table->HasScrollbarYCurr |= (table->InnerWindow->ScrollMax.y > 0.0f);
+		}
+		else
+		{
+			// For non-scrolling tables, WorkRect == OuterRect == InnerRect.
+			// But at this point we do NOT have a correct value for .Max.y (unless a height has been explicitly passed in). It will only be updated in EndTable().
+			table->WorkRect = table->OuterRect = table->InnerRect = outer_rect;
+		}
+
+		// Push a standardized ID for both child-using and not-child-using tables
+		ImGui::PushOverrideID(id);
+		if (instance_no > 0)
+			ImGui::PushOverrideID(instance_id); // FIXME: Somehow this is not resolved by stack-tool, even tho GetIDWithSeed() submitted the symbol.
+
+		// Backup a copy of host window members we will modify
+		ImGuiWindow* inner_window = table->InnerWindow;
+		table->HostIndentX = inner_window->DC.Indent.x;
+		table->HostClipRect = inner_window->ClipRect;
+		table->HostSkipItems = inner_window->SkipItems;
+		temp_data->HostBackupWorkRect = inner_window->WorkRect;
+		temp_data->HostBackupParentWorkRect = inner_window->ParentWorkRect;
+		temp_data->HostBackupColumnsOffset = outer_window->DC.ColumnsOffset;
+		temp_data->HostBackupPrevLineSize = inner_window->DC.PrevLineSize;
+		temp_data->HostBackupCurrLineSize = inner_window->DC.CurrLineSize;
+		temp_data->HostBackupCursorMaxPos = inner_window->DC.CursorMaxPos;
+		temp_data->HostBackupItemWidth = outer_window->DC.ItemWidth;
+		temp_data->HostBackupItemWidthStackSize = outer_window->DC.ItemWidthStack.Size;
+		inner_window->DC.PrevLineSize = inner_window->DC.CurrLineSize = ImVec2(0.0f, 0.0f);
+
+		// Padding and Spacing
+		// - None               ........Content..... Pad .....Content........
+		// - PadOuter           | Pad ..Content..... Pad .....Content.. Pad |
+		// - PadInner           ........Content.. Pad | Pad ..Content........
+		// - PadOuter+PadInner  | Pad ..Content.. Pad | Pad ..Content.. Pad |
+		const bool pad_outer_x = (flags & ImGuiTableFlags_NoPadOuterX) ? false : (flags & ImGuiTableFlags_PadOuterX) ? true : (flags & ImGuiTableFlags_BordersOuterV) != 0;
+		const bool pad_inner_x = (flags & ImGuiTableFlags_NoPadInnerX) ? false : true;
+		const float inner_spacing_for_border = (flags & ImGuiTableFlags_BordersInnerV) ? TABLE_BORDER_SIZE : 0.0f;
+		const float inner_spacing_explicit = (pad_inner_x && (flags & ImGuiTableFlags_BordersInnerV) == 0) ? g.Style.CellPadding.x : 0.0f;
+		const float inner_padding_explicit = (pad_inner_x && (flags & ImGuiTableFlags_BordersInnerV) != 0) ? g.Style.CellPadding.x : 0.0f;
+		table->CellSpacingX1 = inner_spacing_explicit + inner_spacing_for_border;
+		table->CellSpacingX2 = inner_spacing_explicit;
+		table->CellPaddingX = inner_padding_explicit;
+		table->CellPaddingY = g.Style.CellPadding.y;
+
+		const float outer_padding_for_border = (flags & ImGuiTableFlags_BordersOuterV) ? TABLE_BORDER_SIZE : 0.0f;
+		const float outer_padding_explicit = pad_outer_x ? g.Style.CellPadding.x : 0.0f;
+		table->OuterPaddingX = (outer_padding_for_border + outer_padding_explicit) - table->CellPaddingX;
+
+		table->CurrentColumn = -1;
+		table->CurrentRow = -1;
+		table->RowBgColorCounter = 0;
+		table->LastRowFlags = ImGuiTableRowFlags_None;
+		table->InnerClipRect = (inner_window == outer_window) ? table->WorkRect : inner_window->ClipRect;
+		table->InnerClipRect.ClipWith(table->WorkRect);     // We need this to honor inner_width
+		table->InnerClipRect.ClipWithFull(table->HostClipRect);
+		table->InnerClipRect.Max.y = (flags & ImGuiTableFlags_NoHostExtendY) ? ImMin(table->InnerClipRect.Max.y, inner_window->WorkRect.Max.y) : inner_window->ClipRect.Max.y;
+
+		table->RowPosY1 = table->RowPosY2 = table->WorkRect.Min.y; // This is needed somehow
+		table->RowTextBaseline = 0.0f; // This will be cleared again by TableBeginRow()
+		table->FreezeRowsRequest = table->FreezeRowsCount = 0; // This will be setup by TableSetupScrollFreeze(), if any
+		table->FreezeColumnsRequest = table->FreezeColumnsCount = 0;
+		table->IsUnfrozenRows = true;
+		table->DeclColumnsCount = 0;
+
+		// Using opaque colors facilitate overlapping elements of the grid
+		table->BorderColorStrong = ImGui::GetColorU32(ImGuiCol_TableBorderStrong);
+		table->BorderColorLight = ImGui::GetColorU32(ImGuiCol_TableBorderLight);
+
+		// Make table current
+		g.CurrentTable = table;
+		outer_window->DC.NavIsScrollPushableX = false; // Shortcut for NavUpdateCurrentWindowIsScrollPushableX();
+		outer_window->DC.CurrentTableIdx = table_idx;
+		if (inner_window != outer_window) // So EndChild() within the inner window can restore the table properly.
+			inner_window->DC.CurrentTableIdx = table_idx;
+
+		if ((table_last_flags & ImGuiTableFlags_Reorderable) && (flags & ImGuiTableFlags_Reorderable) == 0)
+			table->IsResetDisplayOrderRequest = true;
+
+		// Mark as used
+		if (table_idx >= g.TablesLastTimeActive.Size)
+			g.TablesLastTimeActive.resize(table_idx + 1, -1.0f);
+		g.TablesLastTimeActive[table_idx] = (float)g.Time;
+		temp_data->LastTimeActive = (float)g.Time;
+		table->MemoryCompacted = false;
+
+		// Setup memory buffer (clear data if columns count changed)
+		ImGuiTableColumn* old_columns_to_preserve = NULL;
+		void* old_columns_raw_data = NULL;
+		const int old_columns_count = table->Columns.size();
+		if (old_columns_count != 0 && old_columns_count != columns_count)
+		{
+			// Attempt to preserve width on column count change (#4046)
+			old_columns_to_preserve = table->Columns.Data;
+			old_columns_raw_data = table->RawData;
+			table->RawData = NULL;
+		}
+		if (table->RawData == NULL)
+		{
+			ImGui::TableBeginInitMemory(table, columns_count);
+			table->IsInitializing = table->IsSettingsRequestLoad = true;
+		}
+		if (table->IsResetAllRequest)
+			ImGui::TableResetSettings(table);
+		if (table->IsInitializing)
+		{
+			// Initialize
+			table->SettingsOffset = -1;
+			table->IsSortSpecsDirty = true;
+			table->InstanceInteracted = -1;
+			table->ContextPopupColumn = -1;
+			table->ReorderColumn = table->ResizedColumn = table->LastResizedColumn = -1;
+			table->AutoFitSingleColumn = -1;
+			table->HoveredColumnBody = table->HoveredColumnBorder = -1;
+			for (int n = 0; n < columns_count; n++)
+			{
+				ImGuiTableColumn* column = &table->Columns[n];
+				if (old_columns_to_preserve && n < old_columns_count)
+				{
+					// FIXME: We don't attempt to preserve column order in this path.
+					*column = old_columns_to_preserve[n];
+				}
+				else
+				{
+					float width_auto = column->WidthAuto;
+					*column = ImGuiTableColumn();
+					column->WidthAuto = width_auto;
+					column->IsPreserveWidthAuto = true; // Preserve WidthAuto when reinitializing a live table: not technically necessary but remove a visible flicker
+					column->IsEnabled = column->IsUserEnabled = column->IsUserEnabledNextFrame = true;
+				}
+				column->DisplayOrder = table->DisplayOrderToIndex[n] = (ImGuiTableColumnIdx)n;
+			}
+		}
+		if (old_columns_raw_data)
+			IM_FREE(old_columns_raw_data);
+
+		// Load settings
+		if (table->IsSettingsRequestLoad)
+			ImGui::TableLoadSettings(table);
+
+		// Handle DPI/font resize
+		// This is designed to facilitate DPI changes with the assumption that e.g. style.CellPadding has been scaled as well.
+		// It will also react to changing fonts with mixed results. It doesn't need to be perfect but merely provide a decent transition.
+		// FIXME-DPI: Provide consistent standards for reference size. Perhaps using g.CurrentDpiScale would be more self explanatory.
+		// This is will lead us to non-rounded WidthRequest in columns, which should work but is a poorly tested path.
+		const float new_ref_scale_unit = g.FontSize; // g.Font->GetCharAdvance('A') ?
+		if (table->RefScale != 0.0f && table->RefScale != new_ref_scale_unit)
+		{
+			const float scale_factor = new_ref_scale_unit / table->RefScale;
+			//IMGUI_DEBUG_PRINT("[table] %08X RefScaleUnit %.3f -> %.3f, scaling width by %.3f\n", table->ID, table->RefScaleUnit, new_ref_scale_unit, scale_factor);
+			for (int n = 0; n < columns_count; n++)
+				table->Columns[n].WidthRequest = table->Columns[n].WidthRequest * scale_factor;
+		}
+		table->RefScale = new_ref_scale_unit;
+
+		// Disable output until user calls TableNextRow() or TableNextColumn() leading to the TableUpdateLayout() call..
+		// This is not strictly necessary but will reduce cases were "out of table" output will be misleading to the user.
+		// Because we cannot safely assert in EndTable() when no rows have been created, this seems like our best option.
+		inner_window->SkipItems = true;
+
+		// Clear names
+		// At this point the ->NameOffset field of each column will be invalid until TableUpdateLayout() or the first call to TableSetupColumn()
+		if (table->ColumnsNames.Buf.Size > 0)
+			table->ColumnsNames.Buf.resize(0);
+
+		// Apply queued resizing/reordering/hiding requests
+		ImGui::TableBeginApplyRequests(table);
+
+		return true;
+	}
 
 	COREGUI_API bool BeginTable(const String& label, int columnCount, TableFlags flags, const Vec2& outerSize, f32 innerWidth)
 	{

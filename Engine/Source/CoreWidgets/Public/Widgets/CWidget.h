@@ -170,10 +170,17 @@ namespace CE::Widgets
 		// Draw Helpers
 
 		void DrawBackground(const GUI::GuiStyleState& styleState);
+
+		void DrawBackground(const GUI::GuiStyleState& styleState, const Rect& localRect);
 		
 		inline void DrawDefaultBackground()
 		{
 			DrawBackground(defaultStyleState);
+		}
+
+		inline void DrawDefaultBackground(const Rect& localRect)
+		{
+			DrawBackground(defaultStyleState, localRect);
 		}
 
 		// Events
@@ -201,16 +208,24 @@ namespace CE::Widgets
 
 		CE_SIGNAL(OnMouseClick, CMouseEvent*);
 
-	private:
+	protected:
 
 		static YGSize MeasureFunctionCallback(YGNodeRef nodeRef, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);
 
 		virtual void OnSubobjectAttached(Object* subobject) override;
 		virtual void OnSubobjectDetached(Object* subobject) override;
 
-	protected: // Fields
+	protected: 
 
-		void HandleBasicMouseEvents(bool hovered, bool leftMouseHeld);
+		// Helpers
+
+		void PollBasicMouseEvents(bool hovered, bool leftMouseHeld, CStateFlag& stateFlags);
+
+		void ClearChildNodes();
+		void ReAddChildNodes();
+
+		// Fields
+
 
 		FIELD()
 		WidgetFlags widgetFlags{};
@@ -232,6 +247,8 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isVisible = true;
+
+		CWidget* parent = nullptr;
 		
 		CStyleSheet* stylesheet = nullptr;
 		String stylesheetText = "";
@@ -258,6 +275,11 @@ namespace CE::Widgets
 		Vec2 prevHoverPos{};
 		b8 prevLeftMouseDown = false;
         
+		template<typename TWidget>
+		friend TWidget* CreateWidget(Object* owner,
+				String widgetName,
+				ClassType* widgetClass,
+				ObjectFlags objectFlags);
 	};
     
 } // namespace CE::Widgets
