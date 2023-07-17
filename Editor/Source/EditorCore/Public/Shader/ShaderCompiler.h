@@ -13,7 +13,7 @@ namespace CE::Editor
     {
         String debugName = "";
         String entry = "vert";
-        ShaderStage stage = ShaderStage::Vertex;
+        CE::RHI::ShaderStage stage = CE::RHI::ShaderStage::Vertex;
 
         u32 maxPermutations = 1024;
 		Array<String> globalDefines{};

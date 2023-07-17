@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreRHI.h"
 #include "System.h"
 
 // Platform

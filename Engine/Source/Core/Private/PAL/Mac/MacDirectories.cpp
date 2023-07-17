@@ -71,9 +71,23 @@ namespace CE
 
         FSRefMakePath( &ref, (UInt8*)&path, PATH_MAX );
         
-        return IO::Path(path) / "CrystalEngine";
+        return IO::Path(path) / (gProjectName.IsEmpty() ? "CrystalEngine" : gProjectName);
     }
 
+#if PAL_TRAIT_BUILD_EDITOR
+    IO::Path MacDirectories::GetEditorAppDataDir()
+    {
+        FSRef ref;
+        OSType folderType = kApplicationSupportFolderType;
+        char path[PATH_MAX];
+        
+        FSFindFolder( kUserDomain, folderType, kCreateFolder, &ref );
+
+        FSRefMakePath( &ref, (UInt8*)&path, PATH_MAX );
+        
+        return IO::Path(path) / "CrystalEngine";
+    }
+#endif
 }
 
 

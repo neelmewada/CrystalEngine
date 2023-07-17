@@ -652,7 +652,9 @@ namespace CE
 			JsonObject& objectValue = rootJson->GetObjectValue();
 			for (const auto& [key, value] : objectValue)
 			{
-				s32 idx = fields.IndexOf([&key](FieldType* fieldType) { return fieldType->GetName() == key; });
+                const String& keyString = key;
+				s32 idx = fields.IndexOf([=](FieldType* fieldType) {
+                    return fieldType->GetName().GetString() == keyString; });
 				if (idx < 0)
 					continue;
 
