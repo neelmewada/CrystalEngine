@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 if(PAL_PLATFORM_IS_MAC)
-    project(EditorCore CXX OBJCXX)
+    project(EditorCore CXX OBJC OBJCXX)
 else()
     project(EditorCore CXX)
 endif()
