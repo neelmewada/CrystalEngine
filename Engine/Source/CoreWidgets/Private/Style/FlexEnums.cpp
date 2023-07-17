@@ -2,6 +2,17 @@
 
 namespace CE::Widgets
 {
+
+	static HashMap<String, CDisplay> stringToDisplayMap{
+		{ "none", CDisplay::None },
+		{ "flex", CDisplay::Flex },
+	};
+
+	COREWIDGETS_API CDisplay StringToDisplay(const String& string)
+	{
+		return stringToDisplayMap[string];
+	}
+
 	static HashMap<String, CPosition> stringToPositionMap{
 		{ "auto", CPosition::Static },
 		{ "static", CPosition::Static },
@@ -9,7 +20,7 @@ namespace CE::Widgets
 		{ "relative", CPosition::Relative }
 	};
 
-	COREWIDGETS_API CPosition StringToPosition(const String& string)
+    COREWIDGETS_API CPosition StringToPosition(const String& string)
 	{
 		return stringToPositionMap[string];
 	}

@@ -3,6 +3,16 @@
 namespace CE::Widgets
 {
 	ENUM()
+	enum class CDisplay
+	{
+		Flex = 0,
+		None
+	};
+	ENUM_CLASS_FLAGS(CDisplay);
+
+	COREWIDGETS_API CDisplay StringToDisplay(const String& string);
+
+	ENUM()
 	enum class CPosition
 	{
 		Static = 0,

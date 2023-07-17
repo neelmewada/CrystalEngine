@@ -1,12 +1,26 @@
 
 #include "CrystalEditor.h"
 
+const CE::String css = R"(
+EditorPanel {
+	background: black;
+	align-items: stretch;
+	align-content: stretch;
+}
+
+EditorPanelView {
+	background: red;
+	align-items: stretch;
+	align-content: stretch;
+}
+)";
+
 namespace CE::Editor
 {
 
 	EditorPanel::EditorPanel()
 	{
-
+		
 	}
 
 	EditorPanel::~EditorPanel()
@@ -18,7 +32,7 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
-
+		SetStyleSheet(css);
 	}
 
 	bool EditorPanel::IsSubWidgetAllowed(ClassType* subwidgetClass)

@@ -5868,6 +5868,166 @@ namespace CE::GUI
 		return Vec4(table->OuterRect.Min.x, table->OuterRect.Min.y, table->OuterRect.Max.x, table->OuterRect.Max.y);
 	}
 
+	COREGUI_API void Columns(const Rect& localRect, int count, bool border)
+	{
+		auto rect = ToWindowCoordinateSpace(localRect);
+
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		IM_ASSERT(count >= 1);
+
+		ImGuiOldColumnFlags flags = (border ? 0 : ImGuiOldColumnFlags_NoBorder);
+		//flags |= ImGuiOldColumnFlags_NoPreserveWidths; // NB: Legacy behavior
+		ImGuiOldColumns* columns = window->DC.CurrentColumns;
+		if (columns != NULL && columns->Count == count && columns->Flags == flags)
+			return;
+
+		if (columns != NULL)
+		{
+			ImGui::EndColumns();
+		}
+
+		GUI::SetCursorPos(rect.min);
+
+		ImRect frame{ rect.x, rect.y, rect.w, rect.z };
+
+		int columns_count = count;
+
+		if (count != 1)
+		{
+			//ImGui::BeginColumns(NULL, count, flags);
+
+			IM_ASSERT(columns_count >= 1);
+			IM_ASSERT(window->DC.CurrentColumns == NULL);   // Nested columns are currently not supported
+
+			// Acquire storage for the columns set
+			ImGuiID id = ImGui::GetColumnsID(NULL, columns_count);
+			ImGuiOldColumns* columns = ImGui::FindOrCreateColumns(window, id);
+			IM_ASSERT(columns->ID == id);
+			columns->Current = 0;
+			columns->Count = columns_count;
+			columns->Flags = flags;
+			window->DC.CurrentColumns = columns;
+			window->DC.NavIsScrollPushableX = false; // Shortcut for NavUpdateCurrentWindowIsScrollPushableX();
+
+			columns->HostCursorPosY = window->DC.CursorPos.y;
+			columns->HostCursorMaxPosX = window->DC.CursorMaxPos.x;
+			columns->HostInitialClipRect = frame;//window->ClipRect;
+			columns->HostBackupParentWorkRect = window->ParentWorkRect;
+			window->ParentWorkRect = frame;//window->WorkRect;
+
+			// Set state for first column
+			// We aim so that the right-most column will have the same clipping width as other after being clipped by parent ClipRect
+			const float column_padding = g.Style.ItemSpacing.x;
+			const float half_clip_extend_x = ImFloor(ImMax(window->WindowPadding.x * 0.5f, window->WindowBorderSize));
+			const float max_1 = window->WorkRect.Max.x + column_padding - ImMax(column_padding - window->WindowPadding.x, 0.0f);
+			const float max_2 = window->WorkRect.Max.x + half_clip_extend_x;
+			columns->OffMinX = window->DC.Indent.x - column_padding + ImMax(column_padding - window->WindowPadding.x, 0.0f);
+			columns->OffMaxX = ImMax(ImMin(max_1, max_2) - window->Pos.x, columns->OffMinX + 1.0f);
+			columns->LineMinY = columns->LineMaxY = window->DC.CursorPos.y;
+
+			// Clear data if columns count changed
+			if (columns->Columns.Size != 0 && columns->Columns.Size != columns_count + 1)
+				columns->Columns.resize(0);
+
+			// Initialize default widths
+			columns->IsFirstFrame = (columns->Columns.Size == 0);
+			if (columns->Columns.Size == 0)
+			{
+				columns->Columns.reserve(columns_count + 1);
+				for (int n = 0; n < columns_count + 1; n++)
+				{
+					ImGuiOldColumnData column;
+					column.OffsetNorm = n / (float)columns_count;
+					columns->Columns.push_back(column);
+				}
+			}
+
+			for (int n = 0; n < columns_count; n++)
+			{
+				// Compute clipping rectangle
+				ImGuiOldColumnData* column = &columns->Columns[n];
+				float clip_x1 = IM_ROUND(window->Pos.x + ImGui::GetColumnOffset(n));
+				float clip_x2 = IM_ROUND(window->Pos.x + ImGui::GetColumnOffset(n + 1) - 1.0f);
+				column->ClipRect = ImRect(clip_x1, -FLT_MAX, clip_x2, +FLT_MAX);
+				column->ClipRect.ClipWithFull(window->ClipRect);
+			}
+
+			if (columns->Count > 1)
+			{
+				columns->Splitter.Split(window->DrawList, 1 + columns->Count);
+				columns->Splitter.SetCurrentChannel(window->DrawList, 1);
+				ImGui::PushColumnClipRect(0);
+			}
+
+			// We don't generally store Indent.x inside ColumnsOffset because it may be manipulated by the user.
+			float offset_0 = ImGui::GetColumnOffset(columns->Current);
+			float offset_1 = ImGui::GetColumnOffset(columns->Current + 1);
+			float width = offset_1 - offset_0;
+			ImGui::PushItemWidth(width * 0.65f);
+			window->DC.ColumnsOffset.x = ImMax(column_padding - window->WindowPadding.x, 0.0f);
+			window->DC.CursorPos.x = IM_FLOOR(window->Pos.x + window->DC.Indent.x + window->DC.ColumnsOffset.x);
+			window->WorkRect.Max.x = window->Pos.x + offset_1 - column_padding;
+
+		}
+	}
+
+	COREGUI_API void ColumnsNext()
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems || window->DC.CurrentColumns == NULL)
+			return;
+
+		ImGuiContext& g = *GImGui;
+		ImGuiOldColumns* columns = window->DC.CurrentColumns;
+
+		if (columns->Count == 1)
+		{
+			window->DC.CursorPos.x = IM_FLOOR(window->Pos.x + window->DC.Indent.x + window->DC.ColumnsOffset.x);
+			IM_ASSERT(columns->Current == 0);
+			return;
+		}
+
+		// Next column
+		if (++columns->Current == columns->Count)
+			columns->Current = 0;
+
+		ImGui::PopItemWidth();
+
+		// Optimization: avoid PopClipRect() + SetCurrentChannel() + PushClipRect()
+		// (which would needlessly attempt to update commands in the wrong channel, then pop or overwrite them),
+		ImGuiOldColumnData* column = &columns->Columns[columns->Current];
+		ImGui::SetWindowClipRectBeforeSetChannel(window, column->ClipRect);
+		columns->Splitter.SetCurrentChannel(window->DrawList, columns->Current + 1);
+
+		const float column_padding = g.Style.ItemSpacing.x;
+		columns->LineMaxY = ImMax(columns->LineMaxY, window->DC.CursorPos.y);
+		if (columns->Current > 0)
+		{
+			// Columns 1+ ignore IndentX (by canceling it out)
+			// FIXME-COLUMNS: Unnecessary, could be locked?
+			window->DC.ColumnsOffset.x = ImGui::GetColumnOffset(columns->Current) - window->DC.Indent.x + column_padding;
+		}
+		else
+		{
+			// New row/line: column 0 honor IndentX.
+			window->DC.ColumnsOffset.x = ImMax(column_padding - window->WindowPadding.x, 0.0f);
+			window->DC.IsSameLine = false;
+			columns->LineMinY = columns->LineMaxY;
+		}
+		window->DC.CursorPos.x = IM_FLOOR(window->Pos.x + window->DC.Indent.x + window->DC.ColumnsOffset.x);
+		window->DC.CursorPos.y = columns->LineMinY;
+		window->DC.CurrLineSize = ImVec2(0.0f, 0.0f);
+		window->DC.CurrLineTextBaseOffset = 0.0f;
+
+		// FIXME-COLUMNS: Share code with BeginColumns() - move code on columns setup.
+		float offset_0 = ImGui::GetColumnOffset(columns->Current);
+		float offset_1 = ImGui::GetColumnOffset(columns->Current + 1);
+		float width = offset_1 - offset_0;
+		ImGui::PushItemWidth(width * 0.65f);
+		window->WorkRect.Max.x = window->Pos.x + offset_1 - column_padding;
+	}
+
 #pragma endregion
 
 #pragma region Layout

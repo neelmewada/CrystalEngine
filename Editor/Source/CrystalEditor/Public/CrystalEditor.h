@@ -9,6 +9,8 @@
 #include "Editor/Panels/EditorPanel.h"
 #include "Editor/Panels/AssetBrowserView.h"
 
+#include "Editor/CrystalEditorWindow.h"
+
 namespace CE
 {
     

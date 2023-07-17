@@ -86,6 +86,15 @@ CTabWidget::tab:unfocused {
 CTabContainerWidget {
 	padding: 3 0 3 0;
 }
+		
+CCollapsibleSection::header {
+	font-size: 18px;
+	background: rgb(47, 47, 47);
+	border-width: 1px;
+	border-color: rgb(30, 30, 30);
+	padding: 3px 3px;
+	border-radius: 0px;
+}
 
 )";
 

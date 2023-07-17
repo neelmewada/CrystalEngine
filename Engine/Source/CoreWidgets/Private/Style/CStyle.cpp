@@ -181,6 +181,7 @@ namespace CE::Widgets
 		{ "padding", CStylePropertyType::Padding },
 		{ "margin", CStylePropertyType::Margin },
 		{ "padding", CStylePropertyType::Padding },
+		{ "display", CStylePropertyType::Display },
 		{ "foreground", CStylePropertyType::Foreground },
 		{ "foreground-color", CStylePropertyType::Foreground },
 		{ "background", CStylePropertyType::Background },
@@ -231,6 +232,7 @@ namespace CE::Widgets
 		{ CStylePropertyType::JustifyContent, GetStaticEnum<CJustify>() },
 		{ CStylePropertyType::FlexWrap, GetStaticEnum<CFlexWrap>() },
 		{ CStylePropertyType::FlexDirection, GetStaticEnum<CFlexDirection>() },
+		{ CStylePropertyType::Display, GetStaticEnum<CDisplay>() },
 	};
 
 	COREWIDGETS_API EnumType* GetEnumTypeForProperty(CStylePropertyType property)

@@ -156,9 +156,13 @@ namespace CE::Widgets
 			
 			if (!value.IsValid())
 				continue;
-
+			
 			// Yoga Properties
-			if (property == CStylePropertyType::Position && value.IsEnum())
+			if (property == CStylePropertyType::Display && value.IsEnum())
+			{
+				YGNodeStyleSetDisplay(node, (YGDisplay)value.enumValue.x);
+			}
+			else if (property == CStylePropertyType::Position && value.IsEnum())
 			{
 				YGNodeStyleSetPositionType(node, (YGPositionType)value.enumValue.x);
 			}
@@ -488,7 +492,7 @@ namespace CE::Widgets
 				SetNeedsLayout(false);
 			}
         }
-		else if (IsContainer() && GetOwner() == nullptr) // Container but not a window
+		else if ((IsContainer() && GetOwner() == nullptr) || RequiresLayoutCalculation())
 		{
 			SetNeedsStyle(); // Force update style
 			UpdateStyleIfNeeded();
@@ -501,6 +505,11 @@ namespace CE::Widgets
 			SetNeedsLayout(false);
 		}
 
+		for (auto child : attachedWidgets)
+		{
+			//child->UpdateLayoutIfNeeded();
+		}
+
 		needsLayout = false;
 	}
 
@@ -509,37 +518,8 @@ namespace CE::Widgets
 		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once
 			return;
 
-		//for (auto& [property, variants] : style.properties)
-		//{
-		//	auto& defaultState = variants.Get();
-
-		//	if (defaultState.IsValid())
-		//	{
-		//		if (defaultState.enumValue.x == CStyleValue::Inherited)
-		//		{
-		//			const auto& parentVariants = parent->style.properties[property];
-		//			const auto& parentDefaultState = parentVariants.Get();
-
-		//			if (parentDefaultState.IsValid())
-		//			{
-		//				defaultState = parentDefaultState;
-		//				continue;
-		//			}
-		//		}
-		//	}
-		//	else if (CStyle::IsInheritedProperty(property)) // If default state does not exist but property is auto-inheritable
-		//	{
-		//		const auto& parentVariants = parent->style.properties[property];
-		//		const auto& parentDefaultState = parentVariants.Get();
-
-		//		if (parentDefaultState.IsValid())
-		//		{
-		//			variants.Add(parentDefaultState);
-		//		}
-		//	}
-		//}
-
 		SetNeedsStyle();
+		SetNeedsLayout();
 
 		inheritedPropertiesInitialized = true;
 	}

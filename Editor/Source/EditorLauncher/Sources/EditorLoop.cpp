@@ -188,10 +188,10 @@ void EditorLoop::PostInit()
 
 	InitStyles();
 
-	rootWindow = CreateWidget<CWindow>(nullptr, "RootWindow");
-	rootWindow->SetAsDockSpaceWindow(true);
-	rootWindow->SetTitle("Crystal Editor");
-	rootWindow->SetFullscreen(true);
+	editorWindow = CreateWidget<CrystalEditorWindow>(nullptr, "EditorWindow");
+	editorWindow->SetAsDockSpaceWindow(true);
+	editorWindow->SetTitle("Crystal Editor");
+	editorWindow->SetFullscreen(true);
 }
 
 void EditorLoop::InitStyles()
@@ -214,7 +214,7 @@ void EditorLoop::RunLoop()
 		cmdList->Begin();
 		cmdList->ImGuiNewFrame();
 
-		rootWindow->RenderGUI();
+		editorWindow->RenderGUI();
 
 		cmdList->ImGuiRender();
 		cmdList->End();
@@ -230,8 +230,8 @@ void EditorLoop::RunLoop()
 
 void EditorLoop::PreShutdown()
 {
-	rootWindow->RequestDestroy();
-	rootWindow = nullptr;
+	editorWindow->RequestDestroy();
+	editorWindow = nullptr;
 
 	cmdList->ShutdownImGui();
 

@@ -39,7 +39,9 @@
 #include "Widgets/CSelectableGroup.h"
 #include "Widgets/CCollapsibleSection.h"
 #include "Widgets/CScrollView.h"
+#include "Widgets/CContainerWidget.h"
 #include "Widgets/CLayoutGroup.h"
+#include "Widgets/CSplitWidget.h"
 
 //#include "Widgets/CGridLayout.h"
 

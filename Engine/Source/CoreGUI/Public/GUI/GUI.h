@@ -184,6 +184,9 @@ namespace CE::GUI
 
 	COREGUI_API Vec4 GetTableClipRect();
 
+	COREGUI_API void Columns(const Rect& localRect, int count, bool border = true);
+	COREGUI_API void ColumnsNext();
+
 #pragma endregion
 
 #pragma region Layout

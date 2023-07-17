@@ -16,7 +16,8 @@ namespace CE::Editor
 
 	protected:
 
-
+		CContainerWidget* left = nullptr;
+		CContainerWidget* right = nullptr;
 	};
 
 } // namespace CE::Editor

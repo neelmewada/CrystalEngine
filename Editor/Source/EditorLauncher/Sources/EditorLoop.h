@@ -44,7 +44,7 @@ private:
 
 	IO::Path projectPath{};
 
-	CWindow* rootWindow = nullptr;
+	CrystalEditorWindow* editorWindow = nullptr;
 };
 
 extern EditorLoop gEditorLoop;

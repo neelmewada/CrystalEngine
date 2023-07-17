@@ -35,7 +35,7 @@ namespace CE::Widgets
 
 		// - Public API -
 
-		void UpdateLayoutIfNeeded();
+		virtual void UpdateLayoutIfNeeded();
 		void UpdateStyleIfNeeded();
 
 		virtual void OnBeforeComputeStyle() {}
@@ -63,6 +63,8 @@ namespace CE::Widgets
 
 		/// Should return true if a widget can contain & render subwidgets
 		virtual bool IsContainer() { return IsWindow(); }
+
+		virtual bool RequiresLayoutCalculation() { return false; }
 
 		virtual Vec2 CalculateEstimateSize() { return Vec2(); }
 
