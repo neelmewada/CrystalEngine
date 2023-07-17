@@ -4,13 +4,13 @@ namespace CE::Editor
 {
 
     CLASS()
-	class CRYSTALEDITOR_API AssetBrowserView : public EditorPanelView
+	class CRYSTALEDITOR_API AssetBrowserPanel : public EditorPanel
 	{
-		CE_CLASS(AssetBrowserView, EditorPanelView)
+		CE_CLASS(AssetBrowserPanel, EditorPanel)
 	public:
 
-		AssetBrowserView();
-		virtual ~AssetBrowserView();
+		AssetBrowserPanel();
+		virtual ~AssetBrowserPanel();
 
 		void Construct() override;
 
@@ -22,4 +22,4 @@ namespace CE::Editor
 
 } // namespace CE::Editor
 
-#include "AssetBrowserView.rtti.h"
+#include "AssetBrowserPanel.rtti.h"

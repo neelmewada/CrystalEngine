@@ -19,6 +19,7 @@ namespace CE
 
     Package* gTransientPackage = nullptr;
     Package* gSettingsPackage = nullptr;
+	AssetDatabase* gAssetDatabase = nullptr;
 
     void CoreModule::StartupModule()
     {
@@ -44,6 +45,12 @@ namespace CE
 		{
 			gSettingsPackage->RequestDestroy();
 			gSettingsPackage = nullptr;
+		}
+
+		if (gAssetDatabase != nullptr)
+		{
+			gAssetDatabase->RequestDestroy();
+			gAssetDatabase = nullptr;
 		}
         
         gTransientPackage->RequestDestroy();
@@ -83,7 +90,8 @@ namespace CE
             SystemObject,
             Component,
             SystemComponent,
-			Asset
+			Asset,
+			AssetDatabase
         );
     }
 

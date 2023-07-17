@@ -2,5 +2,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Engine/Shader.h"
+#include "Engine/AssetManager.h"
+#include "Engine/Engine.h"
 

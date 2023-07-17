@@ -20,11 +20,7 @@ namespace CE::Editor
 
 		Super::Construct();
 
-		auto assetBrowserPanel = CreateWidget<EditorPanel>(this, "AssetBrowserPanel");
-		assetBrowserPanel->SetTitle("Asset Browser");
-
-		assetBrowserView = CreateWidget<AssetBrowserView>(assetBrowserPanel, "AssetBrowserView");
-		
+		assetBrowserPanel = CreateWidget<AssetBrowserPanel>(this, "AssetBrowserPanel");
 	}
 
 } // namespace CE::Editor

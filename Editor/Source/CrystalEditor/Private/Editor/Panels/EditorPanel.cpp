@@ -8,11 +8,6 @@ EditorPanel {
 	align-content: stretch;
 }
 
-EditorPanelView {
-	background: red;
-	align-items: stretch;
-	align-content: stretch;
-}
 )";
 
 namespace CE::Editor
@@ -33,11 +28,6 @@ namespace CE::Editor
 		Super::Construct();
 
 		SetStyleSheet(css);
-	}
-
-	bool EditorPanel::IsSubWidgetAllowed(ClassType* subwidgetClass)
-	{
-		return subwidgetClass != nullptr && subwidgetClass->IsSubclassOf<EditorPanelView>();
 	}
 
 	void EditorPanel::OnDrawGUI()

@@ -109,3 +109,4 @@
 // ******************************************************
 // High level
 #include "Asset/Asset.h"
+#include "Asset/AssetDatabase.h"

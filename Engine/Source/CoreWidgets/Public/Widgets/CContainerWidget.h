@@ -14,16 +14,20 @@ namespace CE::Widgets
 		bool IsContainer() override { return true; }
 
 		inline bool IsHorizontalScrollAllowed() const { return allowHorizontalScroll; }
-
 		inline void SetHorizontalScrollAllowed(bool set) { allowHorizontalScroll = set; }
+
+		inline bool IsVerticalScrollAllowed() const { return allowVerticalScroll; }
+		inline void SetVerticalScrollAllowed(bool value) { allowVerticalScroll = value; }
 
 	protected:
 
 		void OnDrawGUI() override;
 
-
 		FIELD()
 		b8 allowHorizontalScroll = false;
+
+		FIELD()
+		b8 allowVerticalScroll = false;
 	};
 
 } // namespace CE::Widgets

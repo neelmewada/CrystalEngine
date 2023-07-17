@@ -21,6 +21,8 @@ namespace CE::Widgets
 		GUI::WindowFlags flags = GUI::WF_NoMove | GUI::WF_NoBackground | GUI::WF_NoResize;
 		if (allowHorizontalScroll)
 			flags |= GUI::WF_HorizontalScrollbar;
+		if (!allowVerticalScroll)
+			flags |= GUI::WF_NoScrollWithMouse;
 
 		bool result = GUI::BeginChild(rect, GetUuid(), "", {}, {}, flags);
 

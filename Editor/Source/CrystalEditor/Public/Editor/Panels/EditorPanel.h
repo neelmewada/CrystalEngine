@@ -13,8 +13,6 @@ namespace CE::Editor
 
 		void Construct() override;
 
-		bool IsSubWidgetAllowed(ClassType* subwidgetClass) override;
-
 	protected:
 
 		void OnDrawGUI() override;

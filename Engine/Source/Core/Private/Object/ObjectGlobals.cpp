@@ -55,11 +55,13 @@ namespace CE
 	}
 
 	/*
-	*	Global Function
+	*	Globals
 	*/
 
 	extern Package* gTransientPackage;
     extern Package* gSettingsPackage;
+
+	extern AssetDatabase* gAssetDatabase;
 
 	CORE_API Package* GetTransientPackage()
 	{
@@ -81,6 +83,13 @@ namespace CE
 
         return gSettingsPackage;
     }
+
+	CORE_API AssetDatabase* GetAssetDatabase()
+	{
+		if (gAssetDatabase == nullptr)
+			gAssetDatabase = CreateObject<AssetDatabase>(nullptr, TEXT("AssetDatabase"));
+		return gAssetDatabase;
+	}
 
 	CORE_API bool IsValidObjectName(const String& name)
 	{

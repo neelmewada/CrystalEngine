@@ -1,8 +1,6 @@
-
-#include "System.h"
+#pragma once
 
 namespace CE
 {
     
 } // namespace CE
-

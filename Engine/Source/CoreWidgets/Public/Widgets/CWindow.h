@@ -26,6 +26,9 @@ namespace CE::Widgets
 		inline bool AllowHorizontalScroll() const { return allowHorizontalScroll; }
 		inline void SetAllowHorizontalScroll(bool value) { allowHorizontalScroll = value; }
 
+		inline bool AllowVerticalScroll() const { return allowVerticalScroll; }
+		inline void SetAllowVerticalScroll(bool value) { allowVerticalScroll = value; }
+
 		inline bool IsFullscreen() const { return isFullscreen; }
 		inline void SetFullscreen(bool value) { isFullscreen = value; }
         
@@ -68,6 +71,9 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 allowHorizontalScroll = false;
+
+		FIELD()
+		b8 allowVerticalScroll = false;
 
 		FIELD()
 		Vec2 windowSize{};

@@ -15,7 +15,7 @@ namespace CE::Editor
 
 	protected:
 
-		AssetBrowserView* assetBrowserView = nullptr;
+		AssetBrowserPanel* assetBrowserPanel = nullptr;
 	};
 
 } // namespace CE::Editor

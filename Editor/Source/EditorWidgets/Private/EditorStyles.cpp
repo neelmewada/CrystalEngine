@@ -6,7 +6,7 @@ static const CE::String globalStyleSheet = R"(
 CWindow {
 	foreground: white;
 	background: rgb(36, 36, 36);
-	padding: 8 25 8 5;
+	padding: 8 25 8 10;
 	flex-direction: column;
 	align-items: flex-start;
 	row-gap: 5px;
@@ -92,7 +92,7 @@ CCollapsibleSection::header {
 	background: rgb(47, 47, 47);
 	border-width: 1px;
 	border-color: rgb(30, 30, 30);
-	padding: 3px 3px;
+	padding: 3px 5px;
 	border-radius: 0px;
 }
 

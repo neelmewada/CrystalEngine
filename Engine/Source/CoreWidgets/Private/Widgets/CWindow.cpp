@@ -15,7 +15,7 @@ namespace CE::Widgets
 
 	Vec2 CWindow::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return Vec2(windowSize.x, YGUndefined);
+		return Vec2(windowSize.x, allowVerticalScroll ? 0 : windowSize.y);
 	}
 
 	void CWindow::Show()
@@ -59,6 +59,8 @@ namespace CE::Widgets
 			GUI::WindowFlags windowFlags = GUI::WF_None;
 			if (allowHorizontalScroll)
 				windowFlags |= GUI::WF_HorizontalScrollbar;
+			if (!allowVerticalScroll)
+				windowFlags |= GUI::WF_NoScrollWithMouse | GUI::WF_NoScrollbar;
 			if (isFullscreen)
 				windowFlags |= GUI::WF_FullScreen | GUI::WF_NoPadding;
 			if (IsDockSpaceWindow())
