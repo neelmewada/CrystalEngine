@@ -279,7 +279,7 @@ void ProjectBrowserWindow::Construct()
 			Object::Bind(openButton, MEMBER_FUNCTION(CButton, OnButtonClicked), [&]
 				{
 					auto projectExtension = ProjectManager::Get().GetProjectFileExtension();
-
+                    
 					auto path = EditorPlatform::ShowFileSelectionDialog(openProjectPathInput->GetText(), {
 						EditorPlatform::FileType{ "CrystalEngine project file", { projectExtension } }
 					});

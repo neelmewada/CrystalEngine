@@ -1,8 +1,8 @@
 
 #include "CoreMedia.h"
 
-#include "CoreMedia.private.h"
-CE_IMPLEMENT_MODULE_AUTORTTI(CoreMedia, CE::CoreMediaModule)
+
+CE_IMPLEMENT_MODULE(CoreMedia, CE::CoreMediaModule)
 
 #define STBI_FAILURE_USERMSG
 

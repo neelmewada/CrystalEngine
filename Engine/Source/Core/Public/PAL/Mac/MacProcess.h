@@ -22,6 +22,8 @@ namespace CE
         static IO::Path GetModuleDllPath(String moduleName);
 
         static String GetDllDecoratedName(String baseName);
+        
+        static bool LaunchProcess(const IO::Path& executablePath, const String& args);
     };
 
     typedef MacProcess PlatformProcess;

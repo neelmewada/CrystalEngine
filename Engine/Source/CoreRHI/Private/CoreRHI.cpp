@@ -1,7 +1,6 @@
 
 #include "CoreRHI.h"
 
-#include "CoreRHI.private.h"
 CE_IMPLEMENT_MODULE(CoreRHI, CE::CoreRHIModule)
 
 namespace CE

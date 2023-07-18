@@ -55,7 +55,7 @@ namespace CE
     {
 #if PAL_TRAIT_BUILD_EDITOR
 		ASSERT(!gProjectPath.IsEmpty(), "GetGameDir() called while project path is NOT set!");
-		return gProjectPath;
+		return gProjectPath / "Game";
 #else
         return GetAppRootDir() / "Game";
 #endif

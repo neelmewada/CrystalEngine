@@ -36,4 +36,11 @@ namespace CE
 		return "lib" + baseName + ".dylib";
 	}
 
+    bool MacProcess::LaunchProcess(const IO::Path& executablePath, const String& args)
+    {
+        String command = "\"" + executablePath.GetString() + "\" " + args + " &";
+        system(command.GetCString());
+        return true;
+    }
+
 }
