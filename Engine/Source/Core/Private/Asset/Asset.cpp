@@ -1,5 +1,5 @@
 
-#include "CoreMinimal.h"
+#include "Core.h"
 
 namespace CE
 {

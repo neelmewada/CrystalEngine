@@ -641,7 +641,8 @@ namespace CE
         {
             if (Buffer[i] == delimiter && startIdx < StringLength)
             {
-                result.Add(GetSubstringView(startIdx, endIdx - startIdx)); // Don't add +1: we don't want the delimiter present in the split string
+				if (startIdx < endIdx)
+					result.Add(GetSubstringView(startIdx, endIdx - startIdx)); // Don't add +1: we don't want the delimiter present in the split string
 
                 startIdx = i + 1;
                 endIdx = startIdx;

@@ -32,6 +32,9 @@ private:
 	void LoadStartupCoreModules();
 	void LoadCoreModules();
 
+	void LoadEngineModules();
+	void UnloadEngineModules();
+
 	void LoadEditorModules();
 	void UnloadEditorModules();
 

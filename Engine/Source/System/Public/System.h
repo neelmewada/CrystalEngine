@@ -1,7 +1,21 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
+
+#include "AssetRegistry/PathTree.h"
+#include "AssetRegistry/AssetData.h"
+#include "AssetRegistry/AssetRegistry.h"
 
 #include "Engine/AssetManager.h"
 #include "Engine/Engine.h"
 
+namespace CE
+{
+
+	/*
+	*	Globals
+	*/
+
+	extern SYSTEM_API Engine* gEngine;
+
+}

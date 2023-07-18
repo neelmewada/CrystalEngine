@@ -2,7 +2,7 @@
 
 The `Package` class is used by the engine to store & load assets & serialized objects. It stores the data in a binary file with `.casset` extension.
 
-This document describes the file format specification of `.casset` files.
+This document describes the file format specification of `.casset` files. The initial version number of this file format is 1.0.
 
 ### Terminology
 
@@ -22,7 +22,9 @@ Spec tables with little endian format
 | +10 | 4B | `00 00 00 00` | File checksum only for the actual data |
 | +14 | 8B | `00 00 00 00 00 00 00 00` | Data start offset (from start of file) |
 | +1C | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |
-| +24 | \0 | `/Engine/Assets/SomeAsset\0` | Path/name of Package. |
+| +24 | \0 | `/Engine/SomeAssetFolder/SomeAsset\0` | Path/name of Package. |
+| +xx | 4B | `00 00 00 02` | No. of external package dependencies **n** (v1.1) |
+| +xx | \0 | `/Engine/Textures/SomeTex\0` | n-th package dependency. Repeat for n times. (v1.1) |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual data. List of [Object Entries](#object-entry)** |
 | +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. (EOF) |

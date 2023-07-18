@@ -33,6 +33,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::CoreWidgets
             CE::EditorCore
             CE::EditorWidgets
+            CE::EditorSystem
     RUNTIME_DEPENDENCIES
 
 )

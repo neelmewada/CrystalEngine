@@ -16,6 +16,7 @@ namespace CE
 		UnknownError,
 		PackageNotFound,
 		InvalidPackage,
+		UnsupportedPackageVersion,
 	};
 
 	enum class SavePackageResult
@@ -110,6 +111,7 @@ namespace CE
 		void OnObjectUnloaded(Object* object);
         
 		friend class Object;
+		friend class AssetRegistry;
         
 #if PAL_TRAIT_BUILD_TESTS
         friend class ::Package_WriteRead_Test;
@@ -119,6 +121,8 @@ namespace CE
         
 		bool isLoaded = true;
         bool isFullyLoaded = true;
+
+		Array<Name> packageDependencies{};
         
 		// Loading Only Data
         

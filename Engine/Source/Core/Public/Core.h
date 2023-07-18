@@ -2,9 +2,8 @@
 
 #include "CoreMinimal.h"
 
-// Module Class
+// ******************************************************
+// High level
+#include "Asset/Asset.h"
+#include "Asset/AssetPath.h"
 
-namespace CE
-{
-    
-}

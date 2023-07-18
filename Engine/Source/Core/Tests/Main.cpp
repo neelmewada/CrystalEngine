@@ -1332,8 +1332,7 @@ TEST(JSON, Prefs)
 			EXPECT_EQ(jsonStruct.subarray[0].stringArray[i], String::Format("entry{}", i));
 		}
 
-		prefs.ClearPrefs();
-
+		prefs.DeletePrefs();
 	}
 
 	IO::Path::Remove(path);
@@ -1346,10 +1345,6 @@ TEST(JSON, Prefs)
 TEST(JSON, Manipulation)
 {
 	TEST_BEGIN;
-
-	{
-		JValue val = JValue();
-	}
 
 	JValue root = JObject();
 	root["item0"] = 12.12f;

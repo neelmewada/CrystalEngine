@@ -2,16 +2,21 @@
 
 namespace CE
 {
-	CLASS(Abstract)
+	class AssetManager;
+
+	CLASS(Abstract, NonSerialized)
 	class SYSTEM_API Engine : public Object
 	{
 		CE_CLASS(Engine, Object)
 	public:
+		// - Functions -
 
 
-	protected:
+	public: 
+		// - Fields -
 
-
+		FIELD()
+		AssetManager* assetManager = nullptr;
 	};
     
 } // namespace CE

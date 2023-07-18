@@ -106,7 +106,3 @@
 #include "Component/SystemComponent.h"
 #include "Component/ComponentApplication.h"
 
-// ******************************************************
-// High level
-#include "Asset/Asset.h"
-#include "Asset/AssetDatabase.h"

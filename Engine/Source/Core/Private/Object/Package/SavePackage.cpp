@@ -5,13 +5,38 @@
 #define PACKAGE_MAGIC_NUMBER CE::FromBigEndian((u64)0x005041434b00000a) // .PACK..\n
 
 #define PACKAGE_VERSION_MAJOR (u32)1
-#define PACKAGE_VERSION_MINOR (u16)0
-#define PACKAGE_VERSION_PATCH (u16)0
+#define PACKAGE_VERSION_MINOR (u32)1
+
+enum PackageFeaturesVersion
+{
+	PackageDependencies_Major = 1,
+	PackageDependencies_Minor = 1,
+};
 
 #define PACKAGE_OBJECT_MAGIC_NUMBER CE::FromBigEndian((u64)0x004f424a45435400) // .OBJECT.
 
 namespace CE
 {
+	static inline bool IsVersionGreaterThanOrEqualTo(u32 currentMajor, u32 currentMinor, u32 checkMajor, u32 checkMinor)
+	{
+		return currentMajor > checkMajor || (currentMajor == checkMajor && currentMinor >= checkMinor);
+	}
+
+	static inline bool IsCurrentVersionGreaterThanOrEqualTo(u32 checkMajor, u32 checkMinor)
+	{
+		return IsVersionGreaterThanOrEqualTo(PACKAGE_VERSION_MAJOR, PACKAGE_VERSION_MINOR, checkMajor, checkMinor);
+	}
+
+	static void SavePackageDependencies(Stream* stream, const Array<Name>& dependencies)
+	{
+		u32 numDependencies = dependencies.GetSize();
+		*stream << numDependencies;
+
+		for (int i = 0; i < numDependencies; i++)
+		{
+			*stream << dependencies[i].GetString();
+		}
+	}
 
 	SavePackageResult Package::SavePackage(Package* package, Object* asset, Stream* stream, const SavePackageArgs& saveArgs)
 	{
@@ -34,13 +59,26 @@ namespace CE
 		HashMap<UUID, Object*> objectsToSerialize{};
 		objectsToSerialize.Add({ asset->GetUuid(), asset });
 		asset->FetchObjectReferences(objectsToSerialize);
+		Array<Name> packageDependencies{};
+
+		for (const auto& [objectUuid, objectInstance] : objectsToSerialize)
+		{
+			if (objectInstance == nullptr || objectUuid == 0)
+				continue;
+			if (objectInstance->IsTransient())
+				continue;
+
+			if (package != objectInstance->GetPackage() && objectInstance->GetPackage() != nullptr)
+			{
+				packageDependencies.Add(objectInstance->GetPackage()->GetPackageName());
+			}
+		}
 
 		stream->SetBinaryMode(true);
 
 		*stream << PACKAGE_MAGIC_NUMBER;
 		*stream << PACKAGE_VERSION_MAJOR;
 		*stream << PACKAGE_VERSION_MINOR;
-		*stream << PACKAGE_VERSION_PATCH;
 
 		u64 fileCrcPos = stream->GetCurrentPosition();
 		*stream << (u32)0; // 0 CRC
@@ -50,6 +88,8 @@ namespace CE
 
 		*stream << package->GetPackageUuid();
 		*stream << package->GetPackageName();
+
+		SavePackageDependencies(stream, packageDependencies);
 
 		// Data Start
 
@@ -65,8 +105,11 @@ namespace CE
 				continue;
 			if (objectInstance->IsTransient())
 				continue;
+
 			if (package != objectInstance->GetPackage()) // Don't serialize objects outside of `this` package
+			{
 				continue;
+			}
             
 			*stream << PACKAGE_OBJECT_MAGIC_NUMBER;
 			*stream << objectInstance->GetUuid();
@@ -143,6 +186,19 @@ namespace CE
 		return SavePackageResult::Success;
 	}
 
+	static void LoadPackageDependencies(Stream* stream, Array<Name>& outDependencies)
+	{
+		u32 numDependencies = 0;
+		*stream >> numDependencies;
+
+		for (int i = 0; i < numDependencies; i++)
+		{
+			String packageName = "";
+			*stream >> packageName;
+			outDependencies.Add(packageName);
+		}
+	}
+
 	Package* Package::LoadPackage(Package* outer, Stream* stream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
 		if (stream == nullptr)
@@ -154,8 +210,7 @@ namespace CE
 
 		u64 magicNumber = 0;
 		u32 majorVersion = 0; 
-		u16 minorVersion = 0;
-		u16 patchVersion = 0;
+		u32 minorVersion = 0;
 		*stream >> magicNumber;
         
 		if (magicNumber != PACKAGE_MAGIC_NUMBER)
@@ -165,14 +220,14 @@ namespace CE
 		}
 
 		*stream >> majorVersion;
-		*stream >> minorVersion;
-		*stream >> patchVersion;
 
 		if (majorVersion > PACKAGE_VERSION_MAJOR)
 		{
-			outResult = LoadPackageResult::InvalidPackage;
+			outResult = LoadPackageResult::UnsupportedPackageVersion;
 			return nullptr;
 		}
+
+		*stream >> minorVersion;
 
 		u32 fileCrc = 0;
 		*stream >> fileCrc;
@@ -184,13 +239,19 @@ namespace CE
 		String packageName = "";
 		*stream >> packageName;
 
+		// Package dependencies list: v1.1
+		Array<Name> packageDependendies{};
+		if (IsVersionGreaterThanOrEqualTo(majorVersion, minorVersion, PackageDependencies_Major, PackageDependencies_Minor))
+		{
+			LoadPackageDependencies(stream, packageDependendies);
+		}
+
 		Package* package = nullptr;
 
 		if (loadedPackages.KeyExists(packageName))
 		{
 			package = loadedPackages[packageName];
-			//outResult = LoadPackageResult::Success;
-			//return loadedPackages[packageName];
+			package->packageDependencies = packageDependendies;
 		}
 		else
 		{
@@ -202,8 +263,8 @@ namespace CE
 			params.outer = nullptr;
 
 			package = (Package*)Internal::StaticConstructObject(params);
-			//package->loadedSubobjects[packageUuid] = package;
 			package->fullPackagePath = fullPackagePath;
+			package->packageDependencies = packageDependendies;
 			package->isFullyLoaded = false;
 			package->objectUuidToEntryMap.Clear();
 		}

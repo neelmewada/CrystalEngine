@@ -147,7 +147,7 @@ namespace CE
 
         virtual bool IsPackage() { return false; }
 
-		virtual Name GetPathInPackage();
+		Name GetPathInPackage();
         
 		// Returns the package this object belongs to.
         Package* GetPackage();

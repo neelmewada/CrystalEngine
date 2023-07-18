@@ -11,12 +11,13 @@ namespace CE::Editor
     public:
         virtual void StartupModule() override
         {
-
+			gEngine = CreateObject<EditorEngine>(nullptr, "EditorEngine", OF_Transient);
         }
 
         virtual void ShutdownModule() override
         {
-
+			gEngine->RequestDestroy();
+			gEngine = nullptr;
         }
 
         virtual void RegisterTypes() override

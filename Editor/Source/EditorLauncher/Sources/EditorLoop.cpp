@@ -88,10 +88,21 @@ void EditorLoop::LoadCoreModules()
 	ModuleManager::Get().LoadModule("CoreWidgets");
 }
 
+void EditorLoop::LoadEngineModules()
+{
+	ModuleManager::Get().LoadModule("System");
+}
+
+void EditorLoop::UnloadEngineModules()
+{
+	ModuleManager::Get().UnloadModule("System");
+}
+
 void EditorLoop::LoadEditorModules()
 {
 	ModuleManager::Get().LoadModule("EditorCore");
 	ModuleManager::Get().LoadModule("EditorWidgets");
+	ModuleManager::Get().LoadModule("EditorSystem");
 
 	ModuleManager::Get().LoadModule("CrystalEditor");
 }
@@ -100,6 +111,7 @@ void EditorLoop::UnloadEditorModules()
 {
 	ModuleManager::Get().UnloadModule("CrystalEditor");
 
+	ModuleManager::Get().UnloadModule("EditorSystem");
 	ModuleManager::Get().UnloadModule("EditorWidgets");
 	ModuleManager::Get().UnloadModule("EditorCore");
 }
@@ -129,6 +141,9 @@ void EditorLoop::PostInit()
 	AppInit();
 
 	RHI::gDynamicRHI->PostInitialize();
+
+	// Load engine modules
+	LoadEngineModules();
 
 	// Load editor modules
 	LoadEditorModules();
@@ -237,6 +252,9 @@ void EditorLoop::PreShutdown()
 
 	// Load editor modules
 	UnloadEditorModules();
+
+	// Unload engine modules
+	UnloadEngineModules();
 
 	RHI::gDynamicRHI->DestroyCommandList(cmdList);
 	RHI::gDynamicRHI->DestroyViewport(viewport);

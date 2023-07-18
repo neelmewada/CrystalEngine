@@ -22,7 +22,6 @@ CContainerWidget {
 #RightContainer {
 	width: 70%;
 	height: 100%;
-	background: red;
 }
 
 )";
@@ -67,7 +66,11 @@ namespace CE::Editor
 		right = CreateWidget<CContainerWidget>(this, "RightContainer");
 		right->SetVerticalScrollAllowed(false);
 		{
+			auto label = CreateWidget<CLabel>(right, "Lbl");
+			label->SetText("This is a very long label. It has 2 sentences.");
 
+			auto btn = CreateWidget<CButton>(right, "Btn");
+			btn->SetText("Button");
 		}
 	}
 

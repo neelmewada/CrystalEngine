@@ -16,7 +16,7 @@ namespace CE
 		}
 
 	private:
-
+		
 		IO::Path sourceAssetRelativePath{};
 	};
 

@@ -11,7 +11,7 @@ namespace CE
 
         void StartupModule() override
         {
-
+			
         }
 
         void ShutdownModule() override
@@ -25,6 +25,12 @@ namespace CE
         }
 
     };
+
+	/*
+	*	Globals
+	*/
+
+	SYSTEM_API Engine* gEngine = nullptr;
     
 } // namespace CE
 

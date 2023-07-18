@@ -8,7 +8,6 @@ namespace CE
 	class FieldType;
 	class FunctionType;
 	class Package;
-	class AssetDatabase;
 
 	/* **********************************
 	*	Global Functions
@@ -19,9 +18,6 @@ namespace CE
 	CORE_API Package* GetTransientPackage();
 
     CORE_API Package* GetSettingsPackage();
-
-	/// Gets the asset database which stores all asset entries
-	CORE_API AssetDatabase* GetAssetDatabase();
 
 	namespace Internal
 	{

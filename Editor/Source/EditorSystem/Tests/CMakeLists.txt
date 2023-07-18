@@ -10,8 +10,8 @@ enable_testing()
 file(GLOB_RECURSE SRCS "*.cpp" "*.h")
 
 ce_add_test(${PROJECT_NAME}
-    TARGET EditorSystem
-    FOLDER "Tests/Engine"
+    TARGET ${TEST_TARGET}
+    FOLDER "Tests/Editor"
     SOURCES
         ${SRCS}
     BUILD_DEPENDENCIES
