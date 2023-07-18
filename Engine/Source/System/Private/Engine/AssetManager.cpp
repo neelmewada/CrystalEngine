@@ -11,6 +11,8 @@ namespace CE
 			singleton = this;
 
 		assetRegistry = CreateObject<AssetRegistry>(this, "AssetRegistry", OF_Transient);
+		
+		assetRegistry->CachePathTree();
 	}
 
 	AssetManager::~AssetManager()

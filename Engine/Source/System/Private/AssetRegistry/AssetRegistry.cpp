@@ -20,17 +20,34 @@ namespace CE
 
 	}
 
-	void AssetRegistry::LoadCachedPathTree()
+	void AssetRegistry::CachePathTree()
 	{
-		if (pathTreeLoaded)
+		if (pathTreeCached)
 			return;
 
 		// Clear the path tree
 		pathTree.RemoveAll();
 
+		pathTree.AddPath("/Game");
+		pathTree.AddPath("/Engine");
+#if PAL_TRAIT_BUILD_EDITOR
+		pathTree.AddPath("/Editor");
+#endif
 
+		if (gProjectPath.Exists() && (gProjectPath / "Game/Assets").Exists())
+		{
+			auto projectAssetsPath = gProjectPath / "Game/Assets";
 
-		pathTreeLoaded = true;
+			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
+				{
+					if (item.IsDirectory())
+					{
+						CE_LOG(Info, All, "Dir: {}", item);
+					}
+				});
+		}
+
+		pathTreeCached = true;
 	}
 
 } // namespace CE

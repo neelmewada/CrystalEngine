@@ -35,9 +35,6 @@ namespace CE::Editor
 
 		// Load settings package
 		Package* settingsPackage = GetSettingsPackage();
-
-		// Load asset database
-		GetAssetDatabase();
 		
 		return true;
     }

@@ -16,13 +16,15 @@ namespace CE
 			return pathTree;
 		}
 
-		void LoadCachedPathTree();
+		void CachePathTree();
 
 	private:
 
+
+
 		PathTree pathTree{};
 
-		b8 pathTreeLoaded = false;
+		b8 pathTreeCached = false;
 
 		static AssetRegistry* singleton;
 	};
