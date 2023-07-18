@@ -40,10 +40,18 @@ namespace CE
 
 			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
 				{
-					if (item.IsDirectory())
+                    auto relativePath = IO::Path::GetRelative(item, gProjectPath / "Game/Assets").GetString();
+                    if (!relativePath.StartsWith("/"))
+                        relativePath = "/" + relativePath;
+					if (item.IsDirectory()) // Folder
 					{
-						CE_LOG(Info, All, "Dir: {}", item);
+                        if (!relativePath.IsEmpty())
+                            pathTree.AddPath("/Game" + relativePath);
 					}
+                    else if (relativePath.EndsWith(".casset")) // Asset file
+                    {
+                        pathTree.AddPath("/Game" + relativePath);
+                    }
 				});
 		}
 
