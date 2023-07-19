@@ -688,7 +688,7 @@ namespace ObjectTest
 
 		CDITest()
 		{
-			subClass = CreateObject<CDISubClass>(this, "SubClassObject");
+			subClass = CreateDefaultSubobject<CDISubClass>("SubClassObject");
 			subClass->subString = "modified";
 		}
         
@@ -797,6 +797,7 @@ TEST(Object, CDI)
 	EXPECT_EQ(testObject->dictionary[2].value, 43);
 
 	EXPECT_EQ(testObject->subClass->subString, "modified again");
+	EXPECT_NE(testObject->subClass, cdi->subClass); // sub objects should always be deep-copied
 
 	testObject->RequestDestroy();
     

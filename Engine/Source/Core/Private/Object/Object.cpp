@@ -401,6 +401,11 @@ namespace CE
         }
     }
 
+	Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name)
+	{
+		return CreateObject<Object>(this, name, {}, classType);
+	}
+
 	void Object::LoadFromTemplate(Object* templateObject)
 	{
 		if (templateObject == nullptr)
