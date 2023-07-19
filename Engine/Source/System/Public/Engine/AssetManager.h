@@ -23,7 +23,6 @@ namespace CE
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;
 
-		static AssetManager* singleton;
 	};
     
 } // namespace CE

@@ -656,12 +656,21 @@ namespace CE
 	*/
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
-	FORCE_INLINE const Object* GetDefaults()
+	FORCE_INLINE const TClass* GetDefaults()
 	{
 		ClassType* classType = TClass::Type();
 		if (classType == nullptr)
 			return nullptr;
-		return classType->GetDefaultInstance();
+		return (TClass*)classType->GetDefaultInstance();
+	}
+
+	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
+	FORCE_INLINE TClass* GetMutableDefaults()
+	{
+		ClassType* classType = TClass::Type();
+		if (classType == nullptr)
+			return nullptr;
+		return (TClass*)classType->GetDefaultInstance();
 	}
 
 	/*

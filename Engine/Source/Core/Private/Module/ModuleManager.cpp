@@ -61,8 +61,15 @@ namespace CE
 		// Register types
 		modulePtr->RegisterTypes();
 
+		// Create transient package
+		if (moduleName != "Core")
+			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+
 		// Startup module
 		modulePtr->StartupModule();
+
+		if (moduleName == "Core")
+			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
 		CE_LOG(Info, All, "Loaded Module: {}", moduleName);
 
@@ -87,6 +94,10 @@ namespace CE
 
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
+
+		// Delete transient package
+		info->transientPackage->RequestDestroy();
+		info->transientPackage = nullptr;
 
 		// Deregister types
 		info->moduleImpl->DeregisterTypes();
@@ -234,6 +245,23 @@ namespace CE
         
         return info->isLoaded;
     }
+
+	Module* ModuleManager::GetLoadedModule(const String& moduleName)
+	{
+		auto info = FindModuleInfo(moduleName);
+		if (info == nullptr || !info->isLoaded)
+			return nullptr;
+
+		return info->moduleImpl;
+	}
+
+	Package* ModuleManager::GetLoadedModuleTransientPackage(const String& moduleName)
+	{
+		ModuleInfo* info = FindModuleInfo(moduleName);
+		if (info == nullptr || !info->isLoaded)
+			return nullptr;
+		return info->transientPackage;
+	}
 
 	ModuleInfo* ModuleManager::AddModule(String moduleName, ModuleLoadResult& result)
 	{

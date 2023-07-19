@@ -2,14 +2,9 @@
 
 namespace CE
 {
-
-	AssetManager* AssetManager::singleton = nullptr;
     
 	AssetManager::AssetManager()
 	{
-		if (singleton == nullptr)
-			singleton = this;
-
 		assetRegistry = CreateObject<AssetRegistry>(this, "AssetRegistry", OF_Transient);
 		
 		assetRegistry->CachePathTree();
@@ -17,20 +12,17 @@ namespace CE
 
 	AssetManager::~AssetManager()
 	{
-		if (singleton == this)
-			singleton = nullptr;
+
 	}
 
 	AssetManager* AssetManager::Get()
 	{
-		return singleton;
+		return nullptr;
 	}
 
 	AssetRegistry* AssetManager::GetRegistry()
 	{
-		if (singleton == nullptr)
-			return nullptr;
-		return singleton->assetRegistry;
+		return nullptr;
 	}
 
 

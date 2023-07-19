@@ -11,6 +11,8 @@ namespace CE
     typedef Module* (*LoadModuleFunc)();
     typedef void (*UnloadModuleFunc)(Module* modulePtr);
 
+	class Package;
+
     struct ModuleInfo
     {
         Name moduleName;
@@ -22,6 +24,8 @@ namespace CE
         bool isLoaded;
         bool isPlugin = false;
         Module* moduleImpl; // nullptr if not loaded
+
+		Package* transientPackage = nullptr;
     };
 
     enum class ModuleLoadResult
@@ -72,6 +76,11 @@ namespace CE
         Name GetLoadedModuleName(Module* modulePtr);
         
         bool IsModuleLoaded(String moduleName);
+
+		Module* GetLoadedModule(const String& moduleName);
+
+		/// Returns the transient package of a loaded module. Returns nullptr if module is not loaded or not found.
+		Package* GetLoadedModuleTransientPackage(const String& moduleName);
 
     private:
 

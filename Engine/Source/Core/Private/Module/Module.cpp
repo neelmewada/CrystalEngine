@@ -1,9 +1,8 @@
 
-#include "Module/Module.h"
+#include "CoreMinimal.h"
 
 namespace CE
 {
 
-	
 
 }

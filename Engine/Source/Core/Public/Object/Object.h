@@ -93,6 +93,8 @@ namespace CE
 			return outer;
 		}
 
+		bool ParentExistsInChain(Object* parent) const;
+
         INLINE bool HasAllObjectFlags(ObjectFlags flags) const
         {
             return (objectFlags & flags) == flags;

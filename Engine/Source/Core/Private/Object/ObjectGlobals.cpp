@@ -33,6 +33,9 @@ namespace CE
                 return nullptr;
             }
 
+			if (init.name == "CDI_EditorAssetManager")
+				DEBUG_BREAK();
+
 			if (instance->HasAnyObjectFlags(OF_ClassDefaultInstance)) // Class Default Instance
 			{
 				instance->LoadDefaults();
@@ -58,12 +61,12 @@ namespace CE
 	*	Globals
 	*/
 
-	extern Package* gTransientPackage;
+	//extern Package* gTransientPackage;
     extern Package* gSettingsPackage;
 
 	CORE_API Package* GetTransientPackage()
 	{
-		return gTransientPackage;
+		return ModuleManager::Get().GetLoadedModuleTransientPackage("Core");
 	}
 
 	static Package* LoadSettingsPackage()

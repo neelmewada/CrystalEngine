@@ -16,8 +16,8 @@ namespace CE::Editor
 
         virtual void ShutdownModule() override
         {
-			//gEngine->RequestDestroy();
-			//gEngine = nullptr;
+			gEngine->RequestDestroy();
+			gEngine = nullptr;
         }
 
         virtual void RegisterTypes() override

@@ -36,6 +36,35 @@ namespace CE
         attachedObjects.RemoveAll();
 	}
 
+	void Object::RequestDestroy()
+	{
+		auto package = GetPackage();
+		if (package != nullptr)
+		{
+			package->OnObjectUnloaded(this); // Mark the object as 'unloaded'
+		}
+
+		// Detach this object from outer
+		if (outer != nullptr)
+		{
+			outer->DetachSubobject(this);
+		}
+		outer = nullptr;
+
+		// Delete all attached subobjects
+		if (attachedObjects.GetObjectCount() > 0)
+		{
+			for (auto [_, subobject] : attachedObjects)
+			{
+				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
+				delete subobject;
+			}
+		}
+		attachedObjects.RemoveAll();
+
+		delete this;
+	}
+
     void Object::ConstructInternal()
     {
         auto initializer = ObjectThreadContext::Get().TopInitializer();
@@ -115,34 +144,19 @@ namespace CE
         return false;
     }
 
-    void Object::RequestDestroy()
-    {
-		auto package = GetPackage();
-		if (package != nullptr)
+	bool Object::ParentExistsInChain(Object* parent) const
+	{
+		Object* outer = GetOuter();
+
+		while (outer != nullptr)
 		{
-			package->OnObjectUnloaded(this); // Mark the object as 'unloaded'
+			if (outer == parent)
+				return true;
+			outer = outer->GetOuter();
 		}
 
-		// Detach this object from outer
-		if (outer != nullptr)
-		{
-			outer->DetachSubobject(this);
-		}
-		outer = nullptr;
-
-		// Delete all attached subobjects
-		if (attachedObjects.GetObjectCount() > 0)
-		{
-			for (auto [_, subobject] : attachedObjects)
-			{
-				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
-				delete subobject;
-			}
-		}
-		attachedObjects.RemoveAll();
-
-        delete this;
-    }
+		return false;
+	}
 
 	bool Object::IsTransient()
 	{
@@ -405,15 +419,40 @@ namespace CE
 				continue;
 			if (destField->IsReadOnly())
 				continue;
-            
-			field->CopyTo(templateObject, destField, this);
+
+			if (field->IsObjectField()) // Deep copy object fields
+			{
+				Object* objectToCopy = field->GetFieldValue<Object*>(templateObject);
+				if (objectToCopy == nullptr)
+				{
+					destField->SetFieldValue<Object*>(this, nullptr);
+				}
+				else
+				{
+					if (objectToCopy->GetOuter() == templateObject)
+					{
+						// Deep copy sub-object
+						Object* deepCopy = CreateObject<Object>(this, objectToCopy->GetName().GetString(), objectToCopy->GetFlags(), objectToCopy->GetClass(), objectToCopy);
+						destField->SetFieldValue<Object*>(this, deepCopy);
+					}
+					else
+					{
+						// Shallow copy external objects
+						destField->SetFieldValue<Object*>(this, objectToCopy);
+					}
+				}
+			}
+			else
+			{
+				field->CopyTo(templateObject, destField, this);
+			}
 		}
 	}
 
 	void Object::LoadDefaults()
 	{
 		// Load Base.ini into Object class
-		LoadConfig(Object::Type(), "");
+		LoadConfig(GetClass(), "");
 
 		Array<ClassType*> superChain{};
 		

@@ -17,7 +17,7 @@ namespace CE
     };
 
 
-    Package* gTransientPackage = nullptr;
+    //Package* gTransientPackage = nullptr;
     Package* gSettingsPackage = nullptr;
 
     void CoreModule::StartupModule()
@@ -33,7 +33,7 @@ namespace CE
         gConfigCache = new ConfigCache;
         gConfigCache->LoadStartupConfigs();
         
-        gTransientPackage = CreateObject<Package>(nullptr, TEXT("/Engine/Transient"), OF_Transient);
+        //gTransientPackage = CreateObject<Package>(nullptr, TEXT("/Engine/Transient"), OF_Transient);
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }
@@ -46,8 +46,8 @@ namespace CE
 			gSettingsPackage = nullptr;
 		}
         
-        gTransientPackage->RequestDestroy();
-        gTransientPackage = nullptr;
+        //gTransientPackage->RequestDestroy();
+        //gTransientPackage = nullptr;
 
         delete gConfigCache;
         gConfigCache = nullptr;

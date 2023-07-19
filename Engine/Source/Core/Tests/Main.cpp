@@ -663,7 +663,6 @@ TEST(Object, Lifecycle)
 
 namespace ObjectTest
 {
-	STRUCT()
 	struct CDIStruct
 	{
 		CE_STRUCT(CDIStruct)
@@ -672,16 +671,33 @@ namespace ObjectTest
 		u32 value = 0;
 	};
 
-    CLASS(Config = Test)
+	class CDISubClass : public Object
+	{
+		CE_CLASS(CDISubClass, Object)
+	public:
+
+		String subString = "sub-string";
+
+		CDISubClass* subClass = nullptr;
+	};
+
     class CDITest : public Object
     {
         CE_CLASS(CDITest, Object)
     public:
+
+		CDITest()
+		{
+			subClass = CreateObject<CDISubClass>(this, "SubClassObject");
+			subClass->subString = "modified";
+		}
         
 		f32 floatValue = 1.21f;
 		String stringValue = "none";
 		Array<String> arrayValue{};
 		bool boolValue = false;
+
+		CDISubClass* subClass = nullptr;
 
 		Array<CDIStruct> dictionary{};
     };
@@ -698,6 +714,18 @@ CE_RTTI_STRUCT(, ObjectTest, CDIStruct,
 )
 CE_RTTI_STRUCT_IMPL(, ObjectTest, CDIStruct)
 
+CE_RTTI_CLASS(, ObjectTest, CDISubClass,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(Config = Test),
+	CE_FIELD_LIST(
+		CE_FIELD(subString, Config)
+		CE_FIELD(subClass)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(, ObjectTest, CDISubClass)
+
 CE_RTTI_CLASS(, ObjectTest, CDITest,
     CE_SUPER(CE::Object),
     CE_NOT_ABSTRACT,
@@ -707,6 +735,7 @@ CE_RTTI_CLASS(, ObjectTest, CDITest,
 		CE_FIELD(stringValue, Config)
 		CE_FIELD(arrayValue, Config)
 		CE_FIELD(boolValue, Config)
+		CE_FIELD(subClass)
 		CE_FIELD(dictionary, Config)
 	),
     CE_FUNCTION_LIST()
@@ -716,9 +745,14 @@ CE_RTTI_CLASS_IMPL(, ObjectTest, CDITest)
 TEST(Object, CDI)
 {
     TEST_BEGIN;
-	CE_REGISTER_TYPES(CDITest, CDIStruct);
+	CE_REGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
 
-	CDITest* cdi = (CDITest*)CDITest::Type()->GetDefaultInstance();
+	{
+		CDISubClass* testSubClass = CreateObject<CDISubClass>(nullptr, "CDISubClassTest");
+		EXPECT_EQ(testSubClass->subString, "String from ini");
+	}
+	
+	CDITest* cdi = GetMutableDefaults<CDITest>();
 	EXPECT_NE(cdi, nullptr);
 	EXPECT_EQ(cdi->floatValue, 42.21f);
 	EXPECT_EQ(cdi->stringValue, "A sample string value");
@@ -737,6 +771,9 @@ TEST(Object, CDI)
 	EXPECT_EQ(cdi->dictionary[2].name, "id2");
 	EXPECT_EQ(cdi->dictionary[2].value, 43);
 
+	EXPECT_EQ(cdi->subClass->subString, "modified");
+	cdi->subClass->subString = "modified again";
+
 	cdi->stringValue = "This is a modified string";
     
 	CDITest* testObject = CreateObject<CDITest>(nullptr, "TestObj", OF_Transient);
@@ -744,9 +781,24 @@ TEST(Object, CDI)
 	EXPECT_EQ(testObject->stringValue, "This is a modified string");
 	EXPECT_EQ(testObject->boolValue, true);
 
+	EXPECT_EQ(testObject->arrayValue.GetSize(), 3);
+	EXPECT_EQ(testObject->arrayValue[0], "Entry0");
+	EXPECT_EQ(testObject->arrayValue[1], "Entry1");
+	EXPECT_EQ(testObject->arrayValue[2], "Entry2");
+
+	EXPECT_EQ(testObject->dictionary.GetSize(), 3);
+	EXPECT_EQ(testObject->dictionary[0].name, "id0");
+	EXPECT_EQ(testObject->dictionary[0].value, 31);
+	EXPECT_EQ(testObject->dictionary[1].name, "id1");
+	EXPECT_EQ(testObject->dictionary[1].value, 35);
+	EXPECT_EQ(testObject->dictionary[2].name, "id2");
+	EXPECT_EQ(testObject->dictionary[2].value, 43);
+
+	EXPECT_EQ(testObject->subClass->subString, "modified again");
+
 	testObject->RequestDestroy();
     
-	CE_DEREGISTER_TYPES(CDITest, CDIStruct);
+	CE_DEREGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
     TEST_END;
 }
 

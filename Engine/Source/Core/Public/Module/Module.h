@@ -15,11 +15,10 @@ namespace CE
 
     class CORE_API Module
     {
+		CE_NO_COPY(Module)
     public:
         Module() {}
         virtual ~Module() {}
-
-        CE_NO_COPY(Module);
 
         virtual void StartupModule() = 0;
         virtual void ShutdownModule() = 0;
