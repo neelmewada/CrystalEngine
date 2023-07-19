@@ -19,6 +19,8 @@ namespace CE::Editor
 		CContainerWidget* left = nullptr;
 		CContainerWidget* right = nullptr;
 
+		CTableView* gameContentDirectoryView = nullptr;
+
 		AssetBrowserTreeModel* folderModel = nullptr;
 	};
 

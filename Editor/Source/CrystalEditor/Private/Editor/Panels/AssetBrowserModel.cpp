@@ -29,7 +29,12 @@ namespace CE::Editor
 
 	void AssetBrowserTreeModel::SetData(const CModelIndex& index, CAbstractItemCell* itemWidget)
 	{
+		
+	}
 
+	void AssetBrowserTreeModel::SetPathTreeRootNode(PathTreeNode* rootNode)
+	{
+		this->rootNode = rootNode;
 	}
 
 } // namespace CE::Editor

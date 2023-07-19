@@ -22,6 +22,11 @@ namespace CE::Editor
 
 		virtual void SetData(const CModelIndex& index, CAbstractItemCell* itemWidget) override;
 
+		void SetPathTreeRootNode(PathTreeNode* rootNode);
+
+	private:
+
+		PathTreeNode* rootNode = nullptr;
 	};
     
 } // namespace CE::Editor

@@ -55,11 +55,10 @@ namespace CE::Editor
 			auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
 			gameContentSection->SetTitle("Game Content");
 
-			auto label = CreateWidget<CLabel>(gameContentSection, "Lbl");
-			label->SetText("This is a very long label. It has 2 sentences.");
-
-			auto btn = CreateWidget<CButton>(gameContentSection, "Btn");
-			btn->SetText("Button");
+			gameContentDirectoryView = CreateWidget<CTableView>(gameContentSection, "GameContentTreeView");
+			auto model = CreateObject<AssetBrowserTreeModel>(gameContentDirectoryView, "GameContentTreeModel");
+			model->SetPathTreeRootNode(AssetManager::GetRegistry()->GetCachedPathTree().GetNode("/Game"));
+			gameContentDirectoryView->SetModel(model);
 		}
 
 		right = CreateWidget<CContainerWidget>(this, "RightContainer");
