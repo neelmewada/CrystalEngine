@@ -1,7 +1,7 @@
 
 #include "CrystalEditor.h"
 
-const CE::String css = R"(
+static const CE::String css = R"(
 EditorPanel {
 	background: black;
 	align-items: stretch;

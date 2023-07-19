@@ -6,6 +6,8 @@
 
 // Panels
 #include "Editor/Panels/EditorPanel.h"
+
+#include "Editor/Panels/AssetBrowserModel.h"
 #include "Editor/Panels/AssetBrowserPanel.h"
 
 #include "Editor/CrystalEditorWindow.h"

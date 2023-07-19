@@ -132,7 +132,9 @@ namespace CE
 
 			if (objectInstance->IsAsset())
 			{
-				*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath().GetString();
+				// TODO: Add source asset relative path
+				*stream << "";
+				//*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath().GetString();
 			}
 			else
 			{

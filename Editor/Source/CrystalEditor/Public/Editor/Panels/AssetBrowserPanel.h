@@ -18,6 +18,8 @@ namespace CE::Editor
 
 		CContainerWidget* left = nullptr;
 		CContainerWidget* right = nullptr;
+
+		AssetBrowserTreeModel* folderModel = nullptr;
 	};
 
 } // namespace CE::Editor

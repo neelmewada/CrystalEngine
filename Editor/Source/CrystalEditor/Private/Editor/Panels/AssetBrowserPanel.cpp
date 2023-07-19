@@ -26,7 +26,6 @@ CContainerWidget {
 
 )";
 
-
 namespace CE::Editor
 {
 

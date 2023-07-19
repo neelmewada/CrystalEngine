@@ -10,6 +10,9 @@
 // Editor Prefs
 #include "Editor/EditorPrefs.h"
 
+// Asset processor
+#include "AssetProcessor/AssetProcessor.h"
+
 // Project
 #include "Project/CrystalProject.h"
 #include "Project/ProjectManager.h"
