@@ -750,6 +750,8 @@ TEST(Object, CDI)
 	{
 		CDISubClass* testSubClass = CreateObject<CDISubClass>(nullptr, "CDISubClassTest");
 		EXPECT_EQ(testSubClass->subString, "String from ini");
+
+		testSubClass->RequestDestroy();
 	}
 	
 	CDITest* cdi = GetMutableDefaults<CDITest>();
