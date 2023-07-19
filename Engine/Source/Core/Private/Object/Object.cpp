@@ -16,28 +16,31 @@ namespace CE
 	Object::~Object()
 	{
 		// Unbind signals
-		UnbindAllSignals(this);
+		//UnbindAllSignals(this);
 
-        // Detach this object from outer
-        if (outer != nullptr)
-        {
-            outer->DetachSubobject(this);
-        }
-        
-        // Delete all attached subobjects
-		if (attachedObjects.GetObjectCount() > 0)
-		{
-			for (auto [_, subobject] : attachedObjects)
-			{
-				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
-				delete subobject;
-			}
-		}
-        attachedObjects.RemoveAll();
+  //      // Detach this object from outer
+  //      if (outer != nullptr)
+  //      {
+  //          outer->DetachSubobject(this);
+  //      }
+  //      
+  //      // Delete all attached subobjects
+		//if (attachedObjects.GetObjectCount() > 0)
+		//{
+		//	for (auto [_, subobject] : attachedObjects)
+		//	{
+		//		subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
+		//		delete subobject;
+		//	}
+		//}
+  //      attachedObjects.RemoveAll();
 	}
 
 	void Object::RequestDestroy()
 	{
+		// Unbind signals
+		UnbindAllSignals(this);
+
 		auto package = GetPackage();
 		if (package != nullptr)
 		{
@@ -57,7 +60,7 @@ namespace CE
 			for (auto [_, subobject] : attachedObjects)
 			{
 				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
-				delete subobject;
+				subobject->RequestDestroy();
 			}
 		}
 		attachedObjects.RemoveAll();
@@ -401,9 +404,9 @@ namespace CE
         }
     }
 
-	Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name)
+	Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)
 	{
-		return CreateObject<Object>(this, name, {}, classType);
+		return CreateObject<Object>(this, name, flags, classType);
 	}
 
 	void Object::LoadFromTemplate(Object* templateObject)

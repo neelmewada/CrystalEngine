@@ -5,9 +5,7 @@ namespace CE
     
 	AssetManager::AssetManager()
 	{
-		assetRegistry = CreateObject<AssetRegistry>(this, "AssetRegistry", OF_Transient);
-		
-		assetRegistry->CachePathTree();
+		assetRegistry = CreateDefaultSubobject<AssetRegistry>("AssetRegistry", OF_Transient);
 	}
 
 	AssetManager::~AssetManager()
@@ -17,12 +15,22 @@ namespace CE
 
 	AssetManager* AssetManager::Get()
 	{
-		return nullptr;
+		if (gEngine == nullptr)
+			return nullptr;
+		return gEngine->assetManager;
 	}
 
 	AssetRegistry* AssetManager::GetRegistry()
 	{
-		return nullptr;
+		if (Self::Get() == nullptr)
+			return nullptr;
+		return Self::Get()->assetRegistry;
+	}
+
+	void AssetManager::Initialize()
+	{
+		// Cache assets
+		assetRegistry->CachePathTree();
 	}
 
 

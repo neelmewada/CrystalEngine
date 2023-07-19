@@ -11,6 +11,11 @@ namespace CE
 	public:
 		// - Functions -
 
+		virtual void PreInit();
+		virtual void Initialize();
+
+		virtual void PreShutdown();
+		virtual void Shutdown();
 
 	public: 
 		// - Fields -

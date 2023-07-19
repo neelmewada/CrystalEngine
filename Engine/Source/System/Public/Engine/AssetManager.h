@@ -15,6 +15,8 @@ namespace CE
 
 		static AssetRegistry* GetRegistry();
 
+		void Initialize();
+
 	protected:
 
 

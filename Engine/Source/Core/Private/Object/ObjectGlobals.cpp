@@ -33,9 +33,6 @@ namespace CE
                 return nullptr;
             }
 
-			if (init.name == "CDI_EditorAssetManager")
-				DEBUG_BREAK();
-
 			if (instance->HasAnyObjectFlags(OF_ClassDefaultInstance)) // Class Default Instance
 			{
 				instance->LoadDefaults();

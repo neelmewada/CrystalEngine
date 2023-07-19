@@ -6,18 +6,12 @@ namespace CE
 
 	AssetRegistry::AssetRegistry()
 	{
-		if (singleton == nullptr)
-			singleton = this;
 
-		
 	}
 
 	AssetRegistry::~AssetRegistry()
 	{
-		if (singleton == this)
-			singleton = nullptr;
 		
-
 	}
 
 	void AssetRegistry::CachePathTree()

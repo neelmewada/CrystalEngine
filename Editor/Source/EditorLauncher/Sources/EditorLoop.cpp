@@ -148,6 +148,10 @@ void EditorLoop::PostInit()
 	// Load editor modules
 	LoadEditorModules();
 
+	gEngine->PreInit();
+
+	// Load RHI & GUI
+
 	auto mainWindow = PlatformApplication::Get()->GetMainWindow();
 	u32 width = 0, height = 0;
 	mainWindow->GetDrawableWindowSize(&width, &height);
@@ -203,6 +207,8 @@ void EditorLoop::PostInit()
 
 	InitStyles();
 
+	gEngine->Initialize();
+
 	editorWindow = CreateWidget<CrystalEditorWindow>(nullptr, "EditorWindow");
 	editorWindow->SetAsDockSpaceWindow(true);
 	editorWindow->SetTitle("Crystal Editor");
@@ -248,7 +254,11 @@ void EditorLoop::PreShutdown()
 	editorWindow->RequestDestroy();
 	editorWindow = nullptr;
 
+	gEngine->PreShutdown();
+
 	cmdList->ShutdownImGui();
+
+	gEngine->Shutdown();
 
 	// Load editor modules
 	UnloadEditorModules();

@@ -4,7 +4,7 @@ namespace CE::Editor
 {
 	EditorEngine::EditorEngine()
 	{
-		assetManager = CreateObject<EditorAssetManager>(this, "EditorAssetManager", OF_Transient);
+		assetManager = CreateDefaultSubobject<EditorAssetManager>("EditorAssetManager", OF_Transient);
 	}
 
 	EditorEngine::~EditorEngine()

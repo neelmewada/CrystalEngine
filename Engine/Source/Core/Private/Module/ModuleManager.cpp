@@ -17,7 +17,6 @@ namespace CE
 	Module* ModuleManager::LoadModule(String moduleName, ModuleLoadResult& result)
 	{
 		TypeInfo::currentlyLoadingModuleStack.Push(moduleName);
-
 		auto info = FindModuleInfo(moduleName);
 
 		if (info != nullptr && info->isLoaded)

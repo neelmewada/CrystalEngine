@@ -163,12 +163,12 @@ namespace CE
         
     protected:
 
-		Object* CreateDefaultSubobject(ClassType* classType, const String& name);
+		Object* CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags = OF_NoFlags);
 
 		template<typename TClass>
-		TClass* CreateDefaultSubobject(const String& name)
+		TClass* CreateDefaultSubobject(const String& name, ObjectFlags flags = OF_NoFlags)
 		{
-			return (TClass*)CreateDefaultSubobject(TClass::Type(), name);
+			return (TClass*)CreateDefaultSubobject(TClass::Type(), name, flags);
 		}
 
 		void LoadFromTemplate(Object* templateObject);
