@@ -29,7 +29,7 @@ namespace CE
 
 	void AssetManager::Initialize()
 	{
-		// Cache assets
+		// Cache asset paths
 		assetRegistry->CachePathTree();
 	}
 

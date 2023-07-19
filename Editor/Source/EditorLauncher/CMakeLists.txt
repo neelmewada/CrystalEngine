@@ -27,6 +27,8 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::EditorCore
             CE::EditorWidgets
             CE::CrystalEditor
+        TARGETS
+            ProjectBrowser
     RUNTIME_DEPENDENCIES
 
 )

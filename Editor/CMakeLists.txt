@@ -10,5 +10,5 @@ add_subdirectory(Source/EditorSystem)
 add_subdirectory(Source/CrystalEditor)
 
 # Editor Executables
-add_subdirectory(Source/EditorLauncher)
 add_subdirectory(Source/ProjectBrowser)
+add_subdirectory(Source/EditorLauncher)

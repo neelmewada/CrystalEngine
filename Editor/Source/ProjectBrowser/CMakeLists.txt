@@ -25,8 +25,6 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::CoreWidgets
             CE::EditorCore
             CE::EditorWidgets
-        TARGETS
-            EditorLauncher
     RUNTIME_DEPENDENCIES
 
 )
