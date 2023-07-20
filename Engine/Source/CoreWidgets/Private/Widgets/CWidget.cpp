@@ -542,10 +542,13 @@ namespace CE::Widgets
 			subWidget->parent = this;
 			subWidget->OnAttachedTo(this);
 
-			YGNodeSetMeasureFunc(node, nullptr);
+			if (!subWidget->RequiresLayoutCalculation())
+			{
+				YGNodeSetMeasureFunc(node, nullptr);
 
-			auto childCount = YGNodeGetChildCount(node);
-			YGNodeInsertChild(node, subWidget->node, childCount);
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, subWidget->node, childCount);
+			}
 		}
 	}
 
@@ -703,8 +706,11 @@ namespace CE::Widgets
 
 		for (auto subWidget : attachedWidgets)
 		{
-			auto childCount = YGNodeGetChildCount(node);
-			YGNodeInsertChild(node, subWidget->node, childCount);
+			if (!subWidget->RequiresLayoutCalculation())
+			{
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, subWidget->node, childCount);
+			}
 		}
 	}
 

@@ -33,7 +33,7 @@ CContainerWidget {
 	height: 100%;
 }
 
-CAbstractItemCell {
+#GameContentTreeView > CAbstractItemCell {
 	font-size: 18px;
 }
 

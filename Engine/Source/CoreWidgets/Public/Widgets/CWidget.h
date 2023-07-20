@@ -64,6 +64,7 @@ namespace CE::Widgets
 		/// Should return true if a widget can contain & render subwidgets
 		virtual bool IsContainer() { return IsWindow(); }
 
+		/// Override and return true if a widget's layout calculation should be independent that of parent's layout
 		virtual bool RequiresLayoutCalculation() { return false; }
 
 		virtual Vec2 CalculateEstimateSize() { return Vec2(); }

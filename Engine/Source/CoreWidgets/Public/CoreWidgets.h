@@ -34,6 +34,7 @@
 #include "Widgets/CLabel.h"
 #include "Widgets/CButton.h"
 #include "Widgets/CTableView.h"
+#include "Widgets/CTreeView.h"
 #include "Widgets/CTabWidget.h"
 #include "Widgets/CSelectableWidget.h"
 #include "Widgets/CSelectableGroup.h"
