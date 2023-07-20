@@ -9,7 +9,21 @@ namespace CE::Editor
 
 	u32 AssetBrowserTreeModel::GetRowCount(const CModelIndex& parent)
 	{
-		return 0;
+		if (rootNode == nullptr)
+			return 0;
+
+		if (!parent.IsValid())
+		{
+			return rootNode->children.GetSize();
+		}
+
+		PathTreeNode* node = (PathTreeNode*)parent.GetInternalData();
+		if (node == nullptr)
+		{
+			return 0;
+		}
+
+		return node->children.GetSize();
 	}
 
 	u32 AssetBrowserTreeModel::GetColumnCount(const CModelIndex& parent)
@@ -19,17 +33,51 @@ namespace CE::Editor
 
 	CModelIndex AssetBrowserTreeModel::GetParent(const CModelIndex& index)
 	{
-		return CModelIndex();
+		if (!index.IsValid())
+			return CModelIndex();
+
+		auto curNode = (PathTreeNode*)index.GetInternalData();
+		if (curNode == nullptr)
+			return CModelIndex();
+
+		auto parentNode = curNode->parent;
+		if (parentNode == nullptr || parentNode == rootNode)
+			return CModelIndex();
+
+		auto parentsParentNode = parentNode->parent;
+		int parentsIndex = parentsParentNode->children.IndexOf(parentNode);
+
+		return CreateIndex(parentsIndex, 0, parentNode);
 	}
 
 	CModelIndex AssetBrowserTreeModel::GetIndex(u32 row, u32 col, const CModelIndex& parent)
 	{
-		return CModelIndex();
+		PathTreeNode* parentNode = nullptr;
+		if (!parent.IsValid())
+			parentNode = this->rootNode;
+		else
+			parentNode = (PathTreeNode*)parent.GetInternalData();
+
+		if (parentNode == nullptr)
+			return CModelIndex();
+
+		if (row >= parentNode->children.GetSize())
+			return CModelIndex();
+
+		return CreateIndex(row, col, parentNode->children[row]);
 	}
 
 	void AssetBrowserTreeModel::SetData(const CModelIndex& index, CAbstractItemCell* itemWidget)
 	{
-		
+		PathTreeNode* node = (PathTreeNode*)index.GetInternalData();
+
+		if (node == nullptr)
+		{
+			itemWidget->SetText("");
+			return;
+		}
+
+		itemWidget->SetText(node->name.GetString());
 	}
 
 	void AssetBrowserTreeModel::SetPathTreeRootNode(PathTreeNode* rootNode)

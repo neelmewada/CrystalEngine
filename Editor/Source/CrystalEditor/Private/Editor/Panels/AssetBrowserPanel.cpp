@@ -24,6 +24,19 @@ CContainerWidget {
 	height: 100%;
 }
 
+#GameContentSection {
+	height: 200px;
+}
+
+#GameContentTreeView {
+	margin: 20px 0 0 0;
+	height: 100%;
+}
+
+CAbstractItemCell {
+	font-size: 18px;
+}
+
 )";
 
 namespace CE::Editor

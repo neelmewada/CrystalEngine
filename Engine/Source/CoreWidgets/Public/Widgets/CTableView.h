@@ -46,6 +46,8 @@ namespace CE::Widgets
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
+		bool IsContainer() override { return true; }
+
 		// Getters & Setters
 
 		inline CDataModel* GetModel() const { return model; }

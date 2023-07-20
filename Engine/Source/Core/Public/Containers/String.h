@@ -256,6 +256,9 @@ namespace CE
 
         Array<String> Split(char delimiter) const;
         void Split(String delimiter, Array<String>& outArray) const;
+		void Split(const Array<String>& delimiters, Array<String>& outArray) const;
+
+		void Split(InitializerList<String> delimiters, Array<String>& outArray) const;
 
         String RemoveWhitespaces();
 

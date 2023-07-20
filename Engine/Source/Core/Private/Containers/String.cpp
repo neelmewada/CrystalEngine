@@ -687,6 +687,45 @@ namespace CE
         }
     }
 
+	void String::Split(const Array<String>& delimiters, Array<String>& outArray) const
+	{
+		int startIdx = 0;
+
+		for (int i = 0; i < StringLength; i++)
+		{
+			char ch = Buffer[i];
+
+			StringView view = StringView(Buffer + i);
+
+			bool isLast = (i == StringLength - 1);
+
+			for (const auto& delimiter : delimiters)
+			{
+				if (view.StartsWith(delimiter) || isLast)
+				{
+					if (isLast)
+						i++;
+
+					if (startIdx != i)
+					{
+						outArray.Add(GetSubstringView(startIdx, i - startIdx));
+					}
+
+					startIdx = i + delimiter.GetLength();
+					i += delimiter.GetLength() - 1;
+					break;
+				}
+			}
+
+		}
+	}
+
+	void String::Split(InitializerList<String> delimiters, Array<String>& outArray) const
+	{
+		Array<String> delims = delimiters;
+		Split(delims, outArray);
+	}
+
     String String::RemoveWhitespaces()
     {
         char* result = new char[GetLength() + 1];

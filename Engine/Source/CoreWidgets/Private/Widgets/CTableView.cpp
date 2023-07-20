@@ -19,12 +19,6 @@ namespace CE::Widgets
 
 	void CAbstractItemCell::OnDrawGUI()
 	{
-		Vec2 cursorPos = GUI::GetCursorPos();
-		Rect rect = GetComputedLayoutRect();
-		Vec2 size = GetComputedLayoutSize();
-		
-		Rect localRect = Rect(cursorPos, cursorPos + size);
-		
 		GUI::Text(text);
 	}
 

@@ -75,7 +75,8 @@ namespace CE
 		if (!pathStr.StartsWith("/"))
 			return false;
 
-		Array<String> components = pathStr.Split('/');
+		Array<String> components = {};
+		pathStr.Split(Array<String>{ "/" , "\\"}, components);
 
 		PathTreeNode* curNode = rootNode;
 
