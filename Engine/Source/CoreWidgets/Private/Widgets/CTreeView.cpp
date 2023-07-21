@@ -67,8 +67,6 @@ namespace CE::Widgets
 		//if (!isLeaf)
 		//	rect.x += 20;
 
-		DrawDefaultBackground(rect);
-
 		GUI::Text(rect + Rect(padding.left, 0, -padding.right, 0), label, defaultStyleState);
 	}
 
@@ -161,6 +159,8 @@ namespace CE::Widgets
 				flags |= GUI::TNF_Leaf;
 
 			auto cursorPos = GUI::GetCursorPos();
+
+			widget->DrawDefaultBackground(Rect(cursorPos, cursorPos + size));
 
 			bool isOpen = GUI::TreeViewNode(size, widget->nodeId, indent * 15.0f, padding, flags);
 			if (isOpen != widget->isOpen)

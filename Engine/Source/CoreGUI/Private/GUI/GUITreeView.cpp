@@ -166,13 +166,17 @@ namespace CE::GUI
 		if (selected != was_selected) //-V547
 			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
 
+		ImVec2 arrow_pos{ text_pos.x - text_offset_x + padding.x, text_pos.y - g.FontSize * 0.15f * 2.f + (frame_bb.GetSize().y / 2.0f) };
+
 		// Render
 		const ImU32 text_col = ImGui::GetColorU32(ImGuiCol_Text);
 		{
 			if (!is_leaf)
-				ImGui::RenderArrow(window->DrawList, 
-					ImVec2(text_pos.x - text_offset_x + padding.x, text_pos.y + g.FontSize * 0.15f), 
+			{
+				ImGui::RenderArrow(window->DrawList,
+					arrow_pos,
 					text_col, is_open ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
+			}
 		}
 
 		if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))

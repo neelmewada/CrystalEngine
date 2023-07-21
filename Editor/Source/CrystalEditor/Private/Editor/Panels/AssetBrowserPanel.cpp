@@ -38,7 +38,8 @@ CContainerWidget {
 #GameContentTreeView > CTreeItemView {
 	text-align: middle-left;
 	font-size: 18px;
-	height: 20px;
+	height: 22px;
+	background: cyan;
 }
 
 )";
