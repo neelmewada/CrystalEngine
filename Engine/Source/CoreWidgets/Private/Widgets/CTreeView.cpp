@@ -114,7 +114,7 @@ namespace CE::Widgets
 			return;
 
 		int children = model->GetRowCount(parent);
-
+        
 		for (int i = 0; i < children; i++)
 		{
 			CModelIndex index = model->GetIndex(i, 0, parent);
@@ -162,16 +162,23 @@ namespace CE::Widgets
 
 			widget->DrawDefaultBackground(Rect(cursorPos, cursorPos + size + Vec2(indent * 15.0f, 0)));
 
-			bool isOpen = GUI::TreeViewNode(size, widget->nodeId, indent * 15.0f, padding, flags);
+			//bool isOpen = GUI::TreeViewNode(size, widget->nodeId, indent * 15.0f, padding, flags);
+            bool selected = false;
+            
+            bool isOpen = GUI::TreeViewNodeSelectable(size, widget->nodeId, indent * 15.0f, &selected, &widget->isHovered, &widget->isLeftMousePressedInside, padding, flags);
 			if (isOpen != widget->isOpen)
 			{
 				widget->isOpen = isOpen;
 				widget->SetNeedsStyle();
 				widget->SetNeedsLayout();
 			}
+            if (selected)
+            {
+                CE_LOG(Info, All, "Select: {}", widget->label);
+            }
 
 			GUI::SetCursorPos(cursorPos);
-
+            
 			GUI::PushChildCoordinateSpace(Rect(cursorPos, cursorPos + size));
 
 			widget->RenderGUI();
