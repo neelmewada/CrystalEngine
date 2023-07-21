@@ -160,7 +160,7 @@ namespace CE::Widgets
 
 			auto cursorPos = GUI::GetCursorPos();
 
-			widget->DrawDefaultBackground(Rect(cursorPos, cursorPos + size));
+			widget->DrawDefaultBackground(Rect(cursorPos, cursorPos + size + Vec2(indent * 15.0f, 0)));
 
 			bool isOpen = GUI::TreeViewNode(size, widget->nodeId, indent * 15.0f, padding, flags);
 			if (isOpen != widget->isOpen)

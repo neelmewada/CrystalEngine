@@ -175,6 +175,8 @@ namespace CE::GUI
 	COREGUI_API void EndTreeView();
 
 	COREGUI_API bool TreeViewNode(const Vec2& size, ID id, f32 indentX, const Vec4& padding = {}, TreeNodeFlags flags = TNF_None);
+	COREGUI_API bool TreeViewNodeSelectable(const Vec2& size, ID id, f32 indentX, bool* isSelected, bool* isHovered = nullptr, bool* isHeld = nullptr,
+		const Vec4& padding = {}, TreeNodeFlags flags = TNF_None);
 
 	COREGUI_API void TreeViewNodePop();
 

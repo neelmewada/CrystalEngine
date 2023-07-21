@@ -190,6 +190,156 @@ namespace CE::GUI
 		return is_open;
 	}
 
+	COREGUI_API bool TreeViewNodeSelectable(const Vec2& size, ID id, f32 indentX, bool* isSelected, bool* isHovered, bool* isHeld, const Vec4& padding, TreeNodeFlags flags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+
+		ImGui::SetCursorPos(ImGui::GetCursorPos() + ImVec2(indentX, 0));
+
+		ImRect frame_bb;
+		frame_bb.Min.x = (flags & ImGuiTreeNodeFlags_SpanFullWidth) ? window->WorkRect.Min.x : window->DC.CursorPos.x;
+		frame_bb.Min.y = window->DC.CursorPos.y;
+		frame_bb.Max.x = window->WorkRect.Max.x;
+		frame_bb.Max.y = window->DC.CursorPos.y + size.y;
+
+		const float text_offset_x = g.FontSize + padding.left;           // Collapser arrow width + Spacing
+		const float text_offset_y = ImMax(padding.y, window->DC.CurrLineTextBaseOffset);                    // Latch before ItemSize changes it
+		const float text_width = g.FontSize + padding.x * 2;  // Include collapser
+		ImVec2 text_pos(window->DC.CursorPos.x + text_offset_x, window->DC.CursorPos.y + text_offset_y);
+		ImGui::ItemSize(frame_bb);
+
+		bool is_leaf = (flags & TNF_Leaf) != 0;
+		bool is_open = ImGui::TreeNodeUpdateNextOpen(id, flags);
+
+		bool item_add = ImGui::ItemAdd(frame_bb, id);
+		g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_HasDisplayRect;
+		g.LastItemData.DisplayRect = frame_bb;
+
+		if (!item_add)
+		{
+			if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+				ImGui::TreePushOverrideID(id);
+			IMGUI_TEST_ENGINE_ITEM_INFO(g.LastItemData.ID, label, g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+			return is_open;
+		}
+
+		ImGuiButtonFlags button_flags = ImGuiTreeNodeFlags_None;
+		if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)
+			button_flags |= ImGuiButtonFlags_AllowItemOverlap;
+		if (!is_leaf)
+			button_flags |= ImGuiButtonFlags_PressedOnDragDropHold;
+
+		// We allow clicking on the arrow section with keyboard modifiers held, in order to easily
+		// allow browsing a tree while preserving selection with code implementing multi-selection patterns.
+		// When clicking on the rest of the tree node we always disallow keyboard modifiers.
+		const float arrow_hit_x1 = (text_pos.x - text_offset_x) - style.TouchExtraPadding.x;
+		const float arrow_hit_x2 = (text_pos.x - text_offset_x) + (g.FontSize + padding.x * 2.0f) + style.TouchExtraPadding.x;
+		const bool is_mouse_x_over_arrow = (g.IO.MousePos.x >= arrow_hit_x1 && g.IO.MousePos.x < arrow_hit_x2);
+		if (window != g.HoveredWindow || !is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_NoKeyModifiers;
+
+		// Open behaviors can be altered with the _OpenOnArrow and _OnOnDoubleClick flags.
+		// Some alteration have subtle effects (e.g. toggle on MouseUp vs MouseDown events) due to requirements for multi-selection and drag and drop support.
+		// - Single-click on label = Toggle on MouseUp (default, when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=0)
+		// - Single-click on arrow = Toggle on MouseDown (when _OpenOnArrow=1)
+		// - Double-click on label = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1)
+		// - Double-click on arrow = Toggle on MouseDoubleClick (when _OpenOnDoubleClick=1 and _OpenOnArrow=0)
+		// It is rather standard that arrow click react on Down rather than Up.
+		// We set ImGuiButtonFlags_PressedOnClickRelease on OpenOnDoubleClick because we want the item to be active on the initial MouseDown in order for drag and drop to work.
+		if (is_mouse_x_over_arrow)
+			button_flags |= ImGuiButtonFlags_PressedOnClick;
+		else if (flags & ImGuiTreeNodeFlags_OpenOnDoubleClick)
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease | ImGuiButtonFlags_PressedOnDoubleClick;
+		else
+			button_flags |= ImGuiButtonFlags_PressedOnClickRelease;
+
+		bool selected = (flags & ImGuiTreeNodeFlags_Selected) != 0;
+		const bool was_selected = selected;
+
+		//bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(frame_bb, id, isHovered, isHeld, button_flags);
+		bool toggled = false;
+
+		if (!is_leaf)
+		{
+			if (pressed && g.DragDropHoldJustPressedId != id)
+			{
+				if ((flags & (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick)) == 0 || (g.NavActivateId == id))
+					toggled = true;
+				if (flags & ImGuiTreeNodeFlags_OpenOnArrow)
+					toggled |= is_mouse_x_over_arrow && !g.NavDisableMouseHover; // Lightweight equivalent of IsMouseHoveringRect() since ButtonBehavior() already did the job
+				if ((flags & ImGuiTreeNodeFlags_OpenOnDoubleClick) && g.IO.MouseClickedCount[0] == 2)
+					toggled = true;
+			}
+			else if (pressed && g.DragDropHoldJustPressedId == id)
+			{
+				IM_ASSERT(button_flags & ImGuiButtonFlags_PressedOnDragDropHold);
+				if (!is_open) // When using Drag and Drop "hold to open" we keep the node highlighted after opening, but never close it again.
+					toggled = true;
+			}
+
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Left && is_open)
+			{
+				toggled = true;
+				ImGui::NavMoveRequestCancel();
+			}
+			if (g.NavId == id && g.NavMoveDir == ImGuiDir_Right && !is_open) // If there's something upcoming on the line we may want to give it the priority?
+			{
+				toggled = true;
+				ImGui::NavMoveRequestCancel();
+			}
+
+			if (toggled)
+			{
+				*isSelected = true;
+
+				is_open = !is_open;
+				window->DC.StateStorage->SetInt(id, is_open);
+				g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
+			}
+		}
+		else if (pressed)
+		{
+			*isSelected = true;
+		}
+
+		if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)
+			ImGui::SetItemAllowOverlap();
+
+		// In this branch, TreeNodeBehavior() cannot toggle the selection so this will never trigger.
+		if (selected != was_selected) //-V547
+			g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledSelection;
+
+		ImVec2 arrow_pos{ text_pos.x - text_offset_x + padding.x, text_pos.y - g.FontSize * 0.15f * 2.f + (frame_bb.GetSize().y / 2.0f) };
+
+		// Render
+		const ImU32 text_col = ImGui::GetColorU32(ImGuiCol_Text);
+		{
+			if (!is_leaf)
+			{
+				ImGui::RenderArrow(window->DrawList,
+					arrow_pos,
+					text_col, is_open ? ImGuiDir_Down : ImGuiDir_Right, 0.70f);
+			}
+		}
+
+		if (is_open && !(flags & ImGuiTreeNodeFlags_NoTreePushOnOpen))
+		{
+			//ImGui::Indent();
+			window->DC.TreeDepth++;
+			ImGui::PushOverrideID(id);
+		}
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label.GetCString(),
+			g.LastItemData.StatusFlags | (is_leaf ? 0 : ImGuiItemStatusFlags_Openable) | (is_open ? ImGuiItemStatusFlags_Opened : 0));
+		return is_open;
+	}
+
 	COREGUI_API void TreeViewNodePop()
 	{
 		ImGuiContext& g = *GImGui;
