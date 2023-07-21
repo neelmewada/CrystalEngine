@@ -12,14 +12,31 @@ namespace CE::Widgets
 
 		virtual ~CTreeItemView();
 
-		bool IsContainer() override { return true; }
+		bool RequiresIndependentLayoutCalculation() override { return true; }
 
-		bool RequiresLayoutCalculation() override { return true; }
+		void UpdateLayoutIfNeeded() override;
+
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
+		inline const String& GetText() const { return label; }
+		inline void SetText(const String& text) { this->label = text; }
 
 	protected:
 
 		virtual void OnDrawGUI() override;
 
+		GUI::ID nodeId = 0;
+
+		FIELD()
+		b8 isOpen = false;
+
+		FIELD()
+		int indent = 0;
+
+		FIELD()
+		String label = "";
+
+		friend class CTreeView;
 	};
 
     CLASS()
@@ -33,6 +50,13 @@ namespace CE::Widgets
 
 		bool IsContainer() override { return true; }
 
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
+		// Getters & Setters
+
+		inline CDataModel* GetModel() const { return model; }
+		inline void SetModel(CDataModel* model) { this->model = model; }
+
 		inline bool AlwaysShowVerticalScroll() const { return alwaysShowVerticalScroll; }
 		inline void SetAlwaysShowVerticalScroll(bool set) { alwaysShowVerticalScroll = set; }
 
@@ -40,12 +64,18 @@ namespace CE::Widgets
 
         virtual void OnDrawGUI() override;
 
+		void DrawChildren(const CModelIndex& parent, int indent = 0);
 
 		FIELD()
 		CDataModel* model = nullptr;
 
 		FIELD()
 		b8 alwaysShowVerticalScroll = false;
+
+		f32 calculatedHeight = 10;
+
+		HashMap<TypeId, Array<CTreeItemView*>> freeWidgetMap{};
+		HashMap<CModelIndex, CTreeItemView*> usedWidgetMap{};
     };
     
 } // namespace CE

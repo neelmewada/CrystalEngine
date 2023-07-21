@@ -30,11 +30,6 @@ namespace CE::Widgets
 		return !(*this == other);
 	}
 
-	ClassType* CDataModel::GetWidgetClass(const CModelIndex& index)
-	{
-		return GetStaticClass<CAbstractItemCell>();
-	}
-
 	CModelIndex CDataModel::CreateIndex(u32 row, u32 col, void* data)
 	{
 		return CModelIndex(row, col, this, data);

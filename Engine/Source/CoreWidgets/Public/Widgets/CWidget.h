@@ -65,7 +65,7 @@ namespace CE::Widgets
 		virtual bool IsContainer() { return IsWindow(); }
 
 		/// Override and return true if a widget's layout calculation should be independent that of parent's layout
-		virtual bool RequiresLayoutCalculation() { return false; }
+		virtual bool RequiresIndependentLayoutCalculation() { return false; }
 
 		virtual Vec2 CalculateEstimateSize() { return Vec2(); }
 

@@ -4,7 +4,7 @@ namespace CE::Widgets
 {
 	CCollapsibleSection::CCollapsibleSection()
 	{
-		internalId = GetUuid();
+		internalId = GenerateRandomU32();
 		SetCollapsed(true);
 	}
 
@@ -107,14 +107,25 @@ namespace CE::Widgets
 
 		if (!isCollapsed)
 		{
-			GUI::PushChildCoordinateSpace(rect + Rect(0, headerHeight, 0, headerHeight));
+			//GUI::PushChildCoordinateSpace(rect + Rect(0, headerHeight, 0, headerHeight));
 
-			for (auto child : attachedWidgets)
+			GUI::WindowFlags childFlags = GUI::WF_NoMove | GUI::WF_NoResize | GUI::WF_NoBackground | 
+				GUI::WF_NoScrollbar | GUI::WF_NoScrollWithMouse | GUI::WF_NoDecoration;
+			bool open = GUI::BeginChild(rect + Rect(0, headerHeight, 0, headerHeight), GetUuid(), "untitled", {}, {}, childFlags);
+
+			if (open)
 			{
-				child->RenderGUI();
+				GUI::PushZeroingChildCoordinateSpace();
+				for (auto child : attachedWidgets)
+				{
+					child->RenderGUI();
+				}
+				GUI::PopChildCoordinateSpace();
 			}
 
-			GUI::PopChildCoordinateSpace();
+			GUI::EndChild();
+
+			//GUI::PopChildCoordinateSpace();
 		}
 
 		if (isCollapsed != !active)

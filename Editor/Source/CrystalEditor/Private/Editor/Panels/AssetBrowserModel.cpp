@@ -7,6 +7,11 @@ namespace CE::Editor
 		return false;
 	}
 
+	ClassType* AssetBrowserTreeModel::GetWidgetClass(const CModelIndex& index)
+	{
+		return GetStaticClass<CTreeItemView>();
+	}
+
 	u32 AssetBrowserTreeModel::GetRowCount(const CModelIndex& parent)
 	{
 		if (rootNode == nullptr)
@@ -67,9 +72,13 @@ namespace CE::Editor
 		return CreateIndex(row, col, parentNode->children[row]);
 	}
 
-	void AssetBrowserTreeModel::SetData(const CModelIndex& index, CAbstractItemCell* itemWidget)
+	void AssetBrowserTreeModel::SetData(const CModelIndex& index, CWidget* widget)
 	{
+		if (widget == nullptr || !widget->GetClass()->IsSubclassOf<CTreeItemView>())
+			return;
+
 		PathTreeNode* node = (PathTreeNode*)index.GetInternalData();
+		CTreeItemView* itemWidget = (CTreeItemView*)widget;
 
 		if (node == nullptr)
 		{

@@ -478,12 +478,12 @@ namespace CE::Widgets
         
         if (IsWindow())
         {
-			SetNeedsStyle(); // Force update style
-			UpdateStyleIfNeeded();
-
 			CWindow* window = (CWindow*)this;
-			if (!window->IsDockSpaceWindow())
+			if (!window->IsDockSpaceWindow() || RequiresIndependentLayoutCalculation())
 			{
+				SetNeedsStyle(); // Force update style
+				UpdateStyleIfNeeded();
+
 				Vec2 size = CalculateIntrinsicContentSize(YGUndefined, YGUndefined);
 				if (size.x <= 0) size.x = YGUndefined;
 				if (size.y <= 0) size.y = YGUndefined;
@@ -491,26 +491,36 @@ namespace CE::Widgets
 
 				SetNeedsLayout(false);
 			}
+
+			needsLayout = false;
         }
-		else if ((IsContainer() && GetOwner() == nullptr) || RequiresLayoutCalculation())
+		else if ((IsContainer() && GetOwner() == nullptr) || RequiresIndependentLayoutCalculation())
 		{
 			SetNeedsStyle(); // Force update style
 			UpdateStyleIfNeeded();
 
-			//Vec2 size = CalculateIntrinsicContentSize(YGUndefined, YGUndefined);
-			//if (size.x <= 0) size.x = YGUndefined;
-			//if (size.y <= 0) size.y = YGUndefined;
-			YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
+			Vec2 size = CalculateIntrinsicContentSize(YGUndefined, YGUndefined);
+			if (size.x <= 0) size.x = YGUndefined;
+			if (size.y <= 0) size.y = YGUndefined;
+			if (GetOwner() != nullptr)
+			{
+				auto ownerSize = GetOwner()->GetComputedLayoutSize();
+				auto ownerPadding = GetOwner()->GetComputedLayoutPadding();
+				size.x = ownerSize.x;
+				//size.y = ownerSize.y;
+			}
+
+			YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
 
 			SetNeedsLayout(false);
+
+			needsLayout = false;
 		}
 
 		for (auto child : attachedWidgets)
 		{
-			//child->UpdateLayoutIfNeeded();
+			child->UpdateLayoutIfNeeded();
 		}
-
-		needsLayout = false;
 	}
 
 	void CWidget::OnAttachedTo(CWidget* parent)
@@ -542,7 +552,7 @@ namespace CE::Widgets
 			subWidget->parent = this;
 			subWidget->OnAttachedTo(this);
 
-			if (!subWidget->RequiresLayoutCalculation())
+			if (!subWidget->RequiresIndependentLayoutCalculation())
 			{
 				YGNodeSetMeasureFunc(node, nullptr);
 
@@ -706,7 +716,7 @@ namespace CE::Widgets
 
 		for (auto subWidget : attachedWidgets)
 		{
-			if (!subWidget->RequiresLayoutCalculation())
+			if (!subWidget->RequiresIndependentLayoutCalculation())
 			{
 				auto childCount = YGNodeGetChildCount(node);
 				YGNodeInsertChild(node, subWidget->node, childCount);
@@ -1008,11 +1018,11 @@ namespace CE::Widgets
 	{
 		return parent;
 
-		if (GetOuter() == nullptr)
-			return nullptr;
-		if (GetOuter()->GetClass()->IsSubclassOf<CWidget>())
-			return (CWidget*)GetOuter();
-		return nullptr;
+		//if (GetOuter() == nullptr)
+		//	return nullptr;
+		//if (GetOuter()->GetClass()->IsSubclassOf<CWidget>())
+		//	return (CWidget*)GetOuter();
+		//return nullptr;
 	}
 
 	CWindow* CWidget::GetOwnerWindow()

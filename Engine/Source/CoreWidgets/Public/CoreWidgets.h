@@ -65,7 +65,7 @@ namespace CE::Widgets
 		ObjectFlags objectFlags = OF_NoFlags)
 	{
 		TWidget* widget = CreateObject<TWidget>(owner, widgetName, objectFlags, widgetClass);
-		widget->Construct();
+		((CWidget*)widget)->Construct();
 		return widget;
 	}
 

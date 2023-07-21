@@ -9,6 +9,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     FOLDER Engine/Source
     PCHHEADER
         PRIVATE
+            Private/${PROJECT_NAME}Internal.h
             Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE

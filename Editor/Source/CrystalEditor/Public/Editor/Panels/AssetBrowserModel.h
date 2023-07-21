@@ -12,6 +12,8 @@ namespace CE::Editor
 
 		virtual bool HasHeader() override;
 
+		virtual ClassType* GetWidgetClass(const CModelIndex& index) override;
+
 		virtual u32 GetRowCount(const CModelIndex& parent) override;
 
 		virtual u32 GetColumnCount(const CModelIndex& parent) override;
@@ -20,7 +22,7 @@ namespace CE::Editor
 
 		virtual CModelIndex GetIndex(u32 row, u32 col, const CModelIndex& parent) override;
 
-		virtual void SetData(const CModelIndex& index, CAbstractItemCell* itemWidget) override;
+		virtual void SetData(const CModelIndex& index, CWidget* widget) override;
 
 		void SetPathTreeRootNode(PathTreeNode* rootNode);
 

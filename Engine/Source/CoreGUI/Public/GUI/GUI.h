@@ -169,6 +169,17 @@ namespace CE::GUI
 
 #pragma endregion
 
+#pragma region Tree View
+
+	COREGUI_API bool BeginTreeView(const Rect& localRect, ID id, const String& label, TreeViewFlags flags = TVF_None);
+	COREGUI_API void EndTreeView();
+
+	COREGUI_API bool TreeViewNode(const Vec2& size, ID id, f32 indentX, const Vec4& padding = {}, TreeNodeFlags flags = TNF_None);
+
+	COREGUI_API void TreeViewNodePop();
+
+#pragma endregion
+
 #pragma region Table
 
 	COREGUI_API bool BeginTable(const Rect& localRect, ID id, const String& label, int columnCount, TableFlags flags = TableFlags_None);
@@ -259,7 +270,7 @@ namespace CE::GUI
 
 #pragma region Custom Drawing
 
-	COREGUI_API bool PushClipRectLocal(const Rect& localRect, bool intersectWithCurrentClipRect = true);
+	COREGUI_API bool PushClipRectInWindow(const Rect& rectInWindow, bool intersectWithCurrentClipRect = true);
 	COREGUI_API void PopClipRect();
 
     COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 }, f32 thickness = 1.0f);

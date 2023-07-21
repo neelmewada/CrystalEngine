@@ -16,7 +16,10 @@ CContainerWidget {
 #LeftContainer {
 	width: 30%;
 	height: 100%;
+	padding: 10px 5px 23px 5px;
 	background: rgb(26, 26, 26);
+	flex-direction: column;
+	justify-content: flex-start;
 }
 
 #RightContainer {
@@ -25,16 +28,17 @@ CContainerWidget {
 }
 
 #GameContentSection {
-	height: 200px;
+	
 }
 
 #GameContentTreeView {
-	margin: 20px 0 0 0;
-	height: 100%;
+	padding: 0px 10px;
 }
 
-#GameContentTreeView > CAbstractItemCell {
+#GameContentTreeView > CTreeItemView {
+	text-align: middle-left;
 	font-size: 18px;
+	height: 20px;
 }
 
 )";
@@ -68,10 +72,13 @@ namespace CE::Editor
 			auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
 			gameContentSection->SetTitle("Game Content");
 
-			gameContentDirectoryView = CreateWidget<CTableView>(gameContentSection, "GameContentTreeView");
+			gameContentDirectoryView = CreateWidget<CTreeView>(gameContentSection, "GameContentTreeView");
 			auto model = CreateObject<AssetBrowserTreeModel>(gameContentDirectoryView, "GameContentTreeModel");
 			model->SetPathTreeRootNode(AssetManager::GetRegistry()->GetCachedPathTree().GetNode("/Game"));
 			gameContentDirectoryView->SetModel(model);
+
+			auto engineContentSection = CreateWidget<CCollapsibleSection>(left, "EngineContentSection");
+			engineContentSection->SetTitle("Engine Content");
 		}
 
 		right = CreateWidget<CContainerWidget>(this, "RightContainer");

@@ -459,6 +459,14 @@ namespace CE::GUI
 		b8 isGradient = false;
 	};
 
+	enum TreeViewFlags
+	{
+		TVF_None = 0,
+		TVF_AlwaysShowVerticalScroll = BIT(0),
+		TVF_AlwaysShowHorizontalScroll = BIT(1),
+	};
+	ENUM_CLASS_FLAGS(TreeViewFlags);
+
 	enum TableFlags
 	{
 		// Features

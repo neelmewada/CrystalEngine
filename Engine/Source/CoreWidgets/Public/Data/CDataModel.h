@@ -58,10 +58,10 @@ namespace CE::Widgets
 		virtual CModelIndex GetIndex(u32 row, u32 col, const CModelIndex& parent = {}) = 0;
 
 		/// The widget class to use for the cell/item
-		virtual ClassType* GetWidgetClass(const CModelIndex& index);
+		virtual ClassType* GetWidgetClass(const CModelIndex& index) = 0;
 
 		/// Override this function to set data for an item widget
-		virtual void SetData(const CModelIndex& index, CAbstractItemCell* itemWidget) = 0;
+		virtual void SetData(const CModelIndex& index, CWidget* itemWidget) = 0;
 
 		virtual String GetText(const CModelIndex& index) { return ""; }
         
