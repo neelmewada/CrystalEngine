@@ -39,7 +39,6 @@ CContainerWidget {
 	text-align: middle-left;
 	font-size: 18px;
 	height: 22px;
-	background: cyan;
 }
 
 )";
