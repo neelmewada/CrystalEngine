@@ -19,7 +19,8 @@ namespace CE::Editor
 
 		if (!parent.IsValid())
 		{
-			return rootNode->children.GetSize();
+			return 1;
+			//return rootNode->children.GetSize();
 		}
 
 		PathTreeNode* node = (PathTreeNode*)parent.GetInternalData();
@@ -42,12 +43,14 @@ namespace CE::Editor
 			return CModelIndex();
 
 		auto curNode = (PathTreeNode*)index.GetInternalData();
-		if (curNode == nullptr)
+		if (curNode == nullptr || curNode == rootNode)
 			return CModelIndex();
 
 		auto parentNode = curNode->parent;
-		if (parentNode == nullptr || parentNode == rootNode)
+		if (parentNode == nullptr)
 			return CModelIndex();
+		if (parentNode == rootNode)
+			return CreateIndex(0, 0, rootNode);
 
 		auto parentsParentNode = parentNode->parent;
 		int parentsIndex = parentsParentNode->children.IndexOf(parentNode);
@@ -58,14 +61,12 @@ namespace CE::Editor
 	CModelIndex AssetBrowserTreeModel::GetIndex(u32 row, u32 col, const CModelIndex& parent)
 	{
 		PathTreeNode* parentNode = nullptr;
-		if (!parent.IsValid())
-			parentNode = this->rootNode;
-		else
-			parentNode = (PathTreeNode*)parent.GetInternalData();
-
+		if (!parent.IsValid()) // Root node
+			return CreateIndex(0, 0, rootNode);
+		
+		parentNode = (PathTreeNode*)parent.GetInternalData();
 		if (parentNode == nullptr)
 			return CModelIndex();
-
 		if (row >= parentNode->children.GetSize())
 			return CModelIndex();
 

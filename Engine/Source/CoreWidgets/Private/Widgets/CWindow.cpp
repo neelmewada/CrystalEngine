@@ -33,9 +33,23 @@ namespace CE::Widgets
         this->windowTitle = String::Format(title + "###{}", GetName());
     }
 
-	void CWindow::OnBeforeComputeStyle()
+	Color CWindow::FetchBackgroundColor(CStateFlag state, CSubControl subControl)
 	{
-		
+		auto style = stylesheet->SelectStyle(this, state, subControl);
+		if (style.properties.KeyExists(CStylePropertyType::Background))
+			return style.properties[CStylePropertyType::Background].color;
+
+		return Color();
+	}
+
+	void CWindow::OnAfterComputeStyle()
+	{
+		titleBar = FetchBackgroundColor(CStateFlag::Default, CSubControl::TitleBar);
+		titleBarActive = FetchBackgroundColor(CStateFlag::Active, CSubControl::TitleBar);
+
+		tab = FetchBackgroundColor(CStateFlag::Default, CSubControl::Tab);
+		tabActive = FetchBackgroundColor(CStateFlag::Active, CSubControl::Tab);
+		tabHovered = FetchBackgroundColor(CStateFlag::Hovered, CSubControl::Tab);
 	}
 
 	void CWindow::SetAsDockSpaceWindow(bool set)
@@ -67,6 +81,16 @@ namespace CE::Widgets
 				windowFlags |= GUI::WF_NoPadding;
 
 			auto color = defaultStyleState.background;
+
+			GUI::PushStyleColor(GUI::StyleCol_TitleBg, titleBar);
+			GUI::PushStyleColor(GUI::StyleCol_TitleBgActive, titleBarActive);
+			GUI::PushStyleColor(GUI::StyleCol_TitleBgCollapsed, titleBar);
+
+			GUI::PushStyleColor(GUI::StyleCol_Tab, tab);
+			GUI::PushStyleColor(GUI::StyleCol_TabActive, tabActive);
+			GUI::PushStyleColor(GUI::StyleCol_TabUnfocused, tab);
+			GUI::PushStyleColor(GUI::StyleCol_TabHovered, tabHovered);
+			GUI::PushStyleColor(GUI::StyleCol_TabUnfocusedActive, tabActive);
 			
 			if (color.a > 0)
 			{
@@ -109,6 +133,8 @@ namespace CE::Widgets
 			this->windowSize = winSize;
 
 			PollEvents();
+
+			GUI::PopStyleColor(8);
         }
     }
 

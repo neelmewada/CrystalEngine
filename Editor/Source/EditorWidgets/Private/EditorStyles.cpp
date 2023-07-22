@@ -12,6 +12,26 @@ CWindow {
 	row-gap: 5px;
 }
 
+CWindow::title-bar {
+	background: rgb(20, 20, 20);
+}
+
+CWindow::title-bar:active {
+	background: rgb(20, 20, 20);
+}
+
+CWindow::tab {
+	background: rgb(28, 28, 28);
+}
+
+CWindow::tab:hovered {
+	background: rgb(32, 32, 32);
+}
+
+CWindow::tab:active {
+	background: rgb(36, 36, 36);
+}
+
 CWindow.DockSpace {
 	background: rgb(21, 21, 21);
 }

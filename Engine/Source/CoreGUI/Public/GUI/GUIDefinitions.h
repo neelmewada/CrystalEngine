@@ -76,6 +76,67 @@ namespace CE::GUI
     };
     ENUM_CLASS_FLAGS(Dir);
 
+	enum StyleCol
+	{
+		StyleCol_Text,
+		StyleCol_TextDisabled,
+		StyleCol_WindowBg,              // Background of normal windows
+		StyleCol_ChildBg,               // Background of child windows
+		StyleCol_PopupBg,               // Background of popups, menus, tooltips windows
+		StyleCol_Border,
+		StyleCol_BorderShadow,
+		StyleCol_FrameBg,               // Background of checkbox, radio button, plot, slider, text input
+		StyleCol_FrameBgHovered,
+		StyleCol_FrameBgActive,
+		StyleCol_TitleBg,
+		StyleCol_TitleBgActive,
+		StyleCol_TitleBgCollapsed,
+		StyleCol_MenuBarBg,
+		StyleCol_ScrollbarBg,
+		StyleCol_ScrollbarGrab,
+		StyleCol_ScrollbarGrabHovered,
+		StyleCol_ScrollbarGrabActive,
+		StyleCol_CheckMark,
+		StyleCol_SliderGrab,
+		StyleCol_SliderGrabActive,
+		StyleCol_Button,
+		StyleCol_ButtonHovered,
+		StyleCol_ButtonActive,
+		StyleCol_Header,                // Header* colors are used for CollapsingHeader, TreeNode, Selectable, MenuItem
+		StyleCol_HeaderHovered,
+		StyleCol_HeaderActive,
+		StyleCol_Separator,
+		StyleCol_SeparatorHovered,
+		StyleCol_SeparatorActive,
+		StyleCol_ResizeGrip,            // Resize grip in lower-right and lower-left corners of windows.
+		StyleCol_ResizeGripHovered,
+		StyleCol_ResizeGripActive,
+		StyleCol_Tab,                   // TabItem in a TabBar
+		StyleCol_TabHovered,
+		StyleCol_TabActive,
+		StyleCol_TabUnfocused,
+		StyleCol_TabUnfocusedActive,
+		StyleCol_DockingPreview,        // Preview overlay color when about to docking something
+		StyleCol_DockingEmptyBg,        // Background color for empty node (e.g. CentralNode with no window docked into it)
+		StyleCol_PlotLines,
+		StyleCol_PlotLinesHovered,
+		StyleCol_PlotHistogram,
+		StyleCol_PlotHistogramHovered,
+		StyleCol_TableHeaderBg,         // Table header background
+		StyleCol_TableBorderStrong,     // Table outer and header borders (prefer using Alpha=1.0 here)
+		StyleCol_TableBorderLight,      // Table inner borders (prefer using Alpha=1.0 here)
+		StyleCol_TableRowBg,            // Table row background (even rows)
+		StyleCol_TableRowBgAlt,         // Table row background (odd rows)
+		StyleCol_TextSelectedBg,
+		StyleCol_DragDropTarget,        // Rectangle highlighting a drop target
+		StyleCol_NavHighlight,          // Gamepad/keyboard: current highlighted item
+		StyleCol_NavWindowingHighlight, // Highlight window when using CTRL+TAB
+		StyleCol_NavWindowingDimBg,     // Darken/colorize entire screen behind the CTRL+TAB window list, when active
+		StyleCol_ModalWindowDimBg,      // Darken/colorize entire screen behind a modal window, when one is active
+		StyleCol_COUNT
+	};
+	ENUM_CLASS_FLAGS(StyleCol);
+
     struct CORERHI_API Style
     {
         float       alpha;                      // Global alpha applies to everything in Dear .
@@ -121,6 +182,7 @@ namespace CE::GUI
         bool        antiAliasedFill;            // Enable anti-aliased edges around filled shapes (rounded rectangles, circles, etc.). Disable if you are really tight on CPU/GPU. Latched at the beginning of the frame (copied to ImDrawList).
         float       curveTessellationTol;       // Tessellation tolerance when using PathBezierCurveTo() without a specific number of segments. Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality.
         float       circleTessellationMaxError; // Maximum error (in pixels) allowed when using AddCircle()/AddCircleFilled() or drawing rounded corner rectangles with no explicit segment count specified. Decrease for higher quality but more geometry.
+		Vec4        colors[StyleCol_COUNT];
 
         Style();
     };
@@ -181,67 +243,6 @@ namespace CE::GUI
         COUNT = 5
     };
     ENUM_CLASS_FLAGS(MouseButton);
-
-    enum StyleCol
-    {
-        StyleCol_Text,
-        StyleCol_TextDisabled,
-        StyleCol_WindowBg,              // Background of normal windows
-        StyleCol_ChildBg,               // Background of child windows
-        StyleCol_PopupBg,               // Background of popups, menus, tooltips windows
-        StyleCol_Border,
-        StyleCol_BorderShadow,
-        StyleCol_FrameBg,               // Background of checkbox, radio button, plot, slider, text input
-        StyleCol_FrameBgHovered,
-        StyleCol_FrameBgActive,
-        StyleCol_TitleBg,
-        StyleCol_TitleBgActive,
-        StyleCol_TitleBgCollapsed,
-        StyleCol_MenuBarBg,
-        StyleCol_ScrollbarBg,
-        StyleCol_ScrollbarGrab,
-        StyleCol_ScrollbarGrabHovered,
-        StyleCol_ScrollbarGrabActive,
-        StyleCol_CheckMark,
-        StyleCol_SliderGrab,
-        StyleCol_SliderGrabActive,
-        StyleCol_Button,
-        StyleCol_ButtonHovered,
-        StyleCol_ButtonActive,
-        StyleCol_Header,                // Header* colors are used for CollapsingHeader, TreeNode, Selectable, MenuItem
-        StyleCol_HeaderHovered,
-        StyleCol_HeaderActive,
-        StyleCol_Separator,
-        StyleCol_SeparatorHovered,
-        StyleCol_SeparatorActive,
-        StyleCol_ResizeGrip,            // Resize grip in lower-right and lower-left corners of windows.
-        StyleCol_ResizeGripHovered,
-        StyleCol_ResizeGripActive,
-        StyleCol_Tab,                   // TabItem in a TabBar
-        StyleCol_TabHovered,
-        StyleCol_TabActive,
-        StyleCol_TabUnfocused,
-        StyleCol_TabUnfocusedActive,
-        StyleCol_DockingPreview,        // Preview overlay color when about to docking something
-        StyleCol_DockingEmptyBg,        // Background color for empty node (e.g. CentralNode with no window docked into it)
-        StyleCol_PlotLines,
-        StyleCol_PlotLinesHovered,
-        StyleCol_PlotHistogram,
-        StyleCol_PlotHistogramHovered,
-        StyleCol_TableHeaderBg,         // Table header background
-        StyleCol_TableBorderStrong,     // Table outer and header borders (prefer using Alpha=1.0 here)
-        StyleCol_TableBorderLight,      // Table inner borders (prefer using Alpha=1.0 here)
-        StyleCol_TableRowBg,            // Table row background (even rows)
-        StyleCol_TableRowBgAlt,         // Table row background (odd rows)
-        StyleCol_TextSelectedBg,
-        StyleCol_DragDropTarget,        // Rectangle highlighting a drop target
-        StyleCol_NavHighlight,          // Gamepad/keyboard: current highlighted item
-        StyleCol_NavWindowingHighlight, // Highlight window when using CTRL+TAB
-        StyleCol_NavWindowingDimBg,     // Darken/colorize entire screen behind the CTRL+TAB window list, when active
-        StyleCol_ModalWindowDimBg,      // Darken/colorize entire screen behind a modal window, when one is active
-        StyleCol_COUNT
-    };
-    ENUM_CLASS_FLAGS(StyleCol);
 
     enum StyleVar
     {

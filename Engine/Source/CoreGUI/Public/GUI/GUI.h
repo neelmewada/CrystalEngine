@@ -64,6 +64,8 @@ namespace CE::GUI
 
 #pragma region Style
 
+	COREGUI_API GUI::Style& GetStyle();
+
     COREGUI_API bool IsStyleVarOfVectorType(StyleVar var);
 
     COREGUI_API void PushStyleVar(StyleVar var, f32 value);

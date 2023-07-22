@@ -45,7 +45,7 @@ namespace CE::Widgets
         void AddSubWidget(CWidget* subWidget);
         void RemoveSubWidget(CWidget* subWidget);
 
-		virtual void OnBeforeComputeStyle() override;
+		virtual void OnAfterComputeStyle() override;
 
 		inline bool IsDockSpaceWindow() const { return isDockSpaceWindow; }
 		void SetAsDockSpaceWindow(bool set);
@@ -56,9 +56,12 @@ namespace CE::Widgets
 		CE_SIGNAL(OnWindowResized, Vec2, Vec2);
         
     protected:
-        virtual void OnDrawGUI() override;
+        
+		virtual void OnDrawGUI() override;
 
 		void HandleEvent(CEvent* event) override;
+
+		Color FetchBackgroundColor(CStateFlag state, CSubControl subControl);
         
         FIELD()
         String windowTitle{};
@@ -81,6 +84,13 @@ namespace CE::Widgets
 		FIELD()
 		b8 isDockSpaceWindow{};
 		String dockSpaceId{};
+
+		Color titleBar{};
+		Color titleBarActive{};
+
+		Color tab{};
+		Color tabActive{};
+		Color tabHovered{};
     };
     
 } // namespace CE::Widgets

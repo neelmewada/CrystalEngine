@@ -352,6 +352,11 @@ namespace CE::GUI
 	/////////////////////////////////////////////////////////////////////
 	// Style
 
+	COREGUI_API GUI::Style& GetStyle()
+	{
+		return *(GUI::Style*)&ImGui::GetStyle();
+	}
+
 	COREGUI_API bool IsStyleVarOfVectorType(StyleVar var)
 	{
 		static HashMap<StyleVar, bool> vectorTypes{
