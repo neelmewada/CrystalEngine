@@ -139,6 +139,8 @@ namespace CE
         }
         
         u32 ToU32() const;
+        
+        Vec4 ToVec4() const;
 
 		inline static Color Lerp(const Color& from, const Color& to, f32 t)
 		{

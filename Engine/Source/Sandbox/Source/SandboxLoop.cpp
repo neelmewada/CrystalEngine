@@ -298,8 +298,9 @@ public:
 		return GetStaticClass<CAbstractItemCell>();
 	}
 
-	virtual void SetData(const CModelIndex& index, CAbstractItemCell* itemWidget) override
+	virtual void SetData(const CModelIndex& index, CWidget* widget) override
 	{
+        CAbstractItemCell* itemWidget = (CAbstractItemCell*)widget;
 		itemWidget->SetText(String::Format("Cell Entry: {},{}", index.GetRow(), index.GetColumn()));
 	}
 

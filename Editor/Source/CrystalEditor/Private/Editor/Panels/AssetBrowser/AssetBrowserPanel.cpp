@@ -10,10 +10,9 @@ AssetBrowserPanel {
 }
 
 #LeftContainer {
-	padding: 10px 5px;
-	width: 30%;
+	width: 25%;
 	height: 100%;
-	padding: 10px 5px 23px 5px;
+	padding: 10px 5px 20px 5px;
 	background: rgb(26, 26, 26);
 	flex-direction: column;
 	justify-content: flex-start;
@@ -21,7 +20,7 @@ AssetBrowserPanel {
 
 #RightContainer {
 	padding: 0px 0px;
-	width: 70%;
+	width: 75%;
 	height: 100%;
 	flex-direction: column;
 	justify-content: flex-start;

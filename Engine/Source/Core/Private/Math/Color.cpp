@@ -21,6 +21,11 @@ namespace CE
     {
 		return ((u32)(r * 255)) | ((u32)(g * 255) << 8) | ((u32)(b * 255) << 16) | ((u32)(a * 255) << 24);
     }
+
+    Vec4 Color::ToVec4() const
+    {
+        return Vec4(r, g, b, a);
+    }
     
 } // namespace CE
 

@@ -2,8 +2,6 @@
 
 static const CE::String css = R"(
 AssetItemWidget {
-	height: 120px;
-	width: 100px;
 	background: rgb(26, 26, 26);
 	border-radius: 5px;
 	border-width: 2px;
@@ -18,6 +16,13 @@ AssetItemWidget:pressed {
 	border-color: rgba(0, 112, 224, 120);
 }
 
+)";
+
+static const CE::String largeSize = R"(
+AssetItemWidget {
+    height: 120px;
+    width: 100px;
+}
 )";
 
 namespace CE::Widgets
@@ -38,8 +43,7 @@ namespace CE::Widgets
 	{
 		Super::Construct();
 
-		SetStyleSheet(css);
-
+		SetStyleSheet(css + largeSize);
 		
 	}
 

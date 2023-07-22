@@ -140,6 +140,11 @@ namespace CE::Editor
 		using namespace CE::Widgets;
 
 		GetStyleManager()->SetGlobalStyleSheet(globalStyleSheet);
+        
+        GUI::Style& style = GUI::GetStyle();
+        style.colors[GUI::StyleCol_Button] = Color::FromRGBA32(64, 64, 64).ToVec4();
+        style.colors[GUI::StyleCol_ButtonHovered] = Color::FromRGBA32(90, 90, 90).ToVec4();
+        style.colors[GUI::StyleCol_ButtonActive] = Color::FromRGBA32(50, 50, 50).ToVec4();
 	}
 
 	void EditorStyles::GetDefaultFont(unsigned char** outFont, unsigned int* outLength)
