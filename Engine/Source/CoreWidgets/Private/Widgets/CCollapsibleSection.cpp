@@ -99,8 +99,14 @@ namespace CE::Widgets
 			DrawDefaultBackground(rect + Rect(0, headerHeight, 0, headerHeight));
 		}
 
+		GUI::TreeNodeFlags treeFlags = GUI::TNF_None;
+		if (!IsCollapsed())
+		{
+			treeFlags |= GUI::TNF_DefaultOpen;
+		}
+
 		bool hovered = false, held = false;
-		bool active = GUI::CollapsibleHeader(rect, title, internalId, headerStyleState, hovered, held, headerPadding, contentPadding);
+		bool active = GUI::CollapsibleHeader(rect, title, internalId, headerStyleState, hovered, held, headerPadding, contentPadding, treeFlags);
 		PollBasicMouseEvents(hovered, false, headerState);
 
 		CFontManager::Get().PopFont();

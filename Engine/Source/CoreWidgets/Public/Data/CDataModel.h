@@ -71,6 +71,8 @@ namespace CE::Widgets
 
 		CModelIndex CreateIndex(u32 row, u32 col, void* data = nullptr);
 
+		virtual void OnIndexSelected(const CModelIndex& index) {}
+
 	};
     
 } // namespace CE::Widgets

@@ -60,6 +60,9 @@ namespace CE::Widgets
 		inline bool AlwaysShowVerticalScroll() const { return alwaysShowVerticalScroll; }
 		inline void SetAlwaysShowVerticalScroll(bool set) { alwaysShowVerticalScroll = set; }
 
+		inline bool AreItemsSelectable() const { return selectableItems; }
+		inline void SetItemsSelectable(bool set) { selectableItems = set; }
+
     protected:
 
         virtual void OnDrawGUI() override;
@@ -71,6 +74,16 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 alwaysShowVerticalScroll = false;
+
+		FIELD()
+		b8 selectableItems = false;
+
+		GUI::GuiStyleState itemHovered{};
+		GUI::GuiStyleState itemActive{};
+
+		CModelIndex selectedIndex = {};
+
+		b8 itemColorFetched = false;
 
 		f32 calculatedHeight = 10;
 

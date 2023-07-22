@@ -96,6 +96,20 @@ CCollapsibleSection::header {
 	border-radius: 0px;
 }
 
+CSeparator:vertical {
+	border-width: 0px;
+	background: rgb(26, 26, 26);
+	width: 100%;
+	height: 2px;
+}
+
+CSeparator:horizontal {
+	border-width: 0px;
+	background: rgb(26, 26, 26);
+	width: 2px;
+	height: 100%;
+}
+
 )";
 
 namespace CE::Editor

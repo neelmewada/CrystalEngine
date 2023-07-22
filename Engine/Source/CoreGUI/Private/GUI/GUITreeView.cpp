@@ -262,9 +262,29 @@ namespace CE::GUI
 		bool selected = (flags & ImGuiTreeNodeFlags_Selected) != 0;
 		const bool was_selected = selected;
 
+		ImRect frame_without_arrow = ImRect(frame_bb.Min + ImVec2(g.FontSize * 0.15f * 6.f, 0), frame_bb.Max);
+
 		//bool hovered, held;
-		bool pressed = ImGui::ButtonBehavior(frame_bb, id, isHovered, isHeld, button_flags);
+		bool titlePressed = ImGui::ButtonBehavior(frame_without_arrow, id, isHovered, isHeld, button_flags);
 		bool toggled = false;
+
+		bool doubleClicked = *isHovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left);
+
+		ImRect arrow_hit_rect = ImRect(frame_bb.Min, ImVec2(frame_bb.Min.x + g.FontSize * 0.15f * 6.f, frame_bb.Max.y));
+		
+		// Arrow button behavior
+		bool arrowHovered, arrowHeld;
+		bool arrowPressed = ImGui::ButtonBehavior(arrow_hit_rect, GetCombinedHash(id, 0xffff), &arrowHovered, &arrowHeld, button_flags);
+
+		if (isHovered != nullptr)
+			*isHovered = *isHovered || arrowHovered;
+		if (isHeld != nullptr)
+			*isHeld = *isHeld || arrowHeld;
+
+		if (titlePressed || (is_leaf && arrowPressed))
+			*isSelected = true;
+
+		bool pressed = doubleClicked || arrowPressed;
 
 		if (!is_leaf)
 		{
@@ -297,16 +317,10 @@ namespace CE::GUI
 
 			if (toggled)
 			{
-				*isSelected = true;
-
 				is_open = !is_open;
 				window->DC.StateStorage->SetInt(id, is_open);
 				g.LastItemData.StatusFlags |= ImGuiItemStatusFlags_ToggledOpen;
 			}
-		}
-		else if (pressed)
-		{
-			*isSelected = true;
 		}
 
 		if (flags & ImGuiTreeNodeFlags_AllowItemOverlap)

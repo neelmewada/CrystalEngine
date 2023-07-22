@@ -6360,6 +6360,8 @@ namespace CE::GUI
 		drawList->PathArcToFast(ImVec2(rect.z - roundingTR, rect.y + roundingTR), roundingTR, 9, 12);
 		drawList->PathArcToFast(ImVec2(rect.z - roundingBR, rect.w - roundingBR), roundingBR, 0, 3);
 		drawList->PathArcToFast(ImVec2(rect.x + roundingBL, rect.w - roundingBL), roundingBL, 3, 6);
+		drawList->PathLineTo(ImVec2(rect.x, rect.y + roundingTL));
+
 		drawList->PathStroke(color, 0, thickness);
 	}
     

@@ -22,9 +22,6 @@ namespace CE::Widgets
 		inline void SetEnabled() { isDisabled = false; }
 		inline void SetDisabled() { isDisabled = true; }
 
-		inline bool IsInteractable() const { return isInteractable; }
-		inline void SetInteractable(bool interactable) { isInteractable = interactable; }
-
     protected:
         
         void OnDrawGUI() override;
@@ -38,9 +35,6 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isDisabled = false;
-
-		FIELD()
-		b8 isInteractable = false;
         
         String invisibleButtonId{};
 

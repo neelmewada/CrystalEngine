@@ -77,6 +77,8 @@ namespace CE::Widgets
 
 		inline CStateFlag GetStateFlags() const { return stateFlags; }
 
+		inline YGNodeRef GetNode() const { return node; }
+
 		// - Style API -
 
 		inline const CStyle& GetComputedStyle()
@@ -126,6 +128,9 @@ namespace CE::Widgets
 
 		bool IsLeftMouseHeld() const { return isLeftMousePressedInside; }
 
+		inline bool IsInteractable() const { return isInteractable; }
+		inline void SetInteractable(bool interactable) { isInteractable = interactable; }
+
 		// Hierarchy API
 
 		CWidget* GetOwner();
@@ -173,8 +178,10 @@ namespace CE::Widgets
 		// Draw Helpers
 
 		void DrawBackground(const GUI::GuiStyleState& styleState);
-
 		void DrawBackground(const GUI::GuiStyleState& styleState, const Rect& localRect);
+
+		void FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius = {});
+		void DrawRect(const Color& color, const Rect& localRect, f32 borderThickness = 1.0f, const Vec4& borderRadius = {});
 		
 		inline void DrawDefaultBackground()
 		{
@@ -206,6 +213,9 @@ namespace CE::Widgets
 
 		/// Must be called at the end of all GUI draw calls
 		virtual void PollEvents();
+
+		// Optimizations
+
 
 	public: // Signals
 
@@ -250,6 +260,9 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isVisible = true;
+
+		FIELD()
+		b8 isInteractable = true;
 
 		CWidget* parent = nullptr;
 		

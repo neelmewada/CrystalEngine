@@ -94,4 +94,13 @@ namespace CE::Editor
 		this->rootNode = rootNode;
 	}
 
+	void AssetBrowserTreeModel::OnIndexSelected(const CModelIndex& index)
+	{
+		PathTreeNode* node = (PathTreeNode*)index.GetInternalData();
+		if (node == nullptr)
+			return;
+
+		emit OnSelectionChanged(node);
+	}
+
 } // namespace CE::Editor

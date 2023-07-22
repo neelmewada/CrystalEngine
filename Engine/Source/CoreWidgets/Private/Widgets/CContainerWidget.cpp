@@ -4,7 +4,7 @@ namespace CE::Widgets
 {
     CContainerWidget::CContainerWidget()
     {
-
+		isInteractable = false;
     }
 
     CContainerWidget::~CContainerWidget()
@@ -23,6 +23,8 @@ namespace CE::Widgets
 			flags |= GUI::WF_HorizontalScrollbar;
 		if (!allowVerticalScroll)
 			flags |= GUI::WF_NoScrollWithMouse;
+		if (!allowVerticalScroll && !allowHorizontalScroll)
+			flags |= GUI::WF_NoScrollbar;
 
 		bool result = GUI::BeginChild(rect, GetUuid(), "", {}, {}, flags);
 

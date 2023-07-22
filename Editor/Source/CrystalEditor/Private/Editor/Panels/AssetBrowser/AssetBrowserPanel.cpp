@@ -9,11 +9,8 @@ AssetBrowserPanel {
 	flex-direction: row;
 }
 
-CContainerWidget {
-	padding: 10px 5px;
-}
-
 #LeftContainer {
+	padding: 10px 5px;
 	width: 30%;
 	height: 100%;
 	padding: 10px 5px 23px 5px;
@@ -23,23 +20,63 @@ CContainerWidget {
 }
 
 #RightContainer {
+	padding: 0px 0px;
 	width: 70%;
 	height: 100%;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
 }
 
 #GameContentSection {
 	
 }
 
-#GameContentTreeView {
+CTreeView {
 	padding: 0px 10px;
 }
 
-#GameContentTreeView > CTreeItemView {
+CTreeView > CTreeItemView {
 	text-align: middle-left;
 	font-size: 18px;
 	height: 22px;
 }
+
+CTreeView > CTreeItemView:hovered {
+	background: rgb(43, 50, 58);
+}
+
+CTreeView > CTreeItemView:active {
+	background: rgb(65, 87, 111);
+}
+
+#TopBarLayout {
+	padding: 10px 3px;
+	height: 40px;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	column-gap: 15px;
+}
+
+#SearchBox {
+	width: 160px;
+	height: 26px;
+}
+
+#AssetGridView {
+	width: 100%;
+	flex-grow: 1;
+	flex-shrink: 3;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	align-self: stretch;
+	padding: 10px 10px;
+	row-gap: 20px;
+	column-gap: 20px;
+}
+
 
 )";
 
@@ -56,7 +93,7 @@ namespace CE::Editor
 
 	AssetBrowserPanel::~AssetBrowserPanel()
 	{
-
+		
 	}
 
 	void AssetBrowserPanel::Construct()
@@ -64,18 +101,23 @@ namespace CE::Editor
 		Super::Construct();
 
 		SetStyleSheet(css);
-
+		
 		left = CreateWidget<CContainerWidget>(this, "LeftContainer");
 		left->SetHorizontalScrollAllowed(true);
 		left->SetVerticalScrollAllowed(true);
 		{
 			auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
 			gameContentSection->SetTitle("Game Content");
+			gameContentSection->SetCollapsed(false);
 
 			gameContentDirectoryView = CreateWidget<CTreeView>(gameContentSection, "GameContentTreeView");
 			auto model = CreateObject<AssetBrowserTreeModel>(gameContentDirectoryView, "GameContentTreeModel");
 			model->SetPathTreeRootNode(AssetManager::GetRegistry()->GetCachedPathTree().GetNode("/Game"));
 			gameContentDirectoryView->SetModel(model);
+			gameContentDirectoryView->SetItemsSelectable(true);
+
+			Object::Bind(model, MEMBER_FUNCTION(AssetBrowserTreeModel, OnSelectionChanged), 
+				this, MEMBER_FUNCTION(Self, OnGameContentTreeViewSelectionChanged));
 
 			auto engineContentSection = CreateWidget<CCollapsibleSection>(left, "EngineContentSection");
 			engineContentSection->SetTitle("Engine Content");
@@ -84,12 +126,32 @@ namespace CE::Editor
 		right = CreateWidget<CContainerWidget>(this, "RightContainer");
 		right->SetVerticalScrollAllowed(false);
 		{
-			auto label = CreateWidget<CLabel>(right, "Lbl");
-			label->SetText("This is a very long label. It has 2 sentences.");
+			auto topBarLayout = CreateWidget<CLayoutGroup>(right, "TopBarLayout");
+			{
+				auto addButton = CreateWidget<CButton>(topBarLayout, "AddButton");
+				addButton->SetText("Add");
 
-			auto btn = CreateWidget<CButton>(right, "Btn");
-			btn->SetText("Button");
+				auto searchBox = CreateWidget<CTextInput>(topBarLayout, "SearchBox");
+				searchBox->SetHint("Search...");
+			}
+
+			CreateWidget<CSeparator>(right, "Separator");
+
+			auto gridView = CreateWidget<CContainerWidget>(right, "AssetGridView");
+			gridView->SetHorizontalScrollAllowed(false);
+			gridView->SetVerticalScrollAllowed(true);
+			{
+				for (int i = 0; i < 16; i++)
+				{
+					auto item = CreateWidget<AssetItemWidget>(gridView, "AssetItem");
+				}
+			}
 		}
+	}
+
+	void AssetBrowserPanel::OnGameContentTreeViewSelectionChanged(PathTreeNode* selectedNode)
+	{
+
 	}
 
 }

@@ -145,6 +145,26 @@ namespace CE::Widgets
 			model->SetData(index, widget);
 
 			widget->nodeId = GetHash<CModelIndex>(index);
+
+			if (!itemColorFetched || widget->NeedsStyle())
+			{
+				itemHovered = widget->defaultStyleState;
+				itemActive = itemHovered;
+
+				auto hoveredStyle = widget->stylesheet->SelectStyle(widget, CStateFlag::Hovered);
+				for (const auto& [property, styleValue] : hoveredStyle.properties)
+				{
+					LoadGuiStyleStateProperty(property, styleValue, itemHovered);
+				}
+
+				auto activeStyle = widget->stylesheet->SelectStyle(widget, CStateFlag::Active);
+				for (const auto& [property, styleValue] : activeStyle.properties)
+				{
+					LoadGuiStyleStateProperty(property, styleValue, itemActive);
+				}
+
+				itemColorFetched = true;
+			}
 			
 			widget->UpdateStyleIfNeeded();
 			widget->UpdateLayoutIfNeeded();
@@ -160,21 +180,29 @@ namespace CE::Widgets
 
 			auto cursorPos = GUI::GetCursorPos();
 
-			widget->DrawDefaultBackground(Rect(cursorPos, cursorPos + size + Vec2(indent * 15.0f, 0)));
+			bool selected = (selectedIndex == index);
 
-			//bool isOpen = GUI::TreeViewNode(size, widget->nodeId, indent * 15.0f, padding, flags);
-            bool selected = false;
-            
-            bool isOpen = GUI::TreeViewNodeSelectable(size, widget->nodeId, indent * 15.0f, &selected, &widget->isHovered, &widget->isLeftMousePressedInside, padding, flags);
+			widget->DrawBackground((selected || widget->isLeftMousePressedInside) ? itemActive : (widget->isHovered ? itemHovered : widget->defaultStyleState), 
+				Rect(cursorPos, cursorPos + size + Vec2(indent * 15.0f, 0)));
+
+			bool isOpen = false;
+
+			if (!selectableItems)
+				isOpen = GUI::TreeViewNode(size, widget->nodeId, indent * 15.0f, padding, flags);
+			else
+				isOpen = GUI::TreeViewNodeSelectable(size, widget->nodeId, indent * 15.0f, &selected, &widget->isHovered, &widget->isLeftMousePressedInside, padding, flags);
+
 			if (isOpen != widget->isOpen)
 			{
 				widget->isOpen = isOpen;
 				widget->SetNeedsStyle();
 				widget->SetNeedsLayout();
 			}
-            if (selected)
+
+            if (selected && selectedIndex != index)
             {
-                CE_LOG(Info, All, "Select: {}", widget->label);
+				selectedIndex = index;
+				model->OnIndexSelected(index);
             }
 
 			GUI::SetCursorPos(cursorPos);

@@ -16,6 +16,9 @@ namespace CE::Editor
 
 	protected:
 
+		FUNCTION()
+		void OnGameContentTreeViewSelectionChanged(PathTreeNode* selectedNode);
+
 		CContainerWidget* left = nullptr;
 		CContainerWidget* right = nullptr;
 

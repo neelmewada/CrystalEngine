@@ -111,14 +111,39 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius)
+	{
+		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+
+		if (color.a > 0)
+		{
+			GUI::FillRect(globalRect, color, borderRadius);
+		}
+	}
+
+	void CWidget::DrawRect(const Color& color, const Rect& localRect, f32 borderThickness, const Vec4& borderRadius)
+	{
+		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		
+		if (color.a > 0)
+		{
+			GUI::DrawRect(globalRect, color, borderRadius, borderThickness);
+		}
+	}
+
 	void CWidget::UpdateStyleIfNeeded()
 	{
-		if (!NeedsStyle() && !stylesheet->IsDirty())
+		if (!needsStyle && !stylesheet->IsDirty())
 			return;
 
 		needsStyle = false;
 
 		node->setStyle({}); // Clear style
+
+		if (GetName().GetString() == "AssetItem")
+		{
+			String::IsAlphabet('a');
+		}
 
 		computedStyle = {};
 		//computedStyle.ApplyProperties(style);
@@ -137,17 +162,19 @@ namespace CE::Widgets
 			}
 		}
 
-		auto rules = stylesheet->GetMatchingRules(this, stateFlags, subControl);
-		for (const auto& rule : rules)
-		{
-			computedStyle.ApplyProperties(rule.style);
-		}
+		auto selectStyle = stylesheet->SelectStyle(this, stateFlags, subControl);
+		computedStyle.ApplyProperties(selectStyle);
+
+		//auto rules = stylesheet->GetMatchingRules(this, stateFlags, subControl);
+		//for (const auto& rule : rules)
+		//{
+		//	computedStyle.ApplyProperties(rule.style);
+		//}
 
 		OnBeforeComputeStyle();
 		
 		for (auto& [property, value] : computedStyle.properties)
 		{
-
 			// Non-Yoga properties
 			if (value.IsValid()) // Default state
 			{
@@ -739,6 +766,9 @@ namespace CE::Widgets
 
 	void CWidget::PollEvents()
 	{
+		if (!IsInteractable())
+			return;
+
 		CWindow* thisWindow = nullptr;
 		if (IsWindow())
 			thisWindow = (CWindow*)this;
@@ -954,9 +984,10 @@ namespace CE::Widgets
 
 		if (IsLeftMouseHeld() && IsHovered())
 		{
-            if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
+            if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
                 SetNeedsStyle();
-			EnumAddFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed);
+			EnumAddFlags(stateFlags, CStateFlag::Pressed);
+			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
 		}
 		else if (IsHovered())
 		{

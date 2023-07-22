@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreMedia.h"
 #include "CoreRHI.h"
 #include "CoreGUI.h"
 
@@ -35,6 +36,7 @@
 #include "Widgets/CButton.h"
 #include "Widgets/CTableView.h"
 #include "Widgets/CTreeView.h"
+#include "Widgets/CSeparator.h"
 #include "Widgets/CTabWidget.h"
 #include "Widgets/CSelectableWidget.h"
 #include "Widgets/CSelectableGroup.h"

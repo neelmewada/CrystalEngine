@@ -26,6 +26,10 @@ namespace CE::Editor
 
 		void SetPathTreeRootNode(PathTreeNode* rootNode);
 
+		virtual void OnIndexSelected(const CModelIndex& index) override;
+
+		CE_SIGNAL(OnSelectionChanged, PathTreeNode*);
+
 	private:
 
 		PathTreeNode* rootNode = nullptr;
