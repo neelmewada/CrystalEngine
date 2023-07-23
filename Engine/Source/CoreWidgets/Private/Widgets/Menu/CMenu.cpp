@@ -40,6 +40,20 @@ namespace CE::Widgets
 		isShown = false;
 	}
 
+    void CMenu::HideAll()
+    {
+        Hide();
+        
+        if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenuItem>())
+        {
+            CWidget* parentsParent = ((CMenuItem*)parent)->GetOwner();
+            if (parentsParent != nullptr && parentsParent->GetClass()->IsSubclassOf<CMenu>())
+            {
+                ((CMenu*)parentsParent)->HideAll();
+            }
+        }
+    }
+
 	void CMenu::Show(Vec2 pos)
 	{
 		isShown = true;
@@ -184,35 +198,39 @@ namespace CE::Widgets
 			pushedColors = 0;
 		}
     }
-
-    bool CMenu::IsMenuItemPresentInHierarchy(CMenuItem* menuItem)
+    
+    bool CMenu::OnSubMenuItemHovered(CMenuItem* subMenuItem)
     {
+        bool result = false;
+        
         for (CWidget* child : attachedWidgets)
         {
             if (child->GetClass()->IsSubclassOf<CMenuItem>())
             {
                 CMenuItem* childMenuItem = (CMenuItem*)child;
-                if (childMenuItem == menuItem)
-                    return true;
-                
-                if (childMenuItem->HasSubMenu() && childMenuItem->GetSubMenu()->IsMenuItemPresentInHierarchy(menuItem))
-                    return true;
+                if (childMenuItem == subMenuItem)
+                {
+                    if (childMenuItem->HasSubMenu() && !childMenuItem->GetSubMenu()->IsShown())
+                        childMenuItem->GetSubMenu()->Show(childMenuItem);
+                    result = true;
+                }
+                else
+                {
+                    if (childMenuItem->HasSubMenu())
+                        childMenuItem->GetSubMenu()->Hide();
+                }
             }
         }
         
-        return false;
+        return result;
     }
 
     void CMenu::HandleEvent(CEvent* event)
     {
-        if (!event->ShouldPropagate())
-            return;
         
         if (event->type == CEventType::MouseButtonClick)
         {
-            if (event->sender->GetClass()->IsSubclassOf<CMenuItem>())
-                Hide();
-            event->HandleAndStopPropagation();
+            
         }
         else if (event->type == CEventType::MouseEnter)
         {
@@ -220,12 +238,8 @@ namespace CE::Widgets
             {
                 CMenuItem* menuItem = (CMenuItem*)event->sender;
                 
-                if (menuItem->HasSubMenu() && !menuItem->GetSubMenu()->IsShown())
-                {
-                    menuItem->GetSubMenu()->Show(menuItem);
-                }
-                
-                event->HandleAndStopPropagation();
+                if (OnSubMenuItemHovered(menuItem))
+                    event->HandleAndStopPropagation();
             }
         }
         else if (event->type == CEventType::MouseLeave)

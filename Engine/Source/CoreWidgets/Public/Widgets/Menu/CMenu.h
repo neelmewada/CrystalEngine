@@ -33,6 +33,8 @@ namespace CE::Widgets
 		void ShowContextMenu();
 
 		void Hide();
+        
+        void HideAll();
 
 		/// Passing `pos` as 0 will show it at mouse position
 		void Show(Vec2 pos);
@@ -43,10 +45,10 @@ namespace CE::Widgets
 
 		inline CMenuPosition GetMenuPosition() const { return menuPosition; }
 		inline void SetMenuPosition(CMenuPosition pos) { menuPosition = pos; }
-        
-        bool IsMenuItemPresentInHierarchy(CMenuItem* menuItem);
 
     protected:
+        
+        bool OnSubMenuItemHovered(CMenuItem* subMenuItem);
         
         virtual void OnDrawGUI() override;
         

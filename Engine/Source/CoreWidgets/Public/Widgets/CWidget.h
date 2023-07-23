@@ -277,7 +277,7 @@ namespace CE::Widgets
 		b8 isInteractable = true;
 
 		FIELD()
-		CWidget* parent = nullptr;
+		CWidget* parent = nullptr; 
 
 		FIELD()
 		CWidget* owner = nullptr;

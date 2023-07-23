@@ -50,12 +50,12 @@ namespace CE::Widgets
 
 	void CMenuItem::HandleEvent(CEvent* event)
 	{
-		if (!event->ShouldPropagate())
-			return;
-
+        
 		if (event->type == CEventType::MouseButtonClick)
 		{
-			
+            if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenu>())
+                ((CMenu*)parent)->HideAll();
+            event->HandleAndStopPropagation();
 		}
 		else if (event->type == CEventType::MouseEnter)
 		{
