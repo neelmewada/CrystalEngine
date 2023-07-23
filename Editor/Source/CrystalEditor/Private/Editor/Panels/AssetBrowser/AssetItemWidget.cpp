@@ -18,7 +18,7 @@ AssetItemWidget:pressed {
 
 )";
 
-static const CE::String largeSize = R"(
+static const CE::String mediumSize = R"(
 AssetItemWidget {
     height: 120px;
     width: 100px;
@@ -43,7 +43,7 @@ namespace CE::Widgets
 	{
 		Super::Construct();
 
-		SetStyleSheet(css + largeSize);
+		SetStyleSheet(css + mediumSize);
 		
 	}
 

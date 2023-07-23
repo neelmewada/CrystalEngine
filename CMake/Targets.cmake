@@ -121,7 +121,11 @@ function(ce_add_target NAME TARGET_TYPE)
     
     ce_group_sources_by_folder(${NAME})
 
-    target_compile_definitions(${NAME} PRIVATE PACKAGE_NAME="/Code/${NAME}")
+    target_compile_definitions(${NAME} 
+        PRIVATE 
+            PACKAGE_NAME="/Code/${NAME}"
+            MODULE_NAME="${NAME}"
+    )
 
     if(${TARGET_TYPE} STREQUAL "GUIAPP")
         target_compile_definitions(${NAME} PRIVATE IS_GUI_APP=1)

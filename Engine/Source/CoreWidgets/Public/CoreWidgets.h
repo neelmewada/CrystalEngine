@@ -34,6 +34,7 @@
 // Widgets
 #include "Widgets/CLabel.h"
 #include "Widgets/CButton.h"
+#include "Widgets/CSpacer.h"
 #include "Widgets/CTableView.h"
 #include "Widgets/CTreeView.h"
 #include "Widgets/CSeparator.h"

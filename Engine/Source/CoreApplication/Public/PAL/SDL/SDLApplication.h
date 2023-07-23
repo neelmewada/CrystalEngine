@@ -35,6 +35,9 @@ namespace CE
         virtual PlatformWindow* CreatePlatformWindow(const String& title) override;
         virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) override;
 
+		virtual Vec2i GetMainScreenSize() override;
+		virtual Vec2i GetScreenSizeForWindow(PlatformWindow* window) override;
+
         void DestroyWindow(PlatformWindow* window) override;
 
         void Tick() override;

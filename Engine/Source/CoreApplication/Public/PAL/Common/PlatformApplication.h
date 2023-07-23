@@ -56,6 +56,9 @@ namespace CE
 
         virtual void DestroyWindow(PlatformWindow* window) = 0;
 
+		virtual Vec2i GetMainScreenSize() = 0;
+		virtual Vec2i GetScreenSizeForWindow(PlatformWindow* window) = 0;
+
         WindowResizeDelegate onWindowResized{};
 
     protected:

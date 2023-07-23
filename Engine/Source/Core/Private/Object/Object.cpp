@@ -93,11 +93,13 @@ namespace CE
             return;
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
+
 		auto package = GetPackage();
 		if (package != nullptr)
 		{
 			package->loadedObjects[subobject->GetUuid()] = subobject;
 		}
+
 		OnSubobjectAttached(subobject);
     }
 

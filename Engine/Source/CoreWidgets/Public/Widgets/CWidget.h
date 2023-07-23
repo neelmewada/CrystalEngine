@@ -120,8 +120,9 @@ namespace CE::Widgets
 		}
 
 		void SetStyleSheet(const String& stylesheet);
-
 		const String& GetStyleSheet() const;
+
+		inline CStyleSheet* GetStyleSheetObject() const { return stylesheet; }
 
 		bool IsHovered() const { return isHovered; }
 		bool IsFocused() const { return isFocused; }

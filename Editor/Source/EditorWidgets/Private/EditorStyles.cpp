@@ -70,6 +70,19 @@ CButton::alternate:pressed {
 	background: rgb(6, 66, 126);
 }
 
+CButton.Transparent {
+	border-width: 0px;
+	background: rgba(0, 0, 0, 0);
+}
+
+CButton.Transparent:hovered {
+	background: rgba(70, 70, 70, 180);
+}
+
+CButton.Transparent:pressed {
+	background: rgba(50, 50, 50, 180);
+}
+
 CTextInput {
 	background: rgb(15, 15, 15);
 	border-width: 1;

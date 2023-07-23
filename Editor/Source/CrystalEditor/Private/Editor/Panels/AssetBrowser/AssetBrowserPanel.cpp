@@ -11,6 +11,7 @@ AssetBrowserPanel {
 
 #LeftContainer {
 	width: 25%;
+	min-width: 200px;
 	height: 100%;
 	padding: 10px 5px 20px 5px;
 	background: rgb(26, 26, 26);
@@ -46,7 +47,7 @@ CTreeView > CTreeItemView:hovered {
 }
 
 CTreeView > CTreeItemView:active {
-	background: rgb(65, 87, 111);
+	background: rgb(6, 66, 126);
 }
 
 #TopBarLayout {
@@ -132,6 +133,12 @@ namespace CE::Editor
 
 				auto searchBox = CreateWidget<CTextInput>(topBarLayout, "SearchBox");
 				searchBox->SetHint("Search...");
+
+				CreateWidget<CSpacer>(topBarLayout, "Spacer");
+
+				auto settingsButton = CreateWidget<CButton>(topBarLayout, "SettingsButton");
+				settingsButton->AddStyleClass("Transparent");
+				settingsButton->SetText("Settings");
 			}
 
 			CreateWidget<CSeparator>(right, "Separator");

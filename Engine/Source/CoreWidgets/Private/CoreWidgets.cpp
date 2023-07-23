@@ -1,5 +1,6 @@
 
 #include "CoreWidgets.h"
+#include "CoreWidgetsPrivate.h"
 
 #include "CoreWidgets.private.h"
 
@@ -7,13 +8,13 @@ namespace CE::Widgets
 {
 	// Globals
 
-	COREWIDGETS_API Package* gWidgetsTransientPackage = nullptr;
+	Package* gWidgetsTransientPackage = nullptr;
 
 	static CStyleManager* gStyleManager = nullptr;
 
 	COREWIDGETS_API Package* GetWidgetsTransientPackage()
 	{
-		return gWidgetsTransientPackage;
+		return ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
 	}
 
 	COREWIDGETS_API CStyleManager* GetStyleManager()
