@@ -28,7 +28,6 @@
 #include "Event/CEvent.h"
 
 #include "Widgets/CWidget.h"
-#include "Widgets/CWindow.h"
 //#include "Widgets/CDockContainer.h"
 
 // Widgets
@@ -47,13 +46,15 @@
 #include "Widgets/CLayoutGroup.h"
 #include "Widgets/CSplitWidget.h"
 
-//#include "Widgets/CGridLayout.h"
-
 // Input Widgets
-//#include "Widgets/Input/CCheckbox.h"
 #include "Widgets/Input/CTextInput.h"
-//#include "Widgets/Input/CFloatInput.h"
-//#include "Widgets/Input/CIntInput.h"
+
+// Menu Widgets
+#include "Widgets/Menu/CMenu.h"
+#include "Widgets/Menu/CMenuBar.h"
+
+#include "Widgets/CWindow.h"
+
 
 namespace CE::Widgets
 {

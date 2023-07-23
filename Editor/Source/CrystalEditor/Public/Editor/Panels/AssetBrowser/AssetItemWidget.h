@@ -13,6 +13,8 @@ namespace CE::Widgets
 
         virtual ~AssetItemWidget();
 
+		bool IsContainer() override { return true; }
+
     protected:
 
 		void Construct() override;

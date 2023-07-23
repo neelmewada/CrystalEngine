@@ -20,7 +20,6 @@ namespace CE::Editor
 		if (!parent.IsValid())
 		{
 			return 1;
-			//return rootNode->children.GetSize();
 		}
 
 		PathTreeNode* node = (PathTreeNode*)parent.GetInternalData();

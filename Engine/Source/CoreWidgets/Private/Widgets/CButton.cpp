@@ -50,8 +50,9 @@ namespace CE::Widgets
 
 		bool hovered = false, held = false;
 		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding);
+		PollEvents();
 
-		PollBasicMouseEvents(hovered, held || pressed, this->stateFlags);
+		//PollBasicMouseEvents(hovered, held || pressed, this->stateFlags);
 
 		GUI::PushChildCoordinateSpace(rect);
 

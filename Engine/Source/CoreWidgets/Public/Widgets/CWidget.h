@@ -24,6 +24,7 @@ namespace CE::Widgets
 	};
 
 	class CWindow;
+	class CMenu;
 
 	CLASS(Abstract)
 	class COREWIDGETS_API CWidget : public Object
@@ -266,6 +267,7 @@ namespace CE::Widgets
 		b8 isInteractable = true;
 
 		CWidget* parent = nullptr;
+		CMenu* contextMenu = nullptr;
 		
 		CStyleSheet* stylesheet = nullptr;
 		String stylesheetText = "";

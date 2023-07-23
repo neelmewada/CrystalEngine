@@ -12,7 +12,7 @@ namespace CE::Widgets
 		CButton();
 		virtual ~CButton();
 
-		bool IsContainer() override { return true; }
+		bool IsContainer() override { return false; }
 
 		void Construct() override;
 

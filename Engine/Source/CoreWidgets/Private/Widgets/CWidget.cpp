@@ -1111,10 +1111,20 @@ namespace CE::Widgets
 		if (event->isHandled && event->stopPropagation)
 			return;
 
-		if (event->GetEventType() == CEventType::MouseButtonClick)
+		if (!event->isHandled && event->GetEventType() == CEventType::MouseButtonClick)
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
-			fire OnMouseClick(mouseEvent);
+			if (mouseEvent->mouseButton == 0)
+			{
+				fire OnMouseClick(mouseEvent);
+				CE_LOG(Info, All, "Left click!");
+				event->MarkHandled();
+			}
+			else if (mouseEvent->mouseButton == 1)
+			{
+				CE_LOG(Info, All, "Right click!");
+				event->MarkHandled();
+			}
 		}
 
 		for (CWidget* parent = GetOwner(); parent != nullptr; parent = parent->GetOwner())
