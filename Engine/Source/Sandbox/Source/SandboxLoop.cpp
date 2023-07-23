@@ -525,7 +525,7 @@ void SandboxLoop::RunLoop()
 			}
             
 			if (window != nullptr)
-				window->RenderGUI();
+				window->Render();
         }
         GUI::EndWindow();
 

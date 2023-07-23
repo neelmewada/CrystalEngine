@@ -124,7 +124,7 @@ namespace CE::Widgets
 				GUI::PushZeroingChildCoordinateSpace();
 				for (auto child : attachedWidgets)
 				{
-					child->RenderGUI();
+					child->Render();
 				}
 				GUI::PopChildCoordinateSpace();
 			}

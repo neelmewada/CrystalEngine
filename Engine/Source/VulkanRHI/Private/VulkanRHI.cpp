@@ -196,7 +196,12 @@ namespace CE
 
     // - Render Target -
 
-    RHI::RenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height,
+	Vec2i VulkanRHI::GetScreenSizeForWindow(void* platformWindowHandle)
+	{
+		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
+	}
+
+	RHI::RenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height,
         const RHI::RenderTargetLayout& rtLayout)
     {
         return new VulkanRenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));

@@ -62,7 +62,7 @@ namespace CE::Widgets
 
 			for (auto child : attachedWidgets)
 			{
-				child->RenderGUI();
+				child->Render();
 			}
 
 			GUI::PopChildCoordinateSpace();

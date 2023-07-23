@@ -2,6 +2,7 @@
 
 namespace CE::Widgets
 {
+	class CMenu;
     
 	CLASS()
 	class COREWIDGETS_API CButton : public CWidget
@@ -31,6 +32,8 @@ namespace CE::Widgets
 
 	protected:
 
+		void OnSubobjectAttached(Object* subobject) override;
+
 		void OnDrawGUI() override;
 
 		void HandleEvent(CEvent* event) override;
@@ -44,6 +47,12 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isAlternateStyleButton = false;
+
+		FIELD()
+		CMenu* menu = nullptr;
+
+		FIELD()
+		b8 openMenuOnLeftClick = true;
 
 		String internalText{};
 	};

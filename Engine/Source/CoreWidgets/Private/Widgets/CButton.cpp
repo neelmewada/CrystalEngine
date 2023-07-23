@@ -43,7 +43,21 @@ namespace CE::Widgets
 		SetNeedsStyle();
 	}
 
-	void CButton::OnDrawGUI()
+    void CButton::OnSubobjectAttached(Object* subobject)
+    {
+		Super::OnSubobjectAttached(subobject);
+
+		if (subobject == nullptr)
+			return;
+
+		if (subobject->GetClass()->IsSubclassOf<CMenu>() && 
+			!subobject->GetClass()->IsSubclassOf<CContextMenu>())
+		{
+			this->menu = (CMenu*)subobject;
+		}
+    }
+
+    void CButton::OnDrawGUI()
 	{
 		Vec4 rect = GetComputedLayoutRect();
 		Vec4 padding = GetComputedLayoutPadding();
@@ -58,13 +72,18 @@ namespace CE::Widgets
 
 		for (auto child : attachedWidgets)
 		{
-			child->RenderGUI();
+			child->Render();
 		}
 
 		GUI::PopChildCoordinateSpace();
 
 		if (pressed)
 		{
+			if (openMenuOnLeftClick && menu != nullptr)
+			{
+				menu->Show();
+			}
+
 			OnClicked();
 			emit OnButtonClicked();
 		}

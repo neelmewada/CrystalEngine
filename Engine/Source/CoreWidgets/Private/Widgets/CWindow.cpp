@@ -98,7 +98,23 @@ namespace CE::Widgets
 				GUI::PushStyleColor(GUI::StyleCol_DockingEmptyBg, color);
 			}
 
+			if (defaultStyleState.borderColor.a > 0)
+			{
+				GUI::PushStyleColor(GUI::StyleCol_Border, defaultStyleState.borderColor);
+			}
+
+			if (defaultStyleState.borderThickness > 0.2f)
+			{
+				GUI::PushStyleVar(GUI::StyleVar_WindowBorderSize, defaultStyleState.borderThickness);
+			}
+
             GUI::BeginWindow(windowTitle, &isShown, windowFlags);
+
+			this->platformHandle = GUI::GetCurrentViewport()->platformHandle;
+			if (this->platformHandle != nullptr)
+			{
+				this->screenSize = RHI::gDynamicRHI->GetScreenSizeForWindow(this->platformHandle);
+			}
 
 			if (IsDockSpaceWindow())
 			{
@@ -112,7 +128,7 @@ namespace CE::Widgets
 
             for (CWidget* subWidget : attachedWidgets)
             {
-                subWidget->RenderGUI();
+                subWidget->Render();
             }
             
 			auto winSize = GUI::GetWindowSize();
@@ -133,6 +149,16 @@ namespace CE::Widgets
 			this->windowSize = winSize;
 
 			PollEvents();
+
+			if (defaultStyleState.borderThickness > 0.2f)
+			{
+				GUI::PopStyleVar(1);
+			}
+
+			if (defaultStyleState.borderColor.a > 0)
+			{
+				GUI::PopStyleColor();
+			}
 
 			GUI::PopStyleColor(8);
         }

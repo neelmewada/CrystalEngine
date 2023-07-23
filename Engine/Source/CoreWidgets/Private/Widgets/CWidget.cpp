@@ -29,6 +29,15 @@ namespace CE::Widgets
 		node = nullptr;
 	}
 
+	void CWidget::ShowContextMenu(bool show)
+	{
+		if (contextMenu == nullptr)
+			return;
+
+		if (show)
+			contextMenu->Show();
+	}
+
 	void CWidget::Construct()
 	{
 		if (GetOwner() != nullptr)
@@ -140,13 +149,7 @@ namespace CE::Widgets
 
 		node->setStyle({}); // Clear style
 
-		if (GetName().GetString() == "AssetItem")
-		{
-			String::IsAlphabet('a');
-		}
-
 		computedStyle = {};
-		//computedStyle.ApplyProperties(style);
 		defaultStyleState = {};
 
 		if (GetOwner() != nullptr)
@@ -164,12 +167,6 @@ namespace CE::Widgets
 
 		auto selectStyle = stylesheet->SelectStyle(this, stateFlags, subControl);
 		computedStyle.ApplyProperties(selectStyle);
-
-		//auto rules = stylesheet->GetMatchingRules(this, stateFlags, subControl);
-		//for (const auto& rule : rules)
-		//{
-		//	computedStyle.ApplyProperties(rule.style);
-		//}
 
 		OnBeforeComputeStyle();
 		
@@ -450,6 +447,12 @@ namespace CE::Widgets
 
 		stylesheet->SetDirty(false);
 
+		for (auto menu : attachedMenus)
+		{
+			menu->SetNeedsStyle();
+			menu->UpdateStyleIfNeeded();
+		}
+
 		if (IsContainer())
 		{
 			for (CWidget* subWidget : attachedWidgets)
@@ -500,6 +503,11 @@ namespace CE::Widgets
 
 	void CWidget::UpdateLayoutIfNeeded()
 	{
+		for (auto menu : attachedMenus)
+		{
+			menu->UpdateLayoutIfNeeded();
+		}
+
 		if (!NeedsLayout())
 			return;
         
@@ -568,15 +576,36 @@ namespace CE::Widgets
 
 	void CWidget::OnSubobjectAttached(Object* subobject)
 	{
-		if (subobject == nullptr)
+		if (subobject == nullptr || subobject == this) // Impossible edge cases
 			return;
-		if (IsContainer() && subobject->GetClass()->IsSubclassOf<CWidget>() && 
-			IsSubWidgetAllowed(subobject->GetClass()))
+		
+		if (subobject->GetClass()->IsSubclassOf<CMenu>())
+		{
+			CMenu* menu = (CMenu*)subobject;
+			attachedMenus.Add(menu);
+			menu->ownerWindow = GetOwnerWindow();
+			menu->parent = this;
+
+			if (subobject->GetClass()->IsSubclassOf<CContextMenu>())
+			{
+				this->contextMenu = (CContextMenu*)subobject;
+				this->contextMenu->parent = nullptr;
+				if (IsWindow())
+					this->contextMenu->ownerWindow = (CWindow*)this;
+				else
+					this->contextMenu->ownerWindow = GetOwnerWindow();
+			}
+		}
+		else if (IsContainer() && subobject->GetClass()->IsSubclassOf<CWidget>() && IsSubWidgetAllowed(subobject->GetClass()))
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Add(subWidget);
 			OnSubWidgetAttached(subWidget);
 			subWidget->parent = this;
+			if (IsWindow())
+				subWidget->ownerWindow = (CWindow*)this;
+			else
+				subWidget->ownerWindow = GetOwnerWindow();
 			subWidget->OnAttachedTo(this);
 
 			if (!subWidget->RequiresIndependentLayoutCalculation())
@@ -593,7 +622,13 @@ namespace CE::Widgets
 	{
 		if (subobject == nullptr)
 			return;
-		if (subobject->GetClass()->IsSubclassOf<CWidget>())
+
+		if (subobject->GetClass()->IsSubclassOf<CContextMenu>())
+		{
+			if (this->contextMenu == (CContextMenu*)subobject)
+				this->contextMenu = nullptr;
+		}
+		else if (subobject->GetClass()->IsSubclassOf<CWidget>())
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Remove(subWidget);
@@ -751,13 +786,19 @@ namespace CE::Widgets
 		}
 	}
 
-	void CWidget::RenderGUI()
+	void CWidget::Render()
 	{
 		if (IsVisible())
 		{
 			CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
 			OnDrawGUI();
 			CFontManager::Get().PopFont();
+		}
+
+		for (auto menu : attachedMenus)
+		{
+			if (menu->IsShown())
+				menu->Render();
 		}
 
 		UpdateStyleIfNeeded();
@@ -1058,14 +1099,20 @@ namespace CE::Widgets
 
 	CWindow* CWidget::GetOwnerWindow()
 	{
+		if (ownerWindow != nullptr)
+			return ownerWindow;
+
 		auto owner = GetOwner();
 		while (owner != nullptr)
 		{
 			if (owner->IsWindow())
-				return (CWindow*)owner;
+			{
+				this->ownerWindow = (CWindow*)owner;
+				return ownerWindow;
+			}
 			owner = owner->GetOwner();
 		}
-		return nullptr;
+		return ownerWindow;
 	}
 
 	int CWidget::GetSubWidgetIndex(CWidget* subWidget)
@@ -1114,15 +1161,19 @@ namespace CE::Widgets
 		if (!event->isHandled && event->GetEventType() == CEventType::MouseButtonClick)
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
-			if (mouseEvent->mouseButton == 0)
+			if (mouseEvent->mouseButton == 0) // Left click
 			{
-				fire OnMouseClick(mouseEvent);
-				CE_LOG(Info, All, "Left click!");
+				emit OnMouseClick(mouseEvent);
 				event->MarkHandled();
 			}
-			else if (mouseEvent->mouseButton == 1)
+			else if (mouseEvent->mouseButton == 1) // Right click
 			{
-				CE_LOG(Info, All, "Right click!");
+				if (contextMenu != nullptr)
+				{
+					contextMenu->ShowContextMenu();
+				}
+
+				emit OnMouseRightClick(mouseEvent);
 				event->MarkHandled();
 			}
 		}

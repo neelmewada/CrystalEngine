@@ -45,6 +45,11 @@ namespace CE::Widgets
 			isHandled = stopPropagation = true;
 		}
 
+		inline bool ShouldPropagate()
+		{
+			return !isHandled || !stopPropagation;
+		}
+
 		inline CEventType GetEventType() const 
 		{ 
 			return type; 

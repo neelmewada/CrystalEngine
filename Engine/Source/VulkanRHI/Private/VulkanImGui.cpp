@@ -30,7 +30,7 @@ namespace CE
     bool VulkanGraphicsCommandList::InitImGui(RHI::FontPreloadConfig* preloadFontConfig, Array<void*>& outFontHandles)
     {
         VkResult result = VK_SUCCESS;
-
+		
         // Create Descriptor Pool
         {
             VkDescriptorPoolSize poolSizes[] =

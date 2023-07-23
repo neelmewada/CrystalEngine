@@ -109,7 +109,7 @@ namespace CE::Editor
 			auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
 			gameContentSection->SetTitle("Game Content");
 			gameContentSection->SetCollapsed(false);
-
+			
 			gameContentDirectoryView = CreateWidget<CTreeView>(gameContentSection, "GameContentTreeView");
 			auto model = CreateObject<AssetBrowserTreeModel>(gameContentDirectoryView, "GameContentTreeModel");
 			model->SetPathTreeRootNode(AssetManager::GetRegistry()->GetCachedPathTree().GetNode("/Game"));
@@ -139,6 +139,15 @@ namespace CE::Editor
 				auto settingsButton = CreateWidget<CButton>(topBarLayout, "SettingsButton");
 				settingsButton->AddStyleClass("Transparent");
 				settingsButton->SetText("Settings");
+
+				auto settingsButtonMenu = CreateWidget<CMenu>(settingsButton, "SettingsButtonMenu");
+				{
+					for (int i = 0; i < 8; i++)
+					{
+						auto menuItem = CreateWidget<CMenuItem>(settingsButtonMenu, "MenuItem");
+						menuItem->SetText(String::Format("Item No. {}", i));
+					}
+				}
 			}
 
 			CreateWidget<CSeparator>(right, "Separator");

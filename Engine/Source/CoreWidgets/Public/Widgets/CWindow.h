@@ -31,6 +31,12 @@ namespace CE::Widgets
 
 		inline bool IsFullscreen() const { return isFullscreen; }
 		inline void SetFullscreen(bool value) { isFullscreen = value; }
+
+		inline Vec2i GetScreenSize() const { return screenSize; }
+		inline void SetScreenSize(const Vec2i& size) { this->screenSize = size; }
+
+		/// Could be: HWND, SDL_Window*, etc depending on platform
+		inline void* GetPlatformHandle() const { return platformHandle; }
         
         void Show();
         void Hide();
@@ -83,6 +89,10 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isDockSpaceWindow{};
+
+		void* platformHandle = nullptr;
+		Vec2i screenSize = Vec2i();
+
 		String dockSpaceId{};
 
 		Color titleBar{};

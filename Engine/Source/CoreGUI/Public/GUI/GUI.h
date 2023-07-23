@@ -24,6 +24,9 @@ namespace CE::GUI
 	COREGUI_API void PopFont();
 	COREGUI_API void SetCurrentFont(void* fontHandle);
 
+	COREGUI_API Viewport* GetCurrentViewport();
+	COREGUI_API Viewport* GetMainViewport();
+
 	/// Converts a rect from window space to global space
 	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow);
 	/// Converts a rect from global space to window space
@@ -201,6 +204,17 @@ namespace CE::GUI
 
 	COREGUI_API void Columns(const Rect& localRect, int count, bool border = true);
 	COREGUI_API void ColumnsNext();
+
+#pragma endregion
+
+#pragma region Popup / Menu
+
+	COREGUI_API void OpenPopup(ID id, PopupFlags flags = PopupFlags_None);
+	COREGUI_API bool IsPopupOpen(ID id, PopupFlags flags = PopupFlags_None);
+	COREGUI_API void CloseCurrentPopup();
+
+	COREGUI_API bool BeginPopup(const String& title, ID id, WindowFlags flags = WF_None);
+	COREGUI_API void EndPopup();
 
 #pragma endregion
 

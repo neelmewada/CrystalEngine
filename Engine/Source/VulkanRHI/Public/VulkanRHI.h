@@ -51,6 +51,10 @@ namespace CE
         // ************************************************
         // - Public API -
 
+		// - Utils -
+
+		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
+
         // - Render Target -
 
         virtual RHI::RenderTarget* CreateRenderTarget(u32 width, u32 height,

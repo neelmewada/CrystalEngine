@@ -177,7 +177,7 @@ namespace CE::Widgets
 					GUI::Indent(indentAmount);
 				}
 
-				widget->RenderGUI(); // Render widget
+				widget->Render(); // Render widget
 
 				for (int i = 0; i < indentLevel; i++)
 				{

@@ -51,6 +51,8 @@
 
 // Menu Widgets
 #include "Widgets/Menu/CMenu.h"
+#include "Widgets/Menu/CMenuItem.h"
+#include "Widgets/Menu/CContextMenu.h"
 #include "Widgets/Menu/CMenuBar.h"
 
 #include "Widgets/CWindow.h"

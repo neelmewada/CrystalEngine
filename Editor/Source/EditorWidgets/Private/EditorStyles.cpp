@@ -71,6 +71,7 @@ CButton::alternate:pressed {
 }
 
 CButton.Transparent {
+	padding: 10px 2px;
 	border-width: 0px;
 	background: rgba(0, 0, 0, 0);
 }
@@ -141,6 +142,27 @@ CSeparator:horizontal {
 	background: rgb(26, 26, 26);
 	width: 2px;
 	height: 100%;
+}
+
+CMenu {
+	background: rgb(50, 50, 50);
+	border-width: 1px;
+	border-color: rgb(26, 26, 26);
+	min-width: 100px;
+	min-height: 20px;
+	max-width: 300px;
+	padding: 0px 10px;
+}
+
+CMenuItem {
+	border-width: 0px;
+	border-color: rgba(0, 0, 0, 0);
+	text-align: middle-left;
+	padding: 10px 0 0 0;
+}
+
+CMenuItem:hovered, CMenuItem:pressed {
+	background: rgb(0, 112, 224);
 }
 
 )";

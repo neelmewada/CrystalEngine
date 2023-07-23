@@ -462,7 +462,7 @@ namespace CE
 	void Object::LoadDefaults()
 	{
 		// Load Base.ini into Object class
-		LoadConfig(GetClass(), "");
+		LoadConfig(GetStaticClass<Object>(), "");
 
 		Array<ClassType*> superChain{};
 		

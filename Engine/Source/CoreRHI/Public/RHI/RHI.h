@@ -36,6 +36,11 @@ namespace CE::RHI
         // *******************************************
         // - Public API -
 
+		// - Utils -
+
+		/// Returns screen size for window based on which monitor it is in. Usually, platformWindowHandle is of type SDL_Window*.
+		virtual Vec2i GetScreenSizeForWindow(void* platformWindowHandle) = 0;
+
         // - Render Target -
 
         virtual RenderTarget* CreateRenderTarget(u32 width, u32 height, 

@@ -182,7 +182,7 @@ void AppLoop::RunLoop()
 		cmdList->Begin();
 		cmdList->ImGuiNewFrame();
 
-		projectBrowser->RenderGUI();
+		projectBrowser->Render();
 
 		cmdList->ImGuiRender();
 		cmdList->End();

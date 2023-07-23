@@ -235,7 +235,7 @@ void EditorLoop::RunLoop()
 		cmdList->Begin();
 		cmdList->ImGuiNewFrame();
 
-		editorWindow->RenderGUI();
+		editorWindow->Render();
 
 		cmdList->ImGuiRender();
 		cmdList->End();

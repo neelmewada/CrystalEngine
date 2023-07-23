@@ -209,7 +209,7 @@ namespace CE::Widgets
             
 			GUI::PushChildCoordinateSpace(Rect(cursorPos, cursorPos + size));
 
-			widget->RenderGUI();
+			widget->Render();
 
 			GUI::PopChildCoordinateSpace();
 

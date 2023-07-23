@@ -37,7 +37,7 @@ namespace CE::Widgets
 
 		for (CWidget* subWidget : attachedWidgets)
 		{
-			subWidget->RenderGUI();
+			subWidget->Render();
 		}
 
 	}
@@ -210,7 +210,7 @@ namespace CE::Widgets
 						item->SetNeedsLayout();
 					}
 
-					item->RenderGUI();
+					item->Render();
 					GUI::EndTabItem();
 				}
 			}

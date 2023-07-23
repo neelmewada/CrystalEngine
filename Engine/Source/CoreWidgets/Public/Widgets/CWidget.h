@@ -25,6 +25,7 @@ namespace CE::Widgets
 
 	class CWindow;
 	class CMenu;
+	class CContextMenu;
 
 	CLASS(Abstract)
 	class COREWIDGETS_API CWidget : public Object
@@ -55,10 +56,12 @@ namespace CE::Widgets
 		inline bool IsVisible() const { return isVisible; }
 		inline void SetVisible(bool visible) { isVisible = visible; }
 
+		void ShowContextMenu(bool show = true);
+
 		virtual void Construct();
 
         // For internal use only!
-		virtual void RenderGUI();
+		virtual void Render();
         
         virtual bool IsWindow() { return false; }
 
@@ -222,6 +225,8 @@ namespace CE::Widgets
 	public: // Signals
 
 		CE_SIGNAL(OnMouseClick, CMouseEvent*);
+		
+		CE_SIGNAL(OnMouseRightClick, CMouseEvent*);
 
 	protected:
 
@@ -266,8 +271,19 @@ namespace CE::Widgets
 		FIELD()
 		b8 isInteractable = true;
 
+		FIELD()
 		CWidget* parent = nullptr;
-		CMenu* contextMenu = nullptr;
+
+		FIELD()
+		CWidget* owner = nullptr;
+
+		FIELD()
+		CWindow* ownerWindow = nullptr;
+
+		FIELD()
+		CContextMenu* contextMenu = nullptr;
+
+		Array<CMenu*> attachedMenus{};
 		
 		CStyleSheet* stylesheet = nullptr;
 		String stylesheetText = "";

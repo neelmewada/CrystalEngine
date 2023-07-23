@@ -114,6 +114,16 @@ namespace CE::GUI
 		ImGui::SetCurrentFont((ImFont*)fontHandle);
 	}
 
+	COREGUI_API Viewport* GetCurrentViewport()
+	{
+		return (Viewport*)ImGui::GetWindowViewport();
+	}
+
+	COREGUI_API Viewport* GetMainViewport()
+	{
+		return (Viewport*)ImGui::GetMainViewport();
+	}
+
 	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow)
 	{
 		Vec2 windowPos = GetWindowPos();

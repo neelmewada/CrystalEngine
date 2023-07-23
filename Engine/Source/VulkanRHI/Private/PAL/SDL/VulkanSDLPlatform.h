@@ -82,6 +82,8 @@ namespace CE
             *height = (u32)h;
         }
 
+		static Vec2i GetScreenSizeForWindow(void* sdlWindow);
+
         static void InitVulkanForWindow(PlatformWindow* window);
 
         static void ShutdownVulkanForWindow();
