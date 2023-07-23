@@ -39,6 +39,11 @@ namespace CE::Widgets
 
 		GUI::InvisibleButton(rect, GetUuid());
 		PollEvents();
+        
+        if (HasSubMenu() && subMenu->IsShown())
+        {
+            stateFlags = CStateFlag::Hovered; // Force hovered state when in sub-menu
+        }
 
 		GUI::Text(rect + Rect(padding.left, padding.top, -padding.right, -padding.bottom), text, defaultStyleState);
     }
@@ -50,21 +55,15 @@ namespace CE::Widgets
 
 		if (event->type == CEventType::MouseButtonClick)
 		{
-			event->HandleAndStopPropagation();
+			
 		}
 		else if (event->type == CEventType::MouseEnter)
 		{
-			if (HasSubMenu() && !subMenu->IsShown())
-			{
-				subMenu->Show(this);
-			}
-
-			event->HandleAndStopPropagation();
+			
 		}
 		else if (event->type == CEventType::MouseLeave)
 		{
-
-			event->HandleAndStopPropagation();
+            
 		}
 
 		Super::HandleEvent(event);

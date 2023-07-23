@@ -146,7 +146,7 @@ namespace CE::Widgets
 		
 		GUI::WindowFlags flags = GUI::WF_NoMove | GUI::WF_NoResize;
 		if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenuItem>())
-			flags |= GUI::WF_ChildMenu;
+			flags |= GUI::WF_ChildMenu | GUI::WF_ChildWindow;
 
 		bool isOpen = GUI::BeginPopup(GetName().GetString(), GetUuid(), flags);
 
@@ -165,6 +165,7 @@ namespace CE::Widgets
 			GUI::PopChildCoordinateSpace();
 
 			GUI::EndPopup();
+            PollEvents();
 		}
 		else
 		{
@@ -182,6 +183,57 @@ namespace CE::Widgets
 			GUI::PopStyleColor(pushedColors);
 			pushedColors = 0;
 		}
+    }
+
+    bool CMenu::IsMenuItemPresentInHierarchy(CMenuItem* menuItem)
+    {
+        for (CWidget* child : attachedWidgets)
+        {
+            if (child->GetClass()->IsSubclassOf<CMenuItem>())
+            {
+                CMenuItem* childMenuItem = (CMenuItem*)child;
+                if (childMenuItem == menuItem)
+                    return true;
+                
+                if (childMenuItem->HasSubMenu() && childMenuItem->GetSubMenu()->IsMenuItemPresentInHierarchy(menuItem))
+                    return true;
+            }
+        }
+        
+        return false;
+    }
+
+    void CMenu::HandleEvent(CEvent* event)
+    {
+        if (!event->ShouldPropagate())
+            return;
+        
+        if (event->type == CEventType::MouseButtonClick)
+        {
+            if (event->sender->GetClass()->IsSubclassOf<CMenuItem>())
+                Hide();
+            event->HandleAndStopPropagation();
+        }
+        else if (event->type == CEventType::MouseEnter)
+        {
+            if (IsShown() && event->sender != nullptr && event->sender->GetClass()->IsSubclassOf<CMenuItem>())
+            {
+                CMenuItem* menuItem = (CMenuItem*)event->sender;
+                
+                if (menuItem->HasSubMenu() && !menuItem->GetSubMenu()->IsShown())
+                {
+                    menuItem->GetSubMenu()->Show(menuItem);
+                }
+                
+                event->HandleAndStopPropagation();
+            }
+        }
+        else if (event->type == CEventType::MouseLeave)
+        {
+            
+        }
+        
+        Super::HandleEvent(event);
     }
     
 } // namespace CE

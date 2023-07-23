@@ -2,6 +2,8 @@
 
 namespace CE::Widgets
 {
+    class CMenuItem;
+
 	ENUM()
 	enum class CMenuPosition
 	{
@@ -41,10 +43,14 @@ namespace CE::Widgets
 
 		inline CMenuPosition GetMenuPosition() const { return menuPosition; }
 		inline void SetMenuPosition(CMenuPosition pos) { menuPosition = pos; }
+        
+        bool IsMenuItemPresentInHierarchy(CMenuItem* menuItem);
 
     protected:
-
+        
         virtual void OnDrawGUI() override;
+        
+        virtual void HandleEvent(CEvent* event) override;
 
 		FIELD()
 		b8 isShown = false;
