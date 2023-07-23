@@ -32,8 +32,15 @@ namespace CE::Widgets
 
 		void Hide();
 
-		/// Passing `pos` as 0 will automatically pick a position
-		void Show(Vec2 pos = Vec2());
+		/// Passing `pos` as 0 will show it at mouse position
+		void Show(Vec2 pos);
+
+		void Show(CWidget* context = nullptr);
+
+		Vec2 CalculateShowPosition(Vec2 tryPosition = Vec2());
+
+		inline CMenuPosition GetMenuPosition() const { return menuPosition; }
+		inline void SetMenuPosition(CMenuPosition pos) { menuPosition = pos; }
 
     protected:
 
@@ -47,6 +54,7 @@ namespace CE::Widgets
 
 		b8 pushShow = false;
 		Vec2 showPos = Vec2();
+		CWidget* showContext = nullptr;
     };
     
 } // namespace CE

@@ -32,7 +32,7 @@ namespace CE::Widgets
 
 	void CMenu::ShowContextMenu()
 	{
-		Show(GUI::GetMousePos());
+		Show(Vec2());
 	}
 
 	void CMenu::Hide()
@@ -44,10 +44,61 @@ namespace CE::Widgets
 	{
 		isShown = true;
 		pushShow = true;
-		this->showPos = pos;
+		this->showContext = nullptr;
+		this->showPos = CalculateShowPosition(pos);
 
 		SetNeedsStyle();
 		SetNeedsLayout();
+	}
+
+	void CMenu::Show(CWidget* context)
+	{
+		isShown = true;
+		pushShow = true;
+		this->showContext = context;
+		this->showPos = CalculateShowPosition();
+
+		SetNeedsStyle();
+		SetNeedsLayout();
+	}
+
+	Vec2 CMenu::CalculateShowPosition(Vec2 tryPosition)
+	{
+		if (tryPosition == Vec2())
+			tryPosition = GUI::GetMousePos();
+
+		auto menuPos = tryPosition;
+		auto menuSize = GetComputedLayoutSize();
+		auto screenSize = PlatformApplication::Get()->GetMainScreenSize();
+		Vec2 contextWidgetSize = Vec2();
+
+		if (showContext != nullptr) // Context is the widget that is opening this menu. Ex: A button or a parent menu item.
+		{
+			menuPos = showContext->GetScreenPosition();
+			contextWidgetSize = showContext->GetComputedLayoutSize();
+			if (!showContext->GetClass()->IsSubclassOf<CMenuItem>())
+				contextWidgetSize.x = 0; // We only care about width of context if it's a menu item
+		}
+
+		menuPos.x += contextWidgetSize.x; // Try opening to the right side of parent menu
+
+		if (menuPos.x + menuSize.x >= screenSize.x - 5)
+		{
+			menuPos.x = screenSize.x - 5 - menuSize.x - contextWidgetSize.x; // Move to left if no space available to right
+		}
+
+		auto verticalPos = menuPosition;
+		if (verticalPos == CMenuPosition::Bottom && menuPos.y + contextWidgetSize.y + menuSize.y >= screenSize.y - 40)
+			verticalPos = CMenuPosition::Top; // Show at bottom if no space available on top
+		else if (verticalPos == CMenuPosition::Top && menuPos.y - contextWidgetSize.y - menuSize.y <= 5)
+			verticalPos = CMenuPosition::Bottom; // and vice versa
+
+		if (verticalPos == CMenuPosition::Bottom)
+			menuPos.y += contextWidgetSize.y;
+		else if (verticalPos == CMenuPosition::Top)
+			menuPos.y -= menuSize.y;
+
+		return menuPos;
 	}
 
     void CMenu::OnDrawGUI()
@@ -56,15 +107,15 @@ namespace CE::Widgets
 
 		auto viewportSize = GUI::GetMainViewport()->size;
 
+		if (showPos.x == 0 || showPos.y == 0)
+		{
+			showPos = CalculateShowPosition();
+		}
+
 		if (pushShow)
 		{
 			pushShow = false;
 			GUI::OpenPopup(GetUuid());
-		}
-
-		if (showPos.x == 0 || showPos.y == 0)
-		{
-			showPos = GUI::GetMousePos();
 		}
 
 		int pushedColors = 0;

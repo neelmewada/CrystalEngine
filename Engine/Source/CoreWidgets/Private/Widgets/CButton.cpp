@@ -43,20 +43,6 @@ namespace CE::Widgets
 		SetNeedsStyle();
 	}
 
-    void CButton::OnSubobjectAttached(Object* subobject)
-    {
-		Super::OnSubobjectAttached(subobject);
-
-		if (subobject == nullptr)
-			return;
-
-		if (subobject->GetClass()->IsSubclassOf<CMenu>() && 
-			!subobject->GetClass()->IsSubclassOf<CContextMenu>())
-		{
-			this->menu = (CMenu*)subobject;
-		}
-    }
-
     void CButton::OnDrawGUI()
 	{
 		Vec4 rect = GetComputedLayoutRect();
@@ -79,9 +65,9 @@ namespace CE::Widgets
 
 		if (pressed)
 		{
-			if (openMenuOnLeftClick && menu != nullptr)
+			if (openMenuOnLeftClick && popupMenu != nullptr)
 			{
-				menu->Show();
+				popupMenu->Show(this);
 			}
 
 			OnClicked();

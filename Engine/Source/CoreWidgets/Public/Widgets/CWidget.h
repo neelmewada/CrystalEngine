@@ -157,6 +157,8 @@ namespace CE::Widgets
 
 		// Calculated Layout
 
+		inline Vec2 GetScreenPosition() const { return screenPos; }
+
 		inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
 		inline Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
 
@@ -310,6 +312,7 @@ namespace CE::Widgets
 		b8 isLeftMousePressedInside = false;
 
 		// Internals
+		Vec2 screenPos{};
 		Vec2 prevHoverPos{};
 		b8 prevLeftMouseDown = false;
         

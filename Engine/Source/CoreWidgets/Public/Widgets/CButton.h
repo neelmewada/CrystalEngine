@@ -26,13 +26,14 @@ namespace CE::Widgets
 
 		void SetAsAlternateStyle(bool set);
 
+		inline CMenu* GetPopupMenu() const { return popupMenu; }
+		inline void SetPopupMenu(CMenu* menu) { this->popupMenu = menu; }
+
 	public: // Signals
 
 		CE_SIGNAL(OnButtonClicked);
 
 	protected:
-
-		void OnSubobjectAttached(Object* subobject) override;
 
 		void OnDrawGUI() override;
 
@@ -49,7 +50,7 @@ namespace CE::Widgets
 		b8 isAlternateStyleButton = false;
 
 		FIELD()
-		CMenu* menu = nullptr;
+		CMenu* popupMenu = nullptr;
 
 		FIELD()
 		b8 openMenuOnLeftClick = true;

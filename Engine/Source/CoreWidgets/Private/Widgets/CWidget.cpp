@@ -790,6 +790,13 @@ namespace CE::Widgets
 	{
 		if (IsVisible())
 		{
+			auto rect = GetComputedLayoutRect();
+
+			if (!isnan(rect.x) && !isnan(rect.y))
+			{
+				screenPos = GUI::WindowRectToGlobalRect(rect).min;
+			}
+
 			CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
 			OnDrawGUI();
 			CFontManager::Get().PopFont();

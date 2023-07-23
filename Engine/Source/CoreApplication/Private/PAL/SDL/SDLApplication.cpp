@@ -103,7 +103,8 @@ namespace CE
 		int displayIndex = 0;
 		if (sdlWindow != nullptr)
 			displayIndex = SDL_GetWindowDisplayIndex(sdlWindow->handle);
-		if (SDL_GetCurrentDisplayMode(displayIndex, &mode) != 0)
+		
+		if (SDL_GetDesktopDisplayMode(displayIndex, &mode) != 0)
 		{
 			CE_LOG(Error, All, "Failed to get screen size for window. Error: {}", SDL_GetError());
 			return Vec2i();
