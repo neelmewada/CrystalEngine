@@ -585,16 +585,6 @@ namespace CE::Widgets
 			attachedMenus.Add(menu);
 			menu->ownerWindow = GetOwnerWindow();
 			menu->parent = this;
-
-			if (subobject->GetClass()->IsSubclassOf<CContextMenu>())
-			{
-				this->contextMenu = (CContextMenu*)subobject;
-				this->contextMenu->parent = nullptr;
-				if (IsWindow())
-					this->contextMenu->ownerWindow = (CWindow*)this;
-				else
-					this->contextMenu->ownerWindow = GetOwnerWindow();
-			}
 		}
 		else if (IsContainer() && subobject->GetClass()->IsSubclassOf<CWidget>() && IsSubWidgetAllowed(subobject->GetClass()))
 		{
@@ -623,10 +613,19 @@ namespace CE::Widgets
 		if (subobject == nullptr)
 			return;
 
-		if (subobject->GetClass()->IsSubclassOf<CContextMenu>())
+		if (subobject->GetClass()->IsSubclassOf<CMenu>())
 		{
-			if (this->contextMenu == (CContextMenu*)subobject)
-				this->contextMenu = nullptr;
+			CMenu* menu = (CMenu*)subobject;
+			attachedMenus.Remove(menu);
+			menu->ownerWindow = nullptr;
+			menu->parent = nullptr;
+
+			if (subobject->GetClass()->IsSubclassOf<CContextMenu>() && contextMenu != nullptr && contextMenu == (CContextMenu*)subobject)
+			{
+				contextMenu->parent = nullptr;
+				contextMenu->ownerWindow = nullptr;
+				contextMenu = nullptr;
+			}
 		}
 		else if (subobject->GetClass()->IsSubclassOf<CWidget>())
 		{
@@ -634,6 +633,7 @@ namespace CE::Widgets
 			attachedWidgets.Remove(subWidget);
 			OnSubWidgetDetached(subWidget);
 			subWidget->OnDetachedFrom(this);
+			subWidget->parent = nullptr;
 
 			auto childCount = YGNodeGetChildCount(node);
 			for (int i = 0; i < childCount; i++)

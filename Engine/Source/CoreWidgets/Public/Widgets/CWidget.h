@@ -152,6 +152,9 @@ namespace CE::Widgets
 
 		virtual bool IsSubWidgetAllowed(ClassType* subWidgetClass);
 
+		inline CContextMenu* GetContextMenu() const { return contextMenu; }
+		inline void SetContextMenu(CContextMenu* contextMenu) { this->contextMenu = contextMenu; }
+
 		// Calculated Layout
 
 		inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }

@@ -140,7 +140,8 @@ namespace CE::Editor
 				settingsButton->AddStyleClass("Transparent");
 				settingsButton->SetText("Settings");
 
-				auto settingsButtonMenu = CreateWidget<CMenu>(settingsButton, "SettingsButtonMenu");
+				auto settingsButtonMenu = CreateWidget<CContextMenu>(settingsButton, "SettingsButtonMenu");
+				settingsButton->SetContextMenu(settingsButtonMenu);
 				{
 					for (int i = 0; i < 8; i++)
 					{
