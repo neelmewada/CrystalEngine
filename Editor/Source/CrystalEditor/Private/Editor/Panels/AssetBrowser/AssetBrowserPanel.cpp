@@ -149,6 +149,18 @@ namespace CE::Editor
 					{
 						auto menuItem = CreateWidget<CMenuItem>(settingsButtonMenu, "MenuItem");
 						menuItem->SetText(String::Format("Item No. {}", i));
+
+						if (i == 3)
+						{
+							auto subMenu = CreateWidget<CMenu>(menuItem, "SubMenu");
+							menuItem->SetSubMenu(subMenu);
+							
+							for (int j = 0; j < 4; j++)
+							{
+								auto subMenuItem = CreateWidget<CMenuItem>(subMenu, "SubMenuItem");
+								subMenuItem->SetText(String::Format("Sub Item {}", j));
+							}
+						}
 					}
 				}
 			}

@@ -23,9 +23,10 @@ namespace CE::Widgets
 		inline const String& GetText() const { return text; }
 		inline void SetText(const String& text) { this->text = text; }
 
-    protected:
+		inline CMenu* GetSubMenu() const { return subMenu; }
+		inline void SetSubMenu(CMenu* subMenu) { this->subMenu = subMenu; }
 
-		void OnSubobjectAttached(Object* subobject) override;
+    protected:
 
         virtual void OnDrawGUI() override;
 

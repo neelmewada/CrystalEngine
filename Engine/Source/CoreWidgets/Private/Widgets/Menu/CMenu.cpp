@@ -78,6 +78,8 @@ namespace CE::Widgets
 			contextWidgetSize = showContext->GetComputedLayoutSize();
 			if (!showContext->GetClass()->IsSubclassOf<CMenuItem>())
 				contextWidgetSize.x = 0; // We only care about width of context if it's a menu item
+			else
+				contextWidgetSize.y = 0; // We only care about width of menu item
 		}
 
 		menuPos.x += contextWidgetSize.x; // Try opening to the right side of parent menu
@@ -141,8 +143,11 @@ namespace CE::Widgets
 
 		GUI::SetNextWindowPos(showPos);
 		GUI::SetNextWindowSize(size);
-
+		
 		GUI::WindowFlags flags = GUI::WF_NoMove | GUI::WF_NoResize;
+		if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenuItem>())
+			flags |= GUI::WF_ChildMenu;
+
 		bool isOpen = GUI::BeginPopup(GetName().GetString(), GetUuid(), flags);
 
 		if (isOpen)
