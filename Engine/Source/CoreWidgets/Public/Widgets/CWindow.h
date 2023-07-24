@@ -2,6 +2,7 @@
 
 namespace CE::Widgets
 {
+	class CMenuBar;
 
     CLASS()
     class COREWIDGETS_API CWindow : public CWidget
@@ -35,8 +36,13 @@ namespace CE::Widgets
 		inline Vec2i GetScreenSize() const { return screenSize; }
 		inline void SetScreenSize(const Vec2i& size) { this->screenSize = size; }
 
+		inline Vec2 GetWindowSize() const { return windowSize; }
+
 		/// Could be: HWND, SDL_Window*, etc depending on platform
 		inline void* GetPlatformHandle() const { return platformHandle; }
+
+		inline CMenuBar* GetMenuBar() const { return menuBar; }
+		inline void SetMenuBar(CMenuBar* menuBar) { this->menuBar = menuBar; }
         
         void Show();
         void Hide();
@@ -65,7 +71,9 @@ namespace CE::Widgets
         
 		virtual void OnDrawGUI() override;
 
-		void HandleEvent(CEvent* event) override;
+		virtual void HandleEvent(CEvent* event) override;
+
+		virtual void OnSubobjectAttached(Object* subobject) override;
 
 		Color FetchBackgroundColor(CStateFlag state, CSubControl subControl);
         
@@ -84,14 +92,19 @@ namespace CE::Widgets
 		FIELD()
 		b8 allowVerticalScroll = false;
 
-		FIELD()
+		FIELD(ReadOnly)
 		Vec2 windowSize{};
 
 		FIELD()
 		b8 isDockSpaceWindow{};
 
-		void* platformHandle = nullptr;
+		FIELD(ReadOnly)
+		CMenuBar* menuBar = nullptr;
+
+		FIELD(ReadOnly)
 		Vec2i screenSize = Vec2i();
+
+		void* platformHandle = nullptr;
 
 		String dockSpaceId{};
 

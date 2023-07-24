@@ -18,6 +18,8 @@ namespace CE::Widgets
 
 		bool HasSubMenu();
 
+		bool IsInsideMenuBar();
+
 		// Getters & Setters
 
 		inline const String& GetText() const { return text; }

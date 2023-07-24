@@ -23,12 +23,20 @@ namespace CE::Widgets
 	{
 		Super::Construct();
 
-		
+		if (GetOwner() != nullptr && GetOwner()->GetClass()->IsSubclassOf<CMenuBar>())
+		{
+			AddStyleClass("MenuBarItem");
+		}
 	}
 
 	bool CMenuItem::HasSubMenu()
 	{
 		return subMenu != nullptr;
+	}
+
+	bool CMenuItem::IsInsideMenuBar()
+	{
+		return GetOwner() != nullptr && GetOwner()->GetClass()->IsSubclassOf<CMenuBar>();
 	}
 
 	void CMenuItem::OnDrawGUI()
@@ -59,10 +67,16 @@ namespace CE::Widgets
         
 		if (event->type == CEventType::MouseButtonClick)
 		{
-            if (!HasSubMenu() && parent != nullptr && parent->GetClass()->IsSubclassOf<CMenu>())
-                ((CMenu*)parent)->HideAllInChain();
+			if (HasSubMenu())
+			{
+				subMenu->Show(this);
+			}
+			else if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenu>())
+			{
+				((CMenu*)parent)->HideAllInChain();
+			}
 
-            event->HandleAndStopPropagation();
+			event->HandleAndStopPropagation();
 		}
 		else if (event->type == CEventType::MouseEnter)
 		{

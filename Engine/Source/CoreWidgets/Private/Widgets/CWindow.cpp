@@ -113,6 +113,7 @@ namespace CE::Widgets
 			this->platformHandle = GUI::GetCurrentViewport()->platformHandle;
 			if (this->platformHandle != nullptr)
 			{
+				// TODO: move this function to CoreApplication instead of VulkanRHI
 				this->screenSize = RHI::gDynamicRHI->GetScreenSizeForWindow(this->platformHandle);
 			}
 
@@ -175,6 +176,19 @@ namespace CE::Widgets
 		}
 
 		Super::HandleEvent(event);
+	}
+
+	void CWindow::OnSubobjectAttached(Object* subobject)
+	{
+		Super::OnSubobjectAttached(subobject);
+
+		if (subobject == nullptr)
+			return;
+
+		if (subobject->GetClass()->IsSubclassOf<CMenuBar>())
+		{
+			this->menuBar = (CMenuBar*)subobject;
+		}
 	}
 
     void CWindow::AddSubWidget(CWidget* subWidget)

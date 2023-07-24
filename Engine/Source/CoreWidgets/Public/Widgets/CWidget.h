@@ -64,7 +64,7 @@ namespace CE::Widgets
 		virtual void Render();
 
 		virtual bool IsMenu() { return false; }
-        
+		virtual bool IsMenuBar() { return false; }
         virtual bool IsWindow() { return false; }
 
 		/// Should return true if a widget can contain & render subwidgets

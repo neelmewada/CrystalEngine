@@ -38,6 +38,8 @@ namespace CE
 		virtual Vec2i GetMainScreenSize() override;
 		virtual Vec2i GetScreenSizeForWindow(PlatformWindow* window) override;
 
+		virtual Vec2i GetWindowSize(void* nativeWindowHandle) override;
+
         void DestroyWindow(PlatformWindow* window) override;
 
         void Tick() override;

@@ -59,6 +59,8 @@ namespace CE
 		virtual Vec2i GetMainScreenSize() = 0;
 		virtual Vec2i GetScreenSizeForWindow(PlatformWindow* window) = 0;
 
+		virtual Vec2i GetWindowSize(void* nativeWindowHandle) = 0;
+
         WindowResizeDelegate onWindowResized{};
 
     protected:

@@ -169,6 +169,25 @@ CMenuItemHeader {
 	foreground: rgb(108, 108, 108);
 }
 
+CMenuBar {
+	background: rgb(21, 21, 21);
+	border-width: 0px;
+	min-height: 20px;
+	max-height: 60px;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: stretch;
+}
+
+.MenuBarItem {
+	text-align: middle-center;
+	padding: 10px 0px;
+}
+
+.MenuBarItem:hovered {
+	background: rgb(0, 112, 224);
+}
+
 )";
 
 namespace CE::Editor

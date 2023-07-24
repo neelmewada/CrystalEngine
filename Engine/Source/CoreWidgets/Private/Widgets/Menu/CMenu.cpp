@@ -38,6 +38,16 @@ namespace CE::Widgets
 	void CMenu::Hide()
 	{
 		isShown = false;
+
+		for (auto child : attachedWidgets)
+		{
+			if (child->GetClass()->IsSubclassOf<CMenuItem>())
+			{
+				CMenuItem* item = (CMenuItem*)child;
+				if (item->HasSubMenu() && item->GetSubMenu() != this)
+					item->GetSubMenu()->Hide();
+			}
+		}
 	}
 
     void CMenu::HideAllInChain()
@@ -90,10 +100,17 @@ namespace CE::Widgets
 		{
 			menuPos = showContext->GetScreenPosition();
 			contextWidgetSize = showContext->GetComputedLayoutSize();
-			if (!showContext->GetClass()->IsSubclassOf<CMenuItem>())
-				contextWidgetSize.x = 0; // We only care about width of context if it's a menu item
-			else
+			CMenuItem* menuItem = nullptr;
+			if (showContext->GetClass()->IsSubclassOf<CMenuItem>() && (menuItem = (CMenuItem*)showContext)->GetOwner() != nullptr &&
+				!menuItem->GetOwner()->IsMenuBar())
 				contextWidgetSize.y = 0; // We only care about width of menu item
+			else
+				contextWidgetSize.x = 0;
+
+			//if (!showContext->GetClass()->IsSubclassOf<CMenuItem>())
+			//	contextWidgetSize.x = 0; // We only care about width of context if it's a menu item
+			//else
+			//	contextWidgetSize.y = 0; // We only care about width of menu item
 		}
 
 		menuPos.x += contextWidgetSize.x; // Try opening to the right side of parent menu
@@ -132,6 +149,8 @@ namespace CE::Widgets
 		{
 			pushShow = false;
 			GUI::OpenPopup(GetUuid());
+
+			GUI::SetNextWindowPos(showPos);
 		}
 
 		int pushedColors = 0;
@@ -155,12 +174,15 @@ namespace CE::Widgets
 			pushedVars++;
 		}
 
-		GUI::SetNextWindowPos(showPos);
 		GUI::SetNextWindowSize(size);
 		
 		GUI::WindowFlags flags = GUI::WF_NoMove | GUI::WF_NoResize;
 		if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenuItem>())
-			flags |= GUI::WF_ChildMenu | GUI::WF_ChildWindow;
+		{
+			CMenuItem* owner = (CMenuItem*)GetOwner();
+			if (!owner->IsInsideMenuBar())
+				flags |= GUI::WF_ChildMenu | GUI::WF_ChildWindow;
+		}
 
 		bool isOpen = GUI::BeginPopup(GetName().GetString(), GetUuid(), flags);
 
@@ -183,6 +205,10 @@ namespace CE::Widgets
 		}
 		else
 		{
+			if (isShown)
+			{
+				Hide(); // Hide `this` and all children
+			}
 			isShown = false;
 		}
 
@@ -199,7 +225,30 @@ namespace CE::Widgets
 		}
     }
     
-    bool CMenu::OnSubMenuItemHovered(CMenuItem* subMenuItem)
+	bool CMenu::IsAnySubMenuOpen()
+	{
+		//if (!this->IsShown())
+		//	return false;
+
+		for (CWidget* child : attachedWidgets)
+		{
+			if (child->GetClass()->IsSubclassOf<CMenuItem>())
+			{
+				CMenuItem* childMenuItem = (CMenuItem*)child;
+				if (childMenuItem->HasSubMenu())
+				{
+					if (childMenuItem->GetSubMenu()->IsShown())
+						return true;
+					else if (childMenuItem->GetSubMenu()->IsAnySubMenuOpen())
+						return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool CMenu::OnSubMenuItemHovered(CMenuItem* subMenuItem)
     {
         bool result = false;
         

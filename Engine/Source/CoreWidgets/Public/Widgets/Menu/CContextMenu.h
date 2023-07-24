@@ -10,7 +10,6 @@ namespace CE::Widgets
     public:
 
         CContextMenu();
-
         virtual ~CContextMenu();
 
     protected:

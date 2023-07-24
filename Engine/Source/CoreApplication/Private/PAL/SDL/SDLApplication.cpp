@@ -112,6 +112,17 @@ namespace CE
 		return Vec2i(mode.w, mode.h);
 	}
 
+	Vec2i SDLApplication::GetWindowSize(void* nativeWindowHandle)
+	{
+		SDL_Window* window = (SDL_Window*)nativeWindowHandle;
+		if (window == nullptr)
+			return Vec2i();
+
+		Vec2i result{};
+		SDL_GetWindowSize(window, &result.width, &result.height);
+		return result;
+	}
+
 	void SDLApplication::DestroyWindow(PlatformWindow* window)
 	{
 		if (window == nullptr)

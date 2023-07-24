@@ -47,6 +47,8 @@ namespace CE::Widgets
 		inline CMenuPosition GetMenuPosition() const { return menuPosition; }
 		inline void SetMenuPosition(CMenuPosition pos) { menuPosition = pos; }
 
+		bool IsAnySubMenuOpen();
+
     protected:
         
         bool OnSubMenuItemHovered(CMenuItem* subMenuItem);

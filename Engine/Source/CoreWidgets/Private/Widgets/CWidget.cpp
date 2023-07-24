@@ -526,7 +526,24 @@ namespace CE::Widgets
 				menu->UpdateLayoutIfNeeded();
 		}
         
-        if (IsWindow())
+		if (IsMenuBar())
+		{
+			CMenuBar* menuBar = (CMenuBar*)this;
+			CWidget* parent = menuBar->GetOwner();
+			CWindow* parentWindow = nullptr;
+
+			// Only calculate layout of menu bar if it is owned by a Dock Space window which doesn't have it's own layout
+			if (parent != nullptr && parent->IsWindow() && (parentWindow = (CWindow*)parent)->IsDockSpaceWindow())
+			{
+				void* windowHandle = parentWindow->GetPlatformHandle();
+				auto size = PlatformApplication::Get()->GetWindowSize(windowHandle);
+				
+				YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
+
+				SetNeedsLayout(false);
+			}
+		}
+		else if (IsWindow())
         {
 			CWindow* window = (CWindow*)this;
 			if (!window->IsDockSpaceWindow() || RequiresIndependentLayoutCalculation())
@@ -540,6 +557,13 @@ namespace CE::Widgets
 				YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
 
 				SetNeedsLayout(false);
+			}
+			else
+			{
+				if (window->GetMenuBar() != nullptr)
+				{
+					window->GetMenuBar()->UpdateLayoutIfNeeded();
+				}
 			}
 
 			needsLayout = false;
@@ -594,7 +618,7 @@ namespace CE::Widgets
 		if (subobject == nullptr || subobject == this) // Impossible edge cases
 			return;
 		
-		if (subobject->GetClass()->IsSubclassOf<CMenu>())
+		if (subobject->GetClass()->IsSubclassOf<CMenu>() && !subobject->GetClass()->IsSubclassOf<CMenuBar>())
 		{
 			CMenu* menu = (CMenu*)subobject;
 			attachedMenus.Add(menu);
