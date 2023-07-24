@@ -60,6 +60,7 @@ namespace CE
 
 	//extern Package* gTransientPackage;
     extern Package* gSettingsPackage;
+	extern ResourceManager* gResourceManager;
 
 	CORE_API Package* GetTransientPackage()
 	{
@@ -81,6 +82,13 @@ namespace CE
 
         return gSettingsPackage;
     }
+
+	CORE_API ResourceManager* GetResourceManager()
+	{
+		if (gResourceManager == nullptr)
+			gResourceManager = CreateObject<ResourceManager>(nullptr, TEXT("ResourceManager"), OF_Transient);
+		return gResourceManager;
+	}
 
 	CORE_API bool IsValidObjectName(const String& name)
 	{

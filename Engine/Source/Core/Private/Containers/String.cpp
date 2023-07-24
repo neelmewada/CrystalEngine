@@ -756,6 +756,27 @@ namespace CE
         return str;
     }
 
+	String String::Replace(const Array<char>& charsToReplace, char replaceWith)
+	{
+		if (replaceWith == 0 || charsToReplace.IsEmpty())
+			return *this;
+
+		String result = String();
+		
+		for (int i = 0; i < GetLength(); i++)
+		{
+			if (charsToReplace.Exists(Buffer[i]))
+			{
+				result.Append(replaceWith);
+				continue;
+			}
+
+			result.Append(Buffer[i]);
+		}
+
+		return result;
+	}
+
 	void String::UpdateLength()
 	{
 		StringLength = (u32)std::strlen(Buffer);

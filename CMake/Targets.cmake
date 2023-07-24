@@ -47,7 +47,7 @@ endfunction()
 function(ce_add_target NAME TARGET_TYPE)
     string(TOUPPER ${NAME} NAME_UPPERCASE)
 
-    set(options AUTORTTI AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS VS_STARTUP_PROJECT)
+    set(options AUTORTTI AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS VS_STARTUP_PROJECT RESOURCES)
     set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY PACKAGE)
     set(multiValueArgs PCHHEADER FILES_CMAKE COMPILE_DEFINITIONS INCLUDE_DIRECTORIES BUILD_DEPENDENCIES RUNTIME_DEPENDENCIES)
 
@@ -246,8 +246,6 @@ function(ce_add_target NAME TARGET_TYPE)
     if(${ce_add_target_AUTORTTI})
         target_compile_definitions(${NAME} PRIVATE _AUTORTTI=1)
 
-        set(AutoRttiCmd "AutoRTTI")
-
         add_custom_command(TARGET ${NAME} PRE_BUILD
             COMMAND "AutoRTTI" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
@@ -256,6 +254,14 @@ function(ce_add_target NAME TARGET_TYPE)
     else()
         target_compile_definitions(${NAME} PRIVATE _AUTORTTI=0)
     endif()
+
+    if(${ce_add_target_RESOURCES})
+        target_compile_definitions(${NAME} PRIVATE _RESOURCES=1)
+
+    else()
+        target_compile_definitions(${NAME} PRIVATE _RESOURCES=0)
+    endif()
+    
     
     # RUNTIME_DEPENDENCIES
 

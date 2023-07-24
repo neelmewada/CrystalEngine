@@ -8,13 +8,14 @@ namespace CE
 		Asset
 	};
 
-	struct SYSTEM_API PathTreeNode
+	struct CORE_API PathTreeNode
 	{
 		~PathTreeNode();
 
 		bool ChildExists(const String& name);
 
-		PathTreeNode* GetOrAddChild(const String& name, PathTreeNodeType type = PathTreeNodeType::Directory);
+		PathTreeNode* GetOrAddChild(const String& name, PathTreeNodeType type = PathTreeNodeType::Directory,
+			void* userData = nullptr, u32 userDataSize = 0);
 
 		PathTreeNode* GetChild(const String& name);
 
@@ -30,16 +31,19 @@ namespace CE
 
 		Array<PathTreeNode*> children{};
 		PathTreeNode* parent = nullptr;
+
+		void* userData = nullptr;
+		u32 userDataSize = 0;
 	};
     
-	class SYSTEM_API PathTree
+	class CORE_API PathTree
 	{
 	public:
 
 		PathTree();
 		~PathTree();
 
-		bool AddPath(const Name& path);
+		bool AddPath(const Name& path, void* userData = nullptr, u32 userDataSize = 0);
 
 		bool RemovePath(const Name& path);
 

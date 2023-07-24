@@ -8,6 +8,7 @@ namespace CE
 	class FieldType;
 	class FunctionType;
 	class Package;
+	class ResourceManager;
 
 	/* **********************************
 	*	Global Functions
@@ -18,6 +19,8 @@ namespace CE
 	CORE_API Package* GetTransientPackage();
 
     CORE_API Package* GetSettingsPackage();
+
+	CORE_API ResourceManager* GetResourceManager();
 
 	namespace Internal
 	{

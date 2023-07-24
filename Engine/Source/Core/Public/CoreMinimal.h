@@ -94,10 +94,6 @@
 #include "Math/MathRTTI.h"
 #include "IO/FileWatcher.h"
 
-// Settings
-#include "Settings/SettingsBase.h"
-#include "Settings/ProjectSettings.h"
-
 // ******************************************************
 // Messaging
 #include "Messaging/MessageBus.h"

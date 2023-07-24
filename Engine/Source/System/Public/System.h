@@ -2,7 +2,6 @@
 
 #include "Core.h"
 
-#include "AssetRegistry/PathTree.h"
 #include "AssetRegistry/AssetData.h"
 #include "AssetRegistry/AssetRegistry.h"
 

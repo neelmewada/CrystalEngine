@@ -20,8 +20,6 @@ namespace CE
 
 	private:
 
-
-
 		PathTree pathTree{};
 
 		b8 pathTreeCached = false;

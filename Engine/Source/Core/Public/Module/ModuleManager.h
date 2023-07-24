@@ -98,6 +98,12 @@ namespace CE
 #define __CE_AUTORTTI_REGISTER_0()
 #define __CE_AUTORTTI_REGISTER_1() CERegisterModuleTypes()
 
+#define __CE_RESOURCES_REGISTER_0()
+#define __CE_RESOURCES_REGISTER_1() CERegisterModuleResources()
+
+#define __CE_RESOURCES_DEREGISTER_0()
+#define __CE_RESOURCES_DEREGISTER_1() CEDeregisterModuleResources()
+
 #if PAL_TRAIT_BUILD_MONOLITHIC
 
 // TODO: Monolithic implementation
@@ -127,14 +133,5 @@ extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
     delete modulePtr;\
 }
 
-#define CE_IMPLEMENT_PLUGIN(PluginName, PluginImplClass)\
-extern "C" DLL_EXPORT CE::Module* CELoadModule()\
-{\
-    return new PluginImplClass();\
-}\
-extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
-{\
-    delete modulePtr;\
-}
 
 #endif

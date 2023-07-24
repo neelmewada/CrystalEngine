@@ -262,6 +262,8 @@ namespace CE
 
         String RemoveWhitespaces();
 
+		String Replace(const Array<char>& charsToReplace, char replaceWith);
+
 		void UpdateLength();
 
 	    // Character Utils

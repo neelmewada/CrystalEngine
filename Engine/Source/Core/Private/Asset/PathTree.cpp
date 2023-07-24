@@ -1,4 +1,4 @@
-#include "System.h"
+#include "Core.h"
 
 namespace CE
 {
@@ -20,7 +20,7 @@ namespace CE
 		return false;
 	}
 
-	PathTreeNode* PathTreeNode::GetOrAddChild(const String& name, PathTreeNodeType type)
+	PathTreeNode* PathTreeNode::GetOrAddChild(const String& name, PathTreeNodeType type, void* userData, u32 userDataSize)
 	{
 		for (auto child : children)
 		{
@@ -31,6 +31,8 @@ namespace CE
 		children.Top()->name = name;
 		children.Top()->nodeType = type;
 		children.Top()->parent = this;
+		children.Top()->userData = userData;
+		children.Top()->userDataSize = userDataSize;
 		return children.Top();
 	}
 
@@ -66,7 +68,7 @@ namespace CE
 		rootNode = nullptr;
 	}
 
-	bool PathTree::AddPath(const Name& path)
+	bool PathTree::AddPath(const Name& path, void* userData, u32 userDataSize)
 	{
 		if (!path.IsValid())
 			return false;
@@ -91,7 +93,7 @@ namespace CE
 			}
 			else
 			{
-				curNode = curNode->GetOrAddChild(component, PathTreeNodeType::Asset);
+				curNode = curNode->GetOrAddChild(component, PathTreeNodeType::Asset, userData, userDataSize);
 			}
 		}
 

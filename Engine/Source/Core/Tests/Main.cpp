@@ -1986,3 +1986,44 @@ TEST(Package, WriteRead)
 }
 
 #pragma endregion
+
+
+/**********************************************
+* Resources
+*/
+
+#pragma region Resource
+
+static const char Resource_Text_Entry0[] = "resource_text";
+static const char Resource_CSS_Style[] = R"(
+* {
+	padding: 5px 5px;
+}
+)";
+
+TEST(Resource, Manipulation)
+{
+	TEST_BEGIN;
+
+	GetResourceManager()->RegisterResource("Core_Test", "Text/Entry0.txt", (void*)Resource_Text_Entry0, COUNTOF(Resource_Text_Entry0));
+	GetResourceManager()->RegisterResource("Core_Test", "CSS/Style.css", (void*)Resource_CSS_Style, COUNTOF(Resource_CSS_Style));
+
+	Resource* resource = GetResourceManager()->LoadResource("/Resources/Core_Test/Text/Entry0.txt");
+	const char* data = (const char*)resource->GetData();
+	EXPECT_EQ(strcmp(data, Resource_Text_Entry0), 0);
+
+	Resource* cssResource = GetResourceManager()->LoadResource("/Resources/Core_Test/CSS/Style.css");
+	EXPECT_EQ(strcmp((const char*)cssResource->GetData(), Resource_CSS_Style), 0);
+
+	cssResource->RequestDestroy();
+	cssResource = nullptr;
+	resource->RequestDestroy();
+	resource = nullptr;
+
+	GetResourceManager()->DeregisterResource("Core_Test", "Text/Entry0.txt");
+	GetResourceManager()->DeregisterResource("Core_Test", "CSS/Style.css");
+
+	TEST_END;
+}
+
+#pragma endregion

@@ -19,6 +19,7 @@ namespace CE
 
     //Package* gTransientPackage = nullptr;
     Package* gSettingsPackage = nullptr;
+	ResourceManager* gResourceManager = nullptr;
 
     void CoreModule::StartupModule()
     {
@@ -28,26 +29,27 @@ namespace CE
 #else
         gProjectPath = PlatformDirectories::GetGameRootDir(); // Runtime: gProjectPath is always the install directory
 #endif
-
+		
         // Load Configs cache
-        gConfigCache = new ConfigCache;
+        gConfigCache = new ConfigCache();
         gConfigCache->LoadStartupConfigs();
-        
-        //gTransientPackage = CreateObject<Package>(nullptr, TEXT("/Engine/Transient"), OF_Transient);
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }
 
     void CoreModule::ShutdownModule()
     {
+		if (gResourceManager != nullptr)
+		{
+			gResourceManager->RequestDestroy();
+			gResourceManager = nullptr;
+		}
+
 		if (gSettingsPackage != nullptr)
 		{
 			gSettingsPackage->RequestDestroy();
 			gSettingsPackage = nullptr;
 		}
-        
-        //gTransientPackage->RequestDestroy();
-        //gTransientPackage = nullptr;
 
         delete gConfigCache;
         gConfigCache = nullptr;
@@ -83,7 +85,9 @@ namespace CE
             SystemObject,
             Component,
             SystemComponent,
-			Asset
+			Asset,
+			ResourceManager,
+			Resource
         );
     }
 
