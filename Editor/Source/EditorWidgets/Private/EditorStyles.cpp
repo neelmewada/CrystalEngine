@@ -181,7 +181,7 @@ CMenuBar {
 
 .MenuBarItem {
 	text-align: middle-center;
-	padding: 10px 0px;
+	padding: 5px 0px;
 }
 
 .MenuBarItem:hovered {

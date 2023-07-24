@@ -82,7 +82,8 @@ namespace CE::Widgets
 			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - toggleSize / 2;
 			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
 
-			GUI::FillArrow(Vec2(toggleRect.x, toggleRect.y), defaultStyleState.foreground, GUI::Dir_Right, toggleSize);
+			//GUI::FillArrow(Vec2(toggleRect.x, toggleRect.y), defaultStyleState.foreground, GUI::Dir_Right, 1);
+			GUI::FillRect(toggleRect, defaultStyleState.foreground);
 		}
 		else if (IsToggleable() && IsToggled())
 		{
