@@ -114,6 +114,11 @@ namespace CE::GUI
 		ImGui::SetCurrentFont((ImFont*)fontHandle);
 	}
 
+	COREGUI_API f32 GetFontSize()
+	{
+		return ImGui::GetFontSize();
+	}
+
 	COREGUI_API Viewport* GetCurrentViewport()
 	{
 		return (Viewport*)ImGui::GetWindowViewport();
@@ -6559,6 +6564,15 @@ namespace CE::GUI
 		}
 
 		drawList->_Path.Size = 0;
+	}
+
+	COREGUI_API void FillCheckMark(const Vec2& pos, const Color& color, f32 size)
+	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		if (drawList == nullptr)
+			return;
+		
+		ImGui::RenderCheckMark(drawList, ImVec2(pos.x, pos.y), color.ToU32(), size);
 	}
 
 	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, f32 borderSize, Vec4 rounding)

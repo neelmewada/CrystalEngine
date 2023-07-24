@@ -148,9 +148,9 @@ CMenu {
 	background: rgb(50, 50, 50);
 	border-width: 1px;
 	border-color: rgb(26, 26, 26);
-	min-width: 100px;
+	min-width: 120px;
 	min-height: 20px;
-	max-width: 300px;
+	max-width: 350px;
 	padding: 0px 10px;
 }
 

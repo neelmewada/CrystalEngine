@@ -28,7 +28,22 @@ namespace CE::Widgets
 		inline CMenu* GetSubMenu() const { return subMenu; }
 		inline void SetSubMenu(CMenu* subMenu) { this->subMenu = subMenu; }
 
+		inline bool IsToggleable() const { return isToggleable; }
+		inline void SetToggleable(bool toggleable) 
+		{ 
+			this->isToggleable = toggleable;
+			SetNeedsStyle();
+			SetNeedsLayout();
+		}
+
+		inline bool IsToggled() const { return toggleValue; }
+		inline void SetToggled(bool set) { toggleValue = set; }
+
+		CE_SIGNAL(OnMenuItemClicked, CMenuItem*);
+
     protected:
+
+		virtual void OnClicked();
 
         void OnDrawGUI() override;
 
@@ -39,6 +54,12 @@ namespace CE::Widgets
 
 		FIELD()
 		CMenu* subMenu = nullptr;
+
+		FIELD()
+		b8 isToggleable = false;
+
+		FIELD()
+		b8 toggleValue = false;
     };
 
 	CLASS()

@@ -41,6 +41,9 @@ namespace CE::Editor
 						{
 							auto subItem = CreateWidget<CMenuItem>(subMenu, "SubItem");
 							subItem->SetText(String::Format("Sub Item: {}", j));
+
+							if (j == 1)
+								subItem->SetToggleable(true);
 						}
 					}
 				}

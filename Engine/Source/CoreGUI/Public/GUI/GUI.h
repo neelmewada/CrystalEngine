@@ -23,6 +23,7 @@ namespace CE::GUI
 	COREGUI_API void PushFont(void* fontHandle);
 	COREGUI_API void PopFont();
 	COREGUI_API void SetCurrentFont(void* fontHandle);
+	COREGUI_API f32 GetFontSize();
 
 	COREGUI_API Viewport* GetCurrentViewport();
 	COREGUI_API Viewport* GetMainViewport();
@@ -298,6 +299,8 @@ namespace CE::GUI
 	COREGUI_API void FillRect(const Vec4& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 });
 
 	COREGUI_API void FillRect(const Vec4& rect, const Gradient& gradient, Vec4 rounding = { 0, 0, 0, 0 });
+
+	COREGUI_API void FillCheckMark(const Vec2& pos, const Color& color, f32 size);
 
 	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });
 	COREGUI_API void RenderFrame(const Vec4& rect, u32 color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });

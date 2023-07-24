@@ -16,7 +16,10 @@ namespace CE::Widgets
 
 	Vec2 CMenuItem::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return GUI::CalculateTextSize(text) + Vec2(10, 5);
+		Vec2 checkMark = {};
+		if (isToggleable)
+			checkMark.x += GUI::GetFontSize() * 0.7f;
+		return GUI::CalculateTextSize(text) + Vec2(15, 5) + checkMark;
 	}
 
 	void CMenuItem::Construct()
@@ -37,6 +40,11 @@ namespace CE::Widgets
 	bool CMenuItem::IsInsideMenuBar()
 	{
 		return GetOwner() != nullptr && GetOwner()->GetClass()->IsSubclassOf<CMenuBar>();
+	}
+
+	void CMenuItem::OnClicked()
+	{
+
 	}
 
 	void CMenuItem::OnDrawGUI()
@@ -60,6 +68,16 @@ namespace CE::Widgets
 		}
 
 		GUI::Text(rect + Rect(padding.left, padding.top, -padding.right, -padding.bottom), text, defaultStyleState);
+
+		if (IsToggleable() && IsToggled())
+		{
+			const f32 toggleSize = GUI::GetFontSize() * 0.7f;
+			f32 togglePosX = rect.max.x - padding.right - toggleSize;
+			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - toggleSize / 2;
+			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
+
+			GUI::FillCheckMark(Vec2(toggleRect.x, toggleRect.y), defaultStyleState.foreground, toggleSize);
+		}
     }
 
 	void CMenuItem::HandleEvent(CEvent* event)
@@ -73,7 +91,20 @@ namespace CE::Widgets
 			}
 			else if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenu>())
 			{
-				((CMenu*)parent)->HideAllInChain();
+				if (IsToggleable())
+				{
+					toggleValue = !toggleValue;
+
+					OnClicked();
+					emit OnMenuItemClicked(this);
+				}
+				else
+				{
+					((CMenu*)parent)->HideAllInChain();
+
+					OnClicked();
+					emit OnMenuItemClicked(this);
+				}
 			}
 
 			event->HandleAndStopPropagation();
