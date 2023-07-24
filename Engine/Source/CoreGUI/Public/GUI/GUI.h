@@ -301,6 +301,7 @@ namespace CE::GUI
 	COREGUI_API void FillRect(const Vec4& rect, const Gradient& gradient, Vec4 rounding = { 0, 0, 0, 0 });
 
 	COREGUI_API void FillCheckMark(const Vec2& pos, const Color& color, f32 size);
+	COREGUI_API void FillArrow(const Vec2& pos, const Color& color, GUI::Dir direction, f32 size);
 
 	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });
 	COREGUI_API void RenderFrame(const Vec4& rect, u32 color, f32 borderSize = 0.0f, Vec4 rounding = { 0, 0, 0, 0 });

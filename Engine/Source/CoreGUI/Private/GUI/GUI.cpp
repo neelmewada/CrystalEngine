@@ -6575,6 +6575,15 @@ namespace CE::GUI
 		ImGui::RenderCheckMark(drawList, ImVec2(pos.x, pos.y), color.ToU32(), size);
 	}
 
+	COREGUI_API void FillArrow(const Vec2& pos, const Color& color, GUI::Dir direction, f32 size)
+	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		if (drawList == nullptr)
+			return;
+
+		ImGui::RenderArrow(drawList, ImVec2(pos.y, pos.y), color.ToU32(), (ImGuiDir)direction, size);
+	}
+
 	COREGUI_API void RenderFrame(const Vec4& rect, const Color& color, f32 borderSize, Vec4 rounding)
 	{
 		RenderFrame(rect, color.ToU32(), borderSize, rounding);

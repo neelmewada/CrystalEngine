@@ -17,7 +17,7 @@ namespace CE::Widgets
 	Vec2 CMenuItem::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
 		Vec2 checkMark = {};
-		if (isToggleable)
+		if (isToggleable || (HasSubMenu() && !IsInsideMenuBar()))
 			checkMark.x += GUI::GetFontSize() * 0.7f;
 		return GUI::CalculateTextSize(text) + Vec2(15, 5) + checkMark;
 	}
@@ -69,7 +69,22 @@ namespace CE::Widgets
 
 		GUI::Text(rect + Rect(padding.left, padding.top, -padding.right, -padding.bottom), text, defaultStyleState);
 
-		if (IsToggleable() && IsToggled())
+		if (HasSubMenu() && !IsInsideMenuBar())
+		{
+			//const f32 arrowSize = GUI::GetFontSize() * 0.7f;
+			//f32 arrowPosX = rect.max.x - padding.right - arrowSize;
+			//f32 arrowPosY = (rect.min.y + rect.max.y) / 2 - arrowSize / 2;
+			//Rect arrowRect = GUI::WindowRectToGlobalRect(Rect(arrowPosX, arrowPosY, arrowPosX + arrowSize, arrowPosY + arrowSize));
+
+			//GUI::FillArrow(Vec2(arrowRect.x, arrowRect.y), defaultStyleState.foreground, GUI::Dir_Right, arrowSize);
+			const f32 toggleSize = GUI::GetFontSize() * 0.7f;
+			f32 togglePosX = rect.max.x - padding.right - toggleSize;
+			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - toggleSize / 2;
+			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
+
+			GUI::FillArrow(Vec2(toggleRect.x, toggleRect.y), defaultStyleState.foreground, GUI::Dir_Right, toggleSize);
+		}
+		else if (IsToggleable() && IsToggled())
 		{
 			const f32 toggleSize = GUI::GetFontSize() * 0.7f;
 			f32 togglePosX = rect.max.x - padding.right - toggleSize;
