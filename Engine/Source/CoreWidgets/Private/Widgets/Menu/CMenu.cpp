@@ -40,7 +40,7 @@ namespace CE::Widgets
 		isShown = false;
 	}
 
-    void CMenu::HideAll()
+    void CMenu::HideAllInChain()
     {
         Hide();
         
@@ -49,7 +49,7 @@ namespace CE::Widgets
             CWidget* parentsParent = ((CMenuItem*)parent)->GetOwner();
             if (parentsParent != nullptr && parentsParent->GetClass()->IsSubclassOf<CMenu>())
             {
-                ((CMenu*)parentsParent)->HideAll();
+                ((CMenu*)parentsParent)->HideAllInChain();
             }
         }
     }
@@ -244,7 +244,7 @@ namespace CE::Widgets
         }
         else if (event->type == CEventType::MouseLeave)
         {
-            
+			
         }
         
         Super::HandleEvent(event);

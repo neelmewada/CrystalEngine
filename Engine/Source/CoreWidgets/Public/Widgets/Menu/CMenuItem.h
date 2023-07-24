@@ -3,7 +3,7 @@
 namespace CE::Widgets
 {
 
-    CLASS(Config)
+    CLASS()
     class COREWIDGETS_API CMenuItem : public CWidget
     {
         CE_CLASS(CMenuItem, CWidget)
@@ -28,7 +28,7 @@ namespace CE::Widgets
 
     protected:
 
-        virtual void OnDrawGUI() override;
+        void OnDrawGUI() override;
 
 		void HandleEvent(CEvent* event) override;
 
@@ -38,6 +38,28 @@ namespace CE::Widgets
 		FIELD()
 		CMenu* subMenu = nullptr;
     };
+
+	CLASS()
+	class COREWIDGETS_API CMenuItemHeader : public CWidget
+	{
+		CE_CLASS(CMenuItemHeader, CWidget)
+	public:
+
+		CMenuItemHeader();
+		virtual ~CMenuItemHeader();
+
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
+		inline const String& GetTitle() const { return title; }
+		inline void SetTitle(const String& title) { this->title = title; }
+
+	protected:
+
+		void OnDrawGUI() override;
+
+		FIELD()
+		String title = "Header";
+	};
     
 } // namespace CE
 

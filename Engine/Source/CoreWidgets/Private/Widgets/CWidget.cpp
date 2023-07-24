@@ -123,7 +123,7 @@ namespace CE::Widgets
 	void CWidget::FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius)
 	{
 		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
-
+		
 		if (color.a > 0)
 		{
 			GUI::FillRect(globalRect, color, borderRadius);
@@ -443,7 +443,10 @@ namespace CE::Widgets
 		OnAfterComputeStyle();
 
 		needsStyle = false;
-		SetNeedsLayout();
+		if (!IsMenu())
+		{
+			SetNeedsLayout();
+		}
 
 		stylesheet->SetDirty(false);
 
@@ -473,6 +476,12 @@ namespace CE::Widgets
 				return true;
 		}
 
+		for (auto menu : attachedMenus)
+		{
+			if (menu->IsShown() && menu->NeedsLayout())
+				return true;
+		}
+
 		return needsLayout;
 	}
 
@@ -486,6 +495,11 @@ namespace CE::Widgets
 		for (auto child : attachedWidgets)
 		{
 			child->SetNeedsLayout(set);
+		}
+
+		for (auto menu : attachedMenus)
+		{
+			menu->SetNeedsLayout(set);
 		}
 
 		needsLayout = set;
@@ -503,13 +517,14 @@ namespace CE::Widgets
 
 	void CWidget::UpdateLayoutIfNeeded()
 	{
-		for (auto menu : attachedMenus)
-		{
-			menu->UpdateLayoutIfNeeded();
-		}
-
 		if (!NeedsLayout())
 			return;
+
+		for (auto menu : attachedMenus)
+		{
+			if (menu->IsShown())
+				menu->UpdateLayoutIfNeeded();
+		}
         
         if (IsWindow())
         {
@@ -1033,21 +1048,30 @@ namespace CE::Widgets
 		if (IsLeftMouseHeld() && IsHovered())
 		{
             if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-                SetNeedsStyle();
+			{
+				SetNeedsStyle();
+				SetNeedsLayout();
+			}
 			EnumAddFlags(stateFlags, CStateFlag::Pressed);
 			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
 		}
 		else if (IsHovered())
 		{
             if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-                SetNeedsStyle();
+			{
+				SetNeedsStyle();
+				SetNeedsLayout();
+			}
 			EnumAddFlags(stateFlags, CStateFlag::Hovered);
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
 		}
 		else
 		{
-            if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-                SetNeedsStyle();
+            if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed))
+			{
+				SetNeedsStyle();
+				SetNeedsLayout();
+			}
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed | CStateFlag::Hovered);
 		}
 	}

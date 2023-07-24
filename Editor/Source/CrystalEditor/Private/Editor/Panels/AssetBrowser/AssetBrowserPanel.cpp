@@ -147,6 +147,12 @@ namespace CE::Editor
 				{
 					for (int i = 0; i < 8; i++)
 					{
+						if (i == 4)
+						{
+							auto header = CreateWidget<CMenuItemHeader>(settingsButtonMenu, "Header");
+							header->SetTitle("TITLE");
+						}
+
 						auto menuItem = CreateWidget<CMenuItem>(settingsButtonMenu, "MenuItem");
 						menuItem->SetText(String::Format("Item No. {}", i));
 

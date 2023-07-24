@@ -154,15 +154,19 @@ CMenu {
 	padding: 0px 10px;
 }
 
-CMenuItem {
+.MenuItem {
 	border-width: 0px;
 	border-color: rgba(0, 0, 0, 0);
 	text-align: middle-left;
-	padding: 10px 0 0 0;
+	padding: 10px 0 10px 0;
 }
 
-CMenuItem:hovered, CMenuItem:pressed {
+CMenuItem:hovered, CMenuItem:pressed, CMenuItem:active {
 	background: rgb(0, 112, 224);
+}
+
+CMenuItemHeader {
+	foreground: rgb(108, 108, 108);
 }
 
 )";

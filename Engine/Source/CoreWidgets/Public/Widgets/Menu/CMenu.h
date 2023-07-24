@@ -23,7 +23,8 @@ namespace CE::Widgets
 
 		void Construct() override;
 
-		bool IsContainer() override { return true; }
+		bool IsMenu() override final { return true; }
+		bool IsContainer() override final { return true; }
 		bool RequiresIndependentLayoutCalculation() override;
 
 		void OnAfterComputeStyle() override;
@@ -34,7 +35,7 @@ namespace CE::Widgets
 
 		void Hide();
         
-        void HideAll();
+        void HideAllInChain();
 
 		/// Passing `pos` as 0 will show it at mouse position
 		void Show(Vec2 pos);

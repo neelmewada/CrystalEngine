@@ -6,6 +6,7 @@ namespace CE::Widgets
     CMenuItem::CMenuItem()
     {
 		isInteractable = true;
+		AddStyleClass("MenuItem");
     }
 
     CMenuItem::~CMenuItem()
@@ -42,8 +43,13 @@ namespace CE::Widgets
         
         if (HasSubMenu() && subMenu->IsShown())
         {
-            stateFlags = CStateFlag::Hovered; // Force hovered state when in sub-menu
+            stateFlags = CStateFlag::Hovered; // Force hovered state when in sub-menu and disable interactivity
+			isInteractable = false;
         }
+		else
+		{
+			isInteractable = true;
+		}
 
 		GUI::Text(rect + Rect(padding.left, padding.top, -padding.right, -padding.bottom), text, defaultStyleState);
     }
@@ -53,8 +59,9 @@ namespace CE::Widgets
         
 		if (event->type == CEventType::MouseButtonClick)
 		{
-            if (parent != nullptr && parent->GetClass()->IsSubclassOf<CMenu>())
-                ((CMenu*)parent)->HideAll();
+            if (!HasSubMenu() && parent != nullptr && parent->GetClass()->IsSubclassOf<CMenu>())
+                ((CMenu*)parent)->HideAllInChain();
+
             event->HandleAndStopPropagation();
 		}
 		else if (event->type == CEventType::MouseEnter)
@@ -69,5 +76,45 @@ namespace CE::Widgets
 		Super::HandleEvent(event);
 	}
     
+	CMenuItemHeader::CMenuItemHeader()
+	{
+		isInteractable = false;
+		AddStyleClass("MenuItem");
+	}
+
+	CMenuItemHeader::~CMenuItemHeader()
+	{
+
+	}
+
+	Vec2 CMenuItemHeader::CalculateIntrinsicContentSize(f32 width, f32 height)
+	{
+		return GUI::CalculateTextSize(title) + Vec2(20, 4);
+	}
+
+	void CMenuItemHeader::OnDrawGUI()
+	{
+		auto rect = GetComputedLayoutRect();
+		auto padding = GetComputedLayoutPadding();
+
+		rect.min.x += padding.left;
+		
+		defaultStyleState.textAlign = GUI::TextAlign_MiddleLeft;
+		auto textSize = GUI::CalculateTextSize(title) + Vec2(10, 0);
+
+		GUI::Text(Rect(rect.min, rect.min + Vec2(textSize.x, rect.max.y - rect.min.y)), title, defaultStyleState);
+
+		f32 centerY = (rect.min.y + rect.max.y) / 2.0f;
+		f32 lineStartX = rect.min.x + textSize.x + 1;
+		f32 lineEndX = rect.max.x - padding.right;
+		f32 lineThickness = 2.0f;
+
+		if (lineStartX + 5 > lineEndX)
+			return;
+
+		Rect lineRect{ lineStartX, centerY - lineThickness / 2.0f, lineEndX, centerY + lineThickness / 2.0f };
+		FillRect(defaultStyleState.foreground, lineRect);
+	}
+
 } // namespace CE
 

@@ -62,6 +62,8 @@ namespace CE::Widgets
 
         // For internal use only!
 		virtual void Render();
+
+		virtual bool IsMenu() { return false; }
         
         virtual bool IsWindow() { return false; }
 
