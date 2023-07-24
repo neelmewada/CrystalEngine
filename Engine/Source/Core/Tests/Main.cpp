@@ -604,7 +604,7 @@ TEST(Object, Lifecycle)
     EXPECT_EQ(instance->GetFlags(), OF_Transient);
     EXPECT_EQ(instance->GetName(), "MyObject");
 
-    delete instance;
+    instance->RequestDestroy();
     instance = nullptr;
 
     // 2. Objects in different threads
@@ -626,7 +626,7 @@ TEST(Object, Lifecycle)
             FAIL();
         }
 
-        delete obj1;
+        obj1->RequestDestroy();
     });
     
     auto t2 = Thread([&]
@@ -641,7 +641,7 @@ TEST(Object, Lifecycle)
             FAIL();
         }
 
-        delete obj2;
+        obj2->RequestDestroy();
     });
     
     auto t1Id = t1.GetId();
