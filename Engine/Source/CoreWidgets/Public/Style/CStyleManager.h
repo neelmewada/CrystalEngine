@@ -2,6 +2,8 @@
 
 namespace CE::Widgets
 {
+    typedef void* CTextureID;
+
     CLASS()
     class COREWIDGETS_API CStyleManager : public Object
     {
@@ -28,7 +30,7 @@ namespace CE::Widgets
 		void RemoveResourceSearchModule(const String& moduleName);
 
 		/// Searches for image in search modules
-		CMImage SearchImageResource(const String& resourceSearchPath);
+        CTextureID SearchImageResource(const String& resourceSearchPath);
 
 		void LoadStyleSheet(const Name& resourcePath, CStyleSheet* styleSheet);
 		String LoadStyleSheet(const Name& resourcePath);
@@ -37,7 +39,7 @@ namespace CE::Widgets
 
 		Resource* LoadResourceInternal(const String& resourceSearchPath);
         
-		HashMap<Name, CMImage> loadedImages{};
+		HashMap<Name, CTextureID> loadedImages{};
 		HashMap<Name, Resource*> loadedResources{};
 		Array<String> resourceSearchModules{};
 		

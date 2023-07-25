@@ -58,7 +58,7 @@ namespace CE::Widgets
 		for (int i = 0; i < resourceSearchModules.GetSize() && loadedResource == nullptr; i++)
 		{
 			Name resPath = "/" + resourceSearchModules[i] + "/Resources" + (path.StartsWith("/") ? "" : "/") + path;
-
+            
 			if (loadedResources.KeyExists(resPath))
 			{
 				return loadedResources[resPath];
@@ -80,12 +80,12 @@ namespace CE::Widgets
 		return loadedResource;
 	}
 
-	CMImage CStyleManager::SearchImageResource(const String& path)
+    CTextureID CStyleManager::SearchImageResource(const String& path)
 	{
 		for (int i = 0; i < resourceSearchModules.GetSize(); i++)
 		{
 			Name resPath = "/" + resourceSearchModules[i] + "/Resources" + (path.StartsWith("/") ? "" : "/") + path;
-			if (loadedImages.KeyExists(resPath) && loadedImages[resPath].IsValid())
+			if (loadedImages.KeyExists(resPath) && loadedImages[resPath] != nullptr)
 			{
 				return loadedImages[resPath];
 			}
@@ -93,11 +93,22 @@ namespace CE::Widgets
 
 		Resource* imageResource = LoadResourceInternal(path);
 		if (imageResource == nullptr || !imageResource->IsValid())
-			return CMImage();
+			return nullptr;
 
 		CMImage image = CMImage::LoadFromMemory(imageResource->GetData(), imageResource->GetDataSize(), 4);
 		if (!image.IsValid())
-			return CMImage();
+			return nullptr;
+        RHI::TextureDesc desc{};
+        desc;
+        
+        RHI::Texture* texture = RHI::gDynamicRHI->CreateTexture(desc);
+        texture->UploadData(image.GetDataPtr());
+        
+        if (texture == nullptr)
+        {
+            image.Free();
+            return nullptr;
+        }
 
 		loadedImages[imageResource->GetFullPath()] = image;
 		return image;

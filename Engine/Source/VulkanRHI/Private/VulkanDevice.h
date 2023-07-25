@@ -46,6 +46,7 @@ namespace CE
 
         VkCommandBuffer BeginSingleUseCommandBuffer();
         void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
+        void SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
         // - Getters -
 

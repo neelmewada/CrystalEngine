@@ -610,17 +610,21 @@ namespace CE
 
 	void VulkanDevice::EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
 	{
-		vkEndCommandBuffer(commandBuffer);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-
-		vkQueueSubmit(graphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(graphicsQueue->GetHandle());
-
-		vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
+        vkEndCommandBuffer(commandBuffer);
 	}
+
+
+    void VulkanDevice::SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
+    {
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(graphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue->GetHandle());
+
+        vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
+    }
 
 } // namespace CE

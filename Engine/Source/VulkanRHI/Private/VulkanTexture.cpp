@@ -402,6 +402,7 @@ namespace CE
         vkCmdCopyBufferToImage(cmdBuffer, srcVkBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
         device->EndSingleUseCommandBuffer(cmdBuffer);
+        device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
     }
 
 } // namespace CE
