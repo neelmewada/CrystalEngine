@@ -2008,10 +2008,10 @@ TEST(Resource, Manipulation)
 	GetResourceManager()->RegisterResource("Core_Test", "Text/Entry0.txt", (void*)Resource_Text_Entry0, COUNTOF(Resource_Text_Entry0));
 	GetResourceManager()->RegisterResource("Core_Test", "CSS/Style.css", (void*)Resource_CSS_Style, COUNTOF(Resource_CSS_Style));
 
-	Resource* resource = GetResourceManager()->LoadResource("/Resources/Core_Test/Text/Entry0.txt");
+	Resource* resource = GetResourceManager()->LoadResource("/Core_Test/Resources/Text/Entry0.txt");
 	EXPECT_EQ(strcmp((const char*)resource->GetData(), Resource_Text_Entry0), 0);
 
-	Resource* cssResource = GetResourceManager()->LoadResource("/Resources/Core_Test/CSS/Style.css");
+	Resource* cssResource = GetResourceManager()->LoadResource("/Core_Test/Resources/CSS/Style.css");
 	EXPECT_EQ(strcmp((const char*)cssResource->GetData(), Resource_CSS_Style), 0);
 
 	cssResource->RequestDestroy();

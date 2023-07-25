@@ -16,6 +16,8 @@ namespace CE
 
 		inline const String& GetExtension() const { return extension; }
 
+		inline const Name& GetFullPath() const { return fullPath; }
+
 		inline bool IsValid() const { return data != nullptr; }
 
 	protected:
@@ -24,6 +26,8 @@ namespace CE
 		u32 dataSize = 0;
 
 		String extension = "";
+
+		Name fullPath{};
 
 		friend class ResourceManager;
 	};

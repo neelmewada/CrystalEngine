@@ -15,7 +15,7 @@ namespace CE
 
 	void ResourceManager::RegisterResource(const String& moduleName, const String& pathToResource, void* data, u32 dataSizeInBytes)
 	{
-		String path = "/Resources/" + moduleName;
+		String path = "/" + moduleName + "/Resources";
 		if (!pathToResource.StartsWith("/"))
 			path += "/";
 		path += pathToResource;
@@ -25,7 +25,7 @@ namespace CE
 
 	void ResourceManager::DeregisterResource(const String& moduleName, const String& pathToResource)
 	{
-		String path = "/Resources/" + moduleName;
+		String path = "/" + moduleName + "/Resources";
 		if (!pathToResource.StartsWith("/"))
 			path += "/";
 		path += pathToResource;
@@ -60,6 +60,7 @@ namespace CE
 		resource->data = (u8*)malloc(node->userDataSize);
 		memcpy(resource->data, node->userData, node->userDataSize);
 		resource->extension = components.GetLast();
+		resource->fullPath = path;
 
 		return resource;
 	}

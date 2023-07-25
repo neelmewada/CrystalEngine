@@ -22,9 +22,20 @@ namespace CE::Widgets
 		}
 
 		void SetGlobalStyleSheet(const String& stylesheet);
+
+		void AddResourceSearchModule(const String& moduleName);
+		void RemoveResourceSearchModule(const String& moduleName);
+
+		Resource* LoadResource(const String& path);
+
+		CMImage LoadImageResource(const String& path);
         
     protected:
         
+		HashMap<Name, CMImage> loadedImages{};
+		HashMap<Name, Resource*> loadedResources{};
+		Array<String> resourceSearchModules{};
+		
 		CStyleSheet* globalStyleSheet = nullptr;
 		String globalStyleSheetText = "";
 
