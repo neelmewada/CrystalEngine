@@ -5,7 +5,7 @@
 namespace CE
 {
     
-    class VulkanWindowsPlatform
+    class VulkanWindowsPlatform : public VulkanPlatformBase
     {
         CE_STATIC_CLASS(VulkanWindowsPlatform)
     public:

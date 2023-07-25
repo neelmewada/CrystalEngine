@@ -6,7 +6,7 @@
 
 namespace CE
 {
-    class VulkanMacPlatform
+    class VulkanMacPlatform : public VulkanPlatformBase
     {
         CE_STATIC_CLASS(VulkanMacPlatform)
     public:
