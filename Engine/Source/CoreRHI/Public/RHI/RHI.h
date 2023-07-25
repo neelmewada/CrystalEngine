@@ -68,6 +68,15 @@ namespace CE::RHI
 
         virtual Buffer* CreateBuffer(const BufferDesc& bufferDesc) = 0;
         virtual void DestroyBuffer(Buffer* buffer) = 0;
+        
+        virtual Texture* CreateTexture(const TextureDesc& textureDesc) = 0;
+        virtual void DestroyTexture(Texture* texture) = 0;
+        
+        virtual Sampler* CreateSampler(const SamplerDesc& samplerDesc) = 0;
+        virtual void DestroySampler(Sampler* sampler) = 0;
+        
+        virtual void* AddImGuiTexture(Texture* texture, Sampler* sampler) = 0;
+        virtual void RemoveImGuiTexture(void* imguiTexture) = 0;
 
     };
 

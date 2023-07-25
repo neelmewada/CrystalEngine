@@ -83,6 +83,15 @@ namespace CE
 
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDesc& bufferDesc) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
+        
+        virtual RHI::Texture* CreateTexture(const RHI::TextureDesc& textureDesc) override;
+        virtual void DestroyTexture(RHI::Texture* texture) override;
+        
+        virtual RHI::Sampler* CreateSampler(const RHI::SamplerDesc& samplerDesc) override;
+        virtual void DestroySampler(RHI::Sampler* sampler) override;
+        
+        virtual void* AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler) override;
+        virtual void RemoveImGuiTexture(void* imguiTexture) override;
 
     protected:
 

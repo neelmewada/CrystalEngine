@@ -181,6 +181,7 @@ namespace CE
     VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc)
         : device(device)
     {
+        this->name = desc.name;
         this->width = desc.width;
         this->height = desc.height;
         this->depth = desc.depth;

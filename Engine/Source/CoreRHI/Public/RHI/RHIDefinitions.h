@@ -18,6 +18,7 @@ namespace CE::RHI
         None,
         Buffer,
         Texture,
+        Sampler,
         ShaderModule,
         ComputePipelineState,
         GraphicsPipelineState,
@@ -235,7 +236,7 @@ namespace CE::RHI
 
     struct TextureDesc
     {
-        Name name{};
+        String name{};
         u32 width = 128, height = 128, depth = 1;
         TextureDimension dimension = TextureDimension::Dim2D;
         TextureFormat format{};
@@ -244,6 +245,32 @@ namespace CE::RHI
         TextureUsageFlags usageFlags = TextureUsageFlags::Default;
 
         bool forceLinearLayout = false;
+    };
+
+    enum SamplerAddressMode
+    {
+        SAMPLER_ADDRESS_MODE_REPEAT = 0,
+        SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1,
+        SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2,
+        SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER = 3,
+    };
+    ENUM_CLASS_FLAGS(SamplerAddressMode);
+
+    enum SamplerFilterMode
+    {
+        SAMPLER_FILTER_LINEAR = 0,
+        SAMPLER_FILTER_NEAREST = 1,
+    };
+
+    struct SamplerDesc
+    {
+        SamplerAddressMode addressModeU{};
+        SamplerAddressMode addressModeV{};
+        SamplerAddressMode addressModeW{};
+        SamplerFilterMode filterMode{};
+        b8 enableAnisotropy = false;
+        int maxAnisotropy = 16;
+        Color borderColor{};
     };
 
     /*

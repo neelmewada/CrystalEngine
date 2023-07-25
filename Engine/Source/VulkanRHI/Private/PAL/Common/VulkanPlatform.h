@@ -3,13 +3,16 @@
 namespace CE
 {
     class VulkanTexture;
+    class VulkanSampler;
 
     class VulkanPlatformBase
     {
         CE_STATIC_CLASS(VulkanPlatformBase)
     public:
         
-        static VkDescriptorSet AddImGuiTexture(VulkanTexture* texture);
+        static VkDescriptorSet AddImGuiTexture(VulkanTexture* texture, VulkanSampler* sampler);
+        
+        static void RemoveImGuiTexture(VkDescriptorSet imguiTexture);
         
     };
 }

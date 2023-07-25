@@ -76,6 +76,20 @@ namespace CE::RHI
         virtual void UploadData(const void* pixels) = 0;
     };
 
+    class CORERHI_API Sampler : public Resource
+    {
+    protected:
+        Sampler() : Resource(ResourceType::Sampler)
+        {}
+        
+    public:
+        
+        virtual ~Sampler() = default;
+        
+        virtual void* GetHandle() = 0;
+        
+    }
+
     /***********************************
     *   Shader
     */

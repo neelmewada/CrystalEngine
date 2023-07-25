@@ -11,6 +11,7 @@
 #include "VulkanRenderPass.h"
 #include "VulkanSwapChain.h"
 #include "VulkanTexture.h"
+#include "VulkanSampler.h"
 
 #include <vulkan/vulkan.h>
 
@@ -391,6 +392,36 @@ namespace CE
     void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
     {
         delete buffer;
+    }
+
+    RHI::Texture* VulkanRHI::CreateTexture(const RHI::TextureDesc& textureDesc)
+    {
+        return new VulkanTexture(device, textureDesc);
+    }
+
+    void VulkanRHI::DestroyTexture(RHI::Texture* texture)
+    {
+        delete texture;
+    }
+
+    RHI::Sampler* VulkanRHI::CreateSampler(const RHI::SamplerDesc& samplerDesc)
+    {
+        return new VulkanSampler(device, samplerDesc);
+    }
+
+    void VulkanRHI::DestroySampler(RHI::Sampler* sampler)
+    {
+        delete sampler;
+    }
+
+    void* VulkanRHI::AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler)
+    {
+        return VulkanPlatform::AddImGuiTexture((VulkanTexture*)texture, (VulkanSampler*)sampler);
+    }
+
+    void VulkanRHI::RemoveImGuiTexture(void* imguiTexture)
+    {
+        VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
     }
 
     /******************************************************************************
