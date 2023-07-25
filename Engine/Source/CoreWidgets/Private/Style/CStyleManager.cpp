@@ -80,7 +80,7 @@ namespace CE::Widgets
 		return loadedResource;
 	}
 
-	CMImage CStyleManager::LoadImageResource(const String& path)
+	CMImage CStyleManager::SearchImageResource(const String& path)
 	{
 		for (int i = 0; i < resourceSearchModules.GetSize(); i++)
 		{
@@ -114,6 +114,17 @@ namespace CE::Widgets
 		CSSParser::ParseStyleSheet((CSSStyleSheet*)styleSheet, css);
 
 		resource->RequestDestroy();
+	}
+
+	String CStyleManager::LoadStyleSheet(const Name& resourcePath)
+	{
+		Resource* resource = GetResourceManager()->LoadResource(resourcePath, this);
+		if (resource == nullptr)
+			return nullptr;
+
+		String text = (const char*)resource->GetData();
+		resource->RequestDestroy();
+		return text;
 	}
 
 } // namespace CE::Widgets

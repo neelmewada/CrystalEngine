@@ -27,13 +27,15 @@ namespace CE::Widgets
 		void AddResourceSearchModule(const String& moduleName);
 		void RemoveResourceSearchModule(const String& moduleName);
 
-		CMImage LoadImageResource(const String& resourceSearchPath);
+		/// Searches for image in search modules
+		CMImage SearchImageResource(const String& resourceSearchPath);
 
 		void LoadStyleSheet(const Name& resourcePath, CStyleSheet* styleSheet);
+		String LoadStyleSheet(const Name& resourcePath);
         
     private:
 
-		Resource* LoadResourceInternal(const String& path);
+		Resource* LoadResourceInternal(const String& resourceSearchPath);
         
 		HashMap<Name, CMImage> loadedImages{};
 		HashMap<Name, Resource*> loadedResources{};
