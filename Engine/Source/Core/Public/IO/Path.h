@@ -59,6 +59,11 @@ namespace CE::IO
             return impl.is_absolute();
         }
 
+		inline auto GetLastWriteTime()
+		{
+			return fs::last_write_time(impl);
+		}
+
         inline friend Path operator/(const Path& lhs, const Path& rhs)
         {
             return Path(lhs.impl / rhs.impl);

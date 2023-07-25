@@ -14,7 +14,7 @@
 
 #include <vulkan/vulkan.h>
 
-CE_IMPLEMENT_PLUGIN(VulkanRHI, CE::VulkanRHIModule)
+CE_IMPLEMENT_MODULE(VulkanRHI, CE::VulkanRHIModule)
 
 namespace CE
 {

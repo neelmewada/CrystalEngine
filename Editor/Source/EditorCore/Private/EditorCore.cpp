@@ -3,7 +3,7 @@
 
 namespace CE::Editor
 {
-    
+
     class EditorCoreModule : public Module
     {
     public:
@@ -32,5 +32,7 @@ namespace CE::Editor
 } // namespace CE
 
 #include "EditorCore.private.h"
+#include "Resource.h"
+
 CE_IMPLEMENT_MODULE(EditorCore, CE::Editor::EditorCoreModule)
 

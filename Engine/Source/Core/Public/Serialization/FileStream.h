@@ -6,7 +6,7 @@ namespace CE
     class CORE_API FileStream : public Stream
     {
     public:
-        FileStream(const IO::Path& filePath, Permissions openMode = Permissions::ReadWrite, bool useBinary = true);
+        FileStream(const IO::Path& filePath, Permissions openMode = Permissions::ReadWrite, bool openAsBinary = true);
 
         virtual ~FileStream();
 

@@ -70,6 +70,9 @@ namespace CE
 		if (moduleName == "Core")
 			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
+		// Load resources
+		info->loadResourcesFuncPtr();
+
 		CE_LOG(Info, All, "Loaded Module: {}", moduleName);
 
 		CoreDelegates::onAfterModuleLoad.Broadcast(info);
@@ -90,6 +93,9 @@ namespace CE
 		TypeInfo::currentlyUnloadingModuleStack.Push(moduleName);
 
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
+
+		// Unload resources
+		info->unloadResourcesFuncPtr();
 
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
@@ -292,6 +298,20 @@ namespace CE
 			return nullptr;
 		}
 
+		auto loadResourcesFuncPtr = (LoadResourcedFunc)PlatformProcess::GetDllSymbol(dllHandle, "CELoadResources");
+		if (loadResourcesFuncPtr == nullptr)
+		{
+			result = ModuleLoadResult::InvalidSymbols;
+			return nullptr;
+		}
+
+		auto unloadResourcesFuncPtr = (UnloadResourcedFunc)PlatformProcess::GetDllSymbol(dllHandle, "CEUnloadResources");
+		if (unloadResourcesFuncPtr == nullptr)
+		{
+			result = ModuleLoadResult::InvalidSymbols;
+			return nullptr;
+		}
+
 		ModuleMap.Emplace(moduleName, ModuleInfo{});
 		
 		ModuleInfo* ptr = &ModuleMap[moduleName];
@@ -300,6 +320,8 @@ namespace CE
 		ptr->dllHandle = dllHandle;
 		ptr->loadFuncPtr = loadFunction;
 		ptr->unloadFuncPtr = unloadFuntion;
+		ptr->loadResourcesFuncPtr = loadResourcesFuncPtr;
+		ptr->unloadResourcesFuncPtr = unloadResourcesFuncPtr;
 		ptr->moduleName = moduleName;
 		ptr->moduleImpl = nullptr;
 
@@ -340,6 +362,20 @@ namespace CE
 			return nullptr;
 		}
 
+		auto loadResourcesFuncPtr = (LoadResourcedFunc)PlatformProcess::GetDllSymbol(dllHandle, "CELoadResources");
+		if (loadResourcesFuncPtr == nullptr)
+		{
+			result = ModuleLoadResult::InvalidSymbols;
+			return nullptr;
+		}
+
+		auto unloadResourcesFuncPtr = (UnloadResourcedFunc)PlatformProcess::GetDllSymbol(dllHandle, "CEUnloadResources");
+		if (unloadResourcesFuncPtr == nullptr)
+		{
+			result = ModuleLoadResult::InvalidSymbols;
+			return nullptr;
+		}
+
 		ModuleMap.Emplace(moduleName, ModuleInfo{});
 
 		ModuleInfo* ptr = &ModuleMap[moduleName];
@@ -348,6 +384,8 @@ namespace CE
 		ptr->dllHandle = dllHandle;
 		ptr->loadFuncPtr = loadFunction;
 		ptr->unloadFuncPtr = unloadFuntion;
+		ptr->loadResourcesFuncPtr = loadResourcesFuncPtr;
+		ptr->unloadResourcesFuncPtr = unloadResourcesFuncPtr;
 		ptr->moduleName = moduleName;
 		ptr->moduleImpl = nullptr;
 

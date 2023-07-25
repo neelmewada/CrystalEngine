@@ -171,6 +171,11 @@ function(ce_add_target NAME TARGET_TYPE)
         list(APPEND ce_add_target_INCLUDE_DIRECTORIES_PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/Generated")
     endif()
 
+    if(${ce_add_target_RESOURCES})
+        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Resources")
+        list(APPEND ce_add_target_INCLUDE_DIRECTORIES_PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/Resources")
+    endif()
+
     target_include_directories(${NAME}
         PRIVATE   ${ce_add_target_INCLUDE_DIRECTORIES_PRIVATE}
         PUBLIC    ${ce_add_target_INCLUDE_DIRECTORIES_PUBLIC}
@@ -257,6 +262,10 @@ function(ce_add_target NAME TARGET_TYPE)
 
     if(${ce_add_target_RESOURCES})
         target_compile_definitions(${NAME} PRIVATE _RESOURCES=1)
+
+        add_custom_command(TARGET ${NAME} PRE_BUILD
+            COMMAND "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
+        )
 
     else()
         target_compile_definitions(${NAME} PRIVATE _RESOURCES=0)

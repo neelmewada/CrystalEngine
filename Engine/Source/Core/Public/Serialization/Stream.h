@@ -169,6 +169,8 @@ namespace CE
             return byte;
         }
 
+		virtual u8 ReadByte() { return Stream::Read(); }
+
         virtual void* GetRawDataPtr() const
         {
             return nullptr;
