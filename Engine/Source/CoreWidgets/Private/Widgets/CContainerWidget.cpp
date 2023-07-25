@@ -44,4 +44,23 @@ namespace CE::Widgets
 		PollEvents();
     }
 
+    void CContainerWidget::HandleEvent(CEvent* event)
+    {
+		if (event->ShouldPropagate())
+		{
+			if (event->sender == this && event->type == CEventType::FocusChanged)
+			{
+				CFocusEvent* focusEvent = (CFocusEvent*)event;
+				focusEvent->GotFocus();
+			}
+		}
+
+		Super::HandleEvent(event);
+    }
+
+	bool CContainerWidget::TestFocus()
+	{
+		return GUI::IsWindowFocused(GetUuid(), GUI::FOCUS_ChildWindows);
+	}
+
 } // namespace CE::Widgets

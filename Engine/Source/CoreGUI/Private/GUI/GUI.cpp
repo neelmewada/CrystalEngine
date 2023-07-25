@@ -6281,6 +6281,13 @@ namespace CE::GUI
 		return windowId == GImGui->WindowsFocusOrder[GImGui->WindowsFocusOrder.Size - 1]->Name && ImGui::IsWindowFocused((int)flags);
 	}
 
+	COREGUI_API bool IsWindowFocused(ID id, FocusFlags flags)
+	{
+		if (GImGui->WindowsFocusOrder.Size == 0)
+			return ImGui::IsWindowFocused((int)flags);
+		return id == GImGui->WindowsFocusOrder[GImGui->WindowsFocusOrder.Size - 1]->ID && ImGui::IsWindowFocused((int)flags);
+	}
+
 	COREGUI_API bool IsItemHovered(HoveredFlags flags)
 	{
 		return ImGui::IsItemHovered(flags);

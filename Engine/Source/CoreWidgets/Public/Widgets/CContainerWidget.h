@@ -23,6 +23,10 @@ namespace CE::Widgets
 
 		void OnDrawGUI() override;
 
+		void HandleEvent(CEvent* event) override;
+
+		bool TestFocus() override;
+
 		FIELD()
 		b8 allowHorizontalScroll = false;
 

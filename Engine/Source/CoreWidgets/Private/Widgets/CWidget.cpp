@@ -29,13 +29,16 @@ namespace CE::Widgets
 		node = nullptr;
 	}
 
-	void CWidget::ShowContextMenu(bool show)
+	void CWidget::ShowContextMenu()
 	{
-		if (contextMenu == nullptr)
-			return;
-
-		if (show)
+		if (contextMenu != nullptr)
 			contextMenu->Show();
+	}
+
+	void CWidget::HideContextMenu()
+	{
+		if (contextMenu != nullptr)
+			contextMenu->Hide();
 	}
 
 	void CWidget::Construct()
@@ -851,16 +854,21 @@ namespace CE::Widgets
 		UpdateLayoutIfNeeded();
 	}
 
-	void CWidget::PollEvents()
+	bool CWidget::TestFocus()
 	{
-		if (!IsInteractable())
-			return;
-
 		CWindow* thisWindow = nullptr;
 		if (IsWindow())
+		{
 			thisWindow = (CWindow*)this;
+			return GUI::IsWindowFocused(thisWindow->GetTitle(), GUI::FOCUS_ChildWindows | GUI::FOCUS_DockHierarchy);
+		}
 
-		bool focused = IsWindow() ? GUI::IsWindowFocused(thisWindow->GetTitle(), GUI::FOCUS_ChildWindows | GUI::FOCUS_DockHierarchy) : GUI::IsItemFocused();
+		return GUI::IsItemFocused();
+	}
+
+	void CWidget::PollEvents()
+	{
+		bool focused = TestFocus();
 
 		if (focused != isFocused) // Focus changed
 		{
@@ -873,6 +881,9 @@ namespace CE::Widgets
 
 			isFocused = focused;
 		}
+
+		if (!IsInteractable())
+			return;
 
 		if (!IsWindow())
 		{
@@ -1024,7 +1035,7 @@ namespace CE::Widgets
 		}
 		else // Window
 		{
-			thisWindow = (CWindow*)this;
+			CWindow* thisWindow = (CWindow*)this;
 
 			// Mouse Click:
 

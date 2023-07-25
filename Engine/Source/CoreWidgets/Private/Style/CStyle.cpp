@@ -182,6 +182,7 @@ namespace CE::Widgets
 		{ "margin", CStylePropertyType::Margin },
 		{ "padding", CStylePropertyType::Padding },
 		{ "display", CStylePropertyType::Display },
+		{ "color", CStylePropertyType::Foreground },
 		{ "foreground", CStylePropertyType::Foreground },
 		{ "foreground-color", CStylePropertyType::Foreground },
 		{ "background", CStylePropertyType::Background },

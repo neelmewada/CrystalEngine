@@ -56,7 +56,8 @@ namespace CE::Widgets
 		inline bool IsVisible() const { return isVisible; }
 		inline void SetVisible(bool visible) { isVisible = visible; }
 
-		void ShowContextMenu(bool show = true);
+		void ShowContextMenu();
+		void HideContextMenu();
 
 		virtual void Construct();
 
@@ -222,6 +223,9 @@ namespace CE::Widgets
         
         /// Override this method to build child widget hierarchy
         virtual void Build() {}
+
+		/// Override to use custom focus validation method
+		virtual bool TestFocus();
 
 		/// Must be called at the end of all GUI draw calls
 		virtual void PollEvents();
