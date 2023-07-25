@@ -93,6 +93,12 @@ function(ce_add_target NAME TARGET_TYPE)
     set(SOURCES ${PRIVATE_FILES})
     list(APPEND SOURCES ${PUBLIC_FILES})
     list(APPEND SOURCES ${CMAKE_FILES})
+    set(RESOURCE_FILES "")
+
+    if(${ce_add_target_RESOURCES})
+        file(GLOB_RECURSE RESOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*")
+        list(APPEND SOURCES ${RESOURCE_FILES})
+    endif()
     
     if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
         add_library(${NAME} ${TARGET_TYPE} ${SOURCES})
@@ -260,17 +266,50 @@ function(ce_add_target NAME TARGET_TYPE)
         target_compile_definitions(${NAME} PRIVATE _AUTORTTI=0)
     endif()
 
+    # RESOURCES
+
     if(${ce_add_target_RESOURCES})
         target_compile_definitions(${NAME} PRIVATE _RESOURCES=1)
+        
+        set(resource_output_files "")
+        foreach(rsrc_path ${RESOURCE_FILES})
+            cmake_path(RELATIVE_PATH rsrc_path BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE rsrc_rel_path)
+            list(APPEND resource_output_files "${CMAKE_CURRENT_BINARY_DIR}/${rsrc_rel_path}.h")
+        endforeach()
 
-        add_custom_command(TARGET ${NAME} PRE_BUILD
+        # add_custom_command(TARGET ${NAME} PRE_BUILD
+        #     COMMAND "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
+        # )
+
+        # add_custom_target(${NAME}_Resources 
+        #     "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
+        #     BYPRODUCTS ${resource_output_files}
+        #     VERBATIM
+        #     SOURCES ${RESOURCE_FILES}
+        # )
+
+        add_custom_command(OUTPUT ${resource_output_files}
             COMMAND "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
+            DEPENDS ${RESOURCE_FILES}
+            VERBATIM
         )
+
+        add_custom_target(${NAME}_Resources
+            DEPENDS ${resource_output_files}
+            SOURCES ${RESOURCE_FILES}
+            VERBATIM
+        )
+
+        set_target_properties(${NAME}_Resources
+            PROPERTIES
+                FOLDER "Resources"
+        )
+
+        add_dependencies(${NAME} ${NAME}_Resources)
 
     else()
         target_compile_definitions(${NAME} PRIVATE _RESOURCES=0)
     endif()
-    
     
     # RUNTIME_DEPENDENCIES
 

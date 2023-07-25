@@ -20,7 +20,7 @@ namespace CE::Widgets
 		YGNodeSetContext(node, this);
 		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
 
-		this->stylesheet = CreateObject<CSSStyleSheet>(this, "StyleSheet");
+		this->stylesheet = CreateDefaultSubobject<CSSStyleSheet>("StyleSheet");
 	}
 
 	CWidget::~CWidget()

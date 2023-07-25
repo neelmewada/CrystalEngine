@@ -22,15 +22,18 @@ namespace CE::Widgets
 		}
 
 		void SetGlobalStyleSheet(const String& stylesheet);
+		void LoadGlobalStyleSheet(const Name& stylesheetResourcePath);
 
 		void AddResourceSearchModule(const String& moduleName);
 		void RemoveResourceSearchModule(const String& moduleName);
 
-		Resource* LoadResource(const String& path);
+		CMImage LoadImageResource(const String& resourceSearchPath);
 
-		CMImage LoadImageResource(const String& path);
+		void LoadStyleSheet(const Name& resourcePath, CStyleSheet* styleSheet);
         
-    protected:
+    private:
+
+		Resource* LoadResourceInternal(const String& path);
         
 		HashMap<Name, CMImage> loadedImages{};
 		HashMap<Name, Resource*> loadedResources{};

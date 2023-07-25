@@ -1,8 +1,6 @@
 
 #include "EditorWidgets.h"
 
-#include "EditorWidgets.private.h"
-
 
 namespace CE::Editor
 {
@@ -25,5 +23,8 @@ namespace CE::Editor
         }
     };
 }
+
+#include "EditorWidgets.private.h"
+#include "Resource.h"
 
 CE_IMPLEMENT_MODULE(EditorWidgets, CE::Editor::EditorWidgetsModule)
