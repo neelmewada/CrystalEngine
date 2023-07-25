@@ -65,6 +65,19 @@ namespace CE
 		return resource;
 	}
 
+	String ResourceManager::LoadTextResource(const Name& path)
+	{
+		PathTreeNode* node = pathTree.GetNode(path);
+		if (node == nullptr || node->userData == nullptr || node->userDataSize == 0)
+			return String();
+
+		String string = String(node->userDataSize);
+		memcpy(string.GetData(), node->userData, node->userDataSize);
+		string[node->userDataSize] = 0;
+		string.UpdateLength();
+		return string;
+	}
+
 } // namespace CE
 
 

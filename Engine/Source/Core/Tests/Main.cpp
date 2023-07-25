@@ -2014,6 +2014,9 @@ TEST(Resource, Manipulation)
 	Resource* cssResource = GetResourceManager()->LoadResource("/Core_Test/Resources/CSS/Style.css");
 	EXPECT_EQ(strcmp((const char*)cssResource->GetData(), Resource_CSS_Style), 0);
 
+	String textResource = GetResourceManager()->LoadTextResource("/Core_Test/Resources/Text/Entry0.txt");
+	EXPECT_EQ(textResource, "resource_text");
+
 	cssResource->RequestDestroy();
 	cssResource = nullptr;
 	resource->RequestDestroy();

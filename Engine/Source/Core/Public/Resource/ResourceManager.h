@@ -16,6 +16,8 @@ namespace CE
 
 		Resource* LoadResource(const Name& path, Object* outer = GetTransientPackage());
 
+		String LoadTextResource(const Name& path);
+
 	protected:
 
 		PathTree pathTree{};
