@@ -193,7 +193,7 @@ int main(int argc, char** argv)
 				}
 
 				auto byte = reader.ReadByte();
-				data << String::Format("{0:#x}", byte) << "i8, ";
+				data << "(char)" << String::Format("{0:#x}", byte) << ", ";
 				counter++;
 			}
 			data << "};\n";

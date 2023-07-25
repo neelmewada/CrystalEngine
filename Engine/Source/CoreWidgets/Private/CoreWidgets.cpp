@@ -32,10 +32,14 @@ namespace CE::Widgets
 			gWidgetsTransientPackage = CreateObject<Package>(nullptr, TEXT("/CoreWidgets/Transient"), OF_Transient);
 
 			gStyleManager = CreateObject<CStyleManager>(gWidgetsTransientPackage, TEXT("StyleManager"), OF_Transient);
+            
+            gStyleManager->AddResourceSearchModule(MODULE_NAME);
         }
 
         virtual void ShutdownModule() override
         {
+            gStyleManager->RemoveResourceSearchModule(MODULE_NAME);
+            
 			gStyleManager->RequestDestroy();
 			gStyleManager = nullptr;
 
