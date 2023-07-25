@@ -33,7 +33,7 @@ namespace CE::GUI
 			g.NextWindowData.ClearFlags(); // We behave like Begin() and need to consume those values
 			return false;
 		}
-		ImGuiPopupFlags_;
+		
 		char name[28];
 		if (flags & WF_ChildMenu)
 			ImFormatString(name, IM_ARRAYSIZE(name), "##Menu_%02d", g.BeginMenuCount); // Recycle windows based on depth

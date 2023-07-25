@@ -15,7 +15,7 @@ namespace CE
             return VK_FORMAT_R8_SNORM;
         case RHI::TextureFormat::R8_SRGB:
             return VK_FORMAT_R8_SRGB;
-
+            
         case RHI::TextureFormat::R8G8B8A8_SRGB:
             return VK_FORMAT_R8G8B8A8_SRGB;
         case RHI::TextureFormat::R8G8B8A8_UNORM:
@@ -54,6 +54,13 @@ namespace CE
             return VK_FORMAT_D32_SFLOAT_S8_UINT;
         case RHI::TextureFormat::D24_UNORM_S8_UINT:
             return VK_FORMAT_D24_UNORM_S8_UINT;
+                
+        case RHI::TextureFormat::B8G8R8_UNORM:
+            return VK_FORMAT_B8G8R8_UNORM;
+        case RHI::TextureFormat::B8G8R8_SNORM:
+            return VK_FORMAT_B8G8R8_SNORM;
+        case RHI::TextureFormat::B8G8R8_SRGB:
+            return VK_FORMAT_B8G8R8_SRGB;
         }
         
         return VK_FORMAT_UNDEFINED;
@@ -111,7 +118,15 @@ namespace CE
             return RHI::TextureFormat::D32_SFLOAT_S8_UINT;
         case VK_FORMAT_D24_UNORM_S8_UINT:
             return RHI::TextureFormat::D24_UNORM_S8_UINT;
+                
+        case VK_FORMAT_B8G8R8_UNORM:
+            return RHI::TextureFormat::B8G8R8_UNORM;
+        case VK_FORMAT_B8G8R8_SNORM:
+            return RHI::TextureFormat::B8G8R8_SNORM;
+        case VK_FORMAT_B8G8R8_SRGB:
+            return RHI::TextureFormat::B8G8R8_SRGB;
         }
+        
         return RHI::TextureFormat::Undefined;
     }
 
@@ -219,9 +234,9 @@ namespace CE
 
         this->vkFormat = imageCI.format;
         
-        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::SampledImage))
+        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::SampledImage) || desc.usageFlags == RHI::TextureUsageFlags::Default)
         {
-            imageCI.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+            imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
             aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
         }
         if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::ColorAttachment))

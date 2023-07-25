@@ -12,7 +12,7 @@ namespace CE::Widgets
 	{
 		for (auto& [_, image] : loadedImages)
 		{
-			image.Free();
+            RHI::gDynamicRHI->RemoveImGuiTexture(image);
 		}
 		loadedImages.Clear();
 
@@ -99,19 +99,57 @@ namespace CE::Widgets
 		if (!image.IsValid())
 			return nullptr;
         RHI::TextureDesc desc{};
-        desc;
+        desc.width = image.GetWidth();
+        desc.height = image.GetHeight();
+        desc.depth = 1;
+        desc.name = "";
+        if (image.GetNumChannels() == 1)
+            desc.format = RHI::TextureFormat::R32_SFLOAT;
+        else if (image.GetNumChannels() == 3)
+            desc.format = RHI::TextureFormat::B8G8R8_SRGB;
+        else if (image.GetNumChannels() == 4)
+            desc.format = RHI::TextureFormat::R8G8B8_SRGB;
+        desc.dimension = RHI::TextureDimension::Dim2D;
+        desc.mipLevels = 1;
+        desc.sampleCount = 1;
+        desc.usageFlags = RHI::TextureUsageFlags::SampledImage;
         
         RHI::Texture* texture = RHI::gDynamicRHI->CreateTexture(desc);
-        texture->UploadData(image.GetDataPtr());
-        
         if (texture == nullptr)
         {
             image.Free();
             return nullptr;
         }
-
-		loadedImages[imageResource->GetFullPath()] = image;
-		return image;
+        
+        texture->UploadData(image.GetDataPtr());
+        
+        image.Free();
+        
+        RHI::SamplerDesc samplerDesc{};
+        samplerDesc.addressModeU = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerDesc.addressModeV = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
+        samplerDesc.enableAnisotropy = true;
+        samplerDesc.maxAnisotropy = 8;
+        samplerDesc.filterMode = RHI::SAMPLER_FILTER_LINEAR;
+        
+        RHI::Sampler* sampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
+        if (sampler == nullptr)
+        {
+            RHI::gDynamicRHI->DestroyTexture(texture);
+            return nullptr;
+        }
+        
+        CTextureID textureId = RHI::gDynamicRHI->AddImGuiTexture(texture, sampler);
+        if (textureId == nullptr)
+        {
+            RHI::gDynamicRHI->DestroySampler(sampler);
+            RHI::gDynamicRHI->DestroyTexture(texture);
+            return nullptr;
+        }
+        
+		loadedImages[imageResource->GetFullPath()] = textureId;
+		return textureId;
 	}
 
 	void CStyleManager::LoadStyleSheet(const Name& resourcePath, CStyleSheet* styleSheet)
