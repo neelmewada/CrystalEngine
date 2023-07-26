@@ -83,6 +83,11 @@ namespace CE
 		}
 
 		vkBindBufferMemory(device->GetHandle(), buffer, bufferMemory, 0);
+
+		if (desc.initialData != nullptr)
+		{
+			UploadData(*desc.initialData);
+		}
 	}
 
 	VulkanBuffer::~VulkanBuffer()

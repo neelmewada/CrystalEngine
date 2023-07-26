@@ -15,6 +15,24 @@ namespace CE
             return VK_FORMAT_R8_SNORM;
         case RHI::TextureFormat::R8_SRGB:
             return VK_FORMAT_R8_SRGB;
+
+		case RHI::TextureFormat::R16G16_UNORM:
+			return VK_FORMAT_R16G16_UNORM;
+		case RHI::TextureFormat::R16G16_SNORM:
+			return VK_FORMAT_R16G16_SNORM;
+		case RHI::TextureFormat::R16G16_UINT:
+			return VK_FORMAT_R16G16_UINT;
+		case RHI::TextureFormat::R16G16_SINT:
+			return VK_FORMAT_R16G16_SINT;
+		case RHI::TextureFormat::R16G16_SFLOAT:
+			return VK_FORMAT_R16G16_SFLOAT;
+
+		case RHI::TextureFormat::R32G32_UINT:
+			return VK_FORMAT_R32G32_UINT;
+		case RHI::TextureFormat::R32G32_SINT:
+			return VK_FORMAT_R32G32_SINT;
+		case RHI::TextureFormat::R32G32_SFLOAT:
+			return VK_FORMAT_R32G32_SFLOAT;
             
         case RHI::TextureFormat::R8G8B8A8_SRGB:
             return VK_FORMAT_R8G8B8A8_SRGB;
@@ -84,6 +102,17 @@ namespace CE
         case VK_FORMAT_R8G8B8A8_SNORM:
             return RHI::TextureFormat::R8G8B8A8_SNORM;
 
+		case VK_FORMAT_R16G16_UNORM:
+			return RHI::TextureFormat::R16G16_UNORM;
+		case VK_FORMAT_R16G16_SNORM:
+			return RHI::TextureFormat::R16G16_SNORM;
+		case VK_FORMAT_R16G16_UINT:
+			return RHI::TextureFormat::R16G16_UINT;
+		case VK_FORMAT_R16G16_SINT:
+			return RHI::TextureFormat::R16G16_SINT;
+		case VK_FORMAT_R16G16_SFLOAT:
+			return RHI::TextureFormat::R16G16_SFLOAT;
+
         case VK_FORMAT_B8G8R8A8_SRGB:
             return RHI::TextureFormat::B8G8R8A8_SRGB;
         case VK_FORMAT_B8G8R8A8_UNORM:
@@ -112,6 +141,13 @@ namespace CE
         case VK_FORMAT_R32_SFLOAT:
             return RHI::TextureFormat::R32_SFLOAT;
 
+		case VK_FORMAT_R32G32_UINT:
+			return RHI::TextureFormat::R32G32_UINT;
+		case VK_FORMAT_R32G32_SINT:
+			return RHI::TextureFormat::R32G32_SINT;
+		case VK_FORMAT_R32G32_SFLOAT:
+			return RHI::TextureFormat::R32G32_SFLOAT;
+
         case VK_FORMAT_D32_SFLOAT:
             return RHI::TextureFormat::D32_SFLOAT;
         case VK_FORMAT_D32_SFLOAT_S8_UINT:
@@ -132,6 +168,7 @@ namespace CE
 
     u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
     {
+		VK_FORMAT_R32G32_SFLOAT;
         switch (format)
         {
         case RHI::TextureFormat::R8_UNORM:
@@ -173,6 +210,32 @@ namespace CE
         case RHI::TextureFormat::R8G8B8_SRGB:
             outByteSizePerChannel = 1;
             return 3;
+
+		case RHI::TextureFormat::R16G16_UNORM:
+			outByteSizePerChannel = 2;
+			return 2;
+		case RHI::TextureFormat::R16G16_SNORM:
+			outByteSizePerChannel = 2;
+			return 2;
+		case RHI::TextureFormat::R16G16_UINT:
+			outByteSizePerChannel = 2;
+			return 2;
+		case RHI::TextureFormat::R16G16_SINT:
+			outByteSizePerChannel = 2;
+			return 2;
+		case RHI::TextureFormat::R16G16_SFLOAT:
+			outByteSizePerChannel = 2;
+			return 2;
+
+		case RHI::TextureFormat::R32G32_UINT:
+			outByteSizePerChannel = 4;
+			return 2;
+		case RHI::TextureFormat::R32G32_SINT:
+			outByteSizePerChannel = 4;
+			return 2;
+		case RHI::TextureFormat::R32G32_SFLOAT:
+			outByteSizePerChannel = 4;
+			return 2;
 
         case RHI::TextureFormat::R16_UNORM:
             outByteSizePerChannel = 2;
@@ -247,7 +310,7 @@ namespace CE
 
         this->vkFormat = imageCI.format;
         
-        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::SampledImage) || desc.usageFlags == RHI::TextureUsageFlags::Default)
+        if (EnumHasAnyFlags(desc.usageFlags, RHI::TextureUsageFlags::SampledImage))
         {
             imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
             aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
@@ -262,7 +325,7 @@ namespace CE
             imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
         }
-
+		
         imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
         imageCI.mipLevels = mipLevels;
         imageCI.arrayLayers = 1;

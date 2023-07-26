@@ -52,15 +52,21 @@ namespace CE::Editor
 		Super::OnDrawGUI();
 
 		auto rect = GetComputedLayoutRect();
+		auto size = GetComputedLayoutSize();
+		f32 rectCenterX = (rect.min.x + rect.max.x) / 2;
 
-		//GUI::PushChildCoordinateSpace(rect);
+		if (!icon.IsValid())
+			icon = GetStyleManager()->SearchImageResource("/Icons/folder.png");
 
-		//if (icon.IsValid())
+		if (icon.IsValid())
 		{
-			//GUI::Image(Rect(300, 300, 400, 400), icon.id, {});
-		}
+			const Vec2 padding = Vec2(20, 0);
+			auto imageSize = size.x - padding.x;
+			Rect imageRect = Rect(rectCenterX - size.x / 2 + padding.x / 2, rect.y + padding.y,
+				rectCenterX + size.x / 2 - padding.x / 2, rect.y + padding.y + imageSize);
 
-		//GUI::PopChildCoordinateSpace();
+			GUI::Image(imageRect, icon.id, {});
+		}
     }
 
 	void AssetItemWidget::HandleEvent(CEvent* event)

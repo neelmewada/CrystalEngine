@@ -10,12 +10,12 @@ namespace CE
     public:
         virtual void StartupModule() override
         {
-			
+			GetStyleManager()->AddResourceSearchModule(MODULE_NAME);
         }
 
         virtual void ShutdownModule() override
         {
-
+			GetStyleManager()->RemoveResourceSearchModule(MODULE_NAME);
         }
 
         virtual void RegisterTypes() override

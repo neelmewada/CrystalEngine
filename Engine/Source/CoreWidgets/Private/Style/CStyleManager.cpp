@@ -16,14 +16,20 @@ namespace CE::Widgets
 
 	void CStyleManager::PreShutdown()
 	{
+
 		for (auto& [_, image] : loadedImages)
 		{
 			RHI::gDynamicRHI->RemoveImGuiTexture(image.id);
 
 			RHI::gDynamicRHI->DestroyTexture(image.texture);
-			RHI::gDynamicRHI->DestroySampler(image.textureSampler);
 		}
 		loadedImages.Clear();
+
+		if (imageSampler != nullptr)
+		{
+			RHI::gDynamicRHI->DestroySampler(imageSampler);
+		}
+		imageSampler = nullptr;
 
 		for (const auto& [_, resource] : loadedResources)
 		{
@@ -112,11 +118,11 @@ namespace CE::Widgets
         desc.height = image.GetHeight();
         desc.depth = 1;
         desc.name = "";
-        if (image.GetNumChannels() == 1)
-            desc.format = RHI::TextureFormat::R32_SFLOAT;
+		if (image.GetNumChannels() == 1)
+			desc.format = RHI::TextureFormat::R32_SFLOAT;
         else if (image.GetNumChannels() == 3)
             desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
-        else if (image.GetNumChannels() == 4)
+        else
             desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
         desc.dimension = RHI::TextureDimension::Dim2D;
         desc.mipLevels = 1;
@@ -138,32 +144,36 @@ namespace CE::Widgets
         
         image.Free();
         
-        RHI::SamplerDesc samplerDesc{};
-        samplerDesc.addressModeU = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerDesc.addressModeV = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
-        samplerDesc.enableAnisotropy = true;
-        samplerDesc.maxAnisotropy = 8;
-        samplerDesc.filterMode = RHI::SAMPLER_FILTER_LINEAR;
+		if (imageSampler == nullptr)
+		{
+			RHI::SamplerDesc samplerDesc{};
+			samplerDesc.addressModeU = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerDesc.addressModeV = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerDesc.enableAnisotropy = true;
+			samplerDesc.maxAnisotropy = 8;
+			samplerDesc.filterMode = RHI::SAMPLER_FILTER_LINEAR;
+
+			imageSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
+			if (imageSampler == nullptr)
+			{
+				RHI::gDynamicRHI->DestroyTexture(texture);
+				return {};
+			}
+		}
+       
         
-        RHI::Sampler* sampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
-        if (sampler == nullptr)
-        {
-            RHI::gDynamicRHI->DestroyTexture(texture);
-			return {};
-        }
-        
-        CTextureID textureId = RHI::gDynamicRHI->AddImGuiTexture(texture, sampler);
+        CTextureID textureId = RHI::gDynamicRHI->AddImGuiTexture(texture, imageSampler);
         if (textureId == nullptr)
         {
-            RHI::gDynamicRHI->DestroySampler(sampler);
+            //RHI::gDynamicRHI->DestroySampler(sampler);
             RHI::gDynamicRHI->DestroyTexture(texture);
 			return {};
         }
 		
 		tex.id = textureId;
 		tex.texture = texture;
-		tex.textureSampler = sampler;
+		//tex.textureSampler = sampler;
         
 		loadedImages[imageResource->GetFullPath()] = tex;
 		return tex;

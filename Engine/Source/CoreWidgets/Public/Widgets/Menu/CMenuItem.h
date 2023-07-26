@@ -25,6 +25,8 @@ namespace CE::Widgets
 		inline const String& GetText() const { return text; }
 		inline void SetText(const String& text) { this->text = text; }
 
+		void LoadIcon(const String& iconSearchPath);
+
 		inline CMenu* GetSubMenu() const { return subMenu; }
 		inline void SetSubMenu(CMenu* subMenu) { this->subMenu = subMenu; }
 
@@ -51,6 +53,8 @@ namespace CE::Widgets
 
 		FIELD()
 		String text = "";
+
+		CTexture icon{};
 
 		FIELD()
 		CMenu* subMenu = nullptr;

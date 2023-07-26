@@ -5,6 +5,7 @@ namespace CE::Widgets
 
 	CButton::CButton()
 	{
+		isInteractable = true;
 		SetText("Button");
 	}
 
@@ -31,9 +32,24 @@ namespace CE::Widgets
 		return text;
 	}
 
+	void CButton::LoadIcon(const String& resourceSearchPath)
+	{
+		icon = GetStyleManager()->SearchImageResource(resourceSearchPath);
+		SetNeedsStyle();
+		SetNeedsLayout();
+	}
+
+	void CButton::RemoveIcon()
+	{
+		icon = {};
+	}
+
 	Vec2 CButton::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return GUI::CalculateTextSize(text) + Vec2(10, 5);
+		f32 iconSize = 0;
+		if (icon.IsValid())
+			iconSize = 16;
+		return GUI::CalculateTextSize(text) + Vec2(10 + iconSize, 5);
 	}
 
 	void CButton::SetAsAlternateStyle(bool set)
@@ -48,13 +64,24 @@ namespace CE::Widgets
 		Vec4 rect = GetComputedLayoutRect();
 		Vec4 padding = GetComputedLayoutPadding();
 
+		f32 iconOffset = 0;
+		if (icon.IsValid())
+			iconOffset = 10;
+
 		bool hovered = false, held = false;
-		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding);
+		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding + Rect(iconOffset, 0, 0, 0));
 		PollEvents();
 
-		//PollBasicMouseEvents(hovered, held || pressed, this->stateFlags);
-
 		GUI::PushChildCoordinateSpace(rect);
+
+		if (icon.IsValid())
+		{
+			constexpr f32 iconSize = 16;
+			f32 centerY = (rect.max.y - rect.min.y) / 2;
+			Rect iconRect{ padding.left, centerY - iconSize / 2,
+				padding.left + iconSize, centerY + iconSize / 2 };
+			GUI::Image(iconRect, icon.id, {});
+		}
 
 		for (auto child : attachedWidgets)
 		{

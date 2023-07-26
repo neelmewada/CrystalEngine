@@ -143,6 +143,11 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::DrawImage(const CTexture& image, const Rect& localRect, const Color& tintColor)
+	{
+
+	}
+
 	void CWidget::UpdateStyleIfNeeded()
 	{
 		if (!needsStyle && !stylesheet->IsDirty())
@@ -1152,15 +1157,14 @@ namespace CE::Widgets
 		return stylesheetText;
 	}
 
+	void CWidget::LoadStyleSheet(const Name& resourcePath)
+	{
+		GetStyleManager()->LoadStyleSheet(resourcePath, this->stylesheet);
+	}
+
 	CWidget* CWidget::GetOwner()
 	{
 		return parent;
-
-		//if (GetOuter() == nullptr)
-		//	return nullptr;
-		//if (GetOuter()->GetClass()->IsSubclassOf<CWidget>())
-		//	return (CWidget*)GetOuter();
-		//return nullptr;
 	}
 
 	CWindow* CWidget::GetOwnerWindow()

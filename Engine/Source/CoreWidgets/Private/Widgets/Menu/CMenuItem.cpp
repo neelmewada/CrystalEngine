@@ -2,11 +2,15 @@
 
 namespace CE::Widgets
 {
+	static CTexture rightArrowIcon{};
 
     CMenuItem::CMenuItem()
     {
 		isInteractable = true;
 		AddStyleClass("MenuItem");
+
+		if (!rightArrowIcon.IsValid())
+			rightArrowIcon = GetStyleManager()->SearchImageResource("/Icons/right_arrow_32.png");
     }
 
     CMenuItem::~CMenuItem()
@@ -19,7 +23,11 @@ namespace CE::Widgets
 		Vec2 checkMark = {};
 		if (isToggleable || (HasSubMenu() && !IsInsideMenuBar()))
 			checkMark.x += GUI::GetFontSize() * 0.7f;
-		return GUI::CalculateTextSize(text) + Vec2(15, 5) + checkMark;
+		f32 iconOffset = 0;
+		if (!IsInsideMenuBar())
+			iconOffset = 18;
+
+		return Vec2(iconOffset, 0) + GUI::CalculateTextSize(text) + Vec2(15, 5) + checkMark;
 	}
 
 	void CMenuItem::Construct()
@@ -42,6 +50,11 @@ namespace CE::Widgets
 		return GetOwner() != nullptr && GetOwner()->GetClass()->IsSubclassOf<CMenuBar>();
 	}
 
+	void CMenuItem::LoadIcon(const String& iconSearchPath)
+	{
+		icon = GetStyleManager()->SearchImageResource(iconSearchPath);
+	}
+
 	void CMenuItem::OnClicked()
 	{
 
@@ -51,6 +64,8 @@ namespace CE::Widgets
     {
 		auto rect = GetComputedLayoutRect();
 		auto padding = GetComputedLayoutPadding();
+
+		f32 centerY = (rect.min.y + rect.max.y) / 2;
 
 		DrawDefaultBackground();
 
@@ -67,23 +82,29 @@ namespace CE::Widgets
 			isInteractable = true;
 		}
 
-		GUI::Text(rect + Rect(padding.left, padding.top, -padding.right, -padding.bottom), text, defaultStyleState);
+		f32 iconOffset = 0;
+		f32 iconSize = 14;
+		if (!IsInsideMenuBar())
+			iconOffset = 18;
 
-		if (HasSubMenu() && !IsInsideMenuBar())
+		GUI::Text(rect + Rect(padding.left + iconOffset, padding.top, -padding.right + iconOffset, -padding.bottom), text, defaultStyleState);
+
+		if (icon.IsValid())
 		{
-			//const f32 arrowSize = GUI::GetFontSize() * 0.7f;
-			//f32 arrowPosX = rect.max.x - padding.right - arrowSize;
-			//f32 arrowPosY = (rect.min.y + rect.max.y) / 2 - arrowSize / 2;
-			//Rect arrowRect = GUI::WindowRectToGlobalRect(Rect(arrowPosX, arrowPosY, arrowPosX + arrowSize, arrowPosY + arrowSize));
+			Rect iconRect = Rect(rect.left + padding.left, centerY - iconSize / 2,
+				rect.left + padding.left + iconSize, centerY + iconSize / 2);
+			GUI::Image(iconRect, icon.id, {});
+		}
 
-			//GUI::FillArrow(Vec2(arrowRect.x, arrowRect.y), defaultStyleState.foreground, GUI::Dir_Right, arrowSize);
+		if (HasSubMenu() && !IsInsideMenuBar() && rightArrowIcon.IsValid())
+		{
 			const f32 toggleSize = GUI::GetFontSize() * 0.7f;
 			f32 togglePosX = rect.max.x - padding.right - toggleSize;
 			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - toggleSize / 2;
-			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
+			Rect toggleRect = Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize);
 
-			//GUI::FillArrow(Vec2(toggleRect.x, toggleRect.y), defaultStyleState.foreground, GUI::Dir_Right, 1);
-			GUI::FillRect(toggleRect, defaultStyleState.foreground);
+			//GUI::FillRect(toggleRect, defaultStyleState.foreground);
+			GUI::Image(toggleRect, rightArrowIcon.id, {});
 		}
 		else if (IsToggleable() && IsToggled())
 		{

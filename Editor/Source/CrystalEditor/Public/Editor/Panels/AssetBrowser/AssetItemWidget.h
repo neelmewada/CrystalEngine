@@ -30,7 +30,7 @@ namespace CE::Editor
 
 		GUI::GuiStyleState selected{};
 
-		//CTexture icon{};
+		CTexture icon{};
     };
     
 } // namespace CE

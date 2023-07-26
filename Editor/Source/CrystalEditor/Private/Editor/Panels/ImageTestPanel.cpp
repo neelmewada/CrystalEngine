@@ -73,6 +73,10 @@ namespace CE::Editor
 				this->screenSize = RHI::gDynamicRHI->GetScreenSizeForWindow(this->platformHandle);
 			}
 
+			auto topLeftPos = GUI::GetCursorPos();
+			GUI::PushZeroingChildCoordinateSpace();
+			GUI::PushChildCoordinateSpace(Rect(5, 10, 0, 0));
+
 			if (IsDockSpaceWindow())
 			{
 				if (dockSpaceId.IsEmpty())
@@ -96,10 +100,13 @@ namespace CE::Editor
 
 			if (icon.IsValid())
 			{
-				Rect rect = Rect(windowPos + Vec2(50, 50), windowPos + Vec2(150, 150));
+				Rect rect = Rect(Vec2(), Vec2(150, 150));
 
 				GUI::Image(rect, icon.id, {});
 			}
+
+			GUI::PopChildCoordinateSpace();
+			GUI::PopChildCoordinateSpace();
 
 			GUI::EndWindow();
 

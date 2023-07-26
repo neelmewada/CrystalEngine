@@ -64,6 +64,8 @@ namespace CE::Widgets
 		CStyleSheet* globalStyleSheet = nullptr;
 		String globalStyleSheetText = "";
 
+		RHI::Sampler* imageSampler = nullptr;
+
 		friend class CWidget;
     };
     

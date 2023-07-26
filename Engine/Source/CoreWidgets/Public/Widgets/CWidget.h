@@ -129,6 +129,8 @@ namespace CE::Widgets
 		void SetStyleSheet(const String& stylesheet);
 		const String& GetStyleSheet() const;
 
+		void LoadStyleSheet(const Name& resourcePath);
+
 		inline CStyleSheet* GetStyleSheetObject() const { return stylesheet; }
 
 		bool IsHovered() const { return isHovered; }
@@ -195,6 +197,7 @@ namespace CE::Widgets
 
 		void FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius = {});
 		void DrawRect(const Color& color, const Rect& localRect, f32 borderThickness = 1.0f, const Vec4& borderRadius = {});
+		void DrawImage(const CTexture& image, const Rect& localRect, const Color& tintColor = Color::White());
 		
 		inline void DrawDefaultBackground()
 		{

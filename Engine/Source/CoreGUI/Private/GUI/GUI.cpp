@@ -429,10 +429,7 @@ namespace CE::GUI
 		if (window->SkipItems)
 			return;
 
-		Rect rect = localRect;//ToWindowCoordinateSpace(localRect);
-		//ImVec2 size = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
-
-		//GUI::SetCursorPos(rect.min);
+		Rect rect = WindowRectToGlobalRect(localRect);
 
 		ImRect bb(rect.min.x, rect.min.y, rect.max.x, rect.max.y);
 

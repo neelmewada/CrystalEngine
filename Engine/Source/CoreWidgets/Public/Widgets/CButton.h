@@ -20,6 +20,9 @@ namespace CE::Widgets
 		void SetText(const String& text);
 		const String& GetText() const;
 
+		void LoadIcon(const String& resourceSearchPath);
+		void RemoveIcon();
+
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
 		inline bool IsAlternateStyle() const { return isAlternateStyleButton; }
@@ -45,6 +48,8 @@ namespace CE::Widgets
 
 		FIELD()
 		String text{};
+
+		CTexture icon{};
 
 		FIELD()
 		b8 isAlternateStyleButton = false;

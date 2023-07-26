@@ -130,6 +130,7 @@ namespace CE::Editor
 			{
 				auto addButton = CreateWidget<CButton>(topBarLayout, "AddButton");
 				addButton->SetText("Add");
+				addButton->LoadIcon("/Icons/plus_green.png");
 
 				auto searchBox = CreateWidget<CTextInput>(topBarLayout, "SearchBox");
 				searchBox->SetHint("Search...");
@@ -154,6 +155,7 @@ namespace CE::Editor
 
 						auto menuItem = CreateWidget<CMenuItem>(settingsButtonMenu, "MenuItem");
 						menuItem->SetText(String::Format("Item No. {}", i));
+						menuItem->LoadIcon("/Icons/folder_32.png");
 
 						if (i == 3)
 						{
