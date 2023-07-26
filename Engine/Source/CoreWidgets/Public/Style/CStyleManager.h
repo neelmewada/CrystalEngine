@@ -4,6 +4,21 @@ namespace CE::Widgets
 {
     typedef void* CTextureID;
 
+	struct CTexture
+	{
+		Vec2i size{};
+		u32 numChannels = 4;
+		CTextureID id = nullptr;
+
+		inline bool IsValid() const
+		{
+			return id != nullptr && numChannels > 0 && size.x > 0 && size.y > 0;
+		}
+
+		RHI::Texture* texture = nullptr;
+		RHI::Sampler* textureSampler = nullptr;
+	};
+
     CLASS()
     class COREWIDGETS_API CStyleManager : public Object
     {
@@ -12,6 +27,8 @@ namespace CE::Widgets
         
         CStyleManager();
         virtual ~CStyleManager();
+
+		void PreShutdown();
 
 		inline CStyleSheet* GetGlobalStyleSheet() const
 		{
@@ -29,17 +46,18 @@ namespace CE::Widgets
 		void AddResourceSearchModule(const String& moduleName);
 		void RemoveResourceSearchModule(const String& moduleName);
 
+		/// Search for resource in the search module paths
+		Resource* SearchResource(const String& resourceSearchPath);
+
 		/// Searches for image in search modules
-        CTextureID SearchImageResource(const String& resourceSearchPath);
+		CTexture SearchImageResource(const String& resourceSearchPath);
 
 		void LoadStyleSheet(const Name& resourcePath, CStyleSheet* styleSheet);
 		String LoadStyleSheet(const Name& resourcePath);
         
     private:
-
-		Resource* LoadResourceInternal(const String& resourceSearchPath);
         
-		HashMap<Name, CTextureID> loadedImages{};
+		HashMap<Name, CTexture> loadedImages{};
 		HashMap<Name, Resource*> loadedResources{};
 		Array<String> resourceSearchModules{};
 		
@@ -51,5 +69,13 @@ namespace CE::Widgets
     
 } // namespace CE::Widgets
 
+namespace CE
+{
+	template<>
+	FORCE_INLINE SIZE_T GetHash<Widgets::CTexture>(const CTexture& value)
+	{
+		return (SIZE_T)value.id;
+	}
+}
 
 #include "CStyleManager.rtti.h"

@@ -423,6 +423,26 @@ namespace CE::GUI
 		ImGui::ShowDemoWindow(open);
 	}
 
+	COREGUI_API void Image(const Rect& localRect, GuiTextureID textureId, const GuiStyleState& style, const Vec2& uvMin, const Vec2& uvMax)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+
+		Rect rect = localRect;//ToWindowCoordinateSpace(localRect);
+		//ImVec2 size = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+
+		//GUI::SetCursorPos(rect.min);
+
+		ImRect bb(rect.min.x, rect.min.y, rect.max.x, rect.max.y);
+
+		//ImGui::ItemSize(bb);
+		//if (!ImGui::ItemAdd(bb, 0))
+		//	return;
+
+		window->DrawList->AddImage(textureId, bb.Min, bb.Max, ImVec2(uvMin.x, uvMin.y), ImVec2(uvMax.x, uvMax.y));
+	}
+
 	COREGUI_API void Text(const Rect& localRect, const String& text, const GuiStyleState& style)
 	{
 		GUI::Text(localRect, text.GetCString(), style);

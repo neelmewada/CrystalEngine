@@ -89,8 +89,11 @@ namespace CE::GUI
 
 	COREGUI_API void ShowDemoWindow(bool* open = nullptr);
 
-	COREGUI_API void Text(const Rect& rect, const String& text, const GuiStyleState& style);
-	COREGUI_API void Text(const Rect& rect, const char* text, const GuiStyleState& style);
+	COREGUI_API void Image(const Rect& localRect, GuiTextureID textureId, const GuiStyleState& style,
+		const Vec2& uvMin = Vec2(0, 0), const Vec2& uvMax = Vec2(1, 1));
+
+	COREGUI_API void Text(const Rect& localRect, const String& text, const GuiStyleState& style);
+	COREGUI_API void Text(const Rect& localRect, const char* text, const GuiStyleState& style);
 
 	COREGUI_API void Text(const char* text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
 	COREGUI_API void Text(const String& text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
@@ -98,7 +101,7 @@ namespace CE::GUI
 	COREGUI_API void TextColored(const char* text, const Color& color);
 	COREGUI_API void TextColored(const String& text, const Color& color);
 
-	COREGUI_API bool Button(const Rect& rect, const String& label, 
+	COREGUI_API bool Button(const Rect& localRect, const String& label,
 		const GuiStyleState& style, bool& isHovered, bool& isHeld, const Vec4& padding = {}, ButtonFlags flags = ButtonFlags::None);
 
     COREGUI_API bool Button(const String& label, const Vec2& size = Vec2(0, 0), ButtonFlags flags = ButtonFlags::None);

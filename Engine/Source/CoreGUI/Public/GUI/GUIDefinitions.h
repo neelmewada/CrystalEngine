@@ -378,9 +378,7 @@ namespace CE::GUI
 
     typedef void (*SizeCallback)(SizeCallbackData* Data); // Callback function for SetNextWindowSizeConstraints()
 
-#ifndef ImTextureID
-    typedef void* ImTextureID;          // Default: store a pointer or an integer fitting in a pointer (most renderer backends are ok with that)
-#endif
+	typedef void* GuiTextureID;
 
 
     enum DockFlags

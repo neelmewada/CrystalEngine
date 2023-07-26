@@ -87,6 +87,7 @@ namespace CE::Editor
 		}
 
 		itemWidget->SetText(node->name.GetString());
+		//itemWidget->SetIcon("Icons/folder.png");
 	}
 
 	void AssetBrowserTreeModel::SetPathTreeRootNode(PathTreeNode* rootNode)

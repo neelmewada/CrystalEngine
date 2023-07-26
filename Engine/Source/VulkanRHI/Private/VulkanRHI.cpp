@@ -421,6 +421,7 @@ namespace CE
 
     void VulkanRHI::RemoveImGuiTexture(void* imguiTexture)
     {
+		device->WaitUntilIdle();
         VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
     }
 

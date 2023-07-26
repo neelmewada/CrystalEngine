@@ -37,6 +37,7 @@ namespace CE::Widgets
 		inline void SetScreenSize(const Vec2i& size) { this->screenSize = size; }
 
 		inline Vec2 GetWindowSize() const { return windowSize; }
+		inline Vec2 GetWindowPos() const { return windowPos; }
 
 		/// Could be: HWND, SDL_Window*, etc depending on platform
 		inline void* GetPlatformHandle() const { return platformHandle; }
@@ -94,6 +95,9 @@ namespace CE::Widgets
 
 		FIELD(ReadOnly)
 		Vec2 windowSize{};
+
+		FIELD(ReadOnly)
+		Vec2 windowPos{};
 
 		FIELD()
 		b8 isDockSpaceWindow{};

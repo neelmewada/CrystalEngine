@@ -40,6 +40,7 @@ namespace CE
         : device(device), borderColor(samplerDesc.borderColor)
     {
         VkSamplerCreateInfo samplerCI{};
+		samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         samplerCI.addressModeU = ToVkSamplerAddressMode(samplerDesc.addressModeU);
         samplerCI.addressModeV = ToVkSamplerAddressMode(samplerDesc.addressModeV);
         samplerCI.addressModeW = ToVkSamplerAddressMode(samplerDesc.addressModeW);

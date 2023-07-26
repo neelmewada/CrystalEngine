@@ -10,9 +10,18 @@ namespace CE::Widgets
 
 	CStyleManager::~CStyleManager()
 	{
+		// Usually, PreShutdown should be called before shutting down ImGui
+		PreShutdown();
+	}
+
+	void CStyleManager::PreShutdown()
+	{
 		for (auto& [_, image] : loadedImages)
 		{
-            RHI::gDynamicRHI->RemoveImGuiTexture(image);
+			RHI::gDynamicRHI->RemoveImGuiTexture(image.id);
+
+			RHI::gDynamicRHI->DestroyTexture(image.texture);
+			RHI::gDynamicRHI->DestroySampler(image.textureSampler);
 		}
 		loadedImages.Clear();
 
@@ -49,13 +58,13 @@ namespace CE::Widgets
 		resourceSearchModules.Remove(moduleName);
 	}
 
-	Resource* CStyleManager::LoadResourceInternal(const String& path)
+	Resource* CStyleManager::SearchResource(const String& path)
 	{
 		ResourceManager* manager = GetResourceManager();
 
 		Resource* loadedResource = nullptr;
 
-		for (int i = 0; i < resourceSearchModules.GetSize() && loadedResource == nullptr; i++)
+		for (int i = resourceSearchModules.GetSize() - 1; i >= 0 && loadedResource == nullptr; i--)
 		{
 			Name resPath = "/" + resourceSearchModules[i] + "/Resources" + (path.StartsWith("/") ? "" : "/") + path;
             
@@ -65,7 +74,7 @@ namespace CE::Widgets
 			}
 		}
 
-		for (int i = 0; i < resourceSearchModules.GetSize() && loadedResource == nullptr; i++)
+		for (int i = resourceSearchModules.GetSize() - 1; i >= 0 && loadedResource == nullptr; i--)
 		{
 			Name resPath = "/" + resourceSearchModules[i] + "/Resources" + (path.StartsWith("/") ? "" : "/") + path;
 			loadedResource = manager->LoadResource(resPath, this);
@@ -80,24 +89,24 @@ namespace CE::Widgets
 		return loadedResource;
 	}
 
-    CTextureID CStyleManager::SearchImageResource(const String& path)
+    CTexture CStyleManager::SearchImageResource(const String& path)
 	{
-		for (int i = 0; i < resourceSearchModules.GetSize(); i++)
+		for (int i = resourceSearchModules.GetSize() - 1; i >= 0; i--)
 		{
 			Name resPath = "/" + resourceSearchModules[i] + "/Resources" + (path.StartsWith("/") ? "" : "/") + path;
-			if (loadedImages.KeyExists(resPath) && loadedImages[resPath] != nullptr)
+			if (loadedImages.KeyExists(resPath) && loadedImages[resPath].id != nullptr)
 			{
 				return loadedImages[resPath];
 			}
 		}
 
-		Resource* imageResource = LoadResourceInternal(path);
+		Resource* imageResource = SearchResource(path);
 		if (imageResource == nullptr || !imageResource->IsValid())
-			return nullptr;
+			return {};
 
 		CMImage image = CMImage::LoadFromMemory(imageResource->GetData(), imageResource->GetDataSize(), 4);
 		if (!image.IsValid())
-			return nullptr;
+			return {};
         RHI::TextureDesc desc{};
         desc.width = image.GetWidth();
         desc.height = image.GetHeight();
@@ -106,9 +115,9 @@ namespace CE::Widgets
         if (image.GetNumChannels() == 1)
             desc.format = RHI::TextureFormat::R32_SFLOAT;
         else if (image.GetNumChannels() == 3)
-            desc.format = RHI::TextureFormat::B8G8R8_SRGB;
+            desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
         else if (image.GetNumChannels() == 4)
-            desc.format = RHI::TextureFormat::R8G8B8_SRGB;
+            desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
         desc.dimension = RHI::TextureDimension::Dim2D;
         desc.mipLevels = 1;
         desc.sampleCount = 1;
@@ -118,10 +127,14 @@ namespace CE::Widgets
         if (texture == nullptr)
         {
             image.Free();
-            return nullptr;
+			return {};
         }
         
         texture->UploadData(image.GetDataPtr());
+
+		CTexture tex{};
+		tex.size = Vec2i(image.GetWidth(), image.GetHeight());
+		tex.numChannels = image.GetNumChannels();
         
         image.Free();
         
@@ -137,7 +150,7 @@ namespace CE::Widgets
         if (sampler == nullptr)
         {
             RHI::gDynamicRHI->DestroyTexture(texture);
-            return nullptr;
+			return {};
         }
         
         CTextureID textureId = RHI::gDynamicRHI->AddImGuiTexture(texture, sampler);
@@ -145,11 +158,15 @@ namespace CE::Widgets
         {
             RHI::gDynamicRHI->DestroySampler(sampler);
             RHI::gDynamicRHI->DestroyTexture(texture);
-            return nullptr;
+			return {};
         }
+		
+		tex.id = textureId;
+		tex.texture = texture;
+		tex.textureSampler = sampler;
         
-		loadedImages[imageResource->GetFullPath()] = textureId;
-		return textureId;
+		loadedImages[imageResource->GetFullPath()] = tex;
+		return tex;
 	}
 
 	void CStyleManager::LoadStyleSheet(const Name& resourcePath, CStyleSheet* styleSheet)

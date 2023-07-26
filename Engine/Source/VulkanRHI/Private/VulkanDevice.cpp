@@ -414,6 +414,11 @@ namespace CE
 		return surfaceSupport;
 	}
 
+	void VulkanDevice::WaitUntilIdle()
+	{
+		vkDeviceWaitIdle(device);
+	}
+
 	VkFormat VulkanDevice::FindSupportedFormat(const Array<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
 	{
 		for (const auto& format : candidates)
@@ -586,6 +591,7 @@ namespace CE
 		);
 
 		EndSingleUseCommandBuffer(commandBuffer);
+		SubmitAndWaitSingleUseCommandBuffer(commandBuffer);
 	}
 
 	VkCommandBuffer VulkanDevice::BeginSingleUseCommandBuffer()

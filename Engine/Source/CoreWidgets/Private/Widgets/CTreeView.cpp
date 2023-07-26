@@ -56,7 +56,18 @@ namespace CE::Widgets
 
 	Vec2 CTreeItemView::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return GUI::CalculateTextSize(label) + Vec2(10, 5);
+		f32 iconWidth = 0;
+		f32 verticalPadding = 5;
+		if (icon.IsValid())
+		{
+			iconWidth = 10;
+		}
+		return GUI::CalculateTextSize(label) + Vec2(iconWidth, 0) + Vec2(10, verticalPadding);
+	}
+
+	void CTreeItemView::SetIcon(const String& searchPath)
+	{
+		icon = GetStyleManager()->SearchImageResource(searchPath);
 	}
 
 	void CTreeItemView::OnDrawGUI()
@@ -64,10 +75,22 @@ namespace CE::Widgets
 		auto rect = GetComputedLayoutRect();
 		auto padding = GetComputedLayoutPadding();
 
-		//if (!isLeaf)
-		//	rect.x += 20;
+		f32 textPadding = 0;
+		if (icon.IsValid())
+		{
+			textPadding = 10;
+			Rect imageRect{};
+			const f32 iconSize = 10;
+			imageRect.min.x = rect.min.x + padding.left;
+			imageRect.max.x = imageRect.min.x + 10;
+			f32 centerY = (rect.min.y + rect.max.y) / 2;
+			imageRect.min.y = centerY - iconSize / 2;
+			imageRect.max.y = centerY + iconSize / 2;
 
-		GUI::Text(rect + Rect(padding.left, 0, -padding.right, 0), label, defaultStyleState);
+			GUI::Image(imageRect, icon.id, {});
+		}
+
+		GUI::Text(rect + Rect(textPadding + padding.left, 0, -padding.right, 0), label, defaultStyleState);
 	}
 
     CTreeView::CTreeView()

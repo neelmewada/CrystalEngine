@@ -11,6 +11,8 @@
 #include "Editor/Panels/AssetBrowser/AssetBrowserPanel.h"
 #include "Editor/Panels/AssetBrowser/AssetItemWidget.h"
 
+#include "Editor/Panels/ImageTestPanel.h"
+
 #include "Editor/CrystalEditorWindow.h"
 
 namespace CE

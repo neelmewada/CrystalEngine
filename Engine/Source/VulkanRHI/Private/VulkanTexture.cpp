@@ -143,6 +143,17 @@ namespace CE
         case RHI::TextureFormat::R8_SRGB:
             outByteSizePerChannel = 1;
             return 1;
+		
+		case RHI::TextureFormat::B8G8R8A8_SRGB:
+			outByteSizePerChannel = 1;
+			return 4;
+		case RHI::TextureFormat::B8G8R8A8_UNORM:
+			outByteSizePerChannel = 1;
+			return 4;
+		case RHI::TextureFormat::B8G8R8A8_SNORM:
+			outByteSizePerChannel = 1;
+			return 4;
+
         case RHI::TextureFormat::R8G8B8A8_SRGB:
             outByteSizePerChannel = 1;
             return 4;
@@ -152,6 +163,7 @@ namespace CE
         case RHI::TextureFormat::R8G8B8A8_SNORM:
             outByteSizePerChannel = 1;
             return 4;
+
         case RHI::TextureFormat::R8G8B8_UNORM:
             outByteSizePerChannel = 1;
             return 3;
@@ -161,6 +173,7 @@ namespace CE
         case RHI::TextureFormat::R8G8B8_SRGB:
             outByteSizePerChannel = 1;
             return 3;
+
         case RHI::TextureFormat::R16_UNORM:
             outByteSizePerChannel = 2;
             return 1;

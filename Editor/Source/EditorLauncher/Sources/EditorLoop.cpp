@@ -256,6 +256,7 @@ void EditorLoop::PreShutdown()
 
 	gEngine->PreShutdown();
 
+	GetStyleManager()->PreShutdown();
 	cmdList->ShutdownImGui();
 
 	gEngine->Shutdown();
@@ -273,11 +274,13 @@ void EditorLoop::PreShutdown()
 
 	AppPreShutdown();
 
+	// Shutdown core widgets before RHI device
+	ModuleManager::Get().UnloadModule("CoreWidgets");
+
 	RHI::gDynamicRHI->Shutdown();
 
 	// Unload modules
 
-	ModuleManager::Get().UnloadModule("CoreWidgets");
 	ModuleManager::Get().UnloadModule("CoreGUI");
 
 	ModuleManager::Get().UnloadModule("CoreMedia");

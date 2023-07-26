@@ -1,7 +1,8 @@
 #pragma once
 
-namespace CE::Widgets
+namespace CE::Editor
 {
+	using namespace CE::Widgets;
 
     CLASS()
     class CRYSTALEDITOR_API AssetItemWidget : public CButton
@@ -28,6 +29,8 @@ namespace CE::Widgets
 		GUI::GuiStyleState hovered{};
 
 		GUI::GuiStyleState selected{};
+
+		//CTexture icon{};
     };
     
 } // namespace CE

@@ -21,6 +21,8 @@ namespace CE::Widgets
 		inline const String& GetText() const { return label; }
 		inline void SetText(const String& text) { this->label = text; }
 
+		void SetIcon(const String& searchPath);
+
 	protected:
 
 		virtual void OnDrawGUI() override;
@@ -35,6 +37,8 @@ namespace CE::Widgets
 
 		FIELD()
 		String label = "";
+
+		CTexture icon{};
 
 		friend class CTreeView;
 	};

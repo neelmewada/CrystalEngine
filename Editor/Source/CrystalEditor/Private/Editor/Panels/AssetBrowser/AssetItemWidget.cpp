@@ -25,7 +25,7 @@ AssetItemWidget {
 }
 )";
 
-namespace CE::Widgets
+namespace CE::Editor
 {
 
     AssetItemWidget::AssetItemWidget()
@@ -50,6 +50,17 @@ namespace CE::Widgets
 	void AssetItemWidget::OnDrawGUI()
     {
 		Super::OnDrawGUI();
+
+		auto rect = GetComputedLayoutRect();
+
+		//GUI::PushChildCoordinateSpace(rect);
+
+		//if (icon.IsValid())
+		{
+			//GUI::Image(Rect(300, 300, 400, 400), icon.id, {});
+		}
+
+		//GUI::PopChildCoordinateSpace();
     }
 
 	void AssetItemWidget::HandleEvent(CEvent* event)

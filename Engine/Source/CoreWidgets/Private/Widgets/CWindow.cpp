@@ -133,6 +133,7 @@ namespace CE::Widgets
             }
             
 			auto winSize = GUI::GetWindowSize();
+			auto winPos = GUI::GetWindowPos();
 
             GUI::EndWindow();
 
@@ -148,6 +149,7 @@ namespace CE::Widgets
 			}
 
 			this->windowSize = winSize;
+			this->windowPos = winPos;
 
 			PollEvents();
 

@@ -32,6 +32,8 @@ namespace CE
 
         // - Public API -
 
+		void WaitUntilIdle();
+
         VkFormat FindSupportedFormat(const Array<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
         VkSurfaceFormatKHR FindAutoColorFormat();
