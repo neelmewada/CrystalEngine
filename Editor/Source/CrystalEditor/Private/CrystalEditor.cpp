@@ -1,8 +1,6 @@
 
 #include "CrystalEditor.h"
 
-#include "CrystalEditor.private.h"
-
 namespace CE
 {
     class CrystalEditorModule : public CE::Module
@@ -25,4 +23,6 @@ namespace CE
     };
 }
 
+#include "CrystalEditor.private.h"
+#include "Resource.h"
 CE_IMPLEMENT_MODULE(CrystalEditor, CE::CrystalEditorModule)

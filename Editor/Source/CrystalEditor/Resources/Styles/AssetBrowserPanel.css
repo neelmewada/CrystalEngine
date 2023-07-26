@@ -1,0 +1,76 @@
+
+AssetBrowserPanel {
+	padding: 0 25px 0 0;
+	position: absolute;
+	top: 0; left: 0; bottom: 0; right: 0;
+	flex-direction: row;
+}
+
+#LeftContainer {
+	width: 25%;
+	min-width: 200px;
+	height: 100%;
+	padding: 10px 5px 20px 5px;
+	background: rgb(26, 26, 26);
+	flex-direction: column;
+	justify-content: flex-start;
+}
+
+#RightContainer {
+	padding: 0px 0px;
+	width: 75%;
+	height: 100%;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: stretch;
+}
+
+CTreeView {
+	padding: 0px 10px;
+}
+
+CTreeView > CTreeItemView {
+	text-align: middle-left;
+	font-size: 18px;
+	height: 22px;
+}
+
+CTreeView > CTreeItemView:hovered {
+	background: rgb(43, 50, 58);
+}
+
+CTreeView > CTreeItemView:active {
+	background: rgb(6, 66, 126);
+}
+
+#TopBarLayout {
+	padding: 10px 3px;
+	height: 40px;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	column-gap: 15px;
+}
+
+#SearchBox {
+	width: 160px;
+	height: 26px;
+}
+
+#AssetGridView {
+	width: 100%;
+	flex-grow: 1;
+	flex-shrink: 3;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	align-self: stretch;
+	padding: 10px 10px;
+	row-gap: 20px;
+	column-gap: 20px;
+}
+
+#AddButton::icon {
+    background-image: url(/Icons/plus_green.png);
+}
+
