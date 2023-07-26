@@ -5,12 +5,12 @@ namespace CE::Widgets
 
 	CStyleManager::CStyleManager()
 	{
-		globalStyleSheet = CreateObject<CSSStyleSheet>(this, "GlobalStyleSheet");
+		globalStyleSheet = CreateDefaultSubobject<CSSStyleSheet>("GlobalStyleSheet");
 	}
 
 	CStyleManager::~CStyleManager()
 	{
-		// Usually, PreShutdown should be called before shutting down ImGui
+		// PreShutdown should be called before shutting down ImGui and before destroying CStyleManager
 		PreShutdown();
 	}
 
@@ -147,9 +147,9 @@ namespace CE::Widgets
 		if (imageSampler == nullptr)
 		{
 			RHI::SamplerDesc samplerDesc{};
-			samplerDesc.addressModeU = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
-			samplerDesc.addressModeV = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
-			samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_REPEAT;
+			samplerDesc.addressModeU = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			samplerDesc.addressModeV = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 			samplerDesc.enableAnisotropy = true;
 			samplerDesc.maxAnisotropy = 8;
 			samplerDesc.filterMode = RHI::SAMPLER_FILTER_LINEAR;

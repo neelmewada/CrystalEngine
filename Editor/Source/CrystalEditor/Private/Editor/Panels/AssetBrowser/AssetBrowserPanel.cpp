@@ -77,6 +77,10 @@ CTreeView > CTreeItemView:active {
 	column-gap: 20px;
 }
 
+#AddButton::icon {
+    background-image: url(/Icons/plus_green.png);
+}
+
 
 )";
 
@@ -130,7 +134,7 @@ namespace CE::Editor
 			{
 				auto addButton = CreateWidget<CButton>(topBarLayout, "AddButton");
 				addButton->SetText("Add");
-				addButton->LoadIcon("/Icons/plus_green.png");
+				//addButton->LoadIcon("/Icons/plus_green.png");
 
 				auto searchBox = CreateWidget<CTextInput>(topBarLayout, "SearchBox");
 				searchBox->SetHint("Search...");

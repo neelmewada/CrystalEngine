@@ -18,6 +18,7 @@ namespace CE::Widgets
 		PeriodToken,
 		PlusSignToken, MinusSignToken,
 		PercentageToken,
+        FwdSlashToken,
 		CurlyOpenToken, CurlyCloseToken,
 		SquareOpenToken, SquareCloseToken,
 		ParenOpenToken, ParenCloseToken,

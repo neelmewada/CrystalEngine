@@ -187,6 +187,7 @@ namespace CE::Widgets
 		{ "foreground-color", CStylePropertyType::Foreground },
 		{ "background", CStylePropertyType::Background },
 		{ "background-color", CStylePropertyType::Background },
+        { "background-image", CStylePropertyType::BackgroundImage },
 		{ "border-radius", CStylePropertyType::BorderRadius },
 		{ "border-width", CStylePropertyType::BorderWidth },
 		{ "border-color", CStylePropertyType::BorderColor },

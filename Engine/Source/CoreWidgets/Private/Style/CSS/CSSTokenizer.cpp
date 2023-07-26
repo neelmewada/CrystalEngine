@@ -70,6 +70,8 @@ namespace CE::Widgets
 			break;
 		case '%':
 			return prevToken = { PercentageToken, "%", line, positionInLine };
+        case '/':
+            return prevToken = { FwdSlashToken, "/", line, positionInLine };
 		case '\"':
 		{
 			String stringLiteral = "";

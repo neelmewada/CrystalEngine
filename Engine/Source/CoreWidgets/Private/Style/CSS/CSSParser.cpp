@@ -372,7 +372,43 @@ namespace CE::Widgets
 
 		if (current->type == IdentifierToken)
 		{
-			if (current->lexeme == "rgb" || current->lexeme == "rgba")
+            if (current->lexeme == "url")
+            {
+                String url = "";
+                
+                current = &tokens[cursor];
+                if (current->type == WhitespaceToken)
+                {
+                    cursor++;
+                    current = &tokens[cursor];
+                }
+                if (!avail() || current->type != ParenOpenToken)
+                {
+                    returnFailure("No parenthesis found after rgb/rgba token", current);
+                    return;
+                }
+                
+                cursor++;
+                bool endReached = false;
+                while (cursor < tokens.GetSize())
+                {
+                    if (tokens[cursor].type == ParenCloseToken)
+                    {
+                        endReached = true;
+                    }
+                    else if (tokens[cursor].type == SemiColonToken)
+                    {
+                        break;
+                    }
+                    
+                    if (!endReached)
+                        url += tokens[cursor].lexeme;
+                    cursor++;
+                }
+                
+                outValue = String(url);
+            }
+			else if (current->lexeme == "rgb" || current->lexeme == "rgba")
 			{
 				Color color{};
 				color.a = 1.0f;

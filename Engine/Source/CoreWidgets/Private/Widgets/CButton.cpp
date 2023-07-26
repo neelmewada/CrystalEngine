@@ -32,7 +32,7 @@ namespace CE::Widgets
 		return text;
 	}
 
-	void CButton::LoadIcon(const String& resourceSearchPath)
+	/*void CButton::LoadIcon(const String& resourceSearchPath)
 	{
 		icon = GetStyleManager()->SearchImageResource(resourceSearchPath);
 		SetNeedsStyle();
@@ -42,7 +42,19 @@ namespace CE::Widgets
 	void CButton::RemoveIcon()
 	{
 		icon = {};
-	}
+	}*/
+
+    void CButton::OnBeforeComputeStyle()
+    {
+        Super::OnBeforeComputeStyle();
+        
+        CStyle style = stylesheet->SelectStyle(this, CStateFlag::Default, CSubControl::Icon);
+        CStyleValue bgImageValue = style.properties[CStylePropertyType::BackgroundImage];
+        if (bgImageValue.IsValid() && bgImageValue.IsString())
+        {
+            icon = GetStyleManager()->SearchImageResource(bgImageValue.string);
+        }
+    }
 
 	Vec2 CButton::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
@@ -76,7 +88,7 @@ namespace CE::Widgets
 
 		if (icon.IsValid())
 		{
-			constexpr f32 iconSize = 16;
+			constexpr f32 iconSize = 14;
 			f32 centerY = (rect.max.y - rect.min.y) / 2;
 			Rect iconRect{ padding.left, centerY - iconSize / 2,
 				padding.left + iconSize, centerY + iconSize / 2 };

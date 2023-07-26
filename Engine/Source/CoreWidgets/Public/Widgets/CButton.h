@@ -20,8 +20,10 @@ namespace CE::Widgets
 		void SetText(const String& text);
 		const String& GetText() const;
 
-		void LoadIcon(const String& resourceSearchPath);
-		void RemoveIcon();
+		//void LoadIcon(const String& resourceSearchPath);
+		//void RemoveIcon();
+        
+        void OnBeforeComputeStyle() override;
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 

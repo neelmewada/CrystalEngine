@@ -63,6 +63,7 @@ namespace CE::Widgets
 		Left, Top, Right, Bottom,
 		Foreground, // Inherited
 		Background,
+        BackgroundImage,
 		BorderRadius,
 		BorderWidth,
 		BorderColor,
