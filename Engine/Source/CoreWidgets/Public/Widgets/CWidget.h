@@ -83,6 +83,7 @@ namespace CE::Widgets
         WidgetFlags GetWidgetFlags() const;
 
 		inline CStateFlag GetStateFlags() const { return stateFlags; }
+		inline void SetStateFlags(CStateFlag flags) { stateFlags = flags; }
 
 		inline YGNodeRef GetNode() const { return node; }
 
@@ -105,20 +106,25 @@ namespace CE::Widgets
 
 		inline void AddStyleClass(const String& styleClass)
 		{
-			styleClasses.Add(styleClass);
-			SetNeedsStyle();
+			if (!StyleClassExists(styleClass))
+			{
+				styleClasses.Add(styleClass);
+				SetNeedsStyle();
+			}
 		}
 
 		inline void AddStyleClasses(const Array<String>& styleClasses)
 		{
-			this->styleClasses.AddRange(styleClasses);
-			SetNeedsStyle();
+			for (const auto& styleClass : styleClasses)
+			{
+				AddStyleClass(styleClass);
+			}
 		}
 
 		inline void RemoveStyleClass(const String& styleClass)
 		{
-			styleClasses.Remove(styleClass);
-			SetNeedsStyle();
+			if (styleClasses.Remove(styleClass))
+				SetNeedsStyle();
 		}
 
 		inline bool StyleClassExists(const String& styleClass) const
@@ -148,12 +154,13 @@ namespace CE::Widgets
 		CWindow* GetOwnerWindow();
 
 		int GetSubWidgetIndex(CWidget* siblingWidget);
-
 		int GetSubWidgetCount();
 
 		CWidget* FindSubWidget(const Name& name);
-
 		CWidget* GetSubWidgetAt(int index);
+
+		void AddSubWidget(CWidget* subWidget);
+		void RemoveSubWidget(CWidget* subWidget);
 
 		virtual bool IsSubWidgetAllowed(ClassType* subWidgetClass);
 
@@ -191,6 +198,8 @@ namespace CE::Widgets
 		void LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState);
 
 		// Draw Helpers
+		void DrawShadow(const GUI::GuiStyleState& styleState);
+		void DrawShadow(const GUI::GuiStyleState& styleState, const Rect& localRect);
 
 		void DrawBackground(const GUI::GuiStyleState& styleState);
 		void DrawBackground(const GUI::GuiStyleState& styleState, const Rect& localRect);

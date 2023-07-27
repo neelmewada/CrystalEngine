@@ -34,7 +34,7 @@ namespace CE::Editor
 
 		PathTreeNode* rootNode = nullptr;
 	};
-    
+
 } // namespace CE::Editor
 
 #include "AssetBrowserModel.rtti.h"

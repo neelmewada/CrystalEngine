@@ -32,18 +32,6 @@ namespace CE::Widgets
 		return text;
 	}
 
-	/*void CButton::LoadIcon(const String& resourceSearchPath)
-	{
-		icon = GetStyleManager()->SearchImageResource(resourceSearchPath);
-		SetNeedsStyle();
-		SetNeedsLayout();
-	}
-
-	void CButton::RemoveIcon()
-	{
-		icon = {};
-	}*/
-
     void CButton::OnBeforeComputeStyle()
     {
         Super::OnBeforeComputeStyle();
@@ -79,6 +67,8 @@ namespace CE::Widgets
 		f32 iconOffset = 0;
 		if (icon.IsValid())
 			iconOffset = 10;
+
+		DrawShadow(defaultStyleState);
 
 		bool hovered = false, held = false;
 		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding + Rect(iconOffset, 0, 0, 0));

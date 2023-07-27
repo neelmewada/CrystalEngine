@@ -10,7 +10,19 @@ namespace CE
 
 	struct CORE_API PathTreeNode
 	{
+		PathTreeNode() = default;
 		~PathTreeNode();
+
+		PathTreeNode(const PathTreeNode& copy)
+		{
+			Clone(copy);
+		}
+
+		inline PathTreeNode& operator=(const PathTreeNode& copy)
+		{
+			Clone(copy);
+			return *this;
+		}
 
 		bool ChildExists(const String& name);
 
@@ -19,7 +31,11 @@ namespace CE
 
 		PathTreeNode* GetChild(const String& name);
 
+		String GetFullPath();
+
 		void RemoveAll();
+
+		void Clone(const PathTreeNode& copy);
 
 		inline bool IsTerminal() const
 		{

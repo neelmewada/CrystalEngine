@@ -11,6 +11,11 @@ namespace CE
 		AssetRegistry();
 		virtual ~AssetRegistry();
 
+		inline PathTree& GetCachedDirectoryPathTree()
+		{
+			return directoryTree;
+		}
+
 		inline PathTree& GetCachedPathTree()
 		{
 			return pathTree;
@@ -20,6 +25,7 @@ namespace CE
 
 	private:
 
+		PathTree directoryTree{};
 		PathTree pathTree{};
 
 		b8 pathTreeCached = false;

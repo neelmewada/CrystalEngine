@@ -191,6 +191,8 @@ namespace CE::Widgets
 		{ "border-radius", CStylePropertyType::BorderRadius },
 		{ "border-width", CStylePropertyType::BorderWidth },
 		{ "border-color", CStylePropertyType::BorderColor },
+		{ "shadow", CStylePropertyType::ShadowColor }, { "box-shadow", CStylePropertyType::ShadowColor }, { "shadow-color", CStylePropertyType::ShadowColor },
+		{ "shadow-offset", CStylePropertyType::ShadowOffset },
 		{ "text-align", CStylePropertyType::TextAlign },
 		{ "width", CStylePropertyType::Width },
 		{ "height", CStylePropertyType::Height },

@@ -433,10 +433,6 @@ namespace CE::GUI
 
 		ImRect bb(rect.min.x, rect.min.y, rect.max.x, rect.max.y);
 
-		//ImGui::ItemSize(bb);
-		//if (!ImGui::ItemAdd(bb, 0))
-		//	return;
-
 		window->DrawList->AddImage(textureId, bb.Min, bb.Max, ImVec2(uvMin.x, uvMin.y), ImVec2(uvMax.x, uvMax.y));
 	}
 
@@ -526,7 +522,60 @@ namespace CE::GUI
 
 			ImGui::PushStyleColor(StyleCol_Text, style.foreground.ToU32());
 			ImGui::RenderTextClipped(bb.Min, bb.Max, text_begin, text_end, &text_size, align);
+			
+			//ImVec4 clipRect = bb.ToVec4();
+			//window->DrawList->AddText(g.Font, g.FontSize, bb.Min, style.foreground.ToU32(), text, text_end, rect.right - rect.left);
+
 			ImGui::PopStyleColor(1);
+		}
+	}
+
+	COREGUI_API void TextWrapped(const Rect& localRect, const String& text, const GuiStyleState& style)
+	{
+		return GUI::TextWrapped(localRect, text.GetCString(), style);
+	}
+
+	COREGUI_API void TextWrapped(const Rect& localRect, const char* text, const GuiStyleState& style)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+		ImGuiContext& g = *GImGui;
+
+		Rect rect = ToWindowCoordinateSpace(localRect);
+
+		const char* text_end = NULL;
+
+		// Accept null ranges
+		if (text == text_end)
+			text = text_end = "";
+		ImGuiTextFlags flags = ImGuiTextFlags_None;
+
+		// Calculate length
+		const char* text_begin = text;
+		if (text_end == NULL)
+			text_end = text + strlen(text); // FIXME-OPT
+
+		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
+
+		ImVec2 inSize = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+
+		const ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+		const float wrap_pos_x = window->DC.TextWrapPos;
+		const bool wrap_enabled = (wrap_pos_x >= 0.0f);
+		//if (text_end - text <= 2000)
+		{
+			// Common case
+			//const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
+			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);// , wrap_width);
+
+			ImRect bb(text_pos, text_pos + inSize);
+			ImGui::ItemSize(inSize, 0.0f);
+			if (!ImGui::ItemAdd(bb, 0))
+				return;
+
+			ImVec4 clipRect = bb.ToVec4();
+			window->DrawList->AddText(g.Font, g.FontSize, bb.Min, style.foreground.ToU32(), text, text_end, rect.right - rect.left);
 		}
 	}
 

@@ -736,6 +736,9 @@ namespace CE::GUI
 		// Color
 		Color background{};
 		Color foreground = Color::White();
+		// Shadow
+		Color shadowColor{};
+		Vec2 shadowOffset{};
 		// Text
 		TextAlign textAlign = TextAlign_MiddleCenter;
 		u32 fontSize = 16;

@@ -67,6 +67,9 @@ namespace CE::Widgets
 		inline bool AreItemsSelectable() const { return selectableItems; }
 		inline void SetItemsSelectable(bool set) { selectableItems = set; }
 
+		inline CModelIndex GetSelectedIndex() const { return selectedIndex; }
+		void Select(const CModelIndex& index);
+
     protected:
 
         virtual void OnDrawGUI() override;

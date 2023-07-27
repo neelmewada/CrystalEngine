@@ -89,6 +89,39 @@ namespace CE::Widgets
 		{
 			outState.fontName = styleValue.string;
 		}
+		else if (property == CStylePropertyType::ShadowColor && styleValue.IsColor())
+		{
+			outState.shadowColor = styleValue.color;
+		}
+		else if (property == CStylePropertyType::ShadowOffset && styleValue.IsVector())
+		{
+			outState.shadowOffset = Vec2(styleValue.vector.x, styleValue.vector.y);
+		}
+	}
+
+	void CWidget::DrawShadow(const GUI::GuiStyleState& styleState)
+	{
+		bool hasShadow = styleState.shadowColor.a > 0 && (styleState.shadowOffset.x != 0 || styleState.shadowOffset.y != 0);
+		if (!hasShadow)
+			return;
+
+		auto localRect = GetComputedLayoutRect();
+		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+
+		const auto& shadowOffset = styleState.shadowOffset;
+		GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
+	}
+
+	void CWidget::DrawShadow(const GUI::GuiStyleState& styleState, const Rect& localRect)
+	{
+		bool hasShadow = styleState.shadowColor.a > 0 && (styleState.shadowOffset.x != 0 || styleState.shadowOffset.y != 0);
+		if (!hasShadow)
+			return;
+
+		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+
+		const auto& shadowOffset = styleState.shadowOffset;
+		GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
 	}
 
 	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState)
@@ -97,7 +130,13 @@ namespace CE::Widgets
 
 		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
 		f32 borderWidth = styleState.borderThickness;
+		bool hasShadow = styleState.shadowColor.a > 0 && (styleState.shadowOffset.x != 0 || styleState.shadowOffset.y != 0);
 
+		if (hasShadow)
+		{
+			const auto& shadowOffset = styleState.shadowOffset;
+			GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
+		}
 		if (styleState.background.a > 0)
 		{
 			GUI::FillRect(globalRect, styleState.background, styleState.borderRadius);
@@ -112,7 +151,13 @@ namespace CE::Widgets
 	{
 		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
 		f32 borderWidth = styleState.borderThickness;
+		bool hasShadow = styleState.shadowColor.a > 0 && (styleState.shadowOffset.x != 0 || styleState.shadowOffset.y != 0);
 
+		if (hasShadow)
+		{
+			const auto& shadowOffset = styleState.shadowOffset;
+			GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
+		}
 		if (styleState.background.a > 0)
 		{
 			GUI::FillRect(globalRect, styleState.background, styleState.borderRadius);
@@ -1216,6 +1261,22 @@ namespace CE::Widgets
 			return nullptr;
 		return attachedWidgets[index];
 	}
+
+    void CWidget::AddSubWidget(CWidget* subWidget)
+    {
+		AttachSubobject(subWidget);
+
+		SetNeedsStyle();
+		SetNeedsLayout();
+    }
+
+    void CWidget::RemoveSubWidget(CWidget* subWidget)
+    {
+		DetachSubobject(subWidget);
+
+		SetNeedsStyle();
+		SetNeedsLayout();
+    }
 
 	bool CWidget::IsSubWidgetAllowed(ClassType* subWidgetClass)
 	{

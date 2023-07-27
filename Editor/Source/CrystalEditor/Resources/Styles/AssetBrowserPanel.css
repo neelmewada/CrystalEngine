@@ -66,8 +66,8 @@ CTreeView > CTreeItemView:active {
 	align-items: flex-start;
 	align-self: stretch;
 	padding: 10px 10px;
-	row-gap: 20px;
-	column-gap: 20px;
+	row-gap: 10px;
+	column-gap: 10px;
 }
 
 #AddButton::icon {

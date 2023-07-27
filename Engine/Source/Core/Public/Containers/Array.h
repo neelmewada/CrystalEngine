@@ -512,16 +512,18 @@ namespace CE
             }
         }
 
-        void Remove(const ElementType& item)
+        bool Remove(const ElementType& item)
         {
             for (int i = 0; i < GetSize(); i++)
             {
                 if (Super::Impl[i] == item)
                 {
                     Super::Impl.erase(Super::Impl.begin() + i);
-                    return;
+                    return true;
                 }
             }
+
+			return false;
         }
 
         void RemoveAll(std::function<bool(const ElementType& item)> pred)

@@ -35,4 +35,33 @@ namespace CE::Widgets
 		return CModelIndex(row, col, this, data);
 	}
 
+	CModelIndex CDataModel::FindIndex(void* internalData, const CModelIndex& parent)
+	{
+		if (internalData == nullptr)
+			return CModelIndex();
+
+		int rowCount = GetRowCount(parent);
+		int colCount = GetColumnCount(parent);
+		if (rowCount == 0 || colCount == 0)
+			return CModelIndex();
+
+		for (int r = 0; r < rowCount; r++)
+		{
+			for (int c = 0; c < colCount; c++)
+			{
+				CModelIndex cellIndex = GetIndex(c, r, parent);
+				if (!cellIndex.IsValid())
+					continue;
+				if (cellIndex.GetInternalData() == internalData)
+					return cellIndex;
+				
+				CModelIndex childSearch = FindIndex(internalData, cellIndex);
+				if (childSearch.IsValid() && childSearch.GetInternalData() == internalData)
+					return childSearch;
+			}
+		}
+
+		return CModelIndex();
+	}
+
 } // namespace CE::Widgets

@@ -89,7 +89,7 @@ namespace CE
 
     void Object::AttachSubobject(Object* subobject)
     {
-        if (subobject == nullptr)
+        if (subobject == nullptr || attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
@@ -105,15 +105,18 @@ namespace CE
 
     void Object::DetachSubobject(Object* subobject)
     {
-        if (subobject == nullptr)
+        if (subobject == nullptr || !attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
+
         subobject->outer = nullptr;
         attachedObjects.RemoveObject(subobject);
+
 		auto package = GetPackage();
 		if (package != nullptr)
 		{
 			package->loadedObjects.Remove(subobject->GetUuid());
 		}
+
 		OnSubobjectDetached(subobject);
     }
 

@@ -1,0 +1,53 @@
+
+AssetItemWidget {
+    color: white;
+    background: rgba(0, 0, 0, 0);
+	border-radius: 5px;
+	border-width: 1.5px;
+	border-color: rgba(0, 0, 0, 0);
+    text-align: top-center;
+}
+
+AssetItemWidget:hovered {
+    background: rgb(47, 47, 47);
+	border-color: rgba(0, 0, 0, 0);
+}
+
+AssetItemWidget.Selected {
+    background: rgb(47, 47, 47);
+    border-color: rgba(0, 112, 224, 255);
+}
+
+AssetItemWidget:pressed {
+    background: rgb(47, 47, 47);
+	border-color: rgba(0, 112, 224, 180);
+}
+
+AssetItemWidget.Asset {
+    background: rgb(26, 26, 26);
+    text-align: top-left;
+    box-shadow: rgb(20, 20, 20);
+    shadow-offset: 1.5px 1.5px;
+}
+
+AssetItemWidget.Asset::alternate {
+    background: rgb(47, 47, 47);
+}
+
+AssetItemWidget.Asset:hovered {
+    border-color: rgb(71, 71, 71);
+}
+
+AssetItemWidget.Asset.Selected {
+    border-color: rgba(0, 112, 224, 255);
+}
+
+AssetItemWidget.Asset:pressed {
+	border-color: rgba(0, 112, 224, 180);
+}
+
+AssetItemWidget {
+    height: 125px;
+    width: 90px;
+}
+

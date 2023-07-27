@@ -16,7 +16,23 @@ namespace CE::Editor
 
 		bool IsContainer() override { return true; }
 
+		inline bool IsAsset() const { return isAssetItem; }
+		inline bool IsFolder() const { return !isAssetItem; }
+
+		inline const Name& GetPath() const { return path; }
+		inline void SetPath(const Name& path) { this->path = path; }
+
+		void SetAsFolder();
+		void SetAsAsset();
+
+		inline const String& GetLabel() const { return label; }
+		inline void SetLabel(const String& label) { this->label = label; }
+
+		CE_SIGNAL(OnItemDoubleClicked);
+
     protected:
+
+		void OnBeforeComputeStyle() override;
 
 		void Construct() override;
 
@@ -24,13 +40,22 @@ namespace CE::Editor
 
 		void HandleEvent(CEvent* event) override;
 
+		void OnClicked() override;
+
 	private:
 
-		GUI::GuiStyleState hovered{};
+		FIELD()
+		String label{};
 
+		GUI::GuiStyleState hovered{};
 		GUI::GuiStyleState selected{};
 
 		CTexture icon{};
+
+		Name path{};
+		Color bottomFrameColor{};
+
+		b8 isAssetItem = false;
     };
     
 } // namespace CE

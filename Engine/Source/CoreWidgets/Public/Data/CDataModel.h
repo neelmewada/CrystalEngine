@@ -69,9 +69,12 @@ namespace CE::Widgets
 
 		virtual f32 GetCellHeight(const CModelIndex& index) { return 20; }
 
+		virtual void OnIndexSelected(const CModelIndex& index) {}
+
 		CModelIndex CreateIndex(u32 row, u32 col, void* data = nullptr);
 
-		virtual void OnIndexSelected(const CModelIndex& index) {}
+		/// Finds the index with matching internal data pointer
+		CModelIndex FindIndex(void* internalData, const CModelIndex& parent = {});
 
 	};
     

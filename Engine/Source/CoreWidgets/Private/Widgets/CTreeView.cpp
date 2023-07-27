@@ -60,14 +60,19 @@ namespace CE::Widgets
 		f32 verticalPadding = 5;
 		if (icon.IsValid())
 		{
-			iconWidth = 10;
+			iconWidth = 20;
 		}
 		return GUI::CalculateTextSize(label) + Vec2(iconWidth, 0) + Vec2(10, verticalPadding);
 	}
 
 	void CTreeItemView::SetIcon(const String& searchPath)
 	{
+		bool wasIconValid = icon.IsValid();
 		icon = GetStyleManager()->SearchImageResource(searchPath);
+		if (icon.IsValid() && !wasIconValid)
+		{
+			SetNeedsLayout();
+		}
 	}
 
 	void CTreeItemView::OnDrawGUI()
@@ -78,11 +83,11 @@ namespace CE::Widgets
 		f32 textPadding = 0;
 		if (icon.IsValid())
 		{
-			textPadding = 10;
 			Rect imageRect{};
-			const f32 iconSize = 10;
+			const f32 iconSize = 16;
+			textPadding = iconSize + 4;
 			imageRect.min.x = rect.min.x + padding.left;
-			imageRect.max.x = imageRect.min.x + 10;
+			imageRect.max.x = imageRect.min.x + iconSize;
 			f32 centerY = (rect.min.y + rect.max.y) / 2;
 			imageRect.min.y = centerY - iconSize / 2;
 			imageRect.max.y = centerY + iconSize / 2;
@@ -108,7 +113,19 @@ namespace CE::Widgets
 		return Vec2(100, calculatedHeight);
 	}
 
-    void CTreeView::OnDrawGUI()
+	void CTreeView::Select(const CModelIndex& index)
+	{
+		if (selectedIndex != index)
+		{
+			selectedIndex = index;
+			if (selectedIndex.IsValid() && model != nullptr)
+			{
+				model->OnIndexSelected(selectedIndex);
+			}
+		}
+	}
+
+	void CTreeView::OnDrawGUI()
     {
 		auto rect = GetComputedLayoutRect();
 
@@ -222,7 +239,7 @@ namespace CE::Widgets
 				widget->SetNeedsLayout();
 			}
 
-            if (selected && selectedIndex != index)
+            if (selected && selectedIndex != index && model != nullptr)
             {
 				selectedIndex = index;
 				model->OnIndexSelected(index);

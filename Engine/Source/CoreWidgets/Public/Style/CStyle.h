@@ -67,6 +67,8 @@ namespace CE::Widgets
 		BorderRadius,
 		BorderWidth,
 		BorderColor,
+		ShadowColor,
+		ShadowOffset,
 		TextAlign, // Inherited
 		Width,
 		Height,

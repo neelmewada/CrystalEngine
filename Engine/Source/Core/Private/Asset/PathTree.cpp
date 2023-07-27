@@ -46,6 +46,23 @@ namespace CE
 		return nullptr;
 	}
 
+    String PathTreeNode::GetFullPath()
+    {
+		String path = name.GetString();
+		if (!path.StartsWith("/"))
+			path = "/" + path;
+
+		if (parent != nullptr)
+		{
+			path = parent->GetFullPath() + path;
+		}
+
+		if (path.StartsWith("//"))
+			path = path.GetSubstringView(1);
+
+		return path;
+    }
+
 	void PathTreeNode::RemoveAll()
 	{
 		for (int i = children.GetSize() - 1; i >= 0; i--)
@@ -53,6 +70,22 @@ namespace CE
 			delete children[i];
 		}
 		children.Clear();
+	}
+
+	void PathTreeNode::Clone(const PathTreeNode& copy)
+	{
+		name = copy.name;
+		nodeType = copy.nodeType;
+		userData = copy.userData;
+		userDataSize = copy.userDataSize;
+
+		for (auto copyChild : copy.children)
+		{
+			PathTreeNode* child = new PathTreeNode();
+			child->parent = this;
+			child->Clone(*copyChild);
+			children.Add(child);
+		}
 	}
 
 	PathTree::PathTree()

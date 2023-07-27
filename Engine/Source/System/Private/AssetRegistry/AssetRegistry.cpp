@@ -22,12 +22,12 @@ namespace CE
 		// Clear the path tree
 		pathTree.RemoveAll();
 
-		pathTree.AddPath("/Game");
-		pathTree.AddPath("/Engine");
+		pathTree.AddPath("/Game"); directoryTree.AddPath("/Game");
+		pathTree.AddPath("/Engine"); directoryTree.AddPath("/Engine");
 #if PAL_TRAIT_BUILD_EDITOR
-		pathTree.AddPath("/Editor");
+		pathTree.AddPath("/Editor"); directoryTree.AddPath("/Editor");
 #endif
-
+		
 		if (gProjectPath.Exists() && (gProjectPath / "Game/Assets").Exists())
 		{
 			auto projectAssetsPath = gProjectPath / "Game/Assets";
@@ -40,7 +40,10 @@ namespace CE
 					if (item.IsDirectory()) // Folder
 					{
                         if (!relativePath.IsEmpty())
-                            pathTree.AddPath("/Game" + relativePath);
+						{
+							pathTree.AddPath("/Game" + relativePath);
+							directoryTree.AddPath("/Game" + relativePath);
+						}
 					}
                     else if (relativePath.EndsWith(".casset")) // Asset file
                     {

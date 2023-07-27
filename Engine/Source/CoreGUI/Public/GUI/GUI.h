@@ -94,6 +94,8 @@ namespace CE::GUI
 
 	COREGUI_API void Text(const Rect& localRect, const String& text, const GuiStyleState& style);
 	COREGUI_API void Text(const Rect& localRect, const char* text, const GuiStyleState& style);
+	COREGUI_API void TextWrapped(const Rect& localRect, const String& text, const GuiStyleState& style);
+	COREGUI_API void TextWrapped(const Rect& localRect, const char* text, const GuiStyleState& style);
 
 	COREGUI_API void Text(const char* text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
 	COREGUI_API void Text(const String& text, const Vec2& size = {}, TextAlign align = TextAlign_MiddleCenter);
