@@ -32,9 +32,9 @@ namespace CE::Widgets
 		{
 			GUI::PushZeroingChildCoordinateSpace();
 
-			for (auto child : attachedWidgets)
+			for (int i = 0; i < attachedWidgets.GetSize(); i++)
 			{
-				child->Render();
+				attachedWidgets[i]->Render();
 			}
 
 			GUI::PopChildCoordinateSpace();

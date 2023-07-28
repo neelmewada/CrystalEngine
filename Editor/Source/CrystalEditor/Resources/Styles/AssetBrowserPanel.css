@@ -74,3 +74,7 @@ CTreeView > CTreeItemView:active {
     background-image: url(/Icons/plus_green.png);
 }
 
+#SettingsButton::icon {
+	background-image: url(/Icons/settings.png);
+	background-size: 14px;
+}

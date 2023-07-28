@@ -113,7 +113,7 @@ namespace CE::Widgets
 		return Vec2(100, calculatedHeight);
 	}
 
-	void CTreeView::Select(const CModelIndex& index)
+	void CTreeView::Select(const CModelIndex& index, bool expand)
 	{
 		if (selectedIndex != index)
 		{
@@ -121,6 +121,11 @@ namespace CE::Widgets
 			if (selectedIndex.IsValid() && model != nullptr)
 			{
 				model->OnIndexSelected(selectedIndex);
+
+				if (expand)
+				{
+					indexToExpand = index;
+				}
 			}
 		}
 	}
@@ -146,6 +151,7 @@ namespace CE::Widgets
 			PollEvents();
 		}
 
+		indexToExpand = {};
     }
 
 	void CTreeView::DrawChildren(const CModelIndex& parent, int indent)
@@ -227,6 +233,11 @@ namespace CE::Widgets
 
 			bool isOpen = false;
 
+			if (indexToExpand.IsValid() && index != indexToExpand && model->IsIndexInParentChain(index, indexToExpand))
+			{
+				GUI::TreeViewNodeSetOpen(widget->nodeId, true);
+			}
+			
 			if (!selectableItems)
 				isOpen = GUI::TreeViewNode(size, widget->nodeId, indent * 15.0f, padding, flags);
 			else

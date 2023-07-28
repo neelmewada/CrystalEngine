@@ -16,8 +16,8 @@ namespace CE::Editor
 
 		bool IsContainer() override { return true; }
 
-		inline bool IsAsset() const { return isAssetItem; }
-		inline bool IsFolder() const { return !isAssetItem; }
+		inline bool IsAssetItem() const { return isAssetItem; }
+		inline bool IsFolderItem() const { return !isAssetItem; }
 
 		inline const Name& GetPath() const { return path; }
 		inline void SetPath(const Name& path) { this->path = path; }
@@ -27,6 +27,17 @@ namespace CE::Editor
 
 		inline const String& GetLabel() const { return label; }
 		inline void SetLabel(const String& label) { this->label = label; }
+
+		virtual void SetText(const String& text) override
+		{
+			Super::SetText("");
+			SetLabel(text);
+		}
+
+		virtual const String& GetText() const override
+		{
+			return GetLabel();
+		}
 
 		CE_SIGNAL(OnItemDoubleClicked);
 

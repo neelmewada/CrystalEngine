@@ -10,7 +10,7 @@ AssetItemWidget {
 
 AssetItemWidget:hovered {
     background: rgb(47, 47, 47);
-	border-color: rgba(0, 0, 0, 0);
+	border-color: rgb(71, 71, 71);
 }
 
 AssetItemWidget.Selected {
@@ -34,10 +34,6 @@ AssetItemWidget.Asset::alternate {
     background: rgb(47, 47, 47);
 }
 
-AssetItemWidget.Asset:hovered {
-    border-color: rgb(71, 71, 71);
-}
-
 AssetItemWidget.Asset.Selected {
     border-color: rgba(0, 112, 224, 255);
 }
@@ -46,8 +42,24 @@ AssetItemWidget.Asset:pressed {
 	border-color: rgba(0, 112, 224, 180);
 }
 
-AssetItemWidget {
+#AssetGridView > AssetItemWidget, #AssetGridView.Medium > AssetItemWidget {
     height: 125px;
     width: 90px;
+}
+
+#AssetGridView.Small > AssetItemWidget {
+    height: 100px;
+    width: 72px;
+    font-size: 15px;
+}
+
+#AssetGridView.Large > AssetItemWidget {
+    height: 150px;
+    width: 108px;
+}
+
+#AssetGridView.Huge > AssetItemWidget {
+    height: 200px;
+    width: 144px;
 }
 

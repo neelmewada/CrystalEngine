@@ -163,6 +163,11 @@ namespace CE::Widgets
 		return properties[propertyType];
 	}
 
+	bool CStyle::IsValidProperty(CStylePropertyType property, CStyleValue::ValueType type)
+	{
+		return properties.KeyExists(property) && properties[property].IsValid() && (type == CStyleValue::Type_None || type == properties[property].valueType);
+	}
+
     void CStyle::ApplyProperties(const CStyle& from)
     {
 		for (const auto& [property, value] : from.properties)
@@ -192,6 +197,7 @@ namespace CE::Widgets
 		{ "border-width", CStylePropertyType::BorderWidth },
 		{ "border-color", CStylePropertyType::BorderColor },
 		{ "shadow", CStylePropertyType::ShadowColor }, { "box-shadow", CStylePropertyType::ShadowColor }, { "shadow-color", CStylePropertyType::ShadowColor },
+		{ "background-size", CStylePropertyType::BackgroundSize },
 		{ "shadow-offset", CStylePropertyType::ShadowOffset },
 		{ "text-align", CStylePropertyType::TextAlign },
 		{ "width", CStylePropertyType::Width },

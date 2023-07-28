@@ -64,4 +64,15 @@ namespace CE::Widgets
 		return CModelIndex();
 	}
 
+	bool CDataModel::IsIndexInParentChain(const CModelIndex& indexToSearch, const CModelIndex& bottomMostIndex)
+	{
+		if (!indexToSearch.IsValid() || !bottomMostIndex.IsValid())
+			return false;
+
+		if (bottomMostIndex == indexToSearch)
+			return true;
+
+		return IsIndexInParentChain(indexToSearch, GetParent(bottomMostIndex));
+	}
+
 } // namespace CE::Widgets

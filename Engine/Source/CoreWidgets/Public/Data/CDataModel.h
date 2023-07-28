@@ -76,6 +76,7 @@ namespace CE::Widgets
 		/// Finds the index with matching internal data pointer
 		CModelIndex FindIndex(void* internalData, const CModelIndex& parent = {});
 
+		bool IsIndexInParentChain(const CModelIndex& indexToSearch, const CModelIndex& bottomMostIndex);
 	};
     
 } // namespace CE::Widgets

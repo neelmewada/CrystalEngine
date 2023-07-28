@@ -40,6 +40,7 @@ namespace CE::Widgets
 		Window,
 		Frame,
 		Check,
+		Radio,
 		Hint,
 		Alternate,
 
@@ -64,6 +65,7 @@ namespace CE::Widgets
 		Foreground, // Inherited
 		Background,
         BackgroundImage,
+		BackgroundSize,
 		BorderRadius,
 		BorderWidth,
 		BorderColor,
@@ -324,6 +326,8 @@ namespace CE::Widgets
 		CStyleValue& AddProperty(CStylePropertyType property, const CStyleValue& value);
 
 		CStyleValue& GetProperty(CStylePropertyType property);
+
+		bool IsValidProperty(CStylePropertyType property, CStyleValue::ValueType type = CStyleValue::Type_None);
 
 		inline bool IsDirty() const { return isDirty; }
 		inline void SetDirty(bool dirty = true) { isDirty = dirty; }

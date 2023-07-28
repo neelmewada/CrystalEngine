@@ -195,6 +195,7 @@ namespace CE::Widgets
 
 		CWidget();
 
+		void LoadGuiStyleState(const CStyle& from, GUI::GuiStyleState& outState);
 		void LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState);
 
 		// Draw Helpers
@@ -207,6 +208,9 @@ namespace CE::Widgets
 		void FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius = {});
 		void DrawRect(const Color& color, const Rect& localRect, f32 borderThickness = 1.0f, const Vec4& borderRadius = {});
 		void DrawImage(const CTexture& image, const Rect& localRect, const Color& tintColor = Color::White());
+
+		void FillCircle(const Color& color, const Rect& localRect);
+		void DrawCircle(const Color& color, const Rect& localRect, f32 borderThickness = 1.0f);
 		
 		inline void DrawDefaultBackground()
 		{

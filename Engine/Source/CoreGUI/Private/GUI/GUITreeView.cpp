@@ -46,6 +46,11 @@ namespace CE::GUI
 		GUI::EndChild();
 	}
 
+	COREGUI_API void TreeViewNodeSetOpen(ID id, bool open)
+	{
+		ImGui::TreeNodeSetOpen(id, open);
+	}
+
 	COREGUI_API bool TreeViewNode(const Vec2& size, ID id, f32 indentX, const Vec4& padding, TreeNodeFlags flags)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -212,7 +217,7 @@ namespace CE::GUI
 		const float text_width = g.FontSize + padding.x * 2;  // Include collapser
 		ImVec2 text_pos(window->DC.CursorPos.x + text_offset_x, window->DC.CursorPos.y + text_offset_y);
 		ImGui::ItemSize(frame_bb);
-
+		
 		bool is_leaf = (flags & TNF_Leaf) != 0;
 		bool is_open = ImGui::TreeNodeUpdateNextOpen(id, flags);
 

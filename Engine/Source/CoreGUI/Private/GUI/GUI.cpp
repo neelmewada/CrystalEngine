@@ -6487,6 +6487,38 @@ namespace CE::GUI
 		drawList->PathFillConvex(color);
 	}
 
+	COREGUI_API void FillCircle(const Rect& rect, const Color& color)
+	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		if (drawList == nullptr)
+			return;
+
+		ImVec2 center = ImVec2((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
+		f32 radius = Math::Min((rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2);
+
+		if (isnan(center.x) || isnan(center.y) || isnan(radius))
+			return;
+
+		drawList->AddCircleFilled(center, radius, color.ToU32(), 0);
+	}
+
+	COREGUI_API void DrawCircle(const Rect& rect, const Color& color, f32 thickness)
+	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		if (drawList == nullptr)
+			return;
+
+		ImVec2 center = ImVec2((rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2);
+		f32 radius = Math::Min((rect.right - rect.left) / 2, (rect.bottom - rect.top) / 2);
+
+		if (isnan(center.x) || isnan(center.y) || isnan(radius))
+			return;
+
+		const int num_segment = drawList->_CalcCircleAutoSegmentCount(radius);
+
+		drawList->AddCircle(center, radius, color.ToU32(), num_segment, thickness);
+	}
+
 	COREGUI_API void FillRect(const Vec4& rect, const Gradient& gradient, Vec4 rounding)
 	{
 		ImDrawList* drawList = ImGui::GetWindowDrawList();

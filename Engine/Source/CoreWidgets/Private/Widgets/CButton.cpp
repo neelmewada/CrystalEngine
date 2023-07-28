@@ -42,13 +42,18 @@ namespace CE::Widgets
         {
             icon = GetStyleManager()->SearchImageResource(bgImageValue.string);
         }
+
+		if (style.IsValidProperty(CStylePropertyType::BackgroundSize, CStyleValue::Type_Single))
+		{
+			this->iconSize = style.properties[CStylePropertyType::BackgroundSize].single;
+		}
     }
 
 	Vec2 CButton::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
 		f32 iconSize = 0;
 		if (icon.IsValid())
-			iconSize = 16;
+			iconSize = this->iconSize;
 		return GUI::CalculateTextSize(text) + Vec2(10 + iconSize, 5);
 	}
 
@@ -66,19 +71,18 @@ namespace CE::Widgets
 
 		f32 iconOffset = 0;
 		if (icon.IsValid())
-			iconOffset = 10;
+			iconOffset = this->iconSize - 2;
 
 		DrawShadow(defaultStyleState);
 
 		bool hovered = false, held = false;
 		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding + Rect(iconOffset, 0, 0, 0));
 		PollEvents();
-
+		
 		GUI::PushChildCoordinateSpace(rect);
 
 		if (icon.IsValid())
 		{
-			constexpr f32 iconSize = 14;
 			f32 centerY = (rect.max.y - rect.min.y) / 2;
 			Rect iconRect{ padding.left, centerY - iconSize / 2,
 				padding.left + iconSize, centerY + iconSize / 2 };

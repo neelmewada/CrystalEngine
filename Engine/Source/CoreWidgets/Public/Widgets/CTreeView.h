@@ -68,7 +68,7 @@ namespace CE::Widgets
 		inline void SetItemsSelectable(bool set) { selectableItems = set; }
 
 		inline CModelIndex GetSelectedIndex() const { return selectedIndex; }
-		void Select(const CModelIndex& index);
+		void Select(const CModelIndex& index, bool expand = true);
 
     protected:
 
@@ -89,6 +89,7 @@ namespace CE::Widgets
 		GUI::GuiStyleState itemActive{};
 
 		CModelIndex selectedIndex = {};
+		CModelIndex indexToExpand = {};
 
 		b8 itemColorFetched = false;
 

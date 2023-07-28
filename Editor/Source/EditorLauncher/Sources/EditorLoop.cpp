@@ -183,11 +183,15 @@ void EditorLoop::PostInit()
 	fontList.Add({ defaultFontByteSize, 16, "Open Sans", false, defaultFont }); // Default Font & Size
 
 	fontList.AddRange({
+		{ defaultFontByteSize, 12, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 13, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 14, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 15, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 17, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 18, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 19, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 20, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 21, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 22, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },

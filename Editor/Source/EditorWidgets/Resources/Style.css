@@ -161,8 +161,16 @@ CMenuItem:hovered, CMenuItem:pressed, CMenuItem:active {
 	background: rgb(0, 112, 224);
 }
 
+CMenuItem::check {
+	background: rgb(30, 30, 30);
+	color: white;
+	border-radius: 2px;
+	border-width: 1.5px;
+	border-color: rgb(77, 77, 77);
+}
+
 CMenuItemHeader {
-	foreground: rgb(108, 108, 108);
+	color: rgb(108, 108, 108);
 }
 
 CMenuBar {

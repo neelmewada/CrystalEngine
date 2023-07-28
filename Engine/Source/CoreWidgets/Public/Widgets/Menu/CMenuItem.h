@@ -25,25 +25,33 @@ namespace CE::Widgets
 		inline const String& GetText() const { return text; }
 		inline void SetText(const String& text) { this->text = text; }
 
+		inline bool HasIcon() const { return icon.IsValid(); }
+
 		void LoadIcon(const String& iconSearchPath);
 
 		inline CMenu* GetSubMenu() const { return subMenu; }
 		inline void SetSubMenu(CMenu* subMenu) { this->subMenu = subMenu; }
 
-		inline bool IsToggleable() const { return isToggleable; }
-		inline void SetToggleable(bool toggleable) 
-		{ 
-			this->isToggleable = toggleable;
-			SetNeedsStyle();
-			SetNeedsLayout();
-		}
+		inline bool IsToggle() const { return itemType == ItemType::Toggle; }
+		inline bool IsRadio() const { return itemType == ItemType::Radio; }
 
-		inline bool IsToggled() const { return toggleValue; }
-		inline void SetToggled(bool set) { toggleValue = set; }
+		bool HasAnySiblingWithToggleOrRadio();
+
+		inline bool IsToggled() const { return isToggled; }
+		inline bool IsRadioSelected() const { return isToggled; }
+
+		void SetAsDefaultType();
+		void SetAsToggle();
+		void SetAsRadio(const String& radioGroupName);
+
+		void SetToggleValue(bool value);
+		void SetRadioValue(bool value = true);
 
 		CE_SIGNAL(OnMenuItemClicked, CMenuItem*);
 
     protected:
+
+		void OnBeforeComputeStyle() override;
 
 		virtual void OnClicked();
 
@@ -59,11 +67,19 @@ namespace CE::Widgets
 		FIELD()
 		CMenu* subMenu = nullptr;
 
-		FIELD()
-		b8 isToggleable = false;
+		enum class ItemType { Default, Toggle, Radio };
+
+		ItemType itemType = ItemType::Default;
 
 		FIELD()
-		b8 toggleValue = false;
+		Name radioGroupName = "";
+
+		FIELD()
+		b8 isToggled = false;
+
+		b8 siblingExistsWithRadioOrToggle = false;
+
+		GUI::GuiStyleState toggleOrRadioStyleState{};
     };
 
 	CLASS()

@@ -49,6 +49,14 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::LoadGuiStyleState(const CStyle& from, GUI::GuiStyleState& outState)
+	{
+		for (const auto& [property, value] : from.properties)
+		{
+			LoadGuiStyleStateProperty(property, value, outState);
+		}
+	}
+
 	void CWidget::LoadGuiStyleStateProperty(CStylePropertyType property, const CStyleValue& styleValue, GUI::GuiStyleState& outState)
 	{
 		if (property == CStylePropertyType::Background)
@@ -190,7 +198,24 @@ namespace CE::Widgets
 
 	void CWidget::DrawImage(const CTexture& image, const Rect& localRect, const Color& tintColor)
 	{
+		if (image.IsValid())
+		{
+			GUI::Image(localRect, image.id, defaultStyleState);
+		}
+	}
 
+	void CWidget::FillCircle(const Color& color, const Rect& localRect)
+	{
+		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+
+		GUI::FillCircle(globalRect, color);
+	}
+
+	void CWidget::DrawCircle(const Color& color, const Rect& localRect, f32 borderThickness)
+	{
+		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+
+		GUI::DrawCircle(globalRect, color, borderThickness);
 	}
 
 	void CWidget::UpdateStyleIfNeeded()

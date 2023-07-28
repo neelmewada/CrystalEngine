@@ -6,6 +6,12 @@ static const CE::String css = R"(
 
 namespace CE::Editor
 {
+	String Private::AssetBrowserPanelPrefs::PrefsKey()
+	{
+		return TYPENAME(AssetBrowserPanel).GetString() + ".Prefs";
+	}
+
+	static const Array<String> thumbnailSizes = { "Small", "Medium", "Large", "Huge" };
 
 	AssetBrowserPanel::AssetBrowserPanel()
 	{
@@ -23,6 +29,8 @@ namespace CE::Editor
 	void AssetBrowserPanel::Construct()
 	{
 		Super::Construct();
+
+		EditorPrefs::Get().GetStruct(Private::AssetBrowserPanelPrefs::PrefsKey(), &prefs);
 
         LoadStyleSheet("/CrystalEditor/Resources/Styles/AssetBrowserPanel.css");
 		
@@ -69,17 +77,46 @@ namespace CE::Editor
 				settingsButtonMenu->SetMenuPosition(CMenuPosition::Bottom);
 				settingsButton->SetPopupMenu(settingsButtonMenu);
 				{
-					for (int i = 0; i < 8; i++)
+					auto header = CreateWidget<CMenuItemHeader>(settingsButtonMenu, "Header");
+					header->SetTitle("VIEW");
+					
+					auto thumbnailSizeMenuItem = CreateWidget<CMenuItem>(settingsButtonMenu, "ThumbnailSizeMenuItem");
+					thumbnailSizeMenuItem->SetText("Thumbnail Size");
+					auto thumbnailSizeSubMenu = CreateWidget<CMenu>(thumbnailSizeMenuItem, "ThumbnailSizeSubMenu");
+					thumbnailSizeMenuItem->SetSubMenu(thumbnailSizeSubMenu);
+					{
+						CMenuItem* radioToEnable = nullptr;
+						if (prefs.thumbnailSize < 0 || prefs.thumbnailSize >= thumbnailSizes.GetSize())
+							prefs.thumbnailSize = 1;
+
+						for (int i = 0; i < thumbnailSizes.GetSize(); i++)
+						{
+							auto value = CreateWidget<CMenuItem>(thumbnailSizeSubMenu, "ThumbnailSizeRadio");
+							value->SetText(thumbnailSizes[i]);
+							value->SetAsRadio("ThumbnailSizeValue");
+							Object::Bind(value, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), 
+								this, MEMBER_FUNCTION(Self, OnThumbnailSizeMenuItemClicked));
+
+							if (i == prefs.thumbnailSize)
+							{
+								radioToEnable = value;
+							}
+						}
+
+						if (radioToEnable != nullptr)
+							radioToEnable->SetRadioValue(true);
+					}
+
+					for (int i = 0; i < 0; i++) // DISABLED
 					{
 						if (i == 4)
 						{
-							auto header = CreateWidget<CMenuItemHeader>(settingsButtonMenu, "Header");
-							header->SetTitle("TITLE");
+							
 						}
 
 						auto menuItem = CreateWidget<CMenuItem>(settingsButtonMenu, "MenuItem");
 						menuItem->SetText(String::Format("Item No. {}", i));
-						menuItem->LoadIcon("/Icons/folder_32.png");
+						//menuItem->LoadIcon("/Icons/folder_32.png");
 
 						if (i == 3)
 						{
@@ -102,26 +139,7 @@ namespace CE::Editor
 			assetGridView->SetInteractable(true);
 			assetGridView->SetHorizontalScrollAllowed(false);
 			assetGridView->SetVerticalScrollAllowed(true);
-			if (false)
-			{
-				for (int i = 0; i < 16; i++)
-				{
-					auto item = CreateWidget<AssetItemWidget>(assetGridView, "AssetItem");
-					item->SetAsFolder();
-					item->SetLabel(String::Format("This is a long folder name {}.", i));
-					assetItems.Add(item);
-
-					Object::Bind(item, MEMBER_FUNCTION(AssetItemWidget, OnButtonClicked), [=]
-						{
-							SetSelectedItem(i);
-						});
-
-					Object::Bind(item, MEMBER_FUNCTION(AssetItemWidget, OnItemDoubleClicked), [=]
-						{
-							
-						});
-				}
-			}
+			assetGridView->AddStyleClass(thumbnailSizes[prefs.thumbnailSize]);
 		}
 
 
@@ -144,13 +162,16 @@ namespace CE::Editor
 			return;
 		}
 
-		CModelIndex indexToSelect = folderModel->FindIndex(directoryNode);
+		auto indexInParent = directoryNode->parent->children.IndexOf(directoryNode);
+		
+		CModelIndex indexToSelect = folderModel->CreateIndex(indexInParent, 0, directoryNode);
 		if (!indexToSelect.IsValid())
 		{
 			return;
 		}
 
-
+		if (path.GetString().StartsWith("/Game") || path.GetString().StartsWith("Game"))
+			gameContentDirectoryView->Select(indexToSelect);
 	}
 
 	void AssetBrowserPanel::UpdateContentView()
@@ -199,7 +220,10 @@ namespace CE::Editor
 
 				Object::Bind(widget, MEMBER_FUNCTION(AssetItemWidget, OnItemDoubleClicked), [=]
 					{
-
+						if (widget->IsAssetItem())
+							HandleOpenAsset(widget);
+						else
+							SetCurrentAssetDirectory(widget->GetPath());
 					});
 			}
 
@@ -257,6 +281,37 @@ namespace CE::Editor
 			else
 				assetItems[i]->RemoveStyleClass("Selected");
 		}
+	}
+
+	void AssetBrowserPanel::HandleOpenAsset(AssetItemWidget* item)
+	{
+		
+	}
+
+	void AssetBrowserPanel::OnThumbnailSizeMenuItemClicked(CMenuItem* menuItem)
+	{
+		if (menuItem == nullptr)
+			return;
+
+		for (const auto& size : thumbnailSizes)
+		{
+			assetGridView->RemoveStyleClass(size);
+		}
+
+		for (int i = 0; i < thumbnailSizes.GetSize(); i++)
+		{
+			if (thumbnailSizes[i] == menuItem->GetText())
+			{
+				assetGridView->AddStyleClass(thumbnailSizes[i]);
+
+				prefs.thumbnailSize = i;
+				EditorPrefs::Get().SetStruct(Private::AssetBrowserPanelPrefs::PrefsKey(), &prefs);
+				break;
+			}
+		}
+
+		assetGridView->SetNeedsStyle();
+		assetGridView->SetNeedsLayout();
 	}
 
 	void AssetBrowserPanel::OnGameContentTreeViewSelectionChanged(PathTreeNode* selectedNode)

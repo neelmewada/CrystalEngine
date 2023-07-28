@@ -43,7 +43,7 @@ namespace CE::Editor
 							subItem->SetText(String::Format("Sub Item: {}", j));
 
 							if (j == 1)
-								subItem->SetToggleable(true);
+								subItem->SetAsToggle();
 						}
 					}
 				}
@@ -64,8 +64,6 @@ namespace CE::Editor
 		}
 
 		assetBrowserPanel = CreateWidget<AssetBrowserPanel>(this, "AssetBrowserPanel");
-
-		auto imageTestPanel = CreateWidget<ImageTestPanel>(this, "ImageTestPanel");
 	}
 
 } // namespace CE::Editor

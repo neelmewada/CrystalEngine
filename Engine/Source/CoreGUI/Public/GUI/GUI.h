@@ -185,6 +185,8 @@ namespace CE::GUI
 	COREGUI_API bool BeginTreeView(const Rect& localRect, ID id, const String& label, TreeViewFlags flags = TVF_None);
 	COREGUI_API void EndTreeView();
 
+	COREGUI_API void TreeViewNodeSetOpen(ID id, bool open);
+
 	COREGUI_API bool TreeViewNode(const Vec2& size, ID id, f32 indentX, const Vec4& padding = {}, TreeNodeFlags flags = TNF_None);
 	COREGUI_API bool TreeViewNodeSelectable(const Vec2& size, ID id, f32 indentX, bool* isSelected, bool* isHovered = nullptr, bool* isHeld = nullptr,
 		const Vec4& padding = {}, TreeNodeFlags flags = TNF_None);
@@ -302,6 +304,9 @@ namespace CE::GUI
 
     COREGUI_API void FillRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
 	COREGUI_API void FillRect(const Vec4& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 });
+
+	COREGUI_API void FillCircle(const Rect& rect, const Color& color);
+	COREGUI_API void DrawCircle(const Rect& rect, const Color& color, f32 thickness = 1.0f);
 
 	COREGUI_API void FillRect(const Vec4& rect, const Gradient& gradient, Vec4 rounding = { 0, 0, 0, 0 });
 

@@ -4,6 +4,21 @@ namespace CE::Editor
 {
 	class AssetItemWidget;
 
+	namespace Private
+	{
+		STRUCT()
+		struct AssetBrowserPanelPrefs
+		{
+			CE_STRUCT(AssetBrowserPanelPrefs)
+		public:
+
+			static String PrefsKey();
+
+			FIELD()
+			u32 thumbnailSize = 1;
+		};
+	}
+
     CLASS()
 	class CRYSTALEDITOR_API AssetBrowserPanel : public EditorPanel
 	{
@@ -28,6 +43,11 @@ namespace CE::Editor
 
 		void SetSelectedItem(int index);
 		void SetSelectedItem(AssetItemWidget* item);
+
+		void HandleOpenAsset(AssetItemWidget* item);
+
+		FUNCTION()
+		void OnThumbnailSizeMenuItemClicked(CMenuItem* menuItem);
 
 		FUNCTION()
 		void OnGameContentTreeViewSelectionChanged(PathTreeNode* selectedNode);
@@ -58,6 +78,8 @@ namespace CE::Editor
 
 		FIELD(ReadOnly)
 		Name selectedDirectoryPath{};
+
+		Private::AssetBrowserPanelPrefs prefs{};
 	};
 
 } // namespace CE::Editor

@@ -17,8 +17,8 @@ namespace CE::Widgets
 
 		void Construct() override;
 
-		void SetText(const String& text);
-		const String& GetText() const;
+		virtual void SetText(const String& text);
+		virtual const String& GetText() const;
 
 		//void LoadIcon(const String& resourceSearchPath);
 		//void RemoveIcon();
@@ -52,6 +52,9 @@ namespace CE::Widgets
 		String text{};
 
 		CTexture icon{};
+		
+		FIELD()
+		f32 iconSize = 14;
 
 		FIELD()
 		b8 isAlternateStyleButton = false;

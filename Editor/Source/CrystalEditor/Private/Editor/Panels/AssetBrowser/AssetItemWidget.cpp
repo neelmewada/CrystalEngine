@@ -70,7 +70,7 @@ namespace CE::Editor
 			GUI::Image(imageRect, icon.id, {});
 		}
 
-		if (IsAsset() && bottomFrameColor.a > 0)
+		if (IsAssetItem() && bottomFrameColor.a > 0)
 		{
 			Rect bottomRect = Rect(rect.left, imageRect.bottom, rect.right, rect.bottom);
 			FillRect(bottomFrameColor, bottomRect, Vec4(0, 0, defaultStyleState.borderRadius.z, defaultStyleState.borderRadius.w));

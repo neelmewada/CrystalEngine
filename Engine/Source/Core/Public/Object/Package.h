@@ -67,30 +67,15 @@ namespace CE
 			Super::SetName(newName);
 		}
         
-        Name GetPackageName()
-        {
-            return packageName;
-        }
+		inline Name GetPackageName() { return packageName; }
 
-		UUID GetPackageUuid()
-		{
-			return uuid;
-		}
+		inline UUID GetPackageUuid(){ return uuid; }
 
-		void SetPackageName(const Name& name)
-		{
-			this->packageName = name;
-		}
+		inline void SetPackageName(const Name& name) { this->packageName = name; }
         
-        bool IsLoaded() const
-        {
-            return isLoaded;
-        }
+        inline bool IsLoaded() const { return isLoaded; }
         
-        bool IsFullyLoaded() const
-        {
-            return isFullyLoaded;
-        }
+        inline bool IsFullyLoaded() const { return isFullyLoaded; }
         
         void LoadFully();
         void LoadFully(Stream* originalStream);
