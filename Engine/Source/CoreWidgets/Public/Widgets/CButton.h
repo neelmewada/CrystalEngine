@@ -13,7 +13,9 @@ namespace CE::Widgets
 		CButton();
 		virtual ~CButton();
 
-		bool IsContainer() override { return false; }
+		bool IsContainer() override { return isContainer; }
+
+		inline void SetAsContainer(bool set = true) { isContainer = set; }
 
 		void Construct() override;
 
@@ -46,7 +48,10 @@ namespace CE::Widgets
 
 		virtual void OnClicked() {}
 
-	private:
+	protected:
+
+		FIELD()
+		b8 isContainer = false;
 
 		FIELD()
 		String text{};

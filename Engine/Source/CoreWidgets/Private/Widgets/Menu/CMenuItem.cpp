@@ -28,7 +28,7 @@ namespace CE::Widgets
 		if (HasIcon() && !IsInsideMenuBar())
 			offsetX += 18; // Menu item icon
 		if (siblingExistsWithRadioOrToggle)
-			offsetX += 18; // Toggle or radio item
+			offsetX += 20; // Toggle or radio item
 
 		return Vec2(offsetX, 0) + GUI::CalculateTextSize(text) + Vec2(15, 8);
 	}

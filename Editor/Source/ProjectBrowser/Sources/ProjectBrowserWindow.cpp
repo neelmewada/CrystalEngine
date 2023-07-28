@@ -248,6 +248,7 @@ void ProjectBrowserWindow::Construct()
 
 			auto item = CreateWidget<CButton>(scrollView, "RecentProjectsButton");
 			item->SetText("");
+			item->SetAsContainer();
 			Object::Bind(item, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
 				{
 					OpenProject(projectPath);

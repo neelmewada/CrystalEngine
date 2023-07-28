@@ -450,7 +450,7 @@ namespace CE
 					}
 					else
 					{
-						// Shallow copy external objects
+						// Shallow copy external object references
 						destField->SetFieldValue<Object*>(this, objectToCopy);
 					}
 				}
