@@ -83,12 +83,20 @@ CButton.Transparent:pressed {
 CTextInput {
 	background: rgb(15, 15, 15);
 	border-width: 1;
-	border-radius: 1 1 1 1;
+	border-radius: 2 2 2 2;
 	border-color: rgb(42, 42, 42);
 	padding: 3 3 3 3;
 }
 CTextInput::hint {
 	foreground: rgba(255, 255, 255, 120);
+}
+
+CTextInput:active {
+	border-color: rgba(9, 92, 174, 255);
+}
+
+CTextInput:disabled {
+	background-color: rgb(56, 56, 56);
 }
 
 CTabWidget {

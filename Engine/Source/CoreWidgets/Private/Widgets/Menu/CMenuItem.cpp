@@ -28,7 +28,7 @@ namespace CE::Widgets
 		if (HasIcon() && !IsInsideMenuBar())
 			offsetX += 18; // Menu item icon
 		if (siblingExistsWithRadioOrToggle)
-			offsetX += 20; // Toggle or radio item
+			offsetX += 24; // Toggle or radio item
 
 		return Vec2(offsetX, 0) + GUI::CalculateTextSize(text) + Vec2(15, 8);
 	}
@@ -173,7 +173,7 @@ namespace CE::Widgets
 		if (!IsInsideMenuBar() && HasIcon())
 			offsetX += 18; // icon offset
 		if (siblingExistsWithRadioOrToggle)
-			offsetX += 18; // radio/toggle offset
+			offsetX += 22; // radio/toggle offset
 
 		GUI::Text(rect + Rect(padding.left + offsetX, padding.top, -padding.right + offsetX, -padding.bottom), text, defaultStyleState);
 

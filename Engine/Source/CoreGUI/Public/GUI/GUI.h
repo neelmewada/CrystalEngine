@@ -82,6 +82,9 @@ namespace CE::GUI
 
     COREGUI_API void PopStyleColor(int count = 1);
 
+	COREGUI_API void BeginDisabled(bool disabled = true);
+	COREGUI_API void EndDisabled();
+
 #pragma endregion
 
 
@@ -131,7 +134,7 @@ namespace CE::GUI
 	COREGUI_API bool CheckboxTriState(ID id, s8* value, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0);
 
 	COREGUI_API bool InputText(const Rect& rect, ID id, const String& hint, String& inputText, 
-		const GuiStyleState& normalState, const GuiStyleState& activeState, const GuiStyleState& disabledState, const Vec4& padding = {},
+		const GuiStyleState& normalState, const Color& hintColor, const Vec4& padding = {},
 		TextInputFlags flags = TextInputFlags_None, TextInputCallback callback = nullptr, void* callback_user_data = nullptr);
 
 	COREGUI_API bool InputTextEx(ID id, const String& hint, String& inputText,

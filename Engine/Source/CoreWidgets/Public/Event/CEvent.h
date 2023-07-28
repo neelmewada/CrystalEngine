@@ -62,6 +62,9 @@ namespace CE::Widgets
 		CEventType type{};
 
 		FIELD()
+		TypeId customEventType{};
+
+		FIELD()
 		b8 isHandled = false;
 
 		FIELD()

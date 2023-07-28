@@ -91,6 +91,7 @@
 #include "Object/Package.h"
 
 // RTTI Dependents
+#include "Serialization/BinaryBlob.h"
 #include "Math/MathRTTI.h"
 #include "IO/FileWatcher.h"
 

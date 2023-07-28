@@ -16,11 +16,9 @@ namespace CE
 		static AssetRegistry* GetRegistry();
 
 		void Initialize();
+		void Shutdown();
 
 	protected:
-
-
-	private:
 
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;

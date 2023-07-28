@@ -14,7 +14,7 @@ namespace CE
 
 	void Engine::PreShutdown()
 	{
-
+		assetManager->Shutdown();
 	}
 
 	void Engine::Shutdown()

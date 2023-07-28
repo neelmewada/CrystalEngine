@@ -62,8 +62,7 @@ namespace CE::Editor
 			{
 				auto addButton = CreateWidget<CButton>(topBarLayout, "AddButton");
 				addButton->SetText("Add");
-				//addButton->LoadIcon("/Icons/plus_green.png");
-
+				
 				auto searchBox = CreateWidget<CTextInput>(topBarLayout, "SearchBox");
 				searchBox->SetHint("Search...");
 
@@ -105,30 +104,6 @@ namespace CE::Editor
 
 						if (radioToEnable != nullptr)
 							radioToEnable->SetRadioValue(true);
-					}
-
-					for (int i = 0; i < 0; i++) // DISABLED
-					{
-						if (i == 4)
-						{
-							
-						}
-
-						auto menuItem = CreateWidget<CMenuItem>(settingsButtonMenu, "MenuItem");
-						menuItem->SetText(String::Format("Item No. {}", i));
-						//menuItem->LoadIcon("/Icons/folder_32.png");
-
-						if (i == 3)
-						{
-							auto subMenu = CreateWidget<CMenu>(menuItem, "SubMenu");
-							menuItem->SetSubMenu(subMenu);
-							
-							for (int j = 0; j < 4; j++)
-							{
-								auto subMenuItem = CreateWidget<CMenuItem>(subMenu, "SubMenuItem");
-								subMenuItem->SetText(String::Format("Sub Item {}", j));
-							}
-						}
 					}
 				}
 			}

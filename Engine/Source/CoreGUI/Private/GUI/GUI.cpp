@@ -416,6 +416,16 @@ namespace CE::GUI
 		ImGui::PopStyleColor(count);
 	}
 
+	COREGUI_API void BeginDisabled(bool disabled)
+	{
+		ImGui::BeginDisabled(disabled);
+	}
+
+	COREGUI_API void EndDisabled()
+	{
+		ImGui::EndDisabled();
+	}
+
 #pragma region Widgets
 
 	COREGUI_API void ShowDemoWindow(bool* open)
@@ -1760,7 +1770,7 @@ namespace CE::GUI
 	}
 
 	COREGUI_API bool InputText(const Rect& localRect, ID id, const String& hint, String& inputText, 
-		const GuiStyleState& normalState, const GuiStyleState& activeState, const GuiStyleState& disabledState, 
+		const GuiStyleState& normalState, const Color& hintColor, 
 		const Vec4& padding, TextInputFlags flags, TextInputCallback callback, void* callback_user_data)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -2498,7 +2508,7 @@ namespace CE::GUI
 			buf_display = hint.GetCString();
 			buf_display_end = hint.GetCString() + hint.GetLength();
 		}
-
+		
 		ImVec2 text_size = ImGui::CalcTextSize(buf_display, buf_display_end);
 
 		// Render text. We currently only render selection when the widget is active or while scrolling.
@@ -2652,7 +2662,7 @@ namespace CE::GUI
 			if (is_multiline || (buf_display_end - buf_display) < buf_display_max_length)
 			{
 				//ImU32 col = ImGui::GetColorU32(is_displaying_hint ? ImGuiCol_TextDisabled : ImGuiCol_Text);
-				u32 col = is_displaying_hint ? disabledState.foreground.ToU32() : normalState.foreground.ToU32();
+				u32 col = is_displaying_hint ? hintColor.ToU32() : normalState.foreground.ToU32();
 				ImVec2 offset = {};
 				if (!is_multiline)
 				{
@@ -2701,7 +2711,7 @@ namespace CE::GUI
 			if (is_multiline || (buf_display_end - buf_display) < buf_display_max_length)
 			{
 				//ImU32 col = ImGui::GetColorU32(is_displaying_hint ? ImGuiCol_TextDisabled : ImGuiCol_Text);
-				u32 col = is_displaying_hint ? disabledState.foreground.ToU32() : normalState.foreground.ToU32();
+				u32 col = is_displaying_hint ? hintColor.ToU32() : normalState.foreground.ToU32();
 				ImVec2 offset = {};
 				if (!is_multiline)
 				{

@@ -20,15 +20,10 @@ namespace CE::Widgets
 	{
 		Super::OnAfterComputeStyle();
 
-		disabledState = defaultStyleState;
-
-		auto rules = stylesheet->GetMatchingRules(this, stateFlags, CSubControl::Hint);
-		for (const auto& rule : rules)
+		auto matchStyle = stylesheet->SelectStyle(this, CStateFlag::Default, CSubControl::Hint);
+		if (matchStyle.IsValidProperty(CStylePropertyType::Foreground, CStyleValue::Type_Color))
 		{
-			for (const auto& [property, styleValue] : rule.style.properties)
-			{
-				LoadGuiStyleStateProperty(property, styleValue, disabledState);
-			}
+			hintColor = matchStyle.properties[CStylePropertyType::Foreground].color;
 		}
 	}
 
@@ -52,11 +47,11 @@ namespace CE::Widgets
 			}
 			return 0;
 		};
-
+		
 		if (id == 0)
 			id = UUID32();
 
-		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, defaultStyleState, defaultStyleState, disabledState, padding, flags, callback, this);
+		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, defaultStyleState, hintColor, padding, flags, callback, this);
 		PollEvents();
 
 		if (inputChanged)
@@ -67,6 +62,20 @@ namespace CE::Widgets
 
 	void CTextInput::HandleEvent(CEvent* event)
 	{
+		if (event->type == CEventType::FocusChanged)
+		{
+			CFocusEvent* focusEvent = (CFocusEvent*)event;
+			if (focusEvent->GotFocus())
+			{
+				stateFlags = CStateFlag::Active;
+			}
+			else // Lost focus
+			{
+				stateFlags = CStateFlag::Default;
+			}
+			SetNeedsStyle();
+			event->MarkHandled();
+		}
 
 		Super::HandleEvent(event);
 	}

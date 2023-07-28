@@ -27,7 +27,7 @@ namespace CE::IO
     class CORE_API IFileWatchListener
     {
     public:
-        virtual void HandleFileAction(WatchID watchId, IO::Path directory, String fileName, FileAction fileAction, String oldFileName) = 0;
+        virtual void HandleFileAction(WatchID watchId, IO::Path directory, const String& fileName, FileAction fileAction, const String& oldFileName) = 0;
     };
 
     class CORE_API FileWatcher final

@@ -51,7 +51,7 @@ namespace CE::Widgets
 
 		inline bool IsEnabled() const { return !isDisabled; }
 		inline bool IsDisabled() const { return isDisabled; }
-		inline void SetEnabled(bool enabled) { isDisabled = !enabled; }
+		void SetEnabled(bool enabled);
 
 		inline bool IsVisible() const { return isVisible; }
 		inline void SetVisible(bool visible) { isVisible = visible; }

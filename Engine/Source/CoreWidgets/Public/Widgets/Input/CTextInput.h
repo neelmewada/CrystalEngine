@@ -69,7 +69,7 @@ namespace CE::Widgets
 
 		UUID32 id = 0;
 
-		GUI::GuiStyleState disabledState{};
+		Color hintColor = Color::White();
 
         CInputValidator validator{};
     };

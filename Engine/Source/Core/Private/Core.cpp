@@ -69,10 +69,12 @@ namespace CE
             CE::Vec2, CE::Vec3, CE::Vec4, CE::Vec2i, CE::Vec3i, CE::Vec4i,
             CE::Quat, CE::Matrix4x4,
 			CE::Color, CE::Gradient,
-			CE::ObjectMap);
+			CE::ObjectMap,
+			CE::BinaryBlob);
 
         // Enums
         CE_REGISTER_TYPES(
+			IO::FileAction,
             EventResult
         );
 

@@ -46,15 +46,6 @@ namespace CE::Widgets
 
     void CContainerWidget::HandleEvent(CEvent* event)
     {
-		if (event->ShouldPropagate())
-		{
-			if (event->sender == this && event->type == CEventType::FocusChanged)
-			{
-				CFocusEvent* focusEvent = (CFocusEvent*)event;
-				focusEvent->GotFocus();
-			}
-		}
-
 		Super::HandleEvent(event);
     }
 

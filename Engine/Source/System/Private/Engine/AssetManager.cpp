@@ -33,5 +33,10 @@ namespace CE
 		assetRegistry->CachePathTree();
 	}
 
+	void AssetManager::Shutdown()
+	{
+
+	}
+
 
 } // namespace CE

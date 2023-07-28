@@ -2,6 +2,10 @@
 
 namespace CE
 {
+#if PAL_TRAIT_BUILD_EDITOR
+	namespace Editor { class EditorAssetManager; }
+#endif
+
 	CLASS()
 	class SYSTEM_API AssetRegistry : public Object
 	{
@@ -31,6 +35,12 @@ namespace CE
 		b8 pathTreeCached = false;
 
 		static AssetRegistry* singleton;
+
+		friend class AssetManager;
+
+#if PAL_TRAIT_BUILD_EDITOR
+		friend class CE::Editor::EditorAssetManager;
+#endif
 	};
     
 } // namespace CE

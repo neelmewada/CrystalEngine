@@ -593,6 +593,24 @@ namespace CE::Widgets
 		needsStyle = set;
 	}
 
+	void CWidget::SetEnabled(bool enabled)
+	{
+		if (isDisabled != !enabled)
+		{
+			isDisabled = !enabled;
+			if (isDisabled)
+			{
+				stateFlags = CStateFlag::Disabled;
+			}
+			else
+			{
+				EnumRemoveFlags(stateFlags, CStateFlag::Disabled);
+			}
+
+			SetNeedsStyle();
+		}	
+	}
+
 	void CWidget::UpdateLayoutIfNeeded()
 	{
 		if (!NeedsLayout())
@@ -914,9 +932,13 @@ namespace CE::Widgets
 				screenPos = GUI::WindowRectToGlobalRect(rect).min;
 			}
 
+			if (IsDisabled()) GUI::BeginDisabled();
+
 			CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
 			OnDrawGUI();
 			CFontManager::Get().PopFont();
+
+			if (IsDisabled()) GUI::EndDisabled();
 		}
 
 		for (auto menu : attachedMenus)
@@ -943,6 +965,9 @@ namespace CE::Widgets
 
 	void CWidget::PollEvents()
 	{
+		if (IsDisabled())
+			return;
+
 		bool focused = TestFocus();
 
 		if (focused != isFocused) // Focus changed

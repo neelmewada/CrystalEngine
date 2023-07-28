@@ -21,6 +21,7 @@ namespace CE
 
 		// Clear the path tree
 		pathTree.RemoveAll();
+		directoryTree.RemoveAll();
 
 		pathTree.AddPath("/Game"); directoryTree.AddPath("/Game");
 		pathTree.AddPath("/Engine"); directoryTree.AddPath("/Engine");
