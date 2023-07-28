@@ -8,20 +8,7 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(BinaryBlobFlags);
 
-	struct CORE_API BlobMetaData
-	{
-		/// Size of binary blob data excluding meta data
-		u32 size = 0;
-
-		/// Offset to the blob data in the entire file/stream
-		u64 offsetInFile = 0;
-
-		/// Blob flags
-		BinaryBlobFlags flags = BLOB_None;
-
-		friend Stream& operator<<(Stream& stream, BlobMetaData& metaData);
-		friend Stream& operator>>(Stream& stream, BlobMetaData& metaData);
-	};
+	
 
 	/// Bulk data
 	class CORE_API BinaryBlob
@@ -34,14 +21,16 @@ namespace CE
 		void Reserve(u32 byteSize);
 
 		bool IsValid();
+        
+        void LoadData(const void* data, u32 dataSize);
 
 		bool ReadFrom(Stream* stream);
+        bool WriteTo(Stream* stream);
 
 	private:
 
 		b8 isAllocated = false;
-
-		BlobMetaData metaData = {};
+        
 
 		u8* data = nullptr;
 		u32 dataSize = 0;

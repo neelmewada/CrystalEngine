@@ -2,31 +2,7 @@
 
 namespace CE
 {
-	Stream& operator<<(Stream& stream, BlobMetaData& metaData)
-	{
-		if (stream.CanWrite())
-		{
-			stream << metaData.size;
-			stream << metaData.offsetInFile;
-			stream << (u32)metaData.flags;
-		}
-
-		return stream;
-	}
-
-	Stream& operator>>(Stream& stream, BlobMetaData& metaData)
-	{
-		if (stream.CanRead())
-		{
-			stream >> metaData.size;
-			stream >> metaData.offsetInFile;
-			u32 flags = 0;
-			stream >> flags;
-			metaData.flags = (BinaryBlobFlags)flags;
-		}
-
-		return stream;
-	}
+	
 
 	BinaryBlob::BinaryBlob()
 	{
@@ -46,19 +22,12 @@ namespace CE
 
 	void BinaryBlob::Reserve(u32 byteSize)
 	{
-		if (dataSize >= byteSize)
-		{
-			return;
-		}
-
 		u8* copy = (u8*)Memory::Malloc(byteSize);
 		memset(copy, 0, byteSize);
-		memcpy(copy, data, dataSize);
+        if (data != nullptr && dataSize > 0)
+            memcpy(copy, data, dataSize);
 
-		if (isAllocated)
-		{
-			Free();
-		}
+        Free();
 
 		data = copy;
 		dataSize = byteSize;
@@ -69,19 +38,42 @@ namespace CE
 		return data != nullptr && dataSize > 0;
 	}
 
+    void BinaryBlob::LoadData(const void* data, u32 dataSize)
+    {
+        Reserve(dataSize);
+        memcpy(this->data, data, dataSize);
+    }
+
 	bool BinaryBlob::ReadFrom(Stream* stream)
 	{
-		if (stream == nullptr || !stream->IsOpen())
+		if (stream == nullptr || !stream->IsOpen() || !stream->CanRead())
 			return false;
-
-		*stream >> metaData;
-		
-		if (metaData.size == 0)
-		{
-
-			return true;
-		}
+        
+        s64 size = 0;
+		*stream >> size;
+        if (size < 0)
+        {
+            Free();
+            return true;
+        }
+        
+        Reserve((u32)size);
+        
+        stream->Read(data, (u32)size);
+        
+        return true;
 	}
+
+    bool BinaryBlob::WriteTo(Stream* stream)
+    {
+        if (!IsValid() || stream == nullptr || !stream->IsOpen() || !stream->CanWrite())
+            return false;
+        
+        *stream << dataSize;
+        stream->Write(data, dataSize);
+        
+        return true;
+    }
 
 } // namespace CE
 

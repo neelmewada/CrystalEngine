@@ -1678,6 +1678,37 @@ TEST(Serialization, StructuredStream)
     TEST_END;
 }
 
+TEST(Serialization, BinaryBlob)
+{
+    TEST_BEGIN;
+    
+    // 1. Basic Blob test
+    {
+        const char data[] = "1234567890";
+        BinaryBlob blob{};
+        blob.LoadData((void*)data, COUNTOF(data));
+        
+        MemoryStream stream = MemoryStream(1024);
+        stream.SetBinaryMode(true);
+        blob.WriteTo(&stream);
+        
+        u8* dataPtr = (u8*)stream.GetRawDataPtr();
+        
+        EXPECT_EQ(*(u32*)dataPtr, 11);
+        for (int i = 0; i < 9; i++)
+        {
+            EXPECT_EQ(*(dataPtr + 4 + i), '1' + i);
+        }
+        EXPECT_EQ(*(dataPtr + 4 + 9), '0');
+        
+        blob.Free();
+        
+        stream.Close();
+    }
+    
+    TEST_END;
+}
+
 #pragma endregion
 
 
