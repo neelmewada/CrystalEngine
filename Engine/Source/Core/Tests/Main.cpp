@@ -1683,6 +1683,11 @@ class BinaryBlobTest : public Object
 	CE_CLASS(BinaryBlobTest, Object)
 public:
 
+	~BinaryBlobTest()
+	{
+		blob.Free();
+	}
+
 	String stringField = "default";
 
 	BinaryBlob blob{};
@@ -1754,7 +1759,49 @@ TEST(Serialization, BinaryBlob)
     
 	// 2. Field serialization
 	{
+		MemoryStream stream = MemoryStream(1_MB);
+		stream.SetBinaryMode(true);
+		const char data[] = { (char)0, (char)0xff, (char)0xa1, (char)0x01, (char)0xf1, (char)0, (char)0x12, (char)0x96, (char)0xe0, (char)0xa0 };
 
+		// Write
+		{
+			BinaryBlobTest* write = CreateObject<BinaryBlobTest>(nullptr, "BlobTest");
+			write->blob.LoadData(data, COUNTOF(data));
+			write->stringField = "modified";
+
+			FieldSerializer serializer{ write->GetClass()->GetFirstField(), write };
+
+			while (serializer.HasNext())
+			{
+				serializer.WriteNext(&stream);
+			}
+
+			write->RequestDestroy();
+		}
+
+		stream.Seek(0);
+
+		// Read
+		{
+			BinaryBlobTest* read = CreateObject<BinaryBlobTest>(nullptr, "BlobTest");
+
+			FieldDeserializer deserializer{ read->GetClass()->GetFirstField(), read, nullptr };
+
+			while (deserializer.HasNext())
+			{
+				deserializer.ReadNext(&stream);
+			}
+
+			EXPECT_EQ(read->stringField, "modified");
+
+			EXPECT_EQ(read->blob.GetDataSize(), COUNTOF(data));
+			for (int i = 0; i < COUNTOF(data); i++)
+			{
+				EXPECT_EQ((u8)read->blob.GetDataPtr()[i], (u8)data[i]);
+			}
+
+			read->RequestDestroy();
+		}
 	}
 
 	CE_DEREGISTER_TYPES(BinaryBlobTest);

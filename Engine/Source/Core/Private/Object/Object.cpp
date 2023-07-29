@@ -47,16 +47,6 @@ namespace CE
 		}
 		attachedObjects.RemoveAll();
 
-		// Free BinaryBlob fields
-		for (auto field = GetClass()->GetFirstField(); field != nullptr; field = field->GetNext())
-		{
-			if (field->GetDeclarationTypeId() == TYPEID(BinaryBlob))
-			{
-				BinaryBlob& value = field->GetFieldValue<BinaryBlob>(this);
-				value.Free();
-			}
-		}
-
 		delete this;
 	}
 

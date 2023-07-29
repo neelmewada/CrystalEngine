@@ -14,19 +14,24 @@ namespace CE
 		
 	}
 
+	AssetRegistry* AssetRegistry::Get()
+	{
+		return AssetManager::GetRegistry();
+	}
+
 	void AssetRegistry::CachePathTree()
 	{
 		if (pathTreeCached)
 			return;
 
 		// Clear the path tree
-		pathTree.RemoveAll();
+		cachedPathTree.RemoveAll();
 		directoryTree.RemoveAll();
 
-		pathTree.AddPath("/Game"); directoryTree.AddPath("/Game");
-		pathTree.AddPath("/Engine"); directoryTree.AddPath("/Engine");
+		cachedPathTree.AddPath("/Game"); directoryTree.AddPath("/Game");
+		cachedPathTree.AddPath("/Engine"); directoryTree.AddPath("/Engine");
 #if PAL_TRAIT_BUILD_EDITOR
-		pathTree.AddPath("/Editor"); directoryTree.AddPath("/Editor");
+		//pathTree.AddPath("/Editor"); directoryTree.AddPath("/Editor");
 #endif
 		
 		if (gProjectPath.Exists() && (gProjectPath / "Game/Assets").Exists())
@@ -42,13 +47,13 @@ namespace CE
 					{
                         if (!relativePath.IsEmpty())
 						{
-							pathTree.AddPath("/Game" + relativePath);
+							cachedPathTree.AddPath("/Game" + relativePath);
 							directoryTree.AddPath("/Game" + relativePath);
 						}
 					}
-                    else if (relativePath.EndsWith(".casset")) // Asset file
+                    else if (relativePath.EndsWith(".casset")) // Product asset file
                     {
-                        pathTree.AddPath("/Game" + relativePath);
+						cachedPathTree.AddPath("/Game" + relativePath);
                     }
 				});
 		}

@@ -178,6 +178,7 @@ CMenuItem::check {
 }
 
 CMenuItemHeader {
+	font-size: 14px;
 	color: rgb(108, 108, 108);
 }
 

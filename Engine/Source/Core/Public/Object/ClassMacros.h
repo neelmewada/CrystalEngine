@@ -236,6 +236,8 @@ const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Struct>::FullTypeName()\
 public:\
 	template<typename T>\
 	friend struct CE::Internal::TypeInfoImpl;\
+	template<typename T, typename>\
+	friend struct TStructReleaseFunction;\
     typedef Struct Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::StructType* Type();\
@@ -244,13 +246,6 @@ public:\
 	~Struct()\
 	{\
 		CE::Object::UnbindAllSignals(this);\
-		for (auto field = Self::Type()->GetFirstField(); field != nullptr; field = field->GetNext())\
-		{\
-			if (field->GetDeclarationTypeId() == TYPEID(BinaryBlob))\
-			{\
-				field->GetFieldValue<BinaryBlob>(this).Free();\
-			}\
-		}\
 		if constexpr (TStructReleaseFunction<Struct>::Value)\
 		{\
 			TStructReleaseFunction<Struct>::Release(this);\

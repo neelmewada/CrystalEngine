@@ -51,7 +51,7 @@ namespace CE
     CMImage CMImage::LoadFromFile(IO::Path filePath, int desiredNumChannels)
     {
         CMImage image{};
-
+		
         if (!filePath.Exists() || filePath.IsDirectory())
         {
             image.failureReason = "File doesn't exist";

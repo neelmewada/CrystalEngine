@@ -11,7 +11,7 @@ namespace CE
 	struct CORE_API PathTreeNode
 	{
 		PathTreeNode() = default;
-		~PathTreeNode();
+		virtual ~PathTreeNode();
 
 		PathTreeNode(const PathTreeNode& copy)
 		{
@@ -57,7 +57,7 @@ namespace CE
 	public:
 
 		PathTree();
-		~PathTree();
+		virtual ~PathTree();
 
 		bool AddPath(const Name& path, void* userData = nullptr, u32 userDataSize = 0);
 

@@ -39,7 +39,7 @@ namespace CE::Editor
 		left->SetVerticalScrollAllowed(true);
 		{
 			auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
-			gameContentSection->SetTitle("Game Content");
+			gameContentSection->SetTitle("Content");
 			gameContentSection->SetCollapsed(false);
 			
 			gameContentDirectoryView = CreateWidget<CTreeView>(gameContentSection, "GameContentTreeView");
@@ -50,9 +50,6 @@ namespace CE::Editor
 
 			Object::Bind(folderModel, MEMBER_FUNCTION(AssetBrowserTreeModel, OnSelectionChanged),
 				this, MEMBER_FUNCTION(Self, OnGameContentTreeViewSelectionChanged));
-
-			auto engineContentSection = CreateWidget<CCollapsibleSection>(left, "EngineContentSection");
-			engineContentSection->SetTitle("Engine Content");
 		}
 
 		right = CreateWidget<CContainerWidget>(this, "RightContainer");
@@ -154,7 +151,8 @@ namespace CE::Editor
 		if (!selectedDirectoryPath.IsValid())
 			return;
 
-		PathTreeNode* contentDirectoryNode = AssetManager::GetRegistry()->GetCachedPathTree().GetNode(selectedDirectoryPath);
+		AssetRegistry* registry = AssetRegistry::Get();
+		PathTreeNode* contentDirectoryNode = registry->GetCachedPathTree().GetNode(selectedDirectoryPath);
 		if (contentDirectoryNode == nullptr)
 			return;
 

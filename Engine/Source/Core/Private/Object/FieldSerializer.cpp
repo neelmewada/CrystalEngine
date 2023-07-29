@@ -301,6 +301,11 @@ namespace CE
                 stream->Seek(fieldDataSize, SeekMode::Current);
                 return false;
             }
+			if (field->GetDeclarationType() == nullptr) // Field's type is unknown
+			{
+				stream->Seek(fieldDataSize, SeekMode::Current);
+				return false;
+			}
             if (fieldTypeName != field->GetDeclarationType()->GetTypeName()) // Type mismatch
             {
                 stream->Seek(fieldDataSize, SeekMode::Current);
