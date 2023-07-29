@@ -88,7 +88,10 @@ namespace CE
 		}
 
 		if (length > 0 || fileAction == IO::FileAction::Delete || fileAction == IO::FileAction::Moved)
+		{
 			CE_LOG(Info, All, "{} | Dir: {} | Name: {} | Old Name: {} | Length: {:#x}", fileAction, relative, fileName, oldFileName, length);
+		}
+
 	}
 
 } // namespace CE

@@ -234,7 +234,7 @@ void EditorLoop::RunLoop()
 		app->Tick();
 		// Engine
 		gEngine->Tick();
-
+		
 		// Render
 		viewport->SetClearColor(Color::Black());
 
