@@ -18,11 +18,14 @@ namespace CE
 		void Initialize();
 		void Shutdown();
 
+		virtual void Tick();
+
 	protected:
 
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;
 
+		friend class Engine;
 	};
     
 } // namespace CE

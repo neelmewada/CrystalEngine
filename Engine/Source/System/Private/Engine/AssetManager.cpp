@@ -38,5 +38,10 @@ namespace CE
 
 	}
 
+	void AssetManager::Tick()
+	{
+
+	}
+
 
 } // namespace CE

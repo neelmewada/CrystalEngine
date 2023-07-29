@@ -232,6 +232,8 @@ void EditorLoop::RunLoop()
 	while (!IsEngineRequestingExit())
 	{
 		app->Tick();
+		// Engine
+		gEngine->Tick();
 
 		// Render
 		viewport->SetClearColor(Color::Black());

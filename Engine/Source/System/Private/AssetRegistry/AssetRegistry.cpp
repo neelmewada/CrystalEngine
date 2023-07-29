@@ -72,7 +72,23 @@ namespace CE
 	{
 		LockGuard<Mutex> guard{ mutex };
 
-		CE_LOG(Info, All, "FileWatcher: {} | Dir: {} | Filename: {} | Old Filename: {}", fileAction, directory, fileName, oldFileName);
+		// Watch for new/modified source assets
+		IO::Path relative = IO::Path::GetRelative(directory, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
+		u64 length = 0;
+		auto filePath = directory / fileName;
+
+		if (filePath.Exists() && !filePath.IsDirectory())
+		{
+			FileStream stream = FileStream(directory / fileName, Stream::Permissions::ReadOnly);
+			stream.SetBinaryMode(true);
+
+			length = stream.GetLength();
+
+			stream.Close();
+		}
+
+		if (length > 0 || fileAction == IO::FileAction::Delete || fileAction == IO::FileAction::Moved)
+			CE_LOG(Info, All, "{} | Dir: {} | Name: {} | Old Name: {} | Length: {:#x}", fileAction, relative, fileName, oldFileName, length);
 	}
 
 } // namespace CE

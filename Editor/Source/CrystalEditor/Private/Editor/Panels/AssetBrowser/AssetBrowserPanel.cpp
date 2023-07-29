@@ -70,7 +70,7 @@ namespace CE::Editor
 				settingsButton->SetText("Settings");
 
 				auto settingsButtonMenu = CreateWidget<CMenu>(settingsButton, "SettingsButtonMenu");
-				settingsButtonMenu->SetMenuPosition(CMenuPosition::Bottom);
+				settingsButtonMenu->SetMenuPosition(CMenuPosition::Top);
 				settingsButton->SetPopupMenu(settingsButtonMenu);
 				{
 					auto header = CreateWidget<CMenuItemHeader>(settingsButtonMenu, "Header");

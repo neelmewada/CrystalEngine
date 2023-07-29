@@ -91,6 +91,10 @@ namespace CE
         impl.seekg(0, std::ios::end);
         auto length = impl.tellg();
         impl.seekg(offset, std::ios::beg);
+		if (length < 0)
+		{
+			length = 0;
+		}
         return length;
     }
 

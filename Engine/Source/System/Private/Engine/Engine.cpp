@@ -22,4 +22,9 @@ namespace CE
 
 	}
 
+	void Engine::Tick()
+	{
+		assetManager->Tick();
+	}
+
 } // namespace CE

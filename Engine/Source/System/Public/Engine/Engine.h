@@ -17,6 +17,8 @@ namespace CE
 		virtual void PreShutdown();
 		virtual void Shutdown();
 
+		virtual void Tick();
+
 	public: 
 		// - Fields -
 

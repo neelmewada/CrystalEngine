@@ -91,6 +91,8 @@ namespace CE::Widgets
 		if (tryPosition == Vec2())
 			tryPosition = GUI::GetMousePos();
 
+		UpdateLayoutIfNeeded(); // Calculate layout
+
 		auto menuPos = tryPosition;
 		auto menuSize = GetComputedLayoutSize();
 		auto screenSize = PlatformApplication::Get()->GetMainScreenSize();
