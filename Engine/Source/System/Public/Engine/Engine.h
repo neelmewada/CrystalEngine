@@ -17,7 +17,7 @@ namespace CE
 		virtual void PreShutdown();
 		virtual void Shutdown();
 
-		virtual void Tick();
+		virtual void Tick(f32 deltaTime);
 
 	public: 
 		// - Fields -

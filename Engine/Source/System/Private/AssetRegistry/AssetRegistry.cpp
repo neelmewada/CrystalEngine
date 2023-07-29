@@ -91,7 +91,6 @@ namespace CE
 		{
 			CE_LOG(Info, All, "{} | Dir: {} | Name: {} | Old Name: {} | Length: {:#x}", fileAction, relative, fileName, oldFileName, length);
 		}
-
 	}
 
 } // namespace CE

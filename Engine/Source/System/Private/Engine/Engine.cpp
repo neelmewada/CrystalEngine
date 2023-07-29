@@ -22,9 +22,9 @@ namespace CE
 
 	}
 
-	void Engine::Tick()
+	void Engine::Tick(f32 deltaTime)
 	{
-		assetManager->Tick();
+		assetManager->Tick(deltaTime);
 	}
 
 } // namespace CE

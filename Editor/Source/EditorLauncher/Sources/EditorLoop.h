@@ -48,6 +48,8 @@ private:
 	IO::Path projectPath{};
 
 	CrystalEditorWindow* editorWindow = nullptr;
+
+	clock_t previousTime{};
 };
 
 extern EditorLoop gEditorLoop;

@@ -6,6 +6,7 @@ namespace CE
 	namespace Editor { class EditorAssetManager; }
 #endif
 
+
 	CLASS()
 	class SYSTEM_API AssetRegistry : public Object, IO::IFileWatchListener
 	{
@@ -22,11 +23,17 @@ namespace CE
 			return directoryTree;
 		}
 
+		struct SourceAssetChange
+		{
+			IO::FileAction fileAsction{};
+			IO::Path currentPath{};
+			IO::Path oldPath{};
+		};
+
 		// - Asset Registry API -
 
 		/// Caches path tree structure
 		void CachePathTree();
-
 
 
 	protected:

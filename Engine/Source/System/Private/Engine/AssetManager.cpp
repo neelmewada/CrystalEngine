@@ -38,7 +38,7 @@ namespace CE
 
 	}
 
-	void AssetManager::Tick()
+	void AssetManager::Tick(f32 deltaTime)
 	{
 
 	}

@@ -231,9 +231,12 @@ void EditorLoop::RunLoop()
 
 	while (!IsEngineRequestingExit())
 	{
+		auto curTime = clock();
+		f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+
 		app->Tick();
 		// Engine
-		gEngine->Tick();
+		gEngine->Tick(deltaTime);
 		
 		// Render
 		viewport->SetClearColor(Color::Black());
@@ -252,6 +255,8 @@ void EditorLoop::RunLoop()
 		{
 			RHI::gDynamicRHI->PresentViewport(cmdList);
 		}
+
+		previousTime = curTime;
 	}
 }
 

@@ -2,6 +2,7 @@
 
 namespace CE
 {
+
 	CLASS()
 	class SYSTEM_API AssetManager : public CE::Object
 	{
@@ -15,10 +16,10 @@ namespace CE
 
 		static AssetRegistry* GetRegistry();
 
-		void Initialize();
-		void Shutdown();
+		virtual void Initialize();
+		virtual void Shutdown();
 
-		virtual void Tick();
+		virtual void Tick(f32 deltaTime);
 
 	protected:
 
