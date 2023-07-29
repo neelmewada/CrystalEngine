@@ -7,7 +7,7 @@ namespace CE
 #endif
 
 	CLASS()
-	class SYSTEM_API AssetRegistry : public Object
+	class SYSTEM_API AssetRegistry : public Object, IO::IFileWatchListener
 	{
 		CE_CLASS(AssetRegistry, Object)
 	public:
@@ -31,6 +31,8 @@ namespace CE
 
 	protected:
 
+		// Inherited via IFileWatchListener
+		virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName) override;
 
 	private:
 
@@ -46,6 +48,10 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::EditorAssetManager;
 #endif
+		IO::FileWatcher fileWatcher{};
+		IO::WatchID fileWatchID = 0;
+		
+		Mutex mutex{};
 	};
     
 } // namespace CE

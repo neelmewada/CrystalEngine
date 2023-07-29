@@ -11,7 +11,9 @@ namespace CE
 
 	AssetRegistry::~AssetRegistry()
 	{
-		
+#if PAL_TRAIT_BUILD_EDITOR
+		fileWatcher.RemoveWatcher(fileWatchID);
+#endif
 	}
 
 	AssetRegistry* AssetRegistry::Get()
@@ -56,9 +58,21 @@ namespace CE
 						cachedPathTree.AddPath("/Game" + relativePath);
                     }
 				});
+
+#if PAL_TRAIT_BUILD_EDITOR
+			fileWatchID = fileWatcher.AddWatcher(projectAssetsPath, this, true);
+			fileWatcher.Watch();
+#endif
 		}
 
 		pathTreeCached = true;
+	}
+
+	void AssetRegistry::HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName)
+	{
+		LockGuard<Mutex> guard{ mutex };
+
+		CE_LOG(Info, All, "FileWatcher: {} | Dir: {} | Filename: {} | Old Filename: {}", fileAction, directory, fileName, oldFileName);
 	}
 
 } // namespace CE

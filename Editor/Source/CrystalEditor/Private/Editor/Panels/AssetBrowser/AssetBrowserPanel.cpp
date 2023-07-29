@@ -152,7 +152,7 @@ namespace CE::Editor
 			return;
 
 		AssetRegistry* registry = AssetRegistry::Get();
-		PathTreeNode* contentDirectoryNode = registry->GetCachedPathTree().GetNode(selectedDirectoryPath);
+		PathTreeNode* contentDirectoryNode = nullptr;//registry->GetCachedPathTree().GetNode(selectedDirectoryPath);
 		if (contentDirectoryNode == nullptr)
 			return;
 

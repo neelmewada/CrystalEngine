@@ -53,6 +53,8 @@ namespace CE
 			FIELD()
 			BinaryBlob rawData{};
 
+			FIELD()
+			TextureFormat format = TextureFormat::None;
 		};
 	}
 
