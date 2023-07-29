@@ -21,6 +21,8 @@ namespace CE
 	class Variant;
 	class Object;
 
+	class BinaryBlob;
+
 	template<typename ElementType>
 	class Array;
 

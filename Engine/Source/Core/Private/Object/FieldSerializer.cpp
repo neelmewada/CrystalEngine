@@ -99,6 +99,10 @@ namespace CE
         {
             *stream << field->GetFieldValue<IO::Path>(rawInstance).GetString();
         }
+		else if (fieldTypeId == TYPEID(BinaryBlob))
+		{
+			*stream << field->GetFieldValue<BinaryBlob>(rawInstance);
+		}
         else if (field->IsArrayField())
         {
             auto& array = field->GetFieldValue<Array<u8>>(rawInstance);
@@ -357,6 +361,10 @@ namespace CE
             *stream >> pathString;
             field->ForceSetFieldValue<IO::Path>(rawInstance, pathString);
         }
+		else if (fieldTypeId == TYPEID(BinaryBlob))
+		{
+			*stream >> field->GetFieldValue<BinaryBlob>(rawInstance);
+		}
         else if (field->IsArrayField())
         {
             auto& array = field->GetFieldValue<Array<u8>>(rawInstance);

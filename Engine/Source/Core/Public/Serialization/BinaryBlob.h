@@ -27,6 +27,21 @@ namespace CE
 		bool ReadFrom(Stream* stream);
         bool WriteTo(Stream* stream);
 
+		inline u8* GetDataPtr() const { return data; }
+		inline u32 GetDataSize() const { return dataSize; }
+
+		friend inline Stream& operator<<(Stream& stream, BinaryBlob& blob)
+		{
+			blob.WriteTo(&stream);
+			return stream;
+		}
+
+		friend inline Stream& operator>>(Stream& stream, BinaryBlob& blob)
+		{
+			blob.ReadFrom(&stream);
+			return stream;
+		}
+
 	private:
 
 		b8 isAllocated = false;

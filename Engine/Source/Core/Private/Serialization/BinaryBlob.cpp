@@ -69,7 +69,7 @@ namespace CE
         if (!IsValid() || stream == nullptr || !stream->IsOpen() || !stream->CanWrite())
             return false;
         
-        *stream << dataSize;
+        *stream << (s64)dataSize;
         stream->Write(data, dataSize);
         
         return true;

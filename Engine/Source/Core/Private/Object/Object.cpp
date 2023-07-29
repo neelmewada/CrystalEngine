@@ -15,25 +15,7 @@ namespace CE
 
 	Object::~Object()
 	{
-		// Unbind signals
-		//UnbindAllSignals(this);
 
-  //      // Detach this object from outer
-  //      if (outer != nullptr)
-  //      {
-  //          outer->DetachSubobject(this);
-  //      }
-  //      
-  //      // Delete all attached subobjects
-		//if (attachedObjects.GetObjectCount() > 0)
-		//{
-		//	for (auto [_, subobject] : attachedObjects)
-		//	{
-		//		subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
-		//		delete subobject;
-		//	}
-		//}
-  //      attachedObjects.RemoveAll();
 	}
 
 	void Object::RequestDestroy()
@@ -64,6 +46,16 @@ namespace CE
 			}
 		}
 		attachedObjects.RemoveAll();
+
+		// Free BinaryBlob fields
+		for (auto field = GetClass()->GetFirstField(); field != nullptr; field = field->GetNext())
+		{
+			if (field->GetDeclarationTypeId() == TYPEID(BinaryBlob))
+			{
+				BinaryBlob& value = field->GetFieldValue<BinaryBlob>(this);
+				value.Free();
+			}
+		}
 
 		delete this;
 	}

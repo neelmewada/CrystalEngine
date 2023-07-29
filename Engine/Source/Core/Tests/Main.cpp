@@ -1678,34 +1678,86 @@ TEST(Serialization, StructuredStream)
     TEST_END;
 }
 
+class BinaryBlobTest : public Object
+{
+	CE_CLASS(BinaryBlobTest, Object)
+public:
+
+	String stringField = "default";
+
+	BinaryBlob blob{};
+};
+
+CE_RTTI_CLASS(,,BinaryBlobTest,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(stringField)
+		CE_FIELD(blob)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(,,BinaryBlobTest)
+
 TEST(Serialization, BinaryBlob)
 {
     TEST_BEGIN;
+	CE_REGISTER_TYPES(BinaryBlobTest);
     
     // 1. Basic Blob test
     {
+		MemoryStream stream = MemoryStream(1024);
         const char data[] = "1234567890";
-        BinaryBlob blob{};
-        blob.LoadData((void*)data, COUNTOF(data));
-        
-        MemoryStream stream = MemoryStream(1024);
-        stream.SetBinaryMode(true);
-        blob.WriteTo(&stream);
-        
-        u8* dataPtr = (u8*)stream.GetRawDataPtr();
-        
-        EXPECT_EQ(*(u32*)dataPtr, 11);
-        for (int i = 0; i < 9; i++)
-        {
-            EXPECT_EQ(*(dataPtr + 4 + i), '1' + i);
-        }
-        EXPECT_EQ(*(dataPtr + 4 + 9), '0');
-        
-        blob.Free();
+
+		{
+			BinaryBlob blob{};
+			blob.LoadData((void*)data, COUNTOF(data));
+			stream.SetBinaryMode(true);
+			stream << blob;
+
+			u8* dataPtr = (u8*)stream.GetRawDataPtr();
+			s64 size = *(s64*)dataPtr;
+
+			EXPECT_EQ(size, 11);
+			for (int i = 0; i < 9; i++)
+			{
+				EXPECT_EQ(*(dataPtr + 8 + i), '1' + i);
+			}
+			EXPECT_EQ(*(dataPtr + 8 + 9), '0');
+
+			blob.Free();
+		}
+
+		{
+			stream.Seek(0);
+
+			BinaryBlob blob{};
+			
+			stream >> blob;
+
+			u8* dataPtr = (u8*)blob.GetDataPtr();
+			s64 size = blob.GetDataSize();
+
+			EXPECT_EQ(size, 11);
+			for (int i = 0; i < 9; i++)
+			{
+				EXPECT_EQ(*(dataPtr + i), '1' + i);
+			}
+			EXPECT_EQ(*(dataPtr + 9), '0');
+
+			blob.Free();
+		}
         
         stream.Close();
     }
     
+	// 2. Field serialization
+	{
+
+	}
+
+	CE_DEREGISTER_TYPES(BinaryBlobTest);
     TEST_END;
 }
 

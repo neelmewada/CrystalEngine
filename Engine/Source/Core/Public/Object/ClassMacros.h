@@ -244,6 +244,13 @@ public:\
 	~Struct()\
 	{\
 		CE::Object::UnbindAllSignals(this);\
+		for (auto field = Self::Type()->GetFirstField(); field != nullptr; field = field->GetNext())\
+		{\
+			if (field->GetDeclarationTypeId() == TYPEID(BinaryBlob))\
+			{\
+				field->GetFieldValue<BinaryBlob>(this).Free();\
+			}\
+		}\
 		if constexpr (TStructReleaseFunction<Struct>::Value)\
 		{\
 			TStructReleaseFunction<Struct>::Release(this);\
