@@ -76,8 +76,10 @@ namespace CE
 		IO::Path relative = IO::Path::GetRelative(directory, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
 		u64 length = 0;
 		auto filePath = directory / fileName;
+        bool isDirectory = filePath.IsDirectory();
+        bool isFile = !isDirectory && filePath.Exists();
 
-		if (filePath.Exists() && !filePath.IsDirectory())
+		if (filePath.Exists() && !isDirectory)
 		{
 			FileStream stream = FileStream(directory / fileName, Stream::Permissions::ReadOnly);
 			stream.SetBinaryMode(true);
@@ -86,9 +88,35 @@ namespace CE
 
 			stream.Close();
 		}
-
-		if (length > 0 || fileAction == IO::FileAction::Delete || fileAction == IO::FileAction::Moved)
+        
+		if (isFile && (length > 0 || fileAction == IO::FileAction::Delete || fileAction == IO::FileAction::Moved))
 		{
+            if (length > 0 && (fileAction == IO::FileAction::Modified || fileAction == IO::FileAction::Add))
+            {
+                SourceAssetChange change{};
+                change.fileAction = IO::FileAction::Modified;
+                change.fileSize = length;
+                change.currentPath = filePath;
+                change.oldPath = "";
+                sourceChanges.Add(change);
+            }
+            else if (fileAction == IO::FileAction::Delete)
+            {
+                SourceAssetChange change{};
+                change.fileAction = IO::FileAction::Delete;
+                change.currentPath = filePath;
+                change.fileSize = length;
+                sourceChanges.Add(change);
+            }
+            else if (fileAction == IO::FileAction::Moved)
+            {
+                SourceAssetChange change{};
+                change.fileAction = IO::FileAction::Moved;
+                change.currentPath = filePath;
+                change.oldPath = directory / oldFileName;
+                change.fileSize = length;
+                sourceChanges.Add(change);
+            }
 			CE_LOG(Info, All, "{} | Dir: {} | Name: {} | Old Name: {} | Length: {:#x}", fileAction, relative, fileName, oldFileName, length);
 		}
 	}

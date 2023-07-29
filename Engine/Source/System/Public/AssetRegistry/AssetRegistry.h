@@ -25,16 +25,16 @@ namespace CE
 
 		struct SourceAssetChange
 		{
-			IO::FileAction fileAsction{};
+			IO::FileAction fileAction{};
 			IO::Path currentPath{};
 			IO::Path oldPath{};
+            u64 fileSize = 0;
 		};
 
 		// - Asset Registry API -
 
 		/// Caches path tree structure
 		void CachePathTree();
-
 
 	protected:
 
@@ -47,6 +47,8 @@ namespace CE
 		PathTree cachedPathTree{};
 
 		b8 pathTreeCached = false;
+        
+        Array<SourceAssetChange> sourceChanges{};
 
 		static AssetRegistry* singleton;
 
