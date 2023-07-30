@@ -479,7 +479,7 @@ namespace CE
         registeredClassesByName.Remove(type->GetTypeName());
     }
 
-    ClassType* ClassType::FindClassByName(Name className)
+    ClassType* ClassType::FindClassByName(const Name& className)
     {
         if (!className.IsValid() || !registeredClassesByName.KeyExists(className))
             return nullptr;

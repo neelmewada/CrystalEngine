@@ -1,6 +1,8 @@
 
 #include "CoreMinimal.h"
 
+#include "Package.inl"
+
 namespace CE
 {
 
@@ -47,6 +49,7 @@ namespace CE
         
         if (!skipHeader)
         {
+			*stream << FIELD_MAGIC_NUMBER;
             *stream << field->GetName();
             *stream << field->GetDeclarationType()->GetTypeName();
         }
@@ -102,6 +105,14 @@ namespace CE
 		else if (fieldTypeId == TYPEID(BinaryBlob))
 		{
 			*stream << field->GetFieldValue<BinaryBlob>(rawInstance);
+		}
+		else if (fieldTypeId == TYPEID(SubClassType<Object>))
+		{
+			ClassType* value = field->GetFieldValue<SubClassType<Object>>(rawInstance);
+			if (value == nullptr)
+				*stream << "";
+			else
+				*stream << value->GetTypeName().GetString();
 		}
         else if (field->IsArrayField())
         {
@@ -236,6 +247,7 @@ namespace CE
 
     FieldDeserializer::FieldDeserializer(FieldType* fieldChain, void* instance, Package* currentPackage)
         : rawInstance(instance), skipHeader(false), currentPackage(currentPackage)
+		, packageMajor(PACKAGE_VERSION_MAJOR), packageMinor(PACKAGE_VERSION_MINOR)
     {
         fields.Clear();
 
@@ -251,6 +263,7 @@ namespace CE
 
     FieldDeserializer::FieldDeserializer(Array<FieldType*> fieldList, void* instance, Package* currentPackage)
         : fields(fieldList), rawInstance(instance), skipHeader(false), currentPackage(currentPackage)
+		, packageMajor(PACKAGE_VERSION_MAJOR), packageMinor(PACKAGE_VERSION_MINOR)
     {
         
     }
@@ -270,6 +283,21 @@ namespace CE
 
         if (!skipHeader)
         {
+			if (packageMajor == 0 || IsVersionGreaterThanOrEqualTo(packageMajor, packageMinor, FieldMagicValue_Major, FieldMagicValue_Minor))
+			{
+				u32 magicValue = 0;
+				*stream >> magicValue;
+				if (magicValue != FIELD_MAGIC_NUMBER) // End of fields or invalid field
+				{
+					if (magicValue != 0)
+					{
+						CE_LOG(Error, All, "Invalid field entry! Expected a magic field number.");
+					}
+					fields.Clear();
+					return false;
+				}
+			}
+
             *stream >> fieldName;
             if (fieldName.IsEmpty())
             {
@@ -319,6 +347,8 @@ namespace CE
         }
 
         TypeId fieldTypeId = field->GetTypeId();
+		auto underlyingTypeId = field->GetUnderlyingTypeId();
+		auto underlyingType = field->GetUnderlyingType();
 
         if (field->IsIntegerField())
         {
@@ -369,6 +399,22 @@ namespace CE
 		else if (fieldTypeId == TYPEID(BinaryBlob))
 		{
 			*stream >> field->GetFieldValue<BinaryBlob>(rawInstance);
+		}
+		else if (fieldTypeId == TYPEID(SubClassType<Object>) && underlyingType != nullptr && underlyingType->IsClass())
+		{
+			SubClassType<Object>& subClassType = field->GetFieldValue<SubClassType<Object>>(rawInstance);
+			ClassType* baseClassType = (ClassType*)underlyingType;
+			String classTypeName = "";
+			*stream >> classTypeName;
+			ClassType* classType = ClassType::FindClass(classTypeName);
+			if (classType != nullptr && classType->IsSubclassOf(baseClassType))
+			{
+				subClassType = classType;
+			}
+			else
+			{
+				subClassType = nullptr;
+			}
 		}
         else if (field->IsArrayField())
         {

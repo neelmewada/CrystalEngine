@@ -124,7 +124,7 @@ namespace CE
 
     bool MemoryStream::CanResize() const
     {
-        return isAllocated;
+        return isAllocated && autoResizeIncrement > 0;
     }
 
     void MemoryStream::SetAutoResizeIncrement(u32 increment)

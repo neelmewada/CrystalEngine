@@ -27,6 +27,8 @@ namespace CE
         void* rawInstance = nullptr;
 
         bool skipHeader = false;
+
+		friend class Package;
     };
 
     class CORE_API FieldDeserializer
@@ -56,6 +58,10 @@ namespace CE
         void* rawInstance = nullptr;
         
         bool skipHeader = false;
+
+		u32 packageMajor = 0, packageMinor = 0;
+
+		friend class Package;
     };
     
 }

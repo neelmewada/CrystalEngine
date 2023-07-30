@@ -426,7 +426,6 @@ TEST(Reflection, RTTI_Registry_Testing)
     EXPECT_EQ(TypeInfo::GetRegisteredCount(), 0);
 }
 
-
 class Core_Reflection_Attribute_Test_Class : public CE::Object
 {
     CE_CLASS(Core_Reflection_Attribute_Test_Class, CE::Object)
@@ -473,6 +472,139 @@ TEST(Reflection, Attribute_Parsing)
     EXPECT_EQ(GetTypeInfo(TYPEID(Core_Reflection_Attribute_Test_Class)), nullptr);
 
     TEST_END;
+}
+
+TEST(Reflection, SubClassType)
+{
+	TEST_BEGIN;
+	CERegisterModuleTypes();
+	using namespace ObjectTests;
+
+	// 1. Basic test
+	{
+		SubClassType<BaseClass> subclass{};
+		subclass = Object::Type();
+		EXPECT_EQ(subclass, nullptr);
+
+		subclass = DerivedClassA::Type();
+		EXPECT_EQ(subclass, DerivedClassA::Type());
+
+		subclass = Object::Type();
+		EXPECT_EQ(subclass, DerivedClassA::Type());
+
+		subclass = nullptr;
+		EXPECT_EQ(subclass, nullptr);
+
+		// Get reference with a different template class
+		// Original subclass requirement should be maintained
+		{
+			SubClassType<Object>& ref = subclass;
+			ref = Object::Type();
+			EXPECT_EQ(ref, nullptr); EXPECT_EQ(subclass, nullptr);
+
+			ref = BaseClass::Type();
+			EXPECT_EQ(ref, BaseClass::Type()); EXPECT_EQ(subclass, BaseClass::Type());
+
+			ref = DerivedClassA::Type();
+			EXPECT_EQ(ref, DerivedClassA::Type()); EXPECT_EQ(subclass, DerivedClassA::Type());
+
+			ref = nullptr;
+			EXPECT_EQ(ref, nullptr); EXPECT_EQ(subclass, nullptr);
+		}
+
+		// Get reference with DerivedClassA as template class
+		{
+			SubClassType<DerivedClassA>& ref = subclass;
+			ref = Object::Type();
+			EXPECT_EQ(ref, nullptr); EXPECT_EQ(subclass, nullptr);
+
+			ref = BaseClass::Type();
+			EXPECT_EQ(ref, BaseClass::Type()); EXPECT_EQ(subclass, BaseClass::Type());
+
+			ref = DerivedClassA::Type();
+			EXPECT_EQ(ref, DerivedClassA::Type()); EXPECT_EQ(subclass, DerivedClassA::Type());
+
+			ref = nullptr;
+			EXPECT_EQ(ref, nullptr); EXPECT_EQ(subclass, nullptr);
+		}
+	}
+
+	// 2. Field & RTTI
+	{
+		ClassType* type = DerivedClassA::Type();
+
+		EXPECT_EQ(TYPEID(SubClassType<Object>), TYPEID(SubClassType<int>));
+		EXPECT_EQ(TYPEID(SubClassType<Object>), TYPEID(SubClassType<void>));
+		EXPECT_EQ(TYPEID(SubClassType<Object>), TYPEID(SubClassType<String>));
+		EXPECT_EQ(TYPEID(SubClassType<Object>), TYPEID(SubClassType<DerivedClassA>));
+
+		EXPECT_EQ(type->FindFieldWithName("assignedClass")->GetDeclarationType(), TYPE(SubClassType<Object>));
+		EXPECT_EQ(type->FindFieldWithName("derivedClassType")->GetDeclarationType(), TYPE(SubClassType<Object>));
+		EXPECT_EQ(type->FindFieldWithName("anyClass")->GetDeclarationType(), TYPE(SubClassType<Object>));
+
+		EXPECT_EQ(type->FindFieldWithName("assignedClass")->GetUnderlyingTypeId(), TYPEID(BaseClass));
+		EXPECT_EQ(type->FindFieldWithName("derivedClassType")->GetUnderlyingTypeId(), TYPEID(DerivedClassA));
+		EXPECT_EQ(type->FindFieldWithName("anyClass")->GetUnderlyingTypeId(), TYPEID(Object));
+
+		EXPECT_EQ(type->FindFieldWithName("assignedClass")->GetUnderlyingType(), TYPE(BaseClass));
+		EXPECT_EQ(type->FindFieldWithName("derivedClassType")->GetUnderlyingType(), TYPE(DerivedClassA));
+		EXPECT_EQ(type->FindFieldWithName("anyClass")->GetUnderlyingType(), TYPE(Object));
+	}
+
+	// 3. Binary serialization
+	{
+		MemoryStream stream = MemoryStream(2048);
+		stream.SetBinaryMode(true);
+		stream.SetAutoResizeIncrement(2048);
+
+		// Write
+		{
+			DerivedClassA* object = CreateObject<DerivedClassA>(nullptr, "DerivedClassObject");
+			object->assignedClass = DerivedClassA::Type();
+			object->anyClass = BaseClass::Type();
+			object->string = "some string";
+			object->derivedClassType = BaseClass::Type();
+
+			EXPECT_EQ(object->assignedClass, DerivedClassA::Type());
+			EXPECT_EQ(object->anyClass, BaseClass::Type());
+			EXPECT_EQ(object->derivedClassType, nullptr);
+
+			FieldSerializer serializer{ DerivedClassA::Type()->GetFirstField(), object };
+
+			while (serializer.HasNext())
+			{
+				serializer.WriteNext(&stream);
+			}
+
+			object->RequestDestroy();
+		}
+
+		stream.Seek(0);
+
+		// Read
+		{
+			DerivedClassA* object = CreateObject<DerivedClassA>(nullptr, "DerivedClassObject");
+
+			FieldDeserializer deserializer{ DerivedClassA::Type()->GetFirstField(), object, nullptr };
+
+			while (deserializer.HasNext())
+			{
+				deserializer.ReadNext(&stream);
+			}
+
+			EXPECT_EQ(object->assignedClass, DerivedClassA::Type());
+			EXPECT_EQ(object->anyClass, BaseClass::Type());
+			EXPECT_EQ(object->derivedClassType, nullptr);
+			EXPECT_EQ(object->string, "some string");
+
+			object->RequestDestroy();
+		}
+
+		stream.Close();
+	}
+
+	CEDeregisterModuleTypes();
+	TEST_END;
 }
 
 #pragma endregion
@@ -804,7 +936,6 @@ TEST(Object, CDI)
 	CE_DEREGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
     TEST_END;
 }
-
 
 TEST(Object, Signals)
 {

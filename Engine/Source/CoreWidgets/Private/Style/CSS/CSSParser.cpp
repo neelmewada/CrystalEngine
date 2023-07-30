@@ -10,6 +10,7 @@ namespace CE::Widgets
 	CSSParser::CSSParser(Stream* stream)
 	{
 		stream->SetAsciiMode(true);
+		stream->SetAutoResizeIncrement(0); // Disable auto resize on stream
 
 		CSSTokenizer tokenizer{ stream };
 

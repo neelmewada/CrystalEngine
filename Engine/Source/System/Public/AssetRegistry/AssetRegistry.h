@@ -29,6 +29,11 @@ namespace CE
 			IO::Path currentPath{};
 			IO::Path oldPath{};
             u64 fileSize = 0;
+
+			inline bool IsValid()
+			{
+				return !currentPath.IsEmpty() || !oldPath.IsEmpty();
+			}
 		};
 
 		// - Asset Registry API -

@@ -523,6 +523,31 @@ namespace CE
 
 			*json = JValue(field->GetFieldValue<Name>(rawInstance).GetString());
 		}
+		else if (fieldTypeId == TYPEID(SubClassType<Object>))
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue("") });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(""));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			ClassType* classType = field->GetFieldValue<SubClassType<Object>>(rawInstance);
+
+			if (classType != nullptr)
+			{
+				*json = JValue(classType->GetTypeName().GetString());
+			}
+			else
+			{
+				*json = JValue(String());
+			}
+		}
 		else if (fieldDeclType->IsStruct())
 		{
 			JValue* json = nullptr;
@@ -715,6 +740,7 @@ namespace CE
 
 		auto fieldDeclType = field->GetDeclarationType();
 		auto fieldTypeId = field->GetDeclarationTypeId();
+		auto underlyingType = field->GetUnderlyingType();
 
 		if (json.IsNumberValue() && (field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(UUID)))
 		{
@@ -764,6 +790,20 @@ namespace CE
 				field->SetFieldValue<Name>(rawInstance, json.GetStringValue());
 			else if (fieldTypeId == TYPEID(IO::Path))
 				field->SetFieldValue<IO::Path>(rawInstance, IO::Path(json.GetStringValue()));
+			else if (fieldTypeId == TYPEID(SubClassType<Object>) && underlyingType != nullptr)
+			{
+				SubClassType<Object>& value = field->GetFieldValue<SubClassType<Object>>(rawInstance);
+				ClassType* baseClassType = (ClassType*)underlyingType;
+				ClassType* classType = ClassType::FindClass(json.GetStringValue());
+				if (classType != nullptr && classType->IsSubclassOf(baseClassType))
+				{
+					value = classType;
+				}
+				else
+				{
+					value = nullptr;
+				}
+			}
 			else
 				return false;
 

@@ -70,7 +70,8 @@ namespace CE
             CE::Quat, CE::Matrix4x4,
 			CE::Color, CE::Gradient,
 			CE::ObjectMap,
-			CE::BinaryBlob);
+			CE::BinaryBlob,
+			CE::SubClassType<Object>);
 
         // Enums
         CE_REGISTER_TYPES(

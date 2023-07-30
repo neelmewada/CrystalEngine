@@ -74,6 +74,34 @@ namespace ObjectTests
 {
 	using namespace CE;
 
+	class DerivedClassA;
+
+	CLASS()
+	class BaseClass : public Object
+	{
+		CE_CLASS(BaseClass, Object)
+	public:
+
+		FIELD()
+		String string = "base class";
+
+		FIELD()
+		SubClassType<BaseClass> assignedClass{};
+
+		FIELD()
+		SubClassType<DerivedClassA> derivedClassType{};
+	};
+
+	CLASS()
+	class DerivedClassA : public BaseClass
+	{
+		CE_CLASS(DerivedClassA, BaseClass)
+	public:
+
+		FIELD()
+		SubClassType<Object> anyClass{};
+	};
+
 	CLASS()
 	class Sender : public CE::Object
 	{

@@ -11,6 +11,7 @@
 #include "Enum.h"
 #include "Field.h"
 #include "Signal.h"
+#include "SubClassType.h"
 
 #include "ObjectThreadContext.h"
 #include "ObjectGlobals.h"

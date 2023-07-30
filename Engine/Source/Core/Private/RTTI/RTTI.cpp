@@ -17,6 +17,11 @@ namespace CE
         {
             return (TypeId)typeid(CE::ObjectMap).hash_code();
         }
+
+        CORE_API TypeId GetSubClassTypeTypeId()
+        {
+			return (TypeId)typeid(CE::SubClassType<Object>).hash_code();
+        }
     }
 
     HashMap<Name, TypeInfo*> TypeInfo::registeredTypesByName{};

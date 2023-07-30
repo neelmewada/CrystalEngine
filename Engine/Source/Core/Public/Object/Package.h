@@ -107,6 +107,9 @@ namespace CE
 		bool isLoaded = true;
         bool isFullyLoaded = true;
 
+		u32 majorVersion = 0;
+		u32 minorVersion = 0;
+
 		Array<Name> packageDependencies{};
         
 		// Loading Only Data

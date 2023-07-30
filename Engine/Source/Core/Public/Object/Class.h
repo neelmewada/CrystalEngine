@@ -467,10 +467,10 @@ namespace CE
 			return registeredClasses.GetSize();
 		}
 
-        static ClassType* FindClassByName(Name className);
+        static ClassType* FindClassByName(const Name& className);
         static ClassType* FindClassById(TypeId classId);
 
-		inline static ClassType* FindClass(Name className)
+		inline static ClassType* FindClass(const Name& className)
 		{
 			return FindClassByName(className);
 		}

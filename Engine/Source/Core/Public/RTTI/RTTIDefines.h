@@ -167,6 +167,7 @@ namespace CE
         
         CORE_API TypeId GetArrayTypeId();
         CORE_API TypeId GetObjectStoreTypeId();
+		CORE_API TypeId GetSubClassTypeTypeId();
 	}
 
 	template<typename Type>
@@ -176,6 +177,7 @@ namespace CE
 		constexpr const bool isPointer = std::is_pointer_v<Type>;
 		constexpr const bool isArray = TIsArray<Type>::Value;
 		constexpr const bool isObjectStore = IsObjectStoreType<Type>::Value;
+		constexpr const bool isSubClassType = TIsSubClassType<Type>::Value;
 		
 		typedef CE::RemovePointerFromType<Type> Type0;
 		typedef CE::RemoveConstVolatileFromType<Type0> FinalType;
@@ -191,6 +193,10 @@ namespace CE
 		else if constexpr (isArray) // array type
 		{
             return Internal::GetArrayTypeId();
+		}
+		else if constexpr (isSubClassType)
+		{
+			return Internal::GetSubClassTypeTypeId();
 		}
 		else if constexpr (isPointer) // a pointer type
 		{

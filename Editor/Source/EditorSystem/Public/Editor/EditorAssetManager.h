@@ -3,6 +3,13 @@
 namespace CE::Editor
 {
 
+	struct SourceAssetFileType
+	{
+		// extension with a '.' prefix
+		String extension = "";
+		ClassType* assetClass = nullptr;
+	};
+
     CLASS()
 	class EDITORSYSTEM_API EditorAssetManager : public AssetManager
 	{
@@ -12,6 +19,7 @@ namespace CE::Editor
 		EditorAssetManager();
 		virtual ~EditorAssetManager();
 
+		void Tick(f32 deltaTime) override;
 
 	protected:
 

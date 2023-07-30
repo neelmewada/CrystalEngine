@@ -50,6 +50,7 @@ Spec tables with little endian format
 ## **Field List Entry**
 | Offset | Size | Value | Description |
 |---|---|---|---|
+| +00 | 4B | `f1 1f f1 1f` | Magic value. (v1.2) |
 | +00 | \0 | `fieldName\0` | Name of the field. |
 | +xx | \0 | `CE::Array\0` | Full type name of the field |
 | +xx | 4B | `xx xx xx xx` | Field Data Size in bytes. `0` is a valid size. |

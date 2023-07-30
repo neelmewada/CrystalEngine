@@ -84,6 +84,9 @@ namespace CE
 	class Array;
 
 	template<typename T>
+	class SubClassType;
+
+	template<typename T>
 	struct TIsArray : TFalseType
 	{
         using ElementType = void;
@@ -93,6 +96,18 @@ namespace CE
 	struct TIsArray<Array<T>> : TTrueType
 	{
 		using ElementType = T;
+	};
+
+	template<typename T>
+	struct TIsSubClassType : TFalseType
+	{
+		using RequiredType = void;
+	};
+
+	template<typename T>
+	struct TIsSubClassType<SubClassType<T>> : TTrueType
+	{
+		using RequiredType = T;
 	};
 
     template<typename T>
@@ -124,6 +139,12 @@ namespace CE
 
 	template<typename T>
 	struct TGetUnderlyingType<Array<T>, false, true> : TTrueType // Array<T>
+	{
+		typedef T Type;
+	};
+
+	template<typename T>
+	struct TGetUnderlyingType<SubClassType<T>, false, false> : TTrueType // SubClassType<T>
 	{
 		typedef T Type;
 	};

@@ -77,7 +77,7 @@ namespace CE
 		u64 length = 0;
 		auto filePath = directory / fileName;
         bool isDirectory = filePath.IsDirectory();
-        bool isFile = !isDirectory && filePath.Exists();
+        bool isFile = !isDirectory;
 
 		if (filePath.Exists() && !isDirectory)
 		{
@@ -93,12 +93,17 @@ namespace CE
 		{
             if (length > 0 && (fileAction == IO::FileAction::Modified || fileAction == IO::FileAction::Add))
             {
-                SourceAssetChange change{};
-                change.fileAction = IO::FileAction::Modified;
-                change.fileSize = length;
-                change.currentPath = filePath;
-                change.oldPath = "";
-                sourceChanges.Add(change);
+				if (sourceChanges.IsEmpty() || 
+					sourceChanges.Top().fileAction != IO::FileAction::Modified || 
+					sourceChanges.Top().currentPath != filePath)
+				{
+					SourceAssetChange change{};
+					change.fileAction = IO::FileAction::Modified;
+					change.fileSize = length;
+					change.currentPath = filePath;
+					change.oldPath = "";
+					sourceChanges.Add(change);
+				}
             }
             else if (fileAction == IO::FileAction::Delete)
             {
@@ -117,7 +122,8 @@ namespace CE
                 change.fileSize = length;
                 sourceChanges.Add(change);
             }
-			CE_LOG(Info, All, "{} | Dir: {} | Name: {} | Old Name: {} | Length: {:#x}", fileAction, relative, fileName, oldFileName, length);
+			
+			//CE_LOG(Info, All, "{} | Dir: {} | Name: {} | Old Name: {} | Length: {:#x}", fileAction, relative, fileName, oldFileName, length);
 		}
 	}
 

@@ -2,30 +2,12 @@
 
 #include "CoreMinimal.h"
 
-#define PACKAGE_MAGIC_NUMBER CE::FromBigEndian((u64)0x005041434b00000a) // .PACK..\n
+#include "../Package.inl"
 
-#define PACKAGE_VERSION_MAJOR (u32)1
-#define PACKAGE_VERSION_MINOR (u32)1
 
-enum PackageFeaturesVersion
-{
-	PackageDependencies_Major = 1,
-	PackageDependencies_Minor = 1,
-};
-
-#define PACKAGE_OBJECT_MAGIC_NUMBER CE::FromBigEndian((u64)0x004f424a45435400) // .OBJECT.
 
 namespace CE
 {
-	static inline bool IsVersionGreaterThanOrEqualTo(u32 currentMajor, u32 currentMinor, u32 checkMajor, u32 checkMinor)
-	{
-		return currentMajor > checkMajor || (currentMajor == checkMajor && currentMinor >= checkMinor);
-	}
-
-	static inline bool IsCurrentVersionGreaterThanOrEqualTo(u32 checkMajor, u32 checkMinor)
-	{
-		return IsVersionGreaterThanOrEqualTo(PACKAGE_VERSION_MAJOR, PACKAGE_VERSION_MINOR, checkMajor, checkMinor);
-	}
 
 	static void SavePackageDependencies(Stream* stream, const Array<Name>& dependencies)
 	{
@@ -269,6 +251,9 @@ namespace CE
 			package->objectUuidToEntryMap.Clear();
 		}
 
+		package->majorVersion = majorVersion;
+		package->minorVersion = minorVersion;
+
 		stream->Seek(dataStartOffset);
 
 		u64 magicObjectNumber = 0;
@@ -433,6 +418,8 @@ namespace CE
         entry.isLoaded = true;
         
         FieldDeserializer fieldDeserializer{ objectClass->GetFirstField(), objectInstance, this };
+		fieldDeserializer.packageMajor = majorVersion;
+		fieldDeserializer.packageMinor = minorVersion;
         
         while (fieldDeserializer.HasNext())
         {

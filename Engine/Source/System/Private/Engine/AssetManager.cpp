@@ -40,8 +40,7 @@ namespace CE
 
 	void AssetManager::Tick(f32 deltaTime)
 	{
-
+		
 	}
-
 
 } // namespace CE
