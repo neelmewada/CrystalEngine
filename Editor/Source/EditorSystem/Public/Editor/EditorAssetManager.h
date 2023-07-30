@@ -3,13 +3,6 @@
 namespace CE::Editor
 {
 
-	struct SourceAssetFileType
-	{
-		// extension with a '.' prefix
-		String extension = "";
-		ClassType* assetClass = nullptr;
-	};
-
     CLASS()
 	class EDITORSYSTEM_API EditorAssetManager : public AssetManager
 	{
@@ -23,6 +16,7 @@ namespace CE::Editor
 
 	protected:
 
+		HashMap<Name, ClassType*> registeredSourceExtensions{};
 	};
 
 } // namespace CE::Editor

@@ -2,8 +2,8 @@
 
 namespace CE
 {
-	AssetPath::AssetPath(const Name& packageName, const Name& assetName)
-		: packageName(packageName), assetName(assetName)
+	AssetPath::AssetPath(const Name& packagePath, const Name& assetName)
+		: packagePath(packagePath), assetName(assetName)
 	{
 
 	}

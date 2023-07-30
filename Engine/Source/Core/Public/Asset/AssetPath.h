@@ -9,11 +9,11 @@ namespace CE
 
 		AssetPath() = default;
 
-		AssetPath(const Name& packageName, const Name& assetName);
+		AssetPath(const Name& packagePath, const Name& assetName);
 
-		inline const Name& GetPackageName() const
+		inline const Name& GetPackagePath() const
 		{
-			return packageName;
+			return packagePath;
 		}
 
 		inline const Name& GetAssetName() const
@@ -23,16 +23,24 @@ namespace CE
 
 		inline Name GetFullName() const
 		{
-			return packageName.GetString() + "." + assetName.GetString();
+			return packagePath.GetString() + "." + assetName.GetString();
 		}
 
 	private:
 
 		// Path of package
-		Name packageName{};
+		Name packagePath{};
 
 		// Path of asset within the package
 		Name assetName{};
 	};
+
+	template<>
+	inline SIZE_T GetHash<AssetPath>(const AssetPath& value)
+	{
+		if (value.GetPackagePath().GetHashValue() == 0 && value.GetAssetName().GetHashValue() == 0)
+			return 0;
+		return GetCombinedHash(value.GetPackagePath().GetHashValue(), value.GetAssetName().GetHashValue());
+	}
 
 } // namespace CE

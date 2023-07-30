@@ -38,10 +38,12 @@ namespace CE
 
 		// - Asset Registry API -
 
-		/// Caches path tree structure
-		void CachePathTree();
+
 
 	protected:
+
+		/// Caches path tree structure
+		void CachePathTree();
 
 		// Inherited via IFileWatchListener
 		virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName) override;
@@ -66,6 +68,11 @@ namespace CE
 		IO::WatchID fileWatchID = 0;
 		
 		Mutex mutex{};
+
+		// Asset Registry State
+
+		HashMap<Name, AssetData*> cachedAssetsByPath{};
+
 	};
     
 } // namespace CE

@@ -4,12 +4,15 @@ namespace CE::Editor
 {
 	EditorAssetManager::EditorAssetManager()
 	{
-
+		// Texture 2D types
+		registeredSourceExtensions[".png"] = 
+			registeredSourceExtensions[".jpg"] = 
+			GetStaticClass<Texture2D>();
 	}
 
 	EditorAssetManager::~EditorAssetManager()
 	{
-
+		
 	}
 
     void EditorAssetManager::Tick(f32 deltaTime)
@@ -20,7 +23,7 @@ namespace CE::Editor
 
 		for (int i = 0; i < sourceChanges.GetSize(); i++)
 		{
-			const auto& thisChange = sourceChanges[i];
+			AssetRegistry::SourceAssetChange thisChange = sourceChanges[i];
 			AssetRegistry::SourceAssetChange nextChange = {};
 			bool nextFound = false;
 			if (i < sourceChanges.GetSize() - 1 && sourceChanges[i + 1].fileAction == IO::FileAction::Modified && thisChange.fileAction == IO::FileAction::Delete)
