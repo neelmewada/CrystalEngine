@@ -14,6 +14,16 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
 		fileWatcher.RemoveWatcher(fileWatchID);
 #endif
+
+		for (auto& [path, assetDatas] : cachedAssetsByPath)
+		{
+			for (const auto& assetData : assetDatas)
+			{
+				delete assetData;
+			}
+			assetDatas.Clear();
+		}
+		cachedAssetsByPath.Clear();
 	}
 
 	AssetRegistry* AssetRegistry::Get()
