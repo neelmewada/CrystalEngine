@@ -51,7 +51,7 @@ namespace CE
 			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
 				{
 					auto relativePath = IO::Path::GetRelative(item, gProjectPath / "Game/Assets");
-                    auto relativePathStr = relativePath.GetString();
+					auto relativePathStr = relativePath.RemoveExtension().GetString().Replace({'\\'}, '/');
                     if (!relativePathStr.StartsWith("/"))
 						relativePathStr = "/" + relativePathStr;
 					if (item.IsDirectory()) // Folder
@@ -62,10 +62,11 @@ namespace CE
 							directoryTree.AddPath("/Game" + relativePathStr);
 						}
 					}
-                    else if (relativePathStr.EndsWith(".casset")) // Product asset file
+                    else if (item.GetExtension() == ".casset") // Product asset file
                     {
-						Package* load = Package::LoadPackage(nullptr, item);
+						Package* load = Package::LoadPackage(nullptr, item, LOAD_Default);
 						AssetData* assetData = new AssetData();
+						String sourceAssetRelativePath = "";
 						if (load != nullptr)
 						{
 							if (!load->GetPrimaryObjectName().IsValid())
@@ -75,6 +76,14 @@ namespace CE
 							assetData->packageName = load->GetPackageName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
+#if PAL_TRAIT_BUILD_EDITOR
+							sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
+							if (!sourceAssetRelativePath.IsEmpty())
+							{
+
+							}
+							assetData->sourceAssetPath = sourceAssetRelativePath;
+#endif
 							load->RequestDestroy();
 							load = nullptr;
 						}
@@ -82,6 +91,11 @@ namespace CE
 						allAssetDatas.Add(assetData);
 						cachedPathTree.AddPath("/Game" + relativePathStr, assetData);
 						cachedAssetsByPath["/Game" + relativePathStr].Add(assetData);
+
+						if (!sourceAssetRelativePath.IsEmpty())
+						{
+							cachedAssetsBySourceFilePath[sourceAssetRelativePath] = assetData;
+						}
                     }
 				});
 

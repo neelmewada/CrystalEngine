@@ -34,6 +34,10 @@ namespace CE::Editor
 			}
 
 			IO::Path relative = IO::Path::GetRelative(thisChange.currentPath, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
+			String extension = thisChange.currentPath.GetExtension().GetString();
+			String pathNameWithoutExtension = relative.RemoveExtension().GetString();
+			if (!pathNameWithoutExtension.StartsWith("/"))
+				pathNameWithoutExtension = "/" + pathNameWithoutExtension;
 
 			if (thisChange.fileAction == IO::FileAction::Delete && nextFound &&
 				nextChange.fileAction == IO::FileAction::Modified &&
@@ -48,7 +52,17 @@ namespace CE::Editor
 			}
 			else if (thisChange.fileAction == IO::FileAction::Modified)
 			{
-				// New file added or modified
+				if (extension == ".casset") // Product asset
+				{
+					
+				}
+				else if (registeredSourceExtensions.KeyExists(extension)) // Source asset
+				{
+					String relativePath = pathNameWithoutExtension + extension;
+					sourceAssetsToImport.Add(relativePath);
+;				}
+
+				// New file added or current file modified
 				CE_LOG(Info, All, "File modified: {}", thisChange.currentPath);
 			}
 			else if (thisChange.fileAction == IO::FileAction::Moved)

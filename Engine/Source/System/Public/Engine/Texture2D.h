@@ -11,6 +11,9 @@ namespace CE
 
 	protected:
 
+		FIELD()
+		TextureFormat format = TextureFormat::None;
+
 	};
     
 } // namespace CE

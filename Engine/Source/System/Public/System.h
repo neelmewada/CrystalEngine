@@ -2,8 +2,9 @@
 
 #include "Core.h"
 
-#include "AssetRegistry/AssetData.h"
-#include "AssetRegistry/AssetRegistry.h"
+#include "Asset/AssetData.h"
+#include "Asset/AssetRegistry.h"
+
 #include "Engine/AssetManager.h"
 
 // Assets

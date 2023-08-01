@@ -35,7 +35,7 @@ namespace CE
 
 	void AssetManager::Shutdown()
 	{
-
+		
 	}
 
 	void AssetManager::Tick(f32 deltaTime)

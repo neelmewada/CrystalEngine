@@ -33,6 +33,16 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(TextureFormat);
 
+	ENUM()
+	enum class TextureType : int
+	{
+		ECONST(Display = "Default (Color sRGB)")
+		Default,
+		NormalMap,
+		Grayscale,
+	};
+	ENUM_CLASS_FLAGS(TextureType);
+
 	namespace Private
 	{
 		STRUCT()
@@ -58,7 +68,7 @@ namespace CE
 		};
 	}
 
-	CLASS()
+	CLASS(Abstract)
 	class SYSTEM_API Texture : public Asset
 	{
 		CE_CLASS(Texture, Asset)
@@ -72,6 +82,9 @@ namespace CE
 		FIELD()
 		Private::TextureSource source{};
 
+		FIELD(ImportSetting)
+		TextureType type = TextureType::Default;
+
 		FIELD()
 		u32 width = 0;
 
@@ -81,8 +94,6 @@ namespace CE
 		FIELD()
 		u32 depth = 1;
 
-		FIELD()
-		TextureFormat format = TextureFormat::None;
 	};
     
 } // namespace CE

@@ -16,6 +16,8 @@ namespace CE::Editor
 
 	protected:
 
+		Array<IO::Path> sourceAssetsToImport{};
+
 		HashMap<Name, ClassType*> registeredSourceExtensions{};
 	};
 

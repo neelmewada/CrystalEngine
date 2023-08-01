@@ -143,15 +143,25 @@ namespace CE
 	{
 		Super::OnSubobjectDetached(subobject);
 
-		if (subobject->GetName() == primaryObjectName)
+		if (subobject->GetUuid() == primaryObjectUuid)
 		{
 			primaryObjectName = "";
 			primaryObjectTypeName = "";
+			primaryObjectUuid = 0;
 		}
+	}
+
+	void Package::OnAfterDeserialize()
+	{
+		Super::OnAfterDeserialize();
+
+		SetName(packageName);
 	}
 
 	const Name& Package::GetPrimaryObjectName()
 	{
+		GetPrimaryObjectUuid();
+
 		if (!primaryObjectName.IsValid())
 		{
 			const auto& map = GetSubObjectMap();
@@ -199,6 +209,8 @@ namespace CE
 
 	const Name& Package::GetPrimaryObjectTypeName()
 	{
+		GetPrimaryObjectUuid();
+
 		if (!primaryObjectTypeName.IsValid())
 		{
 			const auto& map = GetSubObjectMap();
@@ -242,6 +254,76 @@ namespace CE
 			}
 		}
 		return primaryObjectTypeName;
+	}
+
+	UUID Package::GetPrimaryObjectUuid()
+	{
+		if (primaryObjectUuid == 0)
+		{
+			const auto& map = GetSubObjectMap();
+
+			if (isFullyLoaded && GetSubObjectCount() > 0)
+			{
+				for (const auto& [uuid, object] : map)
+				{
+					if (object == nullptr)
+						continue;
+
+					if (object->IsOfType<Asset>())
+					{
+						primaryObjectUuid = object->GetUuid();
+						return primaryObjectUuid;
+					}
+
+					primaryObjectUuid = object->GetUuid();
+				}
+			}
+			else
+			{
+				for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
+				{
+					String pathInPackage = objectEntry.pathInPackage;
+					if (pathInPackage.Contains(".") || pathInPackage.IsEmpty()) // object is not a root object in this package
+						continue;
+
+					ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
+					if (objectClass == nullptr)
+						continue;
+
+					if (objectClass->IsSubclassOf<Asset>())
+					{
+						primaryObjectUuid = objectEntry.instanceUuid;
+						return primaryObjectUuid;
+					}
+
+					primaryObjectUuid = objectEntry.instanceUuid;
+				}
+			}
+		}
+		return primaryObjectUuid;
+	}
+
+	String Package::GetPrimarySourceAssetRelativePath()
+	{
+#if PAL_TRAIT_BUILD_EDITOR
+		const auto& map = GetSubObjectMap();
+		if (GetPrimaryObjectUuid() == 0)
+			return String();
+
+		if (isFullyLoaded && GetSubObjectCount() > 0 && map.ObjectExists(GetPrimaryObjectUuid()))
+		{
+			Object* object = map.FindObject(GetPrimaryObjectUuid());
+			if (object != nullptr && object->IsOfType<Asset>())
+				return ((Asset*)object)->GetSourceAssetRelativePath().GetString();
+		}
+		else if (objectUuidToEntryMap.KeyExists(GetPrimaryObjectUuid()))
+		{
+			const ObjectEntryMetaData& entry = objectUuidToEntryMap[GetPrimaryObjectUuid()];
+			return entry.sourceAssetRelativePath;
+		}
+#endif
+
+		return String();
 	}
 
 	void Package::OnObjectUnloaded(Object* object)

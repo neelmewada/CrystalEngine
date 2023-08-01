@@ -195,7 +195,7 @@ namespace CE
 
 		if (IO::Path::IsSubDirectory(fullPackagePath, gProjectPath / "Game/Assets"))
 		{
-			auto relativePath = IO::Path::GetRelative(fullPackagePath, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
+			auto relativePath = IO::Path::GetRelative(fullPackagePath, gProjectPath / "Game/Assets").RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePath.StartsWith("/"))
 				relativePath = "/" + relativePath;
 

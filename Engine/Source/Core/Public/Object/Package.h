@@ -90,10 +90,14 @@ namespace CE
 
 		const Name& GetPrimaryObjectName();
 		const Name& GetPrimaryObjectTypeName();
+		UUID GetPrimaryObjectUuid();
+		String GetPrimarySourceAssetRelativePath();
         
     private:
 
 		void OnSubobjectDetached(Object* subobject) override;
+
+		void OnAfterDeserialize() override;
         
         Object* LoadObjectFromEntry(Stream* originalStream, UUID objectUuid);
 
@@ -119,6 +123,8 @@ namespace CE
 		Name primaryObjectName{};
 		// Long type name of first object in package
 		Name primaryObjectTypeName;
+		// Primary object uuid
+		UUID primaryObjectUuid;
 
 		Array<Name> packageDependencies{};
         

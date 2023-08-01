@@ -41,7 +41,7 @@ Spec tables with little endian format
 | +04 | 4B | `xx xx xx xx` | Total number of fields |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
 | +10 | \0 | 'SomeObjectName' | Object name (CE::Name) |
-| +xx | \0 | `../SomeTexture.png` | Source asset relative path (only if an asset) |
+| +xx | \0 | `/Textures/SomeTexture.png` | Source asset path relative to project (only if **Is Asset?**) |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Data: List of [Field Entries](#field-list-entry)** |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
