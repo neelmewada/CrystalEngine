@@ -216,12 +216,6 @@ namespace CE
 		}
 	}
 
-	static void LoadPrimaryObjectData(Stream* stream, String& outName, String& outTypeName)
-	{
-		*stream >> outName;
-		*stream >> outTypeName;
-	}
-
 	Package* Package::LoadPackage(Package* outer, Stream* stream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
 		if (stream == nullptr)
@@ -286,13 +280,6 @@ namespace CE
 			LoadPackageDependencies(stream, packageDependendies);
 		}
 
-		String primaryAssetName{};
-		String primaryAssetTypeName{};
-		if (IsVersionGreaterThanOrEqualTo(majorVersion, minorVersion, PrimaryAssetData_Major, PrimaryAssetData_Minor))
-		{
-			LoadPrimaryObjectData(stream, primaryAssetName, primaryAssetTypeName);
-		}
-
 		Package* package = nullptr;
 
 		if (loadedPackages.KeyExists(packageName))
@@ -318,9 +305,6 @@ namespace CE
 
 		package->majorVersion = majorVersion;
 		package->minorVersion = minorVersion;
-
-		package->primaryObjectName = primaryAssetName;
-		package->primaryObjectTypeName = primaryAssetTypeName;
 
 		stream->Seek(dataStartOffset);
 
@@ -442,17 +426,6 @@ namespace CE
 		}
 
 		return nullptr;
-	}
-
-	void Package::OnSubobjectDetached(Object* subobject)
-	{
-		Super::OnSubobjectDetached(subobject);
-
-		if (subobject->GetName() == primaryObjectName)
-		{
-			primaryObjectName = "";
-			primaryObjectTypeName = "";
-		}
 	}
 
 	Object* Package::LoadObjectFromEntry(Stream* stream, UUID objectUuid)

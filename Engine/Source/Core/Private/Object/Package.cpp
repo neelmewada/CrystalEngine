@@ -139,32 +139,59 @@ namespace CE
 		return loadedObjects[objectUuid];
 	}
 
+	void Package::OnSubobjectDetached(Object* subobject)
+	{
+		Super::OnSubobjectDetached(subobject);
+
+		if (subobject->GetName() == primaryObjectName)
+		{
+			primaryObjectName = "";
+			primaryObjectTypeName = "";
+		}
+	}
+
 	const Name& Package::GetPrimaryObjectName()
 	{
 		if (!primaryObjectName.IsValid() && GetSubObjectCount() > 0)
 		{
 			const auto& map = GetSubObjectMap();
 
-			Object* primaryObject = nullptr;
-
-			for (const auto& [uuid, object] : map)
+			if (isFullyLoaded)
 			{
-				if (object == nullptr)
-					continue;
-
-				if (object->IsOfType<Asset>())
+				for (const auto& [uuid, object] : map)
 				{
-					primaryObject = object;
-					break;
-				}
+					if (object == nullptr)
+						continue;
 
-				primaryObject = object;
+					if (object->IsOfType<Asset>())
+					{
+						primaryObjectName = object->GetName();
+						return primaryObjectName;
+					}
+
+					primaryObjectName = object->GetName();
+				}
 			}
-			
-			if (primaryObject != nullptr)
+			else
 			{
-				primaryObjectName = primaryObject->GetName();
-				return primaryObjectName;
+				for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
+				{
+					String pathInPackage = objectEntry.pathInPackage;
+					if (pathInPackage.Contains(".")) // object is not a root object in this package
+						continue;
+
+					ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
+					if (objectClass == nullptr)
+						continue;
+
+					if (objectClass->IsSubclassOf<Asset>())
+					{
+						primaryObjectName = objectEntry.objectName;
+						return primaryObjectName;
+					}
+
+					primaryObjectName = objectEntry.objectName;
+				}
 			}
 		}
 		return primaryObjectName;
@@ -176,26 +203,42 @@ namespace CE
 		{
 			const auto& map = GetSubObjectMap();
 
-			Object* primaryObject = nullptr;
-
-			for (const auto& [uuid, object] : map)
+			if (isFullyLoaded)
 			{
-				if (object == nullptr)
-					continue;
-
-				if (object->IsOfType<Asset>())
+				for (const auto& [uuid, object] : map)
 				{
-					primaryObject = object;
-					break;
+					if (object == nullptr)
+						continue;
+
+					if (object->IsOfType<Asset>())
+					{
+						primaryObjectTypeName = object->GetClass()->GetTypeName();
+						return primaryObjectTypeName;
+					}
+
+					primaryObjectTypeName = object->GetClass()->GetTypeName();
 				}
-
-				primaryObject = object;
 			}
-
-			if (primaryObject != nullptr)
+			else
 			{
-				primaryObjectTypeName = primaryObject->GetClass()->GetTypeName();
-				return primaryObjectTypeName;
+				for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
+				{
+					String pathInPackage = objectEntry.pathInPackage;
+					if (pathInPackage.Contains(".")) // object is not a root object in this package
+						continue;
+
+					ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
+					if (objectClass == nullptr)
+						continue;
+
+					if (objectClass->IsSubclassOf<Asset>())
+					{
+						primaryObjectTypeName = objectClass->GetTypeName();
+						return primaryObjectTypeName;
+					}
+
+					primaryObjectTypeName = objectClass->GetTypeName();
+				}
 			}
 		}
 		return primaryObjectTypeName;

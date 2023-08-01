@@ -2142,6 +2142,10 @@ TEST(Package, WriteRead)
         // Outside the package & transient
 		auto obj1_1 = CreateObject<WritingTestObj1>(GetTransientPackage(), TEXT("Child1_TestObj1"));
 
+		// When Package has multiple subobjects, the primary object selected in undefined (could be anything)
+		EXPECT_TRUE(writePackage->GetPrimaryObjectName() == "TestObj1" || writePackage->GetPrimaryObjectName() == "TestObj2");
+		EXPECT_TRUE(writePackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || writePackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
+
 		packageUuid = writePackage->GetUuid();
 		obj1Uuid = obj1->GetUuid();
 		obj2Uuid = obj2->GetUuid();

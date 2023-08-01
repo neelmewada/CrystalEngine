@@ -65,7 +65,23 @@ namespace CE
                     else if (relativePathStr.EndsWith(".casset")) // Product asset file
                     {
 						Package* load = Package::LoadPackage(nullptr, item);
-						cachedPathTree.AddPath("/Game" + relativePathStr);
+						AssetData* assetData = new AssetData();
+						if (load != nullptr)
+						{
+							if (!load->GetPrimaryObjectName().IsValid())
+								load->LoadFully();
+							Name primaryName = load->GetPrimaryObjectName();
+							Name primaryTypeName = load->GetPrimaryObjectTypeName();
+							assetData->packageName = load->GetPackageName();
+							assetData->assetName = primaryName;
+							assetData->assetClassPath = primaryTypeName;
+							load->RequestDestroy();
+							load = nullptr;
+						}
+
+						allAssetDatas.Add(assetData);
+						cachedPathTree.AddPath("/Game" + relativePathStr, assetData);
+						cachedAssetsByPath["/Game" + relativePathStr].Add(assetData);
                     }
 				});
 
