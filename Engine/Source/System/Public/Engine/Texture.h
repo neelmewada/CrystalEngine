@@ -40,8 +40,17 @@ namespace CE
 		Default,
 		NormalMap,
 		Grayscale,
+		HDR,
 	};
 	ENUM_CLASS_FLAGS(TextureType);
+
+	ENUM()
+	enum class TextureFilter : int
+	{
+		Linear = 0,
+		Nearest
+	};
+	ENUM_CLASS_FLAGS(TextureFilter);
 
 	namespace Private
 	{
@@ -79,11 +88,11 @@ namespace CE
 
 	protected:
 
-		FIELD()
-		Private::TextureSource source{};
-
 		FIELD(ImportSetting)
 		TextureType type = TextureType::Default;
+
+		FIELD()
+		Private::TextureSource source{};
 
 		FIELD()
 		u32 width = 0;

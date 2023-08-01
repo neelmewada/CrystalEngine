@@ -14,6 +14,8 @@ namespace CE
 	typedef void (*LoadResourcedFunc)();
 	typedef void (*UnloadResourcedFunc)();
 
+	typedef void (*LoadTypesFunc)();
+
 	class Package;
 
     struct ModuleInfo
@@ -26,6 +28,8 @@ namespace CE
 
 		LoadResourcedFunc loadResourcesFuncPtr;
 		UnloadResourcedFunc unloadResourcesFuncPtr;
+
+		LoadTypesFunc loadTypesFuncPtr;
 
         bool isLoaded;
         bool isPlugin = false;
@@ -74,11 +78,6 @@ namespace CE
 
         Module* LoadModule(String moduleName);
 
-        PluginModule* LoadPluginModule(String moduleName, ModuleLoadResult& result);
-        void UnloadPluginModule(String moduleName);
-
-        PluginModule* LoadPluginModule(String moduleName);
-
         Name GetLoadedModuleName(Module* modulePtr);
         
         bool IsModuleLoaded(String moduleName);
@@ -91,7 +90,6 @@ namespace CE
     private:
 
         ModuleInfo* AddModule(String moduleName, ModuleLoadResult& result);
-        ModuleInfo* AddPluginModule(String moduleName, ModuleLoadResult& result);
 
         ModuleInfo* FindModuleInfo(String moduleName);
 
@@ -122,7 +120,6 @@ namespace CE
 #define CE_IMPLEMENT_MODULE(ModuleName, ModuleImplClass)\
 extern "C" DLL_EXPORT CE::Module* CELoadModule()\
 {\
-    CE_EXPAND(CE_CONCATENATE(__CE_AUTORTTI_REGISTER_, _AUTORTTI))();\
     return new ModuleImplClass();\
 }\
 extern "C" DLL_EXPORT void CEUnloadModule(CE::Module* modulePtr)\
@@ -136,6 +133,10 @@ extern "C" DLL_EXPORT void CELoadResources()\
 extern "C" DLL_EXPORT void CEUnloadResources()\
 {\
 	CE_EXPAND(CE_CONCATENATE(__CE_RESOURCES_DEREGISTER_, _RESOURCES))();\
+}\
+extern "C" DLL_EXPORT void CELoadTypes()\
+{\
+	CE_EXPAND(CE_CONCATENATE(__CE_AUTORTTI_REGISTER_, _AUTORTTI))();\
 }
 
 #define CE_IMPLEMENT_MODULE_AUTORTTI(ModuleName, ModuleImplClass)\
