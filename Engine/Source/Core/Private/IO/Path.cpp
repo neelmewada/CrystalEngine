@@ -15,7 +15,19 @@ namespace CE::IO
 
 	}
 
-	void Path::IterateChildren(std::function<void(const IO::Path& path)> func)
+    bool Path::IsSubDirectory(Path path, Path root)
+    {
+		for (auto b = root.begin(), s = path.begin(); b != root.end(); ++b, ++s)
+		{
+			if (s == path.end() || *s != *b)
+			{
+				return false;
+			}
+		}
+		return true;
+    }
+
+    void Path::IterateChildren(std::function<void(const IO::Path& path)> func)
 	{
 		for (const auto& iter : fs::directory_iterator(impl))
 		{

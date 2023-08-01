@@ -15,14 +15,12 @@ namespace CE
 		fileWatcher.RemoveWatcher(fileWatchID);
 #endif
 
-		for (auto& [path, assetDatas] : cachedAssetsByPath)
+		for (auto assetData : allAssetDatas)
 		{
-			for (const auto& assetData : assetDatas)
-			{
-				delete assetData;
-			}
-			assetDatas.Clear();
+			delete assetData;
 		}
+		allAssetDatas.Clear();
+
 		cachedAssetsByPath.Clear();
 	}
 
@@ -52,20 +50,22 @@ namespace CE
 
 			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
 				{
-                    auto relativePath = IO::Path::GetRelative(item, gProjectPath / "Game/Assets").GetString();
-                    if (!relativePath.StartsWith("/"))
-                        relativePath = "/" + relativePath;
+					auto relativePath = IO::Path::GetRelative(item, gProjectPath / "Game/Assets");
+                    auto relativePathStr = relativePath.GetString();
+                    if (!relativePathStr.StartsWith("/"))
+						relativePathStr = "/" + relativePathStr;
 					if (item.IsDirectory()) // Folder
 					{
-                        if (!relativePath.IsEmpty())
+                        if (!relativePathStr.IsEmpty())
 						{
-							cachedPathTree.AddPath("/Game" + relativePath);
-							directoryTree.AddPath("/Game" + relativePath);
+							cachedPathTree.AddPath("/Game" + relativePathStr);
+							directoryTree.AddPath("/Game" + relativePathStr);
 						}
 					}
-                    else if (relativePath.EndsWith(".casset")) // Product asset file
+                    else if (relativePathStr.EndsWith(".casset")) // Product asset file
                     {
-						cachedPathTree.AddPath("/Game" + relativePath);
+						Package* load = Package::LoadPackage(nullptr, item);
+						cachedPathTree.AddPath("/Game" + relativePathStr);
                     }
 				});
 

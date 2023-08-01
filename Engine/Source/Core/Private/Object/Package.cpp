@@ -48,7 +48,7 @@ namespace CE
 	Package* Package::LoadPackage(Package* package, const IO::Path& fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
 		auto path = fullPackagePath;
-		if (path.GetExtension().IsEmpty())
+		if (path.GetExtension().IsEmpty()) // Add extension if one doesn't exist
 		{
 			path = path.GetString() + ".casset";
 		}
@@ -137,6 +137,68 @@ namespace CE
 		if (!loadedObjects.KeyExists(objectUuid))
 			return nullptr;
 		return loadedObjects[objectUuid];
+	}
+
+	const Name& Package::GetPrimaryObjectName()
+	{
+		if (!primaryObjectName.IsValid() && GetSubObjectCount() > 0)
+		{
+			const auto& map = GetSubObjectMap();
+
+			Object* primaryObject = nullptr;
+
+			for (const auto& [uuid, object] : map)
+			{
+				if (object == nullptr)
+					continue;
+
+				if (object->IsOfType<Asset>())
+				{
+					primaryObject = object;
+					break;
+				}
+
+				primaryObject = object;
+			}
+			
+			if (primaryObject != nullptr)
+			{
+				primaryObjectName = primaryObject->GetName();
+				return primaryObjectName;
+			}
+		}
+		return primaryObjectName;
+	}
+
+	const Name& Package::GetPrimaryObjectTypeName()
+	{
+		if (!primaryObjectTypeName.IsValid() && GetSubObjectCount() > 0)
+		{
+			const auto& map = GetSubObjectMap();
+
+			Object* primaryObject = nullptr;
+
+			for (const auto& [uuid, object] : map)
+			{
+				if (object == nullptr)
+					continue;
+
+				if (object->IsOfType<Asset>())
+				{
+					primaryObject = object;
+					break;
+				}
+
+				primaryObject = object;
+			}
+
+			if (primaryObject != nullptr)
+			{
+				primaryObjectTypeName = primaryObject->GetClass()->GetTypeName();
+				return primaryObjectTypeName;
+			}
+		}
+		return primaryObjectTypeName;
 	}
 
 	void Package::OnObjectUnloaded(Object* object)

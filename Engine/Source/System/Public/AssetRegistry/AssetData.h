@@ -11,14 +11,14 @@ namespace CE
 
 		// - Fields -
 
-		// Path to the package that contains this asset. Ex: /Game/Textures/TextureAtlas02
+		// Path to the package that contains this asset. Ex: /Game/Textures/DoorTexture
 		Name packageName{};
 
-		// Path of the primary asset within the package. Ex: TextureAtlas.Noise04
+		// Path of the primary asset within the package. Ex: TextureMap
 		Name assetName{};
 
 		/// Path to the primary asset's class. Ex: /Code/System.CE::Texture
-		AssetPath assetClassPath;
+		Name assetClassPath;
 
 		// Path to the source asset
 		IO::Path sourceAssetPath{};

@@ -146,18 +146,7 @@ namespace CE::IO
             return fs::relative(path.impl, base.impl);
         }
 
-        inline static bool IsSubDirectory(Path path, Path root)
-        {
-            while (path != Path())
-            {
-                if (path == root)
-                {
-                    return true;
-                }
-                path = path.GetParentPath();
-            }
-            return false;
-        }
+		static bool IsSubDirectory(Path path, Path root);
 
         friend inline std::ostream& operator<<(std::ostream& os, const Path& path)
         {

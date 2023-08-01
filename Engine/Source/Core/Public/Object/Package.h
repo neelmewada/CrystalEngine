@@ -75,7 +75,7 @@ namespace CE
         
         inline bool IsLoaded() const { return isLoaded; }
         
-        inline bool IsFullyLoaded() const { return isFullyLoaded; }
+		inline bool IsFullyLoaded() const { return isFullyLoaded; }
         
         void LoadFully();
         void LoadFully(Stream* originalStream);
@@ -87,8 +87,13 @@ namespace CE
 		bool ContainsObject(Object* object);
 
 		Object* ResolveObjectReference(UUID objectUuid);
+
+		const Name& GetPrimaryObjectName();
+		const Name& GetPrimaryObjectTypeName();
         
     private:
+
+		void OnSubobjectDetached(Object* subobject) override;
         
         Object* LoadObjectFromEntry(Stream* originalStream, UUID objectUuid);
 
@@ -109,6 +114,11 @@ namespace CE
 
 		u32 majorVersion = 0;
 		u32 minorVersion = 0;
+
+		// Name of first object in package
+		Name primaryObjectName{};
+		// Long type name of first object in package
+		Name primaryObjectTypeName;
 
 		Array<Name> packageDependencies{};
         

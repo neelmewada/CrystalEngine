@@ -71,6 +71,8 @@ namespace CE
 
 		// Asset Registry State
 
+		Array<AssetData*> allAssetDatas{};
+
 		HashMap<Name, Array<AssetData*>> cachedAssetsByPath{};
 
 	};

@@ -15,7 +15,7 @@ namespace CE
 
 	Object::~Object()
 	{
-
+		// Never call delete directly. Use RequestDestroy() instead
 	}
 
 	void Object::RequestDestroy()
@@ -48,6 +48,14 @@ namespace CE
 		attachedObjects.RemoveAll();
 
 		delete this;
+	}
+
+	bool Object::IsOfType(ClassType* classType)
+	{
+		if (classType == nullptr)
+			return false;
+
+		return GetClass()->IsSubclassOf(classType);
 	}
 
     void Object::ConstructInternal()

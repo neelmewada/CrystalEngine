@@ -20,6 +20,38 @@ namespace CE
 		}
 	}
 
+	static void SavePrimaryObjectData(Stream* stream, Package* package)
+	{
+		if (package == nullptr)
+		{
+			*stream << ""; // Primary asset name
+			*stream << ""; // Primary asset type name
+			return;
+		}
+
+		Object* primaryObject = nullptr;
+
+		for (const auto& [uuid, object] : package->GetSubObjectMap())
+		{
+			if (object == nullptr)
+				continue;
+
+			if (object->IsOfType<Asset>())
+			{
+				primaryObject = object;
+				break;
+			}
+
+			primaryObject = object;
+		}
+
+		if (primaryObject != nullptr)
+		{
+			*stream << primaryObject->GetName().GetString(); // Primary asset/object name
+			*stream << primaryObject->GetClass()->GetTypeName(); // Primary asset/object long type name
+		}
+	}
+
 	SavePackageResult Package::SavePackage(Package* package, Object* asset, Stream* stream, const SavePackageArgs& saveArgs)
 	{
 		if (package == nullptr)
@@ -72,6 +104,7 @@ namespace CE
 		*stream << package->GetPackageName();
 
 		SavePackageDependencies(stream, packageDependencies);
+		SavePrimaryObjectData(stream, package);
 
 		// Data Start
 
@@ -133,6 +166,8 @@ namespace CE
             if (firstField != nullptr)
             {
                 FieldSerializer fieldSerializer{ firstField, objectInstance };
+
+				objectInstance->OnBeforeSerialize();
                 
                 while (fieldSerializer.HasNext())
                 {
@@ -181,11 +216,29 @@ namespace CE
 		}
 	}
 
+	static void LoadPrimaryObjectData(Stream* stream, String& outName, String& outTypeName)
+	{
+		*stream >> outName;
+		*stream >> outTypeName;
+	}
+
 	Package* Package::LoadPackage(Package* outer, Stream* stream, IO::Path fullPackagePath, LoadPackageResult& outResult, LoadFlags loadFlags)
 	{
 		if (stream == nullptr)
 		{
 			return nullptr;
+		}
+
+		// Actual package name based on it's path
+		String actualPackageName = "";
+
+		if (IO::Path::IsSubDirectory(fullPackagePath, gProjectPath / "Game/Assets"))
+		{
+			auto relativePath = IO::Path::GetRelative(fullPackagePath, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
+			if (!relativePath.StartsWith("/"))
+				relativePath = "/" + relativePath;
+
+			actualPackageName = relativePath;
 		}
 
 		stream->SetBinaryMode(true);
@@ -221,11 +274,23 @@ namespace CE
 		String packageName = "";
 		*stream >> packageName;
 
+		if (!actualPackageName.IsEmpty() && actualPackageName != packageName)
+		{
+			packageName = actualPackageName;
+		}
+
 		// Package dependencies list: v1.1
 		Array<Name> packageDependendies{};
 		if (IsVersionGreaterThanOrEqualTo(majorVersion, minorVersion, PackageDependencies_Major, PackageDependencies_Minor))
 		{
 			LoadPackageDependencies(stream, packageDependendies);
+		}
+
+		String primaryAssetName{};
+		String primaryAssetTypeName{};
+		if (IsVersionGreaterThanOrEqualTo(majorVersion, minorVersion, PrimaryAssetData_Major, PrimaryAssetData_Minor))
+		{
+			LoadPrimaryObjectData(stream, primaryAssetName, primaryAssetTypeName);
 		}
 
 		Package* package = nullptr;
@@ -253,6 +318,9 @@ namespace CE
 
 		package->majorVersion = majorVersion;
 		package->minorVersion = minorVersion;
+
+		package->primaryObjectName = primaryAssetName;
+		package->primaryObjectTypeName = primaryAssetTypeName;
 
 		stream->Seek(dataStartOffset);
 
@@ -376,7 +444,18 @@ namespace CE
 		return nullptr;
 	}
 
-    Object* Package::LoadObjectFromEntry(Stream* stream, UUID objectUuid)
+	void Package::OnSubobjectDetached(Object* subobject)
+	{
+		Super::OnSubobjectDetached(subobject);
+
+		if (subobject->GetName() == primaryObjectName)
+		{
+			primaryObjectName = "";
+			primaryObjectTypeName = "";
+		}
+	}
+
+	Object* Package::LoadObjectFromEntry(Stream* stream, UUID objectUuid)
     {
         if (loadedObjects.KeyExists(objectUuid))
             return loadedObjects[objectUuid];
@@ -425,6 +504,21 @@ namespace CE
         {
             fieldDeserializer.ReadNext(stream);
         }
+
+		objectInstance->OnAfterDeserialize();
+
+		bool fullyLoaded = true;
+		for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
+		{
+			if (!objectEntry.isLoaded)
+			{
+				fullyLoaded = false;
+				break;
+			}
+		}
+
+		if (fullyLoaded)
+			this->isFullyLoaded = true;
         
         return objectInstance;
     }

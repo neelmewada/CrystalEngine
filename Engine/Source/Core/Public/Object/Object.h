@@ -128,15 +128,14 @@ namespace CE
 
 		bool IsTransient();
 
+		inline u32 GetSubObjectCount() const { return attachedObjects.GetObjectCount(); }
+		inline const ObjectMap& GetSubObjectMap() const { return attachedObjects; }
+
         // Lifecycle
 
         virtual void AttachSubobject(Object* subobject);
-
-		virtual void OnSubobjectAttached(Object* subobject) {}
         
         virtual void DetachSubobject(Object* subobject);
-
-		virtual void OnSubobjectDetached(Object* subobject) {}
 
 		virtual bool HasSubobject(Object* subobject);
 
@@ -149,6 +148,14 @@ namespace CE
         virtual bool IsAsset() { return false; }
 
         virtual bool IsPackage() { return false; }
+
+		bool IsOfType(ClassType* classType);
+
+		template<typename T>
+		FORCE_INLINE bool IsOfType()
+		{
+			return IsOfType(T::Type());
+		}
 
 		Name GetPathInPackage();
         
@@ -163,6 +170,17 @@ namespace CE
         void LoadConfig(ClassType* configClass, String fileName);
         
     protected:
+
+		// Lifecycle
+
+		virtual void OnSubobjectAttached(Object* subobject) {}
+
+		virtual void OnSubobjectDetached(Object* subobject) {}
+
+		virtual void OnAfterDeserialize() {}
+		virtual void OnBeforeSerialize() {}
+
+		// Protected API
 
 		Object* CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags = OF_NoFlags);
 

@@ -16,22 +16,21 @@ namespace CE
     struct CORE_API ObjectMap
     {
     public:
-        ObjectMap()
-        {
+        ObjectMap() {}
 
-        }
-
-        CE_INLINE u32 GetObjectCount() const
+        FORCE_INLINE u32 GetObjectCount() const
         {
             return (u32)objects.GetSize();
         }
         
-        CE_INLINE Object* FindObject(UUID uuid)
+		FORCE_INLINE Object* FindObject(UUID uuid) const
         {
-            return objects[uuid];
+			if (!objects.KeyExists(uuid))
+				return nullptr;
+            return objects.Get(uuid);
         }
         
-        CE_INLINE bool ObjectExists(UUID uuid) const
+		FORCE_INLINE bool ObjectExists(UUID uuid) const
         {
             return objects.KeyExists(uuid);
         }

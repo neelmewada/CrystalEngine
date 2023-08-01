@@ -15,9 +15,14 @@ namespace CE
 	{
 		PackageDependencies_Major = 1,
 		PackageDependencies_Minor = 1,
+
 		// Field entry magic value entry
 		FieldMagicValue_Major = 1,
 		FieldMagicValue_Minor = 2,
+
+		// Primary asset data entry
+		PrimaryAssetData_Major = 1,
+		PrimaryAssetData_Minor = 2,
 	};
 
 	static inline bool IsVersionGreaterThanOrEqualTo(u32 currentMajor, u32 currentMinor, u32 checkMajor, u32 checkMinor)

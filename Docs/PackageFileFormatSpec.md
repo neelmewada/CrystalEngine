@@ -25,6 +25,8 @@ Spec tables with little endian format
 | +24 | \0 | `/Engine/SomeAssetFolder/SomeAsset\0` | Path/name of Package. |
 | +xx | 4B | `00 00 00 02` | No. of external package dependencies **n** (v1.1) |
 | +xx | \0 | `/Engine/Textures/SomeTex\0` | n-th package dependency. Repeat for n times. (v1.1) |
+| +xx | \0 | `NormalMap\0` | Primary object/asset name (v1.2) |
+| +xx | \0 | `/Code/System.CE::Texture\0` | Primary object/asset long type name (v1.2) |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual data. List of [Object Entries](#object-entry)** |
 | +xx | 8B | `00 00 00 00 00 00 00 00` | End Of Object Entries List. (EOF) |
