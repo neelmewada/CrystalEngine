@@ -2188,6 +2188,10 @@ TEST(Package, WriteRead)
 		EXPECT_EQ(readPackage->GetPackageName(), "/TestPackage");
         EXPECT_EQ(readPackage->objectUuidToEntryMap.GetSize(), 4);
 
+		// When Package has multiple subobjects, the primary object selected in undefined (could be anything)
+		EXPECT_TRUE(readPackage->GetPrimaryObjectName() == "TestObj1" || readPackage->GetPrimaryObjectName() == "TestObj2");
+		EXPECT_TRUE(readPackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj1) || readPackage->GetPrimaryObjectTypeName() == TYPENAME(WritingTestObj2));
+
 		readPackage->LoadFully();
 
 		EXPECT_EQ(readPackage->loadedObjects.GetSize(), 4);

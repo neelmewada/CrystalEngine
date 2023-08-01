@@ -152,11 +152,11 @@ namespace CE
 
 	const Name& Package::GetPrimaryObjectName()
 	{
-		if (!primaryObjectName.IsValid() && GetSubObjectCount() > 0)
+		if (!primaryObjectName.IsValid())
 		{
 			const auto& map = GetSubObjectMap();
 
-			if (isFullyLoaded)
+			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
 				for (const auto& [uuid, object] : map)
 				{
@@ -177,7 +177,7 @@ namespace CE
 				for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
 				{
 					String pathInPackage = objectEntry.pathInPackage;
-					if (pathInPackage.Contains(".")) // object is not a root object in this package
+					if (pathInPackage.Contains(".") || pathInPackage.IsEmpty()) // object is not a root object in this package
 						continue;
 
 					ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
@@ -199,11 +199,11 @@ namespace CE
 
 	const Name& Package::GetPrimaryObjectTypeName()
 	{
-		if (!primaryObjectTypeName.IsValid() && GetSubObjectCount() > 0)
+		if (!primaryObjectTypeName.IsValid())
 		{
 			const auto& map = GetSubObjectMap();
 
-			if (isFullyLoaded)
+			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
 				for (const auto& [uuid, object] : map)
 				{
@@ -224,7 +224,7 @@ namespace CE
 				for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
 				{
 					String pathInPackage = objectEntry.pathInPackage;
-					if (pathInPackage.Contains(".")) // object is not a root object in this package
+					if (pathInPackage.Contains(".") || pathInPackage.IsEmpty()) // object is not a root object in this package
 						continue;
 
 					ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
