@@ -20,38 +20,6 @@ namespace CE
 		}
 	}
 
-	static void SavePrimaryObjectData(Stream* stream, Package* package)
-	{
-		if (package == nullptr)
-		{
-			*stream << ""; // Primary asset name
-			*stream << ""; // Primary asset type name
-			return;
-		}
-
-		Object* primaryObject = nullptr;
-
-		for (const auto& [uuid, object] : package->GetSubObjectMap())
-		{
-			if (object == nullptr)
-				continue;
-
-			if (object->IsOfType<Asset>())
-			{
-				primaryObject = object;
-				break;
-			}
-
-			primaryObject = object;
-		}
-
-		if (primaryObject != nullptr)
-		{
-			*stream << primaryObject->GetName().GetString(); // Primary asset/object name
-			*stream << primaryObject->GetClass()->GetTypeName(); // Primary asset/object long type name
-		}
-	}
-
 	SavePackageResult Package::SavePackage(Package* package, Object* asset, Stream* stream, const SavePackageArgs& saveArgs)
 	{
 		if (package == nullptr)
@@ -104,7 +72,6 @@ namespace CE
 		*stream << package->GetPackageName();
 
 		SavePackageDependencies(stream, packageDependencies);
-		SavePrimaryObjectData(stream, package);
 
 		// Data Start
 
