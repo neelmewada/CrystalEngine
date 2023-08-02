@@ -265,7 +265,6 @@ namespace CE
 			return Bind(sourceInstance, sourceFunction, DelegateType(lambda));
 		}
 
-
 		static void UnbindAllSignals(void* instance);
         
         static void Unbind(void* instance, DelegateHandle delegateInstance);

@@ -12,6 +12,9 @@ namespace CE
         Delegate() : Internal::DelegateBase<T>(nullptr)
         {}
 
+		Delegate(std::nullptr_t nullValue) : Internal::DelegateBase<T>(nullptr)
+		{}
+
         Delegate(const std::function<T>& func) : Internal::DelegateBase<T>(func)
         {}
 

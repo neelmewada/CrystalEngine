@@ -29,11 +29,6 @@
 
 // *********************************
 
-// Threading
-#include "Threading/Mutex.h"
-#include "Threading/Thread.h"
-#include "Threading/ThreadSingleton.h"
-
 // Module
 #include "Module/Module.h"
 #include "Module/ModuleManager.h"
@@ -44,6 +39,12 @@
 #include "Delegates/MultiCastDelegate.h"
 #include "Delegates/DelegateRTTI.h"
 #include "Misc/CoreDelegates.h"
+
+// Threading
+#include "Threading/Mutex.h"
+#include "Threading/Thread.h"
+#include "Threading/ThreadSingleton.h"
+#include "Threading/Async.h"
 
 // ******************************************************
 // Math

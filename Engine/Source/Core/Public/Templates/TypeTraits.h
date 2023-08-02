@@ -192,6 +192,42 @@ namespace CE
 		};
 	};
 
+	template <typename TClassType, typename TReturnType, typename... Args>
+	struct FunctionTraits<TReturnType(TClassType::*)(Args...)> // we specialize for pointers to member function
+	{
+		enum { NumArgs = sizeof...(Args) };
+
+		typedef TReturnType ReturnType;
+
+		typedef std::tuple<Args...> Tuple;
+
+		template <SIZE_T i>
+		struct Arg
+		{
+			typedef typename std::tuple_element<i, std::tuple<Args...>>::type Type;
+			// the i-th argument is equivalent to the i-th tuple element of a tuple
+			// composed of those arguments.
+		};
+	};
+
+	template <typename TReturnType, typename... Args>
+	struct FunctionTraits<TReturnType(*)(Args...)> // we specialize for pointers to member function
+	{
+		enum { NumArgs = sizeof...(Args) };
+
+		typedef TReturnType ReturnType;
+
+		typedef std::tuple<Args...> Tuple;
+
+		template <SIZE_T i>
+		struct Arg
+		{
+			typedef typename std::tuple_element<i, std::tuple<Args...>>::type Type;
+			// the i-th argument is equivalent to the i-th tuple element of a tuple
+			// composed of those arguments.
+		};
+	};
+
 
 	template<typename T, typename = void>
 	struct TStructReleaseFunction : TFalseType

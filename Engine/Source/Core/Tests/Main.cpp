@@ -136,6 +136,145 @@ TEST(Threading, ThreadSingleton)
     TEST_END;
 }
 
+static String ThreadingAsyncFunc(const Array<String>& array)
+{
+	String result = "";
+	for (int i = 0; i < array.GetSize(); i++)
+	{
+		result += array[i];
+		if (i != array.GetSize() - 1)
+			result += ",";
+	}
+	Thread::SleepFor(20);
+	return result;
+}
+
+class AsyncTestClass
+{
+public:
+	AsyncTestClass()
+	{
+
+	}
+
+	String ThreadingAsyncFunc(const Array<String>& array)
+	{
+		String result = "";
+		for (int i = 0; i < array.GetSize(); i++)
+		{
+			result += array[i];
+			if (i != array.GetSize() - 1)
+				result += separator;
+		}
+		Thread::SleepFor(20);
+		return result;
+	}
+
+	// This is NOT thread safe
+	String separator = ",";
+};
+
+TEST(Threading, Async)
+{
+	TEST_BEGIN;
+
+	// 1. Simple types
+	{
+		auto operation = [](const String& string) -> int
+		{
+			Thread::SleepFor(20);
+			return string.GetLength();
+		};
+
+		int i = -1;
+
+		auto future = Async(operation, String("123456789"));
+
+		EXPECT_EQ(i, -1);
+		i = future.Get();
+		EXPECT_EQ(i, 9);
+	}
+
+	// 2. Monkey test
+	{
+		auto operation = [](const String& input) -> String
+		{
+			Thread::SleepFor(20);
+			return input.Replace({ '_' }, '-');
+		};
+
+		String input = "this_is_a_string";
+		
+		auto future0 = Async(operation, input);
+
+		EXPECT_EQ(input, "this_is_a_string");
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		future0.Wait();
+		input = future0.Get();
+		input = future0.Get();
+		input = future0.Get();
+		input = future0.Get();
+		input = future0.Get();
+		EXPECT_EQ(input, "this-is-a-string");
+	}
+
+	// 3. Global function with callback
+	{
+		Array<String> input = { "this", "is", "an", "array" };
+
+		Delegate<void(const String&)> callback = [&](const String& value)
+		{
+			EXPECT_EQ(value, "this,is,an,array");
+		};
+
+		auto future = AsyncCallback(ThreadingAsyncFunc, callback, input);
+		
+		EXPECT_EQ(input.GetSize(), 4);
+		EXPECT_EQ(input[0], "this");
+		EXPECT_EQ(input[1], "is");
+		EXPECT_EQ(input[2], "an");
+		EXPECT_EQ(input[3], "array");
+
+		// Wait for exec to complete, otherwise we will finish this test before results
+		future.Wait();
+	}
+
+	// 4. Member functions
+	{
+		AsyncTestClass clazz{};
+		clazz.separator = " ";
+
+		Array<String> input = { "this", "is", "an", "array" };
+
+		Delegate<void(const String&)> callback = [&](const String& value)
+		{
+			EXPECT_EQ(value, "this is an array");
+		};
+
+		const auto& inputRef = input;
+
+		auto future = AsyncMemberCallback(&AsyncTestClass::ThreadingAsyncFunc, &clazz, callback, inputRef);
+
+		EXPECT_EQ(input.GetSize(), 4);
+		EXPECT_EQ(input[0], "this");
+		EXPECT_EQ(input[1], "is");
+		EXPECT_EQ(input[2], "an");
+		EXPECT_EQ(input[3], "array");
+
+		future.Wait();
+	}
+
+	TEST_END;
+}
+
 #pragma endregion
 
 
@@ -238,13 +377,13 @@ TEST(Containers, String)
 	String kebabCase = "this-is-a-string";
 	String snakeCase = "this_is_a_string";
 
-	// CamelCase
+	// camelCase
 	EXPECT_EQ(camelCase.ToCamelCase(), camelCase);
 	EXPECT_EQ(pascalCase.ToCamelCase(), camelCase);
 	EXPECT_EQ(kebabCase.ToCamelCase(), camelCase);
 	EXPECT_EQ(snakeCase.ToCamelCase(), camelCase);
 
-	// pascalCase
+	// PascalCase
 	EXPECT_EQ(camelCase.ToPascalCase(), pascalCase);
 	EXPECT_EQ(pascalCase.ToPascalCase(), pascalCase);
 	EXPECT_EQ(kebabCase.ToPascalCase(), pascalCase);

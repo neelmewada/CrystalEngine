@@ -726,7 +726,7 @@ namespace CE
 		Split(delims, outArray);
 	}
 
-    String String::RemoveWhitespaces()
+    String String::RemoveWhitespaces() const
     {
         char* result = new char[GetLength() + 1];
         result[GetLength()] = 0;
@@ -756,7 +756,7 @@ namespace CE
         return str;
     }
 
-	String String::Replace(const Array<char>& charsToReplace, char replaceWith)
+	String String::Replace(const Array<char>& charsToReplace, char replaceWith) const
 	{
 		if (replaceWith == 0 || charsToReplace.IsEmpty())
 			return *this;

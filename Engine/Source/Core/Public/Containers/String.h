@@ -244,9 +244,13 @@ namespace CE
         String ToLower() const;
         String ToUpper() const;
 
+		/// To: kebab-case
 		String ToKebabCase() const;
+		/// To: snake_case
 		String ToSnakeCase() const;
+		/// To: camelCase
 		String ToCamelCase() const;
+		/// To: PascalCase
 		String ToPascalCase() const;
 
         String GetSubstring(int startIndex, int length = -1);
@@ -260,9 +264,9 @@ namespace CE
 
 		void Split(InitializerList<String> delimiters, Array<String>& outArray) const;
 
-        String RemoveWhitespaces();
+        String RemoveWhitespaces() const;
 
-		String Replace(const Array<char>& charsToReplace, char replaceWith);
+		String Replace(const Array<char>& charsToReplace, char replaceWith) const;
 
 		void UpdateLength();
 

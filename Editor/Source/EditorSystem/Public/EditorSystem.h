@@ -8,6 +8,8 @@
 
 /////////////////////////////////////////////
 
+#include "Asset/AssetProcessor.h"
+
 #include "Editor/EditorEngine.h"
 #include "Editor/EditorAssetManager.h"
 
