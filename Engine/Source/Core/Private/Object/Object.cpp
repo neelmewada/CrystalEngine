@@ -271,6 +271,7 @@ namespace CE
             
             auto fieldTypeId = field->GetDeclarationTypeId();
             auto fieldName = field->GetName().GetString();
+			auto fieldDeclType = field->GetDeclarationType();
 
             if (!configSection.KeyExists(fieldName) || !configSection[fieldName].IsValid())
             {
@@ -347,6 +348,18 @@ namespace CE
                     field->SetFieldValue<bool>(this, value);
                 }
             }
+			else if (fieldDeclType != nullptr && fieldDeclType->IsStruct())
+			{
+				StructType* structType = (StructType*)fieldDeclType;
+				void* structInstance = field->GetFieldInstance(this);
+
+				const String& string = configValue.GetString();
+
+				if (string.StartsWith("(") && string.EndsWith(")"))
+				{
+					ConfigParseStruct(string.GetSubstringView(1, string.GetLength() - 2), structInstance, structType);
+				}
+			}
             else if (field->IsArrayType() && configValue.IsValid())
             {
                 Array<String>& array = configValue.GetArray();
@@ -515,6 +528,7 @@ namespace CE
             return;
         
         TypeId fieldTypeId = field->GetTypeId();
+		TypeInfo* fieldDeclType = field->GetDeclarationType();
         
         if (field->IsStringField())
         {
@@ -573,6 +587,14 @@ namespace CE
 			{
 				field->SetFieldValue<bool>(instance, boolValue);
 			}
+		}
+		else if (fieldDeclType != nullptr && fieldDeclType->IsStruct())
+		{
+			StructType* structType = (StructType*)fieldDeclType;
+			void* structInstance = field->GetFieldInstance(instance);
+
+			if (value.StartsWith("(") && value.EndsWith(")"))
+				ConfigParseStruct(value.GetSubstringView(1, value.GetLength() - 2), structInstance, structType);
 		}
     }
 

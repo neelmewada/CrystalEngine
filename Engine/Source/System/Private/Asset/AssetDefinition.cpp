@@ -11,8 +11,10 @@ namespace CE
 
 	AssetDefinitionRegistry::AssetDefinitionRegistry()
 	{
-		if (!IsDefaultInstance())
+		if (!IsDefaultInstance()) // If not a class default instance
+		{
 			handle = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&Self::OnClassRegistered, this));
+		}
 	}
 
 	AssetDefinitionRegistry::~AssetDefinitionRegistry()

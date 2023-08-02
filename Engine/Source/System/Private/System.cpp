@@ -24,6 +24,8 @@ namespace CE
 
         void RegisterTypes() override
         {
+			CE_REGISTER_TYPES(AssetDefinitionRegistry);
+
 			gAssetDefinitionRegistry = CreateObject<AssetDefinitionRegistry>(nullptr, "AssetDefinitionRegistry");
         }
 
