@@ -77,6 +77,7 @@ namespace CE
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
 #if PAL_TRAIT_BUILD_EDITOR
+							// Source asset path relative to project assets directory
 							sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
 							if (!sourceAssetRelativePath.IsEmpty())
 							{

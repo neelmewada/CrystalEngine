@@ -4,6 +4,7 @@
 
 namespace CE
 {
+	SYSTEM_API AssetDefinitionRegistry* gAssetDefinitionRegistry = nullptr;
 
     class SystemModule : public Module
     {
@@ -16,31 +17,16 @@ namespace CE
 
         void ShutdownModule() override
         {
-			CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(classRegisteredHandle);
-			CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(classDeregisteredHandle);
+			gAssetDefinitionRegistry->RequestDestroy();
+			gAssetDefinitionRegistry = nullptr;
+
         }
 
         void RegisterTypes() override
         {
-			classRegisteredHandle = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&SystemModule::OnClassRegistered, this));
-			classDeregisteredHandle = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&SystemModule::OnClassDeregistered, this));
+			gAssetDefinitionRegistry = CreateObject<AssetDefinitionRegistry>(nullptr, "AssetDefinitionRegistry");
         }
 
-		void OnClassRegistered(ClassType* classType)
-		{
-			if (classType->GetOwnerModuleName() == MODULE_NAME)
-			{
-				
-			}
-		}
-
-		void OnClassDeregistered(ClassType* classType)
-		{
-
-		}
-
-		DelegateHandle classRegisteredHandle = 0;
-		DelegateHandle classDeregisteredHandle = 0;
     };
 
 	/*

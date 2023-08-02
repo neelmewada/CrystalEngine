@@ -88,11 +88,14 @@ namespace CE
 
 	protected:
 
+		FIELD()
+		Private::TextureSource source{};
+
 		FIELD(ImportSetting)
 		TextureType type = TextureType::Default;
 
 		FIELD()
-		Private::TextureSource source{};
+		TextureFilter filter = TextureFilter::Linear;
 
 		FIELD()
 		u32 width = 0;

@@ -9,6 +9,11 @@ namespace CE
 		CE_CLASS(TextureAssetDefinition, AssetDefinition)
 	public:
 
+		const Array<String>& GetSourceExtensions() override;
+
+		ClassType* GetAssetClass() override;
+
+		ClassType* GetAssetClass(const String& extension) override;
 
 	protected:
 

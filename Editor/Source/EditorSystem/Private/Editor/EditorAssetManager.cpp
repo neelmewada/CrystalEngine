@@ -4,10 +4,7 @@ namespace CE::Editor
 {
 	EditorAssetManager::EditorAssetManager()
 	{
-		// Texture 2D types
-		registeredSourceExtensions[".png"] = 
-			registeredSourceExtensions[".jpg"] = 
-			GetStaticClass<Texture2D>();
+		
 	}
 
 	EditorAssetManager::~EditorAssetManager()
@@ -56,10 +53,15 @@ namespace CE::Editor
 				{
 					
 				}
-				else if (registeredSourceExtensions.KeyExists(extension)) // Source asset
+				else
 				{
-					String relativePath = pathNameWithoutExtension + extension;
-					sourceAssetsToImport.Add(relativePath);
+					// Source asset
+					AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinitionForSourceAssetExtension(extension);
+					if (assetDef != nullptr)
+					{
+						String relativePath = pathNameWithoutExtension + extension;
+						sourceAssetsToImport.Add(relativePath);
+					}
 ;				}
 
 				// New file added or current file modified

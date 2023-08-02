@@ -399,7 +399,8 @@ namespace CE
         if (superTypesCached)
             return;
 
-        superTypesCached = true;
+		if (superTypeIds.IsEmpty())
+			superTypesCached = true;
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
@@ -408,9 +409,11 @@ namespace CE
                 continue;
 
             superTypes.Add((ClassType*)type);
+			superTypesCached = true;
         }
 
-		AddDerivedClassToMap(this, this);
+		if (superTypesCached)
+			AddDerivedClassToMap(this, this);
     }
 
     void ClassType::AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath)
