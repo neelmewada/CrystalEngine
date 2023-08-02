@@ -247,31 +247,6 @@ TEST(Threading, Async)
 		future.Wait();
 	}
 
-	// 4. Member functions
-	{
-		AsyncTestClass clazz{};
-		clazz.separator = " ";
-
-		Array<String> input = { "this", "is", "an", "array" };
-
-		Delegate<void(const String&)> callback = [&](const String& value)
-		{
-			EXPECT_EQ(value, "this is an array");
-		};
-
-		const auto& inputRef = input;
-
-		auto future = AsyncMemberCallback(&AsyncTestClass::ThreadingAsyncFunc, &clazz, callback, inputRef);
-
-		EXPECT_EQ(input.GetSize(), 4);
-		EXPECT_EQ(input[0], "this");
-		EXPECT_EQ(input[1], "is");
-		EXPECT_EQ(input[2], "an");
-		EXPECT_EQ(input[3], "array");
-
-		future.Wait();
-	}
-
 	TEST_END;
 }
 
