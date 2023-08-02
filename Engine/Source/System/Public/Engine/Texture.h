@@ -91,7 +91,7 @@ namespace CE
 		FIELD()
 		Private::TextureSource source{};
 
-		FIELD(ImportSetting)
+		FIELD()
 		TextureType type = TextureType::Default;
 
 		FIELD()
