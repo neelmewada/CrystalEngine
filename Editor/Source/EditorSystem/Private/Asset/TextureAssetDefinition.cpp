@@ -1,6 +1,6 @@
 #include "System.h"
 
-namespace CE
+namespace CE::Editor
 {
 	const Array<String>& TextureAssetDefinition::GetSourceExtensions()
 	{

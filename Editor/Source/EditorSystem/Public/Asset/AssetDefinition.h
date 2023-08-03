@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE
+namespace CE::Editor
 {
 
 	/*
@@ -46,6 +46,6 @@ namespace CE
 		DelegateHandle handle = 0;
 	};
     
-} // namespace CE
+} // namespace CE::Editor
 
 #include "AssetDefinition.rtti.h"

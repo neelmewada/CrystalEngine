@@ -26,8 +26,6 @@ namespace CE
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;
 
-		f32 waitForAssetChanges = 0.0f;
-
 		friend class Engine;
 	};
     

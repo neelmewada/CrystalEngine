@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE
+namespace CE::Editor
 {
     
 	CLASS()
@@ -20,6 +20,6 @@ namespace CE
 
 	};
 
-} // namespace CE
+} // namespace CE::Editor
 
 #include "TextureAssetDefinition.rtti.h"

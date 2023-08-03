@@ -1,8 +1,8 @@
 #include "System.h"
 
-namespace CE
+namespace CE::Editor
 {
-	SYSTEM_API extern AssetDefinitionRegistry* gAssetDefinitionRegistry;
+	EDITORSYSTEM_API extern AssetDefinitionRegistry* gAssetDefinitionRegistry;
 
 	AssetDefinition::~AssetDefinition()
 	{

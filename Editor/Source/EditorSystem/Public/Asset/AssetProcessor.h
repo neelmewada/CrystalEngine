@@ -2,7 +2,7 @@
 
 namespace CE::Editor
 {
-    CLASS(Abstract)
+    CLASS()
     class EDITORSYSTEM_API AssetProcessor : public Object
     {
         CE_CLASS(AssetProcessor, Object)
@@ -11,7 +11,6 @@ namespace CE::Editor
 		AssetProcessor();
 		virtual ~AssetProcessor();
 
-		virtual Name ProcessSourceAsset(const IO::Path& sourcePath) = 0;
         
     private:
         

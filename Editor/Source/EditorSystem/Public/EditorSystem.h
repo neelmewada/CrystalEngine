@@ -8,6 +8,9 @@
 
 /////////////////////////////////////////////
 
+#include "Asset/AssetDefinition.h"
+#include "Asset/TextureAssetDefinition.h"
+
 #include "Asset/AssetProcessor.h"
 
 #include "Editor/EditorEngine.h"

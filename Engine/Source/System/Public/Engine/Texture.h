@@ -34,6 +34,14 @@ namespace CE
 	ENUM_CLASS_FLAGS(TextureFormat);
 
 	ENUM()
+	enum class TextureSourceFormat
+	{
+		PNG = 0,
+		JPG
+	};
+	ENUM_CLASS_FLAGS(TextureSourceFormat);
+
+	ENUM()
 	enum class TextureType : int
 	{
 		ECONST(Display = "Default (Color sRGB)")
@@ -74,6 +82,9 @@ namespace CE
 
 			FIELD()
 			TextureFormat format = TextureFormat::None;
+
+			FIELD()
+			TextureSourceFormat sourceFormat = TextureSourceFormat::PNG;
 		};
 	}
 
@@ -91,7 +102,7 @@ namespace CE
 		FIELD()
 		Private::TextureSource source{};
 
-		FIELD()
+		FIELD(ImportSetting)
 		TextureType type = TextureType::Default;
 
 		FIELD()

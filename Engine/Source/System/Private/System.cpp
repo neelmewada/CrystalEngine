@@ -4,7 +4,6 @@
 
 namespace CE
 {
-	SYSTEM_API AssetDefinitionRegistry* gAssetDefinitionRegistry = nullptr;
 
     class SystemModule : public Module
     {
@@ -17,16 +16,12 @@ namespace CE
 
         void ShutdownModule() override
         {
-			gAssetDefinitionRegistry->RequestDestroy();
-			gAssetDefinitionRegistry = nullptr;
 
         }
 
         void RegisterTypes() override
         {
-			CE_REGISTER_TYPES(AssetDefinitionRegistry);
-
-			gAssetDefinitionRegistry = CreateObject<AssetDefinitionRegistry>(nullptr, "AssetDefinitionRegistry");
+			
         }
 
     };

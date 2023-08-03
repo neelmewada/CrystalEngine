@@ -6,6 +6,8 @@
 
 namespace CE::Editor
 {
+	EDITORSYSTEM_API AssetDefinitionRegistry* gAssetDefinitionRegistry = nullptr;
+
     class EditorSystemModule : public CE::Module
     {
     public:
@@ -16,13 +18,18 @@ namespace CE::Editor
 
         virtual void ShutdownModule() override
         {
+			gAssetDefinitionRegistry->RequestDestroy();
+			gAssetDefinitionRegistry = nullptr;
+
 			gEngine->RequestDestroy();
 			gEngine = nullptr;
         }
 
         virtual void RegisterTypes() override
         {
+			CE_REGISTER_TYPES(AssetDefinitionRegistry);
 
+			gAssetDefinitionRegistry = CreateObject<AssetDefinitionRegistry>(nullptr, "AssetDefinitionRegistry");
         }
     };
 }

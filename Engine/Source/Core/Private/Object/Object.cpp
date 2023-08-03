@@ -20,6 +20,9 @@ namespace CE
 
 	void Object::RequestDestroy()
 	{
+		if (this == nullptr)
+			return;
+
 		// Unbind signals
 		UnbindAllSignals(this);
 
