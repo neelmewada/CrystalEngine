@@ -57,15 +57,15 @@ namespace CE
 		info->isLoaded = true;
 		info->moduleImpl = modulePtr;
 
+		// Create transient package for if NOT Core module
+		if (moduleName != "Core")
+			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+
 		// Register custom types
 		modulePtr->RegisterTypes();
 
 		// Register AutoRTTI types
 		info->loadTypesFuncPtr();
-
-		// Create transient package
-		if (moduleName != "Core")
-			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
 		// Startup module
 		modulePtr->StartupModule();
@@ -104,8 +104,11 @@ namespace CE
 		info->moduleImpl->ShutdownModule();
 
 		// Delete transient package
-		info->transientPackage->RequestDestroy();
-		info->transientPackage = nullptr;
+		if (info->transientPackage != nullptr)
+		{
+			info->transientPackage->RequestDestroy();
+			info->transientPackage = nullptr;
+		}
 
 		// Deregister types
 		info->moduleImpl->DeregisterTypes();
@@ -172,6 +175,7 @@ namespace CE
 		ModuleInfo* info = FindModuleInfo(moduleName);
 		if (info == nullptr || !info->isLoaded)
 			return nullptr;
+		
 		return info->transientPackage;
 	}
 

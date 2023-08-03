@@ -4,10 +4,13 @@ namespace CE::Editor
 {
     
 	CLASS()
-	class SYSTEM_API TextureAssetDefinition : public AssetDefinition
+	class EDITORSYSTEM_API TextureAssetDefinition : public AssetDefinition
 	{
 		CE_CLASS(TextureAssetDefinition, AssetDefinition)
 	public:
+
+		TextureAssetDefinition();
+		virtual ~TextureAssetDefinition();
 
 		const Array<String>& GetSourceExtensions() override;
 

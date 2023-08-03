@@ -2,6 +2,16 @@
 
 namespace CE::Editor
 {
+	TextureAssetDefinition::TextureAssetDefinition()
+	{
+		
+	}
+
+	TextureAssetDefinition::~TextureAssetDefinition()
+	{
+		
+	}
+
 	const Array<String>& TextureAssetDefinition::GetSourceExtensions()
 	{
 		static Array<String> extensions = {

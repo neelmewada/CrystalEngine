@@ -441,12 +441,13 @@ namespace CE
 	{
 		if (defaultInstance == nullptr)
 		{
+			auto nameString = GetName().GetLastComponent();
+
 			auto moduleName = GetOwnerModuleName().GetString();
 			Package* transientPackage = ModuleManager::Get().GetLoadedModuleTransientPackage(moduleName);
 			if (transientPackage == nullptr)
 				transientPackage = GetTransientPackage();
-
-			auto nameString = GetName().GetLastComponent();
+			
 			defaultInstance = CreateObject<Object>(transientPackage, "CDI_" + nameString, OF_ClassDefaultInstance, this, nullptr);
 		}
 		return defaultInstance;

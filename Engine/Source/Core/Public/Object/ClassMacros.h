@@ -62,6 +62,12 @@
 
 #define CE_USING_NAMESPACE(Namespace) CE_EXPAND(CE_CONCATENATE(__CE_USING_NAMESPACE_IMPL_,CE_ARG_COUNT(Namespace)))(Namespace)
 
+#define __MERGE_NAMESPACE_IMPL_0(Namespace, SubNamespace) SubNamespace
+#define __MERGE_NAMESPACE_IMPL_1(Namespace, SubNamespace) Namespace::SubNamespace
+
+// Merge Namespace and SubNamespace in a way where Namespace can possibly be empty but SubNamespace will always be valid
+#define MERGE_NAMESPACE(Namespace, SubNamespace) CE_EXPAND(CE_CONCATENATE(__MERGE_NAMESPACE_IMPL_,CE_ARG_COUNT(Namespace)))(Namespace, SubNamespace)
+
 #define CE_RTTI_CLASS(API, Namespace, Class, SuperClasses, IsAbstract, Attributes, FieldList, FunctionList)\
 namespace CE\
 {\
@@ -102,6 +108,14 @@ namespace CE\
 				CE_EXPAND(CE_CONCATENATE(__CE_INIT_DEFAULTS_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
 			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
+			virtual String GetClassPackage() const override\
+			{\
+				return Namespace::Class::StaticPackage();\
+			}\
+			virtual String GetClassModule() const override\
+			{\
+				return Namespace::Class::StaticModule();\
+			}\
 		};\
 	}\
 	template<>\
@@ -135,6 +149,14 @@ const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Class>::FullTypeName()\
 {\
 	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Class);\
 	return name;\
+}\
+CE::String MERGE_NAMESPACE(Namespace, Class)::StaticPackage()\
+{\
+	return PACKAGE_NAME;\
+}\
+CE::String MERGE_NAMESPACE(Namespace, Class)::StaticModule()\
+{\
+	return MODULE_NAME;\
 }
 
 #define __CE_RTTI_SUPERCLASS_0(...) typedef void Super;
@@ -157,6 +179,8 @@ public:\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::ClassType* Type();\
+	static CE::String StaticPackage();\
+	static CE::String StaticModule();\
 	constexpr static bool IsClass() { return true; }\
 	constexpr static bool IsStruct() { return false; }\
     virtual const CE::TypeInfo* GetType() const\
@@ -166,6 +190,14 @@ public:\
 	virtual CE::ClassType* GetClass() const\
 	{\
 		return Type();\
+	}\
+	virtual CE::String GetClassPackage() const\
+	{\
+		return StaticPackage();\
+	}\
+	virtual CE::String GetClassModule() const\
+	{\
+		return StaticModule();\
 	}
 
 
@@ -201,6 +233,14 @@ namespace CE\
 				new(instance) Namespace::Struct;\
 			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
+			virtual String GetStructPackage() const override\
+			{\
+				return Namespace::Struct::StaticPackage();\
+			}\
+			virtual String GetStructModule() const override\
+			{\
+				return Namespace::Struct::StaticModule();\
+			}\
 		};\
 	}\
 	template<>\
@@ -230,6 +270,14 @@ const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Struct>::FullTypeName()\
 {\
 	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Struct);\
 	return name;\
+}\
+CE::String MERGE_NAMESPACE(Namespace, Struct)::StaticPackage()\
+{\
+	return PACKAGE_NAME;\
+}\
+CE::String MERGE_NAMESPACE(Namespace, Struct)::StaticModule()\
+{\
+	return MODULE_NAME;\
 }
 
 #define CE_STRUCT(Struct, ...)\
@@ -243,6 +291,8 @@ public:\
     static CE::StructType* Type();\
 	constexpr static bool IsClass() { return false; }\
 	constexpr static bool IsStruct() { return true; }\
+	static CE::String StaticPackage();\
+	static CE::String StaticModule();\
 	~Struct()\
 	{\
 		CE::Object::UnbindAllSignals(this);\
@@ -258,5 +308,13 @@ public:\
 	virtual CE::StructType* GetStruct() const\
 	{\
 		return Type();\
+	}\
+	virtual CE::String GetStructPackage() const\
+	{\
+		return StaticPackage();\
+	}\
+	virtual CE::String GetStructModule() const\
+	{\
+		return StaticModule();\
 	}
 

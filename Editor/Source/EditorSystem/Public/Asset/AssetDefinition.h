@@ -7,7 +7,7 @@ namespace CE::Editor
 	* Asset Definition class. Gives information about different asset types.
 	*/
     CLASS(Abstract)
-    class SYSTEM_API AssetDefinition : public Object
+    class EDITORSYSTEM_API AssetDefinition : public Object
     {
         CE_CLASS(AssetDefinition, Object)
     public:
@@ -25,7 +25,7 @@ namespace CE::Editor
     };
 
 	CLASS()
-	class SYSTEM_API AssetDefinitionRegistry : public Object
+	class EDITORSYSTEM_API AssetDefinitionRegistry : public Object
 	{
 		CE_CLASS(AssetDefinitionRegistry, Object)
 	public:

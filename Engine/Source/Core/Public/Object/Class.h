@@ -59,6 +59,9 @@ namespace CE
 		public:
 			virtual void InitializeDefaults(void* instance) const = 0;
 			virtual const CE::Name& GetTypeName() const = 0;
+
+			virtual String GetStructPackage() const = 0;
+			virtual String GetStructModule() const = 0;
 		};
 	}
 
@@ -229,6 +232,20 @@ namespace CE
 			return Impl->InitializeDefaults(instance);
 		}
 
+		String GetStructPackage() const
+		{
+			if (Impl == nullptr)
+				return nullptr;
+			return Impl->GetStructPackage();
+		}
+
+		String GetStructModule() const
+		{
+			if (Impl == nullptr)
+				return nullptr;
+			return Impl->GetStructModule();
+		}
+
 		virtual u32 GetSize() const override
 		{
 			return size;
@@ -385,6 +402,10 @@ namespace CE
 			virtual bool CanInstantiate() const = 0;
 
 			virtual const CE::Name& GetTypeName() const = 0;
+
+			virtual String GetClassPackage() const = 0;
+
+			virtual String GetClassModule() const = 0;
 		};
 	}
 
@@ -453,6 +474,20 @@ namespace CE
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->InitializeDefaults(instance);
+		}
+
+		String GetClassPackage() const
+		{
+			if (Impl == nullptr)
+				return "";
+			return Impl->GetClassPackage();
+		}
+
+		String GetClassModule() const
+		{
+			if (Impl == nullptr)
+				return "";
+			return Impl->GetClassModule();
 		}
 
 		const Object* GetDefaultInstance();
