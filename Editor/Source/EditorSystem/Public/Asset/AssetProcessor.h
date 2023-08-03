@@ -7,8 +7,11 @@ namespace CE::Editor
     {
         CE_CLASS(AssetProcessor, Object)
     public:
-        
-        virtual SubClassType<Asset> GetAssetClass() = 0;
+
+		AssetProcessor();
+		virtual ~AssetProcessor();
+
+		virtual Name ProcessSourceAsset(const IO::Path& sourcePath) = 0;
         
     private:
         

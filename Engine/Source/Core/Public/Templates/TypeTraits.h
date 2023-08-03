@@ -244,5 +244,18 @@ namespace CE
 		}
 	};
 
+	/// TTrueType if type has default constructor and is NOT abstract
+	template<typename T, typename = void>
+	struct THasDefaultCtor : TFalseType
+	{
+
+	};
+
+	template<typename T>
+	struct THasDefaultCtor<T, std::void_t<decltype(T())>> : TTrueType
+	{
+
+	};
+
 } // namespace CE::Traits
 
