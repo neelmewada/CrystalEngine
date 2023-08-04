@@ -160,8 +160,6 @@ namespace CE::Editor
 		return outPackageName.IsValid();
 	}
 
-	static Array<Thread> gThreadStorage{};
-
 	void EditorAssetManager::ImportSourceAssets()
 	{
 		for (auto sourcePath : sourceAssetsToImport)
@@ -179,10 +177,9 @@ namespace CE::Editor
 				continue;
 
 			numAssetsBeingImported++;
-			gThreadStorage.Add(Thread([=]
-				{
-					ImportSourceAssetAsync(this, sourcePath, assetImporter);
-				}));
+			
+			// TODO: implement async later
+			ImportSourceAssetAsync(this, sourcePath, assetImporter);
 		}
 
 		sourceAssetsToImport.Clear();

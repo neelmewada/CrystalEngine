@@ -18,25 +18,42 @@ namespace CE::Editor
 			outPath = outPath.GetParentPath() / (assetName + ".casset");
 		}
 
-		String outPackageNameString = outPath.GetString().Replace({ '\\' }, '/');
-
 		String packageName = "";
 
-		if (outPackageNameString.Contains("Game/Assets"))
+		if (IO::Path::IsSubDirectory(outPath, gProjectPath / "Game/Assets"))
 		{
-			Array<String> split = {};
-			outPackageNameString.Split({ "Game/Assets" }, split);
-			packageName = String() + "/Game" + (split.GetLast().StartsWith("/") ? "" : "/") + split.GetLast();
+			packageName = IO::Path::GetRelative(outPath, gProjectPath / "Game/Assets").RemoveExtension().GetString().Replace({'\\'}, '/');
+			if (!packageName.StartsWith("/"))
+				packageName = "/" + packageName;
+			packageName = "/Game" + packageName;
 		}
-		else if (outPackageNameString.Contains("Engine/Assets"))
+		else if (IO::Path::IsSubDirectory(outPath, PlatformDirectories::GetAppRootDir() / "Engine/Assets"))
 		{
-			Array<String> split = {};
-			outPackageNameString.Split({ "Engine/Assets" }, split);
-			packageName = String() + "/Engine" + (split.GetLast().StartsWith("/") ? "" : "/") + split.GetLast();
+			packageName = IO::Path::GetRelative(outPath, PlatformDirectories::GetAppRootDir() / "Engine/Assets").RemoveExtension().GetString().Replace({ '\\' }, '/');
+			if (!packageName.StartsWith("/"))
+				packageName = "/" + packageName;
+			packageName = "/Engine" + packageName;
 		}
 		else
 		{
 			packageName = assetName;
+		}
+
+		String sourceAssetRelativePath = "";
+
+		if (IO::Path::IsSubDirectory(sourceAssetPath, gProjectPath / "Game/Assets"))
+		{
+			sourceAssetRelativePath = IO::Path::GetRelative(sourceAssetPath, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
+			if (!sourceAssetRelativePath.StartsWith("/"))
+				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
+			sourceAssetRelativePath = "/Game" + sourceAssetRelativePath;
+		}
+		else if (IO::Path::IsSubDirectory(sourceAssetPath, PlatformDirectories::GetAppRootDir() / "Engine/Assets"))
+		{
+			sourceAssetRelativePath = IO::Path::GetRelative(sourceAssetPath, gProjectPath / "Engine/Assets").GetString().Replace({ '\\' }, '/');
+			if (!sourceAssetRelativePath.StartsWith("/"))
+				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
+			sourceAssetRelativePath = "/Engine" + sourceAssetRelativePath;
 		}
 
 		String extension = sourceAssetPath.GetExtension().GetString();
@@ -88,6 +105,12 @@ namespace CE::Editor
 			texture->format = TextureFormat::RGBA32;
 		else
 			texture->format = TextureFormat::RGBA32;
+
+		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(IO::Path));
+		if (sourceAssetPathField != nullptr)
+		{
+			sourceAssetPathField->SetFieldValue<IO::Path>(texture, IO::Path(sourceAssetRelativePath));
+		}
 
 		SavePackageResult result = Package::SavePackage(texturePackage, texture, outPath);
 		if (result != SavePackageResult::Success)
