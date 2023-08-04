@@ -74,8 +74,7 @@ namespace CE::Editor
 					AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinitionForSourceAssetExtension(extension);
 					if (assetDef != nullptr)
 					{
-						String relativePath = pathNameWithoutExtension + extension;
-						sourceAssetsToImport.Add((gProjectPath / "Game/Assets") / relativePath);
+						sourceAssetsToImport.Add(thisChange.currentPath);
 
 						waitToImportSourceAssets = 1.0f;
 					}
@@ -114,26 +113,26 @@ namespace CE::Editor
 		AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinitionForSourceAssetExtension(extension);
 		if (assetDef == nullptr)
 		{
+			self->mutex.Lock();
 			self->numAssetsBeingImported--;
 			if (importer != nullptr)
 			{
-				self->mutex.Lock();
 				importer->RequestDestroy();
-				self->mutex.Unlock();
 			}
+			self->mutex.Unlock();
 			return false;
 		}
 
 		IO::Path fullPath = sourceAssetPath;
 		if (!fullPath.Exists())
 		{
+			self->mutex.Lock();
 			self->numAssetsBeingImported--;
 			if (importer != nullptr)
 			{
-				self->mutex.Lock();
 				importer->RequestDestroy();
-				self->mutex.Unlock();
 			}
+			self->mutex.Unlock();
 			return false;
 		}
 
@@ -141,23 +140,27 @@ namespace CE::Editor
 
 		if (importer == nullptr)
 		{
+			self->mutex.Lock();
 			self->numAssetsBeingImported--;
+			self->mutex.Unlock();
 			return false;
 		}
 
 		Name outPackageName = importer->ImportSourceAsset(fullPath, productAssetPath);
 
+		self->mutex.Lock();
 		self->numAssetsBeingImported--;
 		if (importer != nullptr)
 		{
-			self->mutex.Lock();
 			if (outPackageName.IsValid())
 				self->recentlyProcessedPackageNames.Add(outPackageName);
 			importer->RequestDestroy();
-			self->mutex.Unlock();
 		}
+		self->mutex.Unlock();
 		return outPackageName.IsValid();
 	}
+
+	static Array<Thread> gThreadStorage{};
 
 	void EditorAssetManager::ImportSourceAssets()
 	{
@@ -176,10 +179,10 @@ namespace CE::Editor
 				continue;
 
 			numAssetsBeingImported++;
-			auto run = Thread([=]
+			gThreadStorage.Add(Thread([=]
 				{
 					ImportSourceAssetAsync(this, sourcePath, assetImporter);
-				});
+				}));
 		}
 
 		sourceAssetsToImport.Clear();

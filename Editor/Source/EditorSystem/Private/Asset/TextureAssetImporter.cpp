@@ -18,20 +18,20 @@ namespace CE::Editor
 			outPath = outPath.GetParentPath() / (assetName + ".casset");
 		}
 
-		String sourceAssetPathString = sourceAssetPath.GetString().Replace({ '\\' }, '/');
+		String outPackageNameString = outPath.GetString().Replace({ '\\' }, '/');
 
 		String packageName = "";
 
-		if (sourceAssetPathString.Contains("Game/Assets"))
+		if (outPackageNameString.Contains("Game/Assets"))
 		{
 			Array<String> split = {};
-			sourceAssetPathString.Split({ "Game/Assets" }, split);
-			packageName = String() + "/Engine" + (split.GetLast().StartsWith("/") ? "" : "/") + split.GetLast();
+			outPackageNameString.Split({ "Game/Assets" }, split);
+			packageName = String() + "/Game" + (split.GetLast().StartsWith("/") ? "" : "/") + split.GetLast();
 		}
-		else if (sourceAssetPathString.Contains("Engine/Assets"))
+		else if (outPackageNameString.Contains("Engine/Assets"))
 		{
 			Array<String> split = {};
-			sourceAssetPathString.Split({ "Engine/Assets" }, split);
+			outPackageNameString.Split({ "Engine/Assets" }, split);
 			packageName = String() + "/Engine" + (split.GetLast().StartsWith("/") ? "" : "/") + split.GetLast();
 		}
 		else
