@@ -2,6 +2,10 @@
 
 namespace CE
 {
+#if PAL_TRAIT_BUILD_EDITOR
+	namespace Editor { class TextureAssetImporter; }
+#endif
+
 	CLASS()
 	class SYSTEM_API Texture2D : public Texture
 	{
@@ -14,6 +18,9 @@ namespace CE
 		FIELD()
 		TextureFormat format = TextureFormat::None;
 
+#if PAL_TRAIT_BUILD_EDITOR
+		friend class CE::Editor::TextureAssetImporter;
+#endif
 	};
     
 } // namespace CE

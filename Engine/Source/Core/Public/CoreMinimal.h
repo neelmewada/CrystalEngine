@@ -12,6 +12,7 @@
 #include "Misc/Exception.h"
 #include "Misc/Assert.h"
 #include "Misc/ByteUtils.h"
+#include "Misc/Defer.h"
 #include "Memory/Memory.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"

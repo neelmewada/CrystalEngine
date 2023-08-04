@@ -20,6 +20,8 @@ namespace CE::Editor
 
 		virtual ClassType* GetAssetClass(const String& extension) = 0;
 
+		virtual SubClassType<AssetImporter> GetAssetImporterClass() = 0;
+
 	private:
 
     };
@@ -35,6 +37,8 @@ namespace CE::Editor
 
 		static AssetDefinitionRegistry* Get();
 
+		static AssetDefinition* GetAssetDefinition(SubClassType<AssetDefinition> subClass);
+
 		AssetDefinition* FindAssetDefinitionForSourceAssetExtension(const String& extension);
 
 	private:
@@ -45,6 +49,14 @@ namespace CE::Editor
 
 		DelegateHandle handle = 0;
 	};
+
+	template<typename T> requires TIsBaseClassOf<AssetDefinition, T>::Value
+		static inline T* GetAssetDefinition()
+	{
+		if (AssetDefinitionRegistry::Get() == nullptr)
+			return nullptr;
+		return (T*)AssetDefinitionRegistry::Get()->GetAssetDefinition(T::Type());
+	}
     
 } // namespace CE::Editor
 

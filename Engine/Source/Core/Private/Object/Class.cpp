@@ -117,13 +117,20 @@ namespace CE
         return index < GetFieldCount() ? &cachedFields[index] : nullptr;
     }
 
-    FieldType* StructType::FindFieldWithName(const Name& name)
+    FieldType* StructType::FindFieldWithName(const Name& name, TypeId fieldTypeId)
     {
         if (!fieldsCached)
             CacheAllFields();
         
-        if (cachedFieldsMap.KeyExists(name))
-            return cachedFieldsMap[name];
+        if (cachedFieldsMap[name].NonEmpty())
+		{
+			const auto& fields = cachedFieldsMap[name];
+			for (auto field : fields)
+			{
+				if (fieldTypeId == 0 || (field != nullptr && field->GetDeclarationTypeId() == fieldTypeId))
+					return field;
+			}
+		}
 
         return nullptr;
     }
@@ -242,8 +249,8 @@ namespace CE
             {
                 cachedFields[i].next = &cachedFields[i + 1];
             }
-            
-            cachedFieldsMap.Add({ cachedFields[i].GetName(), &cachedFields[i] });
+
+			cachedFieldsMap[cachedFields[i].GetName()].Add(&cachedFields[i]);
         }
     }
 

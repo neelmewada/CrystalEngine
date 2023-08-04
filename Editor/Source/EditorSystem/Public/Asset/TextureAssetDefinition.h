@@ -18,6 +18,10 @@ namespace CE::Editor
 
 		ClassType* GetAssetClass(const String& extension) override;
 
+		SubClassType<AssetImporter> GetAssetImporterClass() override;
+
+		TextureSourceFormat GetSourceFormatFromExtension(const String& sourceExtension);
+
 	protected:
 
 

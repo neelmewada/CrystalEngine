@@ -30,4 +30,18 @@ namespace CE::Editor
 		return GetAssetClass();
 	}
 
+	SubClassType<AssetImporter> TextureAssetDefinition::GetAssetImporterClass()
+	{
+		return GetStaticClass<TextureAssetImporter>();
+	}
+
+	TextureSourceFormat TextureAssetDefinition::GetSourceFormatFromExtension(const String& sourceExtension)
+	{
+		if (sourceExtension.Contains("png"))
+			return TextureSourceFormat::PNG;
+		else if (sourceExtension.Contains("jpg") || sourceExtension.Contains("jpeg"))
+			return TextureSourceFormat::JPG;
+		return TextureSourceFormat::Unsupported;
+	}
+
 } // namespace CE

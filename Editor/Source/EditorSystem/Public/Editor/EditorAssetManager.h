@@ -12,12 +12,27 @@ namespace CE::Editor
 		EditorAssetManager();
 		virtual ~EditorAssetManager();
 
+		static EditorAssetManager* Get();
+
+		void Initialize() override;
+		void Shutdown() override;
+
 		void Tick(f32 deltaTime) override;
+
+		void ImportSourceAssets();
 
 	protected:
 
-		Array<IO::Path> sourceAssetsToImport{};
+		friend bool ImportSourceAssetAsync(EditorAssetManager* self, IO::Path sourceAssetPath, AssetImporter* importer);
 
+		Array<IO::Path> sourceAssetsToImport{};
+		Array<Name> recentlyProcessedPackageNames{};
+
+		f32 waitToImportSourceAssets = 0;
+
+		int numAssetsBeingImported = 0;
+
+		Mutex mutex{};
 	};
 
 } // namespace CE::Editor

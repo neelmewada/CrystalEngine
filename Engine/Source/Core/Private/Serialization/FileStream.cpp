@@ -35,6 +35,11 @@ namespace CE
             return;
         }
 
+		if (filePath.Exists() && openMode == Permissions::WriteOnly)
+		{
+			mode |= std::ios::trunc;
+		}
+
         impl = std::fstream((fs::path)filePath, mode);
     }
 

@@ -12,6 +12,21 @@ namespace CE::Editor
 		
 	}
 
+	EditorAssetManager* EditorAssetManager::Get()
+	{
+		return (EditorAssetManager*)AssetManager::Get();
+	}
+
+	void EditorAssetManager::Initialize()
+	{
+		Super::Initialize();
+	}
+
+	void EditorAssetManager::Shutdown()
+	{
+		Super::Shutdown();
+	}
+
     void EditorAssetManager::Tick(f32 deltaTime)
     {
 		Super::Tick(deltaTime);
@@ -60,7 +75,9 @@ namespace CE::Editor
 					if (assetDef != nullptr)
 					{
 						String relativePath = pathNameWithoutExtension + extension;
-						sourceAssetsToImport.Add(relativePath);
+						sourceAssetsToImport.Add((gProjectPath / "Game/Assets") / relativePath);
+
+						waitToImportSourceAssets = 1.0f;
 					}
 ;				}
 
@@ -74,6 +91,99 @@ namespace CE::Editor
 		}
 
 		sourceChanges.Clear();
+
+		if (!sourceAssetsToImport.IsEmpty())
+		{
+			if (waitToImportSourceAssets > 0)
+			{
+				waitToImportSourceAssets -= deltaTime;
+			}
+			else
+			{
+				waitToImportSourceAssets = 0;
+				// Import assets after delay
+				ImportSourceAssets();
+			}
+		}
     }
+
+	bool ImportSourceAssetAsync(EditorAssetManager* self, IO::Path sourceAssetPath, AssetImporter* importer)
+	{
+		String extension = sourceAssetPath.GetExtension().GetString();
+
+		AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinitionForSourceAssetExtension(extension);
+		if (assetDef == nullptr)
+		{
+			self->numAssetsBeingImported--;
+			if (importer != nullptr)
+			{
+				self->mutex.Lock();
+				importer->RequestDestroy();
+				self->mutex.Unlock();
+			}
+			return false;
+		}
+
+		IO::Path fullPath = sourceAssetPath;
+		if (!fullPath.Exists())
+		{
+			self->numAssetsBeingImported--;
+			if (importer != nullptr)
+			{
+				self->mutex.Lock();
+				importer->RequestDestroy();
+				self->mutex.Unlock();
+			}
+			return false;
+		}
+
+		IO::Path productAssetPath = fullPath.ReplaceExtension(".casset");
+
+		if (importer == nullptr)
+		{
+			self->numAssetsBeingImported--;
+			return false;
+		}
+
+		Name outPackageName = importer->ImportSourceAsset(fullPath, productAssetPath);
+
+		self->numAssetsBeingImported--;
+		if (importer != nullptr)
+		{
+			self->mutex.Lock();
+			if (outPackageName.IsValid())
+				self->recentlyProcessedPackageNames.Add(outPackageName);
+			importer->RequestDestroy();
+			self->mutex.Unlock();
+		}
+		return outPackageName.IsValid();
+	}
+
+	void EditorAssetManager::ImportSourceAssets()
+	{
+		for (auto sourcePath : sourceAssetsToImport)
+		{
+			String extension = sourcePath.GetExtension().GetString();
+
+			AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinitionForSourceAssetExtension(extension);
+			if (assetDef == nullptr)
+				continue;
+			ClassType* assetImporterClass = assetDef->GetAssetImporterClass();
+			if (assetImporterClass == nullptr)
+				continue;
+			AssetImporter* assetImporter = CreateObject<AssetImporter>(this, "AssetImporter", OF_NoFlags, assetImporterClass);
+			if (assetImporter == nullptr)
+				continue;
+
+			numAssetsBeingImported++;
+			auto run = Thread([=]
+				{
+					ImportSourceAssetAsync(this, sourcePath, assetImporter);
+				});
+		}
+
+		sourceAssetsToImport.Clear();
+		waitToImportSourceAssets = 0;
+	}
 
 } // namespace CE::Editor

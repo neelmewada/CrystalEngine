@@ -55,6 +55,17 @@ namespace CE
 			return baseClassType;
 		}
 
+		inline bool operator==(ClassType* other) const
+		{
+			return type == other;
+		}
+
+		template<typename T>
+		inline bool operator==(SubClassType<T> other) const
+		{
+			return type == other.type;
+		}
+
 		template<typename T> requires TIsBaseClassOf<TBaseClass, T>::Value
 		inline SubClassType& operator=(const SubClassType<T>& copy)
 		{
@@ -84,6 +95,11 @@ namespace CE
 				this->type = assignType;
 			}
 			return *this;
+		}
+
+		inline ClassType* operator->() const
+		{
+			return type;
 		}
 
 		template<typename TClass>

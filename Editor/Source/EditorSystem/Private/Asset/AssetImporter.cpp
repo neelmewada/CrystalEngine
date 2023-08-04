@@ -3,12 +3,12 @@
 namespace CE::Editor
 {
     
-	AssetProcessor::AssetProcessor()
+	AssetImporter::AssetImporter()
 	{
 
 	}
 
-	AssetProcessor::~AssetProcessor()
+	AssetImporter::~AssetImporter()
 	{
 
 	}

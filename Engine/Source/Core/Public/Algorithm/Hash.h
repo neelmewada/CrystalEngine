@@ -25,11 +25,16 @@ namespace CE
         constexpr bool isPointer = std::is_pointer_v<T>;
         
         typedef std::remove_pointer_t<T> WithoutPtrType;
+		typedef THasGetHashFunction<T> GetHashFuncType;
         
         if constexpr (isPointer)
         {
             return (SIZE_T)(WithoutPtrType*)value;
         }
+		else if constexpr (GetHashFuncType::Value)
+		{
+			return GetHashFuncType::GetHash(&value);
+		}
         else
         {
 			return std::hash<T>()(value);

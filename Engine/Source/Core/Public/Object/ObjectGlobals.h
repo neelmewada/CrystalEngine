@@ -46,6 +46,7 @@ namespace CE
 	}
 
 	CORE_API bool IsValidObjectName(const String& name);
+	CORE_API String FixObjectName(const String& name);
 
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
 	TClass* CreateObject(Object* outer = (Object*)GetTransientPackage(),

@@ -18,27 +18,30 @@ namespace CE
 		BinaryBlob();
 
 		void Free();
-		void Reserve(u32 byteSize);
+		void Reserve(u64 byteSize);
 
 		bool IsValid();
         
-        void LoadData(const void* data, u32 dataSize);
+        void LoadData(const void* data, u64 dataSize);
 
-		bool ReadFrom(Stream* stream);
-        bool WriteTo(Stream* stream);
+		/// Loads raw binary blob from stream
+		void LoadData(Stream* fromStream);
+
+		bool Deserialize(Stream* stream);
+        bool Serialize(Stream* stream);
 
 		inline u8* GetDataPtr() const { return data; }
-		inline u32 GetDataSize() const { return dataSize; }
+		inline u64 GetDataSize() const { return dataSize; }
 
 		friend inline Stream& operator<<(Stream& stream, BinaryBlob& blob)
 		{
-			blob.WriteTo(&stream);
+			blob.Serialize(&stream);
 			return stream;
 		}
 
 		friend inline Stream& operator>>(Stream& stream, BinaryBlob& blob)
 		{
-			blob.ReadFrom(&stream);
+			blob.Deserialize(&stream);
 			return stream;
 		}
 
@@ -48,7 +51,7 @@ namespace CE
         
 
 		u8* data = nullptr;
-		u32 dataSize = 0;
+		u64 dataSize = 0;
 	};
     
 } // namespace CE

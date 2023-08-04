@@ -45,6 +45,17 @@ namespace CE
 
 		FORCE_INLINE bool IsValid() const { return isValid; }
 
+		FORCE_INLINE bool operator==(const Future& rhs)
+		{
+			return runner.GetId() == rhs.runner.GetId();
+		}
+
+		template<typename T>
+		FORCE_INLINE bool operator==(const Future<T>& rhs)
+		{
+			return runner.GetId() == rhs.runner.GetId();
+		}
+
 		void Wait()
 		{
 			if (!isJoined && runner.IsJoinable())
@@ -59,6 +70,11 @@ namespace CE
 			if (!isFinished)
 				Wait();
 			return returnValue;
+		}
+
+		FORCE_INLINE SIZE_T GetHash()
+		{
+			return runner.GetId();
 		}
 
 	private:

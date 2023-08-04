@@ -2,6 +2,10 @@
 
 namespace CE
 {
+#if PAL_TRAIT_BUILD_EDITOR
+	namespace Editor { class TextureAssetImporter; }
+#endif
+
 	ENUM()
 	enum class TextureFormat
 	{
@@ -36,8 +40,9 @@ namespace CE
 	ENUM()
 	enum class TextureSourceFormat
 	{
-		PNG = 0,
-		JPG
+		Unsupported = 0,
+		PNG,
+		JPG,
 	};
 	ENUM_CLASS_FLAGS(TextureSourceFormat);
 
@@ -77,14 +82,16 @@ namespace CE
 			// Automatically called when struct is destroyed
 			void Release();
 
+#if PAL_TRAIT_BUILD_EDITOR
+			friend class CE::Editor::TextureAssetImporter;
+#endif
+
 			FIELD()
 			BinaryBlob rawData{};
 
 			FIELD()
-			TextureFormat format = TextureFormat::None;
-
-			FIELD()
 			TextureSourceFormat sourceFormat = TextureSourceFormat::PNG;
+
 		};
 	}
 
@@ -99,10 +106,10 @@ namespace CE
 
 	protected:
 
-		FIELD()
+		FIELD(ReadOnly)
 		Private::TextureSource source{};
 
-		FIELD(ImportSetting)
+		FIELD()
 		TextureType type = TextureType::Default;
 
 		FIELD()

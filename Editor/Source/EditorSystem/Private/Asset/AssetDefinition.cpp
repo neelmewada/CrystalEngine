@@ -28,6 +28,20 @@ namespace CE::Editor
 		return gAssetDefinitionRegistry;
 	}
 
+	AssetDefinition* AssetDefinitionRegistry::GetAssetDefinition(SubClassType<AssetDefinition> subClass)
+	{
+		if (subClass == nullptr || gAssetDefinitionRegistry == nullptr)
+			return nullptr;
+
+		for (auto assetDef : gAssetDefinitionRegistry->assetDefinitions)
+		{
+			if (assetDef != nullptr && assetDef->GetClass()->IsSubclassOf(subClass))
+				return assetDef;
+		}
+
+		return nullptr;
+	}
+
 	AssetDefinition* AssetDefinitionRegistry::FindAssetDefinitionForSourceAssetExtension(const String& extension)
 	{
 		for (auto assetDef : assetDefinitions)

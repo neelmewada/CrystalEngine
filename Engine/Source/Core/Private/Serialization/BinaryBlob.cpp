@@ -20,7 +20,7 @@ namespace CE
 		dataSize = 0;
 	}
 
-	void BinaryBlob::Reserve(u32 byteSize)
+	void BinaryBlob::Reserve(u64 byteSize)
 	{
 		u8* copy = (u8*)Memory::Malloc(byteSize);
 		memset(copy, 0, byteSize);
@@ -38,13 +38,30 @@ namespace CE
 		return data != nullptr && dataSize > 0;
 	}
 
-    void BinaryBlob::LoadData(const void* data, u32 dataSize)
+    void BinaryBlob::LoadData(const void* data, u64 dataSize)
     {
         Reserve(dataSize);
         memcpy(this->data, data, dataSize);
     }
 
-	bool BinaryBlob::ReadFrom(Stream* stream)
+	void BinaryBlob::LoadData(Stream* fromStream)
+	{
+		if (!fromStream->CanRead() || !fromStream->IsOpen())
+			return;
+
+		fromStream->SetBinaryMode(true);
+
+		u64 length = fromStream->GetLength();
+		Free();
+
+		if (length > 0)
+		{
+			Reserve(length);
+			fromStream->Read(data, dataSize);
+		}
+	}
+
+	bool BinaryBlob::Deserialize(Stream* stream)
 	{
 		if (stream == nullptr || !stream->IsOpen() || !stream->CanRead())
 			return false;
@@ -57,21 +74,23 @@ namespace CE
             return true;
         }
         
-        Reserve((u32)size);
+        Reserve((u64)size);
         
-        stream->Read(data, (u32)size);
+        stream->Read(data, (u64)size);
         
         return true;
 	}
 
-    bool BinaryBlob::WriteTo(Stream* stream)
+    bool BinaryBlob::Serialize(Stream* stream)
     {
         if (!IsValid() || stream == nullptr || !stream->IsOpen() || !stream->CanWrite())
             return false;
         
         *stream << (s64)dataSize;
-        stream->Write(data, dataSize);
-        
+
+		if (dataSize > 0)
+			stream->Write(data, dataSize);
+
         return true;
     }
 

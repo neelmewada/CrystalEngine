@@ -73,6 +73,9 @@ namespace CE
 
 		SavePackageDependencies(stream, packageDependencies);
 
+		u8 isCooked = 0;
+		*stream << isCooked;
+
 		// Data Start
 
 		u64 curPos = stream->GetCurrentPosition();
@@ -247,6 +250,12 @@ namespace CE
 			LoadPackageDependencies(stream, packageDependendies);
 		}
 
+		u8 isCooked = 0;
+		if (IsVersionGreaterThanOrEqualTo(majorVersion, minorVersion, IsCookedValue_Major, IsCookedValue_Minor))
+		{
+			*stream >> isCooked;
+		}
+
 		Package* package = nullptr;
 
 		if (loadedPackages.KeyExists(packageName))
@@ -270,6 +279,7 @@ namespace CE
 			package->objectUuidToEntryMap.Clear();
 		}
 
+		package->isCooked = isCooked > 0 ? true : false;
 		package->majorVersion = majorVersion;
 		package->minorVersion = minorVersion;
 

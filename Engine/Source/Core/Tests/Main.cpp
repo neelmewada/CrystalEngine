@@ -379,6 +379,26 @@ TEST(Containers, String)
     TEST_END;
 }
 
+TEST(Containers, Path)
+{
+	TEST_BEGIN;
+
+	// Path splitting
+	{
+		IO::Path fullPath = "C:/Projects\\CrystalEngine/Engine\\Assets/Textures\\My_Tex.png";
+		fullPath = fullPath.GetString().Replace({ '\\' }, '/');
+
+		Array<String> components = {};
+		fullPath.GetString().Split({ "/Engine/Assets" }, components);
+
+		EXPECT_EQ(components.GetSize(), 2);
+		EXPECT_EQ(components[0], "C:/Projects/CrystalEngine");
+		EXPECT_EQ(components[1], "/Textures/My_Tex.png");
+	}
+
+	TEST_END;
+}
+
 TEST(Containers, Name)
 {
     TEST_BEGIN;
@@ -429,6 +449,29 @@ TEST(Containers, Variant)
     EXPECT_NE(value.GetValue<Array<f32>>().GetElementTypeId(), TYPEID(f32));
 
     TEST_END;
+}
+
+TEST(Containers, Defer)
+{
+	TEST_BEGIN;
+
+	String string = "original";
+	EXPECT_EQ(string, "original");
+
+	// Inner scope
+	{
+		defer(
+			string = "modified";
+		);
+		EXPECT_EQ(string, "original");
+
+		string = "something";
+		EXPECT_EQ(string, "something");
+	}
+
+	EXPECT_EQ(string, "modified");
+
+	TEST_END;
 }
 
 #pragma endregion

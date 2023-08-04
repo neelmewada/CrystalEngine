@@ -112,6 +112,8 @@ namespace CE
 #endif
 
 		Name packageName{};
+
+		b8 isCooked = false;
         
 		bool isLoaded = true;
         bool isFullyLoaded = true;

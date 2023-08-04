@@ -184,7 +184,7 @@ namespace CE
 		u32 GetFieldCount();
 		FieldType* GetFieldAt(u32 index);
         
-        FieldType* FindFieldWithName(const Name& name);
+        FieldType* FindFieldWithName(const Name& name, TypeId fieldTypeId = 0);
 
 		FunctionType* FindFunctionWithName(const Name& name);
 		CE::Array<FunctionType*> FindAllFunctionsWithName(const Name& name);
@@ -364,7 +364,7 @@ namespace CE
 
 		// Inherited + Local fields
 		CE::Array<FieldType> cachedFields{};
-        CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
+		CE::HashMap<CE::Name, Array<FieldType*>> cachedFieldsMap{};
         
 		CE::Array<FunctionType> cachedFunctions{};
         CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionsMap{};

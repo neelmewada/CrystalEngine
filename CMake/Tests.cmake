@@ -42,7 +42,11 @@ function(ce_add_test NAME)
             ${ce_add_test_TARGET}
     )
 
-    target_compile_definitions(${NAME} PRIVATE PACKAGE_NAME="/Code/${NAME}")
+    target_compile_definitions(${NAME} 
+        PRIVATE
+            PACKAGE_NAME="/Code/${NAME}"
+            MODULE_NAME="${NAME}"
+    )
 
     if(${PAL_PLATFORM_IS_MAC})
         target_link_libraries(${NAME} PRIVATE "c" "c++")

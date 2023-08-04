@@ -98,12 +98,19 @@ namespace CE
 		for (int i = 0; i < name.GetLength(); i++)
 		{
 			char ch = name[i];
-			if (!String::IsAlphabet(ch) && !String::IsNumeric(ch) && ch != '_')
+			if (!String::IsAlphabet(ch) && !String::IsNumeric(ch) && ch != '_' && ch != '-')
 			{
 				return false;
 			}
 		}
 		return true;
+	}
+
+	CORE_API String FixObjectName(const String& name)
+	{
+		return name.Replace({ '\\', '/', ' ', '+', '=', ':', ';', '.', ',', '[', ']', '{', '}', '(', ')',
+			'!', '@', '#', '$', '%', '^', '&', '*', '`', '~', '|' },
+			'_');
 	}
 
 	/*

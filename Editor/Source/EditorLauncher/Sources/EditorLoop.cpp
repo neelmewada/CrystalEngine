@@ -246,6 +246,8 @@ void EditorLoop::RunLoop()
 
 		editorWindow->Render();
 
+		GUI::ShowDemoWindow();
+
 		cmdList->ImGuiRender();
 		cmdList->End();
 

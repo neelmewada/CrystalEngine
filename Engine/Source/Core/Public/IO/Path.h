@@ -147,6 +147,9 @@ namespace CE::IO
         }
 
 		static bool IsSubDirectory(Path path, Path root);
+		
+		/// Returns true if fullPath contains the subString path as a section
+		static bool PathStringContains(const Path& fullPath, const Path& subString);
 
         friend inline std::ostream& operator<<(std::ostream& os, const Path& path)
         {
