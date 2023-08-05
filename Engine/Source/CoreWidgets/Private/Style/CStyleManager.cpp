@@ -110,7 +110,7 @@ namespace CE::Widgets
 		if (imageResource == nullptr || !imageResource->IsValid())
 			return {};
 
-		CMImage image = CMImage::LoadFromMemory(imageResource->GetData(), imageResource->GetDataSize(), 4);
+		CMImage image = CMImage::LoadFromMemory(imageResource->GetData(), imageResource->GetDataSize());
 		if (!image.IsValid())
 			return {};
         RHI::TextureDesc desc{};
@@ -118,12 +118,23 @@ namespace CE::Widgets
         desc.height = image.GetHeight();
         desc.depth = 1;
         desc.name = "";
-		if (image.GetNumChannels() == 1)
-			desc.format = RHI::TextureFormat::R32_SFLOAT;
-        else if (image.GetNumChannels() == 3)
-            desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
-        else
-            desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
+		switch (image.GetFormat())
+		{
+		case CMImageFormat::R:
+			desc.format = RHI::TextureFormat::R8G8B8_UNORM;
+			break;
+		case CMImageFormat::RG:
+			desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;// R16G16_UNORM;
+			break;
+		case CMImageFormat::RGB:
+			desc.format = RHI::TextureFormat::R8G8B8_UNORM;
+			break;
+		case CMImageFormat::RGBA:
+			desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
+			break;
+		default:
+			return {};
+		}
         desc.dimension = RHI::TextureDimension::Dim2D;
         desc.mipLevels = 1;
         desc.sampleCount = 1;
