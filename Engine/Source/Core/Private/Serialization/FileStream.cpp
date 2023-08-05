@@ -88,7 +88,8 @@ namespace CE
 
     void FileStream::Close()
     {
-        impl.close();
+		if (impl.is_open())
+			impl.close();
     }
 
     u64 FileStream::GetLength()

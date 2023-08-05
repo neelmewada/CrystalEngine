@@ -1,10 +1,12 @@
 
 #include "CoreMedia/Image.h"
 
-#include "stb_image.h"
+#include "lodepng.h"
+#include "lodepng_util.h"
 
 namespace CE
 {
+	static const u8 pngHeader[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, };
 
     CMImage::CMImage()
     {
@@ -16,7 +18,7 @@ namespace CE
 
     }
 
-    CMImageInfo CMImage::GetImageInfoFromFile(IO::Path filePath)
+    CMImageInfo CMImage::GetImageInfoFromFile(const IO::Path& filePath)
     {
         CMImageInfo info{};
         if (!filePath.Exists() || filePath.IsDirectory())
@@ -26,29 +28,170 @@ namespace CE
         }
 
         auto filePathStr = filePath.GetString();
-        auto result = stbi_info(filePathStr.GetCString(), &info.x, &info.y, &info.numChannels);
-        if (result != 1)
-        {
-            info.failureReason = stbi_failure_reason();
-        }
+		FileStream stream = FileStream(filePath, Stream::Permissions::ReadOnly);
+		stream.SetBinaryMode(true);
 
+		if (stream.GetLength() < 8)
+		{
+			info.failureReason = "Invalid file";
+			return info;
+		}
+
+		u8 bytes[8] = {};
+		stream.Read(bytes, 8);
+
+		bool isPng = true;
+		for (int i = 0; i < 8; i++)
+		{
+			if (bytes[i] != pngHeader[i])
+			{
+				isPng = false;
+				break;
+			}
+		}
+
+		if (isPng) // Is PNG
+		{
+			stream.Seek(0);
+			MemoryStream memStream = MemoryStream(stream.GetLength());
+			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
+			return GetPNGImageInfo(&memStream);
+		}
+
+		info.failureReason = "Unsupported image format";
         return info;
     }
 
     CMImageInfo CMImage::GetImageInfoFromMemory(unsigned char* buffer, int bufferLength)
     {
-        CMImageInfo info{};
+		CMImageInfo info{};
 
-        auto result = stbi_info_from_memory(buffer, bufferLength, &info.x, &info.y, &info.numChannels);
-        if (result != 1)
-        {
-            info.failureReason = stbi_failure_reason();
-        }
+		if (bufferLength < 8)
+		{
+			info.failureReason = "Invalid input buffer";
+			return info;
+		}
 
+		bool isPng = true;
+		for (int i = 0; i < 8; i++)
+		{
+			if (buffer[i] != pngHeader[i])
+			{
+				isPng = false;
+				break;
+			}
+		}
+
+		if (isPng)
+		{
+			MemoryStream stream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
+			stream.SetBinaryMode(true);
+			return GetPNGImageInfo(&stream);
+		}
+
+		info.failureReason = "Unsupported image format";
         return info;
     }
 
-    CMImage CMImage::LoadFromFile(IO::Path filePath, int desiredNumChannels)
+	CMImageInfo CMImage::GetPNGImageInfo(MemoryStream* stream)
+	{
+		CMImageInfo info{};
+		if (!stream->CanRead())
+		{
+			info.failureReason = "Cannot read stream";
+			return info;
+		}
+
+		stream->SetBinaryMode(true);
+
+		std::vector<unsigned char> image{};
+		u32 w, h;
+		lodepng::State state{};
+
+		u32 result = lodepng::decode(image, w, h, state, (unsigned char*)stream->GetRawDataPtr(), stream->GetLength());
+		
+		info.x = w;
+		info.y = h;
+		info.numChannels = lodepng_get_channels(&state.info_png.color);
+		info.bitDepth = state.info_png.color.bitdepth;
+		info.bitsPerPixel = lodepng_get_bpp(&state.info_png.color);
+
+		switch (state.info_png.color.colortype)
+		{
+		case LCT_GREY:
+			info.format = CMImageFormat::R;
+			break;
+		case LCT_GREY_ALPHA:
+			info.format = CMImageFormat::RG;
+			break;
+		case LCT_RGB:
+			info.format = CMImageFormat::RGB;
+			break;
+		case LCT_RGBA:
+			info.format = CMImageFormat::RGBA;
+			break;
+		default:
+			info.failureReason = "Invalid format";
+			break;
+		}
+
+		return info;
+	}
+
+	CMImage CMImage::LoadPNGImage(MemoryStream* stream)
+	{
+		CMImage image{};
+		if (!stream->CanRead())
+		{
+			image.failureReason = "Cannot read stream";
+			return image;
+		}
+
+		stream->SetBinaryMode(true);
+
+		std::vector<unsigned char> data{};
+		u32 w, h;
+		lodepng::State state{};
+
+		u32 result = lodepng::decode(data, w, h, state, (unsigned char*)stream->GetRawDataPtr(), stream->GetLength());
+		if (result > 0)
+		{
+			image.failureReason = "Decoding failed";
+			return image;
+		}
+		
+		image.x = w;
+		image.y = h;
+		image.numChannels = lodepng_get_channels(&state.info_png.color);
+		image.bitDepth = state.info_png.color.bitdepth;
+		image.bitsPerPixel = lodepng_get_bpp(&state.info_png.color);
+
+		switch (state.info_png.color.colortype)
+		{
+		case LCT_GREY:
+			image.format = CMImageFormat::R;
+			break;
+		case LCT_GREY_ALPHA:
+			image.format = CMImageFormat::RG;
+			break;
+		case LCT_RGB:
+			image.format = CMImageFormat::RGB;
+			break;
+		case LCT_RGBA:
+			image.format = CMImageFormat::RGBA;
+			break;
+		default:
+			image.failureReason = "Invalid format";
+			break;
+		}
+
+		image.data = (unsigned char*)Memory::Malloc(data.size());
+		memcpy(image.data, data.data(), data.size());
+
+		return image;
+	}
+
+    CMImage CMImage::LoadFromFile(IO::Path filePath)
     {
         CMImage image{};
 		
@@ -58,32 +201,85 @@ namespace CE
             return image;
         }
 
-        auto filePathStr = filePath.GetString();
-        image.data = stbi_load(filePathStr.GetCString(), &image.x, &image.y, &image.numChannels, desiredNumChannels);
-        if (!image.IsValid())
-            image.failureReason = stbi_failure_reason();
+		auto filePathStr = filePath.GetString();
+		FileStream stream = FileStream(filePath, Stream::Permissions::ReadOnly);
+		stream.SetBinaryMode(true);
+
+		if (stream.GetLength() < 8)
+		{
+			image.failureReason = "Invalid file";
+			return image;
+		}
+
+		u8 bytes[8] = {};
+		stream.Read(bytes, 8);
+
+		bool isPng = true;
+		for (int i = 0; i < 8; i++)
+		{
+			if (bytes[i] != pngHeader[i])
+			{
+				isPng = false;
+				break;
+			}
+		}
+
+		if (isPng) // Is PNG
+		{
+			stream.Seek(0);
+			MemoryStream memStream = MemoryStream(stream.GetLength());
+			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
+			return LoadPNGImage(&memStream);
+		}
+
+		image.failureReason = "Unsupported image format";
         return image;
     }
 
-    CMImage CMImage::LoadFromMemory(unsigned char* buffer, int bufferLength, int desiredNumChannels)
+    CMImage CMImage::LoadFromMemory(unsigned char* buffer, int bufferLength)
     {
-        CMImage image{};
-        image.data = stbi_load_from_memory(buffer, bufferLength, &image.x, &image.y, &image.numChannels, desiredNumChannels);
-        if (!image.IsValid())
-            image.failureReason = stbi_failure_reason();
-        return image;
+		CMImage image{};
+
+		if (bufferLength < 8)
+		{
+			image.failureReason = "Invalid buffer length";
+			return image;
+		}
+
+		bool isPng = true;
+		for (int i = 0; i < 8; i++)
+		{
+			if (buffer[i] != pngHeader[i])
+			{
+				isPng = false;
+				break;
+			}
+		}
+
+		if (isPng) // Is PNG
+		{
+			MemoryStream memStream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
+			return LoadPNGImage(&memStream);
+		}
+
+		image.failureReason = "Unsupported image format";
+		return image;
     }
 
     void CMImage::Free()
     {
-        if (!IsValid())
-            return;
-
-        stbi_image_free(data);
+		if (data != nullptr)
+		{
+			Memory::Free(data);
+			data = nullptr;
+		}
 
         data = nullptr;
         x = y = numChannels = 0;
         failureReason = nullptr;
+		bitDepth = 0;
+		bitsPerPixel = 0;
+		format = CMImageFormat::Undefined;
     }
 
 }

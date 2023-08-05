@@ -89,7 +89,7 @@ BuildCMake() {
     mkdir cmake-build
     
     cd cmake-build
-
+    # ZLIB args: -DZLIB_INCLUDE_DIR="${base_dir}/../ThirdParty/zlib-1.2.13-rev1-windows/zlib" -DZLIB_LIBRARY="Development/zlibstatic.lib"
     cmake -E env CXXFLAGS="${CxxFlags}" ${MacFlags} cmake ${CMakeBuildSystem} -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=$BuildType ${cmake_args} ../${CmakeRootDir}
     
     cmake -E env CXXFLAGS="${CxxFlags}" cmake --build . -j 8 ${CMakeBuildFlags}

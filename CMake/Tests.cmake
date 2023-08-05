@@ -22,14 +22,21 @@ function(ce_add_test NAME)
     endif()
     
 
-    set(options AUTORTTI)
+    set(options AUTORTTI RESOURCES)
     set(oneValueArgs TARGET FOLDER)
     set(multiValueArgs SOURCES BUILD_DEPENDENCIES)
     set(include_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
 
     cmake_parse_arguments(ce_add_test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    set(SOURCES ${ce_add_test_SOURCES})
     
-    add_executable(${NAME} ${ce_add_test_SOURCES})
+    if(${ce_add_test_RESOURCES})
+        file(GLOB_RECURSE RESOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*")
+        list(APPEND SOURCES ${RESOURCE_FILES})
+    endif()
+
+    add_executable(${NAME} ${SOURCES})
 
     set_target_properties(${NAME} 
         PROPERTIES
@@ -62,6 +69,43 @@ function(ce_add_test NAME)
             COMMAND "AutoRTTI" -m ${NAME} --noapi -d "${CMAKE_CURRENT_SOURCE_DIR}/" -o "${CMAKE_CURRENT_BINARY_DIR}/Generated"
             VERBATIM
         )
+    endif()
+
+    # RESOURCES
+
+    if(${ce_add_test_RESOURCES})
+        target_compile_definitions(${NAME} PRIVATE _RESOURCES=1)
+        
+        set(resource_output_files "")
+        foreach(rsrc_path ${RESOURCE_FILES})
+            cmake_path(RELATIVE_PATH rsrc_path BASE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_VARIABLE rsrc_rel_path)
+            list(APPEND resource_output_files "${CMAKE_CURRENT_BINARY_DIR}/${rsrc_rel_path}.h")
+        endforeach()
+
+        add_custom_command(OUTPUT ${resource_output_files}
+            COMMAND "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
+            DEPENDS ${RESOURCE_FILES}
+            VERBATIM
+        )
+
+        add_custom_target(${NAME}_Resources
+            DEPENDS ${resource_output_files}
+            SOURCES ${RESOURCE_FILES}
+            VERBATIM
+        )
+
+        set_target_properties(${NAME}_Resources
+            PROPERTIES
+                FOLDER "${ce_add_test_FOLDER}"
+        )
+
+        file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Resources")
+        list(APPEND include_dirs "${CMAKE_CURRENT_BINARY_DIR}/Resources")
+
+        add_dependencies(${NAME} ${NAME}_Resources)
+
+    else()
+        target_compile_definitions(${NAME} PRIVATE _RESOURCES=0)
     endif()
 
     target_include_directories(${NAME} 

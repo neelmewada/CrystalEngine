@@ -123,7 +123,7 @@ namespace CE::Editor
 		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String));
 		if (sourceAssetPathField != nullptr)
 		{
-			sourceAssetPathField->SetFieldValue<String>(texture, sourceAssetRelativePath);
+			sourceAssetPathField->ForceSetFieldValue<String>(texture, sourceAssetRelativePath);
 		}
 
 		SavePackageResult result = Package::SavePackage(texturePackage, texture, outPath);

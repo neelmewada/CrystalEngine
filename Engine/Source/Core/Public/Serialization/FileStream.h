@@ -27,7 +27,7 @@ namespace CE
         
         u64 GetCurrentPosition() override;
         
-        void Seek(s64 seekPos, SeekMode seekMode) override;
+        void Seek(s64 seekPos, SeekMode seekMode = SeekMode::Begin) override;
         
         bool IsOpen() override;
         

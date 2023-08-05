@@ -2,18 +2,39 @@
 
 namespace CE
 {
+	enum class CMImageFormat
+	{
+		Undefined = 0,
+		// Grayscale
+		R,
+		// Gray + Alpha
+		RG,
+		RGB,
+		RGBA
+	};
+	ENUM_CLASS_FLAGS(CMImageFormat);
+
     struct CMImageInfo
     {
     public:
-        int x = 0;
-        int y = 0;
-        int numChannels = 0;
+        u32 x = 0;
+		u32 y = 0;
+		u32 numChannels = 0;
+		CMImageFormat format = CMImageFormat::Undefined;
+		u32 bitDepth = 0;
+		u32 bitsPerPixel = 0;
 
         const char* failureReason = nullptr;
 
-        virtual bool IsValid() const { return x > 0 && y > 0 && numChannels > 0 && numChannels <= 4; }
+        virtual bool IsValid() const { return x > 0 && y > 0 && bitDepth > 0 && bitsPerPixel > 0 && numChannels > 0 && numChannels <= 4 && 
+			format != CMImageFormat::Undefined; }
     };
 
+	/*
+	* CMImage is a low-level image that can be used by RHI, Engine, Editor, etc.
+	* It abstracts away all the image loading mechanisms to provide a 'raw' image to be used across the engine.
+	* Currently, only PNG file format is supported.
+	*/
     class COREMEDIA_API CMImage : private CMImageInfo
     {
     public:
@@ -22,11 +43,11 @@ namespace CE
 
         // - Static API -
 
-        static CMImageInfo GetImageInfoFromFile(IO::Path filePath);
+        static CMImageInfo GetImageInfoFromFile(const IO::Path& filePath);
         static CMImageInfo GetImageInfoFromMemory(unsigned char* buffer, int bufferLength);
 
-        static CMImage LoadFromFile(IO::Path filePath, int desiredNumChannels = 0);
-        static CMImage LoadFromMemory(unsigned char* buffer, int bufferLength, int desiredNumChannels = 0);
+        static CMImage LoadFromFile(IO::Path filePath);
+        static CMImage LoadFromMemory(unsigned char* buffer, int bufferLength);
 
         // - Public API -
 
@@ -34,15 +55,22 @@ namespace CE
         void Free();
 
         inline unsigned char* GetDataPtr() const { return data; }
-        inline int GetWidth() const { return x; }
-        inline int GetHeight() const { return y; }
-        inline int GetNumChannels() const { return numChannels; }
+        inline u32 GetWidth() const { return x; }
+        inline u32 GetHeight() const { return y; }
+        inline u32 GetNumChannels() const { return numChannels; }
+		inline CMImageFormat GetFormat() const { return format; }
+		inline u32 GetBitDepth() const { return bitDepth; }
+		inline u32 GetBitsPerPixel() const { return bitsPerPixel; }
 
         bool IsValid() const override { return data != nullptr && CMImageInfo::IsValid(); }
 
         inline const char* GetFailureReason() const { return failureReason; }
 
     private:
+
+		static CMImageInfo GetPNGImageInfo(MemoryStream* stream);
+		static CMImage LoadPNGImage(MemoryStream* stream);
+
         unsigned char* data = nullptr;
     };
 

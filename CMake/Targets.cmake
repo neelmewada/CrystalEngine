@@ -277,17 +277,6 @@ function(ce_add_target NAME TARGET_TYPE)
             list(APPEND resource_output_files "${CMAKE_CURRENT_BINARY_DIR}/${rsrc_rel_path}.h")
         endforeach()
 
-        # add_custom_command(TARGET ${NAME} PRE_BUILD
-        #     COMMAND "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
-        # )
-
-        # add_custom_target(${NAME}_Resources 
-        #     "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
-        #     BYPRODUCTS ${resource_output_files}
-        #     VERBATIM
-        #     SOURCES ${RESOURCE_FILES}
-        # )
-
         add_custom_command(OUTPUT ${resource_output_files}
             COMMAND "ResourceCompiler" -m ${NAME} -d "${CMAKE_CURRENT_SOURCE_DIR}/Resources" -o "${CMAKE_CURRENT_BINARY_DIR}/Resources"
             DEPENDS ${RESOURCE_FILES}
