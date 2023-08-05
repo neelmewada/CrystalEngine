@@ -22,6 +22,9 @@ namespace CE
 
 		IsCookedValue_Major = 1,
 		IsCookedValue_Minor = 2,
+
+		ObjectRefPackageUuid_Major = 1,
+		ObjectRefPackageUuid_Minor = 2,
 	};
 
 	static inline bool IsVersionGreaterThanOrEqualTo(u32 currentMajor, u32 currentMinor, u32 checkMajor, u32 checkMinor)

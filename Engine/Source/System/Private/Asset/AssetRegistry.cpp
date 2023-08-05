@@ -130,7 +130,7 @@ namespace CE
 			stream.Close();
 		}
         
-		if (isFile && (length > 0 || fileAction == IO::FileAction::Delete || fileAction == IO::FileAction::Moved))
+		if (isFile && (length > 0 || fileAction == IO::FileAction::Delete || fileAction == IO::FileAction::Moved || fileAction == IO::FileAction::Add))
 		{
             if (length > 0 && (fileAction == IO::FileAction::Modified || fileAction == IO::FileAction::Add))
             {
@@ -163,9 +163,10 @@ namespace CE
                 change.fileSize = length;
                 sourceChanges.Add(change);
             }
-			
-			//CE_LOG(Info, All, "{} | Dir: {} | Name: {} | Old Name: {} | Length: {:#x}", fileAction, relative, fileName, oldFileName, length);
 		}
+
+		// Bug fix: Add delay to prevent skipping Modified calls
+		Thread::SleepFor(5);
 	}
 
 } // namespace CE

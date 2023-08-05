@@ -10,11 +10,11 @@ namespace CE
 
 		bool IsAsset() override final { return true; }
 
-		inline const IO::Path& GetSourceAssetRelativePath() const { return sourceAssetRelativePath; }
+		inline const String& GetSourceAssetRelativePath() const { return sourceAssetRelativePath; }
 
 	private:
 		
-		IO::Path sourceAssetRelativePath{};
+		String sourceAssetRelativePath{};
 	};
 
 }

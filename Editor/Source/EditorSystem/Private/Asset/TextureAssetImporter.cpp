@@ -22,17 +22,15 @@ namespace CE::Editor
 
 		if (IO::Path::IsSubDirectory(outPath, gProjectPath / "Game/Assets"))
 		{
-			packageName = IO::Path::GetRelative(outPath, gProjectPath / "Game/Assets").RemoveExtension().GetString().Replace({'\\'}, '/');
+			packageName = IO::Path::GetRelative(outPath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!packageName.StartsWith("/"))
 				packageName = "/" + packageName;
-			packageName = "/Game" + packageName;
 		}
 		else if (IO::Path::IsSubDirectory(outPath, PlatformDirectories::GetAppRootDir() / "Engine/Assets"))
 		{
-			packageName = IO::Path::GetRelative(outPath, PlatformDirectories::GetAppRootDir() / "Engine/Assets").RemoveExtension().GetString().Replace({ '\\' }, '/');
+			packageName = IO::Path::GetRelative(outPath, PlatformDirectories::GetAppRootDir()).RemoveExtension().GetString().Replace({ '\\' }, '/');
 			if (!packageName.StartsWith("/"))
 				packageName = "/" + packageName;
-			packageName = "/Engine" + packageName;
 		}
 		else
 		{
@@ -43,17 +41,9 @@ namespace CE::Editor
 
 		if (IO::Path::IsSubDirectory(sourceAssetPath, gProjectPath / "Game/Assets"))
 		{
-			sourceAssetRelativePath = IO::Path::GetRelative(sourceAssetPath, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
+			sourceAssetRelativePath = IO::Path::GetRelative(sourceAssetPath, gProjectPath).GetString().Replace({ '\\' }, '/');
 			if (!sourceAssetRelativePath.StartsWith("/"))
 				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
-			sourceAssetRelativePath = "/Game" + sourceAssetRelativePath;
-		}
-		else if (IO::Path::IsSubDirectory(sourceAssetPath, PlatformDirectories::GetAppRootDir() / "Engine/Assets"))
-		{
-			sourceAssetRelativePath = IO::Path::GetRelative(sourceAssetPath, gProjectPath / "Engine/Assets").GetString().Replace({ '\\' }, '/');
-			if (!sourceAssetRelativePath.StartsWith("/"))
-				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
-			sourceAssetRelativePath = "/Engine" + sourceAssetRelativePath;
 		}
 
 		String extension = sourceAssetPath.GetExtension().GetString();
@@ -77,8 +67,32 @@ namespace CE::Editor
 			return Name();
 		}
 		
-		Package* texturePackage = CreateObject<Package>(nullptr, packageName);
-		Texture2D* texture = CreateObject<Texture2D>(texturePackage, assetName);
+		Package* texturePackage = nullptr;
+		Texture2D* texture = nullptr;
+
+		if (outPath.Exists())
+		{
+			texturePackage = Package::LoadPackage(nullptr, outPath, LOAD_Full);
+			if (texturePackage != nullptr && texturePackage->GetSubObjectCount() > 0)
+			{
+				for (auto [uuid, subobject] : texturePackage->GetSubObjectMap())
+				{
+					if (subobject != nullptr && subobject->IsOfType<Texture2D>())
+					{
+						texture = (Texture2D*)subobject;
+						break;
+					}
+				}
+			}
+		}
+
+		if (texturePackage == nullptr)
+			texturePackage = CreateObject<Package>(nullptr, packageName);
+
+		if (texture == nullptr)
+			texture = CreateObject<Texture2D>(texturePackage, assetName);
+		else if (texture->GetName() != assetName)
+			texture->SetName(assetName);
 		
 		bool failed = false;
 		
@@ -106,10 +120,10 @@ namespace CE::Editor
 		else
 			texture->format = TextureFormat::RGBA32;
 
-		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(IO::Path));
+		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String));
 		if (sourceAssetPathField != nullptr)
 		{
-			sourceAssetPathField->SetFieldValue<IO::Path>(texture, IO::Path(sourceAssetRelativePath));
+			sourceAssetPathField->SetFieldValue<String>(texture, sourceAssetRelativePath);
 		}
 
 		SavePackageResult result = Package::SavePackage(texturePackage, texture, outPath);

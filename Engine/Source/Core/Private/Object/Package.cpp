@@ -314,7 +314,7 @@ namespace CE
 		{
 			Object* object = map.FindObject(GetPrimaryObjectUuid());
 			if (object != nullptr && object->IsOfType<Asset>())
-				return ((Asset*)object)->GetSourceAssetRelativePath().GetString();
+				return ((Asset*)object)->GetSourceAssetRelativePath();
 		}
 		else if (objectUuidToEntryMap.KeyExists(GetPrimaryObjectUuid()))
 		{

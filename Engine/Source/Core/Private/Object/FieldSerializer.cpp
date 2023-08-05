@@ -219,9 +219,15 @@ namespace CE
             auto package = objectRef->GetPackage();
 
             if (package != nullptr)
-                *stream << package->GetPackageName();
+			{
+				*stream << (u64)package->GetUuid();
+				*stream << package->GetPackageName();
+			}
             else
-                *stream << "\0";
+			{
+				*stream << (u64)0; // Package UUID: 0
+				*stream << "\0"; // null package name
+			}
 
             *stream << objectRef->GetPathInPackage();
         }
@@ -524,6 +530,13 @@ namespace CE
 
         Name objectTypeName{};
         *stream >> objectTypeName;
+
+		u64 packageUuid = 0;
+		if (IsVersionGreaterThanOrEqualTo(packageMajor, packageMinor, ObjectRefPackageUuid_Major, ObjectRefPackageUuid_Minor))
+		{
+			*stream >> packageUuid;
+		}
+
         Name packageName{};
         *stream >> packageName;
         Name pathInPackage{};
@@ -539,11 +552,11 @@ namespace CE
         }
         else
         {
-            return ResolveObjectReference(uuid, packageName, pathInPackage);
+            return ResolveObjectReference(uuid, packageUuid, packageName, pathInPackage);
         }
     }
 
-    Object* FieldDeserializer::ResolveObjectReference(UUID objectUuid, Name packageName, Name pathInPackage)
+    Object* FieldDeserializer::ResolveObjectReference(UUID objectUuid, UUID packageUuid, Name packageName, Name pathInPackage)
     {
         Package* package = Package::LoadPackage(nullptr, packageName);
         if (package == nullptr)

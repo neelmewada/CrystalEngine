@@ -75,6 +75,8 @@ namespace CE
 
 		HashMap<Name, Array<AssetData*>> cachedAssetsByPath{};
 		HashMap<Name, AssetData*> cachedAssetsBySourceFilePath{};
+
+		
 	};
     
 } // namespace CE

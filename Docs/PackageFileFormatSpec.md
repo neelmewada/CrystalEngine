@@ -92,7 +92,8 @@ An object is always stored as a reference. i.e. we store the object's uuid, type
 |---|---|---|---|
 | +00 | 8B | `xx xx xx xx xx xx xx xx` | Object Instance UUID |
 | +08 | \0 | `CE::SomeClassName\0` | Object type name |
-| +xx | \0 | `/Engine/MyAsset\0` | Package name it belongs to. |
-| +xx | \0 | `TextureAtlas.Noise.PerlinMap\0` | Path within the package this object belongs to. |
+| +xx | 8B | `xx xx xx xx xx xx xx xx` | Package UUID it belongs to (v1.2) |
+| +08 | \0 | `/Engine/MyAsset\0` | Package name it belongs to |
+| +xx | \0 | `TextureAtlas.Noise.PerlinMap\0` | Path within the package this object belongs to |
 
 

@@ -50,7 +50,7 @@ namespace CE
         
     private:
 
-        Object* ResolveObjectReference(UUID objectUuid, Name packageName, Name pathInPackage);
+        Object* ResolveObjectReference(UUID objectUuid, UUID packageUuid, Name packageName, Name pathInPackage);
 
         Package* currentPackage = nullptr;
 

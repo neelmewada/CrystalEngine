@@ -117,7 +117,7 @@ namespace CE
 
 			if (objectInstance->IsAsset())
 			{
-				*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath().GetString();
+				*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath();
 			}
 			else
 			{
@@ -198,7 +198,7 @@ namespace CE
 
 		if (IO::Path::IsSubDirectory(fullPackagePath, gProjectPath / "Game/Assets"))
 		{
-			auto relativePath = IO::Path::GetRelative(fullPackagePath, gProjectPath / "Game/Assets").RemoveExtension().GetString().Replace({'\\'}, '/');
+			auto relativePath = IO::Path::GetRelative(fullPackagePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePath.StartsWith("/"))
 				relativePath = "/" + relativePath;
 
