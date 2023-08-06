@@ -106,3 +106,12 @@ TEST(CoreMedia, PNG)
 	TEST_END;
 }
 
+TEST(CoreModule, KTX)
+{
+	TEST_BEGIN;
+
+
+
+	TEST_END;
+}
+

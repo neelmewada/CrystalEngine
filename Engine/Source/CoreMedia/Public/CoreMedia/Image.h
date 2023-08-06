@@ -14,6 +14,14 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(CMImageFormat);
 
+	enum class CMImageSourceFormat
+	{
+		Undefined = 0,
+		PNG,
+		BC4,
+		BC7,
+	};
+
     struct CMImageInfo
     {
     public:
@@ -21,13 +29,14 @@ namespace CE
 		u32 y = 0;
 		u32 numChannels = 0;
 		CMImageFormat format = CMImageFormat::Undefined;
+		CMImageSourceFormat sourceFormat = CMImageSourceFormat::Undefined;
 		u32 bitDepth = 0;
 		u32 bitsPerPixel = 0;
 
         const char* failureReason = nullptr;
 
         virtual bool IsValid() const { return x > 0 && y > 0 && bitDepth > 0 && bitsPerPixel > 0 && numChannels > 0 && numChannels <= 4 && 
-			format != CMImageFormat::Undefined; }
+			format != CMImageFormat::Undefined && sourceFormat != CMImageSourceFormat::Undefined; }
     };
 
 	/*
@@ -49,12 +58,18 @@ namespace CE
         static CMImage LoadFromFile(IO::Path filePath);
         static CMImage LoadFromMemory(unsigned char* buffer, int bufferLength);
 
+		// - Encode API -
+
+		static bool Encode(const CMImage& source, CMImageSourceFormat toSourceFormat, Stream* outStream);
+		static bool EncodeToBC7(const CMImage& source, Stream* outStream);
+
         // - Public API -
 
         /// Always call the Free() function when image is no longer needed!
         void Free();
 
         inline unsigned char* GetDataPtr() const { return data; }
+		inline u32 GetDataSize() const { return bitsPerPixel / 8 * x * y; }
         inline u32 GetWidth() const { return x; }
         inline u32 GetHeight() const { return y; }
         inline u32 GetNumChannels() const { return numChannels; }

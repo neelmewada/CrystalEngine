@@ -12,6 +12,7 @@ find_package(crcpp REQUIRED)
 find_package(stb REQUIRED)
 find_package(zlib REQUIRED)
 find_package(dxcompiler REQUIRED)
+find_package(compressonator REQUIRED)
 
 # Yoga
 find_package(yoga REQUIRED)

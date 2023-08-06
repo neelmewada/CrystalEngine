@@ -26,6 +26,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::stb
+            ThirdParty::compressonator
         PUBLIC
             CE::Core
     RUNTIME_DEPENDENCIES

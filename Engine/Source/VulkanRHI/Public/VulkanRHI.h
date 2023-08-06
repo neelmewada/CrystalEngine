@@ -91,7 +91,7 @@ namespace CE
         virtual void DestroySampler(RHI::Sampler* sampler) override;
         
         virtual void* AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler) override;
-        virtual void RemoveImGuiTexture(void* imguiTexture) override;
+        virtual void RemoveImGuiTexture(void* imguiTexture) override; 
 
     protected:
 

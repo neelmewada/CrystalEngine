@@ -34,8 +34,18 @@ namespace CE
 		RGFloat,
 		RGBAFloat,
 
+		// Compressed formats
+		BC7_RGBA,
 	};
 	ENUM_CLASS_FLAGS(TextureFormat);
+
+	ENUM()
+	enum class TextureCompression
+	{
+		None = 0,
+		BC7
+	};
+	ENUM_CLASS_FLAGS(TextureCompression);
 
 	ENUM()
 	enum class TextureSourceFormat
@@ -43,6 +53,8 @@ namespace CE
 		Unsupported = 0,
 		PNG,
 		JPG,
+		BC4,
+		BC7,
 	};
 	ENUM_CLASS_FLAGS(TextureSourceFormat);
 

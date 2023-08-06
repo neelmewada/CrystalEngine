@@ -4,13 +4,15 @@
 #include "lodepng.h"
 #include "lodepng_util.h"
 
+#include "compressonator.h"
+
 namespace CE
 {
 	static const u8 pngHeader[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, };
 
     CMImage::CMImage()
     {
-
+		
     }
 
     CMImage::~CMImage()
@@ -169,6 +171,7 @@ namespace CE
 		image.numChannels = lodepng_get_channels(&state.info_png.color);
 		image.bitDepth = state.info_png.color.bitdepth;
 		image.bitsPerPixel = lodepng_get_bpp(&state.info_png.color);
+		image.sourceFormat = CMImageSourceFormat::PNG;
 
 		switch (state.info_png.color.colortype)
 		{
@@ -269,6 +272,97 @@ namespace CE
 		image.failureReason = "Unsupported image format";
 		return image;
     }
+
+	bool CMImage::Encode(const CMImage& source, CMImageSourceFormat toSourceFormat, Stream* outStream)
+	{
+		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
+			return false;
+
+		if (toSourceFormat == CMImageSourceFormat::BC7)
+		{
+			return EncodeToBC7(source, outStream);
+		}
+
+		return false;
+	}
+
+	static CMP_FORMAT CMImageFormatToSourceCMPFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
+	{
+		switch (format)
+		{
+		case CE::CMImageFormat::R:
+			if (bitDepth == 8)
+				return CMP_FORMAT_R_8;
+			else if (bitDepth == 16)
+				return CMP_FORMAT_R_16;
+			else if (bitDepth == 32)
+				return CMP_FORMAT_R_32F;
+			break;
+		case CE::CMImageFormat::RG:
+			if (bitDepth == 8)
+				return CMP_FORMAT_RG_8;
+			else if (bitDepth == 16)
+				return CMP_FORMAT_RG_16;
+			else if (bitDepth == 32)
+				return CMP_FORMAT_RG_32F;
+			break;
+		case CE::CMImageFormat::RGB:
+			if (bitDepth == 8)
+				return CMP_FORMAT_RGB_888;
+			break;
+		case CE::CMImageFormat::RGBA:
+			if (bitDepth == 8)
+				return CMP_FORMAT_RGBA_8888;
+			break;
+		default:
+			break;
+		}
+
+		return CMP_FORMAT_Unknown;
+	}
+
+	static CMP_FORMAT CMImageFormatToCompressedCMPFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
+	{
+		switch (format)
+		{
+		case CE::CMImageFormat::R:
+			if (bitDepth == 8)
+				return CMP_FORMAT_BC4;
+			break;
+		case CE::CMImageFormat::RG:
+			break;
+		case CE::CMImageFormat::RGB:
+			break;
+		case CE::CMImageFormat::RGBA:
+			if (bitDepth == 8)
+				return CMP_FORMAT_BC7;
+		default:
+			break;
+		}
+
+		return CMP_FORMAT_Unknown;
+	}
+
+	bool CMImage::EncodeToBC7(const CMImage& source, Stream* outStream)
+	{
+		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
+			return false;
+
+		CMP_Texture src{};
+		src.dwWidth = source.GetWidth();
+		src.dwHeight = source.GetHeight();
+		src.dwSize = sizeof(CMP_Texture);
+		src.format = CMImageFormatToSourceCMPFormat(source.format, source.bitDepth, source.bitsPerPixel);
+		src.pData = source.data;
+		src.dwDataSize = source.GetDataSize();
+		
+		if (src.format == CMP_FORMAT_Unknown)
+			return false;
+
+
+
+		return false;
+	}
 
     void CMImage::Free()
     {

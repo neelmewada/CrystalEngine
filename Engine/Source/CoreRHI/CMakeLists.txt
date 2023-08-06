@@ -28,6 +28,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ThirdParty::imgui
         PUBLIC
             CE::Core
+            CE::CoreMedia
         TARGETS Config
     RUNTIME_DEPENDENCIES
 

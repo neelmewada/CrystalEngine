@@ -112,8 +112,43 @@ namespace CE::Editor
 		texture->type = textureType;
 		texture->filter = TextureFilter::Linear;
 
-		FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
-		texture->source.rawData.LoadData(&fileData);
+		//FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
+		//texture->source.rawData.LoadData(&fileData);
+
+		// Store in KTX format
+		MemoryStream memStream = MemoryStream(1024);
+		memStream.SetBinaryMode(true);
+		memStream.SetAutoResizeIncrement(512);
+
+		CMImageSourceFormat encodeToFormat = CMImageSourceFormat::Undefined;
+		TextureSourceFormat outputSourceFormat = TextureSourceFormat::Unsupported;
+
+		if (image.GetFormat() == CMImageFormat::RGBA)
+		{
+			encodeToFormat = CMImageSourceFormat::BC7;
+			outputSourceFormat = TextureSourceFormat::BC7;
+		}
+		else if (image.GetFormat() == CMImageFormat::RGB)
+		{
+			encodeToFormat = CMImageSourceFormat::BC7;
+			outputSourceFormat = TextureSourceFormat::BC7;
+		}
+		else if (image.GetFormat() == CMImageFormat::R)
+		{
+			encodeToFormat = CMImageSourceFormat::BC4;
+			outputSourceFormat = TextureSourceFormat::BC4;
+		}
+
+		// Encode image
+		if (!CMImage::Encode(image, encodeToFormat, &memStream))
+		{
+			failed = true;
+			return Name();
+		}
+
+		memStream.Seek(0);
+		texture->source.rawData.LoadData(&memStream);
+		texture->source.sourceFormat = outputSourceFormat;
 		
 		if (image.GetNumChannels() == 1)
 			texture->format = TextureFormat::RFloat;

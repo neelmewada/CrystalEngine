@@ -3,6 +3,7 @@
 
 #include "VulkanBuffer.h"
 
+
 namespace CE
 {
     VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
@@ -268,6 +269,49 @@ namespace CE
 
         return 0;
     }
+
+	VkFormat CMImageFormatToVkFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
+	{
+		switch (format)
+		{
+		case CE::CMImageFormat::R:
+			if (bitDepth == 32)
+				return VK_FORMAT_R32_SFLOAT;
+			else if (bitDepth == 16)
+				return VK_FORMAT_R16_UNORM;
+			else if (bitDepth == 8)
+				return VK_FORMAT_R8_UNORM;
+			break;
+		case CE::CMImageFormat::RG:
+			if (bitDepth == 32)
+				return VK_FORMAT_R32G32_SFLOAT;
+			else if (bitDepth == 16)
+				return VK_FORMAT_R16G16_UNORM;
+			else if (bitDepth == 8)
+				return VK_FORMAT_R8G8_UNORM;
+			break;
+		case CE::CMImageFormat::RGB:
+			if (bitDepth == 32)
+				return VK_FORMAT_R32G32B32_SFLOAT;
+			else if (bitDepth == 16)
+				return VK_FORMAT_R16G16B16_UNORM;
+			else if (bitDepth == 8)
+				return VK_FORMAT_R8G8B8_UNORM;
+			break;
+		case CE::CMImageFormat::RGBA:
+			if (bitDepth == 32)
+				return VK_FORMAT_R32G32B32A32_SFLOAT;
+			else if (bitDepth == 16)
+				return VK_FORMAT_R16G16B16A16_UNORM;
+			else if (bitDepth == 8)
+				return VK_FORMAT_R8G8B8A8_UNORM;// Transcode: BC7_RGBA
+			break;
+		default:
+			break;
+		}
+
+		return VK_FORMAT_UNDEFINED;
+	}
 
     VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc)
         : device(device)
