@@ -38,7 +38,49 @@ namespace CE
 
 	void AssetRegistry::OnAssetImported(const Name& packageName, const Name& sourcePath)
 	{
+		IO::Path packagePath = Package::GetPackagePath(packageName);
+		Package* load = Package::LoadPackage(nullptr, packageName, LOAD_Default);
+		if (load == nullptr)
+			return;
+		auto projectAssetsPath = gProjectPath / "Game/Assets";
+		String relativePathStr = "";
 
+		if (IO::Path::IsSubDirectory(packagePath, projectAssetsPath))
+		{
+			relativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
+			if (!relativePathStr.StartsWith("/"))
+				relativePathStr = "/" + relativePathStr;
+		}
+
+		AssetData* assetData = new AssetData();
+		String sourceAssetRelativePath = "";
+		if (!load->GetPrimaryObjectName().IsValid())
+			load->LoadFully();
+
+		Name primaryName = load->GetPrimaryObjectName();
+		Name primaryTypeName = load->GetPrimaryObjectTypeName();
+		assetData->packageName = load->GetPackageName();
+		assetData->assetName = primaryName;
+		assetData->assetClassPath = primaryTypeName;
+#if PAL_TRAIT_BUILD_EDITOR
+		// Source asset path relative to project assets directory
+		sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
+		assetData->sourceAssetPath = sourceAssetRelativePath;
+#endif
+
+		allAssetDatas.Add(assetData);
+		if (relativePathStr.NonEmpty())
+		{
+			cachedPathTree.AddPath(relativePathStr, assetData);
+			cachedAssetsByPath[relativePathStr].Add(assetData);
+		}
+
+		if (!sourceAssetRelativePath.IsEmpty())
+		{
+			cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
+		}
+
+		load->RequestDestroy();
 	}
 
 	void AssetRegistry::CachePathTree()

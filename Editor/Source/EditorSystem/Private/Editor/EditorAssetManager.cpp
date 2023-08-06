@@ -168,7 +168,7 @@ namespace CE::Editor
 
 		if (outPackageName.IsValid()) // Import success
 		{
-			assetRegistry->OnAssetImported(outPackageName);
+			assetRegistry->OnAssetImported(outPackageName, sourcePathName);
 		}
 
 		numAssetsBeingImported--;
