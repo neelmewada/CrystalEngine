@@ -106,57 +106,79 @@ namespace CE::Editor
 		}
     }
 
-	bool ImportSourceAssetAsync(EditorAssetManager* self, IO::Path sourceAssetPath, AssetImporter* importer)
+	bool EditorAssetManager::ImportSourceAsset(IO::Path sourceAssetPath, AssetImporter* importer)
 	{
 		String extension = sourceAssetPath.GetExtension().GetString();
 
 		AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinitionForSourceAssetExtension(extension);
 		if (assetDef == nullptr)
 		{
-			self->mutex.Lock();
-			self->numAssetsBeingImported--;
+			numAssetsBeingImported--;
 			if (importer != nullptr)
 			{
 				importer->RequestDestroy();
 			}
-			self->mutex.Unlock();
 			return false;
 		}
 
-		IO::Path fullPath = sourceAssetPath;
-		if (!fullPath.Exists())
+		IO::Path sourcePath = sourceAssetPath;
+		if (!sourcePath.Exists())
 		{
-			self->mutex.Lock();
-			self->numAssetsBeingImported--;
+			numAssetsBeingImported--;
 			if (importer != nullptr)
 			{
 				importer->RequestDestroy();
 			}
-			self->mutex.Unlock();
 			return false;
 		}
 
-		IO::Path productAssetPath = fullPath.ReplaceExtension(".casset");
+		IO::Path productAssetPath = sourcePath.ReplaceExtension(".casset");
 
 		if (importer == nullptr)
 		{
-			self->mutex.Lock();
-			self->numAssetsBeingImported--;
-			self->mutex.Unlock();
+			numAssetsBeingImported--;
 			return false;
 		}
 
-		Name outPackageName = importer->ImportSourceAsset(fullPath, productAssetPath);
+		String sourcePathName = "";
 
-		self->mutex.Lock();
-		self->numAssetsBeingImported--;
+		if (IO::Path::IsSubDirectory(sourcePath, gProjectPath / "Game/Assets"))
+		{
+			sourcePathName = IO::Path::GetRelative(sourcePath, gProjectPath).GetString().Replace({ '\\' }, '/');
+			if (!sourcePathName.StartsWith("/"))
+				sourcePathName = "/" + sourcePathName;
+
+			auto assetBySourcePath = assetRegistry->GetAssetBySourcePath(sourcePathName);
+			if (assetBySourcePath != nullptr)
+			{
+				Name assetPackageName = assetBySourcePath->packageName;
+				auto packagePath = Package::GetPackagePath(assetPackageName);
+				if (packagePath.Exists())
+				{
+					productAssetPath = packagePath;
+				}
+				else
+				{
+					assetRegistry->cachedAssetBySourcePath.Remove(sourcePathName);
+				}
+			}
+		}
+
+		Name outPackageName = importer->ImportSourceAsset(sourcePath, productAssetPath);
+
+		if (outPackageName.IsValid()) // Import success
+		{
+			assetRegistry->OnAssetImported(outPackageName);
+		}
+
+		numAssetsBeingImported--;
+		
 		if (importer != nullptr)
 		{
 			if (outPackageName.IsValid())
-				self->recentlyProcessedPackageNames.Add(outPackageName);
+				recentlyProcessedPackageNames.Add(outPackageName);
 			importer->RequestDestroy();
 		}
-		self->mutex.Unlock();
 		return outPackageName.IsValid();
 	}
 
@@ -179,7 +201,7 @@ namespace CE::Editor
 			numAssetsBeingImported++;
 			
 			// TODO: implement async later
-			ImportSourceAssetAsync(this, sourcePath, assetImporter);
+			ImportSourceAsset(sourcePath, assetImporter);
 		}
 
 		sourceAssetsToImport.Clear();

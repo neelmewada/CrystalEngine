@@ -38,7 +38,7 @@ namespace CE
 
 		// - Asset Registry API -
 
-
+		AssetData* GetAssetBySourcePath(const Name& sourcePath);
 
 	protected:
 
@@ -47,6 +47,10 @@ namespace CE
 
 		// Inherited via IFileWatchListener
 		virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName) override;
+
+		// - Internal API -
+
+		void OnAssetImported(const Name& packageName, const Name& sourcePath = "");
 
 	private:
 
@@ -74,7 +78,7 @@ namespace CE
 		Array<AssetData*> allAssetDatas{};
 
 		HashMap<Name, Array<AssetData*>> cachedAssetsByPath{};
-		HashMap<Name, AssetData*> cachedAssetsBySourceFilePath{};
+		HashMap<Name, AssetData*> cachedAssetBySourcePath{};
 
 		
 	};

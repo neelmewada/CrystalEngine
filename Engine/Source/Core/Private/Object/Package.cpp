@@ -24,14 +24,18 @@ namespace CE
 
 		if (packageNameStr.StartsWith("/Engine")) // Example: /Engine/Assets/Textures/Noise/Perlin/Perlin04
 		{
-			return PlatformDirectories::GetEngineRootDir() / packageNameStr.GetSubstring(1);
+			return PlatformDirectories::GetEngineRootDir() / (packageNameStr.GetSubstring(1) + ".casset");
 		}
 		else if (packageNameStr.StartsWith("/Game"))
 		{
-			return PlatformDirectories::GetGameDir().GetParentPath() / packageNameStr.GetSubstring(1);
+			return gProjectPath / (packageNameStr.GetSubstring(1) + ".casset");
+		}
+		else if (packageNameStr.StartsWith("/Temp"))
+		{
+			return gProjectPath / (packageNameStr.GetSubstring(1) + ".casset");
 		}
 
-		return PlatformDirectories::GetAppRootDir() / packageNameStr.GetSubstring(1);
+		return PlatformDirectories::GetAppRootDir() / (packageNameStr.GetSubstring(1) + ".casset");
 	}
 
 	Package* Package::LoadPackage(Package* outer, const PackagePath& packageName, LoadFlags loadFlags)
@@ -307,19 +311,25 @@ namespace CE
 	{
 #if PAL_TRAIT_BUILD_EDITOR
 		const auto& map = GetSubObjectMap();
-		if (GetPrimaryObjectUuid() == 0)
-			return String();
 
-		if (isFullyLoaded && GetSubObjectCount() > 0 && map.ObjectExists(GetPrimaryObjectUuid()))
+		if (isFullyLoaded && GetSubObjectCount() > 0)
 		{
-			Object* object = map.FindObject(GetPrimaryObjectUuid());
-			if (object != nullptr && object->IsOfType<Asset>())
-				return ((Asset*)object)->GetSourceAssetRelativePath();
+			for (const auto& [uuid, object] : map)
+			{
+				if (object != nullptr && object->IsOfType<Asset>())
+					return ((Asset*)object)->GetSourceAssetRelativePath();
+			}
 		}
-		else if (objectUuidToEntryMap.KeyExists(GetPrimaryObjectUuid()))
+		else
 		{
-			const ObjectEntryMetaData& entry = objectUuidToEntryMap[GetPrimaryObjectUuid()];
-			return entry.sourceAssetRelativePath;
+			for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)
+			{
+				ClassType* objectClass = ClassType::FindClass(objectEntry.objectClassName);
+				if (objectClass != nullptr && objectClass->IsSubclassOf<Asset>())
+				{
+					return objectEntry.sourceAssetRelativePath;
+				}
+			}
 		}
 #endif
 

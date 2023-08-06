@@ -153,7 +153,11 @@ namespace CE
 		u32 w, h;
 		lodepng::State state{};
 
-		u32 result = lodepng::decode(data, w, h, state, (unsigned char*)stream->GetRawDataPtr(), stream->GetLength());
+		int length = stream->GetLength();
+		if (length <= 0)
+			length = stream->GetCapacity();
+
+		u32 result = lodepng::decode(data, w, h, state, (unsigned char*)stream->GetRawDataPtr(), length);
 		if (result > 0)
 		{
 			image.failureReason = "Decoding failed";

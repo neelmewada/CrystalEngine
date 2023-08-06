@@ -23,7 +23,7 @@ namespace CE::Editor
 
 	protected:
 
-		friend bool ImportSourceAssetAsync(EditorAssetManager* self, IO::Path sourceAssetPath, AssetImporter* importer);
+		bool ImportSourceAsset(IO::Path sourceAssetPath, AssetImporter* importer);
 
 		Array<IO::Path> sourceAssetsToImport{};
 		Array<Name> recentlyProcessedPackageNames{};

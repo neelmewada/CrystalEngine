@@ -11,14 +11,25 @@ namespace CE::Editor
 		if (!sourceAssetPath.Exists())
 			return Name();
 
+		auto assetRegistry = AssetRegistry::Get();
+
+		String sourceAssetRelativePath = "";
+
+		if (IO::Path::IsSubDirectory(sourceAssetPath, gProjectPath / "Game/Assets"))
+		{
+			sourceAssetRelativePath = IO::Path::GetRelative(sourceAssetPath, gProjectPath).GetString().Replace({ '\\' }, '/');
+			if (!sourceAssetRelativePath.StartsWith("/"))
+				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
+		}
+
+		String packageName = "";
+
 		String assetName = outPath.GetFilename().RemoveExtension().GetString();
 		if (!IsValidObjectName(assetName))
 		{
 			assetName = FixObjectName(assetName);
 			outPath = outPath.GetParentPath() / (assetName + ".casset");
 		}
-
-		String packageName = "";
 
 		if (IO::Path::IsSubDirectory(outPath, gProjectPath / "Game/Assets"))
 		{
@@ -35,15 +46,6 @@ namespace CE::Editor
 		else
 		{
 			packageName = assetName;
-		}
-
-		String sourceAssetRelativePath = "";
-
-		if (IO::Path::IsSubDirectory(sourceAssetPath, gProjectPath / "Game/Assets"))
-		{
-			sourceAssetRelativePath = IO::Path::GetRelative(sourceAssetPath, gProjectPath).GetString().Replace({ '\\' }, '/');
-			if (!sourceAssetRelativePath.StartsWith("/"))
-				sourceAssetRelativePath = "/" + sourceAssetRelativePath;
 		}
 
 		String extension = sourceAssetPath.GetExtension().GetString();
@@ -112,7 +114,7 @@ namespace CE::Editor
 
 		FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
 		texture->source.rawData.LoadData(&fileData);
-
+		
 		if (image.GetNumChannels() == 1)
 			texture->format = TextureFormat::RFloat;
 		else if (image.GetNumChannels() == 3)

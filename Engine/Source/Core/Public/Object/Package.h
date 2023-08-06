@@ -83,6 +83,12 @@ namespace CE
         Object* LoadObject(UUID objectUuid);
 		Object* LoadObject(const Name& objectClassName);
 
+		template<typename TObject>
+		TObject* LoadObject()
+		{
+			return (TObject*)LoadObject(TYPENAME(TObject));
+		}
+
 		// Returns true if this package contains the given object. Note that the object has to be fully loaded.
 		bool ContainsObject(Object* object);
 

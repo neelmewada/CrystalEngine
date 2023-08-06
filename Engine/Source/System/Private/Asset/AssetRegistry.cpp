@@ -29,6 +29,18 @@ namespace CE
 		return AssetManager::GetRegistry();
 	}
 
+	AssetData* AssetRegistry::GetAssetBySourcePath(const Name& sourcePath)
+	{
+		if (cachedAssetBySourcePath.KeyExists(sourcePath))
+			return cachedAssetBySourcePath[sourcePath];
+		return nullptr;
+	}
+
+	void AssetRegistry::OnAssetImported(const Name& packageName, const Name& sourcePath)
+	{
+
+	}
+
 	void AssetRegistry::CachePathTree()
 	{
 		if (pathTreeCached)
@@ -50,7 +62,7 @@ namespace CE
 
 			projectAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
 				{
-					auto relativePath = IO::Path::GetRelative(item, gProjectPath / "Game/Assets");
+					auto relativePath = IO::Path::GetRelative(item, gProjectPath);
 					auto relativePathStr = relativePath.RemoveExtension().GetString().Replace({'\\'}, '/');
                     if (!relativePathStr.StartsWith("/"))
 						relativePathStr = "/" + relativePathStr;
@@ -58,8 +70,8 @@ namespace CE
 					{
                         if (!relativePathStr.IsEmpty())
 						{
-							cachedPathTree.AddPath("/Game" + relativePathStr);
-							directoryTree.AddPath("/Game" + relativePathStr);
+							cachedPathTree.AddPath(relativePathStr);
+							directoryTree.AddPath(relativePathStr);
 						}
 					}
                     else if (item.GetExtension() == ".casset") // Product asset file
@@ -90,12 +102,12 @@ namespace CE
 						}
 
 						allAssetDatas.Add(assetData);
-						cachedPathTree.AddPath("/Game" + relativePathStr, assetData);
-						cachedAssetsByPath["/Game" + relativePathStr].Add(assetData);
+						cachedPathTree.AddPath(relativePathStr, assetData);
+						cachedAssetsByPath[relativePathStr].Add(assetData);
 
 						if (!sourceAssetRelativePath.IsEmpty())
 						{
-							cachedAssetsBySourceFilePath[sourceAssetRelativePath] = assetData;
+							cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
 						}
                     }
 				});
@@ -165,7 +177,7 @@ namespace CE
             }
 		}
 
-		// Bug fix: Add delay to prevent skipping Modified calls
+		// Bug fix: Add delay to prevent skipping file Modified calls
 		Thread::SleepFor(5);
 	}
 
