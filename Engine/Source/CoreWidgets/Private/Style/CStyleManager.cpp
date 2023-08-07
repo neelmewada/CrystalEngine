@@ -147,7 +147,7 @@ namespace CE::Widgets
 			return {};
         }
         
-        texture->UploadData(image.GetDataPtr());
+        texture->UploadData(image.GetDataPtr(), image.GetDataSize());
 
 		CTexture tex{};
 		tex.size = Vec2i(image.GetWidth(), image.GetHeight());

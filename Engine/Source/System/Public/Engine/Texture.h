@@ -35,6 +35,8 @@ namespace CE
 		RGBAFloat,
 
 		// Compressed formats
+		BC4,
+		BC6H,
 		BC7_RGBA,
 	};
 	ENUM_CLASS_FLAGS(TextureFormat);

@@ -73,7 +73,7 @@ namespace CE::RHI
         virtual u32 GetBytesPerChannel() = 0;
         virtual u32 GetNumberOfChannels() = 0;
 
-        virtual void UploadData(const void* pixels) = 0;
+        virtual void UploadData(const void* pixels, u64 dataSize) = 0;
     };
 
 	class CORERHI_API Sampler : public Resource

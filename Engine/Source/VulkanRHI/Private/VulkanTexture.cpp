@@ -6,312 +6,109 @@
 
 namespace CE
 {
+	struct FormatEntry
+	{
+		RHI::TextureFormat rhiFormat = RHI::TextureFormat::Undefined;
+		VkFormat vkFormat = VK_FORMAT_UNDEFINED;
+		u32 numChannels = 0;
+		u32 bytesPerChannel = 0;
+	};
+
+	static Array<FormatEntry> formatEntries{
+		// RHI::TextureFormat, VkFormat, numChannels, bytesPerChannel
+		{ RHI::TextureFormat::R8_UNORM, VK_FORMAT_R8_UNORM, 1, 1 },
+		{ RHI::TextureFormat::R8_SNORM, VK_FORMAT_R8_SNORM, 1, 1 },
+		{ RHI::TextureFormat::R8_SRGB, VK_FORMAT_R8_SRGB, 1, 1 },
+
+		{ RHI::TextureFormat::R16G16_UNORM, VK_FORMAT_R16G16_UNORM, 2, 2 },
+		{ RHI::TextureFormat::R16G16_SNORM, VK_FORMAT_R16G16_SNORM, 2, 2 },
+		{ RHI::TextureFormat::R16G16_SINT, VK_FORMAT_R16G16_SINT, 2, 2 },
+		{ RHI::TextureFormat::R16G16_SFLOAT, VK_FORMAT_R16G16_SFLOAT, 2, 2 },
+
+		{ RHI::TextureFormat::R32G32_UINT, VK_FORMAT_R32G32_UINT, 2, 4 },
+		{ RHI::TextureFormat::R32G32_SINT, VK_FORMAT_R32G32_SINT, 2, 4 },
+		{ RHI::TextureFormat::R32G32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, 2, 4 },
+
+		{ RHI::TextureFormat::R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_SRGB, 4, 1 },
+		{ RHI::TextureFormat::R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, 4, 1 },
+		{ RHI::TextureFormat::R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_SNORM, 4, 1 },
+
+		{ RHI::TextureFormat::B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_SRGB, 4, 1 },
+		{ RHI::TextureFormat::B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, 4, 1 },
+		{ RHI::TextureFormat::B8G8R8A8_SNORM, VK_FORMAT_B8G8R8A8_SNORM, 4, 1 },
+
+		{ RHI::TextureFormat::R8G8B8_UNORM, VK_FORMAT_R8G8B8_UNORM, 3, 1 },
+		{ RHI::TextureFormat::R8G8B8_SNORM, VK_FORMAT_R8G8B8_SNORM, 3, 1 },
+		{ RHI::TextureFormat::R8G8B8_SRGB, VK_FORMAT_R8G8B8_SRGB, 3, 1 },
+
+		{ RHI::TextureFormat::R16_UNORM, VK_FORMAT_R16_UNORM, 1, 2 },
+		{ RHI::TextureFormat::R16_SNORM, VK_FORMAT_R16_SNORM, 1, 2 },
+		{ RHI::TextureFormat::R16_SFLOAT, VK_FORMAT_R16_SFLOAT, 1, 2 },
+		{ RHI::TextureFormat::R32_UINT, VK_FORMAT_R32_UINT, 1, 4 },
+		{ RHI::TextureFormat::R32_SINT, VK_FORMAT_R32_SINT, 1, 4 },
+		{ RHI::TextureFormat::R32_SFLOAT, VK_FORMAT_R32_SFLOAT, 1, 4 },
+		{ RHI::TextureFormat::D32_SFLOAT, VK_FORMAT_D32_SFLOAT, 1, 4 },
+		{ RHI::TextureFormat::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 5 },
+		{ RHI::TextureFormat::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 4 },
+
+		{ RHI::TextureFormat::B8G8R8_UNORM, VK_FORMAT_B8G8R8_UNORM, 3, 1 },
+		{ RHI::TextureFormat::B8G8R8_SNORM, VK_FORMAT_B8G8R8_SNORM, 3, 1 },
+		{ RHI::TextureFormat::B8G8R8_SRGB, VK_FORMAT_B8G8R8_SRGB, 3, 1 },
+
+		{ RHI::TextureFormat::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK, 4, 1 },
+	};
+
+	static HashMap<RHI::TextureFormat, VkFormat> textureFormatToVkFormatMap{};
+	static HashMap<VkFormat, RHI::TextureFormat> vkFormatToTextureFormatMap{};
+
+	static void LoadMappings()
+	{
+		if (vkFormatToTextureFormatMap.GetSize() == 0)
+		{
+			for (const auto& entry : formatEntries)
+			{
+				textureFormatToVkFormatMap[entry.rhiFormat] = entry.vkFormat;
+				vkFormatToTextureFormatMap[entry.vkFormat] = entry.rhiFormat;
+			}
+		}
+	}
+
     VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
     {
-        switch (format)
-        {
-        case RHI::TextureFormat::R8_UNORM:
-            return VK_FORMAT_R8_UNORM;
-        case RHI::TextureFormat::R8_SNORM:
-            return VK_FORMAT_R8_SNORM;
-        case RHI::TextureFormat::R8_SRGB:
-            return VK_FORMAT_R8_SRGB;
+		LoadMappings();
 
-		case RHI::TextureFormat::R16G16_UNORM:
-			return VK_FORMAT_R16G16_UNORM;
-		case RHI::TextureFormat::R16G16_SNORM:
-			return VK_FORMAT_R16G16_SNORM;
-		case RHI::TextureFormat::R16G16_UINT:
-			return VK_FORMAT_R16G16_UINT;
-		case RHI::TextureFormat::R16G16_SINT:
-			return VK_FORMAT_R16G16_SINT;
-		case RHI::TextureFormat::R16G16_SFLOAT:
-			return VK_FORMAT_R16G16_SFLOAT;
+		if (!textureFormatToVkFormatMap.KeyExists(format))
+			return VK_FORMAT_UNDEFINED;
 
-		case RHI::TextureFormat::R32G32_UINT:
-			return VK_FORMAT_R32G32_UINT;
-		case RHI::TextureFormat::R32G32_SINT:
-			return VK_FORMAT_R32G32_SINT;
-		case RHI::TextureFormat::R32G32_SFLOAT:
-			return VK_FORMAT_R32G32_SFLOAT;
-            
-        case RHI::TextureFormat::R8G8B8A8_SRGB:
-            return VK_FORMAT_R8G8B8A8_SRGB;
-        case RHI::TextureFormat::R8G8B8A8_UNORM:
-            return VK_FORMAT_R8G8B8A8_UNORM;
-        case RHI::TextureFormat::R8G8B8A8_SNORM:
-            return VK_FORMAT_R8G8B8A8_SNORM;
-
-        case RHI::TextureFormat::B8G8R8A8_SRGB:
-            return VK_FORMAT_B8G8R8A8_SRGB;
-        case RHI::TextureFormat::B8G8R8A8_UNORM:
-            return VK_FORMAT_B8G8R8A8_UNORM;
-        case RHI::TextureFormat::B8G8R8A8_SNORM:
-            return VK_FORMAT_B8G8R8A8_SNORM;
-
-        case RHI::TextureFormat::R8G8B8_UNORM:
-            return VK_FORMAT_R8G8B8_UNORM;
-        case RHI::TextureFormat::R8G8B8_SNORM:
-            return VK_FORMAT_R8G8B8_SNORM;
-        case RHI::TextureFormat::R8G8B8_SRGB:
-            return VK_FORMAT_R8G8B8_SRGB;
-        case RHI::TextureFormat::R16_UNORM:
-            return VK_FORMAT_R16_UNORM;
-        case RHI::TextureFormat::R16_SNORM:
-            return VK_FORMAT_R16_SNORM;
-        case RHI::TextureFormat::R16_SFLOAT:
-            return VK_FORMAT_R16_SFLOAT;
-        case RHI::TextureFormat::R32_UINT:
-            return VK_FORMAT_R32_UINT;
-        case RHI::TextureFormat::R32_SINT:
-            return VK_FORMAT_R32_SINT;
-        case RHI::TextureFormat::R32_SFLOAT:
-            return VK_FORMAT_R32_SFLOAT;
-        case RHI::TextureFormat::D32_SFLOAT:
-            return VK_FORMAT_D32_SFLOAT;
-        case RHI::TextureFormat::D32_SFLOAT_S8_UINT:
-            return VK_FORMAT_D32_SFLOAT_S8_UINT;
-        case RHI::TextureFormat::D24_UNORM_S8_UINT:
-            return VK_FORMAT_D24_UNORM_S8_UINT;
-                
-        case RHI::TextureFormat::B8G8R8_UNORM:
-            return VK_FORMAT_B8G8R8_UNORM;
-        case RHI::TextureFormat::B8G8R8_SNORM:
-            return VK_FORMAT_B8G8R8_SNORM;
-        case RHI::TextureFormat::B8G8R8_SRGB:
-            return VK_FORMAT_B8G8R8_SRGB;
-        }
-        
-        return VK_FORMAT_UNDEFINED;
+		return textureFormatToVkFormatMap[format];
     }
 
     RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format)
     {
-        switch (format)
-        {
-        case VK_FORMAT_R8_UNORM:
-            return RHI::TextureFormat::R8_UNORM;
-        case VK_FORMAT_R8_SNORM:
-            return RHI::TextureFormat::R8_SNORM;
-        case VK_FORMAT_R8_SRGB:
-            return RHI::TextureFormat::R8_SRGB;
+		LoadMappings();
 
-        case VK_FORMAT_R8G8B8A8_SRGB:
-            return RHI::TextureFormat::R8G8B8A8_SRGB;
-        case VK_FORMAT_R8G8B8A8_UNORM:
-            return RHI::TextureFormat::R8G8B8A8_UNORM;
-        case VK_FORMAT_R8G8B8A8_SNORM:
-            return RHI::TextureFormat::R8G8B8A8_SNORM;
+		if (!vkFormatToTextureFormatMap.KeyExists(format))
+			return RHI::TextureFormat::Undefined;
 
-		case VK_FORMAT_R16G16_UNORM:
-			return RHI::TextureFormat::R16G16_UNORM;
-		case VK_FORMAT_R16G16_SNORM:
-			return RHI::TextureFormat::R16G16_SNORM;
-		case VK_FORMAT_R16G16_UINT:
-			return RHI::TextureFormat::R16G16_UINT;
-		case VK_FORMAT_R16G16_SINT:
-			return RHI::TextureFormat::R16G16_SINT;
-		case VK_FORMAT_R16G16_SFLOAT:
-			return RHI::TextureFormat::R16G16_SFLOAT;
-
-        case VK_FORMAT_B8G8R8A8_SRGB:
-            return RHI::TextureFormat::B8G8R8A8_SRGB;
-        case VK_FORMAT_B8G8R8A8_UNORM:
-            return RHI::TextureFormat::B8G8R8A8_UNORM;
-        case VK_FORMAT_B8G8R8A8_SNORM:
-            return RHI::TextureFormat::B8G8R8A8_SNORM;
-
-        case VK_FORMAT_R8G8B8_UNORM:
-            return RHI::TextureFormat::R8G8B8_UNORM;
-        case VK_FORMAT_R8G8B8_SNORM:
-            return RHI::TextureFormat::R8G8B8_SNORM;
-        case VK_FORMAT_R8G8B8_SRGB:
-            return RHI::TextureFormat::R8G8B8_SRGB;
-
-        case VK_FORMAT_R16_UNORM:
-            return RHI::TextureFormat::R16_UNORM;
-        case VK_FORMAT_R16_SNORM:
-            return RHI::TextureFormat::R16_SNORM;
-        case VK_FORMAT_R16_SFLOAT:
-            return RHI::TextureFormat::R16_SFLOAT;
-
-        case VK_FORMAT_R32_UINT:
-            return RHI::TextureFormat::R32_UINT;
-        case VK_FORMAT_R32_SINT:
-            return RHI::TextureFormat::R32_SINT;
-        case VK_FORMAT_R32_SFLOAT:
-            return RHI::TextureFormat::R32_SFLOAT;
-
-		case VK_FORMAT_R32G32_UINT:
-			return RHI::TextureFormat::R32G32_UINT;
-		case VK_FORMAT_R32G32_SINT:
-			return RHI::TextureFormat::R32G32_SINT;
-		case VK_FORMAT_R32G32_SFLOAT:
-			return RHI::TextureFormat::R32G32_SFLOAT;
-
-        case VK_FORMAT_D32_SFLOAT:
-            return RHI::TextureFormat::D32_SFLOAT;
-        case VK_FORMAT_D32_SFLOAT_S8_UINT:
-            return RHI::TextureFormat::D32_SFLOAT_S8_UINT;
-        case VK_FORMAT_D24_UNORM_S8_UINT:
-            return RHI::TextureFormat::D24_UNORM_S8_UINT;
-                
-        case VK_FORMAT_B8G8R8_UNORM:
-            return RHI::TextureFormat::B8G8R8_UNORM;
-        case VK_FORMAT_B8G8R8_SNORM:
-            return RHI::TextureFormat::B8G8R8_SNORM;
-        case VK_FORMAT_B8G8R8_SRGB:
-            return RHI::TextureFormat::B8G8R8_SRGB;
-        }
-        
-        return RHI::TextureFormat::Undefined;
+		return vkFormatToTextureFormatMap[format];
     }
 
     u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
     {
-		VK_FORMAT_R32G32_SFLOAT;
-        switch (format)
-        {
-        case RHI::TextureFormat::R8_UNORM:
-            outByteSizePerChannel = 1;
-            return 1;
-        case RHI::TextureFormat::R8_SNORM:
-            outByteSizePerChannel = 1;
-            return 1;
-        case RHI::TextureFormat::R8_SRGB:
-            outByteSizePerChannel = 1;
-            return 1;
-		
-		case RHI::TextureFormat::B8G8R8A8_SRGB:
-			outByteSizePerChannel = 1;
-			return 4;
-		case RHI::TextureFormat::B8G8R8A8_UNORM:
-			outByteSizePerChannel = 1;
-			return 4;
-		case RHI::TextureFormat::B8G8R8A8_SNORM:
-			outByteSizePerChannel = 1;
-			return 4;
+		LoadMappings();
 
-        case RHI::TextureFormat::R8G8B8A8_SRGB:
-            outByteSizePerChannel = 1;
-            return 4;
-        case RHI::TextureFormat::R8G8B8A8_UNORM:
-            outByteSizePerChannel = 1;
-            return 4;
-        case RHI::TextureFormat::R8G8B8A8_SNORM:
-            outByteSizePerChannel = 1;
-            return 4;
-
-        case RHI::TextureFormat::R8G8B8_UNORM:
-            outByteSizePerChannel = 1;
-            return 3;
-        case RHI::TextureFormat::R8G8B8_SNORM:
-            outByteSizePerChannel = 1;
-            return 3;
-        case RHI::TextureFormat::R8G8B8_SRGB:
-            outByteSizePerChannel = 1;
-            return 3;
-
-		case RHI::TextureFormat::R16G16_UNORM:
-			outByteSizePerChannel = 2;
-			return 2;
-		case RHI::TextureFormat::R16G16_SNORM:
-			outByteSizePerChannel = 2;
-			return 2;
-		case RHI::TextureFormat::R16G16_UINT:
-			outByteSizePerChannel = 2;
-			return 2;
-		case RHI::TextureFormat::R16G16_SINT:
-			outByteSizePerChannel = 2;
-			return 2;
-		case RHI::TextureFormat::R16G16_SFLOAT:
-			outByteSizePerChannel = 2;
-			return 2;
-
-		case RHI::TextureFormat::R32G32_UINT:
-			outByteSizePerChannel = 4;
-			return 2;
-		case RHI::TextureFormat::R32G32_SINT:
-			outByteSizePerChannel = 4;
-			return 2;
-		case RHI::TextureFormat::R32G32_SFLOAT:
-			outByteSizePerChannel = 4;
-			return 2;
-
-        case RHI::TextureFormat::R16_UNORM:
-            outByteSizePerChannel = 2;
-            return 1;
-        case RHI::TextureFormat::R16_SNORM:
-            outByteSizePerChannel = 2;
-            return 1;
-        case RHI::TextureFormat::R16_SFLOAT:
-            outByteSizePerChannel = 2;
-            return 1;
-        case RHI::TextureFormat::R32_UINT:
-            outByteSizePerChannel = 4;
-            return 1;
-        case RHI::TextureFormat::R32_SINT:
-            outByteSizePerChannel = 4;
-            return 1;
-        case RHI::TextureFormat::R32_SFLOAT:
-            outByteSizePerChannel = 4;
-            return 1;
-        case RHI::TextureFormat::D32_SFLOAT:
-            outByteSizePerChannel = 4;
-            return 1;
-        case RHI::TextureFormat::D32_SFLOAT_S8_UINT:
-            outByteSizePerChannel = 5;
-            return 1;
-        case RHI::TextureFormat::D24_UNORM_S8_UINT:
-            outByteSizePerChannel = 4;
-            return 1;
-        }
-
-        return 0;
-    }
-
-	VkFormat CMImageFormatToVkFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
-	{
-		switch (format)
+		for (const auto& entry : formatEntries)
 		{
-		case CE::CMImageFormat::R:
-			if (bitDepth == 32)
-				return VK_FORMAT_R32_SFLOAT;
-			else if (bitDepth == 16)
-				return VK_FORMAT_R16_UNORM;
-			else if (bitDepth == 8)
-				return VK_FORMAT_R8_UNORM;
-			break;
-		case CE::CMImageFormat::RG:
-			if (bitDepth == 32)
-				return VK_FORMAT_R32G32_SFLOAT;
-			else if (bitDepth == 16)
-				return VK_FORMAT_R16G16_UNORM;
-			else if (bitDepth == 8)
-				return VK_FORMAT_R8G8_UNORM;
-			break;
-		case CE::CMImageFormat::RGB:
-			if (bitDepth == 32)
-				return VK_FORMAT_R32G32B32_SFLOAT;
-			else if (bitDepth == 16)
-				return VK_FORMAT_R16G16B16_UNORM;
-			else if (bitDepth == 8)
-				return VK_FORMAT_R8G8B8_UNORM;
-			break;
-		case CE::CMImageFormat::RGBA:
-			if (bitDepth == 32)
-				return VK_FORMAT_R32G32B32A32_SFLOAT;
-			else if (bitDepth == 16)
-				return VK_FORMAT_R16G16B16A16_UNORM;
-			else if (bitDepth == 8)
-				return VK_FORMAT_R8G8B8A8_UNORM;// Transcode: BC7_RGBA
-			break;
-		default:
-			break;
+			if (entry.rhiFormat == format)
+			{
+				outByteSizePerChannel = entry.bytesPerChannel;
+				return entry.numChannels;
+			}
 		}
 
-		return VK_FORMAT_UNDEFINED;
-	}
+		return 0;
+    }
+
 
     VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc)
         : device(device)
@@ -481,11 +278,19 @@ namespace CE
         return GetNumberOfChannelsForFormat(format, bytesPerChannel);
     }
 
-    void VulkanTexture::UploadData(const void* pixels)
+    void VulkanTexture::UploadData(const void* pixels, u64 dataSize)
     {
         u32 bytesPerChannel = 0;
         u32 numChannels = GetNumberOfChannelsForFormat(format, bytesPerChannel);
         u64 totalSize = (u64)width * (u64)height * (u64)depth * bytesPerChannel * numChannels;
+
+		if (totalSize != dataSize)
+		{
+			totalSize = dataSize;
+		}
+
+		if (totalSize == 0)
+			return;
 
         RHI::BufferData stagingBufferData{};
         stagingBufferData.startOffsetInBuffer = 0;
@@ -510,6 +315,16 @@ namespace CE
         delete stagingBuffer;
         stagingBuffer = nullptr;
     }
+
+	bool VulkanTexture::ReadPixels(u8** outPixels, u32* outByteSize)
+	{
+		if (outPixels == nullptr || outByteSize == nullptr)
+			return false;
+
+		u32 bytesPerChannel = 0;
+
+		return false;
+	}
 
     void VulkanTexture::CopyPixelsFromBuffer(VulkanBuffer* srcBuffer)
     {
@@ -539,5 +354,32 @@ namespace CE
         device->EndSingleUseCommandBuffer(cmdBuffer);
         device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
     }
+
+	void VulkanTexture::CopyPixelsToBuffer(VulkanBuffer* dstBuffer)
+	{
+		auto cmdBuffer = device->BeginSingleUseCommandBuffer();
+
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+
+		region.imageSubresource.aspectMask = aspectMask;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = {
+			width,
+			height,
+			depth
+		};
+
+		vkCmdCopyImageToBuffer(cmdBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer->GetBuffer(), 1, &region);
+
+		device->EndSingleUseCommandBuffer(cmdBuffer);
+		device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
+	}
 
 } // namespace CE

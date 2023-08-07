@@ -5,12 +5,11 @@
 namespace CE::RHI
 {
 
+	/// Only Vulkan is supported
     enum class GraphicsBackend
     {
         None,
         Vulkan,
-        Metal,
-        DX12,
     };
 
     enum class ResourceType
@@ -231,6 +230,8 @@ namespace CE::RHI
 		R32G32_SFLOAT,
         D24_UNORM_S8_UINT,
         D32_SFLOAT_S8_UINT,
+		// Compressed formats
+		BC7_UNORM,
     };
 
     enum class TextureUsageFlags

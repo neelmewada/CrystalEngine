@@ -33,11 +33,15 @@ namespace CE
         virtual u32 GetBytesPerChannel() override;
         virtual u32 GetNumberOfChannels() override;
 
-        virtual void UploadData(const void* pixels) override;
+        virtual void UploadData(const void* pixels, u64 dataSize) override;
+
+		bool ReadPixels(u8** outPixels, u32* outByteSize);
 
     protected:
 
         void CopyPixelsFromBuffer(VulkanBuffer* srcBuffer);
+
+		void CopyPixelsToBuffer(VulkanBuffer* dstBuffer);
 
     private:
         VulkanDevice* device = nullptr;

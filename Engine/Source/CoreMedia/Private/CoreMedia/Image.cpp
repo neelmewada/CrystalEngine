@@ -383,6 +383,8 @@ namespace CE
 
 		CMP_CompressOptions options = CMP_CompressOptions();
 		options.dwSize = sizeof(options);
+		options.dwnumThreads = CMP_NumberOfProcessors();
+		//options.fquality = 0.9f;
 
 		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
 		if (status != CMP_OK)

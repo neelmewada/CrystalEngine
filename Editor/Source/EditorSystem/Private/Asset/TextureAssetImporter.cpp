@@ -3,6 +3,36 @@
 namespace CE::Editor
 {
 
+	static TextureFormat GetTextureFormatFromCMImage(const CMImage& image)
+	{
+		if (image.GetNumChannels() == 1)
+		{
+			if (image.GetBitDepth() == 8)
+				return TextureFormat::R8;
+			else if (image.GetBitDepth() == 16)
+				return TextureFormat::R16;
+			else if (image.GetBitDepth() == 32)
+				return TextureFormat::RFloat;
+		}
+		else if (image.GetNumChannels() == 2)
+		{
+			if (image.GetBitDepth() == 16)
+				return TextureFormat::RG32;
+			else if (image.GetBitDepth() == 8)
+				return TextureFormat::RG16;
+		}
+		else if (image.GetNumChannels() == 3)
+		{
+			return TextureFormat::RGB24;
+		}
+		else if (image.GetNumChannels() == 4)
+		{
+			return TextureFormat::RGBA32;
+		}
+
+		return TextureFormat::None;
+	}
+
 	Name TextureAssetImporter::ImportSourceAsset(const IO::Path& sourceAssetPath, const IO::Path& productAssetPath, bool linkSourceAsset)
 	{
 		IO::Path outPath = productAssetPath;
@@ -127,18 +157,23 @@ namespace CE::Editor
 			{
 			case CE::CMImageSourceFormat::PNG:
 				texture->source.sourceFormat = TextureSourceFormat::PNG;
+				texture->format = GetTextureFormatFromCMImage(image);
 				break;
 			case CE::CMImageSourceFormat::BC4:
 				texture->source.sourceFormat = TextureSourceFormat::BC4;
+				texture->format = TextureFormat::BC4;
 				break;
 			case CE::CMImageSourceFormat::BC6H:
 				texture->source.sourceFormat = TextureSourceFormat::BC6H;
+				texture->format = TextureFormat::BC6H;
 				break;
 			case CE::CMImageSourceFormat::BC7:
 				texture->source.sourceFormat = TextureSourceFormat::BC7;
+				texture->format = TextureFormat::BC7_RGBA;
 				break;
 			}
-			if (texture->source.sourceFormat == TextureSourceFormat::Unsupported)
+			if (texture->source.sourceFormat == TextureSourceFormat::Unsupported ||
+				texture->format == TextureFormat::None)
 			{
 				failed = true;
 				CE_LOG(Error, All, "Invalid output format");
@@ -146,39 +181,22 @@ namespace CE::Editor
 			}
 			memStream.Seek(0);
 			texture->source.rawData.LoadData(&memStream);
-			switch (outputFormat)
-			{
-			case CE::CMImageSourceFormat::PNG:
-				texture->source.sourceFormat = TextureSourceFormat::PNG;
-				break;
-			case CE::CMImageSourceFormat::BC4:
-				texture->source.sourceFormat = TextureSourceFormat::BC4;
-				break;
-			case CE::CMImageSourceFormat::BC6H:
-				texture->source.sourceFormat = TextureSourceFormat::BC6H;
-				break;
-			case CE::CMImageSourceFormat::BC7:
-				texture->source.sourceFormat = TextureSourceFormat::BC7;
-				break;
-			default:
-				texture->source.sourceFormat = TextureSourceFormat::Unsupported;
-				break;
-			}
 		}
 		else
 		{
+			texture->format = GetTextureFormatFromCMImage(image);
+			if (texture->format == TextureFormat::None)
+			{
+				failed = true;
+				CE_LOG(Error, All, "Invalid number of channels: {}", image.GetNumChannels());
+				return Name();
+			}
+
 			// Save as original (only PNG for now)
 			FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
 			texture->source.rawData.LoadData(&fileData);
 			texture->source.sourceFormat = sourceFormat;
 		}
-		
-		if (image.GetNumChannels() == 1)
-			texture->format = TextureFormat::RFloat;
-		else if (image.GetNumChannels() == 3)
-			texture->format = TextureFormat::RGBA32;
-		else
-			texture->format = TextureFormat::RGBA32;
 
 		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String));
 		if (sourceAssetPathField != nullptr)
