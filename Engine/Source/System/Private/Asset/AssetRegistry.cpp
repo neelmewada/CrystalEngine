@@ -165,7 +165,7 @@ namespace CE
 
 	void AssetRegistry::HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName)
 	{
-		LockGuard<Mutex> guard{ mutex };
+		mutex.Lock();
 
 		// Watch for new/modified source assets
 		IO::Path relative = IO::Path::GetRelative(directory, gProjectPath / "Game/Assets").GetString().Replace({ '\\' }, '/');
@@ -189,7 +189,7 @@ namespace CE
             if (length > 0 && (fileAction == IO::FileAction::Modified || fileAction == IO::FileAction::Add))
             {
 				if (sourceChanges.IsEmpty() || 
-					sourceChanges.Top().fileAction != IO::FileAction::Modified || 
+					//sourceChanges.Top().fileAction != IO::FileAction::Modified || 
 					sourceChanges.Top().currentPath != filePath)
 				{
 					SourceAssetChange change{};
@@ -219,8 +219,12 @@ namespace CE
             }
 		}
 
+		CE_LOG(Info, All, "{} | {} | {} | {:#X}", fileAction, directory, fileName, length);
+
+		mutex.Unlock();
+
 		// Bug fix: Add delay to prevent skipping file Modified calls
-		Thread::SleepFor(5);
+		Thread::SleepFor(1);
 	}
 
 } // namespace CE

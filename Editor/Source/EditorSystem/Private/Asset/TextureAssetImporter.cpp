@@ -112,43 +112,66 @@ namespace CE::Editor
 		texture->type = textureType;
 		texture->filter = TextureFilter::Linear;
 
-		//FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
-		//texture->source.rawData.LoadData(&fileData);
-
 		// Store in KTX format
 		MemoryStream memStream = MemoryStream(1024);
 		memStream.SetBinaryMode(true);
 		memStream.SetAutoResizeIncrement(512);
 
-		CMImageSourceFormat encodeToFormat = CMImageSourceFormat::Undefined;
-		TextureSourceFormat outputSourceFormat = TextureSourceFormat::Unsupported;
-
-		if (image.GetFormat() == CMImageFormat::RGBA)
-		{
-			encodeToFormat = CMImageSourceFormat::BC7;
-			outputSourceFormat = TextureSourceFormat::BC7;
-		}
-		else if (image.GetFormat() == CMImageFormat::RGB)
-		{
-			encodeToFormat = CMImageSourceFormat::BC7;
-			outputSourceFormat = TextureSourceFormat::BC7;
-		}
-		else if (image.GetFormat() == CMImageFormat::R)
-		{
-			encodeToFormat = CMImageSourceFormat::BC4;
-			outputSourceFormat = TextureSourceFormat::BC4;
-		}
-
 		// Encode image
-		if (!CMImage::Encode(image, encodeToFormat, &memStream))
+		CMImageSourceFormat outputFormat = CMImageSourceFormat::Undefined;
+		if (CMImage::EncodeToBCn(image, &memStream, outputFormat))
 		{
-			failed = true;
-			return Name();
+			texture->source.sourceFormat = TextureSourceFormat::Unsupported;
+			// BC4 or BC7 encode success
+			switch (outputFormat)
+			{
+			case CE::CMImageSourceFormat::PNG:
+				texture->source.sourceFormat = TextureSourceFormat::PNG;
+				break;
+			case CE::CMImageSourceFormat::BC4:
+				texture->source.sourceFormat = TextureSourceFormat::BC4;
+				break;
+			case CE::CMImageSourceFormat::BC6H:
+				texture->source.sourceFormat = TextureSourceFormat::BC6H;
+				break;
+			case CE::CMImageSourceFormat::BC7:
+				texture->source.sourceFormat = TextureSourceFormat::BC7;
+				break;
+			}
+			if (texture->source.sourceFormat == TextureSourceFormat::Unsupported)
+			{
+				failed = true;
+				CE_LOG(Error, All, "Invalid output format");
+				return Name();
+			}
+			memStream.Seek(0);
+			texture->source.rawData.LoadData(&memStream);
+			switch (outputFormat)
+			{
+			case CE::CMImageSourceFormat::PNG:
+				texture->source.sourceFormat = TextureSourceFormat::PNG;
+				break;
+			case CE::CMImageSourceFormat::BC4:
+				texture->source.sourceFormat = TextureSourceFormat::BC4;
+				break;
+			case CE::CMImageSourceFormat::BC6H:
+				texture->source.sourceFormat = TextureSourceFormat::BC6H;
+				break;
+			case CE::CMImageSourceFormat::BC7:
+				texture->source.sourceFormat = TextureSourceFormat::BC7;
+				break;
+			default:
+				texture->source.sourceFormat = TextureSourceFormat::Unsupported;
+				break;
+			}
 		}
-
-		memStream.Seek(0);
-		texture->source.rawData.LoadData(&memStream);
-		texture->source.sourceFormat = outputSourceFormat;
+		else
+		{
+			// Save as original (only PNG for now)
+			FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
+			texture->source.rawData.LoadData(&fileData);
+			texture->source.sourceFormat = sourceFormat;
+		}
 		
 		if (image.GetNumChannels() == 1)
 			texture->format = TextureFormat::RFloat;

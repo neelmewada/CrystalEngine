@@ -54,6 +54,7 @@ namespace CE
 		PNG,
 		JPG,
 		BC4,
+		BC6H,
 		BC7,
 	};
 	ENUM_CLASS_FLAGS(TextureSourceFormat);

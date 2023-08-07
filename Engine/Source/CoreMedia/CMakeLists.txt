@@ -26,7 +26,11 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::stb
+            ThirdParty::dxcompiler
             ThirdParty::compressonator
+            $<${PAL_PLATFORM_IS_WINDOWS}:d3d11.lib>
+            $<${PAL_PLATFORM_IS_WINDOWS}:d3d12.lib>
+            $<${PAL_PLATFORM_IS_WINDOWS}:dxgi.lib>
         PUBLIC
             CE::Core
     RUNTIME_DEPENDENCIES

@@ -20,6 +20,18 @@ set(${LIB_NAME}_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/${PACKAGE_FULL_NAME})
 set(${LIB_NAME}_INCLUDE_DIR ${${LIB_NAME}_BASE_DIR}/${PACKAGE_NAME}/cmp_compressonatorlib)
 set(${LIB_NAME}_LIBS_DIR ${${LIB_NAME}_BASE_DIR}/${PACKAGE_NAME})
 
+macro(windows_add_cmp_lib NAME)
+    add_library(${NAME} STATIC IMPORTED)
+    set_target_properties(${NAME}
+        PROPERTIES
+            IMPORTED_LOCATION_DEBUG       ${${LIB_NAME}_LIBS_DIR}/Debug/${NAME}.lib
+            IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_LIBS_DIR}/Development/${NAME}.lib
+            IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_LIBS_DIR}/Development/${NAME}.lib
+            IMPORTED_LOCATION_RELEASE     ${${LIB_NAME}_LIBS_DIR}/Release/${NAME}.lib
+    )
+endmacro()
+
+
 if (${PAL_PLATFORM_NAME} STREQUAL "Mac" OR ${PAL_PLATFORM_NAME} STREQUAL "Linux")
     set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/libCMP_Compressonator.a)
     set(${LIB_NAME}_STATIC_LIBRARY_DEV     ${${LIB_NAME}_LIBS_DIR}/Development/libCMP_Compressonator.a)
@@ -31,14 +43,21 @@ if (${PAL_PLATFORM_NAME} STREQUAL "Mac" OR ${PAL_PLATFORM_NAME} STREQUAL "Linux"
     )
 
 elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
-    add_library(CMP_Compressonator STATIC IMPORTED)
-    set_target_properties(CMP_Compressonator
-        PROPERTIES
-            IMPORTED_LOCATION_DEBUG       ${${LIB_NAME}_LIBS_DIR}/Debug/CMP_Compressonator.lib
-            IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_LIBS_DIR}/Development/CMP_Compressonator.lib
-            IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_LIBS_DIR}/Development/CMP_Compressonator.lib
-            IMPORTED_LOCATION_RELEASE     ${${LIB_NAME}_LIBS_DIR}/Release/CMP_Compressonator.lib
-    )
+    windows_add_cmp_lib(CMP_Compressonator)
+    windows_add_cmp_lib(CMP_Core_AVX)
+    windows_add_cmp_lib(CMP_Core_AVX512)
+    windows_add_cmp_lib(CMP_Core_SSE)
+    windows_add_cmp_lib(CMP_Core)
+    windows_add_cmp_lib(CMP_Common)
+    windows_add_cmp_lib(CMP_Framework)
+    windows_add_cmp_lib(CMP_GpuDecode)
+    windows_add_cmp_lib(GPUDecode_DirectX)
+    windows_add_cmp_lib(GPUDecode_Vulkan)
+    windows_add_cmp_lib(Image_BRLG)
+    windows_add_cmp_lib(EncodeWith_GPU)
+    windows_add_cmp_lib(brotlig)
+    windows_add_cmp_lib(brotli)
+    set(GPU_DECODE_LIBS GPUDecode_DirectX GPUDecode_Vulkan)
 
 else()
     error("${PACKAGE_NAME} build not found for platform: ${PAL_PLATFORM_NAME}")
@@ -51,6 +70,18 @@ add_library(${TARGET_WITH_NAMESPACE} INTERFACE IMPORTED)
 target_link_libraries(${TARGET_WITH_NAMESPACE} 
     INTERFACE
         CMP_Compressonator
+        CMP_Core_AVX
+        CMP_Core_AVX512
+        CMP_Core_SSE
+        CMP_Core
+        CMP_Framework
+        CMP_GpuDecode
+        CMP_Common
+        ${GPU_DECODE_LIBS}
+        Image_BRLG
+        EncodeWith_GPU
+        brotlig
+        brotli
 )
 
 target_include_directories(${TARGET_WITH_NAMESPACE}

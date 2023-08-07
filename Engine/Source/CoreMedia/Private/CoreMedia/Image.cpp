@@ -1,9 +1,10 @@
 
-#include "CoreMedia/Image.h"
+#include "CoreMedia.h"
 
 #include "lodepng.h"
 #include "lodepng_util.h"
 
+#define CMP_STATIC
 #include "compressonator.h"
 
 namespace CE
@@ -273,19 +274,6 @@ namespace CE
 		return image;
     }
 
-	bool CMImage::Encode(const CMImage& source, CMImageSourceFormat toSourceFormat, Stream* outStream)
-	{
-		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
-			return false;
-
-		if (toSourceFormat == CMImageSourceFormat::BC7)
-		{
-			return EncodeToBC7(source, outStream);
-		}
-
-		return false;
-	}
-
 	static CMP_FORMAT CMImageFormatToSourceCMPFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
 	{
 		switch (format)
@@ -313,6 +301,8 @@ namespace CE
 		case CE::CMImageFormat::RGBA:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RGBA_8888;
+			else if (bitDepth == 16)
+				return CMP_FORMAT_RGBA_16;
 			break;
 		default:
 			break;
@@ -321,7 +311,7 @@ namespace CE
 		return CMP_FORMAT_Unknown;
 	}
 
-	static CMP_FORMAT CMImageFormatToCompressedCMPFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
+	static CMP_FORMAT CMImageFormatToBCnFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
 	{
 		switch (format)
 		{
@@ -343,7 +333,21 @@ namespace CE
 		return CMP_FORMAT_Unknown;
 	}
 
-	bool CMImage::EncodeToBC7(const CMImage& source, Stream* outStream)
+	static CMImageSourceFormat CMPFormatToCMImageSourceFormat(CMP_FORMAT format)
+	{
+		switch (format)
+		{
+		case CMP_FORMAT_BC7:
+			return CMImageSourceFormat::BC7;
+		case CMP_FORMAT_BC4:
+			return CMImageSourceFormat::BC4;
+		case CMP_FORMAT_BC6H:
+			return CMImageSourceFormat::BC6H;
+		}
+		return CMImageSourceFormat::Undefined;
+	}
+
+	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, CMImageSourceFormat preferredFormat)
 	{
 		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
 			return false;
@@ -353,15 +357,42 @@ namespace CE
 		src.dwHeight = source.GetHeight();
 		src.dwSize = sizeof(CMP_Texture);
 		src.format = CMImageFormatToSourceCMPFormat(source.format, source.bitDepth, source.bitsPerPixel);
-		src.pData = source.data;
+		src.pData = (CMP_BYTE*)source.data;
 		src.dwDataSize = source.GetDataSize();
-		
+
 		if (src.format == CMP_FORMAT_Unknown)
 			return false;
 
+		CMP_Texture dest{};
+		dest.dwPitch = 0;
+		dest.dwWidth = source.GetWidth();
+		dest.dwHeight = source.GetHeight();
+		dest.dwSize = sizeof(CMP_Texture);
+		dest.format = CMImageFormatToBCnFormat(source.format, source.bitDepth, source.bitsPerPixel);
+		if (dest.format == CMP_FORMAT_Unknown)
+			return false;
 
+		outFormat = CMPFormatToCMImageSourceFormat(dest.format);
 
-		return false;
+		dest.dwDataSize = CMP_CalculateBufferSize(&dest);
+		dest.pData = (CMP_BYTE*)Memory::Malloc(dest.dwDataSize);
+
+		defer(
+			Memory::Free(dest.pData);
+		);
+
+		CMP_CompressOptions options = CMP_CompressOptions();
+		options.dwSize = sizeof(options);
+
+		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
+		if (status != CMP_OK)
+		{
+			return false;
+		}
+
+		outStream->Write(dest.pData, dest.dwDataSize);
+
+		return true;
 	}
 
     void CMImage::Free()

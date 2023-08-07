@@ -18,7 +18,9 @@ namespace CE
 	{
 		Undefined = 0,
 		PNG,
+		BC1,
 		BC4,
+		BC6H,
 		BC7,
 	};
 
@@ -55,13 +57,16 @@ namespace CE
         static CMImageInfo GetImageInfoFromFile(const IO::Path& filePath);
         static CMImageInfo GetImageInfoFromMemory(unsigned char* buffer, int bufferLength);
 
+		// Only supports PNG for now
         static CMImage LoadFromFile(IO::Path filePath);
+
+		// Only supports PNG for now
         static CMImage LoadFromMemory(unsigned char* buffer, int bufferLength);
 
 		// - Encode API -
 
-		static bool Encode(const CMImage& source, CMImageSourceFormat toSourceFormat, Stream* outStream);
-		static bool EncodeToBC7(const CMImage& source, Stream* outStream);
+		// Encodes raw image data to BCn format (BC7, BC1, etc)
+		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, CMImageSourceFormat preferredFormat = CMImageSourceFormat::Undefined);
 
         // - Public API -
 
