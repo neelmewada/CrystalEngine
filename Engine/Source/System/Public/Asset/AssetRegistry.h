@@ -38,7 +38,16 @@ namespace CE
 
 		// - Asset Registry API -
 
+		AssetData* GetPrimaryAssetByPath(const Name& path);
+		Array<AssetData*> GetAssetsByPath(const Name& path);
 		AssetData* GetAssetBySourcePath(const Name& sourcePath);
+
+		Array<AssetData*> GetPrimaryAssetsInSubPath(const Name& parentPath);
+
+		Array<String> GetSubDirectoriesAtPath(const Name& path);
+		PathTreeNode* GetDirectoryNode(const Name& path);
+
+
 
 	protected:
 
@@ -77,9 +86,12 @@ namespace CE
 
 		Array<AssetData*> allAssetDatas{};
 
+		HashMap<Name, AssetData*> cachedPrimaryAssetByPath{};
 		HashMap<Name, Array<AssetData*>> cachedAssetsByPath{};
 		HashMap<Name, AssetData*> cachedAssetBySourcePath{};
 
+		/// List of primary assets in the sub-path of a path
+		HashMap<Name, Array<AssetData*>> cachedPrimaryAssetByParentPath{};
 		
 	};
     

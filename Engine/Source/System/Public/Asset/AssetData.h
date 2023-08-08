@@ -11,7 +11,7 @@ namespace CE
 
 		// - Fields -
 
-		// Path to the package that contains this asset. Ex: /Game/Textures/DoorTexture
+		// Path to the package that contains this asset. Ex: /Game/Assets/Textures/DoorTexture
 		Name packageName{};
 
 		// Path of the primary asset within the package. Ex: TextureMap

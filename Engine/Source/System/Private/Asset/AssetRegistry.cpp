@@ -29,11 +29,47 @@ namespace CE
 		return AssetManager::GetRegistry();
 	}
 
+	AssetData* AssetRegistry::GetPrimaryAssetByPath(const Name& path)
+	{
+		return cachedPrimaryAssetByPath[path];
+	}
+
+	Array<AssetData*> AssetRegistry::GetAssetsByPath(const Name& path)
+	{
+		return cachedAssetsByPath[path];
+	}
+
 	AssetData* AssetRegistry::GetAssetBySourcePath(const Name& sourcePath)
 	{
 		if (cachedAssetBySourcePath.KeyExists(sourcePath))
 			return cachedAssetBySourcePath[sourcePath];
 		return nullptr;
+	}
+
+	Array<AssetData*> AssetRegistry::GetPrimaryAssetsInSubPath(const Name& parentPath)
+	{
+		return cachedPrimaryAssetByParentPath[parentPath];
+	}
+
+	Array<String> AssetRegistry::GetSubDirectoriesAtPath(const Name& path)
+	{
+		Array<String> result{};
+
+		auto directoryNode = directoryTree.GetNode(path);
+		if (directoryNode == nullptr)
+			return result;
+
+		for (const auto subDirectory : directoryNode->children)
+		{
+			result.Add(subDirectory->name.GetString());
+		}
+
+		return result;
+	}
+
+	PathTreeNode* AssetRegistry::GetDirectoryNode(const Name& path)
+	{
+		return directoryTree.GetNode(path);
 	}
 
 	void AssetRegistry::OnAssetImported(const Name& packageName, const Name& sourcePath)
@@ -44,12 +80,17 @@ namespace CE
 			return;
 		auto projectAssetsPath = gProjectPath / "Game/Assets";
 		String relativePathStr = "";
+		String parentRelativePathStr = "";
 
 		if (IO::Path::IsSubDirectory(packagePath, projectAssetsPath))
 		{
 			relativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePathStr.StartsWith("/"))
 				relativePathStr = "/" + relativePathStr;
+
+			parentRelativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			if (parentRelativePathStr.StartsWith("/"))
+				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
 
 		AssetData* assetData = new AssetData();
@@ -71,8 +112,12 @@ namespace CE
 		allAssetDatas.Add(assetData);
 		if (relativePathStr.NonEmpty())
 		{
+			directoryTree.AddPath(parentRelativePathStr);
+
 			cachedPathTree.AddPath(relativePathStr, assetData);
 			cachedAssetsByPath[relativePathStr].Add(assetData);
+
+			cachedPrimaryAssetByParentPath[parentRelativePathStr].Add(assetData);
 		}
 
 		if (!sourceAssetRelativePath.IsEmpty())
@@ -108,6 +153,11 @@ namespace CE
 					auto relativePathStr = relativePath.RemoveExtension().GetString().Replace({'\\'}, '/');
                     if (!relativePathStr.StartsWith("/"))
 						relativePathStr = "/" + relativePathStr;
+
+					String parentRelativePathStr = relativePath.GetParentPath().GetString().Replace({ '\\' }, '/');
+					if (parentRelativePathStr.StartsWith("/"))
+						parentRelativePathStr = "/" + parentRelativePathStr;
+
 					if (item.IsDirectory()) // Folder
 					{
                         if (!relativePathStr.IsEmpty())
@@ -146,6 +196,9 @@ namespace CE
 						allAssetDatas.Add(assetData);
 						cachedPathTree.AddPath(relativePathStr, assetData);
 						cachedAssetsByPath[relativePathStr].Add(assetData);
+						cachedPrimaryAssetByPath[relativePathStr] = assetData;
+
+						cachedPrimaryAssetByParentPath[parentRelativePathStr].Add(assetData);
 
 						if (!sourceAssetRelativePath.IsEmpty())
 						{

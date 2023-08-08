@@ -107,39 +107,7 @@ namespace CE
 	void Name::GetComponents(CE::Array<String>& components) const
 	{
 		components.Clear();
-
-		int i = 0;
-		int length = value.GetLength();
-
-		while (i < length)
-		{
-			if (i < length - 1 && value[i] == ':' && value[i + 1] == ':')
-			{
-				i += 2;
-				continue;
-			}
-			else
-			{
-				int startIdx = i;
-				int len = 0;
-
-				while (i < length)
-				{
-					i++;
-					len++;
-
-					if (i < length - 1 && value[i] == ':' && value[i + 1] == ':')
-					{
-						i++;
-						break;
-					}
-				}
-
-				components.Add(value.GetSubstringView(startIdx, len));
-			}
-
-			i++;
-		}
+		value.Split({ "/", "::" }, components);
 	}
 
 	String Name::GetLastComponent() const
@@ -148,38 +116,13 @@ namespace CE
 		int i = 0;
 		int length = value.GetLength();
 
-		while (i < length)
-		{
-			if (i < length - 1 && value[i] == ':' && value[i + 1] == ':')
-			{
-				i += 2;
-				continue;
-			}
-			else if (value[i] == ':')
-			{
-				i++;
-				continue;
-			}
-			else
-			{
-				int startIdx = i;
-				int len = 0;
+		Array<String> split{};
+		value.Split({ "/", "::" }, split);
 
-				while (value[i] != ':' && i < length)
-				{
-					i++;
-					len++;
-				}
+		if (split.IsEmpty())
+			return "";
 
-				last = value.GetSubstringView(startIdx, len);
-
-				i = startIdx + len;
-			}
-
-			i++;
-		}
-
-		return last;
+		return split.GetLast();
 	}
 
 } // namespace CE

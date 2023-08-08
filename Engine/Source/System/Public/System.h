@@ -8,6 +8,7 @@
 #include "Engine/AssetManager.h"
 
 // Assets
+#include "Engine/TextureEnums.h"
 #include "Engine/Texture.h"
 #include "Engine/Texture2D.h"
 

@@ -152,14 +152,14 @@ namespace CE::Editor
 			return;
 
 		AssetRegistry* registry = AssetRegistry::Get();
-		PathTreeNode* contentDirectoryNode = nullptr;//registry->GetCachedPathTree().GetNode(selectedDirectoryPath);
+		PathTreeNode* contentDirectoryNode = registry->GetDirectoryNode(selectedDirectoryPath);
 		if (contentDirectoryNode == nullptr)
 			return;
 
 		int newCount = contentDirectoryNode->children.GetSize();
 		auto curCount = assetGridView->GetSubWidgetCount();
 
-		//if (curCount > newCount) // Remove extra widgets
+		// Remove all sub-widgets
 		{
 			for (int i = 0; i < curCount; i++)
 			{
@@ -171,9 +171,12 @@ namespace CE::Editor
 
 		assetItems.Clear();
 
+		// Add directories
 		for (int i = 0; i < newCount; i++)
 		{
 			PathTreeNode* node = contentDirectoryNode->children[i];
+			if (node->nodeType != PathTreeNodeType::Directory)
+				continue;
 
 			AssetItemWidget* widget = nullptr;
 			if (freeAssetItems.NonEmpty())
@@ -211,6 +214,47 @@ namespace CE::Editor
 
 			widget->SetLabel(nameWithoutExtension.GetString());
 			widget->SetPath(node->GetFullPath());
+
+			assetItems.Add(widget);
+		}
+
+		// Add Assets
+		auto subAssets = registry->GetPrimaryAssetsInSubPath(selectedDirectoryPath);
+
+		for (int i = 0; i < subAssets.GetSize(); i++)
+		{
+			auto subAsset = subAssets[i];
+
+			AssetItemWidget* widget = nullptr;
+			if (freeAssetItems.NonEmpty())
+			{
+				widget = freeAssetItems.Top();
+				freeAssetItems.Pop();
+				assetGridView->AddSubWidget(widget);
+			}
+			else
+			{
+				widget = CreateWidget<AssetItemWidget>(assetGridView, "AssetItem");
+
+				Object::Bind(widget, MEMBER_FUNCTION(AssetItemWidget, OnButtonClicked), [=]
+					{
+						SetSelectedItem(widget);
+					});
+
+				Object::Bind(widget, MEMBER_FUNCTION(AssetItemWidget, OnItemDoubleClicked), [=]
+					{
+						if (widget->IsAssetItem())
+							HandleOpenAsset(widget);
+						else
+							SetCurrentAssetDirectory(widget->GetPath());
+					});
+			}
+
+			widget->SetAsAsset();
+
+			String name = subAsset->packageName.GetLastComponent();
+
+			widget->SetLabel(name);
 
 			assetItems.Add(widget);
 		}

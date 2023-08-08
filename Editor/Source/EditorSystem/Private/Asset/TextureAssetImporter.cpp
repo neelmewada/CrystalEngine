@@ -142,7 +142,7 @@ namespace CE::Editor
 		texture->type = textureType;
 		texture->filter = TextureFilter::Linear;
 
-		// Store in KTX format
+		// Store in BCn format if possible
 		MemoryStream memStream = MemoryStream(1024);
 		memStream.SetBinaryMode(true);
 		memStream.SetAutoResizeIncrement(512);
