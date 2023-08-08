@@ -24,17 +24,21 @@ namespace CE
         return VK_SAMPLER_ADDRESS_MODE_REPEAT;
     }
     
-    static VkFilter ToVkFilter(RHI::SamplerFilterMode filterMode)
-    {
-        switch (filterMode)
-        {
-            case RHI::SAMPLER_FILTER_LINEAR:
-                return VK_FILTER_LINEAR;
-            case RHI::SAMPLER_FILTER_NEAREST:
-                return VK_FILTER_NEAREST;
-        }
-        return VK_FILTER_LINEAR;
-    }
+	VkFilter VulkanSampler::ToVkFilter(RHI::FilterMode filterMode)
+	{
+		switch (filterMode)
+		{
+		case RHI::FILTER_MODE_LINEAR:
+			return VK_FILTER_LINEAR;
+		case RHI::FILTER_MODE_NEAREST:
+			return VK_FILTER_NEAREST;
+		case RHI::FILTER_MODE_CUBIC:
+			if (device->IsDeviceExtensionSupported(VK_EXT_FILTER_CUBIC_EXTENSION_NAME))
+				return VK_FILTER_CUBIC_EXT;
+			break;
+		}
+		return VK_FILTER_LINEAR;
+	}
 
     VulkanSampler::VulkanSampler(VulkanDevice* device, const RHI::SamplerDesc& samplerDesc)
         : device(device), borderColor(samplerDesc.borderColor)
@@ -47,8 +51,8 @@ namespace CE
         samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
         samplerCI.anisotropyEnable = samplerDesc.enableAnisotropy ? VK_TRUE : VK_FALSE;
         samplerCI.maxAnisotropy = samplerDesc.maxAnisotropy;
-        samplerCI.minFilter = ToVkFilter(samplerDesc.filterMode);
-        samplerCI.magFilter = ToVkFilter(samplerDesc.filterMode);
+        samplerCI.minFilter = ToVkFilter(samplerDesc.samplerFilterMode);
+        samplerCI.magFilter = ToVkFilter(samplerDesc.samplerFilterMode);
         
         if (vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &sampler) != VK_SUCCESS)
         {

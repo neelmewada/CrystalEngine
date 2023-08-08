@@ -21,7 +21,7 @@ namespace CE
         VulkanDevice(VkInstance instance, VulkanRHI* vulkanRhi);
         ~VulkanDevice();
 
-        CE_INLINE bool IsInitialized() const
+        INLINE bool IsInitialized() const
         {
             return isInitialized;
         }
@@ -52,15 +52,20 @@ namespace CE
 
         // - Getters -
 
-        CE_INLINE VkCommandPool GetGraphicsCommandPool() { return gfxCommandPool; }
+        INLINE VkCommandPool GetGraphicsCommandPool() { return gfxCommandPool; }
 
-        CE_INLINE VulkanQueue* GetGraphicsQueue() { return graphicsQueue; }
-        CE_INLINE VulkanQueue* GetPresentQueue() { return presentQueue; }
+        INLINE VulkanQueue* GetGraphicsQueue() { return graphicsQueue; }
+        INLINE VulkanQueue* GetPresentQueue() { return presentQueue; }
 
-        CE_INLINE VkDevice GetHandle() { return device; }
-        CE_INLINE VkPhysicalDevice GetPhysicalHandle() { return gpu; }
+        INLINE VkDevice GetHandle() { return device; }
+        INLINE VkPhysicalDevice GetPhysicalHandle() { return gpu; }
 
-        CE_INLINE const SurfaceSupportInfo& GetSurfaceSupportInfo() const { return surfaceSupport; }
+        INLINE const SurfaceSupportInfo& GetSurfaceSupportInfo() const { return surfaceSupport; }
+
+		INLINE bool IsDeviceExtensionSupported(const String& name) const
+		{
+			return supportedDeviceExtensions.Exists(name);
+		}
 
     protected:
 
@@ -77,6 +82,8 @@ namespace CE
         bool isInitialized = false;
         VkInstance instance = nullptr;
         VulkanRHI* vulkanRhi = nullptr;
+
+		Array<String> supportedDeviceExtensions{};
 
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};

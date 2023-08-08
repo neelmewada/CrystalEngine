@@ -18,6 +18,8 @@ namespace CE
         {
             return sampler;
         }
+
+		VkFilter ToVkFilter(RHI::FilterMode filterMode);
         
     private:
         

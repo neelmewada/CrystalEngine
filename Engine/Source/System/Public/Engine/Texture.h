@@ -54,6 +54,7 @@ namespace CE
 	{
 		Unsupported = 0,
 		PNG,
+		HDR, EXR,
 		JPG,
 		BC4,
 		BC6H,

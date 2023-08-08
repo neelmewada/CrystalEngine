@@ -2,9 +2,9 @@
 
 namespace CE
 {
-	enum BinaryBlobFlags : u32
+	enum BinaryBlobFlags : u64
 	{
-		BLOB_None = 0,
+		BLOB_None = 0
 	};
 	ENUM_CLASS_FLAGS(BinaryBlobFlags);
 
@@ -33,6 +33,16 @@ namespace CE
 		inline u8* GetDataPtr() const { return data; }
 		inline u64 GetDataSize() const { return dataSize; }
 
+		inline BinaryBlobFlags GetFlags() const { return flags; }
+		inline void SetFlags(BinaryBlobFlags value) { flags = value; }
+		inline void SetFlagEnabled(BinaryBlobFlags flag, bool enabled)
+		{
+			if (enabled)
+				EnumAddFlags(flags, flag);
+			else
+				EnumRemoveFlags(flags, flag);
+		}
+
 		friend inline Stream& operator<<(Stream& stream, BinaryBlob& blob)
 		{
 			blob.Serialize(&stream);
@@ -48,7 +58,8 @@ namespace CE
 	private:
 
 		b8 isAllocated = false;
-        
+		
+		BinaryBlobFlags flags = BLOB_None;
 
 		u8* data = nullptr;
 		u64 dataSize = 0;

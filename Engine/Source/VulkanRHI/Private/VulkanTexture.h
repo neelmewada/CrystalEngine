@@ -27,6 +27,16 @@ namespace CE
             return imageView;
         }
 
+		FORCE_INLINE VkImageLayout GetImageLayout() const
+		{
+			return vkImageLayout;
+		}
+
+		FORCE_INLINE VkImageAspectFlags GetAspectMask() const
+		{
+			return aspectMask;
+		}
+
         virtual u32 GetWidth() override;
         virtual u32 GetHeight() override;
         virtual u32 GetDepth() override;
@@ -35,7 +45,7 @@ namespace CE
 
         virtual void UploadData(const void* pixels, u64 dataSize) override;
 
-		bool ReadPixels(u8** outPixels, u32* outByteSize);
+		virtual void ReadData(u8** outPixels, u64* outDataSize) override;
 
     protected:
 
@@ -56,6 +66,7 @@ namespace CE
         u32 mipLevels = 1;
         RHI::TextureFormat format{};
         VkFormat vkFormat{};
+		VkImageLayout vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageAspectFlags aspectMask{};
     };
     

@@ -41,6 +41,10 @@ namespace CE::Editor
 			return TextureSourceFormat::PNG;
 		else if (sourceExtension.Contains("jpg") || sourceExtension.Contains("jpeg"))
 			return TextureSourceFormat::JPG;
+		else if (sourceExtension.Contains("hdr"))
+			return TextureSourceFormat::HDR;
+		else if (sourceExtension.Contains("exr"))
+			return TextureSourceFormat::EXR;
 		return TextureSourceFormat::Unsupported;
 	}
 

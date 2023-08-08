@@ -73,6 +73,10 @@ namespace CE
             Free();
             return true;
         }
+
+		u64 flagsValue = 0;
+		*stream >> flagsValue;
+		this->flags = (BinaryBlobFlags)flagsValue;
         
         Reserve((u64)size);
         
@@ -87,6 +91,8 @@ namespace CE
             return false;
         
         *stream << (s64)dataSize;
+
+		*stream << (u64)flags;
 
 		if (dataSize > 0)
 			stream->Write(data, dataSize);

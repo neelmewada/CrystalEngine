@@ -71,7 +71,6 @@ namespace CE
 
 	SSIZE_T Archive::EntryRead(void* buffer, SIZE_T bufferSize)
 	{
-		
 		return zip_entry_noallocread(handle, buffer, bufferSize);
 	}
 
@@ -101,6 +100,18 @@ namespace CE
 		handle = zip_open(path.GetCString(), ZIP_DEFAULT_COMPRESSION_LEVEL, (char)mode);
 	}
 
+	void Archive::Open(const void* stream, SIZE_T size, ArchiveMode mode)
+	{
+		if (IsOpen())
+			return;
+
+		this->mode = mode;
+
+		handle = zip_stream_open((const char*)stream, size, ZIP_DEFAULT_COMPRESSION_LEVEL, (char)mode);
+		this->stream = (char*)stream;
+		this->streamSize = size;
+	}
+
 	void Archive::Close()
 	{
 		if (!IsOpen())
@@ -110,8 +121,7 @@ namespace CE
 		{
 			if (handle != nullptr)
 				zip_stream_close(handle);
-
-			delete[] stream;
+			
 			stream = nullptr;
 			streamSize = 0;
 		}
@@ -120,7 +130,7 @@ namespace CE
 			if (handle != nullptr)
 				zip_close(handle);
 		}
-
+		
 		handle = nullptr;
 	}
 

@@ -18,6 +18,7 @@ namespace CE
 	{
 		Undefined = 0,
 		PNG,
+		HDR, EXR,
 		BC1,
 		BC4,
 		BC6H,

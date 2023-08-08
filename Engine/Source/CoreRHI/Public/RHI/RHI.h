@@ -78,6 +78,14 @@ namespace CE::RHI
         virtual void* AddImGuiTexture(Texture* texture, Sampler* sampler) = 0;
         virtual void RemoveImGuiTexture(void* imguiTexture) = 0;
 
+		// - Utilities -
+
+		virtual void Blit(Texture* source, Texture* destination, FilterMode filter) = 0;
+
+		// - Encoding/Decoding -
+		
+		
+
     };
 
     CORERHI_API extern DynamicRHI* gDynamicRHI;

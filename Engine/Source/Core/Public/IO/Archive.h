@@ -32,6 +32,7 @@ namespace CE
         // - Public API -
 
         void Open(IO::Path archivePath, ArchiveMode mode);
+		void Open(const void* stream, SIZE_T size, ArchiveMode mode);
         void Close();
 
         CE_INLINE ArchiveMode GetMode() { return mode; }

@@ -127,6 +127,31 @@ namespace CE
 		}
 	}
 
+	void VulkanBuffer::ReadData(u8** outData, u64* outDataSize)
+	{
+		if (outData == nullptr || outDataSize == nullptr)
+			return;
+
+		*outData = nullptr;
+		*outDataSize = 0;
+
+		if (allocMode == RHI::BufferAllocMode::Default || allocMode == RHI::BufferAllocMode::SharedMemory)
+		{
+			// Shared memory
+			*outDataSize = bufferSize;
+			*outData = (u8*)Memory::Malloc(bufferSize);
+			void* ptr = nullptr;
+			vkMapMemory(device->GetHandle(), bufferMemory, 0, bufferSize, 0, &ptr);
+			memcpy(*outData, ptr, bufferSize);
+			vkUnmapMemory(device->GetHandle(), bufferMemory);
+		}
+		else
+		{
+			// GPU Memory
+			ReadDataFromGPU(outData, outDataSize);
+		}
+	}
+
 	void VulkanBuffer::UploadDataToGPU(const RHI::BufferData& bufferData)
 	{
 		if (allocMode != RHI::BufferAllocMode::GpuMemory)
@@ -226,6 +251,20 @@ namespace CE
 
 		delete stagingBuffer;
 		stagingBuffer = nullptr;
+	}
+
+	void VulkanBuffer::ReadDataFromGPU(u8** outData, u64* outDataSize)
+	{
+		if (outData == nullptr || outDataSize == nullptr)
+			return;
+
+		*outData = nullptr;
+		*outDataSize = 0;
+
+		if (allocMode != RHI::BufferAllocMode::GpuMemory)
+			return;
+
+		// TODO
 	}
 
 } // namespace CE

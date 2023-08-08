@@ -22,8 +22,12 @@ namespace CE
 
         virtual void UploadData(const RHI::BufferData& bufferData) override;
 
+		virtual void ReadData(u8** outData, u64* outDataSize) override;
+
     private:
         void UploadDataToGPU(const RHI::BufferData& bufferData);
+
+		void ReadDataFromGPU(u8** outData, u64* outDataSize);
 
     private:
         Name name{};

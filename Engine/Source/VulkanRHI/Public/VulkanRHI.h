@@ -93,6 +93,10 @@ namespace CE
         virtual void* AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler) override;
         virtual void RemoveImGuiTexture(void* imguiTexture) override; 
 
+		// - Utilities -
+
+		virtual void Blit(RHI::Texture* source, RHI::Texture* destination, RHI::FilterMode filter) override;
+
     protected:
 
         bool ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport);

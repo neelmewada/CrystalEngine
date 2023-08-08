@@ -56,6 +56,7 @@ namespace CE
 		{ RHI::TextureFormat::B8G8R8_SRGB, VK_FORMAT_B8G8R8_SRGB, 3, 1 },
 
 		{ RHI::TextureFormat::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK, 4, 1 },
+		{ RHI::TextureFormat::BC4_UNORM, VK_FORMAT_BC4_UNORM_BLOCK, 1, 1 },
 	};
 
 	static HashMap<RHI::TextureFormat, VkFormat> textureFormatToVkFormatMap{};
@@ -109,6 +110,50 @@ namespace CE
 		return 0;
     }
 
+	void VulkanRHI::Blit(RHI::Texture* source, RHI::Texture* destination, RHI::FilterMode filter)
+	{
+		if (source == nullptr || destination == nullptr)
+			return;
+
+		VulkanTexture* src = (VulkanTexture*)source;
+		VulkanTexture* dst = (VulkanTexture*)destination;
+
+		VkFilter vkFilter = VK_FILTER_LINEAR;
+		switch (filter)
+		{
+		case CE::RHI::FILTER_MODE_NEAREST:
+			vkFilter = VK_FILTER_NEAREST;
+			break;
+		case CE::RHI::FILTER_MODE_CUBIC:
+			if (device->IsDeviceExtensionSupported(VK_EXT_FILTER_CUBIC_EXTENSION_NAME))
+				vkFilter = VK_FILTER_CUBIC_EXT;
+			break;
+		}
+
+		VkCommandBuffer cmdBuffer = device->BeginSingleUseCommandBuffer();
+
+		VkImageBlit region{};
+		region.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
+		region.srcOffsets[1] = VkOffset3D{ (int)src->GetWidth(), (int)src->GetHeight(), (int)src->GetDepth() };
+		region.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+		region.dstOffsets[1] = VkOffset3D{ (int)dst->GetWidth(), (int)dst->GetHeight(), (int)dst->GetDepth() };
+
+		region.srcSubresource.mipLevel = 0;
+		region.srcSubresource.layerCount = 1;
+		region.srcSubresource.aspectMask = src->GetAspectMask();
+		region.srcSubresource.baseArrayLayer = 0;
+
+		region.dstSubresource.mipLevel = 0;
+		region.dstSubresource.layerCount = 1;
+		region.dstSubresource.aspectMask = dst->GetAspectMask();
+		region.dstSubresource.baseArrayLayer = 0;
+		
+		vkCmdBlitImage(cmdBuffer, src->GetImage(), src->GetImageLayout(), dst->GetImage(), dst->GetImageLayout(), 1, &region, vkFilter);
+
+		device->EndSingleUseCommandBuffer(cmdBuffer);
+		device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
+	}
+
 
     VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc)
         : device(device)
@@ -146,12 +191,12 @@ namespace CE
 
         imageCI.tiling = desc.forceLinearLayout ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
         imageCI.format = RHITextureFormatToVkFormat(this->format);
-        imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
         this->vkFormat = imageCI.format;
         
-        if (EnumHasAnyFlags(desc.usageFlags, RHI::TextureUsageFlags::SampledImage))
+        if (EnumHasAnyFlags(desc.usageFlags, RHI::TextureUsageFlags::SampledImage) || desc.usageFlags == RHI::TextureUsageFlags::Default)
         {
             imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
             aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
@@ -236,6 +281,27 @@ namespace CE
             CE_LOG(Error, All, "Failed to create Vulkan Image View");
             return;
         }
+
+		// Transition image layout
+
+		switch (desc.usageFlags)
+		{
+		case RHI::TextureUsageFlags::SampledImage:
+		case RHI::TextureUsageFlags::Default:
+			vkImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			break;
+		case RHI::TextureUsageFlags::ColorAttachment:
+			vkImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+			break;
+		case RHI::TextureUsageFlags::DepthStencilAttachment:
+			vkImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+			break;
+		default:
+			break;
+		}
+
+		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
+			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, aspectMask);
     }
 
     VulkanTexture::~VulkanTexture()
@@ -308,22 +374,45 @@ namespace CE
 
         VulkanBuffer* stagingBuffer = new VulkanBuffer(device, stagingBufferDesc);
 
-        device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, aspectMask);
+        device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, aspectMask);
         CopyPixelsFromBuffer(stagingBuffer);
-        device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, aspectMask);
+        device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, vkImageLayout, aspectMask);
 
         delete stagingBuffer;
         stagingBuffer = nullptr;
     }
 
-	bool VulkanTexture::ReadPixels(u8** outPixels, u32* outByteSize)
+	void VulkanTexture::ReadData(u8** outPixels, u64* outDataSize)
 	{
-		if (outPixels == nullptr || outByteSize == nullptr)
-			return false;
+		if (outPixels == nullptr || outDataSize == nullptr)
+			return;
 
 		u32 bytesPerChannel = 0;
+		u32 numChannels = GetNumberOfChannelsForFormat(format, bytesPerChannel);
+		u64 totalSize = (u64)width * (u64)height * (u64)depth * bytesPerChannel * numChannels;
 
-		return false;
+		if (totalSize == 0)
+			return;
+
+		RHI::BufferDesc stagingBufferDesc{};
+		stagingBufferDesc.name = "Staging Texture Buffer";
+		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
+		stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+		stagingBufferDesc.bufferSize = totalSize;
+		stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
+		stagingBufferDesc.initialData = nullptr;
+
+		VulkanBuffer* stagingBuffer = new VulkanBuffer(device, stagingBufferDesc);
+
+		device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, aspectMask);
+		CopyPixelsToBuffer(stagingBuffer);
+		device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, vkImageLayout, aspectMask);
+
+		stagingBuffer->ReadData(outPixels, outDataSize);
+
+		delete stagingBuffer;
+		stagingBuffer = nullptr;
 	}
 
     void VulkanTexture::CopyPixelsFromBuffer(VulkanBuffer* srcBuffer)

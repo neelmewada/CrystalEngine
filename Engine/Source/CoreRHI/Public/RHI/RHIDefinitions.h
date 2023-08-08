@@ -232,19 +232,26 @@ namespace CE::RHI
         D32_SFLOAT_S8_UINT,
 		// Compressed formats
 		BC7_UNORM,
+		BC4_UNORM,
+		BC6H_UFLOAT,
     };
 
     enum class TextureUsageFlags
     {
+		Default,
         SampledImage = BIT(0),
         ColorAttachment = BIT(1),
         DepthStencilAttachment = BIT(2),
-        // For internal use only!
-        Staging = BIT(3),
-
-        Default = SampledImage,
     };
     ENUM_CLASS_FLAGS(TextureUsageFlags);
+
+	enum FilterMode
+	{
+		FILTER_MODE_LINEAR = 0,
+		FILTER_MODE_NEAREST = 1,
+		FILTER_MODE_CUBIC = 2
+	};
+	ENUM_CLASS_FLAGS(FilterMode);
 
     struct TextureDesc
     {
@@ -256,6 +263,7 @@ namespace CE::RHI
         u32 sampleCount = 1;
         TextureUsageFlags usageFlags = TextureUsageFlags::Default;
 
+		/// Force linear tiling rather than optimal tiling
         bool forceLinearLayout = false;
     };
 
@@ -279,7 +287,7 @@ namespace CE::RHI
         SamplerAddressMode addressModeU{};
         SamplerAddressMode addressModeV{};
         SamplerAddressMode addressModeW{};
-        SamplerFilterMode filterMode{};
+		FilterMode samplerFilterMode{};
         b8 enableAnisotropy = false;
         int maxAnisotropy = 16;
         Color borderColor{};

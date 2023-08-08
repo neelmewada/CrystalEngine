@@ -163,7 +163,7 @@ namespace CE::Widgets
 			samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 			samplerDesc.enableAnisotropy = true;
 			samplerDesc.maxAnisotropy = 8;
-			samplerDesc.filterMode = RHI::SAMPLER_FILTER_LINEAR;
+			samplerDesc.samplerFilterMode = RHI::FILTER_MODE_LINEAR;
 
 			imageSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 			if (imageSampler == nullptr)
