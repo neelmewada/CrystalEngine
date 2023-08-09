@@ -31,8 +31,9 @@ void EditorLoop::PreInit(int argc, char** argv)
 
 	options.add_options()
 		("h,help", "Print this help info and exit")
-		("p,project", "Path of project file to open in editor", cxxopts::value<std::string>()->default_value(""))
 		;
+
+	options.allow_unrecognised_options();
 
 	try
 	{
@@ -45,9 +46,22 @@ void EditorLoop::PreInit(int argc, char** argv)
 			return;
 		}
 
-		projectPath = result["p"].as<std::string>();
+		auto positionalArgs = result.unmatched();
+		bool foundProject = false;
 
-		if (!projectPath.Exists() || projectPath.GetExtension() != ProjectManager::Get().GetProjectFileExtension())
+		for (const auto& arg : positionalArgs)
+		{
+			IO::Path path = IO::Path(arg);
+
+			if (path.Exists() && path.GetExtension() == ProjectManager::Get().GetProjectFileExtension())
+			{
+				foundProject = true;
+				projectPath = path;
+				break;
+			}
+		}
+
+		if (!foundProject)
 		{
 			PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
 			exit(0);

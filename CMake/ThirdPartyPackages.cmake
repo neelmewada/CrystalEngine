@@ -10,7 +10,6 @@ find_package(efsw REQUIRED)
 find_package(zip REQUIRED)
 find_package(crcpp REQUIRED)
 find_package(stb REQUIRED)
-find_package(zlib REQUIRED)
 find_package(dxcompiler REQUIRED)
 find_package(compressonator REQUIRED)
 
