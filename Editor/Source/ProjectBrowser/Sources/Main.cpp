@@ -22,7 +22,7 @@ int main(int argc, const char** argv)
 
 	if (gOpenProjectPath.Exists() && gOpenProjectPath.GetExtension() == ".cproject")
 	{
-		String args = String::Format(R"(--project "{}")", gOpenProjectPath);
+		String args = String::Format(R"("{}")", gOpenProjectPath);
 
 		PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "EditorLauncher", args);
 	}
