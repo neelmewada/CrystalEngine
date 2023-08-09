@@ -1185,7 +1185,7 @@ namespace CE::Widgets
             if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
 			{
 				SetNeedsStyle();
-				SetNeedsLayout();
+				//SetNeedsLayout();
 			}
 			EnumAddFlags(stateFlags, CStateFlag::Pressed);
 			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
@@ -1195,7 +1195,7 @@ namespace CE::Widgets
             if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
 			{
 				SetNeedsStyle();
-				SetNeedsLayout();
+				//SetNeedsLayout();
 			}
 			EnumAddFlags(stateFlags, CStateFlag::Hovered);
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
@@ -1205,7 +1205,7 @@ namespace CE::Widgets
             if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed))
 			{
 				SetNeedsStyle();
-				SetNeedsLayout();
+				//SetNeedsLayout();
 			}
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed | CStateFlag::Hovered);
 		}

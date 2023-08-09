@@ -38,6 +38,12 @@ function(ce_add_test NAME)
 
     add_executable(${NAME} ${SOURCES})
 
+    if(${PAL_PLATFORM_IS_WINDOWS})
+        set_property(TARGET ${NAME} PROPERTY
+            MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,Development>:ProgramDatabase>"
+        )
+    endif()
+
     set_target_properties(${NAME} 
         PROPERTIES
             FOLDER "${ce_add_test_FOLDER}"

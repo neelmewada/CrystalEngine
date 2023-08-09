@@ -89,7 +89,7 @@ namespace CE
 				relativePathStr = "/" + relativePathStr;
 
 			parentRelativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
-			if (parentRelativePathStr.StartsWith("/"))
+			if (!parentRelativePathStr.StartsWith("/"))
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
 
@@ -126,6 +126,8 @@ namespace CE
 		}
 
 		load->RequestDestroy();
+
+		onAssetRegistryModified.Broadcast();
 	}
 
 	void AssetRegistry::CachePathTree()
@@ -155,7 +157,7 @@ namespace CE
 						relativePathStr = "/" + relativePathStr;
 
 					String parentRelativePathStr = relativePath.GetParentPath().GetString().Replace({ '\\' }, '/');
-					if (parentRelativePathStr.StartsWith("/"))
+					if (!parentRelativePathStr.StartsWith("/"))
 						parentRelativePathStr = "/" + parentRelativePathStr;
 
 					if (item.IsDirectory()) // Folder
@@ -271,8 +273,6 @@ namespace CE
                 sourceChanges.Add(change);
             }
 		}
-
-		CE_LOG(Info, All, "{} | {} | {} | {:#X}", fileAction, directory, fileName, length);
 
 		mutex.Unlock();
 

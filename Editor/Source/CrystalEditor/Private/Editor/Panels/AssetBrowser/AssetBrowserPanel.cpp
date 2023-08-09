@@ -23,7 +23,10 @@ namespace CE::Editor
 
 	AssetBrowserPanel::~AssetBrowserPanel()
 	{
-		
+		if (assetRegistryModified != 0 && AssetRegistry::Get() != nullptr)
+		{
+			AssetRegistry::Get()->onAssetRegistryModified.RemoveDelegateInstance(assetRegistryModified);
+		}
 	}
 
 	void AssetBrowserPanel::Construct()
@@ -117,6 +120,8 @@ namespace CE::Editor
 
 		// Select root game assets directory
 		gameContentDirectoryView->Select(folderModel->GetIndex(0, 0, {}));
+
+		assetRegistryModified = AssetRegistry::Get()->onAssetRegistryModified.AddDelegateInstance(MemberDelegate(&Self::UpdateContentView, this));
 	}
 
 	void AssetBrowserPanel::SetCurrentAssetDirectory(const Name& path)

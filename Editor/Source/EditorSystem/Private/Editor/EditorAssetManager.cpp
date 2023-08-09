@@ -55,12 +55,12 @@ namespace CE::Editor
 				nextChange.fileAction == IO::FileAction::Modified &&
 				nextChange.currentPath.GetFilename() == thisChange.currentPath.GetFilename())
 			{
-				CE_LOG(Info, All, "File moved: {}", nextChange.currentPath);
+				//CE_LOG(Info, All, "File moved: {}", nextChange.currentPath);
 			}
 			else if (thisChange.fileAction == IO::FileAction::Delete) // File deleted
 			{
 				bool isDirectory = thisChange.currentPath.GetExtension().IsEmpty();
-				CE_LOG(Info, All, "File deleted: {} | {}", thisChange.currentPath, isDirectory);
+				//CE_LOG(Info, All, "File deleted: {} | {}", thisChange.currentPath, isDirectory);
 			}
 			else if (thisChange.fileAction == IO::FileAction::Modified)
 			{
@@ -81,11 +81,11 @@ namespace CE::Editor
 ;				}
 
 				// New file added or current file modified
-				CE_LOG(Info, All, "File modified: {}", thisChange.currentPath);
+				//CE_LOG(Info, All, "File modified: {}", thisChange.currentPath);
 			}
 			else if (thisChange.fileAction == IO::FileAction::Moved)
 			{
-				CE_LOG(Info, All, "File moved: {}", thisChange.currentPath);
+				//CE_LOG(Info, All, "File moved: {}", thisChange.currentPath);
 			}
 		}
 
@@ -163,6 +163,8 @@ namespace CE::Editor
 				}
 			}
 		}
+
+		CE_LOG(Info, All, "Processing asset: {}", sourcePath);
 
 		Name outPackageName = importer->ImportSourceAsset(sourcePath, productAssetPath);
 

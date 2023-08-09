@@ -80,6 +80,8 @@ namespace CE::Editor
 		Name selectedDirectoryPath{};
 
 		Private::AssetBrowserPanelPrefs prefs{};
+
+		DelegateHandle assetRegistryModified = 0;
 	};
 
 } // namespace CE::Editor

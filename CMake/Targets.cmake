@@ -127,6 +127,12 @@ function(ce_add_target NAME TARGET_TYPE)
     
     ce_group_sources_by_folder(${NAME})
 
+    if(${PAL_PLATFORM_IS_WINDOWS})
+        set_property(TARGET ${NAME} PROPERTY
+            MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,Development>:ProgramDatabase>"
+        )
+    endif()
+
     target_compile_definitions(${NAME} 
         PRIVATE 
             PACKAGE_NAME="/Code/${NAME}"

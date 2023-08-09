@@ -61,6 +61,12 @@ namespace CE
 
 		void OnAssetImported(const Name& packageName, const Name& sourcePath = "");
 
+	public:
+
+		// Events
+
+		MultiCastDelegate<void(void)> onAssetRegistryModified{};
+
 	private:
 
 		PathTree directoryTree{};

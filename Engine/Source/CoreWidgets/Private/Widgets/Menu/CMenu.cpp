@@ -91,6 +91,7 @@ namespace CE::Widgets
 		if (tryPosition == Vec2())
 			tryPosition = GUI::GetMousePos();
 
+		SetNeedsLayout();
 		UpdateLayoutIfNeeded(); // Calculate layout
 
 		auto menuPos = tryPosition;
@@ -108,11 +109,6 @@ namespace CE::Widgets
 				contextWidgetSize.y = 0; // We only care about width of menu item
 			else
 				contextWidgetSize.x = 0;
-
-			//if (!showContext->GetClass()->IsSubclassOf<CMenuItem>())
-			//	contextWidgetSize.x = 0; // We only care about width of context if it's a menu item
-			//else
-			//	contextWidgetSize.y = 0; // We only care about width of menu item
 		}
 
 		menuPos.x += contextWidgetSize.x; // Try opening to the right side of parent menu
