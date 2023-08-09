@@ -120,7 +120,6 @@ function(ce_add_target NAME TARGET_TYPE)
             set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${NAME})
         endif()
         
-        
     else()
         message(FATAL_ERROR "Invalid TARGET_TYPE passed: ${TARGET_TYPE}")
     endif()

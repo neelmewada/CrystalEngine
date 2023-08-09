@@ -10,9 +10,9 @@ namespace CE
     class CORE_API Thread
     {
     public:
-        Thread() : thread({})
+        Thread()
         {
-            threadId = std::hash<std::thread::id>{}(thread.get_id());
+			threadId = 0;
         }
 
         Thread(auto func) : thread(func)
@@ -52,7 +52,7 @@ namespace CE
         
     private:
         ThreadId threadId{};
-        std::thread thread{};
+        std::thread thread;
     };
     
 } // namespace CE

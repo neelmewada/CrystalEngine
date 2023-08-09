@@ -56,6 +56,12 @@
 #include "Math/Color.h"
 #include "Math/Gradient.h"
 
+// Jobs
+#include "Jobs/Job.h"
+#include "Jobs/JobQueue.h"
+#include "Jobs/WorkerThread.h"
+#include "Jobs/JobSystem.h"
+
 // Config INI
 #include "Config/ConfigTypes.h"
 #include "Config/ConfigLayers.h"

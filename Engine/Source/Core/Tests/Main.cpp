@@ -2463,11 +2463,37 @@ TEST(Resource, Manipulation)
 
 #pragma region Job System
 
+class JobSleep : IJob
+{
+public:
+
+	JobSleep(SIZE_T sleepFor) : sleepFor(sleepFor)
+	{
+
+	}
+
+	void ExecuteJob(JobData& data) override
+	{
+		Thread::SleepFor(sleepFor);
+	}
+
+	void FinishJob(const JobData& data) override
+	{
+		
+	}
+
+	SIZE_T sleepFor = 0;
+};
+
 TEST(JobSystem, Basic)
 {
 	TEST_BEGIN;
 
+	{
+		JobSystem jobSystem{};
 
+		
+	}
 
 	TEST_END;
 }
