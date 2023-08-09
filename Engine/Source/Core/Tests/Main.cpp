@@ -2015,9 +2015,9 @@ TEST(Serialization, BinaryBlob)
 			EXPECT_EQ(size, 11);
 			for (int i = 0; i < 9; i++)
 			{
-				EXPECT_EQ(*(dataPtr + 8 + i), '1' + i);
+				EXPECT_EQ(*(dataPtr + 8 + 8 + i), '1' + i);
 			}
-			EXPECT_EQ(*(dataPtr + 8 + 9), '0');
+			EXPECT_EQ(*(dataPtr + 8 + 8 + 9), '0');
 
 			blob.Free();
 		}
@@ -2455,3 +2455,22 @@ TEST(Resource, Manipulation)
 }
 
 #pragma endregion
+
+
+/**********************************************
+*  Job System
+*/
+
+#pragma region Job System
+
+TEST(JobSystem, Basic)
+{
+	TEST_BEGIN;
+
+
+
+	TEST_END;
+}
+
+#pragma endregion
+
