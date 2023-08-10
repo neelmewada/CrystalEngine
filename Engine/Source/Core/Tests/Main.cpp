@@ -2512,5 +2512,38 @@ TEST(JobSystem, Basic)
 	TEST_END;
 }
 
+TEST(JobSystem, Dependency)
+{
+	TEST_BEGIN;
+
+	auto prev = clock();
+	int numThreads = 0;
+
+	{
+		JobManager manager{ "Test" };
+		JobContext context{ &manager };
+		JobContext::SetGlobalContext(&context);
+
+		JobSleep* job0 = new JobSleep(1000);
+		JobSleep* job1 = new JobSleep(1000);
+		JobSleep* job2 = new JobSleep(500);
+		job2->SetDependent(job1);
+		job1->SetDependent(job0);
+		job0->Start();
+		job1->Start();
+		job2->Start();
+
+		manager.DeactivateWorkersAndWait();
+
+		JobContext::SetGlobalContext(nullptr);
+	}
+
+	auto now = clock();
+	f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+	
+
+	TEST_END;
+}
+
 #pragma endregion
 

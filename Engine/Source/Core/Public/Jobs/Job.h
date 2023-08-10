@@ -32,7 +32,9 @@ namespace CE
 		virtual void Finish() {}
 
 		u32 GetDependentCount();
+		// Increment the number of jobs this job is waiting on before it's execution
 		void IncrementDependentCount();
+
 		void DecrementDependentCount();
 
 		void IncrementDependentCountAndSetChildFlag();
@@ -57,7 +59,7 @@ namespace CE
 
 		JobContext* volatile context = nullptr;
 
-		// Number of jobs we are waiting on
+		// Number of jobs we are currently waiting on
 		Atomic<u32> dependentCountAndFlags = 0;
 
 		// Job which is dependent on us, and and will be notified once we are finished
