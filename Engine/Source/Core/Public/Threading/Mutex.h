@@ -1,6 +1,8 @@
 #pragma once
 
 #include <mutex>
+#include <semaphore>
+#include <chrono>
 
 namespace CE
 {
@@ -43,5 +45,12 @@ namespace CE
     private:
         Mutex& mutex;
     };
+
+	template<typename T>
+	using Atomic = std::atomic<T>;
+
+	using BinarySemaphore = std::binary_semaphore;
+
+	using CountingSemaphore = std::counting_semaphore<>;
 
 } // namespace CE

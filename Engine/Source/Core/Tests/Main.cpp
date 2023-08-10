@@ -2463,37 +2463,49 @@ TEST(Resource, Manipulation)
 
 #pragma region Job System
 
-class JobSleep : IJob
+class JobSleep : public Job
 {
 public:
 
-	JobSleep(SIZE_T sleepFor) : sleepFor(sleepFor)
+	JobSleep(SIZE_T sleepFor) : millis(sleepFor)
 	{
 
 	}
 
-	void ExecuteJob(JobData& data) override
+	void Process() override
 	{
-		Thread::SleepFor(sleepFor);
+		Thread::SleepFor(millis);
 	}
 
-	void FinishJob(const JobData& data) override
-	{
-		
-	}
-
-	SIZE_T sleepFor = 0;
+	SIZE_T millis = 0;
 };
 
 TEST(JobSystem, Basic)
 {
 	TEST_BEGIN;
 
-	{
-		JobSystem jobSystem{};
+	auto prev = clock();
 
+	{
+		JobManager manager{ "Test", 2 };
+		JobContext context{ &manager };
+		JobContext::SetGlobalContext(&context);
+
+		int numThreads = manager.GetNumThreads();
 		
+		for (int i = 0; i < numThreads; i++)
+		{
+			JobSleep* job = new JobSleep(3000);
+			job->Start();
+		}
+
+		manager.DeactivateWorkersAndWait();
+
+		JobContext::SetGlobalContext(nullptr);
 	}
+
+	auto now = clock();
+	f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
 
 	TEST_END;
 }

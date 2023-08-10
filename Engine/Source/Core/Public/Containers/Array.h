@@ -101,6 +101,11 @@ namespace CE
             Impl.push_back(item);
         }
 
+		CE_INLINE void InsertAt(int index, const ElementType& item)
+		{
+			Impl.insert(Impl.begin() + index, item);
+		}
+
         s32 IndexOf(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)
@@ -442,8 +447,13 @@ namespace CE
 
         CE_INLINE void Add(const ElementType& item)
         {
-            Super::Impl.push_back(item);
+			Super::Add(item);
         }
+
+		CE_INLINE void InsertAt(SIZE_T index, const ElementType& item)
+		{
+			Super::InsertAt(index, item);
+		}
 
         void Push(const ElementType& item)
         {

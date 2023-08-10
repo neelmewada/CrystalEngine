@@ -2,6 +2,8 @@
 
 #include <thread>
 
+#define CE_THREAD_LOCAL thread_local
+
 namespace CE
 {
 
@@ -49,6 +51,11 @@ namespace CE
         {
             thread.detach();
         }
+
+		static unsigned int GetHardwareConcurrency()
+		{
+			return std::thread::hardware_concurrency();
+		}
         
     private:
         ThreadId threadId{};
