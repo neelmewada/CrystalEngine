@@ -21,6 +21,11 @@ namespace CE
         void unlock() { mut.unlock(); }
         bool try_lock() { return mut.try_lock(); }
 
+		inline operator std::mutex&()
+		{
+			return mut;
+		}
+
     private:
         std::mutex mut{};
     };

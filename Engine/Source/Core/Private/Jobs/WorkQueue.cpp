@@ -9,42 +9,48 @@ namespace CE
 
 	Job* WorkQueue::TrySteal()
 	{
-		LockGuard<Mutex> guard{ mutex };
 
-		Job* job = nullptr;
-
-		if (queue.NonEmpty())
+		if (mutex.try_lock())
 		{
-			job = queue[0];
-			queue.RemoveAt(0);
+			Job* job = nullptr;
+			if (!queue.empty())
+			{
+				job = queue.front();
+				queue.pop_front();
+			}
+			mutex.unlock();
+			return job;
 		}
 
-		return job;
+		return nullptr;
 	}
 
 	void WorkQueue::GlobalInsert(Job* job)
 	{
-		LockGuard<Mutex> guard{ mutex };
+		std::lock_guard<std::shared_mutex> guard{ mutex };
 
 		if (job != nullptr)
 		{
-			//queue.InsertAt(0, job);
-			queue.Add(job);
+			queue.push_back(job);
 		}
 	}
 
 	Job* WorkQueue::LocalPop()
 	{
-		if (queue.IsEmpty())
+		std::lock_guard<std::shared_mutex> guard{ mutex };
+
+		if (queue.empty())
 			return nullptr;
-		auto result = queue.Top();
-		queue.Pop();
+		auto result = queue.front();
+		queue.pop_front();
 		return result;
 	}
 
 	void WorkQueue::LocalPush(Job* job)
 	{
-		queue.Push(job);
+		std::lock_guard<std::shared_mutex> guard{ mutex };
+
+		queue.push_front(job);
 	}
 
 } // namespace CE

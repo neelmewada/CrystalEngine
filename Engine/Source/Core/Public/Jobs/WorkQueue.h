@@ -1,5 +1,8 @@
 #pragma once
 
+#include <deque>
+#include <shared_mutex>
+
 namespace CE
 {
 	class Job;
@@ -15,7 +18,7 @@ namespace CE
 
 		inline bool IsEmpty() const
 		{
-			return queue.IsEmpty();
+			return queue.empty();
 		}
 
 	private:
@@ -27,9 +30,9 @@ namespace CE
 		Job* LocalPop();
 		void LocalPush(Job* job);
 
-		Mutex mutex{};
+		std::shared_mutex mutex{};
 
-		Array<Job*> queue{};
+		std::deque<Job*> queue{};
 	};
     
 } // namespace CE
