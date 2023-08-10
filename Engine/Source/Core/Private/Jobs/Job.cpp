@@ -21,7 +21,7 @@ namespace CE
 		}
 
 		SetDependentCountAndFlags(countAndFlags);
-		SetDependent(nullptr);
+		StoreDependent(nullptr);
 	}
 
 	Job::~Job()

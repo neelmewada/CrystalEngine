@@ -2496,7 +2496,7 @@ TEST(JobSystem, Basic)
 		
 		for (int i = 0; i < numThreads; i++)
 		{
-			JobSleep* job = new JobSleep(1000);
+			JobSleep* job = new JobSleep(500);
 			job->Start();
 		}
 
@@ -2507,7 +2507,7 @@ TEST(JobSystem, Basic)
 
 	auto now = clock();
 	f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
-	EXPECT_LE(deltaTime, 2);
+	EXPECT_LE(deltaTime, 1);
 
 	TEST_END;
 }

@@ -35,7 +35,7 @@ namespace CE
 	int JobManager::FixNumThreads(int numThreads)
 	{
 		if (numThreads == 0)
-			numThreads = Thread::GetHardwareConcurrency();
+			numThreads = Thread::GetHardwareConcurrency() - 1;
 		if (numThreads < 2)
 			numThreads = 2;
 		if (numThreads > 64)
@@ -143,24 +143,12 @@ namespace CE
 					continue;
 				}
 
+				// Try stealing from another thread's queue
 				job = worker->threadLocal.load()->queue.TrySteal();
 
 				if (job == nullptr) // Could not steal job
 				{
 					// Yield
-					continue;
-				}
-
-				if (job != nullptr)
-				{
-					if (threadInfo->isAvailable)
-						threadInfo->isAvailable = false;
-
-					Process(job);
-
-					if (!threadInfo->isAvailable)
-						threadInfo->isAvailable = true;
-
 					continue;
 				}
 			}

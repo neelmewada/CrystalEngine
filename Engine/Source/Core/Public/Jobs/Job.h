@@ -21,9 +21,11 @@ namespace CE
 
 		Job* GetDependent();
 
-		/// Sets the given job dependent on `this` job
+		/// Sets the dependent job. The dependent job won't be allowed to run until `this` job has finished executing.
+		/// Both jobs should be in un-started state when calling this function.
 		void SetDependent(Job* dependent);
 
+		/// Override this function to implement the job
 		virtual void Process() = 0;
 
 		/// Called when the job is finished
