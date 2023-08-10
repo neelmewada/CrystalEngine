@@ -22,13 +22,20 @@ namespace CE
 
 	void JobManager::WorkThread::Deactivate()
 	{
-		isActive = false;
+		deactivate.store(true, std::memory_order_release);
+	}
+
+	void JobManager::WorkThread::DeactivateAndWait()
+	{
+		Deactivate();
+		if (thread.IsJoinable())
+			thread.Join();
 	}
 
 	int JobManager::FixNumThreads(int numThreads)
 	{
 		if (numThreads == 0)
-			numThreads = Thread::GetHardwareConcurrency();
+			numThreads = Thread::GetHardwareConcurrency() - 1;
 		if (numThreads < 2)
 			numThreads = 2;
 		if (numThreads > 64)
@@ -55,6 +62,11 @@ namespace CE
 				{
 					this->ProcessJobsWorker(worker);
 				});
+
+			while (worker->threadLocal == nullptr)
+			{
+				// Wait till thread is initialized
+			}
 			
 			workerThreads.Add(worker);
 		}
@@ -88,6 +100,10 @@ namespace CE
 		
 		while (threadInfo->isActive)
 		{
+			// Deactivate after current job if required
+			if (threadInfo->deactivate.load(std::memory_order_acquire))
+				threadInfo->isActive = false;
+
 			Job* job = threadInfo->threadLocal.load()->queue.LocalPop();
 
 			if (job == nullptr && numWorkerThreads > 1)

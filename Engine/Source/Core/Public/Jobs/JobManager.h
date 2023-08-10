@@ -25,12 +25,7 @@ namespace CE
 			void Deactivate();
 
 			/// Deactivates the worker thread and waits for it to finish
-			inline void DeactivateAndWait()
-			{
-				Deactivate();
-				if (thread.IsJoinable())
-					thread.Join();
-			}
+			void DeactivateAndWait();
 
 			JobManager* owner = nullptr;
 
@@ -43,6 +38,8 @@ namespace CE
 			Atomic<bool> isActive = true;
 			Atomic<bool> isAvailable = true;
 
+			Atomic<bool> deactivate = false;
+
 			/// Variable storage that is created locally on the thread
 			Atomic<WorkThreadLocal*> threadLocal = nullptr;
 
@@ -53,10 +50,10 @@ namespace CE
 
 		inline int GetNumThreads() const { return numThreads; }
 
-		/// Deactivates all worker threads but does NOT wait for them to finish
+		/// Deactivates all worker threads after they're done executing current job but does *NOT* wait on this thread for them to finish
 		void DeactivateWorkers();
 
-		/// Deactivates all worker threads and wait for them to finish
+		/// Deactivates all worker threads after they're done executing current job and wait for them on this thread to finish
 		void DeactivateWorkersAndWait();
 
 	private:

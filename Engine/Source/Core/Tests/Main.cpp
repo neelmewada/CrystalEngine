@@ -2485,17 +2485,18 @@ TEST(JobSystem, Basic)
 	TEST_BEGIN;
 
 	auto prev = clock();
+	int numThreads = 0;
 
 	{
-		JobManager manager{ "Test", 2 };
+		JobManager manager{ "Test" };
 		JobContext context{ &manager };
 		JobContext::SetGlobalContext(&context);
 
-		int numThreads = manager.GetNumThreads();
+		numThreads = manager.GetNumThreads();
 		
 		for (int i = 0; i < numThreads; i++)
 		{
-			JobSleep* job = new JobSleep(3000);
+			JobSleep* job = new JobSleep(1000);
 			job->Start();
 		}
 
@@ -2506,6 +2507,7 @@ TEST(JobSystem, Basic)
 
 	auto now = clock();
 	f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+	EXPECT_LE(deltaTime, 2);
 
 	TEST_END;
 }

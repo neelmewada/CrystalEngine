@@ -103,6 +103,11 @@ namespace CE
 
 		CE_INLINE void InsertAt(int index, const ElementType& item)
 		{
+			if (Impl.empty())
+			{
+				Impl.push_back(item);
+				return;
+			}
 			Impl.insert(Impl.begin() + index, item);
 		}
 

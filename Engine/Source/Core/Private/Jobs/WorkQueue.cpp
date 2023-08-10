@@ -28,7 +28,8 @@ namespace CE
 
 		if (job != nullptr)
 		{
-			queue.InsertAt(0, job);
+			//queue.InsertAt(0, job);
+			queue.Add(job);
 		}
 	}
 
