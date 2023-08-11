@@ -14,7 +14,7 @@ namespace CE
 		return queue.empty();
 	}
 
-	Job* WorkQueue::TrySteal(JobThreadTag tagFilter)
+	Job* WorkQueue::TrySteal(JobThreadTag workerThreadTag)
 	{
 		if (mutex.try_lock())
 		{
@@ -22,7 +22,7 @@ namespace CE
 			if (!queue.empty())
 			{
 				job = queue.front();
-				if (tagFilter == JOB_THREAD_UNDEFINED || job->GetThreadFilter() == tagFilter)
+				if (job->threadFilter == JOB_THREAD_UNDEFINED || job->threadFilter == workerThreadTag)
 				{
 					queue.pop_front();
 				}

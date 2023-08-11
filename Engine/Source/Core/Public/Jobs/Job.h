@@ -14,7 +14,7 @@ namespace CE
 		JOB_THREAD_GAME,
 		JOB_THREAD_UPDATE,
 		JOB_THREAD_RENDER,
-		JOB_THREAD_ASSETPROCESSING,
+		JOB_THREAD_ASSET,
 		JOB_THREAD_PHYSICS,
 
 		// 16-bit LSB are built-in tags
@@ -49,7 +49,7 @@ namespace CE
 
 		Job* GetDependent();
 
-		inline JobThreadTag GetThreadFilter() const { return threadFilter; }
+		FORCE_INLINE JobThreadTag GetThreadFilter() const { return threadFilter; }
 
 		/// Must be called before calling Start() function.
 		void SetThreadFilter(JobThreadTag threadTag);
@@ -107,7 +107,7 @@ namespace CE
 		// Job which is dependent on us, and and will be notified once we are finished
 		Atomic<Job*> dependent = nullptr;
 
-		friend class JobQueue;
+		friend class WorkQueue;
 		friend class JobManager;
 	};
 }

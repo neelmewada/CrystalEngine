@@ -299,15 +299,15 @@ reset_thread:
 
 		if (workerFound)
 			return;
-
+		
 		// 2nd attempt
 		for (int i = 0; i < workerThreads.GetSize(); i++)
 		{
 			WorkThread* worker = workerThreads[i];
 			if (worker->threadLocal == nullptr)
 				continue;
-
-			if (worker->isActive.load(std::memory_order_acquire))
+			
+			if (worker->isActive.load(std::memory_order_acquire) && (threadFilterTag == JOB_THREAD_UNDEFINED || worker->tag == threadFilterTag))
 			{
 				worker->threadLocal.load()->queue.GlobalInsert(job);
 				break;

@@ -2484,9 +2484,6 @@ TEST(JobSystem, Basic)
 {
 	TEST_BEGIN;
 
-	auto prev = clock();
-	int numThreads = 0;
-
 	{
 		JobManagerDesc desc{};
 		desc.totalThreads = 0;
@@ -2495,6 +2492,8 @@ TEST(JobSystem, Basic)
 		JobContext context{ &manager };
 		JobContext::PushGlobalContext(&context);
 
+		auto prev = clock();
+		int numThreads = 0;
 		numThreads = manager.GetNumThreads();
 		
 		for (int i = 0; i < numThreads; i++)
@@ -2505,12 +2504,12 @@ TEST(JobSystem, Basic)
 
 		manager.DeactivateWorkersAndWait();
 
+		auto now = clock();
+		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+		EXPECT_LE(deltaTime, 0.8);
+
 		JobContext::PopGlobalContext();
 	}
-
-	auto now = clock();
-	f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
-	EXPECT_LE(deltaTime, 1);
 
 	TEST_END;
 }
@@ -2641,16 +2640,21 @@ class FilteredJob : public Job
 {
 public:
 
-	FilteredJob()
+	FilteredJob(SIZE_T sleepFor) : Job(false), millis(sleepFor)
 	{
 
 	}
 
 	void Process() override
 	{
+		globalMut.lock();
+		LOG("Job: " << millis << " | " << GetContext()->GetJobManager()->GetCurrentJobThreadIndex());
+		globalMut.unlock();
 
+		Thread::SleepFor(millis);
 	}
 
+	SIZE_T millis;
 };
 
 TEST(JobSystem, ThreadFilter)
@@ -2658,23 +2662,47 @@ TEST(JobSystem, ThreadFilter)
 	TEST_BEGIN;
 
 	{
-		auto prev = clock();
-
 		JobManagerDesc desc{};
 		desc.totalThreads = 4;
 		desc.threads = {
-			{ "", JOB_THREAD_PRIMARY },
-			{ "", JOB_THREAD_WORKER },
+			{ "Primary", JOB_THREAD_PRIMARY },
+			{ "Asset", JOB_THREAD_ASSET },
 		};
 
 		JobManager manager{ "Test", desc };
 		JobContext context{ &manager };
 		JobContext::PushGlobalContext(&context);
 
-		FilteredJob* job0 = new FilteredJob();
+		// thread 0 idle
 
+		FilteredJob* job0 = new FilteredJob(500);
+		job0->SetThreadFilter(JOB_THREAD_ASSET); // thread 1
+
+		FilteredJob* job1 = new FilteredJob(250);
+		job1->SetThreadFilter(JOB_THREAD_WORKER); // thread 2 or 3
+
+		FilteredJob* job2 = new FilteredJob(250);
+		job2->SetThreadFilter(JOB_THREAD_WORKER); // thread 2 or 3
+
+		FilteredJob* job3 = new FilteredJob(250);
+		job3->SetThreadFilter(JOB_THREAD_WORKER); // thread 2 or 3
+
+		auto prev = clock();
+
+		job0->Start();
+		job1->Start();
+		job2->Start();
+		job3->Start();
 
 		manager.Complete();
+
+		auto now = clock();
+		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+
+		delete job0;
+		delete job1;
+		delete job2;
+		delete job3;
 
 		JobContext::PopGlobalContext();
 	}

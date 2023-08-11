@@ -27,7 +27,7 @@ namespace CE
 
 		friend class JobManager;
 
-		Job* TrySteal(JobThreadTag tagFilter = JOB_THREAD_UNDEFINED);
+		Job* TrySteal(JobThreadTag workerThreadTag = JOB_THREAD_UNDEFINED);
 
 		Job* LocalPop();
 		void LocalPush(Job* job);
