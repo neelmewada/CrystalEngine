@@ -175,8 +175,8 @@ reset_thread:
 					continue;
 				}
 
-				// Try stealing from another thread's queue
-				job = worker->threadLocal.load()->queue.TrySteal(worker->tag);
+				// Try stealing from another thread's queue if the filter tag is satisfied
+				job = worker->threadLocal.load()->queue.TrySteal(threadInfo->tag);
 
 				if (job == nullptr) // Could not steal a job
 				{
