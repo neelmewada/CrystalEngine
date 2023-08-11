@@ -2,11 +2,11 @@
 
 namespace CE
 {
-	JobManager::JobManager(const String& name, int numThreads)
+	JobManager::JobManager(const String& name, const JobManagerDesc& desc)
 		: name (name)
-		, numThreads(FixNumThreads(numThreads))
+		, numThreads(FixNumThreads(desc))
 	{
-		SpawnWorkThreads();
+		SpawnWorkThreads(desc);
 	}
 
 	JobManager::~JobManager()
@@ -18,6 +18,17 @@ namespace CE
 		}
 
 		workerThreads.Clear();
+	}
+
+	JobManager::WorkThread::~WorkThread()
+	{
+		delete threadLocal;
+		threadLocal = nullptr;
+	}
+
+	void JobManager::WorkThread::Suspend()
+	{
+		isActive.store(false, std::memory_order_release);
 	}
 
 	void JobManager::WorkThread::Deactivate()
@@ -32,28 +43,34 @@ namespace CE
 			thread.Join();
 	}
 
-	int JobManager::FixNumThreads(int numThreads)
+	int JobManager::FixNumThreads(const JobManagerDesc& desc)
 	{
-		if (numThreads == 0)
-			numThreads = Thread::GetHardwareConcurrency() - 1;
-		if (numThreads < 2)
-			numThreads = 2;
-		if (numThreads > 64)
-			numThreads = 64;
+		int totalThreads = desc.totalThreads;
 
-		return numThreads;
+		if (totalThreads == 0)
+			totalThreads = Thread::GetHardwareConcurrency() - 1;
+		if (totalThreads < 2)
+			totalThreads = 2;
+		if (totalThreads > 64)
+			totalThreads = 64;
+
+		return totalThreads;
 	}
 
-	void JobManager::SpawnWorkThreads()
+	void JobManager::SpawnWorkThreads(const JobManagerDesc& desc)
 	{
 		if (!workerThreads.IsEmpty())
 			return;
 
-		numThreads = FixNumThreads(numThreads);
-
 		for (int i = 0; i < numThreads; i++)
 		{
+			JobThreadDesc threadDesc = {};
+			if (i < desc.threads.GetSize())
+				threadDesc = desc.threads[i];
+
 			WorkThread* worker = new WorkThread();
+			worker->name = threadDesc.threadName;
+			worker->tag = threadDesc.tag;
 			worker->owner = this;
 			worker->isMainThread = false;
 			worker->index = i;
@@ -76,6 +93,13 @@ namespace CE
 
 	CE_THREAD_LOCAL JobManager::WorkThread* currentThreadInfo = nullptr;
 
+	int JobManager::GetCurrentJobThreadIndex()
+	{
+		if (currentThreadInfo == nullptr)
+			return -1;
+		return currentThreadInfo->index;
+	}
+
 	void JobManager::ProcessJobsWorker(WorkThread* threadInfo)
 	{
 		threadInfo->threadId = Thread::GetCurrentThreadId();
@@ -97,12 +121,19 @@ namespace CE
 	void JobManager::ProcessJobsInternal(WorkThread* threadInfo)
 	{
 		int numWorkerThreads = workerThreads.GetSize();
+
+reset_thread:
 		
 		while (threadInfo->isActive)
 		{
-			// Deactivate after current job if required
+			// Deactivate only after current job is finished
 			if (threadInfo->deactivate.load(std::memory_order_acquire))
-				threadInfo->isActive = false;
+				threadInfo->isActive.store(false, std::memory_order_release);
+			
+			if (threadInfo->threadLocal == nullptr) 
+			{
+				break;
+			}
 
 			Job* job = threadInfo->threadLocal.load()->queue.LocalPop();
 
@@ -112,6 +143,7 @@ namespace CE
 				int random = Random::Range(0, numWorkerThreads - 1);
 				WorkThread* worker = workerThreads[random];
 
+				// If we arrive to this same thread, move backward or forward by 1 index
 				if (worker == threadInfo || worker == nullptr)
 				{
 					if (random > 0)
@@ -144,9 +176,9 @@ namespace CE
 				}
 
 				// Try stealing from another thread's queue
-				job = worker->threadLocal.load()->queue.TrySteal();
+				job = worker->threadLocal.load()->queue.TrySteal(worker->tag);
 
-				if (job == nullptr) // Could not steal job
+				if (job == nullptr) // Could not steal a job
 				{
 					// Yield
 					continue;
@@ -156,14 +188,15 @@ namespace CE
 			if (job != nullptr)
 			{
 				if (threadInfo->isAvailable)
-					threadInfo->isAvailable = false;
+					threadInfo->isAvailable.store(false, std::memory_order_release);
 
 				Process(job);
 			}
 
 			if (!threadInfo->isAvailable)
-				threadInfo->isAvailable = true;
+				threadInfo->isAvailable.store(true, std::memory_order_release);
 		}
+
 	}
 
 	void JobManager::Process(Job* job)
@@ -172,6 +205,8 @@ namespace CE
 		bool isAutoDelete = job->IsAutoDelete();
 
 		job->Process();
+
+		job->SetDependentCountAndFlags(Job::FLAGS_FINISHED);
 
 		job->Finish();
 
@@ -208,18 +243,76 @@ namespace CE
 		}
 	}
 
-	void JobManager::QueueJob(Job* job)
+	void JobManager::Complete()
 	{
-		if (workerThreads.IsEmpty() || workerThreads[0]->threadLocal == nullptr)
+		if (workerThreads.IsEmpty())
 			return;
 
-		workerThreads[0]->threadLocal.load()->queue.GlobalInsert(job);
+		complete.store(true, std::memory_order_release);
+
+		// Wait for all workers to finish jobs
+		while (true)
+		{
+			bool allThreadsCompleted = true;
+
+			for (int i = 0; i < workerThreads.GetSize(); i++)
+			{
+				bool threadComplete = workerThreads[i]->isAvailable.load(std::memory_order_acquire) && workerThreads[i]->threadLocal.load()->queue.IsEmpty();
+
+				if (!threadComplete)
+					allThreadsCompleted = false;
+			}
+
+			if (allThreadsCompleted)
+				break;
+		}
+
+		// Deactivate all worker threads
+		DeactivateWorkersAndWait();
 	}
 
-	JobManager::WorkThread::~WorkThread()
+	void JobManager::EnqueueJob(Job* job)
 	{
-		delete threadLocal;
-		threadLocal = nullptr;
+		if (job == nullptr || workerThreads.IsEmpty())
+			return;
+
+		ThreadId callingThreadId = Thread::GetCurrentThreadId();
+		bool workerFound = false;
+
+		auto threadFilterTag = job->GetThreadFilter();
+
+		// 1st attempt: Try to enqueue in an active worker of same threadId
+		for (int i = 0; i < workerThreads.GetSize(); i++)
+		{
+			WorkThread* worker = workerThreads[i];
+			if (worker->threadLocal == nullptr)
+				continue;
+
+			if (worker->isActive.load(std::memory_order_acquire) && worker->threadId == callingThreadId &&
+				(threadFilterTag == JOB_THREAD_UNDEFINED || worker->tag == threadFilterTag))
+			{
+				workerFound = true;
+				worker->threadLocal.load()->queue.GlobalInsert(job);
+				break;
+			}
+		}
+
+		if (workerFound)
+			return;
+
+		// 2nd attempt
+		for (int i = 0; i < workerThreads.GetSize(); i++)
+		{
+			WorkThread* worker = workerThreads[i];
+			if (worker->threadLocal == nullptr)
+				continue;
+
+			if (worker->isActive.load(std::memory_order_acquire))
+			{
+				worker->threadLocal.load()->queue.GlobalInsert(job);
+				break;
+			}
+		}
 	}
 
 } // namespace CE

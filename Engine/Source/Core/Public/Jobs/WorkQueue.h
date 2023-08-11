@@ -21,11 +21,13 @@ namespace CE
 			return queue.empty();
 		}
 
+		bool IsEmpty();
+
 	private:
 
 		friend class JobManager;
 
-		Job* TrySteal();
+		Job* TrySteal(JobThreadTag tagFilter = JOB_THREAD_UNDEFINED);
 
 		Job* LocalPop();
 		void LocalPush(Job* job);

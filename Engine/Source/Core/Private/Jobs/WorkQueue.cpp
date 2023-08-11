@@ -7,16 +7,29 @@ namespace CE
 
 	}
 
-	Job* WorkQueue::TrySteal()
+	bool WorkQueue::IsEmpty()
 	{
+		std::lock_guard<std::shared_mutex> guard{ mutex };
 
+		return queue.empty();
+	}
+
+	Job* WorkQueue::TrySteal(JobThreadTag tagFilter)
+	{
 		if (mutex.try_lock())
 		{
 			Job* job = nullptr;
 			if (!queue.empty())
 			{
 				job = queue.front();
-				queue.pop_front();
+				if (tagFilter == JOB_THREAD_UNDEFINED || job->GetThreadFilter() == tagFilter)
+				{
+					queue.pop_front();
+				}
+				else
+				{
+					job = nullptr;
+				}
 			}
 			mutex.unlock();
 			return job;

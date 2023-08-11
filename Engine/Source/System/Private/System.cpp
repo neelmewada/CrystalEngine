@@ -4,6 +4,8 @@
 
 namespace CE
 {
+	JobManager* gJobManager = nullptr;
+	JobContext* gJobContext = nullptr;
 
     class SystemModule : public Module
     {
@@ -11,7 +13,10 @@ namespace CE
 
         void StartupModule() override
         {
-			
+			JobManagerDesc desc{};
+			desc.threads = {
+
+			};
         }
 
         void ShutdownModule() override

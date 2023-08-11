@@ -2,16 +2,23 @@
 
 namespace CE
 {
-	static JobContext* gJobContext = nullptr;
+	static Array<JobContext*> gJobContext = {};
 
-	void JobContext::SetGlobalContext(JobContext* context)
+	void JobContext::PushGlobalContext(JobContext* context)
 	{
-		gJobContext = context;
+		gJobContext.Push(context);
+	}
+
+	void JobContext::PopGlobalContext()
+	{
+		gJobContext.Pop();
 	}
 
 	JobContext* JobContext::GetGlobalContext()
     {
-        return gJobContext;
+		if (gJobContext.IsEmpty())
+			return nullptr;
+        return gJobContext.Top();
     }
 
 } // namespace CE

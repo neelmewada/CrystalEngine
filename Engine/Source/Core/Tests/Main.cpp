@@ -2488,9 +2488,12 @@ TEST(JobSystem, Basic)
 	int numThreads = 0;
 
 	{
-		JobManager manager{ "Test" };
+		JobManagerDesc desc{};
+		desc.totalThreads = 0;
+
+		JobManager manager{ "Test", desc };
 		JobContext context{ &manager };
-		JobContext::SetGlobalContext(&context);
+		JobContext::PushGlobalContext(&context);
 
 		numThreads = manager.GetNumThreads();
 		
@@ -2502,7 +2505,7 @@ TEST(JobSystem, Basic)
 
 		manager.DeactivateWorkersAndWait();
 
-		JobContext::SetGlobalContext(nullptr);
+		JobContext::PopGlobalContext();
 	}
 
 	auto now = clock();
@@ -2512,35 +2515,169 @@ TEST(JobSystem, Basic)
 	TEST_END;
 }
 
+std::mutex globalMut{};
+
+class JobDep : public Job
+{
+public:
+
+	JobDep(SIZE_T sleepFor) : millis(sleepFor)
+	{
+
+	}
+
+	void Process() override
+	{
+		Thread::SleepFor(millis);
+	}
+
+	void Finish() override
+	{
+
+	}
+
+	SIZE_T millis = 0;
+};
+
+class ReusableJob : public Job
+{
+public:
+
+	ReusableJob(SIZE_T sleepFor) : Job(false), millis(sleepFor)
+	{
+
+	}
+
+	void Process() override
+	{
+		Thread::SleepFor(millis);
+	}
+
+	void Finish() override
+	{
+
+	}
+
+	SIZE_T millis = 0;
+};
+
 TEST(JobSystem, Dependency)
 {
 	TEST_BEGIN;
 
-	auto prev = clock();
-	int numThreads = 0;
-
+	// 1. Multiple dependencies
 	{
-		JobManager manager{ "Test" };
+		auto prev = clock();
+
+		JobManagerDesc desc{};
+		desc.totalThreads = 4;
+
+		JobManager manager{ "Test", desc };
 		JobContext context{ &manager };
-		JobContext::SetGlobalContext(&context);
+		JobContext::PushGlobalContext(&context);
 
-		JobSleep* job0 = new JobSleep(1000);
-		JobSleep* job1 = new JobSleep(1000);
-		JobSleep* job2 = new JobSleep(500);
+		JobDep* job0 = new JobDep(250);
+		JobDep* job1 = new JobDep(100);
+		JobDep* job2 = new JobDep(250);
+		job0->SetDependent(job1);
 		job2->SetDependent(job1);
-		job1->SetDependent(job0);
-		job0->Start();
-		job1->Start();
 		job2->Start();
+		job1->Start();
+		job0->Start();
 
-		manager.DeactivateWorkersAndWait();
+		// Wait for jobs to complete & worker threads to deactivate
+		manager.Complete();
 
-		JobContext::SetGlobalContext(nullptr);
+		auto now = clock();
+		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+		EXPECT_LE(deltaTime, 0.5); // deltaTime = (250 OR 250) + 100 = 350 (we use 500 to account for other delays)
+
+		JobContext::PopGlobalContext();
 	}
 
-	auto now = clock();
-	f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
-	
+	// 2. Job sequence
+	{
+		auto prev = clock();
+
+		JobManagerDesc desc{};
+		desc.totalThreads = 4;
+
+		JobManager manager{ "Test", desc };
+		JobContext context{ &manager };
+		JobContext::PushGlobalContext(&context);
+
+		ReusableJob* job0 = new ReusableJob(250);
+		ReusableJob* job1 = new ReusableJob(100);
+		job1->Start();
+		job0->Start();
+		job0->Complete();
+		job1->Complete();
+		// 250ms OR 100ms => 250ms
+
+		job1->Reset(true);
+		job1->Start();
+		// 100ms
+
+		job1->Complete();
+
+		// Total: 350ms
+		auto now = clock();
+		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+		EXPECT_LE(deltaTime, 0.5); // Should be 350ms (we use 500 to account for other delays)
+
+		// Wait for worker threads to complete & deactivate
+		manager.Complete();
+
+		delete job0;
+		delete job1;
+
+		JobContext::PopGlobalContext();
+	}
+
+	TEST_END;
+}
+
+class FilteredJob : public Job
+{
+public:
+
+	FilteredJob()
+	{
+
+	}
+
+	void Process() override
+	{
+
+	}
+
+};
+
+TEST(JobSystem, ThreadFilter)
+{
+	TEST_BEGIN;
+
+	{
+		auto prev = clock();
+
+		JobManagerDesc desc{};
+		desc.totalThreads = 4;
+		desc.threads = {
+			{ "", JOB_THREAD_PRIMARY },
+			{ "", JOB_THREAD_WORKER },
+		};
+
+		JobManager manager{ "Test", desc };
+		JobContext context{ &manager };
+		JobContext::PushGlobalContext(&context);
+
+		FilteredJob* job0 = new FilteredJob();
+
+
+		manager.Complete();
+
+		JobContext::PopGlobalContext();
+	}
 
 	TEST_END;
 }

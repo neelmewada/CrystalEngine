@@ -14,7 +14,11 @@ namespace CE
 
 		}
 
-		static void SetGlobalContext(JobContext* context);
+		/// Ideally, you should only have one context pushed
+		static void PushGlobalContext(JobContext* context);
+
+		static void PopGlobalContext();
+
 		static JobContext* GetGlobalContext();
 
 		inline JobManager* GetJobManager() const

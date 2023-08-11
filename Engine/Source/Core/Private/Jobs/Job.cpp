@@ -39,9 +39,47 @@ namespace CE
 		DecrementDependentCount();
 	}
 
-	bool Job::IsAutoDelete()
+    void Job::Reset(bool clearDependent)
+    {
+		unsigned int countAndFlags = GetDependentCountAndFlags();
+		// Clear flags & set dependent count to 1
+		countAndFlags = (countAndFlags & (~(FLAGS_DEPENDENTCOUNT_MASK) & ~(FLAGS_CHILD_JOBS) & ~(FLAGS_FINISHED))) | 1;
+		SetDependentCountAndFlags(countAndFlags);
+
+		if (clearDependent)
+		{
+			StoreDependent(nullptr);
+		}
+		else
+		{
+			Job* dependent = GetDependent();
+			if (dependent)
+			{
+				dependent->IncrementDependentCount();
+			}
+		}
+
+		OnReset();
+    }
+
+    bool Job::IsAutoDelete()
 	{
 		return (GetDependentCountAndFlags() & (unsigned int)FLAGS_AUTO_DELETE) ? true : false;
+	}
+
+	bool Job::IsFinished()
+	{
+		return (GetDependentCountAndFlags() & (unsigned int)FLAGS_FINISHED) ? true : false;
+	}
+
+	bool Job::IsCancelled()
+	{
+		return (GetDependentCountAndFlags() & (unsigned int)FLAGS_CANCELLED) ? true : false;
+	}
+
+	void Job::SetThreadFilter(JobThreadTag threadTag)
+	{
+		this->threadFilter = threadTag;
 	}
 
 	void Job::SetDependent(Job* dependent)
@@ -49,6 +87,24 @@ namespace CE
 		if (dependent)
 			dependent->IncrementDependentCount();
 		StoreDependent(dependent);
+	}
+
+	void Job::SetAutoDelete(bool set)
+	{
+		u32 oldCountAndFlags, newCountAndFlags;
+		do
+		{
+			oldCountAndFlags = dependentCountAndFlags.load(std::memory_order_acquire);
+			newCountAndFlags = (oldCountAndFlags & ~FLAGS_AUTO_DELETE) | (set ? FLAGS_AUTO_DELETE : FLAGS_NONE);
+		} while (!dependentCountAndFlags.compare_exchange_weak(oldCountAndFlags, newCountAndFlags, std::memory_order_acq_rel, std::memory_order_acquire));
+	}
+
+	void Job::Complete()
+	{
+		while (!IsFinished())
+		{
+			// Wait until finished
+		}
 	}
 
 	u32 Job::GetDependentCount()
@@ -68,10 +124,10 @@ namespace CE
 		u16 count = (u16)(countAndFlags & FLAGS_DEPENDENTCOUNT_MASK);
 		if (count == 1)
 		{
-			if (!(countAndFlags & FLAGS_CHILD_JOBS)) // NOT a child job
+			if (!IsFinished()) // NOT a child job
 			{
 				// Enqueue the job for execution
-				this->context->GetJobManager()->QueueJob(this);
+				this->context->GetJobManager()->EnqueueJob(this);
 			}
 		}
 	}

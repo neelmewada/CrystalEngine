@@ -4,11 +4,25 @@ namespace CE
 {
 	class WorkThread;
 
+	struct JobThreadDesc
+	{
+		String threadName = "";
+		JobThreadTag tag = JOB_THREAD_WORKER;
+	};
+
+	struct JobManagerDesc
+	{
+		/// Set it to 0 to automatically select the most optimal number of threads
+		int totalThreads = 0;
+		/// Thread descriptions. Requirement: Size <= totalThreads.
+		Array<JobThreadDesc> threads{};
+	};
+
 	class CORE_API JobManager final
 	{
 	public:
 
-		JobManager(const String& name, int numThreads = 0);
+		JobManager(const String& name, const JobManagerDesc& desc);
 		~JobManager();
 
 		struct WorkThreadLocal
@@ -21,6 +35,9 @@ namespace CE
 		{
 			~WorkThread();
 
+			/// Suspend the worker thread, i.e. put to sleep
+			void Suspend();
+
 			/// Deactivates the worker thread, but doesn't wait for it to finish
 			void Deactivate();
 
@@ -28,6 +45,9 @@ namespace CE
 			void DeactivateAndWait();
 
 			JobManager* owner = nullptr;
+
+			String name = "";
+			JobThreadTag tag = JOB_THREAD_WORKER;
 
 			Mutex mutex{};
 			bool isMainThread = false;
@@ -39,6 +59,7 @@ namespace CE
 			Atomic<bool> isAvailable = true;
 
 			Atomic<bool> deactivate = false;
+			Atomic<bool> isSleeping = false;
 
 			/// Variable storage that is created locally on the thread
 			Atomic<WorkThreadLocal*> threadLocal = nullptr;
@@ -50,24 +71,29 @@ namespace CE
 
 		inline int GetNumThreads() const { return numThreads; }
 
-		/// Deactivates all worker threads after they're done executing current job but does *NOT* wait on this thread for them to finish
+		/// Deactivates all worker threads after they're done executing current job but does *NOT* wait on this thread for them to terminate.
 		void DeactivateWorkers();
 
-		/// Deactivates all worker threads after they're done executing current job and wait for them on this thread to finish
+		/// Deactivates all worker threads after they're done executing current job and wait for them on this thread to terminate.
 		void DeactivateWorkersAndWait();
+
+		/// Waits for all worker threads to complete execution until all jobs are finished, and deactivates & terminates all worker threads.
+		void Complete();
+
+		int GetCurrentJobThreadIndex();
 
 	private:
 
-		void SpawnWorkThreads();
+		void SpawnWorkThreads(const JobManagerDesc& desc);
 
 		void ProcessJobsWorker(WorkThread* threadInfo);
 		void ProcessJobsInternal(WorkThread* threadInfo);
 
 		void Process(Job* job);
 
-		void QueueJob(Job* job);
+		void EnqueueJob(Job* job);
 
-		int FixNumThreads(int numThreads);
+		int FixNumThreads(const JobManagerDesc& desc);
 
 	private:
 		// - Fields -
@@ -77,6 +103,7 @@ namespace CE
 		Array<WorkThread*> workerThreads{};
 		int numThreads = 0;
 
+		Atomic<bool> complete = false;
 		Atomic<bool> threadsCreated = false;
 
 		Mutex mutex{};
