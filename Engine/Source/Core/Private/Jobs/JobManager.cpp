@@ -39,11 +39,13 @@ namespace CE
 	void JobManager::WorkThread::Deactivate()
 	{
 		deactivate.store(true, std::memory_order_release);
+		Awake();
 	}
 
 	void JobManager::WorkThread::DeactivateAndWait()
 	{
 		Deactivate();
+		Awake();
 		if (thread.IsJoinable())
 			thread.Join();
 	}
@@ -51,8 +53,36 @@ namespace CE
 	void JobManager::WorkThread::Complete()
 	{
 		complete.store(true, std::memory_order_release);
+		Awake();
 		if (thread.IsJoinable())
 			thread.Join();
+	}
+
+	void JobManager::WorkThread::Awake()
+	{
+		LockGuard<Mutex> guard{ threadLocal.load()->mutex };
+		if (threadLocal.load()->sleep)
+		{
+			threadLocal.load()->sleep = false;
+			threadLocal.load()->sleepCv.notify_one();
+			//threadLocal.load()->sleepEvent.release(1);
+		}
+	}
+
+	void JobManager::WorkThread::Sleep()
+	{
+		LockGuard<Mutex> guard{ threadLocal.load()->mutex };
+		threadLocal.load()->sleep = true;
+	}
+
+	bool JobManager::WorkThread::IsLocalQueueEmpty()
+	{
+		auto local = threadLocal.load();
+		if (local != nullptr)
+		{
+			return local->queue.IsEmpty();
+		}
+		return false;
 	}
 
 	int JobManager::FixNumThreads(const JobManagerDesc& desc)
@@ -86,6 +116,7 @@ namespace CE
 			worker->owner = this;
 			worker->isMainThread = false;
 			worker->index = i;
+			//worker->sleep = true; // Set to sleep by default
 
 			worker->thread = Thread([this, worker]
 				{
@@ -175,6 +206,7 @@ namespace CE
 	{
 		threadInfo->threadId = Thread::GetCurrentThreadId();
 		threadInfo->threadLocal = new WorkThreadLocal();
+		threadInfo->threadLocal.load()->sleep = true;
 
 		// Wait for all threads to initialize. Otherwise, we will be stealing jobs from uninitialized threads
 		while (!threadsCreated.load(std::memory_order_acquire))
@@ -215,6 +247,15 @@ namespace CE
 			if (threadInfo->threadLocal == nullptr) 
 			{
 				break;
+			}
+
+			// Sleep if true
+			if (suspendedJob == nullptr)
+			{
+				std::unique_lock<std::mutex> guard{ (std::mutex&)threadInfo->mutex };
+
+				threadInfo->threadLocal.load()->sleepCv.wait(guard, [threadInfo]() -> bool { return !threadInfo->threadLocal.load()->sleep; });
+				//threadInfo->threadLocal.load()->sleepEvent.acquire();
 			}
 
 			Job* job = threadInfo->threadLocal.load()->queue.LocalPop();
@@ -276,6 +317,9 @@ namespace CE
 				if (threadInfo->isIdle)
 					threadInfo->isIdle.store(false, std::memory_order_release);
 				threadInfo->currentJob = job;
+
+				totalJobsInQueue.fetch_sub(1, std::memory_order_acq_rel);
+				AwakeOrSleepWorkers();
 
 				Process(job);
 
@@ -348,21 +392,21 @@ namespace CE
 		complete.store(true, std::memory_order_release);
 
 		// Wait for all workers to finish jobs
-		while (true)
-		{
-			bool allThreadsCompleted = true;
+		//while (true)
+		//{
+		//	bool allThreadsCompleted = true;
 
-			for (int i = 0; i < numThreads; i++)
-			{
-				bool threadComplete = workerThreads[i]->isIdle.load(std::memory_order_acquire) && workerThreads[i]->threadLocal.load()->queue.IsEmpty();
+		//	for (int i = 0; i < numThreads; i++)
+		//	{
+		//		bool threadComplete = workerThreads[i]->isIdle.load(std::memory_order_acquire) && workerThreads[i]->threadLocal.load()->queue.IsEmpty();
 
-				if (!threadComplete)
-					allThreadsCompleted = false;
-			}
+		//		if (!threadComplete)
+		//			allThreadsCompleted = false;
+		//	}
 
-			if (allThreadsCompleted)
-				break;
-		}
+		//	if (allThreadsCompleted)
+		//		break;
+		//}
 
 		// Complete() all worker threads
 		for (int i = 0; i < workerThreads.GetSize(); i++)
@@ -381,18 +425,24 @@ namespace CE
 
 		auto threadFilterTag = job->GetThreadFilter();
 
+		defer(
+			AwakeOrSleepWorkers();
+		);
+
 		// 1st attempt: Try to enqueue in an active worker of same threadId
 		for (int i = 0; i < workerThreads.GetSize(); i++)
 		{
 			WorkThread* worker = workerThreads[i];
 			if (worker->threadLocal == nullptr)
 				continue;
-
+			
 			if (worker->isActive.load(std::memory_order_acquire) && worker->threadId == callingThreadId &&
 				(threadFilterTag == JOB_THREAD_UNDEFINED || worker->tag == threadFilterTag))
 			{
 				workerFound = true;
 				worker->threadLocal.load()->queue.GlobalInsert(job);
+				totalJobsInQueue.fetch_add(1, std::memory_order_acq_rel);
+				worker->Awake();
 				break;
 			}
 		}
@@ -410,9 +460,56 @@ namespace CE
 			if (worker->isActive.load(std::memory_order_acquire) && (threadFilterTag == JOB_THREAD_UNDEFINED || worker->tag == threadFilterTag))
 			{
 				worker->threadLocal.load()->queue.GlobalInsert(job);
+				totalJobsInQueue.fetch_add(1, std::memory_order_acq_rel);
+				worker->Awake();
 				break;
 			}
 		}
+	}
+
+	void JobManager::AwakeOrSleepWorkers()
+	{
+		// Only activate the most optimal number of threads needed for the workload
+
+		int numWorkers = this->numThreads;
+		int numJobsInQueue = this->totalJobsInQueue.load(std::memory_order_acquire);
+
+		if (numJobsInQueue >= numWorkers) // Activate all workers
+		{
+			for (int i = 0; i < numWorkers; i++)
+			{
+				workerThreads[i]->Awake();
+			}
+			return;
+		}
+
+		// else: there are more worker threads than jobs
+
+		int numWorkersEnabled = 0;
+		numJobsInQueue = this->totalJobsInQueue.load(std::memory_order_acquire);
+
+		for (int i = 0; i < numWorkers; i++) // Get current number of active threads (non-sleeping threads)
+		{
+			if (!workerThreads[i]->threadLocal.load()->sleep)
+			{
+				numWorkersEnabled++;
+			}
+		}
+
+		for (int i = 0; i < numWorkers; i++)
+		{
+			if (numWorkersEnabled < numJobsInQueue && workerThreads[i]->threadLocal.load()->sleep)
+			{
+				workerThreads[i]->Awake();
+				numWorkersEnabled++;
+			}
+			else if (numWorkersEnabled > numJobsInQueue && !workerThreads[i]->threadLocal.load()->sleep)
+			{
+				workerThreads[i]->Sleep();
+				numWorkersEnabled--;
+			}
+		}
+
 	}
 
 } // namespace CE

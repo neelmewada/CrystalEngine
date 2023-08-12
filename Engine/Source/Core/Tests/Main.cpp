@@ -2823,10 +2823,24 @@ TEST(JobSystem, Performance)
 
 		//for (int i = 0; i < 1; i++)
 		{
-			//JobSleep* job = new JobSleep(5000);
+			//JobSleep* job = new JobSleep(1000);
 			//job->Start();
+			//job->Complete();
 		}
-		Thread::SleepFor(8000);
+
+		prev = clock();
+
+		{
+			JobSleep* job0 = new JobSleep(1000);
+			JobSleep* job1 = new JobSleep(1000);
+			JobSleep* job2 = new JobSleep(1000);
+			JobSleep* job3 = new JobSleep(1000);
+			
+			job0->Start();
+			job1->Start();
+			job2->Start();
+			job3->Start();
+		}
 
 		manager.Complete();
 

@@ -31,6 +31,9 @@ namespace CE
 		{
 			Mutex mutex{};
 			WorkQueue queue{};
+			Atomic<bool> sleep = false;
+			std::condition_variable sleepCv{};
+			std::binary_semaphore sleepEvent{ 1 };
 		};
 
 		struct CORE_API WorkThread
@@ -47,6 +50,11 @@ namespace CE
 			void DeactivateAndWait();
 
 			void Complete();
+
+			void Awake();
+			void Sleep();
+
+			bool IsLocalQueueEmpty();
 
 			JobManager* owner = nullptr;
 
@@ -66,8 +74,6 @@ namespace CE
 
 			Atomic<bool> deactivate = false;
 			Atomic<bool> complete = false;
-
-			Atomic<bool> sleep = false;
 
 			/// Variable storage that is created locally on the thread
 			Atomic<WorkThreadLocal*> threadLocal = nullptr;
@@ -92,6 +98,8 @@ namespace CE
 
 	private:
 
+		int FixNumThreads(const JobManagerDesc& desc);
+
 		void SpawnWorkThreads(const JobManagerDesc& desc);
 
 		/// Only meant to be called by a job class inside it's Process() function
@@ -110,7 +118,7 @@ namespace CE
 
 		void EnqueueJob(Job* job);
 
-		int FixNumThreads(const JobManagerDesc& desc);
+		void AwakeOrSleepWorkers();
 
 	private:
 		// - Fields -
@@ -123,6 +131,7 @@ namespace CE
 
 		Atomic<bool> complete = false;
 		Atomic<bool> threadsCreated = false;
+		Atomic<int> totalJobsInQueue = 0;
 
 		Mutex mutex{};
 
