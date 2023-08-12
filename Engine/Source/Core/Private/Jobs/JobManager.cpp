@@ -253,7 +253,7 @@ namespace CE
 				}
 				
 				// If thread is available & not executing anything (idle), then don't steal from it
-				if (worker->isAvailable.load(std::memory_order_acquire))
+				if (worker->isIdle.load(std::memory_order_acquire))
 				{
 					// Yield
 					yield();
@@ -273,8 +273,8 @@ namespace CE
 
 			if (job != nullptr)
 			{
-				if (threadInfo->isAvailable)
-					threadInfo->isAvailable.store(false, std::memory_order_release);
+				if (threadInfo->isIdle)
+					threadInfo->isIdle.store(false, std::memory_order_release);
 				threadInfo->currentJob = job;
 
 				Process(job);
@@ -282,8 +282,8 @@ namespace CE
 				threadInfo->currentJob = nullptr;
 			}
 
-			if (!threadInfo->isAvailable)
-				threadInfo->isAvailable.store(true, std::memory_order_release);
+			if (!threadInfo->isIdle)
+				threadInfo->isIdle.store(true, std::memory_order_release);
 		}
 
 	}
@@ -354,7 +354,7 @@ namespace CE
 
 			for (int i = 0; i < numThreads; i++)
 			{
-				bool threadComplete = workerThreads[i]->isAvailable.load(std::memory_order_acquire) && workerThreads[i]->threadLocal.load()->queue.IsEmpty();
+				bool threadComplete = workerThreads[i]->isIdle.load(std::memory_order_acquire) && workerThreads[i]->threadLocal.load()->queue.IsEmpty();
 
 				if (!threadComplete)
 					allThreadsCompleted = false;

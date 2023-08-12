@@ -62,10 +62,12 @@ namespace CE
 			ThreadId threadId = 0;
 
 			Atomic<bool> isActive = true;
-			Atomic<bool> isAvailable = true;
+			Atomic<bool> isIdle = true;
 
 			Atomic<bool> deactivate = false;
 			Atomic<bool> complete = false;
+
+			Atomic<bool> sleep = false;
 
 			/// Variable storage that is created locally on the thread
 			Atomic<WorkThreadLocal*> threadLocal = nullptr;

@@ -2826,7 +2826,7 @@ TEST(JobSystem, Performance)
 			//JobSleep* job = new JobSleep(5000);
 			//job->Start();
 		}
-		Thread::SleepFor(5000);
+		Thread::SleepFor(8000);
 
 		manager.Complete();
 
