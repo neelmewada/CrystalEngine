@@ -165,6 +165,7 @@ namespace CE::Editor
 		}
 
 		CE_LOG(Info, All, "Processing asset: {}", sourcePath);
+		return false;
 
 		Name outPackageName = importer->ImportSourceAsset(sourcePath, productAssetPath);
 

@@ -4,8 +4,8 @@
 
 namespace CE
 {
-	JobManager* gJobManager = nullptr;
-	JobContext* gJobContext = nullptr;
+	static JobManager* gJobManager = nullptr;
+	static JobContext* gJobContext = nullptr;
 
     class SystemModule : public Module
     {
@@ -37,6 +37,11 @@ namespace CE
 
 	SYSTEM_API Engine* gEngine = nullptr;
     
+    SYSTEM_API JobManager* GetJobManager()
+    {
+        return gJobManager;
+    }
+
 } // namespace CE
 
 

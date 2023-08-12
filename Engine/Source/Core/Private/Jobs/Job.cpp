@@ -62,6 +62,21 @@ namespace CE
 		OnReset();
     }
 
+	void Job::StartAsChild(Job* childJob)
+	{
+		childJob->SetDependentChild(this);
+		childJob->Start();
+	}
+
+	void Job::WaitForChildren()
+	{
+		if (GetDependentCount() != 0)
+		{
+			// Suspend this job until all children are executed
+			context->GetJobManager()->SuspendJobUntilReady(this);
+		}
+	}
+
     bool Job::IsAutoDelete()
 	{
 		return (GetDependentCountAndFlags() & (unsigned int)FLAGS_AUTO_DELETE) ? true : false;
@@ -86,6 +101,13 @@ namespace CE
 	{
 		if (dependent)
 			dependent->IncrementDependentCount();
+		StoreDependent(dependent);
+	}
+
+	void Job::SetDependentChild(Job* dependent)
+	{
+		if (dependent)
+			dependent->IncrementDependentCountAndSetChildFlag();
 		StoreDependent(dependent);
 	}
 
@@ -124,7 +146,7 @@ namespace CE
 		u16 count = (u16)(countAndFlags & FLAGS_DEPENDENTCOUNT_MASK);
 		if (count == 1)
 		{
-			if (!IsFinished()) // NOT a child job
+			if (!IsFinished() && !(countAndFlags & FLAGS_CHILD_JOBS)) // NOT a suspended/parent job
 			{
 				// Enqueue the job for execution
 				this->context->GetJobManager()->EnqueueJob(this);

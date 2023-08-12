@@ -2640,7 +2640,7 @@ class FilteredJob : public Job
 {
 public:
 
-	FilteredJob(SIZE_T sleepFor) : Job(false), millis(sleepFor)
+	FilteredJob(SIZE_T sleepFor, int& i) : Job(false), millis(sleepFor), i(i)
 	{
 
 	}
@@ -2648,13 +2648,14 @@ public:
 	void Process() override
 	{
 		globalMut.lock();
-		LOG("Job: " << millis << " | " << GetContext()->GetJobManager()->GetCurrentJobThreadIndex());
+		i = GetContext()->GetJobManager()->GetCurrentJobThreadIndex();
 		globalMut.unlock();
 
 		Thread::SleepFor(millis);
 	}
 
 	SIZE_T millis;
+	int& i;
 };
 
 TEST(JobSystem, ThreadFilter)
@@ -2675,19 +2676,19 @@ TEST(JobSystem, ThreadFilter)
 
 		// thread 0 idle
 
-		FilteredJob* job0 = new FilteredJob(500);
+		int i0 = -1, i1 = -1, i2 = -1, i3 = -1;
+
+		FilteredJob* job0 = new FilteredJob(100, i0);
 		job0->SetThreadFilter(JOB_THREAD_ASSET); // thread 1
 
-		FilteredJob* job1 = new FilteredJob(250);
+		FilteredJob* job1 = new FilteredJob(50, i1);
 		job1->SetThreadFilter(JOB_THREAD_WORKER); // thread 2 or 3
 
-		FilteredJob* job2 = new FilteredJob(250);
+		FilteredJob* job2 = new FilteredJob(50, i2);
 		job2->SetThreadFilter(JOB_THREAD_WORKER); // thread 2 or 3
 
-		FilteredJob* job3 = new FilteredJob(250);
+		FilteredJob* job3 = new FilteredJob(50, i3);
 		job3->SetThreadFilter(JOB_THREAD_WORKER); // thread 2 or 3
-
-		auto prev = clock();
 
 		job0->Start();
 		job1->Start();
@@ -2696,13 +2697,142 @@ TEST(JobSystem, ThreadFilter)
 
 		manager.Complete();
 
-		auto now = clock();
-		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+		EXPECT_TRUE(i0 == 1);
+		EXPECT_TRUE(i1 == 2 || i1 == 3);
+		EXPECT_TRUE(i2 == 2 || i2 == 3);
+		EXPECT_TRUE(i3 == 2 || i3 == 3);
 
 		delete job0;
 		delete job1;
 		delete job2;
 		delete job3;
+
+		JobContext::PopGlobalContext();
+	}
+
+	TEST_END;
+}
+
+class ChildJob : public Job
+{
+public:
+
+	ChildJob(int& i, int value) : i(i), value(value)
+	{
+
+	}
+
+	String GetName() const override { return "Child Job"; }
+
+	void Process() override
+	{
+		int threadIdx = GetContext()->GetJobManager()->GetCurrentJobThreadIndex();
+
+		//globalMut.lock();
+		//LOG("Child: " << value << " | " << threadIdx);
+		//globalMut.unlock();
+
+		Thread::SleepFor(10);
+		i = value;
+	}
+
+	int& i;
+	int value = 0;
+};
+
+class ParentJob : public Job
+{
+public:
+
+	ParentJob(int& i) : i(i)
+	{
+
+	}
+
+	String GetName() const override { return "Parent Job"; }
+
+	void Process() override
+	{
+		int threadIdx = GetContext()->GetJobManager()->GetCurrentJobThreadIndex();
+
+		ChildJob* child0 = new ChildJob(i, 0);
+		ChildJob* child1 = new ChildJob(i, 1);
+		ChildJob* child2 = new ChildJob(i, 2);
+		ChildJob* child3 = new ChildJob(i, 3);
+		ChildJob* child4 = new ChildJob(i, 4);
+
+		StartAsChild(child0);
+		StartAsChild(child1);
+		StartAsChild(child2);
+		StartAsChild(child3);
+		StartAsChild(child4);
+
+		i = -2;
+
+		WaitForChildren();
+
+		//globalMut.lock();
+		//LOG("Parent | " << threadIdx);
+		//globalMut.unlock();
+	}
+
+	int& i;
+};
+
+TEST(JobSystem, ChildJobs)
+{
+	TEST_BEGIN;
+
+	{
+		JobManagerDesc desc{};
+		desc.totalThreads = 4;
+		
+		JobManager manager{ "Test", desc };
+		JobContext context{ &manager };
+		JobContext::PushGlobalContext(&context);
+
+		int i = -1;
+
+		ParentJob* parent = new ParentJob(i);
+		parent->Start();
+		
+		manager.Complete();
+		EXPECT_TRUE(i >= 0); // Child jobs always set i to >= 0
+
+		JobContext::PopGlobalContext();
+	}
+
+	TEST_END;
+}
+
+TEST(JobSystem, Performance)
+{
+	TEST_BEGIN;
+
+	{
+		JobManagerDesc desc{};
+		desc.totalThreads = 0;
+
+		JobManager manager{ "Test", desc };
+		JobContext context{ &manager };
+		JobContext::PushGlobalContext(&context);
+
+		auto prev = clock();
+		int numThreads = 0;
+		numThreads = manager.GetNumThreads();
+
+		//for (int i = 0; i < 1; i++)
+		{
+			//JobSleep* job = new JobSleep(5000);
+			//job->Start();
+		}
+		Thread::SleepFor(5000);
+
+		manager.Complete();
+
+		auto now = clock();
+		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
+		EXPECT_LE(deltaTime, 6);
 
 		JobContext::PopGlobalContext();
 	}

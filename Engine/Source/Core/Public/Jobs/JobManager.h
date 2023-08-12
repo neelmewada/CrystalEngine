@@ -12,6 +12,8 @@ namespace CE
 
 	struct JobManagerDesc
 	{
+		/// Default tag used to create new threads while running jobs
+		JobThreadTag defaultTag = JOB_THREAD_WORKER;
 		/// Set it to 0 to automatically select the most optimal number of threads
 		int totalThreads = 0;
 		/// Thread descriptions. Requirement: Size <= totalThreads.
@@ -44,7 +46,11 @@ namespace CE
 			/// Deactivates the worker thread and waits for it to finish
 			void DeactivateAndWait();
 
+			void Complete();
+
 			JobManager* owner = nullptr;
+
+			Job* currentJob = nullptr;
 
 			String name = "";
 			JobThreadTag tag = JOB_THREAD_WORKER;
@@ -59,7 +65,7 @@ namespace CE
 			Atomic<bool> isAvailable = true;
 
 			Atomic<bool> deactivate = false;
-			Atomic<bool> isSleeping = false;
+			Atomic<bool> complete = false;
 
 			/// Variable storage that is created locally on the thread
 			Atomic<WorkThreadLocal*> threadLocal = nullptr;
@@ -69,7 +75,7 @@ namespace CE
 
 		// - Public API -
 
-		inline int GetNumThreads() const { return numThreads; }
+		int GetNumThreads();
 
 		/// Deactivates all worker threads after they're done executing current job but does *NOT* wait on this thread for them to terminate.
 		void DeactivateWorkers();
@@ -86,8 +92,17 @@ namespace CE
 
 		void SpawnWorkThreads(const JobManagerDesc& desc);
 
+		/// Only meant to be called by a job class inside it's Process() function
+		void SuspendJobUntilReady(Job* job);
+
+		WorkThread* GetCurrentOrCreateThread();
+
+#ifndef PAL_TRAIT_BUILD_MONOLITHIC
+		WorkThread* FindAndSetCurrentWorkThread();
+#endif
+
 		void ProcessJobsWorker(WorkThread* threadInfo);
-		void ProcessJobsInternal(WorkThread* threadInfo);
+		void ProcessJobsInternal(WorkThread* threadInfo, Job* suspendedJob);
 
 		void Process(Job* job);
 
@@ -99,9 +114,10 @@ namespace CE
 		// - Fields -
 
 		String name{};
+		JobThreadTag defaultTag = JOB_THREAD_WORKER;
 
 		Array<WorkThread*> workerThreads{};
-		int numThreads = 0;
+		Atomic<int> numThreads = 0;
 
 		Atomic<bool> complete = false;
 		Atomic<bool> threadsCreated = false;

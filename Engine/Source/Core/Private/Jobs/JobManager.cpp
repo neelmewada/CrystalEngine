@@ -4,6 +4,7 @@ namespace CE
 {
 	JobManager::JobManager(const String& name, const JobManagerDesc& desc)
 		: name (name)
+		, defaultTag(desc.defaultTag)
 		, numThreads(FixNumThreads(desc))
 	{
 		SpawnWorkThreads(desc);
@@ -11,6 +12,8 @@ namespace CE
 
 	JobManager::~JobManager()
 	{
+		mutex.Lock();
+
 		for (int i = 0; i < workerThreads.GetSize(); i++)
 		{
 			workerThreads[i]->Deactivate();
@@ -18,6 +21,8 @@ namespace CE
 		}
 
 		workerThreads.Clear();
+
+		mutex.Unlock();
 	}
 
 	JobManager::WorkThread::~WorkThread()
@@ -39,6 +44,13 @@ namespace CE
 	void JobManager::WorkThread::DeactivateAndWait()
 	{
 		Deactivate();
+		if (thread.IsJoinable())
+			thread.Join();
+	}
+
+	void JobManager::WorkThread::Complete()
+	{
+		complete.store(true, std::memory_order_release);
 		if (thread.IsJoinable())
 			thread.Join();
 	}
@@ -100,6 +112,65 @@ namespace CE
 		return currentThreadInfo->index;
 	}
 
+	void JobManager::SuspendJobUntilReady(Job* job)
+	{
+		auto currentWorkThread = GetCurrentOrCreateThread();
+		CE_ASSERT(currentWorkThread != nullptr, "Could not find current work thread"); // Should never happen
+
+		ProcessJobsInternal(currentThreadInfo, job);
+	}
+
+	JobManager::WorkThread* JobManager::GetCurrentOrCreateThread()
+	{
+		auto threadInfo = currentThreadInfo;
+
+		if (!threadInfo)
+		{
+#ifndef PAL_TRAIT_BUILD_MONOLITHIC
+			threadInfo = FindAndSetCurrentWorkThread();
+#endif
+			if (!threadInfo)
+			{
+				threadInfo = new WorkThread();
+				threadInfo->name = "Dynamic";
+				threadInfo->tag = defaultTag;
+				threadInfo->owner = this;
+				threadInfo->isMainThread = false;
+				threadInfo->index = numThreads.load(std::memory_order_acquire);
+				threadInfo->threadId = Thread::GetCurrentThreadId();
+
+				mutex.Lock();
+				workerThreads.Add(threadInfo);
+				mutex.Unlock();
+
+				numThreads.fetch_add(1, std::memory_order_acq_rel);
+			}
+		}
+
+		return threadInfo;
+	}
+
+#ifndef PAL_TRAIT_BUILD_MONOLITHIC
+	JobManager::WorkThread* JobManager::FindAndSetCurrentWorkThread()
+	{
+		auto thisThreadId = Thread::GetCurrentThreadId();
+
+		int numThreads = this->numThreads.load(std::memory_order_acquire);
+
+		for (int i = 0; i < numThreads; i++)
+		{
+			if (workerThreads[i]->threadId == thisThreadId)
+			{
+				auto info = workerThreads[i];
+				currentThreadInfo = info;
+				return info;
+			}
+		}
+
+		return nullptr;
+	}
+#endif
+
 	void JobManager::ProcessJobsWorker(WorkThread* threadInfo)
 	{
 		threadInfo->threadId = Thread::GetCurrentThreadId();
@@ -113,22 +184,33 @@ namespace CE
 
 		currentThreadInfo = threadInfo;
 
-		ProcessJobsInternal(threadInfo);
+		ProcessJobsInternal(threadInfo, nullptr);
 
 		currentThreadInfo = nullptr;
 	}
 
-	void JobManager::ProcessJobsInternal(WorkThread* threadInfo)
+	void JobManager::ProcessJobsInternal(WorkThread* threadInfo, Job* suspendedJob)
 	{
-		int numWorkerThreads = workerThreads.GetSize();
-
-reset_thread:
 		
 		while (threadInfo->isActive)
 		{
+			// Check if suspended job is ready to be executed
+			if (suspendedJob != nullptr && suspendedJob->GetDependentCount() == 0)
+			{
+				return;
+			}
+
+			int numWorkerThreads = numThreads.load(std::memory_order_acquire);
+
 			// Deactivate only after current job is finished
 			if (threadInfo->deactivate.load(std::memory_order_acquire))
 				threadInfo->isActive.store(false, std::memory_order_release);
+
+			auto yield = [=]
+				{
+					if (suspendedJob == nullptr && threadInfo->complete.load(std::memory_order_acquire))
+						threadInfo->isActive.store(false, std::memory_order_release);
+				};
 			
 			if (threadInfo->threadLocal == nullptr) 
 			{
@@ -159,12 +241,14 @@ reset_thread:
 				if (worker == threadInfo || worker == nullptr)
 				{
 					// Yield
+					yield();
 					continue;
 				}
 
 				if (worker->threadLocal.load() == nullptr) // Thread's local storage not initialized yet
 				{
 					// Yield
+					yield();
 					continue;
 				}
 				
@@ -172,6 +256,7 @@ reset_thread:
 				if (worker->isAvailable.load(std::memory_order_acquire))
 				{
 					// Yield
+					yield();
 					continue;
 				}
 
@@ -181,6 +266,7 @@ reset_thread:
 				if (job == nullptr) // Could not steal a job
 				{
 					// Yield
+					yield();
 					continue;
 				}
 			}
@@ -189,8 +275,11 @@ reset_thread:
 			{
 				if (threadInfo->isAvailable)
 					threadInfo->isAvailable.store(false, std::memory_order_release);
+				threadInfo->currentJob = job;
 
 				Process(job);
+
+				threadInfo->currentJob = nullptr;
 			}
 
 			if (!threadInfo->isAvailable)
@@ -206,7 +295,8 @@ reset_thread:
 
 		job->Process();
 
-		job->SetDependentCountAndFlags(Job::FLAGS_FINISHED);
+		auto oldFlags = job->GetDependentCountAndFlags();
+		job->SetDependentCountAndFlags(oldFlags | Job::FLAGS_FINISHED);
 
 		job->Finish();
 
@@ -219,6 +309,13 @@ reset_thread:
 		{
 			dependent->DecrementDependentCount();
 		}
+	}
+
+	int JobManager::GetNumThreads()
+	{
+		auto size = workerThreads.GetSize();
+		workerThreads;
+		return size;
 	}
 
 	void JobManager::DeactivateWorkers()
@@ -255,7 +352,7 @@ reset_thread:
 		{
 			bool allThreadsCompleted = true;
 
-			for (int i = 0; i < workerThreads.GetSize(); i++)
+			for (int i = 0; i < numThreads; i++)
 			{
 				bool threadComplete = workerThreads[i]->isAvailable.load(std::memory_order_acquire) && workerThreads[i]->threadLocal.load()->queue.IsEmpty();
 
@@ -267,8 +364,11 @@ reset_thread:
 				break;
 		}
 
-		// Deactivate all worker threads
-		DeactivateWorkersAndWait();
+		// Complete() all worker threads
+		for (int i = 0; i < workerThreads.GetSize(); i++)
+		{
+			workerThreads[i]->Complete();
+		}
 	}
 
 	void JobManager::EnqueueJob(Job* job)

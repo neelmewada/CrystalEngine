@@ -34,11 +34,19 @@ namespace CE
 
 		inline JobContext* GetContext() const { return context; }
 
+		/// Override to specify a name for this job
+		virtual String GetName() const { return "Job"; }
+
 		/// Allows the job to start executing. Auto-delete jobs should not be accessed after calling this function.
 		void Start();
 
 		/// Resets the job to be reused. Should not be used if Job is of auto-delete type.
 		void Reset(bool clearDependent);
+
+		void StartAsChild(Job* childJob);
+
+		/// Suspend processing of this job until all children jobs are complete
+		void WaitForChildren();
 
 		/// Override this method to implement reset functionality
 		virtual void OnReset() {}
@@ -57,6 +65,9 @@ namespace CE
 		/// Sets the dependent job. The dependent job won't be allowed to run until `this` job has finished executing.
 		/// Both jobs should be in un-started state when calling this function.
 		void SetDependent(Job* dependent);
+
+		/// Sets the child dependent job.
+		void SetDependentChild(Job* dependent);
 
 		void SetAutoDelete(bool set);
 

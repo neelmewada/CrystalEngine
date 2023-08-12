@@ -23,4 +23,5 @@ namespace CE
 
 	extern SYSTEM_API Engine* gEngine;
 
+	SYSTEM_API JobManager* GetJobManager();
 }
