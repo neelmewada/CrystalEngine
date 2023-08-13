@@ -1,5 +1,14 @@
 #pragma once
 
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+
 #include <queue>
 
 namespace CE
@@ -71,7 +80,7 @@ namespace CE
 			Atomic<bool> deactivate = false;
 			Atomic<bool> complete = false;
 
-			std::binary_semaphore sleepEvent{ 1 };
+			std::binary_semaphore sleepEvent{ 0 };
 
 			/// Variable storage that is created locally on the thread
 			Atomic<WorkThreadLocal*> threadLocal = nullptr;

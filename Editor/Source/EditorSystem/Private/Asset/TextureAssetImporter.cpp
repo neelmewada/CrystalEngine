@@ -214,4 +214,9 @@ namespace CE::Editor
 		return packageName;
 	}
 
+	Array<Job*> TextureAssetImporter::CreateImportJobs(const Array<IO::Path>& sourcePaths)
+	{
+		return {};
+	}
+
 } // namespace CE::Editor

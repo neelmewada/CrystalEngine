@@ -1,5 +1,14 @@
 #include "CoreMinimal.h"
 
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+
 namespace CE
 {
 	JobManager::JobManager(const String& name, const JobManagerDesc& desc)
@@ -40,7 +49,6 @@ namespace CE
 	void JobManager::WorkThread::DeactivateAndWait()
 	{
 		Deactivate();
-		Awake();
 		if (thread.IsJoinable())
 			thread.Join();
 	}
@@ -107,7 +115,7 @@ namespace CE
 			worker->isWorker = true;
 
 			// Fix: acquire() will sleep the thread only when acquire() is called the 2nd time.
-			worker->sleepEvent.acquire();
+			//worker->sleepEvent.acquire();
 
 			worker->thread = Thread([this, worker]
 				{

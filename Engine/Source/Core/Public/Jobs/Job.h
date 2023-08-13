@@ -1,5 +1,14 @@
 #pragma once
 
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+
 namespace CE
 {
 	class TypeInfo;
@@ -16,6 +25,9 @@ namespace CE
 		JOB_THREAD_RENDER,
 		JOB_THREAD_ASSET,
 		JOB_THREAD_PHYSICS,
+		JOB_THREAD_AUDIO,
+		JOB_THREAD_ANIMATION,
+		JOB_THREAD_AI,
 
 		// 16-bit LSB are built-in tags
 		JOB_THREAD_BUILTIN_FLAGS = 0x0000ffff,

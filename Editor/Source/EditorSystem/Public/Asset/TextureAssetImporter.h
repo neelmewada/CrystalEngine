@@ -12,6 +12,8 @@ namespace CE::Editor
 
 	protected:
 
+		virtual Array<Job*> CreateImportJobs(const Array<IO::Path>& sourcePaths) override;
+
 		FIELD()
 		TextureType textureType = TextureType::Default;
 	};

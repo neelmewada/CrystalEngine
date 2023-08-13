@@ -714,14 +714,14 @@ namespace CE::Widgets
 		if (subobject == nullptr || subobject == this) // Impossible edge cases
 			return;
 		
-		if (subobject->GetClass()->IsSubclassOf<CMenu>() && !subobject->GetClass()->IsSubclassOf<CMenuBar>())
+		if (subobject->IsOfType<CMenu>() && !subobject->IsOfType<CMenuBar>())
 		{
 			CMenu* menu = (CMenu*)subobject;
 			attachedMenus.Add(menu);
 			menu->ownerWindow = GetOwnerWindow();
 			menu->parent = this;
 		}
-		else if (IsContainer() && subobject->GetClass()->IsSubclassOf<CWidget>() && IsSubWidgetAllowed(subobject->GetClass()))
+		else if (IsContainer() && subobject->IsOfType<CWidget>() && IsSubWidgetAllowed(subobject->GetClass()))
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Add(subWidget);

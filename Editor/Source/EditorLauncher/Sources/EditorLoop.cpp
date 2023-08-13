@@ -260,6 +260,9 @@ void EditorLoop::RunLoop()
 
 		editorWindow->Render();
 
+		// Demo
+		GUI::ShowDemoWindow();
+
 		cmdList->ImGuiRender();
 		cmdList->End();
 

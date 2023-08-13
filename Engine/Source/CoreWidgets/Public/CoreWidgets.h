@@ -46,6 +46,10 @@
 #include "Widgets/CLayoutGroup.h"
 #include "Widgets/CSplitWidget.h"
 
+// Popups
+#include "Widgets/Popups/CPopup.h"
+#include "Widgets/Popups/CNotificationPopup.h"
+
 // Input Widgets
 #include "Widgets/Input/CTextInput.h"
 

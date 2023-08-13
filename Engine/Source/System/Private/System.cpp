@@ -14,14 +14,24 @@ namespace CE
         void StartupModule() override
         {
 			JobManagerDesc desc{};
-			desc.threads = {
+			desc.defaultTag = JOB_THREAD_WORKER;
+			desc.totalThreads = 0; // auto set optimal number of threads
+			desc.threads = { };
 
-			};
+			gJobManager = new JobManager("JobSystem", desc);
+			gJobContext = new JobContext(gJobManager);
+			JobContext::PushGlobalContext(gJobContext);
         }
 
         void ShutdownModule() override
         {
+			gJobManager->DeactivateWorkersAndWait();
 
+			JobContext::PopGlobalContext();
+			delete gJobContext;
+			gJobContext = nullptr;
+			delete gJobManager;
+			gJobManager = nullptr;
         }
 
         void RegisterTypes() override

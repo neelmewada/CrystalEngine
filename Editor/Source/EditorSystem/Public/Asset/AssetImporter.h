@@ -14,6 +14,8 @@ namespace CE::Editor
 		virtual Name ImportSourceAsset(const IO::Path& sourceAssetPath, const IO::Path& productAssetPath = {}, bool linkSourceAsset = true) = 0;
         
     protected:
+
+		virtual Array<Job*> CreateImportJobs(const Array<IO::Path>& sourcePaths) = 0;
         
 	private:
         

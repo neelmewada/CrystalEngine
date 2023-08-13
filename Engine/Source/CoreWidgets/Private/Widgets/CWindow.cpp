@@ -10,7 +10,7 @@ namespace CE::Widgets
 
     CWindow::~CWindow()
     {
-
+		
     }
 
 	Vec2 CWindow::CalculateIntrinsicContentSize(f32 width, f32 height)
@@ -187,9 +187,26 @@ namespace CE::Widgets
 		if (subobject == nullptr)
 			return;
 
-		if (subobject->GetClass()->IsSubclassOf<CMenuBar>())
+		if (subobject->IsOfType<CMenuBar>())
 		{
 			this->menuBar = (CMenuBar*)subobject;
+		}
+		else if (subobject->IsOfType<CPopup>())
+		{
+			this->attachedPopups.Add((CPopup*)subobject);
+		}
+	}
+
+	void CWindow::OnSubobjectDetached(Object* subobject)
+	{
+		Super::OnSubobjectDetached(subobject);
+
+		if (subobject == nullptr)
+			return;
+
+		if (subobject->IsOfType<CPopup>())
+		{
+			this->attachedPopups.Remove((CPopup*)subobject);
 		}
 	}
 

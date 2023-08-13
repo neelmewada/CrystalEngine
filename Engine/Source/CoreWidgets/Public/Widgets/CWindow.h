@@ -3,6 +3,7 @@
 namespace CE::Widgets
 {
 	class CMenuBar;
+	class CPopup;
 
     CLASS()
     class COREWIDGETS_API CWindow : public CWidget
@@ -75,6 +76,7 @@ namespace CE::Widgets
 		virtual void HandleEvent(CEvent* event) override;
 
 		virtual void OnSubobjectAttached(Object* subobject) override;
+		virtual void OnSubobjectDetached(Object* subobject) override;
 
 		Color FetchBackgroundColor(CStateFlag state, CSubControl subControl);
         
@@ -107,6 +109,9 @@ namespace CE::Widgets
 
 		FIELD(ReadOnly)
 		Vec2i screenSize = Vec2i();
+
+		FIELD(ReadOnly)
+		Array<CPopup*> attachedPopups{};
 
 		void* platformHandle = nullptr;
 

@@ -13,6 +13,8 @@ namespace CE
 			this->context = JobContext::GetGlobalContext();
 		}
 
+		CE_ASSERT(this->context != nullptr, "Job created without context");
+		
 		// initialize dependent count to 1 so the job doesn't start
 		u32 countAndFlags = 1;
 		if (isAutoDelete)

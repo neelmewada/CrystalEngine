@@ -347,10 +347,15 @@ namespace CE
 		return CMImageSourceFormat::Undefined;
 	}
 
-	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, CMImageSourceFormat preferredFormat)
+	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, int numThreads)
 	{
 		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
 			return false;
+
+		if (numThreads == 0)
+			numThreads = Thread::GetHardwareConcurrency() - 1;
+		if (numThreads < 0)
+			numThreads = 0;
 
 		CMP_Texture src{};
 		src.dwWidth = source.GetWidth();
@@ -383,7 +388,7 @@ namespace CE
 
 		CMP_CompressOptions options = CMP_CompressOptions();
 		options.dwSize = sizeof(options);
-		options.dwnumThreads = CMP_NumberOfProcessors();
+		options.dwnumThreads = numThreads;
 		//options.fquality = 0.9f;
 
 		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);

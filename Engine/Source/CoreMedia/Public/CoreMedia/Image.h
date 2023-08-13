@@ -67,7 +67,7 @@ namespace CE
 		// - Encode API -
 
 		// Encodes raw image data to BCn format (BC7, BC1, etc)
-		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, CMImageSourceFormat preferredFormat = CMImageSourceFormat::Undefined);
+		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, int numThreads = 0);
 
         // - Public API -
 
