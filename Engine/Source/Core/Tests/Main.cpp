@@ -2463,6 +2463,8 @@ TEST(Resource, Manipulation)
 
 #pragma region Job System
 
+std::mutex globalMut{};
+
 class JobSleep : public Job
 {
 public:
@@ -2474,6 +2476,10 @@ public:
 
 	void Process() override
 	{
+		//globalMut.lock();
+		//LOG("JobSleep: " << millis);
+		//globalMut.unlock();
+
 		Thread::SleepFor(millis);
 	}
 
@@ -2513,8 +2519,6 @@ TEST(JobSystem, Basic)
 
 	TEST_END;
 }
-
-std::mutex globalMut{};
 
 class JobDep : public Job
 {
@@ -2589,7 +2593,7 @@ TEST(JobSystem, Dependency)
 
 		auto now = clock();
 		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
-		EXPECT_LE(deltaTime, 0.5); // deltaTime = (250 OR 250) + 100 = 350 (we use 500 to account for other delays)
+		EXPECT_LE(deltaTime, 0.45); // deltaTime = (250 OR 250) + 100 = 350 (we use 500 to account for other delays)
 
 		JobContext::PopGlobalContext();
 	}
@@ -2823,18 +2827,16 @@ TEST(JobSystem, Performance)
 
 		//for (int i = 0; i < 1; i++)
 		{
-			//JobSleep* job = new JobSleep(1000);
-			//job->Start();
-			//job->Complete();
+			JobSleep* job = new JobSleep(100);
+			job->Start();
+			job->Complete();
 		}
 
-		prev = clock();
-
 		{
-			JobSleep* job0 = new JobSleep(1000);
-			JobSleep* job1 = new JobSleep(1000);
-			JobSleep* job2 = new JobSleep(1000);
-			JobSleep* job3 = new JobSleep(1000);
+			JobSleep* job0 = new JobSleep(100);
+			JobSleep* job1 = new JobSleep(100);
+			JobSleep* job2 = new JobSleep(100);
+			JobSleep* job3 = new JobSleep(100);
 			
 			job0->Start();
 			job1->Start();
@@ -2846,7 +2848,7 @@ TEST(JobSystem, Performance)
 
 		auto now = clock();
 		f32 deltaTime = ((f32)(now - prev)) / CLOCKS_PER_SEC;
-		EXPECT_LE(deltaTime, 6);
+		EXPECT_LE(deltaTime, 0.3f); // <= 200ms
 
 		JobContext::PopGlobalContext();
 	}

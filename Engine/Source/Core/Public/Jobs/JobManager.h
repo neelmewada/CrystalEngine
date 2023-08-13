@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 namespace CE
 {
 	class WorkThread;
@@ -31,17 +33,11 @@ namespace CE
 		{
 			Mutex mutex{};
 			WorkQueue queue{};
-			Atomic<bool> sleep = false;
-			std::condition_variable sleepCv{};
-			std::binary_semaphore sleepEvent{ 1 };
 		};
 
 		struct CORE_API WorkThread
 		{
 			~WorkThread();
-
-			/// Suspend the worker thread, i.e. put to sleep
-			void Suspend();
 
 			/// Deactivates the worker thread, but doesn't wait for it to finish
 			void Deactivate();
@@ -57,6 +53,7 @@ namespace CE
 			bool IsLocalQueueEmpty();
 
 			JobManager* owner = nullptr;
+			bool isWorker = false;
 
 			Job* currentJob = nullptr;
 
@@ -69,11 +66,12 @@ namespace CE
 			int index = 0;
 			ThreadId threadId = 0;
 
-			Atomic<bool> isActive = true;
-			Atomic<bool> isIdle = true;
+			Atomic<bool> isAvailable = false;
 
 			Atomic<bool> deactivate = false;
 			Atomic<bool> complete = false;
+
+			std::binary_semaphore sleepEvent{ 1 };
 
 			/// Variable storage that is created locally on the thread
 			Atomic<WorkThreadLocal*> threadLocal = nullptr;
@@ -120,6 +118,8 @@ namespace CE
 
 		void AwakeOrSleepWorkers();
 
+		bool AwakeWorker(WorkThread* specificWorker = nullptr);
+
 	private:
 		// - Fields -
 
@@ -129,11 +129,12 @@ namespace CE
 		Array<WorkThread*> workerThreads{};
 		Atomic<int> numThreads = 0;
 
-		Atomic<bool> complete = false;
 		Atomic<bool> threadsCreated = false;
 		Atomic<int> totalJobsInQueue = 0;
+		Atomic<int> numAvailableWorkers = 0;
 
-		Mutex mutex{};
+		std::deque<Job*> globalQueue{};
+		Mutex jobManagerMutex{};
 
 		friend class Job;
 
