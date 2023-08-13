@@ -106,6 +106,7 @@ namespace CE
 			worker->index = i;
 			worker->isWorker = true;
 
+			// Fix: acquire() will sleep the thread only when acquire() is called the 2nd time.
 			worker->sleepEvent.acquire();
 
 			worker->thread = Thread([this, worker]
