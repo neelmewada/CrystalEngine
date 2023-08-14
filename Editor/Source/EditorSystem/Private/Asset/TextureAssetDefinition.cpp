@@ -15,7 +15,7 @@ namespace CE::Editor
 	const Array<String>& TextureAssetDefinition::GetSourceExtensions()
 	{
 		static Array<String> extensions = {
-			".png", ".jpg"
+			".png", ".jpg", ".jpeg"
 		};
 		return extensions;
 	}
@@ -35,17 +35,17 @@ namespace CE::Editor
 		return GetStaticClass<TextureAssetImporter>();
 	}
 
-	TextureSourceFormat TextureAssetDefinition::GetSourceFormatFromExtension(const String& sourceExtension)
+	TextureSourceCompressionFormat TextureAssetDefinition::GetSourceCompressionFormatFromExtension(const String& sourceExtension)
 	{
 		if (sourceExtension.Contains("png"))
-			return TextureSourceFormat::PNG;
+			return TextureSourceCompressionFormat::PNG;
 		else if (sourceExtension.Contains("jpg") || sourceExtension.Contains("jpeg"))
-			return TextureSourceFormat::JPG;
+			return TextureSourceCompressionFormat::JPG;
 		else if (sourceExtension.Contains("hdr"))
-			return TextureSourceFormat::HDR;
+			return TextureSourceCompressionFormat::HDR;
 		else if (sourceExtension.Contains("exr"))
-			return TextureSourceFormat::EXR;
-		return TextureSourceFormat::Unsupported;
+			return TextureSourceCompressionFormat::EXR;
+		return TextureSourceCompressionFormat::None;
 	}
 
 } // namespace CE

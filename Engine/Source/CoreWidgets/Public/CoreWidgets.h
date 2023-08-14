@@ -48,7 +48,7 @@
 
 // Popups
 #include "Widgets/Popups/CPopup.h"
-#include "Widgets/Popups/CNotificationPopup.h"
+#include "Widgets/Popups/CNotification.h"
 
 // Input Widgets
 #include "Widgets/Input/CTextInput.h"
@@ -69,7 +69,7 @@ namespace CE::Widgets
 
 
 	template<typename TWidget> requires TIsBaseClassOf<CWidget, TWidget>::Value
-	TWidget* CreateWidget(Object* owner = nullptr,
+	TWidget* CreateWidget(Object* owner = (Object*)GetWidgetsTransientPackage(),
 		String widgetName = "Widget",
 		ClassType* widgetClass = TWidget::Type(),
 		ObjectFlags objectFlags = OF_NoFlags)

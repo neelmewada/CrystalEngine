@@ -72,11 +72,11 @@ namespace CE::Editor
 				{
 					// Source asset
 					AssetDefinition* assetDef = AssetDefinitionRegistry::Get()->FindAssetDefinitionForSourceAssetExtension(extension);
-					if (assetDef != nullptr)
+					if (assetDef != nullptr && !sourceAssetsToImport.Exists(thisChange.currentPath))
 					{
 						sourceAssetsToImport.Add(thisChange.currentPath);
 
-						waitToImportSourceAssets = 1.0f;
+						waitToImportSourceAssets = 3.0f;
 					}
 ;				}
 
@@ -187,6 +187,9 @@ namespace CE::Editor
 
 	void EditorAssetManager::ImportSourceAssets()
 	{
+		HashMap<AssetImporter*, Array<IO::Path>> sourcePathsToProcess{};
+		HashMap<AssetImporter*, Array<IO::Path>> productPaths{};
+
 		for (auto sourcePath : sourceAssetsToImport)
 		{
 			String extension = sourcePath.GetExtension().GetString();
@@ -201,10 +204,45 @@ namespace CE::Editor
 			if (assetImporter == nullptr)
 				continue;
 
-			numAssetsBeingImported++;
-			
-			// TODO: implement async later
-			ImportSourceAsset(sourcePath, assetImporter);
+			IO::Path productAssetPath = sourcePath.ReplaceExtension(".casset");
+
+			// Relative path to source asset
+			String sourcePathName = "";
+			if (IO::Path::IsSubDirectory(sourcePath, gProjectPath / "Game/Assets"))
+			{
+				sourcePathName = IO::Path::GetRelative(sourcePath, gProjectPath).GetString().Replace({ '\\' }, '/');
+				if (!sourcePathName.StartsWith("/"))
+					sourcePathName = "/" + sourcePathName;
+
+				auto assetBySourcePath = assetRegistry->GetAssetBySourcePath(sourcePathName);
+				if (assetBySourcePath != nullptr)
+				{
+					Name assetPackageName = assetBySourcePath->packageName;
+					auto packagePath = Package::GetPackagePath(assetPackageName);
+					if (packagePath.Exists())
+					{
+						productAssetPath = packagePath;
+					}
+					else
+					{
+						assetRegistry->cachedAssetBySourcePath.Remove(sourcePathName);
+					}
+				}
+			}
+
+			// TODO: implement async
+			//auto jobs = assetImporter->ImportSourceAssets({ sourcePath }, )
+
+			sourcePathsToProcess[assetImporter].Add(sourcePath);
+			productPaths[assetImporter].Add(productAssetPath);
+		}
+
+		for (auto [importer, sourcePaths] : sourcePathsToProcess)
+		{
+			auto outPaths = productPaths[importer];
+
+			importersInProgress.Add(importer);
+			importer->ImportSourceAssets(sourcePaths, outPaths);
 		}
 
 		sourceAssetsToImport.Clear();

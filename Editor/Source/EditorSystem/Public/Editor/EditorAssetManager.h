@@ -2,6 +2,7 @@
 
 namespace CE::Editor
 {
+	class AssetImporter;
 
     CLASS()
 	class EDITORSYSTEM_API EditorAssetManager : public AssetManager
@@ -27,6 +28,8 @@ namespace CE::Editor
 
 		Array<IO::Path> sourceAssetsToImport{};
 		Array<Name> recentlyProcessedPackageNames{};
+
+		Array<AssetImporter*> importersInProgress{};
 
 		f32 waitToImportSourceAssets = 0;
 

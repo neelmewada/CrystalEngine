@@ -721,6 +721,10 @@ namespace CE::Widgets
 			menu->ownerWindow = GetOwnerWindow();
 			menu->parent = this;
 		}
+		else if (subobject->IsOfType<CPopup>())
+		{
+			// Do not add popups to attachedWidgets
+		}
 		else if (IsContainer() && subobject->IsOfType<CWidget>() && IsSubWidgetAllowed(subobject->GetClass()))
 		{
 			CWidget* subWidget = (CWidget*)subobject;

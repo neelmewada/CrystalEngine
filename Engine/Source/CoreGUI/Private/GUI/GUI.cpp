@@ -6275,15 +6275,15 @@ namespace CE::GUI
 		g.GroupStack.pop_back();
 	}
 
-    COREGUI_API Vec2 CalculateTextSize(const char* text)
+    COREGUI_API Vec2 CalculateTextSize(const char* text, float wrapWidth)
     {
-        ImVec2 size = ImGui::CalcTextSize(text, 0, true);
+        ImVec2 size = ImGui::CalcTextSize(text, 0, true, wrapWidth);
         return Vec2(size.x, size.y);
     }
 
-    COREGUI_API Vec2 CalculateTextSize(const String& text)
+    COREGUI_API Vec2 CalculateTextSize(const String& text, float wrapWidth)
     {
-        return CalculateTextSize(text.GetCString());
+        return CalculateTextSize(text.GetCString(), wrapWidth);
     }
 
     COREGUI_API Vec2 GetItemRectSize()

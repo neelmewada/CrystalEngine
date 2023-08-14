@@ -227,6 +227,9 @@ namespace CE::GUI
 	COREGUI_API bool BeginPopup(const String& title, ID id, WindowFlags flags = WF_None);
 	COREGUI_API void EndPopup();
 
+	COREGUI_API bool BeginModalPopup(const String& title, ID id, bool* isShown, WindowFlags flags = WF_None);
+	COREGUI_API void EndModalPopup();
+
 #pragma endregion
 
 #pragma region Layout
@@ -245,8 +248,8 @@ namespace CE::GUI
 	COREGUI_API void BeginGroup();
 	COREGUI_API void EndGroup(const Vec4& padding = {});
 
-    COREGUI_API Vec2 CalculateTextSize(const char* text);
-    COREGUI_API Vec2 CalculateTextSize(const String& text);
+    COREGUI_API Vec2 CalculateTextSize(const char* text, float wrapWidth = -1.0f);
+    COREGUI_API Vec2 CalculateTextSize(const String& text, float wrapWidth = -1.0f);
 
     COREGUI_API Vec2 GetItemRectSize();
 

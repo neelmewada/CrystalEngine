@@ -41,12 +41,12 @@ namespace CE
         TypeId fieldTypeId = field->GetDeclarationTypeId();
         TypeInfo* fieldDeclarationType = field->GetDeclarationType();
         
-        if (fieldDeclarationType == nullptr || fieldTypeId == 0 || !field->IsSerialized())
+        if (fieldDeclarationType == nullptr || fieldTypeId == 0 || !field->IsSerialized() || !field->HasAttribute("DontSerialize"))
         {
             fields.RemoveAt(0);
             return false;
         }
-        
+
         if (!skipHeader)
         {
 			*stream << FIELD_MAGIC_NUMBER;
@@ -314,7 +314,12 @@ namespace CE
             *stream >> fieldTypeName;
             *stream >> fieldDataSize;
 
-            s32 index = fields.IndexOf([&](FieldType* field) { return field->GetName() == fieldName; });
+			s32 index = fields.IndexOf([&](FieldType* field) { return field->HasAttribute("Key") && field->GetAttribute("Key").GetStringValue() == fieldName; });
+
+			if (index < 0)
+			{
+				index = fields.IndexOf([&](FieldType* field) { return field->GetName() == fieldName; });
+			}
 
             if (index < 0 || index >= fields.GetSize() || fieldDataSize == 0)
             {

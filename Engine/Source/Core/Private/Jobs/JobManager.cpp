@@ -279,7 +279,7 @@ namespace CE
 					if (!globalQueue.empty())
 					{
 						job = globalQueue.front();
-						if (job->GetThreadFilter() == JOB_THREAD_UNDEFINED || job->GetThreadFilter() == threadInfo->tag)
+						if (job != nullptr && job->GetThreadFilter() == JOB_THREAD_UNDEFINED || job->GetThreadFilter() == threadInfo->tag)
 						{
 							globalQueue.pop_front();
 						}

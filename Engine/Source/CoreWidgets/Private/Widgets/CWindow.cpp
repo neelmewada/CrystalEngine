@@ -164,6 +164,12 @@ namespace CE::Widgets
 			}
 
 			GUI::PopStyleColor(8);
+
+			for (auto popup : attachedPopups)
+			{
+				if (popup->IsShown())
+					popup->Render();
+			}
         }
     }
 

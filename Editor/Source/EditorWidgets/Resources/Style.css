@@ -200,3 +200,16 @@ CMenuBar {
 .MenuBarItem:hovered {
 	background: rgb(0, 112, 224);
 }
+
+CPopup:title-bar, CPopup::title-bar:active {
+	background: rgb(20, 20, 20);
+}
+
+CPopup {
+	max-width: 250px;
+	padding: 10px 30px 10px 10px;
+	flex-direction: column;
+	align-items: stretch;
+	background: rgb(40, 40, 40);
+}
+

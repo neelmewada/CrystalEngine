@@ -28,7 +28,13 @@ namespace CE::Widgets
 
 	Vec2 CLabel::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return GUI::CalculateTextSize(text) + Vec2(6, 3);
+		float wrapWidth = -1.0f;
+		if (!isnan(width) && width > 0)
+			wrapWidth = width;
+		auto textSize = GUI::CalculateTextSize(text, wrapWidth);
+		if (!isnan(height) && textSize.y > height)
+			textSize.y = height;
+		return textSize + Vec2(6, 3);
 	}
 
     void CLabel::OnDrawGUI()
@@ -62,7 +68,7 @@ namespace CE::Widgets
 			PollEvents();
 		}
 
-		GUI::Text(rect, text, *curState);
+		GUI::TextWrapped(rect, text, *curState);
     }
 
 	void CLabel::HandleEvent(CEvent* event)

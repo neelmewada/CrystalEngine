@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TextureDefines.h"
+
 namespace CE
 {
 #if PAL_TRAIT_BUILD_EDITOR
@@ -31,7 +33,10 @@ namespace CE
 			BinaryBlob rawData{};
 
 			FIELD()
-			TextureSourceFormat sourceFormat = TextureSourceFormat::PNG;
+			TextureFormat sourcePixelFormat = TextureFormat::None;
+
+			FIELD()
+			TextureSourceCompressionFormat sourceCompression = TextureSourceCompressionFormat::PNG;
 
 		};
 	}

@@ -20,7 +20,7 @@ namespace CE::Editor
 
 		SubClassType<AssetImporter> GetAssetImporterClass() override;
 
-		TextureSourceFormat GetSourceFormatFromExtension(const String& sourceExtension);
+		TextureSourceCompressionFormat GetSourceCompressionFormatFromExtension(const String& sourceExtension);
 
 	protected:
 

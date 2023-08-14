@@ -33,7 +33,7 @@ namespace CE::Editor
 		return TextureFormat::None;
 	}
 
-	Name TextureAssetImporter::ImportSourceAsset(const IO::Path& sourceAssetPath, const IO::Path& productAssetPath, bool linkSourceAsset)
+	Name TextureAssetImporter::ImportSourceAsset2(const IO::Path& sourceAssetPath, const IO::Path& productAssetPath, bool linkSourceAsset)
 	{
 		IO::Path outPath = productAssetPath;
 		if (outPath.IsEmpty())
@@ -85,8 +85,8 @@ namespace CE::Editor
 		if (!textureAssetDef->GetSourceExtensions().Exists(extension))
 			return Name();
 
-		TextureSourceFormat sourceFormat = textureAssetDef->GetSourceFormatFromExtension(extension);
-		if (sourceFormat == TextureSourceFormat::Unsupported)
+		TextureSourceCompressionFormat sourceCompressionFormat = textureAssetDef->GetSourceCompressionFormatFromExtension(extension);
+		if (sourceCompressionFormat == TextureSourceCompressionFormat::None)
 		{
 			CE_LOG(Error, All, "Unsupported source extension {}", extension);
 			return Name();
@@ -148,55 +148,54 @@ namespace CE::Editor
 		memStream.SetAutoResizeIncrement(512);
 
 		// Encode image
-		CMImageSourceFormat outputFormat = CMImageSourceFormat::Undefined;
-		if (CMImage::EncodeToBCn(image, &memStream, outputFormat))
+		//CMImageSourceFormat outputFormat = CMImageSourceFormat::Undefined;
+		//if (CMImage::EncodeToBCn(image, &memStream, outputFormat))
+		//{
+		//	texture->source.sourceCompression = TextureSourceFormat::Unsupported;
+		//	// BC4 or BC7 encode success
+		//	switch (outputFormat)
+		//	{
+		//	case CE::CMImageSourceFormat::PNG:
+		//		texture->source.sourceFormat = TextureSourceFormat::PNG;
+		//		texture->format = GetTextureFormatFromCMImage(image);
+		//		break;
+		//	case CE::CMImageSourceFormat::BC4:
+		//		texture->source.sourceFormat = TextureSourceFormat::BC4;
+		//		texture->format = TextureFormat::BC4;
+		//		break;
+		//	case CE::CMImageSourceFormat::BC6H:
+		//		texture->source.sourceFormat = TextureSourceFormat::BC6H;
+		//		texture->format = TextureFormat::BC6H;
+		//		break;
+		//	case CE::CMImageSourceFormat::BC7:
+		//		texture->source.sourceFormat = TextureSourceFormat::BC7;
+		//		texture->format = TextureFormat::BC7_RGBA;
+		//		break;
+		//	}
+		//	if (texture->source.sourceFormat == TextureSourceFormat::Unsupported ||
+		//		texture->format == TextureFormat::None)
+		//	{
+		//		failed = true;
+		//		CE_LOG(Error, All, "Invalid output format");
+		//		return Name();
+		//	}
+		//	memStream.Seek(0);
+		//	texture->source.rawData.LoadData(&memStream);
+		//}
+		
+		texture->pixelFormat = GetTextureFormatFromCMImage(image);
+		if (texture->pixelFormat == TextureFormat::None)
 		{
-			texture->source.sourceFormat = TextureSourceFormat::Unsupported;
-			// BC4 or BC7 encode success
-			switch (outputFormat)
-			{
-			case CE::CMImageSourceFormat::PNG:
-				texture->source.sourceFormat = TextureSourceFormat::PNG;
-				texture->format = GetTextureFormatFromCMImage(image);
-				break;
-			case CE::CMImageSourceFormat::BC4:
-				texture->source.sourceFormat = TextureSourceFormat::BC4;
-				texture->format = TextureFormat::BC4;
-				break;
-			case CE::CMImageSourceFormat::BC6H:
-				texture->source.sourceFormat = TextureSourceFormat::BC6H;
-				texture->format = TextureFormat::BC6H;
-				break;
-			case CE::CMImageSourceFormat::BC7:
-				texture->source.sourceFormat = TextureSourceFormat::BC7;
-				texture->format = TextureFormat::BC7_RGBA;
-				break;
-			}
-			if (texture->source.sourceFormat == TextureSourceFormat::Unsupported ||
-				texture->format == TextureFormat::None)
-			{
-				failed = true;
-				CE_LOG(Error, All, "Invalid output format");
-				return Name();
-			}
-			memStream.Seek(0);
-			texture->source.rawData.LoadData(&memStream);
+			failed = true;
+			CE_LOG(Error, All, "Invalid number of channels: {}", image.GetNumChannels());
+			return Name();
 		}
-		else
-		{
-			texture->format = GetTextureFormatFromCMImage(image);
-			if (texture->format == TextureFormat::None)
-			{
-				failed = true;
-				CE_LOG(Error, All, "Invalid number of channels: {}", image.GetNumChannels());
-				return Name();
-			}
 
-			// Save as original (only PNG for now)
-			FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
-			texture->source.rawData.LoadData(&fileData);
-			texture->source.sourceFormat = sourceFormat;
-		}
+		// Save as original (only PNG for now)
+		FileStream fileData = FileStream(sourceAssetPath, Stream::Permissions::ReadOnly);
+		texture->source.rawData.LoadData(&fileData);
+		texture->source.sourcePixelFormat = texture->pixelFormat;
+		texture->source.sourceCompression = sourceCompressionFormat;
 
 		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String));
 		if (sourceAssetPathField != nullptr)
@@ -214,9 +213,25 @@ namespace CE::Editor
 		return packageName;
 	}
 
-	Array<Job*> TextureAssetImporter::CreateImportJobs(const Array<IO::Path>& sourcePaths)
+	void TextureImportJob::Process()
 	{
-		return {};
+
+	}
+
+	Array<AssetImportJob*> TextureAssetImporter::CreateImportJobs(const Array<IO::Path>& sourcePaths, const Array<IO::Path>& productPaths)
+	{
+		Array<AssetImportJob*> result{};
+
+		for (int i = 0; i < sourcePaths.GetSize(); i++)
+		{
+			IO::Path productPath = {};
+			if (i < productPaths.GetSize() - 1)
+				productPath = productPaths[i];
+
+			result.Add(new TextureImportJob(this, sourcePaths[i], productPath));
+		}
+
+		return result;
 	}
 
 } // namespace CE::Editor

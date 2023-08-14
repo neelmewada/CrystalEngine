@@ -11,9 +11,15 @@ namespace CE::Editor
 		CrystalEditorWindow();
 		virtual ~CrystalEditorWindow();
 
+		static CrystalEditorWindow* Get();
+
 		void Construct() override;
 
+		void ShowDemoPopup();
+
 	protected:
+
+		CPopup* demoPopup = nullptr;
 
 		AssetBrowserPanel* assetBrowserPanel = nullptr;
 	};

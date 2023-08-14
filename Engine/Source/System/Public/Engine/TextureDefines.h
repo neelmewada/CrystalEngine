@@ -2,7 +2,7 @@
 
 namespace CE
 {
-
+	/// Texture pixel format
 	ENUM()
 	enum class TextureFormat
 	{
@@ -31,33 +31,28 @@ namespace CE
 		RGFloat,
 		RGBAFloat,
 
-		// Compressed formats
-		BC4,
-		BC6H,
-		BC7_RGBA,
-	};
-	ENUM_CLASS_FLAGS(TextureFormat);
-
-	ENUM()
-	enum class TextureCompression
-	{
-		None = 0,
-		BC7
-	};
-	ENUM_CLASS_FLAGS(TextureCompression);
-
-	ENUM()
-	enum class TextureSourceFormat
-	{
-		Unsupported = 0,
-		PNG,
-		HDR, EXR,
-		JPG,
+		// Compressed pixel formats
+		BC1,
 		BC4,
 		BC6H,
 		BC7,
 	};
-	ENUM_CLASS_FLAGS(TextureSourceFormat);
+	ENUM_CLASS_FLAGS(TextureFormat);
+
+	ENUM()
+	enum class TextureSourceCompressionFormat
+	{
+		None = 0,
+		PNG,
+		HDR, EXR,
+		JPG,
+		BC1,
+		BC4,
+		BC6H,
+		BC7,
+	};
+	ENUM_CLASS_FLAGS(TextureSourceCompressionFormat);
+
 
 	ENUM()
 	enum class TextureType : int
@@ -74,7 +69,8 @@ namespace CE
 	enum class TextureFilter : int
 	{
 		Linear = 0,
-		Nearest
+		Nearest,
+		Cubic
 	};
 	ENUM_CLASS_FLAGS(TextureFilter);
     
