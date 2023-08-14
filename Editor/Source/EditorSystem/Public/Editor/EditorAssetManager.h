@@ -24,7 +24,7 @@ namespace CE::Editor
 
 	protected:
 
-		bool ImportSourceAsset(IO::Path sourceAssetPath, AssetImporter* importer);
+		//bool ImportSourceAsset(IO::Path sourceAssetPath, AssetImporter* importer);
 
 		Array<IO::Path> sourceAssetsToImport{};
 		Array<Name> recentlyProcessedPackageNames{};

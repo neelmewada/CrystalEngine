@@ -76,4 +76,4 @@ namespace CE
     
 } // namespace CE
 
-#include "TextureEnums.rtti.h"
+#include "TextureDefines.rtti.h"

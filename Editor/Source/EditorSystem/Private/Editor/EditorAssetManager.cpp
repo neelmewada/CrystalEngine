@@ -106,7 +106,7 @@ namespace CE::Editor
 		}
     }
 
-	bool EditorAssetManager::ImportSourceAsset(IO::Path sourceAssetPath, AssetImporter* importer)
+	/*bool EditorAssetManager::ImportSourceAsset(IO::Path sourceAssetPath, AssetImporter* importer)
 	{
 		String extension = sourceAssetPath.GetExtension().GetString();
 
@@ -184,6 +184,7 @@ namespace CE::Editor
 		}
 		return outPackageName.IsValid();
 	}
+	*/
 
 	void EditorAssetManager::ImportSourceAssets()
 	{

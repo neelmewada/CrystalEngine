@@ -5,7 +5,7 @@
 namespace CE
 {
 #if PAL_TRAIT_BUILD_EDITOR
-	namespace Editor { class TextureAssetImporter; }
+	namespace Editor { class TextureImportJob; }
 #endif
 
 	namespace Private
@@ -26,7 +26,7 @@ namespace CE
 			void Release();
 
 #if PAL_TRAIT_BUILD_EDITOR
-			friend class CE::Editor::TextureAssetImporter;
+			friend class CE::Editor::TextureImportJob;
 #endif
 
 			FIELD()

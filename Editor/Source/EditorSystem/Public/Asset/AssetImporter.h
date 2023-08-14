@@ -2,32 +2,8 @@
 
 namespace CE::Editor
 {
-	class EDITORSYSTEM_API AssetImportJob : public Job
-	{
-	public:
-		typedef AssetImportJob Self;
-		typedef Job Super;
-
-		AssetImportJob(AssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath) 
-			: Job(true)
-			, importer(importer)
-			, sourcePath(sourcePath)
-			, outPath(outPath)
-		{
-
-		}
-
-		void Finish() override;
-
-	protected:
-
-		bool success = false;
-		IO::Path sourcePath{};
-		IO::Path outPath{};
-		Name outPackagePath{};
-
-		AssetImporter* importer = nullptr;
-	};
+	class AssetImporter;
+	class AssetImportJob;
 
     CLASS(Abstract)
     class EDITORSYSTEM_API AssetImporter : public Object
@@ -54,6 +30,33 @@ namespace CE::Editor
 	private:
         
     };
+
+	class EDITORSYSTEM_API AssetImportJob : public Job
+	{
+	public:
+		typedef AssetImportJob Self;
+		typedef Job Super;
+
+		AssetImportJob(AssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath)
+			: Job(true)
+			, importer(importer)
+			, sourcePath(sourcePath)
+			, outPath(outPath)
+		{
+
+		}
+
+		void Finish() override;
+
+	protected:
+
+		bool success = false;
+		IO::Path sourcePath{};
+		IO::Path outPath{};
+		Name outPackagePath{};
+
+		AssetImporter* importer = nullptr;
+	};
 
 } // namespace CE::Editor
 
