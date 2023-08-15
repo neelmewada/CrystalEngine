@@ -171,7 +171,7 @@ namespace CE
     }
 
     TypeInfo::TypeInfo(CE::Name name, CE::String attributes)
-        : name(name)
+        : name(name), originalAttributes(attributes)
     {
         int curScope = 0;
         bool isString = false;

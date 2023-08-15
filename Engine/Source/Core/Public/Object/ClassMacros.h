@@ -219,7 +219,8 @@ namespace CE\
             CE::StructType Type;\
 			const CE::StructTypeData<Namespace::Struct> TypeData;\
 			API static const CE::Name& FullTypeName();\
-            TypeInfoImpl(CE::StructType&& type, CE::StructTypeData<Namespace::Struct> typeData) : Type(type), TypeData(typeData)\
+            TypeInfoImpl(const char* name, Internal::IStructTypeImpl* impl, u32 size, CE::StructTypeData<Namespace::Struct> typeData, const char* attributes = "")\
+				: Type(name, impl, size, attributes), TypeData(typeData)\
             {\
 				Type.AddSuper<SuperStructs>();\
 				FieldList\
@@ -246,7 +247,9 @@ namespace CE\
 	template<>\
 	inline TypeInfo* GetStaticType<Namespace::Struct>()\
 	{\
-        static CE::Internal::TypeInfoImpl<Namespace::Struct> instance{ StructType{ #Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), Attributes "" }, StructTypeData<Namespace::Struct>() };\
+        static CE::Internal::TypeInfoImpl<Namespace::Struct> instance{\
+			#Namespace "::" #Struct, &instance, sizeof(Namespace::Struct), StructTypeData<Namespace::Struct>(), Attributes ""\
+		};\
 		return &instance.Type;\
 	}\
 	template<>\

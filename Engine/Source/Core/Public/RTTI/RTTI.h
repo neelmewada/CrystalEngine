@@ -214,6 +214,8 @@ namespace CE
 		Attribute attributes{};
         Name registeredModuleName{};
 
+		String originalAttributes{};
+
 	public:
 		// For internal use only!
         static HashMap<CE::Name, TypeInfo*> registeredTypesByName;
@@ -233,6 +235,7 @@ namespace CE
 	private:
 		friend class ModuleManager;
 		friend class CE::CoreModule;
+		friend class ClassType;
 
 		static void DeregisterTypesForModule(ModuleInfo* moduleInfo);
 

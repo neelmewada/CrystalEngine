@@ -8,7 +8,15 @@ namespace CE
     CE::HashMap<TypeId, StructType*> StructType::registeredStructs{};
     CE::HashMap<Name, StructType*> StructType::registeredStructsByName{};
 
-    bool StructType::IsAssignableTo(TypeId typeId)
+	//StructType::StructType(const StructType& copy) : TypeInfo(copy.name, copy.originalAttributes)
+	//{
+	//	localFields = copy.localFields;
+	//	localFunctions = copy.localFunctions;
+
+	//	cachedFields = copy.cachedFields;
+	//}
+
+	bool StructType::IsAssignableTo(TypeId typeId)
     {
         if (typeId == this->GetTypeId())
             return true;
@@ -155,10 +163,12 @@ namespace CE
 
     void StructType::CacheAllAttributes()
     {
+		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (attributesCached)
             return;
 
         attributesCached = true;
+
         cachedAttributes.isMap = true;
         cachedAttributes.tableValue = {};
 
@@ -208,10 +218,12 @@ namespace CE
 
     void StructType::CacheAllFields()
     {
+		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (fieldsCached)
             return;
 
         fieldsCached = true;
+
         cachedFields.Clear();
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
@@ -252,14 +264,18 @@ namespace CE
 
 			cachedFieldsMap[cachedFields[i].GetName()].Add(&cachedFields[i]);
         }
+
+		
     }
 
     void StructType::CacheAllFunctions()
     {
+		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (functionsCached)
             return;
 
         functionsCached = true;
+
         cachedFunctions.Clear();
 		cachedFunctionsMap.Clear();
 
@@ -322,6 +338,8 @@ namespace CE
 			else
 				cachedFunctionsMap.Add({ cachedFunctions[i].GetName(), { &cachedFunctions[i] } });
 		}
+
+		
     }
 
     void StructType::RegisterStructType(StructType* type)
@@ -387,9 +405,9 @@ namespace CE
             CacheSuperTypes();
         }
 
-        for (int i = 0; i < superTypes.GetSize(); i++)
+        for (int i = 0; i < superClasses.GetSize(); i++)
         {
-            if (superTypes[i]->IsSubclassOf(classTypeId))
+            if (superClasses[i]->IsSubclassOf(classTypeId))
                 return true;
         }
 
@@ -403,11 +421,11 @@ namespace CE
 
     void ClassType::CacheSuperTypes()
     {
+		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (superTypesCached)
             return;
 
-		if (superTypeIds.IsEmpty())
-			superTypesCached = true;
+		superTypesCached = true;
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
         {
@@ -415,15 +433,27 @@ namespace CE
             if (type == nullptr || !type->IsClass())
                 continue;
 
-            superTypes.Add((ClassType*)type);
-			superTypesCached = true;
+			superClasses.Add((ClassType*)type);
         }
 
-		if (superTypesCached)
-			AddDerivedClassToMap(this, this);
+		AddDerivedClassToMap(this, this);
+		
     }
 
-    void ClassType::AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath)
+	void ClassType::ClearDefaultInstancesForModule(const Name& moduleName)
+	{
+		const auto& typesInThisModule = TypeInfo::registeredTypesByModuleName[moduleName];
+
+		for (auto type : typesInThisModule)
+		{
+			if (type->IsClass())
+			{
+				((ClassType*)type)->defaultInstance = nullptr;
+			}
+		}
+	}
+
+	void ClassType::AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath)
     {
         if (derivedClass == nullptr || parentSearchPath == nullptr)
             return;
@@ -446,6 +476,8 @@ namespace CE
 
 	const Object* ClassType::GetDefaultInstance()
 	{
+		//LockGuard<RecursiveMutex> lock{ rttiMutex };
+
 		if (defaultInstance == nullptr)
 		{
 			auto nameString = GetName().GetLastComponent();
@@ -457,6 +489,7 @@ namespace CE
 			
 			defaultInstance = CreateObject<Object>(transientPackage, "CDI_" + nameString, OF_ClassDefaultInstance, this, nullptr);
 		}
+		
 		return defaultInstance;
 	}
 
@@ -489,6 +522,44 @@ namespace CE
         registeredClasses.Remove(type->GetTypeId());
         registeredClassesByName.Remove(type->GetTypeName());
     }
+
+	void ClassType::CreateDefaultInstancesForCurrentModule()
+	{
+		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
+			return;
+
+		const auto& typesInThisModule = TypeInfo::registeredTypesByModuleName[TypeInfo::currentlyLoadingModuleStack.Top()];
+
+		for (auto type : typesInThisModule)
+		{
+			if (type->IsClass())
+			{
+				((ClassType*)type)->GetDefaultInstance();
+			}
+		}
+	}
+
+	void ClassType::CacheTypesForCurrentModule()
+	{
+		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
+			return;
+
+		const auto& typesInThisModule = TypeInfo::registeredTypesByModuleName[TypeInfo::currentlyLoadingModuleStack.Top()];
+
+		for (auto type : typesInThisModule)
+		{
+			if (type->IsClass() || type->IsStruct())
+			{
+				((StructType*)type)->CacheAllFields();
+				((StructType*)type)->CacheAllAttributes();
+				((StructType*)type)->CacheAllFunctions();
+			}
+			if (type->IsClass())
+			{
+				((ClassType*)type)->CacheSuperTypes();
+			}
+		}
+	}
 
     ClassType* ClassType::FindClassByName(const Name& className)
     {

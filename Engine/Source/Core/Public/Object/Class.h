@@ -80,6 +80,8 @@ namespace CE
 
 	public:
 
+		//StructType(const StructType& copy);
+
 		// TypeData is always located AFTER TypeInfo in memory
 		virtual const u8* GetRawTypeData() const { return (u8*)(this + 1); }
 
@@ -376,11 +378,15 @@ namespace CE
 		CE::Array<FunctionType> localFunctions{};
 		bool fieldsCached = false;
 		bool functionsCached = false;
-        bool attributesCached = false;
+		bool attributesCached = false;
 		u32 size = 0;
+
+		//RecursiveMutex rttiMutex{};
 
         static CE::HashMap<TypeId, StructType*> registeredStructs;
         static CE::HashMap<Name, StructType*> registeredStructsByName;
+
+		friend class ClassType;
 
 	private:
 		Internal::IStructTypeImpl* Impl = nullptr;
@@ -497,6 +503,9 @@ namespace CE
         // For internal use only!
         static void DeregisterClassType(ClassType* type);
 
+		static void CreateDefaultInstancesForCurrentModule();
+		static void CacheTypesForCurrentModule();
+
 		static bool GetTotalRegisteredClasses()
 		{
 			return registeredClasses.GetSize();
@@ -519,20 +528,23 @@ namespace CE
 		{
 			if (!superTypesCached)
 				CacheSuperTypes();
-			return (index >= 0 && index < superTypes.GetSize()) ? superTypes[index] : nullptr;
+			return (index >= 0 && index < superClasses.GetSize()) ? superClasses[index] : nullptr;
 		}
 
 		u32 GetSuperClassCount()
 		{
 			if (!superTypesCached)
 				CacheSuperTypes();
-			return superTypes.GetSize();
+			return superClasses.GetSize();
 		}
 
         Array<TypeId> GetDerivedClassesTypeId() const;
         Array<ClassType*> GetDerivedClasses() const;
 
 	private:
+
+		static void ClearDefaultInstancesForModule(const Name& moduleName);
+
         static void AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath);
 
 		void CacheSuperTypes();
@@ -542,12 +554,14 @@ namespace CE
 		Object* defaultInstance = nullptr;
 
 		bool superTypesCached = false;
-		Array<ClassType*> superTypes{};
+		Array<ClassType*> superClasses{};
 
         static CE::HashMap<TypeId, ClassType*> registeredClasses;
         static CE::HashMap<Name, ClassType*> registeredClassesByName;
 
         static CE::HashMap<TypeId, Array<TypeId>> derivedClassesMap;
+
+		friend class ModuleManager;
 	};
 
 #pragma pack(push, 1)

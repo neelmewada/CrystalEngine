@@ -57,7 +57,7 @@ namespace CE
 		info->isLoaded = true;
 		info->moduleImpl = modulePtr;
 
-		// Create transient package for if NOT Core module
+		// Create transient package if NOT Core module
 		if (moduleName != "Core")
 			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
@@ -72,6 +72,9 @@ namespace CE
 
 		if (moduleName == "Core")
 			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
+
+		ClassType::CreateDefaultInstancesForCurrentModule();
+		ClassType::CacheTypesForCurrentModule();
 
 		// Load resources
 		info->loadResourcesFuncPtr();
@@ -94,6 +97,8 @@ namespace CE
 		}
 
 		TypeInfo::currentlyUnloadingModuleStack.Push(moduleName);
+
+		ClassType::ClearDefaultInstancesForModule(moduleName);
 
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 

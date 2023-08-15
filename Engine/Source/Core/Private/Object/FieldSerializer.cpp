@@ -41,7 +41,7 @@ namespace CE
         TypeId fieldTypeId = field->GetDeclarationTypeId();
         TypeInfo* fieldDeclarationType = field->GetDeclarationType();
         
-        if (fieldDeclarationType == nullptr || fieldTypeId == 0 || !field->IsSerialized() || !field->HasAttribute("DontSerialize"))
+        if (fieldDeclarationType == nullptr || fieldTypeId == 0 || !field->IsSerialized() || field->HasAttribute("DontSerialize"))
         {
             fields.RemoveAt(0);
             return false;

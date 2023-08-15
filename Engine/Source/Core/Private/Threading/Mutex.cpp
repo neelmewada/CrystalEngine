@@ -13,4 +13,12 @@ namespace CE
 	{
 	}
 
+    SharedMutex::SharedMutex()
+    {
+    }
+
+    SharedMutex::~SharedMutex()
+    {
+    }
+
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <shared_mutex>
 #include <semaphore>
 #include <chrono>
 
@@ -29,12 +30,58 @@ namespace CE
     private:
         std::mutex mut{};
     };
+
+	class CORE_API SharedMutex
+	{
+	public:
+		SharedMutex();
+		~SharedMutex();
+
+		CE_INLINE void Lock() { mut.lock(); }
+		CE_INLINE void Unlock() { mut.unlock(); }
+		CE_INLINE bool TryLock() { return mut.try_lock(); }
+
+		void lock() { mut.lock(); }
+		void unlock() { mut.unlock(); }
+		bool try_lock() { return mut.try_lock(); }
+
+		inline operator std::shared_mutex& ()
+		{
+			return mut;
+		}
+
+	private:
+		std::shared_mutex mut{};
+	};
+
+	class CORE_API RecursiveMutex
+	{
+	public:
+		RecursiveMutex() {}
+		~RecursiveMutex() {}
+
+		CE_INLINE void Lock() { mut.lock(); }
+		CE_INLINE void Unlock() { mut.unlock(); }
+		CE_INLINE bool TryLock() { return mut.try_lock(); }
+
+		void lock() { mut.lock(); }
+		void unlock() { mut.unlock(); }
+		bool try_lock() { return mut.try_lock(); }
+
+		inline operator std::recursive_mutex& ()
+		{
+			return mut;
+		}
+
+	private:
+		std::recursive_mutex mut{};
+	};
     
     template<class TMutex>
     struct LockGuard
     {
     public:
-        LockGuard(Mutex& mutex) : mutex(mutex)
+        LockGuard(TMutex& mutex) : mutex(mutex)
         {
             mutex.Lock();
         }
@@ -48,7 +95,7 @@ namespace CE
         LockGuard operator=(const LockGuard& copy) = delete;
 
     private:
-        Mutex& mutex;
+		TMutex& mutex;
     };
 
 	template<typename T>
