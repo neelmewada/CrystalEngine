@@ -499,7 +499,6 @@ TEST(Containers, Sorting)
 		EXPECT_EQ(array[i++], "Fbcd");
 		EXPECT_EQ(array[i++], "Z031.jpg");
 		EXPECT_EQ(array[i++], "Zf12.jpg");
-
 	}
 
 	TEST_END;

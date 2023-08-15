@@ -4,6 +4,11 @@ namespace CE
 {
 	AssetRegistry* AssetRegistry::singleton = nullptr;
 
+	static bool SortAssetData(AssetData* lhs, AssetData* rhs)
+	{
+		return String::CompareFileNames(lhs->packageName.GetLastComponent(), rhs->packageName.GetLastComponent());
+	}
+
 	AssetRegistry::AssetRegistry()
 	{
 
@@ -118,6 +123,7 @@ namespace CE
 			cachedAssetsByPath[relativePathStr].Add(assetData);
 
 			cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
+			cachedPrimaryAssetsByParentPath[parentRelativePathStr].Sort(SortAssetData);
 		}
 
 		if (!sourceAssetRelativePath.IsEmpty())
@@ -201,6 +207,7 @@ namespace CE
 						cachedPrimaryAssetByPath[relativePathStr] = assetData;
 
 						cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
+						cachedPrimaryAssetsByParentPath[parentRelativePathStr].Sort(SortAssetData);
 
 						if (!sourceAssetRelativePath.IsEmpty())
 						{

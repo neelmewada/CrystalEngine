@@ -8,5 +8,6 @@
 #include "Containers/StringView.h"
 #include "Containers/HashMap.h"
 #include "Containers/HashSet.h"
+#include "Containers/Queue.h"
 
 #include "Types/Name.h"

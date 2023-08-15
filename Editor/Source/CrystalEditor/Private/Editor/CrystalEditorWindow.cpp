@@ -68,7 +68,7 @@ namespace CE::Editor
 					yesNoPopup->Hide();
 				});
 		}
-		demoPopup = yesNoPopup;
+		assetImportPopup = yesNoPopup;
 
 		auto menuBar = CreateWidget<CMenuBar>(this, "EditorMenuBar");
 		{
@@ -118,7 +118,7 @@ namespace CE::Editor
 
 	void CrystalEditorWindow::ShowDemoPopup()
 	{
-		demoPopup->Show();
+		assetImportPopup->Show();
 	}
 
 } // namespace CE::Editor

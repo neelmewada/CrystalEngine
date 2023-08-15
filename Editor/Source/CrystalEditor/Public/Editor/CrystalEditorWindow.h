@@ -19,7 +19,7 @@ namespace CE::Editor
 
 	protected:
 
-		CPopup* demoPopup = nullptr;
+		CPopup* assetImportPopup = nullptr;
 
 		AssetBrowserPanel* assetBrowserPanel = nullptr;
 	};

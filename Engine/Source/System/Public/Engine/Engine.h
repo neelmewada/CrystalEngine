@@ -19,11 +19,16 @@ namespace CE
 
 		virtual void Tick(f32 deltaTime);
 
+		void DispatchOnMainThread(Delegate<void(void)> action);
+
 	public: 
 		// - Fields -
 
 		FIELD()
 		AssetManager* assetManager = nullptr;
+
+		Queue<Delegate<void()>> mainThreadQueue{};
+		SharedMutex mainThreadQueueMutex{};
 	};
     
 } // namespace CE

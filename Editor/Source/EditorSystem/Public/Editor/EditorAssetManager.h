@@ -36,6 +36,7 @@ namespace CE::Editor
 
 		int numAssetsBeingImported = 0;
 
+		Queue<Delegate<void(void)>> mainThreadQueue{};
 		Mutex mutex{};
 	};
 

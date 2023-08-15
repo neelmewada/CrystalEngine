@@ -104,6 +104,12 @@ namespace CE::Editor
 				ImportSourceAssets();
 			}
 		}
+
+		if (!mainThreadQueue.IsEmpty())
+		{
+			mainThreadQueue.GetFront().InvokeIfValid();
+			mainThreadQueue.PopFront();
+		}
     }
 
 	void EditorAssetManager::ImportSourceAssets()
@@ -151,9 +157,6 @@ namespace CE::Editor
 				}
 			}
 
-			// TODO: implement async
-			//auto jobs = assetImporter->ImportSourceAssets({ sourcePath }, )
-
 			sourcePathsToProcess[assetImporter].Add(sourcePath);
 			productPaths[assetImporter].Add(productAssetPath);
 
@@ -178,9 +181,13 @@ namespace CE::Editor
 		auto sourcePathString = sourcePath.GetString().Replace({ '\\' }, '/');
 		if (!sourcePathString.StartsWith("/"))
 			sourcePathString = "/" + sourcePathString;
-
-		if (success)
-			AssetRegistry::Get()->OnAssetImported(packageName, sourcePathString);
+		
+		mutex.Lock();
+		mainThreadQueue.PushBack([=]()
+			{
+				AssetRegistry::Get()->OnAssetImported(packageName, sourcePathString);
+			});
+		mutex.Unlock();
 	}
 
 } // namespace CE::Editor
