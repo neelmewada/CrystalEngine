@@ -246,32 +246,32 @@ namespace CE
         struct Iterator
         {
             using iterator_category = std::contiguous_iterator_tag;
-            using difference_type = std::ptrdiff_t;
-            using value_type = ElementType;
-            using pointer = ElementType*;  // or also value_type*
-            using reference = ElementType&;  // or also value_type&
+            using difference_type	= std::ptrdiff_t;
+            using value_type		= ElementType;
+            using pointer			= ElementType*;  // or also value_type*
+            using reference			= ElementType&;  // or also value_type&
 
-            Iterator(pointer Ptr) : Ptr(Ptr) {}
+            Iterator(pointer ptr) : ptr(ptr) {}
 
             // De-reference ops
-            reference operator*() const { return *Ptr; }
-            pointer operator->() { return Ptr; }
+            reference operator*() const { return *ptr; }
+            pointer operator->() { return ptr; }
 
             // Increment ops
-            Iterator& operator++() { Ptr++; return *this; }
+            Iterator& operator++() { ptr++; return *this; }
             Iterator operator++(int) { Iterator Temp = *this; ++(*this); return Temp; }
-            Iterator& operator+(SIZE_T rhs) { Ptr += rhs; return *this; }
+			Iterator operator+(difference_type rhs) { return Iterator(ptr + rhs); }
 
             // Decrement ops
-            Iterator& operator--() { Ptr--; return *this; }
+            Iterator& operator--() { ptr--; return *this; }
             Iterator operator--(int) { Iterator Temp = *this; --(*this); return Temp; }
-            Iterator& operator-(SIZE_T rhs) { Ptr -= rhs; return *this; }
+            Iterator operator-(difference_type rhs) { return Iterator(ptr - rhs); }
 
-            friend bool operator== (const Iterator& A, const Iterator& B) { return A.Ptr == B.Ptr; };
-            friend bool operator!= (const Iterator& A, const Iterator& B) { return A.Ptr != B.Ptr; };
+            friend bool operator== (const Iterator& A, const Iterator& B) { return A.ptr == B.ptr; };
+            friend bool operator!= (const Iterator& A, const Iterator& B) { return A.ptr != B.ptr; };
 
         private:
-            pointer Ptr;
+            pointer ptr;
         };
 
         struct ConstIterator
@@ -282,26 +282,26 @@ namespace CE
             using pointer = const ElementType*;  // or also value_type*
             using reference = const ElementType&;  // or also value_type&
 
-            ConstIterator(pointer Ptr) : Ptr(Ptr) {}
+            ConstIterator(pointer ptr) : ptr(ptr) {}
 
             // De-reference ops
-            reference operator*() const { return *Ptr; }
-            pointer operator->() { return Ptr; }
+            reference operator*() const { return *ptr; }
+            pointer operator->() { return ptr; }
 
             // Increment ops
-            ConstIterator& operator++() { Ptr++; return *this; }
+            ConstIterator& operator++() { ptr++; return *this; }
             ConstIterator operator++(int) { ConstIterator temp = *this; ++(*this); return temp; }
-            ConstIterator& operator+(SIZE_T rhs) { Ptr += rhs; return *this; }
+            ConstIterator& operator+(SIZE_T rhs) { ptr += rhs; return *this; }
             // Decrement ops
-            ConstIterator& operator--() { Ptr--; return *this; }
+            ConstIterator& operator--() { ptr--; return *this; }
             ConstIterator operator--(int) { ConstIterator temp = *this; --(*this); return temp; }
-            ConstIterator& operator-(SIZE_T rhs) { Ptr -= rhs; return *this; }
+            ConstIterator& operator-(SIZE_T rhs) { ptr -= rhs; return *this; }
 
-            friend bool operator== (const ConstIterator& A, const ConstIterator& B) { return A.Ptr == B.Ptr; };
-            friend bool operator!= (const ConstIterator& A, const ConstIterator& B) { return A.Ptr != B.Ptr; };
+            friend bool operator== (const ConstIterator& A, const ConstIterator& B) { return A.ptr == B.ptr; };
+            friend bool operator!= (const ConstIterator& A, const ConstIterator& B) { return A.ptr != B.ptr; };
 
         private:
-            pointer Ptr;
+            pointer ptr;
         };
 
         Iterator begin() { return Iterator{ Impl.data() }; }
@@ -312,6 +312,12 @@ namespace CE
 
         Iterator Begin() { return begin(); }
         Iterator End() { return end(); }
+
+		template<class TPred>
+		inline void Sort(TPred pred)
+		{
+			std::sort(begin(), end(), pred);
+		}
 
     protected:
         std::vector<ElementType> Impl;
@@ -624,29 +630,29 @@ namespace CE
             using pointer           = ElementType*;  // or also value_type*
             using reference         = ElementType&;  // or also value_type&
 
-            Iterator(pointer Ptr) : Ptr(Ptr) {}
+            Iterator(pointer ptr) : ptr(ptr) {}
 
             // De-reference ops
-            reference operator*() const { return *Ptr; }
-            pointer operator->() { return Ptr; }
+            reference operator*() const { return *ptr; }
+            pointer operator->() { return ptr; }
 
             // Increment ops
-            Iterator& operator++() { Ptr++; return *this; }
+            Iterator& operator++() { ptr++; return *this; }
             Iterator operator++(int) { Iterator Temp = *this; ++(*this); return Temp; }
-            Iterator& operator+(SIZE_T rhs) { Ptr += rhs; return *this; }
+			Iterator operator+(difference_type rhs) { return Iterator(ptr + rhs); }
 
             // Decrement ops
-            Iterator& operator--() { Ptr--; return *this; }
+            Iterator& operator--() { ptr--; return *this; }
             Iterator operator--(int) { Iterator Temp = *this; --(*this); return Temp; }
-            Iterator& operator-(SIZE_T rhs) { Ptr -= rhs; return *this; }
+			Iterator operator-(difference_type rhs) { return Iterator(ptr - rhs); }
 
-            friend bool operator== (const Iterator& A, const Iterator& B) { return A.Ptr == B.Ptr; };
-            friend bool operator!= (const Iterator& A, const Iterator& B) { return A.Ptr != B.Ptr; };
+            friend bool operator== (const Iterator& A, const Iterator& B) { return A.ptr == B.ptr; };
+            friend bool operator!= (const Iterator& A, const Iterator& B) { return A.ptr != B.ptr; };
 
-            inline operator pointer() const { return Ptr; }
+            inline operator pointer() const { return ptr; }
 
         private:
-            pointer Ptr;
+            pointer ptr;
         };
 
         struct ConstIterator
@@ -657,28 +663,28 @@ namespace CE
             using pointer           = const ElementType*;  // or also value_type*
             using reference         = const ElementType&;  // or also value_type&
 
-            ConstIterator(pointer Ptr) : Ptr(Ptr) {}
+            ConstIterator(pointer ptr) : ptr(ptr) {}
 
             // De-reference ops
-            reference operator*() const { return *Ptr; }
-            pointer operator->() { return Ptr; }
+            reference operator*() const { return *ptr; }
+            pointer operator->() { return ptr; }
 
             // Increment ops
-            ConstIterator& operator++() { Ptr++; return *this; }
+            ConstIterator& operator++() { ptr++; return *this; }
             ConstIterator operator++(int) { ConstIterator temp = *this; ++(*this); return temp; }
-            ConstIterator& operator+(SIZE_T rhs) { Ptr += rhs; return *this; }
+            ConstIterator& operator+(SIZE_T rhs) { ptr += rhs; return *this; }
             // Decrement ops
-            ConstIterator& operator--() { Ptr--; return *this; }
+            ConstIterator& operator--() { ptr--; return *this; }
             ConstIterator operator--(int) { ConstIterator temp = *this; --(*this); return temp; }
-            ConstIterator& operator-(SIZE_T rhs) { Ptr -= rhs; return *this; }
+            ConstIterator& operator-(SIZE_T rhs) { ptr -= rhs; return *this; }
 
-            friend bool operator== (const ConstIterator& A, const ConstIterator& B) { return A.Ptr == B.Ptr; };
-            friend bool operator!= (const ConstIterator& A, const ConstIterator& B) { return A.Ptr != B.Ptr; };
+            friend bool operator== (const ConstIterator& A, const ConstIterator& B) { return A.ptr == B.ptr; };
+            friend bool operator!= (const ConstIterator& A, const ConstIterator& B) { return A.ptr != B.ptr; };
 
-            inline operator pointer() const { return Ptr; }
+            inline operator pointer() const { return ptr; }
 
         private:
-            pointer Ptr;
+            pointer ptr;
         };
 
         auto begin() { return Iterator{ List<ElementType>::Impl.data() }; }
@@ -689,6 +695,12 @@ namespace CE
 
         Iterator Begin() { return begin(); }
         Iterator End() { return end(); }
+
+		template<class TPred>
+		inline void Sort(TPred pred)
+		{
+			std::sort(Begin(), End(), pred);
+		}
 
     private:
         TypeId ElementTypeId;

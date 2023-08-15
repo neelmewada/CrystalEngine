@@ -27,7 +27,7 @@ namespace CE::Editor
 	{
 		mutex.Lock();
 		CE_LOG(Info, All, "Asset import {}: {}", success ? "successful" : "failed", sourcePath);
-		OnAssetImportResult(success, sourcePath, packageName);
+		emit OnAssetImportResult(success, sourcePath, packageName);
 		mutex.Unlock();
 	}
 

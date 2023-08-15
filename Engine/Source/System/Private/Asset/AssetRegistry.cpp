@@ -48,7 +48,7 @@ namespace CE
 
 	Array<AssetData*> AssetRegistry::GetPrimaryAssetsInSubPath(const Name& parentPath)
 	{
-		return cachedPrimaryAssetByParentPath[parentPath];
+		return cachedPrimaryAssetsByParentPath[parentPath];
 	}
 
 	Array<String> AssetRegistry::GetSubDirectoriesAtPath(const Name& path)
@@ -117,7 +117,7 @@ namespace CE
 			cachedPathTree.AddPath(relativePathStr, assetData);
 			cachedAssetsByPath[relativePathStr].Add(assetData);
 
-			cachedPrimaryAssetByParentPath[parentRelativePathStr].Add(assetData);
+			cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
 		}
 
 		if (!sourceAssetRelativePath.IsEmpty())
@@ -200,7 +200,7 @@ namespace CE
 						cachedAssetsByPath[relativePathStr].Add(assetData);
 						cachedPrimaryAssetByPath[relativePathStr] = assetData;
 
-						cachedPrimaryAssetByParentPath[parentRelativePathStr].Add(assetData);
+						cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
 
 						if (!sourceAssetRelativePath.IsEmpty())
 						{

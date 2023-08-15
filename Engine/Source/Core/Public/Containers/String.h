@@ -158,6 +158,10 @@ namespace CE
         inline bool IsEmpty() const { return StringLength == 0; }
 		inline bool NonEmpty() const { return StringLength > 0; }
 
+		/// Returns true if lhs is less than rhs
+		static bool CompareFileNames(const String& lhs, const String& rhs);
+		static bool Compare(const String& lhs, const String& rhs);
+
         /*
          *  Iterators
          */
@@ -283,6 +287,11 @@ namespace CE
 	            return 0;
 	        return (u8)(c - '0');
 	    }
+
+		FORCE_INLINE static bool IsSpecial(char c)
+		{
+			return (c >= 32 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 126);
+		}
 
 	    FORCE_INLINE static bool IsAlphabet(char c)
 	    {

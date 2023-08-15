@@ -451,6 +451,60 @@ TEST(Containers, Variant)
     TEST_END;
 }
 
+TEST(Containers, Sorting)
+{
+	TEST_BEGIN;
+
+	// Custom sorting
+	{
+		struct Interval {
+			int start, end;
+		};
+
+		Array<Interval> array = { { 6, 8 }, { 1, 9 }, { 2, 4 }, { 4, 7 } };
+		array.Sort([](Interval i1, Interval i2)
+			{
+				return (i1.start < i2.start);
+			});
+
+		for (int i = 0; i < array.GetSize() - 1; i++)
+		{
+			auto cur = array[i];
+			auto next = array[i + 1];
+			EXPECT_LE(cur.start, next.start);
+		}
+	}
+
+	// String sorting
+	{
+		Array<String> array = {
+			"-123",
+			"123",
+			"92",
+			"Fbcd",
+			"a421.png",
+			"Zf12.jpg",
+			"Z031.jpg",
+			"@f12",
+		};
+
+		array.Sort(&String::CompareFileNames);
+		
+		int i = 0;
+		EXPECT_EQ(array[i++], "-123");
+		EXPECT_EQ(array[i++], "@f12");
+		EXPECT_EQ(array[i++], "123");
+		EXPECT_EQ(array[i++], "92");
+		EXPECT_EQ(array[i++], "a421.png");
+		EXPECT_EQ(array[i++], "Fbcd");
+		EXPECT_EQ(array[i++], "Z031.jpg");
+		EXPECT_EQ(array[i++], "Zf12.jpg");
+
+	}
+
+	TEST_END;
+}
+
 TEST(Containers, Defer)
 {
 	TEST_BEGIN;

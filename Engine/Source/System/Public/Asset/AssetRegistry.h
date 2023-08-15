@@ -97,7 +97,7 @@ namespace CE
 		HashMap<Name, AssetData*> cachedAssetBySourcePath{};
 
 		/// List of primary assets in the sub-path of a path
-		HashMap<Name, Array<AssetData*>> cachedPrimaryAssetByParentPath{};
+		HashMap<Name, Array<AssetData*>> cachedPrimaryAssetsByParentPath{};
 		
 	};
     

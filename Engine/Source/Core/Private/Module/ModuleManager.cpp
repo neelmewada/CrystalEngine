@@ -73,8 +73,9 @@ namespace CE
 		if (moduleName == "Core")
 			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
-		ClassType::CreateDefaultInstancesForCurrentModule();
 		ClassType::CacheTypesForCurrentModule();
+		ClassType::CreateDefaultInstancesForCurrentModule();
+		ClassType::FireClassRegistrationEventForCurrentModule();
 
 		// Load resources
 		info->loadResourcesFuncPtr();

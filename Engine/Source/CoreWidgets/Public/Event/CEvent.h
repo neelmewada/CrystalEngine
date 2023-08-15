@@ -121,5 +121,4 @@ namespace CE::Widgets
 
 } // namespace CE::Widgets
 
-
 #include "CEvent.rtti.h"

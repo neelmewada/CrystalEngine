@@ -219,7 +219,7 @@ namespace CE\
             CE::StructType Type;\
 			const CE::StructTypeData<Namespace::Struct> TypeData;\
 			API static const CE::Name& FullTypeName();\
-            TypeInfoImpl(const char* name, Internal::IStructTypeImpl* impl, u32 size, CE::StructTypeData<Namespace::Struct> typeData, const char* attributes = "")\
+            TypeInfoImpl(const char* name, CE::Internal::IStructTypeImpl* impl, u32 size, CE::StructTypeData<Namespace::Struct> typeData, const char* attributes = "")\
 				: Type(name, impl, size, attributes), TypeData(typeData)\
             {\
 				Type.AddSuper<SuperStructs>();\

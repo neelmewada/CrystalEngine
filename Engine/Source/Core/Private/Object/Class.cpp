@@ -440,6 +440,22 @@ namespace CE
 		
     }
 
+	void ClassType::FireClassRegistrationEventForCurrentModule()
+	{
+		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
+			return;
+
+		const auto& typesInThisModule = TypeInfo::registeredTypesByModuleName[TypeInfo::currentlyLoadingModuleStack.Top()];
+
+		for (auto type : typesInThisModule)
+		{
+			if (type->IsClass())
+			{
+				CoreObjectDelegates::onClassRegistered.Broadcast((ClassType*)type);
+			}
+		}
+	}
+
 	void ClassType::ClearDefaultInstancesForModule(const Name& moduleName)
 	{
 		const auto& typesInThisModule = TypeInfo::registeredTypesByModuleName[moduleName];
@@ -509,7 +525,10 @@ namespace CE
         //type->CacheSuperTypes();
         //AddDerivedClassToMap(type, type);
 
-        CoreObjectDelegates::onClassRegistered.Broadcast(type);
+		// Only fire registration event for types that are registered outside any module
+		// Types that are registered within a module will fire only after all types within that module are fully loaded
+		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
+			CoreObjectDelegates::onClassRegistered.Broadcast(type);
     }
 
     void ClassType::DeregisterClassType(ClassType* type)

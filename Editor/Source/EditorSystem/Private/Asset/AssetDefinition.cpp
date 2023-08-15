@@ -35,7 +35,7 @@ namespace CE::Editor
 
 		for (auto assetDef : gAssetDefinitionRegistry->assetDefinitions)
 		{
-			if (assetDef != nullptr && assetDef->GetClass()->IsSubclassOf(subClass))
+			if (assetDef != nullptr && assetDef->IsOfType(subClass))
 				return assetDef;
 		}
 
