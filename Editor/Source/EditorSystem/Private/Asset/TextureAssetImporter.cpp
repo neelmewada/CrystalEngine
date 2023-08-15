@@ -33,6 +33,32 @@ namespace CE::Editor
 		return TextureFormat::None;
 	}
 
+	static TextureSourceCompressionFormat GetPreferredSourceCompressionFormat(const CMImage& image, bool lowQuality = true)
+	{
+		if (image.GetNumChannels() == 1)
+		{
+			if (image.GetBitDepth() == 8)
+				return TextureSourceCompressionFormat::BC4;
+		}
+		else if (image.GetNumChannels() == 2)
+		{
+
+		}
+		else if (image.GetNumChannels() == 3)
+		{
+			if (image.GetBitDepth() == 8)
+				return TextureSourceCompressionFormat::BC1;
+		}
+		else if (image.GetNumChannels() == 4)
+		{
+			if (image.GetBitDepth() == 8)
+			{
+				return TextureSourceCompressionFormat::BC7;
+			}
+		}
+		return TextureSourceCompressionFormat::None;
+	}
+
 	TextureImportJob::TextureImportJob(TextureAssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath)
 		: AssetImportJob(importer, sourcePath, outPath)
 	{
@@ -156,6 +182,7 @@ namespace CE::Editor
 		texture->source.rawData.LoadData(&fileData);
 		texture->source.sourcePixelFormat = texture->pixelFormat;
 		texture->source.sourceCompression = sourceCompressionFormat;
+		texture->compressionFormat = GetPreferredSourceCompressionFormat(image);
 
 		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String));
 		if (sourceAssetPathField != nullptr)

@@ -23,6 +23,7 @@ namespace CE::Editor
 	class EDITORSYSTEM_API TextureImportJob : public AssetImportJob
 	{
 	public:
+
 		TextureImportJob(TextureAssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath);
 
 		void Process() override;

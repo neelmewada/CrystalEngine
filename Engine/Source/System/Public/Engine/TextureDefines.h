@@ -33,6 +33,7 @@ namespace CE
 
 		// Compressed pixel formats
 		BC1,
+		BC3,
 		BC4,
 		BC6H,
 		BC7,
@@ -47,6 +48,7 @@ namespace CE
 		HDR, EXR,
 		JPG,
 		BC1,
+		BC3,
 		BC4,
 		BC6H,
 		BC7,

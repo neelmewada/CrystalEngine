@@ -19,6 +19,7 @@ namespace CE::Editor
 
 		for (auto job : jobs)
 		{
+			numJobsInProgress++;
 			job->Start();
 		}
 	}
@@ -27,6 +28,7 @@ namespace CE::Editor
 	{
 		mutex.Lock();
 		CE_LOG(Info, All, "Asset import {}: {}", success ? "successful" : "failed", sourcePath);
+		numJobsInProgress--;
 		emit OnAssetImportResult(success, sourcePath, packageName);
 		mutex.Unlock();
 	}

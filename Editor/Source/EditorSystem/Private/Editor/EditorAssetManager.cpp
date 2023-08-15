@@ -110,6 +110,15 @@ namespace CE::Editor
 			mainThreadQueue.GetFront().InvokeIfValid();
 			mainThreadQueue.PopFront();
 		}
+
+		for (int i = importersInProgress.GetSize() - 1; i >= 0; i--)
+		{
+			if (!importersInProgress[i]->IsImportInProgress())
+			{
+				importersInProgress[i]->RequestDestroy();
+				importersInProgress.RemoveAt(i);
+			}
+		}
     }
 
 	void EditorAssetManager::ImportSourceAssets()

@@ -20,12 +20,16 @@ namespace CE::Editor
 
 		/// Params: bool success, IO::Path sourcePath, Name outPackageName
 		CE_SIGNAL(OnAssetImportResult, bool, IO::Path, Name);
+
+		inline bool IsImportInProgress() { return numJobsInProgress == 0; }
         
     protected:
 
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourcePaths, const Array<IO::Path>& productPaths) = 0;
         
 		Mutex mutex{};
+
+		int numJobsInProgress = 0;
 
 	private:
         

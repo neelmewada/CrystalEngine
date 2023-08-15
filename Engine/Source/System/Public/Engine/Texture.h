@@ -62,6 +62,9 @@ namespace CE
 		TextureFilter filter = TextureFilter::Linear;
 
 		FIELD()
+		TextureSourceCompressionFormat compressionFormat = TextureSourceCompressionFormat::None;
+
+		FIELD()
 		u32 width = 0;
 
 		FIELD()

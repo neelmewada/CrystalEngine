@@ -177,10 +177,10 @@ namespace CE
                     else if (item.GetExtension() == ".casset") // Product asset file
                     {
 						Package* load = Package::LoadPackage(nullptr, item, LOAD_Default);
-						AssetData* assetData = new AssetData();
-						String sourceAssetRelativePath = "";
 						if (load != nullptr)
 						{
+							AssetData* assetData = new AssetData();
+							String sourceAssetRelativePath = "";
 							if (!load->GetPrimaryObjectName().IsValid())
 								load->LoadFully();
 							Name primaryName = load->GetPrimaryObjectName();
@@ -188,30 +188,31 @@ namespace CE
 							assetData->packageName = load->GetPackageName();
 							assetData->assetName = primaryName;
 							assetData->assetClassPath = primaryTypeName;
+							assetData->packageUuid = load->GetUuid();
+							assetData->assetUuid = load->GetPrimaryObjectUuid();
 #if PAL_TRAIT_BUILD_EDITOR
 							// Source asset path relative to project assets directory
-							sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
-							if (!sourceAssetRelativePath.IsEmpty())
-							{
-
-							}
-							assetData->sourceAssetPath = sourceAssetRelativePath;
+							assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
 #endif
 							load->RequestDestroy();
 							load = nullptr;
+
+							allAssetDatas.Add(assetData);
+							cachedPathTree.AddPath(relativePathStr, assetData);
+							cachedAssetsByPath[relativePathStr].Add(assetData);
+							cachedPrimaryAssetByPath[relativePathStr] = assetData;
+
+							cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
+							cachedPrimaryAssetsByParentPath[parentRelativePathStr].Sort(SortAssetData);
+
+							if (!sourceAssetRelativePath.IsEmpty())
+							{
+								cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
+							}
 						}
-
-						allAssetDatas.Add(assetData);
-						cachedPathTree.AddPath(relativePathStr, assetData);
-						cachedAssetsByPath[relativePathStr].Add(assetData);
-						cachedPrimaryAssetByPath[relativePathStr] = assetData;
-
-						cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
-						cachedPrimaryAssetsByParentPath[parentRelativePathStr].Sort(SortAssetData);
-
-						if (!sourceAssetRelativePath.IsEmpty())
+						else
 						{
-							cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
+							CE_LOG(Error, All, "Failed to load asset metadata: {}", item);
 						}
                     }
 				});
