@@ -159,7 +159,7 @@ namespace CE
 		inline bool NonEmpty() const { return StringLength > 0; }
 
 		/// Returns true if lhs is less than rhs
-		static bool CompareFileNames(const String& lhs, const String& rhs);
+		static bool NaturalCompare(const String& lhs, const String& rhs);
 		static bool Compare(const String& lhs, const String& rhs);
 
         /*

@@ -54,7 +54,7 @@ namespace CE::Editor
 			auto yesBtn = CreateWidget<CButton>(horizontalGroup, "YesButton");
 			yesBtn->SetAsAlternateStyle(true);
 			yesBtn->SetText("Yes");
-
+			
 			auto noBtn = CreateWidget<CButton>(horizontalGroup, "NoButton");
 			noBtn->SetText("No");
 

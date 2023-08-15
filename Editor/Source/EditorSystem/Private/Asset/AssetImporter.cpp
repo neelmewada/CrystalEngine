@@ -28,8 +28,8 @@ namespace CE::Editor
 	{
 		mutex.Lock();
 		CE_LOG(Info, All, "Asset import {}: {}", success ? "successful" : "failed", sourcePath);
-		numJobsInProgress--;
 		emit OnAssetImportResult(success, sourcePath, packageName);
+		numJobsInProgress--;
 		mutex.Unlock();
 	}
 

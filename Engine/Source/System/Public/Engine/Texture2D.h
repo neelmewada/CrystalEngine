@@ -16,9 +16,7 @@ namespace CE
 	protected:
 
 		FIELD()
-		TextureFormat pixelFormat = TextureFormat::None;
-
-
+		TextureColorSpace colorSpace = TextureColorSpace::None;
 
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::TextureImportJob;

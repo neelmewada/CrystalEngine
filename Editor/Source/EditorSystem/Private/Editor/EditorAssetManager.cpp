@@ -177,8 +177,8 @@ namespace CE::Editor
 		{
 			auto outPaths = productPaths[importer];
 
-			importersInProgress.Add(importer);
 			importer->ImportSourceAssets(sourcePaths, outPaths);
+			importersInProgress.Add(importer);
 		}
 
 		sourceAssetsToImport.Clear();

@@ -33,30 +33,31 @@ namespace CE::Editor
 		return TextureFormat::None;
 	}
 
-	static TextureSourceCompressionFormat GetPreferredSourceCompressionFormat(const CMImage& image, bool lowQuality = true)
+	static TextureCompressionSettings GetPreferredSourceCompressionFormat(const CMImage& image, bool lowQuality = true)
 	{
 		if (image.GetNumChannels() == 1)
 		{
 			if (image.GetBitDepth() == 8)
-				return TextureSourceCompressionFormat::BC4;
+				return TextureCompressionSettings::Grayscale;
 		}
 		else if (image.GetNumChannels() == 2)
 		{
-
+			if (image.GetBitDepth() == 8 || image.GetBitDepth() == 16)
+				TextureCompressionSettings::NormalMap;
 		}
 		else if (image.GetNumChannels() == 3)
 		{
 			if (image.GetBitDepth() == 8)
-				return TextureSourceCompressionFormat::BC1;
+				return TextureCompressionSettings::Default;
 		}
 		else if (image.GetNumChannels() == 4)
 		{
 			if (image.GetBitDepth() == 8)
 			{
-				return TextureSourceCompressionFormat::BC7;
+				return lowQuality ? TextureCompressionSettings::Default : TextureCompressionSettings::BC7;
 			}
 		}
-		return TextureSourceCompressionFormat::None;
+		return TextureCompressionSettings::Default;
 	}
 
 	TextureImportJob::TextureImportJob(TextureAssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath)
@@ -106,7 +107,7 @@ namespace CE::Editor
 		{
 			packageName = assetName;
 		}
-
+		
 		String extension = sourcePath.GetExtension().GetString();
 		TextureAssetDefinition* textureAssetDef = GetAssetDefinition<TextureAssetDefinition>();
 		if (textureAssetDef == nullptr)
@@ -156,13 +157,13 @@ namespace CE::Editor
 			texture->SetName(assetName);
 		
 		defer(
+			image.Free();
 			texturePackage->RequestDestroy();
 		);
 
 		texture->width = image.GetWidth();
 		texture->height = image.GetHeight();
 		texture->depth = 1;
-		texture->type = TextureType::Default;
 		texture->filter = TextureFilter::Linear;
 
 		// Store in BCn format if possible
@@ -182,7 +183,8 @@ namespace CE::Editor
 		texture->source.rawData.LoadData(&fileData);
 		texture->source.sourcePixelFormat = texture->pixelFormat;
 		texture->source.sourceCompression = sourceCompressionFormat;
-		texture->compressionFormat = GetPreferredSourceCompressionFormat(image);
+		texture->compression = GetPreferredSourceCompressionFormat(image);
+		texture->addressMode = TextureAddressMode::Wrap;
 
 		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String));
 		if (sourceAssetPathField != nullptr)

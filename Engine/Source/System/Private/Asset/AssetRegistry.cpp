@@ -98,7 +98,21 @@ namespace CE
 				parentRelativePathStr = "/" + parentRelativePathStr;
 		}
 
-		AssetData* assetData = new AssetData();
+		AssetData* assetData = nullptr;
+		bool newEntry = false;
+		int originalIndex = cachedPrimaryAssetsByParentPath[parentRelativePathStr].IndexOf([&](AssetData* data) -> bool { return data->packageName == load->GetPackageName(); });
+
+		if (originalIndex >= 0)
+		{
+			assetData = cachedPrimaryAssetsByParentPath[parentRelativePathStr].At(originalIndex);
+		}
+
+		if (assetData == nullptr)
+		{
+			assetData = new AssetData();
+			newEntry = true;
+		}
+
 		String sourceAssetRelativePath = "";
 		if (!load->GetPrimaryObjectName().IsValid())
 			load->LoadFully();
@@ -108,27 +122,39 @@ namespace CE
 		assetData->packageName = load->GetPackageName();
 		assetData->assetName = primaryName;
 		assetData->assetClassPath = primaryTypeName;
+		assetData->packageUuid = load->GetUuid();
+		assetData->assetUuid = load->GetPrimaryObjectUuid();
+		
 #if PAL_TRAIT_BUILD_EDITOR
 		// Source asset path relative to project assets directory
 		sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
 		assetData->sourceAssetPath = sourceAssetRelativePath;
 #endif
 
-		allAssetDatas.Add(assetData);
-		if (relativePathStr.NonEmpty())
+		
+		if (newEntry)
 		{
-			directoryTree.AddPath(parentRelativePathStr);
+			allAssetDatas.Add(assetData);
 
-			cachedPathTree.AddPath(relativePathStr, assetData);
-			cachedAssetsByPath[relativePathStr].Add(assetData);
+			if (relativePathStr.NonEmpty())
+			{
+				directoryTree.AddPath(parentRelativePathStr);
 
-			cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
-			cachedPrimaryAssetsByParentPath[parentRelativePathStr].Sort(SortAssetData);
-		}
+				cachedPathTree.AddPath(relativePathStr, assetData);
 
-		if (!sourceAssetRelativePath.IsEmpty())
-		{
-			cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
+				cachedAssetsByPath[relativePathStr].Add(assetData);
+
+				{
+					auto& array = cachedPrimaryAssetsByParentPath[parentRelativePathStr];
+					array.Add(assetData);
+					array.Sort(SortAssetData);
+				}
+			}
+
+			if (!sourceAssetRelativePath.IsEmpty())
+			{
+				cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
+			}
 		}
 
 		load->RequestDestroy();

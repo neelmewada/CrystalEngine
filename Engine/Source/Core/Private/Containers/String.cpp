@@ -3,6 +3,8 @@
 
 #include "CoreMinimal.h"
 
+#include "NaturalLess.h"
+
 using namespace CE;
 
 namespace CE
@@ -227,57 +229,12 @@ namespace CE
 		return Buffer;
 	}
 
-    bool String::CompareFileNames(const String& lhs, const String& rhs)
+    bool String::NaturalCompare(const String& lhs, const String& rhs)
     {
-		int minLength = Math::Min(lhs.GetLength(), rhs.GetLength());
-
-		for (int i = 0; i < minLength; i++)
-		{
-			char lhsChar = lhs[i];
-			char rhsChar = rhs[i];
-
-			if (lhsChar == rhsChar)
-				continue;
-
-			if (IsSpecial(lhsChar) && IsSpecial(rhsChar))
-			{
-				return lhsChar < rhsChar;
-			}
-			if (IsNumeric(lhsChar) && IsNumeric(rhsChar))
-			{
-				return lhsChar < rhsChar;
-			}
-			if (IsAlphabet(lhsChar) && IsAlphabet(rhsChar))
-			{
-				return std::tolower(lhsChar) < std::tolower(rhsChar);
-			}
-			if (IsSpecial(lhsChar))
-			{
-				return true;
-			}
-			if (IsSpecial(rhsChar))
-			{
-				return false;
-			}
-			if (IsNumeric(lhsChar))
-			{
-				return true;
-			}
-			if (IsNumeric(rhsChar))
-			{
-				return false;
-			}
-			if (IsAlphabet(lhsChar))
-			{
-				return true;
-			}
-			if (IsAlphabet(rhsChar))
-			{
-				return false;
-			}
-		}
-
-        return false;
+		auto left = lhs.ToLower();
+		auto right = rhs.ToLower();
+		int result = strcmp_natural(left.GetCString(), right.GetCString());
+		return result < 0;
     }
 
 	bool String::Compare(const String& lhs, const String& rhs)

@@ -16,8 +16,6 @@ namespace CE::Editor
 
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourcePaths, const Array<IO::Path>& productPaths) override;
 
-		FIELD()
-		TextureType textureType = TextureType::Default;
 	};
 
 	class EDITORSYSTEM_API TextureImportJob : public AssetImportJob

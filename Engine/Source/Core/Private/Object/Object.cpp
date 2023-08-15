@@ -3,6 +3,8 @@
 
 namespace CE
 {
+	static RecursiveMutex globalMutex{};
+
     Object::Object() : name("Object"), uuid(UUID())
     {
         ConstructInternal();
@@ -611,8 +613,32 @@ namespace CE
 		Object::EmitSignal(this, name, args);
 	}
 
+	DelegateHandle Object::BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate)
+	{
+		if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
+			return 0;
+
+		LockGuard<RecursiveMutex> lock{ globalMutex };
+		
+		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
+
+		outgoingBindings.Add({});
+		auto& binding = outgoingBindings.Top();
+
+		binding.signalInstance = sourceInstance;
+		binding.signalFunction = sourceFunction;
+		binding.boundInstance = nullptr;
+		binding.boundFunction = nullptr;
+
+		binding.boundDelegate = delegate;
+
+		return delegate.GetHandle();
+	}
+
 	void Object::EmitSignal(void* signalInstance, const String& name, const Array<Variant>& args)
 	{
+		LockGuard<RecursiveMutex> lock{ globalMutex };
+
 		Array<TypeId> argHashes{};
 		for (const Variant& arg : args)
 		{
@@ -657,6 +683,8 @@ namespace CE
 		if (sourceFunction->GetFunctionSignature() != destinationFunction->GetFunctionSignature())
 			return false;
 
+		LockGuard<RecursiveMutex> lock{ globalMutex };
+
 		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
 		auto& incomingBindings = incomingBindingsMap[destinationInstance];
 
@@ -674,6 +702,8 @@ namespace CE
 
 	void Object::UnbindSignals(void* toInstance, void* fromInstance)
 	{
+		LockGuard<RecursiveMutex> lock{ globalMutex };
+
 		auto& incoming = incomingBindingsMap[toInstance];
 
 		for (int i = incoming.GetSize() - 1; i >= 0; i--)
@@ -685,6 +715,8 @@ namespace CE
 
 	void Object::UnbindAllIncomingSignals(void* toInstance)
 	{
+		LockGuard<RecursiveMutex> lock{ globalMutex };
+
 		auto& incoming = incomingBindingsMap[toInstance];
 
 		for (int i = incoming.GetSize() - 1; i >= 0; i--)
@@ -695,6 +727,8 @@ namespace CE
 
 	void Object::UnbindAllOutgoingSignals(void* fromInstance)
 	{
+		LockGuard<RecursiveMutex> lock{ globalMutex };
+
 		auto& outgoing = outgoingBindingsMap[fromInstance];
 
 		for (int i = outgoing.GetSize() - 1; i >= 0; i--)
@@ -705,41 +739,50 @@ namespace CE
 
 	void Object::UnbindAllSignals(void* instance)
 	{
-		auto& outgoing = outgoingBindingsMap[instance];
-		for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING
-		{
-			auto& binding = outgoing[i];
+		LockGuard<RecursiveMutex> lock{ globalMutex };
 
-			if (binding.boundInstance != nullptr)
+		if (outgoingBindingsMap.KeyExists(instance))
+		{
+			auto& outgoing = outgoingBindingsMap[instance];
+			for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING
 			{
-				UnbindSignals(binding.boundInstance, instance);
+				auto& binding = outgoing[i];
+
+				if (binding.boundInstance != nullptr)
+				{
+					UnbindSignals(binding.boundInstance, instance);
+				}
 			}
+
+			outgoing.Clear();
+			outgoingBindingsMap.Remove(instance);
 		}
 
-		outgoing.Clear();
-		outgoingBindingsMap.Remove(instance);
-
-
-		auto& incoming = incomingBindingsMap[instance];
-		for (int i = incoming.GetSize() - 1; i >= 0; i--) // INCOMING
+		if (incomingBindingsMap.KeyExists(instance))
 		{
-			auto& binding = incoming[i];
-
-			auto& outgoingFrom = outgoingBindingsMap[binding.signalInstance];
-
-			for (int j = outgoingFrom.GetSize() - 1; j >= 0; j--)
+			auto& incoming = incomingBindingsMap[instance];
+			for (int i = incoming.GetSize() - 1; i >= 0; i--) // INCOMING
 			{
-				if (outgoingFrom[j].boundInstance == instance)
-					outgoingFrom.RemoveAt(j);
-			}
-		}
+				auto& binding = incoming[i];
 
-		incoming.Clear();
-		incomingBindingsMap.Remove(instance);
+				auto& outgoingFrom = outgoingBindingsMap[binding.signalInstance];
+
+				for (int j = outgoingFrom.GetSize() - 1; j >= 0; j--)
+				{
+					if (outgoingFrom[j].boundInstance == instance)
+						outgoingFrom.RemoveAt(j);
+				}
+			}
+
+			incoming.Clear();
+			incomingBindingsMap.Remove(instance);
+		}
 	}
 
     void Object::Unbind(void* instance, DelegateHandle delegateInstance)
     {
+		LockGuard<RecursiveMutex> lock{ globalMutex };
+
         auto& outgoing = outgoingBindingsMap[instance];
         for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING
         {

@@ -56,13 +56,16 @@ namespace CE
 		Private::TextureSource source{};
 
 		FIELD()
-		TextureType type = TextureType::Default;
+		TextureFormat pixelFormat = TextureFormat::None;
+
+		FIELD()
+		TextureCompressionSettings compression = TextureCompressionSettings::Default;
 
 		FIELD()
 		TextureFilter filter = TextureFilter::Linear;
 
 		FIELD()
-		TextureSourceCompressionFormat compressionFormat = TextureSourceCompressionFormat::None;
+		TextureAddressMode addressMode = TextureAddressMode::Wrap;
 
 		FIELD()
 		u32 width = 0;

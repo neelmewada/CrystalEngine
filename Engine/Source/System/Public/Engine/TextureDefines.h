@@ -40,6 +40,7 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(TextureFormat);
 
+	/// Texture source data format
 	ENUM()
 	enum class TextureSourceCompressionFormat
 	{
@@ -50,6 +51,7 @@ namespace CE
 		BC1,
 		BC3,
 		BC4,
+		BC5,
 		BC6H,
 		BC7,
 	};
@@ -57,15 +59,22 @@ namespace CE
 
 
 	ENUM()
-	enum class TextureType : int
+	enum class TextureCompressionSettings : int
 	{
-		ECONST(Display = "Default (Color sRGB)")
+		ECONST(Display = "Default (Color BC1/3)")
 		Default,
+		ECONST(Display = "Normal Map (BC5)")
 		NormalMap,
+		ECONST(Display = "Grayscale (R8/16 or BC4)")
 		Grayscale,
+		ECONST(Display = "HDR (BC6H)")
 		HDR,
+		ECONST(Display = "HDR Uncompressed (RGBA16 Half)")
+		HDRUncompressed,
+		ECONST(Display = "BC7 RGBA")
+		BC7,
 	};
-	ENUM_CLASS_FLAGS(TextureType);
+	ENUM_CLASS_FLAGS(TextureCompressionSettings);
 
 	ENUM()
 	enum class TextureFilter : int
@@ -75,6 +84,23 @@ namespace CE
 		Cubic
 	};
 	ENUM_CLASS_FLAGS(TextureFilter);
+
+	ENUM()
+	enum class TextureAddressMode : int
+	{
+		Wrap = 0,
+		Clamp,
+		Repeat,
+	};
+	ENUM_CLASS_FLAGS(TextureAddressMode);
+
+	ENUM()
+	enum class TextureColorSpace : int
+	{
+		None = 0,
+		SRGB
+	};
+	ENUM_CLASS_FLAGS(TextureColorSpace);
     
 } // namespace CE
 

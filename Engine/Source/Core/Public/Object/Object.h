@@ -204,25 +204,7 @@ namespace CE
 
 	private:
 
-		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate)
-		{
-			if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
-				return 0;
-
-			auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
-
-			outgoingBindings.Add({});
-			auto& binding = outgoingBindings.Top();
-
-			binding.signalInstance = sourceInstance;
-			binding.signalFunction = sourceFunction;
-			binding.boundInstance = nullptr;
-			binding.boundFunction = nullptr;
-
-			binding.boundDelegate = delegate;
-
-			return delegate.GetHandle();
-		}
+		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate);
 
 		template<typename ReturnType, typename... Args, std::size_t... Is>
 		inline static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<ReturnType(Args...)> delegate, std::index_sequence<Is...>)

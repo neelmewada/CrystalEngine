@@ -475,12 +475,12 @@ TEST(Containers, Sorting)
 		}
 	}
 
-	// String sorting
+	// Filename sorting 1
 	{
 		Array<String> array = {
-			"-123",
 			"123",
 			"92",
+			"2",
 			"Fbcd",
 			"a421.png",
 			"Zf12.jpg",
@@ -488,17 +488,41 @@ TEST(Containers, Sorting)
 			"@f12",
 		};
 
-		array.Sort(&String::CompareFileNames);
+		array.Sort(&String::NaturalCompare);
 		
 		int i = 0;
-		EXPECT_EQ(array[i++], "-123");
-		EXPECT_EQ(array[i++], "@f12");
-		EXPECT_EQ(array[i++], "123");
+		EXPECT_EQ(array[i++], "2");
 		EXPECT_EQ(array[i++], "92");
+		EXPECT_EQ(array[i++], "123");
+		EXPECT_EQ(array[i++], "@f12");
 		EXPECT_EQ(array[i++], "a421.png");
 		EXPECT_EQ(array[i++], "Fbcd");
 		EXPECT_EQ(array[i++], "Z031.jpg");
 		EXPECT_EQ(array[i++], "Zf12.jpg");
+	}
+
+	// Filename sorting 2
+	{
+		Array<String> array = {
+			"Perlin_22",
+			"Perlin_2",
+			"Perlin_20",
+			"Perlin_10",
+			"Perlin_5",
+			"Perlin_8",
+			"Perlin_1",
+		};
+
+		array.Sort(&String::NaturalCompare);
+
+		int i = 0;
+		EXPECT_EQ(array[i++], "Perlin_1");
+		EXPECT_EQ(array[i++], "Perlin_2");
+		EXPECT_EQ(array[i++], "Perlin_5");
+		EXPECT_EQ(array[i++], "Perlin_8");
+		EXPECT_EQ(array[i++], "Perlin_10");
+		EXPECT_EQ(array[i++], "Perlin_20");
+		EXPECT_EQ(array[i++], "Perlin_22");
 	}
 
 	TEST_END;
