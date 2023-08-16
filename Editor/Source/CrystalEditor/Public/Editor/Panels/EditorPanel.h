@@ -2,6 +2,7 @@
 
 namespace CE::Editor
 {
+	
     CLASS()
 	class CRYSTALEDITOR_API EditorPanel : public CWindow
 	{

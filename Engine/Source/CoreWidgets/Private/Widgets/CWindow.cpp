@@ -5,7 +5,7 @@ namespace CE::Widgets
 
     CWindow::CWindow()
     {
-		SetTitle(GetName().GetString());
+		
     }
 
     CWindow::~CWindow()
@@ -66,7 +66,14 @@ namespace CE::Widgets
 		}
 	}
 
-    void CWindow::OnDrawGUI()
+	void CWindow::Construct()
+	{
+		Super::Construct();
+
+		SetTitle(GetName().GetString());
+	}
+
+	void CWindow::OnDrawGUI()
     {
         if (isShown)
         {
@@ -79,6 +86,8 @@ namespace CE::Widgets
 				windowFlags |= GUI::WF_FullScreen | GUI::WF_NoPadding;
 			if (IsDockSpaceWindow())
 				windowFlags |= GUI::WF_NoPadding;
+			if (IsDockSpaceWindow() && isFullscreen)
+				windowFlags |= GUI::WF_NoBringToFrontOnFocus;
 
 			auto color = defaultStyleState.background;
 
@@ -121,7 +130,63 @@ namespace CE::Widgets
 			{
 				if (dockSpaceId.IsEmpty())
 					dockSpaceId = String::Format("DockSpace##{}", GetName());
-				GUI::DockSpace(dockSpaceId);
+				auto dockId = GUI::DockSpace(dockSpaceId);
+				
+				if (setDefaultDocking)
+				{
+					setDefaultDocking = false;
+
+					GUI::DockBuilderRemoveNode(dockId);
+					GUI::DockBuilderAddNode(dockId);
+					bool fillFound = false;
+
+					for (CWidget* subWidget : attachedWidgets)
+					{
+						if (subWidget->IsOfType<CWindow>())
+						{
+							CWindow* window = (CWindow*)subWidget;
+							if (window->defaultDockPosition == CDockPosition::Fill)
+							{
+								fillFound = true;
+								GUI::DockBuilderDockWindow(window->GetTitle(), dockId);
+							}
+						}
+					}
+
+					if (!fillFound)
+					{
+						auto rightDockId = GUI::DockBuilderSplitNode(dockId, GUI::Dir_Right, 0.25f, nullptr, &dockId);
+						auto centreDockId = GUI::DockBuilderSplitNode(dockId, GUI::Dir_Left, 0.75f, nullptr, &dockId);
+						auto bottomDockId = GUI::DockBuilderSplitNode(centreDockId, GUI::Dir_Down, 0.25f, nullptr, &centreDockId);
+						auto leftDockId = GUI::DockBuilderSplitNode(centreDockId, GUI::Dir_Left, 0.25f, nullptr, &centreDockId);
+
+						for (CWidget* subWidget : attachedWidgets)
+						{
+							if (subWidget->IsOfType<CWindow>())
+							{
+								CWindow* window = (CWindow*)subWidget;
+								String title = window->GetTitle();
+								switch (window->defaultDockPosition)
+								{
+								case CDockPosition::Center:
+									GUI::DockBuilderDockWindow(title, centreDockId);
+									break;
+								case CDockPosition::Left:
+									GUI::DockBuilderDockWindow(title, leftDockId);
+									break;
+								case CDockPosition::Right:
+									GUI::DockBuilderDockWindow(title, rightDockId);
+									break;
+								case CDockPosition::Bottom:
+									GUI::DockBuilderDockWindow(title, bottomDockId);
+									break;
+								}
+							}
+						}
+					}
+
+					GUI::DockBuilderFinish(dockId);
+				}
 			}
 
 			if (color.a > 0)

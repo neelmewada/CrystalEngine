@@ -8,6 +8,8 @@ namespace CE::GUI
 
 	COREGUI_API ID GetID(const String& strId);
 
+	COREGUI_API bool AreSettingsLoaded();
+
     COREGUI_API Vec2 GetCursorPos();
     COREGUI_API void SetCursorPos(const Vec2& pos);
     COREGUI_API Vec2 GetCursorScreenPos();
@@ -37,6 +39,8 @@ namespace CE::GUI
 
 	COREGUI_API void SetNextWindowSize(const Vec2& size, Cond condition = Cond::None);
 
+	COREGUI_API void SetNextWindowViewport(ID viewportId);
+
     COREGUI_API bool BeginWindow(const String& name, bool* isShown, WindowFlags flags = WF_None);
 
     COREGUI_API ID DockSpace(const String& id, Vec2 size = Vec2(0, 0), DockFlags dockFlags = DockFlags_None);
@@ -65,6 +69,18 @@ namespace CE::GUI
 	COREGUI_API bool BeginChild(const Rect& rect, ID id, const String& title, const Vec4& padding = {}, const GuiStyleState& styleState = {}, WindowFlags flags = WF_None);
 
 	extern COREGUI_API Array<Vec2> gPaddingXStack;
+
+#pragma region DockBuilder
+
+	COREGUI_API void DockBuilderRemoveNode(ID nodeId);
+	COREGUI_API void DockBuilderAddNode(ID nodeId);
+	COREGUI_API void DockBuilderSetNodePos(ID nodeId, Vec2 pos);
+	COREGUI_API void DockBuilderSetNodeSize(ID nodeId, Vec2 size);
+	COREGUI_API ID   DockBuilderSplitNode(ID nodeId, GUI::Dir split_dir, float size_ratio_for_node_at_dir, ID* out_id_at_dir, ID* out_id_at_opposite_dir); // Create 2 child nodes in this parent node.
+	COREGUI_API void DockBuilderDockWindow(const String& windowName, ID nodeId);
+	COREGUI_API void DockBuilderFinish(ID nodeId);
+
+#pragma endregion
 
 #pragma region Style
 

@@ -5,6 +5,19 @@ namespace CE::Widgets
 	class CMenuBar;
 	class CPopup;
 
+	ENUM()
+	enum class CDockPosition
+	{
+		None = 0,
+		Center,
+		Left,
+		Top,
+		Right,
+		Bottom,
+		Fill
+	};
+	ENUM_CLASS_FLAGS(CDockPosition);
+
     CLASS()
     class COREWIDGETS_API CWindow : public CWidget
     {
@@ -40,6 +53,11 @@ namespace CE::Widgets
 		inline Vec2 GetWindowSize() const { return windowSize; }
 		inline Vec2 GetWindowPos() const { return windowPos; }
 
+		inline CDockPosition GetDefaultDockPosition() const { return defaultDockPosition; }
+		inline void SetDefaultDockPosition(CDockPosition pos) { defaultDockPosition = pos; }
+
+		inline void SetDefaultDocking() { setDefaultDocking = true; }
+
 		/// Could be: HWND, SDL_Window*, etc depending on platform
 		inline void* GetPlatformHandle() const { return platformHandle; }
 
@@ -71,6 +89,8 @@ namespace CE::Widgets
         
     protected:
         
+		virtual void Construct() override;
+
 		virtual void OnDrawGUI() override;
 
 		virtual void HandleEvent(CEvent* event) override;
@@ -112,6 +132,12 @@ namespace CE::Widgets
 
 		FIELD(ReadOnly)
 		Array<CPopup*> attachedPopups{};
+
+		FIELD()
+		CDockPosition defaultDockPosition = CDockPosition::None;
+
+		FIELD()
+		bool setDefaultDocking = true;
 
 		void* platformHandle = nullptr;
 

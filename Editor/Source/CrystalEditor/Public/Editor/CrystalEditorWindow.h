@@ -2,6 +2,9 @@
 
 namespace CE::Editor
 {
+	class EditorWindow;
+	class SceneEditorWindow;
+
     CLASS()
 	class CRYSTALEDITOR_API CrystalEditorWindow : public CWindow
 	{
@@ -19,9 +22,11 @@ namespace CE::Editor
 
 	protected:
 
+		void OnDrawGUI() override;
+
 		CPopup* assetImportPopup = nullptr;
 
-		AssetBrowserPanel* assetBrowserPanel = nullptr;
+		SceneEditorWindow* sceneEditorWindow = nullptr;
 	};
 
 } // namespace CE::Editor

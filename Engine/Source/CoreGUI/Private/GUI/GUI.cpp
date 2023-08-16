@@ -43,6 +43,11 @@ namespace CE::GUI
 		return ImGui::GetID(strId.GetCString());
 	}
 
+	COREGUI_API bool AreSettingsLoaded()
+	{
+		return ImGui::GetCurrentContext()->SettingsLoaded;
+	}
+
 	COREGUI_API Vec2 GetCursorPos()
 	{
 		ImVec2 pos = ImGui::GetCursorPos();
@@ -151,6 +156,11 @@ namespace CE::GUI
 	COREGUI_API void SetNextWindowSize(const Vec2& size, Cond condition)
 	{
 		ImGui::SetNextWindowSize(ImVec2(size.x, size.y), (int)condition);
+	}
+
+	COREGUI_API void SetNextWindowViewport(ID viewportId)
+	{
+		ImGui::SetNextWindowViewport(viewportId);
 	}
 
 	COREGUI_API bool BeginWindow(const String& name, bool* isShown, WindowFlags flags)

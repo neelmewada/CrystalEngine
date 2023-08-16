@@ -260,6 +260,47 @@ void EditorLoop::RunLoop()
 
 		editorWindow->Render();
 
+		/*GUI::PushStyleColor(GUI::StyleCol_TitleBg, Color::FromRGBA32(20, 20, 20));
+		GUI::PushStyleColor(GUI::StyleCol_TitleBgActive, Color::FromRGBA32(20, 20, 20));
+		GUI::PushStyleColor(GUI::StyleCol_TitleBgCollapsed, Color::FromRGBA32(20, 20, 20));
+
+		GUI::PushStyleColor(GUI::StyleCol_Tab, Color::FromRGBA32(28, 28, 28));
+		GUI::PushStyleColor(GUI::StyleCol_TabActive, Color::FromRGBA32(36, 36, 36));
+		GUI::PushStyleColor(GUI::StyleCol_TabUnfocused, Color::FromRGBA32(28, 28, 28));
+		GUI::PushStyleColor(GUI::StyleCol_TabHovered, Color::FromRGBA32(32, 32, 32));
+		GUI::PushStyleColor(GUI::StyleCol_TabUnfocusedActive, Color::FromRGBA32(36, 36, 36));
+		GUI::PushStyleVar(GUI::StyleVar_WindowPadding, Vec2());
+
+		static bool firstTime = !GUI::AreSettingsLoaded();
+
+		GUI::BeginWindow("RootDockSpaceWindow", NULL, GUI::WF_FullScreen | GUI::WF_NoPadding | GUI::WF_NoBringToFrontOnFocus | GUI::WF_NoNavFocus | GUI::WF_NoBackground);
+		{
+			auto id = GUI::DockSpace("RootDockSpace", {}, GUI::DockFlags_NoSplit | GUI::DockFlags_NoResize);
+			if (firstTime)
+			{
+				GUI::DockBuilderRemoveNode(id);
+				GUI::DockBuilderAddNode(id);
+
+				//GUI::DockBuilderDockWindow(editorWindow->GetTitle(), id);
+				GUI::DockBuilderDockWindow("CrystalEditor", id);
+
+				GUI::DockBuilderFinish(id);
+			}
+
+			editorWindow->Render();
+
+		}
+		GUI::EndWindow();
+
+		GUI::PopStyleVar();
+		GUI::PopStyleColor(8);
+
+		firstTime = false;*/
+
+		static bool showDemo = false;
+		if (showDemo)
+			GUI::ShowDemoWindow(&showDemo);
+
 		cmdList->ImGuiRender();
 		cmdList->End();
 

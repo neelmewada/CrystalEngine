@@ -7,7 +7,6 @@ EditorPanel {
 	align-items: stretch;
 	align-content: stretch;
 }
-
 )";
 
 namespace CE::Editor

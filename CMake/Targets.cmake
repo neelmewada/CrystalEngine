@@ -308,7 +308,7 @@ function(ce_add_target NAME TARGET_TYPE)
     # RUNTIME_DEPENDENCIES
 
     foreach(runtime_dep ${ce_add_target_RUNTIME_DEPENDENCIES})
-        # NEW Loading
+        # NEW DLL copying
         if(TARGET ${runtime_dep}_RT)
             set(target_runtime_deps "")
             get_target_property(root_path ${runtime_dep}_RT ROOT_PATH)
@@ -322,7 +322,6 @@ function(ce_add_target NAME TARGET_TYPE)
                     if(NOT (IS_ABSOLUTE ${copy_lib}))
                         set(copy_lib "${root_path}/${copy_lib}")
                     endif()
-                    
                     add_custom_command(TARGET ${NAME} POST_BUILD
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different ${copy_lib} "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
                     )
@@ -341,10 +340,11 @@ function(ce_add_target NAME TARGET_TYPE)
                     if(NOT (IS_ABSOLUTE ${copy_file}))
                         set(copy_file "${root_path}/${copy_file}")
                     endif()
-                    
-                    add_custom_command(TARGET ${NAME} POST_BUILD
-                        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${copy_file} "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
-                    )
+                    if(EXISTS "${copy_file}")
+                        add_custom_command(TARGET ${NAME} POST_BUILD
+                            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${copy_file} "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"
+                        )
+                    endif()
                     list(APPEND target_runtime_deps "${copy_file}")
                 endforeach()
             endif()

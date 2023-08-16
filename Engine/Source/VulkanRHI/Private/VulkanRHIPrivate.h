@@ -115,6 +115,8 @@ namespace CE
 
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) override;
 
+		virtual void Resize(u32 newWidth, u32 newHeight) override;
+
         // - Getters -
 
         CE_INLINE VulkanRenderPass* GetVulkanRenderPass() { return renderPass; }

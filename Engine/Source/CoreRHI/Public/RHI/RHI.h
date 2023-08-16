@@ -121,6 +121,7 @@ namespace CE::RHI
 
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) = 0;
         
+		virtual void Resize(u32 newWidth, u32 newHeight) = 0;
     };
 
     /// A viewport used to draw to & present from.

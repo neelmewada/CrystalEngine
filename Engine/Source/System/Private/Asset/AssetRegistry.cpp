@@ -6,7 +6,7 @@ namespace CE
 
 	static bool SortAssetData(AssetData* lhs, AssetData* rhs)
 	{
-		return String::CompareFileNames(lhs->packageName.GetLastComponent(), rhs->packageName.GetLastComponent());
+		return String::NaturalCompare(lhs->packageName.GetLastComponent(), rhs->packageName.GetLastComponent());
 	}
 
 	AssetRegistry::AssetRegistry()

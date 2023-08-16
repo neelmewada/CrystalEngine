@@ -18,7 +18,7 @@ namespace CE::Editor
 		SetAllowHorizontalScroll(false);
 		SetAllowVerticalScroll(false);
 
-		SetTitle("Asset Browser");
+		defaultDockPosition = CDockPosition::Bottom;
 	}
 
 	AssetBrowserPanel::~AssetBrowserPanel()
@@ -34,6 +34,7 @@ namespace CE::Editor
 		Super::Construct();
 
 		EditorPrefs::Get().GetStruct(Private::AssetBrowserPanelPrefs::PrefsKey(), &prefs);
+		SetTitle("Asset Browser");
 
         LoadStyleSheet("/CrystalEditor/Resources/Styles/AssetBrowserPanel.css");
 		

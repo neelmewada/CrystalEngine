@@ -202,7 +202,7 @@ namespace CE
             }
         }
 
-        // TODO: Add color attachments
+        
         for (int i = 0; i < rtLayout.numColorOutputs; i++) // Color Attachments
         {
             auto& attachment = attachmentDesc[i];
@@ -306,7 +306,7 @@ namespace CE
         // Create render pass
         renderPass = new VulkanRenderPass(device, rtLayout);
 
-        // No need to create any depth & color buffers, handled by VulkanViewport
+        // No need to create any depth & color buffers, they are handled by VulkanViewport
     }
 
     VulkanRenderTarget::~VulkanRenderTarget()
@@ -326,6 +326,26 @@ namespace CE
     {
         this->clearColors[colorTargetIndex] = color;
     }
+
+	void VulkanRenderTarget::Resize(u32 newWidth, u32 newHeight)
+	{
+		DestroyDepthBuffer();
+		DestroyColorBuffers();
+
+		this->width = newWidth;
+		this->height = newHeight;
+		this->rtLayout.width = newWidth;
+		this->rtLayout.height = newHeight;
+		
+		// Depth Buffer
+		if (rtLayout.HasDepthStencilAttachment())
+		{
+			CreateDepthBuffer();
+		}
+
+		// Color Buffers
+		CreateColorBuffers();
+	}
 
     VkRenderPass VulkanRenderTarget::GetVulkanRenderPassHandle() const
     {

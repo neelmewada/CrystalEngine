@@ -40,37 +40,38 @@ namespace CE::Editor
 
 		Super::Construct();
 
-		auto yesNoPopup = CreateWidget<CPopup>(this, "YesNoPopup");
-		yesNoPopup->SetTitle("Demo Popup");
-		yesNoPopup->SetStyleSheet(css);
-		{
-			auto text = CreateWidget<CLabel>(yesNoPopup, "TextArea");
-			text->SetText("This is a long form text. And this is the second sentence. Please click yes or no button below.");
+		//auto yesNoPopup = CreateWidget<CPopup>(this, "YesNoPopup");
+		//yesNoPopup->SetTitle("Demo Popup");
+		//yesNoPopup->SetStyleSheet(css);
+		//{
+		//	auto text = CreateWidget<CLabel>(yesNoPopup, "TextArea");
+		//	text->SetText("This is a long form text. And this is the second sentence. Please click yes or no button below.");
 
-			auto horizontalGroup = CreateWidget<CLayoutGroup>(yesNoPopup, "HorizontalLayout");
+		//	auto horizontalGroup = CreateWidget<CLayoutGroup>(yesNoPopup, "HorizontalLayout");
 
-			CreateWidget<CSpacer>(horizontalGroup, "Spacer");
+		//	CreateWidget<CSpacer>(horizontalGroup, "Spacer");
 
-			auto yesBtn = CreateWidget<CButton>(horizontalGroup, "YesButton");
-			yesBtn->SetAsAlternateStyle(true);
-			yesBtn->SetText("Yes");
-			
-			auto noBtn = CreateWidget<CButton>(horizontalGroup, "NoButton");
-			noBtn->SetText("No");
+		//	auto yesBtn = CreateWidget<CButton>(horizontalGroup, "YesButton");
+		//	yesBtn->SetAsAlternateStyle(true);
+		//	yesBtn->SetText("Yes");
+		//	
+		//	auto noBtn = CreateWidget<CButton>(horizontalGroup, "NoButton");
+		//	noBtn->SetText("No");
 
-			Object::Bind(yesBtn, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
-				{
-					yesNoPopup->Hide();
-				});
+		//	Object::Bind(yesBtn, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
+		//		{
+		//			yesNoPopup->Hide();
+		//		});
 
-			Object::Bind(noBtn, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
-				{
-					yesNoPopup->Hide();
-				});
-		}
-		assetImportPopup = yesNoPopup;
+		//	Object::Bind(noBtn, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
+		//		{
+		//			yesNoPopup->Hide();
+		//		});
+		//}
+		//assetImportPopup = yesNoPopup;
 
-		auto menuBar = CreateWidget<CMenuBar>(this, "EditorMenuBar");
+		//auto menuBar = CreateWidget<CMenuBar>(this, "EditorMenuBar");
+		if (false)
 		{
 			auto fileMenuItem = CreateWidget<CMenuItem>(menuBar, "FileMenuItem");
 			fileMenuItem->SetText("File");
@@ -113,12 +114,17 @@ namespace CE::Editor
 			}
 		}
 
-		assetBrowserPanel = CreateWidget<AssetBrowserPanel>(this, "AssetBrowserPanel");
+		sceneEditorWindow = CreateWidget<SceneEditorWindow>(this, "SceneEditor");
 	}
 
 	void CrystalEditorWindow::ShowDemoPopup()
 	{
 		assetImportPopup->Show();
+	}
+
+	void CrystalEditorWindow::OnDrawGUI()
+	{
+		Super::OnDrawGUI();
 	}
 
 } // namespace CE::Editor
