@@ -302,6 +302,9 @@ namespace CE
         vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo,
             commandList->renderFinishedFence[renderTarget->currentImageIndex]);
 
+		// TODO: For testing purposes only
+		vkQueueWaitIdle(device->GetGraphicsQueue()->GetHandle());
+
         renderTarget->isFresh = false;
         return true;
     }

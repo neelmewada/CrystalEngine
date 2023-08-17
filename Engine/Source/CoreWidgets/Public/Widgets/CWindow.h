@@ -64,7 +64,10 @@ namespace CE::Widgets
 
 		inline CMenuBar* GetMenuBar() const { return menuBar; }
 		inline void SetMenuBar(CMenuBar* menuBar) { this->menuBar = menuBar; }
-        
+
+		inline CTextureID GetBackgroundImage() const { return backgroundImage; }
+		inline void SetBackgroundImage(CTextureID image) { backgroundImage = image; }
+
         void Show();
         void Hide();
         
@@ -141,6 +144,8 @@ namespace CE::Widgets
 		bool setDefaultDocking = true;
 
 		void* platformHandle = nullptr;
+
+		CTextureID backgroundImage = nullptr;
 
 		String dockSpaceId{};
 

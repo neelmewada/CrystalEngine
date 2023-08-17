@@ -53,6 +53,7 @@ namespace CE
 
 		// - Utils -
 
+		// TODO: move this function to CoreApplication instead of VulkanRHI
 		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
 
         // - Render Target -

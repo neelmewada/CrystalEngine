@@ -196,13 +196,22 @@ namespace CE::Widgets
 			if (color.a > 0)
 				GUI::PopStyleColor(2);
 
+			auto winSize = GUI::GetWindowSize();
+			auto winPos = GUI::GetWindowPos();
+
+			if (backgroundImage != nullptr)
+			{
+				auto imageRect = Rect(winPos, winPos + winSize);
+
+				GUI::PushChildCoordinateSpace(Rect(-winPos, winSize));
+				GUI::Image(imageRect, backgroundImage, {});
+				GUI::PopChildCoordinateSpace();
+			}
+
             for (CWidget* subWidget : attachedWidgets)
             {
                 subWidget->Render();
             }
-            
-			auto winSize = GUI::GetWindowSize();
-			auto winPos = GUI::GetWindowPos();
 
             GUI::EndWindow();
 

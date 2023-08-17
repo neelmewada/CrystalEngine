@@ -100,7 +100,7 @@ namespace CE::Widgets
 					stream->Seek(-2, SeekMode::Current);
 					if (c == '-')
 						return prevToken = { MinusSignToken, "-", line, positionInLine };
-					else
+					else if (c == '+')
 						return prevToken = { PlusSignToken, "+", line, positionInLine };
 				}
 

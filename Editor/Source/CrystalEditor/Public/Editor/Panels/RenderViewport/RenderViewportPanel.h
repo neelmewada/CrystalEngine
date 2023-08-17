@@ -2,6 +2,8 @@
 
 namespace CE::Editor
 {
+	using namespace Widgets;
+
 	CLASS()
 	class CRYSTALEDITOR_API RenderViewportPanel : public EditorPanel
 	{
@@ -17,8 +19,11 @@ namespace CE::Editor
 
 		void OnDrawGUI() override;
 
-		RHI::CommandList* gfxCommandList = nullptr;
+		RHI::GraphicsCommandList* gfxCommandList = nullptr;
 		RHI::RenderTarget* viewportRT = nullptr;
+		CTextureID guiTexture = nullptr;
+
+		Vec2i currentResolution = Vec2i(512, 512);
 	};
     
 } // namespace CE::Editor

@@ -87,13 +87,16 @@ namespace CE
         VkFramebuffer frameBuffer = nullptr;
     };
 
-    /// Vulkan Render Pass class
+    // Forward decls
+
     class VulkanRenderPass;
+	class VulkanSampler;
 
     struct VulkanFrame
     {
         List<VulkanTexture*> textures{};
-        List<VkSampler> samplers{};
+        //List<VkSampler> samplers{};
+		List<VulkanSampler*> samplers{};
         VulkanFrameBuffer* framebuffer = nullptr;
     };
     
@@ -116,6 +119,14 @@ namespace CE
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) override;
 
 		virtual void Resize(u32 newWidth, u32 newHeight) override;
+
+		virtual int GetNumColorBuffers() override
+		{
+			return colorFrames.GetSize();
+		}
+
+		virtual RHI::Texture* GetColorTargetTexture(int index, int attachmentIndex = 0) override;
+		virtual RHI::Sampler* GetColorTargetTextureSampler(int index, int attachmentIndex = 0) override;
 
         // - Getters -
 

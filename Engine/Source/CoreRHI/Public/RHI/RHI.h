@@ -122,6 +122,17 @@ namespace CE::RHI
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) = 0;
         
 		virtual void Resize(u32 newWidth, u32 newHeight) = 0;
+
+		inline void Resize(Vec2i resolution)
+		{
+			Resize(resolution.x, resolution.y);
+		}
+
+		/// Number of back buffers used for rendering
+		virtual int GetNumColorBuffers() = 0;
+
+		virtual Texture* GetColorTargetTexture(int index, int attachmentIndex = 0) = 0;
+		virtual Sampler* GetColorTargetTextureSampler(int index, int attachmentIndex = 0) = 0;
     };
 
     /// A viewport used to draw to & present from.
