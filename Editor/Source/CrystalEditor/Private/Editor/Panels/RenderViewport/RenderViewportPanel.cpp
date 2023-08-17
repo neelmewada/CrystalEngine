@@ -54,10 +54,10 @@ namespace CE::Editor
 	void RenderViewportPanel::OnDrawGUI()
 	{
 		auto rect = GetComputedLayoutRect();
-		auto winSize = GetComputedLayoutSize();
+		auto winSize = GetWindowSize();
 		bool shouldShowImage = false;
 
-		if (!isnan(winSize.x) && !isnan(winSize.y))
+		if (!isnan(winSize.x) && !isnan(winSize.y) && winSize.x > 0 && winSize.y > 0)
 		{
 			shouldShowImage = true;
 			if (winSize.x != currentResolution.x || winSize.y != currentResolution.y)
