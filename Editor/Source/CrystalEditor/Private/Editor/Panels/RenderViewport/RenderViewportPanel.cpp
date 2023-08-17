@@ -11,7 +11,7 @@ namespace CE::Editor
 	{
 		if (guiTexture != nullptr)
 		{
-			//RHI::gDynamicRHI->RemoveImGuiTexture(guiTexture);
+			RHI::gDynamicRHI->RemoveImGuiTexture(guiTexture);
 			guiTexture = nullptr;
 		}
 
@@ -40,12 +40,15 @@ namespace CE::Editor
 			layout.backBufferCount = 1;
 			layout.numColorOutputs = 1;
 			layout.colorOutputs[0].preferredFormat = RHI::ColorFormat::RGBA32;
+			layout.colorOutputs[0].sampleCount = 1;
+			layout.colorOutputs[0].loadAction = RHI::RenderPassLoadAction::Clear;
+			layout.colorOutputs[0].storeAction = RHI::RenderPassStoreAction::Store;
 			layout.depthStencilFormat = RHI::DepthStencilFormat::None; // TODO: enable depth texture
 			layout.simultaneousFrameDraws = 1;
 			layout.presentationRTIndex = -1;
 			
 			viewportRT = RHI::gDynamicRHI->CreateRenderTarget(currentResolution.x, currentResolution.y, layout);
-			viewportRT->SetClearColor(0, Color::FromRGBA32(0, 255, 255, 255));
+			viewportRT->SetClearColor(0, Color::FromRGBA32(34, 59, 99, 255));
 			
 			gfxCommandList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewportRT);
 		}
@@ -69,7 +72,6 @@ namespace CE::Editor
 				auto sampler = viewportRT->GetColorTargetTextureSampler(0);
 
 				guiTexture = RHI::gDynamicRHI->AddImGuiTexture(texture, sampler);
-				//guiTexture = GetStyleManager()->SearchImageResource("Icons/folder_32.png").id;
 			}
 		}
 
