@@ -29,6 +29,10 @@ namespace CE
 
     bool VulkanGraphicsCommandList::InitImGui(RHI::FontPreloadConfig* preloadFontConfig, Array<void*>& outFontHandles)
     {
+		// ImGui is supported only on viewport command lists
+		if (!IsViewportTarget())
+			return false;
+
         VkResult result = VK_SUCCESS;
 		
         // Create Descriptor Pool

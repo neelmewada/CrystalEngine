@@ -4,7 +4,7 @@ namespace CE::Editor
 {
 	RenderViewportPanel::RenderViewportPanel()
 	{
-
+		defaultDockPosition = CDockPosition::Center;
 	}
 
 	RenderViewportPanel::~RenderViewportPanel()
@@ -26,6 +26,8 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
+		SetTitle("Viewport");
+
 		if (gfxCommandList == nullptr)
 		{
 			RHI::RenderTargetLayout layout{};
@@ -38,7 +40,7 @@ namespace CE::Editor
 			
 			viewportRT = RHI::gDynamicRHI->CreateRenderTarget(512, 512, layout);
 
-			
+			gfxCommandList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewportRT);
 		}
 	}
 
@@ -47,6 +49,7 @@ namespace CE::Editor
 		Super::OnDrawGUI();
 
 		
+
 	}
 
 } // namespace CE::Editor

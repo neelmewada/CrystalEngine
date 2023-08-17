@@ -26,12 +26,13 @@ namespace CE
                 if (Thread::GetCurrentThreadId() == gMainThreadId)
                 {
                     // Do NOT clean up string buffers on main thread.
-                    // Sometimes, static/global destructors are be called after thread singleton is destroyed, which can cause crash on app exit
+                    // Sometimes, static/global destructors are called after StaticStringBlockAllocator thread singleton is destroyed, 
+					// which can cause crash on app exit
                     return;
                 }
                 staticBufferAllocator.FreeAll();
             }
-        
+			
             FixedSizeFreeListAllocator<STRING_BUFFER_SIZE, STRING_BUFFER_GROW_COUNT> staticBufferAllocator{ STRING_BUFFER_GROW_COUNT };
         };
     }

@@ -66,8 +66,10 @@ namespace CE
 
 		// - Encode API -
 
+#if PAL_TRAIT_BUILD_EDITOR
 		// Encodes raw image data to BCn format (BC7, BC1, etc)
 		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, int numThreads = 0);
+#endif
 
         // - Public API -
 

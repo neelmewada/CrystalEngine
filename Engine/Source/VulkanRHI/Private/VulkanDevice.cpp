@@ -665,7 +665,6 @@ namespace CE
         vkEndCommandBuffer(commandBuffer);
 	}
 
-
     void VulkanDevice::SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
     {
         VkSubmitInfo submitInfo{};

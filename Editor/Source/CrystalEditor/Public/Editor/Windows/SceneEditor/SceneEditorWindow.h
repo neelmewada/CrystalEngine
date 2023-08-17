@@ -16,7 +16,9 @@ namespace CE::Editor
 		void Construct() override;
 
 		AssetBrowserPanel* assetBrowserPanel = nullptr;
-		RenderViewportPanel* renderViewport = nullptr;
+		RenderViewportPanel* viewportPanel = nullptr;
+		DetailsPanel* detailsPanel = nullptr;
+		SceneOutlinerPanel* sceneOutlinerPanel = nullptr;
 	};
 
 } // namespace CE::Editor

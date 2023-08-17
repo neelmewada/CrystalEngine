@@ -13,6 +13,7 @@ namespace CE::Widgets
 		Left,
 		Top,
 		Right,
+		RightBottom,
 		Bottom,
 		Fill
 	};

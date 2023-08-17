@@ -26,8 +26,8 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::stb
-            ThirdParty::dxcompiler
-            ThirdParty::compressonator
+            $<${PAL_TRAIT_BUILD_EDITOR}:ThirdParty::dxcompiler>
+            $<${PAL_TRAIT_BUILD_EDITOR}:ThirdParty::compressonator>
             $<${PAL_PLATFORM_IS_WINDOWS}:d3d11.lib>
             $<${PAL_PLATFORM_IS_WINDOWS}:d3d12.lib>
             $<${PAL_PLATFORM_IS_WINDOWS}:dxgi.lib>

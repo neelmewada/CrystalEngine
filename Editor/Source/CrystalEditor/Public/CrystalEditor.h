@@ -13,6 +13,8 @@
 #include "Editor/Panels/AssetBrowser/AssetItemWidget.h"
 
 #include "Editor/Panels/RenderViewport/RenderViewportPanel.h"
+#include "Editor/Panels/Details/DetailsPanel.h"
+#include "Editor/Panels/SceneOutliner/SceneOutlinerPanel.h"
 
 #include "Editor/Panels/ImageTestPanel.h"
 

@@ -4,8 +4,10 @@
 #include "lodepng.h"
 #include "lodepng_util.h"
 
+#if PAL_TRAIT_BUILD_EDITOR
 #define CMP_STATIC
 #include "compressonator.h"
+#endif
 
 namespace CE
 {
@@ -347,6 +349,7 @@ namespace CE
 		return CMImageSourceFormat::Undefined;
 	}
 
+#if PAL_TRAIT_BUILD_EDITOR
 	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, int numThreads)
 	{
 		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
@@ -401,6 +404,7 @@ namespace CE
 
 		return true;
 	}
+#endif
 
     void CMImage::Free()
     {

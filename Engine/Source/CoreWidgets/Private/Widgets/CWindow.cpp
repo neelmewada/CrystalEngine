@@ -157,8 +157,9 @@ namespace CE::Widgets
 					{
 						auto rightDockId = GUI::DockBuilderSplitNode(dockId, GUI::Dir_Right, 0.25f, nullptr, &dockId);
 						auto centreDockId = GUI::DockBuilderSplitNode(dockId, GUI::Dir_Left, 0.75f, nullptr, &dockId);
-						auto bottomDockId = GUI::DockBuilderSplitNode(centreDockId, GUI::Dir_Down, 0.25f, nullptr, &centreDockId);
+						auto bottomDockId = GUI::DockBuilderSplitNode(centreDockId, GUI::Dir_Down, 0.35f, nullptr, &centreDockId);
 						auto leftDockId = GUI::DockBuilderSplitNode(centreDockId, GUI::Dir_Left, 0.25f, nullptr, &centreDockId);
+						auto rightBottomDockId = GUI::DockBuilderSplitNode(rightDockId, GUI::Dir_Down, 0.6f, nullptr, &rightDockId);
 
 						for (CWidget* subWidget : attachedWidgets)
 						{
@@ -179,6 +180,9 @@ namespace CE::Widgets
 									break;
 								case CDockPosition::Bottom:
 									GUI::DockBuilderDockWindow(title, bottomDockId);
+									break;
+								case CDockPosition::RightBottom:
+									GUI::DockBuilderDockWindow(title, rightBottomDockId);
 									break;
 								}
 							}
