@@ -30,6 +30,9 @@ namespace CE::GUI
 	COREGUI_API Viewport* GetCurrentViewport();
 	COREGUI_API Viewport* GetMainViewport();
 
+	COREGUI_API void SetWindowToolBarHeight(float height);
+	COREGUI_API float GetWindowToolBarHeight();
+
 	/// Converts a rect from window space to global space
 	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow);
 	/// Converts a rect from global space to window space

@@ -391,6 +391,21 @@ namespace CE::GUI
         DockFlags_NoSplit = 1 << 4,   // Shared/Local // Disable splitting the node into smaller nodes. Useful e.g. when embedding dockspaces into a main root one (the root one may have splitting disabled to reduce confusion). Note: when turned off, existing splits will be preserved.
         DockFlags_NoResize = 1 << 5,   // Shared/Local // Disable resizing node using the splitter/separators. Useful with programmatically setup dockspaces.
         DockFlags_AutoHideTabBar = 1 << 6,   // Shared/Local // Tab bar will automatically hide when there is a single window in the dock node.
+		DockFlags_DockSpace = 1 << 10,  // Local, Saved  // A dockspace is a node that occupy space within an existing user window. Otherwise the node is floating and create its own window.
+		DockFlags_CentralNode = 1 << 11,  // Local, Saved  // The central node has 2 main properties: stay visible when empty, only use "remaining" spaces from its neighbor.
+		DockFlags_NoTabBar = 1 << 12,  // Local, Saved  // Tab bar is completely unavailable. No triangle in the corner to enable it back.
+		DockFlags_HiddenTabBar = 1 << 13,  // Local, Saved  // Tab bar is hidden, with a triangle in the corner to show it again (NB: actual tab-bar instance may be destroyed as this is only used for single-window tab bar)
+		DockFlags_NoWindowMenuButton = 1 << 14,  // Local, Saved  // Disable window/docking menu (that one that appears instead of the collapse button)
+		DockFlags_NoCloseButton = 1 << 15,  // Local, Saved  //
+		DockFlags_NoDocking = 1 << 16,  // Local, Saved  // Disable any form of docking in this dockspace or individual node. (On a whole dockspace, this pretty much defeat the purpose of using a dockspace at all). Note: when turned on, existing docked nodes will be preserved.
+		DockFlags_NoDockingSplitMe = 1 << 17,  // [EXPERIMENTAL] Prevent another window/node from splitting this node.
+		DockFlags_NoDockingSplitOther = 1 << 18,  // [EXPERIMENTAL] Prevent this node from splitting another window/node.
+		DockFlags_NoDockingOverMe = 1 << 19,  // [EXPERIMENTAL] Prevent another window/node to be docked over this node.
+		DockFlags_NoDockingOverOther = 1 << 20,  // [EXPERIMENTAL] Prevent this node to be docked over another window or non-empty node.
+		DockFlags_NoDockingOverEmpty = 1 << 21,  // [EXPERIMENTAL] Prevent this node to be docked over an empty node (e.g. DockSpace with no other windows)
+		DockFlags_NoResizeX = 1 << 22,  // [EXPERIMENTAL]
+		DockFlags_NoResizeY = 1 << 23,  // [EXPERIMENTAL]
+
     };
     ENUM_CLASS_FLAGS(DockFlags);
 

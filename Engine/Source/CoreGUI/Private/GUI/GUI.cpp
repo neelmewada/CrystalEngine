@@ -134,6 +134,22 @@ namespace CE::GUI
 		return (Viewport*)ImGui::GetMainViewport();
 	}
 
+	COREGUI_API void SetWindowToolBarHeight(float height)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return;
+		window->ToolBarHeight = height;
+	}
+
+	COREGUI_API float GetWindowToolBarHeight()
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return 0;
+		return window->ToolBarHeight;
+	}
+
 	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow)
 	{
 		Vec2 windowPos = GetWindowPos();
@@ -196,6 +212,8 @@ namespace CE::GUI
 		{
 			ImGui::PopStyleVar(2);
 		}
+
+		ImGui::GetCurrentWindow()->MenuBarHeight();
 
 		return retVal;
 	}
@@ -459,6 +477,11 @@ namespace CE::GUI
 	COREGUI_API void Text(const Rect& localRect, const String& text, const GuiStyleState& style)
 	{
 		GUI::Text(localRect, text.GetCString(), style);
+	}
+
+	static void Test()
+	{
+		
 	}
 
 	COREGUI_API void Text(const Rect& localRect, const char* text, const GuiStyleState& style)

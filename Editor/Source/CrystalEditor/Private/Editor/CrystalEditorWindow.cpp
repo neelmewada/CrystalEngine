@@ -15,7 +15,7 @@ namespace CE::Editor
 
 	CrystalEditorWindow::CrystalEditorWindow()
 	{
-		
+		tabPadding = Vec2(10, 10);
 	}
 
 	CrystalEditorWindow::~CrystalEditorWindow()

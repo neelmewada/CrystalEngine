@@ -70,11 +70,23 @@ namespace CE::Widgets
 		flags |= GUI::WF_NoScrollWithMouse;
 		flags |= GUI::WF_NoScrollbar;
 
-		bool result = GUI::BeginChild(rect, GetUuid(), "", {}, {}, flags);
+		//bool result = GUI::BeginChild(rect, GetUuid(), "", {}, {}, flags);
+		bool result = GUI::BeginMenuBar();
 
 		if (result)
 		{
-			GUI::PushZeroingChildCoordinateSpace();
+			auto parent = GetOwner();
+			Rect offset = {};
+			if (parent != nullptr && parent->IsOfType<CWindow>())
+			{
+				CWindow* window = (CWindow*)parent;
+				if (window->GetMenuBar() != nullptr)
+				{
+					offset = Rect(0, 1, 0, 1) * window->GetTabPadding().y * GUI::GetFontSize() * 0.25f;
+				}
+			}
+
+			GUI::PushChildCoordinateSpace(rect + offset);
 
 			for (auto child : attachedWidgets)
 			{
@@ -84,7 +96,8 @@ namespace CE::Widgets
 			GUI::PopChildCoordinateSpace();
 		}
 
-		GUI::EndChild();
+		//GUI::EndChild();
+		GUI::EndMenuBar();
 		PollEvents();
     }
 

@@ -59,6 +59,10 @@
 #include "Widgets/Menu/CContextMenu.h"
 #include "Widgets/Menu/CMenuBar.h"
 
+// ToolBar Widgets
+#include "Widgets/Tool/CToolBarItem.h"
+#include "Widgets/Tool/CToolBar.h"
+
 #include "Widgets/CWindow.h"
 
 

@@ -13,6 +13,8 @@ namespace CE::Editor
 
 	protected:
 
+		void Construct() override;
+
 		void OnDrawGUI() override;
 
 	};

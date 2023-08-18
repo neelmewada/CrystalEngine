@@ -4,7 +4,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 
 // Import Dear ImGui from VulkanRHI
-#define IMGUI_API DLL_IMPORT
+//#define IMGUI_API DLL_IMPORT
+
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -16,6 +17,6 @@
 
 namespace CE::GUI
 {
-
+	
 }
 

@@ -213,3 +213,10 @@ CPopup {
 	background: rgb(40, 40, 40);
 }
 
+CToolBar {
+	flex-direction: row;
+	align-items: stretch;
+	justify-content: flex-start;
+	min-height: 50px;
+	font-size: 18px;
+}

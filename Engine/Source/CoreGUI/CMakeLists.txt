@@ -19,14 +19,15 @@ ce_add_target(${PROJECT_NAME} SHARED
     INCLUDE_DIRECTORIES
         PRIVATE
             Private/
+            Private/imgui
         PUBLIC
             Public/
     COMPILE_DEFINITIONS
         PRIVATE
             ${PROJECT_NAME}_EXPORTS
+            IMGUI_API=DLL_IMPORT
     BUILD_DEPENDENCIES
         PRIVATE
-            ThirdParty::imgui
         PUBLIC
             CE::Core
             CE::CoreRHI

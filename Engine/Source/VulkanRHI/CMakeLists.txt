@@ -16,16 +16,20 @@ ce_add_target(${PROJECT_NAME} SHARED
     INCLUDE_DIRECTORIES
         PRIVATE
             Private/
+            Private/imgui
             ${Vulkan_INCLUDE_DIR}
         PUBLIC
+            Private/imgui
             Public/
     COMPILE_DEFINITIONS
         PRIVATE
             ${PROJECT_NAME}_EXPORTS
+            IMGUI_API=DLL_EXPORT
+        INTERFACE
+            IMGUI_API=DLL_IMPORT
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::sdl
-            ThirdParty::imgui
             ${Vulkan_LIBRARIES}
         PUBLIC
             CE::Core

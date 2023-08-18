@@ -50,6 +50,9 @@ namespace CE::Widgets
 		tab = FetchBackgroundColor(CStateFlag::Default, CSubControl::Tab);
 		tabActive = FetchBackgroundColor(CStateFlag::Active, CSubControl::Tab);
 		tabHovered = FetchBackgroundColor(CStateFlag::Hovered, CSubControl::Tab);
+
+		//auto style = stylesheet->SelectStyle(this, CStateFlag::Default, CSubControl::Tab);
+		//tabPadding = style.properties[CStylePropertyType::Padding].vector;
 	}
 
 	void CWindow::SetAsDockSpaceWindow(bool set)
@@ -88,6 +91,8 @@ namespace CE::Widgets
 				windowFlags |= GUI::WF_NoPadding;
 			if (IsDockSpaceWindow() && isFullscreen)
 				windowFlags |= GUI::WF_NoBringToFrontOnFocus;
+			if (menuBar != nullptr)
+				windowFlags |= GUI::WF_MenuBar;
 
 			auto color = defaultStyleState.background;
 
@@ -117,6 +122,8 @@ namespace CE::Widgets
 				GUI::PushStyleVar(GUI::StyleVar_WindowBorderSize, defaultStyleState.borderThickness);
 			}
 
+			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
+
             GUI::BeginWindow(windowTitle, &isShown, windowFlags);
 
 			this->platformHandle = GUI::GetCurrentViewport()->platformHandle;
@@ -130,7 +137,7 @@ namespace CE::Widgets
 			{
 				if (dockSpaceId.IsEmpty())
 					dockSpaceId = String::Format("DockSpace##{}", GetName());
-				auto dockId = GUI::DockSpace(dockSpaceId);
+				auto dockId = GUI::DockSpace(dockSpaceId, {}, GUI::DockFlags_NoCloseButton);
 				
 				if (setDefaultDocking)
 				{
@@ -193,6 +200,8 @@ namespace CE::Widgets
 				}
 			}
 
+			GUI::PopStyleVar();
+
 			if (color.a > 0)
 				GUI::PopStyleColor(2);
 
@@ -208,12 +217,25 @@ namespace CE::Widgets
 				GUI::PopChildCoordinateSpace();
 			}
 
+			if (toolBar != nullptr)
+			{
+				auto toolBarHeight = toolBar->GetComputedLayoutSize().y;
+				if (!isnan(toolBarHeight) && toolBarHeight > 1)
+				{
+					GUI::SetWindowToolBarHeight(toolBarHeight);
+				}
+			}
+
             for (CWidget* subWidget : attachedWidgets)
             {
-                subWidget->Render();
+				subWidget->Render();
             }
 
+			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
+
             GUI::EndWindow();
+
+			GUI::PopStyleVar();
 
 			if (windowSize.x > 0 && windowSize.y > 0 && windowSize != winSize)
 			{
@@ -274,6 +296,10 @@ namespace CE::Widgets
 		if (subobject->IsOfType<CMenuBar>())
 		{
 			this->menuBar = (CMenuBar*)subobject;
+		}
+		else if (subobject->IsOfType<CToolBar>())
+		{
+			this->toolBar = (CToolBar*)toolBar;
 		}
 		else if (subobject->IsOfType<CPopup>())
 		{

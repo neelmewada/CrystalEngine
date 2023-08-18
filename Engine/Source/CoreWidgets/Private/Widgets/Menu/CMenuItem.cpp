@@ -50,7 +50,7 @@ namespace CE::Widgets
 
 	bool CMenuItem::IsInsideMenuBar()
 	{
-		return GetOwner() != nullptr && GetOwner()->GetClass()->IsSubclassOf<CMenuBar>();
+		return GetOwner() != nullptr && GetOwner()->IsOfType<CMenuBar>();
 	}
 
 	void CMenuItem::LoadIcon(const String& iconSearchPath)

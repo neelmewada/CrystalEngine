@@ -4,6 +4,7 @@ namespace CE::Widgets
 {
 	class CMenuBar;
 	class CPopup;
+	class CToolBar;
 
 	ENUM()
 	enum class CDockPosition
@@ -63,7 +64,10 @@ namespace CE::Widgets
 		inline void* GetPlatformHandle() const { return platformHandle; }
 
 		inline CMenuBar* GetMenuBar() const { return menuBar; }
-		inline void SetMenuBar(CMenuBar* menuBar) { this->menuBar = menuBar; }
+		inline CToolBar* GetToolBar() const { return toolBar; }
+
+		inline Vec2 GetTabPadding() const { return tabPadding; }
+		inline void SetTabPadding(const Vec2 padding) { tabPadding = padding; }
 
 		inline CTextureID GetBackgroundImage() const { return backgroundImage; }
 		inline void SetBackgroundImage(CTextureID image) { backgroundImage = image; }
@@ -132,6 +136,9 @@ namespace CE::Widgets
 		CMenuBar* menuBar = nullptr;
 
 		FIELD(ReadOnly)
+		CToolBar* toolBar = nullptr;
+
+		FIELD(ReadOnly)
 		Vec2i screenSize = Vec2i();
 
 		FIELD(ReadOnly)
@@ -151,6 +158,7 @@ namespace CE::Widgets
 
 		Color titleBar{};
 		Color titleBarActive{};
+		Vec2 tabPadding = Vec2(5, 5);
 
 		Color tab{};
 		Color tabActive{};

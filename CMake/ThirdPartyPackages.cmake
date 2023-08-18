@@ -19,9 +19,6 @@ find_package(yoga REQUIRED)
 # SDL2
 find_package(sdl REQUIRED)
 
-# ImGui
-find_package(imgui REQUIRED)
-
 # Vulkan
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
     find_package(Vulkan REQUIRED

@@ -18,7 +18,7 @@
 
 #include "imgui.h"
 #if PAL_TRAIT_SDL_SUPPORTED
-#include "backends/imgui_impl_sdl2.h"
+#include "PAL/SDL/imgui_impl_sdl2.h"
 #endif
 #include "backends/imgui_impl_vulkan.h"
 
@@ -217,17 +217,3 @@ namespace CE
     }
     
 } // namespace CE
-
-
-#include "imgui.cpp"
-#include "imgui_demo.cpp"
-#include "imgui_draw.cpp"
-#include "imgui_tables.cpp"
-#include "imgui_widgets.cpp"
-
-#if PAL_TRAIT_SDL_SUPPORTED
-#include "backends/imgui_impl_sdl2.cpp"
-#endif
-#include "backends/imgui_impl_vulkan.cpp"
-
-#include "misc/cpp/imgui_stdlib.cpp"
