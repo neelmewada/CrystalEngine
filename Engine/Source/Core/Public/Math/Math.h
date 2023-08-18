@@ -94,6 +94,12 @@ namespace CE
     private:
 
     };
+
+	template<typename T>
+	FORCE_INLINE bool IsNan(T value)
+	{
+		return std::isnan(value);
+	}
     
 } // namespace CE
 

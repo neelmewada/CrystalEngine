@@ -20,6 +20,7 @@ namespace CE::Editor
 		SetTitle("Scene Editor");
 		SetFullscreen(false);
 
+		// Menu Bar
 		{
 			auto fileMenuItem = CreateWidget<CMenuItem>(menuBar, "FileMenuItem");
 			fileMenuItem->SetText("File");

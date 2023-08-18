@@ -18,8 +18,6 @@ namespace CE::Editor
 
 		void Construct() override;
 
-		void ShowDemoPopup();
-
 	protected:
 
 		void OnDrawGUI() override;

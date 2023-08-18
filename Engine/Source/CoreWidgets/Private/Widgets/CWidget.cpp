@@ -220,7 +220,7 @@ namespace CE::Widgets
 
 	void CWidget::UpdateStyleIfNeeded()
 	{
-		if (!needsStyle && !stylesheet->IsDirty())
+		if (!needsStyle)
 			return;
 
 		needsStyle = false;
@@ -546,7 +546,7 @@ namespace CE::Widgets
 		}
 	}
 
-	inline bool CWidget::NeedsLayout()
+	bool CWidget::NeedsLayout()
 	{
 		for (auto child : attachedWidgets)
 		{

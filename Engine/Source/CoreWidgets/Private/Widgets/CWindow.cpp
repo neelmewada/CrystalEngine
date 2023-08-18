@@ -230,7 +230,7 @@ namespace CE::Widgets
             {
 				subWidget->Render();
             }
-
+			
 			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
 
             GUI::EndWindow();

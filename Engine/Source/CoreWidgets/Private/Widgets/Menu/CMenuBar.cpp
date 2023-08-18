@@ -63,8 +63,6 @@ namespace CE::Widgets
     {
 		auto rect = GetComputedLayoutRect();
 
-		DrawDefaultBackground();
-
 		GUI::WindowFlags flags = GUI::WF_NoMove | GUI::WF_NoBackground | GUI::WF_NoResize;
 		flags |= GUI::WF_HorizontalScrollbar;
 		flags |= GUI::WF_NoScrollWithMouse;

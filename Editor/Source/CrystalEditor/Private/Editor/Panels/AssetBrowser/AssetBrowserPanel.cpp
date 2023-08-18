@@ -65,7 +65,7 @@ namespace CE::Editor
 				addButton->SetText("Add");
 				Object::Bind(addButton, MEMBER_FUNCTION(CButton, OnButtonClicked), []
 					{
-						CrystalEditorWindow::Get()->ShowDemoPopup();
+						
 					});
 				
 				auto searchBox = CreateWidget<CTextInput>(topBarLayout, "SearchBox");

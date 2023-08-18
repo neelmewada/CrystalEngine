@@ -15,6 +15,8 @@ namespace CE::Widgets
 
 	protected:
 
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
 		void OnDrawGUI() override;
 
 	};

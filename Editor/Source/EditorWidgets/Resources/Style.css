@@ -183,10 +183,11 @@ CMenuItemHeader {
 }
 
 CMenuBar {
-	background: rgb(21, 21, 21);
+	background: rgba(0, 0, 0, 0);
 	border-width: 0px;
 	min-height: 20px;
 	max-height: 60px;
+	width: 100%;
 	flex-direction: row;
 	justify-content: flex-start;
 	align-items: stretch;
@@ -217,6 +218,6 @@ CToolBar {
 	flex-direction: row;
 	align-items: stretch;
 	justify-content: flex-start;
-	min-height: 50px;
+	min-height: 25px;
 	font-size: 18px;
 }

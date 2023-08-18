@@ -12,6 +12,8 @@ namespace CE::Editor
 		EditorPanel();
 		virtual ~EditorPanel();
 
+		bool RequiresIndependentLayoutCalculation() override final { return true; }
+
 		void Construct() override;
 
 	protected:
