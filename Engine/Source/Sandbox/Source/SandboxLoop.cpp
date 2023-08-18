@@ -391,34 +391,6 @@ CButton::alternate:pressed {
 	background: rgb(6, 66, 126);
 }
 
-CTextInput {
-	background: rgb(15, 15, 15);
-	border-width: 1;
-	border-radius: 1 1 1 1;
-	border-color: rgb(42, 42, 42);
-	padding: 3 3 3 3;
-}
-CTextInput::hint {
-	foreground: rgba(255, 255, 255, 120);
-}
-
-CCollapsibleSection {
-	padding: 20px 0 0 0;
-}
-
-CCollapsibleSection::header {
-	font-size: 18px;
-	background: rgb(47, 47, 47);
-	border-width: 1px;
-	border-color: rgb(30, 30, 30);
-	padding: 3px 3px;
-	border-radius: 0px;
-}
-
-#TableView {
-	height: 250px;
-}
-
 )";
 
 void SandboxLoop::SetupGUI()
@@ -441,10 +413,6 @@ void SandboxLoop::SetupGUI()
 
 		auto button = CreateWidget<CButton>(section, "ButtonInside");
 		button->SetText("Click me");
-
-		auto table = CreateWidget<CTableView>(section, "TableView");
-		auto tableModel = CreateObject<MyTableModel>(table, "TableModel");
-		table->SetModel(tableModel);
 	}
 	
 	auto testLabel = CreateWidget<CLabel>(window, "TestLabel");

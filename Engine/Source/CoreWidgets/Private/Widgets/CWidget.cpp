@@ -546,53 +546,6 @@ namespace CE::Widgets
 		}
 	}
 
-	bool CWidget::NeedsLayout()
-	{
-		for (auto child : attachedWidgets)
-		{
-			if (child->NeedsLayout())
-				return true;
-		}
-
-		for (auto menu : attachedMenus)
-		{
-			if (menu->IsShown() && menu->NeedsLayout())
-				return true;
-		}
-
-		return needsLayout;
-	}
-
-	bool CWidget::NeedsStyle()
-	{
-		return needsStyle;
-	}
-
-	void CWidget::SetNeedsLayout(bool set)
-	{
-		for (auto child : attachedWidgets)
-		{
-			child->SetNeedsLayout(set);
-		}
-
-		for (auto menu : attachedMenus)
-		{
-			menu->SetNeedsLayout(set);
-		}
-
-		needsLayout = set;
-	}
-
-	void CWidget::SetNeedsStyle(bool set)
-	{
-		for (auto child : attachedWidgets)
-		{
-			child->SetNeedsStyle(set);
-		}
-
-		needsStyle = set;
-	}
-
 	void CWidget::SetEnabled(bool enabled)
 	{
 		if (isDisabled != !enabled)
@@ -611,6 +564,7 @@ namespace CE::Widgets
 		}	
 	}
 
+	/*
 	void CWidget::UpdateLayoutIfNeeded()
 	{
 		if (!NeedsLayout())
@@ -692,6 +646,7 @@ namespace CE::Widgets
 			child->UpdateLayoutIfNeeded();
 		}
 	}
+	*/
 
 	void CWidget::OnAttachedTo(CWidget* parent)
 	{
@@ -729,21 +684,24 @@ namespace CE::Widgets
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Add(subWidget);
-			OnSubWidgetAttached(subWidget);
-			subWidget->parent = this;
-			if (IsWindow())
-				subWidget->ownerWindow = (CWindow*)this;
-			else
-				subWidget->ownerWindow = GetOwnerWindow();
-			subWidget->OnAttachedTo(this);
 
-			if (!subWidget->RequiresIndependentLayoutCalculation())
-			{
-				YGNodeSetMeasureFunc(node, nullptr);
+			//CWidget* subWidget = (CWidget*)subobject;
+			//attachedWidgets.Add(subWidget);
+			//OnSubWidgetAttached(subWidget);
+			//subWidget->parent = this;
+			//if (IsWindow())
+			//	subWidget->ownerWindow = (CWindow*)this;
+			//else
+			//	subWidget->ownerWindow = GetOwnerWindow();
+			//subWidget->OnAttachedTo(this);
 
-				auto childCount = YGNodeGetChildCount(node);
-				YGNodeInsertChild(node, subWidget->node, childCount);
-			}
+			//if (!subWidget->IsLayoutCalculationRoot())
+			//{
+			//	YGNodeSetMeasureFunc(node, nullptr);
+
+			//	auto childCount = YGNodeGetChildCount(node);
+			//	YGNodeInsertChild(node, subWidget->node, childCount);
+			//}
 		}
 	}
 
@@ -917,7 +875,7 @@ namespace CE::Widgets
 
 		for (auto subWidget : attachedWidgets)
 		{
-			if (!subWidget->RequiresIndependentLayoutCalculation())
+			if (!subWidget->IsLayoutCalculationRoot())
 			{
 				auto childCount = YGNodeGetChildCount(node);
 				YGNodeInsertChild(node, subWidget->node, childCount);
@@ -1224,6 +1182,26 @@ namespace CE::Widgets
     {
         return widgetFlags;
     }
+
+	bool CWidget::NeedsLayout()
+	{
+		return needsLayout;
+	}
+
+	bool CWidget::NeedsStyle()
+	{
+		return needsStyle;
+	}
+
+	void CWidget::SetNeedsLayout(bool set)
+	{
+		needsLayout = set;
+	}
+
+	void CWidget::SetNeedsStyle(bool set)
+	{
+		needsStyle = set;
+	}
 
 	void CWidget::SetStyleSheet(const String& stylesheetText)
 	{

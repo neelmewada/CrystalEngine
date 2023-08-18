@@ -43,12 +43,6 @@ namespace CE::Widgets
 		virtual void OnBeforeComputeStyle() {}
 		virtual void OnAfterComputeStyle() {}
 
-		bool NeedsLayout();
-		bool NeedsStyle();
-
-		void SetNeedsLayout(bool set = true);
-		void SetNeedsStyle(bool set = true);
-
 		inline bool IsEnabled() const { return !isDisabled; }
 		inline bool IsDisabled() const { return isDisabled; }
 		void SetEnabled(bool enabled);
@@ -70,13 +64,6 @@ namespace CE::Widgets
 
 		/// Should return true if a widget can contain & render subwidgets
 		virtual bool IsContainer() { return IsWindow(); }
-
-		/// Override and return true if a widget's layout calculation should be independent that of parent's layout
-		virtual bool RequiresIndependentLayoutCalculation() { return false; }
-
-		virtual Vec2 CalculateEstimateSize() { return Vec2(); }
-
-		virtual Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) { return Vec2(); }
         
         void SetWidgetFlags(WidgetFlags flags);
         
@@ -86,6 +73,19 @@ namespace CE::Widgets
 		inline void SetStateFlags(CStateFlag flags) { stateFlags = flags; }
 
 		inline YGNodeRef GetNode() const { return node; }
+
+		// - Layout -
+
+		virtual Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) { return Vec2(); }
+
+		/// Override and return true if the widget is the root of layout calculation for it's children
+		virtual bool IsLayoutCalculationRoot() { return IsWindow(); }
+
+		bool NeedsLayout();
+		bool NeedsStyle();
+
+		void SetNeedsLayout(bool set = true);
+		void SetNeedsStyle(bool set = true);
 
 		// - Style API -
 
@@ -310,6 +310,12 @@ namespace CE::Widgets
 		FIELD()
 		CContextMenu* contextMenu = nullptr;
 
+		FIELD()
+		b8 needsLayout = true;
+
+		FIELD()
+		b8 needsStyle = true;
+
 		Array<CMenu*> attachedMenus{};
 		
 		CStyleSheet* stylesheet = nullptr;
@@ -322,9 +328,6 @@ namespace CE::Widgets
 		CStyle computedStyle{};
 
 		GUI::GuiStyleState defaultStyleState{};
-
-		b8 needsLayout = true;
-		b8 needsStyle = true;
 
 		b8 inheritedPropertiesInitialized = false;
 
