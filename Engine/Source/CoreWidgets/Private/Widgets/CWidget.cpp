@@ -925,6 +925,7 @@ namespace CE::Widgets
 		return GUI::IsItemFocused();
 	}
 
+	/* REDO:
 	void CWidget::PollEvents()
 	{
 		if (IsDisabled())
@@ -1172,6 +1173,7 @@ namespace CE::Widgets
 			EnumRemoveFlags(stateFlags, CStateFlag::Pressed | CStateFlag::Hovered);
 		}
 	}
+	*/
 
     void CWidget::SetWidgetFlags(WidgetFlags flags)
     {
