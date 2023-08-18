@@ -61,6 +61,9 @@ namespace CE::Widgets
 
 	void CMenuBar::OnDrawGUI()
     {
+		SetNeedsLayout();
+		UpdateLayoutIfNeeded();
+
 		auto rect = GetComputedLayoutRect();
 
 		GUI::WindowFlags flags = GUI::WF_NoMove | GUI::WF_NoBackground | GUI::WF_NoResize;
@@ -94,7 +97,6 @@ namespace CE::Widgets
 			GUI::PopChildCoordinateSpace();
 		}
 
-		//GUI::EndChild();
 		GUI::EndMenuBar();
 		PollEvents();
     }

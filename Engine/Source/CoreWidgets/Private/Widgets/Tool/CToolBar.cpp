@@ -27,16 +27,22 @@ namespace CE::Widgets
     {
 		auto rect = GetComputedLayoutRect();
 
-		GUI::BeginGroup();
+		GUI::WindowFlags flags = GUI::WF_NoBackground | GUI::WF_NoTitleBar | GUI::WF_NoMove | GUI::WF_NoDocking | GUI::WF_NoPadding;
 
-		GUI::PushChildCoordinateSpace(rect);
+		//GUI::BeginGroup();
+		GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2());
+		GUI::BeginChild(rect, GetUuid(), "ToolBar", {}, defaultStyleState, flags);
+
+		GUI::PushZeroingChildCoordinateSpace();
 		for (auto subwidget : attachedWidgets)
 		{
 			subwidget->Render();
 		}
 		GUI::PopChildCoordinateSpace();
 
-		GUI::EndGroup();
+		GUI::EndChild();
+		GUI::PopStyleVar();
+		//GUI::EndGroup();
 		PollEvents();
     }
 
