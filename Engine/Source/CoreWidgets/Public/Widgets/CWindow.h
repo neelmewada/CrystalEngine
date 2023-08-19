@@ -40,6 +40,9 @@ namespace CE::Widgets
 
 		virtual Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
+		inline bool IsWindowDebugMode() const { return windowDebugMode; }
+		inline void SetWindowDebugMode(bool debugMode) { this->windowDebugMode = debugMode; }
+
 		inline bool AllowHorizontalScroll() const { return allowHorizontalScroll; }
 		inline void SetAllowHorizontalScroll(bool value) { allowHorizontalScroll = value; }
 
@@ -98,6 +101,7 @@ namespace CE::Widgets
     protected:
         
 		virtual void Construct() override;
+		virtual void OnBeforeDestroy() override;
 
 		virtual void OnDrawGUI() override;
 
@@ -150,6 +154,9 @@ namespace CE::Widgets
 		FIELD()
 		bool setDefaultDocking = true;
 
+		FIELD()
+		b8 windowDebugMode = false;
+
 		void* platformHandle = nullptr;
 
 		CTextureID backgroundImage = nullptr;
@@ -163,6 +170,8 @@ namespace CE::Widgets
 		Color tab{};
 		Color tabActive{};
 		Color tabHovered{};
+
+		friend class CWidgetDebugger;
     };
     
 } // namespace CE::Widgets

@@ -12,7 +12,7 @@ namespace CE::Widgets
 
 		virtual ~CTreeItemView();
 
-		bool RequiresIndependentLayoutCalculation() override { return true; }
+		bool IsLayoutCalculationRoot() override { return true; }
 
 		void UpdateLayoutIfNeeded() override;
 

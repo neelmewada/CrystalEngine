@@ -33,6 +33,11 @@ namespace CE::GUI
 	COREGUI_API void SetWindowToolBarHeight(float height);
 	COREGUI_API float GetWindowToolBarHeight();
 
+	COREGUI_API Rect GetWindowWorkRect();
+
+	/// Window Title bar height
+	COREGUI_API float GetWindowTitleBarHeight();
+
 	/// Converts a rect from window space to global space
 	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow);
 	/// Converts a rect from global space to window space
@@ -146,7 +151,8 @@ namespace CE::GUI
 		SelectableFlags flags = SelectableFlags_None);
 
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
-	COREGUI_API bool InvisibleButton(const Rect& rect, ID id, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
+	COREGUI_API bool InvisibleButton(const Rect& localRect, ID id, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
+	COREGUI_API bool InvisibleButton(const Rect& localRect, ID id, bool& outHovered, bool& outHeld, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
 
 	COREGUI_API bool Checkbox(const String& label, bool* value);
 

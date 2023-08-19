@@ -49,6 +49,8 @@ namespace CE
             
 			if (params.outer != nullptr)
 				params.outer->AttachSubobject(instance);
+
+			instance->OnAfterConstruct();
 			return instance;
 		}
 		

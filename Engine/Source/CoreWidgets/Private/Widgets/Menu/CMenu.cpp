@@ -19,11 +19,6 @@ namespace CE::Widgets
 		Super::Construct();
 	}
 
-	bool CMenu::RequiresIndependentLayoutCalculation()
-	{
-		return true;
-	}
-
 	void CMenu::OnAfterComputeStyle()
 	{
 		Super::OnAfterComputeStyle();

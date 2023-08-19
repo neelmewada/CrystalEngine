@@ -173,6 +173,9 @@ namespace CE
 
 		// Lifecycle
 
+		virtual void OnAfterConstruct() {}
+		virtual void OnBeforeDestroy() {}
+
 		virtual void OnSubobjectAttached(Object* subobject) {}
 
 		virtual void OnSubobjectDetached(Object* subobject) {}

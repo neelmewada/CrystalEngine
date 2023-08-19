@@ -6,15 +6,21 @@
 
 namespace CE::Widgets
 {
-	// Globals
 
 	Package* gWidgetsTransientPackage = nullptr;
+
+	CWidgetDebugger* gWidgetDebugger = nullptr;
 
 	static CStyleManager* gStyleManager = nullptr;
 
 	COREWIDGETS_API Package* GetWidgetsTransientPackage()
 	{
 		return ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
+	}
+
+	COREWIDGETS_API CWidgetDebugger* GetWidgetDebugger()
+	{
+		return gWidgetDebugger;
 	}
 
 	COREWIDGETS_API CStyleManager* GetStyleManager()
@@ -34,10 +40,15 @@ namespace CE::Widgets
 			gStyleManager = CreateObject<CStyleManager>(gWidgetsTransientPackage, TEXT("StyleManager"), OF_Transient);
             
             gStyleManager->AddResourceSearchModule(MODULE_NAME);
+
+			gWidgetDebugger = CreateObject<CWidgetDebugger>(gWidgetsTransientPackage, TEXT("WidgetDebugger"), OF_Transient);
         }
 
         virtual void ShutdownModule() override
         {
+			gWidgetDebugger->RequestDestroy();
+			gWidgetDebugger = nullptr;
+
             gStyleManager->RemoveResourceSearchModule(MODULE_NAME);
             
 			gStyleManager->RequestDestroy();

@@ -25,7 +25,7 @@ namespace CE::Widgets
 
 		bool IsMenu() override final { return true; }
 		bool IsContainer() override final { return true; }
-		bool RequiresIndependentLayoutCalculation() override;
+		bool IsLayoutCalculationRoot() override final { return true; }
 
 		void OnAfterComputeStyle() override;
 

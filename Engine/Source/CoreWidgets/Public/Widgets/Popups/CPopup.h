@@ -12,6 +12,7 @@ namespace CE::Widgets
 		virtual ~CPopup();
 
 		bool IsContainer() override final { return true; }
+		bool IsLayoutCalculationRoot() override final { return true; }
 
 		// - Getters & Setters -
 

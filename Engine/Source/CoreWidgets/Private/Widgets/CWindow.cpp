@@ -15,7 +15,7 @@ namespace CE::Widgets
 
 	Vec2 CWindow::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return Vec2(windowSize.x, allowVerticalScroll ? 0 : windowSize.y);
+		return Vec2(windowSize.x <= 0 ? YGUndefined : windowSize.x, (allowVerticalScroll || windowSize.y <= 0) ? YGUndefined : windowSize.y);
 	}
 
 	void CWindow::Show()
@@ -73,7 +73,16 @@ namespace CE::Widgets
 	{
 		Super::Construct();
 
+		if (GetWidgetDebugger() != nullptr)
+			GetWidgetDebugger()->registeredWindows.Add(this);
+
 		SetTitle(GetName().GetString());
+	}
+
+	void CWindow::OnBeforeDestroy()
+	{
+		if (GetWidgetDebugger() != nullptr)
+			GetWidgetDebugger()->registeredWindows.Remove(this);
 	}
 
 	void CWindow::OnDrawGUI()
@@ -226,10 +235,15 @@ namespace CE::Widgets
 				}
 			}
 
+			// Add space at top for title bar (if present)
+			GUI::PushChildCoordinateSpace(Rect(0, GUI::GetWindowTitleBarHeight()));
+
             for (CWidget* subWidget : attachedWidgets)
             {
 				subWidget->Render();
             }
+
+			GUI::PopChildCoordinateSpace();
 			
 			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
 
@@ -280,7 +294,7 @@ namespace CE::Widgets
 			CResizeEvent* resizeEvent = (CResizeEvent*)event;
 			emit OnWindowResized(resizeEvent->oldSize, resizeEvent->newSize);
 
-			SetNeedsLayout();
+			SetNeedsLayoutRecursive();
 		}
 
 		Super::HandleEvent(event);

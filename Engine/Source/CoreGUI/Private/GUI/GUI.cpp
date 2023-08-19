@@ -150,6 +150,25 @@ namespace CE::GUI
 		return window->ToolBarHeight;
 	}
 
+	COREGUI_API Rect GetWindowWorkRect()
+	{
+		auto window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return Rect();
+
+		auto rect = window->WorkRect;
+		return Rect(rect.Min.x, rect.Min.y, rect.Max.x, rect.Max.y);
+	}
+
+	COREGUI_API float GetWindowTitleBarHeight()
+	{
+		auto window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return 0;
+
+		auto rect = window->TitleBarHeight();
+	}
+
 	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow)
 	{
 		Vec2 windowPos = GetWindowPos();
@@ -1376,6 +1395,35 @@ namespace CE::GUI
 
 		bool hovered, held;
 		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, (int)flags);
+
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, "", g.LastItemData.StatusFlags);
+		return pressed;
+	}
+
+	COREGUI_API bool InvisibleButton(const Rect& localRect, ID id, bool& outHovered, bool& outHeld, GUI::ButtonFlags flags)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		outHovered = false;
+		outHeld = false;
+
+		if (window->SkipItems)
+			return false;
+
+		auto rect = ToWindowCoordinateSpace(localRect);
+
+		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
+
+		ImVec2 size = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
+		ImGui::ItemSize(size);
+		if (!ImGui::ItemAdd(bb, id))
+			return false;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, (int)flags);
+		outHeld = held;
+		outHovered = hovered;
 
 		IMGUI_TEST_ENGINE_ITEM_INFO(id, "", g.LastItemData.StatusFlags);
 		return pressed;

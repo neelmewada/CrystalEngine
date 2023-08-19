@@ -23,6 +23,18 @@ namespace CE::Widgets
         String message{};
 	};
 
+	ENUM()
+	enum class CDebugBackgroundFilter
+	{
+		None = 0,
+		IntrinsicSize = BIT(0),
+		Padding = BIT(1),
+		Border = BIT(2),
+		Margin = BIT(3),
+		All = IntrinsicSize | Padding | Border | Margin,
+	};
+	ENUM_CLASS_FLAGS(CDebugBackgroundFilter);
+
 	class CWindow;
 	class CMenu;
 	class CContextMenu;
@@ -34,11 +46,10 @@ namespace CE::Widgets
 	public:
 
 		virtual ~CWidget();
+		
+		void OnBeforeDestroy() override;
 
 		// - Public API -
-
-		virtual void UpdateLayoutIfNeeded();
-		void UpdateStyleIfNeeded();
 
 		virtual void OnBeforeComputeStyle() {}
 		virtual void OnAfterComputeStyle() {}
@@ -49,6 +60,11 @@ namespace CE::Widgets
 
 		inline bool IsVisible() const { return isVisible; }
 		inline void SetVisible(bool visible) { isVisible = visible; }
+
+		bool IsDebugModeEnabled();
+
+		inline bool IsDebugDrawEnabled() const { return debugDraw; }
+		inline void SetDebugDrawEnabled(bool enable) { this->debugDraw = enable; }
 
 		void ShowContextMenu();
 		void HideContextMenu();
@@ -81,11 +97,37 @@ namespace CE::Widgets
 		/// Override and return true if the widget is the root of layout calculation for it's children
 		virtual bool IsLayoutCalculationRoot() { return IsWindow(); }
 
-		bool NeedsLayout();
-		bool NeedsStyle();
+		bool NeedsLayout(bool recursive = false);
+		bool NeedsStyle(bool recursive = false);
 
-		void SetNeedsLayout(bool set = true);
-		void SetNeedsStyle(bool set = true);
+		bool ChildrenNeedsLayout();
+		bool ChildrenNeedsStyle();
+
+		inline bool NeedsLayoutRecursive()
+		{
+			return NeedsLayout(true);
+		}
+
+		inline bool NeedsStyleRecursive()
+		{
+			return NeedsStyle(true);
+		}
+
+		void SetNeedsLayout(bool set = true, bool recursive = false);
+		void SetNeedsStyle(bool set = true, bool recursive = false);
+
+		inline void SetNeedsLayoutRecursive(bool set = true)
+		{
+			SetNeedsLayout(set, true);
+		}
+
+		inline void SetNeedsStyleRecursive(bool set = true)
+		{
+			SetNeedsStyle(set, true);
+		}
+
+		virtual void UpdateLayoutIfNeeded();
+		void UpdateStyleIfNeeded();
 
 		// - Style API -
 
@@ -153,6 +195,9 @@ namespace CE::Widgets
 
 		CWindow* GetOwnerWindow();
 
+		/// Returns true if the given widget is present in the parent hierarchy of this widget
+		bool IsWidgetPresentInParentHierarchy(CWidget* widget);
+
 		int GetSubWidgetIndex(CWidget* siblingWidget);
 		int GetSubWidgetCount();
 
@@ -181,6 +226,43 @@ namespace CE::Widgets
 			return Rect(pos, pos + size);
 		}
 
+		inline Rect GetComputedMarginRect() const
+		{
+			auto layoutRect = GetComputedLayoutRect();
+			return Rect(layoutRect.left - YGNodeLayoutGetMargin(node, YGEdgeLeft),
+				layoutRect.top - YGNodeLayoutGetMargin(node, YGEdgeTop),
+				layoutRect.right + YGNodeLayoutGetMargin(node, YGEdgeRight),
+				layoutRect.bottom + YGNodeLayoutGetMargin(node, YGEdgeBottom));
+		}
+
+		inline Rect GetComputedBorderRect() const
+		{
+			auto layoutRect = GetComputedLayoutRect();
+			return Rect(layoutRect.left - YGNodeLayoutGetBorder(node, YGEdgeLeft),
+				layoutRect.top - YGNodeLayoutGetBorder(node, YGEdgeTop),
+				layoutRect.right + YGNodeLayoutGetBorder(node, YGEdgeRight),
+				layoutRect.bottom + YGNodeLayoutGetBorder(node, YGEdgeBottom));
+		}
+
+		inline Rect GetComputedPaddingRect() const
+		{
+			auto layoutRect = GetComputedLayoutRect();
+			return layoutRect;
+			return Rect(layoutRect.left + YGNodeLayoutGetPadding(node, YGEdgeLeft),
+				layoutRect.top + YGNodeLayoutGetPadding(node, YGEdgeTop),
+				layoutRect.right - YGNodeLayoutGetPadding(node, YGEdgeRight),
+				layoutRect.bottom - YGNodeLayoutGetPadding(node, YGEdgeBottom));
+		}
+
+		inline Rect GetComputedIntrinsicSizeRect() const
+		{
+			auto layoutRect = GetComputedPaddingRect();
+			return Rect(layoutRect.left + YGNodeLayoutGetPadding(node, YGEdgeLeft),
+				layoutRect.top + YGNodeLayoutGetPadding(node, YGEdgeTop),
+				layoutRect.right - YGNodeLayoutGetPadding(node, YGEdgeRight),
+				layoutRect.bottom - YGNodeLayoutGetPadding(node, YGEdgeBottom));
+		}
+
 		inline Vec4 GetComputedLayoutPadding() const
 		{
 			Vec4 padding{};
@@ -204,6 +286,8 @@ namespace CE::Widgets
 
 		void DrawBackground(const GUI::GuiStyleState& styleState);
 		void DrawBackground(const GUI::GuiStyleState& styleState, const Rect& localRect);
+
+		void DrawDebugBackground(CDebugBackgroundFilter filter = CDebugBackgroundFilter::All);
 
 		void FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius = {});
 		void DrawRect(const Color& color, const Rect& localRect, f32 borderThickness = 1.0f, const Vec4& borderRadius = {});
@@ -266,8 +350,6 @@ namespace CE::Widgets
 
 		// Helpers
 
-		void PollBasicMouseEvents(bool hovered, bool leftMouseHeld, CStateFlag& stateFlags);
-
 		void ClearChildNodes();
 		void ReAddChildNodes();
 
@@ -316,6 +398,12 @@ namespace CE::Widgets
 		FIELD()
 		b8 needsStyle = true;
 
+		FIELD()
+		b8 debugDraw = false;
+
+		FIELD()
+		u32 debugId = 0;
+
 		Array<CMenu*> attachedMenus{};
 		
 		CStyleSheet* stylesheet = nullptr;
@@ -329,17 +417,20 @@ namespace CE::Widgets
 
 		GUI::GuiStyleState defaultStyleState{};
 
-		b8 inheritedPropertiesInitialized = false;
-
 		// States
 		b8 isHovered = false;
 		b8 isFocused = false;
 		b8 isLeftMousePressedInside = false;
 
+	private:
+
 		// Internals
 		Vec2 screenPos{};
 		Vec2 prevHoverPos{};
 		b8 prevLeftMouseDown = false;
+		b8 firstDraw = true;
+
+		friend class CWidgetDebugger;
         
 		template<typename TWidget>
 		friend TWidget* CreateWidget(Object* owner,

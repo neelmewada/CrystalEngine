@@ -5,7 +5,7 @@ namespace CE::Widgets
 	CCollapsibleSection::CCollapsibleSection()
 	{
 		internalId = GenerateRandomU32();
-		SetCollapsed(true);
+		isCollapsed = false;
 	}
 
 	CCollapsibleSection::~CCollapsibleSection()
@@ -26,7 +26,7 @@ namespace CE::Widgets
 			ReAddChildNodes();
 		}
 
-		SetNeedsStyle();
+		SetNeedsStyleRecursive();
 		SetNeedsLayout();
 	}
 
@@ -46,7 +46,7 @@ namespace CE::Widgets
 	Vec2 CCollapsibleSection::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
 		CFontManager::Get().PushFont(headerStyleState.fontSize, headerStyleState.fontName);
-		Vec2 result = Vec2(width, GUI::CalculateTextSize("label").height + headerPadding.top + headerPadding.bottom);
+		Vec2 result = Vec2(width, GUI::CalculateTextSize("label").height);
 		CFontManager::Get().PopFont();
 		return result;
 	}
@@ -81,18 +81,23 @@ namespace CE::Widgets
 			auto bottomMargin = YGNodeStyleGetMargin(node, YGEdgeBottom);
 			if (bottomMargin.unit == YGUnitUndefined || std::isnan(bottomMargin.value))
 				bottomMargin.value = 0;
-			YGNodeStyleSetMargin(node, YGEdgeBottom, bottomMargin.value + CalculateIntrinsicContentSize(0, 0).height);
+			auto headerHeight = CalculateIntrinsicContentSize(0, 0).height + headerPadding.top + headerPadding.bottom;
+
+			YGNodeStyleSetMargin(node, YGEdgeBottom, bottomMargin.value + headerHeight);
 		}
 	}
 
 	void CCollapsibleSection::OnDrawGUI()
 	{
+		SetNeedsStyleRecursive();
+		SetNeedsLayout();
+
 		auto rect = GetComputedLayoutRect();
 		auto contentPadding = GetComputedLayoutPadding();
 
 		CFontManager::Get().PushFont(headerStyleState.fontSize, headerStyleState.fontName);
 
-		f32 headerHeight = CalculateIntrinsicContentSize(0, 0).height;
+		f32 headerHeight = CalculateIntrinsicContentSize(0, 0).height + headerPadding.top + headerPadding.bottom;
 
 		if (!IsCollapsed())
 		{
@@ -107,7 +112,7 @@ namespace CE::Widgets
 
 		bool hovered = false, held = false;
 		bool active = GUI::CollapsibleHeader(rect, title, internalId, headerStyleState, hovered, held, headerPadding, contentPadding, treeFlags);
-		PollBasicMouseEvents(hovered, false, headerState);
+		PollEvents();
 
 		CFontManager::Get().PopFont();
 

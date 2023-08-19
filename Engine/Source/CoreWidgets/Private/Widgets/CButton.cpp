@@ -73,10 +73,18 @@ namespace CE::Widgets
 		if (icon.IsValid())
 			iconOffset = this->iconSize - 2;
 
-		DrawShadow(defaultStyleState);
+		//DrawShadow(defaultStyleState);
+		//DrawDefaultBackground();
+
+		auto styleState = defaultStyleState;
+		// Do not let GUI::Button draw the background & borders
+		styleState.background = {};
+		styleState.borderColor = {};
+		styleState.borderThickness = 0;
+		styleState.shadowColor = {};
 
 		bool hovered = false, held = false;
-		bool pressed = GUI::Button(rect, internalText, defaultStyleState, hovered, held, padding + Rect(iconOffset, 0, 0, 0));
+		bool pressed = GUI::Button(rect, internalText, styleState, hovered, held, padding + Rect(iconOffset, 0, 0, 0));
 		PollEvents();
 		
 		GUI::PushChildCoordinateSpace(rect);

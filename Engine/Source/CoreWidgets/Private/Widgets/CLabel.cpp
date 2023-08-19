@@ -55,7 +55,7 @@ namespace CE::Widgets
 		GUI::SetCursorPos(rect.min);
 		auto windowPos = GUI::GetWindowPos();
 
-		DrawBackground(*curState);
+		//DrawBackground(*curState);
 
 		if (invisibleButtonId.IsEmpty())
 		{
