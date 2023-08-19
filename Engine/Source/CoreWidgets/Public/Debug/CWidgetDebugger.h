@@ -22,7 +22,7 @@ namespace CE::Widgets
 
 		void DrawWidgetTreeEntry(CWidget* widget);
 
-		void DrawLayoutRectAtCenter(const String& title, const Color& color, const Vec4& values, const Vec2& rectSize);
+		void DrawLayoutRectAtCenter(const String& title, const Color& color, const Vec4& values, const Vec2& centerPos, const Vec2& rectSize);
 
 		bool isShown = false;
 		bool enableLayoutDebugMode = false;

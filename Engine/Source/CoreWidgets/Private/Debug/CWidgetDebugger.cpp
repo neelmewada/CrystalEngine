@@ -69,7 +69,7 @@ namespace CE::Widgets
 					
 				}
 
-
+				
 			}
 		}
 
@@ -84,9 +84,12 @@ namespace CE::Widgets
 		foundWidgetInHierarchy = false;
 	}
 
-	void CWidgetDebugger::DrawLayoutRectAtCenter(const String& title, const Color& color, const Vec4& values, const Vec2& rectSize)
+	void CWidgetDebugger::DrawLayoutRectAtCenter(const String& title, const Color& color, const Vec4& values, const Vec2& centerPos, const Vec2& rectSize)
 	{
+		Rect rect = Rect(centerPos.x - rectSize.x / 2, centerPos.y - rectSize.y / 2,
+			centerPos.x + rectSize.x / 2, centerPos.y + rectSize.y / 2);
 
+		GUI::FillRect(rect, color);
 	}
 
 	void CWidgetDebugger::DrawWidgetTreeEntry(CWidget* widget)

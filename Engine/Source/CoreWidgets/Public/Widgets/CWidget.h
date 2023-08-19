@@ -219,6 +219,43 @@ namespace CE::Widgets
 		inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
 		inline Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
 
+		inline Vec4 GetComputedLayoutMargin() const
+		{
+			return Vec4(
+				YGNodeLayoutGetMargin(node, YGEdgeLeft),
+				YGNodeLayoutGetMargin(node, YGEdgeTop),
+				YGNodeLayoutGetMargin(node, YGEdgeRight),
+				YGNodeLayoutGetMargin(node, YGEdgeBottom)
+			);
+		}
+
+		inline Vec4 GetComputedLayoutPadding() const
+		{
+			return Vec4(
+				YGNodeLayoutGetPadding(node, YGEdgeLeft),
+				YGNodeLayoutGetPadding(node, YGEdgeTop),
+				YGNodeLayoutGetPadding(node, YGEdgeRight),
+				YGNodeLayoutGetPadding(node, YGEdgeBottom)
+			);
+		}
+
+		inline Vec4 GetComputedLayoutBorder() const
+		{
+			return Vec4(
+				YGNodeLayoutGetBorder(node, YGEdgeLeft),
+				YGNodeLayoutGetBorder(node, YGEdgeTop),
+				YGNodeLayoutGetBorder(node, YGEdgeRight),
+				YGNodeLayoutGetBorder(node, YGEdgeBottom)
+			);
+		}
+
+		inline Vec2 GetComputedLayoutIntrinsicSize() const
+		{
+			return GetComputedLayoutSize() - 
+				Vec2(YGNodeLayoutGetPadding(node, YGEdgeLeft) + YGNodeLayoutGetPadding(node, YGEdgeRight),
+					YGNodeLayoutGetPadding(node, YGEdgeTop) + YGNodeLayoutGetPadding(node, YGEdgeBottom));
+		}
+
 		inline Rect GetComputedLayoutRect() const
 		{
 			Vec2 pos = GetComputedLayoutTopLeft();
