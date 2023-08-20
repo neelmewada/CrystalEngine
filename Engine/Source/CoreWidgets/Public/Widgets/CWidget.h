@@ -24,7 +24,7 @@ namespace CE::Widgets
 	};
 
 	ENUM()
-	enum class CDebugBackgroundFilter
+	enum class CDebugBackgroundFilter : u8
 	{
 		None = 0,
 		IntrinsicSize = BIT(0),
@@ -300,16 +300,6 @@ namespace CE::Widgets
 				layoutRect.bottom - YGNodeLayoutGetPadding(node, YGEdgeBottom));
 		}
 
-		inline Vec4 GetComputedLayoutPadding() const
-		{
-			Vec4 padding{};
-			padding.left = YGNodeLayoutGetPadding(node, YGEdgeLeft);
-			padding.top = YGNodeLayoutGetPadding(node, YGEdgeTop);
-			padding.right = YGNodeLayoutGetPadding(node, YGEdgeRight);
-			padding.bottom = YGNodeLayoutGetPadding(node, YGEdgeBottom);
-			return padding;
-		}
-
 	protected:
 
 		CWidget();
@@ -435,12 +425,6 @@ namespace CE::Widgets
 		FIELD()
 		b8 needsStyle = true;
 
-		FIELD()
-		b8 debugDraw = false;
-
-		FIELD()
-		u32 debugId = 0;
-
 		Array<CMenu*> attachedMenus{};
 		
 		CStyleSheet* stylesheet = nullptr;
@@ -466,6 +450,11 @@ namespace CE::Widgets
 		Vec2 prevHoverPos{};
 		b8 prevLeftMouseDown = false;
 		b8 firstDraw = true;
+
+		CDebugBackgroundFilter filter = CDebugBackgroundFilter::All;
+		b8 debugDraw = false;
+		CDebugBackgroundFilter forceDebugDrawMode = CDebugBackgroundFilter::None;
+		u32 debugId = 0;
 
 		friend class CWidgetDebugger;
         

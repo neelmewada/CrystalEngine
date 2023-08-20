@@ -4,9 +4,19 @@
 
 namespace CE::GUI
 {
-	COREGUI_API ID GetID(const char* strId);
+	enum CoordSpace
+	{
+		/// Global screen space coordinate
+		COORD_Screen,
+		/// Window space coordinate
+		COORD_Window,
+		/// Coordinate space local to a widget container inside a Window
+		COORD_Widget
+	};
 
+	COREGUI_API ID GetID(const char* strId);
 	COREGUI_API ID GetID(const String& strId);
+	COREGUI_API void* GetCurrentWindow();
 
 	COREGUI_API bool AreSettingsLoaded();
 
@@ -38,10 +48,65 @@ namespace CE::GUI
 	/// Window Title bar height
 	COREGUI_API float GetWindowTitleBarHeight();
 
+	COREGUI_API Rect WidgetSpaceToWindowSpace(const Rect& widgetSpaceRect);
+	COREGUI_API Vec2 WidgetSpaceToWindowSpace(const Vec2& widgetSpacePoint);
+
+	COREGUI_API Rect WindowSpaceToWidgetSpace(const Rect& windowSpaceRect);
+	COREGUI_API Vec2 WindowSpaceToWidgetSpace(const Vec2& windowSpacePoint);
+
+	COREGUI_API Rect ToScreenSpaceRect(const Rect& fromRect, CoordSpace fromCoordSpace);
+	COREGUI_API Vec2 ToScreenSpacePos(const Vec2& fromPos, CoordSpace fromCoordSpace);
+
+	COREGUI_API Rect ToWindowSpaceRect(const Rect& fromRect, CoordSpace fromCoordSpace);
+	COREGUI_API Vec2 ToWindowSpacePos(const Vec2& fromPos, CoordSpace fromCoordSpace);
+
+	COREGUI_API Rect ToWidgetSpaceRect(const Rect& fromRect, CoordSpace fromCoordSpace);
+	COREGUI_API Vec2 ToWidgetSpacePos(const Vec2& fromPos, CoordSpace fromCoordSpace);
+
+	FORCE_INLINE Rect ScreenSpaceToWindowSpace(const Rect& rect)
+	{
+		return ToWindowSpaceRect(rect, COORD_Screen);
+	}
+
+	FORCE_INLINE Vec2 ScreenSpaceToWindowSpace(const Vec2& pos)
+	{
+		return ToWindowSpacePos(pos, COORD_Screen);
+	}
+
+	FORCE_INLINE Rect ScreenSpaceToWidgetSpace(const Rect& rect)
+	{
+		return ToWidgetSpaceRect(rect, COORD_Screen);
+	}
+
+	FORCE_INLINE Vec2 ScreenSpaceToWidgetSpace(const Vec2& pos)
+	{
+		return ToWidgetSpacePos(pos, COORD_Screen);
+	}
+
+	FORCE_INLINE Rect WindowSpaceToScreenSpace(const Rect& rect)
+	{
+		return ToScreenSpaceRect(rect, COORD_Window);
+	}
+
+	FORCE_INLINE Vec2 WindowSpaceToScreenSpace(const Vec2& pos)
+	{
+		return ToScreenSpacePos(pos, COORD_Window);
+	}
+
+	FORCE_INLINE Rect WidgetSpaceToScreenSpace(const Rect& rect)
+	{
+		return ToScreenSpaceRect(rect, COORD_Widget);
+	}
+
+	FORCE_INLINE Vec2 WidgetSpaceToScreenSpace(const Vec2& pos)
+	{
+		return ToScreenSpacePos(pos, COORD_Widget);
+	}
+
 	/// Converts a rect from window space to global space
-	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow);
+	//COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow);
 	/// Converts a rect from global space to window space
-	COREGUI_API Vec4 GlobalRectToWindowRect(const Vec4& globalRect);
+	//COREGUI_API Vec4 GlobalRectToWindowRect(const Vec4& globalRect);
 
 	COREGUI_API void SetNextWindowPos(const Vec2& pos, Cond condition = Cond::None, const Vec2& pivot = Vec2(0, 0));
 
@@ -153,6 +218,7 @@ namespace CE::GUI
     COREGUI_API void InvisibleButton(const String& id, const Vec2& size);
 	COREGUI_API bool InvisibleButton(const Rect& localRect, ID id, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
 	COREGUI_API bool InvisibleButton(const Rect& localRect, ID id, bool& outHovered, bool& outHeld, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
+	COREGUI_API bool InvisibleButton(const Rect& rect, CoordSpace rectSpace, ID id, bool& outHovered, bool& outHeld, GUI::ButtonFlags flags = GUI::ButtonFlags::None);
 
 	COREGUI_API bool Checkbox(const String& label, bool* value);
 
@@ -259,9 +325,10 @@ namespace CE::GUI
 
 #pragma region Layout
 
-	COREGUI_API Rect ToWindowCoordinateSpace(const Rect& localRect);
+	//COREGUI_API Rect ToWindowCoordinateSpace(const Rect& localRect);
 
-	COREGUI_API void PushChildCoordinateSpace(const Rect& rect, const Vec4& padding = {});
+	COREGUI_API void PushChildCoordinateSpace(const Rect& rect);
+	COREGUI_API void PushChildCoordinateSpace(const Vec2& origin);
 	COREGUI_API void PushZeroingChildCoordinateSpace();
 
 	COREGUI_API void PopChildCoordinateSpace();
@@ -333,8 +400,11 @@ namespace CE::GUI
     COREGUI_API void DrawRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 }, f32 thickness = 1.0f);
 	COREGUI_API void DrawRect(const Vec4& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 }, f32 thickness = 1.0f);
 
-    COREGUI_API void FillRect(const Vec4& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
-	COREGUI_API void FillRect(const Vec4& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 });
+    COREGUI_API void FillRect(const Rect& rect, const Color& color, Vec4 rounding = { 0, 0, 0, 0 });
+	COREGUI_API void FillRect(const Rect& rect, u32 color, Vec4 rounding = { 0, 0, 0, 0 });
+
+	COREGUI_API void FillRectWidth(const Rect& outerRect, const Rect& innerRect, const Color& color);
+	COREGUI_API void FillRectWidth(const Rect& outerRect, const Rect& innerRect, u32 color);
 
 	COREGUI_API void FillCircle(const Rect& rect, const Color& color);
 	COREGUI_API void DrawCircle(const Rect& rect, const Color& color, f32 thickness = 1.0f);

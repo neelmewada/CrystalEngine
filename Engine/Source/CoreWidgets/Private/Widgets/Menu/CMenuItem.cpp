@@ -200,7 +200,7 @@ namespace CE::Widgets
 			const f32 toggleSize = GUI::GetFontSize() * 0.7f;
 			f32 togglePosX = rect.min.x + padding.left;
 			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - toggleSize / 2;
-			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
+			Rect toggleRect = GUI::WindowSpaceToScreenSpace(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
 			Rect bgOffset = Rect(-2, -2, 2, 2);
 
 			GUI::FillRect(toggleRect + bgOffset, toggleOrRadioStyleState.background, toggleOrRadioStyleState.borderRadius);
@@ -215,7 +215,7 @@ namespace CE::Widgets
 			const f32 radioSize = GUI::GetFontSize() * 0.5f;
 			f32 togglePosX = rect.min.x + padding.left;
 			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - radioSize / 2;
-			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + radioSize, togglePosY + radioSize));
+			Rect toggleRect = GUI::WindowSpaceToScreenSpace(Rect(togglePosX, togglePosY, togglePosX + radioSize, togglePosY + radioSize));
 
 			GUI::FillCircle(toggleRect, toggleOrRadioStyleState.background);
 

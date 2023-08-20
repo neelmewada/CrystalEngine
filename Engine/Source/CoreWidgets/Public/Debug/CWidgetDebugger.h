@@ -22,10 +22,11 @@ namespace CE::Widgets
 
 		void DrawWidgetTreeEntry(CWidget* widget);
 
-		void DrawLayoutRectAtCenter(const String& title, const Color& color, const Vec4& values, const Vec2& centerPos, const Vec2& rectSize);
+		void DrawLayoutRectAtCenter(const String& title, bool isEnabled, const Color& color, const Color& clearColor, const Vec4& values, const Rect& screenRect);
 
 		bool isShown = false;
 		bool enableLayoutDebugMode = false;
+		CDebugBackgroundFilter hoveredLayoutItem = CDebugBackgroundFilter::None;
 
 		CWidget* debugWidget = nullptr;
 		bool foundWidgetInHierarchy = true;

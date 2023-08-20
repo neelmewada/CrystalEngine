@@ -1,18 +1,6 @@
 
 #include "CoreGUIInternal.h"
 
-//#define IMGUI_DEFINE_MATH_OPERATORS
-//
-//// Import Dear ImGui from VulkanRHI
-//#define IMGUI_API DLL_IMPORT
-//#include "imgui.h"
-//#include "imgui_internal.h"
-//
-//#define IM_NORMALIZE2F_OVER_ZERO(VX,VY)     { float d2 = VX*VX + VY*VY; if (d2 > 0.0f) { float inv_len = ImRsqrt(d2); VX *= inv_len; VY *= inv_len; } } (void)0
-//#define IM_FIXNORMAL2F_MAX_INVLEN2          100.0f // 500.0f (see #4053, #3366)
-//#define IM_FIXNORMAL2F(VX,VY)               { float d2 = VX*VX + VY*VY; if (d2 > 0.000001f) { float inv_len2 = 1.0f / d2; if (inv_len2 > IM_FIXNORMAL2F_MAX_INVLEN2) inv_len2 = IM_FIXNORMAL2F_MAX_INVLEN2; VX *= inv_len2; VY *= inv_len2; } } (void)0
-//
-//#include "misc/cpp/imgui_stdlib.h"
 
 namespace CE::GUI
 {
@@ -22,16 +10,18 @@ namespace CE::GUI
 	
 	static Array<Rect> coordinateSpaceStack{};
 
-	static Rect ToGlobalSpace(const Rect& localSpaceRect)
-	{
-		if (coordinateSpaceStack.IsEmpty())
-			return localSpaceRect;
+	static Array<Vec2> widgetCoordinateSpaces{};
 
-		const auto& parentSpace = coordinateSpaceStack.Top();
-		auto originalSize = localSpaceRect.max - localSpaceRect.min;
+	//static Rect ToGlobalSpace(const Rect& localSpaceRect)
+	//{
+	//	if (coordinateSpaceStack.IsEmpty())
+	//		return localSpaceRect;
 
-		return Rect(parentSpace.min + localSpaceRect.min, parentSpace.min + localSpaceRect.min + originalSize);
-	}
+	//	const auto& parentSpace = coordinateSpaceStack.Top();
+	//	auto originalSize = localSpaceRect.max - localSpaceRect.min;
+
+	//	return Rect(parentSpace.min + localSpaceRect.min, parentSpace.min + localSpaceRect.min + originalSize);
+	//}
 
 	COREGUI_API ID GetID(const char* strId)
 	{
@@ -41,6 +31,11 @@ namespace CE::GUI
 	COREGUI_API ID GetID(const String& strId)
 	{
 		return ImGui::GetID(strId.GetCString());
+	}
+
+	COREGUI_API void* GetCurrentWindow()
+	{
+		return ImGui::GetCurrentWindow();
 	}
 
 	COREGUI_API bool AreSettingsLoaded()
@@ -166,14 +161,194 @@ namespace CE::GUI
 		if (window == nullptr)
 			return 0;
 
-		auto rect = window->TitleBarHeight();
+		return window->TitleBarHeight();
+	}
+
+	static Rect ToParentCoordinateSpace(const Rect& childSpaceRect, const Vec2& parentSpace)
+	{
+		return Rect(parentSpace + childSpaceRect.min, parentSpace + childSpaceRect.max);
+	}
+
+	static Vec2 ToParentCoordinateSpace(const Vec2& localSpacePoint, const Vec2& parentSpace)
+	{
+		return parentSpace + localSpacePoint;
+	}
+
+	COREGUI_API Rect WidgetSpaceToWindowSpace(const Rect& widgetSpace)
+	{
+		if (widgetCoordinateSpaces.IsEmpty())
+			return widgetSpace;
+
+		auto rect = widgetSpace;
+
+		for (int i = widgetCoordinateSpaces.GetSize() - 1; i >= 0; i--)
+		{
+			rect = ToParentCoordinateSpace(rect, widgetCoordinateSpaces[i]);
+		}
+
+		return rect;
+	}
+
+	COREGUI_API Vec2 WidgetSpaceToWindowSpace(const Vec2& widgetSpacePoint)
+	{
+		if (widgetCoordinateSpaces.IsEmpty())
+			return widgetSpacePoint;
+
+		auto point = widgetSpacePoint;
+
+		for (int i = widgetCoordinateSpaces.GetSize() - 1; i >= 0; i--)
+		{
+			point = ToParentCoordinateSpace(point, widgetCoordinateSpaces[i]);
+		}
+
+		return point;
+	}
+
+	static Rect ToChildCoordinateSpace(const Rect& parentSpaceRect, const Vec2& childSpace)
+	{
+		return Rect(parentSpaceRect.min - childSpace, parentSpaceRect.max - childSpace);
+	}
+
+	static Vec2 ToChildCoordinateSpace(const Vec2& parentSpacePos, const Vec2& childSpace)
+	{
+		return parentSpacePos - childSpace;
+	}
+	
+	COREGUI_API Rect WindowSpaceToWidgetSpace(const Rect& windowSpaceRect)
+	{
+		if (widgetCoordinateSpaces.IsEmpty())
+			return windowSpaceRect;
+
+		auto rect = windowSpaceRect;
+
+		for (int i = 0; i < widgetCoordinateSpaces.GetSize(); i++)
+		{
+			rect = ToChildCoordinateSpace(rect, widgetCoordinateSpaces[i]);
+		}
+
+		return rect;
+	}
+
+	COREGUI_API Vec2 WindowSpaceToWidgetSpace(const Vec2& windowSpacePoint)
+	{
+		if (widgetCoordinateSpaces.IsEmpty())
+			return windowSpacePoint;
+
+		auto pos = windowSpacePoint;
+
+		for (int i = 0; i < widgetCoordinateSpaces.GetSize(); i++)
+		{
+			pos = ToChildCoordinateSpace(pos, widgetCoordinateSpaces[i]);
+		}
+
+		return pos;
+	}
+
+	COREGUI_API Rect ToScreenSpaceRect(const Rect& fromRect, CoordSpace fromCoordSpace)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr || fromCoordSpace == COORD_Screen)
+			return fromRect;
+
+		ImVec2 windowPos = window->Pos;
+		ImVec2 scroll = window->Scroll;
+		Rect windowSpaceRect = fromRect;
+		if (fromCoordSpace == COORD_Widget)
+			windowSpaceRect = WidgetSpaceToWindowSpace(fromRect);
+		
+		return windowSpaceRect + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y);
+	}
+
+	COREGUI_API Vec2 ToScreenSpacePos(const Vec2& fromPos, CoordSpace fromCoordSpace)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr || fromCoordSpace == COORD_Screen)
+			return fromPos;
+
+		ImVec2 windowPos = window->Pos;
+		ImVec2 scroll = window->Scroll;
+		Vec2 windowSpacePos = fromPos;
+		if (fromCoordSpace == COORD_Widget)
+			windowSpacePos = WidgetSpaceToWindowSpace(fromPos);
+
+		return windowSpacePos + Vec2(windowPos.x - scroll.x, windowPos.y - scroll.y);
+	}
+
+	COREGUI_API Rect ToWindowSpaceRect(const Rect& fromRect, CoordSpace fromCoordSpace)
+	{
+		if (fromCoordSpace == COORD_Window)
+			return fromRect;
+		if (fromCoordSpace == COORD_Widget)
+			return WidgetSpaceToWindowSpace(fromRect);
+
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return fromRect;
+
+		ImVec2 windowPos = window->Pos;
+		ImVec2 scroll = window->Scroll;
+		
+		return fromRect - Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y);
+	}
+
+	COREGUI_API Vec2 ToWindowSpacePos(const Vec2& fromPos, CoordSpace fromCoordSpace)
+	{
+		if (fromCoordSpace == COORD_Window)
+			return fromPos;
+		if (fromCoordSpace == COORD_Widget)
+			return WidgetSpaceToWindowSpace(fromPos);
+
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return fromPos;
+
+		ImVec2 windowPos = window->Pos;
+		ImVec2 scroll = window->Scroll;
+
+		return fromPos - Vec2(windowPos.x - scroll.x, windowPos.y - scroll.y);
+	}
+
+	COREGUI_API Rect ToWidgetSpaceRect(const Rect& fromRect, CoordSpace fromCoordSpace)
+	{
+		if (fromCoordSpace == COORD_Widget)
+			return fromRect;
+		if (fromCoordSpace == COORD_Window)
+			return WindowSpaceToWidgetSpace(fromRect);
+
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return fromRect;
+
+		ImVec2 windowPos = window->Pos;
+		ImVec2 scroll = window->Scroll;
+
+		auto windowSpaceRect = fromRect - Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y);
+		return WindowSpaceToWidgetSpace(windowSpaceRect);
+	}
+
+	COREGUI_API Vec2 ToWidgetSpacePos(const Vec2& fromPos, CoordSpace fromCoordSpace)
+	{
+		if (fromCoordSpace == COORD_Widget)
+			return fromPos;
+		if (fromCoordSpace == COORD_Window)
+			return WindowSpaceToWidgetSpace(fromPos);
+
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return fromPos;
+
+		ImVec2 windowPos = window->Pos;
+		ImVec2 scroll = window->Scroll;
+
+		auto windowSpacePos = fromPos - Vec2(windowPos.x - scroll.x, windowPos.y - scroll.y);
+		return WindowSpaceToWidgetSpace(windowSpacePos);
 	}
 
 	COREGUI_API Vec4 WindowRectToGlobalRect(const Vec4& rectInWindow)
 	{
 		Vec2 windowPos = GetWindowPos();
 		Vec2 scroll = GetWindowScroll();
-		return ToWindowCoordinateSpace(rectInWindow + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y));
+		return WidgetSpaceToWindowSpace(rectInWindow + Vec4(windowPos.x - scroll.x, windowPos.y - scroll.y, windowPos.x - scroll.x, windowPos.y - scroll.y));
 	}
 
 	COREGUI_API Vec4 GlobalRectToWindowRect(const Vec4& globalRect)
@@ -510,7 +685,7 @@ namespace CE::GUI
 			return;
 		ImGuiContext& g = *GImGui;
 
-		Rect rect = ToWindowCoordinateSpace(localRect);
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
 
 		const char* text_end = NULL;
 
@@ -604,7 +779,7 @@ namespace CE::GUI
 			return;
 		ImGuiContext& g = *GImGui;
 
-		Rect rect = ToWindowCoordinateSpace(localRect);
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
 
 		const char* text_end = NULL;
 
@@ -837,7 +1012,7 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
 
-		Rect rect = ToWindowCoordinateSpace(localRect);
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
 
 		int flags = (int)buttonFlags;
 
@@ -1239,7 +1414,7 @@ namespace CE::GUI
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
 
-		auto rect = ToWindowCoordinateSpace(localRect);
+		auto rect = WidgetSpaceToWindowSpace(localRect);
 		auto rectSize = rect.max - rect.min;
 
 		auto globalRect = GUI::WindowRectToGlobalRect(localRect);
@@ -1383,7 +1558,7 @@ namespace CE::GUI
 		if (window->SkipItems)
 			return false;
 
-		auto rect = ToWindowCoordinateSpace(localRect);
+		auto rect = WidgetSpaceToWindowSpace(localRect);
 
 		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
 
@@ -1410,7 +1585,7 @@ namespace CE::GUI
 		if (window->SkipItems)
 			return false;
 
-		auto rect = ToWindowCoordinateSpace(localRect);
+		auto rect = WidgetSpaceToWindowSpace(localRect);
 
 		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
 
@@ -1425,6 +1600,37 @@ namespace CE::GUI
 		outHeld = held;
 		outHovered = hovered;
 
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, "", g.LastItemData.StatusFlags);
+		return pressed;
+	}
+
+	COREGUI_API bool InvisibleButton(const Rect& origRect, CoordSpace rectSpace, ID id, bool& outHovered, bool& outHeld, GUI::ButtonFlags flags)
+	{
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		outHovered = false;
+		outHeld = false;
+
+		if (window->SkipItems)
+			return false;
+
+		auto rect = ToWindowSpaceRect(origRect, rectSpace);
+
+		auto cursorPos = ImGui::GetCursorPos();
+		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
+
+		ImVec2 size = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
+		ImGui::ItemSize(size);
+		if (!ImGui::ItemAdd(bb, id))
+			return false;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, (int)flags);
+		outHeld = held;
+		outHovered = hovered;
+
+		ImGui::SetCursorPos(cursorPos);
 		IMGUI_TEST_ENGINE_ITEM_INFO(id, "", g.LastItemData.StatusFlags);
 		return pressed;
 	}
@@ -1868,7 +2074,7 @@ namespace CE::GUI
 		ImGuiIO& io = g.IO;
 		const ImGuiStyle& style = g.Style;
 
-		Rect rect = ToWindowCoordinateSpace(localRect);
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
 
 		flags |= TextInputFlags_CallbackResize;
 
@@ -4562,7 +4768,7 @@ namespace CE::GUI
 		if (window->SkipItems)
 			return false;
 
-		Rect rect = ToWindowCoordinateSpace(localRect);
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
 		auto rectSize = rect.max - rect.min;
 
 		GUI::SetCursorPos(rect.min);
@@ -5271,7 +5477,7 @@ namespace CE::GUI
 		{
 			window->DC.CursorPos = ImVec2(tab_bar->BarRect.Min.x, tab_bar->BarRect.Max.y + tab_bar->ItemSpacingY);
 			tab_bar->BeginCount++;
-			coordinateSpaceStack.Push(contentSpaceRect);
+			widgetCoordinateSpaces.Push(contentSpaceRect);
 			return true;
 		}
 
@@ -5309,7 +5515,7 @@ namespace CE::GUI
 			const float separator_max_x = tab_bar->BarRect.Max.x + IM_FLOOR(window->WindowPadding.x * 0.5f);
 			window->DrawList->AddLine(ImVec2(separator_min_x, y), ImVec2(separator_max_x, y), col, 1.0f);
 		}
-		coordinateSpaceStack.Push(contentSpaceRect);
+		widgetCoordinateSpaces.Push(contentSpaceRect);
 		return true;
 	}
 
@@ -5669,7 +5875,7 @@ namespace CE::GUI
 		g.CurrentTabBarStack.pop_back();
 		g.CurrentTabBar = g.CurrentTabBarStack.empty() ? NULL : GetTabBarFromTabBarRef(g.CurrentTabBarStack.back());
 
-		coordinateSpaceStack.Pop();
+		widgetCoordinateSpaces.Pop();
 	}
 
 #pragma endregion
@@ -5724,7 +5930,7 @@ namespace CE::GUI
 		if (outer_window->SkipItems) // Consistent with other tables + beneficial side effect that assert on miscalling EndTable() will be more visible.
 			return false;
 
-		Rect rect = ToWindowCoordinateSpace(localRect);
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
 		Vec2 rectSize = rect.max - rect.min;
 		ImVec2 outer_size = ImVec2(rectSize.x, rectSize.y);
 
@@ -6047,7 +6253,7 @@ namespace CE::GUI
 
 	COREGUI_API void Columns(const Rect& localRect, int count, bool border)
 	{
-		auto rect = ToWindowCoordinateSpace(localRect);
+		auto rect = WidgetSpaceToWindowSpace(localRect);
 
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -6209,51 +6415,31 @@ namespace CE::GUI
 
 #pragma region Layout
 
-	static Rect ToParentCoordinateSpace(const Rect& localSpaceRect, const Rect& parentSpace)
+	COREGUI_API void PushChildCoordinateSpace(const Rect& rect)
 	{
-		auto originalSize = localSpaceRect.max - localSpaceRect.min;
-
-		return Rect(parentSpace.min + localSpaceRect.min, parentSpace.min + localSpaceRect.min + originalSize);
+		widgetCoordinateSpaces.Push(rect.min);
 	}
 
-	COREGUI_API Rect ToWindowCoordinateSpace(const Rect& localSpaceRect)
+	COREGUI_API void PushChildCoordinateSpace(const Vec2& origin)
 	{
-		if (coordinateSpaceStack.IsEmpty())
-			return localSpaceRect;
-
-		auto rect = localSpaceRect;
-
-		for (int i = coordinateSpaceStack.GetSize() - 1; i >= 0; i--)
-		{
-			rect = ToParentCoordinateSpace(rect, coordinateSpaceStack[i]);
-		}
-
-		return rect;
-	}
-
-	COREGUI_API void PushChildCoordinateSpace(const Rect& rect, const Vec4& padding)
-	{
-		Rect contentSpaceRect = rect;
-		//contentSpaceRect.min += padding.min;
-		//contentSpaceRect.max -= padding.max;
-		coordinateSpaceStack.Push(contentSpaceRect);
+		widgetCoordinateSpaces.Push(origin);
 	}
 
 	COREGUI_API void PushZeroingChildCoordinateSpace()
 	{
-		Rect rect = {};
+		Vec2 origin = {};
 
-		for (int i = coordinateSpaceStack.GetSize() - 1; i >= 0; i--)
+		for (int i = widgetCoordinateSpaces.GetSize() - 1; i >= 0; i--)
 		{
-			rect -= coordinateSpaceStack[i];
+			origin -= widgetCoordinateSpaces[i];
 		}
 
-		coordinateSpaceStack.Push(rect);
+		widgetCoordinateSpaces.Push(origin);
 	}
 
 	COREGUI_API void PopChildCoordinateSpace()
 	{
-		coordinateSpaceStack.Pop();
+		widgetCoordinateSpaces.Pop();
 	}
 
 	COREGUI_API void Spacing()
@@ -6549,12 +6735,12 @@ namespace CE::GUI
 		drawList->PathStroke(color, 0, thickness);
 	}
     
-    COREGUI_API void FillRect(const Vec4& rect, const Color& color, Vec4 rounding)
+    COREGUI_API void FillRect(const Rect& rect, const Color& color, Vec4 rounding)
     {
 		FillRect(rect, color.ToU32(), rounding);
     }
 
-	COREGUI_API void FillRect(const Vec4& rect, u32 color, Vec4 rounding)
+	COREGUI_API void FillRect(const Rect& rect, u32 color, Vec4 rounding)
 	{
 		ImDrawList* drawList = ImGui::GetWindowDrawList();
 		if (drawList == nullptr)
@@ -6576,6 +6762,19 @@ namespace CE::GUI
 		drawList->PathArcToFast(ImVec2(rect.z - roundingBR, rect.w - roundingBR), roundingBR, 0, 3);
 		drawList->PathArcToFast(ImVec2(rect.x + roundingBL, rect.w - roundingBL), roundingBL, 3, 6);
 		drawList->PathFillConvex(color);
+	}
+
+	COREGUI_API void FillRectWidth(const Rect& outerRect, const Rect& innerRect, const Color& color)
+	{
+		FillRectWidth(outerRect, innerRect, color.ToU32());
+	}
+
+	COREGUI_API void FillRectWidth(const Rect& outerRect, const Rect& innerRect, u32 color)
+	{
+		FillRect(Rect(outerRect.min, Vec2(innerRect.left, innerRect.bottom)), color);
+		FillRect(Rect(outerRect.min, Vec2(innerRect.right, innerRect.top)), color);
+		FillRect(Rect(Vec2(innerRect.right, outerRect.top), outerRect.max), color);
+		FillRect(Rect(Vec2(outerRect.left, innerRect.bottom), outerRect.max), color);
 	}
 
 	COREGUI_API void FillCircle(const Rect& rect, const Color& color)

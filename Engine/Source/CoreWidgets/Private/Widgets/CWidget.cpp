@@ -124,7 +124,7 @@ namespace CE::Widgets
 			return;
 
 		auto localRect = GetComputedLayoutRect();
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		const auto& shadowOffset = styleState.shadowOffset;
 		GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
@@ -136,7 +136,7 @@ namespace CE::Widgets
 		if (!hasShadow)
 			return;
 
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		const auto& shadowOffset = styleState.shadowOffset;
 		GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
@@ -149,7 +149,7 @@ namespace CE::Widgets
 
 	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState, const Rect& rect)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(rect);
 		f32 borderWidth = styleState.borderThickness;
 		bool hasShadow = styleState.shadowColor.a > 0 && (styleState.shadowOffset.x != 0 || styleState.shadowOffset.y != 0);
 
@@ -164,36 +164,51 @@ namespace CE::Widgets
 		}
 		if (borderWidth > 0 && styleState.borderColor.a > 0)
 		{
-			Rect globalBorderRect = GUI::WindowRectToGlobalRect(GetComputedBorderRect());
+			Rect globalBorderRect = GUI::WidgetSpaceToScreenSpace(GetComputedBorderRect());
 			GUI::DrawRect(globalBorderRect, styleState.borderColor, styleState.borderRadius, borderWidth);
 		}
 
-		if (debugDraw)
+		if (forceDebugDrawMode != CDebugBackgroundFilter::None)
 		{
-			DrawDebugBackground();
+			DrawDebugBackground(forceDebugDrawMode);
+		}
+		else if (debugDraw)
+		{
+			DrawDebugBackground(filter);
 		}
 	}
 
 	void CWidget::DrawDebugBackground(CDebugBackgroundFilter filter)
 	{
-		Rect globalMargin = GUI::WindowRectToGlobalRect(GetComputedMarginRect());
-		Rect globalBorder = GUI::WindowRectToGlobalRect(GetComputedBorderRect());
-		Rect globalPadding = GUI::WindowRectToGlobalRect(GetComputedPaddingRect());
-		Rect globalRect = GUI::WindowRectToGlobalRect(GetComputedIntrinsicSizeRect());
+		Rect globalMargin = GUI::WidgetSpaceToScreenSpace(GetComputedMarginRect());
+		Rect margin = GetComputedLayoutMargin();
+		Rect globalBorder = GUI::WidgetSpaceToScreenSpace(GetComputedBorderRect());
+		Rect border = GetComputedLayoutBorder();
+		Rect globalPadding = GUI::WidgetSpaceToScreenSpace(GetComputedPaddingRect());
+		Rect padding = GetComputedLayoutPadding();
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(GetComputedIntrinsicSizeRect());
 		
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::Margin))
-			GUI::FillRect(globalMargin, Color::FromRGBA32(173, 128, 82));
+		{
+			GUI::FillRectWidth(globalMargin, globalMargin + Rect(margin.min, -margin.max), Color::FromRGBA32(173, 128, 82));
+		}
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::Border))
-			GUI::FillRect(globalBorder, Color::FromRGBA32(227, 195, 129));
+		{
+			GUI::FillRectWidth(globalBorder, globalBorder + Rect(border.min, -border.max), Color::FromRGBA32(227, 195, 129));
+		}
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::Padding))
-			GUI::FillRect(globalPadding, Color::FromRGBA32(183, 196, 127));
+		{
+			GUI::FillRectWidth(globalPadding, globalPadding + Rect(padding.min, -padding.max), Color::FromRGBA32(183, 196, 127));
+		}
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::IntrinsicSize))
+		{
 			GUI::FillRect(globalRect, Color::FromRGBA32(135, 178, 188));
+		}
 	}
 
 	void CWidget::FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 		
 		if (color.a > 0)
 		{
@@ -203,7 +218,7 @@ namespace CE::Widgets
 
 	void CWidget::DrawRect(const Color& color, const Rect& localRect, f32 borderThickness, const Vec4& borderRadius)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 		
 		if (color.a > 0)
 		{
@@ -221,14 +236,14 @@ namespace CE::Widgets
 
 	void CWidget::FillCircle(const Color& color, const Rect& localRect)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		GUI::FillCircle(globalRect, color);
 	}
 
 	void CWidget::DrawCircle(const Color& color, const Rect& localRect, f32 borderThickness)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		GUI::DrawCircle(globalRect, color, borderThickness);
 	}
@@ -825,7 +840,7 @@ namespace CE::Widgets
 
 			if (!isnan(rect.x) && !isnan(rect.y))
 			{
-				screenPos = GUI::WindowRectToGlobalRect(rect).min;
+				screenPos = GUI::WidgetSpaceToScreenSpace(rect).min;
 			}
 
 			if (IsDisabled()) GUI::BeginDisabled();
