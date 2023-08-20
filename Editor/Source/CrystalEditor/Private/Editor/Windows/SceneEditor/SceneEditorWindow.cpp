@@ -24,10 +24,9 @@ namespace CE::Editor
 		{
 			auto fileMenuItem = CreateWidget<CMenuItem>(menuBar, "FileMenuItem");
 			fileMenuItem->SetText("File");
+			auto fileMenu = CreateWidget<CMenu>(fileMenuItem, "FileMenu");
+			fileMenuItem->SetSubMenu(fileMenu);
 			{
-				auto fileMenu = CreateWidget<CMenu>(fileMenuItem, "FileMenu");
-				fileMenuItem->SetSubMenu(fileMenu);
-
 				for (int i = 0; i < 8; i++)
 				{
 					auto item = CreateWidget<CMenuItem>(fileMenu, "FileMenuSubItem");
@@ -51,15 +50,28 @@ namespace CE::Editor
 
 			auto editMenuItem = CreateWidget<CMenuItem>(menuBar, "EditMenuItem");
 			editMenuItem->SetText("Edit");
+			auto editMenu = CreateWidget<CMenu>(editMenuItem, "EditMenu");
+			editMenuItem->SetSubMenu(editMenu);
 			{
-				auto editMenu = CreateWidget<CMenu>(editMenuItem, "EditMenu");
-				editMenuItem->SetSubMenu(editMenu);
-
 				for (int i = 0; i < 8; i++)
 				{
 					auto item = CreateWidget<CMenuItem>(editMenu, "EditMenuSubItem");
 					item->SetText(String::Format("Edit Item {}", i));
 				}
+			}
+
+			auto toolsMenuItem = CreateWidget<CMenuItem>(menuBar, "ToolsMenuItem");
+			toolsMenuItem->SetText("Tools");
+			auto toolsMenu = CreateWidget<CMenu>(toolsMenuItem);
+			toolsMenuItem->SetSubMenu(toolsMenu);
+			{
+				auto widgetDebuggerItem = CreateWidget<CMenuItem>(toolsMenu, "WidgetDebuggerItem");
+				widgetDebuggerItem->SetText("Widget Debugger");
+				
+				Object::Bind(widgetDebuggerItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [](CMenuItem* item)
+					{
+						GetWidgetDebugger()->Show();
+					});
 			}
 		}
 

@@ -20,13 +20,19 @@ namespace CE::Widgets
 		YGNodeSetContext(node, this);
 		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
 
+		detachedNode = YGNodeNew();
+		YGNodeSetContext(detachedNode, this);
+		YGNodeSetMeasureFunc(detachedNode, MeasureFunctionCallback);
+
 		this->stylesheet = CreateDefaultSubobject<CSSStyleSheet>("StyleSheet");
 	}
 
 	CWidget::~CWidget()
 	{
 		YGNodeFree(node);
+		YGNodeFree(detachedNode);
 		node = nullptr;
+		detachedNode = nullptr;
 	}
 
 	void CWidget::OnBeforeDestroy()
@@ -165,6 +171,8 @@ namespace CE::Widgets
 		if (borderWidth > 0 && styleState.borderColor.a > 0)
 		{
 			Rect globalBorderRect = GUI::WidgetSpaceToScreenSpace(GetComputedBorderRect());
+			auto borderWidths = GetComputedLayoutBorder();
+			globalBorderRect += Rect(borderWidths.left / 2, borderWidths.top / 2, -borderWidths.right / 2, -borderWidths.bottom / 2);
 			GUI::DrawRect(globalBorderRect, styleState.borderColor, styleState.borderRadius, borderWidth);
 		}
 
@@ -326,6 +334,13 @@ namespace CE::Widgets
 				auto childCount = YGNodeGetChildCount(node);
 				YGNodeInsertChild(node, subWidget->node, childCount);
 			}
+			else
+			{
+				YGNodeSetMeasureFunc(detachedNode, nullptr);
+
+				auto childCount = YGNodeGetChildCount(detachedNode);
+				YGNodeInsertChild(detachedNode, subWidget->node, childCount);
+			}
 		}
 	}
 
@@ -408,7 +423,8 @@ namespace CE::Widgets
 		{
 			auto rect = GetComputedLayoutRect();
 
-			DrawDefaultBackground();
+			if (ShouldHandleBackgroundDraw())
+				DrawDefaultBackground();
 
 			if (IsDebugModeEnabled())
 			{
@@ -1057,7 +1073,8 @@ namespace CE::Widgets
 
 		for (auto widget : attachedWidgets)
 		{
-			widget->SetNeedsLayout(set, recursive);
+			if (set || !widget->IsLayoutCalculationRoot())
+				widget->SetNeedsLayout(set, recursive);
 		}
 	}
 
@@ -1077,6 +1094,8 @@ namespace CE::Widgets
 	void CWidget::UpdateLayoutIfNeeded()
 	{
 		if (!NeedsLayoutRecursive())
+			return;
+		if (!IsLayoutCalculationRoot())
 			return;
 
 		UpdateStyleIfNeeded();
@@ -1102,6 +1121,12 @@ namespace CE::Widgets
 		YGNodeCalculateLayout(node, parentSize.width, parentSize.height, YGDirectionLTR);
 
 		SetNeedsLayoutRecursive(false);
+		needsLayout = false;
+
+		for (auto widget : attachedWidgets)
+		{
+			widget->SetNeedsLayout(false, true);
+		}
 	}
 
 	void CWidget::UpdateStyleIfNeeded()

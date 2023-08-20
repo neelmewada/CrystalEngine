@@ -97,6 +97,8 @@ namespace CE::Widgets
 		/// Override and return true if the widget is the root of layout calculation for it's children
 		virtual bool IsLayoutCalculationRoot() { return IsWindow(); }
 
+		virtual bool ShouldHandleBackgroundDraw() { return true; }
+
 		bool NeedsLayout(bool recursive = false);
 		bool NeedsStyle(bool recursive = false);
 
@@ -151,7 +153,8 @@ namespace CE::Widgets
 			if (!StyleClassExists(styleClass))
 			{
 				styleClasses.Add(styleClass);
-				SetNeedsStyle();
+				SetNeedsStyleRecursive();
+				SetNeedsLayout();
 			}
 		}
 
@@ -166,7 +169,10 @@ namespace CE::Widgets
 		inline void RemoveStyleClass(const String& styleClass)
 		{
 			if (styleClasses.Remove(styleClass))
-				SetNeedsStyle();
+			{
+				SetNeedsStyleRecursive();
+				SetNeedsLayout();
+			}
 		}
 
 		inline bool StyleClassExists(const String& styleClass) const
@@ -433,6 +439,7 @@ namespace CE::Widgets
 		String stylesheetText = "";
 
 		YGNodeRef node{};
+		YGNodeRef detachedNode{};
 
 		// Style states
 

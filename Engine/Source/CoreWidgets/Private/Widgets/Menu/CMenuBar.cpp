@@ -71,7 +71,6 @@ namespace CE::Widgets
 		flags |= GUI::WF_NoScrollWithMouse;
 		flags |= GUI::WF_NoScrollbar;
 
-		//bool result = GUI::BeginChild(rect, GetUuid(), "", {}, {}, flags);
 		bool result = GUI::BeginMenuBar();
 
 		if (result)

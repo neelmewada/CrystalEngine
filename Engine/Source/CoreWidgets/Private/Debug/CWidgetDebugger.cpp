@@ -430,6 +430,7 @@ namespace CE::Widgets
 					}
 				};
 
+			drawVec4Entry("layout", debugWidget->GetComputedLayoutRect());
 			drawVec4Entry("margin", debugWidget->GetComputedLayoutMargin());
 			drawVec4Entry("padding", debugWidget->GetComputedLayoutPadding());
 			drawSingleEntry("width", debugWidget->GetComputedLayoutSize().width);
@@ -468,7 +469,7 @@ namespace CE::Widgets
 			u32 textColor = isEnabled ? Color::RGBA(36, 36, 36).ToU32() : Color(1, 1, 1).ToU32();
 			ImGui::PushStyleColor(ImGuiCol_Text, textColor);
 
-			ImGui::GetWindowDrawList()->AddText(ImVec2(screenRect.x + 2.5f, screenRect.y + 2.5f), 
+			GImGui->CurrentWindow->DrawList->AddText(ImVec2(screenRect.x + 2.5f, screenRect.y + 2.5f), 
 				textColor, title.GetCString());
 
 			ImRect topRect = ImRect(screenRect.left, screenRect.top, screenRect.right, screenRect.top + minHeight);

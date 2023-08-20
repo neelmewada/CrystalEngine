@@ -75,7 +75,7 @@ namespace CE::Widgets
 	{
 		Super::Construct();
 
-		if (GetWidgetDebugger() != nullptr)
+		if (GetWidgetDebugger() != nullptr && GetOwner() == nullptr)
 			GetWidgetDebugger()->registeredWindows.Add(this);
 
 		SetTitle(GetName().GetString());
@@ -233,21 +233,16 @@ namespace CE::Widgets
 			if (toolBar != nullptr)
 			{
 				auto toolBarHeight = toolBar->GetComputedLayoutSize().y;
-				if (!isnan(toolBarHeight) && toolBarHeight > 1)
+				if (!IsNan(toolBarHeight) && toolBarHeight > 1)
 				{
 					GUI::SetWindowToolBarHeight(toolBarHeight);
 				}
 			}
 
-			// Add space at top for title bar (if present)
-			GUI::PushChildCoordinateSpace(Rect(0, GUI::GetWindowTitleBarHeight()));
-
             for (CWidget* subWidget : attachedWidgets)
             {
 				subWidget->Render();
             }
-
-			GUI::PopChildCoordinateSpace();
 			
 			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
 

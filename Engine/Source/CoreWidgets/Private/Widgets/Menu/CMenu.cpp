@@ -21,8 +21,6 @@ namespace CE::Widgets
 
 	Vec2 CMenu::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		SetNeedsLayout();
-		UpdateLayoutIfNeeded();
 		return GetComputedLayoutSize();
 	}
 
@@ -246,6 +244,15 @@ namespace CE::Widgets
 		}
 
 		return false;
+	}
+
+	void CMenu::UpdateLayoutIfNeeded()
+	{
+		UpdateStyleIfNeeded();
+
+		YGNodeCalculateLayout(node, YGUndefined, YGUndefined, YGDirectionLTR);
+
+		SetNeedsLayoutRecursive(false);
 	}
 
 	bool CMenu::OnSubMenuItemHovered(CMenuItem* subMenuItem)

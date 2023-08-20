@@ -26,6 +26,7 @@ namespace CE::Widgets
 		bool IsMenu() override final { return true; }
 		bool IsContainer() override final { return true; }
 		bool IsLayoutCalculationRoot() override final { return true; }
+		bool ShouldHandleBackgroundDraw() override { return false; }
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
@@ -52,6 +53,8 @@ namespace CE::Widgets
 		bool IsAnySubMenuOpen();
 
     protected:
+
+		void UpdateLayoutIfNeeded() override;
         
         bool OnSubMenuItemHovered(CMenuItem* subMenuItem);
         

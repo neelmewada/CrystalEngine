@@ -154,8 +154,6 @@ namespace CE::Widgets
 
 		f32 centerY = (rect.min.y + rect.max.y) / 2;
 
-		DrawDefaultBackground();
-
 		GUI::InvisibleButton(rect, GetUuid());
 		PollEvents();
         
@@ -175,7 +173,11 @@ namespace CE::Widgets
 		if (siblingExistsWithRadioOrToggle)
 			offsetX += 22; // radio/toggle offset
 
-		GUI::Text(rect + Rect(padding.left + offsetX, padding.top, -padding.right + offsetX, -padding.bottom), text, defaultStyleState);
+		f32 offsetY = 0;
+		//if (IsInsideMenuBar())
+		//	offsetY = -7.5f;
+
+		GUI::Text(rect + Rect(padding.left + offsetX, padding.top + offsetY, -padding.right + offsetX, -padding.bottom), text, defaultStyleState);
 
 		if (HasIcon())
 		{
