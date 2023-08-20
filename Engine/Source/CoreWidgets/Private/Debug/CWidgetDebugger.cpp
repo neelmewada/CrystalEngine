@@ -306,7 +306,7 @@ namespace CE::Widgets
 						for (const auto& string : array)
 						{
 							if (display.NonEmpty())
-								display += " ";
+								display += ", ";
 							display += "." + string;
 						}
 					}
@@ -499,7 +499,7 @@ namespace CE::Widgets
 
 		bool isLeaf = widget->attachedWidgets.IsEmpty();
 
-		String widgetName = String::Format("{} ({})", widget->GetName(), widget->GetClass()->GetName().GetLastComponent());
+		String widgetName = String::Format("{} ({})###{}", widget->GetName(), widget->GetClass()->GetName().GetLastComponent(), widget->GetUuid());
 		if (!foundWidgetInHierarchy && debugWidget != nullptr && debugWidget->IsWidgetPresentInParentHierarchy(widget))
 			ImGui::SetNextItemOpen(true);
 

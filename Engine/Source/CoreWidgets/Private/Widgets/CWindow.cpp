@@ -1,5 +1,7 @@
 #include "CoreWidgets.h"
 
+#include "imgui.h"
+
 namespace CE::Widgets
 {
 
@@ -89,6 +91,8 @@ namespace CE::Widgets
     {
         if (isShown)
         {
+			auto& io = ImGui::GetIO();
+
 			GUI::WindowFlags windowFlags = GUI::WF_None;
 			if (allowHorizontalScroll)
 				windowFlags |= GUI::WF_HorizontalScrollbar;

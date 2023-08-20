@@ -138,7 +138,7 @@ void ProjectBrowserWindow::Construct()
 	Super::Construct();
 	
 	SetStyleSheet(css);
-	
+
 	CTabWidget* tabWidget = CreateWidget<CTabWidget>(this, "ProjectBrowserTabWidget");
 
 	EditorPrefs::Get().GetStruct("ProjectBrowser.Cache", &cache);

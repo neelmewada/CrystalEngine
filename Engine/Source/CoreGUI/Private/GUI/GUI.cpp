@@ -251,7 +251,7 @@ namespace CE::GUI
 
 	COREGUI_API Rect ToScreenSpaceRect(const Rect& fromRect, CoordSpace fromCoordSpace)
 	{
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		ImGuiWindow* window = GImGui->CurrentWindow;
 		if (window == nullptr || fromCoordSpace == COORD_Screen)
 			return fromRect;
 
@@ -266,7 +266,7 @@ namespace CE::GUI
 
 	COREGUI_API Vec2 ToScreenSpacePos(const Vec2& fromPos, CoordSpace fromCoordSpace)
 	{
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		ImGuiWindow* window = GImGui->CurrentWindow;
 		if (window == nullptr || fromCoordSpace == COORD_Screen)
 			return fromPos;
 
@@ -286,7 +286,7 @@ namespace CE::GUI
 		if (fromCoordSpace == COORD_Widget)
 			return WidgetSpaceToWindowSpace(fromRect);
 
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		ImGuiWindow* window = GImGui->CurrentWindow;
 		if (window == nullptr)
 			return fromRect;
 
@@ -303,7 +303,7 @@ namespace CE::GUI
 		if (fromCoordSpace == COORD_Widget)
 			return WidgetSpaceToWindowSpace(fromPos);
 
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		ImGuiWindow* window = GImGui->CurrentWindow;
 		if (window == nullptr)
 			return fromPos;
 
@@ -320,7 +320,7 @@ namespace CE::GUI
 		if (fromCoordSpace == COORD_Window)
 			return WindowSpaceToWidgetSpace(fromRect);
 
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		ImGuiWindow* window = GImGui->CurrentWindow;
 		if (window == nullptr)
 			return fromRect;
 
@@ -338,7 +338,7 @@ namespace CE::GUI
 		if (fromCoordSpace == COORD_Window)
 			return WindowSpaceToWidgetSpace(fromPos);
 
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		ImGuiWindow* window = GImGui->CurrentWindow;
 		if (window == nullptr)
 			return fromPos;
 
@@ -850,6 +850,7 @@ namespace CE::GUI
 			//const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
 			ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);// , wrap_width);
 			text_pos.x += align.x * inSize.x - align.x * text_size.x;
+			text_pos.y += align.y * inSize.y - align.y * text_size.y;
 
 			ImRect bb(text_pos, text_pos + inSize);
 			ImGui::ItemSize(inSize, 0.0f);
@@ -6787,7 +6788,7 @@ namespace CE::GUI
 
 	COREGUI_API void FillRect(const Rect& rect, u32 color, Vec4 rounding)
 	{
-		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		ImDrawList* drawList = GImGui->CurrentWindow->DrawList;
 		if (drawList == nullptr)
 			return;
 
@@ -6824,7 +6825,7 @@ namespace CE::GUI
 
 	COREGUI_API void FillCircle(const Rect& rect, const Color& color)
 	{
-		ImDrawList* drawList = ImGui::GetWindowDrawList();
+		ImDrawList* drawList = GImGui->CurrentWindow->DrawList;
 		if (drawList == nullptr)
 			return;
 

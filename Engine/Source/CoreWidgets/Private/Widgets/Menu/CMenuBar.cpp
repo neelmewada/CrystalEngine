@@ -87,7 +87,7 @@ namespace CE::Widgets
 				}
 			}
 
-			GUI::PushChildCoordinateSpace(rect + offset);
+			GUI::PushChildCoordinateSpace(rect);
 
 			for (auto child : attachedWidgets)
 			{

@@ -19,6 +19,13 @@ namespace CE::Widgets
 		Super::Construct();
 	}
 
+	Vec2 CMenu::CalculateIntrinsicContentSize(f32 width, f32 height)
+	{
+		SetNeedsLayout();
+		UpdateLayoutIfNeeded();
+		return GetComputedLayoutSize();
+	}
+
 	void CMenu::OnAfterComputeStyle()
 	{
 		Super::OnAfterComputeStyle();

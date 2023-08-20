@@ -64,6 +64,7 @@ namespace CE::Editor
 		}
 
 		// ToolBar
+		if (false)
 		{
 			auto saveButton = CreateWidget<CButton>(toolBar, "SaveButton");
 			saveButton->SetAsContainer(false);

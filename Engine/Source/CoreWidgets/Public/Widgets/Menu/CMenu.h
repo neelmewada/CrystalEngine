@@ -27,6 +27,8 @@ namespace CE::Widgets
 		bool IsContainer() override final { return true; }
 		bool IsLayoutCalculationRoot() override final { return true; }
 
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
+
 		void OnAfterComputeStyle() override;
 
 		inline b8 IsShown() const { return isShown; }

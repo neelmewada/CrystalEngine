@@ -46,6 +46,8 @@ namespace CE::Editor
 	void CrystalEditorWindow::OnDrawGUI()
 	{
 		Super::OnDrawGUI();
+
+		GetWidgetDebugger()->RenderGUI();
 	}
 
 } // namespace CE::Editor
