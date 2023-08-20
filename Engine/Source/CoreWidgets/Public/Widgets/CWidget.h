@@ -219,6 +219,8 @@ namespace CE::Widgets
 		inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
 		inline Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
 
+		CStyleValue GetComputedPropertyValue(CStylePropertyType property);
+
 		inline Vec4 GetComputedLayoutMargin() const
 		{
 			return Vec4(

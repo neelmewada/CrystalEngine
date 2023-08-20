@@ -98,7 +98,9 @@ void SandboxLoop::PostInit()
 		{ defaultFontByteSize, 15, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 17, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 18, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 19, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 20, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 22, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },
 	});
@@ -351,6 +353,7 @@ CWindow {
 	flex-direction: column;
 	align-items: stretch;
 	row-gap: 5px;
+	text-align: middle-center;
 }
 
 CWindow::title-bar {
@@ -359,10 +362,6 @@ CWindow::title-bar {
 
 CWindow.DockSpace {
 	background: rgb(21, 21, 21);
-}
-
-CLabel {
-	text-align: middle-center;
 }
 
 CButton {
@@ -417,6 +416,7 @@ void SandboxLoop::SetupGUI()
 	
 	auto testLabel = CreateWidget<CLabel>(window, "TestLabel");
 	testLabel->SetText("TEST LABEL");
+	testLabel->AddStyleClasses({ "MyStyleClass", "Alternate" });
 
 	GetWidgetDebugger()->Show();
 }

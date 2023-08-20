@@ -55,4 +55,16 @@ namespace CE::Widgets
 		}
 	}
 
+	CFont CFontManager::GetCurrentFont()
+	{
+		for (const auto& font : fonts)
+		{
+			if (font.fontHandle == GUI::GetCurrentFont())
+			{
+				return font;
+			}
+		}
+		return CFont();
+	}
+
 } // namespace CE::Widgets

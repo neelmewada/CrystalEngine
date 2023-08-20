@@ -30,6 +30,8 @@ namespace CE::Widgets
 		void PushFont(u32 pointSize, const Name& fontName = {});
 		void PopFont();
 
+		CFont GetCurrentFont();
+
 	private:
 		Array<int> pushedFonts{};
 

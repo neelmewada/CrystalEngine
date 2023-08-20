@@ -105,6 +105,14 @@ namespace CE
         return fieldTypeId == TYPEID(f32) || fieldTypeId == TYPEID(f64);
     }
 
+	bool FieldType::IsEnumField()
+	{
+		auto declType = GetDeclarationType();
+		if (declType == nullptr)
+			return false;
+		return declType->IsEnum();
+	}
+
     bool FieldType::IsObjectField() const
     {
         auto classType = ClassType::FindClass(fieldTypeId);

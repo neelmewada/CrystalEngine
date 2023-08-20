@@ -2,6 +2,58 @@
 
 namespace CE::Widgets
 {
+	struct CStylePropertyMeta
+	{
+		CStylePropertyType property{};
+		TypeInfo* valueType = nullptr;
+		b8 affectsLayout = false;
+	};
+
+	static Array<CStylePropertyMeta> propertyMetas = {
+		{ CStylePropertyType::Opacity, TYPE(f32), false },
+		{ CStylePropertyType::Padding, TYPE(f32), true },
+		{ CStylePropertyType::Margin, TYPE(f32), true },
+		{ CStylePropertyType::Position, TYPE(CPosition), true },
+		{ CStylePropertyType::Display, TYPE(CDisplay), true },
+		{ CStylePropertyType::Left, TYPE(f32), true },
+		{ CStylePropertyType::Top, TYPE(f32), true },
+		{ CStylePropertyType::Right, TYPE(f32), true },
+		{ CStylePropertyType::Bottom, TYPE(f32), true },
+		{ CStylePropertyType::Foreground, TYPE(Color), false },
+		{ CStylePropertyType::Background, TYPE(Color), false },
+        { CStylePropertyType::BackgroundImage, TYPE(String), false },
+		{ CStylePropertyType::BackgroundSize, TYPE(Vec2), false },
+		{ CStylePropertyType::BorderRadius, TYPE(Vec4), false },
+		{ CStylePropertyType::BorderWidth, TYPE(Vec4), false },
+		{ CStylePropertyType::BorderColor, TYPE(Color), false },
+		{ CStylePropertyType::ShadowColor, TYPE(Color), false },
+		{ CStylePropertyType::ShadowOffset, TYPE(Vec2), false },
+		{ CStylePropertyType::TextAlign, TYPE(CTextAlign), false },
+		{ CStylePropertyType::Width, TYPE(f32), true },
+		{ CStylePropertyType::Height, TYPE(f32), true },
+		{ CStylePropertyType::MinWidth, TYPE(f32), true },
+		{ CStylePropertyType::MinHeight, TYPE(f32), true },
+		{ CStylePropertyType::MaxWidth, TYPE(f32), true },
+		{ CStylePropertyType::MaxHeight, TYPE(f32), true },
+		{ CStylePropertyType::Spacing, TYPE(f32), true },
+		{ CStylePropertyType::FontSize, TYPE(f32), true },
+		{ CStylePropertyType::FontName, TYPE(String), true },
+		{ CStylePropertyType::AlignContent, TYPE(CAlign), true },
+		{ CStylePropertyType::AlignItems, TYPE(CAlign), true },
+		{ CStylePropertyType::AlignSelf, TYPE(CAlign), true },
+		{ CStylePropertyType::JustifyContent, TYPE(CJustify), true },
+		{ CStylePropertyType::Flex, TYPE(f32), true },
+		{ CStylePropertyType::FlexBasis, TYPE(f32), true },
+		{ CStylePropertyType::FlexFlow, TYPE(f32), true },
+		{ CStylePropertyType::FlexWrap, TYPE(CFlexWrap), true },
+		{ CStylePropertyType::FlexGrow, TYPE(f32), true },
+		{ CStylePropertyType::FlexShrink, TYPE(f32), true },
+		{ CStylePropertyType::FlexDirection, TYPE(CFlexDirection), true },
+		{ CStylePropertyType::FlexOrder, TYPE(f32), true },
+		{ CStylePropertyType::RowGap, TYPE(f32), true },
+		{ CStylePropertyType::ColumnGap, TYPE(f32), true },
+
+	};
 
 	COREWIDGETS_API CStateFlag StateFlagsFromString(const String& string)
 	{
@@ -151,6 +203,11 @@ namespace CE::Widgets
 		return flags;
 	}
 
+	TypeInfo* CStyle::GetPropertyValueType(CStylePropertyType property)
+	{
+		return nullptr;
+	}
+
 	CStyleValue& CStyle::AddProperty(CStylePropertyType propertyType, const CStyleValue& value)
 	{
 		properties[propertyType] = value;
@@ -181,6 +238,21 @@ namespace CE::Widgets
 		return GetInheritedProperties().Exists(property);
 	}
 
+	TypeInfo* CStyle::GetValueTypeForProperty(CStylePropertyType property)
+	{
+		int index = propertyMetas.IndexOf([=](const CStylePropertyMeta& meta) -> bool { return meta.property == property; });
+		if (index >= 0)
+		{
+			return propertyMetas[index].valueType;
+		}
+		return nullptr;
+	}
+
+    bool CStyle::IsLayoutProperty(CStylePropertyType property)
+    {
+		return propertyMetas.Exists([](const CStylePropertyMeta& meta) -> bool { return meta.affectsLayout; });
+    }
+
 	static HashMap<String, CStylePropertyType> stringToStylePropertyTypeMap{
 		{ "opacity", CStylePropertyType::Opacity },
 		{ "padding", CStylePropertyType::Padding },
@@ -208,7 +280,7 @@ namespace CE::Widgets
 		{ "max-height", CStylePropertyType::MaxHeight },
 		{ "font-size", CStylePropertyType::FontSize },
 		{ "font-name", CStylePropertyType::FontName},
-
+		{ "font", CStylePropertyType::FontName},
 		{ "align-content", CStylePropertyType::AlignContent },
 		{ "align-items", CStylePropertyType::AlignItems },
 		{ "align-self", CStylePropertyType::AlignSelf },
@@ -235,7 +307,7 @@ namespace CE::Widgets
 	}
 
 	static HashMap<CStylePropertyType, EnumType*> propertyTypeToEnumMap{
-		{ CStylePropertyType::TextAlign, GetStaticEnum<Alignment>() },
+		{ CStylePropertyType::TextAlign, GetStaticEnum<CTextAlign>() },
 		{ CStylePropertyType::AlignContent, GetStaticEnum<CAlign>() },
 		{ CStylePropertyType::AlignItems, GetStaticEnum<CAlign>() },
 		{ CStylePropertyType::AlignSelf, GetStaticEnum<CAlign>() },
@@ -250,21 +322,21 @@ namespace CE::Widgets
 		return propertyTypeToEnumMap[property];
 	}
 
-	static HashMap<String, Alignment> stringToAlignmentMap{
-		{ "auto", Alignment::Inherited },
-		{ "inherited", Alignment::Inherited },
-		{ "top-left", Alignment::TopLeft },
-		{ "top-center", Alignment::TopCenter },
-		{ "top-right", Alignment::TopRight },
-		{ "middle-left", Alignment::MiddleLeft },
-		{ "middle-center", Alignment::MiddleCenter },
-		{ "middle-right", Alignment::MiddleRight },
-		{ "bottom-left", Alignment::BottomLeft },
-		{ "bottom-center", Alignment::BottomCenter },
-		{ "bottom-right", Alignment::BottomRight },
+	static HashMap<String, CTextAlign> stringToAlignmentMap{
+		{ "auto", CTextAlign::Inherited },
+		{ "inherited", CTextAlign::Inherited },
+		{ "top-left", CTextAlign::TopLeft },
+		{ "top-center", CTextAlign::TopCenter },
+		{ "top-right", CTextAlign::TopRight },
+		{ "middle-left", CTextAlign::MiddleLeft },
+		{ "middle-center", CTextAlign::MiddleCenter },
+		{ "middle-right", CTextAlign::MiddleRight },
+		{ "bottom-left", CTextAlign::BottomLeft },
+		{ "bottom-center", CTextAlign::BottomCenter },
+		{ "bottom-right", CTextAlign::BottomRight },
 	};
 
-	COREWIDGETS_API Alignment StringToAlignment(const String& string)
+	COREWIDGETS_API CTextAlign StringToAlignment(const String& string)
 	{
 		return stringToAlignmentMap[string];
 	}

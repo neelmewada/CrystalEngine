@@ -64,6 +64,7 @@ namespace CE
 
         bool IsIntegerField() const;
         bool IsDecimalField() const;
+		bool IsEnumField();
 
         bool IsObjectField() const;
 

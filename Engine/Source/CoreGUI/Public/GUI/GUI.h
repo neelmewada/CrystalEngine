@@ -35,6 +35,7 @@ namespace CE::GUI
 	COREGUI_API void PushFont(void* fontHandle);
 	COREGUI_API void PopFont();
 	COREGUI_API void SetCurrentFont(void* fontHandle);
+	COREGUI_API void* GetCurrentFont();
 	COREGUI_API f32 GetFontSize();
 
 	COREGUI_API Viewport* GetCurrentViewport();

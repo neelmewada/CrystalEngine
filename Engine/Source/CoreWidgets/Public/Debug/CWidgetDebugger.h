@@ -24,6 +24,9 @@ namespace CE::Widgets
 
 		void DrawLayoutRectAtCenter(const String& title, bool isEnabled, const Color& color, const Color& clearColor, const Vec4& values, const Rect& screenRect);
 
+		void DrawComputedFieldsTable();
+		void DrawPropertiesTable();
+
 		bool isShown = false;
 		bool enableLayoutDebugMode = false;
 		CDebugBackgroundFilter hoveredLayoutItem = CDebugBackgroundFilter::None;

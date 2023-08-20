@@ -113,18 +113,17 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS_FLAGS(CStylePropertyTypeFlags);
 
-
 	ENUM()
-	enum class Alignment : int
+	enum class CTextAlign : u8
 	{
 		Inherited = 0,
 		TopLeft, TopCenter, TopRight,
 		MiddleLeft, MiddleCenter, MiddleRight,
 		BottomLeft, BottomCenter, BottomRight
 	};
-	ENUM_CLASS_FLAGS(Alignment);
+	ENUM_CLASS_FLAGS(CTextAlign);
 
-	COREWIDGETS_API Alignment StringToAlignment(const String& string);
+	COREWIDGETS_API CTextAlign StringToAlignment(const String& string);
 
 	STRUCT()
 	struct COREWIDGETS_API CStyleValue
@@ -157,7 +156,7 @@ namespace CE::Widgets
 		void Release();
 
 		template<typename TEnum> requires TIsEnum<TEnum>::Value
-			CStyleValue(TEnum enumValue) : enumValue(Vec4i(1, 1, 1, 1) * (int)enumValue), valueType(Type_Enum)
+		CStyleValue(TEnum enumValue) : enumValue(Vec4i(1, 1, 1, 1) * (int)enumValue), valueType(Type_Enum)
 		{
 
 		}
@@ -321,7 +320,10 @@ namespace CE::Widgets
 		
 		static const Array<CStylePropertyType>& GetInheritedProperties();
 		static bool IsInheritedProperty(CStylePropertyType property);
+		static TypeInfo* GetValueTypeForProperty(CStylePropertyType property);
+		static bool IsLayoutProperty(CStylePropertyType property);
 		static CStylePropertyTypeFlags GetPropertyTypeFlags(CStylePropertyType property);
+		static TypeInfo* GetPropertyValueType(CStylePropertyType property);
 
 		CStyleValue& AddProperty(CStylePropertyType property, const CStyleValue& value);
 

@@ -114,6 +114,11 @@ namespace CE::GUI
 		ImGui::SetCurrentFont((ImFont*)fontHandle);
 	}
 
+	COREGUI_API void* GetCurrentFont()
+	{
+		return GImGui->Font;
+	}
+
 	COREGUI_API f32 GetFontSize()
 	{
 		return ImGui::GetFontSize();
@@ -793,18 +798,58 @@ namespace CE::GUI
 		if (text_end == NULL)
 			text_end = text + strlen(text); // FIXME-OPT
 
+		ImVec2 align = ImVec2(0.5f, 0.5f);
+		auto textAlign = style.textAlign;
+		if (textAlign == TextAlign_TopLeft)
+		{
+			align = ImVec2(0, 0);
+		}
+		else if (textAlign == TextAlign_TopCenter)
+		{
+			align = ImVec2(0.5f, 0);
+		}
+		else if (textAlign == TextAlign_TopRight)
+		{
+			align = ImVec2(1, 0);
+		}
+		else if (textAlign == TextAlign_MiddleLeft)
+		{
+			align = ImVec2(0, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleCenter)
+		{
+			align = ImVec2(0.5f, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleRight)
+		{
+			align = ImVec2(1, 0.5f);
+		}
+		else if (textAlign == TextAlign_BottomLeft)
+		{
+			align = ImVec2(0, 1);
+		}
+		else if (textAlign == TextAlign_BottomCenter)
+		{
+			align = ImVec2(0.5f, 1);
+		}
+		else if (textAlign == TextAlign_BottomRight)
+		{
+			align = ImVec2(1, 1);
+		}
+
 		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
 
 		ImVec2 inSize = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
 
-		const ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+		ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
 		const float wrap_pos_x = window->DC.TextWrapPos;
 		const bool wrap_enabled = (wrap_pos_x >= 0.0f);
 		//if (text_end - text <= 2000)
 		{
 			// Common case
 			//const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
-			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);// , wrap_width);
+			ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);// , wrap_width);
+			text_pos.x += align.x * inSize.x - align.x * text_size.x;
 
 			ImRect bb(text_pos, text_pos + inSize);
 			ImGui::ItemSize(inSize, 0.0f);
