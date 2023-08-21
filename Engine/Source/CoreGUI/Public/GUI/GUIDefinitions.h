@@ -751,6 +751,7 @@ namespace CE::GUI
 		// Color
 		Color background{};
 		Color foreground = Color::White();
+		Color imageTint = Color::White();
 		// Shadow
 		Color shadowColor{};
 		Vec2 shadowOffset{};

@@ -76,11 +76,13 @@ namespace CE::Editor
 		}
 
 		// ToolBar
-		if (false)
+		//if (false)
 		{
 			auto saveButton = CreateWidget<CButton>(toolBar, "SaveButton");
 			saveButton->SetAsContainer(false);
-			saveButton->SetText("Save");
+			saveButton->SetText("");
+			saveButton->LoadIcon("/Icons/save.png");
+			saveButton->SetIconSize(22);
 		}
 
 		assetBrowserPanel = CreateWidget<AssetBrowserPanel>(this, "SceneEditorWindow_AssetBrowserPanel");

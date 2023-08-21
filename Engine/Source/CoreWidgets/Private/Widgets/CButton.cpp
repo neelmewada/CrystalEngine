@@ -32,6 +32,16 @@ namespace CE::Widgets
 		return text;
 	}
 
+	void CButton::LoadIcon(const String& resourceSearchPath)
+	{
+		icon = GetStyleManager()->SearchImageResource(resourceSearchPath);
+	}
+
+	void CButton::RemoveIcon()
+	{
+		icon = {};
+	}
+
     void CButton::OnBeforeComputeStyle()
     {
         Super::OnBeforeComputeStyle();
@@ -70,7 +80,7 @@ namespace CE::Widgets
 		Vec4 padding = GetComputedLayoutPadding();
 
 		f32 iconOffset = 0;
-		if (icon.IsValid())
+		if (icon.IsValid() && !text.IsEmpty())
 			iconOffset = this->iconSize - 2;
 
 		//DrawShadow(defaultStyleState);
@@ -91,9 +101,14 @@ namespace CE::Widgets
 
 		if (icon.IsValid())
 		{
+			f32 centerX = (rect.max.x - rect.min.x) / 2;
 			f32 centerY = (rect.max.y - rect.min.y) / 2;
 			Rect iconRect{ padding.left, centerY - iconSize / 2,
 				padding.left + iconSize, centerY + iconSize / 2 };
+			if (text.IsEmpty())
+			{
+				iconRect = Rect(centerX - iconSize / 2, centerY - iconSize / 2, centerX + iconSize / 2, centerY + iconSize / 2);
+			}
 			GUI::Image(iconRect, icon.id, {});
 		}
 

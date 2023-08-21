@@ -25,7 +25,7 @@ namespace CE::Widgets
 
 			static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | 
 				ImGuiTableFlags_Resizable | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY;
-
+			
 			if (ImGui::BeginTable("Tree view", 1, flags, ImVec2(0, 250)))
 			{
 				for (auto window : registeredWindows)
@@ -445,6 +445,7 @@ namespace CE::Widgets
 			drawEnumEntry("text-align", GetStaticEnum<CTextAlign>(), debugWidget->GetComputedPropertyValue(CStylePropertyType::TextAlign));
 			drawComputedEntry("background", debugWidget->GetComputedPropertyValue(CStylePropertyType::Background));
 			drawComputedEntry("foreground", debugWidget->GetComputedPropertyValue(CStylePropertyType::Foreground));
+			drawComputedEntry("image-tint", debugWidget->GetComputedPropertyValue(CStylePropertyType::ImageTint));
 			//drawComputedEntry("opacity", debugWidget->GetComputedPropertyValue(CStylePropertyType::Opacity));
 			drawComputedEntry("shadow-color", debugWidget->GetComputedPropertyValue(CStylePropertyType::ShadowColor));
 			drawComputedEntry("shadow-offset", debugWidget->GetComputedPropertyValue(CStylePropertyType::ShadowOffset));

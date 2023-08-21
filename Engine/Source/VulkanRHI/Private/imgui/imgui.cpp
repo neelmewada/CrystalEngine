@@ -6788,7 +6788,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         const ImVec2 scrollbar_sizes_from_last_frame = window->ScrollbarSizes;
         window->DecoOuterSizeX1 = 0.0f;
         window->DecoOuterSizeX2 = 0.0f;
-        window->DecoOuterSizeY1 = window->TitleBarHeight() + window->MenuBarHeight();
+		window->DecoOuterSizeY1 = window->TitleBarHeight() + window->MenuBarHeight() + window->ToolBarHeight;
         window->DecoOuterSizeY2 = 0.0f;
         window->ScrollbarSizes = ImVec2(0.0f, 0.0f);
 
@@ -7027,7 +7027,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         // - Begin() initial clip rect
         float top_border_size = (((flags & ImGuiWindowFlags_MenuBar) || !(flags & ImGuiWindowFlags_NoTitleBar)) ? style.FrameBorderSize : window->WindowBorderSize);
         window->InnerClipRect.Min.x = ImFloor(0.5f + window->InnerRect.Min.x + ImMax(ImFloor(window->WindowPadding.x * 0.5f), window->WindowBorderSize));
-        window->InnerClipRect.Min.y = ImFloor(0.5f + window->InnerRect.Min.y + top_border_size);
+        window->InnerClipRect.Min.y = ImFloor(0.5f + window->InnerRect.Min.y + top_border_size - window->ToolBarHeight);
         window->InnerClipRect.Max.x = ImFloor(0.5f + window->InnerRect.Max.x - ImMax(ImFloor(window->WindowPadding.x * 0.5f), window->WindowBorderSize));
         window->InnerClipRect.Max.y = ImFloor(0.5f + window->InnerRect.Max.y - window->WindowBorderSize);
         window->InnerClipRect.ClipWithFull(host_rect);

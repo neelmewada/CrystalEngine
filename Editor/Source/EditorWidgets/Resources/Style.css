@@ -80,6 +80,24 @@ CButton.Transparent:pressed {
 	background: rgba(50, 50, 50, 180);
 }
 
+CButton.ToolBarItem {
+	padding: 5px 2.5px;
+	border-width: 0px;
+	background: rgba(0, 0, 0, 0);
+}
+
+CButton.ToolBarItem:hovered {
+	background: rgba(70, 70, 70, 180);
+}
+
+CButton.ToolBarItem:pressed {
+	background: rgba(50, 50, 50, 180);
+}
+
+.ToolBarItem {
+	min-height: 25px;
+}
+
 CTextInput {
 	background: rgb(15, 15, 15);
 	border-width: 1;
@@ -214,6 +232,9 @@ CPopup {
 }
 
 CToolBar {
+	padding: 5px 2.5px;
+	width: 100%;
+	background: rgb(36, 36, 36);
 	flex-direction: row;
 	align-items: stretch;
 	justify-content: flex-start;

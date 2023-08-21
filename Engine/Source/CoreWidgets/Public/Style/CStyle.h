@@ -62,6 +62,7 @@ namespace CE::Widgets
 		Position,
 		Display,
 		Left, Top, Right, Bottom,
+		ImageTint,
 		Foreground, // Inherited
 		Background,
         BackgroundImage,

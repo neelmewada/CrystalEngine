@@ -327,6 +327,11 @@ namespace CE::Widgets
 				subWidget->ownerWindow = GetOwnerWindow();
 			subWidget->OnAttachedTo(this);
 
+			if (IsOfType<CToolBar>())
+			{
+				subWidget->AddStyleClass("ToolBarItem");
+			}
+
 			if (!subWidget->IsLayoutCalculationRoot())
 			{
 				YGNodeSetMeasureFunc(node, nullptr);

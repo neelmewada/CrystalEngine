@@ -702,7 +702,7 @@ namespace CE::GUI
 
 		ImRect bb(rect.min.x, rect.min.y, rect.max.x, rect.max.y);
 
-		window->DrawList->AddImage(textureId, bb.Min, bb.Max, ImVec2(uvMin.x, uvMin.y), ImVec2(uvMax.x, uvMax.y));
+		window->DrawList->AddImage(textureId, bb.Min, bb.Max, ImVec2(uvMin.x, uvMin.y), ImVec2(uvMax.x, uvMax.y), style.imageTint.ToU32());
 	}
 
 	COREGUI_API void Text(const Rect& localRect, const String& text, const GuiStyleState& style)

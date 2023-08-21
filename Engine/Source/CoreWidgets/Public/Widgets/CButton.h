@@ -22,8 +22,11 @@ namespace CE::Widgets
 		virtual void SetText(const String& text);
 		virtual const String& GetText() const;
 
-		//void LoadIcon(const String& resourceSearchPath);
-		//void RemoveIcon();
+		inline f32 GetIconSize() const { return iconSize; }
+		inline void SetIconSize(f32 value) { iconSize = value; }
+
+		void LoadIcon(const String& resourceSearchPath);
+		void RemoveIcon();
         
         void OnBeforeComputeStyle() override;
 
