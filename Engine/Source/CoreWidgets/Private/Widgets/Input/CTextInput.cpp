@@ -51,7 +51,12 @@ namespace CE::Widgets
 		if (id == 0)
 			id = UUID32();
 
-		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, defaultStyleState, hintColor, padding, flags, callback, this);
+		auto styleState = defaultStyleState;
+		styleState.background = {};
+		styleState.borderThickness = 0;
+		styleState.borderColor = {};
+
+		auto inputChanged = GUI::InputText(rect, (u32)id, hint, value, styleState, hintColor, padding, flags, callback, this);
 		PollEvents();
 
 		if (inputChanged)
