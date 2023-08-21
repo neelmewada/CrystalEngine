@@ -433,9 +433,41 @@ namespace CE::GUI
 		ImGui::End();
 	}
 
-	COREGUI_API bool BeginMenuBar()
+	COREGUI_API bool BeginMenuBar(const Rect& localRect, GUI::ID id)
 	{
-		return ImGui::BeginMenuBar();
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+		if (!(window->Flags & ImGuiWindowFlags_MenuBar))
+			return false;
+
+		auto windowSpaceRect = WidgetSpaceToWindowSpace(localRect);
+		Vec2 originalSize = windowSpaceRect.max - windowSpaceRect.min;
+
+		GUI::SetCursorPos(windowSpaceRect.min);
+
+		IM_ASSERT(!window->DC.MenuBarAppending);
+		ImGui::BeginGroup(); // Backup position on layer 0 // FIXME: Misleading to use a group for that backup/restore
+		ImGui::PushID(id);
+
+		// We don't clip with current window clipping rectangle as it is already set to the area below. However we clip with window full rect.
+		// We remove 1 worth of rounding to Max.x to that text in long menus and small windows don't tend to display over the lower-right rounded area, which looks particularly glitchy.
+		ImRect bar_rect = window->MenuBarRect();
+
+		ImRect clip_rect(IM_ROUND(bar_rect.Min.x + window->WindowBorderSize), IM_ROUND(bar_rect.Min.y + window->WindowBorderSize), IM_ROUND(ImMax(bar_rect.Min.x, bar_rect.Max.x - ImMax(window->WindowRounding, window->WindowBorderSize))), IM_ROUND(bar_rect.Max.y));
+		clip_rect.Max = clip_rect.Min + ImVec2(originalSize.x, originalSize.y);
+		clip_rect.ClipWith(window->OuterRectClipped);
+		ImGui::PushClipRect(clip_rect.Min, clip_rect.Max, false);
+
+		GUI::SetCursorPos(windowSpaceRect.min);
+		// We overwrite CursorMaxPos because BeginGroup sets it to CursorPos (essentially the .EmitItem hack in EndMenuBar() would need something analogous here, maybe a BeginGroupEx() with flags).
+		//window->DC.CursorPos = window->DC.CursorMaxPos = ImVec2(bar_rect.Min.x + window->DC.MenuBarOffset.x, bar_rect.Min.y + window->DC.MenuBarOffset.y);
+		window->DC.LayoutType = ImGuiLayoutType_Horizontal;
+		window->DC.IsSameLine = false;
+		window->DC.NavLayerCurrent = ImGuiNavLayer_Menu;
+		window->DC.MenuBarAppending = true;
+		ImGui::AlignTextToFramePadding();
+		return true;
 	}
 
 	COREGUI_API void EndMenuBar()
@@ -678,11 +710,6 @@ namespace CE::GUI
 		GUI::Text(localRect, text.GetCString(), style);
 	}
 
-	static void Test()
-	{
-		
-	}
-
 	COREGUI_API void Text(const Rect& localRect, const char* text, const GuiStyleState& style)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -763,7 +790,9 @@ namespace CE::GUI
 				return;
 
 			ImGui::PushStyleColor(StyleCol_Text, style.foreground.ToU32());
-			ImGui::RenderTextClipped(bb.Min, bb.Max, text_begin, text_end, &text_size, align);
+			//ImGui::DebugDrawItemRect(Color::RGBA(120, 120, 120).ToU32());
+
+			ImGui::RenderTextClipped(bb.Min, bb.Max, text_begin, text_end, &text_size, align, &bb);
 			
 			//ImVec4 clipRect = bb.ToVec4();
 			//window->DrawList->AddText(g.Font, g.FontSize, bb.Min, style.foreground.ToU32(), text, text_end, rect.right - rect.left);

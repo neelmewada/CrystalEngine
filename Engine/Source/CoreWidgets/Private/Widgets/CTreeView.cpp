@@ -75,6 +75,11 @@ namespace CE::Widgets
 		}
 	}
 
+	bool CTreeItemView::ShouldHandleBackgroundDraw()
+	{
+		return true;
+	}
+
 	void CTreeItemView::OnDrawGUI()
 	{
 		auto rect = GetComputedLayoutRect();
@@ -229,7 +234,7 @@ namespace CE::Widgets
 			bool selected = (selectedIndex == index);
 
 			widget->DrawBackground((selected || widget->isLeftMousePressedInside) ? itemActive : (widget->isHovered ? itemHovered : widget->defaultStyleState), 
-				Rect(cursorPos, cursorPos + size + Vec2(indent * 15.0f, 0)));
+				Rect(cursorPos, cursorPos + size + Vec2(indent * 15.0f, 0)), false);
 
 			bool isOpen = false;
 

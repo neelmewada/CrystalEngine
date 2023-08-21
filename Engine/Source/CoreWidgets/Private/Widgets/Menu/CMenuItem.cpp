@@ -174,8 +174,8 @@ namespace CE::Widgets
 			offsetX += 22; // radio/toggle offset
 
 		f32 offsetY = 0;
-		//if (IsInsideMenuBar())
-		//	offsetY = -7.5f;
+		if (IsInsideMenuBar())
+			offsetY = -5.0f;
 
 		GUI::Text(rect + Rect(padding.left + offsetX, padding.top + offsetY, -padding.right + offsetX, -padding.bottom), text, defaultStyleState);
 

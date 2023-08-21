@@ -319,8 +319,8 @@ namespace CE::Widgets
 		void DrawShadow(const GUI::GuiStyleState& styleState);
 		void DrawShadow(const GUI::GuiStyleState& styleState, const Rect& localRect);
 
-		void DrawBackground(const GUI::GuiStyleState& styleState);
-		void DrawBackground(const GUI::GuiStyleState& styleState, const Rect& localRect);
+		void DrawBackground(const GUI::GuiStyleState& styleState, bool allowDebug = true);
+		void DrawBackground(const GUI::GuiStyleState& styleState, const Rect& localRect, bool allowDebug = true);
 
 		void DrawDebugBackground(CDebugBackgroundFilter filter = CDebugBackgroundFilter::All);
 

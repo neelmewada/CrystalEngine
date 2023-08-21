@@ -123,7 +123,7 @@ namespace CE::GUI
 
     COREGUI_API void EndWindow();
 
-    COREGUI_API bool BeginMenuBar();
+    COREGUI_API bool BeginMenuBar(const Rect& localRect, GUI::ID id);
 
     COREGUI_API void EndMenuBar();
 

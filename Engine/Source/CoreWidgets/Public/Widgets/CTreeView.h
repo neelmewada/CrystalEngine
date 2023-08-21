@@ -25,6 +25,8 @@ namespace CE::Widgets
 
 	protected:
 
+		bool ShouldHandleBackgroundDraw() override;
+
 		virtual void OnDrawGUI() override;
 
 		GUI::ID nodeId = 0;

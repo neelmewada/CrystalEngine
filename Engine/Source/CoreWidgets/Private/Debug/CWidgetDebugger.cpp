@@ -13,6 +13,9 @@ namespace CE::Widgets
 			return;
 
 		GUI::PushStyleColor(GUI::StyleCol_WindowBg, Color::FromRGBA32(32, 33, 36));
+		GUI::PushStyleColor(GUI::StyleCol_TitleBg, Color::RGBA(20, 20, 20));
+		GUI::PushStyleColor(GUI::StyleCol_TitleBgActive, Color::RGBA(20, 20, 20));
+		GUI::PushStyleColor(GUI::StyleCol_TitleBgCollapsed, Color::RGBA(20, 20, 20));
 
 		auto shown = GUI::BeginWindow("Widget Debugger", &isShown);
 
@@ -20,7 +23,8 @@ namespace CE::Widgets
 		{
 			GUI::Checkbox("Widget Selection Mode", &enableLayoutDebugMode);
 
-			static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_NoBordersInBody;
+			static ImGuiTableFlags flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | 
+				ImGuiTableFlags_Resizable | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_ScrollY;
 
 			if (ImGui::BeginTable("Tree view", 1, flags, ImVec2(0, 250)))
 			{
@@ -207,7 +211,7 @@ namespace CE::Widgets
 
 		GUI::EndWindow();
 
-		GUI::PopStyleColor();
+		GUI::PopStyleColor(4);
 	}
 
 	void CWidgetDebugger::DrawPropertiesTable()

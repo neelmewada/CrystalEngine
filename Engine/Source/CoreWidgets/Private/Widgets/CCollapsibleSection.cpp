@@ -89,9 +89,6 @@ namespace CE::Widgets
 
 	void CCollapsibleSection::OnDrawGUI()
 	{
-		SetNeedsStyleRecursive();
-		SetNeedsLayout();
-
 		auto rect = GetComputedLayoutRect();
 		auto contentPadding = GetComputedLayoutPadding();
 

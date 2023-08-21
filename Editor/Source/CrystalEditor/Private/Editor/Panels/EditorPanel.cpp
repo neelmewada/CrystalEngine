@@ -27,8 +27,6 @@ namespace CE::Editor
 
     Vec2 EditorPanel::CalculateIntrinsicContentSize(f32 width, f32 height)
     {
-		SetNeedsStyle();
-		SetNeedsLayout();
 		return Super::CalculateIntrinsicContentSize(width, height);
     }
 
