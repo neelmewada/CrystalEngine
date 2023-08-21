@@ -42,11 +42,11 @@ namespace CE::Editor
 		left->SetHorizontalScrollAllowed(true);
 		left->SetVerticalScrollAllowed(true);
 		{
-			auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
-			gameContentSection->SetTitle("Content");
-			gameContentSection->SetCollapsed(false);
+			//auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
+			//gameContentSection->SetTitle("Content");
+			//gameContentSection->SetCollapsed(false);
 			
-			gameContentDirectoryView = CreateWidget<CTreeView>(gameContentSection, "GameContentTreeView");
+			gameContentDirectoryView = CreateWidget<CTreeView>(left, "GameContentTreeView");
 			folderModel = CreateObject<AssetBrowserTreeModel>(gameContentDirectoryView, "GameContentTreeModel");
 			folderModel->SetPathTreeRootNode(AssetManager::GetRegistry()->GetCachedDirectoryPathTree().GetNode("/Game"));
 			gameContentDirectoryView->SetModel(folderModel);

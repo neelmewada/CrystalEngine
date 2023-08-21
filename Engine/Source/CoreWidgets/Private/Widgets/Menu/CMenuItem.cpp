@@ -154,8 +154,6 @@ namespace CE::Widgets
 
 		f32 centerY = (rect.min.y + rect.max.y) / 2;
 
-		DrawDefaultBackground();
-
 		GUI::InvisibleButton(rect, GetUuid());
 		PollEvents();
         
@@ -175,7 +173,11 @@ namespace CE::Widgets
 		if (siblingExistsWithRadioOrToggle)
 			offsetX += 22; // radio/toggle offset
 
-		GUI::Text(rect + Rect(padding.left + offsetX, padding.top, -padding.right + offsetX, -padding.bottom), text, defaultStyleState);
+		f32 offsetY = 0;
+		if (IsInsideMenuBar())
+			offsetY = -5.0f;
+
+		GUI::Text(rect + Rect(padding.left + offsetX, padding.top + offsetY, -padding.right + offsetX, -padding.bottom), text, defaultStyleState);
 
 		if (HasIcon())
 		{
@@ -200,7 +202,7 @@ namespace CE::Widgets
 			const f32 toggleSize = GUI::GetFontSize() * 0.7f;
 			f32 togglePosX = rect.min.x + padding.left;
 			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - toggleSize / 2;
-			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
+			Rect toggleRect = GUI::WindowSpaceToScreenSpace(Rect(togglePosX, togglePosY, togglePosX + toggleSize, togglePosY + toggleSize));
 			Rect bgOffset = Rect(-2, -2, 2, 2);
 
 			GUI::FillRect(toggleRect + bgOffset, toggleOrRadioStyleState.background, toggleOrRadioStyleState.borderRadius);
@@ -215,7 +217,7 @@ namespace CE::Widgets
 			const f32 radioSize = GUI::GetFontSize() * 0.5f;
 			f32 togglePosX = rect.min.x + padding.left;
 			f32 togglePosY = (rect.min.y + rect.max.y) / 2 - radioSize / 2;
-			Rect toggleRect = GUI::WindowRectToGlobalRect(Rect(togglePosX, togglePosY, togglePosX + radioSize, togglePosY + radioSize));
+			Rect toggleRect = GUI::WindowSpaceToScreenSpace(Rect(togglePosX, togglePosY, togglePosX + radioSize, togglePosY + radioSize));
 
 			GUI::FillCircle(toggleRect, toggleOrRadioStyleState.background);
 

@@ -11,11 +11,11 @@ namespace CE::GUI
 		if (outer_window->SkipItems) // Consistent with other tables + beneficial side effect that assert on miscalling EndTable() will be more visible.
 			return false;
 
-		Rect rect = ToWindowCoordinateSpace(localRect);
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
 		Vec2 rectSize = rect.max - rect.min;
 		ImVec2 outer_size = ImVec2(rectSize.x, rectSize.y);
 		
-		GUI::WindowFlags windowFlags = GUI::WF_None;
+		GUI::WindowFlags windowFlags = GUI::WF_None | GUI::WF_NoDecoration | GUI::WF_NoMove;
 
 		if (isnan(rect.z) || isnan(rect.w))
 			return false;

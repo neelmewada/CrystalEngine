@@ -43,19 +43,8 @@ namespace CE::Widgets
 
 		GUI::GuiStyleState* curState = &defaultStyleState;
 
-		if (IsLeftMouseHeld() && IsHovered()) // Pressed
-		{
-			//curState = &pressedStyleState;
-		}
-		else if (IsHovered()) // Hovered
-		{
-			//curState = &hoveredStyleState;
-		}
-
 		GUI::SetCursorPos(rect.min);
 		auto windowPos = GUI::GetWindowPos();
-
-		DrawBackground(*curState);
 
 		if (invisibleButtonId.IsEmpty())
 		{
@@ -66,6 +55,11 @@ namespace CE::Widgets
 		{
 			GUI::InvisibleButton(rect, GetUuid());
 			PollEvents();
+		}
+
+		if (text == "Empty Project")
+		{
+			String::Format("");
 		}
 
 		GUI::TextWrapped(rect, text, *curState);

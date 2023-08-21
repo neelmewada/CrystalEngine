@@ -1,5 +1,7 @@
 #include "CoreWidgets.h"
 
+#include "imgui.h"
+
 namespace CE::Widgets
 {
 
@@ -15,7 +17,7 @@ namespace CE::Widgets
 
 	Vec2 CWindow::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
-		return Vec2(windowSize.x, allowVerticalScroll ? 0 : windowSize.y);
+		return Vec2(windowSize.x <= 0 ? YGUndefined : windowSize.x, (allowVerticalScroll || windowSize.y <= 0) ? YGUndefined : windowSize.y);
 	}
 
 	void CWindow::Show()
@@ -73,13 +75,24 @@ namespace CE::Widgets
 	{
 		Super::Construct();
 
+		if (GetWidgetDebugger() != nullptr && GetOwner() == nullptr)
+			GetWidgetDebugger()->registeredWindows.Add(this);
+
 		SetTitle(GetName().GetString());
+	}
+
+	void CWindow::OnBeforeDestroy()
+	{
+		if (GetWidgetDebugger() != nullptr)
+			GetWidgetDebugger()->registeredWindows.Remove(this);
 	}
 
 	void CWindow::OnDrawGUI()
     {
         if (isShown)
         {
+			auto& io = ImGui::GetIO();
+
 			GUI::WindowFlags windowFlags = GUI::WF_None;
 			if (allowHorizontalScroll)
 				windowFlags |= GUI::WF_HorizontalScrollbar;
@@ -220,7 +233,7 @@ namespace CE::Widgets
 			if (toolBar != nullptr)
 			{
 				auto toolBarHeight = toolBar->GetComputedLayoutSize().y;
-				if (!isnan(toolBarHeight) && toolBarHeight > 1)
+				if (!IsNan(toolBarHeight) && toolBarHeight > 1)
 				{
 					GUI::SetWindowToolBarHeight(toolBarHeight);
 				}
@@ -280,7 +293,7 @@ namespace CE::Widgets
 			CResizeEvent* resizeEvent = (CResizeEvent*)event;
 			emit OnWindowResized(resizeEvent->oldSize, resizeEvent->newSize);
 
-			SetNeedsLayout();
+			SetNeedsLayoutRecursive();
 		}
 
 		Super::HandleEvent(event);

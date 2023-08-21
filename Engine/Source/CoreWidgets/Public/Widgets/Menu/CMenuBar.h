@@ -15,6 +15,8 @@ namespace CE::Widgets
 		bool IsContainer() override final { return true; }
 		bool IsMenuBar() override final { return true; }
 
+		bool ShouldHandleBackgroundDraw() override { return false; }
+
     protected:
 
 		bool OnSubMenuItemHovered(CMenuItem* subMenuItem);

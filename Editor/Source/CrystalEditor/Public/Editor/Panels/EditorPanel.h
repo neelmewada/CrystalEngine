@@ -12,11 +12,15 @@ namespace CE::Editor
 		EditorPanel();
 		virtual ~EditorPanel();
 
-		bool RequiresIndependentLayoutCalculation() override final { return true; }
+		bool IsLayoutCalculationRoot() override final { return true; }
+
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
 		void Construct() override;
 
 	protected:
+
+		void UpdateLayoutIfNeeded() override;
 
 		void OnDrawGUI() override;
 

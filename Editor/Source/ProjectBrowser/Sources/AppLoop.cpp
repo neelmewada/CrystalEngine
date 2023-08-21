@@ -161,6 +161,8 @@ void AppLoop::PostInit()
 	EditorStyles::Get().InitDefaultStyle();
 
 	projectBrowser = CreateWidget<ProjectBrowserWindow>(nullptr, "ProjectBrowser");
+
+	//GetWidgetDebugger()->Show();
 }
 
 void AppLoop::InitStyles()
@@ -171,6 +173,8 @@ void AppLoop::InitStyles()
 void AppLoop::RunLoop()
 {
 	using namespace CE::Widgets;
+
+	int loopNumber = 0;
 
 	while (!IsEngineRequestingExit())
 	{
@@ -184,6 +188,8 @@ void AppLoop::RunLoop()
 
 		projectBrowser->Render();
 
+		GetWidgetDebugger()->RenderGUI();
+
 		cmdList->ImGuiRender();
 		cmdList->End();
 
@@ -193,6 +199,8 @@ void AppLoop::RunLoop()
 		{
 			RHI::gDynamicRHI->PresentViewport(cmdList);
 		}
+
+		loopNumber++;
 	}
 }
 

@@ -6,7 +6,7 @@ EditorPanel::tab {
 	padding: 5px 5px;
 }
 EditorPanel {
-	padding: 0 30px 0 0;
+	padding: 0 0 0 0;
 	align-items: stretch;
 	align-content: stretch;
 }
@@ -25,11 +25,21 @@ namespace CE::Editor
 
 	}
 
-	void EditorPanel::Construct()
+    Vec2 EditorPanel::CalculateIntrinsicContentSize(f32 width, f32 height)
+    {
+		return Super::CalculateIntrinsicContentSize(width, height);
+    }
+
+    void EditorPanel::Construct()
 	{
 		Super::Construct();
 
 		SetStyleSheet(css);
+	}
+
+	void EditorPanel::UpdateLayoutIfNeeded()
+	{
+		Super::UpdateLayoutIfNeeded();
 	}
 
 	void EditorPanel::OnDrawGUI()

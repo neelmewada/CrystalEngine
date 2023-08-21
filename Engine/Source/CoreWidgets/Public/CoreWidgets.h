@@ -65,12 +65,16 @@
 
 #include "Widgets/CWindow.h"
 
+// Debugging
+#include "Debug/CWidgetDebugger.h"
+
 
 namespace CE::Widgets
 {
     
 	COREWIDGETS_API Package* GetWidgetsTransientPackage();
 
+	COREWIDGETS_API CWidgetDebugger* GetWidgetDebugger();
 
 	template<typename TWidget> requires TIsBaseClassOf<CWidget, TWidget>::Value
 	TWidget* CreateWidget(Object* owner = (Object*)GetWidgetsTransientPackage(),

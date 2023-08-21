@@ -24,6 +24,8 @@ namespace CE
 	{
 		if (this == nullptr)
 			return;
+		
+		OnBeforeDestroy();
 
 		// Unbind signals
 		UnbindAllSignals(this);

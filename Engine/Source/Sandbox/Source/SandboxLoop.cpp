@@ -98,7 +98,9 @@ void SandboxLoop::PostInit()
 		{ defaultFontByteSize, 15, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 17, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 18, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 19, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 20, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 22, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },
 	});
@@ -347,24 +349,25 @@ static const String stylesheet = R"(
 CWindow {
 	foreground: white;
 	background: rgb(36, 36, 36);
-	padding: 8 25 8 10;
+	padding: 8 10 8 10;
 	flex-direction: column;
 	align-items: stretch;
 	row-gap: 5px;
+	text-align: middle-center;
+}
+
+CWindow::title-bar {
+	background: rgb(35, 67, 108);
 }
 
 CWindow.DockSpace {
 	background: rgb(21, 21, 21);
 }
 
-CLabel {
-	text-align: middle-center;
-}
-
 CButton {
 	padding: 10px 1px;
-	border-radius: 2px;
-	border-width: 1.5px;
+	border-radius: 1px;
+	border-width: 1px;
 	border-color: rgb(25, 25, 25);
 	background: rgb(64, 64, 64);
 }
@@ -375,51 +378,16 @@ CButton:pressed {
 	background: rgba(50, 50, 50);
 }
 
-CButton::alternate {
-	padding: 10px 1px;
-	border-radius: 2px;
-	border-width: 1.5px;
-	border-color: rgb(25, 25, 25);
-	background: rgb(0, 112, 224);
-}
-
-CButton::alternate:hovered {
-	background: rgb(14, 134, 255);
-}
-
-CButton::alternate:pressed {
-	background: rgb(6, 66, 126);
-}
-
-CTextInput {
-	background: rgb(15, 15, 15);
-	border-width: 1;
-	border-radius: 1 1 1 1;
-	border-color: rgb(42, 42, 42);
-	padding: 3 3 3 3;
-}
-CTextInput::hint {
-	foreground: rgba(255, 255, 255, 120);
-}
-
 CCollapsibleSection {
-	padding: 20px 0 0 0;
+	padding: 5 5 5 5;
 }
 
 CCollapsibleSection::header {
-	font-size: 18px;
-	background: rgb(47, 47, 47);
-	border-width: 1px;
-	border-color: rgb(30, 30, 30);
-	padding: 3px 3px;
-	border-radius: 0px;
-}
-
-#TableView {
-	height: 250px;
+	padding: 0 5 0 0;
 }
 
 )";
+
 
 void SandboxLoop::SetupGUI()
 {
@@ -427,11 +395,14 @@ void SandboxLoop::SetupGUI()
 
 	GetStyleManager()->SetGlobalStyleSheet(stylesheet);
 
+	//CoreWidgets::enableDebugMode = true;
+
 	window = CreateWidget<CWindow>(nullptr, "TestWindow");
 	window->SetWidgetFlags(WidgetFlags::None);
 	window->SetTitle("Test Window");
 	window->SetAllowHorizontalScroll(true);
-
+	window->SetWindowDebugMode(false);
+	
 	auto section = CreateWidget<CCollapsibleSection>(window, "CollapsibleSection");
 	section->SetTitle("Header Title");
 
@@ -441,14 +412,13 @@ void SandboxLoop::SetupGUI()
 
 		auto button = CreateWidget<CButton>(section, "ButtonInside");
 		button->SetText("Click me");
-
-		auto table = CreateWidget<CTableView>(section, "TableView");
-		auto tableModel = CreateObject<MyTableModel>(table, "TableModel");
-		table->SetModel(tableModel);
 	}
 	
 	auto testLabel = CreateWidget<CLabel>(window, "TestLabel");
-	testLabel->SetText("This is a test label");
+	testLabel->SetText("TEST LABEL");
+	testLabel->AddStyleClasses({ "MyStyleClass", "Alternate" });
+
+	GetWidgetDebugger()->Show();
 }
 
 void SandboxLoop::RunLoop()
@@ -487,35 +457,17 @@ void SandboxLoop::RunLoop()
 					GUI::EndMenu();
 				}
 
-                GUI::EndMenuBar();
-            }
-
-            static bool shown1 = true;
-            if (shown1)
-            {
-                GUI::BeginWindow("My Window", &shown1);
-                
-                if (GUI::Button("Click Me"))
-                {
-                    CE_LOG(Info, All, "Clicked!");
-                }
-
+				if (GUI::BeginMenu("Help"))
 				{
-					GUI::BeginGroup();
-					GUI::Button("HStack 0"); GUI::SameLine();
-					GUI::Button("HStack 1"); GUI::SameLine();
-					GUI::BeginGroup();
-					GUI::Button("HStack 2 v0");
-					GUI::Button("HStack 2 v1");
-					GUI::Text("My Text");
-					GUI::EndGroup(); GUI::SameLine();
-					GUI::Button("HStack 3");
-					GUI::EndGroup();
+					if (GUI::MenuItem("Widget Debugger"))
+					{
+						GetWidgetDebugger()->Show();
+					}
+
+					GUI::EndMenu();
 				}
 
-				
-                
-                GUI::EndWindow();
+                GUI::EndMenuBar();
             }
 
 			static bool demoWindow = true;
@@ -526,6 +478,8 @@ void SandboxLoop::RunLoop()
             
 			if (window != nullptr)
 				window->Render();
+
+			GetWidgetDebugger()->RenderGUI();
         }
         GUI::EndWindow();
 

@@ -27,6 +27,8 @@ AssetBrowserPanel {
 
 CTreeView {
 	padding: 0px 10px;
+	border-color: rgba(0, 0, 0, 0);
+	border-width: 0px;
 }
 
 CTreeView > CTreeItemView {

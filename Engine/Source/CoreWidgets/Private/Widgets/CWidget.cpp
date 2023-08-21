@@ -20,6 +20,10 @@ namespace CE::Widgets
 		YGNodeSetContext(node, this);
 		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
 
+		detachedNode = YGNodeNew();
+		YGNodeSetContext(detachedNode, this);
+		YGNodeSetMeasureFunc(detachedNode, MeasureFunctionCallback);
+
 		this->stylesheet = CreateDefaultSubobject<CSSStyleSheet>("StyleSheet");
 	}
 
@@ -27,6 +31,18 @@ namespace CE::Widgets
 	{
 		YGNodeFree(node);
 		node = nullptr;
+		YGNodeFree(detachedNode);
+		detachedNode = nullptr;
+	}
+
+	void CWidget::OnBeforeDestroy()
+	{
+		Super::OnBeforeDestroy();
+
+		if (GetWidgetDebugger() != nullptr && GetWidgetDebugger()->debugWidget == this)
+		{
+			GetWidgetDebugger()->SetDebugWidget(nullptr);
+		}
 	}
 
 	void CWidget::ShowContextMenu()
@@ -114,7 +130,7 @@ namespace CE::Widgets
 			return;
 
 		auto localRect = GetComputedLayoutRect();
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		const auto& shadowOffset = styleState.shadowOffset;
 		GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
@@ -126,17 +142,20 @@ namespace CE::Widgets
 		if (!hasShadow)
 			return;
 
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		const auto& shadowOffset = styleState.shadowOffset;
 		GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
 	}
 
-	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState)
+	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState, bool allowDebug)
 	{
-		auto rect = GetComputedLayoutRect();
+		DrawBackground(styleState, GetComputedLayoutRect(), allowDebug);
+	}
 
-		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
+	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState, const Rect& rect, bool allowDebug)
+	{
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(rect);
 		f32 borderWidth = styleState.borderThickness;
 		bool hasShadow = styleState.shadowColor.a > 0 && (styleState.shadowOffset.x != 0 || styleState.shadowOffset.y != 0);
 
@@ -151,34 +170,53 @@ namespace CE::Widgets
 		}
 		if (borderWidth > 0 && styleState.borderColor.a > 0)
 		{
-			GUI::DrawRect(globalRect + Rect(borderWidth, borderWidth, -borderWidth, -borderWidth), styleState.borderColor, styleState.borderRadius, borderWidth);
+			Rect globalBorderRect = GUI::WidgetSpaceToScreenSpace(GetComputedBorderRect());
+			auto borderWidths = GetComputedLayoutBorder();
+			globalBorderRect += Rect(borderWidths.left / 2, borderWidths.top / 2, -borderWidths.right / 2, -borderWidths.bottom / 2);
+			GUI::DrawRect(globalBorderRect, styleState.borderColor, styleState.borderRadius, borderWidth);
+		}
+
+		if (allowDebug && forceDebugDrawMode != CDebugBackgroundFilter::None)
+		{
+			DrawDebugBackground(forceDebugDrawMode);
+		}
+		else if (allowDebug && debugDraw)
+		{
+			DrawDebugBackground(filter);
 		}
 	}
 
-	void CWidget::DrawBackground(const GUI::GuiStyleState& styleState, const Rect& rect)
+	void CWidget::DrawDebugBackground(CDebugBackgroundFilter filter)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(rect);
-		f32 borderWidth = styleState.borderThickness;
-		bool hasShadow = styleState.shadowColor.a > 0 && (styleState.shadowOffset.x != 0 || styleState.shadowOffset.y != 0);
-
-		if (hasShadow)
+		Rect globalMargin = GUI::WidgetSpaceToScreenSpace(GetComputedMarginRect());
+		Rect margin = GetComputedLayoutMargin();
+		Rect globalBorder = GUI::WidgetSpaceToScreenSpace(GetComputedBorderRect());
+		Rect border = GetComputedLayoutBorder();
+		Rect globalPadding = GUI::WidgetSpaceToScreenSpace(GetComputedPaddingRect());
+		Rect padding = GetComputedLayoutPadding();
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(GetComputedIntrinsicSizeRect());
+		
+		if (EnumHasFlag(filter, CDebugBackgroundFilter::Margin))
 		{
-			const auto& shadowOffset = styleState.shadowOffset;
-			GUI::FillRect(globalRect + Rect(shadowOffset.x, shadowOffset.y, shadowOffset.x, shadowOffset.y), styleState.shadowColor, styleState.borderRadius);
+			GUI::FillRectWidth(globalMargin, globalMargin + Rect(margin.min, -margin.max), Color::FromRGBA32(173, 128, 82));
 		}
-		if (styleState.background.a > 0)
+		if (EnumHasFlag(filter, CDebugBackgroundFilter::Border))
 		{
-			GUI::FillRect(globalRect, styleState.background, styleState.borderRadius);
+			GUI::FillRectWidth(globalBorder, globalBorder + Rect(border.min, -border.max), Color::FromRGBA32(227, 195, 129));
 		}
-		if (borderWidth > 0 && styleState.borderColor.a > 0)
+		if (EnumHasFlag(filter, CDebugBackgroundFilter::Padding))
 		{
-			GUI::DrawRect(globalRect + Rect(borderWidth, borderWidth, -borderWidth, -borderWidth), styleState.borderColor, styleState.borderRadius, borderWidth);
+			GUI::FillRectWidth(globalPadding, globalPadding + Rect(padding.min, -padding.max), Color::FromRGBA32(183, 196, 127));
+		}
+		if (EnumHasFlag(filter, CDebugBackgroundFilter::IntrinsicSize))
+		{
+			GUI::FillRect(globalRect, Color::FromRGBA32(135, 178, 188));
 		}
 	}
 
 	void CWidget::FillRect(const Color& color, const Rect& localRect, const Vec4& borderRadius)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 		
 		if (color.a > 0)
 		{
@@ -188,7 +226,7 @@ namespace CE::Widgets
 
 	void CWidget::DrawRect(const Color& color, const Rect& localRect, f32 borderThickness, const Vec4& borderRadius)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 		
 		if (color.a > 0)
 		{
@@ -206,24 +244,642 @@ namespace CE::Widgets
 
 	void CWidget::FillCircle(const Color& color, const Rect& localRect)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		GUI::FillCircle(globalRect, color);
 	}
 
 	void CWidget::DrawCircle(const Color& color, const Rect& localRect, f32 borderThickness)
 	{
-		Rect globalRect = GUI::WindowRectToGlobalRect(localRect);
+		Rect globalRect = GUI::WidgetSpaceToScreenSpace(localRect);
 
 		GUI::DrawCircle(globalRect, color, borderThickness);
 	}
 
-	void CWidget::UpdateStyleIfNeeded()
+	void CWidget::SetEnabled(bool enabled)
 	{
-		if (!needsStyle)
+		if (isDisabled != !enabled)
+		{
+			isDisabled = !enabled;
+			if (isDisabled)
+			{
+				stateFlags = CStateFlag::Disabled;
+			}
+			else
+			{
+				EnumRemoveFlags(stateFlags, CStateFlag::Disabled);
+			}
+
+			SetNeedsStyle();
+		}
+	}
+
+	bool CWidget::IsDebugModeEnabled()
+	{
+		if (GetWidgetDebugger() != nullptr && GetWidgetDebugger()->enableLayoutDebugMode)
+			return true;
+
+		if (IsWindow())
+			return ((CWindow*)this)->IsWindowDebugMode();
+		auto window = GetOwnerWindow();
+		if (window == nullptr)
+			return false;
+		return window->IsWindowDebugMode();
+	}
+
+	void CWidget::OnAttachedTo(CWidget* parent)
+	{
+		SetNeedsStyleRecursive();
+		SetNeedsLayout();
+	}
+
+	void CWidget::OnDetachedFrom(CWidget* parent)
+	{
+
+	}
+
+	void CWidget::OnSubobjectAttached(Object* subobject)
+	{
+		if (subobject == nullptr || subobject == this) // Impossible edge cases
+			return;
+		
+		if (subobject->IsOfType<CMenu>() && !subobject->IsOfType<CMenuBar>())
+		{
+			CMenu* menu = (CMenu*)subobject;
+			attachedMenus.Add(menu);
+			menu->ownerWindow = GetOwnerWindow();
+			menu->parent = this;
+		}
+		else if (subobject->IsOfType<CPopup>())
+		{
+			// Do not add popups to attachedWidgets
+		}
+		else if (IsContainer() && subobject->IsOfType<CWidget>() && IsSubWidgetAllowed(subobject->GetClass()))
+		{
+			CWidget* subWidget = (CWidget*)subobject;
+			attachedWidgets.Add(subWidget);
+			OnSubWidgetAttached(subWidget);
+			subWidget->parent = this;
+
+			if (IsWindow())
+				subWidget->ownerWindow = (CWindow*)this;
+			else
+				subWidget->ownerWindow = GetOwnerWindow();
+			subWidget->OnAttachedTo(this);
+
+			if (!subWidget->IsLayoutCalculationRoot())
+			{
+				YGNodeSetMeasureFunc(node, nullptr);
+
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, subWidget->node, childCount);
+			}
+			else // SubWidget requires independent layout calculation. Ex: Child window, Splitter view, etc
+			{
+				YGNodeSetMeasureFunc(node, nullptr);
+
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, subWidget->detachedNode, childCount);
+			}
+		}
+	}
+
+	void CWidget::OnSubobjectDetached(Object* subobject)
+	{
+		if (subobject == nullptr)
 			return;
 
-		needsStyle = false;
+		if (subobject->GetClass()->IsSubclassOf<CMenu>())
+		{
+			CMenu* menu = (CMenu*)subobject;
+			attachedMenus.Remove(menu);
+			menu->ownerWindow = nullptr;
+			menu->parent = nullptr;
+
+			if (subobject->GetClass()->IsSubclassOf<CContextMenu>() && contextMenu != nullptr && contextMenu == (CContextMenu*)subobject)
+			{
+				contextMenu->parent = nullptr;
+				contextMenu->ownerWindow = nullptr;
+				contextMenu = nullptr;
+			}
+		}
+		else if (subobject->GetClass()->IsSubclassOf<CWidget>())
+		{
+			CWidget* subWidget = (CWidget*)subobject;
+			attachedWidgets.Remove(subWidget);
+			OnSubWidgetDetached(subWidget);
+			subWidget->OnDetachedFrom(this);
+			subWidget->parent = nullptr;
+
+			auto childCount = YGNodeGetChildCount(node);
+			for (int i = 0; i < childCount; i++)
+			{
+				auto childNodeRef = YGNodeGetChild(node, i);
+				CWidget* ctx = (CWidget*)YGNodeGetContext(childNodeRef);
+				if (ctx != nullptr && ctx == subWidget)
+				{
+					YGNodeRemoveChild(node, childNodeRef);
+					break;
+				}
+			}
+
+			childCount = YGNodeGetChildCount(node);
+			if (childCount == 0)
+			{
+				YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+			}
+		}
+	}
+
+	void CWidget::ClearChildNodes()
+	{
+		YGNodeRemoveAllChildren(node);
+		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+	}
+
+	void CWidget::ReAddChildNodes()
+	{
+		ClearChildNodes();
+
+		if (attachedWidgets.NonEmpty())
+			YGNodeSetMeasureFunc(node, nullptr);
+
+		for (auto subWidget : attachedWidgets)
+		{
+			if (!subWidget->IsLayoutCalculationRoot())
+			{
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, subWidget->node, childCount);
+			}
+		}
+	}
+
+	void CWidget::Render()
+	{
+		UpdateStyleIfNeeded();
+		UpdateLayoutIfNeeded();
+
+		if (IsVisible())
+		{
+			auto rect = GetComputedLayoutRect();
+
+			if (ShouldHandleBackgroundDraw())
+				DrawDefaultBackground();
+
+			if (IsDebugModeEnabled())
+			{
+				if (debugId == 0) debugId = GenerateRandomU32();
+				
+				bool hovered = false, held = false;
+				if (GUI::InvisibleButton(rect, debugId, hovered, held) && GetWidgetDebugger() != nullptr)
+				{
+					GetWidgetDebugger()->SetDebugWidget(this);
+				}
+
+				if (hovered)
+				{
+					DrawDebugBackground();
+				}
+			}
+
+			if (!isnan(rect.x) && !isnan(rect.y))
+			{
+				screenPos = GUI::WidgetSpaceToScreenSpace(rect).min;
+			}
+
+			if (IsDisabled()) GUI::BeginDisabled();
+
+			CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
+			OnDrawGUI();
+			CFontManager::Get().PopFont();
+
+			if (IsDisabled()) GUI::EndDisabled();
+
+			if (firstDraw)
+			{
+				firstDraw = false;
+
+				SetNeedsStyleRecursive();
+				SetNeedsLayoutRecursive();
+			}
+		}
+		else
+		{
+			auto rect = GetComputedLayoutRect();
+
+			if (IsDebugModeEnabled())
+			{
+				if (debugId == 0) debugId = GenerateRandomU32();
+
+				bool hovered = false, held = false;
+				GUI::InvisibleButton(rect, debugId, hovered, held);
+
+				if (hovered)
+				{
+					DrawDebugBackground();
+				}
+			}
+		}
+
+		for (auto menu : attachedMenus)
+		{
+			if (menu->IsShown())
+				menu->Render();
+		}
+	}
+
+	bool CWidget::TestFocus()
+	{
+		CWindow* thisWindow = nullptr;
+		if (IsWindow())
+		{
+			thisWindow = (CWindow*)this;
+			return GUI::IsWindowFocused(thisWindow->GetTitle(), GUI::FOCUS_ChildWindows | GUI::FOCUS_DockHierarchy);
+		}
+		
+		return GUI::IsItemFocused();
+	}
+
+	void CWidget::PollEvents()
+	{
+		if (IsDisabled())
+			return;
+
+		bool focused = TestFocus();
+
+		if (focused != isFocused) // Focus changed
+		{
+			CFocusEvent event{};
+			event.name = "FocusChanged";
+			event.type = CEventType::FocusChanged;
+			event.gotFocus = focused;
+			event.sender = this;
+			HandleEvent(&event);
+
+			isFocused = focused;
+		}
+
+		if (!IsInteractable())
+			return;
+
+		if (!IsWindow())
+		{
+			bool hovered = GUI::IsItemHovered();
+
+			// Mouse: Press, Release
+
+			b8 leftMouseDown = GUI::IsMouseDown(GUI::MouseButton::Left);
+
+			if (leftMouseDown != prevLeftMouseDown && hovered) // Left mouse state changed within bounds
+			{
+				isLeftMousePressedInside = leftMouseDown && hovered;
+
+				if (isLeftMousePressedInside) // Press inside
+				{
+					CMouseEvent event{};
+					event.name = "MousePress";
+					event.type = CEventType::MousePress;
+					event.mousePos = GUI::GetMousePos();
+					event.mouseButton = 0; // Left = 0
+					event.prevMousePos = prevHoverPos;
+					event.isInside = true;
+					event.sender = this;
+
+					HandleEvent(&event);
+					prevHoverPos = event.mousePos;
+				}
+				else // Release inside
+				{
+					CMouseEvent event{};
+					event.name = "MouseRelease";
+					event.type = CEventType::MouseRelease;
+					event.mousePos = GUI::GetMousePos();
+					event.mouseButton = 0; // Left = 0
+					event.prevMousePos = prevHoverPos;
+					event.isInside = true;
+					event.sender = this;
+
+					HandleEvent(&event);
+					prevHoverPos = event.mousePos;
+				}
+			}
+			else if (isLeftMousePressedInside && !leftMouseDown && !hovered) // Release outside
+			{
+				isLeftMousePressedInside = false;
+
+				CMouseEvent event{};
+				event.name = "MouseRelease";
+				event.type = CEventType::MouseRelease;
+				event.mousePos = GUI::GetMousePos();
+				event.mouseButton = 0; // Left = 0
+				event.prevMousePos = prevHoverPos;
+				event.isInside = false;
+				event.sender = this;
+
+				HandleEvent(&event);
+				prevHoverPos = event.mousePos;
+			}
+
+			prevLeftMouseDown = GUI::IsMouseDown(GUI::MouseButton::Left);
+
+			// Mouse: Enter, Move, Leave
+
+			if (hovered && !isHovered)
+			{
+				CMouseEvent event{};
+				event.name = "MouseEnter";
+				event.type = CEventType::MouseEnter;
+				event.mousePos = GUI::GetMousePos();
+				event.sender = this;
+				HandleEvent(&event);
+				isHovered = hovered;
+				prevHoverPos = event.mousePos;
+
+				stateFlags |= CStateFlag::Hovered;
+				SetNeedsStyle();
+			}
+			else if (hovered && isHovered)
+			{
+				auto mousePos = GUI::GetMousePos();
+				if (mousePos.x != prevHoverPos.x && mousePos.y != prevHoverPos.y)
+				{
+					CMouseEvent event{};
+					event.name = "MouseMove";
+					event.type = CEventType::MouseMove;
+					event.mousePos = GUI::GetMousePos();
+					event.prevMousePos = prevHoverPos;
+					event.sender = this;
+
+					HandleEvent(&event);
+					prevHoverPos = mousePos;
+				}
+			}
+			else if (!hovered && isHovered)
+			{
+				CMouseEvent event{};
+				event.name = "MouseLeave";
+				event.type = CEventType::MouseLeave;
+				event.mousePos = GUI::GetMousePos();
+				event.prevMousePos = prevHoverPos;
+				event.sender = this;
+				HandleEvent(&event);
+				isHovered = hovered;
+				prevHoverPos = event.mousePos;
+
+				EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
+				SetNeedsStyle();
+			}
+
+			// Mouse Click:
+
+			bool isLeftClicked = GUI::IsItemClicked(GUI::MouseButton::Left);
+			bool isRightClicked = GUI::IsItemClicked(GUI::MouseButton::Right);
+			bool isMiddleClicked = GUI::IsItemClicked(GUI::MouseButton::Middle);
+
+			if (isLeftClicked || isRightClicked || isMiddleClicked)
+			{
+				if (GUI::IsItemHovered())
+				{
+					CMouseEvent event{};
+					event.name = "MouseClick";
+					event.type = CEventType::MouseButtonClick;
+					event.mouseButton = isLeftClicked ? 0 : (isRightClicked ? 1 : 2);
+					event.mousePos = GUI::GetMousePos();
+					event.prevMousePos = event.mousePos;
+					event.sender = this;
+					HandleEvent(&event);
+				}
+			}
+
+			bool isLeftDblClicked = GUI::IsItemDoubleClicked(GUI::MouseButton::Left);
+			bool isRightDblClicked = GUI::IsItemDoubleClicked(GUI::MouseButton::Right);
+			bool isMiddleDblClicked = GUI::IsItemDoubleClicked(GUI::MouseButton::Middle);
+
+			if (isLeftDblClicked || isRightDblClicked || isMiddleDblClicked)
+			{
+				if (GUI::IsItemHovered())
+				{
+					CMouseEvent event{};
+					event.name = "MouseDoubleClick";
+					event.type = CEventType::MouseButtonDoubleClick;
+					event.mouseButton = isLeftDblClicked ? 0 : (isRightDblClicked ? 1 : 2);
+					event.mousePos = GUI::GetMousePos();
+					event.prevMousePos = event.mousePos;
+					event.sender = this;
+					HandleEvent(&event);
+				}
+			}
+		}
+		else // A Window
+		{
+			CWindow* thisWindow = (CWindow*)this;
+
+			// Mouse Click:
+
+			bool isLeftClicked = GUI::IsMouseClicked(GUI::MouseButton::Left);
+			bool isRightClicked = GUI::IsMouseClicked(GUI::MouseButton::Right);
+			bool isMiddleClicked = GUI::IsMouseClicked(GUI::MouseButton::Middle);
+
+			if (isLeftClicked || isRightClicked || isMiddleClicked)
+			{
+				bool isWindowHovered = GUI::IsWindowHovered(thisWindow->GetTitle(), GUI::Hovered_ChildWindows | GUI::Hovered_DockHierarchy | GUI::Hovered_NoPopupHierarchy);
+				if (isWindowHovered)
+				{
+					CMouseEvent event{};
+					event.name = "MouseClick";
+					event.type = CEventType::MouseButtonClick;
+					event.mouseButton = isLeftClicked ? 0 : (isRightClicked ? 1 : 2);
+					event.mousePos = GUI::GetMousePos();
+					event.prevMousePos = event.mousePos;
+					event.sender = this;
+					HandleEvent(&event);
+				}
+			}
+
+			bool isLeftDblClicked = GUI::IsMouseDoubleClicked(GUI::MouseButton::Left);
+			bool isRightDblClicked = GUI::IsMouseDoubleClicked(GUI::MouseButton::Right);
+			bool isMiddleDblClicked = GUI::IsMouseDoubleClicked(GUI::MouseButton::Middle);
+
+			if (isLeftDblClicked || isRightDblClicked || isMiddleDblClicked)
+			{
+				bool isWindowHovered = GUI::IsWindowHovered(thisWindow->GetTitle(), GUI::Hovered_ChildWindows | GUI::Hovered_DockHierarchy | GUI::Hovered_NoPopupHierarchy);
+				if (isWindowHovered)
+				{
+					CMouseEvent event{};
+					event.name = "MouseDoubleClick";
+					event.type = CEventType::MouseButtonDoubleClick;
+					event.mouseButton = isLeftClicked ? 0 : (isRightClicked ? 1 : 2);
+					event.mousePos = GUI::GetMousePos();
+					event.prevMousePos = event.mousePos;
+					event.sender = this;
+					HandleEvent(&event);
+				}
+			}
+		}
+
+		if (IsLeftMouseHeld() && IsHovered())
+		{
+			if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed))
+			{
+				SetNeedsStyle();
+			}
+
+			EnumAddFlags(stateFlags, CStateFlag::Pressed);
+			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
+		}
+		else if (IsHovered())
+		{
+			if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
+			{
+				SetNeedsStyle();
+			}
+
+			EnumAddFlags(stateFlags, CStateFlag::Hovered);
+			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
+		}
+		else
+		{
+			if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed))
+			{
+				SetNeedsStyle();
+			}
+
+			EnumRemoveFlags(stateFlags, CStateFlag::Pressed | CStateFlag::Hovered);
+		}
+	}
+
+    void CWidget::SetWidgetFlags(WidgetFlags flags)
+    {
+        this->widgetFlags = flags;
+    }
+
+    WidgetFlags CWidget::GetWidgetFlags() const
+    {
+        return widgetFlags;
+    }
+
+	bool CWidget::NeedsLayout(bool recursive)
+	{
+		if (!recursive)
+			return needsLayout;
+
+		for (auto widget : attachedWidgets)
+		{
+			if (!widget->IsWindow() && widget->NeedsLayout(recursive))
+				return true;
+		}
+
+		return needsLayout;
+	}
+
+	bool CWidget::NeedsStyle(bool recursive)
+	{
+		if (!recursive)
+			return needsStyle;
+
+		for (auto widget : attachedWidgets)
+		{
+			if (widget->NeedsStyle(recursive))
+				return true;
+		}
+
+		return needsStyle;
+	}
+
+	bool CWidget::ChildrenNeedsLayout()
+	{
+		if (needsLayout)
+			return true;
+
+		for (auto widget : attachedWidgets)
+		{
+			if (widget->NeedsLayout(false))
+				return true;
+		}
+
+		return false;
+	}
+
+	bool CWidget::ChildrenNeedsStyle()
+	{
+		if (needsStyle)
+			return true;
+
+		for (auto widget : attachedWidgets)
+		{
+			if (widget->NeedsStyle(false))
+				return true;
+		}
+
+		return false;
+	}
+
+	void CWidget::SetNeedsLayout(bool set, bool recursive)
+	{
+		needsLayout = set;
+
+		if (!recursive)
+			return;
+
+		for (auto widget : attachedWidgets)
+		{
+			if (set || !widget->IsLayoutCalculationRoot())
+				widget->SetNeedsLayout(set, recursive);
+		}
+	}
+
+	void CWidget::SetNeedsStyle(bool set, bool recursive)
+	{
+		needsStyle = set;
+
+		if (!recursive)
+			return;
+
+		for (auto widget : attachedWidgets)
+		{
+			widget->SetNeedsStyle(set, recursive);
+		}
+	}
+
+	void CWidget::UpdateLayoutIfNeeded()
+	{
+		if (!NeedsLayoutRecursive())
+			return;
+		if (!IsLayoutCalculationRoot())
+			return;
+
+		UpdateStyleIfNeeded();
+
+		NeedsLayoutRecursive();
+
+		auto parent = GetOwner();
+		Vec2 parentSize = Vec2(YGUndefined, YGUndefined);
+
+		if (IsWindow())
+		{
+			CWindow* window = (CWindow*)this;
+			auto winSize = window->GetWindowSize();
+			if (winSize.width > 0 && !IsNan(winSize.width))
+				parentSize.width = winSize.width;
+			if (winSize.height > 0 && !IsNan(winSize.height))
+				parentSize.height = winSize.height;
+		}
+		else if (parent != nullptr)
+		{
+			parent->UpdateLayoutIfNeeded();
+			parentSize = parent->GetComputedLayoutSize();
+		}
+		
+		YGNodeCalculateLayout(node, parentSize.width, parentSize.height, YGDirectionLTR);
+
+		SetNeedsLayoutRecursive(false);
+		needsLayout = false;
+	}
+
+	void CWidget::UpdateStyleIfNeeded()
+	{
+		if (!NeedsStyle())
+			return;
 
 		node->setStyle({}); // Clear style
 
@@ -247,18 +903,18 @@ namespace CE::Widgets
 		computedStyle.ApplyProperties(selectStyle);
 
 		OnBeforeComputeStyle();
-		
-		for (auto& [property, value] : computedStyle.properties)
+
+		for (const auto& [property, value] : selectStyle.properties)
 		{
 			// Non-Yoga properties
 			if (value.IsValid()) // Default state
 			{
 				LoadGuiStyleStateProperty(property, value, defaultStyleState);
 			}
-			
+
 			if (!value.IsValid())
 				continue;
-			
+
 			// Yoga Properties
 			if (property == CStylePropertyType::Display && value.IsEnum())
 			{
@@ -521,709 +1177,17 @@ namespace CE::Widgets
 		OnAfterComputeStyle();
 
 		needsStyle = false;
-		if (!IsMenu())
-		{
-			SetNeedsLayout();
-		}
 
-		stylesheet->SetDirty(false);
+		for (auto widget : attachedWidgets)
+		{
+			widget->UpdateStyleIfNeeded();
+		}
 
 		for (auto menu : attachedMenus)
 		{
-			menu->SetNeedsStyle();
 			menu->UpdateStyleIfNeeded();
 		}
-
-		if (IsContainer())
-		{
-			for (CWidget* subWidget : attachedWidgets)
-			{
-				if (subWidget == nullptr || subWidget == this)
-					continue;
-				subWidget->needsStyle = true;
-				subWidget->UpdateStyleIfNeeded();
-			}
-		}
 	}
-
-	bool CWidget::NeedsLayout()
-	{
-		for (auto child : attachedWidgets)
-		{
-			if (child->NeedsLayout())
-				return true;
-		}
-
-		for (auto menu : attachedMenus)
-		{
-			if (menu->IsShown() && menu->NeedsLayout())
-				return true;
-		}
-
-		return needsLayout;
-	}
-
-	bool CWidget::NeedsStyle()
-	{
-		return needsStyle;
-	}
-
-	void CWidget::SetNeedsLayout(bool set)
-	{
-		for (auto child : attachedWidgets)
-		{
-			child->SetNeedsLayout(set);
-		}
-
-		for (auto menu : attachedMenus)
-		{
-			menu->SetNeedsLayout(set);
-		}
-
-		needsLayout = set;
-	}
-
-	void CWidget::SetNeedsStyle(bool set)
-	{
-		for (auto child : attachedWidgets)
-		{
-			child->SetNeedsStyle(set);
-		}
-
-		needsStyle = set;
-	}
-
-	void CWidget::SetEnabled(bool enabled)
-	{
-		if (isDisabled != !enabled)
-		{
-			isDisabled = !enabled;
-			if (isDisabled)
-			{
-				stateFlags = CStateFlag::Disabled;
-			}
-			else
-			{
-				EnumRemoveFlags(stateFlags, CStateFlag::Disabled);
-			}
-
-			SetNeedsStyle();
-		}	
-	}
-
-	void CWidget::UpdateLayoutIfNeeded()
-	{
-		if (!NeedsLayout())
-			return;
-
-		for (auto menu : attachedMenus)
-		{
-			if (menu->IsShown())
-				menu->UpdateLayoutIfNeeded();
-		}
-        
-		if (IsMenuBar())
-		{
-			CMenuBar* menuBar = (CMenuBar*)this;
-			CWidget* parent = menuBar->GetOwner();
-			CWindow* parentWindow = nullptr;
-
-			// Only calculate layout of menu bar if it is owned by a Dock Space window which doesn't have it's own layout
-			if (parent != nullptr && parent->IsWindow() && (parentWindow = (CWindow*)parent)->IsDockSpaceWindow())
-			{
-				void* windowHandle = parentWindow->GetPlatformHandle();
-				auto size = PlatformApplication::Get()->GetWindowSize(windowHandle);
-				
-				YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
-
-				SetNeedsLayout(false);
-			}
-		}
-		else if (IsWindow())
-        {
-			CWindow* window = (CWindow*)this;
-			if (!window->IsDockSpaceWindow() || RequiresIndependentLayoutCalculation())
-			{
-				SetNeedsStyle(); // Force update style
-				UpdateStyleIfNeeded();
-
-				Vec2 size = CalculateIntrinsicContentSize(YGUndefined, YGUndefined);
-				if (size.x <= 0) size.x = YGUndefined;
-				if (size.y <= 0) size.y = YGUndefined;
-				YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
-
-				SetNeedsLayout(false);
-			}
-			else
-			{
-				if (window->GetMenuBar() != nullptr)
-				{
-					window->GetMenuBar()->UpdateLayoutIfNeeded();
-				}
-			}
-
-			needsLayout = false;
-        }
-		else if ((IsContainer() && GetOwner() == nullptr) || RequiresIndependentLayoutCalculation())
-		{
-			SetNeedsStyle(); // Force update style
-			UpdateStyleIfNeeded();
-
-			Vec2 size = CalculateIntrinsicContentSize(YGUndefined, YGUndefined);
-			if (size.x <= 0) size.x = YGUndefined;
-			if (size.y <= 0) size.y = YGUndefined;
-			if (GetOwner() != nullptr)
-			{
-				auto ownerSize = GetOwner()->GetComputedLayoutSize();
-				auto ownerPadding = GetOwner()->GetComputedLayoutPadding();
-				size.x = ownerSize.x;
-				//size.y = ownerSize.y;
-			}
-
-			YGNodeCalculateLayout(node, size.x, size.y, YGDirectionLTR);
-
-			SetNeedsLayout(false);
-
-			needsLayout = false;
-		}
-
-		for (auto child : attachedWidgets)
-		{
-			child->UpdateLayoutIfNeeded();
-		}
-	}
-
-	void CWidget::OnAttachedTo(CWidget* parent)
-	{
-		if (inheritedPropertiesInitialized) // Inherited properties can only be initialized once
-			return;
-
-		SetNeedsStyle();
-		SetNeedsLayout();
-
-		inheritedPropertiesInitialized = true;
-	}
-
-	void CWidget::OnDetachedFrom(CWidget* parent)
-	{
-
-	}
-
-	void CWidget::OnSubobjectAttached(Object* subobject)
-	{
-		if (subobject == nullptr || subobject == this) // Impossible edge cases
-			return;
-		
-		if (subobject->IsOfType<CMenu>() && !subobject->IsOfType<CMenuBar>())
-		{
-			CMenu* menu = (CMenu*)subobject;
-			attachedMenus.Add(menu);
-			menu->ownerWindow = GetOwnerWindow();
-			menu->parent = this;
-		}
-		else if (subobject->IsOfType<CPopup>())
-		{
-			// Do not add popups to attachedWidgets
-		}
-		else if (IsContainer() && subobject->IsOfType<CWidget>() && IsSubWidgetAllowed(subobject->GetClass()))
-		{
-			CWidget* subWidget = (CWidget*)subobject;
-			attachedWidgets.Add(subWidget);
-			OnSubWidgetAttached(subWidget);
-			subWidget->parent = this;
-			if (IsWindow())
-				subWidget->ownerWindow = (CWindow*)this;
-			else
-				subWidget->ownerWindow = GetOwnerWindow();
-			subWidget->OnAttachedTo(this);
-
-			if (!subWidget->RequiresIndependentLayoutCalculation())
-			{
-				YGNodeSetMeasureFunc(node, nullptr);
-
-				auto childCount = YGNodeGetChildCount(node);
-				YGNodeInsertChild(node, subWidget->node, childCount);
-			}
-		}
-	}
-
-	void CWidget::OnSubobjectDetached(Object* subobject)
-	{
-		if (subobject == nullptr)
-			return;
-
-		if (subobject->GetClass()->IsSubclassOf<CMenu>())
-		{
-			CMenu* menu = (CMenu*)subobject;
-			attachedMenus.Remove(menu);
-			menu->ownerWindow = nullptr;
-			menu->parent = nullptr;
-
-			if (subobject->GetClass()->IsSubclassOf<CContextMenu>() && contextMenu != nullptr && contextMenu == (CContextMenu*)subobject)
-			{
-				contextMenu->parent = nullptr;
-				contextMenu->ownerWindow = nullptr;
-				contextMenu = nullptr;
-			}
-		}
-		else if (subobject->GetClass()->IsSubclassOf<CWidget>())
-		{
-			CWidget* subWidget = (CWidget*)subobject;
-			attachedWidgets.Remove(subWidget);
-			OnSubWidgetDetached(subWidget);
-			subWidget->OnDetachedFrom(this);
-			subWidget->parent = nullptr;
-
-			auto childCount = YGNodeGetChildCount(node);
-			for (int i = 0; i < childCount; i++)
-			{
-				auto childNodeRef = YGNodeGetChild(node, i);
-				CWidget* ctx = (CWidget*)YGNodeGetContext(childNodeRef);
-				if (ctx != nullptr && ctx == subWidget)
-				{
-					YGNodeRemoveChild(node, childNodeRef);
-					break;
-				}
-			}
-
-			childCount = YGNodeGetChildCount(node);
-			if (childCount == 0)
-			{
-				YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
-			}
-		}
-	}
-
-	void CWidget::PollBasicMouseEvents(bool hovered, bool leftMouseHeld, CStateFlag& stateFlags)
-	{
-		if (isHovered != hovered)
-		{
-			isHovered = hovered;
-			SetNeedsStyle();
-
-			if (isHovered) // Mouse Enter
-			{
-				CMouseEvent event{};
-				event.name = "MouseEnter";
-				event.type = CEventType::MouseEnter;
-				event.mousePos = GUI::GetMousePos();
-				event.sender = this;
-				HandleEvent(&event);
-
-				isHovered = hovered;
-				prevHoverPos = event.mousePos;
-			}
-			else // Mouse Leave
-			{
-				CMouseEvent event{};
-				event.name = "MouseLeave";
-				event.type = CEventType::MouseLeave;
-				event.mousePos = GUI::GetMousePos();
-				event.prevMousePos = prevHoverPos;
-				event.sender = this;
-				HandleEvent(&event);
-
-				isHovered = hovered;
-				prevHoverPos = event.mousePos;
-			}
-		}
-
-		if (isLeftMousePressedInside != (isHovered && leftMouseHeld))
-		{
-			isLeftMousePressedInside = isHovered && leftMouseHeld;
-			SetNeedsStyle();
-
-			if (isLeftMousePressedInside) // Press inside
-			{
-				CMouseEvent event{};
-				event.name = "MousePress";
-				event.type = CEventType::MousePress;
-				event.mousePos = GUI::GetMousePos();
-				event.mouseButton = 0; // Left = 0
-				event.prevMousePos = prevHoverPos;
-				event.isInside = true;
-				event.sender = this;
-				HandleEvent(&event);
-
-				prevHoverPos = event.mousePos;
-			}
-			else if (isHovered && !leftMouseHeld) // Release inside
-			{
-				CMouseEvent event{};
-				event.name = "MouseRelease";
-				event.type = CEventType::MouseRelease;
-				event.mousePos = GUI::GetMousePos();
-				event.mouseButton = 0; // Left = 0
-				event.prevMousePos = prevHoverPos;
-				event.isInside = true;
-				event.sender = this;
-				HandleEvent(&event);
-
-				prevHoverPos = event.mousePos;
-			}
-			else if (!leftMouseHeld) // Release outside
-			{
-				CMouseEvent event{};
-				event.name = "MouseRelease";
-				event.type = CEventType::MouseRelease;
-				event.mousePos = GUI::GetMousePos();
-				event.mouseButton = 0; // Left = 0
-				event.prevMousePos = prevHoverPos;
-				event.isInside = false;
-				event.sender = this;
-				HandleEvent(&event);
-
-				prevHoverPos = event.mousePos;
-			}
-		}
-
-		if (isLeftMousePressedInside)
-		{
-			if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-				SetNeedsStyle();
-
-			EnumAddFlags(stateFlags, CStateFlag::Pressed);
-			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
-		}
-		else if (isHovered)
-		{
-			if (EnumHasAnyFlags(stateFlags, CStateFlag::Pressed) || !EnumHasAnyFlags(stateFlags, CStateFlag::Hovered))
-				SetNeedsStyle();
-
-			EnumAddFlags(stateFlags, CStateFlag::Hovered);
-			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
-		}
-		else
-		{
-			if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed))
-				SetNeedsStyle();
-
-			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
-			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
-		}
-	}
-
-	void CWidget::ClearChildNodes()
-	{
-		YGNodeRemoveAllChildren(node);
-		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
-	}
-
-	void CWidget::ReAddChildNodes()
-	{
-		ClearChildNodes();
-
-		YGNodeSetMeasureFunc(node, nullptr);
-
-		for (auto subWidget : attachedWidgets)
-		{
-			if (!subWidget->RequiresIndependentLayoutCalculation())
-			{
-				auto childCount = YGNodeGetChildCount(node);
-				YGNodeInsertChild(node, subWidget->node, childCount);
-			}
-		}
-	}
-
-	void CWidget::Render()
-	{
-		if (IsVisible())
-		{
-			auto rect = GetComputedLayoutRect();
-
-			if (!isnan(rect.x) && !isnan(rect.y))
-			{
-				screenPos = GUI::WindowRectToGlobalRect(rect).min;
-			}
-
-			if (IsDisabled()) GUI::BeginDisabled();
-
-			CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
-			OnDrawGUI();
-			CFontManager::Get().PopFont();
-
-			if (IsDisabled()) GUI::EndDisabled();
-		}
-
-		for (auto menu : attachedMenus)
-		{
-			if (menu->IsShown())
-				menu->Render();
-		}
-
-		UpdateStyleIfNeeded();
-		UpdateLayoutIfNeeded();
-	}
-
-	bool CWidget::TestFocus()
-	{
-		CWindow* thisWindow = nullptr;
-		if (IsWindow())
-		{
-			thisWindow = (CWindow*)this;
-			return GUI::IsWindowFocused(thisWindow->GetTitle(), GUI::FOCUS_ChildWindows | GUI::FOCUS_DockHierarchy);
-		}
-
-		return GUI::IsItemFocused();
-	}
-
-	void CWidget::PollEvents()
-	{
-		if (IsDisabled())
-			return;
-
-		bool focused = TestFocus();
-
-		if (focused != isFocused) // Focus changed
-		{
-			CFocusEvent event{};
-			event.name = "FocusChanged";
-			event.type = CEventType::FocusChanged;
-			event.gotFocus = focused;
-			event.sender = this;
-			HandleEvent(&event);
-
-			isFocused = focused;
-		}
-
-		if (!IsInteractable())
-			return;
-
-		if (!IsWindow())
-		{
-			bool hovered = GUI::IsItemHovered();
-
-			// Mouse: Press, Release
-
-			b8 leftMouseDown = GUI::IsMouseDown(GUI::MouseButton::Left);
-
-			if (leftMouseDown != prevLeftMouseDown && hovered) // Left mouse state changed within bounds
-			{
-				isLeftMousePressedInside = leftMouseDown && hovered;
-
-				if (isLeftMousePressedInside) // Press inside
-				{
-					CMouseEvent event{};
-					event.name = "MousePress";
-					event.type = CEventType::MousePress;
-					event.mousePos = GUI::GetMousePos();
-					event.mouseButton = 0; // Left = 0
-					event.prevMousePos = prevHoverPos;
-					event.isInside = true;
-					event.sender = this;
-
-					HandleEvent(&event);
-					prevHoverPos = event.mousePos;
-				}
-				else // Release inside
-				{
-					CMouseEvent event{};
-					event.name = "MouseRelease";
-					event.type = CEventType::MouseRelease;
-					event.mousePos = GUI::GetMousePos();
-					event.mouseButton = 0; // Left = 0
-					event.prevMousePos = prevHoverPos;
-					event.isInside = true;
-					event.sender = this;
-
-					HandleEvent(&event);
-					prevHoverPos = event.mousePos;
-				}
-			}
-			else if (isLeftMousePressedInside && !leftMouseDown && !hovered) // Release outside
-			{
-				isLeftMousePressedInside = false;
-
-				CMouseEvent event{};
-				event.name = "MouseRelease";
-				event.type = CEventType::MouseRelease;
-				event.mousePos = GUI::GetMousePos();
-				event.mouseButton = 0; // Left = 0
-				event.prevMousePos = prevHoverPos;
-				event.isInside = false;
-				event.sender = this;
-
-				HandleEvent(&event);
-				prevHoverPos = event.mousePos;
-			}
-
-			prevLeftMouseDown = GUI::IsMouseDown(GUI::MouseButton::Left);
-
-			// Mouse: Enter, Move, Leave
-			
-			if (hovered && !isHovered)
-			{
-				CMouseEvent event{};
-				event.name = "MouseEnter";
-				event.type = CEventType::MouseEnter;
-				event.mousePos = GUI::GetMousePos();
-				event.sender = this;
-				HandleEvent(&event);
-				isHovered = hovered;
-				prevHoverPos = event.mousePos;
-
-				stateFlags |= CStateFlag::Hovered;
-				SetNeedsStyle();
-			}
-			else if (hovered && isHovered)
-			{
-				auto mousePos = GUI::GetMousePos();
-				if (mousePos.x != prevHoverPos.x && mousePos.y != prevHoverPos.y)
-				{
-					CMouseEvent event{};
-					event.name = "MouseMove";
-					event.type = CEventType::MouseMove;
-					event.mousePos = GUI::GetMousePos();
-					event.prevMousePos = prevHoverPos;
-					event.sender = this;
-
-					HandleEvent(&event);
-					prevHoverPos = mousePos;
-				}
-			}
-			else if (!hovered && isHovered)
-			{
-				CMouseEvent event{};
-				event.name = "MouseLeave";
-				event.type = CEventType::MouseLeave;
-				event.mousePos = GUI::GetMousePos();
-				event.prevMousePos = prevHoverPos;
-				event.sender = this;
-				HandleEvent(&event);
-				isHovered = hovered;
-				prevHoverPos = event.mousePos;
-                
-                EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
-				SetNeedsStyle();
-			}
-
-			// Mouse Click:
-
-			bool isLeftClicked = GUI::IsItemClicked(GUI::MouseButton::Left);
-			bool isRightClicked = GUI::IsItemClicked(GUI::MouseButton::Right);
-			bool isMiddleClicked = GUI::IsItemClicked(GUI::MouseButton::Middle);
-
-			if (isLeftClicked || isRightClicked || isMiddleClicked)
-			{
-				if (GUI::IsItemHovered())
-				{
-					CMouseEvent event{};
-					event.name = "MouseClick";
-					event.type = CEventType::MouseButtonClick;
-					event.mouseButton = isLeftClicked ? 0 : (isRightClicked ? 1 : 2);
-					event.mousePos = GUI::GetMousePos();
-					event.prevMousePos = event.mousePos;
-					event.sender = this;
-					HandleEvent(&event);
-				}
-			}
-
-			bool isLeftDblClicked = GUI::IsItemDoubleClicked(GUI::MouseButton::Left);
-			bool isRightDblClicked = GUI::IsItemDoubleClicked(GUI::MouseButton::Right);
-			bool isMiddleDblClicked = GUI::IsItemDoubleClicked(GUI::MouseButton::Middle);
-
-			if (isLeftDblClicked || isRightDblClicked || isMiddleDblClicked)
-			{
-				if (GUI::IsItemHovered())
-				{
-					CMouseEvent event{};
-					event.name = "MouseDoubleClick";
-					event.type = CEventType::MouseButtonDoubleClick;
-					event.mouseButton = isLeftDblClicked ? 0 : (isRightDblClicked ? 1 : 2);
-					event.mousePos = GUI::GetMousePos();
-					event.prevMousePos = event.mousePos;
-					event.sender = this;
-					HandleEvent(&event);
-				}
-			}
-		}
-		else // Window
-		{
-			CWindow* thisWindow = (CWindow*)this;
-
-			// Mouse Click:
-
-			bool isLeftClicked = GUI::IsMouseClicked(GUI::MouseButton::Left);
-			bool isRightClicked = GUI::IsMouseClicked(GUI::MouseButton::Right);
-			bool isMiddleClicked = GUI::IsMouseClicked(GUI::MouseButton::Middle);
-			
-			if (isLeftClicked || isRightClicked || isMiddleClicked)
-			{
-				bool isWindowHovered = GUI::IsWindowHovered(thisWindow->GetTitle(), GUI::Hovered_ChildWindows | GUI::Hovered_DockHierarchy | GUI::Hovered_NoPopupHierarchy);
-				if (isWindowHovered)
-				{
-					CMouseEvent event{};
-					event.name = "MouseClick";
-					event.type = CEventType::MouseButtonClick;
-					event.mouseButton = isLeftClicked ? 0 : (isRightClicked ? 1 : 2);
-					event.mousePos = GUI::GetMousePos();
-					event.prevMousePos = event.mousePos;
-					event.sender = this;
-					HandleEvent(&event);
-				}
-			}
-
-			bool isLeftDblClicked = GUI::IsMouseDoubleClicked(GUI::MouseButton::Left);
-			bool isRightDblClicked = GUI::IsMouseDoubleClicked(GUI::MouseButton::Right);
-			bool isMiddleDblClicked = GUI::IsMouseDoubleClicked(GUI::MouseButton::Middle);
-
-			if (isLeftDblClicked || isRightDblClicked || isMiddleDblClicked)
-			{
-				bool isWindowHovered = GUI::IsWindowHovered(thisWindow->GetTitle(), GUI::Hovered_ChildWindows | GUI::Hovered_DockHierarchy | GUI::Hovered_NoPopupHierarchy);
-				if (isWindowHovered)
-				{
-					CMouseEvent event{};
-					event.name = "MouseDoubleClick";
-					event.type = CEventType::MouseButtonDoubleClick;
-					event.mouseButton = isLeftClicked ? 0 : (isRightClicked ? 1 : 2);
-					event.mousePos = GUI::GetMousePos();
-					event.prevMousePos = event.mousePos;
-					event.sender = this;
-					HandleEvent(&event);
-				}
-			}
-		}
-
-		if (IsLeftMouseHeld() && IsHovered())
-		{
-            if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || !EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-			{
-				SetNeedsStyle();
-				//SetNeedsLayout();
-			}
-			EnumAddFlags(stateFlags, CStateFlag::Pressed);
-			EnumRemoveFlags(stateFlags, CStateFlag::Hovered);
-		}
-		else if (IsHovered())
-		{
-            if (!EnumHasAnyFlags(stateFlags, CStateFlag::Hovered) || EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-			{
-				SetNeedsStyle();
-				//SetNeedsLayout();
-			}
-			EnumAddFlags(stateFlags, CStateFlag::Hovered);
-			EnumRemoveFlags(stateFlags, CStateFlag::Pressed);
-		}
-		else
-		{
-            if (EnumHasAnyFlags(stateFlags, CStateFlag::Hovered | CStateFlag::Pressed))
-			{
-				SetNeedsStyle();
-				//SetNeedsLayout();
-			}
-			EnumRemoveFlags(stateFlags, CStateFlag::Pressed | CStateFlag::Hovered);
-		}
-	}
-
-    void CWidget::SetWidgetFlags(WidgetFlags flags)
-    {
-        this->widgetFlags = flags;
-    }
-
-    WidgetFlags CWidget::GetWidgetFlags() const
-    {
-        return widgetFlags;
-    }
 
 	void CWidget::SetStyleSheet(const String& stylesheetText)
 	{
@@ -1284,6 +1248,18 @@ namespace CE::Widgets
 		return ownerWindow;
 	}
 
+	bool CWidget::IsWidgetPresentInParentHierarchy(CWidget* widget)
+	{
+		auto owner = GetOwner();
+		while (owner != nullptr)
+		{
+			if (owner == widget)
+				return true;
+			owner = owner->GetOwner();
+		}
+		return false;
+	}
+
 	int CWidget::GetSubWidgetIndex(CWidget* subWidget)
 	{
 		for (int i = 0; i < attachedWidgets.GetSize(); i++)
@@ -1336,7 +1312,20 @@ namespace CE::Widgets
 	{
 		return subWidgetClass->IsSubclassOf<CWidget>();
 	}
-	
+
+	CStyleValue CWidget::GetComputedPropertyValue(CStylePropertyType property)
+	{
+		if (computedStyle.properties.KeyExists(property))
+			return computedStyle.properties[property];
+		switch (property)
+		{
+		case CStylePropertyType::FontName:
+			return CStyleValue(CFontManager::Get().GetCurrentFont().fontName.GetString());
+		case CStylePropertyType::FontSize:
+			return CStyleValue((f32)CFontManager::Get().GetCurrentFont().pointSize);
+		}
+		return CStyleValue();
+	}
 
 	void CWidget::HandleEvent(CEvent* event)
     {

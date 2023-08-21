@@ -323,7 +323,7 @@ namespace CE::GUI
 		PopupFlags_MouseButtonDefault_ = 1,
 		PopupFlags_NoOpenOverExistingPopup = 1 << 5,   // For OpenPopup*(), BeginPopupContext*(): don't open if there's already a popup at the same level of the popup stack
 		PopupFlags_NoOpenOverItems = 1 << 6,   // For BeginPopupContextWindow(): don't return true when hovering items, only when hovering empty space
-		PopupFlags_AnyPopupId = 1 << 7,   // For IsPopupOpen(): ignore the ImGuiID parameter and test for any popup.
+		PopupFlags_AnyPopupId = 1 << 7,   // For IsPopupOpen(): ignore the GUI::ID parameter and test for any popup.
 		PopupFlags_AnyPopupLevel = 1 << 8,   // For IsPopupOpen(): search/test at any level of the popup stack (default test in the current level)
 		PopupFlags_AnyPopup = PopupFlags_AnyPopupId | PopupFlags_AnyPopupLevel,
 	};

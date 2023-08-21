@@ -12,7 +12,7 @@ namespace CE::Widgets
 
 		virtual ~CTreeItemView();
 
-		bool RequiresIndependentLayoutCalculation() override { return true; }
+		bool IsLayoutCalculationRoot() override { return true; }
 
 		void UpdateLayoutIfNeeded() override;
 
@@ -24,6 +24,8 @@ namespace CE::Widgets
 		void SetIcon(const String& searchPath);
 
 	protected:
+
+		bool ShouldHandleBackgroundDraw() override;
 
 		virtual void OnDrawGUI() override;
 
