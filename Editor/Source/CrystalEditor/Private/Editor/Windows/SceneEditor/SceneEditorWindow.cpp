@@ -80,7 +80,7 @@ namespace CE::Editor
 		{
 			auto saveButton = CreateWidget<CButton>(toolBar, "SaveButton");
 			saveButton->SetAsContainer(false);
-			saveButton->SetText("");
+			saveButton->SetText("Save");
 			saveButton->LoadIcon("/Icons/save.png");
 			saveButton->SetIconSize(22);
 		}
