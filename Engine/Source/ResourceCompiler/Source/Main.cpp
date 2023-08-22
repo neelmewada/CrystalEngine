@@ -16,40 +16,16 @@ public:
 	u32 crc{};
 
 };
-namespace CE {
-	; template<> struct StructTypeData<::ResourceStampEntry> : public CE::Internal::TypeDataImpl<::ResourceStampEntry > { }; namespace Internal {
-		template<> struct TypeInfoImpl<::ResourceStampEntry> : public CE::Internal::IStructTypeImpl {
-			typedef ::ResourceStampEntry Self; CE::StructType Type; const CE::StructTypeData<::ResourceStampEntry> TypeData;  
-			static const CE::Name& FullTypeName(); 
-			TypeInfoImpl(CE::StructType&& type, CE::StructTypeData<::ResourceStampEntry> typeData) : Type(type), TypeData(typeData) {
-				Type.AddSuper<>(); Type.AddField("relativePath", &Self::relativePath, ((::size_t) & reinterpret_cast<char const volatile&>((((Self*)0)->relativePath))), "", CE::GetTypeId<TGetUnderlyingType<decltype(Self::relativePath)>::Type>()); Type.AddField("crc", &Self::crc, ((::size_t) & reinterpret_cast<char const volatile&>((((Self*)0)->crc))), "", CE::GetTypeId<TGetUnderlyingType<decltype(Self::crc)>::Type>());
-			} virtual ~TypeInfoImpl() { } virtual void InitializeDefaults(void* instance) const override {
-				new(instance) ::ResourceStampEntry;
-			} virtual const CE::Name& GetTypeName() const override {
-				return FullTypeName();
-			} virtual String GetStructPackage() const override {
-				return ::ResourceStampEntry::StaticPackage();
-			} virtual String GetStructModule() const override {
-				return ::ResourceStampEntry::StaticModule();
-			}
-		};
-	} template<> inline TypeInfo* GetStaticType<::ResourceStampEntry>() {
-		static CE::Internal::TypeInfoImpl<::ResourceStampEntry> instance{ StructType{ "" "::" "ResourceStampEntry", &instance, sizeof(::ResourceStampEntry),  "" }, StructTypeData<::ResourceStampEntry>() }; return &instance.Type;
-	} template<> inline CE::Name GetTypeName<::ResourceStampEntry>() {
-		return CE::Internal::TypeInfoImpl<::ResourceStampEntry>::FullTypeName();
-	} template<> inline StructType* GetStaticStruct<::ResourceStampEntry>() {
-		return (StructType*)GetStaticType<::ResourceStampEntry>();
-	}
-}
-//CE_RTTI_STRUCT(, , ResourceStampEntry,
-//	CE_SUPER(),
-//	CE_ATTRIBS(),
-//	CE_FIELD_LIST(
-//		CE_FIELD(relativePath)
-//		CE_FIELD(crc)
-//	),
-//	CE_FUNCTION_LIST()
-//)
+
+CE_RTTI_STRUCT(, , ResourceStampEntry,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(relativePath)
+		CE_FIELD(crc)
+	),
+	CE_FUNCTION_LIST()
+)
 CE_RTTI_STRUCT_IMPL(, , ResourceStampEntry)
 
 struct ResourceStampManifest

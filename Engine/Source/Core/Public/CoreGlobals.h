@@ -17,7 +17,6 @@ namespace CE
      * At runtime, it is the path to root installation directory.
      */
     extern CORE_API IO::Path gProjectPath;
-
     extern CORE_API String gProjectName;
 
     extern CORE_API u32 gDefaultWindowWidth;
@@ -33,6 +32,12 @@ namespace CE
     /* *******************************************
      *  Global Functions
      */
+
+	/// Returns true if we're running inside an editor build. Applies to all editors, tools and programs (AutoRTTI, etc) built in editor mode.
+	CORE_API bool IsEditor();
+
+	/// Returns true if we're running inside a runtime build.
+	CORE_API bool IsRuntime();
 
     CORE_API void RequestEngineExit(String exitMessage);
 

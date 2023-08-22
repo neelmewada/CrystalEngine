@@ -29,13 +29,13 @@ namespace CE
 
 	void AssetManager::Initialize()
 	{
-		// Cache asset paths
-		assetRegistry->CachePathTree();
+		// Cache asset paths & load saved cache
+		assetRegistry->InitializeCache();
 	}
 
 	void AssetManager::Shutdown()
 	{
-		
+		assetRegistry->Shutdown();
 	}
 
 	void AssetManager::Tick(f32 deltaTime)

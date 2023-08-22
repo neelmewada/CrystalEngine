@@ -29,6 +29,16 @@ namespace CE
 		cachedAssetsByPath.Clear();
 	}
 
+	void AssetRegistry::Shutdown()
+	{
+		if (cachePackage != nullptr)
+		{
+			Package::SavePackage(cachePackage, nullptr);
+			cachePackage->Destroy();
+		}
+		cachePackage = nullptr;
+	}
+
 	AssetRegistry* AssetRegistry::Get()
 	{
 		return AssetManager::GetRegistry();
@@ -157,14 +167,19 @@ namespace CE
 			}
 		}
 
+		if (cache != nullptr)
+		{
+			
+		}
+
 		load->RequestDestroy();
 
 		onAssetRegistryModified.Broadcast();
 	}
 
-	void AssetRegistry::CachePathTree()
+	void AssetRegistry::InitializeCache()
 	{
-		if (pathTreeCached)
+		if (cacheInitialized)
 			return;
 
 		// Clear the path tree
@@ -249,7 +264,17 @@ namespace CE
 #endif
 		}
 
-		pathTreeCached = true;
+#if PAL_TRAIT_BUILD_EDITOR
+		// Load cache if it exists
+		if (cachePackage == nullptr)
+			cachePackage = Package::LoadPackage(nullptr, Name("/Temp/AssetCache"));
+		// Or create new if it doesn't
+		if (cachePackage == nullptr)
+			cachePackage = CreateObject<Package>(nullptr, "/Temp/AssetCache");
+
+#endif
+
+		cacheInitialized = true;
 	}
 
 	void AssetRegistry::HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName)
@@ -310,7 +335,7 @@ namespace CE
 
 		mutex.Unlock();
 
-		// Bug fix: Add delay to prevent skipping file Modified calls
+		// FIX: Added delay to prevent skipping file Modified calls
 		Thread::SleepFor(1);
 	}
 

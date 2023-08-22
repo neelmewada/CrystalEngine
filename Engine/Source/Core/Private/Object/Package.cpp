@@ -32,7 +32,7 @@ namespace CE
 		}
 		else if (packageNameStr.StartsWith("/Temp"))
 		{
-			return gProjectPath / (packageNameStr.GetSubstring(1) + ".casset");
+			return gProjectPath / (packageNameStr.GetSubstring(1) + ".temp");
 		}
 
 		return PlatformDirectories::GetAppRootDir() / (packageNameStr.GetSubstring(1) + ".casset");

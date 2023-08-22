@@ -16,7 +16,7 @@ namespace CE
 
 	enum class CMImageSourceFormat
 	{
-		Undefined = 0,
+		None = 0,
 		PNG,
 		HDR, EXR,
 		BC1,
@@ -32,14 +32,14 @@ namespace CE
 		u32 y = 0;
 		u32 numChannels = 0;
 		CMImageFormat format = CMImageFormat::Undefined;
-		CMImageSourceFormat sourceFormat = CMImageSourceFormat::Undefined;
+		CMImageSourceFormat sourceFormat = CMImageSourceFormat::None;
 		u32 bitDepth = 0;
 		u32 bitsPerPixel = 0;
 
         const char* failureReason = nullptr;
 
         virtual bool IsValid() const { return x > 0 && y > 0 && bitDepth > 0 && bitsPerPixel > 0 && numChannels > 0 && numChannels <= 4 && 
-			format != CMImageFormat::Undefined && sourceFormat != CMImageSourceFormat::Undefined; }
+			format != CMImageFormat::Undefined && sourceFormat != CMImageSourceFormat::None; }
     };
 
 	/*
@@ -64,7 +64,16 @@ namespace CE
 		// Only supports PNG for now
         static CMImage LoadFromMemory(unsigned char* buffer, int bufferLength);
 
+		/// Loads raw image from memory without allocating any memory
+		static CMImage LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, u32 bitDepth, u32 bitsPerPixel);
+
 		// - Encode API -
+
+		// Encodes raw image pixel data to PNG format
+		static bool EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth = 8);
+
+		// Decodes raw image pixel data from PNG format
+		static CMImage DecodePNG(const CMImage& source, MemoryStream* inStream);
 
 #if PAL_TRAIT_BUILD_EDITOR
 		// Encodes raw image data to BCn format (BC7, BC1, etc)
@@ -95,6 +104,7 @@ namespace CE
 		static CMImage LoadPNGImage(MemoryStream* stream);
 
         unsigned char* data = nullptr;
+		bool allocated = true;
     };
 
 }

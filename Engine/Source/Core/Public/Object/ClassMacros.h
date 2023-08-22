@@ -242,6 +242,20 @@ namespace CE\
 			{\
 				return Namespace::Struct::StaticModule();\
 			}\
+			virtual void OnAfterDeserialize(void* instance) override\
+			{\
+				if constexpr (THasOnAfterDeserializeFunction<Namespace::Struct>::Value)\
+				{\
+					THasOnAfterDeserializeFunction<Namespace::Struct>::OnAfterDeserialize((Namespace::Struct*)instance);\
+				}\
+			}\
+			virtual void OnBeforeSerialize(void* instance) override\
+			{\
+				if constexpr (THasOnBeforeSerializeFunction<Namespace::Struct>::Value)\
+				{\
+					THasOnBeforeSerializeFunction<Namespace::Struct>::OnBeforeSerialize((Namespace::Struct*)instance);\
+				}\
+			}\
 		};\
 	}\
 	template<>\

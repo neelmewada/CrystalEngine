@@ -62,6 +62,9 @@ namespace CE
 
 			virtual String GetStructPackage() const = 0;
 			virtual String GetStructModule() const = 0;
+
+			virtual void OnAfterDeserialize(void* instance) = 0;
+			virtual void OnBeforeSerialize(void* instance) = 0;
 		};
 	}
 
@@ -232,6 +235,22 @@ namespace CE
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->InitializeDefaults(instance);
+		}
+
+		/// To be called only on struct types
+		void OnAfterDeserialize(void* instance)
+		{
+			if (Impl != nullptr)
+				Impl->OnAfterDeserialize(instance);
+		}
+
+		/// To be called only on struct types
+		void OnBeforeSerialize(void* instance)
+		{
+			if (Impl != nullptr)
+			{
+				Impl->OnBeforeSerialize(instance);
+			}
 		}
 
 		String GetStructPackage() const

@@ -13,8 +13,10 @@ void EditorLoop::PreInit(int argc, char** argv)
 	// Set Core Globals before loading Core
 	gProjectName = "CrystalEngine";
 
-	gDefaultWindowWidth = 1280;
-	gDefaultWindowHeight = 720;
+	if (gDefaultWindowWidth == 0)
+		gDefaultWindowWidth = 1280;
+	if (gDefaultWindowHeight == 0)
+		gDefaultWindowHeight = 720;
 
 	// Initialize logging
 	Logger::Initialize();
@@ -63,6 +65,7 @@ void EditorLoop::PreInit(int argc, char** argv)
 
 		if (!foundProject)
 		{
+			// Open the project browser as an external process and exit
 			PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
 			exit(0);
 			return;
@@ -147,7 +150,7 @@ void EditorLoop::PostInit()
 {
 	using namespace CE::Widgets;
 
-	// Load non-important modules
+	// Load non-important core modules
 	LoadCoreModules();
 
 	RHI::gDynamicRHI->Initialize();
@@ -164,7 +167,7 @@ void EditorLoop::PostInit()
 
 	gEngine->PreInit();
 
-	// Load RHI & GUI
+	// Load RHI::Viewport and initialize GUI
 
 	auto mainWindow = PlatformApplication::Get()->GetMainWindow();
 	u32 width = 0, height = 0;

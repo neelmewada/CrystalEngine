@@ -11,8 +11,8 @@ namespace CE
 
     CORE_API String gProjectName{};
 
-    CORE_API u32 gDefaultWindowWidth = 1280;
-    CORE_API u32 gDefaultWindowHeight = 720;
+    CORE_API u32 gDefaultWindowWidth = 1920;
+    CORE_API u32 gDefaultWindowHeight = 1080;
 
     CORE_API bool gIsEngineRequestingExit = false;
     CORE_API String gEngineExitMessage{};
@@ -25,7 +25,25 @@ namespace CE
      *  Global Functions
      */
     
-    CORE_API void RequestEngineExit(String exitMessage)
+	CORE_API bool IsEditor()
+	{
+#if PAL_TRAIT_BUILD_EDITOR
+		return true;
+#else
+		return false;
+#endif
+	}
+
+	CORE_API bool IsRuntime()
+	{
+#if PAL_TRAIT_BUILD_EDITOR
+		return false;
+#else
+		return true;
+#endif
+	}
+
+	CORE_API void RequestEngineExit(String exitMessage)
     {
         gEngineExitMessage = exitMessage;
         gIsEngineRequestingExit = true;

@@ -173,7 +173,7 @@ namespace CE::Widgets
 
 						hoveredLayoutItem = newHoveredLayoutItem;
 
-						debugWidget->debugDraw = hoveredLayoutItem != CDebugBackgroundFilter::All;
+						debugWidget->debugDraw = !debugWidget->IsWindow() && hoveredLayoutItem != CDebugBackgroundFilter::All;
 						debugWidget->filter = hoveredLayoutItem;
 
 						textStyle.foreground = EnumHasFlag(hoveredLayoutItem, CDebugBackgroundFilter::IntrinsicSize) ? foregroundDark : Color::White();
@@ -524,7 +524,7 @@ namespace CE::Widgets
 			SetDebugWidget(widget);
 		}
 
-		widget->forceDebugDrawMode = ImGui::IsItemHovered() ? CDebugBackgroundFilter::All : CDebugBackgroundFilter::None;
+		widget->forceDebugDrawMode = (!widget->IsWindow() && ImGui::IsItemHovered()) ? CDebugBackgroundFilter::All : CDebugBackgroundFilter::None;
 
 		if (isOpen && !isLeaf)
 		{

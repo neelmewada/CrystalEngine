@@ -269,5 +269,30 @@ namespace CE
 		static SIZE_T GetHash(T* instance) { return instance->GetHash(); }
 	};
 
+	template<typename T, typename = void>
+	struct THasOnBeforeSerializeFunction : TFalseType
+	{
+		static void OnBeforeSerialize(T* instance) {} // Do nothing
+	};
+
+	template<typename T>
+	struct THasOnBeforeSerializeFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TTrueType
+	{
+		static void OnBeforeSerialize(T* instance) { return instance->OnBeforeSerialize(); }
+	};
+
+	template<typename T, typename = void>
+	struct THasOnAfterDeserializeFunction : TFalseType
+	{
+		static void OnAfterDeserialize(T* instance) {} // Do nothing
+	};
+
+	template<typename T>
+	struct THasOnAfterDeserializeFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TTrueType
+	{
+		static void OnAfterDeserialize(T* instance) { return instance->OnAfterDeserialize(); }
+	};
+
+
 } // namespace CE::Traits
 

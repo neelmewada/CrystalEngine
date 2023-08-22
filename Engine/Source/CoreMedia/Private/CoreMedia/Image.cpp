@@ -192,7 +192,7 @@ namespace CE
 			break;
 		default:
 			image.failureReason = "Invalid format";
-			break;
+			return image;
 		}
 
 		image.data = (unsigned char*)Memory::Malloc(data.size());
@@ -214,7 +214,7 @@ namespace CE
 		auto filePathStr = filePath.GetString();
 		FileStream stream = FileStream(filePath, Stream::Permissions::ReadOnly);
 		stream.SetBinaryMode(true);
-
+		
 		if (stream.GetLength() < 8)
 		{
 			image.failureReason = "Invalid file";
@@ -275,6 +275,19 @@ namespace CE
 		image.failureReason = "Unsupported image format";
 		return image;
     }
+
+	CMImage CMImage::LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, u32 bitDepth, u32 bitsPerPixel)
+	{
+		CMImage image{};
+		image.allocated = false;
+		image.data = buffer;
+		image.bitDepth = bitDepth;
+		image.bitsPerPixel = bitsPerPixel;
+		image.format = pixelFormat;
+		image.sourceFormat = CMImageSourceFormat::None;
+
+		return image;
+	}
 
 	static CMP_FORMAT CMImageFormatToSourceCMPFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
 	{
@@ -346,7 +359,109 @@ namespace CE
 		case CMP_FORMAT_BC6H:
 			return CMImageSourceFormat::BC6H;
 		}
-		return CMImageSourceFormat::Undefined;
+		return CMImageSourceFormat::None;
+	}
+
+	bool CMImage::EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth)
+	{
+		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
+			return false;
+
+		std::vector<u8> encoded{};
+		lodepng::State state{};
+		state.info_raw.bitdepth = bitDepth;
+		switch (pixelFormat)
+		{
+		case CMImageFormat::R:
+			state.info_raw.colortype = LCT_GREY;
+			break;
+		case CMImageFormat::RG:
+			state.info_raw.colortype = LCT_GREY_ALPHA;
+			break;
+		case CMImageFormat::RGB:
+			state.info_raw.colortype = LCT_RGB;
+			break;
+		case CMImageFormat::RGBA:
+			state.info_raw.colortype = LCT_RGBA;
+			break;
+		default:
+			CE_LOG(Error, All, "Failed to encode png. Invalid pixel format: {}", (int)pixelFormat);
+			return false;
+		}
+
+		u32 result = lodepng::encode(encoded, source.data, source.GetWidth(), source.GetHeight(), state);
+		if (result > 0)
+		{
+			CE_LOG(Error, All, "Failed to encode png. {}.", lodepng_error_text(result));
+			return false;
+		}
+		
+		for (auto byte : encoded)
+		{
+			if (outStream->IsOutOfBounds())
+			{
+				CE_LOG(Error, All, "Failed to encode png. Stream out of bounds.");
+				return false;
+			}
+			outStream->Write(byte);
+		}
+
+		return true;
+	}
+
+	CMImage CMImage::DecodePNG(const CMImage& source, MemoryStream* inStream)
+	{
+		if (!source.IsValid() || inStream == nullptr || !inStream->CanRead())
+			return CMImage();
+
+		CMImage image{};
+		inStream->SetBinaryMode(true);
+
+		std::vector<unsigned char> data{};
+		u32 w, h;
+		lodepng::State state{};
+
+		int length = inStream->GetLength();
+		if (length <= 0)
+			length = inStream->GetCapacity();
+
+		u32 result = lodepng::decode(data, w, h, state, (unsigned char*)inStream->GetRawDataPtr(), length);
+		if (result > 0)
+		{
+			image.failureReason = "Decoding failed";
+			return image;
+		}
+
+		image.x = w;
+		image.y = h;
+		image.numChannels = lodepng_get_channels(&state.info_png.color);
+		image.bitDepth = state.info_png.color.bitdepth;
+		image.bitsPerPixel = lodepng_get_bpp(&state.info_png.color);
+		image.sourceFormat = CMImageSourceFormat::PNG;
+
+		switch (state.info_png.color.colortype)
+		{
+		case LCT_GREY:
+			image.format = CMImageFormat::R;
+			break;
+		case LCT_GREY_ALPHA:
+			image.format = CMImageFormat::RG;
+			break;
+		case LCT_RGB:
+			image.format = CMImageFormat::RGB;
+			break;
+		case LCT_RGBA:
+			image.format = CMImageFormat::RGBA;
+			break;
+		default:
+			image.failureReason = "Invalid format";
+			return image;
+		}
+
+		image.data = (unsigned char*)Memory::Malloc(data.size());
+		memcpy(image.data, data.data(), data.size());
+
+		return image;
 	}
 
 #if PAL_TRAIT_BUILD_EDITOR
@@ -408,10 +523,9 @@ namespace CE
 
     void CMImage::Free()
     {
-		if (data != nullptr)
+		if (data != nullptr && allocated)
 		{
 			Memory::Free(data);
-			data = nullptr;
 		}
 
         data = nullptr;

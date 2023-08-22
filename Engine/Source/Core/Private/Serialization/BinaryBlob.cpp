@@ -9,6 +9,16 @@ namespace CE
 		
 	}
 
+	BinaryBlob::BinaryBlob(const BinaryBlob& copy)
+	{
+		Free();
+
+		if (copy.IsValid())
+		{
+			LoadData(copy.data, copy.dataSize);
+		}
+	}
+
 	void BinaryBlob::Free()
 	{
 		if (isAllocated)
@@ -33,7 +43,7 @@ namespace CE
 		dataSize = byteSize;
 	}
 
-	bool BinaryBlob::IsValid()
+	bool BinaryBlob::IsValid() const
 	{
 		return data != nullptr && dataSize > 0;
 	}

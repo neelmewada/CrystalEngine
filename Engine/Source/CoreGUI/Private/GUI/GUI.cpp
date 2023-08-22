@@ -470,6 +470,11 @@ namespace CE::GUI
 		return true;
 	}
 
+	COREGUI_API bool BeginMenuBar()
+	{
+		return ImGui::BeginMenuBar();
+	}
+
 	COREGUI_API void EndMenuBar()
 	{
 		ImGui::EndMenuBar();

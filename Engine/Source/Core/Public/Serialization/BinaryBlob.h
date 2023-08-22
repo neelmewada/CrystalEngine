@@ -16,11 +16,12 @@ namespace CE
 	public:
 
 		BinaryBlob();
+		BinaryBlob(const BinaryBlob& copy);
 
 		void Free();
 		void Reserve(u64 byteSize);
 
-		bool IsValid();
+		bool IsValid() const;
         
         void LoadData(const void* data, u64 dataSize);
 

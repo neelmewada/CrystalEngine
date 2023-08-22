@@ -33,7 +33,6 @@ namespace CE::Widgets
 
 		if (GUI::BeginChild(rect, GetUuid(), "ToolBar", {}, defaultStyleState, flags))
 		{
-			//GUI::PushChildCoordinateSpace(rect);
 			GUI::PushZeroingChildCoordinateSpace();
 			for (auto child : attachedWidgets)
 			{

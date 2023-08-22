@@ -20,6 +20,8 @@ namespace CE::Editor
 	void EditorAssetManager::Initialize()
 	{
 		Super::Initialize();
+
+		
 	}
 
 	void EditorAssetManager::Shutdown()
@@ -53,20 +55,19 @@ namespace CE::Editor
 
 			if (thisChange.fileAction == IO::FileAction::Delete && nextFound &&
 				nextChange.fileAction == IO::FileAction::Modified &&
-				nextChange.currentPath.GetFilename() == thisChange.currentPath.GetFilename())
+				nextChange.currentPath.GetFilename() == thisChange.currentPath.GetFilename()) // File moved
 			{
 				//CE_LOG(Info, All, "File moved: {}", nextChange.currentPath);
 			}
 			else if (thisChange.fileAction == IO::FileAction::Delete) // File deleted
 			{
-				bool isDirectory = thisChange.currentPath.GetExtension().IsEmpty();
-				//CE_LOG(Info, All, "File deleted: {} | {}", thisChange.currentPath, isDirectory);
+
 			}
-			else if (thisChange.fileAction == IO::FileAction::Modified)
+			else if (thisChange.fileAction == IO::FileAction::Modified) // Product asset
 			{
-				if (extension == ".casset") // Product asset
+				if (extension == ".casset")
 				{
-					
+					// Do nothing if product asset is modified
 				}
 				else
 				{
@@ -81,11 +82,10 @@ namespace CE::Editor
 ;				}
 
 				// New file added or current file modified
-				//CE_LOG(Info, All, "File modified: {}", thisChange.currentPath);
 			}
-			else if (thisChange.fileAction == IO::FileAction::Moved)
+			else if (thisChange.fileAction == IO::FileAction::Moved) // File moved (undefined behaviour)
 			{
-				//CE_LOG(Info, All, "File moved: {}", thisChange.currentPath);
+
 			}
 		}
 

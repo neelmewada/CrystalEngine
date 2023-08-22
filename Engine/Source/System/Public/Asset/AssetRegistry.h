@@ -16,6 +16,8 @@ namespace CE
 		AssetRegistry();
 		virtual ~AssetRegistry();
 
+		void Shutdown();
+
 		static AssetRegistry* Get();
 
 		inline PathTree& GetCachedDirectoryPathTree()
@@ -52,7 +54,7 @@ namespace CE
 	protected:
 
 		/// Caches path tree structure
-		void CachePathTree();
+		void InitializeCache();
 
 		// Inherited via IFileWatchListener
 		virtual void HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName) override;
@@ -72,7 +74,7 @@ namespace CE
 		PathTree directoryTree{};
 		PathTree cachedPathTree{};
 
-		b8 pathTreeCached = false;
+		b8 cacheInitialized = false;
         
         Array<SourceAssetChange> sourceChanges{};
 
@@ -89,6 +91,9 @@ namespace CE
 		Mutex mutex{};
 
 		// Asset Registry State
+
+		Package* cachePackage = nullptr;
+		AssetCache* cache = nullptr;
 
 		Array<AssetData*> allAssetDatas{};
 

@@ -143,6 +143,11 @@ namespace CE
 
         void RequestDestroy();
 
+		FORCE_INLINE void Destroy()
+		{
+			RequestDestroy();
+		}
+
         // - Public API -
 
         virtual bool IsAsset() { return false; }

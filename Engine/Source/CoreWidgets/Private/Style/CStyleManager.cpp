@@ -16,7 +16,6 @@ namespace CE::Widgets
 
 	void CStyleManager::PreShutdown()
 	{
-
 		for (auto& [_, image] : loadedImages)
 		{
 			RHI::gDynamicRHI->RemoveImGuiTexture(image.id);
@@ -172,19 +171,16 @@ namespace CE::Widgets
 				return {};
 			}
 		}
-       
         
         CTextureID textureId = RHI::gDynamicRHI->AddImGuiTexture(texture, imageSampler);
         if (textureId == nullptr)
         {
-            //RHI::gDynamicRHI->DestroySampler(sampler);
             RHI::gDynamicRHI->DestroyTexture(texture);
 			return {};
         }
 		
 		tex.id = textureId;
 		tex.texture = texture;
-		//tex.textureSampler = sampler;
         
 		loadedImages[imageResource->GetFullPath()] = tex;
 		return tex;
