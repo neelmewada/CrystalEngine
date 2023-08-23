@@ -14,12 +14,6 @@ namespace CE::Editor
 		Name packagePath{};
 
 		FIELD()
-		Name sourcePath{}; // Source asset path, relative to the project directory
-
-		FIELD()
-		Name assetClass{};
-
-		FIELD()
 		BinaryBlob thumbnailPNG;
 
 	};
@@ -32,6 +26,8 @@ namespace CE::Editor
 
 		AssetCache();
 		virtual ~AssetCache();
+
+		void AddThumbnailCache(const Name& packagePath, const BinaryBlob& thumbnail);
 
 	protected:
 

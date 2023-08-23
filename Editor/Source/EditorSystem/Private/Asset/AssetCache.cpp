@@ -18,6 +18,11 @@ namespace CE::Editor
 
 	}
 
+    void AssetCache::AddThumbnailCache(const Name& packagePath, const BinaryBlob& thumbnail)
+    {
+
+    }
+
 	void AssetCache::OnAfterDeserialize()
 	{
 		Super::OnAfterDeserialize();

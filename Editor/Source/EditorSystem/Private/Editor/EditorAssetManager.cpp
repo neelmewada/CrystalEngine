@@ -129,7 +129,7 @@ namespace CE::Editor
 		{
 			if (!importersInProgress[i]->IsImportInProgress())
 			{
-				importersInProgress[i]->RequestDestroy();
+				importersInProgress[i]->Destroy();
 				importersInProgress.RemoveAt(i);
 			}
 		}
@@ -183,8 +183,29 @@ namespace CE::Editor
 			sourcePathsToProcess[assetImporter].Add(sourcePath);
 			productPaths[assetImporter].Add(productAssetPath);
 
-			Object::Bind(assetImporter, MEMBER_FUNCTION(AssetImporter, OnAssetImportResult),
-				this, MEMBER_FUNCTION(Self, OnAssetImportResult));
+			Object::Bind(assetImporter, MEMBER_FUNCTION(AssetImporter, OnAssetImportResult), 
+				[=](bool success, IO::Path sourcePath, Name packageName) -> void
+				{
+					auto sourcePathString = sourcePath.GetString().Replace({ '\\' }, '/');
+					if (!sourcePathString.StartsWith("/"))
+						sourcePathString = "/" + sourcePathString;
+
+					mutex.Lock();
+					mainThreadQueue.PushBack([=]()
+						{
+							if (success)
+							{
+								AssetRegistry::Get()->OnAssetImported(packageName, sourcePathString);
+								BinaryBlob thumbnail{};
+								if (assetImporter->GenerateThumbnail(packageName, thumbnail))
+								{
+									
+								}
+								thumbnail.Free();
+							}
+						});
+					mutex.Unlock();
+				});
 		}
 
 		for (auto [importer, sourcePaths] : sourcePathsToProcess)
@@ -208,7 +229,10 @@ namespace CE::Editor
 		mutex.Lock();
 		mainThreadQueue.PushBack([=]()
 			{
-				AssetRegistry::Get()->OnAssetImported(packageName, sourcePathString);
+				if (success)
+				{
+					AssetRegistry::Get()->OnAssetImported(packageName, sourcePathString);
+				}
 			});
 		mutex.Unlock();
 	}

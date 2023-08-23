@@ -19,6 +19,8 @@ namespace CE
 		BinaryBlob(const BinaryBlob& copy);
 		BinaryBlob& operator=(const BinaryBlob& copy);
 
+		~BinaryBlob();
+
 		BinaryBlob(BinaryBlob&& move) noexcept;
 
 		void Free();

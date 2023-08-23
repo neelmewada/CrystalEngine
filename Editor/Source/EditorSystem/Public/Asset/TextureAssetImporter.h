@@ -12,6 +12,8 @@ namespace CE::Editor
 
 		//Name ImportSourceAsset2(const IO::Path& sourceAssetPath, const IO::Path& productAssetPath = {}, bool linkSourceAsset = true);
 
+		bool GenerateThumbnail(const Name& packagePath, BinaryBlob& outThumbnailPNG) override;
+
 	protected:
 
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourcePaths, const Array<IO::Path>& productPaths) override;

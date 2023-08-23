@@ -306,6 +306,12 @@ namespace CE::Editor
 		success = true;
 	}
 
+	bool TextureAssetImporter::GenerateThumbnail(const Name& packagePath, BinaryBlob& outThumbnailPNG)
+	{
+
+		return false;
+	}
+
 	Array<AssetImportJob*> TextureAssetImporter::CreateImportJobs(const Array<IO::Path>& sourcePaths, const Array<IO::Path>& productPaths)
 	{
 		Array<AssetImportJob*> result{};

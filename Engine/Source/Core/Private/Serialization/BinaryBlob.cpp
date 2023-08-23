@@ -31,6 +31,11 @@ namespace CE
 		return *this;
 	}
 
+	BinaryBlob::~BinaryBlob()
+	{
+		Free();
+	}
+
 	BinaryBlob::BinaryBlob(BinaryBlob&& move) noexcept
 	{
 		isAllocated = move.isAllocated;

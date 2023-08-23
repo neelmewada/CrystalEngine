@@ -23,6 +23,8 @@ namespace CE::Editor
 		CE_SIGNAL(OnAssetImportResult, bool, IO::Path, Name);
 
 		inline bool IsImportInProgress() { return numJobsInProgress > 0; }
+
+		virtual bool GenerateThumbnail(const Name& packagePath, BinaryBlob& outThumbnailPNG) = 0;
         
     protected:
 
