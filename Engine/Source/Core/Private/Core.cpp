@@ -23,12 +23,13 @@ namespace CE
 
     void CoreModule::StartupModule()
     {
+		gConfigCache = new ConfigCache();
+
 #if PAL_TRAIT_BUILD_EDITOR
         if (gProjectPath.IsEmpty()) // Editor: gProjectPath should be set before loading Core
             gProjectPath = PlatformDirectories::GetEngineRootDir();
 
-		// Load Configs cache (not needed at Runtime)
-		gConfigCache = new ConfigCache();
+		// Load .ini configs into cache (not needed at Runtime)
 		gConfigCache->LoadStartupConfigs();
 #else
         gProjectPath = PlatformDirectories::GetGameRootDir(); // Runtime: gProjectPath is always the install directory
