@@ -1,11 +1,11 @@
 #pragma once
 
-namespace CE
+namespace CE::Editor
 {
 	STRUCT()
-	struct SYSTEM_API AssetCacheEntry
+	struct EDITORSYSTEM_API AssetThumbnailCacheEntry
 	{
-		CE_STRUCT(AssetCacheEntry)
+		CE_STRUCT(AssetThumbnailCacheEntry)
 	public:
 
 		void Release();
@@ -17,12 +17,15 @@ namespace CE
 		Name sourcePath{}; // Source asset path, relative to the project directory
 
 		FIELD()
+		Name assetClass{};
+
+		FIELD()
 		BinaryBlob thumbnailPNG;
 
 	};
 
     CLASS()
-	class SYSTEM_API AssetCache : public Object
+	class EDITORSYSTEM_API AssetCache : public Object
 	{
 		CE_CLASS(AssetCache, Object)
 	public:
@@ -36,11 +39,11 @@ namespace CE
 		void OnBeforeSerialize() override;
 
 		FIELD()
-		Array<AssetCacheEntry> savedEntries{};
+		Array<AssetThumbnailCacheEntry> thumbnailCache{};
 
-		
+		HashMap<Name, AssetThumbnailCacheEntry> cachedThumbnailsByPath;
 	};
 
-} // namespace CE
+} // namespace CE::Editor
 
 #include "AssetCache.rtti.h"

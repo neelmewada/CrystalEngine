@@ -492,7 +492,7 @@ namespace CE
 
 	const Object* ClassType::GetDefaultInstance()
 	{
-		//LockGuard<RecursiveMutex> lock{ rttiMutex };
+		// TODO: In runtime builds, CDI's are serialized directly instead of loading config files
 
 		if (defaultInstance == nullptr)
 		{

@@ -114,6 +114,30 @@ namespace CE
 			else
 				*stream << value->GetTypeName().GetString();
 		}
+		else if (fieldTypeId == TYPEID(ClassType))
+		{
+			ClassType* value = field->GetFieldValue<ClassType*>(rawInstance);
+			if (value == nullptr)
+				*stream << "";
+			else
+				*stream << value->GetTypeName().GetString();
+		}
+		else if (fieldTypeId == TYPEID(StructType))
+		{
+			StructType* value = field->GetFieldValue<StructType*>(rawInstance);
+			if (value == nullptr)
+				*stream << "";
+			else
+				*stream << value->GetTypeName().GetString();
+		}
+		else if (fieldTypeId == TYPEID(EnumType))
+		{
+			EnumType* value = field->GetFieldValue<EnumType*>(rawInstance);
+			if (value == nullptr)
+				*stream << "";
+			else
+				*stream << value->GetTypeName().GetString();
+		}
         else if (field->IsArrayField())
         {
             auto& array = field->GetFieldValue<Array<u8>>(rawInstance);
@@ -189,11 +213,19 @@ namespace CE
             auto firstField = structType->GetFirstField();
 
             FieldSerializer fieldSerializer{ firstField, structInstance };
+			structType->OnBeforeSerialize(structInstance);
+
             while (fieldSerializer.HasNext())
             {
                 fieldSerializer.WriteNext(stream);
             }
         }
+		else if (fieldDeclarationType->IsEnum())
+		{
+			auto enumType = (EnumType*)fieldDeclarationType;
+
+			*stream << field->GetFieldEnumValue(rawInstance);
+		}
         
         u64 curPos = stream->GetCurrentPosition();
         auto dataSize = (u32)(stream->GetCurrentPosition() - dataStartPos);
@@ -358,6 +390,7 @@ namespace CE
         }
 
         TypeId fieldTypeId = field->GetTypeId();
+		auto fieldDeclarationType = field->GetDeclarationType();
 		auto underlyingTypeId = field->GetUnderlyingTypeId();
 		auto underlyingType = field->GetUnderlyingType();
 
@@ -426,6 +459,27 @@ namespace CE
 			{
 				subClassType = nullptr;
 			}
+		}
+		else if (fieldTypeId == TYPEID(ClassType))
+		{
+			String typeName{};
+			*stream >> typeName;
+			ClassType* value = ClassType::FindClass(typeName);
+			field->SetFieldValue(rawInstance, value);
+		}
+		else if (fieldTypeId == TYPEID(StructType))
+		{
+			String typeName{};
+			*stream >> typeName;
+			StructType* value = StructType::FindStruct(typeName);
+			field->SetFieldValue(rawInstance, value);
+		}
+		else if (fieldTypeId == TYPEID(EnumType))
+		{
+			String typeName{};
+			*stream >> typeName;
+			EnumType* value = EnumType::FindEnum(typeName);
+			field->SetFieldValue(rawInstance, value);
 		}
         else if (field->IsArrayField())
         {
@@ -518,8 +572,18 @@ namespace CE
                 {
                     deserializer.ReadNext(stream);
                 }
+
+				structType->OnAfterDeserialize(structInstance);
             }
         }
+		else if (fieldDeclarationType->IsEnum())
+		{
+			auto enumType = (EnumType*)fieldDeclarationType;
+
+			s64 enumValue = 0;
+			*stream >> enumValue;
+			field->SetFieldEnumValue(rawInstance, enumValue);
+		}
 
         return true;
     }

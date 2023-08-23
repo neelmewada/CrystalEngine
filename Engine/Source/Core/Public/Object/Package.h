@@ -33,8 +33,6 @@ namespace CE
 
 	};
 
-	typedef Name PackagePath;
-
 	class CORE_API Package : public Object
 	{
 		CE_CLASS(Package, CE::Object)
@@ -44,9 +42,12 @@ namespace CE
 
 		// - Static API -
 
-		static IO::Path GetPackagePath(const PackagePath& packageName);
+		static IO::Path GetPackagePath(const Name& packageName);
 
-		static Package* LoadPackage(Package* outer, const PackagePath& packageName, LoadFlags loadFlags = LOAD_Default);
+		static bool DestroyLoadedPackage(const Name& packageName);
+		static void DestroyAllPackages();
+
+		static Package* LoadPackage(Package* outer, const Name& packageName, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadFlags loadFlags = LOAD_Default);
 		static Package* LoadPackage(Package* outer, const IO::Path& fullPackageFilePath, LoadPackageResult& outResult, LoadFlags loadFlags = LOAD_Default);
         
@@ -159,6 +160,8 @@ namespace CE
 		IO::Path fullPackagePath{};
 
 		static HashMap<Name, Package*> loadedPackages;
+
+		friend class CoreModule;
 	};
 
 } // namespace CE

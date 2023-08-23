@@ -296,6 +296,32 @@ namespace CE
 		static HashMap<void*, Array<SignalBinding>> outgoingBindingsMap;
 		static HashMap<void*, Array<SignalBinding>> incomingBindingsMap;
     };
+
+	template<typename T, typename = void>
+	struct THasImplementSignalsFunction : TFalseType
+	{};
+
+	template<typename T>
+	struct THasImplementSignalsFunction<T, std::void_t<decltype(std::declval<T>().__implement_signals)>> : TTrueType
+	{};
+
+	template<typename T, bool = THasImplementSignalsFunction<T>::Value>
+	struct TImplementSignals : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value>
+	{
+
+	};
+
+	template<typename T>
+	struct TImplementSignals<T, false> : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value>
+	{
+
+	};
+
+	template<typename T>
+	struct TImplementSignals<T, true> : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value or T::__implement_signals>
+	{
+
+	};
     
 } // namespace CE
 

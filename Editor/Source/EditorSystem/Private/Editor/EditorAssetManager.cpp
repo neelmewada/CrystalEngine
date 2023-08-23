@@ -21,11 +21,25 @@ namespace CE::Editor
 	{
 		Super::Initialize();
 
-		
+		cachePackage = Package::LoadPackage(nullptr, Name("/Temp/AssetCache"));
+		if (cachePackage == nullptr)
+			cachePackage = CreateObject<Package>(nullptr, "/Temp/AssetCache");
+		cache = cachePackage->LoadObject<AssetCache>();
+		if (cache == nullptr)
+			cache = CreateObject<AssetCache>(cachePackage, "Cache");
+
+		assetRegistry->listener = this;
 	}
 
 	void EditorAssetManager::Shutdown()
 	{
+		assetRegistry->listener = nullptr;
+
+		Package::SavePackage(cachePackage, nullptr);
+		cachePackage->Destroy();
+		cache = nullptr;
+		cachePackage = nullptr;
+
 		Super::Shutdown();
 	}
 

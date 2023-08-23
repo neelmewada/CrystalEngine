@@ -31,12 +31,7 @@ namespace CE
 
 	void AssetRegistry::Shutdown()
 	{
-		if (cachePackage != nullptr)
-		{
-			Package::SavePackage(cachePackage, nullptr);
-			cachePackage->Destroy();
-		}
-		cachePackage = nullptr;
+		
 	}
 
 	AssetRegistry* AssetRegistry::Get()
@@ -167,13 +162,12 @@ namespace CE
 			}
 		}
 
-		if (cache != nullptr)
-		{
-			
-		}
-
 		load->RequestDestroy();
 
+		if (listener != nullptr)
+			listener->OnAssetImported(packageName, sourcePath);
+
+		onAssetImported.Broadcast(packageName);
 		onAssetRegistryModified.Broadcast();
 	}
 
@@ -263,16 +257,6 @@ namespace CE
 			fileWatcher.Watch();
 #endif
 		}
-
-#if PAL_TRAIT_BUILD_EDITOR
-		// Load cache if it exists
-		if (cachePackage == nullptr)
-			cachePackage = Package::LoadPackage(nullptr, Name("/Temp/AssetCache"));
-		// Or create new if it doesn't
-		if (cachePackage == nullptr)
-			cachePackage = CreateObject<Package>(nullptr, "/Temp/AssetCache");
-
-#endif
 
 		cacheInitialized = true;
 	}

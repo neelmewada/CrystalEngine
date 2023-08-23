@@ -5,7 +5,7 @@ namespace CE::Editor
 	class AssetImporter;
 
     CLASS()
-	class EDITORSYSTEM_API EditorAssetManager : public AssetManager
+	class EDITORSYSTEM_API EditorAssetManager : public AssetManager, IAssetRegistryListener
 	{
 		CE_CLASS(EditorAssetManager, AssetManager)
 	public:
@@ -35,6 +35,9 @@ namespace CE::Editor
 		f32 waitToImportSourceAssets = 0;
 
 		int numAssetsBeingImported = 0;
+
+		Package* cachePackage = nullptr;
+		AssetCache* cache = nullptr;
 
 		Queue<Delegate<void(void)>> mainThreadQueue{};
 		Mutex mutex{};

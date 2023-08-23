@@ -33,11 +33,17 @@ namespace CE::Editor
 		mutex.Unlock();
 	}
 
+	void AssetImporter::OnAssetThumbnaiJobFinish(bool success, const Name& packageName)
+	{
+
+	}
+
 	void AssetImportJob::Finish()
 	{
 		Super::Finish();
 
 		importer->OnAssetImportJobFinish(success, sourcePath, outPackagePath);
 	}
+
 
 } // namespace CE::Editor

@@ -20,7 +20,9 @@ namespace CE
 		PNG,
 		HDR, EXR,
 		BC1,
+		BC3,
 		BC4,
+		BC5,
 		BC6H,
 		BC7,
 	};
@@ -77,7 +79,7 @@ namespace CE
 
 #if PAL_TRAIT_BUILD_EDITOR
 		// Encodes raw image data to BCn format (BC7, BC1, etc)
-		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, int numThreads = 0);
+		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat toBCnFormat, float quality = 0.25f);
 #endif
 
         // - Public API -
@@ -91,6 +93,7 @@ namespace CE
         inline u32 GetHeight() const { return y; }
         inline u32 GetNumChannels() const { return numChannels; }
 		inline CMImageFormat GetFormat() const { return format; }
+		inline CMImageSourceFormat GetSourceFormat() const { return sourceFormat; }
 		inline u32 GetBitDepth() const { return bitDepth; }
 		inline u32 GetBitsPerPixel() const { return bitsPerPixel; }
 

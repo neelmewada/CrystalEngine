@@ -99,6 +99,8 @@ namespace CE
         VkCommandPool gfxCommandPool = nullptr;
 
         HashMap<u32, VkCommandPool> queueFamilyToCmdPool{};
+
+		SharedMutex mainThreadMutex{};
     };
     
 } // namespace CE

@@ -11,6 +11,7 @@
 
 #include "Asset/AssetImporter.h"
 #include "Asset/AssetDefinition.h"
+#include "Asset/AssetCache.h"
 
 #include "Asset/TextureAssetImporter.h"
 #include "Asset/TextureAssetDefinition.h"

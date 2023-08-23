@@ -71,7 +71,7 @@ namespace CE
 
 	static Package* LoadSettingsPackage()
 	{
-		return Package::LoadPackage(nullptr, PackagePath("/Game/Settings"), LOAD_Full);
+		return Package::LoadPackage(nullptr, Name("/Game/Settings"), LOAD_Full);
 	}
 
     CORE_API Package* GetSettingsPackage()

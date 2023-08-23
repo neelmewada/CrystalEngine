@@ -132,6 +132,16 @@ namespace CE
         static EnumType* FindEnumByName(Name enumName);
         static EnumType* FindEnumById(TypeId enumId);
 
+		inline static EnumType* FindEnum(const Name& enumName)
+		{
+			return FindEnumByName(enumName);
+		}
+
+		inline static EnumType* FindEnum(TypeId enumId)
+		{
+			return FindEnumById(enumId);
+		}
+
     private:
         TypeId underlyingTypeId;
         TypeId typeId;

@@ -6,6 +6,10 @@ namespace CE
 	namespace Editor { class EditorAssetManager; }
 #endif
 
+	struct IAssetRegistryListener
+	{
+		virtual void OnAssetImported(const Name& packageName, const Name& sourcePath = "") {}
+	};
 
 	CLASS()
 	class SYSTEM_API AssetRegistry : public Object, IO::IFileWatchListener
@@ -68,6 +72,7 @@ namespace CE
 		// Events
 
 		MultiCastDelegate<void(void)> onAssetRegistryModified{};
+		MultiCastDelegate<void(const Name&)> onAssetImported{};
 
 	private:
 
@@ -90,10 +95,9 @@ namespace CE
 		
 		Mutex mutex{};
 
-		// Asset Registry State
+		IAssetRegistryListener* listener = nullptr;
 
-		Package* cachePackage = nullptr;
-		AssetCache* cache = nullptr;
+		// Asset Registry State
 
 		Array<AssetData*> allAssetDatas{};
 

@@ -257,6 +257,12 @@ namespace CE
 
 	};
 
+	template<typename T>
+	struct TIsCopyConstructible : TBoolConst<std::is_copy_constructible<T>::value>
+	{
+
+	};
+
 	template<typename T, typename = void>
 	struct THasGetHashFunction : TFalseType
 	{
@@ -292,7 +298,6 @@ namespace CE
 	{
 		static void OnAfterDeserialize(T* instance) { return instance->OnAfterDeserialize(); }
 	};
-
 
 } // namespace CE::Traits
 

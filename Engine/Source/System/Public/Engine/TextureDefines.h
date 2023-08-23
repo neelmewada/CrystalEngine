@@ -35,6 +35,7 @@ namespace CE
 		BC1,
 		BC3,
 		BC4,
+		BC5,
 		BC6H,
 		BC7,
 	};
@@ -57,22 +58,23 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(TextureSourceCompressionFormat);
 
+	SYSTEM_API bool TextureSourceCompressionFormatIsBCn(TextureSourceCompressionFormat sourceCompressionFormat);
 
 	ENUM()
 	enum class TextureCompressionSettings : int
 	{
 		ECONST(Display = "Default (Color BC1/3)")
-		Default,
+		Default, // Color BC1/3
 		ECONST(Display = "Normal Map (BC5)")
-		NormalMap,
+		NormalMap, // BC5
 		ECONST(Display = "Grayscale (R8/16 or BC4)")
-		Grayscale,
+		Grayscale, // R8/16 or BC4
 		ECONST(Display = "HDR (BC6H)")
-		HDR,
+		HDR, // BC6H
 		ECONST(Display = "HDR Uncompressed (RGBA16 Half)")
-		HDRUncompressed,
+		HDRUncompressed, // RGBAHalf
 		ECONST(Display = "BC7 RGBA")
-		BC7,
+		BC7, // BC7
 	};
 	ENUM_CLASS_FLAGS(TextureCompressionSettings);
 

@@ -17,6 +17,7 @@ namespace CE::Editor
 		void ImportSourceAssets(const Array<IO::Path>& sourcePaths, const Array<IO::Path>& productPaths);
 
 		void OnAssetImportJobFinish(bool success, const IO::Path& sourcePath, const Name& packageName);
+		void OnAssetThumbnaiJobFinish(bool success, const Name& packageName);
 
 		/// Params: bool success, IO::Path sourcePath, Name outPackageName
 		CE_SIGNAL(OnAssetImportResult, bool, IO::Path, Name);

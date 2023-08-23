@@ -341,7 +341,6 @@ namespace CE
 		case CE::CMImageFormat::RGBA:
 			if (bitDepth == 8)
 				return CMP_FORMAT_BC7;
-		default:
 			break;
 		}
 
@@ -361,6 +360,157 @@ namespace CE
 		}
 		return CMImageSourceFormat::None;
 	}
+
+	static CMP_FORMAT CalculateDestinationCMPFormat(CMImageFormat format, CMImageSourceFormat outputFormat, u32 bitDepth, u32 bitsPerPixel)
+	{
+		switch (outputFormat)
+		{
+		case CMImageSourceFormat::BC1:
+			return CMP_FORMAT_BC1;
+		case CMImageSourceFormat::BC3:
+			return CMP_FORMAT_BC3;
+		case CMImageSourceFormat::BC4:
+			return CMP_FORMAT_BC4;
+		case CMImageSourceFormat::BC5:
+			return CMP_FORMAT_BC5;
+		case CMImageSourceFormat::BC6H:
+			return CMP_FORMAT_BC6H;
+		case CMImageSourceFormat::BC7:
+			return CMP_FORMAT_BC7;
+		}
+
+		switch (format)
+		{
+		case CMImageFormat::R:
+			if (bitDepth == 8)
+				return CMP_FORMAT_R_8;
+			else if (bitDepth == 16)
+				return CMP_FORMAT_R_16;
+			break;
+		case CMImageFormat::RG:
+			if (bitDepth == 8)
+				return CMP_FORMAT_RG_8;
+			else if (bitDepth == 16)
+				return CMP_FORMAT_RG_16;
+			else if (bitDepth == 32)
+				return CMP_FORMAT_RG_32F;
+			break;
+		case CMImageFormat::RGB:
+			if (bitDepth == 8)
+				return CMP_FORMAT_RGB_888;
+			else if (bitDepth == 32)
+				return CMP_FORMAT_RGB_32F;
+			break;
+		case CMImageFormat::RGBA:
+			if (bitDepth == 8)
+				return CMP_FORMAT_RGBA_8888;
+			else if (bitDepth == 16)
+				return CMP_FORMAT_RGBA_16F;
+			else if (bitDepth == 32)
+				return CMP_FORMAT_RGBA_32F;
+			break;
+		}
+		
+		return CMP_FORMAT_Unknown;
+	}
+
+	static bool IsFormatSupported(CMImageFormat pixelFormat, u32 bitDepth, CMImageSourceFormat outputFormat)
+	{
+		switch (pixelFormat)
+		{
+		case CMImageFormat::R:
+			if (outputFormat == CMImageSourceFormat::BC4 && bitDepth == 8)
+				return true;
+			break;
+		case CMImageFormat::RG:
+			if (outputFormat == CMImageSourceFormat::BC5 && bitDepth == 8)
+				return true;
+			break;
+		case CMImageFormat::RGB:
+			if ((outputFormat == CMImageSourceFormat::BC1 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
+				return true;
+			break;
+		case CMImageFormat::RGBA:
+			if ((outputFormat == CMImageSourceFormat::BC3 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
+				return true;
+			break;
+		}
+
+		return false;
+	}
+
+#if PAL_TRAIT_BUILD_EDITOR
+
+	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat destFormat, float quality)
+	{
+		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
+			return false;
+		if ((int)destFormat < (int)CMImageSourceFormat::BC1 ||
+			(int)destFormat > (int)CMImageSourceFormat::BC7)
+			return false;
+		if (!IsFormatSupported(source.format, source.bitDepth, destFormat))
+			return false;
+
+		CMP_Texture src{};
+		src.dwWidth = source.GetWidth();
+		src.dwHeight = source.GetHeight();
+		src.dwSize = sizeof(CMP_Texture);
+		src.format = CMImageFormatToSourceCMPFormat(source.format, source.bitDepth, source.bitsPerPixel);
+		src.pData = (CMP_BYTE*)source.data;
+		src.dwDataSize = source.GetDataSize();
+
+		if (src.format == CMP_FORMAT_Unknown)
+			return false;
+
+		CMP_Texture dest{};
+		dest.dwPitch = 0;
+		dest.dwWidth = source.GetWidth();
+		dest.dwHeight = source.GetHeight();
+		dest.dwSize = sizeof(CMP_Texture);
+		dest.format = CalculateDestinationCMPFormat(source.format, destFormat, source.bitDepth, source.bitsPerPixel);
+		if (dest.format == CMP_FORMAT_Unknown)
+			return false;
+
+		dest.dwDataSize = CMP_CalculateBufferSize(&dest);
+		dest.pData = (CMP_BYTE*)Memory::Malloc(dest.dwDataSize);
+
+		defer(
+			Memory::Free(dest.pData);
+		);
+
+		CMP_CompressOptions options = CMP_CompressOptions();
+		options.dwSize = sizeof(options);
+		options.nEncodeWith = CMP_GPU_HW;
+		options.fquality = quality;
+
+		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
+		if (status != CMP_OK)
+		{
+#if PLATFORM_WINDOWS
+			options.nEncodeWith = CMP_GPU_DXC;
+			status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
+#endif
+			if (status != CMP_OK)
+			{
+				options.nEncodeWith = CMP_GPU_VLK;
+				status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
+			}
+
+			if (status != CMP_OK)
+			{
+				options.nEncodeWith = CMP_HPC;
+				status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
+			}
+
+			CE_LOG(Error, All, "BCn Encoding failed: {}", (int)status);
+			return false;
+		}
+
+		outStream->Write(dest.pData, dest.dwDataSize);
+
+		return true;
+	}
+#endif
 
 	bool CMImage::EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth)
 	{
@@ -463,63 +613,6 @@ namespace CE
 
 		return image;
 	}
-
-#if PAL_TRAIT_BUILD_EDITOR
-	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat& outFormat, int numThreads)
-	{
-		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
-			return false;
-
-		if (numThreads == 0)
-			numThreads = Thread::GetHardwareConcurrency() - 1;
-		if (numThreads < 0)
-			numThreads = 0;
-
-		CMP_Texture src{};
-		src.dwWidth = source.GetWidth();
-		src.dwHeight = source.GetHeight();
-		src.dwSize = sizeof(CMP_Texture);
-		src.format = CMImageFormatToSourceCMPFormat(source.format, source.bitDepth, source.bitsPerPixel);
-		src.pData = (CMP_BYTE*)source.data;
-		src.dwDataSize = source.GetDataSize();
-
-		if (src.format == CMP_FORMAT_Unknown)
-			return false;
-
-		CMP_Texture dest{};
-		dest.dwPitch = 0;
-		dest.dwWidth = source.GetWidth();
-		dest.dwHeight = source.GetHeight();
-		dest.dwSize = sizeof(CMP_Texture);
-		dest.format = CMImageFormatToBCnFormat(source.format, source.bitDepth, source.bitsPerPixel);
-		if (dest.format == CMP_FORMAT_Unknown)
-			return false;
-
-		outFormat = CMPFormatToCMImageSourceFormat(dest.format);
-
-		dest.dwDataSize = CMP_CalculateBufferSize(&dest);
-		dest.pData = (CMP_BYTE*)Memory::Malloc(dest.dwDataSize);
-
-		defer(
-			Memory::Free(dest.pData);
-		);
-
-		CMP_CompressOptions options = CMP_CompressOptions();
-		options.dwSize = sizeof(options);
-		options.dwnumThreads = numThreads;
-		//options.fquality = 0.9f;
-
-		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
-		if (status != CMP_OK)
-		{
-			return false;
-		}
-
-		outStream->Write(dest.pData, dest.dwDataSize);
-
-		return true;
-	}
-#endif
 
     void CMImage::Free()
     {

@@ -26,13 +26,13 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
         if (gProjectPath.IsEmpty()) // Editor: gProjectPath should be set before loading Core
             gProjectPath = PlatformDirectories::GetEngineRootDir();
+
+		// Load Configs cache (not needed at Runtime)
+		gConfigCache = new ConfigCache();
+		gConfigCache->LoadStartupConfigs();
 #else
         gProjectPath = PlatformDirectories::GetGameRootDir(); // Runtime: gProjectPath is always the install directory
 #endif
-		
-        // Load Configs cache
-        gConfigCache = new ConfigCache();
-        gConfigCache->LoadStartupConfigs();
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
     }
@@ -51,8 +51,11 @@ namespace CE
 			gSettingsPackage = nullptr;
 		}
 
-        delete gConfigCache;
-        gConfigCache = nullptr;
+		if (gConfigCache != nullptr)
+		{
+			delete gConfigCache;
+			gConfigCache = nullptr;
+		}
 
         gProjectPath = "";
         

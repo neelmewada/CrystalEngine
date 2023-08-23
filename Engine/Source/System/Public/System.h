@@ -3,7 +3,6 @@
 #include "Core.h"
 
 #include "Asset/AssetData.h"
-#include "Asset/AssetCache.h"
 #include "Asset/AssetRegistry.h"
 
 #include "Engine/AssetManager.h"

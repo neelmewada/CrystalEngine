@@ -4,7 +4,7 @@ namespace CE::Editor
 {
 	class AssetImportJob;
 
-    CLASS()
+    CLASS(Config = Engine)
 	class EDITORSYSTEM_API TextureAssetImporter : public AssetImporter
 	{
 		CE_CLASS(TextureAssetImporter, AssetImporter)
@@ -16,6 +16,14 @@ namespace CE::Editor
 
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourcePaths, const Array<IO::Path>& productPaths) override;
 
+		FIELD(Config)
+		b8 compressByDefault = false;
+
+		FIELD(Config)
+		b8 highQualityCompression = false;
+
+		FIELD(Config)
+		f32 compressionQuality = 0.05f;
 	};
 
 	class EDITORSYSTEM_API TextureImportJob : public AssetImportJob
@@ -26,6 +34,9 @@ namespace CE::Editor
 
 		void Process() override;
 
+		b8 compressByDefault = false;
+		b8 highQualityCompression = false;
+		f32 compressionQuality = 0.05f;
 	};
 
 } // namespace CE::Editor

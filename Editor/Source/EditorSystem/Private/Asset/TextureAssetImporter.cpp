@@ -68,6 +68,8 @@ namespace CE::Editor
 
 	void TextureImportJob::Process()
 	{
+		success = false;
+
 		if (outPath.IsEmpty())
 			outPath = sourcePath.ReplaceExtension(".casset");
 		if (!sourcePath.Exists())
@@ -166,24 +168,124 @@ namespace CE::Editor
 		texture->depth = 1;
 		texture->filter = TextureFilter::Linear;
 
-		// Store in BCn format if possible
-		MemoryStream memStream = MemoryStream(1024);
-		memStream.SetBinaryMode(true);
-		memStream.SetAutoResizeIncrement(512);
+		auto imageFormat = image.GetFormat();
+		auto imageBitDepth = image.GetBitDepth();
+		CMImageSourceFormat inputSourceFormat = image.GetSourceFormat();
+		CMImageSourceFormat outputSourceFormat = image.GetSourceFormat();
+		texture->compression = TextureCompressionSettings::Default;
+		
+		switch (imageFormat)
+		{
+		case CMImageFormat::R:
+			if (imageBitDepth == 8 && compressByDefault)
+			{
+				outputSourceFormat = CMImageSourceFormat::BC4;
+				texture->compression = TextureCompressionSettings::Grayscale;
+				sourceCompressionFormat = TextureSourceCompressionFormat::BC4;
+				texture->pixelFormat = TextureFormat::BC4;
+			}
+			else
+			{
+				if (imageBitDepth == 8)
+					texture->pixelFormat = TextureFormat::R8;
+				else if (imageBitDepth == 16)
+					texture->pixelFormat = TextureFormat::R16;
+				else if (imageBitDepth == 32)
+					texture->pixelFormat = TextureFormat::RFloat;
+				else
+					return;
+			}
+			break;
+		case CMImageFormat::RG:
+			if (imageBitDepth == 8 && compressByDefault)
+			{
+				outputSourceFormat = CMImageSourceFormat::BC5;
+				texture->compression = TextureCompressionSettings::NormalMap;
+				sourceCompressionFormat = TextureSourceCompressionFormat::BC5;
+				texture->pixelFormat = TextureFormat::BC5;
+			}
+			else
+			{
+				if (imageBitDepth == 8)
+					texture->pixelFormat = TextureFormat::RG16;
+				else if (imageBitDepth == 16)
+					texture->pixelFormat = TextureFormat::RG32;
+				else if (imageBitDepth == 32)
+					texture->pixelFormat = TextureFormat::RGFloat;
+				else
+					return;
+			}
+			break;
+		case CMImageFormat::RGB:
+			if (imageBitDepth == 8 && compressByDefault)
+			{
+				outputSourceFormat = CMImageSourceFormat::BC1;
+				texture->compression = TextureCompressionSettings::Default;
+				sourceCompressionFormat = TextureSourceCompressionFormat::BC1;
+				texture->pixelFormat = TextureFormat::BC1;
+			}
+			else
+			{
+				if (imageBitDepth == 8)
+					texture->pixelFormat = TextureFormat::RGB24;
+				else
+					return;
+			}
+			break;
+		case CMImageFormat::RGBA:
+			if (imageBitDepth == 8 && compressByDefault)
+			{
+				outputSourceFormat = highQualityCompression ? CMImageSourceFormat::BC7 : CMImageSourceFormat::BC3;
+				texture->compression = highQualityCompression ? TextureCompressionSettings::BC7 : TextureCompressionSettings::Default;
+				sourceCompressionFormat = highQualityCompression ? TextureSourceCompressionFormat::BC7 : TextureSourceCompressionFormat::BC3;
+				texture->pixelFormat = highQualityCompression ? TextureFormat::BC7 : TextureFormat::BC3;
+			}
+			else
+			{
+				if (imageBitDepth == 8)
+					texture->pixelFormat = TextureFormat::RGBA32;
+				else if (imageBitDepth == 16)
+					texture->pixelFormat = TextureFormat::RGBAHalf;
+				else if (imageBitDepth == 32)
+					texture->pixelFormat = TextureFormat::RGBAFloat;
+				else
+					return;
+			}
+			break;
+		default:
 
-		texture->pixelFormat = GetTextureFormatFromCMImage(image);
+			break;
+		}
+
 		if (texture->pixelFormat == TextureFormat::None)
 		{
 			//CE_LOG(Error, All, "Invalid number of channels: {}", image.GetNumChannels());
 			return;
 		}
 
-		// Save as original (only PNG for now)
-		FileStream fileData = FileStream(sourcePath, Stream::Permissions::ReadOnly);
-		texture->source.rawData.LoadData(&fileData);
+		// BCn compression
+		if (TextureSourceCompressionFormatIsBCn(sourceCompressionFormat))
+		{
+			MemoryStream memStream = MemoryStream(1024);
+			memStream.SetBinaryMode(true);
+			memStream.SetAutoResizeIncrement(1024);
+			bool result = CMImage::EncodeToBCn(image, &memStream, outputSourceFormat, compressionQuality);
+			if (!result)
+			{
+				return;
+			}
+			memStream.Seek(0, SeekMode::Begin);
+			texture->source.rawData.LoadData(memStream.GetRawDataPtr(), memStream.GetLength());
+		}
+		else
+		{
+			FileStream fileStream = FileStream(sourcePath, Stream::Permissions::ReadOnly);
+			fileStream.SetBinaryMode(true);
+			texture->source.rawData.LoadData(&fileStream);
+		}
+
 		texture->source.sourcePixelFormat = texture->pixelFormat;
 		texture->source.sourceCompression = sourceCompressionFormat;
-		texture->compression = GetPreferredSourceCompressionFormat(image);
 		texture->addressMode = TextureAddressMode::Wrap;
 
 		FieldType* sourceAssetPathField = texture->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String));
@@ -197,6 +299,8 @@ namespace CE::Editor
 		{
 			return;
 		}
+		
+		// TODO: Generate thumbnail
 
 		outPackagePath = packageName;
 		success = true;
@@ -212,7 +316,12 @@ namespace CE::Editor
 			if (i < productPaths.GetSize() - 1)
 				productPath = productPaths[i];
 
-			result.Add(new TextureImportJob(this, sourcePaths[i], productPath));
+			auto job = new TextureImportJob(this, sourcePaths[i], productPath);
+			job->compressByDefault = compressByDefault;
+			job->highQualityCompression = highQualityCompression;
+			job->compressionQuality = compressionQuality;
+
+			result.Add(job);
 		}
 
 		return result;

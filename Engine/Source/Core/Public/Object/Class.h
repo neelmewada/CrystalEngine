@@ -65,6 +65,8 @@ namespace CE
 
 			virtual void OnAfterDeserialize(void* instance) = 0;
 			virtual void OnBeforeSerialize(void* instance) = 0;
+
+			virtual bool ImplementSignals() = 0;
 		};
 	}
 
@@ -251,6 +253,17 @@ namespace CE
 			{
 				Impl->OnBeforeSerialize(instance);
 			}
+		}
+
+		/// To be called only on struct types
+		bool StructImplementsSignals()
+		{
+			if (Impl != nullptr)
+			{
+				return Impl->ImplementSignals();
+			}
+
+			return false;
 		}
 
 		String GetStructPackage() const

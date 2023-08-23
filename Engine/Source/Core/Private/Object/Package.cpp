@@ -16,21 +16,21 @@ namespace CE
         loadedPackages.Remove(packageName);
 	}
 
-	IO::Path Package::GetPackagePath(const PackagePath& packageName)
+	IO::Path Package::GetPackagePath(const Name& packageName)
 	{
 		if (!packageName.IsValid())
 			return {};
 		String packageNameStr = packageName.GetString();
 
-		if (packageNameStr.StartsWith("/Engine")) // Example: /Engine/Assets/Textures/Noise/Perlin/Perlin04
+		if (packageNameStr.StartsWith("/Engine/") || packageNameStr == "/Engine") // Example: /Engine/Assets/Textures/Noise/Perlin/Perlin04
 		{
 			return PlatformDirectories::GetEngineRootDir() / (packageNameStr.GetSubstring(1) + ".casset");
 		}
-		else if (packageNameStr.StartsWith("/Game"))
+		else if (packageNameStr.StartsWith("/Game/") || packageNameStr == "/Game")
 		{
 			return gProjectPath / (packageNameStr.GetSubstring(1) + ".casset");
 		}
-		else if (packageNameStr.StartsWith("/Temp"))
+		else if (packageNameStr.StartsWith("/Temp/") || packageNameStr == "/Temp")
 		{
 			return gProjectPath / (packageNameStr.GetSubstring(1) + ".temp");
 		}
@@ -38,7 +38,30 @@ namespace CE
 		return PlatformDirectories::GetAppRootDir() / (packageNameStr.GetSubstring(1) + ".casset");
 	}
 
-	Package* Package::LoadPackage(Package* outer, const PackagePath& packageName, LoadFlags loadFlags)
+	bool Package::DestroyLoadedPackage(const Name& packageName)
+	{
+		if (!loadedPackages.KeyExists(packageName))
+			return false;
+		loadedPackages[packageName]->Destroy(); // Destroying package automatically removes it from the HashMap.
+		return true;
+	}
+
+	void Package::DestroyAllPackages()
+	{
+		Array<Package*> packagesToDestroy{};
+		for (auto& [packageName, package] : loadedPackages)
+		{
+			packagesToDestroy.Add(package);
+		}
+		for (auto package : packagesToDestroy)
+		{
+			package->Destroy();
+		}
+		packagesToDestroy.Clear();
+		loadedPackages.Clear();
+	}
+
+	Package* Package::LoadPackage(Package* outer, const Name& packageName, LoadFlags loadFlags)
 	{
 		return LoadPackage(outer, GetPackagePath(packageName), loadFlags);
 	}
@@ -59,7 +82,7 @@ namespace CE
 		if (!path.Exists())
 		{
 			outResult = LoadPackageResult::PackageNotFound;
-			CE_LOG(Error, All, "Package not found at: {}", path);
+			//CE_LOG(Error, All, "Package not found at: {}", path);
 			return nullptr;
 		}
 		if (path.IsDirectory())
@@ -103,6 +126,12 @@ namespace CE
 		{
 			path = path.GetString() + ".casset";
 		}
+
+		if (!path.GetParentPath().Exists())
+		{
+			IO::Path::CreateDirectories(path.GetParentPath());
+		}
+
 		if (package == nullptr)
 		{
 			CE_LOG(Error, All, "SavePackage() passed with NULL package!");

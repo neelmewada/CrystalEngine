@@ -17,7 +17,7 @@ namespace CE
 
 	Object::~Object()
 	{
-		// Never call delete directly. Use RequestDestroy() instead
+		// Never call delete directly. Use Destroy() instead
 	}
 
 	void Object::RequestDestroy()
@@ -165,9 +165,9 @@ namespace CE
 
 	bool Object::IsTransient()
 	{
-		Package* package = GetPackage();
-		if (package != nullptr && package != this && package->IsTransient())
-			return true;
+		//Package* package = GetPackage();
+		//if (package != nullptr && package != this && package->IsTransient())
+		//	return true;
 		return HasAnyObjectFlags(OF_Transient);
 	}
 

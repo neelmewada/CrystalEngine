@@ -19,9 +19,34 @@ namespace CE
 		}
 	}
 
+	BinaryBlob& BinaryBlob::operator=(const BinaryBlob& copy)
+	{
+		Free();
+
+		if (copy.IsValid())
+		{
+			LoadData(copy.data, copy.dataSize);
+		}
+
+		return *this;
+	}
+
+	BinaryBlob::BinaryBlob(BinaryBlob&& move) noexcept
+	{
+		isAllocated = move.isAllocated;
+		flags = move.flags;
+		data = move.data;
+		dataSize = move.dataSize;
+
+		move.isAllocated = false;
+		move.flags = BLOB_None;
+		move.data = nullptr;
+		move.dataSize = 0;
+	}
+
 	void BinaryBlob::Free()
 	{
-		if (isAllocated)
+		if (isAllocated && data != nullptr)
 		{
 			Memory::Free(data);
 		}
@@ -50,6 +75,12 @@ namespace CE
 
     void BinaryBlob::LoadData(const void* data, u64 dataSize)
     {
+		if (dataSize <= 0)
+		{
+			Free();
+			return;
+		}
+
         Reserve(dataSize);
         memcpy(this->data, data, dataSize);
     }
@@ -80,6 +111,7 @@ namespace CE
 		*stream >> size;
         if (size < 0)
         {
+			this->flags = BLOB_None;
             Free();
             return true;
         }
