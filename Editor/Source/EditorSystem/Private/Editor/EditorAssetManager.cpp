@@ -75,7 +75,10 @@ namespace CE::Editor
 			}
 			else if (thisChange.fileAction == IO::FileAction::Delete) // File deleted
 			{
-
+				if (extension == ".casset") // Product asset deleted
+				{
+					assetRegistry->OnAssetDeleted(pathNameWithoutExtension);
+				}
 			}
 			else if (thisChange.fileAction == IO::FileAction::Modified) // Product asset
 			{
@@ -195,12 +198,14 @@ namespace CE::Editor
 						{
 							if (success)
 							{
-								AssetRegistry::Get()->OnAssetImported(packageName, sourcePathString);
+								assetRegistry->OnAssetImported(packageName, sourcePathString);
+								//AssetRegistry::Get()->OnAssetImported(packageName, sourcePathString);
 								BinaryBlob thumbnail{};
 								if (assetImporter->GenerateThumbnail(packageName, thumbnail))
 								{
 									
 								}
+								assetImporter->numThumbnailsInProgress--;
 								thumbnail.Free();
 							}
 						});

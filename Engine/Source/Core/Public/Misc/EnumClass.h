@@ -1,5 +1,10 @@
 #pragma once
 
+#define ENUM_CLASS(Enum)\
+	inline			 bool  operator==(Enum E, s32 Rhs) { return E == (Enum)Rhs; }\
+	inline			 bool  operator!=(Enum E, s32 Rhs) { return E != (Enum)Rhs; }\
+    inline           bool  operator==(Enum E, s64 Rhs) { return E == (Enum)Rhs; }\
+    inline           bool  operator!=(Enum E, s64 Rhs) { return E != (Enum)Rhs; }
 
 #define ENUM_CLASS_FLAGS(Enum) \
 	inline           Enum& operator|=(Enum& Lhs, Enum Rhs) { return Lhs = (Enum)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); } \
@@ -34,13 +39,13 @@ constexpr bool EnumHasAllFlags(Enum Flags, Enum Contains)
 template<typename Enum>
 constexpr bool EnumHasAnyFlags(Enum Flags, Enum Contains)
 {
-	return ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0;
+	return ( ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0 ) || ( Contains == 0 );
 }
 
 template<typename Enum>
 constexpr bool EnumHasFlag(Enum Flags, Enum Contains)
 {
-	return ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0;
+	return ( ( ( ( __underlying_type(Enum) )Flags ) & ( __underlying_type(Enum) )Contains ) != 0 ) || ( Contains == 0 );
 }
 
 template<typename Enum>

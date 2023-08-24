@@ -140,7 +140,7 @@ namespace CE
 		}
         else if (field->IsArrayField())
         {
-            auto& array = field->GetFieldValue<Array<u8>>(rawInstance);
+            auto& array = const_cast<Array<u8>&>(field->GetFieldValue<Array<u8>>(rawInstance));
             
             auto underlyingType = field->GetUnderlyingType();
             u32 arraySize = field->GetArraySize(rawInstance);
@@ -396,10 +396,11 @@ namespace CE
 
         if (field->IsIntegerField())
         {
+
             if (fieldTypeId == TYPEID(u8))
-                *stream >> field->GetFieldValue<u8>(rawInstance);
+                field->SetFieldValue<u8>(rawInstance, stream->ReadInteger<u8>());
             else if (fieldTypeId == TYPEID(u16))
-                *stream >> field->GetFieldValue<u16>(rawInstance);
+				field->SetFieldValue<u16>(rawInstance, stream->ReadInteger<u16>());
             else if (fieldTypeId == TYPEID(u32))
                 *stream >> field->GetFieldValue<u32>(rawInstance);
             else if (fieldTypeId == TYPEID(u64))

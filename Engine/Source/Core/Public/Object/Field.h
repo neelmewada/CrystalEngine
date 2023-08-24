@@ -98,17 +98,17 @@ namespace CE
 
 		String GetFieldValueAsString(void* instance);
 
-        template<typename T>
-        T& GetFieldValue(void* instance)
-        {
-            return *(T*)((SIZE_T)instance + offset);
-        }
-
 		// Returns pointer to the field's location in memory itself
 		void* GetFieldInstance(void* instance)
 		{
 			return (void*)((SIZE_T)instance + offset);
 		}
+
+		//template<typename T>
+		//T& GetFieldValue(void* instance)
+		//{
+		//	return *(T*)((SIZE_T)instance + offset);
+		//}
 
         template<typename T>
         const T& GetFieldValue(void* instance) const

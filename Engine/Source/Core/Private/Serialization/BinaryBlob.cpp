@@ -132,7 +132,7 @@ namespace CE
         return true;
 	}
 
-    bool BinaryBlob::Serialize(Stream* stream)
+    bool BinaryBlob::Serialize(Stream* stream) const
     {
         if (!IsValid() || stream == nullptr || !stream->IsOpen() || !stream->CanWrite())
             return false;

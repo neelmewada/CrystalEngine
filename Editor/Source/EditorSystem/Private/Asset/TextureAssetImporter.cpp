@@ -299,8 +299,6 @@ namespace CE::Editor
 		{
 			return;
 		}
-		
-		// TODO: Generate thumbnail
 
 		outPackagePath = packageName;
 		success = true;
@@ -308,7 +306,7 @@ namespace CE::Editor
 
 	bool TextureAssetImporter::GenerateThumbnail(const Name& packagePath, BinaryBlob& outThumbnailPNG)
 	{
-
+		CE_LOG(Info, All, "Generating thumbnail: {}", packagePath);
 		return false;
 	}
 

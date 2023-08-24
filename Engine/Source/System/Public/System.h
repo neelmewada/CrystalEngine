@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "CoreRHI.h"
 
 #include "Asset/AssetData.h"
 #include "Asset/AssetRegistry.h"
@@ -11,6 +12,7 @@
 #include "Engine/TextureDefines.h"
 #include "Engine/Texture.h"
 #include "Engine/Texture2D.h"
+#include "Engine/Shader.h"
 
 #include "Engine/Engine.h"
 

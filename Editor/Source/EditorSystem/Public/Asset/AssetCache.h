@@ -14,8 +14,7 @@ namespace CE::Editor
 		Name packagePath{};
 
 		FIELD()
-		BinaryBlob thumbnailPNG;
-
+		BinaryBlob thumbnailPNG{};
 	};
 
     CLASS()

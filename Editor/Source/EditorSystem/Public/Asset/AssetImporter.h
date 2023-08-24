@@ -22,7 +22,7 @@ namespace CE::Editor
 		/// Params: bool success, IO::Path sourcePath, Name outPackageName
 		CE_SIGNAL(OnAssetImportResult, bool, IO::Path, Name);
 
-		inline bool IsImportInProgress() { return numJobsInProgress > 0; }
+		inline bool IsImportInProgress() { return numJobsInProgress > 0 || numThumbnailsInProgress > 0; }
 
 		virtual bool GenerateThumbnail(const Name& packagePath, BinaryBlob& outThumbnailPNG) = 0;
         
@@ -33,9 +33,9 @@ namespace CE::Editor
 		Mutex mutex{};
 
 		int numJobsInProgress = 0;
+		int numThumbnailsInProgress = 0;
 
-	private:
-        
+		friend class EditorAssetManager;
     };
 
 	class EDITORSYSTEM_API AssetImportJob : public Job

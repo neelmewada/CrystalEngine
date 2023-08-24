@@ -34,7 +34,7 @@ namespace CE
 		void LoadData(Stream* fromStream);
 
 		bool Deserialize(Stream* stream);
-        bool Serialize(Stream* stream);
+        bool Serialize(Stream* stream) const;
 
 		inline u8* GetDataPtr() const { return data; }
 		inline u64 GetDataSize() const { return dataSize; }
@@ -49,7 +49,7 @@ namespace CE
 				EnumRemoveFlags(flags, flag);
 		}
 
-		friend inline Stream& operator<<(Stream& stream, BinaryBlob& blob)
+		friend inline Stream& operator<<(Stream& stream, const BinaryBlob& blob)
 		{
 			blob.Serialize(&stream);
 			return stream;

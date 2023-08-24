@@ -9,6 +9,8 @@ namespace CE
 	struct IAssetRegistryListener
 	{
 		virtual void OnAssetImported(const Name& packageName, const Name& sourcePath = "") {}
+
+		virtual void OnAssetDeleted(const Name& packageName) {}
 	};
 
 	CLASS()
@@ -67,6 +69,8 @@ namespace CE
 
 		void OnAssetImported(const Name& packageName, const Name& sourcePath = "");
 
+		void OnAssetDeleted(const Name& packageName);
+
 	public:
 
 		// Events
@@ -75,6 +79,9 @@ namespace CE
 		MultiCastDelegate<void(const Name&)> onAssetImported{};
 
 	private:
+
+		void AddAssetEntry(const Name& packageName, AssetData* assetData);
+		void DeleteAssetEntry(const Name& packageName);
 
 		PathTree directoryTree{};
 		PathTree cachedPathTree{};

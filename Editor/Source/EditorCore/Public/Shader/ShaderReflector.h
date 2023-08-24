@@ -13,8 +13,6 @@ namespace CE::Editor
 
     private:
 
-        void Test();
-
     };
 
 } // namespace CE::Editor

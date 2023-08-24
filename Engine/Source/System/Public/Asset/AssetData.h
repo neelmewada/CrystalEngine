@@ -27,7 +27,7 @@ namespace CE
 		Name assetClassPath;
 
 		// Path to the source asset. For Editor only!
-		IO::Path sourceAssetPath{};
+		Name sourceAssetPath{};
 	};
 
 	template<>

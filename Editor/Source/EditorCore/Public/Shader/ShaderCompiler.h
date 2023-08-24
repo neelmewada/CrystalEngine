@@ -4,11 +4,6 @@
 namespace CE::Editor
 {
 
-    enum class ShaderLang
-    {
-        HLSL
-    };
-
     struct ShaderBuildConfig
     {
         String debugName = "";
@@ -45,8 +40,11 @@ namespace CE::Editor
         ShaderCompiler();
         ~ShaderCompiler();
 
-		// It allocates memory to the *outByteCode location which you will have to manually release after use
+		// It allocates memory to the *outByteCode location which you will have to manually release after use.
 		ErrorCode Build(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+
+		// It allocates memory to the *outByteCode location which you will have to manually release after use.
+		ErrorCode Build(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
 
 		// Fully custom compilation
         ErrorCode Compile(const IO::Path& filePath, Array<std::wstring>& args, void** outByteCode, u32* outByteCodeSize);

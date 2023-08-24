@@ -1,4 +1,6 @@
-#define SRG(setNum, bindingNum) [[vk::binding(bindingNum, setNum)]]
+//#define SRG(setNum, bindingNum) [[vk::binding(bindingNum, setNum)]]
+
+#define SRG(pos, set) register(pos, space##set)
 
 // data structure : before vertex shader (mesh info)
 struct VertexInfo
@@ -23,8 +25,8 @@ struct MyBuffer
 };
 
 
-ConstantBuffer<MyBuffer> buff : register(b0, space0);
-ConstantBuffer<MyBuffer> buff2 : register(b1, space0);
+ConstantBuffer<MyBuffer> buff : SRG(b0, 0); //register(b0, space0);
+ConstantBuffer<MyBuffer> buff2 : SRG(b1, 0);
 
 Texture2D texture : register(t0, space1);
 SamplerState textureSampler : register(t1, space1);

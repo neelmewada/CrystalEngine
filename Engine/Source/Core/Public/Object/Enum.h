@@ -202,6 +202,7 @@ namespace CE\
 		return (__underlying_type(Namespace::Enum))enumValue;\
 	}\
 }\
+ENUM_CLASS_FLAGS(Namespace::Enum)\
 template <> struct fmt::formatter<Namespace::Enum> {\
     constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {\
         return ctx.end();\

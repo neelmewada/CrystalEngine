@@ -137,29 +137,9 @@ namespace CE
 #endif
 
 		
-		if (newEntry)
+		if (newEntry && relativePathStr.NonEmpty())
 		{
-			allAssetDatas.Add(assetData);
-
-			if (relativePathStr.NonEmpty())
-			{
-				directoryTree.AddPath(parentRelativePathStr);
-
-				cachedPathTree.AddPath(relativePathStr, assetData);
-
-				cachedAssetsByPath[relativePathStr].Add(assetData);
-
-				{
-					auto& array = cachedPrimaryAssetsByParentPath[parentRelativePathStr];
-					array.Add(assetData);
-					array.Sort(SortAssetData);
-				}
-			}
-
-			if (!sourceAssetRelativePath.IsEmpty())
-			{
-				cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
-			}
+			AddAssetEntry(relativePathStr, assetData);
 		}
 
 		load->RequestDestroy();
@@ -168,6 +148,43 @@ namespace CE
 			listener->OnAssetImported(packageName, sourcePath);
 
 		onAssetImported.Broadcast(packageName);
+		onAssetRegistryModified.Broadcast();
+	}
+
+	void AssetRegistry::OnAssetDeleted(const Name& packageName)
+	{
+		IO::Path packagePath = Package::GetPackagePath(packageName);
+
+		auto projectAssetsPath = gProjectPath / "Game/Assets";
+		String relativePathStr = "";
+		String parentRelativePathStr = "";
+
+		if (IO::Path::IsSubDirectory(packagePath, projectAssetsPath))
+		{
+			relativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
+			if (!relativePathStr.StartsWith("/"))
+				relativePathStr = "/" + relativePathStr;
+
+			parentRelativePathStr = IO::Path::GetRelative(packagePath, gProjectPath).GetParentPath().GetString().Replace({ '\\' }, '/');
+			if (!parentRelativePathStr.StartsWith("/"))
+				parentRelativePathStr = "/" + parentRelativePathStr;
+		}
+		else
+		{
+			return;
+		}
+
+		Name parentRelativePathName = parentRelativePathStr;
+		Name relativePathName = relativePathStr;
+
+		cachedPrimaryAssetsByParentPath.Remove(parentRelativePathName);
+
+		cachedPathTree.RemovePath(relativePathName);
+		cachedAssetsByPath.Remove(relativePathName);
+
+		if (listener != nullptr)
+			listener->OnAssetImported(packageName);
+
 		onAssetRegistryModified.Broadcast();
 	}
 
@@ -215,7 +232,6 @@ namespace CE
 						if (load != nullptr)
 						{
 							AssetData* assetData = new AssetData();
-							String sourceAssetRelativePath = "";
 							if (!load->GetPrimaryObjectName().IsValid())
 								load->LoadFully();
 							Name primaryName = load->GetPrimaryObjectName();
@@ -232,18 +248,7 @@ namespace CE
 							load->RequestDestroy();
 							load = nullptr;
 
-							allAssetDatas.Add(assetData);
-							cachedPathTree.AddPath(relativePathStr, assetData);
-							cachedAssetsByPath[relativePathStr].Add(assetData);
-							cachedPrimaryAssetByPath[relativePathStr] = assetData;
-
-							cachedPrimaryAssetsByParentPath[parentRelativePathStr].Add(assetData);
-							cachedPrimaryAssetsByParentPath[parentRelativePathStr].Sort(SortAssetData);
-
-							if (!sourceAssetRelativePath.IsEmpty())
-							{
-								cachedAssetBySourcePath[sourceAssetRelativePath] = assetData;
-							}
+							AddAssetEntry(relativePathStr, assetData);
 						}
 						else
 						{
@@ -259,6 +264,56 @@ namespace CE
 		}
 
 		cacheInitialized = true;
+	}
+
+
+	void AssetRegistry::AddAssetEntry(const Name& packageName, AssetData* assetData)
+	{
+		allAssetDatas.Add(assetData);
+		cachedPathTree.AddPath(packageName, assetData);
+		cachedAssetsByPath[packageName].Add(assetData);
+		cachedPrimaryAssetByPath[packageName] = assetData;
+
+		String parentPathStr = IO::Path(packageName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
+		Name parentPath = parentPathStr;
+		
+		cachedPrimaryAssetsByParentPath[parentPath].Add(assetData);
+		cachedPrimaryAssetsByParentPath[parentPath].Sort(SortAssetData);
+
+		if (assetData->sourceAssetPath.IsValid())
+		{
+			cachedAssetBySourcePath[assetData->sourceAssetPath] = assetData;
+		}
+	}
+
+	void AssetRegistry::DeleteAssetEntry(const Name& packageName)
+	{
+		if (!cachedAssetsByPath.KeyExists(packageName))
+			return;
+
+		auto assetDatas = cachedAssetsByPath[packageName];
+
+		cachedPathTree.RemovePath(packageName);
+		cachedAssetsByPath.Remove(packageName);
+		cachedPrimaryAssetByPath.Remove(packageName);
+		
+		String parentPathStr = IO::Path(packageName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
+		Name parentPath = parentPathStr;
+
+		cachedPrimaryAssetsByParentPath.Remove(parentPath);
+
+		for (auto assetData : assetDatas)
+		{
+			if (assetData != nullptr)
+			{
+				Name sourcePath = assetData->sourceAssetPath;
+				if (cachedAssetBySourcePath.KeyExists(sourcePath))
+				{
+					cachedAssetBySourcePath.Remove(sourcePath);
+				}
+				delete assetData;
+			}
+		}
 	}
 
 	void AssetRegistry::HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName)

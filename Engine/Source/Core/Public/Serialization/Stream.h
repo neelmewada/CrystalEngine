@@ -171,6 +171,14 @@ namespace CE
 
 		virtual u8 ReadByte() { return Stream::Read(); }
 
+		template<typename T> requires TIsIntegralType<T>::Value
+		T ReadInteger()
+		{
+			T value = 0;
+			Read(&value, sizeof(value));
+			return value;
+		}
+
         virtual void* GetRawDataPtr() const
         {
             return nullptr;
