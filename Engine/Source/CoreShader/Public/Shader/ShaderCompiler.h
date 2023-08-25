@@ -47,6 +47,7 @@ namespace CE
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
 		ErrorCode BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
 
+		// It allocates memory to the *outByteCode location which you will have to manually release after use.
 		inline ErrorCode Build(ShaderBlobFormat buildFormat, const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
 		{
 			if (buildFormat == ShaderBlobFormat::Spirv)

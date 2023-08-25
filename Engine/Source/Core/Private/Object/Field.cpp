@@ -284,8 +284,8 @@ namespace CE
 					if (srcArraySize > 0)
 					{
 						Array<FieldType> arrayFields = this->GetArrayFieldList(srcInstance);
-						u8* srcArrayInstance = &this->GetFieldValue<Array<u8>>(srcInstance)[0];
-						u8* destArrayInstance = &this->GetFieldValue<Array<u8>>(destInstance)[0];
+						u8* srcArrayInstance = const_cast<u8*>(&this->GetFieldValue<Array<u8>>(srcInstance)[0]);
+						u8* destArrayInstance = const_cast<u8*>(&this->GetFieldValue<Array<u8>>(destInstance)[0]);
 
 						for (int i = 0; i < arrayFields.GetSize(); i++)
 						{
@@ -418,7 +418,7 @@ namespace CE
 		if (!IsArrayField())
 			return;
 
-		auto& array = GetFieldValue<Array<u8>>(instance);
+		auto& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
 		TypeId underlyingTypeId = GetUnderlyingTypeId();
 		if (underlyingTypeId == 0)
 			return;

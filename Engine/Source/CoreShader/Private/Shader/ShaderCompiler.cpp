@@ -50,8 +50,7 @@ namespace CE
 
 		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&impl->utils));
 		DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&impl->compiler));
-
-		// Create default include handler
+		
 		impl->utils->CreateDefaultIncludeHandler(&impl->includeHandler);
 	}
 
@@ -92,7 +91,7 @@ namespace CE
 		{
 			wcharArgs.Add(arg.data());
 		}
-
+		
 		wcharArgs.AddRange({
 			fileNameStr.data()
 		});

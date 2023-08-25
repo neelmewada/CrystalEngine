@@ -372,12 +372,12 @@ namespace CE
                 Array<String>& array = configValue.GetArray();
                 if (array.IsEmpty())
                 {
-                    auto& arrayValue = field->GetFieldValue<Array<u8>>(this);
+                    auto& arrayValue = const_cast<Array<u8>&>(field->GetFieldValue<Array<u8>>(this));
                     arrayValue.Clear();
                 }
                 else
                 {
-                    Array<u8>& arrayValue = field->GetFieldValue<Array<u8>>(this);
+					Array<u8>& arrayValue = const_cast<Array<u8>&>(field->GetFieldValue<Array<u8>>(this));
                     bool isMap = false;
                     isMap = array[0].StartsWith("(");
                     

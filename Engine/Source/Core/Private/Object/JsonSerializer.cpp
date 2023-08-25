@@ -792,7 +792,7 @@ namespace CE
 				field->SetFieldValue<IO::Path>(rawInstance, IO::Path(json.GetStringValue()));
 			else if (fieldTypeId == TYPEID(SubClassType<Object>) && underlyingType != nullptr)
 			{
-				SubClassType<Object>& value = field->GetFieldValue<SubClassType<Object>>(rawInstance);
+				SubClassType<Object>& value = const_cast<SubClassType<Object>&>(field->GetFieldValue<SubClassType<Object>>(rawInstance));
 				ClassType* baseClassType = (ClassType*)underlyingType;
 				ClassType* classType = ClassType::FindClass(json.GetStringValue());
 				if (classType != nullptr && classType->IsSubclassOf(baseClassType))
@@ -857,7 +857,7 @@ namespace CE
 			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
 			Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& f) { return &f; });
 
-			auto arrayInstance = &field->GetFieldValue<Array<u8>>(rawInstance)[0];
+			u8* arrayInstance = const_cast<u8*>(&field->GetFieldValue<Array<u8>>(rawInstance)[0]);
 
 			JsonFieldDeserializer deserializer{ fieldListPtr, arrayInstance };
 			deserializer.isMap = false;
@@ -1003,7 +1003,7 @@ namespace CE
 			Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
 			Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& f) { return &f; });
 
-			auto arrayInstance = &field->GetFieldValue<Array<u8>>(rawInstance)[0];
+			u8* arrayInstance = const_cast<u8*>(&field->GetFieldValue<Array<u8>>(rawInstance)[0]);
 
 			JsonFieldDeserializer deserializer{ fieldListPtr, arrayInstance };
 			deserializer.isFirstRead = false;
