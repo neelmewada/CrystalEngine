@@ -60,7 +60,7 @@ namespace CE::Editor
 		delete impl;
 	}
 
-	ShaderCompiler::ErrorCode ShaderCompiler::Build(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
 	{
 		if (!hlslPath.Exists())
 			return ERR_FileNotFound;
@@ -170,7 +170,8 @@ namespace CE::Editor
 		return ErrorCode::ERR_Success;
 	}
 
-	ShaderCompiler::ErrorCode ShaderCompiler::Build(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, 
+		void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
 	{
 		HRESULT status;
 		ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);

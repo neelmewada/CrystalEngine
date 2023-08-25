@@ -8,7 +8,7 @@ namespace CE::Editor
     
     ShaderReflector::ShaderReflector()
     {
-
+		
     }
 
     ShaderReflector::~ShaderReflector()
@@ -16,6 +16,12 @@ namespace CE::Editor
 
     }
 
+	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, ShaderReflection& outReflection)
+	{
+
+
+		return ERR_Success;
+	}
     
 
 } // namespace CE::Editor

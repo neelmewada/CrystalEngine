@@ -13,6 +13,18 @@ namespace CE
 
     protected:
         VulkanDevice* device = nullptr;
+		VkPipeline pipeline = nullptr;
     };
+
+	class VulkanGraphicsPipeline : public VulkanPipeline
+	{
+	public:
+		VulkanGraphicsPipeline(VulkanDevice* device, const RHI::GraphicsPipelineDesc& desc);
+		virtual ~VulkanGraphicsPipeline();
+
+	protected:
+
+		
+	};
     
 } // namespace CE::Editor

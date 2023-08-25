@@ -396,23 +396,22 @@ namespace CE
 
         if (field->IsIntegerField())
         {
-
             if (fieldTypeId == TYPEID(u8))
-                field->SetFieldValue<u8>(rawInstance, stream->ReadInteger<u8>());
+                field->ForceSetFieldValue<u8>(rawInstance, stream->ReadInteger<u8>());
             else if (fieldTypeId == TYPEID(u16))
-				field->SetFieldValue<u16>(rawInstance, stream->ReadInteger<u16>());
+				field->ForceSetFieldValue<u16>(rawInstance, stream->ReadInteger<u16>());
             else if (fieldTypeId == TYPEID(u32))
-                *stream >> field->GetFieldValue<u32>(rawInstance);
+				field->ForceSetFieldValue<u32>(rawInstance, stream->ReadInteger<u32>());
             else if (fieldTypeId == TYPEID(u64))
-                *stream >> field->GetFieldValue<u64>(rawInstance);
+				field->ForceSetFieldValue<u64>(rawInstance, stream->ReadInteger<u64>());
             else if (fieldTypeId == TYPEID(s8))
-                *stream >> field->GetFieldValue<s8>(rawInstance);
+				field->ForceSetFieldValue<s8>(rawInstance, stream->ReadInteger<s8>());
             else if (fieldTypeId == TYPEID(s16))
-                *stream >> field->GetFieldValue<s16>(rawInstance);
+				field->ForceSetFieldValue<s16>(rawInstance, stream->ReadInteger<s16>());
             else if (fieldTypeId == TYPEID(s32))
-                *stream >> field->GetFieldValue<s32>(rawInstance);
+				field->ForceSetFieldValue<s32>(rawInstance, stream->ReadInteger<s32>());
             else if (fieldTypeId == TYPEID(s64))
-                *stream >> field->GetFieldValue<s64>(rawInstance);
+				field->ForceSetFieldValue<s64>(rawInstance, stream->ReadInteger<s64>());
         }
         else if (field->IsDecimalField())
         {
@@ -425,15 +424,19 @@ namespace CE
         }
         else if (fieldTypeId == TYPEID(UUID))
         {
-            *stream >> field->GetFieldValue<UUID>(rawInstance);
+			field->ForceSetFieldValue<UUID>(rawInstance, stream->ReadInteger<u64>());
         }
         else if (fieldTypeId == TYPEID(String))
         {
-            *stream >> field->GetFieldValue<String>(rawInstance);
+			String value = "";
+			*stream >> value;
+			field->ForceSetFieldValue<String>(rawInstance, value);
         }
         else if (fieldTypeId == TYPEID(Name))
         {
-            *stream >> field->GetFieldValue<Name>(rawInstance);
+			Name value = "";
+			*stream >> value;
+			field->ForceSetFieldValue<Name>(rawInstance, value);
         }
         else if (fieldTypeId == TYPEID(IO::Path))
         {
@@ -443,11 +446,12 @@ namespace CE
         }
 		else if (fieldTypeId == TYPEID(BinaryBlob))
 		{
-			*stream >> field->GetFieldValue<BinaryBlob>(rawInstance);
+			BinaryBlob& blob = const_cast<BinaryBlob&>(field->GetFieldValue<BinaryBlob>(rawInstance));
+			*stream >> blob;
 		}
 		else if (fieldTypeId == TYPEID(SubClassType<Object>) && underlyingType != nullptr && underlyingType->IsClass())
 		{
-			SubClassType<Object>& subClassType = field->GetFieldValue<SubClassType<Object>>(rawInstance);
+			SubClassType<Object>& subClassType = const_cast<SubClassType<Object>&>(field->GetFieldValue<SubClassType<Object>>(rawInstance));
 			ClassType* baseClassType = (ClassType*)underlyingType;
 			String classTypeName = "";
 			*stream >> classTypeName;
@@ -466,25 +470,25 @@ namespace CE
 			String typeName{};
 			*stream >> typeName;
 			ClassType* value = ClassType::FindClass(typeName);
-			field->SetFieldValue(rawInstance, value);
+			field->ForceSetFieldValue(rawInstance, value);
 		}
 		else if (fieldTypeId == TYPEID(StructType))
 		{
 			String typeName{};
 			*stream >> typeName;
 			StructType* value = StructType::FindStruct(typeName);
-			field->SetFieldValue(rawInstance, value);
+			field->ForceSetFieldValue(rawInstance, value);
 		}
 		else if (fieldTypeId == TYPEID(EnumType))
 		{
 			String typeName{};
 			*stream >> typeName;
 			EnumType* value = EnumType::FindEnum(typeName);
-			field->SetFieldValue(rawInstance, value);
+			field->ForceSetFieldValue(rawInstance, value);
 		}
         else if (field->IsArrayField())
         {
-            auto& array = field->GetFieldValue<Array<u8>>(rawInstance);
+			auto& array = const_cast<Array<u8>&>(field->GetFieldValue<Array<u8>>(rawInstance));
             auto underlyingType = field->GetUnderlyingType();
 
             Name serializedUnderlyingTypeName{};
@@ -525,7 +529,7 @@ namespace CE
         }
         else if (fieldTypeId == TYPEID(ObjectMap))
         {
-            ObjectMap& map = field->GetFieldValue<ObjectMap>(rawInstance);
+			ObjectMap& map = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(rawInstance));
 
             Name serializedUnderlyingTypeName{};
             u32 numElements = 0;
@@ -583,7 +587,7 @@ namespace CE
 
 			s64 enumValue = 0;
 			*stream >> enumValue;
-			field->SetFieldEnumValue(rawInstance, enumValue);
+			field->ForceSetFieldEnumValue(rawInstance, enumValue);
 		}
 
         return true;

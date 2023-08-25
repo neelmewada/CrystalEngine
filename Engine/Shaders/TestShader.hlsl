@@ -28,8 +28,8 @@ struct MyBuffer
 ConstantBuffer<MyBuffer> buff : SRG(b0, 0); //register(b0, space0);
 ConstantBuffer<MyBuffer> buff2 : SRG(b1, 0);
 
-Texture2D texture : register(t0, space1);
-SamplerState textureSampler : register(t1, space1);
+Texture2D texture : SRG(t0, 1);
+SamplerState textureSampler : SRG(t1, 1);
 
 // vertex shader function
 v2p VertMain(VertexInfo input)

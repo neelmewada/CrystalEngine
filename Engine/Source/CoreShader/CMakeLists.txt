@@ -1,19 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 
-if(PAL_PLATFORM_IS_MAC)
-    project(EditorCore CXX OBJC OBJCXX)
-else()
-    project(EditorCore CXX)
-endif()
+project(CoreShader CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
-    AUTORTTI
+    
     NAMESPACE CE
-    FOLDER Editor/Source
-    PCHHEADER 
-        PRIVATE 
+    FOLDER Engine/Source
+    PCHHEADER
+        PRIVATE
             Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
@@ -34,16 +30,13 @@ ce_add_target(${PROJECT_NAME} SHARED
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:Vulkan::SPIRV-Tools>
         PUBLIC
             CE::Core
-            CE::CoreRHI
-            CE::CoreGUI
-            $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
-            CE::System
     RUNTIME_DEPENDENCIES
-        
+        dxcompiler
+        SpirvTools
 )
 
 
-if(${PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED})
+if(${PAL_TRAIT_BUILD_TESTS})
     add_subdirectory(Tests)
 endif()
 

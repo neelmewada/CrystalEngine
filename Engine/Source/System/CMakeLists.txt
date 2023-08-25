@@ -28,6 +28,7 @@ ce_add_target(System SHARED
             CE::CoreApplication
             CE::CoreGUI
             CE::CoreRHI
+            CE::CoreShader
         PUBLIC
             CE::Core
             CE::CoreMedia

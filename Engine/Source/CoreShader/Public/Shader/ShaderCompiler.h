@@ -30,6 +30,7 @@ namespace CE::Editor
         enum ErrorCode
         {
             ERR_Success = 0,
+			ERR_InvalidBuildFormat,
             ERR_FileNotFound,
             ERR_InvalidFile,
             ERR_FailedToLoadFile,
@@ -41,10 +42,28 @@ namespace CE::Editor
         ~ShaderCompiler();
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
-		ErrorCode Build(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+		ErrorCode BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
-		ErrorCode Build(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+		ErrorCode BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+
+		inline ErrorCode Build(ShaderBlobFormat buildFormat, const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+		{
+			if (buildFormat == ShaderBlobFormat::Spirv)
+			{
+				return BuildSpirv(data, dataSize, buildConfig, outByteCode, outByteCodeSize, extraArgs);
+			}
+			return ERR_InvalidBuildFormat;
+		}
+
+		inline ErrorCode Build(ShaderBlobFormat buildFormat, const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+		{
+			if (buildFormat == ShaderBlobFormat::Spirv)
+			{
+				return BuildSpirv(hlslPath, buildConfig, outByteCode, outByteCodeSize, extraArgs);
+			}
+			return ERR_InvalidBuildFormat;
+		}
 
 		// Fully custom compilation
         ErrorCode Compile(const IO::Path& filePath, Array<std::wstring>& args, void** outByteCode, u32* outByteCodeSize);

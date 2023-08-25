@@ -328,6 +328,9 @@ namespace CE::RHI
     *   Graphics Pipeline
     */
 
-
+	struct GraphicsPipelineDesc
+	{
+		u32 vertexSizeInBytes = 0;
+	};
 
 } // namespace CE
