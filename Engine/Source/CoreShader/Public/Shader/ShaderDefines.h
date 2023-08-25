@@ -17,6 +17,21 @@ namespace CE
 	{
 		Spirv = 0
 	};
+
+	ENUM()
+	enum class ShaderResourceType
+	{
+		None = 0,
+		ConstantBuffer,
+		StructuredBuffer,
+		SamplerState,
+		Texture2D,
+		Texture3D,
+		TextureCube,
+		RWTexture2D,
+		RWTexture3D,
+		RWTextureCube,
+	};
     
 	STRUCT()
 	struct CORESHADER_API ShaderReflection
