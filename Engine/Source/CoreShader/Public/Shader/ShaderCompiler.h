@@ -1,30 +1,30 @@
 #pragma once
 
 
-namespace CE::Editor
+namespace CE
 {
 
-    struct ShaderBuildConfig
-    {
-        String debugName = "";
-        String entry = "vert";
-        CE::RHI::ShaderStage stage = CE::RHI::ShaderStage::Vertex;
+	struct ShaderBuildConfig
+	{
+		String debugName = "";
+		String entry = "vert";
+		ShaderStage stage = ShaderStage::Vertex;
 
-        u32 maxPermutations = 1024;
+		u32 maxPermutations = 1024;
 		Array<String> globalDefines{};
 
-        // Define flags to build multiple permutations of the shader
-        Array<String> featurePermutationDefines{};
-        // Define flags to strip from compilation
-        Array<String> unusedDefines{};
+		// Define flags to build multiple permutations of the shader
+		Array<String> featurePermutationDefines{};
+		// Define flags to strip from compilation
+		Array<String> unusedDefines{};
 
 		Array<IO::Path> includeSearchPaths{};
-    };
+	};
 
     /*
     *   Low level access to DirectX Shader Compiler. Always use ShaderProcessor class instead.
     */
-    class EDITORCORE_API ShaderCompiler
+    class CORESHADER_API ShaderCompiler
     {
     public:
         enum ErrorCode

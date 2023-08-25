@@ -1,5 +1,5 @@
 
-#include "EditorCore.h"
+#include "CoreShader.h"
 
 #include <PAL/Common/PlatformSystemIncludes.h>
 
@@ -14,7 +14,7 @@
 #include <codecvt>
 #include <string>
 
-namespace CE::Editor
+namespace CE
 {
 	static std::wstring ToWString(const std::string& stringToConvert)
 	{
@@ -111,11 +111,11 @@ namespace CE::Editor
 
 		wcharArgs.AddRange({ L"-E", entryName.data() });
 
-		if (buildConfig.stage == RHI::ShaderStage::Vertex)
+		if (buildConfig.stage == ShaderStage::Vertex)
 		{
 			wcharArgs.AddRange({ L"-T", L"vs_6_0" });
 		} 
-		else if (buildConfig.stage == RHI::ShaderStage::Fragment)
+		else if (buildConfig.stage == ShaderStage::Fragment)
 		{
 			wcharArgs.AddRange({ L"-T", L"ps_6_0" });
 		}
@@ -215,11 +215,11 @@ namespace CE::Editor
 
 		wcharArgs.AddRange({ L"-E", entryName.data() });
 
-		if (buildConfig.stage == RHI::ShaderStage::Vertex)
+		if (buildConfig.stage == ShaderStage::Vertex)
 		{
 			wcharArgs.AddRange({ L"-T", L"vs_6_0" });
 		}
-		else if (buildConfig.stage == RHI::ShaderStage::Fragment)
+		else if (buildConfig.stage == ShaderStage::Fragment)
 		{
 			wcharArgs.AddRange({ L"-T", L"ps_6_0" });
 		}

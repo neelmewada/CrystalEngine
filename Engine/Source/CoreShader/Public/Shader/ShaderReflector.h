@@ -1,9 +1,9 @@
 #pragma once
 
-namespace CE::Editor
+namespace CE
 {
     
-    class EDITORCORE_API ShaderReflector
+    class CORESHADER_API ShaderReflector
     {
     public:
         ShaderReflector();
@@ -26,4 +26,4 @@ namespace CE::Editor
 
     };
 
-} // namespace CE::Editor
+} // namespace CE

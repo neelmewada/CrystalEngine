@@ -1,9 +1,9 @@
 
-#include "EditorCore.h"
+#include "CoreShader.h"
 
 #include "spirv_cross/spirv_reflect.hpp"
 
-namespace CE::Editor
+namespace CE
 {   
     
     ShaderReflector::ShaderReflector()
@@ -24,5 +24,5 @@ namespace CE::Editor
 	}
     
 
-} // namespace CE::Editor
+} // namespace CE
 

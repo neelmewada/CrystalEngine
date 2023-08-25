@@ -1,8 +1,7 @@
 
 #include "CoreShader.h"
 
-
-
+#include "CoreShader.private.h"
 
 namespace CE
 {

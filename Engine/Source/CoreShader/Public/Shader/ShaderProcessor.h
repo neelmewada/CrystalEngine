@@ -1,9 +1,9 @@
 #pragma once
 
-namespace CE::Editor
+namespace CE
 {
 
-    class EDITORCORE_API ShaderProcessor
+    class CORESHADER_API ShaderProcessor
     {
     public:
         enum ErrorCode

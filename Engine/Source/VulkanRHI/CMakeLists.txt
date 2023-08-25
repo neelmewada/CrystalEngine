@@ -31,7 +31,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ThirdParty::sdl
             ${Vulkan_LIBRARIES}
-            CE::CoreShader
         PUBLIC
             CE::Core
             CE::CoreApplication

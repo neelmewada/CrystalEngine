@@ -2,7 +2,6 @@
 
 namespace CE
 {
-    
 	ENUM(Flags)
 	enum class ShaderStage
 	{
@@ -17,6 +16,15 @@ namespace CE
 	enum class ShaderBlobFormat
 	{
 		Spirv = 0
+	};
+    
+	STRUCT()
+	struct CORESHADER_API ShaderReflection
+	{
+		CE_STRUCT(ShaderReflection)
+	public:
+
+
 	};
 
 } // namespace CE

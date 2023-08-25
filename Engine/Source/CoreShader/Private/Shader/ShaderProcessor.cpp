@@ -1,11 +1,11 @@
 
-#include "EditorCore.h"
+#include "CoreShader.h"
 
 #include <locale>
 #include <codecvt>
 #include <string>
 
-namespace CE::Editor
+namespace CE
 {
 	static std::wstring ToWString(const std::string& stringToConvert)
 	{

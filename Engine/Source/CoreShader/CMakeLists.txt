@@ -5,7 +5,7 @@ project(CoreShader CXX)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
-    
+    AUTORTTI
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER
@@ -30,6 +30,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:Vulkan::SPIRV-Tools>
         PUBLIC
             CE::Core
+            CE::CoreRHI
     RUNTIME_DEPENDENCIES
         dxcompiler
         SpirvTools

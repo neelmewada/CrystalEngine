@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ShaderDefines.h"
-#include "ShaderReflection.h"
 
 namespace CE
 {
