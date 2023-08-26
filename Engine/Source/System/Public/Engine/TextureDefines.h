@@ -65,16 +65,20 @@ namespace CE
 	{
 		ECONST(Display = "Default (Color BC1/3)")
 		Default, // Color BC1/3
-		ECONST(Display = "Normal Map (BC5)")
-		NormalMap, // BC5
+		ECONST(Display = "Normal Map (BC1/5)")
+		NormalMap, // BC1/5: BC1 = low quality , BC5 = high quality
 		ECONST(Display = "Grayscale (R8/16 or BC4)")
 		Grayscale, // R8/16 or BC4
+		ECONST(Display = "Grayscale Alpha (RG16/32 or BC5)")
+		GrayscaleAlpha, // RG16/32 or BC5
 		ECONST(Display = "HDR (BC6H)")
 		HDR, // BC6H
 		ECONST(Display = "HDR Uncompressed (RGBA16 Half)")
 		HDRUncompressed, // RGBAHalf
 		ECONST(Display = "BC7 RGBA")
-		BC7, // BC7
+		BC7, // BC7 RGBA
+		ECONST(Display = "Color Uncompressed RGB(A)")
+		ColorUncompressed,
 	};
 	ENUM_CLASS_FLAGS(TextureCompressionSettings);
 

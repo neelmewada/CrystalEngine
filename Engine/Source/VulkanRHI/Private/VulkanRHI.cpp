@@ -444,10 +444,7 @@ namespace CE
         
         List<VkImageView> attachments{ frameBufferCI.attachmentCount };
         attachments[rtLayout.presentationRTIndex] = swapChain->swapChainColorImages[swapChainImageIndex].imageView;
-//        for (int i = 0; i < attachments.GetSize(); i++)
-//        {
-//            attachments[i] = swapChain->swapChainColorImages[swapChainImageIndex].imageView;
-//        }
+
         if (rtLayout.HasDepthStencilAttachment())
         {
             attachments[attachments.GetSize() - 1] = swapChain->swapChainDepthImage->GetImageView();

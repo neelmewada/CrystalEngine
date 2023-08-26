@@ -51,7 +51,7 @@ namespace CE::Editor
 	};
 
 	template<typename T> requires TIsBaseClassOf<AssetDefinition, T>::Value
-		static inline T* GetAssetDefinition()
+	static inline T* GetAssetDefinition()
 	{
 		if (AssetDefinitionRegistry::Get() == nullptr)
 			return nullptr;

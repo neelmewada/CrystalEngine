@@ -2,7 +2,6 @@
 
 namespace CE::Editor
 {
-	class AssetImportJob;
 
     CLASS(Config = Editor)
 	class EDITORSYSTEM_API TextureAssetImporter : public AssetImporter

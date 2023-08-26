@@ -40,6 +40,8 @@ namespace CE
         { "namespace", TK_KW_NAMESPACE },
         { "using", TK_KW_USING },
         { "final", TK_KW_FINAL },
+		{ "alignas", TK_KW_ALIGNAS },
+		{ "alignof", TK_KW_ALIGNOF },
         // built-in types
         { "void", TK_KW_VOID },
         { "int", TK_KW_INT },

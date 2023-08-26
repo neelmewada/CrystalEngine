@@ -69,6 +69,7 @@ namespace CE::Editor
 	void TextureImportJob::Process()
 	{
 		success = false;
+		bool isGameAsset = false;
 
 		if (outPath.IsEmpty())
 			outPath = sourcePath.ReplaceExtension(".casset");
@@ -95,6 +96,7 @@ namespace CE::Editor
 
 		if (IO::Path::IsSubDirectory(outPath, gProjectPath / "Game/Assets"))
 		{
+			isGameAsset = true;
 			packageName = IO::Path::GetRelative(outPath, gProjectPath).RemoveExtension().GetString().Replace({ '\\' }, '/');
 			if (!packageName.StartsWith("/"))
 				packageName = "/" + packageName;
@@ -187,50 +189,65 @@ namespace CE::Editor
 			else
 			{
 				if (imageBitDepth == 8)
+				{
+					texture->compression = TextureCompressionSettings::Grayscale;
 					texture->pixelFormat = TextureFormat::R8;
+				}
 				else if (imageBitDepth == 16)
+				{
+					texture->compression = TextureCompressionSettings::Grayscale;
 					texture->pixelFormat = TextureFormat::R16;
-				else if (imageBitDepth == 32)
-					texture->pixelFormat = TextureFormat::RFloat;
-				else
-					return;
+				}
+				else return;
 			}
 			break;
 		case CMImageFormat::RG:
 			if (imageBitDepth == 8 && compressByDefault)
 			{
 				outputSourceFormat = CMImageSourceFormat::BC5;
-				texture->compression = TextureCompressionSettings::NormalMap;
+				texture->compression = TextureCompressionSettings::GrayscaleAlpha;
 				sourceCompressionFormat = TextureSourceCompressionFormat::BC5;
 				texture->pixelFormat = TextureFormat::BC5;
 			}
 			else
 			{
 				if (imageBitDepth == 8)
+				{
+					texture->compression = TextureCompressionSettings::GrayscaleAlpha;
 					texture->pixelFormat = TextureFormat::RG16;
+				}
 				else if (imageBitDepth == 16)
+				{
+					texture->compression = TextureCompressionSettings::GrayscaleAlpha;
 					texture->pixelFormat = TextureFormat::RG32;
-				else if (imageBitDepth == 32)
-					texture->pixelFormat = TextureFormat::RGFloat;
-				else
-					return;
+				}
+				else return;
 			}
 			break;
 		case CMImageFormat::RGB:
-			if (imageBitDepth == 8 && compressByDefault)
+			if ((sourceCompressionFormat == TextureSourceCompressionFormat::HDR ||
+				sourceCompressionFormat == TextureSourceCompressionFormat::EXR) && imageBitDepth == 16) // HDR image
 			{
-				outputSourceFormat = CMImageSourceFormat::BC1;
-				texture->compression = TextureCompressionSettings::Default;
-				sourceCompressionFormat = TextureSourceCompressionFormat::BC1;
-				texture->pixelFormat = TextureFormat::BC1;
+				outputSourceFormat = compressByDefault ? CMImageSourceFormat::BC6H :
+					(sourceCompressionFormat == TextureSourceCompressionFormat::HDR ? CMImageSourceFormat::HDR : CMImageSourceFormat::EXR);
+				texture->compression = compressByDefault ? TextureCompressionSettings::HDR : TextureCompressionSettings::HDRUncompressed;
+				sourceCompressionFormat = compressByDefault ? TextureSourceCompressionFormat::BC6H : TextureSourceCompressionFormat::HDR;
+				texture->pixelFormat = compressByDefault ? TextureFormat::BC6H : TextureFormat::RGBAHalf;
 			}
-			else
+			else if (imageBitDepth == 8 && compressByDefault)
 			{
-				if (imageBitDepth == 8)
-					texture->pixelFormat = TextureFormat::RGB24;
-				else
-					return;
+				outputSourceFormat = highQualityCompression ? CMImageSourceFormat::BC7 : CMImageSourceFormat::BC1;
+				texture->compression = highQualityCompression ? TextureCompressionSettings::BC7 : TextureCompressionSettings::Default;
+				sourceCompressionFormat = highQualityCompression ? TextureSourceCompressionFormat::BC7 : TextureSourceCompressionFormat::BC1;
+				texture->pixelFormat = highQualityCompression ? TextureFormat::BC7 : TextureFormat::BC1;
 			}
+			else if (imageBitDepth == 8)
+			{
+				texture->compression = TextureCompressionSettings::ColorUncompressed;
+				texture->pixelFormat = TextureFormat::RGB24;
+			}
+			else return;
+
 			break;
 		case CMImageFormat::RGBA:
 			if (imageBitDepth == 8 && compressByDefault)
@@ -317,7 +334,7 @@ namespace CE::Editor
 		for (int i = 0; i < sourcePaths.GetSize(); i++)
 		{
 			IO::Path productPath = {};
-			if (i < productPaths.GetSize() - 1)
+			if (i < productPaths.GetSize())
 				productPath = productPaths[i];
 
 			auto job = new TextureImportJob(this, sourcePaths[i], productPath);

@@ -9,10 +9,58 @@
 #include "compressonator.h"
 #endif
 
+#include "stb_image.h"
+
 namespace CE
 {
 	static const u8 pngHeader[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, };
+	static const u8 hdrHeader[10] = { '#', '?', 'R', 'A', 'D', 'I', 'A', 'N', 'C', 'E' }; // #?RADIANCE
+	static const u8 exrHeader[4] = { 0x76, 0x2F, 0x31, 0x01 };
 
+	static CMImageSourceFormat GetSourceFormatFromHeader(u8 header[10])
+	{
+		bool isPNG = true;
+		for (int i = 0; i < COUNTOF(pngHeader); i++)
+		{
+			if (header[i] != pngHeader[i])
+			{
+				isPNG = false;
+				break;
+			}
+		}
+
+		if (isPNG)
+			return CMImageSourceFormat::PNG;
+
+		bool isHDR = true;
+		for (int i = 0; i < COUNTOF(hdrHeader); i++)
+		{
+			if (header[i] != hdrHeader[i])
+			{
+				isHDR = false;
+				break;
+			}
+		}
+
+		if (isHDR)
+			return CMImageSourceFormat::HDR;
+
+		bool isEXR = true;
+		for (int i = 0; i < COUNTOF(exrHeader); i++)
+		{
+			if (header[i] != exrHeader[i])
+			{
+				isEXR = false;
+				break;
+			}
+		}
+
+		if (isEXR)
+			return CMImageSourceFormat::EXR;
+
+		return CMImageSourceFormat::None;
+	}
+	
     CMImage::CMImage()
     {
 		
@@ -20,7 +68,7 @@ namespace CE
 
     CMImage::~CMImage()
     {
-
+		
     }
 
     CMImageInfo CMImage::GetImageInfoFromFile(const IO::Path& filePath)
@@ -42,22 +90,14 @@ namespace CE
 			return info;
 		}
 
-		u8 bytes[8] = {};
-		stream.Read(bytes, 8);
+		u8 bytes[10] = {};
+		stream.Read(bytes, 10);
+		stream.Seek(0);
 
-		bool isPng = true;
-		for (int i = 0; i < 8; i++)
-		{
-			if (bytes[i] != pngHeader[i])
-			{
-				isPng = false;
-				break;
-			}
-		}
+		auto sourceType = GetSourceFormatFromHeader(bytes);
 
-		if (isPng) // Is PNG
+		if (sourceType == CMImageSourceFormat::PNG) // Is PNG
 		{
-			stream.Seek(0);
 			MemoryStream memStream = MemoryStream(stream.GetLength());
 			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
 			return GetPNGImageInfo(&memStream);
@@ -71,23 +111,15 @@ namespace CE
     {
 		CMImageInfo info{};
 
-		if (bufferLength < 8)
+		if (bufferLength < 10)
 		{
 			info.failureReason = "Invalid input buffer";
 			return info;
 		}
 
-		bool isPng = true;
-		for (int i = 0; i < 8; i++)
-		{
-			if (buffer[i] != pngHeader[i])
-			{
-				isPng = false;
-				break;
-			}
-		}
+		auto sourceType = GetSourceFormatFromHeader(buffer);
 
-		if (isPng)
+		if (sourceType == CMImageSourceFormat::PNG)
 		{
 			MemoryStream stream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
 			stream.SetBinaryMode(true);
@@ -221,22 +253,14 @@ namespace CE
 			return image;
 		}
 
-		u8 bytes[8] = {};
-		stream.Read(bytes, 8);
+		u8 bytes[10] = {};
+		stream.Read(bytes, 10);
+		stream.Seek(0);
 
-		bool isPng = true;
-		for (int i = 0; i < 8; i++)
-		{
-			if (bytes[i] != pngHeader[i])
-			{
-				isPng = false;
-				break;
-			}
-		}
+		auto sourceType = GetSourceFormatFromHeader(bytes);
 
-		if (isPng) // Is PNG
+		if (sourceType == CMImageSourceFormat::PNG) // Is PNG
 		{
-			stream.Seek(0);
 			MemoryStream memStream = MemoryStream(stream.GetLength());
 			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
 			return LoadPNGImage(&memStream);
@@ -250,23 +274,15 @@ namespace CE
     {
 		CMImage image{};
 
-		if (bufferLength < 8)
+		if (bufferLength < 10)
 		{
 			image.failureReason = "Invalid buffer length";
 			return image;
 		}
 
-		bool isPng = true;
-		for (int i = 0; i < 8; i++)
-		{
-			if (buffer[i] != pngHeader[i])
-			{
-				isPng = false;
-				break;
-			}
-		}
+		auto sourceType = GetSourceFormatFromHeader(buffer);
 
-		if (isPng) // Is PNG
+		if (sourceType == CMImageSourceFormat::PNG) // Is PNG
 		{
 			MemoryStream memStream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
 			return LoadPNGImage(&memStream);
@@ -285,7 +301,6 @@ namespace CE
 		image.bitsPerPixel = bitsPerPixel;
 		image.format = pixelFormat;
 		image.sourceFormat = CMImageSourceFormat::None;
-
 		return image;
 	}
 

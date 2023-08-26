@@ -20,7 +20,11 @@ namespace CE
 			ERR_InvalidArgs,
 		};
 
+#if PLATFORM_DESKTOP
+
 		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, ShaderReflection& outReflection);
+
+#endif
 
     private:
 

@@ -1,5 +1,6 @@
 #pragma once
 
+struct DxcBuffer;
 
 namespace CE
 {
@@ -66,15 +67,14 @@ namespace CE
 			return ERR_InvalidBuildFormat;
 		}
 
-		// Fully custom compilation
-        ErrorCode Compile(const IO::Path& filePath, Array<std::wstring>& args, void** outByteCode, u32* outByteCodeSize);
-
         const String& GetErrorMessage() const
         {
             return errorMessage;
         }
 
     protected:
+
+		ErrorCode BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
 
         String errorMessage = "";
 
