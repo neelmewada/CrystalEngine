@@ -31,7 +31,7 @@ namespace CE::Editor
 
 	SubClassType<AssetImporter> ShaderAssetDefinition::GetAssetImporterClass()
 	{
-		return SubClassType<ShaderAssetImporter>();
+		return GetStaticClass<ShaderAssetImporter>();
 	}
 
 } // namespace CE::Editor

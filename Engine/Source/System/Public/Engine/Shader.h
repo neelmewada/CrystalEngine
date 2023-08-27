@@ -4,6 +4,8 @@
 namespace CE
 {
 
+	namespace Editor { class ShaderImportJob; }
+
 	STRUCT()
 	struct SYSTEM_API ShaderBlob
 	{
@@ -12,11 +14,19 @@ namespace CE
 
 		void Release();
 
+		inline bool IsValid() const
+		{
+			return blob.IsValid() && reflectionInfo.IsValid();
+		}
+
 		FIELD()
 		ShaderBlobFormat format = ShaderBlobFormat::Spirv;
 
 		FIELD()
 		ShaderStage shaderStage = ShaderStage::None;
+
+		FIELD()
+		ShaderReflection reflectionInfo{};
 
 		FIELD()
 		BinaryBlob blob{};
@@ -51,12 +61,15 @@ namespace CE
 
 	protected:
 
-		FIELD(ReadOnly)
+		FIELD()
 		Array<ShaderVariant> variants{};
 
-		FIELD(ReadOnly)
-		ShaderStage stageMask = ShaderStage::Default;
+		FIELD()
+		ShaderStage stages = ShaderStage::Default;
 
+#if PAL_TRAIT_BUILD_EDITOR
+		friend class CE::Editor::ShaderImportJob;
+#endif
 	};
     
 } // namespace CE

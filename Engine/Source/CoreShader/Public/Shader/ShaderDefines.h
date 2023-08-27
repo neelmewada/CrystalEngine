@@ -22,15 +22,15 @@ namespace CE
 	enum class ShaderResourceType
 	{
 		None = 0,
+		/// Uniform buffer in vulkan terms
 		ConstantBuffer,
+		/// Storage Buffer in vulkan terms
 		StructuredBuffer,
 		SamplerState,
+		Texture1D,
 		Texture2D,
 		Texture3D,
-		TextureCube,
-		RWTexture2D,
-		RWTexture3D,
-		RWTextureCube,
+		TextureCube
 	};
 
 	STRUCT()
@@ -44,7 +44,7 @@ namespace CE
 		inline u32 GetBinding() const { return binding; }
 
 		inline const Name& GetName() const { return name; }
-		inline const Name& GetActualName() const { return actualName; }
+		inline const Name& GetInternalName() const { return internalName; }
 
 	protected:
 		
@@ -55,7 +55,7 @@ namespace CE
 		Name name{};
 
 		FIELD(ReadOnly)
-		Name actualName{};
+		Name internalName{};
 
 		FIELD(ReadOnly)
 		ShaderResourceType resourceType = ShaderResourceType::None;
@@ -88,6 +88,7 @@ namespace CE
 		Array<SRGVariable> variables{};
 
 		friend class ShaderReflector;
+		friend struct ShaderReflection;
 	};
     
 	STRUCT()
@@ -96,7 +97,14 @@ namespace CE
 		CE_STRUCT(ShaderReflection)
 	public:
 
+		inline bool IsValid() const
+		{
+			return resourceGroups.NonEmpty();
+		}
+
 	protected:
+
+		SRGEntry& FindOrAdd(u32 frequencyId);
 
 		FIELD(ReadOnly)
 		Array<SRGEntry> resourceGroups{};

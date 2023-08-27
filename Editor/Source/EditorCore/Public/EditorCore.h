@@ -14,11 +14,6 @@
 #include "Project/CrystalProject.h"
 #include "Project/ProjectManager.h"
 
-// Shader
-#include "Shader/ShaderCompiler.h"
-#include "Shader/ShaderReflector.h"
-#include "Shader/ShaderProcessor.h"
-
 namespace CE::Editor
 {
     

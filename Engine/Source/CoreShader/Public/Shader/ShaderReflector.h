@@ -20,13 +20,20 @@ namespace CE
 			ERR_InvalidArgs,
 		};
 
-#if PLATFORM_DESKTOP
-
 		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, ShaderReflection& outReflection);
 
-#endif
+		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, ShaderReflection& outReflection)
+		{
+			if (shaderFormat == ShaderBlobFormat::Spirv)
+			{
+				return ReflectSpirv(byteCode, byteSize, outReflection);
+			}
+			return ERR_InvalidFormat;
+		}
 
     private:
+
+		
 
     };
 

@@ -28,7 +28,10 @@
 #define __CONCATENATE2(arg1, arg2)  arg1 ## arg2
 
 #define SRG_PerScene(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerScene_Frequency)))
+#define SRG_PerPass(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerPass_Frequency)))
 #define SRG_PerMaterial(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerMaterial_Frequency)))
+#define SRG_PerObject(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerObject_Frequency)))
+#define SRG_PerDraw(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerDraw_Frequency)))
 
 //*****************************************************************************************************************************************
 
@@ -54,17 +57,32 @@ struct SceneBuffer
     float3 cameraPos;
 };
 
+struct ObjectData
+{
+    float4 model;
+};
+
+struct DrawData
+{
+    int index;
+};
+
 ConstantBuffer<SceneBuffer> buff : SRG_PerScene(b);
 ConstantBuffer<SceneBuffer> buffer2 : SRG_PerScene(b);
 
-Texture2D _MainTex : SRG_PerMaterial(t);
+TextureBuffer<ObjectData> _Object : SRG_PerPass(t);
+
+Texture2D _MainTex[10] : SRG_PerMaterial(t);
+RWTexture2D<float4> _DataTex : SRG_PerMaterial(u);
 SamplerState _MainTexSampler : SRG_PerMaterial(t);
+
+ConstantBuffer<DrawData> _DrawData : SRG_PerDraw(b);
 
 // vertex shader function
 v2p VertMain(VertexInfo input)
 {
     v2p output;
-    output.position = float4(input.position * buff.cameraPos * buffer2.lightColor, 1.0);
+    output.position = float4(_Object.model.rgb * input.position * buff.cameraPos * buffer2.lightColor, 1.0);
     output.uv = float2(0, 0);
     output.color = float3(1, 1, 0);
     return output;
@@ -73,6 +91,7 @@ v2p VertMain(VertexInfo input)
 // pixel shader function
 float4 FragMain(v2p input) : SV_TARGET
 {
-    float4 col = _MainTex.Sample(_MainTexSampler, float2(0, 0));
+    float4 col = _MainTex[_DrawData.index].Sample(_MainTexSampler, float2(0, 0));
+    _DataTex[int2(1, 1)] = float4(0.5, 0.5, 0.5, 1);
     return float4(buff.lightColor * col.rgb, 0.0);
 }

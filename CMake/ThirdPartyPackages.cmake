@@ -44,11 +44,11 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
         INTERFACE 
             "SPIRV" 
             "SPIRV-Tools" 
-            "spirv-cross-reflect" 
-            "spirv-cross-core" 
-            "spirv-cross-cpp"
-            "spirv-cross-glsl"
-            "spirv-cross-hlsl"
+            "spirv-cross-reflect$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>" 
+            "spirv-cross-core$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>" 
+            "spirv-cross-cpp$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
+            "spirv-cross-glsl$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
+            "spirv-cross-hlsl$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
     )
 
     ce_add_rt_deps(SpirvTools

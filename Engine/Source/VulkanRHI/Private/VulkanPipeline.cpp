@@ -29,9 +29,9 @@ namespace CE
 		binding0.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
 		binding0.pImmutableSamplers = nullptr;
 
-		Array<VkDescriptorSetLayoutCreateInfo> setLayoutInfos{};
+		List<VkDescriptorSetLayoutCreateInfo> setLayoutInfos{};
 
-		Array<VkDescriptorSetLayout> setLayouts{};
+		List<VkDescriptorSetLayout> setLayouts{};
 
 		VkPipelineLayoutCreateInfo layoutCI{};
 		layoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

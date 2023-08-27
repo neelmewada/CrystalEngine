@@ -125,12 +125,14 @@ namespace CE
 			wcharArgs.Add(arg.data());
 		}
 
+		wcharArgs.Add(L"-spirv");
+
 		Array<std::wstring> includeSearchPathsWString = config.includeSearchPaths.Transform<std::wstring>([&](IO::Path& path) -> std::wstring
 			{
 				return ToWString(path.GetString());
 			});
 
-		for (const auto includePath : includeSearchPathsWString)
+		for (const auto& includePath : includeSearchPathsWString)
 		{
 			wcharArgs.AddRange({ L"-I", includePath.data() });
 		}
@@ -165,12 +167,12 @@ namespace CE
 		CComPtr<IDxcResult> results;
 		status = impl->compiler->Compile(
 			&buffer,                // Source buffer.
-			wcharArgs.GetData(),                // Array of pointers to arguments.
+			wcharArgs.GetData(),     // Array of pointers to arguments.
 			wcharArgs.GetSize(),      // Number of arguments.
-			impl->includeHandler,        // User-provided interface to handle #include directives (optional).
-			IID_PPV_ARGS(&results) // Compiler output status, buffer, and errors.
+			impl->includeHandler,    // User-provided interface to handle #include directives (optional).
+			IID_PPV_ARGS(&results)  // Compiler output status, buffer, and errors.
 		);
-
+		
 		defer(
 			results.Release();
 		);
