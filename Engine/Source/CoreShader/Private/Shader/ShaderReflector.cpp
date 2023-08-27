@@ -93,6 +93,42 @@ namespace CE
 			auto& entry = outReflection.FindOrAdd(set);
 			entry.variables.Add(variable);
 		}
+
+		int numStorageImages = resources.storage_images.size();
+		for (int i = 0; i < numStorageImages; i++)
+		{
+			auto storageImage = resources.storage_images[i];
+
+			String name = reflection.get_name(storageImage.id);
+			auto id = storageImage.id;
+			String internalName = reflection.get_name(storageImage.id);
+
+			auto type = reflection.get_type(storageImage.type_id);
+			int count = 1;
+			if (type.array.size() > 0)
+				count = type.array[0];
+
+			u32 set = reflection.get_decoration(id, spv::DecorationDescriptorSet);
+			u32 binding = reflection.get_decoration(id, spv::DecorationBinding);
+
+			SRGVariable variable{};
+			variable.binding = binding;
+			variable.name = name;
+			variable.internalName = internalName;
+			if (type.image.dim == spv::Dim2D)
+			{
+				variable.resourceType = ShaderResourceType::RWTexture2D;
+			}
+			else
+			{
+				continue; // Invalid type
+			}
+			variable.resourceType = ShaderResourceType::RWTexture2D;
+			variable.count = count;
+
+			auto& entry = outReflection.FindOrAdd(set);
+			entry.variables.Add(variable);
+		}
 		
 		int numTextures = resources.separate_images.size();
 		for (int i = 0; i < numTextures; i++) // Texure1D/2D/3D/Cube (separate texture)

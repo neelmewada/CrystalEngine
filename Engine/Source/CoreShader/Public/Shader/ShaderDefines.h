@@ -30,7 +30,8 @@ namespace CE
 		Texture1D,
 		Texture2D,
 		Texture3D,
-		TextureCube
+		TextureCube,
+		RWTexture2D,
 	};
 
 	STRUCT()
