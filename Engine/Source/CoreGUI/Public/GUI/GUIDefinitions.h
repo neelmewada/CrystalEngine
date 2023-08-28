@@ -44,7 +44,8 @@ namespace CE::GUI
         WF_DockNodeHost = 1 << 29,  // Don't use! For internal use by Begin()/NewFrame()
 
         // Custom
-        WF_NoPadding = 1 << 30
+        WF_NoPadding = 1 << 30,
+		WF_DockSpace = 1 << 31,
     };
     ENUM_CLASS_FLAGS(WindowFlags);
 

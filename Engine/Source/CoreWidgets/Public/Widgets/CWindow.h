@@ -37,6 +37,7 @@ namespace CE::Widgets
         }
         
         virtual bool IsWindow() override { return true; }
+		virtual bool CanBeClosed() { return true; }
 
 		virtual Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
@@ -89,6 +90,9 @@ namespace CE::Widgets
         void RemoveSubWidget(CWidget* subWidget);
 
 		virtual void OnAfterComputeStyle() override;
+
+		/// Returns true if this window is the top-most dockspace
+		bool IsDockSpaceRoot();
 
 		inline bool IsDockSpaceWindow() const { return isDockSpaceWindow; }
 		void SetAsDockSpaceWindow(bool set);

@@ -22,8 +22,15 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
-		menuBar = CreateWidget<CMenuBar>(this, "EditorMenuBar");
-		toolBar = CreateWidget<CToolBar>(this, "EditorToolBar");
+		if (ShouldCreateMenuBar())
+		{
+			menuBar = CreateWidget<CMenuBar>(this, "EditorMenuBar");
+		}
+
+		if (ShouldCreateToolBar())
+		{
+			toolBar = CreateWidget<CToolBar>(this, "EditorToolBar");
+		}
 
 		SetStyleSheet(css);
 	}

@@ -11,6 +11,8 @@ namespace CE::Editor
 		SceneEditorWindow();
 		virtual ~SceneEditorWindow();
 
+		virtual bool CanBeClosed() override { return false; }
+
 	protected:
 
 		void Construct() override;

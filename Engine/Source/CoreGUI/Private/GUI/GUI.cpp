@@ -400,7 +400,28 @@ namespace CE::GUI
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		}
 
+		auto parentWindow = ImGui::GetCurrentWindowRead();
+		ImGuiID parentsParentDockId = 0;
+		ImGuiID parentDockId = 0;
+		if (parentWindow != nullptr)
+		{
+			parentDockId = parentWindow->DockId;
+		}
+
 		auto retVal = ImGui::Begin(name.GetCString(), isShown, (ImGuiWindowFlags)flags);
+
+		auto window = ImGui::GetCurrentWindow();
+
+		if (retVal && parentDockId == 0)//(flags & WF_DockSpace) && !(flags & WF_FullScreen))
+		{
+			auto dockId = window->DockId;
+			window->ExtraTitleBarHeight = 10;
+		}
+		else
+		{
+			auto window = ImGui::GetCurrentWindow();
+			window->ExtraTitleBarHeight = 0;
+		}
 
 		if (flags & GUI::WF_NoPadding)
 		{
@@ -419,8 +440,8 @@ namespace CE::GUI
 
 	COREGUI_API ID DockSpace(const String& id, Vec2 size, DockFlags dockFlags)
 	{
-		GUI::ID imguiID = ImGui::GetID(id.GetCString());
-		return ImGui::DockSpace(imguiID, ImVec2(size.x, size.y), (ImGuiDockNodeFlags)dockFlags);
+		auto dockId = ImGui::DockSpace(ImGui::GetID(id.GetCString()), ImVec2(size.x, size.y), (ImGuiDockNodeFlags)dockFlags);
+		return dockId;
 	}
 
 	COREGUI_API ID DockSpace(ID id, Vec2 size, DockFlags dockFlags)

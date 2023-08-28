@@ -13,6 +13,9 @@ namespace CE::Editor
 
 		bool IsLayoutCalculationRoot() override final { return true; }
 
+		virtual bool ShouldCreateToolBar() { return true; }
+		virtual bool ShouldCreateMenuBar() { return true; }
+
 	protected:
 
 		void Construct() override;

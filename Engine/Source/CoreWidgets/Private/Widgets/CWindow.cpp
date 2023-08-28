@@ -57,6 +57,23 @@ namespace CE::Widgets
 		//tabPadding = style.properties[CStylePropertyType::Padding].vector;
 	}
 
+	bool CWindow::IsDockSpaceRoot()
+	{
+		if (!IsDockSpaceWindow())
+			return false;
+
+		auto owner = GetOwner();
+
+		while (owner != nullptr)
+		{
+			if (owner->IsWindow() && ((CWindow*)owner)->IsDockSpaceWindow())
+				return false;
+			owner = owner->GetOwner();
+		}
+
+		return IsDockSpaceWindow();
+	}
+
 	void CWindow::SetAsDockSpaceWindow(bool set)
 	{
 		isDockSpaceWindow = set;
@@ -101,7 +118,7 @@ namespace CE::Widgets
 			if (isFullscreen)
 				windowFlags |= GUI::WF_FullScreen | GUI::WF_NoPadding;
 			if (IsDockSpaceWindow())
-				windowFlags |= GUI::WF_NoPadding;
+				windowFlags |= GUI::WF_NoPadding | GUI::WF_DockSpace;
 			if (IsDockSpaceWindow() && isFullscreen)
 				windowFlags |= GUI::WF_NoBringToFrontOnFocus;
 			if (menuBar != nullptr)
@@ -137,7 +154,7 @@ namespace CE::Widgets
 
 			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
 
-            GUI::BeginWindow(windowTitle, &isShown, windowFlags);
+            GUI::BeginWindow(windowTitle, CanBeClosed() ? &isShown : nullptr, windowFlags);
 
 			this->platformHandle = GUI::GetCurrentViewport()->platformHandle;
 			if (this->platformHandle != nullptr)
@@ -240,17 +257,24 @@ namespace CE::Widgets
 			}
 			
 			auto titleBarHeight = GUI::GetWindowTitleBarHeight();
+			bool pushChildCoords = (menuBar == nullptr && toolBar == nullptr);
 
-			//GUI::PushZeroingChildCoordinateSpace();
-			//GUI::PushChildCoordinateSpace(Vec2(0, titleBarHeight));
+			if (pushChildCoords)
+			{
+				GUI::PushZeroingChildCoordinateSpace();
+				GUI::PushChildCoordinateSpace(Vec2(0, titleBarHeight));
+			}
 
             for (CWidget* subWidget : attachedWidgets)
             {
 				subWidget->Render();
             }
 
-			//GUI::PopChildCoordinateSpace();
-			//GUI::PopChildCoordinateSpace();
+			if (pushChildCoords)
+			{
+				GUI::PopChildCoordinateSpace();
+				GUI::PopChildCoordinateSpace();
+			}
 			
 			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
 
