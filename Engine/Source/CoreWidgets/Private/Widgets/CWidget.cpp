@@ -339,7 +339,7 @@ namespace CE::Widgets
 				auto childCount = YGNodeGetChildCount(node);
 				YGNodeInsertChild(node, subWidget->node, childCount);
 			}
-			else // SubWidget requires independent layout calculation. Ex: Child window, Splitter view, etc
+			else // SubWidget requires independent layout calculation. Ex: Child window, Splitter view, etc. Insert empty (detached) node for that.
 			{
 				YGNodeSetMeasureFunc(node, nullptr);
 
@@ -354,21 +354,21 @@ namespace CE::Widgets
 		if (subobject == nullptr)
 			return;
 
-		if (subobject->GetClass()->IsSubclassOf<CMenu>())
+		if (subobject->IsOfType<CMenu>())
 		{
 			CMenu* menu = (CMenu*)subobject;
 			attachedMenus.Remove(menu);
 			menu->ownerWindow = nullptr;
 			menu->parent = nullptr;
 
-			if (subobject->GetClass()->IsSubclassOf<CContextMenu>() && contextMenu != nullptr && contextMenu == (CContextMenu*)subobject)
+			if (subobject->IsOfType<CContextMenu>() && contextMenu != nullptr && contextMenu == (CContextMenu*)subobject)
 			{
 				contextMenu->parent = nullptr;
 				contextMenu->ownerWindow = nullptr;
 				contextMenu = nullptr;
 			}
 		}
-		else if (subobject->GetClass()->IsSubclassOf<CWidget>())
+		else if (subobject->IsOfType<CWidget>())
 		{
 			CWidget* subWidget = (CWidget*)subobject;
 			attachedWidgets.Remove(subWidget);

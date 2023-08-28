@@ -22,7 +22,7 @@ namespace CE::Editor
 
         void RegisterTypes() override
         {
-
+			
         }
     };
 }

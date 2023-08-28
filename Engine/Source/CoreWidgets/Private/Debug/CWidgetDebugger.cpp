@@ -269,6 +269,21 @@ namespace CE::Widgets
 					{
 						display = String::Format("{}", field->GetFieldValue<f32>(debugWidget));
 					}
+					else if (fieldTypeId == TYPEID(SubClassType<Object>))
+					{
+						ClassType* value = field->GetFieldValue<SubClassType<Object>>(debugWidget);
+						display = String::Format("{}", value == nullptr ? "" : value->GetTypeName());
+					}
+					else if (fieldTypeId == TYPEID(ClassType))
+					{
+						ClassType* value = field->GetFieldValue<ClassType*>(debugWidget);
+						display = String::Format("{}", value == nullptr ? "" : value->GetTypeName());
+					}
+					else if (fieldTypeId == TYPEID(StructType))
+					{
+						StructType* value = field->GetFieldValue<StructType*>(debugWidget);
+						display = String::Format("{}", value == nullptr ? "" : value->GetTypeName());
+					}
 					else if (fieldDeclType != nullptr && fieldDeclType->IsAssignableTo(TYPEID(Object)))
 					{
 						Object* object = field->GetFieldValue<Object*>(debugWidget);

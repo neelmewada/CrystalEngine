@@ -302,6 +302,11 @@ namespace CE
 			{
 				memcpy(destField->GetFieldInstance(destInstance), GetFieldInstance(srcInstance), this->GetFieldSize());
 			}
+			else if (fieldTypeId == TYPEID(BinaryBlob)) // Binary blob
+			{
+				const BinaryBlob& blob = GetFieldValue<BinaryBlob>(srcInstance);
+				destField->SetFieldValue(destInstance, blob);
+			}
 			else
 			{
 				return false;
@@ -322,6 +327,16 @@ namespace CE
 		{
 			Object* objectPtr = this->GetFieldValue<Object*>(srcInstance);
 			destField->SetFieldValue(destInstance, objectPtr);
+		}
+		else if (GetDeclarationTypeId() == TYPEID(ClassType))
+		{
+			ClassType* type = this->GetFieldValue<ClassType*>(srcInstance);
+			destField->SetFieldValue(destInstance, type);
+		}
+		else if (GetDeclarationTypeId() == TYPEID(StructType))
+		{
+			StructType* type = this->GetFieldValue<StructType*>(srcInstance);
+			destField->SetFieldValue(destInstance, type);
 		}
 		else
 		{
