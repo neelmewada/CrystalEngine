@@ -186,7 +186,7 @@ namespace CE
             u64 dataSizePos = stream->GetCurrentPosition();
             *stream << (u32)0; // Total data byte size, excluding itself
 
-            for (const auto& [uuid, object] : map)
+            for (const auto& object : map)
             {
                 if (object == nullptr)
                     continue;

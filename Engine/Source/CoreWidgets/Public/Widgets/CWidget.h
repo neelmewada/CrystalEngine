@@ -213,6 +213,8 @@ namespace CE::Widgets
 		void AddSubWidget(CWidget* subWidget);
 		void RemoveSubWidget(CWidget* subWidget);
 
+		void RemoveAllSubWidgets();
+
 		virtual bool IsSubWidgetAllowed(ClassType* subWidgetClass);
 
 		inline CContextMenu* GetContextMenu() const { return contextMenu; }

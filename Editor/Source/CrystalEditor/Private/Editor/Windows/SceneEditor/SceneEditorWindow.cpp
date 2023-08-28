@@ -53,11 +53,12 @@ namespace CE::Editor
 			auto editMenu = CreateWidget<CMenu>(editMenuItem, "EditMenu");
 			editMenuItem->SetSubMenu(editMenu);
 			{
-				for (int i = 0; i < 8; i++)
-				{
-					auto item = CreateWidget<CMenuItem>(editMenu, "EditMenuSubItem");
-					item->SetText(String::Format("Edit Item {}", i));
-				}
+				auto projectSettingsItem = CreateWidget<CMenuItem>(editMenu, "ProjectSettingsMenuItem");
+				projectSettingsItem->SetText("Project Settings...");
+				Object::Bind(projectSettingsItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [](CMenuItem* item)
+					{
+						CrystalEditorWindow::Get()->ShowProjectSettingsWindow();
+					});
 			}
 
 			auto toolsMenuItem = CreateWidget<CMenuItem>(menuBar, "ToolsMenuItem");

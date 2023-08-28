@@ -43,6 +43,13 @@ namespace CE::Editor
 		sceneEditorWindow = CreateWidget<SceneEditorWindow>(this, "SceneEditor");
 	}
 
+	void CrystalEditorWindow::ShowProjectSettingsWindow()
+	{
+		if (settingsWindow == nullptr)
+			settingsWindow = CreateWidget<ProjectSettingsWindow>(this, "ProjectSettingsWindow");
+		settingsWindow->Show();
+	}
+
 	void CrystalEditorWindow::OnDrawGUI()
 	{
 		Super::OnDrawGUI();

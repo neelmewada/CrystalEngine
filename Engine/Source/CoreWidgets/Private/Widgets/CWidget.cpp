@@ -1313,6 +1313,18 @@ namespace CE::Widgets
 		SetNeedsLayout();
     }
 
+	void CWidget::RemoveAllSubWidgets()
+	{
+		for (int i = attachedWidgets.GetSize() - 1; i >= 0; i--)
+		{
+			DetachSubobject(attachedWidgets[i]);
+		}
+		attachedWidgets.Clear();
+
+		SetNeedsStyle();
+		SetNeedsLayout();
+	}
+
 	bool CWidget::IsSubWidgetAllowed(ClassType* subWidgetClass)
 	{
 		return subWidgetClass->IsSubclassOf<CWidget>();

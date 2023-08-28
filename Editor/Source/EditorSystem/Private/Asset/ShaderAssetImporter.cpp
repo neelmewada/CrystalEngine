@@ -149,7 +149,7 @@ namespace CE::Editor
 			shaderPackage = Package::LoadPackage(nullptr, outPath, LOAD_Full);
 			if (shaderPackage != nullptr && shaderPackage->GetSubObjectCount() > 0)
 			{
-				for (auto [uuid, subobject] : shaderPackage->GetSubObjectMap())
+				for (auto subobject : shaderPackage->GetSubObjectMap())
 				{
 					if (subobject != nullptr && subobject->IsOfType<Shader>())
 					{

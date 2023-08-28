@@ -23,17 +23,9 @@ namespace CE
             return (u32)objects.GetSize();
         }
         
-		FORCE_INLINE Object* FindObject(UUID uuid) const
-        {
-			if (!objects.KeyExists(uuid))
-				return nullptr;
-            return objects.Get(uuid);
-        }
+		Object* FindObject(UUID uuid) const;
         
-		FORCE_INLINE bool ObjectExists(UUID uuid) const
-        {
-            return objects.KeyExists(uuid);
-        }
+		bool ObjectExists(UUID uuid) const;
         
         void AddObject(Object* object);
         
@@ -50,7 +42,8 @@ namespace CE
 		const auto end() const { return objects.end(); }
 
     private:
-        HashMap<UUID, Object*> objects{};
+        //HashMap<UUID, Object*> objects{};
+		Array<Object*> objects{};
     };
     
 } // namespace CE

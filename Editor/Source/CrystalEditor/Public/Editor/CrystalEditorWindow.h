@@ -4,6 +4,7 @@ namespace CE::Editor
 {
 	class EditorWindow;
 	class SceneEditorWindow;
+	class ProjectSettingsWindow;
 
     CLASS()
 	class CRYSTALEDITOR_API CrystalEditorWindow : public CWindow
@@ -18,6 +19,10 @@ namespace CE::Editor
 
 		void Construct() override;
 
+		// - Public API -
+
+		void ShowProjectSettingsWindow();
+
 	protected:
 
 		void OnDrawGUI() override;
@@ -25,6 +30,7 @@ namespace CE::Editor
 		CPopup* assetImportPopup = nullptr;
 
 		SceneEditorWindow* sceneEditorWindow = nullptr;
+		ProjectSettingsWindow* settingsWindow = nullptr;
 	};
 
 } // namespace CE::Editor

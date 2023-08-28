@@ -238,11 +238,19 @@ namespace CE::Widgets
 					GUI::SetWindowToolBarHeight(toolBarHeight);
 				}
 			}
+			
+			auto titleBarHeight = GUI::GetWindowTitleBarHeight();
+
+			//GUI::PushZeroingChildCoordinateSpace();
+			//GUI::PushChildCoordinateSpace(Vec2(0, titleBarHeight));
 
             for (CWidget* subWidget : attachedWidgets)
             {
 				subWidget->Render();
             }
+
+			//GUI::PopChildCoordinateSpace();
+			//GUI::PopChildCoordinateSpace();
 			
 			GUI::PushStyleVar(GUI::StyleVar_FramePadding, tabPadding);
 

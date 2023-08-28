@@ -421,7 +421,6 @@ namespace CE
 
     void ClassType::CacheSuperTypes()
     {
-		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (superTypesCached)
             return;
 

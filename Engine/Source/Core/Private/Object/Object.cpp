@@ -46,7 +46,7 @@ namespace CE
 		// Delete all attached subobjects
 		if (attachedObjects.GetObjectCount() > 0)
 		{
-			for (auto [_, subobject] : attachedObjects)
+			for (auto subobject : attachedObjects)
 			{
 				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
 				subobject->RequestDestroy();
@@ -140,7 +140,7 @@ namespace CE
 			return true;
 		}
 
-		for (auto [_, subobject] : attachedObjects)
+		for (auto subobject : attachedObjects)
 		{
 			if (subobject->HasSubobject(searchObject))
 				return true;
@@ -212,7 +212,7 @@ namespace CE
 
 	void Object::FetchObjectReferences(HashMap<UUID, Object*>& outReferences)
 	{
-		for (const auto& [uuid, subobject] : attachedObjects)
+		for (const auto& subobject : attachedObjects)
 		{
 			if (subobject == nullptr || uuid == 0)
 				continue;

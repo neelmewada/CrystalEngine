@@ -3,12 +3,28 @@
 
 namespace CE
 {
+    Object* ObjectMap::FindObject(UUID uuid) const
+    {
+		for (auto object : objects)
+		{
+			if (object != nullptr && object->GetUuid() == uuid)
+			{
+				return object;
+			}
+		}
+		return nullptr;
+    }
 
-	void ObjectMap::AddObject(Object* object)
+	bool ObjectMap::ObjectExists(UUID uuid) const
 	{
-        if (object == nullptr || objects.KeyExists(object->GetUuid()))
+		return objects.Exists([=](Object* obj) { return obj != nullptr && obj->GetUuid() == uuid; });
+	}
+
+    void ObjectMap::AddObject(Object* object)
+	{
+        if (object == nullptr || objects.Exists(object))
             return;
-        objects.Add({ object->GetUuid(), object });
+        objects.Add(object);
 	}
 
 	void ObjectMap::RemoveObject(Object* object)
@@ -16,16 +32,16 @@ namespace CE
 		if (object == nullptr)
 			return;
 		
-		objects.Remove(object->GetUuid());
+		objects.Remove(object);
 	}
 
 	void ObjectMap::RemoveObject(UUID uuid)
 	{
-		if (!objects.KeyExists(uuid))
+		if (!ObjectExists(uuid))
 			return;
 
 		auto objectRef = objects[uuid];
-		objects.Remove(uuid);
+		objects.Remove(objectRef);
 	}
 
 	void ObjectMap::RemoveAll()

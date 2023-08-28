@@ -141,7 +141,7 @@ namespace CE::Editor
 			texturePackage = Package::LoadPackage(nullptr, outPath, LOAD_Full);
 			if (texturePackage != nullptr && texturePackage->GetSubObjectCount() > 0)
 			{
-				for (auto [uuid, subobject] : texturePackage->GetSubObjectMap())
+				for (auto subobject : texturePackage->GetSubObjectMap())
 				{
 					if (subobject != nullptr && subobject->IsOfType<Texture2D>())
 					{

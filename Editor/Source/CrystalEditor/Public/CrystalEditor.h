@@ -4,6 +4,7 @@
 #include "CoreRHI.h"
 #include "CoreWidgets.h"
 #include "EditorCore.h"
+#include "EditorWidgets.h"
 
 // Panels
 #include "Editor/Panels/EditorPanel.h"
@@ -22,6 +23,8 @@
 
 // Editor Windows
 #include "Editor/Windows/EditorWindow.h"
+#include "Editor/Windows/ProjectSettingsWindow.h"
+
 #include "Editor/Windows/SceneEditor/SceneEditorWindow.h"
 
 namespace CE

@@ -201,7 +201,7 @@ namespace CE
 
 			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
-				for (const auto& [uuid, object] : map)
+				for (const auto& object : map)
 				{
 					if (object == nullptr)
 						continue;
@@ -250,7 +250,7 @@ namespace CE
 
 			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
-				for (const auto& [uuid, object] : map)
+				for (const auto& object : map)
 				{
 					if (object == nullptr)
 						continue;
@@ -297,7 +297,7 @@ namespace CE
 
 			if (isFullyLoaded && GetSubObjectCount() > 0)
 			{
-				for (const auto& [uuid, object] : map)
+				for (const auto& object : map)
 				{
 					if (object == nullptr)
 						continue;
@@ -343,7 +343,7 @@ namespace CE
 
 		if (isFullyLoaded && GetSubObjectCount() > 0)
 		{
-			for (const auto& [uuid, object] : map)
+			for (const auto& object : map)
 			{
 				if (object != nullptr && object->IsOfType<Asset>())
 					return ((Asset*)object)->GetSourceAssetRelativePath();
