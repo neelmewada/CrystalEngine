@@ -296,6 +296,7 @@ namespace CE::GUI
 
 	COREGUI_API bool BeginTable(const Rect& localRect, ID id, const String& label, int columnCount, TableFlags flags = TableFlags_None);
 	COREGUI_API bool BeginTable(const String& label, int columnCount, TableFlags flags = TableFlags_None, const Vec2& outerSize = {0, 0}, f32 innerWidth = 0);
+	COREGUI_API void TableSetMinColumnWidth(float minColumnWidth);
 
 	COREGUI_API void EndTable();
 

@@ -6327,6 +6327,15 @@ namespace CE::GUI
 		return ImGui::BeginTable(label.GetCString(), columnCount, flags, ImVec2(outerSize.x, outerSize.y), innerWidth);
 	}
 
+	COREGUI_API void TableSetMinColumnWidth(float minColumnWidth)
+	{
+		auto table = GImGui->CurrentTable;
+		if (table != nullptr)
+		{
+			table->MinColumnWidth = minColumnWidth;
+		}
+	}
+
 	COREGUI_API void EndTable()
 	{
 		ImGui::EndTable();

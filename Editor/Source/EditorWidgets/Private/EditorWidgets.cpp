@@ -13,10 +13,14 @@ namespace CE::Editor
         void StartupModule() override
         {
 			GetStyleManager()->AddResourceSearchModule(MODULE_NAME);
+
+			onClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&EditorWidgetsModule::OnClassRegistered, this));
         }
 
         void ShutdownModule() override
         {
+			CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(onClassRegistered);
+
 			GetStyleManager()->RemoveResourceSearchModule(MODULE_NAME);
         }
 
@@ -24,6 +28,13 @@ namespace CE::Editor
         {
 			
         }
+
+		void OnClassRegistered(ClassType* classType)
+		{
+
+		}
+
+		DelegateHandle onClassRegistered = 0;
     };
 }
 

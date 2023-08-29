@@ -1,11 +1,25 @@
 #include "CoreWidgets.h"
 
-static const CE::String css = R"(
-
-)";
-
 namespace CE::Widgets
 {
+	CSplitViewContainer::CSplitViewContainer()
+	{
+	}
+
+	CSplitViewContainer::~CSplitViewContainer()
+	{
+	}
+
+	void CSplitViewContainer::Construct()
+	{
+		Super::Construct();
+	}
+
+	void CSplitViewContainer::OnDrawGUI()
+	{
+		Super::OnDrawGUI();
+	}
+
     CSplitView::CSplitView()
     {
 
@@ -20,11 +34,9 @@ namespace CE::Widgets
     {
 		Super::Construct();
 
-		SetStyleSheet(css);
+		left = CreateWidget<CSplitViewContainer>(this, "SplitViewLeft");
 
-		left = CreateWidget<CLayoutGroup>(this, "SplitViewLeft");
-
-		right = CreateWidget<CLayoutGroup>(this, "SplitViewRight");
+		right = CreateWidget<CSplitViewContainer>(this, "SplitViewRight");
     }
 
 	Vec2 CSplitView::CalculateIntrinsicContentSize(f32 width, f32 height)
@@ -40,7 +52,7 @@ namespace CE::Widgets
 		}
 		if (height > 0 && !IsNan(height))
 		{
-			left->sizeConstraint.height = right->sizeConstraint.height = height;
+			//left->sizeConstraint.height = right->sizeConstraint.height = height;
 		}
 
 		left->SetNeedsStyle();
@@ -60,20 +72,49 @@ namespace CE::Widgets
     {
 		auto rect = GetComputedLayoutRect();
 		int count = attachedWidgets.GetSize();
+		DrawDefaultBackground();
 
 		GUI::PushChildCoordinateSpace(rect);
 
-		GUI::TableFlags flags = GUI::TableFlags_BordersInnerV;
+		GUI::TableFlags flags = GUI::TableFlags_BordersInnerV | GUI::TableFlags_Resizable;
 
 		if (GUI::BeginTable(rect, GetUuid(), "SplitView", 2, flags))
 		{
+			GUI::TableSetMinColumnWidth(25);
+
 			// Empty headers
 			GUI::TableNextRow();
 			GUI::TableNextColumn();
 			GUI::TableNextColumn();
 
 			// Actual rows/columns
+			GUI::TableNextRow();
 
+			// Column 0
+			GUI::TableNextColumn();
+			auto pos1 = GUI::GetCursorPos();
+			leftSize = GUI::GetContentRegionAvailableSpace().x;
+
+			GUI::PushChildCoordinateSpace(pos1);
+			left->Render();
+			GUI::PopChildCoordinateSpace();
+
+			// Column 1
+			GUI::TableNextColumn();
+			auto pos2 = GUI::GetCursorPos();
+			rightSize = GUI::GetContentRegionAvailableSpace().x;
+
+			GUI::PushChildCoordinateSpace(pos2);
+			right->Render();
+			GUI::PopChildCoordinateSpace();
+
+			auto split = leftSize / (leftSize + rightSize);
+			if (this->split != split)
+			{
+				auto owner = this->GetOwner();
+				this->split = split;
+				SetNeedsLayout();
+			}
 
 			GUI::EndTable();
 		}

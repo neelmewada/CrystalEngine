@@ -329,7 +329,7 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
         ItemSize(outer_rect);
         return false;
     }
-
+	
     // Acquire storage for the table
     ImGuiTable* table = g.Tables.GetOrAddByKey(id);
     const ImGuiTableFlags table_last_flags = table->Flags;

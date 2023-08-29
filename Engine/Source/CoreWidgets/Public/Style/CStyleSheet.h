@@ -23,7 +23,7 @@ namespace CE::Widgets
 
 		virtual void Clear() = 0;
 
-	protected:
+	corewidgets_protected_internal:
 
 		FIELD()
 		CStyleSheet* parent = nullptr;

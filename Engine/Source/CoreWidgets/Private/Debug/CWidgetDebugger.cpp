@@ -289,7 +289,7 @@ namespace CE::Widgets
 						Object* object = field->GetFieldValue<Object*>(debugWidget);
 						if (object != nullptr)
 						{
-							display = String::Format("{} ({})", object->GetName(), object->GetClass()->GetName());
+							display = String::Format("{} ({}) {{{:x}}}", object->GetName(), object->GetClass()->GetName(), object->GetUuid());
 						}
 					}
 					else if (field->IsEnumField())
@@ -404,6 +404,24 @@ namespace CE::Widgets
 					}
 				};
 
+			auto drawComputedEnumEntry = [](const String& name, EnumType* enumType, s64 value)
+				{
+					if (enumType == nullptr)
+						return;
+					EnumConstant* constant = enumType->FindConstantWithValue(value);
+					if (constant == nullptr)
+						return;
+
+					ImGui::TableNextRow();
+
+					ImGui::TableNextColumn();
+					GUI::TextColored(name, Color::RGBA(53, 212, 188));
+
+					ImGui::TableNextColumn();
+					const String& str = constant->GetName().GetString();
+					ImGui::Text(str.GetCString());
+				};
+
 			auto drawVec4Entry = [](const String& name, const Vec4& value)
 				{
 					ImGui::TableNextRow();
@@ -413,6 +431,18 @@ namespace CE::Widgets
 
 					ImGui::TableNextColumn();
 					String text = String::Format("{}px {}px {}px {}px", value.left, value.top, value.right, value.bottom);
+					ImGui::Text(text.GetCString());
+				};
+
+			auto drawVec2Entry = [](const String& name, const Vec2& value)
+				{
+					ImGui::TableNextRow();
+
+					ImGui::TableNextColumn();
+					GUI::TextColored(name, Color::RGBA(53, 212, 188));
+
+					ImGui::TableNextColumn();
+					String text = String::Format("{}px {}px", value.x, value.y);
 					ImGui::Text(text.GetCString());
 				};
 
@@ -454,6 +484,7 @@ namespace CE::Widgets
 			drawVec4Entry("padding", debugWidget->GetComputedLayoutPadding());
 			drawSingleEntry("width", debugWidget->GetComputedLayoutSize().width);
 			drawSingleEntry("height", debugWidget->GetComputedLayoutSize().height);
+			drawVec2Entry("screen-position", debugWidget->screenPos);
 			drawVec4Entry("border-width", debugWidget->GetComputedLayoutBorder());
 			drawComputedEntry("border-radius", debugWidget->GetComputedPropertyValue(CStylePropertyType::BorderRadius));
 			drawComputedEntry("border-color", debugWidget->GetComputedPropertyValue(CStylePropertyType::BorderColor));
@@ -466,6 +497,17 @@ namespace CE::Widgets
 			drawComputedEntry("shadow-offset", debugWidget->GetComputedPropertyValue(CStylePropertyType::ShadowOffset));
 			drawComputedEntry("font", debugWidget->GetComputedPropertyValue(CStylePropertyType::FontName));
 			drawComputedEntry("font-size", debugWidget->GetComputedPropertyValue(CStylePropertyType::FontSize));
+			
+			CFlexDirection flexDir = (CFlexDirection)YGNodeStyleGetFlexDirection(debugWidget->node);
+			drawComputedEnumEntry("flex-direction", GetStaticEnum<CFlexDirection>(), (s64)flexDir);
+			CAlign alignContent = (CAlign)YGNodeStyleGetAlignContent(debugWidget->node);
+			drawComputedEnumEntry("align-content", GetStaticEnum<CAlign>(), (s64)alignContent);
+			CAlign alignItems = (CAlign)YGNodeStyleGetAlignItems(debugWidget->node);
+			drawComputedEnumEntry("align-items", GetStaticEnum<CAlign>(), (s64)alignItems);
+			CAlign alignSelf = (CAlign)YGNodeStyleGetAlignSelf(debugWidget->node);
+			drawComputedEnumEntry("align-self", GetStaticEnum<CAlign>(), (s64)alignSelf);
+			CJustify justifyContent = (CJustify)YGNodeStyleGetJustifyContent(debugWidget->node);
+			drawComputedEnumEntry("justify-content", GetStaticEnum<CJustify>(), (s64)justifyContent);
 
 			ImGui::EndTable();
 		}
@@ -518,7 +560,8 @@ namespace CE::Widgets
 		if (!widget)
 			return;
 
-		bool isLeaf = widget->attachedWidgets.IsEmpty();
+		bool isSplitView = widget->IsOfType<CSplitView>();
+		bool isLeaf = widget->attachedWidgets.IsEmpty() && !isSplitView;
 
 		String widgetName = String::Format("{} ({})###{}", widget->GetName(), widget->GetClass()->GetName().GetLastComponent(), widget->GetUuid());
 		if (!foundWidgetInHierarchy && debugWidget != nullptr && debugWidget->IsWidgetPresentInParentHierarchy(widget))
@@ -543,9 +586,18 @@ namespace CE::Widgets
 
 		if (isOpen && !isLeaf)
 		{
-			for (auto widget : widget->attachedWidgets)
+			if (isSplitView)
 			{
-				DrawWidgetTreeEntry(widget);
+				CSplitView* splitView = (CSplitView*)widget;
+				DrawWidgetTreeEntry(splitView->left);
+				DrawWidgetTreeEntry(splitView->right);
+			}
+			else
+			{
+				for (auto widget : widget->attachedWidgets)
+				{
+					DrawWidgetTreeEntry(widget);
+				}
 			}
 
 			ImGui::TreePop();

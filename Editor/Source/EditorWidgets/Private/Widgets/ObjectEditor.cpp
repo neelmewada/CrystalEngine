@@ -116,19 +116,23 @@ namespace CE::Editor
 
 		DestroyAllSubWidgets();
 
-		CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "CollapsibleSection");
+		CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
 		section->SetTitle(category);
 		{
-			Array<FieldType*> fields = {};
+			CSplitView* splitView = CreateWidget<CSplitView>(section, "EditorSplitView");
+			auto splitViewLeft = splitView->GetLeft();
+			auto splitViewRight = splitView->GetRight();
 
 			for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
 			{
 				if ((category == "General" && !field->HasAttribute("Category")) ||
 					(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
 				{
-					fields.Add(field);
-					CLabel* label = CreateWidget<CLabel>(section, "FieldLabel");
-					label->SetText(field->GetName().GetString());
+					CLabel* label = CreateWidget<CLabel>(splitViewLeft, "FieldLabel");
+					label->SetText(field->GetDisplayName());
+
+					CLabel* label2 = CreateWidget<CLabel>(splitViewRight, "FieldValue");
+					label2->SetText("Field value here");
 				}
 			}
 		}
@@ -142,6 +146,8 @@ namespace CE::Editor
 	void ObjectEditorSection::Construct()
 	{
 		Super::Construct();
+
+		LoadStyleSheet("/EditorWidgets/Resources/ObjectEditorStyle.css");
 	}
 
 	void ObjectEditorSection::OnDrawGUI()

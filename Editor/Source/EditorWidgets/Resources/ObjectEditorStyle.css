@@ -3,3 +3,12 @@ ObjectEditorSection {
     flex-direction: column;
     justify-content: flex-start;
 }
+
+#EditorSplitView #SplitViewLeft {
+    justify-content: flex-start;
+    text-align: middle-left;
+}
+
+#FieldLabel {
+    text-align: middle-left;
+}

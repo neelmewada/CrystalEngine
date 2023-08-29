@@ -241,4 +241,10 @@ CToolBar {
 	font-size: 18px;
 }
 
+CSplitViewContainer {
+	padding: 10px 0 5px 10px;
+}
 
+#ObjectEditorCollapsible::header {
+	font-size: 16px;
+}

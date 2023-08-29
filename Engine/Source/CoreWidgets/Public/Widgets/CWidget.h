@@ -441,7 +441,9 @@ namespace CE::Widgets
 
 		Array<CMenu*> attachedMenus{};
 		
+		FIELD(ReadOnly)
 		CStyleSheet* stylesheet = nullptr;
+
 		String stylesheetText = "";
 
 		YGNodeRef node{};
@@ -461,6 +463,7 @@ namespace CE::Widgets
 	corewidgets_private_internal:
 
 		// Internals
+
 		Vec2 screenPos{};
 		Vec2 prevHoverPos{};
 		b8 prevLeftMouseDown = false;

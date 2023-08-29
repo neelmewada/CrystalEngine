@@ -72,6 +72,8 @@ namespace CE::Editor
 
 		FIELD(ReadOnly)
 		Vec2 size = Vec2();
+
+		
 	};
 
 } // namespace CE::Editor

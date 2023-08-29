@@ -15,6 +15,10 @@ namespace CE::Editor
 
 		void Construct() override;
 
+		FIELD()
+		CSplitView* splitView = nullptr;
+
+		
 		ObjectEditor* editor = nullptr;
 	};
 

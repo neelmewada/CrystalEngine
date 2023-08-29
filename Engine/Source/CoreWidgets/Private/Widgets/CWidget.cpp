@@ -347,6 +347,14 @@ namespace CE::Widgets
 				YGNodeInsertChild(node, subWidget->detachedNode, childCount);
 			}
 		}
+		else if (subobject->IsOfType<CWidget>())
+		{
+			CWidget* widget = (CWidget*)subobject;
+			if (widget != this)
+			{
+				widget->parent = this;
+			}
+		}
 	}
 
 	void CWidget::OnSubobjectDetached(Object* subobject)
@@ -460,6 +468,8 @@ namespace CE::Widgets
 
 			if (IsDisabled()) GUI::EndDisabled();
 
+			// Always calculate layout twice if it's first draw call (on next draw).
+			// So internal state can get updated children sizes & positions from ImGui, especially the window sizes.
 			if (firstDraw)
 			{
 				firstDraw = false;
@@ -822,6 +832,10 @@ namespace CE::Widgets
 	void CWidget::SetNeedsLayout(bool set, bool recursive)
 	{
 		needsLayout = set;
+		if (set && YGNodeGetChildCount(node) == 0)
+		{
+			YGNodeMarkDirty(node);
+		}
 
 		if (!recursive)
 			return;
