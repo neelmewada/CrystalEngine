@@ -37,6 +37,11 @@ namespace CE::Widgets
 
 		FORCE_INLINE CLayoutGroup* GetLeft() const { return left; }
 		FORCE_INLINE CLayoutGroup* GetRight() const { return right; }
+
+		FORCE_INLINE void SetInitialSplit(f32 split)
+		{
+			this->split = split;
+		}
 	
 	corewidgets_protected_internal:
 

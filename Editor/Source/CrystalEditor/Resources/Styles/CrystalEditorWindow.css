@@ -14,3 +14,7 @@ EditorPanel::tab {
 SceneEditorWindow {
     row-gap: 0;
 }
+
+#ProjectSettingsLeftView {
+    background: rgb(30, 30, 30);
+}

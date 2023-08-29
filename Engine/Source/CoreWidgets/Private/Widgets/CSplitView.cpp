@@ -52,7 +52,7 @@ namespace CE::Widgets
 		}
 		if (height > 0 && !IsNan(height))
 		{
-			//left->sizeConstraint.height = right->sizeConstraint.height = height;
+			left->sizeConstraint.height = right->sizeConstraint.height = height;
 		}
 
 		left->SetNeedsStyle();

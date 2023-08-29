@@ -19,11 +19,13 @@ namespace CE::Editor
 		SetTitle("Project Settings");
 		SetFullscreen(false);
 
-		//splitView = CreateWidget<CSplitView>(this, "ProjectSettingsSplitView");
+		splitView = CreateWidget<CSplitView>(this, "ProjectSettingsSplitView");
+		splitView->SetInitialSplit(0.25f);
 
-		editor = CreateWidget<ObjectEditor>(this, "ObjectEditor");
+		auto leftView = CreateWidget<CLayoutGroup>(splitView->GetLeft(), "ProjectSettingsLeftView");
+
+		editor = CreateWidget<ObjectEditor>(splitView->GetRight(), "ProjectSettingsObjectEditor");
 		editor->SetTargets({ GetSettings<ProjectSettings>() });
-		
 	}
 
 } // namespace CE::Editor
