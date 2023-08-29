@@ -213,7 +213,8 @@ namespace CE::Widgets
 		void AddSubWidget(CWidget* subWidget);
 		void RemoveSubWidget(CWidget* subWidget);
 
-		void RemoveAllSubWidgets();
+		Array<CWidget*> RemoveAllSubWidgets();
+		void DestroyAllSubWidgets();
 
 		virtual bool IsSubWidgetAllowed(ClassType* subWidgetClass);
 
@@ -383,7 +384,7 @@ namespace CE::Widgets
 		virtual void OnSubobjectAttached(Object* subobject) override;
 		virtual void OnSubobjectDetached(Object* subobject) override;
 
-	protected: 
+	corewidgets_protected_internal:
 
 		// Helpers
 
@@ -435,6 +436,9 @@ namespace CE::Widgets
 		FIELD()
 		b8 needsStyle = true;
 
+		FIELD()
+		Vec2 sizeConstraint = Vec2(YGUndefined, YGUndefined);
+
 		Array<CMenu*> attachedMenus{};
 		
 		CStyleSheet* stylesheet = nullptr;
@@ -454,7 +458,7 @@ namespace CE::Widgets
 		b8 isFocused = false;
 		b8 isLeftMousePressedInside = false;
 
-	private:
+	corewidgets_private_internal:
 
 		// Internals
 		Vec2 screenPos{};

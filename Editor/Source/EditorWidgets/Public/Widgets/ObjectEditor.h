@@ -2,6 +2,35 @@
 
 namespace CE::Editor
 {
+	CLASS()
+	class EDITORWIDGETS_API ObjectEditorSection : public CLayoutGroup
+	{
+		CE_CLASS(ObjectEditorSection, CLayoutGroup)
+	public:
+
+		ObjectEditorSection();
+		virtual ~ObjectEditorSection();
+
+		void Construct(ClassType* type, const String& category, const Array<Object*>& targets);
+
+	protected:
+
+		void Construct() override;
+
+		void OnDrawGUI() override;
+
+		FIELD()
+		ClassType* targetType = nullptr;
+
+		FIELD()
+		String category = "General";
+
+		FIELD()
+		Array<Object*> targets{};
+
+		friend class ObjectEditor;
+	};
+
     CLASS()
 	class EDITORWIDGETS_API ObjectEditor : public CLayoutGroup
 	{

@@ -12,6 +12,14 @@ namespace CE::Editor
 
 	}
 
+	ObjectEditorSection::ObjectEditorSection()
+	{
+	}
+
+	ObjectEditorSection::~ObjectEditorSection()
+	{
+	}
+
 	bool ObjectEditor::SetTargets(const Array<Object*>& targets)
 	{
 		ClassType* type = nullptr;
@@ -68,7 +76,7 @@ namespace CE::Editor
 			}
 		}
 
-		RemoveAllSubWidgets();
+		DestroyAllSubWidgets();
 		ConstructWidgets();
 
 		return this->targets.NonEmpty();
@@ -92,47 +100,53 @@ namespace CE::Editor
 	{
 		for (const auto& category : categories)
 		{
-			//CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "ObjectEditorSection");
-			//section->SetTitle(category);
-			{
-				for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
-				{
-					if ((category == "General" && !field->HasAttribute("Category")) ||
-						(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
-					{
-						CLabel* label = CreateWidget<CLabel>(this, "FieldLabel");
-						label->SetText(field->GetName().GetString());
-					}
-				}
-			}
+			ObjectEditorSection* section = CreateWidget<ObjectEditorSection>(this, "ObjectEditorSection");
+			section->Construct(targetType, category, targets);
 		}
 
 		SetNeedsStyle();
 		SetNeedsLayout();
 	}
 
+	void ObjectEditorSection::Construct(ClassType* type, const String& category, const Array<Object*>& targets)
+	{
+		this->targetType = type;
+		this->category = category;
+		this->targets = targets;
+
+		DestroyAllSubWidgets();
+
+		CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "CollapsibleSection");
+		section->SetTitle(category);
+		{
+			Array<FieldType*> fields = {};
+
+			for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
+			{
+				if ((category == "General" && !field->HasAttribute("Category")) ||
+					(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
+				{
+					fields.Add(field);
+					CLabel* label = CreateWidget<CLabel>(section, "FieldLabel");
+					label->SetText(field->GetName().GetString());
+				}
+			}
+		}
+	}
+
 	void ObjectEditor::OnDrawGUI()
 	{
 		Super::OnDrawGUI();
+	}
 
-		//if (targets.IsEmpty())
-		//	return;
+	void ObjectEditorSection::Construct()
+	{
+		Super::Construct();
+	}
 
-		//auto rect = GetComputedLayoutRect();
-
-		//GUI::BeginChild(rect, GetUuid(), GetName().GetString(), {}, defaultStyleState);
-		//DrawDefaultBackground();
-
-		//GUI::PushZeroingChildCoordinateSpace();
-		//{
-		//	for (auto widget : attachedWidgets)
-		//	{
-		//		widget->Render();
-		//	}
-		//}
-		//GUI::PopChildCoordinateSpace();
-
-		//GUI::EndChild();
+	void ObjectEditorSection::OnDrawGUI()
+	{
+		Super::OnDrawGUI();
 	}
 
 } // namespace CE::Editor

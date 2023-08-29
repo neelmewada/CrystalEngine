@@ -869,6 +869,13 @@ namespace CE::Widgets
 			if (winSize.height > 0 && !IsNan(winSize.height))
 				parentSize.height = winSize.height;
 		}
+		else if ((!IsNan(sizeConstraint.x) && sizeConstraint.x > 0) || (!IsNan(sizeConstraint.y) && sizeConstraint.y > 0))
+		{
+			if (!IsNan(sizeConstraint.x))
+				parentSize.width = sizeConstraint.x;
+			if (!IsNan(sizeConstraint.y))
+				parentSize.height = sizeConstraint.y;
+		}
 		else if (parent != nullptr)
 		{
 			parent->UpdateLayoutIfNeeded();
@@ -1313,11 +1320,30 @@ namespace CE::Widgets
 		SetNeedsLayout();
     }
 
-	void CWidget::RemoveAllSubWidgets()
+	Array<CWidget*> CWidget::RemoveAllSubWidgets()
+	{
+		Array<CWidget*> result{};
+
+		for (int i = attachedWidgets.GetSize() - 1; i >= 0; i--)
+		{
+			result.Add(attachedWidgets[i]);
+			DetachSubobject(attachedWidgets[i]);
+		}
+		attachedWidgets.Clear();
+
+		SetNeedsStyle();
+		SetNeedsLayout();
+
+		return result;
+	}
+
+	void CWidget::DestroyAllSubWidgets()
 	{
 		for (int i = attachedWidgets.GetSize() - 1; i >= 0; i--)
 		{
-			DetachSubobject(attachedWidgets[i]);
+			auto widget = attachedWidgets[i];
+			DetachSubobject(widget);
+			widget->Destroy();
 		}
 		attachedWidgets.Clear();
 

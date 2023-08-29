@@ -48,6 +48,7 @@ namespace CE::GUI
 
 	/// Window Title bar height
 	COREGUI_API float GetWindowTitleBarHeight();
+	COREGUI_API float GetWindowMenuBarHeight();
 
 	COREGUI_API Rect WidgetSpaceToWindowSpace(const Rect& widgetSpaceRect);
 	COREGUI_API Vec2 WidgetSpaceToWindowSpace(const Vec2& widgetSpacePoint);

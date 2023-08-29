@@ -44,7 +44,7 @@
 #include "Widgets/CScrollView.h"
 #include "Widgets/CContainerWidget.h"
 #include "Widgets/CLayoutGroup.h"
-#include "Widgets/CSplitWidget.h"
+#include "Widgets/CSplitView.h"
 
 // Popups
 #include "Widgets/Popups/CPopup.h"

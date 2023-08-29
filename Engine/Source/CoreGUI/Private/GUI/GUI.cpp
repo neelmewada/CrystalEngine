@@ -166,7 +166,16 @@ namespace CE::GUI
 		if (window == nullptr)
 			return 0;
 
-		return window->TitleBarHeight();
+		return window->TitleBarHeight() + window->ExtraTitleBarHeight;
+	}
+
+	COREGUI_API float GetWindowMenuBarHeight()
+	{
+		auto window = ImGui::GetCurrentWindow();
+		if (window == nullptr)
+			return 0;
+
+		return window->MenuBarHeight();
 	}
 
 	static Rect ToParentCoordinateSpace(const Rect& childSpaceRect, const Vec2& parentSpace)
@@ -411,7 +420,7 @@ namespace CE::GUI
 		auto retVal = ImGui::Begin(name.GetCString(), isShown, (ImGuiWindowFlags)flags);
 
 		auto window = ImGui::GetCurrentWindow();
-
+		
 		if (retVal && parentDockId == 0)//(flags & WF_DockSpace) && !(flags & WF_FullScreen))
 		{
 			auto dockId = window->DockId;

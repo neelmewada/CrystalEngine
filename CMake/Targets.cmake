@@ -46,6 +46,7 @@ endfunction()
 # \arg:TARGET_TYPE: SHARED; STATIC; MODULE; CONSOLEAPP ; GUIAPP ; TOOL
 function(ce_add_target NAME TARGET_TYPE)
     string(TOUPPER ${NAME} NAME_UPPERCASE)
+    string(TOLOWER ${NAME} NAME_LOWERCASE)
 
     set(options AUTORTTI AUTOMOC AUTOUIC AUTORCC COPY_CONFIGS VS_STARTUP_PROJECT RESOURCES)
     set(oneValueArgs VERSION OUTPUT_SUBDIRECTORY FOLDER NAMESPACE OUTPUT_DIRECTORY PACKAGE)
@@ -243,6 +244,14 @@ function(ce_add_target NAME TARGET_TYPE)
 
     set(multiValueArgs PRIVATE PUBLIC INTERFACE)
     cmake_parse_arguments(ce_add_target_COMPILE_DEFINITIONS "" "" "${multiValueArgs}" ${ce_add_target_COMPILE_DEFINITIONS})
+
+    list(APPEND ce_add_target_COMPILE_DEFINITIONS_INTERFACE  "${NAME_LOWERCASE}_protected_internal=protected")
+    list(APPEND ce_add_target_COMPILE_DEFINITIONS_INTERFACE  "${NAME_LOWERCASE}_private_internal=private")
+    list(APPEND ce_add_target_COMPILE_DEFINITIONS_INTERFACE  "${NAME_LOWERCASE}_internal=private")
+
+    list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE  "${NAME_LOWERCASE}_protected_internal=public")
+    list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE  "${NAME_LOWERCASE}_private_internal=public")
+    list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE  "${NAME_LOWERCASE}_internal=public")
     
     if((${PAL_PLATFORM_IS_WINDOWS}) EQUAL 1 AND (${TARGET_TYPE_${TARGET_TYPE}_IS_SHAREDLIB}) EQUAL 1)
         list(APPEND ce_add_target_COMPILE_DEFINITIONS_PRIVATE "${NAME_UPPERCASE}_API=__declspec(dllexport)")

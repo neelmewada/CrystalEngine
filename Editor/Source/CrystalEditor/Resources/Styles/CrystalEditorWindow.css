@@ -1,6 +1,14 @@
 
-CrystalEditorWindow {
-    
+CrystalEditorWindow::tab {
+	padding: 20px 10px;
+}
+
+CWindow::tab {
+    padding: 20px 10px;
+}
+
+EditorPanel::tab {
+    padding: 20px 7px;
 }
 
 SceneEditorWindow {
