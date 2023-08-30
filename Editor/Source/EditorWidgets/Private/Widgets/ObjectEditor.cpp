@@ -121,6 +121,7 @@ namespace CE::Editor
 		{
 			CSplitView* splitView = CreateWidget<CSplitView>(section, "ObjectEditorSplitView");
 			splitView->SetStretchToFill(false);
+			splitView->ShowHorizontalBorders(true);
 			auto splitViewLeft = splitView->GetLeft();
 			auto splitViewRight = splitView->GetRight();
 

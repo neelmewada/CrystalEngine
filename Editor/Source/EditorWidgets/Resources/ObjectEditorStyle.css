@@ -5,7 +5,7 @@
 }
 
 #ObjectEditorCollapsible {
-
+    background: rgb(36, 36, 36);
 }
 
 #ObjectEditorSplitView::splitter {

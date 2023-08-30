@@ -53,6 +53,13 @@ namespace CE
             T xy[2];
         };
 
+		FORCE_INLINE SIZE_T GetHash()
+		{
+			return GetCombinedHashes({
+				CE::GetHash(x), CE::GetHash(y)
+			});
+		}
+
         inline TVector2 operator+(const TVector2& rhs) const
         {
             return TVector2(x + rhs.x, y + rhs.y);
@@ -215,6 +222,13 @@ namespace CE
             };
             T xyz[4]; // size/alignment is same as Vector4
         };
+
+		FORCE_INLINE SIZE_T GetHash()
+		{
+			return GetCombinedHashes({
+				CE::GetHash(x), CE::GetHash(y), CE::GetHash(z)
+			});
+		}
 
         inline T operator[](int index) const
         {
@@ -409,6 +423,13 @@ namespace CE
 			};
             T xyzw[4];
         };
+
+		FORCE_INLINE SIZE_T GetHash()
+		{
+			return GetCombinedHashes({
+				CE::GetHash(x), CE::GetHash(y), CE::GetHash(z), CE::GetHash(w)
+			});
+		}
 
         inline T& operator[](int index)
         {

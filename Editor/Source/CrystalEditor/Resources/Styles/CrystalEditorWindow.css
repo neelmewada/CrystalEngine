@@ -23,11 +23,11 @@ SceneEditorWindow {
     padding: 0 0 0 0;
 }
 
-#ProjectSettingsLeftView {
-    background: rgb(30, 30, 30);
-    height: 100%;
+#ProjectSettingsSplitView #SplitViewRight {
+    padding: 0 0 0 0;
 }
 
-#ProjectSettingsRightView {
-
+#ProjectSettingsLeftView {
+    background: rgb(26, 26, 26);
+    height: 100%;
 }
