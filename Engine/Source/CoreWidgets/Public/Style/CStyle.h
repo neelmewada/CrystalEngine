@@ -43,6 +43,7 @@ namespace CE::Widgets
 		Radio,
 		Hint,
 		Alternate,
+		Splitter,
 
 		Cell,
 

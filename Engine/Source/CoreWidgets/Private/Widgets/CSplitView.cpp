@@ -50,7 +50,7 @@ namespace CE::Widgets
 			left->sizeConstraint.width = width * split;
 			right->sizeConstraint.width = width * (1 - split);
 		}
-		if (height > 0 && !IsNan(height))
+		if (height > 0 && !IsNan(height) && stretchToFill)
 		{
 			left->sizeConstraint.height = right->sizeConstraint.height = height;
 		}
@@ -68,31 +68,48 @@ namespace CE::Widgets
 		return Vec2(leftSize.width + rightSize.width, Math::Max(leftSize.height, rightSize.height));
 	}
 
-    void CSplitView::OnDrawGUI()
+	void CSplitView::OnBeforeComputeStyle()
+	{
+		Super::OnBeforeComputeStyle();
+
+		auto splitter = stylesheet->SelectStyle(this, CStateFlag::Default, CSubControl::Splitter);
+		if (splitter.properties.KeyExists(CStylePropertyType::Background))
+			splitterColor = splitter.properties[CStylePropertyType::Background].color;
+	}
+
+	void CSplitView::OnDrawGUI()
     {
 		auto rect = GetComputedLayoutRect();
 		int count = attachedWidgets.GetSize();
 		DrawDefaultBackground();
 
-		GUI::PushChildCoordinateSpace(rect);
-
 		GUI::TableFlags flags = GUI::TableFlags_BordersInnerV | GUI::TableFlags_Resizable;
+
+		GUI::PushStyleColor(GUI::StyleCol_TableBorderLight, splitterColor);
+		GUI::PushStyleColor(GUI::StyleCol_TableBorderStrong, splitterColor);
+		GUI::PushStyleColor(GUI::StyleCol_Separator, splitterColor);
+		GUI::PushStyleColor(GUI::StyleCol_SeparatorActive, splitterColor);
+		GUI::PushStyleColor(GUI::StyleCol_SeparatorHovered, splitterColor);
 
 		if (GUI::BeginTable(rect, GetUuid(), "SplitView", 2, flags))
 		{
-			GUI::TableSetMinColumnWidth(25);
-
-			// Empty headers
-			GUI::TableNextRow();
-			GUI::TableNextColumn();
-			GUI::TableNextColumn();
+			float totalWidth = leftSize + rightSize;
+			if (firstTime && !IsNan(totalWidth) && totalWidth > 0)
+			{
+				firstTime = false;
+				if (initialSplit > 1 || initialSplit < 0)
+					initialSplit = 0.5f;
+				GUI::TableSetColumnWidth(0, totalWidth * initialSplit);
+			}
 
 			// Actual rows/columns
 			GUI::TableNextRow();
 
 			// Column 0
 			GUI::TableNextColumn();
+			
 			auto pos1 = GUI::GetCursorPos();
+			pos1.y = 0;
 			leftSize = GUI::GetContentRegionAvailableSpace().x;
 
 			GUI::PushChildCoordinateSpace(pos1);
@@ -102,6 +119,7 @@ namespace CE::Widgets
 			// Column 1
 			GUI::TableNextColumn();
 			auto pos2 = GUI::GetCursorPos();
+			pos2.y = 0;
 			rightSize = GUI::GetContentRegionAvailableSpace().x;
 
 			GUI::PushChildCoordinateSpace(pos2);
@@ -119,7 +137,7 @@ namespace CE::Widgets
 			GUI::EndTable();
 		}
 
-		GUI::PopChildCoordinateSpace();
+		GUI::PopStyleColor(5);
     }
 
 } // namespace CE::Widgets

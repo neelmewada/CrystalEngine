@@ -6361,6 +6361,11 @@ namespace CE::GUI
 		return ImGui::TableNextColumn();
 	}
 
+	COREGUI_API void TableSetColumnWidth(int columnIdx, float width)
+	{
+		ImGui::TableSetColumnWidth(columnIdx, width);
+	}
+
 	COREGUI_API Vec4 GetTableClipRect()
 	{
 		auto table = GImGui->CurrentTable;

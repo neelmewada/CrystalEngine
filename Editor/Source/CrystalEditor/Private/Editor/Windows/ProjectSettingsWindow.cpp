@@ -21,6 +21,7 @@ namespace CE::Editor
 
 		splitView = CreateWidget<CSplitView>(this, "ProjectSettingsSplitView");
 		splitView->SetInitialSplit(0.25f);
+		splitView->SetStretchToFill(true);
 
 		auto leftView = CreateWidget<CLayoutGroup>(splitView->GetLeft(), "ProjectSettingsLeftView");
 

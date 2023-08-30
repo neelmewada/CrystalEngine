@@ -1,14 +1,34 @@
 
-ObjectEditorSection {
+#ObjectEditorSection {
     flex-direction: column;
     justify-content: flex-start;
 }
 
-#EditorSplitView #SplitViewLeft {
+#ObjectEditorCollapsible {
+
+}
+
+#ObjectEditorSplitView::splitter {
+    background: rgb(20, 20, 20);
+}
+
+#ObjectEditorSplitView #SplitViewLeft {
     justify-content: flex-start;
     text-align: middle-left;
+    padding: 10px 0 10px 0;
+}
+
+#ObjectEditorSplitView #SplitViewRight {
+    justify-content: flex-start;
+    text-align: middle-left;
+    padding: 10px 0 10px 0;
 }
 
 #FieldLabel {
     text-align: middle-left;
+    height: 25px;
+}
+
+#FieldValue {
+    height: 25px;
 }

@@ -4,7 +4,7 @@ namespace CE::Editor
 {
 	ObjectEditor::ObjectEditor()
 	{
-
+		
 	}
 
 	ObjectEditor::~ObjectEditor()
@@ -119,7 +119,8 @@ namespace CE::Editor
 		CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
 		section->SetTitle(category);
 		{
-			CSplitView* splitView = CreateWidget<CSplitView>(section, "EditorSplitView");
+			CSplitView* splitView = CreateWidget<CSplitView>(section, "ObjectEditorSplitView");
+			splitView->SetStretchToFill(false);
 			auto splitViewLeft = splitView->GetLeft();
 			auto splitViewRight = splitView->GetRight();
 

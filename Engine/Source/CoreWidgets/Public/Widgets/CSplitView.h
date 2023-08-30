@@ -40,10 +40,15 @@ namespace CE::Widgets
 
 		FORCE_INLINE void SetInitialSplit(f32 split)
 		{
-			this->split = split;
+			this->initialSplit = split;
 		}
+
+		FORCE_INLINE bool IsStretchToFill() const { return stretchToFill; }
+		FORCE_INLINE void SetStretchToFill(bool value) { stretchToFill = value; }
 	
 	corewidgets_protected_internal:
+
+		void OnBeforeComputeStyle() override;
 
 		void OnDrawGUI() override;
 
@@ -54,13 +59,24 @@ namespace CE::Widgets
 		CSplitViewContainer* right = nullptr;
 
 		FIELD(ReadOnly)
-		f32 split = 0.5f;
+		f32 split = 0.25f;
+
+		FIELD()
+		f32 initialSplit = 0.25f;
 
 		FIELD(ReadOnly)
 		f32 leftSize = 0;
 
 		FIELD(ReadOnly)
 		f32 rightSize = 0;
+
+		FIELD()
+		b8 stretchToFill = false;
+		
+	private:
+
+		b8 firstTime = true;
+		Color splitterColor = Color::RGBA(26, 26, 26);
 	};
     
 } // namespace CE::Widgets

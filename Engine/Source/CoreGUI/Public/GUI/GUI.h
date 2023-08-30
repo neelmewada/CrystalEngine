@@ -305,6 +305,7 @@ namespace CE::GUI
 
 	COREGUI_API void TableNextRow(TableRowFlags flags = TableRowFlags_None, f32 minHeight = 0);
 	COREGUI_API bool TableNextColumn();
+	COREGUI_API void TableSetColumnWidth(int columnIdx, float width);
 
 	COREGUI_API Vec4 GetTableClipRect();
 

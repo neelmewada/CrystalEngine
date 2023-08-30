@@ -16,6 +16,11 @@ namespace CE::Widgets
 	{
 		auto rect = GetComputedLayoutRect();
 
+		if (GetName() == "ProjectSettingsLeftView")
+		{
+			String::Format("");
+		}
+
 		DrawDefaultBackground();
 
 		GUI::PushChildCoordinateSpace(rect);

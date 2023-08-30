@@ -85,6 +85,8 @@ namespace CE::Widgets
 
 			YGNodeStyleSetMargin(node, YGEdgeBottom, bottomMargin.value + headerHeight);
 		}
+
+		SetNeedsLayout();
 	}
 
 	void CCollapsibleSection::OnDrawGUI()
