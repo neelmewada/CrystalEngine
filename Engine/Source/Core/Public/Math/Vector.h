@@ -53,7 +53,7 @@ namespace CE
             T xy[2];
         };
 
-		FORCE_INLINE SIZE_T GetHash()
+		FORCE_INLINE SIZE_T GetHash() const
 		{
 			return GetCombinedHashes({
 				CE::GetHash(x), CE::GetHash(y)
@@ -223,7 +223,7 @@ namespace CE
             T xyz[4]; // size/alignment is same as Vector4
         };
 
-		FORCE_INLINE SIZE_T GetHash()
+		FORCE_INLINE SIZE_T GetHash() const
 		{
 			return GetCombinedHashes({
 				CE::GetHash(x), CE::GetHash(y), CE::GetHash(z)
@@ -424,7 +424,7 @@ namespace CE
             T xyzw[4];
         };
 
-		FORCE_INLINE SIZE_T GetHash()
+		FORCE_INLINE SIZE_T GetHash() const
 		{
 			return GetCombinedHashes({
 				CE::GetHash(x), CE::GetHash(y), CE::GetHash(z), CE::GetHash(w)

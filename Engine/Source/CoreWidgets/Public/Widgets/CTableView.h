@@ -11,6 +11,9 @@ namespace CE::Widgets
 		ReorderableColumns = BIT(1),
 		ScrollX = BIT(3),
 		ScrollY = BIT(4),
+		InnerBordersH = BIT(5),
+		InnerBordersV = BIT(6),
+		InnerBorders = InnerBordersH | InnerBordersV,
 	};
 	ENUM_CLASS_FLAGS(CTableFlags);
 

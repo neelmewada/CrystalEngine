@@ -418,7 +418,7 @@ namespace CE::Widgets
 					GUI::TextColored(name, Color::RGBA(53, 212, 188));
 
 					ImGui::TableNextColumn();
-					const String& str = constant->GetName().GetString();
+					const String& str = constant->GetName().GetString().ToKebabCase();
 					ImGui::Text(str.GetCString());
 				};
 
@@ -561,9 +561,17 @@ namespace CE::Widgets
 			return;
 
 		bool isSplitView = widget->IsOfType<CSplitView>();
+		bool isTableWidget = widget->IsOfType<CTableWidget>();
 		bool isLeaf = widget->attachedWidgets.IsEmpty() && !isSplitView;
 
 		String widgetName = String::Format("{} ({})###{}", widget->GetName(), widget->GetClass()->GetName().GetLastComponent(), widget->GetUuid());
+		if (widget->IsOfType<CTableCellWidget>())
+		{
+			CTableCellWidget* cell = (CTableCellWidget*)widget;
+			widgetName = String::Format("{} {} ({})###{}", widget->GetName(), cell->GetPosition(), 
+				widget->GetClass()->GetName().GetLastComponent(), widget->GetUuid());
+		}
+
 		if (!foundWidgetInHierarchy && debugWidget != nullptr && debugWidget->IsWidgetPresentInParentHierarchy(widget))
 			ImGui::SetNextItemOpen(true);
 
@@ -591,6 +599,14 @@ namespace CE::Widgets
 				CSplitView* splitView = (CSplitView*)widget;
 				DrawWidgetTreeEntry(splitView->left);
 				DrawWidgetTreeEntry(splitView->right);
+			}
+			else if (isTableWidget)
+			{
+				CTableWidget* table = (CTableWidget*)widget;
+				for (auto [pos, cell] : table->cellWidgets)
+				{
+					DrawWidgetTreeEntry(cell);
+				}
 			}
 			else
 			{

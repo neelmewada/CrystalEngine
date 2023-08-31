@@ -266,13 +266,13 @@ namespace CE
 	template<typename T, typename = void>
 	struct THasGetHashFunction : TFalseType
 	{
-		static SIZE_T GetHash(T* instance) { return 0; }
+		static SIZE_T GetHash(const T* instance) { return 0; }
 	};
 
 	template<typename T>
 	struct THasGetHashFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TTrueType
 	{
-		static SIZE_T GetHash(T* instance) { return instance->GetHash(); }
+		static SIZE_T GetHash(const T* instance) { return instance->GetHash(); }
 	};
 
 	template<typename T, typename = void>

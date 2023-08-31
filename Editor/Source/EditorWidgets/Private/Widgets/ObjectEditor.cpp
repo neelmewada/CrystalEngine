@@ -119,24 +119,49 @@ namespace CE::Editor
 		CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
 		section->SetTitle(category);
 		{
-			CSplitView* splitView = CreateWidget<CSplitView>(section, "ObjectEditorSplitView");
-			splitView->SetStretchToFill(false);
-			splitView->ShowHorizontalBorders(true);
-			auto splitViewLeft = splitView->GetLeft();
-			auto splitViewRight = splitView->GetRight();
-
+			CTableWidget* table = CreateWidget<CTableWidget>(section, "ObjectEditorTableWidget");
+			table->SetNumColumns(2);
+			Array<FieldType*> fields = {};
+			
 			for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
 			{
 				if ((category == "General" && !field->HasAttribute("Category")) ||
 					(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
 				{
-					CLabel* label = CreateWidget<CLabel>(splitViewLeft, "FieldLabel");
-					label->SetText(field->GetDisplayName());
-
-					CLabel* label2 = CreateWidget<CLabel>(splitViewRight, "FieldValue");
-					label2->SetText("Field value here");
+					fields.Add(field);
 				}
 			}
+
+			table->SetNumRows(fields.GetSize());
+			int i = 0;
+
+			for (auto field : fields)
+			{
+				CLabel* label = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 0)), "FieldLabel");
+				label->SetText(field->GetDisplayName());
+
+				CLabel* value = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 1)), "FieldValue");
+				value->SetText("Field value here");
+				
+				i++;
+			}
+
+			//splitView->SetStretchToFill(false);
+			//auto splitViewLeft = splitView->GetLeft();
+			//auto splitViewRight = splitView->GetRight();
+
+			//for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
+			//{
+			//	if ((category == "General" && !field->HasAttribute("Category")) ||
+			//		(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
+			//	{
+			//		CLabel* label = CreateWidget<CLabel>(splitViewLeft, "FieldLabel");
+			//		label->SetText(field->GetDisplayName());
+
+			//		CLabel* label2 = CreateWidget<CLabel>(splitViewRight, "FieldValue");
+			//		label2->SetText("Field value here");
+			//	}
+			//}
 		}
 	}
 
