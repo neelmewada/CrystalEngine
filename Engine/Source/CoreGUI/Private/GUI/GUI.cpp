@@ -6353,6 +6353,7 @@ namespace CE::GUI
 
 	COREGUI_API void TableNextRow(TableRowFlags flags, f32 minHeight)
 	{
+		ImGui::TableGetColumnIndex();
 		ImGui::TableNextRow((ImGuiTableRowFlags)flags, minHeight);
 	}
 
@@ -6364,6 +6365,17 @@ namespace CE::GUI
 	COREGUI_API void TableSetColumnWidth(int columnIdx, float width)
 	{
 		ImGui::TableSetColumnWidth(columnIdx, width);
+	}
+
+	COREGUI_API float TableGetColumnWidth(int columnIdx)
+	{
+		auto table = GImGui->CurrentTable;
+		if (table == nullptr)
+			return 0;
+		if (columnIdx < 0 || columnIdx >= table->ColumnsCount)
+			return 0;
+		auto column = &table->Columns[columnIdx];
+		return column->MaxX - column->MinX;
 	}
 
 	COREGUI_API Vec4 GetTableClipRect()

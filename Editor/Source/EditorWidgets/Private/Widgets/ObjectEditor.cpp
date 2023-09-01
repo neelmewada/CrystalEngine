@@ -120,11 +120,14 @@ namespace CE::Editor
 		section->SetTitle(category);
 		{
 			CTableWidget* table = CreateWidget<CTableWidget>(section, "ObjectEditorTableWidget");
+			table->SetTableFlags(CTableFlags::InnerBorders | CTableFlags::ResizeableColumns);
 			table->SetNumColumns(2);
 			Array<FieldType*> fields = {};
 			
 			for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
 			{
+				if (field->IsHidden())
+					continue;
 				if ((category == "General" && !field->HasAttribute("Category")) ||
 					(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
 				{
@@ -145,23 +148,6 @@ namespace CE::Editor
 				
 				i++;
 			}
-
-			//splitView->SetStretchToFill(false);
-			//auto splitViewLeft = splitView->GetLeft();
-			//auto splitViewRight = splitView->GetRight();
-
-			//for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
-			//{
-			//	if ((category == "General" && !field->HasAttribute("Category")) ||
-			//		(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
-			//	{
-			//		CLabel* label = CreateWidget<CLabel>(splitViewLeft, "FieldLabel");
-			//		label->SetText(field->GetDisplayName());
-
-			//		CLabel* label2 = CreateWidget<CLabel>(splitViewRight, "FieldValue");
-			//		label2->SetText("Field value here");
-			//	}
-			//}
 		}
 	}
 

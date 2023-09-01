@@ -36,6 +36,10 @@ CLabel {
 	text-align: middle-center;
 }
 
+CLabel.Title {
+	font-size: 30px;
+}
+
 CButton {
 	padding: 10px 1px;
 	border-radius: 2px;

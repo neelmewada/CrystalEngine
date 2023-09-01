@@ -31,10 +31,15 @@ namespace CE::Widgets
 		float wrapWidth = -1.0f;
 		if (!isnan(width) && width > 0)
 			wrapWidth = width;
+
+		CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
 		auto textSize = GUI::CalculateTextSize(text, wrapWidth);
+		CFontManager::Get().PopFont();
+
 		if (!isnan(height) && textSize.y > height)
 			textSize.y = height;
-		return textSize + Vec2(6, 3);
+		Vec2 extra = Vec2(6, 3);
+		return textSize + extra;
 	}
 
     void CLabel::OnDrawGUI()

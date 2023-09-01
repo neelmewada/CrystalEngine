@@ -73,6 +73,8 @@ namespace CE::Widgets
 		u32 numRows = 0;
 
 		HashMap<Vec2i, CTableCellWidget*> cellWidgets{};
+
+		Array<float> columnWidths{};
 	};
     
 } // namespace CE::Widgets

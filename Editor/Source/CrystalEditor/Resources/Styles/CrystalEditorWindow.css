@@ -15,21 +15,36 @@ SceneEditorWindow {
     row-gap: 0;
 }
 
+#TitleLabel {
+    text-align: middle-left;
+    margin: 0 0 0 20px;
+}
+
 #ProjectSettingsSplitView {
     padding: 0 0 0 35px;
 }
 
 #ProjectSettingsSplitView #SplitViewLeft {
     padding: 0 0 0 0;
+    background: rgb(20, 20, 20);
 }
 
 #ProjectSettingsSplitView #SplitViewRight {
     padding: 0 0 0 0;
+    background: rgb(26, 26, 26);
 }
 
 #ProjectSettingsLeftView {
-    background: rgb(26, 26, 26);
+    background: rgb(20, 20, 20);
     height: 100%;
+}
+
+#ProjectSettingsRightView {
+    padding: 20px 20px;
+    background: rgb(26, 26, 26);
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
 }
 
 

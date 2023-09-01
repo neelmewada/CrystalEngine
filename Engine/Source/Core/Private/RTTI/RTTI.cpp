@@ -184,6 +184,12 @@ namespace CE
         if (!displayName.IsEmpty())
             return displayName;
 
+		if (HasAttribute("Display") && GetAttribute("Display").IsString())
+		{
+			displayName = GetAttribute("Display");
+			return displayName;
+		}
+
         auto tempStr = name.GetString();
         displayName = "";
 

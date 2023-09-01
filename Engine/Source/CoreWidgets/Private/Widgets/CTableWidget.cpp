@@ -38,13 +38,16 @@ namespace CE::Widgets
 
 	Vec2 CTableWidget::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
+		if (columnWidths.GetSize() != numColumns)
+			columnWidths.Resize(numColumns);
+
 		Vec2 intrinsicSize = Vec2(width, YGUndefined);
 		f32 h = 0;
 		for (int r = 0; r < numRows; r++)
 		{
+			f32 maxHeight = 0;
 			for (int c = 0; c < numColumns; c++)
 			{
-				f32 maxHeight = 0;
 				if (cellWidgets.KeyExists(Vec2i(r, c)))
 				{
 					auto cell = cellWidgets[Vec2i(r, c)];
@@ -52,14 +55,15 @@ namespace CE::Widgets
 					{
 						cell->SetNeedsStyleRecursive();
 						cell->SetNeedsLayoutRecursive();
+						cell->sizeConstraint.x = columnWidths[c];
 						cell->UpdateLayoutIfNeeded();
 						maxHeight = Math::Max(maxHeight, cell->GetComputedLayoutSize().height);
 					}
 				}
-				h += maxHeight;
 			}
+			h += maxHeight;
 		}
-		if (!IsNan(intrinsicSize.height))
+		if (!IsNan(h) && h > 0)
 			intrinsicSize.height = h;
 		return intrinsicSize;
 	}
@@ -113,6 +117,9 @@ namespace CE::Widgets
 		if (EnumHasFlag(tableFlags, CTableFlags::InnerBordersV))
 			flags |= GUI::TableFlags_BordersInnerV;
 
+		if (columnWidths.GetSize() != numColumns)
+			columnWidths.Resize(numColumns);
+
 		if (GUI::BeginTable(rect, GetUuid(), GetName().GetString(), numColumns, flags))
 		{
 			GUI::PushChildCoordinateSpace(rect);
@@ -140,6 +147,11 @@ namespace CE::Widgets
 					GUI::PushChildCoordinateSpace(cursorPos);
 					cell->Render();
 					GUI::PopChildCoordinateSpace();
+
+					auto colWidth = GUI::TableGetColumnWidth(c);
+					if (columnWidths[c] != colWidth)
+						SetNeedsLayout();
+					columnWidths[c] = colWidth;
 				}
 			}
 

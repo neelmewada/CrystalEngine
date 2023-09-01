@@ -25,7 +25,13 @@ namespace CE::Editor
 
 		auto leftView = CreateWidget<CLayoutGroup>(splitView->GetLeft(), "ProjectSettingsLeftView");
 
-		editor = CreateWidget<ObjectEditor>(splitView->GetRight(), "ProjectSettingsObjectEditor");
+		auto rightView = CreateWidget<CLayoutGroup>(splitView->GetRight(), "ProjectSettingsRightView");
+
+		auto titleLabel  = CreateWidget<CLabel>(rightView, "TitleLabel");
+		titleLabel->SetText("Project");
+		titleLabel->AddStyleClass("Title");
+
+		editor = CreateWidget<ObjectEditor>(rightView, "ProjectSettingsObjectEditor");
 		editor->SetTargets({ GetSettings<ProjectSettings>() });
 	}
 

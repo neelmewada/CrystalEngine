@@ -20,10 +20,10 @@ namespace CE
 CE_RTTI_CLASS(CORE_API, CE, ProjectSettings,
     CE_SUPER(CE::SettingsBase),
     CE_NOT_ABSTRACT,
-    CE_ATTRIBS(Settings = "ProjectSettings"),
+    CE_ATTRIBS(Settings = "ProjectSettings", DisplayName = "Project"),
     CE_FIELD_LIST(
-		CE_FIELD(projectName)
-		CE_FIELD(projectVersion)
+		CE_FIELD(projectName, Category = "Description")
+		CE_FIELD(projectVersion, Category = "Description")
     ),
     CE_FUNCTION_LIST()
 )

@@ -217,20 +217,46 @@ namespace CE
 			if (subobject == nullptr || uuid == 0)
 				continue;
 
-			if (!outReferences.KeyExists(uuid))
-				outReferences[uuid] = subobject;
+			if (!outReferences.KeyExists(subobject->uuid))
+				outReferences[subobject->uuid] = subobject;
 			subobject->FetchObjectReferences(outReferences);
 		}
 
-		auto objectFields = GetClass()->FetchObjectFields();
-
-		for (auto field : objectFields)
+		for (auto field = GetClass()->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
-			auto object = field->GetFieldValue<Object*>(this);
-			if (object != nullptr)
+			if (field->IsObjectField())
 			{
-				if (!outReferences.KeyExists(object->GetUuid()))
-					outReferences[object->GetUuid()] = object;
+				Object* value = field->GetFieldValue<Object*>(this);
+				if (value != nullptr && !outReferences.KeyExists(value->uuid))
+				{
+					outReferences[value->uuid] = value;
+				}
+			}
+			else if (field->GetDeclarationTypeId() == TYPEID(ObjectMap))
+			{
+				const auto& objectMap = field->GetFieldValue<ObjectMap>(this);
+				for (const auto& object : objectMap)
+				{
+					if (object != nullptr && !outReferences.KeyExists(object->uuid))
+					{
+						outReferences[object->uuid] = object;
+					}
+				}
+			}
+			else if (field->IsArrayField())
+			{
+				auto underlyingType = field->GetUnderlyingType();
+				if (underlyingType != nullptr && underlyingType->IsObject())
+				{
+					const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(this);
+					for (Object* object : array)
+					{
+						if (object != nullptr && !outReferences.KeyExists(object->uuid))
+						{
+							outReferences[object->uuid] = object;
+						}
+					}
+				}
 			}
 		}
 	}

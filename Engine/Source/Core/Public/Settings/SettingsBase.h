@@ -14,6 +14,12 @@ namespace CE
 
 		static void SaveSettings();
         
+	core_internal:
+
+		static void OnClassRegistered(ClassType* classType);
+		static void OnClassDeregistered(ClassType* classType);
+
+		static Array<ClassType*> settingsClasses;
     };
 
 	template<typename TSettings> requires TIsBaseClassOf<SettingsBase, TSettings>::Value

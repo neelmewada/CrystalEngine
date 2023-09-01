@@ -13,7 +13,9 @@ namespace CE
         void RegisterTypes() override;
 
     private:
-        DelegateHandle onBeforeModuleUnloadHandle{};
+        DelegateHandle onBeforeModuleUnloadHandle = 0;
+		DelegateHandle settingsBaseOnClassRegistered = 0;
+		DelegateHandle settingsBaseOnClassDeregistered = 0;
     };
 
 
@@ -36,6 +38,8 @@ namespace CE
 #endif
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
+		settingsBaseOnClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&SettingsBase::OnClassRegistered);
+		settingsBaseOnClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(&SettingsBase::OnClassDeregistered);
     }
 
     void CoreModule::ShutdownModule()
@@ -60,6 +64,10 @@ namespace CE
 
         gProjectPath = "";
         
+		CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(settingsBaseOnClassDeregistered);
+		settingsBaseOnClassDeregistered = 0;
+		CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(settingsBaseOnClassRegistered);
+		settingsBaseOnClassRegistered = 0;
         CoreDelegates::onBeforeModuleUnload.RemoveDelegateInstance(onBeforeModuleUnloadHandle);
         onBeforeModuleUnloadHandle = 0;
     }
@@ -87,15 +95,19 @@ namespace CE
         CE_REGISTER_TYPES(
             Object,
             Package,
-            SettingsBase,
-            ProjectSettings,
             SystemObject,
             Component,
             SystemComponent,
 			Asset,
 			ResourceManager,
-			Resource
+			Resource,
+			SettingsBase
         );
+
+		// Register Settings
+		CE_REGISTER_TYPES(
+			ProjectSettings
+		);
     }
 
 }

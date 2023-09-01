@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	Array<ClassType*> SettingsBase::settingsClasses{};
 
 	static SettingsBase* LoadSettingsFromPackage(ClassType* settingsClass)
 	{
@@ -44,6 +45,22 @@ namespace CE
 			settingsPackage->LoadFully();
 
 		Package::SavePackage(settingsPackage, nullptr);
+	}
+
+	void SettingsBase::OnClassRegistered(ClassType* classType)
+	{
+		if (classType != nullptr && classType->IsSubclassOf<SettingsBase>() && classType != GetStaticClass<SettingsBase>())
+		{
+			settingsClasses.Add(classType);
+		}
+	}
+
+	void SettingsBase::OnClassDeregistered(ClassType* classType)
+	{
+		if (classType != nullptr && classType->IsSubclassOf<SettingsBase>() && classType != GetStaticClass<SettingsBase>())
+		{
+			settingsClasses.Remove(classType);
+		}
 	}
 }
 

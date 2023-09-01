@@ -562,7 +562,7 @@ namespace CE::Widgets
 
 		bool isSplitView = widget->IsOfType<CSplitView>();
 		bool isTableWidget = widget->IsOfType<CTableWidget>();
-		bool isLeaf = widget->attachedWidgets.IsEmpty() && !isSplitView;
+		bool isLeaf = widget->attachedWidgets.IsEmpty() && !isSplitView && !isTableWidget;
 
 		String widgetName = String::Format("{} ({})###{}", widget->GetName(), widget->GetClass()->GetName().GetLastComponent(), widget->GetUuid());
 		if (widget->IsOfType<CTableCellWidget>())

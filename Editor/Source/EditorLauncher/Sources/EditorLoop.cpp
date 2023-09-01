@@ -211,7 +211,9 @@ void EditorLoop::PostInit()
 		{ defaultFontByteSize, 21, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 22, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 24, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 26, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 28, "Open Sans", false, defaultFont },
+		{ defaultFontByteSize, 30, "Open Sans", false, defaultFont },
 		{ defaultFontByteSize, 32, "Open Sans", false, defaultFont },
 	});
 

@@ -161,7 +161,7 @@ namespace CE
         return cachedFunctionsMap[name];
     }
 
-    void StructType::CacheAllAttributes()
+	void StructType::CacheAllAttributes()
     {
 		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (attributesCached)
@@ -520,9 +520,6 @@ namespace CE
         {
             derivedClassesMap.Add({type->GetTypeId(), {}});
         }
-
-        //type->CacheSuperTypes();
-        //AddDerivedClassToMap(type, type);
 
 		// Only fire registration event for types that are registered outside any module
 		// Types that are registered within a module will fire only after all types within that module are fully loaded
