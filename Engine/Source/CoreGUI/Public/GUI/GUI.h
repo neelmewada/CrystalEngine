@@ -29,6 +29,9 @@ namespace CE::GUI
 	COREGUI_API Vec4 GetWindowRect();
 	COREGUI_API Vec2 GetWindowScroll();
 
+	COREGUI_API MouseCursor GetMouseCursor();
+	COREGUI_API void SetMouseCursor(MouseCursor cursor);
+
 	COREGUI_API void SetWindowFontScale(f32 scale);
 	COREGUI_API f32 GetWindowFontScale();
 
@@ -189,6 +192,13 @@ namespace CE::GUI
 
 	COREGUI_API void Text(const Rect& localRect, const String& text, const GuiStyleState& style);
 	COREGUI_API void Text(const Rect& localRect, const char* text, const GuiStyleState& style);
+
+	COREGUI_API void TextEllipsis(const Rect& localRect, const String& text, const GuiStyleState& style);
+	COREGUI_API void TextEllipsis(const Rect& localRect, const char* text, const GuiStyleState& style);
+
+	COREGUI_API void TextClipped(const Rect& localRect, const String& text, const GuiStyleState& style);
+	COREGUI_API void TextClipped(const Rect& localRect, const char* text, const GuiStyleState& style);
+
 	COREGUI_API void TextWrapped(const Rect& localRect, const String& text, const GuiStyleState& style);
 	COREGUI_API void TextWrapped(const Rect& localRect, const char* text, const GuiStyleState& style);
 

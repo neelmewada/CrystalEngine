@@ -34,6 +34,7 @@ CWindow.DockSpace {
 
 CLabel {
 	text-align: middle-center;
+	word-wrap: normal;
 }
 
 CLabel.Title {

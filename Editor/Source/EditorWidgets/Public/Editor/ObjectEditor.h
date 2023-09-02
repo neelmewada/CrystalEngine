@@ -31,7 +31,7 @@ namespace CE::Editor
 		friend class ObjectEditor;
 	};
 
-    CLASS()
+    CLASS(TargetType = "/Code/Core.CE::Object")
 	class EDITORWIDGETS_API ObjectEditor : public CLayoutGroup
 	{
 		CE_CLASS(ObjectEditor, CLayoutGroup)
@@ -48,7 +48,7 @@ namespace CE::Editor
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
-	protected:
+	editorwidgets_protected_internal:
 
 		void Construct() override;
 
@@ -73,7 +73,7 @@ namespace CE::Editor
 		FIELD(ReadOnly)
 		Vec2 size = Vec2();
 
-		
+		static HashMap<Name, Array<ClassType*>> classTypeToEditorMap;
 	};
 
 } // namespace CE::Editor

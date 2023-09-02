@@ -179,6 +179,7 @@ public:\
     typedef Class Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::ClassType* Type();\
+	inline static CE::ClassType* StaticType() { return Self::Type(); }\
 	static CE::String StaticPackage();\
 	static CE::String StaticModule();\
 	constexpr static bool IsClass() { return true; }\
@@ -312,6 +313,7 @@ public:\
     typedef Struct Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::StructType* Type();\
+	inline static CE::StructType* StaticType() { return Self::Type(); }\
 	constexpr static bool IsClass() { return false; }\
 	constexpr static bool IsStruct() { return true; }\
 	static CE::String StaticPackage();\

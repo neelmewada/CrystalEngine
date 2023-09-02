@@ -1,15 +1,15 @@
-#include "EditorWidgets.h"
+#include "EditorCore.h"
 
 namespace CE::Editor
 {
+	HashMap<Name, Array<ClassType*>> ObjectEditor::classTypeToEditorMap{};
+
 	ObjectEditor::ObjectEditor()
 	{
-		
 	}
 
 	ObjectEditor::~ObjectEditor()
 	{
-
 	}
 
 	ObjectEditorSection::ObjectEditorSection()
@@ -22,33 +22,34 @@ namespace CE::Editor
 
 	bool ObjectEditor::SetTargets(const Array<Object*>& targets)
 	{
-		ClassType* type = nullptr;
+		ClassType* editedType = nullptr;
 
 		for (auto target : targets)
 		{
 			if (target == nullptr)
 				return false;
-			if (type == nullptr)
+			if (editedType == nullptr)
 			{
-				type = target->GetClass();
+				editedType = target->GetClass();
 			}
-			else if (type->IsSubclassOf(target->GetClass()))
+			else if (editedType->IsSubclassOf(target->GetClass()))
 			{
-				type = target->GetClass();
+				editedType = target->GetClass();
 			}
-			else if (target->GetClass()->IsSubclassOf(type))
+			else if (target->GetClass()->IsSubclassOf(editedType))
 			{
-				
+				// Do nothing
 			}
 			else
 			{
+				// Different target type: target is out of inheritence hierarchy
 				return false;
 			}
 		}
 
 		this->targets.Clear();
 
-		if (type == nullptr)
+		if (editedType == nullptr)
 		{
 			return false;
 		}
@@ -61,7 +62,7 @@ namespace CE::Editor
 			}
 		}
 
-		this->targetType = type;
+		this->targetType = editedType;
 
 		categories.Add("General");
 		numFields = targetType->GetFieldCount();
@@ -76,7 +77,6 @@ namespace CE::Editor
 			}
 		}
 
-		DestroyAllSubWidgets();
 		ConstructWidgets();
 
 		return this->targets.NonEmpty();
@@ -98,10 +98,15 @@ namespace CE::Editor
 
 	void ObjectEditor::ConstructWidgets()
 	{
-		for (const auto& category : categories)
+		DestroyAllSubWidgets();
+
+		if (targetType != nullptr && categories.NonEmpty())
 		{
-			ObjectEditorSection* section = CreateWidget<ObjectEditorSection>(this, "ObjectEditorSection");
-			section->Construct(targetType, category, targets);
+			for (const auto& category : categories)
+			{
+				ObjectEditorSection* section = CreateWidget<ObjectEditorSection>(this, "ObjectEditorSection");
+				section->Construct(targetType, category, targets);
+			}
 		}
 
 		SetNeedsStyle();
@@ -116,37 +121,52 @@ namespace CE::Editor
 
 		DestroyAllSubWidgets();
 
+		if (targetType == nullptr)
+			return;
+
+		Array<FieldType*> fields = {};
+
+		for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
+		{
+			if (field->IsHidden())
+				continue;
+			if ((category == "General" && !field->HasAttribute("Category")) ||
+				(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
+			{
+				fields.Add(field);
+			}
+		}
+
+		if (fields.IsEmpty())
+			return;
+
 		CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
 		section->SetTitle(category);
 		{
 			CTableWidget* table = CreateWidget<CTableWidget>(section, "ObjectEditorTableWidget");
 			table->SetTableFlags(CTableFlags::InnerBorders | CTableFlags::ResizeableColumns);
 			table->SetNumColumns(2);
-			Array<FieldType*> fields = {};
 			
-			for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
+			if (targetType != nullptr)
 			{
-				if (field->IsHidden())
-					continue;
-				if ((category == "General" && !field->HasAttribute("Category")) ||
-					(field->HasAttribute("Category") && field->GetAttribute("Category").GetStringValue() == category))
+				table->SetNumRows(fields.GetSize());
+				int i = 0;
+
+				for (auto field : fields)
 				{
-					fields.Add(field);
+					SubClassType<FieldEditor> fieldEditorClass = FieldEditor::GetFieldEditorClass(field->GetDeclarationTypeId());
+
+					if (fieldEditorClass == nullptr)
+						continue;
+
+					CLabel* label = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 0)), "FieldLabel");
+					label->SetText(field->GetDisplayName());
+
+					CLabel* value = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 1)), "FieldValue");
+					value->SetText("Field value here");
+
+					i++;
 				}
-			}
-
-			table->SetNumRows(fields.GetSize());
-			int i = 0;
-
-			for (auto field : fields)
-			{
-				CLabel* label = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 0)), "FieldLabel");
-				label->SetText(field->GetDisplayName());
-
-				CLabel* value = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 1)), "FieldValue");
-				value->SetText("Field value here");
-				
-				i++;
 			}
 		}
 	}

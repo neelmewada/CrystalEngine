@@ -22,7 +22,11 @@ namespace CE::Widgets
 		inline void SetEnabled() { isDisabled = false; }
 		inline void SetDisabled() { isDisabled = true; }
 
+		CE_SIGNAL(OnTextClicked);
+
     protected:
+
+		void OnAfterComputeStyle() override;
         
         void OnDrawGUI() override;
 
@@ -35,9 +39,9 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isDisabled = false;
-        
-        String invisibleButtonId{};
 
+		FIELD()
+		CWordWrap wordWrap = CWordWrap::Inherited;
     };
     
 } // namespace CE::Widgets

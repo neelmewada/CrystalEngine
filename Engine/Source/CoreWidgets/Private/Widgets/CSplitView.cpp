@@ -100,6 +100,7 @@ namespace CE::Widgets
 				if (initialSplit > 1 || initialSplit < 0)
 					initialSplit = 0.5f;
 				GUI::TableSetColumnWidth(0, totalWidth * initialSplit);
+				GUI::TableSetColumnWidth(1, totalWidth * (1 - initialSplit));
 			}
 
 			// Actual rows/columns

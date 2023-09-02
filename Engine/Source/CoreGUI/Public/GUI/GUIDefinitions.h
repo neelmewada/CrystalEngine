@@ -743,6 +743,37 @@ namespace CE::GUI
 	};
 	ENUM_CLASS_FLAGS(SelectableFlags);
 
+	enum MouseCursor
+	{
+		MouseCursor_None = -1,
+		MouseCursor_Arrow = 0,
+		MouseCursor_TextInput,         // When hovering over InputText, etc.
+		MouseCursor_ResizeAll,         // (Unused by Dear ImGui functions)
+		MouseCursor_ResizeNS,          // When hovering over a horizontal border
+		MouseCursor_ResizeEW,          // When hovering over a vertical border or a column
+		MouseCursor_ResizeNESW,        // When hovering over the bottom-left corner of a window
+		MouseCursor_ResizeNWSE,        // When hovering over the bottom-right corner of a window
+		MouseCursor_Hand,              // (Unused by Dear ImGui functions. Use for e.g. hyperlinks)
+		MouseCursor_NotAllowed,        // When hovering something with disallowed interaction. Usually a crossed circle.
+		MouseCursor_COUNT
+	};
+	ENUM_CLASS(MouseCursor);
+
+	enum TextDecoration : u8
+	{
+		TextDecoration_None = 0,
+		TextDecoration_Underline = BIT(0),
+		TextDecoration_LineThrough = BIT(1),
+		TextDecoration_Overline = BIT(2),
+
+		TextDecoration_Solid = 0,
+		TextDecoration_Dotted = BIT(3),
+
+		TextDecoration_Position_MASK = TextDecoration_Underline | TextDecoration_LineThrough | TextDecoration_Overline,
+		TextDecoration_Style_MASK = TextDecoration_Dotted,
+	};
+	ENUM_CLASS_FLAGS(TextDecoration);
+
 	struct COREGUI_API GuiStyleState
 	{
 		// Border
@@ -760,7 +791,12 @@ namespace CE::GUI
 		TextAlign textAlign = TextAlign_MiddleCenter;
 		u32 fontSize = 16;
 		Name fontName{};
+		TextDecoration textDecoration = TextDecoration_None;
+		Color textDecorationColor = Color::Clear();
+		// Misc
+		MouseCursor cursor = MouseCursor_Arrow;
 	};
-    
+
+
 } // namespace CE
 

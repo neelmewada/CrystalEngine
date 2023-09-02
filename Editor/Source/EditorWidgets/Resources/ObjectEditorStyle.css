@@ -32,4 +32,10 @@
 
 #FieldValue {
     height: 25px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#FieldValue CTextInput {
+    min-width: 100px;
 }

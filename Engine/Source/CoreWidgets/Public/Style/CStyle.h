@@ -83,6 +83,8 @@ namespace CE::Widgets
 		Spacing,
 		FontSize, // Inherited
 		FontName, // Inherited
+		Cursor, // Inherited
+		WordWrap, // Inherited
 
 		// FlexBox properties
 		AlignContent,
@@ -126,6 +128,26 @@ namespace CE::Widgets
 	ENUM_CLASS_FLAGS(CTextAlign);
 
 	COREWIDGETS_API CTextAlign StringToAlignment(const String& string);
+
+	ENUM()
+	enum class CCursor : u8
+	{
+		Inherited = 0,
+		Arrow = 1,
+		Hand = 2,
+	};
+	ENUM_CLASS(CCursor);
+
+	ENUM()
+	enum class CWordWrap : u8
+	{
+		Inherited = 0,
+		Normal,
+		BreakWord,
+		Clip,
+		Ellipsis,
+	};
+	ENUM_CLASS(CWordWrap);
 
 	STRUCT()
 	struct COREWIDGETS_API CStyleValue

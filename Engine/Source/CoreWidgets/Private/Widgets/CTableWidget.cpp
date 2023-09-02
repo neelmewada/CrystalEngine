@@ -150,13 +150,16 @@ namespace CE::Widgets
 
 					auto colWidth = GUI::TableGetColumnWidth(c);
 					if (columnWidths[c] != colWidth)
+					{
 						SetNeedsLayout();
+					}
 					columnWidths[c] = colWidth;
 				}
 			}
 
 			GUI::PopChildCoordinateSpace();
 			GUI::EndTable();
+			PollEvents();
 		}
 	}
 

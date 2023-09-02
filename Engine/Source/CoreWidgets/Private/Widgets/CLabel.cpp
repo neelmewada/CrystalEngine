@@ -29,7 +29,7 @@ namespace CE::Widgets
 	Vec2 CLabel::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
 		float wrapWidth = -1.0f;
-		if (!isnan(width) && width > 0)
+		if (wordWrap == CWordWrap::BreakWord && !isnan(width) && width > 0)
 			wrapWidth = width;
 
 		CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
@@ -42,7 +42,17 @@ namespace CE::Widgets
 		return textSize + extra;
 	}
 
-    void CLabel::OnDrawGUI()
+	void CLabel::OnAfterComputeStyle()
+	{
+		Super::OnAfterComputeStyle();
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::WordWrap))
+		{
+			wordWrap = (CWordWrap)computedStyle.properties[CStylePropertyType::WordWrap].enumValue.x;
+		}
+	}
+
+	void CLabel::OnDrawGUI()
     {
 		Vec4 rect = GetComputedLayoutRect();
 
@@ -51,23 +61,31 @@ namespace CE::Widgets
 		GUI::SetCursorPos(rect.min);
 		auto windowPos = GUI::GetWindowPos();
 
-		if (invisibleButtonId.IsEmpty())
-		{
-			invisibleButtonId = String::Format("CLabel_InvisibleButton##{}", GetUuid());
-		}
-
 		if (IsInteractable())
 		{
-			GUI::InvisibleButton(rect, GetUuid());
+			if (GUI::InvisibleButton(rect, GetUuid()))
+			{
+				emit OnTextClicked();
+			}
 			PollEvents();
 		}
 
-		if (text == "Empty Project")
+		if (wordWrap == CWordWrap::Ellipsis || wordWrap == CWordWrap::Inherited)
 		{
-			String::Format("");
+			GUI::TextEllipsis(rect, text, *curState);
 		}
-
-		GUI::TextWrapped(rect, text, *curState);
+		else if (wordWrap == CWordWrap::Clip)
+		{
+			GUI::TextClipped(rect, text, *curState);
+		}
+		else if (wordWrap == CWordWrap::BreakWord)
+		{
+			GUI::TextWrapped(rect, text, *curState);
+		}
+		else // Normal
+		{
+			GUI::Text(rect, text, *curState);
+		}
     }
 
 	void CLabel::HandleEvent(CEvent* event)

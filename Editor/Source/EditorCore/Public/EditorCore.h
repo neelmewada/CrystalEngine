@@ -14,8 +14,3 @@
 #include "Project/CrystalProject.h"
 #include "Project/ProjectManager.h"
 
-namespace CE::Editor
-{
-    
-} // namespace CE::Editor
-

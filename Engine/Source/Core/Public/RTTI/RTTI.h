@@ -8,6 +8,7 @@
 #include "Containers/String.h"
 #include "IO/Path.h"
 
+#include "Attributes.h"
 #include "RTTIDefines.h"
 #include "AutoRTTI.h"
 

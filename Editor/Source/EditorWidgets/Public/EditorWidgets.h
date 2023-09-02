@@ -7,5 +7,6 @@
 // Editor Widgets headers
 #include "EditorStyles.h"
 
-// Widgets
-#include "Widgets/ObjectEditor.h"
+// Editors
+#include "Editor/ObjectEditor.h"
+#include "Editor/FieldEditor.h"

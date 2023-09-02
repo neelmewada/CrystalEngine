@@ -139,4 +139,52 @@ namespace CE::Widgets
 		return 0;
 	}
 
+    COREWIDGETS_API u16 CLongVersionInputValidator(const String& input, u16 appendChar, int cursorPos)
+    {
+		if (appendChar == '.')
+		{
+			int totalPeriods = 0;
+			for (int i = 0; i < input.GetLength(); i++)
+			{
+				if (input[i] == '.')
+					totalPeriods++;
+			}
+			if (totalPeriods >= 3)
+				return 0;
+			if (cursorPos <= 0 || !String::IsNumeric(input[cursorPos - 1]))
+				return 0;
+			return appendChar;
+		}
+		else if (String::IsNumeric(appendChar))
+		{
+			return appendChar;
+		}
+
+		return 0;
+    }
+
+	COREWIDGETS_API u16 CVersionInputValidator(const String& input, u16 appendChar, int cursorPos)
+	{
+		if (appendChar == '.')
+		{
+			int totalPeriods = 0;
+			for (int i = 0; i < input.GetLength(); i++)
+			{
+				if (input[i] == '.')
+					totalPeriods++;
+			}
+			if (totalPeriods >= 2)
+				return 0;
+			if (cursorPos <= 0 || !String::IsNumeric(input[cursorPos - 1]))
+				return 0;
+			return appendChar;
+		}
+		else if (String::IsNumeric(appendChar))
+		{
+			return appendChar;
+		}
+
+		return 0;
+	}
+
 } // namespace CE::Widgets

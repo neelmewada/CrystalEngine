@@ -47,6 +47,24 @@ namespace CE
 		Package::SavePackage(settingsPackage, nullptr);
 	}
 
+	Array<ClassType*> SettingsBase::GetSettingsClassesWithCategory(const String& settingsCategory)
+    {
+		Array<ClassType*> result{};
+		
+		for (auto classType : settingsClasses)
+		{
+			if (classType == nullptr)
+				continue;
+			if (classType->HasAttribute("SettingsCategory") && classType->GetAttribute("SettingsCategory").IsString())
+			{
+				String category = classType->GetAttribute("SettingsCategory").GetStringValue();
+				if (category == settingsCategory)
+					result.Add(classType);
+			}
+		}
+        return result;
+    }
+
 	void SettingsBase::OnClassRegistered(ClassType* classType)
 	{
 		if (classType != nullptr && classType->IsSubclassOf<SettingsBase>() && classType != GetStaticClass<SettingsBase>())

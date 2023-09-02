@@ -13,6 +13,10 @@ namespace CE
         static SettingsBase* LoadSettings(ClassType* settingsClass, String settingsName = "");
 
 		static void SaveSettings();
+
+		static Array<ClassType*> GetSettingsClassesWithCategory(const String& settingsCategory);
+
+		FORCE_INLINE static const Array<ClassType*>& GetAllSettingsClasses() { return settingsClasses; }
         
 	core_internal:
 

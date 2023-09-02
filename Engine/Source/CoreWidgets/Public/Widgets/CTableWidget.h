@@ -3,6 +3,20 @@
 namespace CE::Widgets
 {
 
+	ENUM(Flags)
+	enum class CTableFlags
+	{
+		None = 0,
+		ResizeableColumns = BIT(0),
+		ReorderableColumns = BIT(1),
+		ScrollX = BIT(3),
+		ScrollY = BIT(4),
+		InnerBordersH = BIT(5),
+		InnerBordersV = BIT(6),
+		InnerBorders = InnerBordersH | InnerBordersV,
+	};
+	ENUM_CLASS_FLAGS(CTableFlags);
+
 	CLASS()
 	class COREWIDGETS_API CTableCellWidget : public CWidget
 	{

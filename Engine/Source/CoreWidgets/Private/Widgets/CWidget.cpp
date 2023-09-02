@@ -121,6 +121,14 @@ namespace CE::Widgets
 		{
 			outState.shadowOffset = Vec2(styleValue.vector.x, styleValue.vector.y);
 		}
+		else if (property == CStylePropertyType::Cursor && styleValue.IsEnum())
+		{
+			CCursor cursorValue = (CCursor)styleValue.enumValue.x;
+			if (cursorValue == CCursor::Arrow)
+				outState.cursor = GUI::MouseCursor_Arrow;
+			else if (cursorValue == CCursor::Hand)
+				outState.cursor = GUI::MouseCursor_Hand;
+		}
 	}
 
 	void CWidget::DrawShadow(const GUI::GuiStyleState& styleState)
@@ -459,8 +467,13 @@ namespace CE::Widgets
 			{
 				screenPos = GUI::WidgetSpaceToScreenSpace(rect).min;
 			}
-
+			
 			if (IsDisabled()) GUI::BeginDisabled();
+
+			if (isHovered && defaultStyleState.cursor != GUI::MouseCursor_None)
+			{
+				GUI::SetMouseCursor(defaultStyleState.cursor);
+			}
 
 			CFontManager::Get().PushFont(defaultStyleState.fontSize, defaultStyleState.fontName);
 			OnDrawGUI();
@@ -869,8 +882,6 @@ namespace CE::Widgets
 
 		UpdateStyleIfNeeded();
 
-		NeedsLayoutRecursive();
-
 		auto parent = GetOwner();
 		Vec2 parentSize = Vec2(YGUndefined, YGUndefined);
 
@@ -933,9 +944,9 @@ namespace CE::Widgets
 		for (const auto& [property, value] : selectStyle.properties)
 		{
 			// Non-Yoga properties
-			if (value.IsValid()) // Default state
+			if (value.IsValid())
 			{
-				LoadGuiStyleStateProperty(property, value, defaultStyleState);
+				LoadGuiStyleStateProperty(property, value, defaultStyleState); // Default state
 			}
 
 			if (!value.IsValid())
@@ -1360,7 +1371,7 @@ namespace CE::Widgets
 			widget->Destroy();
 		}
 		attachedWidgets.Clear();
-
+		
 		SetNeedsStyle();
 		SetNeedsLayout();
 	}
@@ -1388,6 +1399,39 @@ namespace CE::Widgets
     {
 		if (event->isHandled && event->stopPropagation)
 			return;
+
+		GUI::MouseCursor mouseCursor = GUI::MouseCursor_None;
+
+		if (event->GetEventType() == CEventType::MouseEnter || event->GetEventType() == CEventType::MouseMove)
+		{
+			if (computedStyle.properties.KeyExists(CStylePropertyType::Cursor))
+			{
+				CCursor cursor = (CCursor)computedStyle.properties[CStylePropertyType::Cursor].enumValue.x;
+				switch (cursor)
+				{
+				case CCursor::Arrow:
+					mouseCursor = GUI::MouseCursor_Arrow;
+					GUI::SetMouseCursor(mouseCursor);
+					break;
+				case CCursor::Hand:
+					mouseCursor = GUI::MouseCursor_Hand;
+					GUI::SetMouseCursor(mouseCursor);
+					break;
+				}
+			}
+		}
+		else if (event->GetEventType() == CEventType::MouseLeave)
+		{
+			if (computedStyle.properties.KeyExists(CStylePropertyType::Cursor))
+			{
+				CCursor cursor = (CCursor)computedStyle.properties[CStylePropertyType::Cursor].enumValue.x;
+				if (cursor != CCursor::Inherited)
+				{
+					mouseCursor = GUI::MouseCursor_Arrow;
+					GUI::SetMouseCursor(mouseCursor);
+				}
+			}
+		}
 
 		if (!event->isHandled && event->GetEventType() == CEventType::MouseButtonClick)
 		{

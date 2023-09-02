@@ -87,6 +87,16 @@ namespace CE::GUI
 		return Vec2(window->Scroll.x, window->Scroll.y);
 	}
 
+	COREGUI_API MouseCursor GetMouseCursor()
+	{
+		return (MouseCursor)ImGui::GetMouseCursor();
+	}
+
+	COREGUI_API void SetMouseCursor(MouseCursor cursor)
+	{
+		ImGui::SetMouseCursor((MouseCursor)cursor);
+	}
+
 	COREGUI_API void SetWindowFontScale(f32 scale)
 	{
 		ImGui::SetWindowFontScale(scale);
@@ -740,6 +750,18 @@ namespace CE::GUI
 		window->DrawList->AddImage(textureId, bb.Min, bb.Max, ImVec2(uvMin.x, uvMin.y), ImVec2(uvMax.x, uvMax.y));// , style.imageTint.ToU32());
 	}
 
+	static void RenderTextDecoration(const ImRect& rect, const GuiStyleState& style)
+	{
+		if ((style.textDecoration & TextDecoration_Position_MASK) == TextDecoration_None)
+			return;
+
+		auto drawList = ImGui::GetWindowDrawList();
+		if (drawList == nullptr)
+			return;
+
+		
+	}
+
 	COREGUI_API void Text(const Rect& localRect, const String& text, const GuiStyleState& style)
 	{
 		GUI::Text(localRect, text.GetCString(), style);
@@ -809,15 +831,211 @@ namespace CE::GUI
 		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
 
 		ImVec2 inSize = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
-		
-		const ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
-		const float wrap_pos_x = window->DC.TextWrapPos;
-		const bool wrap_enabled = (wrap_pos_x >= 0.0f);
+
+		ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+
+		{
+			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);
+			
+			ImRect bb(text_pos, text_pos + inSize);
+			ImGui::ItemSize(inSize, 0.0f);
+			if (!ImGui::ItemAdd(bb, 0))
+				return;
+
+			text_pos.x += align.x * inSize.x - align.x * text_size.x;
+			text_pos.y += align.y * inSize.y - align.y * text_size.y;
+			
+			ImGui::PushStyleColor(StyleCol_Text, style.foreground.ToU32());
+
+			ImGui::RenderText(text_pos, text_begin, text_end, false);
+
+			RenderTextDecoration(ImRect(text_pos, text_pos + text_size), style);
+			
+			ImGui::PopStyleColor(1);
+		}
+	}
+
+	COREGUI_API void TextEllipsis(const Rect& localRect, const String& text, const GuiStyleState& style)
+	{
+		TextEllipsis(localRect, text.GetCString(), style);
+	}
+
+	COREGUI_API void TextEllipsis(const Rect& localRect, const char* text, const GuiStyleState& style)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+		ImGuiContext& g = *GImGui;
+
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
+
+		const char* text_end = NULL;
+
+		// Accept null ranges
+		if (text == text_end)
+			text = text_end = "";
+		ImGuiTextFlags flags = ImGuiTextFlags_None;
+
+		// Calculate length
+		const char* text_begin = text;
+		if (text_end == NULL)
+			text_end = text + strlen(text); // FIXME-OPT
+
+		auto textAlign = style.textAlign;
+		ImVec2 align = ImVec2(0.5f, 0.5f);
+
+		if (textAlign == TextAlign_TopLeft)
+		{
+			align = ImVec2(0, 0);
+		}
+		else if (textAlign == TextAlign_TopCenter)
+		{
+			align = ImVec2(0.5f, 0);
+		}
+		else if (textAlign == TextAlign_TopRight)
+		{
+			align = ImVec2(1, 0);
+		}
+		else if (textAlign == TextAlign_MiddleLeft)
+		{
+			align = ImVec2(0, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleCenter)
+		{
+			align = ImVec2(0.5f, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleRight)
+		{
+			align = ImVec2(1, 0.5f);
+		}
+		else if (textAlign == TextAlign_BottomLeft)
+		{
+			align = ImVec2(0, 1);
+		}
+		else if (textAlign == TextAlign_BottomCenter)
+		{
+			align = ImVec2(0.5f, 1);
+		}
+		else if (textAlign == TextAlign_BottomRight)
+		{
+			align = ImVec2(1, 1);
+		}
+
+		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
+
+		ImVec2 inSize = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+
+		ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+
 		//if (text_end - text <= 2000)
 		{
 			// Common case
 			//const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
-			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);// , wrap_width);
+			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);
+
+			//ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);
+			text_pos.x += align.x * inSize.x - align.x * text_size.x;
+			text_pos.y += align.y * inSize.y - align.y * text_size.y;
+
+			ImRect bb(text_pos, text_pos + inSize);
+			ImGui::ItemSize(inSize, 0.0f);
+			if (!ImGui::ItemAdd(bb, 0))
+				return;
+
+			float text_max_x = text_pos.x + text_size.x;
+
+			ImGui::PushStyleColor(StyleCol_Text, style.foreground.ToU32());
+
+			if (text_size.x > bb.GetSize().x)
+			{
+				ImGui::RenderTextEllipsis(ImGui::GetWindowDrawList(), text_pos, text_pos + text_size, text_max_x, text_max_x, text, text_end, &text_size);
+			}
+			else
+			{
+				ImGui::RenderText(text_pos, text, text_end, false);
+			}
+
+			ImGui::PopStyleColor(1);
+		}
+	}
+
+	COREGUI_API void TextClipped(const Rect& localRect, const String& text, const GuiStyleState& style)
+	{
+		GUI::TextClipped(localRect, text.GetCString(), style);
+	}
+
+	COREGUI_API void TextClipped(const Rect& localRect, const char* text, const GuiStyleState& style)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+		ImGuiContext& g = *GImGui;
+
+		Rect rect = WidgetSpaceToWindowSpace(localRect);
+
+		const char* text_end = NULL;
+
+		// Accept null ranges
+		if (text == text_end)
+			text = text_end = "";
+		ImGuiTextFlags flags = ImGuiTextFlags_None;
+
+		// Calculate length
+		const char* text_begin = text;
+		if (text_end == NULL)
+			text_end = text + strlen(text); // FIXME-OPT
+
+		auto textAlign = style.textAlign;
+		ImVec2 align = ImVec2(0.5f, 0.5f);
+
+		if (textAlign == TextAlign_TopLeft)
+		{
+			align = ImVec2(0, 0);
+		}
+		else if (textAlign == TextAlign_TopCenter)
+		{
+			align = ImVec2(0.5f, 0);
+		}
+		else if (textAlign == TextAlign_TopRight)
+		{
+			align = ImVec2(1, 0);
+		}
+		else if (textAlign == TextAlign_MiddleLeft)
+		{
+			align = ImVec2(0, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleCenter)
+		{
+			align = ImVec2(0.5f, 0.5f);
+		}
+		else if (textAlign == TextAlign_MiddleRight)
+		{
+			align = ImVec2(1, 0.5f);
+		}
+		else if (textAlign == TextAlign_BottomLeft)
+		{
+			align = ImVec2(0, 1);
+		}
+		else if (textAlign == TextAlign_BottomCenter)
+		{
+			align = ImVec2(0.5f, 1);
+		}
+		else if (textAlign == TextAlign_BottomRight)
+		{
+			align = ImVec2(1, 1);
+		}
+
+		ImGui::SetCursorPos(ImVec2(rect.left, rect.top));
+
+		ImVec2 inSize = ImVec2(rect.right - rect.left, rect.bottom - rect.top);
+		
+		const ImVec2 text_pos(window->DC.CursorPos.x, window->DC.CursorPos.y + window->DC.CurrLineTextBaseOffset);
+
+		//if (text_end - text <= 2000)
+		{
+			// Common case
+			//const float wrap_width = wrap_enabled ? ImGui::CalcWrapWidthForPos(window->DC.CursorPos, wrap_pos_x) : 0.0f;
+			const ImVec2 text_size = ImGui::CalcTextSize(text_begin, text_end, false);
 
 			ImRect bb(text_pos, text_pos + inSize);
 			ImGui::ItemSize(inSize, 0.0f);
@@ -825,12 +1043,8 @@ namespace CE::GUI
 				return;
 
 			ImGui::PushStyleColor(StyleCol_Text, style.foreground.ToU32());
-			//ImGui::DebugDrawItemRect(Color::RGBA(120, 120, 120).ToU32());
 
 			ImGui::RenderTextClipped(bb.Min, bb.Max, text_begin, text_end, &text_size, align, &bb);
-			
-			//ImVec4 clipRect = bb.ToVec4();
-			//window->DrawList->AddText(g.Font, g.FontSize, bb.Min, style.foreground.ToU32(), text, text_end, rect.right - rect.left);
 
 			ImGui::PopStyleColor(1);
 		}

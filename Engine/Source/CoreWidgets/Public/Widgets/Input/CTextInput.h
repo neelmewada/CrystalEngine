@@ -7,6 +7,12 @@ namespace CE::Widgets
     COREWIDGETS_API u16 CFloatInputValidator(const String& input, u16 appendChar, int cursorPos);
     COREWIDGETS_API u16 CIntegerInputValidator(const String& input, u16 appendChar, int cursorPos);
 
+	/// Long version example: 1.12.4.46
+	COREWIDGETS_API u16 CLongVersionInputValidator(const String& input, u16 appendChar, int cursorPos);
+
+	/// Normal version example: 1.2.12
+	COREWIDGETS_API u16 CVersionInputValidator(const String& input, u16 appendChar, int cursorPos);
+
     CLASS()
     class COREWIDGETS_API CTextInput : public CWidget
     {

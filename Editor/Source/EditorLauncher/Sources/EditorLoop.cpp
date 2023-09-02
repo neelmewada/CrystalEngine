@@ -119,6 +119,7 @@ void EditorLoop::LoadEditorModules()
 {
 	ModuleManager::Get().LoadModule("EditorCore");
 	ModuleManager::Get().LoadModule("EditorWidgets");
+
 	ModuleManager::Get().LoadModule("EditorSystem");
 
 	ModuleManager::Get().LoadModule("CrystalEditor");
@@ -129,6 +130,7 @@ void EditorLoop::UnloadEditorModules()
 	ModuleManager::Get().UnloadModule("CrystalEditor");
 
 	ModuleManager::Get().UnloadModule("EditorSystem");
+
 	ModuleManager::Get().UnloadModule("EditorWidgets");
 	ModuleManager::Get().UnloadModule("EditorCore");
 }
@@ -327,7 +329,8 @@ void EditorLoop::PreShutdown()
 
 void EditorLoop::Shutdown()
 {
-	// Unload project
+	// Save & unload project
+	SaveProject();
 	UnloadProject();
 
 	// Shutdown application
@@ -347,6 +350,11 @@ void EditorLoop::LoadProject()
 		PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
 		RequestEngineExit("INVALID_PROJECT");
 	}
+}
+
+void EditorLoop::SaveProject()
+{
+	SaveSettings();
 }
 
 void EditorLoop::UnloadProject()

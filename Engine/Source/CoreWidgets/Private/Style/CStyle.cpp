@@ -185,7 +185,9 @@ namespace CE::Widgets
 			CStylePropertyType::Foreground,
 			CStylePropertyType::TextAlign,
 			CStylePropertyType::FontSize,
-			CStylePropertyType::FontName
+			CStylePropertyType::FontName,
+			CStylePropertyType::Cursor,
+			CStylePropertyType::WordWrap,
 		};
 
 		return inheritedProperties;
@@ -274,6 +276,7 @@ namespace CE::Widgets
 		{ "background-size", CStylePropertyType::BackgroundSize },
 		{ "shadow-offset", CStylePropertyType::ShadowOffset },
 		{ "text-align", CStylePropertyType::TextAlign },
+		{ "word-wrap", CStylePropertyType::WordWrap },
 		{ "width", CStylePropertyType::Width },
 		{ "height", CStylePropertyType::Height },
 		{ "min-width", CStylePropertyType::MinWidth },
@@ -283,6 +286,7 @@ namespace CE::Widgets
 		{ "font-size", CStylePropertyType::FontSize },
 		{ "font-name", CStylePropertyType::FontName},
 		{ "font", CStylePropertyType::FontName},
+		{ "cursor", CStylePropertyType::Cursor },
 		{ "align-content", CStylePropertyType::AlignContent },
 		{ "align-items", CStylePropertyType::AlignItems },
 		{ "align-self", CStylePropertyType::AlignSelf },
@@ -317,6 +321,8 @@ namespace CE::Widgets
 		{ CStylePropertyType::FlexWrap, GetStaticEnum<CFlexWrap>() },
 		{ CStylePropertyType::FlexDirection, GetStaticEnum<CFlexDirection>() },
 		{ CStylePropertyType::Display, GetStaticEnum<CDisplay>() },
+		{ CStylePropertyType::Cursor, GetStaticEnum<CCursor>() },
+		{ CStylePropertyType::WordWrap, GetStaticEnum<CWordWrap>() }
 	};
 
 	COREWIDGETS_API EnumType* GetEnumTypeForProperty(CStylePropertyType property)
