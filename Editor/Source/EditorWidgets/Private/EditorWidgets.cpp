@@ -14,8 +14,6 @@ namespace CE::Editor
         {
 			GetStyleManager()->AddResourceSearchModule(MODULE_NAME);
 
-			ObjectEditor::classTypeToEditorMap.Add({ TYPEID(Object), GetStaticClass<ObjectEditor>()});
-
 			onClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&EditorWidgetsModule::OnClassRegistered, this));
 			onClassDeregistered = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&EditorWidgetsModule::OnClassDeregistered, this));
         }

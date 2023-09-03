@@ -4,8 +4,16 @@ namespace CE::Widgets
 {
     typedef Delegate<u16(const String& string, u16 appendChar, int cursorPos)> CInputValidator;
 
+	// Used for CE::Name types.
+	COREWIDGETS_API u16 CNameInputValidator(const String& input, u16 appendChar, int cursorPos);
+
     COREWIDGETS_API u16 CFloatInputValidator(const String& input, u16 appendChar, int cursorPos);
+
+	/// Signed integer.
     COREWIDGETS_API u16 CIntegerInputValidator(const String& input, u16 appendChar, int cursorPos);
+
+	/// Unsigned integer.
+	COREWIDGETS_API u16 CUnsignedIntegerInputValidator(const String& input, u16 appendChar, int cursorPos);
 
 	/// Long version example: 1.12.4.46
 	COREWIDGETS_API u16 CLongVersionInputValidator(const String& input, u16 appendChar, int cursorPos);

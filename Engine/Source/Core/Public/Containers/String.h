@@ -311,13 +311,40 @@ namespace CE
 	    // Parsing
 
 	    template<typename T>
-	    static bool TryParse(const String& string, T& outValue)
+		static bool TryParseValue(const String& string, T& outValue)
 	    {
-	        return TryParse(string, outValue);
+			if constexpr (TIsIntegralType<T>::Value)
+			{
+				s64 value = 0;
+				if (TryParseInteger(string, value))
+				{
+					outValue = StaticCast<T>(value);
+					return true;
+				}
+				return false;
+			}
+			else if constexpr (TIsSameType<T, f32>::Value or TIsSameType<T, f64>::Value)
+			{
+				T value = 0;
+				if (TryParseFloat(string, value))
+				{
+					outValue = StaticCast<T>(value);
+					return true;
+				}
+				return false;
+			}
+			else
+			{
+				return TryParse(string, outValue);
+			}
 	    }
 
+		static bool TryParse(const String& string, c8& outValue);
+		static bool TryParse(const String& string, c16& outValue);
 	    static bool TryParse(const String& string, u8& outValue);
 	    static bool TryParse(const String& string, s8& outValue);
+		static bool TryParse(const String& string, u16& outValue);
+		static bool TryParse(const String& string, s16& outValue);
 	    static bool TryParse(const String& string, u32& outValue);
 	    static bool TryParse(const String& string, s32& outValue);
         static bool TryParse(const String& string, u64& outValue);
@@ -327,10 +354,10 @@ namespace CE
         static bool TryParse(const String& string, b8& outValue);
 
 	    template<typename T>
-	    INLINE static T Parse(const String& string)
+	    FORCE_INLINE static T Parse(const String& string)
 	    {
 	        T retVal{};
-	        if (!TryParse(string, retVal))
+	        if (!TryParseValue(string, retVal))
 	            Internal_ThrowParseException("Failed to parse string");
 	        return retVal;
 	    }

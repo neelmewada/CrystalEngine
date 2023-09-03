@@ -334,6 +334,8 @@ TEST(Containers, String)
 
     // 3. Parse Tests
 
+	EXPECT_EQ(String::Parse<u16>("65000"), 65000);
+	EXPECT_NE(String::Parse<u16>("65900"), 65000);
     EXPECT_EQ(String::Parse<s32>("1234567890"), 1234567890);
     EXPECT_EQ(String::Parse<s32>("-1234567890"), -1234567890);
     EXPECT_EQ(String::Parse<s32>("0001234"), 1234);

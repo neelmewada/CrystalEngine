@@ -15,11 +15,22 @@ namespace CE::Editor
 
 		void Construct() override;
 
+		void ConstructEditor();
+
 		FIELD()
 		CSplitView* splitView = nullptr;
 
+		FIELD()
+		CLayoutGroup* rightView = nullptr;
+
+		FIELD()
+		CLabel* editorTitleLabel = nullptr;
 		
+		FIELD(ReadOnly)
 		ObjectEditor* editor = nullptr;
+
+		FIELD(ReadOnly)
+		SettingsBase* target = nullptr;
 	};
 
 } // namespace CE::Editor

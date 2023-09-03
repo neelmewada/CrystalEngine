@@ -48,6 +48,10 @@ namespace CE::Editor
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
+		static SubClassType<ObjectEditor> GetObjectEditorClass(const Name& targetObjectTypeName);
+
+		static ObjectEditor* CreateEditorFor(const Name& targetObjectTypeName, CWidget* parent);
+
 	editorwidgets_protected_internal:
 
 		void Construct() override;

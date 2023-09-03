@@ -189,7 +189,7 @@ namespace CE
 		{
 			return 0;
 		}
-		else if constexpr (isObjectStore) // object store type
+		else if constexpr (isObjectStore) // ObjectMap type
 		{
             return Internal::GetObjectStoreTypeId();
 		}
@@ -197,7 +197,7 @@ namespace CE
 		{
             return Internal::GetArrayTypeId();
 		}
-		else if constexpr (isSubClassType)
+		else if constexpr (isSubClassType) // SubClassType<SomeClass>
 		{
 			return Internal::GetSubClassTypeTypeId();
 		}

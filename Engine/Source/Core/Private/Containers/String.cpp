@@ -818,7 +818,29 @@ namespace CE
 		StringLength = (u32)std::strlen(Buffer);
 	}
 
-    bool String::TryParse(const String& string, u8& outValue)
+	bool String::TryParse(const String& string, c8& outValue)
+	{
+		s64 value = 0;
+		if (TryParseInteger(string, value))
+		{
+			outValue = StaticCast<c8>(value);
+			return true;
+		}
+		return false;
+	}
+
+	bool String::TryParse(const String& string, c16& outValue)
+	{
+		s64 value = 0;
+		if (TryParseInteger(string, value))
+		{
+			outValue = StaticCast<c16>(value);
+			return true;
+		}
+		return false;
+	}
+
+	bool String::TryParse(const String& string, u8& outValue)
     {
         s64 value = 0;
         if (TryParseInteger(string, value))
@@ -839,6 +861,28 @@ namespace CE
         }
         return false;
     }
+
+	bool String::TryParse(const String& string, u16& outValue)
+	{
+		s64 value = 0;
+		if (TryParseInteger(string, value))
+		{
+			outValue = StaticCast<u16>(value);
+			return true;
+		}
+		return false;
+	}
+
+	bool String::TryParse(const String& string, s16& outValue)
+	{
+		s64 value = 0;
+		if (TryParseInteger(string, value))
+		{
+			outValue = StaticCast<s16>(value);
+			return true;
+		}
+		return false;
+	}
 
     bool String::TryParse(const String& string, u32& outValue)
     {

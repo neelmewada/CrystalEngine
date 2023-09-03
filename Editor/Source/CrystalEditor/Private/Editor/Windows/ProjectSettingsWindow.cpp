@@ -18,6 +18,7 @@ namespace CE::Editor
 
 		SetTitle("Project Settings");
 		SetFullscreen(false);
+		target = GetSettings<ProjectSettings>();
 
 		splitView = CreateWidget<CSplitView>(this, "ProjectSettingsSplitView");
 		splitView->SetInitialSplit(0.25f);
@@ -68,21 +69,42 @@ namespace CE::Editor
 					labelButton->SetText(settingsClass->GetDisplayName());
 					Object::Bind(labelButton, MEMBER_FUNCTION(CLabel, OnTextClicked), [=]
 						{
-							editor->SetTargets({ SettingsBase::LoadSettings(settingsClass) });
+							target = SettingsBase::LoadSettings(settingsClass);
+							auto editorClass = editor->GetClass();
+							auto requiredEditorClass = ObjectEditor::GetObjectEditorClass(settingsClass->GetTypeName());
+							if (editorClass != requiredEditorClass)
+							{
+								ConstructEditor();
+							}
+							else
+							{
+								editor->SetTargets({ target });
+							}
 						});
 				}
 			}
 		}
-
-		auto rightView = CreateWidget<CLayoutGroup>(splitView->GetRight(), "ProjectSettingsRightView");
+		
+		rightView = CreateWidget<CLayoutGroup>(splitView->GetRight(), "ProjectSettingsRightView");
 		{
-			auto titleLabel = CreateWidget<CLabel>(rightView, "TitleLabel");
-			titleLabel->SetText("Project");
-			titleLabel->AddStyleClass("Title");
+			editorTitleLabel = CreateWidget<CLabel>(rightView, "TitleLabel");
+			editorTitleLabel->SetText(target->GetClass()->GetDisplayName());
+			editorTitleLabel->AddStyleClass("Title");
 
-			editor = CreateWidget<ObjectEditor>(rightView, "ProjectSettingsObjectEditor");
-			editor->SetTargets({ GetSettings<ProjectSettings>() });
+			ConstructEditor();
 		}
+	}
+
+	void ProjectSettingsWindow::ConstructEditor()
+	{
+		if (editor != nullptr)
+			editor->Destroy();
+		if (target == nullptr)
+			return;
+
+		editor = ObjectEditor::CreateEditorFor(target->GetClass()->GetTypeName(), rightView);
+		editorTitleLabel->SetText(target->GetClass()->GetDisplayName());
+		editor->SetTargets({ target });
 	}
 
 } // namespace CE::Editor

@@ -30,12 +30,14 @@
     height: 25px;
 }
 
-#FieldValue {
+#FieldEditor {
     height: 25px;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
 }
 
-#FieldValue CTextInput {
-    min-width: 100px;
+#FieldEditor CTextInput {
+    min-width: 175px;
+    height: 22.5px;
 }

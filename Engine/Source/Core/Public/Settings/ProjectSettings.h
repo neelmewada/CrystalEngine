@@ -27,11 +27,11 @@ CE_RTTI_CLASS(CORE_API, CE, ProjectSettings,
     CE_ATTRIBS(Settings = "ProjectSettings", Display = "Project", SettingsCategory = "Project"),
     CE_FIELD_LIST(
 		CE_FIELD(projectName, Category = "Description")
-		CE_FIELD(projectVersion, Category = "Description")
+		CE_FIELD(projectVersion, Category = "Description", Validator = "LongVersion")
 		CE_FIELD(description, Category = "Description")
 
 		CE_FIELD(copyrightNotice, Category = "Legal")
-		CE_FIELD(privacyPolicyUrl, Category = "Legal")
+		CE_FIELD(privacyPolicyUrl, Category = "Legal", Display = "Privacy Policy URL")
 
     ),
     CE_FUNCTION_LIST()

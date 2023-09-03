@@ -167,13 +167,21 @@ namespace CE
 			{
 				return String::Format("{}", (u32)GetFieldValue<UUID32>(instance));
 			}
+			else if (fieldTypeId == TYPEID(c8))
+			{
+				return String::Format("{}", (int)GetFieldValue<c8>(instance));
+			}
+			else if (fieldTypeId == TYPEID(c16))
+			{
+				return String::Format("{}", (int)GetFieldValue<c16>(instance));
+			}
 			else if (fieldTypeId == TYPEID(u8))
 			{
-				return String::Format("{}", GetFieldValue<u8>(instance));
+				return String::Format("{}", (int)GetFieldValue<u8>(instance));
 			}
 			else if (fieldTypeId == TYPEID(s8))
 			{
-				return String::Format("{}", GetFieldValue<s8>(instance));
+				return String::Format("{}", (int)GetFieldValue<s8>(instance));
 			}
 			else if (fieldTypeId == TYPEID(u16))
 			{

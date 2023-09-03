@@ -23,6 +23,7 @@ typedef float  f32;
 typedef double f64;
 
 typedef char c8;
+typedef wchar_t c16;
 typedef bool b8;
 
 typedef intptr_t IntPtr;

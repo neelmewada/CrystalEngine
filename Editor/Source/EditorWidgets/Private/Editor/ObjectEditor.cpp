@@ -87,6 +87,39 @@ namespace CE::Editor
 		return Vec2(width, (numFields + categories.GetSize()) * 15.0f);
 	}
 
+	SubClassType<ObjectEditor> ObjectEditor::GetObjectEditorClass(const Name& objectTypeName)
+	{
+		auto classType = ClassType::FindClass(objectTypeName);
+		if (classType == nullptr)
+			return ObjectEditor::StaticType();
+
+		auto baseClass = classType;
+		while (baseClass != nullptr)
+		{
+			if (classTypeToEditorMap.KeyExists(baseClass->GetTypeName()))
+			{
+				const auto& array = classTypeToEditorMap[baseClass->GetTypeName()];
+				if (array.NonEmpty())
+					return array.Top();
+			}
+
+			if (baseClass->GetSuperClassCount() > 0)
+				baseClass = baseClass->GetSuperClass(0);
+			else break;
+		}
+
+		return ObjectEditor::StaticType();
+	}
+
+	ObjectEditor* ObjectEditor::CreateEditorFor(const Name& targetObjectTypeName, CWidget* parent)
+	{
+		ClassType* objectEditorClass = GetObjectEditorClass(targetObjectTypeName);
+		if (objectEditorClass == nullptr)
+			return nullptr;
+
+		return CreateWidget<ObjectEditor>(parent, "ObjectEditor", objectEditorClass);
+	}
+
 	void ObjectEditor::Construct()
 	{
 		Super::Construct();
@@ -100,7 +133,7 @@ namespace CE::Editor
 	{
 		DestroyAllSubWidgets();
 
-		if (targetType != nullptr && categories.NonEmpty())
+		if (targetType != nullptr && categories.NonEmpty() && targets.NonEmpty())
 		{
 			for (const auto& category : categories)
 			{
@@ -118,10 +151,11 @@ namespace CE::Editor
 		this->targetType = type;
 		this->category = category;
 		this->targets = targets;
+		Array<void*> targetInstances = this->targets.Transform<void*>([](Object* instance) { return (void*)instance; });
 
 		DestroyAllSubWidgets();
 
-		if (targetType == nullptr)
+		if (targetType == nullptr || targets.IsEmpty())
 			return;
 
 		Array<FieldType*> fields = {};
@@ -154,16 +188,26 @@ namespace CE::Editor
 
 				for (auto field : fields)
 				{
-					SubClassType<FieldEditor> fieldEditorClass = FieldEditor::GetFieldEditorClass(field->GetDeclarationTypeId());
+					auto fieldDeclType = field->GetDeclarationType();
+					if (fieldDeclType == nullptr)
+						continue;
 
+					SubClassType<FieldEditor> fieldEditorClass = FieldEditor::GetFieldEditorClass(fieldDeclType->GetTypeName());
 					if (fieldEditorClass == nullptr)
 						continue;
 
 					CLabel* label = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 0)), "FieldLabel");
 					label->SetText(field->GetDisplayName());
 
-					CLabel* value = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 1)), "FieldValue");
-					value->SetText("Field value here");
+					//CLabel* value = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 1)), "FieldEditor");
+					//value->SetText("Field value here");
+					FieldEditor* editor = CreateWidget<FieldEditor>(table->GetCellWidget(Vec2i(i, 1)), "FieldEditor", fieldEditorClass);
+
+					Array<FieldType*> targetFields = {};
+					for (int j = 0; j < targetInstances.GetSize(); j++)
+						targetFields.Add(field);
+
+					editor->SetTargets(fieldDeclType, targetFields, targetInstances);
 
 					i++;
 				}

@@ -85,6 +85,13 @@ namespace CE::Widgets
 		Super::HandleEvent(event);
 	}
 
+	COREWIDGETS_API u16 CNameInputValidator(const String& input, u16 appendChar, int cursorPos)
+	{
+		if (String::IsAlphabet(appendChar) || String::IsNumeric(appendChar) || appendChar == '-' || appendChar == '_')
+			return appendChar;
+		return 0;
+	}
+
 	COREWIDGETS_API u16 CFloatInputValidator(const String& input, u16 appendChar, int cursorPos)
 	{
 		if (String::IsNumeric(appendChar))
@@ -134,6 +141,16 @@ namespace CE::Widgets
 			if (cursorPos == 0 && !input.Contains('-'))
 				return appendChar;
 			break;
+		}
+
+		return 0;
+	}
+
+	COREWIDGETS_API u16 CUnsignedIntegerInputValidator(const String& input, u16 appendChar, int cursorPos)
+	{
+		if (String::IsNumeric(appendChar))
+		{
+			return appendChar;
 		}
 
 		return 0;
