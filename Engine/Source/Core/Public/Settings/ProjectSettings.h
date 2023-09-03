@@ -26,7 +26,7 @@ CE_RTTI_CLASS(CORE_API, CE, ProjectSettings,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(Settings = "ProjectSettings", Display = "Project", SettingsCategory = "Project"),
     CE_FIELD_LIST(
-		CE_FIELD(projectName, Category = "Description")
+		CE_FIELD(projectName, Category = "Description", Validator = "Name")
 		CE_FIELD(projectVersion, Category = "Description", Validator = "LongVersion")
 		CE_FIELD(description, Category = "Description")
 
