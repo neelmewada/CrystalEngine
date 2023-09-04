@@ -15,7 +15,7 @@ namespace CE
     {
         if (!settingsClass->IsSubclassOf<SettingsBase>() || !settingsClass->CanBeInstantiated())
             return nullptr;
-
+		
 		SettingsBase* settings = LoadSettingsFromPackage(settingsClass);
 
 		if (settings == nullptr)

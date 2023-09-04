@@ -145,6 +145,10 @@ namespace CE::Editor
 					{
 						textValidator = CLongVersionInputValidator;
 					}
+					else if (validatorType == FIELD_ATTRIB_NO_VALIDATOR)
+					{
+						textValidator = nullptr;
+					}
 				}
 			}
 		}
@@ -176,7 +180,11 @@ namespace CE::Editor
 
 		if (fieldDeclType == nullptr || targets.IsEmpty() || fieldTypes.IsEmpty() ||
 			(fieldTypes.GetSize() != targets.GetSize()))
+		{
+			auto label = CreateWidget<CLabel>(this, "FieldIncompatibleLabel");
+			label->SetText("Incompatible values");
 			return;
+		}
 
 		if (textTypes.Exists(fieldDeclType->GetTypeId()))
 		{
@@ -326,6 +334,37 @@ namespace CE::Editor
 					{
 						SetTargetFieldValue<Name>(newText);
 					}
+				});
+		}
+		else if (fieldDeclType->GetTypeId() == TYPEID(b8))
+		{
+			auto checkbox = CreateWidget<CCheckbox>(this, "FieldCheckbox");
+			s8 value = 0;
+
+			for (int i = 0; i < fieldTypes.GetSize(); i++)
+			{
+				if (i == 0)
+				{
+					value = fieldTypes[i]->GetFieldValue<b8>(targets[i]) ? 1 : 0;
+				}
+				else
+				{
+					b8 fieldValue = fieldTypes[i]->GetFieldValue<b8>(targets[i]);
+					if (value != fieldValue)
+					{
+						value = -1; // Multiple
+						break;
+					}
+				}
+			}
+
+			checkbox->SetRawValue(value);
+
+			Object::Bind(checkbox, MEMBER_FUNCTION(CCheckbox, OnValueChanged), [=](s8 value)
+				{
+					auto tagsAndLayers = GetSettings<TagAndLayerSettings>();
+					SetTargetFieldValue<b8>(value > 0);
+					String::Format("");
 				});
 		}
 

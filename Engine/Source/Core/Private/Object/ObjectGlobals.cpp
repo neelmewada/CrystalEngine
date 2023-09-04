@@ -85,6 +85,15 @@ namespace CE
         return gSettingsPackage;
     }
 
+	CORE_API void UnloadSettings()
+	{
+		if (gSettingsPackage != nullptr)
+		{
+			gSettingsPackage->Destroy();
+			gSettingsPackage = nullptr;
+		}
+	}
+
 	CORE_API ResourceManager* GetResourceManager()
 	{
 		if (gResourceManager == nullptr)

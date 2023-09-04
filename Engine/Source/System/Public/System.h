@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "CoreRHI.h"
 #include "CoreShader.h"
+#include "CoreSettings.h"
 
 #include "Asset/AssetData.h"
 #include "Asset/AssetRegistry.h"

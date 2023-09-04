@@ -235,6 +235,8 @@ namespace CE::GUI
 
 	COREGUI_API bool Checkbox(const String& label, bool* value);
 
+	COREGUI_API bool Checkbox(const Rect& localRect, ID id, s8* triStateValue, const GuiStyleState& style);
+
 	COREGUI_API bool CheckboxTriState(ID id, s8* value, const Vec4& padding = {}, const Vec4& rounding = {}, f32 borderThickness = 0);
 
 	COREGUI_API bool InputText(const Rect& rect, ID id, const String& hint, String& inputText, 

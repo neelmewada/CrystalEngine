@@ -99,6 +99,7 @@ void EditorLoop::LoadStartupCoreModules()
 void EditorLoop::LoadCoreModules()
 {
 	// Load other Core modules
+	ModuleManager::Get().LoadModule("CoreSettings");
 	ModuleManager::Get().LoadModule("CoreMedia");
 
 	ModuleManager::Get().LoadModule("CoreGUI");
@@ -287,8 +288,12 @@ void EditorLoop::RunLoop()
 
 void EditorLoop::PreShutdown()
 {
-	editorWindow->RequestDestroy();
+	editorWindow->Destroy();
 	editorWindow = nullptr;
+
+	// Save project & settings, and unload
+	SaveSettings();
+	UnloadSettings();
 
 	gEngine->PreShutdown();
 
@@ -320,6 +325,7 @@ void EditorLoop::PreShutdown()
 	ModuleManager::Get().UnloadModule("CoreGUI");
 
 	ModuleManager::Get().UnloadModule("CoreMedia");
+	ModuleManager::Get().UnloadModule("CoreSettings");
 
 #if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().UnloadModule("VulkanRHI");
@@ -329,10 +335,6 @@ void EditorLoop::PreShutdown()
 
 void EditorLoop::Shutdown()
 {
-	// Save & unload project
-	SaveProject();
-	UnloadProject();
-
 	// Shutdown application
 	AppShutdown();
 
@@ -350,16 +352,6 @@ void EditorLoop::LoadProject()
 		PlatformProcess::LaunchProcess(PlatformDirectories::GetAppRootDir() / "ProjectBrowser", "");
 		RequestEngineExit("INVALID_PROJECT");
 	}
-}
-
-void EditorLoop::SaveProject()
-{
-	SaveSettings();
-}
-
-void EditorLoop::UnloadProject()
-{
-	// Do nothing for now
 }
 
 void EditorLoop::AppPreInit()

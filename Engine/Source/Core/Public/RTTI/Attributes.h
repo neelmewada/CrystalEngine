@@ -13,6 +13,7 @@ namespace CE
     static constexpr const char* FIELD_ATTRIB_CONFIG = "Config";
 
 	static constexpr const char* FIELD_ATTRIB_VALIDATOR = "Validator";
+	static constexpr const char* FIELD_ATTRIB_NO_VALIDATOR = "None";
 	static constexpr const char* FIELD_ATTRIB_LONG_VERSION_VALIDATOR = "LongVersion";
 	static constexpr const char* FIELD_ATTRIB_VERSION_VALIDATOR = "Version";
 	static constexpr const char* FIELD_ATTRIB_INTEGER_VALIDATOR = "Integer";

@@ -57,6 +57,7 @@
 #include "Widgets/Popups/CNotification.h"
 
 // Input
+#include "Widgets/Input/CCheckbox.h"
 #include "Widgets/Input/CTextInput.h"
 
 // Menu

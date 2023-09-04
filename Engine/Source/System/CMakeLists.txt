@@ -32,6 +32,7 @@ ce_add_target(System SHARED
             CE::CoreMedia
             CE::CoreRHI
             CE::CoreShader
+            CE::CoreSettings
         TARGETS Config EngineAssets
     RUNTIME_DEPENDENCIES
         

@@ -1964,6 +1964,66 @@ namespace CE::GUI
 		return ImGui::Checkbox(label.GetCString(), value);
 	}
 
+	COREGUI_API bool Checkbox(const Rect& localRect, ID id, s8* v, const GuiStyleState& style)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext& g = *GImGui;
+
+		auto rect = GUI::WidgetSpaceToWindowSpace(localRect);
+		GUI::SetCursorPos(rect.min);
+		
+		const float square_sz = rect.max.y - rect.min.y; // = g.FontSize;
+		const ImVec2 pos = window->DC.CursorPos;
+		const ImRect total_bb(pos,
+			pos + ImVec2(square_sz, square_sz));
+
+		ImGui::ItemSize(total_bb);
+		if (!ImGui::ItemAdd(total_bb, id))
+		{
+			IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | ImGuiItemStatusFlags_Checkable | (*v ? ImGuiItemStatusFlags_Checked : 0));
+			return false;
+		}
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(total_bb, id, &hovered, &held);
+		if (pressed)
+		{
+			if (*v > 0) *v = 0;
+			else *v = 1;
+			ImGui::MarkItemEdited(id);
+		}
+
+		const ImRect check_bb(pos, pos + ImVec2(square_sz, square_sz));
+		Vec4 mainRect = Vec4(check_bb.Min.x, check_bb.Min.y, check_bb.Max.x, check_bb.Max.y);
+
+		RenderNavHighlight(mainRect, id, style.borderThickness, style.borderRadius);
+		//RenderFrame(mainRect, ImGui::GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), 
+		//	style.borderThickness, style.borderRadius);
+		RenderFrame(mainRect, style.background, style.borderThickness, style.borderRadius);
+
+		ImU32 check_col = style.foreground.ToU32();
+
+		if (*v < 0) // Mixed state
+		{
+			// Undocumented tristate/mixed/indeterminate checkbox (#2644)
+			// This may seem awkwardly designed because the aim is to make ImGuiItemFlags_MixedValue supported by all widgets (not just checkbox)
+			ImVec2 pad(ImMax(1.0f, IM_FLOOR(square_sz / 3.6f)), ImMax(1.0f, IM_FLOOR(square_sz / 3.6f)));
+			window->DrawList->AddRectFilled(check_bb.Min + pad, check_bb.Max - pad, check_col, 0);
+		}
+		else if (*v > 0) // Checked state
+		{
+			const float pad = ImMax(1.0f, IM_FLOOR(square_sz / 6.0f));
+			ImGui::RenderCheckMark(window->DrawList, check_bb.Min + ImVec2(pad, pad), check_col, square_sz - pad * 2.0f);
+		}
+
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label, g.LastItemData.StatusFlags | ImGuiItemStatusFlags_Checkable | (*v ? ImGuiItemStatusFlags_Checked : 0));
+		return pressed;
+	}
+
+
 	COREGUI_API bool CheckboxTriState(ID id, s8* v, const Vec4& padding, const Vec4& rounding, f32 borderThickness)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -2001,7 +2061,6 @@ namespace CE::GUI
 
 		RenderNavHighlight(mainRect, id, borderThickness, rounding);
 		RenderFrame(mainRect, ImGui::GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), borderThickness, rounding);
-
 
 		ImU32 check_col = ImGui::GetColorU32(ImGuiCol_CheckMark);
 		bool mixed_value = (g.LastItemData.InFlags & ImGuiItemFlags_MixedValue) != 0;

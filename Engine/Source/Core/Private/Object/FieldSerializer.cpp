@@ -86,6 +86,10 @@ namespace CE
             else if (fieldTypeId == TYPEID(f64))
                 *stream << (f32)field->GetFieldValue<f64>(rawInstance);
         }
+		else if (fieldTypeId == TYPEID(bool))
+		{
+			*stream << field->GetFieldValue<bool>(rawInstance);
+		}
         else if (fieldTypeId == TYPEID(UUID))
         {
             *stream << field->GetFieldValue<UUID>(rawInstance);
@@ -422,6 +426,12 @@ namespace CE
             else if (fieldTypeId == TYPEID(f64))
                 field->ForceSetFieldValue<f64>(rawInstance, value);
         }
+		else if (fieldTypeId == TYPEID(bool))
+		{
+			bool value = 0;
+			*stream >> value;
+			field->ForceSetFieldValue<bool>(rawInstance, value);
+		}
         else if (fieldTypeId == TYPEID(UUID))
         {
 			field->ForceSetFieldValue<UUID>(rawInstance, stream->ReadInteger<u64>());

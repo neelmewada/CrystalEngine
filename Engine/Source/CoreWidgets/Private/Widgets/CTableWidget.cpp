@@ -61,7 +61,7 @@ namespace CE::Widgets
 					}
 				}
 			}
-			h += maxHeight + 1;
+			h += maxHeight + 1; // +1 for row spacing
 		}
 		if (!IsNan(h) && h > 0)
 			intrinsicSize.height = h;

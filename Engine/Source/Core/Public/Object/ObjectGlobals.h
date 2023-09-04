@@ -20,6 +20,9 @@ namespace CE
 
     CORE_API Package* GetSettingsPackage();
 
+	/// Call this to unload all settings. Should be called in PreShutdown phase.
+	CORE_API void UnloadSettings();
+
 	CORE_API ResourceManager* GetResourceManager();
 
 	namespace Internal

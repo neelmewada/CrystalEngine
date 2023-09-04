@@ -149,6 +149,44 @@ namespace CE
         return *this;
     }
 
+	Stream& Stream::operator<<(bool boolean)
+	{
+		if (IsBinaryMode())
+		{
+			Write(boolean ? (u8)1 : (u8)0);
+		}
+		else if (IsAsciiMode())
+		{
+			*this << (boolean ? "true" : "false");
+		}
+		return *this;
+	}
+
+	Stream& Stream::operator>>(bool& boolean)
+	{
+		if (IsBinaryMode())
+		{
+			u8 value = 0;
+			Read(&value, sizeof(u8));
+			boolean = (value > 0);
+		}
+		else if (IsAsciiMode())
+		{
+			String value = "";
+			*this >> value;
+			value = value.ToLower();
+			if (value == "true")
+			{
+				boolean = true;
+			}
+			else if (value == "false")
+			{
+				boolean = false;
+			}
+		}
+		return *this;
+	}
+
     Stream& Stream::operator<<(u16 integer)
     {
         if (IsBinaryMode())

@@ -73,6 +73,9 @@ namespace CE
 
         virtual Stream& operator<<(u8 byte);
         virtual Stream& operator>>(u8& byte);
+
+		virtual Stream& operator<<(bool boolean);
+		virtual Stream& operator>>(bool& boolean);
         
         virtual Stream& operator<<(u16 integer);
         virtual Stream& operator>>(u16& integer);

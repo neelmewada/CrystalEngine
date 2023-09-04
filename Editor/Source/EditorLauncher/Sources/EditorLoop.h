@@ -19,9 +19,6 @@ public:
 private:
 
 	void LoadProject();
-	void SaveProject();
-
-	void UnloadProject();
 
 	void InitStyles();
 

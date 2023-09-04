@@ -402,6 +402,12 @@ namespace CE
 			}
 		}
 
+		for (auto subobject : GetSubObjectMap())
+		{
+			if (subobject != nullptr && subobject->GetClass()->GetTypeName() == objectClassName)
+				return subobject;
+		}
+
 		return nullptr;
 	}
 
