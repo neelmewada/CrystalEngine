@@ -137,8 +137,14 @@ namespace CE::Editor
 		{
 			for (const auto& category : categories)
 			{
+				//CCollapsibleSection* collapsibleSection = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
+				//collapsibleSection->SetTitle(category);
+
 				ObjectEditorSection* section = CreateWidget<ObjectEditorSection>(this, "ObjectEditorSection");
-				section->Construct(targetType, category, targets);
+				if (!section->Construct(targetType, category, targets))
+				{
+					//collapsibleSection->Destroy(); // If section is empty
+				}
 			}
 		}
 
@@ -146,19 +152,19 @@ namespace CE::Editor
 		SetNeedsLayout();
 	}
 
-	void ObjectEditorSection::Construct(ClassType* type, const String& category, const Array<Object*>& targets)
+	bool ObjectEditorSection::Construct(ClassType* type, const String& category, const Array<Object*>& targets)
 	{
 		this->targetType = type;
 		this->category = category;
 		this->targets = targets;
+		this->fields = {};
+
 		Array<void*> targetInstances = this->targets.Transform<void*>([](Object* instance) { return (void*)instance; });
 
 		DestroyAllSubWidgets();
 
 		if (targetType == nullptr || targets.IsEmpty())
-			return;
-
-		Array<FieldType*> fields = {};
+			return false;
 
 		for (auto field = targetType->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
@@ -172,47 +178,45 @@ namespace CE::Editor
 		}
 
 		if (fields.IsEmpty())
-			return;
+			return false;
 
-		CCollapsibleSection* section = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
-		section->SetTitle(category);
-		{
-			CTableWidget* table = CreateWidget<CTableWidget>(section, "ObjectEditorTableWidget");
-			table->SetTableFlags(CTableFlags::InnerBorders | CTableFlags::ResizeableColumns);
-			table->SetNumColumns(2);
+		return true; // TODO: Temp code
+
+		CTableWidget* table = CreateWidget<CTableWidget>(this, "ObjectEditorTableWidget");
+		table->SetTableFlags(CTableFlags::InnerBorders | CTableFlags::ResizeableColumns);
+		table->SetNumColumns(2);
 			
-			if (targetType != nullptr)
+		if (targetType != nullptr)
+		{
+			table->SetNumRows(fields.GetSize());
+			int i = 0;
+
+			for (auto field : fields)
 			{
-				table->SetNumRows(fields.GetSize());
-				int i = 0;
+				auto fieldDeclType = field->GetDeclarationType();
+				if (fieldDeclType == nullptr)
+					continue;
 
-				for (auto field : fields)
-				{
-					auto fieldDeclType = field->GetDeclarationType();
-					if (fieldDeclType == nullptr)
-						continue;
+				SubClassType<FieldEditor> fieldEditorClass = FieldEditor::GetFieldEditorClass(fieldDeclType->GetTypeName());
+				if (fieldEditorClass == nullptr)
+					continue;
 
-					SubClassType<FieldEditor> fieldEditorClass = FieldEditor::GetFieldEditorClass(fieldDeclType->GetTypeName());
-					if (fieldEditorClass == nullptr)
-						continue;
+				CLabel* label = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 0)), "FieldLabel");
+				label->SetText(field->GetDisplayName());
 
-					CLabel* label = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 0)), "FieldLabel");
-					label->SetText(field->GetDisplayName());
+				FieldEditor* editor = CreateWidget<FieldEditor>(table->GetCellWidget(Vec2i(i, 1)), "FieldEditor", fieldEditorClass);
 
-					//CLabel* value = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 1)), "FieldEditor");
-					//value->SetText("Field value here");
-					FieldEditor* editor = CreateWidget<FieldEditor>(table->GetCellWidget(Vec2i(i, 1)), "FieldEditor", fieldEditorClass);
+				Array<FieldType*> targetFields = {};
+				for (int j = 0; j < targetInstances.GetSize(); j++)
+					targetFields.Add(field);
 
-					Array<FieldType*> targetFields = {};
-					for (int j = 0; j < targetInstances.GetSize(); j++)
-						targetFields.Add(field);
+				editor->SetTargets(fieldDeclType, targetFields, targetInstances);
 
-					editor->SetTargets(fieldDeclType, targetFields, targetInstances);
-
-					i++;
-				}
+				i++;
 			}
 		}
+
+		return true;
 	}
 
 	void ObjectEditor::OnDrawGUI()
@@ -224,12 +228,53 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
+		tableId = GenerateRandomU32();
+
 		LoadStyleSheet("/EditorWidgets/Resources/ObjectEditorStyle.css");
+	}
+
+	Vec2 ObjectEditorSection::CalculateIntrinsicContentSize(f32 width, f32 height)
+	{
+		return Vec2(width, totalHeight);
 	}
 
 	void ObjectEditorSection::OnDrawGUI()
 	{
-		Super::OnDrawGUI();
+		auto rect = GetComputedLayoutRect();
+
+		GUI::TableFlags flags = GUI::TableFlags_None;
+
+		bool hovered, held;
+		bool active = !GUI::CollapsibleHeader(rect, category, GetUuid(), headerStyle, hovered, held);
+
+		if (!isCollapsed)
+		{
+			if (GUI::BeginTable(rect, GetUuid(), "", 2, flags))
+			{
+				for (auto field : fields)
+				{
+					GUI::TableNextRow();
+
+					GUI::TableNextColumn();
+					GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
+					{
+						GUI::Text(field->GetDisplayName(), {}, GUI::TextAlign_MiddleCenter);
+					}
+					GUI::PopChildCoordinateSpace();
+
+					GUI::TableNextColumn();
+					GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
+					{
+
+					}
+					GUI::PopChildCoordinateSpace();
+				}
+
+				GUI::EndTable();
+			}
+		}
+
+
 	}
 
 } // namespace CE::Editor

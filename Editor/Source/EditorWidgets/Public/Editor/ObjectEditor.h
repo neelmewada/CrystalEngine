@@ -3,19 +3,25 @@
 namespace CE::Editor
 {
 	CLASS()
-	class EDITORWIDGETS_API ObjectEditorSection : public CLayoutGroup
+	class EDITORWIDGETS_API ObjectEditorSection : public CWidget
 	{
-		CE_CLASS(ObjectEditorSection, CLayoutGroup)
+		CE_CLASS(ObjectEditorSection, CWidget)
 	public:
 
 		ObjectEditorSection();
 		virtual ~ObjectEditorSection();
 
-		void Construct(ClassType* type, const String& category, const Array<Object*>& targets);
+		bool IsContainer() override final { return true; }
+
+		bool IsLayoutCalculationRoot() override final { return true; }
+
+		bool Construct(ClassType* type, const String& category, const Array<Object*>& targets);
 
 	protected:
 
 		void Construct() override;
+
+		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
 
 		void OnDrawGUI() override;
 
@@ -27,6 +33,17 @@ namespace CE::Editor
 
 		FIELD()
 		Array<Object*> targets{};
+
+		bool isCollapsed = false;
+
+		GUI::ID tableId = 0;
+
+		GUI::GuiStyleState headerStyle{};
+
+		Array<FieldType*> fields{};
+
+		Array<float> columnWidths{};
+		float totalHeight;
 
 		friend class ObjectEditor;
 	};
