@@ -137,13 +137,13 @@ namespace CE::Editor
 		{
 			for (const auto& category : categories)
 			{
-				//CCollapsibleSection* collapsibleSection = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
-				//collapsibleSection->SetTitle(category);
+				CCollapsibleSection* collapsibleSection = CreateWidget<CCollapsibleSection>(this, "ObjectEditorCollapsible");
+				collapsibleSection->SetTitle(category);
 
-				ObjectEditorSection* section = CreateWidget<ObjectEditorSection>(this, "ObjectEditorSection");
+				ObjectEditorSection* section = CreateWidget<ObjectEditorSection>(collapsibleSection, "ObjectEditorSection");
 				if (!section->Construct(targetType, category, targets))
 				{
-					//collapsibleSection->Destroy(); // If section is empty
+					collapsibleSection->Destroy(); // If section is empty
 				}
 			}
 		}
@@ -158,6 +158,14 @@ namespace CE::Editor
 		this->category = category;
 		this->targets = targets;
 		this->fields = {};
+
+		for (auto label : fieldNameLabels)
+			label->Destroy();
+		fieldNameLabels.Clear();
+
+		for (auto editor : fieldEditors)
+			editor->Destroy();
+		fieldEditors.Clear();
 
 		Array<void*> targetInstances = this->targets.Transform<void*>([](Object* instance) { return (void*)instance; });
 
@@ -179,18 +187,9 @@ namespace CE::Editor
 
 		if (fields.IsEmpty())
 			return false;
-
-		return true; // TODO: Temp code
-
-		CTableWidget* table = CreateWidget<CTableWidget>(this, "ObjectEditorTableWidget");
-		table->SetTableFlags(CTableFlags::InnerBorders | CTableFlags::ResizeableColumns);
-		table->SetNumColumns(2);
 			
 		if (targetType != nullptr)
 		{
-			table->SetNumRows(fields.GetSize());
-			int i = 0;
-
 			for (auto field : fields)
 			{
 				auto fieldDeclType = field->GetDeclarationType();
@@ -201,18 +200,19 @@ namespace CE::Editor
 				if (fieldEditorClass == nullptr)
 					continue;
 
-				CLabel* label = CreateWidget<CLabel>(table->GetCellWidget(Vec2i(i, 0)), "FieldLabel");
+				CLabel* label = CreateWidget<CLabel>(this, "FieldLabel");
+				label->SetIndependentLayout(true);
 				label->SetText(field->GetDisplayName());
+				fieldNameLabels.Add(label);
 
-				FieldEditor* editor = CreateWidget<FieldEditor>(table->GetCellWidget(Vec2i(i, 1)), "FieldEditor", fieldEditorClass);
+				FieldEditor* editor = CreateWidget<FieldEditor>(this, "FieldEditor", fieldEditorClass);
+				fieldEditors.Add(editor);
 
 				Array<FieldType*> targetFields = {};
 				for (int j = 0; j < targetInstances.GetSize(); j++)
 					targetFields.Add(field);
 
 				editor->SetTargets(fieldDeclType, targetFields, targetInstances);
-
-				i++;
 			}
 		}
 
@@ -222,6 +222,19 @@ namespace CE::Editor
 	void ObjectEditor::OnDrawGUI()
 	{
 		Super::OnDrawGUI();
+	}
+
+	void ObjectEditorSection::OnAfterComputeStyle()
+	{
+		Super::OnAfterComputeStyle();
+
+		auto headerSelect = stylesheet->SelectStyle(this, CStateFlag::Default, CSubControl::Header);
+		LoadGuiStyleState(headerSelect, headerStyle);
+
+		if (headerSelect.properties.KeyExists(CStylePropertyType::Padding))
+		{
+			headerPadding = headerSelect.properties[CStylePropertyType::Padding].vector;
+		}
 	}
 
 	void ObjectEditorSection::Construct()
@@ -242,39 +255,65 @@ namespace CE::Editor
 	{
 		auto rect = GetComputedLayoutRect();
 
-		GUI::TableFlags flags = GUI::TableFlags_None;
+		GUI::TableFlags flags = GUI::TableFlags_BordersInner | GUI::TableFlags_Resizable;
 
-		bool hovered, held;
-		bool active = !GUI::CollapsibleHeader(rect, category, GetUuid(), headerStyle, hovered, held);
-
-		if (!isCollapsed)
+		if (GUI::BeginTable(rect, tableId, "", 2, flags))
 		{
-			if (GUI::BeginTable(rect, GetUuid(), "", 2, flags))
+			float height = 0;
+
+			for (int i = 0; i < fieldNameLabels.GetSize(); i++)
 			{
-				for (auto field : fields)
+				float h = 0;
+				CLabel* fieldLabel = fieldNameLabels[i];
+				FieldEditor* fieldEditor = fieldEditors[i];
+
+				GUI::TableNextRow();
+
+				GUI::TableNextColumn();
+				GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
 				{
-					GUI::TableNextRow();
-
-					GUI::TableNextColumn();
-					GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
-					{
-						GUI::Text(field->GetDisplayName(), {}, GUI::TextAlign_MiddleCenter);
-					}
-					GUI::PopChildCoordinateSpace();
-
-					GUI::TableNextColumn();
-					GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
-					{
-
-					}
-					GUI::PopChildCoordinateSpace();
+					fieldLabel->Render();
+					h = Math::Max(h, GUI::GetItemRectSize().height);
 				}
+				GUI::PopChildCoordinateSpace();
 
-				GUI::EndTable();
+				auto colWidth = GUI::TableGetColumnWidth(0);
+				if (columnWidths[0] != colWidth)
+				{
+					SetNeedsLayout();
+					fieldLabel->SetNeedsLayout();
+					fieldEditor->SetNeedsLayout();
+				}
+				columnWidths[0] = colWidth;
+
+				GUI::TableNextColumn();
+				GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
+				{
+					fieldEditor->Render();
+					h = Math::Max(h, GUI::GetItemRectSize().height);
+				}
+				GUI::PopChildCoordinateSpace();
+
+				colWidth = GUI::TableGetColumnWidth(1);
+				if (columnWidths[1] != colWidth)
+				{
+					SetNeedsLayout();
+					fieldLabel->SetNeedsLayout();
+					fieldEditor->SetNeedsLayout();
+				}
+				columnWidths[1] = colWidth;
+
+				height += h + 1;
 			}
+
+			if (height != totalHeight)
+			{
+				totalHeight = height;
+				SetNeedsLayout();
+			}
+
+			GUI::EndTable();
 		}
-
-
 	}
 
 } // namespace CE::Editor

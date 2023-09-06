@@ -2,6 +2,8 @@
 
 namespace CE::Editor
 {
+	class FieldEditor;
+
 	CLASS()
 	class EDITORWIDGETS_API ObjectEditorSection : public CWidget
 	{
@@ -11,13 +13,13 @@ namespace CE::Editor
 		ObjectEditorSection();
 		virtual ~ObjectEditorSection();
 
-		bool IsContainer() override final { return true; }
-
 		bool IsLayoutCalculationRoot() override final { return true; }
 
 		bool Construct(ClassType* type, const String& category, const Array<Object*>& targets);
 
 	protected:
+
+		void OnAfterComputeStyle() override;
 
 		void Construct() override;
 
@@ -34,15 +36,17 @@ namespace CE::Editor
 		FIELD()
 		Array<Object*> targets{};
 
-		bool isCollapsed = false;
+		Array<CLabel*> fieldNameLabels{};
+		Array<FieldEditor*> fieldEditors{};
 
 		GUI::ID tableId = 0;
 
+		Vec4 headerPadding = {};
 		GUI::GuiStyleState headerStyle{};
 
 		Array<FieldType*> fields{};
 
-		Array<float> columnWidths{};
+		Array<float> columnWidths = Array<float>(2, 0);
 		float totalHeight;
 
 		friend class ObjectEditor;

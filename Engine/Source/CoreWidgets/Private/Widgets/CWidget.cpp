@@ -786,6 +786,16 @@ namespace CE::Widgets
         return widgetFlags;
     }
 
+	bool CWidget::IsLayoutCalculationRoot()
+	{
+		if (independentLayout)
+		{
+			return true;
+		}
+
+		return IsWindow();
+	}
+
 	bool CWidget::NeedsLayout(bool recursive)
 	{
 		if (!recursive)
@@ -847,6 +857,11 @@ namespace CE::Widgets
 		needsLayout = set;
 		if (set && YGNodeGetChildCount(node) == 0)
 		{
+			if (!YGNodeHasMeasureFunc(node))
+			{
+				YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+			}
+
 			YGNodeMarkDirty(node);
 		}
 

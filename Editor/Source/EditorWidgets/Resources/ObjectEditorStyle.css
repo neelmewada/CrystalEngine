@@ -25,9 +25,19 @@
     padding: 10px 0 10px 0;
 }
 
+ObjectEditorSection::header {
+	font-size: 18px;
+	background: rgb(47, 47, 47);
+	border-width: 1px;
+	border-color: rgb(30, 30, 30);
+	padding: 3px 5px;
+	border-radius: 0px;
+}
+
 #FieldLabel {
     text-align: middle-left;
     height: 25px;
+    margin: 10px 0 0 0;
 }
 
 #FieldEditor {

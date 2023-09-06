@@ -90,12 +90,14 @@ namespace CE::Widgets
 
 		inline YGNodeRef GetNode() const { return node; }
 
+		inline void SetIndependentLayout(bool set) { this->independentLayout = set; }
+
 		// - Layout -
 
 		virtual Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) { return Vec2(); }
 
 		/// Override and return true if the widget is the root of layout calculation for it's children
-		virtual bool IsLayoutCalculationRoot() { return IsWindow(); }
+		virtual bool IsLayoutCalculationRoot();
 
 		virtual bool ShouldHandleBackgroundDraw() { return true; }
 
@@ -435,6 +437,9 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 needsStyle = true;
+
+		FIELD()
+		b8 independentLayout = false;
 
 		FIELD()
 		Vec2 sizeConstraint = Vec2(YGUndefined, YGUndefined);

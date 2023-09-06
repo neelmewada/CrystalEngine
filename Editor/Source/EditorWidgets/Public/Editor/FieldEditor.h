@@ -17,6 +17,8 @@ namespace CE::Editor
 
 		bool SetTargets(TypeInfo* allFieldsDeclType, const Array<FieldType*>& fieldTypes, const Array<void*>& targetInstances);
 
+		bool IsLayoutCalculationRoot() override { return true; }
+
 	protected:
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
