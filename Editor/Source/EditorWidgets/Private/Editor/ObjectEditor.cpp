@@ -266,13 +266,25 @@ namespace CE::Editor
 				float h = 0;
 				CLabel* fieldLabel = fieldNameLabels[i];
 				FieldEditor* fieldEditor = fieldEditors[i];
+				bool isExpandable = fieldEditor->IsExpandable();
 
 				GUI::TableNextRow();
 
 				GUI::TableNextColumn();
 				GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
 				{
-					fieldLabel->Render();
+					if (isExpandable)
+					{
+						if (GUI::TreeNode(fieldLabel->GetText(), GUI::TNF_SpanFullWidth))
+						{
+
+							GUI::TreePop();
+						}
+					}
+					else
+					{
+						fieldLabel->Render();
+					}
 					h = Math::Max(h, GUI::GetItemRectSize().height);
 				}
 				GUI::PopChildCoordinateSpace();
