@@ -167,6 +167,16 @@ namespace CE::Editor
 		return true;
 	}
 
+	bool FieldEditor::IsExpandable()
+	{
+		if (fieldDeclType != nullptr)
+		{
+			if (fieldDeclType->IsArrayType())
+				return true;
+		}
+		return false;
+	}
+
 	Vec2 FieldEditor::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
 		return Vec2(120, 18);

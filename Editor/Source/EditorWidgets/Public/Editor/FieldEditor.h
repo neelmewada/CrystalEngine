@@ -19,6 +19,8 @@ namespace CE::Editor
 
 		bool IsLayoutCalculationRoot() override { return true; }
 
+		virtual bool IsExpandable();
+
 	protected:
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;
