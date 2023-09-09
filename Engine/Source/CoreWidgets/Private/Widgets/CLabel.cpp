@@ -58,7 +58,7 @@ namespace CE::Widgets
 
 		GUI::GuiStyleState* curState = &defaultStyleState;
 
-		GUI::SetCursorPos(rect.min);
+		//GUI::SetCursorPos(rect.min);
 		auto windowPos = GUI::GetWindowPos();
 
 		if (IsInteractable())

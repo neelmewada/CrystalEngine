@@ -11,8 +11,8 @@ namespace CE
 
     CORE_API String gProjectName{};
 
-    CORE_API u32 gDefaultWindowWidth = 1920;
-    CORE_API u32 gDefaultWindowHeight = 1080;
+    CORE_API u32 gDefaultWindowWidth = 1360;
+    CORE_API u32 gDefaultWindowHeight = 768;
 
     CORE_API bool gIsEngineRequestingExit = false;
     CORE_API String gEngineExitMessage{};

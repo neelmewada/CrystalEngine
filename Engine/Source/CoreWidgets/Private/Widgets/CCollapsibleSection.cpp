@@ -23,7 +23,19 @@ namespace CE::Widgets
 		}
 		else
 		{
-			ReAddChildNodes();
+			ClearChildNodes();
+
+			if (attachedWidgets.NonEmpty())
+				YGNodeSetMeasureFunc(node, nullptr);
+
+			for (auto subWidget : attachedWidgets)
+			{
+				//if (!subWidget->IsLayoutCalculationRoot())
+				{
+					auto childCount = YGNodeGetChildCount(node);
+					YGNodeInsertChild(node, subWidget->node, childCount);
+				}
+			}
 		}
 
 		SetNeedsStyleRecursive();
