@@ -59,6 +59,8 @@ namespace CE::Editor
 		Array<void*> targets{};
 		CInputValidator textValidator = nullptr;
 
+		Array<FieldEditor*> children{};
+
 		FIELD(Config)
 		bool useDragSlider = false;
 	};
