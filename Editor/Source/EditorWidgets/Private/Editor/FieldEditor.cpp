@@ -398,7 +398,7 @@ namespace CE::Editor
 					String::Format("");
 				});
 		}
-		else if (fieldDeclType->IsArrayType())
+		else if (fieldDeclType->IsArrayType()) // Array type
 		{
 
 		}
