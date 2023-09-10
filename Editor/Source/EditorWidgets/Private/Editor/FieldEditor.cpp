@@ -177,6 +177,27 @@ namespace CE::Editor
 		return false;
 	}
 
+	float FieldEditor::RenderExpansion()
+	{
+		if (!IsExpandable() || fieldDeclType == nullptr)
+			return 0;
+
+		UpdateStyleIfNeeded();
+		UpdateLayoutIfNeeded();
+
+		float h = 0;
+
+		if (IsVisible())
+		{
+			if (fieldDeclType->IsArrayType())
+			{
+				
+			}
+		}
+
+		return h;
+	}
+
 	Vec2 FieldEditor::CalculateIntrinsicContentSize(f32 width, f32 height)
 	{
 		return Vec2(120, 18);
@@ -346,7 +367,7 @@ namespace CE::Editor
 					}
 				});
 		}
-		else if (fieldDeclType->GetTypeId() == TYPEID(b8))
+		else if (fieldDeclType->GetTypeId() == TYPEID(b8)) // Bool
 		{
 			auto checkbox = CreateWidget<CCheckbox>(this, "FieldCheckbox");
 			s8 value = 0;
@@ -360,7 +381,7 @@ namespace CE::Editor
 				else
 				{
 					b8 fieldValue = fieldTypes[i]->GetFieldValue<b8>(targets[i]);
-					if (value != fieldValue)
+					if ((value > 0) != fieldValue)
 					{
 						value = -1; // Multiple
 						break;
@@ -376,6 +397,10 @@ namespace CE::Editor
 					SetTargetFieldValue<b8>(value > 0);
 					String::Format("");
 				});
+		}
+		else if (fieldDeclType->IsArrayType())
+		{
+
 		}
 
 		SetNeedsStyle();

@@ -21,6 +21,9 @@ namespace CE::Editor
 
 		virtual bool IsExpandable();
 
+		/// Renders expansion and returns total height
+		virtual float RenderExpansion();
+
 	protected:
 
 		Vec2 CalculateIntrinsicContentSize(f32 width, f32 height) override;

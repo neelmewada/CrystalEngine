@@ -200,11 +200,6 @@ namespace CE::Editor
 				if (fieldEditorClass == nullptr)
 					continue;
 
-				CLabel* label = CreateWidget<CLabel>(this, "FieldLabel");
-				label->SetIndependentLayout(true);
-				label->SetText(field->GetDisplayName());
-				fieldNameLabels.Add(label);
-
 				FieldEditor* editor = CreateWidget<FieldEditor>(this, "FieldEditor", fieldEditorClass);
 				fieldEditors.Add(editor);
 
@@ -213,6 +208,11 @@ namespace CE::Editor
 					targetFields.Add(field);
 
 				editor->SetTargets(fieldDeclType, targetFields, targetInstances);
+
+				CLabel* label = CreateWidget<CLabel>(this, "FieldLabel");
+				label->SetIndependentLayout(true);
+				label->SetText(field->GetDisplayName());
+				fieldNameLabels.Add(label);
 			}
 		}
 
@@ -267,6 +267,7 @@ namespace CE::Editor
 				CLabel* fieldLabel = fieldNameLabels[i];
 				FieldEditor* fieldEditor = fieldEditors[i];
 				bool isExpandable = fieldEditor->IsExpandable();
+				bool isExpanded = false;
 
 				GUI::TableNextRow();
 
@@ -275,11 +276,13 @@ namespace CE::Editor
 				{
 					if (isExpandable)
 					{
-						if (GUI::TreeNode(fieldLabel->GetText(), GUI::TNF_SpanFullWidth))
-						{
-
-							GUI::TreePop();
-						}
+						GUI::PushStyleVar(GUI::StyleVar_FramePadding, Vec2(5, 5));
+						GUI::PushStyleColor(GUI::StyleCol_Header, Color::Clear());
+						GUI::PushStyleColor(GUI::StyleCol_HeaderActive, Color::Clear());
+						GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, Color::Clear());
+						isExpanded = GUI::TreeNode(fieldLabel->GetText(), GUI::TNF_SpanFullWidth | GUI::TNF_FramePadding);
+						GUI::PopStyleColor(3);
+						GUI::PopStyleVar();
 					}
 					else
 					{
@@ -316,6 +319,23 @@ namespace CE::Editor
 				columnWidths[1] = colWidth;
 
 				height += h + 1;
+
+				if (isExpanded)
+				{
+					GUI::TableNextRow();
+
+					GUI::TableNextColumn();
+					GUI::Text("Label");
+					h = GUI::GetItemRectSize().height;
+
+					GUI::TableNextColumn();
+					GUI::Text("Value");
+					h = Math::Max(h, GUI::GetItemRectSize().height);
+
+					height += h + 1;
+
+					GUI::TreePop();
+				}
 			}
 
 			if (height != totalHeight)
