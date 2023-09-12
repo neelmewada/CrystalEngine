@@ -471,8 +471,10 @@ namespace CE
 
 	void FieldType::ResizeArray(void* instance, u32 numElements)
 	{
-		if (!IsArrayField())
+		if (!IsArrayField() || instance == nullptr)
 			return;
+
+		auto arraySize = GetArraySize(instance);
 
 		Array<u8>& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
 		TypeId underlyingTypeId = GetUnderlyingTypeId();
@@ -488,6 +490,10 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+		}
+		else
+		{
+
 		}
 
 		array.Resize(numElements * underlyingTypeSize, 0);
