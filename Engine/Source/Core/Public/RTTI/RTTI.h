@@ -186,7 +186,6 @@ namespace CE
 		virtual bool IsEnumConstant() const { return false; }
 
 		virtual bool IsPOD() const { return false; }
-		virtual void CopyConstructor(void* source, void* destination) {}
 
 		virtual bool IsAssignableTo(TypeId typeId) { return false; }
 
@@ -206,6 +205,10 @@ namespace CE
         virtual bool IsObject() { return IsClass() && IsAssignableTo(TYPEID(Object)); }
 
 		virtual void InitializeDefaults(void* instance) = 0;
+		
+		void CallConstructor(void* instance) { InitializeDefaults(instance); }
+		virtual void CopyConstructor(void* source, void* destination) {}
+		virtual void CallDestructor(void* instance) = 0;
 
 		Name GenerateInstanceName(UUID uuid) const;
 

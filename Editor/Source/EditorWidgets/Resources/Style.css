@@ -85,6 +85,21 @@ CButton.Transparent:pressed {
 	background: rgba(50, 50, 50, 180);
 }
 
+CButton.IconButton {
+	padding: 2px 2px;
+	border-width: 0px;
+	background: rgba(0, 0, 0, 0);
+}
+
+CButton.IconButton:hovered {
+	background: rgba(70, 70, 70, 180);
+}
+
+CButton.IconButton:pressed {
+	background: rgba(50, 50, 50, 180);
+}
+
+
 CButton.ToolBarItem {
 	padding: 5px 2.5px;
 	border-width: 0px;

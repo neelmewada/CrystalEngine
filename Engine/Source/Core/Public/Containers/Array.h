@@ -111,6 +111,16 @@ namespace CE
 			Impl.insert(Impl.begin() + index, item);
 		}
 
+		CE_INLINE void InsertRange(int index, std::initializer_list<ElementType> elements)
+		{
+			Impl.insert(Impl.begin() + index, elements);
+		}
+
+		CE_INLINE void InsertRange(int index, const List<ElementType>& elements)
+		{
+			Impl.insert(Impl.begin() + index, elements.begin(), elements.end());
+		}
+
         s32 IndexOf(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)
@@ -256,16 +266,19 @@ namespace CE
             // De-reference ops
             reference operator*() const { return *ptr; }
             pointer operator->() { return ptr; }
+			operator pointer() { return ptr; }
 
             // Increment ops
             Iterator& operator++() { ptr++; return *this; }
             Iterator operator++(int) { Iterator Temp = *this; ++(*this); return Temp; }
-			Iterator operator+(difference_type rhs) { return Iterator(ptr + rhs); }
+			Iterator operator+(difference_type rhs) const { return Iterator(ptr + rhs); }
+			Iterator operator+(Iterator rhs) const { return ptr + rhs.ptr; }
 
             // Decrement ops
             Iterator& operator--() { ptr--; return *this; }
             Iterator operator--(int) { Iterator Temp = *this; --(*this); return Temp; }
-            Iterator operator-(difference_type rhs) { return Iterator(ptr - rhs); }
+			Iterator operator-(difference_type rhs) const { return Iterator(ptr - rhs); }
+			difference_type operator-(Iterator rhs) const { return ptr - rhs.ptr; }
 
             friend bool operator== (const Iterator& A, const Iterator& B) { return A.ptr == B.ptr; };
             friend bool operator!= (const Iterator& A, const Iterator& B) { return A.ptr != B.ptr; };
@@ -286,16 +299,21 @@ namespace CE
 
             // De-reference ops
             reference operator*() const { return *ptr; }
-            pointer operator->() { return ptr; }
+            pointer operator->() const { return ptr; }
+			operator pointer() const { return ptr; }
 
             // Increment ops
             ConstIterator& operator++() { ptr++; return *this; }
             ConstIterator operator++(int) { ConstIterator temp = *this; ++(*this); return temp; }
-            ConstIterator& operator+(SIZE_T rhs) { ptr += rhs; return *this; }
+			ConstIterator operator+(difference_type rhs) const { return ConstIterator(ptr + rhs); }
+			//ConstIterator operator+(SIZE_T rhs) { return ConstIterator(ptr + rhs); }
+			difference_type operator+(const ConstIterator& rhs) const { return (ptr + rhs.ptr); }
             // Decrement ops
             ConstIterator& operator--() { ptr--; return *this; }
             ConstIterator operator--(int) { ConstIterator temp = *this; --(*this); return temp; }
-            ConstIterator& operator-(SIZE_T rhs) { ptr -= rhs; return *this; }
+            ConstIterator operator-(difference_type rhs) const { return ConstIterator(ptr - rhs); }
+			ConstIterator operator-(SIZE_T rhs) { return Iterator(ptr - rhs); }
+			difference_type operator-(const ConstIterator& rhs) const { return (ptr - rhs.ptr); }
 
             friend bool operator== (const ConstIterator& A, const ConstIterator& B) { return A.ptr == B.ptr; };
             friend bool operator!= (const ConstIterator& A, const ConstIterator& B) { return A.ptr != B.ptr; };
@@ -533,6 +551,16 @@ namespace CE
             }
         }
 
+		CE_INLINE void InsertRange(int index, std::initializer_list<ElementType> elements)
+		{
+			Super::InsertRange(index, elements);
+		}
+
+		CE_INLINE void InsertRange(int index, const Array<ElementType>& elements)
+		{
+			Super::InsertRange(index, (const List<ElementType>&)elements);
+		}
+
         bool Remove(const ElementType& item)
         {
             for (int i = 0; i < GetSize(); i++)
@@ -627,7 +655,7 @@ namespace CE
          *  Iterators
          */
 
-        struct Iterator
+        /*struct Iterator
         {
             using iterator_category = std::contiguous_iterator_tag;
             using difference_type   = std::ptrdiff_t;
@@ -690,7 +718,10 @@ namespace CE
 
         private:
             pointer ptr;
-        };
+        };*/
+
+		using Iterator = Super::Iterator;
+		using ConstIterator = Super::ConstIterator;
 
         auto begin() { return Iterator{ List<ElementType>::Impl.data() }; }
         auto end() { return Iterator{ List<ElementType>::Impl.data() + List<ElementType>::Impl.size() }; }
@@ -698,8 +729,8 @@ namespace CE
         const ConstIterator begin() const { return ConstIterator{ List<ElementType>::Impl.data() }; }
         const ConstIterator end() const { return ConstIterator{ List<ElementType>::Impl.data() + List<ElementType>::Impl.size() }; }
 
-        Iterator Begin() { return begin(); }
-        Iterator End() { return end(); }
+		Iterator Begin() { return begin(); }
+		Iterator End() { return end(); }
 
 		template<class TPred>
 		inline void Sort(TPred pred)

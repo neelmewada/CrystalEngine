@@ -23,10 +23,33 @@ namespace CE
 	{
 		auto declType = GetDeclarationType();
 		auto fieldInstance = GetFieldInstance(instance);
-		if (declType != nullptr || fieldInstance == nullptr)
+		if (declType == nullptr || fieldInstance == nullptr)
+			return;
+		if (declType->IsClass())
 		{
-			declType->InitializeDefaults(fieldInstance);
+			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			return;
 		}
+
+		declType->InitializeDefaults(fieldInstance);
+	}
+
+	void FieldType::CallDestructor(void* instance)
+	{
+		auto declType = GetDeclarationType();
+		auto fieldInstance = GetFieldInstance(instance);
+		if (declType == nullptr || fieldInstance == nullptr)
+			return;
+		if (declType->IsClass())
+		{
+			Object* object = (Object*)fieldInstance;
+			if (object != nullptr)
+				object->Destroy();
+			memset(fieldInstance, 0, sizeof(SIZE_T)); // Set pointer to nullptr
+			return;
+		}
+
+		declType->CallDestructor(fieldInstance);
 	}
 
 	const CE::Name& FieldType::GetTypeName()
@@ -477,6 +500,79 @@ namespace CE
 			void* instance = &array[0] + underlyingTypeSize * i;
 			underlyingType->InitializeDefaults(instance);
 		}
+	}
+
+	void FieldType::InsertArrayElement(void* instance)
+	{
+		if (!IsArrayField() || instance == nullptr)
+			return;
+
+		auto arraySize = GetArraySize(instance);
+		InsertArrayElement(instance, arraySize);
+	}
+
+	void FieldType::InsertArrayElement(void* instance, u32 insertPosition)
+	{
+		if (!IsArrayField() || instance == nullptr)
+			return;
+
+		auto arraySize = GetArraySize(instance);
+
+		if (insertPosition == NumericLimits<u32>::Max())
+		{
+			insertPosition = arraySize;
+		}
+		if (insertPosition > arraySize)
+			return;
+
+		Array<u8>& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
+		TypeId underlyingTypeId = GetUnderlyingTypeId();
+		if (underlyingTypeId == 0)
+			return;
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return;
+
+		auto underlyingTypeSize = underlyingType->GetSize();
+
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+		}
+
+		auto insertBytePos = insertPosition * underlyingTypeSize;
+
+		Array<u8> insertionValues = Array<u8>(underlyingTypeSize, 0);
+		array.InsertRange(insertBytePos, insertionValues); // Insert an array of zero byte values
+
+		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes. They're null pointers.
+			return;
+
+		void* elementInstance = &array[insertBytePos];
+		underlyingType->InitializeDefaults(elementInstance);
+	}
+
+	void FieldType::DeleteArrayElement(void* instance, u32 deletePosition)
+	{
+		if (!IsArrayField() || instance == nullptr)
+			return;
+
+		auto arraySize = GetArraySize(instance);
+
+		if (arraySize == 0 || deletePosition >= arraySize)
+			return;
+
+		Array<u8>& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
+		TypeId underlyingTypeId = GetUnderlyingTypeId();
+		if (underlyingTypeId == 0)
+			return;
+
+		TypeInfo* underlyingType = GetUnderlyingType();
+		if (underlyingType == nullptr)
+			return;
+
+
 	}
 
 	Array<FieldType> FieldType::GetArrayFieldList(void* instance)

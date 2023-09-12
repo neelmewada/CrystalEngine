@@ -282,7 +282,7 @@ namespace CE::Editor
 						GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, Color::Clear());
 						isExpanded = GUI::TreeNode(fieldLabel->GetText(), GUI::TNF_SpanFullWidth | GUI::TNF_FramePadding);
 						GUI::PopStyleColor(3);
-						GUI::PopStyleVar();
+						GUI::PopStyleVar(1);
 					}
 					else
 					{
@@ -322,17 +322,19 @@ namespace CE::Editor
 
 				if (isExpanded)
 				{
-					GUI::TableNextRow();
+					fieldEditor->RenderExpansion();
 
-					GUI::TableNextColumn();
-					GUI::Text("Label");
-					h = GUI::GetItemRectSize().height;
+					//GUI::TableNextRow();
 
-					GUI::TableNextColumn();
-					GUI::Text("Value");
-					h = Math::Max(h, GUI::GetItemRectSize().height);
+					//GUI::TableNextColumn();
+					//GUI::Text("Label");
+					//h = GUI::GetItemRectSize().height;
 
-					height += h + 1;
+					//GUI::TableNextColumn();
+					//GUI::Text("Value");
+					//h = Math::Max(h, GUI::GetItemRectSize().height);
+
+					//height += h + 1;
 
 					GUI::TreePop();
 				}

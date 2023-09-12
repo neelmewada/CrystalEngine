@@ -24,6 +24,7 @@ namespace CE::Internal\
 		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type); }\
 		virtual bool IsPOD() const override { return true; }\
 		virtual void InitializeDefaults(void* instance) override { new(instance) Namespace::Type(); }\
+		virtual void CallDestructor(void* instance) override { CE::TTypeDestructor<Namespace::Type>::Invoke(instance); }\
 		virtual void CopyConstructor(void* source, void* destination) override\
 		{\
 			*(Namespace::Type*)destination = *(Namespace::Type*)source;\
@@ -89,6 +90,7 @@ namespace CE::Internal\
 		virtual bool IsPOD() const override { return true; }\
 		virtual bool IsTemplatedPOD() const { return true; }\
 		virtual void InitializeDefaults(void* instance) override { new(instance) Namespace::Type<DefaultArgType>(); }\
+		virtual void CallDestructor(void* instance) override { TTypeDestructor<Namespace::Type<DefaultArgType>>::Invoke(instance); }\
 		virtual bool IsAssignableTo(TypeId typeId) override\
 		{\
 			std::initializer_list<TypeId> types = { __VA_ARGS__ };\

@@ -59,3 +59,4 @@ CE_RTTI_ENUM(CORE_API, CE::IO, FileAction,
     CE_CONST(Modified),
     CE_CONST(Moved)
 )
+

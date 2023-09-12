@@ -6,6 +6,24 @@
 
 namespace CE
 {
+	template<typename T>
+	struct NumericLimits
+	{
+		constexpr static T Min() noexcept
+		{
+			return std::numeric_limits<T>::min();
+		}
+
+		constexpr static T Max() noexcept
+		{
+			return std::numeric_limits<T>::max();
+		}
+
+		constexpr static T Infinity() noexcept
+		{
+			return std::numeric_limits<T>::infinity();
+		}
+	};
 
     template<bool TValue>
     struct TBoolConst

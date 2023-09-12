@@ -299,5 +299,15 @@ namespace CE
 		static void OnAfterDeserialize(T* instance) { return instance->OnAfterDeserialize(); }
 	};
 
+	template<typename T>
+	struct TTypeDestructor
+	{
+		static void Invoke(void* instance) 
+		{
+			static_assert(std::is_destructible<T>::value);
+			((T*)instance)->~T();
+		}
+	};
+
 } // namespace CE::Traits
 

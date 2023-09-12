@@ -26,6 +26,7 @@ namespace CE
 		virtual bool IsFunction() const override { return true; }
 
 		virtual void InitializeDefaults(void* instance) override {  } // Do nothing
+		virtual void CallDestructor(void* instance) override { }
 
 		INLINE TypeId GetReturnTypeId() const { return returnType; }
 

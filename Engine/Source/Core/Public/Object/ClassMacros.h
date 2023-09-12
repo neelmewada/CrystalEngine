@@ -107,6 +107,10 @@ namespace CE\
 			{\
 				CE_EXPAND(CE_CONCATENATE(__CE_INIT_DEFAULTS_,CE_FIRST_ARG(IsAbstract)))(Namespace, Class);\
 			}\
+			virtual void CallDestructor(void* instance) const override\
+			{\
+				((Namespace::Class*)instance)->~Class();\
+			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
 			virtual String GetClassPackage() const override\
 			{\
@@ -233,6 +237,10 @@ namespace CE\
 			virtual void InitializeDefaults(void* instance) const override\
 			{\
 				new(instance) Namespace::Struct;\
+			}\
+			virtual void CallDestructor(void* instance) const override\
+			{\
+				((Namespace::Struct*)instance)->~Struct();\
 			}\
 			virtual const CE::Name& GetTypeName() const override { return FullTypeName(); }\
 			virtual String GetStructPackage() const override\

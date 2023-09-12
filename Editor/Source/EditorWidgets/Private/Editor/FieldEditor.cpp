@@ -185,17 +185,60 @@ namespace CE::Editor
 		UpdateStyleIfNeeded();
 		UpdateLayoutIfNeeded();
 
-		float h = 0;
+		float height = 0;
 
 		if (IsVisible())
 		{
 			if (fieldDeclType->IsArrayType())
 			{
-				
+				while (childrenEditors.GetSize() > targets.GetSize()) // Delete extra children editors
+				{
+					childrenEditors.GetLast()->Destroy();
+					childrenEditors.RemoveAt(childrenEditors.GetSize() - 1);
+					childrenLabels.GetLast()->Destroy();
+					childrenLabels.RemoveAt(childrenLabels.GetSize() - 1);
+				}
+
+				for (int i = 0; i < childrenEditors.GetSize(); i++)
+				{
+					CLabel* label = nullptr;
+					FieldEditor* fieldEditor = nullptr;
+
+					if (i >= childrenEditors.GetSize()) // Add new children editors
+					{
+						auto fieldEditorClass = FieldEditor::GetFieldEditorClass(fieldDeclType->GetTypeName());
+						if (fieldEditorClass == nullptr)
+							continue;
+						fieldEditor = CreateWidget<FieldEditor>(this, "FieldEditor", fieldEditorClass);
+						if (fieldEditor == nullptr)
+							continue;
+						childrenEditors.Add(fieldEditor);
+						label = CreateWidget<CLabel>(this, "FieldLabel");
+						label->SetText(String::Format("Element {}", i));
+						childrenLabels.Add(label);
+					}
+					else
+					{
+						label = childrenLabels[i];
+						fieldEditor = childrenEditors[i];
+					}
+
+					GUI::TableNextRow();
+
+					GUI::TableNextColumn();
+					label->Render();
+					float h = label->GetComputedLayoutSize().height;
+
+					GUI::TableNextColumn();
+					fieldEditor->Render();
+					h = Math::Max(h, fieldEditor->GetComputedLayoutSize().height);
+
+					height += h;
+				}
 			}
 		}
 
-		return h;
+		return height;
 	}
 
 	Vec2 FieldEditor::CalculateIntrinsicContentSize(f32 width, f32 height)
@@ -400,7 +443,11 @@ namespace CE::Editor
 		}
 		else if (fieldDeclType->IsArrayType()) // Array type
 		{
-
+			auto button = CreateWidget<CButton>(this, "AddButton");
+			button->LoadIcon("Icons/add.png");
+			button->SetIconSize(18);
+			button->SetText("");
+			button->AddStyleClass("IconButton");
 		}
 
 		SetNeedsStyle();

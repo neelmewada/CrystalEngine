@@ -50,6 +50,7 @@ namespace CE
         virtual u32 GetSize() const override { return size; }
 
 		virtual void InitializeDefaults(void* instance) override {  } // Do nothing
+		virtual void CallDestructor(void* instance) override { }
 
     private:
 		Name enumFullName;
@@ -180,6 +181,7 @@ namespace CE\
 			{\
 			}\
 			virtual void InitializeDefaults(void* instance) override { new(instance) Namespace::Enum(); }\
+			virtual void CallDestructor(void* instance) override { TTypeDestructor<Namespace::Enum>::Invoke(instance); }\
         };\
     }\
     template<>\

@@ -888,21 +888,39 @@ TEST(Reflection, Fields)
 	CE_REGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest);
 	CERegisterModuleTypes();
 
-	ReflectionFieldTest data{};
-	data.testString = "modified";
-	StructType* type = data.GetStruct();
-	auto arrayField = type->FindFieldWithName("array", TYPEID(Array<>));
-	arrayField->ResizeArray(&data, 3);
-	auto stringField = type->FindFieldWithName("testString", TYPEID(String));
+	// 1. Array field resize
+	{
+		ReflectionFieldTest data{};
+		data.testString = "modified";
+		StructType* type = data.GetStruct();
+		auto arrayField = type->FindFieldWithName("array", TYPEID(Array<>));
+		auto stringField = type->FindFieldWithName("testString", TYPEID(String));
 
-	EXPECT_FALSE(data.array[0].myText.IsEmpty());
-	EXPECT_EQ(data.array[0].myText, "default");
+		arrayField->ResizeArray(&data, 3);
+		EXPECT_EQ(data.array[0].myText, "default");
 
-	EXPECT_EQ(data.testString, "modified");
-	stringField->InitializeDefaults(&data);
-	EXPECT_EQ(data.testString, "");
-	type->InitializeDefaults(&data);
-	EXPECT_EQ(data.testString, "default value");
+		EXPECT_EQ(data.testString, "modified");
+		stringField->InitializeDefaults(&data);
+		EXPECT_EQ(data.testString, "");
+		type->InitializeDefaults(&data);
+		EXPECT_EQ(data.testString, "default value");
+	}
+
+	// 2. Array field insertion & deletion
+	{
+		ReflectionFieldTest data{};
+		StructType* type = data.GetStruct();
+		auto arrayField = type->FindFieldWithName("array", TYPEID(Array<>));
+		auto stringField = type->FindFieldWithName("testString", TYPEID(String));
+
+		arrayField->ResizeArray(&data, 1);
+		EXPECT_EQ(data.array[0].myText, "default");
+		data.array[0].myText = "new";
+		EXPECT_EQ(data.array[0].myText, "new");
+
+		arrayField->InsertArrayElement(&data, 1);
+		EXPECT_EQ(data.array[1].myText, "default");
+	}
 
 	CEDeregisterModuleTypes();
 	CE_DEREGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest);

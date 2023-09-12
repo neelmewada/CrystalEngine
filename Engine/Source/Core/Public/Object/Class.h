@@ -58,6 +58,8 @@ namespace CE
 		{
 		public:
 			virtual void InitializeDefaults(void* instance) const = 0;
+			virtual void CallDestructor(void* instance) const = 0;
+
 			virtual const CE::Name& GetTypeName() const = 0;
 
 			virtual String GetStructPackage() const = 0;
@@ -237,6 +239,13 @@ namespace CE
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->InitializeDefaults(instance);
+		}
+
+		virtual void CallDestructor(void* instance) override
+		{
+			if (Impl == nullptr || instance == nullptr)
+				return;
+			return Impl->CallDestructor(instance);
 		}
 
 		/// To be called only on struct types
@@ -436,6 +445,7 @@ namespace CE
 			virtual Object* CreateInstance() const = 0;
 			
 			virtual void InitializeDefaults(void* instance) const = 0;
+			virtual void CallDestructor(void* instance) const = 0;
 
 			virtual bool CanInstantiate() const = 0;
 
@@ -513,6 +523,13 @@ namespace CE
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->InitializeDefaults(instance);
+		}
+
+		virtual void CallDestructor(void* instance) override
+		{
+			if (Impl == nullptr || instance == nullptr)
+				return;
+			return Impl->CallDestructor(instance);
 		}
 
 		String GetClassPackage() const

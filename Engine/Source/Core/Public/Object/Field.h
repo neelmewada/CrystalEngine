@@ -39,6 +39,7 @@ namespace CE
     public:
 
 		virtual void InitializeDefaults(void* instance) override;
+		virtual void CallDestructor(void* instance) override;
 
 		virtual const CE::Name& GetTypeName() override;
 
@@ -142,10 +143,15 @@ namespace CE
 
 		u32 GetArraySize(void* instance);
 
-		virtual void ResizeArray(void* instance, u32 numElements);
+		void ResizeArray(void* instance, u32 numElements);
+
+		void InsertArrayElement(void* instance);
+		void InsertArrayElement(void* instance, u32 insertPosition);
+
+		void DeleteArrayElement(void* instance, u32 deletePosition);
 
 		template<typename T>
-		const T& GetArrayElementAt(u32 index, void* instance)
+		const T& GetArrayElementValueAt(u32 index, void* instance)
 		{
 			if (!IsArrayField())
 				return {};
