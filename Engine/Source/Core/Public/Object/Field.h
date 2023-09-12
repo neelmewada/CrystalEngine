@@ -38,6 +38,8 @@ namespace CE
 
     public:
 
+		virtual void InitializeDefaults(void* instance) override;
+
 		virtual const CE::Name& GetTypeName() override;
 
         String GetDisplayName() override;

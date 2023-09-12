@@ -325,7 +325,7 @@ namespace CE
         friend class Variant;
     };
 
-    template<typename ElementType>
+    template<typename ElementType = u8>
     class Array : public List<ElementType>
     {
     public:
@@ -593,6 +593,11 @@ namespace CE
         {
             List<ElementType>::Impl.resize(newSize);
         }
+
+		CE_INLINE void Resize(u32 newSize, const ElementType& defaultValue)
+		{
+			List<ElementType>::Impl.resize(newSize, defaultValue);
+		}
 
         bool Exists(const ElementType& item) const
         {

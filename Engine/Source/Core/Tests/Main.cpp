@@ -843,6 +843,72 @@ TEST(Reflection, SubClassType)
 	TEST_END;
 }
 
+struct ReflectionFieldElement
+{
+	CE_STRUCT(ReflectionFieldElement)
+public:
+
+	String myText = "default";
+};
+
+CE_RTTI_STRUCT(, , ReflectionFieldElement,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(myText)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(, , ReflectionFieldElement)
+
+struct ReflectionFieldTest
+{
+	CE_STRUCT(ReflectionFieldTest)
+public:
+
+	Array<ReflectionFieldElement> array{};
+
+	String testString = "default value";
+};
+
+CE_RTTI_STRUCT(,,ReflectionFieldTest,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(array)
+		CE_FIELD(testString)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(,,ReflectionFieldTest)
+
+TEST(Reflection, Fields)
+{
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest);
+	CERegisterModuleTypes();
+
+	ReflectionFieldTest data{};
+	data.testString = "modified";
+	StructType* type = data.GetStruct();
+	auto arrayField = type->FindFieldWithName("array", TYPEID(Array<>));
+	arrayField->ResizeArray(&data, 3);
+	auto stringField = type->FindFieldWithName("testString", TYPEID(String));
+
+	EXPECT_FALSE(data.array[0].myText.IsEmpty());
+	EXPECT_EQ(data.array[0].myText, "default");
+
+	EXPECT_EQ(data.testString, "modified");
+	stringField->InitializeDefaults(&data);
+	EXPECT_EQ(data.testString, "");
+	type->InitializeDefaults(&data);
+	EXPECT_EQ(data.testString, "default value");
+
+	CEDeregisterModuleTypes();
+	CE_DEREGISTER_TYPES(ReflectionFieldElement, ReflectionFieldTest);
+	TEST_END;
+}
+
 #pragma endregion
 
 

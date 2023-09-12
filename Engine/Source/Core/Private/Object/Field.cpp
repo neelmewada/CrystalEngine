@@ -19,7 +19,17 @@ namespace CE
             fieldFlags |= FIELD_ImportSetting;
     }
 
-    const CE::Name& FieldType::GetTypeName()
+	void FieldType::InitializeDefaults(void* instance)
+	{
+		auto declType = GetDeclarationType();
+		auto fieldInstance = GetFieldInstance(instance);
+		if (declType != nullptr || fieldInstance == nullptr)
+		{
+			declType->InitializeDefaults(fieldInstance);
+		}
+	}
+
+	const CE::Name& FieldType::GetTypeName()
     {
 		if (!typeName.IsValid())
 		{
@@ -441,7 +451,7 @@ namespace CE
 		if (!IsArrayField())
 			return;
 
-		auto& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
+		Array<u8>& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
 		TypeId underlyingTypeId = GetUnderlyingTypeId();
 		if (underlyingTypeId == 0)
 			return;
@@ -457,7 +467,16 @@ namespace CE
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
 		}
 
-		array.Resize(numElements * underlyingTypeSize);
+		array.Resize(numElements * underlyingTypeSize, 0);
+
+		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes. They're null pointers.
+			return;
+
+		for (int i = 0; i < numElements; i++)
+		{
+			void* instance = &array[0] + underlyingTypeSize * i;
+			underlyingType->InitializeDefaults(instance);
+		}
 	}
 
 	Array<FieldType> FieldType::GetArrayFieldList(void* instance)

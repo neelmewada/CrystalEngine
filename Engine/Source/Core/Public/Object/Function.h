@@ -25,6 +25,8 @@ namespace CE
 
 		virtual bool IsFunction() const override { return true; }
 
+		virtual void InitializeDefaults(void* instance) override {  } // Do nothing
+
 		INLINE TypeId GetReturnTypeId() const { return returnType; }
 
 		INLINE TypeId GetFunctionSignature()

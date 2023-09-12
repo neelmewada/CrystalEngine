@@ -49,6 +49,8 @@ namespace CE
         CE_INLINE s64 GetValue() const { return value; }
         virtual u32 GetSize() const override { return size; }
 
+		virtual void InitializeDefaults(void* instance) override {  } // Do nothing
+
     private:
 		Name enumFullName;
 		Name constantFullName;
@@ -177,6 +179,7 @@ namespace CE\
 			virtual ~TypeInfoImpl()\
 			{\
 			}\
+			virtual void InitializeDefaults(void* instance) override { new(instance) Namespace::Enum(); }\
         };\
     }\
     template<>\

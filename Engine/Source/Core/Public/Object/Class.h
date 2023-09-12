@@ -232,7 +232,7 @@ namespace CE
 			return nullptr;
 		}
 
-		virtual void InitializeDefaults(void* instance) const
+		virtual void InitializeDefaults(void* instance) override
 		{
 			if (Impl == nullptr || instance == nullptr)
 				return;
@@ -507,8 +507,9 @@ namespace CE
 			return Impl->CanInstantiate();
 		}
 
-		virtual void InitializeDefaults(void* instance) const override
+		virtual void InitializeDefaults(void* instance) override
 		{
+			// TODO: Reimplement this. Load CDI instead of calling default constructor.
 			if (Impl == nullptr || instance == nullptr)
 				return;
 			return Impl->InitializeDefaults(instance);

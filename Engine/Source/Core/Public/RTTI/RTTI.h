@@ -205,6 +205,8 @@ namespace CE
         
         virtual bool IsObject() { return IsClass() && IsAssignableTo(TYPEID(Object)); }
 
+		virtual void InitializeDefaults(void* instance) = 0;
+
 		Name GenerateInstanceName(UUID uuid) const;
 
 		Name GetOwnerModuleName() const;
