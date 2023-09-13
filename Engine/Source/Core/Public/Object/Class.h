@@ -352,7 +352,11 @@ namespace CE
 				}
 			};
 
-			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, attributes));
+
+
+			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, attributes,
+				TGetUnderlyingTypeId<ReturnType>::Get(),
+				TGetUnderlyingTypeIdPack<Args...>::Get()));
 		}
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>
@@ -374,7 +378,9 @@ namespace CE
 				}
 			};
 
-			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, String(attributes) + ",Constant"));
+			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, String(attributes) + ",Constant",
+				TGetUnderlyingTypeId<ReturnType>::Get(),
+				TGetUnderlyingTypeIdPack<Args...>::Get()));
 		}
 
 	protected:

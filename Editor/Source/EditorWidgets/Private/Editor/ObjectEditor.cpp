@@ -322,19 +322,7 @@ namespace CE::Editor
 
 				if (isExpanded)
 				{
-					fieldEditor->RenderExpansion();
-
-					//GUI::TableNextRow();
-
-					//GUI::TableNextColumn();
-					//GUI::Text("Label");
-					//h = GUI::GetItemRectSize().height;
-
-					//GUI::TableNextColumn();
-					//GUI::Text("Value");
-					//h = Math::Max(h, GUI::GetItemRectSize().height);
-
-					//height += h + 1;
+					height += fieldEditor->RenderExpansion();
 
 					GUI::TreePop();
 				}

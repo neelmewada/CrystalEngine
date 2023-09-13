@@ -62,6 +62,9 @@ namespace CE::Editor
 		Array<FieldEditor*> childrenEditors{};
 		Array<CLabel*> childrenLabels{};
 
+		Array<FieldType> childrenArrayFields{};
+		bool isIncompatible = false;
+
 		FIELD(Config)
 		bool useDragSlider = false;
 	};

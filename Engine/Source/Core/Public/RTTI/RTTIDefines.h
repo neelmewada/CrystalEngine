@@ -221,6 +221,57 @@ namespace CE
 			return (TypeId)typeid(FinalType).hash_code();
 		}
 	}
+
+	template<typename T>
+	struct TGetUnderlyingTypeId
+	{
+		static inline TypeId Get()
+		{
+			typedef TGetUnderlyingType<T>::Type UnderlyingType;
+			return TYPEID(UnderlyingType);
+		}
+	};
+
+	template <auto Start, auto End, auto Inc, class F>
+	constexpr void constexpr_for(F&& f)
+	{
+		if constexpr (Start < End)
+		{
+			f(std::integral_constant<decltype(Start), Start>());
+			constexpr_for<Start + Inc, End, Inc>(f);
+		}
+	}
+
+	template<typename... Args>
+	struct TGetUnderlyingTypeIdPack
+	{
+		enum : SIZE_T { NumArgs = sizeof...(Args) };
+
+		typedef std::tuple<Args...> Tuple;
+
+		template <SIZE_T i>
+		struct Arg
+		{
+			typedef typename std::tuple_element<i, std::tuple<Args...>>::type Type;
+			// the i-th argument is equivalent to the i-th tuple element of a tuple
+			// composed of those arguments.
+		};
+
+		static inline std::vector<TypeId> Get()
+		{
+			std::vector<TypeId> allTypes = std::vector<TypeId>();
+			allTypes.resize(NumArgs, 0);
+
+			constexpr_for<(SIZE_T)0, NumArgs, (SIZE_T)1>([&](auto i)
+				{
+					typedef Arg<i>::Type ArgType;
+					allTypes[i] = TGetUnderlyingTypeId<ArgType>::Get();
+				});
+
+			return allTypes;
+		}
+	};
+
     
 } // namespace CE
 

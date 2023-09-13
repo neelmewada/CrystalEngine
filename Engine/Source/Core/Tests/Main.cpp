@@ -848,8 +848,17 @@ struct ReflectionFieldElement
 	CE_STRUCT(ReflectionFieldElement)
 public:
 
+	static int releaseCount;
+
+	void Release()
+	{
+		releaseCount++;
+	}
+
 	String myText = "default";
 };
+
+int ReflectionFieldElement::releaseCount = 1;
 
 CE_RTTI_STRUCT(, , ReflectionFieldElement,
 	CE_SUPER(),
@@ -913,13 +922,38 @@ TEST(Reflection, Fields)
 		auto arrayField = type->FindFieldWithName("array", TYPEID(Array<>));
 		auto stringField = type->FindFieldWithName("testString", TYPEID(String));
 
+		ReflectionFieldElement::releaseCount = 0;
+		EXPECT_EQ(ReflectionFieldElement::releaseCount, 0);
+
 		arrayField->ResizeArray(&data, 1);
 		EXPECT_EQ(data.array[0].myText, "default");
 		data.array[0].myText = "new";
 		EXPECT_EQ(data.array[0].myText, "new");
 
 		arrayField->InsertArrayElement(&data, 1);
+		EXPECT_EQ(data.array[0].myText, "new");
 		EXPECT_EQ(data.array[1].myText, "default");
+		data.array[1].myText = "new2";
+		EXPECT_EQ(data.array[1].myText, "new2");
+
+		arrayField->ResizeArray(&data, 3); // Adds 1 new element
+		EXPECT_EQ(data.array[0].myText, "new");
+		EXPECT_EQ(data.array[1].myText, "new2");
+		EXPECT_EQ(data.array[2].myText, "default");
+
+		arrayField->DeleteArrayElement(&data, 1); // Delete element at index 1
+		EXPECT_EQ(data.array.GetSize(), 2);
+		EXPECT_EQ(data.array[0].myText, "new");
+		EXPECT_EQ(data.array[1].myText, "default");
+		data.array[1].myText = "new2";
+
+		arrayField->InsertArrayElement(&data, 1); // Insert new element at index 1
+		EXPECT_EQ(data.array[0].myText, "new");
+		EXPECT_EQ(data.array[1].myText, "default");
+		EXPECT_EQ(data.array[2].myText, "new2");
+
+		EXPECT_EQ(ReflectionFieldElement::releaseCount, 1);
+		ReflectionFieldElement::releaseCount = 0;
 	}
 
 	CEDeregisterModuleTypes();

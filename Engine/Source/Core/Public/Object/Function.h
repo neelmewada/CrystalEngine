@@ -17,7 +17,8 @@ namespace CE
     {
 	protected:
 		FunctionType(String name, TypeId returnType, std::initializer_list<TypeId> parameterTypes,
-			FunctionDelegate delegate, const TypeInfo* owner, String attributes);
+			FunctionDelegate delegate, TypeInfo* owner, String attributes,
+			TypeId returnUnderlyingTypeId = 0, Array<TypeId> parameterUnderlyingTypeIds = {});
 
 	public:
 
@@ -30,6 +31,8 @@ namespace CE
 
 		INLINE TypeId GetReturnTypeId() const { return returnType; }
 
+		INLINE TypeId GetReturnUnderlyingTypeId() const { return returnUnderlyingTypeId; }
+
 		INLINE TypeId GetFunctionSignature()
 		{
 			if (signature == 0)
@@ -40,6 +43,8 @@ namespace CE
 		INLINE u32 GetParameterCount() const { return paramTypes.GetSize(); }
 
 		INLINE TypeId GetParameterTypeIdAt(u32 index) const { return paramTypes[index]; }
+
+		INLINE TypeId GetParameterUnderlyingTypeIdAt(u32 index) const { return paramUnderlyingTypeIds[index]; }
 
 		INLINE const TypeInfo* GetOwner() const { return owner; }
 
@@ -70,7 +75,11 @@ namespace CE
 	protected:
 		Name typeName{};
 		TypeId returnType = 0;
+		TypeId returnUnderlyingTypeId = 0;
+
 		Array<TypeId> paramTypes{};
+		Array<TypeId> paramUnderlyingTypeIds{};
+
 		FunctionDelegate delegateCallback;
 		FunctionType* next = nullptr;
 		TypeInfo* owner = nullptr;
@@ -87,19 +96,19 @@ namespace CE
 	template<typename ReturnType, typename ClassOrStruct, typename... Args>
 	TypeId GetFunctionSignature(ReturnType(ClassOrStruct::* function)(Args...))
 	{
-		return GetCombinedHashes({ TYPEID(Args)... });
+		return GetCombinedHashes({ CE::GetTypeId<Args>()...});
 	}
 
 	template<typename ReturnType, typename ClassOrStruct, typename... Args>
 	TypeId GetFunctionSignature(ReturnType(ClassOrStruct::* function)(Args...) const)
 	{
-		return GetCombinedHashes({ TYPEID(Args)... });
+		return GetCombinedHashes({ CE::GetTypeId<Args>()... });
 	}
 
 	template<typename... Args>
 	TypeId GetFunctionSignature()
 	{
-		return GetCombinedHashes({ TYPEID(Args)... });
+		return GetCombinedHashes({ CE::GetTypeId<Args>()... });
 	}
     
 } // namespace CE

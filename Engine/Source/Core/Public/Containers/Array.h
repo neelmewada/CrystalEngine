@@ -375,6 +375,15 @@ namespace CE
 
         }
 
+		template<SIZE_T Size>
+		Array(const ElementType inArray[Size]) : Super(Size), ElementTypeId(GetTypeId<ElementType>())
+		{
+			for (int i = 0; i < Size; i++)
+			{
+				Super::Impl[i] = inArray[i];
+			}
+		}
+
         Array(const Array& copy)
         {
             Super::Impl = copy.Super::Impl;

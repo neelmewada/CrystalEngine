@@ -175,7 +175,7 @@ namespace CE
 	// For generic types, directly use the result of the signature of its 'operator()'
 
 	template <typename TClassType, typename TReturnType, typename... Args>
-	struct FunctionTraits<TReturnType(TClassType::*)(Args...) const> // we specialize for pointers to member function
+	struct FunctionTraits<TReturnType(TClassType::*)(Args...) const> // we specialize for pointers to const member function
 	{
 		enum { NumArgs = sizeof...(Args) };
 
@@ -211,7 +211,7 @@ namespace CE
 	};
 
 	template <typename TReturnType, typename... Args>
-	struct FunctionTraits<TReturnType(*)(Args...)> // we specialize for pointers to member function
+	struct FunctionTraits<TReturnType(*)(Args...)> // we specialize for pointers to global functions
 	{
 		enum { NumArgs = sizeof...(Args) };
 

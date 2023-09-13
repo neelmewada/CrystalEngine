@@ -182,6 +182,7 @@ namespace CE::Editor
 		if (!IsExpandable() || fieldDeclType == nullptr)
 			return 0;
 
+		bool needsLayout = NeedsLayout();
 		UpdateStyleIfNeeded();
 		UpdateLayoutIfNeeded();
 
@@ -199,7 +200,50 @@ namespace CE::Editor
 					childrenLabels.RemoveAt(childrenLabels.GetSize() - 1);
 				}
 
-				for (int i = 0; i < childrenEditors.GetSize(); i++)
+				bool match = true;
+				int arraySize = 0;
+
+				for (int i = 0; i < fieldTypes.GetSize(); i++)
+				{
+					auto curArraySize = fieldTypes[i]->GetArraySize(targets[i]);
+					if (i == 0)
+					{
+						arraySize = curArraySize;
+					}
+					else if (curArraySize != arraySize)
+					{
+						match = false;
+						break;
+					}
+					else
+					{
+						arraySize = curArraySize;
+					}
+				}
+
+				isIncompatible = !match;
+
+				if (!match)
+				{
+					GUI::TableNextRow();
+
+					GUI::TableNextColumn();
+					GUI::Text("");
+					float h = GUI::GetItemRectSize().height;
+
+					GUI::TableNextColumn();
+					GUI::Text("[Incompatible Arrays]");
+					h = Math::Max(h, GUI::GetItemRectSize().height);
+
+					return h + 1;
+				}
+
+				if (childrenArrayFields.GetSize() != arraySize)
+				{
+					// TODO: set fields
+				}
+
+				for (int i = 0; i < Math::Max(childrenEditors.GetSize(), targets.GetSize()); i++)
 				{
 					CLabel* label = nullptr;
 					FieldEditor* fieldEditor = nullptr;
@@ -212,6 +256,8 @@ namespace CE::Editor
 						fieldEditor = CreateWidget<FieldEditor>(this, "FieldEditor", fieldEditorClass);
 						if (fieldEditor == nullptr)
 							continue;
+						
+						//fieldEditor->SetTargets(fieldDeclType, fieldT)
 						childrenEditors.Add(fieldEditor);
 						label = CreateWidget<CLabel>(this, "FieldLabel");
 						label->SetText(String::Format("Element {}", i));
@@ -221,6 +267,12 @@ namespace CE::Editor
 					{
 						label = childrenLabels[i];
 						fieldEditor = childrenEditors[i];
+					}
+
+					if (needsLayout)
+					{
+						label->SetNeedsLayout();
+						fieldEditor->SetNeedsLayout();
 					}
 
 					GUI::TableNextRow();
@@ -448,6 +500,20 @@ namespace CE::Editor
 			button->SetIconSize(18);
 			button->SetText("");
 			button->AddStyleClass("IconButton");
+
+			Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
+				{
+					for (int i = 0; i < fieldTypes.GetSize(); i++)
+					{
+						if (!fieldTypes[i]->IsArrayField())
+							continue;
+
+						fieldTypes[i]->InsertArrayElement(targets[i]);
+					}
+
+					SetNeedsStyle();
+					SetNeedsLayout();
+				});
 		}
 
 		SetNeedsStyle();

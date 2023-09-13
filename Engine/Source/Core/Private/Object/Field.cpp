@@ -463,7 +463,7 @@ namespace CE
 
 		if (underlyingType->IsClass())
 		{
-			underlyingTypeSize = sizeof(Object*);
+			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
 		}
 
 		return array.GetSize() / underlyingTypeSize;
@@ -474,7 +474,7 @@ namespace CE
 		if (!IsArrayField() || instance == nullptr)
 			return;
 
-		auto arraySize = GetArraySize(instance);
+		auto curNumElements = GetArraySize(instance);
 
 		Array<u8>& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
 		TypeId underlyingTypeId = GetUnderlyingTypeId();
@@ -490,21 +490,23 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+			array.Resize(numElements * underlyingTypeSize, 0);
 		}
 		else
 		{
+			for (int i = numElements; i < curNumElements; i++) // Call destructor on elements that will be removed
+			{
+				void* elementInstance = &array[0] + underlyingTypeSize * i;
+				underlyingType->CallDestructor(elementInstance);
+			}
 
-		}
+			array.Resize(numElements * underlyingTypeSize, 0);
 
-		array.Resize(numElements * underlyingTypeSize, 0);
-
-		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes. They're null pointers.
-			return;
-
-		for (int i = 0; i < numElements; i++)
-		{
-			void* instance = &array[0] + underlyingTypeSize * i;
-			underlyingType->InitializeDefaults(instance);
+			for (int i = curNumElements; i < numElements; i++) // Initialize newly added elements if exists
+			{
+				void* elementInstance = &array[0] + underlyingTypeSize * i;
+				underlyingType->InitializeDefaults(elementInstance);
+			}
 		}
 	}
 
@@ -548,9 +550,9 @@ namespace CE
 		}
 
 		auto insertBytePos = insertPosition * underlyingTypeSize;
-
+		
 		Array<u8> insertionValues = Array<u8>(underlyingTypeSize, 0);
-		array.InsertRange(insertBytePos, insertionValues); // Insert an array of zero byte values
+		array.InsertRange(insertBytePos, insertionValues); // Insert an array of zeroes
 
 		if (underlyingType->IsClass()) // Do NOT call InitializeDefaults on a classes. They're null pointers.
 			return;
@@ -564,9 +566,9 @@ namespace CE
 		if (!IsArrayField() || instance == nullptr)
 			return;
 
-		auto arraySize = GetArraySize(instance);
+		auto curNumElements = GetArraySize(instance);
 
-		if (arraySize == 0 || deletePosition >= arraySize)
+		if (curNumElements == 0 || deletePosition >= curNumElements)
 			return;
 
 		Array<u8>& array = const_cast<Array<u8>&>(GetFieldValue<Array<u8>>(instance));
@@ -578,7 +580,24 @@ namespace CE
 		if (underlyingType == nullptr)
 			return;
 
+		auto underlyingTypeSize = underlyingType->GetSize();
+		u32 deletionBytePos = deletePosition * underlyingTypeSize;
 
+		if (underlyingType->IsClass())
+		{
+			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+			deletionBytePos = deletePosition * underlyingTypeSize;
+		}
+		else
+		{
+			void* elementInstance = &array[deletionBytePos];
+			underlyingType->CallDestructor(elementInstance);
+		}
+
+		for (int i = 0; i < underlyingTypeSize; i++) // Remove bytes from array
+		{
+			array.RemoveAt(deletionBytePos);
+		}
 	}
 
 	Array<FieldType> FieldType::GetArrayFieldList(void* instance)

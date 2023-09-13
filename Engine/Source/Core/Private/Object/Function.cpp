@@ -8,15 +8,22 @@ namespace CE
         TypeId returnType, 
         std::initializer_list<TypeId> parameterTypes, 
         FunctionDelegate delegate, 
-        const TypeInfo* owner, 
-        String attributes)
+        TypeInfo* owner, 
+        String attributes,
+		TypeId returnUnderlyingTypeId, 
+		Array<TypeId> parameterUnderlyingTypeIds)
         : TypeInfo(name, attributes)
         , returnType(returnType)
         , paramTypes(parameterTypes)
         , delegateCallback(delegate)
 		, owner(const_cast<TypeInfo*>(owner))
+		, returnUnderlyingTypeId(returnUnderlyingTypeId)
+		, paramUnderlyingTypeIds(parameterUnderlyingTypeIds)
     {
-
+		if (paramUnderlyingTypeIds.GetSize() != paramTypes.GetSize())
+		{
+			paramUnderlyingTypeIds.Resize(paramTypes.GetSize(), 0);
+		}
     }
 
     const Name& FunctionType::GetTypeName()
