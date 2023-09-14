@@ -379,6 +379,11 @@ namespace CE::Widgets
 		
 		CE_SIGNAL(OnMouseRightClick, CMouseEvent*);
 
+		CE_SIGNAL(OnFocusChanged, bool);
+
+		CE_SIGNAL(OnKeyPressed, CKey);
+		CE_SIGNAL(OnKeyReleased, CKey);
+
 	protected:
 
 		static YGSize MeasureFunctionCallback(YGNodeRef nodeRef, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode);

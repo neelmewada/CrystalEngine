@@ -15,6 +15,8 @@ namespace CE::Editor
 
 		virtual bool IsFieldTypeSupported(TypeInfo* type);
 
+		virtual bool IsContainer() override;
+
 		bool SetTargets(TypeInfo* allFieldsDeclType, const Array<FieldType*>& fieldTypes, const Array<void*>& targetInstances);
 
 		bool IsLayoutCalculationRoot() override { return true; }
@@ -63,7 +65,10 @@ namespace CE::Editor
 		Array<CLabel*> childrenLabels{};
 
 		Array<FieldType> childrenArrayFields{};
+		Array<FieldType*> childrenArrayFieldsPtr{};
+		Array<void*> childrenArrayFieldInstances{};
 		bool isIncompatible = false;
+		bool canAddChildren = true;
 
 		FIELD(Config)
 		bool useDragSlider = false;

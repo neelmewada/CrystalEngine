@@ -80,6 +80,37 @@ namespace CE
         return {};
     }
 
+    Array<FunctionType*> StructType::GetAllFunctions()
+    {
+		if (!functionsCached)
+		{
+			CacheAllFunctions();
+		}
+
+		Array<FunctionType*> result{};
+		for (auto& function : cachedFunctions)
+		{
+			result.Add(&function);
+		}
+		return result;
+    }
+
+	Array<FunctionType*> StructType::GetAllSignals()
+	{
+		if (!functionsCached)
+		{
+			CacheAllFunctions();
+		}
+
+		Array<FunctionType*> result{};
+		for (auto& function : cachedFunctions)
+		{
+			if (function.IsSignalFunction())
+				result.Add(&function);
+		}
+		return result;
+	}
+
     FieldType* StructType::GetFirstField()
     {
         if (!fieldsCached)

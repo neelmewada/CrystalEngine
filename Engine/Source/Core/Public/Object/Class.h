@@ -165,6 +165,9 @@ namespace CE
 			return &cachedFunctions[index];
 		}
 
+		Array<FunctionType*> GetAllFunctions();
+		Array<FunctionType*> GetAllSignals();
+
 		CE_INLINE u32 GetLocalFunctionCount() const
 		{
 			return localFunctions.GetSize();

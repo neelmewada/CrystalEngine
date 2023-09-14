@@ -149,6 +149,20 @@ namespace CE::GUI
 
 	extern COREGUI_API Array<Vec2> gPaddingXStack;
 
+
+#pragma region Input
+
+	COREGUI_API bool IsKeyPressed(GUI::Key key, GUI::ID ownerId);
+	COREGUI_API bool IsKeyPressed(GUI::Key key, bool repeat = true);
+
+	COREGUI_API bool IsKeyDown(GUI::Key key);
+	COREGUI_API bool IsKeyDown(GUI::Key key, GUI::ID ownerId);
+
+	COREGUI_API bool IsKeyReleased(GUI::Key key);
+	COREGUI_API bool IsKeyReleased(GUI::Key key, GUI::ID ownerId);
+
+#pragma endregion
+
 #pragma region DockBuilder
 
 	COREGUI_API void DockBuilderRemoveNode(ID nodeId);
@@ -347,6 +361,8 @@ namespace CE::GUI
 
 	COREGUI_API void PushChildCoordinateSpace(const Rect& rect);
 	COREGUI_API void PushChildCoordinateSpace(const Vec2& origin);
+	// Push child coordinate space at current cursor position
+	COREGUI_API void PushChildCoordinateSpace();
 	COREGUI_API void PushZeroingChildCoordinateSpace();
 
 	COREGUI_API void PopChildCoordinateSpace();

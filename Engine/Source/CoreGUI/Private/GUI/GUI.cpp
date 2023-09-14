@@ -669,6 +669,39 @@ namespace CE::GUI
 	}
 
 	/////////////////////////////////////////////////////////////////////
+	// Input
+
+	COREGUI_API bool IsKeyPressed(GUI::Key key, GUI::ID ownerId)
+	{
+		return ImGui::IsKeyPressed((ImGuiKey)key, ownerId);
+	}
+
+	COREGUI_API bool IsKeyPressed(GUI::Key key, bool repeat)
+	{
+		return ImGui::IsKeyPressed((ImGuiKey)key, repeat);
+	}
+
+	COREGUI_API bool IsKeyDown(GUI::Key key)
+	{
+		return ImGui::IsKeyDown((ImGuiKey)key);
+	}
+
+	COREGUI_API bool IsKeyDown(GUI::Key key, GUI::ID ownerId)
+	{
+		return ImGui::IsKeyDown((ImGuiKey)key, ownerId);
+	}
+
+	COREGUI_API bool IsKeyReleased(GUI::Key key)
+	{
+		return ImGui::IsKeyReleased((ImGuiKey)key);
+	}
+
+	COREGUI_API bool IsKeyReleased(GUI::Key key, GUI::ID ownerId)
+	{
+		return ImGui::IsKeyReleased((ImGuiKey)key, ownerId);
+	}
+
+	/////////////////////////////////////////////////////////////////////
 	// Style
 
 	COREGUI_API GUI::Style& GetStyle()
@@ -6832,6 +6865,11 @@ namespace CE::GUI
 	COREGUI_API void PushChildCoordinateSpace(const Vec2& origin)
 	{
 		widgetCoordinateSpaces.Push(origin);
+	}
+
+	COREGUI_API void PushChildCoordinateSpace()
+	{
+		GUI::PushChildCoordinateSpace(GUI::GetCursorPos());
 	}
 
 	COREGUI_API void PushZeroingChildCoordinateSpace()

@@ -19,6 +19,8 @@ namespace CE::Widgets
 		MouseButtonDoubleClick,
 		FocusChanged,
 		ResizeEvent,
+
+		KeyEvent,
 	};
 	ENUM_CLASS_FLAGS(CEventType);
 
@@ -62,7 +64,7 @@ namespace CE::Widgets
 		CEventType type{};
 
 		FIELD()
-		TypeId customEventType{};
+		TypeId customEventType{}; // TypeId of the event type struct
 
 		FIELD()
 		b8 isHandled = false;
@@ -117,6 +119,84 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 gotFocus = false;
+	};
+
+	ENUM()
+	enum class CKey
+	{
+		None = 0,
+		Tab = 512,             // == NamedBEGIN
+		LeftArrow,
+		RightArrow,
+		UpArrow,
+		DownArrow,
+		PageUp,
+		PageDown,
+		Home,
+		End,
+		Insert,
+		Delete,
+		Backspace,
+		Space,
+		Enter,
+		Escape,
+		LeftCtrl, LeftShift, LeftAlt, LeftSuper,
+		RightCtrl, RightShift, RightAlt, RightSuper,
+		Menu,
+		N0, N1, N2, N3, N4, N5, N6, N7, N8, N9,
+		A, B, C, D, E, F, G, H, I, J,
+		K, L, M, N, O, P, Q, R, S, T,
+		U, V, W, X, Y, Z,
+		F1, F2, F3, F4, F5, F6,
+		F7, F8, F9, F10, F11, F12,
+		Apostrophe,        // '
+		Comma,             // ,
+		Minus,             // -
+		Period,            // .
+		Slash,             // /
+		Semicolon,         // ;
+		Equal,             // =
+		LeftBracket,       // [
+		Backslash,         // \ (this text inhibit multiline comment caused by backslash)
+		RightBracket,      // ]
+		GraveAccent,       // `
+		CapsLock,
+		ScrollLock,
+		NumLock,
+		PrintScreen,
+		Pause,
+		Keypad0, Keypad1, Keypad2, Keypad3, Keypad4,
+		Keypad5, Keypad6, Keypad7, Keypad8, Keypad9,
+		KeypadDecimal,
+		KeypadDivide,
+		KeypadMultiply,
+		KeypadSubtract,
+		KeypadAdd,
+		KeypadEnter,
+		KeypadEqual,
+
+		Ctrl = 1 << 12, // Ctrl
+		Shift = 1 << 13, // Shift
+		Alt = 1 << 14, // Option/Menu
+		Super = 1 << 15, // Cmd/Super/Windows
+		Shortcut = 1 << 11, // Alias for Ctrl (non-macOS) _or_ Super (macOS).
+		Mask = 0xF800,  // 5-bits
+	};
+
+	STRUCT()
+	struct COREWIDGETS_API CKeyEvent : public CEvent
+	{
+		CE_STRUCT(CKeyEvent, CEvent)
+	public:
+
+		inline bool IsPressed() const { return isPressed; }
+		inline bool IsReleased() const { return !isPressed; }
+
+		FIELD()
+		b8 isPressed = true;
+
+		FIELD()
+		CKey key = CKey::None;
 	};
 
 } // namespace CE::Widgets

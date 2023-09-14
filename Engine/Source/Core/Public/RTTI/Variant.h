@@ -167,7 +167,7 @@ namespace CE
 			valueTypeId = TYPEID(String);
 		}
 
-		template<typename T> requires std::is_enum<T>::Value
+		template<typename T> requires std::is_enum<T>::value
 		Variant(T enumValue)
 		{
 			SetInternalValue((std::underlying_type_t<T>)enumValue);

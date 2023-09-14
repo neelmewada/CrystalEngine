@@ -15,7 +15,7 @@ namespace CE::Editor
 
     FieldEditor::FieldEditor()
     {
-
+		
     }
 
     FieldEditor::~FieldEditor()
@@ -94,6 +94,11 @@ namespace CE::Editor
 		};
 
 		return allowedTypeIds.Exists(typeId);
+	}
+
+	bool FieldEditor::IsContainer()
+	{
+		return canAddChildren || !IsExpandable();
 	}
 
 	bool FieldEditor::SetTargets(TypeInfo* fieldDeclType, const Array<FieldType*>& fieldTypes, const Array<void*>& targetInstances)
@@ -179,7 +184,7 @@ namespace CE::Editor
 
 	float FieldEditor::RenderExpansion()
 	{
-		if (!IsExpandable() || fieldDeclType == nullptr)
+		if (!IsExpandable() || fieldDeclType == nullptr || fieldTypes.IsEmpty())
 			return 0;
 
 		bool needsLayout = NeedsLayout();
@@ -192,14 +197,6 @@ namespace CE::Editor
 		{
 			if (fieldDeclType->IsArrayType())
 			{
-				while (childrenEditors.GetSize() > targets.GetSize()) // Delete extra children editors
-				{
-					childrenEditors.GetLast()->Destroy();
-					childrenEditors.RemoveAt(childrenEditors.GetSize() - 1);
-					childrenLabels.GetLast()->Destroy();
-					childrenLabels.RemoveAt(childrenLabels.GetSize() - 1);
-				}
-
 				bool match = true;
 				int arraySize = 0;
 
@@ -223,7 +220,7 @@ namespace CE::Editor
 
 				isIncompatible = !match;
 
-				if (!match)
+				if (!match || fieldTypes.GetSize() > 1) // Multi-target editing not supported for arrays
 				{
 					GUI::TableNextRow();
 
@@ -238,12 +235,39 @@ namespace CE::Editor
 					return h + 1;
 				}
 
-				if (childrenArrayFields.GetSize() != arraySize)
+				while (childrenEditors.GetSize() > arraySize) // Delete extra children editors
 				{
-					// TODO: set fields
+					childrenEditors.GetLast()->Destroy();
+					childrenEditors.RemoveAt(childrenEditors.GetSize() - 1);
+					childrenLabels.GetLast()->Destroy();
+					childrenLabels.RemoveAt(childrenLabels.GetSize() - 1);
 				}
 
-				for (int i = 0; i < Math::Max(childrenEditors.GetSize(), targets.GetSize()); i++)
+				bool recreateFieldEditors = false;
+
+				if (childrenArrayFields.GetSize() != arraySize)
+				{
+					recreateFieldEditors = true;
+					if (arraySize > 0)
+					{
+						childrenArrayFields = fieldTypes[0]->GetArrayFieldList(targets[0]);
+						childrenArrayFieldsPtr = childrenArrayFields.Transform<FieldType*>([](FieldType& in){ return &in; });
+						childrenArrayFieldInstances.Resize(childrenArrayFieldsPtr.GetSize());
+						const Array<u8>& arrayRef = fieldTypes[0]->GetFieldValue<Array<u8>>(targets[0]);
+						childrenArrayFieldInstances = childrenArrayFields.Transform<void*>([&](FieldType& in) 
+							{ 
+								return (void*)&arrayRef[0]; 
+							});
+					}
+					else
+					{
+						childrenArrayFields = {};
+						childrenArrayFieldsPtr = {};
+						childrenArrayFieldInstances = {};
+					}
+				}
+
+				for (int i = 0; i < arraySize; i++)
 				{
 					CLabel* label = nullptr;
 					FieldEditor* fieldEditor = nullptr;
@@ -256,17 +280,43 @@ namespace CE::Editor
 						fieldEditor = CreateWidget<FieldEditor>(this, "FieldEditor", fieldEditorClass);
 						if (fieldEditor == nullptr)
 							continue;
-						
-						//fieldEditor->SetTargets(fieldDeclType, fieldT)
+						fieldEditor->SetIndependentLayout(true);
 						childrenEditors.Add(fieldEditor);
 						label = CreateWidget<CLabel>(this, "FieldLabel");
 						label->SetText(String::Format("Element {}", i));
+						label->SetIndependentLayout(true);
 						childrenLabels.Add(label);
 					}
 					else
 					{
 						label = childrenLabels[i];
 						fieldEditor = childrenEditors[i];
+					}
+
+					if (recreateFieldEditors)
+					{
+						TypeInfo* fieldUnderlyingType = nullptr;
+						if (childrenArrayFieldsPtr.NonEmpty())
+							fieldUnderlyingType = childrenArrayFieldsPtr[0]->GetDeclarationType();
+						fieldEditor->SetTargets(fieldUnderlyingType, { childrenArrayFieldsPtr[i] }, { childrenArrayFieldInstances[i]});
+
+						fieldEditor->canAddChildren = true;
+						auto deleteButton = CreateWidget<CButton>(fieldEditor, "DeleteButton");
+						fieldEditor->canAddChildren = false;
+						deleteButton->LoadIcon("Icons/delete.png");
+						deleteButton->SetIconSize(18);
+						deleteButton->SetText("");
+						deleteButton->AddStyleClass("IconButton");
+
+						int elementIndex = i;
+
+						Object::Bind(deleteButton, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
+							{
+								for (int j = 0; j < fieldTypes.GetSize(); j++)
+								{
+									fieldTypes[j]->DeleteArrayElement(targets[j], elementIndex);
+								}
+							});
 					}
 
 					if (needsLayout)
@@ -277,15 +327,25 @@ namespace CE::Editor
 
 					GUI::TableNextRow();
 
-					GUI::TableNextColumn();
-					label->Render();
-					float h = label->GetComputedLayoutSize().height;
+					float h = 0;
 
 					GUI::TableNextColumn();
-					fieldEditor->Render();
-					h = Math::Max(h, fieldEditor->GetComputedLayoutSize().height);
+					GUI::PushChildCoordinateSpace();
+					{
+						label->Render();
+						h = label->GetComputedLayoutSize().height;
+					}
+					GUI::PopChildCoordinateSpace();
 
-					height += h;
+					GUI::TableNextColumn();
+					GUI::PushChildCoordinateSpace();
+					{
+						fieldEditor->Render();
+						h = Math::Max(h, fieldEditor->GetComputedLayoutSize().height);
+					}
+					GUI::PopChildCoordinateSpace();
+
+					height += h + Math::Min(arraySize, 5);
 				}
 			}
 		}
@@ -490,18 +550,19 @@ namespace CE::Editor
 				{
 					auto tagsAndLayers = GetSettings<TagAndLayerSettings>();
 					SetTargetFieldValue<b8>(value > 0);
-					String::Format("");
 				});
 		}
 		else if (fieldDeclType->IsArrayType()) // Array type
 		{
-			auto button = CreateWidget<CButton>(this, "AddButton");
-			button->LoadIcon("Icons/add.png");
-			button->SetIconSize(18);
-			button->SetText("");
-			button->AddStyleClass("IconButton");
+			canAddChildren = true;
+			auto addButton = CreateWidget<CButton>(this, "AddButton");
+			canAddChildren = false;
+			addButton->LoadIcon("Icons/add.png");
+			addButton->SetIconSize(18);
+			addButton->SetText("");
+			addButton->AddStyleClass("IconButton");
 
-			Object::Bind(button, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
+			Object::Bind(addButton, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
 				{
 					for (int i = 0; i < fieldTypes.GetSize(); i++)
 					{
@@ -514,6 +575,34 @@ namespace CE::Editor
 					SetNeedsStyle();
 					SetNeedsLayout();
 				});
+
+			canAddChildren = true;
+			auto clearButton = CreateWidget<CButton>(this, "ClearButton");
+			canAddChildren = false;
+			clearButton->LoadIcon("Icons/clear.png");
+			clearButton->SetIconSize(18);
+			clearButton->SetText("");
+			clearButton->AddStyleClass("IconButton");
+
+			Object::Bind(clearButton, MEMBER_FUNCTION(CButton, OnButtonClicked), [=]
+				{
+					for (int i = 0; i < fieldTypes.GetSize(); i++)
+					{
+						if (!fieldTypes[i]->IsArrayField())
+							continue;
+
+						fieldTypes[i]->ResizeArray(targets[i], 0);
+					}
+
+					SetNeedsStyle();
+					SetNeedsLayout();
+				});
+		}
+		else
+		{
+			SetNeedsStyle();
+			SetNeedsLayout();
+			return;
 		}
 
 		SetNeedsStyle();

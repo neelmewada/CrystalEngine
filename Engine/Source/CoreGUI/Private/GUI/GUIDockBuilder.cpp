@@ -2,8 +2,9 @@
 
 namespace CE::GUI
 {
+    
 
-	COREGUI_API void DockBuilderRemoveNode(ID nodeId)
+    COREGUI_API void DockBuilderRemoveNode(ID nodeId)
 	{
 		ImGui::DockBuilderRemoveNode(nodeId);
 	}

@@ -78,6 +78,7 @@ namespace CE::Widgets
 			{
 				stateFlags = CStateFlag::Default;
 			}
+			emit OnFocusChanged(focusEvent->GotFocus());
 			SetNeedsStyle();
 			event->MarkHandled();
 		}

@@ -550,6 +550,45 @@ namespace CE::Widgets
 		if (!IsInteractable())
 			return;
 
+		if (isFocused)
+		{
+			auto onKeyPressed = [&](CKey key)
+				{
+					CKeyEvent event{};
+					event.name = "KeyPressed";
+					event.type = CEventType::KeyEvent;
+					event.isPressed = true;
+					event.key = key;
+					HandleEvent(&event);
+				};
+			auto onKeyReleased = [&](CKey key)
+				{
+					CKeyEvent event{};
+					event.name = "KeyPressed";
+					event.type = CEventType::KeyEvent;
+					event.isPressed = false;
+					event.key = key;
+					HandleEvent(&event);
+				};
+
+			if (GUI::IsKeyPressed(GUI::Key_Enter))
+			{
+				onKeyPressed(CKey::Enter);
+			}
+			if (GUI::IsKeyReleased(GUI::Key_Enter))
+			{
+				onKeyReleased(CKey::Enter);
+			}
+			if (GUI::IsKeyPressed(GUI::Key_Escape))
+			{
+				onKeyPressed(CKey::Escape);
+			}
+			if (GUI::IsKeyReleased(GUI::Key_Escape))
+			{
+				onKeyReleased(CKey::Escape);
+			}
+		}
+
 		if (!IsWindow())
 		{
 			bool hovered = GUI::IsItemHovered();
@@ -1465,6 +1504,25 @@ namespace CE::Widgets
 
 				emit OnMouseRightClick(mouseEvent);
 				event->MarkHandled();
+			}
+		}
+
+		if (!event->isHandled && event->GetEventType() == CEventType::FocusChanged)
+		{
+			CFocusEvent* focusEvent = (CFocusEvent*)event;
+			emit OnFocusChanged(focusEvent->GotFocus());
+		}
+
+		if (event->type == CEventType::KeyEvent)
+		{
+			CKeyEvent* keyEvent = (CKeyEvent*)event;
+			if (keyEvent->IsPressed())
+			{
+				emit OnKeyPressed(keyEvent->key);
+			}
+			else if (keyEvent->IsReleased())
+			{
+				emit OnKeyReleased(keyEvent->key);
 			}
 		}
 
