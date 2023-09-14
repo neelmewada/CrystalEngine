@@ -107,7 +107,7 @@ namespace CE::Editor
 		this->fieldTypes = {};
 		this->targets = {};
 
-		textValidator = nullptr;
+		//textValidator = nullptr;
 		String validator = "";
 
 		for (auto field : fieldTypes)
@@ -281,6 +281,7 @@ namespace CE::Editor
 						if (fieldEditor == nullptr)
 							continue;
 						fieldEditor->SetIndependentLayout(true);
+						fieldEditor->textValidator = textValidator;
 						childrenEditors.Add(fieldEditor);
 						label = CreateWidget<CLabel>(this, "FieldLabel");
 						label->SetText(String::Format("Element {}", i));
@@ -298,7 +299,9 @@ namespace CE::Editor
 						TypeInfo* fieldUnderlyingType = nullptr;
 						if (childrenArrayFieldsPtr.NonEmpty())
 							fieldUnderlyingType = childrenArrayFieldsPtr[0]->GetDeclarationType();
+
 						fieldEditor->SetTargets(fieldUnderlyingType, { childrenArrayFieldsPtr[i] }, { childrenArrayFieldInstances[i]});
+						fieldEditor->textValidator = textValidator;
 
 						fieldEditor->canAddChildren = true;
 						auto deleteButton = CreateWidget<CButton>(fieldEditor, "DeleteButton");
@@ -345,7 +348,7 @@ namespace CE::Editor
 					}
 					GUI::PopChildCoordinateSpace();
 
-					height += h + Math::Min(arraySize, 5);
+					height += h + 4;
 				}
 			}
 		}
@@ -425,7 +428,7 @@ namespace CE::Editor
 			{
 				input->SetInputValidator(CFloatInputValidator);
 			}
-
+			
 			Object::Bind(input, MEMBER_FUNCTION(CTextInput, OnTextEdited), [=](String newText)
 				{
 					if (fieldTypeId == TYPEID(c8))

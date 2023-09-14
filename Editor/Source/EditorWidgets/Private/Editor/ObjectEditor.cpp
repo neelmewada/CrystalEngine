@@ -280,7 +280,7 @@ namespace CE::Editor
 						GUI::PushStyleColor(GUI::StyleCol_Header, Color::Clear());
 						GUI::PushStyleColor(GUI::StyleCol_HeaderActive, Color::Clear());
 						GUI::PushStyleColor(GUI::StyleCol_HeaderHovered, Color::Clear());
-						isExpanded = GUI::TreeNode(fieldLabel->GetText(), GUI::TNF_SpanFullWidth | GUI::TNF_FramePadding);
+						isExpanded = GUI::TreeNode(fieldLabel->GetText(), GUI::TNF_SpanFullWidth | GUI::TNF_FramePadding | GUI::TNF_DefaultOpen);
 						GUI::PopStyleColor(3);
 						GUI::PopStyleVar(1);
 					}

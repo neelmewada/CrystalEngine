@@ -13,7 +13,7 @@ namespace CE
 		FIELD(Category = "Tags")
 		bool useTags = true;
 
-		FIELD(Category = "Tags")
+		FIELD(Category = "Tags", Validator = "Name")
 		Array<String> tags{};
 	};
 
