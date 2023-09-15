@@ -8,6 +8,8 @@ EditorWindow::tab {
 
 namespace CE::Editor
 {
+	HashMap<Name, Array<ClassType*>> EditorWindow::assetDefNameToEditorWindowClass{};
+
     EditorWindow::EditorWindow()
     {
 		tabPadding = Vec2(5, 5);
@@ -17,6 +19,18 @@ namespace CE::Editor
     {
 
     }
+
+	ClassType* EditorWindow::GetEditorWindowClassForAssetDef(const Name& assetDefClassName)
+	{
+		if (assetDefNameToEditorWindowClass.KeyExists(assetDefClassName))
+		{
+			auto& array = assetDefNameToEditorWindowClass[assetDefClassName];
+			if (array.IsEmpty())
+				return nullptr;
+			return array.Top();
+		}
+		return nullptr;
+	}
 
 	void EditorWindow::Construct()
 	{
@@ -38,7 +52,6 @@ namespace CE::Editor
 	void EditorWindow::OnDrawGUI()
     {
 		Super::OnDrawGUI();
-
     }
 
 } // namespace CE::Editor

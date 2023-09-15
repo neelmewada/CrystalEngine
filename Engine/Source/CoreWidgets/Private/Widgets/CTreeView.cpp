@@ -135,6 +135,44 @@ namespace CE::Widgets
 		}
 	}
 
+	bool CTreeView::SelectHelper(const CModelIndex& parent, Delegate<bool(const CModelIndex& index)> predicate, bool expand)
+	{
+		if (!predicate.IsValid() || model == nullptr)
+			return false;
+
+		int rowCount = model->GetRowCount(parent);
+		int colCount = model->GetColumnCount(parent);
+
+		for (int r = 0; r < rowCount; r++)
+		{
+			for (int c = 0; c < colCount; c++)
+			{
+				auto index = model->GetIndex(r, c, parent);
+				if (index.IsValid() && predicate(index))
+				{
+					selectedIndex = index;
+					model->OnIndexSelected(selectedIndex);
+					if (expand)
+					{
+						indexToExpand = selectedIndex;
+					}
+					return true;
+				}
+				else if (SelectHelper(index, predicate, expand))
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	bool CTreeView::Select(Delegate<bool(const CModelIndex& index)> predicate, bool expand)
+	{
+		return SelectHelper({}, predicate, expand);
+	}
+
 	void CTreeView::OnDrawGUI()
     {
 		auto rect = GetComputedLayoutRect();

@@ -72,7 +72,11 @@ namespace CE::Widgets
 		inline CModelIndex GetSelectedIndex() const { return selectedIndex; }
 		void Select(const CModelIndex& index, bool expand = true);
 
+		bool Select(Delegate<bool(const CModelIndex& index)> predicate, bool expand = true);
+
     protected:
+
+		bool SelectHelper(const CModelIndex& root, Delegate<bool(const CModelIndex& index)> predicate, bool expand);
 
         virtual void OnDrawGUI() override;
 

@@ -35,17 +35,13 @@ namespace CE::Editor
 
 		EditorPrefs::Get().GetStruct(Private::AssetBrowserPanelPrefs::PrefsKey(), &prefs);
 		SetTitle("Asset Browser");
-
+		
         LoadStyleSheet("/CrystalEditor/Resources/Styles/AssetBrowserPanel.css");
 		
 		left = CreateWidget<CContainerWidget>(this, "LeftContainer");
 		left->SetHorizontalScrollAllowed(true);
 		left->SetVerticalScrollAllowed(true);
 		{
-			//auto gameContentSection = CreateWidget<CCollapsibleSection>(left, "GameContentSection");
-			//gameContentSection->SetTitle("Content");
-			//gameContentSection->SetCollapsed(false);
-			
 			gameContentDirectoryView = CreateWidget<CTreeView>(left, "GameContentTreeView");
 			folderModel = CreateObject<AssetBrowserTreeModel>(gameContentDirectoryView, "GameContentTreeModel");
 			folderModel->SetPathTreeRootNode(AssetManager::GetRegistry()->GetCachedDirectoryPathTree().GetNode("/Game"));
@@ -123,8 +119,26 @@ namespace CE::Editor
 		}
 
 
-		// Select root game assets directory
-		gameContentDirectoryView->Select(folderModel->GetIndex(0, 0, {}));
+		// Select selected game assets directory
+		if (prefs.initialPath.IsValid())
+		{
+			bool success = gameContentDirectoryView->Select([=](const CModelIndex& index) -> bool
+				{
+					PathTreeNode* node = (PathTreeNode*)index.GetInternalData();
+					if (node != nullptr)
+					{
+						return (node->GetFullPath() == prefs.initialPath.GetString());
+					}
+					return false;
+				});
+
+			if (!success)
+				gameContentDirectoryView->Select(folderModel->GetIndex(0, 0, {}));
+		}
+		else
+		{
+			gameContentDirectoryView->Select(folderModel->GetIndex(0, 0, {}));
+		}
 
 		assetRegistryModified = AssetRegistry::Get()->onAssetRegistryModified.AddDelegateInstance(MemberDelegate(&Self::UpdateContentView, this));
 	}
@@ -154,6 +168,11 @@ namespace CE::Editor
 
 		if (path.GetString().StartsWith("/Game") || path.GetString().StartsWith("Game"))
 			gameContentDirectoryView->Select(indexToSelect);
+	}
+
+	void AssetBrowserPanel::OnBeforeDestroy()
+	{
+		Super::OnBeforeDestroy();
 	}
 
 	void AssetBrowserPanel::UpdateContentView()
@@ -265,11 +284,20 @@ namespace CE::Editor
 			String name = subAsset->packageName.GetLastComponent();
 
 			widget->SetLabel(name);
+			widget->SetPath(subAsset->packageName);
 
 			assetItems.Add(widget);
 		}
 
 		SetSelectedItem(nullptr);
+
+		prefs.initialPath = selectedDirectoryPath;
+		StorePrefs();
+	}
+
+	void AssetBrowserPanel::StorePrefs()
+	{
+		EditorPrefs::Get().SetStruct(Private::AssetBrowserPanelPrefs::PrefsKey(), &prefs);
 	}
 
 	void AssetBrowserPanel::HandleEvent(CEvent* event)
@@ -312,7 +340,11 @@ namespace CE::Editor
 
 	void AssetBrowserPanel::HandleOpenAsset(AssetItemWidget* item)
 	{
-		
+		if (item == nullptr)
+			return;
+
+		Name path = item->GetPath();
+		CE_LOG(Info, All, "Open asset: {}", path);
 	}
 
 	void AssetBrowserPanel::OnThumbnailSizeMenuItemClicked(CMenuItem* menuItem)
@@ -332,7 +364,7 @@ namespace CE::Editor
 				assetGridView->AddStyleClass(thumbnailSizes[i]);
 
 				prefs.thumbnailSize = i;
-				EditorPrefs::Get().SetStruct(Private::AssetBrowserPanelPrefs::PrefsKey(), &prefs);
+				StorePrefs();
 				break;
 			}
 		}

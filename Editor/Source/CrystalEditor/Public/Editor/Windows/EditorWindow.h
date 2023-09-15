@@ -16,12 +16,17 @@ namespace CE::Editor
 		virtual bool ShouldCreateToolBar() { return true; }
 		virtual bool ShouldCreateMenuBar() { return true; }
 
+		ClassType* GetEditorWindowClassForAssetDef(const Name& assetDefClassName);
+
 	protected:
 
 		void Construct() override;
 
 		void OnDrawGUI() override;
 
+	crystaleditor_protected_internal:
+
+		static HashMap<Name, Array<ClassType*>> assetDefNameToEditorWindowClass;
 	};
     
 } // namespace CE::Editor

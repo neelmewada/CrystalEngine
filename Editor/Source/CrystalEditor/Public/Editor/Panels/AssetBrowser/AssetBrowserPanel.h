@@ -16,6 +16,9 @@ namespace CE::Editor
 
 			FIELD()
 			u32 thumbnailSize = 1;
+
+			FIELD()
+			Name initialPath = "";
 		};
 	}
 
@@ -35,9 +38,13 @@ namespace CE::Editor
 
 	private:
 
+		void OnBeforeDestroy() override;
+		
 		void UpdateContentView();
 
 	protected:
+
+		void StorePrefs();
 		
 		void HandleEvent(CEvent* event) override;
 

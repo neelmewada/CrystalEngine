@@ -26,6 +26,7 @@
 #include "Editor/Windows/ProjectSettingsWindow.h"
 
 #include "Editor/Windows/SceneEditor/SceneEditorWindow.h"
+#include "Editor/Windows/TextureEditor/TextureEditorWindow.h"
 
 namespace CE
 {
