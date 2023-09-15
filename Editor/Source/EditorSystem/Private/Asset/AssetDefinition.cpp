@@ -53,7 +53,23 @@ namespace CE::Editor
 		return nullptr;
 	}
 
-	void AssetDefinitionRegistry::OnClassRegistered(ClassType* classType)
+	AssetDefinition* AssetDefinitionRegistry::FindAssetDefinitionForAssetClassType(const Name& assetClassName)
+	{
+		ClassType* inAssetClass = ClassType::FindClass(assetClassName);
+		if (inAssetClass == nullptr)
+			return nullptr;
+		for (auto assetDef : assetDefinitions)
+		{
+			auto assetClass = assetDef->GetAssetClass();
+			if (assetClass == nullptr)
+				continue;
+			if (inAssetClass->IsSubclassOf(assetClass))
+				return assetDef;
+		}
+		return nullptr;
+	}
+
+	void AssetDefinitionRegistry::OnClassRegistered(ClassType* classType) // Create the asset definition when it's class is registered
 	{
 		if (classType != nullptr && classType->IsSubclassOf<AssetDefinition>() && classType->CanBeInstantiated())
 		{

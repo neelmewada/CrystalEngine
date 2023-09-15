@@ -10,6 +10,8 @@ namespace CE::Editor
 {
 	HashMap<Name, Array<ClassType*>> EditorWindow::assetDefNameToEditorWindowClass{};
 
+	Array<EditorWindow*> EditorWindow::openEditors{};
+
     EditorWindow::EditorWindow()
     {
 		tabPadding = Vec2(5, 5);
@@ -32,9 +34,25 @@ namespace CE::Editor
 		return nullptr;
 	}
 
+    bool EditorWindow::OpenAsset(const Name& assetPath)
+    {
+		auto assetData = AssetRegistry::Get()->GetPrimaryAssetByPath(assetPath);
+		if (assetData == nullptr)
+			return false;
+
+		return assetData;
+    }
+
+	void EditorWindow::OnBeforeDestroy()
+	{
+		openEditors.Remove(this);
+	}
+
 	void EditorWindow::Construct()
 	{
 		Super::Construct();
+
+		openEditors.Add(this);
 
 		if (ShouldCreateMenuBar())
 		{

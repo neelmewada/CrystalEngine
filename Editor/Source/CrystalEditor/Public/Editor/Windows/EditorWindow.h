@@ -18,7 +18,11 @@ namespace CE::Editor
 
 		ClassType* GetEditorWindowClassForAssetDef(const Name& assetDefClassName);
 
+		static bool OpenAsset(const Name& assetPath);
+
 	protected:
+
+		void OnBeforeDestroy() override;
 
 		void Construct() override;
 
@@ -27,6 +31,10 @@ namespace CE::Editor
 	crystaleditor_protected_internal:
 
 		static HashMap<Name, Array<ClassType*>> assetDefNameToEditorWindowClass;
+
+	private:
+
+		static Array<EditorWindow*> openEditors;
 	};
     
 } // namespace CE::Editor

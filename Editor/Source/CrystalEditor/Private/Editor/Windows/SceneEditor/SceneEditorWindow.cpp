@@ -63,6 +63,7 @@ namespace CE::Editor
 
 			auto toolsMenuItem = CreateWidget<CMenuItem>(menuBar, "ToolsMenuItem");
 			toolsMenuItem->SetText("Tools");
+
 			auto toolsMenu = CreateWidget<CMenu>(toolsMenuItem);
 			toolsMenuItem->SetSubMenu(toolsMenu);
 			{

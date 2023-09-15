@@ -11,6 +11,10 @@ namespace CE::Editor
 		TextureEditorWindow();
 		virtual ~TextureEditorWindow();
 
+	protected:
+
+		void Construct() override;
+
 	};
     
 } // namespace CE::Editor

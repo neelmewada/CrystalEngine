@@ -12,4 +12,11 @@ namespace CE::Editor
 
 	}
 
+	void TextureEditorWindow::Construct()
+	{
+		Super::Construct();
+
+
+	}
+
 } // namespace CE::Editor

@@ -40,6 +40,7 @@ namespace CE::Editor
 		static AssetDefinition* GetAssetDefinition(SubClassType<AssetDefinition> subClass);
 
 		AssetDefinition* FindAssetDefinitionForSourceAssetExtension(const String& extension);
+		AssetDefinition* FindAssetDefinitionForAssetClassType(const Name& assetClassName);
 
 	private:
 

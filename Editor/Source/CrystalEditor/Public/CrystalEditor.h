@@ -5,6 +5,7 @@
 #include "CoreWidgets.h"
 #include "EditorCore.h"
 #include "EditorWidgets.h"
+#include "EditorSystem.h"
 
 // Panels
 #include "Editor/Panels/EditorPanel.h"
@@ -20,6 +21,9 @@
 #include "Editor/Panels/ImageTestPanel.h"
 
 #include "Editor/CrystalEditorWindow.h"
+
+// Menus
+#include "Editor/Menus/AssetItemContextMenu.h"
 
 // Editor Windows
 #include "Editor/Windows/EditorWindow.h"
