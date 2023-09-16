@@ -196,7 +196,7 @@ namespace CE
 		// Actual package name based on it's path
 		String actualPackageName = "";
 
-		if (IO::Path::IsSubDirectory(fullPackagePath, gProjectPath / "Game/Assets"))
+		if (IO::Path::IsSubDirectory(fullPackagePath, gProjectPath / "Game"))
 		{
 			auto relativePath = IO::Path::GetRelative(fullPackagePath, gProjectPath).RemoveExtension().GetString().Replace({'\\'}, '/');
 			if (!relativePath.StartsWith("/"))
@@ -279,6 +279,8 @@ namespace CE
 			package->objectUuidToEntryMap.Clear();
 		}
 
+		loadedPackages[packageName] = package;
+
 		package->isCooked = isCooked > 0 ? true : false;
 		package->majorVersion = majorVersion;
 		package->minorVersion = minorVersion;
@@ -341,8 +343,6 @@ namespace CE
         
         package->isFullyLoaded = false;
         package->isLoaded = true;
-        
-		loadedPackages[packageName] = package;
         
         if (loadFlags & LOAD_Full)
         {

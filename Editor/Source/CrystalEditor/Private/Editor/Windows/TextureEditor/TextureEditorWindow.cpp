@@ -16,7 +16,14 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
+		SetAsDockSpaceWindow(true);
+		SetTitle("Scene Editor");
+		SetFullscreen(false);
 
+		// Menu Bar
+		{
+
+		}
 	}
 
 } // namespace CE::Editor

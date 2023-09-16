@@ -16,6 +16,7 @@ namespace CE::Editor
 	{
 		Super::Construct();
 
+		SetAsDockSpaceWindow(false);
 		SetTitle("Project Settings");
 		SetFullscreen(false);
 		target = GetSettings<ProjectSettings>();

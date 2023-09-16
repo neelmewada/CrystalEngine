@@ -39,6 +39,7 @@ namespace CE::Editor
 		auto assetData = AssetRegistry::Get()->GetPrimaryAssetByPath(assetPath);
 		if (assetData == nullptr)
 			return false;
+		
 
 		return assetData;
     }

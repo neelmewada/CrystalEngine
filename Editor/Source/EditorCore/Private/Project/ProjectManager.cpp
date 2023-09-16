@@ -81,7 +81,7 @@ namespace CE::Editor
 		
 		ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
 		projectSettings->projectName = projectName;
-		projectSettings->projectVersion = "0.1.0";
+		projectSettings->projectVersion = "0.1.0.0";
 
 		SaveSettings(); // Saves the settings package in the global project path gProjectPath
 
