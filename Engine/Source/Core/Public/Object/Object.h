@@ -170,6 +170,8 @@ namespace CE
 		// Internal use only! Returns a list of all objects that this object and it's subobjects reference to.
 		void FetchObjectReferences(HashMap<UUID, Object*>& outReferences);
 
+		Object* Clone(String cloneName = "", bool deepClone = true);
+
         // - Config API -
 
         void LoadConfig(ClassType* configClass, String fileName);
@@ -332,8 +334,8 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_FIELD_LIST(
         CE_FIELD(name, Hidden, ReadOnly) // name cannot be modified directly
         CE_FIELD(uuid, Hidden, ReadOnly) // uuid cannot be modified directly
-		CE_FIELD(attachedObjects, Hidden, ReadOnly)
-		CE_FIELD(outer, Hidden, ReadOnly)
+		CE_FIELD(attachedObjects, Hidden)
+		CE_FIELD(outer, Hidden)
     ),
     CE_FUNCTION_LIST(
         

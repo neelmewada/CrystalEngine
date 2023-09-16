@@ -379,6 +379,11 @@ namespace CE
 			StructType* type = this->GetFieldValue<StructType*>(srcInstance);
 			destField->SetFieldValue(destInstance, type);
 		}
+		else if (GetDeclarationTypeId() == TYPEID(SubClassType<Object>))
+		{
+			const SubClassType<Object>& type = this->GetFieldValue<SubClassType<Object>>(srcInstance);
+			destField->SetFieldValue(destInstance, type);
+		}
 		else
 		{
 			return false;

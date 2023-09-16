@@ -450,6 +450,35 @@ namespace CE
 		return CreateObject<Object>(this, name, flags, classType);
 	}
 
+	Object* Object::Clone(String cloneName, bool deepClone)
+	{
+		auto thisClass = GetClass();
+
+		if (cloneName.IsEmpty())
+			cloneName = GetName().GetString() + "_Copy";
+
+		Object* clone = CreateObject<Object>(outer, cloneName, OF_NoFlags, thisClass);
+
+		for (auto field = thisClass->GetFirstField(); field != nullptr; field = field->GetNext())
+		{
+			if (field->GetName() == "name" && field->GetDeclarationTypeId() == TYPEID(Name))
+				continue;
+			if (field->GetName() == "uuid" && field->GetDeclarationTypeId() == TYPEID(UUID))
+				continue;
+
+			if (field->IsObjectField())
+			{
+
+			}
+			else
+			{
+
+			}
+		}
+
+		return nullptr;
+	}
+
 	void Object::LoadFromTemplate(Object* templateObject)
 	{
 		if (templateObject == nullptr)
@@ -490,6 +519,10 @@ namespace CE
 						destField->SetFieldValue<Object*>(this, objectToCopy);
 					}
 				}
+			}
+			else if (field->IsObjectStoreType())
+			{
+				const ObjectMap& srcArray = field->GetFieldValue<ObjectMap>(this);
 			}
 			else
 			{

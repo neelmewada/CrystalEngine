@@ -10,11 +10,17 @@
 
 #include "Engine/AssetManager.h"
 
+#include "Engine/NodeComponent.h"
+#include "Engine/Node.h"
+
 // Assets
 #include "Engine/TextureDefines.h"
 #include "Engine/Texture.h"
 #include "Engine/Texture2D.h"
 #include "Engine/Shader.h"
+#include "Engine/Scene.h"
+
+#include "Engine/SceneManager.h"
 
 #include "Engine/Engine.h"
 

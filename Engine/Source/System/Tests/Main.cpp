@@ -28,33 +28,37 @@ static inline void EndTest()
 }
 
 
-#pragma region Asset Tests
+#pragma region Nodes
 
-TEST(Asset, PathTree)
+TEST(Scene, BasicNodes)
 {
 	TEST_BEGIN;
 
-	PathTree pathTree{};
+	Scene* scene = CreateObject<Scene>(nullptr, "TestScene");
+	{
+		auto root = scene->GetRoot();
+		EXPECT_NE(root, nullptr);
+		EXPECT_TRUE(root->GetName().IsValid());
 
-	pathTree.AddPath("/Engine/Textures/NoiseMap.casset");
-	pathTree.AddPath("/Engine/Textures/Voronoi/Voronoi01.casset");
-	pathTree.AddPath("/Engine/Sounds/SoundEffects.casset");
+		auto myNode = CreateObject<Node>(root, "MyNode");
+		EXPECT_EQ(root->GetChildrenCount(), 1);
+		EXPECT_EQ(root->GetChildAt(0), myNode);
 
-	EXPECT_TRUE(pathTree.GetRootNode()->ChildExists("Engine"));
-	
-	auto engineNode = pathTree.GetRootNode()->GetChild("Engine");
-	EXPECT_TRUE(engineNode->ChildExists("Textures"));
-	EXPECT_TRUE(engineNode->ChildExists("Sounds"));
-	EXPECT_TRUE(engineNode->GetChild("Sounds")->ChildExists("SoundEffects.casset"));
+		NodeComponent* myNodeComp = CreateObject<NodeComponent>(myNode, "MyNodeComponent");
+		EXPECT_EQ(root->GetComponentCount(), 0);
+		EXPECT_EQ(myNode->GetComponentCount(), 1);
+		EXPECT_EQ(myNode->GetComponentAt(0), myNodeComp);
 
-	auto textureNode = engineNode->GetChild("Textures");
-	EXPECT_TRUE(textureNode->ChildExists("Voronoi"));
-	EXPECT_TRUE(textureNode->GetChild("Voronoi")->ChildExists("Voronoi01.casset"));
-	EXPECT_TRUE(textureNode->ChildExists("NoiseMap.casset"));
+		auto duplicate = CreateObject<Scene>(nullptr, "TestDuplicate", {}, Scene::StaticType(), scene);
+		root = duplicate->GetRoot();
+		EXPECT_NE(root, nullptr);
+		EXPECT_TRUE(root->GetName().IsValid());
 
-	pathTree.RemovePath("/Engine/Textures");
-	EXPECT_FALSE(engineNode->ChildExists("Textures"));
-	EXPECT_TRUE(engineNode->ChildExists("Sounds"));
+		duplicate->Destroy();
+	}
+
+
+	scene->Destroy();
 
 	TEST_END;
 }
