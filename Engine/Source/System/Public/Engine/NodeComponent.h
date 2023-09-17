@@ -19,15 +19,14 @@ namespace CE
 		inline auto begin() { return children.begin(); }
 		inline auto end() { return children.end(); }
 
+		Node* GetOwner() const;
+
 	protected:
 
 		void OnSubobjectAttached(Object* object) override;
 		void OnSubobjectDetached(Object* object) override;
 
 	system_internal:
-
-		FIELD()
-		Node* owner = nullptr;
 
 		FIELD()
 		Array<NodeComponent*> children{};

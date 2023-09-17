@@ -19,7 +19,16 @@ namespace CE
 		return children[index];
 	}
 
-	void NodeComponent::OnSubobjectAttached(Object* object)
+    Node* NodeComponent::GetOwner() const
+    {
+		if (GetOuter() != nullptr && GetOuter()->IsOfType<Node>())
+		{
+			return (Node*)GetOuter();
+		}
+		return nullptr;
+    }
+
+    void NodeComponent::OnSubobjectAttached(Object* object)
 	{
 		Super::OnSubobjectAttached(object);
 

@@ -17,6 +17,7 @@ namespace CE
         FIELD_Serializable = BIT(2),
         FIELD_Config = BIT(3),
         FIELD_ImportSetting = BIT(4),
+		FIELD_Internal = BIT(5),
     };
     ENUM_CLASS_FLAGS(FieldFlags);
     
@@ -84,6 +85,7 @@ namespace CE
         bool IsSerialized() const;
         bool IsHidden() const;
         bool IsReadOnly() const;
+		bool IsInternal() const;
 
         /// The strict owner of this field, which remains same for all derived classes.
 		TypeInfo* GetOwnerType();

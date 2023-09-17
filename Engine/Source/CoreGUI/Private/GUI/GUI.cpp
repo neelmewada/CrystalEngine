@@ -779,7 +779,7 @@ namespace CE::GUI
 		Rect rect = WindowRectToGlobalRect(localRect);
 
 		ImRect bb(rect.min.x, rect.min.y, rect.max.x, rect.max.y);
-
+		
 		window->DrawList->AddImage(textureId, bb.Min, bb.Max, ImVec2(uvMin.x, uvMin.y), ImVec2(uvMax.x, uvMax.y));// , style.imageTint.ToU32());
 	}
 

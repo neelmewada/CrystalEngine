@@ -17,6 +17,8 @@ namespace CE
             fieldFlags |= FIELD_ReadOnly;
         if (HasAttribute("ImportSetting"))
             fieldFlags |= FIELD_ImportSetting;
+		if (HasAttribute("Internal"))
+			fieldFlags |= FIELD_Internal;
     }
 
 	void FieldType::InitializeDefaults(void* instance)
@@ -100,6 +102,11 @@ namespace CE
     bool FieldType::IsReadOnly() const
     {
         return fieldFlags & FIELD_ReadOnly;
+    }
+
+    bool FieldType::IsInternal() const
+    {
+        return fieldFlags & FIELD_Internal;
     }
 
 	TypeInfo* FieldType::GetOwnerType()
@@ -263,7 +270,7 @@ namespace CE
 
 					if (arraySize > 0)
 					{
-						String result = "";
+						String result = "[";
 						for (int i = 0; i < arraySize; i++)
 						{
 							auto str = arrayList[i].GetFieldValueAsString(arrayFieldInstance);
@@ -271,6 +278,7 @@ namespace CE
 								result += ",";
 							result += str;
 						}
+						result += "]";
 						return result;
 					}
 				}
@@ -292,29 +300,29 @@ namespace CE
 			if (fieldTypeId == TYPEID(String))
 			{
 				const String& value = GetFieldValue<String>(srcInstance);
-				destField->SetFieldValue(destInstance, value);
+				destField->ForceSetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(Name))
 			{
 				const Name& value = GetFieldValue<Name>(srcInstance);
-				destField->SetFieldValue(destInstance, value);
+				destField->ForceSetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(IO::Path))
 			{
 				const IO::Path& value = GetFieldValue<IO::Path>(srcInstance);
-				destField->SetFieldValue(destInstance, value);
+				destField->ForceSetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(UUID))
 			{
 				const UUID& value = GetFieldValue<UUID>(srcInstance);
-				destField->SetFieldValue(destInstance, value);
+				destField->ForceSetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(UUID32))
 			{
 				const UUID32& value = GetFieldValue<UUID32>(srcInstance);
-				destField->SetFieldValue(destInstance, value);
+				destField->ForceSetFieldValue(destInstance, value);
 			}
-			else if (IsArrayField())
+			else if (IsArrayField()) // Array
 			{
 				auto underlyingType = this->GetUnderlyingType();
 				if (underlyingType != nullptr && underlyingType == destField->GetUnderlyingType())
@@ -346,7 +354,7 @@ namespace CE
 			else if (fieldTypeId == TYPEID(BinaryBlob)) // Binary blob
 			{
 				const BinaryBlob& blob = GetFieldValue<BinaryBlob>(srcInstance);
-				destField->SetFieldValue(destInstance, blob);
+				destField->ForceSetFieldValue(destInstance, blob);
 			}
 			else
 			{
@@ -367,22 +375,22 @@ namespace CE
 		else if (GetDeclarationType()->IsClass())
 		{
 			Object* objectPtr = this->GetFieldValue<Object*>(srcInstance);
-			destField->SetFieldValue(destInstance, objectPtr);
+			destField->ForceSetFieldValue(destInstance, objectPtr);
 		}
 		else if (GetDeclarationTypeId() == TYPEID(ClassType))
 		{
 			ClassType* type = this->GetFieldValue<ClassType*>(srcInstance);
-			destField->SetFieldValue(destInstance, type);
+			destField->ForceSetFieldValue(destInstance, type);
 		}
 		else if (GetDeclarationTypeId() == TYPEID(StructType))
 		{
 			StructType* type = this->GetFieldValue<StructType*>(srcInstance);
-			destField->SetFieldValue(destInstance, type);
+			destField->ForceSetFieldValue(destInstance, type);
 		}
 		else if (GetDeclarationTypeId() == TYPEID(SubClassType<Object>))
 		{
 			const SubClassType<Object>& type = this->GetFieldValue<SubClassType<Object>>(srcInstance);
-			destField->SetFieldValue(destInstance, type);
+			destField->ForceSetFieldValue(destInstance, type);
 		}
 		else
 		{

@@ -1,0 +1,16 @@
+
+SceneOutlinerPanel {
+    padding: 5px 5px 5px 0px;
+}
+
+#SceneOutlinerTopBar {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+#SceneOutlinerSearchBox {
+    flex-grow: 3;
+    flex-shrink: 1;
+}

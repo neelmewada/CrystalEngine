@@ -450,7 +450,7 @@ namespace CE
 		return CreateObject<Object>(this, name, flags, classType);
 	}
 
-	Object* Object::Clone(String cloneName, bool deepClone)
+	Object* Object::CloneHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone)
 	{
 		auto thisClass = GetClass();
 
@@ -458,6 +458,7 @@ namespace CE
 			cloneName = GetName().GetString() + "_Copy";
 
 		Object* clone = CreateObject<Object>(outer, cloneName, OF_NoFlags, thisClass);
+		originalToClonedObjectMap[this->GetUuid()] = clone;
 
 		for (auto field = thisClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
@@ -466,20 +467,98 @@ namespace CE
 			if (field->GetName() == "uuid" && field->GetDeclarationTypeId() == TYPEID(UUID))
 				continue;
 
-			if (field->IsObjectField())
+			if (field->IsObjectField()) // Deep copy object fields
 			{
+				Object* objectToCopy = field->GetFieldValue<Object*>(this);
+				if (objectToCopy == nullptr)
+				{
+					field->ForceSetFieldValue<Object*>(clone, nullptr);
+				}
+				else
+				{
+					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
+					{
+						// Deep copy sub-object
+						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
+						field->ForceSetFieldValue<Object*>(clone, deepCopy);
+					}
+					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
+					{
+						field->ForceSetFieldValue<Object*>(clone, originalToClonedObjectMap[objectToCopy->GetUuid()]);
+					}
+					else
+					{
+						// Shallow copy external object reference
+						field->ForceSetFieldValue<Object*>(clone, objectToCopy);
+					}
+				}
+			}
+			else if (field->IsObjectStoreType())
+			{
+				const ObjectMap& srcMap = field->GetFieldValue<ObjectMap>(this);
+				ObjectMap& destMap = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(clone));
+				for (int i = destMap.GetObjectCount() - 1; i >= 0; i--)
+				{
+					auto objectToDelete = *(destMap.begin() + i);
+					if (objectToDelete != nullptr)
+						objectToDelete->Destroy();
+				}
+				destMap.RemoveAll();
 
+				for (auto objectToCopy : srcMap)
+				{
+					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
+					{
+						// Deep copy sub-object
+						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
+						destMap.AddObject(deepCopy);
+					}
+					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
+					{
+						destMap.AddObject(originalToClonedObjectMap[objectToCopy->GetUuid()]);
+					}
+				}
+			}
+			else if (field->IsArrayField() && field->GetUnderlyingType() != nullptr && field->GetUnderlyingType()->IsClass())
+			{
+				const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(this);
+				Array<Object*>& destArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(clone));
+				destArray.Clear();
+				for (auto objectToCopy : srcArray)
+				{
+					if (deepClone && objectToCopy->GetOuter() == this && !originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
+					{
+						// Deep copy sub-object
+						Object* deepCopy = objectToCopy->CloneHelper(originalToClonedObjectMap, clone, objectToCopy->GetName().GetString(), deepClone);
+						destArray.Add(deepCopy);
+					}
+					else if (deepClone && originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
+					{
+						destArray.Add(originalToClonedObjectMap[objectToCopy->GetUuid()]);
+					}
+					else
+					{
+						// Shallow copy external object reference
+						destArray.Add(objectToCopy);
+					}
+				}
 			}
 			else
 			{
-
+				field->CopyTo(this, field, clone);
 			}
 		}
 
-		return nullptr;
+		return clone;
 	}
 
-	void Object::LoadFromTemplate(Object* templateObject)
+	Object* Object::Clone(String cloneName, bool deepClone)
+	{
+		HashMap<UUID, Object*> originalToCloneMap{};
+		return CloneHelper(originalToCloneMap, outer, cloneName, deepClone);
+	}
+
+	void Object::LoadFromTemplateHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* templateObject)
 	{
 		if (templateObject == nullptr)
 			return;
@@ -490,12 +569,14 @@ namespace CE
 		if (!thisClass->IsSubclassOf(templateClass))
 			return;
 
+		originalToClonedObjectMap[templateObject->GetUuid()] = this;
+
 		for (auto field = templateClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
 			auto destField = thisClass->FindFieldWithName(field->GetName());
 			if (destField->GetTypeId() != field->GetTypeId()) // Type mismatch
 				continue;
-			if (destField->IsReadOnly())
+			if (destField->IsInternal())
 				continue;
 
 			if (field->IsObjectField()) // Deep copy object fields
@@ -510,25 +591,28 @@ namespace CE
 					if (objectToCopy->GetOuter() == templateObject)
 					{
 						// Deep copy sub-object
-						Object* deepCopy = CreateObject<Object>(this, objectToCopy->GetName().GetString(), objectToCopy->GetFlags(), objectToCopy->GetClass(), objectToCopy);
-						destField->SetFieldValue<Object*>(this, deepCopy);
+						auto copyDestObject = destField->GetFieldValue<Object*>(this);
+						if (copyDestObject != nullptr)
+							copyDestObject->LoadFromTemplateHelper(originalToClonedObjectMap, objectToCopy);
 					}
-					else
+					else if (!originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
 					{
 						// Shallow copy external object references
 						destField->SetFieldValue<Object*>(this, objectToCopy);
 					}
 				}
 			}
-			else if (field->IsObjectStoreType())
-			{
-				const ObjectMap& srcArray = field->GetFieldValue<ObjectMap>(this);
-			}
 			else
 			{
 				field->CopyTo(templateObject, destField, this);
 			}
 		}
+	}
+
+	void Object::LoadFromTemplate(Object* templateObject)
+	{
+		HashMap<UUID, Object*> originalToCloneMap{};
+		LoadFromTemplateHelper(originalToCloneMap, templateObject);
 	}
 
 	void Object::LoadDefaults()

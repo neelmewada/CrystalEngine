@@ -172,11 +172,17 @@ namespace CE
 
 		Object* Clone(String cloneName = "", bool deepClone = true);
 
+		void LoadFromTemplate(Object* templateObject);
+
         // - Config API -
 
         void LoadConfig(ClassType* configClass, String fileName);
         
     protected:
+
+		void LoadFromTemplateHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* templateObject);
+
+		Object* CloneHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone);
 
 		// Lifecycle
 
@@ -199,8 +205,6 @@ namespace CE
 		{
 			return (TClass*)CreateDefaultSubobject(TClass::Type(), name, flags);
 		}
-
-		void LoadFromTemplate(Object* templateObject);
         
 		void LoadDefaults();
 
@@ -332,10 +336,10 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(name, Hidden, ReadOnly) // name cannot be modified directly
-        CE_FIELD(uuid, Hidden, ReadOnly) // uuid cannot be modified directly
-		CE_FIELD(attachedObjects, Hidden)
-		CE_FIELD(outer, Hidden)
+        CE_FIELD(name, Hidden, ReadOnly, Internal) // name cannot be modified directly
+        CE_FIELD(uuid, Hidden, ReadOnly, Internal) // uuid cannot be modified directly
+		CE_FIELD(attachedObjects, Hidden, Internal)
+		CE_FIELD(outer, Hidden, Internal)
     ),
     CE_FUNCTION_LIST(
         

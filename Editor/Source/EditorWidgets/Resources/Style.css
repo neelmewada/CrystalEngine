@@ -198,6 +198,16 @@ CSeparator:horizontal {
 	height: 100%;
 }
 
+CLayoutGroup.Horizontal {
+	flex-direction: row;
+	justify-content: flex-start;
+}
+
+CLayoutGroup.Vertical {
+	flex-direction: column;
+	justify-content: flex-start;
+}
+
 CMenu {
 	background: rgb(50, 50, 50);
 	border-width: 1px;

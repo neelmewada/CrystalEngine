@@ -897,7 +897,7 @@ namespace CE
 		auto fieldTypeId = field->GetDeclarationTypeId();
 
 		if (jsonValue->IsNumberValue() &&
-			(field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(UUID)))
+			(field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(UUID) || fieldTypeId == TYPEID(UUID32)))
 		{
 			if (fieldTypeId == TYPEID(s8))
 				field->SetFieldValue<s8>(rawInstance, (s8)jsonValue->GetNumberValue());
@@ -921,6 +921,8 @@ namespace CE
 				field->SetFieldValue<f64>(rawInstance, (f64)jsonValue->GetNumberValue());
 			else if (fieldTypeId == TYPEID(UUID))
 				field->SetFieldValue<UUID>(rawInstance, UUID((u64)jsonValue->GetNumberValue()));
+			else if (fieldTypeId == TYPEID(UUID32))
+				field->SetFieldValue<UUID32>(rawInstance, UUID32((u32)jsonValue->GetNumberValue()));
 			else
 				return false;
 

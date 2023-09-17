@@ -16,14 +16,10 @@ namespace CE::Widgets
 
 		DrawDefaultBackground();
 
-		//GUI::PushChildCoordinateSpace(rect);
-
 		for (auto widget : attachedWidgets)
 		{
 			widget->Render();
 		}
-
-		//GUI::PopChildCoordinateSpace();
 	}
 
 	CTableWidget::CTableWidget()
@@ -119,7 +115,7 @@ namespace CE::Widgets
 
 		if (columnWidths.GetSize() != numColumns)
 			columnWidths.Resize(numColumns);
-
+		
 		if (GUI::BeginTable(rect, GetUuid(), GetName().GetString(), numColumns, flags))
 		{
 			GUI::PushChildCoordinateSpace(rect);

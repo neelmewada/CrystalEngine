@@ -27,7 +27,21 @@ namespace CE
 		return components[index];
 	}
 
-	void Node::OnSubobjectAttached(Object* object)
+    Node* Node::GetParent() const
+    {
+		if (GetOuter() != nullptr && GetOuter()->IsOfType<Node>())
+		{
+			return (Node*)GetOuter();
+		}
+		return nullptr;
+    }
+
+	bool Node::IsRoot() const
+	{
+		return GetOuter() == nullptr || GetOuter()->IsOfType<Scene>();
+	}
+
+    void Node::OnSubobjectAttached(Object* object)
 	{
 		Super::OnSubobjectAttached(object);
 

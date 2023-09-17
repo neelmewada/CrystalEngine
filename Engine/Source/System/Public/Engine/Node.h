@@ -22,6 +22,10 @@ namespace CE
 		inline auto begin() { return children.begin(); }
 		inline auto end() { return children.end(); }
 
+		Node* GetParent() const;
+
+		bool IsRoot() const;
+
 	protected:
 
 		void OnSubobjectAttached(Object* object) override;

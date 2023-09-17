@@ -49,15 +49,24 @@ TEST(Scene, BasicNodes)
 		EXPECT_EQ(myNode->GetComponentCount(), 1);
 		EXPECT_EQ(myNode->GetComponentAt(0), myNodeComp);
 
-		auto duplicate = CreateObject<Scene>(nullptr, "TestDuplicate", {}, Scene::StaticType(), scene);
-		root = duplicate->GetRoot();
-		EXPECT_NE(root, nullptr);
-		EXPECT_TRUE(root->GetName().IsValid());
+		auto duplicate = (Scene*)scene->Clone();
+		auto root2 = duplicate->GetRoot();
+		EXPECT_NE(root2, nullptr);
+		EXPECT_NE(root, root2);
+		EXPECT_TRUE(root2->GetName().IsValid());
+
+		EXPECT_EQ(root2->GetChildrenCount(), 1);
+		auto myNodeCopy = root2->GetChildAt(0);
+		EXPECT_NE(myNodeCopy, myNode);
+		EXPECT_EQ(myNodeCopy->GetName(), "MyNode");
+
+		EXPECT_EQ(myNodeCopy->GetComponentCount(), 1);
+		auto myNodeCompCopy = myNodeCopy->GetComponentAt(0);
+		EXPECT_NE(myNodeCompCopy, myNodeComp);
+		EXPECT_EQ(myNodeCompCopy->GetName(), "MyNodeComponent");
 
 		duplicate->Destroy();
 	}
-
-
 	scene->Destroy();
 
 	TEST_END;
