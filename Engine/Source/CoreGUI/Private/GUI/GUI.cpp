@@ -1760,6 +1760,11 @@ namespace CE::GUI
 		return pressed; //-V1020
 	}
 
+	COREGUI_API bool Selectable(const String& label, bool selected, GUI::SelectableFlags flags, const Vec2& size)
+	{
+		return ImGui::Selectable(label.GetCString(), selected, flags, ImVec2(size.x, size.y));
+	}
+
 	COREGUI_API bool Selectable(const Rect& localRect, ID id, bool selected, 
 		const GuiStyleState& hoveredState, const GuiStyleState& pressedState, const GuiStyleState& selectedState, 
 		SelectableFlags flags)

@@ -28,11 +28,19 @@ namespace CE::Editor
 		SceneOutlinerPanel();
 		virtual ~SceneOutlinerPanel();
 
+		void SetScene(Scene* scene);
+
 	protected:
 
 		void Construct() override;
 
 		void OnDrawGUI() override;
+
+		FIELD()
+		Scene* scene = nullptr;
+
+		FIELD()
+		SceneOutlinerTree* tree = nullptr;
 	};
     
 } // namespace CE::Editor

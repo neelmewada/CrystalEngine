@@ -238,6 +238,8 @@ namespace CE::GUI
 		f32 borderThickness = 0, const Color& hoveredCol = {}, const Color& pressedCol = {}, const Color& activeCol = {},
 		const Color& hoveredBorderCol = {}, const Color& pressedBorderCol = {}, const Color& activeBorderCol = {});
 
+	COREGUI_API bool Selectable(const String& label, bool selected, GUI::SelectableFlags flags = GUI::SelectableFlags_None, const Vec2& size = Vec2(0, 0));
+
 	COREGUI_API bool Selectable(const Rect& localRect, ID id, bool selected, 
 		const GuiStyleState& hoveredState, const GuiStyleState& pressedState, const GuiStyleState& selectedState,
 		SelectableFlags flags = SelectableFlags_None);

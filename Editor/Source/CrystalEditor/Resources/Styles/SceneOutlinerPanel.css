@@ -1,6 +1,6 @@
 
 SceneOutlinerPanel {
-    padding: 5px 5px 5px 0px;
+    padding: 0 0;
     flex-direction: column;
 }
 
@@ -9,7 +9,9 @@ SceneOutlinerPanel {
     justify-content: flex-start;
     align-self: flex-start;
     align-items: flex-start;
+    column-gap: 3px;
     width: 100%;
+    padding: 5px 5px 5px 0px;
 }
 
 #SceneOutlinerSearchBox {
@@ -21,4 +23,9 @@ SceneOutlinerPanel {
 
 #SceneOutlinerTopBar CButton {
     padding: 2px 2px;
+}
+
+SceneOutlinerTree {
+    flex-grow: 1;
+    flex-shrink: 3;
 }

@@ -12,6 +12,22 @@ namespace CE::Editor
 
     }
 
+	void SceneEditorWindow::OpenScene(Scene* scene)
+	{
+		if (currentScene != nullptr)
+			currentScene->Destroy();
+		currentScene = scene;
+
+		
+	}
+
+	void SceneEditorWindow::CloseScene()
+	{
+		if (currentScene != nullptr)
+			currentScene->Destroy();
+		currentScene = nullptr;
+	}
+
     void SceneEditorWindow::Construct()
     {
 		Super::Construct();

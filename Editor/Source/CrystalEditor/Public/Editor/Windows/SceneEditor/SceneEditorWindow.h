@@ -13,9 +13,15 @@ namespace CE::Editor
 
 		virtual bool CanBeClosed() override { return false; }
 
+		void OpenScene(Scene* scene);
+		void CloseScene();
+
 	protected:
 
 		void Construct() override;
+
+		FIELD()
+		Scene* currentScene = nullptr;
 
 		AssetBrowserPanel* assetBrowserPanel = nullptr;
 		RenderViewportPanel* viewportPanel = nullptr;
