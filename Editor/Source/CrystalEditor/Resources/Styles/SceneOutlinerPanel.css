@@ -15,4 +15,10 @@ SceneOutlinerPanel {
 #SceneOutlinerSearchBox {
     flex-grow: 1;
     flex-shrink: 3;
+    padding: 5px 1px;
+    border-radius: 7.5px;
+}
+
+#SceneOutlinerTopBar CButton {
+    padding: 2px 2px;
 }

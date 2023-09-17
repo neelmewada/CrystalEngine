@@ -63,7 +63,11 @@ namespace CE::Widgets
 	{
 		f32 iconSize = 0;
 		if (icon.IsValid())
+		{
 			iconSize = this->iconSize;
+			if (text.IsEmpty())
+				return Vec2(iconSize, iconSize);
+		}
 		return GUI::CalculateTextSize(text) + Vec2(10 + iconSize, 5);
 	}
 

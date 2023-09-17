@@ -50,6 +50,7 @@ namespace CE::Editor
 
 			auto settingsBtn = CreateWidget<CButton>(topBar, "SceneOutlinerSettingsButton");
 			settingsBtn->SetText("");
+			settingsBtn->SetIconSize(18);
 			settingsBtn->AddStyleClass("IconButton");
 			settingsBtn->LoadIcon("/Icons/settings.png");
 		}

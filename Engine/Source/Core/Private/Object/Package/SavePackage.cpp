@@ -156,12 +156,6 @@ namespace CE
 			*stream << numEntries;
 
 			u32 crc = 0;
-			//char* dataPtr = new char[dataSize];
-			//{
-			//	stream->Read(dataPtr, dataSize);
-			//	crc = CalculateCRC(dataPtr, dataSize);
-			//}
-			//delete[] dataPtr; dataPtr = nullptr;
 
 			stream->Seek(dataEndPos);
 			*stream << (u32)0; // End of Field Entries
