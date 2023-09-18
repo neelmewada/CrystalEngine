@@ -17,6 +17,12 @@ namespace CE::Editor
 
 		void OnDrawGUI() override;
 
+		int DrawNode(Node* node);
+
+		FIELD()
+		Scene* scene = nullptr;
+
+		friend class SceneOutlinerPanel;
 	};
 
 	CLASS()

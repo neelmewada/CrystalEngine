@@ -25,6 +25,8 @@ namespace CE::Editor
 
 		auto tableFlags = GUI::TableFlags_Resizable | GUI::TableFlags_RowBg | GUI::TableFlags_ScrollY;
 
+		GUI::FillRect(GUI::WidgetSpaceToScreenSpace(rect), Color::RGBA(21, 21, 21));
+
 		GUI::PushStyleColor(GUI::StyleCol_TableRowBg, Color::RGBA(21, 21, 21));
 		GUI::PushStyleColor(GUI::StyleCol_TableRowBgAlt, Color::RGBA(26, 26, 26));
 
@@ -34,21 +36,50 @@ namespace CE::Editor
 			GUI::TableSetupColumn("Type");
 			GUI::TableHeadersRow();
 
-			for (int i = 0; i < 32; i++)
+			int totalRows = 0;
+
+			if (scene != nullptr)
 			{
-				GUI::TableNextRow();
-
-				GUI::TableNextColumn();
-				GUI::Selectable(String::Format("Node {}", i), false, GUI::SelectableFlags_SpanAllColumns);
-
-				GUI::TableNextColumn();
-				GUI::Text("Node");
+				totalRows = DrawNode(scene->GetRoot());
 			}
-
+			
 			GUI::EndTable();
 		}
 
 		GUI::PopStyleColor(2);
+	}
+
+	int SceneOutlinerTree::DrawNode(Node* root)
+	{
+		if (node == nullptr)
+			return 0;
+
+		int rowCount = root->GetChildrenCount();
+		int totalRows = rowCount;
+
+		for (int i = 0; i < rowCount; i++)
+		{
+			auto node = root->GetChildAt(i);
+
+			GUI::TableNextRow();
+			bool isLeaf = node->GetChildrenCount() == 0;
+			auto flags = GUI::TNF_None;
+			if (isLeaf)
+				flags = GUI::TNF_Leaf | GUI::TNF_NoTreePushOnOpen;
+
+			GUI::TableNextColumn();
+			bool expanded = GUI::TreeNode(node->GetName().GetString(), GUI::TNF_SpanFullWidth | flags);
+
+			GUI::TableNextColumn();
+			GUI::Text("Node");
+
+			if (expanded && !isLeaf)
+			{
+				totalRows += DrawNode(node);
+			}
+		}
+
+		return totalRows;
 	}
 
     SceneOutlinerPanel::SceneOutlinerPanel()
@@ -64,8 +95,7 @@ namespace CE::Editor
 	void SceneOutlinerPanel::SetScene(Scene* scene)
 	{
 		this->scene = scene;
-
-
+		tree->scene = scene;
 	}
 
     void SceneOutlinerPanel::Construct()

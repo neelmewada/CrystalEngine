@@ -9,7 +9,7 @@ namespace CE::Editor
 
     SceneEditorWindow::~SceneEditorWindow()
     {
-
+		CloseScene();
     }
 
 	void SceneEditorWindow::OpenScene(Scene* scene)
@@ -17,8 +17,8 @@ namespace CE::Editor
 		if (currentScene != nullptr)
 			currentScene->Destroy();
 		currentScene = scene;
-
 		
+		sceneOutlinerPanel->SetScene(currentScene);
 	}
 
 	void SceneEditorWindow::CloseScene()
@@ -43,6 +43,14 @@ namespace CE::Editor
 			auto fileMenu = CreateWidget<CMenu>(fileMenuItem, "FileMenu");
 			fileMenuItem->SetSubMenu(fileMenu);
 			{
+				auto newSceneItem = CreateWidget<CMenuItem>(fileMenu, "NewSceneMenuItem");
+				newSceneItem->SetText("New Scene");
+				Object::Bind(newSceneItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked), [=](CMenuItem* item)
+					{
+						auto newScene = CreateObject<Scene>(nullptr, "Scene");
+						OpenScene(newScene);
+					});
+
 				for (int i = 0; i < 8; i++)
 				{
 					auto item = CreateWidget<CMenuItem>(fileMenu, "FileMenuSubItem");
@@ -97,11 +105,30 @@ namespace CE::Editor
 		{
 			auto saveButton = CreateWidget<CButton>(toolBar, "SaveButton");
 			saveButton->SetAsContainer(false);
-			saveButton->SetText("Save");
+			saveButton->SetText("");
 			saveButton->LoadIcon("/Icons/save.png");
 			saveButton->SetIconSize(22);
-		}
 
+			auto separator = CreateWidget<CSeparator>(toolBar, "Separator");
+			
+			auto newNodeButton = CreateWidget<CButton>(toolBar, "NewNodeButton");
+			newNodeButton->SetAsContainer(false);
+			newNodeButton->SetText("");
+			newNodeButton->LoadIcon("/Icons/object.png");
+			newNodeButton->SetIconSize(22);
+
+			newNodeMenu = CreateWidget<CMenu>(newNodeButton, "NewNodeMenu");
+			newNodeButton->SetPopupMenu(newNodeMenu);
+			{
+				auto emptyNodeItem = CreateWidget<CMenuItem>(newNodeMenu, "EmptyNodeMenuItem");
+				emptyNodeItem->SetText("Node");
+				Object::Bind(emptyNodeItem, MEMBER_FUNCTION(CMenuItem, OnMenuItemClicked),
+					this, MEMBER_FUNCTION(Self, OnNewNodeMenuItemClicked));
+
+
+			}
+		}
+		
 		assetBrowserPanel = CreateWidget<AssetBrowserPanel>(this, "SceneEditorWindow_AssetBrowserPanel");
 		viewportPanel = CreateWidget<RenderViewportPanel>(this, "SceneEditorWindow_ViewportPanel");
 		sceneOutlinerPanel = CreateWidget<SceneOutlinerPanel>(this, "SceneEditorWindow_SceneOutlinerPanel");
@@ -111,6 +138,23 @@ namespace CE::Editor
 		viewportPanel->SetDefaultDockPosition(CDockPosition::Center);
 		sceneOutlinerPanel->SetDefaultDockPosition(CDockPosition::Right);
 		detailsPanel->SetDefaultDockPosition(CDockPosition::RightBottom);
+
+		auto scene = CreateObject<Scene>(nullptr, "Scene");
+		OpenScene(scene);
     }
+
+	void SceneEditorWindow::OnNewNodeMenuItemClicked(CMenuItem* menuItem)
+	{
+		if (menuItem == nullptr)
+			return;
+
+		if (menuItem->GetName() == "EmptyNodeMenuItem")
+		{
+			if (currentScene != nullptr)
+			{
+				auto newNode = CreateObject<Node>(currentScene->GetRoot(), "EmptyNode");
+			}
+		}
+	}
 
 } // namespace CE::Editor
