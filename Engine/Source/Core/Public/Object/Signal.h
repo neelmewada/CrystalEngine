@@ -47,7 +47,3 @@ namespace CE
     CE::Object::EmitSignal(this, #SignalName, args);\
 }
 
-#define fire
-#define FIRE
-#define emit
-#define EMIT

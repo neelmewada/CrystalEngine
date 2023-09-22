@@ -28,6 +28,7 @@ ce_set(PAL_TRAIT_SDL_SUPPORTED 1)
 
 add_compile_definitions(PAL_TRAIT_VULKAN_SUPPORTED=1)
 add_compile_definitions(PAL_TRAIT_SDL_SUPPORTED=1)
+add_compile_options("/MP")
 
 ce_set(PAL_TRAIT_BUILD_TESTS_SUPPORTED 1)
 ce_set(PAL_TRAIT_BUILD_EDITOR_TESTS_SUPPORTED 1)

@@ -58,6 +58,8 @@ namespace CE
 		static SavePackageResult SavePackage(Package* package, Object* asset, const IO::Path& fullPackageFilePath, const SavePackageArgs& saveArgs = {});
 		static SavePackageResult SavePackage(Package* package, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs = {});
 
+		static SavePackageResult SavePackage2(Package* package, Object* asset, Stream* outputStream, const SavePackageArgs& saveArgs = {});
+
 		// - Public API -
 
 		bool IsPackage() override { return true; }
