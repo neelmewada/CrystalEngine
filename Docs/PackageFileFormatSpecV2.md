@@ -79,6 +79,7 @@ Spec tables with big endian format
 | 0A | f64 | double |
 | 0B | b8 | boolean |
 | 0C | String | String |
+| 0D | Binary | Raw binary data |
 | 10 | [Map](#map) | map |
 | 11 | [Array](#array) | array |
 
@@ -90,6 +91,12 @@ Plain old data types:
 |---|---|---|
 | u32 | 4B | `00 00 00 00` |
 | String | \0 | StringValue\0 |
+
+Binary data type:
+| Field Type | Size | Format |
+|---|---|---|
+| Byte size | 8B | `xx xx xx xx xx xx xx xx` |
+| xx | xx | Raw binary data |
 
 
 ## Array
@@ -113,6 +120,5 @@ Object reference fields are stored as an **array**.
 | +10 | xx | `/Code/Core.CE::SomeClass\0` | Object class name (String [Field Value](#field-value)) |
 | +xx | 8B | `xx xx xx xx xx xx xx xx` | Package UUID it belongs to (u64 [Field Value](#field-value)) |
 | +08 | xx | `/Game/Assets/MyTexture\0` | Package name/path it belongs to (String [Field Value](#field-value)) |
-| +xx | xx | `TextureAtlas.Noise.PerlinMap\0` | Path within the package this object belongs to (String [Field Value](#field-value)) |
 
 
