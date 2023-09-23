@@ -2,7 +2,6 @@
 
 #include "../Package.inl"
 
-#include "ryml.hpp"
 
 namespace CE
 {
@@ -30,9 +29,20 @@ namespace CE
 		asset->FetchObjectReferences(objectsToSerialize);
 		Array<Name> packageDependencies{};
 
-		ryml::Tree tree{};
-		ryml::NodeRef root = tree.rootref();
-		
+		for (const auto& [objectUuid, objectInstance] : objectsToSerialize) // External package dependencies
+		{
+			if (objectInstance == nullptr || objectUuid == 0)
+				continue;
+			if (objectInstance->IsTransient())
+				continue;
+
+			if (package != objectInstance->GetPackage() && objectInstance->GetPackage() != nullptr)
+			{
+				packageDependencies.Add(objectInstance->GetPackage()->GetPackageName());
+			}
+		}
+
+
 
 		return SavePackageResult::Success;
 	}

@@ -96,70 +96,9 @@ namespace CE
 				continue;
 			}
             
-			*stream << PACKAGE_OBJECT_MAGIC_NUMBER;
-			*stream << objectInstance->GetUuid();
-			*stream << (objectInstance->IsAsset() ? (u8)1 : (u8)0);
-			if (objectInstance == package)
-				*stream << "";
-			else
-				*stream << objectInstance->GetPathInPackage();
-			*stream << objectInstance->GetClass()->GetTypeName();
+			*stream << PACKAGE_OBJECT_MAGIC_NUMBER; // .OBJECT.
+			
 
-			u64 dataSizeValuePos = stream->GetCurrentPosition();
-			*stream << (u32)0; // 0 data size. updated later
-
-			*stream << (u32)0; // Number of field entries
-
-			curPos = stream->GetCurrentPosition();
-			*stream << (u64)(0); // Data Start Offset (excluding itself). Set empty at first
-
-			*stream << objectInstance->GetName(); // Object Name
-
-			if (objectInstance->IsAsset())
-			{
-				*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath();
-			}
-			else
-			{
-				*stream << "";
-			}
-
-			u64 dataStartPos = stream->GetCurrentPosition();
-			u32 numEntries = 0;
-
-			stream->Seek(curPos);
-			*stream << (u64)(dataStartPos); // Data Start Offset (excluding itself)
-			stream->Seek(dataStartPos);
-            
-            ClassType* objectClass = objectInstance->GetClass();
-            FieldType* firstField = objectClass->GetFirstField();
-            if (firstField != nullptr)
-            {
-                FieldSerializer fieldSerializer{ firstField, objectInstance };
-
-				objectInstance->OnBeforeSerialize();
-                
-                while (fieldSerializer.HasNext())
-                {
-					if (fieldSerializer.WriteNext(stream))
-					{
-						numEntries++;
-					}
-                }
-            }
-
-			u64 dataEndPos = stream->GetCurrentPosition();
-
-			stream->Seek(dataSizeValuePos);
-			u32 dataSize = (u32)(dataEndPos - dataStartPos);
-			*stream << dataSize;
-			*stream << numEntries;
-
-			u32 crc = 0;
-
-			stream->Seek(dataEndPos);
-			*stream << (u32)0; // End of Field Entries
-			*stream << crc; // Object CRC checksum
 		}
 
 		*stream << (u64)0; // EOF

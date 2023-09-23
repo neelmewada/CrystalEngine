@@ -1,6 +1,9 @@
 
 #include "Core.h"
 
+#include "ryml.hpp"
+#include "ryml_std.hpp"
+
 #include "Include.h"
 
 #include "Core_Test.private.h"
@@ -2291,6 +2294,15 @@ TEST(Serialization, BinaryBlob)
 
 	CE_DEREGISTER_TYPES(BinaryBlobTest);
     TEST_END;
+}
+
+TEST(Serialization, YAML)
+{
+	TEST_BEGIN;
+
+	
+
+	TEST_END;
 }
 
 #pragma endregion
