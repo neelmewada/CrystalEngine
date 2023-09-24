@@ -18,13 +18,14 @@ Spec tables with big endian format
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 8B | `00 50 41 43 4b 00 00 0a` | Magic Number: `. P A C K . . \n` |
-| +08 | 8B | 2.0 | Version number: Major(u32) . Minor(u32) |
+| +08 | 4B | 2 | Major Version (u32) |
+| +0C | 4B | 0 | Minor Version (u32) |
 | +10 | 4B | `00 00 00 00` | Data checksum |
 | +14 | 8B | `00 00 00 00 00 00 00 00` | Data start offset (from start of file) |
 | +1C | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |
 | +24 | \0 | `/Game/Assets/SomeAsset\0` | Path/name of Package. |
 | +xx | 4B | `01 00 00 00` | No. of external package dependencies **n** |
-| +xx | \0 | `/Engine/Assets/SomeTex\0` | n-th package dependency. Repeat for n times. |
+| +xx | 8B | `xx xx xx xx xx xx xx xx` | n-th package dependency. Repeat for n times. |
 | +01 | 1B | `00/01` | Is cooked? |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | **Actual Data. List of [Object Entries](#object-entry)** |
@@ -43,8 +44,7 @@ Spec tables with big endian format
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | A **[Map](#map)** of fields. |
-| +xx | 4B | `00 00 00 00` | End Of Field Entries List |
-| +04 | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
+| +xx | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
 
 ## Map
 | Offset | Size | Value | Description |
@@ -110,7 +110,7 @@ Spec tables with big endian format
 
 ## Object Reference fields
 
-Object reference fields are stored as an **array** with a size field of 4 bytes instead of 8.
+Object reference fields are stored as an array with a size field of 4 bytes instead of 8.
 
 | Offset | Size | Value | Description |
 |---|---|---|---|

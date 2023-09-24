@@ -302,7 +302,8 @@ namespace CE
 
 			auto curPos = stream->GetCurrentPosition();
 			stream->Seek(sizePos);
-			*stream << curPos;
+			*stream << (curPos - sizePos - sizeof(u32));
+			stream->Seek(curPos);
         }
         else
         {
