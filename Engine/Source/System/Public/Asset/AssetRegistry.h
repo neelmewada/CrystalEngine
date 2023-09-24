@@ -108,6 +108,7 @@ namespace CE
 
 		Array<AssetData*> allAssetDatas{};
 
+		HashMap<UUID, AssetData*> cachedPrimaryAssetByPackageUuid{};
 		HashMap<Name, AssetData*> cachedPrimaryAssetByPath{};
 		HashMap<Name, Array<AssetData*>> cachedAssetsByPath{};
 		HashMap<Name, AssetData*> cachedAssetBySourcePath{};

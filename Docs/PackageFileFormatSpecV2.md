@@ -38,9 +38,9 @@ Spec tables with big endian format
 | +10 | 1B | `01` | Is Asset? `0` or `1` |
 | +11 | \0 | `TextureAtlas.Noise.MyNoiseTexture\0` | Virtual path to object within the package. |
 | +xx | \0 | `/Engine/Core.CE::Texture\0` | Object class TypeName |
-| +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
 | +10 | \0 | `SomeObjectName\0` | Object name (CE::Name) |
 | +xx | \0 | `/Textures/SomeTexture.png` | Source asset path relative to project (exists only if **Is Asset?**) |
+| +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
 | +xx | xx | | Newly added header fields |
 | +xx | xx | | A **[Map](#map)** of fields. |
 | +xx | 4B | `00 00 00 00` | End Of Field Entries List |
@@ -49,19 +49,28 @@ Spec tables with big endian format
 ## Map
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +xx | 4B | `xx xx xx xx` | Length of the **map** in bytes excluding **this**. `0` is valid. |
-| +04 | 4B | `xx xx xx xx` | Total number of elements |
-| +08 | \0 | keyName\0 | Key name |
+| +00 | 8B | `xx xx xx xx xx xx xx xx` | Length of the **map** in bytes excluding **this**. Minimun is `4`. |
+| +08 | 4B | `xx xx xx xx` | Total number of elements |
+| +10 | \0 | keyName\0 | Key name |
 | +xx | xx |  | [Field Value](#field-value) |
 | +08 | \0 | keyName2\0 | Key name |
 | +xx | xx |  | [Field Value](#field-value) |
+|...|
+
+## Array
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of **array** in bytes excluding **this**. Minimum is `4`. |
+| +08 | 4B | | Total number of elements |
+| +xx | xx |  | [Field Value](#field-value) |
+| +xx | xx |  | [Field Value](#field-value) #2 |
 |...|
 
 ## **Field Value**
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +xx | 1B | `00` | [Field Type](#field-type) |
-| +xx | xx |  | [Field Data](#field-data) |
+| +xx | xx |  | [Field Data](#field-data) (if NOT null) |
 
 ## Field Type
 | Type byte | Type | Description |
@@ -79,46 +88,36 @@ Spec tables with big endian format
 | 0A | f64 | double |
 | 0B | b8 | boolean |
 | 0C | String | String |
-| 0D | Binary | Raw binary data |
+| 0D | [Binary](#binary-data-type) | Raw binary data |
 | 10 | [Map](#map) | map |
 | 11 | [Array](#array) | array |
 
 ## Field Data
 
-Plain old data types:
+#### Plain old data types
 
-| Field Type | Size | Format |
-|---|---|---|
-| u32 | 4B | `00 00 00 00` |
-| String | \0 | StringValue\0 |
-
-Binary data type:
-| Field Type | Size | Format |
-|---|---|---|
-| Byte size | 8B | `xx xx xx xx xx xx xx xx` |
-| xx | xx | Raw binary data |
-
-
-## Array
-| Offset | Size | Value | Description |
+| Field Type | Size | Format | Desc |
 |---|---|---|---|
-| +00 | 4B | `xx xx xx xx` | Length of **array** in bytes excluding **this**. `0` is valid. |
-| +04 | 4B | | Total number of elements |
-| +xx | xx |  | [Field Value](#field-value) |
-| +xx | xx |  | [Field Value](#field-value) #2 |
-|...|
+| null | 0B | | No data for null value |
+| u32 | 4B | `00 00 00 00` | 4 bytes |
+| String | \0 | StringValue\0 | Null terminated string |
+
+#### Binary data type
+| Field Type | Size | Format | Desc |
+|---|---|---|---|
+| Byte size | 8B | `xx xx xx xx xx xx xx xx` | `0` is valid size. |
+| xx | xx |  | Raw binary data. |
 
 ## Object Reference fields
 
-Object reference fields are stored as an **array**.
+Object reference fields are stored as an **array** with a size field of 4 bytes instead of 8.
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 4B | `xx xx xx xx` | Length of **array** in bytes excluding **this**. `0` is valid. |
-| +04 | 4B | 5 | Total number of elements |
+| +04 | 4B | 3 | Total number of elements |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Object UUID (u64 [Field Value](#field-value)) |
-| +10 | xx | `/Code/Core.CE::SomeClass\0` | Object class name (String [Field Value](#field-value)) |
-| +xx | 8B | `xx xx xx xx xx xx xx xx` | Package UUID it belongs to (u64 [Field Value](#field-value)) |
-| +08 | xx | `/Game/Assets/MyTexture\0` | Package name/path it belongs to (String [Field Value](#field-value)) |
+| +10 | 8B | `xx xx xx xx xx xx xx xx` | Package UUID it belongs to (u64 [Field Value](#field-value)) |
+| +18 | xx | `/Code/Core.CE::SomeClass\0` | Object class name (String [Field Value](#field-value)) |
 
 

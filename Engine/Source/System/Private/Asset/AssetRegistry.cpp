@@ -269,10 +269,14 @@ namespace CE
 
 	void AssetRegistry::AddAssetEntry(const Name& packageName, AssetData* assetData)
 	{
+		if (assetData == nullptr)
+			return;
+
 		allAssetDatas.Add(assetData);
 		cachedPathTree.AddPath(packageName, assetData);
 		cachedAssetsByPath[packageName].Add(assetData);
 		cachedPrimaryAssetByPath[packageName] = assetData;
+		cachedPrimaryAssetByPackageUuid[assetData->packageUuid] = assetData;
 
 		String parentPathStr = IO::Path(packageName.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
 		Name parentPath = parentPathStr;

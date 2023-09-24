@@ -29,20 +29,22 @@ namespace CE
 		asset->FetchObjectReferences(objectsToSerialize);
 		Array<Name> packageDependencies{};
 
-		for (const auto& [objectUuid, objectInstance] : objectsToSerialize) // External package dependencies
+		for (const auto& [objectUuid, objectInstance] : objectsToSerialize) //Find external package dependencies
 		{
 			if (objectInstance == nullptr || objectUuid == 0)
 				continue;
 			if (objectInstance->IsTransient())
 				continue;
 
-			if (package != objectInstance->GetPackage() && objectInstance->GetPackage() != nullptr)
+			auto objectPackage = objectInstance->GetPackage();
+
+			if (package != objectPackage && objectPackage != nullptr)
 			{
-				packageDependencies.Add(objectInstance->GetPackage()->GetPackageName());
+				packageDependencies.Add(objectPackage->GetPackageName());
 			}
 		}
 
-
+		
 
 		return SavePackageResult::Success;
 	}

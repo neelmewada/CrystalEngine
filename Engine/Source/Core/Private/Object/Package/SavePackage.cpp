@@ -49,10 +49,11 @@ namespace CE
 				continue;
 			if (objectInstance->IsTransient())
 				continue;
+			auto objectPackage = objectInstance->GetPackage();
 
-			if (package != objectInstance->GetPackage() && objectInstance->GetPackage() != nullptr)
+			if (package != objectPackage && objectPackage != nullptr)
 			{
-				packageDependencies.Add(objectInstance->GetPackage()->GetPackageName());
+				packageDependencies.Add(objectPackage->GetPackageName());
 			}
 		}
 
@@ -71,6 +72,7 @@ namespace CE
 		*stream << package->GetPackageUuid();
 		*stream << package->GetPackageName();
 
+		// Other packages that `this` package depends upon
 		SavePackageDependencies(stream, packageDependencies);
 
 		u8 isCooked = 0;
@@ -98,6 +100,28 @@ namespace CE
             
 			*stream << PACKAGE_OBJECT_MAGIC_NUMBER; // .OBJECT.
 			
+			*stream << objectInstance->GetUuid();
+			*stream << objectInstance->IsAsset();
+			*stream << objectInstance->GetPathInPackage();
+			*stream << objectInstance->GetClass()->GetTypeName();
+			*stream << objectInstance->GetName();
+
+			if (objectInstance->IsAsset())
+			{
+				*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath();
+			}
+
+			// Data start offset (excluding itself)
+			*stream << stream->GetCurrentPosition() + sizeof(u64);
+
+			auto classType = objectInstance->GetClass();
+
+			FieldSerializer serializer = FieldSerializer(classType->GetFirstField(), objectInstance);
+
+			while (serializer.HasNext())
+			{
+				serializer.WriteNext(stream);
+			}
 
 		}
 
