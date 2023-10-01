@@ -132,7 +132,6 @@ namespace CE
 			stream->Seek(mapSizePos);
 			*stream << (u64)0;
 
-
 			u32 crc = 0;
 			*stream << crc;
 		}

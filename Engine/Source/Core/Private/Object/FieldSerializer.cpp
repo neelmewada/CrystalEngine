@@ -20,6 +20,7 @@ namespace CE
 		{ TYPEID(b8), 0x0B },
 		{ TYPEID(String), 0x0C }, { TYPEID(Name), 0x0C }, { TYPEID(IO::Path), 0x0C },
 		{ TYPEID(BinaryBlob), 0x0D },
+		{ TYPEID(Object), 0x0E },
 		{ TYPEID(Array<>), 0x11 },
 	};
 
@@ -222,6 +223,8 @@ namespace CE
         }
         else if (fieldTypeId == TYPEID(ObjectMap)) // ObjectMaps are stored just like arrays
         {
+			*stream << typeIdToFieldTypeMap[TYPEID(Array<>)];
+
             const auto& map = field->GetFieldValue<ObjectMap>(rawInstance);
 
             u32 mapSize = map.GetObjectCount();
@@ -246,12 +249,16 @@ namespace CE
         }
         else if (field->IsObjectField())
         {
+			*stream << typeIdToFieldTypeMap[TYPEID(Object)];
+
             Object* object = field->GetFieldValue<Object*>(rawInstance);
             
             WriteObjectReference(stream, object);
         }
         else if (fieldDeclarationType->IsStruct())
         {
+			*stream << (u8)0x10;
+
             StructType* structType = (StructType*)fieldDeclarationType;
             auto structInstance = field->GetFieldInstance(rawInstance);
 
@@ -267,6 +274,8 @@ namespace CE
         }
 		else if (fieldDeclarationType->IsEnum())
 		{
+			*stream << typeIdToFieldTypeMap[TYPEID(s64)];
+
 			auto enumType = (EnumType*)fieldDeclarationType;
 
 			*stream << field->GetFieldEnumValue(rawInstance);
@@ -282,8 +291,6 @@ namespace CE
         {
 			u64 sizePos = stream->GetCurrentPosition();
 			*stream << (u32)0; // Data size
-
-			*stream << (u32)3;
 
             *stream << objectRef->GetUuid();
 
