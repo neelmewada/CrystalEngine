@@ -8,6 +8,7 @@ ce_set(TARGET_TYPE_MODULE_IS_LIBRARY TRUE)
 ce_set(TARGET_TYPE_CONSOLEAPP_IS_EXECUTABLE TRUE)
 ce_set(TARGET_TYPE_GUIAPP_IS_EXECUTABLE TRUE)
 ce_set(TARGET_TYPE_TOOL_IS_EXECUTABLE TRUE)
+ce_set(TARGET_TYPE_GUITOOL_IS_EXECUTABLE TRUE)
 
 ce_set(TARGET_TYPE_STATIC_IS_STATICLIB TRUE)
 ce_set(TARGET_TYPE_SHARED_IS_SHAREDLIB TRUE)
@@ -88,6 +89,10 @@ function(ce_add_target NAME TARGET_TYPE)
     if(${TARGET_TYPE} STREQUAL "GUIAPP")
         #set(EXE_FLAG $<$<CONFIG:Release>:${PAL_EXECUTABLE_APPLICATION_FLAG}>)
     endif()
+
+    if(${TARGET_TYPE} STREQUAL "TOOL")
+        set(IS_TOOL TRUE)
+    endif()
     
     # Create target
 
@@ -147,7 +152,7 @@ function(ce_add_target NAME TARGET_TYPE)
 
     # OUTPUT_DIRECTORY
 
-    if(${ce_add_target_OUTPUT_DIRECTORY})
+    if(ce_add_target_OUTPUT_DIRECTORY)
         set_target_properties(${NAME}
             PROPERTIES
                 ARCHIVE_OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_target_OUTPUT_DIRECTORY}"

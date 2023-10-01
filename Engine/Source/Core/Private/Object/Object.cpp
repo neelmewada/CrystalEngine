@@ -285,7 +285,6 @@ namespace CE
 
         ConfigSection& configSection = config->Get(classTypeName);
         FieldType* configField = configClass->GetFirstField();
-        config->SectionExists("");
         
         while (configField != nullptr)
         {

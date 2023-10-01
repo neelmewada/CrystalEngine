@@ -159,7 +159,17 @@ namespace CE
 		template<typename T>
 		FORCE_INLINE bool IsOfType()
 		{
-			return IsOfType(T::Type());
+			return IsOfType(T::StaticType());
+		}
+
+		template<typename TClass> requires TIsBaseClassOf<CE::Object, TClass>::Value
+		FORCE_INLINE static TClass* CastTo(Object* instance)
+		{
+			if (instance == nullptr || !instance->IsOfType<TClass>())
+			{
+				return nullptr;
+			}
+			return (TClass*)instance;
 		}
 
 		Name GetPathInPackage();
@@ -205,7 +215,8 @@ namespace CE
 		{
 			return (TClass*)CreateDefaultSubobject(TClass::Type(), name, flags);
 		}
-        
+
+		
 		void LoadDefaults();
 
         void ConfigParseStruct(const String& value, void* instance, StructType* structType);

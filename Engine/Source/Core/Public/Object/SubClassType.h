@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    template<typename TBaseClass>
+    template<typename TBaseClass = CE::Object>
 	struct SubClassType
 	{
 	public:
@@ -120,8 +120,8 @@ namespace CE
 
 	private:
 
-		ClassType* baseClassType = nullptr;
 		ClassType* type = nullptr;
+		ClassType* baseClassType = nullptr;
 	};
 
 } // namespace CE

@@ -2296,12 +2296,85 @@ TEST(Serialization, BinaryBlob)
     TEST_END;
 }
 
-TEST(Serialization, YAML)
+namespace SerializationTests {
+	struct MyData
+	{
+		CE_STRUCT(MyData)
+	public:
+
+		CE::String string = "default";
+
+		Vec4 vector = {};
+
+		ClassType* clazz = nullptr;
+
+		Array<String> array{};
+	};
+
+	class TestClass1 : public Object
+	{
+		CE_CLASS(TestClass1, Object)
+	public:
+
+		Array<MyData> dataList{};
+
+	};
+}
+
+CE_RTTI_STRUCT(,SerializationTests, MyData,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(string)
+		CE_FIELD(vector)
+		CE_FIELD(clazz)
+		CE_FIELD(array)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(,SerializationTests, MyData)
+
+CE_RTTI_CLASS(,SerializationTests, TestClass1,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(dataList)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(,SerializationTests, TestClass1)
+
+TEST(Serialization, BasicBinarySerialization)
 {
+	using namespace SerializationTests;
+
 	TEST_BEGIN;
+	CE_REGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
 
-	
+	{
+		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject");
+		test->dataList.Add({}); test->dataList.Add({});
+		MyData& data0 = test->dataList[0];
+		data0.clazz = Package::StaticType();
+		data0.vector = Vec4(1, 2.2f, 3.3f, 4.125f);
+		data0.string = "Data 0 String";
+		data0.array = { "item0", "item1", "item2" };
+		MyData& data1 = test->dataList[1];
+		data1.clazz = nullptr;
+		data1.string = "Data 1 String";
+		data1.array = {};
 
+		MemoryStream stream = MemoryStream(1024);
+		stream.SetBinaryMode(true);
+
+		BinarySerializer serializer{ test->GetClass(), test };
+		serializer.Serialize(&stream);
+
+		test->Destroy();
+	}
+
+	CE_DEREGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
 	TEST_END;
 }
 

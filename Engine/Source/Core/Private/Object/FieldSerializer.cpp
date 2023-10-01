@@ -42,7 +42,7 @@ namespace CE
     FieldSerializer::FieldSerializer(Array<FieldType*> fieldList, void* instance)
         : rawInstance(instance), fields(fieldList)
     {
-
+		
     }
 
     bool FieldSerializer::HasNext()

@@ -141,6 +141,66 @@ const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type<DefaultArgType>>::Ful
 	return name;\
 }
 
+#define CE_RTTI_TYPEINFO(API, Namespace, Type, ...)\
+namespace CE::Internal\
+{\
+	template<>\
+	struct TypeInfoImpl<Namespace::Type> : public CE::TypeInfo\
+	{\
+	private:\
+		TypeInfoImpl<Namespace::Type>() : TypeInfo(#Namespace "::" #Type)\
+		{}\
+	public:\
+		API static const CE::Name& FullTypeName();\
+		API static CE::TypeInfo* StaticType();\
+		const CE::Name& GetTypeName() override { return FullTypeName(); }\
+		virtual CE::TypeId GetTypeId() const override { return TYPEID(Namespace::Type); }\
+		virtual bool IsTypeInfo() const override { return true; }\
+		virtual void InitializeDefaults(void* instance) override { }\
+		virtual void CallDestructor(void* instance) override { }\
+		virtual bool IsAssignableTo(TypeId typeId) override\
+		{\
+			std::initializer_list<TypeId> types = { __VA_ARGS__ };\
+			for (auto assignableType : types)\
+			{\
+				if (typeId == assignableType)\
+				{\
+					return true;\
+				}\
+			}\
+			return typeId == this->GetTypeId();\
+		}\
+		virtual u32 GetSize() const override\
+		{\
+			return (u32)sizeof(Namespace::Type);\
+		}\
+	};\
+}\
+namespace CE\
+{\
+	template<>\
+	inline TypeInfo* GetStaticType<Namespace::Type>()\
+	{\
+        return CE::Internal::TypeInfoImpl<Namespace::Type>::StaticType();\
+	}\
+	template<>\
+	inline CE::Name GetTypeName<Namespace::Type>()\
+	{\
+		return CE::Internal::TypeInfoImpl<Namespace::Type>::FullTypeName();\
+	}\
+}
+
+#define CE_RTTI_TYPEINFO_IMPL(Namespace, Type)\
+CE::TypeInfo* CE::Internal::TypeInfoImpl<Namespace::Type>::StaticType()\
+{\
+	static CE::Internal::TypeInfoImpl<Namespace::Type> instance{};\
+	return &instance;\
+}\
+const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Type>::FullTypeName()\
+{\
+	static Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Type);\
+	return name;\
+}
 
 #define CE_REGISTER_TYPES(...) CE::RegisterTypes<__VA_ARGS__>();
 #define CE_DEREGISTER_TYPES(...) CE::DeregisterTypes<__VA_ARGS__>();

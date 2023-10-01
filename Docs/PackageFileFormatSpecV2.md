@@ -43,28 +43,9 @@ Spec tables with big endian format
 | +xx | \0 | `/Textures/SomeTexture.png` | Source asset path relative to project (exists only if **Is Asset?**) |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Data start offset (from start of file) |
 | +xx | xx | | Newly added header fields |
+| +xx | 1B | `10` | [Field Type](#field-type): Map. |
 | +xx | xx | | A **[Map](#map)** of fields. |
 | +xx | 4B | `xx xx xx xx` | Data CRC checksum. Can be `0`. |
-
-## Map
-| Offset | Size | Value | Description |
-|---|---|---|---|
-| +00 | 8B | `xx xx xx xx xx xx xx xx` | Length of the **map** in bytes excluding **this**. Minimun is `4`. |
-| +08 | 4B | `xx xx xx xx` | Total number of elements |
-| +10 | \0 | keyName\0 | Key name |
-| +xx | xx |  | [Field Value](#field-value) |
-| +08 | \0 | keyName2\0 | Key name |
-| +xx | xx |  | [Field Value](#field-value) |
-|...|
-
-## Array
-| Offset | Size | Value | Description |
-|---|---|---|---|
-| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of **array** in bytes excluding **this**. Minimum is `4`. |
-| +08 | 4B | | Total number of elements |
-| +xx | xx |  | [Field Value](#field-value) |
-| +xx | xx |  | [Field Value](#field-value) #2 |
-|...|
 
 ## **Field Value**
 | Offset | Size | Value | Description |
@@ -89,12 +70,19 @@ Spec tables with big endian format
 | 0B | b8 | boolean |
 | 0C | String | String |
 | 0D | [Binary](#binary-data-type) | Raw binary data |
+| 0E | [Object Ref](#object-reference) | Object reference |
 | 10 | [Map](#map) | map |
 | 11 | [Array](#array) | array |
+| Extension types--> |
+| 81 | Vec2 | Vec2 |
+| 82 | Vec3 | Vec3 |
+| 83 | Vec4 | Vec4 |
+| 84 | Matrix4x4 | Matrix4x4 |
+
 
 ## Field Data
 
-#### Plain old data types
+### Plain old data types
 
 | Field Type | Size | Format | Desc |
 |---|---|---|---|
@@ -102,22 +90,37 @@ Spec tables with big endian format
 | u32 | 4B | `00 00 00 00` | 4 bytes |
 | String | \0 | StringValue\0 | Null terminated string |
 
-#### Binary data type
+### Binary data type
 | Field Type | Size | Format | Desc |
 |---|---|---|---|
 | Byte size | 8B | `xx xx xx xx xx xx xx xx` | `0` is valid size. |
+| Flags | 8B | `xx xx xx xx xx xx xx xx` | BinaryBlob flags value. |
 | xx | xx |  | Raw binary data. |
 
-## Object Reference fields
+### Map
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 8B | `xx xx xx xx xx xx xx xx` | Length of the **map** in bytes excluding **this**. Minimun is `4`. |
+| +08 | 4B | `xx xx xx xx` | Total number of elements |
+| +10 | \0 | keyName\0 | Key name |
+| +xx | xx |  | [Field Value](#field-value) |
+| +08 | \0 | keyName2\0 | Key name |
+| +xx | xx |  | [Field Value](#field-value) |
+|...|
 
-Object reference fields are stored as an array with a size field of 4 bytes instead of 8.
+### Array
+| Offset | Size | Value | Description |
+|---|---|---|---|
+| +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of **array** in bytes excluding **this**. Minimum is `4`. |
+| +08 | 4B | | Total number of elements |
+| +xx | xx |  | [Field Value](#field-value) |
+| +xx | xx |  | [Field Value](#field-value) #2 |
+|...|
+
+### Object Reference
 
 | Offset | Size | Value | Description |
 |---|---|---|---|
-| +00 | 4B | `xx xx xx xx` | Length of **array** in bytes excluding **this**. `0` is valid. |
-| +04 | 4B | 3 | Total number of elements |
 | +08 | 8B | `xx xx xx xx xx xx xx xx` | Object UUID (u64 [Field Value](#field-value)) |
 | +10 | 8B | `xx xx xx xx xx xx xx xx` | Package UUID it belongs to (u64 [Field Value](#field-value)) |
-| +18 | xx | `/Code/Core.CE::SomeClass\0` | Object class name (String [Field Value](#field-value)) |
-
 

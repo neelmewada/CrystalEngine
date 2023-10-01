@@ -26,7 +26,7 @@ namespace CE
     };
 
     
-    template<typename KeyType, typename ValueType>
+    template<typename KeyType = CE::Name, typename ValueType = CE::Variant>
     class HashMap
     {
     public:

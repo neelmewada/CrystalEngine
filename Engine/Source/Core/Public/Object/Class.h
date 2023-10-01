@@ -328,6 +328,15 @@ namespace CE
 		template<typename Struct, typename Field>
 		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes, TypeId underlyingTypeId = 0)
 		{
+			constexpr bool isPointer = std::is_pointer_v<Field>;
+			typedef RemovePointerFromType<Field> _Type0;
+			typedef RemoveReferenceFromType<_Type0> _Type1;
+			typedef RemoveConstVolatileFromType<_Type1> FinalType;
+			constexpr bool isObject = TIsBaseClassOf<CE::Object, FinalType>::Value;
+			constexpr bool isTypeInfo = TIsBaseClassOf<CE::TypeInfo, FinalType>::Value;
+
+			static_assert(!isPointer || isObject || isTypeInfo, "Pointer types should only be used for object fields!");
+
 			localFields.Add(FieldType(name,
                                       CE::GetTypeId<Field>(),
                                       underlyingTypeId,
@@ -340,7 +349,9 @@ namespace CE
 		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...), const char* attributes, std::index_sequence<Is...>)
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) = function;
-            
+
+			static_assert(!TIsTypePresent<CE::Variant, Args...>::Value, "A reflected function should NOT have a parameter of CE::Variant type.");
+
 			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
 				if constexpr (std::is_same_v<ReturnType, void>) // No return value
@@ -355,8 +366,6 @@ namespace CE
 				}
 			};
 
-
-
 			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, attributes,
 				TGetUnderlyingTypeId<ReturnType>::Get(),
 				TGetUnderlyingTypeIdPack<Args...>::Get()));
@@ -366,6 +375,8 @@ namespace CE
 		void AddFunction(const char* name, ReturnType(ClassOrStruct::* function)(Args...) const, const char* attributes, std::index_sequence<Is...>)
 		{
 			ReturnType(ClassOrStruct::*funcPtr)(Args...) const = function;
+
+			static_assert(!TIsTypePresent<CE::Variant, Args...>::Value, "A reflected function should NOT have a parameter of CE::Variant type.");
 
 			FunctionDelegate funcDelegate = [funcPtr](void* instance, CE::Array<CE::Variant> params, CE::Variant& returnValue) -> void
 			{
@@ -441,6 +452,8 @@ namespace CE
 	private:
 		Internal::IStructTypeImpl* Impl = nullptr;
 	};
+
+	typedef StructType Struct;
 
 
 	// *************************************************
@@ -626,6 +639,8 @@ namespace CE
 
 #pragma pack(push, 1)
 
+	typedef ClassType Class;
+
 	namespace Internal
 	{
 		// Specialization will contain the required data
@@ -801,3 +816,6 @@ namespace CE
 	}
 
 }
+
+CE_RTTI_TYPEINFO(CORE_API, CE, StructType, TYPEID(CE::TypeInfo))
+CE_RTTI_TYPEINFO(CORE_API, CE, ClassType, TYPEID(CE::TypeInfo))

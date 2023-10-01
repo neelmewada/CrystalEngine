@@ -650,3 +650,7 @@ namespace CE
     }
 
 } // namespace CE
+
+CE_RTTI_TYPEINFO_IMPL(CE, StructType)
+CE_RTTI_TYPEINFO_IMPL(CE, ClassType)
+

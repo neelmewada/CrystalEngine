@@ -379,8 +379,10 @@ namespace CE
 
 }
 
-// POD Types
 
+CE_RTTI_TYPEINFO_IMPL(CE, TypeInfo)
+
+// POD Types
 
 CE_RTTI_POD_IMPL(, b8)
 CE_RTTI_POD_IMPL(, c8)

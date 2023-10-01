@@ -83,7 +83,9 @@ namespace CE
 			CE::Color, CE::Gradient,
 			CE::ObjectMap,
 			CE::BinaryBlob,
-			CE::SubClassType<Object>);
+			CE::SubClassType<Object>,
+			// TypeInfo types
+			TypeInfo, EnumType, EnumConstant, StructType, ClassType, FieldType, FunctionType);
 
         // Enums
         CE_REGISTER_TYPES(

@@ -134,3 +134,6 @@ namespace CE
 
 } // namespace CE
 
+
+CE_RTTI_TYPEINFO_IMPL(CE, EnumType)
+CE_RTTI_TYPEINFO_IMPL(CE, EnumConstant)

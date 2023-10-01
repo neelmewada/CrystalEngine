@@ -120,20 +120,16 @@ namespace CE
 			*stream << (u64)0; // map data size
 			*stream << (u32)0; // map length
 
-			FieldSerializer serializer = FieldSerializer(classType->GetFirstField(), objectInstance);
-			objectInstance->OnBeforeSerialize();
-
-			while (serializer.HasNext())
-			{
-				serializer.WriteNext(stream);
-			}
+			// TODO: Serialize
 
 			curPos = stream->GetCurrentPosition();
 			stream->Seek(mapSizePos);
-			*stream << (u64)0;
+			*stream << (u64)0; // map data size
+			*stream << (u32)0; // map length
+			stream->Seek(curPos);
 
 			u32 crc = 0;
-			*stream << crc;
+			*stream << crc; // 0 crc for now. Not needed
 		}
 
 		*stream << (u64)0; // EOF

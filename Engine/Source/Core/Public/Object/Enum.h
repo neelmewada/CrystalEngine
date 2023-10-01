@@ -157,6 +157,8 @@ namespace CE
         static CE::HashMap<Name, EnumType*> registeredEnumsByName;
     };
     
+	typedef EnumType Enum;
+
 } // namespace name
 
 #define CE_ENUM_CONSTANTS(...) __VA_ARGS__
@@ -229,4 +231,7 @@ const CE::Name& CE::Internal::TypeInfoImpl<Namespace::Enum>::FullTypeName()\
 	static CE::Name name = MAKE_NAME(PACKAGE_NAME, Namespace, Enum);\
 	return name;\
 }
+
+CE_RTTI_TYPEINFO(CORE_API, CE, EnumType, TYPEID(CE::TypeInfo))
+CE_RTTI_TYPEINFO(CORE_API, CE, EnumConstant, TYPEID(CE::TypeInfo))
 

@@ -15,6 +15,13 @@ namespace CE
 		return nullptr;
     }
 
+    Object* ObjectMap::GetObjectAt(u32 index) const
+    {
+		if (index >= objects.GetSize())
+			return nullptr;
+		return objects[index];
+    }
+
 	bool ObjectMap::ObjectExists(UUID uuid) const
 	{
 		return objects.Exists([=](Object* obj) { return obj != nullptr && obj->GetUuid() == uuid; });

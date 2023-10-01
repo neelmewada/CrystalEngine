@@ -395,6 +395,32 @@ namespace CE
         return *this;
     }
 
+	Stream& Stream::operator<<(f64 value)
+	{
+		if (IsBinaryMode())
+		{
+			Write(&value, sizeof(value));
+		}
+		else if (IsAsciiMode())
+		{
+			*this << String::Format("{}", value);
+		}
+		return *this;
+	}
+
+	Stream& Stream::operator>>(f64& value)
+	{
+		if (IsBinaryMode())
+		{
+			Read(&value, sizeof(value));
+		}
+		else if (IsAsciiMode())
+		{
+			ReadNumberFromAscii(value);
+		}
+		return *this;
+	}
+
     void Stream::SwapBytes(void* value, u32 length)
     {
         u8* ptr = (u8*)value;

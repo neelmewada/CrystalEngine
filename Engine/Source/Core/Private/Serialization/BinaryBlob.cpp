@@ -143,7 +143,7 @@ namespace CE
 
 		if (dataSize > 0)
 			stream->Write(data, dataSize);
-
+		
         return true;
     }
 

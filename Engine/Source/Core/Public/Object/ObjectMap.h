@@ -24,6 +24,8 @@ namespace CE
         }
         
 		Object* FindObject(UUID uuid) const;
+
+		Object* GetObjectAt(u32 index) const;
         
 		bool ObjectExists(UUID uuid) const;
         
