@@ -5,6 +5,8 @@ namespace CE
 {
 	static RecursiveMutex globalMutex{};
 
+	static HashMap<Object*, List<Object*>> dependencyMap = {};
+
     Object::Object() : name("Object"), uuid(UUID())
     {
         ConstructInternal();
@@ -237,7 +239,7 @@ namespace CE
 				const auto& objectMap = field->GetFieldValue<ObjectMap>(this);
 				for (const auto& object : objectMap)
 				{
-					if (object != nullptr && !outReferences.KeyExists(object->uuid))
+					if (object != nullptr)
 					{
 						outReferences[object->uuid] = object;
 					}
@@ -251,11 +253,60 @@ namespace CE
 					const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(this);
 					for (Object* object : array)
 					{
-						if (object != nullptr && !outReferences.KeyExists(object->uuid))
+						if (object != nullptr)
 						{
 							outReferences[object->uuid] = object;
 						}
 					}
+				}
+			}
+			else if (field->IsStructField())
+			{
+				auto structType = (StructType*)field->GetDeclarationType();
+				if (structType != nullptr)
+				{
+					FetchObjectReferencesInStructField(outReferences, structType, field->GetFieldInstance(this));
+				}
+			}
+		}
+	}
+
+	void Object::FetchObjectReferencesInStructField(HashMap<UUID, Object*>& outReferences, StructType* structType, void* structInstance)
+	{
+		if (structType == nullptr || structInstance == nullptr)
+			return;
+
+		for (auto field = structType->GetFirstField(); field != nullptr; field = field->GetNext())
+		{
+			if (field->IsObjectField())
+			{
+				Object* value = field->GetFieldValue<Object*>(structInstance);
+				if (value != nullptr && !outReferences.KeyExists(value->uuid))
+				{
+					outReferences[value->uuid] = value;
+				}
+			}
+			else if (field->IsArrayField())
+			{
+				auto underlyingType = field->GetUnderlyingType();
+				if (underlyingType != nullptr && underlyingType->IsObject())
+				{
+					const Array<Object*>& array = field->GetFieldValue<Array<Object*>>(structInstance);
+					for (Object* object : array)
+					{
+						if (object != nullptr)
+						{
+							outReferences[object->uuid] = object;
+						}
+					}
+				}
+			}
+			else if (field->IsStructField())
+			{
+				auto structType = (StructType*)field->GetDeclarationType();
+				if (structType != nullptr)
+				{
+					FetchObjectReferencesInStructField(outReferences, structType, field->GetFieldInstance(structInstance));
 				}
 			}
 		}

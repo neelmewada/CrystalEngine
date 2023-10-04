@@ -116,17 +116,8 @@ namespace CE
 
 			auto classType = objectInstance->GetClass();
 
-			u64 mapSizePos = stream->GetCurrentPosition();
-			*stream << (u64)0; // map data size
-			*stream << (u32)0; // map length
-
-			// TODO: Serialize
-
-			curPos = stream->GetCurrentPosition();
-			stream->Seek(mapSizePos);
-			*stream << (u64)0; // map data size
-			*stream << (u32)0; // map length
-			stream->Seek(curPos);
+			BinarySerializer serializer = BinarySerializer(classType, package);
+			serializer.Serialize(stream);
 
 			u32 crc = 0;
 			*stream << crc; // 0 crc for now. Not needed

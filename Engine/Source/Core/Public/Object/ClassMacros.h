@@ -3,6 +3,7 @@
 
 #define __CE_SUPER_LIST(...) CE_EXPAND(CE_CONCATENATE(__CE_SUPER_LIST_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
+
 #define CE_FIELD_LIST(x) x
 #define CE_FIELD(FieldName, ...)\
 	Type.AddField(#FieldName, &Self::FieldName, offsetof(Self, FieldName), "" #__VA_ARGS__, TYPEID(TGetUnderlyingType<decltype(Self::FieldName)>::Type));

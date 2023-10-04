@@ -229,6 +229,8 @@ namespace CE
 
 	private:
 
+		void FetchObjectReferencesInStructField(HashMap<UUID, Object*>& outReferences, StructType* structType, void* structInstance);
+
 		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate);
 
 		template<typename ReturnType, typename... Args, std::size_t... Is>
@@ -356,4 +358,3 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
         
     )
 )
-

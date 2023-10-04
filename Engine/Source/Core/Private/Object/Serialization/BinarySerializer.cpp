@@ -38,8 +38,8 @@ namespace CE
 
 	int BinarySerializer::Serialize(Stream* stream)
 	{
-		if (!stream || !IsValid())
-			return 0;
+		if (!stream || !IsValid() || !stream->CanWrite())
+			return -1;
 
 		stream->SetBinaryMode(true);
 
@@ -125,10 +125,10 @@ namespace CE
 		}
 		else
 		{
-			return 0;
+			return -1;
 		}
 
-		return 0;
+		return -1;
 	}
 
 	bool BinarySerializer::SerializeField(Stream* stream, Field* field, void* instance)
@@ -333,6 +333,414 @@ namespace CE
 		}
 
 		return false;
+	}
+
+	BinaryDeserializer::BinaryDeserializer(TypeInfo* targetType, void* targetInstance)
+		: targetType(targetType), instance(targetInstance)
+	{
+
+	}
+
+	int BinaryDeserializer::Deserialize(Stream* stream)
+	{
+		if (!stream || !IsValid() || !stream->CanRead())
+			return -1;
+
+		stream->SetBinaryMode(true);
+
+		auto type = targetType;
+
+		if (type->IsClass())
+		{
+			Class* clazz = (Class*)type;
+
+			clazz->OnBeforeSerialize(instance);
+
+			u8 typeByte = 0;
+			*stream >> typeByte;
+
+			if (typeByte != typeIdToFieldTypeMap[TYPEID(HashMap<>)])
+				return -1;
+
+			u64 totalByteSize = 0;
+			u32 numElements = 0;
+
+			*stream >> totalByteSize;
+			*stream >> numElements;
+
+			if (numElements == 0)
+			{
+				return 0;
+			}
+
+			for (int i = 0; i < numElements; i++)
+			{
+				String fieldName = "";
+				*stream >> fieldName;
+
+				Field* field = clazz->FindFieldWithName(fieldName);
+				if (field == nullptr)
+				{
+					SkipFieldValue(stream);
+					continue;
+				}
+
+				DeserializeField(stream, field, instance);
+			}
+		}
+		else if (type->IsStruct())
+		{
+
+		}
+
+		return -1;
+	}
+
+	bool BinaryDeserializer::DeserializeField(Stream* stream, Field* field, void* instance)
+	{
+		if (field == nullptr)
+		{
+			SkipFieldValue(stream);
+			return false;
+		}
+
+		auto fieldDeclId = field->GetDeclarationTypeId();
+		auto fieldDeclType = field->GetDeclarationType();
+
+		if (fieldDeclType == nullptr || fieldDeclId == 0)
+		{
+			SkipFieldValue(stream);
+			return false;
+		}
+
+		u8 typeByte = 0;
+		*stream >> typeByte;
+
+		if (field->IsPODField())
+		{
+			bool isIntData = (typeByte >= 0x01 && typeByte <= 0x08) || typeByte == 0x0B;
+			bool isUnsignedInt = typeByte >= 0x01 && typeByte <= 0x04;
+			bool isDecimal = (typeByte == 0x09) || (typeByte == 0x0A);
+			bool isString = (typeByte == typeIdToFieldTypeMap[TYPEID(String)]);
+
+			if (isIntData) // Serialized data is an integer
+			{
+				u64 unsignedInt = 0;
+				s64 signedInt = 0;
+
+				c8 c8Value = 0; u8 u8Value = 0; u16 u16Value = 0; u32 u32Value = 0; u64 u64Value = 0;
+				s8 s8Value = 0; s16 s16Value = 0; s32 s32Value = 0; s64 s64Value = 0;
+				if (typeByte == typeIdToFieldTypeMap[TYPEID(b8)])
+				{
+					b8 boolValue = false;
+					*stream >> boolValue;
+					unsignedInt = (u64)boolValue;
+					signedInt = unsignedInt;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(c8)])
+				{
+					*stream >> c8Value;
+					unsignedInt = c8Value;
+					signedInt = unsignedInt;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u8)])
+				{
+					*stream >> u8Value;
+					unsignedInt = u8Value;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u16)])
+				{
+					*stream >> u16Value;
+					unsignedInt = u16Value;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u32)])
+				{
+					*stream >> u16Value;
+					unsignedInt = u16Value;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u64)])
+				{
+					*stream >> u32Value;
+					unsignedInt = u32Value;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s8)])
+				{
+					*stream >> s8Value;
+					signedInt = s8Value;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s16)])
+				{
+					*stream >> s16Value;
+					signedInt = s16Value;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s32)])
+				{
+					*stream >> s16Value;
+					signedInt = s16Value;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s64)])
+				{
+					*stream >> s32Value;
+					signedInt = s32Value;
+				}
+
+				if (fieldDeclId == TYPEID(b8))
+				{
+					field->SetFieldValue<b8>(instance, (isUnsignedInt ? (unsignedInt > 0) : (signedInt > 0)));
+				}
+				else if (fieldDeclId == TYPEID(c8))
+				{
+					field->SetFieldValue<c8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(u8))
+				{
+					field->SetFieldValue<u8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(s8))
+				{
+					field->SetFieldValue<s8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(u16))
+				{
+					field->SetFieldValue<u16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(s16))
+				{
+					field->SetFieldValue<s16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(u32))
+				{
+					field->SetFieldValue<u32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(s32))
+				{
+					field->SetFieldValue<s32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(u64))
+				{
+					field->SetFieldValue<u64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(s64))
+				{
+					field->SetFieldValue<s64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(f32))
+				{
+					field->SetFieldValue<f32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else if (fieldDeclId == TYPEID(f64))
+				{
+					field->SetFieldValue<f64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				}
+				else
+				{
+					return false;
+				}
+
+				return true;
+			}
+			else if (isDecimal) // Serialized data is decimal
+			{
+				f32 floatValue = 0;
+				f64 doubleValue = 0;
+
+				if (typeByte == typeIdToFieldTypeMap[TYPEID(f32)])
+				{
+					*stream >> floatValue;
+					doubleValue = floatValue;
+				}
+				else if (typeByte == typeIdToFieldTypeMap[TYPEID(f64)])
+				{
+					*stream >> doubleValue;
+					floatValue = doubleValue;
+				}
+
+				if (fieldDeclId == TYPEID(b8))
+				{
+					field->SetFieldValue<b8>(instance, floatValue > 0);
+				}
+				else if (fieldDeclId == TYPEID(c8))
+				{
+					field->SetFieldValue<c8>(instance, (c8)(s64)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(u8))
+				{
+					field->SetFieldValue<u8>(instance, (u8)(s64)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(s8))
+				{
+					field->SetFieldValue<s8>(instance, (s8)(s64)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(u16))
+				{
+					field->SetFieldValue<u16>(instance, (u16)(s64)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(s16))
+				{
+					field->SetFieldValue<s16>(instance, (s16)(s64)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(u32))
+				{
+					field->SetFieldValue<u32>(instance, (u32)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(s32))
+				{
+					field->SetFieldValue<s32>(instance, (s32)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(u64))
+				{
+					field->SetFieldValue<u64>(instance, (u64)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(s64))
+				{
+					field->SetFieldValue<s64>(instance, (s64)floatValue);
+				}
+				else if (fieldDeclId == TYPEID(f32))
+				{
+					field->SetFieldValue<f32>(instance, floatValue);
+				}
+				else if (fieldDeclId == TYPEID(f64))
+				{
+					field->SetFieldValue<f64>(instance, doubleValue);
+				}
+				else
+				{
+					return false;
+				}
+
+				return true;
+			}
+			else if (isString)
+			{
+				String string = "";
+				*stream >> string;
+
+				if (fieldDeclId == TYPEID(String))
+				{
+					field->SetFieldValue<String>(instance, string);
+				}
+				else if (fieldDeclId == TYPEID(Name))
+				{
+					field->SetFieldValue<Name>(instance, string);
+				}
+				else if (fieldDeclId == TYPEID(IO::Path))
+				{
+					field->SetFieldValue<IO::Path>(instance, string);
+				}
+				else if (fieldDeclId == TYPEID(SubClassType<>))
+				{
+					ClassType* classType = ClassType::FindClass(string);
+					field->SetFieldValue<SubClassType<Object>>(instance, classType);
+				}
+				else if (fieldDeclId == TYPEID(ClassType))
+				{
+					ClassType* classType = ClassType::FindClass(string);
+					field->SetFieldValue<ClassType*>(instance, classType);
+				}
+				else if (fieldDeclId == TYPEID(StructType))
+				{
+					StructType* structType = StructType::FindStruct(string);
+					field->SetFieldValue<StructType*>(instance, structType);
+				}
+				else if (fieldDeclId == TYPEID(EnumType))
+				{
+					EnumType* enumType = EnumType::FindEnum(string);
+					field->SetFieldValue<EnumType*>(instance, enumType);
+				}
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void BinaryDeserializer::SkipFieldValue(Stream* stream)
+	{
+		u8 typeByte = 0;
+		*stream >> typeByte;
+
+		if (typeByte == 0)
+			return;
+
+		u8 bytes[16];
+
+		switch (typeByte)
+		{
+		case 0x01: // u8
+			stream->Read(bytes, 1);
+			break;
+		case 0x02: // u16
+			stream->Read(bytes, 2);
+			break;
+		case 0x03: // u32
+			stream->Read(bytes, 4);
+			break;
+		case 0x04: // u64
+			stream->Read(bytes, 8);
+			break;
+		case 0x05: // s8
+			stream->Read(bytes, 1);
+			break;
+		case 0x06: // s16
+			stream->Read(bytes, 2);
+			break;
+		case 0x07: // s32
+			stream->Read(bytes, 4);
+			break;
+		case 0x08: // s64
+			stream->Read(bytes, 8);
+			break;
+		case 0x09: // f32
+			stream->Read(bytes, 4);
+			break;
+		case 0x0A: // f64
+			stream->Read(bytes, 8);
+			break;
+		case 0x0B: // b8
+			stream->Read(bytes, 1);
+			break;
+		case 0x0C: // String
+		{
+			String str = "";
+			*stream >> str;
+		}
+			break;
+		case 0x0D: // Binary blob
+		{
+			BinaryBlob blob{};
+			*stream >> blob;
+			blob.Free();
+		}
+			break;
+		case 0x0E: // Object Ref
+		{
+			u64 obj = 0;
+			*stream >> obj; // Object UUID
+			*stream >> obj; // Package UUID
+		}
+			break;
+		case 0x10: // Map
+		case 0x11: // Array
+		{
+			u64 byteSize = 0;
+			*stream >> byteSize;
+			stream->Seek(byteSize, SeekMode::Current);
+		}
+			break;
+		case 0x81:
+			stream->Seek(sizeof(Vec2), SeekMode::Current);
+			break;
+		case 0x82:
+			stream->Seek(sizeof(Vec3), SeekMode::Current);
+			break;
+		case 0x83:
+			stream->Seek(sizeof(Vec4), SeekMode::Current);
+			break;
+		case 0x84:
+			stream->Seek(sizeof(Matrix4x4), SeekMode::Current);
+			break;
+		}
 	}
 
 } // namespace CE

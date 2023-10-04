@@ -3,6 +3,7 @@
 
 namespace CE::Widgets
 {
+
 	YGSize CWidget::MeasureFunctionCallback(YGNodeRef nodeRef, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
 	{
 		CWidget* widget = (CWidget*)YGNodeGetContext(nodeRef);

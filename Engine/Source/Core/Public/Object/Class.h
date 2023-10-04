@@ -325,8 +325,8 @@ namespace CE
 
 		virtual void CacheAllFunctions();
 
-		template<typename Struct, typename Field>
-		CE_INLINE void AddField(const char* name, Field Struct::* field, SIZE_T offset, const char* attributes, TypeId underlyingTypeId = 0)
+		template<typename StructOrClass, typename Field>
+		CE_INLINE void AddField(const char* name, Field StructOrClass::* field, SIZE_T offset, const char* attributes, TypeId underlyingTypeId = 0)
 		{
 			constexpr bool isPointer = std::is_pointer_v<Field>;
 			typedef RemovePointerFromType<Field> _Type0;
