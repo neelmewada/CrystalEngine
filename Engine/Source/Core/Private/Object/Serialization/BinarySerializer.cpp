@@ -354,8 +354,6 @@ namespace CE
 		{
 			Class* clazz = (Class*)type;
 
-			clazz->OnBeforeSerialize(instance);
-
 			u8 typeByte = 0;
 			*stream >> typeByte;
 
@@ -387,10 +385,46 @@ namespace CE
 
 				DeserializeField(stream, field, instance);
 			}
+
+			clazz->OnAfterDeserialize(instance);
 		}
 		else if (type->IsStruct())
 		{
+			Struct* structType = (Struct*)type;
 
+			u8 typeByte = 0;
+			*stream >> typeByte;
+
+			if (typeByte != typeIdToFieldTypeMap[TYPEID(HashMap<>)])
+				return -1;
+
+			u64 totalByteSize = 0;
+			u32 numElements = 0;
+
+			*stream >> totalByteSize;
+			*stream >> numElements;
+
+			if (numElements == 0)
+			{
+				return 0;
+			}
+
+			for (int i = 0; i < numElements; i++)
+			{
+				String fieldName = "";
+				*stream >> fieldName;
+
+				Field* field = structType->FindFieldWithName(fieldName);
+				if (field == nullptr)
+				{
+					SkipFieldValue(stream);
+					continue;
+				}
+
+				DeserializeField(stream, field, instance);
+			}
+
+			structType->OnAfterDeserialize(instance);
 		}
 
 		return -1;
@@ -415,241 +449,446 @@ namespace CE
 
 		u8 typeByte = 0;
 		*stream >> typeByte;
+		
+		bool isIntData = (typeByte >= 0x01 && typeByte <= 0x08) || typeByte == 0x0B;
+		bool isUnsignedInt = typeByte >= 0x01 && typeByte <= 0x04;
+		bool isDecimal = (typeByte == 0x09) || (typeByte == 0x0A);
+		bool isString = (typeByte == typeIdToFieldTypeMap[TYPEID(String)]);
+		bool isVec2 = typeByte == typeIdToFieldTypeMap[TYPEID(Vec2)];
+		bool isVec3 = typeByte == typeIdToFieldTypeMap[TYPEID(Vec3)];
+		bool isVec4 = typeByte == typeIdToFieldTypeMap[TYPEID(Vec4)];
+		bool isBinaryBlob = typeByte == typeIdToFieldTypeMap[TYPEID(BinaryBlob)];
+		bool isArray = typeByte == typeIdToFieldTypeMap[TYPEID(Array<>)];
+		bool isMap = typeByte == typeIdToFieldTypeMap[TYPEID(HashMap<>)];
+		bool isObjectRef = typeByte == typeIdToFieldTypeMap[TYPEID(Object)];
 
-		if (field->IsPODField())
+		if (isBinaryBlob)
 		{
-			bool isIntData = (typeByte >= 0x01 && typeByte <= 0x08) || typeByte == 0x0B;
-			bool isUnsignedInt = typeByte >= 0x01 && typeByte <= 0x04;
-			bool isDecimal = (typeByte == 0x09) || (typeByte == 0x0A);
-			bool isString = (typeByte == typeIdToFieldTypeMap[TYPEID(String)]);
-
-			if (isIntData) // Serialized data is an integer
+			if (fieldDeclId == TYPEID(BinaryBlob))
 			{
-				u64 unsignedInt = 0;
-				s64 signedInt = 0;
+				BinaryBlob& blob = const_cast<BinaryBlob&>(field->GetFieldValue<BinaryBlob>(instance));
+				*stream >> blob;
+			}
+		}
+		else if (isIntData) // Serialized data is an integer
+		{
+			u64 unsignedInt = 0;
+			s64 signedInt = 0;
 
-				c8 c8Value = 0; u8 u8Value = 0; u16 u16Value = 0; u32 u32Value = 0; u64 u64Value = 0;
-				s8 s8Value = 0; s16 s16Value = 0; s32 s32Value = 0; s64 s64Value = 0;
-				if (typeByte == typeIdToFieldTypeMap[TYPEID(b8)])
-				{
-					b8 boolValue = false;
-					*stream >> boolValue;
-					unsignedInt = (u64)boolValue;
-					signedInt = unsignedInt;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(c8)])
-				{
-					*stream >> c8Value;
-					unsignedInt = c8Value;
-					signedInt = unsignedInt;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u8)])
-				{
-					*stream >> u8Value;
-					unsignedInt = u8Value;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u16)])
-				{
-					*stream >> u16Value;
-					unsignedInt = u16Value;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u32)])
-				{
-					*stream >> u16Value;
-					unsignedInt = u16Value;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(u64)])
-				{
-					*stream >> u32Value;
-					unsignedInt = u32Value;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s8)])
-				{
-					*stream >> s8Value;
-					signedInt = s8Value;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s16)])
-				{
-					*stream >> s16Value;
-					signedInt = s16Value;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s32)])
-				{
-					*stream >> s16Value;
-					signedInt = s16Value;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(s64)])
-				{
-					*stream >> s32Value;
-					signedInt = s32Value;
-				}
+			c8 c8Value = 0; u8 u8Value = 0; u16 u16Value = 0; u32 u32Value = 0; u64 u64Value = 0;
+			s8 s8Value = 0; s16 s16Value = 0; s32 s32Value = 0; s64 s64Value = 0;
+			if (typeByte == typeIdToFieldTypeMap[TYPEID(b8)])
+			{
+				b8 boolValue = false;
+				*stream >> boolValue;
+				unsignedInt = (u64)boolValue;
+				signedInt = unsignedInt;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(c8)])
+			{
+				*stream >> c8Value;
+				unsignedInt = c8Value;
+				signedInt = unsignedInt;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(u8)])
+			{
+				*stream >> u8Value;
+				unsignedInt = u8Value;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(u16)])
+			{
+				*stream >> u16Value;
+				unsignedInt = u16Value;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(u32)])
+			{
+				*stream >> u16Value;
+				unsignedInt = u16Value;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(u64)])
+			{
+				*stream >> u32Value;
+				unsignedInt = u32Value;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(s8)])
+			{
+				*stream >> s8Value;
+				signedInt = s8Value;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(s16)])
+			{
+				*stream >> s16Value;
+				signedInt = s16Value;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(s32)])
+			{
+				*stream >> s16Value;
+				signedInt = s16Value;
+			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(s64)])
+			{
+				*stream >> s32Value;
+				signedInt = s32Value;
+			}
 
-				if (fieldDeclId == TYPEID(b8))
-				{
-					field->SetFieldValue<b8>(instance, (isUnsignedInt ? (unsignedInt > 0) : (signedInt > 0)));
-				}
-				else if (fieldDeclId == TYPEID(c8))
-				{
-					field->SetFieldValue<c8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(u8))
-				{
-					field->SetFieldValue<u8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(s8))
-				{
-					field->SetFieldValue<s8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(u16))
-				{
-					field->SetFieldValue<u16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(s16))
-				{
-					field->SetFieldValue<s16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(u32))
-				{
-					field->SetFieldValue<u32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(s32))
-				{
-					field->SetFieldValue<s32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(u64))
-				{
-					field->SetFieldValue<u64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(s64))
-				{
-					field->SetFieldValue<s64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(f32))
-				{
-					field->SetFieldValue<f32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
-				else if (fieldDeclId == TYPEID(f64))
-				{
-					field->SetFieldValue<f64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
-				}
+			if (fieldDeclId == TYPEID(b8))
+			{
+				field->SetFieldValue<b8>(instance, (isUnsignedInt ? (unsignedInt > 0) : (signedInt > 0)));
+			}
+			else if (fieldDeclId == TYPEID(c8))
+			{
+				field->SetFieldValue<c8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(u8))
+			{
+				field->SetFieldValue<u8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(s8))
+			{
+				field->SetFieldValue<s8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(u16))
+			{
+				field->SetFieldValue<u16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(s16))
+			{
+				field->SetFieldValue<s16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(u32))
+			{
+				field->SetFieldValue<u32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(s32))
+			{
+				field->SetFieldValue<s32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(u64))
+			{
+				field->SetFieldValue<u64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(s64))
+			{
+				field->SetFieldValue<s64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(f32))
+			{
+				field->SetFieldValue<f32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(f64))
+			{
+				field->SetFieldValue<f64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(String))
+			{
+				if (isUnsignedInt)
+					field->SetFieldValue<String>(instance, String::Format("{}", unsignedInt));
 				else
-				{
-					return false;
-				}
-
-				return true;
+					field->SetFieldValue<String>(instance, String::Format("{}", signedInt));
 			}
-			else if (isDecimal) // Serialized data is decimal
+			else
 			{
-				f32 floatValue = 0;
-				f64 doubleValue = 0;
-
-				if (typeByte == typeIdToFieldTypeMap[TYPEID(f32)])
-				{
-					*stream >> floatValue;
-					doubleValue = floatValue;
-				}
-				else if (typeByte == typeIdToFieldTypeMap[TYPEID(f64)])
-				{
-					*stream >> doubleValue;
-					floatValue = doubleValue;
-				}
-
-				if (fieldDeclId == TYPEID(b8))
-				{
-					field->SetFieldValue<b8>(instance, floatValue > 0);
-				}
-				else if (fieldDeclId == TYPEID(c8))
-				{
-					field->SetFieldValue<c8>(instance, (c8)(s64)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(u8))
-				{
-					field->SetFieldValue<u8>(instance, (u8)(s64)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(s8))
-				{
-					field->SetFieldValue<s8>(instance, (s8)(s64)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(u16))
-				{
-					field->SetFieldValue<u16>(instance, (u16)(s64)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(s16))
-				{
-					field->SetFieldValue<s16>(instance, (s16)(s64)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(u32))
-				{
-					field->SetFieldValue<u32>(instance, (u32)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(s32))
-				{
-					field->SetFieldValue<s32>(instance, (s32)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(u64))
-				{
-					field->SetFieldValue<u64>(instance, (u64)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(s64))
-				{
-					field->SetFieldValue<s64>(instance, (s64)floatValue);
-				}
-				else if (fieldDeclId == TYPEID(f32))
-				{
-					field->SetFieldValue<f32>(instance, floatValue);
-				}
-				else if (fieldDeclId == TYPEID(f64))
-				{
-					field->SetFieldValue<f64>(instance, doubleValue);
-				}
-				else
-				{
-					return false;
-				}
-
-				return true;
+				return false;
 			}
-			else if (isString)
+
+			return true;
+		}
+		else if (isDecimal) // Serialized data is decimal
+		{
+			f32 floatValue = 0;
+			f64 doubleValue = 0;
+
+			if (typeByte == typeIdToFieldTypeMap[TYPEID(f32)])
 			{
-				String string = "";
-				*stream >> string;
-
-				if (fieldDeclId == TYPEID(String))
-				{
-					field->SetFieldValue<String>(instance, string);
-				}
-				else if (fieldDeclId == TYPEID(Name))
-				{
-					field->SetFieldValue<Name>(instance, string);
-				}
-				else if (fieldDeclId == TYPEID(IO::Path))
-				{
-					field->SetFieldValue<IO::Path>(instance, string);
-				}
-				else if (fieldDeclId == TYPEID(SubClassType<>))
-				{
-					ClassType* classType = ClassType::FindClass(string);
-					field->SetFieldValue<SubClassType<Object>>(instance, classType);
-				}
-				else if (fieldDeclId == TYPEID(ClassType))
-				{
-					ClassType* classType = ClassType::FindClass(string);
-					field->SetFieldValue<ClassType*>(instance, classType);
-				}
-				else if (fieldDeclId == TYPEID(StructType))
-				{
-					StructType* structType = StructType::FindStruct(string);
-					field->SetFieldValue<StructType*>(instance, structType);
-				}
-				else if (fieldDeclId == TYPEID(EnumType))
-				{
-					EnumType* enumType = EnumType::FindEnum(string);
-					field->SetFieldValue<EnumType*>(instance, enumType);
-				}
-
-				return true;
+				*stream >> floatValue;
+				doubleValue = floatValue;
 			}
+			else if (typeByte == typeIdToFieldTypeMap[TYPEID(f64)])
+			{
+				*stream >> doubleValue;
+				floatValue = doubleValue;
+			}
+
+			if (fieldDeclId == TYPEID(b8))
+			{
+				field->SetFieldValue<b8>(instance, floatValue > 0);
+			}
+			else if (fieldDeclId == TYPEID(c8))
+			{
+				field->SetFieldValue<c8>(instance, (c8)(s64)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(u8))
+			{
+				field->SetFieldValue<u8>(instance, (u8)(s64)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(s8))
+			{
+				field->SetFieldValue<s8>(instance, (s8)(s64)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(u16))
+			{
+				field->SetFieldValue<u16>(instance, (u16)(s64)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(s16))
+			{
+				field->SetFieldValue<s16>(instance, (s16)(s64)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(u32))
+			{
+				field->SetFieldValue<u32>(instance, (u32)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(s32))
+			{
+				field->SetFieldValue<s32>(instance, (s32)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(u64))
+			{
+				field->SetFieldValue<u64>(instance, (u64)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(s64))
+			{
+				field->SetFieldValue<s64>(instance, (s64)floatValue);
+			}
+			else if (fieldDeclId == TYPEID(f32))
+			{
+				field->SetFieldValue<f32>(instance, floatValue);
+			}
+			else if (fieldDeclId == TYPEID(f64))
+			{
+				field->SetFieldValue<f64>(instance, doubleValue);
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else if (isString)
+		{
+			String string = "";
+			*stream >> string;
+
+			if (fieldDeclId == TYPEID(String))
+			{
+				field->SetFieldValue<String>(instance, string);
+			}
+			else if (fieldDeclId == TYPEID(Name))
+			{
+				field->SetFieldValue<Name>(instance, string);
+			}
+			else if (fieldDeclId == TYPEID(IO::Path))
+			{
+				field->SetFieldValue<IO::Path>(instance, string);
+			}
+			else if (fieldDeclId == TYPEID(SubClassType<>))
+			{
+				ClassType* classType = ClassType::FindClass(string);
+				field->SetFieldValue<SubClassType<Object>>(instance, classType);
+			}
+			else if (fieldDeclId == TYPEID(ClassType))
+			{
+				ClassType* classType = ClassType::FindClass(string);
+				field->SetFieldValue<ClassType*>(instance, classType);
+			}
+			else if (fieldDeclId == TYPEID(StructType))
+			{
+				StructType* structType = StructType::FindStruct(string);
+				field->SetFieldValue<StructType*>(instance, structType);
+			}
+			else if (fieldDeclId == TYPEID(EnumType))
+			{
+				EnumType* enumType = EnumType::FindEnum(string);
+				field->SetFieldValue<EnumType*>(instance, enumType);
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else if (isVec2)
+		{
+			Vec2 val = Vec2();
+			*stream >> val.x; *stream >> val.y;
+
+			if (fieldDeclId == TYPEID(Vec2))
+			{
+				field->SetFieldValue<Vec2>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec2i))
+			{
+				field->SetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
+			}
+			else if (fieldDeclId == TYPEID(Vec3))
+			{
+				field->SetFieldValue<Vec3>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec3i))
+			{
+				field->SetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, 0));
+			}
+			else if (fieldDeclId == TYPEID(Vec4))
+			{
+				field->SetFieldValue<Vec4>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec4i))
+			{
+				field->SetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, 0, 0));
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else if (isVec3)
+		{
+			Vec3 val = Vec3();
+			*stream >> val.x; *stream >> val.y; *stream >> val.z;
+
+			if (fieldDeclId == TYPEID(Vec2))
+			{
+				field->SetFieldValue<Vec2>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec2i))
+			{
+				field->SetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
+			}
+			else if (fieldDeclId == TYPEID(Vec3))
+			{
+				field->SetFieldValue<Vec3>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec3i))
+			{
+				field->SetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, (int)val.z));
+			}
+			else if (fieldDeclId == TYPEID(Vec4))
+			{
+				field->SetFieldValue<Vec4>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec4i))
+			{
+				field->SetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, (int)val.z, 0));
+			}
+			else if (fieldDeclId == TYPEID(Quat))
+			{
+				field->SetFieldValue<Quat>(instance, Quat(val, 0));
+			}
+			else if (fieldDeclId == TYPEID(Color))
+			{
+				field->SetFieldValue<Color>(instance, val);
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else if (isVec4)
+		{
+			Vec4 val = Vec4();
+			*stream >> val.x; *stream >> val.y; *stream >> val.z; *stream >> val.w;
+
+			if (fieldDeclId == TYPEID(Vec2))
+			{
+				field->SetFieldValue<Vec2>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec2i))
+			{
+				field->SetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
+			}
+			else if (fieldDeclId == TYPEID(Vec3))
+			{
+				field->SetFieldValue<Vec3>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec3i))
+			{
+				field->SetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, (int)val.z));
+			}
+			else if (fieldDeclId == TYPEID(Vec4))
+			{
+				field->SetFieldValue<Vec4>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Vec4i))
+			{
+				field->SetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, (int)val.z, (int)val.w));
+			}
+			else if (fieldDeclId == TYPEID(Quat))
+			{
+				field->SetFieldValue<Quat>(instance, Quat(val.x, val.y, val.z, val.w));
+			}
+			else if (fieldDeclId == TYPEID(Color))
+			{
+				field->SetFieldValue<Color>(instance, val);
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else if (isObjectRef)
+		{
+			u64 objectUuid = 0;
+			u64 packageUuid = 0;
+			*stream >> objectUuid;
+			*stream >> packageUuid;
+
+			// TODO: Find object reference
+
+			return true;
+		}
+		else if (isMap)
+		{
+			if (field->IsStructField())
+			{
+				StructType* structType = (StructType*)field->GetDeclarationType();
+				
+				BinaryDeserializer deserializer{ structType, field->GetFieldInstance(instance) };
+
+				deserializer.Deserialize(stream);
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else if (isArray)
+		{
+			if (field->IsArrayField())
+			{
+				const Array<u8>& array = field->GetFieldValue<Array<u8>>(instance);
+
+				Array<FieldType> elements = field->GetArrayFieldList(instance);
+				u64 dataSize = 0;
+				u32 numElements = 0;
+
+				auto headerPos = stream->GetCurrentPosition();
+				*stream >> dataSize; // Data byte size
+				*stream >> numElements; // Num of elements
+
+				void* arrayInstance = nullptr;
+				if (array.NonEmpty())
+					arrayInstance = (void*)&array[0];
+
+				for (int i = 0; i < elements.GetSize(); i++)
+				{
+					DeserializeField(stream, &elements[i], arrayInstance);
+				}
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
 		}
 
 		return false;
