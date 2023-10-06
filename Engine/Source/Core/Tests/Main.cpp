@@ -2352,8 +2352,13 @@ TEST(Serialization, BasicBinarySerialization)
 	TEST_BEGIN;
 	CE_REGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
 
+	MemoryStream stream = MemoryStream(1024);
+	stream.SetBinaryMode(true);
+	UUID original = 0;
+
 	{
 		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject");
+		original = test->GetUuid();
 		test->dataList.Add({}); test->dataList.Add({});
 		MyData& data0 = test->dataList[0];
 		data0.clazz = Package::StaticType();
@@ -2365,12 +2370,20 @@ TEST(Serialization, BasicBinarySerialization)
 		data1.string = "Data 1 String";
 		data1.array = {};
 
-		MemoryStream stream = MemoryStream(1024);
-		stream.SetBinaryMode(true);
-
 		BinarySerializer serializer{ test->GetClass(), test };
 		serializer.Serialize(&stream);
 
+		test->Destroy();
+	}
+
+	stream.Seek(0);
+
+	{
+		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject2");
+
+		BinaryDeserializer deserializer{ test->GetClass(), test };
+		deserializer.Deserialize(&stream);
+		
 		test->Destroy();
 	}
 

@@ -9,6 +9,7 @@ class Package_WriteRead_Test;
 namespace CE
 {
 	class SavePackage;
+	class Package;
 
 	enum class LoadPackageResult
 	{
@@ -33,6 +34,11 @@ namespace CE
 
 	};
 
+	struct IPackageResolver
+	{
+		virtual Name GetPackagePath(UUID packageUuid) = 0;
+	};
+
 	class CORE_API Package : public Object
 	{
 		CE_CLASS(Package, CE::Object)
@@ -41,6 +47,9 @@ namespace CE
 		virtual ~Package();
 
 		// - Static API -
+
+		inline static void SetPackageResolver(IPackageResolver* resolver) { Self::packageResolver = resolver; }
+		inline static IPackageResolver* GetPackageResolver() { return packageResolver; }
 
 		static IO::Path GetPackagePath(const Name& packageName);
 
@@ -162,6 +171,8 @@ namespace CE
 		IO::Path fullPackagePath{};
 
 		static HashMap<Name, Package*> loadedPackages;
+
+		static IPackageResolver* packageResolver;
 
 		friend class CoreModule;
 	};

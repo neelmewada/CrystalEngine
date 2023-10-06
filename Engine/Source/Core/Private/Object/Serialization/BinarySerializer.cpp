@@ -272,7 +272,7 @@ namespace CE
 				*stream << (u64)(curPos - headerPos - sizeof(u64));
 				stream->Seek(curPos);
 			}
-			else if (field->IsObjectStoreType()) // Object stores are stored as arrays
+			else if (fieldDeclId == TYPEID(ObjectMap)) // Object stores are stored as arrays
 			{
 				const ObjectMap& array = field->GetFieldValue<ObjectMap>(instance);
 
@@ -382,7 +382,7 @@ namespace CE
 					SkipFieldValue(stream);
 					continue;
 				}
-
+				
 				DeserializeField(stream, field, instance);
 			}
 
@@ -462,7 +462,116 @@ namespace CE
 		bool isMap = typeByte == typeIdToFieldTypeMap[TYPEID(HashMap<>)];
 		bool isObjectRef = typeByte == typeIdToFieldTypeMap[TYPEID(Object)];
 
-		if (isBinaryBlob)
+		if (typeByte == 0) // NULL value
+		{
+			if (!field->IsSerialized())
+			{
+				// Do NOT serialize fields marked as NonSerialized
+			}
+			else if (field->IsObjectField())
+			{
+				field->ForceSetFieldValue<Object*>(instance, nullptr);
+			}
+			else if (fieldDeclId == TYPEID(b8))
+			{
+				field->ForceSetFieldValue<b8>(instance, false);
+			}
+			else if (fieldDeclId == TYPEID(c8))
+			{
+				field->ForceSetFieldValue<c8>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(u8))
+			{
+				field->ForceSetFieldValue<u8>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(s8))
+			{
+				field->ForceSetFieldValue<s8>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(u16))
+			{
+				field->ForceSetFieldValue<u16>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(s16))
+			{
+				field->ForceSetFieldValue<s16>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(u32))
+			{
+				field->ForceSetFieldValue<u32>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(s32))
+			{
+				field->ForceSetFieldValue<s32>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(u64))
+			{
+				field->ForceSetFieldValue<u64>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(s64))
+			{
+				field->ForceSetFieldValue<s64>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(UUID))
+			{
+				field->ForceSetFieldValue<UUID>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(UUID32))
+			{
+				field->ForceSetFieldValue<UUID32>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(f32))
+			{
+				field->ForceSetFieldValue<f32>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(f64))
+			{
+				field->ForceSetFieldValue<f64>(instance, 0);
+			}
+			else if (fieldDeclId == TYPEID(String))
+			{
+				field->ForceSetFieldValue<String>(instance, "");
+			}
+			else if (fieldDeclId == TYPEID(Name))
+			{
+				field->ForceSetFieldValue<Name>(instance, "");
+			}
+			else if (fieldDeclId == TYPEID(IO::Path))
+			{
+				field->ForceSetFieldValue<IO::Path>(instance, "");
+			}
+			else if (fieldDeclId == TYPEID(Vec2))
+			{
+				field->ForceSetFieldValue<Vec2>(instance, {});
+			}
+			else if (fieldDeclId == TYPEID(Vec2i))
+			{
+				field->ForceSetFieldValue<Vec2i>(instance, {});
+			}
+			else if (fieldDeclId == TYPEID(Vec3))
+			{
+				field->ForceSetFieldValue<Vec3>(instance, {});
+			}
+			else if (fieldDeclId == TYPEID(Vec3i))
+			{
+				field->ForceSetFieldValue<Vec3i>(instance, {});
+			}
+			else if (fieldDeclId == TYPEID(Vec4))
+			{
+				field->ForceSetFieldValue<Vec4>(instance, {});
+			}
+			else if (fieldDeclId == TYPEID(Vec4i))
+			{
+				field->ForceSetFieldValue<Vec4i>(instance, {});
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+		else if (isBinaryBlob)
 		{
 			if (fieldDeclId == TYPEID(BinaryBlob))
 			{
@@ -502,13 +611,13 @@ namespace CE
 			}
 			else if (typeByte == typeIdToFieldTypeMap[TYPEID(u32)])
 			{
-				*stream >> u16Value;
-				unsignedInt = u16Value;
+				*stream >> u32Value;
+				unsignedInt = u32Value;
 			}
 			else if (typeByte == typeIdToFieldTypeMap[TYPEID(u64)])
 			{
-				*stream >> u32Value;
-				unsignedInt = u32Value;
+				*stream >> u64Value;
+				unsignedInt = u64Value;
 			}
 			else if (typeByte == typeIdToFieldTypeMap[TYPEID(s8)])
 			{
@@ -522,69 +631,77 @@ namespace CE
 			}
 			else if (typeByte == typeIdToFieldTypeMap[TYPEID(s32)])
 			{
-				*stream >> s16Value;
-				signedInt = s16Value;
+				*stream >> s32Value;
+				signedInt = s32Value;
 			}
 			else if (typeByte == typeIdToFieldTypeMap[TYPEID(s64)])
 			{
-				*stream >> s32Value;
-				signedInt = s32Value;
+				*stream >> s64Value;
+				signedInt = s64Value;
 			}
 
 			if (fieldDeclId == TYPEID(b8))
 			{
-				field->SetFieldValue<b8>(instance, (isUnsignedInt ? (unsignedInt > 0) : (signedInt > 0)));
+				field->ForceSetFieldValue<b8>(instance, (isUnsignedInt ? (unsignedInt > 0) : (signedInt > 0)));
 			}
 			else if (fieldDeclId == TYPEID(c8))
 			{
-				field->SetFieldValue<c8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<c8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(u8))
 			{
-				field->SetFieldValue<u8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<u8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(s8))
 			{
-				field->SetFieldValue<s8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<s8>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(u16))
 			{
-				field->SetFieldValue<u16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<u16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(s16))
 			{
-				field->SetFieldValue<s16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<s16>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(u32))
 			{
-				field->SetFieldValue<u32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<u32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(s32))
 			{
-				field->SetFieldValue<s32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<s32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(u64))
 			{
-				field->SetFieldValue<u64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<u64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(s64))
 			{
-				field->SetFieldValue<s64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<s64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(f32))
 			{
-				field->SetFieldValue<f32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<f32>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
 			else if (fieldDeclId == TYPEID(f64))
 			{
-				field->SetFieldValue<f64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+				field->ForceSetFieldValue<f64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
+			}
+			else if (fieldDeclId == TYPEID(UUID))
+			{
+				field->ForceSetFieldValue<UUID>(instance, unsignedInt);
+			}
+			else if (fieldDeclId == TYPEID(UUID32))
+			{
+				field->ForceSetFieldValue<UUID32>(instance, (u32)unsignedInt);
 			}
 			else if (fieldDeclId == TYPEID(String))
 			{
 				if (isUnsignedInt)
-					field->SetFieldValue<String>(instance, String::Format("{}", unsignedInt));
+					field->ForceSetFieldValue<String>(instance, String::Format("{}", unsignedInt));
 				else
-					field->SetFieldValue<String>(instance, String::Format("{}", signedInt));
+					field->ForceSetFieldValue<String>(instance, String::Format("{}", signedInt));
 			}
 			else
 			{
@@ -611,51 +728,51 @@ namespace CE
 
 			if (fieldDeclId == TYPEID(b8))
 			{
-				field->SetFieldValue<b8>(instance, floatValue > 0);
+				field->ForceSetFieldValue<b8>(instance, floatValue > 0);
 			}
 			else if (fieldDeclId == TYPEID(c8))
 			{
-				field->SetFieldValue<c8>(instance, (c8)(s64)floatValue);
+				field->ForceSetFieldValue<c8>(instance, (c8)(s64)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(u8))
 			{
-				field->SetFieldValue<u8>(instance, (u8)(s64)floatValue);
+				field->ForceSetFieldValue<u8>(instance, (u8)(s64)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(s8))
 			{
-				field->SetFieldValue<s8>(instance, (s8)(s64)floatValue);
+				field->ForceSetFieldValue<s8>(instance, (s8)(s64)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(u16))
 			{
-				field->SetFieldValue<u16>(instance, (u16)(s64)floatValue);
+				field->ForceSetFieldValue<u16>(instance, (u16)(s64)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(s16))
 			{
-				field->SetFieldValue<s16>(instance, (s16)(s64)floatValue);
+				field->ForceSetFieldValue<s16>(instance, (s16)(s64)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(u32))
 			{
-				field->SetFieldValue<u32>(instance, (u32)floatValue);
+				field->ForceSetFieldValue<u32>(instance, (u32)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(s32))
 			{
-				field->SetFieldValue<s32>(instance, (s32)floatValue);
+				field->ForceSetFieldValue<s32>(instance, (s32)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(u64))
 			{
-				field->SetFieldValue<u64>(instance, (u64)floatValue);
+				field->ForceSetFieldValue<u64>(instance, (u64)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(s64))
 			{
-				field->SetFieldValue<s64>(instance, (s64)floatValue);
+				field->ForceSetFieldValue<s64>(instance, (s64)floatValue);
 			}
 			else if (fieldDeclId == TYPEID(f32))
 			{
-				field->SetFieldValue<f32>(instance, floatValue);
+				field->ForceSetFieldValue<f32>(instance, floatValue);
 			}
 			else if (fieldDeclId == TYPEID(f64))
 			{
-				field->SetFieldValue<f64>(instance, doubleValue);
+				field->ForceSetFieldValue<f64>(instance, doubleValue);
 			}
 			else
 			{
@@ -671,35 +788,35 @@ namespace CE
 
 			if (fieldDeclId == TYPEID(String))
 			{
-				field->SetFieldValue<String>(instance, string);
+				field->ForceSetFieldValue<String>(instance, string);
 			}
 			else if (fieldDeclId == TYPEID(Name))
 			{
-				field->SetFieldValue<Name>(instance, string);
+				field->ForceSetFieldValue<Name>(instance, string);
 			}
 			else if (fieldDeclId == TYPEID(IO::Path))
 			{
-				field->SetFieldValue<IO::Path>(instance, string);
+				field->ForceSetFieldValue<IO::Path>(instance, string);
 			}
 			else if (fieldDeclId == TYPEID(SubClassType<>))
 			{
 				ClassType* classType = ClassType::FindClass(string);
-				field->SetFieldValue<SubClassType<Object>>(instance, classType);
+				field->ForceSetFieldValue<SubClassType<Object>>(instance, classType);
 			}
 			else if (fieldDeclId == TYPEID(ClassType))
 			{
 				ClassType* classType = ClassType::FindClass(string);
-				field->SetFieldValue<ClassType*>(instance, classType);
+				field->ForceSetFieldValue<ClassType*>(instance, classType);
 			}
 			else if (fieldDeclId == TYPEID(StructType))
 			{
 				StructType* structType = StructType::FindStruct(string);
-				field->SetFieldValue<StructType*>(instance, structType);
+				field->ForceSetFieldValue<StructType*>(instance, structType);
 			}
 			else if (fieldDeclId == TYPEID(EnumType))
 			{
 				EnumType* enumType = EnumType::FindEnum(string);
-				field->SetFieldValue<EnumType*>(instance, enumType);
+				field->ForceSetFieldValue<EnumType*>(instance, enumType);
 			}
 			else
 			{
@@ -715,27 +832,27 @@ namespace CE
 
 			if (fieldDeclId == TYPEID(Vec2))
 			{
-				field->SetFieldValue<Vec2>(instance, val);
+				field->ForceSetFieldValue<Vec2>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec2i))
 			{
-				field->SetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
+				field->ForceSetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
 			}
 			else if (fieldDeclId == TYPEID(Vec3))
 			{
-				field->SetFieldValue<Vec3>(instance, val);
+				field->ForceSetFieldValue<Vec3>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec3i))
 			{
-				field->SetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, 0));
+				field->ForceSetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, 0));
 			}
 			else if (fieldDeclId == TYPEID(Vec4))
 			{
-				field->SetFieldValue<Vec4>(instance, val);
+				field->ForceSetFieldValue<Vec4>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec4i))
 			{
-				field->SetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, 0, 0));
+				field->ForceSetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, 0, 0));
 			}
 			else
 			{
@@ -751,35 +868,35 @@ namespace CE
 
 			if (fieldDeclId == TYPEID(Vec2))
 			{
-				field->SetFieldValue<Vec2>(instance, val);
+				field->ForceSetFieldValue<Vec2>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec2i))
 			{
-				field->SetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
+				field->ForceSetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
 			}
 			else if (fieldDeclId == TYPEID(Vec3))
 			{
-				field->SetFieldValue<Vec3>(instance, val);
+				field->ForceSetFieldValue<Vec3>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec3i))
 			{
-				field->SetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, (int)val.z));
+				field->ForceSetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, (int)val.z));
 			}
 			else if (fieldDeclId == TYPEID(Vec4))
 			{
-				field->SetFieldValue<Vec4>(instance, val);
+				field->ForceSetFieldValue<Vec4>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec4i))
 			{
-				field->SetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, (int)val.z, 0));
+				field->ForceSetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, (int)val.z, 0));
 			}
 			else if (fieldDeclId == TYPEID(Quat))
 			{
-				field->SetFieldValue<Quat>(instance, Quat(val, 0));
+				field->ForceSetFieldValue<Quat>(instance, Quat(val, 0));
 			}
 			else if (fieldDeclId == TYPEID(Color))
 			{
-				field->SetFieldValue<Color>(instance, val);
+				field->ForceSetFieldValue<Color>(instance, val);
 			}
 			else
 			{
@@ -795,35 +912,35 @@ namespace CE
 
 			if (fieldDeclId == TYPEID(Vec2))
 			{
-				field->SetFieldValue<Vec2>(instance, val);
+				field->ForceSetFieldValue<Vec2>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec2i))
 			{
-				field->SetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
+				field->ForceSetFieldValue<Vec2i>(instance, Vec2i((int)val.x, (int)val.y));
 			}
 			else if (fieldDeclId == TYPEID(Vec3))
 			{
-				field->SetFieldValue<Vec3>(instance, val);
+				field->ForceSetFieldValue<Vec3>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec3i))
 			{
-				field->SetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, (int)val.z));
+				field->ForceSetFieldValue<Vec3i>(instance, Vec3i((int)val.x, (int)val.y, (int)val.z));
 			}
 			else if (fieldDeclId == TYPEID(Vec4))
 			{
-				field->SetFieldValue<Vec4>(instance, val);
+				field->ForceSetFieldValue<Vec4>(instance, val);
 			}
 			else if (fieldDeclId == TYPEID(Vec4i))
 			{
-				field->SetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, (int)val.z, (int)val.w));
+				field->ForceSetFieldValue<Vec4i>(instance, Vec4i((int)val.x, (int)val.y, (int)val.z, (int)val.w));
 			}
 			else if (fieldDeclId == TYPEID(Quat))
 			{
-				field->SetFieldValue<Quat>(instance, Quat(val.x, val.y, val.z, val.w));
+				field->ForceSetFieldValue<Quat>(instance, Quat(val.x, val.y, val.z, val.w));
 			}
 			else if (fieldDeclId == TYPEID(Color))
 			{
-				field->SetFieldValue<Color>(instance, val);
+				field->ForceSetFieldValue<Color>(instance, val);
 			}
 			else
 			{
@@ -840,6 +957,17 @@ namespace CE
 			*stream >> packageUuid;
 
 			// TODO: Find object reference
+			auto packageResolver = Package::GetPackageResolver();
+			if (packageResolver != nullptr)
+			{
+				Name packagePath = packageResolver->GetPackagePath(packageUuid);
+				Package* package = Package::LoadPackage(nullptr, packagePath);
+				if (package != nullptr)
+				{
+					Object* object = package->LoadObject(objectUuid);
+					field->ForceSetFieldValue<Object*>(instance, object);
+				}
+			}
 
 			return true;
 		}
@@ -851,6 +979,7 @@ namespace CE
 				
 				BinaryDeserializer deserializer{ structType, field->GetFieldInstance(instance) };
 
+				stream->Seek(-1, SeekMode::Current); // Go back 1 byte, the deserializer needs to read the type byte
 				deserializer.Deserialize(stream);
 			}
 			else
@@ -864,15 +993,17 @@ namespace CE
 		{
 			if (field->IsArrayField())
 			{
-				const Array<u8>& array = field->GetFieldValue<Array<u8>>(instance);
-
-				Array<FieldType> elements = field->GetArrayFieldList(instance);
 				u64 dataSize = 0;
 				u32 numElements = 0;
 
 				auto headerPos = stream->GetCurrentPosition();
 				*stream >> dataSize; // Data byte size
 				*stream >> numElements; // Num of elements
+
+				field->ResizeArray(instance, numElements);
+				Array<FieldType> elements = field->GetArrayFieldList(instance);
+
+				const Array<u8>& array = field->GetFieldValue<Array<u8>>(instance);
 
 				void* arrayInstance = nullptr;
 				if (array.NonEmpty())
@@ -881,6 +1012,34 @@ namespace CE
 				for (int i = 0; i < elements.GetSize(); i++)
 				{
 					DeserializeField(stream, &elements[i], arrayInstance);
+				}
+			}
+			else if (fieldDeclId == TYPEID(ObjectMap))
+			{
+				ObjectMap& array = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(instance));
+
+				u64 dataSize = 0;
+				u32 numElements = 0;
+
+				auto headerPos = stream->GetCurrentPosition();
+				*stream >> dataSize; // Data byte size
+				*stream >> numElements; // Num of elements
+
+				for (int i = 0; i < numElements; i++)
+				{
+					u8 typeByte = 0;
+					*stream >> typeByte;
+					if (typeByte == 0)
+						continue;// Null object
+					if (typeByte != typeIdToFieldTypeMap[TYPEID(Object)])
+						continue;
+
+					u64 uuid = 0; u64 packageUuid = 0;
+					*stream >> uuid;
+					*stream >> packageUuid;
+
+					// TODO: Resolve object reference
+
 				}
 			}
 			else

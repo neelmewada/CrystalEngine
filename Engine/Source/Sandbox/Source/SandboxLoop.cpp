@@ -17,7 +17,7 @@ void SandboxLoop::PreInit(int argc, const char** argv)
     {
         gProgramArguments.Add(argv[i]);
     }
-
+	
     // Initialize logging
 	Logger::SetConsoleLogLevel(LogLevel::Trace);
 	Logger::SetFileDumpLogLevel(LogLevel::Trace);

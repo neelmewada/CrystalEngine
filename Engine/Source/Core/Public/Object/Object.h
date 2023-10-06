@@ -315,32 +315,6 @@ namespace CE
 		static HashMap<void*, Array<SignalBinding>> outgoingBindingsMap;
 		static HashMap<void*, Array<SignalBinding>> incomingBindingsMap;
     };
-
-	template<typename T, typename = void>
-	struct THasImplementSignalsFunction : TFalseType
-	{};
-
-	template<typename T>
-	struct THasImplementSignalsFunction<T, std::void_t<decltype(std::declval<T>().__implement_signals)>> : TTrueType
-	{};
-
-	template<typename T, bool = THasImplementSignalsFunction<T>::Value>
-	struct TImplementSignals : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value>
-	{
-
-	};
-
-	template<typename T>
-	struct TImplementSignals<T, false> : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value>
-	{
-
-	};
-
-	template<typename T>
-	struct TImplementSignals<T, true> : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value or T::__implement_signals>
-	{
-
-	};
     
 } // namespace CE
 
@@ -349,10 +323,10 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(name, Hidden, ReadOnly, Internal) // name cannot be modified directly
-        CE_FIELD(uuid, Hidden, ReadOnly, Internal) // uuid cannot be modified directly
-		CE_FIELD(attachedObjects, Hidden, Internal)
-		CE_FIELD(outer, Hidden, Internal)
+        CE_FIELD(name, Hidden, ReadOnly) // name cannot be modified directly
+        CE_FIELD(uuid, Hidden, ReadOnly) // uuid cannot be modified directly
+		CE_FIELD(attachedObjects, Hidden)
+		CE_FIELD(outer, Hidden)
     ),
     CE_FUNCTION_LIST(
         

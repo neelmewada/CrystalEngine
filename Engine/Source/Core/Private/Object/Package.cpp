@@ -6,6 +6,8 @@ namespace CE
 {
 	HashMap<Name, Package*> Package::loadedPackages{};
 
+	IPackageResolver* Package::packageResolver = nullptr;
+
 	Package::Package()
 	{
 		this->packageName = name;
