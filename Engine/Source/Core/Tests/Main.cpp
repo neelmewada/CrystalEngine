@@ -1324,6 +1324,8 @@ TEST(Object, CDI2)
 		EXPECT_EQ(anotherCDI->myString, "default");
 
 		testCDI->subobject->myString = "modified from CDI";
+
+		testCDI->transient = ModuleManager::Get().GetLoadedModuleTransientPackage("Core");
 	}
 
 	// 2. Object instantiation

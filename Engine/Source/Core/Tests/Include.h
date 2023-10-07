@@ -203,6 +203,9 @@ namespace CDITests
 
 		FIELD()
 		TestObject* test = nullptr;
+
+		FIELD()
+		Object* transient = nullptr;
 	};
 
 	CLASS()
@@ -222,6 +225,9 @@ namespace CDITests
 
 		FIELD()
 		AnotherObject* subobject = nullptr;
+
+		FIELD()
+		Object* transient = nullptr;
 	};
 }
 
