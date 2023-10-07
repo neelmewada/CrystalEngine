@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 
+using namespace CE;
+
 namespace PackageTests
 {
 	using namespace CE;
@@ -72,7 +74,6 @@ namespace PackageTests
 
 namespace ObjectTests
 {
-	using namespace CE;
 
 	class DerivedClassA;
 
@@ -155,6 +156,72 @@ namespace ObjectTests
 
 		FIELD()
 		Array<String> arrayValue{};
+	};
+}
+
+// CDI
+
+namespace CDITests
+{
+	class TestObject;
+	class AnotherObject;
+
+	STRUCT()
+	struct TestStruct
+	{
+		CE_STRUCT(TestStruct)
+	public:
+
+		FIELD()
+		Array<String> stringArray = {};
+
+		FIELD()
+		TestObject* testObject = nullptr;
+
+		FIELD()
+		AnotherObject* another = nullptr;
+	};
+
+	CLASS()
+	class AnotherObject : public Object
+	{
+		CE_CLASS(AnotherObject, Object)
+	public:
+
+		AnotherObject()
+		{
+			data.stringArray = {
+				"another0", "another1", "another2"
+			};
+		}
+
+		FIELD()
+		TestStruct data{};
+
+		FIELD()
+		String myString = "default";
+
+		FIELD()
+		TestObject* test = nullptr;
+	};
+
+	CLASS()
+	class TestObject : public Object
+	{
+		CE_CLASS(TestObject, Object)
+	public:
+
+		TestObject()
+		{
+			subobject = CreateDefaultSubobject<AnotherObject>("SomeSubobject");
+			subobject->myString = "modified from TestObject";
+			subobject->data.stringArray = {
+				"test0", "test1"
+			};
+		}
+
+		FIELD()
+		AnotherObject* subobject = nullptr;
 	};
 }
 

@@ -780,7 +780,7 @@ namespace CE
 	template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
 	FORCE_INLINE TClass* GetMutableDefaults()
 	{
-		ClassType* classType = TClass::Type();
+		ClassType* classType = TClass::StaticType();
 		if (classType == nullptr)
 			return nullptr;
 		return (TClass*)classType->GetDefaultInstance();

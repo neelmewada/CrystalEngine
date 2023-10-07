@@ -370,20 +370,7 @@ namespace CE
 
         if (!skipHeader)
         {
-			if (packageMajor == 0 || IsVersionGreaterThanOrEqualTo(packageMajor, packageMinor, FieldMagicValue_Major, FieldMagicValue_Minor))
-			{
-				u32 magicValue = 0;
-				*stream >> magicValue;
-				if (magicValue != FIELD_MAGIC_NUMBER) // End of fields or invalid field
-				{
-					if (magicValue != 0)
-					{
-						CE_LOG(Error, All, "Invalid field entry! Expected a magic field number.");
-					}
-					fields.Clear();
-					return false;
-				}
-			}
+			
 
             *stream >> fieldName;
             if (fieldName.IsEmpty())
@@ -661,10 +648,7 @@ namespace CE
         *stream >> objectTypeName;
 
 		u64 packageUuid = 0;
-		if (IsVersionGreaterThanOrEqualTo(packageMajor, packageMinor, ObjectRefPackageUuid_Major, ObjectRefPackageUuid_Minor))
-		{
-			*stream >> packageUuid;
-		}
+		*stream >> packageUuid;
 
         Name packageName{};
         *stream >> packageName;

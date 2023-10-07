@@ -90,6 +90,11 @@ namespace CE
     {
         if (subobject == nullptr || attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
+		if (attachedObjects.ObjectExists(subobject->GetName()))
+		{
+			CE_LOG(Error, All, "Attempting to add subobject of name {}, which is already used by another object in the parent {}", subobject->GetName(), GetName());
+			return;
+		}
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
 
@@ -500,6 +505,16 @@ namespace CE
 		return CreateObject<Object>(this, name, flags, classType);
 	}
 
+	Object* Object::GetDefaultSubobject(ClassType* classType, const String& name)
+	{
+		for (auto object : attachedObjects)
+		{
+			if (object->GetName() == name && object->GetClass() == classType)
+				return object;
+		}
+		return nullptr;
+	}
+
 	Object* Object::CloneHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone)
 	{
 		auto thisClass = GetClass();
@@ -623,13 +638,42 @@ namespace CE
 
 		for (auto field = templateClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
-			auto destField = thisClass->FindFieldWithName(field->GetName());
+			auto destField = thisClass->FindFieldWithName(field->GetName(), field->GetTypeId());
 			if (destField->GetTypeId() != field->GetTypeId()) // Type mismatch
 				continue;
 			if (destField->IsInternal())
 				continue;
 
-			if (field->IsObjectField()) // Deep copy object fields
+			if (field->GetDeclarationTypeId() == TYPEID(ObjectMap))
+			{
+				const ObjectMap& srcMap = field->GetFieldValue<ObjectMap>(templateObject);
+				ObjectMap& dstMap = const_cast<ObjectMap&>(destField->GetFieldValue<ObjectMap>(this));
+
+				for (auto srcObject : srcMap)
+				{
+					if (srcObject == nullptr)
+						continue;
+					Object* dstObject = srcMap.FindObject(srcObject->GetName(), srcObject->GetClass());
+					if (dstObject == nullptr)
+						return;
+
+					dstObject->LoadFromTemplateHelper(originalToClonedObjectMap, srcObject);
+				}
+			}
+			else if (field->IsArrayField() && field->GetUnderlyingType() != nullptr && field->GetUnderlyingType()->IsObject())
+			{
+				const Array<Object*>& srcArray = field->GetFieldValue<Array<Object*>>(templateObject);
+				Array<Object*>& dstArray = const_cast<Array<Object*>&>(field->GetFieldValue<Array<Object*>>(this));
+
+				for (auto srcObject : srcArray)
+				{
+					if (srcObject == nullptr)
+						continue;
+
+
+				}
+			}
+			else if (field->IsObjectField()) // Deep copy object fields
 			{
 				Object* objectToCopy = field->GetFieldValue<Object*>(templateObject);
 				if (objectToCopy == nullptr)

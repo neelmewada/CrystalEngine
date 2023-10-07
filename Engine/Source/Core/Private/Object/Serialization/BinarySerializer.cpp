@@ -338,7 +338,10 @@ namespace CE
 	BinaryDeserializer::BinaryDeserializer(TypeInfo* targetType, void* targetInstance)
 		: targetType(targetType), instance(targetInstance)
 	{
-
+		if (targetType->IsClass())
+		{
+			closestParent = (Object*)targetInstance;
+		}
 	}
 
 	int BinaryDeserializer::Deserialize(Stream* stream)
@@ -559,6 +562,10 @@ namespace CE
 			else if (fieldDeclId == TYPEID(Vec4))
 			{
 				field->ForceSetFieldValue<Vec4>(instance, {});
+			}
+			else if (fieldDeclId == TYPEID(Color))
+			{
+				field->ForceSetFieldValue<Color>(instance, {});
 			}
 			else if (fieldDeclId == TYPEID(Vec4i))
 			{
@@ -955,16 +962,20 @@ namespace CE
 			u64 packageUuid = 0;
 			*stream >> objectUuid;
 			*stream >> packageUuid;
-
-			// TODO: Find object reference
-			auto packageResolver = Package::GetPackageResolver();
-			if (packageResolver != nullptr)
+			
+			if (packageUuid != 0)
 			{
-				Name packagePath = packageResolver->GetPackagePath(packageUuid);
-				Package* package = Package::LoadPackage(nullptr, packagePath);
-				if (package != nullptr)
+				Package* refPackage = Package::LoadPackageByUuid(packageUuid);
+				if (refPackage != nullptr)
 				{
-					Object* object = package->LoadObject(objectUuid);
+					Object* original = field->GetFieldValue<Object*>(instance);
+					Object* object = refPackage->LoadObject(objectUuid);
+
+					if (original != nullptr && closestParent != nullptr)
+					{
+						
+					}
+
 					field->ForceSetFieldValue<Object*>(instance, object);
 				}
 			}
@@ -978,6 +989,7 @@ namespace CE
 				StructType* structType = (StructType*)field->GetDeclarationType();
 				
 				BinaryDeserializer deserializer{ structType, field->GetFieldInstance(instance) };
+				deserializer.closestParent = closestParent;
 
 				stream->Seek(-1, SeekMode::Current); // Go back 1 byte, the deserializer needs to read the type byte
 				deserializer.Deserialize(stream);
@@ -991,30 +1003,7 @@ namespace CE
 		}
 		else if (isArray)
 		{
-			if (field->IsArrayField())
-			{
-				u64 dataSize = 0;
-				u32 numElements = 0;
-
-				auto headerPos = stream->GetCurrentPosition();
-				*stream >> dataSize; // Data byte size
-				*stream >> numElements; // Num of elements
-
-				field->ResizeArray(instance, numElements);
-				Array<FieldType> elements = field->GetArrayFieldList(instance);
-
-				const Array<u8>& array = field->GetFieldValue<Array<u8>>(instance);
-
-				void* arrayInstance = nullptr;
-				if (array.NonEmpty())
-					arrayInstance = (void*)&array[0];
-
-				for (int i = 0; i < elements.GetSize(); i++)
-				{
-					DeserializeField(stream, &elements[i], arrayInstance);
-				}
-			}
-			else if (fieldDeclId == TYPEID(ObjectMap))
+			if (fieldDeclId == TYPEID(ObjectMap))
 			{
 				ObjectMap& array = const_cast<ObjectMap&>(field->GetFieldValue<ObjectMap>(instance));
 
@@ -1038,8 +1027,44 @@ namespace CE
 					*stream >> uuid;
 					*stream >> packageUuid;
 
-					// TODO: Resolve object reference
+					if (packageUuid != 0)
+					{
+						Package* refPackage = Package::LoadPackageByUuid(packageUuid);
+						if (refPackage != nullptr)
+						{
+							Object* original = field->GetFieldValue<Object*>(instance);
+							if (original != nullptr)
+							{
 
+							}
+
+							Object* object = refPackage->LoadObject(uuid);
+							field->ForceSetFieldValue<Object*>(instance, object);
+						}
+					}
+				}
+			}
+			else if (field->IsArrayField())
+			{
+				u64 dataSize = 0;
+				u32 numElements = 0;
+
+				auto headerPos = stream->GetCurrentPosition();
+				*stream >> dataSize; // Data byte size
+				*stream >> numElements; // Num of elements
+
+				field->ResizeArray(instance, numElements);
+				Array<FieldType> elements = field->GetArrayFieldList(instance);
+
+				const Array<u8>& array = field->GetFieldValue<Array<u8>>(instance);
+
+				void* arrayInstance = nullptr;
+				if (array.NonEmpty())
+					arrayInstance = (void*)&array[0];
+
+				for (int i = 0; i < elements.GetSize(); i++)
+				{
+					DeserializeField(stream, &elements[i], arrayInstance);
 				}
 			}
 			else

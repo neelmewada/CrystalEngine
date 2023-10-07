@@ -229,6 +229,8 @@ namespace CE
 
 	private:
 
+		Object* GetDefaultSubobject(ClassType* classType, const String& name);
+
 		void FetchObjectReferencesInStructField(HashMap<UUID, Object*>& outReferences, StructType* structType, void* structInstance);
 
 		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate);
@@ -323,10 +325,10 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(name, Hidden, ReadOnly) // name cannot be modified directly
-        CE_FIELD(uuid, Hidden, ReadOnly) // uuid cannot be modified directly
-		CE_FIELD(attachedObjects, Hidden)
-		CE_FIELD(outer, Hidden)
+        CE_FIELD(name, Hidden, ReadOnly, Internal) // name cannot be modified directly
+        CE_FIELD(uuid, Hidden, ReadOnly, Internal) // uuid cannot be modified directly
+		CE_FIELD(attachedObjects, Hidden, ReadOnly)
+		CE_FIELD(outer, Hidden, ReadOnly)
     ),
     CE_FUNCTION_LIST(
         

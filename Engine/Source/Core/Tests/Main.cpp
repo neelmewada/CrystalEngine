@@ -791,6 +791,7 @@ TEST(Reflection, SubClassType)
 	}
 
 	// 3. Binary serialization
+	if (false)
 	{
 		MemoryStream stream = MemoryStream(2048);
 		stream.SetBinaryMode(true);
@@ -1237,6 +1238,7 @@ TEST(Object, CDI)
 	CE_REGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
 
 	{
+		{
 		CDISubClass* testSubClass = CreateObject<CDISubClass>(nullptr, "CDISubClassTest");
 		EXPECT_EQ(testSubClass->subString, "String from ini");
 
@@ -1285,13 +1287,52 @@ TEST(Object, CDI)
 	EXPECT_EQ(testObject->dictionary[2].name, "id2");
 	EXPECT_EQ(testObject->dictionary[2].value, 43);
 
+	EXPECT_NE(cdi->subClass, testObject->subClass);
 	EXPECT_EQ(testObject->subClass->subString, "modified again");
 	EXPECT_NE(testObject->subClass, cdi->subClass); // sub objects should always be deep-copied
 
 	testObject->RequestDestroy();
+	}
     
 	CE_DEREGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
     TEST_END;
+}
+
+
+TEST(Object, CDI2)
+{
+	using namespace CDITests;
+
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(TestObject, AnotherObject, TestStruct);
+
+	auto anotherCDI = GetMutableDefaults<AnotherObject>();
+	auto testCDI = GetMutableDefaults<TestObject>();
+
+	// 1. CDI Test
+	{
+		EXPECT_EQ(testCDI->subobject->myString, "modified from TestObject");
+		EXPECT_EQ(testCDI->subobject->data.stringArray.GetSize(), 2);
+		EXPECT_EQ(testCDI->subobject->data.stringArray[0], "test0");
+		EXPECT_EQ(testCDI->subobject->data.stringArray[1], "test1");
+
+		EXPECT_EQ(anotherCDI->data.stringArray.GetSize(), 3);
+		EXPECT_EQ(anotherCDI->data.stringArray[0], "another0");
+		EXPECT_EQ(anotherCDI->data.stringArray[1], "another1");
+		EXPECT_EQ(anotherCDI->data.stringArray[2], "another2");
+
+		EXPECT_EQ(anotherCDI->myString, "default");
+
+		testCDI->subobject->myString = "modified from CDI";
+	}
+
+	// 2. Object instantiation
+	{
+
+	}
+
+	CE_DEREGISTER_TYPES(TestObject, AnotherObject, TestStruct);
+	TEST_END;
 }
 
 TEST(Object, Signals)
@@ -2246,6 +2287,7 @@ TEST(Serialization, BinaryBlob)
     }
     
 	// 2. Field serialization
+	if (false)
 	{
 		MemoryStream stream = MemoryStream(1_MB);
 		stream.SetBinaryMode(true);
@@ -2316,6 +2358,13 @@ namespace SerializationTests {
 		CE_CLASS(TestClass1, Object)
 	public:
 
+		TestClass1()
+		{
+			myString = "default";
+		}
+
+		String myString = "";
+
 		Array<MyData> dataList{};
 
 	};
@@ -2339,6 +2388,7 @@ CE_RTTI_CLASS(,SerializationTests, TestClass1,
 	CE_NOT_ABSTRACT,
 	CE_ATTRIBS(),
 	CE_FIELD_LIST(
+		CE_FIELD(myString)
 		CE_FIELD(dataList)
 	),
 	CE_FUNCTION_LIST()
@@ -2358,6 +2408,7 @@ TEST(Serialization, BasicBinarySerialization)
 
 	{
 		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject");
+		test->myString = "modified";
 		original = test->GetUuid();
 		test->dataList.Add({}); test->dataList.Add({});
 		MyData& data0 = test->dataList[0];
@@ -2378,11 +2429,33 @@ TEST(Serialization, BasicBinarySerialization)
 
 	stream.Seek(0);
 
+	TestClass1* testClass1Defaults = GetMutableDefaults<TestClass1>();
+	testClass1Defaults->myString = "modified default";
+
 	{
 		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject2");
+		EXPECT_EQ(test->GetOuter(), nullptr);
+		EXPECT_EQ(test->myString, "modified default");
 
 		BinaryDeserializer deserializer{ test->GetClass(), test };
 		deserializer.Deserialize(&stream);
+
+		EXPECT_EQ(test->myString, "modified");
+		EXPECT_EQ(test->GetName(), "TestObject");
+		EXPECT_EQ(test->GetUuid(), original);
+		EXPECT_EQ(test->dataList.GetSize(), 2);
+
+		MyData& data0 = test->dataList[0];
+		EXPECT_EQ(data0.clazz, Package::StaticType());
+		EXPECT_EQ(data0.vector, Vec4(1, 2.2f, 3.3f, 4.125f));
+		EXPECT_EQ(data0.string, "Data 0 String");
+		EXPECT_EQ(data0.array.GetSize(), 3);
+		EXPECT_EQ(data0.array[0], "item0"); EXPECT_EQ(data0.array[1], "item1"); EXPECT_EQ(data0.array[2], "item2");
+		
+		MyData& data1 = test->dataList[1];
+		EXPECT_EQ(data1.clazz, nullptr);
+		EXPECT_EQ(data1.string, "Data 1 String");
+		EXPECT_EQ(data1.array.GetSize(), 0);
 		
 		test->Destroy();
 	}

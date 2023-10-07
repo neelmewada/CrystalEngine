@@ -15,6 +15,18 @@ namespace CE
 		return nullptr;
     }
 
+	Object* ObjectMap::FindObject(const Name& name, ClassType* classType) const
+	{
+		for (auto object : objects)
+		{
+			if (object != nullptr && object->GetName() == name && (classType == nullptr || classType == object->GetClass()))
+			{
+				return object;
+			}
+		}
+		return nullptr;
+	}
+
     Object* ObjectMap::GetObjectAt(u32 index) const
     {
 		if (index >= objects.GetSize())
@@ -25,6 +37,11 @@ namespace CE
 	bool ObjectMap::ObjectExists(UUID uuid) const
 	{
 		return objects.Exists([=](Object* obj) { return obj != nullptr && obj->GetUuid() == uuid; });
+	}
+
+	bool ObjectMap::ObjectExists(const Name& objectName) const
+	{
+		return objects.Exists([=](Object* obj) { return obj != nullptr && obj->GetName() == objectName; });
 	}
 
     void ObjectMap::AddObject(Object* object)

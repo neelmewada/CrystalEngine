@@ -45,6 +45,8 @@ namespace CE
 
 		TypeInfo* targetType = nullptr;
 		void* instance = nullptr;
+
+		Object* closestParent = nullptr;
 	};
 
 } // namespace CE
