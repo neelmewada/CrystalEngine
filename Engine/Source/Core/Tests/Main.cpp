@@ -1315,22 +1315,44 @@ TEST(Object, CDI2)
 		EXPECT_EQ(testCDI->subobject->data.stringArray.GetSize(), 2);
 		EXPECT_EQ(testCDI->subobject->data.stringArray[0], "test0");
 		EXPECT_EQ(testCDI->subobject->data.stringArray[1], "test1");
+		EXPECT_EQ(testCDI->subobject->data.another, nullptr);
 
 		EXPECT_EQ(anotherCDI->data.stringArray.GetSize(), 3);
 		EXPECT_EQ(anotherCDI->data.stringArray[0], "another0");
 		EXPECT_EQ(anotherCDI->data.stringArray[1], "another1");
 		EXPECT_EQ(anotherCDI->data.stringArray[2], "another2");
+		EXPECT_EQ(anotherCDI->data.another, anotherCDI);
 
 		EXPECT_EQ(anotherCDI->myString, "default");
 
 		testCDI->subobject->myString = "modified from CDI";
+		testCDI->subobject->data.another = testCDI->subobject;
 
 		testCDI->transient = ModuleManager::Get().GetLoadedModuleTransientPackage("Core");
 	}
 
 	// 2. Object instantiation
 	{
+		Object* transient = CreateObject<Object>(nullptr, "Transient", OF_Transient);
 
+		TestObject* test = CreateObject<TestObject>(nullptr, "TestObject");
+		EXPECT_EQ(test->GetOuter(), nullptr);
+		EXPECT_EQ(test->subobject->myString, "modified from CDI");
+		EXPECT_EQ(test->subobject->data.stringArray.GetSize(), 2);
+		EXPECT_EQ(test->subobject->data.stringArray[0], "test0");
+		EXPECT_EQ(test->subobject->data.stringArray[1], "test1");
+		EXPECT_EQ(test->transient, testCDI->transient);
+		EXPECT_EQ(test->subobject->data.another, test->subobject);
+
+		anotherCDI->test = test;
+
+		AnotherObject* another = CreateObject<AnotherObject>(nullptr, "AnotherObject");
+		EXPECT_EQ(another->test, test);
+		EXPECT_EQ(another->myString, "default");
+		EXPECT_EQ(another->data.another, another);
+
+		test->Destroy();
+		another->Destroy();
 	}
 
 	CE_DEREGISTER_TYPES(TestObject, AnotherObject, TestStruct);

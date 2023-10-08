@@ -193,6 +193,7 @@ namespace CDITests
 			data.stringArray = {
 				"another0", "another1", "another2"
 			};
+			data.another = this;
 		}
 
 		FIELD()
@@ -221,6 +222,9 @@ namespace CDITests
 			subobject->data.stringArray = {
 				"test0", "test1"
 			};
+
+			subobject->data.another = nullptr;
+			subobject->data.testObject = this;
 		}
 
 		FIELD()

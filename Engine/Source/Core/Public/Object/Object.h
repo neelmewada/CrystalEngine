@@ -192,6 +192,9 @@ namespace CE
 
 		void LoadFromTemplateHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* templateObject);
 
+		void LoadFromTemplateFieldHelper(HashMap<UUID, Object*>& originalToClonedObjectMap,
+			Field* srcField, void* srcInstance, Field* dstField, void* dstInstance);
+
 		Object* CloneHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone);
 
 		// Lifecycle

@@ -623,6 +623,31 @@ namespace CE
 		return CloneHelper(originalToCloneMap, outer, cloneName, deepClone);
 	}
 
+	void Object::LoadFromTemplate(Object* templateObject)
+	{
+		HashMap<UUID, Object*> originalToCloneMap{};
+
+		std::function<void(Object*, Object*)> fetchSubobjects = [&](Object* src, Object* dst)
+			{
+				for (auto srcObject : src->attachedObjects)
+				{
+					if (srcObject == nullptr)
+						continue;
+					Object* dstObject = src->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
+					if (dstObject == nullptr)
+						continue;
+
+					originalToCloneMap[srcObject->GetUuid()] = dstObject;
+
+					fetchSubobjects(srcObject, dstObject);
+				}
+			};
+
+		fetchSubobjects(templateObject, this);
+
+		LoadFromTemplateHelper(originalToCloneMap, templateObject);
+	}
+
 	void Object::LoadFromTemplateHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* templateObject)
 	{
 		if (templateObject == nullptr)
@@ -634,14 +659,14 @@ namespace CE
 		if (!thisClass->IsSubclassOf(templateClass))
 			return;
 
-		originalToClonedObjectMap[templateObject->GetUuid()] = this;
-
 		for (auto field = templateClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
 			auto destField = thisClass->FindFieldWithName(field->GetName(), field->GetTypeId());
 			if (destField->GetTypeId() != field->GetTypeId()) // Type mismatch
 				continue;
-			if (destField->IsInternal())
+			if (destField->IsInternal()) // Do NOT modify name & uuid fields
+				continue;
+			if (destField->GetName() == "outer" && destField->GetOwnerType()->GetTypeId() == TYPEID(Object))
 				continue;
 
 			if (field->GetDeclarationTypeId() == TYPEID(ObjectMap))
@@ -670,7 +695,34 @@ namespace CE
 					if (srcObject == nullptr)
 						continue;
 
+					int idx = dstArray.IndexOf([&](Object* x) { return x != nullptr && x->GetClass() == srcObject->GetClass() && x->GetName() == srcObject->GetName(); });
+					if (idx >= 0)
+					{
+						Object* dstObject = dstArray[idx];
+						
+					}
+				}
+			}
+			else if (field->IsArrayField())
+			{
+				u32 arraySize = field->GetArraySize(templateObject);
+				destField->ResizeArray(this, arraySize);
 
+				const Array<u8>& srcArray = field->GetFieldValue<Array<u8>>(templateObject);
+				const Array<u8>& destArray = destField->GetFieldValue<Array<u8>>(this);
+
+				if (arraySize > 0)
+				{
+					Array<FieldType> srcElements = field->GetArrayFieldList(templateObject);
+					Array<FieldType> destElements = destField->GetArrayFieldList(this);
+					void* srcInstance = (void*)&srcArray[0];
+					void* destInstance = (void*)&destArray[0];
+
+					for (int i = 0; i < arraySize; i++)
+					{
+						LoadFromTemplateFieldHelper(originalToClonedObjectMap, &srcElements[i], srcInstance,
+							&destElements[i], destInstance);
+					}
 				}
 			}
 			else if (field->IsObjectField()) // Deep copy object fields
@@ -682,12 +734,9 @@ namespace CE
 				}
 				else
 				{
-					if (objectToCopy->GetOuter() == templateObject)
+					if (originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
 					{
-						// Deep copy sub-object
-						auto copyDestObject = destField->GetFieldValue<Object*>(this);
-						if (copyDestObject != nullptr)
-							copyDestObject->LoadFromTemplateHelper(originalToClonedObjectMap, objectToCopy);
+						destField->SetFieldValue<Object*>(this, originalToClonedObjectMap[objectToCopy->GetUuid()]);
 					}
 					else if (!originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
 					{
@@ -698,15 +747,143 @@ namespace CE
 			}
 			else
 			{
-				field->CopyTo(templateObject, destField, this);
+				LoadFromTemplateFieldHelper(originalToClonedObjectMap, field, templateObject, destField, this);
+				//field->CopyTo(templateObject, destField, this);
 			}
 		}
 	}
 
-	void Object::LoadFromTemplate(Object* templateObject)
+	void Object::LoadFromTemplateFieldHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, 
+		Field* srcField, void* srcInstance, Field* dstField, void* dstInstance)
 	{
-		HashMap<UUID, Object*> originalToCloneMap{};
-		LoadFromTemplateHelper(originalToCloneMap, templateObject);
+		if (dstField == nullptr || dstField->GetDeclarationTypeId() != srcField->GetDeclarationTypeId() || srcInstance == nullptr || dstInstance == nullptr)
+			return;
+		if (dstField->IsReadOnly() || srcField->GetDeclarationType() == nullptr)
+			return;
+		
+		auto fieldDeclId = dstField->GetDeclarationTypeId();
+		auto fieldDeclType = dstField->GetDeclarationType();
+		
+		static const Array<TypeId> rawDataTypes{
+			TYPEID(Vec2), TYPEID(Vec2i),
+			TYPEID(Vec3), TYPEID(Vec3i),
+			TYPEID(Vec4), TYPEID(Vec4i), TYPEID(Quat), TYPEID(Color),
+			TYPEID(Matrix4x4)
+		};
+
+		if (fieldDeclType->IsPOD())
+		{
+			if (fieldDeclId == TYPEID(String))
+			{
+				String value = srcField->GetFieldValue<String>(srcInstance);
+				dstField->ForceSetFieldValue(dstInstance, value);
+			}
+			else if (fieldDeclId == TYPEID(Name))
+			{
+				Name value = srcField->GetFieldValue<Name>(srcInstance);
+				dstField->ForceSetFieldValue(dstInstance, value);
+			}
+			else if (fieldDeclId == TYPEID(IO::Path))
+			{
+				IO::Path value = srcField->GetFieldValue<IO::Path>(srcInstance);
+				dstField->ForceSetFieldValue(dstInstance, value);
+			}
+			else if (fieldDeclId == TYPEID(UUID))
+			{
+				UUID value = srcField->GetFieldValue<UUID>(srcInstance);
+				dstField->ForceSetFieldValue(dstInstance, value);
+			}
+			else if (fieldDeclId == TYPEID(UUID32))
+			{
+				UUID32 value = srcField->GetFieldValue<UUID32>(srcInstance);
+				dstField->ForceSetFieldValue(dstInstance, value);
+			}
+			else if (srcField->IsArrayField())
+			{
+				u32 arraySize = srcField->GetArraySize(srcInstance);
+				dstField->ResizeArray(dstInstance, arraySize);
+
+				const Array<u8>& srcArray = srcField->GetFieldValue<Array<u8>>(srcInstance);
+				const Array<u8>& destArray = dstField->GetFieldValue<Array<u8>>(dstInstance);
+
+				if (arraySize > 0)
+				{
+					Array<FieldType> srcElements = srcField->GetArrayFieldList(srcInstance);
+					Array<FieldType> destElements = dstField->GetArrayFieldList(dstInstance);
+					void* srcInstance = (void*)&srcArray[0];
+					void* destInstance = (void*)&destArray[0];
+
+					for (int i = 0; i < arraySize; i++)
+					{
+						LoadFromTemplateFieldHelper(originalToClonedObjectMap, &srcElements[i], srcInstance,
+							&destElements[i], destInstance);
+					}
+				}
+			}
+			else if (srcField->IsDecimalField() || srcField->IsIntegerField() || fieldDeclId == TYPEID(b8) || 
+				rawDataTypes.Exists(fieldDeclId))
+			{
+				memcpy(dstField->GetFieldInstance(dstInstance), srcField->GetFieldInstance(srcInstance), srcField->GetFieldSize());
+			}
+			else if (fieldDeclId == TYPEID(BinaryBlob)) // Binary blob
+			{
+				const BinaryBlob& blob = srcField->GetFieldValue<BinaryBlob>(srcInstance);
+				dstField->SetFieldValue(dstInstance, blob);
+			}
+		}
+		else if (fieldDeclType->IsStruct())
+		{
+			auto structType = (StructType*)srcField->GetDeclarationType();
+			void* srcStructInstance = srcField->GetFieldInstance(srcInstance);
+			void* dstStructInstance = dstField->GetFieldInstance(dstInstance);
+
+			for (auto field = structType->GetFirstField(); field != nullptr; field = field->GetNext())
+			{
+				LoadFromTemplateFieldHelper(originalToClonedObjectMap, field, srcStructInstance, field, dstStructInstance);
+			}
+		}
+		else if (fieldDeclType->IsObject())
+		{
+			Object* original = srcField->GetFieldValue<Object*>(srcInstance);
+
+			if (original == nullptr)
+			{
+				dstField->SetFieldValue<Object*>(this, nullptr);
+			}
+			else
+			{
+				Object* parent = nullptr;
+				if (originalToClonedObjectMap.KeyExists(original->GetUuid()))
+				{
+					dstField->SetFieldValue<Object*>(this, originalToClonedObjectMap[original->GetUuid()]);
+				}
+				else
+				{
+					
+				}
+			}
+
+			//Object* objectToCopy = field->GetFieldValue<Object*>(templateObject);
+			//if (objectToCopy == nullptr)
+			//{
+			//	destField->SetFieldValue<Object*>(this, nullptr);
+			//}
+			//else
+			//{
+			//	if (objectToCopy->GetOuter() == templateObject)
+			//	{
+			//		// Deep copy sub-object
+			//		auto copyDestObject = destField->GetFieldValue<Object*>(this);
+			//		if (copyDestObject != nullptr)
+			//			copyDestObject->LoadFromTemplateHelper(originalToClonedObjectMap, objectToCopy);
+			//	}
+			//	else if (!originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
+			//	{
+			//		// Shallow copy external object references
+			//		destField->SetFieldValue<Object*>(this, objectToCopy);
+			//	}
+			//}
+		}
 	}
 
 	void Object::LoadDefaults()
