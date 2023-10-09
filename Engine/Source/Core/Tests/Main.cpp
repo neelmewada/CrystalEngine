@@ -1026,7 +1026,7 @@ TEST(Config, HierarchicalParsing)
 {
     TEST_BEGIN;
 
-    auto engineConfig = gConfigCache->GetConfigFile(CFG_Test);
+    auto engineConfig = gConfigCache->GetConfigFile(CFG_Test());
 
     EXPECT_TRUE(engineConfig->SectionExists("Test::0"));
     auto test0Section = engineConfig->Get("Test::0");
@@ -1238,7 +1238,6 @@ TEST(Object, CDI)
 	CE_REGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
 
 	{
-		{
 		CDISubClass* testSubClass = CreateObject<CDISubClass>(nullptr, "CDISubClassTest");
 		EXPECT_EQ(testSubClass->subString, "String from ini");
 
@@ -1250,7 +1249,7 @@ TEST(Object, CDI)
 	EXPECT_EQ(cdi->floatValue, 42.21f);
 	EXPECT_EQ(cdi->stringValue, "A sample string value");
 	EXPECT_EQ(cdi->boolValue, true);
-
+	
 	EXPECT_EQ(cdi->arrayValue.GetSize(), 3);
 	EXPECT_EQ(cdi->arrayValue[0], "Entry0");
 	EXPECT_EQ(cdi->arrayValue[1], "Entry1");
@@ -1288,11 +1287,11 @@ TEST(Object, CDI)
 	EXPECT_EQ(testObject->dictionary[2].value, 43);
 
 	EXPECT_NE(cdi->subClass, testObject->subClass);
+	EXPECT_EQ(testObject->subClass->GetOuter(), testObject);
 	EXPECT_EQ(testObject->subClass->subString, "modified again");
 	EXPECT_NE(testObject->subClass, cdi->subClass); // sub objects should always be deep-copied
 
-	testObject->RequestDestroy();
-	}
+	testObject->Destroy();
     
 	CE_DEREGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
     TEST_END;
@@ -1330,7 +1329,7 @@ TEST(Object, CDI2)
 
 		testCDI->transient = ModuleManager::Get().GetLoadedModuleTransientPackage("Core");
 	}
-
+	
 	// 2. Object instantiation
 	{
 		Object* transient = CreateObject<Object>(nullptr, "Transient", OF_Transient);
@@ -1347,12 +1346,14 @@ TEST(Object, CDI2)
 		anotherCDI->test = test;
 
 		AnotherObject* another = CreateObject<AnotherObject>(nullptr, "AnotherObject");
+		EXPECT_EQ(another->GetOuter(), nullptr);
 		EXPECT_EQ(another->test, test);
 		EXPECT_EQ(another->myString, "default");
 		EXPECT_EQ(another->data.another, another);
 
 		test->Destroy();
 		another->Destroy();
+		transient->Destroy();
 	}
 
 	CE_DEREGISTER_TYPES(TestObject, AnotherObject, TestStruct);

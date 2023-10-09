@@ -6,6 +6,28 @@
 
 namespace CE
 {
+
+	CORE_API ConfigType CFG_Engine()
+	{
+		return ConfigType("Engine", false);
+	}
+
+	CORE_API ConfigType CFG_Editor()
+	{
+		return ConfigType("Editor", false);
+	}
+
+	CORE_API ConfigType CFG_Game()
+	{
+		return ConfigType("Game", false);
+	}
+
+#if PAL_TRAIT_BUILD_TESTS
+	CORE_API ConfigType CFG_Test()
+	{
+		return ConfigType("Test", false);
+	}
+#endif
     
     ConfigFile::ConfigFile()
     {
@@ -198,10 +220,10 @@ namespace CE
 
     void ConfigCache::LoadStartupConfigs()
     {
-        gConfigCache->LoadConfig(CFG_Engine);
-        gConfigCache->LoadConfig(CFG_Game);
+        gConfigCache->LoadConfig(CFG_Engine());
+        gConfigCache->LoadConfig(CFG_Game());
 #if PAL_TRAIT_BUILD_EDITOR
-        gConfigCache->LoadConfig(CFG_Editor);
+        gConfigCache->LoadConfig(CFG_Editor());
 #endif
     }
 

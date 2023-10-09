@@ -1032,14 +1032,8 @@ namespace CE
 						Package* refPackage = Package::LoadPackageByUuid(packageUuid);
 						if (refPackage != nullptr)
 						{
-							Object* original = field->GetFieldValue<Object*>(instance);
-							if (original != nullptr)
-							{
-
-							}
-
 							Object* object = refPackage->LoadObject(uuid);
-							field->ForceSetFieldValue<Object*>(instance, object);
+							array.AddObject(object);
 						}
 					}
 				}

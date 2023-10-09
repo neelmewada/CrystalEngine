@@ -35,11 +35,17 @@ namespace CE
         bool isCustom = true;
     };
 
-    static ConfigType CFG_Engine = ConfigType("Engine", false);
-    static ConfigType CFG_Editor = ConfigType("Editor", false);
-    static ConfigType CFG_Game = ConfigType("Game", false);
+	CORE_API ConfigType CFG_Engine();
+	CORE_API ConfigType CFG_Editor();
+	CORE_API ConfigType CFG_Game();
 #if PAL_TRAIT_BUILD_TESTS
-    static ConfigType CFG_Test = ConfigType("Test", false);
+	CORE_API ConfigType CFG_Test();
+#endif
+	//static ConfigType CFG_Engine = ConfigType("Engine", false);
+    //static ConfigType CFG_Editor = ConfigType("Editor", false);
+    //static ConfigType CFG_Game = ConfigType("Game", false);
+#if PAL_TRAIT_BUILD_TESTS
+    //static ConfigType CFG_Test = ConfigType("Test", false);
 #endif
 
     template<>

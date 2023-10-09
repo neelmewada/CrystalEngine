@@ -48,14 +48,15 @@ namespace CE
 		// Delete all attached subobjects
 		if (attachedObjects.GetObjectCount() > 0)
 		{
-			for (auto subobject : attachedObjects)
+			for (int i = attachedObjects.GetObjectCount() - 1; i >= 0; i--)
 			{
-				subobject->outer = nullptr; // set subobject's outer to null, so it cannot call Detach on destruction
+				auto subobject = attachedObjects.GetObjectAt(i);
+				subobject->outer = nullptr;
 				subobject->RequestDestroy();
 			}
 		}
 		attachedObjects.RemoveAll();
-
+		
 		delete this;
 	}
 
@@ -633,7 +634,7 @@ namespace CE
 				{
 					if (srcObject == nullptr)
 						continue;
-					Object* dstObject = src->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
+					Object* dstObject = dst->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
 					if (dstObject == nullptr)
 						continue;
 
@@ -678,7 +679,7 @@ namespace CE
 				{
 					if (srcObject == nullptr)
 						continue;
-					Object* dstObject = srcMap.FindObject(srcObject->GetName(), srcObject->GetClass());
+					Object* dstObject = dstMap.FindObject(srcObject->GetName(), srcObject->GetClass());
 					if (dstObject == nullptr)
 						return;
 

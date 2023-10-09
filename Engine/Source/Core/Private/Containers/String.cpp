@@ -126,7 +126,7 @@ namespace CE
     }
 
     String::~String()
-    {
+	{
         if (!bIsUsingDynamicBuffer && Buffer != nullptr)
         {
             Internal::StaticStringBlockAllocator::Get().staticBufferAllocator.Free(Buffer);

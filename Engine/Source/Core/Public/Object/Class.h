@@ -353,9 +353,12 @@ namespace CE
 				}
 			};
 
-			localFunctions.Add(FunctionType(name, CE::GetTypeId<ReturnType>(), { CE::GetTypeId<Args>()... }, funcDelegate, this, attributes,
+			FunctionType funcType = FunctionType(name, CE::GetTypeId<ReturnType>(), std::initializer_list<TypeId>{ CE::GetTypeId<Args>()... }, 
+				funcDelegate, this, attributes,
 				TGetUnderlyingTypeId<ReturnType>::Get(),
-				TGetUnderlyingTypeIdPack<Args...>::Get()));
+				TGetUnderlyingTypeIdPack<Args...>::Get());
+
+			localFunctions.Add(funcType);
 		}
 
 		template<typename ReturnType, typename ClassOrStruct, typename... Args, std::size_t... Is>

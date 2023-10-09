@@ -4,6 +4,8 @@
 
 #include <unordered_map>
 
+#include "unordered_dense.h"
+
 namespace CE
 {
     template<typename KeyType, typename ValueType>
@@ -35,7 +37,7 @@ namespace CE
             
         }
         
-        HashMap(std::initializer_list<std::pair<const KeyType, ValueType>> list) : Impl(list)
+        HashMap(std::initializer_list<std::pair<KeyType, ValueType>> list) : Impl(list)
         {
             
         }
@@ -106,7 +108,7 @@ namespace CE
         inline auto End() { return end(); }
 
     private:
-        std::unordered_map<KeyType, ValueType, HashFunc<KeyType>> Impl;
+        ankerl::unordered_dense::map<KeyType, ValueType, HashFunc<KeyType>> Impl;
     };
 
 } // namespace CE

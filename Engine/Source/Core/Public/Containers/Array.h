@@ -4,6 +4,8 @@
 
 #include "RTTI/RTTIDefines.h"
 
+#include "fast_vector.h"
+
 #include <vector>
 #include <functional>
 
@@ -41,10 +43,10 @@ namespace CE
 
         }
 
-        List(const std::vector<ElementType>& vector) : Impl(vector)
-        {
+		List(std::vector<ElementType> list) : Impl(list)
+		{
 
-        }
+		}
 
         ElementType& operator[](SIZE_T index)
         {
@@ -370,10 +372,10 @@ namespace CE
             
         }
 
-        Array(const std::vector<ElementType>& vector) : Super(vector), ElementTypeId(GetTypeId<ElementType>())
-        {
-
-        }
+		Array(std::vector<ElementType> list) : Super(list), ElementTypeId(GetTypeId<ElementType>())
+		{
+			
+		}
 
 		template<SIZE_T Size>
 		Array(const ElementType inArray[Size]) : Super(Size), ElementTypeId(GetTypeId<ElementType>())
