@@ -31,16 +31,31 @@ macro(windows_add_cmp_lib NAME)
     )
 endmacro()
 
+macro(mac_add_cmp_lib NAME)
+    add_library(${NAME} SHARED IMPORTED)
+    set_target_properties(${NAME}
+        PROPERTIES
+            IMPORTED_LOCATION_DEBUG       ${${LIB_NAME}_LIBS_DIR}/Debug/lib${NAME}.dylib
+            IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_LIBS_DIR}/Development/lib${NAME}.dylib
+            IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_LIBS_DIR}/Development/lib${NAME}.dylib
+            IMPORTED_LOCATION_RELEASE     ${${LIB_NAME}_LIBS_DIR}/Release/lib${NAME}.dylib
+            #IMPORTED_LOCATION "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/lib${NAME}.dylib"
+    )
+endmacro()
+
+
 add_library(${TARGET_WITH_NAMESPACE} INTERFACE IMPORTED)
 
 if (${PAL_PLATFORM_NAME} STREQUAL "Mac")
-    set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/libCMP_Compressonator.dylib)
-    set(${LIB_NAME}_STATIC_LIBRARY_DEV     ${${LIB_NAME}_LIBS_DIR}/Development/libCMP_Compressonator.dylib)
-    set(${LIB_NAME}_STATIC_LIBRARY_RELEASE ${${LIB_NAME}_LIBS_DIR}/Release/libCMP_Compressonator.dylib)
+    mac_add_cmp_lib(CMP_Compressonator)
+    mac_add_cmp_lib(CMP_Core)
+    mac_add_cmp_lib(CMP_Framework)
 
-    set_target_properties(${TARGET_WITH_NAMESPACE}
-        PROPERTIES
-            IMPORTED_LOCATION "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/libCMP_Compressonator.dylib"
+    target_link_libraries(${TARGET_WITH_NAMESPACE}
+        INTERFACE
+            CMP_Compressonator
+            CMP_Core
+            CMP_Framework
     )
 
 elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
@@ -60,28 +75,27 @@ elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
     windows_add_cmp_lib(brotli)
     set(GPU_DECODE_LIBS GPUDecode_DirectX GPUDecode_Vulkan)
 
+    target_link_libraries(${TARGET_WITH_NAMESPACE} 
+        INTERFACE
+            CMP_Compressonator
+            CMP_Core_AVX
+            CMP_Core_AVX512
+            CMP_Core_SSE
+            CMP_Core
+            CMP_Framework
+            CMP_GpuDecode
+            CMP_Common
+            ${GPU_DECODE_LIBS}
+            Image_BRLG
+            EncodeWith_GPU
+            brotlig
+            brotli
+    )
+
 else()
     error("${PACKAGE_NAME} build not found for platform: ${PAL_PLATFORM_NAME}")
 endif()
 
-#add_library(${TARGET_WITH_NAMESPACE} STATIC IMPORTED GLOBAL)
-
-target_link_libraries(${TARGET_WITH_NAMESPACE} 
-    INTERFACE
-        CMP_Compressonator
-        CMP_Core_AVX
-        CMP_Core_AVX512
-        CMP_Core_SSE
-        CMP_Core
-        CMP_Framework
-        CMP_GpuDecode
-        CMP_Common
-        ${GPU_DECODE_LIBS}
-        Image_BRLG
-        EncodeWith_GPU
-        brotlig
-        brotli
-)
 
 target_include_directories(${TARGET_WITH_NAMESPACE}
     INTERFACE
