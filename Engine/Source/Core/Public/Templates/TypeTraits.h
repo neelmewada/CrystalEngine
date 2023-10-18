@@ -265,19 +265,6 @@ namespace CE
 
 	};
 
-	/// True if type has default constructor and is NOT abstract
-	template<typename T, typename = void>
-	struct THasObjectInitCtor : TFalseType
-	{
-
-	};
-
-	template<typename T>
-	struct THasObjectInitCtor<T, std::void_t<decltype(T(CE::ObjectInitializer()))>> : TTrueType
-	{
-
-	};
-
 	template<typename T>
 	struct TIsCopyConstructible : TBoolConst<std::is_copy_constructible<T>::value>
 	{

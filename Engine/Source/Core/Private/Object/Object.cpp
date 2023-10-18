@@ -630,6 +630,8 @@ namespace CE
 
 		std::function<void(Object*, Object*)> fetchSubobjects = [&](Object* src, Object* dst)
 			{
+                originalToCloneMap[src->GetUuid()] = dst;
+                
 				for (auto srcObject : src->attachedObjects)
 				{
 					if (srcObject == nullptr)
@@ -638,7 +640,7 @@ namespace CE
 					if (dstObject == nullptr)
 						continue;
 
-					originalToCloneMap[srcObject->GetUuid()] = dstObject;
+					//originalToCloneMap[srcObject->GetUuid()] = dstObject;
 
 					fetchSubobjects(srcObject, dstObject);
 				}
@@ -696,12 +698,7 @@ namespace CE
 					if (srcObject == nullptr)
 						continue;
 
-					int idx = dstArray.IndexOf([&](Object* x) { return x != nullptr && x->GetClass() == srcObject->GetClass() && x->GetName() == srcObject->GetName(); });
-					if (idx >= 0)
-					{
-						Object* dstObject = dstArray[idx];
-						
-					}
+					
 				}
 			}
 			else if (field->IsArrayField())
@@ -749,7 +746,6 @@ namespace CE
 			else
 			{
 				LoadFromTemplateFieldHelper(originalToClonedObjectMap, field, templateObject, destField, this);
-				//field->CopyTo(templateObject, destField, this);
 			}
 		}
 	}
@@ -849,41 +845,20 @@ namespace CE
 
 			if (original == nullptr)
 			{
-				dstField->SetFieldValue<Object*>(this, nullptr);
+				dstField->SetFieldValue<Object*>(dstInstance, nullptr);
 			}
 			else
 			{
 				Object* parent = nullptr;
 				if (originalToClonedObjectMap.KeyExists(original->GetUuid()))
 				{
-					dstField->SetFieldValue<Object*>(this, originalToClonedObjectMap[original->GetUuid()]);
+					dstField->SetFieldValue<Object*>(dstInstance, originalToClonedObjectMap[original->GetUuid()]);
 				}
 				else
 				{
-					
+                    dstField->SetFieldValue<Object*>(dstInstance, original);
 				}
 			}
-
-			//Object* objectToCopy = field->GetFieldValue<Object*>(templateObject);
-			//if (objectToCopy == nullptr)
-			//{
-			//	destField->SetFieldValue<Object*>(this, nullptr);
-			//}
-			//else
-			//{
-			//	if (objectToCopy->GetOuter() == templateObject)
-			//	{
-			//		// Deep copy sub-object
-			//		auto copyDestObject = destField->GetFieldValue<Object*>(this);
-			//		if (copyDestObject != nullptr)
-			//			copyDestObject->LoadFromTemplateHelper(originalToClonedObjectMap, objectToCopy);
-			//	}
-			//	else if (!originalToClonedObjectMap.KeyExists(objectToCopy->GetUuid()))
-			//	{
-			//		// Shallow copy external object references
-			//		destField->SetFieldValue<Object*>(this, objectToCopy);
-			//	}
-			//}
 		}
 	}
 

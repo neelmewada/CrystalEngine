@@ -8,6 +8,8 @@
 
 namespace CE
 {
+    class Name;
+
     template<typename KeyType, typename ValueType>
     class Pair
     {

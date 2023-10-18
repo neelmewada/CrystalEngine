@@ -692,4 +692,4 @@ namespace CE
 
 }
 
-CE_RTTI_TYPEINFO_IMPL(CE, FieldType, TYPEID(CE::TypeInfo))
+CE_RTTI_TYPEINFO_IMPL(CE, FieldType)

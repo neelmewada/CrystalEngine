@@ -10,13 +10,11 @@ enable_testing()
 file(GLOB_RECURSE SRCS "*.cpp" "*.h")
 
 ce_add_test(${PROJECT_NAME}
-    AUTORTTI
     TARGET Core
     FOLDER "Tests/Engine"
     SOURCES
         ${SRCS}
     BUILD_DEPENDENCIES
-        PRIVATE ThirdParty::rapidyaml
         TARGETS Config
 )
 

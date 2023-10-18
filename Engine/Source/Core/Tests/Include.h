@@ -281,5 +281,169 @@ namespace JsonTests
 	};
 }
 
-#include "Include.rtti.h"
+CE_RTTI_CLASS(, PackageTests, WritingTestObj1,
+    CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(stringValue)
+        CE_FIELD(floatValue)
+        CE_FIELD(stringArray)
+        CE_FIELD(objPtr)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_CLASS(, PackageTests, WritingTestObj2,
+    CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(testStruct)
+        CE_FIELD(objectArray)
+        CE_FIELD(value)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_CLASS(, ObjectTests, BaseClass,
+    CE_SUPER(Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(string)
+        CE_FIELD(assignedClass)
+        CE_FIELD(derivedClassType)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_CLASS(, ObjectTests, DerivedClassA,
+    CE_SUPER(BaseClass),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(anyClass)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_CLASS(, ObjectTests, Sender,
+    CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+    ),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION2(MySignal1, auto, (String), Signal)
+    )
+)
+CE_RTTI_CLASS(, ObjectTests, Receiver,
+    CE_SUPER(CE::Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(printValue)
+    ),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION2(PrintString, void, (String string))
+    )
+)
+CE_RTTI_CLASS(, CDITests, AnotherObject,
+    CE_SUPER(Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(data)
+        CE_FIELD(myString)
+        CE_FIELD(test)
+        CE_FIELD(transient)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_CLASS(, CDITests, TestObject,
+    CE_SUPER(Object),
+    CE_NOT_ABSTRACT,
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(subobject)
+        CE_FIELD(transient)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_STRUCT(, PackageTests, WritingTestStructBase,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(stringValue)
+        CE_FIELD(owner)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_STRUCT(, PackageTests, WritingTestStruct1,
+    CE_SUPER(WritingTestStructBase),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(obj1Ptr)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_STRUCT(, ObjectTests, SenderStruct,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+    ),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION2(StructSignal1, auto, (String), Signal)
+    )
+)
+CE_RTTI_STRUCT(, ObjectTests, ReceiverStruct,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(stringValue)
+        CE_FIELD(arrayValue)
+    ),
+    CE_FUNCTION_LIST(
+        CE_FUNCTION2(PrintStringValue, void, (String string))
+    )
+)
+CE_RTTI_STRUCT(, CDITests, TestStruct,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(stringArray)
+        CE_FIELD(testObject)
+        CE_FIELD(another)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_STRUCT(, JsonTests, InnerStruct,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(value)
+        CE_FIELD(myInt)
+        CE_FIELD(nextInner)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
+CE_RTTI_STRUCT(, JsonTests, SerializedData,
+    CE_SUPER(),
+    CE_ATTRIBS(),
+    CE_FIELD_LIST(
+        CE_FIELD(strVal)
+        CE_FIELD(strArray)
+        CE_FIELD(inner)
+        CE_FIELD(innerArray)
+    ),
+    CE_FUNCTION_LIST(
+    )
+)
 

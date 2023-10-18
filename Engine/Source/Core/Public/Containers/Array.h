@@ -120,7 +120,7 @@ namespace CE
 
 		CE_INLINE void InsertRange(int index, const List<ElementType>& elements)
 		{
-			Impl.insert(Impl.begin() + index, elements.begin(), elements.end());
+			Impl.insert(Impl.begin() + index, elements.begin().ptr, elements.end().ptr);
 		}
 
         s32 IndexOf(const ElementType& item) const
@@ -257,6 +257,9 @@ namespace CE
 
         struct Iterator
         {
+            friend class List;
+            friend class Array<ElementType>;
+            
             using iterator_category = std::contiguous_iterator_tag;
             using difference_type	= std::ptrdiff_t;
             using value_type		= ElementType;
@@ -291,6 +294,9 @@ namespace CE
 
         struct ConstIterator
         {
+            friend class List;
+            friend class Array<ElementType>;
+            
             using iterator_category = std::contiguous_iterator_tag;
             using difference_type = std::ptrdiff_t;
             using value_type = ElementType;
@@ -336,7 +342,7 @@ namespace CE
 		template<class TPred>
 		inline void Sort(TPred pred)
 		{
-			std::sort(begin(), end(), pred);
+			std::sort(Impl.begin(), Impl.end(), pred);
 		}
 
     protected:
@@ -731,8 +737,8 @@ namespace CE
             pointer ptr;
         };*/
 
-		using Iterator = Super::Iterator;
-		using ConstIterator = Super::ConstIterator;
+        using Iterator = typename Super::Iterator;
+        using ConstIterator = typename Super::ConstIterator;
 
         auto begin() { return Iterator{ List<ElementType>::Impl.data() }; }
         auto end() { return Iterator{ List<ElementType>::Impl.data() + List<ElementType>::Impl.size() }; }
@@ -742,12 +748,6 @@ namespace CE
 
 		Iterator Begin() { return begin(); }
 		Iterator End() { return end(); }
-
-		template<class TPred>
-		inline void Sort(TPred pred)
-		{
-			std::sort(Begin(), End(), pred);
-		}
 
     private:
         TypeId ElementTypeId;

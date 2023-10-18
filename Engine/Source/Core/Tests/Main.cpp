@@ -1,12 +1,68 @@
 
 #include "Core.h"
 
-#include "ryml.hpp"
-#include "ryml_std.hpp"
-
 #include "Include.h"
 
-#include "Core_Test.private.h"
+#pragma region Registration
+
+CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj1)
+CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj2)
+CE_RTTI_CLASS_IMPL(, ObjectTests, BaseClass)
+CE_RTTI_CLASS_IMPL(, ObjectTests, DerivedClassA)
+CE_RTTI_CLASS_IMPL(, ObjectTests, Sender)
+CE_RTTI_CLASS_IMPL(, ObjectTests, Receiver)
+CE_RTTI_CLASS_IMPL(, CDITests, AnotherObject)
+CE_RTTI_CLASS_IMPL(, CDITests, TestObject)
+CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStructBase)
+CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStruct1)
+CE_RTTI_STRUCT_IMPL(, ObjectTests, SenderStruct)
+CE_RTTI_STRUCT_IMPL(, ObjectTests, ReceiverStruct)
+CE_RTTI_STRUCT_IMPL(, CDITests, TestStruct)
+CE_RTTI_STRUCT_IMPL(, JsonTests, InnerStruct)
+CE_RTTI_STRUCT_IMPL(, JsonTests, SerializedData)
+
+static void CERegisterModuleTypes()
+{
+    CE_REGISTER_TYPES(
+        PackageTests::WritingTestObj1,
+        PackageTests::WritingTestObj2,
+        ObjectTests::BaseClass,
+        ObjectTests::DerivedClassA,
+        ObjectTests::Sender,
+        ObjectTests::Receiver,
+        CDITests::AnotherObject,
+        CDITests::TestObject,
+        PackageTests::WritingTestStructBase,
+        PackageTests::WritingTestStruct1,
+        ObjectTests::SenderStruct,
+        ObjectTests::ReceiverStruct,
+        CDITests::TestStruct,
+        JsonTests::InnerStruct,
+        JsonTests::SerializedData
+    );
+}
+static void CEDeregisterModuleTypes()
+{
+    CE_DEREGISTER_TYPES(
+        PackageTests::WritingTestObj1,
+        PackageTests::WritingTestObj2,
+        ObjectTests::BaseClass,
+        ObjectTests::DerivedClassA,
+        ObjectTests::Sender,
+        ObjectTests::Receiver,
+        CDITests::AnotherObject,
+        CDITests::TestObject,
+        PackageTests::WritingTestStructBase,
+        PackageTests::WritingTestStruct1,
+        ObjectTests::SenderStruct,
+        ObjectTests::ReceiverStruct,
+        CDITests::TestStruct,
+        JsonTests::InnerStruct,
+        JsonTests::SerializedData
+    );
+}
+
+#pragma endregion
 
 #include <iostream>
 #include <any>
@@ -1341,14 +1397,16 @@ TEST(Object, CDI2)
 		EXPECT_EQ(test->subobject->data.stringArray[0], "test0");
 		EXPECT_EQ(test->subobject->data.stringArray[1], "test1");
 		EXPECT_EQ(test->transient, testCDI->transient);
+        EXPECT_EQ(test->transient, ModuleManager::Get().GetLoadedModuleTransientPackage("Core"));
 		EXPECT_EQ(test->subobject->data.another, test->subobject);
 
 		anotherCDI->test = test;
+        anotherCDI->myString = "modified anotherCDI";
 
 		AnotherObject* another = CreateObject<AnotherObject>(nullptr, "AnotherObject");
 		EXPECT_EQ(another->GetOuter(), nullptr);
 		EXPECT_EQ(another->test, test);
-		EXPECT_EQ(another->myString, "default");
+		EXPECT_EQ(another->myString, "modified anotherCDI");
 		EXPECT_EQ(another->data.another, another);
 
 		test->Destroy();

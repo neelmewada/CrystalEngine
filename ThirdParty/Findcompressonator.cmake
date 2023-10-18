@@ -31,15 +31,16 @@ macro(windows_add_cmp_lib NAME)
     )
 endmacro()
 
+add_library(${TARGET_WITH_NAMESPACE} INTERFACE IMPORTED)
 
-if (${PAL_PLATFORM_NAME} STREQUAL "Mac" OR ${PAL_PLATFORM_NAME} STREQUAL "Linux")
-    set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/libCMP_Compressonator.a)
-    set(${LIB_NAME}_STATIC_LIBRARY_DEV     ${${LIB_NAME}_LIBS_DIR}/Development/libCMP_Compressonator.a)
-    set(${LIB_NAME}_STATIC_LIBRARY_RELEASE ${${LIB_NAME}_LIBS_DIR}/Release/libCMP_Compressonator.a)
+if (${PAL_PLATFORM_NAME} STREQUAL "Mac")
+    set(${LIB_NAME}_STATIC_LIBRARY_DEBUG   ${${LIB_NAME}_LIBS_DIR}/Debug/libCMP_Compressonator.dylib)
+    set(${LIB_NAME}_STATIC_LIBRARY_DEV     ${${LIB_NAME}_LIBS_DIR}/Development/libCMP_Compressonator.dylib)
+    set(${LIB_NAME}_STATIC_LIBRARY_RELEASE ${${LIB_NAME}_LIBS_DIR}/Release/libCMP_Compressonator.dylib)
 
     set_target_properties(${TARGET_WITH_NAMESPACE}
         PROPERTIES
-            IMPORTED_LOCATION "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/lib${LIB_NAME}.a"
+            IMPORTED_LOCATION "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/libCMP_Compressonator.dylib"
     )
 
 elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
@@ -65,8 +66,6 @@ endif()
 
 #add_library(${TARGET_WITH_NAMESPACE} STATIC IMPORTED GLOBAL)
 
-add_library(${TARGET_WITH_NAMESPACE} INTERFACE IMPORTED)
-
 target_link_libraries(${TARGET_WITH_NAMESPACE} 
     INTERFACE
         CMP_Compressonator
@@ -87,6 +86,16 @@ target_link_libraries(${TARGET_WITH_NAMESPACE}
 target_include_directories(${TARGET_WITH_NAMESPACE}
     INTERFACE
         ${${LIB_NAME}_INCLUDE_DIR}
+)
+
+# Runtime Dependencies
+
+ce_add_rt_deps(compressonator
+    ROOT_PATH "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>"
+    COPY_FILES
+        $<${PAL_PLATFORM_IS_MAC}:libCMP_Compressonator.dylib>
+        $<${PAL_PLATFORM_IS_MAC}:libCMP_Core.dylib>
+        $<${PAL_PLATFORM_IS_MAC}:libCMP_Framework.dylib>
 )
 
 set(${LIB_NAME}_FOUND True)

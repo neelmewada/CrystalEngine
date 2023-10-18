@@ -287,7 +287,7 @@ namespace CE
 	{
 		static inline TypeId Get()
 		{
-			typedef TGetUnderlyingType<T>::Type UnderlyingType;
+            typedef typename TGetUnderlyingType<T>::Type UnderlyingType;
 			return TYPEID(UnderlyingType);
 		}
 	};
@@ -324,7 +324,7 @@ namespace CE
 
 			constexpr_for<(SIZE_T)0, NumArgs, (SIZE_T)1>([&](auto i)
 				{
-					typedef Arg<i>::Type ArgType;
+                    typedef typename Arg<i>::Type ArgType;
 					allTypes[i] = TGetUnderlyingTypeId<ArgType>::Get();
 				});
 
