@@ -27,6 +27,8 @@ namespace CE::Editor
 
 		void OnDrawGUI() override;
 
+		void HandleEvent(CEvent* event) override;
+
 		CPopup* assetImportPopup = nullptr;
 
 		SceneEditorWindow* sceneEditorWindow = nullptr;

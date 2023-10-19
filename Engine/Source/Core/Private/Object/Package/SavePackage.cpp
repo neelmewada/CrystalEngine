@@ -148,11 +148,6 @@ namespace CE
 			return nullptr;
 		}
 
-		if (fullPackagePath.GetFilename() == "Settings.casset")
-		{
-			DEBUG_BREAK();
-		}
-
 		// Actual package name based on it's path
 		String actualPackageName = "";
 
