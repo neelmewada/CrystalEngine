@@ -2952,6 +2952,7 @@ TEST(JobSystem, Basic)
 		auto prev = clock();
 		int numThreads = 0;
 		numThreads = manager.GetNumThreads();
+		numThreads = Math::Max(2, numThreads); // Run only 2 threads
 		
 		for (int i = 0; i < numThreads; i++)
 		{

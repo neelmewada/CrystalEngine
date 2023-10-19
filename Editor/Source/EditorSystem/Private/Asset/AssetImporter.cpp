@@ -29,7 +29,7 @@ namespace CE::Editor
 		mutex.Lock();
 		if (success)
 			numThumbnailsInProgress++;
-		emit OnAssetImportResult(success, sourcePath, packageName);
+		OnAssetImportResult(success, sourcePath, packageName);
 		CE_LOG(Info, All, "Asset import {}: {}", success ? "successful" : "failed", sourcePath);
 		numJobsInProgress--;
 		mutex.Unlock();

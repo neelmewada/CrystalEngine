@@ -250,14 +250,14 @@ namespace CE::Widgets
 					}
 
 					OnClicked();
-					emit OnMenuItemClicked(this);
+					OnMenuItemClicked(this);
 				}
 				else
 				{
 					((CMenu*)parent)->HideAllInChain();
 
 					OnClicked();
-					emit OnMenuItemClicked(this);
+					OnMenuItemClicked(this);
 				}
 			}
 

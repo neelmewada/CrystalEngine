@@ -101,7 +101,7 @@ namespace CE::Editor
 		if (node == nullptr)
 			return;
 
-		emit OnSelectionChanged(node);
+		OnSelectionChanged(node);
 	}
 
 } // namespace CE::Editor
