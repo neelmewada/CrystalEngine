@@ -25,9 +25,7 @@ namespace CE
 		{
 			return packagePath.GetString() + "." + assetName.GetString();
 		}
-
-	private:
-
+        
 		// Path of package
 		Name packagePath{};
 

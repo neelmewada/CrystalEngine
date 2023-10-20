@@ -101,6 +101,9 @@
 #include "Component/Component.h"
 #include "Object/Package.h"
 
+// Asset types
+#include "Asset/SoftObjectPath.h"
+
 // RTTI Dependents
 #include "Serialization/BinaryBlob.h"
 #include "Math/MathRTTI.h"

@@ -19,7 +19,7 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
 		fileWatcher.RemoveWatcher(fileWatchID);
 #endif
-
+        
 		for (auto assetData : allAssetDatas)
 		{
 			delete assetData;
