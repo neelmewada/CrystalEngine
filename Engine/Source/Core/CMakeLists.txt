@@ -28,7 +28,6 @@ ce_add_target(Core SHARED
             ThirdParty::mINI
             ThirdParty::zip
             ThirdParty::crcpp
-            ThirdParty::rapidyaml
         PUBLIC
             ThirdParty::spdlog
             ThirdParty::yaml

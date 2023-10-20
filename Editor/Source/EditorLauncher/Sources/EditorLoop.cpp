@@ -87,6 +87,9 @@ void EditorLoop::LoadStartupCoreModules()
 	ModuleManager::Get().LoadModule("Core");
 	ModuleManager::Get().LoadModule("CoreApplication");
 
+	// Settings module
+	ModuleManager::Get().LoadModule("CoreSettings");
+
 	// Load Rendering modules
 	ModuleManager::Get().LoadModule("CoreRHI");
 #if PAL_TRAIT_VULKAN_SUPPORTED
@@ -99,7 +102,6 @@ void EditorLoop::LoadStartupCoreModules()
 void EditorLoop::LoadCoreModules()
 {
 	// Load other Core modules
-	ModuleManager::Get().LoadModule("CoreSettings");
 	ModuleManager::Get().LoadModule("CoreMedia");
 
 	ModuleManager::Get().LoadModule("CoreGUI");
@@ -325,7 +327,6 @@ void EditorLoop::PreShutdown()
 	ModuleManager::Get().UnloadModule("CoreGUI");
 
 	ModuleManager::Get().UnloadModule("CoreMedia");
-	ModuleManager::Get().UnloadModule("CoreSettings");
 
 #if PAL_TRAIT_VULKAN_SUPPORTED
 	ModuleManager::Get().UnloadModule("VulkanRHI");
@@ -337,6 +338,9 @@ void EditorLoop::Shutdown()
 {
 	// Shutdown application
 	AppShutdown();
+
+	// Unload settings module
+	ModuleManager::Get().UnloadModule("CoreSettings");
 
 	// Unload most important modules at last
 	ModuleManager::Get().UnloadModule("CoreApplication");

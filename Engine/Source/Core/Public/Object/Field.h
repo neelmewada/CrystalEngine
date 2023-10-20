@@ -65,12 +65,14 @@ namespace CE
 		bool IsPODField();
         bool IsArrayField() const;
         bool IsStringField() const;
+		bool IsTypeInfoField();
 
         bool IsIntegerField() const;
         bool IsDecimalField() const;
 		bool IsEnumField();
 
         bool IsObjectField() const;
+		bool IsStructField();
 
         bool HasAnyFieldFlags(FieldFlags flags) const
         {
@@ -185,6 +187,9 @@ namespace CE
         friend class StructType;
         friend class ClassType;
     };
+
+	typedef FieldType Field;
     
 } // namespace CE
 
+CE_RTTI_TYPEINFO(CORE_API, CE, FieldType, TYPEID(CE::TypeInfo))

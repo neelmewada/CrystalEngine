@@ -24,8 +24,14 @@ namespace CE
         }
         
 		Object* FindObject(UUID uuid) const;
+
+		Object* FindObject(const Name& objectName, ClassType* classType = nullptr) const;
+
+		Object* GetObjectAt(u32 index) const;
         
 		bool ObjectExists(UUID uuid) const;
+
+		bool ObjectExists(const Name& objectName) const;
         
         void AddObject(Object* object);
         

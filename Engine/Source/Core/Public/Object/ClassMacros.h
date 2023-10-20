@@ -3,6 +3,7 @@
 
 #define __CE_SUPER_LIST(...) CE_EXPAND(CE_CONCATENATE(__CE_SUPER_LIST_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)
 
+
 #define CE_FIELD_LIST(x) x
 #define CE_FIELD(FieldName, ...)\
 	Type.AddField(#FieldName, &Self::FieldName, offsetof(Self, FieldName), "" #__VA_ARGS__, TYPEID(TGetUnderlyingType<decltype(Self::FieldName)>::Type));
@@ -265,10 +266,6 @@ namespace CE\
 					THasOnBeforeSerializeFunction<Namespace::Struct>::OnBeforeSerialize((Namespace::Struct*)instance);\
 				}\
 			}\
-			virtual bool ImplementSignals() override\
-			{\
-				return TImplementSignals<Namespace::Struct>::Value;\
-			}\
 		};\
 	}\
 	template<>\
@@ -309,8 +306,6 @@ CE::String MERGE_NAMESPACE(Namespace, Struct)::StaticModule()\
 {\
 	return MODULE_NAME;\
 }
-
-#define IMPLEMENT_SIGNALS() constexpr static bool __implement_signals = true;
 
 #define CE_STRUCT(Struct, ...)\
 public:\

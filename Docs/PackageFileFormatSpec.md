@@ -18,7 +18,7 @@ Spec tables with little endian format
 | Offset | Size | Value | Description |
 |---|---|---|---|
 | +00 | 8B | `00 50 41 43 4b 00 00 0a` | Magic Number: `. P A C K . . \n` |
-| +08 | 8B | `00 00 01 00 00 00 00 00` | Version number: Major(u32) . Minor(u16) . Patch(u16) |
+| +08 | 8B |  | Version number: Major(u32) . Minor(u32) |
 | +10 | 4B | `00 00 00 00` | File checksum only for the actual data |
 | +14 | 8B | `00 00 00 00 00 00 00 00` | Data start offset (from start of file) |
 | +1C | 8B | `xx xx xx xx xx xx xx xx` | Package UUID |

@@ -4,12 +4,9 @@ project(AutoRTTI CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
-ce_add_target(${PROJECT_NAME} CONSOLEAPP
-    NAMESPACE CE
-    FOLDER Engine/Source
-    PCHHEADER
-        PRIVATE
-            "../Core/Public/CoreMinimal.h"
+ce_add_target(${PROJECT_NAME} TOOL
+    NAMESPACE "CE::Tools"
+    FOLDER Tools
     FILES_CMAKE
         PRIVATE ${PROJECT_NAME_LOWERCASE}_source_files.cmake
     INCLUDE_DIRECTORIES
@@ -22,5 +19,7 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
     RUNTIME_DEPENDENCIES
 
 )
+
+add_dependencies(EditorTools "CE::Tools::${PROJECT_NAME}")
 
 

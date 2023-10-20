@@ -5,6 +5,10 @@
 namespace CE
 {
 	HashMap<Name, Package*> Package::loadedPackages{};
+	HashMap<UUID, Package*> Package::loadedPackagesByUuid{};
+	HashMap<UUID, Name> Package::loadedPackageUuidToPath{};
+
+	Array<IPackageResolver*> Package::packageResolvers = {};
 
 	Package::Package()
 	{
@@ -14,6 +18,26 @@ namespace CE
 	Package::~Package()
 	{
         loadedPackages.Remove(packageName);
+		loadedPackagesByUuid.Remove(GetUuid());
+		loadedPackageUuidToPath.Remove(GetUuid());
+	}
+
+	Package* Package::LoadPackageByUuid(UUID packageUuid, LoadFlags loadFlags)
+	{
+		if (loadedPackagesByUuid.KeyExists(packageUuid))
+			return loadedPackagesByUuid[packageUuid];
+		if (packageResolvers.IsEmpty())
+			return nullptr;
+
+		for (int i = packageResolvers.GetSize() - 1; i >= 0; i--)
+		{
+			Name packagePath = packageResolvers[i]->GetPackagePath(packageUuid);
+			if (!packagePath.IsValid())
+				continue;
+			Package::LoadPackage(nullptr, packagePath, loadFlags);
+		}
+
+		return nullptr;
 	}
 
 	IO::Path Package::GetPackagePath(const Name& packageName)

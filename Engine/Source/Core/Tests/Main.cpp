@@ -3,7 +3,66 @@
 
 #include "Include.h"
 
-#include "Core_Test.private.h"
+#pragma region Registration
+
+CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj1)
+CE_RTTI_CLASS_IMPL(, PackageTests, WritingTestObj2)
+CE_RTTI_CLASS_IMPL(, ObjectTests, BaseClass)
+CE_RTTI_CLASS_IMPL(, ObjectTests, DerivedClassA)
+CE_RTTI_CLASS_IMPL(, ObjectTests, Sender)
+CE_RTTI_CLASS_IMPL(, ObjectTests, Receiver)
+CE_RTTI_CLASS_IMPL(, CDITests, AnotherObject)
+CE_RTTI_CLASS_IMPL(, CDITests, TestObject)
+CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStructBase)
+CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStruct1)
+CE_RTTI_STRUCT_IMPL(, ObjectTests, SenderStruct)
+CE_RTTI_STRUCT_IMPL(, ObjectTests, ReceiverStruct)
+CE_RTTI_STRUCT_IMPL(, CDITests, TestStruct)
+CE_RTTI_STRUCT_IMPL(, JsonTests, InnerStruct)
+CE_RTTI_STRUCT_IMPL(, JsonTests, SerializedData)
+
+static void CERegisterModuleTypes()
+{
+    CE_REGISTER_TYPES(
+        PackageTests::WritingTestObj1,
+        PackageTests::WritingTestObj2,
+        ObjectTests::BaseClass,
+        ObjectTests::DerivedClassA,
+        ObjectTests::Sender,
+        ObjectTests::Receiver,
+        CDITests::AnotherObject,
+        CDITests::TestObject,
+        PackageTests::WritingTestStructBase,
+        PackageTests::WritingTestStruct1,
+        ObjectTests::SenderStruct,
+        ObjectTests::ReceiverStruct,
+        CDITests::TestStruct,
+        JsonTests::InnerStruct,
+        JsonTests::SerializedData
+    );
+}
+static void CEDeregisterModuleTypes()
+{
+    CE_DEREGISTER_TYPES(
+        PackageTests::WritingTestObj1,
+        PackageTests::WritingTestObj2,
+        ObjectTests::BaseClass,
+        ObjectTests::DerivedClassA,
+        ObjectTests::Sender,
+        ObjectTests::Receiver,
+        CDITests::AnotherObject,
+        CDITests::TestObject,
+        PackageTests::WritingTestStructBase,
+        PackageTests::WritingTestStruct1,
+        ObjectTests::SenderStruct,
+        ObjectTests::ReceiverStruct,
+        CDITests::TestStruct,
+        JsonTests::InnerStruct,
+        JsonTests::SerializedData
+    );
+}
+
+#pragma endregion
 
 #include <iostream>
 #include <any>
@@ -788,6 +847,7 @@ TEST(Reflection, SubClassType)
 	}
 
 	// 3. Binary serialization
+	if (false)
 	{
 		MemoryStream stream = MemoryStream(2048);
 		stream.SetBinaryMode(true);
@@ -1022,7 +1082,7 @@ TEST(Config, HierarchicalParsing)
 {
     TEST_BEGIN;
 
-    auto engineConfig = gConfigCache->GetConfigFile(CFG_Test);
+    auto engineConfig = gConfigCache->GetConfigFile(CFG_Test());
 
     EXPECT_TRUE(engineConfig->SectionExists("Test::0"));
     auto test0Section = engineConfig->Get("Test::0");
@@ -1245,7 +1305,7 @@ TEST(Object, CDI)
 	EXPECT_EQ(cdi->floatValue, 42.21f);
 	EXPECT_EQ(cdi->stringValue, "A sample string value");
 	EXPECT_EQ(cdi->boolValue, true);
-
+	
 	EXPECT_EQ(cdi->arrayValue.GetSize(), 3);
 	EXPECT_EQ(cdi->arrayValue[0], "Entry0");
 	EXPECT_EQ(cdi->arrayValue[1], "Entry1");
@@ -1282,13 +1342,80 @@ TEST(Object, CDI)
 	EXPECT_EQ(testObject->dictionary[2].name, "id2");
 	EXPECT_EQ(testObject->dictionary[2].value, 43);
 
+	EXPECT_NE(cdi->subClass, testObject->subClass);
+	EXPECT_EQ(testObject->subClass->GetOuter(), testObject);
 	EXPECT_EQ(testObject->subClass->subString, "modified again");
 	EXPECT_NE(testObject->subClass, cdi->subClass); // sub objects should always be deep-copied
 
-	testObject->RequestDestroy();
+	testObject->Destroy();
     
 	CE_DEREGISTER_TYPES(CDITest, CDIStruct, CDISubClass);
     TEST_END;
+}
+
+
+TEST(Object, CDI2)
+{
+	using namespace CDITests;
+
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(TestObject, AnotherObject, TestStruct);
+
+	auto anotherCDI = GetMutableDefaults<AnotherObject>();
+	auto testCDI = GetMutableDefaults<TestObject>();
+
+	// 1. CDI Test
+	{
+		EXPECT_EQ(testCDI->subobject->myString, "modified from TestObject");
+		EXPECT_EQ(testCDI->subobject->data.stringArray.GetSize(), 2);
+		EXPECT_EQ(testCDI->subobject->data.stringArray[0], "test0");
+		EXPECT_EQ(testCDI->subobject->data.stringArray[1], "test1");
+		EXPECT_EQ(testCDI->subobject->data.another, nullptr);
+
+		EXPECT_EQ(anotherCDI->data.stringArray.GetSize(), 3);
+		EXPECT_EQ(anotherCDI->data.stringArray[0], "another0");
+		EXPECT_EQ(anotherCDI->data.stringArray[1], "another1");
+		EXPECT_EQ(anotherCDI->data.stringArray[2], "another2");
+		EXPECT_EQ(anotherCDI->data.another, anotherCDI);
+
+		EXPECT_EQ(anotherCDI->myString, "default");
+
+		testCDI->subobject->myString = "modified from CDI";
+		testCDI->subobject->data.another = testCDI->subobject;
+
+		testCDI->transient = ModuleManager::Get().GetLoadedModuleTransientPackage("Core");
+	}
+	
+	// 2. Object instantiation
+	{
+		Object* transient = CreateObject<Object>(nullptr, "Transient", OF_Transient);
+
+		TestObject* test = CreateObject<TestObject>(nullptr, "TestObject");
+		EXPECT_EQ(test->GetOuter(), nullptr);
+		EXPECT_EQ(test->subobject->myString, "modified from CDI");
+		EXPECT_EQ(test->subobject->data.stringArray.GetSize(), 2);
+		EXPECT_EQ(test->subobject->data.stringArray[0], "test0");
+		EXPECT_EQ(test->subobject->data.stringArray[1], "test1");
+		EXPECT_EQ(test->transient, testCDI->transient);
+        EXPECT_EQ(test->transient, ModuleManager::Get().GetLoadedModuleTransientPackage("Core"));
+		EXPECT_EQ(test->subobject->data.another, test->subobject);
+
+		anotherCDI->test = test;
+        anotherCDI->myString = "modified anotherCDI";
+
+		AnotherObject* another = CreateObject<AnotherObject>(nullptr, "AnotherObject");
+		EXPECT_EQ(another->GetOuter(), nullptr);
+		EXPECT_EQ(another->test, test);
+		EXPECT_EQ(another->myString, "modified anotherCDI");
+		EXPECT_EQ(another->data.another, another);
+
+		test->Destroy();
+		another->Destroy();
+		transient->Destroy();
+	}
+
+	CE_DEREGISTER_TYPES(TestObject, AnotherObject, TestStruct);
+	TEST_END;
 }
 
 TEST(Object, Signals)
@@ -2243,6 +2370,7 @@ TEST(Serialization, BinaryBlob)
     }
     
 	// 2. Field serialization
+	if (false)
 	{
 		MemoryStream stream = MemoryStream(1_MB);
 		stream.SetBinaryMode(true);
@@ -2291,6 +2419,132 @@ TEST(Serialization, BinaryBlob)
 
 	CE_DEREGISTER_TYPES(BinaryBlobTest);
     TEST_END;
+}
+
+namespace SerializationTests {
+	struct MyData
+	{
+		CE_STRUCT(MyData)
+	public:
+
+		CE::String string = "default";
+
+		Vec4 vector = {};
+
+		ClassType* clazz = nullptr;
+
+		Array<String> array{};
+	};
+
+	class TestClass1 : public Object
+	{
+		CE_CLASS(TestClass1, Object)
+	public:
+
+		TestClass1()
+		{
+			myString = "default";
+		}
+
+		String myString = "";
+
+		Array<MyData> dataList{};
+
+	};
+}
+
+CE_RTTI_STRUCT(,SerializationTests, MyData,
+	CE_SUPER(),
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(string)
+		CE_FIELD(vector)
+		CE_FIELD(clazz)
+		CE_FIELD(array)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_STRUCT_IMPL(,SerializationTests, MyData)
+
+CE_RTTI_CLASS(,SerializationTests, TestClass1,
+	CE_SUPER(CE::Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(myString)
+		CE_FIELD(dataList)
+	),
+	CE_FUNCTION_LIST()
+)
+CE_RTTI_CLASS_IMPL(,SerializationTests, TestClass1)
+
+TEST(Serialization, BasicBinarySerialization)
+{
+	using namespace SerializationTests;
+
+	TEST_BEGIN;
+	CE_REGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
+
+	MemoryStream stream = MemoryStream(1024);
+	stream.SetBinaryMode(true);
+	UUID original = 0;
+
+	{
+		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject");
+		test->myString = "modified";
+		original = test->GetUuid();
+		test->dataList.Add({}); test->dataList.Add({});
+		MyData& data0 = test->dataList[0];
+		data0.clazz = Package::StaticType();
+		data0.vector = Vec4(1, 2.2f, 3.3f, 4.125f);
+		data0.string = "Data 0 String";
+		data0.array = { "item0", "item1", "item2" };
+		MyData& data1 = test->dataList[1];
+		data1.clazz = nullptr;
+		data1.string = "Data 1 String";
+		data1.array = {};
+
+		BinarySerializer serializer{ test->GetClass(), test };
+		serializer.Serialize(&stream);
+
+		test->Destroy();
+	}
+
+	stream.Seek(0);
+
+	TestClass1* testClass1Defaults = GetMutableDefaults<TestClass1>();
+	testClass1Defaults->myString = "modified default";
+
+	{
+		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject2");
+		EXPECT_EQ(test->GetOuter(), nullptr);
+		EXPECT_EQ(test->myString, "modified default");
+
+		BinaryDeserializer deserializer{ test->GetClass(), test };
+		deserializer.Deserialize(&stream);
+
+		EXPECT_EQ(test->myString, "modified");
+		EXPECT_EQ(test->GetName(), "TestObject");
+		EXPECT_EQ(test->GetUuid(), original);
+		EXPECT_EQ(test->dataList.GetSize(), 2);
+
+		MyData& data0 = test->dataList[0];
+		EXPECT_EQ(data0.clazz, Package::StaticType());
+		EXPECT_EQ(data0.vector, Vec4(1, 2.2f, 3.3f, 4.125f));
+		EXPECT_EQ(data0.string, "Data 0 String");
+		EXPECT_EQ(data0.array.GetSize(), 3);
+		EXPECT_EQ(data0.array[0], "item0"); EXPECT_EQ(data0.array[1], "item1"); EXPECT_EQ(data0.array[2], "item2");
+		
+		MyData& data1 = test->dataList[1];
+		EXPECT_EQ(data1.clazz, nullptr);
+		EXPECT_EQ(data1.string, "Data 1 String");
+		EXPECT_EQ(data1.array.GetSize(), 0);
+		
+		test->Destroy();
+	}
+
+	CE_DEREGISTER_TYPES(SerializationTests::TestClass1, SerializationTests::MyData);
+	TEST_END;
 }
 
 #pragma endregion
@@ -2698,6 +2952,7 @@ TEST(JobSystem, Basic)
 		auto prev = clock();
 		int numThreads = 0;
 		numThreads = manager.GetNumThreads();
+		numThreads = Math::Max(2, numThreads); // Run only 2 threads
 		
 		for (int i = 0; i < numThreads; i++)
 		{

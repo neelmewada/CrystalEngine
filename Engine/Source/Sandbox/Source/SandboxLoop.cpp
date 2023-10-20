@@ -17,7 +17,7 @@ void SandboxLoop::PreInit(int argc, const char** argv)
     {
         gProgramArguments.Add(argv[i]);
     }
-
+	
     // Initialize logging
 	Logger::SetConsoleLogLevel(LogLevel::Trace);
 	Logger::SetFileDumpLogLevel(LogLevel::Trace);
@@ -395,30 +395,7 @@ void SandboxLoop::SetupGUI()
 
 	GetStyleManager()->SetGlobalStyleSheet(stylesheet);
 
-	//CoreWidgets::enableDebugMode = true;
-
-	window = CreateWidget<CWindow>(nullptr, "TestWindow");
-	window->SetWidgetFlags(WidgetFlags::None);
-	window->SetTitle("Test Window");
-	window->SetAllowHorizontalScroll(true);
-	window->SetWindowDebugMode(false);
 	
-	auto section = CreateWidget<CCollapsibleSection>(window, "CollapsibleSection");
-	section->SetTitle("Header Title");
-
-	{
-		auto label = CreateWidget<CLabel>(section, "LabelInside");
-		label->SetText("This is a sub-label");
-
-		auto button = CreateWidget<CButton>(section, "ButtonInside");
-		button->SetText("Click me");
-	}
-	
-	auto testLabel = CreateWidget<CLabel>(window, "TestLabel");
-	testLabel->SetText("TEST LABEL");
-	testLabel->AddStyleClasses({ "MyStyleClass", "Alternate" });
-
-	GetWidgetDebugger()->Show();
 }
 
 void SandboxLoop::RunLoop()

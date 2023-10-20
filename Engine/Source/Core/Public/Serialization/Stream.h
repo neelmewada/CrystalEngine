@@ -101,6 +101,9 @@ namespace CE
         virtual Stream& operator<<(f32 single);
         virtual Stream& operator>>(f32& single);
 
+		virtual Stream& operator<<(f64 decimal);
+		virtual Stream& operator>>(f64& decimal);
+
 	private:
 
 		template<typename TInt> requires TIsNumericType<TInt>::Value

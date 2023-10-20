@@ -49,10 +49,11 @@ namespace CE
 				continue;
 			if (objectInstance->IsTransient())
 				continue;
+			auto objectPackage = objectInstance->GetPackage();
 
-			if (package != objectInstance->GetPackage() && objectInstance->GetPackage() != nullptr)
+			if (package != objectPackage && objectPackage != nullptr && !objectPackage->IsTransient())
 			{
-				packageDependencies.Add(objectInstance->GetPackage()->GetPackageName());
+				packageDependencies.Add(objectPackage->GetPackageName());
 			}
 		}
 
@@ -71,6 +72,7 @@ namespace CE
 		*stream << package->GetPackageUuid();
 		*stream << package->GetPackageName();
 
+		// Other packages that `this` package depends upon
 		SavePackageDependencies(stream, packageDependencies);
 
 		u8 isCooked = 0;
@@ -96,70 +98,29 @@ namespace CE
 				continue;
 			}
             
-			*stream << PACKAGE_OBJECT_MAGIC_NUMBER;
+			*stream << PACKAGE_OBJECT_MAGIC_NUMBER; // .OBJECT.
+			
 			*stream << objectInstance->GetUuid();
-			*stream << (objectInstance->IsAsset() ? (u8)1 : (u8)0);
-			if (objectInstance == package)
-				*stream << "";
-			else
-				*stream << objectInstance->GetPathInPackage();
+			*stream << objectInstance->IsAsset();
+			*stream << objectInstance->GetPathInPackage();
 			*stream << objectInstance->GetClass()->GetTypeName();
-
-			u64 dataSizeValuePos = stream->GetCurrentPosition();
-			*stream << (u32)0; // 0 data size. updated later
-
-			*stream << (u32)0; // Number of field entries
-
-			curPos = stream->GetCurrentPosition();
-			*stream << (u64)(0); // Data Start Offset (excluding itself). Set empty at first
-
-			*stream << objectInstance->GetName(); // Object Name
+			*stream << objectInstance->GetName();
 
 			if (objectInstance->IsAsset())
 			{
 				*stream << ((Asset*)objectInstance)->GetSourceAssetRelativePath();
 			}
-			else
-			{
-				*stream << "";
-			}
 
-			u64 dataStartPos = stream->GetCurrentPosition();
-			u32 numEntries = 0;
+			// Data start offset from start of file (excluding itself)
+			*stream << stream->GetCurrentPosition() + sizeof(u64);
 
-			stream->Seek(curPos);
-			*stream << (u64)(dataStartPos); // Data Start Offset (excluding itself)
-			stream->Seek(dataStartPos);
-            
-            ClassType* objectClass = objectInstance->GetClass();
-            FieldType* firstField = objectClass->GetFirstField();
-            if (firstField != nullptr)
-            {
-                FieldSerializer fieldSerializer{ firstField, objectInstance };
+			auto classType = objectInstance->GetClass();
 
-				objectInstance->OnBeforeSerialize();
-                
-                while (fieldSerializer.HasNext())
-                {
-					if (fieldSerializer.WriteNext(stream))
-					{
-						numEntries++;
-					}
-                }
-            }
-
-			u64 dataEndPos = stream->GetCurrentPosition();
-
-			stream->Seek(dataSizeValuePos);
-			u32 dataSize = (u32)(dataEndPos - dataStartPos);
-			*stream << dataSize;
-			*stream << numEntries;
+			BinarySerializer serializer = BinarySerializer(classType, objectInstance);
+			serializer.Serialize(stream);
 
 			u32 crc = 0;
-
-			stream->Seek(dataEndPos);
-			*stream << (u32)0; // End of Field Entries
-			*stream << crc; // Object CRC checksum
+			*stream << crc; // 0 crc for now. Not needed
 		}
 
 		*stream << (u64)0; // EOF
@@ -237,24 +198,22 @@ namespace CE
 			packageName = actualPackageName;
 		}
 
-		// Package dependencies list: v1.1
 		Array<Name> packageDependendies{};
-		if (IsVersionGreaterThanOrEqualTo(majorVersion, minorVersion, PackageDependencies_Major, PackageDependencies_Minor))
-		{
-			LoadPackageDependencies(stream, packageDependendies);
-		}
+		LoadPackageDependencies(stream, packageDependendies);
 
 		u8 isCooked = 0;
-		if (IsVersionGreaterThanOrEqualTo(majorVersion, minorVersion, IsCookedValue_Major, IsCookedValue_Minor))
-		{
-			*stream >> isCooked;
-		}
+		*stream >> isCooked;
 
 		Package* package = nullptr;
 
 		if (loadedPackages.KeyExists(packageName))
 		{
 			package = loadedPackages[packageName];
+			package->packageDependencies = packageDependendies;
+		}
+		else if (loadedPackagesByUuid.KeyExists(packageUuid))
+		{
+			package = loadedPackagesByUuid[packageUuid];
 			package->packageDependencies = packageDependendies;
 		}
 		else
@@ -274,6 +233,8 @@ namespace CE
 		}
 
 		loadedPackages[packageName] = package;
+		loadedPackagesByUuid[packageUuid] = package;
+		loadedPackageUuidToPath[packageUuid] = packageName;
 
 		package->isCooked = isCooked > 0 ? true : false;
 		package->majorVersion = majorVersion;
@@ -289,7 +250,7 @@ namespace CE
 			u64 objectUuid = 0;
 			*stream >> objectUuid;
 
-			u8 isAsset = 0;
+			b8 isAsset = false;
 			*stream >> isAsset;
 
 			String pathInPackage{};
@@ -298,23 +259,26 @@ namespace CE
 			String objectTypeName{};
 			*stream >> objectTypeName;
 
-			u32 dataByteSize = 0;
-			*stream >> dataByteSize;
+			String objectName{};
+			*stream >> objectName;
 
-			u32 numFields = 0;
-			*stream >> numFields;
+			String sourceAssetPath = "";
+			if (isAsset)
+			{
+				*stream >> sourceAssetPath;
+			}
 
 			u64 dataStartOffset = 0;
 			*stream >> dataStartOffset;
 
-			String objectName{};
-			*stream >> objectName;
-
-			String sourceAssetRelativePath{};
-			*stream >> sourceAssetRelativePath;
-
 			stream->Seek(dataStartOffset);
-			stream->Seek(dataByteSize, SeekMode::Current); // Skip data for now
+
+			u8 typeByte = 0;
+			*stream >> typeByte; // Should always be map type
+
+			u64 dataSize = 0;
+			*stream >> dataSize;
+			stream->Seek(dataSize, SeekMode::Current);
             
             package->objectUuidToEntryMap[objectUuid] = ObjectEntryMetaData();
             
@@ -324,13 +288,12 @@ namespace CE
             objectEntry.objectClassName = objectTypeName;
             objectEntry.pathInPackage = pathInPackage;
             objectEntry.offsetInFile = dataStartOffset;
-            objectEntry.objectDataSize = dataByteSize;
+            objectEntry.objectDataSize = dataSize;
 			objectEntry.objectName = objectName;
-			objectEntry.sourceAssetRelativePath = sourceAssetRelativePath;
+			objectEntry.sourceAssetRelativePath = sourceAssetPath;
 
 			u32 crc = 0;
-			*stream >> crc; // End marker, ignored
-			*stream >> crc; // Actual crc, unused
+			*stream >> crc; // Object data crc, unused
 
 			*stream >> magicObjectNumber; // magic number is 0 if end of file
 		}
@@ -445,17 +408,9 @@ namespace CE
         loadedObjects[objectUuid] = objectInstance;
         
         entry.isLoaded = true;
-        
-        FieldDeserializer fieldDeserializer{ objectClass->GetFirstField(), objectInstance, this };
-		fieldDeserializer.packageMajor = majorVersion;
-		fieldDeserializer.packageMinor = minorVersion;
-        
-        while (fieldDeserializer.HasNext())
-        {
-            fieldDeserializer.ReadNext(stream);
-        }
 
-		objectInstance->OnAfterDeserialize();
+		BinaryDeserializer deserializer{ objectClass, objectInstance };
+		deserializer.Deserialize(stream);
 
 		bool fullyLoaded = true;
 		for (const auto& [uuid, objectEntry] : objectUuidToEntryMap)

@@ -77,7 +77,7 @@ namespace CE
 		// Decodes raw image pixel data from PNG format
 		static CMImage DecodePNG(const CMImage& source, MemoryStream* inStream);
 
-#if PAL_TRAIT_BUILD_EDITOR
+#if PLATFORM_DESKTOP
 		// Encodes raw image data to BCn format (BC7, BC1, etc)
 		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat toBCnFormat, float quality = 0.25f);
 #endif

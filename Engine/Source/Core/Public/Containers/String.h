@@ -387,10 +387,8 @@ namespace CE
     inline SIZE_T GetHash(const String& Value)
     {
         return CalculateHash(Value.GetCString(), Value.GetLength());
-    }
-
-    
-    
+    }    
+   
 }
 
 /// fmt user-defined Formatter for CE::String

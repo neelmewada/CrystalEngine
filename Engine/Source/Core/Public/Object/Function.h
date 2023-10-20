@@ -113,3 +113,4 @@ namespace CE
     
 } // namespace CE
 
+CE_RTTI_TYPEINFO(CORE_API, CE, FunctionType, TYPEID(CE::TypeInfo))

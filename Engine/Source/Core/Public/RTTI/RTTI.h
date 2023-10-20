@@ -185,6 +185,9 @@ namespace CE
 		virtual bool IsEnum() const { return false; }
 		virtual bool IsEnumConstant() const { return false; }
 
+		/// Returns true if the type is a subclass of TypeInfo. i.e. Reflection of RTTI classes.
+		virtual bool IsTypeInfo() const { return false; }
+
 		virtual bool IsPOD() const { return false; }
 
 		virtual bool IsAssignableTo(TypeId typeId) { return false; }
@@ -318,6 +321,8 @@ namespace CE
 	{}
 	
 } // namespace CE
+
+CE_RTTI_TYPEINFO(CORE_API, CE, TypeInfo)
 
 // Simple data types
 

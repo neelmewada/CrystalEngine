@@ -166,6 +166,12 @@ namespace CE
 	template<typename T>
 	struct TIsStruct : TBoolConst<__is_class(T) && T::IsStruct()> {};
 
+	template<typename What, typename... Args>
+	struct TIsTypePresent : TBoolConst<(std::is_same_v<What, Args> or ...)>
+	{
+		
+	};
+
 	// Function
 
 	template <typename T>
@@ -244,7 +250,9 @@ namespace CE
 		}
 	};
 
-	/// TTrueType if type has default constructor and is NOT abstract
+	class ObjectInitializer;
+
+	/// True if type has default constructor and is NOT abstract
 	template<typename T, typename = void>
 	struct THasDefaultCtor : TFalseType
 	{

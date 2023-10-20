@@ -159,7 +159,17 @@ namespace CE
 		template<typename T>
 		FORCE_INLINE bool IsOfType()
 		{
-			return IsOfType(T::Type());
+			return IsOfType(T::StaticType());
+		}
+
+		template<typename TClass> requires TIsBaseClassOf<CE::Object, TClass>::Value
+		FORCE_INLINE static TClass* CastTo(Object* instance)
+		{
+			if (instance == nullptr || !instance->IsOfType<TClass>())
+			{
+				return nullptr;
+			}
+			return (TClass*)instance;
 		}
 
 		Name GetPathInPackage();
@@ -181,6 +191,9 @@ namespace CE
     protected:
 
 		void LoadFromTemplateHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* templateObject);
+
+		void LoadFromTemplateFieldHelper(HashMap<UUID, Object*>& originalToClonedObjectMap,
+			Field* srcField, void* srcInstance, Field* dstField, void* dstInstance);
 
 		Object* CloneHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone);
 
@@ -205,7 +218,8 @@ namespace CE
 		{
 			return (TClass*)CreateDefaultSubobject(TClass::Type(), name, flags);
 		}
-        
+
+		
 		void LoadDefaults();
 
         void ConfigParseStruct(const String& value, void* instance, StructType* structType);
@@ -217,6 +231,10 @@ namespace CE
 		void EmitSignal(const String& name, const Array<Variant>& args);
 
 	private:
+
+		Object* GetDefaultSubobject(ClassType* classType, const String& name);
+
+		void FetchObjectReferencesInStructField(HashMap<UUID, Object*>& outReferences, StructType* structType, void* structInstance);
 
 		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate);
 
@@ -302,32 +320,6 @@ namespace CE
 		static HashMap<void*, Array<SignalBinding>> outgoingBindingsMap;
 		static HashMap<void*, Array<SignalBinding>> incomingBindingsMap;
     };
-
-	template<typename T, typename = void>
-	struct THasImplementSignalsFunction : TFalseType
-	{};
-
-	template<typename T>
-	struct THasImplementSignalsFunction<T, std::void_t<decltype(std::declval<T>().__implement_signals)>> : TTrueType
-	{};
-
-	template<typename T, bool = THasImplementSignalsFunction<T>::Value>
-	struct TImplementSignals : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value>
-	{
-
-	};
-
-	template<typename T>
-	struct TImplementSignals<T, false> : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value>
-	{
-
-	};
-
-	template<typename T>
-	struct TImplementSignals<T, true> : TBoolConst<TIsBaseClassOf<CE::Object, T>::Value or T::__implement_signals>
-	{
-
-	};
     
 } // namespace CE
 
@@ -338,11 +330,10 @@ CE_RTTI_CLASS(CORE_API, CE, Object,
     CE_FIELD_LIST(
         CE_FIELD(name, Hidden, ReadOnly, Internal) // name cannot be modified directly
         CE_FIELD(uuid, Hidden, ReadOnly, Internal) // uuid cannot be modified directly
-		CE_FIELD(attachedObjects, Hidden, Internal)
-		CE_FIELD(outer, Hidden, Internal)
+		CE_FIELD(attachedObjects, Hidden, ReadOnly)
+		CE_FIELD(outer, Hidden, ReadOnly)
     ),
     CE_FUNCTION_LIST(
         
     )
 )
-

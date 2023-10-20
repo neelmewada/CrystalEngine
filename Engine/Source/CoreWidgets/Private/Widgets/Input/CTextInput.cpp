@@ -61,7 +61,7 @@ namespace CE::Widgets
 
 		if (inputChanged)
 		{
-			emit OnTextEdited(value);
+			OnTextEdited(value);
 		}
 	}
 
@@ -78,7 +78,7 @@ namespace CE::Widgets
 			{
 				stateFlags = CStateFlag::Default;
 			}
-			emit OnFocusChanged(focusEvent->GotFocus());
+			OnFocusChanged(focusEvent->GotFocus());
 			SetNeedsStyle();
 			event->MarkHandled();
 		}

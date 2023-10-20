@@ -13,8 +13,8 @@ add_subdirectory(Shaders)
 # Core Modules
 
 add_subdirectory(Source/Core)
-add_subdirectory(Source/AutoRTTI)
-add_subdirectory(Source/ResourceCompiler)
+#add_subdirectory(Source/AutoRTTI)
+#add_subdirectory(Source/ResourceCompiler)
 
 add_subdirectory(Source/CoreApplication)
 add_subdirectory(Source/CoreMedia)

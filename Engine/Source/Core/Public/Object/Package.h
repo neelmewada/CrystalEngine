@@ -9,6 +9,7 @@ class Package_WriteRead_Test;
 namespace CE
 {
 	class SavePackage;
+	class Package;
 
 	enum class LoadPackageResult
 	{
@@ -33,6 +34,11 @@ namespace CE
 
 	};
 
+	struct IPackageResolver
+	{
+		virtual Name GetPackagePath(UUID packageUuid) = 0;
+	};
+
 	class CORE_API Package : public Object
 	{
 		CE_CLASS(Package, CE::Object)
@@ -41,6 +47,18 @@ namespace CE
 		virtual ~Package();
 
 		// - Static API -
+
+		inline static void PushPackageResolver(IPackageResolver* resolver) { Self::packageResolvers.Push(resolver); }
+		inline static void PopPackageResolver() { if (!Self::packageResolvers.IsEmpty()) Self::packageResolvers.Pop(); }
+
+		inline static IPackageResolver* GetPackageResolver() 
+		{ 
+			if (!Self::packageResolvers.IsEmpty()) 
+				return packageResolvers.Top();
+			return nullptr;
+		}
+
+		static Package* LoadPackageByUuid(UUID packageUuid, LoadFlags loadFlags = LOAD_Default);
 
 		static IO::Path GetPackagePath(const Name& packageName);
 
@@ -86,7 +104,7 @@ namespace CE
         Object* LoadObject(UUID objectUuid);
 		Object* LoadObject(const Name& objectClassName);
 
-		template<typename TObject>
+		template<typename TObject> requires TIsBaseClassOf<CE::Object, TObject>::Value
 		TObject* LoadObject()
 		{
 			return (TObject*)LoadObject(TYPENAME(TObject));
@@ -95,6 +113,7 @@ namespace CE
 		// Returns true if this package contains the given object. Note that the object has to be fully loaded.
 		bool ContainsObject(Object* object);
 
+		// Find and return an already loaded object with the given UUID
 		Object* ResolveObjectReference(UUID objectUuid);
 
 		const Name& GetPrimaryObjectName();
@@ -162,6 +181,10 @@ namespace CE
 		IO::Path fullPackagePath{};
 
 		static HashMap<Name, Package*> loadedPackages;
+		static HashMap<UUID, Package*> loadedPackagesByUuid;
+		static HashMap<UUID, Name> loadedPackageUuidToPath;
+
+		static Array<IPackageResolver*> packageResolvers;
 
 		friend class CoreModule;
 	};

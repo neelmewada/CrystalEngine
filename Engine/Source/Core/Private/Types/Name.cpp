@@ -5,10 +5,13 @@
 
 namespace CE
 {
+	HashMap<SIZE_T, String> Name::nameHashMap = HashMap<SIZE_T, String>{
+		{ 0, "" }
+	};
 
 	Name::Name(String name)
 	{
-		value = "";
+		String value = "";
 
 		if (name.IsEmpty())
 		{
@@ -74,8 +77,12 @@ namespace CE
 			i++;
 		}
 
-		this->value = hashString;
 		this->hashValue = GetHash(hashString);
+		//this->value = hashString;
+		nameHashMap[this->hashValue] = hashString;
+#if CE_NAME_DEBUG
+		debugString = nameHashMap[this->hashValue].GetCString();
+#endif
 	}
 
 	Name::Name(const char* name) : Name(String(name))
@@ -85,28 +92,40 @@ namespace CE
 
 	Name::Name(const Name& copy)
 	{
-		this->value = copy.value;
 		this->hashValue = copy.hashValue;
+#if CE_NAME_DEBUG
+		debugString = nameHashMap[this->hashValue].GetCString();
+#endif
 	}
 
 	Name& Name::operator=(const Name& copy)
 	{
-		this->value = copy.value;
 		this->hashValue = copy.hashValue;
+#if CE_NAME_DEBUG
+		debugString = nameHashMap[this->hashValue].GetCString();
+#endif
 		return *this;
 	}
 
 	Name::Name(Name&& move)
-		: value(move.value)
-		, hashValue(move.hashValue)
 	{
-		move.value.Clear();
+		hashValue = move.hashValue;
 		move.hashValue = 0;
+
+#if CE_NAME_DEBUG
+		debugString = nameHashMap[this->hashValue].GetCString();
+#endif
+	}
+
+	const String& Name::GetString() const
+	{
+		return nameHashMap[hashValue];
 	}
 
 	void Name::GetComponents(CE::Array<String>& components) const
 	{
 		components.Clear();
+		String value = GetString();
 		value.Split({ "/", "::" }, components);
 	}
 
@@ -114,6 +133,7 @@ namespace CE
 	{
 		String last = "";
 		int i = 0;
+		String value = GetString();
 		int length = value.GetLength();
 
 		Array<String> split{};

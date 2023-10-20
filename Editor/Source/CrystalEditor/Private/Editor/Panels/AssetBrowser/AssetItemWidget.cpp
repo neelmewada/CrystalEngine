@@ -90,7 +90,7 @@ namespace CE::Editor
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
 			if (mouseEvent->mouseButton == 0)
 			{
-				emit OnItemDoubleClicked();
+				OnItemDoubleClicked();
 				event->HandleAndStopPropagation();
 			}
 		}

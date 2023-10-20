@@ -3,6 +3,7 @@
 
 namespace CE::Widgets
 {
+
 	YGSize CWidget::MeasureFunctionCallback(YGNodeRef nodeRef, float width, YGMeasureMode widthMode, float height, YGMeasureMode heightMode)
 	{
 		CWidget* widget = (CWidget*)YGNodeGetContext(nodeRef);
@@ -1492,7 +1493,7 @@ namespace CE::Widgets
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
 			if (mouseEvent->mouseButton == 0) // Left click
 			{
-				emit OnMouseClick(mouseEvent);
+				OnMouseClick(mouseEvent);
 				event->MarkHandled();
 			}
 			else if (mouseEvent->mouseButton == 1) // Right click
@@ -1502,7 +1503,7 @@ namespace CE::Widgets
 					contextMenu->ShowContextMenu();
 				}
 
-				emit OnMouseRightClick(mouseEvent);
+				OnMouseRightClick(mouseEvent);
 				event->MarkHandled();
 			}
 		}
@@ -1510,7 +1511,7 @@ namespace CE::Widgets
 		if (!event->isHandled && event->GetEventType() == CEventType::FocusChanged)
 		{
 			CFocusEvent* focusEvent = (CFocusEvent*)event;
-			emit OnFocusChanged(focusEvent->GotFocus());
+			OnFocusChanged(focusEvent->GotFocus());
 		}
 
 		if (event->type == CEventType::KeyEvent)
@@ -1518,11 +1519,11 @@ namespace CE::Widgets
 			CKeyEvent* keyEvent = (CKeyEvent*)event;
 			if (keyEvent->IsPressed())
 			{
-				emit OnKeyPressed(keyEvent->key);
+				OnKeyPressed(keyEvent->key);
 			}
 			else if (keyEvent->IsReleased())
 			{
-				emit OnKeyReleased(keyEvent->key);
+				OnKeyReleased(keyEvent->key);
 			}
 		}
 

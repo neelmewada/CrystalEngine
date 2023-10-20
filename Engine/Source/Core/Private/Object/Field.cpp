@@ -121,6 +121,8 @@ namespace CE
 
 	bool FieldType::IsPODField()
 	{
+		if (GetDeclarationType() == nullptr)
+			return false;
 		return GetDeclarationType()->IsPOD();
 	}
 
@@ -133,6 +135,13 @@ namespace CE
     {
         return GetDeclarationTypeId() == TYPEID(String);
     }
+
+	bool FieldType::IsTypeInfoField()
+	{
+		if (GetDeclarationType() == nullptr)
+			return false;
+		return GetDeclarationType()->IsTypeInfo();
+	}
 
     bool FieldType::IsIntegerField() const
     {
@@ -155,9 +164,15 @@ namespace CE
 
     bool FieldType::IsObjectField() const
     {
-        auto classType = ClassType::FindClass(fieldTypeId);
+		Class* classType = ClassType::FindClass(fieldTypeId);
         return classType != nullptr && classType->IsObject();
     }
+
+	bool FieldType::IsStructField()
+	{
+		Struct* structType = StructType::FindStruct(fieldTypeId);
+		return structType != nullptr;
+	}
 
 	TypeInfo* FieldType::GetUnderlyingType()
 	{
@@ -283,6 +298,34 @@ namespace CE
 					}
 				}
 			}
+			else if (fieldTypeId == TYPEID(SubClassType<>))
+			{
+				ClassType* type = GetFieldValue<SubClassType<Object>>(instance);
+				if (type == nullptr)
+					return "";
+				return type->GetTypeName().GetString();
+			}
+		}
+		else if (fieldTypeId == TYPEID(ClassType))
+		{
+			ClassType* type = GetFieldValue<ClassType*>(instance);
+			if (type == nullptr)
+				return "";
+			return type->GetTypeName().GetString();
+		}
+		else if (fieldTypeId == TYPEID(StructType))
+		{
+			StructType* type = GetFieldValue<StructType*>(instance);
+			if (type == nullptr)
+				return "";
+			return type->GetTypeName().GetString();
+		}
+		else if (fieldTypeId == TYPEID(EnumType))
+		{
+			EnumType* type = GetFieldValue<EnumType*>(instance);
+			if (type == nullptr)
+				return "";
+			return type->GetTypeName().GetString();
 		}
 
 		return "";
@@ -300,27 +343,27 @@ namespace CE
 			if (fieldTypeId == TYPEID(String))
 			{
 				const String& value = GetFieldValue<String>(srcInstance);
-				destField->ForceSetFieldValue(destInstance, value);
+				destField->SetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(Name))
 			{
 				const Name& value = GetFieldValue<Name>(srcInstance);
-				destField->ForceSetFieldValue(destInstance, value);
+				destField->SetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(IO::Path))
 			{
 				const IO::Path& value = GetFieldValue<IO::Path>(srcInstance);
-				destField->ForceSetFieldValue(destInstance, value);
+				destField->SetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(UUID))
 			{
 				const UUID& value = GetFieldValue<UUID>(srcInstance);
-				destField->ForceSetFieldValue(destInstance, value);
+				destField->SetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(UUID32))
 			{
 				const UUID32& value = GetFieldValue<UUID32>(srcInstance);
-				destField->ForceSetFieldValue(destInstance, value);
+				destField->SetFieldValue(destInstance, value);
 			}
 			else if (IsArrayField()) // Array
 			{
@@ -354,7 +397,7 @@ namespace CE
 			else if (fieldTypeId == TYPEID(BinaryBlob)) // Binary blob
 			{
 				const BinaryBlob& blob = GetFieldValue<BinaryBlob>(srcInstance);
-				destField->ForceSetFieldValue(destInstance, blob);
+				destField->SetFieldValue(destInstance, blob);
 			}
 			else
 			{
@@ -365,32 +408,32 @@ namespace CE
 		{
 			auto structType = (StructType*)GetDeclarationType();
 			void* srcStructInstance = this->GetFieldInstance(srcInstance);
-			void* destStructInstance = destField->GetFieldInstance(destInstance);
+			void* dstStructInstance = destField->GetFieldInstance(destInstance);
 
 			for (auto field = structType->GetFirstField(); field != nullptr; field = field->GetNext())
 			{
-				field->CopyTo(srcStructInstance, field, destStructInstance);
+				field->CopyTo(srcStructInstance, field, dstStructInstance);
 			}
 		}
 		else if (GetDeclarationType()->IsClass())
 		{
 			Object* objectPtr = this->GetFieldValue<Object*>(srcInstance);
-			destField->ForceSetFieldValue(destInstance, objectPtr);
+			destField->SetFieldValue(destInstance, objectPtr);
 		}
 		else if (GetDeclarationTypeId() == TYPEID(ClassType))
 		{
 			ClassType* type = this->GetFieldValue<ClassType*>(srcInstance);
-			destField->ForceSetFieldValue(destInstance, type);
+			destField->SetFieldValue(destInstance, type);
 		}
 		else if (GetDeclarationTypeId() == TYPEID(StructType))
 		{
 			StructType* type = this->GetFieldValue<StructType*>(srcInstance);
-			destField->ForceSetFieldValue(destInstance, type);
+			destField->SetFieldValue(destInstance, type);
 		}
 		else if (GetDeclarationTypeId() == TYPEID(SubClassType<Object>))
 		{
 			const SubClassType<Object>& type = this->GetFieldValue<SubClassType<Object>>(srcInstance);
-			destField->ForceSetFieldValue(destInstance, type);
+			destField->SetFieldValue(destInstance, type);
 		}
 		else
 		{
@@ -477,6 +520,10 @@ namespace CE
 		if (underlyingType->IsClass())
 		{
 			underlyingTypeSize = sizeof(Object*); // classes are always stored as pointers
+		}
+		if (underlyingType->IsTypeInfo())
+		{
+			underlyingTypeSize = sizeof(TypeInfo*); // Reflection types are always stored as pointers
 		}
 
 		return array.GetSize() / underlyingTypeSize;
@@ -644,3 +691,5 @@ namespace CE
 	}
 
 }
+
+CE_RTTI_TYPEINFO_IMPL(CE, FieldType)

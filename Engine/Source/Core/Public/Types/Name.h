@@ -48,17 +48,17 @@ namespace CE
 
         CE_INLINE bool IsValid() const
         {
-            return !value.IsEmpty() && hashValue != 0;
+            return hashValue != 0;
         }
 
         CE_INLINE SIZE_T GetHashValue() const { return hashValue; }
 
-        CE_INLINE const String& GetString() const { return value; }
+		const String& GetString() const;
         
-        CE_INLINE const char* GetCString() const
-        {
-            return value.GetCString();
-        }
+		CE_INLINE const char* GetCString() const
+		{
+			return GetString().GetCString();
+		}
 
         CE_INLINE bool operator==(const Name& rhs) const
         {
@@ -75,8 +75,12 @@ namespace CE
         String GetLastComponent() const;
 
     private:
-        String value;
         SIZE_T hashValue;
+#if CE_NAME_DEBUG
+		char* debugString = nullptr;
+#endif
+
+		static HashMap<SIZE_T, String> nameHashMap;
     };
 
     template<>

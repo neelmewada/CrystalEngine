@@ -5,6 +5,24 @@
 
 namespace CE
 {
+	static HashMap<TypeId, u8> typeIdToFieldTypeMap{
+		{ 0, 0x00 }, // Null value
+		{ TYPEID(u8), 0x01 },
+		{ TYPEID(u16), 0x02 },
+		{ TYPEID(u32), 0x03 }, { TYPEID(UUID32), 0x04 },
+		{ TYPEID(u64), 0x04 }, { TYPEID(UUID), 0x04 },
+		{ TYPEID(s8), 0x05 },
+		{ TYPEID(s16), 0x06 },
+		{ TYPEID(s32), 0x07 },
+		{ TYPEID(s64), 0x08 },
+		{ TYPEID(f32), 0x09 },
+		{ TYPEID(f64), 0x0A },
+		{ TYPEID(b8), 0x0B },
+		{ TYPEID(String), 0x0C }, { TYPEID(Name), 0x0C }, { TYPEID(IO::Path), 0x0C },
+		{ TYPEID(BinaryBlob), 0x0D },
+		{ TYPEID(Object), 0x0E },
+		{ TYPEID(Array<>), 0x11 },
+	};
 
     FieldSerializer::FieldSerializer(FieldType* fieldChain, void* instance)
         : rawInstance(instance)
@@ -24,7 +42,7 @@ namespace CE
     FieldSerializer::FieldSerializer(Array<FieldType*> fieldList, void* instance)
         : rawInstance(instance), fields(fieldList)
     {
-
+		
     }
 
     bool FieldSerializer::HasNext()
@@ -49,19 +67,14 @@ namespace CE
 
         if (!skipHeader)
         {
-			*stream << FIELD_MAGIC_NUMBER;
             *stream << field->GetName();
-            *stream << field->GetDeclarationType()->GetTypeName();
         }
-        
-        auto dataSizePos = stream->GetCurrentPosition();
-        if (!skipHeader)
-            *stream << (u32)0; // Set 0 size for now. Updated later
-        
-        auto dataStartPos = stream->GetCurrentPosition();
-        
+		
         if (field->IsIntegerField())
         {
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
             if (fieldTypeId == TYPEID(u8))
                 *stream << field->GetFieldValue<u8>(rawInstance);
             else if (fieldTypeId == TYPEID(u16))
@@ -81,6 +94,9 @@ namespace CE
         }
         else if (field->IsDecimalField())
         {
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
             if (fieldTypeId == TYPEID(f32))
                 *stream << field->GetFieldValue<f32>(rawInstance);
             else if (fieldTypeId == TYPEID(f64))
@@ -88,30 +104,50 @@ namespace CE
         }
 		else if (fieldTypeId == TYPEID(bool))
 		{
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
 			*stream << field->GetFieldValue<bool>(rawInstance);
 		}
         else if (fieldTypeId == TYPEID(UUID))
         {
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
             *stream << field->GetFieldValue<UUID>(rawInstance);
         }
         else if (fieldTypeId == TYPEID(String))
         {
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
             *stream << field->GetFieldValue<String>(rawInstance);
         }
         else if (fieldTypeId == TYPEID(Name))
         {
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
             *stream << field->GetFieldValue<Name>(rawInstance);
         }
         else if (fieldTypeId == TYPEID(IO::Path))
         {
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
             *stream << field->GetFieldValue<IO::Path>(rawInstance).GetString();
         }
 		else if (fieldTypeId == TYPEID(BinaryBlob))
 		{
+			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
+				*stream << typeIdToFieldTypeMap[fieldTypeId];
+
 			*stream << field->GetFieldValue<BinaryBlob>(rawInstance);
 		}
 		else if (fieldTypeId == TYPEID(SubClassType<Object>))
 		{
+			*stream << typeIdToFieldTypeMap[TYPEID(String)];
+
 			ClassType* value = field->GetFieldValue<SubClassType<Object>>(rawInstance);
 			if (value == nullptr)
 				*stream << "";
@@ -120,6 +156,8 @@ namespace CE
 		}
 		else if (fieldTypeId == TYPEID(ClassType))
 		{
+			*stream << typeIdToFieldTypeMap[TYPEID(String)];
+
 			ClassType* value = field->GetFieldValue<ClassType*>(rawInstance);
 			if (value == nullptr)
 				*stream << "";
@@ -128,6 +166,8 @@ namespace CE
 		}
 		else if (fieldTypeId == TYPEID(StructType))
 		{
+			*stream << typeIdToFieldTypeMap[TYPEID(String)];
+
 			StructType* value = field->GetFieldValue<StructType*>(rawInstance);
 			if (value == nullptr)
 				*stream << "";
@@ -136,6 +176,8 @@ namespace CE
 		}
 		else if (fieldTypeId == TYPEID(EnumType))
 		{
+			*stream << typeIdToFieldTypeMap[TYPEID(String)];
+
 			EnumType* value = field->GetFieldValue<EnumType*>(rawInstance);
 			if (value == nullptr)
 				*stream << "";
@@ -144,16 +186,17 @@ namespace CE
 		}
         else if (field->IsArrayField())
         {
+			*stream << typeIdToFieldTypeMap[TYPEID(Array<>)];
+
             auto& array = const_cast<Array<u8>&>(field->GetFieldValue<Array<u8>>(rawInstance));
             
             auto underlyingType = field->GetUnderlyingType();
             u32 arraySize = field->GetArraySize(rawInstance);
 
-            *stream << underlyingType->GetTypeName();
-            *stream << arraySize;
-
             u64 dataSizePos = stream->GetCurrentPosition();
-            *stream << (u32)0; // Total data byte size, excluding itself
+            *stream << (u64)0; // Total data byte size, excluding itself
+
+			*stream << arraySize;
 
             Array<FieldType> fieldList = field->GetArrayFieldList(rawInstance);
             Array<FieldType*> fieldListPtr = fieldList.Transform<FieldType*>([](FieldType& item)-> FieldType*
@@ -175,20 +218,21 @@ namespace CE
 
             u64 curPos = stream->GetCurrentPosition();
             stream->Seek(dataSizePos);
-            *stream << (u32)(curPos - dataSizePos - sizeof(u32)); // subtract the size of the "Data Byte Size" field itself
+            *stream << (u64)(curPos - dataSizePos - sizeof(u64)); // subtract the size of the "Data Byte Size" field itself
             stream->Seek(curPos);
         }
         else if (fieldTypeId == TYPEID(ObjectMap)) // ObjectMaps are stored just like arrays
         {
+			*stream << typeIdToFieldTypeMap[TYPEID(Array<>)];
+
             const auto& map = field->GetFieldValue<ObjectMap>(rawInstance);
 
             u32 mapSize = map.GetObjectCount();
 
-            *stream << TYPENAME(Object);
-            *stream << mapSize;
-
             u64 dataSizePos = stream->GetCurrentPosition();
-            *stream << (u32)0; // Total data byte size, excluding itself
+            *stream << (u64)0; // Total data byte size, excluding itself
+
+			*stream << mapSize;
 
             for (const auto& object : map)
             {
@@ -200,17 +244,21 @@ namespace CE
 
             u64 curPos = stream->GetCurrentPosition();
             stream->Seek(dataSizePos);
-            *stream << (u32)(curPos - dataSizePos - sizeof(u32)); // subtract the size of the "Data Byte Size" field itself
+            *stream << (u64)(curPos - dataSizePos - sizeof(u64)); // subtract the size of the "Data Byte Size" field itself
             stream->Seek(curPos);
         }
         else if (field->IsObjectField())
         {
+			*stream << typeIdToFieldTypeMap[TYPEID(Object)];
+
             Object* object = field->GetFieldValue<Object*>(rawInstance);
             
             WriteObjectReference(stream, object);
         }
         else if (fieldDeclarationType->IsStruct())
         {
+			*stream << (u8)0x10;
+
             StructType* structType = (StructType*)fieldDeclarationType;
             auto structInstance = field->GetFieldInstance(rawInstance);
 
@@ -226,20 +274,12 @@ namespace CE
         }
 		else if (fieldDeclarationType->IsEnum())
 		{
+			*stream << typeIdToFieldTypeMap[TYPEID(s64)];
+
 			auto enumType = (EnumType*)fieldDeclarationType;
 
 			*stream << field->GetFieldEnumValue(rawInstance);
 		}
-        
-        u64 curPos = stream->GetCurrentPosition();
-        auto dataSize = (u32)(stream->GetCurrentPosition() - dataStartPos);
-        
-        if (!skipHeader)
-        {
-            stream->Seek(dataSizePos);
-            *stream << dataSize;
-            stream->Seek(curPos);
-        }
 
         fields.RemoveAt(0);
         return true;
@@ -249,27 +289,32 @@ namespace CE
     {
         if (objectRef != nullptr && !objectRef->IsTransient()) // non-temporary object
         {
+			u64 sizePos = stream->GetCurrentPosition();
+			*stream << (u32)0; // Data size
+
             *stream << objectRef->GetUuid();
-            *stream << objectRef->GetClass()->GetTypeName();
 
             auto package = objectRef->GetPackage();
 
             if (package != nullptr)
 			{
 				*stream << (u64)package->GetUuid();
-				*stream << package->GetPackageName();
+				*stream << objectRef->GetClass()->GetTypeName();
 			}
             else
 			{
 				*stream << (u64)0; // Package UUID: 0
-				*stream << "\0"; // null package name
+				*stream << objectRef->GetClass()->GetTypeName();
 			}
 
-            *stream << objectRef->GetPathInPackage();
+			auto curPos = stream->GetCurrentPosition();
+			stream->Seek(sizePos);
+			*stream << (curPos - sizePos - sizeof(u32));
+			stream->Seek(curPos);
         }
         else
         {
-            *stream << (u64)0; // A Uuid of 0 means NULL object
+			*stream << (u32)0; // 0 is nullptr.
         }
     }
 
@@ -325,20 +370,7 @@ namespace CE
 
         if (!skipHeader)
         {
-			if (packageMajor == 0 || IsVersionGreaterThanOrEqualTo(packageMajor, packageMinor, FieldMagicValue_Major, FieldMagicValue_Minor))
-			{
-				u32 magicValue = 0;
-				*stream >> magicValue;
-				if (magicValue != FIELD_MAGIC_NUMBER) // End of fields or invalid field
-				{
-					if (magicValue != 0)
-					{
-						CE_LOG(Error, All, "Invalid field entry! Expected a magic field number.");
-					}
-					fields.Clear();
-					return false;
-				}
-			}
+			
 
             *stream >> fieldName;
             if (fieldName.IsEmpty())
@@ -616,10 +648,7 @@ namespace CE
         *stream >> objectTypeName;
 
 		u64 packageUuid = 0;
-		if (IsVersionGreaterThanOrEqualTo(packageMajor, packageMinor, ObjectRefPackageUuid_Major, ObjectRefPackageUuid_Minor))
-		{
-			*stream >> packageUuid;
-		}
+		*stream >> packageUuid;
 
         Name packageName{};
         *stream >> packageName;

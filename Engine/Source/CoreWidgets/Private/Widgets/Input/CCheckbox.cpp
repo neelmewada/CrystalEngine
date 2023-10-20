@@ -23,7 +23,7 @@ namespace CE::Widgets
 
 		if (GUI::Checkbox(rect, GetUuid(), &tristateValue, defaultStyleState))
 		{
-			emit OnValueChanged(tristateValue);
+			OnValueChanged(tristateValue);
 		}
 		PollEvents();
     }

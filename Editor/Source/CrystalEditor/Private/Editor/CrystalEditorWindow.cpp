@@ -57,4 +57,10 @@ namespace CE::Editor
 		GetWidgetDebugger()->RenderGUI();
 	}
 
+	void CrystalEditorWindow::HandleEvent(CEvent* event)
+	{
+
+		Super::HandleEvent(event);
+	}
+
 } // namespace CE::Editor

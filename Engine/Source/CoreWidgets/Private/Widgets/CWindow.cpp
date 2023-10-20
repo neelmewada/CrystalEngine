@@ -323,7 +323,7 @@ namespace CE::Widgets
 		if (event->GetEventType() == CEventType::ResizeEvent)
 		{
 			CResizeEvent* resizeEvent = (CResizeEvent*)event;
-			emit OnWindowResized(resizeEvent->oldSize, resizeEvent->newSize);
+			OnWindowResized(resizeEvent->oldSize, resizeEvent->newSize);
 
 			SetNeedsLayoutRecursive();
 		}

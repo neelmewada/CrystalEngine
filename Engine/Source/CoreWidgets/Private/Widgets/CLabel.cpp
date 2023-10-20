@@ -65,7 +65,7 @@ namespace CE::Widgets
 		{
 			if (GUI::InvisibleButton(rect, GetUuid()))
 			{
-				emit OnTextClicked();
+				OnTextClicked();
 			}
 			PollEvents();
 		}

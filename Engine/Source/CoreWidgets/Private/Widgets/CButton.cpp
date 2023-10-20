@@ -131,7 +131,7 @@ namespace CE::Widgets
 			}
 
 			OnClicked();
-			emit OnButtonClicked();
+			OnButtonClicked();
 		}
 	}
 

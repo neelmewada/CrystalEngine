@@ -47,3 +47,5 @@ namespace CE
 
 } // namespace CE
 
+CE_RTTI_TYPEINFO_IMPL(CE, FunctionType)
+
