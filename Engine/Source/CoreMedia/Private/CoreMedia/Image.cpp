@@ -4,7 +4,7 @@
 #include "lodepng.h"
 #include "lodepng_util.h"
 
-#if PAL_TRAIT_BUILD_EDITOR
+#if PLATFORM_DESKTOP
 #define CMP_STATIC
 #include "compressonator.h"
 #endif
@@ -454,7 +454,7 @@ namespace CE
 		return false;
 	}
 
-#if PAL_TRAIT_BUILD_EDITOR
+#if PLATFORM_DESKTOP
 
 	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat destFormat, float quality)
 	{
