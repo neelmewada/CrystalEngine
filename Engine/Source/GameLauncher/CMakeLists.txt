@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Sandbox CXX)
+project(GameLauncher CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
-ce_add_target(${PROJECT_NAME} SHARED
-    AUTORTTI
+ce_add_target(${PROJECT_NAME} GUIAPP
+    NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER
         PRIVATE
@@ -25,7 +25,6 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-        PUBLIC
             CE::Core
             CE::CoreSettings
             CE::CoreApplication
@@ -35,8 +34,8 @@ ce_add_target(${PROJECT_NAME} SHARED
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
             CE::System
             CE::GameSystem
+            $<${PAL_TRAIT_BUID}:Sandbox>
     RUNTIME_DEPENDENCIES
-
 )
 
 
