@@ -39,6 +39,8 @@ namespace CE::Editor
 		Package* cachePackage = nullptr;
 		AssetCache* cache = nullptr;
 
+		PlatformWindow* mainWindow = nullptr;
+
 		Queue<Delegate<void(void)>> mainThreadQueue{};
 		Mutex mutex{};
 	};

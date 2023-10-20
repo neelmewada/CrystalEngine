@@ -4,6 +4,7 @@
 #include "CoreMedia.h"
 #include "CoreRHI.h"
 #include "CoreShader.h"
+#include "CoreApplication.h"
 #include "System.h"
 
 #include "EditorCore.h"

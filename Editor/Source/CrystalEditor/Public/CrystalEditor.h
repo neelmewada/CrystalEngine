@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "CoreRHI.h"
 #include "CoreWidgets.h"
+#include "CoreApplication.h"
 #include "EditorCore.h"
 #include "EditorWidgets.h"
 #include "EditorSystem.h"
@@ -32,8 +33,4 @@
 #include "Editor/Windows/SceneEditor/SceneEditorWindow.h"
 #include "Editor/Windows/TextureEditor/TextureEditorWindow.h"
 
-namespace CE
-{
-    
-}
 
