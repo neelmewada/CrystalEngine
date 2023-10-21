@@ -15,35 +15,35 @@ set(CE_EDITOR_PATH "${CMAKE_BINARY_DIR}/$<CONFIG>" CACHE STRING "Path to editor 
 
 if (CE_STANDALONE)
     
-    if (${CE_STANDALONE} STREQUAL "Windows")
+    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 
         ce_set(PAL_STANDALONE_PLATFORM_NAME "Windows")
         ce_set(CMAKE_SYSTEM_NAME "Windows")
         ce_set(CE_STANDALONE ON)
         ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
-    elseif(${CE_STANDALONE} STREQUAL "Mac")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 
         ce_set(PAL_STANDALONE_PLATFORM_NAME "Mac")
         ce_set(CMAKE_SYSTEM_NAME "Darwin")
         ce_set(CE_STANDALONE ON)
         ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
-    elseif(${CE_STANDALONE} STREQUAL "Linux")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
         ce_set(PAL_STANDALONE_PLATFORM_NAME "Linux")
         ce_set(CMAKE_SYSTEM_NAME "Linux")
         ce_set(CE_STANDALONE ON)
         ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
-    elseif(${CE_STANDALONE} STREQUAL "Android")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Android")
 
         ce_set(PAL_STANDALONE_PLATFORM_NAME "Android")
         ce_set(CMAKE_SYSTEM_NAME "Android")
         ce_set(CE_STANDALONE ON)
         ce_set(PAL_PLATFORM_NAME ${PAL_STANDALONE_PLATFORM_NAME})
 
-    elseif(${CE_STANDALONE} STREQUAL "iOS")
+    elseif(${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
 
         ce_set(PAL_STANDALONE_PLATFORM_NAME "iOS")
         ce_set(CMAKE_SYSTEM_NAME "iOS")

@@ -13,9 +13,6 @@ add_subdirectory(Shaders)
 # Core Modules
 
 add_subdirectory(Source/Core)
-#add_subdirectory(Source/AutoRTTI)
-#add_subdirectory(Source/ResourceCompiler)
-
 add_subdirectory(Source/CoreApplication)
 add_subdirectory(Source/CoreMedia)
 add_subdirectory(Source/CoreRHI)
@@ -35,12 +32,10 @@ add_subdirectory(Source/CoreShader)
 
 add_subdirectory(Source/System)
 
-#add_subdirectory(Source/GameSystem)
-#add_subdirectory(Source/GameLauncher)
-
-######################################
-# Sandbox & Testing
-
-if(${CE_BUILD_TESTS})
-    add_subdirectory(Source/Sandbox)
+if(${CE_STANDALONE})
+    add_subdirectory(Source/GameSystem)
+    if(${CE_BUILD_TESTS})
+        add_subdirectory(Source/Sandbox)
+    endif()
+    add_subdirectory(Source/GameLauncher)
 endif()
