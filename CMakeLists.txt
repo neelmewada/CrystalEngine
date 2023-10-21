@@ -14,7 +14,7 @@ include(CMake/Version.cmake)
 ce_set(CE_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 ################################################################################
-# Initialize
+# CMake headers
 ################################################################################
 include(CMake/GeneralSettings.cmake)
 include(CMake/Options.cmake)
@@ -48,7 +48,7 @@ if(${PAL_TRAIT_BUILD_EDITOR})
 endif()
 
 # Build Host Tools
-if(${PAL_TRAIT_BUILD_HOST_TOOLS})
+#if(${PAL_TRAIT_BUILD_HOST_TOOLS})
     add_subdirectory(Tools)
-endif()
+#endif()
 

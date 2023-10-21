@@ -698,7 +698,7 @@ namespace CE
 					if (srcObject == nullptr)
 						continue;
 
-					
+					// TODO: LoadFromTemplateHelper from Array
 				}
 			}
 			else if (field->IsArrayField())

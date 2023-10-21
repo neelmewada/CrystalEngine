@@ -94,6 +94,34 @@ ce_set(PAL_HOST_PLATFORM_NAME_LOWERCASE ${PAL_HOST_PLATFORM_NAME_LOWERCASE})
 # Include Platform CMake
 include(CMake/Platform/${PAL_PLATFORM_NAME}/PAL_${PAL_PLATFORM_NAME_LOWERCASE}.cmake)
 
+# Options
+
+set(CE_HOST_BUILD_DIR "Build/${PAL_HOST_PLATFORM_NAME}" CACHE STRING "Path to the editor/tools build directory. Required when building standalone.")
+if(NOT ${CE_STANDALONE})
+    set(CE_HOST_BUILD_DIR "${CMAKE_BINARY_DIR}")
+endif()
+
+set(CE_HOST_TOOLS_BINARY_DIR "${CE_HOST_BUILD_DIR}")
+
+if(IS_ABSOLUTE ${CE_HOST_BUILD_DIR})
+    # Do nothing
+else()
+    # Get absolute path to host build directory
+    set(CE_HOST_TOOLS_BINARY_DIR "${CE_ROOT_DIR}/${CE_HOST_TOOLS_BINARY_DIR}")
+endif()
+
+if(${CE_STANDALONE})
+    message(STATUS "Host Tools Path: ${CE_HOST_TOOLS_BINARY_DIR}")
+endif()
+
+
+if(${CE_BUILD_TESTS})
+    set(CE_BUILD_TESTS 1)
+else()
+    set(CE_BUILD_TESTS 0)
+endif()
+
+
 # Endianness
 
 add_compile_definitions(PAL_TRAIT_${CMAKE_CXX_BYTE_ORDER}=1)

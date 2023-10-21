@@ -305,12 +305,19 @@ namespace CE
 		else if (fieldDeclType->IsObject())
 		{
 			Object* object = field->GetFieldValue<Object*>(instance);
-			if (object == nullptr)
+			if (object == nullptr || object->IsTransient())
 			{
 				*stream << (u8)0; // NULL field type byte
 				return true;
 			}
+
 			auto package = object->GetPackage();
+			if (package != nullptr && package->IsTransient()) // Do NOT save Transient object references
+			{
+				*stream << (u8)0; // NULL field type byte
+				return true;
+			}
+
 			*stream << typeIdToFieldTypeMap[TYPEID(Object)]; // Field Type byte
 			*stream << (u64)object->GetUuid();
 			*stream << ((package != nullptr) ? (u64)package->GetUuid() : 0);
@@ -324,6 +331,10 @@ namespace CE
 			BinarySerializer serializer{ structType, structInstance };
 			serializer.Serialize(stream);
 			return true;
+		}
+		else if (fieldDeclType->IsEnum()) // Enum field
+		{
+			*stream << field->GetFieldEnumValue(instance);
 		}
 		else if (fieldDeclId == TYPEID(ClassType) || fieldDeclId == TYPEID(StructType) || fieldDeclId == TYPEID(EnumType))
 		{
@@ -474,6 +485,10 @@ namespace CE
 			else if (field->IsObjectField())
 			{
 				field->ForceSetFieldValue<Object*>(instance, nullptr);
+			}
+			else if (fieldDeclType->IsEnum())
+			{
+				field->ForceSetFieldEnumValue(instance, 0);
 			}
 			else if (fieldDeclId == TYPEID(b8))
 			{
@@ -646,7 +661,7 @@ namespace CE
 				*stream >> s64Value;
 				signedInt = s64Value;
 			}
-
+			
 			if (fieldDeclId == TYPEID(b8))
 			{
 				field->ForceSetFieldValue<b8>(instance, (isUnsignedInt ? (unsignedInt > 0) : (signedInt > 0)));
@@ -709,6 +724,10 @@ namespace CE
 					field->ForceSetFieldValue<String>(instance, String::Format("{}", unsignedInt));
 				else
 					field->ForceSetFieldValue<String>(instance, String::Format("{}", signedInt));
+			}
+			else if (fieldDeclType->IsEnum())
+			{
+				field->ForceSetFieldEnumValue(instance, isUnsignedInt ? (s64)unsignedInt : signedInt);
 			}
 			else
 			{
@@ -788,7 +807,7 @@ namespace CE
 
 			return true;
 		}
-		else if (isString)
+		else if (isString) // Serialized data is string
 		{
 			String string = "";
 			*stream >> string;
@@ -808,7 +827,7 @@ namespace CE
 			else if (fieldDeclId == TYPEID(SubClassType<>))
 			{
 				ClassType* classType = ClassType::FindClass(string);
-				field->ForceSetFieldValue<SubClassType<Object>>(instance, classType);
+				field->ForceSetFieldValue<SubClassType<>>(instance, classType);
 			}
 			else if (fieldDeclId == TYPEID(ClassType))
 			{
@@ -968,19 +987,18 @@ namespace CE
 				Package* refPackage = Package::LoadPackageByUuid(packageUuid);
 				if (refPackage != nullptr)
 				{
-					Object* original = field->GetFieldValue<Object*>(instance);
 					Object* object = refPackage->LoadObject(objectUuid);
-
-					if (original != nullptr && closestParent != nullptr)
-					{
-						
-					}
-
 					field->ForceSetFieldValue<Object*>(instance, object);
+					return true;
+				}
+				else
+				{
+					field->ForceSetFieldValue<Object*>(instance, nullptr);
+					return true;
 				}
 			}
 
-			return true;
+			return false;
 		}
 		else if (isMap)
 		{

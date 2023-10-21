@@ -90,8 +90,21 @@ function(ce_add_target NAME TARGET_TYPE)
         #set(EXE_FLAG $<$<CONFIG:Release>:${PAL_EXECUTABLE_APPLICATION_FLAG}>)
     endif()
 
+    # Imported Tools
+
     if(${TARGET_TYPE} STREQUAL "TOOL")
-        set(IS_TOOL TRUE)
+        if(${CE_STANDALONE})
+            add_executable(${NAME} IMPORTED GLOBAL)
+            set_target_properties(${NAME}
+                PROPERTIES
+                    IMPORTED_LOCATION_DEBUG "${CE_HOST_TOOLS_BINARY_DIR}/${NAME}${CMAKE_EXECUTABLE_SUFFIX}"
+                    IMPORTED_LOCATION_DEVELOPMENT "${CE_HOST_TOOLS_BINARY_DIR}/${NAME}${CMAKE_EXECUTABLE_SUFFIX}"
+                    IMPORTED_LOCATION_PROFILE "${CE_HOST_TOOLS_BINARY_DIR}/${NAME}${CMAKE_EXECUTABLE_SUFFIX}"
+                    IMPORTED_LOCATION_RELEASE "${CE_HOST_TOOLS_BINARY_DIR}/${NAME}${CMAKE_EXECUTABLE_SUFFIX}"
+                    IMPORTED_LOCATION "${CE_HOST_TOOLS_BINARY_DIR}/${NAME}${CMAKE_EXECUTABLE_SUFFIX}"
+            )
+            return()
+        endif()
     endif()
     
     # Create target

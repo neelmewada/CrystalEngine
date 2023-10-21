@@ -98,6 +98,7 @@ void AppLoop::PostInit()
 	// Load non-important modules
 	LoadCoreModules();
 
+	RHI::gDynamicRHI = new VulkanRHI();
 	RHI::gDynamicRHI->Initialize();
 
 	AppInit();
@@ -110,7 +111,6 @@ void AppLoop::PostInit()
 	auto mainWindow = PlatformApplication::Get()->GetMainWindow();
 	u32 width = 0, height = 0;
 	mainWindow->GetDrawableWindowSize(&width, &height);
-	mainWindow->GetUnderlyingHandle();
 
 	RHI::RenderTargetColorOutputDesc colorDesc{};
 	colorDesc.loadAction = RHI::RenderPassLoadAction::Clear;

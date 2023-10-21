@@ -4,6 +4,7 @@ namespace CE
 {
 	void Engine::PreInit()
 	{
+		// Init asset manager & asset registry
 		assetManager->Initialize();
 	}
 

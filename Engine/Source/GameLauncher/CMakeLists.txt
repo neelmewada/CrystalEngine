@@ -9,22 +9,19 @@ ce_add_target(${PROJECT_NAME} GUIAPP
     FOLDER Engine/Source
     PCHHEADER
         PRIVATE
-            Public/${PROJECT_NAME}.h
+            Sources/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
-            ${PROJECT_NAME_LOWERCASE}_private_files.cmake
-        PUBLIC
-            ${PROJECT_NAME_LOWERCASE}_public_files.cmake
+            ${PROJECT_NAME_LOWERCASE}_source_files.cmake
     INCLUDE_DIRECTORIES
-        PRIVATE
-            Private/
         PUBLIC
-            Public/
+            Sources/
     COMPILE_DEFINITIONS
         PRIVATE
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            ThirdParty::cxxopts
             CE::Core
             CE::CoreSettings
             CE::CoreApplication
@@ -34,7 +31,7 @@ ce_add_target(${PROJECT_NAME} GUIAPP
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
             CE::System
             CE::GameSystem
-            $<${PAL_TRAIT_BUID}:Sandbox>
+            $<${CE_BUILD_TESTS}:Sandbox>
     RUNTIME_DEPENDENCIES
 )
 

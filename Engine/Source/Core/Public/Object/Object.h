@@ -213,12 +213,19 @@ namespace CE
 
 		Object* CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags = OF_NoFlags);
 
-		template<typename TClass>
+		template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
 		TClass* CreateDefaultSubobject(const String& name, ObjectFlags flags = OF_NoFlags)
 		{
 			return (TClass*)CreateDefaultSubobject(TClass::Type(), name, flags);
 		}
 
+		template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
+		TClass* CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags = OF_NoFlags)
+		{
+			if (!classType->IsSubclassOf<TClass>())
+				return nullptr;
+			return (TClass*)CreateDefaultSubobject(classType, name, flags);
+		}
 		
 		void LoadDefaults();
 

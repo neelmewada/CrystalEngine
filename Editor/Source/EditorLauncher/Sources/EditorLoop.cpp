@@ -4,8 +4,6 @@ EditorLoop gEditorLoop{};
 
 extern const CE::String css;
 
-//rgb(21, 21, 21)
-
 void EditorLoop::PreInit(int argc, char** argv)
 {
 	// Setup before loading any module
@@ -158,6 +156,7 @@ void EditorLoop::PostInit()
 	// Load non-important core modules
 	LoadCoreModules();
 
+	RHI::gDynamicRHI = new VulkanRHI();
 	RHI::gDynamicRHI->Initialize();
 
 	AppInit();

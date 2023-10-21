@@ -18,7 +18,7 @@ namespace CE
 			desc.totalThreads = 0; // auto set optimal number of threads
 			desc.threads = { };
 
-			gJobManager = new JobManager("JobSystem", desc);
+			gJobManager = new JobManager("JobSystemManager", desc);
 			gJobContext = new JobContext(gJobManager);
 			JobContext::PushGlobalContext(gJobContext);
         }

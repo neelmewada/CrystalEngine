@@ -2,7 +2,8 @@
 
 namespace CE
 {
-    
+	class SceneComponent;
+
 	CLASS()
 	class SYSTEM_API ActorComponent : public Object
 	{
@@ -11,6 +12,13 @@ namespace CE
 
 		ActorComponent();
 
+		// Public API
+
+		virtual bool IsSceneComponent() const { return false; }
+
+	protected:
+
+		
 	};
 
 } // namespace CE

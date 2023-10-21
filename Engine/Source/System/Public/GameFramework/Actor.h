@@ -2,7 +2,9 @@
 
 namespace CE
 {
-    
+	class ActorComponent;
+	class SceneComponent;
+
 	CLASS()
 	class SYSTEM_API Actor : public Object
 	{
@@ -11,8 +13,18 @@ namespace CE
 
 		Actor();
 
+		// - Public API -
+
 	protected:
 
+
+	private:
+
+		FIELD()
+		SceneComponent* rootComponent = nullptr;
+
+		FIELD()
+		Array<ActorComponent*> attachedComponents{};
 	};
 
 } // namespace CE

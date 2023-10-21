@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "CoreApplication.h"
+#include "CoreRHI.h"
+#include "VulkanRHI.h"
 
 #include "EditorCore.h"
 #include "EditorWidgets.h"

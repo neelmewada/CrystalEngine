@@ -34,7 +34,9 @@ namespace CE
 			Name packagePath = packageResolvers[i]->GetPackagePath(packageUuid);
 			if (!packagePath.IsValid())
 				continue;
-			Package::LoadPackage(nullptr, packagePath, loadFlags);
+			Package* package = Package::LoadPackage(nullptr, packagePath, loadFlags);
+			if (package != nullptr)
+				return package;
 		}
 
 		return nullptr;

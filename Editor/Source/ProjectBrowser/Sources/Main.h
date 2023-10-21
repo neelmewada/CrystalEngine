@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "CoreApplication.h"
+#include "VulkanRHI.h"
 #include "CoreGUI.h"
 #include "CoreWidgets.h"
 

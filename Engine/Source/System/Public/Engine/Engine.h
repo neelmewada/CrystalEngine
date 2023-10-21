@@ -25,6 +25,9 @@ namespace CE
 		// - Fields -
 
 		FIELD()
+		SubClassType<AssetManager> runtimeAssetManagerClass = nullptr;
+
+		FIELD()
 		AssetManager* assetManager = nullptr;
 
 		Queue<Delegate<void()>> mainThreadQueue{};

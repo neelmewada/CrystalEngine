@@ -11,8 +11,9 @@
 #include "Engine/AssetManager.h"
 
 // GameFramework
-#include "GameFramework/Actor.h"
 #include "GameFramework/ActorComponent.h"
+#include "GameFramework/SceneComponent.h"
+#include "GameFramework/Actor.h"
 
 // Asset Types
 #include "Engine/TextureDefines.h"

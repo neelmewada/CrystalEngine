@@ -30,7 +30,7 @@ namespace CE
 	void SDLApplication::Initialize()
 	{
 		Super::Initialize();
-
+		
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
 		{
 			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! " + String(SDL_GetError()));

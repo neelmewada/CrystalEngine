@@ -56,7 +56,6 @@ cmake-build-*/
 # IDE
 .idea
 .vs
-.vscode
 
 
 # macOS General
