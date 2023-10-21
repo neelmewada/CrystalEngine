@@ -630,7 +630,8 @@ namespace CE
 
 		std::function<void(Object*, Object*)> fetchSubobjects = [&](Object* src, Object* dst)
 			{
-                originalToCloneMap[src->GetUuid()] = dst;
+                if (src != nullptr && dst != nullptr)
+                    originalToCloneMap[src->GetUuid()] = dst;
                 
 				for (auto srcObject : src->attachedObjects)
 				{
