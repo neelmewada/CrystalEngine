@@ -16,7 +16,7 @@ namespace CE
 
 		inline bool IsValid() const
 		{
-			return blob.IsValid() && reflectionInfo.IsValid();
+			return source.IsValid() && reflectionInfo.IsValid();
 		}
 
 		FIELD()
@@ -29,7 +29,7 @@ namespace CE
 		ShaderReflection reflectionInfo{};
 
 		FIELD()
-		BinaryBlob blob{};
+		BinaryBlob source{};
 	};
 
 	STRUCT()

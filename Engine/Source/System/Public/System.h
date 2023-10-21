@@ -5,15 +5,16 @@
 #include "CoreShader.h"
 #include "CoreSettings.h"
 
+// Asset Meta
 #include "Asset/AssetData.h"
 #include "Asset/AssetRegistry.h"
-
 #include "Engine/AssetManager.h"
 
-#include "Engine/NodeComponent.h"
-#include "Engine/Node.h"
+// GameFramework
+#include "GameFramework/Actor.h"
+#include "GameFramework/ActorComponent.h"
 
-// Assets
+// Asset Types
 #include "Engine/TextureDefines.h"
 #include "Engine/Texture.h"
 #include "Engine/Texture2D.h"

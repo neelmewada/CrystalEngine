@@ -6,6 +6,10 @@
 #define PerScene_Frequency 0
 #endif
 
+#ifndef PerViewport_Frequency
+#define PerViewport_Frequency 0
+#endif
+
 #ifndef PerPass_Frequency
 #define PerPass_Frequency 1
 #endif
@@ -27,7 +31,10 @@
 #define __CONCATENATE1(arg1, arg2)  __CONCATENATE2(arg1, arg2)
 #define __CONCATENATE2(arg1, arg2)  arg1 ## arg2
 
+#define SRG(frequencyId, type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, frequencyId)))
+
 #define SRG_PerScene(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerScene_Frequency)))
+#define SRG_PerViewport(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerViewport_Frequency)))
 #define SRG_PerPass(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerPass_Frequency)))
 #define SRG_PerMaterial(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerMaterial_Frequency)))
 #define SRG_PerObject(type) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, PerObject_Frequency)))

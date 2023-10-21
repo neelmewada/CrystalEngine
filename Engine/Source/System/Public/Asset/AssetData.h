@@ -33,7 +33,14 @@ namespace CE
 	template<>
 	inline SIZE_T GetHash<AssetData>(const AssetData& assetData)
 	{
-		return GetCombinedHashes({ assetData.packageName.GetHashValue(), assetData.assetName.GetHashValue(), assetData.assetClassPath.GetHashValue() });
+		return GetCombinedHashes({ 
+			assetData.packageName.GetHashValue(), 
+			assetData.assetName.GetHashValue(), 
+			assetData.assetClassPath.GetHashValue(),
+			assetData.packageUuid,
+			assetData.assetUuid,
+			assetData.sourceAssetPath.GetHashValue()
+		});
 	}
     
 } // namespace CE
