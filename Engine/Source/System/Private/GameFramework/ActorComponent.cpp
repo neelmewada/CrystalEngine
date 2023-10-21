@@ -3,14 +3,10 @@
 namespace CE
 {
 
-	Scene::Scene()
+	ActorComponent::ActorComponent()
 	{
 		
 	}
 
-	Scene::~Scene()
-	{
-
-	}
-
 } // namespace CE
+

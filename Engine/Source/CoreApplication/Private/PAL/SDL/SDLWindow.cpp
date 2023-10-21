@@ -100,5 +100,11 @@ namespace CE
 		SDL_HideWindow(handle);
 	}
 
+	bool SDLPlatformWindow::IsFocussed()
+	{
+		Uint32 flags = SDL_GetWindowFlags(handle);
+		return (flags & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS)) != 0;
+	}
+
 } // namespace CE
 

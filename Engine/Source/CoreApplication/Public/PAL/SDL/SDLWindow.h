@@ -18,6 +18,8 @@ namespace CE
 
         void Hide() override;
 
+		bool IsFocussed() override;
+
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) override;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) override;
 

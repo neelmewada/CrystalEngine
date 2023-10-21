@@ -25,6 +25,8 @@ namespace CE
         virtual void Show() = 0;
         virtual void Hide() = 0;
 
+		virtual bool IsFocussed() = 0;
+
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) = 0;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) = 0;
 

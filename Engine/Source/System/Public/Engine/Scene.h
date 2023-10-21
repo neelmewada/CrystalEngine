@@ -2,7 +2,7 @@
 
 namespace CE
 {
-	class Node;
+	class Actor;
 
 	CLASS()
 	class SYSTEM_API Scene : public Asset
@@ -13,12 +13,10 @@ namespace CE
 		Scene();
 		virtual ~Scene();
 
-		FORCE_INLINE Node* GetRoot() const { return root; }
+
 
 	protected:
 
-		FIELD(ReadOnly)
-		Node* root = nullptr;
 	};
     
 } // namespace CE

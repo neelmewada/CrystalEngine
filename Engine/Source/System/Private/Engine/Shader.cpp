@@ -4,7 +4,7 @@ namespace CE
 {
 	void ShaderBlob::Release()
 	{
-		blob.Free();
+		source.Free();
 	}
 
 	void ShaderVariant::Release()
