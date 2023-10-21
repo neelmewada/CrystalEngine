@@ -1,6 +1,7 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
+#include "System.h"
 
 namespace CE
 {

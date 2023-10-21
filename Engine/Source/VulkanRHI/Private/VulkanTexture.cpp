@@ -210,6 +210,8 @@ namespace CE
         {
             imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
+			if (this->format == RHI::TextureFormat::D24_UNORM_S8_UINT || this->format == RHI::TextureFormat::D32_SFLOAT_S8_UINT)
+				aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
         }
 		
         imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;

@@ -5,9 +5,6 @@ namespace CE
 
 	GameEngine::GameEngine()
 	{
-		if (!IsDefaultInstance())
-			return;
-
 		ClassType* assetManagerClass = Super::runtimeAssetManagerClass;
 		if (assetManagerClass != nullptr)
 		{

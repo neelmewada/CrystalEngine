@@ -8,6 +8,7 @@
 #endif
 #include "System.h"
 #include "GameSystem.h"
+#include "Sandbox.h"
 
 #include "cxxopts.hpp"
 

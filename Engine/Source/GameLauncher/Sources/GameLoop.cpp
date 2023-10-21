@@ -30,7 +30,6 @@ void GameLoop::PreInit(int argc, char** argv)
 	Logger::SetConsoleLogLevel(LogLevel::Trace);
 	Logger::SetFileDumpLogLevel(LogLevel::Trace);
 
-
 	gProgramArguments.Clear();
 	for (int i = 0; i < argc; i++)
 	{
@@ -146,38 +145,86 @@ void GameLoop::PostInit()
 	rtLayout.numColorOutputs = 1;
 	rtLayout.colorOutputs[0] = colorDesc;
 	rtLayout.presentationRTIndex = 0;
-	rtLayout.depthStencilFormat = RHI::DepthStencilFormat::None;
+	rtLayout.depthStencilFormat = RHI::DepthStencilFormat::Auto;
 
 	viewport = RHI::gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
 
 	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
-
+	
 	gEngine->Initialize();
 }
 
 void GameLoop::RunLoop()
 {
+	while (!IsEngineRequestingExit())
+	{
+		auto curTime = clock();
+		f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
 
+		app->Tick();
+		// Engine
+		gEngine->Tick(deltaTime);
+
+		// Render
+		viewport->SetClearColor(Color::Cyan());
+
+		cmdList->Begin();
+
+		cmdList->End();
+
+		if (RHI::gDynamicRHI->ExecuteCommandList(cmdList))
+		{
+			RHI::gDynamicRHI->PresentViewport(cmdList);
+		}
+
+		previousTime = curTime;
+	}
 }
 
 void GameLoop::PreShutdown()
 {
+	gEngine->PreShutdown();
 
+	gEngine->Shutdown();
+
+	UnloadEngineModules();
+
+	RHI::gDynamicRHI->DestroyCommandList(cmdList);
+	RHI::gDynamicRHI->DestroyViewport(viewport);
+
+	RHI::gDynamicRHI->PreShutdown();
+
+	AppPreShutdown();
+
+	RHI::gDynamicRHI->Shutdown();
+
+	ModuleManager::Get().UnloadModule("VulkanRHI");
+	ModuleManager::Get().UnloadModule("CoreRHI");
 }
 
 void GameLoop::Shutdown()
 {
+	// Shutdown application
+	AppShutdown();
 
+	// Unload settings module
+	ModuleManager::Get().UnloadModule("CoreSettings");
+
+	// Unload most important modules at last
+	ModuleManager::Get().UnloadModule("CoreApplication");
+	ModuleManager::Get().UnloadModule("Core");
+
+	Logger::Shutdown();
 }
 
 void GameLoop::LoadProject()
 {
-
+	
 }
 
 void GameLoop::InitStyles()
 {
-
+	
 }
 
 void GameLoop::AppPreInit()
@@ -194,12 +241,15 @@ void GameLoop::AppInit()
 
 void GameLoop::AppPreShutdown()
 {
-
+	app->PreShutdown();
 }
 
 void GameLoop::AppShutdown()
 {
+	app->Shutdown();
 
+	delete app;
+	app = nullptr;
 }
 
 

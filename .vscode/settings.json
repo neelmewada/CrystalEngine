@@ -1,7 +1,4 @@
 {
-    "binary-file-viewer.parserFolders": [
-        "${workspaceFolder}/Tools/VSTools/BinaryParsers"
-    ],
     "material-icon-theme.folders.associations": {
         "Mac": "macOS"
     }
