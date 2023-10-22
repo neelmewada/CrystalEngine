@@ -511,7 +511,7 @@ namespace CE
             Super::Impl.pop_back();
         }
 
-        s32 IndexOf(const ElementType& item) const
+        s64 IndexOf(const ElementType& item) const
         {
             for (int i = 0; i < Super::Impl.size(); i++)
             {
@@ -523,7 +523,7 @@ namespace CE
             return -1;
         }
 
-        s32 IndexOf(std::function<bool(const ElementType&)> pred) const
+		s64 IndexOf(std::function<bool(const ElementType&)> pred) const
         {
             for (int i = 0; i < Super::Impl.size(); i++)
             {

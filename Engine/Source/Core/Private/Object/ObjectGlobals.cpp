@@ -148,4 +148,7 @@ namespace CE
 	CoreObjectDelegates::StructRegistrationDelegate CoreObjectDelegates::onStructRegistered{};
 	CoreObjectDelegates::StructRegistrationDelegate CoreObjectDelegates::onStructDeregistered{};
 
+	CoreObjectDelegates::EnumRegistrationDelegate CoreObjectDelegates::onEnumRegistered{};
+	CoreObjectDelegates::EnumRegistrationDelegate CoreObjectDelegates::onEnumDeregistered{};
+
 } // namespace CE

@@ -381,7 +381,8 @@ namespace CE
         registeredStructs.Add({type->GetTypeId(), type});
         registeredStructsByName.Add({ type->GetTypeName(), type });
 
-        CoreObjectDelegates::onStructRegistered.Broadcast(type);
+		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
+			CoreObjectDelegates::onStructRegistered.Broadcast(type);
     }
 
     void StructType::DeregisterStructType(StructType* type)
@@ -470,22 +471,6 @@ namespace CE
 		
     }
 
-	void ClassType::FireClassRegistrationEventForCurrentModule()
-	{
-		if (TypeInfo::currentlyLoadingModuleStack.IsEmpty())
-			return;
-
-		const auto& typesInThisModule = TypeInfo::registeredTypesByModuleName[TypeInfo::currentlyLoadingModuleStack.Top()];
-
-		for (auto type : typesInThisModule)
-		{
-			if (type->IsClass())
-			{
-				CoreObjectDelegates::onClassRegistered.Broadcast((ClassType*)type);
-			}
-		}
-	}
-
 	void ClassType::ClearDefaultInstancesForModule(const Name& moduleName)
 	{
 		const auto& typesInThisModule = TypeInfo::registeredTypesByModuleName[moduleName];
@@ -522,9 +507,9 @@ namespace CE
 
 	const Object* ClassType::GetDefaultInstance()
 	{
-		// TODO: In runtime builds, CDI's are serialized directly instead of loading config files
+		// TODO: In runtime builds, CDI's should be serialized directly instead of loading config files
 
-		if (defaultInstance == nullptr)
+		if (defaultInstance == nullptr && CanBeInstantiated())
 		{
 			auto nameString = GetName().GetLastComponent();
 

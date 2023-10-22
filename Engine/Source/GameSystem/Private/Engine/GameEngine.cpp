@@ -24,5 +24,22 @@ namespace CE
 
 	}
 
+    void GameEngine::Initialize()
+    {
+		Super::Initialize();
+
+		gameInstance = CreateObject<GameInstance>(this, TEXT("GameInstance"), OF_Transient);
+		gameInstances.Add(gameInstance);
+    }
+
+	void GameEngine::Shutdown()
+	{
+		Super::Shutdown();
+
+		gameInstances.Remove(gameInstance);
+		gameInstance->Destroy();
+		gameInstance = nullptr;
+	}
+
 } // namespace CE
 

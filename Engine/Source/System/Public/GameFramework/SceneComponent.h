@@ -13,8 +13,6 @@ namespace CE
 
 		bool IsSceneComponent() const override final { return true; }
 
-	protected:
-
 		void SetupAttachment(SceneComponent* component);
 
 		bool ComponentExists(SceneComponent* component);

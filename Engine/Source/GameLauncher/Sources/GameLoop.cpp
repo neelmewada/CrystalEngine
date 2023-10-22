@@ -151,7 +151,11 @@ void GameLoop::PostInit()
 
 	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 	
+	// Initialize engine & it's subsystems
 	gEngine->Initialize();
+
+	// Load game code
+	ModuleManager::Get().LoadModule("Sandbox");
 }
 
 void GameLoop::RunLoop()
@@ -162,10 +166,11 @@ void GameLoop::RunLoop()
 		f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
 
 		app->Tick();
-		// Engine
+
+		// - Engine -
 		gEngine->Tick(deltaTime);
 
-		// Render
+		// - Render -
 		viewport->SetClearColor(Color::Cyan());
 
 		cmdList->Begin();
@@ -176,13 +181,18 @@ void GameLoop::RunLoop()
 		{
 			RHI::gDynamicRHI->PresentViewport(cmdList);
 		}
-
+		
 		previousTime = curTime;
 	}
 }
 
 void GameLoop::PreShutdown()
 {
+	// Unload game code
+	ModuleManager::Get().UnloadModule("Sandbox");
+
+	UnloadSettings();
+
 	gEngine->PreShutdown();
 
 	gEngine->Shutdown();
@@ -219,6 +229,18 @@ void GameLoop::Shutdown()
 
 void GameLoop::LoadProject()
 {
+	// Load project (aka Setings)
+	Package* settingsPackage = GetSettingsPackage();
+
+	ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
+	if (projectSettings != nullptr)
+	{
+		gProjectName = projectSettings->projectName;
+	}
+}
+
+void GameLoop::UnloadProject()
+{
 	
 }
 
@@ -236,7 +258,14 @@ void GameLoop::AppInit()
 {
 	app->Initialize();
 
-	mainWindow = app->InitMainWindow(gProjectName, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+	String windowTitle = gProjectName;
+	ProjectSettings* projectSettings = GetSettings<ProjectSettings>();
+	if (projectSettings != nullptr)
+	{
+		windowTitle += " - v" + projectSettings->projectVersion;
+	}
+
+	mainWindow = app->InitMainWindow(windowTitle, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 }
 
 void GameLoop::AppPreShutdown()

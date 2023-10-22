@@ -251,6 +251,30 @@ namespace CE
         return registeredModuleName;
     }
 
+    void TypeInfo::FireTypeRegistrationEventsForCurrentModule()
+    {
+		if (currentlyLoadingModuleStack.IsEmpty())
+			return;
+
+		const auto& typesInThisModule = registeredTypesByModuleName[currentlyLoadingModuleStack.Top()];
+
+		for (auto type : typesInThisModule)
+		{
+			if (type->IsClass())
+			{
+				CoreObjectDelegates::onClassRegistered.Broadcast((ClassType*)type);
+			}
+			else if (type->IsStruct())
+			{
+				CoreObjectDelegates::onStructRegistered.Broadcast((StructType*)type);
+			}
+			else if (type->IsEnum())
+			{
+				CoreObjectDelegates::onEnumRegistered.Broadcast((EnumType*)type);
+			}
+		}
+    }
+
     void TypeInfo::RegisterType(TypeInfo* type)
     {
         if (type == nullptr || registeredTypeById.KeyExists(type->GetTypeId()))

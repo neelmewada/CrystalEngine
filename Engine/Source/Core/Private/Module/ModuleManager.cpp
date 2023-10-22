@@ -61,10 +61,10 @@ namespace CE
 		if (moduleName != "Core")
 			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
-		// Register custom types
+		// Register manually reflected types
 		modulePtr->RegisterTypes();
 
-		// Register AutoRTTI types
+		// Register AutoRTTI reflected types
 		info->loadTypesFuncPtr();
 
 		// Startup module
@@ -73,9 +73,10 @@ namespace CE
 		if (moduleName == "Core")
 			info->transientPackage = CreateObject<Package>(nullptr, "/" + moduleName + "/Transient", OF_Transient);
 
+		// RTTI setup
 		ClassType::CacheTypesForCurrentModule();
 		ClassType::CreateDefaultInstancesForCurrentModule();
-		ClassType::FireClassRegistrationEventForCurrentModule();
+		TypeInfo::FireTypeRegistrationEventsForCurrentModule();
 
 		// Load resources
 		info->loadResourcesFuncPtr();

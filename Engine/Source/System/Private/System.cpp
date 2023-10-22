@@ -21,10 +21,14 @@ namespace CE
 			gJobManager = new JobManager("JobSystemManager", desc);
 			gJobContext = new JobContext(gJobManager);
 			JobContext::PushGlobalContext(gJobContext);
+
+			onClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&SystemModule::OnClassRegistered, this));
         }
 
         void ShutdownModule() override
         {
+			CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(onClassRegistered);
+
 			gJobManager->DeactivateWorkersAndWait();
 
 			JobContext::PopGlobalContext();
@@ -39,6 +43,38 @@ namespace CE
 			
         }
 
+		void OnClassRegistered(ClassType* type)
+		{
+			if (type == nullptr)
+				return;
+
+			if (gEngine != nullptr && !engineSubsystemClasses.IsEmpty())
+			{
+				for (auto classType : engineSubsystemClasses)
+				{
+					gEngine->CreateSubsystem(classType);
+				}
+
+				engineSubsystemClasses.Clear();
+			}
+
+			if (type->GetTypeId() != TYPEID(EngineSubsystem) && 
+				type->IsSubclassOf<EngineSubsystem>())
+			{
+				if (gEngine == nullptr) // Engine has not been initialize yet, cache the subsystem class type.
+				{
+					engineSubsystemClasses.Add(type);
+				}
+				else
+				{
+					gEngine->CreateSubsystem(type);
+				}
+			}
+		}
+
+		Array<ClassType*> engineSubsystemClasses{};
+
+		DelegateHandle onClassRegistered = 0;
     };
 
 	/*

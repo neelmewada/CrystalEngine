@@ -18,6 +18,7 @@ public:
 private:
 
 	void LoadProject();
+	void UnloadProject();
 
 	void InitStyles();
 

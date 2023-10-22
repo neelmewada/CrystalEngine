@@ -135,9 +135,10 @@ namespace CE
 		static StructRegistrationDelegate onStructRegistered;
 		static StructRegistrationDelegate onStructDeregistered;
 
-#if PAL_TRAIT_WITH_EDITOR_DATA
+		typedef MultiCastDelegate<void(EnumType*)> EnumRegistrationDelegate;
 
-#endif
+		static EnumRegistrationDelegate onEnumRegistered;
+		static EnumRegistrationDelegate onEnumDeregistered;
 	};
 
 }

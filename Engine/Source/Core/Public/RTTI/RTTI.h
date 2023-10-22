@@ -217,6 +217,10 @@ namespace CE
 
 		Name GetOwnerModuleName() const;
 
+	private:
+
+		static void FireTypeRegistrationEventsForCurrentModule();
+
 	protected:
 		CE::Name name;
 		CE::String displayName{};
@@ -245,6 +249,7 @@ namespace CE
 		friend class ModuleManager;
 		friend class CE::CoreModule;
 		friend class ClassType;
+		friend class StructType;
 
 		static void DeregisterTypesForModule(ModuleInfo* moduleInfo);
 

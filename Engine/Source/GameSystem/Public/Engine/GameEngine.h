@@ -2,7 +2,7 @@
 
 namespace CE
 {
-	CLASS(NonSerialized)
+	CLASS(NonSerialized, Config = Game)
 	class GAMESYSTEM_API GameEngine : public Engine
 	{
 		CE_CLASS(GameEngine, Engine)
@@ -11,6 +11,14 @@ namespace CE
 		GameEngine();
 		virtual ~GameEngine();
 
+	protected:
+
+		void Initialize() override;
+
+		void Shutdown() override;
+		
+		FIELD()
+		GameInstance* gameInstance = nullptr;
 	};
     
 } // namespace CE

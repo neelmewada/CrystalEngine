@@ -115,6 +115,8 @@ namespace CE
 
 		registeredEnumsById.Remove(enumType->GetTypeId());
 		registeredEnumsByName.Remove(enumType->GetTypeName());
+
+		CoreObjectDelegates::onEnumDeregistered.Broadcast(enumType);
 	}
 
 	EnumType* EnumType::FindEnumByName(Name enumName)

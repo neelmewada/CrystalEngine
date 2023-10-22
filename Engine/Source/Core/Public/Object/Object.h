@@ -216,7 +216,7 @@ namespace CE
 		template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
 		TClass* CreateDefaultSubobject(const String& name, ObjectFlags flags = OF_NoFlags)
 		{
-			return (TClass*)CreateDefaultSubobject(TClass::Type(), name, flags);
+			return (TClass*)CreateDefaultSubobject(TClass::Type(), name, flags | OF_DefaultSubobject);
 		}
 
 		template<typename TClass> requires TIsBaseClassOf<Object, TClass>::Value
@@ -224,14 +224,14 @@ namespace CE
 		{
 			if (!classType->IsSubclassOf<TClass>())
 				return nullptr;
-			return (TClass*)CreateDefaultSubobject(classType, name, flags);
+			return (TClass*)CreateDefaultSubobject(classType, name, flags | OF_DefaultSubobject);
 		}
 		
 		void LoadDefaults();
 
         void ConfigParseStruct(const String& value, void* instance, StructType* structType);
         
-        void ConfigParsePOD(const String& value, void* instance, FieldType* field);
+        void ConfigParseField(const String& value, void* instance, FieldType* field);
         
         virtual void OnAfterConfigLoad() {}
 

@@ -13,10 +13,10 @@ namespace CE
 		Scene();
 		virtual ~Scene();
 
-
-
 	protected:
 
+		FIELD()
+		Actor* root = nullptr;
 	};
     
 } // namespace CE

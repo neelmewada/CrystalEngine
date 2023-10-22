@@ -2,5 +2,11 @@
 
 namespace CE
 {
-    
+
+    GameInstance::GameInstance()
+    {
+
+    }
+
 } // namespace CE
+

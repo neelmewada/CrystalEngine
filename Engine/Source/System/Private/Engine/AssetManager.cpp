@@ -17,7 +17,7 @@ namespace CE
 	{
 		if (gEngine == nullptr)
 			return nullptr;
-		return gEngine->assetManager;
+		return gEngine->GetAssetManager();
 	}
 
 	AssetRegistry* AssetManager::GetRegistry()

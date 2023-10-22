@@ -5,7 +5,7 @@ namespace CE
 
 	Scene::Scene()
 	{
-		
+		root = CreateDefaultSubobject<Actor>("SceneRoot");
 	}
 
 	Scene::~Scene()

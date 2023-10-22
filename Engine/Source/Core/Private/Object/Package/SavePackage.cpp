@@ -147,7 +147,7 @@ namespace CE
 		{
 			return nullptr;
 		}
-
+		
 		// Actual package name based on it's path
 		String actualPackageName = "";
 

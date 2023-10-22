@@ -605,7 +605,6 @@ namespace CE
 
 	private:
 
-		static void FireClassRegistrationEventForCurrentModule();
 		static void ClearDefaultInstancesForModule(const Name& moduleName);
 
         static void AddDerivedClassToMap(ClassType* derivedClass, ClassType* parentSearchPath);

@@ -11,7 +11,8 @@ namespace CE
 
 		OF_Transient = BIT(0),
 		OF_ClassDefaultInstance = BIT(1),
-		OF_TemplateInstance = BIT(2)
+		OF_TemplateInstance = BIT(2),
+		OF_DefaultSubobject = BIT(3),
 	};
 	ENUM_CLASS_FLAGS(ObjectFlags);
 

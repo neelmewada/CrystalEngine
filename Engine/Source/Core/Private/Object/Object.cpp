@@ -387,6 +387,30 @@ namespace CE
             {
                 field->SetFieldValue<Name>(this, Name(stringValue));
             }
+			else if (fieldTypeId == TYPEID(ClassType))
+			{
+				ClassType* classType = ClassType::FindClass(stringValue);
+				if (classType != nullptr)
+					field->SetFieldValue<ClassType*>(this, classType);
+			}
+			else if (fieldTypeId == TYPEID(StructType))
+			{
+				StructType* structType = StructType::FindStruct(stringValue);
+				if (structType != nullptr)
+					field->SetFieldValue<StructType*>(this, structType);
+			}
+			else if (fieldTypeId == TYPEID(EnumType))
+			{
+				EnumType* enumType = EnumType::FindEnum(stringValue);
+				if (enumType != nullptr)
+					field->SetFieldValue<EnumType*>(this, enumType);
+			}
+			else if (fieldTypeId == TYPEID(SubClassType<>))
+			{
+				ClassType* classType = ClassType::FindClass(stringValue);
+				if (classType != nullptr)
+					field->SetFieldValue<SubClassType<>>(this, classType);
+			}
             else if (fieldTypeId == TYPEID(UUID))
             {
                 u64 uuid = 0;
@@ -395,6 +419,14 @@ namespace CE
                     field->SetFieldValue<UUID>(this, UUID(uuid));
                 }
             }
+			else if (fieldTypeId == TYPEID(UUID32))
+			{
+				u32 uuid = 0;
+				if (String::TryParse(stringValue, uuid))
+				{
+					field->SetFieldValue<UUID32>(this, UUID32(uuid));
+				}
+			}
             else if (field->IsIntegerField())
             {
                 s64 value = 0;
@@ -490,7 +522,7 @@ namespace CE
 							for (int i = 0; i < arrayFieldList.GetSize(); i++)
 							{
 								FieldType* field = &arrayFieldList[i];
-								ConfigParsePOD(array[i], arrayInstance, field);
+								ConfigParseField(array[i], arrayInstance, field);
 							}
                         }
                     }
@@ -503,7 +535,7 @@ namespace CE
 
 	Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)
 	{
-		return CreateObject<Object>(this, name, flags, classType);
+		return CreateObject<Object>(this, name, flags | OF_DefaultSubobject, classType);
 	}
 
 	Object* Object::GetDefaultSubobject(ClassType* classType, const String& name)
@@ -910,17 +942,17 @@ namespace CE
                 FieldType* field = structType->FindFieldWithName(lhs);
                 if (field == nullptr)
                     continue;
+
+				TypeInfo* fieldDeclType = field->GetDeclarationType();
+				if (fieldDeclType == nullptr)
+					continue;
                 
-                if (field->GetDeclarationType()->IsPOD())
-                {
-                    ConfigParsePOD(rhs, instance, field);
-                }
-                
+                ConfigParseField(rhs, instance, field);
             }
         }
     }
 
-    void Object::ConfigParsePOD(const String& value, void* instance, FieldType* field)
+    void Object::ConfigParseField(const String& value, void* instance, FieldType* field)
     {
         if (field == nullptr || instance == nullptr)
             return;
@@ -936,6 +968,30 @@ namespace CE
         {
             field->SetFieldValue(instance, Name(value));
         }
+		else if (fieldTypeId == TYPEID(ClassType))
+		{
+			ClassType* classType = ClassType::FindClass(value);
+			if (classType != nullptr)
+				field->SetFieldValue<ClassType*>(this, classType);
+		}
+		else if (fieldTypeId == TYPEID(StructType))
+		{
+			StructType* structType = StructType::FindStruct(value);
+			if (structType != nullptr)
+				field->SetFieldValue<StructType*>(this, structType);
+		}
+		else if (fieldTypeId == TYPEID(EnumType))
+		{
+			EnumType* enumType = EnumType::FindEnum(value);
+			if (enumType != nullptr)
+				field->SetFieldValue<EnumType*>(this, enumType);
+		}
+		else if (fieldTypeId == TYPEID(SubClassType<>))
+		{
+			ClassType* classType = ClassType::FindClass(value);
+			if (classType != nullptr)
+				field->SetFieldValue<SubClassType<>>(this, classType);
+		}
         else if (field->GetTypeId() == TYPEID(UUID))
         {
             u64 intValue = 0;
@@ -944,6 +1000,14 @@ namespace CE
                 field->SetFieldValue(instance, UUID(intValue));
             }
         }
+		else if (field->GetTypeId() == TYPEID(UUID32))
+		{
+			u32 intValue = 0;
+			if (String::TryParse(value, intValue))
+			{
+				field->SetFieldValue(instance, UUID32(intValue));
+			}
+		}
         else if (field->IsIntegerField())
         {
             s64 intValue = 0;

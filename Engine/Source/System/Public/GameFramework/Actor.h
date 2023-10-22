@@ -15,6 +15,14 @@ namespace CE
 
 		// - Public API -
 
+		SceneComponent* SetRootComponent(SubClassType<SceneComponent> componentType, String name = "");
+
+		template<typename TSceneComponent> requires TIsBaseClassOf<SceneComponent, TSceneComponent>::Value
+		FORCE_INLINE TSceneComponent* SetRootComponent(const String& name = "")
+		{
+			return (TSceneComponent*)SetRootComponent(TSceneComponent::StaticType(), name);
+		}
+
 	protected:
 
 
@@ -25,6 +33,11 @@ namespace CE
 
 		FIELD()
 		Array<ActorComponent*> attachedComponents{};
+
+		FIELD()
+		Array<Actor*> children{};
+
+
 	};
 
 } // namespace CE
