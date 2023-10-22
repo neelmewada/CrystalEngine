@@ -10,10 +10,12 @@ namespace CE
 
 	void SandboxGameInstance::Initialize()
 	{
+		Super::Initialize();
 	}
 
 	void SandboxGameInstance::Shutdown()
 	{
+		Super::Shutdown();
 	}
 
 } // namespace CE
