@@ -90,9 +90,20 @@ namespace CE
 
 		}
 
-		inline Attribute operator=(const Attribute& copy)
+		Attribute& operator=(const Attribute& copy)
 		{
-			return Attribute(copy);
+			isString = copy.isString;
+			isMap = copy.isMap;
+
+			if (isString)
+			{
+				stringValue = copy.stringValue;
+			}
+			else if (isMap)
+			{
+				tableValue = copy.tableValue;
+			}
+			return *this;
 		}
 
 		inline Attribute& operator[](const Name& key)

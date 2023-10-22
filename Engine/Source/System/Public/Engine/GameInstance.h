@@ -12,6 +12,9 @@ namespace CE
 
 		// - Public API -
 
+		virtual void Initialize();
+		virtual void Shutdown();
+
 	protected:
 
 	};

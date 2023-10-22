@@ -26,14 +26,14 @@ ce_add_target(System SHARED
         PRIVATE
             ThirdParty::sdl
             CE::CoreApplication
-            CE::CoreGUI
         PUBLIC
             CE::Core
             CE::CoreMedia
             CE::CoreRHI
             CE::CoreShader
             CE::CoreSettings
-        TARGETS Config EngineAssets
+        TARGETS 
+            Config EngineAssets
     RUNTIME_DEPENDENCIES
         
 )

@@ -332,7 +332,8 @@ namespace CE
         //if (fileName.IsEmpty())
         //    return;
         
-        auto config = gConfigCache->GetConfigFile(ConfigType(fileName));
+		auto configType = ConfigType(fileName, false);
+        auto config = gConfigCache->GetConfigFile(configType);
         auto classTypeName = configClass->GetTypeName();
         
         if (config == nullptr)
@@ -410,6 +411,8 @@ namespace CE
 				ClassType* classType = ClassType::FindClass(stringValue);
 				if (classType != nullptr)
 					field->SetFieldValue<SubClassType<>>(this, classType);
+				else
+					field->SetFieldValue<SubClassType<>>(this, Name(stringValue));
 			}
             else if (fieldTypeId == TYPEID(UUID))
             {
@@ -798,7 +801,8 @@ namespace CE
 			TYPEID(Vec2), TYPEID(Vec2i),
 			TYPEID(Vec3), TYPEID(Vec3i),
 			TYPEID(Vec4), TYPEID(Vec4i), TYPEID(Quat), TYPEID(Color),
-			TYPEID(Matrix4x4)
+			TYPEID(Matrix4x4),
+			TYPEID(ClassType), TYPEID(StructType), TYPEID(EnumType), TYPEID(SubClassType<>)
 		};
 
 		if (fieldDeclType->IsPOD())
@@ -917,7 +921,7 @@ namespace CE
 		{
 			if (superChain[i]->GetTypeId() == TYPEID(Object))
 				continue;
-
+			
 			auto fileName = superChain[i]->GetAttribute("Config").GetStringValue();
 			LoadConfig(superChain[i], fileName);
 		}

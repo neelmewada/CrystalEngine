@@ -8,5 +8,15 @@ namespace CE
 
     }
 
+	void GameInstance::Initialize()
+	{
+
+	}
+
+	void GameInstance::Shutdown()
+	{
+
+	}
+
 } // namespace CE
 

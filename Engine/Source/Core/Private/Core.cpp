@@ -31,10 +31,10 @@ namespace CE
         if (gProjectPath.IsEmpty()) // Editor: gProjectPath should be set before loading Core
             gProjectPath = PlatformDirectories::GetEngineRootDir();
 
-		// Load .ini configs into cache (not needed at Runtime)
+		// Load .ini configs into cache
 		gConfigCache->LoadStartupConfigs();
 #else
-        gProjectPath = PlatformDirectories::GetGameRootDir(); // Runtime: gProjectPath is always the install directory
+		gConfigCache->LoadStartupConfigs();
 #endif
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);

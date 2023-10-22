@@ -306,7 +306,7 @@ namespace CE
 
         virtual void CacheAllAttributes();
 
-        void MergeAttributes(const Attribute& attribs);
+		void MergeAttributes(const Attribute& attribs, bool inherit = false);
 
 		virtual void CacheAllFields();
 

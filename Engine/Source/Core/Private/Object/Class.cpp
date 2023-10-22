@@ -214,35 +214,46 @@ namespace CE
             {
                 auto superStruct = (StructType*)superType;
                 superStruct->CacheAllAttributes();
-                MergeAttributes(superStruct->cachedAttributes);
+                MergeAttributes(superStruct->cachedAttributes, true);
             }
             else if (superType->IsClass())
             {
                 auto superClass = (ClassType*)superType;
                 superClass->CacheAllAttributes();
-                MergeAttributes(superClass->cachedAttributes);
+                MergeAttributes(superClass->cachedAttributes, true);
             }
         }
 
         MergeAttributes(attributes);
     }
 
-    void StructType::MergeAttributes(const Attribute& attribs)
+    void StructType::MergeAttributes(const Attribute& attribs, bool inherit)
     {
         if (!attribs.IsMap())
             return;
+
+		static HashSet<Name> disallowInheritance = { "Abstract", "abstract" };
 
         auto& table = attribs.GetTableValue();
 
         for (const auto& [name, attr] : table)
         {
+			if (inherit && disallowInheritance.Exists(name))
+			{
+				continue;
+			}
+
+			auto& tableValue = cachedAttributes.GetTableValue();
+
             if (cachedAttributes.HasKey(name))
             {
-                cachedAttributes.GetTableValue()[name] = attr;
+				tableValue[name] = attr;
+				//Attribute& ref = tableValue[name];
+				//ref = attr;
             }
             else
             {
-                cachedAttributes.GetTableValue().Add({ name, attr });
+				tableValue.Add({ name, attr });
             }
         }
     }

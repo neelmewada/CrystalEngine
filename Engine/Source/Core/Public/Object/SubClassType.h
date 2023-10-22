@@ -21,7 +21,7 @@ namespace CE
 				this->type = subClassType;
 		}
 
-		SubClassType(const Name& typeName) : baseClassType(TBaseClass::Type()), type(nullptr)
+		SubClassType(const Name& typeName) : baseClassType(TBaseClass::Type()), type(nullptr), classTypeName(typeName)
 		{
 			if (!typeName.IsValid())
 				return;
@@ -41,6 +41,8 @@ namespace CE
 
 		inline operator ClassType*() const
 		{
+			if (type == nullptr && classTypeName.IsValid())
+				return ClassType::FindClass(classTypeName);
 			return type;
 		}
 
@@ -97,6 +99,26 @@ namespace CE
 			return *this;
 		}
 
+		inline SubClassType& operator=(const String& typeName)
+		{
+			if (baseClassType == nullptr)
+				baseClassType = TBaseClass::Type();
+
+			if (typeName.IsEmpty())
+			{
+				this->type = nullptr;
+				return *this;
+			}
+
+			ClassType* classType = ClassType::FindClass(typeName);
+			if (classType == nullptr)
+				return *this;
+			if (classType->IsSubclassOf(baseClassType))
+				this->type = classType;
+
+			return *this;
+		}
+
 		inline ClassType* operator->() const
 		{
 			return type;
@@ -122,6 +144,7 @@ namespace CE
 
 		ClassType* type = nullptr;
 		ClassType* baseClassType = nullptr;
+		Name classTypeName = "";
 	};
 
 } // namespace CE

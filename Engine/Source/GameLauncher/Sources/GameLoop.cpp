@@ -151,11 +151,11 @@ void GameLoop::PostInit()
 
 	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 	
-	// Initialize engine & it's subsystems
-	gEngine->Initialize();
-
 	// Load game code
 	ModuleManager::Get().LoadModule("Sandbox");
+
+	// Initialize engine & it's subsystems
+	gEngine->Initialize();
 }
 
 void GameLoop::RunLoop()
@@ -189,13 +189,14 @@ void GameLoop::RunLoop()
 void GameLoop::PreShutdown()
 {
 	// Unload game code
-	ModuleManager::Get().UnloadModule("Sandbox");
 
 	UnloadSettings();
 
 	gEngine->PreShutdown();
 
 	gEngine->Shutdown();
+
+	ModuleManager::Get().UnloadModule("Sandbox");
 
 	UnloadEngineModules();
 

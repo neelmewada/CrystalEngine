@@ -28,13 +28,21 @@ namespace CE
     {
 		Super::Initialize();
 
-		gameInstance = CreateObject<GameInstance>(this, TEXT("GameInstance"), OF_Transient);
+		ClassType* gameInstanceClass = Super::gameInstanceClass;
+		if (gameInstanceClass == nullptr || !gameInstanceClass->IsSubclassOf<GameInstance>())
+			gameInstanceClass = GameInstance::StaticType();
+
+		gameInstance = CreateObject<GameInstance>(this, TEXT("GameInstance"), OF_Transient, gameInstanceClass);
 		gameInstances.Add(gameInstance);
+
+		gameInstance->Initialize();
     }
 
 	void GameEngine::Shutdown()
 	{
 		Super::Shutdown();
+
+		gameInstance->Shutdown();
 
 		gameInstances.Remove(gameInstance);
 		gameInstance->Destroy();
