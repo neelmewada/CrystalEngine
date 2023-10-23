@@ -24,6 +24,15 @@ namespace CE
 
 		FIELD()
 		SceneComponent* parentComponent = nullptr;
+
+		FIELD(Category = Transform, Display = "Position")
+		Vec3 localPosition{};
+
+		FIELD(Category = Transform, Display = "Rotation")
+		Vec3 localEulerAngles{};
+
+		FIELD(Category = Transform, Display = "Scale")
+		Vec3 localScale{};
 	};
 
 } // namespace CE

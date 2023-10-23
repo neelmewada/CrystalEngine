@@ -17,6 +17,8 @@ namespace CE
 
 		virtual bool IsSceneComponent() const { return false; }
 
+
+
 	protected:
 
 		FIELD()
