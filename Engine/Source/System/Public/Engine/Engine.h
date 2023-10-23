@@ -25,6 +25,8 @@ namespace CE
 
 		virtual GameInstance* GetGameInstance();
 
+		inline bool IsInitialized() const { return isInitialized; }
+
 		inline AssetManager* GetAssetManager() const { return assetManager; }
 
 		EngineSubsystem* GetSubsystem(ClassType* subsystemClass);
@@ -61,6 +63,12 @@ namespace CE
 
 		Queue<Delegate<void()>> mainThreadQueue{};
 		SharedMutex mainThreadQueueMutex{};
+
+		b8 isInitialized = false;
+
+	system_internal:
+		static Array<ClassType*> subsystemClassQueue;
+
 	};
     
 } // namespace CE

@@ -48,31 +48,32 @@ namespace CE
 			if (type == nullptr)
 				return;
 
-			if (gEngine != nullptr && !engineSubsystemClasses.IsEmpty())
-			{
-				for (auto classType : engineSubsystemClasses)
-				{
-					gEngine->CreateSubsystem(classType);
-				}
-
-				engineSubsystemClasses.Clear();
-			}
-
 			if (type->GetTypeId() != TYPEID(EngineSubsystem) && 
 				type->IsSubclassOf<EngineSubsystem>())
 			{
-				if (gEngine == nullptr) // Engine has not been initialize yet, cache the subsystem class type.
+				if (gEngine == nullptr || !gEngine->IsInitialized()) // Engine has not been initialize yet, cache the subsystem class type.
 				{
-					engineSubsystemClasses.Add(type);
+					Engine::subsystemClassQueue.Add(type);
 				}
 				else
 				{
 					gEngine->CreateSubsystem(type);
 				}
 			}
-		}
 
-		Array<ClassType*> engineSubsystemClasses{};
+			if (type->GetTypeId() != TYPEID(GameInstanceSubsystem) &&
+				type->IsSubclassOf<GameInstanceSubsystem>())
+			{
+				if (gEngine == nullptr || gEngine->GetGameInstance() == nullptr || !gEngine->GetGameInstance()->IsInitialized())
+				{
+					GameInstance::subsystemClassesQueue.Add(type);
+				}
+				else
+				{
+					gEngine->GetGameInstance()->CreateSubsystem(type);
+				}
+			}
+		}
 
 		DelegateHandle onClassRegistered = 0;
     };

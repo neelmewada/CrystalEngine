@@ -2,6 +2,8 @@
 
 namespace CE
 {
+	Array<ClassType*> Engine::subsystemClassQueue{};
+
 	void Engine::PreInit()
 	{
 		// Init asset manager & asset registry
@@ -11,6 +13,15 @@ namespace CE
 
 	void Engine::Initialize()
 	{
+		isInitialized = true;
+
+		for (auto classType : subsystemClassQueue)
+		{
+			CreateSubsystem(classType);
+		}
+
+		subsystemClassQueue.Clear();
+
 		for (auto subsystem : engineSubsystems)
 		{
 			subsystem->Initialize();
@@ -25,6 +36,9 @@ namespace CE
 
 	void Engine::Shutdown()
 	{
+		isInitialized = false;
+
+		// Shutdown Engine Subsystems
 		for (auto subsystem : engineSubsystems) // Shutdown
 			subsystem->Shutdown();
 		for (auto subsystem : engineSubsystems) // Destroy
@@ -94,6 +108,10 @@ namespace CE
 
 		String name = type->GetName().GetLastComponent();
 		EngineSubsystem* instance = CreateObject<EngineSubsystem>(this, name, OF_NoFlags, type);
+		if (isInitialized)
+		{
+			instance->Initialize();
+		}
 		engineSubsystems.Add(instance);
 		return instance;
 	}

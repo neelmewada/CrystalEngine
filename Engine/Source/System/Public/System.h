@@ -26,6 +26,7 @@
 #include "Engine/Subsystem.h"
 #include "Engine/EngineSubsystem.h"
 #include "Engine/Subsystems/SceneSubsystem.h"
+#include "Engine/GameInstanceSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
 

@@ -3,17 +3,17 @@
 namespace CE
 {
 
-	SandboxGameInstance::SandboxGameInstance()
+	SandboxSubsystem::SandboxSubsystem()
 	{
 
 	}
 
-	void SandboxGameInstance::Initialize()
+	void SandboxSubsystem::Initialize()
 	{
 		Super::Initialize();
 	}
 
-	void SandboxGameInstance::Shutdown()
+	void SandboxSubsystem::Shutdown()
 	{
 		Super::Shutdown();
 	}

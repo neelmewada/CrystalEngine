@@ -113,10 +113,10 @@ namespace CE
 		if (enumType == nullptr)
 			return;
 
+		CoreObjectDelegates::onEnumDeregistered.Broadcast(enumType);
+
 		registeredEnumsById.Remove(enumType->GetTypeId());
 		registeredEnumsByName.Remove(enumType->GetTypeName());
-
-		CoreObjectDelegates::onEnumDeregistered.Broadcast(enumType);
 	}
 
 	EnumType* EnumType::FindEnumByName(Name enumName)

@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "System.h"
 
-#include "SandboxGameInstance.h"
+#include "SandboxSubsystem.h"
 
 namespace CE
 {
