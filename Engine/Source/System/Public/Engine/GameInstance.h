@@ -18,6 +18,8 @@ namespace CE
 
 		GameInstanceSubsystem* CreateSubsystem(ClassType* subsystemClass);
 
+		GameInstanceSubsystem* GetSubsystem(ClassType* subsystemClass);
+
 		virtual void Initialize();
 		virtual void Shutdown();
 

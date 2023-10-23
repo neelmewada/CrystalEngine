@@ -22,7 +22,7 @@ namespace CE
 
 		// Check if subsystem already exists. Only 1 subsystem object allowed per class type.
 		int index = subsystems.IndexOf([&](GameInstanceSubsystem* subsystem) -> bool
-			{ return subsystem != nullptr && subsystem->GetType()->GetTypeId() == subsystemClass->GetTypeId(); });
+			{ return subsystem != nullptr && subsystem->GetClass()->GetTypeId() == subsystemClass->GetTypeId(); });
 
 		if (index >= 0)
 			return subsystems[index];
@@ -35,6 +35,25 @@ namespace CE
 			if (isInitailized)
 				subsystem->Initialize();
 		}
+
+		return subsystem;
+	}
+
+	GameInstanceSubsystem* GameInstance::GetSubsystem(ClassType* type)
+	{
+		if (type == nullptr ||
+			type->GetTypeId() == TYPEID(GameInstanceSubsystem) ||
+			!type->IsSubclassOf<GameInstanceSubsystem>())
+			return nullptr;
+
+		// Get the index of the subsystem
+		int index = subsystems.IndexOf([&](GameInstanceSubsystem* subsystem) -> bool
+			{ return subsystem != nullptr && subsystem->GetClass()->GetTypeId() == type->GetTypeId(); });
+
+		if (index >= 0)
+			return subsystems[index];
+
+		return nullptr;
 	}
 
 	void GameInstance::Initialize()

@@ -13,6 +13,11 @@ namespace CE
 		Scene();
 		virtual ~Scene();
 
+		inline Actor* GetRootActor() const
+		{
+			return root;
+		}
+
 	protected:
 
 		FIELD()

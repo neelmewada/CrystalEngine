@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	class Actor;
 	class SceneComponent;
 
 	CLASS()
@@ -18,7 +19,8 @@ namespace CE
 
 	protected:
 
-		
+		FIELD()
+		Actor* owner = nullptr;
 	};
 
 } // namespace CE

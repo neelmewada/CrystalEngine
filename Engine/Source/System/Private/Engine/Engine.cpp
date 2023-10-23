@@ -13,8 +13,6 @@ namespace CE
 
 	void Engine::Initialize()
 	{
-		isInitialized = true;
-
 		for (auto classType : subsystemClassQueue)
 		{
 			CreateSubsystem(classType);
@@ -26,6 +24,8 @@ namespace CE
 		{
 			subsystem->Initialize();
 		}
+
+		isInitialized = true;
 	}
 
 	void Engine::PreShutdown()

@@ -23,6 +23,8 @@ namespace CE
 			return (TSceneComponent*)SetRootComponent(TSceneComponent::StaticType(), name);
 		}
 
+		void AttachActor(Actor* actor);
+
 	protected:
 
 
@@ -37,7 +39,13 @@ namespace CE
 		FIELD()
 		Array<Actor*> children{};
 
+		FIELD()
+		Actor* parent = nullptr;
 
+		FIELD()
+		Scene* owner = nullptr;
+
+		friend class Scene;
 	};
 
 } // namespace CE

@@ -12,7 +12,7 @@ namespace CE
 		SceneSubsystem();
 		
 
-		inline Scene* GetScene() { return scene; }
+		inline Scene* GetActiveScene() { return scene; }
 
 	protected:
 

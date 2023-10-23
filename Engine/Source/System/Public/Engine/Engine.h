@@ -34,7 +34,7 @@ namespace CE
 		template<typename TSubsystem> requires TIsBaseClassOf<EngineSubsystem, TSubsystem>::Value
 		FORCE_INLINE TSubsystem* GetSubsystem()
 		{
-			return GetSubsystem(TSubsystem::StaticType());
+			return (TSubsystem*)GetSubsystem(TSubsystem::StaticType());
 		}
 
 	system_internal:

@@ -21,6 +21,9 @@ namespace CE
 
 		FIELD()
 		Array<SceneComponent*> attachedComponents{};
+
+		FIELD()
+		SceneComponent* parentComponent = nullptr;
 	};
 
 } // namespace CE

@@ -22,4 +22,13 @@ namespace CE
 		return rootComponent;
 	}
 
+	void Actor::AttachActor(Actor* actor)
+	{
+		if (!actor)
+			return;
+
+		children.Add(actor);
+		actor->parent = this;
+	}
+
 } // namespace CE
