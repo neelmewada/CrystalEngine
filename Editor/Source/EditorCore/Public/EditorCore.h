@@ -16,4 +16,5 @@
 
 // Asset
 #include "Asset/AssetDefinition.h"
-
+#include "Asset/AssetDefinitionRegistry.h"
+#include "Asset/AssetImporter.h"

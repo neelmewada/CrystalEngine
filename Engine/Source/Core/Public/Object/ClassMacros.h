@@ -187,8 +187,8 @@ public:\
 	inline static CE::ClassType* StaticType() { return Self::Type(); }\
 	static CE::String StaticPackage();\
 	static CE::String StaticModule();\
-	constexpr static bool IsClass() { return true; }\
-	constexpr static bool IsStruct() { return false; }\
+	constexpr static bool IsClass = true;\
+	constexpr static bool IsStruct = false;\
     virtual const CE::TypeInfo* GetType() const\
     {\
         return Type();\
@@ -317,8 +317,8 @@ public:\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
     static CE::StructType* Type();\
 	inline static CE::StructType* StaticType() { return Self::Type(); }\
-	constexpr static bool IsClass() { return false; }\
-	constexpr static bool IsStruct() { return true; }\
+    constexpr static bool IsClass = false;\
+    constexpr static bool IsStruct = true;\
 	static CE::String StaticPackage();\
 	static CE::String StaticModule();\
 	~Struct()\

@@ -4,4 +4,5 @@ project(Tools)
 
 add_subdirectory(AutoRTTI)
 add_subdirectory(ResourceCompiler)
+add_subdirectory(AssetProcessor)
 
