@@ -12,7 +12,7 @@ namespace CE
 	{
 		Super::Initialize();
 
-		// Set an empty scene by default
+		// Create & set an empty scene by default
 		scene = CreateObject<Scene>(this, TEXT("EmptyScene"));
 	}
 

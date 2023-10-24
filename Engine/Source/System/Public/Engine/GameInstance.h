@@ -20,8 +20,16 @@ namespace CE
 
 		GameInstanceSubsystem* GetSubsystem(ClassType* subsystemClass);
 
+		template<typename TGameInstanceSubsystem> requires TIsBaseClassOf<GameInstanceSubsystem, TGameInstanceSubsystem>::Value
+		FORCE_INLINE TGameInstanceSubsystem* GetSubsystem()
+		{
+			return (TGameInstanceSubsystem*)GetSubsystem(TGameInstanceSubsystem::StaticType());
+		}
+
 		virtual void Initialize();
 		virtual void Shutdown();
+
+		virtual void Tick(f32 delta);
 
 	protected:
 

@@ -87,5 +87,11 @@ namespace CE
 		subsystems.Clear();
 	}
 
+	void GameInstance::Tick(f32 delta)
+	{
+		for (auto subsystem : subsystems)
+			subsystem->Tick(delta);
+	}
+
 } // namespace CE
 

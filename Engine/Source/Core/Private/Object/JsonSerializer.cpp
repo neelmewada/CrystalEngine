@@ -977,6 +977,8 @@ namespace CE
 		else if (jsonValue->IsObjectValue() && fieldDeclType->IsClass())
 		{
 			Object* classInstance = field->GetFieldValue<Object*>(rawInstance);
+			if (classInstance == nullptr)
+				return true;
 
 			JsonFieldDeserializer deserializer{ (StructType*)fieldDeclType, classInstance };
 			deserializer.isFirstRead = false;

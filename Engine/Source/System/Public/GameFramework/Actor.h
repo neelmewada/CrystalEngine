@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	class Scene;
 	class ActorComponent;
 	class SceneComponent;
 
@@ -24,6 +25,11 @@ namespace CE
 		}
 
 		void AttachActor(Actor* actor);
+		void DetachActor(Actor* actor);
+
+		inline Actor* GetParent() const { return parent; }
+
+		inline Scene* GetScene() const { return scene; }
 
 	protected:
 
@@ -43,7 +49,7 @@ namespace CE
 		Actor* parent = nullptr;
 
 		FIELD()
-		Scene* owner = nullptr;
+		Scene* scene = nullptr;
 
 		friend class Scene;
 	};

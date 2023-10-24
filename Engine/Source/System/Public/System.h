@@ -10,9 +10,18 @@
 #include "Asset/AssetRegistry.h"
 #include "Engine/AssetManager.h"
 
+///////////////////////////////////////////////////////
 // GameFramework
+///////////////////////////////////////////////////////
+
+// Components
 #include "GameFramework/ActorComponent.h"
 #include "GameFramework/SceneComponent.h"
+#include "GameFramework/GeometryComponent.h"
+#include "GameFramework/MeshComponent.h"
+#include "GameFramework/StaticMeshComponent.h"
+
+// Actors
 #include "GameFramework/Actor.h"
 
 // Asset Types

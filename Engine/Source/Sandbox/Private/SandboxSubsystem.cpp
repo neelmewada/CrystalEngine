@@ -16,7 +16,9 @@ namespace CE
 		if (sceneSubsystem != nullptr)
 		{
 			Scene* scene = sceneSubsystem->GetActiveScene();
+			Actor* root = scene->GetRootActor();
 			
+
 		}
 	}
 

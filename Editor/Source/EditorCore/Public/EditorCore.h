@@ -14,3 +14,6 @@
 #include "Project/CrystalProject.h"
 #include "Project/ProjectManager.h"
 
+// Asset
+#include "Asset/AssetDefinition.h"
+

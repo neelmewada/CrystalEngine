@@ -91,11 +91,11 @@ namespace CE
     {
         if (subobject == nullptr || attachedObjects.ObjectExists(subobject->GetUuid()))
             return;
-		//if (attachedObjects.ObjectExists(subobject->GetName()))
-		//{
-		//	CE_LOG(Error, All, "Attempting to add subobject of name {}, which is already used by another object in the parent {}", subobject->GetName(), GetName());
-		//	return;
-		//}
+		
+		// Detach the passed subobject from it's parent
+		if (subobject->outer != nullptr && subobject->outer != this)
+			subobject->outer->DetachSubobject(subobject);
+
         attachedObjects.AddObject(subobject);
         subobject->outer = this;
 

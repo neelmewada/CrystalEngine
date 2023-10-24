@@ -29,6 +29,20 @@ namespace CE
 
 		children.Add(actor);
 		actor->parent = this;
+		actor->scene = scene;
+
+		AttachSubobject(actor);
+	}
+
+	void Actor::DetachActor(Actor* actor)
+	{
+		if (!actor)
+			return;
+
+		children.Remove(actor);
+		actor->parent = nullptr;
+
+		DetachSubobject(actor);
 	}
 
 } // namespace CE
