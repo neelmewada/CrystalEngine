@@ -139,7 +139,7 @@ namespace CE
 
 		virtual bool HasSubobject(Object* subobject);
 
-		bool ObjectPresentInHierarchy(Object* searchObject);
+		bool IsObjectPresentInHierarchy(Object* searchObject);
 
         void RequestDestroy();
 

@@ -5,7 +5,7 @@ namespace CE
 
 	Actor::Actor()
 	{
-		rootComponent = CreateDefaultSubobject<SceneComponent>(TEXT("RootComponent"));
+		rootComponent = nullptr;//CreateDefaultSubobject<SceneComponent>(TEXT("RootComponent"));
 	}
 
 	SceneComponent* Actor::SetRootComponent(SubClassType<SceneComponent> componentType, String name)
@@ -22,11 +22,37 @@ namespace CE
 		return rootComponent;
 	}
 
+	void Actor::SetRootComponent(SceneComponent* component)
+	{
+		if (rootComponent)
+		{
+			// If current rootComponent's lifecycle is managed by `this` actor, destroy it.
+			// Otherwise, just detach the subobject without destroying it.
+			if (IsObjectPresentInHierarchy(rootComponent))
+			{
+				rootComponent->Destroy();
+			}
+			else
+			{
+				DetachSubobject(rootComponent);
+			}
+
+			rootComponent = nullptr;
+		}
+
+		rootComponent = component;
+
+		if (rootComponent) // component can be set to nullptr
+		{
+			
+		}
+	}
+
 	void Actor::AttachActor(Actor* actor)
 	{
 		if (!actor)
 			return;
-
+		
 		children.Add(actor);
 		actor->parent = this;
 		actor->scene = scene;
@@ -41,6 +67,7 @@ namespace CE
 
 		children.Remove(actor);
 		actor->parent = nullptr;
+		actor->scene = nullptr;
 
 		DetachSubobject(actor);
 	}

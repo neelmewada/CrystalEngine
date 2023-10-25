@@ -18,6 +18,7 @@ namespace CE
 			return;
 		}
 		
+		component->parentComponent = this;
 		attachedComponents.Add(component);
 	}
 

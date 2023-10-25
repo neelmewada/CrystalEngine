@@ -18,6 +18,8 @@ namespace CE
 
 		SceneComponent* SetRootComponent(SubClassType<SceneComponent> componentType, String name = "");
 
+		void SetRootComponent(SceneComponent* rootComponent);
+
 		template<typename TSceneComponent> requires TIsBaseClassOf<SceneComponent, TSceneComponent>::Value
 		FORCE_INLINE TSceneComponent* SetRootComponent(const String& name = "")
 		{

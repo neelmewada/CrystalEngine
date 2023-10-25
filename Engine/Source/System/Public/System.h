@@ -23,6 +23,7 @@
 
 // Actors
 #include "GameFramework/Actor.h"
+#include "GameFramework/StaticMeshActor.h"
 
 // Asset Types
 #include "Engine/TextureDefines.h"
@@ -30,6 +31,7 @@
 #include "Engine/Texture2D.h"
 #include "Engine/Shader.h"
 #include "Engine/Scene.h"
+#include "Engine/StaticMesh.h"
 
 // Engine
 #include "Engine/Subsystem.h"

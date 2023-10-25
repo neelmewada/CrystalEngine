@@ -136,21 +136,16 @@ namespace CE
 		return false;
 	}
 
-    bool Object::ObjectPresentInHierarchy(Object* searchObject)
+    bool Object::IsObjectPresentInHierarchy(Object* searchObject)
     {
 		if (searchObject == nullptr)
 			return false;
 		if (searchObject == this)
 			return true;
 
-		if (HasSubobject(searchObject))
-		{
-			return true;
-		}
-
 		for (auto subobject : attachedObjects)
 		{
-			if (subobject->HasSubobject(searchObject))
+			if (subobject->IsObjectPresentInHierarchy(searchObject))
 				return true;
 		}
 

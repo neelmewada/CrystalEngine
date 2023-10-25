@@ -14,6 +14,7 @@ namespace CE
 		void Initialize() override;
 		void Shutdown() override;
 
+		void Tick(f32 delta) override;
 	};
 
 } // namespace CE

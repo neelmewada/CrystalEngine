@@ -188,7 +188,7 @@ namespace CE
 
 	bool Package::ContainsObject(Object* object)
 	{
-		return ObjectPresentInHierarchy(object);
+		return IsObjectPresentInHierarchy(object);
 	}
 
 	Object* Package::ResolveObjectReference(UUID objectUuid)

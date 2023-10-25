@@ -7,7 +7,7 @@ namespace CE::Editor
         if (!IsDefaultInstance())
         {
             classRegHandle = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&Self::OnClassRegistered, this));
-            classDeregHandle = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&Self::OnClassD, <#ClassOrStruct *instance#>))
+			classDeregHandle = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&Self::OnClassDeregistered, this));
         }
     }
 
@@ -17,8 +17,13 @@ namespace CE::Editor
         {
             CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(classRegHandle);
             classRegHandle = 0;
-            classDeregHandle = 0;
         }
+
+		if (classDeregHandle != 0)
+		{
+			CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(classDeregHandle);
+			classDeregHandle = 0;
+		}
     }
 
     void AssetDefinitionRegistry::OnClassRegistered(ClassType* classType)
@@ -30,7 +35,7 @@ namespace CE::Editor
             classType->IsSubclassOf<AssetDefinition>() &&
             classType->CanBeInstantiated())
         {
-            
+			assetDefinitions.Add((AssetDefinition*)classType->GetDefaultInstance());
         }
     }
 
@@ -40,9 +45,10 @@ namespace CE::Editor
             return;
         
         if (classType != AssetDefinition::StaticType() &&
-            classType->IsSubclassOf<AssetDefinition>())
+            classType->IsSubclassOf<AssetDefinition>() &&
+			classType->CanBeInstantiated())
         {
-            
+			assetDefinitions.Remove((AssetDefinition*)classType->GetDefaultInstance());
         }
     }
 

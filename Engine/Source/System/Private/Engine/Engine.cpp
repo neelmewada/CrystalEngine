@@ -61,6 +61,12 @@ namespace CE
 			mainThreadQueue.GetFront().InvokeIfValid();
 			mainThreadQueue.PopFront();
 		}
+
+		for (auto gameInstance : gameInstances)
+		{
+			if (gameInstance->IsInitialized())
+				gameInstance->Tick(deltaTime);
+		}
 	}
 
 	void Engine::DispatchOnMainThread(Delegate<void(void)> action)
