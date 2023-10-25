@@ -56,20 +56,44 @@ namespace CE
 		children.Add(actor);
 		actor->parent = this;
 		actor->scene = scene;
-
+        
 		AttachSubobject(actor);
+        
+        std::function<void(Actor*)> recursivelySetScene = [&](Actor* inActor)
+        {
+            inActor->scene = scene;
+            
+            for (auto child : inActor->children)
+            {
+                recursivelySetScene(child);
+            }
+        };
+        
+        recursivelySetScene(actor);
 	}
 
 	void Actor::DetachActor(Actor* actor)
 	{
 		if (!actor)
 			return;
-
+        
 		children.Remove(actor);
 		actor->parent = nullptr;
 		actor->scene = nullptr;
-
+        
 		DetachSubobject(actor);
+        
+        std::function<void(Actor*)> recursivelyResetScene = [&](Actor* inActor)
+        {
+            inActor->scene = nullptr;
+            
+            for (auto child : inActor->children)
+            {
+                recursivelyResetScene(child);
+            }
+        };
+        
+        recursivelyResetScene(actor);
 	}
 
 } // namespace CE

@@ -5,7 +5,7 @@ namespace CE
 
     StaticMeshComponent::StaticMeshComponent()
     {
-
+        
     }
 
 } // namespace CE

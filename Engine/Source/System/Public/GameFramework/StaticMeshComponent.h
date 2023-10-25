@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    class StaticMesh;
+
     CLASS()
 	class SYSTEM_API StaticMeshComponent : public MeshComponent
 	{
@@ -10,7 +12,14 @@ namespace CE
 
 		StaticMeshComponent();
 
+        inline StaticMesh* GetStaticMesh() const { return staticMesh; }
+        
+        inline void SetStaticMesh(StaticMesh* mesh) { this->staticMesh = mesh; }
+        
 	protected:
+        
+        FIELD()
+        StaticMesh* staticMesh = nullptr;
 
 	};
 

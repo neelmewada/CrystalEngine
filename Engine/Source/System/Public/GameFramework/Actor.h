@@ -37,6 +37,7 @@ namespace CE
 
 
 	private:
+        
 
 		FIELD()
 		SceneComponent* rootComponent = nullptr;

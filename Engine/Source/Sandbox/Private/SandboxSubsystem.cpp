@@ -11,7 +11,7 @@ namespace CE
 	void SandboxSubsystem::Initialize()
 	{
 		Super::Initialize();
-
+        
 		auto sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 		if (sceneSubsystem != nullptr)
 		{
@@ -22,7 +22,7 @@ namespace CE
 			root->AttachActor(meshActor);
 
 			StaticMeshComponent* meshComponent = meshActor->GetMeshComponent();
-			
+            
 		}
 	}
 
