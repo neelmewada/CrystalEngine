@@ -531,6 +531,23 @@ TEST(Containers, Matrix)
         EXPECT_EQ(out, Vec4(20, 20, 30, 1.0f));
     }
     
+    // Transformation
+    {
+        auto translation = Matrix4x4({
+            { 1, 0, 0, 10 },
+            { 0, 1, 0, 0  },
+            { 0, 0, 1, 0  },
+            { 0, 0, 0, 1  },
+        });
+        
+        auto rotation = Matrix4x4({
+            { 1, 0, 0, 0 },
+            { 0, 1, 0, 0 },
+            { 0, 0, 1, 0 },
+            { 0, 0, 0, 1 },
+        });
+    }
+    
     TEST_END;
 }
 
