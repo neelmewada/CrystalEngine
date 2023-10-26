@@ -404,6 +404,9 @@ namespace CE
         TVector4(TVector2<T> vec2);
 		TVector4(TVector2<T> xy, TVector2<T> zw);
         TVector4(TVector3<T> vec3);
+        
+        TVector4(TVector3<T> vec3, T w) : x(vec3.x), y(vec3.y), z(vec3.z), w(w)
+        {}
 
         union {
             struct {

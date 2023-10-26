@@ -48,6 +48,8 @@ namespace CE
 		// Delete all attached subobjects
 		if (attachedObjects.GetObjectCount() > 0)
 		{
+            int totalCount = attachedObjects.GetObjectCount();
+            
 			for (int i = attachedObjects.GetObjectCount() - 1; i >= 0; i--)
 			{
 				auto subobject = attachedObjects.GetObjectAt(i);

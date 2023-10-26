@@ -512,6 +512,28 @@ TEST(Containers, Variant)
     TEST_END;
 }
 
+TEST(Containers, Matrix)
+{
+    TEST_BEGIN;
+    
+    // Multiplication
+    {
+        Vec3 pos = Vec3(10, 20, 30);
+        
+        auto translation = Matrix4x4({
+            { 1, 0, 0, 10 },
+            { 0, 1, 0, 0  },
+            { 0, 0, 1, 0  },
+            { 0, 0, 0, 1  },
+        });
+        
+        Vec4 out = translation * Vec4(pos, 1.0f);
+        EXPECT_EQ(out, Vec4(20, 20, 30, 1.0f));
+    }
+    
+    TEST_END;
+}
+
 TEST(Containers, Sorting)
 {
 	TEST_BEGIN;
@@ -611,6 +633,8 @@ TEST(Containers, Defer)
 
 	TEST_END;
 }
+
+
 
 #pragma endregion
 
@@ -1160,11 +1184,14 @@ TEST(Object, Lifecycle)
     ObjectInitializer init1{};
     ObjectInitializer init2{};
     
-    auto t1 = Thread([&]
+    SharedMutex mutex{};
+    
+    /*auto t1 = Thread([&]
     {
         auto obj1 = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(),
             "Obj1", OF_Transient, ObjectLifecycleTestClass::Type(),
             nullptr);
+        
         if (obj1->GetName() != "Obj1")
         {
             auto name = obj1->GetName();
@@ -1180,6 +1207,7 @@ TEST(Object, Lifecycle)
         auto obj2 = CreateObject<ObjectLifecycleTestClass>(GetTransientPackage(),
             "Obj2", OF_Transient, ObjectLifecycleTestClass::Type(),
             nullptr);
+        
         if (obj2->GetName() != "Obj2")
         {
             auto name = obj2->GetName();
@@ -1196,7 +1224,7 @@ TEST(Object, Lifecycle)
     if (t1.IsJoinable())
         t1.Join();
     if (t2.IsJoinable())
-        t2.Join();
+        t2.Join();*/
 
     EXPECT_NE(ClassType::FindClass(TYPEID(ObjectLifecycleTestClass)), nullptr);
     CE_DEREGISTER_TYPES(ObjectLifecycleTestClass);

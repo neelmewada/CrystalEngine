@@ -10,7 +10,7 @@ namespace CE
 		
 		for (int i = 0; i < 4; i++)
 		{
-			result.Rows[i] = Rows[i] + rhs.Rows[i];
+			result.rows[i] = rows[i] + rhs.rows[i];
 		}
 
 		return result;
@@ -22,7 +22,7 @@ namespace CE
 
 		for (int i = 0; i < 4; i++)
 		{
-			result.Rows[i] = Rows[i] - rhs.Rows[i];
+			result.rows[i] = rows[i] - rhs.rows[i];
 		}
 
 		return result;
@@ -34,7 +34,7 @@ namespace CE
 
 		for (int i = 0; i < 4; i++)
 		{
-			result.Rows[i] *= rhs;
+			result.rows[i] *= rhs;
 		}
 
 		return result;
@@ -46,7 +46,7 @@ namespace CE
 
 		for (int i = 0; i < 4; i++)
 		{
-			result.Rows[i] /= rhs;
+			result.rows[i] /= rhs;
 		}
 
 		return result;
@@ -60,17 +60,36 @@ namespace CE
 		{
 			for (int j = 0; j < 4; j++)
 			{
-				result.Rows[i][j] = 0;
+				result.rows[i][j] = 0;
 
 				for (int k = 0; k < 4; k++) 
 				{
-					result.Rows[i][j] += lhs.Rows[i][k] * rhs.Rows[k][j];
+					result.rows[i][j] += lhs.rows[i][k] * rhs.rows[k][j];
 				}
 			}
 		}
 
 		return result;
 	}
+
+    Vec4 Matrix4x4::Multiply(const Matrix4x4& lhs, const Vec4& rhs)
+    {
+        Vec4 result{};
+        
+        for (int i = 0; i < 4; i++)
+        {
+            f32 value = 0;
+            
+            for (int j = 0; j < 4; j++)
+            {
+                value += lhs.rows[i][j] * rhs[j];
+            }
+            
+            result[i] = value;
+        }
+        
+        return result;
+    }
 
 	Matrix4x4 Matrix4x4::GetTranspose(const Matrix4x4& mat)
 	{
@@ -80,7 +99,7 @@ namespace CE
 		{
 			for (int j = 0; j < 4; j++)
 			{
-				result.Rows[i][j] = mat.Rows[j][i];
+				result.rows[i][j] = mat.rows[j][i];
 			}
 		}
 

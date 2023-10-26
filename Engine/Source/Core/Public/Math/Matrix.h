@@ -12,27 +12,29 @@ namespace CE
 
         Matrix4x4()
         {
-            memset(Rows, 0, sizeof(Rows));
+            memset(rows, 0, sizeof(rows));
         }
 
         Matrix4x4(Vec4 rows[4])
         {
-            memcpy(Rows, rows, sizeof(Rows));
+            for (int i = 0; i < 4; i++)
+                this->rows[i] = rows[i];
         }
 
         Matrix4x4(std::initializer_list<Vec4> rows)
         {
-            memcpy(Rows, rows.begin(), sizeof(Rows));
+            for (int i = 0; i < 4; i++)
+                this->rows[i] = *(rows.begin() + i);
         }
 
         Matrix4x4(const Matrix4x4& copy)
         {
-            memcpy(Rows, copy.Rows, sizeof(Rows));
+            memcpy(rows, copy.rows, sizeof(rows));
         }
 
         CE_INLINE static Matrix4x4 Zero()
         {
-            Vec4 rows[4] = {
+            static Vec4 rows[4] = {
                 Vec4{ 0, 0, 0, 0 },
                 Vec4{ 0, 0, 0, 0 },
                 Vec4{ 0, 0, 0, 0 },
@@ -44,7 +46,7 @@ namespace CE
 
         CE_INLINE static Matrix4x4 Identity()
         {
-            Vec4 rows[4] = {
+            static Vec4 rows[4] = {
                 Vec4{ 1, 0, 0, 0 },
                 Vec4{ 0, 1, 0, 0 },
                 Vec4{ 0, 0, 1, 0 },
@@ -56,12 +58,12 @@ namespace CE
 
         CE_INLINE Vec4& operator[](int index)
         {
-            return Rows[index];
+            return rows[index];
         }
 
         CE_INLINE const Vec4& operator[](int index) const
         {
-            return Rows[index];
+            return rows[index];
         }
 
         Matrix4x4 operator+(const Matrix4x4& rhs) const;
@@ -98,6 +100,11 @@ namespace CE
         {
             return Multiply(*this, rhs);
         }
+        
+        CE_INLINE Vec4 operator*(const Vec4& rhs) const
+        {
+            return Multiply(*this, rhs);
+        }
 
         CE_INLINE Matrix4x4 operator*=(const Matrix4x4& rhs)
         {
@@ -107,7 +114,7 @@ namespace CE
 
         CE_INLINE bool operator==(const Matrix4x4& rhs) const
         {
-            return Rows[0] == rhs.Rows[0] && Rows[1] == rhs.Rows[1] && Rows[2] == rhs.Rows[2] && Rows[3] == rhs.Rows[3];
+            return rows[0] == rhs.rows[0] && rows[1] == rhs.rows[1] && rows[2] == rhs.rows[2] && rows[3] == rhs.rows[3];
         }
 
         CE_INLINE bool operator!=(const Matrix4x4& rhs) const
@@ -116,6 +123,7 @@ namespace CE
         }
 
         static Matrix4x4 Multiply(const Matrix4x4& lhs, const Matrix4x4& rhs);
+        static Vec4 Multiply(const Matrix4x4& lhs, const Vec4& rhs);
 
         static Matrix4x4 GetTranspose(const Matrix4x4& mat);
 
@@ -142,10 +150,10 @@ namespace CE
         CE_INLINE String ToString() const
         {
             return String::Format("[{} {} {} {}]\n[{} {} {} {}]\n[{} {} {} {}]\n[{} {} {} {}]",
-                Rows[0][0], Rows[0][1], Rows[0][2], Rows[0][3],
-                Rows[1][0], Rows[1][1], Rows[1][2], Rows[1][3],
-                Rows[2][0], Rows[2][1], Rows[2][2], Rows[2][3],
-                Rows[3][0], Rows[3][1], Rows[3][2], Rows[3][3]);
+                rows[0][0], rows[0][1], rows[0][2], rows[0][3],
+                rows[1][0], rows[1][1], rows[1][2], rows[1][3],
+                rows[2][0], rows[2][1], rows[2][2], rows[2][3],
+                rows[3][0], rows[3][1], rows[3][2], rows[3][3]);
         }
 
     private:
@@ -160,7 +168,7 @@ namespace CE
         
     public:
 
-        Vec4 Rows[4];
+        Vec4 rows[4];
     };
 
 } // namespace CE

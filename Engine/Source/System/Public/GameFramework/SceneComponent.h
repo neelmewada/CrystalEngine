@@ -49,6 +49,8 @@ namespace CE
 
 		FIELD(Category = Transform, Display = "Scale")
 		Vec3 localScale{};
+        
+        Matrix4x4 transform{};
 	};
 
 } // namespace CE

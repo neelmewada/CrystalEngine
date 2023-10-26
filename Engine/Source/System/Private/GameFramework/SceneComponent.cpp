@@ -5,7 +5,7 @@ namespace CE
 
     SceneComponent::SceneComponent()
     {
-		
+        Matrix4x4::Identity();
     }
 
 	void SceneComponent::SetupAttachment(SceneComponent* component)
@@ -17,7 +17,7 @@ namespace CE
 			CE_LOG(Error, All, "SceneComponent::SetupAttachment called with a scene component that already exists in it's hierarcy");
 			return;
 		}
-		
+        
 		component->parentComponent = this;
 		attachedComponents.Add(component);
 	}
@@ -35,6 +35,8 @@ namespace CE
 	void SceneComponent::Tick(f32 delta)
 	{
 		Super::Tick(delta);
+        
+        
 
 		for (auto component : attachedComponents)
 		{

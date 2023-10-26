@@ -402,6 +402,10 @@ namespace CE
             return;
 
         CoreObjectDelegates::onStructDeregistered.Broadcast(type);
+        
+        type->fieldsCached = false;
+        type->attributesCached = false;
+        type->functionsCached = false;
 
         registeredStructs.Remove(type->GetTypeId());
         registeredStructsByName.Remove(type->GetTypeName());
@@ -560,6 +564,11 @@ namespace CE
             return;
 
         CoreObjectDelegates::onClassDeregistered.Broadcast(type);
+        
+        type->defaultInstance = nullptr;
+        type->fieldsCached = false;
+        type->attributesCached = false;
+        type->functionsCached = false;
 
         registeredClasses.Remove(type->GetTypeId());
         registeredClassesByName.Remove(type->GetTypeName());
