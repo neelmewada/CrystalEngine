@@ -33,6 +33,8 @@ namespace CE
 
 		inline Scene* GetScene() const { return scene; }
 
+		virtual void Tick(f32 delta);
+
 	protected:
 
 

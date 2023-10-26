@@ -8,5 +8,10 @@ namespace CE
 		
 	}
 
+	void ActorComponent::Tick(f32 delta)
+	{
+
+	}
+
 } // namespace CE
 

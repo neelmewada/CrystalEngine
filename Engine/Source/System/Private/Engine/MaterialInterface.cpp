@@ -3,7 +3,7 @@
 namespace CE
 {
 
-    MeshComponent::MeshComponent()
+    MaterialInterface::MaterialInterface()
     {
 
     }

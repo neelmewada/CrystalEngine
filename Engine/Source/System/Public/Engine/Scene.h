@@ -18,7 +18,7 @@ namespace CE
 			return root;
 		}
         
-        
+		virtual void Tick(f32 delta);
 
 	protected:
 

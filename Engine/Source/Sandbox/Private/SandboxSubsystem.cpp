@@ -22,7 +22,11 @@ namespace CE
 			root->AttachActor(meshActor);
 
 			StaticMeshComponent* meshComponent = meshActor->GetMeshComponent();
-            
+			ModelData* cubeMesh = ModelData::GetCubeMesh();
+			StaticMesh* cubeStaticMesh = CreateObject<StaticMesh>(meshComponent, "CubeStaticMesh");
+			cubeStaticMesh->SetMesh(cubeMesh);
+
+			meshComponent->SetStaticMesh(cubeStaticMesh);
 		}
 	}
 

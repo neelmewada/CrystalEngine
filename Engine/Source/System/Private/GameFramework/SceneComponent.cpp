@@ -32,5 +32,15 @@ namespace CE
 		return false;
 	}
 
+	void SceneComponent::Tick(f32 delta)
+	{
+		Super::Tick(delta);
+
+		for (auto component : attachedComponents)
+		{
+			component->Tick(delta);
+		}
+	}
+
 } // namespace CE
 

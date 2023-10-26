@@ -2,10 +2,5 @@
 
 namespace CE
 {
-
-    MeshComponent::MeshComponent()
-    {
-
-    }
-
+    
 } // namespace CE

@@ -13,9 +13,25 @@ namespace CE
 
 		bool IsSceneComponent() const override final { return true; }
 
+		/// @brief Add the passed scene component as a child of receiving scene component.
+		/// @param component: Component to add as child.
 		void SetupAttachment(SceneComponent* component);
 
 		bool ComponentExists(SceneComponent* component);
+
+		inline Vec3 GetLocalPosition() const { return localPosition; }
+
+		inline Vec3 GetLocalEulerAngles() const { return localEulerAngles; }
+
+		inline Vec3 GetLocalScale() const { return localScale; }
+
+		inline void SetLocalPosition(const Vec3& value) { localPosition = value; }
+
+		inline void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; }
+
+		inline void SetLocalScale(const Vec3& value) { localScale = value; }
+
+		void Tick(f32 delta) override;
 
 	private:
 

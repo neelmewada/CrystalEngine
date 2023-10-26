@@ -76,8 +76,11 @@ namespace CE
 	{
 		if (!actor)
 			return;
+		s64 index = children.IndexOf(actor);
+		if (index < 0)
+			return;
         
-		children.Remove(actor);
+		children.RemoveAt(index);
 		actor->parent = nullptr;
 		actor->scene = nullptr;
         
@@ -95,5 +98,21 @@ namespace CE
         
         recursivelyResetScene(actor);
 	}
+
+    void Actor::Tick(f32 delta)
+    {
+		if (rootComponent)
+			rootComponent->Tick(delta);
+
+		for (auto component : attachedComponents)
+		{
+			component->Tick(delta);
+		}
+
+		for (auto child : children)
+		{
+			child->Tick(delta);
+		}
+    }
 
 } // namespace CE

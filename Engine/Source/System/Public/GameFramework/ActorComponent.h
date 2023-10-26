@@ -17,7 +17,7 @@ namespace CE
 
 		virtual bool IsSceneComponent() const { return false; }
 
-
+		virtual void Tick(f32 delta);
 
 	protected:
 

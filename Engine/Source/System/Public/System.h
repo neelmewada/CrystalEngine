@@ -32,6 +32,9 @@
 #include "Engine/Shader.h"
 #include "Engine/Scene.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/MaterialInterface.h"
+#include "Engine/Material.h"
+#include "Engine/MaterialAsset.h"
 
 // Engine
 #include "Engine/Subsystem.h"

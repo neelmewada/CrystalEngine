@@ -34,6 +34,10 @@ namespace CE
 
 		StaticMesh();
 
+		inline ModelData* GetModelData() const { return modelData; }
+
+		inline void SetMesh(ModelData* modelData) { this->modelData = modelData; }
+
 	protected:
 
 		FIELD()

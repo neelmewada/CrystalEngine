@@ -19,7 +19,7 @@ namespace CE
 
 	Shader::~Shader()
 	{
-
+		
 	}
 
 } // namespace CE

@@ -598,9 +598,9 @@ TEST(Containers, Defer)
 
 	// Inner scope
 	{
-		defer(
+		defer {
 			string = "modified";
-		);
+		};
 		EXPECT_EQ(string, "original");
 
 		string = "something";

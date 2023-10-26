@@ -21,11 +21,14 @@ namespace CE
 
 	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, ShaderReflection& outReflection)
 	{
-		spirv_cross::CompilerReflection reflection{ (const uint32_t*)byteCode, byteSize / 4 };
+		spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)byteCode, byteSize / 4);
+		defer {
+			delete reflection;
+		};
 
 		outReflection = ShaderReflection();
 		
-		auto resources = reflection.get_shader_resources();
+		auto resources = reflection->get_shader_resources();
 
 		auto reflectResource = [&](spirv_cross::SmallVector<spirv_cross::Resource>& resourceList, ShaderResourceType resourceType)
 			{
@@ -35,7 +38,7 @@ namespace CE
 					auto resource = resourceList[i];
 					auto id = resource.id;
 
-					String internalName = reflection.get_name(resource.base_type_id);
+					String internalName = reflection->get_name(resource.base_type_id);
 				}
 			};
 		
@@ -44,16 +47,16 @@ namespace CE
 		{
 			auto uniformBuffer = resources.uniform_buffers[i];
 			
-			String name = reflection.get_name(uniformBuffer.id);
+			String name = reflection->get_name(uniformBuffer.id);
 			auto id = uniformBuffer.id;
-			String internalName = reflection.get_name(uniformBuffer.base_type_id);
-			auto type = reflection.get_type(uniformBuffer.type_id);
+			String internalName = reflection->get_name(uniformBuffer.base_type_id);
+			auto type = reflection->get_type(uniformBuffer.type_id);
 			int count = 1;
 			if (type.array.size() > 0)
 				count = type.array[0];
 
-			u32 set = reflection.get_decoration(id, spv::DecorationDescriptorSet);
-			u32 binding = reflection.get_decoration(id, spv::DecorationBinding);
+			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
+			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
 			variable.binding = binding;
@@ -71,17 +74,17 @@ namespace CE
 		{
 			auto storageBuffer = resources.storage_buffers[i];
 
-			String name = reflection.get_name(storageBuffer.id);
+			String name = reflection->get_name(storageBuffer.id);
 			auto id = storageBuffer.id;
-			String internalName = reflection.get_name(storageBuffer.base_type_id);
+			String internalName = reflection->get_name(storageBuffer.base_type_id);
 
-			auto type = reflection.get_type(storageBuffer.type_id);
+			auto type = reflection->get_type(storageBuffer.type_id);
 			int count = 1;
 			if (type.array.size() > 0)
 				count = type.array[0];
 
-			u32 set = reflection.get_decoration(id, spv::DecorationDescriptorSet);
-			u32 binding = reflection.get_decoration(id, spv::DecorationBinding);
+			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
+			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
 			variable.binding = binding;
@@ -99,17 +102,17 @@ namespace CE
 		{
 			auto storageImage = resources.storage_images[i];
 
-			String name = reflection.get_name(storageImage.id);
+			String name = reflection->get_name(storageImage.id);
 			auto id = storageImage.id;
-			String internalName = reflection.get_name(storageImage.id);
+			String internalName = reflection->get_name(storageImage.id);
 
-			auto type = reflection.get_type(storageImage.type_id);
+			auto type = reflection->get_type(storageImage.type_id);
 			int count = 1;
 			if (type.array.size() > 0)
 				count = type.array[0];
 
-			u32 set = reflection.get_decoration(id, spv::DecorationDescriptorSet);
-			u32 binding = reflection.get_decoration(id, spv::DecorationBinding);
+			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
+			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
 			variable.binding = binding;
@@ -135,17 +138,17 @@ namespace CE
 		{
 			auto texture = resources.separate_images[i];
 			
-			String name = reflection.get_name(texture.id);
+			String name = reflection->get_name(texture.id);
 			auto id = texture.id;
-			String internalName = reflection.get_name(texture.base_type_id);
+			String internalName = reflection->get_name(texture.base_type_id);
 
-			auto type = reflection.get_type(texture.type_id);
+			auto type = reflection->get_type(texture.type_id);
 			int count = 1;
 			if (type.array.size() > 0)
 				count = type.array[0];
 
-			u32 set = reflection.get_decoration(id, spv::DecorationDescriptorSet);
-			u32 binding = reflection.get_decoration(id, spv::DecorationBinding);
+			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
+			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
 			variable.binding = binding;
@@ -183,17 +186,17 @@ namespace CE
 		{
 			auto sampler = resources.separate_samplers[i];
 
-			String name = reflection.get_name(sampler.id);
+			String name = reflection->get_name(sampler.id);
 			auto id = sampler.id;
-			String internalName = reflection.get_name(sampler.base_type_id);
+			String internalName = reflection->get_name(sampler.base_type_id);
 
-			auto type = reflection.get_type(sampler.type_id);
+			auto type = reflection->get_type(sampler.type_id);
 			int count = 1;
 			if (type.array.size() > 0)
 				count = type.array[0];
 
-			u32 set = reflection.get_decoration(id, spv::DecorationDescriptorSet);
-			u32 binding = reflection.get_decoration(id, spv::DecorationBinding);
+			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
+			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
 			variable.binding = binding;

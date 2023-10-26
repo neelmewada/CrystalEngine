@@ -3,8 +3,9 @@
 
 namespace CE
 {
-
+#if PAL_TRAIT_BUILD_EDITOR
 	namespace Editor { class ShaderImportJob; }
+#endif
 
 	STRUCT()
 	struct SYSTEM_API ShaderBlob
@@ -48,6 +49,7 @@ namespace CE
 
 		FIELD()
 		ShaderBlob fragmentShader{};
+
 	};
 
 	CLASS()

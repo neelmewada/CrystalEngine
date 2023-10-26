@@ -25,7 +25,10 @@ namespace CE
 	{
 		Super::Tick(deltaTime);
 
-		
+		if (scene != nullptr)
+		{
+			scene->Tick(deltaTime);
+		}
 	}
 
 } // namespace CE

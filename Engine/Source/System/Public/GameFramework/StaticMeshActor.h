@@ -16,6 +16,7 @@ namespace CE
 
 		FIELD()
 		StaticMeshComponent* meshComponent = nullptr;
+
 	};
     
 } // namespace CE

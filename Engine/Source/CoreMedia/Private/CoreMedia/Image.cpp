@@ -489,9 +489,9 @@ namespace CE
 		dest.dwDataSize = CMP_CalculateBufferSize(&dest);
 		dest.pData = (CMP_BYTE*)Memory::Malloc(dest.dwDataSize);
 
-		defer(
+		defer {
 			Memory::Free(dest.pData);
-		);
+		};
 
 		CMP_CompressOptions options = CMP_CompressOptions();
 		options.dwSize = sizeof(options);

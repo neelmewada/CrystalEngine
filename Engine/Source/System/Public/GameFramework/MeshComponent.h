@@ -2,6 +2,8 @@
 
 namespace CE
 {
+	class MaterialInterface;
+
 	CLASS(Abstract)
 	class SYSTEM_API MeshComponent : public GeometryComponent
 	{
@@ -12,7 +14,8 @@ namespace CE
 
 	protected:
 
-
+		FIELD()
+		Array<MaterialInterface*> materials{};
 	};
     
 } // namespace CE

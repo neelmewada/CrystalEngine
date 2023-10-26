@@ -22,7 +22,7 @@ namespace CE
 		vertexInputDesc.binding = 0;
 		vertexInputDesc.stride = desc.vertexSizeInBytes;
 		vertexInputDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
+		
 		VkDescriptorSetLayoutBinding binding0{};
 		binding0.binding = 0;
 		binding0.descriptorCount = 1;
@@ -35,8 +35,6 @@ namespace CE
 
 		VkPipelineLayoutCreateInfo layoutCI{};
 		layoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-
-		
 
 		VkGraphicsPipelineCreateInfo pipelineCI{};
 		pipelineCI.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

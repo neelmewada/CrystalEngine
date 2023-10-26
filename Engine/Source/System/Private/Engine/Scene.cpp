@@ -14,4 +14,12 @@ namespace CE
         
 	}
 
+	void Scene::Tick(f32 delta)
+	{
+		if (root != nullptr)
+		{
+			root->Tick(delta);
+		}
+	}
+
 } // namespace CE

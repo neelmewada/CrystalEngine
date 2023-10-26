@@ -1,6 +1,6 @@
 #pragma once
 
-#define defer(action) CE::DeferImpl CE_CONCATENATE(__defer_, __LINE__)([&] { action; })
+#define defer CE::DeferImpl CE_CONCATENATE(__defer_, __LINE__) = [&]
 
 namespace CE
 {
@@ -13,6 +13,12 @@ namespace CE
 			: action(act) {}
 		DeferImpl(Action&& act)
 			: action(std::move(act)) {}
+
+		template<class Func>
+		DeferImpl(Func&& lamda) : action(std::move(lamda)) {}
+
+		template<class Func>
+		DeferImpl(const Func& lamda) : action(std::move(lamda)) {}
 
 		DeferImpl(const DeferImpl& act) = delete;
 		DeferImpl& operator=(const DeferImpl& act) = delete;

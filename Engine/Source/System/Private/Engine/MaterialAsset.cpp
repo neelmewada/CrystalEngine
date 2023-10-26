@@ -2,10 +2,8 @@
 
 namespace CE
 {
-
-    MeshComponent::MeshComponent()
+    MaterialAsset::MaterialAsset()
     {
 
     }
-
 } // namespace CE

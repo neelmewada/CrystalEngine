@@ -3,13 +3,27 @@
 namespace CE
 {
 	STRUCT()
-	struct SYSTEM_API Mesh
+	struct SYSTEM_API SubMesh
 	{
-		CE_STRUCT(Mesh)
+		CE_STRUCT(SubMesh)
 	public:
 
 		FIELD()
 		s32 materialSlotIndex = 0;
+
+		FIELD()
+		Array<u32> indices{};
+
+		void Clear();
+
+		void Release();
+	};
+
+	STRUCT()
+	struct SYSTEM_API Mesh
+	{
+		CE_STRUCT(Mesh)
+	public:
 
 		FIELD()
 		Name name{};
@@ -24,13 +38,13 @@ namespace CE
 		Array<Vec3> normals{};
 
 		FIELD()
-		Array<Vec3> tangents{};
-
-		FIELD()
-		Array<u32> indices{};
+		Array<Vec4> tangents{};
 
 		FIELD()
 		Array<Color> vertexColors{};
+
+		FIELD()
+		Array<SubMesh> submeshes{};
 
 		FORCE_INLINE bool IsValid() const
 		{
@@ -42,16 +56,6 @@ namespace CE
 		void Release();
 	};
 
-	STRUCT()
-	struct SYSTEM_API MeshLOD
-	{
-		CE_STRUCT(MeshLOD)
-	public:
-
-		FIELD()
-		Array<Mesh> mesh{};
-	};
-
 	CLASS()
 	class SYSTEM_API ModelData : public Object
 	{
@@ -59,7 +63,9 @@ namespace CE
 	public:
 
 		FIELD()
-		Array<MeshLOD> lod{};
+		Array<Mesh> lod{};
+
+		static ModelData* GetCubeMesh();
 		
 	};
     
