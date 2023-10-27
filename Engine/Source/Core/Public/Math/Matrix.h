@@ -106,6 +106,11 @@ namespace CE
             return Multiply(*this, rhs);
         }
 
+		CE_INLINE Vec4 operator*(const Vec3& rhs) const
+		{
+			return Multiply(*this, Vec4(rhs, 1.0f));
+		}
+
         CE_INLINE Matrix4x4 operator*=(const Matrix4x4& rhs)
         {
             *this = *this * rhs;

@@ -918,7 +918,7 @@ namespace CE
 			}
 			else if (fieldDeclId == TYPEID(Quat))
 			{
-				field->ForceSetFieldValue<Quat>(instance, Quat(val, 0));
+				field->ForceSetFieldValue<Quat>(instance, Quat(0, val.x, val.y, val.z));
 			}
 			else if (fieldDeclId == TYPEID(Color))
 			{

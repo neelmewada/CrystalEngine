@@ -486,36 +486,59 @@ TEST(Containers, Name)
 
 TEST(Containers, Variant)
 {
-    TEST_BEGIN;
+	TEST_BEGIN;
 
-    // String
-    Variant value = "TestString";
-    EXPECT_TRUE(value.IsOfType<String>());
-    EXPECT_FALSE(value.IsOfType<Name>());
-    EXPECT_FALSE(value.IsPointer());
+	// String
+	Variant value = "TestString";
+	EXPECT_TRUE(value.IsOfType<String>());
+	EXPECT_FALSE(value.IsOfType<Name>());
+	EXPECT_FALSE(value.IsPointer());
 
-    // Name
-    value = TYPENAME(Object);
-    EXPECT_TRUE(value.IsOfType<Name>());
-    EXPECT_FALSE(value.IsOfType<String>());
-    EXPECT_FALSE(value.IsPointer());
+	// Name
+	value = TYPENAME(Object);
+	EXPECT_TRUE(value.IsOfType<Name>());
+	EXPECT_FALSE(value.IsOfType<String>());
+	EXPECT_FALSE(value.IsPointer());
 
-    value = Array<String>{ "Item1", "Item2" };
-    EXPECT_TRUE(value.IsOfType<Array<u8>>());
-    EXPECT_TRUE(value.IsOfType<Array<f32>>());
-    EXPECT_TRUE(value.IsOfType<Array<String>>());
-    EXPECT_EQ(value.GetValue<Array<String>>().GetElementTypeId(), TYPEID(String));
-    EXPECT_EQ(value.GetValue<Array<f32>>().GetElementTypeId(), TYPEID(String));
-    EXPECT_NE(value.GetValue<Array<String>>().GetElementTypeId(), TYPEID(f32));
-    EXPECT_NE(value.GetValue<Array<f32>>().GetElementTypeId(), TYPEID(f32));
+	value = Array<String>{ "Item1", "Item2" };
+	EXPECT_TRUE(value.IsOfType<Array<u8>>());
+	EXPECT_TRUE(value.IsOfType<Array<f32>>());
+	EXPECT_TRUE(value.IsOfType<Array<String>>());
+	EXPECT_EQ(value.GetValue<Array<String>>().GetElementTypeId(), TYPEID(String));
+	EXPECT_EQ(value.GetValue<Array<f32>>().GetElementTypeId(), TYPEID(String));
+	EXPECT_NE(value.GetValue<Array<String>>().GetElementTypeId(), TYPEID(f32));
+	EXPECT_NE(value.GetValue<Array<f32>>().GetElementTypeId(), TYPEID(f32));
 
-    TEST_END;
+	TEST_END;
 }
 
 TEST(Containers, Matrix)
 {
     TEST_BEGIN;
     
+	// Quaternion basics
+	{
+		Quat a = Quat(2, 3, 4, 1);
+		Quat b = Quat(3, 4, 5, 2);
+
+		Quat sum = a + b;
+		EXPECT_EQ(sum, Quat(5, 7, 9, 3));
+
+		Quat diff = b - a;
+		EXPECT_EQ(diff, Quat(1, 1, 1, 1));
+
+		Quat rotator = Quat::EulerDegrees(90, 0, 0);
+
+		Vec4 vec = Vec4(0, 1, 0, 1);
+		Vec4 out = rotator * vec;
+		EXPECT_EQ(out, Vec4(0, 0, 1, 1));
+
+		rotator = Quat::EulerDegrees(90, 0, 0) * rotator;
+		vec = Vec4(0, 1, 0, 1);
+		out = rotator * vec;
+		EXPECT_EQ(out, Vec4(0, -1, 0, 1));
+	}
+
     // Multiplication
     {
         Vec3 pos = Vec3(10, 20, 30);
@@ -540,12 +563,24 @@ TEST(Containers, Matrix)
             { 0, 0, 0, 1  },
         });
         
-        auto rotation = Matrix4x4({
-            { 1, 0, 0, 0 },
-            { 0, 1, 0, 0 },
-            { 0, 0, 1, 0 },
-            { 0, 0, 0, 1 },
-        });
+		Quat quat = Quat::EulerDegrees(0, 90, 0);
+		auto rotation = quat.ToMatrix();
+
+		auto scale = Matrix4x4({
+			{ 2, 0, 0, 0 },
+			{ 0, 2, 0, 0 },
+			{ 0, 0, 2, 0 },
+			{ 0, 0, 0, 1 },
+		});
+
+		Vec3 point = Vec3(1, 0, 0);
+
+		Vec3 out = translation * rotation * scale * point;
+		EXPECT_EQ(out, Vec3(10, 0, -2));
+
+		Matrix4x4 transform = translation * rotation * scale;
+		out = transform * point;
+		EXPECT_EQ(out, Vec3(10, 0, -2));
     }
     
     TEST_END;

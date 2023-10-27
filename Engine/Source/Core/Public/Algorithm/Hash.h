@@ -58,6 +58,12 @@ namespace CE
 	
 	CORE_API SIZE_T GetCombinedHashes(CE::Array<SIZE_T> hashes);
 
+	template<typename... Args>
+	inline SIZE_T GetHashes(const Args&... values)
+	{
+		return GetCombinedHashes({ CE::GetHash<Args>(values)... });
+	}
+
 	DECL_HASH(u8)
 	DECL_HASH(u16)
 	DECL_HASH(u32)

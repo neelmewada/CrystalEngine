@@ -284,7 +284,7 @@ namespace CE
             
             ObjectEntryMetaData& objectEntry = package->objectUuidToEntryMap[objectUuid];
             objectEntry.instanceUuid = objectUuid;
-            objectEntry.isAsset = isAsset > 0 ? true : false;
+            objectEntry.isAsset = isAsset;
             objectEntry.objectClassName = objectTypeName;
             objectEntry.pathInPackage = pathInPackage;
             objectEntry.offsetInFile = dataStartOffset;
