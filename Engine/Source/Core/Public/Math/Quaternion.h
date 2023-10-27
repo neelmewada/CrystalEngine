@@ -50,6 +50,16 @@ namespace CE
 		static Quat EulerRadians(float x, float y, float z);
 		static Matrix4x4 ToMatrix(const Quat& q);
 
+		inline static Quat EulerDegrees(Vec3 euler)
+		{
+			return EulerDegrees(euler.x, euler.y, euler.z);
+		}
+
+		inline static Quat EulerRadians(Vec3 euler)
+		{
+			return EulerRadians(euler.x, euler.y, euler.z);
+		}
+
     public:
 
         union {

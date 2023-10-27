@@ -5,7 +5,7 @@ namespace CE
     CLASS()
 	class SYSTEM_API SceneComponent : public ActorComponent
 	{
-		CE_CLASS(SystemComponent, ActorComponent)
+		CE_CLASS(SceneComponent, ActorComponent)
 	public:
 		SceneComponent();
 
@@ -25,15 +25,19 @@ namespace CE
 
 		inline Vec3 GetLocalScale() const { return localScale; }
 
-		inline void SetLocalPosition(const Vec3& value) { localPosition = value; }
+		inline void SetLocalPosition(const Vec3& value) { localPosition = value; SetDirty(true); }
 
-		inline void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; }
+		inline void SetLocalEulerAngles(const Vec3& value) { localEulerAngles = value; SetDirty(true); }
 
-		inline void SetLocalScale(const Vec3& value) { localScale = value; }
+		inline void SetLocalScale(const Vec3& value) { localScale = value; SetDirty(true); }
 
 		void Tick(f32 delta) override;
 
+		bool IsDirty();
+
 	private:
+
+		void SetDirty(bool set = true);
 
 		FIELD()
 		Array<SceneComponent*> attachedComponents{};
@@ -48,9 +52,18 @@ namespace CE
 		Vec3 localEulerAngles{};
 
 		FIELD(Category = Transform, Display = "Scale")
-		Vec3 localScale{};
+		Vec3 localScale = Vec3(1, 1, 1);
+
+		Quat localRotation = Quat::EulerDegrees(0, 0, 0);
+
+		b8 isDirty = true;
         
         Matrix4x4 transform{};
+		Matrix4x4 localTransform{};
+
+		Matrix4x4 localTranslationMat = Matrix4x4::Identity();
+		Matrix4x4 localRotationMat = Matrix4x4::Identity();
+		Matrix4x4 localScaleMat = Matrix4x4::Identity();
 	};
 
 } // namespace CE

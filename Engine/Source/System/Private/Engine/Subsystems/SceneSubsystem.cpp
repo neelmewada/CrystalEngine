@@ -24,7 +24,7 @@ namespace CE
 	void SceneSubsystem::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
-
+		
 		if (scene != nullptr)
 		{
 			scene->Tick(deltaTime);

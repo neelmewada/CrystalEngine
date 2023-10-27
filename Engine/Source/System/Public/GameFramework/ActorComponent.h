@@ -19,10 +19,14 @@ namespace CE
 
 		virtual void Tick(f32 delta);
 
+		inline Actor* GetActor() const { return owner; }
+
 	protected:
 
 		FIELD()
 		Actor* owner = nullptr;
+
+		friend class Actor;
 	};
 
 } // namespace CE

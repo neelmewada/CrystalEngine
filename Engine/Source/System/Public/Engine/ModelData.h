@@ -65,7 +65,7 @@ namespace CE
 		FIELD()
 		Array<Mesh> lod{};
 
-		static ModelData* GetCubeMesh();
+		static ModelData* GetCubeModel();
 		
 	};
     

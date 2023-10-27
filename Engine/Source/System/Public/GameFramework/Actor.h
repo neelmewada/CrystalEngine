@@ -29,11 +29,19 @@ namespace CE
 		void AttachActor(Actor* actor);
 		void DetachActor(Actor* actor);
 
-		inline Actor* GetParent() const { return parent; }
+		inline Actor* GetParentActor() const { return parent; }
 
 		inline Scene* GetScene() const { return scene; }
 
 		virtual void Tick(f32 delta);
+
+		inline SceneComponent* GetRootComponent() const { return rootComponent; }
+
+		inline void SetLocalPosition(const Vec3& localPos)
+		{
+			if (rootComponent)
+				rootComponent->SetLocalPosition(localPos);
+		}
 
 	protected:
 
@@ -57,6 +65,7 @@ namespace CE
 		Scene* scene = nullptr;
 
 		friend class Scene;
+		friend class SceneComponent;
 	};
 
 } // namespace CE

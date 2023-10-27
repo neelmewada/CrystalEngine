@@ -28,7 +28,7 @@ namespace CE
 
     }
 
-	ModelData* ModelData::GetCubeMesh()
+	ModelData* ModelData::GetCubeModel()
 	{
 		Package* transient = ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
 		ModelData* cubeModel = nullptr;
@@ -38,7 +38,7 @@ namespace CE
 			{
 				if (object != nullptr && object->IsOfType<ModelData>() && object->GetName() == "CubeMesh")
 				{
-					cubeModel = (ModelData*)object;
+					cubeModel = Object::CastTo<ModelData>(object);
 					break;
 				}
 			}

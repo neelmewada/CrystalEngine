@@ -323,6 +323,12 @@ namespace CE::RHI
     };
     ENUM_CLASS_FLAGS(ShaderStage);
 
+	struct ShaderModuleDesc
+	{
+		String name = "";
+		ShaderStage stage = ShaderStage::None;
+
+	};
 
     /*
     *   Graphics Pipeline

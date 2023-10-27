@@ -3,6 +3,7 @@
 namespace CE
 {
     class StaticMesh;
+	class ModelData;
 
     CLASS()
 	class SYSTEM_API StaticMeshComponent : public MeshComponent

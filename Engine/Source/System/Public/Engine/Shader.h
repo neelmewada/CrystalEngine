@@ -52,6 +52,14 @@ namespace CE
 
 	};
 
+	ENUM()
+	enum class ShaderFlags
+	{
+		None = 0,
+		ErrorShader = BIT(0),
+	};
+	ENUM_CLASS_FLAGS(ShaderFlags);
+
 	CLASS()
 	class SYSTEM_API Shader : public Asset
 	{
@@ -61,13 +69,20 @@ namespace CE
 		Shader();
 		virtual ~Shader(); 
 
+		static Shader* GetDebugShader();
+
 	protected:
+
+		FIELD()
+		ShaderFlags shaderFlags = ShaderFlags::None;
 
 		FIELD()
 		Array<ShaderVariant> variants{};
 
 		FIELD()
 		ShaderStage stages = ShaderStage::Default;
+
+		Array<RHI::ShaderModule*> shaderModules{};
 
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::ShaderImportJob;

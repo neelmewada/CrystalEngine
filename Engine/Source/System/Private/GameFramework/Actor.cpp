@@ -44,7 +44,7 @@ namespace CE
 
 		if (rootComponent) // component can be set to nullptr
 		{
-			
+			rootComponent->owner = this;
 		}
 	}
 

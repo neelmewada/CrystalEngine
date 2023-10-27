@@ -38,6 +38,8 @@ namespace CE
 
 		inline void SetMesh(ModelData* modelData) { this->modelData = modelData; }
 
+		static StaticMesh* GetCubeMesh();
+
 	protected:
 
 		FIELD()
