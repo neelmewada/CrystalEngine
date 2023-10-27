@@ -35,7 +35,7 @@ namespace CE
 	void SceneComponent::Tick(f32 delta)
 	{
 		Super::Tick(delta);
-		
+        
 		if (IsDirty())
 		{
 			auto actor = GetActor();

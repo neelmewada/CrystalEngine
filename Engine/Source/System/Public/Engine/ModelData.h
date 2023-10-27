@@ -50,6 +50,11 @@ namespace CE
 		{
 			return vertices.NonEmpty();
 		}
+        
+        FORCE_INLINE u32 GetSubMeshCount() const
+        {
+            return submeshes.GetSize();
+        }
 
 		void Clear();
 

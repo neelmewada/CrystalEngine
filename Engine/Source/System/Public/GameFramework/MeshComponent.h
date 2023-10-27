@@ -11,6 +11,10 @@ namespace CE
 	public:
 
 		MeshComponent();
+        
+        inline u32 GetMaterialCount() const { return materials.GetSize(); }
+        
+        void SetMaterialAt(u32 index, MaterialInterface* material);
 
 	protected:
 

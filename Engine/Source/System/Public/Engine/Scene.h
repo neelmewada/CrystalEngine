@@ -3,6 +3,8 @@
 namespace CE
 {
 	class Actor;
+    class CameraComponent;
+    class StaticMeshComponent;
 
 	CLASS()
 	class SYSTEM_API Scene : public Asset
@@ -35,6 +37,8 @@ namespace CE
 		// - Cache -
 
 		HashMap<UUID, Actor*> actorInstancesByUuid{};
+        HashMap<UUID, CameraComponent*> camerasByUuid{};
+        HashMap<UUID, StaticMeshComponent*> staticMeshComponentsByUuid{};
 
 		friend class Actor;
 		friend class ActorComponent;

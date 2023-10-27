@@ -26,7 +26,7 @@ namespace CE
 		shaderModules.Clear();
 	}
 
-	Shader* Shader::GetDebugShader()
+	Shader* Shader::GetErrorShader()
 	{
 		auto transient = ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
 		if (transient == nullptr)
@@ -45,7 +45,7 @@ namespace CE
 				return Object::CastTo<Shader>(object);
 			}
 		}
-
+        
 		Resource* vertSpv = GetResourceManager()->LoadResource("ErrorShaderVert.spv", transient);
 		Resource* fragSpv = GetResourceManager()->LoadResource("ErrorShaderFrag.spv", transient);
 

@@ -59,6 +59,11 @@ namespace CE
         
 		AttachSubobject(actor);
         
+        if (scene != nullptr)
+        {
+            scene->OnActorChainAttached(actor);
+        }
+        
         std::function<void(Actor*)> recursivelySetScene = [&](Actor* inActor)
         {
             inActor->scene = scene;
@@ -85,6 +90,11 @@ namespace CE
 		actor->scene = nullptr;
         
 		DetachSubobject(actor);
+        
+        if (scene != nullptr)
+        {
+            scene->OnActorChainDetached(actor);
+        }
         
         std::function<void(Actor*)> recursivelyResetScene = [&](Actor* inActor)
         {

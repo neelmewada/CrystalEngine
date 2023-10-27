@@ -64,6 +64,8 @@ namespace CE
 		Matrix4x4 localTranslationMat = Matrix4x4::Identity();
 		Matrix4x4 localRotationMat = Matrix4x4::Identity();
 		Matrix4x4 localScaleMat = Matrix4x4::Identity();
+        
+        friend class Scene;
 	};
 
 } // namespace CE

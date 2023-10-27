@@ -26,7 +26,9 @@ namespace CE
 			meshComponent->SetStaticMesh(cubeStaticMesh);
 
 			meshComponent->SetLocalPosition(Vec3(0, -2, 10));
-			
+            
+            Shader* errorShader = Shader::GetErrorShader();
+            
 		}
 	}
 

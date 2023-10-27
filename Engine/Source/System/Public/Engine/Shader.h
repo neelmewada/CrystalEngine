@@ -69,7 +69,7 @@ namespace CE
 		Shader();
 		virtual ~Shader(); 
 
-		static Shader* GetDebugShader();
+		static Shader* GetErrorShader();
 
 	protected:
 

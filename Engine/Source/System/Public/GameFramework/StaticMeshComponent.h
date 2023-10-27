@@ -15,7 +15,7 @@ namespace CE
 
         inline StaticMesh* GetStaticMesh() const { return staticMesh; }
         
-        inline void SetStaticMesh(StaticMesh* mesh) { this->staticMesh = mesh; }
+        void SetStaticMesh(StaticMesh* mesh);
         
 	protected:
         
