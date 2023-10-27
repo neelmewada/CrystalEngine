@@ -327,7 +327,8 @@ namespace CE::RHI
 	{
 		String name = "";
 		ShaderStage stage = ShaderStage::None;
-
+		void* byteCode = nullptr;
+		SIZE_T byteSize = 0;
 	};
 
     /*

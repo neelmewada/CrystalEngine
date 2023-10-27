@@ -12,6 +12,7 @@
 #include "VulkanSwapChain.h"
 #include "VulkanTexture.h"
 #include "VulkanSampler.h"
+#include "VulkanShaderModule.h"
 
 #include <vulkan/vulkan.h>
 
@@ -427,6 +428,19 @@ namespace CE
 		device->WaitUntilIdle();
         VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
     }
+
+	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDesc& desc)
+	{
+		return new VulkanShaderModule(device, desc);
+	}
+
+	void VulkanRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)
+	{
+		if (shaderModule != nullptr)
+		{
+			delete shaderModule;
+		}
+	}
 
     /******************************************************************************
     *  VulkanFrameBuffer

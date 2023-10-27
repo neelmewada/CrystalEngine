@@ -20,10 +20,25 @@ namespace CE
         
 		virtual void Tick(f32 delta);
 
+	system_internal:
+
+		// - Internal API -
+
+		void OnActorChainAttached(Actor* actor);
+		void OnActorChainDetached(Actor* actor);
+
 	protected:
 
 		FIELD()
 		Actor* root = nullptr;
+
+		// - Cache -
+
+		HashMap<UUID, Actor*> actorInstancesByUuid{};
+
+		friend class Actor;
+		friend class ActorComponent;
+		friend class SceneComponent;
 	};
     
 } // namespace CE

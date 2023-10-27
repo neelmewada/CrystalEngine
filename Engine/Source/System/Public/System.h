@@ -20,6 +20,7 @@
 #include "GameFramework/GeometryComponent.h"
 #include "GameFramework/MeshComponent.h"
 #include "GameFramework/StaticMeshComponent.h"
+#include "GameFramework/CameraComponent.h"
 
 // Actors
 #include "GameFramework/Actor.h"

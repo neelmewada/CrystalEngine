@@ -2,5 +2,10 @@
 
 namespace CE
 {
-    
+
+    CameraComponent::CameraComponent()
+    {
+
+    }
+
 } // namespace CE

@@ -4,6 +4,7 @@ project(System CXX)
 
 ce_add_target(System SHARED
     AUTORTTI
+    RESOURCES
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER 

@@ -94,6 +94,9 @@ namespace CE
         virtual void* AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler) override;
         virtual void RemoveImGuiTexture(void* imguiTexture) override; 
 
+		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc) override;
+		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
+
 		// - Utilities -
 
 		virtual void Blit(RHI::Texture* source, RHI::Texture* destination, RHI::FilterMode filter) override;
