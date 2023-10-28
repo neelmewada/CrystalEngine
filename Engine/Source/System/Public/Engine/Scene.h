@@ -3,6 +3,7 @@
 namespace CE
 {
 	class Actor;
+	class ActorComponent;
     class CameraComponent;
     class StaticMeshComponent;
 
@@ -20,7 +21,11 @@ namespace CE
 			return root;
 		}
         
+		virtual void OnBeginPlay();
+
 		virtual void Tick(f32 delta);
+
+		inline CameraComponent* GetMainCamera() const { return mainCamera; }
 
 	system_internal:
 
@@ -34,15 +39,22 @@ namespace CE
 		FIELD()
 		Actor* root = nullptr;
 
+	private:
+
+		b8 isPlaying = false;
+
 		// - Cache -
 
-		HashMap<UUID, Actor*> actorInstancesByUuid{};
-        HashMap<UUID, CameraComponent*> camerasByUuid{};
-        HashMap<UUID, StaticMeshComponent*> staticMeshComponentsByUuid{};
+		HashMap<UUID, Actor*> actorsByUuid{};
+		HashMap<TypeId, HashMap<UUID, ActorComponent*>> componentsByType{};
+		Array<CameraComponent*> cameras{};
+
+		CameraComponent* mainCamera = nullptr;
 
 		friend class Actor;
 		friend class ActorComponent;
 		friend class SceneComponent;
+		friend class CameraComponent;
 	};
     
 } // namespace CE

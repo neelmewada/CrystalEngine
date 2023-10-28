@@ -5,7 +5,7 @@ namespace CE
 
     StaticMeshComponent::StaticMeshComponent()
     {
-        
+		canTick = true;
     }
 
     void StaticMeshComponent::SetStaticMesh(StaticMesh* mesh)
@@ -13,7 +13,8 @@ namespace CE
         this->staticMesh = mesh;
         Mesh& meshRef = mesh->GetModelData()->lod[0];
         
-        Super::materials.Resize(meshRef.GetSubMeshCount());
+        materials.Resize(meshRef.GetSubMeshCount());
+		
     }
 
 } // namespace CE

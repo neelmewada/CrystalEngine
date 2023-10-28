@@ -8,6 +8,12 @@ namespace CE
 		
     }
 
+	void SceneSubsystem::OnBeginPlay()
+	{
+		if (scene != nullptr)
+			scene->OnBeginPlay();
+	}
+
 	void SceneSubsystem::Initialize()
 	{
 		Super::Initialize();
@@ -18,6 +24,12 @@ namespace CE
 
 	void SceneSubsystem::Shutdown()
 	{
+		if (scene)
+		{
+			scene->Destroy();
+			scene = nullptr;
+		}
+
 		Super::Shutdown();
 	}
 

@@ -31,7 +31,7 @@ ce_add_target(System SHARED
             CE::Core
             CE::CoreMedia
             CE::CoreRHI
-            CE::CoreShader
+            $<${PAL_PLATFORM_IS_DESKTOP}:CE::CoreShader>
             CE::CoreSettings
         TARGETS 
             Config EngineAssets

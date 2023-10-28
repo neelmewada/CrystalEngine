@@ -25,6 +25,8 @@ namespace CE
 			return stage;
 		}
 
+		inline VkShaderModule GetHandle() const { return shaderModule; }
+
 	private:
 
 		Name name = "";

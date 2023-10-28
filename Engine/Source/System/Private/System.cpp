@@ -1,6 +1,7 @@
 
 #include "System.h"
 
+#include "Resource.h"
 
 namespace CE
 {

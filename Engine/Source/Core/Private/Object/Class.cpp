@@ -248,8 +248,6 @@ namespace CE
             if (cachedAttributes.HasKey(name))
             {
 				tableValue[name] = attr;
-				//Attribute& ref = tableValue[name];
-				//ref = attr;
             }
             else
             {
@@ -260,7 +258,6 @@ namespace CE
 
     void StructType::CacheAllFields()
     {
-		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (fieldsCached)
             return;
 

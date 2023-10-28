@@ -335,9 +335,15 @@ namespace CE::RHI
     *   Graphics Pipeline
     */
 
+	class ShaderModule;
+
 	struct GraphicsPipelineDesc
 	{
 		u32 vertexSizeInBytes = 0;
+		RHI::ShaderModule* vertexShader = nullptr;
+		String vertexEntry = "VertMain";
+		RHI::ShaderModule* fragmentShader = nullptr;
+		String fragmentEntry = "FragMain";
 	};
 
 } // namespace CE

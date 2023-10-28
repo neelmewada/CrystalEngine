@@ -5,7 +5,7 @@ namespace CE
 
     SceneComponent::SceneComponent()
     {
-        Matrix4x4::Identity();
+		canTick = true;
     }
 
 	void SceneComponent::SetupAttachment(SceneComponent* component)
@@ -17,9 +17,21 @@ namespace CE
 			CE_LOG(Error, All, "SceneComponent::SetupAttachment called with a scene component that already exists in it's hierarcy");
 			return;
 		}
-        
+
 		component->parentComponent = this;
+		component->owner = this->owner;
 		attachedComponents.Add(component);
+
+		if (HasBegunPlaying() && !component->HasBegunPlaying())
+		{
+			component->OnBeginPlay();
+		}
+
+		if (GetScene() != nullptr)
+		{
+			Scene* scene = GetScene();
+			scene->componentsByType[component->GetTypeId()][component->GetUuid()] = component;
+		}
 	}
 
 	bool SceneComponent::ComponentExists(SceneComponent* component)
@@ -30,6 +42,13 @@ namespace CE
 				return true;
 		}
 		return false;
+	}
+
+	void SceneComponent::OnBeginPlay()
+	{
+		Super::OnBeginPlay();
+
+
 	}
 
 	void SceneComponent::Tick(f32 delta)
@@ -63,6 +82,8 @@ namespace CE
 				while (parent != nullptr)
 				{
 					if (parent->rootComponent != nullptr)
+						break;
+					if (parent->GetParentActor() == nullptr)
 						break;
 					parent = parent->GetParentActor();
 				}

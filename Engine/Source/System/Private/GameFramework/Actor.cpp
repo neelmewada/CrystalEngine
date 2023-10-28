@@ -5,7 +5,7 @@ namespace CE
 
 	Actor::Actor()
 	{
-		rootComponent = nullptr;//CreateDefaultSubobject<SceneComponent>(TEXT("RootComponent"));
+		rootComponent = nullptr;
 	}
 
 	SceneComponent* Actor::SetRootComponent(SubClassType<SceneComponent> componentType, String name)
@@ -109,14 +109,33 @@ namespace CE
         recursivelyResetScene(actor);
 	}
 
-    void Actor::Tick(f32 delta)
+	void Actor::OnBeginPlay()
+	{
+		if (rootComponent)
+			rootComponent->OnBeginPlay();
+
+		for (auto component : attachedComponents)
+		{
+			component->OnBeginPlay();
+		}
+
+		for (auto child : children)
+		{
+			child->OnBeginPlay();
+		}
+
+		hasBegunPlaying = true;
+	}
+
+	void Actor::Tick(f32 delta)
     {
 		if (rootComponent)
 			rootComponent->Tick(delta);
 
 		for (auto component : attachedComponents)
 		{
-			component->Tick(delta);
+			if (component->CanTick())
+				component->Tick(delta);
 		}
 
 		for (auto child : children)

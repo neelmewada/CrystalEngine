@@ -14,6 +14,16 @@ namespace CE
         
 	}
 
+	void Scene::OnBeginPlay()
+	{
+		isPlaying = true;
+
+		if (root != nullptr)
+		{
+			root->OnBeginPlay();
+		}
+	}
+
 	void Scene::Tick(f32 delta)
 	{
 		if (root != nullptr)
@@ -26,16 +36,29 @@ namespace CE
 	{
 		if (!actor)
 			return;
-        
+		
         std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
             if (!sceneComponent)
                 return;
-            
+			
             if (sceneComponent->IsOfType<CameraComponent>())
-                camerasByUuid[sceneComponent->GetUuid()] = (CameraComponent*)sceneComponent;
-            else if (sceneComponent->IsOfType<StaticMeshComponent>())
-                staticMeshComponentsByUuid[sceneComponent->GetUuid()] = (StaticMeshComponent*)sceneComponent;
+			{
+				CameraComponent* camera = (CameraComponent*)sceneComponent;
+				cameras.Add(camera);
+				if (camera->IsMainCamera())
+					mainCamera = camera;
+			}
+
+			auto componentClass = sceneComponent->GetClass();
+			auto componentUuid = sceneComponent->GetUuid();
+
+			while (componentClass->GetTypeId() != TYPEID(Object))
+			{
+				componentsByType[componentClass->GetTypeId()][componentUuid] = sceneComponent;
+
+				componentClass = componentClass->GetSuperClass(0);
+			}
             
             for (auto component : sceneComponent->attachedComponents)
             {
@@ -48,11 +71,25 @@ namespace CE
         {
             if (!add)
                 return;
+
+			add->scene = this;
             
             if (add->rootComponent != nullptr)
                 recursivelyAddSceneComponents(add->rootComponent);
             
-            actorInstancesByUuid[add->GetUuid()] = add;
+			actorsByUuid[add->GetUuid()] = add;
+
+			for (auto component : add->attachedComponents)
+			{
+				auto componentClass = component->GetClass();
+
+				while (componentClass->GetTypeId() != TYPEID(Object))
+				{
+					componentsByType[componentClass->GetTypeId()][component->GetUuid()] = component;
+
+					componentClass = componentClass->GetSuperClass(0);
+				}
+			}
 
             for (auto child : add->children)
             {
@@ -62,6 +99,11 @@ namespace CE
         };
 
 		recursivelyAdd(actor);
+
+		if (isPlaying && !actor->hasBegunPlaying)
+		{
+			actor->OnBeginPlay();
+		}
 	}
 
 	void Scene::OnActorChainDetached(Actor* actor)
@@ -75,9 +117,19 @@ namespace CE
                 return;
             
             if (sceneComponent->IsOfType<CameraComponent>())
-                camerasByUuid.Remove(sceneComponent->GetUuid());
-            else if (sceneComponent->IsOfType<StaticMeshComponent>())
-                staticMeshComponentsByUuid.Remove(sceneComponent->GetUuid());
+			{
+				cameras.Remove((CameraComponent*)sceneComponent);
+			}
+
+			auto componentClass = sceneComponent->GetClass();
+			auto componentUuid = sceneComponent->GetUuid();
+
+			while (componentClass->GetTypeId() != TYPEID(Object))
+			{
+				componentsByType[componentClass->GetTypeId()].Remove(componentUuid);
+
+				componentClass = componentClass->GetSuperClass(0);
+			}
             
             for (auto component : sceneComponent->attachedComponents)
             {
@@ -94,7 +146,22 @@ namespace CE
             if (remove->rootComponent != nullptr)
                 recursivelyRemoveSceneComponents(remove->rootComponent);
             
-            actorInstancesByUuid.Remove(remove->GetUuid());
+			actorsByUuid.Remove(remove->GetUuid());
+
+			for (auto component : remove->attachedComponents)
+			{
+				auto componentClass = component->GetClass();
+				auto componentUuid = component->GetUuid();
+
+				while (componentClass->GetTypeId() != TYPEID(Object))
+				{
+					componentsByType[componentClass->GetTypeId()].Remove(componentUuid);
+
+					componentClass = componentClass->GetSuperClass(0);
+				}
+			}
+
+			remove->scene = nullptr;
 
             for (auto child : remove->children)
             {

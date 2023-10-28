@@ -25,6 +25,7 @@
 // Actors
 #include "GameFramework/Actor.h"
 #include "GameFramework/StaticMeshActor.h"
+#include "GameFramework/CameraActor.h"
 
 // Asset Types
 #include "Engine/TextureDefines.h"

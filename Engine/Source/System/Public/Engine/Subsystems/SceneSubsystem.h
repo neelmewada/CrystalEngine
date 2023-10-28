@@ -14,6 +14,8 @@ namespace CE
 
 		inline Scene* GetActiveScene() { return scene; }
 
+		void OnBeginPlay();
+
 	protected:
 
 		void Initialize() override;

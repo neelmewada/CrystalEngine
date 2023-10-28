@@ -31,9 +31,13 @@ namespace CE
 
 		inline void SetLocalScale(const Vec3& value) { localScale = value; SetDirty(true); }
 
+		void OnBeginPlay() override;
+
 		void Tick(f32 delta) override;
 
 		bool IsDirty();
+
+		inline Matrix4x4 GetTransform() const { return transform; }
 
 	private:
 

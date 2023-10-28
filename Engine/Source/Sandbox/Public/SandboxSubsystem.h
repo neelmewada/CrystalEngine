@@ -11,6 +11,8 @@ namespace CE
 
 	protected:
 
+		void SetupScene(Scene* scene);
+
 		void Initialize() override;
 		void Shutdown() override;
 

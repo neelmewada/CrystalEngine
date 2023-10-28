@@ -16,7 +16,10 @@ namespace CE
 {
 
 	// Forward Declarations
-	
+	class TypeInfo;
+	class ClassType;
+	class StructType;
+	class EnumType;
 
 	// **********************************************************
 	// Variant
@@ -75,6 +78,12 @@ namespace CE
         Variant(Vec2  value) { SetInternalValue(value); }
         Variant(Vec3  value) { SetInternalValue(value); }
         Variant(Vec4  value) { SetInternalValue(value); }
+		Variant(Quat  value) { SetInternalValue(value); }
+		Variant(Color  value) { SetInternalValue(value); }
+
+		Variant(Vec2i value) { SetInternalValue(value); }
+		Variant(Vec3i value) { SetInternalValue(value); }
+		Variant(Vec4i value) { SetInternalValue(value); }
 
         Variant(String value) { Clear(); StringValue = value; valueTypeId = TYPEID(String); }
 
@@ -174,40 +183,40 @@ namespace CE
 			valueTypeId = TYPEID(T);
 		}
 
-		CE_INLINE bool HasValue() const
+		INLINE bool HasValue() const
 		{
 			return valueTypeId > 0;
 		}
 
 		template<typename T>
-		CE_INLINE bool IsOfType() const
+		INLINE bool IsOfType() const
 		{
 			return valueTypeId == TYPEID(T);
 		}
 
-		CE_INLINE TypeId GetValueTypeId() const
+		INLINE TypeId GetValueTypeId() const
 		{
 			return valueTypeId;
 		}
 
-		CE_INLINE bool IsPointer() const
+		INLINE bool IsPointer() const
 		{
 			return isPointer;
 		}
 
-		CE_INLINE bool IsArray() const
+		INLINE bool IsArray() const
 		{
 			return isArray;
 		}
 
 		template<typename T>
-		CE_INLINE bool IsArrayElementOfType() const
+		INLINE bool IsArrayElementOfType() const
 		{
 			return arrayElementTypeId == TYPEID(T);
 		}
 
 		template<typename T>
-		CE_INLINE T GetValue() const
+		INLINE T GetValue() const
 		{
 			if (valueTypeId != GetTypeId<T>())
 			{
@@ -226,7 +235,7 @@ namespace CE
 		}
 
 		template<>
-		CE_INLINE Array<String> GetValue() const
+		INLINE Array<String> GetValue() const
 		{
 			if (valueTypeId != TYPEID(Array<String>))
 			{
@@ -241,7 +250,7 @@ namespace CE
 		}
 
 		template<>
-		CE_INLINE Array<Name> GetValue() const
+		INLINE Array<Name> GetValue() const
 		{
 			if (valueTypeId != TYPEID(Array<Name>))
 			{
@@ -256,7 +265,7 @@ namespace CE
 		}
 
 		template<>
-		CE_INLINE Array<IO::Path> GetValue() const
+		INLINE Array<IO::Path> GetValue() const
 		{
 			if (valueTypeId != TYPEID(Array<IO::Path>))
 			{
@@ -270,13 +279,13 @@ namespace CE
 			return pathArrayValue;
 		}
 
-		CE_INLINE void* GetRawPtrValue() const
+		INLINE void* GetRawPtrValue() const
 		{
 			return PtrValue;
 		}
 
 		template<typename PtrType>
-		CE_INLINE PtrType* TryGetPointerValue() const
+		INLINE PtrType* TryGetPointerValue() const
 		{
 			if (TYPEID(PtrType) != valueTypeId)
 				return nullptr;
@@ -284,7 +293,7 @@ namespace CE
 		}
 
 		template<typename PtrType>
-		CE_INLINE PtrType* GetPointerValue() const
+		INLINE PtrType* GetPointerValue() const
 		{
 			return (PtrType*)PtrValue;
 		}
@@ -292,7 +301,7 @@ namespace CE
 	private:
 
 		template<typename T>
-		CE_INLINE void SetInternalValue(const T& value)
+		INLINE void SetInternalValue(const T& value)
 		{
 			memset(this, 0, sizeof(Variant)); // Initialze memory to 0
 			valueTypeId = TYPEID(T);
@@ -325,6 +334,13 @@ namespace CE
             Vec2   Vec2Value;
             Vec3   Vec3Value;
             Vec4   Vec4Value;
+			Quat   QuatValue;
+
+			Color  ColorValue;
+
+			Vec2i  Vec2iValue;
+			Vec3i  Vec3iValue;
+			Vec4i  Vec4iValue;
 
 			IO::Path pathValue;
 			CE::Name nameValue;

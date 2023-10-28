@@ -33,6 +33,8 @@ namespace CE
 
 		inline Scene* GetScene() const { return scene; }
 
+		virtual void OnBeginPlay();
+
 		virtual void Tick(f32 delta);
 
 		inline SceneComponent* GetRootComponent() const { return rootComponent; }
@@ -63,6 +65,8 @@ namespace CE
 
 		FIELD()
 		Scene* scene = nullptr;
+
+		b8 hasBegunPlaying = false;
 
 		friend class Scene;
 		friend class SceneComponent;

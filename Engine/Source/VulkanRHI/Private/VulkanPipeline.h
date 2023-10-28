@@ -24,6 +24,7 @@ namespace CE
 
 	protected:
 
+		void Create(const RHI::GraphicsPipelineDesc& desc);
 		
 	};
     

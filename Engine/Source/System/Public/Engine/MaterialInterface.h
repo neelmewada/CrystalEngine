@@ -20,6 +20,8 @@ namespace CE
 
 		FIELD()
 		Shader* shader = nullptr;
+
+		Shader* errorShader = nullptr;
 	};
     
 } // namespace CE

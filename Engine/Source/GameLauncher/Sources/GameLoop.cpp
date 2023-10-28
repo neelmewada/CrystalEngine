@@ -160,6 +160,11 @@ void GameLoop::PostInit()
 
 void GameLoop::RunLoop()
 {
+	SceneSubsystem* sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+
+	if (sceneSubsystem)
+		sceneSubsystem->OnBeginPlay();
+
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
@@ -170,8 +175,19 @@ void GameLoop::RunLoop()
 		// - Engine -
 		gEngine->Tick(deltaTime);
 
+		if (!sceneSubsystem)
+			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+
 		// - Render -
-		viewport->SetClearColor(Color::Cyan());
+		viewport->SetClearColor(Color::Black());
+		if (sceneSubsystem && sceneSubsystem->GetActiveScene() != nullptr)
+		{
+			CameraComponent* mainCamera = sceneSubsystem->GetActiveScene()->GetMainCamera();
+			if (mainCamera != nullptr)
+			{
+				viewport->SetClearColor(mainCamera->GetClearColor());
+			}
+		}
 
 		cmdList->Begin();
 
