@@ -22,9 +22,9 @@ namespace CE
 	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, ShaderReflection& outReflection)
 	{
 		spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)byteCode, byteSize / 4);
-		defer {
+		defer(
 			delete reflection;
-		};
+		);
 
 		outReflection = ShaderReflection();
 		

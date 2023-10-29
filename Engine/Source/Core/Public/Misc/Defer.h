@@ -1,6 +1,6 @@
 #pragma once
 
-#define defer CE::DeferImpl CE_CONCATENATE(__defer_, __LINE__) = [&]
+#define defer(x) CE::DeferImpl CE_CONCATENATE(__defer_, __LINE__) = [&]{ x; }
 
 namespace CE
 {

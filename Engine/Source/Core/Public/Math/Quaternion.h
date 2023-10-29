@@ -2,8 +2,6 @@
 
 #include "Types/CoreTypeDefs.h"
 
-#include "quat_external.h"
-
 namespace CE
 {
 	class Matrix4x4;

@@ -279,6 +279,10 @@ namespace CE
 
 		VulkanShaderResourceGroup(VulkanDevice* device);
 
+    private:
+        
+        VulkanDevice* device = nullptr;
+        VkDescriptorSet descriptorSet = nullptr;
 	};
 
 } // namespace CE

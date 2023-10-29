@@ -14,7 +14,6 @@ namespace CE
         Mesh& meshRef = mesh->GetModelData()->lod[0];
         
         materials.Resize(meshRef.GetSubMeshCount());
-		
     }
 
 } // namespace CE

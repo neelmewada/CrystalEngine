@@ -744,9 +744,9 @@ namespace CE
 	*	Vulkan Shader Resources
 	*/
 
-	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device)
+	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device) : device(device)
 	{
-
+        
 	}
 
 } // namespace CE

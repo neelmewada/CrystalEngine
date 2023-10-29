@@ -173,9 +173,9 @@ namespace CE
 			IID_PPV_ARGS(&results)  // Compiler output status, buffer, and errors.
 		);
 		
-		defer {
+		defer(
 			results.Release();
-		};
+		);
 
 		results->GetStatus(&status);
 
