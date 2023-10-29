@@ -71,6 +71,10 @@ namespace CE
 
 		static Shader* GetErrorShader();
 
+		inline const ShaderVariant& GetVariant(u32 index) const { return variants[index]; }
+
+		const Array<RHI::ShaderModule*>& GetShaderModules();
+
 	protected:
 
 		FIELD()

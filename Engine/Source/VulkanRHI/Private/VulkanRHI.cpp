@@ -13,6 +13,7 @@
 #include "VulkanTexture.h"
 #include "VulkanSampler.h"
 #include "VulkanShaderModule.h"
+#include "VulkanPipeline.h"
 
 #include <vulkan/vulkan.h>
 
@@ -235,7 +236,7 @@ namespace CE
     {
         if (renderTarget->IsViewportRenderTarget())
         {
-            auto vulkanViewport = ((VulkanRenderTarget*)renderTarget)->GetViewport();
+            auto vulkanViewport = ((VulkanRenderTarget*)renderTarget)->GetVulkanViewport();
             return CreateGraphicsCommandList(vulkanViewport);
         }
 
@@ -436,10 +437,17 @@ namespace CE
 
 	void VulkanRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)
 	{
-		if (shaderModule != nullptr)
-		{
-			delete shaderModule;
-		}
+		delete shaderModule;
+	}
+
+	RHI::GraphicsPipelineState* VulkanRHI::CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
+	{
+		return new VulkanGraphicsPipeline(device, (VulkanRenderTarget*)renderTarget, desc);
+	}
+
+	void VulkanRHI::DestroyPipelineState(RHI::IPipelineState* pipelineState)
+	{
+		delete pipelineState;
 	}
 
     /******************************************************************************
@@ -549,7 +557,7 @@ namespace CE
     {
         if (renderTarget->IsViewportRenderTarget())
         {
-            auto viewport = renderTarget->GetViewport();
+            auto viewport = renderTarget->GetVulkanViewport();
 
             this->renderTarget = (VulkanRenderTarget*)viewport->GetRenderTarget();
             this->numCommandBuffers = viewport->GetBackBufferCount();

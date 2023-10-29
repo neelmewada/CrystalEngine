@@ -337,13 +337,45 @@ namespace CE::RHI
 
 	class ShaderModule;
 
+	struct ShaderStageDesc
+	{
+		RHI::ShaderModule* shaderModule = nullptr;
+		RHI::ShaderStage stage = RHI::ShaderStage::None;
+		String entry = "";
+	};
+
+	struct VertexAttribDesc
+	{
+		u32 location = 0;
+		TypeId dataType = 0;
+		u32 offset = 0;
+	};
+
+	enum CullMode
+	{
+		CULL_MODE_NONE = 0,
+		CULL_MODE_BACK,
+		CULL_MODE_FRONT,
+		CULL_MODE_ALL
+	};
+
 	struct GraphicsPipelineDesc
 	{
 		u32 vertexSizeInBytes = 0;
+		Array<VertexAttribDesc> vertexAttribs{};
+
 		RHI::ShaderModule* vertexShader = nullptr;
 		String vertexEntry = "VertMain";
 		RHI::ShaderModule* fragmentShader = nullptr;
 		String fragmentEntry = "FragMain";
+		Array<ShaderStageDesc> otherStages{};
+
+		CullMode cullMode = CULL_MODE_BACK;
+	};
+
+	struct CORERHI_API GraphicsPipelineBuilder
+	{
+
 	};
 
 } // namespace CE

@@ -21,7 +21,8 @@ namespace CE
 		FIELD()
 		Shader* shader = nullptr;
 
-		Shader* errorShader = nullptr;
+
+		RHI::GraphicsPipelineState* pipelineState = nullptr;
 	};
     
 } // namespace CE

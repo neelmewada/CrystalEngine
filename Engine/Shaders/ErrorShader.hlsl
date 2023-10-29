@@ -21,17 +21,9 @@ struct ModelData
     float4x4 modelMatrix;
 };
 
-struct MaterialData
-{
-    float4 albedo;
-    Texture2D albedoTex;
-};
-
 ConstantBuffer<PerViewData> _PerViewData : register(b0, space0);
 
 ConstantBuffer<ModelData> _Model : register(b0, space1);
-
-ConstantBuffer<MaterialData> _MaterialData : register(b0, space3);
 
 // vertex shader function
 v2f VertMain(VertexInfo input)

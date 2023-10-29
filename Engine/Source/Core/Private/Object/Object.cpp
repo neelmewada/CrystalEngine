@@ -662,6 +662,9 @@ namespace CE
 
 		std::function<void(Object*, Object*)> fetchSubobjects = [&](Object* src, Object* dst)
 			{
+				if (src == nullptr || dst == nullptr)
+					return;
+
                 if (src != nullptr && dst != nullptr)
                     originalToCloneMap[src->GetUuid()] = dst;
                 
@@ -672,8 +675,6 @@ namespace CE
 					Object* dstObject = dst->attachedObjects.FindObject(srcObject->GetName(), srcObject->GetClass());
 					if (dstObject == nullptr)
 						continue;
-
-					//originalToCloneMap[srcObject->GetUuid()] = dstObject;
 
 					fetchSubobjects(srcObject, dstObject);
 				}
@@ -759,9 +760,10 @@ namespace CE
 			else if (field->IsObjectField()) // Deep copy object fields
 			{
 				Object* objectToCopy = field->GetFieldValue<Object*>(templateObject);
+				
 				if (objectToCopy == nullptr)
 				{
-					destField->SetFieldValue<Object*>(this, nullptr);
+					//destField->SetFieldValue<Object*>(this, nullptr);
 				}
 				else
 				{
@@ -879,7 +881,7 @@ namespace CE
 
 			if (original == nullptr)
 			{
-				dstField->SetFieldValue<Object*>(dstInstance, nullptr);
+				//dstField->SetFieldValue<Object*>(dstInstance, nullptr);
 			}
 			else
 			{

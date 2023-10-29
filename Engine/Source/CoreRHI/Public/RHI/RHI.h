@@ -81,6 +81,11 @@ namespace CE::RHI
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc) = 0;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) = 0;
 
+		// - Pipeline State -
+
+		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc) = 0;
+		virtual void DestroyPipelineState(IPipelineState* pipelineState) = 0;
+
 		// - Utilities -
 
 		virtual void Blit(Texture* source, Texture* destination, FilterMode filter) = 0;
@@ -103,6 +108,8 @@ namespace CE::RHI
 
     };
 
+	class Viewport;
+
     /// A render target that is drawn to by GPU. It is automatically created for you in case of Viewport.
     class CORERHI_API RenderTarget : public Resource
     {
@@ -115,6 +122,8 @@ namespace CE::RHI
         // - Public API -
 
         virtual bool IsViewportRenderTarget() = 0;
+
+		virtual RHI::Viewport* GetRenderTargetViewport() = 0;
 
         virtual RenderPass* GetRenderPass() = 0;
 

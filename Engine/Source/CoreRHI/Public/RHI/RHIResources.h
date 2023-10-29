@@ -123,27 +123,29 @@ namespace CE::RHI
     *   Pipeline
     */
 
-    class CORERHI_API PipelineState : public Resource
+	class IPipelineState
+	{
+	public:
+
+		virtual ~IPipelineState() {}
+
+		virtual bool IsGraphicsPipelineState() = 0;
+		virtual bool IsComputePipelineState() = 0;
+
+		virtual void* GetNativeHandle() = 0;
+
+	};
+
+    class CORERHI_API GraphicsPipelineState : public Resource, public IPipelineState
     {
     protected:
-        PipelineState(ResourceType type) : Resource(type)
+		GraphicsPipelineState() : Resource(ResourceType::GraphicsPipelineState)
         {}
 
     public:
-        virtual ~PipelineState() = default;
+        virtual ~GraphicsPipelineState() = default;
 
         // - Public API -
-
-        virtual bool IsGraphicsPipelineState() 
-        {
-            return GetResourceType() == ResourceType::GraphicsPipelineState; 
-        }
-
-        virtual bool IsComputePipelineState()
-        {
-            return GetResourceType() == ResourceType::ComputePipelineState;
-        }
-
 
     };
     

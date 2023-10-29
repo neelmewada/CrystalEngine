@@ -5,6 +5,7 @@ namespace CE
 	class AssetManager;
 	class GameInstance;
 	class EngineSubsystem;
+	class GameViewport;
 
 	CLASS(Abstract, NonSerialized, Config = Engine)
 	class SYSTEM_API Engine : public Object
@@ -65,6 +66,10 @@ namespace CE
 		SharedMutex mainThreadQueueMutex{};
 
 		b8 isInitialized = false;
+
+		RHI::Viewport* mainViewport = nullptr;
+
+		GameViewport* primaryViewport = nullptr;
 
 	system_internal:
 		static Array<ClassType*> subsystemClassQueue;

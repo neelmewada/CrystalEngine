@@ -129,7 +129,7 @@ namespace CE
 
 	void Actor::Tick(f32 delta)
     {
-		if (rootComponent)
+		if (rootComponent && rootComponent->CanTick())
 			rootComponent->Tick(delta);
 
 		for (auto component : attachedComponents)

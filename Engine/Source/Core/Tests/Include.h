@@ -225,10 +225,19 @@ namespace CDITests
 
 			subobject->data.another = nullptr;
 			subobject->data.testObject = this;
+			
+			if (!IsDefaultInstance()) // Not a CDI
+			{
+				another = CreateDefaultSubobject<AnotherObject>("AnotherSubobject");
+				another->myString = "modified manually";
+			}
 		}
 
 		FIELD()
 		AnotherObject* subobject = nullptr;
+
+		FIELD()
+		AnotherObject* another = nullptr;
 
 		FIELD()
 		Object* transient = nullptr;
@@ -367,7 +376,8 @@ CE_RTTI_CLASS(, CDITests, TestObject,
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
-        CE_FIELD(subobject)
+		CE_FIELD(subobject)
+		CE_FIELD(another)
         CE_FIELD(transient)
     ),
     CE_FUNCTION_LIST(

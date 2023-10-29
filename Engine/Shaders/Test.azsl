@@ -1,0 +1,55 @@
+ShaderResourceGroupSemantic SRG_PerDraw
+{
+    FrequencyId = 0;
+}
+ShaderResourceGroupSemantic SRG_PerObject
+{
+    FrequencyId = 1;
+}
+
+ShaderResourceGroup PerObject : SRG_PerObject
+{
+    row_major float4x4 m_modelToWorld;
+
+    float4x4 GetWorldMatrix()
+    {
+        float4x4 modelToWorld = float4x4(
+            float4(1, 0, 0, 0),
+            float4(0, 1, 0, 0),
+            float4(0, 0, 1, 0),
+            float4(0, 0, 0, 1));
+
+        modelToWorld[0] = m_modelToWorld[0];
+        modelToWorld[1] = m_modelToWorld[1];
+        modelToWorld[2] = m_modelToWorld[2];
+        return modelToWorld;
+    }
+    
+}
+
+struct VertexInput
+{
+    float3 m_position;
+
+};
+
+struct VertexOutput
+{
+    float2 m_position : POSITION;
+    float2 m_uv : TEXCOORD0;
+};
+
+VertexOutput MainVS(VertexInput input)
+{
+    const float4x4 worldMatrix = PerObject::GetWorldMatrix();
+
+    VertexOutput output;
+    float3 worldPosition = mul(worldMatrix, float4(input.m_position,1)).xyz;
+    output.m_position = mul(GetView_ViewProjectionMatrix(), float4(worldPosition, 1.0));
+
+    output.m_uv = input.m_uv;
+
+    return output;
+}
+
+

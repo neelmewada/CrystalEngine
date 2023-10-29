@@ -1451,6 +1451,7 @@ TEST(Object, CDI2)
 		EXPECT_EQ(testCDI->subobject->data.stringArray[0], "test0");
 		EXPECT_EQ(testCDI->subobject->data.stringArray[1], "test1");
 		EXPECT_EQ(testCDI->subobject->data.another, nullptr);
+		EXPECT_EQ(testCDI->another, nullptr);
 
 		EXPECT_EQ(anotherCDI->data.stringArray.GetSize(), 3);
 		EXPECT_EQ(anotherCDI->data.stringArray[0], "another0");
@@ -1479,6 +1480,7 @@ TEST(Object, CDI2)
 		EXPECT_EQ(test->transient, testCDI->transient);
         EXPECT_EQ(test->transient, ModuleManager::Get().GetLoadedModuleTransientPackage("Core"));
 		EXPECT_EQ(test->subobject->data.another, test->subobject);
+		EXPECT_NE(test->another, nullptr);
 
 		anotherCDI->test = test;
         anotherCDI->myString = "modified anotherCDI";

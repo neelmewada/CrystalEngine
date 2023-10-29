@@ -14,6 +14,9 @@ namespace CE
 		virtual bool ShouldBeCreated(Object* outer) { return true; }
 
 		virtual void Initialize();
+		virtual void PostInitialize();
+
+		virtual void PreShutdown();
 		virtual void Shutdown();
 
 		virtual void Tick(float deltaTime);

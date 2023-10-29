@@ -25,6 +25,11 @@ namespace CE
 			subsystem->Initialize();
 		}
 
+		for (auto subsystem : engineSubsystems)
+		{
+			subsystem->PostInitialize();
+		}
+
 		isInitialized = true;
 	}
 
@@ -39,6 +44,8 @@ namespace CE
 		isInitialized = false;
 
 		// Shutdown Engine Subsystems
+		for (auto subsystem : engineSubsystems) // Shutdown
+			subsystem->PreShutdown();
 		for (auto subsystem : engineSubsystems) // Shutdown
 			subsystem->Shutdown();
 		for (auto subsystem : engineSubsystems) // Destroy

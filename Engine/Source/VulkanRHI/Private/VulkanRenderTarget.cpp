@@ -276,6 +276,7 @@ namespace CE
         this->simultaneousFrameDraws = rtLayout.simultaneousFrameDraws;
         this->width = rtLayout.width;
         this->height = rtLayout.height;
+		this->viewport = nullptr;
 
         // Create render pass
         renderPass = new VulkanRenderPass(device, rtLayout);

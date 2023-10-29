@@ -5,7 +5,7 @@
 namespace CE
 {
 
-    class VulkanPipeline
+    class VulkanPipeline : public RHI::IPipelineState
     {
     public:
         VulkanPipeline(VulkanDevice* device);
@@ -14,18 +14,35 @@ namespace CE
     protected:
         VulkanDevice* device = nullptr;
 		VkPipeline pipeline = nullptr;
+		VkPipelineLayout pipelineLayout = nullptr;
+
+		List<VkDescriptorSetLayout> setLayouts{};
     };
 
-	class VulkanGraphicsPipeline : public VulkanPipeline
+
+	class VulkanGraphicsPipeline : public VulkanPipeline, public RHI::GraphicsPipelineState
 	{
 	public:
-		VulkanGraphicsPipeline(VulkanDevice* device, const RHI::GraphicsPipelineDesc& desc);
+		VulkanGraphicsPipeline(VulkanDevice* device, VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc);
 		virtual ~VulkanGraphicsPipeline();
+
+		bool IsGraphicsPipelineState() override final
+		{
+			return true;
+		}
+
+		bool IsComputePipelineState() override final
+		{
+			return false;
+		}
+
+		void* GetNativeHandle() override { return pipeline; }
 
 	protected:
 
-		void Create(const RHI::GraphicsPipelineDesc& desc);
+		void Create(VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc);
 		
+		void Destroy();
 	};
     
 } // namespace CE::Editor

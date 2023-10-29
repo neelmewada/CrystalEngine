@@ -13,6 +13,16 @@ namespace CE
 
 	}
 
+	void Subsystem::PostInitialize()
+	{
+		
+	}
+
+	void Subsystem::PreShutdown()
+	{
+
+	}
+
 	void Subsystem::Shutdown()
 	{
 

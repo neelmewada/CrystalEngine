@@ -149,6 +149,9 @@ void GameLoop::PostInit()
 
 	viewport = RHI::gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
 
+	GameViewport* gameViewport = CreateObject<GameViewport>(gEngine, "GameViewport");
+	gameViewport->Initialize(viewport->GetRenderTarget());
+
 	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 	
 	// Load game code

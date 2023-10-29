@@ -2,7 +2,7 @@ Shader "Test Shader"
 {
     Properties 
     {
-        _Material ("Material") = {
+        _Material ("Material", auto) = {
             albedo ("Albedo", Vector) = 0
             albedoTex ("Albedo Texture", 2D) = "black"
             roughness ("Roughness", Float) = 0
@@ -47,7 +47,7 @@ Shader "Test Shader"
 
             void VertMain()
             {
-
+                
             }
 
             ENDHLSL

@@ -114,6 +114,8 @@ namespace CE
 
         virtual bool IsViewportRenderTarget() override { return isViewportRenderTarget; }
 
+		virtual RHI::Viewport* GetRenderTargetViewport() override { return viewport; }
+
         virtual RHI::RenderPass* GetRenderPass() override;
 
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) override;
@@ -132,7 +134,7 @@ namespace CE
 
         CE_INLINE VulkanRenderPass* GetVulkanRenderPass() { return renderPass; }
 
-        CE_INLINE VulkanViewport* GetViewport() { return viewport; }
+        CE_INLINE VulkanViewport* GetVulkanViewport() { return viewport; }
 
         VkRenderPass GetVulkanRenderPassHandle() const;
 
@@ -191,6 +193,7 @@ namespace CE
         friend class VulkanGraphicsCommandList;
         friend class VulkanFrameBuffer;
         friend class VulkanRHI;
+		friend class VulkanGraphicsPipeline;
     };
 
     /*

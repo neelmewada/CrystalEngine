@@ -10,7 +10,13 @@ namespace CE
 
 		Material();
 
+		static Material* GetErrorMaterial();
+
+		
+
 	protected:
+
+		void CreateGraphicsPipeline();
 
 	};
     
