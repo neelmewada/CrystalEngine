@@ -6,7 +6,7 @@
 namespace CE
 {
 
-    VulkanPipeline::VulkanPipeline(VulkanDevice* device)
+    VulkanPipeline::VulkanPipeline(VulkanDevice* device) : device(device)
     {
         
     }
@@ -213,6 +213,22 @@ namespace CE
 		
 		pipelineCI.pColorBlendState = &colorBlending;
 
+		// - Depth Stencil -
+
+		VkPipelineDepthStencilStateCreateInfo depthStencilCI{};
+		depthStencilCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencilCI.depthTestEnable = VK_TRUE;
+		depthStencilCI.depthWriteEnable = VK_TRUE;
+		depthStencilCI.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencilCI.depthBoundsTestEnable = VK_FALSE;
+		depthStencilCI.minDepthBounds = 0.0f;
+		depthStencilCI.maxDepthBounds = 1.0f;
+		depthStencilCI.stencilTestEnable = VK_FALSE;
+		depthStencilCI.front = {};
+		depthStencilCI.back = {};
+
+		pipelineCI.pDepthStencilState = &depthStencilCI;
+
 		// - Render Pass -
 
 		pipelineCI.renderPass = renderTarget->renderPass->GetHandle();
@@ -226,13 +242,16 @@ namespace CE
 
 		// Set 0
 		{
-			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
-			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			
 			VkDescriptorSetLayoutBinding binding{};
 			binding.binding = 0;
 			binding.descriptorCount = 1;
 			binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			setLayoutCI.bindingCount = 1;
+			setLayoutCI.pBindings = &binding;
 			
 			auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayouts[0]);
 			if (result != VK_SUCCESS)
@@ -244,13 +263,16 @@ namespace CE
 
 		// Set 1
 		{
-			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
-			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-
 			VkDescriptorSetLayoutBinding binding{};
 			binding.binding = 0;
 			binding.descriptorCount = 1;
 			binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			setLayoutCI.bindingCount = 1;
+			setLayoutCI.pBindings = &binding;
 
 			result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayouts[1]);
 			if (result != VK_SUCCESS)
@@ -269,6 +291,10 @@ namespace CE
 			CE_LOG(Error, All, "Failed to create Vulkan Pipeline Layout. Error code {}", (int)result);
 			return;
 		}
+
+		pipelineCI.layout = pipelineLayout;
+		pipelineCI.basePipelineHandle = VK_NULL_HANDLE;
+		pipelineCI.basePipelineIndex = -1;
 
 		// - END -
 		

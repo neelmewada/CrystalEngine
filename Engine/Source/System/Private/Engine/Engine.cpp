@@ -25,12 +25,15 @@ namespace CE
 			subsystem->Initialize();
 		}
 
+		isInitialized = true;
+	}
+
+	void Engine::PostInitialize()
+	{
 		for (auto subsystem : engineSubsystems)
 		{
 			subsystem->PostInitialize();
 		}
-
-		isInitialized = true;
 	}
 
 	void Engine::PreShutdown()
@@ -101,6 +104,11 @@ namespace CE
 		}
 
 		return nullptr;
+	}
+
+	void Engine::SetPrimaryGameViewport(GameViewport* gameViewport)
+	{
+		this->primaryViewport = gameViewport;
 	}
 
 	EngineSubsystem* Engine::CreateSubsystem(ClassType* type)

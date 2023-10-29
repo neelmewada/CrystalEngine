@@ -91,6 +91,7 @@ namespace CE
 
     class VulkanRenderPass;
 	class VulkanSampler;
+	class Viewport;
 
     struct VulkanFrame
     {
@@ -114,7 +115,7 @@ namespace CE
 
         virtual bool IsViewportRenderTarget() override { return isViewportRenderTarget; }
 
-		virtual RHI::Viewport* GetRenderTargetViewport() override { return viewport; }
+		virtual RHI::Viewport* GetRenderTargetViewport() override;
 
         virtual RHI::RenderPass* GetRenderPass() override;
 
@@ -142,9 +143,9 @@ namespace CE
 
         u32 GetSimultaneousFrameDrawCount();
 
-        u32 GetWidth();
+        virtual u32 GetWidth() override;
 
-        u32 GetHeight();
+        virtual u32 GetHeight() override;
 
         u32 GetColorAttachmentCount()
         {
@@ -267,5 +268,17 @@ namespace CE
         friend class VulkanRHI;
 
     };
+
+	/*
+	*	Shader Resources
+	*/
+
+	class VulkanShaderResourceGroup : public RHI::ShaderResourceGroup
+	{
+	public:
+
+		VulkanShaderResourceGroup(VulkanDevice* device);
+
+	};
 
 } // namespace CE

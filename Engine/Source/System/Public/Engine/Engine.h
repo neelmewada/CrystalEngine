@@ -16,6 +16,7 @@ namespace CE
 
 		virtual void PreInit();
 		virtual void Initialize();
+		virtual void PostInitialize();
 
 		virtual void PreShutdown();
 		virtual void Shutdown();
@@ -37,6 +38,10 @@ namespace CE
 		{
 			return (TSubsystem*)GetSubsystem(TSubsystem::StaticType());
 		}
+
+		void SetPrimaryGameViewport(GameViewport* gameViewport);
+
+		inline GameViewport* GetPrimaryGameViewport() const { return primaryViewport; }
 
 	system_internal:
 
@@ -66,8 +71,6 @@ namespace CE
 		SharedMutex mainThreadQueueMutex{};
 
 		b8 isInitialized = false;
-
-		RHI::Viewport* mainViewport = nullptr;
 
 		GameViewport* primaryViewport = nullptr;
 

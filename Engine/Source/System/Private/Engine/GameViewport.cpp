@@ -12,4 +12,9 @@ namespace CE
 		this->renderTarget = renderTarget;
 	}
 
+	void GameViewport::Shutdown()
+	{
+
+	}
+
 } // namespace CE

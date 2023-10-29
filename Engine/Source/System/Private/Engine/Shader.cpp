@@ -46,8 +46,8 @@ namespace CE
 			}
 		}
         
-		Resource* vertSpv = GetResourceManager()->LoadResource("ErrorShaderVert.spv", transient);
-		Resource* fragSpv = GetResourceManager()->LoadResource("ErrorShaderFrag.spv", transient);
+		Resource* vertSpv = GetResourceManager()->LoadResource("/System/Resources/ErrorShaderVert.spv", transient);
+		Resource* fragSpv = GetResourceManager()->LoadResource("/System/Resources/ErrorShaderFrag.spv", transient);
 
 		Shader* shader = CreateObject<Shader>(transient, "ErrorShader", OF_Transient);
 		shader->variants.Resize(1);
@@ -67,13 +67,15 @@ namespace CE
 		if (shaderModules.IsEmpty() && variants.NonEmpty())
 		{
 			RHI::ShaderModuleDesc vertDesc{};
+			vertDesc.stage = RHI::ShaderStage::Vertex;
 			vertDesc.byteCode = variants[0].vertexShader.source.GetDataPtr();
 			vertDesc.byteSize = variants[0].vertexShader.source.GetDataSize();
 			auto vertShaderModule = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
 
 			RHI::ShaderModuleDesc fragDesc{};
-			fragDesc.byteCode = variants[0].vertexShader.source.GetDataPtr();
-			fragDesc.byteSize = variants[0].vertexShader.source.GetDataSize();
+			fragDesc.stage = RHI::ShaderStage::Fragment;
+			fragDesc.byteCode = variants[0].fragmentShader.source.GetDataPtr();
+			fragDesc.byteSize = variants[0].fragmentShader.source.GetDataSize();
 			auto fragShaderModule = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
 
 			shaderModules.Add(vertShaderModule);

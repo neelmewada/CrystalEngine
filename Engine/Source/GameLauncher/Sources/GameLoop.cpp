@@ -149,6 +149,7 @@ void GameLoop::PostInit()
 
 	viewport = RHI::gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
 
+	// Create GameViewport
 	GameViewport* gameViewport = CreateObject<GameViewport>(gEngine, "GameViewport");
 	gameViewport->Initialize(viewport->GetRenderTarget());
 
@@ -157,8 +158,13 @@ void GameLoop::PostInit()
 	// Load game code
 	ModuleManager::Get().LoadModule("Sandbox");
 
-	// Initialize engine & it's subsystems
+	// Initialize engine & it's subsystems, and set game viewport
 	gEngine->Initialize();
+
+	gEngine->SetPrimaryGameViewport(gameViewport);
+
+	// Post initialize
+	gEngine->PostInitialize();
 }
 
 void GameLoop::RunLoop()
@@ -213,6 +219,8 @@ void GameLoop::PreShutdown()
 
 	gEngine->PreShutdown();
 
+	gEngine->GetPrimaryGameViewport()->Shutdown();
+
 	gEngine->Shutdown();
 
 	ModuleManager::Get().UnloadModule("Sandbox");
@@ -227,6 +235,9 @@ void GameLoop::PreShutdown()
 	AppPreShutdown();
 
 	RHI::gDynamicRHI->Shutdown();
+
+	delete RHI::gDynamicRHI;
+	RHI::gDynamicRHI = nullptr;
 
 	ModuleManager::Get().UnloadModule("VulkanRHI");
 	ModuleManager::Get().UnloadModule("CoreRHI");

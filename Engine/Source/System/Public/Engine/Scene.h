@@ -55,6 +55,7 @@ namespace CE
 		friend class ActorComponent;
 		friend class SceneComponent;
 		friend class CameraComponent;
+		friend class RendererSubsystem;
 	};
     
 } // namespace CE

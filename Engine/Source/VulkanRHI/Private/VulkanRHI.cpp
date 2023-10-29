@@ -740,4 +740,13 @@ namespace CE
         renderFinishedSemaphore.Clear();
     }
 
+	/*
+	*	Vulkan Shader Resources
+	*/
+
+	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device)
+	{
+
+	}
+
 } // namespace CE

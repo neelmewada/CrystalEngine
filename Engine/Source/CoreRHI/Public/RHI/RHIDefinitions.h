@@ -21,6 +21,7 @@ namespace CE::RHI
         ShaderModule,
         ComputePipelineState,
         GraphicsPipelineState,
+		ShaderResourceGroup,
 
         RenderTarget,
         RenderPass,

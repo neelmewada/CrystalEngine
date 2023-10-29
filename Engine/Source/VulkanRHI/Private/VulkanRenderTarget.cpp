@@ -312,7 +312,12 @@ namespace CE
         delete renderPass;
     }
 
-    RHI::RenderPass* VulkanRenderTarget::GetRenderPass()
+	RHI::Viewport* VulkanRenderTarget::GetRenderTargetViewport()
+	{
+		return viewport;
+	}
+
+	RHI::RenderPass* VulkanRenderTarget::GetRenderPass()
     {
         return renderPass;
     }

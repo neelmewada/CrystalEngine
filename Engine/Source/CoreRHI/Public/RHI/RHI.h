@@ -136,6 +136,10 @@ namespace CE::RHI
 			Resize(resolution.x, resolution.y);
 		}
 
+		virtual u32 GetWidth() = 0;
+
+		virtual u32 GetHeight() = 0;
+
 		/// Number of back buffers used for rendering
 		virtual int GetNumColorBuffers() = 0;
 

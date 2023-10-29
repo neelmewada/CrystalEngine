@@ -119,6 +119,22 @@ namespace CE::RHI
 
     };
 
+	/***********************************
+	*   Shader Resources
+	*/
+
+	class CORERHI_API ShaderResourceGroup : public Resource
+	{
+	protected:
+		ShaderResourceGroup() : Resource(ResourceType::ShaderResourceGroup)
+		{}
+
+	public:
+
+
+
+	};
+
     /***********************************
     *   Pipeline
     */

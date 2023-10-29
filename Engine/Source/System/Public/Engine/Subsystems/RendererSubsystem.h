@@ -29,7 +29,11 @@ namespace CE
 		FIELD()
 		SceneSubsystem* sceneSubsystem = nullptr;
 
+		// Temporary stuff
+
 		RHI::GraphicsPipelineState* errorPipeline = nullptr;
+
+		
 	};
     
 } // namespace CE
