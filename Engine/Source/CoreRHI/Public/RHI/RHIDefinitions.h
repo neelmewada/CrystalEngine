@@ -365,7 +365,7 @@ namespace CE::RHI
 
 	struct ShaderResourceGroupBuilder
 	{
-		ShaderResourceGroupBuilder& Variable()
+		ShaderResourceGroupBuilder& Variable(u32 binding, const Name& name = "")
 		{
 			if (isInitialized)
 			{
@@ -373,17 +373,7 @@ namespace CE::RHI
 			}
 			isInitialized = true;
 			variable = {};
-			return *this;
-		}
-
-		ShaderResourceGroupBuilder& Binding(u32 binding)
-		{
 			variable.binding = binding;
-			return *this;
-		}
-
-		ShaderResourceGroupBuilder& Name(const Name& name)
-		{
 			variable.name = name;
 			return *this;
 		}
