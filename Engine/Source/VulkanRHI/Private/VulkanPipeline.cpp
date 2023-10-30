@@ -17,7 +17,7 @@ namespace CE
     }
     
 	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* device, VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
-		: VulkanPipeline(device)
+		: VulkanPipeline(device), resourceGroups(desc.resourceGroups)
 	{
 		Create(renderTarget, desc);
 	}
@@ -234,6 +234,8 @@ namespace CE
 		pipelineCI.renderPass = renderTarget->renderPass->GetHandle();
 
 		// - Pipeline Layout -
+
+		// This is temporary code
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCI{};
 		pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

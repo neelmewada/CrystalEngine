@@ -24,7 +24,7 @@ namespace CE
 		if (asset == nullptr)
 			asset = package;
 
-		HashMap<UUID, Object*> objectsToSerialize{};
+		HashMap<Uuid, Object*> objectsToSerialize{};
 		objectsToSerialize.Add({ asset->GetUuid(), asset });
 		asset->FetchObjectReferences(objectsToSerialize);
 		Array<Name> packageDependencies{};

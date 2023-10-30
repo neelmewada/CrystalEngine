@@ -34,6 +34,8 @@ namespace CE
 		desc.vertexAttribs[0].dataType = TYPEID(Vec3);
 		desc.vertexAttribs[0].location = 0;
 		desc.vertexAttribs[0].offset = 0;
+
+		
         
 		errorPipeline = RHI::gDynamicRHI->CreateGraphicsPipelineState(renderTarget, desc);
 	}

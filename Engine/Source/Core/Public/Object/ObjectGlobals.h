@@ -40,7 +40,7 @@ namespace CE
 			String name{};
 			Object* templateObject = nullptr;
 			ObjectFlags objectFlags{};
-			UUID uuid = 0;
+			Uuid uuid = 0;
 		};
 
 		/// For internal use only
@@ -97,7 +97,7 @@ namespace CE
 			return name;
 		}
 
-		UUID GetUuid() const
+		Uuid GetUuid() const
 		{
 			return uuid;
 		}
@@ -113,7 +113,7 @@ namespace CE
         ClassType* objectClass = nullptr;
 		ObjectFlags objectFlags{};
 		String name{};
-		UUID uuid{};
+		Uuid uuid{};
         Package* package = nullptr;
 	};
 

@@ -36,7 +36,9 @@ function(ce_add_test NAME)
         list(APPEND SOURCES ${RESOURCE_FILES})
     endif()
 
-    add_executable(${NAME} ${SOURCES})
+    add_executable(${NAME} ${SOURCES} ${BACKWARD_ENABLE})
+
+    add_backward(${NAME})
 
     if(${PAL_PLATFORM_IS_WINDOWS})
         set_property(TARGET ${NAME} PROPERTY

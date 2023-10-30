@@ -1,6 +1,6 @@
 //#define SRG(setNum, bindingNum) [[vk::binding(bindingNum, setNum)]]
 
-#define SRG(pos, set) register(pos, space##set)
+//#define SRG(pos, set) register(pos, space##set)
 
 #ifndef PerScene_Frequency
 #define PerScene_Frequency 0
@@ -77,6 +77,11 @@ struct DrawData
 ConstantBuffer<SceneBuffer> buff : SRG_PerScene(b);
 ConstantBuffer<SceneBuffer> buffer2 : SRG_PerScene(b);
 
+cbuffer buffer3 : SRG_PerScene(b)
+{
+    float3 ambientColor;
+};
+
 TextureBuffer<ObjectData> _Object : SRG_PerPass(t);
 
 Texture2D _MainTex[10] : SRG_PerMaterial(t);
@@ -89,7 +94,7 @@ ConstantBuffer<DrawData> _DrawData : SRG_PerDraw(b);
 v2p VertMain(VertexInfo input)
 {
     v2p output;
-    output.position = float4(_Object.model.rgb * input.position * buff.cameraPos * buffer2.lightColor, 1.0);
+    output.position = float4(_Object.model.rgb * input.position * buff.cameraPos * buffer2.lightColor * ambientColor, 1.0);
     output.uv = float2(0, 0);
     output.color = float3(1, 1, 0);
     return output;
@@ -100,5 +105,5 @@ float4 FragMain(v2p input) : SV_TARGET
 {
     float4 col = _MainTex[_DrawData.index].Sample(_MainTexSampler, float2(0, 0));
     _DataTex[int2(1, 1)] = float4(0.5, 0.5, 0.5, 1);
-    return float4(buff.lightColor * col.rgb, 0.0);
+    return float4(buff.lightColor * col.rgb * ambientColor, 0.0);
 }

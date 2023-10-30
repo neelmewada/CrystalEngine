@@ -183,7 +183,7 @@ namespace CE
         }
 
         template<typename... Args>
-        CE::Variant Publish(UUID messageTarget, Name eventName, Args... args)
+        CE::Variant Publish(Uuid messageTarget, Name eventName, Args... args)
         {
             CE::Variant result{};
 

@@ -12,26 +12,26 @@ namespace CE
     CORE_API u32 GenerateRandomU32();
 
     /// A 64-bit unique identifier
-    class CORE_API UUID
+    class CORE_API Uuid
     {
     public:
-        UUID();
+        Uuid();
         
-        UUID(u64 value);
+        Uuid(u64 value);
         
-        UUID(const UUID&) = default;
+        Uuid(const Uuid&) = default;
         
         CE_INLINE operator u64() const
         {
             return uuid;
         }
         
-        CE_INLINE bool operator==(const UUID& other) const
+        CE_INLINE bool operator==(const Uuid& other) const
         {
             return uuid == other.uuid;
         }
         
-        CE_INLINE bool operator!=(const UUID& other) const
+        CE_INLINE bool operator!=(const Uuid& other) const
         {
             return uuid != other.uuid;
         }
@@ -150,7 +150,7 @@ namespace CE
     };
 
     template<>
-    inline SIZE_T GetHash<UUID>(const UUID& value)\
+    inline SIZE_T GetHash<Uuid>(const Uuid& value)\
     {
         return (u64)value;
     }

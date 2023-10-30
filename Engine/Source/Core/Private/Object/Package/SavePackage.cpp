@@ -38,7 +38,7 @@ namespace CE
 		if (asset == nullptr)
 			asset = package;
 		
-		HashMap<UUID, Object*> objectsToSerialize{};
+		HashMap<Uuid, Object*> objectsToSerialize{};
 		objectsToSerialize.Add({ asset->GetUuid(), asset });
 		asset->FetchObjectReferences(objectsToSerialize);
 		Array<Name> packageDependencies{};
@@ -188,7 +188,7 @@ namespace CE
 		u64 dataStartOffset;
 		*stream >> dataStartOffset;
 
-		UUID packageUuid = 0;
+		Uuid packageUuid = 0;
 		*stream >> packageUuid;
 		String packageName = "";
 		*stream >> packageName;
@@ -335,7 +335,7 @@ namespace CE
 		isFullyLoaded = true;
     }
 
-    Object* Package::LoadObject(UUID objectUuid)
+    Object* Package::LoadObject(Uuid objectUuid)
     {
         if (objectUuid != 0 && loadedObjects.KeyExists(objectUuid))
             return loadedObjects[objectUuid];
@@ -368,7 +368,7 @@ namespace CE
 		return nullptr;
 	}
 
-	Object* Package::LoadObjectFromEntry(Stream* stream, UUID objectUuid)
+	Object* Package::LoadObjectFromEntry(Stream* stream, Uuid objectUuid)
     {
         if (loadedObjects.KeyExists(objectUuid))
             return loadedObjects[objectUuid];

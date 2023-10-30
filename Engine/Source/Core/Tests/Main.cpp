@@ -312,6 +312,15 @@ TEST(Threading, Async)
 #pragma endregion
 
 
+/**********************************************
+*   Misc
+*/
+
+#pragma region Misc
+
+
+#pragma endregion
+
 
 /**********************************************
 *   Containers
@@ -669,12 +678,12 @@ TEST(Containers, Defer)
 
 	String string = "original";
 	EXPECT_EQ(string, "original");
-
+	
 	// Inner scope
 	{
-		defer {
+		defer(
 			string = "modified";
-		};
+		);
 		EXPECT_EQ(string, "original");
 
 		string = "something";
@@ -2203,7 +2212,7 @@ TEST(Serialization, BasicStreams)
     fileBinStream << (u8)250;
     fileBinStream << 41212.42f;
     fileBinStream << "New String";
-	UUID uuid = UUID();
+	auto uuid = CE::Uuid();
 	fileBinStream << uuid;
     
     fileBinStream.Close();
@@ -2569,7 +2578,7 @@ TEST(Serialization, BasicBinarySerialization)
 
 	MemoryStream stream = MemoryStream(1024);
 	stream.SetBinaryMode(true);
-	UUID original = 0;
+	CE::Uuid original = 0;
 
 	{
 		TestClass1* test = CreateObject<TestClass1>(nullptr, "TestObject");
@@ -2819,7 +2828,7 @@ TEST(Package, WriteRead)
     
     IO::Path packagePath = PlatformDirectories::GetLaunchDir() / "TestPackage.casset";
 
-	UUID obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, packageUuid;
+	CE::Uuid obj1Uuid, obj2Uuid, obj1_0Uuid, obj1_1Uuid, packageUuid;
 
 	// Write
 	{
@@ -2859,7 +2868,7 @@ TEST(Package, WriteRead)
 
 		obj1_0->objPtr = obj1_1;
 
-		HashMap<UUID, Object*> references{};
+		HashMap<CE::Uuid, Object*> references{};
 		writePackage->FetchObjectReferences(references);
 		EXPECT_EQ(references.GetSize(), 5);
 

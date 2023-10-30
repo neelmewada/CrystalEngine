@@ -13,6 +13,14 @@ find_package(stb REQUIRED)
 find_package(dxcompiler REQUIRED)
 find_package(compressonator REQUIRED)
 
+include(FetchContent)
+
+# Also requires one of: libbfd (gnu binutils), libdwarf, libdw (elfutils)
+FetchContent_Declare(backward
+        GIT_REPOSITORY https://github.com/bombela/backward-cpp
+        GIT_TAG v1.6)
+FetchContent_MakeAvailable(backward)
+
 # Yoga
 find_package(yoga REQUIRED)
 

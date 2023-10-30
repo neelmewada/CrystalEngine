@@ -214,9 +214,9 @@ namespace CE
 			{
 				return GetFieldValue<IO::Path>(instance).GetString();
 			}
-			else if (fieldTypeId == TYPEID(UUID))
+			else if (fieldTypeId == TYPEID(Uuid))
 			{
-				return String::Format("{}", (u64)GetFieldValue<UUID>(instance));
+				return String::Format("{}", (u64)GetFieldValue<Uuid>(instance));
 			}
 			else if (fieldTypeId == TYPEID(UUID32))
 			{
@@ -355,9 +355,9 @@ namespace CE
 				const IO::Path& value = GetFieldValue<IO::Path>(srcInstance);
 				destField->SetFieldValue(destInstance, value);
 			}
-			else if (fieldTypeId == TYPEID(UUID))
+			else if (fieldTypeId == TYPEID(Uuid))
 			{
-				const UUID& value = GetFieldValue<UUID>(srcInstance);
+				const Uuid& value = GetFieldValue<Uuid>(srcInstance);
 				destField->SetFieldValue(destInstance, value);
 			}
 			else if (fieldTypeId == TYPEID(UUID32))

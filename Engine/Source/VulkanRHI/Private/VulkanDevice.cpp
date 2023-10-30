@@ -2,6 +2,8 @@
 #include "VulkanDevice.h"
 #include "PAL/Common/VulkanPlatform.h"
 
+#include "VulkanDescriptorPool.h"
+
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
@@ -41,6 +43,8 @@ namespace CE
 		VulkanPlatform::DestroySurface(instance, testSurface);
 		testSurface = nullptr;
 
+		descriptorPool = new VulkanDescriptorPool(this);
+
 		isInitialized = true;
 
 		CE_LOG(Info, All, "Vulkan device initialized");
@@ -50,8 +54,14 @@ namespace CE
 	{
 		isInitialized = false;
 
+		delete descriptorPool;
+		descriptorPool = nullptr;
+
 		delete graphicsQueue;
+		graphicsQueue = nullptr;
+
 		delete presentQueue;
+		presentQueue = nullptr;
 	}
 
 	void VulkanDevice::Shutdown()

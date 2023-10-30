@@ -5,8 +5,8 @@
 namespace CE
 {
 	HashMap<Name, Package*> Package::loadedPackages{};
-	HashMap<UUID, Package*> Package::loadedPackagesByUuid{};
-	HashMap<UUID, Name> Package::loadedPackageUuidToPath{};
+	HashMap<Uuid, Package*> Package::loadedPackagesByUuid{};
+	HashMap<Uuid, Name> Package::loadedPackageUuidToPath{};
 
 	Array<IPackageResolver*> Package::packageResolvers = {};
 
@@ -22,7 +22,7 @@ namespace CE
 		loadedPackageUuidToPath.Remove(GetUuid());
 	}
 
-	Package* Package::LoadPackageByUuid(UUID packageUuid, LoadFlags loadFlags)
+	Package* Package::LoadPackageByUuid(Uuid packageUuid, LoadFlags loadFlags)
 	{
 		if (loadedPackagesByUuid.KeyExists(packageUuid))
 			return loadedPackagesByUuid[packageUuid];
@@ -191,7 +191,7 @@ namespace CE
 		return IsObjectPresentInHierarchy(object);
 	}
 
-	Object* Package::ResolveObjectReference(UUID objectUuid)
+	Object* Package::ResolveObjectReference(Uuid objectUuid)
 	{
 		if (!loadedObjects.KeyExists(objectUuid))
 			return nullptr;
@@ -315,7 +315,7 @@ namespace CE
 		return primaryObjectTypeName;
 	}
 
-	UUID Package::GetPrimaryObjectUuid()
+	Uuid Package::GetPrimaryObjectUuid()
 	{
 		if (primaryObjectUuid == 0)
 		{

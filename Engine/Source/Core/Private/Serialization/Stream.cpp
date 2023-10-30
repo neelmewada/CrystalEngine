@@ -100,12 +100,12 @@ namespace CE
         return *this << String(cString);
     }
 
-    Stream& Stream::operator<<(const UUID& uuid)
+    Stream& Stream::operator<<(const Uuid& uuid)
     {
         return *this << (u64)uuid;
     }
 
-    Stream& Stream::operator>>(UUID& uuid)
+    Stream& Stream::operator>>(Uuid& uuid)
     {
         u64 value = 0;
         *this >> value;

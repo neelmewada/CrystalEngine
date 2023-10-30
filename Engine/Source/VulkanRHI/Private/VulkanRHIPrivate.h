@@ -273,16 +273,28 @@ namespace CE
 	*	Shader Resources
 	*/
 
+	class VulkanDescriptorPool;
+
 	class VulkanShaderResourceGroup : public RHI::ShaderResourceGroup
 	{
 	public:
 
-		VulkanShaderResourceGroup(VulkanDevice* device);
+		VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc);
+
+		~VulkanShaderResourceGroup();
 
     private:
         
         VulkanDevice* device = nullptr;
-        VkDescriptorSet descriptorSet = nullptr;
+        VkDescriptorSetLayout setLayout = nullptr;
+
+		VkDescriptorSet descriptorSet = nullptr;
+		VkDescriptorPool descriptorPool = nullptr;
+
+		RHI::ShaderResourceGroupDesc desc{};
+
+		Array<Name> variableNames{};
+		Array<VkDescriptorSetLayoutBinding> bindings{};
 	};
 
 } // namespace CE

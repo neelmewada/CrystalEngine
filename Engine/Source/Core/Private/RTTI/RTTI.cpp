@@ -240,7 +240,7 @@ namespace CE
 		return GetSize();
 	}
 
-	Name TypeInfo::GenerateInstanceName(UUID uuid) const
+	Name TypeInfo::GenerateInstanceName(Uuid uuid) const
     {
         String typeName = GetName().GetString();
         return String::Format("{0}_{1:x}", typeName, uuid);
@@ -421,7 +421,7 @@ CE_RTTI_POD_IMPL(, u8)
 CE_RTTI_POD_IMPL(, u16)
 CE_RTTI_POD_IMPL(, u32)
 CE_RTTI_POD_IMPL(, u64)
-CE_RTTI_POD_IMPL(CE, UUID)
+CE_RTTI_POD_IMPL(CE, Uuid)
 CE_RTTI_POD_IMPL(CE, UUID32)
 
 CE_RTTI_POD_IMPL(, f32)

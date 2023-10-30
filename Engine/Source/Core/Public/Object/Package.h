@@ -36,7 +36,7 @@ namespace CE
 
 	struct IPackageResolver
 	{
-		virtual Name GetPackagePath(UUID packageUuid) = 0;
+		virtual Name GetPackagePath(Uuid packageUuid) = 0;
 	};
 
 	class CORE_API Package : public Object
@@ -58,7 +58,7 @@ namespace CE
 			return nullptr;
 		}
 
-		static Package* LoadPackageByUuid(UUID packageUuid, LoadFlags loadFlags = LOAD_Default);
+		static Package* LoadPackageByUuid(Uuid packageUuid, LoadFlags loadFlags = LOAD_Default);
 
 		static IO::Path GetPackagePath(const Name& packageName);
 
@@ -90,7 +90,7 @@ namespace CE
         
 		inline Name GetPackageName() { return packageName; }
 
-		inline UUID GetPackageUuid(){ return uuid; }
+		inline Uuid GetPackageUuid(){ return uuid; }
 
 		inline void SetPackageName(const Name& name) { this->packageName = name; }
         
@@ -101,7 +101,7 @@ namespace CE
         void LoadFully();
         void LoadFully(Stream* originalStream);
         
-        Object* LoadObject(UUID objectUuid);
+        Object* LoadObject(Uuid objectUuid);
 		Object* LoadObject(const Name& objectClassName);
 
 		template<typename TObject> requires TIsBaseClassOf<CE::Object, TObject>::Value
@@ -113,12 +113,12 @@ namespace CE
 		// Returns true if this package contains the given object. Note that the object has to be fully loaded.
 		bool ContainsObject(Object* object);
 
-		// Find and return an already loaded object with the given UUID
-		Object* ResolveObjectReference(UUID objectUuid);
+		// Find and return an already loaded object with the given Uuid
+		Object* ResolveObjectReference(Uuid objectUuid);
 
 		const Name& GetPrimaryObjectName();
 		const Name& GetPrimaryObjectTypeName();
-		UUID GetPrimaryObjectUuid();
+		Uuid GetPrimaryObjectUuid();
 		String GetPrimarySourceAssetRelativePath();
         
     private:
@@ -127,7 +127,7 @@ namespace CE
 
 		void OnAfterDeserialize() override;
         
-        Object* LoadObjectFromEntry(Stream* originalStream, UUID objectUuid);
+        Object* LoadObjectFromEntry(Stream* originalStream, Uuid objectUuid);
 
 		// Internal use only! Marks the passed object as 'unloaded'
 		void OnObjectUnloaded(Object* object);
@@ -154,7 +154,7 @@ namespace CE
 		// Long type name of first object in package
 		Name primaryObjectTypeName;
 		// Primary object uuid
-		UUID primaryObjectUuid;
+		Uuid primaryObjectUuid;
 
 		Array<Name> packageDependencies{};
         
@@ -163,7 +163,7 @@ namespace CE
 		struct ObjectEntryMetaData
 		{
 			u64 offsetInFile = 0;
-			UUID instanceUuid = 0;
+			Uuid instanceUuid = 0;
 			b8 isAsset = false;
 			String pathInPackage{};
 			Name objectClassName{};
@@ -174,15 +174,15 @@ namespace CE
             b8 isLoaded = false;
 		};
 
-		HashMap<UUID, ObjectEntryMetaData> objectUuidToEntryMap{};
+		HashMap<Uuid, ObjectEntryMetaData> objectUuidToEntryMap{};
 
-		HashMap<UUID, Object*> loadedObjects{};
+		HashMap<Uuid, Object*> loadedObjects{};
         
 		IO::Path fullPackagePath{};
 
 		static HashMap<Name, Package*> loadedPackages;
-		static HashMap<UUID, Package*> loadedPackagesByUuid;
-		static HashMap<UUID, Name> loadedPackageUuidToPath;
+		static HashMap<Uuid, Package*> loadedPackagesByUuid;
+		static HashMap<Uuid, Name> loadedPackageUuidToPath;
 
 		static Array<IPackageResolver*> packageResolvers;
 

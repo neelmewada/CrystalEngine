@@ -7,7 +7,7 @@ namespace CE
 
 	static HashMap<Object*, List<Object*>> dependencyMap = {};
 
-    Object::Object() : name("Object"), uuid(UUID())
+    Object::Object() : name("Object"), uuid(Uuid())
     {
         ConstructInternal();
     }
@@ -215,7 +215,7 @@ namespace CE
 		return path;
 	}
 
-	void Object::FetchObjectReferences(HashMap<UUID, Object*>& outReferences)
+	void Object::FetchObjectReferences(HashMap<Uuid, Object*>& outReferences)
 	{
 		for (const auto& subobject : attachedObjects)
 		{
@@ -274,7 +274,7 @@ namespace CE
 		}
 	}
 
-	void Object::FetchObjectReferencesInStructField(HashMap<UUID, Object*>& outReferences, StructType* structType, void* structInstance)
+	void Object::FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance)
 	{
 		if (structType == nullptr || structInstance == nullptr)
 			return;
@@ -411,12 +411,12 @@ namespace CE
 				else
 					field->SetFieldValue<SubClassType<>>(this, Name(stringValue));
 			}
-            else if (fieldTypeId == TYPEID(UUID))
+            else if (fieldTypeId == TYPEID(Uuid))
             {
                 u64 uuid = 0;
                 if (String::TryParse(stringValue, uuid))
                 {
-                    field->SetFieldValue<UUID>(this, UUID(uuid));
+                    field->SetFieldValue<Uuid>(this, Uuid(uuid));
                 }
             }
 			else if (fieldTypeId == TYPEID(UUID32))
@@ -548,7 +548,7 @@ namespace CE
 		return nullptr;
 	}
 
-	Object* Object::CloneHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone)
+	Object* Object::CloneHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone)
 	{
 		auto thisClass = GetClass();
 
@@ -562,7 +562,7 @@ namespace CE
 		{
 			if (field->GetName() == "name" && field->GetDeclarationTypeId() == TYPEID(Name))
 				continue;
-			if (field->GetName() == "uuid" && field->GetDeclarationTypeId() == TYPEID(UUID))
+			if (field->GetName() == "uuid" && field->GetDeclarationTypeId() == TYPEID(Uuid))
 				continue;
 
 			if (field->IsObjectField()) // Deep copy object fields
@@ -652,13 +652,13 @@ namespace CE
 
 	Object* Object::Clone(String cloneName, bool deepClone)
 	{
-		HashMap<UUID, Object*> originalToCloneMap{};
+		HashMap<Uuid, Object*> originalToCloneMap{};
 		return CloneHelper(originalToCloneMap, outer, cloneName, deepClone);
 	}
 
 	void Object::LoadFromTemplate(Object* templateObject)
 	{
-		HashMap<UUID, Object*> originalToCloneMap{};
+		HashMap<Uuid, Object*> originalToCloneMap{};
 
 		std::function<void(Object*, Object*)> fetchSubobjects = [&](Object* src, Object* dst)
 			{
@@ -685,7 +685,7 @@ namespace CE
 		LoadFromTemplateHelper(originalToCloneMap, templateObject);
 	}
 
-	void Object::LoadFromTemplateHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* templateObject)
+	void Object::LoadFromTemplateHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* templateObject)
 	{
 		if (templateObject == nullptr)
 			return;
@@ -785,7 +785,7 @@ namespace CE
 		}
 	}
 
-	void Object::LoadFromTemplateFieldHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, 
+	void Object::LoadFromTemplateFieldHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, 
 		Field* srcField, void* srcInstance, Field* dstField, void* dstInstance)
 	{
 		if (dstField == nullptr || dstField->GetDeclarationTypeId() != srcField->GetDeclarationTypeId() || srcInstance == nullptr || dstInstance == nullptr)
@@ -821,9 +821,9 @@ namespace CE
 				IO::Path value = srcField->GetFieldValue<IO::Path>(srcInstance);
 				dstField->ForceSetFieldValue(dstInstance, value);
 			}
-			else if (fieldDeclId == TYPEID(UUID))
+			else if (fieldDeclId == TYPEID(Uuid))
 			{
-				UUID value = srcField->GetFieldValue<UUID>(srcInstance);
+				Uuid value = srcField->GetFieldValue<Uuid>(srcInstance);
 				dstField->ForceSetFieldValue(dstInstance, value);
 			}
 			else if (fieldDeclId == TYPEID(UUID32))
@@ -995,12 +995,12 @@ namespace CE
 			if (classType != nullptr)
 				field->SetFieldValue<SubClassType<>>(this, classType);
 		}
-        else if (field->GetTypeId() == TYPEID(UUID))
+        else if (field->GetTypeId() == TYPEID(Uuid))
         {
             u64 intValue = 0;
             if (String::TryParse(value, intValue))
             {
-                field->SetFieldValue(instance, UUID(intValue));
+                field->SetFieldValue(instance, Uuid(intValue));
             }
         }
 		else if (field->GetTypeId() == TYPEID(UUID32))

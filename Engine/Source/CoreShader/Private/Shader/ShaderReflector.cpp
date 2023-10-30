@@ -70,7 +70,7 @@ namespace CE
 		}
 
 		int numStorageBuffers = resources.storage_buffers.size();
-		for (int i = 0; i < numStorageBuffers; i++) // StructuredBuffer (Storage Buffers)
+		for (int i = 0; i < numStorageBuffers; i++) // TextureBuffer (Storage Buffers)
 		{
 			auto storageBuffer = resources.storage_buffers[i];
 
@@ -90,7 +90,7 @@ namespace CE
 			variable.binding = binding;
 			variable.name = name;
 			variable.internalName = internalName;
-			variable.resourceType = ShaderResourceType::StructuredBuffer;
+			variable.resourceType = ShaderResourceType::TextureBuffer;
 			variable.count = count;
 			
 			auto& entry = outReflection.FindOrAdd(set);

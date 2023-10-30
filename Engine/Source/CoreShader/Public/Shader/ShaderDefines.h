@@ -25,12 +25,13 @@ namespace CE
 		/// Uniform buffer in vulkan terms
 		ConstantBuffer,
 		/// Storage Buffer in vulkan terms
-		StructuredBuffer,
+		TextureBuffer,
 		SamplerState,
 		Texture1D,
 		Texture2D,
 		Texture3D,
 		TextureCube,
+		// image2D in vulkan
 		RWTexture2D,
 	};
 

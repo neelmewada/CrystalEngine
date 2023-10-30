@@ -338,6 +338,100 @@ namespace CE::RHI
 
 	class ShaderModule;
 
+	enum ShaderResourceType
+	{
+		SHADER_RESOURCE_TYPE_NONE = 0,
+		SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
+		SHADER_RESOURCE_TYPE_TEXTURE_BUFFER,
+		SHADER_RESOURCE_TYPE_SAMPLED_IMAGE,
+		SHADER_RESOURCE_TYPE_SAMPLER_STATE,
+	};
+
+	struct ShaderResourceVariableDesc
+	{
+		u32 binding = 0;
+		Name name = "";
+		u32 arrayCount = 1;
+		ShaderResourceType type = SHADER_RESOURCE_TYPE_NONE;
+		b8 isDynamic = false;
+
+		ShaderStage stageFlags = ShaderStage::Vertex | ShaderStage::Fragment;
+	};
+
+	struct ShaderResourceGroupDesc
+	{
+		Array<ShaderResourceVariableDesc> variables{};
+	};
+
+	struct ShaderResourceGroupBuilder
+	{
+		ShaderResourceGroupBuilder& Variable()
+		{
+			if (isInitialized)
+			{
+				desc.variables.Add(variable);
+			}
+			isInitialized = true;
+			variable = {};
+			return *this;
+		}
+
+		ShaderResourceGroupBuilder& Binding(u32 binding)
+		{
+			variable.binding = binding;
+			return *this;
+		}
+
+		ShaderResourceGroupBuilder& Name(const Name& name)
+		{
+			variable.name = name;
+			return *this;
+		}
+
+		ShaderResourceGroupBuilder& Count(u32 count)
+		{
+			variable.arrayCount = count;
+			return *this;
+		}
+
+		ShaderResourceGroupBuilder& Type(ShaderResourceType type)
+		{
+			variable.type = type;
+			return *this;
+		}
+
+		ShaderResourceGroupBuilder& Stage(ShaderStage stage)
+		{
+			variable.stageFlags |= stage;
+			return *this;
+		}
+
+		ShaderResourceGroupBuilder& WithoutStage(ShaderStage stage)
+		{
+			EnumRemoveFlags(variable.stageFlags, stage);
+			return *this;
+		}
+
+		ShaderResourceGroupBuilder& Dynamic(bool isDynamic = true)
+		{
+			variable.isDynamic = isDynamic;
+			return *this;
+		}
+
+		const ShaderResourceGroupDesc& Build()
+		{
+			desc.variables.Add(variable);
+			return desc;
+		}
+
+	private:
+
+		bool isInitialized = false;
+		ShaderResourceVariableDesc variable{};
+
+		ShaderResourceGroupDesc desc{};
+	};
+
 	struct ShaderStageDesc
 	{
 		RHI::ShaderModule* shaderModule = nullptr;
@@ -372,11 +466,27 @@ namespace CE::RHI
 		Array<ShaderStageDesc> otherStages{};
 
 		CullMode cullMode = CULL_MODE_BACK;
+
+		Array<RHI::ShaderResourceGroup*> shaderResourceGroups{};
+
+		Array<ShaderResourceGroupDesc> resourceDesc{};
 	};
 
 	struct CORERHI_API GraphicsPipelineBuilder
 	{
+		GraphicsPipelineBuilder() {}
 
+		GraphicsPipelineBuilder& VertexSize(u32 byteSize)
+		{
+			desc.vertexSizeInBytes = byteSize;
+			return *this;
+		}
+
+
+
+	private:
+
+		GraphicsPipelineDesc desc{};
 	};
 
 } // namespace CE

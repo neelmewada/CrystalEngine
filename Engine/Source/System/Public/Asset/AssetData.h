@@ -14,14 +14,14 @@ namespace CE
 		// Path to the package that contains this asset. Ex: /Game/Assets/Textures/DoorTexture
 		Name packageName{};
 
-		// UUID of the package that contains this asset.
-		UUID packageUuid{};
+		// Uuid of the package that contains this asset.
+		Uuid packageUuid{};
 
 		// Path of the primary asset within the package. Ex: TextureMap
 		Name assetName{};
 
-		// UUID of the primary asset within the package.
-		UUID assetUuid{};
+		// Uuid of the primary asset within the package.
+		Uuid assetUuid{};
 
 		/// Path to the primary asset's class. Ex: /Code/System.CE::Texture2D
 		Name assetClassPath;

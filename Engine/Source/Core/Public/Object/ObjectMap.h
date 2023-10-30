@@ -23,13 +23,13 @@ namespace CE
             return (u32)objects.GetSize();
         }
         
-		Object* FindObject(UUID uuid) const;
+		Object* FindObject(Uuid uuid) const;
 
 		Object* FindObject(const Name& objectName, ClassType* classType = nullptr) const;
 
 		Object* GetObjectAt(u32 index) const;
         
-		bool ObjectExists(UUID uuid) const;
+		bool ObjectExists(Uuid uuid) const;
 
 		bool ObjectExists(const Name& objectName) const;
         
@@ -37,7 +37,7 @@ namespace CE
         
         void RemoveObject(Object* object);
         
-        void RemoveObject(UUID uuid);
+        void RemoveObject(Uuid uuid);
 
         void RemoveAll();
         
@@ -48,7 +48,7 @@ namespace CE
 		const auto end() const { return objects.end(); }
 
     private:
-        //HashMap<UUID, Object*> objects{};
+        //HashMap<Uuid, Object*> objects{};
 		Array<Object*> objects{};
     };
     

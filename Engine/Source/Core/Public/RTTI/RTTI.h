@@ -224,7 +224,7 @@ namespace CE
 		virtual void CopyConstructor(void* source, void* destination) {}
 		virtual void CallDestructor(void* instance) = 0;
 
-		Name GenerateInstanceName(UUID uuid) const;
+		Name GenerateInstanceName(Uuid uuid) const;
 
 		Name GetOwnerModuleName() const;
 
@@ -355,7 +355,7 @@ CE_RTTI_POD(CORE_API, , u8, TYPEID(s8))
 CE_RTTI_POD(CORE_API, , u16, TYPEID(s16))
 CE_RTTI_POD(CORE_API, , u32, TYPEID(s32))
 CE_RTTI_POD(CORE_API, , u64, TYPEID(s64))
-CE_RTTI_POD(CORE_API, CE, UUID, TYPEID(u64), TYPEID(s64))
+CE_RTTI_POD(CORE_API, CE, Uuid, TYPEID(u64), TYPEID(s64))
 CE_RTTI_POD(CORE_API, CE, UUID32, TYPEID(u32), TYPEID(s32))
 
 CE_RTTI_POD(CORE_API, , f32)

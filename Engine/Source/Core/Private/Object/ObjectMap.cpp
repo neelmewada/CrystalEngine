@@ -3,7 +3,7 @@
 
 namespace CE
 {
-    Object* ObjectMap::FindObject(UUID uuid) const
+    Object* ObjectMap::FindObject(Uuid uuid) const
     {
 		for (auto object : objects)
 		{
@@ -34,7 +34,7 @@ namespace CE
 		return objects[index];
     }
 
-	bool ObjectMap::ObjectExists(UUID uuid) const
+	bool ObjectMap::ObjectExists(Uuid uuid) const
 	{
 		return objects.Exists([=](Object* obj) { return obj != nullptr && obj->GetUuid() == uuid; });
 	}
@@ -59,7 +59,7 @@ namespace CE
 		objects.Remove(object);
 	}
 
-	void ObjectMap::RemoveObject(UUID uuid)
+	void ObjectMap::RemoveObject(Uuid uuid)
 	{
 		if (!ObjectExists(uuid))
 			return;

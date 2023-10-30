@@ -13,6 +13,7 @@ namespace CE
     class VulkanQueue;
     class VulkanSwapChain;
     class VulkanTexture;
+	class VulkanDescriptorPool;
 
     class VulkanDevice
     {
@@ -67,6 +68,8 @@ namespace CE
 			return supportedDeviceExtensions.Exists(name);
 		}
 
+		INLINE VulkanDescriptorPool* GetDescriptorPool() const { return descriptorPool; }
+
     protected:
 
     private:
@@ -101,6 +104,8 @@ namespace CE
         HashMap<u32, VkCommandPool> queueFamilyToCmdPool{};
 
 		SharedMutex mainThreadMutex{};
+
+		VulkanDescriptorPool* descriptorPool = nullptr;
     };
     
 } // namespace CE

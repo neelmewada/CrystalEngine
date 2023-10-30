@@ -97,6 +97,9 @@ namespace CE
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc) override;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
 
+		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) override;
+		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) override;
+
 		// - Pipeline State -
 
 		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc) override;

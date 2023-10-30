@@ -10,7 +10,7 @@ namespace CE
 		{ TYPEID(u8), 0x01 },
 		{ TYPEID(u16), 0x02 },
 		{ TYPEID(u32), 0x03 }, { TYPEID(UUID32), 0x04 },
-		{ TYPEID(u64), 0x04 }, { TYPEID(UUID), 0x04 },
+		{ TYPEID(u64), 0x04 }, { TYPEID(Uuid), 0x04 },
 		{ TYPEID(s8), 0x05 },
 		{ TYPEID(s16), 0x06 },
 		{ TYPEID(s32), 0x07 },
@@ -109,12 +109,12 @@ namespace CE
 
 			*stream << field->GetFieldValue<bool>(rawInstance);
 		}
-        else if (fieldTypeId == TYPEID(UUID))
+        else if (fieldTypeId == TYPEID(Uuid))
         {
 			if (typeIdToFieldTypeMap.KeyExists(fieldTypeId))
 				*stream << typeIdToFieldTypeMap[fieldTypeId];
 
-            *stream << field->GetFieldValue<UUID>(rawInstance);
+            *stream << field->GetFieldValue<Uuid>(rawInstance);
         }
         else if (fieldTypeId == TYPEID(String))
         {
@@ -303,7 +303,7 @@ namespace CE
 			}
             else
 			{
-				*stream << (u64)0; // Package UUID: 0
+				*stream << (u64)0; // Package Uuid: 0
 				*stream << objectRef->GetClass()->GetTypeName();
 			}
 
@@ -464,9 +464,9 @@ namespace CE
 			*stream >> value;
 			field->ForceSetFieldValue<bool>(rawInstance, value);
 		}
-        else if (fieldTypeId == TYPEID(UUID))
+        else if (fieldTypeId == TYPEID(Uuid))
         {
-			field->ForceSetFieldValue<UUID>(rawInstance, stream->ReadInteger<u64>());
+			field->ForceSetFieldValue<Uuid>(rawInstance, stream->ReadInteger<u64>());
         }
         else if (fieldTypeId == TYPEID(String))
         {
@@ -669,7 +669,7 @@ namespace CE
         }
     }
 
-    Object* FieldDeserializer::ResolveObjectReference(UUID objectUuid, UUID packageUuid, Name packageName, Name pathInPackage)
+    Object* FieldDeserializer::ResolveObjectReference(Uuid objectUuid, Uuid packageUuid, Name packageName, Name pathInPackage)
     {
         Package* package = Package::LoadPackage(nullptr, packageName);
         if (package == nullptr)

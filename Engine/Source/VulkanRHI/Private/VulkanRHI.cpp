@@ -14,6 +14,7 @@
 #include "VulkanSampler.h"
 #include "VulkanShaderModule.h"
 #include "VulkanPipeline.h"
+#include "VulkanDescriptorPool.h"
 
 #include <vulkan/vulkan.h>
 
@@ -440,6 +441,16 @@ namespace CE
 		delete shaderModule;
 	}
 
+	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc)
+	{
+		return nullptr;
+	}
+
+	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
+	{
+
+	}
+
 	RHI::GraphicsPipelineState* VulkanRHI::CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
 	{
 		return new VulkanGraphicsPipeline(device, (VulkanRenderTarget*)renderTarget, desc);
@@ -744,9 +755,78 @@ namespace CE
 	*	Vulkan Shader Resources
 	*/
 
-	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device) : device(device)
+	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc) 
+		: device(device), desc(desc)
 	{
-        
+		VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+		setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		
+		bindings.Clear();
+		variableNames.Clear();
+
+		for (int i = 0; i < desc.variables.GetSize(); i++)
+		{
+			const auto& variable = desc.variables[i];
+
+			VkDescriptorSetLayoutBinding binding{};
+			binding.binding = variable.binding;
+			binding.descriptorCount = variable.arrayCount;
+			
+			if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Vertex))
+				binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+			if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Fragment))
+				binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+			if (binding.stageFlags == 0)
+				continue;
+
+			switch (variable.type)
+			{
+			case RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER:
+				binding.descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+				break;
+			case RHI::SHADER_RESOURCE_TYPE_TEXTURE_BUFFER:
+				binding.descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+				break;
+			case RHI::SHADER_RESOURCE_TYPE_SAMPLED_IMAGE:
+				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+				break;
+			case RHI::SHADER_RESOURCE_TYPE_SAMPLER_STATE:
+				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+				break;
+			default:
+				continue;
+			}
+
+			variableNames.Add(variable.name);
+			bindings.Add(binding);
+		}
+
+		setLayoutCI.bindingCount = bindings.GetSize();
+		setLayoutCI.pBindings = bindings.GetData();
+		
+		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
+		if (result != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create Descriptor Set Layout");
+			return;
+		}
+
+		auto pool = device->GetDescriptorPool();
+
+		auto sets = pool->Allocate(1, { setLayout }, descriptorPool);
+		if (sets.IsEmpty())
+		{
+			return;
+		}
+
+		descriptorSet = sets[0];
+	}
+
+	VulkanShaderResourceGroup::~VulkanShaderResourceGroup()
+	{
+		vkFreeDescriptorSets(device->GetHandle(), descriptorPool, 1, &descriptorSet);
+		descriptorPool = nullptr;
+		descriptorSet = nullptr;
 	}
 
 } // namespace CE

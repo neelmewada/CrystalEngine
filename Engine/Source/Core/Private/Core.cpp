@@ -77,7 +77,7 @@ namespace CE
         // Register Data types
         CE_REGISTER_TYPES(b8, s8, s16, s32, s64,
             u8, u16, u32, u64, f32, f64, c8, c16,
-            CE::String, CE::UUID, CE::UUID32, CE::Name, CE::Array<u8>,
+            CE::String, CE::Uuid, CE::UUID32, CE::Name, CE::Array<u8>,
             CE::Vec2, CE::Vec3, CE::Vec4, CE::Vec2i, CE::Vec3i, CE::Vec4i,
             CE::Quat, CE::Matrix4x4,
 			CE::Color, CE::Gradient,

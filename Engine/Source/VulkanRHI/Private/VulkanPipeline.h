@@ -43,6 +43,11 @@ namespace CE
 		void Create(VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc);
 		
 		void Destroy();
+
+	private:
+
+		Array<RHI::ShaderResourceGroupDesc> resourceGroups{};
+
 	};
     
 } // namespace CE::Editor

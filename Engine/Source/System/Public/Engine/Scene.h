@@ -45,8 +45,8 @@ namespace CE
 
 		// - Cache -
 
-		HashMap<UUID, Actor*> actorsByUuid{};
-		HashMap<TypeId, HashMap<UUID, ActorComponent*>> componentsByType{};
+		HashMap<Uuid, Actor*> actorsByUuid{};
+		HashMap<TypeId, HashMap<Uuid, ActorComponent*>> componentsByType{};
 		Array<CameraComponent*> cameras{};
 
 		CameraComponent* mainCamera = nullptr;

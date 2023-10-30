@@ -7,7 +7,7 @@ namespace CE
 		{ TYPEID(u8), 0x01 }, { TYPEID(c8), 0x01 },
 		{ TYPEID(u16), 0x02 },
 		{ TYPEID(u32), 0x03 }, { TYPEID(UUID32), 0x04 },
-		{ TYPEID(u64), 0x04 }, { TYPEID(UUID), 0x04 },
+		{ TYPEID(u64), 0x04 }, { TYPEID(Uuid), 0x04 },
 		{ TYPEID(s8), 0x05 },
 		{ TYPEID(s16), 0x06 },
 		{ TYPEID(s32), 0x07 },
@@ -162,7 +162,7 @@ namespace CE
 				*stream << field->GetFieldValue<u32>(instance);
 			else if (fieldDeclId == TYPEID(s64))
 				*stream << field->GetFieldValue<s64>(instance);
-			else if (fieldDeclId == TYPEID(u64) || fieldDeclId == TYPEID(UUID))
+			else if (fieldDeclId == TYPEID(u64) || fieldDeclId == TYPEID(Uuid))
 				*stream << field->GetFieldValue<u64>(instance);
 			else if (fieldDeclId == TYPEID(f32))
 				*stream << field->GetFieldValue<f32>(instance);
@@ -530,9 +530,9 @@ namespace CE
 			{
 				field->ForceSetFieldValue<s64>(instance, 0);
 			}
-			else if (fieldDeclId == TYPEID(UUID))
+			else if (fieldDeclId == TYPEID(Uuid))
 			{
-				field->ForceSetFieldValue<UUID>(instance, 0);
+				field->ForceSetFieldValue<Uuid>(instance, 0);
 			}
 			else if (fieldDeclId == TYPEID(UUID32))
 			{
@@ -710,9 +710,9 @@ namespace CE
 			{
 				field->ForceSetFieldValue<f64>(instance, (isUnsignedInt ? unsignedInt : signedInt));
 			}
-			else if (fieldDeclId == TYPEID(UUID))
+			else if (fieldDeclId == TYPEID(Uuid))
 			{
-				field->ForceSetFieldValue<UUID>(instance, unsignedInt);
+				field->ForceSetFieldValue<Uuid>(instance, unsignedInt);
 			}
 			else if (fieldDeclId == TYPEID(UUID32))
 			{
@@ -1151,8 +1151,8 @@ namespace CE
 		case 0x0E: // Object Ref
 		{
 			u64 obj = 0;
-			*stream >> obj; // Object UUID
-			*stream >> obj; // Package UUID
+			*stream >> obj; // Object Uuid
+			*stream >> obj; // Package Uuid
 		}
 			break;
 		case 0x10: // Map

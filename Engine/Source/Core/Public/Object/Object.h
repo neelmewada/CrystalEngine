@@ -74,7 +74,7 @@ namespace CE
             this->name = newName;
         }
         
-        INLINE UUID GetUuid() const
+        INLINE Uuid GetUuid() const
         {
             return uuid;
         }
@@ -178,7 +178,7 @@ namespace CE
         Package* GetPackage();
 
 		// Internal use only! Returns a list of all objects that this object and it's subobjects reference to.
-		void FetchObjectReferences(HashMap<UUID, Object*>& outReferences);
+		void FetchObjectReferences(HashMap<Uuid, Object*>& outReferences);
 
 		Object* Clone(String cloneName = "", bool deepClone = true);
 
@@ -190,12 +190,12 @@ namespace CE
         
     protected:
 
-		void LoadFromTemplateHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* templateObject);
+		void LoadFromTemplateHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* templateObject);
 
-		void LoadFromTemplateFieldHelper(HashMap<UUID, Object*>& originalToClonedObjectMap,
+		void LoadFromTemplateFieldHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap,
 			Field* srcField, void* srcInstance, Field* dstField, void* dstInstance);
 
-		Object* CloneHelper(HashMap<UUID, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone);
+		Object* CloneHelper(HashMap<Uuid, Object*>& originalToClonedObjectMap, Object* outer, String cloneName, bool deepClone);
 
 		// Lifecycle
 
@@ -241,7 +241,7 @@ namespace CE
 
 		Object* GetDefaultSubobject(ClassType* classType, const String& name);
 
-		void FetchObjectReferencesInStructField(HashMap<UUID, Object*>& outReferences, StructType* structType, void* structInstance);
+		void FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance);
 
 		static DelegateHandle BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate);
 
@@ -315,7 +315,7 @@ namespace CE
          */
 
         Name name;
-        UUID uuid;
+        Uuid uuid;
 
         ObjectFlags objectFlags = OF_NoFlags;
 

@@ -237,9 +237,9 @@ namespace CE::Widgets
 					auto fieldTypeId = field->GetDeclarationTypeId();
 					auto fieldDeclType = field->GetDeclarationType();
 
-					if (fieldTypeId == TYPEID(UUID))
+					if (fieldTypeId == TYPEID(Uuid))
 					{
-						display = String::Format("{:x}", field->GetFieldValue<UUID>(debugWidget));
+						display = String::Format("{:x}", field->GetFieldValue<Uuid>(debugWidget));
 					}
 					else if (fieldTypeId == TYPEID(String))
 					{
