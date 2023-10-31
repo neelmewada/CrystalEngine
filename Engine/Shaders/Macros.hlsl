@@ -1,8 +1,6 @@
 #ifndef __MACROS_H__
 #define __MACROS_H__
 
-#define SRG(pos, set) register(pos, space##set)
-
 #ifndef PerScene_Frequency
 #define PerScene_Frequency 0
 #endif

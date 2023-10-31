@@ -59,6 +59,9 @@ namespace CE
 		void Clear();
 
 		void Release();
+        
+        RHI::Buffer* CreateBuffer();
+        
 	};
 
 	CLASS()

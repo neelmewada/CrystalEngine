@@ -25,7 +25,19 @@ namespace CE
 
     void Mesh::Release()
     {
-
+        Clear();
+    }
+    
+    RHI::Buffer* Mesh::CreateBuffer()
+    {
+        RHI::BufferDesc desc{};
+        desc.name = "VertexBuffer";
+        desc.allocMode = RHI::BufferAllocMode::GpuMemory;
+        desc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
+        desc.usageFlags = RHI::BufferUsageFlags::Default;
+        // VertexPosition + UV + Normal
+        desc.structureByteStride = sizeof(Vec3) + sizeof(Vec2) + sizeof(Vec3);
+        
     }
 
 	ModelData* ModelData::GetCubeModel()
