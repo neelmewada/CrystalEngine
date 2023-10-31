@@ -37,6 +37,11 @@ namespace CE
         desc.usageFlags = RHI::BufferUsageFlags::Default;
         // VertexPosition + UV + Normal
         desc.structureByteStride = sizeof(Vec3) + sizeof(Vec2) + sizeof(Vec3);
+        u64 numVertices = vertices.GetSize();
+        desc.bufferSize = (u64)desc.structureByteStride * numVertices;
+        
+        RHI::Buffer* buffer = RHI::gDynamicRHI->CreateBuffer(desc);
+        
         
     }
 

@@ -19,6 +19,28 @@ namespace CE
 		void Release();
 	};
 
+    STRUCT()
+    struct SYSTEM_API MeshVertex
+    {
+        CE_STRUCT(MeshVertex)
+    public:
+        
+        FIELD()
+        Vec3 position{};
+        
+        FIELD()
+        Vec2 uv{};
+        
+        FIELD()
+        Vec3 normal{};
+        
+        FIELD()
+        Vec3 tangent{};
+        
+        FIELD()
+        Color vertexColor{};
+    };
+
 	STRUCT()
 	struct SYSTEM_API Mesh
 	{
@@ -27,6 +49,9 @@ namespace CE
 
 		FIELD()
 		Name name{};
+        
+        FIELD()
+        Array<MeshVertex> allVertices{};
 
 		FIELD()
 		Array<Vec3> vertices{};
