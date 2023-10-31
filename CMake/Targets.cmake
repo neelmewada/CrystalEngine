@@ -120,14 +120,14 @@ function(ce_add_target NAME TARGET_TYPE)
     endif()
     
     if(${TARGET_TYPE_${TARGET_TYPE}_IS_LIBRARY})
-        add_library(${NAME} ${TARGET_TYPE} ${SOURCES} ${BACKWARD_ENABLE})
+        add_library(${NAME} ${TARGET_TYPE} ${SOURCES})
 
         if(ce_add_target_NAMESPACE)
             add_library("${ce_add_target_NAMESPACE}::${NAME}" ALIAS ${NAME})
         endif()
 
     elseif(${TARGET_TYPE_${TARGET_TYPE}_IS_EXECUTABLE})
-        add_executable(${NAME} ${EXE_FLAG} ${SOURCES} ${BACKWARD_ENABLE})
+        add_executable(${NAME} ${EXE_FLAG} ${SOURCES})
 
         if(${TARGET_TYPE} STREQUAL "GUIAPP")
             set_target_properties(${NAME} 
@@ -142,8 +142,6 @@ function(ce_add_target NAME TARGET_TYPE)
     else()
         message(FATAL_ERROR "Invalid TARGET_TYPE passed: ${TARGET_TYPE}")
     endif()
-
-    add_backward(${NAME})
     
     ce_group_sources_by_folder(${NAME})
 
