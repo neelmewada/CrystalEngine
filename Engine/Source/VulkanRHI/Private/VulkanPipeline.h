@@ -46,7 +46,6 @@ namespace CE
 
 	private:
 
-		Array<RHI::ShaderResourceGroupDesc> resourceGroups{};
 
 	};
     

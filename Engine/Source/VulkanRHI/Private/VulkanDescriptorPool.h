@@ -15,7 +15,7 @@ namespace CE
 
 		void Free(const List<VkDescriptorSet>& sets);
         
-        void Increment(int size);
+        void Increment(u32 size);
         
     private:
         

@@ -11,6 +11,7 @@ namespace CE
 	public:
 
 		MeshComponent();
+		virtual ~MeshComponent();
         
         inline u32 GetMaterialCount() const { return materials.GetSize(); }
         
@@ -20,6 +21,9 @@ namespace CE
 
 		FIELD()
 		Array<MaterialInterface*> materials{};
+
+		RHI::Buffer* vertexBuffer = nullptr;
+
 	};
     
 } // namespace CE

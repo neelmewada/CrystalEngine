@@ -443,12 +443,12 @@ namespace CE
 
 	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc)
 	{
-		return nullptr;
+		return new VulkanShaderResourceGroup(device, desc);
 	}
 
 	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
 	{
-
+		delete shaderResourceGroup;
 	}
 
 	RHI::GraphicsPipelineState* VulkanRHI::CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
@@ -796,7 +796,7 @@ namespace CE
 			default:
 				continue;
 			}
-
+			
 			variableNames.Add(variable.name);
 			bindings.Add(binding);
 		}
@@ -827,6 +827,9 @@ namespace CE
 		vkFreeDescriptorSets(device->GetHandle(), descriptorPool, 1, &descriptorSet);
 		descriptorPool = nullptr;
 		descriptorSet = nullptr;
+
+		vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
+		setLayout = nullptr;
 	}
 
 } // namespace CE

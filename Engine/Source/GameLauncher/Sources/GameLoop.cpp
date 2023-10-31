@@ -200,6 +200,8 @@ void GameLoop::RunLoop()
 
 		cmdList->Begin();
 
+		gEngine->Render();
+
 		cmdList->End();
 
 		if (RHI::gDynamicRHI->ExecuteCommandList(cmdList))

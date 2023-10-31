@@ -295,6 +295,8 @@ namespace CE
 
 		Array<Name> variableNames{};
 		Array<VkDescriptorSetLayoutBinding> bindings{};
+
+		friend class VulkanGraphicsPipeline;
 	};
 
 } // namespace CE

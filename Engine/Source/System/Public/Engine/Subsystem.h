@@ -21,6 +21,8 @@ namespace CE
 
 		virtual void Tick(float deltaTime);
 
+		virtual void Render() {}
+
 	protected:
 
 	};

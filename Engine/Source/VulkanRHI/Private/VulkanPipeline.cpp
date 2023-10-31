@@ -17,7 +17,7 @@ namespace CE
     }
     
 	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* device, VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
-		: VulkanPipeline(device), resourceGroups(desc.resourceGroups)
+		: VulkanPipeline(device)
 	{
 		Create(renderTarget, desc);
 	}
@@ -235,12 +235,71 @@ namespace CE
 
 		// - Pipeline Layout -
 
-		// This is temporary code
-
 		VkPipelineLayoutCreateInfo pipelineLayoutCI{};
 		pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		
-		setLayouts.Resize(2);
+
+		setLayouts.Clear();
+
+		for (int i = 0; i < desc.shaderResourceGroups.GetSize(); i++)
+		{
+			VulkanShaderResourceGroup* srg = (VulkanShaderResourceGroup*)desc.shaderResourceGroups[i];
+
+			List<VkDescriptorSetLayoutBinding> setLayoutBindings{};
+
+			for (const auto& variable : srg->desc.variables)
+			{
+				VkDescriptorType descriptorType;
+				
+				switch (variable.type)
+				{
+				case RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER:
+					descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+					break;
+				case RHI::SHADER_RESOURCE_TYPE_TEXTURE_BUFFER:
+					descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+					break;
+				case RHI::SHADER_RESOURCE_TYPE_SAMPLED_IMAGE:
+					descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+					break;
+				case RHI::SHADER_RESOURCE_TYPE_SAMPLER_STATE:
+					descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+					break;
+				default:
+					continue;
+				}
+
+				VkShaderStageFlags stageFlags = 0;
+				if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Vertex))
+					stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
+				if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Fragment))
+					stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+
+				setLayoutBindings.Add({
+					.binding = variable.binding,
+					.descriptorType = descriptorType,
+					.descriptorCount = variable.arrayCount,
+					.stageFlags = stageFlags
+				});
+			}
+
+			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+			setLayoutCI.bindingCount = setLayoutBindings.GetSize();
+			setLayoutCI.pBindings = setLayoutBindings.GetData();
+
+			VkDescriptorSetLayout setLayout = nullptr;
+			
+			auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
+			if (result != VK_SUCCESS)
+			{
+				CE_LOG(Error, All, "Failed to create Descriptor Set Layout. Error code {}", (int)result);
+				return;
+			}
+
+			setLayouts.Add(setLayout);
+		}
+
+		/*setLayouts.Resize(2);
 
 		// Set 0
 		{
@@ -282,7 +341,7 @@ namespace CE
 				CE_LOG(Error, All, "Failed to create Descriptor Set Layout 0");
 				return;
 			}
-		}
+		}*/
 
 		pipelineLayoutCI.setLayoutCount = setLayouts.GetSize();
 		pipelineLayoutCI.pSetLayouts = setLayouts.GetData();

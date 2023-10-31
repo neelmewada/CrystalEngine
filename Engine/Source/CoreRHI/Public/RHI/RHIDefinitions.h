@@ -337,6 +337,7 @@ namespace CE::RHI
     */
 
 	class ShaderModule;
+	class ShaderResourceGroup;
 
 	enum ShaderResourceType
 	{
@@ -361,65 +362,6 @@ namespace CE::RHI
 	struct ShaderResourceGroupDesc
 	{
 		Array<ShaderResourceVariableDesc> variables{};
-	};
-
-	struct ShaderResourceGroupBuilder
-	{
-		ShaderResourceGroupBuilder& Variable(u32 binding, const Name& name = "")
-		{
-			if (isInitialized)
-			{
-				desc.variables.Add(variable);
-			}
-			isInitialized = true;
-			variable = {};
-			variable.binding = binding;
-			variable.name = name;
-			return *this;
-		}
-
-		ShaderResourceGroupBuilder& Count(u32 count)
-		{
-			variable.arrayCount = count;
-			return *this;
-		}
-
-		ShaderResourceGroupBuilder& Type(ShaderResourceType type)
-		{
-			variable.type = type;
-			return *this;
-		}
-
-		ShaderResourceGroupBuilder& Stage(ShaderStage stage)
-		{
-			variable.stageFlags |= stage;
-			return *this;
-		}
-
-		ShaderResourceGroupBuilder& WithoutStage(ShaderStage stage)
-		{
-			EnumRemoveFlags(variable.stageFlags, stage);
-			return *this;
-		}
-
-		ShaderResourceGroupBuilder& Dynamic(bool isDynamic = true)
-		{
-			variable.isDynamic = isDynamic;
-			return *this;
-		}
-
-		const ShaderResourceGroupDesc& Build()
-		{
-			desc.variables.Add(variable);
-			return desc;
-		}
-
-	private:
-
-		bool isInitialized = false;
-		ShaderResourceVariableDesc variable{};
-
-		ShaderResourceGroupDesc desc{};
 	};
 
 	struct ShaderStageDesc
@@ -458,8 +400,6 @@ namespace CE::RHI
 		CullMode cullMode = CULL_MODE_BACK;
 
 		Array<RHI::ShaderResourceGroup*> shaderResourceGroups{};
-
-		Array<ShaderResourceGroupDesc> resourceDesc{};
 	};
 
 	struct CORERHI_API GraphicsPipelineBuilder
@@ -472,7 +412,46 @@ namespace CE::RHI
 			return *this;
 		}
 
+		GraphicsPipelineBuilder& VertexAttrib(u32 location, TypeId dataType, u32 offset)
+		{
+			VertexAttribDesc attrib{};
+			attrib.location = location;
+			attrib.dataType = dataType;
+			attrib.offset = offset;
+			desc.vertexAttribs.Add(attrib);
+			return *this;
+		}
 
+		GraphicsPipelineBuilder& VertexShader(RHI::ShaderModule* shaderModule, const String& entry = "VertMain")
+		{
+			desc.vertexShader = shaderModule;
+			desc.vertexEntry = entry;
+			return *this;
+		}
+
+		GraphicsPipelineBuilder& FragmentShader(RHI::ShaderModule* shaderModule, const String& entry = "FragMain")
+		{
+			desc.fragmentShader = shaderModule;
+			desc.fragmentEntry = entry;
+			return *this;
+		}
+
+		GraphicsPipelineBuilder& CullMode(CullMode cullMode)
+		{
+			desc.cullMode = cullMode;
+			return *this;
+		}
+
+		GraphicsPipelineBuilder& ShaderResource(RHI::ShaderResourceGroup* srg)
+		{
+			desc.shaderResourceGroups.Add(srg);
+			return *this;
+		}
+
+		const GraphicsPipelineDesc& Build()
+		{
+			return desc;
+		}
 
 	private:
 

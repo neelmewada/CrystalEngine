@@ -23,6 +23,8 @@ namespace CE
 
 		virtual void Tick(f32 deltaTime);
 
+		virtual void Render();
+
 		void DispatchOnMainThread(Delegate<void(void)> action);
 
 		virtual GameInstance* GetGameInstance();

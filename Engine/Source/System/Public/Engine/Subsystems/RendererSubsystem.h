@@ -22,6 +22,8 @@ namespace CE
 
 		void Tick(f32 delta) override;
 
+		void Render() override;
+
 	protected:
 
 		// - Fields -
@@ -33,7 +35,9 @@ namespace CE
 
 		RHI::GraphicsPipelineState* errorPipeline = nullptr;
 
-		
+		RHI::ShaderResourceGroup* srg0 = nullptr;
+		RHI::ShaderResourceGroup* srg1 = nullptr;
+
 	};
     
 } // namespace CE

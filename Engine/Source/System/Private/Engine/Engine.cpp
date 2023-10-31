@@ -79,6 +79,14 @@ namespace CE
 		}
 	}
 
+	void Engine::Render()
+	{
+		for (auto subsystem : engineSubsystems)
+		{
+			subsystem->Render();
+		}
+	}
+
 	void Engine::DispatchOnMainThread(Delegate<void(void)> action)
 	{
 		mainThreadQueueMutex.Lock();

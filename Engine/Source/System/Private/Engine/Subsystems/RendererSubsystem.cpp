@@ -23,25 +23,46 @@ namespace CE
 
 		auto errorShader = Shader::GetErrorShader();
 		auto shaderModules = errorShader->GetShaderModules();
-		
-		RHI::GraphicsPipelineDesc desc{};
-		desc.vertexShader = shaderModules[0];
-		desc.fragmentShader = shaderModules[1];
-		desc.vertexSizeInBytes = sizeof(Vec3);
-		desc.cullMode = RHI::CULL_MODE_BACK;
-		
-		desc.vertexAttribs.Resize(1);
-		desc.vertexAttribs[0].dataType = TYPEID(Vec3);
-		desc.vertexAttribs[0].location = 0;
-		desc.vertexAttribs[0].offset = 0;
 
-		
+		RHI::ShaderResourceGroupDesc resourceGroup0Desc{};
+		resourceGroup0Desc.variables.Add({
+			.binding = 0,
+			.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
+			.isDynamic = false,
+			.stageFlags = RHI::ShaderStage::Vertex
+			});
+
+		srg0 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup0Desc);
+
+		RHI::ShaderResourceGroupDesc resourceGroup1Desc{};
+		resourceGroup1Desc.variables.Add({
+			.binding = 0,
+			.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
+			.isDynamic = false,
+			.stageFlags = RHI::ShaderStage::Vertex
+			});
+
+		srg1 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup1Desc);
+
+		RHI::GraphicsPipelineDesc desc = RHI::GraphicsPipelineBuilder()
+			.VertexSize(sizeof(Vec3))
+			.VertexAttrib(0, TYPEID(Vec3), 0)
+			.CullMode(RHI::CULL_MODE_BACK)
+			.VertexShader(shaderModules[0])
+			.FragmentShader(shaderModules[1])
+			.ShaderResource(srg0)
+			.ShaderResource(srg1)
+			.Build();
         
 		errorPipeline = RHI::gDynamicRHI->CreateGraphicsPipelineState(renderTarget, desc);
 	}
 
 	void RendererSubsystem::Shutdown()
 	{
+		if (srg0 != nullptr)
+			RHI::gDynamicRHI->DestroyShaderResourceGroup(srg0);
+		if (srg1 != nullptr)
+			RHI::gDynamicRHI->DestroyShaderResourceGroup(srg1);
 		if (errorPipeline != nullptr)
 			RHI::gDynamicRHI->DestroyPipelineState(errorPipeline);
         errorPipeline = nullptr;
@@ -52,10 +73,14 @@ namespace CE
 	void RendererSubsystem::Tick(f32 delta)
 	{
 		Super::Tick(delta);
+		
+	}
 
+	void RendererSubsystem::Render()
+	{
 		if (sceneSubsystem == nullptr)
 			return;
-		
+
 		auto scene = sceneSubsystem->GetActiveScene();
 		if (scene == nullptr)
 			return;
@@ -64,18 +89,22 @@ namespace CE
 		if (mainCamera == nullptr)
 			return;
 
-		auto viewMatrix = mainCamera->GetTransform().GetInverse();
-		
+		auto cameraMatrix = mainCamera->GetTransform();
+
+		auto viewMatrix = cameraMatrix.GetInverse();
+
 		const auto& components = scene->componentsByType[TYPEID(MeshComponent)];
-		
+
 		for (auto [uuid, component] : components)
 		{
-			MeshComponent* meshComponent = Object::CastTo<MeshComponent>(component);
+			StaticMeshComponent* meshComponent = Object::CastTo<StaticMeshComponent>(component);
 			if (meshComponent == nullptr)
 				continue;
+			
 
 			Matrix4x4 modelMatrix = meshComponent->GetTransform();
 
+			
 		}
 	}
 
