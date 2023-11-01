@@ -26,6 +26,8 @@ namespace CE
 		virtual void ReadData(u8** outData, u64* outDataSize) override;
         
         virtual void Resize(u64 newBufferSize) override;
+        
+        virtual u64 GetBufferSize() override;
 
     private:
         void CreateUploadContext();

@@ -100,7 +100,6 @@ namespace CE
 			StaticMeshComponent* meshComponent = Object::CastTo<StaticMeshComponent>(component);
 			if (meshComponent == nullptr)
 				continue;
-			
 
 			Matrix4x4 modelMatrix = meshComponent->GetTransform();
 

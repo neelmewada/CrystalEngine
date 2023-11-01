@@ -39,6 +39,8 @@ namespace CE
 		inline void SetMesh(ModelData* modelData) { this->modelData = modelData; }
 
 		static StaticMesh* GetCubeMesh();
+        
+        RHI::Buffer* GetVertexBuffer();
 
 	protected:
 
@@ -47,6 +49,8 @@ namespace CE
 
 		FIELD()
 		ModelData* modelData = nullptr;
+        
+        RHI::Buffer* vertexBuffer = nullptr;
 	};
 	
 } // namespace CE

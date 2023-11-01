@@ -95,6 +95,11 @@ namespace CE
         Free();
 	}
 
+    u64 VulkanBuffer::GetBufferSize()
+    {
+        return bufferSize;
+    }
+
     void VulkanBuffer::Free()
     {
         if (buffer != nullptr)

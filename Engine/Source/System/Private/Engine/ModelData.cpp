@@ -68,11 +68,123 @@ namespace CE
         
         RHI::Buffer* buffer = RHI::gDynamicRHI->CreateBuffer(desc);
         
+        f32* data = new f32[desc.bufferSize];
+        
+        for (u32 vertIdx = 0; vertIdx < numVertices; vertIdx++)
+        {
+            f32* posStart = data + vertIdx * (u32)desc.structureByteStride;
+            
+            f32* pos = posStart;
+            
+            for (VertexInputType inputType : inputs)
+            {
+                SIZE_T size = GetVertexInputTypeSize(inputType);
+                Vec2* vec2 = (Vec2*)pos;
+                Vec3* vec3 = (Vec3*)pos;
+                Vec4* vec4 = (Vec4*)pos;
+                Color* color = (Color*)pos;
+                
+                switch (inputType) {
+                    case VertexInputType::None:
+                        break;
+                    case VertexInputType::Position:
+                        *vec3 = vertices[vertIdx];
+                        break;
+                    case VertexInputType::UV0:
+                        *vec2 = uvCoords[vertIdx];
+                        break;
+                    case VertexInputType::Normal:
+                        *vec3 = normals[vertIdx];
+                        break;
+                    case VertexInputType::Tangent:
+                        *vec3 = tangents[vertIdx];
+                        break;
+                    case VertexInputType::Color:
+                        *color = vertexColors[vertIdx];
+                        break;
+                }
+                
+                pos += size;
+            }
+        }
+        
+        RHI::BufferData uploadData{};
+        uploadData.data = data;
+        uploadData.dataSize = buffer->GetBufferSize();
+        uploadData.startOffsetInBuffer = 0;
+        buffer->UploadData(uploadData);
+        
+        delete[] data;
+        
         return buffer;
     }
 
     void Mesh::PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputType>& inputs)
     {
+        u64 structureSize = 0;
+        
+        for (VertexInputType inputType : inputs)
+        {
+            structureSize += GetVertexInputTypeSize(inputType);
+        }
+        
+        u64 numVertices = vertices.GetSize();
+        u64 bufferSize = (u64)structureSize * numVertices;
+        
+        if (buffer->GetBufferSize() != bufferSize)
+        {
+            buffer->Resize(bufferSize);
+        }
+        
+        f32* data = new f32[bufferSize];
+        
+        for (u32 vertIdx = 0; vertIdx < numVertices; vertIdx++)
+        {
+            f32* posStart = data + vertIdx * (u32)structureSize;
+            
+            f32* pos = posStart;
+            
+            for (VertexInputType inputType : inputs)
+            {
+                SIZE_T size = GetVertexInputTypeSize(inputType);
+                Vec2* vec2 = (Vec2*)pos;
+                Vec3* vec3 = (Vec3*)pos;
+                Vec4* vec4 = (Vec4*)pos;
+                Color* color = (Color*)pos;
+                
+                switch (inputType) {
+                    case VertexInputType::None:
+                        break;
+                    case VertexInputType::Position:
+                        *vec3 = vertices[vertIdx];
+                        break;
+                    case VertexInputType::UV0:
+                        *vec2 = uvCoords[vertIdx];
+                        break;
+                    case VertexInputType::Normal:
+                        *vec3 = normals[vertIdx];
+                        break;
+                    case VertexInputType::Tangent:
+                        *vec3 = tangents[vertIdx];
+                        break;
+                    case VertexInputType::Color:
+                        *color = vertexColors[vertIdx];
+                        break;
+                }
+                
+                pos += size;
+            }
+        }
+        
+        RHI::BufferData uploadData{};
+        uploadData.data = data;
+        uploadData.dataSize = buffer->GetBufferSize();
+        uploadData.startOffsetInBuffer = 0;
+        buffer->UploadData(uploadData);
+        
+        delete[] data;
+        data = nullptr;
+        
         
     }
 

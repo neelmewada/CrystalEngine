@@ -51,6 +51,8 @@ namespace CE::RHI
         virtual BufferBindFlags GetBindFlags() = 0;
 
         virtual void* GetHandle() = 0;
+        
+        virtual u64 GetBufferSize() = 0;
 
         virtual void UploadData(const BufferData& data) = 0;
 
