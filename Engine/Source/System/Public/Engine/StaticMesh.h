@@ -50,7 +50,7 @@ namespace CE
 		FIELD()
 		ModelData* modelData = nullptr;
         
-        RHI::Buffer* vertexBuffer = nullptr;
+        
 	};
 	
 } // namespace CE

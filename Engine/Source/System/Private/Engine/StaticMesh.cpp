@@ -5,13 +5,12 @@ namespace CE
 
     StaticMesh::StaticMesh()
     {
-		//modelData = CreateDefaultSubobject<ModelData>("ModelData");
         modelData = nullptr;
     }
 
     RHI::Buffer* StaticMesh::GetVertexBuffer()
     {
-        return vertexBuffer;
+        
     }
 
 	StaticMesh* StaticMesh::GetCubeMesh()

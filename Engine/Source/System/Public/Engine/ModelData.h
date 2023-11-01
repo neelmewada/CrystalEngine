@@ -6,11 +6,11 @@ namespace CE
     enum class VertexInputType
     {
         None = 0,
-        Position,
-        UV0,
-        Normal,
-        Tangent,
-        Color,
+        Position = BIT(0),
+        UV0 = BIT(1),
+        Normal = BIT(2),
+        Tangent = BIT(3),
+        Color = BIT(4),
     };
     ENUM_CLASS_FLAGS(VertexInputType);
 
@@ -77,6 +77,7 @@ namespace CE
         RHI::Buffer* CreateBuffer(const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
         
         void PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
+        
 	};
 
 	CLASS()
@@ -84,12 +85,17 @@ namespace CE
 	{
 		CE_CLASS(ModelData, Object)
 	public:
+        
+        virtual ~ModelData();
 
 		FIELD()
 		Array<Mesh> lod{};
 
 		static ModelData* GetCubeModel();
 		
+    private:
+        
+        
 	};
     
 } // namespace CE

@@ -188,6 +188,11 @@ namespace CE
         
     }
 
+    ModelData::~ModelData()
+    {
+        
+    }
+
 	ModelData* ModelData::GetCubeModel()
 	{
 		Package* transient = ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
