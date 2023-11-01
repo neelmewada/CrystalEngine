@@ -55,6 +55,9 @@ namespace CE::RHI
         virtual void UploadData(const BufferData& data) = 0;
 
 		virtual void ReadData(u8** outData, u64* outDataSize) = 0;
+        
+        virtual void Resize(u64 newBufferSize) = 0;
+        
     };
     
     class CORERHI_API Texture : public Resource, public IDeviceObject

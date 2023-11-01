@@ -2,6 +2,20 @@
 
 namespace CE
 {
+    ENUM()
+    enum class VertexInputType
+    {
+        None = 0,
+        Position,
+        UV0,
+        Normal,
+        Tangent,
+        Color,
+    };
+    ENUM_CLASS_FLAGS(VertexInputType);
+
+    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputType input);
+
 	STRUCT()
 	struct SYSTEM_API SubMesh
 	{
@@ -19,28 +33,6 @@ namespace CE
 		void Release();
 	};
 
-    STRUCT()
-    struct SYSTEM_API MeshVertex
-    {
-        CE_STRUCT(MeshVertex)
-    public:
-        
-        FIELD()
-        Vec3 position{};
-        
-        FIELD()
-        Vec2 uv{};
-        
-        FIELD()
-        Vec3 normal{};
-        
-        FIELD()
-        Vec3 tangent{};
-        
-        FIELD()
-        Color vertexColor{};
-    };
-
 	STRUCT()
 	struct SYSTEM_API Mesh
 	{
@@ -49,9 +41,6 @@ namespace CE
 
 		FIELD()
 		Name name{};
-        
-        FIELD()
-        Array<MeshVertex> allVertices{};
 
 		FIELD()
 		Array<Vec3> vertices{};
@@ -85,8 +74,9 @@ namespace CE
 
 		void Release();
         
-        RHI::Buffer* CreateBuffer();
+        RHI::Buffer* CreateBuffer(const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
         
+        void PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
 	};
 
 	CLASS()

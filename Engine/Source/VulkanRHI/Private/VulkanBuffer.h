@@ -22,12 +22,19 @@ namespace CE
 
         virtual void UploadData(const RHI::BufferData& bufferData) override;
 
+        /// Allocates a raw buffer in CPU memory and reads buffer data into it. You are responsible for releasing outData memory block using Memory::Free().
 		virtual void ReadData(u8** outData, u64* outDataSize) override;
+        
+        virtual void Resize(u64 newBufferSize) override;
 
     private:
+        void CreateUploadContext();
+        
         void UploadDataToGPU(const RHI::BufferData& bufferData);
 
 		void ReadDataFromGPU(u8** outData, u64* outDataSize);
+        
+        void Free();
 
     private:
         Name name{};

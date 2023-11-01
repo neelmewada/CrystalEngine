@@ -2,6 +2,26 @@
 
 namespace CE
 {
+    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputType input)
+    {
+        switch (input) {
+            case VertexInputType::Position:
+                return sizeof(Vec3);
+            case VertexInputType::UV0:
+                return sizeof(Vec2);
+            case VertexInputType::Normal:
+                return sizeof(Vec3);
+            case VertexInputType::Tangent:
+                return sizeof(Vec3);
+            case VertexInputType::Color:
+                return sizeof(Vec4);
+            default:
+                return 0;
+        }
+        
+        return 0;
+    }
+
 	void SubMesh::Clear()
 	{
 		materialSlotIndex = 0;
@@ -28,20 +48,31 @@ namespace CE
         Clear();
     }
     
-    RHI::Buffer* Mesh::CreateBuffer()
+    RHI::Buffer* Mesh::CreateBuffer(const Array<VertexInputType>& inputs)
     {
         RHI::BufferDesc desc{};
         desc.name = "VertexBuffer";
         desc.allocMode = RHI::BufferAllocMode::GpuMemory;
         desc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
         desc.usageFlags = RHI::BufferUsageFlags::Default;
-        // VertexPosition + UV + Normal
-        desc.structureByteStride = sizeof(Vec3) + sizeof(Vec2) + sizeof(Vec3);
+        
+        desc.structureByteStride = 0;
+        
+        for (VertexInputType inputType : inputs)
+        {
+            desc.structureByteStride += GetVertexInputTypeSize(inputType);
+        }
+        
         u64 numVertices = vertices.GetSize();
         desc.bufferSize = (u64)desc.structureByteStride * numVertices;
         
         RHI::Buffer* buffer = RHI::gDynamicRHI->CreateBuffer(desc);
         
+        return buffer;
+    }
+
+    void Mesh::PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputType>& inputs)
+    {
         
     }
 
@@ -69,7 +100,7 @@ namespace CE
 
 			mesh.submeshes.Resize(1);
 			SubMesh& submesh = mesh.submeshes[0];
-
+            
 			mesh.vertices = {
 				Vec3(0.5, -0.5, 0.5),
 				Vec3(-0.5, -0.5, 0.5),
