@@ -33,11 +33,13 @@ namespace CE
 		void Release();
 	};
 
-	STRUCT()
-	struct SYSTEM_API Mesh
+	CLASS()
+	class SYSTEM_API Mesh : public Object
 	{
-		CE_STRUCT(Mesh)
+		CE_CLASS(Mesh, Object)
 	public:
+        
+        virtual ~Mesh();
 
 		FIELD()
 		Name name{};
@@ -71,13 +73,13 @@ namespace CE
         }
 
 		void Clear();
-
-		void Release();
         
         RHI::Buffer* CreateBuffer(const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
         
         void PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
         
+        
+        HashMap<VertexInputType, RHI::Buffer*> vertexBuffers{};
 	};
 
 	CLASS()
@@ -89,7 +91,7 @@ namespace CE
         virtual ~ModelData();
 
 		FIELD()
-		Array<Mesh> lod{};
+		Array<Mesh*> lod{};
 
 		static ModelData* GetCubeModel();
 		

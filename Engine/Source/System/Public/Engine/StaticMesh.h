@@ -40,7 +40,7 @@ namespace CE
 
 		static StaticMesh* GetCubeMesh();
         
-        RHI::Buffer* GetVertexBuffer();
+        RHI::Buffer* GetVertexBuffer(int lod = 0);
 
 	protected:
 
@@ -50,7 +50,7 @@ namespace CE
 		FIELD()
 		ModelData* modelData = nullptr;
         
-        
+        Array<RHI::Buffer*> vertexBufferLODs{};
 	};
 	
 } // namespace CE

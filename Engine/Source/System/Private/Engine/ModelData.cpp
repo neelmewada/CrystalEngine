@@ -43,8 +43,13 @@ namespace CE
 		vertexColors.Clear();
     }
 
-    void Mesh::Release()
+    Mesh::~Mesh()
     {
+        for (auto [flags, buffer] : vertexBuffers)
+        {
+            RHI::gDynamicRHI->DestroyBuffer(buffer);
+        }
+        
         Clear();
     }
     
@@ -57,10 +62,12 @@ namespace CE
         desc.usageFlags = RHI::BufferUsageFlags::Default;
         
         desc.structureByteStride = 0;
+        VertexInputType flags = VertexInputType::None;
         
         for (VertexInputType inputType : inputs)
         {
             desc.structureByteStride += GetVertexInputTypeSize(inputType);
+            flags |= inputType;
         }
         
         u64 numVertices = vertices.GetSize();
@@ -115,6 +122,9 @@ namespace CE
         buffer->UploadData(uploadData);
         
         delete[] data;
+        
+        if (vertexBuffers[flags] == nullptr)
+            vertexBuffers[flags] = buffer;
         
         return buffer;
     }
@@ -213,12 +223,15 @@ namespace CE
 		{
 			cubeModel = CreateObject<ModelData>(transient, "CubeMesh", OF_Transient);
 			cubeModel->lod.Resize(1);
-			Mesh& mesh = cubeModel->lod[0];
-
-			mesh.submeshes.Resize(1);
-			SubMesh& submesh = mesh.submeshes[0];
             
-			mesh.vertices = {
+            cubeModel->lod[0] = CreateObject<Mesh>(cubeModel, TEXT("CubeMesh"), OF_Transient);
+            
+			Mesh* mesh = cubeModel->lod[0];
+
+			mesh->submeshes.Resize(1);
+			SubMesh& submesh = mesh->submeshes[0];
+            
+			mesh->vertices = {
 				Vec3(0.5, -0.5, 0.5),
 				Vec3(-0.5, -0.5, 0.5),
 				Vec3(0.5, 0.5, 0.5),
@@ -265,7 +278,7 @@ namespace CE
 				20, 22, 23
 			};
 
-			mesh.uvCoords = {
+			mesh->uvCoords = {
 				Vec2(0, 0),
 				Vec2(1, 0),
 				Vec2(0, 1),
@@ -297,7 +310,7 @@ namespace CE
 				Vec2(1, 0)
 			};
 
-			mesh.normals = {
+			mesh->normals = {
 				Vec3(0, 0, 1),
 				Vec3(0, 0, 1),
 				Vec3(0, 0, 1),
@@ -329,7 +342,7 @@ namespace CE
 				Vec3(1, 0, 0)
 			};
 
-			mesh.tangents = {
+			mesh->tangents = {
 				Vec4(-1, 0, 0, -1),
 				Vec4(-1, 0, 0, -1),
 				Vec4(-1, 0, 0, -1),

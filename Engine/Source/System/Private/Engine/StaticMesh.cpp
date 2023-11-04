@@ -8,8 +8,11 @@ namespace CE
         modelData = nullptr;
     }
 
-    RHI::Buffer* StaticMesh::GetVertexBuffer()
+    RHI::Buffer* StaticMesh::GetVertexBuffer(int lod)
     {
+        if (modelData == nullptr || lod >= modelData->lod.GetSize() || lod < 0)
+            return nullptr;
+        
         
     }
 
