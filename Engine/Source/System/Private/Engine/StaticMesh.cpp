@@ -6,6 +6,7 @@ namespace CE
     StaticMesh::StaticMesh()
     {
         modelData = nullptr;
+		vertexAttribs = VertexInputAttribute::Position | VertexInputAttribute::UV0 | VertexInputAttribute::Normal;
     }
 
     RHI::Buffer* StaticMesh::GetVertexBuffer(int lod)
@@ -13,8 +14,31 @@ namespace CE
         if (modelData == nullptr || lod >= modelData->lod.GetSize() || lod < 0)
             return nullptr;
         
-        
+		return modelData->lod[lod]->GetOrCreateBuffer();
     }
+
+	RHI::Buffer* StaticMesh::GetErrorShaderVertexBuffer()
+	{
+		if (modelData == nullptr || modelData->lod.GetSize() == 0)
+			return nullptr;
+
+		return modelData->lod[0]->GetOrCreateBuffer({ VertexInputAttribute::Position });
+	}
+
+	RHI::Buffer* StaticMesh::GetIndexBuffer(int lod)
+	{
+		if (modelData == nullptr || lod >= modelData->lod.GetSize() || lod < 0)
+			return nullptr;
+
+		return modelData->lod[lod]->GetOrCreateIndexBuffer();
+	}
+
+	bool StaticMesh::Uses32BitIndices(int lod)
+	{
+		if (modelData == nullptr || lod >= modelData->lod.GetSize() || lod < 0)
+			return false;
+		return modelData->lod[lod]->uses32BitIndex;
+	}
 
 	StaticMesh* StaticMesh::GetCubeMesh()
 	{

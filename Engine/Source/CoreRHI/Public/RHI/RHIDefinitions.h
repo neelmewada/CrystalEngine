@@ -138,7 +138,7 @@ namespace CE::RHI
         Undefined = 0,
         VertexBuffer = BIT(0),
         IndexBuffer = BIT(1),
-        UniformBuffer = BIT(2),
+        ConstantBuffer = BIT(2),
         StorageBuffer = BIT(3),
         // Internal usage only!
         StagingBuffer = BIT(4),

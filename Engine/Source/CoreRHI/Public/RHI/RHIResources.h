@@ -136,13 +136,20 @@ namespace CE::RHI
 
 	public:
         
-        
+		virtual void Bind(Name name, RHI::Buffer* buffer) = 0;
         
 	};
 
     /***********************************
     *   Pipeline
     */
+
+	class IPipelineLayout
+	{
+	public:
+		virtual ~IPipelineLayout() {}
+
+	};
 
 	class IPipelineState
 	{
@@ -154,6 +161,8 @@ namespace CE::RHI
 		virtual bool IsComputePipelineState() = 0;
 
 		virtual void* GetNativeHandle() = 0;
+
+		virtual IPipelineLayout* GetPipelineLayout() = 0;
 
 	};
 

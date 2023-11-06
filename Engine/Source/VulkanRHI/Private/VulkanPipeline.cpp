@@ -299,52 +299,10 @@ namespace CE
 			setLayouts.Add(setLayout);
 		}
 
-		/*setLayouts.Resize(2);
-
-		// Set 0
-		{
-			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = 0;
-			binding.descriptorCount = 1;
-			binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
-			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			setLayoutCI.bindingCount = 1;
-			setLayoutCI.pBindings = &binding;
-			
-			auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayouts[0]);
-			if (result != VK_SUCCESS)
-			{
-				CE_LOG(Error, All, "Failed to create Descriptor Set Layout 0");
-				return;
-			}
-		}
-
-		// Set 1
-		{
-			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = 0;
-			binding.descriptorCount = 1;
-			binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
-			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			setLayoutCI.bindingCount = 1;
-			setLayoutCI.pBindings = &binding;
-
-			result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayouts[1]);
-			if (result != VK_SUCCESS)
-			{
-				CE_LOG(Error, All, "Failed to create Descriptor Set Layout 0");
-				return;
-			}
-		}*/
-
 		pipelineLayoutCI.setLayoutCount = setLayouts.GetSize();
 		pipelineLayoutCI.pSetLayouts = setLayouts.GetData();
+
+		VkPipelineLayout pipelineLayout = nullptr;
 
 		result = vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCI, nullptr, &pipelineLayout);
 		if (result != VK_SUCCESS)
@@ -352,6 +310,11 @@ namespace CE
 			CE_LOG(Error, All, "Failed to create Vulkan Pipeline Layout. Error code {}", (int)result);
 			return;
 		}
+
+		if (this->pipelineLayout == nullptr)
+			this->pipelineLayout = new VulkanPipelineLayout(device, pipelineLayout);
+		else
+			this->pipelineLayout->handle = pipelineLayout;
 
 		pipelineCI.layout = pipelineLayout;
 		pipelineCI.basePipelineHandle = VK_NULL_HANDLE;
@@ -377,7 +340,7 @@ namespace CE
 
 		if (pipelineLayout != nullptr)
 		{
-			vkDestroyPipelineLayout(device->GetHandle(), pipelineLayout, nullptr);
+			delete pipelineLayout;
 			pipelineLayout = nullptr;
 		}
 
@@ -389,6 +352,23 @@ namespace CE
 			}
 		}
 		setLayouts.Clear();
+	}
+
+	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout)
+		: device(device), handle(pipelineLayout)
+	{
+
+	}
+
+	VulkanPipelineLayout::~VulkanPipelineLayout()
+	{
+		if (handle != nullptr)
+		{
+			vkDestroyPipelineLayout(device->GetHandle(), handle, nullptr);
+			handle = nullptr;
+		}
+
+		device = nullptr;
 	}
 
 } // namespace CE

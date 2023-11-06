@@ -55,6 +55,8 @@ namespace CE
 	*	Globals
 	*/
 
+	class Engine;
+
 	extern SYSTEM_API Engine* gEngine;
 
 	SYSTEM_API JobManager* GetJobManager();

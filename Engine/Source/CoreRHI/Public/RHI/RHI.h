@@ -208,6 +208,11 @@ namespace CE::RHI
         virtual void Begin() = 0;
         virtual void End() = 0;
 
+		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers) = 0;
+		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets) = 0;
+
+		virtual void BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset) = 0;
+
         // - ImGui Setup -
 
         virtual bool InitImGui(FontPreloadConfig* preloadFonts, Array<void*>& outFontHandles) = 0;

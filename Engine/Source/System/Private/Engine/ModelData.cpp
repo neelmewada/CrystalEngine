@@ -2,18 +2,18 @@
 
 namespace CE
 {
-    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputType input)
+    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input)
     {
         switch (input) {
-            case VertexInputType::Position:
+            case VertexInputAttribute::Position:
                 return sizeof(Vec3);
-            case VertexInputType::UV0:
+            case VertexInputAttribute::UV0:
                 return sizeof(Vec2);
-            case VertexInputType::Normal:
+            case VertexInputAttribute::Normal:
                 return sizeof(Vec3);
-            case VertexInputType::Tangent:
+            case VertexInputAttribute::Tangent:
                 return sizeof(Vec3);
-            case VertexInputType::Color:
+            case VertexInputAttribute::Color:
                 return sizeof(Vec4);
             default:
                 return 0;
@@ -39,8 +39,10 @@ namespace CE
 		uvCoords.Clear();
 		normals.Clear();
 		tangents.Clear();
-		submeshes.Clear();
+		subMeshes.Clear();
 		vertexColors.Clear();
+		vertexBuffers.Clear();
+		indexBuffer = nullptr;
     }
 
     Mesh::~Mesh()
@@ -49,11 +51,16 @@ namespace CE
         {
             RHI::gDynamicRHI->DestroyBuffer(buffer);
         }
+
+		if (indexBuffer != nullptr)
+		{
+			RHI::gDynamicRHI->DestroyBuffer(indexBuffer);
+		}
         
         Clear();
     }
     
-    RHI::Buffer* Mesh::CreateBuffer(const Array<VertexInputType>& inputs)
+    RHI::Buffer* Mesh::GetOrCreateBuffer(const Array<VertexInputAttribute>& inputs)
     {
         RHI::BufferDesc desc{};
         desc.name = "VertexBuffer";
@@ -62,13 +69,18 @@ namespace CE
         desc.usageFlags = RHI::BufferUsageFlags::Default;
         
         desc.structureByteStride = 0;
-        VertexInputType flags = VertexInputType::None;
+        VertexInputAttribute flags = VertexInputAttribute::None;
         
-        for (VertexInputType inputType : inputs)
+        for (VertexInputAttribute inputType : inputs)
         {
             desc.structureByteStride += GetVertexInputTypeSize(inputType);
             flags |= inputType;
         }
+
+		if (vertexBuffers.KeyExists(flags) && vertexBuffers[flags] != nullptr)
+		{
+			return vertexBuffers[flags];
+		}
         
         u64 numVertices = vertices.GetSize();
         desc.bufferSize = (u64)desc.structureByteStride * numVertices;
@@ -83,7 +95,7 @@ namespace CE
             
             f32* pos = posStart;
             
-            for (VertexInputType inputType : inputs)
+            for (VertexInputAttribute inputType : inputs)
             {
                 SIZE_T size = GetVertexInputTypeSize(inputType);
                 Vec2* vec2 = (Vec2*)pos;
@@ -92,21 +104,21 @@ namespace CE
                 Color* color = (Color*)pos;
                 
                 switch (inputType) {
-                    case VertexInputType::None:
+                    case VertexInputAttribute::None:
                         break;
-                    case VertexInputType::Position:
+                    case VertexInputAttribute::Position:
                         *vec3 = vertices[vertIdx];
                         break;
-                    case VertexInputType::UV0:
+                    case VertexInputAttribute::UV0:
                         *vec2 = uvCoords[vertIdx];
                         break;
-                    case VertexInputType::Normal:
+                    case VertexInputAttribute::Normal:
                         *vec3 = normals[vertIdx];
                         break;
-                    case VertexInputType::Tangent:
+                    case VertexInputAttribute::Tangent:
                         *vec3 = tangents[vertIdx];
                         break;
-                    case VertexInputType::Color:
+                    case VertexInputAttribute::Color:
                         *color = vertexColors[vertIdx];
                         break;
                 }
@@ -129,11 +141,11 @@ namespace CE
         return buffer;
     }
 
-    void Mesh::PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputType>& inputs)
+    void Mesh::PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputAttribute>& inputs)
     {
         u64 structureSize = 0;
         
-        for (VertexInputType inputType : inputs)
+        for (VertexInputAttribute inputType : inputs)
         {
             structureSize += GetVertexInputTypeSize(inputType);
         }
@@ -154,7 +166,7 @@ namespace CE
             
             f32* pos = posStart;
             
-            for (VertexInputType inputType : inputs)
+            for (VertexInputAttribute inputType : inputs)
             {
                 SIZE_T size = GetVertexInputTypeSize(inputType);
                 Vec2* vec2 = (Vec2*)pos;
@@ -163,21 +175,21 @@ namespace CE
                 Color* color = (Color*)pos;
                 
                 switch (inputType) {
-                    case VertexInputType::None:
+                    case VertexInputAttribute::None:
                         break;
-                    case VertexInputType::Position:
+                    case VertexInputAttribute::Position:
                         *vec3 = vertices[vertIdx];
                         break;
-                    case VertexInputType::UV0:
+                    case VertexInputAttribute::UV0:
                         *vec2 = uvCoords[vertIdx];
                         break;
-                    case VertexInputType::Normal:
+                    case VertexInputAttribute::Normal:
                         *vec3 = normals[vertIdx];
                         break;
-                    case VertexInputType::Tangent:
+                    case VertexInputAttribute::Tangent:
                         *vec3 = tangents[vertIdx];
                         break;
-                    case VertexInputType::Color:
+                    case VertexInputAttribute::Color:
                         *color = vertexColors[vertIdx];
                         break;
                 }
@@ -194,9 +206,73 @@ namespace CE
         
         delete[] data;
         data = nullptr;
-        
-        
     }
+
+	RHI::Buffer* Mesh::GetOrCreateIndexBuffer()
+	{
+		if (indexBuffer != nullptr)
+			return indexBuffer;
+
+		RHI::BufferDesc indexBufferDesc{};
+		indexBufferDesc.name = "Index Buffer";
+		indexBufferDesc.bindFlags = RHI::BufferBindFlags::IndexBuffer;
+		indexBufferDesc.allocMode = RHI::BufferAllocMode::GpuMemory;
+		indexBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+
+		constexpr SIZE_T u16Max = NumericLimits<u16>::Max();
+		uses32BitIndex = vertices.GetSize() > u16Max;
+
+		u32 totalIndices = 0;
+		for (const auto& subMesh : subMeshes)
+		{
+			totalIndices += subMesh.indices.GetSize();
+		}
+
+		if (totalIndices == 0)
+			return nullptr;
+
+		void* bytes = nullptr;
+
+		if (uses32BitIndex)
+		{
+			indexBufferDesc.bufferSize = sizeof(u32) * totalIndices;
+			bytes = Memory::Malloc(sizeof(u32) * totalIndices);
+			u32* data = (u32*)bytes;
+
+			for (int i = 0; i < subMeshes.GetSize(); i++)
+			{
+				memcpy(data, subMeshes[i].indices.GetData(), subMeshes[i].indices.GetSize());
+				data = data + subMeshes[i].indices.GetSize();
+			}
+		}
+		else
+		{
+			indexBufferDesc.bufferSize = sizeof(u16) * totalIndices;
+			bytes = Memory::Malloc(sizeof(u16) * totalIndices);
+			u16* data = (u16*)bytes;
+
+			for (const auto& subMesh : subMeshes)
+			{
+				for (int i = 0; i < subMesh.indices.GetSize(); i++)
+				{
+					data[i] = (u16)subMesh.indices[i];
+				}
+
+				data += subMesh.indices.GetSize();
+			}
+		}
+
+		RHI::BufferData initialData{};
+		initialData.data = bytes;
+		initialData.dataSize = indexBufferDesc.bufferSize;
+		initialData.startOffsetInBuffer = 0;
+
+		indexBuffer = RHI::gDynamicRHI->CreateBuffer(indexBufferDesc);
+
+		Memory::Free(bytes);
+
+		return indexBuffer;
+	}
 
     ModelData::~ModelData()
     {
@@ -228,8 +304,8 @@ namespace CE
             
 			Mesh* mesh = cubeModel->lod[0];
 
-			mesh->submeshes.Resize(1);
-			SubMesh& submesh = mesh->submeshes[0];
+			mesh->subMeshes.Resize(1);
+			SubMesh& submesh = mesh->subMeshes[0];
             
 			mesh->vertices = {
 				Vec3(0.5, -0.5, 0.5),

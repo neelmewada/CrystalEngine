@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	RHI::Buffer* vertexBuffer = nullptr;
 
     RendererSubsystem::RendererSubsystem()
     {
@@ -27,6 +28,7 @@ namespace CE
 		RHI::ShaderResourceGroupDesc resourceGroup0Desc{};
 		resourceGroup0Desc.variables.Add({
 			.binding = 0,
+			.name = "_PerViewData",
 			.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
 			.isDynamic = false,
 			.stageFlags = RHI::ShaderStage::Vertex
@@ -37,6 +39,7 @@ namespace CE
 		RHI::ShaderResourceGroupDesc resourceGroup1Desc{};
 		resourceGroup1Desc.variables.Add({
 			.binding = 0,
+			.name = "_Model",
 			.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
 			.isDynamic = false,
 			.stageFlags = RHI::ShaderStage::Vertex
@@ -100,6 +103,12 @@ namespace CE
 			StaticMeshComponent* meshComponent = Object::CastTo<StaticMeshComponent>(component);
 			if (meshComponent == nullptr)
 				continue;
+
+			StaticMesh* staticMesh = meshComponent->GetStaticMesh();
+			if (staticMesh == nullptr)
+				continue;
+
+			auto vertexBuffer = staticMesh->GetErrorShaderVertexBuffer();
 
 			Matrix4x4 modelMatrix = meshComponent->GetTransform();
 

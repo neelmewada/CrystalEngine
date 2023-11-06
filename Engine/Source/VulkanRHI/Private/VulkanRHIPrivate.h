@@ -208,10 +208,17 @@ namespace CE
         VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget);
         virtual ~VulkanGraphicsCommandList();
 
-        // - Rendering API -
+        // - Command List API -
 
         virtual void Begin() override;
         virtual void End() override;
+
+		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers) override;
+		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets) override;
+
+		virtual void BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset) override;
+
+		// - Getters -
 
         CE_INLINE bool IsViewportTarget()
         {
@@ -282,6 +289,8 @@ namespace CE
 		VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc);
 
 		~VulkanShaderResourceGroup();
+
+		virtual void Bind(Name variableName, RHI::Buffer* buffer) override;
 
     private:
         

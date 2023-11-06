@@ -27,6 +27,19 @@ namespace CE
                 this->rows[i] = *(rows.begin() + i);
         }
 
+		Matrix4x4(std::initializer_list<f32> cells)
+		{
+			memset(rows, 0, sizeof(rows));
+
+			for (int i = 0; i < cells.size(); i++)
+			{
+				int row = cells.size() / 4;
+				int col = cells.size() % 4;
+
+				rows[row][col] = *(cells.begin() + i);
+			}
+		}
+
         Matrix4x4(const Matrix4x4& copy)
         {
             memcpy(rows, copy.rows, sizeof(rows));

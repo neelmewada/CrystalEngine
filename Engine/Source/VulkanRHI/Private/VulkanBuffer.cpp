@@ -16,7 +16,7 @@ namespace CE
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 		}
-		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::UniformBuffer))
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::ConstantBuffer))
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		}
@@ -56,7 +56,7 @@ namespace CE
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
 			return;
 		}
-
+		
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);
 
@@ -372,7 +372,7 @@ namespace CE
             copy.size = bufferSize;
             copy.dstOffset = 0;
             
-            vkCmdCopyBuffer(uploadCmdBuffer, this->buffer, stagingBuffer, 1, &copy);
+            vkCmdCopyBuffer(uploadCmdBuffer, this->buffer, stagingBuffer->GetBuffer(), 1, &copy);
         }
         vkEndCommandBuffer(uploadCmdBuffer);
         
@@ -461,7 +461,7 @@ namespace CE
         // Destroy `this` buffer
         Free();
         
-        // `Move` the buffer
+        // `Move` the new buffer to `this` buffer
         this->buffer = newBuffer->buffer;
         this->bufferMemory = newBuffer->bufferMemory;
         this->bufferSize = newBuffer->bufferSize;

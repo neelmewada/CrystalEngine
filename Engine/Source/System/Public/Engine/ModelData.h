@@ -2,8 +2,8 @@
 
 namespace CE
 {
-    ENUM()
-    enum class VertexInputType
+    ENUM(Flags)
+    enum class VertexInputAttribute
     {
         None = 0,
         Position = BIT(0),
@@ -12,9 +12,9 @@ namespace CE
         Tangent = BIT(3),
         Color = BIT(4),
     };
-    ENUM_CLASS_FLAGS(VertexInputType);
+    ENUM_CLASS_FLAGS(VertexInputAttribute);
 
-    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputType input);
+    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input);
 
 	STRUCT()
 	struct SYSTEM_API SubMesh
@@ -60,7 +60,7 @@ namespace CE
 		Array<Color> vertexColors{};
 
 		FIELD()
-		Array<SubMesh> submeshes{};
+		Array<SubMesh> subMeshes{};
 
 		FORCE_INLINE bool IsValid() const
 		{
@@ -69,17 +69,21 @@ namespace CE
         
         FORCE_INLINE u32 GetSubMeshCount() const
         {
-            return submeshes.GetSize();
+            return subMeshes.GetSize();
         }
 
 		void Clear();
         
-        RHI::Buffer* CreateBuffer(const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
+        RHI::Buffer* GetOrCreateBuffer(const Array<VertexInputAttribute>& inputs = { VertexInputAttribute::Position, VertexInputAttribute::UV0, VertexInputAttribute::Normal });
         
-        void PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputType>& inputs = { VertexInputType::Position, VertexInputType::UV0, VertexInputType::Normal });
+        void PushToBuffer(RHI::Buffer* buffer, const Array<VertexInputAttribute>& inputs = { VertexInputAttribute::Position, VertexInputAttribute::UV0, VertexInputAttribute::Normal });
+		
+		RHI::Buffer* GetOrCreateIndexBuffer();
         
-        
-        HashMap<VertexInputType, RHI::Buffer*> vertexBuffers{};
+        HashMap<VertexInputAttribute, RHI::Buffer*> vertexBuffers{};
+		RHI::Buffer* indexBuffer = nullptr;
+
+		b8 uses32BitIndex = false;
 	};
 
 	CLASS()

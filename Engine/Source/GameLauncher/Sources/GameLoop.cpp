@@ -174,13 +174,172 @@ void GameLoop::RunLoop()
 	if (sceneSubsystem)
 		sceneSubsystem->OnBeginPlay();
 
+	// TODO: Test Code
+
+	auto renderTarget = gEngine->GetPrimaryGameViewport()->GetRenderTarget();
+
+	auto errorShader = Shader::GetErrorShader();
+	auto shaderModules = errorShader->GetShaderModules();
+
+	RHI::ShaderResourceGroupDesc resourceGroup0Desc{};
+	resourceGroup0Desc.variables.Add({
+		.binding = 0,
+		.name = "_PerViewData",
+		.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
+		.isDynamic = false,
+		.stageFlags = RHI::ShaderStage::Vertex
+		});
+
+	auto srg0 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup0Desc);
+
+	RHI::ShaderResourceGroupDesc resourceGroup1Desc{};
+	resourceGroup1Desc.variables.Add({
+		.binding = 0,
+		.name = "_Model",
+		.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
+		.isDynamic = false,
+		.stageFlags = RHI::ShaderStage::Vertex
+		});
+
+	auto srg1 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup1Desc);
+
+	RHI::GraphicsPipelineDesc desc = RHI::GraphicsPipelineBuilder()
+		.VertexSize(sizeof(Vec3))
+		.VertexAttrib(0, TYPEID(Vec3), 0)
+		.CullMode(RHI::CULL_MODE_BACK)
+		.VertexShader(shaderModules[0])
+		.FragmentShader(shaderModules[1])
+		.ShaderResource(srg0)
+		.ShaderResource(srg1)
+		.Build();
+
+	auto errorPipeline = RHI::gDynamicRHI->CreateGraphicsPipelineState(renderTarget, desc);
+
+	StaticMesh* cubeMesh = StaticMesh::GetCubeMesh();
+	RHI::Buffer* vertBuffer = cubeMesh->GetErrorShaderVertexBuffer();
+	RHI::Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
+
+	Matrix4x4 modelMatrix{};
+	Vec3 localPos = Vec3(0, 0, 10);
+	Vec3 localEuler = Vec3(0, 0, 0);
+	Vec3 localScale = Vec3(1, 1, 1);
+
+	{
+		Matrix4x4 translation = Matrix4x4::Identity();
+		translation[0][3] = localPos.x;
+		translation[1][3] = localPos.y;
+		translation[2][3] = localPos.z;
+
+		Quat localRotation = Quat::EulerDegrees(localEuler);
+		Matrix4x4 rotation = localRotation.ToMatrix();
+
+		Matrix4x4 scale = Matrix4x4::Identity();
+		scale[0][0] = localScale.x;
+		scale[1][1] = localScale.y;
+		scale[2][2] = localScale.z;
+
+		modelMatrix = translation * rotation * scale;
+	}
+
+	Matrix4x4 viewMatrix{};
+	Vec3 cameraPos = Vec3(0, 0, 0);
+	Vec3 cameraEuler = Vec3(0, 0, 0);
+	Vec3 cameraScale = Vec3(1, 1, 1);
+
+	{
+		Matrix4x4 translation = Matrix4x4::Identity();
+		translation[0][3] = cameraPos.x;
+		translation[1][3] = cameraPos.y;
+		translation[2][3] = cameraPos.z;
+
+		Quat localRotation = Quat::EulerDegrees(cameraEuler);
+		Matrix4x4 rotation = localRotation.ToMatrix();
+
+		Matrix4x4 scale = Matrix4x4::Identity();
+		scale[0][0] = cameraScale.x;
+		scale[1][1] = cameraScale.y;
+		scale[2][2] = cameraScale.z;
+
+		viewMatrix = (translation * rotation * scale).GetInverse();
+	}
+
+	Matrix4x4 projectionMatrix{};
+
+	auto rt = viewport->GetRenderTarget();
+
+	{
+		float fov = 70.0f;  // Field of view in degrees
+		float aspect = (float)rt->GetWidth() / (float)rt->GetHeight();  // Aspect ratio
+		float near = 0.1f;  // Near clipping plane
+		float far = 100.0f;  // Far clipping plane
+
+		float tanHalfFOV = tan(Math::ToRadians(fov / 2.0f));
+		float range = near - far;
+
+		projectionMatrix = Matrix4x4({
+			{ 1.0f / (aspect * tanHalfFOV), 0.0f, 0.0f, 0.0f },
+			{ 0.0f, 1.0f / tanHalfFOV, 0.0f, 0.0f, },
+			{ 0.0f, 0.0f, (near + far) / range, -1.0f },
+			{ 0.0f, 0.0f, (2.0f * near * far) / range, 0.0f }
+		});
+	}
+
+	struct PerViewData
+	{
+		Matrix4x4 viewMatrix;
+		Matrix4x4 viewProjectionMatrix;
+	} perViewUniforms;
+
+	perViewUniforms.viewMatrix = viewMatrix;
+	perViewUniforms.viewProjectionMatrix = viewMatrix * projectionMatrix;
+
+	RHI::Buffer* perViewBuffer = nullptr;
+	{
+		RHI::BufferData initialData{};
+		initialData.data = &perViewUniforms;
+		initialData.dataSize = sizeof(perViewUniforms);
+		initialData.startOffsetInBuffer = 0;
+
+		RHI::BufferDesc bufferDesc{};
+		bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+		bufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
+		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+		bufferDesc.name = "PerView Uniforms";
+		bufferDesc.bufferSize = sizeof(perViewUniforms);
+		bufferDesc.structureByteStride = bufferDesc.bufferSize;
+		bufferDesc.initialData = &initialData;
+
+		perViewBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+	}
+
+	RHI::Buffer* perModelBuffer = nullptr;
+	{
+		RHI::BufferData initialData{};
+		initialData.data = &modelMatrix;
+		initialData.dataSize = sizeof(modelMatrix);
+		initialData.startOffsetInBuffer = 0;
+
+		RHI::BufferDesc bufferDesc{};
+		bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+		bufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
+		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+		bufferDesc.name = "PerModel Uniforms";
+		bufferDesc.bufferSize = sizeof(modelMatrix);
+		bufferDesc.structureByteStride = bufferDesc.bufferSize;
+		bufferDesc.initialData = &initialData;
+
+		perModelBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+	}
+
+	RHI::IPipelineLayout* pipelineLayout = errorPipeline->GetPipelineLayout();
+	
 	while (!IsEngineRequestingExit())
 	{
 		auto curTime = clock();
 		f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
 
 		app->Tick();
-
+		
 		// - Engine -
 		gEngine->Tick(deltaTime);
 
@@ -202,6 +361,9 @@ void GameLoop::RunLoop()
 
 		gEngine->Render();
 
+		//cmdList->BindVertexBuffers(0, { vertBuffer });
+		//cmdList->BindIndexBuffer(indexBuffer, false, 0);
+		
 		cmdList->End();
 
 		if (RHI::gDynamicRHI->ExecuteCommandList(cmdList))
@@ -211,6 +373,15 @@ void GameLoop::RunLoop()
 		
 		previousTime = curTime;
 	}
+
+	// TODO: Test Code
+	RHI::gDynamicRHI->DestroyBuffer(perViewBuffer);
+	RHI::gDynamicRHI->DestroyBuffer(perModelBuffer);
+
+	RHI::gDynamicRHI->DestroyPipelineState(errorPipeline);
+
+	RHI::gDynamicRHI->DestroyShaderResourceGroup(srg0);
+	RHI::gDynamicRHI->DestroyShaderResourceGroup(srg1);
 }
 
 void GameLoop::PreShutdown()

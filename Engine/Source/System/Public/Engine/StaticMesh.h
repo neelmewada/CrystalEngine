@@ -40,7 +40,13 @@ namespace CE
 
 		static StaticMesh* GetCubeMesh();
         
-        RHI::Buffer* GetVertexBuffer(int lod = 0);
+		RHI::Buffer* GetVertexBuffer(int lod = 0);
+
+		RHI::Buffer* GetErrorShaderVertexBuffer();
+
+		RHI::Buffer* GetIndexBuffer(int lod = 0);
+
+		bool Uses32BitIndices(int lod = 0);
 
 	protected:
 
@@ -49,6 +55,9 @@ namespace CE
 
 		FIELD()
 		ModelData* modelData = nullptr;
+
+		FIELD()
+		VertexInputAttribute vertexAttribs{};
         
         Array<RHI::Buffer*> vertexBufferLODs{};
 	};

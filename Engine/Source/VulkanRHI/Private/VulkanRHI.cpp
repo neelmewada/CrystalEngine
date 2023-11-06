@@ -706,6 +706,55 @@ namespace CE
         }
     }
 
+	void VulkanGraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers)
+	{
+		List<VkBuffer> vkBuffers = {};
+		Array<SIZE_T> offsets = {};
+		vkBuffers.Resize(buffers.GetSize());
+		offsets.Resize(buffers.GetSize());
+		for (int i = 0; i < buffers.GetSize(); i++)
+		{
+			vkBuffers[i] = (VkBuffer)buffers[i]->GetHandle();
+			offsets[i] = 0;
+		}
+
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			vkCmdBindVertexBuffers(commandBuffers[i], firstBinding, vkBuffers.GetSize(), vkBuffers.GetData(), offsets.GetData());
+		}
+	}
+
+	void VulkanGraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets)
+	{
+		if (buffers.GetSize() != bufferOffsets.GetSize())
+		{
+			CE_LOG(Error, All, "BindVertexBuffers() passed with buffers & bufferOffsets array of different size!");
+			return;
+		}
+
+		List<VkBuffer> vkBuffers = {};
+		vkBuffers.Resize(buffers.GetSize());
+		for (int i = 0; i < buffers.GetSize(); i++)
+		{
+			vkBuffers[i] = (VkBuffer)buffers[i]->GetHandle();
+		}
+
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			vkCmdBindVertexBuffers(commandBuffers[i], firstBinding, vkBuffers.GetSize(), vkBuffers.GetData(), bufferOffsets.GetData());
+		}
+	}
+
+	void VulkanGraphicsCommandList::BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset)
+	{
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			vkCmdBindIndexBuffer(commandBuffers[i], (VkBuffer)buffer->GetHandle(), offset, use32BitIndex ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16);
+		}
+
+		
+	}
+
     void VulkanGraphicsCommandList::CreateSyncObjects()
     {
         VkSemaphoreCreateInfo semaphoreCI{};
@@ -771,11 +820,13 @@ namespace CE
 			VkDescriptorSetLayoutBinding binding{};
 			binding.binding = variable.binding;
 			binding.descriptorCount = variable.arrayCount;
+			binding.stageFlags = 0;
 			
 			if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Vertex))
-				binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+				binding.stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
 			if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Fragment))
-				binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+				binding.stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
+
 			if (binding.stageFlags == 0)
 				continue;
 
@@ -830,6 +881,32 @@ namespace CE
 
 		vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
 		setLayout = nullptr;
+	}
+
+	void VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer)
+	{
+		int index = variableNames.IndexOf(variableName);
+		if (index < 0)
+			return;
+
+		VkDescriptorSetLayoutBinding binding = bindings[index];
+
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = (VkBuffer)buffer->GetHandle();
+		bufferInfo.offset = 0;
+		bufferInfo.range = buffer->GetBufferSize();
+
+		VkWriteDescriptorSet write{};
+		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		write.dstSet = descriptorSet;
+		write.dstBinding = binding.binding;
+		write.dstArrayElement = 0;
+
+		write.descriptorCount = binding.descriptorCount;
+		write.descriptorType = binding.descriptorType;
+		write.pBufferInfo = &bufferInfo;
+		
+		vkUpdateDescriptorSets(device->GetHandle(), 1, &write, 0, nullptr);
 	}
 
 } // namespace CE
