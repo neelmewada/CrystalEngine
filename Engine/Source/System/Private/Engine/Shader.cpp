@@ -62,6 +62,42 @@ namespace CE
 		return shader;
 	}
 
+	Shader* Shader::GetTestShader()
+	{
+		auto transient = ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
+		if (transient == nullptr)
+		{
+			CE_LOG(Error, All, "Cannot find transient package for module: {}", MODULE_NAME);
+			return nullptr;
+		}
+
+		if (RHI::gDynamicRHI->GetGraphicsBackend() != RHI::GraphicsBackend::Vulkan)
+			return nullptr;
+
+		for (auto object : transient->GetSubObjectMap())
+		{
+			if (object != nullptr && object->IsOfType<Shader>() && object->GetName() == "TestShader")
+			{
+				return Object::CastTo<Shader>(object);
+			}
+		}
+
+		Resource* vertSpv = GetResourceManager()->LoadResource("/System/Resources/TestShaderVert.spv", transient);
+		Resource* fragSpv = GetResourceManager()->LoadResource("/System/Resources/TestShaderFrag.spv", transient);
+
+		Shader* shader = CreateObject<Shader>(transient, "TestShader", OF_Transient);
+		shader->variants.Resize(1);
+
+		ShaderVariant& variant = shader->variants[0];
+		variant.vertexShader.shaderStage = ShaderStage::Vertex;
+		variant.vertexShader.source.LoadData(vertSpv->GetData(), vertSpv->GetDataSize());
+
+		variant.fragmentShader.shaderStage = ShaderStage::Fragment;
+		variant.fragmentShader.source.LoadData(fragSpv->GetData(), fragSpv->GetDataSize());
+
+		return shader;
+	}
+
 	const Array<RHI::ShaderModule*>& Shader::GetShaderModules()
 	{
 		if (shaderModules.IsEmpty() && variants.NonEmpty())

@@ -14,6 +14,7 @@ struct PerViewData
 {
     float4x4 viewMatrix;
     float4x4 viewProjectionMatrix;
+    float4x4 projectionMatrix;
 };
 
 struct ModelData
@@ -29,7 +30,8 @@ ConstantBuffer<ModelData> _Model : register(b0, space1);
 v2f VertMain(VertexInfo input)
 {
     v2f output;
-    output.position = mul(float4(input.position, 1.0), _Model.modelMatrix * _PerViewData.viewProjectionMatrix);
+    output.position = mul(float4(input.position, 1.0), mul(_PerViewData.projectionMatrix, mul(_PerViewData.viewMatrix, _Model.modelMatrix)));
+    //output.position = float4(input.position, 1.0);
     return output;
 }
 

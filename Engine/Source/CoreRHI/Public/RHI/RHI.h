@@ -186,7 +186,11 @@ namespace CE::RHI
 
         virtual CommandListType GetCommandListType() = 0;
 
+		virtual void CommitShaderResources(u32 firstFrequencyId,
+			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups,
+			RHI::IPipelineLayout* pipelineLayout) = 0;
 
+		virtual void WaitForExecution() = 0;
 
     };
 
@@ -215,10 +219,7 @@ namespace CE::RHI
 
 		virtual void BindPipeline(RHI::IPipelineState* pipeline) = 0;
 
-		virtual void CommitShaderResources(u32 firstFrequencyId, 
-			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups, 
-			RHI::IPipelineLayout* pipelineLayout) = 0;
-		
+		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance) = 0;
 
         // - ImGui Setup -
 

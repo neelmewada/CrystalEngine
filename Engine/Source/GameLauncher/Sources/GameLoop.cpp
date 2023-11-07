@@ -178,7 +178,7 @@ void GameLoop::RunLoop()
 
 	auto renderTarget = gEngine->GetPrimaryGameViewport()->GetRenderTarget();
 
-	auto errorShader = Shader::GetErrorShader();
+	auto errorShader = Shader::GetTestShader();
 	auto shaderModules = errorShader->GetShaderModules();
 
 	RHI::ShaderResourceGroupDesc resourceGroup0Desc{};
@@ -206,7 +206,7 @@ void GameLoop::RunLoop()
 	RHI::GraphicsPipelineDesc desc = RHI::GraphicsPipelineBuilder()
 		.VertexSize(sizeof(Vec3))
 		.VertexAttrib(0, TYPEID(Vec3), 0)
-		.CullMode(RHI::CULL_MODE_BACK)
+		.CullMode(RHI::CULL_MODE_NONE)
 		.VertexShader(shaderModules[0])
 		.FragmentShader(shaderModules[1])
 		.ShaderResource(srg0)
@@ -215,15 +215,59 @@ void GameLoop::RunLoop()
 
 	auto errorPipeline = RHI::gDynamicRHI->CreateGraphicsPipelineState(renderTarget, desc);
 
+	Vec3 verts[] = { Vec3(-1, 1, 0), Vec3(1, 1, 0), Vec3(0, -1, 0) };
+	u16 indices[] = { 0, 2, 1 };
+
 	StaticMesh* cubeMesh = StaticMesh::GetCubeMesh();
-	RHI::Buffer* vertBuffer = cubeMesh->GetErrorShaderVertexBuffer();
-	RHI::Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
+	ModelData* cubeModel = cubeMesh->GetModelData();
+	u32 numIndices = COUNTOF(indices);//cubeModel->lod[0]->subMeshes[0].indices.GetSize();
+	//RHI::Buffer* vertBuffer = cubeMesh->GetErrorShaderVertexBuffer();
+	//RHI::Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
+
+	RHI::Buffer* vertBuffer = nullptr;
+	RHI::Buffer* indexBuffer = nullptr;
+
+	{
+		RHI::BufferData bufferData{};
+		bufferData.data = verts;
+		bufferData.dataSize = sizeof(Vec3) * COUNTOF(verts);
+		bufferData.startOffsetInBuffer = 0;
+
+		RHI::BufferDesc bufferDesc{};
+		bufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
+		bufferDesc.allocMode = RHI::BufferAllocMode::GpuMemory;
+		bufferDesc.name = "Vertex Buffer";
+		bufferDesc.structureByteStride = sizeof(Vec3) * COUNTOF(verts);
+		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+		bufferDesc.bufferSize = sizeof(Vec3) * COUNTOF(verts);
+		bufferDesc.initialData = &bufferData;
+		
+		vertBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+	}
+
+	{
+		RHI::BufferData bufferData{};
+		bufferData.data = indices;
+		bufferData.dataSize = sizeof(u16) * COUNTOF(indices);
+		bufferData.startOffsetInBuffer = 0;
+
+		RHI::BufferDesc bufferDesc{};
+		bufferDesc.bindFlags = RHI::BufferBindFlags::IndexBuffer;
+		bufferDesc.allocMode = RHI::BufferAllocMode::GpuMemory;
+		bufferDesc.name = "Index Buffer";
+		bufferDesc.structureByteStride = sizeof(u16) * COUNTOF(indices);
+		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+		bufferDesc.bufferSize = sizeof(u16) * COUNTOF(indices);
+		bufferDesc.initialData = &bufferData;
+
+		indexBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+	}
 
 	Matrix4x4 modelMatrix{};
 	Vec3 localPos = Vec3(0, 0, 10);
 	Vec3 localEuler = Vec3(0, 0, 0);
 	Vec3 localScale = Vec3(1, 1, 1);
-
+	
 	{
 		Matrix4x4 translation = Matrix4x4::Identity();
 		translation[0][3] = localPos.x;
@@ -270,7 +314,7 @@ void GameLoop::RunLoop()
 	{
 		float fov = 70.0f;  // Field of view in degrees
 		float aspect = (float)rt->GetWidth() / (float)rt->GetHeight();  // Aspect ratio
-		float near = 0.1f;  // Near clipping plane
+		float near = 0;  // Near clipping plane
 		float far = 100.0f;  // Far clipping plane
 
 		float tanHalfFOV = tan(Math::ToRadians(fov / 2.0f));
@@ -282,16 +326,32 @@ void GameLoop::RunLoop()
 			{ 0.0f, 0.0f, (near + far) / range, -1.0f },
 			{ 0.0f, 0.0f, (2.0f * near * far) / range, 0.0f }
 		});
+
+		float fov_rad = fov * 2.0f * M_PI / 360.0f;
+		float focal_length = 1.0f / std::tan(fov_rad / 2.0f);
+
+		float g = 1.0f / tan(Math::ToRadians(fov / 2.0f));
+		float k = far / (far - near);
+
+		projectionMatrix = Matrix4x4({
+			g / aspect,  0.0f,   0.0f,   0.0f,
+            0.0f,  g,      0.0f,   0.0f,
+            0.0f,  0.0f,   k,      -near * k,
+            0.0f,  0.0f,   1.0f,   0.0f
+		});
 	}
 
 	struct PerViewData
 	{
 		Matrix4x4 viewMatrix;
 		Matrix4x4 viewProjectionMatrix;
+		Matrix4x4 projectionMatrix;
 	} perViewUniforms;
 
 	perViewUniforms.viewMatrix = viewMatrix;
 	perViewUniforms.viewProjectionMatrix = viewMatrix * projectionMatrix;
+	perViewUniforms.projectionMatrix = projectionMatrix;
+	//perViewUniforms.projectionMatrix = Matrix4x4::Identity();
 
 	RHI::Buffer* perViewBuffer = nullptr;
 	{
@@ -362,12 +422,14 @@ void GameLoop::RunLoop()
 
 		cmdList->Begin();
 
-		//gEngine->Render();
-
 		cmdList->BindPipeline(errorPipeline);
 
 		cmdList->BindVertexBuffers(0, { vertBuffer });
 		cmdList->BindIndexBuffer(indexBuffer, false, 0);
+		
+		cmdList->CommitShaderResources(0, { srg0, srg1 }, pipelineLayout);
+
+		cmdList->DrawIndexed(numIndices, 1, 0, 0, 0);
 		
 		cmdList->End();
 
@@ -379,7 +441,14 @@ void GameLoop::RunLoop()
 		previousTime = curTime;
 	}
 
+	cmdList->WaitForExecution();
+
 	// TODO: Test Code
+	{
+		RHI::gDynamicRHI->DestroyBuffer(vertBuffer);
+		RHI::gDynamicRHI->DestroyBuffer(indexBuffer);
+	}
+
 	RHI::gDynamicRHI->DestroyBuffer(perViewBuffer);
 	RHI::gDynamicRHI->DestroyBuffer(perModelBuffer);
 
@@ -401,11 +470,10 @@ void GameLoop::PreShutdown()
 
 	gEngine->Shutdown();
 
-	ModuleManager::Get().UnloadModule("Sandbox");
-
 	RHI::gDynamicRHI->DestroyCommandList(cmdList);
 	RHI::gDynamicRHI->DestroyViewport(viewport);
 
+	ModuleManager::Get().UnloadModule("Sandbox");
 	UnloadEngineModules();
 
 	RHI::gDynamicRHI->PreShutdown();

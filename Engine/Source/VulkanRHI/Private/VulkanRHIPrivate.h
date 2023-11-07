@@ -224,6 +224,10 @@ namespace CE
 			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups,
 			RHI::IPipelineLayout* pipelineLayout) override;
 
+		virtual void WaitForExecution() override;
+
+		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance) override;
+
 		// - Getters -
 
         CE_INLINE bool IsViewportTarget()

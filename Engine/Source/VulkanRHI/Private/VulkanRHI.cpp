@@ -814,6 +814,22 @@ namespace CE
 		}
 	}
 
+	void VulkanGraphicsCommandList::WaitForExecution()
+	{
+		constexpr u64 u64Max = NumericLimits<u64>::Max();
+		auto result = vkWaitForFences(device->GetHandle(),
+			renderFinishedFence.GetSize(), renderFinishedFence.GetData(),
+			VK_TRUE, u64Max);
+	}
+
+	void VulkanGraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)
+	{
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			vkCmdDrawIndexed(commandBuffers[i], indexCount, instanceCount, firstIndex, vertexOffset, firstIndex);
+		}
+	}
+
     void VulkanGraphicsCommandList::CreateSyncObjects()
     {
         VkSemaphoreCreateInfo semaphoreCI{};
