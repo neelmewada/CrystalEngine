@@ -306,7 +306,7 @@ namespace CE
             commandList->renderFinishedFence[renderTarget->currentImageIndex]);
 
 		// TODO: For testing purposes only
-		vkQueueWaitIdle(device->GetGraphicsQueue()->GetHandle());
+		//vkQueueWaitIdle(device->GetGraphicsQueue()->GetHandle());
 
         renderTarget->isFresh = false;
         return true;
@@ -751,8 +751,67 @@ namespace CE
 		{
 			vkCmdBindIndexBuffer(commandBuffers[i], (VkBuffer)buffer->GetHandle(), offset, use32BitIndex ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16);
 		}
+	}
 
+	void VulkanGraphicsCommandList::BindPipeline(RHI::IPipelineState* pipeline)
+	{
+		if (pipeline == nullptr)
+			return;
+
+		VkPipeline vkPipeline = (VkPipeline)pipeline->GetNativeHandle();
+
+		RHI::IPipelineLayout* pipelineLayout = pipeline->GetPipelineLayout();
+
+		VkPipelineBindPoint bindPoint{};
+
+		switch (pipelineLayout->GetPipelineType())
+		{
+		case RHI::PipelineType::None:
+			return;
+		case RHI::PipelineType::Graphics:
+			bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+			break;
+		case RHI::PipelineType::Compute:
+			bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
+			break;
+		}
+
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			vkCmdBindPipeline(commandBuffers[i], bindPoint, vkPipeline);
+		}
+	}
+
+	void VulkanGraphicsCommandList::CommitShaderResources(u32 firstFrequencyId, 
+		const List<RHI::ShaderResourceGroup*>& shaderResourceGroups, 
+		RHI::IPipelineLayout* pipelineLayout)
+	{
+		if (shaderResourceGroups.IsEmpty() || pipelineLayout == nullptr)
+			return;
+
+		List<VkDescriptorSet> srgs = shaderResourceGroups.Transform<VkDescriptorSet>(
+			[&](RHI::ShaderResourceGroup* in) { return ((VulkanShaderResourceGroup*)in)->GetDescriptorSet(); });
 		
+		VulkanPipelineLayout* vulkanPipelineLayout = (VulkanPipelineLayout*)pipelineLayout;
+
+		VkPipelineBindPoint bindPoint{};
+
+		switch (pipelineLayout->GetPipelineType())
+		{
+		case RHI::PipelineType::None:
+			return;
+		case RHI::PipelineType::Graphics:
+			bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+			break;
+		case RHI::PipelineType::Compute:
+			bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
+			break;
+		}
+
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			vkCmdBindDescriptorSets(commandBuffers[i], bindPoint, vulkanPipelineLayout->handle, firstFrequencyId, srgs.GetSize(), srgs.GetData(), 0, nullptr);
+		}
 	}
 
     void VulkanGraphicsCommandList::CreateSyncObjects()

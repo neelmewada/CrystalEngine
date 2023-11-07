@@ -149,6 +149,8 @@ namespace CE::RHI
 	public:
 		virtual ~IPipelineLayout() {}
 
+		virtual PipelineType GetPipelineType() = 0;
+
 	};
 
 	class IPipelineState

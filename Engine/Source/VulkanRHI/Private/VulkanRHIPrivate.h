@@ -218,6 +218,12 @@ namespace CE
 
 		virtual void BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset) override;
 
+		virtual void BindPipeline(RHI::IPipelineState* pipeline) override;
+
+		virtual void CommitShaderResources(u32 firstFrequencyId, 
+			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups,
+			RHI::IPipelineLayout* pipelineLayout) override;
+
 		// - Getters -
 
         CE_INLINE bool IsViewportTarget()
@@ -292,6 +298,11 @@ namespace CE
 
 		virtual void Bind(Name variableName, RHI::Buffer* buffer) override;
 
+		inline VkDescriptorSet GetDescriptorSet() const
+		{
+			return descriptorSet;
+		}
+
     private:
         
         VulkanDevice* device = nullptr;
@@ -306,6 +317,7 @@ namespace CE
 		Array<VkDescriptorSetLayoutBinding> bindings{};
 
 		friend class VulkanGraphicsPipeline;
+		friend class VulkanGraphicsCommandList;
 	};
 
 } // namespace CE

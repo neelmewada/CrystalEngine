@@ -312,7 +312,7 @@ namespace CE
 		}
 
 		if (this->pipelineLayout == nullptr)
-			this->pipelineLayout = new VulkanPipelineLayout(device, pipelineLayout);
+			this->pipelineLayout = new VulkanPipelineLayout(device, pipelineLayout, RHI::PipelineType::Graphics);
 		else
 			this->pipelineLayout->handle = pipelineLayout;
 
@@ -354,8 +354,8 @@ namespace CE
 		setLayouts.Clear();
 	}
 
-	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout)
-		: device(device), handle(pipelineLayout)
+	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType)
+		: device(device), handle(pipelineLayout), pipelineType(pipelineType)
 	{
 
 	}

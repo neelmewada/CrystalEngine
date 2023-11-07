@@ -7,11 +7,18 @@ namespace CE
 	class VulkanPipelineLayout : public RHI::IPipelineLayout
 	{
 	public:
-		VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout);
+		VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType);
 		virtual ~VulkanPipelineLayout();
+
+		virtual RHI::PipelineType GetPipelineType() override
+		{
+			return pipelineType;
+		}
 
 		VulkanDevice* device = nullptr;
 		VkPipelineLayout handle = nullptr;
+		
+		RHI::PipelineType pipelineType = RHI::PipelineType::Graphics;
 	};
 
     class VulkanPipeline : public RHI::IPipelineState

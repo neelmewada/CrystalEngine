@@ -332,6 +332,9 @@ void GameLoop::RunLoop()
 	}
 
 	RHI::IPipelineLayout* pipelineLayout = errorPipeline->GetPipelineLayout();
+
+	srg0->Bind("_PerViewData", perViewBuffer);
+	srg1->Bind("_Model", perModelBuffer);
 	
 	while (!IsEngineRequestingExit())
 	{
@@ -359,10 +362,12 @@ void GameLoop::RunLoop()
 
 		cmdList->Begin();
 
-		gEngine->Render();
+		//gEngine->Render();
 
-		//cmdList->BindVertexBuffers(0, { vertBuffer });
-		//cmdList->BindIndexBuffer(indexBuffer, false, 0);
+		cmdList->BindPipeline(errorPipeline);
+
+		cmdList->BindVertexBuffers(0, { vertBuffer });
+		cmdList->BindIndexBuffer(indexBuffer, false, 0);
 		
 		cmdList->End();
 
@@ -398,10 +403,10 @@ void GameLoop::PreShutdown()
 
 	ModuleManager::Get().UnloadModule("Sandbox");
 
-	UnloadEngineModules();
-
 	RHI::gDynamicRHI->DestroyCommandList(cmdList);
 	RHI::gDynamicRHI->DestroyViewport(viewport);
+
+	UnloadEngineModules();
 
 	RHI::gDynamicRHI->PreShutdown();
 

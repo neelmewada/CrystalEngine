@@ -213,6 +213,13 @@ namespace CE::RHI
 
 		virtual void BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset) = 0;
 
+		virtual void BindPipeline(RHI::IPipelineState* pipeline) = 0;
+
+		virtual void CommitShaderResources(u32 firstFrequencyId, 
+			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups, 
+			RHI::IPipelineLayout* pipelineLayout) = 0;
+		
+
         // - ImGui Setup -
 
         virtual bool InitImGui(FontPreloadConfig* preloadFonts, Array<void*>& outFontHandles) = 0;

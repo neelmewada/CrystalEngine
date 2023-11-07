@@ -58,6 +58,16 @@ namespace CE
             return Impl[index];
         }
 
+		const ElementType& At(SIZE_T index) const
+		{
+			return Impl[index];
+		}
+
+		ElementType& At(SIZE_T index)
+		{
+			return Impl[index];
+		}
+
         ElementType& GetFirst()
         {
             return Impl[0];
@@ -211,6 +221,54 @@ namespace CE
                 }
             }
         }
+
+		template<typename T>
+		List<T> Transform(std::function<T(ElementType&)> selector)
+		{
+			List<T> result{};
+			for (int i = 0; i < GetSize(); i++)
+			{
+				result.Add(selector(At(i)));
+			}
+			return result;
+		}
+
+		template<typename T>
+		List<T> Transform(std::function<T(const ElementType&)> selector) const
+		{
+			List<T> result{};
+			for (int i = 0; i < GetSize(); i++)
+			{
+				result.Add(selector(At(i)));
+			}
+			return result;
+		}
+
+		List<ElementType> Where(std::function<bool(const ElementType& item)> predicate) const
+		{
+			List<ElementType> result{};
+			for (int i = 0; i < GetSize(); i++)
+			{
+				if (predicate(At(i)))
+				{
+					result.Add(At(i));
+				}
+			}
+			return result;
+		}
+
+		List<ElementType> Where(std::function<bool(const ElementType& item, int index)> predicate) const
+		{
+			List<ElementType> result{};
+			for (int i = 0; i < GetSize(); i++)
+			{
+				if (predicate(At(i), i))
+				{
+					result.Add(At(i));
+				}
+			}
+			return result;
+		}
 
         CE_INLINE void RemoveAt(SIZE_T index)
         {
@@ -539,9 +597,46 @@ namespace CE
 		Array<T> Transform(std::function<T(ElementType&)> selector)
 		{
 			Array<T> result{};
-			for (int i = 0; i < Super::Impl.size(); i++)
+			for (int i = 0; i < GetSize(); i++)
 			{
-				result.Add(selector(Super::Impl[i]));
+				result.Add(selector(At(i)));
+			}
+			return result;
+		}
+
+		template<typename T>
+		Array<T> Transform(std::function<T(const ElementType&)> selector) const
+		{
+			Array<T> result{};
+			for (int i = 0; i < GetSize(); i++)
+			{
+				result.Add(selector(At(i)));
+			}
+			return result;
+		}
+
+		Array<ElementType> Where(std::function<bool(const ElementType& item)> predicate) const
+		{
+			Array<ElementType> result{};
+			for (int i = 0; i < GetSize(); i++)
+			{
+				if (predicate(At(i)))
+				{
+					result.Add(At(i));
+				}
+			}
+			return result;
+		}
+
+		Array<ElementType> Where(std::function<bool(const ElementType& item, int index)> predicate) const
+		{
+			Array<ElementType> result{};
+			for (int i = 0; i < GetSize(); i++)
+			{
+				if (predicate(At(i), i))
+				{
+					result.Add(At(i));
+				}
 			}
 			return result;
 		}
