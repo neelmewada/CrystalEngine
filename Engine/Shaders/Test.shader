@@ -2,8 +2,9 @@ Shader "Test Shader"
 {
     Properties 
     {
-        _Material("Albedo")
-
+        _Material.albedo("Albedo", Color) = (0, 0, 0, 0)
+        
+    }
     SubShader
     {
         LOD 100
@@ -43,6 +44,8 @@ Shader "Test Shader"
             {
                 float4 albedo;
                 float roughness;
+                float normalStrength;
+                float metallic;
             };
             
             ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
@@ -51,6 +54,8 @@ Shader "Test Shader"
 
             ConstantBuffer<MaterialData> _Material : SRG_PerMaterial(b);
             Texture2D _AlbedoTex : SRG_PerMaterial(t);
+            Texture2D _NormalMap : SRG_PerMaterial(t);
+            Texture2D _Metallic : SRG_PerMaterial(t);
 
             void VertMain(VertexInfo input)
             {
