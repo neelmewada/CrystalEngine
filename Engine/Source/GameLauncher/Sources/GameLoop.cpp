@@ -220,13 +220,15 @@ void GameLoop::RunLoop()
 
 	StaticMesh* cubeMesh = StaticMesh::GetCubeMesh();
 	ModelData* cubeModel = cubeMesh->GetModelData();
-	u32 numIndices = COUNTOF(indices);//cubeModel->lod[0]->subMeshes[0].indices.GetSize();
-	//RHI::Buffer* vertBuffer = cubeMesh->GetErrorShaderVertexBuffer();
-	//RHI::Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
+	RHI::Buffer* vertBuffer = cubeMesh->GetErrorShaderVertexBuffer();
+	RHI::Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
+	u32 numIndices = cubeModel->lod[0]->subMeshes[0].indices.GetSize();
 
-	RHI::Buffer* vertBuffer = nullptr;
-	RHI::Buffer* indexBuffer = nullptr;
+	//RHI::Buffer* vertBuffer = nullptr;
+	//RHI::Buffer* indexBuffer = nullptr;
+	//u32 numIndices = COUNTOF(indices);
 
+	if (false)
 	{
 		RHI::BufferData bufferData{};
 		bufferData.data = verts;
@@ -245,6 +247,7 @@ void GameLoop::RunLoop()
 		vertBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
 	}
 
+	if (false)
 	{
 		RHI::BufferData bufferData{};
 		bufferData.data = indices;
@@ -264,7 +267,7 @@ void GameLoop::RunLoop()
 	}
 
 	Matrix4x4 modelMatrix{};
-	Vec3 localPos = Vec3(0, 0, 0.5f);
+	Vec3 localPos = Vec3(0, 0, 10);// 0.5f);
 	Vec3 localEuler = Vec3(0, 0, 0);
 	Vec3 localScale = Vec3(1, 1, 1);
 	
@@ -312,50 +315,31 @@ void GameLoop::RunLoop()
 	auto rt = viewport->GetRenderTarget();
 
 	{
-		float fov = 70.0f;  // Field of view in degrees
-		float aspect = (float)rt->GetWidth() / (float)rt->GetHeight();  // Aspect ratio
-		float near = 0;  // Near clipping plane
-		float far = 100.0f;  // Far clipping plane
-		float n = near, f = far;
+		float fov = 50.0f;  // Field of view in degrees
+		float n = 0.1f, f = 500.0f;
+		float w = rt->GetWidth();
+		float h = rt->GetHeight();
+		float aspect = w / h;
 
 		float tanHalfFOV = tan(Math::ToRadians(fov / 2.0f));
-		float range = near - far;
+		
+		float l = -1, r = 1, b = -1, t = 1;
 
-		projectionMatrix = Matrix4x4({
-			{ 1.0f / (aspect * tanHalfFOV), 0.0f, 0.0f, 0.0f },
-			{ 0.0f, 1.0f / tanHalfFOV, 0.0f, 0.0f, },
-			{ 0.0f, 0.0f, (near + far) / range, -1.0f },
-			{ 0.0f, 0.0f, (2.0f * near * far) / range, 0.0f }
-		});
-
-		float fov_rad = fov * 2.0f * M_PI / 360.0f;
-		float focal_length = 1.0f / std::tan(fov_rad / 2.0f);
-
-		float g = 1.0f / tan(Math::ToRadians(fov / 2.0f));
-		float k = far / (far - near);
-
-		projectionMatrix = Matrix4x4({
-			{ g / aspect,  0.0f,   0.0f,   0.0f },
-			{ 0.0f,  g,      0.0f,   0.0f },
-			{ 0.0f,  0.0f,   k,   -near * k },
-			{ 0.0f,  0.0f,   1.0f,   0.0f }
-		});
-
-		float l = -5, r = 5, t = 5, b = -5;
-
-		projectionMatrix = Matrix4x4({
+		// Orthographic
+		/*projectionMatrix = Matrix4x4({
 			{ 2 / (r - l), 0, 0, -(r + l) / (r - l) },
 			{ 0, 2 / (b - t), 0, -(b + t) / (b - t) },
 			{ 0, 0, 1 / (far - near), - near / (far - near) },
 			{ 0, 0, 0, 1 }
-		});
-
-		/*projectionMatrix = Matrix4x4({
-			{ 2 * n / (r - l), 0, - (r + l) / (r - l), 0 },
-			{ 0, 2 * n / (b - t), - (b + t) / (b - t), 0 },
-			{ 0, 0, f / (f - n), - f * n / (f - n) },
-			{ 0, 0, 1, 0 }
 		});*/
+
+		// Perspective
+		projectionMatrix = Matrix4x4({
+			{ 1 / (aspect * tanHalfFOV), 0, 0, 0 },
+			{ 0, 1 / tanHalfFOV, 0, 0 },
+			{ 0, 0, f / (f - n), -f * n / (f - n) },
+			{ 0, 0, 1, 0 }
+		});
 	}
 
 	struct PerViewData
@@ -366,7 +350,7 @@ void GameLoop::RunLoop()
 	} perViewUniforms;
 
 	perViewUniforms.viewMatrix = viewMatrix;
-	perViewUniforms.viewProjectionMatrix = viewMatrix * projectionMatrix;
+	perViewUniforms.viewProjectionMatrix = projectionMatrix * viewMatrix;
 	perViewUniforms.projectionMatrix = projectionMatrix;
 
 	RHI::Buffer* perViewBuffer = nullptr;
@@ -411,6 +395,10 @@ void GameLoop::RunLoop()
 
 	srg0->Bind("_PerViewData", perViewBuffer);
 	srg1->Bind("_Model", perModelBuffer);
+
+	float curAspect = (float)rt->GetWidth() / (float)rt->GetHeight();
+
+	f32 rot = 0;
 	
 	while (!IsEngineRequestingExit())
 	{
@@ -424,6 +412,75 @@ void GameLoop::RunLoop()
 
 		if (!sceneSubsystem)
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
+
+		rot += deltaTime * 30;
+		if (rot > 360)
+			rot = 0;
+
+		// - Update Model Matrix -
+		{
+			Matrix4x4 translation = Matrix4x4::Identity();
+			translation[0][3] = localPos.x;
+			translation[1][3] = localPos.y;
+			translation[2][3] = localPos.z;
+
+			localEuler.y = rot;
+			Quat localRotation = Quat::EulerDegrees(localEuler);
+			Matrix4x4 rotation = localRotation.ToMatrix();
+
+			Matrix4x4 scale = Matrix4x4::Identity();
+			scale[0][0] = localScale.x;
+			scale[1][1] = localScale.y;
+			scale[2][2] = localScale.z;
+
+			modelMatrix = translation * rotation * scale;
+
+			RHI::BufferData modelData{};
+			modelData.data = &modelMatrix;
+			modelData.dataSize = sizeof(modelMatrix);
+			modelData.startOffsetInBuffer = 0;
+			perModelBuffer->UploadData(modelData);
+		}
+
+		// - Update Projection -
+		float w = rt->GetWidth();
+		float h = rt->GetHeight();
+		float aspect = w / h;
+
+		if (curAspect != aspect)
+		{
+			curAspect = aspect;
+			float fov = 50.0f;  // Field of view in degrees
+			float n = 0.1f, f = 500.0f;
+
+			float tanHalfFOV = tan(Math::ToRadians(fov / 2.0f));
+
+			float l = -aspect, r = aspect, b = -1, t = 1;
+
+			// Orthographic
+			/*projectionMatrix = Matrix4x4({
+				{ 2 / (r - l), 0, 0, -(r + l) / (r - l) },
+				{ 0, 2 / (b - t), 0, -(b + t) / (b - t) },
+				{ 0, 0, 1 / (f - n), - n / (f - n) },
+				{ 0, 0, 0, 1 }
+			});*/
+
+			// Perspective
+			projectionMatrix = Matrix4x4({
+				{ 1 / (aspect * tanHalfFOV), 0, 0, 0 },
+				{ 0, 1 / tanHalfFOV, 0, 0 },
+				{ 0, 0, f / (f - n), -f * n / (f - n) },
+				{ 0, 0, 1, 0 }
+			});
+			perViewUniforms.projectionMatrix = projectionMatrix;
+
+			RHI::BufferData perViewBufferData{};
+			perViewBufferData.data = &perViewUniforms;
+			perViewBufferData.dataSize = sizeof(perViewUniforms);
+			perViewBufferData.startOffsetInBuffer = 0;
+
+			perViewBuffer->UploadData(perViewBufferData);
+		}
 
 		// - Render -
 		viewport->SetClearColor(Color::Black());
@@ -461,8 +518,8 @@ void GameLoop::RunLoop()
 
 	// TODO: Test Code
 	{
-		RHI::gDynamicRHI->DestroyBuffer(vertBuffer);
-		RHI::gDynamicRHI->DestroyBuffer(indexBuffer);
+		//RHI::gDynamicRHI->DestroyBuffer(vertBuffer);
+		//RHI::gDynamicRHI->DestroyBuffer(indexBuffer);
 	}
 
 	RHI::gDynamicRHI->DestroyBuffer(perViewBuffer);

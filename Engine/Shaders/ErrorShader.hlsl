@@ -30,8 +30,8 @@ ConstantBuffer<ModelData> _Model : register(b0, space1);
 v2f VertMain(VertexInfo input)
 {
     v2f output;
-    output.position = mul(float4(input.position, 1.0), mul(_PerViewData.projectionMatrix, mul(_PerViewData.viewMatrix, _Model.modelMatrix)));
-    //output.position = float4(input.position, 1.0);
+    //output.position = mul(float4(input.position, 1.0), mul(_PerViewData.projectionMatrix, mul(_PerViewData.viewMatrix, _Model.modelMatrix)));
+    output.position = mul(mul(mul(float4(input.position, 1.0), _Model.modelMatrix), _PerViewData.viewMatrix), _PerViewData.projectionMatrix);
     return output;
 }
 

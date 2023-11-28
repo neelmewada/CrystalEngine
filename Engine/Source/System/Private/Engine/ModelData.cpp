@@ -91,9 +91,9 @@ namespace CE
         
         for (u32 vertIdx = 0; vertIdx < numVertices; vertIdx++)
         {
-            f32* posStart = data + vertIdx * (u32)desc.structureByteStride;
+			u8* posStart = (u8*)data + vertIdx * (u32)desc.structureByteStride;
             
-            f32* pos = posStart;
+            u8* pos = (u8*)posStart;
             
             for (VertexInputAttribute inputType : inputs)
             {
@@ -123,7 +123,7 @@ namespace CE
                         break;
                 }
                 
-                pos += size;
+				pos += size;
             }
         }
         
@@ -266,6 +266,8 @@ namespace CE
 		initialData.data = bytes;
 		initialData.dataSize = indexBufferDesc.bufferSize;
 		initialData.startOffsetInBuffer = 0;
+
+		indexBufferDesc.initialData = &initialData;
 
 		indexBuffer = RHI::gDynamicRHI->CreateBuffer(indexBufferDesc);
 
