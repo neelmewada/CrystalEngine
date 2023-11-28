@@ -264,7 +264,7 @@ void GameLoop::RunLoop()
 	}
 
 	Matrix4x4 modelMatrix{};
-	Vec3 localPos = Vec3(0, 0, 10);
+	Vec3 localPos = Vec3(0, 0, 0.5f);
 	Vec3 localEuler = Vec3(0, 0, 0);
 	Vec3 localScale = Vec3(1, 1, 1);
 	
@@ -316,6 +316,7 @@ void GameLoop::RunLoop()
 		float aspect = (float)rt->GetWidth() / (float)rt->GetHeight();  // Aspect ratio
 		float near = 0;  // Near clipping plane
 		float far = 100.0f;  // Far clipping plane
+		float n = near, f = far;
 
 		float tanHalfFOV = tan(Math::ToRadians(fov / 2.0f));
 		float range = near - far;
@@ -334,11 +335,27 @@ void GameLoop::RunLoop()
 		float k = far / (far - near);
 
 		projectionMatrix = Matrix4x4({
-			g / aspect,  0.0f,   0.0f,   0.0f,
-            0.0f,  g,      0.0f,   0.0f,
-            0.0f,  0.0f,   k,      -near * k,
-            0.0f,  0.0f,   1.0f,   0.0f
+			{ g / aspect,  0.0f,   0.0f,   0.0f },
+			{ 0.0f,  g,      0.0f,   0.0f },
+			{ 0.0f,  0.0f,   k,   -near * k },
+			{ 0.0f,  0.0f,   1.0f,   0.0f }
 		});
+
+		float l = -5, r = 5, t = 5, b = -5;
+
+		projectionMatrix = Matrix4x4({
+			{ 2 / (r - l), 0, 0, -(r + l) / (r - l) },
+			{ 0, 2 / (b - t), 0, -(b + t) / (b - t) },
+			{ 0, 0, 1 / (far - near), - near / (far - near) },
+			{ 0, 0, 0, 1 }
+		});
+
+		/*projectionMatrix = Matrix4x4({
+			{ 2 * n / (r - l), 0, - (r + l) / (r - l), 0 },
+			{ 0, 2 * n / (b - t), - (b + t) / (b - t), 0 },
+			{ 0, 0, f / (f - n), - f * n / (f - n) },
+			{ 0, 0, 1, 0 }
+		});*/
 	}
 
 	struct PerViewData
@@ -351,7 +368,6 @@ void GameLoop::RunLoop()
 	perViewUniforms.viewMatrix = viewMatrix;
 	perViewUniforms.viewProjectionMatrix = viewMatrix * projectionMatrix;
 	perViewUniforms.projectionMatrix = projectionMatrix;
-	//perViewUniforms.projectionMatrix = Matrix4x4::Identity();
 
 	RHI::Buffer* perViewBuffer = nullptr;
 	{
