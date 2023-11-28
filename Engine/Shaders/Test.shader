@@ -2,8 +2,15 @@ Shader "Test Shader"
 {
     Properties 
     {
-        _Material.albedo("Albedo", Color) = (0, 0, 0, 0)
-        
+        _Material("Material", ConstantBuffer)
+        {
+            albedo("Albedo", Color) = (1, 1, 1, 1)
+            roughness("Roughness", Float) = 1.0
+            normalStrength("Normal Strength", Range(0, 2)) = 1.0
+            metallic("Metallic", Float) = 0.0
+        }
+
+        _AlbedoTex("Albedo Map", 2D) = "black"
     }
     SubShader
     {
@@ -28,6 +35,11 @@ Shader "Test Shader"
                 float2 uv0 : TEXCOORD0;
             };
 
+            struct v2f
+            {
+                float4 position : SV_POSITION;
+            };
+
             struct CameraData
             {
                 float4x4 viewMatrix;
@@ -50,21 +62,21 @@ Shader "Test Shader"
             
             ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
 
-            ConstantBuffer<ModelData> _ModelData : SRG_PerObject(b);
+            ConstantBuffer<ModelData> _Model : SRG_PerObject(b);
 
             ConstantBuffer<MaterialData> _Material : SRG_PerMaterial(b);
             Texture2D _AlbedoTex : SRG_PerMaterial(t);
-            Texture2D _NormalMap : SRG_PerMaterial(t);
-            Texture2D _Metallic : SRG_PerMaterial(t);
 
-            void VertMain(VertexInfo input)
+            v2f VertMain(VertexInfo input)
             {
-                
+                v2f o;
+                o.position = mul(mul(mul(float4(input.position, 1.0), _Model.modelMatrix), _Camera.viewMatrix), _Camera.projectionMatrix);
+                return o;
             }
 
-            void FragMain()
+            void FragMain(v2f input) : SV_TARGET
             {
-
+                return float4(1.0, 0, 1.0, 1.0);
             }
 
             ENDHLSL

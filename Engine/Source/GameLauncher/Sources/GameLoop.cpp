@@ -372,7 +372,8 @@ void GameLoop::RunLoop()
 		if (!sceneSubsystem)
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
-		rot += deltaTime * 30;
+        CE_LOG(Info, All, "Delta: {}", deltaTime);
+		rot += deltaTime * 100;
 		if (rot > 360)
 			rot = 0;
 

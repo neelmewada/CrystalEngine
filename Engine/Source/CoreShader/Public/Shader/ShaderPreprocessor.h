@@ -2,30 +2,6 @@
 
 namespace CE
 {
-	namespace ShaderPreprocessData
-	{
-
-	}
-
-	STRUCT()
-	struct CORESHADER_API SubshaderPreprocessData
-	{
-		CE_STRUCT(SubshaderPreprocessData)
-	public:
-
-	};
-
-	STRUCT()
-	struct CORESHADER_API ShaderPreprocessData
-	{
-		CE_STRUCT(ShaderPreprocessData)
-	public:
-
-		FIELD()
-		Name shaderName{};
-
-
-	};
     
     class CORESHADER_API ShaderPreprocessor
     {
