@@ -45,7 +45,7 @@ namespace CE
 				return Object::CastTo<Shader>(object);
 			}
 		}
-        
+		
 		Resource* vertSpv = GetResourceManager()->LoadResource("/System/Resources/ErrorShaderVert.spv", transient);
 		Resource* fragSpv = GetResourceManager()->LoadResource("/System/Resources/ErrorShaderFrag.spv", transient);
 

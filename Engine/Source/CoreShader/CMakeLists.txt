@@ -26,7 +26,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            ThirdParty::dxcompiler
+            $<${PAL_PLATFORM_IS_DESKTOP}:ThirdParty::dxcompiler>
             $<${PAL_TRAIT_VULKAN_SUPPORTED}:Vulkan::SPIRV-Tools>
         PUBLIC
             CE::Core

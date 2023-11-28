@@ -25,9 +25,7 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
     add_subdirectory(Source/VulkanRHI)
 endif()
 
-if(${PAL_PLATFORM_IS_DESKTOP})
-    add_subdirectory(Source/CoreShader)
-endif()
+add_subdirectory(Source/CoreShader)
 
 ######################################
 # System Modules

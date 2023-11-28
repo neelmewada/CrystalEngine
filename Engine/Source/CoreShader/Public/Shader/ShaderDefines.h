@@ -3,6 +3,23 @@
 namespace CE
 {
 	ENUM(Flags)
+	enum class VertexInputAttribute
+	{
+		None = 0,
+		Position = BIT(0),
+		Normal = BIT(1),
+		Tangent = BIT(2),
+		Color = BIT(3),
+		UV0 = BIT(4),
+		UV1 = BIT(5),
+		UV2 = BIT(6),
+		UV3 = BIT(7),
+	};
+	ENUM_CLASS_FLAGS(VertexInputAttribute);
+
+	CORESHADER_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input);
+
+	ENUM(Flags)
 	enum class ShaderStage
 	{
 		None = 0,
@@ -11,6 +28,7 @@ namespace CE
 
 		Default = Vertex | Fragment,
 	};
+	ENUM_CLASS_FLAGS(ShaderStage);
 
 	ENUM()
 	enum class ShaderBlobFormat
@@ -25,7 +43,7 @@ namespace CE
 		/// Uniform buffer in vulkan terms
 		ConstantBuffer,
 		/// Storage Buffer in vulkan terms
-		TextureBuffer,
+		StructuredBuffer,
 		SamplerState,
 		Texture1D,
 		Texture2D,
@@ -66,6 +84,7 @@ namespace CE
 		int count = 1;
 
 		friend class ShaderReflector;
+		friend class Shader;
 	};
 
 	STRUCT()
@@ -91,6 +110,7 @@ namespace CE
 
 		friend class ShaderReflector;
 		friend struct ShaderReflection;
+		friend class Shader;
 	};
     
 	STRUCT()
@@ -112,6 +132,7 @@ namespace CE
 		Array<SRGEntry> resourceGroups{};
 		
 		friend class ShaderReflector;
+		friend class Shader;
 	};
 
 } // namespace CE

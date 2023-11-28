@@ -45,7 +45,7 @@ cbuffer buffer3 : SRG_PerScene(b)
     float3 ambientColor;
 };
 
-TextureBuffer<ObjectData> _Object : SRG_PerPass(t);
+StructuredBuffer<ObjectData> _Object : SRG_PerPass(t);
 
 Texture2D _MainTex[10] : SRG_PerMaterial(t);
 RWTexture2D<float4> _DataTex : SRG_PerMaterial(u);
@@ -57,7 +57,7 @@ ConstantBuffer<DrawData> _DrawData : SRG_PerDraw(b);
 v2p VertMain(VertexInfo input)
 {
     v2p output;
-    output.position = float4(_Object.model.rgb * input.position * buff.cameraPos * buffer2.lightColor * ambientColor, 1.0);
+    output.position = float4(_Object[0].model.rgb * input.position * buff.cameraPos * buffer2.lightColor * ambientColor, 1.0);
     output.uv = float2(0, 0);
     output.color = float3(1, 1, 0);
     return output;

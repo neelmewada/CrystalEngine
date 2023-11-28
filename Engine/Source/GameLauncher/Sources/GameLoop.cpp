@@ -192,6 +192,9 @@ void GameLoop::RunLoop()
 
 	auto srg0 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup0Desc);
 
+	RHI::ShaderResourceGroupDesc emptyResourceGroupDesc{};
+	auto srgEmpty = RHI::gDynamicRHI->CreateShaderResourceGroup(emptyResourceGroupDesc);
+
 	RHI::ShaderResourceGroupDesc resourceGroup1Desc{};
 	resourceGroup1Desc.variables.Add({
 		.binding = 0,
@@ -210,61 +213,17 @@ void GameLoop::RunLoop()
 		.VertexShader(shaderModules[0])
 		.FragmentShader(shaderModules[1])
 		.ShaderResource(srg0)
+		.ShaderResource(srgEmpty)
 		.ShaderResource(srg1)
 		.Build();
 
 	auto errorPipeline = RHI::gDynamicRHI->CreateGraphicsPipelineState(renderTarget, desc);
-
-	Vec3 verts[] = { Vec3(-1, 1, 0), Vec3(1, 1, 0), Vec3(0, -1, 0) };
-	u16 indices[] = { 0, 2, 1 };
 
 	StaticMesh* cubeMesh = StaticMesh::GetCubeMesh();
 	ModelData* cubeModel = cubeMesh->GetModelData();
 	RHI::Buffer* vertBuffer = cubeMesh->GetErrorShaderVertexBuffer();
 	RHI::Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
 	u32 numIndices = cubeModel->lod[0]->subMeshes[0].indices.GetSize();
-
-	//RHI::Buffer* vertBuffer = nullptr;
-	//RHI::Buffer* indexBuffer = nullptr;
-	//u32 numIndices = COUNTOF(indices);
-
-	if (false)
-	{
-		RHI::BufferData bufferData{};
-		bufferData.data = verts;
-		bufferData.dataSize = sizeof(Vec3) * COUNTOF(verts);
-		bufferData.startOffsetInBuffer = 0;
-
-		RHI::BufferDesc bufferDesc{};
-		bufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
-		bufferDesc.allocMode = RHI::BufferAllocMode::GpuMemory;
-		bufferDesc.name = "Vertex Buffer";
-		bufferDesc.structureByteStride = sizeof(Vec3) * COUNTOF(verts);
-		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
-		bufferDesc.bufferSize = sizeof(Vec3) * COUNTOF(verts);
-		bufferDesc.initialData = &bufferData;
-		
-		vertBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-	}
-
-	if (false)
-	{
-		RHI::BufferData bufferData{};
-		bufferData.data = indices;
-		bufferData.dataSize = sizeof(u16) * COUNTOF(indices);
-		bufferData.startOffsetInBuffer = 0;
-
-		RHI::BufferDesc bufferDesc{};
-		bufferDesc.bindFlags = RHI::BufferBindFlags::IndexBuffer;
-		bufferDesc.allocMode = RHI::BufferAllocMode::GpuMemory;
-		bufferDesc.name = "Index Buffer";
-		bufferDesc.structureByteStride = sizeof(u16) * COUNTOF(indices);
-		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
-		bufferDesc.bufferSize = sizeof(u16) * COUNTOF(indices);
-		bufferDesc.initialData = &bufferData;
-
-		indexBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-	}
 
 	Matrix4x4 modelMatrix{};
 	Vec3 localPos = Vec3(0, 0, 10);// 0.5f);
@@ -500,7 +459,7 @@ void GameLoop::RunLoop()
 		cmdList->BindVertexBuffers(0, { vertBuffer });
 		cmdList->BindIndexBuffer(indexBuffer, false, 0);
 		
-		cmdList->CommitShaderResources(0, { srg0, srg1 }, pipelineLayout);
+		cmdList->CommitShaderResources(0, { srg0, srgEmpty, srg1 }, pipelineLayout);
 
 		cmdList->DrawIndexed(numIndices, 1, 0, 0, 0);
 		
@@ -516,14 +475,10 @@ void GameLoop::RunLoop()
 
 	cmdList->WaitForExecution();
 
-	// TODO: Test Code
-	{
-		//RHI::gDynamicRHI->DestroyBuffer(vertBuffer);
-		//RHI::gDynamicRHI->DestroyBuffer(indexBuffer);
-	}
-
 	RHI::gDynamicRHI->DestroyBuffer(perViewBuffer);
 	RHI::gDynamicRHI->DestroyBuffer(perModelBuffer);
+
+	RHI::gDynamicRHI->DestroyShaderResourceGroup(srgEmpty);
 
 	RHI::gDynamicRHI->DestroyPipelineState(errorPipeline);
 

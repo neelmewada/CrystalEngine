@@ -2,12 +2,7 @@ Shader "Test Shader"
 {
     Properties 
     {
-        _Material ("Material", auto) = {
-            albedo ("Albedo", Vector) = 0
-            albedoTex ("Albedo Texture", 2D) = "black"
-            roughness ("Roughness", Float) = 0
-        }
-    }
+        _Material("Albedo")
 
     SubShader
     {
@@ -15,15 +10,27 @@ Shader "Test Shader"
 
         Pass
         {
-            Tags { "Vertex" = "VertMain", "Fragment" = "FragMain" }
+            Name "Main"
+            Tags {  }
 
             HLSLPROGRAM
 
             #include "Macros.hlsl"
-            
-            struct PerViewData
+
+            #pragma vertex VertMain
+            #pragma fragment FragMain
+
+            struct VertexInfo
+            {
+                float3 position : POSITION;
+                float3 normal : NORMAL;
+                float2 uv0 : TEXCOORD0;
+            };
+
+            struct CameraData
             {
                 float4x4 viewMatrix;
+                float4x4 projectionMatrix;
                 float4x4 viewProjectionMatrix;
             };
 
@@ -35,19 +42,24 @@ Shader "Test Shader"
             struct MaterialData
             {
                 float4 albedo;
-                Texture2D albedoTex;
                 float roughness;
             };
             
-            ConstantBuffer<PerViewData> _PerView : SRG_PerView(b);
+            ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
 
             ConstantBuffer<ModelData> _ModelData : SRG_PerObject(b);
 
             ConstantBuffer<MaterialData> _Material : SRG_PerMaterial(b);
+            Texture2D _AlbedoTex : SRG_PerMaterial(t);
 
-            void VertMain()
+            void VertMain(VertexInfo input)
             {
                 
+            }
+
+            void FragMain()
+            {
+
             }
 
             ENDHLSL

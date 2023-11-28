@@ -31,6 +31,8 @@ namespace CE
 
 		FIELD()
 		BinaryBlob source{};
+
+		friend class Shader;
 	};
 
 	STRUCT()
@@ -50,6 +52,7 @@ namespace CE
 		FIELD()
 		ShaderBlob fragmentShader{};
 
+		friend class Shader;
 	};
 
 	ENUM()
