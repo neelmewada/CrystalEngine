@@ -83,5 +83,5 @@ namespace CE
         
     };
     
-} // namespace CE::Editor
+} // namespace CE
 

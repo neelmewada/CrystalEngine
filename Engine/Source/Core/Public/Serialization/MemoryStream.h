@@ -11,6 +11,8 @@ namespace CE
         MemoryStream(void* data, u32 length, Permissions permissions = Permissions::ReadOnly);
 
         virtual ~MemoryStream();
+
+		MemoryStream(MemoryStream&& move) noexcept;
         
         bool IsOpen() override;
         void Close() override;

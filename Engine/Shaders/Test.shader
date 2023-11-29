@@ -4,6 +4,7 @@ Shader "Test Shader"
     {
         _Material("Material", ConstantBuffer)
         {
+            [MainColor]
             albedo("Albedo", Color) = (1, 1, 1, 1)
             roughness("Roughness", Float) = 1.0
             normalStrength("Normal Strength", Range(0, 2)) = 1.0
@@ -15,6 +16,9 @@ Shader "Test Shader"
     SubShader
     {
         LOD 100
+        Tags {
+            "Blend" = "SrcAlpha,OneMinusSrcAlpha",
+        }
 
         Pass
         {
@@ -51,20 +55,19 @@ Shader "Test Shader"
             {
                 float4x4 modelMatrix;
             };
+            
+            ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
 
-            struct MaterialData
+            ConstantBuffer<ModelData> _Model : SRG_PerObject(b);
+
+            cbuffer _Material : SRG_PerMaterial(b)
             {
                 float4 albedo;
                 float roughness;
                 float normalStrength;
                 float metallic;
             };
-            
-            ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
 
-            ConstantBuffer<ModelData> _Model : SRG_PerObject(b);
-
-            ConstantBuffer<MaterialData> _Material : SRG_PerMaterial(b);
             Texture2D _AlbedoTex : SRG_PerMaterial(t);
 
             v2f VertMain(VertexInfo input)
@@ -74,7 +77,7 @@ Shader "Test Shader"
                 return o;
             }
 
-            void FragMain(v2f input) : SV_TARGET
+            float4 FragMain(v2f input) : SV_TARGET
             {
                 return float4(1.0, 0, 1.0, 1.0);
             }
