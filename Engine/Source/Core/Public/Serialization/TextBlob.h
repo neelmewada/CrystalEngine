@@ -8,8 +8,6 @@ namespace CE
 	public:
 		
 		TextBlob();
-		TextBlob(const TextBlob& copy);
-		TextBlob& operator=(const TextBlob& copy);
 
 		~TextBlob();
 		

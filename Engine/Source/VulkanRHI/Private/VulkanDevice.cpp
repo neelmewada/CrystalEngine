@@ -25,7 +25,8 @@ namespace CE
 	{
 		// TODO: pass window handle
 		auto mainWindow = VulkanPlatform::GetMainPlatformWindow();
-		testSurface = VulkanPlatform::CreateSurface(instance, mainWindow);
+		if (mainWindow != nullptr)
+			testSurface = VulkanPlatform::CreateSurface(instance, mainWindow);
 
 		SelectGpu();
 		InitGpu();
@@ -40,7 +41,8 @@ namespace CE
 			return;
 		}
 
-		VulkanPlatform::DestroySurface(instance, testSurface);
+		if (testSurface != nullptr)
+			VulkanPlatform::DestroySurface(instance, testSurface);
 		testSurface = nullptr;
 
 		descriptorPool = new VulkanDescriptorPool(this);
@@ -320,7 +322,7 @@ namespace CE
 			const auto& queueFamilyProperty = queueFamilyProps[i];
 
 			// Always prefer a single Graphics Queue Family that supports all 3: Graphics, Presentation, Compute
-			if (queueFamilyProperty.queueCount > 0 &&
+			if (testSurface != nullptr && queueFamilyProperty.queueCount > 0 &&
 				(queueFamilyProperty.queueFlags & VK_QUEUE_GRAPHICS_BIT))
 			{
 				VkBool32 presentationSupported = false;
@@ -348,7 +350,7 @@ namespace CE
 			}
 
 			// Pick any presentation queue if we couldn't find our preferred one
-			if (!queueFamilies.IsValidPresentFamily() && queueFamilyProperty.queueCount > 0)
+			if (testSurface != nullptr && !queueFamilies.IsValidPresentFamily() && queueFamilyProperty.queueCount > 0)
 			{
 				VkBool32 PresentationSupported = false;
 				vkGetPhysicalDeviceSurfaceSupportKHR(gpu, i, testSurface, &PresentationSupported);
@@ -399,6 +401,9 @@ namespace CE
 	SurfaceSupportInfo VulkanDevice::FetchSurfaceSupportInfo(VkPhysicalDevice gpu)
 	{
 		SurfaceSupportInfo surfaceSupport = {};
+
+		if (testSurface == nullptr)
+			return surfaceSupport;
 
 		// -- CAPABILITIES --
 		// Get the surface capabilities for the given physical pDevice

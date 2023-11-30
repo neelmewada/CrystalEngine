@@ -7,16 +7,6 @@ namespace CE
 
     }
 
-    TextBlob::TextBlob(const TextBlob& copy)
-    {
-
-    }
-
-    TextBlob& TextBlob::operator=(const TextBlob& copy)
-    {
-
-    }
-
 	TextBlob::~TextBlob()
 	{
 

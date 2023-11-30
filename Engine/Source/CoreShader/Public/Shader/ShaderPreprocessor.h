@@ -150,7 +150,7 @@ namespace CE
 			TK_SCOPE_OPEN, TK_SCOPE_CLOSE,
 			TK_PAREN_OPEN, TK_PAREN_CLOSE,
 			TK_KW_SHADER,
-			TK_STRING,
+			TK_LITERAL_STRING,
 			TK_KW_HLSLPROGRAM,
 			TK_KW_HLSLINCLUDE,
 			TK_KW_ENDHLSL,
@@ -174,6 +174,8 @@ namespace CE
 			String lexeme{};
 		};
 
+		bool ReadNext();
+
 		bool Tokenize();
 		bool ReadNextToken(Token& outToken);
 
@@ -183,6 +185,7 @@ namespace CE
 		Array<IO::Path> includePaths{};
 		String errorMessage = "";
 
+		ScopeType curScope = SCOPE_NONE;
 		Array<ScopeType> scopeStack{};
 		Token prevToken{};
 

@@ -8,6 +8,13 @@ namespace CE::Editor
         {
             classRegHandle = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&Self::OnClassRegistered, this));
 			classDeregHandle = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&Self::OnClassDeregistered, this));
+
+			auto derivedClasses = AssetDefinition::StaticType()->GetDerivedClasses();
+			
+			for (auto classType : derivedClasses)
+			{
+				OnClassRegistered(classType);
+			}
         }
     }
 

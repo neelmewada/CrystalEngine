@@ -34,51 +34,32 @@ namespace CE
 		}
 
 		tokens.Clear();
-		if (!Tokenize())
-		{
-			return nullptr;
-		}
 
+		while (!stream->IsOutOfBounds())
+		{
+			bool valid = ReadNext();
+		}
 		
 
 		return nullptr;
 	}
 
-	bool ShaderPreprocessor::Tokenize()
-	{
-		tokens.Clear();
-
-		if (stream == nullptr || !stream->CanRead())
-		{
-			errorMessage = "Invalid input stream";
-			return false;
-		}
-
-		while (!stream->IsOutOfBounds())
-		{
-			Token token{};
-			bool success = ReadNextToken(token);
-			if (success)
-				prevToken = token;
-		}
-
-		return false;
-	}
-
-	bool ShaderPreprocessor::ReadNextToken(Token& outToken)
+	bool ShaderPreprocessor::ReadNext()
 	{
 		if (stream->IsOutOfBounds())
 			return false;
 
 		char c = stream->Read();
 
-		ScopeType curScope = SCOPE_NONE;
+		ScopeType lastScope = SCOPE_NONE;
 		if (scopeStack.NonEmpty())
-			curScope = scopeStack.Top();
+			lastScope = scopeStack.Top();
 
 		switch (c)
 		{
-		case '\"':
+		case ' ':
+			break;
+		case '\"': // String literal
 			break;
 		default:
 		{
@@ -101,15 +82,105 @@ namespace CE
 					nextChar = stream->Read();
 				}
 
-				if (curScope == SCOPE_NONE)
+				if (curScope == SCOPE_NONE && identifier == "Shader")
 				{
+					curScope = SCOPE_SHADER;
 
+					return true;
+				}
+			}
+		}
+		break;
+		}
+	}
+
+	bool ShaderPreprocessor::Tokenize()
+	{
+		tokens.Clear();
+
+		if (stream == nullptr || !stream->CanRead())
+		{
+			errorMessage = "Invalid input stream";
+			return false;
+		}
+
+		
+
+		return false;
+	}
+
+	bool ShaderPreprocessor::ReadNextToken(Token& outToken)
+	{
+		if (stream->IsOutOfBounds())
+			return false;
+
+		char c = stream->Read();
+
+		ScopeType curScope = SCOPE_NONE;
+		if (scopeStack.NonEmpty())
+			curScope = scopeStack.Top();
+
+		switch (c)
+		{
+		case ' ':
+			break;
+		case '\"': // String literal
+		{
+			String stringLiteral = "";
+			char next = stream->Read();
+
+			while (!stream->IsOutOfBounds() && next != '\"')
+			{
+				stringLiteral.Append(next);
+				next = stream->Read();
+			}
+
+			outToken = Token{ .token = TK_LITERAL_STRING, .lexeme = stringLiteral };
+			return true;
+		}
+			break;
+		case '{':
+			outToken = Token{ .token = TK_SCOPE_OPEN };
+			return true;
+		case '}':
+			outToken = Token{ .token = TK_SCOPE_CLOSE };
+			return true;
+		case '(':
+			outToken = Token{ TK_PAREN_OPEN };
+			return true;
+		case ')':
+			outToken = Token{ TK_PAREN_CLOSE };
+			return true;
+		default:
+		{
+			if (String::IsAlphabet(c) || c == '_')
+			{
+				char nextChar = c;
+				std::string identifier{};
+				std::regex identifierRegex = std::regex("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
+
+				while (!stream->IsOutOfBounds())
+				{
+					if (!identifier.empty() && !std::regex_match(identifier, identifierRegex))
+					{
+						identifier = identifier.substr(0, identifier.size() - 1);
+						stream->Seek(-2, SeekMode::Current);
+						break;
+					}
+
+					identifier.append({ nextChar });
+					nextChar = stream->Read();
+				}
+
+				if (curScope == SCOPE_NONE && identifier == "Shader")
+				{
+					outToken = Token{ .token = TK_KW_SHADER, .lexeme = identifier };
+					return true;
 				}
 			}
 		}
 			break;
 		}
-
 		
 
 		return false;

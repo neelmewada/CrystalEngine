@@ -17,7 +17,6 @@ namespace CE
 			JobManagerDesc desc{};
 			desc.defaultTag = JOB_THREAD_WORKER;
 			desc.totalThreads = 0; // auto set optimal number of threads
-			desc.threads = { };
 
 			gJobManager = new JobManager("JobSystemManager", desc);
 			gJobContext = new JobContext(gJobManager);
@@ -28,7 +27,7 @@ namespace CE
 
         void ShutdownModule() override
         {
-			CoreObjectDelegates::onClassDeregistered.RemoveDelegateInstance(onClassRegistered);
+			CoreObjectDelegates::onClassRegistered.RemoveDelegateInstance(onClassRegistered);
 
 			gJobManager->DeactivateWorkersAndWait();
 

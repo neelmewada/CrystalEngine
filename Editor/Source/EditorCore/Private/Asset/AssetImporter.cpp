@@ -17,5 +17,17 @@ namespace CE::Editor
 	{
 
 	}
+
+	void AssetImporter::OnAssetImportJobFinish(AssetImportJob* job)
+	{
+		LockGuard<SharedMutex> lock{ mutex };
+
+		numJobsInProgress--;
+	}
+
+	void AssetImportJob::Finish()
+	{
+		importer->OnAssetImportJobFinish(this);
+	}
     
 } // namespace CE::Editor
