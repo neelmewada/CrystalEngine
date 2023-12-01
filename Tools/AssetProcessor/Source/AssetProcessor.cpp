@@ -101,6 +101,20 @@ int AssetProcessor::Run()
 
 	for (const auto& sourcePath : allSourceAssetPaths)
 	{
+		String extension = sourcePath.GetExtension().GetString();
+
+		AssetDefinition* assetDef = assetDefRegistry->FindAssetDefinition(extension);
+
+		if (assetDef != nullptr)
+		{
+			ClassType* assetImporterClass = assetDef->GetAssetImporterClass();
+			if (assetImporterClass != nullptr)
+			{
+				
+			}
+		}
+
+		// Test Code
 		if (sourcePath.GetExtension() == ".shader")
 		{
 			FileStream stream = FileStream(assetsDir / sourcePath, Stream::Permissions::ReadOnly);
@@ -112,8 +126,15 @@ int AssetProcessor::Run()
 			ShaderPreprocessor preprocessor{ &stream, includePaths };
 
 			auto preprocessData = preprocessor.PreprocessShader();
+
+			if (preprocessData != nullptr)
+			{
+
+			}
 		}
 	}
+
+	jobManager->Complete();
 
 	Shutdown();
 

@@ -3,7 +3,7 @@
 namespace CE::Editor
 {
 
-	CLASS()
+	CLASS(Config = Editor)
 	class EDITORCORE_API ShaderAssetImporter : public AssetImporter
 	{
 		CE_CLASS(ShaderAssetImporter, AssetImporter)

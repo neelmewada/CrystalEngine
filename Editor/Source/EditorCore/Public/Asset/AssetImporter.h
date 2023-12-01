@@ -4,7 +4,7 @@ namespace CE::Editor
 {
 	class AssetImportJob;
 
-    CLASS(Abstract)
+    CLASS(Abstract, Config = Editor)
     class EDITORCORE_API AssetImporter : public Object
     {
         CE_CLASS(AssetImporter, Object)
@@ -12,6 +12,8 @@ namespace CE::Editor
         
         AssetImporter();
         virtual ~AssetImporter();
+
+		void ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets);
 
 		void ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
         

@@ -12,6 +12,8 @@ namespace CE::Editor
         
         AssetDefinitionRegistry();
         ~AssetDefinitionRegistry();
+
+		AssetDefinition* FindAssetDefinition(const String& sourceExtension);
         
     protected:
         

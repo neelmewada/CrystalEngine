@@ -35,78 +35,352 @@ namespace CE
 
 		tokens.Clear();
 
-		while (!stream->IsOutOfBounds())
+		Array<Token> tokens{};
+
+		bool success = Tokenize(tokens);
+		if (!success)
+			return nullptr;
+
+		ShaderPreprocessData* preprocessData = CreateObject<ShaderPreprocessData>(nullptr, "ShaderPreprocessData");
+
+		scopeStack.Clear();
+		allScopeStack.Clear();
+		curScope = SCOPE_NONE;
+
+		int passIndex = 0;
+
+		defer(
+			passSources.Clear();
+		);
+
+		ShaderProperty currentProperty{};
+		int defaultValueIdx = 0;
+		bool isPropertyAttrib = false;
+		bool isPropertyAttribInsideParen = false;
+
+		for (int i = 0; i < tokens.GetSize(); i++)
 		{
-			bool valid = ReadNext();
-		}
-		
+			ScopeType lastScope = SCOPE_NONE;
+			if (scopeStack.NonEmpty())
+				lastScope = scopeStack.Top();
 
-		return nullptr;
-	}
+			const Token& curToken = tokens[i];
+			Token nextToken = {};
+			Token lastToken = {};
+			if (i > 0)
+				lastToken = tokens[i - 1];
+			if (i < tokens.GetSize() - 1)
+				nextToken = tokens[i + 1];
 
-	bool ShaderPreprocessor::ReadNext()
-	{
-		if (stream->IsOutOfBounds())
-			return false;
-
-		char c = stream->Read();
-
-		ScopeType lastScope = SCOPE_NONE;
-		if (scopeStack.NonEmpty())
-			lastScope = scopeStack.Top();
-
-		switch (c)
-		{
-		case ' ':
-			break;
-		case '\"': // String literal
-			break;
-		default:
-		{
-			if (String::IsAlphabet(c) || c == '_')
+			if (curToken.token == TK_SCOPE_OPEN)
 			{
-				char nextChar = c;
-				std::string identifier{};
-				std::regex identifierRegex = std::regex("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
-
-				while (!stream->IsOutOfBounds())
+				if (curScope != SCOPE_NONE)
+					scopeStack.Push(curScope);
+				allScopeStack.Push(curScope);
+				curScope = SCOPE_NONE;
+			}
+			else if (curToken.token == TK_SCOPE_CLOSE)
+			{
+				if (allScopeStack.NonEmpty())
 				{
-					if (!identifier.empty() && !std::regex_match(identifier, identifierRegex))
+					if (allScopeStack.Top() != SCOPE_NONE)
 					{
-						identifier = identifier.substr(0, identifier.size() - 1);
-						stream->Seek(-2, SeekMode::Current);
-						break;
+						scopeStack.Pop();
+					}
+					allScopeStack.Pop();
+				}
+				else
+				{
+					errorMessage = "Mismatching scope bracket '}' found";
+					preprocessData->Destroy();
+					return nullptr;
+				}
+			}
+			else if (lastScope == SCOPE_PROPERTIES) // Parse properties
+			{
+				if (curToken.token == TK_SQUARE_OPEN && !isPropertyAttrib)
+				{
+					isPropertyAttrib = true;
+				}
+				if (curToken.token == TK_SQUARE_CLOSE && isPropertyAttrib)
+				{
+					isPropertyAttrib = false;
+				}
+				else if (isPropertyAttrib)
+				{
+					if (currentProperty.attributes.IsEmpty())
+						currentProperty.attributes.Add("");
+
+					if (curToken.token == TK_IDENTIFIER || curToken.token == TK_LITERAL_INTEGER || curToken.token == TK_LITERAL_FLOAT ||
+						curToken.token == TK_LITERAL_STRING)
+					{
+						currentProperty.attributes.Top() += curToken.lexeme;
+					}
+					else if (curToken.token == TK_COMMA)
+					{
+						currentProperty.attributes.Add("");
+					}
+				}
+				else if (curToken.token == TK_IDENTIFIER && !currentProperty.name.IsValid())
+				{
+					currentProperty.name = curToken.lexeme;
+					defaultValueIdx = 0;
+				}
+				else if (curToken.token == TK_LITERAL_STRING && !currentProperty.displayName.IsValid())
+				{
+					currentProperty.displayName = curToken.lexeme;
+					defaultValueIdx = 0;
+				}
+				else if (curToken.token == TK_IDENTIFIER && currentProperty.name.IsValid() && 
+					currentProperty.displayName.IsValid() &&  
+					currentProperty.propertyType == ShaderPropertyType::None)
+				{
+					defaultValueIdx = 0;
+					if (curToken.lexeme == "Float")
+					{
+						currentProperty.propertyType = ShaderPropertyType::Float;
+					}
+					else if (curToken.lexeme == "Color")
+					{
+						currentProperty.propertyType = ShaderPropertyType::Color;
+					}
+					else if (curToken.lexeme == "Vector")
+					{
+						currentProperty.propertyType = ShaderPropertyType::Vector;
+					}
+					else if (curToken.lexeme == "Tex2D")
+					{
+						currentProperty.propertyType = ShaderPropertyType::Tex2D;
+					}
+					else if (curToken.lexeme == "Tex3D")
+					{
+						currentProperty.propertyType = ShaderPropertyType::Tex3D;
+					}
+					else if (curToken.lexeme == "TexCube")
+					{
+						currentProperty.propertyType = ShaderPropertyType::TexCube;
+					}
+					else if (curToken.lexeme == "ConstantBuffer")
+					{
+						currentProperty.propertyType = ShaderPropertyType::ConstantBuffer;
+					}
+					else if (curToken.lexeme == "StructuredBuffer")
+					{
+						currentProperty.propertyType = ShaderPropertyType::StructuredBuffer;
+					}
+					else
+					{
+						errorMessage = "Invalid property type: " + curToken.lexeme;
+						preprocessData->Destroy();
+						return nullptr;
+					}
+				}
+				else if (curToken.token == TK_LITERAL_STRING)
+				{
+					currentProperty.defaultStringValue = curToken.lexeme;
+				}
+				else if (curToken.token == TK_LITERAL_INTEGER)
+				{
+					int intValue = 0;
+					if (String::TryParse(curToken.lexeme, intValue))
+					{
+						if (defaultValueIdx == 0)
+						{
+							currentProperty.defaultFloatValue = intValue;
+							currentProperty.defaultVectorValue.x = intValue;
+							defaultValueIdx++;
+						}
+						else if (defaultValueIdx == 1)
+						{
+							currentProperty.defaultVectorValue.y = intValue;
+							defaultValueIdx++;
+						}
+						else if (defaultValueIdx == 2)
+						{
+							currentProperty.defaultVectorValue.z = intValue;
+							defaultValueIdx++;
+						}
+						else if (defaultValueIdx == 3)
+						{
+							currentProperty.defaultVectorValue.z = intValue;
+							defaultValueIdx++;
+						}
+					}
+				}
+				else if (curToken.token == TK_LITERAL_FLOAT)
+				{
+					f32 floatValue = 0;
+					if (String::TryParse(curToken.lexeme, floatValue))
+					{
+						if (defaultValueIdx == 0)
+						{
+							currentProperty.defaultFloatValue = floatValue;
+							currentProperty.defaultVectorValue.x = floatValue;
+							defaultValueIdx++;
+						}
+						else if (defaultValueIdx == 1)
+						{
+							currentProperty.defaultVectorValue.y = floatValue;
+							defaultValueIdx++;
+						}
+						else if (defaultValueIdx == 2)
+						{
+							currentProperty.defaultVectorValue.z = floatValue;
+							defaultValueIdx++;
+						}
+						else if (defaultValueIdx == 3)
+						{
+							currentProperty.defaultVectorValue.z = floatValue;
+							defaultValueIdx++;
+						}
+					}
+				}
+				else if (curToken.token == TK_NEWLINE)
+				{
+					if (currentProperty.IsValid())
+					{
+						preprocessData->properties.Add(currentProperty);
+						currentProperty = {};
+					}
+					defaultValueIdx = 0;
+				}
+			}
+			else if (lastScope == SCOPE_NONE && curToken.token == TK_KW_SHADER)
+			{
+				curScope = SCOPE_SHADER;
+			}
+			else if (curToken.token == TK_LITERAL_STRING && curScope == SCOPE_SHADER)
+			{
+				preprocessData->shaderName = curToken.lexeme;
+			}
+			else if (lastScope == SCOPE_SHADER && curToken.token == TK_KW_PROPERTIES)
+			{
+				curScope = SCOPE_PROPERTIES;
+			}
+			else if (lastScope == SCOPE_SHADER && curToken.token == TK_KW_SUBSHADER)
+			{
+				preprocessData->subShaders.Add({});
+				curScope = SCOPE_SUBSHADER;
+			}
+			else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && curToken.token == TK_KW_TAGS)
+			{
+				curScope = SCOPE_TAGS;
+			}
+			else if (lastScope == SCOPE_SUBSHADER)
+			{
+				if (curToken.token == TK_KW_PASS)
+				{
+					preprocessData->subShaders.Top().passes.Add({});
+					curScope = SCOPE_PASS;
+				}
+			}
+			else if (lastScope == SCOPE_TAGS)
+			{
+				auto parentScope = scopeStack[scopeStack.GetSize() - 2];
+				if (parentScope == SCOPE_SUBSHADER)
+				{
+					if (curToken.token == TK_LITERAL_STRING)
+					{
+						ShaderTagEntry tag{};
+						tag.key = curToken.lexeme;
+
+						Token next{};
+						while (i < tokens.GetSize() && next.token != TK_LITERAL_STRING)
+						{
+							i++;
+							next = tokens[i];
+						}
+
+						if (next.token == TK_LITERAL_STRING)
+						{
+							tag.value = next.lexeme;
+							preprocessData->subShaders.Top().subShaderTags.Add(tag);
+						}
+					}
+				}
+				else if (parentScope == SCOPE_PASS)
+				{
+					if (curToken.token == TK_LITERAL_STRING)
+					{
+						ShaderTagEntry tag{};
+						tag.key = curToken.lexeme;
+
+						Token next{};
+						while (i < tokens.GetSize() && next.token != TK_LITERAL_STRING)
+						{
+							i++;
+							next = tokens[i];
+						}
+
+						if (next.token == TK_LITERAL_STRING)
+						{
+							tag.value = next.lexeme;
+							preprocessData->subShaders.Top().passes.Top().passTags.Add(tag);
+
+							if (tag.key == "Vertex")
+								preprocessData->subShaders.Top().passes.Top().vertexEntry = "VertMain";
+							else if (tag.key == "Fragment")
+								preprocessData->subShaders.Top().passes.Top().fragmentEntry = "FragMain";
+						}
+					}
+				}
+			}
+			else if (lastScope == SCOPE_PASS)
+			{
+				if (curToken.token == TK_IDENTIFIER && curToken.lexeme == "Name")
+				{
+					Token next{};
+					while (i < tokens.GetSize() && next.token != TK_LITERAL_STRING)
+					{
+						i++;
+						next = tokens[i];
 					}
 
-					identifier.append({ nextChar });
-					nextChar = stream->Read();
+					if (next.token == TK_LITERAL_STRING)
+					{
+						preprocessData->subShaders.Top().passes.Top().passName = next.lexeme;
+					}
 				}
-
-				if (curScope == SCOPE_NONE && identifier == "Shader")
+				else if (curToken.token == TK_HLSLPROGRAM)
 				{
-					curScope = SCOPE_SHADER;
-
-					return true;
+					BinaryBlob& passSource = passSources[passIndex];
+					preprocessData->subShaders.Top().passes.Top().source = passSource;
+					passIndex++;
 				}
 			}
 		}
-		break;
-		}
+
+		return preprocessData;
 	}
 
-	bool ShaderPreprocessor::Tokenize()
+	bool ShaderPreprocessor::Tokenize(Array<Token>& tokens)
 	{
-		tokens.Clear();
+		passSources.Clear();
 
-		if (stream == nullptr || !stream->CanRead())
+		while (!stream->IsOutOfBounds())
 		{
-			errorMessage = "Invalid input stream";
-			return false;
+			Token token{};
+			bool valid = ReadNextToken(token);
+
+			if (token.token == TK_HLSLPROGRAM && curPassSource != nullptr)
+			{
+				auto data = curPassSource->GetRawDataPtr();
+				auto dataSize = curPassSource->GetLength();
+				passSources.Push({});
+				BinaryBlob& blob = passSources.Top();
+				blob.LoadData(data, dataSize);
+				delete curPassSource;
+				curPassSource = nullptr;
+			}
+
+			if (valid)
+			{
+				tokens.Add(token);
+				prevToken = token;
+			}
 		}
 
-		
-
-		return false;
+		return true;
 	}
 
 	bool ShaderPreprocessor::ReadNextToken(Token& outToken)
@@ -116,9 +390,9 @@ namespace CE
 
 		char c = stream->Read();
 
-		ScopeType curScope = SCOPE_NONE;
+		ScopeType lastScope = SCOPE_NONE;
 		if (scopeStack.NonEmpty())
-			curScope = scopeStack.Top();
+			lastScope = scopeStack.Top();
 
 		switch (c)
 		{
@@ -140,10 +414,29 @@ namespace CE
 		}
 			break;
 		case '{':
-			outToken = Token{ .token = TK_SCOPE_OPEN };
+			if (curScope != SCOPE_NONE)
+			{
+				scopeStack.Push(curScope);
+				allScopeStack.Push(curScope);
+				curScope = SCOPE_NONE;
+			}
+			else
+			{
+				allScopeStack.Push(SCOPE_NONE);
+			}
+			outToken = Token{ TK_SCOPE_OPEN };
 			return true;
 		case '}':
-			outToken = Token{ .token = TK_SCOPE_CLOSE };
+			if (allScopeStack.NonEmpty())
+			{
+				auto top = allScopeStack.Top();
+				if (top != SCOPE_NONE)
+				{
+					scopeStack.Pop();
+				}
+				allScopeStack.Pop();
+			}
+			outToken = Token{ TK_SCOPE_CLOSE };
 			return true;
 		case '(':
 			outToken = Token{ TK_PAREN_OPEN };
@@ -151,13 +444,37 @@ namespace CE
 		case ')':
 			outToken = Token{ TK_PAREN_CLOSE };
 			return true;
+		case '[':
+			outToken = Token{ TK_SQUARE_OPEN };
+			return true;
+		case ']':
+			outToken = Token{ TK_SQUARE_CLOSE };
+			return true;
+		case '=':
+			outToken = Token{ TK_EQUAL };
+			return true;
+		case '#':
+			outToken = Token{ TK_POUND };
+			return true;
+		case ',':
+			outToken = Token{ TK_COMMA };
+			return true;
+		case ':':
+			outToken = Token{ TK_COLON };
+			return true;
+		case ';':
+			outToken = Token{ TK_SEMICOLON };
+			return true;
+		case '\n':
+			outToken = Token{ TK_NEWLINE };
+			return true;
 		default:
 		{
 			if (String::IsAlphabet(c) || c == '_')
 			{
 				char nextChar = c;
 				std::string identifier{};
-				std::regex identifierRegex = std::regex("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
+				std::regex identifierRegex = std::regex("[a-zA-Z0-9_][a-zA-Z0-9_]*");
 
 				while (!stream->IsOutOfBounds())
 				{
@@ -174,9 +491,81 @@ namespace CE
 
 				if (curScope == SCOPE_NONE && identifier == "Shader")
 				{
-					outToken = Token{ .token = TK_KW_SHADER, .lexeme = identifier };
+					curScope = SCOPE_SHADER;
+					outToken = Token{ TK_KW_SHADER, identifier };
 					return true;
 				}
+				else if (lastScope == SCOPE_SHADER && identifier == "Properties")
+				{
+					curScope = SCOPE_PROPERTIES;
+					outToken = Token{ TK_KW_PROPERTIES, identifier };
+					return true;
+				}
+				else if (lastScope == SCOPE_SHADER && identifier == "SubShader")
+				{
+					curScope = SCOPE_SUBSHADER;
+					outToken = Token{ TK_KW_SUBSHADER, identifier };
+					return true;
+				}
+				else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && identifier == "Tags")
+				{
+					curScope = SCOPE_TAGS;
+					outToken = Token{ TK_KW_TAGS, identifier };
+					return true;
+				}
+				else if (lastScope == SCOPE_SUBSHADER && identifier == "Pass")
+				{
+					curScope = SCOPE_PASS;
+					outToken = Token{ TK_KW_PASS, identifier };
+					return true;
+				}
+				else if (lastScope == SCOPE_PASS && identifier == "HLSLPROGRAM")
+				{
+					curScope = SCOPE_HLSLPROGRAM;
+					outToken = Token{ TK_HLSLPROGRAM, identifier };
+					if (curPassSource != nullptr)
+					{
+						delete curPassSource;
+					}
+					curPassSource = new MemoryStream(1024);
+					curPassSource->SetAutoResizeIncrement(1024);
+					curPassSource->SetAsciiMode(true);
+					bool result = ReadHLSLProgram();
+					if (result)
+					{
+
+					}
+					return true;
+				}
+				else
+				{
+					outToken = Token{ TK_IDENTIFIER, identifier };
+					return true;
+				}
+			}
+			else if (String::IsNumeric(c))
+			{
+				char nextChar = c;
+				std::string number = "";
+				bool periodFound = false;
+
+				while (!stream->IsOutOfBounds())
+				{
+					if (nextChar != '.' && !String::IsNumeric(nextChar))
+					{
+						stream->Seek(-1, SeekMode::Current);
+						break;
+					}
+					if (nextChar == '.' && periodFound)
+						break;
+					number.append({ nextChar });
+					if (nextChar == '.')
+						periodFound = true;
+					nextChar = stream->Read();
+				}
+
+				outToken = Token{ periodFound ? TK_LITERAL_FLOAT : TK_LITERAL_INTEGER, number };
+				return true;
 			}
 		}
 			break;
@@ -184,6 +573,191 @@ namespace CE
 		
 
 		return false;
+	}
+
+	bool ShaderPreprocessor::ReadHLSLProgram()
+	{
+		if (stream->IsOutOfBounds())
+			return false;
+
+		Array<IO::Path> alreadyIncludedFiles{};
+
+		bool result = PreprocessHLSL(stream, curPassSource, alreadyIncludedFiles);
+		curPassSource->Write('\0'); // Null terminator
+
+		return result;
+	}
+
+	bool ShaderPreprocessor::PreprocessHLSL(Stream* stream, MemoryStream* outStream, Array<IO::Path>& alreadyIncludedFiles, const IO::Path& additionalIncludePath)
+	{
+		if (stream->IsOutOfBounds())
+			return false;
+
+		Array<IO::Path> includeSearchPaths = includePaths;
+		includeSearchPaths.Add(additionalIncludePath);
+
+		char next = 0;
+		char prev = 0;
+
+		while (!stream->IsOutOfBounds())
+		{
+			next = stream->Read();
+			
+			if (!String::IsAlphabet(prev) && prev != '_' && next == 'E' && !stream->IsOutOfBounds())
+			{
+				auto curPos = stream->GetCurrentPosition();
+				char next2 = 0;
+
+				String string = "E";
+
+				while (!stream->IsOutOfBounds())
+				{
+					next2 = stream->Read();
+					if (String::IsAlphabet(next2))
+					{
+						string.Append(next2);
+					}
+					else
+					{
+						stream->Seek(-1, SeekMode::Current);
+						break;
+					}
+				}
+				
+				if (string == "ENDHLSL")
+				{
+					break;
+				}
+
+				stream->Seek(curPos, SeekMode::Begin);
+			}
+			else if (next == '/' && !stream->IsOutOfBounds()) // Check for comment
+			{
+				auto next2 = stream->Read();
+				if (next2 == '*') // Multi-line comment
+				{
+					while (!stream->IsOutOfBounds())
+					{
+						next2 = stream->Read();
+						if (next2 == '*' && !stream->IsOutOfBounds() && stream->Read() == '/')
+						{
+							break; // End of multi-line comment
+						}
+					}
+					continue;
+				}
+				else if (next2 == '/') // Single-line comment
+				{
+					while (!stream->IsOutOfBounds())
+					{
+						next2 = stream->Read();
+						if (next2 == '\n')
+						{
+							break; // End of single-line comment
+						}
+					}
+					continue;
+				}
+				else // NOT a comment, go back before next2 character
+				{
+					stream->Seek(-1, SeekMode::Current);
+				}
+			}
+			else if (next == '#' && !stream->IsOutOfBounds()) // Check for #include or #pragma
+			{
+				auto curPos = stream->GetCurrentPosition();
+				char next2 = 0;
+				bool shouldContinue = false;
+
+				while (!stream->IsOutOfBounds())
+				{
+					next2 = stream->Read();
+					if (next2 == ' ')
+						continue;
+					if (String::IsAlphabet(next2))
+					{
+						String keyword = "";
+
+						while (String::IsAlphabet(next2))
+						{
+							keyword.Append(next2);
+							next2 = stream->Read();
+						}
+
+						stream->Seek(-1, SeekMode::Current);
+
+						if (keyword == "include")
+						{
+							bool isStringLiteral = false;
+							String stringLiteral = "";
+
+							while (!stream->IsOutOfBounds())
+							{
+								next2 = stream->Read();
+								if (!isStringLiteral && next2 == ' ')
+									continue;
+								if (next2 == '\"')
+								{
+									isStringLiteral = !isStringLiteral;
+									if (!isStringLiteral)
+										break;
+								}
+								else if (isStringLiteral)
+								{
+									stringLiteral.Append(next2);
+								}
+							}
+
+							for (const auto& includePath : includeSearchPaths)
+							{
+								auto includeFile = includePath / stringLiteral;
+								if (includeFile.Exists() && !includeFile.IsDirectory())
+								{
+									FileStream fileReader = FileStream(includeFile, Stream::Permissions::ReadOnly);
+									fileReader.SetAsciiMode(true);
+									shouldContinue = true;
+									if (alreadyIncludedFiles.Exists(includeFile)) // If we have already include'ed this file
+										break;
+									alreadyIncludedFiles.Add(includeFile);
+									PreprocessHLSL(&fileReader, outStream, alreadyIncludedFiles, includeFile.GetParentPath());
+									break;
+								}
+							}
+
+							break;
+						}
+						else if (keyword == "pragma")
+						{
+							while (!stream->IsOutOfBounds())
+							{
+								next2 = stream->Read();
+								if (next2 == '\n')
+									break;
+							}
+
+							shouldContinue = true;
+						}
+
+						break;
+					}
+				}
+
+				if (shouldContinue)
+					continue;
+
+				stream->Seek(curPos, SeekMode::Begin);
+			}
+
+			prev = next;
+			outStream->Write(next);
+		}
+
+		return true;
+	}
+
+	bool ShaderProperty::IsValid()
+	{
+		return name.IsValid() && displayName.IsValid() && propertyType != ShaderPropertyType::None;
 	}
 
 } // namespace CE

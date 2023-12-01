@@ -16,11 +16,11 @@ namespace CE
 		Float,
 		Color,
 		Vector,
-		Range,
 		Tex2D,
 		Tex3D,
 		TexCube,
-		ConstantBuffer
+		ConstantBuffer,
+		StructuredBuffer
 	};
 	ENUM_CLASS_FLAGS(ShaderPropertyType);
 
@@ -43,12 +43,6 @@ namespace CE
 		Array<String> attributes{};
 
 		FIELD()
-		f32 rangeMin = 0;
-		
-		FIELD()
-		f32 rangeMax = 0;
-
-		FIELD()
 		String defaultStringValue = "";
 
 		FIELD()
@@ -56,6 +50,8 @@ namespace CE
 
 		FIELD()
 		f32 defaultFloatValue = 0;
+
+		bool IsValid();
 	};
 
 	STRUCT()
@@ -149,13 +145,25 @@ namespace CE
 			TK_IDENTIFIER,
 			TK_SCOPE_OPEN, TK_SCOPE_CLOSE,
 			TK_PAREN_OPEN, TK_PAREN_CLOSE,
+			TK_SQUARE_OPEN, TK_SQUARE_CLOSE,
 			TK_KW_SHADER,
+			TK_KW_SUBSHADER,
+			TK_KW_TAGS,
+			TK_KW_PASS,
+			TK_KW_PROPERTIES,
+			TK_KW_INCLUDE,
 			TK_LITERAL_STRING,
-			TK_KW_HLSLPROGRAM,
-			TK_KW_HLSLINCLUDE,
-			TK_KW_ENDHLSL,
+			TK_LITERAL_INTEGER,
+			TK_LITERAL_FLOAT,
+			TK_HLSLPROGRAM,
+			TK_HLSLINCLUDE,
 			TK_POUND,
-			TK_KW_PRAGMA,
+			TK_EQUAL,
+			TK_COMMA,
+			TK_COLON,
+			TK_SEMICOLON,
+			TK_NEWLINE,
+			TK_KW_PRAGMA
 		};
 
 		enum ScopeType
@@ -165,19 +173,25 @@ namespace CE
 			SCOPE_PROPERTIES,
 			SCOPE_SUBSHADER,
 			SCOPE_TAGS,
-			SCOPE_PASS
+			SCOPE_PASS,
+			SCOPE_HLSLPROGRAM,
+			SCOPE_HLSLINCLUDE,
 		};
 
 		struct Token
 		{
 			TokenType token = TK_WHITESPACE;
 			String lexeme{};
+
+			ScopeType scopeType{};
 		};
 
-		bool ReadNext();
-
-		bool Tokenize();
+		bool Tokenize(Array<Token>& outTokens);
 		bool ReadNextToken(Token& outToken);
+
+		bool ReadHLSLProgram();
+
+		bool PreprocessHLSL(Stream* inStream, MemoryStream* outStream, Array<IO::Path>& alreadyIncludedFiles, const IO::Path& additionalIncludePath = {});
 
 		Array<Token> tokens{};
 		
@@ -187,7 +201,10 @@ namespace CE
 
 		ScopeType curScope = SCOPE_NONE;
 		Array<ScopeType> scopeStack{};
+		Array<ScopeType> allScopeStack{};
 		Token prevToken{};
+
+		Array<BinaryBlob> passSources{};
 
 		MemoryStream* curPassSource = nullptr;
     };

@@ -13,9 +13,21 @@ namespace CE::Editor
         
     }
 
+	void AssetImporter::ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets)
+	{
+		Array<IO::Path> productAssets{};
+
+		for (const auto& sourceAsset : sourceAssets)
+		{
+			productAssets.Add(sourceAsset.ReplaceExtension(".casset"));
+		}
+
+		ImportSourceAssetsAsync(sourceAssets, productAssets);
+	}
+
 	void AssetImporter::ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets)
 	{
-
+		
 	}
 
 	void AssetImporter::OnAssetImportJobFinish(AssetImportJob* job)

@@ -33,6 +33,19 @@ namespace CE::Editor
 		}
     }
 
+	AssetDefinition* AssetDefinitionRegistry::FindAssetDefinition(const String& sourceExtension)
+	{
+		for (auto assetDef : assetDefinitions)
+		{
+			if (assetDef->GetSourceExtensions().Exists(sourceExtension))
+			{
+				return assetDef;
+			}
+		}
+
+		return nullptr;
+	}
+
     void AssetDefinitionRegistry::OnClassRegistered(ClassType* classType)
     {
         if (!classType)
