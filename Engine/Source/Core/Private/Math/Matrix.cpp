@@ -3,8 +3,29 @@
 
 namespace CE
 {
+    Matrix4x4 Matrix4x4::PerspectiveProjection(float aspect, float fieldOfView, float n, float f)
+    {
+		float tanHalfFOV = tan(Math::ToRadians(fieldOfView / 2.0f));
 
-	Matrix4x4 Matrix4x4::operator+(const Matrix4x4& rhs) const
+        return Matrix4x4({
+			{ 1 / (aspect * tanHalfFOV), 0, 0, 0 },
+			{ 0, 1 / tanHalfFOV, 0, 0 },
+			{ 0, 0, f / (f - n), -f * n / (f - n) },
+			{ 0, 0, 1, 0 }
+		});
+    }
+
+	Matrix4x4 Matrix4x4::OrthographicProjection(float l, float r, float t, float b, float near, float far)
+	{
+		return Matrix4x4({
+			{ 2 / (r - l), 0, 0, -(r + l) / (r - l) },
+			{ 0, 2 / (b - t), 0, -(b + t) / (b - t) },
+			{ 0, 0, 1 / (far - near), -near / (far - near) },
+			{ 0, 0, 0, 1 }
+		});
+	}
+
+    Matrix4x4 Matrix4x4::operator+(const Matrix4x4& rhs) const
 	{
 		Matrix4x4 result{};
 		

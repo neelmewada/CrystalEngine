@@ -280,25 +280,7 @@ void GameLoop::RunLoop()
 		float h = rt->GetHeight();
 		float aspect = w / h;
 
-		float tanHalfFOV = tan(Math::ToRadians(fov / 2.0f));
-		
-		float l = -1, r = 1, b = -1, t = 1;
-
-		// Orthographic
-		/*projectionMatrix = Matrix4x4({
-			{ 2 / (r - l), 0, 0, -(r + l) / (r - l) },
-			{ 0, 2 / (b - t), 0, -(b + t) / (b - t) },
-			{ 0, 0, 1 / (far - near), - near / (far - near) },
-			{ 0, 0, 0, 1 }
-		});*/
-
-		// Perspective
-		projectionMatrix = Matrix4x4({
-			{ 1 / (aspect * tanHalfFOV), 0, 0, 0 },
-			{ 0, 1 / tanHalfFOV, 0, 0 },
-			{ 0, 0, f / (f - n), -f * n / (f - n) },
-			{ 0, 0, 1, 0 }
-		});
+		projectionMatrix = Matrix4x4::PerspectiveProjection(aspect, fov, n, f);
 	}
 
 	struct PerViewData
@@ -412,25 +394,9 @@ void GameLoop::RunLoop()
 			float fov = 50.0f;  // Field of view in degrees
 			float n = 0.1f, f = 500.0f;
 
-			float tanHalfFOV = tan(Math::ToRadians(fov / 2.0f));
-
-			float l = -aspect, r = aspect, b = -1, t = 1;
-
-			// Orthographic
-			/*projectionMatrix = Matrix4x4({
-				{ 2 / (r - l), 0, 0, -(r + l) / (r - l) },
-				{ 0, 2 / (b - t), 0, -(b + t) / (b - t) },
-				{ 0, 0, 1 / (f - n), - n / (f - n) },
-				{ 0, 0, 0, 1 }
-			});*/
-
 			// Perspective
-			projectionMatrix = Matrix4x4({
-				{ 1 / (aspect * tanHalfFOV), 0, 0, 0 },
-				{ 0, 1 / tanHalfFOV, 0, 0 },
-				{ 0, 0, f / (f - n), -f * n / (f - n) },
-				{ 0, 0, 1, 0 }
-			});
+			projectionMatrix = Matrix4x4::PerspectiveProjection(aspect, fov, n, f);
+			perViewUniforms.viewProjectionMatrix = projectionMatrix * viewMatrix;
 			perViewUniforms.projectionMatrix = projectionMatrix;
 
 			RHI::BufferData perViewBufferData{};
