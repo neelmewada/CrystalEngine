@@ -361,6 +361,14 @@ namespace CE
         return true;
     }
 
+	void VulkanGraphicsCommandList::WaitForExecution()
+	{
+		constexpr u64 u64Max = NumericLimits<u64>::Max();
+		auto result = vkWaitForFences(device->GetHandle(),
+			renderFinishedFence.GetSize(), renderFinishedFence.GetData(),
+			VK_TRUE, u64Max);
+	}
+
     bool VulkanRHI::PresentViewport(RHI::GraphicsCommandList* viewportCommandList)
     {
         auto vulkanCommandList = (VulkanGraphicsCommandList*)viewportCommandList;
@@ -812,14 +820,6 @@ namespace CE
 		{
 			vkCmdBindDescriptorSets(commandBuffers[i], bindPoint, vulkanPipelineLayout->handle, firstFrequencyId, srgs.GetSize(), srgs.GetData(), 0, nullptr);
 		}
-	}
-
-	void VulkanGraphicsCommandList::WaitForExecution()
-	{
-		constexpr u64 u64Max = NumericLimits<u64>::Max();
-		auto result = vkWaitForFences(device->GetHandle(),
-			renderFinishedFence.GetSize(), renderFinishedFence.GetData(),
-			VK_TRUE, u64Max);
 	}
 
 	void VulkanGraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)

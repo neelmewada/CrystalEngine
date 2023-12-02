@@ -22,8 +22,6 @@ namespace CE
 		FIELD()
 		Array<MaterialInterface*> materials{};
 
-		RHI::Buffer* vertexBuffer = nullptr;
-
 	};
     
 } // namespace CE

@@ -173,173 +173,9 @@ void GameLoop::RunLoop()
 
 	if (sceneSubsystem)
 		sceneSubsystem->OnBeginPlay();
-
-	// TODO: Test Code
-
 	auto renderTarget = gEngine->GetPrimaryGameViewport()->GetRenderTarget();
 
-	auto errorShader = Shader::GetErrorShader();
-	auto gpuShaderModule = errorShader->FindOrCreateModule();
-
-	RHI::ShaderResourceGroupDesc resourceGroup0Desc{};
-	resourceGroup0Desc.variables.Add({
-		.binding = 0,
-		.name = "_PerViewData",
-		.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-		.isDynamic = false,
-		.stageFlags = RHI::ShaderStage::Vertex
-		});
-
-	auto srg0 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup0Desc);
-
-	RHI::ShaderResourceGroupDesc emptyResourceGroupDesc{};
-	auto srgEmpty = RHI::gDynamicRHI->CreateShaderResourceGroup(emptyResourceGroupDesc);
-
-	RHI::ShaderResourceGroupDesc resourceGroup1Desc{};
-	resourceGroup1Desc.variables.Add({
-		.binding = 0,
-		.name = "_Model",
-		.type = RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-		.isDynamic = false,
-		.stageFlags = RHI::ShaderStage::Vertex
-		});
-
-	auto srg1 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup1Desc);
-
-	RHI::GraphicsPipelineDesc desc = RHI::GraphicsPipelineBuilder()
-		.VertexSize(sizeof(Vec3))
-		.VertexAttrib(0, TYPEID(Vec3), 0)
-		.CullMode(RHI::CULL_MODE_NONE)
-		.VertexShader(gpuShaderModule->vertex)
-		.FragmentShader(gpuShaderModule->fragment)
-		.ShaderResource(srg0)
-		.ShaderResource(srgEmpty)
-		.ShaderResource(srg1)
-		.Build();
-
-	auto errorPipeline = RHI::gDynamicRHI->CreateGraphicsPipelineState(renderTarget, desc);
-
-	StaticMesh* cubeMesh = StaticMesh::GetCubeMesh();
-	ModelData* cubeModel = cubeMesh->GetModelData();
-	RHI::Buffer* vertBuffer = cubeMesh->GetErrorShaderVertexBuffer();
-	RHI::Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
-	u32 numIndices = cubeModel->lod[0]->subMeshes[0].indices.GetSize();
-
-	Matrix4x4 modelMatrix{};
-	Vec3 localPos = Vec3(0, 0, 10);// 0.5f);
-	Vec3 localEuler = Vec3(0, 0, 0);
-	Vec3 localScale = Vec3(1, 1, 1);
-	
-	{
-		Matrix4x4 translation = Matrix4x4::Identity();
-		translation[0][3] = localPos.x;
-		translation[1][3] = localPos.y;
-		translation[2][3] = localPos.z;
-
-		Quat localRotation = Quat::EulerDegrees(localEuler);
-		Matrix4x4 rotation = localRotation.ToMatrix();
-
-		Matrix4x4 scale = Matrix4x4::Identity();
-		scale[0][0] = localScale.x;
-		scale[1][1] = localScale.y;
-		scale[2][2] = localScale.z;
-
-		modelMatrix = translation * rotation * scale;
-	}
-
-	Matrix4x4 viewMatrix{};
-	Vec3 cameraPos = Vec3(0, 0, 0);
-	Vec3 cameraEuler = Vec3(0, 0, 0);
-	Vec3 cameraScale = Vec3(1, 1, 1);
-
-	{
-		Matrix4x4 translation = Matrix4x4::Identity();
-		translation[0][3] = cameraPos.x;
-		translation[1][3] = cameraPos.y;
-		translation[2][3] = cameraPos.z;
-
-		Quat localRotation = Quat::EulerDegrees(cameraEuler);
-		Matrix4x4 rotation = localRotation.ToMatrix();
-
-		Matrix4x4 scale = Matrix4x4::Identity();
-		scale[0][0] = cameraScale.x;
-		scale[1][1] = cameraScale.y;
-		scale[2][2] = cameraScale.z;
-
-		viewMatrix = (translation * rotation * scale).GetInverse();
-	}
-
-	Matrix4x4 projectionMatrix{};
-
 	auto rt = viewport->GetRenderTarget();
-
-	{
-		float fov = 50.0f;  // Field of view in degrees
-		float n = 0.1f, f = 500.0f;
-		float w = rt->GetWidth();
-		float h = rt->GetHeight();
-		float aspect = w / h;
-
-		projectionMatrix = Matrix4x4::PerspectiveProjection(aspect, fov, n, f);
-	}
-
-	struct PerViewData
-	{
-		Matrix4x4 viewMatrix;
-		Matrix4x4 viewProjectionMatrix;
-		Matrix4x4 projectionMatrix;
-	} perViewUniforms;
-
-	perViewUniforms.viewMatrix = viewMatrix;
-	perViewUniforms.viewProjectionMatrix = projectionMatrix * viewMatrix;
-	perViewUniforms.projectionMatrix = projectionMatrix;
-
-	RHI::Buffer* perViewBuffer = nullptr;
-	{
-		RHI::BufferData initialData{};
-		initialData.data = &perViewUniforms;
-		initialData.dataSize = sizeof(perViewUniforms);
-		initialData.startOffsetInBuffer = 0;
-
-		RHI::BufferDesc bufferDesc{};
-		bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-		bufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
-		bufferDesc.name = "PerView Uniforms";
-		bufferDesc.bufferSize = sizeof(perViewUniforms);
-		bufferDesc.structureByteStride = bufferDesc.bufferSize;
-		bufferDesc.initialData = &initialData;
-
-		perViewBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-	}
-
-	RHI::Buffer* perModelBuffer = nullptr;
-	{
-		RHI::BufferData initialData{};
-		initialData.data = &modelMatrix;
-		initialData.dataSize = sizeof(modelMatrix);
-		initialData.startOffsetInBuffer = 0;
-
-		RHI::BufferDesc bufferDesc{};
-		bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-		bufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-		bufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
-		bufferDesc.name = "PerModel Uniforms";
-		bufferDesc.bufferSize = sizeof(modelMatrix);
-		bufferDesc.structureByteStride = bufferDesc.bufferSize;
-		bufferDesc.initialData = &initialData;
-
-		perModelBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-	}
-
-	RHI::IPipelineLayout* pipelineLayout = errorPipeline->GetPipelineLayout();
-
-	srg0->Bind("_PerViewData", perViewBuffer);
-	srg1->Bind("_Model", perModelBuffer);
-
-	float curAspect = (float)rt->GetWidth() / (float)rt->GetHeight();
-
-	f32 rot = 0;
 	
 	while (!IsEngineRequestingExit())
 	{
@@ -354,59 +190,6 @@ void GameLoop::RunLoop()
 		if (!sceneSubsystem)
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
-		rot += deltaTime * 100;
-		if (rot > 360)
-			rot = 0;
-
-		// - Update Model Matrix -
-		{
-			Matrix4x4 translation = Matrix4x4::Identity();
-			translation[0][3] = localPos.x;
-			translation[1][3] = localPos.y;
-			translation[2][3] = localPos.z;
-
-			localEuler.y = rot;
-			Quat localRotation = Quat::EulerDegrees(localEuler);
-			Matrix4x4 rotation = localRotation.ToMatrix();
-
-			Matrix4x4 scale = Matrix4x4::Identity();
-			scale[0][0] = localScale.x;
-			scale[1][1] = localScale.y;
-			scale[2][2] = localScale.z;
-
-			modelMatrix = translation * rotation * scale;
-
-			RHI::BufferData modelData{};
-			modelData.data = &modelMatrix;
-			modelData.dataSize = sizeof(modelMatrix);
-			modelData.startOffsetInBuffer = 0;
-			perModelBuffer->UploadData(modelData);
-		}
-
-		// - Update Projection -
-		float w = rt->GetWidth();
-		float h = rt->GetHeight();
-		float aspect = w / h;
-
-		if (curAspect != aspect)
-		{
-			curAspect = aspect;
-			float fov = 50.0f;  // Field of view in degrees
-			float n = 0.1f, f = 500.0f;
-
-			// Perspective
-			projectionMatrix = Matrix4x4::PerspectiveProjection(aspect, fov, n, f);
-			perViewUniforms.viewProjectionMatrix = projectionMatrix * viewMatrix;
-			perViewUniforms.projectionMatrix = projectionMatrix;
-
-			RHI::BufferData perViewBufferData{};
-			perViewBufferData.data = &perViewUniforms;
-			perViewBufferData.dataSize = sizeof(perViewUniforms);
-			perViewBufferData.startOffsetInBuffer = 0;
-
-			perViewBuffer->UploadData(perViewBufferData);
-		}
-
 		// - Render -
 		viewport->SetClearColor(Color::Black());
 		if (sceneSubsystem && sceneSubsystem->GetActiveScene() != nullptr)
@@ -420,14 +203,7 @@ void GameLoop::RunLoop()
 
 		cmdList->Begin();
 
-		cmdList->BindPipeline(errorPipeline);
-
-		cmdList->BindVertexBuffers(0, { vertBuffer });
-		cmdList->BindIndexBuffer(indexBuffer, false, 0);
-		
-		cmdList->CommitShaderResources(0, { srg0, srgEmpty, srg1 }, pipelineLayout);
-
-		cmdList->DrawIndexed(numIndices, 1, 0, 0, 0);
+		gEngine->Render();
 		
 		cmdList->End();
 
@@ -440,16 +216,6 @@ void GameLoop::RunLoop()
 	}
 
 	cmdList->WaitForExecution();
-
-	RHI::gDynamicRHI->DestroyBuffer(perViewBuffer);
-	RHI::gDynamicRHI->DestroyBuffer(perModelBuffer);
-
-	RHI::gDynamicRHI->DestroyShaderResourceGroup(srgEmpty);
-
-	RHI::gDynamicRHI->DestroyPipelineState(errorPipeline);
-
-	RHI::gDynamicRHI->DestroyShaderResourceGroup(srg0);
-	RHI::gDynamicRHI->DestroyShaderResourceGroup(srg1);
 }
 
 void GameLoop::PreShutdown()

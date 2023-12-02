@@ -29,7 +29,7 @@ namespace CE
 		inline CameraProjection GetProjection() const { return projection; }
 		inline void SetProjection(CameraProjection projection) { this->projection = projection; }
 
-	protected:
+	private:
 
 		FIELD()
 		b8 isMainCamera = false;
@@ -39,6 +39,20 @@ namespace CE
 
 		FIELD()
 		CameraProjection projection{};
+
+		FIELD()
+		float nearPlane = 0.1f;
+
+		FIELD()
+		float farPlane = 1000;
+
+		FIELD()
+		float fieldOfView = 60;
+
+		FIELD(ReadOnly)
+		Matrix4x4 projectionMatrix{};
+
+		friend class RendererSubsystem;
 	};
 
 } // namespace CE

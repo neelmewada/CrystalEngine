@@ -40,9 +40,4 @@ namespace CE
 		return errorMaterial;
 	}
 
-	void Material::CreateGraphicsPipeline()
-	{
-
-	}
-
 } // namespace CE

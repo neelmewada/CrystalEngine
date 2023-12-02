@@ -16,8 +16,6 @@ namespace CE
 
 	protected:
 
-		void CreateGraphicsPipeline();
-
 	};
     
 } // namespace CE
