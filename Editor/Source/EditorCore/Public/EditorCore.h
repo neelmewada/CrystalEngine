@@ -18,3 +18,8 @@
 #include "Asset/AssetDefinition.h"
 #include "Asset/AssetDefinitionRegistry.h"
 #include "Asset/AssetImporter.h"
+
+// Assets
+#include "Asset/ShaderAssetDefinition.h"
+#include "Asset/ShaderAssetImporter.h"
+

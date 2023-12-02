@@ -4,7 +4,7 @@
 namespace CE
 {
 #if PAL_TRAIT_BUILD_EDITOR
-	namespace Editor { class ShaderImportJob; }
+	namespace Editor { class ShaderAssetImportJob; }
 #endif
 
 	STRUCT()
@@ -17,7 +17,7 @@ namespace CE
 
 		inline bool IsValid() const
 		{
-			return source.IsValid() && reflectionInfo.IsValid();
+			return byteCode.IsValid();
 		}
 
 		FIELD()
@@ -27,10 +27,9 @@ namespace CE
 		ShaderStage shaderStage = ShaderStage::None;
 
 		FIELD()
-		ShaderReflection reflectionInfo{};
+		BinaryBlob byteCode{};
 
-		FIELD()
-		BinaryBlob source{};
+		friend class Shader;
 	};
 
 	STRUCT()
@@ -45,11 +44,32 @@ namespace CE
 		Array<String> defineFlags{};
 
 		FIELD()
-		ShaderBlob vertexShader{};
+		SIZE_T variantHash = 0;
 
 		FIELD()
-		ShaderBlob fragmentShader{};
+		Array<ShaderBlob> shaderStageBlobs{};
 
+		FIELD()
+		ShaderReflection reflectionInfo{};
+
+		ShaderBlob* GetShaderBlobForStage(ShaderStage stage);
+
+		friend class Shader;
+	};
+
+	CLASS()
+	class SYSTEM_API ShaderPass : public Object
+	{
+		CE_CLASS(ShaderPass, Object)
+	public:
+
+		FIELD()
+		Name passName = "Main";
+
+		FIELD()
+		Array<ShaderVariant> variants{};
+
+		friend class Shader;
 	};
 
 	ENUM()
@@ -59,6 +79,22 @@ namespace CE
 		ErrorShader = BIT(0),
 	};
 	ENUM_CLASS_FLAGS(ShaderFlags);
+
+	STRUCT()
+	struct SYSTEM_API GPUShaderModule
+	{
+		CE_STRUCT(GPUShaderModule)
+	public:
+
+		FIELD()
+		Name passName = "Main";
+
+		FIELD()
+		SIZE_T variantHash = 0;
+
+		RHI::ShaderModule* vertex = nullptr;
+		RHI::ShaderModule* fragment = nullptr;
+	};
 
 	CLASS()
 	class SYSTEM_API Shader : public Asset
@@ -71,27 +107,35 @@ namespace CE
 
 		static Shader* GetErrorShader();
 
-		static Shader* GetTestShader();
+		GPUShaderModule* FindOrCreateModule(Name passName = "", SIZE_T variantHash = 0);
 
-		inline const ShaderVariant& GetVariant(u32 index) const { return variants[index]; }
+		GPUShaderModule* FindModule(Name passName = "", SIZE_T variantHash = 0);
 
-		const Array<RHI::ShaderModule*>& GetShaderModules();
+		inline Name GetShaderName() const
+		{
+			if (preprocessData != nullptr)
+				return preprocessData->shaderName;
+			return GetName();
+		}
 
 	protected:
 
-		FIELD()
+		FIELD(ReadOnly)
 		ShaderFlags shaderFlags = ShaderFlags::None;
 
 		FIELD()
-		Array<ShaderVariant> variants{};
+		ShaderPreprocessData* preprocessData = nullptr;
+
+		FIELD()
+		Array<ShaderPass*> passes{};
 
 		FIELD()
 		ShaderStage stages = ShaderStage::Default;
 
-		Array<RHI::ShaderModule*> shaderModules{};
+		Array<GPUShaderModule> allModules{};
 
 #if PAL_TRAIT_BUILD_EDITOR
-		friend class CE::Editor::ShaderImportJob;
+		friend class CE::Editor::ShaderAssetImportJob;
 #endif
 	};
     

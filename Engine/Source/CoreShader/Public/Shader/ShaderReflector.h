@@ -20,13 +20,13 @@ namespace CE
 			ERR_InvalidArgs,
 		};
 
-		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, ShaderReflection& outReflection);
+		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection);
 
-		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, ShaderReflection& outReflection)
+		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection)
 		{
 			if (shaderFormat == ShaderBlobFormat::Spirv)
 			{
-				return ReflectSpirv(byteCode, byteSize, outReflection);
+				return ReflectSpirv(byteCode, byteSize, curStage, outReflection);
 			}
 			return ERR_InvalidFormat;
 		}

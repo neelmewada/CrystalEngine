@@ -2,19 +2,6 @@
 
 namespace CE
 {
-    ENUM(Flags)
-    enum class VertexInputAttribute
-    {
-        None = 0,
-        Position = BIT(0),
-        UV0 = BIT(1),
-        Normal = BIT(2),
-        Tangent = BIT(3),
-        Color = BIT(4),
-    };
-    ENUM_CLASS_FLAGS(VertexInputAttribute);
-
-    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input);
 
 	STRUCT()
 	struct SYSTEM_API SubMesh

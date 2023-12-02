@@ -1,30 +1,22 @@
-#include "EditorSystem.h"
+#include "EditorCore.h"
 
 namespace CE::Editor
 {
-    
-	ShaderAssetDefinition::ShaderAssetDefinition()
-	{
-	}
-
-	ShaderAssetDefinition::~ShaderAssetDefinition()
-	{
-	}
 
 	const Array<String>& ShaderAssetDefinition::GetSourceExtensions()
 	{
 		static Array<String> extensions = {
-			".hlsl"
+			".shader"
 		};
 		return extensions;
 	}
 
-	ClassType* ShaderAssetDefinition::GetAssetClass()
+	SubClassType<Asset> ShaderAssetDefinition::GetDefaultAssetClass()
 	{
 		return GetStaticClass<Shader>();
 	}
 
-	ClassType* ShaderAssetDefinition::GetAssetClass(const String& extension)
+	SubClassType<Asset> ShaderAssetDefinition::GetAssetClass(const String& extension)
 	{
 		return GetStaticClass<Shader>();
 	}
@@ -33,5 +25,5 @@ namespace CE::Editor
 	{
 		return GetStaticClass<ShaderAssetImporter>();
 	}
-
+    
 } // namespace CE::Editor

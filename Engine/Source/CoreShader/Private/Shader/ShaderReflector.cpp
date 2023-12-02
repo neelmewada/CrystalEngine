@@ -19,26 +19,52 @@ namespace CE
     }
 
 
-	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, ShaderReflection& outReflection)
+	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection)
 	{
 		spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)byteCode, byteSize / 4);
 		defer(
 			delete reflection;
 		);
-
-		outReflection = ShaderReflection();
 		
 		auto resources = reflection->get_shader_resources();
 
-		auto reflectResource = [&](spirv_cross::SmallVector<spirv_cross::Resource>& resourceList, ShaderResourceType resourceType)
+		auto reflectStruct = [&](SRGVariable& variable, spirv_cross::SPIRType type, spirv_cross::TypeID baseTypeId)
 			{
-				int numResources = resourceList.size();
-				for (int i = 0; i < numResources; i++)
+				int numMembers = type.member_types.size();
+				for (int i = 0; i < numMembers; i++)
 				{
-					auto resource = resourceList[i];
-					auto id = resource.id;
+					auto memberTypeId = type.member_types[i];
+					String name = reflection->get_member_name(baseTypeId, i);
+					auto memberType = reflection->get_type(memberTypeId);
 
-					String internalName = reflection->get_name(resource.base_type_id);
+					ShaderStructMember structMember{};
+					structMember.name = name;
+
+					if (memberType.basetype != spirv_cross::SPIRType::Float)
+						continue;
+					if (memberType.columns == 1)
+					{
+						if (memberType.vecsize == 1)
+							structMember.dataType = ShaderStructMemberType::Float;
+						else if (memberType.vecsize == 2)
+							structMember.dataType = ShaderStructMemberType::Float2;
+						else if (memberType.vecsize == 3)
+							structMember.dataType = ShaderStructMemberType::Float3;
+						else if (memberType.vecsize == 4)
+							structMember.dataType = ShaderStructMemberType::Float4;
+						else
+							continue;
+					}
+					else if (memberType.columns == 4)
+					{
+						structMember.dataType = ShaderStructMemberType::Float4x4;
+					}
+					else
+					{
+						continue;
+					}
+
+					variable.structMembers.Add(structMember);
 				}
 			};
 		
@@ -64,13 +90,19 @@ namespace CE
 			variable.internalName = internalName;
 			variable.resourceType = ShaderResourceType::ConstantBuffer;
 			variable.count = count;
+			variable.shaderStages = curStage;
+
+			if (type.basetype == spirv_cross::SPIRType::Struct)
+			{
+				reflectStruct(variable, type, uniformBuffer.base_type_id);
+			}
 
 			auto& entry = outReflection.FindOrAdd(set);
-			entry.variables.Add(variable);
+			entry.TryAdd(variable, curStage);
 		}
 
 		int numStorageBuffers = resources.storage_buffers.size();
-		for (int i = 0; i < numStorageBuffers; i++) // TextureBuffer (Storage Buffers)
+		for (int i = 0; i < numStorageBuffers; i++) // StructuredBuffer (Storage Buffers)
 		{
 			auto storageBuffer = resources.storage_buffers[i];
 
@@ -90,15 +122,21 @@ namespace CE
 			variable.binding = binding;
 			variable.name = name;
 			variable.internalName = internalName;
-			variable.resourceType = ShaderResourceType::TextureBuffer;
+			variable.resourceType = ShaderResourceType::StructuredBuffer;
 			variable.count = count;
+			variable.shaderStages = curStage;
 			
+			if (type.basetype == spirv_cross::SPIRType::Struct)
+			{
+				reflectStruct(variable, type, storageBuffer.base_type_id);
+			}
+
 			auto& entry = outReflection.FindOrAdd(set);
-			entry.variables.Add(variable);
+			entry.TryAdd(variable, curStage);
 		}
 
 		int numStorageImages = resources.storage_images.size();
-		for (int i = 0; i < numStorageImages; i++)
+		for (int i = 0; i < numStorageImages; i++) // RWTexture2D, etc
 		{
 			auto storageImage = resources.storage_images[i];
 
@@ -113,7 +151,7 @@ namespace CE
 
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
-
+			
 			SRGVariable variable{};
 			variable.binding = binding;
 			variable.name = name;
@@ -128,9 +166,10 @@ namespace CE
 			}
 			variable.resourceType = ShaderResourceType::RWTexture2D;
 			variable.count = count;
+			variable.shaderStages = curStage;
 
 			auto& entry = outReflection.FindOrAdd(set);
-			entry.variables.Add(variable);
+			entry.TryAdd(variable, curStage);
 		}
 		
 		int numTextures = resources.separate_images.size();
@@ -154,6 +193,7 @@ namespace CE
 			variable.binding = binding;
 			variable.name = name;
 			variable.internalName = internalName;
+			variable.shaderStages = curStage;
 			
 			if (type.image.dim == spv::Dim2D)
 			{
@@ -178,11 +218,11 @@ namespace CE
 			variable.count = count;
 
 			auto& entry = outReflection.FindOrAdd(set);
-			entry.variables.Add(variable);
+			entry.TryAdd(variable, curStage);
 		}
 
 		int numSamplers = resources.separate_samplers.size();
-		for (int i = 0; i < numSamplers; i++) // SampelerState (separate sampler)
+		for (int i = 0; i < numSamplers; i++) // SamplerState (separate sampler)
 		{
 			auto sampler = resources.separate_samplers[i];
 
@@ -204,9 +244,10 @@ namespace CE
 			variable.internalName = internalName;
 			variable.resourceType = ShaderResourceType::SamplerState;
 			variable.count = count;
+			variable.shaderStages = curStage;
 
 			auto& entry = outReflection.FindOrAdd(set);
-			entry.variables.Add(variable);
+			entry.TryAdd(variable, curStage);
 		}
 
 		return ERR_Success;

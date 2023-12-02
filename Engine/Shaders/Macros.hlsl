@@ -6,7 +6,7 @@
 #endif
 
 #ifndef PerView_Frequency
-#define PerView_Frequency 0
+#define PerView_Frequency 1
 #endif
 
 #ifndef PerPass_Frequency

@@ -964,6 +964,8 @@ namespace CE
 		if (index < 0)
 			return;
 
+		bufferVariableBindings[variableName] = buffer;
+
 		VkDescriptorSetLayoutBinding binding = bindings[index];
 
 		VkDescriptorBufferInfo bufferInfo{};

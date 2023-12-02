@@ -2,25 +2,6 @@
 
 namespace CE
 {
-    SYSTEM_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input)
-    {
-        switch (input) {
-            case VertexInputAttribute::Position:
-                return sizeof(Vec3);
-            case VertexInputAttribute::UV0:
-                return sizeof(Vec2);
-            case VertexInputAttribute::Normal:
-                return sizeof(Vec3);
-            case VertexInputAttribute::Tangent:
-                return sizeof(Vec3);
-            case VertexInputAttribute::Color:
-                return sizeof(Vec4);
-            default:
-                return 0;
-        }
-        
-        return 0;
-    }
 
 	void SubMesh::Clear()
 	{
@@ -109,9 +90,6 @@ namespace CE
                     case VertexInputAttribute::Position:
                         *vec3 = vertices[vertIdx];
                         break;
-                    case VertexInputAttribute::UV0:
-                        *vec2 = uvCoords[vertIdx];
-                        break;
                     case VertexInputAttribute::Normal:
                         *vec3 = normals[vertIdx];
                         break;
@@ -121,6 +99,9 @@ namespace CE
                     case VertexInputAttribute::Color:
                         *color = vertexColors[vertIdx];
                         break;
+					case VertexInputAttribute::UV0:
+						*vec2 = uvCoords[vertIdx];
+						break;
                 }
                 
 				pos += size;
@@ -162,9 +143,9 @@ namespace CE
         
         for (u32 vertIdx = 0; vertIdx < numVertices; vertIdx++)
         {
-            f32* posStart = data + vertIdx * (u32)structureSize;
-            
-            f32* pos = posStart;
+			u8* posStart = (u8*)data + vertIdx * (u32)structureSize;
+
+			u8* pos = (u8*)posStart;
             
             for (VertexInputAttribute inputType : inputs)
             {

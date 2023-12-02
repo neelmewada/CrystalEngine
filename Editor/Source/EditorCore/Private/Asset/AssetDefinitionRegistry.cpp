@@ -8,6 +8,13 @@ namespace CE::Editor
         {
             classRegHandle = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(MemberDelegate(&Self::OnClassRegistered, this));
 			classDeregHandle = CoreObjectDelegates::onClassDeregistered.AddDelegateInstance(MemberDelegate(&Self::OnClassDeregistered, this));
+
+			auto derivedClasses = AssetDefinition::StaticType()->GetDerivedClasses();
+			
+			for (auto classType : derivedClasses)
+			{
+				OnClassRegistered(classType);
+			}
         }
     }
 
@@ -25,6 +32,19 @@ namespace CE::Editor
 			classDeregHandle = 0;
 		}
     }
+
+	AssetDefinition* AssetDefinitionRegistry::FindAssetDefinition(const String& sourceExtension)
+	{
+		for (auto assetDef : assetDefinitions)
+		{
+			if (assetDef->GetSourceExtensions().Exists(sourceExtension))
+			{
+				return assetDef;
+			}
+		}
+
+		return nullptr;
+	}
 
     void AssetDefinitionRegistry::OnClassRegistered(ClassType* classType)
     {

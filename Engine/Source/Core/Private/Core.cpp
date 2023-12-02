@@ -30,12 +30,10 @@ namespace CE
 #if PAL_TRAIT_BUILD_EDITOR
         if (gProjectPath.IsEmpty()) // Editor: gProjectPath should be set before loading Core
             gProjectPath = PlatformDirectories::GetEngineRootDir();
+#endif
 
 		// Load .ini configs into cache
 		gConfigCache->LoadStartupConfigs();
-#else
-		gConfigCache->LoadStartupConfigs();
-#endif
         
         onBeforeModuleUnloadHandle = CoreDelegates::onBeforeModuleUnload.AddDelegateInstance(&TypeInfo::DeregisterTypesForModule);
 		settingsBaseOnClassRegistered = CoreObjectDelegates::onClassRegistered.AddDelegateInstance(&SettingsBase::OnClassRegistered);

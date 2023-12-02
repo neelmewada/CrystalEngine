@@ -106,6 +106,7 @@
 
 // RTTI Dependents
 #include "Serialization/BinaryBlob.h"
+#include "Serialization/TextBlob.h"
 #include "Math/MathRTTI.h"
 #include "IO/FileWatcher.h"
 

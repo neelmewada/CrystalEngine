@@ -319,6 +319,7 @@ namespace CE
 
 		Array<Name> variableNames{};
 		Array<VkDescriptorSetLayoutBinding> bindings{};
+		HashMap<Name, RHI::Buffer*> bufferVariableBindings{};
 
 		friend class VulkanGraphicsPipeline;
 		friend class VulkanGraphicsCommandList;

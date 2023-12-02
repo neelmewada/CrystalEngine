@@ -5,68 +5,52 @@
 
 //*****************************************************************************************************************************************
 
-// data structure : before vertex shader (mesh info)
 struct VertexInfo
 {
     float3 position : POSITION;
+    float3 normal : NORMAL;
+    float2 uv0 : TEXCOORD0;
 };
 
-// data structure : vertex shader to pixel shader
-// also called interpolants because values interpolates through the triangle
-// from one vertex to another
-struct v2p
+struct Varyings
 {
     float4 position : SV_POSITION;
-    float2 uv : TEXCOORD0;
-    float3 color : TEXCOORD1;
 };
 
-struct SceneBuffer
+struct CameraData
 {
-    float3 lightColor;
-    float3 cameraPos;
+    float4x4 viewMatrix;
+    float4x4 projectionMatrix;
+    float4x4 viewProjectionMatrix;
 };
 
-struct ObjectData
+struct ModelData
 {
-    float4 model;
+    float4x4 modelMatrix;
 };
 
-struct DrawData
+ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
+
+ConstantBuffer<ModelData> _Model : SRG_PerObject(b);
+
+cbuffer _Material : SRG_PerMaterial(b)
 {
-    int index;
+    float4 albedo;
+    float roughness;
+    float normalStrength;
+    float metallic;
 };
 
-ConstantBuffer<SceneBuffer> buff : SRG_PerScene(b);
-ConstantBuffer<SceneBuffer> buffer2 : SRG_PerScene(b);
+Texture2D _AlbedoTex : SRG_PerMaterial(t);
 
-cbuffer buffer3 : SRG_PerScene(b)
+Varyings VertMain(VertexInfo input)
 {
-    float3 ambientColor;
-};
-
-TextureBuffer<ObjectData> _Object : SRG_PerPass(t);
-
-Texture2D _MainTex[10] : SRG_PerMaterial(t);
-RWTexture2D<float4> _DataTex : SRG_PerMaterial(u);
-SamplerState _MainTexSampler : SRG_PerMaterial(t);
-
-ConstantBuffer<DrawData> _DrawData : SRG_PerDraw(b);
-
-// vertex shader function
-v2p VertMain(VertexInfo input)
-{
-    v2p output;
-    output.position = float4(_Object.model.rgb * input.position * buff.cameraPos * buffer2.lightColor * ambientColor, 1.0);
-    output.uv = float2(0, 0);
-    output.color = float3(1, 1, 0);
-    return output;
+    Varyings o;
+    o.position = mul(mul(mul(float4(input.position, 1.0), _Model.modelMatrix), _Camera.viewMatrix), _Camera.projectionMatrix);
+    return o;
 }
 
-// pixel shader function
-float4 FragMain(v2p input) : SV_TARGET
+float4 FragMain(Varyings input) : SV_TARGET
 {
-    float4 col = _MainTex[_DrawData.index].Sample(_MainTexSampler, float2(0, 0));
-    _DataTex[int2(1, 1)] = float4(0.5, 0.5, 0.5, 1);
-    return float4(buff.lightColor * col.rgb * ambientColor, 0.0);
+    return albedo * metallic;
 }
