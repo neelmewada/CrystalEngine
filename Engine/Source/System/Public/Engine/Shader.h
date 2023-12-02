@@ -80,16 +80,9 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(ShaderFlags);
 
-	STRUCT()
-	struct SYSTEM_API GPUShaderModule
+	struct GPUShaderModule
 	{
-		CE_STRUCT(GPUShaderModule)
-	public:
-
-		FIELD()
 		Name passName = "Main";
-
-		FIELD()
 		SIZE_T variantHash = 0;
 
 		RHI::ShaderModule* vertex = nullptr;

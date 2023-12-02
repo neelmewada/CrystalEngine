@@ -94,7 +94,7 @@ namespace CE
 					{
 						allModules.Add({});
 						module = &allModules.Top();
-						module->passName = passName;
+						module->passName = pass->passName;
 						module->variantHash = variant.variantHash;
 
 						RHI::ShaderModuleDesc vertexDesc{};
