@@ -40,4 +40,19 @@ namespace CE
 		return resourceGroups.Top();
     }
 
+	void SRGEntry::TryAdd(const SRGVariable& variable, ShaderStage stage)
+	{
+		for (auto& var : variables)
+		{
+			if (var.GetName() == variable.GetName() && var.GetBinding() == variable.GetBinding())
+			{
+				var.shaderStages |= stage;
+				return;
+			}
+		}
+		
+		variables.Add(variable);
+		variables.Top().shaderStages |= stage;
+	}
+
 } // namespace CE

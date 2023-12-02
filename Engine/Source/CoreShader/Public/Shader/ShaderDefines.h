@@ -27,6 +27,7 @@ namespace CE
 		Fragment = BIT(1),
 
 		Default = Vertex | Fragment,
+		All = Vertex | Fragment,
 	};
 	ENUM_CLASS_FLAGS(ShaderStage);
 
@@ -51,6 +52,33 @@ namespace CE
 		TextureCube,
 		// image2D in vulkan
 		RWTexture2D,
+	};
+	ENUM_CLASS_FLAGS(ShaderResourceType);
+
+	ENUM()
+	enum class ShaderStructMemberType
+	{
+		None = 0,
+		Float,
+		Float2,
+		Float3,
+		Float4,
+		Float4x4
+	};
+	ENUM_CLASS_FLAGS(ShaderStructMemberType);
+
+	STRUCT()
+	struct ShaderStructMember
+	{
+		CE_STRUCT(ShaderStructMember)
+	public:
+
+		FIELD()
+		Name name{};
+
+		FIELD()
+		ShaderStructMemberType dataType{};
+		
 	};
 
 	STRUCT()
@@ -80,11 +108,18 @@ namespace CE
 		FIELD(ReadOnly)
 		ShaderResourceType resourceType = ShaderResourceType::None;
 
+		FIELD()
+		ShaderStage shaderStages = ShaderStage::All;
+
+		FIELD()
+		Array<ShaderStructMember> structMembers{};
+
 		FIELD(ReadOnly)
 		int count = 1;
 
 		friend class ShaderReflector;
 		friend class Shader;
+		friend struct SRGEntry;
 	};
 
 	STRUCT()
@@ -107,6 +142,8 @@ namespace CE
 		
 		FIELD(ReadOnly)
 		Array<SRGVariable> variables{};
+
+		void TryAdd(const SRGVariable& variable, ShaderStage stage);
 
 		friend class ShaderReflector;
 		friend struct ShaderReflection;

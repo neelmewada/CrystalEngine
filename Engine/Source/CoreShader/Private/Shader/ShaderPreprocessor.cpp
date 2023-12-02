@@ -16,7 +16,7 @@ namespace CE
 
 	}
 
-	ShaderPreprocessData* ShaderPreprocessor::PreprocessShader()
+	ShaderPreprocessData* ShaderPreprocessor::PreprocessShader(Object* outer)
 	{
 		errorMessage = "";
 
@@ -41,7 +41,7 @@ namespace CE
 		if (!success)
 			return nullptr;
 
-		ShaderPreprocessData* preprocessData = CreateObject<ShaderPreprocessData>(nullptr, "ShaderPreprocessData");
+		ShaderPreprocessData* preprocessData = CreateObject<ShaderPreprocessData>(outer, "ShaderPreprocessData");
 
 		scopeStack.Clear();
 		allScopeStack.Clear();
@@ -53,7 +53,7 @@ namespace CE
 			passSources.Clear();
 		);
 
-		ShaderProperty currentProperty{};
+		ShaderPropertyEntry currentProperty{};
 		int defaultValueIdx = 0;
 		bool isPropertyAttrib = false;
 		bool isPropertyAttribInsideParen = false;
@@ -531,10 +531,6 @@ namespace CE
 					curPassSource->SetAutoResizeIncrement(1024);
 					curPassSource->SetAsciiMode(true);
 					bool result = ReadHLSLProgram();
-					if (result)
-					{
-
-					}
 					return true;
 				}
 				else
@@ -755,7 +751,7 @@ namespace CE
 		return true;
 	}
 
-	bool ShaderProperty::IsValid()
+	bool ShaderPropertyEntry::IsValid()
 	{
 		return name.IsValid() && displayName.IsValid() && propertyType != ShaderPropertyType::None;
 	}

@@ -4,6 +4,14 @@ namespace CE::Editor
 {
 	class AssetImportJob;
 
+	struct AssetImportJobResult
+	{
+		bool success = false;
+		IO::Path sourcePath{};
+		IO::Path productPath{};
+		String errorMessage{};
+	};
+
     CLASS(Abstract, Config = Editor)
     class EDITORCORE_API AssetImporter : public Object
     {
@@ -15,11 +23,17 @@ namespace CE::Editor
 
 		void ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets);
 
-		void ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
+		bool ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
         
 		inline bool IsImportInProgress() const { return numJobsInProgress > 0; }
 
 		inline int GetNumJobsLeft() const { return numJobsInProgress; }
+
+		inline const Array<AssetImportJobResult>& GetResults() const { return importResults; }
+
+		inline void SetIncludePaths(const Array<IO::Path>& paths) { this->includePaths = paths; }
+
+		inline void SetLogging(bool enabled) { enableLogging = enabled; }
 
     protected:
 
@@ -29,6 +43,11 @@ namespace CE::Editor
 
 		SharedMutex mutex{};
 		int numJobsInProgress = 0;
+		bool enableLogging = false;
+
+		Array<AssetImportJobResult> importResults{};
+
+		Array<IO::Path> includePaths{};
 
 		friend class AssetImportJob;
     };
@@ -39,25 +58,49 @@ namespace CE::Editor
 		typedef AssetImportJob Self;
 		typedef Job Super;
 
-		AssetImportJob(AssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath)
+		AssetImportJob(AssetImporter* importer, const IO::Path& sourcePath, const IO::Path& productPath)
 			: Job(true)
 			, importer(importer)
 			, sourcePath(sourcePath)
-			, outPath(outPath)
+			, productPath(productPath)
 		{
 
 		}
 
 		void Finish() override;
 
+		void Process() override;
+
+		virtual bool ProcessAsset(Package* package) = 0;
+
+		inline bool Succeeded() const { return success; }
+		inline const String& GetErrorMessage() const { return errorMessage; }
+
+		inline bool IsGeneratingDistributionAsset() const 
+		{
+			return generateDistributionAsset;
+		}
+
 	protected:
 
-		bool success = false;
+		Array<IO::Path> includePaths{};
+
+		String sourceAssetRelativePath = "";
+		String packageName = "";
+
+		b8 generateDistributionAsset = false;
+		b8 isGameAsset = false;
+		
 		IO::Path sourcePath{};
-		IO::Path outPath{};
-		Name outPackagePath{};
+		IO::Path productPath{};
+		IO::Path editorProductPath{};
+
+		bool success = false;
+		String errorMessage = "";
 
 		AssetImporter* importer = nullptr;
+
+		friend class AssetImporter;
 	};
 
 } // namespace CE::Editor

@@ -36,6 +36,7 @@ namespace CE
 		RHI::GraphicsPipelineState* errorPipeline = nullptr;
 
 		RHI::ShaderResourceGroup* srg0 = nullptr;
+		RHI::ShaderResourceGroup* srgEmpty = nullptr;
 		RHI::ShaderResourceGroup* srg1 = nullptr;
 
 	};

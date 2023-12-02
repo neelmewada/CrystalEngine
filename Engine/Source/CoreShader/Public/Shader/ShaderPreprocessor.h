@@ -25,9 +25,9 @@ namespace CE
 	ENUM_CLASS_FLAGS(ShaderPropertyType);
 
 	STRUCT()
-	struct CORESHADER_API ShaderProperty
+	struct CORESHADER_API ShaderPropertyEntry
 	{
-		CE_STRUCT(ShaderProperty)
+		CE_STRUCT(ShaderPropertyEntry)
 	public:
 
 		FIELD()
@@ -68,9 +68,9 @@ namespace CE
 	};
 
 	STRUCT()
-	struct CORESHADER_API SubShaderPass
+	struct CORESHADER_API SubShaderPassEntry
 	{
-		CE_STRUCT(SubShaderPass)
+		CE_STRUCT(SubShaderPassEntry)
 	public:
 
 		FIELD()
@@ -106,7 +106,7 @@ namespace CE
 		Array<ShaderTagEntry> subShaderTags{};
 
 		FIELD()
-		Array<SubShaderPass> passes{};
+		Array<SubShaderPassEntry> passes{};
 	};
 
 	CLASS()
@@ -119,7 +119,7 @@ namespace CE
 		Name shaderName{};
 
 		FIELD()
-		Array<ShaderProperty> properties{};
+		Array<ShaderPropertyEntry> properties{};
 
 		FIELD()
 		Array<SubShaderEntry> subShaders{};
@@ -133,7 +133,7 @@ namespace CE
 		ShaderPreprocessor(Stream* stream, const Array<IO::Path>& includePaths);
 		~ShaderPreprocessor();
         
-		ShaderPreprocessData* PreprocessShader();
+		ShaderPreprocessData* PreprocessShader(Object* outer = nullptr);
 
 		inline const String& GetErrorMessage() const { return errorMessage; }
 

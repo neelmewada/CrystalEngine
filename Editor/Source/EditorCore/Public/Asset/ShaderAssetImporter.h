@@ -11,13 +11,24 @@ namespace CE::Editor
 
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets) override;
 
+	private:
+
+
 	};
 
 	class EDITORCORE_API ShaderAssetImportJob : public AssetImportJob
 	{
 	public:
+		typedef ShaderAssetImportJob Self;
+		typedef AssetImportJob Super;
 
+		ShaderAssetImportJob(AssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath)
+			: Super(importer, sourcePath, outPath)
+		{
 
+		}
+
+		virtual bool ProcessAsset(Package* package) override;
 
 	};
     

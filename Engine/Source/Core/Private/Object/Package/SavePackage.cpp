@@ -353,6 +353,9 @@ namespace CE
 		{
 			if (entry.objectClassName == objectClassName)
 			{
+				if (loadedObjects.KeyExists(uuid))
+					return loadedObjects[uuid];
+
 				FileStream fileStream = FileStream(fullPackagePath, Stream::Permissions::ReadOnly);
 				fileStream.SetBinaryMode(true);
 				return LoadObjectFromEntry(&fileStream, uuid);

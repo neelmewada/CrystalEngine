@@ -334,7 +334,9 @@ namespace CE
 		}
 		else if (fieldDeclType->IsEnum()) // Enum field
 		{
+			*stream << typeIdToFieldTypeMap[TYPEID(s64)];
 			*stream << field->GetFieldEnumValue(instance);
+			return true;
 		}
 		else if (fieldDeclId == TYPEID(ClassType) || fieldDeclId == TYPEID(StructType) || fieldDeclId == TYPEID(EnumType))
 		{

@@ -17,7 +17,8 @@ public:
 	enum class AssetMode
 	{
 		Game = 0,
-		Engine
+		Engine,
+		Plugin,
 	};
 
 	enum class ProcessMode

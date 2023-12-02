@@ -178,8 +178,8 @@ void GameLoop::RunLoop()
 
 	auto renderTarget = gEngine->GetPrimaryGameViewport()->GetRenderTarget();
 
-	auto errorShader = Shader::GetTestShader();
-	auto shaderModules = errorShader->GetShaderModules();
+	auto errorShader = Shader::GetErrorShader();
+	auto gpuShaderModule = errorShader->FindOrCreateModule();
 
 	RHI::ShaderResourceGroupDesc resourceGroup0Desc{};
 	resourceGroup0Desc.variables.Add({
@@ -210,8 +210,8 @@ void GameLoop::RunLoop()
 		.VertexSize(sizeof(Vec3))
 		.VertexAttrib(0, TYPEID(Vec3), 0)
 		.CullMode(RHI::CULL_MODE_NONE)
-		.VertexShader(shaderModules[0])
-		.FragmentShader(shaderModules[1])
+		.VertexShader(gpuShaderModule->vertex)
+		.FragmentShader(gpuShaderModule->fragment)
 		.ShaderResource(srg0)
 		.ShaderResource(srgEmpty)
 		.ShaderResource(srg1)
@@ -372,7 +372,6 @@ void GameLoop::RunLoop()
 		if (!sceneSubsystem)
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 
-        CE_LOG(Info, All, "Delta: {}", deltaTime);
 		rot += deltaTime * 100;
 		if (rot > 360)
 			rot = 0;

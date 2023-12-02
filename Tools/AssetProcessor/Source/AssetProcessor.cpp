@@ -33,9 +33,13 @@ AssetProcessor::AssetProcessor(int argc, char** argv)
 
 	String mode = parsedOptions["M"].as<std::string>();
 	if (mode == "Game")
+	{
 		this->mode = AssetMode::Game;
+	}
 	else if (mode == "Engine")
+	{
 		this->mode = AssetMode::Engine;
+	}
 	else
 	{
 		LOG("Invalid mode passed: " << mode);
@@ -75,16 +79,19 @@ AssetProcessor::AssetProcessor(int argc, char** argv)
 	assetsDir = parsedOptions["R"].as<std::string>();
 	assetsDir = assetsDir.GetString().Replace({ '\\' }, '/');
 
+	gProjectPath = assetsDir.GetParentPath().GetParentPath();
+	gProjectName = "AssetProcessor";
+
 	assetsDir.RecursivelyIterateChildren([&](const IO::Path& path)
 		{
 			auto extension = path.GetExtension();
 			if (!path.IsDirectory() && extension != ".casset")
 			{
 				auto relative = IO::Path::GetRelative(path, assetsDir).GetString().Replace({ '\\' }, '/');
-				allSourceAssetPaths.Add(relative);
+				allSourceAssetPaths.Add(path);
 			}
 		});
-
+	
 	allSourceAssetPaths.GetSize();
 }
 
@@ -99,41 +106,45 @@ int AssetProcessor::Run()
 	JobContext* jobContext = JobContext::GetGlobalContext();
 	JobManager* jobManager = jobContext->GetJobManager();
 
+	HashMap<AssetDefinition*, Array<IO::Path>> sourcePathsByAssetDef{};
+
 	for (const auto& sourcePath : allSourceAssetPaths)
 	{
+		if (!sourcePath.Exists())
+			continue;
+
 		String extension = sourcePath.GetExtension().GetString();
 
 		AssetDefinition* assetDef = assetDefRegistry->FindAssetDefinition(extension);
 
 		if (assetDef != nullptr)
 		{
-			ClassType* assetImporterClass = assetDef->GetAssetImporterClass();
-			if (assetImporterClass != nullptr)
-			{
-				
-			}
-		}
-
-		// Test Code
-		if (sourcePath.GetExtension() == ".shader")
-		{
-			FileStream stream = FileStream(assetsDir / sourcePath, Stream::Permissions::ReadOnly);
-			if (!stream.IsOpen())
-			{
-				continue;
-			}
-
-			ShaderPreprocessor preprocessor{ &stream, includePaths };
-
-			auto preprocessData = preprocessor.PreprocessShader();
-
-			if (preprocessData != nullptr)
-			{
-
-			}
+			sourcePathsByAssetDef[assetDef].Add(sourcePath);
 		}
 	}
 
+	Array<AssetImporter*> importers{};
+
+	for (const auto& [assetDef, sourcePaths] : sourcePathsByAssetDef)
+	{
+		if (assetDef == nullptr || sourcePaths.IsEmpty())
+			continue;
+
+		ClassType* assetImporterClass = assetDef->GetAssetImporterClass();
+		if (assetImporterClass == nullptr || !assetImporterClass->CanBeInstantiated())
+			continue;
+		auto assetImporter = CreateObject<AssetImporter>(nullptr, "AssetImporter", OF_Transient, assetImporterClass);
+		if (assetImporter == nullptr)
+			continue;
+
+		assetImporter->SetIncludePaths(includePaths);
+		assetImporter->SetLogging(true);
+
+		importers.Add(assetImporter);
+		assetImporter->ImportSourceAssetsAsync(sourcePaths);
+	}
+
+	// Wait for all jobs to complete
 	jobManager->Complete();
 
 	Shutdown();

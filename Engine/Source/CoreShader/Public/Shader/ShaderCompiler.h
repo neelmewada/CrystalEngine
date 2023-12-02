@@ -4,12 +4,18 @@ struct DxcBuffer;
 
 namespace CE
 {
+	enum HlslShaderModel
+	{
+		SHADER_6_0 = 0,
+	};
 
 	struct ShaderBuildConfig
 	{
 		String debugName = "";
-		String entry = "vert";
+		String entry = "VertMain";
 		ShaderStage stage = ShaderStage::Vertex;
+
+		HlslShaderModel shaderModel = SHADER_6_0;
 
 		u32 maxPermutations = 1024;
 		Array<String> globalDefines{};
@@ -23,7 +29,7 @@ namespace CE
 	};
 
     /*
-    *   Low level access to DirectX Shader Compiler. Always use ShaderProcessor class instead.
+    *   Low level access to DirectX Shader Compiler.
     */
     class CORESHADER_API ShaderCompiler
     {
@@ -43,26 +49,26 @@ namespace CE
         ~ShaderCompiler();
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
-		ErrorCode BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+		ErrorCode BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
-		ErrorCode BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+		ErrorCode BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
 
 		// It allocates memory to the *outByteCode location which you will have to manually release after use.
-		inline ErrorCode Build(ShaderBlobFormat buildFormat, const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+		inline ErrorCode Build(ShaderBlobFormat buildFormat, const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 		{
 			if (buildFormat == ShaderBlobFormat::Spirv)
 			{
-				return BuildSpirv(data, dataSize, buildConfig, outByteCode, outByteCodeSize, extraArgs);
+				return BuildSpirv(data, dataSize, buildConfig, outByteCode, extraArgs);
 			}
 			return ERR_InvalidBuildFormat;
 		}
 
-		inline ErrorCode Build(ShaderBlobFormat buildFormat, const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+		inline ErrorCode Build(ShaderBlobFormat buildFormat, const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 		{
 			if (buildFormat == ShaderBlobFormat::Spirv)
 			{
-				return BuildSpirv(hlslPath, buildConfig, outByteCode, outByteCodeSize, extraArgs);
+				return BuildSpirv(hlslPath, buildConfig, outByteCode, extraArgs);
 			}
 			return ERR_InvalidBuildFormat;
 		}
@@ -74,7 +80,7 @@ namespace CE
 
     protected:
 
-		ErrorCode BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs);
+		ErrorCode BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs);
 
         String errorMessage = "";
 

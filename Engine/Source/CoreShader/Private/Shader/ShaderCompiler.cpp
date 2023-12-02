@@ -60,7 +60,7 @@ namespace CE
 		delete impl;
 	}
 
-	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
 		if (!hlslPath.Exists())
 			return ERR_FileNotFound;
@@ -87,11 +87,11 @@ namespace CE
 		buffer.Size = source->GetBufferSize();
 		buffer.Encoding = DXC_CP_UTF8;
 
-		return BuildSpirv(buffer, config, outByteCode, outByteCodeSize, extraArgs);
+		return BuildSpirv(buffer, config, outByteCode, extraArgs);
 	}
 
 	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, 
-		void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+		BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
 		HRESULT status = 0;
 		ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);
@@ -111,10 +111,10 @@ namespace CE
 		buffer.Size = source->GetBufferSize();
 		buffer.Encoding = DXC_CP_UTF8;
 
-		return BuildSpirv(buffer, config, outByteCode, outByteCodeSize, extraArgs);
+		return BuildSpirv(buffer, config, outByteCode, extraArgs);
 	}
 
-	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, void** outByteCode, u32* outByteCodeSize, Array<std::wstring>& extraArgs)
+	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(DxcBuffer buffer, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
 		HRESULT status = 0;
 		ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);
@@ -197,9 +197,7 @@ namespace CE
 			return ERR_CompilationFailure;
 		}
 
-		*outByteCodeSize = blob->GetBufferSize();
-		*outByteCode = Memory::Malloc(*outByteCodeSize);
-		memcpy(*outByteCode, blob->GetBufferPointer(), *outByteCodeSize);
+		outByteCode.LoadData(blob->GetBufferPointer(), blob->GetBufferSize());
 
 		return ERR_Success;
 	}

@@ -23,7 +23,7 @@ namespace CE
 		auto renderTarget = gEngine->GetPrimaryGameViewport()->GetRenderTarget();
 
 		auto errorShader = Shader::GetErrorShader();
-		auto shaderModules = errorShader->GetShaderModules();
+		auto gpuShader = errorShader->FindOrCreateModule();
 
 		RHI::ShaderResourceGroupDesc resourceGroup0Desc{};
 		resourceGroup0Desc.variables.Add({
@@ -33,6 +33,11 @@ namespace CE
 			.isDynamic = false,
 			.stageFlags = RHI::ShaderStage::Vertex
 			});
+
+		srg0 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup0Desc);
+
+		RHI::ShaderResourceGroupDesc emptyResourceGroupDesc{};
+		srgEmpty = RHI::gDynamicRHI->CreateShaderResourceGroup(emptyResourceGroupDesc);
 
 		srg0 = RHI::gDynamicRHI->CreateShaderResourceGroup(resourceGroup0Desc);
 
@@ -51,9 +56,10 @@ namespace CE
 			.VertexSize(sizeof(Vec3))
 			.VertexAttrib(0, TYPEID(Vec3), 0)
 			.CullMode(RHI::CULL_MODE_BACK)
-			.VertexShader(shaderModules[0])
-			.FragmentShader(shaderModules[1])
+			.VertexShader(gpuShader->vertex)
+			.FragmentShader(gpuShader->fragment)
 			.ShaderResource(srg0)
+			.ShaderResource(srgEmpty)
 			.ShaderResource(srg1)
 			.Build();
         
@@ -64,6 +70,8 @@ namespace CE
 	{
 		if (srg0 != nullptr)
 			RHI::gDynamicRHI->DestroyShaderResourceGroup(srg0);
+		if (srgEmpty != nullptr)
+			RHI::gDynamicRHI->DestroyShaderResourceGroup(srgEmpty);
 		if (srg1 != nullptr)
 			RHI::gDynamicRHI->DestroyShaderResourceGroup(srg1);
 		if (errorPipeline != nullptr)
