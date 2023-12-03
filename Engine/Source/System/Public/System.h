@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "CoreRHI.h"
+#include "CoreRPI.h"
 #include "CoreShader.h"
 #include "CoreSettings.h"
 

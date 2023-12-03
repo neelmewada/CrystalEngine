@@ -136,7 +136,7 @@ namespace CE::RHI
 
 	public:
         
-		virtual void Bind(Name name, RHI::Buffer* buffer) = 0;
+		virtual bool Bind(Name name, RHI::Buffer* buffer) = 0;
         
 	};
 

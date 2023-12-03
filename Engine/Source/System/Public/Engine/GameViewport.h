@@ -9,21 +9,21 @@ namespace CE
 	public:
 		GameViewport();
 
-		void Initialize(RHI::RenderTarget* renderTarget);
+		void Initialize(RPI::RenderViewport* rpiViewport);
 
 		void Shutdown();
 
-		inline u32 GetWidth() const { return renderTarget->GetWidth(); }
+		inline u32 GetWidth() const { return rpiViewport->GetRenderTarget()->GetWidth(); }
 
-		inline u32 GetHeight() const { return renderTarget->GetHeight(); }
+		inline u32 GetHeight() const { return rpiViewport->GetRenderTarget()->GetHeight(); }
 
-		inline bool IsNativeSurface() const { return renderTarget->IsViewportRenderTarget(); }
+		inline bool IsNativeSurface() const { return rpiViewport->IsNativeViewport(); }
 
-		inline RHI::RenderTarget* GetRenderTarget() const { return renderTarget; }
+		inline RHI::RenderTarget* GetRenderTarget() const { return rpiViewport->GetRenderTarget(); }
 
 	protected:
 
-		RHI::RenderTarget* renderTarget = nullptr;
+		RPI::RenderViewport* rpiViewport = nullptr;
 	};
     
 } // namespace CE

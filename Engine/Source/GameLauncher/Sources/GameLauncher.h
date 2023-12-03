@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "CoreApplication.h"
 #include "CoreRHI.h"
+#include "CoreRPI.h"
 #if PAL_TRAIT_VULKAN_SUPPORTED
 #	include "VulkanRHI.h"
 #endif

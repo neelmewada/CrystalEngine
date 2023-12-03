@@ -73,10 +73,10 @@ namespace CE
 		CE_STRUCT(ShaderStructMember)
 	public:
 
-		FIELD()
+		FIELD(ReadOnly)
 		Name name{};
 
-		FIELD()
+		FIELD(ReadOnly)
 		ShaderStructMemberType dataType{};
 		
 	};
@@ -93,8 +93,6 @@ namespace CE
 
 		inline const Name& GetName() const { return name; }
 		inline const Name& GetInternalName() const { return internalName; }
-
-	protected:
 		
 		FIELD(ReadOnly)
 		u32 binding = 0;
@@ -108,10 +106,10 @@ namespace CE
 		FIELD(ReadOnly)
 		ShaderResourceType resourceType = ShaderResourceType::None;
 
-		FIELD()
+		FIELD(ReadOnly)
 		ShaderStage shaderStages = ShaderStage::All;
 
-		FIELD()
+		FIELD(ReadOnly)
 		Array<ShaderStructMember> structMembers{};
 
 		FIELD(ReadOnly)
@@ -134,8 +132,6 @@ namespace CE
 
 		inline const SRGVariable& GetVariable(int index) const { return variables[index]; }
 
-
-	protected:
 
 		FIELD(ReadOnly)
 		u32 frequencyId = 0; // The set number in vulkan, or register space in dx12.
@@ -160,8 +156,6 @@ namespace CE
 		{
 			return resourceGroups.NonEmpty();
 		}
-
-	protected:
 
 		SRGEntry& FindOrAdd(u32 frequencyId);
 

@@ -28,7 +28,7 @@ namespace CE
         info.maxSets = initialPoolSize * 2;
         info.poolSizeCount = COUNTOF(poolSizes);
         info.pPoolSizes = poolSizes;
-		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
         
         VkDescriptorPool pool = nullptr;
         
@@ -139,7 +139,7 @@ namespace CE
         info.maxSets = incrementSize * 2;
         info.poolSizeCount = COUNTOF(poolSizes);
         info.pPoolSizes = poolSizes;
-        info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
         
         VkDescriptorPool pool = nullptr;
         

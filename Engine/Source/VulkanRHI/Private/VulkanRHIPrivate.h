@@ -300,12 +300,17 @@ namespace CE
 
 		~VulkanShaderResourceGroup();
 
-		virtual void Bind(Name variableName, RHI::Buffer* buffer) override;
+		virtual bool Bind(Name variableName, RHI::Buffer* buffer) override;
 
 		inline VkDescriptorSet GetDescriptorSet() const
 		{
 			return descriptorSet;
 		}
+
+		/// @brief Recreates the descriptor sets and rebinds all bindings that were already bound in the descriptor set except for the given binding slot.
+		/// @param excludeBindingSlot: The binding slot to not re-bind.
+		/// @return true if succeeds.
+		bool RecreateDescriptorSetWithoutBindingSlot(int excludeBindingSlot);
 
     private:
         
@@ -319,7 +324,11 @@ namespace CE
 
 		Array<Name> variableNames{};
 		Array<VkDescriptorSetLayoutBinding> bindings{};
-		HashMap<Name, RHI::Buffer*> bufferVariableBindings{};
+
+		HashMap<Name, VkDescriptorSetLayoutBinding> variableNameToBinding{};
+		HashMap<int, VkDescriptorSetLayoutBinding> bindingSlotToBinding{};
+
+		HashMap<int, VkDescriptorBufferInfo> bufferVariablesBoundByBindingSlot{};
 
 		friend class VulkanGraphicsPipeline;
 		friend class VulkanGraphicsCommandList;

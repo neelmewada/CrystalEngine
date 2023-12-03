@@ -1,20 +1,21 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(System CXX)
+project(CoreRPI CXX)
 
-ce_add_target(System SHARED
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
+
+ce_add_target(${PROJECT_NAME} SHARED
     AUTORTTI
-    RESOURCES
     NAMESPACE CE
     FOLDER Engine/Source
-    PCHHEADER 
-        PRIVATE 
-            Public/System.h
+    PCHHEADER
+        PRIVATE
+            Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
-            system_private_files.cmake
+            ${PROJECT_NAME_LOWERCASE}_private_files.cmake
         PUBLIC
-            system_public_files.cmake
+            ${PROJECT_NAME_LOWERCASE}_public_files.cmake
     INCLUDE_DIRECTORIES
         PRIVATE
             Private/
@@ -25,23 +26,17 @@ ce_add_target(System SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            ThirdParty::sdl
-            CE::CoreApplication
         PUBLIC
             CE::Core
-            CE::CoreSettings
             CE::CoreMedia
-            $<${PAL_PLATFORM_IS_DESKTOP}:CE::CoreShader>
+            CE::CoreShader
             CE::CoreRHI
-            CE::CoreRPI
-        TARGETS 
-            Config EngineAssets
     RUNTIME_DEPENDENCIES
-        
+
 )
 
 
-if(${PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED})
+if(${PAL_TRAIT_BUILD_TESTS})
     add_subdirectory(Tests)
 endif()
 

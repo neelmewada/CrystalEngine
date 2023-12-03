@@ -7,9 +7,9 @@ namespace CE
 
     }
 
-	void GameViewport::Initialize(RHI::RenderTarget* renderTarget)
+	void GameViewport::Initialize(RPI::RenderViewport* rpiViewport)
 	{
-		this->renderTarget = renderTarget;
+		this->rpiViewport = rpiViewport;
 	}
 
 	void GameViewport::Shutdown()

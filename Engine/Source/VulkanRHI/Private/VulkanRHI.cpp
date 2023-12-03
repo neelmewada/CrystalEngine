@@ -826,7 +826,7 @@ namespace CE
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
-			vkCmdDrawIndexed(commandBuffers[i], indexCount, instanceCount, firstIndex, vertexOffset, firstIndex);
+			vkCmdDrawIndexed(commandBuffers[i], indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 		}
 	}
 
@@ -910,7 +910,7 @@ namespace CE
 			case RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER:
 				binding.descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				break;
-			case RHI::SHADER_RESOURCE_TYPE_TEXTURE_BUFFER:
+			case RHI::SHADER_RESOURCE_TYPE_STRUCTURED_BUFFER:
 				binding.descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 				break;
 			case RHI::SHADER_RESOURCE_TYPE_SAMPLED_IMAGE:
@@ -923,6 +923,8 @@ namespace CE
 				continue;
 			}
 			
+			variableNameToBinding[variable.name] = binding;
+			bindingSlotToBinding[variable.binding] = binding;
 			variableNames.Add(variable.name);
 			bindings.Add(binding);
 		}
@@ -958,32 +960,90 @@ namespace CE
 		setLayout = nullptr;
 	}
 
-	void VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer)
+	bool VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer)
 	{
 		int index = variableNames.IndexOf(variableName);
 		if (index < 0)
-			return;
+			return false;
 
-		bufferVariableBindings[variableName] = buffer;
+		VkDescriptorSetLayoutBinding bindingInfo = bindings[index];
+		int bindingSlot = bindingInfo.binding;
 
-		VkDescriptorSetLayoutBinding binding = bindings[index];
+		// Binding slot already bound. Recreate descriptor set to bind it.
+		if (bufferVariablesBoundByBindingSlot.KeyExists(bindingSlot) &&
+			bufferVariablesBoundByBindingSlot[bindingSlot].buffer != nullptr)
+		{
+			bool success = RecreateDescriptorSetWithoutBindingSlot(bindingSlot);
+			if (!success)
+				return false;
+		}
 
 		VkDescriptorBufferInfo bufferInfo{};
 		bufferInfo.buffer = (VkBuffer)buffer->GetHandle();
 		bufferInfo.offset = 0;
 		bufferInfo.range = buffer->GetBufferSize();
 
+		bufferVariablesBoundByBindingSlot[bindingSlot] = bufferInfo;
+
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.dstSet = descriptorSet;
-		write.dstBinding = binding.binding;
+		write.dstBinding = bindingSlot;
 		write.dstArrayElement = 0;
 
-		write.descriptorCount = binding.descriptorCount;
-		write.descriptorType = binding.descriptorType;
+		write.descriptorCount = bindingInfo.descriptorCount;
+		write.descriptorType = bindingInfo.descriptorType;
 		write.pBufferInfo = &bufferInfo;
 		
 		vkUpdateDescriptorSets(device->GetHandle(), 1, &write, 0, nullptr);
+
+		return true;
+	}
+
+	bool VulkanShaderResourceGroup::RecreateDescriptorSetWithoutBindingSlot(int excludeBindingSlot)
+	{
+		auto pool = device->GetDescriptorPool();
+		pool->Free({ descriptorSet });
+		descriptorSet = nullptr;
+
+		auto sets = pool->Allocate(1, { setLayout }, descriptorPool);
+		if (sets.IsEmpty())
+		{
+			return false;
+		}
+
+		descriptorSet = sets[0];
+
+		Array<VkWriteDescriptorSet> writes{};
+		writes.Resize(bufferVariablesBoundByBindingSlot.GetSize());
+		int count = 0;
+
+		for (const auto& [bindingSlot, bufferInfo] : bufferVariablesBoundByBindingSlot)
+		{
+			auto buffer = bufferInfo.buffer;
+			if (buffer == nullptr || bindingSlot == excludeBindingSlot || bindingSlot < 0)
+				continue;
+			if (!bindingSlotToBinding.KeyExists(bindingSlot))
+				continue;
+
+			VkDescriptorSetLayoutBinding bindingInfo = bindingSlotToBinding[bindingSlot];
+			
+			writes[count] = {};
+			writes[count].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			writes[count].dstSet = descriptorSet;
+			writes[count].dstBinding = bindingSlot;
+			writes[count].dstArrayElement = 0;
+			
+			writes[count].descriptorCount = bindingInfo.descriptorCount;
+			writes[count].descriptorType = bindingInfo.descriptorType;
+			writes[count].pBufferInfo = &bufferInfo;
+
+			count++;
+		}
+
+		vkUpdateDescriptorSets(device->GetHandle(), count, writes.GetData(), 0, nullptr);
+
+		return true;
 	}
 
 } // namespace CE
