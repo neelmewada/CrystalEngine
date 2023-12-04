@@ -128,6 +128,15 @@ namespace CE::RHI
 	*   Shader Resources
 	*/
 
+	class CORERHI_API ShaderResourceGroupManager : public Resource
+	{
+	public:
+
+		ShaderResourceGroupManager() : Resource(ResourceType::ShaderResourceGroupManager)
+		{}
+
+	};
+
 	class CORERHI_API ShaderResourceGroup : public Resource
 	{
 	protected:
@@ -137,6 +146,12 @@ namespace CE::RHI
 	public:
         
 		virtual bool Bind(Name name, RHI::Buffer* buffer) = 0;
+
+		virtual int GetFrequencyId() = 0;
+
+		virtual Name GetSRGName() = 0;
+
+		virtual SRGType GetSRGType() = 0;
         
 	};
 

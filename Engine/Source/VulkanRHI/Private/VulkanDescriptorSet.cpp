@@ -1,6 +1,7 @@
 #include "VulkanRHIPrivate.h"
 
 #include "VulkanDescriptorSet.h"
+#include "VulkanShaderResourceGroup.h"
 
 namespace CE
 {

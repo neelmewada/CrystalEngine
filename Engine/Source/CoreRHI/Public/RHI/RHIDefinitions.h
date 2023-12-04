@@ -22,6 +22,7 @@ namespace CE::RHI
         ComputePipelineState,
         GraphicsPipelineState,
 		ShaderResourceGroup,
+		ShaderResourceGroupManager,
 
         RenderTarget,
         RenderPass,
@@ -362,8 +363,24 @@ namespace CE::RHI
 		ShaderStage stageFlags = ShaderStage::Vertex | ShaderStage::Fragment;
 	};
 
+	ENUM()
+	enum SRGType
+	{
+		SRG_Custom = 0,
+		SRG_PerScene,
+		SRG_PerView,
+		SRG_PerPass,
+		SRG_PerSubPass,
+		SRG_PerMaterial,
+		SRG_PerObject,
+		SRG_PerDraw
+	};
+
 	struct ShaderResourceGroupDesc
 	{
+		int frequencyId = 0;
+		SRGType srgType = SRG_Custom;
+		Name srgName = ""; // Ex: SRG_PerView
 		Array<ShaderResourceVariableDesc> variables{};
 	};
 
@@ -462,3 +479,5 @@ namespace CE::RHI
 	};
 
 } // namespace CE
+
+#include "RHIDefinitions.rtti.h"

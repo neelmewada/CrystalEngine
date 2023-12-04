@@ -224,6 +224,8 @@ namespace CE
 			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups,
 			RHI::IPipelineLayout* pipelineLayout) override;
 
+		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups, RHI::IPipelineLayout* pipelineLayout);
+
 		virtual void WaitForExecution() override;
 
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance) override;
@@ -278,6 +280,8 @@ namespace CE
         List<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
         List<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
 
+		HashMap<int, Array<VulkanShaderResourceGroup*>> boundSRGs{};
+
         // ImGui
         b8 isImGuiEnabled = false;
         VkDescriptorPool imGuiDescriptorPool;
@@ -285,53 +289,5 @@ namespace CE
         friend class VulkanRHI;
 
     };
-
-	/*
-	*	Shader Resources
-	*/
-
-	class VulkanDescriptorPool;
-
-	class VulkanShaderResourceGroup : public RHI::ShaderResourceGroup
-	{
-	public:
-
-		VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc);
-
-		~VulkanShaderResourceGroup();
-
-		virtual bool Bind(Name variableName, RHI::Buffer* buffer) override;
-
-		inline VkDescriptorSet GetDescriptorSet() const
-		{
-			return descriptorSet;
-		}
-
-		/// @brief Recreates the descriptor sets and rebinds all bindings that were already bound in the descriptor set except for the given binding slot.
-		/// @param excludeBindingSlot: The binding slot to not re-bind.
-		/// @return true if succeeds.
-		bool RecreateDescriptorSetWithoutBindingSlot(int excludeBindingSlot);
-
-    private:
-        
-        VulkanDevice* device = nullptr;
-        VkDescriptorSetLayout setLayout = nullptr;
-
-		VkDescriptorSet descriptorSet = nullptr;
-		VkDescriptorPool descriptorPool = nullptr;
-
-		RHI::ShaderResourceGroupDesc desc{};
-
-		Array<Name> variableNames{};
-		Array<VkDescriptorSetLayoutBinding> bindings{};
-
-		HashMap<Name, VkDescriptorSetLayoutBinding> variableNameToBinding{};
-		HashMap<int, VkDescriptorSetLayoutBinding> bindingSlotToBinding{};
-
-		HashMap<int, VkDescriptorBufferInfo> bufferVariablesBoundByBindingSlot{};
-
-		friend class VulkanGraphicsPipeline;
-		friend class VulkanGraphicsCommandList;
-	};
 
 } // namespace CE

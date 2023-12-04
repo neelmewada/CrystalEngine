@@ -2,7 +2,8 @@
 
 namespace CE
 {
-    
+	class VulkanShaderResourceGroup;
+
 	class VULKANRHI_API VulkanDescriptorSet
 	{
 	public:

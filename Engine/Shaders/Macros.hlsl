@@ -13,6 +13,10 @@
 #define PerPass_Frequency 1
 #endif
 
+#ifndef PerSubPass_Frequency
+#define PerSubPass_Frequency 1
+#endif
+
 #ifndef PerMaterial_Frequency
 #define PerMaterial_Frequency 2
 #endif
