@@ -128,15 +128,6 @@ namespace CE::RHI
 	*   Shader Resources
 	*/
 
-	class CORERHI_API ShaderResourceGroupManager : public Resource
-	{
-	public:
-
-		ShaderResourceGroupManager() : Resource(ResourceType::ShaderResourceGroupManager)
-		{}
-
-	};
-
 	class CORERHI_API ShaderResourceGroup : public Resource
 	{
 	protected:

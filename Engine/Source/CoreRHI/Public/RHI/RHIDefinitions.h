@@ -364,23 +364,24 @@ namespace CE::RHI
 	};
 
 	ENUM()
-	enum SRGType
+	enum class SRGType
 	{
-		SRG_Custom = 0,
-		SRG_PerScene,
-		SRG_PerView,
-		SRG_PerPass,
-		SRG_PerSubPass,
-		SRG_PerMaterial,
-		SRG_PerObject,
-		SRG_PerDraw
+		Custom = 0,
+		PerScene,
+		PerView,
+		PerPass,
+		PerSubPass,
+		PerMaterial,
+		PerObject,
+		PerDraw
 	};
+	ENUM_CLASS(SRGType);
 
 	struct ShaderResourceGroupDesc
 	{
 		int frequencyId = 0;
-		SRGType srgType = SRG_Custom;
-		Name srgName = ""; // Ex: SRG_PerView
+		SRGType srgType = SRGType::Custom;
+		Name srgName = ""; // Ex: PerView
 		Array<ShaderResourceVariableDesc> variables{};
 	};
 

@@ -14,6 +14,7 @@ namespace CE
     class VulkanSwapChain;
     class VulkanTexture;
 	class VulkanDescriptorPool;
+	class VulkanShaderResourceManager;
 
     class VulkanDevice
     {
@@ -70,6 +71,11 @@ namespace CE
 
 		INLINE VulkanDescriptorPool* GetDescriptorPool() const { return descriptorPool; }
 
+		INLINE const VkPhysicalDeviceLimits& GetDeviceLimits() const
+		{
+			return gpuProperties.limits;
+		}
+
     protected:
 
     private:
@@ -90,6 +96,7 @@ namespace CE
 
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};
+
         GpuMetaData gpuMetaData{};
 
         VkDevice device = nullptr;
@@ -99,6 +106,7 @@ namespace CE
         VkSurfaceKHR testSurface = nullptr;
         VulkanQueue* graphicsQueue = nullptr;
         VulkanQueue* presentQueue = nullptr;
+		VulkanShaderResourceManager* srgManager = nullptr;
         VkCommandPool gfxCommandPool = nullptr;
 
         HashMap<u32, VkCommandPool> queueFamilyToCmdPool{};

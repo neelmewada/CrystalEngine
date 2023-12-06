@@ -3,6 +3,7 @@
 #include "PAL/Common/VulkanPlatform.h"
 
 #include "VulkanDescriptorPool.h"
+#include "VulkanShaderResourceGroup.h"
 
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
@@ -47,6 +48,8 @@ namespace CE
 
 		descriptorPool = new VulkanDescriptorPool(this);
 
+		srgManager = new VulkanShaderResourceManager(this);
+
 		isInitialized = true;
 
 		CE_LOG(Info, All, "Vulkan device initialized");
@@ -55,6 +58,9 @@ namespace CE
 	void VulkanDevice::PreShutdown()
 	{
 		isInitialized = false;
+
+		delete srgManager;
+		srgManager = nullptr;
 
 		delete descriptorPool;
 		descriptorPool = nullptr;
@@ -213,7 +219,7 @@ namespace CE
 			CE_LOG(Error, All, "Failed to create vulkan device.");
 			return;
 		}
-
+		
 		VkQueue gfxQueue = nullptr, presentQueue = nullptr;
 		vkGetDeviceQueue(device, queueFamilies.graphicsFamily, graphicsQueueIndex, &gfxQueue);
 		vkGetDeviceQueue(device, queueFamilies.presentFamily, presentQueueIndex, &presentQueue);
@@ -299,7 +305,7 @@ namespace CE
 				return false;
 			}
 		}
-
+		
 		auto surfaceSupportInfo = FetchSurfaceSupportInfo(gpu);
 		bool surfaceSupportsSwapChain = !surfaceSupportInfo.presentationModes.IsEmpty() && !surfaceSupportInfo.surfaceFormats.IsEmpty();
 		if (!surfaceSupportsSwapChain)

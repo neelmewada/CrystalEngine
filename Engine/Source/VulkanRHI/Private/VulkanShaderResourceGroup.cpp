@@ -8,13 +8,23 @@
 namespace CE
 {
 
+	VulkanShaderResourceManager::VulkanShaderResourceManager(VulkanDevice* device)
+	{
+		const auto& limits = device->GetDeviceLimits();
+		maxBoundDescriptorSets =  limits.maxBoundDescriptorSets;
+	}
+
+	VulkanShaderResourceManager::~VulkanShaderResourceManager()
+	{
+	}
+
 	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc)
 		: device(device), desc(desc)
 	{
 		frequencyId = desc.frequencyId;
 		srgName = desc.srgName;
 		srgType = desc.srgType;
-
+		
 		VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 		setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
@@ -193,6 +203,6 @@ namespace CE
 
 		return true;
 	}
-    
+
 } // namespace CE
 

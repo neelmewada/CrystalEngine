@@ -3,6 +3,23 @@
 namespace CE
 {
 
+	class VulkanShaderResourceManager
+	{
+	public:
+
+		VulkanShaderResourceManager(VulkanDevice* device);
+		~VulkanShaderResourceManager();
+
+		inline u32 GetMaxBoundSets() const { return maxBoundDescriptorSets; }
+
+	private:
+
+		HashMap<int, Array<RHI::SRGType>> srgTypesByFrequency{};
+		
+		u32 maxBoundDescriptorSets = 0;
+
+	};
+
 	class VulkanShaderResourceGroup : public RHI::ShaderResourceGroup
 	{
 	public:
