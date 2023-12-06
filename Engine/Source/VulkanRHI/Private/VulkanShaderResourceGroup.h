@@ -11,10 +11,21 @@ namespace CE
 		~VulkanShaderResourceManager();
 
 		inline u32 GetMaxBoundSets() const { return maxBoundDescriptorSets; }
+        
+        inline bool IsSharedDescriptorSet(int set) { return descriptorSetToSrgs[set].GetSize() > 1; }
 
 	private:
-
-		HashMap<int, Array<RHI::SRGType>> srgTypesByFrequency{};
+        
+        struct SRGSlot
+        {
+            RHI::SRGType srgType{};
+            int set;
+        };
+        
+        Array<SRGInfo> srgSlots{};
+        
+        HashMap<RHI::SRGType, SRGSlot> builtinSrgNameToDescriptorSet{};
+        HashMap<int, Array<SRGSlot>> descriptorSetToSrgs;
 		
 		u32 maxBoundDescriptorSets = 0;
 

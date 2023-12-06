@@ -12,6 +12,53 @@ namespace CE
 	{
 		const auto& limits = device->GetDeviceLimits();
 		maxBoundDescriptorSets =  limits.maxBoundDescriptorSets;
+        
+        if (maxBoundDescriptorSets == 4)
+        {
+            srgSlots.Add({ RHI::SRGType::PerScene, 0 });
+            srgSlots.Add({ RHI::SRGType::PerView, 1 });
+            srgSlots.Add({ RHI::SRGType::PerPass, 1 });
+            srgSlots.Add({ RHI::SRGType::PerSubPass, 1 });
+            srgSlots.Add({ RHI::SRGType::PerMaterial, 2 });
+            srgSlots.Add({ RHI::SRGType::PerObject, 3 });
+            srgSlots.Add({ RHI::SRGType::PerDraw, 3 });
+        }
+        else if (maxBoundDescriptorSets == 5)
+        {
+            srgSlots.Add({ RHI::SRGType::PerScene, 0 });
+            srgSlots.Add({ RHI::SRGType::PerView, 1 });
+            srgSlots.Add({ RHI::SRGType::PerPass, 1 });
+            srgSlots.Add({ RHI::SRGType::PerSubPass, 1 });
+            srgSlots.Add({ RHI::SRGType::PerMaterial, 2 });
+            srgSlots.Add({ RHI::SRGType::PerObject, 3 });
+            srgSlots.Add({ RHI::SRGType::PerDraw, 4 });
+        }
+        else if (maxBoundDescriptorSets == 6)
+        {
+            srgSlots.Add({ RHI::SRGType::PerScene, 0 });
+            srgSlots.Add({ RHI::SRGType::PerView, 1 });
+            srgSlots.Add({ RHI::SRGType::PerPass, 2 });
+            srgSlots.Add({ RHI::SRGType::PerSubPass, 2 });
+            srgSlots.Add({ RHI::SRGType::PerMaterial, 3 });
+            srgSlots.Add({ RHI::SRGType::PerObject, 4 });
+            srgSlots.Add({ RHI::SRGType::PerDraw, 5 });
+        }
+        else if (maxBoundDescriptorSets >= 7)
+        {
+            srgSlots.Add({ RHI::SRGType::PerScene, 0 });
+            srgSlots.Add({ RHI::SRGType::PerView, 1 });
+            srgSlots.Add({ RHI::SRGType::PerPass, 2 });
+            srgSlots.Add({ RHI::SRGType::PerSubPass, 3 });
+            srgSlots.Add({ RHI::SRGType::PerMaterial, 4 });
+            srgSlots.Add({ RHI::SRGType::PerObject, 5 });
+            srgSlots.Add({ RHI::SRGType::PerDraw, 6 });
+        }
+        
+        for (const SRGSlot& slot : srgSlots)
+        {
+            builtinSrgNameToDescriptorSet[slot.srgType] = slot;
+            descriptorSetToSrgs[slot.set].Add(slot);
+        }
 	}
 
 	VulkanShaderResourceManager::~VulkanShaderResourceManager()
