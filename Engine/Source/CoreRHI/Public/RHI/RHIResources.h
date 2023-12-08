@@ -136,7 +136,7 @@ namespace CE::RHI
 
 	public:
         
-		virtual bool Bind(Name name, RHI::Buffer* buffer) = 0;
+		virtual bool Bind(Name name, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) = 0;
 
 		virtual int GetFrequencyId() = 0;
 

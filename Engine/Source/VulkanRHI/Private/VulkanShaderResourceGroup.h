@@ -22,7 +22,7 @@ namespace CE
             int set;
         };
         
-        Array<SRGInfo> srgSlots{};
+        Array<SRGSlot> srgSlots{};
         
         HashMap<RHI::SRGType, SRGSlot> builtinSrgNameToDescriptorSet{};
         HashMap<int, Array<SRGSlot>> descriptorSetToSrgs;
@@ -39,7 +39,7 @@ namespace CE
 
 		~VulkanShaderResourceGroup();
 
-		virtual bool Bind(Name variableName, RHI::Buffer* buffer) override;
+		virtual bool Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) override;
 
 		virtual int GetFrequencyId() override;
 
@@ -72,12 +72,13 @@ namespace CE
 		RHI::ShaderResourceGroupDesc desc{};
 
 		Array<Name> variableNames{};
-		Array<VkDescriptorSetLayoutBinding> bindings{};
+		Array<VkDescriptorSetLayoutBinding> setBindings{};
 
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableNameToBinding{};
 		HashMap<int, VkDescriptorSetLayoutBinding> bindingSlotToBinding{};
 
 		HashMap<int, VkDescriptorBufferInfo> bufferVariablesBoundByBindingSlot{};
+		HashMap<int, VkDescriptorImageInfo> imageVariablesBoundByBindingSlot{};
 
 		friend class VulkanGraphicsPipeline;
 		friend class VulkanGraphicsCommandList;

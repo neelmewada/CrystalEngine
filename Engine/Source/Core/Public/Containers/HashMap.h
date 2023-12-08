@@ -54,6 +54,11 @@ namespace CE
             return Impl.size();
         }
 
+		inline bool IsEmpty() const
+		{
+			return Impl.empty();
+		}
+
         inline SIZE_T GetCount(const KeyType& key) const
         {
             return Impl.count(key);
@@ -79,10 +84,23 @@ namespace CE
             return Impl.at(key);
         }
 
+		inline void Add(const KeyType& key, const ValueType& value)
+		{
+			Impl.insert({ key, value });
+		}
+
         inline void Add(const Pair<KeyType, ValueType>& pair)
         {
             Impl.insert({ pair.First, pair.Second });
         }
+
+		inline void AddRange(const HashMap<KeyType, ValueType>& from)
+		{
+			for (const auto& [key, value] : from)
+			{
+				Add({ key, value });
+			}
+		}
 
         template<typename... Args>
         inline void Emplace(Args... args)

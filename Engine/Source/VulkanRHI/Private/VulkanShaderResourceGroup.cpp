@@ -75,7 +75,7 @@ namespace CE
 		VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 		setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 
-		bindings.Clear();
+		setBindings.Clear();
 		variableNames.Clear();
 
 		for (int i = 0; i < desc.variables.GetSize(); i++)
@@ -116,11 +116,11 @@ namespace CE
 			variableNameToBinding[variable.name] = binding;
 			bindingSlotToBinding[variable.binding] = binding;
 			variableNames.Add(variable.name);
-			bindings.Add(binding);
+			setBindings.Add(binding);
 		}
 
-		setLayoutCI.bindingCount = bindings.GetSize();
-		setLayoutCI.pBindings = bindings.GetData();
+		setLayoutCI.bindingCount = setBindings.GetSize();
+		setLayoutCI.pBindings = setBindings.GetData();
 
 		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
 		if (result != VK_SUCCESS)
@@ -150,13 +150,13 @@ namespace CE
 		setLayout = nullptr;
 	}
 
-	bool VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer)
+	bool VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0)
 	{
 		int index = variableNames.IndexOf(variableName);
 		if (index < 0)
 			return false;
 
-		VkDescriptorSetLayoutBinding bindingInfo = bindings[index];
+		VkDescriptorSetLayoutBinding bindingInfo = setBindings[index];
 		int bindingSlot = bindingInfo.binding;
 
 		// Binding slot already bound. Recreate descriptor set to bind it.
@@ -170,8 +170,8 @@ namespace CE
 
 		VkDescriptorBufferInfo bufferInfo{};
 		bufferInfo.buffer = (VkBuffer)buffer->GetHandle();
-		bufferInfo.offset = 0;
-		bufferInfo.range = buffer->GetBufferSize();
+		bufferInfo.offset = offset;
+		bufferInfo.range = size > 0 ? size : buffer->GetBufferSize();
 
 		bufferVariablesBoundByBindingSlot[bindingSlot] = bufferInfo;
 
@@ -220,7 +220,7 @@ namespace CE
 		descriptorSet = sets[0];
 
 		Array<VkWriteDescriptorSet> writes{};
-		writes.Resize(bufferVariablesBoundByBindingSlot.GetSize());
+		writes.Resize(bufferVariablesBoundByBindingSlot.GetSize() + imageVariablesBoundByBindingSlot.GetSize());
 		int count = 0;
 
 		for (const auto& [bindingSlot, bufferInfo] : bufferVariablesBoundByBindingSlot)
@@ -242,6 +242,29 @@ namespace CE
 			writes[count].descriptorCount = bindingInfo.descriptorCount;
 			writes[count].descriptorType = bindingInfo.descriptorType;
 			writes[count].pBufferInfo = &bufferInfo;
+
+			count++;
+		}
+
+		for (const auto& [bindingSlot, imageInfo] : imageVariablesBoundByBindingSlot)
+		{
+			if (bindingSlot == excludeBindingSlot || bindingSlot < 0)
+				continue;
+			if (!bindingSlotToBinding.KeyExists(bindingSlot))
+				continue;
+
+			VkDescriptorSetLayoutBinding bindingInfo = bindingSlotToBinding[bindingSlot];
+
+			writes[count] = {};
+			writes[count].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			writes[count].dstSet = descriptorSet;
+			writes[count].dstBinding = bindingSlot;
+			writes[count].dstArrayElement = 0;
+
+			writes[count].descriptorCount = bindingInfo.descriptorCount;
+			writes[count].descriptorType = bindingInfo.descriptorType;
+			writes[count].pBufferInfo = nullptr;
+			writes[count].pImageInfo = &imageInfo;
 
 			count++;
 		}
