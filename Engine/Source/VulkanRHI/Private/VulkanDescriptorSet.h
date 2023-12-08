@@ -7,14 +7,25 @@ namespace CE
 	class VULKANRHI_API VulkanDescriptorSet
 	{
 	public:
-		VulkanDescriptorSet(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc);
+		VulkanDescriptorSet(VulkanDevice* device, const Array<VulkanShaderResourceGroup*>& srgs);
 
 	private:
+        
+        int frequencyId = 0;
+        Name srgName{};
+        RHI::SRGType srgType{};
 
 		VulkanDevice* device = nullptr;
 		VkDescriptorPool descriptorPool = nullptr;
 		VkDescriptorSet descriptorSet = nullptr;
 
+        Array<Name> variableNames{};
+        Array<VkDescriptorSetLayoutBinding> bindings{};
+
+        HashMap<Name, VkDescriptorSetLayoutBinding> variableNameToBinding{};
+        HashMap<int, VkDescriptorSetLayoutBinding> bindingSlotToBinding{};
+
+        HashMap<int, VkDescriptorBufferInfo> bufferVariablesBoundByBindingSlot{};
 	};
 
 } // namespace CE

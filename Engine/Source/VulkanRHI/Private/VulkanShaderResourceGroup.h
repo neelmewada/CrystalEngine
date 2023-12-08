@@ -81,6 +81,7 @@ namespace CE
 
 		friend class VulkanGraphicsPipeline;
 		friend class VulkanGraphicsCommandList;
+        friend class VulkanDescriptorSet;
 	};
 
 } // namespace CE
