@@ -2,6 +2,8 @@
 
 namespace CE
 {
+	class VulkanDescriptorSet;
+	class VulkanShaderResourceGroup;
 
 	class VulkanShaderResourceManager
 	{
@@ -13,6 +15,11 @@ namespace CE
 		inline u32 GetMaxBoundSets() const { return maxBoundDescriptorSets; }
         
         inline bool IsSharedDescriptorSet(int set) { return descriptorSetToSrgs[set].GetSize() > 1; }
+		bool IsSharedDescriptorSet(RHI::SRGType srgType);
+
+		int GetDescriptorSetNumber(RHI::SRGType srgType);
+
+		bool ShouldCreateDescriptorSetForSRG(RHI::SRGType srgType);
 
 	private:
         
@@ -25,7 +32,7 @@ namespace CE
         Array<SRGSlot> srgSlots{};
         
         HashMap<RHI::SRGType, SRGSlot> builtinSrgNameToDescriptorSet{};
-        HashMap<int, Array<SRGSlot>> descriptorSetToSrgs;
+		HashMap<int, Array<SRGSlot>> descriptorSetToSrgs{};
 		
 		u32 maxBoundDescriptorSets = 0;
 
@@ -49,25 +56,27 @@ namespace CE
 
 		inline VkDescriptorSet GetDescriptorSet() const
 		{
-			return descriptorSet;
+			if (sharedDescriptorSet == nullptr)
+				return nullptr;
+			return sharedDescriptorSet->descriptorSet;
 		}
 
-		/// @brief Recreates the descriptor sets and rebinds all bindings that were already bound in the descriptor set except for the given binding slot.
-		/// @param excludeBindingSlot: The binding slot to not re-bind.
-		/// @return true if succeeds.
-		bool RecreateDescriptorSetWithoutBindingSlot(int excludeBindingSlot);
+		inline bool ManagesDescriptorSet() const
+		{
+			return sharedDescriptorSet != nullptr;
+		}
 
 	private:
 
-		int frequencyId = 0;
+		int setNumber = 0;
 		Name srgName{};
 		RHI::SRGType srgType{};
+		bool isCommitted = false;
 
 		VulkanDevice* device = nullptr;
-		VkDescriptorSetLayout setLayout = nullptr;
 
-		VkDescriptorSet descriptorSet = nullptr;
-		VkDescriptorPool descriptorPool = nullptr;
+		VulkanShaderResourceManager* srgManager = nullptr;
+		VulkanDescriptorSet* sharedDescriptorSet = nullptr;
 
 		RHI::ShaderResourceGroupDesc desc{};
 
@@ -77,6 +86,7 @@ namespace CE
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableNameToBinding{};
 		HashMap<int, VkDescriptorSetLayoutBinding> bindingSlotToBinding{};
 
+		// Bound buffers/images
 		HashMap<int, VkDescriptorBufferInfo> bufferVariablesBoundByBindingSlot{};
 		HashMap<int, VkDescriptorImageInfo> imageVariablesBoundByBindingSlot{};
 

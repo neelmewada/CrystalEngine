@@ -15,6 +15,12 @@ namespace CE
 			return pipelineType;
 		}
 
+		inline VkPipelineLayout GetNativeHandle() const
+		{
+			return handle;
+		}
+
+	private:
 		VulkanDevice* device = nullptr;
 		VkPipelineLayout handle = nullptr;
 		

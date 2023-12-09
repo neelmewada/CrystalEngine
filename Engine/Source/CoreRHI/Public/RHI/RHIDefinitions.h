@@ -373,16 +373,14 @@ namespace CE::RHI
 		PerMaterial,
 		PerObject,
 		PerDraw,
-        COUNT,
-        Custom,
+        COUNT
 	};
 	ENUM_CLASS(SRGType);
 
 	struct ShaderResourceGroupDesc
 	{
-		int frequencyId = 0;
 		SRGType srgType = SRGType::PerScene;
-		Name srgName = ""; // Ex: PerView
+		Name srgName = "PerScene"; // Ex: PerView
 		Array<ShaderResourceVariableDesc> variables{};
 	};
 

@@ -15,6 +15,7 @@
 #include "VulkanShaderModule.h"
 #include "VulkanPipeline.h"
 #include "VulkanDescriptorPool.h"
+#include "VulkanDescriptorSet.h"
 #include "VulkanShaderResourceGroup.h"
 
 #include <vulkan/vulkan.h>
@@ -789,72 +790,112 @@ namespace CE
 		{
 			vkCmdBindPipeline(commandBuffers[i], bindPoint, vkPipeline);
 		}
+
+		currentPipelineLayout = (VulkanPipelineLayout*)pipeline->GetPipelineLayout();
 	}
 
-	void VulkanGraphicsCommandList::CommitShaderResources(u32 firstFrequencyId, 
-		const List<RHI::ShaderResourceGroup*>& shaderResourceGroups, 
-		RHI::IPipelineLayout* pipelineLayout)
+	void VulkanGraphicsCommandList::CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups)
 	{
-		if (shaderResourceGroups.IsEmpty() || pipelineLayout == nullptr)
+		if (shaderResourceGroups.IsEmpty())
 			return;
 
-		List<VulkanShaderResourceGroup*> srgs = shaderResourceGroups.Transform<VulkanShaderResourceGroup*>(
-			[&](RHI::ShaderResourceGroup* in) { return (VulkanShaderResourceGroup*)in; });
-
-		List<VkDescriptorSet> sets = shaderResourceGroups.Transform<VkDescriptorSet>(
-			[&](RHI::ShaderResourceGroup* in) { return ((VulkanShaderResourceGroup*)in)->GetDescriptorSet(); });
-		
-		VulkanPipelineLayout* vulkanPipelineLayout = (VulkanPipelineLayout*)pipelineLayout;
-
-		VkPipelineBindPoint bindPoint{};
-
-		switch (pipelineLayout->GetPipelineType())
-		{
-		case RHI::PipelineType::None:
-			return;
-		case RHI::PipelineType::Graphics:
-			bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			break;
-		case RHI::PipelineType::Compute:
-			bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
-			break;
-		}
-
-		for (int i = 0; i < commandBuffers.GetSize(); ++i)
-		{
-			vkCmdBindDescriptorSets(commandBuffers[i], bindPoint, vulkanPipelineLayout->handle, firstFrequencyId, sets.GetSize(), sets.GetData(), 0, nullptr);
-		}
-	}
-
-	void VulkanGraphicsCommandList::CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups, RHI::IPipelineLayout* pipelineLayout)
-	{
-		if (shaderResourceGroups.IsEmpty() || pipelineLayout == nullptr)
-			return;
+		if (srgManager == nullptr)
+			srgManager = device->GetShaderResourceManager();
 
 		Array<VulkanShaderResourceGroup*> srgs = shaderResourceGroups.Transform<VulkanShaderResourceGroup*>(
 			[&](RHI::ShaderResourceGroup* in) { return (VulkanShaderResourceGroup*)in; });
 
-		VulkanPipelineLayout* vulkanPipelineLayout = (VulkanPipelineLayout*)pipelineLayout;
+		Array<VulkanShaderResourceGroup*> removedSRGs{};
 
-		VkPipelineBindPoint bindPoint{};
-
-		switch (pipelineLayout->GetPipelineType())
+		for (VulkanShaderResourceGroup* srg : srgs)
 		{
-		case RHI::PipelineType::None:
-			return;
-		case RHI::PipelineType::Graphics:
-			bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			break;
-		case RHI::PipelineType::Compute:
-			bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
-			break;
+			Name srgName = srg->GetSRGName();
+			auto oldSRG = boundSRGs[srgName];
+			if (oldSRG == srg)
+				continue;
+
+			// SRG has been modified...
+
+			modifiedDescriptorSetNumbers.Add(srg->setNumber);
+
+			if (oldSRG != nullptr && oldSRG != srg)
+			{
+				removedSRGs.Add(oldSRG);
+			}
+
+			boundSRGs[srgName] = srg;
+			srg->isCommitted = true;
+			
+			Array<VulkanShaderResourceGroup*>& array = boundSRGsBySetNumber[srg->setNumber];
+			array.Remove(oldSRG);
+			if (!array.Exists(srg))
+			{
+				array.Add(srg);
+			}
 		}
 
+		for (const auto& [setNumber, srgArray] : boundSRGsBySetNumber)
+		{
+			VulkanShaderResourceGroup* mainSRG = nullptr;
 
+			for (VulkanShaderResourceGroup* srg : srgArray)
+			{
+				if (srg->ManagesDescriptorSet())
+				{
+					mainSRG = srg;
+					break;
+				}
+			}
+
+			if (mainSRG == nullptr)
+				continue;
+
+			boundMainSRGBySetNumber[setNumber] = mainSRG;
+			
+			Array<VulkanShaderResourceGroup*> srgsToRemove{};
+
+			for (int i = removedSRGs.GetSize() - 1; i >= 0; i--)
+			{
+				if (removedSRGs[i]->setNumber == setNumber)
+				{
+					if (removedSRGs[i] != mainSRG)
+						srgsToRemove.Add(removedSRGs[i]);
+					removedSRGs.RemoveAt(i);
+				}
+			}
+
+			if (srgsToRemove.NonEmpty())
+			{
+				mainSRG->sharedDescriptorSet->RemoveSRGs(srgsToRemove);
+			}
+
+			for (VulkanShaderResourceGroup* srg : srgArray)
+			{
+				if (srg == mainSRG)
+					continue;
+
+				mainSRG->sharedDescriptorSet->SetSRG(srg);
+			}
+		}
 	}
 
 	void VulkanGraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)
 	{
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			for (auto [setNumber, srg] : boundMainSRGBySetNumber)
+			{
+				if (!modifiedDescriptorSetNumbers.Exists(setNumber))
+					continue;
+
+				modifiedDescriptorSetNumbers.Remove(setNumber);
+
+				VkDescriptorSet set = srg->GetDescriptorSet();
+				vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipelineLayout->GetNativeHandle(),
+					setNumber, 1, &set, 0, nullptr);
+			}
+		}
+
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
 			vkCmdDrawIndexed(commandBuffers[i], indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);

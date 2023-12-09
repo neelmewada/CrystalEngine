@@ -15,21 +15,20 @@ namespace CE
 			{.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = initialPoolSize },
 			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = initialPoolSize },
 			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = initialPoolSize / 2 },
 			{.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = initialPoolSize },
 			{.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = initialPoolSize },
 			{.type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = initialPoolSize }
+			{.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, .descriptorCount = initialPoolSize / 2 }
 		};
         
         VkDescriptorPoolCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        info.maxSets = initialPoolSize * 2;
+        info.maxSets = initialPoolSize * 4;
         info.poolSizeCount = COUNTOF(poolSizes);
         info.pPoolSizes = poolSizes;
-		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
-        
+		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+		
         VkDescriptorPool pool = nullptr;
         
         auto result = vkCreateDescriptorPool(device->GetHandle(), &info, nullptr, &pool);
@@ -126,20 +125,19 @@ namespace CE
             { .type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = incrementSize },
             { .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = incrementSize },
             { .type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = incrementSize },
-            { .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = incrementSize },
+            { .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = incrementSize / 2 },
             { .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = incrementSize },
 			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = incrementSize },
 			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = incrementSize },
-			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, .descriptorCount = incrementSize },
-            { .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, .descriptorCount = incrementSize }
+			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, .descriptorCount = incrementSize / 2 }
         };
         
         VkDescriptorPoolCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        info.maxSets = incrementSize * 2;
+        info.maxSets = incrementSize * 4;
         info.poolSizeCount = COUNTOF(poolSizes);
         info.pPoolSizes = poolSizes;
-		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
         
         VkDescriptorPool pool = nullptr;
         

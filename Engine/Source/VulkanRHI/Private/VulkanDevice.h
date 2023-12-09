@@ -76,6 +76,11 @@ namespace CE
 			return gpuProperties.limits;
 		}
 
+		INLINE VulkanShaderResourceManager* GetShaderResourceManager() const
+		{
+			return srgManager;
+		}
+
     protected:
 
     private:

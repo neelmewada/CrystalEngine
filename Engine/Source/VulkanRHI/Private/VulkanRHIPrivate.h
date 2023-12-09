@@ -12,6 +12,10 @@
 namespace CE
 {
     class VulkanViewport;
+	class VulkanDescriptorSet;
+	class VulkanShaderResourceGroup;
+	class VulkanShaderResourceManager;
+	class VulkanPipelineLayout;
 
     struct VulkanRenderTargetLayout
     {
@@ -220,12 +224,14 @@ namespace CE
 
 		virtual void BindPipeline(RHI::IPipelineState* pipeline) override;
 
-		virtual void CommitShaderResources(u32 firstFrequencyId, 
+		void CommitShaderResources(u32 firstFrequencyId, 
 			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups,
-			RHI::IPipelineLayout* pipelineLayout) override;
+			RHI::IPipelineLayout* pipelineLayout);
 
-		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups, RHI::IPipelineLayout* pipelineLayout);
+		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) override;
 
+		
+		// TODO: Re-implement this function with more flexibilty. Maybe expose Fences?
 		virtual void WaitForExecution() override;
 
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance) override;
@@ -269,6 +275,8 @@ namespace CE
         VulkanDevice* device = nullptr;
         VulkanRenderTarget* renderTarget = nullptr;
         VulkanViewport* viewport = nullptr;
+		VulkanShaderResourceManager* srgManager = nullptr;
+		VulkanPipelineLayout* currentPipelineLayout = nullptr;
 
         u32 numCommandBuffers = 1; // = BackBufferCount
         u32 simultaneousFrameDraws = 1;
@@ -280,7 +288,10 @@ namespace CE
         List<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
         List<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
 
-		HashMap<int, Array<VulkanShaderResourceGroup*>> boundSRGs{};
+		HashMap<Name, VulkanShaderResourceGroup*> boundSRGs{};
+		HashMap<int, Array<VulkanShaderResourceGroup*>> boundSRGsBySetNumber{};
+		HashMap<int, VulkanShaderResourceGroup*> boundMainSRGBySetNumber{};
+		HashSet<int> modifiedDescriptorSetNumbers{};
 
         // ImGui
         b8 isImGuiEnabled = false;
