@@ -143,6 +143,8 @@ namespace CE::RHI
 		virtual Name GetSRGName() = 0;
 
 		virtual SRGType GetSRGType() = 0;
+
+		virtual const RHI::ShaderResourceGroupDesc& GetDesc() = 0;
         
 	};
 

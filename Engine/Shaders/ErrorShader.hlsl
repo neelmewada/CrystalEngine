@@ -1,5 +1,5 @@
 
-#include "Macros.hlsl"
+#include "ShaderLibrary.hlsl"
 
 // data structure : before vertex shader (mesh info)
 struct VertexInfo
@@ -10,18 +10,6 @@ struct VertexInfo
 struct v2f
 {
     float4 position : SV_POSITION;
-};
-
-cbuffer _PerViewData : SRG_PerView(b)
-{
-    float4x4 viewMatrix;
-    float4x4 viewProjectionMatrix;
-    float4x4 projectionMatrix;
-};
-
-cbuffer _Model : SRG_PerObject(b)
-{
-    float4x4 modelMatrix;
 };
 
 // vertex shader function

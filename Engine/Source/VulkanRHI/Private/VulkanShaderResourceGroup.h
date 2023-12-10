@@ -54,6 +54,8 @@ namespace CE
 
 		virtual RHI::SRGType GetSRGType() override;
 
+		virtual const RHI::ShaderResourceGroupDesc& GetDesc() override;
+
 		inline VkDescriptorSet GetDescriptorSet() const
 		{
 			if (sharedDescriptorSet == nullptr)

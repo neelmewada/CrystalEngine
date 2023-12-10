@@ -1,8 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CoreShader.h"
 #include "CoreRHI.h"
+#include "CoreShader.h"
+
+// ***********************************
+// CoreRPI Includes
 
 #include "RenderViewport.h"
 #include "View.h"

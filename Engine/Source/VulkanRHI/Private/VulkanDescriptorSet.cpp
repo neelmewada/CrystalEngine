@@ -35,12 +35,9 @@ namespace CE
 		setBindings.Clear();
 		variableNameToBinding.Clear();
 		bindingSlotToBinding.Clear();
-		sharedSRGs.Clear();
 
 		for (VulkanShaderResourceGroup* srg : srgs)
 		{
-			sharedSRGs.Add(srg->GetSRGName(), srg);
-
 			variableNames.AddRange(srg->variableNames);
 			setBindings.AddRange(srg->setBindings);
 			

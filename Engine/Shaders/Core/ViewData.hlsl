@@ -1,5 +1,5 @@
-#ifndef __PER_VIEW_DATA_HLSL__
-#define __PER_VIEW_DATA_HLSL__
+#ifndef __VIEW_DATA_HLSL__
+#define __VIEW_DATA_HLSL__
 
 cbuffer _PerViewData : SRG_PerView(b)
 {
@@ -8,4 +8,4 @@ cbuffer _PerViewData : SRG_PerView(b)
     float4x4 projectionMatrix;
 };
 
-#endif // __PER_VIEW_DATA_HLSL__
+#endif // __VIEW_DATA_HLSL__

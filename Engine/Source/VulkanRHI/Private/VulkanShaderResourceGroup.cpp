@@ -162,7 +162,6 @@ namespace CE
 		if (srgManager->ShouldCreateDescriptorSetForSRG(srgType))
 		{
 			sharedDescriptorSet = new VulkanDescriptorSet(device);
-			sharedDescriptorSet->SetSRG(this);
 		}
 	}
 
@@ -206,6 +205,11 @@ namespace CE
 	RHI::SRGType VulkanShaderResourceGroup::GetSRGType()
 	{
 		return srgType;
+	}
+
+	const RHI::ShaderResourceGroupDesc& VulkanShaderResourceGroup::GetDesc()
+	{
+		return desc;
 	}
 
 } // namespace CE

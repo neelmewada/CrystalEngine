@@ -871,9 +871,6 @@ namespace CE
 
 			for (VulkanShaderResourceGroup* srg : srgArray)
 			{
-				if (srg == mainSRG)
-					continue;
-
 				mainSRG->sharedDescriptorSet->SetSRG(srg);
 			}
 		}

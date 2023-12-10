@@ -10,7 +10,7 @@ namespace CE::RPI
 
     Model::~Model()
     {
-		for (auto lod : lods)
+		for (RPI::ModelLod* lod : lods)
 		{
 			delete lod;
 		}

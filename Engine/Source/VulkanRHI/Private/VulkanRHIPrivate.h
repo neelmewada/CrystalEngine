@@ -224,12 +224,7 @@ namespace CE
 
 		virtual void BindPipeline(RHI::IPipelineState* pipeline) override;
 
-		void CommitShaderResources(u32 firstFrequencyId, 
-			const List<RHI::ShaderResourceGroup*>& shaderResourceGroups,
-			RHI::IPipelineLayout* pipelineLayout);
-
 		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) override;
-
 		
 		// TODO: Re-implement this function with more flexibilty. Maybe expose Fences?
 		virtual void WaitForExecution() override;
