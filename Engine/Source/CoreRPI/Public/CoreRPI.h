@@ -9,6 +9,9 @@
 
 #include "RenderViewport.h"
 #include "View.h"
+#include "Scene.h"
+
+#include "Material/Material.h"
 
 #include "Model/ModelLod.h"
 #include "Model/Model.h"

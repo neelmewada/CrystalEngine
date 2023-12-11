@@ -2,16 +2,6 @@
 
 namespace CE::RPI
 {
-	void SubMesh::Clear()
-	{
-		materialSlotIndex = 0;
-		indices.Clear();
-	}
-
-	void SubMesh::Release()
-	{
-		Clear();
-	}
 
 	void Mesh::Clear()
 	{
@@ -19,7 +9,6 @@ namespace CE::RPI
 		uvCoords.Clear();
 		normals.Clear();
 		tangents.Clear();
-		subMeshes.Clear();
 		vertexColors.Clear();
 	}
 

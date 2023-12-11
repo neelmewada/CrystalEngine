@@ -11,7 +11,13 @@ namespace CE::RPI
 
 	ShaderVariant::~ShaderVariant()
 	{
-
+		for (auto [stage, module] : modulesByStage)
+		{
+			if (module == nullptr)
+				continue;
+			RHI::gDynamicRHI->DestroyShaderModule(module);
+		}
+		modulesByStage.Clear();
 	}
 
 } // namespace CE::RPI

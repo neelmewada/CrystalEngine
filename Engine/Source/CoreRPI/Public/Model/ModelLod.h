@@ -2,23 +2,6 @@
 
 namespace CE::RPI
 {
-	STRUCT()
-	struct CORERPI_API SubMesh
-	{
-		CE_STRUCT(SubMesh)
-	public:
-
-		FIELD()
-		s32 materialSlotIndex = 0;
-
-		FIELD()
-		Array<u32> indices{};
-
-		void Clear();
-
-		void Release();
-
-	};
 
 	CLASS()
 	class CORERPI_API Mesh : public Object
@@ -42,16 +25,14 @@ namespace CE::RPI
 		Array<Color> vertexColors{};
 
 		FIELD()
-		Array<SubMesh> subMeshes{};
+		s32 materialSlotIndex = 0;
+
+		FIELD()
+		Array<u32> indices{};
 
 		FORCE_INLINE bool IsValid() const
 		{
 			return vertices.NonEmpty();
-		}
-
-		FORCE_INLINE u32 GetSubMeshCount() const
-		{
-			return subMeshes.GetSize();
 		}
 
 		void Clear();
@@ -77,4 +58,3 @@ namespace CE::RPI
     
 } // namespace CE::RPI
 
-#include "ModelLod.rtti.h"
