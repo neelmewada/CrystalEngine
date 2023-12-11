@@ -441,9 +441,9 @@ namespace CE
         VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
     }
 
-	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDesc& desc)
+	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection)
 	{
-		return new VulkanShaderModule(device, desc);
+		return new VulkanShaderModule(device, desc, shaderReflection);
 	}
 
 	void VulkanRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)

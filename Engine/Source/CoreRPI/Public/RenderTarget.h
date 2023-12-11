@@ -3,12 +3,12 @@
 namespace CE::RPI
 {
 
-	class CORERPI_API RenderViewport
+	class CORERPI_API RenderTarget
 	{
 	public:
-		RenderViewport(RHI::RenderTarget* rt);
+		RenderTarget(RHI::RenderTarget* rt);
 
-		inline RHI::RenderTarget* GetRenderTarget() const { return renderTarget; }
+		inline RHI::RenderTarget* GetRHIRenderTarget() const { return renderTarget; }
 
 		inline bool IsNativeViewport() const { return renderTarget->IsViewportRenderTarget(); }
 

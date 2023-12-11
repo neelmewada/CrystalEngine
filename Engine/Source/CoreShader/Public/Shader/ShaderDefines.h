@@ -89,13 +89,13 @@ namespace CE
 
 		inline bool IsValid() const { return resourceType != ShaderResourceType::None; }
 
-		inline u32 GetBinding() const { return binding; }
+		inline u32 GetBindingSlot() const { return bindingSlot; }
 
 		inline const Name& GetName() const { return name; }
 		inline const Name& GetInternalName() const { return internalName; }
 		
 		FIELD(ReadOnly)
-		u32 binding = 0;
+		u32 bindingSlot = 0;
 
 		FIELD(ReadOnly)
 		Name name{};
@@ -145,6 +145,8 @@ namespace CE
 		friend struct ShaderReflection;
 		friend class Shader;
 	};
+
+	typedef HashMap<Name, int> VariableBindingMap;
     
 	STRUCT()
 	struct CORESHADER_API ShaderReflection
@@ -161,6 +163,17 @@ namespace CE
 
 		FIELD(ReadOnly)
 		Array<SRGEntry> resourceGroups{};
+
+		FIELD(ReadOnly)
+		Array<VertexInputAttribute> vertexInputs{};
+
+		const VariableBindingMap& GetVariableNameMap() const;
+
+	private:
+
+		void OnAfterDeserialize();
+
+		mutable VariableBindingMap variableNameToBindingSlot{};
 		
 		friend class ShaderReflector;
 		friend class Shader;

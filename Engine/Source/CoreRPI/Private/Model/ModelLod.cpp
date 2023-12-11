@@ -10,6 +10,7 @@ namespace CE::RPI
 		normals.Clear();
 		tangents.Clear();
 		vertexColors.Clear();
+		indices.Clear();
 	}
 
 	ModelLod::ModelLod()

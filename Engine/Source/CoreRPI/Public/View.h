@@ -22,7 +22,7 @@ namespace CE::RPI
 	private:
 
 		/// @brief Could be native window surface OR an offscreen render target
-		RPI::RenderViewport* targetViewport = nullptr;
+		RPI::RenderTarget* renderTarget = nullptr;
 
 		/// @brief View ShaderResourceGroup (SRG_PerView)
 		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;

@@ -4,7 +4,7 @@
 
 namespace CE
 {
-	VulkanShaderModule::VulkanShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc)
+	VulkanShaderModule::VulkanShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection)
 		: device(device), stage(desc.stage), name(desc.name)
 	{
 		VkShaderModuleCreateInfo shaderCI{};
@@ -17,6 +17,8 @@ namespace CE
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan shader module. Error code {}", (int)result);
 		}
+
+		variableBindingMap = shaderReflection.GetVariableNameMap();
 	}
 
 	VulkanShaderModule::~VulkanShaderModule()

@@ -56,12 +56,7 @@ namespace CE
 
 		virtual const RHI::ShaderResourceGroupDesc& GetDesc() override;
 
-		inline VkDescriptorSet GetDescriptorSet() const
-		{
-			if (sharedDescriptorSet == nullptr)
-				return nullptr;
-			return sharedDescriptorSet->descriptorSet;
-		}
+		VkDescriptorSet GetDescriptorSet() const;
 
 		inline bool ManagesDescriptorSet() const
 		{

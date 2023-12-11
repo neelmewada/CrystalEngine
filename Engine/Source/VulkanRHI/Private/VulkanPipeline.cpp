@@ -1,7 +1,10 @@
 
+#include "VulkanRHIPrivate.h"
+
 #include "VulkanPipeline.h"
 #include "VulkanShaderModule.h"
 #include "VulkanRenderPass.h"
+#include "VulkanShaderResourceGroup.h"
 
 namespace CE
 {
@@ -235,6 +238,8 @@ namespace CE
 
 		// - Pipeline Layout -
 
+		auto srgManager = device->GetShaderResourceManager();
+
 		VkPipelineLayoutCreateInfo pipelineLayoutCI{};
 		pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
@@ -242,13 +247,16 @@ namespace CE
 
 		for (int i = 0; i < desc.shaderResourceGroups.GetSize(); i++)
 		{
-			VulkanShaderResourceGroup* srg = (VulkanShaderResourceGroup*)desc.shaderResourceGroups[i];
+			auto srg = desc.shaderResourceGroups[i];
 
 			List<VkDescriptorSetLayoutBinding> setLayoutBindings{};
 
-			for (const auto& variable : srg->desc.variables)
+			for (const auto& variable : srg.variables)
 			{
 				VkDescriptorType descriptorType;
+				u32 bindingSlot = 0;
+				if (desc.variableNameBindingMap.KeyExists(variable.name))
+					bindingSlot = desc.variableNameBindingMap.Get(variable.name);
 				
 				switch (variable.type)
 				{
@@ -275,7 +283,7 @@ namespace CE
 					stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
 
 				setLayoutBindings.Add({
-					.binding = variable.binding,
+					.binding = bindingSlot,
 					.descriptorType = descriptorType,
 					.descriptorCount = variable.arrayCount,
 					.stageFlags = stageFlags

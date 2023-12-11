@@ -27,6 +27,15 @@ namespace CE
 		);
 		
 		auto resources = reflection->get_shader_resources();
+		
+		if (curStage == ShaderStage::Vertex)
+		{
+			// Fetch vertex stage inputs
+			for (const auto& input : resources.stage_inputs)
+			{
+				
+			}
+		}
 
 		auto reflectStruct = [&](SRGVariable& variable, spirv_cross::SPIRType type, spirv_cross::TypeID baseTypeId)
 			{
@@ -85,7 +94,7 @@ namespace CE
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
-			variable.binding = binding;
+			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
 			variable.resourceType = ShaderResourceType::ConstantBuffer;
@@ -119,7 +128,7 @@ namespace CE
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
-			variable.binding = binding;
+			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
 			variable.resourceType = ShaderResourceType::StructuredBuffer;
@@ -153,7 +162,7 @@ namespace CE
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 			
 			SRGVariable variable{};
-			variable.binding = binding;
+			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
 			if (type.image.dim == spv::Dim2D)
@@ -190,7 +199,7 @@ namespace CE
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
-			variable.binding = binding;
+			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
 			variable.shaderStages = curStage;
@@ -239,7 +248,7 @@ namespace CE
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
 			SRGVariable variable{};
-			variable.binding = binding;
+			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
 			variable.resourceType = ShaderResourceType::SamplerState;

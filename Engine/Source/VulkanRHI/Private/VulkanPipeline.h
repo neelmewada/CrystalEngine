@@ -25,6 +25,8 @@ namespace CE
 		VkPipelineLayout handle = nullptr;
 		
 		RHI::PipelineType pipelineType = RHI::PipelineType::Graphics;
+
+		friend class VulkanGraphicsPipeline;
 	};
 
     class VulkanPipeline : public RHI::IPipelineState

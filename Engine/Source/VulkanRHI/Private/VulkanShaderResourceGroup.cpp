@@ -212,5 +212,12 @@ namespace CE
 		return desc;
 	}
 
+    VkDescriptorSet VulkanShaderResourceGroup::GetDescriptorSet() const
+    {
+		if (sharedDescriptorSet == nullptr)
+			return nullptr;
+		return sharedDescriptorSet->descriptorSet;
+    }
+
 } // namespace CE
 

@@ -7,7 +7,7 @@
 // ***********************************
 // CoreRPI Includes
 
-#include "RenderViewport.h"
+#include "RenderTarget.h"
 #include "View.h"
 #include "Scene.h"
 

@@ -354,7 +354,7 @@ namespace CE::RHI
 
 	struct ShaderResourceVariableDesc
 	{
-		u32 binding = 0;
+		//u32 bindingSlot = 0;
 		Name name = "";
 		u32 arrayCount = 1;
 		ShaderResourceType type = SHADER_RESOURCE_TYPE_NONE;
@@ -419,7 +419,9 @@ namespace CE::RHI
 
 		CullMode cullMode = CULL_MODE_BACK;
 
-		Array<RHI::ShaderResourceGroup*> shaderResourceGroups{};
+		Array<RHI::ShaderResourceGroupDesc> shaderResourceGroups{};
+
+		HashMap<Name, int> variableNameBindingMap{};
 	};
 
 	struct CORERHI_API GraphicsPipelineBuilder
@@ -462,7 +464,7 @@ namespace CE::RHI
 			return *this;
 		}
 
-		GraphicsPipelineBuilder& ShaderResource(RHI::ShaderResourceGroup* srg)
+		GraphicsPipelineBuilder& SRG(const RHI::ShaderResourceGroupDesc& srg)
 		{
 			desc.shaderResourceGroups.Add(srg);
 			return *this;

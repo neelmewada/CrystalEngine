@@ -6,7 +6,7 @@ namespace CE::RPI
 	{
 		RHI::ShaderResourceGroupDesc desc{};
 		desc.srgType = RHI::SRGType::PerView;
-
+		
 		shaderResourceGroup = new RPI::ShaderResourceGroup(desc);
 	}
 

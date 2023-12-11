@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	RenderViewport::RenderViewport(RHI::RenderTarget* rt)
+	RenderTarget::RenderTarget(RHI::RenderTarget* rt)
 		: renderTarget(rt)
 	{
 

@@ -7,6 +7,7 @@
 namespace CE
 {
     class PlatformWindow;
+	struct ShaderReflection;
 }
 
 namespace CE::RHI
@@ -78,7 +79,7 @@ namespace CE::RHI
         virtual void* AddImGuiTexture(RHI::Texture* texture, Sampler* sampler) = 0;
         virtual void RemoveImGuiTexture(void* imguiTexture) = 0;
 
-		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc) = 0;
+		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection) = 0;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) = 0;
 
 		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) = 0;

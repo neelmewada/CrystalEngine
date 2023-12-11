@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "CoreApplication.h"
 #include "CoreRHI.h"
+#include "CoreShader.h"
 
 #include "VulkanRHI.h"
 #include "VulkanDevice.h"

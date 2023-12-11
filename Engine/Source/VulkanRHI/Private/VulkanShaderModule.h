@@ -7,7 +7,7 @@ namespace CE
 	{
 	public:
 
-		VulkanShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc);
+		VulkanShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection);
 		~VulkanShaderModule();
 
 		Name GetName() override
@@ -33,6 +33,9 @@ namespace CE
 		VulkanDevice* device = nullptr;
 		VkShaderModule shaderModule = nullptr;
 		RHI::ShaderStage stage = RHI::ShaderStage::None;
+
+		HashMap<Name, int> variableBindingMap{};
+
 	};
 
 } // namespace CE

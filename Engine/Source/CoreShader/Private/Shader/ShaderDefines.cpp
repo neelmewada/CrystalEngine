@@ -40,11 +40,40 @@ namespace CE
 		return resourceGroups.Top();
     }
 
+	const VariableBindingMap& ShaderReflection::GetVariableNameMap() const
+	{
+		if (variableNameToBindingSlot.IsEmpty())
+		{
+			for (const SRGEntry& srgEntry : resourceGroups)
+			{
+				for (const SRGVariable& variable : srgEntry.variables)
+				{
+					variableNameToBindingSlot[variable.name] = variable.bindingSlot;
+				}
+			}
+		}
+
+		return variableNameToBindingSlot;
+	}
+
+	void ShaderReflection::OnAfterDeserialize()
+	{
+		variableNameToBindingSlot.Clear();
+
+		for (const SRGEntry& srgEntry : resourceGroups)
+		{
+			for (const SRGVariable& variable : srgEntry.variables)
+			{
+				variableNameToBindingSlot[variable.name] = variable.bindingSlot;
+			}
+		}
+	}
+
 	void SRGEntry::TryAdd(const SRGVariable& variable, ShaderStage stage)
 	{
 		for (auto& var : variables)
 		{
-			if (var.GetName() == variable.GetName() && var.GetBinding() == variable.GetBinding())
+			if (var.GetName() == variable.GetName() && var.GetBindingSlot() == variable.GetBindingSlot())
 			{
 				var.shaderStages |= stage;
 				return;
