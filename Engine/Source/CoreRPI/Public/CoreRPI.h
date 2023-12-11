@@ -20,6 +20,8 @@
 #include "Shader/ShaderVariant.h"
 #include "Shader/Shader.h"
 
+#include "DrawItem.h"
+
 namespace CE::RPI
 {
     
