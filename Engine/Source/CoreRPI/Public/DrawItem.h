@@ -35,15 +35,30 @@ namespace CE::RPI
 
 		RHI::VertexBufferView* vertexBufferViews = nullptr;
 
-		/// @brief Shader resource groups to be bound for this DrawItem. 
+		/// @brief Shader resource groups to be bound for this DrawItem.
 		RHI::ShaderResourceGroup* shaderResourceGroups = nullptr;
 
-		/// @brief A unique shader resource group that is local to this DrawItem and is not shared outside. Usually a PerDraw SRG.
+		/// @brief A unique shader resource group that is local to this DrawItem and
+		/// is not shared outside. Usually a PerDraw SRG.
 		RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
 
 		RHI::ScissorRect* scissorRects = nullptr;
 
 		RHI::ViewportRect* viewportRects = nullptr;
+
+	};
+
+	typedef u32 DrawFilterMask;
+	constexpr u32 DrawFilterMaskNullValue = u32(-1);
+
+	struct DrawItemProperties
+	{
+		DrawItemProperties() = default;
+
+		const DrawItem* item = nullptr;
+
+		/// @brief A filter mask which helps decide if this item is supposed to be pushed to a CommandList for drawing.
+		DrawFilterMask drawFilterMask = DrawFilterMaskNullValue;
 	};
 
 } // namespace CE::RPI

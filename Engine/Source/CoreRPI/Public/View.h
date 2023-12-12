@@ -19,6 +19,8 @@ namespace CE::RPI
 			UsageCustom = BIT(3),
 		};
 
+
+
 	private:
 
 		/// @brief Could be native window surface OR an offscreen render target

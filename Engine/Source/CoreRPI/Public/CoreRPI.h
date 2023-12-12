@@ -10,6 +10,11 @@
 #include "Handle.h"
 #include "Limits.h"
 
+#include "DrawItem.h"
+#include "DrawList.h"
+#include "DrawPacket.h"
+#include "DrawPacketBuilder.h"
+
 #include "RenderTarget.h"
 #include "View.h"
 #include "Scene.h"
@@ -24,11 +29,6 @@
 #include "Shader/ShaderResourceGroup.h"
 #include "Shader/ShaderVariant.h"
 #include "Shader/Shader.h"
-
-#include "DrawItem.h"
-#include "DrawList.h"
-#include "DrawPacket.h"
-#include "DrawPacketBuilder.h"
 
 #include "Feature/FeatureProcessor.h"
 #include "Feature/FeatureProcessorRegistry.h"
