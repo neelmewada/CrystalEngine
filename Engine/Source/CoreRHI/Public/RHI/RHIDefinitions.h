@@ -134,6 +134,12 @@ namespace CE::RHI
     *   Buffer
     */
 
+	enum class IndexFormat
+	{
+		Uint16 = 0,
+		Uint32
+	};
+
     enum class BufferBindFlags
     {
         Undefined = 0,
@@ -305,6 +311,33 @@ namespace CE::RHI
         Graphics,
         Compute,
     };
+
+	struct ViewportRect
+	{
+		ViewportRect() = default;
+
+		ViewportRect(float x, float y,
+			float width, float height,
+			float minDepth = 0.0f, float maxDepth = 1.0f) 
+			: x(x), y(y) , width(width), height(height), minDepth(minDepth), maxDepth(maxDepth)
+		{}
+
+		float x = 0, y = 0;
+		float width = 0, height = 0;
+		float minDepth = 0.0f, maxDepth = 1.0f;
+	};
+
+	struct ScissorRect
+	{
+		ScissorRect() = default;
+
+		ScissorRect(float x, float y, float width, float height)
+			: x(x), y(y), width(width), height(height)
+		{}
+
+		float x = 0, y = 0;
+		float width = 0, height = 0;
+	};
 
     /*
     *   Shader

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <bitset>
 
 #include "RemoveReference.h"
 
@@ -26,6 +27,66 @@ namespace CE
 		{
 			return std::numeric_limits<T>::infinity();
 		}
+	};
+
+	template<SIZE_T Bits = 32>
+	class BitSet
+	{
+	public:
+		inline void Set(SIZE_T pos, bool value = true)
+		{
+			impl.set(pos, value);
+		}
+
+		/// @brief Flips all bits
+		inline void Flip()
+		{
+			impl.flip();
+		}
+
+		inline bool Test(SIZE_T pos) const
+		{
+			return impl.test(pos);
+		}
+
+		inline SIZE_T Count() const
+		{
+			return impl.count();
+		}
+
+		inline bool Any() const
+		{
+			return impl.any();
+		}
+
+		inline bool All() const
+		{
+			return impl.all();
+		}
+
+		inline bool None() const
+		{
+			return impl.none();
+		}
+
+		inline u32 ToU32() const
+		{
+			return impl.to_ulong();
+		}
+
+		inline u64 ToU64() const
+		{
+			return impl.to_ullong();
+		}
+
+		inline String ToString() const
+		{
+			return impl.to_string();
+		}
+
+	private:
+
+		std::bitset<Bits> impl{};
 	};
 
     template<bool TValue>

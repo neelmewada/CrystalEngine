@@ -30,13 +30,7 @@ namespace CE
 
 	Shader::~Shader()
 	{
-		for (auto module : allModules)
-		{
-			RHI::gDynamicRHI->DestroyShaderModule(module.vertex);
-			RHI::gDynamicRHI->DestroyShaderModule(module.fragment);
-		}
-
-		allModules.Clear();
+		
 	}
 
 	Shader* Shader::GetErrorShader()
@@ -49,7 +43,9 @@ namespace CE
 		}
 
 		if (RHI::gDynamicRHI->GetGraphicsBackend() != RHI::GraphicsBackend::Vulkan)
+		{
 			return nullptr;
+		}
 
 		for (auto object : transient->GetSubObjectMap())
 		{
@@ -74,6 +70,9 @@ namespace CE
 		variant.shaderStageBlobs.Add(ShaderBlob{});
 		variant.shaderStageBlobs.Top().shaderStage = ShaderStage::Fragment;
 		variant.shaderStageBlobs.Top().byteCode.LoadData(fragSpv->GetData(), fragSpv->GetDataSize());
+
+		vertSpv->Destroy();
+		fragSpv->Destroy();
 
 		return shader;
 	}

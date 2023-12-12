@@ -82,6 +82,16 @@ namespace CE
 		return directoryTree.GetNode(path);
 	}
 
+	Name AssetRegistry::GetPackagePath(Uuid packageUuid)
+	{
+		if (!cachedPrimaryAssetByPackageUuid.KeyExists(packageUuid))
+			return Name();
+		AssetData* assetData = cachedPrimaryAssetByPackageUuid[packageUuid];
+		if (assetData == nullptr)
+			return Name();
+		return assetData->packageName;
+	}
+
 	void AssetRegistry::OnAssetImported(const Name& packageName, const Name& sourcePath)
 	{
 		IO::Path packagePath = Package::GetPackagePath(packageName);

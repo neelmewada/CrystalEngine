@@ -3,15 +3,6 @@
 namespace CE::RPI
 {
 
-	void Mesh::Clear()
-	{
-		vertices.Clear();
-		uvCoords.Clear();
-		normals.Clear();
-		tangents.Clear();
-		vertexColors.Clear();
-		indices.Clear();
-	}
 
 	ModelLod::ModelLod()
 	{

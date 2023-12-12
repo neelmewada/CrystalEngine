@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	class CORERPI_API RenderTarget
+	class CORERPI_API RenderTarget final
 	{
 	public:
 		RenderTarget(RHI::RenderTarget* rt);

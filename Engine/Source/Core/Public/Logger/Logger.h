@@ -11,8 +11,8 @@ namespace spdlog
 
 namespace CE
 {
-    class CORE_API StringView;
-    class CORE_API String;
+    class StringView;
+    class String;
 
 	enum class LogLevel
 	{

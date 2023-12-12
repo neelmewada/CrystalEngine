@@ -102,6 +102,7 @@ namespace CE
 
 		ClassType::ClearDefaultInstancesForModule(moduleName);
 
+		// This also deregisters all types that were registered in this module
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 
 		// Unload resources

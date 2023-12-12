@@ -643,19 +643,6 @@ namespace CE
         extent.width = renderTarget->GetWidth();
         extent.height = renderTarget->GetHeight();
 
-        // - Dynamic Viewport & Scissor -
-        VkViewport viewportSize = {};
-        viewportSize.x = 0;
-        viewportSize.y = 0;
-        viewportSize.width = (float)extent.width;
-        viewportSize.height = (float)extent.height;
-        viewportSize.minDepth = 0.0f;
-        viewportSize.maxDepth = 1.0f;
-
-        VkRect2D scissor = {};
-        scissor.offset = { 0, 0 };
-        scissor.extent = extent;
-
         // - Command Buffer & Render Pass --
         VkCommandBufferBeginInfo cmdBufferInfo{};
         cmdBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -700,10 +687,6 @@ namespace CE
 
             // Begin Render Pass
             vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            // Set viewport & scissor dynamic state
-            vkCmdSetViewport(commandBuffers[i], 0, 1, &viewportSize);
-            vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
         }
     }
 
@@ -715,6 +698,52 @@ namespace CE
             vkEndCommandBuffer(commandBuffers[i]);
         }
     }
+
+	void VulkanGraphicsCommandList::SetScissorRects(u32 scissorCount, const RHI::ScissorRect* scissors)
+	{
+		static Array<VkRect2D> scissorRects{};
+		if (scissorRects.GetSize() < scissorCount)
+		{
+			scissorRects.Resize(scissorCount);
+		}
+
+		for (int i = 0; i < scissorCount; i++)
+		{
+			scissorRects[i].offset.x = scissors[i].x;
+			scissorRects[i].offset.y = scissors[i].y;
+			scissorRects[i].extent.width = scissors[i].width;
+			scissorRects[i].extent.height = scissors[i].height;
+		}
+
+		for (int i = 0; i < commandBuffers.GetSize(); i++)
+		{
+			vkCmdSetScissor(commandBuffers[i], 0, scissorCount, scissorRects.GetData());
+		}
+	}
+
+	void VulkanGraphicsCommandList::SetViewportRects(u32 viewportCount, const RHI::ViewportRect* viewports)
+	{
+		static Array<VkViewport> viewportArray{};
+		if (viewportArray.GetSize() < viewportCount)
+		{
+			viewportArray.Resize(viewportCount);
+		}
+
+		for (int i = 0; i < viewportCount; i++)
+		{
+			viewportArray[i].x = viewports[i].x;
+			viewportArray[i].y = viewports[i].y;
+			viewportArray[i].width = viewports[i].width;
+			viewportArray[i].height = viewports[i].height;
+			viewportArray[i].minDepth = viewports[i].minDepth;
+			viewportArray[i].maxDepth = viewports[i].maxDepth;
+		}
+
+		for (int i = 0; i < commandBuffers.GetSize(); i++)
+		{
+			vkCmdSetViewport(commandBuffers[i], 0, viewportCount, viewportArray.GetData());
+		}
+	}
 
 	void VulkanGraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers)
 	{

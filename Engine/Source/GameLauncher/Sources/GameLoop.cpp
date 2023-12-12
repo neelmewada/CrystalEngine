@@ -149,12 +149,10 @@ void GameLoop::PostInit()
 
 	viewport = RHI::gDynamicRHI->CreateViewport(mainWindow, width, height, false, rtLayout);
 
-	RPI::RenderViewport* rpiViewport = new RPI::RenderViewport(viewport->GetRenderTarget());
-
 	// Create GameViewport
 	GameViewport* gameViewport = CreateObject<GameViewport>(gEngine, "GameViewport");
-	gameViewport->Initialize(rpiViewport);
-
+	//gameViewport->Initialize(rpiViewport);
+	
 	cmdList = RHI::gDynamicRHI->CreateGraphicsCommandList(viewport);
 	
 	// Load game code
@@ -205,7 +203,11 @@ void GameLoop::RunLoop()
 
 		cmdList->Begin();
 
-		//gEngine->Render();
+		RHI::ViewportRect viewportRect = RHI::ViewportRect(0, 0, rt->GetWidth(), rt->GetHeight(), 0.0f, 1.0f);
+		RHI::ScissorRect scissorRect = RHI::ScissorRect(0, 0, rt->GetWidth(), rt->GetHeight());
+
+		cmdList->SetScissorRects(1, &scissorRect);
+		cmdList->SetViewportRects(1, &viewportRect);
 		
 		cmdList->End();
 

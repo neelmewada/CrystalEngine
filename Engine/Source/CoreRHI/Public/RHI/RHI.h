@@ -209,6 +209,9 @@ namespace CE::RHI
         virtual void Begin() = 0;
         virtual void End() = 0;
 
+		virtual void SetScissorRects(u32 scissorCount, const RHI::ScissorRect* scissors) = 0;
+		virtual void SetViewportRects(u32 viewportCount, const RHI::ViewportRect* viewportRects) = 0;
+
 		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers) = 0;
 		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets) = 0;
 
@@ -220,7 +223,7 @@ namespace CE::RHI
 
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance) = 0;
 
-        // - ImGui Setup -
+        // - ImGui Setup (Deprecated) -
 
         virtual bool InitImGui(FontPreloadConfig* preloadFonts, Array<void*>& outFontHandles) = 0;
 

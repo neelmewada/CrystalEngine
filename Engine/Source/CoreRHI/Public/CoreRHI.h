@@ -7,15 +7,10 @@
 #include "RHI/RHIResources.h"
 #include "RHI/RHI.h"
 
+#include "RHI/IndexBufferView.h"
+#include "RHI/VertexBufferView.h"
+
 namespace CE
 {
-    class CORERHI_API CoreRHIModule : public CE::Module
-    {
-    public:
-        virtual void StartupModule() override;
-
-        virtual void ShutdownModule() override;
-
-        virtual void RegisterTypes() override;
-    };
+    
 }

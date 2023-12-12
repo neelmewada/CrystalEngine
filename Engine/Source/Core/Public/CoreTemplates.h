@@ -3,4 +3,6 @@
 // Templates
 #include "Templates/RemoveReference.h"
 #include "Templates/CrystalTemplate.h"
+#include "Templates/IntrusivePtr.h"
 #include "Templates/TypeTraits.h"
+

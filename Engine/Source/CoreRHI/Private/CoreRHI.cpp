@@ -3,24 +3,27 @@
 
 #include "CoreRHI.private.h"
 
-CE_IMPLEMENT_MODULE(CoreRHI, CE::CoreRHIModule)
-
 namespace CE
 {
-    
-    void CoreRHIModule::StartupModule()
-    {
+	class CORERHI_API CoreRHIModule : public CE::Module
+	{
+	public:
+		virtual void StartupModule() override
+		{
 
-    }
+		}
 
-    void CoreRHIModule::ShutdownModule()
-    {
+		virtual void ShutdownModule() override
+		{
 
-    }
+		}
 
-    void CoreRHIModule::RegisterTypes()
-    {
+		virtual void RegisterTypes() override
+		{
 
-    }
+		}
+	};
     
 }
+
+CE_IMPLEMENT_MODULE(CoreRHI, CE::CoreRHIModule)

@@ -18,7 +18,7 @@ namespace CE
 
 	protected:
 
-		bool SerializeField(Stream* stream, Field* field, void* instance);
+		virtual bool SerializeField(Stream* stream, Field* field, void* instance);
 
 		TypeInfo* targetType = nullptr;
 		void* instance = nullptr;
@@ -39,7 +39,7 @@ namespace CE
 
 	protected:
 
-		bool DeserializeField(Stream* stream, Field* field, void* instance);
+		virtual bool DeserializeField(Stream* stream, Field* field, void* instance);
 
 		void SkipFieldValue(Stream* stream);
 

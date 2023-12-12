@@ -3,17 +3,12 @@
 namespace CE::RPI
 {
 
-	class CORERPI_API Scene final
+	class CORERPI_API DrawPacketBuilder final
 	{
 	public:
-
-		Scene();
-		~Scene();
 
 	private:
 
 	};
-
-	typedef Scene* ScenePtr;
     
 } // namespace CE::RPI

@@ -984,7 +984,8 @@ namespace CE
 			*stream >> objectUuid;
 			*stream >> packageUuid;
 			
-			if (packageUuid != 0)
+			// TODO: Better loading mechanism for external object references?
+			if (packageUuid != 0 && field->IsObjectField())
 			{
 				Package* refPackage = Package::LoadPackageByUuid(packageUuid);
 				if (refPackage != nullptr)

@@ -117,13 +117,14 @@ namespace CE
 
 		setBindings.Clear();
 		variableNames.Clear();
-
+		
 		for (int i = 0; i < desc.variables.GetSize(); i++)
 		{
 			const auto& variable = desc.variables[i];
-
+			
+			
 			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = variable.binding;
+			binding.binding = binding;
 			binding.descriptorCount = variable.arrayCount;
 			binding.stageFlags = 0;
 

@@ -3,17 +3,14 @@
 namespace CE::RPI
 {
 
-	class CORERPI_API Scene final
+	class CORERPI_API RPISystem final
 	{
 	public:
 
-		Scene();
-		~Scene();
-
 	private:
 
-	};
+		Array<ScenePtr> scenes{};
 
-	typedef Scene* ScenePtr;
+	};
     
 } // namespace CE::RPI
