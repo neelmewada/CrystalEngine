@@ -15,6 +15,8 @@
 #include "Misc/Defer.h"
 #include "Misc/Random.h"
 #include "Memory/Memory.h"
+#include "Memory/IAllocator.h"
+#include "Memory/SystemAllocator.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
 #include "PAL/Common/PlatformMisc.h"

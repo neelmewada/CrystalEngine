@@ -7,6 +7,8 @@ namespace CE::RHI
 	{
 	public:
 
+		DrawList& GetDrawListForTag(u8 tag);
+
 	private:
 
 		

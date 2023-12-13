@@ -2,6 +2,11 @@
 
 namespace CE::RHI
 {
+	enum DrawArgumentsType
+	{
+		DrawArgumentsIndexed = 0,
+	};
+
 	struct DrawIndexedArguments
 	{
 		u32 instanceCount = 0;
@@ -9,6 +14,24 @@ namespace CE::RHI
 		u32 vertexOffset = 0;
 		u32 indexCount = 0;
 		u32 firstIndex = 0;
+
+		inline bool IsValid() const
+		{
+			return instanceCount > 0 && indexCount > 0;
+		}
+	};
+
+	struct DrawArguments
+	{
+		DrawArguments()
+		{}
+		
+		DrawArguments(const DrawIndexedArguments& indexedArgs)
+			: indexedArgs(indexedArgs), type(DrawArgumentsIndexed)
+		{}
+
+		DrawArgumentsType type = DrawArgumentsIndexed;
+		DrawIndexedArguments indexedArgs{};
 	};
 
 	/// @brief A DrawItem is a draw call of one mesh in one pass. Multiple DrawItems are
@@ -18,7 +41,7 @@ namespace CE::RHI
 	{
 	public:
 
-		DrawIndexedArguments arguments{};
+		DrawArguments arguments{};
 
 		u8 stencilRef = 0;
 		u8 vertexBufferViewCount = 0;
@@ -26,13 +49,16 @@ namespace CE::RHI
 		u8 scissorCount = 0;
 		u8 viewportCount = 0;
 
-		/// @brief whether to render this DrawItem or not
+		/// @brief whether to render this DrawItem or not.
 		b8 enabled = true;
 
+		/// @brief The pipeline to use for this draw call.
 		RHI::IPipelineState* pipelineState = nullptr;
 
+		/// @brief Index buffer to bind for this draw call.
 		RHI::IndexBufferView* indexBufferView = nullptr;
 
+		/// @brief Array of vertex buffers to bind for this draw call.
 		RHI::VertexBufferView* vertexBufferViews = nullptr;
 
 		/// @brief Shader resource groups to be bound for this DrawItem.
@@ -54,6 +80,10 @@ namespace CE::RHI
 	struct DrawItemProperties
 	{
 		DrawItemProperties() = default;
+
+		DrawItemProperties(const DrawItem* item, const DrawFilterMask filterMask = DrawFilterMaskNullValue)
+			: item(item), drawFilterMask(filterMask)
+		{}
 
 		const DrawItem* item = nullptr;
 
