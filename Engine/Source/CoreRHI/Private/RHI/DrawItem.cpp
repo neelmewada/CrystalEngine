@@ -1,6 +1,6 @@
 #include "CoreRHI.h"
 
-namespace CE::RPI
+namespace CE::RHI
 {
     
 } // namespace CE::RPI

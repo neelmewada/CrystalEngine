@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE::RPI
+namespace CE::RHI
 {
 	template<typename T>
 	using Ptr = IntrusivePtr<T>;

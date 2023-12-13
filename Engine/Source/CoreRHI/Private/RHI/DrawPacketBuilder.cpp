@@ -1,11 +1,12 @@
-#include "CoreRPI.h"
+#include "CoreRHI.h"
 
-namespace CE::RPI
+namespace CE::RHI
 {
 
 	DrawPacket* DrawPacketBuilder::Build()
 	{
+		
 		return nullptr;
 	}
 
-} // namespace CE::RPI
+} // namespace CE::RHI

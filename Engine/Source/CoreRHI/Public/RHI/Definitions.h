@@ -46,9 +46,6 @@ namespace CE::RHI
         /// Max number of vertex attributes
         MaxVertexAttribs = 8,
 
-        /// Max number of shader resource groups (aka no. of descriptor sets for vulkan)
-        MaxShaderResourceGroups = 4,
-
         /// Max number of subpasses in a single renderpass
         MaxSubpasses = 4,
     };
@@ -312,11 +309,11 @@ namespace CE::RHI
         Compute,
     };
 
-	struct ViewportRect
+	struct ViewportState
 	{
-		ViewportRect() = default;
+		ViewportState() = default;
 
-		ViewportRect(float x, float y,
+		ViewportState(float x, float y,
 			float width, float height,
 			float minDepth = 0.0f, float maxDepth = 1.0f) 
 			: x(x), y(y) , width(width), height(height), minDepth(minDepth), maxDepth(maxDepth)
@@ -327,11 +324,11 @@ namespace CE::RHI
 		float minDepth = 0.0f, maxDepth = 1.0f;
 	};
 
-	struct ScissorRect
+	struct ScissorState
 	{
-		ScissorRect() = default;
+		ScissorState() = default;
 
-		ScissorRect(float x, float y, float width, float height)
+		ScissorState(float x, float y, float width, float height)
 			: x(x), y(y), width(width), height(height)
 		{}
 

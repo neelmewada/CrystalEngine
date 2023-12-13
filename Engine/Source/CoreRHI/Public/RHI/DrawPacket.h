@@ -1,12 +1,12 @@
 #pragma once
 
-namespace CE::RPI
+namespace CE::RHI
 {
 
 	/// @brief DrawPacket is a collection of DrawItems that represent a single mesh. Each DrawItem represent a single pass on the mesh
 	/// and is associated with a DrawListTag which denotes the DrawList the DrawItem is associated to. DrawListTag can be used to
 	/// determine the pass for ex: Shadow Pass, Forward+ Pass, Transparent pass, etc.
-	class CORERPI_API DrawPacket final : public IntrusiveBase
+	class CORERHI_API DrawPacket final : public IntrusiveBase
 	{
 	public:
 

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE::RPI
+namespace CE::RHI
 {
 	struct DrawIndexedArguments
 	{
@@ -23,8 +23,8 @@ namespace CE::RPI
 		u8 stencilRef = 0;
 		u8 vertexBufferViewCount = 0;
 		u8 shaderResourceGroupCount = 0;
-		u8 scissorRectCount = 0;
-		u8 viewportRectCount = 0;
+		u8 scissorCount = 0;
+		u8 viewportCount = 0;
 
 		/// @brief whether to render this DrawItem or not
 		b8 enabled = true;
@@ -39,12 +39,12 @@ namespace CE::RPI
 		RHI::ShaderResourceGroup* shaderResourceGroups = nullptr;
 
 		/// @brief A unique shader resource group that is local to this DrawItem and
-		/// is not shared outside. Usually a PerDraw SRG.
+		/// is not used outside. Usually a PerDraw SRG.
 		RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
 
-		RHI::ScissorRect* scissorRects = nullptr;
+		RHI::ScissorState* scissors = nullptr;
 
-		RHI::ViewportRect* viewportRects = nullptr;
+		RHI::ViewportState* viewports = nullptr;
 
 	};
 
