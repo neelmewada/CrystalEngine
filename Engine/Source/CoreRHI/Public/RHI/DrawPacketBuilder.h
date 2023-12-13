@@ -46,6 +46,7 @@ namespace CE::RHI
 
 		DrawArguments drawArguments;
 		IndexBufferView indexBufferView{};
+        DrawListMask drawListMask{};
 
 		FixedArray<ScissorState, Limits::Pipeline::MaxColorAttachmentCount> scissors{};
 		u32 scissorCount = 0;

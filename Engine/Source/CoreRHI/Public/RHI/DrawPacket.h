@@ -22,6 +22,8 @@ namespace CE::RHI
 		inline SIZE_T GetDrawItemCount() { return drawItemCount; }
 
 		IndexBufferView indexBufferView{};
+        
+        DrawListMask drawListMask{};
 
 		u8 drawItemCount = 0;
 		u8 vertexBufferViewCount = 0;
