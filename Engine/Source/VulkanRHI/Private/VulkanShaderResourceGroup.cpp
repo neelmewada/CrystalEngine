@@ -193,22 +193,22 @@ namespace CE
 		bufferVariablesBoundByBindingSlot[bindingSlot] = bufferInfo;
 	}
 
-	int VulkanShaderResourceGroup::GetFrequencyId()
+	int VulkanShaderResourceGroup::GetFrequencyId() const
 	{
 		return setNumber;
 	}
 
-	Name VulkanShaderResourceGroup::GetSRGName()
+	Name VulkanShaderResourceGroup::GetSRGName() const
 	{
 		return srgName;
 	}
 
-	RHI::SRGType VulkanShaderResourceGroup::GetSRGType()
+	RHI::SRGType VulkanShaderResourceGroup::GetSRGType() const
 	{
 		return srgType;
 	}
 
-	const RHI::ShaderResourceGroupDesc& VulkanShaderResourceGroup::GetDesc()
+	const RHI::ShaderResourceGroupDesc& VulkanShaderResourceGroup::GetDesc() const
 	{
 		return desc;
 	}

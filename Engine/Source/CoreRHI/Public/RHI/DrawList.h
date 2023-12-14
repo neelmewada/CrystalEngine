@@ -12,13 +12,17 @@ namespace CE::RHI
 	{
 	public:
 
+		void Clear();
+
+		void AddDrawItem(DrawItemProperties drawItemProperties);
+
+		void Merge(const DrawList& other);
 
 	private:
 
-		DrawListTag drawListTag = 0;
-
 		HashMap<RHI::IPipelineState*, Array<DrawItemProperties>> drawItemsByPipeline{};
 
+		friend class DrawListContext;
 	};
 
 	typedef FixedArray<DrawList, Limits::Pipeline::DrawListTagCount> DrawListsByTag;

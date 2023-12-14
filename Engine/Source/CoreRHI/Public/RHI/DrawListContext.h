@@ -9,10 +9,14 @@ namespace CE::RHI
 
 		DrawList& GetDrawListForTag(u8 tag);
 
-	private:
+		void AddDrawPacket(DrawPacket* drawPacket);
 
+		void Finalize();
+
+	private:
 		
-		DrawListsByTag drawListsByTag{};
+		ThreadLocalContext<DrawListsByTag> threadDrawLists{};
+		DrawListsByTag mergedDrawListsByTag{};
 		DrawListMask drawListMask{};
 	};
     

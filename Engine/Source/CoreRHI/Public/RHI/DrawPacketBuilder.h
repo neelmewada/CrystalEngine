@@ -54,8 +54,8 @@ namespace CE::RHI
 		u32 viewportCount = 0;
 		FixedArray<ShaderResourceGroup*, Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroups{};
 		u32 shaderResourceGroupCount = 0;
-		FixedArray<DrawItemRequest, DrawItemCountMax> drawItems{};
-		u32 drawItemCount = 0;
+		FixedArray<DrawItemRequest, DrawItemCountMax> drawRequests{};
+		u32 drawRequestsCount = 0;
 		u32 vertexBufferViewCount = 0;
 
 		SIZE_T byteOffsetCurrent = 0;

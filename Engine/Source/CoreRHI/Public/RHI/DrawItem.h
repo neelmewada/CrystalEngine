@@ -62,15 +62,15 @@ namespace CE::RHI
 		RHI::VertexBufferView* vertexBufferViews = nullptr;
 
 		/// @brief Shader resource groups to be bound for this DrawItem.
-		RHI::ShaderResourceGroup* shaderResourceGroups = nullptr;
+		const RHI::ShaderResourceGroup* const* shaderResourceGroups = nullptr;
 
 		/// @brief A unique shader resource group that is local to this DrawItem and
 		/// is not used outside. Usually a PerDraw SRG.
-		RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
+		const RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
 
-		RHI::ScissorState* scissors = nullptr;
+		const RHI::ScissorState* scissors = nullptr;
 
-		RHI::ViewportState* viewports = nullptr;
+		const RHI::ViewportState* viewports = nullptr;
 
 	};
 

@@ -48,13 +48,13 @@ namespace CE
 
 		virtual bool Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) override;
 
-		virtual int GetFrequencyId() override;
+		virtual int GetFrequencyId() const override;
 
-		virtual Name GetSRGName() override;
+		virtual Name GetSRGName() const override;
 
-		virtual RHI::SRGType GetSRGType() override;
+		virtual RHI::SRGType GetSRGType() const override;
 
-		virtual const RHI::ShaderResourceGroupDesc& GetDesc() override;
+		virtual const RHI::ShaderResourceGroupDesc& GetDesc() const override;
 
 		VkDescriptorSet GetDescriptorSet() const;
 

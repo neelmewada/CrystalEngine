@@ -51,32 +51,32 @@ namespace CE::RHI
 
 	void DrawPacketBuilder::AddDrawItem(const DrawItemRequest& request)
 	{
-		if (drawItemCount >= drawItems.GetSize())
+		if (drawRequestsCount >= drawRequests.GetSize())
 			return;
 		if (request.vertexBufferViews.IsEmpty() || request.pipelineState == nullptr)
 			return;
 		
 		vertexBufferViewCount += request.vertexBufferViews.GetSize();
         drawListMask.Set(request.drawItemTag);
-		drawItems[drawItemCount++] = request;
+		drawRequests[drawRequestsCount++] = request;
 	}
 
 	DrawPacket* DrawPacketBuilder::Build()
 	{
-		if (drawItemCount == 0)
+		if (drawRequestsCount == 0)
 			return nullptr;
 
 		SIZE_T drawPacketOffset = AllocateOffset(sizeof(DrawPacket), alignof(DrawPacket));
 
-		SIZE_T drawItemsOffset = AllocateOffset(sizeof(DrawItem) * drawItemCount, alignof(DrawItem));
+		SIZE_T drawItemsOffset = AllocateOffset(sizeof(DrawItem) * drawRequestsCount, alignof(DrawItem));
 
-		SIZE_T drawListTagsOffset = AllocateOffset(sizeof(DrawListTag) * drawItemCount, alignof(DrawListTag));
+		SIZE_T drawListTagsOffset = AllocateOffset(sizeof(DrawListTag) * drawRequestsCount, alignof(DrawListTag));
 
-		SIZE_T drawFilterMasksOffset = AllocateOffset(sizeof(DrawFilterMask) * drawItemCount, alignof(DrawFilterMask));
+		SIZE_T drawFilterMasksOffset = AllocateOffset(sizeof(DrawFilterMask) * drawRequestsCount, alignof(DrawFilterMask));
 
 		SIZE_T shaderResourceGroupsOffset = AllocateOffset(sizeof(ShaderResourceGroup*) * shaderResourceGroupCount, alignof(ShaderResourceGroup*));
 
-		SIZE_T uniqueShaderResourceGroupOffset = AllocateOffset(sizeof(ShaderResourceGroup*) * drawItemCount, alignof(ShaderResourceGroup*));
+		SIZE_T uniqueShaderResourceGroupOffset = AllocateOffset(sizeof(ShaderResourceGroup*) * drawRequestsCount, alignof(ShaderResourceGroup*));
 
 		SIZE_T vertexBufferViewsOffset = AllocateOffset(sizeof(VertexBufferView) * vertexBufferViewCount, alignof(VertexBufferView));
 
@@ -84,7 +84,7 @@ namespace CE::RHI
 
 		SIZE_T viewportsOffset = AllocateOffset(sizeof(ViewportState) * viewportCount, alignof(ViewportState));
 
-		SIZE_T totalByteCount = vertexBufferViewCount;
+		SIZE_T totalByteCount = byteOffsetCurrent;
 
 		u8* allocationData = (u8*)allocator->AlignedAlloc(totalByteCount, alignof(DrawPacket));
 
@@ -106,17 +106,17 @@ namespace CE::RHI
             drawPacket->shaderResourceGroupCount = shaderResourceGroupCount;
         }
         
-        if (drawItemCount > 0)
+        if (drawRequestsCount > 0)
         {
             const ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<const ShaderResourceGroup**>(allocationData + shaderResourceGroupsOffset);
             
-            for (int i = 0; i < drawItemCount; i++)
+            for (int i = 0; i < drawRequestsCount; i++)
             {
-                shaderResourceGroups[i] = this->drawItems[i].uniqueShaderResourceGroup;
+                shaderResourceGroups[i] = this->drawRequests[i].uniqueShaderResourceGroup;
             }
             
             drawPacket->uniqueShaderResourceGroups = shaderResourceGroups;
-            drawPacket->uniqueShaderResourceGroupCount = drawItemCount;
+            drawPacket->uniqueShaderResourceGroupCount = drawRequestsCount;
         }
         
         if (scissorCount > 0)
@@ -145,41 +145,28 @@ namespace CE::RHI
             drawPacket->viewportCount = viewportCount;
         }
         
-        if (vertexBufferViewCount > 0)
-        {
-            auto vertexBufferViews = reinterpret_cast<VertexBufferView*>(allocationData + vertexBufferViewsOffset);
-            
-            for (int i = 0; i < vertexBufferViewCount; i++)
-            {
-                vertexBufferViewsOffset[i] = this->viewports[i];
-            }
-            
-            drawPacket->vertexBufferViews = vertexBufferViews;
-            drawPacket->vertexBufferViewCount = vertexBufferViewCount;
-        }
-        
         auto drawItems = reinterpret_cast<DrawItem*>(allocationData + drawItemsOffset);
         auto drawListTags = reinterpret_cast<DrawListTag*>(allocationData + drawListTagsOffset);
-        auto drawFilterMasks reinterpret_cast<DrawFilterMask*>(allocationData + drawFilterMasksOffset);
+        auto drawFilterMasks = reinterpret_cast<DrawFilterMask*>(allocationData + drawFilterMasksOffset);
         
         drawPacket->drawItems = drawItems;
         drawPacket->drawListTags = drawListTags;
         drawPacket->drawFilterMasks = drawFilterMasks;
         
-        for (int i = 0; i < drawItemCount; i++)
+        for (int i = 0; i < drawRequestsCount; i++)
         {
-            const DrawItemRequest& drawRequest = drawItems[i];
+            const DrawItemRequest& drawRequest = this->drawRequests[i];
             
             drawListTags[i] = drawRequest.drawItemTag;
             drawFilterMasks[i] = drawRequest.drawFilterMask;
             
             DrawItem& drawItem = drawItems[i];
             drawItem.enabled = true; // TODO: Add enabled flag
-            drawItem.indexBufferView = indexBufferView;
-            drawItem.vertexBufferViewCount = drawPacket->vertexBufferViewCount;
-            drawItem.vertexBufferViews = drawPacket->vertexBufferViews;
+            drawItem.indexBufferView = &drawPacket->indexBufferView;
+            drawItem.vertexBufferViewCount = 0;
+			drawItem.vertexBufferViews = nullptr;
             drawItem.scissorCount = drawPacket->scissorCount;
-            drawItem.scissors = drawPacket->scissors;
+			drawItem.scissors = drawPacket->scissors;
             drawItem.viewportCount = drawPacket->viewportCount;
             drawItem.viewports = drawPacket->viewports;
             drawItem.shaderResourceGroups = drawPacket->shaderResourceGroups;
@@ -189,6 +176,31 @@ namespace CE::RHI
             drawItem.pipelineState = drawRequest.pipelineState;
             drawItem.arguments = drawArguments;
         }
+
+		if (vertexBufferViewCount > 0)
+		{
+			auto vertexBufferViews = reinterpret_cast<VertexBufferView*>(allocationData + vertexBufferViewsOffset);
+
+			drawPacket->vertexBufferViews = vertexBufferViews;
+			drawPacket->vertexBufferViewCount = vertexBufferViewCount;
+
+			for (int i = 0; i < drawRequestsCount; i++)
+			{
+				const DrawItemRequest& drawRequest = this->drawRequests[i];
+
+				if (!drawRequest.vertexBufferViews.IsEmpty())
+				{
+					DrawItem& drawItem = drawItems[i];
+					drawItem.vertexBufferViews = vertexBufferViews;
+					drawItem.vertexBufferViewCount = vertexBufferViewCount;
+
+					for (const VertexBufferView& vertexBufferView : drawRequest.vertexBufferViews)
+					{
+						*vertexBufferViews++ = vertexBufferView;
+					}
+				}
+			}
+		}
         
 		return drawPacket;
 	}

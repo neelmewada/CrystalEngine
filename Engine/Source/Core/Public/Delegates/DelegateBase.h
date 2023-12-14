@@ -9,8 +9,6 @@ namespace std
 #if PLATFORM_MAC
     template <int _Np>
     using _Ph = struct std::placeholders::__ph<_Np>;
-#else
-
 #endif
 }
 
