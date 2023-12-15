@@ -12,9 +12,6 @@ namespace CE
         VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
             u32 width, u32 height,
             bool isFullscreen, const RHI::RenderTargetLayout& rtLayout);
-#if PAL_TRAIT_QT_SUPPORTED
-        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RenderTargetLayout& rtLayout);
-#endif
         virtual ~VulkanViewport();
 
         virtual RHI::RenderTarget* GetRenderTarget() override;

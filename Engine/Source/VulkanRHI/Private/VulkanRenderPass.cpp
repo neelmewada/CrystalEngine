@@ -82,8 +82,8 @@ namespace CE
 
     private:
         VulkanDevice* device = nullptr;
-        VkSubpassDescription subpasses[RHI::MaxSubpasses];
-        VkSubpassDependency dependencies[(u32)RHI::MaxSubpasses + 2];
+		VkSubpassDescription subpasses[RHI::MaxSubpasses] = {};
+		VkSubpassDependency dependencies[(u32)RHI::MaxSubpasses + 2] = {};
     };
 
     VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout)

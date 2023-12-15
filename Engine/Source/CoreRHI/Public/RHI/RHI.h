@@ -97,20 +97,6 @@ namespace CE::RHI
     };
 
     CORERHI_API extern DynamicRHI* gDynamicRHI;
-
-    class CORERHI_API RenderPass : public Resource
-    {
-    protected:
-        RenderPass() : Resource(ResourceType::RenderPass)
-        {}
-    public:
-        virtual ~RenderPass() = default;
-
-        // - Public API -
-
-        
-
-    };
     
 } // namespace CE
 

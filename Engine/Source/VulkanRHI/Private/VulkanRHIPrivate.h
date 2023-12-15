@@ -33,15 +33,15 @@ namespace CE
         u32 width = 0, height = 0;
         u32 presentationRTIndex = -1;
 
-        Color clearColors[RHI::MaxSimultaneousRenderOutputs] = {};
+        Color clearColors[RHI::Limits::Pipeline::MaxSimultaneousFramesInFlight] = {};
 
-        VkFormat colorFormats[RHI::MaxSimultaneousRenderOutputs] = {};
+        VkFormat colorFormats[RHI::Limits::Pipeline::MaxSimultaneousFramesInFlight] = {};
         VkFormat depthFormat = {};
 
-        VkAttachmentReference colorReferences[RHI::MaxSimultaneousRenderOutputs] = {};
+        VkAttachmentReference colorReferences[RHI::Limits::Pipeline::MaxSimultaneousFramesInFlight] = {};
         VkAttachmentReference depthStencilReference = {};
 
-        VkAttachmentDescription attachmentDesc[RHI::MaxSimultaneousRenderOutputs + 1]; // countof(ColorAttachments) + 1 depth attachment
+        VkAttachmentDescription attachmentDesc[RHI::Limits::Pipeline::MaxSimultaneousFramesInFlight + 1]; // countof(ColorAttachments) + 1 depth attachment
 
         u8 colorAttachmentCount = 0;
 
@@ -101,7 +101,6 @@ namespace CE
     struct VulkanFrame
     {
         List<VulkanTexture*> textures{};
-        //List<VkSampler> samplers{};
 		List<VulkanSampler*> samplers{};
         VulkanFrameBuffer* framebuffer = nullptr;
     };

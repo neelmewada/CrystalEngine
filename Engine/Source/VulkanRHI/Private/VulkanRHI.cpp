@@ -525,7 +525,7 @@ namespace CE
         frameBufferCI.renderPass = renderTarget->GetVulkanRenderPass()->GetHandle();
 
         frameBufferCI.layers = 1;
-
+		
         if (vkCreateFramebuffer(device->GetHandle(), &frameBufferCI, nullptr, &frameBuffer) != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");

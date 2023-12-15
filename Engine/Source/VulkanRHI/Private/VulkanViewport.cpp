@@ -47,16 +47,6 @@ namespace CE
         CE_LOG(Info, All, "Vulkan Viewport created");
     }
 
-#if PAL_TRAIT_QT_SUPPORTED
-    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, void* qtWindowHandle, const RenderTargetLayout& rtLayout)
-        : vulkanRHI(vulkanRHI), device(device), windowHandle(qtWindowHandle), isQtWindow(true)
-    {
-        swapChain = nullptr;
-        renderTarget = nullptr;
-
-    }
-#endif
-
     VulkanViewport::~VulkanViewport()
     {
         PlatformApplication::Get()->onWindowResized.RemoveDelegateInstance(windowResizeDelegateHandle);
