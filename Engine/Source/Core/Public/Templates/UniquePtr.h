@@ -15,6 +15,11 @@ namespace CE
 
 		}
 
+		UniquePtr(std::unique_ptr<T>&& move) : impl(std::move(move))
+		{
+
+		}
+
 		inline void Reset(T* ptr)
 		{
 			impl.reset(ptr);
@@ -43,5 +48,11 @@ namespace CE
 	private:
 		std::unique_ptr<T> impl = nullptr;
 	};
+
+	template<typename T, typename... TArgs>
+	UniquePtr<T> MakeUnique(TArgs&&... args)
+	{
+		return UniquePtr<T>(new T(args...));
+	}
     
 } // namespace CE

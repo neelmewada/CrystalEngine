@@ -158,7 +158,7 @@ namespace CE
         }
 
         template<typename... Args>
-        CE_INLINE void EmplaceBack(Args... args)
+        CE_INLINE void EmplaceBack(Args&&... args)
         {
             Impl.emplace_back(args...);
         }
@@ -642,7 +642,7 @@ namespace CE
 		}
 
         template<typename... Args>
-        CE_INLINE void EmplaceBack(Args... args)
+        CE_INLINE void EmplaceBack(Args&&... args)
         {
             Super::Impl.emplace_back(args...);
         }

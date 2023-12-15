@@ -2,7 +2,7 @@
 
 namespace CE::RHI
 {
-
+	class IPipelineState;
 	class Viewport;
 
 	class CORERHI_API CommandList : public Resource
@@ -19,6 +19,15 @@ namespace CE::RHI
 
 		virtual void WaitForExecution() = 0;
 
+		// - Command List API -
+
+		virtual void Begin() = 0;
+		virtual void End() = 0;
+
+		virtual void BindPipeline(RHI::IPipelineState* pipeline) = 0;
+
+		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) = 0;
+
 	};
 
 	class CORERHI_API GraphicsCommandList : public CommandList
@@ -34,10 +43,7 @@ namespace CE::RHI
 
 		virtual CommandListType GetCommandListType() override final { return CommandListType::Graphics; }
 
-		// - Command List API -
-
-		virtual void Begin() = 0;
-		virtual void End() = 0;
+		// - Graphics Command List API -
 
 		virtual void SetScissorRects(u32 scissorCount, const RHI::ScissorState* scissors) = 0;
 		virtual void SetViewportRects(u32 viewportCount, const RHI::ViewportState* viewports) = 0;
@@ -46,10 +52,6 @@ namespace CE::RHI
 		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets) = 0;
 
 		virtual void BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset) = 0;
-
-		virtual void BindPipeline(RHI::IPipelineState* pipeline) = 0;
-
-		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) = 0;
 
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance) = 0;
 

@@ -2,6 +2,8 @@
 
 namespace CE::RPI
 {
+	class ShaderResourceGroup;
+	class RenderTarget;
     
 	class CORERPI_API View final
 	{

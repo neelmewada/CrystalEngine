@@ -387,8 +387,13 @@ namespace CE
     inline SIZE_T GetHash(const String& Value)
     {
         return CalculateHash(Value.GetCString(), Value.GetLength());
-    }    
-   
+    }
+
+	template<SIZE_T Bits>
+	inline String BitSet<Bits>::ToString() const
+	{
+		return impl.to_string();
+	}
 }
 
 /// fmt user-defined Formatter for CE::String

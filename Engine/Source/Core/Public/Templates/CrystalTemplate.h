@@ -10,6 +10,8 @@
 
 namespace CE
 {
+	class String;
+
 	template<typename T>
 	struct NumericLimits
 	{
@@ -79,10 +81,7 @@ namespace CE
 			return impl.to_ullong();
 		}
 
-		inline String ToString() const
-		{
-			return impl.to_string();
-		}
+		String ToString() const;
 
 	private:
 
@@ -112,5 +111,5 @@ namespace CE
         a = MoveTemp(b);
         b = MoveTemp(aTemp);
     }
-    
+
 } // namespace CE

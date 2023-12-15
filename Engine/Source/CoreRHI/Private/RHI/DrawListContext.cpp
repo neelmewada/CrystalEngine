@@ -25,6 +25,7 @@ namespace CE::RHI
 			DrawListTag drawListTag = drawPacket->drawListTags[i];
 
 			auto& drawList = threadDrawListsByTag[drawListTag];
+			threadDrawListsByTag[drawListTag].listTag = drawListTag;
 			drawList.AddDrawItem(drawItemProperties);
 		}
 	}
@@ -34,6 +35,7 @@ namespace CE::RHI
 		for (int i = 0; i < mergedDrawListsByTag.GetSize(); i++)
 		{
 			mergedDrawListsByTag[i].Clear();
+			mergedDrawListsByTag[i].listTag = (u8)i;
 		}
 
 		threadDrawLists.ForEach([&](DrawListsByTag& drawLists)

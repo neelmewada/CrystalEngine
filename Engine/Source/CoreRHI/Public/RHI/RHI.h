@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "RHIResources.h"
+#include "Resources.h"
 
 namespace CE
 {

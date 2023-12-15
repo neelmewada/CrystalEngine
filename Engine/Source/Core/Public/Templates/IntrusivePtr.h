@@ -36,6 +36,11 @@ namespace CE
 	{
 	public:
 
+		virtual ~IntrusiveBaseRefCnt()
+		{
+
+		}
+
 		inline u32 GetCount() const
 		{
 			return refCount;
@@ -49,11 +54,6 @@ namespace CE
 
 		IntrusiveBaseRefCnt(const IntrusiveBaseRefCnt&) = delete;
 		IntrusiveBaseRefCnt(IntrusiveBaseRefCnt&&) = delete;
-
-		virtual ~IntrusiveBaseRefCnt()
-		{
-			
-		}
 
 	private:
 

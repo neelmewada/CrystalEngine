@@ -696,7 +696,7 @@ namespace CE
         }
     }
 
-	void VulkanGraphicsCommandList::SetScissorRects(u32 scissorCount, const RHI::ScissorRect* scissors)
+	void VulkanGraphicsCommandList::SetScissorRects(u32 scissorCount, const RHI::ScissorState* scissors)
 	{
 		static Array<VkRect2D> scissorRects{};
 		if (scissorRects.GetSize() < scissorCount)
@@ -718,7 +718,7 @@ namespace CE
 		}
 	}
 
-	void VulkanGraphicsCommandList::SetViewportRects(u32 viewportCount, const RHI::ViewportRect* viewports)
+	void VulkanGraphicsCommandList::SetViewportRects(u32 viewportCount, const RHI::ViewportState* viewports)
 	{
 		static Array<VkViewport> viewportArray{};
 		if (viewportArray.GetSize() < viewportCount)

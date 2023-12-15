@@ -512,4 +512,4 @@ namespace CE::RHI
 
 } // namespace CE
 
-#include "RHIDefinitions.rtti.h"
+#include "Definitions.rtti.h"

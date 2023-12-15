@@ -2,7 +2,9 @@
 
 namespace CE
 {
-    template<typename TBaseClass = CE::Object> requires TIsBaseClassOf<CE::Object, TBaseClass>::Value
+	class Object;
+
+    template<typename TBaseClass = CE::Object>
 	struct SubClassType
 	{
 	public:
@@ -153,7 +155,7 @@ namespace CE
 
 	private:
 
-		inline void UpdateTypePtr()
+		inline void UpdateTypePtr() const
 		{
 			if (type == nullptr && classTypeName.IsValid())
 				type = ClassType::FindClass(classTypeName);
@@ -171,7 +173,7 @@ namespace CE
 			}
 		}
 
-		ClassType* type = nullptr;
+		mutable ClassType* type = nullptr;
 		ClassType* baseClassType = nullptr;
 		Name classTypeName = "";
 	};

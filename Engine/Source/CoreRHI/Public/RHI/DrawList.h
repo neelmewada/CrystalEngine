@@ -20,6 +20,8 @@ namespace CE::RHI
 
 	private:
 
+		DrawListTag listTag = DrawListTag::NullValue;
+
 		HashMap<RHI::IPipelineState*, Array<DrawItemProperties>> drawItemsByPipeline{};
 
 		friend class DrawListContext;

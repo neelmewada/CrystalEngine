@@ -122,9 +122,8 @@ namespace CE
 		{
 			const auto& variable = desc.variables[i];
 			
-			
 			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = binding;
+			binding.binding = binding; // TODO: Find an alternative way to get bindingSlot number from shader reflection
 			binding.descriptorCount = variable.arrayCount;
 			binding.stageFlags = 0;
 
@@ -172,7 +171,7 @@ namespace CE
 		sharedDescriptorSet = nullptr;
 	}
 
-	bool VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0)
+	bool VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset, SIZE_T size)
 	{
 		// Cannot change bindings once an SRG is committed
 		if (isCommitted)

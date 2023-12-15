@@ -7,9 +7,6 @@
 // ***********************************
 // CoreRPI Includes
 
-#include "Handle.h"
-#include "Limits.h"
-
 #include "RenderTarget.h"
 #include "View.h"
 #include "Scene.h"

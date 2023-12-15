@@ -9,6 +9,8 @@ namespace CE::RHI
 
 		DrawList& GetDrawListForTag(u8 tag);
 
+		/// @brief Thread safe function to add a draw package to the DrawList.
+		/// @param drawPacket to add.
 		void AddDrawPacket(DrawPacket* drawPacket);
 
 		void Finalize();

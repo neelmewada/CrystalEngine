@@ -84,7 +84,7 @@ namespace CE::RHI
 				{
 					containerId = id;
 					storagePtr = storageList[index];
-					return storagePtr;
+					return *storagePtr;
 				}
 			}
 
@@ -92,8 +92,8 @@ namespace CE::RHI
 			{
 				LockGuard<SharedMutex> lock{ mutex };
 				threadIdList.EmplaceBack(curThreadId);
-				storageList.EmplaceBack(UniquePtr<Storage>(new Storage()));
-
+				storageList.EmplaceBack(new Storage());
+				
 				Storage& storage = *storageList.Top();
 				initFunction(storage);
 				containerId = id;

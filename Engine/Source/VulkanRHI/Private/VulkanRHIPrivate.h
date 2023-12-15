@@ -218,8 +218,8 @@ namespace CE
         virtual void Begin() override;
         virtual void End() override;
 
-		virtual void SetScissorRects(u32 scissorCount, const RHI::ScissorRect* scissors) override;
-		virtual void SetViewportRects(u32 viewportCount, const RHI::ViewportRect* viewports) override;
+		virtual void SetScissorRects(u32 scissorCount, const RHI::ScissorState* scissors) override;
+		virtual void SetViewportRects(u32 viewportCount, const RHI::ViewportState* viewports) override;
 
 		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers) override;
 		virtual void BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets) override;
