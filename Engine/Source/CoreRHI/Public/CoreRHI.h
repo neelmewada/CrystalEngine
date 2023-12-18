@@ -29,6 +29,9 @@
 #include "RHI/DrawPacketBuilder.h"
 #include "RHI/DrawListContext.h"
 
+// Frame
+#include "RHI/FrameAttachment.h"
+
 namespace CE
 {
     

@@ -234,6 +234,7 @@ namespace CE
 
 		// - Render Pass -
 
+		pipelineCI.subpass = 0;
 		pipelineCI.renderPass = renderTarget->renderPass->GetHandle();
 
 		// - Pipeline Layout -
