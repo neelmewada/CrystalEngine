@@ -5,6 +5,7 @@ namespace CE::RHI
 	enum DrawArgumentsType
 	{
 		DrawArgumentsIndexed = 0,
+		DrawArgumentsLinear = 1,
 	};
 
 	struct DrawIndexedArguments
@@ -21,6 +22,19 @@ namespace CE::RHI
 		}
 	};
 
+	struct DrawLinearArguments
+	{
+		u32 instanceCount = 0;
+		u32 firstInstance = 0;
+		u32 vertexCount = 0;
+		u32 vertexOffset = 0;
+
+		inline bool IsValid() const
+		{
+			return instanceCount > 0 && vertexCount > 0;
+		}
+	};
+
 	struct DrawArguments
 	{
 		DrawArguments()
@@ -30,8 +44,16 @@ namespace CE::RHI
 			: indexedArgs(indexedArgs), type(DrawArgumentsIndexed)
 		{}
 
+		DrawArguments(const DrawLinearArguments& linearArgs)
+			: linearArgs(linearArgs), type(DrawArgumentsLinear)
+		{}
+
 		DrawArgumentsType type = DrawArgumentsIndexed;
-		DrawIndexedArguments indexedArgs{};
+		union
+		{
+			DrawIndexedArguments indexedArgs{};
+			DrawLinearArguments linearArgs;
+		};
 	};
 
 	/// @brief A DrawItem is a draw call of one mesh in one pass. Multiple DrawItems are
@@ -46,6 +68,7 @@ namespace CE::RHI
 		u8 stencilRef = 0;
 		u8 vertexBufferViewCount = 0;
 		u8 shaderResourceGroupCount = 0;
+		u8 rootConstantSize = 0;
 		u8 scissorCount = 0;
 		u8 viewportCount = 0;
 
@@ -60,6 +83,9 @@ namespace CE::RHI
 
 		/// @brief Array of vertex buffers to bind for this draw call.
 		RHI::VertexBufferView* vertexBufferViews = nullptr;
+
+		/// @brief Array of root constants to bind.
+		const u8* rootConstants = nullptr;
 
 		/// @brief Shader resource groups to be bound for this DrawItem.
 		const RHI::ShaderResourceGroup* const* shaderResourceGroups = nullptr;

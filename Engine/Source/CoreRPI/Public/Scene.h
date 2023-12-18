@@ -12,6 +12,8 @@ namespace CE::RPI
 
 	private:
 
+		Array<RenderPipelinePtr> renderPipelines{};
+
 	};
 
 	typedef Scene* ScenePtr;

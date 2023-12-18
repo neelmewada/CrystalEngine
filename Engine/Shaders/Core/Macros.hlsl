@@ -80,4 +80,10 @@
 #define SRG_PerObject(type) SRG(type, PerObject_Frequency)
 #define SRG_PerDraw(type) SRG(type, PerDraw_Frequency)
 
+#ifdef __spirv__
+#define SUBPASS_INPUT(subpass) [[vk::input_attachment_index(subpass)]]
+#else
+#define SUBPASS_INPUT(subpass)
+#endif
+
 #endif // __MACROS_HLSL__

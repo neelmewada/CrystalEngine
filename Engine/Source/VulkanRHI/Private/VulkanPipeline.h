@@ -4,9 +4,14 @@
 
 namespace CE
 {
+	class VulkanPipeline;
+
 	class VulkanPipelineLayout : public RHI::IPipelineLayout
 	{
 	public:
+
+		VulkanPipelineLayout(VulkanDevice* device, VulkanPipeline* copyFrom);
+
 		VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType);
 		virtual ~VulkanPipelineLayout();
 
@@ -20,11 +25,17 @@ namespace CE
 			return handle;
 		}
 
+		void CopyFrom(VulkanDevice* device, VulkanPipeline* copyFrom);
+
 	private:
 		VulkanDevice* device = nullptr;
 		VkPipelineLayout handle = nullptr;
 		
 		RHI::PipelineType pipelineType = RHI::PipelineType::Graphics;
+
+		List<VkDescriptorSetLayout> setLayouts{};
+		List<VkPushConstantRange> pushConstantRanges{};
+		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
 
 		friend class VulkanGraphicsPipeline;
 	};
@@ -41,8 +52,11 @@ namespace CE
 		VulkanPipelineLayout* pipelineLayout = nullptr;
 
 		List<VkDescriptorSetLayout> setLayouts{};
+		List<VkPushConstantRange> pushConstantRanges{};
+		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
 
 		friend class VulkanGraphicsCommandList;
+		friend class VulkanPipelineLayout;
     };
 
 
@@ -78,6 +92,7 @@ namespace CE
 	private:
 
 		friend class VulkanGraphicsCommandList;
+		friend class VulkanPipelineLayout;
 	};
     
 } // namespace CE::Editor

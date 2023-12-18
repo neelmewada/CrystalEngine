@@ -247,6 +247,7 @@ namespace CE::RHI
         SampledImage = BIT(0),
         ColorAttachment = BIT(1),
         DepthStencilAttachment = BIT(2),
+		InputAttachment = BIT(3)
     };
     ENUM_CLASS_FLAGS(TextureUsageFlags);
 

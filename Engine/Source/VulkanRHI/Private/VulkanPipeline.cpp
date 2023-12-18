@@ -245,12 +245,13 @@ namespace CE
 		pipelineLayoutCI.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
 		setLayouts.Clear();
+		setLayoutBindingsMap.Clear();
 
 		for (int i = 0; i < desc.shaderResourceGroups.GetSize(); i++)
 		{
 			auto srg = desc.shaderResourceGroups[i];
 
-			List<VkDescriptorSetLayoutBinding> setLayoutBindings{};
+			Array<VkDescriptorSetLayoutBinding> setLayoutBindings{};
 
 			for (const auto& variable : srg.variables)
 			{
@@ -291,6 +292,8 @@ namespace CE
 				});
 			}
 
+			setLayoutBindingsMap.Add(srgManager->GetDescriptorSetNumber(srg.srgType), setLayoutBindings);
+
 			VkDescriptorSetLayoutCreateInfo setLayoutCI{};
 			setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 			setLayoutCI.bindingCount = setLayoutBindings.GetSize();
@@ -310,6 +313,9 @@ namespace CE
 
 		pipelineLayoutCI.setLayoutCount = setLayouts.GetSize();
 		pipelineLayoutCI.pSetLayouts = setLayouts.GetData();
+		
+		pipelineLayoutCI.pushConstantRangeCount = pushConstantRanges.GetSize();
+		pipelineLayoutCI.pPushConstantRanges = pushConstantRanges.GetData();
 
 		VkPipelineLayout pipelineLayout = nullptr;
 
@@ -321,9 +327,9 @@ namespace CE
 		}
 
 		if (this->pipelineLayout == nullptr)
-			this->pipelineLayout = new VulkanPipelineLayout(device, pipelineLayout, RHI::PipelineType::Graphics);
-		else
-			this->pipelineLayout->handle = pipelineLayout;
+			this->pipelineLayout = new VulkanPipelineLayout(device, this);
+		
+		this->pipelineLayout->handle = pipelineLayout;
 
 		pipelineCI.layout = pipelineLayout;
 		pipelineCI.basePipelineHandle = VK_NULL_HANDLE;
@@ -363,6 +369,12 @@ namespace CE
 		setLayouts.Clear();
 	}
 
+	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, VulkanPipeline* copyFrom)
+		: device(device)
+	{
+		CopyFrom(device, copyFrom);
+	}
+
 	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType)
 		: device(device), handle(pipelineLayout), pipelineType(pipelineType)
 	{
@@ -378,6 +390,22 @@ namespace CE
 		}
 
 		device = nullptr;
+	}
+
+	void VulkanPipelineLayout::CopyFrom(VulkanDevice* device, VulkanPipeline* copyFrom)
+	{
+		if (copyFrom->IsGraphicsPipelineState())
+		{
+			pipelineType = RHI::PipelineType::Graphics;
+		}
+		else
+		{
+			pipelineType = RHI::PipelineType::Compute;
+		}
+
+		pushConstantRanges = copyFrom->pushConstantRanges;
+		setLayouts = copyFrom->setLayouts;
+		setLayoutBindingsMap = copyFrom->setLayoutBindingsMap;
 	}
 
 } // namespace CE

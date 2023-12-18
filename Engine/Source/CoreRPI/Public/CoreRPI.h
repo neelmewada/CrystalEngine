@@ -8,7 +8,9 @@
 // CoreRPI Includes
 
 #include "RenderTarget.h"
+#include "Pass.h"
 #include "View.h"
+#include "RenderPipeline.h"
 #include "Scene.h"
 
 #include "RPISystem.h"
@@ -24,4 +26,5 @@
 
 #include "Feature/FeatureProcessor.h"
 #include "Feature/FeatureProcessorRegistry.h"
+
 

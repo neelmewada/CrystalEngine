@@ -28,6 +28,8 @@ namespace CE::RHI
 
 		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) = 0;
 
+		virtual void SetRootConstants(u8 size, const u8* data) = 0;
+
 	};
 
 	class CORERHI_API GraphicsCommandList : public CommandList

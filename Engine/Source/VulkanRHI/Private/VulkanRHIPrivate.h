@@ -229,6 +229,8 @@ namespace CE
 
 		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) override;
 		
+		virtual void SetRootConstants(u8 size, const u8* data) override;
+
 		// TODO: Re-implement this function with more flexibilty. Maybe expose Fences?
 		virtual void WaitForExecution() override;
 

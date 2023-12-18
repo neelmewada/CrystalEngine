@@ -21,6 +21,9 @@ namespace CE::RHI
 
 			/// @brief Max number of shader resource groups that can be bound
 			constexpr u32 MaxShaderResourceGroupCount = 8;
+
+			/// @brief Max byte size of root constants
+			constexpr u8 MaxRootConstantSize = 64;
 		}
 	}
 } // namespace CE::RPI

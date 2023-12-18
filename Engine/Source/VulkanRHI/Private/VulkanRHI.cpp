@@ -902,6 +902,14 @@ namespace CE
 		}
 	}
 
+	void VulkanGraphicsCommandList::SetRootConstants(u8 size, const u8* data)
+	{
+		for (int i = 0; i < commandBuffers.GetSize(); ++i)
+		{
+			vkCmdPushConstants(commandBuffers[i], currentPipelineLayout->GetNativeHandle(), VK_SHADER_STAGE_ALL, 0, 12, data);
+		}
+	}
+
 	void VulkanGraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)

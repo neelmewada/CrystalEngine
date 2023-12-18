@@ -27,6 +27,7 @@ namespace CE::RHI
 
 		u8 drawItemCount = 0;
 		u8 vertexBufferViewCount = 0;
+		u8 rootConstantSize = 0;
 		u8 shaderResourceGroupCount = 0;
 		u8 uniqueShaderResourceGroupCount = 0;
 		u8 scissorCount = 0;
@@ -42,6 +43,8 @@ namespace CE::RHI
 
 		/// @brief List of draw filter masks associated with the draw item index.
 		const DrawFilterMask* drawFilterMasks = nullptr;
+
+		const u8* rootConstants = nullptr;
 
 		const ShaderResourceGroup* const* shaderResourceGroups = nullptr;
 

@@ -213,6 +213,10 @@ namespace CE
 			if (this->format == RHI::TextureFormat::D24_UNORM_S8_UINT || this->format == RHI::TextureFormat::D32_SFLOAT_S8_UINT)
 				aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
         }
+		if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::InputAttachment))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+		}
 		
         imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
         imageCI.mipLevels = mipLevels;
@@ -249,7 +253,7 @@ namespace CE
         imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         imageViewCI.format = vkFormat;
         imageViewCI.image = image;
-
+		
         imageViewCI.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         imageViewCI.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
         imageViewCI.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;

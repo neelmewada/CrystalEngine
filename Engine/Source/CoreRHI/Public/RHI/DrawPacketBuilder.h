@@ -25,6 +25,8 @@ namespace CE::RHI
 			DrawFilterMask drawFilterMask = DrawFilterMaskNullValue;
 		};
 
+		void SetRootConstants(const u8* rootConstants, u8 rootConstantSize);
+
 		void SetDrawArguments(const DrawArguments& drawArguments);
 
 		void SetIndexBufferView(const IndexBufferView& indexBufferView);
@@ -57,6 +59,9 @@ namespace CE::RHI
 		FixedArray<DrawItemRequest, DrawItemCountMax> drawRequests{};
 		u32 drawRequestsCount = 0;
 		u32 vertexBufferViewCount = 0;
+		FixedArray<u8, Limits::Pipeline::MaxRootConstantSize> rootConstants{};
+		u8 rootConstantSize = 0;
+
 
 		SIZE_T byteOffsetCurrent = 0;
 	};

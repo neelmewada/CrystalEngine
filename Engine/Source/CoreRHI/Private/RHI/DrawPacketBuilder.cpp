@@ -9,6 +9,16 @@ namespace CE::RHI
 		this->allocator = allocator;
 	}
 
+	void DrawPacketBuilder::SetRootConstants(const u8* rootConstants, u8 rootConstantSize)
+	{
+		this->rootConstantSize = rootConstantSize;
+
+		for (int i = 0; i < rootConstantSize; i++)
+		{
+			this->rootConstants[i] = rootConstants[i];
+		}
+	}
+
 	void DrawPacketBuilder::SetDrawArguments(const DrawArguments& args)
 	{
 		this->drawArguments = args;
@@ -73,6 +83,8 @@ namespace CE::RHI
 		SIZE_T drawListTagsOffset = AllocateOffset(sizeof(DrawListTag) * drawRequestsCount, alignof(DrawListTag));
 
 		SIZE_T drawFilterMasksOffset = AllocateOffset(sizeof(DrawFilterMask) * drawRequestsCount, alignof(DrawFilterMask));
+
+		SIZE_T rootConstantsOffset = AllocateOffset(sizeof(u8) * rootConstantSize, alignof(u8));
 
 		SIZE_T shaderResourceGroupsOffset = AllocateOffset(sizeof(ShaderResourceGroup*) * shaderResourceGroupCount, alignof(ShaderResourceGroup*));
 
@@ -144,6 +156,15 @@ namespace CE::RHI
             drawPacket->viewports = viewports;
             drawPacket->viewportCount = viewportCount;
         }
+
+		if (rootConstantSize > 0)
+		{
+			auto rootConstants = reinterpret_cast<u8*>(allocationData + rootConstantsOffset);
+			memcpy(rootConstants, this->rootConstants.GetData(), rootConstantSize);
+			
+			drawPacket->rootConstants = rootConstants;
+			drawPacket->rootConstantSize = rootConstantSize;
+		}
         
         auto drawItems = reinterpret_cast<DrawItem*>(allocationData + drawItemsOffset);
         auto drawListTags = reinterpret_cast<DrawListTag*>(allocationData + drawListTagsOffset);
@@ -175,6 +196,8 @@ namespace CE::RHI
             drawItem.stencilRef = drawRequest.stencilRef;
             drawItem.pipelineState = drawRequest.pipelineState;
             drawItem.arguments = drawArguments;
+			drawItem.rootConstants = drawPacket->rootConstants;
+			drawItem.rootConstantSize = drawPacket->rootConstantSize;
         }
 
 		if (vertexBufferViewCount > 0)

@@ -694,6 +694,10 @@ namespace CE
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffer;
 
+		VkFenceCreateInfo fenceCI{};
+		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
         vkQueueSubmit(graphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(graphicsQueue->GetHandle());
 
