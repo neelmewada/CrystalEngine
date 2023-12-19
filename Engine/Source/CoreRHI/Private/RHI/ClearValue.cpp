@@ -4,12 +4,12 @@ namespace CE::RHI
 {
     ClearValue::ClearValue(const Vec4& float4) : clearType(RHI::ClearValueType::Float4)
     {
-		this->float4 = float4;
+		memcpy(this->float4, float4.xyzw, sizeof(f32) * 4);
     }
 
-    ClearValue::ClearValue(const Vec4i& int4) : clearType(RHI::ClearValueType::Int4)
+    ClearValue::ClearValue(u32 uint4[4]) : clearType(RHI::ClearValueType::Int4)
     {
-		this->int4 = int4;
+		memcpy(this->uint4, uint4, sizeof(u32) * 4);
     }
 
     ClearValue::ClearValue(ClearDepthStencil depthStencil) : clearType(RHI::ClearValueType::DepthStencil)
@@ -25,9 +25,9 @@ namespace CE::RHI
 		switch (clearType)
 		{
 		case ClearValueType::Float4:
-			return float4 == other.float4;
+			return memcmp(float4, other.float4, sizeof(f32) * 4) == 0;
 		case ClearValueType::Int4:
-			return int4 == other.int4;
+			return memcmp(uint4, other.uint4, sizeof(u32) * 4) == 0;
 		case ClearValueType::DepthStencil:
 			return depthStencil == other.depthStencil;
 		default:

@@ -81,7 +81,7 @@
 #define SRG_PerDraw(type) SRG(type, PerDraw_Frequency)
 
 #ifdef __spirv__
-#define SUBPASS_INPUT(subpass, name) [[vk::input_attachment_index(subpass)]] [[vk::binding(subpass)]] SubpassInput name;
+#define SUBPASS_INPUT(subpass, name) [[vk::input_attachment_index(subpass)]] [[vk::binding(subpass)]] SubpassInput name
 #define ROOT_CONSTANT() [[vk::push_constant]]
 #else
 #define SUBPASS_INPUT(subpass, name) SubpassInput name;

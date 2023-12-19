@@ -2,7 +2,6 @@
 
 namespace CE::RHI
 {
-	ENUM()
 	enum class ClearValueType
 	{
 		Float4,
@@ -21,33 +20,24 @@ namespace CE::RHI
 		}
 	};
 
-	STRUCT()
 	struct ClearValue
 	{
-		CE_STRUCT(ClearValue)
-	public:
-
 		ClearValue() = default;
 
 		explicit ClearValue(const Vec4& float4);
-		explicit ClearValue(const Vec4i& int4);
+		explicit ClearValue(u32 uint4[4]);
 		explicit ClearValue(ClearDepthStencil depthStencil);
 
 		bool operator==(const ClearValue& other) const;
 
-		FIELD()
 		ClearValueType clearType = ClearValueType::Float4;
 
-		FIELD()
-		Vec4 float4{};
-
-		FIELD()
-		Vec4i int4{};
-
-		FIELD()
-		ClearDepthStencil depthStencil{};
+		union {
+			f32 float4[4] = {};
+			u32 uint4[4];
+			ClearDepthStencil depthStencil;
+		};
 	};
     
 } // namespace CE::RHI
 
-#include "ClearValue.rtti.h"

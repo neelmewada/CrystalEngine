@@ -27,7 +27,7 @@ Shader "Test Shader"
 
             HLSLPROGRAM
 
-            #include "ShaderLibrary.hlsl"
+            #include "ShaderLibrary.hlsli"
 
             #pragma vertex VertMain
             #pragma fragment FragMain
