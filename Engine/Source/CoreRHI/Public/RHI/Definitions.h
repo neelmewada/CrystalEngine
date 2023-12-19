@@ -200,7 +200,7 @@ namespace CE::RHI
         DimCUBE,
     };
 
-    enum class TextureFormat
+    enum class Format
     {
         Undefined = 0,
         R8_UNORM,
@@ -240,6 +240,8 @@ namespace CE::RHI
 		BC4_UNORM,
 		BC6H_UFLOAT,
     };
+
+    typedef Format TextureFormat;
 
     enum class TextureUsageFlags
     {

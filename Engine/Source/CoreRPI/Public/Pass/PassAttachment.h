@@ -2,7 +2,6 @@
 
 namespace CE::RPI
 {
-	ENUM()
 	enum PassAttachmentType : u32
 	{
 		Undefined = 0,
@@ -11,22 +10,34 @@ namespace CE::RPI
 		InputOutput = Input | Output
 	};
 
-	STRUCT()
 	struct PassSlot
 	{
-		CE_STRUCT(PassSlot)
-	public:
-
-		FIELD()
-		Name name{}; /// @brief Name of the slot.
-
-		FIELD()
-		PassAttachmentType attachmentType = PassAttachmentType::Undefined; /// @brief Attachment type of the slot.
-
-		FIELD()
-		RHI::AttachmentLoadStoreAction loadStoreAction{}; /// @brief Attachment's load and store action.
-
+        /// @brief Name of the slot.
+		Name name{};
+        
+        /// @brief Attachment type of the slot.
+		PassAttachmentType attachmentType = PassAttachmentType::Undefined;
+        
+        /// @brief Attachment's load and store action.
+		RHI::AttachmentLoadStoreAction loadStoreAction{};
+        
 	};
+    
+    typedef Array<PassSlot> PassSlotList;
+
+    struct AttachmentRef
+    {
+        Name pass{};
+        Name attachment{};
+    };
+    
+    struct PassConnection final
+    {
+        Name localSlot{};
+        AttachmentRef attachmentRef{};
+    };
+    
+    
     
 } // namespace CE::RPI
 
