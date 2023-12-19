@@ -7,8 +7,22 @@
 // ***********************************
 // CoreRPI Includes
 
+namespace CE::RPI
+{
+	template<typename T>
+	using Ptr = RHI::Ptr<T>;
+}
+
+// Passes
+#include "Pass/PassAttachment.h"
+#include "Pass/Pass.h"
+#include "Pass/ParentPass.h"
+#include "Pass/PassFactory.h"
+#include "Pass/PassTemplate.h"
+#include "Pass/PassLibrary.h"
+#include "Pass/PassSystem.h"
+
 #include "RenderTarget.h"
-#include "Pass.h"
 #include "View.h"
 #include "RenderPipeline.h"
 #include "Scene.h"

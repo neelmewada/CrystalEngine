@@ -27,7 +27,7 @@ Shader "Test Shader"
 
             HLSLPROGRAM
 
-            #include "Macros.hlsl"
+            #include "ShaderLibrary.hlsl"
 
             #pragma vertex VertMain
             #pragma fragment FragMain
@@ -44,22 +44,6 @@ Shader "Test Shader"
                 float4 position : SV_POSITION;
             };
 
-            struct CameraData
-            {
-                float4x4 viewMatrix;
-                float4x4 projectionMatrix;
-                float4x4 viewProjectionMatrix;
-            };
-
-            struct ModelData
-            {
-                float4x4 modelMatrix;
-            };
-            
-            ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
-
-            ConstantBuffer<ModelData> _Model : SRG_PerObject(b);
-
             cbuffer _Material : SRG_PerMaterial(b)
             {
                 float4 albedo;
@@ -73,7 +57,7 @@ Shader "Test Shader"
             v2f VertMain(VertexInfo input)
             {
                 v2f o;
-                o.position = mul(mul(mul(float4(input.position, 1.0), _Model.modelMatrix), _Camera.viewMatrix), _Camera.projectionMatrix);
+                o.position = mul(mul(mul(float4(input.position, 1.0), modelMatrix), viewMatrix), projectionMatrix);
                 return o;
             }
 

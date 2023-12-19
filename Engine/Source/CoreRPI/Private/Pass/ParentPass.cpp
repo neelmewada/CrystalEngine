@@ -2,8 +2,12 @@
 
 namespace CE::RPI
 {
+    ParentPass::ParentPass()
+    {
 
-    RenderPipeline::~RenderPipeline()
+    }
+
+    ParentPass::~ParentPass()
     {
 
     }

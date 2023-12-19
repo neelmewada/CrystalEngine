@@ -62,6 +62,7 @@
 // Jobs
 #include "Jobs/JobContext.h"
 #include "Jobs/Job.h"
+#include "Jobs/JobCompletion.h"
 #include "Jobs/WorkQueue.h"
 #include "Jobs/WorkThread.h"
 #include "Jobs/JobManager.h"

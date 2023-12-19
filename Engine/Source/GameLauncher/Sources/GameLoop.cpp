@@ -203,8 +203,8 @@ void GameLoop::RunLoop()
 
 		cmdList->Begin();
 
-		RHI::ViewportRect viewportRect = RHI::ViewportRect(0, 0, rt->GetWidth(), rt->GetHeight(), 0.0f, 1.0f);
-		RHI::ScissorRect scissorRect = RHI::ScissorRect(0, 0, rt->GetWidth(), rt->GetHeight());
+		RHI::ViewportState viewportRect = RHI::ViewportState(0, 0, rt->GetWidth(), rt->GetHeight(), 0.0f, 1.0f);
+		RHI::ScissorState scissorRect = RHI::ScissorState(0, 0, rt->GetWidth(), rt->GetHeight());
 
 		cmdList->SetScissorRects(1, &scissorRect);
 		cmdList->SetViewportRects(1, &viewportRect);

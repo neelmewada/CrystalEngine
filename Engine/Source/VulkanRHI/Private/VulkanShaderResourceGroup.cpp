@@ -154,7 +154,7 @@ namespace CE
 			}
 
 			variableNameToBinding[variable.name] = binding;
-			bindingSlotToBinding[variable.binding] = binding;
+			bindingSlotToBinding[binding.binding] = binding;
 			variableNames.Add(variable.name);
 			setBindings.Add(binding);
 		}

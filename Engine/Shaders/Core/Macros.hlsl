@@ -3,7 +3,7 @@
 
 #define LIMITED_SETS 1
 
-#ifdef LIMITED_SETS // Majority android phones only support maxBoundDescriptorSets = 4
+#ifdef LIMITED_SETS // Almost all android phones only support maxBoundDescriptorSets = 4
 
 #ifndef PerScene_Frequency
 #define PerScene_Frequency 0
@@ -33,7 +33,7 @@
 #define PerDraw_Frequency 3
 #endif
 
-#else // All platforms other than android support maxBoundDescriptorSets = 8 for majority of devices
+#else // All platforms other than android support minimum maxBoundDescriptorSets = 8 for majority of devices
 
 #ifndef PerScene_Frequency
 #define PerScene_Frequency 0
@@ -81,9 +81,11 @@
 #define SRG_PerDraw(type) SRG(type, PerDraw_Frequency)
 
 #ifdef __spirv__
-#define SUBPASS_INPUT(subpass) [[vk::input_attachment_index(subpass)]]
+#define SUBPASS_INPUT(subpass, name) [[vk::input_attachment_index(subpass)]] [[vk::binding(subpass)]] SubpassInput name;
+#define ROOT_CONSTANT() [[vk::push_constant]]
 #else
-#define SUBPASS_INPUT(subpass)
+#define SUBPASS_INPUT(subpass, name) SubpassInput name;
+#define ROOT_CONSTANT()
 #endif
 
 #endif // __MACROS_HLSL__

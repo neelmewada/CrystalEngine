@@ -15,6 +15,7 @@ namespace CE::RPI
 	private:
 
 		RHI::RenderTarget* renderTarget = nullptr;
+
 	};
     
 } // namespace CE::RPI

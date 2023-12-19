@@ -7,6 +7,8 @@ namespace CE::RPI
 	{
 	public:
 
+		virtual ~RenderPipeline();
+
 	private:
 
 
