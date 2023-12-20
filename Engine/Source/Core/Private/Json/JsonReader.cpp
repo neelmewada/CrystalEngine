@@ -293,6 +293,32 @@ namespace CE
                 outToken = JsonToken::Comma;
                 currentToken = outToken;
                 return true;
+			case '/': // Possibly a comment
+				if (!stream->IsOutOfBounds())
+				{
+					CHAR next = stream->Read();
+					if (next == '/') // Definitely a comment
+					{
+						while (!stream->IsOutOfBounds()) // Skip thru entire comment
+						{
+							next = stream->Read();
+							if (next == '\n') // Stop at new-line
+								break;
+						}
+						
+						// Now that comment is skipped, read next actual token
+						return ParseNextToken(outToken, outLexeme);
+					}
+					else // Not a comment, invalid character?
+					{
+						parseError = JsonParseError::InvalidKeyword;
+						errorMessage = String::Format("Invalid character {}", next);
+						return false;
+					}
+				}
+				parseError = JsonParseError::OutOfBounds;
+				errorMessage = "Stream out of bounds";
+				return false;
             case '\"': // String start token
                 {
                     outLexeme.Clear();

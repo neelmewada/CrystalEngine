@@ -1633,6 +1633,22 @@ const char JSON_Writer_Test2_Comparison[] = R"([
 	42.212
 ])";
 
+const char JSON_Writer_Test2_Comment_Comparison[] = R"([
+	{
+		// this is a comment
+		"some_array":
+		[
+			"child0", // another comment
+			123,
+			42.212,
+			false// a bad comment
+		],
+		"name": "Some name"// another bad comment
+	},
+	"item0",
+	42.212
+])";
+
 TEST(JSON, Writer)
 {
     TEST_BEGIN;
@@ -1726,7 +1742,7 @@ TEST(JSON, TokenParser)
 {
     TEST_BEGIN;
 
-    auto stream = MemoryStream((void*)JSON_Writer_Test2_Comparison, COUNTOF(JSON_Writer_Test2_Comparison), Stream::Permissions::ReadOnly);
+    auto stream = MemoryStream((void*)JSON_Writer_Test2_Comment_Comparison, COUNTOF(JSON_Writer_Test2_Comment_Comparison), Stream::Permissions::ReadOnly);
     stream.SetAsciiMode(true);
 
     struct TokenPair

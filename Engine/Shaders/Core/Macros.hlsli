@@ -1,6 +1,7 @@
 #ifndef __MACROS_HLSL__
 #define __MACROS_HLSL__
 
+// TODO: Temp code
 #define LIMITED_SETS 1
 
 #ifdef LIMITED_SETS // Almost all android phones only support maxBoundDescriptorSets = 4
@@ -81,11 +82,18 @@
 #define SRG_PerDraw(type) SRG(type, PerDraw_Frequency)
 
 #ifdef __spirv__
-#define SUBPASS_INPUT(subpass, name) [[vk::input_attachment_index(subpass)]] [[vk::binding(subpass)]] SubpassInput name
+
+#define SUBPASS_INPUT(subpass, name) [[vk::input_attachment_index(subpass)]] [[vk::binding(subpass, PerSubPass_Frequency)]] SubpassInput name
 #define ROOT_CONSTANT() [[vk::push_constant]]
+#define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()
+
 #else
+
 #define SUBPASS_INPUT(subpass, name) SubpassInput name;
 #define ROOT_CONSTANT()
+#define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()
+
 #endif
+
 
 #endif // __MACROS_HLSL__

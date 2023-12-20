@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	/// @brief The base Pass class. All passes should derive from this class.
+	/// @brief The ParentPass class allows adding passes as children. ParentPass don't do any work on their own.
 	class CORERPI_API ParentPass : public Pass
 	{
 		friend class Pass;
@@ -16,6 +16,9 @@ namespace CE::RPI
 		ParentPass();
 
 		~ParentPass();
+
+		void AddChild(Pass* childPass);
+		void RemoveChild(Pass* childPass);
 
 	private:
 

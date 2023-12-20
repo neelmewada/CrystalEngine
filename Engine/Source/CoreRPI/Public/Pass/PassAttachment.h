@@ -22,13 +22,11 @@ namespace CE::RPI
 		RHI::AttachmentLoadStoreAction loadStoreAction{};
         
 	};
-    
-    typedef Array<PassSlot> PassSlotList;
 
     struct AttachmentRef
     {
         Name pass{};
-        Name attachment{};
+        Name attachmentSlot{};
     };
     
     struct PassConnection final
@@ -37,8 +35,15 @@ namespace CE::RPI
         AttachmentRef attachmentRef{};
     };
     
-    
+	/// @brief Describes an attachment used by a pass.
+	class CORERPI_API PassAttachment final : public IntrusiveBase
+	{
+	public:
+
+		PassAttachment() = default;
+
+		
+
+	};
     
 } // namespace CE::RPI
-
-#include "PassAttachment.rtti.h"

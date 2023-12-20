@@ -30,6 +30,8 @@ namespace CE
 		{ TYPEID(Matrix4x4), 0x84 },
 	};
 
+	constexpr u8 customFieldType = 0xFF;
+
 	BinarySerializer::BinarySerializer(TypeInfo* targetType, void* targetInstance)
 		: targetType(targetType), instance(targetInstance)
 	{

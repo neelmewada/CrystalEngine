@@ -1,9 +1,0 @@
-{
-    "name": "TransparentPass",
-    "slots": [
-        {
-            "name": "Input",
-            "slotType": "Input"
-        }
-    ]
-}

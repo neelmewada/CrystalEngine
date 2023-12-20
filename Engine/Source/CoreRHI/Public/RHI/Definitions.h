@@ -147,7 +147,6 @@ namespace CE::RHI
         // Internal usage only!
         StagingBuffer = BIT(4),
     };
-
     ENUM_CLASS_FLAGS(BufferBindFlags);
 
     /// Features used by the buffer
@@ -164,7 +163,9 @@ namespace CE::RHI
     enum class BufferAllocMode
     {
         Default = 0,
+        /// @brief Use memory shared with CPU & GPU
         SharedMemory,
+        /// @brief Use only GPU visible memory
         GpuMemory,
     };
     ENUM_CLASS_FLAGS(BufferAllocMode);
@@ -383,6 +384,7 @@ namespace CE::RHI
 		SHADER_RESOURCE_TYPE_STRUCTURED_BUFFER,
 		SHADER_RESOURCE_TYPE_SAMPLED_IMAGE,
 		SHADER_RESOURCE_TYPE_SAMPLER_STATE,
+		SHADER_RESOURCE_TYPE_INPUT_ATTACHMENT
 	};
 
 	struct ShaderResourceVariableDesc

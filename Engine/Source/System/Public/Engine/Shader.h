@@ -67,7 +67,7 @@ namespace CE
 		Name passName = "Main";
 
 		FIELD()
-		Array<ShaderVariant> variants{};
+		Array<CE::ShaderVariant> variants{};
 
 		friend class Shader;
 	};

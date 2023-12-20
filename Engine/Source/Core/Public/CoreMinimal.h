@@ -1,5 +1,7 @@
 #pragma once
 
+#define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
+
 // Basic headers
 #include "CoreTypes.h"
 #include "CoreTemplates.h"
