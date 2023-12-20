@@ -10,7 +10,8 @@ namespace CE::RPI
 	private:
 
 		Array<ScenePtr> scenes{};
-
+        
+        
 	};
     
 } // namespace CE::RPI

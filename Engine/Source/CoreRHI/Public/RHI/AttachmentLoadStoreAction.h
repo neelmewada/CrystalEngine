@@ -8,13 +8,13 @@ namespace CE::RHI
 		Clear,
 		DontCare
 	};
-
+    
 	enum class AttachmentStoreAction : u8
 	{
 		Store = 0,
 		DontCare
 	};
-
+    
 	enum class AttachmentType : u8
 	{
 		None = 0,
@@ -22,7 +22,7 @@ namespace CE::RHI
 		Buffer,
 		Resolve
 	};
-
+    
     struct AttachmentLoadStoreAction
     {
 		ClearValue clearValue{};

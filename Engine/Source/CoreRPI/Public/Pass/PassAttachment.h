@@ -21,12 +21,17 @@ namespace CE::RPI
         /// @brief Attachment's load and store action.
 		RHI::AttachmentLoadStoreAction loadStoreAction{};
         
+        /// @brief List of formats supported by this pass slot.
+        Array<RHI::Format> formats{};
+        
+        /// @brief List of image dimensions supported by this pass slot.
+        Array<RHI::TextureDimension> dimensions{};
 	};
-
+    
     struct AttachmentRef
     {
         Name pass{};
-        Name attachmentSlot{};
+        Name attachment{};
     };
     
     struct PassConnection final
@@ -34,16 +39,33 @@ namespace CE::RPI
         Name localSlot{};
         AttachmentRef attachmentRef{};
     };
+
+    enum class AttachmentLifetime
+    {
+        Transient = 0,
+        Imported
+    };
     
+    struct PassImageAttachmentDesc
+    {
+        /// @brief Name of the attachment.
+        Name name{};
+        
+        /// @brief Lifetime of the image attachment.
+        AttachmentLifetime lifetime{};
+        
+        
+    };
+
 	/// @brief Describes an attachment used by a pass.
 	class CORERPI_API PassAttachment final : public IntrusiveBase
 	{
 	public:
 
 		PassAttachment() = default;
-
-		
-
+        
+        Name name{};
+        
 	};
     
 } // namespace CE::RPI

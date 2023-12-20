@@ -10,7 +10,7 @@
 namespace CE::RPI
 {
 	template<typename T>
-	using Ptr = RHI::Ptr<T>;
+    using Ptr = RHI::Ptr<T>;
 }
 
 // Passes

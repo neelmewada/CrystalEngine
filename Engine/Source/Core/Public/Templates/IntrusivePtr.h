@@ -1,5 +1,9 @@
 #pragma once
 
+#define INTRUSIVE_IMPL\
+    template<typename T>\
+    friend struct IntrusivePtrCountPolicy;
+
 namespace CE
 {
 
@@ -28,7 +32,7 @@ namespace CE
 	struct IntrusivePtrCountPolicy
 	{
 		static inline void AddRef(T* p) { p->_AddRef(); }
-		static inline void Release(T* p) { p->_Release(); }
+		static inline void ReleaseRef(T* p) { p->_ReleaseRef(); }
 	};
 
 	template<typename RefCntType, typename Deleter = IntrusiveDefaultDeleter>
@@ -62,7 +66,7 @@ namespace CE
 			++refCount;
 		}
 
-		void _Release() const
+		void _ReleaseRef() const
 		{
 			const int refCnt = static_cast<int>(--this->refCount);
 			if (refCnt == 0)
@@ -124,7 +128,7 @@ namespace CE
 		{
 			if (ptr != 0)
 			{
-				CountPolicy::Release(ptr);
+				CountPolicy::ReleaseRef(ptr);
 			}
 		}
 
