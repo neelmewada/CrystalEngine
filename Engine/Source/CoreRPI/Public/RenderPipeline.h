@@ -2,8 +2,9 @@
 
 namespace CE::RPI
 {
+	class PassTree;
 
-	class CORERPI_API RenderPipeline final
+	class CORERPI_API RenderPipeline final : public IntrusiveBase
 	{
 	public:
 
@@ -11,9 +12,10 @@ namespace CE::RPI
 
 	private:
 
+		PassTree passTree{};
 
 	};
 
-	typedef RenderPipeline* RenderPipelinePtr;
+	typedef Ptr<RenderPipeline> RenderPipelinePtr;
     
 } // namespace CE::RPI

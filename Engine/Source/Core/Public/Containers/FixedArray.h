@@ -48,7 +48,9 @@ namespace CE
 
 		constexpr inline bool IsEmpty() const { return false; }
 
-		constexpr inline T* GetData() const { return impl.data(); }
+		constexpr inline const T* GetData() const { return impl.data(); }
+
+		constexpr inline T* GetData() { return impl.data(); }
 
 		constexpr inline SIZE_T GetSize() const { return impl.size(); }
 

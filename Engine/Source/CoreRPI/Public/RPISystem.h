@@ -7,11 +7,16 @@ namespace CE::RPI
 	{
 	public:
 
+		void Initialize();
+
+		void Shutdown();
+
 	private:
 
 		Array<ScenePtr> scenes{};
         
-        
+		PassSystem passSystem{};
+
 	};
     
 } // namespace CE::RPI

@@ -16,4 +16,14 @@ namespace CE::RPI
 		shaderResourceGroup = nullptr;
 	}
 
+	void View::SetDrawListMask(const RHI::DrawListMask& mask)
+	{
+		if (drawListMask != mask)
+		{
+			drawListMask = mask;
+			drawListContext.Shutdown();
+			drawListContext.Init(drawListMask);
+		}
+	}
+
 } // namespace CE::RPI

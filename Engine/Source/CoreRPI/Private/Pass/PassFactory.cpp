@@ -2,5 +2,6 @@
 
 namespace CE::RPI
 {
-    
+
+
 } // namespace CE::RPI

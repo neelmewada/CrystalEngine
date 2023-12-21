@@ -46,6 +46,11 @@ namespace CE
 			impl.flip();
 		}
 
+		inline void Reset()
+		{
+			impl.reset();
+		}
+
 		inline bool Test(SIZE_T pos) const
 		{
 			return impl.test(pos);
@@ -82,6 +87,16 @@ namespace CE
 		}
 
 		String ToString() const;
+
+		inline bool operator==(const BitSet& rhs) const
+		{
+			return impl == rhs.impl;
+		}
+
+		inline bool operator!=(const BitSet& rhs) const
+		{
+			return impl != rhs.impl;
+		}
 
 	private:
 

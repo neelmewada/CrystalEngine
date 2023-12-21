@@ -94,8 +94,10 @@ namespace CE::RHI
 		/// is not used outside. Usually a PerDraw SRG.
 		const RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
 
+		/// @brief List of scissor states for this draw call.
 		const RHI::ScissorState* scissors = nullptr;
 
+		/// @brief List of viewport states for this draw call.
 		const RHI::ViewportState* viewports = nullptr;
 
 	};

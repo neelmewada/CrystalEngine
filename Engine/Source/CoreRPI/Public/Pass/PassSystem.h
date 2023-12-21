@@ -7,8 +7,15 @@ namespace CE::RPI
 	{
 	public:
 
+		void Initialize();
+
+		void Shutdown();
 
 	private:
+
+		PassLibrary passLibrary{};
+
+		PassFactory passFactory{};
 
 	};
     

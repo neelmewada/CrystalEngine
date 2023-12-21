@@ -1,6 +1,7 @@
 
 #include "CoreRPI.h"
 
+#include "Resource.h"
 #include "CoreRPI.private.h"
 
 

@@ -338,6 +338,7 @@ namespace CE
 
     bool JsonSerializer::Deserialize2(Stream* stream, JValue& out)
     {
+		Deserialize(nullptr);
 		if (stream == nullptr)
 		{
 			CE_LOG(Error, All, "JSON Deserialize: Input stream is null");
@@ -528,6 +529,12 @@ namespace CE
 
 		return true;
     }
+
+	bool JsonSerializer::Deserialize2(const String& json, JValue& out)
+	{
+		MemoryStream stream = MemoryStream(json.GetData(), json.GetLength(), Stream::Permissions::ReadOnly);
+		return Deserialize2(&stream, out);
+	}
 
 } // namespace CE
 

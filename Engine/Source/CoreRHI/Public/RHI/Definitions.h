@@ -177,17 +177,17 @@ namespace CE::RHI
         const void* data = nullptr;
     };
 
-    struct BufferDesc
-    {
-        Name name{};
-        BufferBindFlags bindFlags{};
-        BufferUsageFlags usageFlags{};
-        BufferAllocMode allocMode{};
-        u64 bufferSize = 0;
-        u64 structureByteStride = 0;
+	struct BufferDesc
+	{
+		Name name{};
+		BufferBindFlags bindFlags{};
+		BufferUsageFlags usageFlags{};
+		BufferAllocMode allocMode{};
+		u64 bufferSize = 0;
+		u64 structureByteStride = 0;
 
-        const BufferData* initialData = nullptr;
-    };
+		const BufferData* initialData = nullptr;
+	};
 
     /*
     *   Texture
@@ -262,9 +262,10 @@ namespace CE::RHI
 	};
 	ENUM_CLASS_FLAGS(FilterMode);
 
+
     struct TextureDesc
     {
-        String name{};
+        Name name{};
         u32 width = 128, height = 128, depth = 1;
         TextureDimension dimension = TextureDimension::Dim2D;
         TextureFormat format{};
@@ -275,6 +276,8 @@ namespace CE::RHI
 		/// Force linear tiling rather than optimal tiling
         bool forceLinearLayout = false;
     };
+
+	typedef TextureDesc ImageDesc;
 
     enum SamplerAddressMode
     {

@@ -7,6 +7,9 @@ namespace CE::RHI
 	{
 	public:
 
+		void Init(const DrawListMask& drawListMask);
+		void Shutdown();
+
 		DrawList& GetDrawListForTag(u8 tag);
 
 		/// @brief Thread safe function to add a draw package to the DrawList.
@@ -17,7 +20,7 @@ namespace CE::RHI
 
 	private:
 		
-		ThreadLocalContext<DrawListsByTag> threadDrawLists{};
+		ThreadLocalContext<DrawListsByTag> threadDrawListsByTag{};
 		DrawListsByTag mergedDrawListsByTag{};
 		DrawListMask drawListMask{};
 	};

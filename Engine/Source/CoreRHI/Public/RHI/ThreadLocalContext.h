@@ -29,6 +29,8 @@ namespace CE::RHI
 		// Clear all storages
 		void Clear();
 
+		bool IsEmpty();
+
 	private:
 
 		static u32 MakeId();
@@ -124,6 +126,14 @@ namespace CE::RHI
 		threadIdList.Clear();
 		storageList.Clear();
 		id = MakeId();
+	}
+
+	template<typename Storage>
+	inline bool ThreadLocalContext<Storage>::IsEmpty()
+	{
+		LockGuard<SharedMutex> lock{ mutex };
+
+		return storageList.IsEmpty() || threadIdList.IsEmpty();
 	}
 
 } // namespace CE::RHI

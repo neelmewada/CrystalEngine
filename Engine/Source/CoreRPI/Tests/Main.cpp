@@ -3,3 +3,8 @@
 
 #include <gtest/gtest.h>
 
+
+TEST(RPI, SomeTest)
+{
+
+}

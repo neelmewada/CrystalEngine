@@ -78,7 +78,7 @@ namespace CE
 		ClassType::CreateDefaultInstancesForCurrentModule();
 		TypeInfo::FireTypeRegistrationEventsForCurrentModule();
 
-		// Load resources
+		// Register resources
 		info->loadResourcesFuncPtr();
 
 		CE_LOG(Info, All, "Loaded Module: {}", moduleName);
@@ -102,11 +102,14 @@ namespace CE
 
 		ClassType::ClearDefaultInstancesForModule(moduleName);
 
+		// Deregister resources
+		info->unloadResourcesFuncPtr();
+
 		// This also deregisters all types that were registered in this module
 		CoreDelegates::onBeforeModuleUnload.Broadcast(info);
 
-		// Unload resources
-		info->unloadResourcesFuncPtr();
+		// Deregister types
+		info->moduleImpl->DeregisterTypes();
 
 		// Shutdown module
 		info->moduleImpl->ShutdownModule();
@@ -117,9 +120,6 @@ namespace CE
 			info->transientPackage->RequestDestroy();
 			info->transientPackage = nullptr;
 		}
-
-		// Deregister types
-		info->moduleImpl->DeregisterTypes();
 
 		// Unload module
 		info->isLoaded = false;

@@ -21,9 +21,22 @@ namespace CE::RPI
 			UsageCustom = BIT(3),
 		};
 
+		void SetDrawListMask(const RHI::DrawListMask& mask);
 
+		inline RHI::DrawListMask GetDrawListMask() const
+		{
+			return drawListMask;
+		}
+
+		inline RHI::DrawListContext* GetDrawListContext()
+		{
+			return &drawListContext;
+		}
 
 	private:
+
+		RHI::DrawListContext drawListContext{};
+		RHI::DrawListMask drawListMask{};
 
 		/// @brief Could be native window surface OR an offscreen render target
 		RPI::RenderTarget* renderTarget = nullptr;

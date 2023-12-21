@@ -2,6 +2,20 @@
 
 namespace CE::RPI
 {
+	struct PassRequest
+	{
+		/// @brief Name of the pass after instantiation
+		Name passName{};
+
+		/// @brief Name of pass template we will instantiate from
+		Name templateName{};
+
+		/// @brief Connections of the instantiated pass
+		Array<PassConnection> connections{};
+
+		Array<PassImageAttachmentDesc> imageAttachmentOverrides{};
+
+	};
     
 	class CORERPI_API PassTemplate final : public IntrusiveBase
 	{
@@ -16,6 +30,12 @@ namespace CE::RPI
 		Name passClass{};
         
         Array<PassSlot> slots{};
+
+		Array<PassConnection> connections{};
+
+		Array<PassImageAttachmentDesc> imageAttachments{};
+
+		Array<PassRequest> passRequest{};
 
 	};
 

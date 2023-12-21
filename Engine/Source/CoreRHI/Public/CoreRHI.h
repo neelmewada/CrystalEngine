@@ -9,7 +9,7 @@
 
 #include "RHI/Definitions.h"
 #include "RHI/ClearValue.h"
-#include "RHI/AttachmentLoadStoreAction.h"
+#include "RHI/AttachmentDefines.h"
 #include "RHI/Resources.h"
 #include "RHI/Buffer.h"
 #include "RHI/Texture.h"

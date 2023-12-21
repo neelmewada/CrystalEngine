@@ -2,8 +2,30 @@
 
 namespace CE::RHI
 {
+    void DrawListContext::Init(const DrawListMask& drawListMask)
+    {
+		// Set mask
+		if (drawListMask.Any())
+		{
+			this->drawListMask = drawListMask;
+		}
+    }
 
-	DrawList& DrawListContext::GetDrawListForTag(u8 tag)
+    void DrawListContext::Shutdown()
+    {
+		// Clear all lists
+		threadDrawListsByTag.Clear();
+
+		for (auto& mergedList : mergedDrawListsByTag)
+		{
+			mergedList.Clear();
+		}
+
+		// Reset mask
+		drawListMask.Reset();
+    }
+
+    DrawList& DrawListContext::GetDrawListForTag(u8 tag)
 	{
 		static DrawList empty{};
 		if (tag >= mergedDrawListsByTag.GetSize())
@@ -16,17 +38,21 @@ namespace CE::RHI
 	{
 		if (!drawPacket)
 			return;
-
-		DrawListsByTag& threadDrawListsByTag = this->threadDrawLists.GetStorage();
+		
+		DrawListsByTag& threadDrawListsByTag = this->threadDrawListsByTag.GetStorage();
 
 		for (int i = 0; i < drawPacket->GetDrawItemCount(); i++)
 		{
-			DrawItemProperties drawItemProperties = drawPacket->GetDrawItemProperties(i);
-			DrawListTag drawListTag = drawPacket->drawListTags[i];
+			const DrawListTag drawListTag = drawPacket->GetDrawListTag(i);
+			
+			if (this->drawListMask.Test(drawListTag.Get()))
+			{
+				DrawItemProperties drawItemProperties = drawPacket->GetDrawItemProperties(i);
 
-			auto& drawList = threadDrawListsByTag[drawListTag];
-			threadDrawListsByTag[drawListTag].listTag = drawListTag;
-			drawList.AddDrawItem(drawItemProperties);
+				auto& drawList = threadDrawListsByTag[drawListTag];
+				threadDrawListsByTag[drawListTag].listTag = drawListTag;
+				drawList.AddDrawItem(drawItemProperties);
+			}
 		}
 	}
 
@@ -38,7 +64,7 @@ namespace CE::RHI
 			mergedDrawListsByTag[i].listTag = (u8)i;
 		}
 
-		threadDrawLists.ForEach([&](DrawListsByTag& drawLists)
+		threadDrawListsByTag.ForEach([&](DrawListsByTag& drawLists)
 			{
 				for (int i = 0; i < drawLists.GetSize(); i++)
 				{
