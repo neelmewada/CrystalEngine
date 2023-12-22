@@ -25,4 +25,9 @@ namespace CE::RPI
 		passes.Remove(childPass);
 	}
 
+    void ParentPass::Clear()
+    {
+		passes.Clear();
+    }
+
 } // namespace CE::RPI

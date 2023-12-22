@@ -17,8 +17,12 @@ namespace CE::RPI
 
 		~ParentPass();
 
+		virtual Name GetClassName() const override { return "ParentPass"; }
+
 		void AddChild(Pass* childPass);
 		void RemoveChild(Pass* childPass);
+
+		void Clear();
 
 	private:
 

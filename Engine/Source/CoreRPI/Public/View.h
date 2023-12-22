@@ -5,7 +5,7 @@ namespace CE::RPI
 	class ShaderResourceGroup;
 	class RenderTarget;
     
-	class CORERPI_API View final
+	class CORERPI_API View final : public IntrusiveBase
 	{
 	public:
 
@@ -44,8 +44,12 @@ namespace CE::RPI
 		/// @brief View ShaderResourceGroup (SRG_PerView)
 		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
+		b8 enabled = true;
+
 		UsageFlags usageFlags = UsageCamera;
 	};
+
+	typedef Ptr<View> ViewPtr;
 
 	ENUM_CLASS_FLAGS(View::UsageFlags);
 

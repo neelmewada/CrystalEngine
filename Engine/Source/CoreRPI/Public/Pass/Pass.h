@@ -25,13 +25,20 @@ namespace CE::RPI
 		
 		inline Name GetName() const { return name; }
 
+		virtual Name GetClassName() const { return "Pass"; }
+
 	private:
 
 		Name name{};
+
+		/// @brief The view tag associated with a pipeline view.
+		/// The view that matches this tag will queried by this pass.
+		PipelineViewTag pipelineViewTag{};
 		
 	};
 
 	typedef Ptr<Pass> PassPtr;
-	typedef Delegate<Ptr<Pass>(const PassDesc& desc)> PassCreatorFunc;
+
+	using PassCreatorFunc = Delegate<PassPtr(const PassDesc&)>;
     
 } // namespace CE::RPI

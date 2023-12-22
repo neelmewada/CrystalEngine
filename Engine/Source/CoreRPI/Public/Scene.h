@@ -12,7 +12,7 @@ namespace CE::RPI
 
 	private:
 
-		Array<RenderPipelinePtr> renderPipelines{};
+		Array<RenderPipeline*> renderPipelines{};
 
 	};
 

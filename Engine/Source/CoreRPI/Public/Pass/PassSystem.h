@@ -13,8 +13,10 @@ namespace CE::RPI
 
 	private:
 
+		/// @brief Used to store pass templates.
 		PassLibrary passLibrary{};
 
+		/// @brief Used to store pass factories.
 		PassFactory passFactory{};
 
 	};
