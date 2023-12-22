@@ -2,9 +2,10 @@
 
 namespace CE::RPI
 {
-    ParentPass::ParentPass()
+    ParentPass::ParentPass(const PassDesc& desc) : desc(desc)
     {
-
+		name = desc.passName;
+		
     }
 
     ParentPass::~ParentPass()

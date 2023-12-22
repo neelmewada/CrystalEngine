@@ -6,7 +6,6 @@
 	friend class PassLibrary;\
 	friend class PassTemplate;\
 	friend class PassSystem;\
-	friend class ParentPass;\
 	friend class RenderPipeline;
 
 namespace CE::RPI
@@ -19,6 +18,9 @@ namespace CE::RPI
 	/// @brief The base Pass class. All passes should derive from this class.
 	class CORERPI_API Pass : public IntrusiveBase
 	{
+		friend class ParentPass;
+		friend class PassFactory;
+		friend class PassLibrary;
 	public:
 
 		virtual ~Pass();
@@ -27,12 +29,12 @@ namespace CE::RPI
 
 		virtual Name GetClassName() const { return "Pass"; }
 
-	private:
+	protected:
 
 		Name name{};
 
 		/// @brief The view tag associated with a pipeline view.
-		/// The view that matches this tag will queried by this pass.
+		/// The view that matches this tag will be queried by this pass.
 		PipelineViewTag pipelineViewTag{};
 		
 	};

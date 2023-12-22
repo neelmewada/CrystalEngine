@@ -1,0 +1,19 @@
+{
+    "PassTemplate": {
+        "Name": "MainPipeline",
+        "PassClass": "ParentPass",
+        "Slots": [
+            {
+                "Name": "PipelineOutput",
+                "SlotType": "Output"
+            }
+        ],
+        // Child Passes (PassRequests)
+        "ChildPasses": [
+            {
+                "Name": "OpaquePass",
+                "TemplateName": "OpaquePassTemplate"
+            }
+        ]
+    }
+}

@@ -17,7 +17,7 @@ namespace CE::RPI
 		Name name{};
         
         /// @brief Attachment type of the slot.
-		PassAttachmentType attachmentType = PassAttachmentType::Undefined;
+		PassAttachmentType slotType = PassAttachmentType::Undefined;
 
 		RHI::ScopeAttachmentUsage attachmentUsage{};
         
@@ -86,13 +86,18 @@ namespace CE::RPI
 		PassAttachment(const PassBufferAttachmentDesc& bufferAttachmentDesc);
 		PassAttachment(const PassImageAttachmentDesc& imageAttachmentDesc);
         
+	private:
+
         Name name{};
 
 		AttachmentLifetime lifetime{};
-        
-	private:
 
 		RHI::UnifiedAttachmentDesc attachmentDesc{};
+
+	};
+
+	struct PassAttachmentBinding
+	{
 
 	};
     

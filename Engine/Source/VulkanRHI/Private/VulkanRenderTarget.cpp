@@ -429,23 +429,6 @@ namespace CE
 		depthFrame.samplers.Resize(1);
 		depthFrame.samplers[0] = new VulkanSampler(device, samplerDesc);
 
-		// Old sampler code
-        //VkSamplerCreateInfo samplerCI = {};
-        //samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-        //samplerCI.addressModeU = samplerCI.addressModeV = samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        //samplerCI.anisotropyEnable = VK_FALSE;
-        //samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
-        //samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        //samplerCI.minFilter = samplerCI.magFilter = VK_FILTER_LINEAR;
-        //samplerCI.compareEnable = VK_FALSE;
-        //samplerCI.minLod = 0.0f;
-        //samplerCI.maxLod = 0.0f;
-        //samplerCI.mipLodBias = 0.0f;
-        //samplerCI.unnormalizedCoordinates = VK_FALSE;
-
-        //depthFrame.samplers.Resize(1);
-        //vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &depthFrame.samplers[0]);
-
         depthFrame.framebuffer = nullptr;
     }
 
@@ -495,21 +478,6 @@ namespace CE
 				samplerDesc.samplerFilterMode = RHI::FILTER_MODE_LINEAR;
 
 				frame.samplers[j] = new VulkanSampler(device, samplerDesc);
-
-                //VkSamplerCreateInfo samplerCI{};
-                //samplerCI.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-                //samplerCI.addressModeU = samplerCI.addressModeV = samplerCI.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-                //samplerCI.anisotropyEnable = VK_FALSE;
-                //samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
-                //samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-                //samplerCI.minFilter = samplerCI.magFilter = VK_FILTER_LINEAR;
-                //samplerCI.compareEnable = VK_FALSE;
-                //samplerCI.minLod = 0.0f;
-                //samplerCI.maxLod = 0.0f;
-                //samplerCI.mipLodBias = 0.0f;
-                //samplerCI.unnormalizedCoordinates = VK_FALSE;
-
-                //vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &frame.samplers[j]);
 
                 attachments[j] = frame.textures[j]->GetImageView();
             }

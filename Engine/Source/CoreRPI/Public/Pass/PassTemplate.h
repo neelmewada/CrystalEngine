@@ -2,6 +2,7 @@
 
 namespace CE::RPI
 {
+	/// @brief Describes the pass to create as a subpass of current pass.
 	struct PassRequest
 	{
 		/// @brief Name of the pass after instantiation
@@ -13,6 +14,7 @@ namespace CE::RPI
 		/// @brief Connections of the instantiated pass
 		Array<PassConnection> connections{};
 
+		/// @brief Override for image attachments.
 		Array<PassImageAttachmentDesc> imageAttachmentOverrides{};
 
 	};
@@ -22,6 +24,7 @@ namespace CE::RPI
         friend class Pass;
 	public:
         
+		static Ptr<PassTemplate> CreateFromJson(const String& json);
         
 	private:
         
@@ -35,7 +38,7 @@ namespace CE::RPI
 
 		Array<PassImageAttachmentDesc> imageAttachments{};
 
-		Array<PassRequest> passRequest{};
+		Array<PassRequest> childPasses{};
 
 	};
 

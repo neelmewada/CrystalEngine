@@ -38,9 +38,6 @@ namespace CE::RPI
 		RHI::DrawListContext drawListContext{};
 		RHI::DrawListMask drawListMask{};
 
-		/// @brief Could be native window surface OR an offscreen render target
-		RPI::RenderTarget* renderTarget = nullptr;
-
 		/// @brief View ShaderResourceGroup (SRG_PerView)
 		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 

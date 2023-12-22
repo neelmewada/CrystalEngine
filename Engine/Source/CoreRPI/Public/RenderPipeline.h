@@ -24,6 +24,9 @@ namespace CE::RPI
 
 		/// @brief Name tag of the main view.
 		Name mainViewTag = "MainCamera";
+
+		/// @brief Name tags of each draw lists
+		HashMap<u8, Name> drawListTagNames{};
 	};
 
 	class CORERPI_API RenderPipeline final
@@ -31,6 +34,8 @@ namespace CE::RPI
 	public:
 
 		virtual ~RenderPipeline();
+
+		static RenderPipeline* CreateBuiltin(RHI::RenderTarget* renderTarget);
 
 		static RenderPipeline* Create(RHI::RenderTarget* renderTarget, const RenderPipelineDesc& desc);
 		
@@ -59,7 +64,7 @@ namespace CE::RPI
 		/// @brief Scene this render pipeline belongs to.
 		Scene* scene = nullptr;
 
-		/// @brief The pass tree hierarchy.
+		/// @brief The pass tree hierarchy. Pipeline owns & manages the passes.
 		PassTree passTree{};
 
 		/// @brief A hash map of all views owned by this pipeline accessed by their respective tags

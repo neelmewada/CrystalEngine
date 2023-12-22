@@ -1,0 +1,16 @@
+{
+    "Name": "MainPipeline",
+    "RootPass": "RootPass",
+    "PassDefinitions": [
+        // Root Pass...
+        {
+            "Name": "RootPass",
+            "Slots": [
+                {
+                    "Name": "PipelineOutput",
+                    "SlotType": "InputOutput"
+                }
+            ]
+        }
+    ]
+}

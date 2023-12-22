@@ -8,6 +8,16 @@ namespace CE::RPI
 
     }
 
+	RenderPipeline* RenderPipeline::CreateBuiltin(RHI::RenderTarget* renderTarget)
+	{
+		RenderPipelineDesc desc{};
+		desc.name = "MainPipeline";
+		desc.rootPassTemplate = "MainPipeline";
+		desc.mainViewTag = "MainCamera";
+
+		return Create(renderTarget, desc);
+	}
+
 	RenderPipeline* RenderPipeline::Create(RHI::RenderTarget* renderTarget, const RenderPipelineDesc& desc)
 	{
 		RenderPipeline* renderPipeline = new RenderPipeline();

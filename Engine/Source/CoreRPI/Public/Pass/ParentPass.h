@@ -13,7 +13,7 @@ namespace CE::RPI
 		friend class PassSystem;
 	public:
 
-		ParentPass();
+		ParentPass(const PassDesc& desc);
 
 		~ParentPass();
 
@@ -25,6 +25,8 @@ namespace CE::RPI
 		void Clear();
 
 	private:
+
+		PassDesc desc{};
 
 		Array<PassPtr> passes{};
 
