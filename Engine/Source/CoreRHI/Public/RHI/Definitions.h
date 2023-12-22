@@ -201,6 +201,7 @@ namespace CE::RHI
         DimCUBE,
     };
 
+	ENUM()
     enum class Format
     {
         Undefined = 0,
@@ -241,9 +242,11 @@ namespace CE::RHI
 		BC4_UNORM,
 		BC6H_UFLOAT,
     };
+	ENUM_CLASS(Format);
 
     typedef Format TextureFormat;
 
+	ENUM(Flags)
     enum class TextureUsageFlags
     {
 		Default,
@@ -254,11 +257,12 @@ namespace CE::RHI
     };
     ENUM_CLASS_FLAGS(TextureUsageFlags);
 
-	enum FilterMode
+	ENUM()
+	enum class FilterMode
 	{
-		FILTER_MODE_LINEAR = 0,
-		FILTER_MODE_NEAREST = 1,
-		FILTER_MODE_CUBIC = 2
+		Linear = 0,
+		Nearest = 1,
+		Cubic = 2
 	};
 	ENUM_CLASS_FLAGS(FilterMode);
 
@@ -268,7 +272,7 @@ namespace CE::RHI
         Name name{};
         u32 width = 128, height = 128, depth = 1;
         TextureDimension dimension = TextureDimension::Dim2D;
-        TextureFormat format{};
+        Format format{};
         u32 mipLevels = 1;
         u32 sampleCount = 1;
         TextureUsageFlags usageFlags = TextureUsageFlags::Default;

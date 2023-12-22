@@ -33,6 +33,16 @@ namespace CE::RPI
 	{
 	public:
 
+		struct Builder
+		{
+		public:
+
+			RenderPipeline* Build();
+
+		private:
+
+		};
+
 		virtual ~RenderPipeline();
 
 		static RenderPipeline* CreateBuiltin(RHI::RenderTarget* renderTarget);

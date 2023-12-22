@@ -10,8 +10,6 @@ namespace CE::RPI
 
 	private:
 
-		HashMap<Name, PassCreatorFunc> passCreatorsByClassName{};
-
 	};
 
 } // namespace CE::RPI

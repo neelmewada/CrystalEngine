@@ -16,18 +16,16 @@ namespace CE::RPI
 	constexpr u32 PassInputOutputBindingCountMax = PassAttachmentBindingCountMax;
 
 	/// @brief The base Pass class. All passes should derive from this class.
-	class CORERPI_API Pass : public IntrusiveBase
+	CLASS(Abstract)
+	class CORERPI_API Pass : public Object
 	{
+		CE_CLASS(Pass, Object)
+	public:
 		friend class ParentPass;
 		friend class PassFactory;
 		friend class PassLibrary;
-	public:
 
 		virtual ~Pass();
-		
-		inline Name GetName() const { return name; }
-
-		virtual Name GetClassName() const { return "Pass"; }
 
 	protected:
 
@@ -39,8 +37,7 @@ namespace CE::RPI
 		
 	};
 
-	typedef Ptr<Pass> PassPtr;
-
-	using PassCreatorFunc = Delegate<PassPtr(const PassDesc&)>;
     
 } // namespace CE::RPI
+
+#include "Pass.rtti.h"

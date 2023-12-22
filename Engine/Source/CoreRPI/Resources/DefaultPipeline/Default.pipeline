@@ -1,15 +1,41 @@
 {
     "Name": "MainPipeline",
-    "RootPass": "RootPass",
-    "PassDefinitions": [
-        // Root Pass...
+    "PassClass": "ParentPass", // PassClass that defines the MainPipeline as parent class
+    "Slots": [
         {
-            "Name": "RootPass",
+            "Name": "PipelineOutput",
+            "SlotType": "InputOutput"
+        }
+    ],
+    "ChildPasses": [
+        // Depth PrePass
+        {
+            "Name": "DepthPrePass",
+            "PassClass": "DepthPrePass",
             "Slots": [
                 {
-                    "Name": "PipelineOutput",
-                    "SlotType": "InputOutput"
+                    "Name": "Output",
+                    "SlotType": "Output"
                 }
+            ],
+            "ImageAttachments": [
+                {
+                    "Name": "DepthStencil",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "MainPipeline",
+                            "Attachment": "PipelineOutput"
+                        }
+                    },
+                    "ImageDesc": {
+                        "Format": "D32_SFLOAT_S8_UINT",
+                        "UsageFlags": ["DepthStencilAttachment"]
+                    },
+                    "FallbackFormats": ["D32_SFLOAT_S8_UINT", "D24_UNORM_S8_UINT"]
+                }
+            ],
+            "Connections": [
+
             ]
         }
     ]

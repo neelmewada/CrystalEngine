@@ -33,7 +33,7 @@ namespace CE::RPI
         Array<RHI::TextureDimension> dimensions{};
 	};
     
-    struct AttachmentRef
+    struct PassAttachmentRef
     {
         Name pass{};
         Name attachment{};
@@ -42,7 +42,7 @@ namespace CE::RPI
     struct PassConnection final
     {
         Name localSlot{};
-        AttachmentRef attachmentRef{};
+		PassAttachmentRef attachmentRef{};
     };
 
     enum class AttachmentLifetime
@@ -50,6 +50,14 @@ namespace CE::RPI
         Transient = 0,
         Imported
     };
+
+	struct PassAttachmentSizeSource
+	{
+		PassAttachmentRef source{};
+
+		/// @brief Size multipliers for (width, height, depth) from source attachment.
+		Vec3 sizeMultipliers = Vec3(1, 1, 1);
+	};
 
 	struct PassAttachmentDesc
 	{
@@ -59,6 +67,7 @@ namespace CE::RPI
 		/// @brief Lifetime of the attachment.
 		AttachmentLifetime lifetime{};
 
+		PassAttachmentSizeSource sizeSource{};
 
 	};
 

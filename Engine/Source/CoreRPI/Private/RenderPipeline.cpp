@@ -38,4 +38,9 @@ namespace CE::RPI
 
     }
 
+	RenderPipeline* RenderPipeline::Builder::Build()
+	{
+		return nullptr;
+	}
+
 } // namespace CE::RPI
