@@ -1,42 +1,59 @@
 {
-    "Name": "MainPipeline",
-    "PassClass": "ParentPass", // PassClass that defines the MainPipeline as parent class
-    "Slots": [
-        {
-            "Name": "PipelineOutput",
-            "SlotType": "InputOutput"
-        }
-    ],
-    "ChildPasses": [
-        // Depth PrePass
-        {
-            "Name": "DepthPrePass",
-            "PassClass": "DepthPrePass",
-            "Slots": [
-                {
-                    "Name": "Output",
-                    "SlotType": "Output"
+    "Name": "DefaultPipeline",
+    "MainViewTag": "Camera",
+    "ViewTags": ["Shadow", "Camera", "ReflectionProbe"],
+    "RootPass": {
+        "Slots": [
+            // Final color output
+            {
+                "Name": "PipelineOutput",
+                "SlotType": "InputOutput",
+                "ScopeAttachmentUsage": "RenderTarget",
+                "LoadStoreAction": {
+                    "LoadAction": "Clear", // Clear render target using clear color
+                    "StoreAction": "Store" // Store it so it can be presented
                 }
-            ],
-            "ImageAttachments": [
-                {
-                    "Name": "DepthStencil",
-                    "SizeSource": {
-                        "Source": {
-                            "Pass": "MainPipeline",
-                            "Attachment": "PipelineOutput"
+            }
+        ],
+        "ImageAttachments": [
+            // Color Output
+            {
+                "Name": "RenderTarget",
+                "Lifetime": "Imported", // Transient OR PipelineGlobal OR Imported
+                "ImageDesc": {
+                    "UsageFlags": ["RenderTarget"],
+                    "Format": "R8G8B8A8_SRGB"
+                }
+            },
+            // Depth Stencil
+            {
+                "Name": "DepthStencil",
+                "Lifetime": "PipelineGlobal",
+                "ImageDesc": {
+                    "UsageFlags": ["DepthStencil"],
+                    "Format": "D32_SFLOAT_S8_UINT"
+                }
+            }
+        ],
+        "ChildPasses": [
+            {
+                "Name": "DepthPrePass",
+                "Slots": [
+                    {
+                        "Name": "Depth",
+                        "SlotType": "Output"
+                    }
+                ],
+                "Connections": [
+                    {
+                        "LocalSlot": "Depth",
+                        "AttachmentRef": {
+                            "Pass": "RootPass",
+                            "Attachment": "DepthStencil"
                         }
-                    },
-                    "ImageDesc": {
-                        "Format": "D32_SFLOAT_S8_UINT",
-                        "UsageFlags": ["DepthStencilAttachment"]
-                    },
-                    "FallbackFormats": ["D32_SFLOAT_S8_UINT", "D24_UNORM_S8_UINT"]
-                }
-            ],
-            "Connections": [
-
-            ]
-        }
-    ]
+                    }
+                ]
+            }
+        ]
+    }
 }
