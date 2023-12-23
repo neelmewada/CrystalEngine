@@ -1,7 +1,46 @@
 {
     "Name": "DefaultPipeline",
     "MainViewTag": "Camera",
-    "RootPass": "DefaultPipelineRoot",
+    // Root pass (PassRequest)
+    "RootPass": {
+        "Name": "DefaultPipelineRoot",
+        "PassDefinition": "DefaultPipelineRoot",
+        "ChildPasses": [ // [PassRequest] list
+            {
+                "PassName": "DepthPrePass",
+                "PassDefinition": "DepthPrePassDefinition",
+                "Connections": [],
+                "ChildPasses": [] // No child passes
+            },
+            {
+                "PassName": "OpaquePass",
+                "PassDefinition": "OpaquePassDefinition",
+                "Connections": [],
+                "ChildPasses": [] // No child passes
+            },
+            {
+                "PassName": "TransparentPass",
+                "PassDefinition": "TransparentPassDefinition",
+                "Connections": [ // INPUT connections should ALWAYS be defined inside "ChildPasses" and NOT in root pass definitions array.
+                    { // Connect TransparentPass's Input to OpaquePass's Output like this:   OpaquePass[Color] -> TransparentPass[Color]
+                        "LocalSlot": "Color",
+                        "AttachmentRef": {
+                            "Pass": "OpaquePass",
+                            "Attachment": "Color"
+                        }
+                    },
+                    { // Connect Color IO slot to PipelineOutput
+                        "LocalSlot": "Color",
+                        "AttachmentRef": {
+                            "Pass": "$root",
+                            "Attachment": "PipelineOutput"
+                        }
+                    }
+                ],
+                "ChildPasses": [] // No child passes
+            }
+        ]
+    },
     // List of pass definitions
     "PassDefinitions": [
         // Root Pass (DefaultPipelineRoot): The render target image attachment is automaticall inferred, no need to manually define it.
@@ -13,34 +52,6 @@
                 {
                     "Name": "PipelineOutput",
                     "SlotType": "InputOutput"
-                }
-            ],
-            "ChildPasses": [
-                {
-                    "Name": "DepthPrePass",
-                    "PassDefinition": "DepthPrePassDefinition",
-                    "Connections": [],
-                    "ChildPasses": [] // No child passes
-                },
-                {
-                    "Name": "OpaquePass",
-                    "PassDefinition": "OpaquePassDefinition",
-                    "Connections": [],
-                    "ChildPasses": [] // No child passes
-                },
-                {
-                    "Name": "TransparentPass",
-                    "PassDefinition": "TransparentPassDefinition",
-                    "Connections": [ // INPUT connections should ALWAYS be defined inside "ChildPasses" and NOT in root pass definitions array.
-                        { // Connect TransparentPass's Input to OpaquePass's Output like this: OpaquePass -> TransparentPass
-                            "LocalSlot": "Color",
-                            "AttachmentRef": {
-                                "Pass": "OpaquePass",
-                                "Attachment": "Color"
-                            }
-                        }
-                    ],
-                    "ChildPasses": [] // No child passes
                 }
             ]
         },

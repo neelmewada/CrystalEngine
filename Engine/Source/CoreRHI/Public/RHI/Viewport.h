@@ -8,10 +8,10 @@ namespace CE::RHI
 	class Viewport;
 
 	/// A render target that is drawn to by GPU. It is automatically created for you in case of Viewport.
-	class CORERHI_API RenderTarget : public Resource
+	class CORERHI_API RenderTarget : public RHIResource
 	{
 	protected:
-		RenderTarget() : Resource(ResourceType::RenderTarget)
+		RenderTarget() : RHIResource(ResourceType::RenderTarget)
 		{}
 	public:
 		virtual ~RenderTarget() = default;
@@ -45,10 +45,10 @@ namespace CE::RHI
 	};
 
 	/// A viewport used to draw to & present from.
-	class CORERHI_API Viewport : public Resource
+	class CORERHI_API Viewport : public RHIResource
 	{
 	protected:
-		Viewport() : Resource(ResourceType::Viewport)
+		Viewport() : RHIResource(ResourceType::Viewport)
 		{}
 	public:
 		virtual ~Viewport() = default;

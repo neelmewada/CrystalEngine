@@ -3,10 +3,10 @@
 namespace CE::RHI
 {
 
-	class CORERHI_API Texture : public Resource, public IDeviceObject
+	class CORERHI_API Texture : public RHIResource, public IDeviceObject
 	{
 	protected:
-		Texture() : Resource(ResourceType::Texture), IDeviceObject(DeviceObjectType::Texture)
+		Texture() : RHIResource(ResourceType::Texture), IDeviceObject(DeviceObjectType::Texture)
 		{}
 
 	public:

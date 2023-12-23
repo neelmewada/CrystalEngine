@@ -27,10 +27,10 @@ namespace CE::RHI
 
 	};
 
-	class CORERHI_API GraphicsPipelineState : public Resource, public IPipelineState
+	class CORERHI_API GraphicsPipelineState : public RHIResource, public IPipelineState
 	{
 	protected:
-		GraphicsPipelineState() : Resource(ResourceType::GraphicsPipelineState)
+		GraphicsPipelineState() : RHIResource(ResourceType::GraphicsPipelineState)
 		{}
 
 	public:

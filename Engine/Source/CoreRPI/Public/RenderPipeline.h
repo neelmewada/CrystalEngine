@@ -3,6 +3,7 @@
 namespace CE::RPI
 {
 	class PassTree;
+	class Scene;
 
 	enum class PipelineViewType
 	{

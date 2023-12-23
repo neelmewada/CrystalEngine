@@ -3,10 +3,10 @@
 namespace CE::RHI
 {
 
-	class CORERHI_API Sampler : public Resource
+	class CORERHI_API Sampler : public RHIResource
 	{
 	protected:
-		Sampler() : Resource(ResourceType::Sampler)
+		Sampler() : RHIResource(ResourceType::Sampler)
 		{}
 
 	public:

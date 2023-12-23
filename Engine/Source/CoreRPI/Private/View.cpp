@@ -4,16 +4,16 @@ namespace CE::RPI
 {
 	View::View()
 	{
-		RHI::ShaderResourceGroupDesc desc{};
-		desc.srgType = RHI::SRGType::PerView;
 		
-		shaderResourceGroup = new RPI::ShaderResourceGroup(desc);
 	}
 
 	View::~View()
 	{
-		delete shaderResourceGroup;
-		shaderResourceGroup = nullptr;
+		if (shaderResourceGroup != nullptr)
+		{
+			delete shaderResourceGroup;
+			shaderResourceGroup = nullptr;
+		}
 	}
 
 	void View::SetDrawListMask(const RHI::DrawListMask& mask)

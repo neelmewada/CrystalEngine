@@ -5,10 +5,10 @@ namespace CE::RHI
 	class IPipelineState;
 	class Viewport;
 
-	class CORERHI_API CommandList : public Resource
+	class CORERHI_API CommandList : public RHIResource
 	{
 	protected:
-		CommandList() : Resource(ResourceType::CommandList)
+		CommandList() : RHIResource(ResourceType::CommandList)
 		{}
 	public:
 		virtual ~CommandList() = default;

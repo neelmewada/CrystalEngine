@@ -3,10 +3,10 @@
 namespace CE::RHI
 {
 
-	class CORERHI_API Buffer : public Resource, public IDeviceObject
+	class CORERHI_API Buffer : public RHIResource, public IDeviceObject
 	{
 	protected:
-		Buffer() : Resource(ResourceType::Buffer), IDeviceObject(DeviceObjectType::Buffer)
+		Buffer() : RHIResource(ResourceType::Buffer), IDeviceObject(DeviceObjectType::Buffer)
 		{}
 
 	public:

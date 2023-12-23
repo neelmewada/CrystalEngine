@@ -1,0 +1,26 @@
+{
+    "Name": "DefaultPipeline",
+    "MainViewTag": "Camera",
+    // Root pass (PassRequest)
+    "RootPass": {
+        "PassName": "DefaultPipelineRoot",
+        "PassDefinition": "DefaultPipelineRoot",
+        "ChildPasses": [ // [PassRequest] list
+            
+        ]
+    },
+    "PassDefinitions": [
+        // Root Pass (DefaultPipelineRoot): The render target image attachment is automaticall inferred, no need to manually define it.
+        {
+            "Name": "DefaultPipelineRoot",
+            "PassClass": "ParentPass",
+            "Slots": [
+                // Final color output
+                {
+                    "Name": "PipelineOutput",
+                    "SlotType": "InputOutput"
+                }
+            ]
+        }
+    ]
+}

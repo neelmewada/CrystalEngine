@@ -5,13 +5,13 @@
 namespace CE::RHI
 {
     
-    class CORERHI_API Resource : IntrusiveBase
+    class CORERHI_API RHIResource : IntrusiveBase
     {
     protected:
-        Resource(ResourceType resourceType) : resourceType(resourceType)
+		RHIResource(ResourceType resourceType) : resourceType(resourceType)
         {}
     public:
-        virtual ~Resource() = default;
+        virtual ~RHIResource() = default;
 
         ResourceType GetResourceType() const 
         {

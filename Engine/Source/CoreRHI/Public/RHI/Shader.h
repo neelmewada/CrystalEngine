@@ -3,10 +3,10 @@
 namespace CE::RHI
 {
 
-	class CORERHI_API ShaderModule : public Resource
+	class CORERHI_API ShaderModule : public RHIResource
 	{
 	protected:
-		ShaderModule() : Resource(ResourceType::ShaderModule)
+		ShaderModule() : RHIResource(ResourceType::ShaderModule)
 		{}
 
 	public:
