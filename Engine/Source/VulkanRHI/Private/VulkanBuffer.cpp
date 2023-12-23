@@ -20,7 +20,7 @@ namespace CE
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 		}
-		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::StorageBuffer))
+		if (EnumHasFlag(bindFlags, RHI::BufferBindFlags::StructuredBuffer))
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		}

@@ -15,6 +15,23 @@ namespace CE::RPI
 	constexpr u32 PassOutputBindingCountMax = PassAttachmentBindingCountMax;
 	constexpr u32 PassInputOutputBindingCountMax = PassAttachmentBindingCountMax;
 
+	/// @brief Describes the pass to create as a subpass of current pass.
+	struct PassRequest
+	{
+		/// @brief Name of the pass after instantiation
+		Name passName{};
+
+		/// @brief Name of pass template we will instantiate from
+		Name templateName{};
+
+		/// @brief Connections of the instantiated pass
+		Array<PassConnection> connections{};
+
+		/// @brief Override for image attachments.
+		Array<PassImageAttachmentDesc> imageAttachmentOverrides{};
+
+	};
+
 	/// @brief The base Pass class. All passes should derive from this class.
 	CLASS(Abstract)
 	class CORERPI_API Pass : public Object

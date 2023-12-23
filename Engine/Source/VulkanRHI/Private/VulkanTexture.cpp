@@ -121,10 +121,10 @@ namespace CE
 		VkFilter vkFilter = VK_FILTER_LINEAR;
 		switch (filter)
 		{
-		case CE::RHI::FILTER_MODE_NEAREST:
+		case CE::RHI::FilterMode::Nearest:
 			vkFilter = VK_FILTER_NEAREST;
 			break;
-		case CE::RHI::FILTER_MODE_CUBIC:
+		case CE::RHI::FilterMode::Cubic:
 			if (device->IsDeviceExtensionSupported(VK_EXT_FILTER_CUBIC_EXTENSION_NAME))
 				vkFilter = VK_FILTER_CUBIC_EXT;
 			break;
@@ -196,24 +196,24 @@ namespace CE
 
         this->vkFormat = imageCI.format;
         
-        if (EnumHasAnyFlags(desc.usageFlags, RHI::TextureUsageFlags::SampledImage) || desc.usageFlags == RHI::TextureUsageFlags::Default)
+        if (EnumHasAnyFlags(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
         {
             imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
             aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
         }
-        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::ColorAttachment))
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Color))
         {
             imageCI.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
             aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
         }
-        if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::DepthStencilAttachment))
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::DepthStencil))
         {
             imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
 			if (this->format == RHI::TextureFormat::D24_UNORM_S8_UINT || this->format == RHI::TextureFormat::D32_SFLOAT_S8_UINT)
 				aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
         }
-		if (EnumHasFlag(desc.usageFlags, RHI::TextureUsageFlags::InputAttachment))
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::SubpassInput))
 		{
 			imageCI.usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 		}
@@ -290,16 +290,15 @@ namespace CE
 
 		// Transition image layout
 
-		switch (desc.usageFlags)
+		switch (desc.bindFlags)
 		{
-		case RHI::TextureUsageFlags::SampledImage:
-		case RHI::TextureUsageFlags::Default:
+		case RHI::TextureBindFlags::ShaderRead:
 			vkImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			break;
-		case RHI::TextureUsageFlags::ColorAttachment:
+		case RHI::TextureBindFlags::Color:
 			vkImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 			break;
-		case RHI::TextureUsageFlags::DepthStencilAttachment:
+		case RHI::TextureBindFlags::DepthStencil:
 			vkImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			break;
 		default:
@@ -373,7 +372,7 @@ namespace CE
         stagingBufferDesc.name = "Staging Texture Buffer";
         stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
         stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-        stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+        stagingBufferDesc.bindFlags = RHI::BufferUsageFlags::Default;
         stagingBufferDesc.bufferSize = totalSize;
         stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
         stagingBufferDesc.initialData = &stagingBufferData;
@@ -404,7 +403,7 @@ namespace CE
 		stagingBufferDesc.name = "Staging Texture Buffer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
 		stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-		stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+		stagingBufferDesc.bindFlags = RHI::BufferUsageFlags::Default;
 		stagingBufferDesc.bufferSize = totalSize;
 		stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
 		stagingBufferDesc.initialData = nullptr;

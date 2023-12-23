@@ -4,54 +4,34 @@ namespace CE::RPI
 {
 	class PassTree;
 
+	enum class PipelineViewType
+	{
+		Undefined = 0,
+		Persistent,
+		Transient
+	};
+
 	struct PipelineViews
 	{
 		PipelineViewTag viewTag{};
+		PipelineViewType viewType{};
 
 		Array<ViewPtr> views{};
 	};
 
 	using PipelineViewsByTag = HashMap<PipelineViewTag, PipelineViews>;
 
-	/// @brief Descriptor used to create a Render Pipeline.
-	struct RenderPipelineDesc
-	{
-		/// @brief Name of the render pipeline.
-		Name name{};
-
-		/// @brief Name of the pass template to instantiate as root pass
-		Name rootPassTemplate{};
-
-		/// @brief Name tag of the main view.
-		Name mainViewTag = "MainCamera";
-
-		/// @brief Name tags of each draw lists
-		HashMap<u8, Name> drawListTagNames{};
-	};
-
 	class CORERPI_API RenderPipeline final
 	{
+		friend class RenderPipelineBuilder;
 	public:
-
-		struct Builder
-		{
-		public:
-
-			RenderPipeline* Build();
-
-		private:
-
-		};
 
 		virtual ~RenderPipeline();
 
-		static RenderPipeline* CreateBuiltin(RHI::RenderTarget* renderTarget);
-
-		static RenderPipeline* Create(RHI::RenderTarget* renderTarget, const RenderPipelineDesc& desc);
+		void SetPersistentView(const PipelineViewTag& viewTag, ViewPtr view);
 		
 	private:
 
-		void Initialize(const RenderPipelineDesc& desc);
 
 	protected:
 
@@ -62,8 +42,6 @@ namespace CE::RPI
 
 		/// @brief Name of the pipeline
 		Name name{};
-
-		RenderPipelineDesc desc{};
 
 		/// @brief Name of the pass template to instantiate as root pass
 		Name rootPassTemplateName{};

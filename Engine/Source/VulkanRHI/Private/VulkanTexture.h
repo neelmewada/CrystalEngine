@@ -60,7 +60,7 @@ namespace CE
         VkImageView imageView = nullptr;
         RHI::TextureDimension dimension{};
 
-        String name = "";
+        Name name = "";
         u32 width = 0, height = 0, depth = 0;
         u32 sampleCount = 0;
         u32 mipLevels = 1;

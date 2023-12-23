@@ -30,7 +30,6 @@ ce_add_target(${PROJECT_NAME} SHARED
             $<${PAL_PLATFORM_IS_DESKTOP}:Vulkan::SPIRV-Tools>
         PUBLIC
             CE::Core
-            CE::CoreRHI
     RUNTIME_DEPENDENCIES
         dxcompiler
         SpirvTools

@@ -15,8 +15,6 @@ namespace CE::RPI
 		friend class PassTemplate;
 		friend class PassSystem;
 
-		ParentPass(const PassDesc& desc);
-
 		~ParentPass();
 
 		void AddChild(Pass* childPass);
@@ -26,9 +24,7 @@ namespace CE::RPI
 
 	private:
 
-		PassDesc desc{};
-
-		Array<PassPtr> passes{};
+		Array<Pass*> passes{};
 
 	};
     

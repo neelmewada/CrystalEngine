@@ -8,6 +8,8 @@ namespace CE::RHI
 
 	using DrawListMask = BitSet<Limits::Pipeline::DrawListTagCount>;
 
+	using DrawListTagRegistry = TagRegistry<DrawListTag::IndexType, Limits::Pipeline::DrawListTagCount>;
+
 	class CORERHI_API DrawList final
 	{
 	public:

@@ -4,6 +4,11 @@ namespace CE::RHI
 {
 	CORERHI_API u32 GetTheadLocalContextCounter();
 
+	/*
+	 * Copyright (c) Contributors to the Open 3D Engine Project.
+	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 */
+
 	template<typename Storage>
 	class ThreadLocalContext
 	{

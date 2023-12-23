@@ -7,9 +7,11 @@ namespace CE::RPI
 	{
 	public:
 
+		virtual ~PassTree();
+
 	private:
 
-		Ptr<ParentPass> rootPass = nullptr;
+		ParentPass* rootPass = nullptr;
 
 	};
 

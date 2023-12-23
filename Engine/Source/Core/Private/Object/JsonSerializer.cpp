@@ -61,6 +61,14 @@ namespace CE
         
 		TypeInfo* fieldDeclType = field->GetDeclarationType();
         TypeId fieldTypeId = fieldDeclType->GetTypeId();
+
+		bool isVectorField = false;
+		if (fieldTypeId == TYPEID(Vec2) || fieldTypeId == TYPEID(Vec3) || fieldTypeId == TYPEID(Vec4) ||
+			fieldTypeId == TYPEID(Vec2i) || fieldTypeId == TYPEID(Vec3i) || fieldTypeId == TYPEID(Vec4i) || 
+			fieldTypeId == TYPEID(Color))
+		{
+			isVectorField = true;
+		}
         
         if (field->IsIntegerField())
         {
@@ -94,6 +102,73 @@ namespace CE
             else if (fieldTypeId == TYPEID(f64))
                 writer.WriteValue((f32)field->GetFieldValue<f64>(rawInstance));
         }
+		else if (field->IsEnumField()) // Serialize Enum as number
+		{
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			writer.WriteValue(field->GetFieldEnumValue(rawInstance));
+		}
+		else if (isVectorField) // Serialize vector as array of numbers
+		{
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			writer.WriteArrayStart();
+			{
+				if (fieldTypeId == TYPEID(Vec2))
+				{
+					Vec2 vec = field->GetFieldValue<Vec2>(rawInstance);
+					writer.WriteValue(vec.x);
+					writer.WriteValue(vec.y);
+				}
+				else if (fieldTypeId == TYPEID(Vec2i))
+				{
+					Vec2i vec = field->GetFieldValue<Vec2i>(rawInstance);
+					writer.WriteValue(vec.x);
+					writer.WriteValue(vec.y);
+				}
+				else if (fieldTypeId == TYPEID(Vec3))
+				{
+					Vec3 vec = field->GetFieldValue<Vec3>(rawInstance);
+					writer.WriteValue(vec.x);
+					writer.WriteValue(vec.y);
+					writer.WriteValue(vec.z);
+				}
+				else if (fieldTypeId == TYPEID(Vec3i))
+				{
+					Vec3i vec = field->GetFieldValue<Vec3i>(rawInstance);
+					writer.WriteValue(vec.x);
+					writer.WriteValue(vec.y);
+					writer.WriteValue(vec.z);
+				}
+				else if (fieldTypeId == TYPEID(Vec4))
+				{
+					Vec4 vec = field->GetFieldValue<Vec4>(rawInstance);
+					writer.WriteValue(vec.x);
+					writer.WriteValue(vec.y);
+					writer.WriteValue(vec.z);
+					writer.WriteValue(vec.w);
+				}
+				else if (fieldTypeId == TYPEID(Vec4i))
+				{
+					Vec4i vec = field->GetFieldValue<Vec4i>(rawInstance);
+					writer.WriteValue(vec.x);
+					writer.WriteValue(vec.y);
+					writer.WriteValue(vec.z);
+					writer.WriteValue(vec.w);
+				}
+				else if (fieldTypeId == TYPEID(Color))
+				{
+					Color color = field->GetFieldValue<Color>(rawInstance);
+					writer.WriteValue(color.r);
+					writer.WriteValue(color.g);
+					writer.WriteValue(color.b);
+					writer.WriteValue(color.a);
+				}
+			}
+			writer.WriteArrayClose();
+		}
         else if (fieldTypeId == TYPEID(Uuid))
         {
 			if (isMap)
@@ -115,6 +190,70 @@ namespace CE
 				writer.WriteIdentifier(field->GetName().GetString());
 
 			writer.WriteValue(field->GetFieldValue<Name>(rawInstance).GetString());
+		}
+		else if (fieldTypeId == TYPEID(ClassType))
+		{
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			ClassType* classType = field->GetFieldValue<ClassType*>(rawInstance);
+
+			if (classType == nullptr)
+			{
+				writer.WriteNull();
+			}
+			else
+			{
+				writer.WriteValue(classType->GetTypeName().GetString());
+			}
+		}
+		else if (fieldTypeId == TYPEID(StructType))
+		{
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			StructType* structType = field->GetFieldValue<StructType*>(rawInstance);
+
+			if (structType == nullptr)
+			{
+				writer.WriteNull();
+			}
+			else
+			{
+				writer.WriteValue(structType->GetTypeName().GetString());
+			}
+		}
+		else if (fieldTypeId == TYPEID(EnumType))
+		{
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			EnumType* enumType = field->GetFieldValue<EnumType*>(rawInstance);
+
+			if (enumType == nullptr)
+			{
+				writer.WriteNull();
+			}
+			else
+			{
+				writer.WriteValue(enumType->GetTypeName().GetString());
+			}
+		}
+		else if (fieldTypeId == TYPEID(SubClassType<>))
+		{
+			if (isMap)
+				writer.WriteIdentifier(field->GetName().GetString());
+
+			ClassType* classType = field->GetFieldValue<SubClassType<>>(rawInstance);
+
+			if (classType == nullptr)
+			{
+				writer.WriteNull();
+			}
+			else
+			{
+				writer.WriteValue(classType->GetTypeName().GetString());
+			}
 		}
 		else if (fieldDeclType->IsStruct())
 		{
@@ -548,6 +687,22 @@ namespace CE
 				*json = JValue(String());
 			}
 		}
+		else if (field->IsEnumField()) // Serialize enum as an integer
+		{
+			JValue* json = nullptr;
+			if (isMap)
+			{
+				parentJson.GetObjectValue().Add({ fieldName, JValue(0) });
+				json = &parentJson.GetObjectValue()[fieldName];
+			}
+			else if (isArray)
+			{
+				parentJson.GetArrayValue().Add(JValue(0));
+				json = &parentJson.GetArrayValue().Top();
+			}
+
+			*json = JValue(field->GetFieldEnumValue(rawInstance));
+		}
 		else if (fieldDeclType->IsStruct())
 		{
 			JValue* json = nullptr;
@@ -728,10 +883,18 @@ namespace CE
 		fields.RemoveAt(0);
 		auto fieldName = field->GetName().GetString();
 
-		if (isMap && !parentJson.KeyExists(fieldName))
-			return false;
 		if (isArray && !parentJson.IndexExists(arrayIndex))
 			return false;
+
+		if (isMap)
+		{
+			if (parentJson.KeyExists(fieldName))
+				; // Do nothing
+			else if (parentJson.KeyExists(fieldName.ToPascalCase()))
+				fieldName = fieldName.ToPascalCase();
+			else
+				return false;
+		}
 
 		const auto& json = isMap ? parentJson.GetObjectValue().Get(fieldName) : parentJson.GetArrayValue()[arrayIndex++];
 
@@ -742,7 +905,15 @@ namespace CE
 		auto fieldTypeId = field->GetDeclarationTypeId();
 		auto underlyingType = field->GetUnderlyingType();
 
-		if (json.IsNumberValue() && (field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(Uuid)))
+		bool isVectorField = false;
+		if (fieldTypeId == TYPEID(Vec2) || fieldTypeId == TYPEID(Vec3) || fieldTypeId == TYPEID(Vec4) ||
+			fieldTypeId == TYPEID(Vec2i) || fieldTypeId == TYPEID(Vec3i) || fieldTypeId == TYPEID(Vec4i) ||
+			fieldTypeId == TYPEID(Color))
+		{
+			isVectorField = true;
+		}
+		
+		if (json.IsNumberValue() && (field->IsIntegerField() || field->IsDecimalField() || fieldTypeId == TYPEID(Uuid) || field->IsEnumField()))
 		{
 			if (fieldTypeId == TYPEID(s8))
 				field->SetFieldValue<s8>(rawInstance, (s8)json.GetNumberValue());
@@ -766,6 +937,8 @@ namespace CE
 				field->SetFieldValue<f64>(rawInstance, (f64)json.GetNumberValue());
 			else if (fieldTypeId == TYPEID(Uuid))
 				field->SetFieldValue<Uuid>(rawInstance, Uuid((u64)json.GetNumberValue()));
+			else if (field->IsEnumField()) // Deserialize enum from number
+				field->SetFieldEnumValue(rawInstance, (s64)json.GetNumberValue());
 			else
 				return false;
 
@@ -804,8 +977,17 @@ namespace CE
 					value = nullptr;
 				}
 			}
+			else if (field->IsEnumField()) // Deserialize enum from string
+			{
+				EnumType* enumType = (EnumType*)fieldDeclType;
+				EnumConstant* enumConstant = enumType->FindConstantWithName(json.GetStringValue());
+				if (enumConstant != nullptr)
+					field->SetFieldEnumValue(rawInstance, enumConstant->GetValue());
+			}
 			else
+			{
 				return false;
+			}
 
 			return true;
 		}
@@ -867,6 +1049,70 @@ namespace CE
 			{
 				deserializer.ReadNext(json);
 			}
+
+			return true;
+		}
+		else if (json.IsArrayValue() && field->IsEnumFlagsField()) // Array of enum flags, i.e. array string values
+		{
+			if (json.GetArrayValue().IsEmpty())
+			{
+				field->SetFieldEnumValue(rawInstance, 0);
+				return true;
+			}
+
+			EnumType* enumType = (EnumType*)fieldDeclType;
+
+			const JArray& flagsArray = json.GetArrayValue();
+			s64 enumFlags = 0;
+
+			for (int i = 0; i < flagsArray.GetSize(); i++)
+			{
+				if (!flagsArray[i].IsStringValue())
+					continue;
+				
+				String flagName = flagsArray[i].GetStringValue();
+				EnumConstant* constant = enumType->FindConstantWithName(flagName);
+				if (constant == nullptr)
+					continue;
+
+				enumFlags |= constant->GetValue();
+			}
+
+			field->SetFieldEnumValue(rawInstance, enumFlags);
+
+			return true;
+		}
+		else if (json.IsArrayValue() && isVectorField) // Vector (float array)
+		{
+			const JArray& arrayValue = json.GetArrayValue();
+			Vec4 vec4 = {};
+			Vec4i vec4i = {};
+			int idx = 0;
+			
+			for (int i = 0; i < arrayValue.GetSize() && idx < 4; i++)
+			{
+				if (!arrayValue[i].IsNumberValue())
+					continue;
+
+				vec4[idx] = (f32)arrayValue[i].GetNumberValue();
+				vec4i[idx] = (s32)arrayValue[i].GetNumberValue();
+				idx++;
+			}
+
+			if (fieldTypeId == TYPEID(Vec2))
+				field->SetFieldValue<Vec2>(rawInstance, vec4);
+			else if (fieldTypeId == TYPEID(Vec3))
+				field->SetFieldValue<Vec3>(rawInstance, vec4);
+			else if (fieldTypeId == TYPEID(Vec4))
+				field->SetFieldValue<Vec4>(rawInstance, vec4);
+			else if (fieldTypeId == TYPEID(Vec2i))
+				field->SetFieldValue<Vec2i>(rawInstance, vec4i);
+			else if (fieldTypeId == TYPEID(Vec3i))
+				field->SetFieldValue<Vec3i>(rawInstance, vec4i);
+			else if (fieldTypeId == TYPEID(Vec4i))
+				field->SetFieldValue<Vec4i>(rawInstance, vec4i);
+			else if (fieldTypeId == TYPEID(Color))
+				field->SetFieldValue<Color>(rawInstance, Color(vec4.x, vec4.y, vec4.z, vec4.w));
 
 			return true;
 		}

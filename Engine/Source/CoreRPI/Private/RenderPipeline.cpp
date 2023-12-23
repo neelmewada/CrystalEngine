@@ -8,39 +8,16 @@ namespace CE::RPI
 
     }
 
-	RenderPipeline* RenderPipeline::CreateBuiltin(RHI::RenderTarget* renderTarget)
+	void RenderPipeline::SetPersistentView(const PipelineViewTag& viewTag, ViewPtr view)
 	{
-		RenderPipelineDesc desc{};
-		desc.name = "MainPipeline";
-		desc.rootPassTemplate = "MainPipeline";
-		desc.mainViewTag = "MainCamera";
+		if (pipelineViewsByTag.KeyExists(viewTag))
+		{
 
-		return Create(renderTarget, desc);
-	}
+		}
+		else
+		{
 
-	RenderPipeline* RenderPipeline::Create(RHI::RenderTarget* renderTarget, const RenderPipelineDesc& desc)
-	{
-		RenderPipeline* renderPipeline = new RenderPipeline();
-		renderPipeline->renderTarget = renderTarget;
-
-		renderPipeline->Initialize(desc);
-
-		return renderPipeline;
-	}
-
-    void RenderPipeline::Initialize(const RenderPipelineDesc& desc)
-    {
-		this->desc = desc;
-
-		name = desc.name;
-		rootPassTemplateName = desc.rootPassTemplate;
-		mainViewTag = desc.mainViewTag;
-
-    }
-
-	RenderPipeline* RenderPipeline::Builder::Build()
-	{
-		return nullptr;
+		}
 	}
 
 } // namespace CE::RPI

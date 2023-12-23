@@ -24,10 +24,14 @@ namespace CE
 
 	void VulkanDevice::Initialize()
 	{
-		// TODO: pass window handle
+		// Check if a main window exists, otherwise initialize in offscreen mode
 		auto mainWindow = VulkanPlatform::GetMainPlatformWindow();
+		surfaceSupported = true;
+
 		if (mainWindow != nullptr)
 			testSurface = VulkanPlatform::CreateSurface(instance, mainWindow);
+		else
+			surfaceSupported = false; // Initialize vulkan in offscreen mode
 
 		SelectGpu();
 		InitGpu();

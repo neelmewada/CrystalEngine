@@ -1,7 +1,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CoreRHI.h"
 
 #include "ShaderMath/Vector.h"
 

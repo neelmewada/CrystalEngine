@@ -70,6 +70,7 @@ namespace CE
         bool IsIntegerField() const;
         bool IsDecimalField() const;
 		bool IsEnumField();
+		bool IsEnumFlagsField();
 
         bool IsObjectField() const;
 		bool IsStructField();

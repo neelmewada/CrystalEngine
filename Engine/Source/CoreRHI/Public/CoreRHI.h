@@ -2,10 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "CoreMedia.h"
+#include "CoreShader.h"
 
 #include "RHI/ThreadLocalContext.h"
 #include "RHI/Limits.h"
 #include "RHI/Handle.h"
+
+#include "RHI/TagRegistry.h"
 
 #include "RHI/Definitions.h"
 #include "RHI/ClearValue.h"
@@ -33,6 +36,8 @@
 
 // Frame
 #include "RHI/FrameAttachment.h"
+
+#include "RHI/RHISystem.h"
 
 namespace CE
 {

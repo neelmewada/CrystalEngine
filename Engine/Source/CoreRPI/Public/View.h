@@ -39,7 +39,7 @@ namespace CE::RPI
 		RHI::DrawListMask drawListMask{};
 
 		/// @brief View ShaderResourceGroup (SRG_PerView)
-		RPI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
 		b8 enabled = true;
 

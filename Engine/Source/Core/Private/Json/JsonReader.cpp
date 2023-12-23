@@ -297,7 +297,7 @@ namespace CE
 				if (!stream->IsOutOfBounds())
 				{
 					CHAR next = stream->Read();
-					if (next == '/') // Definitely a comment
+					if (next == '/') // Single line comment
 					{
 						while (!stream->IsOutOfBounds()) // Skip thru entire comment
 						{
@@ -306,6 +306,20 @@ namespace CE
 								break;
 						}
 						
+						// Now that comment is skipped, read next actual token
+						return ParseNextToken(outToken, outLexeme);
+					}
+					else if (next == '*') // Multi line comment
+					{
+						CHAR prev = 0;
+						while (!stream->IsOutOfBounds()) // Skip thru entire comment
+						{
+							next = stream->Read();
+							if (prev == '*' && next == '/') // Stop at end of multi line comment
+								break;
+							prev = next;
+						}
+
 						// Now that comment is skipped, read next actual token
 						return ParseNextToken(outToken, outLexeme);
 					}

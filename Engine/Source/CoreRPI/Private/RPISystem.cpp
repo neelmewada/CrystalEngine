@@ -2,6 +2,13 @@
 
 namespace CE::RPI
 {
+
+    RPISystem& RPISystem::Get()
+    {
+		static RPISystem instance{};
+        return instance;
+    }
+
     void RPISystem::Initialize()
     {
 		passSystem.Initialize();

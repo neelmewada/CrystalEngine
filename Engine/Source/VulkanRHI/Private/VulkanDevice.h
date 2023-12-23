@@ -54,13 +54,15 @@ namespace CE
 
         // - Getters -
 
-        INLINE VkCommandPool GetGraphicsCommandPool() { return gfxCommandPool; }
+		INLINE bool IsOffscreenMode() const { return !surfaceSupported; }
 
-        INLINE VulkanQueue* GetGraphicsQueue() { return graphicsQueue; }
-        INLINE VulkanQueue* GetPresentQueue() { return presentQueue; }
+        INLINE VkCommandPool GetGraphicsCommandPool() const { return gfxCommandPool; }
 
-        INLINE VkDevice GetHandle() { return device; }
-        INLINE VkPhysicalDevice GetPhysicalHandle() { return gpu; }
+        INLINE VulkanQueue* GetGraphicsQueue() const { return graphicsQueue; }
+        INLINE VulkanQueue* GetPresentQueue() const { return presentQueue; }
+
+        INLINE VkDevice GetHandle() const { return device; }
+        INLINE VkPhysicalDevice GetPhysicalHandle() const { return gpu; }
 
         INLINE const SurfaceSupportInfo& GetSurfaceSupportInfo() const { return surfaceSupport; }
 
@@ -94,6 +96,11 @@ namespace CE
         SurfaceSupportInfo FetchSurfaceSupportInfo(VkPhysicalDevice gpu);
 
         bool isInitialized = false;
+
+		/// @brief Vulkan can be initialized without any Native windows (i.e. offscreen mode).
+		/// Potentially useful for command line applications/toos.
+		bool surfaceSupported = false;
+
         VkInstance instance = nullptr;
         VulkanRHI* vulkanRhi = nullptr;
 

@@ -11,6 +11,7 @@ namespace CE::RHI
 	class Handle
 	{
 	public:
+		using IndexType = T;
 
 		static const constexpr T NullValue = T(-1);
 
@@ -32,6 +33,11 @@ namespace CE::RHI
 		inline bool IsNull() const
 		{
 			return value == NullValue;
+		}
+
+		inline bool IsValid() const
+		{
+			return !IsNull();
 		}
 
 		inline T Get() const

@@ -137,13 +137,14 @@ namespace CE::RHI
 		Uint32
 	};
 
+	ENUM(Flags)
     enum class BufferBindFlags
     {
         Undefined = 0,
         VertexBuffer = BIT(0),
         IndexBuffer = BIT(1),
         ConstantBuffer = BIT(2),
-        StorageBuffer = BIT(3),
+        StructuredBuffer = BIT(3),
         // Internal usage only!
         StagingBuffer = BIT(4),
     };
@@ -155,8 +156,6 @@ namespace CE::RHI
         Default = 0,
         /// Buffer can be used with dynamic offset
         DynamicOffset = BIT(0),
-        // TODO: Not implemented yet (Buffer can be resized dynamically)
-        DynamicSize = BIT(1),
     };
     ENUM_CLASS_FLAGS(BufferUsageFlags);
 
@@ -193,7 +192,8 @@ namespace CE::RHI
     *   Texture
     */
 
-    enum class TextureDimension
+	ENUM()
+    enum class Dimension
     {
         Dim2D = 0,
         Dim3D,
@@ -247,15 +247,23 @@ namespace CE::RHI
     typedef Format TextureFormat;
 
 	ENUM(Flags)
-    enum class TextureUsageFlags
+    enum class TextureBindFlags
     {
-		Default,
-        SampledImage = BIT(0),
-        ColorAttachment = BIT(1),
-        DepthStencilAttachment = BIT(2),
-		InputAttachment = BIT(3)
+		None = 0,
+		/// @brief Use as sampled image for read.
+		ShaderRead = BIT(0),
+		/// @brief Use as output image.
+		ShaderWrite = BIT(1),
+		/// @brief Use with shader read & write access.
+		ShaderReadWrite = ShaderRead | ShaderWrite,
+		/// @brief Use as color attachment.
+		Color = BIT(2),
+		/// @brief Use as depth stencil attachment.
+		DepthStencil = BIT(3),
+		/// @brief Use as a subpass input.
+		SubpassInput = BIT(4),
     };
-    ENUM_CLASS_FLAGS(TextureUsageFlags);
+    ENUM_CLASS_FLAGS(TextureBindFlags);
 
 	ENUM()
 	enum class FilterMode
@@ -266,16 +274,15 @@ namespace CE::RHI
 	};
 	ENUM_CLASS_FLAGS(FilterMode);
 
-
     struct TextureDesc
     {
         Name name{};
         u32 width = 128, height = 128, depth = 1;
-        TextureDimension dimension = TextureDimension::Dim2D;
+		Dimension dimension = Dimension::Dim2D;
         Format format{};
         u32 mipLevels = 1;
         u32 sampleCount = 1;
-        TextureUsageFlags usageFlags = TextureUsageFlags::Default;
+		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
 
 		/// Force linear tiling rather than optimal tiling
         bool forceLinearLayout = false;

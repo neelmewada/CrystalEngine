@@ -2,6 +2,7 @@
 
 namespace CE::RPI
 {
+	ENUM()
 	enum PassAttachmentType : u32
 	{
 		Undefined = 0,
@@ -9,105 +10,167 @@ namespace CE::RPI
 		Output = BIT(1),
 		InputOutput = Input | Output
 	};
+	ENUM_CLASS_FLAGS(PassAttachmentType);
 
 	/// @brief Describes a slot on a pass.
-	struct PassSlot
+	STRUCT()
+	struct CORERPI_API PassSlot
 	{
+		CE_STRUCT(PassSlot)
+	public:
+
         /// @brief Name of the slot.
+		FIELD()
 		Name name{};
         
         /// @brief Attachment type of the slot.
+		FIELD()
 		PassAttachmentType slotType = PassAttachmentType::Undefined;
 
+		FIELD()
 		RHI::ScopeAttachmentUsage attachmentUsage{};
         
         /// @brief Attachment's load and store action.
+		FIELD()
 		RHI::AttachmentLoadStoreAction loadStoreAction{};
-
-		RHI::UnifiedAttachmentDesc attachmentDesc{};
         
         /// @brief List of formats supported by this pass slot.
+		FIELD()
         Array<RHI::Format> formats{};
         
         /// @brief List of image dimensions supported by this pass slot.
-        Array<RHI::TextureDimension> dimensions{};
+		FIELD()
+        Array<RHI::Dimension> dimensions{};
 	};
     
-    struct PassAttachmentRef
+	STRUCT()
+    struct CORERPI_API PassAttachmentRef
     {
+		CE_STRUCT(PassAttachmentRef)
+	public:
+
+		FIELD()
         Name pass{};
+
+		FIELD()
         Name attachment{};
     };
     
-    struct PassConnection final
+	STRUCT()
+    struct CORERPI_API PassConnection
     {
+		CE_STRUCT(PassConnection)
+	public:
+
+		FIELD()
         Name localSlot{};
+
+		FIELD()
 		PassAttachmentRef attachmentRef{};
     };
 
+	ENUM()
     enum class AttachmentLifetime
     {
         Transient = 0,
         Imported
     };
+	ENUM_CLASS(AttachmentLifetime);
 
-	struct PassAttachmentSizeSource
+	STRUCT()
+	struct CORERPI_API PassAttachmentSizeSource
 	{
+		CE_STRUCT(PassAttachmentSizeSource)
+	public:
+
+		FIELD()
 		PassAttachmentRef source{};
 
 		/// @brief Size multipliers for (width, height, depth) from source attachment.
+		FIELD()
 		Vec3 sizeMultipliers = Vec3(1, 1, 1);
 	};
 
-	struct PassAttachmentDesc
+	STRUCT()
+	struct CORERPI_API PassAttachmentDesc
 	{
+		CE_STRUCT(PassAttachmentDesc)
+	public:
+
 		/// @brief Name of the attachment.
+		FIELD()
 		Name name{};
 
 		/// @brief Lifetime of the attachment.
+		FIELD()
 		AttachmentLifetime lifetime{};
 
+		FIELD()
 		PassAttachmentSizeSource sizeSource{};
 
 	};
 
-	struct PassBufferAttachmentDesc : PassAttachmentDesc
+	STRUCT()
+	struct CORERPI_API BufferDescriptor
 	{
-		RHI::BufferDesc bufferDesc{};
-	};
-    
-    struct PassImageAttachmentDesc : PassAttachmentDesc
-    {
-		RHI::ImageDesc imageDesc{};
-
-		b8 generateMipChain = false;
-
-		Array<RHI::Format> fallbackFormats{};
-    };
-
-	/// @brief Describes an attachment used by a pass. Usually used for pass outputs.
-	class CORERPI_API PassAttachment final : public IntrusiveBase
-	{
+		CE_STRUCT(BufferDescriptor)
 	public:
 
-		PassAttachment() = default;
+		FIELD()
+		RHI::BufferBindFlags bindFlags{};
 
-		PassAttachment(const PassBufferAttachmentDesc& bufferAttachmentDesc);
-		PassAttachment(const PassImageAttachmentDesc& imageAttachmentDesc);
-        
-	private:
-
-        Name name{};
-
-		AttachmentLifetime lifetime{};
-
-		RHI::UnifiedAttachmentDesc attachmentDesc{};
 
 	};
 
-	struct PassAttachmentBinding
+	STRUCT()
+	struct CORERPI_API PassBufferAttachmentDesc : PassAttachmentDesc
 	{
+		CE_STRUCT(PassBufferAttachmentDesc, PassAttachmentDesc)
+	public:
+
+		
+	};
+
+	STRUCT()
+	struct CORERPI_API ImageDescriptor
+	{
+		CE_STRUCT(ImageDescriptor)
+	public:
+
+		FIELD()
+		RHI::TextureBindFlags bindFlags{};
+
+		FIELD()
+		RHI::Dimension dimension = RHI::Dimension::Dim2D;
+
+		FIELD()
+		u16 arraySize = 1;
+
+		FIELD()
+		u16 mipCount = 1;
+
+		FIELD()
+		RHI::Format format = RHI::Format::Undefined;
+
 
 	};
     
+	STRUCT()
+    struct PassImageAttachmentDesc : PassAttachmentDesc
+    {
+		CE_STRUCT(PassImageAttachmentDesc, PassAttachmentDesc)
+	public:
+
+		FIELD()
+		ImageDescriptor imageDescriptor{};
+
+		FIELD()
+		b8 generateFullMipChain = false;
+
+		FIELD()
+		Array<RHI::Format> fallbackFormats{};
+    };
+    
 } // namespace CE::RPI
+
+#include "PassAttachment.rtti.h"

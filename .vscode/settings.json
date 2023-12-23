@@ -1,6 +1,7 @@
 {
     "material-icon-theme.folders.associations": {
-        "Mac": "macOS"
+        "Mac": "macOS",
+        "Pipeline": "Pipe"
     },
     "C_Cpp.default.defines": [
         "CORE_API=",

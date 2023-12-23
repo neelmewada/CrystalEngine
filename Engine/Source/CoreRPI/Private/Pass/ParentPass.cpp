@@ -2,15 +2,14 @@
 
 namespace CE::RPI
 {
-    ParentPass::ParentPass(const PassDesc& desc) : desc(desc)
-    {
-		name = desc.passName;
-		
-    }
 
     ParentPass::~ParentPass()
     {
-
+		for (auto pass : passes)
+		{
+			pass->Destroy();
+		}
+		passes.Clear();
     }
 
 	void ParentPass::AddChild(Pass* childPass)

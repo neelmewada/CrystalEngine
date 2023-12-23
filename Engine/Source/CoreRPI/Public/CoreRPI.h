@@ -15,6 +15,8 @@ namespace CE::RPI
 	/// @brief Name tag used to identify each View inside a Render Pipeline.
 	using PipelineViewTag = CE::Name;
 
+	using PipelineViewTagList = HashSet<PipelineViewTag>;
+
 }
 
 // Passes
@@ -22,6 +24,8 @@ namespace CE::RPI
 #include "Pass/PassDesc.h"
 #include "Pass/Pass.h"
 #include "Pass/ParentPass.h"
+#include "Pass/GpuPass.h"
+#include "Pass/RasterPass.h"
 #include "Pass/PassTemplate.h"
 #include "Pass/PassTree.h"
 #include "Pass/PassFactory.h"
@@ -30,6 +34,7 @@ namespace CE::RPI
 
 #include "RenderTarget.h"
 #include "View.h"
+#include "RenderPipelineBuilder.h"
 #include "RenderPipeline.h"
 #include "Scene.h"
 
@@ -46,5 +51,4 @@ namespace CE::RPI
 
 #include "Feature/FeatureProcessor.h"
 #include "Feature/FeatureProcessorRegistry.h"
-
 

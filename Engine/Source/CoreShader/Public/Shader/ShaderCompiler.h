@@ -4,9 +4,9 @@ struct DxcBuffer;
 
 namespace CE
 {
-	enum HlslShaderModel
+	enum class HlslShaderModel
 	{
-		SHADER_6_0 = 0,
+		SM_6_0 = 0,
 	};
 
 	struct ShaderBuildConfig
@@ -15,7 +15,7 @@ namespace CE
 		String entry = "VertMain";
 		ShaderStage stage = ShaderStage::Vertex;
 
-		HlslShaderModel shaderModel = SHADER_6_0;
+		HlslShaderModel shaderModel = HlslShaderModel::SM_6_0;
 
 		u32 maxPermutations = 1024;
 		Array<String> globalDefines{};

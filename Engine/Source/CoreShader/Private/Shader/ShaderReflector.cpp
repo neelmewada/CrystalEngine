@@ -21,6 +21,7 @@ namespace CE
 
 	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection)
 	{
+#if PLATFORM_DESKTOP
 		spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)byteCode, byteSize / 4);
 		defer(
 			delete reflection;
@@ -258,8 +259,10 @@ namespace CE
 			auto& entry = outReflection.FindOrAdd(set);
 			entry.TryAdd(variable, curStage);
 		}
-
 		return ERR_Success;
+#else
+		return ERR_UnsupportedPlatform;
+#endif
 	}
 
 } // namespace CE

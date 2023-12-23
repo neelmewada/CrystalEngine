@@ -162,6 +162,14 @@ namespace CE
 		return declType->IsEnum();
 	}
 
+	bool FieldType::IsEnumFlagsField()
+	{
+		auto declType = GetDeclarationType();
+		if (declType == nullptr)
+			return false;
+		return declType->IsEnum() && ((EnumType*)declType)->IsFlagsEnum();
+	}
+
     bool FieldType::IsObjectField() const
     {
 		Class* classType = ClassType::FindClass(fieldTypeId);

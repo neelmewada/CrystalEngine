@@ -18,6 +18,7 @@ namespace CE
 			ERR_FailedToLoadFile,
 			ERR_FailedToReflect,
 			ERR_InvalidArgs,
+			ERR_UnsupportedPlatform
 		};
 
 		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection);
