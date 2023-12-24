@@ -1,3 +1,6 @@
+#pragma once
+
+const char DescriptorParsing_DefaultPipeline_JSON[] = R"(
 {
     "Name": "DefaultPipeline",
     "MainViewTag": "Camera",
@@ -15,21 +18,13 @@
             {
                 "PassName": "OpaquePass",
                 "PassDefinition": "OpaquePassDefinition",
-                "Connections": [
-                    {
-                        "LocalSlot": "DepthStencil",
-                        "AttachmentRef": {
-                            "Pass": "DepthPrePass",
-                            "Attachment": "Output"
-                        }
-                    }
-                ],
+                "Connections": [],
                 "ChildPasses": [] // No child passes
             },
             {
                 "PassName": "TransparentPass",
                 "PassDefinition": "TransparentPassDefinition",
-                "Connections": [ // Only INPUT connections should be defined inside "ChildPasses" list.
+                "Connections": [ // INPUT connections should ALWAYS be defined inside "ChildPasses" and NOT in root pass definitions array.
                     { // Connect TransparentPass's Input to OpaquePass's Output like this:   OpaquePass[Color] -> TransparentPass[Color]
                         "LocalSlot": "Color",
                         "AttachmentRef": {
@@ -42,13 +37,6 @@
                         "AttachmentRef": {
                             "Pass": "$root",
                             "Attachment": "PipelineOutput"
-                        }
-                    },
-                    {
-                        "LocalSlot": "DepthStencil",
-                        "AttachmentRef": {
-                            "Pass": "OpaquePass",
-                            "Attachment": "DepthStencil"
                         }
                     }
                 ],
@@ -128,10 +116,6 @@
             "PassClass": "RasterPass",
             "Slots": [
                 {
-                    "Name": "DepthStencil",
-                    "SlotType": "InputOutput"
-                },
-                {
                     "Name": "Color",
                     "SlotType": "Output",
                     "AttachmentUsage": "RenderTarget",
@@ -167,10 +151,6 @@
             "PassClass": "RasterPass",
             "Slots": [
                 {
-                    "Name": "DepthStencil",
-                    "SlotType": "InputOutput"
-                },
-                {
                     "Name": "Color",
                     "SlotType": "InputOutput",
                     "LoadStoreAction": {
@@ -189,3 +169,4 @@
         }
     ]
 }
+)";

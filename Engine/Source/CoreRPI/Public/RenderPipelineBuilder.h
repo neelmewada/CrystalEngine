@@ -25,17 +25,21 @@ namespace CE::RPI
 		CE_STRUCT(PassRequest)
 	public:
 
-		/// @brief Name of the pass after instantiation
+		/// @brief Name of the pass after instantiation.
 		FIELD()
 		Name passName{};
 
-		/// @brief Name of pass template we will instantiate from
+		/// @brief Name of pass template we will instantiate from.
 		FIELD()
 		Name passDefinition{};
 
-		/// @brief Connections of the instantiated pass
+		/// @brief Connections of the instantiated pass.
 		FIELD()
 		Array<PassConnection> connections{};
+
+		/// @brief List of child passes through pass requests.
+		FIELD()
+		Array<PassRequest> childPasses{};
 
 	};
 
@@ -105,6 +109,7 @@ namespace CE::RPI
 		}
 
 	private:
+		friend class RenderPipeline;
 
 		RenderPipelineDescriptor descriptor{};
 	};

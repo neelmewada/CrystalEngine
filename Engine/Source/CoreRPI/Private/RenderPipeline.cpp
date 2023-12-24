@@ -8,16 +8,5 @@ namespace CE::RPI
 
     }
 
-	void RenderPipeline::SetPersistentView(const PipelineViewTag& viewTag, ViewPtr view)
-	{
-		if (pipelineViewsByTag.KeyExists(viewTag))
-		{
-
-		}
-		else
-		{
-
-		}
-	}
 
 } // namespace CE::RPI

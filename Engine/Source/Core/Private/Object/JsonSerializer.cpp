@@ -29,6 +29,16 @@ namespace CE
         return fields.NonEmpty() && IsValid();
     }
 
+	int JsonFieldSerializer::Serialize(Stream* stream)
+	{
+		while (HasNext())
+		{
+			WriteNext(stream);
+		}
+
+		return 0;
+	}
+
     bool JsonFieldSerializer::WriteNext(Stream* stream)
     {
         if (!IsValid() || !HasNext())
@@ -810,6 +820,19 @@ namespace CE
 	bool JsonFieldDeserializer::HasNext()
 	{
 		return fields.NonEmpty();
+	}
+
+	int JsonFieldDeserializer::Deserialize(Stream* stream)
+	{
+		JValue root{};
+		JsonSerializer::Deserialize2(stream, root);
+
+		while (HasNext())
+		{
+			ReadNext(root);
+		}
+
+		return 0;
 	}
 
 	bool JsonFieldDeserializer::ReadNext(Stream* stream)

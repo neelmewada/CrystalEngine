@@ -2,6 +2,8 @@
 #include "CoreRPI.h"
 #include <gtest/gtest.h>
 
+#include "JsonData.h"
+
 using namespace CE;
 
 #define TEST_BEGIN TestBegin()
@@ -25,36 +27,8 @@ static void TestEnd()
 	ModuleManager::Get().UnloadModule("Core");
 }
 
-const char* DescriptorParsing_Basic_JSON = R"(
-{
-    "Name": "DefaultPipeline",
-    "MainViewTag": "Camera",
-    // Root pass (PassRequest)
-    "RootPass": {
-        "PassName": "DefaultPipelineRoot",
-        "PassDefinition": "DefaultPipelineRoot",
-        "ChildPasses": [ // [PassRequest] list
-            
-        ]
-    },
-    "PassDefinitions": [
-        // Root Pass (DefaultPipelineRoot): The render target image attachment is automaticall inferred, no need to manually define it.
-        {
-            "Name": "DefaultPipelineRoot",
-            "PassClass": "ParentPass",
-            "Slots": [
-                // Final color output
-                {
-                    "Name": "PipelineOutput",
-                    "SlotType": "InputOutput"
-                }
-            ]
-        }
-    ]
-}
-)";
 
-TEST(RenderPipeline, DescriptorParsing_Basic)
+TEST(RenderPipeline, DescriptorParsing)
 {
 	TEST_BEGIN;
 
@@ -63,12 +37,140 @@ TEST(RenderPipeline, DescriptorParsing_Basic)
 	JsonFieldDeserializer deserializer{ desc.GetStruct(), &desc };
 
 	JValue root{};
-	JsonSerializer::Deserialize2(DescriptorParsing_Basic_JSON, root);
+	JsonSerializer::Deserialize2(DescriptorParsing_DefaultPipeline_JSON, root);
+
+	MemoryStream stream = MemoryStream((void*)DescriptorParsing_DefaultPipeline_JSON, COUNTOF(DescriptorParsing_DefaultPipeline_JSON));
 	
-	while (deserializer.HasNext())
+	deserializer.Deserialize(&stream);
+
+	EXPECT_EQ(desc.name, "DefaultPipeline");
+	EXPECT_EQ(desc.mainViewTag, "Camera");
+
+	const RPI::PassRequest& rootPass = desc.rootPass;
 	{
-		deserializer.ReadNext(root);
+		EXPECT_EQ(rootPass.passName, "DefaultPipelineRoot");
+		EXPECT_EQ(rootPass.passDefinition, "DefaultPipelineRoot");
+		EXPECT_EQ(rootPass.childPasses.GetSize(), 3);
+
+		{
+			const RPI::PassRequest& childPass = rootPass.childPasses[0];
+			EXPECT_EQ(childPass.passName, "DepthPrePass");
+			EXPECT_EQ(childPass.passDefinition, "DepthPrePassDefinition");
+			EXPECT_EQ(childPass.connections.GetSize(), 0);
+			EXPECT_EQ(childPass.childPasses.GetSize(), 0);
+		}
+		{
+			const RPI::PassRequest& childPass = rootPass.childPasses[1];
+			EXPECT_EQ(childPass.passName, "OpaquePass");
+			EXPECT_EQ(childPass.passDefinition, "OpaquePassDefinition");
+			EXPECT_EQ(childPass.connections.GetSize(), 0);
+			EXPECT_EQ(childPass.childPasses.GetSize(), 0);
+		}
+		{
+			const RPI::PassRequest& childPass = rootPass.childPasses[2];
+			EXPECT_EQ(childPass.passName, "TransparentPass");
+			EXPECT_EQ(childPass.passDefinition, "TransparentPassDefinition");
+			EXPECT_EQ(childPass.connections.GetSize(), 2);
+			{
+				const RPI::PassConnection& connection0 = childPass.connections[0];
+				EXPECT_EQ(connection0.localSlot, "Color");
+				EXPECT_EQ(connection0.attachmentRef.pass, "OpaquePass");
+				EXPECT_EQ(connection0.attachmentRef.attachment, "Color");
+
+				const RPI::PassConnection& connection1 = childPass.connections[1];
+				EXPECT_EQ(connection1.localSlot, "Color");
+				EXPECT_EQ(connection1.attachmentRef.pass, "$root");
+				EXPECT_EQ(connection1.attachmentRef.attachment, "PipelineOutput");
+			}
+			EXPECT_EQ(childPass.childPasses.GetSize(), 0);
+		}
+	}
+
+	EXPECT_EQ(desc.passDefinitions.GetSize(), 4);
+
+	// Root Pass
+	{
+		const RPI::PassDefinition& passDesc = desc.passDefinitions[0];
+
+		EXPECT_EQ(passDesc.name, "DefaultPipelineRoot");
+		EXPECT_EQ(passDesc.passClass, "ParentPass");
+		EXPECT_EQ(passDesc.slots.GetSize(), 1);
+		EXPECT_EQ(passDesc.slots[0].name, "PipelineOutput");
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::InputOutput);
+	}
+
+	// Depth Pre-Pass Definition
+	{
+		const RPI::PassDefinition& passDesc = desc.passDefinitions[1];
+
+		EXPECT_EQ(passDesc.name, "DepthPrePassDefinition");
+		EXPECT_EQ(passDesc.passClass, "RasterPass");
+		EXPECT_EQ(passDesc.slots.GetSize(), 1);
+		EXPECT_EQ(passDesc.slots[0].name, "Output");
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::Output);
+
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.clearValueDepth, 0);
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.clearValueStencil, 0);
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.loadAction, RHI::AttachmentLoadAction::Clear);
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.storeAction, RHI::AttachmentStoreAction::Store);
+
+		EXPECT_EQ(passDesc.imageAttachments.GetSize(), 1);
+		EXPECT_EQ(passDesc.imageAttachments[0].name, "DepthStencil");
+		EXPECT_EQ(passDesc.imageAttachments[0].lifetime, RPI::AttachmentLifetime::Transient);
+		EXPECT_EQ(passDesc.imageAttachments[0].sizeSource.source.pass, "$root");
+		EXPECT_EQ(passDesc.imageAttachments[0].sizeSource.source.attachment, "PipelineOutput");
+		EXPECT_EQ(passDesc.imageAttachments[0].sizeSource.sizeMultipliers, Vec3(1, 1, 1));
+		EXPECT_EQ(passDesc.imageAttachments[0].imageDescriptor.bindFlags, RHI::TextureBindFlags::DepthStencil);
+		EXPECT_EQ(passDesc.imageAttachments[0].imageDescriptor.format, RHI::Format::D32_SFLOAT_S8_UINT);
+		EXPECT_EQ(passDesc.imageAttachments[0].fallbackFormats[0], RHI::Format::D24_UNORM_S8_UINT);
+
+		EXPECT_EQ(passDesc.connections.GetSize(), 1);
+		EXPECT_EQ(passDesc.connections[0].localSlot, "Output");
+		EXPECT_EQ(passDesc.connections[0].attachmentRef.pass, "$this");
+		EXPECT_EQ(passDesc.connections[0].attachmentRef.attachment, "DepthStencil");
+
+		EXPECT_EQ(passDesc.passData.drawListTag, "depth");
+		EXPECT_EQ(passDesc.passData.viewTag, "Camera");
+	}
+
+	// OpaquePassDefinition
+	{
+		const RPI::PassDefinition& passDesc = desc.passDefinitions[2];
+
+		EXPECT_EQ(passDesc.name, "OpaquePassDefinition");
+		EXPECT_EQ(passDesc.passClass, "RasterPass");
+		EXPECT_EQ(passDesc.slots.GetSize(), 1);
+		EXPECT_EQ(passDesc.slots[0].name, "Color");
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::Output);
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.clearValue, Vec4(0, 0, 0, 0));
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.loadAction, RHI::AttachmentLoadAction::Clear);
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.storeAction, RHI::AttachmentStoreAction::Store);
+
+		EXPECT_EQ(passDesc.connections.GetSize(), 1);
+		EXPECT_EQ(passDesc.connections[0].localSlot, "Color");
+		EXPECT_EQ(passDesc.connections[0].attachmentRef.pass, "$root");
+		EXPECT_EQ(passDesc.connections[0].attachmentRef.attachment, "PipelineOutput");
+
+		EXPECT_EQ(passDesc.passData.drawListTag, "forward");
+		EXPECT_EQ(passDesc.passData.viewTag, "Camera");
+	}
+
+	// TransparentPassDefinition
+	{
+		const RPI::PassDefinition& passDesc = desc.passDefinitions[3];
+
+		EXPECT_EQ(passDesc.name, "TransparentPassDefinition");
+		EXPECT_EQ(passDesc.passClass, "RasterPass");
+		EXPECT_EQ(passDesc.slots.GetSize(), 1);
+		EXPECT_EQ(passDesc.slots[0].name, "Color");
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::InputOutput);
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.loadAction, RHI::AttachmentLoadAction::Load);
+		EXPECT_EQ(passDesc.slots[0].loadStoreAction.storeAction, RHI::AttachmentStoreAction::Store);
+
+		EXPECT_EQ(passDesc.passData.drawListTag, "forward");
+		EXPECT_EQ(passDesc.passData.viewTag, "Camera");
 	}
 
 	TEST_END;
 }
+

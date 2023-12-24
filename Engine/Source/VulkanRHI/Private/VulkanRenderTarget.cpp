@@ -317,11 +317,6 @@ namespace CE
 		return viewport;
 	}
 
-	RHI::RenderPass* VulkanRenderTarget::GetRenderPass()
-    {
-        return renderPass;
-    }
-
     void VulkanRenderTarget::SetClearColor(u32 colorTargetIndex, const Color& color)
     {
         this->clearColors[colorTargetIndex] = color;
@@ -409,11 +404,11 @@ namespace CE
         textureDesc.width = width;
         textureDesc.height = height;
         textureDesc.depth = 1;
-        textureDesc.dimension = RHI::TextureDimension::Dim2D;
+        textureDesc.dimension = RHI::Dimension::Dim2D;
         textureDesc.format = VkFormatToRHITextureFormat(rtLayout.depthFormat);
         textureDesc.mipLevels = 1;
         textureDesc.sampleCount = 1;
-        textureDesc.usageFlags = RHI::TextureUsageFlags::DepthStencilAttachment;
+        textureDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
         textureDesc.forceLinearLayout = false;
 
         depthFrame.textures.Resize(1);
@@ -424,7 +419,7 @@ namespace CE
 		samplerDesc.enableAnisotropy = true;
 		samplerDesc.maxAnisotropy = 16;
 		samplerDesc.borderColor = Color::Black();
-		samplerDesc.samplerFilterMode = RHI::FILTER_MODE_LINEAR;
+		samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
 
 		depthFrame.samplers.Resize(1);
 		depthFrame.samplers[0] = new VulkanSampler(device, samplerDesc);
@@ -461,10 +456,10 @@ namespace CE
                 textureDesc.width = GetWidth();
                 textureDesc.height = GetHeight();
                 textureDesc.depth = 1;
-                textureDesc.dimension = RHI::TextureDimension::Dim2D;
+                textureDesc.dimension = RHI::Dimension::Dim2D;
                 textureDesc.format = VkFormatToRHITextureFormat(imageFormat);
                 textureDesc.mipLevels = 1;
-                textureDesc.usageFlags = RHI::TextureUsageFlags::ColorAttachment | RHI::TextureUsageFlags::SampledImage;
+                textureDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
                 textureDesc.sampleCount = 1;
                 textureDesc.forceLinearLayout = false;
 
@@ -475,7 +470,7 @@ namespace CE
 				samplerDesc.enableAnisotropy = true;
 				samplerDesc.maxAnisotropy = 16;
 				samplerDesc.borderColor = Color::Black();
-				samplerDesc.samplerFilterMode = RHI::FILTER_MODE_LINEAR;
+				samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
 
 				frame.samplers[j] = new VulkanSampler(device, samplerDesc);
 

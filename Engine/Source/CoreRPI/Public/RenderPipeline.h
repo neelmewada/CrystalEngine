@@ -28,8 +28,6 @@ namespace CE::RPI
 	public:
 
 		virtual ~RenderPipeline();
-
-		void SetPersistentView(const PipelineViewTag& viewTag, ViewPtr view);
 		
 	private:
 

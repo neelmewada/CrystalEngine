@@ -121,8 +121,6 @@ namespace CE
 
 		virtual RHI::Viewport* GetRenderTargetViewport() override;
 
-        virtual RHI::RenderPass* GetRenderPass() override;
-
         virtual void SetClearColor(u32 colorTargetIndex, const Color& color) override;
 
 		virtual void Resize(u32 newWidth, u32 newHeight) override;

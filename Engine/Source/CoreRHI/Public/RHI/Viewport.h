@@ -22,8 +22,6 @@ namespace CE::RHI
 
 		virtual RHI::Viewport* GetRenderTargetViewport() = 0;
 
-		virtual RenderPass* GetRenderPass() = 0;
-
 		virtual void SetClearColor(u32 colorTargetIndex, const Color& color) = 0;
 
 		virtual void Resize(u32 newWidth, u32 newHeight) = 0;
