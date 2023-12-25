@@ -34,10 +34,12 @@ namespace CE::RPI
 		static RenderPipeline* CreateFromJson(const String& jsonString, Scene* ownerScene);
 
 		static RenderPipeline* CreateFromJson(Stream* jsonStream, Scene* ownerScene);
-		
-		void Compile();
 
 	private:
+        
+        const PassDefinition& GetRootDefinition();
+        
+        void CompileTree();
 
 		void InitializeInternal();
 

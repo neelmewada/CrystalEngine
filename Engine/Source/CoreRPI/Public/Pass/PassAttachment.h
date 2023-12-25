@@ -12,38 +12,41 @@ namespace CE::RPI
 
 		/// @brief Name of the attachment.
 		Name name{};
-
+        
 		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
-
-		RHI::UnifiedScopeAttachmentDesc unifiedAttachmentDesc{};
+        
+        RPI::UnifiedAttachmentDescriptor attachmentDescriptor{};
 
 	};
 
 	/// @brief A Pass attachment binding either points to a pass attachment OR to another
-	/// pass attachment binding, for example, an input slot of one pass connected to output
-	/// of another.
+	/// pass attachment binding, for example, an input slot of one pass connected to output of another.
 	struct CORERPI_API PassAttachmentBinding final
 	{
 	public:
-
+        
 		/// @brief Name of the attachment binding. Either pass slot name, or attachment name.
 		Name name = "";
-
+        
 		/// @brief Name of shader input field.
 		Name shaderInputName = "";
-
+        
 		PassSlotType slotType = PassSlotType::Undefined;
-
+        
 		RHI::ScopeAttachmentUsage attachmentUsage = RHI::ScopeAttachmentUsage::None;
-
+        
 		/// @brief Pointer to another attachment binding slot this binding is connected to. For InputOutput slots,
 		/// this is always an input connection.
 		PassAttachmentBinding* connectedBinding = nullptr;
-
+        
+        /// @brief Pointer to the binding when the pass that owns this binding is disabled. Used only
+        /// for output slot types.
+        PassAttachmentBinding* fallbackBinding = nullptr;
+        
 	private:
-
+        
 		Ptr<PassAttachment> attachment = nullptr;
-
+        
 	};
 
 } // namespace CE::RPI

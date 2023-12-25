@@ -12,4 +12,13 @@ namespace CE::RPI
 		rootPass->Destroy();
 	}
 
+    void PassTree::Clear()
+    {
+        if (rootPass != nullptr)
+        {
+            rootPass->Destroy();
+            rootPass = nullptr;
+        }
+    }
+
 } // namespace CE::RPI

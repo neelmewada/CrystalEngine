@@ -11,6 +11,8 @@ namespace CE::RPI
 		PassTree();
 
 		virtual ~PassTree();
+        
+        void Clear();
 
 	private:
 

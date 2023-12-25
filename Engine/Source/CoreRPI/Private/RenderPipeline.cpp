@@ -53,16 +53,18 @@ namespace CE::RPI
 	void RenderPipeline::InitializeInternal()
 	{
 		renderTarget = descriptor.renderTarget;
-
+        
 		name = descriptor.name;
 		rootPassDefinitionName = descriptor.rootPass.passDefinition;
 		mainViewTag = descriptor.mainViewTag;
-
+        
 	}
 
-	void RenderPipeline::Compile()
+	void RenderPipeline::CompileTree()
 	{
-
+        passTree->Clear();
+        
+        
 	}
 
 } // namespace CE::RPI
