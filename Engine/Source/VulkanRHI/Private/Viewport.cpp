@@ -1,9 +1,5 @@
 
-#include "VulkanViewport.h"
-
-#include "VulkanRenderPass.h"
-#include "VulkanSwapChain.h"
-#include "VulkanTexture.h"
+#include "VulkanRHIPrivate.h"
 
 #include "PAL/Common/VulkanPlatform.h"
 
@@ -11,7 +7,7 @@
 #include <QVulkanWindow>
 #endif
 
-namespace CE
+namespace CE::Vulkan
 {
     
     VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,

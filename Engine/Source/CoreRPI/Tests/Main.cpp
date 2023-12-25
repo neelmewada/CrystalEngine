@@ -27,7 +27,6 @@ static void TestEnd()
 	ModuleManager::Get().UnloadModule("Core");
 }
 
-
 TEST(RenderPipeline, DescriptorParsing)
 {
 	TEST_BEGIN;
@@ -96,7 +95,7 @@ TEST(RenderPipeline, DescriptorParsing)
 		EXPECT_EQ(passDesc.passClass, "ParentPass");
 		EXPECT_EQ(passDesc.slots.GetSize(), 1);
 		EXPECT_EQ(passDesc.slots[0].name, "PipelineOutput");
-		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::InputOutput);
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassSlotType::InputOutput);
 	}
 
 	// Depth Pre-Pass Definition
@@ -107,7 +106,7 @@ TEST(RenderPipeline, DescriptorParsing)
 		EXPECT_EQ(passDesc.passClass, "RasterPass");
 		EXPECT_EQ(passDesc.slots.GetSize(), 1);
 		EXPECT_EQ(passDesc.slots[0].name, "Output");
-		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::Output);
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassSlotType::Output);
 
 		EXPECT_EQ(passDesc.slots[0].loadStoreAction.clearValueDepth, 0);
 		EXPECT_EQ(passDesc.slots[0].loadStoreAction.clearValueStencil, 0);
@@ -141,7 +140,7 @@ TEST(RenderPipeline, DescriptorParsing)
 		EXPECT_EQ(passDesc.passClass, "RasterPass");
 		EXPECT_EQ(passDesc.slots.GetSize(), 1);
 		EXPECT_EQ(passDesc.slots[0].name, "Color");
-		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::Output);
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassSlotType::Output);
 		EXPECT_EQ(passDesc.slots[0].loadStoreAction.clearValue, Vec4(0, 0, 0, 0));
 		EXPECT_EQ(passDesc.slots[0].loadStoreAction.loadAction, RHI::AttachmentLoadAction::Clear);
 		EXPECT_EQ(passDesc.slots[0].loadStoreAction.storeAction, RHI::AttachmentStoreAction::Store);
@@ -163,7 +162,7 @@ TEST(RenderPipeline, DescriptorParsing)
 		EXPECT_EQ(passDesc.passClass, "RasterPass");
 		EXPECT_EQ(passDesc.slots.GetSize(), 1);
 		EXPECT_EQ(passDesc.slots[0].name, "Color");
-		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassAttachmentType::InputOutput);
+		EXPECT_EQ(passDesc.slots[0].slotType, RPI::PassSlotType::InputOutput);
 		EXPECT_EQ(passDesc.slots[0].loadStoreAction.loadAction, RHI::AttachmentLoadAction::Load);
 		EXPECT_EQ(passDesc.slots[0].loadStoreAction.storeAction, RHI::AttachmentStoreAction::Store);
 

@@ -338,7 +338,6 @@ namespace CE
 
     bool JsonSerializer::Deserialize2(Stream* stream, JValue& out)
     {
-		Deserialize(nullptr);
 		if (stream == nullptr)
 		{
 			CE_LOG(Error, All, "JSON Deserialize: Input stream is null");

@@ -84,13 +84,15 @@
 #ifdef __spirv__
 
 #define SUBPASS_INPUT(subpass, name) [[vk::input_attachment_index(subpass)]] [[vk::binding(subpass, PerSubPass_Frequency)]] SubpassInput name
-#define ROOT_CONSTANT() [[vk::push_constant]]
 #define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()
+
+#define BEGIN_ROOT_CONSTANTS() struct RootConstants {
+#define END_ROOT_CONSTANTS() }; [[vk::push_constant]] RootConstants _RootConstants;
+#define ROOT_CONSTANT(name) _RootConstants.name
 
 #else
 
 #define SUBPASS_INPUT(subpass, name) SubpassInput name;
-#define ROOT_CONSTANT()
 #define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()
 
 #endif

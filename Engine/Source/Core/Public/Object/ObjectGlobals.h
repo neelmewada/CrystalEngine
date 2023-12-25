@@ -18,6 +18,9 @@ namespace CE
 	///	Used to store temporary objects that are not saved to disk.
 	CORE_API Package* GetTransientPackage();
 
+	/// @brief Returns the transient package of a specific module.
+	CORE_API Package* GetTransientPackage(const String& moduleName);
+
     CORE_API Package* GetSettingsPackage();
 
 	/// Call this to unload all settings. Should be called in PreShutdown phase.

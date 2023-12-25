@@ -178,6 +178,9 @@ namespace CE
 		Name classTypeName = "";
 	};
 
+	template<typename TBaseClass>
+	using SubClass = SubClassType<TBaseClass>;
+
 } // namespace CE
 
 CE_RTTI_POD_TEMPLATE(CORE_API, CE, SubClassType, CE::Object)

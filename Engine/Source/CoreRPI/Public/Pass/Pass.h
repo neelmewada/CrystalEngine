@@ -10,10 +10,6 @@
 
 namespace CE::RPI
 {
-	constexpr u32 PassAttachmentBindingCountMax = 16;
-	constexpr u32 PassInputBindingCountMax = PassAttachmentBindingCountMax;
-	constexpr u32 PassOutputBindingCountMax = PassAttachmentBindingCountMax;
-	constexpr u32 PassInputOutputBindingCountMax = PassAttachmentBindingCountMax;
 
 	/// @brief The base Pass class. All passes should derive from this class.
 	CLASS(Abstract)
@@ -34,6 +30,9 @@ namespace CE::RPI
 		/// @brief The view tag associated with a pipeline view.
 		/// The view that matches this tag will be queried by this pass.
 		PipelineViewTag pipelineViewTag{};
+
+		FixedArray<PassAttachmentBinding, PassAttachmentBindingCountMax> attachmentBindings{};
+
 		
 	};
 

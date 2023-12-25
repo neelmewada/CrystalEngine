@@ -1,7 +1,7 @@
 
 #include "VulkanQueue.h"
 
-namespace CE
+namespace CE::Vulkan
 {
 
 	VulkanQueue::VulkanQueue(VulkanDevice* device, u32 familyIndex, u32 queueIndex, VkQueue queue)

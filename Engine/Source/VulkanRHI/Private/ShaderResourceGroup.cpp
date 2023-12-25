@@ -1,16 +1,9 @@
 #include "VulkanRHIPrivate.h"
 
-#include "VulkanDevice.h"
-#include "VulkanDescriptorPool.h"
-#include "VulkanDescriptorSet.h"
-#include "VulkanShaderResourceGroup.h"
-#include "VulkanTexture.h"
-#include "VulkanBuffer.h"
-
-namespace CE
+namespace CE::Vulkan
 {
 
-	VulkanShaderResourceManager::VulkanShaderResourceManager(VulkanDevice* device)
+	ShaderResourceManager::ShaderResourceManager(VulkanDevice* device)
 	{
 		const auto& limits = device->GetDeviceLimits();
 		maxBoundDescriptorSets =  limits.maxBoundDescriptorSets;
@@ -63,11 +56,11 @@ namespace CE
         }
 	}
 
-	VulkanShaderResourceManager::~VulkanShaderResourceManager()
+	ShaderResourceManager::~ShaderResourceManager()
 	{
 	}
 
-	bool VulkanShaderResourceManager::IsSharedDescriptorSet(RHI::SRGType srgType)
+	bool ShaderResourceManager::IsSharedDescriptorSet(RHI::SRGType srgType)
 	{
 		if (!builtinSrgNameToDescriptorSet.KeyExists(srgType))
 			return false;
@@ -76,7 +69,7 @@ namespace CE
 		return IsSharedDescriptorSet(set);
 	}
 
-	int VulkanShaderResourceManager::GetDescriptorSetNumber(RHI::SRGType srgType)
+	int ShaderResourceManager::GetDescriptorSetNumber(RHI::SRGType srgType)
 	{
 		if (!builtinSrgNameToDescriptorSet.KeyExists(srgType))
 			return false;
@@ -84,7 +77,7 @@ namespace CE
 		return builtinSrgNameToDescriptorSet[srgType].set;
 	}
 
-	bool VulkanShaderResourceManager::ShouldCreateDescriptorSetForSRG(RHI::SRGType srgType)
+	bool ShaderResourceManager::ShouldCreateDescriptorSetForSRG(RHI::SRGType srgType)
 	{
 		if (!builtinSrgNameToDescriptorSet.KeyExists(srgType))
 			return false;
@@ -97,7 +90,7 @@ namespace CE
 		return array.GetLast().srgType == srgType;
 	}
 
-	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc)
+	ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc)
 		: device(device), desc(desc)
 	{
 		srgManager = device->GetShaderResourceManager();
@@ -165,13 +158,13 @@ namespace CE
 		}
 	}
 
-	VulkanShaderResourceGroup::~VulkanShaderResourceGroup()
+	ShaderResourceGroup::~ShaderResourceGroup()
 	{
 		delete sharedDescriptorSet;
 		sharedDescriptorSet = nullptr;
 	}
 
-	bool VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset, SIZE_T size)
+	bool ShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset, SIZE_T size)
 	{
 		// Cannot change bindings once an SRG is committed
 		if (isCommitted)
@@ -192,27 +185,27 @@ namespace CE
 		bufferVariablesBoundByBindingSlot[bindingSlot] = bufferInfo;
 	}
 
-	int VulkanShaderResourceGroup::GetFrequencyId() const
+	int ShaderResourceGroup::GetFrequencyId() const
 	{
 		return setNumber;
 	}
 
-	Name VulkanShaderResourceGroup::GetSRGName() const
+	Name ShaderResourceGroup::GetSRGName() const
 	{
 		return srgName;
 	}
 
-	RHI::SRGType VulkanShaderResourceGroup::GetSRGType() const
+	RHI::SRGType ShaderResourceGroup::GetSRGType() const
 	{
 		return srgType;
 	}
 
-	const RHI::ShaderResourceGroupDesc& VulkanShaderResourceGroup::GetDesc() const
+	const RHI::ShaderResourceGroupDesc& ShaderResourceGroup::GetDesc() const
 	{
 		return desc;
 	}
 
-    VkDescriptorSet VulkanShaderResourceGroup::GetDescriptorSet() const
+    VkDescriptorSet ShaderResourceGroup::GetDescriptorSet() const
     {
 		if (sharedDescriptorSet == nullptr)
 			return nullptr;

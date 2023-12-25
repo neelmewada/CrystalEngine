@@ -1,9 +1,10 @@
 
 #include "VulkanRHI.h"
+#include "VulkanRHIPrivate.h"
 
-#include "VulkanBuffer.h"
+#include "Buffer.h"
 
-namespace CE
+namespace CE::Vulkan
 {
 	static VkBufferUsageFlags VkBufferUsageFlagsFromBufferBindFlags(RHI::BufferBindFlags bindFlags)
 	{
@@ -28,19 +29,20 @@ namespace CE
 		{
 			bufferUsageFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		}
-
+		
 		return bufferUsageFlags;
 	}
 
-	VulkanBuffer::VulkanBuffer(VulkanDevice* device, const RHI::BufferDesc& desc)
+	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDesc& desc)
 		: device(device)
-		, bindFlags(desc.bindFlags)
 		, usageFlags(desc.usageFlags)
 		, allocMode(desc.allocMode)
 		, name(desc.name)
-		, bufferSize(desc.bufferSize)
-		, structureByteStride(desc.structureByteStride)
 	{
+		bindFlags = desc.bindFlags;
+		bufferSize = desc.bufferSize;
+		structureByteStride = desc.structureByteStride;
+
 		VkBufferCreateInfo bufferCI{};
 		bufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferCI.size = desc.bufferSize;
@@ -90,17 +92,12 @@ namespace CE
 		}
 	}
 
-	VulkanBuffer::~VulkanBuffer()
+	Buffer::~Buffer()
 	{
         Free();
 	}
 
-    u64 VulkanBuffer::GetBufferSize()
-    {
-        return bufferSize;
-    }
-
-    void VulkanBuffer::Free()
+    void Buffer::Free()
     {
         if (buffer != nullptr)
         {
@@ -131,12 +128,7 @@ namespace CE
         uploadContextExists = false;
     }
 
-	RHI::BufferBindFlags VulkanBuffer::GetBindFlags()
-	{
-		return bindFlags;
-	}
-
-	void VulkanBuffer::UploadData(const RHI::BufferData& bufferData)
+	void Buffer::UploadData(const RHI::BufferData& bufferData)
 	{
 		if (allocMode == RHI::BufferAllocMode::Default || allocMode == RHI::BufferAllocMode::SharedMemory)
 		{
@@ -153,7 +145,7 @@ namespace CE
 		}
 	}
 
-	void VulkanBuffer::ReadData(u8** outData, u64* outDataSize)
+	void Buffer::ReadData(u8** outData, u64* outDataSize)
 	{
 		if (outData == nullptr || outDataSize == nullptr)
 			return;
@@ -178,7 +170,7 @@ namespace CE
 		}
 	}
 
-    void VulkanBuffer::CreateUploadContext()
+    void Buffer::CreateUploadContext()
     {
         if (!uploadContextExists)
         {
@@ -207,7 +199,7 @@ namespace CE
         }
     }
 
-	void VulkanBuffer::UploadDataToGPU(const RHI::BufferData& bufferData)
+	void Buffer::UploadDataToGPU(const RHI::BufferData& bufferData)
 	{
 		if (allocMode != RHI::BufferAllocMode::GpuMemory)
 			return;
@@ -269,7 +261,7 @@ namespace CE
 		stagingBufferDesc.structureByteStride = bufferData.dataSize;
 		stagingBufferDesc.initialData = &stagingBufferData;
 
-		auto stagingBuffer = new VulkanBuffer(device, stagingBufferDesc);
+		auto stagingBuffer = new Buffer(device, stagingBufferDesc);
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -308,7 +300,7 @@ namespace CE
 		stagingBuffer = nullptr;
 	}
 
-	void VulkanBuffer::ReadDataFromGPU(u8** outData, u64* outDataSize)
+	void Buffer::ReadDataFromGPU(u8** outData, u64* outDataSize)
 	{
 		if (outData == nullptr || outDataSize == nullptr)
 			return;
@@ -359,7 +351,7 @@ namespace CE
         stagingBufferDesc.bufferSize = bufferSize;
         stagingBufferDesc.structureByteStride = structureByteStride;
         
-        VulkanBuffer* stagingBuffer = new VulkanBuffer(device, stagingBufferDesc);
+        Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
         
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -400,7 +392,7 @@ namespace CE
         stagingBuffer = nullptr;
 	}
 
-    void VulkanBuffer::Resize(u64 newBufferSize)
+    void Buffer::Resize(u64 newBufferSize)
     {
         if (newBufferSize == 0)
         {
@@ -420,7 +412,7 @@ namespace CE
         newBufferDesc.structureByteStride = structureByteStride;
         newBufferDesc.usageFlags = usageFlags;
         
-        VulkanBuffer* newBuffer = new VulkanBuffer(device, newBufferDesc);
+        Buffer* newBuffer = new Buffer(device, newBufferDesc);
         
         if (copyDataSize > 0)
         {

@@ -7,7 +7,7 @@ namespace CE::RPI
 	CLASS()
 	class CORERPI_API ParentPass : public Pass
 	{
-		CE_CLASS(ParentPass)
+		CE_CLASS(ParentPass, Pass)
 	public:
 		friend class Pass;
 		friend class PassFactory;

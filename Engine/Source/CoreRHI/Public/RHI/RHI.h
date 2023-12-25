@@ -17,6 +17,7 @@ namespace CE::RHI
     class RenderPass;
     class CommandList;
     class GraphicsCommandList;
+	struct BufferDescriptor;
 
     class CORERHI_API DynamicRHI
     {

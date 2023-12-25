@@ -1,14 +1,11 @@
 
-#include "VulkanDevice.h"
+#include "VulkanRHIPrivate.h"
 #include "PAL/Common/VulkanPlatform.h"
-
-#include "VulkanDescriptorPool.h"
-#include "VulkanShaderResourceGroup.h"
 
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
-namespace CE
+namespace CE::Vulkan
 {
 
 	VulkanDevice::VulkanDevice(VkInstance instance, VulkanRHI* vulkanRhi)
@@ -52,7 +49,7 @@ namespace CE
 
 		descriptorPool = new VulkanDescriptorPool(this);
 
-		srgManager = new VulkanShaderResourceManager(this);
+		srgManager = new ShaderResourceManager(this);
 
 		isInitialized = true;
 

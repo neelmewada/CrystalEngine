@@ -2,7 +2,7 @@
 
 #include "VulkanRHIPrivate.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     
     class VulkanRenderPass

@@ -8,13 +8,13 @@
 
 #include <vulkan/vulkan.h>
 
-namespace CE
+namespace CE::Vulkan
 {
     class VulkanQueue;
     class VulkanSwapChain;
     class VulkanTexture;
 	class VulkanDescriptorPool;
-	class VulkanShaderResourceManager;
+	class ShaderResourceManager;
 
     class VulkanDevice
     {
@@ -78,7 +78,7 @@ namespace CE
 			return gpuProperties.limits;
 		}
 
-		INLINE VulkanShaderResourceManager* GetShaderResourceManager() const
+		INLINE ShaderResourceManager* GetShaderResourceManager() const
 		{
 			return srgManager;
 		}
@@ -118,7 +118,7 @@ namespace CE
         VkSurfaceKHR testSurface = nullptr;
         VulkanQueue* graphicsQueue = nullptr;
         VulkanQueue* presentQueue = nullptr;
-		VulkanShaderResourceManager* srgManager = nullptr;
+		ShaderResourceManager* srgManager = nullptr;
         VkCommandPool gfxCommandPool = nullptr;
 
         HashMap<u32, VkCommandPool> queueFamilyToCmdPool{};

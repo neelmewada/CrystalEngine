@@ -2,6 +2,8 @@
 
 namespace CE::RHI
 {
+	typedef Name AttachmentID;
+
 	ENUM()
 	enum class AttachmentLoadAction : u8
 	{
@@ -42,25 +44,25 @@ namespace CE::RHI
 	};
 	ENUM_CLASS(ScopeAttachmentUsage);
 
-	struct UnifiedAttachmentDesc
+	struct UnifiedScopeAttachmentDesc
 	{
-		UnifiedAttachmentDesc() = default;
+		UnifiedScopeAttachmentDesc() = default;
 
-		UnifiedAttachmentDesc(const ImageDesc& imageDesc)
+		UnifiedScopeAttachmentDesc(const ImageDesc& imageDesc)
 			: type(AttachmentType::Image)
 			, imageDesc(imageDesc)
 		{
 
 		}
 
-		UnifiedAttachmentDesc(const BufferDesc& bufferDesc)
+		UnifiedScopeAttachmentDesc(const BufferDesc& bufferDesc)
 			: type(AttachmentType::Buffer)
 			, bufferDesc(bufferDesc)
 		{
 
 		}
 
-		~UnifiedAttachmentDesc()
+		~UnifiedScopeAttachmentDesc()
 		{
 			if (type == AttachmentType::Image)
 			{

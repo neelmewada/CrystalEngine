@@ -4,9 +4,12 @@
 
 #include "vulkan/vulkan.h"
 
-namespace CE
+namespace CE {
+	class PlatformWindow;
+}
+
+namespace CE::Vulkan
 {
-    class PlatformWindow;
     class VulkanDevice;
     class VulkanTexture;
 

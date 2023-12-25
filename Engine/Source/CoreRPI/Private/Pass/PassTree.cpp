@@ -2,6 +2,10 @@
 
 namespace CE::RPI
 {
+	PassTree::PassTree()
+	{
+
+	}
 
 	PassTree::~PassTree()
 	{

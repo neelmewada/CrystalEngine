@@ -1,10 +1,8 @@
 
-#include "VulkanTexture.h"
-
-#include "VulkanBuffer.h"
+#include "VulkanRHIPrivate.h"
 
 
-namespace CE
+namespace CE::Vulkan
 {
 	struct FormatEntry
 	{
@@ -172,16 +170,16 @@ namespace CE
         imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         switch (desc.dimension)
         {
-        case RHI::TextureDimension::Dim2D:
+        case RHI::Dimension::Dim2D:
             imageCI.imageType = VK_IMAGE_TYPE_2D;
             break;
-        case RHI::TextureDimension::Dim3D:
+        case RHI::Dimension::Dim3D:
             imageCI.imageType = VK_IMAGE_TYPE_3D;
             break;
-        case RHI::TextureDimension::Dim1D:
+        case RHI::Dimension::Dim1D:
             imageCI.imageType = VK_IMAGE_TYPE_1D;
             break;
-        case RHI::TextureDimension::DimCUBE:
+        case RHI::Dimension::DimCUBE:
             imageCI.imageType = VK_IMAGE_TYPE_2D;
         }
         
@@ -189,7 +187,7 @@ namespace CE
         imageCI.extent.height = height;
         imageCI.extent.depth = depth;
 
-        imageCI.tiling = desc.forceLinearLayout ? VK_IMAGE_TILING_LINEAR : VK_IMAGE_TILING_OPTIMAL;
+        imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageCI.format = RHITextureFormatToVkFormat(this->format);
         imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -261,16 +259,16 @@ namespace CE
 
         switch (dimension)
         {
-        case RHI::TextureDimension::Dim2D:
+        case RHI::Dimension::Dim2D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
             break;
-        case RHI::TextureDimension::Dim3D:
+        case RHI::Dimension::Dim3D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_3D;
             break;
-        case RHI::TextureDimension::Dim1D:
+        case RHI::Dimension::Dim1D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
             break;
-        case RHI::TextureDimension::DimCUBE:
+        case RHI::Dimension::DimCUBE:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
             break;
         }
@@ -372,12 +370,12 @@ namespace CE
         stagingBufferDesc.name = "Staging Texture Buffer";
         stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
         stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-        stagingBufferDesc.bindFlags = RHI::BufferUsageFlags::Default;
+        stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
         stagingBufferDesc.bufferSize = totalSize;
         stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
         stagingBufferDesc.initialData = &stagingBufferData;
 
-        VulkanBuffer* stagingBuffer = new VulkanBuffer(device, stagingBufferDesc);
+		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
 
         device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, aspectMask);
         CopyPixelsFromBuffer(stagingBuffer);
@@ -403,12 +401,12 @@ namespace CE
 		stagingBufferDesc.name = "Staging Texture Buffer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
 		stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-		stagingBufferDesc.bindFlags = RHI::BufferUsageFlags::Default;
+		stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
 		stagingBufferDesc.bufferSize = totalSize;
 		stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
 		stagingBufferDesc.initialData = nullptr;
 
-		VulkanBuffer* stagingBuffer = new VulkanBuffer(device, stagingBufferDesc);
+		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
 
 		device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, aspectMask);
 		CopyPixelsToBuffer(stagingBuffer);
@@ -420,7 +418,7 @@ namespace CE
 		stagingBuffer = nullptr;
 	}
 
-    void VulkanTexture::CopyPixelsFromBuffer(VulkanBuffer* srcBuffer)
+    void VulkanTexture::CopyPixelsFromBuffer(Buffer* srcBuffer)
     {
         auto cmdBuffer = device->BeginSingleUseCommandBuffer();
 
@@ -449,7 +447,7 @@ namespace CE
         device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
     }
 
-	void VulkanTexture::CopyPixelsToBuffer(VulkanBuffer* dstBuffer)
+	void VulkanTexture::CopyPixelsToBuffer(Buffer* dstBuffer)
 	{
 		auto cmdBuffer = device->BeginSingleUseCommandBuffer();
 

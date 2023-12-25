@@ -156,7 +156,7 @@
                 }
             ],
             "PassData": {
-                "DrawListTag": "forward",
+                "DrawListTag": "opaque",
                 "ViewTag": "Camera"
             }
         },
@@ -183,7 +183,7 @@
                 // No default connections here
             ],
             "PassData": {
-                "DrawListTag": "forward",
+                "DrawListTag": "transparent",
                 "ViewTag": "Camera"
             }
         }

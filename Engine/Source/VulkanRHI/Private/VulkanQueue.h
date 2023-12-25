@@ -3,7 +3,7 @@
 #include "VulkanRHI.h"
 #include "vulkan/vulkan.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     class VulkanDevice;
 

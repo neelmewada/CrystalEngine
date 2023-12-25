@@ -1,10 +1,8 @@
 #pragma once
 
-#include "VulkanRHIPrivate.h"
-
-namespace CE
+namespace CE::Vulkan
 {
-    class VulkanBuffer;
+	class VulkanDevice;
 
     class VulkanTexture : public RHI::Texture
     {
@@ -49,16 +47,16 @@ namespace CE
 
     protected:
 
-        void CopyPixelsFromBuffer(VulkanBuffer* srcBuffer);
+        void CopyPixelsFromBuffer(Buffer* srcBuffer);
 
-		void CopyPixelsToBuffer(VulkanBuffer* dstBuffer);
+		void CopyPixelsToBuffer(Buffer* dstBuffer);
 
     private:
         VulkanDevice* device = nullptr;
         VkImage image = nullptr;
         VkDeviceMemory imageMemory = nullptr;
         VkImageView imageView = nullptr;
-        RHI::TextureDimension dimension{};
+        RHI::Dimension dimension{};
 
         Name name = "";
         u32 width = 0, height = 0, depth = 0;

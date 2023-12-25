@@ -1,11 +1,10 @@
 
-#include "VulkanSwapChain.h"
-#include "VulkanTexture.h"
+#include "VulkanRHIPrivate.h"
 
 #include "PAL/Common/VulkanPlatform.h"
 #undef max
 
-namespace CE
+namespace CE::Vulkan
 {
 
 	VulkanSwapChain::VulkanSwapChain(VulkanRHI* vulkanRHI, PlatformWindow* windowHandle, VulkanDevice* device,

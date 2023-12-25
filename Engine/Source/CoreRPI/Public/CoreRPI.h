@@ -20,16 +20,14 @@ namespace CE::RPI
 }
 
 // Passes
+#include "Pass/PassAttachmentDefines.h"
 #include "Pass/PassAttachment.h"
-#include "Pass/PassDesc.h"
 #include "Pass/Pass.h"
 #include "Pass/ParentPass.h"
 #include "Pass/GpuPass.h"
 #include "Pass/RasterPass.h"
-#include "Pass/PassTemplate.h"
 #include "Pass/PassTree.h"
-#include "Pass/PassFactory.h"
-#include "Pass/PassLibrary.h"
+#include "Pass/PassRegistry.h"
 #include "Pass/PassSystem.h"
 
 #include "RenderTarget.h"

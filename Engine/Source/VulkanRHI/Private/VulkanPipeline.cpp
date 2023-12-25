@@ -6,7 +6,7 @@
 #include "VulkanRenderPass.h"
 #include "VulkanShaderResourceGroup.h"
 
-namespace CE
+namespace CE::Vulkan
 {
 
     VulkanPipeline::VulkanPipeline(VulkanDevice* device) : device(device)

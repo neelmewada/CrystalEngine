@@ -15,12 +15,11 @@ namespace CE::RHI
 
 		virtual int GetFrequencyId() const = 0;
 
-		virtual Name GetSRGName() const = 0;
-
 		virtual SRGType GetSRGType() const = 0;
 
-		virtual const RHI::ShaderResourceGroupDesc& GetDesc() const = 0;
+	protected:
 
 	};
     
 } // namespace CE::RHI
+

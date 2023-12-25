@@ -31,12 +31,12 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ThirdParty::sdl
             ${Vulkan_LIBRARIES}
+            CE::CoreApplication
+            CE::CoreShader
         PUBLIC
             CE::Core
-            CE::CoreApplication
             CE::CoreRHI
             CE::CoreMedia
-            CE::CoreShader
         TARGETS Config
         MACFRAMEWORKS
             QuartzCore

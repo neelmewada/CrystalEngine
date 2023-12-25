@@ -4,7 +4,7 @@
 #include "VulkanDescriptorSet.h"
 #include "VulkanShaderResourceGroup.h"
 
-namespace CE
+namespace CE::Vulkan
 {
 
 	VulkanDescriptorSet::VulkanDescriptorSet(VulkanDevice* device)
@@ -29,14 +29,14 @@ namespace CE
 		setLayout = nullptr;
 	}
 
-	int VulkanDescriptorSet::Create(Array<VulkanShaderResourceGroup*> srgs)
+	int VulkanDescriptorSet::Create(Array<ShaderResourceGroup*> srgs)
 	{
 		variableNames.Clear();
 		setBindings.Clear();
 		variableNameToBinding.Clear();
 		bindingSlotToBinding.Clear();
 
-		for (VulkanShaderResourceGroup* srg : srgs)
+		for (ShaderResourceGroup* srg : srgs)
 		{
 			variableNames.AddRange(srg->variableNames);
 			setBindings.AddRange(srg->setBindings);
@@ -69,7 +69,7 @@ namespace CE
 		BindAllVariables();
 	}
 
-	bool VulkanDescriptorSet::ContainsSRG(VulkanShaderResourceGroup* srg)
+	bool VulkanDescriptorSet::ContainsSRG(ShaderResourceGroup* srg)
 	{
 		if (srg == nullptr)
 			return false;
@@ -108,7 +108,7 @@ namespace CE
 		return true;
 	}
 
-	int VulkanDescriptorSet::SetSRG(VulkanShaderResourceGroup* srg)
+	int VulkanDescriptorSet::SetSRG(ShaderResourceGroup* srg)
 	{
 		if (srg == nullptr)
 			return -1;
@@ -119,7 +119,7 @@ namespace CE
 		return AddSRG(srg);
 	}
 
-	int VulkanDescriptorSet::RemoveSRG(VulkanShaderResourceGroup* srg, bool recreate)
+	int VulkanDescriptorSet::RemoveSRG(ShaderResourceGroup* srg, bool recreate)
 	{
 		if (srg == nullptr)
 			return -1;
@@ -158,7 +158,7 @@ namespace CE
 		return 0;
 	}
 
-	int VulkanDescriptorSet::RemoveSRGs(const Array<VulkanShaderResourceGroup*>& srgs, bool recreate)
+	int VulkanDescriptorSet::RemoveSRGs(const Array<ShaderResourceGroup*>& srgs, bool recreate)
 	{
 		if (srgs.IsEmpty())
 			return 0;
@@ -171,7 +171,7 @@ namespace CE
 		return Recreate();
 	}
 
-	int VulkanDescriptorSet::AddSRG(VulkanShaderResourceGroup* srg)
+	int VulkanDescriptorSet::AddSRG(ShaderResourceGroup* srg)
 	{
 		if (srg == nullptr)
 			return -1;

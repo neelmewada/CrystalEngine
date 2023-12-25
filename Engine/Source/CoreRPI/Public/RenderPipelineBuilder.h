@@ -65,6 +65,9 @@ namespace CE::RPI
 		Array<PassImageAttachmentDesc> imageAttachments{};
 
 		FIELD()
+		Array<PassBufferAttachmentDesc> bufferAttachments{};
+
+		FIELD()
 		PassData passData{};
 	};
 
@@ -88,6 +91,9 @@ namespace CE::RPI
 		FIELD()
 		Array<PassDefinition> passDefinitions{};
 
+		/// @brief Output render target for this pipeline.
+		RHI::RenderTarget* renderTarget = nullptr;
+
 	};
 
 	struct CORERPI_API RenderPipelineBuilder
@@ -100,6 +106,12 @@ namespace CE::RPI
 		inline Self& WithName(const Name& name)
 		{
 			descriptor.name = name;
+			return *this;
+		}
+
+		inline Self& SetRenderTarget(RHI::RenderTarget* renderTarget)
+		{
+			descriptor.renderTarget = renderTarget;
 			return *this;
 		}
 

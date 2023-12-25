@@ -250,7 +250,7 @@ namespace CE::RHI
     enum class TextureBindFlags
     {
 		None = 0,
-		/// @brief Use as sampled image for read.
+		/// @brief Use as shader input.
 		ShaderRead = BIT(0),
 		/// @brief Use as output image.
 		ShaderWrite = BIT(1),
@@ -260,8 +260,10 @@ namespace CE::RHI
 		Color = BIT(2),
 		/// @brief Use as depth stencil attachment.
 		DepthStencil = BIT(3),
+		/// @brief Use as depth-only attachment.
+		Depth = BIT(4),
 		/// @brief Use as a subpass input.
-		SubpassInput = BIT(4),
+		SubpassInput = BIT(5),
     };
     ENUM_CLASS_FLAGS(TextureBindFlags);
 
@@ -283,9 +285,6 @@ namespace CE::RHI
         u32 mipLevels = 1;
         u32 sampleCount = 1;
 		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
-
-		/// Force linear tiling rather than optimal tiling
-        bool forceLinearLayout = false;
     };
 
 	typedef TextureDesc ImageDesc;
@@ -365,6 +364,7 @@ namespace CE::RHI
         Compute
     };
 
+	ENUM()
     enum class ShaderStage
     {
         None = 0,
@@ -372,6 +372,8 @@ namespace CE::RHI
         Fragment = BIT(1),
 		Tessellation = BIT(2),
 
+		Default = Vertex | Fragment,
+		All = Vertex | Fragment | Tessellation,
 		COUNT = 3,
     };
     ENUM_CLASS_FLAGS(ShaderStage);
@@ -384,54 +386,21 @@ namespace CE::RHI
 		SIZE_T byteSize = 0;
 	};
 
-    /*
-    *   Graphics Pipeline
-    */
-
-	class ShaderModule;
-	class ShaderResourceGroup;
-
-	enum ShaderResourceType
-	{
-		SHADER_RESOURCE_TYPE_NONE = 0,
-		SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-		SHADER_RESOURCE_TYPE_STRUCTURED_BUFFER,
-		SHADER_RESOURCE_TYPE_SAMPLED_IMAGE,
-		SHADER_RESOURCE_TYPE_SAMPLER_STATE,
-		SHADER_RESOURCE_TYPE_INPUT_ATTACHMENT
-	};
-
-	struct ShaderResourceVariableDesc
-	{
-		//u32 bindingSlot = 0;
-		Name name = "";
-		u32 arrayCount = 1;
-		ShaderResourceType type = SHADER_RESOURCE_TYPE_NONE;
-		b8 isDynamic = false;
-
-		ShaderStage stageFlags = ShaderStage::Vertex | ShaderStage::Fragment;
-	};
-
 	ENUM()
-	enum class SRGType
+	enum class ShaderResourceType
 	{
-		PerScene = 0,
-		PerView,
-		PerPass,
-		PerSubPass,
-		PerMaterial,
-		PerObject,
-		PerDraw,
-        COUNT
+		None = 0,
+		ConstantBuffer, // A uniform buffer in vulkan
+		StructuredBuffer, // A storage buffer in vulkan
+		RWStructuredBuffer, // A RW storage buffer in vulkan
+		Texture2D, // A texture2D in vulkan
+		Texture3D, // A texture3D in vulkan
+		RWTexture2D, // An image2D in vulkan
+		RWTexture3D, // An image3D in vulkan
+		SamplerState, // A sampler in vulkan
+		InputAttachment
 	};
-	ENUM_CLASS(SRGType);
-
-	struct ShaderResourceGroupDesc
-	{
-		SRGType srgType = SRGType::PerScene;
-		Name srgName = "PerScene"; // Ex: PerView
-		Array<ShaderResourceVariableDesc> variables{};
-	};
+	ENUM_CLASS(ShaderResourceType);
 
 	struct ShaderStageDesc
 	{
@@ -447,13 +416,15 @@ namespace CE::RHI
 		u32 offset = 0;
 	};
 
-	enum CullMode
+	ENUM()
+	enum class CullMode
 	{
-		CULL_MODE_NONE = 0,
-		CULL_MODE_BACK,
-		CULL_MODE_FRONT,
-		CULL_MODE_ALL
+		None = 0,
+		Back,
+		Front,
+		All
 	};
+	ENUM_CLASS(CullMode);
 
 	struct GraphicsPipelineDesc
 	{
@@ -466,9 +437,7 @@ namespace CE::RHI
 		String fragmentEntry = "FragMain";
 		Array<ShaderStageDesc> otherStages{};
 
-		CullMode cullMode = CULL_MODE_BACK;
-
-		Array<RHI::ShaderResourceGroupDesc> shaderResourceGroups{};
+		CullMode cullMode = CullMode::Back;
 
 		HashMap<Name, int> variableNameBindingMap{};
 	};
@@ -513,12 +482,6 @@ namespace CE::RHI
 			return *this;
 		}
 
-		GraphicsPipelineBuilder& SRG(const RHI::ShaderResourceGroupDesc& srg)
-		{
-			desc.shaderResourceGroups.Add(srg);
-			return *this;
-		}
-
 		const GraphicsPipelineDesc& Build()
 		{
 			return desc;
@@ -531,4 +494,4 @@ namespace CE::RHI
 
 } // namespace CE
 
-#include "Definitions.rtti.h"
+#include "RHIDefinitions.rtti.h"

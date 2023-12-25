@@ -1,16 +1,16 @@
 #pragma once
 
-namespace CE
+namespace CE::Vulkan
 {
 	class VulkanDescriptorSet;
-	class VulkanShaderResourceGroup;
+	class ShaderResourceGroup;
 
-	class VulkanShaderResourceManager
+	class ShaderResourceManager
 	{
 	public:
 
-		VulkanShaderResourceManager(VulkanDevice* device);
-		~VulkanShaderResourceManager();
+		ShaderResourceManager(VulkanDevice* device);
+		~ShaderResourceManager();
 
 		inline u32 GetMaxBoundSets() const { return maxBoundDescriptorSets; }
         
@@ -38,13 +38,13 @@ namespace CE
 
 	};
 
-	class VulkanShaderResourceGroup : public RHI::ShaderResourceGroup
+	class ShaderResourceGroup : public RHI::ShaderResourceGroup
 	{
 	public:
 
-		VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc);
+		ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc);
 
-		~VulkanShaderResourceGroup();
+		~ShaderResourceGroup();
 
 		virtual bool Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) override;
 
@@ -72,7 +72,7 @@ namespace CE
 
 		VulkanDevice* device = nullptr;
 
-		VulkanShaderResourceManager* srgManager = nullptr;
+		ShaderResourceManager* srgManager = nullptr;
 		VulkanDescriptorSet* sharedDescriptorSet = nullptr;
 
 		RHI::ShaderResourceGroupDesc desc{};

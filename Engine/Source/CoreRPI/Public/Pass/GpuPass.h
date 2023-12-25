@@ -10,9 +10,10 @@ namespace CE::RPI
 	public:
 
 
+
 	private:
 
-
+		RPI_PASS(GpuPass)
 	};
     
 } // namespace CE::RPI

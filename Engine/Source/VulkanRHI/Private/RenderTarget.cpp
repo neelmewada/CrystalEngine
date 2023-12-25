@@ -7,7 +7,7 @@
 #include "VulkanTexture.h"
 #include "VulkanSampler.h"
 
-namespace CE
+namespace CE::Vulkan
 {
 
     // ****************************************************

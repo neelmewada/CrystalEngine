@@ -4,7 +4,7 @@
 
 #include "VulkanDescriptorPool.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     
     VulkanDescriptorPool::VulkanDescriptorPool(VulkanDevice* device, u32 initialPoolSize, u32 poolSizeIncrement)

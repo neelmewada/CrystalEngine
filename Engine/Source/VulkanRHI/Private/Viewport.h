@@ -2,9 +2,12 @@
 
 #include "VulkanRHIPrivate.h"
 
-namespace CE
+namespace CE {
+	class PlatformWindow;
+}
+
+namespace CE::Vulkan
 {
-    class PlatformWindow;
 
     class VulkanViewport : public RHI::Viewport
     {

@@ -12,17 +12,31 @@ namespace CE::RHI
 	public:
 		virtual ~Buffer() = default;
 
-		virtual BufferBindFlags GetBindFlags() = 0;
+		inline BufferBindFlags GetBindFlags() const
+		{
+			return bindFlags;
+		}
 
 		virtual void* GetHandle() = 0;
 
-		virtual u64 GetBufferSize() = 0;
+		inline u64 GetBufferSize() const
+		{
+			return bufferSize;
+		}
 
 		virtual void UploadData(const BufferData& data) = 0;
 
 		virtual void ReadData(u8** outData, u64* outDataSize) = 0;
 
 		virtual void Resize(u64 newBufferSize) = 0;
+
+	protected:
+
+		BufferBindFlags bindFlags{};
+
+		u64 bufferSize = 0;
+
+		u64 structureByteStride = 0;
 
 	};
     

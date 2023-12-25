@@ -28,13 +28,24 @@ namespace CE::RPI
 	public:
 
 		virtual ~RenderPipeline();
+
+		static RenderPipeline* Create(const RenderPipelineDescriptor& descriptor, Scene* ownerScene);
+
+		static RenderPipeline* CreateFromJson(const String& jsonString, Scene* ownerScene);
+
+		static RenderPipeline* CreateFromJson(Stream* jsonStream, Scene* ownerScene);
 		
+		void Compile();
+
 	private:
 
+		void InitializeInternal();
 
 	protected:
 
-		RenderPipeline() = default;
+		RenderPipeline();
+
+		RenderPipelineDescriptor descriptor{};
 
 		/// @brief The output render target of this render pipeline.
 		RHI::RenderTarget* renderTarget = nullptr;
@@ -42,8 +53,8 @@ namespace CE::RPI
 		/// @brief Name of the pipeline
 		Name name{};
 
-		/// @brief Name of the pass template to instantiate as root pass
-		Name rootPassTemplateName{};
+		/// @brief Name of the pass definition to instantiate as root pass
+		Name rootPassDefinitionName{};
 
 		/// @brief Name tag of the main view.
 		Name mainViewTag = "MainCamera";
@@ -52,7 +63,7 @@ namespace CE::RPI
 		Scene* scene = nullptr;
 
 		/// @brief The pass tree hierarchy. Pipeline owns & manages the passes.
-		PassTree passTree{};
+		PassTree* passTree = nullptr;
 
 		/// @brief A hash map of all views owned by this pipeline accessed by their respective tags
 		PipelineViewsByTag pipelineViewsByTag{};

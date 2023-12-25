@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "CoreMedia.h"
-#include "CoreShader.h"
 
 #include "RHI/ThreadLocalContext.h"
 #include "RHI/Limits.h"
@@ -10,10 +9,12 @@
 
 #include "RHI/TagRegistry.h"
 
-#include "RHI/Definitions.h"
+#include "RHI/RHIDefinitions.h"
 #include "RHI/ClearValue.h"
 #include "RHI/AttachmentDefines.h"
+#include "RHI/ShaderResourceGroupLayout.h"
 #include "RHI/Resources.h"
+#include "RHI/BufferView.h"
 #include "RHI/Buffer.h"
 #include "RHI/Texture.h"
 #include "RHI/CommandList.h"

@@ -2,16 +2,14 @@
 
 #include "VulkanRHIPrivate.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     
-    class VulkanBuffer : public RHI::Buffer
+    class Buffer : public RHI::Buffer
     {
     public:
-        VulkanBuffer(VulkanDevice* device, const RHI::BufferDesc& desc);
-        virtual ~VulkanBuffer();
-
-        virtual RHI::BufferBindFlags GetBindFlags() override;
+        Buffer(VulkanDevice* device, const RHI::BufferDesc& desc);
+        virtual ~Buffer();
 
         virtual void* GetHandle() override
         {
@@ -26,8 +24,6 @@ namespace CE
 		virtual void ReadData(u8** outData, u64* outDataSize) override;
         
         virtual void Resize(u64 newBufferSize) override;
-        
-        virtual u64 GetBufferSize() override;
 
     private:
         void CreateUploadContext();
@@ -40,11 +36,8 @@ namespace CE
 
     private:
         Name name{};
-        RHI::BufferBindFlags bindFlags{};
         RHI::BufferUsageFlags usageFlags{};
         RHI::BufferAllocMode allocMode{};
-
-        u64 bufferSize = 0, structureByteStride = 0;
 
         VulkanDevice* device = nullptr;
         VkBuffer buffer = nullptr;

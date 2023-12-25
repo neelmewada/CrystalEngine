@@ -1,7 +1,7 @@
 
 #include "VulkanRenderPass.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     
     class VulkanRenderPassBuilder

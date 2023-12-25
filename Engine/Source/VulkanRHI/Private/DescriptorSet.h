@@ -1,8 +1,8 @@
 #pragma once
 
-namespace CE
+namespace CE::Vulkan
 {
-	class VulkanShaderResourceGroup;
+	class ShaderResourceGroup;
 
 	class VULKANRHI_API VulkanDescriptorSet
 	{
@@ -14,37 +14,37 @@ namespace CE
 		void Destroy();
 
 		// Create a descriptor set by combining multiple SRGs
-		int Create(Array<VulkanShaderResourceGroup*> sharedResourceGroups);
+		int Create(Array<ShaderResourceGroup*> sharedResourceGroups);
 
 		/// @brief Returns true if the given srg is a subset of this descriptor set.
 		/// @param srg 
 		/// @return 
-		bool ContainsSRG(VulkanShaderResourceGroup* srg);
+		bool ContainsSRG(ShaderResourceGroup* srg);
 
 		/// @brief Sets the given SRG into this shared descriptor set. Always use SetSRG() function instead of AddSRG().
 		/// @param srg 
 		/// @return 
-		int SetSRG(VulkanShaderResourceGroup* srg);
+		int SetSRG(ShaderResourceGroup* srg);
 
 		bool BindVariable(int bindingSlot, RHI::Buffer* buffer, SIZE_T offset, SIZE_T size);
 
-		inline int RemoveSRG(VulkanShaderResourceGroup* srg)
+		inline int RemoveSRG(ShaderResourceGroup* srg)
 		{
 			return RemoveSRG(srg, true);
 		}
 
-		inline int RemoveSRGs(const Array<VulkanShaderResourceGroup*>& srgs)
+		inline int RemoveSRGs(const Array<ShaderResourceGroup*>& srgs)
 		{
 			return RemoveSRGs(srgs, true);
 		}
 
 	private:
 
-		int RemoveSRG(VulkanShaderResourceGroup* srg, bool recreate);
+		int RemoveSRG(ShaderResourceGroup* srg, bool recreate);
 
-		int RemoveSRGs(const Array<VulkanShaderResourceGroup*>& srgs, bool recreate);
+		int RemoveSRGs(const Array<ShaderResourceGroup*>& srgs, bool recreate);
 
-		int AddSRG(VulkanShaderResourceGroup* srg);
+		int AddSRG(ShaderResourceGroup* srg);
 
 		int Recreate();
 
@@ -57,7 +57,7 @@ namespace CE
 		VkDescriptorSet descriptorSet = nullptr;
 		VkDescriptorSetLayout setLayout = nullptr;
 
-		HashMap<Name, VulkanShaderResourceGroup*> boundSRGs{};
+		HashMap<Name, ShaderResourceGroup*> boundSRGs{};
 
         Array<Name> variableNames{};
         Array<VkDescriptorSetLayoutBinding> setBindings{};
@@ -69,7 +69,7 @@ namespace CE
 		HashMap<int, VkDescriptorBufferInfo> bufferVariablesBoundByBindingSlot{};
 		HashMap<int, VkDescriptorImageInfo> imageVariablesBoundByBindingSlot{};
 
-		friend class VulkanShaderResourceGroup;
+		friend class ShaderResourceGroup;
 	};
 
 } // namespace CE
