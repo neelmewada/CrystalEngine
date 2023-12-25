@@ -3,13 +3,19 @@
 namespace CE::RPI
 {
 	/// @brief Describes the attachment used by a pass
-	class CORERPI_API PassAttachment final : public IntrusiveBase
+	struct CORERPI_API PassAttachment final : public IntrusiveBase
 	{
 	public:
 
-		RHI::UnifiedScopeAttachmentDesc unifiedAttachmentDesc{};
+		PassAttachment(const PassImageAttachmentDesc& desc);
+		PassAttachment(const PassBufferAttachmentDesc& desc);
 
-	private:
+		/// @brief Name of the attachment.
+		Name name{};
+
+		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
+
+		RHI::UnifiedScopeAttachmentDesc unifiedAttachmentDesc{};
 
 	};
 

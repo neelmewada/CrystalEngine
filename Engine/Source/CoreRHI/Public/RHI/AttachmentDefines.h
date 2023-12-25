@@ -20,6 +20,14 @@ namespace CE::RHI
 		DontCare
 	};
 	ENUM_CLASS(AttachmentStoreAction);
+
+	ENUM()
+	enum class AttachmentLifetimeType
+	{
+		External = 0,
+		Transient
+	};
+	ENUM_CLASS(AttachmentLifetimeType)
     
 	ENUM()
 	enum class AttachmentType : u8

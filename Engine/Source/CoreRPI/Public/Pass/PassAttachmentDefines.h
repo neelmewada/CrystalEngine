@@ -87,14 +87,6 @@ namespace CE::RPI
 		}
     };
 
-	ENUM()
-    enum class AttachmentLifetime
-    {
-        Transient = 0,
-        Imported
-    };
-	ENUM_CLASS(AttachmentLifetime);
-
 	STRUCT()
 	struct CORERPI_API PassAttachmentSizeSource
 	{
@@ -125,7 +117,7 @@ namespace CE::RPI
 
 		/// @brief Lifetime of the attachment.
 		FIELD()
-		AttachmentLifetime lifetime{};
+		RHI::AttachmentLifetimeType lifetime{};
 
 		FIELD()
 		PassAttachmentSizeSource sizeSource{};
@@ -197,6 +189,44 @@ namespace CE::RPI
 		BufferDescriptor bufferDescriptor{};
 
 
+	};
+
+	struct UnifiedAttachmentDescriptor
+	{
+		UnifiedAttachmentDescriptor() = default;
+
+		UnifiedAttachmentDescriptor(const ImageDescriptor& imageDesc)
+			: type(RHI::AttachmentType::Image)
+			, imageDesc(imageDesc)
+		{
+
+		}
+
+		UnifiedAttachmentDescriptor(const BufferDescriptor& bufferDesc)
+			: type(RHI::AttachmentType::Buffer)
+			, bufferDesc(bufferDesc)
+		{
+
+		}
+
+		~UnifiedAttachmentDescriptor()
+		{
+			if (type == AttachmentType::Image)
+			{
+				imageDesc.~ImageDescriptor();
+			}
+			else
+			{
+				bufferDesc.~BufferDescriptor();
+			}
+		}
+
+		AttachmentType type = AttachmentType::Image;
+
+		union {
+			ImageDescriptor imageDesc{};
+			BufferDescriptor bufferDesc;
+		};
 	};
     
 } // namespace CE::RPI
