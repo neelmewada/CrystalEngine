@@ -28,6 +28,8 @@ namespace CE::RPI
 
 		PassSlotType slotType = PassSlotType::Undefined;
 
+		RHI::ScopeAttachmentUsage attachmentUsage = RHI::ScopeAttachmentUsage::None;
+
 		/// @brief Pointer to another attachment binding slot this binding is connected to. For InputOutput slots,
 		/// this is always an input connection.
 		PassAttachmentBinding* connectedBinding = nullptr;
