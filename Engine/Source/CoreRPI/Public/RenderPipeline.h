@@ -37,9 +37,9 @@ namespace CE::RPI
 
 	private:
         
-        const PassDefinition& GetRootDefinition();
-        
         void CompileTree();
+
+		Pass* CreatePassFromDefinition(const PassDefinition& passDefinition);
 
 		void InitializeInternal();
 

@@ -13,6 +13,9 @@ namespace CE::RPI
 		/// @brief Name of the attachment.
 		Name name{};
         
+		/// @brief Path to this attachment. Path of owning pass and the attachment name.
+		AttachmentID path{};
+
 		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
         
         RPI::UnifiedAttachmentDescriptor attachmentDescriptor{};
@@ -41,10 +44,12 @@ namespace CE::RPI
         
         /// @brief Pointer to the binding when the pass that owns this binding is disabled. Used only
         /// for output slot types.
-        PassAttachmentBinding* fallbackBinding = nullptr;
+		PassAttachmentBinding* fallbackBinding = nullptr;
+
+		/// @brief The pass that owns this binding.
+		Pass* ownerPass = nullptr;
         
-	private:
-        
+		/// @brief The pass attachment this binding points to. Connected binding should be null if this is used.
 		Ptr<PassAttachment> attachment = nullptr;
         
 	};

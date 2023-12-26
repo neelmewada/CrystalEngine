@@ -25,7 +25,10 @@ namespace CE::RPI
 
 	protected:
 
-		Name name{};
+		Pass();
+
+		/// @brief Draw list tag this pass is associated to.
+		DrawListTag drawListTag{};
 
 		/// @brief The view tag associated with a pipeline view.
 		/// The view that matches this tag will be queried by this pass.
@@ -33,7 +36,9 @@ namespace CE::RPI
 
 		FixedArray<PassAttachmentBinding, PassAttachmentBindingCountMax> attachmentBindings{};
 
-		
+		Array<Ptr<PassAttachment>> passAttachments{};
+
+		friend class RenderPipeline;
 	};
 
     
