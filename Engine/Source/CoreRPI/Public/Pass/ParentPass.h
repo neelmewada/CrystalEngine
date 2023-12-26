@@ -24,6 +24,8 @@ namespace CE::RPI
 		void Clear();
 
 		virtual bool IsParentPass() const override final { return true; }
+        
+        Pass* GetPass(const Name& passName);
 
 	private:
 

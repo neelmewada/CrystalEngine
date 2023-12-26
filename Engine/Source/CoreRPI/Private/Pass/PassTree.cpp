@@ -64,9 +64,10 @@ namespace CE::RPI
 					curSearchPass = rootPass;
 				}
 			}
-			else if (curSearchPass)
+			else if (curSearchPass && curSearchPass->IsParentPass())
 			{
-				
+                ParentPass* cast = (ParentPass*)curSearchPass;
+                
 			}
 		}
 

@@ -29,7 +29,9 @@
             {
                 "PassName": "TransparentPass",
                 "PassDefinition": "TransparentPassDefinition",
-                "Connections": [ // Only INPUT connections should be defined inside "ChildPasses" list.
+                "Connections": [ 
+                    // Only INPUT connections should be defined inside "ChildPasses" list, except for
+                    // parent pass's output connection.
                     { // Connect TransparentPass's Input to OpaquePass's Output like this:   OpaquePass[Color] -> TransparentPass[Color]
                         "LocalSlot": "Color",
                         "AttachmentRef": {
@@ -37,10 +39,10 @@
                             "Attachment": "Color"
                         }
                     },
-                    { // Connect Color IO slot to PipelineOutput
+                    { // Connect Color IO slot to PipelineOutput (as output)
                         "LocalSlot": "Color",
                         "AttachmentRef": {
-                            "Pass": "$root",
+                            "Pass": "$parent",
                             "Attachment": "PipelineOutput"
                         }
                     },
