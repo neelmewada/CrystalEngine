@@ -61,6 +61,11 @@ namespace CE::RPI
 		CompileTree();
 	}
 
+	bool RenderPipeline::IsRootPass(const Name& passName)
+	{
+		return passTree->rootPass != nullptr && passTree->rootPass->GetName() == passName;
+	}
+
 	bool RenderPipeline::CompileTree()
 	{
         passTree->Clear();
@@ -72,10 +77,36 @@ namespace CE::RPI
 		if (rootPass == nullptr)
 			return false;
 
-		// Connect passes
+		// Connect pass slots & attachments
 		
 
 		return true;
+	}
+
+	void RenderPipeline::BuildPassConnections(const PassRequest& passRequest)
+	{
+		int index = descriptor.passDefinitions.IndexOf([&](const PassDefinition& x) { return x.name == passRequest.passDefinition; });
+		if (index < 0)
+			return;
+
+		const PassDefinition& passDefinition = descriptor.passDefinitions[index];
+		Pass* pass = passTree->FindPass(passRequest.passName);
+		if (pass == nullptr)
+			return;
+
+		// Pass definition connections are only made to connect slots to actual attachments, NOT to other slots.
+
+		for (const auto& connection : passDefinition.connections)
+		{
+			PassSlot* localSlot = passDefinition.FindSlot(connection.localSlot);
+			if (localSlot == nullptr)
+				continue;
+
+			Name passPath = connection.attachmentRef.pass; // Specials: $this, %parent, $root
+			Name attachmentName = connection.attachmentRef.attachment;
+
+			
+		}
 	}
 
 	Pass* RenderPipeline::InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass)
@@ -100,6 +131,8 @@ namespace CE::RPI
 		Pass* pass = CreateObject<Pass>(outer, passRequest.passName.GetString(), OF_NoFlags, passClassType);
 		if (pass == nullptr)
 			return nullptr;
+
+		pass->parentPass = parentPass;
 
 		if (passDefinition.passData.drawListTag.IsValid())
 		{

@@ -288,6 +288,88 @@ namespace CE::RPI
 			BufferDescriptor bufferDesc;
 		};
 	};
+
+	STRUCT()
+	struct CORERPI_API PassData
+	{
+		CE_STRUCT(PassData)
+	public:
+
+		FIELD()
+		Name drawListTag{};
+
+		FIELD()
+		Name viewTag{};
+
+	};
+
+	/// @brief Describes the pass to create as a subpass of current pass.
+	STRUCT()
+	struct CORERPI_API PassRequest
+	{
+		CE_STRUCT(PassRequest)
+	public:
+
+		/// @brief Name of the pass after instantiation.
+		FIELD()
+		Name passName{};
+
+		/// @brief Name of pass template we will instantiate from.
+		FIELD()
+		Name passDefinition{};
+
+		/// @brief Connections of the instantiated pass.
+		FIELD()
+		Array<PassConnection> connections{};
+
+		/// @brief List of child passes through pass requests.
+		FIELD()
+		Array<PassRequest> childPasses{};
+
+	};
+
+	STRUCT()
+	struct CORERPI_API PassDefinition
+	{
+		CE_STRUCT(PassDefinition)
+	public:
+
+		FIELD()
+		Name name{};
+
+		FIELD()
+		Name passClass{};
+
+		FIELD()
+		Array<PassSlot> slots{};
+
+		FIELD()
+		Array<PassConnection> connections{};
+
+		FIELD()
+		Array<PassImageAttachmentDesc> imageAttachments{};
+
+		FIELD()
+		Array<PassBufferAttachmentDesc> bufferAttachments{};
+
+		FIELD()
+		PassData passData{};
+
+		inline PassSlot* FindSlot(const Name& slotName) const
+		{
+			for (int i = 0; i < slots.GetSize(); i++)
+			{
+				if (slots[i].name == slotName)
+					return const_cast<PassSlot*>(&slots[i]);
+			}
+			return nullptr;
+		}
+
+		inline int GetPassSlotIndex(const Name& slotName) const
+		{
+			return slots.IndexOf([&](const PassSlot& slot) { return slot.name == slotName; });
+		}
+	};
     
 } // namespace CE::RPI
 

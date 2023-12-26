@@ -2,14 +2,16 @@
 
 #define RPI_PASS(passName)\
 	friend class Pass;\
-	friend class PassFactory;\
+	friend class PassTree;\
+	friend class ParentPass;\
+	friend class GpuPass;\
 	friend class PassLibrary;\
-	friend class PassTemplate;\
 	friend class PassSystem;\
 	friend class RenderPipeline;
 
 namespace CE::RPI
 {
+	class ParentPass;
 
 	/// @brief The base Pass class. All passes should derive from this class.
 	CLASS(Abstract)
@@ -18,8 +20,8 @@ namespace CE::RPI
 		CE_CLASS(Pass, Object)
 	public:
 		friend class ParentPass;
-		friend class PassFactory;
-		friend class PassLibrary;
+		friend class PassTree;
+		friend class PassRegistry;
 
 		virtual ~Pass();
 
@@ -35,6 +37,8 @@ namespace CE::RPI
 		/// @brief The view tag associated with a pipeline view.
 		/// The view that matches this tag will be queried by this pass.
 		PipelineViewTag pipelineViewTag{};
+
+		ParentPass* parentPass = nullptr;
 
 		FixedArray<PassAttachmentBinding, PassAttachmentBindingCountMax> attachmentBindings{};
 

@@ -9,7 +9,7 @@ namespace CE::RPI
 		CE_CLASS(GpuPass, Pass)
 	public:
 
-
+		virtual bool IsParentPass() const override final { return false; }
 
 	private:
 

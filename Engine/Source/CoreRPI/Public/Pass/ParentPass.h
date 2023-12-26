@@ -14,6 +14,7 @@ namespace CE::RPI
 		friend class PassLibrary;
 		friend class PassTemplate;
 		friend class PassSystem;
+		friend class PassTree;
 
 		~ParentPass();
 

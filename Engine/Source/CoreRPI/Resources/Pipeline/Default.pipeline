@@ -63,7 +63,7 @@
             "Name": "DefaultPipelineRoot",
             "PassClass": "ParentPass",
             "Slots": [
-                // Final color output
+                // Final color output. Root pass should always have 1 InputOutput slot, which will always be the render target.
                 {
                     "Name": "PipelineOutput",
                     "SlotType": "InputOutput"
