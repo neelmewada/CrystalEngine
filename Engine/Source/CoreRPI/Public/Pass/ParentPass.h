@@ -22,6 +22,8 @@ namespace CE::RPI
 
 		void Clear();
 
+		virtual bool IsParentPass() const override final { return true; }
+
 	private:
 
 		Array<Pass*> passes{};

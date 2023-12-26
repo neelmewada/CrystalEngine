@@ -69,6 +69,11 @@ namespace CE::RPI
 
 		FIELD()
 		PassData passData{};
+
+		inline int GetPassSlotIndex(const Name& slotName)
+		{
+			return slots.IndexOf([&](const PassSlot& slot) { return slot.name == slotName; });
+		}
 	};
 
 	STRUCT()

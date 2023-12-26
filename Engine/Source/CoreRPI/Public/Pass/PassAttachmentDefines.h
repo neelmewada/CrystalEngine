@@ -23,14 +23,12 @@ namespace CE::RPI
 	{
 		CE_STRUCT(PassSlot)
 	public:
-
-        /// @brief Name of the slot.
-		FIELD()
-		Name name{};
         
-        /// @brief Attachment type of the slot.
 		FIELD()
-		PassSlotType slotType = PassSlotType::Undefined;
+		Name name{}; /// @brief Name of the slot.
+        
+		FIELD()
+		PassSlotType slotType = PassSlotType::Undefined; /// @brief Attachment type of the slot.
 
 		FIELD()
 		Name shaderInputName{};
@@ -38,17 +36,14 @@ namespace CE::RPI
 		FIELD()
 		RHI::ScopeAttachmentUsage attachmentUsage{};
         
-        /// @brief Attachment's load and store action.
 		FIELD()
-		RHI::AttachmentLoadStoreAction loadStoreAction{};
+		RHI::AttachmentLoadStoreAction loadStoreAction{}; /// @brief Attachment's load and store action.
         
-        /// @brief List of formats supported by this pass slot.
 		FIELD()
-        Array<RHI::Format> formats{};
+        Array<RHI::Format> formats{}; /// @brief List of formats supported by this pass slot.
         
-        /// @brief List of image dimensions supported by this pass slot.
 		FIELD()
-        Array<RHI::Dimension> dimensions{};
+        Array<RHI::Dimension> dimensions{}; /// @brief List of image dimensions supported by this pass slot.
 	};
     
 	STRUCT()

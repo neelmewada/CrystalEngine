@@ -23,6 +23,8 @@ namespace CE::RPI
 
 		virtual ~Pass();
 
+		virtual bool IsParentPass() const { return false; }
+
 	protected:
 
 		Pass();

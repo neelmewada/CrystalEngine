@@ -58,19 +58,38 @@ namespace CE::RPI
 		rootPassDefinitionName = descriptor.rootPass.passDefinition;
 		mainViewTag = descriptor.mainViewTag;
         
+		CompileTree();
 	}
 
-	void RenderPipeline::CompileTree()
+	bool RenderPipeline::CompileTree()
 	{
         passTree->Clear();
         
-		passTree->rootPass = CreateObject<ParentPass>(passTree, "RootPass");
+		const RPI::PassRequest& rootPassRequest = descriptor.rootPass;
 
+		// Instantiate passes recursively
+		Pass* rootPass = InstantiatePassesRecursively(rootPassRequest, nullptr);
+		if (rootPass == nullptr)
+			return false;
+
+		// Connect passes
 		
+
+		return true;
 	}
 
-	Pass* RenderPipeline::CreatePassFromDefinition(const PassDefinition& passDefinition)
+	Pass* RenderPipeline::InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass)
 	{
+		Object* outer = parentPass;
+		if (parentPass == nullptr)
+			outer = passTree;
+
+		int index = descriptor.passDefinitions.IndexOf([&](const PassDefinition& x) { return x.name == passRequest.passDefinition; });
+		if (index < 0)
+			return nullptr;
+
+		const PassDefinition& passDefinition = descriptor.passDefinitions[index];
+
 		if (!passDefinition.name.IsValid() || !passDefinition.passClass.IsValid())
 			return nullptr;
 
@@ -78,7 +97,7 @@ namespace CE::RPI
 		if (passClassType == nullptr)
 			return nullptr;
 
-		Pass* pass = CreateObject<Pass>(passTree, passDefinition.name.GetString(), OF_NoFlags, passClassType);
+		Pass* pass = CreateObject<Pass>(outer, passRequest.passName.GetString(), OF_NoFlags, passClassType);
 		if (pass == nullptr)
 			return nullptr;
 
@@ -91,6 +110,32 @@ namespace CE::RPI
 		{
 			pass->pipelineViewTag = passDefinition.passData.viewTag;
 		}
+
+		// Attachments owned by this pass
+		for (const auto& attachmentDesc : passDefinition.imageAttachments)
+		{
+			pass->passAttachments.Add(new PassAttachment(attachmentDesc));
+		}
+		for (const auto& attachmentDesc : passDefinition.bufferAttachments)
+		{
+			pass->passAttachments.Add(new PassAttachment(attachmentDesc));
+		}
+
+		if (pass->IsParentPass())
+		{
+			// Child passes
+			for (const PassRequest& childPassRequest : passRequest.childPasses)
+			{
+				ParentPass* cast = (ParentPass*)pass;
+				Pass* childPass = InstantiatePassesRecursively(childPassRequest, cast);
+				if (childPass != nullptr)
+				{
+					cast->AddChild(childPass);
+				}
+			}
+		}
+
+		return pass;
 	}
 
 } // namespace CE::RPI

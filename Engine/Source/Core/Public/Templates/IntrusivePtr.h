@@ -147,6 +147,11 @@ namespace CE
 			return ptr;
 		}
 
+		inline operator T*() const
+		{
+			return ptr;
+		}
+
 		inline T& operator*() const
 		{
 			return *ptr;

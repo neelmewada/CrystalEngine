@@ -4,6 +4,7 @@ namespace CE::RHI
 {
 	class IPipelineState;
 	class Viewport;
+	class ShaderResourceGroup;
 
 	class CORERHI_API CommandList : public RHIResource
 	{

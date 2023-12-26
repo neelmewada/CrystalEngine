@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Definitions.h"
+#include "RHIDefinitions.h"
 
 namespace CE::RHI
 {

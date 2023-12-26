@@ -83,7 +83,7 @@ namespace CE::RHI
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection) = 0;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) = 0;
 
-		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) = 0;
+		//virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) = 0;
 		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) = 0;
 
 		// - Pipeline State -

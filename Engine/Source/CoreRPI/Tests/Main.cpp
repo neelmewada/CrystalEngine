@@ -1,4 +1,6 @@
 
+#include "Core.h"
+
 #include "CoreRPI.h"
 #include <gtest/gtest.h>
 
@@ -115,7 +117,7 @@ TEST(RenderPipeline, DescriptorParsing)
 
 		EXPECT_EQ(passDesc.imageAttachments.GetSize(), 1);
 		EXPECT_EQ(passDesc.imageAttachments[0].name, "DepthStencil");
-		EXPECT_EQ(passDesc.imageAttachments[0].lifetime, RPI::AttachmentLifetime::Transient);
+		EXPECT_EQ(passDesc.imageAttachments[0].lifetime, RHI::AttachmentLifetimeType::Transient);
 		EXPECT_EQ(passDesc.imageAttachments[0].sizeSource.source.pass, "$root");
 		EXPECT_EQ(passDesc.imageAttachments[0].sizeSource.source.attachment, "PipelineOutput");
 		EXPECT_EQ(passDesc.imageAttachments[0].sizeSource.sizeMultipliers, Vec3(1, 1, 1));
@@ -169,6 +171,26 @@ TEST(RenderPipeline, DescriptorParsing)
 		EXPECT_EQ(passDesc.passData.drawListTag, "forward");
 		EXPECT_EQ(passDesc.passData.viewTag, "Camera");
 	}
+
+	TEST_END;
+}
+
+
+TEST(RenderPipeline, BuildPassTree)
+{
+	TEST_BEGIN;
+
+	Resource* pipelineJson = GetResourceManager()->LoadResource("/CoreRPI/Resources/Pipeline/Default.pipeline", nullptr);
+	{
+		RPI::Ptr<RPI::Scene> scene = new RPI::Scene();
+		MemoryStream stream = MemoryStream(pipelineJson->GetData(), pipelineJson->GetDataSize());
+
+		RenderPipeline* renderPipeline = RenderPipeline::CreateFromJson(&stream, scene);
+
+		delete renderPipeline;
+		scene = nullptr;
+	}
+	pipelineJson->Destroy();
 
 	TEST_END;
 }

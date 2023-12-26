@@ -37,9 +37,9 @@ namespace CE::RPI
 
 	private:
         
-        void CompileTree();
+        bool CompileTree();
 
-		Pass* CreatePassFromDefinition(const PassDefinition& passDefinition);
+		Pass* InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass);
 
 		void InitializeInternal();
 

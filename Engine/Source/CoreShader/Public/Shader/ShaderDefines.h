@@ -19,41 +19,11 @@ namespace CE
 
 	CORESHADER_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input);
 
-	ENUM(Flags)
-	enum class ShaderStage
-	{
-		None = 0,
-		Vertex = BIT(0),
-		Fragment = BIT(1),
-
-		Default = Vertex | Fragment,
-		All = Vertex | Fragment,
-	};
-	ENUM_CLASS_FLAGS(ShaderStage);
-
 	ENUM()
 	enum class ShaderBlobFormat
 	{
 		Spirv = 0
 	};
-
-	ENUM()
-	enum class ShaderResourceType
-	{
-		None = 0,
-		/// Uniform buffer in vulkan terms
-		ConstantBuffer,
-		/// Storage Buffer in vulkan terms
-		StructuredBuffer,
-		SamplerState,
-		Texture1D,
-		Texture2D,
-		Texture3D,
-		TextureCube,
-		// image2D in vulkan
-		RWTexture2D,
-	};
-	ENUM_CLASS_FLAGS(ShaderResourceType);
 
 	ENUM()
 	enum class ShaderStructMemberType
@@ -87,7 +57,7 @@ namespace CE
 		CE_STRUCT(SRGVariable)
 	public:
 
-		inline bool IsValid() const { return resourceType != ShaderResourceType::None; }
+		inline bool IsValid() const { return resourceType != RHI::ShaderResourceType::None; }
 
 		inline u32 GetBindingSlot() const { return bindingSlot; }
 
@@ -104,7 +74,7 @@ namespace CE
 		Name internalName{};
 
 		FIELD(ReadOnly)
-		ShaderResourceType resourceType = ShaderResourceType::None;
+		RHI::ShaderResourceType resourceType = RHI::ShaderResourceType::None;
 
 		FIELD(ReadOnly)
 		ShaderStage shaderStages = ShaderStage::All;

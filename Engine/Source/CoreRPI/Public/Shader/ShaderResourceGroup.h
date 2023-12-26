@@ -7,7 +7,6 @@ namespace CE::RPI
 	{
 	public:
 		ShaderResourceGroup(RHI::ShaderResourceGroup* srg);
-		ShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc);
 
 		~ShaderResourceGroup();
 

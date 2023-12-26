@@ -357,6 +357,8 @@ namespace CE::RHI
     *   Shader
     */
 
+	class ShaderModule;
+
     enum class PipelineType
     {
         None = 0,
@@ -393,12 +395,14 @@ namespace CE::RHI
 		ConstantBuffer, // A uniform buffer in vulkan
 		StructuredBuffer, // A storage buffer in vulkan
 		RWStructuredBuffer, // A RW storage buffer in vulkan
+		Texture1D, // A texture1D in vulkan
 		Texture2D, // A texture2D in vulkan
 		Texture3D, // A texture3D in vulkan
+		TextureCube,
 		RWTexture2D, // An image2D in vulkan
 		RWTexture3D, // An image3D in vulkan
 		SamplerState, // A sampler in vulkan
-		InputAttachment
+		InputAttachment // A SubpassInput in vulkan
 	};
 	ENUM_CLASS(ShaderResourceType);
 

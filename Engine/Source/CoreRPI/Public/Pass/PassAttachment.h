@@ -2,6 +2,8 @@
 
 namespace CE::RPI
 {
+	class Pass;
+
 	/// @brief Describes the attachment used by a pass
 	struct CORERPI_API PassAttachment final : public IntrusiveBase
 	{
@@ -42,8 +44,7 @@ namespace CE::RPI
 		/// this is always an input connection.
 		PassAttachmentBinding* connectedBinding = nullptr;
         
-        /// @brief Pointer to the binding when the pass that owns this binding is disabled. Used only
-        /// for output slot types.
+        /// @brief Pointer to the binding when the pass that owns this binding is disabled. Used only for output slot types.
 		PassAttachmentBinding* fallbackBinding = nullptr;
 
 		/// @brief The pass that owns this binding.

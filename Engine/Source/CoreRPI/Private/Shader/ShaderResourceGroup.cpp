@@ -9,11 +9,6 @@ namespace CE::RPI
 		
 	}
 
-	ShaderResourceGroup::ShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc)
-	{
-		rhiShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(desc);
-	}
-
 	ShaderResourceGroup::~ShaderResourceGroup()
 	{
 		if (rhiShaderResourceGroup != nullptr)
