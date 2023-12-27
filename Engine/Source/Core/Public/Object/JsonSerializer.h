@@ -32,6 +32,7 @@ namespace CE
 
 		PrettyJsonWriter writer;
         
+		StructType* structType = nullptr;
         Array<FieldType*> fields{};
         void* rawInstance = nullptr;
 
@@ -72,6 +73,7 @@ namespace CE
 
 		JsonValue* rootJson = nullptr;
 
+		StructType* structType = nullptr;
 		Array<FieldType*> fields{};
 		void* rawInstance = nullptr;
 

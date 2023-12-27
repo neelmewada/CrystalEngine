@@ -27,7 +27,7 @@ namespace CE::RPI
 
     Pass* ParentPass::GetPass(const Name& passName)
     {
-        int index = passes.IndexOf([&](Pass* p) { return p->GetName() == passName });
+		int index = passes.IndexOf([&](Pass* p) { return p->GetName() == passName; });
         if (index < 0)
             return nullptr;
         return passes[index];

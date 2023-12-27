@@ -2,13 +2,6 @@
 
 namespace CE::RPI
 {
-
-    RenderPipeline* RenderPipelineBuilder::Build()
-    {
-		
-        return nullptr;
-    }
-
 	PassDefinition* RenderPipelineDescriptor::FindPassDefinition(const Name& passDefinition)
 	{
 		for (int i = 0; i < passDefinitions.GetSize(); i++)
@@ -19,5 +12,11 @@ namespace CE::RPI
 
 		return nullptr;
 	}
+
+    RenderPipeline* RenderPipelineBuilder::Build()
+    {
+		
+        return nullptr;
+    }
 
 } // namespace CE::RPI

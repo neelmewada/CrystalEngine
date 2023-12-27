@@ -64,10 +64,13 @@ namespace CE::RPI
 					curSearchPass = rootPass;
 				}
 			}
-			else if (curSearchPass && curSearchPass->IsParentPass())
+			else if (curSearchPass && curSearchPass->IsParentPass()) // Find the pass in current ParentPass
 			{
                 ParentPass* cast = (ParentPass*)curSearchPass;
-                
+				Pass* search = cast->GetPass(split[i]);
+				if (search == nullptr) // Child pass not found, return null
+					return nullptr;
+				curSearchPass = search;
 			}
 		}
 

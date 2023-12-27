@@ -83,6 +83,42 @@ namespace CE::RPI
 		return true;
 	}
 
+	void RenderPipeline::SetupRootPass(ParentPass* rootPass)
+	{
+		const RPI::PassRequest& rootPassRequest = descriptor.rootPass;
+		int index = descriptor.passDefinitions.IndexOf([&](const PassDefinition& x) { return x.name == rootPassRequest.passDefinition; });
+		if (index < 0)
+			return;
+
+		const RPI::PassDefinition& rootPassDef = descriptor.passDefinitions[index];
+		int slotIdx = -1;
+		for (int i = 0; i < rootPassDef.slots.GetSize(); i++)
+		{
+			if (rootPassDef.slots[i].slotType == RPI::PassSlotType::InputOutput)
+			{
+				slotIdx = i;
+				break;
+			}
+		}
+
+		if (slotIdx < 0)
+			return;
+
+		PassImageAttachmentDesc imageAttachmentDesc{};
+		imageAttachmentDesc.name = rootPassDef.slots[slotIdx].name;
+		imageAttachmentDesc.lifetime = RHI::AttachmentLifetimeType::External;
+		imageAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Color;
+		imageAttachmentDesc.imageDescriptor.arraySize = 1;
+		imageAttachmentDesc.imageDescriptor.mipCount = 1;
+		imageAttachmentDesc.imageDescriptor.format = RHI::Format::R8G8B8A8_UNORM;
+		imageAttachmentDesc.imageDescriptor.dimension = Dimension::Dim2D;
+		imageAttachmentDesc.generateFullMipChain = false;
+		imageAttachmentDesc.fallbackFormats = { RHI::Format::B8G8R8A8_UNORM };
+
+		Ptr<PassAttachment> pipelineOutputAttachment = new PassAttachment(imageAttachmentDesc);
+		rootPass->passAttachments.Add(pipelineOutputAttachment);
+	}
+
 	void RenderPipeline::BuildPassConnections(const PassRequest& passRequest)
 	{
 		int index = descriptor.passDefinitions.IndexOf([&](const PassDefinition& x) { return x.name == passRequest.passDefinition; });
@@ -94,65 +130,72 @@ namespace CE::RPI
 		if (pass == nullptr)
 			return;
 
-		// Pass definition connections are only made to connect slots to actual attachments, NOT to other slots.
-
+		// Pass definition connections are only made to connect local slots to actual attachments, NOT to other slots.
 		for (const auto& connection : passDefinition.connections)
 		{
 			PassSlot* localSlot = passDefinition.FindSlot(connection.localSlot);
 			if (localSlot == nullptr)
 				continue;
 
-			Name passPath = connection.attachmentRef.pass; // Specials: $this, %parent, $root
+			Name passPath = connection.attachmentRef.pass; // Specials: $this, $parent, $root
 			Name attachmentName = connection.attachmentRef.attachment;
 
-			
+			Pass* targetPass = passTree->GetPassAtPath(passPath, pass);
+			if (targetPass == nullptr)
+				continue;
+
+
 		}
+		
 	}
 
 	Pass* RenderPipeline::InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass)
 	{
 		Object* outer = parentPass;
-		if (parentPass == nullptr)
+		if (parentPass == nullptr) // True if root pas
 			outer = passTree;
 
-		int index = descriptor.passDefinitions.IndexOf([&](const PassDefinition& x) { return x.name == passRequest.passDefinition; });
-		if (index < 0)
+		PassDefinition* passDefinition = descriptor.FindPassDefinition(passRequest.passDefinition);
+		if (passDefinition == nullptr)
+			return;
+
+		if (!passDefinition->name.IsValid() || !passDefinition->passClass.IsValid())
 			return nullptr;
 
-		const PassDefinition& passDefinition = descriptor.passDefinitions[index];
-
-		if (!passDefinition.name.IsValid() || !passDefinition.passClass.IsValid())
-			return nullptr;
-
-		ClassType* passClassType = PassRegistry::Get().GetPassClass(passDefinition.passClass);
+		ClassType* passClassType = PassRegistry::Get().GetPassClass(passDefinition->passClass);
 		if (passClassType == nullptr)
 			return nullptr;
-
+		if (parentPass == nullptr && !passClassType->IsSubclassOf<ParentPass>()) // Root pass should always be subclass of ParentPass class
+			return nullptr;
+		
 		Pass* pass = CreateObject<Pass>(outer, passRequest.passName.GetString(), OF_NoFlags, passClassType);
 		if (pass == nullptr)
 			return nullptr;
 
 		pass->parentPass = parentPass;
 
-		if (passDefinition.passData.drawListTag.IsValid())
+		if (passDefinition->passData.drawListTag.IsValid())
 		{
-			pass->drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(passDefinition.passData.drawListTag);
+			pass->drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(passDefinition->passData.drawListTag);
 		}
 
-		if (passDefinition.passData.viewTag.IsValid())
+		if (passDefinition->passData.viewTag.IsValid())
 		{
-			pass->pipelineViewTag = passDefinition.passData.viewTag;
+			pass->pipelineViewTag = passDefinition->passData.viewTag;
 		}
 
 		// Attachments owned by this pass
-		for (const auto& attachmentDesc : passDefinition.imageAttachments)
+		for (PassImageAttachmentDesc& attachmentDesc : passDefinition->imageAttachments)
 		{
 			pass->passAttachments.Add(new PassAttachment(attachmentDesc));
 		}
-		for (const auto& attachmentDesc : passDefinition.bufferAttachments)
+		for (PassBufferAttachmentDesc& attachmentDesc : passDefinition->bufferAttachments)
 		{
 			pass->passAttachments.Add(new PassAttachment(attachmentDesc));
 		}
+
+		if (parentPass == nullptr)
+			SetupRootPass((ParentPass*)pass);
 
 		if (pass->IsParentPass())
 		{

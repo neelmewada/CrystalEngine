@@ -39,6 +39,8 @@ namespace CE::RPI
         
         bool CompileTree();
 
+		void SetupRootPass(ParentPass* rootPass);
+
 		Pass* InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass);
 
 		void BuildPassConnections(const PassRequest& passRequest);

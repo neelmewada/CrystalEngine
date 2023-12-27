@@ -10,9 +10,8 @@ namespace CE::RPI
 		CE_CLASS(ParentPass, Pass)
 	public:
 		friend class Pass;
-		friend class PassFactory;
-		friend class PassLibrary;
-		friend class PassTemplate;
+		friend class PassRegistry;
+		friend class RenderPipeline;
 		friend class PassSystem;
 		friend class PassTree;
 

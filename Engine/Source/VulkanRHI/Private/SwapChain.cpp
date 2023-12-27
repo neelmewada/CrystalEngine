@@ -73,7 +73,7 @@ namespace CE::Vulkan
 		uint32_t formatCount = 0;
 		vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, nullptr);
 
-		Array<VkSurfaceFormatKHR> surfaceFormats(formatCount);
+		List<VkSurfaceFormatKHR> surfaceFormats(formatCount);
 		vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surfaceFormats.GetData());
 
 		// Get the surface capabilities
@@ -313,12 +313,11 @@ namespace CE::Vulkan
 		depthTextureDesc.width = width;
 		depthTextureDesc.height = height;
 		depthTextureDesc.depth = 1;
-		depthTextureDesc.dimension = RHI::TextureDimension::Dim2D;
+		depthTextureDesc.dimension = RHI::Dimension::Dim2D;
 		depthTextureDesc.format = depthTextureFormat;
 		depthTextureDesc.mipLevels = 1;
 		depthTextureDesc.sampleCount = 1;
-		depthTextureDesc.usageFlags = RHI::TextureUsageFlags::DepthStencilAttachment;
-		depthTextureDesc.forceLinearLayout = false;
+		depthTextureDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
 
 		swapChainDepthImage = new VulkanTexture(device, depthTextureDesc);
 	}

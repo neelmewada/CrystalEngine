@@ -4,7 +4,7 @@ namespace CE
 {
 
     JsonFieldSerializer::JsonFieldSerializer(StructType* instanceType, void* instance)
-        : rawInstance(instance), writer(PrettyJsonWriter::Create(nullptr))
+        : rawInstance(instance), writer(PrettyJsonWriter::Create(nullptr)), structType(instanceType)
     {
         fields.Clear();
 
@@ -31,6 +31,9 @@ namespace CE
 
 	int JsonFieldSerializer::Serialize(Stream* stream)
 	{
+		if (structType)
+			structType->OnBeforeSerialize(rawInstance);
+
 		while (HasNext())
 		{
 			WriteNext(stream);
@@ -792,6 +795,7 @@ namespace CE
     
 	JsonFieldDeserializer::JsonFieldDeserializer(StructType* instanceType, void* instance)
 		: rawInstance(instance)
+		, structType(instanceType)
 	{
 		fields.Clear();
 
@@ -830,6 +834,11 @@ namespace CE
 		while (HasNext())
 		{
 			ReadNext(root);
+		}
+
+		if (structType != nullptr)
+		{
+			structType->OnAfterDeserialize(rawInstance);
 		}
 
 		return 0;

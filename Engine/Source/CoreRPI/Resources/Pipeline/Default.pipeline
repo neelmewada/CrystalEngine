@@ -93,7 +93,7 @@
                 // Depth Stencil
                 {
                     "Name": "DepthStencil",
-                    "Lifetime": "Transient", // Transient or Imported
+                    "Lifetime": "Transient", // Transient or External
                     "SizeSource": { // Size should be same as PipelineOutput
                         "Source": {
                             "Pass": "$root", // Specials: $this, $parent, $root
