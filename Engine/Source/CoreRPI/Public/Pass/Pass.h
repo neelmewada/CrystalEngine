@@ -41,6 +41,7 @@ namespace CE::RPI
 		ParentPass* parentPass = nullptr;
 
 		FixedArray<PassAttachmentBinding, PassAttachmentBindingCountMax> attachmentBindings{};
+		u32 attachmentBindingCount = 0;
 
 		Array<Ptr<PassAttachment>> passAttachments{};
 

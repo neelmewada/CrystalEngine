@@ -78,7 +78,7 @@ namespace CE::RPI
 			return false;
 
 		// Connect pass slots & attachments
-		
+		BuildPassConnections(rootPassRequest);
 
 		return true;
 	}
@@ -90,8 +90,10 @@ namespace CE::RPI
 		if (index < 0)
 			return;
 
+		passTree->rootPass = rootPass;
+
 		const RPI::PassDefinition& rootPassDef = descriptor.passDefinitions[index];
-		int slotIdx = -1;
+		int slotIdx = -1; // Find the first InputOutput slot & create an attachment out of it.
 		for (int i = 0; i < rootPassDef.slots.GetSize(); i++)
 		{
 			if (rootPassDef.slots[i].slotType == RPI::PassSlotType::InputOutput)
@@ -110,7 +112,7 @@ namespace CE::RPI
 		imageAttachmentDesc.imageDescriptor.bindFlags = RHI::TextureBindFlags::Color;
 		imageAttachmentDesc.imageDescriptor.arraySize = 1;
 		imageAttachmentDesc.imageDescriptor.mipCount = 1;
-		imageAttachmentDesc.imageDescriptor.format = RHI::Format::R8G8B8A8_UNORM;
+		imageAttachmentDesc.imageDescriptor.format = RHI::Format::R8G8B8A8_UNORM; // RGBA or BGRA
 		imageAttachmentDesc.imageDescriptor.dimension = Dimension::Dim2D;
 		imageAttachmentDesc.generateFullMipChain = false;
 		imageAttachmentDesc.fallbackFormats = { RHI::Format::B8G8R8A8_UNORM };
@@ -130,7 +132,7 @@ namespace CE::RPI
 		if (pass == nullptr)
 			return;
 
-		// Pass definition connections are only made to connect local slots to actual attachments, NOT to other slots.
+		// Pass definition connections are only used to connect local slots to actual attachments, NOT to other slots.
 		for (const auto& connection : passDefinition.connections)
 		{
 			PassSlot* localSlot = passDefinition.FindSlot(connection.localSlot);
@@ -143,6 +145,11 @@ namespace CE::RPI
 			Pass* targetPass = passTree->GetPassAtPath(passPath, pass);
 			if (targetPass == nullptr)
 				continue;
+			Name passName = targetPass->GetName();
+
+			PassDefinition* targetPassDef = descriptor.FindPassDefinitionForPassRequest(targetPass->GetName());
+			if (!targetPassDef)
+				continue;
 
 
 		}
@@ -152,7 +159,7 @@ namespace CE::RPI
 	Pass* RenderPipeline::InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass)
 	{
 		Object* outer = parentPass;
-		if (parentPass == nullptr) // True if root pas
+		if (parentPass == nullptr) // True if root pass
 			outer = passTree;
 
 		PassDefinition* passDefinition = descriptor.FindPassDefinition(passRequest.passDefinition);
@@ -196,6 +203,34 @@ namespace CE::RPI
 
 		if (parentPass == nullptr)
 			SetupRootPass((ParentPass*)pass);
+
+		// Build connections defined in the PassDefinition. Connections in PassDefinition should always
+		// be for connecting actual attachments and not a slot to another slot.
+		for (const auto& connection : passDefinition->connections)
+		{
+			PassSlot* localSlot = passDefinition->FindSlot(connection.localSlot);
+			if (!localSlot)
+				continue;
+
+			Pass* attachmentPass = passTree->FindPass(connection.attachmentRef.pass);
+			
+			for (int i = 0; i < attachmentPass->passAttachments.GetSize(); i++)
+			{
+				if (attachmentPass->passAttachments[i]->name == connection.attachmentRef.attachment)
+				{
+					// Found an attachment with matching name
+					PassAttachmentBinding attachmentBinding{};
+					attachmentBinding.name = localSlot->name;
+					attachmentBinding.attachmentUsage = localSlot->attachmentUsage;
+					attachmentBinding.slotType = localSlot->slotType;
+					attachmentBinding.ownerPass = pass;
+					attachmentBinding.attachment = attachmentPass->passAttachments[i];
+
+					attachmentPass->attachmentBindings[attachmentPass->attachmentBindingCount++] = attachmentBinding;
+					break;
+				}
+			}
+		}
 
 		if (pass->IsParentPass())
 		{

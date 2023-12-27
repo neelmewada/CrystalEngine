@@ -40,8 +40,7 @@ namespace CE::RPI
         
 		RHI::ScopeAttachmentUsage attachmentUsage = RHI::ScopeAttachmentUsage::None;
         
-		/// @brief Pointer to another attachment binding slot this binding is connected to. For InputOutput slots,
-		/// this is always an input connection.
+		/// @brief Pointer to another attachment binding slot this binding is connected to.
 		PassAttachmentBinding* connectedBinding = nullptr;
         
         /// @brief Pointer to the binding when the pass that owns this binding is disabled. Used only for output slot types.

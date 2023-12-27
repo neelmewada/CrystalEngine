@@ -29,6 +29,10 @@ namespace CE::RPI
 
 		PassDefinition* FindPassDefinition(const Name& passDefinition);
 
+		PassRequest* FindPassRequest(const Name& passName, PassRequest* parent = nullptr);
+
+		PassDefinition* FindPassDefinitionForPassRequest(const Name& passName);
+
 	};
 
 	struct CORERPI_API RenderPipelineBuilder

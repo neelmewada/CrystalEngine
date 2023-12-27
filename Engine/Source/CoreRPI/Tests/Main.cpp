@@ -176,7 +176,7 @@ TEST(RenderPipeline, DescriptorParsing)
 }
 
 
-TEST(RenderPipeline, BuildPassTree)
+TEST(RenderPipeline, DefaultPipelineTree)
 {
 	TEST_BEGIN;
 
