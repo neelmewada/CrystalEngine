@@ -33,6 +33,13 @@ namespace CE::RPI
 
 		PassDefinition* FindPassDefinitionForPassRequest(const Name& passName);
 
+	private:
+
+		void OnAfterDeserialize();
+
+		HashMap<Name, int> passDefinitionsNameToIndex{};
+
+		HashMap<Name, PassRequest*> passRequestsByName{};
 	};
 
 	struct CORERPI_API RenderPipelineBuilder

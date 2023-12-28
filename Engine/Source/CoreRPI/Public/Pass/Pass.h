@@ -27,6 +27,12 @@ namespace CE::RPI
 
 		virtual bool IsParentPass() const { return false; }
 
+		PassAttachmentBinding* FindInputBinding(const Name& name);
+		PassAttachmentBinding* FindInputOutputBinding(const Name& name);
+		PassAttachmentBinding* FindOutputBinding(const Name& name);
+
+		PassAttachmentBinding* FindBinding(const Name& name);
+
 	protected:
 
 		Pass();

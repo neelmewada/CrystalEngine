@@ -47,7 +47,7 @@ namespace CE::RPI
 
 		Pass* InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass);
 
-		void BuildPassConnections(const PassRequest& passRequest);
+		void BuildPassConnectionsRecursively(const PassRequest& passRequest);
 
 		void InitializeInternal();
 

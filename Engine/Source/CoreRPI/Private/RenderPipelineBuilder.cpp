@@ -38,6 +38,31 @@ namespace CE::RPI
 		return FindPassDefinition(passRequest->passDefinition);
 	}
 
+    void RenderPipelineDescriptor::OnAfterDeserialize()
+    {
+		passDefinitionsNameToIndex.Clear();
+		passRequestsByName.Clear();
+
+		for (int i = 0; i < passDefinitions.GetSize(); i++)
+		{
+			passDefinitionsNameToIndex[passDefinitions[i].name] = i;
+		}
+
+		Delegate<void(PassRequest*)> visitor = [&](PassRequest* parent)
+			{
+				if (parent != nullptr)
+				{
+					passRequestsByName[parent->passName] = parent;
+					for (int i = 0; i < parent->childPasses.GetSize(); i++)
+					{
+						visitor(&parent->childPasses[i]);
+					}
+				}
+			};
+		
+		visitor(&rootPass);
+    }
+
     RenderPipeline* RenderPipelineBuilder::Build()
     {
 		

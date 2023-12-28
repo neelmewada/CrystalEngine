@@ -369,6 +369,14 @@ namespace CE::RPI
 		{
 			return slots.IndexOf([&](const PassSlot& slot) { return slot.name == slotName; });
 		}
+
+	private:
+
+		void OnAfterDeserialize();
+
+		HashMap<Name, int> slotNamesToIndex{};
+		HashMap<Name, int> imageAttachmentNameToIndex{};
+		HashMap<Name, int> bufferAttachmentNameToIndex{};
 	};
     
 } // namespace CE::RPI

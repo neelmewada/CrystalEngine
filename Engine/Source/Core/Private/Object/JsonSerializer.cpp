@@ -277,6 +277,9 @@ namespace CE
 
 			JsonFieldSerializer serializer{ structType, field->GetFieldInstance(rawInstance) };
 			serializer.writer = this->writer;
+			
+			if (structType)
+				structType->OnBeforeSerialize(rawInstance);
 
 			if (serializer.HasNext())
 			{
@@ -734,6 +737,8 @@ namespace CE
 
 			JsonFieldSerializer serializer{ structType, field->GetFieldInstance(rawInstance) };
 
+			structType->OnBeforeSerialize(field->GetFieldInstance(rawInstance));
+
 			while (serializer.HasNext())
 			{
 				serializer.WriteNext(*json);
@@ -1040,6 +1045,11 @@ namespace CE
 				deserializer.ReadNext(json);
 			}
 
+			if (structType != nullptr)
+			{
+				structType->OnAfterDeserialize(structInstance);
+			}
+
 			return true;
 		}
 		else if (json.IsObjectValue() && fieldDeclType->IsObject())
@@ -1048,7 +1058,7 @@ namespace CE
 			if (object == nullptr)
 				return false;
 
-			JsonFieldDeserializer deserializer{ (StructType*)fieldDeclType, object };
+			JsonFieldDeserializer deserializer{ (ClassType*)fieldDeclType, object };
 			deserializer.isMap = true;
 			deserializer.isArray = false;
 

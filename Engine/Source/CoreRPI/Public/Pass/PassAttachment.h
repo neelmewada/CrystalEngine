@@ -52,6 +52,7 @@ namespace CE::RPI
 		/// @brief The pass attachment this binding points to. Connected binding should be null if this is used.
 		Ptr<PassAttachment> attachment = nullptr;
         
+		Ptr<PassAttachment> originalAttachment = nullptr;
 	};
 
 } // namespace CE::RPI

@@ -78,6 +78,7 @@ namespace CE::RPI
 			return false;
 
 		// Connect pass slots & attachments
+		BuildPassConnectionsRecursively(rootPassRequest);
 
 		return true;
 	}
@@ -120,7 +121,7 @@ namespace CE::RPI
 		rootPass->passAttachments.Add(pipelineOutputAttachment);
 	}
 
-	void RenderPipeline::BuildPassConnections(const PassRequest& passRequest)
+	void RenderPipeline::BuildPassConnectionsRecursively(const PassRequest& passRequest)
 	{
 		int index = descriptor.passDefinitions.IndexOf([&](const PassDefinition& x) { return x.name == passRequest.passDefinition; });
 		if (index < 0)
@@ -131,9 +132,10 @@ namespace CE::RPI
 		if (pass == nullptr)
 			return;
 
-		// Pass definition connections are only used to connect local slots to actual attachments, NOT to other slots.
+		// Connect slots to other slots.
 		for (const auto& connection : passRequest.connections)
 		{
+			// The local slot descriptor
 			PassSlot* localSlot = passDefinition.FindSlot(connection.localSlot);
 			if (localSlot == nullptr)
 				continue;
@@ -141,17 +143,22 @@ namespace CE::RPI
 			Name passPath = connection.attachmentRef.pass; // Specials: $this, $parent, $root
 			Name attachmentName = connection.attachmentRef.attachment;
 
+			// The pass instance we are connecting to.
 			Pass* attachmentPass = passTree->GetPassAtPath(passPath, pass);
 			if (!attachmentPass)
 				continue;
 
+			// The definition of the pass we are connecting to.
 			PassDefinition* attachmentPassDef = descriptor.FindPassDefinitionForPassRequest(attachmentPass->GetName());
 			if (!attachmentPassDef)
 				continue;
 
+			PassAttachmentBinding* attachmentPassBinding = attachmentPass->FindBinding(attachmentName);
 
+
+			PassAttachmentBinding attachmentBinding{};
+			
 		}
-		
 	}
 
 	Pass* RenderPipeline::InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass)
