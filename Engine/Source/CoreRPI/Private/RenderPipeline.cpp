@@ -154,8 +154,7 @@ namespace CE::RPI
 				continue;
 
 			PassAttachmentBinding* attachmentPassBinding = attachmentPass->FindBinding(attachmentName);
-
-
+            
 			PassAttachmentBinding attachmentBinding{};
 			
 		}
@@ -208,9 +207,31 @@ namespace CE::RPI
 
 		if (parentPass == nullptr)
 			SetupRootPass((ParentPass*)pass);
+        
+        for (const PassSlot& slot : passDefinition->slots)
+        {
+            PassAttachmentBinding passAttachmentBinding{};
+            passAttachmentBinding.name = slot.name;
+            passAttachmentBinding.attachmentUsage = slot.attachmentUsage;
+            passAttachmentBinding.ownerPass = pass;
+            passAttachmentBinding.slotType = slot.slotType;
+            
+            switch (slot.slotType) 
+            {
+            case PassSlotType::Input:
+                pass->inputBindings.Add(passAttachmentBinding);
+                break;
+            case PassSlotType::Output:
+                pass->outputBindings.Add(passAttachmentBinding);
+                break;
+            case PassSlotType::InputOutput:
+                pass->inputOutputBindings.Add(passAttachmentBinding);
+                break;
+            }
+        }
 
 		// Build connections defined in the PassDefinition. Connections in PassDefinition should always
-		// be for connecting actual attachments and not a slot to another slot.
+		// be for connecting local slots to actual attachments.
 		for (const auto& connection : passDefinition->connections)
 		{
 			PassSlot* localSlot = passDefinition->FindSlot(connection.localSlot);

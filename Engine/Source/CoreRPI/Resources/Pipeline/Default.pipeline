@@ -5,6 +5,15 @@
     "RootPass": {
         "PassName": "DefaultPipelineRoot",
         "PassDefinition": "DefaultPipelineRoot",
+        "Connections": [
+            { // Connect PipelineOutput (as output)
+                "LocalSlot": "PipelineOutput",
+                "AttachmentRef": {
+                    "Pass": "TransparentPass",
+                    "Attachment": "Color"
+                }
+            }
+        ],
         "ChildPasses": [ // [PassRequest] list
             {
                 "PassName": "DepthPrePass",
@@ -37,13 +46,6 @@
                         "AttachmentRef": {
                             "Pass": "OpaquePass",
                             "Attachment": "Color"
-                        }
-                    },
-                    { // Connect Color IO slot to PipelineOutput (as output)
-                        "LocalSlot": "Color",
-                        "AttachmentRef": {
-                            "Pass": "$parent",
-                            "Attachment": "PipelineOutput"
                         }
                     },
                     {
