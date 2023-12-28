@@ -5,11 +5,7 @@ namespace CE::RPI
 
     ParentPass::~ParentPass()
     {
-		for (auto pass : passes)
-		{
-			pass->Destroy();
-		}
-		passes.Clear();
+
     }
 
 	void ParentPass::AddChild(Pass* childPass)

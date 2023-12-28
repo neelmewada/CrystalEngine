@@ -1,5 +1,9 @@
 #pragma once
 
+#if PAL_TRAIT_BUILD_TESTS
+class RenderPipeline_DefaultPipelineTree_Test;
+#endif
+
 namespace CE::RPI
 {
 	class PassTree;
@@ -76,6 +80,9 @@ namespace CE::RPI
 		/// @brief A hash map of all views owned by this pipeline accessed by their respective tags
 		PipelineViewsByTag pipelineViewsByTag{};
 
+#if PAL_TRAIT_BUILD_TESTS
+		friend class RenderPipeline_DefaultPipelineTree_Test;
+#endif
 	};
     
 } // namespace CE::RPI

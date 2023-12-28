@@ -159,7 +159,7 @@ namespace CE
 
 		inline T* operator->() const
 		{
-			return *ptr;
+			return ptr;
 		}
 
 		inline bool operator!() const 

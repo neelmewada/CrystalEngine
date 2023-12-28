@@ -9,7 +9,7 @@ namespace CE::RPI
 
 	PassTree::~PassTree()
 	{
-		rootPass->Destroy();
+		
 	}
 
     void PassTree::Clear()
@@ -38,7 +38,7 @@ namespace CE::RPI
 		if (currentPassContext == nullptr)
 			currentPassContext = rootPass;
 
-		Pass* curSearchPass = nullptr;
+		Pass* curSearchPass = currentPassContext;
 
 		for (int i = 0; i < split.GetSize(); i++)
 		{

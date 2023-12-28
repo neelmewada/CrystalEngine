@@ -78,7 +78,6 @@ namespace CE::RPI
 			return false;
 
 		// Connect pass slots & attachments
-		BuildPassConnections(rootPassRequest);
 
 		return true;
 	}
@@ -133,7 +132,7 @@ namespace CE::RPI
 			return;
 
 		// Pass definition connections are only used to connect local slots to actual attachments, NOT to other slots.
-		for (const auto& connection : passDefinition.connections)
+		for (const auto& connection : passRequest.connections)
 		{
 			PassSlot* localSlot = passDefinition.FindSlot(connection.localSlot);
 			if (localSlot == nullptr)
@@ -142,13 +141,12 @@ namespace CE::RPI
 			Name passPath = connection.attachmentRef.pass; // Specials: $this, $parent, $root
 			Name attachmentName = connection.attachmentRef.attachment;
 
-			Pass* targetPass = passTree->GetPassAtPath(passPath, pass);
-			if (targetPass == nullptr)
+			Pass* attachmentPass = passTree->GetPassAtPath(passPath, pass);
+			if (!attachmentPass)
 				continue;
-			Name passName = targetPass->GetName();
 
-			PassDefinition* targetPassDef = descriptor.FindPassDefinitionForPassRequest(targetPass->GetName());
-			if (!targetPassDef)
+			PassDefinition* attachmentPassDef = descriptor.FindPassDefinitionForPassRequest(attachmentPass->GetName());
+			if (!attachmentPassDef)
 				continue;
 
 
@@ -164,7 +162,7 @@ namespace CE::RPI
 
 		PassDefinition* passDefinition = descriptor.FindPassDefinition(passRequest.passDefinition);
 		if (passDefinition == nullptr)
-			return;
+			return nullptr;
 
 		if (!passDefinition->name.IsValid() || !passDefinition->passClass.IsValid())
 			return nullptr;
@@ -212,21 +210,52 @@ namespace CE::RPI
 			if (!localSlot)
 				continue;
 
-			Pass* attachmentPass = passTree->FindPass(connection.attachmentRef.pass);
+			Pass* attachmentPass = passTree->GetPassAtPath(connection.attachmentRef.pass, pass);
+			if (!attachmentPass)
+				continue;
 			
 			for (int i = 0; i < attachmentPass->passAttachments.GetSize(); i++)
 			{
-				if (attachmentPass->passAttachments[i]->name == connection.attachmentRef.attachment)
+				PassAttachment* attachment = attachmentPass->passAttachments[i];
+				// Found an attachment with matching name
+				if (attachment->name == connection.attachmentRef.attachment)
 				{
-					// Found an attachment with matching name
+					// Infer attachment usage, etc from the attachment
+					if (attachment->attachmentDescriptor.type == AttachmentType::Image)
+					{
+						const ImageDescriptor& imageDesc = attachment->attachmentDescriptor.imageDesc;
+						if (EnumHasFlag(imageDesc.bindFlags, RHI::TextureBindFlags::DepthStencil))
+						{
+							localSlot->attachmentUsage = RHI::ScopeAttachmentUsage::DepthStencil;
+						}
+						else if (EnumHasFlag(imageDesc.bindFlags, RHI::TextureBindFlags::Color))
+						{
+							localSlot->attachmentUsage = RHI::ScopeAttachmentUsage::RenderTarget;
+						}
+						else if (EnumHasFlag(imageDesc.bindFlags, RHI::TextureBindFlags::SubpassInput))
+						{
+							localSlot->attachmentUsage = RHI::ScopeAttachmentUsage::SubpassInput;
+						}
+						else if (EnumHasAnyFlags(imageDesc.bindFlags, RHI::TextureBindFlags::ShaderRead | RHI::TextureBindFlags::ShaderWrite))
+						{
+							localSlot->attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
+						}
+					}
+
 					PassAttachmentBinding attachmentBinding{};
 					attachmentBinding.name = localSlot->name;
 					attachmentBinding.attachmentUsage = localSlot->attachmentUsage;
 					attachmentBinding.slotType = localSlot->slotType;
 					attachmentBinding.ownerPass = pass;
-					attachmentBinding.attachment = attachmentPass->passAttachments[i];
+					attachmentBinding.attachment = attachment;
 
-					attachmentPass->attachmentBindings[attachmentPass->attachmentBindingCount++] = attachmentBinding;
+					if (attachmentBinding.slotType == PassSlotType::Input)
+						pass->inputBindings.Add(attachmentBinding);
+					else if (attachmentBinding.slotType == PassSlotType::InputOutput)
+						pass->inputOutputBindings.Add(attachmentBinding);
+					else if (attachmentBinding.slotType == PassSlotType::Output)
+						pass->outputBindings.Add(attachmentBinding);
+
 					break;
 				}
 			}
