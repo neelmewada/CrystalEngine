@@ -188,7 +188,12 @@ namespace CE::RPI
 
 	struct UnifiedAttachmentDescriptor
 	{
-		UnifiedAttachmentDescriptor() = default;
+		UnifiedAttachmentDescriptor()
+            : type(RHI::AttachmentType::Image)
+            , imageDesc({})
+        {
+            
+        }
 
 		UnifiedAttachmentDescriptor(const ImageDescriptor& imageDesc)
 			: type(RHI::AttachmentType::Image)

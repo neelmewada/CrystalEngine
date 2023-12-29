@@ -20,6 +20,8 @@ namespace CE::RPI
 
 		RHI::AttachmentLifetimeType lifetime = RHI::AttachmentLifetimeType::Transient;
         
+        PassAttachmentSizeSource sizeSource{};
+        
         RPI::UnifiedAttachmentDescriptor attachmentDescriptor{};
 
 	};

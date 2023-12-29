@@ -154,10 +154,18 @@ namespace CE::RPI
 				continue;
 
 			PassAttachmentBinding* attachmentPassBinding = attachmentPass->FindBinding(attachmentName);
+            PassAttachmentBinding* thisPassBinding = pass->FindBinding(connection.localSlot);
             
-			PassAttachmentBinding attachmentBinding{};
-			
+            if (attachmentPassBinding == nullptr || thisPassBinding == nullptr)
+                continue;
+            
+            thisPassBinding->connectedBinding = attachmentPassBinding;
 		}
+        
+        for (const PassRequest& child : passRequest.childPasses)
+        {
+            BuildPassConnectionsRecursively(child);
+        }
 	}
 
 	Pass* RenderPipeline::InstantiatePassesRecursively(const PassRequest& passRequest, ParentPass* parentPass)
@@ -208,6 +216,7 @@ namespace CE::RPI
 		if (parentPass == nullptr)
 			SetupRootPass((ParentPass*)pass);
         
+        // Create PassAttachmentBinding's for each slot
         for (const PassSlot& slot : passDefinition->slots)
         {
             PassAttachmentBinding passAttachmentBinding{};
@@ -269,20 +278,9 @@ namespace CE::RPI
 							localSlot->attachmentUsage = RHI::ScopeAttachmentUsage::Shader;
 						}
 					}
-
-					PassAttachmentBinding attachmentBinding{};
-					attachmentBinding.name = localSlot->name;
-					attachmentBinding.attachmentUsage = localSlot->attachmentUsage;
-					attachmentBinding.slotType = localSlot->slotType;
-					attachmentBinding.ownerPass = pass;
-					attachmentBinding.attachment = attachment;
-
-					if (attachmentBinding.slotType == PassSlotType::Input)
-						pass->inputBindings.Add(attachmentBinding);
-					else if (attachmentBinding.slotType == PassSlotType::InputOutput)
-						pass->inputOutputBindings.Add(attachmentBinding);
-					else if (attachmentBinding.slotType == PassSlotType::Output)
-						pass->outputBindings.Add(attachmentBinding);
+                    
+                    PassAttachmentBinding* attachmentBinding = pass->FindBinding(localSlot->name);
+					attachmentBinding->attachment = attachment;
 
 					break;
 				}

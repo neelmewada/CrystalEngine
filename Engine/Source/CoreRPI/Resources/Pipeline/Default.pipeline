@@ -51,8 +51,8 @@
                     {
                         "LocalSlot": "DepthStencil",
                         "AttachmentRef": {
-                            "Pass": "OpaquePass",
-                            "Attachment": "DepthStencil"
+                            "Pass": "DepthPrePass",
+                            "Attachment": "Output"
                         }
                     }
                 ],
@@ -133,7 +133,7 @@
             "Slots": [
                 {
                     "Name": "DepthStencil",
-                    "SlotType": "InputOutput"
+                    "SlotType": "Input"
                 },
                 {
                     "Name": "Color",
@@ -172,7 +172,7 @@
             "Slots": [
                 {
                     "Name": "DepthStencil",
-                    "SlotType": "InputOutput"
+                    "SlotType": "Input"
                 },
                 {
                     "Name": "Color",

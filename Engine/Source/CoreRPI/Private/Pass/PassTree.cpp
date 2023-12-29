@@ -79,6 +79,9 @@ namespace CE::RPI
 
 	Pass* PassTree::FindPassInternal(const Name& passName, ParentPass* parentPass)
 	{
+        if (parentPass->GetName() == passName)
+            return parentPass;
+        
 		for (int i = 0; i < parentPass->passes.GetSize(); i++)
 		{
 			Pass* childPass = parentPass->passes[i];
