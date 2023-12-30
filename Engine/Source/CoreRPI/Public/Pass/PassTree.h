@@ -1,5 +1,9 @@
 #pragma once
 
+#if PAL_TRAIT_BUILD_TESTS
+class RenderPipeline_DefaultPipelineTree_Test;
+#endif
+
 namespace CE::RPI
 {
     CLASS()
@@ -21,6 +25,11 @@ namespace CE::RPI
 		/// @param currentPassContext denotes the pass defined by `$this` key.
 		Pass* GetPassAtPath(const Name& path, Pass* currentPassContext = nullptr);
 
+		inline ParentPass* GetRootPas() const
+		{
+			return rootPass;
+		}
+
 	private:
 
 		Pass* FindPassInternal(const Name& passName, ParentPass* parentPass);
@@ -29,6 +38,10 @@ namespace CE::RPI
 		ParentPass* rootPass = nullptr;
 
 		friend class RenderPipeline;
+
+#if PAL_TRAIT_BUILD_TESTS
+		friend class RenderPipeline_DefaultPipelineTree_Test;
+#endif
 	};
 
 } // namespace CE::RPI

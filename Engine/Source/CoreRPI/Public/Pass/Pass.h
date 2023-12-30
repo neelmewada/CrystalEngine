@@ -1,5 +1,9 @@
 #pragma once
 
+#if PAL_TRAIT_BUILD_TESTS
+class RenderPipeline_DefaultPipelineTree_Test;
+#endif
+
 #define RPI_PASS(passName)\
 	friend class Pass;\
 	friend class PassTree;\
@@ -33,7 +37,7 @@ namespace CE::RPI
 
 		PassAttachmentBinding* FindBinding(const Name& name);
 
-	protected:
+	corerpi_protected_internal:
 
 		Pass();
 
@@ -53,6 +57,10 @@ namespace CE::RPI
 		Array<Ptr<PassAttachment>> passAttachments{};
 
 		friend class RenderPipeline;
+
+#if PAL_TRAIT_BUILD_TESTS
+		friend class RenderPipeline_DefaultPipelineTree_Test;
+#endif
 	};
 
     

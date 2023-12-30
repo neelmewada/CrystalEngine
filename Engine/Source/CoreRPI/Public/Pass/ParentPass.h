@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace CE::RPI
 {
 
@@ -26,7 +27,7 @@ namespace CE::RPI
         
         Pass* GetPass(const Name& passName);
 
-	private:
+	corerpi_internal:
 
 		Array<Pass*> passes{};
 

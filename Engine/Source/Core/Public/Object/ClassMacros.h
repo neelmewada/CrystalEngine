@@ -316,6 +316,10 @@ public:\
 	friend struct TStructReleaseFunction;\
     typedef Struct Self;\
     __CE_RTTI_SUPERCLASS(__VA_ARGS__)\
+	template<typename T, typename>\
+	friend struct CE::THasOnAfterDeserializeFunction;\
+	template<typename T, typename>\
+	friend struct CE::THasOnBeforeSerializeFunction;\
     static CE::StructType* Type();\
 	inline static CE::StructType* StaticType() { return Self::Type(); }\
     constexpr static bool IsClass = false;\

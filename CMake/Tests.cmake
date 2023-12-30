@@ -55,6 +55,8 @@ function(ce_add_test NAME)
             ${ce_add_test_TARGET}
     )
 
+    string(TOLOWER ${ce_add_test_TARGET} ce_add_test_TARGET_LOWERCASE)
+
     target_compile_definitions(${NAME} 
         PRIVATE
             PACKAGE_NAME="/Code/${NAME}"

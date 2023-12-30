@@ -290,7 +290,7 @@ namespace CE
 	};
 
 	template<typename T>
-	struct THasOnBeforeSerializeFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TTrueType
+	struct THasOnBeforeSerializeFunction<T, std::void_t<decltype(std::declval<T>().OnBeforeSerialize())>> : TTrueType
 	{
 		static void OnBeforeSerialize(T* instance) { return instance->OnBeforeSerialize(); }
 	};
@@ -302,7 +302,7 @@ namespace CE
 	};
 
 	template<typename T>
-	struct THasOnAfterDeserializeFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TTrueType
+	struct THasOnAfterDeserializeFunction<T, std::void_t<decltype(std::declval<T>().OnAfterDeserialize())>> : TTrueType
 	{
 		static void OnAfterDeserialize(T* instance) { return instance->OnAfterDeserialize(); }
 	};

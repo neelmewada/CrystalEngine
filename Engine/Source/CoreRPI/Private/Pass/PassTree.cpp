@@ -38,7 +38,7 @@ namespace CE::RPI
 		if (currentPassContext == nullptr)
 			currentPassContext = rootPass;
 
-		Pass* curSearchPass = currentPassContext;
+		Pass* curSearchPass = nullptr;
 
 		for (int i = 0; i < split.GetSize(); i++)
 		{
@@ -71,6 +71,10 @@ namespace CE::RPI
 				if (search == nullptr) // Child pass not found, return null
 					return nullptr;
 				curSearchPass = search;
+			}
+			else if (curSearchPass == nullptr)
+			{
+				curSearchPass = FindPass(split[i]);
 			}
 		}
 
