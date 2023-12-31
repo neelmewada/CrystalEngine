@@ -21,6 +21,8 @@ namespace CE::Vulkan
 
 		bool ShouldCreateDescriptorSetForSRG(RHI::SRGType srgType);
 
+		VkDescriptorType GetDescriptorType(ShaderResourceType shaderResourceType, bool usesDynamicOffset = false);
+
 	private:
         
         struct SRGSlot
@@ -53,14 +55,35 @@ namespace CE::Vulkan
 		inline VkDescriptorSet GetDescriptorSet() const { return descriptorSet; }
 		inline VkDescriptorSetLayout GetDescriptorSetLayout() const { return setLayout; }
 
-	private:
+		void Compile();
+
+	protected:
+
+		ShaderResourceGroup(VulkanDevice* device);
+
+		void Destroy();
+
+		void CompileBindings();
+
+		b8 isCompiled = false;
+
+		VulkanDevice* device = nullptr;
+		ShaderResourceManager* srgManager = nullptr;
+		VulkanDescriptorPool* pool = null;
+		VkDescriptorPool allocPool = null;
 
 		int setNumber = -1;
 		VkDescriptorSet descriptorSet = nullptr;
-		VkDescriptorSetLayout setLayout = null;
+		VkDescriptorSetLayout setLayout = nullptr;
 
+		Array<VkDescriptorSetLayoutBinding> setLayoutBindings{};
+		HashMap<Name, int> bindingSlotsByVariableName{};
+		
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
 		HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};
+
+		HashMap<int, VkDescriptorBufferInfo> buffersBoundBySlot{};
+		HashMap<int, VkDescriptorImageInfo> imagesBoundBySlot{};
 
 		friend class VulkanGraphicsPipeline;
 		friend class VulkanGraphicsCommandList;

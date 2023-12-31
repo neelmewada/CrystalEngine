@@ -59,6 +59,33 @@ namespace CE::RHI
 		FIELD()
 		Array<SRGVariableDesc> variables{};
 
+		void Merge(const ShaderResourceGroupLayout& other)
+		{
+			if ((int)other.srgType > (int)srgType)
+			{
+				srgType = other.srgType;
+			}
+
+			for (const auto& otherVariable : other.variables)
+			{
+				bool exists = false;
+				
+				for (const auto& thisVariable : variables)
+				{
+					if (thisVariable.bindingSlot == otherVariable.bindingSlot || thisVariable.name == otherVariable.name)
+					{
+						exists = true;
+						break;
+					}
+				}
+
+				if (!exists)
+				{
+					variables.Add(otherVariable);
+				}
+			}
+		}
+
 	};
     
 } // namespace CE::RHI

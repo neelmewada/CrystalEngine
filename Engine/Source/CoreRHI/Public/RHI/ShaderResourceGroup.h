@@ -15,7 +15,7 @@ namespace CE::RHI
 
 		inline SRGType GetSRGType() const
 		{
-			return srgLayout.srgType;
+			return srgType;
 		}
 
 		inline ShaderResourceGroupLayout GetLayout() const
@@ -24,6 +24,8 @@ namespace CE::RHI
 		}
 
 	protected:
+
+		SRGType srgType{};
 
 		ShaderResourceGroupLayout srgLayout{};
 

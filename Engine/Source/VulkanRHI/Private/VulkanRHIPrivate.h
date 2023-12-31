@@ -16,6 +16,7 @@
 #include "DescriptorPool.h"
 #include "DescriptorSet.h"
 #include "ShaderResourceGroup.h"
+#include "MergedShaderResourceGroup.h"
 #include "Texture.h"
 #include "Buffer.h"
 
