@@ -5,6 +5,8 @@
 #include "CoreRHI.h"
 #include "CoreShader.h"
 
+#include "vulkan/vulkan.h"
+
 #include "VulkanRHI.h"
 #include "VulkanQueue.h"
 #include "VulkanDevice.h"
@@ -25,8 +27,6 @@
 #include "SwapChain.h"
 #include "ShaderResourceGroup.h"
 #include "CommandList.h"
-
-#include "vulkan/vulkan.h"
 
 namespace CE::Vulkan
 {

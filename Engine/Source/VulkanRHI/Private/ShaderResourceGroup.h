@@ -42,50 +42,25 @@ namespace CE::Vulkan
 	{
 	public:
 
-		ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc);
+		ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupLayout& srgLayout);
 
-		~ShaderResourceGroup();
+		virtual ~ShaderResourceGroup();
 
-		virtual bool Bind(Name variableName, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) override;
+		bool Bind(Name name, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) override;
+		
+		inline int GetSetNumber() const { return setNumber; }
 
-		virtual int GetFrequencyId() const override;
-
-		virtual Name GetSRGName() const override;
-
-		virtual RHI::SRGType GetSRGType() const override;
-
-		virtual const RHI::ShaderResourceGroupDesc& GetDesc() const override;
-
-		VkDescriptorSet GetDescriptorSet() const;
-
-		inline bool ManagesDescriptorSet() const
-		{
-			return sharedDescriptorSet != nullptr;
-		}
+		inline VkDescriptorSet GetDescriptorSet() const { return descriptorSet; }
+		inline VkDescriptorSetLayout GetDescriptorSetLayout() const { return setLayout; }
 
 	private:
 
-		int setNumber = 0;
-		Name srgName{};
-		RHI::SRGType srgType{};
-		bool isCommitted = false;
+		int setNumber = -1;
+		VkDescriptorSet descriptorSet = nullptr;
+		VkDescriptorSetLayout setLayout = null;
 
-		VulkanDevice* device = nullptr;
-
-		ShaderResourceManager* srgManager = nullptr;
-		VulkanDescriptorSet* sharedDescriptorSet = nullptr;
-
-		RHI::ShaderResourceGroupDesc desc{};
-
-		Array<Name> variableNames{};
-		Array<VkDescriptorSetLayoutBinding> setBindings{};
-
-		HashMap<Name, VkDescriptorSetLayoutBinding> variableNameToBinding{};
-		HashMap<int, VkDescriptorSetLayoutBinding> bindingSlotToBinding{};
-
-		// Bound buffers/images
-		HashMap<int, VkDescriptorBufferInfo> bufferVariablesBoundByBindingSlot{};
-		HashMap<int, VkDescriptorImageInfo> imageVariablesBoundByBindingSlot{};
+		HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
+		HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};
 
 		friend class VulkanGraphicsPipeline;
 		friend class VulkanGraphicsCommandList;

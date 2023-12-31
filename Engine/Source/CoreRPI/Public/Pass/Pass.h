@@ -37,6 +37,8 @@ namespace CE::RPI
 
 		PassAttachmentBinding* FindBinding(const Name& name);
 
+		inline const Name& GetPassName() const { return GetName(); }
+
 	corerpi_protected_internal:
 
 		Pass();

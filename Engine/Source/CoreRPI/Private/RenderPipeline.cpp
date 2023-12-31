@@ -58,7 +58,7 @@ namespace CE::RPI
 		rootPassDefinitionName = descriptor.rootPass.passDefinition;
 		mainViewTag = descriptor.mainViewTag;
         
-		CompileTree();
+		CompilePipeline();
 	}
 
 	bool RenderPipeline::IsRootPass(const Name& passName)
@@ -66,7 +66,7 @@ namespace CE::RPI
 		return passTree->rootPass != nullptr && passTree->rootPass->GetName() == passName;
 	}
 
-	bool RenderPipeline::CompileTree()
+	bool RenderPipeline::CompilePipeline()
 	{
         passTree->Clear();
         

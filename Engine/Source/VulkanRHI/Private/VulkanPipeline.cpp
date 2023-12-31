@@ -4,7 +4,7 @@
 #include "VulkanPipeline.h"
 #include "VulkanShaderModule.h"
 #include "VulkanRenderPass.h"
-#include "VulkanShaderResourceGroup.h"
+#include "ShaderResourceGroup.h"
 
 namespace CE::Vulkan
 {

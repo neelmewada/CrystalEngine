@@ -41,7 +41,7 @@ namespace CE::RPI
 
 	private:
         
-        bool CompileTree();
+        bool CompilePipeline();
 
 		void SetupRootPass(ParentPass* rootPass);
 

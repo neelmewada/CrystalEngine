@@ -207,7 +207,7 @@ TEST(RenderPipeline, DefaultPipelineTree)
 		// Depth PrePass
 		{
 			Pass* pass = rootPass->passes[0];
-			EXPECT_EQ(pass->GetName(), "DepthPrePass");
+			EXPECT_EQ(pass->GetPassName(), "DepthPrePass");
 			EXPECT_EQ(pass->passAttachments.GetSize(), 1);
 			EXPECT_EQ(pass->passAttachments[0]->name, "DepthStencil");
 			EXPECT_EQ(pass->passAttachments[0]->lifetime, RHI::AttachmentLifetimeType::Transient);
@@ -219,19 +219,28 @@ TEST(RenderPipeline, DefaultPipelineTree)
 			EXPECT_EQ(pass->outputBindings.GetSize(), 1);
 
 			EXPECT_EQ(pass->outputBindings[0].attachment, pass->passAttachments[0]);
+			EXPECT_EQ(pass->outputBindings[0].connectedBinding, null);
 		}
 
 		// Opaque Pass
 		{
+			Pass* depthPass = rootPass->passes[0];
 			Pass* pass = rootPass->passes[1];
-			EXPECT_EQ(pass->GetName(), "OpaquePass");
+			EXPECT_EQ(pass->GetPassName(), "OpaquePass");
+			
+			EXPECT_EQ(pass->inputBindings.GetSize(), 1);
+			EXPECT_EQ(pass->inputBindings[0].connectedBinding, &depthPass->outputBindings[0]);
 
+			EXPECT_EQ(pass->outputBindings.GetSize(), 1);
+			EXPECT_EQ(pass->outputBindings[0].connectedBinding, null);
+			EXPECT_EQ(pass->outputBindings[0].attachment, rootPass->passAttachments[0]);
 		}
 
 		// Transparent Pass
 		{
+			Pass* opaquePass = rootPass->passes[1];
 			Pass* pass = rootPass->passes[2];
-			EXPECT_EQ(pass->GetName(), "TransparentPass");
+			EXPECT_EQ(pass->GetPassName(), "TransparentPass");
 
 		}
 

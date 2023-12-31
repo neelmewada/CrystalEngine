@@ -13,11 +13,19 @@ namespace CE::RHI
 
 		virtual bool Bind(Name name, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) = 0;
 
-		virtual int GetFrequencyId() const = 0;
+		inline SRGType GetSRGType() const
+		{
+			return srgLayout.srgType;
+		}
 
-		virtual SRGType GetSRGType() const = 0;
+		inline ShaderResourceGroupLayout GetLayout() const
+		{
+			return srgLayout;
+		}
 
 	protected:
+
+		ShaderResourceGroupLayout srgLayout{};
 
 	};
     
