@@ -15,8 +15,6 @@ namespace CE::Vulkan
 
     VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHI::RenderTargetLayout& rtLayout)
     {
-        using namespace CE::RHI;
-
         this->width = width;
         this->height = height;
         this->backBufferCount = rtLayout.backBufferCount;
@@ -140,8 +138,6 @@ namespace CE::Vulkan
 
     VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHI::RenderTargetLayout& rtLayout)
     {
-        using namespace CE::RHI;
-
         this->width = viewport->GetWidth();
         this->height = viewport->GetHeight();
         this->backBufferCount = viewport->GetBackBufferCount();

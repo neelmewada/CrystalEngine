@@ -68,6 +68,11 @@ namespace CE::RHI
 
         // - Resources -
 
+		virtual RHI::MemoryHeap* AllocateMemoryHeap(const MemoryHeapDescriptor& desc) = 0;
+		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) = 0;
+
+		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, BufferMemoryRequirements& outRequirements) = 0;
+
         virtual RHI::Buffer* CreateBuffer(const BufferDesc& bufferDesc) = 0;
         virtual void DestroyBuffer(Buffer* buffer) = 0;
         
@@ -88,7 +93,7 @@ namespace CE::RHI
 
 		// - Pipeline State -
 
-		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc) = 0;
+		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) = 0;
 		virtual void DestroyPipelineState(IPipelineState* pipelineState) = 0;
 
 		// - Utilities -

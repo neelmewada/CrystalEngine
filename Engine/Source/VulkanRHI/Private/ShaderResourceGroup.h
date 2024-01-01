@@ -14,7 +14,7 @@ namespace CE::Vulkan
 
 		inline u32 GetMaxBoundSets() const { return maxBoundDescriptorSets; }
         
-        inline bool IsSharedDescriptorSet(int set) { return descriptorSetToSrgs[set].GetSize() > 1; }
+        inline bool IsSharedDescriptorSet(int set) { return setNumberToSrgs[set].GetSize() > 1; }
 		bool IsSharedDescriptorSet(RHI::SRGType srgType);
 
 		int GetDescriptorSetNumber(RHI::SRGType srgType);
@@ -34,9 +34,11 @@ namespace CE::Vulkan
         Array<SRGSlot> srgSlots{};
         
         HashMap<RHI::SRGType, SRGSlot> builtinSrgNameToDescriptorSet{};
-		HashMap<int, Array<SRGSlot>> descriptorSetToSrgs{};
+		HashMap<int, Array<SRGSlot>> setNumberToSrgs{};
 		
 		u32 maxBoundDescriptorSets = 0;
+
+		
 
 	};
 
@@ -55,7 +57,12 @@ namespace CE::Vulkan
 		inline VkDescriptorSet GetDescriptorSet() const { return descriptorSet; }
 		inline VkDescriptorSetLayout GetDescriptorSetLayout() const { return setLayout; }
 
-		void Compile();
+		void Compile() override;
+
+		inline bool IsFailed() const
+		{
+			return failed;
+		}
 
 	protected:
 
@@ -65,7 +72,7 @@ namespace CE::Vulkan
 
 		void CompileBindings();
 
-		b8 isCompiled = false;
+		bool failed = false;
 
 		VulkanDevice* device = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
@@ -82,12 +89,13 @@ namespace CE::Vulkan
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
 		HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};
 
-		HashMap<int, VkDescriptorBufferInfo> buffersBoundBySlot{};
-		HashMap<int, VkDescriptorImageInfo> imagesBoundBySlot{};
+		HashMap<int, VkDescriptorBufferInfo> bufferInfosBoundBySlot{};
+		HashMap<int, VkDescriptorImageInfo> imageInfosBoundBySlot{};
 
 		friend class VulkanGraphicsPipeline;
-		friend class VulkanGraphicsCommandList;
+		friend class GraphicsCommandList;
         friend class VulkanDescriptorSet;
+		friend class MergedShaderResourceGroup;
 	};
 
 } // namespace CE

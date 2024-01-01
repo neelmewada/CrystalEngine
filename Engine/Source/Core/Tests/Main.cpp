@@ -695,7 +695,39 @@ TEST(Containers, Defer)
 	TEST_END;
 }
 
+TEST(Container, ArrayView)
+{
+	TEST_BEGIN;
 
+	// View into Array<int>
+	{
+		Array<int> array = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+		ArrayView<int> view = ArrayView<int>(array.Begin() + 2, array.End() - 2);
+		EXPECT_EQ(view.GetSize(), 7);
+		int idx = 2;
+		EXPECT_EQ(view[0], 2);
+		EXPECT_EQ(view[3], 5);
+		EXPECT_EQ(view[6], 8);
+
+		for (int value : view)
+		{
+			EXPECT_EQ(value, array[idx++]);
+		}
+	}
+
+	// View into Array<String>
+	{
+		Array<String> array = { "str0", "str1", "str2", "str3", "str4" };
+
+		ArrayView<String> view = ArrayView<String>(array.Begin() + 1, array.End() - 2);
+
+		EXPECT_EQ(view.GetSize(), 3);
+		EXPECT_EQ(view[0], "str1");
+	}
+
+	TEST_END;
+}
 
 #pragma endregion
 

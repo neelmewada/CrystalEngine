@@ -131,7 +131,7 @@ namespace CE::RHI
             {
                 shaderResourceGroups[i] = this->drawRequests[i].uniqueShaderResourceGroup;
             }
-            
+			
             drawPacket->uniqueShaderResourceGroups = shaderResourceGroups;
             drawPacket->uniqueShaderResourceGroupCount = drawRequestsCount;
         }

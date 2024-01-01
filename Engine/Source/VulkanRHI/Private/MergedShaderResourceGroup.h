@@ -16,6 +16,7 @@ namespace CE::Vulkan
 
 		Array<RHI::ShaderResourceGroup*> shaderResourceGroups{};
 
+
 	};
 
 } // namespace CE::Vulkan

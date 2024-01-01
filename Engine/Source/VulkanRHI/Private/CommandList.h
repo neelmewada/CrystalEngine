@@ -3,12 +3,12 @@
 namespace CE::Vulkan
 {
 
-	class VulkanGraphicsCommandList : public RHI::GraphicsCommandList, public ApplicationMessageHandler
+	class GraphicsCommandList : public RHI::GraphicsCommandList, public ApplicationMessageHandler
 	{
 	public:
-		VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport);
-		VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget);
-		virtual ~VulkanGraphicsCommandList();
+		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport);
+		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget);
+		virtual ~GraphicsCommandList();
 
 		// - Command List API -
 
@@ -86,10 +86,9 @@ namespace CE::Vulkan
 		List<VkFence> renderFinishedFence{}; // Size = NumCommandBuffers
 		List<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
 
-		HashMap<Name, ShaderResourceGroup*> boundSRGs{};
-		HashMap<int, Array<ShaderResourceGroup*>> boundSRGsBySetNumber{};
-		HashMap<int, ShaderResourceGroup*> boundMainSRGBySetNumber{};
-		HashSet<int> modifiedDescriptorSetNumbers{};
+		// DescriptorSet binding
+		FixedArray<ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroupBindings{};
+		u32 shaderResourceGroupBindingCount = 0;
 
 		// ImGui
 		b8 isImGuiEnabled = false;

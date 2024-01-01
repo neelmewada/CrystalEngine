@@ -29,6 +29,11 @@ namespace CE::RHI
 
 		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) = 0;
 
+		virtual void CommitShaderResource(RHI::ShaderResourceGroup* shaderResourceGroup)
+		{
+			CommitShaderResources({ shaderResourceGroup });
+		}
+
 		virtual void SetRootConstants(u8 size, const u8* data) = 0;
 
 	};

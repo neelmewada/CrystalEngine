@@ -70,7 +70,7 @@ namespace CE::Vulkan
         DelegateHandle windowResizeDelegateHandle = 0;
 
         friend struct VulkanRenderTargetLayout;
-        friend class VulkanGraphicsCommandList;
+        friend class GraphicsCommandList;
         friend class VulkanRHI;
     };
     

@@ -18,12 +18,23 @@ namespace CE::RHI
 			return srgType;
 		}
 
-		inline ShaderResourceGroupLayout GetLayout() const
+		inline const ShaderResourceGroupLayout& GetLayout() const
 		{
 			return srgLayout;
 		}
 
+		inline bool IsCompiled() const
+		{
+			return isCompiled;
+		}
+
+		/// @brief Compile the Shader Resource Group. You cannot bind new buffers or images to the variables
+		/// in this SRG once it's compiled. You will have to create a new SRG to do so.
+		virtual void Compile() = 0;
+
 	protected:
+
+		b8 isCompiled = false;
 
 		SRGType srgType{};
 

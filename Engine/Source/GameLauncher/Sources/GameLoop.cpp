@@ -70,8 +70,8 @@ void GameLoop::LoadStartupCoreModules()
 	ModuleManager::Get().LoadModule("Core");
 	ModuleManager::Get().LoadModule("CoreApplication");
 
-	// Settings module
 	ModuleManager::Get().LoadModule("CoreSettings");
+	ModuleManager::Get().LoadModule("CoreShader");
 
 	// Load Rendering modules
 	ModuleManager::Get().LoadModule("CoreRHI");
@@ -117,7 +117,7 @@ void GameLoop::PostInit()
 	// Load non-important core modules
 	LoadCoreModules();
 
-	RHI::gDynamicRHI = new VulkanRHI();
+	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
 	RHI::gDynamicRHI->Initialize();
 
 	AppInit();
@@ -258,7 +258,7 @@ void GameLoop::Shutdown()
 	// Shutdown application
 	AppShutdown();
 
-	// Unload settings module
+	ModuleManager::Get().UnloadModule("CoreShader");
 	ModuleManager::Get().UnloadModule("CoreSettings");
 
 	// Unload most important modules at last

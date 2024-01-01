@@ -100,7 +100,7 @@ namespace CE::Vulkan
 		VulkanFrame depthFrame{};
 
 		friend class VulkanViewport;
-		friend class VulkanGraphicsCommandList;
+		friend class GraphicsCommandList;
 		friend class VulkanFrameBuffer;
 		friend class VulkanRHI;
 		friend class VulkanGraphicsPipeline;

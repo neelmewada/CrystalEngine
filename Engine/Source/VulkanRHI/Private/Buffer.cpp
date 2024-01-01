@@ -33,14 +33,41 @@ namespace CE::Vulkan
 		return bufferUsageFlags;
 	}
 
-	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDesc& desc)
-		: device(device)
-		, usageFlags(desc.usageFlags)
-		, allocMode(desc.allocMode)
-		, name(desc.name)
+	void VulkanRHI::GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, BufferMemoryRequirements& outRequirements)
 	{
+		VkBuffer tempBuffer = nullptr;
+		VkBufferCreateInfo tempBufferCI{};
+		tempBufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		tempBufferCI.size = bufferDesc.bufferSize;
+
+		tempBufferCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		tempBufferCI.queueFamilyIndexCount = 0;
+		tempBufferCI.pQueueFamilyIndices = nullptr;
+
+		tempBufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(bufferDesc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+		if (vkCreateBuffer(device->GetHandle(), &tempBufferCI, nullptr, &tempBuffer) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", bufferDesc.name, bufferDesc.bufferSize);
+			return;
+		}
+
+		VkMemoryRequirements bufferRequirements{};
+		vkGetBufferMemoryRequirements(device->GetHandle(), tempBuffer, &bufferRequirements);
+		outRequirements.bufferSize = bufferRequirements.size;
+		outRequirements.offsetAlignment = bufferRequirements.alignment;
+		outRequirements.flags = bufferRequirements.memoryTypeBits;
+		
+		vkDestroyBuffer(device->GetHandle(), tempBuffer, nullptr);
+	}
+
+	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc)
+		: device(device)
+	{
+		name = desc.name;
 		bindFlags = desc.bindFlags;
 		bufferSize = desc.bufferSize;
+		heapType = desc.defaultHeapType;
 		structureByteStride = desc.structureByteStride;
 
 		VkBufferCreateInfo bufferCI{};
@@ -50,7 +77,7 @@ namespace CE::Vulkan
 		bufferCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		bufferCI.queueFamilyIndexCount = 0;
 		bufferCI.pQueueFamilyIndices = nullptr;
-
+		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 		
 		if (vkCreateBuffer(device->GetHandle(), &bufferCI, nullptr, &buffer) != VK_SUCCESS)
@@ -63,9 +90,11 @@ namespace CE::Vulkan
 		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);
 
 		VkMemoryPropertyFlags memoryFlags{};
-		if (allocMode == RHI::BufferAllocMode::Default || allocMode == RHI::BufferAllocMode::SharedMemory)
+		if (heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+			if (heapType == RHI::MemoryHeapType::ReadBack)
+				memoryFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
 		}
 		else
 		{
@@ -77,7 +106,7 @@ namespace CE::Vulkan
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memoryFlags);
 		allocInfo.pNext = nullptr;
-
+		
 		if (vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to allocate memory to buffer with name {} of size {} bytes", name, bufferSize);
@@ -85,11 +114,37 @@ namespace CE::Vulkan
 		}
 
 		vkBindBufferMemory(device->GetHandle(), buffer, bufferMemory, 0);
+	}
 
-		if (desc.initialData != nullptr)
+	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDesc& desc, const RHI::BufferMemoryDescriptor& memoryDesc)
+		: device(device)
+		, memoryHeap((Vulkan::MemoryHeap*)memoryDesc.memoryHeap)
+		, memoryOffset(memoryDesc.memoryOffset)
+	{
+		bindFlags = desc.bindFlags;
+		bufferSize = desc.bufferSize;
+		structureByteStride = desc.structureByteStride;
+
+		VkBufferCreateInfo bufferCI{};
+		bufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferCI.size = desc.bufferSize;
+
+		bufferCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		bufferCI.queueFamilyIndexCount = 0;
+		bufferCI.pQueueFamilyIndices = nullptr;
+
+		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+		if (vkCreateBuffer(device->GetHandle(), &bufferCI, nullptr, &buffer) != VK_SUCCESS)
 		{
-			UploadData(*desc.initialData);
+			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
+			return;
 		}
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);
+		
+		
 	}
 
 	Buffer::~Buffer()
@@ -130,9 +185,9 @@ namespace CE::Vulkan
 
 	void Buffer::UploadData(const RHI::BufferData& bufferData)
 	{
-		if (allocMode == RHI::BufferAllocMode::Default || allocMode == RHI::BufferAllocMode::SharedMemory)
+		if (heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
-			// Shared Memory
+			// CPU Visible Memory
 			void* ptr;
 			vkMapMemory(device->GetHandle(), bufferMemory, 0, bufferSize, 0, &ptr);
 			memcpy((void*)((SIZE_T)ptr + (SIZE_T)bufferData.startOffsetInBuffer), bufferData.data, bufferData.dataSize);
@@ -140,7 +195,7 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			// GPU Memory
+			// GPU exclusive Memory
 			UploadDataToGPU(bufferData);
 		}
 	}
@@ -153,7 +208,7 @@ namespace CE::Vulkan
 		*outData = nullptr;
 		*outDataSize = 0;
 
-		if (allocMode == RHI::BufferAllocMode::Default || allocMode == RHI::BufferAllocMode::SharedMemory)
+		if (heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			// Shared memory
 			*outDataSize = bufferSize;
@@ -201,7 +256,7 @@ namespace CE::Vulkan
 
 	void Buffer::UploadDataToGPU(const RHI::BufferData& bufferData)
 	{
-		if (allocMode != RHI::BufferAllocMode::GpuMemory)
+		if (heapType != RHI::MemoryHeapType::Default)
 			return;
 
 		if (!uploadContextExists)
@@ -252,16 +307,16 @@ namespace CE::Vulkan
 		stagingBufferData.dataSize = bufferData.dataSize;
 		stagingBufferData.startOffsetInBuffer = 0;
 
-		RHI::BufferDesc stagingBufferDesc{};
+		RHI::BufferDescriptor stagingBufferDesc{};
 		stagingBufferDesc.name = "Staging Buffer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
+		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 		stagingBufferDesc.bufferSize = bufferData.dataSize;
-		stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
 		stagingBufferDesc.structureByteStride = bufferData.dataSize;
-		stagingBufferDesc.initialData = &stagingBufferData;
 
 		auto stagingBuffer = new Buffer(device, stagingBufferDesc);
+
+		stagingBuffer->UploadData(stagingBufferData);
 
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -308,7 +363,7 @@ namespace CE::Vulkan
 		*outData = nullptr;
 		*outDataSize = 0;
 
-		if (allocMode != RHI::BufferAllocMode::GpuMemory)
+		if (heapType != RHI::MemoryHeapType::Default)
 			return;
 
         if (!uploadContextExists)
@@ -343,11 +398,10 @@ namespace CE::Vulkan
             return;
         }
         
-        RHI::BufferDesc stagingBufferDesc{};
+        RHI::BufferDescriptor stagingBufferDesc{};
         stagingBufferDesc.name = "Staging Buffer";
         stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-        stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-        stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+        stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::ReadBack;
         stagingBufferDesc.bufferSize = bufferSize;
         stagingBufferDesc.structureByteStride = structureByteStride;
         
@@ -392,81 +446,81 @@ namespace CE::Vulkan
         stagingBuffer = nullptr;
 	}
 
-    void Buffer::Resize(u64 newBufferSize)
-    {
-        if (newBufferSize == 0)
-        {
-            CE_LOG(Error, All, "Cannot resize a Vulkan Buffer to a size of 0.");
-            return;
-        }
-        
-        u64 copyDataSize = Math::Min(bufferSize, newBufferSize);
-        
-        CreateUploadContext();
-        
-        RHI::BufferDesc newBufferDesc{};
-        newBufferDesc.name = name;
-        newBufferDesc.bufferSize = newBufferSize;
-        newBufferDesc.allocMode = allocMode;
-        newBufferDesc.bindFlags = bindFlags;
-        newBufferDesc.structureByteStride = structureByteStride;
-        newBufferDesc.usageFlags = usageFlags;
-        
-        Buffer* newBuffer = new Buffer(device, newBufferDesc);
-        
-        if (copyDataSize > 0)
-        {
-            VkCommandBufferBeginInfo beginInfo{};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-            
-            vkBeginCommandBuffer(uploadCmdBuffer, &beginInfo);
-            {
-                VkBufferCopy copy{};
-                copy.size = copyDataSize;
-                copy.srcOffset = 0;
-                copy.dstOffset = 0;
-                
-                vkCmdCopyBuffer(uploadCmdBuffer, this->buffer, newBuffer->buffer, 1, &copy);
-            }
-            vkEndCommandBuffer(uploadCmdBuffer);
-            
-            VkSubmitInfo submitInfo{};
-            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-            submitInfo.commandBufferCount = 1;
-            submitInfo.pCommandBuffers = &uploadCmdBuffer;
-            submitInfo.waitSemaphoreCount = 0;
-            submitInfo.pWaitDstStageMask = nullptr;
-            submitInfo.pWaitSemaphores = nullptr;
-            submitInfo.signalSemaphoreCount = 0;
-            submitInfo.pSignalSemaphores = nullptr;
-            
-            vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
-            
-            constexpr u64 u64Max = std::numeric_limits<u64>::max();
-            vkWaitForFences(device->GetHandle(), 1, &uploadFence, VK_TRUE, u64Max);
-            vkResetFences(device->GetHandle(), 1, &uploadFence);
+    //void Buffer::Resize(u64 newBufferSize)
+    //{
+    //    if (newBufferSize == 0)
+    //    {
+    //        CE_LOG(Error, All, "Cannot resize a Vulkan Buffer to a size of 0.");
+    //        return;
+    //    }
+    //    
+    //    u64 copyDataSize = Math::Min(bufferSize, newBufferSize);
+    //    
+    //    CreateUploadContext();
+    //    
+    //    RHI::BufferDesc newBufferDesc{};
+    //    newBufferDesc.name = name;
+    //    newBufferDesc.bufferSize = newBufferSize;
+    //    newBufferDesc.allocMode = allocMode;
+    //    newBufferDesc.bindFlags = bindFlags;
+    //    newBufferDesc.structureByteStride = structureByteStride;
+    //    newBufferDesc.usageFlags = usageFlags;
+    //    
+    //    Buffer* newBuffer = new Buffer(device, newBufferDesc);
+    //    
+    //    if (copyDataSize > 0)
+    //    {
+    //        VkCommandBufferBeginInfo beginInfo{};
+    //        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    //        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    //        
+    //        vkBeginCommandBuffer(uploadCmdBuffer, &beginInfo);
+    //        {
+    //            VkBufferCopy copy{};
+    //            copy.size = copyDataSize;
+    //            copy.srcOffset = 0;
+    //            copy.dstOffset = 0;
+    //            
+    //            vkCmdCopyBuffer(uploadCmdBuffer, this->buffer, newBuffer->buffer, 1, &copy);
+    //        }
+    //        vkEndCommandBuffer(uploadCmdBuffer);
+    //        
+    //        VkSubmitInfo submitInfo{};
+    //        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    //        submitInfo.commandBufferCount = 1;
+    //        submitInfo.pCommandBuffers = &uploadCmdBuffer;
+    //        submitInfo.waitSemaphoreCount = 0;
+    //        submitInfo.pWaitDstStageMask = nullptr;
+    //        submitInfo.pWaitSemaphores = nullptr;
+    //        submitInfo.signalSemaphoreCount = 0;
+    //        submitInfo.pSignalSemaphores = nullptr;
+    //        
+    //        vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
+    //        
+    //        constexpr u64 u64Max = std::numeric_limits<u64>::max();
+    //        vkWaitForFences(device->GetHandle(), 1, &uploadFence, VK_TRUE, u64Max);
+    //        vkResetFences(device->GetHandle(), 1, &uploadFence);
 
-            vkResetCommandPool(device->GetHandle(), uploadCmdPool, 0);
-        }
-        
-        // Destroy `this` buffer
-        Free();
-        
-        // `Move` the new buffer to `this` buffer
-        this->buffer = newBuffer->buffer;
-        this->bufferMemory = newBuffer->bufferMemory;
-        this->bufferSize = newBuffer->bufferSize;
-        this->allocMode = newBuffer->allocMode;
-        this->bindFlags = newBuffer->bindFlags;
-        this->usageFlags = newBuffer->usageFlags;
-        this->structureByteStride = newBuffer->structureByteStride;
-        
-        // Set newBuffer fields to nullptr so the new buffer doesn't get destroyed
-        newBuffer->buffer = nullptr;
-        newBuffer->bufferMemory = nullptr;
-        
-        delete newBuffer;
-    }
+    //        vkResetCommandPool(device->GetHandle(), uploadCmdPool, 0);
+    //    }
+    //    
+    //    // Destroy `this` buffer
+    //    Free();
+    //    
+    //    // `Move` the new buffer to `this` buffer
+    //    this->buffer = newBuffer->buffer;
+    //    this->bufferMemory = newBuffer->bufferMemory;
+    //    this->bufferSize = newBuffer->bufferSize;
+    //    this->allocMode = newBuffer->allocMode;
+    //    this->bindFlags = newBuffer->bindFlags;
+    //    this->usageFlags = newBuffer->usageFlags;
+    //    this->structureByteStride = newBuffer->structureByteStride;
+    //    
+    //    // Set newBuffer fields to nullptr so the new buffer doesn't get destroyed
+    //    newBuffer->buffer = nullptr;
+    //    newBuffer->bufferMemory = nullptr;
+    //    
+    //    delete newBuffer;
+    //}
 
 } // namespace CE

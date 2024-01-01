@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
     
-	VulkanGraphicsCommandList::VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport)
+	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport)
 		: vulkanRHI(vulkanRHI)
 		, device(device)
 		, viewport(viewport)
@@ -29,7 +29,7 @@ namespace CE::Vulkan
 		CreateSyncObjects();
 	}
 
-	VulkanGraphicsCommandList::VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget)
+	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget)
 		: vulkanRHI(vulkanRHI)
 		, device(device)
 		, renderTarget(renderTarget)
@@ -82,7 +82,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	VulkanGraphicsCommandList::~VulkanGraphicsCommandList()
+	GraphicsCommandList::~GraphicsCommandList()
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
@@ -91,7 +91,7 @@ namespace CE::Vulkan
 		DestroySyncObjects();
 	}
 
-	void VulkanGraphicsCommandList::Begin()
+	void GraphicsCommandList::Begin()
 	{
 		constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -148,7 +148,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::End()
+	void GraphicsCommandList::End()
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
@@ -157,7 +157,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::SetScissorRects(u32 scissorCount, const RHI::ScissorState* scissors)
+	void GraphicsCommandList::SetScissorRects(u32 scissorCount, const RHI::ScissorState* scissors)
 	{
 		static Array<VkRect2D> scissorRects{};
 		if (scissorRects.GetSize() < scissorCount)
@@ -179,7 +179,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::SetViewportRects(u32 viewportCount, const RHI::ViewportState* viewports)
+	void GraphicsCommandList::SetViewportRects(u32 viewportCount, const RHI::ViewportState* viewports)
 	{
 		static Array<VkViewport> viewportArray{};
 		if (viewportArray.GetSize() < viewportCount)
@@ -203,7 +203,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers)
+	void GraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers)
 	{
 		List<VkBuffer> vkBuffers = {};
 		Array<SIZE_T> offsets = {};
@@ -221,7 +221,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets)
+	void GraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets)
 	{
 		if (buffers.GetSize() != bufferOffsets.GetSize())
 		{
@@ -242,7 +242,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset)
+	void GraphicsCommandList::BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset)
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
@@ -250,7 +250,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::BindPipeline(RHI::IPipelineState* pipeline)
+	void GraphicsCommandList::BindPipeline(RHI::IPipelineState* pipeline)
 	{
 		if (pipeline == nullptr)
 			return;
@@ -281,7 +281,7 @@ namespace CE::Vulkan
 		currentPipelineLayout = (VulkanPipelineLayout*)pipeline->GetPipelineLayout();
 	}
 
-	void VulkanGraphicsCommandList::CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups)
+	void GraphicsCommandList::CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups)
 	{
 		if (shaderResourceGroups.IsEmpty())
 			return;
@@ -292,78 +292,14 @@ namespace CE::Vulkan
 		Array<ShaderResourceGroup*> srgs = shaderResourceGroups.Transform<ShaderResourceGroup*>(
 			[&](RHI::ShaderResourceGroup* in) { return (ShaderResourceGroup*)in; });
 
-		Array<ShaderResourceGroup*> removedSRGs{};
-
 		for (ShaderResourceGroup* srg : srgs)
 		{
-			Name srgName = srg->GetSRGName();
-			auto oldSRG = boundSRGs[srgName];
-			if (oldSRG == srg)
-				continue;
-
-			// SRG has been modified...
-
-			modifiedDescriptorSetNumbers.Add(srg->setNumber);
-
-			if (oldSRG != nullptr && oldSRG != srg)
-			{
-				removedSRGs.Add(oldSRG);
-			}
-
-			boundSRGs[srgName] = srg;
-			srg->isCommitted = true;
-
-			Array<ShaderResourceGroup*>& array = boundSRGsBySetNumber[srg->setNumber];
-			array.Remove(oldSRG);
-			if (!array.Exists(srg))
-			{
-				array.Add(srg);
-			}
+			
 		}
-
-		for (const auto& [setNumber, srgArray] : boundSRGsBySetNumber)
-		{
-			ShaderResourceGroup* mainSRG = nullptr;
-
-			for (ShaderResourceGroup* srg : srgArray)
-			{
-				if (srg->ManagesDescriptorSet())
-				{
-					mainSRG = srg;
-					break;
-				}
-			}
-
-			if (mainSRG == nullptr)
-				continue;
-
-			boundMainSRGBySetNumber[setNumber] = mainSRG;
-
-			Array<ShaderResourceGroup*> srgsToRemove{};
-
-			for (int i = removedSRGs.GetSize() - 1; i >= 0; i--)
-			{
-				if (removedSRGs[i]->setNumber == setNumber)
-				{
-					if (removedSRGs[i] != mainSRG)
-						srgsToRemove.Add(removedSRGs[i]);
-					removedSRGs.RemoveAt(i);
-				}
-			}
-
-			if (srgsToRemove.NonEmpty())
-			{
-				mainSRG->sharedDescriptorSet->RemoveSRGs(srgsToRemove);
-			}
-
-			for (ShaderResourceGroup* srg : srgArray)
-			{
-				mainSRG->sharedDescriptorSet->SetSRG(srg);
-			}
-		}
+		
 	}
 
-	void VulkanGraphicsCommandList::SetRootConstants(u8 size, const u8* data)
+	void GraphicsCommandList::SetRootConstants(u8 size, const u8* data)
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
@@ -371,11 +307,11 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)
+	void GraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
-			for (auto [setNumber, srg] : boundMainSRGBySetNumber)
+			/*for (auto [setNumber, srg] : boundMainSRGBySetNumber)
 			{
 				if (!modifiedDescriptorSetNumbers.Exists(setNumber))
 					continue;
@@ -385,7 +321,7 @@ namespace CE::Vulkan
 				VkDescriptorSet set = srg->GetDescriptorSet();
 				vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipelineLayout->GetNativeHandle(),
 					setNumber, 1, &set, 0, nullptr);
-			}
+			}*/
 		}
 
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
@@ -394,7 +330,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::CreateSyncObjects()
+	void GraphicsCommandList::CreateSyncObjects()
 	{
 		VkSemaphoreCreateInfo semaphoreCI{};
 		semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -424,7 +360,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsCommandList::DestroySyncObjects()
+	void GraphicsCommandList::DestroySyncObjects()
 	{
 		for (int i = 0; i < renderFinishedFence.GetSize(); ++i)
 		{

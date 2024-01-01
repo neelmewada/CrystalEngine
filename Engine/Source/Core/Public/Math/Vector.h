@@ -23,6 +23,8 @@ namespace CE
 
 	typedef Vec4i RectInt;
 
+	typedef Vec2 Range;
+
     template<typename T>
     class TVector2
     {
@@ -41,6 +43,9 @@ namespace CE
             struct {
                 T x, y;
             };
+			struct {
+				T min, max;
+			};
 			struct {
 				T left, right;
 			};

@@ -242,6 +242,9 @@ TEST(RenderPipeline, DefaultPipelineTree)
 			Pass* pass = rootPass->passes[2];
 			EXPECT_EQ(pass->GetPassName(), "TransparentPass");
 
+			EXPECT_EQ(pass->inputOutputBindings.GetSize(), 1);
+			EXPECT_EQ(pass->inputOutputBindings[0].connectedBinding, &opaquePass->outputBindings[0]);
+
 		}
 
 		delete renderPipeline;

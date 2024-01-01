@@ -147,6 +147,9 @@ namespace CE::Vulkan
 
 	void VulkanDevice::InitGpu()
 	{
+		// Fetch memory properties
+		vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
+
 		vkGetPhysicalDeviceProperties(gpu, &gpuProperties);
 		gpuMetaData.localMemorySize = GetPhysicalDeviceLocalMemory(gpu);
 

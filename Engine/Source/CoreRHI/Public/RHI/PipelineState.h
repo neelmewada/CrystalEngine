@@ -3,6 +3,15 @@
 namespace CE::RHI
 {
 
+	struct GraphicsPipelineDescriptor
+	{
+		u32 vertexSizeInBytes = 0;
+		Array<VertexAttribDesc> vertexAttribs{};
+		Array<ShaderStageDesc> otherStages{};
+
+		CullMode cullMode = CullMode::Back;
+	};
+
 	class IPipelineLayout
 	{
 	public:

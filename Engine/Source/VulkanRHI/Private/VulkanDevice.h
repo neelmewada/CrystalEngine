@@ -83,6 +83,11 @@ namespace CE::Vulkan
 			return srgManager;
 		}
 
+		INLINE const VkPhysicalDeviceMemoryProperties& GetMemoryProperties() const
+		{
+			return memoryProperties;
+		}
+
     protected:
 
     private:
@@ -103,6 +108,8 @@ namespace CE::Vulkan
 
         VkInstance instance = nullptr;
         VulkanRHI* vulkanRhi = nullptr;
+
+		VkPhysicalDeviceMemoryProperties memoryProperties{};
 
 		Array<String> supportedDeviceExtensions{};
 

@@ -14,6 +14,7 @@
 #include "RHI/AttachmentDefines.h"
 #include "RHI/ShaderResourceGroupLayout.h"
 #include "RHI/Resources.h"
+#include "RHI/MemoryHeap.h"
 #include "RHI/BufferView.h"
 #include "RHI/Buffer.h"
 #include "RHI/Texture.h"

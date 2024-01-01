@@ -2,6 +2,34 @@
 
 namespace CE::RHI
 {
+	struct BufferDescriptor
+	{
+		/// @brief Name used for debugging purposes.
+		Name name = "Buffer";
+		
+		u64 bufferSize = 0;
+
+		u64 structureByteStride = 0;
+		
+		BufferBindFlags bindFlags{};
+
+		MemoryHeapType defaultHeapType{};
+	};
+
+	class MemoryHeap;
+
+	struct BufferMemoryRequirements
+	{
+		SIZE_T bufferSize = 0;
+		SIZE_T offsetAlignment = 0;
+		u32 flags = 0;
+	};
+
+	struct BufferMemoryDescriptor
+	{
+		RHI::MemoryHeap* memoryHeap = nullptr;
+		u64 memoryOffset = 0;
+	};
 
 	class CORERHI_API Buffer : public RHIResource, public IDeviceObject
 	{
@@ -17,6 +45,11 @@ namespace CE::RHI
 			return bindFlags;
 		}
 
+		inline u64 GetStructureByteStride() const
+		{
+			return structureByteStride;
+		}
+
 		virtual void* GetHandle() = 0;
 
 		inline u64 GetBufferSize() const
@@ -28,9 +61,10 @@ namespace CE::RHI
 
 		virtual void ReadData(u8** outData, u64* outDataSize) = 0;
 
-		virtual void Resize(u64 newBufferSize) = 0;
-
 	protected:
+
+		/// @brief Name used for debugging purposes.
+		Name name{};
 
 		BufferBindFlags bindFlags{};
 

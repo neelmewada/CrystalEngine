@@ -220,7 +220,7 @@ namespace CE::Vulkan
 
     RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::Viewport* viewport)
     {
-        return new VulkanGraphicsCommandList(this, device, (VulkanViewport*)viewport);
+        return new GraphicsCommandList(this, device, (VulkanViewport*)viewport);
     }
 
     RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::RenderTarget* renderTarget)
@@ -231,7 +231,7 @@ namespace CE::Vulkan
             return CreateGraphicsCommandList(vulkanViewport);
         }
 
-        return new VulkanGraphicsCommandList(this, device, (VulkanRenderTarget*)renderTarget);
+        return new GraphicsCommandList(this, device, (VulkanRenderTarget*)renderTarget);
     }
 
     void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)
@@ -243,7 +243,7 @@ namespace CE::Vulkan
     {
         if (commandList->GetCommandListType() == RHI::CommandListType::Graphics)
         {
-            auto vulkanCommandList = (VulkanGraphicsCommandList*)commandList;
+            auto vulkanCommandList = (GraphicsCommandList*)commandList;
             if (vulkanCommandList->IsViewportTarget())
             {
                 return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetViewport());
@@ -256,7 +256,7 @@ namespace CE::Vulkan
         return false;
     }
 
-    bool VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
+    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -299,7 +299,7 @@ namespace CE::Vulkan
         return true;
     }
 
-    bool VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport)
+    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanViewport* viewport)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -348,7 +348,7 @@ namespace CE::Vulkan
         return true;
     }
 
-	void VulkanGraphicsCommandList::WaitForExecution()
+	void GraphicsCommandList::WaitForExecution()
 	{
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
 		auto result = vkWaitForFences(device->GetHandle(),
@@ -358,7 +358,7 @@ namespace CE::Vulkan
 
     bool VulkanRHI::PresentViewport(RHI::GraphicsCommandList* viewportCommandList)
     {
-        auto vulkanCommandList = (VulkanGraphicsCommandList*)viewportCommandList;
+        auto vulkanCommandList = (GraphicsCommandList*)viewportCommandList;
         if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
             return false;
 
@@ -385,7 +385,17 @@ namespace CE::Vulkan
 
     // - Resources -
 
-    RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDesc& bufferDesc)
+	RHI::MemoryHeap* VulkanRHI::AllocateMemoryHeap(const MemoryHeapDescriptor& desc)
+	{
+		return new MemoryHeap(device, desc);
+	}
+
+	void VulkanRHI::FreeMemoryHeap(RHI::MemoryHeap* memoryHeap)
+	{
+		delete memoryHeap;
+	}
+
+	RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDesc& bufferDesc)
     {
         return new Buffer(device, bufferDesc);
     }
@@ -428,7 +438,7 @@ namespace CE::Vulkan
 
 	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection)
 	{
-		return new VulkanShaderModule(device, desc, shaderReflection);
+		return new Vulkan::ShaderModule(device, desc, shaderReflection);
 	}
 
 	void VulkanRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)
@@ -436,20 +446,12 @@ namespace CE::Vulkan
 		delete shaderModule;
 	}
 
-	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc)
-	{
-		return new ShaderResourceGroup(device, desc);
-	}
 
 	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
 	{
 		delete shaderResourceGroup;
 	}
 
-	RHI::GraphicsPipelineState* VulkanRHI::CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
-	{
-		return new VulkanGraphicsPipeline(device, (VulkanRenderTarget*)renderTarget, desc);
-	}
 
 	void VulkanRHI::DestroyPipelineState(RHI::IPipelineState* pipelineState)
 	{

@@ -56,12 +56,17 @@ namespace CE::RHI
 		}
 	}
 
+	void DrawListContext::AddDrawItem(DrawItemProperties drawItem)
+	{
+
+	}
+
 	void DrawListContext::Finalize()
 	{
 		for (int i = 0; i < mergedDrawListsByTag.GetSize(); i++)
 		{
 			mergedDrawListsByTag[i].Clear();
-			mergedDrawListsByTag[i].listTag = (u8)i;
+			mergedDrawListsByTag[i].listTag = (DrawListTag)i;
 		}
 
 		threadDrawListsByTag.ForEach([&](DrawListsByTag& drawLists)
@@ -69,6 +74,24 @@ namespace CE::RHI
 				for (int i = 0; i < drawLists.GetSize(); i++)
 				{
 					mergedDrawListsByTag[i].Merge(drawLists[i]);
+					drawLists[i].Clear();
+				}
+			});
+	}
+
+	void DrawListContext::ClearAll()
+	{
+		for (int i = 0; i < mergedDrawListsByTag.GetSize(); i++)
+		{
+			mergedDrawListsByTag[i].Clear();
+			mergedDrawListsByTag[i].listTag = (DrawListTag)i;
+		}
+
+		threadDrawListsByTag.ForEach([&](DrawListsByTag& drawLists)
+			{
+				for (int i = 0; i < drawLists.GetSize(); i++)
+				{
+					drawLists[i].Clear();
 				}
 			});
 	}

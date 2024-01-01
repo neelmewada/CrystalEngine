@@ -12,11 +12,12 @@
 #include "VulkanDevice.h"
 #include "SwapChain.h"
 #include "Viewport.h"
+#include "VulkanRenderPass.h"
 
 #include "DescriptorPool.h"
-#include "DescriptorSet.h"
 #include "ShaderResourceGroup.h"
 #include "MergedShaderResourceGroup.h"
+#include "MemoryHeap.h"
 #include "Texture.h"
 #include "Buffer.h"
 
@@ -33,4 +34,5 @@ namespace CE::Vulkan
 {
 
 
-} // namespace CE
+
+} // namespace CE::Vulkan

@@ -22,8 +22,8 @@ namespace CE::RHI
         ComputePipelineState,
         GraphicsPipelineState,
 		ShaderResourceGroup,
-		ShaderResourceGroupManager,
 
+		MemoryHeap,
         RenderTarget,
         RenderPass,
         Viewport,
@@ -150,15 +150,6 @@ namespace CE::RHI
     };
     ENUM_CLASS_FLAGS(BufferBindFlags);
 
-    /// Features used by the buffer
-    enum class BufferUsageFlags
-    {
-        Default = 0,
-        /// Buffer can be used with dynamic offset
-        DynamicOffset = BIT(0),
-    };
-    ENUM_CLASS_FLAGS(BufferUsageFlags);
-
     enum class BufferAllocMode
     {
         Default = 0,
@@ -180,8 +171,7 @@ namespace CE::RHI
 	{
 		Name name{};
 		BufferBindFlags bindFlags{};
-		BufferUsageFlags usageFlags{};
-		BufferAllocMode allocMode{};
+		//BufferAllocMode allocMode{};
 		u64 bufferSize = 0;
 		u64 structureByteStride = 0;
 
@@ -398,11 +388,11 @@ namespace CE::RHI
 		Texture1D, // A texture1D in vulkan
 		Texture2D, // A texture2D in vulkan
 		Texture3D, // A texture3D in vulkan
-		TextureCube,
+		TextureCube, // A textureCube in vulkan
 		RWTexture2D, // An image2D in vulkan
 		RWTexture3D, // An image3D in vulkan
 		SamplerState, // A sampler in vulkan
-		InputAttachment // A SubpassInput in vulkan
+		SubpassInput // A SubpassInput in vulkan
 	};
 	ENUM_CLASS(ShaderResourceType);
 
@@ -429,72 +419,6 @@ namespace CE::RHI
 		All
 	};
 	ENUM_CLASS(CullMode);
-
-	struct GraphicsPipelineDesc
-	{
-		u32 vertexSizeInBytes = 0;
-		Array<VertexAttribDesc> vertexAttribs{};
-
-		RHI::ShaderModule* vertexShader = nullptr;
-		String vertexEntry = "VertMain";
-		RHI::ShaderModule* fragmentShader = nullptr;
-		String fragmentEntry = "FragMain";
-		Array<ShaderStageDesc> otherStages{};
-
-		CullMode cullMode = CullMode::Back;
-
-		HashMap<Name, int> variableNameBindingMap{};
-	};
-
-	struct CORERHI_API GraphicsPipelineBuilder
-	{
-		GraphicsPipelineBuilder() {}
-
-		GraphicsPipelineBuilder& VertexSize(u32 byteSize)
-		{
-			desc.vertexSizeInBytes = byteSize;
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& VertexAttrib(u32 location, TypeId dataType, u32 offset)
-		{
-			VertexAttribDesc attrib{};
-			attrib.location = location;
-			attrib.dataType = dataType;
-			attrib.offset = offset;
-			desc.vertexAttribs.Add(attrib);
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& VertexShader(RHI::ShaderModule* shaderModule, const String& entry = "VertMain")
-		{
-			desc.vertexShader = shaderModule;
-			desc.vertexEntry = entry;
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& FragmentShader(RHI::ShaderModule* shaderModule, const String& entry = "FragMain")
-		{
-			desc.fragmentShader = shaderModule;
-			desc.fragmentEntry = entry;
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& CullMode(CullMode cullMode)
-		{
-			desc.cullMode = cullMode;
-			return *this;
-		}
-
-		const GraphicsPipelineDesc& Build()
-		{
-			return desc;
-		}
-
-	private:
-
-		GraphicsPipelineDesc desc{};
-	};
 
 } // namespace CE
 

@@ -8,7 +8,8 @@ namespace CE::Vulkan
     class Buffer : public RHI::Buffer
     {
     public:
-        Buffer(VulkanDevice* device, const RHI::BufferDesc& desc);
+		Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc);
+		Buffer(VulkanDevice* device, const RHI::BufferDesc& desc, const RHI::BufferMemoryDescriptor& memoryDesc);
         virtual ~Buffer();
 
         virtual void* GetHandle() override
@@ -22,8 +23,6 @@ namespace CE::Vulkan
 
         /// Allocates a raw buffer in CPU memory and reads buffer data into it. You are responsible for releasing outData memory block using Memory::Free().
 		virtual void ReadData(u8** outData, u64* outDataSize) override;
-        
-        virtual void Resize(u64 newBufferSize) override;
 
     private:
         void CreateUploadContext();
@@ -35,12 +34,14 @@ namespace CE::Vulkan
         void Free();
 
     private:
-        Name name{};
-        RHI::BufferUsageFlags usageFlags{};
-        RHI::BufferAllocMode allocMode{};
+
+		// External memory heap
+		MemoryHeap* memoryHeap = nullptr;
+		u64 memoryOffset = 0;
 
         VulkanDevice* device = nullptr;
         VkBuffer buffer = nullptr;
+		RHI::MemoryHeapType heapType = RHI::MemoryHeapType::Default;
         VkDeviceMemory bufferMemory = nullptr;
 
         bool uploadContextExists = false;

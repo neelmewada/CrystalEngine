@@ -92,8 +92,8 @@ namespace CE::Vulkan
 		// - Shader Stages -
 
 		VkPipelineShaderStageCreateInfo shaderStages[2] = {};
-		VulkanShaderModule* vertexShader = (VulkanShaderModule*)desc.vertexShader;
-		VulkanShaderModule* fragmentShader = (VulkanShaderModule*)desc.fragmentShader;
+		ShaderModule* vertexShader = (ShaderModule*)desc.vertexShader;
+		ShaderModule* fragmentShader = (ShaderModule*)desc.fragmentShader;
 
 		shaderStages[0] = {};
 		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -157,16 +157,16 @@ namespace CE::Vulkan
 		rasterizerCI.lineWidth = 1.0f;
 		switch (desc.cullMode)
 		{
-		case RHI::CULL_MODE_NONE:
+		case RHI::CullMode::None:
 			rasterizerCI.cullMode = VK_CULL_MODE_NONE;
 			break;
-		case RHI::CULL_MODE_BACK:
+		case RHI::CullMode::Back:
 			rasterizerCI.cullMode = VK_CULL_MODE_BACK_BIT;
 			break;
-		case RHI::CULL_MODE_FRONT:
+		case RHI::CullMode::Front:
 			rasterizerCI.cullMode = VK_CULL_MODE_FRONT_BIT;
 			break;
-		case RHI::CULL_MODE_ALL:
+		case RHI::CullMode::All:
 			rasterizerCI.cullMode = VK_CULL_MODE_FRONT_AND_BACK;
 			break;
 		}
@@ -247,7 +247,7 @@ namespace CE::Vulkan
 		setLayouts.Clear();
 		setLayoutBindingsMap.Clear();
 
-		for (int i = 0; i < desc.shaderResourceGroups.GetSize(); i++)
+		/*for (int i = 0; i < desc.shaderResourceGroups.GetSize(); i++)
 		{
 			auto srg = desc.shaderResourceGroups[i];
 
@@ -309,7 +309,7 @@ namespace CE::Vulkan
 			}
 
 			setLayouts.Add(setLayout);
-		}
+		}*/
 
 		pipelineLayoutCI.setLayoutCount = setLayouts.GetSize();
 		pipelineLayoutCI.pSetLayouts = setLayouts.GetData();

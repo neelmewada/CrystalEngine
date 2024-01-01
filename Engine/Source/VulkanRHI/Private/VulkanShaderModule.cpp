@@ -2,9 +2,9 @@
 #include "VulkanRHIPrivate.h"
 #include "VulkanShaderModule.h"
 
-namespace CE
+namespace CE::Vulkan
 {
-	VulkanShaderModule::VulkanShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection)
+	ShaderModule::ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection)
 		: device(device), stage(desc.stage), name(desc.name)
 	{
 		VkShaderModuleCreateInfo shaderCI{};
@@ -21,7 +21,7 @@ namespace CE
 		variableBindingMap = shaderReflection.GetVariableNameMap();
 	}
 
-	VulkanShaderModule::~VulkanShaderModule()
+	ShaderModule::~ShaderModule()
 	{
 		if (shaderModule != nullptr)
 		{

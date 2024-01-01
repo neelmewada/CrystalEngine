@@ -1,14 +1,14 @@
 #pragma once
 
-namespace CE
+namespace CE::Vulkan
 {
     
-	class VulkanShaderModule : public RHI::ShaderModule
+	class ShaderModule : public RHI::ShaderModule
 	{
 	public:
 
-		VulkanShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection);
-		~VulkanShaderModule();
+		ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection);
+		~ShaderModule();
 
 		Name GetName() override
 		{

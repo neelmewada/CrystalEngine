@@ -4,11 +4,6 @@
 
 #include "VulkanRHIPrivate.h"
 
-#include "VulkanRenderPass.h"
-#include "VulkanViewport.h"
-#include "VulkanSwapChain.h"
-#include "VulkanTexture.h"
-
 #include "PAL/Common/VulkanPlatform.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -24,10 +19,10 @@
 
 #include "misc/cpp/imgui_stdlib.h"
 
-namespace CE
+namespace CE::Vulkan
 {
 
-    bool VulkanGraphicsCommandList::InitImGui(RHI::FontPreloadConfig* preloadFontConfig, Array<void*>& outFontHandles)
+    bool GraphicsCommandList::InitImGui(RHI::FontPreloadConfig* preloadFontConfig, Array<void*>& outFontHandles)
     {
 		// ImGui is supported only on viewport command lists
 		if (!IsViewportTarget())
@@ -157,7 +152,7 @@ namespace CE
         return true;
     }
 
-    void VulkanGraphicsCommandList::ShutdownImGui()
+    void GraphicsCommandList::ShutdownImGui()
     {
         PlatformApplication::Get()->RemoveMessageHandler(this);
 
@@ -175,7 +170,7 @@ namespace CE
         isImGuiEnabled = false;
     }
 
-    void VulkanGraphicsCommandList::ImGuiNewFrame()
+    void GraphicsCommandList::ImGuiNewFrame()
     {
         ImGui_ImplVulkan_NewFrame();
 		if (IsViewportTarget())
@@ -183,7 +178,7 @@ namespace CE
         ImGui::NewFrame();
     }
 
-    void VulkanGraphicsCommandList::ImGuiRender()
+    void GraphicsCommandList::ImGuiRender()
     {
         ImGui::Render();
         ImDrawData* imGuiDrawData = ::ImGui::GetDrawData();
@@ -194,7 +189,7 @@ namespace CE
         }
     }
 
-    void VulkanGraphicsCommandList::ImGuiPlatformUpdate()
+    void GraphicsCommandList::ImGuiPlatformUpdate()
     {
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 
@@ -206,7 +201,7 @@ namespace CE
         }
     }
 
-    void VulkanGraphicsCommandList::ProcessNativeEvents(void* nativeEvent)
+    void GraphicsCommandList::ProcessNativeEvents(void* nativeEvent)
     {
         if (isImGuiEnabled)
         {

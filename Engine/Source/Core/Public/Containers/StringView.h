@@ -60,7 +60,7 @@ namespace CE
 		bool operator==(const String& rhs);
 		bool operator!=(const String& rhs);
 
-		inline char operator[](s32 index)
+		inline char operator[](int index)
 		{
 			return Impl[index];
 		}

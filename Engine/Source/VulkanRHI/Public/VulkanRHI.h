@@ -14,7 +14,7 @@ namespace CE::Vulkan
 {
     class VulkanDevice;
     class VulkanViewport;
-    class VulkanGraphicsCommandList;
+    class GraphicsCommandList;
     class VulkanRenderTarget;
 
     class VULKANRHI_API VulkanRHIModule : public PluginModule
@@ -82,6 +82,11 @@ namespace CE::Vulkan
 
         // - Resources -
 
+		virtual RHI::MemoryHeap* AllocateMemoryHeap(const MemoryHeapDescriptor& desc) override;
+		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) override;
+
+		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, BufferMemoryRequirements& outRequirements) override;
+
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDesc& bufferDesc) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
         
@@ -97,12 +102,12 @@ namespace CE::Vulkan
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection) override;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
 
-		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) override;
+		//virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) override;
 		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) override;
 
 		// - Pipeline State -
 
-		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc) override;
+		//virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc) override;
 		virtual void DestroyPipelineState(RHI::IPipelineState* pipelineState) override;
 
 		// - Utilities -
@@ -111,8 +116,8 @@ namespace CE::Vulkan
 
     protected:
 
-        bool ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport);
-        bool ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget);
+        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanViewport* viewport);
+        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanRenderTarget* renderTarget);
 
     private:
         VkInstance vkInstance = nullptr;

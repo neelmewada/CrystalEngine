@@ -21,7 +21,7 @@ namespace CE::Vulkan
         else if (maxBoundDescriptorSets == 5)
         {
             srgSlots.Add({ RHI::SRGType::PerScene, 0 });
-            srgSlots.Add({ RHI::SRGType::PerView, 1 });
+            srgSlots.Add({ RHI::SRGType::PerView, 0 });
             srgSlots.Add({ RHI::SRGType::PerPass, 1 });
             srgSlots.Add({ RHI::SRGType::PerSubPass, 1 });
             srgSlots.Add({ RHI::SRGType::PerMaterial, 2 });
@@ -52,7 +52,7 @@ namespace CE::Vulkan
         for (const SRGSlot& slot : srgSlots)
         {
             builtinSrgNameToDescriptorSet[slot.srgType] = slot;
-            descriptorSetToSrgs[slot.set].Add(slot);
+			setNumberToSrgs[slot.set].Add(slot);
         }
 	}
 
@@ -83,7 +83,7 @@ namespace CE::Vulkan
 			return false;
 
 		int set = builtinSrgNameToDescriptorSet[srgType].set;
-		const auto& array = descriptorSetToSrgs[set];
+		const auto& array = setNumberToSrgs[set];
 		if (array.IsEmpty())
 			return false;
 
@@ -107,7 +107,7 @@ namespace CE::Vulkan
 		case ShaderResourceType::RWTexture2D:
 		case ShaderResourceType::RWTexture3D:
 			return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		case ShaderResourceType::InputAttachment:
+		case ShaderResourceType::SubpassInput:
 			return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
 		case ShaderResourceType::SamplerState:
 			return VK_DESCRIPTOR_TYPE_SAMPLER;
@@ -123,6 +123,8 @@ namespace CE::Vulkan
 		this->srgLayout = srgLayout;
 		this->srgManager = device->GetShaderResourceManager();
 		pool = device->GetDescriptorPool();
+
+		setNumber = srgManager->GetDescriptorSetNumber(srgType);
     }
 
     ShaderResourceGroup::~ShaderResourceGroup()
@@ -149,6 +151,7 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::Buffer* buffer, SIZE_T offset, SIZE_T size)
 	{
+		// Cannot bind new buffer once SRG is compiled.
 		if (isCompiled)
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -160,7 +163,7 @@ namespace CE::Vulkan
 		bufferWrite.range = size > 0 ? size : buffer->GetBufferSize();
 		
 		int bindingSlot = bindingSlotsByVariableName[name];
-		buffersBoundBySlot[bindingSlot] = bufferWrite;
+		bufferInfosBoundBySlot[bindingSlot] = bufferWrite;
 		
 		return true;
 	}
@@ -212,6 +215,7 @@ namespace CE::Vulkan
 		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &layoutCI, nullptr, &setLayout);
 		if (result != VK_SUCCESS)
 		{
+			failed = true;
 			CE_LOG(Error, All, "Failed to create vulkan descriptor set layout");
 			return;
 		}
@@ -219,6 +223,7 @@ namespace CE::Vulkan
 		auto allocatedSets = pool->Allocate(1, { setLayout }, allocPool);
 		if (allocatedSets.IsEmpty())
 		{
+			failed = true;
 			CE_LOG(Error, All, "Failed to allocate descriptor set");
 			return;
 		}
@@ -246,11 +251,14 @@ namespace CE::Vulkan
 	void ShaderResourceGroup::CompileBindings()
 	{
 		Array<VkWriteDescriptorSet> writes{};
-		writes.Resize(buffersBoundBySlot.GetSize() + imagesBoundBySlot.GetSize());
+		writes.Resize(bufferInfosBoundBySlot.GetSize() + imageInfosBoundBySlot.GetSize());
 		int idx = 0;
 
-		for (const auto& [slot, bufferWrite] : buffersBoundBySlot)
+		for (const auto& [slot, bufferWrite] : bufferInfosBoundBySlot)
 		{
+			if (!variableBindingsBySlot.KeyExists(slot))
+				continue;
+
 			VkDescriptorSetLayoutBinding& variable = variableBindingsBySlot[slot];
 
 			VkWriteDescriptorSet& write = writes[idx++];
@@ -263,8 +271,11 @@ namespace CE::Vulkan
 			write.pBufferInfo = &bufferWrite;
 		}
 
-		for (const auto& [slot, imageWrite] : imagesBoundBySlot)
+		for (const auto& [slot, imageWrite] : imageInfosBoundBySlot)
 		{
+			if (!variableBindingsBySlot.KeyExists(slot))
+				continue;
+
 			VkDescriptorSetLayoutBinding& variable = variableBindingsBySlot[slot];
 
 			VkWriteDescriptorSet& write = writes[idx++];

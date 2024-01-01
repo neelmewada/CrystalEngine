@@ -38,6 +38,7 @@ namespace CE::Vulkan
 		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
 
 		friend class VulkanGraphicsPipeline;
+		friend class GraphicsCommandList;
 	};
 
     class VulkanPipeline : public RHI::IPipelineState
@@ -55,7 +56,7 @@ namespace CE::Vulkan
 		List<VkPushConstantRange> pushConstantRanges{};
 		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
 
-		friend class VulkanGraphicsCommandList;
+		friend class GraphicsCommandList;
 		friend class VulkanPipelineLayout;
     };
 
@@ -91,7 +92,7 @@ namespace CE::Vulkan
 
 	private:
 
-		friend class VulkanGraphicsCommandList;
+		friend class GraphicsCommandList;
 		friend class VulkanPipelineLayout;
 	};
     

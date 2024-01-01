@@ -59,6 +59,7 @@ namespace CE::RHI
 		FIELD()
 		Array<SRGVariableDesc> variables{};
 
+		/// @brief Merge 'other' SRG layout into 'this' SRG layout.
 		void Merge(const ShaderResourceGroupLayout& other)
 		{
 			if ((int)other.srgType > (int)srgType)
