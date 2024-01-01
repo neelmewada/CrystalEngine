@@ -7,7 +7,7 @@ namespace CE::Vulkan
     class VulkanTexture : public RHI::Texture
     {
     public:
-        VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc);
+        VulkanTexture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
         virtual ~VulkanTexture();
 
         virtual void* GetHandle() override
@@ -34,10 +34,7 @@ namespace CE::Vulkan
 		{
 			return aspectMask;
 		}
-
-        virtual u32 GetWidth() override;
-        virtual u32 GetHeight() override;
-        virtual u32 GetDepth() override;
+        
         virtual u32 GetBytesPerChannel() override;
         virtual u32 GetNumberOfChannels() override;
 
@@ -56,13 +53,7 @@ namespace CE::Vulkan
         VkImage image = nullptr;
         VkDeviceMemory imageMemory = nullptr;
         VkImageView imageView = nullptr;
-        RHI::Dimension dimension{};
-
-        Name name = "";
-        u32 width = 0, height = 0, depth = 0;
-        u32 sampleCount = 0;
-        u32 mipLevels = 1;
-        RHI::TextureFormat format{};
+        
         VkFormat vkFormat{};
 		VkImageLayout vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageAspectFlags aspectMask{};

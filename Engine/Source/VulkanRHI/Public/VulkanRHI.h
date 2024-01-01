@@ -86,6 +86,8 @@ namespace CE::Vulkan
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) override;
 
 		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements) override;
+        
+        virtual void GetTextureMemoryRequirements(const ImageDescriptor& imageDesc, ResourceMemoryRequirements& outRequirements) override;
 
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) override;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) override;

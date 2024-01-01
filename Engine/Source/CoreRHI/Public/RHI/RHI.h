@@ -72,6 +72,8 @@ namespace CE::RHI
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) = 0;
 
 		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements) = 0;
+        
+        virtual void GetTextureMemoryRequirements(const ImageDescriptor& imageDesc, ResourceMemoryRequirements& outRequirements) = 0;
 
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc) = 0;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;

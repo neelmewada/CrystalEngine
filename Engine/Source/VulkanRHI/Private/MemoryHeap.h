@@ -13,7 +13,7 @@ namespace CE::Vulkan
 
 		bool SupportsOptimalImageTiling();
 
-		bool AllocateBuffer(Buffer* buffer, VkDeviceSize offset);
+		bool BindBuffer(Buffer* buffer, VkDeviceSize offset);
 
 	private:
 

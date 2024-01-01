@@ -152,8 +152,81 @@ namespace CE::Vulkan
 		device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
 	}
 
+    void VulkanRHI::GetTextureMemoryRequirements(const ImageDescriptor& imageDesc, ResourceMemoryRequirements& outRequirements)
+    {
+        VkImageCreateInfo imageCI{};
+        imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        switch (desc.dimension)
+        {
+        case RHI::Dimension::Dim2D:
+            imageCI.imageType = VK_IMAGE_TYPE_2D;
+            break;
+        case RHI::Dimension::Dim3D:
+            imageCI.imageType = VK_IMAGE_TYPE_3D;
+            break;
+        case RHI::Dimension::Dim1D:
+            imageCI.imageType = VK_IMAGE_TYPE_1D;
+            break;
+        case RHI::Dimension::DimCUBE:
+            imageCI.imageType = VK_IMAGE_TYPE_2D;
+        }
+        
+        imageCI.extent.width = width;
+        imageCI.extent.height = height;
+        imageCI.extent.depth = depth;
+        
+        imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
+        imageCI.format = RHITextureFormatToVkFormat(this->format);
+        imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-    VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDesc& desc)
+        this->vkFormat = imageCI.format;
+        
+        if (EnumHasAnyFlags(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
+        {
+            imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        }
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Color))
+        {
+            imageCI.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        }
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::DepthStencil))
+        {
+            imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        }
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::SubpassInput))
+        {
+            imageCI.usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+        }
+        
+        imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
+        imageCI.mipLevels = mipLevels;
+        imageCI.arrayLayers = 1;
+        imageCI.flags = 0;
+
+        imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageCI.queueFamilyIndexCount = 0;
+        imageCI.pQueueFamilyIndices = nullptr;
+        
+        VkImage tempImage = nullptr;
+        
+        if (vkCreateImage(device->GetHandle(), &imageCI, nullptr, &tempImage) != VK_SUCCESS)
+        {
+            return;
+        }
+        
+        VkMemoryRequirements memoryRequirements{};
+        vkGetImageMemoryRequirements(device->GetHandle(), tempImage, &memoryRequirements);
+        
+        outRequirements.size = memoryRequirements.size;
+        outRequirements.offsetAlignment = memoryRequirements.alignment;
+        outRequirements.flags = memoryRequirements.memoryTypeBits;
+        
+        vkDestroyImage(device->GetHandle(), tempImage, nullptr);
+    }
+
+
+    VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDescriptor& desc)
         : device(device)
     {
         this->name = desc.name;
@@ -186,7 +259,7 @@ namespace CE::Vulkan
         imageCI.extent.width = width;
         imageCI.extent.height = height;
         imageCI.extent.depth = depth;
-
+        
         imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageCI.format = RHITextureFormatToVkFormat(this->format);
         imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -309,14 +382,23 @@ namespace CE::Vulkan
 
     VulkanTexture::~VulkanTexture()
     {
-        vkDestroyImageView(device->GetHandle(), imageView, nullptr);
-        imageView = nullptr;
+        if (imageView != nullptr)
+        {
+            vkDestroyImageView(device->GetHandle(), imageView, nullptr);
+            imageView = nullptr;
+        }
 
-        vkFreeMemory(device->GetHandle(), imageMemory, nullptr);
-        imageMemory = nullptr;
+        if (imageMemory != nullptr)
+        {
+            vkFreeMemory(device->GetHandle(), imageMemory, nullptr);
+            imageMemory = nullptr;
+        }
 
-        vkDestroyImage(device->GetHandle(), image, nullptr);
-        image = nullptr;
+        if (image != nullptr)
+        {
+            vkDestroyImage(device->GetHandle(), image, nullptr);
+            image = nullptr;
+        }
     }
 
     u32 VulkanTexture::GetWidth()
@@ -467,7 +549,7 @@ namespace CE::Vulkan
 			height,
 			depth
 		};
-
+        
 		vkCmdCopyImageToBuffer(cmdBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstBuffer->GetBuffer(), 1, &region);
 
 		device->EndSingleUseCommandBuffer(cmdBuffer);

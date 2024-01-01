@@ -24,11 +24,24 @@ namespace CE::RHI
 		virtual ~Texture() = default;
 
 		virtual void* GetHandle() = 0;
-
-		virtual u32 GetWidth() = 0;
-		virtual u32 GetHeight() = 0;
-		virtual u32 GetDepth() = 0;
-		virtual u32 GetBytesPerChannel() = 0;
+        
+        inline u32 GetWidth() const
+        {
+            return width;
+        }
+        
+		inline u32 GetHeight() const
+        {
+            return height;
+        }
+        
+		inline u32 GetDepth() const
+        {
+            return depth;
+        }
+        
+		inline u32 GetBytesPerChannel() = 0;
+        
 		virtual u32 GetNumberOfChannels() = 0;
 
 		virtual void UploadData(const void* pixels, u64 dataSize) = 0;

@@ -63,12 +63,15 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to allocate memory of size {}: {}", heapSize, debugName);
 			return;
 		}
-
 	}
 
 	MemoryHeap::~MemoryHeap()
 	{
-		
+		if (allocation != nullptr)
+        {
+            vkFreeMemory(device->GetHandle(), allocation, nullptr);
+            allocation = nullptr;
+        }
 	}
 
 	bool MemoryHeap::SupportsOptimalImageTiling()
@@ -78,7 +81,7 @@ namespace CE::Vulkan
 		return true;
 	}
 
-	bool MemoryHeap::AllocateBuffer(Buffer* buffer, VkDeviceSize offset)
+	bool MemoryHeap::BindBuffer(Buffer* buffer, VkDeviceSize offset)
 	{
 		auto result = vkBindBufferMemory(device->GetHandle(), buffer->GetBuffer(), allocation, offset);
 		if (result != VK_SUCCESS)

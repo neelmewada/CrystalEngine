@@ -54,7 +54,7 @@ namespace CE::Vulkan
 
 		VkMemoryRequirements bufferRequirements{};
 		vkGetBufferMemoryRequirements(device->GetHandle(), tempBuffer, &bufferRequirements);
-		outRequirements.bufferSize = bufferRequirements.size;
+		outRequirements.size = bufferRequirements.size;
 		outRequirements.offsetAlignment = bufferRequirements.alignment;
 		outRequirements.flags = bufferRequirements.memoryTypeBits;
 		
@@ -126,6 +126,7 @@ namespace CE::Vulkan
 		bufferSize = desc.bufferSize;
 		heapType = memoryHeap->GetHeapType();
 		structureByteStride = desc.structureByteStride;
+        bufferMemory = nullptr;
 
 		VkBufferCreateInfo bufferCI{};
 		bufferCI.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -142,8 +143,8 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
 			return;
 		}
-		
-		bool success = memoryHeap->AllocateBuffer(this, memoryOffset);
+        
+		bool success = memoryHeap->BindBuffer(this, memoryOffset);
 		if (!success)
 		{
 			return;
