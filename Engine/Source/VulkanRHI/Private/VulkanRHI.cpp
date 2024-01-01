@@ -395,10 +395,15 @@ namespace CE::Vulkan
 		delete memoryHeap;
 	}
 
-	RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDesc& bufferDesc)
+	RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc)
     {
         return new Buffer(device, bufferDesc);
     }
+
+	RHI::Buffer* VulkanRHI::CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc)
+	{
+		return new Buffer(device, bufferDesc, memoryDesc);
+	}
 
     void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
     {

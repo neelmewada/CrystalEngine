@@ -64,12 +64,11 @@ namespace CE::Vulkan
 			return;
 		}
 
-		freeRanges.Add(Range(0, heapSize));
 	}
 
 	MemoryHeap::~MemoryHeap()
 	{
-
+		
 	}
 
 	bool MemoryHeap::SupportsOptimalImageTiling()
@@ -77,12 +76,6 @@ namespace CE::Vulkan
 		if (memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
 			return false;
 		return true;
-	}
-
-	bool MemoryHeap::Allocate(u64 size, u64 alignment)
-	{
-		
-		return false;
 	}
 
 	bool MemoryHeap::AllocateBuffer(Buffer* buffer, VkDeviceSize offset)

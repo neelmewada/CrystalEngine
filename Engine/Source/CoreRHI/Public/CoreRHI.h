@@ -18,6 +18,7 @@
 #include "RHI/BufferView.h"
 #include "RHI/Buffer.h"
 #include "RHI/Texture.h"
+#include "RHI/Image.h"
 #include "RHI/CommandList.h"
 #include "RHI/Sampler.h"
 #include "RHI/PipelineState.h"

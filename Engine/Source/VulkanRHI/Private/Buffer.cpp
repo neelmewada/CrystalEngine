@@ -33,7 +33,7 @@ namespace CE::Vulkan
 		return bufferUsageFlags;
 	}
 
-	void VulkanRHI::GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, BufferMemoryRequirements& outRequirements)
+	void VulkanRHI::GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements)
 	{
 		VkBuffer tempBuffer = nullptr;
 		VkBufferCreateInfo tempBufferCI{};
@@ -116,13 +116,15 @@ namespace CE::Vulkan
 		vkBindBufferMemory(device->GetHandle(), buffer, bufferMemory, 0);
 	}
 
-	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDesc& desc, const RHI::BufferMemoryDescriptor& memoryDesc)
+	Buffer::Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc)
 		: device(device)
 		, memoryHeap((Vulkan::MemoryHeap*)memoryDesc.memoryHeap)
 		, memoryOffset(memoryDesc.memoryOffset)
 	{
+		name = desc.name;
 		bindFlags = desc.bindFlags;
 		bufferSize = desc.bufferSize;
+		heapType = memoryHeap->GetHeapType();
 		structureByteStride = desc.structureByteStride;
 
 		VkBufferCreateInfo bufferCI{};
@@ -132,7 +134,7 @@ namespace CE::Vulkan
 		bufferCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		bufferCI.queueFamilyIndexCount = 0;
 		bufferCI.pQueueFamilyIndices = nullptr;
-
+		
 		bufferCI.usage = VkBufferUsageFlagsFromBufferBindFlags(desc.bindFlags) | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
 		if (vkCreateBuffer(device->GetHandle(), &bufferCI, nullptr, &buffer) != VK_SUCCESS)
@@ -140,11 +142,12 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create buffer with name {} of size {} bytes", name, bufferSize);
 			return;
 		}
-
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);
 		
-		
+		bool success = memoryHeap->AllocateBuffer(this, memoryOffset);
+		if (!success)
+		{
+			return;
+		}
 	}
 
 	Buffer::~Buffer()

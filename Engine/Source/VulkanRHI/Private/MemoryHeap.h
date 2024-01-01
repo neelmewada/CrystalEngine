@@ -13,8 +13,6 @@ namespace CE::Vulkan
 
 		bool SupportsOptimalImageTiling();
 
-		bool Allocate(u64 size, u64 alignment);
-
 		bool AllocateBuffer(Buffer* buffer, VkDeviceSize offset);
 
 	private:
@@ -25,7 +23,6 @@ namespace CE::Vulkan
 		};
 
 		Array<Range> allocatedRanges{};
-		Array<Range> freeRanges{};
 		VkDeviceMemory allocation{};
 
 		VulkanDevice* device = nullptr;

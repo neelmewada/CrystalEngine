@@ -9,7 +9,7 @@ namespace CE::Vulkan
     {
     public:
 		Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc);
-		Buffer(VulkanDevice* device, const RHI::BufferDesc& desc, const RHI::BufferMemoryDescriptor& memoryDesc);
+		Buffer(VulkanDevice* device, const RHI::BufferDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
         virtual ~Buffer();
 
         virtual void* GetHandle() override

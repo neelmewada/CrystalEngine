@@ -18,14 +18,14 @@ namespace CE::RHI
 
 	class MemoryHeap;
 
-	struct BufferMemoryRequirements
+	struct ResourceMemoryRequirements
 	{
 		SIZE_T bufferSize = 0;
 		SIZE_T offsetAlignment = 0;
 		u32 flags = 0;
 	};
 
-	struct BufferMemoryDescriptor
+	struct ResourceMemoryDescriptor
 	{
 		RHI::MemoryHeap* memoryHeap = nullptr;
 		u64 memoryOffset = 0;
