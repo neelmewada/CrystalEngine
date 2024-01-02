@@ -150,6 +150,17 @@ namespace CE::Vulkan
 		// Fetch memory properties
 		vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
 
+		isUnifiedMemory = true;
+
+		for (int i = 0; i < memoryProperties.memoryHeapCount; i++)
+		{
+			if (memoryProperties.memoryHeaps[0].flags != VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+			{
+				isUnifiedMemory = false;
+				break;
+			}
+		}
+
 		vkGetPhysicalDeviceProperties(gpu, &gpuProperties);
 		gpuMetaData.localMemorySize = GetPhysicalDeviceLocalMemory(gpu);
 

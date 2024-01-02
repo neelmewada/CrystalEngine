@@ -4,6 +4,7 @@ namespace CE::Vulkan
 {
 	class VulkanDescriptorSet;
 	class ShaderResourceGroup;
+	class MergedShaderResourceGroup;
 
 	class ShaderResourceManager
 	{
@@ -23,6 +24,12 @@ namespace CE::Vulkan
 
 		VkDescriptorType GetDescriptorType(ShaderResourceType shaderResourceType, bool usesDynamicOffset = false);
 
+		MergedShaderResourceGroup* FindOrCreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs);
+
+		MergedShaderResourceGroup* CreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs);
+		void RemoveMergedSRG(MergedShaderResourceGroup* srg);
+		void OnSRGDestroyed(ShaderResourceGroup* srg);
+
 	private:
         
         struct SRGSlot
@@ -31,15 +38,22 @@ namespace CE::Vulkan
             int set;
         };
         
+		VulkanDevice* device = nullptr;
         Array<SRGSlot> srgSlots{};
         
-        HashMap<RHI::SRGType, SRGSlot> builtinSrgNameToDescriptorSet{};
+        HashMap<RHI::SRGType, SRGSlot> srgTypeToDescriptorSet{};
 		HashMap<int, Array<SRGSlot>> setNumberToSrgs{};
 		
 		u32 maxBoundDescriptorSets = 0;
 
-		
+		HashMap<SIZE_T, MergedShaderResourceGroup*> mergedSRGsByHash{};
 
+		/// @brief HashMap of Merged SRG by each source SRG. Used to manage lifetime of Merged SRG.
+		/// If any one of the source SRG that comprises the Merged SRG is destroyed, the Merged SRG should be destroyed.
+		HashMap<Vulkan::ShaderResourceGroup*, Array<MergedShaderResourceGroup*>> mergedSRGsBySourceSRG{};
+
+		friend class ShaderResourceGroup;
+		friend class MergedShaderResourceGroup;
 	};
 
 	class ShaderResourceGroup : public RHI::ShaderResourceGroup
@@ -49,6 +63,8 @@ namespace CE::Vulkan
 		ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupLayout& srgLayout);
 
 		virtual ~ShaderResourceGroup();
+
+		virtual bool IsMerged() const { return false; }
 
 		bool Bind(Name name, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) override;
 		
@@ -70,7 +86,7 @@ namespace CE::Vulkan
 
 		void Destroy();
 
-		void CompileBindings();
+		void UpdateBindings();
 
 		bool failed = false;
 
@@ -92,10 +108,11 @@ namespace CE::Vulkan
 		HashMap<int, VkDescriptorBufferInfo> bufferInfosBoundBySlot{};
 		HashMap<int, VkDescriptorImageInfo> imageInfosBoundBySlot{};
 
-		friend class VulkanGraphicsPipeline;
+		friend class GraphicsPipelineState;
 		friend class GraphicsCommandList;
         friend class VulkanDescriptorSet;
 		friend class MergedShaderResourceGroup;
+		friend class ShaderResourceManager;
 	};
 
 } // namespace CE

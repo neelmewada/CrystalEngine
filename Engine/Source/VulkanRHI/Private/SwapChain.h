@@ -11,7 +11,7 @@ namespace CE {
 namespace CE::Vulkan
 {
     class VulkanDevice;
-    class VulkanTexture;
+    class Texture;
 
     struct VulkanSwapChainImage
     {
@@ -73,11 +73,11 @@ namespace CE::Vulkan
         u32 height = 0;
 
         Array<VulkanSwapChainImage> swapChainColorImages{};
-        VulkanTexture* swapChainDepthImage{};
+        Texture* swapChainDepthImage{};
 
         friend struct VulkanRenderTargetLayout;
         friend class VulkanFrameBuffer;
-        friend class VulkanViewport;
+        friend class Viewport;
     };
 
 } // namespace CE

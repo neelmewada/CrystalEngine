@@ -13,9 +13,9 @@ typedef VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 namespace CE::Vulkan
 {
     class VulkanDevice;
-    class VulkanViewport;
+    class Viewport;
     class GraphicsCommandList;
-    class VulkanRenderTarget;
+    class RenderTarget;
 
     class VULKANRHI_API VulkanRHIModule : public PluginModule
     {
@@ -28,6 +28,15 @@ namespace CE::Vulkan
         virtual void RegisterTypes() override;
         
     };
+
+	namespace Limits
+	{
+#if PAL_TRAIT_VULKAN_LIMITED_DESCRIPTOR_SETS
+		constexpr u32 MaxDescriptorSetCount = 4;
+#else
+		constexpr u32 MaxDescriptorSetCount = 8;
+#endif
+	}
 
     class VULKANRHI_API VulkanRHI : public RHI::DynamicRHI
     {
@@ -87,22 +96,22 @@ namespace CE::Vulkan
 
 		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements) override;
         
-        virtual void GetTextureMemoryRequirements(const ImageDescriptor& imageDesc, ResourceMemoryRequirements& outRequirements) override;
+        virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, ResourceMemoryRequirements& outRequirements) override;
 
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) override;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
         
-        virtual RHI::Texture* CreateTexture(const RHI::TextureDesc& textureDesc) override;
+        virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc) override;
         virtual void DestroyTexture(RHI::Texture* texture) override;
         
-        virtual RHI::Sampler* CreateSampler(const RHI::SamplerDesc& samplerDesc) override;
+        virtual RHI::Sampler* CreateSampler(const RHI::SamplerDescriptor& samplerDesc) override;
         virtual void DestroySampler(RHI::Sampler* sampler) override;
         
         virtual void* AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler) override;
         virtual void RemoveImGuiTexture(void* imguiTexture) override; 
 
-		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection) override;
+		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection) override;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
 
 		//virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) override;
@@ -110,7 +119,7 @@ namespace CE::Vulkan
 
 		// - Pipeline State -
 
-		//virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc) override;
+		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) override;
 		virtual void DestroyPipelineState(RHI::IPipelineState* pipelineState) override;
 
 		// - Utilities -
@@ -119,8 +128,8 @@ namespace CE::Vulkan
 
     protected:
 
-        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanViewport* viewport);
-        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanRenderTarget* renderTarget);
+        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, Viewport* viewport);
+        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, RenderTarget* renderTarget);
 
     private:
         VkInstance vkInstance = nullptr;

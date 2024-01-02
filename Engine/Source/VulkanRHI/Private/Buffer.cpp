@@ -90,11 +90,13 @@ namespace CE::Vulkan
 		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);
 
 		VkMemoryPropertyFlags memoryFlags{};
-		if (heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 			if (heapType == RHI::MemoryHeapType::ReadBack)
 				memoryFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
+			if (device->IsUnifiedMemoryArchitecture())
+				memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		}
 		else
 		{
@@ -189,7 +191,7 @@ namespace CE::Vulkan
 
 	void Buffer::UploadData(const RHI::BufferData& bufferData)
 	{
-		if (heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			// CPU Visible Memory
 			void* ptr;
@@ -212,7 +214,7 @@ namespace CE::Vulkan
 		*outData = nullptr;
 		*outDataSize = 0;
 
-		if (heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			// Shared memory
 			*outDataSize = bufferSize;
@@ -318,7 +320,7 @@ namespace CE::Vulkan
 		stagingBufferDesc.bufferSize = bufferData.dataSize;
 		stagingBufferDesc.structureByteStride = bufferData.dataSize;
 
-		auto stagingBuffer = new Buffer(device, stagingBufferDesc);
+		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
 
 		stagingBuffer->UploadData(stagingBufferData);
 

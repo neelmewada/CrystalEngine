@@ -9,13 +9,13 @@ namespace CE {
 namespace CE::Vulkan
 {
 
-    class VulkanViewport : public RHI::Viewport
+    class Viewport : public RHI::Viewport
     {
     public:
-        VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
+        Viewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
             u32 width, u32 height,
             bool isFullscreen, const RHI::RenderTargetLayout& rtLayout);
-        virtual ~VulkanViewport();
+        virtual ~Viewport();
 
         virtual RHI::RenderTarget* GetRenderTarget() override;
 
@@ -55,7 +55,7 @@ namespace CE::Vulkan
         PlatformWindow* windowHandle = nullptr;
         VulkanRHI* vulkanRHI = nullptr;
         VulkanDevice* device = nullptr;
-        VulkanRenderTarget* renderTarget = nullptr;
+        RenderTarget* renderTarget = nullptr;
         VulkanSwapChain* swapChain = nullptr;
 
         Array<VulkanFrameBuffer*> frameBuffers{};

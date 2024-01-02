@@ -2,22 +2,29 @@
 
 namespace CE::Vulkan
 {
-    MergedShaderResourceGroup::MergedShaderResourceGroup(VulkanDevice* device, const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups)
+    MergedShaderResourceGroup::MergedShaderResourceGroup(VulkanDevice* device, const ArrayView<Vulkan::ShaderResourceGroup*>& shaderResourceGroups)
 		: ShaderResourceGroup(device)
     {
 		srgLayout = {};
 		int curSrgType = (int)RHI::SRGType::PerScene;
 		setNumber = -1;
 
-		for (RHI::ShaderResourceGroup* srg : shaderResourceGroups)
+		if (shaderResourceGroups.IsEmpty())
+			return;
+
+		int i = 0;
+		combinedSRGs.Resize(shaderResourceGroups.GetSize());
+
+		for (Vulkan::ShaderResourceGroup* srg : shaderResourceGroups)
 		{
-			Vulkan::ShaderResourceGroup* vulkanSRG = (Vulkan::ShaderResourceGroup*)srg;
+			combinedSRGs[i++] = srg;
+			srgManager->mergedSRGsBySourceSRG[srg].Add(this);
 
 			if (setNumber == -1)
 			{
-				setNumber = vulkanSRG->setNumber;
+				setNumber = srg->setNumber;
 			}
-			else if (setNumber != vulkanSRG->setNumber)
+			else if (setNumber != srg->setNumber)
 			{
 				failed = true;
 				CE_LOG(Error, All, "");
@@ -38,8 +45,19 @@ namespace CE::Vulkan
 			srgLayout.Merge(srg->GetLayout());
 
 			// Merge bindings
-			bufferInfosBoundBySlot.AddRange(vulkanSRG->bufferInfosBoundBySlot);
-			imageInfosBoundBySlot.AddRange(vulkanSRG->imageInfosBoundBySlot);
+			bufferInfosBoundBySlot.AddRange(srg->bufferInfosBoundBySlot);
+			imageInfosBoundBySlot.AddRange(srg->imageInfosBoundBySlot);
+		}
+
+		combinedSRGs.Sort([](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b)
+			{
+				return (int)a->GetSRGType() <= (int)b->GetSRGType();
+			});
+
+		mergedHash = (SIZE_T)combinedSRGs[0];
+		for (int i = 1; i < combinedSRGs.GetSize(); i++)
+		{
+			mergedHash = GetCombinedHash(mergedHash, (SIZE_T)combinedSRGs[i]);
 		}
 
 		this->srgType = (RHI::SRGType)curSrgType;
@@ -49,6 +67,8 @@ namespace CE::Vulkan
 
     MergedShaderResourceGroup::~MergedShaderResourceGroup()
     {
+		// Remove this SRG from SRGManager
+		srgManager->RemoveMergedSRG(this);
     }
 
 } // namespace CE::Vulkan

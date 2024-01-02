@@ -726,6 +726,54 @@ TEST(Container, ArrayView)
 		EXPECT_EQ(view[0], "str1");
 	}
 
+	// View into initializer list
+	{
+		ArrayView<int> view = ArrayView<int>({ 0, 1, 2, 3, 4 });
+
+		EXPECT_EQ(view.GetSize(), 5);
+		EXPECT_EQ(view[0], 0);
+		EXPECT_EQ(view[4], 4);
+	}
+
+	TEST_END;
+}
+
+TEST(Container, FixedArray)
+{
+	TEST_BEGIN;
+
+	FixedArray<String, 8> array = { "str0", "str1", "str2", "str3" };
+	EXPECT_EQ(array.GetSize(), 4);
+	EXPECT_EQ(array.GetCapacity(), 8);
+	EXPECT_EQ(array[0], "str0");
+	EXPECT_EQ(array[1], "str1");
+	EXPECT_EQ(array[2], "str2");
+	EXPECT_EQ(array[3], "str3");
+
+	EXPECT_EQ(array.GetFirst(), "str0");
+	EXPECT_EQ(array.GetLast(), "str3");
+
+	array.Insert("str_Insert", 2);
+	EXPECT_EQ(array.GetSize(), 5);
+	EXPECT_EQ(array[0], "str0");
+	EXPECT_EQ(array[1], "str1");
+	EXPECT_EQ(array[2], "str_Insert");
+	EXPECT_EQ(array[3], "str2");
+	EXPECT_EQ(array[4], "str3");
+
+	array.Remove("str_Insert");
+	EXPECT_EQ(array[0], "str0");
+	EXPECT_EQ(array[1], "str1");
+	EXPECT_EQ(array[2], "str2");
+	EXPECT_EQ(array[3], "str3");
+
+	int i = 0;
+	for (const String& item : array)
+	{
+		EXPECT_EQ(item, String("str") + i);
+		i++;
+	}
+
 	TEST_END;
 }
 

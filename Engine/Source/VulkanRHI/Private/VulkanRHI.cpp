@@ -198,7 +198,7 @@ namespace CE::Vulkan
 	RHI::RenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height,
         const RHI::RenderTargetLayout& rtLayout)
     {
-        return new VulkanRenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));
+        return new RenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));
     }
 
     void VulkanRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
@@ -208,7 +208,7 @@ namespace CE::Vulkan
 
     RHI::Viewport* VulkanRHI::CreateViewport(PlatformWindow* window, u32 width, u32 height, bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
     {
-        return new VulkanViewport(this, device, window, width, height, isFullscreen, rtLayout);
+        return new Viewport(this, device, window, width, height, isFullscreen, rtLayout);
     }
 
     void VulkanRHI::DestroyViewport(RHI::Viewport* viewport)
@@ -220,18 +220,18 @@ namespace CE::Vulkan
 
     RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::Viewport* viewport)
     {
-        return new GraphicsCommandList(this, device, (VulkanViewport*)viewport);
+        return new GraphicsCommandList(this, device, (Viewport*)viewport);
     }
 
     RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::RenderTarget* renderTarget)
     {
         if (renderTarget->IsViewportRenderTarget())
         {
-            auto vulkanViewport = ((VulkanRenderTarget*)renderTarget)->GetVulkanViewport();
+            auto vulkanViewport = ((RenderTarget*)renderTarget)->GetVulkanViewport();
             return CreateGraphicsCommandList(vulkanViewport);
         }
 
-        return new GraphicsCommandList(this, device, (VulkanRenderTarget*)renderTarget);
+        return new GraphicsCommandList(this, device, (RenderTarget*)renderTarget);
     }
 
     void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)
@@ -256,7 +256,7 @@ namespace CE::Vulkan
         return false;
     }
 
-    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
+    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, RenderTarget* renderTarget)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -299,7 +299,7 @@ namespace CE::Vulkan
         return true;
     }
 
-    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, VulkanViewport* viewport)
+    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, Viewport* viewport)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
@@ -347,14 +347,6 @@ namespace CE::Vulkan
 
         return true;
     }
-
-	void GraphicsCommandList::WaitForExecution()
-	{
-		constexpr u64 u64Max = NumericLimits<u64>::Max();
-		auto result = vkWaitForFences(device->GetHandle(),
-			renderFinishedFence.GetSize(), renderFinishedFence.GetData(),
-			VK_TRUE, u64Max);
-	}
 
     bool VulkanRHI::PresentViewport(RHI::GraphicsCommandList* viewportCommandList)
     {
@@ -410,7 +402,7 @@ namespace CE::Vulkan
         delete buffer;
     }
 
-    RHI::Texture* VulkanRHI::CreateTexture(const RHI::TextureDesc& textureDesc)
+    RHI::Texture* VulkanRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc)
     {
         return new Texture(device, textureDesc);
     }
@@ -420,7 +412,7 @@ namespace CE::Vulkan
         delete texture;
     }
 
-    RHI::Sampler* VulkanRHI::CreateSampler(const RHI::SamplerDesc& samplerDesc)
+    RHI::Sampler* VulkanRHI::CreateSampler(const RHI::SamplerDescriptor& samplerDesc)
     {
         return new VulkanSampler(device, samplerDesc);
     }
@@ -432,7 +424,7 @@ namespace CE::Vulkan
 
     void* VulkanRHI::AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler)
     {
-        return VulkanPlatform::AddImGuiTexture((VulkanTexture*)texture, (VulkanSampler*)sampler);
+        return VulkanPlatform::AddImGuiTexture((Texture*)texture, (VulkanSampler*)sampler);
     }
 
     void VulkanRHI::RemoveImGuiTexture(void* imguiTexture)
@@ -441,7 +433,7 @@ namespace CE::Vulkan
         VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
     }
 
-	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection)
+	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection)
 	{
 		return new Vulkan::ShaderModule(device, desc, shaderReflection);
 	}
@@ -457,6 +449,11 @@ namespace CE::Vulkan
 		delete shaderResourceGroup;
 	}
 
+
+	RHI::GraphicsPipelineState* VulkanRHI::CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc)
+	{
+		return nullptr;
+	}
 
 	void VulkanRHI::DestroyPipelineState(RHI::IPipelineState* pipelineState)
 	{

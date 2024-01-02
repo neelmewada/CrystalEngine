@@ -88,6 +88,12 @@ namespace CE
 		ArrayView()
 		{}
 
+		ArrayView(std::initializer_list<ElementType> list)
+			: first(list.begin()), _end(list.end())
+		{
+
+		}
+
 		ArrayView(const Array<ElementType>& array)
 			: first(array.begin()), _end(array.end())
 		{
@@ -124,11 +130,6 @@ namespace CE
 
 		}
 
-		inline ElementType& operator[](SIZE_T index)
-		{
-			return first[index];
-		}
-
 		inline const ElementType& operator[](SIZE_T index) const
 		{
 			return first[index];
@@ -161,9 +162,6 @@ namespace CE
 			return _end - 1;
 		}
 
-		Iterator begin() { return first; }
-		Iterator end() { return _end; }
-
 		const ConstIterator begin() const { return first; }
 		const ConstIterator end() const { return _end; }
 
@@ -172,8 +170,8 @@ namespace CE
 
 	private:
 
-		Iterator first = nullptr;
-		Iterator _end = nullptr;
+		ConstIterator first = nullptr;
+		ConstIterator _end = nullptr;
 
 	};
     

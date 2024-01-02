@@ -2,12 +2,34 @@
 
 namespace CE::RHI
 {
+	enum class VertexAttributeDataType
+	{
+		Undefined = 0,
+		Float, Float2, Float3, Float4,
+		Int, Int2, Int3, Int4
+	};
+	ENUM_CLASS(VertexAttributeDataType);
+
+	struct VertexAttributeDescriptor
+	{
+		VertexAttributeDataType dataType = VertexAttributeDataType::Undefined;
+		u32 location = 0;
+		u32 offset = 0;
+	};
+
+	struct ShaderStageDescriptor
+	{
+		RHI::ShaderModule* shaderModule = nullptr;
+		RHI::ShaderStage stage = RHI::ShaderStage::None;
+		Name entryPoint = "";
+	};
 
 	struct GraphicsPipelineDescriptor
 	{
-		u32 vertexSizeInBytes = 0;
-		Array<VertexAttribDesc> vertexAttribs{};
-		Array<ShaderStageDesc> otherStages{};
+		u32 vertexStrideInBytes = 0;
+		Array<VertexAttributeDescriptor> vertexAttribs{};
+		Array<ShaderStageDescriptor> shaderStages{};
+		Array<ShaderResourceGroupLayout> srgLayouts{};
 
 		CullMode cullMode = CullMode::Back;
 	};

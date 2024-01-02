@@ -18,10 +18,12 @@
 #include "ShaderResourceGroup.h"
 #include "MergedShaderResourceGroup.h"
 #include "MemoryHeap.h"
+#include "Sampler.h"
 #include "Texture.h"
 #include "Buffer.h"
 
-#include "VulkanPipeline.h"
+#include "ShaderModule.h"
+#include "PipelineState.h"
 
 #include "RenderTargetLayout.h"
 #include "RenderTarget.h"

@@ -27,12 +27,14 @@ namespace CE::RHI
 
 		virtual void BindPipeline(RHI::IPipelineState* pipeline) = 0;
 
-		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) = 0;
+		virtual void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& shaderResourceGroups) = 0;
 
-		virtual void CommitShaderResource(RHI::ShaderResourceGroup* shaderResourceGroup)
+		virtual void SetShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
 		{
-			CommitShaderResources({ shaderResourceGroup });
+			SetShaderResourceGroups({ shaderResourceGroup });
 		}
+
+		virtual void CommitShaderResourceGroups() = 0;
 
 		virtual void SetRootConstants(u8 size, const u8* data) = 0;
 

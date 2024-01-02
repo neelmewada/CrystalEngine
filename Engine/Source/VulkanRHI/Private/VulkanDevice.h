@@ -12,7 +12,7 @@ namespace CE::Vulkan
 {
     class VulkanQueue;
     class VulkanSwapChain;
-    class VulkanTexture;
+    class Texture;
 	class VulkanDescriptorPool;
 	class ShaderResourceManager;
 
@@ -53,6 +53,11 @@ namespace CE::Vulkan
         void SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
         // - Getters -
+
+		INLINE bool IsUnifiedMemoryArchitecture() const
+		{
+			return isUnifiedMemory;
+		}
 
 		INLINE bool IsOffscreenMode() const { return !surfaceSupported; }
 
@@ -101,6 +106,7 @@ namespace CE::Vulkan
         SurfaceSupportInfo FetchSurfaceSupportInfo(VkPhysicalDevice gpu);
 
         bool isInitialized = false;
+		bool isUnifiedMemory = false;
 
 		/// @brief Vulkan can be initialized without any Native windows (i.e. offscreen mode).
 		/// Potentially useful for command line applications/toos.
@@ -110,6 +116,7 @@ namespace CE::Vulkan
         VulkanRHI* vulkanRhi = nullptr;
 
 		VkPhysicalDeviceMemoryProperties memoryProperties{};
+		HashSet<int> ignoredHeapIndices{};
 
 		Array<String> supportedDeviceExtensions{};
 

@@ -4,11 +4,11 @@ namespace CE::Vulkan
 {
 	class VulkanDevice;
 
-    class VulkanTexture : public RHI::Texture
+    class Texture : public RHI::Texture
     {
     public:
-        VulkanTexture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
-        virtual ~VulkanTexture();
+        Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
+        virtual ~Texture();
 
         virtual void* GetHandle() override
         {

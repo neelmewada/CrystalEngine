@@ -1,10 +1,9 @@
 
 #include "VulkanRHIPrivate.h"
-#include "VulkanShaderModule.h"
 
 namespace CE::Vulkan
 {
-	ShaderModule::ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection)
+	ShaderModule::ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection)
 		: device(device), stage(desc.stage), name(desc.name)
 	{
 		VkShaderModuleCreateInfo shaderCI{};

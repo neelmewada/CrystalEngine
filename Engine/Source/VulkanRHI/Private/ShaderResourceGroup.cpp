@@ -4,6 +4,7 @@ namespace CE::Vulkan
 {
 
 	ShaderResourceManager::ShaderResourceManager(VulkanDevice* device)
+		: device(device)
 	{
 		const auto& limits = device->GetDeviceLimits();
 		maxBoundDescriptorSets =  limits.maxBoundDescriptorSets;
@@ -51,38 +52,43 @@ namespace CE::Vulkan
         
         for (const SRGSlot& slot : srgSlots)
         {
-            builtinSrgNameToDescriptorSet[slot.srgType] = slot;
+			srgTypeToDescriptorSet[slot.srgType] = slot;
 			setNumberToSrgs[slot.set].Add(slot);
         }
 	}
 
 	ShaderResourceManager::~ShaderResourceManager()
 	{
+		for (auto [hash, srg] : mergedSRGsByHash)
+		{
+			delete srg;
+		}
+		mergedSRGsByHash.Clear();
 	}
 
 	bool ShaderResourceManager::IsSharedDescriptorSet(RHI::SRGType srgType)
 	{
-		if (!builtinSrgNameToDescriptorSet.KeyExists(srgType))
+		if (!srgTypeToDescriptorSet.KeyExists(srgType))
 			return false;
 
-		int set = builtinSrgNameToDescriptorSet[srgType].set;
+		int set = srgTypeToDescriptorSet[srgType].set;
 		return IsSharedDescriptorSet(set);
 	}
 
 	int ShaderResourceManager::GetDescriptorSetNumber(RHI::SRGType srgType)
 	{
-		if (!builtinSrgNameToDescriptorSet.KeyExists(srgType))
+		if (!srgTypeToDescriptorSet.KeyExists(srgType))
 			return false;
 
-		return builtinSrgNameToDescriptorSet[srgType].set;
+		return srgTypeToDescriptorSet[srgType].set;
 	}
 
 	bool ShaderResourceManager::ShouldCreateDescriptorSetForSRG(RHI::SRGType srgType)
 	{
-		if (!builtinSrgNameToDescriptorSet.KeyExists(srgType))
+		if (!srgTypeToDescriptorSet.KeyExists(srgType))
 			return false;
 
-		int set = builtinSrgNameToDescriptorSet[srgType].set;
+		int set = srgTypeToDescriptorSet[srgType].set;
 		const auto& array = setNumberToSrgs[set];
 		if (array.IsEmpty())
 			return false;
@@ -116,6 +122,79 @@ namespace CE::Vulkan
 		return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 	}
 
+	MergedShaderResourceGroup* ShaderResourceManager::FindOrCreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs)
+	{
+		SIZE_T mergedSRGHash = 0;
+		std::sort(srgs.begin(), srgs.end(), [](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b)
+			{
+				return (int)a->GetSRGType() <= (int)b->GetSRGType();
+			});
+
+		mergedSRGHash = (SIZE_T)srgs[0];
+		for (int i = 1; i < srgs.GetSize(); i++)
+		{
+			mergedSRGHash = GetCombinedHash(mergedSRGHash, (SIZE_T)srgs[i]);
+		}
+
+		if (mergedSRGsByHash.KeyExists(mergedSRGHash) && mergedSRGsByHash[mergedSRGHash] != nullptr)
+		{
+			return mergedSRGsByHash[mergedSRGHash];
+		}
+
+		return CreateMergedSRG(srgs);
+	}
+
+	MergedShaderResourceGroup* ShaderResourceManager::CreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs)
+	{
+		if (srgs.IsEmpty())
+			return null;
+
+		MergedShaderResourceGroup* mergedSRG = new MergedShaderResourceGroup(device, srgs);
+		if (mergedSRG->GetMergedHash() == 0)
+		{
+			delete mergedSRG;
+			return null;
+		}
+		
+		mergedSRGsByHash[mergedSRG->GetMergedHash()] = mergedSRG;
+	}
+
+	void ShaderResourceManager::RemoveMergedSRG(MergedShaderResourceGroup* mergedSRG)
+	{
+		if (!mergedSRG)
+			return;
+
+		mergedSRGsByHash.Remove(mergedSRG->GetMergedHash());
+
+		for (auto sourceSRG : mergedSRG->combinedSRGs)
+		{
+			mergedSRGsBySourceSRG[sourceSRG].Remove(mergedSRG);
+		}
+	}
+
+	void ShaderResourceManager::OnSRGDestroyed(ShaderResourceGroup* srg)
+	{
+		if (!mergedSRGsBySourceSRG.KeyExists(srg))
+			return;
+		
+		// Destroy all merged SRGs created from the given 'srg'
+		for (MergedShaderResourceGroup* mergedSRG : mergedSRGsBySourceSRG[srg])
+		{
+			// Get all source SRGs used to create 'mergeSRG'
+			for (ShaderResourceGroup* sourceSRG : mergedSRG->combinedSRGs)
+			{
+				// Remove reference to 'mergeSRG' from all the source SRGs used to create it.
+				mergedSRGsBySourceSRG[sourceSRG].Remove(mergedSRG);
+			}
+
+			mergedSRGsByHash.Remove(mergedSRG->GetMergedHash());
+			delete mergedSRG;
+		}
+
+		mergedSRGsBySourceSRG[srg].Clear();
+		mergedSRGsBySourceSRG.Remove(srg);
+	}
+
     ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupLayout& srgLayout)
 		: device(device)
     {
@@ -129,17 +208,8 @@ namespace CE::Vulkan
 
     ShaderResourceGroup::~ShaderResourceGroup()
 	{
-		if (descriptorSet)
-		{
-			pool->Free({ descriptorSet });
-			descriptorSet = null;
-		}
-
-		if (setLayout)
-		{
-			vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, null);
-			setLayout = null;
-		}
+		srgManager->OnSRGDestroyed(this);
+		Destroy();
 	}
 
 	ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device)
@@ -180,7 +250,7 @@ namespace CE::Vulkan
 		variableBindingsByName.Clear();
 		variableBindingsBySlot.Clear();
 
-		for (const RHI::SRGVariableDesc& variable : srgLayout.variables)
+		for (const RHI::SRGVariableDescriptor& variable : srgLayout.variables)
 		{
 			setLayoutBindings.Add({});
 			VkDescriptorSetLayoutBinding& entry = setLayoutBindings.GetLast();
@@ -230,7 +300,7 @@ namespace CE::Vulkan
 
 		descriptorSet = allocatedSets[0];
 
-		CompileBindings();
+		UpdateBindings();
 	}
 
 	void ShaderResourceGroup::Destroy()
@@ -248,7 +318,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void ShaderResourceGroup::CompileBindings()
+	void ShaderResourceGroup::UpdateBindings()
 	{
 		Array<VkWriteDescriptorSet> writes{};
 		writes.Resize(bufferInfosBoundBySlot.GetSize() + imageInfosBoundBySlot.GetSize());

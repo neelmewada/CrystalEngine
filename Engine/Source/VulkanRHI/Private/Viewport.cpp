@@ -10,7 +10,7 @@
 namespace CE::Vulkan
 {
     
-    VulkanViewport::VulkanViewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
+    Viewport::Viewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
         u32 width, u32 height,
         bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(windowHandle), isFullscreen(isFullscreen)
@@ -19,7 +19,7 @@ namespace CE::Vulkan
         auto simultaneousFrameDraws = rtLayout.simultaneousFrameDraws;
         
         windowResizeDelegateHandle =
-            PlatformApplication::Get()->onWindowResized.AddDelegateInstance(MemberDelegate(&VulkanViewport::OnWindowResized, this));
+            PlatformApplication::Get()->onWindowResized.AddDelegateInstance(MemberDelegate(&Viewport::OnWindowResized, this));
 
         if (simultaneousFrameDraws > backBufferCount - 1)
             simultaneousFrameDraws = backBufferCount - 1;
@@ -32,7 +32,7 @@ namespace CE::Vulkan
             rtLayout.colorOutputs[presentationIndex].preferredFormat, rtLayout.depthStencilFormat);
 
         // - Render Target -
-        renderTarget = new VulkanRenderTarget(device, this, VulkanRenderTargetLayout(device, this, rtLayout));
+        renderTarget = new RenderTarget(device, this, VulkanRenderTargetLayout(device, this, rtLayout));
 
         // - Frame Buffers -
         CreateFrameBuffers();
@@ -43,7 +43,7 @@ namespace CE::Vulkan
         CE_LOG(Info, All, "Vulkan Viewport created");
     }
 
-    VulkanViewport::~VulkanViewport()
+    Viewport::~Viewport()
     {
         PlatformApplication::Get()->onWindowResized.RemoveDelegateInstance(windowResizeDelegateHandle);
         
@@ -70,7 +70,7 @@ namespace CE::Vulkan
         CE_LOG(Info, All, "Vulkan Viewport destroyed");
     }
 
-    void VulkanViewport::CreateFrameBuffers()
+    void Viewport::CreateFrameBuffers()
     {
         frameBuffers.Resize(swapChain->GetBackBufferCount());
 
@@ -80,7 +80,7 @@ namespace CE::Vulkan
         }
     }
 
-    void VulkanViewport::CreateSyncObjects()
+    void Viewport::CreateSyncObjects()
     {
         VkSemaphoreCreateInfo semaphoreCI = {};
         semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -97,14 +97,14 @@ namespace CE::Vulkan
         }
     }
 
-    void VulkanViewport::OnWindowResized(PlatformWindow* window, u32 width, u32 height)
+    void Viewport::OnWindowResized(PlatformWindow* window, u32 width, u32 height)
     {
         Rebuild();
     }
 
     // - Setters -
 
-    void VulkanViewport::SetClearColor(const Color& color)
+    void Viewport::SetClearColor(const Color& color)
     {
         this->clearColor = color;
         this->renderTarget->SetClearColor(renderTarget->rtLayout.presentationRTIndex, color);
@@ -112,12 +112,12 @@ namespace CE::Vulkan
 
     // - Getters -
 
-    RHI::RenderTarget* VulkanViewport::GetRenderTarget()
+    RHI::RenderTarget* Viewport::GetRenderTarget()
     {
         return renderTarget;
     }
 
-    void VulkanViewport::Rebuild()
+    void Viewport::Rebuild()
     {
         VulkanPlatform::GetDrawableWindowSize(windowHandle, &swapChain->width, &swapChain->height);
 
@@ -132,22 +132,22 @@ namespace CE::Vulkan
         CreateFrameBuffers();
     }
 
-    u32 VulkanViewport::GetBackBufferCount()
+    u32 Viewport::GetBackBufferCount()
     {
         return swapChain->GetBackBufferCount();
     }
 
-    u32 VulkanViewport::GetSimultaneousFrameDrawCount()
+    u32 Viewport::GetSimultaneousFrameDrawCount()
     {
         return swapChain->GetSimultaneousFrameDraws();
     }
 
-    u32 VulkanViewport::GetWidth()
+    u32 Viewport::GetWidth()
     {
         return swapChain->GetWidth();
     }
 
-    u32 VulkanViewport::GetHeight()
+    u32 Viewport::GetHeight()
     {
         return swapChain->GetHeight();
     }

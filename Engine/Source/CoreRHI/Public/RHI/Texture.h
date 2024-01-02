@@ -11,6 +11,7 @@ namespace CE::RHI
 		Format format{};
 		u32 mipLevels = 1;
 		u32 sampleCount = 1;
+		u32 arrayLayers = 1;
 		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
 	};
 
@@ -39,8 +40,13 @@ namespace CE::RHI
         {
             return depth;
         }
+
+		inline u32 GetArrayLayers() const
+		{
+			return arrayLayers;
+		}
         
-		inline u32 GetBytesPerChannel() = 0;
+		virtual u32 GetBytesPerChannel() = 0;
         
 		virtual u32 GetNumberOfChannels() = 0;
 
@@ -57,6 +63,7 @@ namespace CE::RHI
 		Format format{};
 		u32 mipLevels = 1;
 		u32 sampleCount = 1;
+		u32 arrayLayers = 1;
 		TextureBindFlags bindFlags = TextureBindFlags::None;
 		
 	};

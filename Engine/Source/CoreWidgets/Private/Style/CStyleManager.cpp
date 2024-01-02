@@ -156,7 +156,7 @@ namespace CE::Widgets
         
 		if (imageSampler == nullptr)
 		{
-			RHI::SamplerDesc samplerDesc{};
+			RHI::SamplerDescriptor samplerDesc{};
 			samplerDesc.addressModeU = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 			samplerDesc.addressModeV = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 			samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;

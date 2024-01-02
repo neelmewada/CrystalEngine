@@ -187,8 +187,7 @@ namespace CE::RHI
     {
         Dim2D = 0,
         Dim3D,
-        Dim1D,
-        DimCUBE,
+        Dim1D
     };
 
 	ENUM()
@@ -242,7 +241,7 @@ namespace CE::RHI
 		None = 0,
 		/// @brief Use as shader input.
 		ShaderRead = BIT(0),
-		/// @brief Use as output image.
+		/// @brief Use as shader output.
 		ShaderWrite = BIT(1),
 		/// @brief Use with shader read & write access.
 		ShaderReadWrite = ShaderRead | ShaderWrite,
@@ -264,7 +263,7 @@ namespace CE::RHI
 		Nearest = 1,
 		Cubic = 2
 	};
-	ENUM_CLASS_FLAGS(FilterMode);
+	ENUM_CLASS(FilterMode);
 
     struct TextureDesc
     {
@@ -279,30 +278,24 @@ namespace CE::RHI
 
 	typedef TextureDesc ImageDesc;
 
-    enum SamplerAddressMode
+    enum class SamplerAddressMode
     {
-        SAMPLER_ADDRESS_MODE_REPEAT = 0,
-        SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1,
-        SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2,
-        SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER = 3,
+        Repeat = 0,
+        MirroredRepeat = 1,
+        ClampToEdge = 2,
+        ClampToBorder = 3,
     };
-    ENUM_CLASS_FLAGS(SamplerAddressMode);
+    ENUM_CLASS(SamplerAddressMode);
 
-    enum SamplerFilterMode
-    {
-        SAMPLER_FILTER_LINEAR = 0,
-        SAMPLER_FILTER_NEAREST = 1,
-    };
-
-    struct SamplerDesc
+    struct SamplerDescriptor
     {
         SamplerAddressMode addressModeU{};
         SamplerAddressMode addressModeV{};
         SamplerAddressMode addressModeW{};
 		FilterMode samplerFilterMode{};
+		Color borderColor{};
         b8 enableAnisotropy = false;
         int maxAnisotropy = 16;
-        Color borderColor{};
     };
 
     /*
@@ -363,14 +356,15 @@ namespace CE::RHI
         Vertex = BIT(0),
         Fragment = BIT(1),
 		Tessellation = BIT(2),
+		Geometry = BIT(3),
 
 		Default = Vertex | Fragment,
-		All = Vertex | Fragment | Tessellation,
-		COUNT = 3,
+		All = Vertex | Fragment | Tessellation | Geometry,
+		COUNT = 4,
     };
     ENUM_CLASS_FLAGS(ShaderStage);
 
-	struct ShaderModuleDesc
+	struct ShaderModuleDescriptor
 	{
 		String name = "";
 		ShaderStage stage = ShaderStage::None;
@@ -395,20 +389,6 @@ namespace CE::RHI
 		SubpassInput // A SubpassInput in vulkan
 	};
 	ENUM_CLASS(ShaderResourceType);
-
-	struct ShaderStageDesc
-	{
-		RHI::ShaderModule* shaderModule = nullptr;
-		RHI::ShaderStage stage = RHI::ShaderStage::None;
-		String entry = "";
-	};
-
-	struct VertexAttribDesc
-	{
-		u32 location = 0;
-		TypeId dataType = 0;
-		u32 offset = 0;
-	};
 
 	ENUM()
 	enum class CullMode

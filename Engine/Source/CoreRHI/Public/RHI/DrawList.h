@@ -29,6 +29,6 @@ namespace CE::RHI
 		friend class DrawListContext;
 	};
 
-	typedef FixedArray<DrawList, Limits::Pipeline::DrawListTagCount> DrawListsByTag;
+	typedef StaticArray<DrawList, Limits::Pipeline::DrawListTagCount> DrawListsByTag;
     
 } // namespace CE::RPI

@@ -2,27 +2,27 @@
 
 namespace CE::Vulkan
 {
-	class VulkanTexture;
+	class Texture;
 	class VulkanFrameBuffer;
 
 	struct VulkanFrame
 	{
-		List<VulkanTexture*> textures{};
+		List<Texture*> textures{};
 		List<VulkanSampler*> samplers{};
 		VulkanFrameBuffer* framebuffer = nullptr;
 	};
 
 	/// Vulkan Render Target class
-	class VulkanRenderTarget : public RHI::RenderTarget
+	class RenderTarget : public RHI::RenderTarget
 	{
 	public:
 		/// An offscreen render target
-		VulkanRenderTarget(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout);
+		RenderTarget(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout);
 
 		/// A viewport render target
-		VulkanRenderTarget(VulkanDevice* device, VulkanViewport* viewport, const VulkanRenderTargetLayout& rtLayout);
+		RenderTarget(VulkanDevice* device, Viewport* viewport, const VulkanRenderTargetLayout& rtLayout);
 
-		virtual ~VulkanRenderTarget();
+		virtual ~RenderTarget();
 
 		virtual bool IsViewportRenderTarget() override { return isViewportRenderTarget; }
 
@@ -44,7 +44,7 @@ namespace CE::Vulkan
 
 		CE_INLINE VulkanRenderPass* GetVulkanRenderPass() { return renderPass; }
 
-		CE_INLINE VulkanViewport* GetVulkanViewport() { return viewport; }
+		CE_INLINE Viewport* GetVulkanViewport() { return viewport; }
 
 		VkRenderPass GetVulkanRenderPassHandle() const;
 
@@ -80,7 +80,7 @@ namespace CE::Vulkan
 
 	private:
 		bool isViewportRenderTarget = false;
-		VulkanViewport* viewport = nullptr;
+		Viewport* viewport = nullptr;
 		bool isFresh = true;
 
 		Color clearColors[RHI::MaxSimultaneousRenderOutputs] = {};
@@ -99,10 +99,10 @@ namespace CE::Vulkan
 		Array<VulkanFrame> colorFrames{};
 		VulkanFrame depthFrame{};
 
-		friend class VulkanViewport;
+		friend class Viewport;
 		friend class GraphicsCommandList;
 		friend class VulkanFrameBuffer;
 		friend class VulkanRHI;
-		friend class VulkanGraphicsPipeline;
+		friend class GraphicsPipelineState;
 	};
 } // namespace CE

@@ -72,7 +72,7 @@ namespace CE::Vulkan
 		}
 	}
 
-    VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
+	static VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
     {
 		LoadMappings();
 
@@ -82,7 +82,35 @@ namespace CE::Vulkan
 		return textureFormatToVkFormatMap[format];
     }
 
-    RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format)
+	static bool IsDepthFormat(VkFormat format)
+	{
+		switch (format)
+		{
+		case VK_FORMAT_X8_D24_UNORM_PACK32:
+		case VK_FORMAT_D16_UNORM:
+		case VK_FORMAT_D16_UNORM_S8_UINT:
+		case VK_FORMAT_D24_UNORM_S8_UINT:
+		case VK_FORMAT_D32_SFLOAT_S8_UINT:
+		case VK_FORMAT_D32_SFLOAT:
+			return true;
+		}
+		return false;
+	}
+
+	static bool IsStencilFormat(VkFormat format)
+	{
+		switch (format)
+		{
+		case VK_FORMAT_S8_UINT:
+		case VK_FORMAT_D16_UNORM_S8_UINT:
+		case VK_FORMAT_D24_UNORM_S8_UINT:
+		case VK_FORMAT_D32_SFLOAT_S8_UINT:
+			return true;
+		}
+		return false;
+	}
+
+	static RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format)
     {
 		LoadMappings();
 
@@ -92,7 +120,7 @@ namespace CE::Vulkan
 		return vkFormatToTextureFormatMap[format];
     }
 
-    u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
+	static u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
     {
 		LoadMappings();
 
@@ -113,8 +141,8 @@ namespace CE::Vulkan
 		if (source == nullptr || destination == nullptr)
 			return;
 
-		VulkanTexture* src = (VulkanTexture*)source;
-		VulkanTexture* dst = (VulkanTexture*)destination;
+		Texture* src = (Texture*)source;
+		Texture* dst = (Texture*)destination;
 
 		VkFilter vkFilter = VK_FILTER_LINEAR;
 		switch (filter)
@@ -152,7 +180,7 @@ namespace CE::Vulkan
 		device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
 	}
 
-    void VulkanRHI::GetTextureMemoryRequirements(const ImageDescriptor& imageDesc, ResourceMemoryRequirements& outRequirements)
+    void VulkanRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& desc, ResourceMemoryRequirements& outRequirements)
     {
         VkImageCreateInfo imageCI{};
         imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -167,20 +195,16 @@ namespace CE::Vulkan
         case RHI::Dimension::Dim1D:
             imageCI.imageType = VK_IMAGE_TYPE_1D;
             break;
-        case RHI::Dimension::DimCUBE:
-            imageCI.imageType = VK_IMAGE_TYPE_2D;
         }
         
-        imageCI.extent.width = width;
-        imageCI.extent.height = height;
-        imageCI.extent.depth = depth;
+        imageCI.extent.width = desc.width;
+        imageCI.extent.height = desc.height;
+        imageCI.extent.depth = desc.depth;
         
         imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageCI.format = RHITextureFormatToVkFormat(this->format);
-        imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageCI.format = RHITextureFormatToVkFormat(desc.format);
+        imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-
-        this->vkFormat = imageCI.format;
         
         if (EnumHasAnyFlags(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
         {
@@ -200,7 +224,7 @@ namespace CE::Vulkan
         }
         
         imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
-        imageCI.mipLevels = mipLevels;
+        imageCI.mipLevels = desc.mipLevels;
         imageCI.arrayLayers = 1;
         imageCI.flags = 0;
 
@@ -226,13 +250,14 @@ namespace CE::Vulkan
     }
 
 
-    VulkanTexture::VulkanTexture(VulkanDevice* device, const RHI::TextureDescriptor& desc)
+    Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc)
         : device(device)
     {
         this->name = desc.name;
         this->width = desc.width;
         this->height = desc.height;
         this->depth = desc.depth;
+		this->arrayLayers = desc.arrayLayers;
 
         this->dimension = desc.dimension;
         this->format = desc.format;
@@ -252,8 +277,6 @@ namespace CE::Vulkan
         case RHI::Dimension::Dim1D:
             imageCI.imageType = VK_IMAGE_TYPE_1D;
             break;
-        case RHI::Dimension::DimCUBE:
-            imageCI.imageType = VK_IMAGE_TYPE_2D;
         }
         
         imageCI.extent.width = width;
@@ -266,24 +289,39 @@ namespace CE::Vulkan
         imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
         this->vkFormat = imageCI.format;
+
+		bool isDepthFormat = IsDepthFormat(vkFormat);
+		bool isStencilFormat = IsStencilFormat(vkFormat);
+		if (isDepthFormat)
+			aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
+		if (isStencilFormat)
+			aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+		if (!isDepthFormat && !isStencilFormat)
+			aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
         
-        if (EnumHasAnyFlags(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
+        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
         {
             imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
-            aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
         }
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderWrite))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+		}
         if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Color))
         {
             imageCI.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-            aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
+			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         }
         if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::DepthStencil))
         {
             imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-            aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
-			if (this->format == RHI::TextureFormat::D24_UNORM_S8_UINT || this->format == RHI::TextureFormat::D32_SFLOAT_S8_UINT)
-				aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+            aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
         }
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Depth))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		}
 		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::SubpassInput))
 		{
 			imageCI.usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
@@ -291,7 +329,7 @@ namespace CE::Vulkan
 		
         imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
         imageCI.mipLevels = mipLevels;
-        imageCI.arrayLayers = 1;
+        imageCI.arrayLayers = arrayLayers;
         imageCI.flags = 0;
 
         imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -341,12 +379,9 @@ namespace CE::Vulkan
         case RHI::Dimension::Dim1D:
             imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
             break;
-        case RHI::Dimension::DimCUBE:
-            imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
-            break;
         }
 
-        // Subresources allow the view to view only a part of an image
+        // Subresources allow the view to see only a part of an image
         imageViewCI.subresourceRange.aspectMask = aspectMask;  // Which aspect of the image to view (e.g. color bit for viewing color)
         imageViewCI.subresourceRange.baseMipLevel = 0;          // Start mipmap level to view from
         imageViewCI.subresourceRange.levelCount = mipLevels;    // No. of mipmap levels to view
@@ -361,26 +396,24 @@ namespace CE::Vulkan
 
 		// Transition image layout
 
-		switch (desc.bindFlags)
+		if (desc.bindFlags == RHI::TextureBindFlags::ShaderRead || desc.bindFlags == RHI::TextureBindFlags::SubpassInput)
 		{
-		case RHI::TextureBindFlags::ShaderRead:
 			vkImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			break;
-		case RHI::TextureBindFlags::Color:
+		}
+		else if (desc.bindFlags == RHI::TextureBindFlags::Color)
+		{
 			vkImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-			break;
-		case RHI::TextureBindFlags::DepthStencil:
+		}
+		else if (desc.bindFlags == RHI::TextureBindFlags::DepthStencil)
+		{
 			vkImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-			break;
-		default:
-			break;
 		}
 
 		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
 			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, aspectMask);
     }
 
-    VulkanTexture::~VulkanTexture()
+    Texture::~Texture()
     {
         if (imageView != nullptr)
         {
@@ -401,35 +434,20 @@ namespace CE::Vulkan
         }
     }
 
-    u32 VulkanTexture::GetWidth()
-    {
-        return width;
-    }
-
-    u32 VulkanTexture::GetHeight()
-    {
-        return height;
-    }
-
-    u32 VulkanTexture::GetDepth()
-    {
-        return depth;
-    }
-
-    u32 VulkanTexture::GetBytesPerChannel()
+    u32 Texture::GetBytesPerChannel()
     {
         u32 bytesPerChannel = 0;
         u32 numChannels = GetNumberOfChannelsForFormat(format, bytesPerChannel);
         return bytesPerChannel;
     }
 
-    u32 VulkanTexture::GetNumberOfChannels()
+    u32 Texture::GetNumberOfChannels()
     {
         u32 bytesPerChannel = 0;
         return GetNumberOfChannelsForFormat(format, bytesPerChannel);
     }
 
-    void VulkanTexture::UploadData(const void* pixels, u64 dataSize)
+    void Texture::UploadData(const void* pixels, u64 dataSize)
     {
         u32 bytesPerChannel = 0;
         u32 numChannels = GetNumberOfChannelsForFormat(format, bytesPerChannel);
@@ -448,16 +466,15 @@ namespace CE::Vulkan
         stagingBufferData.data = pixels;
         stagingBufferData.dataSize = totalSize;
 
-        RHI::BufferDesc stagingBufferDesc{};
+        RHI::BufferDescriptor stagingBufferDesc{};
         stagingBufferDesc.name = "Staging Texture Buffer";
         stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-        stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-        stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
         stagingBufferDesc.bufferSize = totalSize;
         stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
-        stagingBufferDesc.initialData = &stagingBufferData;
+		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 
 		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
+		stagingBuffer->UploadData(stagingBufferData);
 
         device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, aspectMask);
         CopyPixelsFromBuffer(stagingBuffer);
@@ -467,7 +484,7 @@ namespace CE::Vulkan
         stagingBuffer = nullptr;
     }
 
-	void VulkanTexture::ReadData(u8** outPixels, u64* outDataSize)
+	void Texture::ReadData(u8** outPixels, u64* outDataSize)
 	{
 		if (outPixels == nullptr || outDataSize == nullptr)
 			return;
@@ -479,14 +496,12 @@ namespace CE::Vulkan
 		if (totalSize == 0)
 			return;
 
-		RHI::BufferDesc stagingBufferDesc{};
+		RHI::BufferDescriptor stagingBufferDesc{};
 		stagingBufferDesc.name = "Staging Texture Buffer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		stagingBufferDesc.allocMode = RHI::BufferAllocMode::SharedMemory;
-		stagingBufferDesc.usageFlags = RHI::BufferUsageFlags::Default;
+		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::ReadBack;
 		stagingBufferDesc.bufferSize = totalSize;
 		stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
-		stagingBufferDesc.initialData = nullptr;
 
 		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
 
@@ -500,7 +515,7 @@ namespace CE::Vulkan
 		stagingBuffer = nullptr;
 	}
 
-    void VulkanTexture::CopyPixelsFromBuffer(Buffer* srcBuffer)
+    void Texture::CopyPixelsFromBuffer(Buffer* srcBuffer)
     {
         auto cmdBuffer = device->BeginSingleUseCommandBuffer();
 
@@ -529,7 +544,7 @@ namespace CE::Vulkan
         device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
     }
 
-	void VulkanTexture::CopyPixelsToBuffer(Buffer* dstBuffer)
+	void Texture::CopyPixelsToBuffer(Buffer* dstBuffer)
 	{
 		auto cmdBuffer = device->BeginSingleUseCommandBuffer();
 

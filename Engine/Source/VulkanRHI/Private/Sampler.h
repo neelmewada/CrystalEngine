@@ -1,12 +1,12 @@
 #pragma once
 
-namespace CE
+namespace CE::Vulkan
 {
     
     class VULKANRHI_API VulkanSampler : public RHI::Sampler
     {
     public:
-        VulkanSampler(VulkanDevice* device, const RHI::SamplerDesc& samplerDesc);
+        VulkanSampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc);
         virtual ~VulkanSampler();
         
         virtual void* GetHandle() override

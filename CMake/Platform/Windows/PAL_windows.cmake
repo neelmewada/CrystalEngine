@@ -28,6 +28,9 @@ ce_set(PAL_TRAIT_SDL_SUPPORTED 1)
 
 add_compile_definitions(PAL_TRAIT_VULKAN_SUPPORTED=1)
 add_compile_definitions(PAL_TRAIT_SDL_SUPPORTED=1)
+# For testing only
+add_compile_definitions(PAL_TRAIT_VULKAN_LIMITED_DESCRIPTOR_SETS=1)
+
 add_compile_options("/MP")
 
 ce_set(PAL_TRAIT_BUILD_TESTS_SUPPORTED 1)

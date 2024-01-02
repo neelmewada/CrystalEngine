@@ -3,12 +3,12 @@
 namespace CE::Vulkan
 {
     
-	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport)
+	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, Viewport* viewport)
 		: vulkanRHI(vulkanRHI)
 		, device(device)
 		, viewport(viewport)
 	{
-		this->renderTarget = (VulkanRenderTarget*)viewport->GetRenderTarget();
+		this->renderTarget = (RenderTarget*)viewport->GetRenderTarget();
 		this->numCommandBuffers = viewport->GetBackBufferCount();
 		this->simultaneousFrameDraws = viewport->GetSimultaneousFrameDrawCount();
 
@@ -29,7 +29,7 @@ namespace CE::Vulkan
 		CreateSyncObjects();
 	}
 
-	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget)
+	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, RenderTarget* renderTarget)
 		: vulkanRHI(vulkanRHI)
 		, device(device)
 		, renderTarget(renderTarget)
@@ -38,7 +38,7 @@ namespace CE::Vulkan
 		{
 			auto viewport = renderTarget->GetVulkanViewport();
 
-			this->renderTarget = (VulkanRenderTarget*)viewport->GetRenderTarget();
+			this->renderTarget = (RenderTarget*)viewport->GetRenderTarget();
 			this->numCommandBuffers = viewport->GetBackBufferCount();
 			this->simultaneousFrameDraws = viewport->GetSimultaneousFrameDrawCount();
 
@@ -281,30 +281,74 @@ namespace CE::Vulkan
 		currentPipelineLayout = (VulkanPipelineLayout*)pipeline->GetPipelineLayout();
 	}
 
-	void GraphicsCommandList::CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups)
+	void GraphicsCommandList::SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& shaderResourceGroups)
 	{
-		if (shaderResourceGroups.IsEmpty())
-			return;
-
-		if (srgManager == nullptr)
-			srgManager = device->GetShaderResourceManager();
-
-		Array<ShaderResourceGroup*> srgs = shaderResourceGroups.Transform<ShaderResourceGroup*>(
-			[&](RHI::ShaderResourceGroup* in) { return (ShaderResourceGroup*)in; });
-
-		for (ShaderResourceGroup* srg : srgs)
+		for (RHI::ShaderResourceGroup* srg : shaderResourceGroups)
 		{
-			
+			if (!srg)
+				continue;
+
+			Vulkan::ShaderResourceGroup* vulkanSRG = (Vulkan::ShaderResourceGroup*)srg;
+			boundSRGs[(int)vulkanSRG->srgType] = vulkanSRG;
 		}
-		
+	}
+
+	void GraphicsCommandList::CommitShaderResourceGroups()
+	{
+		StaticArray<
+			FixedArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount>,
+			Vulkan::Limits::MaxDescriptorSetCount
+		> srgsBySetNumber{};
+
+		for (ShaderResourceGroup* srg : boundSRGs)
+		{
+			if (!srg)
+				continue;
+
+			int setNumber = srg->GetSetNumber();
+
+			srgsBySetNumber[setNumber].Add(srg);
+		}
+
+		for (int setNumber = 0; setNumber < srgsBySetNumber.GetCapacity(); setNumber++)
+		{
+			int count = srgsBySetNumber[setNumber].GetSize();
+			
+			if (count > 1) // Merge several SRGs into one
+			{
+				// Sort SRGs according to SRGType to fetch correct combined hash value
+				std::sort(srgsBySetNumber[setNumber].begin(), srgsBySetNumber[setNumber].end(),
+					[](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b)
+					{
+						return (int)a->GetSRGType() <= (int)b->GetSRGType();
+					});
+
+				auto view = ArrayView<Vulkan::ShaderResourceGroup*>(&srgsBySetNumber[setNumber][0], &srgsBySetNumber[setNumber][count - 1]);
+				MergedShaderResourceGroup* mergedSRG = srgManager->FindOrCreateMergedSRG(view);
+
+				commitedSRGsBySetNumber[setNumber] = mergedSRG;
+			}
+			else if (count == 1)
+			{
+				commitedSRGsBySetNumber[setNumber] = srgsBySetNumber[setNumber][0];
+			}
+		}
 	}
 
 	void GraphicsCommandList::SetRootConstants(u8 size, const u8* data)
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
-			vkCmdPushConstants(commandBuffers[i], currentPipelineLayout->GetNativeHandle(), VK_SHADER_STAGE_ALL, 0, 12, data);
+			vkCmdPushConstants(commandBuffers[i], currentPipelineLayout->GetNativeHandle(), VK_SHADER_STAGE_ALL, 0, size, data);
 		}
+	}
+
+	void GraphicsCommandList::WaitForExecution()
+	{
+		constexpr u64 u64Max = NumericLimits<u64>::Max();
+		auto result = vkWaitForFences(device->GetHandle(),
+			renderFinishedFence.GetSize(), renderFinishedFence.GetData(),
+			VK_TRUE, u64Max);
 	}
 
 	void GraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)

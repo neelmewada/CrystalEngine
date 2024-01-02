@@ -45,8 +45,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         sdl
 )
 
-
-if(${PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED})
-    #add_subdirectory(Tests)
+if(${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
+    add_subdirectory(Tests)
 endif()
-

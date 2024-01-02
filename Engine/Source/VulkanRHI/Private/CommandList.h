@@ -6,8 +6,8 @@ namespace CE::Vulkan
 	class GraphicsCommandList : public RHI::GraphicsCommandList, public ApplicationMessageHandler
 	{
 	public:
-		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport);
-		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget);
+		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, Viewport* viewport);
+		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, RenderTarget* renderTarget);
 		virtual ~GraphicsCommandList();
 
 		// - Command List API -
@@ -25,7 +25,9 @@ namespace CE::Vulkan
 
 		virtual void BindPipeline(RHI::IPipelineState* pipeline) override;
 
-		virtual void CommitShaderResources(const Array<RHI::ShaderResourceGroup*>& shaderResourceGroups) override;
+		virtual void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& shaderResourceGroups) override;
+
+		virtual void CommitShaderResourceGroups() override;
 
 		virtual void SetRootConstants(u8 size, const u8* data) override;
 
@@ -41,12 +43,12 @@ namespace CE::Vulkan
 			return viewport != nullptr;
 		}
 
-		CE_INLINE VulkanViewport* GetViewport()
+		CE_INLINE Viewport* GetViewport()
 		{
 			return viewport;
 		}
 
-		CE_INLINE VulkanRenderTarget* GetRenderTarget()
+		CE_INLINE RenderTarget* GetRenderTarget()
 		{
 			return renderTarget;
 		}
@@ -71,8 +73,8 @@ namespace CE::Vulkan
 	private:
 		VulkanRHI* vulkanRHI = nullptr;
 		VulkanDevice* device = nullptr;
-		VulkanRenderTarget* renderTarget = nullptr;
-		VulkanViewport* viewport = nullptr;
+		RenderTarget* renderTarget = nullptr;
+		Viewport* viewport = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
 		VulkanPipelineLayout* currentPipelineLayout = nullptr;
 
@@ -87,8 +89,8 @@ namespace CE::Vulkan
 		List<VkSemaphore> renderFinishedSemaphore{}; // Size = NumCommandBuffers
 
 		// DescriptorSet binding
-		FixedArray<ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroupBindings{};
-		u32 shaderResourceGroupBindingCount = 0;
+		StaticArray<ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
+		StaticArray<ShaderResourceGroup*, Vulkan::Limits::MaxDescriptorSetCount> commitedSRGsBySetNumber{};
 
 		// ImGui
 		b8 isImGuiEnabled = false;

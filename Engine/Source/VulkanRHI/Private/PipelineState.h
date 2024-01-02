@@ -4,13 +4,13 @@
 
 namespace CE::Vulkan
 {
-	class VulkanPipeline;
+	class PipelineState;
 
 	class VulkanPipelineLayout : public RHI::IPipelineLayout
 	{
 	public:
 
-		VulkanPipelineLayout(VulkanDevice* device, VulkanPipeline* copyFrom);
+		VulkanPipelineLayout(VulkanDevice* device, PipelineState* copyFrom);
 
 		VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType);
 		virtual ~VulkanPipelineLayout();
@@ -25,7 +25,7 @@ namespace CE::Vulkan
 			return handle;
 		}
 
-		void CopyFrom(VulkanDevice* device, VulkanPipeline* copyFrom);
+		void CopyFrom(VulkanDevice* device, PipelineState* copyFrom);
 
 	private:
 		VulkanDevice* device = nullptr;
@@ -37,15 +37,15 @@ namespace CE::Vulkan
 		List<VkPushConstantRange> pushConstantRanges{};
 		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
 
-		friend class VulkanGraphicsPipeline;
+		friend class GraphicsPipelineState;
 		friend class GraphicsCommandList;
 	};
 
-    class VulkanPipeline : public RHI::IPipelineState
+    class PipelineState : public RHI::IPipelineState
     {
     public:
-        VulkanPipeline(VulkanDevice* device);
-        virtual ~VulkanPipeline();
+        PipelineState(VulkanDevice* device);
+        virtual ~PipelineState();
 
     protected:
         VulkanDevice* device = nullptr;
@@ -61,11 +61,11 @@ namespace CE::Vulkan
     };
 
 
-	class VulkanGraphicsPipeline : public VulkanPipeline, public RHI::GraphicsPipelineState
+	class GraphicsPipelineState : public PipelineState, public RHI::GraphicsPipelineState
 	{
 	public:
-		VulkanGraphicsPipeline(VulkanDevice* device, VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc);
-		virtual ~VulkanGraphicsPipeline();
+		GraphicsPipelineState(VulkanDevice* device, RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc);
+		virtual ~GraphicsPipelineState();
 
 		bool IsGraphicsPipelineState() override final
 		{
@@ -86,7 +86,7 @@ namespace CE::Vulkan
 
 	protected:
 
-		void Create(VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc);
+		void Create(RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc);
 		
 		void Destroy();
 

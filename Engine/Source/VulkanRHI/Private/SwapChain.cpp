@@ -251,8 +251,8 @@ namespace CE::Vulkan
 		// - Get SwapChain Images -
 		u32 swapChainImageCount = 0;
 		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, nullptr);
-		std::vector<VkImage> images(swapChainImageCount);
-		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, images.data());
+		List<VkImage> images{}; images.Resize(swapChainImageCount);
+		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, images.GetData());
 
 		// Destroy old image views
 		for (const auto& swapChainImage : swapChainColorImages)
@@ -309,7 +309,7 @@ namespace CE::Vulkan
 			break;
 		}
         
-		RHI::TextureDesc depthTextureDesc{};
+		RHI::TextureDescriptor depthTextureDesc{};
 		depthTextureDesc.width = width;
 		depthTextureDesc.height = height;
 		depthTextureDesc.depth = 1;
@@ -319,7 +319,7 @@ namespace CE::Vulkan
 		depthTextureDesc.sampleCount = 1;
 		depthTextureDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
 
-		swapChainDepthImage = new VulkanTexture(device, depthTextureDesc);
+		swapChainDepthImage = new Texture(device, depthTextureDesc);
 	}
 
 	void VulkanSwapChain::DestroyDepthBuffer()

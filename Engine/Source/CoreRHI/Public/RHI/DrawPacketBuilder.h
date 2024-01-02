@@ -54,16 +54,16 @@ namespace CE::RHI
 		IndexBufferView indexBufferView{};
         DrawListMask drawListMask{};
 
-		FixedArray<ScissorState, Limits::Pipeline::MaxColorAttachmentCount> scissors{};
+		StaticArray<ScissorState, Limits::Pipeline::MaxColorAttachmentCount> scissors{};
 		u32 scissorCount = 0;
-		FixedArray<ViewportState, Limits::Pipeline::MaxColorAttachmentCount> viewports{};
+		StaticArray<ViewportState, Limits::Pipeline::MaxColorAttachmentCount> viewports{};
 		u32 viewportCount = 0;
-		FixedArray<ShaderResourceGroup*, Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroups{};
+		StaticArray<ShaderResourceGroup*, Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroups{};
 		u32 shaderResourceGroupCount = 0;
-		FixedArray<DrawItemRequest, DrawItemCountMax> drawRequests{};
+		StaticArray<DrawItemRequest, DrawItemCountMax> drawRequests{};
 		u32 drawRequestsCount = 0;
 		u32 vertexBufferViewCount = 0;
-		FixedArray<u8, Limits::Pipeline::MaxRootConstantSize> rootConstants{};
+		StaticArray<u8, Limits::Pipeline::MaxRootConstantSize> rootConstants{};
 		u8 rootConstantSize = 0;
 
 

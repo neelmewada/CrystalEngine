@@ -9,7 +9,7 @@ namespace CE::RHI
 		namespace Pipeline
 		{
 			/// @brief Max number of vertex attributes
-			constexpr u32 MaxVertexAttribCount = 8;
+			constexpr u32 MaxVertexAttribCount = 16;
 
 			/// @brief Max number of simultaneous frames that can be rendered (triple buffering, etc)
 			constexpr u32 MaxSimultaneousFramesInFlight = 4;

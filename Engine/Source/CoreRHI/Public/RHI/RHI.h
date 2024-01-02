@@ -72,23 +72,22 @@ namespace CE::RHI
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) = 0;
 
 		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements) = 0;
-        
-        virtual void GetTextureMemoryRequirements(const ImageDescriptor& imageDesc, ResourceMemoryRequirements& outRequirements) = 0;
+        virtual void GetTextureMemoryRequirements(const TextureDescriptor& textureDesc, ResourceMemoryRequirements& outRequirements) = 0;
 
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc) = 0;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;
         virtual void DestroyBuffer(Buffer* buffer) = 0;
         
-        virtual RHI::Texture* CreateTexture(const TextureDesc& textureDesc) = 0;
+        virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc) = 0;
         virtual void DestroyTexture(RHI::Texture* texture) = 0;
         
-        virtual RHI::Sampler* CreateSampler(const SamplerDesc& samplerDesc) = 0;
+        virtual RHI::Sampler* CreateSampler(const SamplerDescriptor& samplerDesc) = 0;
         virtual void DestroySampler(Sampler* sampler) = 0;
         
         virtual void* AddImGuiTexture(RHI::Texture* texture, Sampler* sampler) = 0;
         virtual void RemoveImGuiTexture(void* imguiTexture) = 0;
 
-		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDesc& desc, const ShaderReflection& shaderReflection) = 0;
+		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection) = 0;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) = 0;
 
 		//virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) = 0;

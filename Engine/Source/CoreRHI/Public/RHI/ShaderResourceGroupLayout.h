@@ -17,9 +17,9 @@ namespace CE::RHI
 	ENUM_CLASS(SRGType);
 
 	STRUCT()
-	struct CORERHI_API SRGVariableDesc
+	struct CORERHI_API SRGVariableDescriptor
 	{
-		CE_STRUCT(SRGVariableDesc)
+		CE_STRUCT(SRGVariableDescriptor)
 	public:
 
 		/// @brief Name of the variable.
@@ -57,7 +57,7 @@ namespace CE::RHI
 		SRGType srgType = SRGType::PerScene;
 
 		FIELD()
-		Array<SRGVariableDesc> variables{};
+		Array<SRGVariableDescriptor> variables{};
 
 		/// @brief Merge 'other' SRG layout into 'this' SRG layout.
 		void Merge(const ShaderResourceGroupLayout& other)

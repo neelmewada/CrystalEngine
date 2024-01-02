@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
     
-	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, VulkanRenderTarget* renderTarget)
+	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget)
 	{
 		this->device = device;
 		const auto& rtLayout = renderTarget->rtLayout;
@@ -39,7 +39,7 @@ namespace CE::Vulkan
 
 	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device,
 		VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1],
-		VulkanRenderTarget* renderTarget)
+		RenderTarget* renderTarget)
 	{
 		this->device = device;
 		const auto& rtLayout = renderTarget->rtLayout;

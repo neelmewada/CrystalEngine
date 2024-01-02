@@ -12,7 +12,7 @@ namespace CE::Vulkan
         VulkanRenderTargetLayout(VulkanDevice* device, u32 width, u32 height, const RHI::RenderTargetLayout& rtLayout);
 
         /// Viewport render target layout
-        VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHI::RenderTargetLayout& rtLayout);
+        VulkanRenderTargetLayout(VulkanDevice* device, Viewport* viewport, const RHI::RenderTargetLayout& rtLayout);
 
         u32 width = 0, height = 0;
         u32 presentationRTIndex = -1;

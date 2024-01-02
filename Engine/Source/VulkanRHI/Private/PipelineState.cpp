@@ -1,36 +1,31 @@
 
 #include "VulkanRHIPrivate.h"
 
-#include "VulkanPipeline.h"
-#include "VulkanShaderModule.h"
-#include "VulkanRenderPass.h"
-#include "ShaderResourceGroup.h"
-
 namespace CE::Vulkan
 {
 
-    VulkanPipeline::VulkanPipeline(VulkanDevice* device) : device(device)
+    PipelineState::PipelineState(VulkanDevice* device) : device(device)
     {
         
     }
 
-    VulkanPipeline::~VulkanPipeline()
+    PipelineState::~PipelineState()
     {
         
     }
     
-	VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanDevice* device, VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
-		: VulkanPipeline(device)
+	GraphicsPipelineState::GraphicsPipelineState(VulkanDevice* device, RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc)
+		: PipelineState(device)
 	{
 		Create(renderTarget, desc);
 	}
 
-	VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
+	GraphicsPipelineState::~GraphicsPipelineState()
 	{
 		Destroy();
 	}
 
-	void VulkanGraphicsPipeline::Create(VulkanRenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
+	void GraphicsPipelineState::Create(RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc)
 	{
 		VkResult result = VK_SUCCESS;
 
@@ -43,34 +38,46 @@ namespace CE::Vulkan
 
 		VkVertexInputBindingDescription vertexInputBindingDesc = {};
 		vertexInputBindingDesc.binding = 0;
-		vertexInputBindingDesc.stride = desc.vertexSizeInBytes;
+		vertexInputBindingDesc.stride = desc.vertexStrideInBytes;
 		vertexInputBindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		
-		Array<VkVertexInputAttributeDescription> vertexAttribs = {};
+		FixedArray<VkVertexInputAttributeDescription, RHI::Limits::Pipeline::MaxVertexAttribCount> vertexAttribs = {};
 		for (const auto& vertex : desc.vertexAttribs)
 		{
-			vertexAttribs.Add({});
-			VkVertexInputAttributeDescription& vertexAttribDesc = vertexAttribs.Top();
+			VkVertexInputAttributeDescription vertexAttribDesc = {};
 			vertexAttribDesc.binding = 0;
 			vertexAttribDesc.location = vertex.location;
 			vertexAttribDesc.offset = vertex.offset;
 
-			if (vertex.dataType == TYPEID(f32))
+			switch (vertex.dataType)
+			{
+			case VertexAttributeDataType::Float:
 				vertexAttribDesc.format = VK_FORMAT_R32_SFLOAT;
-			else if (vertex.dataType == TYPEID(Vec2))
+				break;
+			case VertexAttributeDataType::Float2:
 				vertexAttribDesc.format = VK_FORMAT_R32G32_SFLOAT;
-			else if (vertex.dataType == TYPEID(Vec3))
+				break;
+			case VertexAttributeDataType::Float3:
 				vertexAttribDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
-			else if (vertex.dataType == TYPEID(Vec4))
+				break;
+			case VertexAttributeDataType::Float4:
 				vertexAttribDesc.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-			else if (vertex.dataType == TYPEID(f64))
-				vertexAttribDesc.format = VK_FORMAT_R64_SFLOAT;
-			else if (vertex.dataType == TYPEID(Vec2i))
+				break;
+			case VertexAttributeDataType::Int:
+				vertexAttribDesc.format = VK_FORMAT_R32_SINT;
+				break;
+			case VertexAttributeDataType::Int2:
 				vertexAttribDesc.format = VK_FORMAT_R32G32_SINT;
-			else if (vertex.dataType == TYPEID(Vec3i))
+				break;
+			case VertexAttributeDataType::Int3:
 				vertexAttribDesc.format = VK_FORMAT_R32G32B32_SINT;
-			else if (vertex.dataType == TYPEID(Vec4i))
+				break;
+			case VertexAttributeDataType::Int4:
 				vertexAttribDesc.format = VK_FORMAT_R32G32B32A32_SINT;
+				break;
+			}
+
+			vertexAttribs.Add(vertexAttribDesc);
 		}
 		
 		vertexInputCI.pVertexBindingDescriptions = &vertexInputBindingDesc;
@@ -91,24 +98,37 @@ namespace CE::Vulkan
 
 		// - Shader Stages -
 
-		VkPipelineShaderStageCreateInfo shaderStages[2] = {};
-		ShaderModule* vertexShader = (ShaderModule*)desc.vertexShader;
-		ShaderModule* fragmentShader = (ShaderModule*)desc.fragmentShader;
+		FixedArray<VkPipelineShaderStageCreateInfo, (SIZE_T)RHI::ShaderStage::COUNT> shaderStages{};
 
-		shaderStages[0] = {};
-		shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[0].module = vertexShader->GetHandle();
-		shaderStages[0].pName = desc.vertexEntry.GetCString();
-		shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+		for (const auto& shaderStage : desc.shaderStages)
+		{
+			VkPipelineShaderStageCreateInfo stageInfo{};
+			stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 
-		shaderStages[1] = {};
-		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[1].module = fragmentShader->GetHandle();
-		shaderStages[1].pName = desc.fragmentEntry.GetCString();
-		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			Vulkan::ShaderModule* module = (Vulkan::ShaderModule*)shaderStage.shaderModule;
+			stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+
+			switch (shaderStage.stage)
+			{
+			case RHI::ShaderStage::Vertex:
+				stageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+				break;
+			case RHI::ShaderStage::Fragment:
+				stageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+				break;
+			case RHI::ShaderStage::Geometry:
+				stageInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+				break;
+			}
+
+			stageInfo.pName = shaderStage.entryPoint.GetCString();
+			stageInfo.module = module->GetHandle();
+
+			shaderStages.Add(stageInfo);
+		}
 		
-		pipelineCI.stageCount = 2;
-		pipelineCI.pStages = shaderStages;
+		pipelineCI.stageCount = shaderStages.GetSize();
+		pipelineCI.pStages = shaderStages.GetData();
 
 		// - Dynamic States -
 
@@ -345,7 +365,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	void VulkanGraphicsPipeline::Destroy()
+	void GraphicsPipelineState::Destroy()
 	{
 		if (pipeline != nullptr)
 		{
@@ -369,7 +389,7 @@ namespace CE::Vulkan
 		setLayouts.Clear();
 	}
 
-	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, VulkanPipeline* copyFrom)
+	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, PipelineState* copyFrom)
 		: device(device)
 	{
 		CopyFrom(device, copyFrom);
@@ -392,7 +412,7 @@ namespace CE::Vulkan
 		device = nullptr;
 	}
 
-	void VulkanPipelineLayout::CopyFrom(VulkanDevice* device, VulkanPipeline* copyFrom)
+	void VulkanPipelineLayout::CopyFrom(VulkanDevice* device, PipelineState* copyFrom)
 	{
 		if (copyFrom->IsGraphicsPipelineState())
 		{

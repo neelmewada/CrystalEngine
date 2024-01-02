@@ -136,7 +136,7 @@ namespace CE::Vulkan
         }
     }
 
-    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, VulkanViewport* viewport, const RHI::RenderTargetLayout& rtLayout)
+    VulkanRenderTargetLayout::VulkanRenderTargetLayout(VulkanDevice* device, Viewport* viewport, const RHI::RenderTargetLayout& rtLayout)
     {
         this->width = viewport->GetWidth();
         this->height = viewport->GetHeight();
@@ -261,9 +261,9 @@ namespace CE::Vulkan
     }
 
     // ****************************************************
-    // VulkanRenderTarget
+    // RenderTarget
 
-    VulkanRenderTarget::VulkanRenderTarget(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout)
+    RenderTarget::RenderTarget(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout)
         : isViewportRenderTarget(false)
     {
         this->device = device;
@@ -287,7 +287,7 @@ namespace CE::Vulkan
         CreateColorBuffers();
     }
 
-    VulkanRenderTarget::VulkanRenderTarget(VulkanDevice* device, VulkanViewport* viewport, const VulkanRenderTargetLayout& rtLayout)
+    RenderTarget::RenderTarget(VulkanDevice* device, Viewport* viewport, const VulkanRenderTargetLayout& rtLayout)
         : isViewportRenderTarget(true)
     {
         this->device = device;
@@ -297,10 +297,10 @@ namespace CE::Vulkan
         // Create render pass
         renderPass = new VulkanRenderPass(device, rtLayout);
 
-        // No need to create any depth & color buffers, they are handled by VulkanViewport
+        // No need to create any depth & color buffers, they are handled by Viewport
     }
 
-    VulkanRenderTarget::~VulkanRenderTarget()
+    RenderTarget::~RenderTarget()
     {
         DestroyColorBuffers();
         DestroyDepthBuffer();
@@ -308,17 +308,17 @@ namespace CE::Vulkan
         delete renderPass;
     }
 
-	RHI::Viewport* VulkanRenderTarget::GetRenderTargetViewport()
+	RHI::Viewport* RenderTarget::GetRenderTargetViewport()
 	{
 		return viewport;
 	}
 
-    void VulkanRenderTarget::SetClearColor(u32 colorTargetIndex, const Color& color)
+    void RenderTarget::SetClearColor(u32 colorTargetIndex, const Color& color)
     {
         this->clearColors[colorTargetIndex] = color;
     }
 
-	void VulkanRenderTarget::Resize(u32 newWidth, u32 newHeight)
+	void RenderTarget::Resize(u32 newWidth, u32 newHeight)
 	{
 		DestroyDepthBuffer();
 		DestroyColorBuffers();
@@ -338,7 +338,7 @@ namespace CE::Vulkan
 		CreateColorBuffers();
 	}
 
-	RHI::Texture* VulkanRenderTarget::GetColorTargetTexture(int index, int attachmentIndex)
+	RHI::Texture* RenderTarget::GetColorTargetTexture(int index, int attachmentIndex)
 	{
 		if (index < 0 || index >= colorFrames.GetSize())
 			return nullptr;
@@ -347,7 +347,7 @@ namespace CE::Vulkan
 		return colorFrames[index].textures[attachmentIndex];
 	}
 
-	RHI::Sampler* VulkanRenderTarget::GetColorTargetTextureSampler(int index, int attachmentIndex)
+	RHI::Sampler* RenderTarget::GetColorTargetTextureSampler(int index, int attachmentIndex)
 	{
 		if (index >= colorFrames.GetSize() || index < 0)
 			return nullptr;
@@ -356,46 +356,46 @@ namespace CE::Vulkan
 		return colorFrames[index].samplers[attachmentIndex];
 	}
 
-    VkRenderPass VulkanRenderTarget::GetVulkanRenderPassHandle() const
+    VkRenderPass RenderTarget::GetVulkanRenderPassHandle() const
     {
         if (renderPass == nullptr)
             return nullptr;
         return renderPass->GetHandle();
     }
 
-    u32 VulkanRenderTarget::GetBackBufferCount()
+    u32 RenderTarget::GetBackBufferCount()
     {
         if (IsViewportRenderTarget())
             return viewport->GetBackBufferCount();
         return backBufferCount;
     }
 
-    u32 VulkanRenderTarget::GetSimultaneousFrameDrawCount()
+    u32 RenderTarget::GetSimultaneousFrameDrawCount()
     {
         if (IsViewportRenderTarget())
             return viewport->GetSimultaneousFrameDrawCount();
         return simultaneousFrameDraws;
     }
 
-    u32 VulkanRenderTarget::GetWidth()
+    u32 RenderTarget::GetWidth()
     {
         if (IsViewportRenderTarget())
             return viewport->GetWidth();
         return width;
     }
 
-    u32 VulkanRenderTarget::GetHeight()
+    u32 RenderTarget::GetHeight()
     {
         if (IsViewportRenderTarget())
             return viewport->GetHeight();
         return height;
     }
 
-    void VulkanRenderTarget::CreateDepthBuffer()
+    void RenderTarget::CreateDepthBuffer()
     {
         auto imageFormat = rtLayout.depthFormat;
 
-        RHI::TextureDesc textureDesc{};
+        RHI::TextureDescriptor textureDesc{};
         textureDesc.name = "Depth Buffer";
         textureDesc.width = width;
         textureDesc.height = height;
@@ -405,13 +405,13 @@ namespace CE::Vulkan
         textureDesc.mipLevels = 1;
         textureDesc.sampleCount = 1;
         textureDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
-        textureDesc.forceLinearLayout = false;
+		textureDesc.arrayLayers = 1;
 
         depthFrame.textures.Resize(1);
-        depthFrame.textures[0] = new VulkanTexture(device, textureDesc);
+        depthFrame.textures[0] = new Texture(device, textureDesc);
 
-		RHI::SamplerDesc samplerDesc{};
-		samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		RHI::SamplerDescriptor samplerDesc{};
+		samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
 		samplerDesc.enableAnisotropy = true;
 		samplerDesc.maxAnisotropy = 16;
 		samplerDesc.borderColor = Color::Black();
@@ -423,17 +423,16 @@ namespace CE::Vulkan
         depthFrame.framebuffer = nullptr;
     }
 
-    void VulkanRenderTarget::DestroyDepthBuffer()
+    void RenderTarget::DestroyDepthBuffer()
     {
         if (depthFrame.textures.GetSize() > 0)
             delete depthFrame.textures[0];
 		if (depthFrame.samplers.GetSize() > 0)
 			delete depthFrame.samplers[0];
-            //vkDestroySampler(device->GetHandle(), depthFrame.samplers[0], nullptr);
         delete depthFrame.framebuffer;
     }
 
-    void VulkanRenderTarget::CreateColorBuffers()
+    void RenderTarget::CreateColorBuffers()
     {
         for (int i = 0; i < backBufferCount; i++)
         {
@@ -447,7 +446,7 @@ namespace CE::Vulkan
             {
                 auto imageFormat = rtLayout.colorFormats[j];
 
-                RHI::TextureDesc textureDesc{};
+                RHI::TextureDescriptor textureDesc{};
                 textureDesc.name = "Color Buffer";
                 textureDesc.width = GetWidth();
                 textureDesc.height = GetHeight();
@@ -457,12 +456,12 @@ namespace CE::Vulkan
                 textureDesc.mipLevels = 1;
                 textureDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
                 textureDesc.sampleCount = 1;
-                textureDesc.forceLinearLayout = false;
+				textureDesc.arrayLayers = 1;
 
-                frame.textures[j] = new VulkanTexture(device, textureDesc);
+                frame.textures[j] = new Texture(device, textureDesc);
 
-				RHI::SamplerDesc samplerDesc{};
-				samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+				RHI::SamplerDescriptor samplerDesc{};
+				samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
 				samplerDesc.enableAnisotropy = true;
 				samplerDesc.maxAnisotropy = 16;
 				samplerDesc.borderColor = Color::Black();
@@ -484,7 +483,7 @@ namespace CE::Vulkan
         }
     }
 
-    void VulkanRenderTarget::DestroyColorBuffers()
+    void RenderTarget::DestroyColorBuffers()
     {
         for (int i = 0; i < colorFrames.GetSize(); i++)
         {

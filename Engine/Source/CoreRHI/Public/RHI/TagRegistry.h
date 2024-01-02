@@ -121,7 +121,7 @@ namespace CE::RHI
 		};
 
 		mutable SharedMutex mutex{};
-		FixedArray<Entry, MaxTagCount> entriesByTag{};
+		StaticArray<Entry, MaxTagCount> entriesByTag{};
 		SIZE_T allocatedTagCount = 0;
 
 	};

@@ -14,7 +14,7 @@ namespace CE::RHI
 	/// DrawListTag can be used to determine the pass for ex: Shadow Pass, Forward+ Pass, Transparent pass, etc.
 	class CORERHI_API DrawPacket final : public IntrusiveBase
 	{
-		CE_NO_COPY(DrawPacket);
+		CE_NO_COPY(DrawPacket)
 	public:
 
 		DrawPacket() = default;

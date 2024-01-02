@@ -1,11 +1,8 @@
 
-#include "VulkanRHI.h"
 #include "VulkanRHIPrivate.h"
-#include "VulkanDevice.h"
 
-#include "VulkanSampler.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     static VkSamplerAddressMode ToVkSamplerAddressMode(RHI::SamplerAddressMode mode)
     {
@@ -40,7 +37,7 @@ namespace CE
 		return VK_FILTER_LINEAR;
 	}
 
-    VulkanSampler::VulkanSampler(VulkanDevice* device, const RHI::SamplerDesc& samplerDesc)
+    VulkanSampler::VulkanSampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc)
         : device(device), borderColor(samplerDesc.borderColor)
     {
         VkSamplerCreateInfo samplerCI{};
