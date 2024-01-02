@@ -17,7 +17,8 @@ namespace CE
 			JobManagerDesc desc{};
 			desc.defaultTag = JOB_THREAD_WORKER;
 			desc.totalThreads = 0; // auto set optimal number of threads
-
+            JOB_THREAD_PRIMARY;
+            
 			gJobManager = new JobManager("JobSystemManager", desc);
 			gJobContext = new JobContext(gJobManager);
 			JobContext::PushGlobalContext(gJobContext);

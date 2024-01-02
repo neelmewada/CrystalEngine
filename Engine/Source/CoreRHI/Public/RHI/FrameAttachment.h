@@ -8,11 +8,17 @@ namespace CE::RHI
 	class CORERHI_API FrameAttachment
 	{
 	public:
-
+        
+        virtual ~FrameAttachment() = default;
+        
+    protected:
+        
+        FrameAttachment(const AttachmentID& attachmentId, AttachmentLifetimeType lifetime);
 
 	private:
-
-
+        
+        AttachmentID attachmentId{};
+        AttachmentLifetimeType lifetime{};
 	};
     
 } // namespace CE::RHI

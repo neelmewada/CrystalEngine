@@ -294,11 +294,11 @@ namespace CE::Vulkan
 
         vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo,
             commandList->renderFinishedFence[renderTarget->currentImageIndex]);
-
+        
         renderTarget->isFresh = false;
         return true;
     }
-
+    
     bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, Viewport* viewport)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();

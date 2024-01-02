@@ -15,6 +15,8 @@ namespace CE::RHI
 		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
 	};
 
+    using ImageDescriptor = TextureDescriptor;
+
 	class CORERHI_API Texture : public RHIResource, public IDeviceObject
 	{
 	protected:

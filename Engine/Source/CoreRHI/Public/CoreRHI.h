@@ -39,6 +39,10 @@
 
 // Frame
 #include "RHI/FrameAttachment.h"
+#include "RHI/ImageFrameAttachment.h"
+#include "RHI/FrameAttachmentDatabase.h"
+#include "RHI/Scope.h"
+#include "RHI/FrameGraph.h"
 
 #include "RHI/RHISystem.h"
 

@@ -32,8 +32,7 @@ namespace CE
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
 	 *
-	 * SPDX-License-Identifier: Apache-2.0 OR MIT
-	 *
+	 * Used under MIT License: https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
 	 */
 
 	class CORE_API Job

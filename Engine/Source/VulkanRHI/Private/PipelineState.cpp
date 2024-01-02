@@ -252,11 +252,6 @@ namespace CE::Vulkan
 
 		pipelineCI.pDepthStencilState = &depthStencilCI;
 
-		// - Render Pass -
-
-		pipelineCI.subpass = 0;
-		pipelineCI.renderPass = renderTarget->renderPass->GetHandle();
-
 		// - Pipeline Layout -
 
 		auto srgManager = device->GetShaderResourceManager();
@@ -352,8 +347,15 @@ namespace CE::Vulkan
 		this->pipelineLayout->handle = pipelineLayout;
 
 		pipelineCI.layout = pipelineLayout;
+        
+        // No need to use pipeline derivatives
 		pipelineCI.basePipelineHandle = VK_NULL_HANDLE;
 		pipelineCI.basePipelineIndex = -1;
+        
+        // - Render Pass -
+        
+        pipelineCI.subpass = 0;
+        pipelineCI.renderPass = renderTarget->renderPass->GetHandle();
 
 		// - END -
 		
