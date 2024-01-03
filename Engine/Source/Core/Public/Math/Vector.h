@@ -25,6 +25,11 @@ namespace CE
 
 	typedef Vec2 Range;
 
+    inline bool ApproxEquals(f32 lhs, f32 rhs)
+    {
+        return std::abs(lhs - rhs) < std::numeric_limits<f32>::epsilon();
+    }
+
     template<typename T>
     class TVector2
     {

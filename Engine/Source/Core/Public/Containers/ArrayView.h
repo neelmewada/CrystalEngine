@@ -142,7 +142,7 @@ namespace CE
 
 		inline bool IsEmpty() const
 		{
-			return first == null || _end == null || ((SIZE_T)first.ptr > (SIZE_T)_end.ptr);
+			return first == nullptr || _end == nullptr || ((SIZE_T)first.ptr > (SIZE_T)_end.ptr);
 		}
 
 		inline SIZE_T GetSize() const

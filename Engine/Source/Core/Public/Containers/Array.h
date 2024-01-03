@@ -340,6 +340,7 @@ namespace CE
             Iterator& operator++() { ptr++; return *this; }
             Iterator operator++(int) { Iterator Temp = *this; ++(*this); return Temp; }
 			Iterator operator+(difference_type rhs) const { return Iterator(ptr + rhs); }
+            Iterator& operator+=(difference_type rhs) { ptr += rhs; return *this; }
 			Iterator operator+(Iterator rhs) const { return ptr + rhs.ptr; }
 
             // Decrement ops

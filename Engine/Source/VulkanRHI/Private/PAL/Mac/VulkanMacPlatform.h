@@ -4,7 +4,7 @@
 #include "vulkan/vulkan_macos.h"
 #include "vma/vk_mem_alloc.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     class VulkanMacPlatform : public VulkanPlatformBase
     {

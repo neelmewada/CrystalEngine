@@ -38,6 +38,11 @@ namespace CE::RPI
 		static RenderPipeline* CreateFromJson(const String& jsonString, Scene* ownerScene);
 
 		static RenderPipeline* CreateFromJson(Stream* jsonStream, Scene* ownerScene);
+        
+        inline PassTree* GetPassTree() const
+        {
+            return passTree;
+        }
 
 	private:
         

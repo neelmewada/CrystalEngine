@@ -31,7 +31,7 @@ ce_add_target(System SHARED
             CE::Core
             CE::CoreSettings
             CE::CoreMedia
-            $<${PAL_PLATFORM_IS_DESKTOP}:CE::CoreShader>
+            CE::CoreShader
             CE::CoreRHI
             CE::CoreRPI
         TARGETS 

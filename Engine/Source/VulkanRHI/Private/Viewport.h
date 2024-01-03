@@ -8,6 +8,7 @@ namespace CE {
 
 namespace CE::Vulkan
 {
+    class VulkanFrameBuffer;
 
     class Viewport : public RHI::Viewport
     {

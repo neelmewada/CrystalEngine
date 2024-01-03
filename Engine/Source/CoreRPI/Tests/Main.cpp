@@ -192,8 +192,8 @@ TEST(RenderPipeline, DefaultPipelineTree)
 
 		RenderPipeline* renderPipeline = RenderPipeline::CreateFromJson(&stream, scene);
 		
-		PassTree* tree = renderPipeline->passTree;
-		ParentPass* rootPass = tree->rootPass;
+		PassTree* tree = renderPipeline->GetPassTree();
+		ParentPass* rootPass = tree->GetRootPas();
 
 		EXPECT_EQ(rootPass->GetName(), "DefaultPipelineRoot");
 		EXPECT_EQ(rootPass->passes.GetSize(), 3);
@@ -219,7 +219,7 @@ TEST(RenderPipeline, DefaultPipelineTree)
 			EXPECT_EQ(pass->outputBindings.GetSize(), 1);
 
 			EXPECT_EQ(pass->outputBindings[0].attachment, pass->passAttachments[0]);
-			EXPECT_EQ(pass->outputBindings[0].connectedBinding, null);
+			EXPECT_EQ(pass->outputBindings[0].connectedBinding, nullptr);
 		}
 
 		// Opaque Pass
@@ -232,7 +232,7 @@ TEST(RenderPipeline, DefaultPipelineTree)
 			EXPECT_EQ(pass->inputBindings[0].connectedBinding, &depthPass->outputBindings[0]);
 
 			EXPECT_EQ(pass->outputBindings.GetSize(), 1);
-			EXPECT_EQ(pass->outputBindings[0].connectedBinding, null);
+			EXPECT_EQ(pass->outputBindings[0].connectedBinding, nullptr);
 			EXPECT_EQ(pass->outputBindings[0].attachment, rootPass->passAttachments[0]);
 		}
 

@@ -92,8 +92,8 @@ namespace CE::Vulkan
 
 		VulkanDevice* device = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
-		VulkanDescriptorPool* pool = null;
-		VkDescriptorPool allocPool = null;
+		VulkanDescriptorPool* pool = nullptr;
+		VkDescriptorPool allocPool = nullptr;
 
 		int setNumber = -1;
 		VkDescriptorSet descriptorSet = nullptr;

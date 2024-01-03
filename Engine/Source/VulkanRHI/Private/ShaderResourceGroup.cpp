@@ -122,11 +122,13 @@ namespace CE::Vulkan
 		return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 	}
 
-	MergedShaderResourceGroup* ShaderResourceManager::FindOrCreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs)
+	MergedShaderResourceGroup* ShaderResourceManager::FindOrCreateMergedSRG(const ArrayView<Vulkan::ShaderResourceGroup*>& srgs)
 	{
 		SIZE_T mergedSRGHash = 0;
-		Array<ShaderResourceGroup*> srgArray = srgs;
-		std::sort(srgArray.begin(), srgArray.end(), [](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b)
+		Array<Vulkan::ShaderResourceGroup*> srgArray = srgs;
+        
+		srgArray.Sort(
+            [](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b) -> bool
 			{
 				return (int)a->GetSRGType() <= (int)b->GetSRGType();
 			});
@@ -148,13 +150,13 @@ namespace CE::Vulkan
 	MergedShaderResourceGroup* ShaderResourceManager::CreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs)
 	{
 		if (srgs.IsEmpty())
-			return null;
+			return nullptr;
 
 		MergedShaderResourceGroup* mergedSRG = new MergedShaderResourceGroup(device, srgs);
 		if (mergedSRG->GetMergedHash() == 0)
 		{
 			delete mergedSRG;
-			return null;
+			return nullptr;
 		}
 		
 		mergedSRGsByHash[mergedSRG->GetMergedHash()] = mergedSRG;
@@ -311,13 +313,13 @@ namespace CE::Vulkan
 		if (descriptorSet)
 		{
 			pool->Free({ descriptorSet });
-			descriptorSet = null;
+			descriptorSet = nullptr;
 		}
 
 		if (setLayout)
 		{
-			vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, null);
-			setLayout = null;
+			vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
+			setLayout = nullptr;
 		}
 	}
 
@@ -361,7 +363,7 @@ namespace CE::Vulkan
 			write.pImageInfo = &imageWrite;
 		}
 
-		vkUpdateDescriptorSets(device->GetHandle(), writes.GetSize(), writes.GetData(), 0, null);
+		vkUpdateDescriptorSets(device->GetHandle(), writes.GetSize(), writes.GetData(), 0, nullptr);
 	}
 
 } // namespace CE
