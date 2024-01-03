@@ -60,7 +60,11 @@ namespace CE::RHI
 
 		virtual void UploadData(const BufferData& data) = 0;
 
+		//! Allocates a raw buffer in CPU memory and reads buffer data into it. You are responsible for releasing outData memory block using Memory::Free().
 		virtual void ReadData(u8** outData, u64* outDataSize) = 0;
+
+		//! Read data into a pre-allocated memory.
+		virtual void ReadData(void* data) = 0;
 
 	protected:
 

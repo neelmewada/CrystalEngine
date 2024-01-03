@@ -15,6 +15,11 @@ namespace CE::Vulkan
 
 		bool BindBuffer(Buffer* buffer, VkDeviceSize offset);
 
+		inline VkDeviceMemory GetHandle() const
+		{
+			return allocation;
+		}
+
 	private:
 
 		struct Range

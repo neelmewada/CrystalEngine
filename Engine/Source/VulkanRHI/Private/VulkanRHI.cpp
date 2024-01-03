@@ -27,6 +27,8 @@ namespace CE::Vulkan
 
 	}
 
+	VULKANRHI_API IValidationCallbacks* gVulkanValidationCallbacks = nullptr;
+
     VKAPI_ATTR VkBool32 VulkanValidationCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageTypes,
@@ -35,18 +37,26 @@ namespace CE::Vulkan
     {
         if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         {
+			if (gVulkanValidationCallbacks != nullptr)
+				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Error, pCallbackData->pMessage);
             CE_LOG(Error, All, "Vulkan Error: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
         {
+			if (gVulkanValidationCallbacks != nullptr)
+				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Info, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Info: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
         {
+			if (gVulkanValidationCallbacks != nullptr)
+				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Verbose, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         {
+			if (gVulkanValidationCallbacks != nullptr)
+				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Warning, pCallbackData->pMessage);
             CE_LOG(Warn, All, "Vulkan Warning: {}", pCallbackData->pMessage);
         }
         return VK_FALSE;
@@ -444,6 +454,11 @@ namespace CE::Vulkan
 	}
 
 
+	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout)
+	{
+		return new Vulkan::ShaderResourceGroup(device, srgLayout);
+	}
+
 	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
 	{
 		delete shaderResourceGroup;
@@ -458,6 +473,11 @@ namespace CE::Vulkan
 	void VulkanRHI::DestroyPipelineState(RHI::IPipelineState* pipelineState)
 	{
 		delete pipelineState;
+	}
+
+	Array<RHI::CommandQueue*> VulkanRHI::GetQueues(RHI::HardwareQueueClassMask queueMask)
+	{
+		return device->GetQueues(queueMask);
 	}
 
 } // namespace CE

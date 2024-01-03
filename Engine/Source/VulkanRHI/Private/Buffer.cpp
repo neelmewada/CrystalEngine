@@ -193,11 +193,20 @@ namespace CE::Vulkan
 	{
 		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
-			// CPU Visible Memory
-			void* ptr;
-			vkMapMemory(device->GetHandle(), bufferMemory, 0, bufferSize, 0, &ptr);
-			memcpy((void*)((SIZE_T)ptr + (SIZE_T)bufferData.startOffsetInBuffer), bufferData.data, bufferData.dataSize);
-			vkUnmapMemory(device->GetHandle(), bufferMemory);
+			if (bufferMemory != nullptr) // Self allocated memory
+			{
+				void* ptr;
+				vkMapMemory(device->GetHandle(), bufferMemory, 0, bufferSize, 0, &ptr);
+				memcpy((void*)((SIZE_T)ptr + (SIZE_T)bufferData.startOffsetInBuffer), bufferData.data, bufferData.dataSize);
+				vkUnmapMemory(device->GetHandle(), bufferMemory);
+			}
+			else if (memoryHeap != nullptr) // Externally managed memory
+			{
+				void* ptr;
+				vkMapMemory(device->GetHandle(), memoryHeap->GetHandle(), memoryOffset, bufferSize, 0, &ptr);
+				memcpy((void*)((SIZE_T)ptr + (SIZE_T)bufferData.startOffsetInBuffer), bufferData.data, bufferData.dataSize);
+				vkUnmapMemory(device->GetHandle(), memoryHeap->GetHandle());
+			}
 		}
 		else
 		{
@@ -219,15 +228,51 @@ namespace CE::Vulkan
 			// Shared memory
 			*outDataSize = bufferSize;
 			*outData = (u8*)Memory::Malloc(bufferSize);
-			void* ptr = nullptr;
-			vkMapMemory(device->GetHandle(), bufferMemory, 0, bufferSize, 0, &ptr);
-			memcpy(*outData, ptr, bufferSize);
-			vkUnmapMemory(device->GetHandle(), bufferMemory);
+			if (bufferMemory != nullptr) // Self allocated memory
+			{
+				void* ptr = nullptr;
+				vkMapMemory(device->GetHandle(), bufferMemory, 0, bufferSize, 0, &ptr);
+				memcpy(*outData, ptr, bufferSize);
+				vkUnmapMemory(device->GetHandle(), bufferMemory);
+			}
+			else if (memoryHeap != nullptr) // Externally managed memory
+			{
+				void* ptr = nullptr;
+				vkMapMemory(device->GetHandle(), memoryHeap->GetHandle(), memoryOffset, bufferSize, 0, &ptr);
+				memcpy(*outData, ptr, bufferSize);
+				vkUnmapMemory(device->GetHandle(), memoryHeap->GetHandle());
+			}
 		}
 		else
 		{
 			// GPU Memory
 			ReadDataFromGPU(outData, outDataSize);
+		}
+	}
+
+	void Buffer::ReadData(void* data)
+	{
+		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		{
+			if (bufferMemory != nullptr) // Self allocated memory
+			{
+				void* ptr = nullptr;
+				vkMapMemory(device->GetHandle(), bufferMemory, 0, bufferSize, 0, &ptr);
+				memcpy(data, ptr, bufferSize);
+				vkUnmapMemory(device->GetHandle(), bufferMemory);
+			}
+			else if (memoryHeap != nullptr) // Externally managed memory
+			{
+				void* ptr = nullptr;
+				vkMapMemory(device->GetHandle(), memoryHeap->GetHandle(), memoryOffset, bufferSize, 0, &ptr);
+				memcpy(data, ptr, bufferSize);
+				vkUnmapMemory(device->GetHandle(), memoryHeap->GetHandle());
+			}
+		}
+		else
+		{
+			// GPU Memory
+			ReadDataFromGPU(data);
 		}
 	}
 
@@ -452,81 +497,89 @@ namespace CE::Vulkan
         stagingBuffer = nullptr;
 	}
 
-    //void Buffer::Resize(u64 newBufferSize)
-    //{
-    //    if (newBufferSize == 0)
-    //    {
-    //        CE_LOG(Error, All, "Cannot resize a Vulkan Buffer to a size of 0.");
-    //        return;
-    //    }
-    //    
-    //    u64 copyDataSize = Math::Min(bufferSize, newBufferSize);
-    //    
-    //    CreateUploadContext();
-    //    
-    //    RHI::BufferDesc newBufferDesc{};
-    //    newBufferDesc.name = name;
-    //    newBufferDesc.bufferSize = newBufferSize;
-    //    newBufferDesc.allocMode = allocMode;
-    //    newBufferDesc.bindFlags = bindFlags;
-    //    newBufferDesc.structureByteStride = structureByteStride;
-    //    newBufferDesc.usageFlags = usageFlags;
-    //    
-    //    Buffer* newBuffer = new Buffer(device, newBufferDesc);
-    //    
-    //    if (copyDataSize > 0)
-    //    {
-    //        VkCommandBufferBeginInfo beginInfo{};
-    //        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    //        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    //        
-    //        vkBeginCommandBuffer(uploadCmdBuffer, &beginInfo);
-    //        {
-    //            VkBufferCopy copy{};
-    //            copy.size = copyDataSize;
-    //            copy.srcOffset = 0;
-    //            copy.dstOffset = 0;
-    //            
-    //            vkCmdCopyBuffer(uploadCmdBuffer, this->buffer, newBuffer->buffer, 1, &copy);
-    //        }
-    //        vkEndCommandBuffer(uploadCmdBuffer);
-    //        
-    //        VkSubmitInfo submitInfo{};
-    //        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    //        submitInfo.commandBufferCount = 1;
-    //        submitInfo.pCommandBuffers = &uploadCmdBuffer;
-    //        submitInfo.waitSemaphoreCount = 0;
-    //        submitInfo.pWaitDstStageMask = nullptr;
-    //        submitInfo.pWaitSemaphores = nullptr;
-    //        submitInfo.signalSemaphoreCount = 0;
-    //        submitInfo.pSignalSemaphores = nullptr;
-    //        
-    //        vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
-    //        
-    //        constexpr u64 u64Max = std::numeric_limits<u64>::max();
-    //        vkWaitForFences(device->GetHandle(), 1, &uploadFence, VK_TRUE, u64Max);
-    //        vkResetFences(device->GetHandle(), 1, &uploadFence);
+	void Buffer::ReadDataFromGPU(void* data)
+	{
+		if (heapType != RHI::MemoryHeapType::Default)
+			return;
 
-    //        vkResetCommandPool(device->GetHandle(), uploadCmdPool, 0);
-    //    }
-    //    
-    //    // Destroy `this` buffer
-    //    Free();
-    //    
-    //    // `Move` the new buffer to `this` buffer
-    //    this->buffer = newBuffer->buffer;
-    //    this->bufferMemory = newBuffer->bufferMemory;
-    //    this->bufferSize = newBuffer->bufferSize;
-    //    this->allocMode = newBuffer->allocMode;
-    //    this->bindFlags = newBuffer->bindFlags;
-    //    this->usageFlags = newBuffer->usageFlags;
-    //    this->structureByteStride = newBuffer->structureByteStride;
-    //    
-    //    // Set newBuffer fields to nullptr so the new buffer doesn't get destroyed
-    //    newBuffer->buffer = nullptr;
-    //    newBuffer->bufferMemory = nullptr;
-    //    
-    //    delete newBuffer;
-    //}
+		if (!uploadContextExists)
+		{
+			VkFenceCreateInfo fenceCI{};
+			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+			if (vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &uploadFence) != VK_SUCCESS)
+			{
+				CE_LOG(Error, All, "Failed to create GPU Buffer Upload Fence for buffer {}", name);
+				return;
+			}
+
+			VkCommandPoolCreateInfo cmdPoolCI{};
+			cmdPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+			cmdPoolCI.queueFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
+
+			if (vkCreateCommandPool(device->GetHandle(), &cmdPoolCI, nullptr, &uploadCmdPool) != VK_SUCCESS)
+			{
+				vkDestroyFence(device->GetHandle(), uploadFence, nullptr);
+				uploadFence = nullptr;
+				CE_LOG(Error, All, "Failed to create GPU Buffer Upload Command Pool for buffer {}", name);
+				return;
+			}
+
+			uploadContextExists = true;
+		}
+
+		if (!uploadContextExists)
+		{
+			CE_LOG(Error, All, "Failed to read data from GPU buffer! Could not create upload context for buffer {}", name);
+			return;
+		}
+
+		RHI::BufferDescriptor stagingBufferDesc{};
+		stagingBufferDesc.name = "Staging Buffer";
+		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::ReadBack;
+		stagingBufferDesc.bufferSize = bufferSize;
+		stagingBufferDesc.structureByteStride = structureByteStride;
+
+		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(uploadCmdBuffer, &beginInfo);
+		{
+			VkBufferCopy copy{};
+			copy.srcOffset = 0;
+			copy.size = bufferSize;
+			copy.dstOffset = 0;
+
+			vkCmdCopyBuffer(uploadCmdBuffer, this->buffer, stagingBuffer->GetBuffer(), 1, &copy);
+		}
+		vkEndCommandBuffer(uploadCmdBuffer);
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &uploadCmdBuffer;
+		submitInfo.waitSemaphoreCount = 0;
+		submitInfo.pWaitDstStageMask = nullptr;
+		submitInfo.pWaitSemaphores = nullptr;
+		submitInfo.signalSemaphoreCount = 0;
+		submitInfo.pSignalSemaphores = nullptr;
+
+		vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
+
+		constexpr u64 u64Max = std::numeric_limits<u64>::max();
+		vkWaitForFences(device->GetHandle(), 1, &uploadFence, VK_TRUE, u64Max);
+		vkResetFences(device->GetHandle(), 1, &uploadFence);
+
+		vkResetCommandPool(device->GetHandle(), uploadCmdPool, 0);
+
+		stagingBuffer->ReadData(data);
+
+		delete stagingBuffer;
+		stagingBuffer = nullptr;
+	}
 
 } // namespace CE

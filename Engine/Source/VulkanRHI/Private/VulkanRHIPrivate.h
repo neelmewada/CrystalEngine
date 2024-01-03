@@ -8,10 +8,11 @@
 #include "vulkan/vulkan.h"
 
 #include "VulkanRHI.h"
-#include "VulkanQueue.h"
+#include "CommandQueue.h"
 #include "VulkanDevice.h"
 #include "SwapChain.h"
 #include "Viewport.h"
+#include "RenderTargetLayout.h"
 #include "VulkanRenderPass.h"
 
 #include "DescriptorPool.h"
@@ -25,7 +26,6 @@
 #include "ShaderModule.h"
 #include "PipelineState.h"
 
-#include "RenderTargetLayout.h"
 #include "RenderTarget.h"
 #include "FrameBuffer.h"
 #include "SwapChain.h"
@@ -35,6 +35,22 @@
 namespace CE::Vulkan
 {
 
+	enum class ValidationMessageType
+	{
+		Verbose,
+		Info,
+		Warning,
+		Error
+	};
 
+	class IValidationCallbacks
+	{
+	public:
+
+		virtual void OnValidationMessage(ValidationMessageType messageType, const char* message) {}
+
+	};
+
+	extern VULKANRHI_API IValidationCallbacks* gVulkanValidationCallbacks;
 
 } // namespace CE::Vulkan

@@ -28,6 +28,7 @@ namespace CE::RHI
         RenderPass,
         Viewport,
 
+		CommandQueue,
         CommandList
     };
 

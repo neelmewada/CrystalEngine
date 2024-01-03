@@ -39,12 +39,23 @@ namespace CE::RHI
 	};
 	ENUM_CLASS(AttachmentType);
 
+	ENUM(Flags)
+	enum class ScopeAttachmentAccess : u8
+	{
+		Undefined = 0,
+		Read = BIT(0),
+		Write = BIT(1),
+		ReadWrite = Read | Write
+	};
+	ENUM_CLASS_FLAGS(ScopeAttachmentAccess)
+
 	ENUM()
 	enum class ScopeAttachmentUsage
 	{
 		None = 0,
 		RenderTarget,
 		DepthStencil,
+		Copy,
 		Shader,
 		Resolve,
 		SubpassInput,
@@ -56,14 +67,14 @@ namespace CE::RHI
 	{
 		UnifiedScopeAttachmentDesc() = default;
 
-		UnifiedScopeAttachmentDesc(const ImageDesc& imageDesc)
+		UnifiedScopeAttachmentDesc(const ImageDescriptor& imageDesc)
 			: type(AttachmentType::Image)
 			, imageDesc(imageDesc)
 		{
 
 		}
 
-		UnifiedScopeAttachmentDesc(const BufferDesc& bufferDesc)
+		UnifiedScopeAttachmentDesc(const BufferDescriptor& bufferDesc)
 			: type(AttachmentType::Buffer)
 			, bufferDesc(bufferDesc)
 		{
@@ -74,19 +85,19 @@ namespace CE::RHI
 		{
 			if (type == AttachmentType::Image)
 			{
-				imageDesc.~ImageDesc();
+				imageDesc.~ImageDescriptor();
 			}
 			else
 			{
-				bufferDesc.~BufferDesc();
+				bufferDesc.~BufferDescriptor();
 			}
 		}
 
 		AttachmentType type = AttachmentType::Image;
 
 		union {
-			ImageDesc imageDesc{};
-			BufferDesc bufferDesc;
+			ImageDescriptor imageDesc{};
+			BufferDescriptor bufferDesc;
 		};
 	};
     

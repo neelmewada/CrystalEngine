@@ -57,9 +57,6 @@ namespace CE::Vulkan
 			}
 		}
 
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = heapSize;
 		allocInfo.memoryTypeIndex = allocatedMemoryTypeIndex;
 		
 		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &allocation);
@@ -81,9 +78,10 @@ namespace CE::Vulkan
 
 	bool MemoryHeap::SupportsOptimalImageTiling()
 	{
-		if (memoryPropertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-			return false;
-		return true;
+		// Optimal image tiling is supported only on Device local memory
+		if (memoryPropertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
+			return true;
+		return false;
 	}
 
 	bool MemoryHeap::BindBuffer(Buffer* buffer, VkDeviceSize offset)

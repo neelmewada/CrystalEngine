@@ -113,14 +113,16 @@ namespace CE::Vulkan
 
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection) override;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
-
-		//virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) override;
+		
+		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout) override;
 		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) override;
 
 		// - Pipeline State -
 
 		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) override;
 		virtual void DestroyPipelineState(RHI::IPipelineState* pipelineState) override;
+
+		virtual Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask) override;
 
 		// - Utilities -
 

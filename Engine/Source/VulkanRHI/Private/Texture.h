@@ -8,6 +8,7 @@ namespace CE::Vulkan
     {
     public:
         Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
+		Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
         virtual ~Texture();
 
         virtual void* GetHandle() override
@@ -42,6 +43,8 @@ namespace CE::Vulkan
 
 		virtual void ReadData(u8** outPixels, u64* outDataSize) override;
 
+		virtual void UploadData(RHI::Buffer* srcBuffer, u64 offsetInBuffer = 0, u32 mipLevel = 0, u32 arrayLayer = 0);
+
     protected:
 
         void CopyPixelsFromBuffer(Buffer* srcBuffer);
@@ -49,10 +52,17 @@ namespace CE::Vulkan
 		void CopyPixelsToBuffer(Buffer* dstBuffer);
 
     private:
+
+		void Init(const RHI::TextureDescriptor& desc);
+		void AllocateInternal();
+		void PostInit(const RHI::TextureDescriptor& desc);
+
         VulkanDevice* device = nullptr;
         VkImage image = nullptr;
         VkDeviceMemory imageMemory = nullptr;
         VkImageView imageView = nullptr;
+
+		MemoryHeapType heapType{};
         
         VkFormat vkFormat{};
 		VkImageLayout vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;

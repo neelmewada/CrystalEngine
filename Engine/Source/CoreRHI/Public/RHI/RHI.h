@@ -90,7 +90,7 @@ namespace CE::RHI
 		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection) = 0;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) = 0;
 
-		//virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc) = 0;
+		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout) = 0;
 		virtual void DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup) = 0;
 
 		// - Pipeline State -
@@ -99,6 +99,8 @@ namespace CE::RHI
 		virtual void DestroyPipelineState(IPipelineState* pipelineState) = 0;
 
 		// - Utilities -
+
+		virtual Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask) = 0;
 
 		virtual void Blit(Texture* source, Texture* destination, FilterMode filter) = 0;
 

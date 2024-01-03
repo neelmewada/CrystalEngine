@@ -107,7 +107,7 @@ namespace CE::Vulkan
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = ((VulkanRenderPass*)renderTarget->GetRenderPass())->GetHandle();
+		//renderPassInfo.renderPass = ((VulkanRenderPass*)renderTarget->GetRenderPass())->GetHandle();
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = extent;
 
@@ -278,7 +278,7 @@ namespace CE::Vulkan
 			vkCmdBindPipeline(commandBuffers[i], bindPoint, vkPipeline);
 		}
 
-		currentPipelineLayout = (VulkanPipelineLayout*)pipeline->GetPipelineLayout();
+		currentPipelineLayout = (PipelineLayout*)pipeline->GetPipelineLayout();
 	}
 
 	void GraphicsCommandList::SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& shaderResourceGroups)

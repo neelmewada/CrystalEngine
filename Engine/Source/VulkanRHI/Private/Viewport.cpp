@@ -3,10 +3,6 @@
 
 #include "PAL/Common/VulkanPlatform.h"
 
-#if PAL_TRAIT_QT_SUPPORTED
-#include <QVulkanWindow>
-#endif
-
 namespace CE::Vulkan
 {
     
@@ -99,7 +95,10 @@ namespace CE::Vulkan
 
     void Viewport::OnWindowResized(PlatformWindow* window, u32 width, u32 height)
     {
-        Rebuild();
+		if (windowHandle == window)
+		{
+			Rebuild();
+		}
     }
 
     // - Setters -

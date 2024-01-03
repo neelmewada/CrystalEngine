@@ -18,7 +18,9 @@
 	inline			 bool  operator==(Enum E, s32 Rhs) { return E == (Enum)Rhs; }\
 	inline			 bool  operator!=(Enum E, s32 Rhs) { return E != (Enum)Rhs; }\
     inline           bool  operator==(Enum E, s64 Rhs) { return E == (Enum)Rhs; }\
-    inline           bool  operator!=(Enum E, s64 Rhs) { return E != (Enum)Rhs; }
+    inline           bool  operator!=(Enum E, s64 Rhs) { return E != (Enum)Rhs; }\
+	inline constexpr u32  operator& (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs & (__underlying_type(Enum))Rhs); }\
+	inline constexpr u32  operator| (Enum  Lhs, u32 Rhs) { return (u32)((__underlying_type(Enum))Lhs | (__underlying_type(Enum))Rhs); }
 
 #define FRIEND_ENUM_CLASS_FLAGS(Enum) \
 	friend           Enum& operator|=(Enum& Lhs, Enum Rhs); \

@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 
     ImageFrameAttachment::ImageFrameAttachment(const ImageDescriptor& imageDesc, AttachmentLifetimeType lifetime)
-        : (imageDesc)
+        : FrameAttachment(imageDesc.name, lifetime), descriptor(imageDesc)
     {
         
     }

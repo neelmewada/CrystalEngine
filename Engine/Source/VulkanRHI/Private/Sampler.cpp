@@ -8,13 +8,13 @@ namespace CE::Vulkan
     {
         switch (mode)
         {
-            case RHI::SAMPLER_ADDRESS_MODE_REPEAT:
+		case RHI::SamplerAddressMode::Repeat:
                 return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            case RHI::SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT:
+		case RHI::SamplerAddressMode::MirroredRepeat:
                 return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-            case RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE:
+		case RHI::SamplerAddressMode::ClampToEdge:
                 return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-            case RHI::SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER:
+		case RHI::SamplerAddressMode::ClampToBorder:
                 return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
         }
         
@@ -25,11 +25,11 @@ namespace CE::Vulkan
 	{
 		switch (filterMode)
 		{
-		case RHI::FILTER_MODE_LINEAR:
+		case RHI::FilterMode::Linear:
 			return VK_FILTER_LINEAR;
-		case RHI::FILTER_MODE_NEAREST:
+		case RHI::FilterMode::Nearest:
 			return VK_FILTER_NEAREST;
-		case RHI::FILTER_MODE_CUBIC:
+		case RHI::FilterMode::Cubic:
 			if (device->IsDeviceExtensionSupported(VK_EXT_FILTER_CUBIC_EXTENSION_NAME))
 				return VK_FILTER_CUBIC_EXT;
 			break;

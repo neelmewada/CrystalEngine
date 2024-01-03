@@ -55,6 +55,17 @@ function(ce_add_test NAME)
             ${ce_add_test_TARGET}
     )
 
+    get_target_property(target_include_paths ${ce_add_test_TARGET} INCLUDE_DIRECTORIES)
+    foreach(dir ${target_include_paths})
+        list(APPEND include_dirs "${dir}")
+    endforeach()
+    
+    get_target_property(target_links ${ce_add_test_TARGET} LINK_LIBRARIES)
+    target_link_libraries(${NAME}
+        PRIVATE
+            ${target_links}
+    )
+
     string(TOLOWER ${ce_add_test_TARGET} ce_add_test_TARGET_LOWERCASE)
 
     target_compile_definitions(${NAME} 

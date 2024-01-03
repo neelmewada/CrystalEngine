@@ -19,6 +19,9 @@ namespace CE
     template<typename ElementType>
     class Array;
 
+	template<typename ElementType>
+	class ArrayView;
+
     template<typename ElementType>
     class List
     {
@@ -27,6 +30,8 @@ namespace CE
         {
 
         }
+
+		List(const ArrayView<ElementType>& view);
 
         List(SIZE_T count) : Impl(count)
         {
@@ -420,6 +425,8 @@ namespace CE
         {
             
         }
+
+		Array(const ArrayView<ElementType>& view);
 
         Array(SIZE_T count) : Super(count), ElementTypeId(GetTypeId<ElementType>())
         {

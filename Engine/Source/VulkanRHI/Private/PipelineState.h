@@ -5,15 +5,16 @@
 namespace CE::Vulkan
 {
 	class PipelineState;
+	class GraphicsPipelineState;
 
-	class VulkanPipelineLayout : public RHI::IPipelineLayout
+	class PipelineLayout : public RHI::IPipelineLayout
 	{
 	public:
 
-		VulkanPipelineLayout(VulkanDevice* device, PipelineState* copyFrom);
+		PipelineLayout(VulkanDevice* device, PipelineState* copyFrom);
 
-		VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType);
-		virtual ~VulkanPipelineLayout();
+		PipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType);
+		virtual ~PipelineLayout();
 
 		virtual RHI::PipelineType GetPipelineType() override
 		{
@@ -39,6 +40,7 @@ namespace CE::Vulkan
 
 		friend class GraphicsPipelineState;
 		friend class GraphicsCommandList;
+		friend class PipelineState;
 	};
 
     class PipelineState : public RHI::IPipelineState
@@ -50,14 +52,15 @@ namespace CE::Vulkan
     protected:
         VulkanDevice* device = nullptr;
 		VkPipeline pipeline = nullptr;
-		VulkanPipelineLayout* pipelineLayout = nullptr;
+		PipelineLayout* pipelineLayout = nullptr;
 
 		List<VkDescriptorSetLayout> setLayouts{};
 		List<VkPushConstantRange> pushConstantRanges{};
 		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
 
 		friend class GraphicsCommandList;
-		friend class VulkanPipelineLayout;
+		friend class PipelineLayout;
+		friend class GraphicsPipelineState;
     };
 
 
@@ -93,7 +96,7 @@ namespace CE::Vulkan
 	private:
 
 		friend class GraphicsCommandList;
-		friend class VulkanPipelineLayout;
+		friend class PipelineLayout;
 	};
     
 } // namespace CE::Editor

@@ -2,7 +2,7 @@
 
 #include "vulkan/vulkan.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     
     class VulkanWindowsPlatform : public VulkanPlatformBase

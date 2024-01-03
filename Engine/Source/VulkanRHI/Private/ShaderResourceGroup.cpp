@@ -125,15 +125,16 @@ namespace CE::Vulkan
 	MergedShaderResourceGroup* ShaderResourceManager::FindOrCreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs)
 	{
 		SIZE_T mergedSRGHash = 0;
-		std::sort(srgs.begin(), srgs.end(), [](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b)
+		Array<ShaderResourceGroup*> srgArray = srgs;
+		std::sort(srgArray.begin(), srgArray.end(), [](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b)
 			{
 				return (int)a->GetSRGType() <= (int)b->GetSRGType();
 			});
 
-		mergedSRGHash = (SIZE_T)srgs[0];
-		for (int i = 1; i < srgs.GetSize(); i++)
+		mergedSRGHash = (SIZE_T)srgArray[0];
+		for (int i = 1; i < srgArray.GetSize(); i++)
 		{
-			mergedSRGHash = GetCombinedHash(mergedSRGHash, (SIZE_T)srgs[i]);
+			mergedSRGHash = GetCombinedHash(mergedSRGHash, (SIZE_T)srgArray[i]);
 		}
 
 		if (mergedSRGsByHash.KeyExists(mergedSRGHash) && mergedSRGsByHash[mergedSRGHash] != nullptr)
@@ -141,7 +142,7 @@ namespace CE::Vulkan
 			return mergedSRGsByHash[mergedSRGHash];
 		}
 
-		return CreateMergedSRG(srgs);
+		return CreateMergedSRG(srgArray);
 	}
 
 	MergedShaderResourceGroup* ShaderResourceManager::CreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs)
@@ -157,6 +158,8 @@ namespace CE::Vulkan
 		}
 		
 		mergedSRGsByHash[mergedSRG->GetMergedHash()] = mergedSRG;
+
+		return mergedSRG;
 	}
 
 	void ShaderResourceManager::RemoveMergedSRG(MergedShaderResourceGroup* mergedSRG)
@@ -177,7 +180,7 @@ namespace CE::Vulkan
 		if (!mergedSRGsBySourceSRG.KeyExists(srg))
 			return;
 		
-		// Destroy all merged SRGs created from the given 'srg'
+		// Destroy all merged SRGs created from the given source 'srg'
 		for (MergedShaderResourceGroup* mergedSRG : mergedSRGsBySourceSRG[srg])
 		{
 			// Get all source SRGs used to create 'mergeSRG'

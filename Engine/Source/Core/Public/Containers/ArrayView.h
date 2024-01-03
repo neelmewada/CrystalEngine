@@ -174,5 +174,17 @@ namespace CE
 		ConstIterator _end = nullptr;
 
 	};
+
+	template<typename ElementType>
+	inline CE::List<ElementType>::List(const ArrayView<ElementType>& view)
+		: Impl(view.begin(), view.end())
+	{
+
+	}
+
+	template<typename ElementType>
+	inline CE::Array<ElementType>::Array(const ArrayView<ElementType>& view) : Super(view)
+	{
+	}
     
 } // namespace CE

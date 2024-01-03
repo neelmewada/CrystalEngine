@@ -13,6 +13,7 @@ namespace CE::RHI
 		u32 sampleCount = 1;
 		u32 arrayLayers = 1;
 		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
+		MemoryHeapType defaultHeapType = MemoryHeapType::Default;
 	};
 
     using ImageDescriptor = TextureDescriptor;

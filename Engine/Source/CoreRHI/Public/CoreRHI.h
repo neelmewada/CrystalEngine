@@ -11,9 +11,9 @@
 
 #include "RHI/RHIDefinitions.h"
 #include "RHI/ClearValue.h"
-#include "RHI/AttachmentDefines.h"
 #include "RHI/ShaderResourceGroupLayout.h"
 #include "RHI/Resources.h"
+#include "RHI/CommandQueue.h"
 #include "RHI/MemoryHeap.h"
 #include "RHI/BufferView.h"
 #include "RHI/Buffer.h"
@@ -38,9 +38,11 @@
 #include "RHI/DrawListContext.h"
 
 // Frame
+#include "RHI/AttachmentDefines.h"
 #include "RHI/FrameAttachment.h"
 #include "RHI/ImageFrameAttachment.h"
 #include "RHI/FrameAttachmentDatabase.h"
+#include "RHI/ScopeAttachment.h"
 #include "RHI/Scope.h"
 #include "RHI/FrameGraph.h"
 

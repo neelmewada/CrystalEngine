@@ -21,8 +21,10 @@ namespace CE::Vulkan
 
         virtual void UploadData(const RHI::BufferData& bufferData) override;
 
-        /// Allocates a raw buffer in CPU memory and reads buffer data into it. You are responsible for releasing outData memory block using Memory::Free().
+        //! Allocates a raw buffer in CPU memory and reads buffer data into it. You are responsible for releasing outData memory block using Memory::Free().
 		virtual void ReadData(u8** outData, u64* outDataSize) override;
+
+		virtual void ReadData(void* data) override;
 
     private:
         void CreateUploadContext();
@@ -30,6 +32,7 @@ namespace CE::Vulkan
         void UploadDataToGPU(const RHI::BufferData& bufferData);
 
 		void ReadDataFromGPU(u8** outData, u64* outDataSize);
+		void ReadDataFromGPU(void* data);
         
         void Free();
 

@@ -342,7 +342,7 @@ namespace CE::Vulkan
 		}
 
 		if (this->pipelineLayout == nullptr)
-			this->pipelineLayout = new VulkanPipelineLayout(device, this);
+			this->pipelineLayout = new PipelineLayout(device, this);
 		
 		this->pipelineLayout->handle = pipelineLayout;
 
@@ -391,19 +391,19 @@ namespace CE::Vulkan
 		setLayouts.Clear();
 	}
 
-	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, PipelineState* copyFrom)
+	PipelineLayout::PipelineLayout(VulkanDevice* device, PipelineState* copyFrom)
 		: device(device)
 	{
 		CopyFrom(device, copyFrom);
 	}
 
-	VulkanPipelineLayout::VulkanPipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType)
+	PipelineLayout::PipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType)
 		: device(device), handle(pipelineLayout), pipelineType(pipelineType)
 	{
 
 	}
 
-	VulkanPipelineLayout::~VulkanPipelineLayout()
+	PipelineLayout::~PipelineLayout()
 	{
 		if (handle != nullptr)
 		{
@@ -414,7 +414,7 @@ namespace CE::Vulkan
 		device = nullptr;
 	}
 
-	void VulkanPipelineLayout::CopyFrom(VulkanDevice* device, PipelineState* copyFrom)
+	void PipelineLayout::CopyFrom(VulkanDevice* device, PipelineState* copyFrom)
 	{
 		if (copyFrom->IsGraphicsPipelineState())
 		{

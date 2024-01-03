@@ -4,13 +4,12 @@
 
 #include "VulkanRHI.h"
 #include "VulkanStructs.h"
-#include "VulkanQueue.h"
 
 #include <vulkan/vulkan.h>
 
 namespace CE::Vulkan
 {
-    class VulkanQueue;
+    class CommandQueue;
     class VulkanSwapChain;
     class Texture;
 	class VulkanDescriptorPool;
@@ -54,17 +53,19 @@ namespace CE::Vulkan
 
         // - Getters -
 
+		Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask);
+
 		INLINE bool IsUnifiedMemoryArchitecture() const
 		{
 			return isUnifiedMemory;
 		}
 
-		INLINE bool IsOffscreenMode() const { return !surfaceSupported; }
+		INLINE bool IsOffscreenOnly() const { return !surfaceSupported; }
 
         INLINE VkCommandPool GetGraphicsCommandPool() const { return gfxCommandPool; }
 
-        INLINE VulkanQueue* GetGraphicsQueue() const { return graphicsQueue; }
-        INLINE VulkanQueue* GetPresentQueue() const { return presentQueue; }
+        INLINE CommandQueue* GetGraphicsQueue() const { return primaryGraphicsQueue; }
+        INLINE CommandQueue* GetPresentQueue() const { return presentQueue; }
 
         INLINE VkDevice GetHandle() const { return device; }
         INLINE VkPhysicalDevice GetPhysicalHandle() const { return gpu; }
@@ -101,6 +102,8 @@ namespace CE::Vulkan
         void InitGpu();
         bool QueryGpu(u32 gpuIndex);
 
+		void FetchQueues(VkPhysicalDevice gpu);
+
         VulkanQueueFamilies GetQueueFamilies(VkPhysicalDevice gpu);
         VkDeviceSize GetPhysicalDeviceLocalMemory(VkPhysicalDevice gpu);
         SurfaceSupportInfo FetchSurfaceSupportInfo(VkPhysicalDevice gpu);
@@ -122,16 +125,20 @@ namespace CE::Vulkan
 
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};
+		Array<VkQueueFamilyProperties> queueFamilyPropeties{};
 
         GpuMetaData gpuMetaData{};
 
         VkDevice device = nullptr;
-        VulkanQueueFamilies queueFamilies{};
+        //VulkanQueueFamilies queueFamilies{};
         SurfaceSupportInfo surfaceSupport{};
 
         VkSurfaceKHR testSurface = nullptr;
-        VulkanQueue* graphicsQueue = nullptr;
-        VulkanQueue* presentQueue = nullptr;
+
+		Array<CommandQueue*> queues{};
+        CommandQueue* primaryGraphicsQueue = nullptr;
+        CommandQueue* presentQueue = nullptr;
+
 		ShaderResourceManager* srgManager = nullptr;
         VkCommandPool gfxCommandPool = nullptr;
 

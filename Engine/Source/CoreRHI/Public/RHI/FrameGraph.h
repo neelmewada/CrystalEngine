@@ -11,7 +11,10 @@ namespace CE::RHI
         
     private:
         
+        //! A database of all attachments used in this frame graph.
         FrameAttachmentDatabase attachmentDatabase{};
+
+		//! List of scopes in the correct chronological order from start to end.
         Array<Scope*> scopes{};
         
         friend class FrameAttachmentDatabase;

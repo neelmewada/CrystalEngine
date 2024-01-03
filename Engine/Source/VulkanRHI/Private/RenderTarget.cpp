@@ -1,12 +1,6 @@
 
 #include "VulkanRHIPrivate.h"
 
-#include "VulkanRenderPass.h"
-#include "VulkanViewport.h"
-#include "VulkanSwapChain.h"
-#include "VulkanTexture.h"
-#include "VulkanSampler.h"
-
 namespace CE::Vulkan
 {
 
@@ -440,7 +434,7 @@ namespace CE::Vulkan
             frame.textures.Resize(rtLayout.colorAttachmentCount);
             frame.samplers.Resize(rtLayout.colorAttachmentCount);
 
-            VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1] = {};
+            VkImageView attachments[RHI::Limits::Pipeline::MaxColorAttachmentCount + 1] = {};
 
             for (int j = 0; j < rtLayout.colorAttachmentCount; j++)
             {

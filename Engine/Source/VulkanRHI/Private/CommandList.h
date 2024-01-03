@@ -76,7 +76,7 @@ namespace CE::Vulkan
 		RenderTarget* renderTarget = nullptr;
 		Viewport* viewport = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
-		VulkanPipelineLayout* currentPipelineLayout = nullptr;
+		PipelineLayout* currentPipelineLayout = nullptr;
 
 		u32 numCommandBuffers = 1; // = BackBufferCount
 		u32 simultaneousFrameDraws = 1;

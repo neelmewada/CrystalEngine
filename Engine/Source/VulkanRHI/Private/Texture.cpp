@@ -72,7 +72,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	static VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
+	VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
     {
 		LoadMappings();
 
@@ -110,7 +110,7 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	static RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format)
+	RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format)
     {
 		LoadMappings();
 
@@ -120,7 +120,7 @@ namespace CE::Vulkan
 		return vkFormatToTextureFormatMap[format];
     }
 
-	static u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
+	u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
     {
 		LoadMappings();
 
@@ -200,8 +200,12 @@ namespace CE::Vulkan
         imageCI.extent.width = desc.width;
         imageCI.extent.height = desc.height;
         imageCI.extent.depth = desc.depth;
-        
-        imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
+
+		if (device->IsUnifiedMemoryArchitecture() || desc.defaultHeapType == RHI::MemoryHeapType::Default)
+			imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
+		else
+			imageCI.tiling = VK_IMAGE_TILING_LINEAR;
+
         imageCI.format = RHITextureFormatToVkFormat(desc.format);
         imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -249,46 +253,47 @@ namespace CE::Vulkan
         vkDestroyImage(device->GetHandle(), tempImage, nullptr);
     }
 
-
-    Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc)
-        : device(device)
-    {
-        this->name = desc.name;
-        this->width = desc.width;
-        this->height = desc.height;
-        this->depth = desc.depth;
+	void Texture::Init(const RHI::TextureDescriptor& desc)
+	{
+		this->name = desc.name;
+		this->width = desc.width;
+		this->height = desc.height;
+		this->depth = desc.depth;
 		this->arrayLayers = desc.arrayLayers;
 
-        this->dimension = desc.dimension;
-        this->format = desc.format;
-        this->mipLevels = desc.mipLevels;
-        this->sampleCount = desc.sampleCount;
-        
-        VkImageCreateInfo imageCI{};
-        imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        switch (desc.dimension)
-        {
-        case RHI::Dimension::Dim2D:
-            imageCI.imageType = VK_IMAGE_TYPE_2D;
-            break;
-        case RHI::Dimension::Dim3D:
-            imageCI.imageType = VK_IMAGE_TYPE_3D;
-            break;
-        case RHI::Dimension::Dim1D:
-            imageCI.imageType = VK_IMAGE_TYPE_1D;
-            break;
-        }
-        
-        imageCI.extent.width = width;
-        imageCI.extent.height = height;
-        imageCI.extent.depth = depth;
-        
-        imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageCI.format = RHITextureFormatToVkFormat(this->format);
-        imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		this->dimension = desc.dimension;
+		this->format = desc.format;
+		this->mipLevels = desc.mipLevels;
+		this->sampleCount = desc.sampleCount;
 
-        this->vkFormat = imageCI.format;
+		VkImageCreateInfo imageCI{};
+		imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		switch (desc.dimension)
+		{
+		case RHI::Dimension::Dim2D:
+			imageCI.imageType = VK_IMAGE_TYPE_2D;
+			break;
+		case RHI::Dimension::Dim3D:
+			imageCI.imageType = VK_IMAGE_TYPE_3D;
+			break;
+		case RHI::Dimension::Dim1D:
+			imageCI.imageType = VK_IMAGE_TYPE_1D;
+			break;
+		}
+
+		imageCI.extent.width = width;
+		imageCI.extent.height = height;
+		imageCI.extent.depth = depth;
+
+		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Default)
+			imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
+		else
+			imageCI.tiling = VK_IMAGE_TILING_LINEAR;
+		imageCI.format = RHITextureFormatToVkFormat(this->format);
+		imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+
+		this->vkFormat = imageCI.format;
 
 		bool isDepthFormat = IsDepthFormat(vkFormat);
 		bool isStencilFormat = IsStencilFormat(vkFormat);
@@ -298,25 +303,25 @@ namespace CE::Vulkan
 			aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
 		if (!isDepthFormat && !isStencilFormat)
 			aspectMask |= VK_IMAGE_ASPECT_COLOR_BIT;
-        
-        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
-        {
-            imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
-        }
+
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderRead))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+		}
 		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderWrite))
 		{
 			imageCI.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
 		}
-        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Color))
-        {
-            imageCI.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Color))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        }
-        if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::DepthStencil))
-        {
-            imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-            aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-        }
+		}
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::DepthStencil))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+		}
 		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Depth))
 		{
 			imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -326,73 +331,80 @@ namespace CE::Vulkan
 		{
 			imageCI.usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
 		}
-		
-        imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
-        imageCI.mipLevels = mipLevels;
-        imageCI.arrayLayers = arrayLayers;
-        imageCI.flags = 0;
 
-        imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageCI.queueFamilyIndexCount = 0;
-        imageCI.pQueueFamilyIndices = nullptr;
-        
-        if (vkCreateImage(device->GetHandle(), &imageCI, nullptr, &image) != VK_SUCCESS)
-        {
-            CE_LOG(Error, All, "Failed to create Vulkan Image");
-            return;
-        }
+		imageCI.samples = (VkSampleCountFlagBits)desc.sampleCount;
+		imageCI.mipLevels = mipLevels;
+		imageCI.arrayLayers = arrayLayers;
+		imageCI.flags = 0;
 
-        VkMemoryRequirements memRequirements{};
-        vkGetImageMemoryRequirements(device->GetHandle(), image, &memRequirements);
+		imageCI.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		imageCI.queueFamilyIndexCount = 0;
+		imageCI.pQueueFamilyIndices = nullptr;
 
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		if (vkCreateImage(device->GetHandle(), &imageCI, nullptr, &image) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create Vulkan Image");
+			return;
+		}
+	}
 
-        if (vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
-        {
-            CE_LOG(Error, All, "Failed to allocate Vulkan Image Memory");
-            return;
-        }
-        
-        vkBindImageMemory(device->GetHandle(), image, imageMemory, 0);
+	void Texture::AllocateInternal()
+	{
+		// Custom allocation
+		VkMemoryRequirements memRequirements{};
+		vkGetImageMemoryRequirements(device->GetHandle(), image, &memRequirements);
 
-        VkImageViewCreateInfo imageViewCI{};
-        imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        imageViewCI.format = vkFormat;
-        imageViewCI.image = image;
-		
-        imageViewCI.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCI.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCI.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        imageViewCI.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        switch (dimension)
-        {
-        case RHI::Dimension::Dim2D:
-            imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            break;
-        case RHI::Dimension::Dim3D:
-            imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_3D;
-            break;
-        case RHI::Dimension::Dim1D:
-            imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
-            break;
-        }
+		if (vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to allocate Vulkan Image Memory");
+			return;
+		}
 
-        // Subresources allow the view to see only a part of an image
-        imageViewCI.subresourceRange.aspectMask = aspectMask;  // Which aspect of the image to view (e.g. color bit for viewing color)
-        imageViewCI.subresourceRange.baseMipLevel = 0;          // Start mipmap level to view from
-        imageViewCI.subresourceRange.levelCount = mipLevels;    // No. of mipmap levels to view
-        imageViewCI.subresourceRange.baseArrayLayer = 0;        // Start array layer to view from
-        imageViewCI.subresourceRange.layerCount = 1;            // No. of array layers to view
+		vkBindImageMemory(device->GetHandle(), image, imageMemory, 0);
+	}
 
-        if (vkCreateImageView(device->GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
-        {
-            CE_LOG(Error, All, "Failed to create Vulkan Image View");
-            return;
-        }
+	void Texture::PostInit(const RHI::TextureDescriptor& desc)
+	{
+		VkImageViewCreateInfo imageViewCI{};
+		imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewCI.format = vkFormat;
+		imageViewCI.image = image;
+
+		imageViewCI.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		switch (dimension)
+		{
+		case RHI::Dimension::Dim2D:
+			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			break;
+		case RHI::Dimension::Dim3D:
+			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_3D;
+			break;
+		case RHI::Dimension::Dim1D:
+			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_1D;
+			break;
+		}
+
+		// Subresources allow the view to see only a part of an image
+		imageViewCI.subresourceRange.aspectMask = aspectMask;   // Which aspect of the image to view (e.g. color bit for viewing color)
+		imageViewCI.subresourceRange.baseMipLevel = 0;          // Start mipmap level to view from
+		imageViewCI.subresourceRange.levelCount = mipLevels;    // No. of mipmap levels to view
+		imageViewCI.subresourceRange.baseArrayLayer = 0;        // Start array layer to view from
+		imageViewCI.subresourceRange.layerCount = arrayLayers;  // No. of array layers to view
+
+		if (vkCreateImageView(device->GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create Vulkan Image View");
+			return;
+		}
 
 		// Transition image layout
 
@@ -411,7 +423,43 @@ namespace CE::Vulkan
 
 		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
 			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, aspectMask);
+	}
+
+    Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc)
+        : device(device)
+    {
+		this->heapType = desc.defaultHeapType;
+		Init(desc);
+		AllocateInternal();
+		PostInit(desc);
     }
+
+	Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc)
+		: device(device)
+	{
+		if (memoryDesc.memoryHeap == nullptr)
+		{
+			this->heapType = desc.defaultHeapType;
+			Init(desc);
+			AllocateInternal();
+			PostInit(desc);
+			return;
+		}
+
+		this->heapType = memoryDesc.memoryHeap->GetHeapType();
+		Init(desc);
+
+		Vulkan::MemoryHeap* heap = (Vulkan::MemoryHeap*)memoryDesc.memoryHeap;
+
+		auto result = vkBindImageMemory(device->GetHandle(), image, heap->GetHandle(), memoryDesc.memoryOffset);
+		if (result != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to bind Memory to Texture {}", desc.name);
+			return;
+		}
+
+		PostInit(desc);
+	}
 
     Texture::~Texture()
     {
@@ -478,7 +526,8 @@ namespace CE::Vulkan
 
         device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, aspectMask);
         CopyPixelsFromBuffer(stagingBuffer);
-        device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, vkImageLayout, aspectMask);
+		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
+			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, vkImageLayout, aspectMask);
 
         delete stagingBuffer;
         stagingBuffer = nullptr;
@@ -515,6 +564,33 @@ namespace CE::Vulkan
 		stagingBuffer = nullptr;
 	}
 
+	void Texture::UploadData(RHI::Buffer* buffer, u64 offsetInBuffer, u32 mipLevel, u32 arrayLayer)
+	{
+		if (!buffer)
+			return;
+
+		Vulkan::Buffer* srcBuffer = (Vulkan::Buffer*)buffer;
+
+		VkBufferImageCopy region{};
+		region.bufferOffset = offsetInBuffer;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		
+		region.imageSubresource.aspectMask = aspectMask;
+		region.imageSubresource.mipLevel = mipLevel;
+		region.imageSubresource.baseArrayLayer = arrayLayer;
+		region.imageSubresource.layerCount = 1;
+
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = {
+			width,
+			height,
+			depth
+		};
+
+
+	}
+
     void Texture::CopyPixelsFromBuffer(Buffer* srcBuffer)
     {
         auto cmdBuffer = device->BeginSingleUseCommandBuffer();
@@ -525,7 +601,7 @@ namespace CE::Vulkan
         region.bufferOffset = 0;
         region.bufferRowLength = 0;
         region.bufferImageHeight = 0;
-
+		
         region.imageSubresource.aspectMask = aspectMask;
         region.imageSubresource.mipLevel = 0;
         region.imageSubresource.baseArrayLayer = 0;

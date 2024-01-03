@@ -4,6 +4,7 @@ namespace CE::Vulkan
 {
 	class Texture;
 	class VulkanFrameBuffer;
+	class VulkanRenderPass;
 
 	struct VulkanFrame
 	{
@@ -83,7 +84,7 @@ namespace CE::Vulkan
 		Viewport* viewport = nullptr;
 		bool isFresh = true;
 
-		Color clearColors[RHI::MaxSimultaneousRenderOutputs] = {};
+		Color clearColors[RHI::Limits::Pipeline::MaxColorAttachmentCount] = {};
 		VulkanDevice* device = nullptr;
 		VulkanRenderTargetLayout rtLayout{};
 		VulkanRenderPass* renderPass = nullptr;

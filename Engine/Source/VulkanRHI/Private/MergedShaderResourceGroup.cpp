@@ -34,9 +34,7 @@ namespace CE::Vulkan
 			// All input SRGs must be compiled before being merged into a single set.
 			if (!srg->IsCompiled())
 			{
-				failed = true;
-				CE_LOG(Error, All, "Failed to create MergedShaderResourceGroup. Make sure to call Compile() on each SRG before creating a Merged SRG.");
-				return;
+				srg->Compile();
 			}
 
 			if ((int)srg->GetSRGType() > curSrgType)
