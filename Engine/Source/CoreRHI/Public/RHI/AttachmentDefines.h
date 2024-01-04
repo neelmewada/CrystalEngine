@@ -49,6 +49,7 @@ namespace CE::RHI
 	};
 	ENUM_CLASS_FLAGS(ScopeAttachmentAccess)
 
+    ///! Describes how an attachment is used by a scope.
 	ENUM()
 	enum class ScopeAttachmentUsage
 	{
