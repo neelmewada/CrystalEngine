@@ -12,6 +12,8 @@ CE_IMPLEMENT_MODULE(VulkanRHI, CE::Vulkan::VulkanRHIModule)
 
 namespace CE::Vulkan
 {
+	static VulkanRHI* gVulkanRHI = nullptr;
+
 	void VulkanRHIModule::StartupModule()
 	{
         //RHI::gDynamicRHI = new VulkanRHI();
@@ -27,8 +29,6 @@ namespace CE::Vulkan
 
 	}
 
-	VULKANRHI_API IValidationCallbacks* gVulkanValidationCallbacks = nullptr;
-
     VKAPI_ATTR VkBool32 VulkanValidationCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageTypes,
@@ -37,26 +37,26 @@ namespace CE::Vulkan
     {
         if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         {
-			if (gVulkanValidationCallbacks != nullptr)
-				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Error, pCallbackData->pMessage);
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Error, pCallbackData->pMessage);
             CE_LOG(Error, All, "Vulkan Error: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
         {
-			if (gVulkanValidationCallbacks != nullptr)
-				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Info, pCallbackData->pMessage);
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Info, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Info: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
         {
-			if (gVulkanValidationCallbacks != nullptr)
-				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Verbose, pCallbackData->pMessage);
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Verbose, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         {
-			if (gVulkanValidationCallbacks != nullptr)
-				gVulkanValidationCallbacks->OnValidationMessage(ValidationMessageType::Warning, pCallbackData->pMessage);
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Warning, pCallbackData->pMessage);
             CE_LOG(Warn, All, "Vulkan Warning: {}", pCallbackData->pMessage);
         }
         return VK_FALSE;
@@ -97,6 +97,8 @@ namespace CE::Vulkan
 
 	void VulkanRHI::Initialize()
 	{
+		gVulkanRHI = this;
+
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.apiVersion = VK_API_VERSION_1_1;
@@ -186,6 +188,8 @@ namespace CE::Vulkan
 
         vkDestroyInstance(vkInstance, nullptr);
         vkInstance = nullptr;
+
+		gVulkanRHI = nullptr;
 	}
 
     void* VulkanRHI::GetNativeHandle()
@@ -199,6 +203,15 @@ namespace CE::Vulkan
 	}
 
     // - Render Target -
+
+	void VulkanRHI::BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message)
+	{
+		for (auto handler : validationCallbackHandlers[(int)type])
+		{
+			if (handler)
+				handler(type, message);
+		}
+	}
 
 	bool VulkanRHI::IsOffscreenOnly()
 	{
@@ -438,7 +451,7 @@ namespace CE::Vulkan
 
     RHI::Sampler* VulkanRHI::CreateSampler(const RHI::SamplerDescriptor& samplerDesc)
     {
-        return new VulkanSampler(device, samplerDesc);
+        return new Sampler(device, samplerDesc);
     }
 
     void VulkanRHI::DestroySampler(RHI::Sampler* sampler)
@@ -448,7 +461,7 @@ namespace CE::Vulkan
 
     void* VulkanRHI::AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler)
     {
-        return VulkanPlatform::AddImGuiTexture((Texture*)texture, (VulkanSampler*)sampler);
+        return VulkanPlatform::AddImGuiTexture((Texture*)texture, (Sampler*)sampler);
     }
 
     void VulkanRHI::RemoveImGuiTexture(void* imguiTexture)

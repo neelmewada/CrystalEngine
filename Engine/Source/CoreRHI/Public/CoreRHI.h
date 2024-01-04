@@ -25,7 +25,6 @@
 #include "RHI/PipelineState.h"
 #include "RHI/Shader.h"
 #include "RHI/ShaderResourceGroup.h"
-#include "RHI/Viewport.h"
 #include "RHI/IndexBufferView.h"
 #include "RHI/VertexBufferView.h"
 
@@ -42,6 +41,7 @@
 #include "RHI/AttachmentDefines.h"
 #include "RHI/FrameAttachment.h"
 #include "RHI/ImageFrameAttachment.h"
+#include "RHI/SwapChainFrameAttachment.h"
 #include "RHI/FrameAttachmentDatabase.h"
 #include "RHI/ScopeAttachment.h"
 #include "RHI/Scope.h"

@@ -21,6 +21,13 @@ namespace CE::Vulkan
 
 	SwapChain::~SwapChain()
 	{
+		// Delete images
+		for (auto image : images)
+		{
+			delete image;
+		}
+		images.Clear();
+
 		if (swapChain != nullptr)
 		{
 			vkDestroySwapchainKHR(device->GetHandle(), swapChain, nullptr);
@@ -192,11 +199,12 @@ namespace CE::Vulkan
 
 		desc.imageCount = imageCount;
 
-		// - For triple buffering (not supported for now)
+		// - For triple buffering - (not supported for now)
 		
 		//if (simultaneousFramesInFlight > imageCount - 1)
 		//	simultaneousFramesInFlight = imageCount - 1;
 		//simultaneousFramesInFlight = Math::Min(simultaneousFramesInFlight, (u32)2); // Maximum 2 simultaneous draws
+		simultaneousFramesInFlight = 1;
 
 		// - Create SwapChain -
 		VkSwapchainCreateInfoKHR swapChainCI{};

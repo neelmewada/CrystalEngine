@@ -5,14 +5,14 @@
 namespace CE::Vulkan
 {
     class Texture;
-    class VulkanSampler;
+    class Sampler;
 
     class VulkanPlatformBase
     {
         CE_STATIC_CLASS(VulkanPlatformBase)
     public:
         
-        static VkDescriptorSet AddImGuiTexture(Texture* texture, VulkanSampler* sampler);
+        static VkDescriptorSet AddImGuiTexture(Texture* texture, Sampler* sampler);
         
         static void RemoveImGuiTexture(VkDescriptorSet imguiTexture);
         

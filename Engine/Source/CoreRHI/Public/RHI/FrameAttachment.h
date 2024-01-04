@@ -10,6 +10,8 @@ namespace CE::RHI
 	public:
         
         virtual ~FrameAttachment() = default;
+
+		void SetResource(RHIResource* resource);
         
     protected:
         
@@ -19,6 +21,8 @@ namespace CE::RHI
         
         AttachmentID attachmentId{};
         AttachmentLifetimeType lifetime{};
+		//! Either a buffer or texture
+		RHIResource* resource = nullptr;
 	};
     
 } // namespace CE::RHI

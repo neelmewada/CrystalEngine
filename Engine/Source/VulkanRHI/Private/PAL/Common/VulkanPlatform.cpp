@@ -8,7 +8,7 @@
 
 namespace CE::Vulkan
 {
-    VkDescriptorSet VulkanPlatformBase::AddImGuiTexture(Texture* texture, VulkanSampler* sampler)
+    VkDescriptorSet VulkanPlatformBase::AddImGuiTexture(Texture* texture, Sampler* sampler)
     {
         if (texture == nullptr)
             return nullptr;

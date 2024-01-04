@@ -21,7 +21,7 @@ namespace CE::Vulkan
         return VK_SAMPLER_ADDRESS_MODE_REPEAT;
     }
     
-	VkFilter VulkanSampler::ToVkFilter(RHI::FilterMode filterMode)
+	VkFilter Sampler::ToVkFilter(RHI::FilterMode filterMode)
 	{
 		switch (filterMode)
 		{
@@ -37,7 +37,7 @@ namespace CE::Vulkan
 		return VK_FILTER_LINEAR;
 	}
 
-    VulkanSampler::VulkanSampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc)
+    Sampler::Sampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc)
         : device(device), borderColor(samplerDesc.borderColor)
     {
         VkSamplerCreateInfo samplerCI{};
@@ -57,7 +57,7 @@ namespace CE::Vulkan
         }
     }
 
-    VulkanSampler::~VulkanSampler()
+    Sampler::~Sampler()
     {
         if (sampler != nullptr)
         {

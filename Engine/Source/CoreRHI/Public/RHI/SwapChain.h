@@ -24,6 +24,15 @@ namespace CE::RHI
 
 	public:
 
+		inline u32 GetCurrentImageIndex() const
+		{
+			return currentImageIndex;
+		}
+
+		inline Texture* GetCurrentImage() const
+		{
+			return images[currentImageIndex];
+		}
 
 	protected:
 

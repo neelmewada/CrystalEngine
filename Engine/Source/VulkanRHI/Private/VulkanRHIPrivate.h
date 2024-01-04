@@ -35,22 +35,4 @@
 namespace CE::Vulkan
 {
 
-	enum class ValidationMessageType
-	{
-		Verbose,
-		Info,
-		Warning,
-		Error
-	};
-
-	class IValidationCallbacks
-	{
-	public:
-
-		virtual void OnValidationMessage(ValidationMessageType messageType, const char* message) {}
-
-	};
-
-	extern VULKANRHI_API IValidationCallbacks* gVulkanValidationCallbacks;
-
 } // namespace CE::Vulkan

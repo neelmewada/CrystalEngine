@@ -8,5 +8,10 @@ namespace CE::RHI
     {
         
     }
+
+	void FrameAttachment::SetResource(RHIResource* resource)
+	{
+		this->resource = resource;
+	}
     
 } // namespace CE::RHI

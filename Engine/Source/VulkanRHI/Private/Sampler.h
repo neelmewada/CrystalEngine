@@ -3,11 +3,11 @@
 namespace CE::Vulkan
 {
     
-    class VULKANRHI_API VulkanSampler : public RHI::Sampler
+    class VULKANRHI_API Sampler : public RHI::Sampler
     {
     public:
-        VulkanSampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc);
-        virtual ~VulkanSampler();
+        Sampler(VulkanDevice* device, const RHI::SamplerDescriptor& samplerDesc);
+        virtual ~Sampler();
         
         virtual void* GetHandle() override
         {

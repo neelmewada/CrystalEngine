@@ -21,15 +21,7 @@ using namespace CE;
 
 static bool gErrorFound = false;
 
-class VulkanCallbacks : public Vulkan::IValidationCallbacks
-{
-public:
-
-	void OnValidationMessage(Vulkan::ValidationMessageType messageType, const char* message) override;
-
-};
-
-static VulkanCallbacks gCallbacks{};
+void OnValidationMessage(RHI::ValidationMessageType messageType, const char* message);
 
 static void TestBegin()
 {
@@ -41,9 +33,8 @@ static void TestBegin()
 	ModuleManager::Get().LoadModule("CoreRHI");
 	ModuleManager::Get().LoadModule("VulkanRHI");
 
-	Vulkan::gVulkanValidationCallbacks = &gCallbacks;
-
 	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
+	RHI::gDynamicRHI->AddValidationCallbackHandler(OnValidationMessage, RHI::ValidationMessageType::Warning);
 
 	RHI::gDynamicRHI->Initialize();
 	RHI::gDynamicRHI->PostInitialize();
@@ -57,23 +48,21 @@ static void TestEnd()
 	delete RHI::gDynamicRHI;
 	RHI::gDynamicRHI = nullptr;
 
-	Vulkan::gVulkanValidationCallbacks = nullptr;
-
 	ModuleManager::Get().LoadModule("VulkanRHI");
 	ModuleManager::Get().LoadModule("CoreRHI");
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("Core");	
 }
 
-void VulkanCallbacks::OnValidationMessage(Vulkan::ValidationMessageType messageType, const char* message)
+void OnValidationMessage(RHI::ValidationMessageType messageType, const char* message)
 {
 	switch (messageType)
 	{
-	case Vulkan::ValidationMessageType::Error:
+	case RHI::ValidationMessageType::Error:
 		ERROR("Vulkan Error: " << message);
 		FAIL();
 		break;
-	case Vulkan::ValidationMessageType::Warning:
+	case RHI::ValidationMessageType::Warning:
 		WARN("Vulkan Warning: " << message);
 		break;
 	}

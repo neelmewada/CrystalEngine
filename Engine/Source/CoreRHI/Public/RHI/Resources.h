@@ -5,7 +5,7 @@
 namespace CE::RHI
 {
     
-    class CORERHI_API RHIResource : IntrusiveBase
+    class CORERHI_API RHIResource
     {
     protected:
 		RHIResource(ResourceType resourceType) : resourceType(resourceType)

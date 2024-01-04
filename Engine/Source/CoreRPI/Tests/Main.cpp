@@ -34,6 +34,16 @@ static void TestEnd()
 	ModuleManager::Get().UnloadModule("Core");
 }
 
+static void VulkanTestBegin()
+{
+
+}
+
+static void VulkanTestEnd()
+{
+
+}
+
 TEST(RenderPipeline, DescriptorParsing)
 {
 	TEST_BEGIN;
@@ -180,7 +190,6 @@ TEST(RenderPipeline, DescriptorParsing)
 	TEST_END;
 }
 
-
 TEST(RenderPipeline, DefaultPipelineTree)
 {
 	TEST_BEGIN;
@@ -254,4 +263,5 @@ TEST(RenderPipeline, DefaultPipelineTree)
 
 	TEST_END;
 }
+
 

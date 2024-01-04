@@ -62,6 +62,8 @@ namespace CE::Vulkan
 
 		// - Utils -
 
+		void BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message);
+
 		virtual bool IsOffscreenOnly() override;
 
 		// TODO: move this function to CoreApplication instead of VulkanRHI

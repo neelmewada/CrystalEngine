@@ -19,6 +19,17 @@ namespace CE::RHI
     class GraphicsCommandList;
 	struct BufferDescriptor;
 
+	enum class ValidationMessageType
+	{
+		Verbose = 0,
+		Info,
+		Warning,
+		Error,
+		COUNT
+	};
+
+	typedef void (*ValidationCallback)(ValidationMessageType, const char*);
+
     class CORERHI_API DynamicRHI
     {
     public:
@@ -39,6 +50,22 @@ namespace CE::RHI
         // - Public API -
 
 		// - Utils -
+
+		void AddValidationCallbackHandler(ValidationCallback handler, ValidationMessageType logLevel)
+		{
+			for (int i = (int)logLevel; i < validationCallbackHandlers.GetCapacity(); i++)
+			{
+				validationCallbackHandlers[i].Add(handler);
+			}
+		}
+
+		void RemoveValidationCallbackHandler(ValidationCallback handler)
+		{
+			for (int i = 0; i < validationCallbackHandlers.GetCapacity(); i++)
+			{
+				validationCallbackHandlers[i].Remove(handler);
+			}
+		}
 
 		virtual Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask) = 0;
 
@@ -110,6 +137,9 @@ namespace CE::RHI
 
 		virtual void Blit(Texture* source, Texture* destination, FilterMode filter) = 0;
 
+	protected:
+
+		StaticArray<Array<ValidationCallback>, (SIZE_T)ValidationMessageType::COUNT> validationCallbackHandlers{};
     };
 
     CORERHI_API extern DynamicRHI* gDynamicRHI;

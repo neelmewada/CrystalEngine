@@ -6,7 +6,13 @@ namespace CE::RHI
     class CORERHI_API ImageFrameAttachment : public FrameAttachment
     {
     public:
-        ImageFrameAttachment(const ImageDescriptor& imageDesc, AttachmentLifetimeType lifetime);
+
+        //! Create a transient image attachment
+        ImageFrameAttachment(AttachmentID id, const ImageDescriptor& imageDesc);
+
+		//! Create an external image attachment 
+		ImageFrameAttachment(AttachmentID id, Ptr<Texture> image);
+
         virtual ~ImageFrameAttachment();
         
     private:
