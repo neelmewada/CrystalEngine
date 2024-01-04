@@ -10,7 +10,7 @@
 namespace CE::Vulkan
 {
     class CommandQueue;
-    class VulkanSwapChain;
+    class SwapChain;
     class Texture;
 	class VulkanDescriptorPool;
 	class ShaderResourceManager;

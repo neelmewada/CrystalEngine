@@ -6,7 +6,7 @@ namespace CE
 {
     class PlatformWindow;
 
-    typedef MultiCastDelegate<void(PlatformWindow*, u32, u32)> WindowResizeDelegate;
+    typedef MultiCastDelegate<void(PlatformWindow* window, u32 newWidth, u32 newHeight)> WindowResizeDelegate;
 
     enum class PlatformBackend
     {
@@ -61,7 +61,7 @@ namespace CE
 
 		virtual Vec2i GetWindowSize(void* nativeWindowHandle) = 0;
 
-        WindowResizeDelegate onWindowResized{};
+        WindowResizeDelegate onWindowDrawableSizeChanged{};
 
     protected:
 

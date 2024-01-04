@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CoreApplication.h"
 #include "CoreMedia.h"
 
 #include "RHI/ThreadLocalContext.h"
@@ -18,7 +19,7 @@
 #include "RHI/BufferView.h"
 #include "RHI/Buffer.h"
 #include "RHI/Texture.h"
-#include "RHI/Image.h"
+#include "RHI/SwapChain.h"
 #include "RHI/CommandList.h"
 #include "RHI/Sampler.h"
 #include "RHI/PipelineState.h"

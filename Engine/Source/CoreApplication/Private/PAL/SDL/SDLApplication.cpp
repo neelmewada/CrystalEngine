@@ -205,7 +205,7 @@ namespace CE
 				if (handler != nullptr && window->GetWindowId() == mainWindow->GetWindowId())
 					handler->OnMainWindowDrawableSizeChanged(w, h);
 			}
-            onWindowResized.Broadcast(window, w, h);
+            onWindowDrawableSizeChanged.Broadcast(window, w, h);
 		}
 	}
 

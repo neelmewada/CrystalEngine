@@ -72,7 +72,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format)
+	VkFormat RHIFormatToVkFormat(RHI::TextureFormat format)
     {
 		LoadMappings();
 
@@ -110,7 +110,7 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format)
+	RHI::TextureFormat VkFormatToRHIFormat(VkFormat format)
     {
 		LoadMappings();
 
@@ -206,7 +206,7 @@ namespace CE::Vulkan
 		else
 			imageCI.tiling = VK_IMAGE_TILING_LINEAR;
 
-        imageCI.format = RHITextureFormatToVkFormat(desc.format);
+        imageCI.format = RHIFormatToVkFormat(desc.format);
         imageCI.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         
@@ -289,7 +289,7 @@ namespace CE::Vulkan
 			imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
 		else
 			imageCI.tiling = VK_IMAGE_TILING_LINEAR;
-		imageCI.format = RHITextureFormatToVkFormat(this->format);
+		imageCI.format = RHIFormatToVkFormat(this->format);
 		imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
@@ -461,6 +461,36 @@ namespace CE::Vulkan
 		PostInit(desc);
 	}
 
+	Texture::Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags)
+		: device(device)
+		, importedImage(true)
+	{
+		VkImageViewCreateInfo imageViewCI{};
+		imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewCI.image = image;
+		imageViewCI.viewType = imageViewType;
+		imageViewCI.format = format;
+
+		// Allows remapping of RGBA components to other channel values
+		imageViewCI.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		imageViewCI.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		// Subresources allow the view to view only a part of an image
+		imageViewCI.subresourceRange.aspectMask = aspectFlags;  // Which aspect of the image to view (e.g. color bit for viewing color)
+		imageViewCI.subresourceRange.baseMipLevel = 0;          // Start mipmap level to view from
+		imageViewCI.subresourceRange.levelCount = 1;            // No. of mipmap levels to view
+		imageViewCI.subresourceRange.baseArrayLayer = 0;        // Start array layer to view from
+		imageViewCI.subresourceRange.layerCount = 1;            // No. of array layers to view
+		
+		if (vkCreateImageView(device->GetHandle(), &imageViewCI, nullptr, &imageView) != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create Vulkan Image View!");
+			return;
+		}
+	}
+
     Texture::~Texture()
     {
         if (imageView != nullptr)
@@ -475,7 +505,8 @@ namespace CE::Vulkan
             imageMemory = nullptr;
         }
 
-        if (image != nullptr)
+		// Don't destroy images that are managed externally
+        if (!importedImage && image != nullptr)
         {
             vkDestroyImage(device->GetHandle(), image, nullptr);
             image = nullptr;

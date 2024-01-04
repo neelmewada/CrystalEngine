@@ -6,120 +6,107 @@
 
 namespace CE::Vulkan
 {
-
-	VulkanSwapChain::VulkanSwapChain(VulkanRHI* vulkanRHI, PlatformWindow* windowHandle, VulkanDevice* device,
-		u32 desiredBackBufferCount, u32 simultaneousFrameDraws, 
-		u32 width, u32 height, bool isFullscreen, 
-		RHI::ColorFormat colorFormat, RHI::DepthStencilFormat depthBufferFormat)
-		: vulkanRHI(vulkanRHI)
-		, windowHandle(windowHandle)
-		, device(device)
-		, backBufferCount(desiredBackBufferCount)
-		, simultaneousFrameDraws(simultaneousFrameDraws)
-		, width(width)
-		, height(height)
-		, isFullscreen(isFullscreen)
-		, colorBufferFormat(colorBufferFormat)
-		, depthBufferFormat(depthBufferFormat)
+	SwapChain::SwapChain(VulkanRHI* rhi, VulkanDevice* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
+		: rhi(rhi), device(device), window(window), desc(desc)
 	{
-		
-		CreateSurface();
-		CreateSwapChain();
-		CreateDepthBuffer();
+		this->desc.preferredFormats.AddRange({ RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM });
 
-		CE_LOG(Info, All, "Vulkan SwapChain created");
+		window->GetDrawableWindowSize(&width, &height);
+		surface = VulkanPlatform::CreateSurface((VkInstance)rhi->GetNativeHandle(), window);
+
+		Create();
+
+		windowResizeCallback = PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(MemberDelegate(&SwapChain::OnWindowResized, this));
 	}
 
-	VulkanSwapChain::~VulkanSwapChain()
+	SwapChain::~SwapChain()
 	{
-		DestroyDepthBuffer();
-
-		for (const auto& swapChainImage : swapChainColorImages)
+		if (swapChain != nullptr)
 		{
-			vkDestroyImageView(device->GetHandle(), swapChainImage.imageView, nullptr);
+			vkDestroySwapchainKHR(device->GetHandle(), swapChain, nullptr);
+			swapChain = nullptr;
 		}
 
-		vkDestroySwapchainKHR(device->GetHandle(), swapChain, nullptr);
-
-		vkDestroySurfaceKHR((VkInstance)vulkanRHI->GetNativeHandle(), surface, nullptr);
-
-		CE_LOG(Info, All, "Vulkan SwapChain destroyed");
-	}
-
-	void VulkanSwapChain::RebuildSwapChain()
-	{
-		CreateSwapChain();
-
-		if (depthBufferFormat != RHI::DepthStencilFormat::None)
+		if (surface != nullptr)
 		{
-			DestroyDepthBuffer();
-			CreateDepthBuffer();
+			vkDestroySurfaceKHR(rhi->GetInstanceHandle(), surface, nullptr);
+			surface = nullptr;
 		}
+
+		PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeCallback);
+		windowResizeCallback = 0;
 	}
 
-	void VulkanSwapChain::CreateSurface()
+	void SwapChain::RebuildSwapChain()
 	{
-		surface = VulkanPlatform::CreateSurface((VkInstance)vulkanRHI->GetNativeHandle(), (PlatformWindow*)windowHandle);
+		window->GetDrawableWindowSize(&width, &height);
+
+		Create();
 	}
 
-	void VulkanSwapChain::CreateSwapChain()
+	void SwapChain::OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight)
+	{
+		RebuildSwapChain();
+	}
+
+	void SwapChain::Create()
 	{
 		auto oldSwapChain = swapChain;
 		auto gpu = device->GetPhysicalHandle();
 
 		// -- SURFACE SUPPORT INFO --
+		
+		if (surfaceFormats.IsEmpty()) // Do this only once!
+		{
+			// Retrieve the list of supported formats
+			u32 formatCount = 0;
+			vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, nullptr);
 
-		// Retrieve the list of supported formats
-		uint32_t formatCount = 0;
-		vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, nullptr);
+			surfaceFormats.Resize(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surfaceFormats.GetData());
 
-		List<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-		vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surfaceFormats.GetData());
-
-		// Get the surface capabilities
-		VkSurfaceCapabilitiesKHR surfaceCapabilities{};
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surfaceCapabilities);
+			// Get the surface capabilities
+			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surfaceCapabilities);
+		}
 
 		// Select optimal surface format
 		bool formatSelected = false;
 		VkSurfaceFormatKHR selectedSurfaceFormat{};
 
-		VkFormat preferredColorFormat = VK_FORMAT_R8G8B8A8_UNORM;
-		if (colorBufferFormat == RHI::ColorFormat::BGRA32)
-			preferredColorFormat = VK_FORMAT_B8G8R8A8_UNORM;
-
+		// This condition means all formats are supported
 		if (surfaceFormats.GetSize() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
 		{
-			selectedSurfaceFormat = { preferredColorFormat, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 			formatSelected = true;
+			if (desc.preferredFormats.IsEmpty())
+			{
+				selectedSurfaceFormat.format = VK_FORMAT_R8G8B8A8_UNORM;
+				selectedSurfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+			}
+			else
+			{
+				RHI::Format format = desc.preferredFormats[0];
+				VkFormat vkFormat = RHIFormatToVkFormat(format);
+				selectedSurfaceFormat.format = vkFormat;
+				selectedSurfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+			}
 		}
 		else
 		{
 			// Find our first preferred format
-			for (const auto& format : surfaceFormats)
+			for (RHI::Format format : desc.preferredFormats)
 			{
-				if (format.format == preferredColorFormat)
+				VkFormat vkFormat = RHIFormatToVkFormat(format);
+				if (vkFormat != VK_FORMAT_UNDEFINED &&
+					surfaceFormats.Exists([&](const VkSurfaceFormatKHR& surfaceFormat) { return surfaceFormat.format == vkFormat; }))
 				{
-					selectedSurfaceFormat = { format.format, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
 					formatSelected = true;
+					selectedSurfaceFormat.format = vkFormat;
+					selectedSurfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 					break;
 				}
 			}
 
-			if (!formatSelected)
-			{
-				// RGBA-8 is first preferred and BGRA-8 is second preferred format
-				for (const auto& format : surfaceFormats)
-				{
-					if (format.format == VK_FORMAT_R8G8B8A8_UNORM || format.format == VK_FORMAT_B8G8R8A8_UNORM)
-					{
-						selectedSurfaceFormat = { format.format, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
-						formatSelected = true;
-						break;
-					}
-				}
-			}
-
+			// If we still couldn't select a format, just select the first available one.
 			if (!formatSelected)
 			{
 				selectedSurfaceFormat = surfaceFormats[0];
@@ -127,20 +114,9 @@ namespace CE::Vulkan
 			}
 		}
 
-		if (selectedSurfaceFormat.format == VK_FORMAT_R8G8B8A8_UNORM)
-		{
-			colorBufferFormat = RHI::ColorFormat::RGBA32;
-		}
-		else if (selectedSurfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM)
-		{
-			colorBufferFormat = RHI::ColorFormat::BGRA32;
-		}
-		else
-		{
-			colorBufferFormat = RHI::ColorFormat::Auto;
-		}
+		this->swapChainSurfaceFormat = selectedSurfaceFormat;
 
-		swapChainColorFormat = selectedSurfaceFormat;
+		swapChainColorFormat = VkFormatToRHIFormat(selectedSurfaceFormat.format);
 
 		// - Select Extent
 
@@ -152,10 +128,10 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			extent.width = GetWidth();
-			extent.height = GetHeight();
+			extent.width = width;
+			extent.height = height;
 
-			// Surface also defines max & min. So make sure the values are clamped
+			// Surface also defines max & min values. So make sure the values are clamped
 			extent.width = Math::Clamp(extent.width, surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
 			extent.height = Math::Clamp(extent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
 		}
@@ -165,17 +141,21 @@ namespace CE::Vulkan
 
 		// - Select a presentation mode
 
-		// Retrieve the list of supported presentation modes
-		uint32_t presentationCount = 0;
-		vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, nullptr);
+		if (presentationModes.IsEmpty())
+		{
+			// Retrieve the list of supported presentation modes
+			uint32_t presentationCount = 0;
+			vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, nullptr);
 
-		Array<VkPresentModeKHR> presentationModes(presentationCount);
-		vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, presentationModes.GetData());
+			presentationModes.Resize(presentationCount);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, presentationModes.GetData());
+		}
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 		if (!presentationModes.Exists(VK_PRESENT_MODE_FIFO_KHR))
 		{
-			presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+			//presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+			presentMode = presentationModes[0];
 		}
 
 		this->presentMode = presentMode;
@@ -193,7 +173,9 @@ namespace CE::Vulkan
 			preTransform = surfaceCapabilities.currentTransform;
 		}
 
-		u32 imageCount = backBufferCount;
+		// - Get Image count
+
+		u32 imageCount = desc.imageCount;
 
 		// If imageCount is higher than max allowed image count. If it's 0 then limitless
 		if (surfaceCapabilities.maxImageCount > 0 &&
@@ -208,40 +190,45 @@ namespace CE::Vulkan
 			imageCount = surfaceCapabilities.minImageCount;
 		}
 
-		backBufferCount = imageCount;
+		desc.imageCount = imageCount;
 
-		if (simultaneousFrameDraws > backBufferCount - 1)
-			simultaneousFrameDraws = backBufferCount - 1;
-		simultaneousFrameDraws = Math::Min(simultaneousFrameDraws, (u32)2); // Maximum 2 simultaneous draws
+		// - For triple buffering (not supported for now)
+		
+		//if (simultaneousFramesInFlight > imageCount - 1)
+		//	simultaneousFramesInFlight = imageCount - 1;
+		//simultaneousFramesInFlight = Math::Min(simultaneousFramesInFlight, (u32)2); // Maximum 2 simultaneous draws
 
 		// - Create SwapChain -
 		VkSwapchainCreateInfoKHR swapChainCI{};
 		swapChainCI.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		swapChainCI.surface = surface;
-		swapChainCI.minImageCount = backBufferCount;
+		swapChainCI.minImageCount = imageCount;
 		swapChainCI.imageExtent = extent;
 		swapChainCI.presentMode = presentMode;
-		
+
 		swapChainCI.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		swapChainCI.queueFamilyIndexCount = 0;
 		swapChainCI.pQueueFamilyIndices = nullptr;
 
+		// Facilitates quicker recreation of swapchain
 		swapChainCI.oldSwapchain = oldSwapChain;
-		
+
 		swapChainCI.preTransform = preTransform;
-		swapChainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		swapChainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | 
+			VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		swapChainCI.imageFormat = selectedSurfaceFormat.format;
 		swapChainCI.imageColorSpace = selectedSurfaceFormat.colorSpace;
 		swapChainCI.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 		swapChainCI.clipped = VK_TRUE;
 		swapChainCI.imageArrayLayers = 1;
-		
+
 		if (vkCreateSwapchainKHR(device->GetHandle(), &swapChainCI, nullptr, &swapChain) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan SwapChain!");
 			return;
 		}
 
+		// Destroy old swapchain if exists
 		if (oldSwapChain != nullptr)
 		{
 			vkDestroySwapchainKHR(device->GetHandle(), oldSwapChain, nullptr);
@@ -251,82 +238,24 @@ namespace CE::Vulkan
 		// - Get SwapChain Images -
 		u32 swapChainImageCount = 0;
 		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, nullptr);
-		List<VkImage> images{}; images.Resize(swapChainImageCount);
-		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, images.GetData());
+		List<VkImage> swapChainImages{}; swapChainImages.Resize(swapChainImageCount);
+		vkGetSwapchainImagesKHR(device->GetHandle(), swapChain, &swapChainImageCount, swapChainImages.GetData());
 
-		// Destroy old image views
-		for (const auto& swapChainImage : swapChainColorImages)
+		// Delete old images
+		for (int i = 0; i < images.GetSize(); i++)
 		{
-			vkDestroyImageView(device->GetHandle(), swapChainImage.imageView, nullptr);
+			delete images[i];
+		}
+		images.Clear();
+
+		// Create new images
+		for (const auto& swapChainImage : swapChainImages)
+		{
+			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, swapChainSurfaceFormat.format, 
+				VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT);
+			images.Add(image);
 		}
 
-		swapChainColorImages.Clear();
-
-		for (const auto& image : images)
-		{
-			VulkanSwapChainImage swapChainImage{};
-			swapChainImage.image = image;
-			swapChainImage.imageView = device->CreateImageView(image, swapChainColorFormat.format, VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT);
-
-			swapChainColorImages.Add(swapChainImage);
-		}
-	}
-
-	void VulkanSwapChain::CreateDepthBuffer()
-	{
-		if (depthBufferFormat == RHI::DepthStencilFormat::None)
-		{
-			return;
-		}
-		
-		Array<VkFormat> preferredDepthFormats{};
-		if (depthBufferFormat == RHI::DepthStencilFormat::Auto || depthBufferFormat == RHI::DepthStencilFormat::D32_S8)
-			preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT });
-		else if (depthBufferFormat == RHI::DepthStencilFormat::D24_S8)
-			preferredDepthFormats.AddRange({ VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT });
-		else if (depthBufferFormat == RHI::DepthStencilFormat::D32)
-			preferredDepthFormats.AddRange({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT });
-
-		swapChainDepthFormat = device->FindSupportedFormat(preferredDepthFormats,
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-
-		RHI::TextureFormat depthTextureFormat{};
-
-		switch (swapChainDepthFormat)
-		{
-		case VK_FORMAT_D32_SFLOAT_S8_UINT:
-			depthBufferFormat = RHI::DepthStencilFormat::D32_S8;
-			depthTextureFormat = RHI::TextureFormat::D32_SFLOAT_S8_UINT;
-			break;
-		case VK_FORMAT_D24_UNORM_S8_UINT:
-			depthBufferFormat = RHI::DepthStencilFormat::D24_S8;
-			depthTextureFormat = RHI::TextureFormat::D24_UNORM_S8_UINT;
-			break;
-		case VK_FORMAT_D32_SFLOAT:
-			depthBufferFormat = RHI::DepthStencilFormat::D32;
-			depthTextureFormat = RHI::TextureFormat::D32_SFLOAT;
-			break;
-		}
-        
-		RHI::TextureDescriptor depthTextureDesc{};
-		depthTextureDesc.width = width;
-		depthTextureDesc.height = height;
-		depthTextureDesc.depth = 1;
-		depthTextureDesc.dimension = RHI::Dimension::Dim2D;
-		depthTextureDesc.format = depthTextureFormat;
-		depthTextureDesc.mipLevels = 1;
-		depthTextureDesc.sampleCount = 1;
-		depthTextureDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
-
-		swapChainDepthImage = new Texture(device, depthTextureDesc);
-	}
-
-	void VulkanSwapChain::DestroyDepthBuffer()
-	{
-        vkDeviceWaitIdle(device->GetHandle());
-        
-		delete swapChainDepthImage;
 	}
 
 } // namespace CE

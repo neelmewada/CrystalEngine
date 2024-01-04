@@ -8,6 +8,15 @@ typedef VkSurfaceKHR_T* VkSurfaceKHR;
 
 namespace CE
 {
+	typedef void* WindowHandle;
+
+	class IWindowResizeCallback
+	{
+	public:
+
+		virtual void OnPlatformWindowResized(u32 newWidth, u32 newHeight) {}
+
+	};
     
     class COREAPPLICATION_API PlatformWindow
     {
@@ -20,7 +29,7 @@ namespace CE
 
         virtual void* GetUnderlyingHandle() = 0;
 
-		virtual void* GetOSNativeHandle() = 0;
+		virtual WindowHandle GetOSNativeHandle() = 0;
 
         virtual void Show() = 0;
         virtual void Hide() = 0;

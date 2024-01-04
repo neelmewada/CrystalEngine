@@ -9,6 +9,8 @@ namespace CE::Vulkan
     public:
         Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
 		Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
+		Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags);
+
         virtual ~Texture();
 
         virtual void* GetHandle() override
@@ -56,6 +58,9 @@ namespace CE::Vulkan
 		void Init(const RHI::TextureDescriptor& desc);
 		void AllocateInternal();
 		void PostInit(const RHI::TextureDescriptor& desc);
+		
+		// True if the image is not managed by this Texture object
+		bool importedImage = false;
 
         VulkanDevice* device = nullptr;
         VkImage image = nullptr;
@@ -69,8 +74,8 @@ namespace CE::Vulkan
         VkImageAspectFlags aspectMask{};
     };
     
-    VkFormat RHITextureFormatToVkFormat(RHI::TextureFormat format);
-    RHI::TextureFormat VkFormatToRHITextureFormat(VkFormat format);
+    VkFormat RHIFormatToVkFormat(RHI::TextureFormat format);
+    RHI::TextureFormat VkFormatToRHIFormat(VkFormat format);
     u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel);
 
 } // namespace CE

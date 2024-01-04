@@ -395,7 +395,7 @@ namespace CE::Vulkan
         textureDesc.height = height;
         textureDesc.depth = 1;
         textureDesc.dimension = RHI::Dimension::Dim2D;
-        textureDesc.format = VkFormatToRHITextureFormat(rtLayout.depthFormat);
+        textureDesc.format = VkFormatToRHIFormat(rtLayout.depthFormat);
         textureDesc.mipLevels = 1;
         textureDesc.sampleCount = 1;
         textureDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
@@ -446,7 +446,7 @@ namespace CE::Vulkan
                 textureDesc.height = GetHeight();
                 textureDesc.depth = 1;
                 textureDesc.dimension = RHI::Dimension::Dim2D;
-                textureDesc.format = VkFormatToRHITextureFormat(imageFormat);
+                textureDesc.format = VkFormatToRHIFormat(imageFormat);
                 textureDesc.mipLevels = 1;
                 textureDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
                 textureDesc.sampleCount = 1;

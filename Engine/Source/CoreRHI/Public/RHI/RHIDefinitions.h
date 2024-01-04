@@ -27,6 +27,7 @@ namespace CE::RHI
         RenderTarget,
         RenderPass,
         Viewport,
+		SwapChain,
 
 		CommandQueue,
         CommandList

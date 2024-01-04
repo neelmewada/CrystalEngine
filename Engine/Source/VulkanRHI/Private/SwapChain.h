@@ -19,65 +19,45 @@ namespace CE::Vulkan
         VkImageView imageView = nullptr;
     };
 
-    class VulkanSwapChain
-    {
-    public:
-        VulkanSwapChain(VulkanRHI* vulkanRHI, PlatformWindow* windowHandle, VulkanDevice* device,
-            u32 desiredBackBufferCount, u32 simultaneousFrameDraws,
-            u32 width, u32 height, bool isFullscreen, 
-            RHI::ColorFormat colorFormat = RHI::ColorFormat::Auto,
-            RHI::DepthStencilFormat depthBufferFormat = RHI::DepthStencilFormat::Auto);
-        virtual ~VulkanSwapChain();
+	class SwapChain : public RHI::SwapChain
+	{
+	public:
+		SwapChain(VulkanRHI* rhi, VulkanDevice* device, PlatformWindow* window, const RHI::SwapChainDescriptor& desc);
 
-        // - Getters -
+		virtual ~SwapChain();
 
-        CE_INLINE u32 GetWidth() { return width; }
-        CE_INLINE u32 GetHeight() { return height; }
+		void RebuildSwapChain();
 
-        CE_INLINE u32 GetBackBufferCount() { return backBufferCount; }
-        CE_INLINE u32 GetSimultaneousFrameDraws() { return simultaneousFrameDraws; }
+	protected:
 
-        CE_INLINE VkSwapchainKHR GetHandle() { return swapChain; }
+		void OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight);
 
-        CE_INLINE bool HasDepthStencilAttachment() { return depthBufferFormat != RHI::DepthStencilFormat::None; }
+		void Create();
 
-        void RebuildSwapChain();
+		VulkanRHI* rhi = nullptr;
+		VulkanDevice* device = nullptr;
+		PlatformWindow* window = nullptr;
 
-    protected:
+		RHI::SwapChainDescriptor desc{};
 
-        void CreateSurface();
-        void CreateSwapChain();
-        void CreateDepthBuffer();
+		List<VkSurfaceFormatKHR> surfaceFormats{};
+		VkSurfaceCapabilitiesKHR surfaceCapabilities{};
+		List<VkPresentModeKHR> presentationModes{};
 
-        void DestroyDepthBuffer();
+		//! @brief We do not support triple buffering, etc for time being.
+		u32 simultaneousFramesInFlight = 1;
 
-    private:
-        VulkanRHI* vulkanRHI = nullptr;
-        VulkanDevice* device = nullptr;
-        PlatformWindow* windowHandle = nullptr;
-        bool isFullscreen = false;
+		VkSwapchainKHR swapChain = nullptr;
+		VkSurfaceKHR surface = nullptr;
 
-        VkSwapchainKHR swapChain = nullptr;
-        VkSurfaceKHR surface = nullptr;
+		VkPresentModeKHR presentMode{};
+		VkSurfaceFormatKHR swapChainSurfaceFormat{};
+		RHI::Format swapChainColorFormat{};
 
-        VkPresentModeKHR presentMode{};
-        VkSurfaceFormatKHR swapChainColorFormat{};
-        VkFormat swapChainDepthFormat = VK_FORMAT_UNDEFINED;
+		u32 width = 0;
+		u32 height = 0;
 
-        RHI::ColorFormat colorBufferFormat{};
-        RHI::DepthStencilFormat depthBufferFormat{};
-
-        u32 backBufferCount = 0;
-        u32 simultaneousFrameDraws = 0;
-        u32 width = 0;
-        u32 height = 0;
-
-        Array<VulkanSwapChainImage> swapChainColorImages{};
-        Texture* swapChainDepthImage{};
-
-        friend struct VulkanRenderTargetLayout;
-        friend class VulkanFrameBuffer;
-        friend class Viewport;
-    };
+		DelegateHandle windowResizeCallback = 0;
+	};
 
 } // namespace CE

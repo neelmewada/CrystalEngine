@@ -3,7 +3,7 @@
 namespace CE::Vulkan
 {
     
-	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget)
+	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, SwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget)
 	{
 		this->device = device;
 		const auto& rtLayout = renderTarget->rtLayout;

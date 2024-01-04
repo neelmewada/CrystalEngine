@@ -62,6 +62,8 @@ namespace CE::Vulkan
 
 		// - Utils -
 
+		virtual bool IsOffscreenOnly() override;
+
 		// TODO: move this function to CoreApplication instead of VulkanRHI
 		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
 
@@ -90,6 +92,9 @@ namespace CE::Vulkan
         virtual bool PresentViewport(RHI::GraphicsCommandList* viewportCommandList) override;
 
         // - Resources -
+
+		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) override;
+		virtual void DestroySwapChain(RHI::SwapChain* swapChain) override;
 
 		virtual RHI::MemoryHeap* AllocateMemoryHeap(const MemoryHeapDescriptor& desc) override;
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) override;

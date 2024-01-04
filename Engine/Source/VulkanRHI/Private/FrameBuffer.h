@@ -3,14 +3,14 @@
 namespace CE::Vulkan
 {
 
-	class VulkanSwapChain;
+	class SwapChain;
 	class RenderTarget;
 	class Texture;
 
 	class VulkanFrameBuffer
 	{
 	public:
-		VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget);
+		VulkanFrameBuffer(VulkanDevice* device, SwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget);
 		VulkanFrameBuffer(VulkanDevice* device, VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1], RenderTarget* renderTarget);
 
 		~VulkanFrameBuffer();

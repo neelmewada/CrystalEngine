@@ -15,7 +15,7 @@ namespace CE::Vulkan
         auto simultaneousFrameDraws = rtLayout.simultaneousFrameDraws;
         
         windowResizeDelegateHandle =
-            PlatformApplication::Get()->onWindowResized.AddDelegateInstance(MemberDelegate(&Viewport::OnWindowResized, this));
+            PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(MemberDelegate(&Viewport::OnWindowResized, this));
 
         if (simultaneousFrameDraws > backBufferCount - 1)
             simultaneousFrameDraws = backBufferCount - 1;
@@ -23,7 +23,7 @@ namespace CE::Vulkan
         // - Swap Chain -
         s32 presentationIndex = Math::Max(rtLayout.presentationRTIndex, 0);
 
-        swapChain = new VulkanSwapChain(vulkanRHI, windowHandle, device, backBufferCount, simultaneousFrameDraws, 
+        swapChain = new SwapChain(vulkanRHI, windowHandle, device, backBufferCount, simultaneousFrameDraws, 
             width, height, isFullscreen, 
             rtLayout.colorOutputs[presentationIndex].preferredFormat, rtLayout.depthStencilFormat);
 
@@ -41,7 +41,7 @@ namespace CE::Vulkan
 
     Viewport::~Viewport()
     {
-        PlatformApplication::Get()->onWindowResized.RemoveDelegateInstance(windowResizeDelegateHandle);
+        PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeDelegateHandle);
         
         // - Sync Objects -
         for (int i = 0; i < imageAcquiredSemaphore.GetSize(); ++i)

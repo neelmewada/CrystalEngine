@@ -40,6 +40,11 @@ namespace CE::RHI
 
 		// - Utils -
 
+		virtual Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask) = 0;
+
+		//! Returns true if RHI was initialized in Offscreen mode, i.e. there was no main window when RHI was initialized. 
+		virtual bool IsOffscreenOnly() = 0;
+
 		/// Returns screen size for window based on which monitor it is in. Usually, platformWindowHandle is of type SDL_Window*.
 		virtual Vec2i GetScreenSizeForWindow(void* platformWindowHandle) = 0;
 
@@ -67,6 +72,9 @@ namespace CE::RHI
         virtual bool PresentViewport(GraphicsCommandList* viewportCommandList) = 0;
 
         // - Resources -
+
+		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) = 0;
+		virtual void DestroySwapChain(RHI::SwapChain* swapChain) = 0;
 
 		virtual RHI::MemoryHeap* AllocateMemoryHeap(const MemoryHeapDescriptor& desc) = 0;
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) = 0;
@@ -98,9 +106,7 @@ namespace CE::RHI
 		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) = 0;
 		virtual void DestroyPipelineState(IPipelineState* pipelineState) = 0;
 
-		// - Utilities -
-
-		virtual Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask) = 0;
+		// - Helper Operations -
 
 		virtual void Blit(Texture* source, Texture* destination, FilterMode filter) = 0;
 

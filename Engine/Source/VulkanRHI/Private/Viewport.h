@@ -33,7 +33,7 @@ namespace CE::Vulkan
 
         // - Getters -
 
-        VulkanSwapChain* GetSwapChain() const { return swapChain; }
+        SwapChain* GetSwapChain() const { return swapChain; }
 
         PlatformWindow* GetWindowHandle() const { return windowHandle; }
 
@@ -57,7 +57,7 @@ namespace CE::Vulkan
         VulkanRHI* vulkanRHI = nullptr;
         VulkanDevice* device = nullptr;
         RenderTarget* renderTarget = nullptr;
-        VulkanSwapChain* swapChain = nullptr;
+        SwapChain* swapChain = nullptr;
 
         Array<VulkanFrameBuffer*> frameBuffers{};
 

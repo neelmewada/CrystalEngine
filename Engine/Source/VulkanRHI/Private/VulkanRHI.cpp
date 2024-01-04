@@ -200,6 +200,11 @@ namespace CE::Vulkan
 
     // - Render Target -
 
+	bool VulkanRHI::IsOffscreenOnly()
+	{
+		return device->IsOffscreenOnly();
+	}
+
 	Vec2i VulkanRHI::GetScreenSizeForWindow(void* platformWindowHandle)
 	{
 		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
@@ -386,6 +391,15 @@ namespace CE::Vulkan
     }
 
     // - Resources -
+
+	RHI::SwapChain* VulkanRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
+	{
+		return new Vulkan::SwapChain(this, device, window, desc);
+	}
+
+	void VulkanRHI::DestroySwapChain(RHI::SwapChain* swapChain)
+	{
+	}
 
 	RHI::MemoryHeap* VulkanRHI::AllocateMemoryHeap(const MemoryHeapDescriptor& desc)
 	{
