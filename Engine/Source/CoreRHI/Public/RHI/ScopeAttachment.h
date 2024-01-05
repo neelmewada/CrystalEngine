@@ -8,7 +8,13 @@ namespace CE::RHI
 	class CORERHI_API ScopeAttachment
 	{
 	public:
-
+        
+        ScopeAttachment(Scope* scope,
+                        FrameAttachment* attachment,
+                        ScopeAttachmentUsage usage,
+                        ScopeAttachmentAccess access);
+        
+        virtual ~ScopeAttachment();
 
 	protected:
 
