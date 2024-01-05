@@ -11,13 +11,31 @@ namespace CE::RHI
         
     private:
         
+		struct GraphEdge
+		{
+			u32 producerIndex = 0;
+			u32 consumerIndex = 0;
+		};
+
+		struct GraphNode
+		{
+			Scope* scope = nullptr;
+			Array<Scope*> producers{};
+			Array<Scope*> consumers{};
+		};
+
         //! A database of all attachments used in this frame graph.
         FrameAttachmentDatabase attachmentDatabase{};
 
-		//! List of scopes in the correct chronological order from start to end.
         Array<Scope*> scopes{};
-        
+		Array<GraphNode> nodes{};
+		Array<GraphEdge> edges{};
+		Array<u32> producers{};
+		Scope* currentScope = nullptr;
+
         friend class FrameAttachmentDatabase;
+		friend class FrameGraphCompiler;
+		friend class FrameGraphBuilder;
     };
 
 } // namespace CE::RHI

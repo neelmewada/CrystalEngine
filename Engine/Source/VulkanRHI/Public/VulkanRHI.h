@@ -60,6 +60,10 @@ namespace CE::Vulkan
         // ************************************************
         // - Public API -
 
+		// - FrameGraph API -
+
+		virtual RHI::Scope* CreateScope(const RHI::ScopeDescriptor& desc) override;
+
 		// - Utils -
 
 		void BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message);
@@ -69,23 +73,7 @@ namespace CE::Vulkan
 		// TODO: move this function to CoreApplication instead of VulkanRHI
 		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
 
-        // - Render Target -
-
-        virtual RHI::RenderTarget* CreateRenderTarget(u32 width, u32 height,
-            const RHI::RenderTargetLayout& rtLayout) override;
-
-        virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) override;
-
-        virtual RHI::Viewport* CreateViewport(PlatformWindow* window,
-            u32 width, u32 height, bool isFullscreen,
-            const RHI::RenderTargetLayout& rtLayout) override;
-
-        virtual void DestroyViewport(RHI::Viewport* viewport) override;
-
         // - Command List -
-        virtual RHI::GraphicsCommandList* CreateGraphicsCommandList(RHI::Viewport* viewport) override;
-
-        virtual RHI::GraphicsCommandList* CreateGraphicsCommandList(RHI::RenderTarget* renderTarget) override;
 
         virtual void DestroyCommandList(RHI::CommandList* commandList) override;
 
@@ -129,7 +117,7 @@ namespace CE::Vulkan
 		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) override;
 		virtual void DestroyPipelineState(RHI::IPipelineState* pipelineState) override;
 
-		virtual Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask) override;
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
 
 		// - Utilities -
 

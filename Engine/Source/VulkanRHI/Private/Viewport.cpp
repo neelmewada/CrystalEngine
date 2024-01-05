@@ -22,7 +22,7 @@ namespace CE::Vulkan
 
         // - Swap Chain -
         s32 presentationIndex = Math::Max(rtLayout.presentationRTIndex, 0);
-
+		
         swapChain = new SwapChain(vulkanRHI, windowHandle, device, backBufferCount, simultaneousFrameDraws, 
             width, height, isFullscreen, 
             rtLayout.colorOutputs[presentationIndex].preferredFormat, rtLayout.depthStencilFormat);

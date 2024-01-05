@@ -3,6 +3,52 @@
 
 namespace CE::Vulkan
 {
+	RenderPass::RenderPass(VulkanDevice* device, const RenderPassDescriptor& desc)
+		: device(device)
+	{
+		FixedArray<VkSubpassDescription, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
+		FixedArray<VkAttachmentDescription, RHI::Limits::Pipeline::MaxBoundAttachmentCount> attachments{};
+		Array<VkSubpassDependency> dependencies{};
+
+		for (const auto& subPassDesc : desc.subpasses)
+		{
+			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxBoundAttachmentCount> attachments{};
+
+			subpasses.Add({});
+			VkSubpassDescription& subpass = subpasses.GetLast();
+			subpass.flags = 0;
+
+			subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+
+			for (int i = 0; i < desc.attachments.GetSize(); i++)
+			{
+
+			}
+		}
+
+		VkRenderPassCreateInfo renderPassCI{};
+		renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassCI.flags = 0;
+		
+		renderPassCI.subpassCount = subpasses.GetSize();
+		renderPassCI.pSubpasses = subpasses.GetData();
+
+		renderPassCI.dependencyCount = dependencies.GetSize();
+		renderPassCI.pDependencies = dependencies.GetData();
+
+		renderPassCI.attachmentCount = attachments.GetSize();
+		renderPassCI.pAttachments = attachments.GetData();
+
+
+	}
+
+	RenderPass::~RenderPass()
+	{
+		if (renderPass != nullptr)
+		{
+			vkDestroyRenderPass(device->GetHandle(), renderPass, nullptr);
+		}
+	}
     
     class VulkanRenderPassBuilder
     {
@@ -28,13 +74,13 @@ namespace CE::Vulkan
 
                 desc.preserveAttachmentCount = 0;
                 desc.pPreserveAttachments = nullptr;
-                desc.pResolveAttachments = nullptr;
 
                 desc.inputAttachmentCount = 0;
                 desc.pInputAttachments = nullptr;
 
                 desc.colorAttachmentCount = rtLayout.colorAttachmentCount;
                 desc.pColorAttachments = rtLayout.colorReferences;
+				desc.pResolveAttachments = nullptr; // Count = colorAttachmentCount
 
                 if (rtLayout.HasDepthStencilAttachment())
                     desc.pDepthStencilAttachment = &rtLayout.depthStencilReference;
@@ -82,8 +128,8 @@ namespace CE::Vulkan
 
     private:
         VulkanDevice* device = nullptr;
-		VkSubpassDescription subpasses[RHI::MaxSubpasses] = {};
-		VkSubpassDependency dependencies[(u32)RHI::MaxSubpasses + 2] = {};
+		VkSubpassDescription subpasses[RHI::Limits::Pipeline::MaxSubPassCount] = {};
+		VkSubpassDependency dependencies[RHI::Limits::Pipeline::MaxSubPassCount + 2] = {};
     };
 
     VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout)

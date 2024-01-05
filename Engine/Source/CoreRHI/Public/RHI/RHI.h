@@ -49,6 +49,10 @@ namespace CE::RHI
         // *******************************************
         // - Public API -
 
+		// - FrameGraph -
+
+		virtual RHI::Scope* CreateScope(const ScopeDescriptor& desc) = 0;
+
 		// - Utils -
 
 		void AddValidationCallbackHandler(ValidationCallback handler, ValidationMessageType logLevel)
@@ -67,7 +71,7 @@ namespace CE::RHI
 			}
 		}
 
-		virtual Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask) = 0;
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) = 0;
 
 		//! Returns true if RHI was initialized in Offscreen mode, i.e. there was no main window when RHI was initialized. 
 		virtual bool IsOffscreenOnly() = 0;
@@ -75,23 +79,8 @@ namespace CE::RHI
 		/// Returns screen size for window based on which monitor it is in. Usually, platformWindowHandle is of type SDL_Window*.
 		virtual Vec2i GetScreenSizeForWindow(void* platformWindowHandle) = 0;
 
-        // - Render Target -
-
-        virtual RenderTarget* CreateRenderTarget(u32 width, u32 height, 
-            const RenderTargetLayout& rtLayout) = 0;
-
-        virtual void DestroyRenderTarget(RenderTarget* renderTarget) = 0;
-
-        virtual RHI::Viewport* CreateViewport(PlatformWindow* window,
-            u32 width, u32 height, bool isFullscreen,
-            const RHI::RenderTargetLayout& rtLayout) = 0;
-
-        virtual void DestroyViewport(Viewport* viewport) = 0;
-
         // - Command List -
 
-        virtual GraphicsCommandList* CreateGraphicsCommandList(Viewport* viewport) = 0;
-        virtual GraphicsCommandList* CreateGraphicsCommandList(RenderTarget* renderTarget) = 0;
         virtual void DestroyCommandList(CommandList* commandList) = 0;
 
         virtual bool ExecuteCommandList(CommandList* commandList) = 0;

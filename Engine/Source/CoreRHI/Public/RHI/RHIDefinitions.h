@@ -47,9 +47,6 @@ namespace CE::RHI
 
         /// Max number of vertex attributes
         MaxVertexAttribs = 8,
-
-        /// Max number of subpasses in a single renderpass
-        MaxSubpasses = 4,
     };
 
     /// Render Target Color Format: Always prefer using Auto

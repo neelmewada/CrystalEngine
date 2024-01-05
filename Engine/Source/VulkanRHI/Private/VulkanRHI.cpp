@@ -204,6 +204,11 @@ namespace CE::Vulkan
 
     // - Render Target -
 
+	RHI::Scope* VulkanRHI::CreateScope(const RHI::ScopeDescriptor& desc)
+	{
+		return new Vulkan::Scope(desc);
+	}
+
 	void VulkanRHI::BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message)
 	{
 		for (auto handler : validationCallbackHandlers[(int)type])
@@ -223,44 +228,7 @@ namespace CE::Vulkan
 		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
 	}
 
-	RHI::RenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height,
-        const RHI::RenderTargetLayout& rtLayout)
-    {
-        return new RenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));
-    }
-
-    void VulkanRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
-    {
-        delete renderTarget;
-    } 
-
-    RHI::Viewport* VulkanRHI::CreateViewport(PlatformWindow* window, u32 width, u32 height, bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
-    {
-        return new Viewport(this, device, window, width, height, isFullscreen, rtLayout);
-    }
-
-    void VulkanRHI::DestroyViewport(RHI::Viewport* viewport)
-    {
-        delete viewport;
-    }
-
     // - Command List -
-
-    RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::Viewport* viewport)
-    {
-        return new GraphicsCommandList(this, device, (Viewport*)viewport);
-    }
-
-    RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::RenderTarget* renderTarget)
-    {
-        if (renderTarget->IsViewportRenderTarget())
-        {
-            auto vulkanViewport = ((RenderTarget*)renderTarget)->GetVulkanViewport();
-            return CreateGraphicsCommandList(vulkanViewport);
-        }
-
-        return new GraphicsCommandList(this, device, (RenderTarget*)renderTarget);
-    }
 
     void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)
     {
@@ -502,9 +470,9 @@ namespace CE::Vulkan
 		delete pipelineState;
 	}
 
-	Array<RHI::CommandQueue*> VulkanRHI::GetQueues(RHI::HardwareQueueClassMask queueMask)
+	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
 	{
-		return device->GetQueues(queueMask);
+		return device->GetHardwareQueues(queueMask);
 	}
 
 } // namespace CE

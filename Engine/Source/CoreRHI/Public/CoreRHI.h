@@ -28,9 +28,7 @@
 #include "RHI/IndexBufferView.h"
 #include "RHI/VertexBufferView.h"
 
-#include "RHI/RHI.h"
-
-// Draw
+// Draw Data
 #include "RHI/DrawItem.h"
 #include "RHI/DrawList.h"
 #include "RHI/DrawPacket.h"
@@ -44,9 +42,13 @@
 #include "RHI/SwapChainFrameAttachment.h"
 #include "RHI/FrameAttachmentDatabase.h"
 #include "RHI/ScopeAttachment.h"
+#include "RHI/BufferScopeAttachment.h"
+#include "RHI/ImageScopeAttachment.h"
 #include "RHI/Scope.h"
 #include "RHI/FrameGraph.h"
+#include "RHI/FrameGraphBuilder.h"
 
+#include "RHI/RHI.h"
 #include "RHI/RHISystem.h"
 
 namespace CE

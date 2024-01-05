@@ -136,7 +136,7 @@ TEST(VulkanRHI, BufferAliasing)
 	RHI::MemoryHeapDescriptor heapDesc{};
 	heapDesc.allocationSize = totalSize;
 	heapDesc.heapType = heapType;
-	heapDesc.flags = src1Req.flags & src2Req.flags;
+	heapDesc.flags = src1Req.flags & src2Req.flags; // You need to AND all the flags together
 	heapDesc.usageFlags = RHI::MemoryHeapUsageFlags::Buffer;
 
 	RHI::MemoryHeap* heap = RHI::gDynamicRHI->AllocateMemoryHeap(heapDesc);
@@ -195,3 +195,12 @@ TEST(VulkanRHI, BufferAliasing)
 	TEST_END;
 }
 
+
+TEST(VulkanRHI, FrameGraph)
+{
+	TEST_BEGIN;
+
+
+
+	TEST_END;
+}

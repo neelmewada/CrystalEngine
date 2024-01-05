@@ -3,9 +3,10 @@
 namespace CE::RHI
 {
 
-    Scope::Scope()
+    Scope::Scope(const ScopeDescriptor& desc)
     {
-        
+		id = desc.id;
+		queueClass = desc.queueClass;
     }
 
     Scope::~Scope()

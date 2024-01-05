@@ -121,6 +121,11 @@ namespace CE::RHI
 
 		const DrawItem* item = nullptr;
 
+		inline bool operator==(const DrawItemProperties& props) const
+		{
+			return item == props.item;
+		}
+
 		/// @brief A filter mask which helps decide if this item is supposed to be pushed to a CommandList for drawing.
 		DrawFilterMask drawFilterMask = DrawFilterMaskNullValue;
 	};

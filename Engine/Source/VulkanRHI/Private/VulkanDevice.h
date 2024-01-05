@@ -53,7 +53,7 @@ namespace CE::Vulkan
 
         // - Getters -
 
-		Array<RHI::CommandQueue*> GetQueues(RHI::HardwareQueueClassMask queueMask);
+		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask);
 
 		INLINE bool IsUnifiedMemoryArchitecture() const
 		{

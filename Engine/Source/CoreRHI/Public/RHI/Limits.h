@@ -14,7 +14,11 @@ namespace CE::RHI
 			/// @brief Max number of simultaneous frames that can be rendered (triple buffering, etc)
 			constexpr u32 MaxSimultaneousFramesInFlight = 4;
 
-			constexpr u32 MaxColorAttachmentCount = 8;
+			//! @brief Max number of attachments (color + input + depth stencil) that can be bound in a single pass
+			constexpr u32 MaxBoundAttachmentCount = 8;
+
+			//! @brief Max number of subpasses a render pass can have
+			constexpr u32 MaxSubPassCount = 4;
 
 			/// @brief Max number of DrawList Tags
 			constexpr u32 DrawListTagCount = 64;

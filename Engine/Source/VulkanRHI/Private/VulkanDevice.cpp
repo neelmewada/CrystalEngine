@@ -759,7 +759,7 @@ namespace CE::Vulkan
         vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
     }
 
-	Array<RHI::CommandQueue*> VulkanDevice::GetQueues(RHI::HardwareQueueClassMask queueMask)
+	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
 	{
 		Array<RHI::CommandQueue*> result{};
 
