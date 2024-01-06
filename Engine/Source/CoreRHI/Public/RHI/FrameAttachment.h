@@ -17,7 +17,7 @@ namespace CE::RHI
         
         FrameAttachment(const AttachmentID& attachmentId, AttachmentLifetimeType lifetime);
 
-	private:
+	protected:
         
         AttachmentID attachmentId{};
         AttachmentLifetimeType lifetime{};

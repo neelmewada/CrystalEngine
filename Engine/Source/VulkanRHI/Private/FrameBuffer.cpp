@@ -6,7 +6,7 @@ namespace CE::Vulkan
 	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, SwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget)
 	{
 		this->device = device;
-		const auto& rtLayout = renderTarget->rtLayout;
+		/*const auto& rtLayout = renderTarget->rtLayout;
 
 		VkFramebufferCreateInfo frameBufferCI{};
 		frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -34,7 +34,7 @@ namespace CE::Vulkan
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
 			return;
-		}
+		}*/
 	}
 
 	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device,
@@ -42,7 +42,7 @@ namespace CE::Vulkan
 		RenderTarget* renderTarget)
 	{
 		this->device = device;
-		const auto& rtLayout = renderTarget->rtLayout;
+		/*const auto& rtLayout = renderTarget->rtLayout;
 
 		VkFramebufferCreateInfo frameBufferCI{};
 		frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -61,7 +61,7 @@ namespace CE::Vulkan
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
 			return;
-		}
+		}*/
 	}
 
 	VulkanFrameBuffer::~VulkanFrameBuffer()

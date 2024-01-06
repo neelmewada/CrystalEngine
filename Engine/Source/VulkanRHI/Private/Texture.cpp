@@ -48,6 +48,7 @@ namespace CE::Vulkan
 		{ RHI::TextureFormat::D32_SFLOAT, VK_FORMAT_D32_SFLOAT, 1, 4 },
 		{ RHI::TextureFormat::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 5 },
 		{ RHI::TextureFormat::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 4 },
+		{ RHI::TextureFormat::D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, 1, 3 },
 
 		{ RHI::TextureFormat::B8G8R8_UNORM, VK_FORMAT_B8G8R8_UNORM, 3, 1 },
 		{ RHI::TextureFormat::B8G8R8_SNORM, VK_FORMAT_B8G8R8_SNORM, 3, 1 },

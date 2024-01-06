@@ -2,7 +2,7 @@
 
 
 // Preprocessor utilities
-// Macros with __ prefix are considered implementation details and should not be used or relied upon
+// Macros with __ prefix are considered engine internals and should not be used directly
 
 // Converts parameter to string, guarantees macro expansion 2 levels
 // Ex: CE_TOSTRING(arg) <=> "arg"

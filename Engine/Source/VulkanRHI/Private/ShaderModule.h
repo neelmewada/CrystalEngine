@@ -7,7 +7,7 @@ namespace CE::Vulkan
 	{
 	public:
 
-		ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection);
+		ShaderModule(VulkanDevice* device, const RHI::ShaderModuleDescriptor& desc);
 		~ShaderModule();
 
 		Name GetName() override

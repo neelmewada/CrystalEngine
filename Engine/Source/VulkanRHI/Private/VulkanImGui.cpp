@@ -106,16 +106,16 @@ namespace CE::Vulkan
 
         ASSERT(IsViewportTarget(), "ImGui is only supported on viewport render targets at this moment!");
 
-        VulkanPlatform::InitVulkanForWindow(viewport->GetWindowHandle());
+        //VulkanPlatform::InitVulkanForWindow(viewport->GetWindowHandle());
 
-        gPersistentRenderPass = viewport->renderTarget->renderPass->GetHandle();
+        //gPersistentRenderPass = viewport->renderTarget->renderPass->GetHandle();
 
         ImGui_ImplVulkan_InitInfo initInfo{};
         initInfo.PhysicalDevice = device->GetPhysicalHandle();
         initInfo.Device = device->GetHandle();
         initInfo.DescriptorPool = imGuiDescriptorPool;
         initInfo.Instance = vulkanRHI->GetInstanceHandle();
-        initInfo.ImageCount = viewport->swapChain->GetBackBufferCount();
+        //initInfo.ImageCount = viewport->swapChain->GetBackBufferCount();
         initInfo.MinImageCount = 2;
         initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         initInfo.Queue = device->GetGraphicsQueue()->GetHandle();
@@ -125,7 +125,7 @@ namespace CE::Vulkan
         // Upload fonts
         {
             VkCommandPool cmdPool = device->GetGraphicsCommandPool();
-            VkCommandBuffer cmdBuffer = commandBuffers[viewport->currentDrawFrameIndex];
+			VkCommandBuffer cmdBuffer = commandBuffers[0];//[viewport->currentDrawFrameIndex];
 
             vkResetCommandPool(device->GetHandle(), cmdPool, 0);
             VkCommandBufferBeginInfo beginInfo = {};

@@ -3,13 +3,13 @@
 namespace CE::RHI
 {
 
-    ImageFrameAttachment::ImageFrameAttachment(AttachmentID id, const ImageDescriptor& imageDesc)
-        : FrameAttachment(id, RHI::AttachmentLifetimeType::Transient), descriptor(imageDesc)
+    ImageFrameAttachment::ImageFrameAttachment(AttachmentID id, const ImageDescriptor& descriptor)
+        : FrameAttachment(id, RHI::AttachmentLifetimeType::Transient), descriptor(descriptor)
     {
         
     }
 
-	ImageFrameAttachment::ImageFrameAttachment(AttachmentID id, Ptr<Texture> image)
+	ImageFrameAttachment::ImageFrameAttachment(AttachmentID id, Texture* image)
 		: FrameAttachment(id, RHI::AttachmentLifetimeType::External)
 	{
 		if (image)

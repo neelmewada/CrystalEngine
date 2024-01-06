@@ -10,9 +10,20 @@ namespace CE::RHI
 
 		void Begin(FrameGraph* frameGraph);
 
-		void BeginScope();
+		inline FrameAttachmentDatabase& GetFrameAttachmentDatabase()
+		{
+			return frameGraph->attachmentDatabase;
+		}
 
-		bool EndScope();
+		void BeginScope(const Name& id);
+
+		bool UseAttachment(const ImageScopeAttachmentDescriptor& descriptor,
+			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
+
+		bool UseAttachment(const BufferScopeAttachmentDescriptor& descriptor,
+			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
+
+		Scope* EndScope();
 
 		bool End();
 

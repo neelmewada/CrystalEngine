@@ -62,6 +62,9 @@ namespace CE::Vulkan
 		// True if the image is not managed by this Texture object
 		bool importedImage = false;
 
+		//! Queue family index of the queue that this texture is used with the first time
+		int initialFamilyIndex = -1;
+
         VulkanDevice* device = nullptr;
         VkImage image = nullptr;
         VkDeviceMemory imageMemory = nullptr;
@@ -72,6 +75,9 @@ namespace CE::Vulkan
         VkFormat vkFormat{};
 		VkImageLayout vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageAspectFlags aspectMask{};
+
+		friend class RHI::FrameGraph;
+		friend class GraphicsCommandList;
     };
     
     VkFormat RHIFormatToVkFormat(RHI::TextureFormat format);

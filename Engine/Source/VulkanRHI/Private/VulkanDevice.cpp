@@ -91,6 +91,27 @@ namespace CE::Vulkan
 		CE_LOG(Info, All, "Vulkan device shutdown");
 	}
 
+	const Array<RHI::Format>& VulkanDevice::GetAvailableDepthStencilFormats()
+	{
+		if (availableDepthStencilFormats.IsEmpty())
+		{
+			StaticArray<VkFormat, 3> formats = { VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT };
+
+			for (VkFormat format : formats)
+			{
+				VkFormatProperties props;
+				vkGetPhysicalDeviceFormatProperties(gpu, format, &props);
+
+				if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+				{
+					availableDepthStencilFormats.Add(VkFormatToRHIFormat(format));
+				}
+			}
+		}
+
+		return availableDepthStencilFormats;
+	}
+
 	void VulkanDevice::SelectGpu()
 	{
 		// Fetch all available physical devices

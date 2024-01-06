@@ -50,7 +50,7 @@ namespace CE::Vulkan
 		}
 	}
     
-    class VulkanRenderPassBuilder
+    /*class VulkanRenderPassBuilder
     {
     public:
         VulkanRenderPassBuilder(VulkanDevice* device) : device(device)
@@ -130,26 +130,7 @@ namespace CE::Vulkan
         VulkanDevice* device = nullptr;
 		VkSubpassDescription subpasses[RHI::Limits::Pipeline::MaxSubPassCount] = {};
 		VkSubpassDependency dependencies[RHI::Limits::Pipeline::MaxSubPassCount + 2] = {};
-    };
-
-    VulkanRenderPass::VulkanRenderPass(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout)
-        : device(device), layout(rtLayout)
-    {
-        VulkanRenderPassBuilder builder = VulkanRenderPassBuilder(device);
-        this->renderPass = builder.Build(rtLayout);
-
-        if (renderPass != nullptr)
-            CE_LOG(Info, All, "Vulkan RenderPass created");
-    }
-
-    VulkanRenderPass::~VulkanRenderPass()
-    {
-        if (renderPass != nullptr)
-        {
-            vkDestroyRenderPass(device->GetHandle(), renderPass, nullptr);
-            CE_LOG(Info, All, "Vulkan RenderPass destroyed");
-        }
-    }
+    };*/
 
 } // namespace CE
 

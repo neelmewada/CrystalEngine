@@ -8,9 +8,9 @@ namespace CE::Vulkan
 		, device(device)
 		, viewport(viewport)
 	{
-		this->renderTarget = (RenderTarget*)viewport->GetRenderTarget();
-		this->numCommandBuffers = viewport->GetBackBufferCount();
-		this->simultaneousFrameDraws = viewport->GetSimultaneousFrameDrawCount();
+		//this->renderTarget = (RenderTarget*)viewport->GetRenderTarget();
+		//this->numCommandBuffers = viewport->GetBackBufferCount();
+		//this->simultaneousFrameDraws = viewport->GetSimultaneousFrameDrawCount();
 
 		VkCommandBufferAllocateInfo commandAllocInfo = {};
 		commandAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -34,7 +34,7 @@ namespace CE::Vulkan
 		, device(device)
 		, renderTarget(renderTarget)
 	{
-		if (renderTarget->IsViewportRenderTarget())
+		/*if (renderTarget->IsViewportRenderTarget())
 		{
 			auto viewport = renderTarget->GetVulkanViewport();
 
@@ -79,7 +79,7 @@ namespace CE::Vulkan
 			}
 
 			CreateSyncObjects();
-		}
+		}*/
 	}
 
 	GraphicsCommandList::~GraphicsCommandList()
@@ -97,7 +97,7 @@ namespace CE::Vulkan
 
 		vkWaitForFences(device->GetHandle(), renderFinishedFence.GetSize(), renderFinishedFence.GetData(), VK_TRUE, u64Max);
 
-		VkExtent2D extent{};
+		/*VkExtent2D extent{};
 		extent.width = renderTarget->GetWidth();
 		extent.height = renderTarget->GetHeight();
 
@@ -145,7 +145,7 @@ namespace CE::Vulkan
 
 			// Begin Render Pass
 			vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-		}
+		}*/
 	}
 
 	void GraphicsCommandList::End()

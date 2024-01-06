@@ -14,6 +14,17 @@ namespace CE
 		StaticArray()
 		{}
 
+		StaticArray(std::initializer_list<T> list)
+		{
+			int i = 0;
+			for (const auto& item : list)
+			{
+				if (i >= impl.size())
+					break;
+				impl[i++] = item;
+			}
+		}
+
 		inline T& operator[](SIZE_T index)
 		{
 			return impl[index];

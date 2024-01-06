@@ -68,7 +68,7 @@ void OnValidationMessage(RHI::ValidationMessageType messageType, const char* mes
 	}
 }
 
-TEST(VulkanRHI, BufferAliasing)
+TEST(RHI, BufferAliasing)
 {
 	TEST_BEGIN;
 	
@@ -196,11 +196,118 @@ TEST(VulkanRHI, BufferAliasing)
 }
 
 
-TEST(VulkanRHI, FrameGraph)
+TEST(RHI, FrameGraphBuilder)
 {
 	TEST_BEGIN;
 
+	FrameGraphBuilder builder{};
+	FrameGraph* frameGraph = new FrameGraph();
 
+	builder.Begin(frameGraph);
+	{
+		Array<RHI::Format> depthFormats = RHI::gDynamicRHI->GetAvailableDepthStencilFormats();
 
+		RHI::ImageDescriptor colorRT{};
+		colorRT.name = "PipelineOutput";
+		colorRT.dimension = RHI::Dimension::Dim2D;
+		colorRT.format = RHI::Format::R8G8B8A8_UNORM;
+		colorRT.width = colorRT.height = 512;
+		colorRT.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
+
+		RHI::BufferDescriptor culledLightList{};
+		culledLightList.name = "CulledLightList";
+		culledLightList.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
+		culledLightList.bufferSize = 1_MB;
+		
+		RHI::ImageDescriptor depthDesc{};
+		depthDesc.name = "DepthStencil";
+		depthDesc.dimension = RHI::Dimension::Dim2D;
+		depthDesc.format = depthFormats[0];
+		depthDesc.width = depthDesc.height = 512;
+		depthDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
+
+		RHI::ImageDescriptor shadowMapDesc{};
+		shadowMapDesc.name = "DirectionalShadowMap";
+		shadowMapDesc.dimension = RHI::Dimension::Dim2D;
+		shadowMapDesc.format = depthFormats[0];
+		shadowMapDesc.width = shadowMapDesc.height = 512;
+		shadowMapDesc.bindFlags = RHI::TextureBindFlags::ShaderReadWrite | RHI::TextureBindFlags::Depth;
+
+		// Frame Attachments
+		builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("PipelineOutput", colorRT);
+		builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("DepthStencil", depthDesc);
+		builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("CulledLightList", culledLightList);
+
+		builder.BeginScope("DepthPass");
+		{
+			ImageScopeAttachmentDescriptor depthAttachment{};
+			depthAttachment.attachmentId = "DepthStencil";
+			depthAttachment.loadStoreAction.clearValueDepth = 0;
+			depthAttachment.loadStoreAction.clearValueStencil = 0;
+			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+			depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
+			depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare; // Dont use stencil
+
+			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+
+		}
+		builder.EndScope();
+
+		builder.BeginScope("LightCulling");
+		{
+			ImageScopeAttachmentDescriptor depthAttachment{};
+			depthAttachment.attachmentId = "DepthStencil";
+			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+			BufferScopeAttachmentDescriptor culledLightListAttachment{};
+			culledLightListAttachment.attachmentId = "CulledLightList";
+
+			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+			builder.UseAttachment(culledLightListAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Write);
+		}
+		builder.EndScope();
+
+		builder.BeginScope("OpaquePass");
+		{
+			ImageScopeAttachmentDescriptor depthAttachment{};
+			depthAttachment.attachmentId = "DepthStencil";
+			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
+
+			ImageScopeAttachmentDescriptor colorAttachment{};
+			colorAttachment.attachmentId = "PipelineOutput";
+			colorAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0.5f, 1); // Clear color
+			colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+			colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+			
+			builder.UseAttachment(colorAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+		}
+		builder.EndScope();
+
+		builder.BeginScope("TransparentPass");
+		{
+			ImageScopeAttachmentDescriptor depthAttachment{};
+			depthAttachment.attachmentId = "DepthStencil";
+			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
+
+			ImageScopeAttachmentDescriptor colorAttachment{};
+			colorAttachment.attachmentId = "PipelineOutput";
+			colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+			colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+			builder.UseAttachment(colorAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
+		}
+		builder.EndScope();
+	}
+	builder.End();
+	
+	delete frameGraph;
 	TEST_END;
 }

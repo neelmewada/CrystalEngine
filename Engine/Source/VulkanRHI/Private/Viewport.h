@@ -10,7 +10,7 @@ namespace CE::Vulkan
 {
     class VulkanFrameBuffer;
 
-    class Viewport : public RHI::Viewport
+    /*class Viewport : public RHI::Viewport
     {
     public:
         Viewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
@@ -73,6 +73,6 @@ namespace CE::Vulkan
         friend struct VulkanRenderTargetLayout;
         friend class GraphicsCommandList;
         friend class VulkanRHI;
-    };
+    };*/
     
 } // namespace CE

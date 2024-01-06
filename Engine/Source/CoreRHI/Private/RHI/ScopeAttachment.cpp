@@ -3,16 +3,20 @@
 namespace CE::RHI
 {
 
-    ScopeAttachment::ScopeAttachment(Scope* scope,
-                                     FrameAttachment* attachment, 
-                                     ScopeAttachmentUsage usage,
-                                     ScopeAttachmentAccess access)
-        : scope(scope), attachment(attachment), usage(usage), access(access)
-    {
-        
-    }
-    
-    ScopeAttachment::~ScopeAttachment()
+	ScopeAttachment::ScopeAttachment(Scope* scope,
+		FrameAttachment* attachment,
+		ScopeAttachmentUsage usage,
+		ScopeAttachmentAccess access,
+		const ScopeAttachmentDescriptor& descriptor)
+		: scope(scope)
+		, id(descriptor.attachmentId)
+		, attachment(attachment)
+		, usage(usage), access(access)
+		, loadStoreAction(descriptor.loadStoreAction)
+	{
+	}
+
+	ScopeAttachment::~ScopeAttachment()
     {
         
     }

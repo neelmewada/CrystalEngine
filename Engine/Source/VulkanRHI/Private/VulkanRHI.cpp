@@ -228,6 +228,11 @@ namespace CE::Vulkan
 		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
 	}
 
+	Array<RHI::Format> VulkanRHI::GetAvailableDepthStencilFormats()
+	{
+		return device->GetAvailableDepthStencilFormats();
+	}
+
     // - Command List -
 
     void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)
@@ -258,7 +263,7 @@ namespace CE::Vulkan
 
         // -- Waiting for Fences --
         // Wait until the rendering from previous call has been finished
-        vkWaitForFences(device->GetHandle(),
+        /*vkWaitForFences(device->GetHandle(),
             1, &commandList->renderFinishedFence[renderTarget->currentImageIndex],
             VK_TRUE, u64Max);
 
@@ -291,7 +296,7 @@ namespace CE::Vulkan
         vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo,
             commandList->renderFinishedFence[renderTarget->currentImageIndex]);
         
-        renderTarget->isFresh = false;
+        renderTarget->isFresh = false;*/
         return true;
     }
     
@@ -301,72 +306,72 @@ namespace CE::Vulkan
 
         // -- Waiting for Fences --
         // Wait until the rendering from previous call has been finished
-        auto result = vkWaitForFences(device->GetHandle(),
-            1, &commandList->renderFinishedFence[viewport->currentImageIndex],
-            VK_TRUE, u64Max);
-        
-        result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
-            viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
+        //auto result = vkWaitForFences(device->GetHandle(),
+        //    1, &commandList->renderFinishedFence[viewport->currentImageIndex],
+        //    VK_TRUE, u64Max);
+        //
+        //result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
+        //    viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-        {
-            viewport->Rebuild();
-            return false;
-        }
-        
-        // Manually reset (close) the fences
-        result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
+        //if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+        //{
+        //    viewport->Rebuild();
+        //    return false;
+        //}
+        //
+        //// Manually reset (close) the fences
+        //result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
 
-        // Submit to Queue
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.waitSemaphoreCount = 1;
-        // List of semaphores to wait on at waitStages[i]
-        submitInfo.pWaitSemaphores = &viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex];
+        //// Submit to Queue
+        //VkSubmitInfo submitInfo = {};
+        //submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        //submitInfo.waitSemaphoreCount = 1;
+        //// List of semaphores to wait on at waitStages[i]
+        //submitInfo.pWaitSemaphores = &viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex];
 
-        // Execute the whole command buffer until the fragment shader stage (so we don't output any data to framebuffer yet)
-        // and THEN wait for the image to be available (imageAcquiredSemaphore) so fragment shader can output pixels to it.
-        VkPipelineStageFlags waitStages[] = {
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        };
-        submitInfo.pWaitDstStageMask = waitStages; // Stages to check semaphores at
+        //// Execute the whole command buffer until the fragment shader stage (so we don't output any data to framebuffer yet)
+        //// and THEN wait for the image to be available (imageAcquiredSemaphore) so fragment shader can output pixels to it.
+        //VkPipelineStageFlags waitStages[] = {
+        //        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        //};
+        //submitInfo.pWaitDstStageMask = waitStages; // Stages to check semaphores at
 
-        // Only submit the command buffer we want to render to since they're 1:1 with SwapChain Images
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandList->commandBuffers[viewport->currentImageIndex];
+        //// Only submit the command buffer we want to render to since they're 1:1 with SwapChain Images
+        //submitInfo.commandBufferCount = 1;
+        //submitInfo.pCommandBuffers = &commandList->commandBuffers[viewport->currentImageIndex];
 
-        // Semaphores to signal when command buffer finishes executing (finished rendering)
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
+        //// Semaphores to signal when command buffer finishes executing (finished rendering)
+        //submitInfo.signalSemaphoreCount = 1;
+        //submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
 
-        result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
+        //result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
 
         return true;
     }
 
     bool VulkanRHI::PresentViewport(RHI::GraphicsCommandList* viewportCommandList)
     {
-        auto vulkanCommandList = (GraphicsCommandList*)viewportCommandList;
-        if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
-            return false;
+  //      auto vulkanCommandList = (GraphicsCommandList*)viewportCommandList;
+  //      if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
+  //          return false;
 
-        auto vulkanViewport = vulkanCommandList->GetViewport();
-        auto swapChain = vulkanViewport->GetSwapChain()-> GetHandle();
+  //      auto vulkanViewport = vulkanCommandList->GetViewport();
+		//VkSwapchainKHR swapChain = nullptr;// vulkanViewport->GetSwapChain()->GetHandle();
 
-        VkPresentInfoKHR presentInfo{};
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = &vulkanCommandList->renderFinishedSemaphore[vulkanViewport->currentImageIndex];
-        presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = &swapChain;
-        presentInfo.pImageIndices = &vulkanViewport->currentImageIndex;
+  //      VkPresentInfoKHR presentInfo{};
+  //      presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  //      presentInfo.waitSemaphoreCount = 1;
+  //      presentInfo.pWaitSemaphores = &vulkanCommandList->renderFinishedSemaphore[vulkanViewport->currentImageIndex];
+  //      presentInfo.swapchainCount = 1;
+  //      presentInfo.pSwapchains = &swapChain;
+  //      presentInfo.pImageIndices = &vulkanViewport->currentImageIndex;
 
-        auto result = vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
-        if (result != VK_SUCCESS)
-            return false;
+  //      auto result = vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
+  //      if (result != VK_SUCCESS)
+  //          return false;
 
-        // Next frame index (if we're rendering 2 frames simultaneously for triple buffering)
-        vulkanViewport->currentDrawFrameIndex = (vulkanViewport->currentDrawFrameIndex + 1) % vulkanViewport->GetSimultaneousFrameDrawCount();
+  //      // Next frame index (if we're rendering 2 frames simultaneously for triple buffering)
+  //      vulkanViewport->currentDrawFrameIndex = (vulkanViewport->currentDrawFrameIndex + 1) % vulkanViewport->GetSimultaneousFrameDrawCount();
 
         return true;
     }
@@ -440,7 +445,7 @@ namespace CE::Vulkan
 
 	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection)
 	{
-		return new Vulkan::ShaderModule(device, desc, shaderReflection);
+		return nullptr;
 	}
 
 	void VulkanRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)

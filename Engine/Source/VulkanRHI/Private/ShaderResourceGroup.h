@@ -113,6 +113,7 @@ namespace CE::Vulkan
         friend class VulkanDescriptorSet;
 		friend class MergedShaderResourceGroup;
 		friend class ShaderResourceManager;
+
 	};
 
 } // namespace CE

@@ -94,6 +94,8 @@ namespace CE::Vulkan
 			return memoryProperties;
 		}
 
+		const Array<RHI::Format>& GetAvailableDepthStencilFormats();
+
     protected:
 
     private:
@@ -126,6 +128,7 @@ namespace CE::Vulkan
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};
 		Array<VkQueueFamilyProperties> queueFamilyPropeties{};
+		Array<RHI::Format> availableDepthStencilFormats{};
 
         GpuMetaData gpuMetaData{};
 

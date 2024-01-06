@@ -38,6 +38,7 @@
 // Frame
 #include "RHI/AttachmentDefines.h"
 #include "RHI/FrameAttachment.h"
+#include "RHI/BufferFrameAttachment.h"
 #include "RHI/ImageFrameAttachment.h"
 #include "RHI/SwapChainFrameAttachment.h"
 #include "RHI/FrameAttachmentDatabase.h"

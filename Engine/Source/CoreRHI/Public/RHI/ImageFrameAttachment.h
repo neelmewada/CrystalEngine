@@ -11,11 +11,11 @@ namespace CE::RHI
         ImageFrameAttachment(AttachmentID id, const ImageDescriptor& imageDesc);
 
 		//! Create an external image attachment 
-		ImageFrameAttachment(AttachmentID id, Ptr<Texture> image);
+		ImageFrameAttachment(AttachmentID id, Texture* image);
 
         virtual ~ImageFrameAttachment();
         
-    private:
+	protected:
         ImageDescriptor descriptor{};
         
     };

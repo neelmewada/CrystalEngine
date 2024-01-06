@@ -50,7 +50,7 @@ namespace CE::Vulkan
         samplerCI.maxAnisotropy = samplerDesc.maxAnisotropy;
         samplerCI.minFilter = ToVkFilter(samplerDesc.samplerFilterMode);
         samplerCI.magFilter = ToVkFilter(samplerDesc.samplerFilterMode);
-        
+		
         if (vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &sampler) != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create vulkan sampler");

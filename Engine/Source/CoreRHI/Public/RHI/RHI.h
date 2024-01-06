@@ -71,6 +71,8 @@ namespace CE::RHI
 			}
 		}
 
+		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() = 0;
+
 		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) = 0;
 
 		//! Returns true if RHI was initialized in Offscreen mode, i.e. there was no main window when RHI was initialized. 

@@ -223,7 +223,8 @@ namespace CE::RHI
 		R32G32_UINT,
 		R32G32_SINT,
 		R32G32_SFLOAT,
-        D24_UNORM_S8_UINT,
+		D16_UNORM_S8_UINT,
+		D24_UNORM_S8_UINT,
         D32_SFLOAT_S8_UINT,
 		// Compressed formats
 		BC7_UNORM,

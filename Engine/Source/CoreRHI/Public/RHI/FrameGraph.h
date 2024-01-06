@@ -30,12 +30,16 @@ namespace CE::RHI
         Array<Scope*> scopes{};
 		Array<GraphNode> nodes{};
 		Array<GraphEdge> edges{};
-		Array<u32> producers{};
+		HashMap<Name, Scope*> scopesById{};
+		
+		Array<Scope*> startProducers{};
+		Array<Scope*> endConsumers{};
 		Scope* currentScope = nullptr;
 
         friend class FrameAttachmentDatabase;
 		friend class FrameGraphCompiler;
 		friend class FrameGraphBuilder;
+		friend class RHI_FrameGraphBuilder_Test;
     };
 
 } // namespace CE::RHI

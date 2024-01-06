@@ -66,6 +66,8 @@ namespace CE::Vulkan
 
 		// - Utils -
 
+		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() override;
+
 		void BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message);
 
 		virtual bool IsOffscreenOnly() override;

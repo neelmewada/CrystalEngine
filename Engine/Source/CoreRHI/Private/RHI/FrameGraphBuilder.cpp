@@ -8,17 +8,66 @@ namespace CE::RHI
 		this->frameGraph = frameGraph;
     }
 
-	void FrameGraphBuilder::BeginScope()
+	void FrameGraphBuilder::BeginScope(const Name& id)
 	{
-		this->currentScope = RHI::gDynamicRHI->CreateScope({});
+		RHI::ScopeDescriptor desc{};
+		desc.id = id;
+		desc.queueClass = RHI::HardwareQueueClass::Graphics;
+		this->currentScope = RHI::gDynamicRHI->CreateScope(desc);
 	}
 
-	bool FrameGraphBuilder::EndScope()
+	bool FrameGraphBuilder::UseAttachment(const ImageScopeAttachmentDescriptor& descriptor, ScopeAttachmentUsage usage, ScopeAttachmentAccess access)
 	{
 		if (!currentScope || !frameGraph)
 			return false;
-		frameGraph->scopes.Add(currentScope);
+
+		FrameAttachment* frameAttachment = GetFrameAttachmentDatabase().FindFrameAttachment(descriptor.attachmentId);
+		if (!frameAttachment)
+			return false;
+
+		ScopeAttachment* scopeAttachment = currentScope->FindScopeAttachment(descriptor.attachmentId);
+		if (scopeAttachment == nullptr)
+		{
+			scopeAttachment = currentScope->EmplaceScopeAttachment<ImageScopeAttachment>(frameAttachment, usage, access, descriptor);
+		}
+		else
+		{
+			scopeAttachment->usage = usage;
+			scopeAttachment->access = access;
+		}
+		
 		return true;
+	}
+
+	bool FrameGraphBuilder::UseAttachment(const BufferScopeAttachmentDescriptor& descriptor, ScopeAttachmentUsage usage, ScopeAttachmentAccess access)
+	{
+		if (!currentScope || !frameGraph)
+			return false;
+
+		FrameAttachment* frameAttachment = GetFrameAttachmentDatabase().FindFrameAttachment(descriptor.attachmentId);
+		if (!frameAttachment)
+			return false;
+
+		ScopeAttachment* scopeAttachment = currentScope->FindScopeAttachment(descriptor.attachmentId);
+		if (scopeAttachment == nullptr)
+		{
+			scopeAttachment = currentScope->EmplaceScopeAttachment<BufferScopeAttachment>(frameAttachment, usage, access, descriptor);
+		}
+		else
+		{
+			scopeAttachment->usage = usage;
+			scopeAttachment->access = access;
+		}
+
+		return true;
+	}
+
+	Scope* FrameGraphBuilder::EndScope()
+	{
+		if (!currentScope || !frameGraph)
+			return nullptr;
+		frameGraph->scopes.Add(currentScope);
+		return currentScope;
 	}
 
     bool FrameGraphBuilder::End()

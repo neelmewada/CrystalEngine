@@ -139,14 +139,14 @@ namespace CE::Vulkan
 
 		VkPipelineDynamicStateCreateInfo dynamicStateCI{};
 		dynamicStateCI.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamicStateCI.dynamicStateCount = (u32)COUNTOF(dynamicStates);
+		dynamicStateCI.dynamicStateCount = static_cast<u32>(COUNTOF(dynamicStates));
 		dynamicStateCI.pDynamicStates = dynamicStates;
 		
 		pipelineCI.pDynamicState = &dynamicStateCI;
 
 		// - Viewport State -
 
-		VkViewport viewport{};
+		/*VkViewport viewport{};
 		viewport.x = viewport.y = 0;
 		viewport.minDepth = 0;
 		viewport.maxDepth = 1;
@@ -156,16 +156,16 @@ namespace CE::Vulkan
 		VkRect2D scissor{};
 		scissor.offset.x = scissor.offset.y = 0;
 		scissor.extent.width = viewport.width;
-		scissor.extent.height = viewport.height;
+		scissor.extent.height = viewport.height;*/
 
-		VkPipelineViewportStateCreateInfo viewportState{};
+		/*VkPipelineViewportStateCreateInfo viewportState{};
 		viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 		viewportState.viewportCount = 1;
 		viewportState.pViewports = &viewport;
 		viewportState.scissorCount = 1;
-		viewportState.pScissors = &scissor;
+		viewportState.pScissors = &scissor;*/
 
-		pipelineCI.pViewportState = &viewportState;
+		//pipelineCI.pViewportState = &viewportState;
 
 		// - Rasterization State -
 
@@ -355,7 +355,7 @@ namespace CE::Vulkan
         // - Render Pass -
         
         pipelineCI.subpass = 0;
-        pipelineCI.renderPass = renderTarget->renderPass->GetHandle();
+        //pipelineCI.renderPass = renderTarget->renderPass->GetHandle();
 
 		// - END -
 		

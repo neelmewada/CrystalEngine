@@ -6,7 +6,7 @@
 namespace CE::Vulkan
 {
     
-    Viewport::Viewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
+    /*Viewport::Viewport(VulkanRHI* vulkanRHI, VulkanDevice* device, PlatformWindow* windowHandle,
         u32 width, u32 height,
         bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
         : vulkanRHI(vulkanRHI), device(device), windowHandle(windowHandle), isFullscreen(isFullscreen)
@@ -149,6 +149,6 @@ namespace CE::Vulkan
     u32 Viewport::GetHeight()
     {
         return swapChain->GetHeight();
-    }
+    }*/
 
 } // namespace CE

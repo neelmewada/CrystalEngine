@@ -42,6 +42,9 @@ namespace CE::Vulkan
 		MemoryHeap* memoryHeap = nullptr;
 		u64 memoryOffset = 0;
 
+		//! Queue family index of the queue that this buffer is used with the first time
+		int initialFamilyIndex = -1;
+
         VulkanDevice* device = nullptr;
         VkBuffer buffer = nullptr;
 		RHI::MemoryHeapType heapType = RHI::MemoryHeapType::Default;

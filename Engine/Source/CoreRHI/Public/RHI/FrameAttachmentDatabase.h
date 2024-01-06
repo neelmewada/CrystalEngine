@@ -9,6 +9,16 @@ namespace CE::RHI
 		FrameAttachmentDatabase();
 		virtual ~FrameAttachmentDatabase();
 
+		//! Add a transient image attachment
+		void EmplaceFrameAttachment(AttachmentID id, const ImageDescriptor& descriptor);
+
+		//! Add an external image attachment
+		void EmplaceFrameAttachment(AttachmentID id, Texture* image);
+
+		//! Add a transient buffer attachment
+		void EmplaceFrameAttachment(AttachmentID id, const BufferDescriptor& descriptor);
+
+		FrameAttachment* FindFrameAttachment(AttachmentID id);
 
 	private:
 
@@ -16,6 +26,7 @@ namespace CE::RHI
 		HashMap<AttachmentID, FrameAttachment*> attachmentsById{};
 
 		friend class FrameGraph;
+		friend class FrameGraphBuilder;
 	};
 
 } // namespace CE::RHI
