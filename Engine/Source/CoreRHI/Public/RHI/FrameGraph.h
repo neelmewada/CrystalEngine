@@ -32,8 +32,7 @@ namespace CE::RHI
 		Array<GraphEdge> edges{};
 		HashMap<Name, Scope*> scopesById{};
 		
-		Array<Scope*> startProducers{};
-		Array<Scope*> endConsumers{};
+		Array<Scope*> producers{};
 		Scope* currentScope = nullptr;
 
         friend class FrameAttachmentDatabase;
