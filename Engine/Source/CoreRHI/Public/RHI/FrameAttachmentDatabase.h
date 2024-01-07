@@ -23,6 +23,8 @@ namespace CE::RHI
 
 		FrameAttachment* FindFrameAttachment(AttachmentID id);
 
+		void Clear();
+
 	private:
 
 		Array<FrameAttachment*> attachments{};

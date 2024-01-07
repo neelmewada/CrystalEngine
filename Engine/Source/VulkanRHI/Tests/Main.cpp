@@ -372,33 +372,37 @@ TEST(RHI, FrameGraph)
 	auto swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
 
 	FrameGraph* frameGraph = new FrameGraph();
-	
-	// Build FrameGraph
+
+	while (!IsEngineRequestingExit())
 	{
-		FrameGraphBuilder builder{};
+		app->Tick();
 
-		builder.Begin(frameGraph);
+		// Build FrameGraph
 		{
-
-			builder.BeginScope("Depth");
+			FrameGraphBuilder builder{};
+			
+			builder.Begin(frameGraph);
 			{
+				builder.BeginScope("Depth");
+				{
 
+				}
+				builder.EndScope();
+
+				builder.BeginScope("Opaque");
+				{
+
+				}
+				builder.EndScope();
+
+				builder.BeginScope("Transparent");
+				{
+
+				}
+				builder.EndScope();
 			}
-			builder.EndScope();
-
-			builder.BeginScope("Opaque");
-			{
-
-			}
-			builder.EndScope();
-
-			builder.BeginScope("Transparent");
-			{
-
-			}
-			builder.EndScope();
+			builder.End();
 		}
-		builder.End();
 	}
 
 	delete frameGraph;

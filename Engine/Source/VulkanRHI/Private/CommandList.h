@@ -2,8 +2,18 @@
 
 namespace CE::Vulkan
 {
+	class GraphicsCommandList : public RHI::GraphicsCommandList
+	{
+	public:
 
 
+
+	private:
+
+
+	};
+
+	/*
 	class GraphicsCommandListOld : public RHI::GraphicsCommandList, public ApplicationMessageHandler
 	{
 	public:
@@ -88,6 +98,6 @@ namespace CE::Vulkan
 
 		friend class VulkanRHI;
 
-	};
+	};*/
     
 } // namespace CE::Vulkan

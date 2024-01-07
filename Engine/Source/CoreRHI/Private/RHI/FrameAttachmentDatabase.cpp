@@ -9,12 +9,7 @@ namespace CE::RHI
     
     FrameAttachmentDatabase::~FrameAttachmentDatabase()
     {
-		for (auto attachment : attachments)
-		{
-			delete attachment;
-		}
-		attachments.Clear();
-		attachmentsById.Clear();
+		Clear();
     }
 
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, const ImageDescriptor& descriptor)
@@ -51,5 +46,15 @@ namespace CE::RHI
 			return attachmentsById[id];
 		return nullptr;
 	}
+
+    void FrameAttachmentDatabase::Clear()
+    {
+		for (auto attachment : attachments)
+		{
+			delete attachment;
+		}
+		attachments.Clear();
+		attachmentsById.Clear();
+    }
 
 } // namespace CE::RHI

@@ -10,10 +10,23 @@ namespace CE::RHI
 
     FrameGraph::~FrameGraph()
     {
+		Clear();
+    }
+
+    void FrameGraph::Clear()
+    {
 		for (auto scope : scopes)
 		{
 			delete scope;
 		}
+		scopes.Clear();
+		scopesById.Clear();
+		producers.Clear();
+
+		attachmentDatabase.Clear();
+		lastWrittenAttachmentToScope.Clear();
+		attachmentReadSchedule.Clear();
+		nodeDependencies.Clear();
     }
 
 	bool FrameGraph::Build()
@@ -108,7 +121,6 @@ namespace CE::RHI
 				}
 			}
 
-			//node.producers = producerList;
 			producersForEachScope[scope] = producerList;
 		}
 

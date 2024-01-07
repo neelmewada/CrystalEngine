@@ -268,7 +268,7 @@ namespace CE::Vulkan
 		// Fetch all queues from the GPU
 		FetchQueues(gpu);
 
-		// Command Pools
+		// Command Pools for each family
 		for (int familyIdx = 0; familyIdx < queueFamilyPropeties.GetSize(); familyIdx++)
 		{
 			VkCommandPoolCreateInfo commandPoolCI = {};
@@ -293,8 +293,6 @@ namespace CE::Vulkan
 
 			queueFamilyToCmdPool[familyIdx] = commandPool;
 		}
-
-		CE_LOG(Info, All, "Vulkan: Created logical device & queues");
 	}
 
 	void VulkanDevice::FetchQueues(VkPhysicalDevice gpu)

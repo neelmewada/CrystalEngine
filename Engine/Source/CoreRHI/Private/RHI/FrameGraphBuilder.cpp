@@ -6,6 +6,7 @@ namespace CE::RHI
     void FrameGraphBuilder::Begin(FrameGraph* frameGraph)
     {
 		this->frameGraph = frameGraph;
+		frameGraph->Clear();
     }
 
 	void FrameGraphBuilder::BeginScope(const ScopeID& id)

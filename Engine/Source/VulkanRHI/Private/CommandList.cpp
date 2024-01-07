@@ -2,7 +2,9 @@
 
 namespace CE::Vulkan
 {
-    
+
+
+    /*
 	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, Viewport* viewport)
 		: vulkanRHI(vulkanRHI)
 		, device(device)
@@ -34,7 +36,7 @@ namespace CE::Vulkan
 		, device(device)
 		, renderTarget(renderTarget)
 	{
-		/*if (renderTarget->IsViewportRenderTarget())
+		if (renderTarget->IsViewportRenderTarget())
 		{
 			auto viewport = renderTarget->GetVulkanViewport();
 
@@ -79,7 +81,7 @@ namespace CE::Vulkan
 			}
 
 			CreateSyncObjects();
-		}*/
+		}
 	}
 
 	GraphicsCommandList::~GraphicsCommandList()
@@ -97,7 +99,7 @@ namespace CE::Vulkan
 
 		vkWaitForFences(device->GetHandle(), renderFinishedFence.GetSize(), renderFinishedFence.GetData(), VK_TRUE, u64Max);
 
-		/*VkExtent2D extent{};
+		VkExtent2D extent{};
 		extent.width = renderTarget->GetWidth();
 		extent.height = renderTarget->GetHeight();
 
@@ -145,7 +147,7 @@ namespace CE::Vulkan
 
 			// Begin Render Pass
 			vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-		}*/
+		}
 	}
 
 	void GraphicsCommandList::End()
@@ -355,7 +357,7 @@ namespace CE::Vulkan
 	{
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
 		{
-			/*for (auto [setNumber, srg] : boundMainSRGBySetNumber)
+			for (auto [setNumber, srg] : boundMainSRGBySetNumber)
 			{
 				if (!modifiedDescriptorSetNumbers.Exists(setNumber))
 					continue;
@@ -365,7 +367,7 @@ namespace CE::Vulkan
 				VkDescriptorSet set = srg->GetDescriptorSet();
 				vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, currentPipelineLayout->GetNativeHandle(),
 					setNumber, 1, &set, 0, nullptr);
-			}*/
+			}
 		}
 
 		for (int i = 0; i < commandBuffers.GetSize(); ++i)
@@ -418,5 +420,5 @@ namespace CE::Vulkan
 		}
 		renderFinishedSemaphore.Clear();
 	}
-
+	*/
 } // namespace CE::Vulkan

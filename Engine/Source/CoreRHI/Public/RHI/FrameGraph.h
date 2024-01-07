@@ -15,6 +15,8 @@ namespace CE::RHI
         
     private:
 
+		void Clear();
+
 		using ScopeIndex = u32;
         
 		bool Build();
