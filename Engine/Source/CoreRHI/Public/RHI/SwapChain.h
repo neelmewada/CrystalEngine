@@ -34,6 +34,10 @@ namespace CE::RHI
 			return images[currentImageIndex];
 		}
 
+		inline Texture* GetImage(u32 index) const { return images[index]; }
+
+		inline u32 GetImageCount() const { return images.GetSize(); }
+
 	protected:
 
 		Array<Texture*> images{};

@@ -3,12 +3,13 @@
 namespace CE::Vulkan
 {
 
-	class GraphicsCommandList : public RHI::GraphicsCommandList, public ApplicationMessageHandler
+
+	class GraphicsCommandListOld : public RHI::GraphicsCommandList, public ApplicationMessageHandler
 	{
 	public:
-		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, Viewport* viewport);
-		GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, RenderTarget* renderTarget);
-		virtual ~GraphicsCommandList();
+		GraphicsCommandListOld(VulkanRHI* vulkanRHI, VulkanDevice* device, Viewport* viewport);
+		GraphicsCommandListOld(VulkanRHI* vulkanRHI, VulkanDevice* device, RenderTarget* renderTarget);
+		virtual ~GraphicsCommandListOld();
 
 		// - Command List API -
 
@@ -54,17 +55,6 @@ namespace CE::Vulkan
 		}
 
 		void ProcessNativeEvents(void* nativeEvent) override;
-
-		// - ImGui API -
-
-		bool InitImGui(RHI::FontPreloadConfig* preloadFonts, Array<void*>& outFontHandles) override;
-
-		void ShutdownImGui() override;
-
-		virtual void ImGuiNewFrame() override;
-		virtual void ImGuiRender() override;
-
-		void ImGuiPlatformUpdate() override;
 
 	protected:
 		void CreateSyncObjects();

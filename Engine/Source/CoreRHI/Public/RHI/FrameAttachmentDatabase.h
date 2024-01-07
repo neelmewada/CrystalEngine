@@ -18,6 +18,9 @@ namespace CE::RHI
 		//! Add a transient buffer attachment
 		void EmplaceFrameAttachment(AttachmentID id, const BufferDescriptor& descriptor);
 
+		//! Add a external buffer attachment
+		void EmplaceFrameAttachment(AttachmentID id, Buffer* buffer);
+
 		FrameAttachment* FindFrameAttachment(AttachmentID id);
 
 	private:

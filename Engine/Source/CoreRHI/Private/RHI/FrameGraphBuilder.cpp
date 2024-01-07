@@ -8,7 +8,7 @@ namespace CE::RHI
 		this->frameGraph = frameGraph;
     }
 
-	void FrameGraphBuilder::BeginScope(const Name& id)
+	void FrameGraphBuilder::BeginScope(const ScopeID& id)
 	{
 		RHI::ScopeDescriptor desc{};
 		desc.id = id;
@@ -67,12 +67,13 @@ namespace CE::RHI
 		if (!currentScope || !frameGraph)
 			return nullptr;
 		frameGraph->scopes.Add(currentScope);
+		frameGraph->scopesById[currentScope->id] = currentScope;
 		return currentScope;
 	}
 
     bool FrameGraphBuilder::End()
     {
-		return true;
+		return frameGraph->Build();
     }
 
 } // namespace CE::RHI

@@ -385,6 +385,7 @@ namespace CE::Vulkan
 
 	void VulkanRHI::DestroySwapChain(RHI::SwapChain* swapChain)
 	{
+		delete swapChain;
 	}
 
 	RHI::MemoryHeap* VulkanRHI::AllocateMemoryHeap(const MemoryHeapDescriptor& desc)

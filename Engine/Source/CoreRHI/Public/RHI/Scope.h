@@ -6,7 +6,7 @@ namespace CE::RHI
 
 	struct ScopeDescriptor
 	{
-		Name id{};
+		ScopeID id{};
 		RHI::HardwareQueueClass queueClass{};
 	};
 
@@ -19,13 +19,17 @@ namespace CE::RHI
 
 		Scope(const ScopeDescriptor& desc);
 
+	public:
+
+		inline ScopeID GetId() const { return id; }
+
 		void AddScopeAttachment(ScopeAttachment* attachment);
 
 		bool ScopeAttachmentExists(const Name& id);
 
 		ScopeAttachment* FindScopeAttachment(const Name& id);
 
-		template<typename ScopeAttachmentType, typename DescriptorType = ScopeAttachmentType::DescriptorType>
+		template<typename ScopeAttachmentType, typename DescriptorType = ScopeAttachmentType::DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value
 		ScopeAttachmentType* EmplaceScopeAttachment(FrameAttachment* attachment,
 			ScopeAttachmentUsage usage,
 			ScopeAttachmentAccess access,
@@ -38,28 +42,28 @@ namespace CE::RHI
 
 		RHI::HardwareQueueClass queueClass{};
 
-		Name id{};
+		ScopeID id{};
         
 		//! @brief List of all scope attachments owned by this scope.
 		Array<ScopeAttachment*> attachments{};
 
-		Array<ImageScopeAttachment> imageAttachments{};
-
-		Array<BufferScopeAttachment> bufferAttachments{};
-
+		Array<ImageScopeAttachment*> imageAttachments{};
+		Array<BufferScopeAttachment*> bufferAttachments{};
+		Array<ScopeAttachment*> readAttachments{};
+		Array<ScopeAttachment*> writeAttachments{};
 
 		friend class FrameGraph;
 		friend class FrameGraphBuilder;
     };
 
-	template<typename ScopeAttachmentType, typename DescriptorType>
+	template<typename ScopeAttachmentType, typename DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value
 	inline ScopeAttachmentType* Scope::EmplaceScopeAttachment(FrameAttachment* attachment, 
 		ScopeAttachmentUsage usage, 
 		ScopeAttachmentAccess access, 
 		const DescriptorType& descriptor)
 	{
 		ScopeAttachmentType* scopeAttachment = new ScopeAttachmentType(this, attachment, usage, access, descriptor);
-		attachments.Add(scopeAttachment);
+		AddScopeAttachment(scopeAttachment);
 		return scopeAttachment;
 	}
 

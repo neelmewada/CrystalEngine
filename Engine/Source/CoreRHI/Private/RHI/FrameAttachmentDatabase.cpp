@@ -34,6 +34,15 @@ namespace CE::RHI
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, const BufferDescriptor& descriptor)
 	{
 		auto attachment = new BufferFrameAttachment(id, descriptor);
+		attachments.Add(attachment);
+		attachmentsById[id] = attachment;
+	}
+
+	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, Buffer* buffer)
+	{
+		auto attachment = new BufferFrameAttachment(id, buffer);
+		attachments.Add(attachment);
+		attachmentsById[id] = attachment;
 	}
 
 	FrameAttachment* FrameAttachmentDatabase::FindFrameAttachment(AttachmentID id)

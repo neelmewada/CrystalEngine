@@ -7,7 +7,7 @@ namespace CE::RHI
 
 	struct ScopeAttachmentDescriptor
 	{
-		Name attachmentId{};
+		AttachmentID attachmentId{};
 		AttachmentLoadStoreAction loadStoreAction{};
 	};
 
@@ -30,7 +30,7 @@ namespace CE::RHI
 
 	protected:
 
-		Name id{};
+		AttachmentID id{};
 
 		Scope* scope = nullptr;
 

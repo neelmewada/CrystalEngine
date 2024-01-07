@@ -15,7 +15,7 @@ namespace CE::RHI
 			return frameGraph->attachmentDatabase;
 		}
 
-		void BeginScope(const Name& id);
+		void BeginScope(const ScopeID& id);
 
 		bool UseAttachment(const ImageScopeAttachmentDescriptor& descriptor,
 			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);

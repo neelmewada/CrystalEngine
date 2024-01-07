@@ -63,18 +63,15 @@ namespace CE::Vulkan
 
 		// -- SURFACE SUPPORT INFO --
 		
-		if (surfaceFormats.IsEmpty()) // Do this only once!
-		{
-			// Retrieve the list of supported formats
-			u32 formatCount = 0;
-			vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, nullptr);
+		// Retrieve the list of supported formats
+		u32 formatCount = 0;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, nullptr);
 
-			surfaceFormats.Resize(formatCount);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surfaceFormats.GetData());
+		surfaceFormats.Resize(formatCount);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(gpu, surface, &formatCount, surfaceFormats.GetData());
 
-			// Get the surface capabilities
-			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surfaceCapabilities);
-		}
+		// Get the surface capabilities
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(gpu, surface, &surfaceCapabilities);
 
 		// Select optimal surface format
 		bool formatSelected = false;
@@ -148,15 +145,12 @@ namespace CE::Vulkan
 
 		// - Select a presentation mode
 
-		if (presentationModes.IsEmpty())
-		{
-			// Retrieve the list of supported presentation modes
-			uint32_t presentationCount = 0;
-			vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, nullptr);
+		// Retrieve the list of supported presentation modes
+		uint32_t presentationCount = 0;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, nullptr);
 
-			presentationModes.Resize(presentationCount);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, presentationModes.GetData());
-		}
+		presentationModes.Resize(presentationCount);
+		vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, presentationModes.GetData());
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 		if (!presentationModes.Exists(VK_PRESENT_MODE_FIFO_KHR))

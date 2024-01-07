@@ -15,6 +15,9 @@ using namespace CE;
 #define TEST_BEGIN TestBegin()
 #define TEST_END TestEnd()
 
+#define WINDOW_TEST_BEGIN WindowTestBegin()
+#define WINDOW_TEST_END WindowTestEnd()
+
 #define LOG(x) std::cout << "\033[1;32m[ INFO ]\033[0m " << x << std::endl;
 #define ERROR(x) std::cerr << "\033[1;31m[ ERROR ]\033[0m " << x << std::endl;
 #define WARN(x) std::cerr << "\033[1;33m[ WARNING ]\033[0m " << x << std::endl;
@@ -52,6 +55,55 @@ static void TestEnd()
 	ModuleManager::Get().LoadModule("CoreRHI");
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("Core");	
+}
+
+static void WindowTestBegin()
+{
+	gProjectName = MODULE_NAME;
+	gProjectPath = PlatformDirectories::GetLaunchDir();
+
+	ModuleManager::Get().LoadModule("Core");
+	ModuleManager::Get().LoadModule("CoreMedia");
+	ModuleManager::Get().LoadModule("CoreRHI");
+	ModuleManager::Get().LoadModule("VulkanRHI");
+
+	auto app = PlatformApplication::Get();
+	app->Initialize();
+
+	gDefaultWindowWidth = 1280;
+	gDefaultWindowHeight = 720;
+	
+	PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+
+	RHI::gDynamicRHI = new Vulkan::VulkanRHI();
+	RHI::gDynamicRHI->AddValidationCallbackHandler(OnValidationMessage, RHI::ValidationMessageType::Warning);
+
+	RHI::gDynamicRHI->Initialize();
+	RHI::gDynamicRHI->PostInitialize();
+}
+
+static void WindowTestEnd()
+{
+	auto app = PlatformApplication::Get();
+
+	RHI::gDynamicRHI->PreShutdown();
+
+	app->PreShutdown();
+
+	RHI::gDynamicRHI->Shutdown();
+
+	app->Shutdown();
+
+	delete RHI::gDynamicRHI;
+	RHI::gDynamicRHI = nullptr;
+
+	delete app;
+	app = nullptr;
+
+	ModuleManager::Get().LoadModule("VulkanRHI");
+	ModuleManager::Get().LoadModule("CoreRHI");
+	ModuleManager::Get().LoadModule("CoreMedia");
+	ModuleManager::Get().LoadModule("Core");
 }
 
 void OnValidationMessage(RHI::ValidationMessageType messageType, const char* message)
@@ -195,119 +247,162 @@ TEST(RHI, BufferAliasing)
 	TEST_END;
 }
 
-
 TEST(RHI, FrameGraphBuilder)
 {
 	TEST_BEGIN;
 
-	FrameGraphBuilder builder{};
-	FrameGraph* frameGraph = new FrameGraph();
-
-	builder.Begin(frameGraph);
+	// Simple test
 	{
-		Array<RHI::Format> depthFormats = RHI::gDynamicRHI->GetAvailableDepthStencilFormats();
+		FrameGraphBuilder builder{};
+		FrameGraph* frameGraph = new FrameGraph();
 
-		RHI::ImageDescriptor colorRT{};
-		colorRT.name = "PipelineOutput";
-		colorRT.dimension = RHI::Dimension::Dim2D;
-		colorRT.format = RHI::Format::R8G8B8A8_UNORM;
-		colorRT.width = colorRT.height = 512;
-		colorRT.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
-
-		RHI::BufferDescriptor culledLightList{};
-		culledLightList.name = "CulledLightList";
-		culledLightList.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
-		culledLightList.bufferSize = 1_MB;
-		
-		RHI::ImageDescriptor depthDesc{};
-		depthDesc.name = "DepthStencil";
-		depthDesc.dimension = RHI::Dimension::Dim2D;
-		depthDesc.format = depthFormats[0];
-		depthDesc.width = depthDesc.height = 512;
-		depthDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
-
-		RHI::ImageDescriptor shadowMapDesc{};
-		shadowMapDesc.name = "DirectionalShadowMap";
-		shadowMapDesc.dimension = RHI::Dimension::Dim2D;
-		shadowMapDesc.format = depthFormats[0];
-		shadowMapDesc.width = shadowMapDesc.height = 512;
-		shadowMapDesc.bindFlags = RHI::TextureBindFlags::ShaderReadWrite | RHI::TextureBindFlags::Depth;
-
-		// Frame Attachments
-		builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("PipelineOutput", colorRT);
-		builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("DepthStencil", depthDesc);
-		builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("CulledLightList", culledLightList);
-
-		builder.BeginScope("DepthPass");
+		builder.Begin(frameGraph);
 		{
-			ImageScopeAttachmentDescriptor depthAttachment{};
-			depthAttachment.attachmentId = "DepthStencil";
-			depthAttachment.loadStoreAction.clearValueDepth = 0;
-			depthAttachment.loadStoreAction.clearValueStencil = 0;
-			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-			depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
-			depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare; // Dont use stencil
+			// Frame Attachments
+			builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("1", RHI::ImageDescriptor());
+			builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("2", RHI::ImageDescriptor());
+			builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("3", RHI::ImageDescriptor());
+			builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("4", RHI::ImageDescriptor());
 
-			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+			builder.BeginScope("A");
+			{
+				ImageScopeAttachmentDescriptor a1{};
+				a1.attachmentId = "1";
+				
+				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+			}
+			builder.EndScope();
 
+			builder.BeginScope("B");
+			{
+				ImageScopeAttachmentDescriptor a1{};
+				a1.attachmentId = "1";
+
+				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::ReadWrite);
+			}
+			builder.EndScope();
+
+			builder.BeginScope("C");
+			{
+				ImageScopeAttachmentDescriptor a1{};
+				a1.attachmentId = "1";
+				ImageScopeAttachmentDescriptor a2{};
+				a2.attachmentId = "2";
+
+				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+				builder.UseAttachment(a2, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+
+			}
+			builder.EndScope();
+
+			builder.BeginScope("D");
+			{
+				ImageScopeAttachmentDescriptor a3{};
+				a3.attachmentId = "3";
+
+				builder.UseAttachment(a3, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+			}
+			builder.EndScope();
+
+			builder.BeginScope("E");
+			{
+				ImageScopeAttachmentDescriptor a1{};
+				a1.attachmentId = "1";
+				ImageScopeAttachmentDescriptor a2{};
+				a2.attachmentId = "2";
+				ImageScopeAttachmentDescriptor a4{};
+				a4.attachmentId = "4";
+
+				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+				builder.UseAttachment(a2, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+
+				builder.UseAttachment(a4, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+
+			}
+			builder.EndScope();
+
+			builder.BeginScope("F");
+			{
+				ImageScopeAttachmentDescriptor a1{};
+				a1.attachmentId = "1";
+				ImageScopeAttachmentDescriptor a2{};
+				a2.attachmentId = "2";
+				ImageScopeAttachmentDescriptor a3{};
+				a3.attachmentId = "3";
+				ImageScopeAttachmentDescriptor a4{};
+				a4.attachmentId = "4";
+
+				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+				builder.UseAttachment(a2, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+				builder.UseAttachment(a3, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+
+				builder.UseAttachment(a4, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+			}
+			builder.EndScope();
 		}
-		builder.EndScope();
+		builder.End();
 
-		builder.BeginScope("LightCulling");
-		{
-			ImageScopeAttachmentDescriptor depthAttachment{};
-			depthAttachment.attachmentId = "DepthStencil";
-			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+		auto nodeDependencies = frameGraph->nodeDependencies;
+		auto scopesById = frameGraph->scopesById;
+		EXPECT_EQ(nodeDependencies[scopesById["F"]].GetSize(), 2);
+		EXPECT_EQ(nodeDependencies[scopesById["E"]].GetSize(), 1);
+		EXPECT_EQ(nodeDependencies[scopesById["C"]].GetSize(), 1);
+		EXPECT_TRUE(nodeDependencies[scopesById["C"]].Exists(scopesById["B"]));
+		EXPECT_TRUE(nodeDependencies[scopesById["E"]].Exists(scopesById["C"]));
+		EXPECT_TRUE(nodeDependencies[scopesById["F"]].Exists(scopesById["D"]));
+		EXPECT_TRUE(nodeDependencies[scopesById["F"]].Exists(scopesById["E"]));
 
-			BufferScopeAttachmentDescriptor culledLightListAttachment{};
-			culledLightListAttachment.attachmentId = "CulledLightList";
-
-			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
-			builder.UseAttachment(culledLightListAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Write);
-		}
-		builder.EndScope();
-
-		builder.BeginScope("OpaquePass");
-		{
-			ImageScopeAttachmentDescriptor depthAttachment{};
-			depthAttachment.attachmentId = "DepthStencil";
-			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
-			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
-
-			ImageScopeAttachmentDescriptor colorAttachment{};
-			colorAttachment.attachmentId = "PipelineOutput";
-			colorAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0.5f, 1); // Clear color
-			colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-			colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-			
-			builder.UseAttachment(colorAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
-		}
-		builder.EndScope();
-
-		builder.BeginScope("TransparentPass");
-		{
-			ImageScopeAttachmentDescriptor depthAttachment{};
-			depthAttachment.attachmentId = "DepthStencil";
-			depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-			depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
-			builder.UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
-
-			ImageScopeAttachmentDescriptor colorAttachment{};
-			colorAttachment.attachmentId = "PipelineOutput";
-			colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-			colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
-			builder.UseAttachment(colorAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
-		}
-		builder.EndScope();
+		delete frameGraph;
 	}
-	builder.End();
-	
-	delete frameGraph;
+
 	TEST_END;
+}
+
+TEST(RHI, FrameGraph)
+{
+	WINDOW_TEST_BEGIN;
+
+	auto app = PlatformApplication::Get();
+	PlatformWindow* mainWindow = app->GetMainWindow();
+
+	RHI::SwapChainDescriptor swapChainDesc{};
+	swapChainDesc.imageCount = 2;
+	swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+	
+	auto swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
+
+	FrameGraph* frameGraph = new FrameGraph();
+	
+	// Build FrameGraph
+	{
+		FrameGraphBuilder builder{};
+
+		builder.Begin(frameGraph);
+		{
+
+			builder.BeginScope("Depth");
+			{
+
+			}
+			builder.EndScope();
+
+			builder.BeginScope("Opaque");
+			{
+
+			}
+			builder.EndScope();
+
+			builder.BeginScope("Transparent");
+			{
+
+			}
+			builder.EndScope();
+		}
+		builder.End();
+	}
+
+	delete frameGraph;
+	RHI::gDynamicRHI->DestroySwapChain(swapChain);
+
+	WINDOW_TEST_END;
 }

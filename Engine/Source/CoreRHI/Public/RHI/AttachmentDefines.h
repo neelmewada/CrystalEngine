@@ -3,6 +3,7 @@
 namespace CE::RHI
 {
 	typedef Name AttachmentID;
+	typedef Name ScopeID;
 
 	ENUM()
 	enum class AttachmentLoadAction : u8

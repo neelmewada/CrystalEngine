@@ -1,5 +1,9 @@
 #pragma once
 
+#if PAL_TRAIT_BUILD_TESTS
+class RHI_FrameGraphBuilder_Test;
+#endif
+
 namespace CE::RHI
 {
 
@@ -10,27 +14,37 @@ namespace CE::RHI
         virtual ~FrameGraph();
         
     private:
+
+		using ScopeIndex = u32;
         
-		struct GraphEdge
-		{
-			u32 producerIndex = 0;
-			u32 consumerIndex = 0;
-		};
+		bool Build();
 
 		struct GraphNode
 		{
 			Scope* scope = nullptr;
 			Array<Scope*> producers{};
-			Array<Scope*> consumers{};
+
+			inline bool operator==(const GraphNode& rhs) const
+			{
+				return scope == rhs.scope;
+			}
 		};
+
+		bool ScopeHasDependency(Scope* source, Scope* dependentOn);
+
+		void AddScopeDependency(Scope* from, Scope* to);
+
+		void FinalizeGraph();
+
+		HashMap<AttachmentID, Scope*> lastWrittenAttachmentToScope{};
+		HashMap<AttachmentID, HashSet<Scope*>> attachmentReadSchedule{};
+		HashMap<Scope*, HashSet<Scope*>> nodeDependencies{};
 
         //! A database of all attachments used in this frame graph.
         FrameAttachmentDatabase attachmentDatabase{};
 
         Array<Scope*> scopes{};
-		Array<GraphNode> nodes{};
-		Array<GraphEdge> edges{};
-		HashMap<Name, Scope*> scopesById{};
+		HashMap<ScopeID, Scope*> scopesById{};
 		
 		Array<Scope*> producers{};
 		Scope* currentScope = nullptr;
@@ -38,7 +52,9 @@ namespace CE::RHI
         friend class FrameAttachmentDatabase;
 		friend class FrameGraphCompiler;
 		friend class FrameGraphBuilder;
+#if PAL_TRAIT_BUILD_TESTS
 		friend class RHI_FrameGraphBuilder_Test;
+#endif
     };
 
 } // namespace CE::RHI

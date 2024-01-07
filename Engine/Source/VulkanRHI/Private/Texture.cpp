@@ -465,6 +465,7 @@ namespace CE::Vulkan
 	Texture::Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags)
 		: device(device)
 		, importedImage(true)
+		, image(image)
 	{
 		VkImageViewCreateInfo imageViewCI{};
 		imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

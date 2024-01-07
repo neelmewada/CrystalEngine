@@ -20,6 +20,14 @@ namespace CE::RHI
 	void Scope::AddScopeAttachment(ScopeAttachment* attachment)
 	{
 		attachments.Add(attachment);
+		if (attachment->IsBufferAttachment())
+			bufferAttachments.Add((BufferScopeAttachment*)attachment);
+		if (attachment->IsImageAttachment())
+			imageAttachments.Add((ImageScopeAttachment*)attachment);
+		if (EnumHasFlag(attachment->access, RHI::ScopeAttachmentAccess::Read))
+			readAttachments.Add(attachment);
+		if (EnumHasFlag(attachment->access, RHI::ScopeAttachmentAccess::Write))
+			writeAttachments.Add(attachment);
 	}
 
 	bool Scope::ScopeAttachmentExists(const Name& id)
