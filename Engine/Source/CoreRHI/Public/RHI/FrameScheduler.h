@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	struct FrameSchedulerDescriptor
 	{
-
+        
 	};
 
 	//! FrameScheduler provides user facing API to construct, compile and execute FrameGraph.
@@ -20,6 +20,8 @@ namespace CE::RHI
 		inline FrameAttachmentDatabase& GetAttachmentDatabase() const { return frameGraph->attachmentDatabase; }
 
 		inline FrameGraph* GetFrameGraph() const { return frameGraph; }
+        
+        
 
 		void BeginFrame();
 
@@ -32,6 +34,8 @@ namespace CE::RHI
 		UniquePtr<FrameGraph> frameGraph = nullptr;
 		
 		FrameGraphBuilder builder{};
+        
+        TransientMemoryPool* transientMemoryPool = nullptr;
 	};
     
 } // namespace CE::RHI

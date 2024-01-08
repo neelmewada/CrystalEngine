@@ -5,10 +5,12 @@ namespace CE::RHI
 	FrameScheduler::FrameScheduler(const FrameSchedulerDescriptor& descriptor)
 	{
 		frameGraph = new FrameGraph();
+        transientMemoryPool = new TransientMemoryPool();
 	}
 
 	FrameScheduler::~FrameScheduler()
 	{
+        delete transientMemoryPool;
 		delete frameGraph;
 	}
 

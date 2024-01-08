@@ -2,9 +2,9 @@
 
 namespace CE::RHI
 {
-    TransientMemoryPool::TransientMemoryPool(const TransientMemoryPoolDescriptor& descriptor)
+    TransientMemoryPool::TransientMemoryPool()
     {
-
+        
     }
 
 	TransientMemoryPool::~TransientMemoryPool()

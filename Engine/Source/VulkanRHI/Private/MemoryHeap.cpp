@@ -27,11 +27,6 @@ namespace CE::Vulkan
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
 			break;
 		}
-
-		if (device->IsUnifiedMemoryArchitecture())
-		{
-			memoryPropertyFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-		}
 		
 		VkPhysicalDeviceMemoryProperties memoryProps = device->GetMemoryProperties();
 

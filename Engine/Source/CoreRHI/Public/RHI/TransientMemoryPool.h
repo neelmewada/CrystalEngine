@@ -2,17 +2,12 @@
 
 namespace CE::RHI
 {
-	struct TransientMemoryPoolDescriptor
-	{
-		u64 initialBufferPoolSize = 0;
-		u64 initialTexturePoolSize = 0;
-	};
     
 	class CORERHI_API TransientMemoryPool final
 	{
 	public:
 
-		TransientMemoryPool(const TransientMemoryPoolDescriptor& descriptor);
+		TransientMemoryPool();
 		virtual ~TransientMemoryPool();
 
 	private:
