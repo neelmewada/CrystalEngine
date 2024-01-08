@@ -12,6 +12,9 @@ namespace CE::RHI
         virtual ~FrameAttachment() = default;
 
 		void SetResource(RHIResource* resource);
+
+		virtual bool IsBufferAttachment() const = 0;
+		virtual bool IsImageAttachment() const = 0;
         
     protected:
         

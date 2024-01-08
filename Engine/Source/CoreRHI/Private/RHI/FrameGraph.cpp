@@ -31,8 +31,8 @@ namespace CE::RHI
 
 	bool FrameGraph::Build()
 	{
-		lastWrittenAttachmentToScope = {};
-		attachmentReadSchedule = {};
+		lastWrittenAttachmentToScope.Clear();
+		attachmentReadSchedule.Clear();
 
 		for (Scope* scope : scopes)
 		{

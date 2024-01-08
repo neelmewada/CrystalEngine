@@ -16,8 +16,6 @@ namespace CE::RHI
     private:
 
 		void Clear();
-
-		using ScopeIndex = u32;
         
 		bool Build();
 
@@ -54,6 +52,7 @@ namespace CE::RHI
         friend class FrameAttachmentDatabase;
 		friend class FrameGraphCompiler;
 		friend class FrameGraphBuilder;
+		friend class FrameScheduler;
 #if PAL_TRAIT_BUILD_TESTS
 		friend class RHI_FrameGraphBuilder_Test;
 #endif

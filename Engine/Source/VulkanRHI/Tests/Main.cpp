@@ -358,7 +358,7 @@ TEST(RHI, FrameGraphBuilder)
 	TEST_END;
 }
 
-TEST(RHI, FrameGraph)
+TEST(RHI, FrameScheduler)
 {
 	WINDOW_TEST_BEGIN;
 
@@ -371,7 +371,11 @@ TEST(RHI, FrameGraph)
 	
 	auto swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
 
-	FrameGraph* frameGraph = new FrameGraph();
+	FrameSchedulerDescriptor frameSchedulerDesc{};
+
+	FrameScheduler* scheduler = new FrameScheduler(frameSchedulerDesc);
+	
+	FrameGraph* frameGraph = scheduler->GetFrameGraph();
 
 	while (!IsEngineRequestingExit())
 	{
@@ -379,7 +383,7 @@ TEST(RHI, FrameGraph)
 
 		// Build FrameGraph
 		{
-			FrameGraphBuilder builder{};
+			FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
 			
 			builder.Begin(frameGraph);
 			{
@@ -405,7 +409,7 @@ TEST(RHI, FrameGraph)
 		}
 	}
 
-	delete frameGraph;
+	delete scheduler;
 	RHI::gDynamicRHI->DestroySwapChain(swapChain);
 
 	WINDOW_TEST_END;

@@ -16,7 +16,6 @@ namespace CE::RHI
 
 		// - Public API -
 
-		virtual CommandListType GetCommandListType() = 0;
 
 		// - Command List API -
 
@@ -25,22 +24,4 @@ namespace CE::RHI
 
 	};
 
-	class CORERHI_API GraphicsCommandList : public CommandList
-	{
-	protected:
-		GraphicsCommandList() : CommandList()
-		{}
-
-	public:
-		virtual ~GraphicsCommandList() = default;
-
-		// - Public API -
-
-		virtual CommandListType GetCommandListType() override final { return CommandListType::Graphics; }
-
-		// - Graphics Command List API -
-
-
-	};
-    
 } // namespace CE::RHI

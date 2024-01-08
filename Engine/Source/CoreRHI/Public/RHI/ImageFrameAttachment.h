@@ -14,6 +14,9 @@ namespace CE::RHI
 		ImageFrameAttachment(AttachmentID id, Texture* image);
 
         virtual ~ImageFrameAttachment();
+
+		virtual bool IsBufferAttachment() const override final { return false; }
+		virtual bool IsImageAttachment() const override final { return true; }
         
 	protected:
         ImageDescriptor descriptor{};

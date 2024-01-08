@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	class GraphicsCommandList : public RHI::GraphicsCommandList
+	class CommandList : public RHI::CommandList
 	{
 	public:
 

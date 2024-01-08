@@ -30,17 +30,17 @@ namespace CE
 			return impl.release();
 		}
 
-		inline T* Get()
+		inline T* Get() const
 		{
 			return impl.get();
 		}
 
-		inline operator T*()
+		inline operator T*() const
 		{
 			return impl.get();
 		}
 
-		inline T* operator->()
+		inline T* operator->() const
 		{
 			return impl.get();
 		}

@@ -52,6 +52,8 @@ namespace CE::RHI
 		Array<ScopeAttachment*> readAttachments{};
 		Array<ScopeAttachment*> writeAttachments{};
 
+		Array<SwapChain*> swapChainsToPresent{};
+
 		friend class FrameGraph;
 		friend class FrameGraphBuilder;
     };

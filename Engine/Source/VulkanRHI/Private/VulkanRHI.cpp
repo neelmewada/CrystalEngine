@@ -357,7 +357,7 @@ namespace CE::Vulkan
 
   //      auto vulkanViewport = vulkanCommandList->GetViewport();
 		//VkSwapchainKHR swapChain = nullptr;// vulkanViewport->GetSwapChain()->GetHandle();
-
+		
   //      VkPresentInfoKHR presentInfo{};
   //      presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
   //      presentInfo.waitSemaphoreCount = 1;

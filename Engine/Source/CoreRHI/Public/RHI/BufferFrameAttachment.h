@@ -14,6 +14,9 @@ namespace CE::RHI
 
 		virtual ~BufferFrameAttachment();
 
+		virtual bool IsBufferAttachment() const override final { return true; }
+		virtual bool IsImageAttachment() const override final { return false; }
+
 	protected:
 		BufferDescriptor descriptor{};
 	};

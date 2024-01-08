@@ -63,6 +63,14 @@ namespace CE::RHI
 		return true;
 	}
 
+	bool FrameGraphBuilder::PresentSwapChain(SwapChain* swapChain)
+	{
+		if (!currentScope || !frameGraph)
+			return false;
+		currentScope->swapChainsToPresent.Add(swapChain);
+		return true;
+	}
+
 	Scope* FrameGraphBuilder::EndScope()
 	{
 		if (!currentScope || !frameGraph)

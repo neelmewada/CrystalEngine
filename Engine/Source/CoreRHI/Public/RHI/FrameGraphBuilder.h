@@ -23,11 +23,13 @@ namespace CE::RHI
 		bool UseAttachment(const BufferScopeAttachmentDescriptor& descriptor,
 			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
 
+		bool PresentSwapChain(SwapChain* swapChain);
+
 		Scope* EndScope();
 
 		bool End();
 
-	private:
+	protected:
 
 		FrameGraph* frameGraph = nullptr;
 		Scope* currentScope = nullptr;

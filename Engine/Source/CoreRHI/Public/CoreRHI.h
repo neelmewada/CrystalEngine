@@ -46,8 +46,10 @@
 #include "RHI/BufferScopeAttachment.h"
 #include "RHI/ImageScopeAttachment.h"
 #include "RHI/Scope.h"
+#include "RHI/TransientMemoryPool.h"
 #include "RHI/FrameGraph.h"
 #include "RHI/FrameGraphBuilder.h"
+#include "RHI/FrameScheduler.h"
 
 #include "RHI/RHI.h"
 #include "RHI/RHISystem.h"
