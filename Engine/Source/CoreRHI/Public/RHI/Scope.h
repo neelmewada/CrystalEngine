@@ -55,6 +55,7 @@ namespace CE::RHI
 		Array<SwapChain*> swapChainsToPresent{};
 
 		friend class FrameGraph;
+        friend class FrameGraphCompiler;
 		friend class FrameGraphBuilder;
     };
 

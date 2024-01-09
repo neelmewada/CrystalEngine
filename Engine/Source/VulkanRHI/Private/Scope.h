@@ -12,7 +12,10 @@ namespace CE::Vulkan
 		virtual ~Scope();
 
 	private:
-
+        
+        CommandQueue* queue = nullptr;
+        
+        friend class FrameGraphCompiler;
 	};
     
 } // namespace CE::Vulkan

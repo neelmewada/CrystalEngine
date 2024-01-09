@@ -320,6 +320,10 @@ namespace CE::Vulkan
 				CommandQueue* queue = new CommandQueue(this, familyIdx, i, queueMask, vkQueue, presentationSupported > 0);
 				queues.Add(queue);
 				queuesByFamily[familyIdx].Add(queue);
+                if (presentationSupported)
+                {
+                    presentQueues.Add(queue);
+                }
 
 				if (primaryGraphicsQueue == nullptr && 
 					EnumHasAllFlags(queueMask, RHI::HardwareQueueClassMask::Compute | RHI::HardwareQueueClassMask::Graphics))

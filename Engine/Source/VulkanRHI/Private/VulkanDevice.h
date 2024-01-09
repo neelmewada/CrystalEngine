@@ -140,6 +140,7 @@ namespace CE::Vulkan
         VkSurfaceKHR testSurface = nullptr;
 
 		Array<CommandQueue*> queues{};
+        Array<CommandQueue*> presentQueues{};
 		HashMap<int, Array<CommandQueue*>> queuesByFamily{};
 
         CommandQueue* primaryGraphicsQueue = nullptr;
@@ -153,6 +154,8 @@ namespace CE::Vulkan
 		SharedMutex mainThreadMutex{};
 
 		VulkanDescriptorPool* descriptorPool = nullptr;
+        
+        friend class FrameGraphCompiler;
     };
     
 } // namespace CE
