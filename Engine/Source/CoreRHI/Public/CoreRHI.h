@@ -49,6 +49,7 @@
 #include "RHI/TransientMemoryPool.h"
 #include "RHI/FrameGraph.h"
 #include "RHI/FrameGraphBuilder.h"
+#include "RHI/FrameGraphCompiler.h"
 #include "RHI/FrameScheduler.h"
 
 #include "RHI/RHI.h"

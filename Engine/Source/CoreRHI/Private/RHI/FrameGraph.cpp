@@ -22,6 +22,7 @@ namespace CE::RHI
 		scopes.Clear();
 		scopesById.Clear();
 		producers.Clear();
+		nodes.Clear();
 
 		attachmentDatabase.Clear();
 		lastWrittenAttachmentToScope.Clear();
@@ -33,6 +34,7 @@ namespace CE::RHI
 	{
 		lastWrittenAttachmentToScope.Clear();
 		attachmentReadSchedule.Clear();
+		nodeDependencies.Clear();
 
 		for (Scope* scope : scopes)
 		{
@@ -97,6 +99,8 @@ namespace CE::RHI
 
 	void FrameGraph::FinalizeGraph()
 	{
+		producers.Clear();
+		nodes.Clear();
 		HashMap<Scope*, HashSet<Scope*>> producersForEachScope{};
 
 		for (auto& [scope, dependencies] : nodeDependencies)
@@ -124,7 +128,27 @@ namespace CE::RHI
 			producersForEachScope[scope] = producerList;
 		}
 
+		for (auto scope : scopes)
+		{
+			if (!nodeDependencies.KeyExists(scope) || nodeDependencies[scope].IsEmpty())
+				producers.Add(scope);
+		}
+
 		nodeDependencies = producersForEachScope;
+
+		for (auto& [scope, dependencies] : nodeDependencies)
+		{
+			for (auto dependent : dependencies)
+			{
+				if (!nodes.KeyExists(dependent))
+					nodes.Add(dependent, dependent);
+				nodes[dependent].consumers.Add(scope);
+
+				if (!nodes.KeyExists(scope))
+					nodes.Add(scope, scope);
+				nodes[scope].producers.Add(dependent);
+			}
+		}
 	}
 
 } // namespace CE::RHI

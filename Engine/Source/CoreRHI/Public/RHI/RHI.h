@@ -53,6 +53,8 @@ namespace CE::RHI
 
 		virtual RHI::Scope* CreateScope(const ScopeDescriptor& desc) = 0;
 
+		virtual RHI::FrameGraphCompiler* CreateFrameGraphCompiler() = 0;
+
 		// - Utils -
 
 		void AddValidationCallbackHandler(ValidationCallback handler, ValidationMessageType logLevel)

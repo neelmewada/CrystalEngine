@@ -3,7 +3,7 @@
 namespace CE::RHI
 {
 
-    void FrameGraphBuilder::Begin(FrameGraph* frameGraph)
+    void FrameGraphBuilder::BeginFrameGraph(FrameGraph* frameGraph)
     {
 		this->frameGraph = frameGraph;
 		frameGraph->Clear();
@@ -80,7 +80,7 @@ namespace CE::RHI
 		return currentScope;
 	}
 
-    bool FrameGraphBuilder::End()
+    bool FrameGraphBuilder::EndFrameGraph()
     {
 		return frameGraph->Build();
     }

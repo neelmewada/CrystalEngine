@@ -2,6 +2,11 @@
 
 namespace CE::RHI
 {
+	struct TransientMemoryAllocation
+	{
+		ResourceMemoryRequirements imagePool{};
+		ResourceMemoryRequirements bufferPool{};
+	};
     
 	class CORERHI_API TransientMemoryPool final
 	{

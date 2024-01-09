@@ -256,7 +256,7 @@ TEST(RHI, FrameGraphBuilder)
 		FrameGraphBuilder builder{};
 		FrameGraph* frameGraph = new FrameGraph();
 
-		builder.Begin(frameGraph);
+		builder.BeginFrameGraph(frameGraph);
 		{
 			// Frame Attachments
 			builder.GetFrameAttachmentDatabase().EmplaceFrameAttachment("1", RHI::ImageDescriptor());
@@ -340,7 +340,7 @@ TEST(RHI, FrameGraphBuilder)
 			}
 			builder.EndScope();
 		}
-		builder.End();
+		builder.EndFrameGraph();
 
 		auto nodeDependencies = frameGraph->nodeDependencies;
 		auto scopesById = frameGraph->scopesById;
@@ -385,7 +385,7 @@ TEST(RHI, FrameScheduler)
 		{
 			FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
 			
-			builder.Begin(frameGraph);
+			builder.BeginFrameGraph(frameGraph);
 			{
 				builder.BeginScope("Depth");
 				{
@@ -405,7 +405,7 @@ TEST(RHI, FrameScheduler)
 				}
 				builder.EndScope();
 			}
-			builder.End();
+			builder.EndFrameGraph();
 		}
 	}
 

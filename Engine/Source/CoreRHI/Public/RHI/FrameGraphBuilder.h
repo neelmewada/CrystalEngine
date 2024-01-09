@@ -3,12 +3,12 @@
 namespace CE::RHI
 {
 
-	class CORERHI_API FrameGraphBuilder final
+	class CORERHI_API FrameGraphBuilder
 	{
 	public:
 		FrameGraphBuilder() = default;
 
-		void Begin(FrameGraph* frameGraph);
+		void BeginFrameGraph(FrameGraph* frameGraph);
 
 		inline FrameAttachmentDatabase& GetFrameAttachmentDatabase()
 		{
@@ -27,7 +27,7 @@ namespace CE::RHI
 
 		Scope* EndScope();
 
-		bool End();
+		bool EndFrameGraph();
 
 	protected:
 

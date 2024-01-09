@@ -21,8 +21,19 @@ namespace CE::RHI
 
 		struct GraphNode
 		{
+			GraphNode(Scope* scope = nullptr) : scope(scope)
+			{
+
+			}
+
 			Scope* scope = nullptr;
 			Array<Scope*> producers{};
+			Array<Scope*> consumers{};
+
+			inline SIZE_T GetHash() const
+			{
+				return (SIZE_T)scope;
+			}
 
 			inline bool operator==(const GraphNode& rhs) const
 			{
@@ -39,6 +50,7 @@ namespace CE::RHI
 		HashMap<AttachmentID, Scope*> lastWrittenAttachmentToScope{};
 		HashMap<AttachmentID, HashSet<Scope*>> attachmentReadSchedule{};
 		HashMap<Scope*, HashSet<Scope*>> nodeDependencies{};
+		HashMap<Scope*, GraphNode> nodes{};
 
         //! A database of all attachments used in this frame graph.
         FrameAttachmentDatabase attachmentDatabase{};
