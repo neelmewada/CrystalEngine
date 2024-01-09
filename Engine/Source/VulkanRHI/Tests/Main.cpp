@@ -360,12 +360,12 @@ TEST(RHI, FrameGraphBuilder)
 		EXPECT_TRUE(producers[1]->GetId() == "D" || producers[1]->GetId() == "A");
 		RHI::Scope* scopeA = producers[0]->GetId() == "A" ? producers[0] : producers[1];
 		RHI::Scope* scopeD = producers[0]->GetId() == "D" ? producers[0] : producers[1];
-		EXPECT_EQ(nodes[scopeA].producers.GetSize(), 0);
-		EXPECT_EQ(nodes[scopeA].consumers.GetSize(), 1);
-		EXPECT_EQ(nodes[scopeA].consumers[0]->GetId(), "B");
-		EXPECT_EQ(nodes[scopeD].producers.GetSize(), 0);
-		EXPECT_EQ(nodes[scopeD].consumers.GetSize(), 1);
-		EXPECT_EQ(nodes[scopeD].consumers[0]->GetId(), "F");
+		EXPECT_EQ(nodes[scopeA->GetId()].producers.GetSize(), 0);
+		EXPECT_EQ(nodes[scopeA->GetId()].consumers.GetSize(), 1);
+		EXPECT_EQ(nodes[scopeA->GetId()].consumers[0]->GetId(), "B");
+		EXPECT_EQ(nodes[scopeD->GetId()].producers.GetSize(), 0);
+		EXPECT_EQ(nodes[scopeD->GetId()].consumers.GetSize(), 1);
+		EXPECT_EQ(nodes[scopeD->GetId()].consumers[0]->GetId(), "F");
 
 		delete frameGraph;
 	}

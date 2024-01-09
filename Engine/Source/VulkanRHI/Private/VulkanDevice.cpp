@@ -319,6 +319,7 @@ namespace CE::Vulkan
 
 				CommandQueue* queue = new CommandQueue(this, familyIdx, i, queueMask, vkQueue, presentationSupported > 0);
 				queues.Add(queue);
+				queuesByFamily[familyIdx].Add(queue);
 
 				if (primaryGraphicsQueue == nullptr && 
 					EnumHasAllFlags(queueMask, RHI::HardwareQueueClassMask::Compute | RHI::HardwareQueueClassMask::Graphics))
@@ -789,6 +790,33 @@ namespace CE::Vulkan
 		}
 
 		return result;
+	}
+
+	Array<RHI::CommandQueue*> VulkanDevice::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)
+	{
+		Array<RHI::CommandQueue*> queues{};
+		int queueFamilyCount = queueFamilyPropeties.GetSize();
+		HashMap<RHI::HardwareQueueClass, int> queueCounts = queueCountByClass;
+
+		int& graphicsQueueCount = queueCounts[RHI::HardwareQueueClass::Graphics];
+		int& transferQueueCount = queueCounts[RHI::HardwareQueueClass::Transfer];
+		int& computeQueueCount = queueCounts[RHI::HardwareQueueClass::Compute];
+
+		for (int familyIdx = 0; familyIdx < queueFamilyCount; familyIdx++)
+		{
+			VkQueueFamilyProperties familyProps = queueFamilyPropeties[familyIdx];
+			
+			if (graphicsQueueCount > 0 && (familyProps.queueFlags & VK_QUEUE_GRAPHICS_BIT))
+			{
+				if (graphicsQueueCount < familyProps.queueCount)
+					graphicsQueueCount = 0;
+				else
+					graphicsQueueCount -= familyProps.queueCount;
+			}
+
+		}
+
+		return queues;
 	}
 
 } // namespace CE

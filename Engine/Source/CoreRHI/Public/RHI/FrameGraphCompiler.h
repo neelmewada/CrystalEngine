@@ -22,6 +22,8 @@ namespace CE::RHI
 
 	protected:
 
+		virtual void CompileCrossQueueScopes(const FrameGraphCompilerRequest& compileRequest) = 0;
+
 		virtual void CompileInternal(const FrameGraphCompilerRequest& compileRequest) = 0;
 
 	};

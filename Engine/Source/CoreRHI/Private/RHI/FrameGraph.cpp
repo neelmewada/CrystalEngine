@@ -140,13 +140,13 @@ namespace CE::RHI
 		{
 			for (auto dependent : dependencies)
 			{
-				if (!nodes.KeyExists(dependent))
-					nodes.Add(dependent, dependent);
-				nodes[dependent].consumers.Add(scope);
+				if (!nodes.KeyExists(dependent->id))
+					nodes.Add(dependent->id, dependent);
+				nodes[dependent->id].consumers.Add(scope);
 
-				if (!nodes.KeyExists(scope))
-					nodes.Add(scope, scope);
-				nodes[scope].producers.Add(dependent);
+				if (!nodes.KeyExists(scope->id))
+					nodes.Add(scope->id, scope);
+				nodes[scope->id].producers.Add(dependent);
 			}
 		}
 	}

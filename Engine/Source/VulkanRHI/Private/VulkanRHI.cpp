@@ -486,4 +486,9 @@ namespace CE::Vulkan
 		return device->GetHardwareQueues(queueMask);
 	}
 
+	Array<RHI::CommandQueue*> VulkanRHI::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)
+	{
+		return device->AllocateHardwareQueues(queueClasses);
+	}
+
 } // namespace CE

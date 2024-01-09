@@ -74,6 +74,10 @@ namespace CE::Vulkan
 
 		virtual bool IsOffscreenOnly() override;
 
+		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
+
+		virtual Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass) override;
+
 		// TODO: move this function to CoreApplication instead of VulkanRHI
 		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
 
@@ -120,8 +124,6 @@ namespace CE::Vulkan
 
 		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) override;
 		virtual void DestroyPipelineState(RHI::IPipelineState* pipelineState) override;
-
-		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
 
 		// - Utilities -
 

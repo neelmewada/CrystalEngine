@@ -9,6 +9,7 @@ namespace CE::Vulkan
 		FrameGraphCompiler(VulkanDevice* device);
 		virtual ~FrameGraphCompiler();
 
+		void CompileCrossQueueScopes(const FrameGraphCompilerRequest& compileRequest) override;
 		
 		void CompileInternal(const FrameGraphCompilerRequest& compileRequest) override;
 

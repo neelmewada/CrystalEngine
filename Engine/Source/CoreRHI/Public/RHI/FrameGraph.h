@@ -4,6 +4,11 @@
 class RHI_FrameGraphBuilder_Test;
 #endif
 
+namespace CE::Vulkan
+{
+	class FrameGraphCompiler;
+}
+
 namespace CE::RHI
 {
 
@@ -50,7 +55,7 @@ namespace CE::RHI
 		HashMap<AttachmentID, Scope*> lastWrittenAttachmentToScope{};
 		HashMap<AttachmentID, HashSet<Scope*>> attachmentReadSchedule{};
 		HashMap<Scope*, HashSet<Scope*>> nodeDependencies{};
-		HashMap<Scope*, GraphNode> nodes{};
+		HashMap<ScopeID, GraphNode> nodes{};
 
         //! A database of all attachments used in this frame graph.
         FrameAttachmentDatabase attachmentDatabase{};
@@ -63,6 +68,7 @@ namespace CE::RHI
 
         friend class FrameAttachmentDatabase;
 		friend class FrameGraphCompiler;
+		friend class CE::Vulkan::FrameGraphCompiler;
 		friend class FrameGraphBuilder;
 		friend class FrameScheduler;
 #if PAL_TRAIT_BUILD_TESTS

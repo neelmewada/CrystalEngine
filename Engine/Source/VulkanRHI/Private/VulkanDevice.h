@@ -54,6 +54,7 @@ namespace CE::Vulkan
         // - Getters -
 
 		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask);
+		Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass);
 
 		INLINE bool IsUnifiedMemoryArchitecture() const
 		{
@@ -139,6 +140,8 @@ namespace CE::Vulkan
         VkSurfaceKHR testSurface = nullptr;
 
 		Array<CommandQueue*> queues{};
+		HashMap<int, Array<CommandQueue*>> queuesByFamily{};
+
         CommandQueue* primaryGraphicsQueue = nullptr;
         CommandQueue* presentQueue = nullptr;
 

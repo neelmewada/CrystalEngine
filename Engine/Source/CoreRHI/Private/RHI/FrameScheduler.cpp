@@ -25,7 +25,9 @@ namespace CE::RHI
 		const Array<RHI::FrameAttachment*>& attachments = frameGraph->attachmentDatabase.GetAttachments();
 		
 		bufferReq = {};
+		u64 bufferOffset = 0;
 		imageReq = {};
+		u64 imageOffset = 0;
 
 		for (auto attachment : attachments)
 		{
@@ -35,7 +37,10 @@ namespace CE::RHI
 				const auto& desc = bufferAttachment->GetBufferDescriptor();
 				ResourceMemoryRequirements req{};
 				RHI::gDynamicRHI->GetBufferMemoryRequirements(desc, req);
-				bufferReq.size += req.size;
+				if (bufferOffset > 0)
+					bufferOffset = Memory::GetAlignedSize(bufferOffset, req.offsetAlignment);
+				bufferReq.size = bufferOffset + req.size;
+				bufferOffset += req.size;
 				if (bufferReq.flags == 0)
 					bufferReq.flags = req.flags;
 				else
@@ -48,7 +53,10 @@ namespace CE::RHI
 				const auto& desc = imageAttachment->GetImageDescriptor();
 				ResourceMemoryRequirements req{};
 				RHI::gDynamicRHI->GetTextureMemoryRequirements(desc, req);
-				imageReq.size += req.size;
+				if (imageOffset > 0)
+					imageOffset = Memory::GetAlignedSize(imageOffset, req.offsetAlignment);
+				imageReq.size = imageOffset + req.size;
+				imageOffset += req.size;
 				if (imageReq.flags == 0)
 					imageReq.flags = req.flags;
 				else

@@ -13,6 +13,13 @@ namespace CE::Vulkan
 
 	}
 
+	void FrameGraphCompiler::CompileCrossQueueScopes(const FrameGraphCompilerRequest& compileRequest)
+	{
+		FrameGraph* frameGraph = compileRequest.frameGraph;
+		
+		// TODO: Allocate proper queues
+	}
+
 	void FrameGraphCompiler::CompileInternal(const FrameGraphCompilerRequest& compileRequest)
 	{
 
