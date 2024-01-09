@@ -22,6 +22,7 @@ namespace CE::RHI
 
 	protected:
 
+		virtual void CompileInternal(const FrameGraphCompilerRequest& compileRequest) = 0;
 
 	};
 

@@ -13,4 +13,9 @@ namespace CE::Vulkan
 
 	}
 
+	void FrameGraphCompiler::CompileInternal(const FrameGraphCompilerRequest& compileRequest)
+	{
+
+	}
+
 } // namespace CE::Vulkan

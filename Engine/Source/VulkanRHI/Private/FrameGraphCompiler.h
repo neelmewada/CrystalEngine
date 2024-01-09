@@ -3,11 +3,14 @@
 namespace CE::Vulkan
 {
     
-	class VULKANRHI_API FrameGraphCompiler final : RHI::FrameGraphCompiler
+	class VULKANRHI_API FrameGraphCompiler final : public RHI::FrameGraphCompiler
 	{
 	public:
 		FrameGraphCompiler(VulkanDevice* device);
 		virtual ~FrameGraphCompiler();
+
+		
+		void CompileInternal(const FrameGraphCompilerRequest& compileRequest) override;
 
 	private:
 

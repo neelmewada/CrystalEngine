@@ -343,6 +343,9 @@ TEST(RHI, FrameGraphBuilder)
 		builder.EndFrameGraph();
 
 		auto nodeDependencies = frameGraph->nodeDependencies;
+		auto nodes = frameGraph->nodes;
+		auto producers = frameGraph->producers;
+
 		auto scopesById = frameGraph->scopesById;
 		EXPECT_EQ(nodeDependencies[scopesById["F"]].GetSize(), 2);
 		EXPECT_EQ(nodeDependencies[scopesById["E"]].GetSize(), 1);
@@ -351,6 +354,18 @@ TEST(RHI, FrameGraphBuilder)
 		EXPECT_TRUE(nodeDependencies[scopesById["E"]].Exists(scopesById["C"]));
 		EXPECT_TRUE(nodeDependencies[scopesById["F"]].Exists(scopesById["D"]));
 		EXPECT_TRUE(nodeDependencies[scopesById["F"]].Exists(scopesById["E"]));
+
+		EXPECT_EQ(producers.GetSize(), 2);
+		EXPECT_TRUE(producers[0]->GetId() == "A" || producers[0]->GetId() == "D");
+		EXPECT_TRUE(producers[1]->GetId() == "D" || producers[1]->GetId() == "A");
+		RHI::Scope* scopeA = producers[0]->GetId() == "A" ? producers[0] : producers[1];
+		RHI::Scope* scopeD = producers[0]->GetId() == "D" ? producers[0] : producers[1];
+		EXPECT_EQ(nodes[scopeA].producers.GetSize(), 0);
+		EXPECT_EQ(nodes[scopeA].consumers.GetSize(), 1);
+		EXPECT_EQ(nodes[scopeA].consumers[0]->GetId(), "B");
+		EXPECT_EQ(nodes[scopeD].producers.GetSize(), 0);
+		EXPECT_EQ(nodes[scopeD].consumers.GetSize(), 1);
+		EXPECT_EQ(nodes[scopeD].consumers[0]->GetId(), "F");
 
 		delete frameGraph;
 	}

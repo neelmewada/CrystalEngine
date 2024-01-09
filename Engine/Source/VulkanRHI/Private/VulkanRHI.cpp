@@ -209,6 +209,11 @@ namespace CE::Vulkan
 		return new Vulkan::Scope(desc);
 	}
 
+	RHI::FrameGraphCompiler* VulkanRHI::CreateFrameGraphCompiler()
+	{
+		return new Vulkan::FrameGraphCompiler(device);
+	}
+
 	void VulkanRHI::BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message)
 	{
 		for (auto handler : validationCallbackHandlers[(int)type])
@@ -242,7 +247,7 @@ namespace CE::Vulkan
 
     bool VulkanRHI::ExecuteCommandList(RHI::CommandList* commandList)
     {
-        if (commandList->GetCommandListType() == RHI::CommandListType::Graphics)
+        /*if (commandList->GetCommandListType() == RHI::CommandListType::Graphics)
         {
             auto vulkanCommandList = (GraphicsCommandList*)commandList;
             if (vulkanCommandList->IsViewportTarget())
@@ -253,7 +258,7 @@ namespace CE::Vulkan
             {
                 return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetRenderTarget());
             }
-        }
+        }*/
         return false;
     }
 

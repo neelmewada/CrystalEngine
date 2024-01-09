@@ -64,6 +64,8 @@ namespace CE::Vulkan
 
 		virtual RHI::Scope* CreateScope(const RHI::ScopeDescriptor& desc) override;
 
+		virtual RHI::FrameGraphCompiler* CreateFrameGraphCompiler() override;
+
 		// - Utils -
 
 		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() override;
