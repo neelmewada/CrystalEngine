@@ -395,6 +395,7 @@ TEST(RHI, FrameScheduler)
 	FrameGraph* frameGraph = scheduler->GetFrameGraph();
 
 	//FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
+    bool recompile = true;
     
     u32 width = 0;
     u32 height = 0;
@@ -482,7 +483,16 @@ TEST(RHI, FrameScheduler)
                 scheduler->EndScope();
             }
             scheduler->EndFrameGraph();
+            
+            recompile = true;
 		}
+        
+        if (recompile)
+        {
+            recompile = false;
+            
+            scheduler->Compile();
+        }
 	}
     
 	delete scheduler;

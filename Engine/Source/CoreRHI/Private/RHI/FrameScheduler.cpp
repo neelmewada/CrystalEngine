@@ -26,7 +26,12 @@ namespace CE::RHI
 
     void FrameScheduler::Compile()
     {
-
+        FrameGraphCompileRequest compileRequest{};
+        compileRequest.frameGraph = frameGraph;
+        compileRequest.transientPool = transientMemoryPool;
+        
+        FrameGraphCompiler compiler{};
+        compiler.Compile(compileRequest);
     }
 
     void FrameScheduler::BeginFrame()
