@@ -20,7 +20,7 @@ namespace CE::RHI
 		MemoryHeapDescriptor bufferHeapDesc{};
 		bufferHeapDesc.allocationSize = allocInfo.bufferPool.size;
 		bufferHeapDesc.flags = allocInfo.bufferPool.flags;
-		bufferHeapDesc.debugName = "TransientBufferPool";
+		bufferHeapDesc.debugName = "Transient Buffer Pool";
 		bufferHeapDesc.usageFlags = RHI::MemoryHeapUsageFlags::Buffer;
 		bufferHeapDesc.heapType = RHI::MemoryHeapType::Default;
 
@@ -44,7 +44,7 @@ namespace CE::RHI
 		MemoryHeapDescriptor imageHeapDesc{};
 		imageHeapDesc.allocationSize = allocInfo.imagePool.size;
 		imageHeapDesc.flags = allocInfo.imagePool.flags;
-		imageHeapDesc.debugName = "TransientImagePool";
+		imageHeapDesc.debugName = "Transient Image Pool";
 		imageHeapDesc.usageFlags = RHI::MemoryHeapUsageFlags::Texture;
 		imageHeapDesc.heapType = RHI::MemoryHeapType::Default;
 		

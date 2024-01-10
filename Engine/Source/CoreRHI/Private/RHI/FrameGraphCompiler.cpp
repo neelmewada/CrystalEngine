@@ -10,6 +10,9 @@ namespace CE::RHI
 
 		// 2. Compile transient attachments
 		CompileTransientAttachments(compileRequest);
+
+		// Platform specific compilation
+		CompileInternal(compileRequest);
 	}
 
 	void FrameGraphCompiler::CompileTransientAttachments(const FrameGraphCompileRequest& compileRequest)
@@ -19,14 +22,17 @@ namespace CE::RHI
 
 		const Array<RHI::FrameAttachment*>& attachments = frameGraph->attachmentDatabase.GetAttachments();
 
+		// TODO: Implement memory aliasing
+
 		ResourceMemoryRequirements bufferReq = {};
 		u64 bufferOffset = 0;
 		ResourceMemoryRequirements imageReq = {};
 		u64 imageOffset = 0;
 		Array<u64> attachmentOffsets{};
 
-		for (auto attachment : attachments)
+		for (int i = 0; i < attachments.GetSize(); i++)
 		{
+			auto attachment = attachments[i];
 			// Reset the resource pointer, we will be recreating the buffer/image anyway.
 			attachment->SetResource(nullptr);
 

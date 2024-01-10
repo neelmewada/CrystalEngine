@@ -13,4 +13,9 @@ namespace CE::Vulkan
 
 	}
 
+	void Scope::CompileInternal()
+	{
+
+	}
+
 } // namespace CE::Vulkan

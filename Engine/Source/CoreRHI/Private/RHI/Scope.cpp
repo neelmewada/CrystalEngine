@@ -49,5 +49,30 @@ namespace CE::RHI
 		}
 		return nullptr;
 	}
+
+    void Scope::Compile()
+    {
+
+    }
+
+	bool Scope::UsesAttachment(FrameAttachment* attachment)
+	{
+		for (auto scopeAttachment : attachments)
+		{
+			if (scopeAttachment != nullptr && scopeAttachment->attachment == attachment)
+				return true;
+		}
+		return false;
+	}
+
+	bool Scope::UsesAttachment(AttachmentID attachmentId)
+	{
+		for (auto scopeAttachment : attachments)
+		{
+			if (scopeAttachment != nullptr && scopeAttachment->id == attachmentId)
+				return true;
+		}
+		return false;
+	}
     
 } // namespace CE::RHI

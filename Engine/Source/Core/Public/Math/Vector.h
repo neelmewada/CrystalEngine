@@ -24,6 +24,7 @@ namespace CE
 	typedef Vec4i RectInt;
 
 	typedef Vec2 Range;
+	typedef Vec2i RangeInt;
 
     inline bool ApproxEquals(f32 lhs, f32 rhs)
     {

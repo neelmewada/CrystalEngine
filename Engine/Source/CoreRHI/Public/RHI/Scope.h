@@ -42,6 +42,16 @@ namespace CE::RHI
 
 		inline bool PresentsSwapChain() const { return swapChainsToPresent.NonEmpty(); }
 
+		void Compile();
+
+		bool UsesAttachment(FrameAttachment* attachment);
+
+		bool UsesAttachment(AttachmentID attachmentId);
+
+	protected:
+
+		virtual void CompileInternal() {}
+
     private:
 
 		//! @brief The frame graph that owns this scope.

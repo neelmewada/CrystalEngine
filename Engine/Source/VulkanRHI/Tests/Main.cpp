@@ -383,8 +383,10 @@ TEST(RHI, FrameScheduler)
 	RHI::SwapChainDescriptor swapChainDesc{};
 	swapChainDesc.imageCount = 2;
 	swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+
+	auto rhi = RHI::gDynamicRHI;
 	
-	auto swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
+	auto swapChain = rhi->CreateSwapChain(mainWindow, swapChainDesc);
 
 	FrameSchedulerDescriptor frameSchedulerDesc{};
 
@@ -392,40 +394,42 @@ TEST(RHI, FrameScheduler)
 	
 	FrameGraph* frameGraph = scheduler->GetFrameGraph();
 
+	FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
+
+	builder.BeginFrameGraph(frameGraph);
+	{
+		builder.BeginScope("Depth");
+		{
+
+		}
+		builder.EndScope();
+
+		builder.BeginScope("Opaque");
+		{
+
+		}
+		builder.EndScope();
+
+		builder.BeginScope("Transparent");
+		{
+
+		}
+		builder.EndScope();
+	}
+	builder.EndFrameGraph();
+
 	while (!IsEngineRequestingExit())
 	{
 		app->Tick();
 
 		// Build FrameGraph
 		{
-			FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
 			
-			builder.BeginFrameGraph(frameGraph);
-			{
-				builder.BeginScope("Depth");
-				{
-
-				}
-				builder.EndScope();
-
-				builder.BeginScope("Opaque");
-				{
-
-				}
-				builder.EndScope();
-
-				builder.BeginScope("Transparent");
-				{
-
-				}
-				builder.EndScope();
-			}
-			builder.EndFrameGraph();
 		}
 	}
 
 	delete scheduler;
-	RHI::gDynamicRHI->DestroySwapChain(swapChain);
+	rhi->DestroySwapChain(swapChain);
 
 	WINDOW_TEST_END;
 }

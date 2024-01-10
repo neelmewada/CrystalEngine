@@ -11,6 +11,8 @@ namespace CE::Vulkan
 		Scope(const RHI::ScopeDescriptor& desc);
 		virtual ~Scope();
 
+		virtual void CompileInternal() override;
+
 	private:
         
         CommandQueue* queue = nullptr;
