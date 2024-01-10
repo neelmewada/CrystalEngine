@@ -9,7 +9,7 @@ namespace CE::RHI
 	{
 	public:
         
-        virtual ~FrameAttachment() = default;
+		virtual ~FrameAttachment();
 
 		void SetResource(RHIResource* resource);
 

@@ -108,7 +108,8 @@ namespace CE::RHI
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;
         virtual void DestroyBuffer(Buffer* buffer) = 0;
         
-        virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc) = 0;
+		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc) = 0;
+		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;
         virtual void DestroyTexture(RHI::Texture* texture) = 0;
         
         virtual RHI::Sampler* CreateSampler(const SamplerDescriptor& samplerDesc) = 0;

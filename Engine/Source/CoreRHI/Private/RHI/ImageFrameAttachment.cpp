@@ -18,10 +18,7 @@ namespace CE::RHI
 
     ImageFrameAttachment::~ImageFrameAttachment()
     {
-        if (lifetime != RHI::AttachmentLifetimeType::External && resource)
-        {
-            delete resource;
-        }
+        
     }
     
 } // namespace CE::RHI

@@ -106,6 +106,7 @@ namespace CE::Vulkan
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
         
         virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc) override;
+		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc) override;
         virtual void DestroyTexture(RHI::Texture* texture) override;
         
         virtual RHI::Sampler* CreateSampler(const RHI::SamplerDescriptor& samplerDesc) override;

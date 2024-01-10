@@ -7,9 +7,9 @@ namespace CE::RHI
 		FrameAttachment* attachment,
 		ScopeAttachmentUsage usage,
 		ScopeAttachmentAccess access,
-		const ImageScopeAttachmentDescriptor& descriptor)
-		: ScopeAttachment(scope, attachment, usage, access, descriptor)
+		const ImageScopeAttachmentDescriptor& descriptor) : ScopeAttachment(scope, attachment, usage, access, descriptor)
 	{
+
 	}
 
 	ImageScopeAttachment::~ImageScopeAttachment()

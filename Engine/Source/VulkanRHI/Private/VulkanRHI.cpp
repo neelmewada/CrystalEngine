@@ -423,6 +423,11 @@ namespace CE::Vulkan
         return new Texture(device, textureDesc);
     }
 
+	RHI::Texture* VulkanRHI::CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc)
+	{
+		return new Texture(device, textureDesc, memoryDesc);
+	}
+
     void VulkanRHI::DestroyTexture(RHI::Texture* texture)
     {
         delete texture;

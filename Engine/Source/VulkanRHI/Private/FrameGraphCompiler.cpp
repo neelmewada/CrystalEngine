@@ -1,3 +1,4 @@
+#include "FrameGraphCompiler.h"
 #include "VulkanRHIPrivate.h"
 
 namespace CE::Vulkan
@@ -9,24 +10,42 @@ namespace CE::Vulkan
         
         void Init()
         {
-            for (const auto& [familyIdx, queues] : queuesByFamily)
+            for (int familyIdx = 0; familyIdx < queuesByFamily.GetSize(); familyIdx++)
             {
-                
+				for (CommandQueue* queue : queuesByFamily[familyIdx])
+				{
+					auto mask = queue->GetQueueMask();
+					if (EnumHasFlag(mask, RHI::HardwareQueueClassMask::Graphics))
+					{
+						graphicsQueues.Add(queue);
+					}
+					else if (EnumHasFlag(mask, RHI::HardwareQueueClassMask::Compute))
+					{
+						computeQueues.Add(queue);
+					}
+					else if (EnumHasFlag(mask, RHI::HardwareQueueClassMask::Transfer))
+					{
+						transferQueues.Add(queue);
+					}
+				}
             }
         }
         
-        CommandQueue* Acquire(int index, RHI::HardwareQueueClass queueClass, bool present = false)
+        CommandQueue* Acquire(int trackNumber, RHI::HardwareQueueClass queueClass, bool present = false)
         {
-            return primaryQueue;
+			if (trackNumber < graphicsQueues.GetSize())
+				return graphicsQueues[trackNumber];
+			else if (queueClass == RHI::HardwareQueueClass::Compute && (trackNumber - graphicsQueues.GetSize()) < computeQueues.GetSize())
+				return computeQueues[trackNumber - graphicsQueues.GetSize()];
+            return graphicsQueues.GetLast();
         }
         
-        int graphicsQueuesAvailable = 0;
-        int computeQueuesAvailable = 0;
-        int transferQueuesAvailable = 0;
+		Array<CommandQueue*> graphicsQueues{};
+		Array<CommandQueue*> computeQueues{};
+		Array<CommandQueue*> transferQueues{};
         
         CommandQueue* primaryQueue = nullptr;
-        Array<VkQueueFlags> queueFamilyFlags{};
-        Array<CommandQueue*> presentQueues{};
+        CommandQueue* presentQueue = nullptr;
         Array<CommandQueue*> queues{};
         HashMap<int, Array<CommandQueue*>> queuesByFamily{};
     };
@@ -41,43 +60,38 @@ namespace CE::Vulkan
 
 	}
 
-	void FrameGraphCompiler::CompileCrossQueueScopes(const FrameGraphCompilerRequest& compileRequest)
+	void FrameGraphCompiler::CompileCrossQueueScopes(const FrameGraphCompileRequest& compileRequest)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
         QueueAllocator queueAllocator{};
-        for (auto familyProps : device->queueFamilyPropeties)
-        {
-            queueAllocator.queueFamilyFlags.Add(familyProps.queueFlags);
-        }
         queueAllocator.queuesByFamily = device->queuesByFamily;
-        queueAllocator.presentQueues = device->presentQueue;
+        queueAllocator.presentQueue = device->presentQueue;
         queueAllocator.primaryQueue = device->primaryGraphicsQueue;
         queueAllocator.queues = device->queues;
         queueAllocator.Init();
-        
-        // TODO: Allocate proper queues
 		
         std::function<void(RHI::Scope*, int)> func = [&](RHI::Scope* rhiScope, int i)
         {
             Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
             if (scope->queue == nullptr)
-                scope->queue = queueAllocator.Acquire(i, scope->queueClass);
+                scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
             
             for (auto consumer : frameGraph->nodes[scope->id].consumers)
             {
-                func(consumer, i++);
+                func(consumer, i);
+				i++;
             }
         };
         
-        int i = 0;
+        int trackNumber = 0;
         for (auto scope : frameGraph->producers)
         {
-            func(scope, i);
-            i++;
+            func(scope, trackNumber);
+			trackNumber++;
         }
 	}
 
-	void FrameGraphCompiler::CompileInternal(const FrameGraphCompilerRequest& compileRequest)
+	void FrameGraphCompiler::CompileInternal(const FrameGraphCompileRequest& compileRequest)
 	{
 
 	}

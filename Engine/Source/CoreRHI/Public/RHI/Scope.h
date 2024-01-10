@@ -1,5 +1,10 @@
 #pragma once
 
+namespace CE::Vulkan
+{
+	class FrameGraphCompiler;
+}
+
 namespace CE::RHI
 {
 	class FrameGraph;
@@ -35,6 +40,8 @@ namespace CE::RHI
 			ScopeAttachmentAccess access,
 			const DescriptorType& descriptor);
 
+		inline bool PresentsSwapChain() const { return swapChainsToPresent.NonEmpty(); }
+
     private:
 
 		//! @brief The frame graph that owns this scope.
@@ -56,6 +63,7 @@ namespace CE::RHI
 
 		friend class FrameGraph;
         friend class FrameGraphCompiler;
+		friend class CE::Vulkan::FrameGraphCompiler;
 		friend class FrameGraphBuilder;
     };
 

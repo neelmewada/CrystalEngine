@@ -2,7 +2,7 @@
 
 namespace CE::RHI
 {
-	struct FrameGraphCompilerRequest
+	struct FrameGraphCompileRequest
 	{
 		FrameGraph* frameGraph = nullptr;
 
@@ -18,13 +18,15 @@ namespace CE::RHI
 
 		virtual ~FrameGraphCompiler() = default;
 
-		void Compile(const FrameGraphCompilerRequest& compileRequest);
+		void Compile(const FrameGraphCompileRequest& compileRequest);
 
 	protected:
 
-		virtual void CompileCrossQueueScopes(const FrameGraphCompilerRequest& compileRequest) = 0;
+		void CompileTransientAttachments(const FrameGraphCompileRequest& compileRequest);
 
-		virtual void CompileInternal(const FrameGraphCompilerRequest& compileRequest) = 0;
+		virtual void CompileCrossQueueScopes(const FrameGraphCompileRequest& compileRequest) = 0;
+
+		virtual void CompileInternal(const FrameGraphCompileRequest& compileRequest) = 0;
 
 	};
 
