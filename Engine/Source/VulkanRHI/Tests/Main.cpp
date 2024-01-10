@@ -394,40 +394,97 @@ TEST(RHI, FrameScheduler)
 	
 	FrameGraph* frameGraph = scheduler->GetFrameGraph();
 
-	FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
-
-	builder.BeginFrameGraph(frameGraph);
-	{
-		builder.BeginScope("Depth");
-		{
-
-		}
-		builder.EndScope();
-
-		builder.BeginScope("Opaque");
-		{
-
-		}
-		builder.EndScope();
-
-		builder.BeginScope("Transparent");
-		{
-
-		}
-		builder.EndScope();
-	}
-	builder.EndFrameGraph();
-
+	//FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
+    
+    u32 width = 0;
+    u32 height = 0;
+    
 	while (!IsEngineRequestingExit())
 	{
 		app->Tick();
-
-		// Build FrameGraph
+        u32 curWidth = 0, curHeight = 0;
+        mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
+        
+		// Re-build FrameGraph
+        if (curWidth != width || curHeight != height)
 		{
-			
+            width = curWidth;
+            height = curHeight;
+            
+            scheduler->BeginFrameGraph();
+            {
+                FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
+                
+                RHI::ImageDescriptor depthDesc{};
+                depthDesc.width = width;
+                depthDesc.height = height;
+                depthDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
+                depthDesc.format = RHI::gDynamicRHI->GetAvailableDepthStencilFormats()[0];
+                depthDesc.name = "DepthStencil";
+                
+                attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
+                attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
+                
+                scheduler->BeginScope("Depth");
+                {
+                    RHI::ImageScopeAttachmentDescriptor depthAttachment{};
+                    depthAttachment.attachmentId = "DepthStencil";
+                    depthAttachment.loadStoreAction.clearValueDepth = 0;
+                    depthAttachment.loadStoreAction.clearValueStencil = 0;
+                    depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+                    depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                    depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
+                    depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
+                    
+                    scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+                }
+                scheduler->EndScope();
+
+                scheduler->BeginScope("Opaque");
+                {
+                    RHI::ImageScopeAttachmentDescriptor depthAttachment{};
+                    depthAttachment.attachmentId = "DepthStencil";
+                    depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                    depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                    depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::Load;
+                    depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::Store;
+                    
+                    scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
+                    
+                    RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+                    swapChainAttachment.attachmentId = "SwapChain";
+                    swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0, 1);
+                    swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+                    swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                    
+                    scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+                }
+                scheduler->EndScope();
+                
+                scheduler->BeginScope("Transparent");
+                {
+                    RHI::ImageScopeAttachmentDescriptor depthAttachment{};
+                    depthAttachment.attachmentId = "DepthStencil";
+                    depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                    depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                    depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::Load;
+                    depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::Store;
+                    
+                    scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
+                    
+                    RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+                    swapChainAttachment.attachmentId = "SwapChain";
+                    swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                    swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+                    
+                    scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
+                }
+                scheduler->EndScope();
+            }
+            scheduler->EndFrameGraph();
 		}
 	}
-
+    
 	delete scheduler;
 	rhi->DestroySwapChain(swapChain);
 

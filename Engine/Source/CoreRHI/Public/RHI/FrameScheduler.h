@@ -32,12 +32,10 @@ namespace CE::RHI
 		void BeginFrame();
 
 		void EndFrame();
-
-		inline FrameGraphBuilder& GetFrameGraphBuilder() { return builder; }
+        
+        FrameAttachment* GetFrameAttachment(AttachmentID id);
 
 	private:
-		
-		FrameGraphBuilder builder{};
         
         TransientMemoryPool* transientMemoryPool = nullptr;
 

@@ -11,7 +11,8 @@ namespace CE::RHI
 
 	FrameAttachment::~FrameAttachment()
 	{
-		if (lifetime != RHI::AttachmentLifetimeType::External && resource)
+        // Destroy transient resource
+		if (lifetime == RHI::AttachmentLifetimeType::Transient && resource)
 		{
 			delete resource;
 		}

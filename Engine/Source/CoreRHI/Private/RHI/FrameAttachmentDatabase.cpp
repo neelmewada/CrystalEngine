@@ -19,6 +19,13 @@ namespace CE::RHI
 		attachmentsById[id] = attachment;
 	}
 
+    void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, SwapChain* swapChain)
+    {
+        auto attachment = new SwapChainFrameAttachment(id, swapChain);
+        attachments.Add(attachment);
+        attachmentsById[id] = attachment;
+    }
+
 	void FrameAttachmentDatabase::EmplaceFrameAttachment(AttachmentID id, Texture* image)
 	{
 		auto attachment = new ImageFrameAttachment(id, image);

@@ -39,4 +39,9 @@ namespace CE::RHI
 
 	}
 
+    FrameAttachment* FrameScheduler::GetFrameAttachment(AttachmentID id)
+    {
+        return GetAttachmentDatabase().FindFrameAttachment(id);
+    }
+
 } // namespace CE::RHI

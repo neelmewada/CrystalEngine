@@ -77,7 +77,7 @@ namespace CE::RHI
 		allocationInfo.imagePool = imageReq;
 
 		// Allocate aliased memory pool
-		pool->AllocateAliasedMemory(allocationInfo, &bufferPoolRecreated, &imagePoolRecreated);
+		pool->AllocateMemoryPool(allocationInfo, &bufferPoolRecreated, &imagePoolRecreated);
 
 		// Create & bind buffers & images
 		for (int i = 0; i < attachments.GetSize(); i++)

@@ -15,7 +15,7 @@ namespace CE::RHI
 			delete imagePool;
 	}
 
-    void TransientMemoryPool::AllocateAliasedMemory(const TransientMemoryAllocation& allocInfo, bool* bufferPoolRecreated, bool* imagePoolRecreated)
+    void TransientMemoryPool::AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, bool* bufferPoolRecreated, bool* imagePoolRecreated)
     {
 		MemoryHeapDescriptor bufferHeapDesc{};
 		bufferHeapDesc.allocationSize = allocInfo.bufferPool.size;

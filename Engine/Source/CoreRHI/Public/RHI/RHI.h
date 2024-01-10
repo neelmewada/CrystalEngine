@@ -56,7 +56,7 @@ namespace CE::RHI
 		virtual RHI::FrameGraphCompiler* CreateFrameGraphCompiler() = 0;
 
 		// - Utils -
-
+        
 		void AddValidationCallbackHandler(ValidationCallback handler, ValidationMessageType logLevel)
 		{
 			for (int i = (int)logLevel; i < validationCallbackHandlers.GetCapacity(); i++)

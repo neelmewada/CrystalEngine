@@ -8,12 +8,16 @@ namespace CE::RHI
 	public:
 		FrameAttachmentDatabase();
 		virtual ~FrameAttachmentDatabase();
+        
+        void AddAttachment(AttachmentID id, );
 
 		//! Add a transient image attachment
 		void EmplaceFrameAttachment(AttachmentID id, const ImageDescriptor& descriptor);
 
 		//! Add an external image attachment
 		void EmplaceFrameAttachment(AttachmentID id, Texture* image);
+        
+        void EmplaceFrameAttachment(AttachmentID id, SwapChain* swapChain);
 
 		//! Add a transient buffer attachment
 		void EmplaceFrameAttachment(AttachmentID id, const BufferDescriptor& descriptor);
