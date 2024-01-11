@@ -32,6 +32,7 @@
 // Frame
 #include "Scope.h"
 #include "FrameGraphCompiler.h"
+#include "FrameGraphExecuter.h"
 
 namespace CE::Vulkan
 {

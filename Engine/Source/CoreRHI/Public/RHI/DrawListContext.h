@@ -20,7 +20,7 @@ namespace CE::RHI
 		/// @param drawPacket to add.
 		void AddDrawPacket(DrawPacket* drawPacket);
 
-		void AddDrawItem(DrawItemProperties drawItem);
+		void AddDrawItem(DrawItemProperties drawItem, DrawListTag drawListTag);
 
 		void Finalize();
 

@@ -6,10 +6,14 @@ namespace CE::RHI
 	{
 		frameGraph = new FrameGraph();
         transientMemoryPool = new TransientMemoryPool();
+		numFramesInFlight = descriptor.numFramesInFlight;
+
+		compiler = RHI::gDynamicRHI->CreateFrameGraphCompiler();
 	}
 
 	FrameScheduler::~FrameScheduler()
 	{
+		delete compiler;
         delete transientMemoryPool;
 		delete frameGraph;
 	}
@@ -29,22 +33,49 @@ namespace CE::RHI
         FrameGraphCompileRequest compileRequest{};
         compileRequest.frameGraph = frameGraph;
         compileRequest.transientPool = transientMemoryPool;
-        
-        FrameGraphCompiler compiler{};
-        compiler.Compile(compileRequest);
+		compileRequest.numFramesInFlight = 1;
+
+        compiler->Compile(compileRequest);
     }
 
-    void FrameScheduler::BeginFrame()
+	void FrameScheduler::BeginDrawListSubmission()
 	{
-		
+		for (RHI::Scope* scope : frameGraph->scopes)
+		{
+			scope->drawList.Clear();
+		}
 	}
 
-	void FrameScheduler::EndFrame()
+	void FrameScheduler::BeginDrawListScope(ScopeID scopeId)
+	{
+		RHI::Scope* scope = frameGraph->scopesById[scopeId];
+		if (scope != nullptr)
+		{
+			drawListScope = scope;
+			drawListScope->drawList.Clear();
+		}
+		else
+		{
+			frameGraph->scopesById.Remove(scopeId);
+		}
+	}
+
+	void FrameScheduler::EndDrawListScope()
+	{
+		drawListScope = nullptr;
+	}
+
+	void FrameScheduler::EndDrawListSubmission()
 	{
 
 	}
 
-    FrameAttachment* FrameScheduler::GetFrameAttachment(AttachmentID id)
+	void FrameScheduler::Execute(const FrameGraphExecuteRequest& executeRequest)
+	{
+
+	}
+
+    FrameAttachment* FrameScheduler::GetFrameAttachment(AttachmentID id) const
     {
         return GetAttachmentDatabase().FindFrameAttachment(id);
     }

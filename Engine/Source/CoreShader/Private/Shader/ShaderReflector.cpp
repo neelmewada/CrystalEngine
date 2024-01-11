@@ -3,6 +3,8 @@
 
 #if PLATFORM_DESKTOP
 #include "spirv_cross/spirv_reflect.hpp"
+#include "spirv_cross/spirv_parser.hpp"
+#include "spirv-tools/libspirv.h"
 #endif
 
 namespace CE
@@ -26,7 +28,7 @@ namespace CE
 		defer(
 			delete reflection;
 		);
-		
+
 		auto resources = reflection->get_shader_resources();
 		
 		if (curStage == ShaderStage::Vertex)

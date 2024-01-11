@@ -17,6 +17,14 @@ namespace CE::RHI
 		this->currentScope = RHI::gDynamicRHI->CreateScope(desc);
 	}
 
+	bool FrameGraphBuilder::ScopeQueueClass(HardwareQueueClass queueClass)
+	{
+		if (!currentScope || !frameGraph)
+			return false;
+		currentScope->queueClass = queueClass;
+		return true;
+	}
+
 	bool FrameGraphBuilder::UseAttachment(const ImageScopeAttachmentDescriptor& descriptor, ScopeAttachmentUsage usage, ScopeAttachmentAccess access)
 	{
 		if (!currentScope || !frameGraph)
@@ -67,7 +75,8 @@ namespace CE::RHI
 	{
 		if (!currentScope || !frameGraph)
 			return false;
-		currentScope->swapChainsToPresent.Add(swapChain);
+		frameGraph->presentSwapChain = swapChain;
+		currentScope->presentsSwapChain = true;
 		return true;
 	}
 

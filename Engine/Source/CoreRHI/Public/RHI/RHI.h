@@ -55,6 +55,8 @@ namespace CE::RHI
 
 		virtual RHI::FrameGraphCompiler* CreateFrameGraphCompiler() = 0;
 
+		virtual RHI::FrameGraphExecuter* CreateFrameGraphExecuter() = 0;
+
 		// - Utils -
         
 		void AddValidationCallbackHandler(ValidationCallback handler, ValidationMessageType logLevel)
@@ -76,8 +78,6 @@ namespace CE::RHI
 		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() = 0;
 
 		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) = 0;
-
-		virtual Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass) = 0;
 
 		//! Returns true if RHI was initialized in Offscreen mode, i.e. there was no main window when RHI was initialized. 
 		virtual bool IsOffscreenOnly() = 0;

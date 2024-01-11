@@ -66,6 +66,8 @@ namespace CE::Vulkan
 
 		virtual RHI::FrameGraphCompiler* CreateFrameGraphCompiler() override;
 
+		virtual RHI::FrameGraphExecuter* CreateFrameGraphExecuter() override;
+
 		// - Utils -
 
 		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() override;
@@ -75,8 +77,6 @@ namespace CE::Vulkan
 		virtual bool IsOffscreenOnly() override;
 
 		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
-
-		virtual Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass) override;
 
 		// TODO: move this function to CoreApplication instead of VulkanRHI
 		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;

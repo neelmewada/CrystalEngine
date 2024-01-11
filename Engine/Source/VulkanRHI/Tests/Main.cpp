@@ -394,7 +394,6 @@ TEST(RHI, FrameScheduler)
 	
 	FrameGraph* frameGraph = scheduler->GetFrameGraph();
 
-	//FrameGraphBuilder& builder = scheduler->GetFrameGraphBuilder();
     bool recompile = true;
     
     u32 width = 0;
@@ -479,6 +478,8 @@ TEST(RHI, FrameScheduler)
                     swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                     
                     scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
+
+					scheduler->PresentSwapChain(swapChain);
                 }
                 scheduler->EndScope();
             }
@@ -492,6 +493,8 @@ TEST(RHI, FrameScheduler)
             recompile = false;
             
             scheduler->Compile();
+
+
         }
 	}
     

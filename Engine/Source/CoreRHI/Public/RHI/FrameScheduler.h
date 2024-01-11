@@ -2,9 +2,14 @@
 
 namespace CE::RHI
 {
+	class FrameGraphCompiler;
+	class FrameGraphExecuter;
+
 	struct FrameSchedulerDescriptor
 	{
-        
+		//! @brief Number of frames being rendered simultaneously (ex: triple buffering = 3).
+		//! We don't support more than 1 frames for now.
+		const u32 numFramesInFlight = 1;
 	};
 
 	//! FrameScheduler provides user facing API to construct, compile and execute FrameGraph.
@@ -29,18 +34,25 @@ namespace CE::RHI
 		//! @brief Compile the transient attachments, and everything.
 		void Compile();
 
-		void BeginFrame();
+		void BeginDrawListSubmission();
+		void BeginDrawListScope(ScopeID scopeId);
+		void EndDrawListScope();
+		void EndDrawListSubmission();
 
-		void EndFrame();
+		void Execute(const FrameGraphExecuteRequest& executeRequest);
         
-        FrameAttachment* GetFrameAttachment(AttachmentID id);
+        FrameAttachment* GetFrameAttachment(AttachmentID id) const;
 
 	private:
+
+		u32 numFramesInFlight = 1;
+
+		RHI::Scope* drawListScope = nullptr;
         
         TransientMemoryPool* transientMemoryPool = nullptr;
 
-		ResourceMemoryRequirements bufferReq{};
-		ResourceMemoryRequirements imageReq{};
+		FrameGraphCompiler* compiler = nullptr;
+		FrameGraphExecuter* executer = nullptr;
 	};
     
 } // namespace CE::RHI

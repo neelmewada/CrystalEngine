@@ -62,6 +62,8 @@ namespace CE::RHI
 
         Array<Scope*> scopes{};
 		HashMap<ScopeID, Scope*> scopesById{};
+
+		SwapChain* presentSwapChain = nullptr;
 		
 		Array<Scope*> producers{};
 		Scope* currentScope = nullptr;

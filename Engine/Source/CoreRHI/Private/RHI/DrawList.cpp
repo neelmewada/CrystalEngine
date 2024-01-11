@@ -10,6 +10,9 @@ namespace CE::RHI
 
 	void DrawList::AddDrawItem(DrawItemProperties drawItemProperties)
 	{
+		if (drawItemProperties.item == nullptr)
+			return;
+
 		drawItemsByPipeline[drawItemProperties.item->pipelineState].Add(drawItemProperties);
 		drawItems.Add(drawItemProperties);
 	}

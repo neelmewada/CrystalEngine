@@ -50,6 +50,7 @@
 #include "RHI/FrameGraph.h"
 #include "RHI/FrameGraphBuilder.h"
 #include "RHI/FrameGraphCompiler.h"
+#include "RHI/FrameGraphExecuter.h"
 #include "RHI/FrameScheduler.h"
 
 #include "RHI/RHI.h"

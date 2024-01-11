@@ -56,9 +56,11 @@ namespace CE::RHI
 		}
 	}
 
-	void DrawListContext::AddDrawItem(DrawItemProperties drawItem)
+	void DrawListContext::AddDrawItem(DrawItemProperties drawItem, DrawListTag drawListTag)
 	{
-
+		DrawListsByTag& threadDrawListsByTag = this->threadDrawListsByTag.GetStorage();
+		threadDrawListsByTag[drawListTag].AddDrawItem(drawItem);
+		threadDrawListsByTag[drawListTag].listTag = drawListTag;
 	}
 
 	void DrawListContext::Finalize()

@@ -17,6 +17,8 @@ namespace CE::RHI
 
 		void BeginScope(const ScopeID& id);
 
+		bool ScopeQueueClass(HardwareQueueClass queueClass);
+
 		bool UseAttachment(const ImageScopeAttachmentDescriptor& descriptor,
 			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
 

@@ -206,12 +206,17 @@ namespace CE::Vulkan
 
 	RHI::Scope* VulkanRHI::CreateScope(const RHI::ScopeDescriptor& desc)
 	{
-		return new Vulkan::Scope(desc);
+		return new Vulkan::Scope(device, desc);
 	}
 
 	RHI::FrameGraphCompiler* VulkanRHI::CreateFrameGraphCompiler()
 	{
 		return new Vulkan::FrameGraphCompiler(device);
+	}
+
+	RHI::FrameGraphExecuter* VulkanRHI::CreateFrameGraphExecuter()
+	{
+		return new Vulkan::FrameGraphExecuter(device);
 	}
 
 	void VulkanRHI::BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message)
@@ -489,11 +494,6 @@ namespace CE::Vulkan
 	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
 	{
 		return device->GetHardwareQueues(queueMask);
-	}
-
-	Array<RHI::CommandQueue*> VulkanRHI::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)
-	{
-		return device->AllocateHardwareQueues(queueClasses);
 	}
 
 } // namespace CE

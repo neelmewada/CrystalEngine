@@ -8,6 +8,7 @@ namespace CE::Vulkan
 namespace CE::RHI
 {
 	class FrameGraph;
+	struct FrameGraphCompileRequest;
 
 	struct ScopeDescriptor
 	{
@@ -40,9 +41,9 @@ namespace CE::RHI
 			ScopeAttachmentAccess access,
 			const DescriptorType& descriptor);
 
-		inline bool PresentsSwapChain() const { return swapChainsToPresent.NonEmpty(); }
+		inline bool PresentsSwapChain() const { return presentsSwapChain; }
 
-		void Compile();
+		bool Compile(const FrameGraphCompileRequest& compileRequest);
 
 		bool UsesAttachment(FrameAttachment* attachment);
 
@@ -50,9 +51,7 @@ namespace CE::RHI
 
 	protected:
 
-		virtual void CompileInternal() {}
-
-    private:
+		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) {}
 
 		//! @brief The frame graph that owns this scope.
 		FrameGraph* frameGraph = nullptr;
@@ -60,6 +59,8 @@ namespace CE::RHI
 		RHI::HardwareQueueClass queueClass{};
 
 		ScopeID id{};
+
+		DrawList drawList{};
         
 		//! @brief List of all scope attachments owned by this scope.
 		Array<ScopeAttachment*> attachments{};
@@ -69,12 +70,13 @@ namespace CE::RHI
 		Array<ScopeAttachment*> readAttachments{};
 		Array<ScopeAttachment*> writeAttachments{};
 
-		Array<SwapChain*> swapChainsToPresent{};
+		bool presentsSwapChain = false;
 
 		friend class FrameGraph;
         friend class FrameGraphCompiler;
 		friend class CE::Vulkan::FrameGraphCompiler;
 		friend class FrameGraphBuilder;
+		friend class FrameScheduler;
     };
 
 	template<typename ScopeAttachmentType, typename DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value

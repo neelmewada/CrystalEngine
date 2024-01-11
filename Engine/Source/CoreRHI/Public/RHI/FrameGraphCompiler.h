@@ -7,6 +7,8 @@ namespace CE::RHI
 		FrameGraph* frameGraph = nullptr;
 
 		TransientMemoryPool* transientPool = nullptr;
+
+		u32 numFramesInFlight = 1;
 	};
     
 	class CORERHI_API FrameGraphCompiler

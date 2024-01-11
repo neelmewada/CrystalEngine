@@ -11,7 +11,7 @@ namespace CE::RHI
 
 	Scope::~Scope()
 	{
-		for (auto attachment : attachments)
+		for (RHI::ScopeAttachment* attachment : attachments)
 		{
 			delete attachment;
 		}
@@ -50,9 +50,10 @@ namespace CE::RHI
 		return nullptr;
 	}
 
-    void Scope::Compile()
+	bool Scope::Compile(const FrameGraphCompileRequest& compileRequest)
     {
 
+		return CompileInternal(compileRequest);
     }
 
 	bool Scope::UsesAttachment(FrameAttachment* attachment)

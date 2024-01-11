@@ -7,14 +7,18 @@ namespace CE::Vulkan
 	{
 	public:
 		using Super = RHI::Scope;
+		using Self = Scope;
 
-		Scope(const RHI::ScopeDescriptor& desc);
+		Scope(VulkanDevice* device, const RHI::ScopeDescriptor& desc);
 		virtual ~Scope();
 
-		virtual void CompileInternal() override;
+		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) override;
 
 	private:
+
+		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSimultaneousFramesInFlight> imageAquiredSemaphores{};
         
+		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;
         
         friend class FrameGraphCompiler;

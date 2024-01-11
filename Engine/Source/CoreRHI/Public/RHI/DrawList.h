@@ -22,10 +22,9 @@ namespace CE::RHI
 
 	private:
 
-		DrawListTag listTag = DrawListTag::NullValue;
-
 		HashMap<RHI::IPipelineState*, Array<DrawItemProperties>> drawItemsByPipeline{};
 		Array<DrawItemProperties> drawItems{};
+		DrawListTag listTag = DrawListTag::NullValue;
 
 		friend class DrawListContext;
 	};

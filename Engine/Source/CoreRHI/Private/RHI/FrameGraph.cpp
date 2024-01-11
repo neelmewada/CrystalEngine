@@ -15,6 +15,7 @@ namespace CE::RHI
 
     void FrameGraph::Clear()
     {
+		presentSwapChain = nullptr;
 		for (auto scope : scopes)
 		{
 			delete scope;

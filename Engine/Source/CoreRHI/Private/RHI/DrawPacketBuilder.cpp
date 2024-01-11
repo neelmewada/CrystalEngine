@@ -36,18 +36,18 @@ namespace CE::RHI
 
 	void DrawPacketBuilder::AddScissorState(const ScissorState& scissorState)
 	{
-		if (scissorCount >= scissors.GetSize())
+		if (scissors.GetSize() >= scissors.GetCapacity())
 			return;
 
-		scissors[scissorCount++] = scissorState;
+		scissors.Add(scissorState);
 	}
 
 	void DrawPacketBuilder::AddViewportState(const ViewportState& viewportState)
 	{
-		if (viewportCount >= viewports.GetSize())
+		if (viewports.GetSize() >= viewports.GetCapacity())
 			return;
 
-		viewports[viewportCount++] = viewportState;
+		viewports.Add(viewportState);
 	}
 
 	void DrawPacketBuilder::AddShaderResourceGroup(ShaderResourceGroup* srg)
@@ -97,9 +97,9 @@ namespace CE::RHI
 
 		SIZE_T vertexBufferViewsOffset = AllocateOffset(sizeof(VertexBufferView) * vertexBufferViewCount, alignof(VertexBufferView));
 
-		SIZE_T scissorsOffset = AllocateOffset(sizeof(ScissorState) * scissorCount, alignof(ScissorState));
+		SIZE_T scissorsOffset = AllocateOffset(sizeof(ScissorState) * scissors.GetSize(), alignof(ScissorState));
 
-		SIZE_T viewportsOffset = AllocateOffset(sizeof(ViewportState) * viewportCount, alignof(ViewportState));
+		SIZE_T viewportsOffset = AllocateOffset(sizeof(ViewportState) * viewports.GetSize(), alignof(ViewportState));
 
 		SIZE_T totalByteCount = byteOffsetCurrent;
 
@@ -136,30 +136,30 @@ namespace CE::RHI
             drawPacket->uniqueShaderResourceGroupCount = drawRequestsCount;
         }
         
-        if (scissorCount > 0)
+        if (scissors.GetSize() > 0)
         {
-            ScissorState* scissors = reinterpret_cast<ScissorState*>(allocationData + scissorsOffset);
+            ScissorState* scissorsStates = reinterpret_cast<ScissorState*>(allocationData + scissorsOffset);
             
-            for (int i = 0; i < scissorCount; i++)
+            for (int i = 0; i < scissors.GetSize(); i++)
             {
                 scissors[i] = this->scissors[i];
             }
             
-            drawPacket->scissors = scissors;
-            drawPacket->scissorCount = scissorCount;
+            drawPacket->scissors = scissorsStates;
+            drawPacket->scissorCount = scissors.GetSize();
         }
         
-        if (viewportCount > 0)
+        if (viewports.GetSize() > 0)
         {
-            ViewportState* viewports = reinterpret_cast<ViewportState*>(allocationData + viewportsOffset);
+            ViewportState* viewportStates = reinterpret_cast<ViewportState*>(allocationData + viewportsOffset);
             
-            for (int i = 0; i < viewportCount; i++)
+            for (int i = 0; i < viewports.GetSize(); i++)
             {
                 viewports[i] = this->viewports[i];
             }
             
-            drawPacket->viewports = viewports;
-            drawPacket->viewportCount = viewportCount;
+            drawPacket->viewports = viewportStates;
+            drawPacket->viewportCount = viewports.GetSize();
         }
 
 		if (rootConstantSize > 0)

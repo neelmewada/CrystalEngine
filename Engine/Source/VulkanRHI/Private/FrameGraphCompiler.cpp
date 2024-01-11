@@ -70,7 +70,7 @@ namespace CE::Vulkan
         queueAllocator.queues = device->queues;
         queueAllocator.Init();
 		
-        std::function<void(RHI::Scope*, int)> func = [&](RHI::Scope* rhiScope, int i)
+        std::function<void(RHI::Scope*, int)> visitor = [&](RHI::Scope* rhiScope, int i)
         {
             Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
             if (scope->queue == nullptr)
@@ -78,7 +78,7 @@ namespace CE::Vulkan
             
             for (auto consumer : frameGraph->nodes[scope->id].consumers)
             {
-                func(consumer, i);
+				visitor(consumer, i);
 				i++;
             }
         };
@@ -86,9 +86,15 @@ namespace CE::Vulkan
         int trackNumber = 0;
         for (auto scope : frameGraph->producers)
         {
-            func(scope, trackNumber);
+			visitor(scope, trackNumber);
 			trackNumber++;
         }
+
+		// Compile individual scopes
+		for (auto scope : frameGraph->scopes)
+		{
+			scope->Compile(compileRequest);
+		}
 	}
 
 	void FrameGraphCompiler::CompileInternal(const FrameGraphCompileRequest& compileRequest)
