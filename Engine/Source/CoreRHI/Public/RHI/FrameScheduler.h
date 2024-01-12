@@ -36,10 +36,11 @@ namespace CE::RHI
 
 		void BeginDrawListSubmission();
 		void BeginDrawListScope(ScopeID scopeId);
+		void SubmitDrawItem(DrawItemProperties drawItemProperties);
 		void EndDrawListScope();
 		void EndDrawListSubmission();
 
-		void Execute(const FrameGraphExecuteRequest& executeRequest);
+		void Execute();
         
         FrameAttachment* GetFrameAttachment(AttachmentID id) const;
 

@@ -11,8 +11,9 @@ namespace CE::RHI
 			/// @brief Max number of vertex attributes
 			constexpr u32 MaxVertexAttribCount = 16;
 
-			/// @brief Max number of simultaneous frames that can be rendered (triple buffering, etc). For now, we only support 1.
-			constexpr u32 MaxSimultaneousFramesInFlight = 1;
+			/// @brief Max number of simultaneous frames that can be rendered (triple buffering, etc).
+			/// For now we only support double buffering.
+			constexpr u32 MaxFramesInFlight = 2;
 
 			//! @brief Max number of attachments (color + input + depth stencil) that can be bound in a single pass
 			constexpr u32 MaxBoundAttachmentCount = 8;

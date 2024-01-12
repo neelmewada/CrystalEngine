@@ -7,6 +7,7 @@ class RHI_FrameGraphBuilder_Test;
 namespace CE::Vulkan
 {
 	class FrameGraphCompiler;
+	class FrameGraphExecuter;
 }
 
 namespace CE::RHI
@@ -17,6 +18,11 @@ namespace CE::RHI
     public:
         FrameGraph();
         virtual ~FrameGraph();
+
+		inline SwapChain* GetSwapChain() const
+		{
+			return presentSwapChain;
+		}
         
     private:
 
@@ -73,6 +79,8 @@ namespace CE::RHI
 		friend class CE::Vulkan::FrameGraphCompiler;
 		friend class FrameGraphBuilder;
 		friend class FrameScheduler;
+		friend class FrameGraphExecuter;
+		friend class CE::Vulkan::FrameGraphExecuter;
 #if PAL_TRAIT_BUILD_TESTS
 		friend class RHI_FrameGraphBuilder_Test;
 #endif

@@ -2,6 +2,7 @@
 
 namespace CE::Vulkan
 {
+	class Scope;
     
 	class VULKANRHI_API FrameGraphCompiler final : public RHI::FrameGraphCompiler
 	{
@@ -15,12 +16,9 @@ namespace CE::Vulkan
 
 	private:
         
-        struct QueueID
-        {
-            int familyIdx = -1;
-            int queueIdx = -1;
-        };
-        
+		void CompileProducers(const FrameGraphCompileRequest& compileRequest, 
+			const Array<RHI::Scope*>& producers, Vulkan::Scope* current = nullptr);
+
 		VulkanDevice* device = nullptr;
 	};
 

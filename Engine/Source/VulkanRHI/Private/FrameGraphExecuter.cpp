@@ -15,7 +15,12 @@ namespace CE::Vulkan
 
 	bool FrameGraphExecuter::ExecuteInternal(const FrameGraphExecuteRequest& executeRequest)
 	{
-		return false;
+		FrameGraph* frameGraph = executeRequest.frameGraph;
+
+		const Array<RHI::Scope*>& producers = frameGraph->producers;
+		
+
+		return true;
 	}
     
 } // namespace CE::Vulkan

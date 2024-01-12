@@ -2,6 +2,8 @@
 
 namespace CE::RHI
 {
+	class FrameScheduler;
+
 	struct FrameGraphCompileRequest
 	{
 		FrameGraph* frameGraph = nullptr;

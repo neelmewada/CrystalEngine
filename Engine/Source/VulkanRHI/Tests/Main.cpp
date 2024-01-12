@@ -395,6 +395,7 @@ TEST(RHI, FrameScheduler)
 	FrameGraph* frameGraph = scheduler->GetFrameGraph();
 
     bool recompile = true;
+	bool resubmit = true;
     
     u32 width = 0;
     u32 height = 0;
@@ -486,16 +487,45 @@ TEST(RHI, FrameScheduler)
             scheduler->EndFrameGraph();
             
             recompile = true;
+			resubmit = true;
 		}
         
         if (recompile)
         {
             recompile = false;
+			resubmit = true;
             
-            scheduler->Compile();
-
-
+			scheduler->Compile();
         }
+
+		if (resubmit)
+		{
+			resubmit = false;
+
+			scheduler->BeginDrawListSubmission();
+			{
+				scheduler->BeginDrawListScope("Depth");
+				{
+
+				}
+				scheduler->EndDrawListScope();
+
+				scheduler->BeginDrawListScope("Opaque");
+				{
+
+				}
+				scheduler->EndDrawListScope();
+
+				scheduler->BeginDrawListScope("Transparent");
+				{
+
+				}
+				scheduler->EndDrawListScope();
+			}
+			scheduler->EndDrawListSubmission();
+		}
+
+		scheduler->Execute();
 	}
     
 	delete scheduler;

@@ -16,7 +16,11 @@ namespace CE::Vulkan
 
 	private:
 
-		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSimultaneousFramesInFlight> imageAquiredSemaphores{};
+		void DestroySyncObjects();
+
+		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxFramesInFlight> imageAquiredSemaphores{};
+		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxFramesInFlight> renderFinishedSemaphores{};
+		FixedArray<VkFence, RHI::Limits::Pipeline::MaxFramesInFlight> renderFinishedFences{};
         
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;

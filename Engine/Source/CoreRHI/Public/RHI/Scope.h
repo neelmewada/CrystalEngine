@@ -61,6 +61,7 @@ namespace CE::RHI
 		ScopeID id{};
 
 		DrawList drawList{};
+		ThreadLocalContext<DrawList> threadDrawLists{};
         
 		//! @brief List of all scope attachments owned by this scope.
 		Array<ScopeAttachment*> attachments{};

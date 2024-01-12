@@ -2,9 +2,13 @@
 
 namespace CE::RHI
 {
+	class FrameGraph;
+
 	struct FrameGraphExecuteRequest
 	{
+		FrameGraph* frameGraph = nullptr;
 
+		u32 currentImageIndex = 0;
 	};
     
 	class CORERHI_API FrameGraphExecuter

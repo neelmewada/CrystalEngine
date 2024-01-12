@@ -99,7 +99,24 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::CompileInternal(const FrameGraphCompileRequest& compileRequest)
 	{
+		FrameGraph* frameGraph = compileRequest.frameGraph;
 
+		CompileProducers(compileRequest, frameGraph->producers, nullptr);;
+	}
+
+	void FrameGraphCompiler::CompileProducers(const FrameGraphCompileRequest& compileRequest, const Array<RHI::Scope*>& producers, Vulkan::Scope* current)
+	{
+		FrameGraph* frameGraph = compileRequest.frameGraph;
+		u32 numFramesInFlight = compileRequest.numFramesInFlight;
+
+		for (RHI::Scope* rhiScope : producers)
+		{
+			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
+
+
+			const auto& consumers = frameGraph->nodes[scope->GetId()].consumers;
+			CompileProducers(compileRequest, consumers, scope);
+		}
 	}
 
 } // namespace CE::Vulkan

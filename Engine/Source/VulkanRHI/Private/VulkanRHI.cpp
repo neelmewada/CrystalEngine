@@ -313,7 +313,7 @@ namespace CE::Vulkan
     bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, Viewport* viewport)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
-
+		
         // -- Waiting for Fences --
         // Wait until the rendering from previous call has been finished
         //auto result = vkWaitForFences(device->GetHandle(),
@@ -355,7 +355,7 @@ namespace CE::Vulkan
         //submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
 
         //result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
-
+		
         return true;
     }
 
