@@ -407,7 +407,7 @@ TEST(RHI, FrameScheduler)
 
 	auto rhi = RHI::gDynamicRHI;
 	
-	auto swapChain = rhi->CreateSwapChain(mainWindow, swapChainDesc);
+	RHI::SwapChain* swapChain = rhi->CreateSwapChain(mainWindow, swapChainDesc);
 
 	FrameSchedulerDescriptor frameSchedulerDesc{};
 
@@ -429,7 +429,7 @@ TEST(RHI, FrameScheduler)
         mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
 		// If window size changed
 		if (curWidth != width || curHeight != height)
-			rebuild = true;
+            rebuild = true;
 
 		// Re-build FrameGraph
         if (rebuild == true)

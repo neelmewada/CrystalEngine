@@ -53,7 +53,10 @@ namespace CE::Vulkan
 
 	void SwapChain::OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight)
 	{
-		RebuildSwapChain();
+        if (this->window == window)
+		{
+            RebuildSwapChain();
+        }
 	}
 
 	void SwapChain::Create()

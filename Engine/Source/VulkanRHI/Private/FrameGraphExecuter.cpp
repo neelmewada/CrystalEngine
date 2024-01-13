@@ -29,8 +29,8 @@ namespace CE::Vulkan
 				imageAcquiredSemaphores[currentSubmissionIndex],
 				imageAcquiredFence[currentSubmissionIndex], &swapChain->currentImageIndex);
 		}
-
-
+        
+        
 
 		return true;
 	}
