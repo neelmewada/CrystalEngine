@@ -331,7 +331,7 @@ namespace CE::Vulkan
         //
         //// Manually reset (close) the fences
         //result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
-
+		
         //// Submit to Queue
         //VkSubmitInfo submitInfo = {};
         //submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

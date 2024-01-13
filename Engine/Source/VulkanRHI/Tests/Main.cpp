@@ -106,6 +106,27 @@ static void WindowTestEnd()
 	ModuleManager::Get().LoadModule("Core");
 }
 
+static JobManager* gJobManager = nullptr;
+static JobContext* gJobContext = nullptr;
+
+static void InitJobManager()
+{
+	JobManagerDesc desc{};
+	desc.defaultTag = JOB_THREAD_WORKER;
+	desc.totalThreads = 0; // auto set optimal number of threads
+
+	gJobManager = new JobManager("JobSystemManager", desc);
+	gJobContext = new JobContext(gJobManager);
+	JobContext::PushGlobalContext(gJobContext);
+}
+
+static void ShutdownJobManager()
+{
+	JobContext::PopGlobalContext();
+	delete gJobContext; gJobContext = nullptr;
+	delete gJobManager; gJobManager = nullptr;
+}
+
 void OnValidationMessage(RHI::ValidationMessageType messageType, const char* message)
 {
 	switch (messageType)
@@ -377,7 +398,7 @@ TEST(RHI, FrameScheduler)
 {
 	WINDOW_TEST_BEGIN;
 
-	auto app = PlatformApplication::Get();
+	PlatformApplication* app = PlatformApplication::Get();
 	PlatformWindow* mainWindow = app->GetMainWindow();
 
 	RHI::SwapChainDescriptor swapChainDesc{};
@@ -394,6 +415,7 @@ TEST(RHI, FrameScheduler)
 	
 	FrameGraph* frameGraph = scheduler->GetFrameGraph();
 
+	bool rebuild = true;
     bool recompile = true;
 	bool resubmit = true;
     
@@ -405,9 +427,12 @@ TEST(RHI, FrameScheduler)
 		app->Tick();
         u32 curWidth = 0, curHeight = 0;
         mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
-        
+		// If window size changed
+		if (curWidth != width || curHeight != height)
+			rebuild = true;
+
 		// Re-build FrameGraph
-        if (curWidth != width || curHeight != height)
+        if (rebuild == true)
 		{
             width = curWidth;
             height = curHeight;
@@ -426,6 +451,7 @@ TEST(RHI, FrameScheduler)
                 attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
                 attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
                 
+				//scheduler->BeginScopeGroup("MainPass");
                 scheduler->BeginScope("Depth");
                 {
                     RHI::ImageScopeAttachmentDescriptor depthAttachment{};
@@ -454,7 +480,7 @@ TEST(RHI, FrameScheduler)
                     
                     RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
                     swapChainAttachment.attachmentId = "SwapChain";
-                    swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0, 1);
+                    swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
                     swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
                     swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                     
@@ -483,9 +509,11 @@ TEST(RHI, FrameScheduler)
 					scheduler->PresentSwapChain(swapChain);
                 }
                 scheduler->EndScope();
+				//scheduler->EndScopeGroup();
             }
             scheduler->EndFrameGraph();
             
+			rebuild = false;
             recompile = true;
 			resubmit = true;
 		}
@@ -518,7 +546,7 @@ TEST(RHI, FrameScheduler)
 
 				scheduler->BeginDrawListScope("Transparent");
 				{
-
+					
 				}
 				scheduler->EndDrawListScope();
 			}

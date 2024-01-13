@@ -28,6 +28,8 @@ namespace CE::Vulkan
 
 		void RebuildSwapChain();
 
+		inline VkSwapchainKHR GetHandle() const { return swapChain; }
+
 	protected:
 
 		void OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight);
@@ -58,6 +60,8 @@ namespace CE::Vulkan
 		u32 height = 0;
 
 		DelegateHandle windowResizeCallback = 0;
+
+		friend class FrameGraphExecuter;
 	};
 
 } // namespace CE

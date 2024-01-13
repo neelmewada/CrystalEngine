@@ -18,14 +18,16 @@ namespace CE::Vulkan
 
 		void DestroySyncObjects();
 
-		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxFramesInFlight> imageAquiredSemaphores{};
-		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxFramesInFlight> renderFinishedSemaphores{};
-		FixedArray<VkFence, RHI::Limits::Pipeline::MaxFramesInFlight> renderFinishedFences{};
-        
+		void Execute(const FrameGraphExecuteRequest& executeRequest);
+		
+		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedSemaphores{};
+		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedFences{};
+
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;
         
-        friend class FrameGraphCompiler;
+		friend class FrameGraphCompiler;
+		friend class FrameGraphExecuter;
 	};
     
 } // namespace CE::Vulkan

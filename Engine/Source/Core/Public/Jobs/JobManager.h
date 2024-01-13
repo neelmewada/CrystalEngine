@@ -17,7 +17,7 @@ namespace CE
 
 	struct JobThreadDesc
 	{
-		String threadName = "";
+		Name threadName = "";
 		JobThreadTag tag = JOB_THREAD_WORKER;
 	};
 
@@ -35,7 +35,7 @@ namespace CE
 	{
 	public:
 
-		JobManager(const String& name, const JobManagerDesc& desc);
+		JobManager(const Name& name, const JobManagerDesc& desc);
 		~JobManager();
 
 		struct WorkThreadLocal
@@ -66,7 +66,7 @@ namespace CE
 
 			Job* currentJob = nullptr;
 
-			String name = "";
+			Name name = "";
 			JobThreadTag tag = JOB_THREAD_WORKER;
 
 			Mutex mutex{};
@@ -132,7 +132,7 @@ namespace CE
 	private:
 		// - Fields -
 
-		String name{};
+		Name name{};
 		JobThreadTag defaultTag = JOB_THREAD_WORKER;
 
 		Array<WorkThread*> workerThreads{};
@@ -143,7 +143,7 @@ namespace CE
 		Atomic<int> numAvailableWorkers = 0;
 
 		std::deque<Job*> globalQueue{};
-		Mutex jobManagerMutex{};
+		SharedMutex jobManagerMutex{};
 
 		friend class Job;
 

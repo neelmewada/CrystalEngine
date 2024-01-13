@@ -33,9 +33,7 @@ namespace CE::RHI
 		struct GraphNode
 		{
 			GraphNode(Scope* scope = nullptr) : scope(scope)
-			{
-
-			}
+			{}
 
 			Scope* scope = nullptr;
 			Array<Scope*> producers{};
@@ -69,7 +67,13 @@ namespace CE::RHI
         Array<Scope*> scopes{};
 		HashMap<ScopeID, Scope*> scopesById{};
 
+		//! Multiple scopes can be grouped together as subpasses in a single render pass.
+		Array<ScopeGroup> scopeGroups{};
+
 		SwapChain* presentSwapChain = nullptr;
+		Scope* presentingScope = nullptr;
+
+		u32 numFramesInFlight = 1;
 		
 		Array<Scope*> producers{};
 		Scope* currentScope = nullptr;

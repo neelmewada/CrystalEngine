@@ -19,32 +19,17 @@ namespace CE::Vulkan
 
 		auto frameGraph = compileRequest.frameGraph;
 		SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->GetSwapChain();
-		
-		u32 numFrames = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::Pipeline::MaxFramesInFlight);
+
+		u32 imageCount = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::Pipeline::MaxFramesInFlight);
+		u32 numFramesInFlight = imageCount;
+
 		if (swapChain != nullptr)
 		{
-			numFrames = swapChain->GetImageCount();
+			imageCount = swapChain->GetImageCount();
+			numFramesInFlight = imageCount - 1;
 		}
 
-		if (PresentsSwapChain())
-		{
-			for (int i = 0; i < numFrames; i++)
-			{
-				VkSemaphoreCreateInfo semaphoreCI{};
-				semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-				
-				VkSemaphore semaphore = nullptr;
-				auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
-				if (result != VK_SUCCESS)
-				{
-					continue;
-				}
-
-				imageAquiredSemaphores.Add(semaphore);
-			}
-		}
-
-		for (int i = 0; i < numFrames; i++)
+		for (int i = 0; i < imageCount; i++)
 		{
 			VkSemaphoreCreateInfo semaphoreCI{};
 			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -60,6 +45,7 @@ namespace CE::Vulkan
 
 			VkFenceCreateInfo fenceCI{};
 			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 			
 			VkFence fence = nullptr;
 			result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
@@ -70,21 +56,31 @@ namespace CE::Vulkan
 
 			renderFinishedFences.Add(fence);
 		}
+
+		if (prevSubPass == nullptr && nextSubPass != nullptr)
+		{
+			// TODO: RenderPass with multiple subpasses
+		}
 	}
 
 	void Scope::DestroySyncObjects()
 	{
-		for (VkSemaphore semaphore : imageAquiredSemaphores)
-		{
-			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
-		}
-		imageAquiredSemaphores.Clear();
-
 		for (VkSemaphore semaphore : renderFinishedSemaphores)
 		{
 			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
 		}
 		renderFinishedSemaphores.Clear();
+
+		for (auto fence : renderFinishedFences)
+		{
+			vkDestroyFence(device->GetHandle(), fence, nullptr);
+		}
+		renderFinishedFences.Clear();
+	}
+
+	void Scope::Execute(const FrameGraphExecuteRequest& executeRequest)
+	{
+		
 	}
 
 } // namespace CE::Vulkan

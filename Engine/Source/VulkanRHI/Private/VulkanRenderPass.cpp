@@ -7,12 +7,12 @@ namespace CE::Vulkan
 		: device(device)
 	{
 		FixedArray<VkSubpassDescription, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
-		FixedArray<VkAttachmentDescription, RHI::Limits::Pipeline::MaxBoundAttachmentCount> attachments{};
+		FixedArray<VkAttachmentDescription, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 		Array<VkSubpassDependency> dependencies{};
 
 		for (const auto& subPassDesc : desc.subpasses)
 		{
-			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxBoundAttachmentCount> attachments{};
+			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 
 			subpasses.Add({});
 			VkSubpassDescription& subpass = subpasses.GetLast();

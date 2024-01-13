@@ -9,6 +9,12 @@ namespace CE::RHI
 		frameGraph->Clear();
     }
 
+	void FrameGraphBuilder::BeginScopeGroup(const ScopeID& groupId)
+	{
+		curScopeGroup = {};
+		curScopeGroup.groupId = groupId;
+	}
+
 	void FrameGraphBuilder::BeginScope(const ScopeID& id)
 	{
 		RHI::ScopeDescriptor desc{};
@@ -75,7 +81,9 @@ namespace CE::RHI
 	{
 		if (!currentScope || !frameGraph)
 			return false;
+		frameGraph->numFramesInFlight = swapChain->GetImageCount();
 		frameGraph->presentSwapChain = swapChain;
+		frameGraph->presentingScope = currentScope;
 		currentScope->presentsSwapChain = true;
 		return true;
 	}
@@ -84,9 +92,37 @@ namespace CE::RHI
 	{
 		if (!currentScope || !frameGraph)
 			return nullptr;
+		if (curScopeGroup.groupId.IsValid())
+			curScopeGroup.scopes.Add(currentScope);
+
 		frameGraph->scopes.Add(currentScope);
 		frameGraph->scopesById[currentScope->id] = currentScope;
 		return currentScope;
+	}
+
+	void FrameGraphBuilder::EndScopeGroup()
+	{
+		int scopeGroupIndex = frameGraph->scopeGroups.GetSize();
+		frameGraph->scopeGroups.Add(curScopeGroup);
+		curScopeGroup = {};
+
+		const Array<Scope*>& scopesList = frameGraph->scopeGroups.GetLast().scopes;
+
+		for (int i = 0; i < scopesList.GetSize(); i++)
+		{
+			Scope* cur = scopesList[i];
+			Scope* prev = nullptr;
+			Scope* next = nullptr;
+			cur->scopeGroupIndex = scopeGroupIndex;
+
+			if (i < scopesList.GetSize() - 1)
+				next = scopesList[i + 1];
+			if (i > 0)
+				prev = scopesList[i - 1];
+
+			cur->prevSubPass = prev;
+			cur->nextSubPass = next;
+		}
 	}
 
     bool FrameGraphBuilder::EndFrameGraph()

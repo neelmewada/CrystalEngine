@@ -52,7 +52,6 @@ namespace CE::RHI
 
 	bool Scope::Compile(const FrameGraphCompileRequest& compileRequest)
     {
-
 		return CompileInternal(compileRequest);
     }
 

@@ -38,6 +38,9 @@ namespace CE::RHI
 		compileRequest.numFramesInFlight = 1;
 
         compiler->Compile(compileRequest);
+
+		// Compile the executer too.
+		executer->Compile(compileRequest);
     }
 
 	void FrameScheduler::BeginDrawListSubmission()

@@ -16,6 +16,12 @@ namespace CE::RHI
 		RHI::HardwareQueueClass queueClass{};
 	};
 
+	struct ScopeGroup
+	{
+		ScopeID groupId{};
+		Array<Scope*> scopes{};
+	};
+
     class CORERHI_API Scope
     {
     public:
@@ -59,6 +65,10 @@ namespace CE::RHI
 		RHI::HardwareQueueClass queueClass{};
 
 		ScopeID id{};
+		int scopeGroupIndex = -1;
+
+		Scope* prevSubPass = nullptr;
+		Scope* nextSubPass = nullptr;
 
 		DrawList drawList{};
 		ThreadLocalContext<DrawList> threadDrawLists{};
