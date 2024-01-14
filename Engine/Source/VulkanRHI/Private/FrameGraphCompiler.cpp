@@ -234,16 +234,21 @@ namespace CE::Vulkan
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 		u32 numFramesInFlight = compileRequest.numFramesInFlight;
 
+		const auto& consumers = frameGraph->nodes[current->GetId()].consumers;
+		for (RHI::Scope* consumerScope : consumers)
+		{
+
+		}
+
 		if (producers.IsEmpty()) // No need to wait on anything if there aren't any producers for this scope.
 			return;
 
 		for (RHI::Scope* rhiScope : producers)
 		{
-			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
+			Vulkan::Scope* producerScope = (Vulkan::Scope*)rhiScope;
 			
 
-			const auto& consumers = frameGraph->nodes[scope->GetId()].consumers;
-			CompileCrossQueueDependencies(compileRequest, consumers, scope);
+			
 		}
 	}
 
