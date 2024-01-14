@@ -62,6 +62,7 @@ namespace CE::Vulkan
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 		bool presentRequired = false;
+		auto presentQueue = device->GetPresentQueue();
 		
 		const RHI::FrameGraph::GraphNode& graphNode = frameGraph->nodes[scope->id];
 		
@@ -96,6 +97,37 @@ namespace CE::Vulkan
 		vkBeginCommandBuffer(commandList->commandBuffer, &cmdBeginInfo);
 		{
 			
+			// Transition to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			if (presentRequired)
+			{
+				Vulkan::Texture* image = (Vulkan::Texture*)swapChain->GetCurrentImage();
+
+				VkImageMemoryBarrier imageBarrier{};
+				imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+				imageBarrier.srcQueueFamilyIndex = image->curFamilyIndex;
+				imageBarrier.dstQueueFamilyIndex = presentQueue->GetFamilyIndex();
+				imageBarrier.image = image->image;
+				imageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				imageBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+				//imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+				imageBarrier.srcAccessMask = 0;
+				imageBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+
+				imageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				imageBarrier.subresourceRange.baseMipLevel = 0;
+				imageBarrier.subresourceRange.levelCount = 1;
+				imageBarrier.subresourceRange.baseArrayLayer = 0;
+				imageBarrier.subresourceRange.layerCount = 1;
+				
+				vkCmdPipelineBarrier(commandList->commandBuffer,
+					//VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+					VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+					0,
+					0, nullptr,
+					0, nullptr,
+					1, &imageBarrier);
+			}
 		}
 		vkEndCommandBuffer(commandList->commandBuffer);
 
@@ -126,7 +158,7 @@ namespace CE::Vulkan
 			presentInfo.waitSemaphoreCount = 1;
 			presentInfo.pWaitSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
 
-			result = vkQueuePresentKHR(scope->queue->GetHandle(), &presentInfo);
+			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 		}
 
 		return result == VK_SUCCESS;

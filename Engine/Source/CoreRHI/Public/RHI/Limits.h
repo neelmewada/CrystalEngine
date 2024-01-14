@@ -24,7 +24,7 @@ namespace CE::RHI
 			constexpr u32 MaxRenderAttachmentCount = 2 * MaxColorAttachmentCount + 1;
 
 			//! @brief Max number of subpasses a render pass can have
-			constexpr u32 MaxSubPassCount = 8;
+			constexpr u32 MaxSubPassCount = 12;
 
 			/// @brief Max number of DrawList Tags
 			constexpr u32 DrawListTagCount = 64;

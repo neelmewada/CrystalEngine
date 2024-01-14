@@ -53,6 +53,8 @@ namespace CE::Vulkan
 
 		commandAllocator = new CommandBufferAllocator(this);
 
+		renderPassCache = new RenderPassCache(this);
+
 		isInitialized = true;
 
 		CE_LOG(Info, All, "Vulkan device initialized");
@@ -61,6 +63,9 @@ namespace CE::Vulkan
 	void VulkanDevice::PreShutdown()
 	{
 		isInitialized = false;
+
+		delete renderPassCache;
+		renderPassCache = nullptr;
 
 		delete commandAllocator;
 		commandAllocator = nullptr;
@@ -694,7 +699,7 @@ namespace CE::Vulkan
 			break;
 		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
 			barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-			sourceStage = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+			sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		default:
 			return;

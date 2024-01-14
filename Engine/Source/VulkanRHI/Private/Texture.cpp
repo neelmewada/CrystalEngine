@@ -462,7 +462,8 @@ namespace CE::Vulkan
 		PostInit(desc);
 	}
 
-	Texture::Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags)
+	Texture::Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, 
+		VkImageAspectFlags aspectFlags, VkImageLayout dstLayout)
 		: device(device)
 		, importedImage(true)
 		, image(image)
@@ -491,6 +492,9 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create Vulkan Image View!");
 			return;
 		}
+		
+		if (dstLayout != VK_IMAGE_LAYOUT_UNDEFINED)
+			device->TransitionImageLayout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, dstLayout, aspectFlags);
 	}
 
     Texture::~Texture()

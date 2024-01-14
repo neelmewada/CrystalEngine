@@ -126,6 +126,12 @@ namespace CE::RHI
         FontDesc* preloadFonts = nullptr;
     };
 
+	struct MultisampleState
+	{
+		u16 sampleCount = 1;
+		u16 quality = 0;
+	};
+
     /*
     *   Buffer
     */

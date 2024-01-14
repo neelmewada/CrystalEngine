@@ -169,7 +169,7 @@ namespace CE::Vulkan
 			fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 			VkFence fence = nullptr;
 			vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
-			graphExecutedFences.Add(fence);
+			graphFinishedFences.Add(fence);
 
 			commandListsByImageIndex.Add({});
 
@@ -204,11 +204,11 @@ namespace CE::Vulkan
 		}
 		graphExecutedSemaphores.Clear();
 
-		for (VkFence fence : graphExecutedFences)
+		for (VkFence fence : graphFinishedFences)
 		{
 			vkDestroyFence(device->GetHandle(), fence, nullptr);
 		}
-		graphExecutedFences.Clear();
+		graphFinishedFences.Clear();
     }
 
 	void FrameGraphCompiler::DestroyCommandLists()
@@ -266,8 +266,8 @@ namespace CE::Vulkan
 				current->waitSemaphoreStageFlags.Add(flags);
 			}
 		}
-
-
+		
+		
 	}
 
 } // namespace CE::Vulkan

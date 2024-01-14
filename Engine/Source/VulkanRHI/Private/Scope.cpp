@@ -77,16 +77,11 @@ namespace CE::Vulkan
 		}
 		renderFinishedSemaphores.Clear();
 
-		for (auto fence : renderFinishedFences)
+		for (VkFence fence : renderFinishedFences)
 		{
 			vkDestroyFence(device->GetHandle(), fence, nullptr);
 		}
 		renderFinishedFences.Clear();
-	}
-
-	void Scope::Execute(const FrameGraphExecuteRequest& executeRequest)
-	{
-		
 	}
 
 } // namespace CE::Vulkan

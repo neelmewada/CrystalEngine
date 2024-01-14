@@ -9,7 +9,8 @@ namespace CE::Vulkan
     public:
         Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
 		Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
-		Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags);
+		Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags, 
+			VkImageLayout dstLayout = VK_IMAGE_LAYOUT_UNDEFINED);
 
         virtual ~Texture();
 
@@ -47,6 +48,8 @@ namespace CE::Vulkan
 
 		virtual void UploadData(RHI::Buffer* srcBuffer, u64 offsetInBuffer = 0, u32 mipLevel = 0, u32 arrayLayer = 0);
 
+		inline VkImageLayout GetVkImageLayout() const { return vkImageLayout; }
+
     protected:
 
         void CopyPixelsFromBuffer(Buffer* srcBuffer);
@@ -64,6 +67,7 @@ namespace CE::Vulkan
 
 		//! Queue family index of the queue that this texture is used with the first time
 		int initialFamilyIndex = -1;
+		int curFamilyIndex = -1;
 
         VulkanDevice* device = nullptr;
         VkImage image = nullptr;
@@ -78,6 +82,7 @@ namespace CE::Vulkan
 
 		friend class RHI::FrameGraph;
 		friend class GraphicsCommandList;
+		friend class FrameGraphExecuter;
     };
     
     VkFormat RHIFormatToVkFormat(RHI::TextureFormat format);

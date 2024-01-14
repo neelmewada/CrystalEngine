@@ -15,6 +15,7 @@ namespace CE::Vulkan
 	class VulkanDescriptorPool;
 	class ShaderResourceManager;
 	class CommandBufferAllocator;
+	class RenderPassCache;
 
     class VulkanDevice
     {
@@ -153,6 +154,7 @@ namespace CE::Vulkan
         CommandQueue* primaryGraphicsQueue = nullptr;
         CommandQueue* presentQueue = nullptr;
 
+		RenderPassCache* renderPassCache = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
         VkCommandPool gfxCommandPool = nullptr;
 

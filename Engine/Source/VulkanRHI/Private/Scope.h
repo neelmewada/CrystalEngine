@@ -17,8 +17,6 @@ namespace CE::Vulkan
 	private:
 
 		void DestroySyncObjects();
-
-		void Execute(const FrameGraphExecuteRequest& executeRequest);
 		
 		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedSemaphores{};
 		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedFences{};

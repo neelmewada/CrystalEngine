@@ -11,6 +11,14 @@ namespace CE::RHI
 		AttachmentLoadStoreAction loadStoreAction{};
 	};
 
+	struct RenderAttachmentDescriptor
+	{
+		AttachmentID attachmentId{};
+		AttachmentLoadStoreAction loadStoreAction{};
+		ScopeAttachmentUsage usage{};
+		ScopeAttachmentAccess access{};
+	};
+
 	class CORERHI_API ScopeAttachment
 	{
 	public:

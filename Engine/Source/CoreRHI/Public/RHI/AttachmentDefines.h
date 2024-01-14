@@ -130,6 +130,8 @@ namespace CE::RHI
 		FIELD()
 		AttachmentStoreAction storeActionStencil = AttachmentStoreAction::Store;
     };
+
+
     
 } // namespace CE::RHI
 
