@@ -13,9 +13,4 @@ namespace CE::RHI
 		return ExecuteInternal(executeRequest);
 	}
 
-	bool FrameGraphExecuter::Compile(const FrameGraphCompileRequest& compileRequest)
-	{
-		return CompileInternal(compileRequest);
-	}
-
 } // namespace CE::RHI

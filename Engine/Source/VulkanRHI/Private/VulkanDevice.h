@@ -14,6 +14,7 @@ namespace CE::Vulkan
     class Texture;
 	class VulkanDescriptorPool;
 	class ShaderResourceManager;
+	class CommandBufferAllocator;
 
     class VulkanDevice
     {
@@ -51,6 +52,9 @@ namespace CE::Vulkan
         void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
         void SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
+		VkCommandPool AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, VkCommandBufferLevel level, u32 queueFamilyIndex);
+		void FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers);
+
         // - Getters -
 
 		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask);
@@ -60,6 +64,8 @@ namespace CE::Vulkan
 		{
 			return isUnifiedMemory;
 		}
+
+		inline CommandBufferAllocator* GetCommandAllocator() const { return commandAllocator; }
 
 		INLINE bool IsOffscreenOnly() const { return !surfaceSupported; }
 
@@ -143,6 +149,7 @@ namespace CE::Vulkan
         Array<CommandQueue*> presentQueues{};
 		HashMap<int, Array<CommandQueue*>> queuesByFamily{};
 
+		CommandBufferAllocator* commandAllocator = nullptr;
         CommandQueue* primaryGraphicsQueue = nullptr;
         CommandQueue* presentQueue = nullptr;
 

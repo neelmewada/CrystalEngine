@@ -57,10 +57,11 @@ namespace CE::Vulkan
 
 	FrameGraphCompiler::~FrameGraphCompiler()
 	{
-
+		DestroySyncObjects();
+		DestroyCommandLists();
 	}
 
-	void FrameGraphCompiler::CompileCrossQueueScopes(const FrameGraphCompileRequest& compileRequest)
+	void FrameGraphCompiler::CompileScopesInternal(const FrameGraphCompileRequest& compileRequest)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
         QueueAllocator queueAllocator{};
@@ -89,33 +90,160 @@ namespace CE::Vulkan
 			visitor(scope, trackNumber);
 			trackNumber++;
         }
-
-		// Compile individual scopes
-		for (auto scope : frameGraph->scopes)
-		{
-			scope->Compile(compileRequest);
-		}
 	}
 
 	void FrameGraphCompiler::CompileInternal(const FrameGraphCompileRequest& compileRequest)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 
-		CompileProducers(compileRequest, frameGraph->producers, nullptr);;
+		vkDeviceWaitIdle(device->GetHandle());
+		
+		// Compile sync objects for individual scopes
+		for (auto scope : frameGraph->scopes)
+		{
+			scope->Compile(compileRequest);
+		}
+
+		for (auto scope : frameGraph->producers)
+		{
+			CompileCrossQueueDependencies(compileRequest, {}, (Vulkan::Scope*)scope);
+		}
+
+		// ---------------------------
+		// Destroy old objects
+
+		DestroySyncObjects();
+		DestroyCommandLists();
+
+		// ----------------------------
+		// Create new objects
+
+		FrameGraph* frameGraph = compileRequest.frameGraph;
+		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
+		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
+		numFramesInFlight = compileRequest.numFramesInFlight;
+		imageCount = numFramesInFlight;
+
+		if (swapChain && presentingScope)
+		{
+			imageCount = swapChain->GetImageCount();
+			numFramesInFlight = Math::Min<u32>(imageCount - 1, numFramesInFlight);
+
+			for (int i = 0; i < numFramesInFlight; i++)
+			{
+				VkSemaphoreCreateInfo semaphoreCI{};
+				semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+				VkSemaphore semaphore = nullptr;
+				auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
+				if (result != VK_SUCCESS)
+				{
+					continue;
+				}
+
+				imageAcquiredSemaphores.Add(semaphore);
+
+				VkFenceCreateInfo fenceCI{};
+				fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+				fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+				VkFence fence = nullptr;
+				result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
+				if (result != VK_SUCCESS)
+				{
+					continue;
+				}
+
+				imageAcquiredFences.Add(fence);
+			}
+		}
+
+		for (int i = 0; i < imageCount; i++)
+		{
+			VkSemaphoreCreateInfo semaphoreCI{};
+			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+			VkSemaphore semaphore = nullptr;
+			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
+			graphExecutedSemaphores.Add(semaphore);
+
+			VkFenceCreateInfo fenceCI{};
+			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+			VkFence fence = nullptr;
+			vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
+			graphExecutedFences.Add(fence);
+
+			commandListsByImageIndex.Add({});
+
+			for (u32 familyIdx = 0; familyIdx < device->queueFamilyPropeties.GetSize(); familyIdx++)
+			{
+				VkCommandBuffer cmdBuffer = nullptr;
+				VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx);
+				CommandList* commandList = new Vulkan::CommandList(device, cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx, pool);
+				commandListsByImageIndex[i].Add(commandList);
+			}
+		}
+
 	}
 
-	void FrameGraphCompiler::CompileProducers(const FrameGraphCompileRequest& compileRequest, const Array<RHI::Scope*>& producers, Vulkan::Scope* current)
+    void FrameGraphCompiler::DestroySyncObjects()
+    {
+		for (VkSemaphore semaphore : imageAcquiredSemaphores)
+		{
+			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+		}
+		imageAcquiredSemaphores.Clear();
+
+		for (VkFence fence : imageAcquiredFences)
+		{
+			vkDestroyFence(device->GetHandle(), fence, nullptr);
+		}
+		imageAcquiredFences.Clear();
+
+		for (VkSemaphore semaphore : graphExecutedSemaphores)
+		{
+			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+		}
+		graphExecutedSemaphores.Clear();
+
+		for (VkFence fence : graphExecutedFences)
+		{
+			vkDestroyFence(device->GetHandle(), fence, nullptr);
+		}
+		graphExecutedFences.Clear();
+    }
+
+	void FrameGraphCompiler::DestroyCommandLists()
+	{
+		for (Array<CommandList*>& commandLists : commandListsByImageIndex)
+		{
+			for (CommandList* commandList : commandLists)
+			{
+				delete commandList;
+			}
+			commandLists.Clear();
+		}
+		commandListsByImageIndex.Clear();
+	}
+
+    //! If two scopes are executed one different queues and there's a dependency between them, then we
+	//! need to use a wait semaphore for it.
+    void FrameGraphCompiler::CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest, 
+		const Array<RHI::Scope*>& producers, Vulkan::Scope* current)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 		u32 numFramesInFlight = compileRequest.numFramesInFlight;
 
+		if (producers.IsEmpty()) // No need to wait on anything if there aren't any producers for this scope.
+			return;
+
 		for (RHI::Scope* rhiScope : producers)
 		{
 			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
-
+			
 
 			const auto& consumers = frameGraph->nodes[scope->GetId()].consumers;
-			CompileProducers(compileRequest, consumers, scope);
+			CompileCrossQueueDependencies(compileRequest, consumers, scope);
 		}
 	}
 

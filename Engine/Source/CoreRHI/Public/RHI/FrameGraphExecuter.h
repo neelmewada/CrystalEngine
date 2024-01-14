@@ -4,12 +4,12 @@ namespace CE::RHI
 {
 	class FrameGraph;
 	struct FrameGraphCompileRequest;
+	class FrameGraphCompiler;
 
 	struct FrameGraphExecuteRequest
 	{
 		FrameGraph* frameGraph = nullptr;
-
-		u32 currentImageIndex = 0;
+		FrameGraphCompiler* compiler = nullptr;
 	};
     
 	class CORERHI_API FrameGraphExecuter
@@ -19,14 +19,10 @@ namespace CE::RHI
 
 		bool Execute(const FrameGraphExecuteRequest& executeRequest);
 
-		bool Compile(const FrameGraphCompileRequest& compileRequest);
-
 	protected:
 		FrameGraphExecuter() = default;
 
 	private:
-
-		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) = 0;
 
 		virtual bool ExecuteInternal(const FrameGraphExecuteRequest& executeRequest) = 0;
 

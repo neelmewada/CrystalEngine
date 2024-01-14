@@ -19,8 +19,6 @@ namespace CE::RHI
 
 		// - Command List API -
 
-		virtual void Begin() = 0;
-		virtual void End() = 0;
 
 	};
 

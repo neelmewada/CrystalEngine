@@ -51,6 +51,8 @@ namespace CE::Vulkan
 
 		srgManager = new ShaderResourceManager(this);
 
+		commandAllocator = new CommandBufferAllocator(this);
+
 		isInitialized = true;
 
 		CE_LOG(Info, All, "Vulkan device initialized");
@@ -59,6 +61,9 @@ namespace CE::Vulkan
 	void VulkanDevice::PreShutdown()
 	{
 		isInitialized = false;
+
+		delete commandAllocator;
+		commandAllocator = nullptr;
 
 		delete srgManager;
 		srgManager = nullptr;
@@ -782,6 +787,16 @@ namespace CE::Vulkan
 
         vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
     }
+
+	VkCommandPool VulkanDevice::AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, VkCommandBufferLevel level, u32 queueFamilyIndex)
+	{
+		return commandAllocator->Allocate(count, outBuffers, level, queueFamilyIndex);
+	}
+
+	void VulkanDevice::FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers)
+	{
+
+	}
 
 	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
 	{

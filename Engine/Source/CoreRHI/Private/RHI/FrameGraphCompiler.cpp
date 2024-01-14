@@ -5,14 +5,19 @@ namespace CE::RHI
 
 	void FrameGraphCompiler::Compile(const FrameGraphCompileRequest& compileRequest)
 	{
-		// 1. Compile cross queue scope
-		CompileCrossQueueScopes(compileRequest);
+		// 1. Compile scope
+		CompileScopes(compileRequest);
 
 		// 2. Compile transient attachments
 		CompileTransientAttachments(compileRequest);
 
 		// Platform specific compilation
 		CompileInternal(compileRequest);
+	}
+
+	void FrameGraphCompiler::CompileScopes(const FrameGraphCompileRequest& compileRequest)
+	{
+		CompileScopesInternal(compileRequest);
 	}
 
 	void FrameGraphCompiler::CompileTransientAttachments(const FrameGraphCompileRequest& compileRequest)

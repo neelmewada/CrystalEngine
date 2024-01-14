@@ -2,7 +2,20 @@
 
 namespace CE::Vulkan
 {
+	CommandList::CommandList(VulkanDevice* device, VkCommandBuffer commandBuffer, VkCommandBufferLevel level, u32 queueFamilyIndex, VkCommandPool pool)
+		: device(device)
+		, commandBuffer(commandBuffer)
+		, level(level)
+		, queueFamilyIndex(queueFamilyIndex)
+		, pool(pool)
+	{
+		
+	}
 
+	CommandList::~CommandList()
+	{
+		vkFreeCommandBuffers(device->GetHandle(), pool, 1, &commandBuffer);
+	}
 
     /*
 	GraphicsCommandList::GraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, Viewport* viewport)

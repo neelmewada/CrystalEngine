@@ -29,6 +29,7 @@ namespace CE::Vulkan
 			numFramesInFlight = imageCount - 1;
 		}
 
+		// Render Finished semaphores & fences
 		for (int i = 0; i < imageCount; i++)
 		{
 			VkSemaphoreCreateInfo semaphoreCI{};

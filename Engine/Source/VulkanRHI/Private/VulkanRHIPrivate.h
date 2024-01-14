@@ -11,7 +11,8 @@
 #include "VulkanDevice.h"
 #include "SwapChain.h"
 #include "Viewport.h"
-#include "VulkanRenderPass.h"
+#include "RenderPass.h"
+#include "RenderPassCache.h"
 
 #include "DescriptorPool.h"
 #include "ShaderResourceGroup.h"
@@ -28,6 +29,7 @@
 #include "SwapChain.h"
 #include "ShaderResourceGroup.h"
 #include "CommandList.h"
+#include "CommandBufferAllocator.h"
 
 // Frame
 #include "Scope.h"

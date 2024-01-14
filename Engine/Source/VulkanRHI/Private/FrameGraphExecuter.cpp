@@ -16,6 +16,7 @@ namespace CE::Vulkan
 	bool FrameGraphExecuter::ExecuteInternal(const FrameGraphExecuteRequest& executeRequest)
 	{
 		FrameGraph* frameGraph = executeRequest.frameGraph;
+		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 
@@ -26,80 +27,69 @@ namespace CE::Vulkan
 		if (swapChain && presentingScope)
 		{
 			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max, 
-				imageAcquiredSemaphores[currentSubmissionIndex],
-				imageAcquiredFence[currentSubmissionIndex], &swapChain->currentImageIndex);
-		}
-        
-        
+				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
+				compiler->imageAcquiredFences[currentSubmissionIndex], &swapChain->currentImageIndex);
 
-		return true;
-	}
-
-	bool FrameGraphExecuter::CompileInternal(const FrameGraphCompileRequest& compileRequest)
-	{
-		DestroySyncObjects();
-
-		FrameGraph* frameGraph = compileRequest.frameGraph;
-		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
-		u32 numFramesInFlight = compileRequest.numFramesInFlight;
-
-		if (swapChain && presentingScope)
-		{
-			u32 imageCount = swapChain->GetImageCount();
-			numFramesInFlight = Math::Min<u32>(imageCount - 1, numFramesInFlight);
-
-			for (int i = 0; i < numFramesInFlight; i++)
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
-				VkSemaphoreCreateInfo semaphoreCI{};
-				semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-				
-				VkSemaphore semaphore = nullptr;
-				auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
-				if (result != VK_SUCCESS)
-				{
-					continue;
-				}
-
-				imageAcquiredSemaphores.Add(semaphore);
-
-				VkFenceCreateInfo fenceCI{};
-				fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-				fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-				VkFence fence = nullptr;
-				result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
-				if (result != VK_SUCCESS)
-				{
-					continue;
-				}
-				
-				imageAcquiredFence.Add(fence);
+				swapChain->RebuildSwapChain();
+				return false; // TODO: Try acquiring image again...
 			}
+
+			currentImageIndex = swapChain->currentImageIndex;
 		}
-
-		return true;
-	}
-
-	void FrameGraphExecuter::DestroySyncObjects()
-	{
-		for (VkSemaphore semaphore : imageAcquiredSemaphores)
+		else
 		{
-			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+			currentImageIndex = currentSubmissionIndex;
 		}
-		imageAcquiredSemaphores.Clear();
 
-		for (VkFence fence : imageAcquiredFence)
+		bool success = true;
+        
+		for (auto rhiScope : frameGraph->producers)
 		{
-			vkDestroyFence(device->GetHandle(), fence, nullptr);
+			success = ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope);
 		}
-		imageAcquiredFence.Clear();
+
+		return success && result == VK_SUCCESS;
 	}
 
 	bool FrameGraphExecuter::ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope)
 	{
+		FrameGraph* frameGraph = executeRequest.frameGraph;
+		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
+		//Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
+		//auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
+		
+		const RHI::FrameGraph::GraphNode& graphNode = frameGraph->nodes[scope->id];
+		
+		constexpr u64 u64Max = NumericLimits<u64>::Max();
+		VkResult result = VK_SUCCESS;
 
-		return true;
+		// Wait for rendering from earlier submission to finish.
+		// We cannot record new commands into a command buffer that is currently being executed.
+		result = vkWaitForFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex], VK_TRUE, u64Max);
+
+		// Manually reset (close) the fence. i.e. put it in unsignalled state
+		result = vkResetFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex]);
+		
+		u32 familyIndex = scope->queue->GetFamilyIndex();
+		CommandList* commandList = compiler->commandListsByImageIndex[currentImageIndex][familyIndex];
+
+		VkCommandBufferBeginInfo cmdBeginInfo{};
+		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		//cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(commandList->commandBuffer, &cmdBeginInfo);
+		{
+
+		}
+		vkEndCommandBuffer(commandList->commandBuffer);
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		
+
+		return result == VK_SUCCESS;
 	}
     
 } // namespace CE::Vulkan

@@ -26,9 +26,11 @@ namespace CE::RHI
 
 	protected:
 
+		void CompileScopes(const FrameGraphCompileRequest& compileRequest);
+
 		void CompileTransientAttachments(const FrameGraphCompileRequest& compileRequest);
 
-		virtual void CompileCrossQueueScopes(const FrameGraphCompileRequest& compileRequest) = 0;
+		virtual void CompileScopesInternal(const FrameGraphCompileRequest& compileRequest) = 0;
 
 		virtual void CompileInternal(const FrameGraphCompileRequest& compileRequest) = 0;
 
