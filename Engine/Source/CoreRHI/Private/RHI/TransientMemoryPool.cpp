@@ -38,7 +38,8 @@ namespace CE::RHI
 			}
 
 			*bufferPoolRecreated = true;
-			bufferPool = RHI::gDynamicRHI->AllocateMemoryHeap(bufferHeapDesc);
+			if (bufferHeapDesc.allocationSize > 0)
+				bufferPool = RHI::gDynamicRHI->AllocateMemoryHeap(bufferHeapDesc);
 		}
 
 		MemoryHeapDescriptor imageHeapDesc{};
@@ -62,7 +63,9 @@ namespace CE::RHI
 			}
 
 			*imagePoolRecreated = true;
-			imagePool = RHI::gDynamicRHI->AllocateMemoryHeap(imageHeapDesc);
+
+			if (imageHeapDesc.allocationSize > 0)
+				imagePool = RHI::gDynamicRHI->AllocateMemoryHeap(imageHeapDesc);
 		}
     }
 

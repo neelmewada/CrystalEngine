@@ -18,6 +18,8 @@ namespace CE::RHI
 		virtual bool IsBufferAttachment() const override final { return false; }
 		virtual bool IsImageAttachment() const override final { return true; }
 
+		virtual bool IsSwapChainAttachment() const { return false; }
+
 		inline const ImageDescriptor& GetImageDescriptor() const { return descriptor; }
         
 	protected:

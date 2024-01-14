@@ -28,6 +28,16 @@ namespace CE::RHI
 
 		inline const Name& GetId() const { return id; }
 
+		inline FrameAttachment* GetFrameAttachment() const { return attachment; }
+
+		inline ScopeAttachmentUsage GetUsage() const { return usage; }
+
+		inline ScopeAttachmentAccess GetAccess() const { return access; }
+
+		inline const AttachmentLoadStoreAction& GetLoadStoreAction() const { return loadStoreAction; }
+
+		inline Scope* GetOwner() const { return scope; }
+
 	protected:
 
 		AttachmentID id{};

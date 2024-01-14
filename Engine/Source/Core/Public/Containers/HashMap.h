@@ -15,18 +15,18 @@ namespace CE
     {
     public:
 
-        Pair() : First({}), Second({})
+        Pair() : first({}), second({})
         {
 
         }
 
-        Pair(KeyType key, ValueType value) : First(key), Second(value)
+        Pair(KeyType key, ValueType value) : first(key), second(value)
         {
 
         }
 
-        KeyType First;
-        ValueType Second;
+        KeyType first;
+        ValueType second;
     };
 
     
@@ -91,7 +91,7 @@ namespace CE
 
         inline void Add(const Pair<KeyType, ValueType>& pair)
         {
-            Impl.insert({ pair.First, pair.Second });
+            Impl.insert({ pair.first, pair.second });
         }
 
 		inline void AddRange(const HashMap<KeyType, ValueType>& from)

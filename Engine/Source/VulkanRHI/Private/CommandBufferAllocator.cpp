@@ -57,6 +57,7 @@ namespace CE::Vulkan
 			return;
 		}
 
+		context = commandAllocatorContexts.Top();
 		valid = true;
 	}
 
@@ -69,6 +70,7 @@ namespace CE::Vulkan
 		commandPools.Clear();
 
 		valid = false;
+		context = {};
 	}
 
 	VkCommandPool CommandBufferAllocator::Allocator::GetOrCreate(u32 queueFamilyIndex)

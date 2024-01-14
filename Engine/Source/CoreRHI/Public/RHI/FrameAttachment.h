@@ -17,6 +17,8 @@ namespace CE::RHI
 		virtual bool IsImageAttachment() const = 0;
 
 		inline AttachmentID GetId() const { return attachmentId; }
+
+		inline AttachmentLifetimeType GetLifetimeType() const { return lifetime; }
         
     protected:
         

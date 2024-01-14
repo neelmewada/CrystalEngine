@@ -140,16 +140,26 @@ namespace CE::RHI
 
 		for (auto& [scope, dependencies] : nodeDependencies)
 		{
-			for (auto dependent : dependencies)
+			for (RHI::Scope* dependent : dependencies)
 			{
 				if (!nodes.KeyExists(dependent->id))
 					nodes.Add(dependent->id, dependent);
 				nodes[dependent->id].consumers.Add(scope);
+				dependent->consumers.Add(scope);
 
 				if (!nodes.KeyExists(scope->id))
 					nodes.Add(scope->id, scope);
 				nodes[scope->id].producers.Add(dependent);
+				scope->producers.Add(dependent);
 			}
+		}
+
+		for (Scope* scope : scopes)
+		{
+			if (scope->producers.GetSize() == 1 && !scope->producers[0]->PresentsSwapChain())
+				scope->prev = scope->producers[0];
+			if (scope->consumers.GetSize() == 1 && !scope->PresentsSwapChain())
+				scope->next = scope->consumers[0];
 		}
 	}
 

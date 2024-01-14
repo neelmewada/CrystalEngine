@@ -29,9 +29,13 @@ namespace CE::Vulkan
 			numFramesInFlight = imageCount - 1;
 		}
 
+		waitSemaphores.Clear();
+
 		// Render Finished semaphores & fences
 		for (int i = 0; i < imageCount; i++)
 		{
+			waitSemaphores.Add({});
+
 			VkSemaphoreCreateInfo semaphoreCI{};
 			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -41,7 +45,6 @@ namespace CE::Vulkan
 			{
 				continue;
 			}
-
 			renderFinishedSemaphores.Add(semaphore);
 
 			VkFenceCreateInfo fenceCI{};
@@ -62,6 +65,8 @@ namespace CE::Vulkan
 		{
 			// TODO: RenderPass with multiple subpasses
 		}
+
+		return true;
 	}
 
 	void Scope::DestroySyncObjects()

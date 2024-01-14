@@ -22,7 +22,7 @@ namespace CE::Vulkan
 		void DestroyCommandLists();
 
 		void CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest, 
-			const Array<RHI::Scope*>& producers, Vulkan::Scope* current = nullptr);
+			Vulkan::Scope* current = nullptr);
 
 		VulkanDevice* device = nullptr;
 

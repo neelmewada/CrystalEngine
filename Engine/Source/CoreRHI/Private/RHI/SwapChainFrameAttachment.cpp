@@ -5,6 +5,7 @@ namespace CE::RHI
 
     SwapChainFrameAttachment::SwapChainFrameAttachment(AttachmentID id, SwapChain* swapChain)
 		: ImageFrameAttachment(id, swapChain->GetCurrentImage())
+		, swapChain(swapChain)
     {
 
     }

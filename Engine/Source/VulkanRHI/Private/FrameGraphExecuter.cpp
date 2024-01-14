@@ -26,10 +26,12 @@ namespace CE::Vulkan
 
 		if (swapChain && presentingScope)
 		{
+			result = vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex]);
+
 			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max, 
 				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
 				compiler->imageAcquiredFences[currentSubmissionIndex], &swapChain->currentImageIndex);
-
+			
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
 				swapChain->RebuildSwapChain();
@@ -57,8 +59,9 @@ namespace CE::Vulkan
 	{
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
-		//Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		//auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
+		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
+		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
+		bool presentRequired = false;
 		
 		const RHI::FrameGraph::GraphNode& graphNode = frameGraph->nodes[scope->id];
 		
@@ -75,19 +78,56 @@ namespace CE::Vulkan
 		u32 familyIndex = scope->queue->GetFamilyIndex();
 		CommandList* commandList = compiler->commandListsByImageIndex[currentImageIndex][familyIndex];
 
+		Array<Scope*> scopeChain{};
+		auto scopeInChain = scope;
+		while (scopeInChain != nullptr)
+		{
+			scopeChain.Add(scopeInChain);
+			scopeInChain = (Vulkan::Scope*)scopeInChain->next;
+		}
+
+		if (scopeChain.Top()->PresentsSwapChain())
+			presentRequired = true;
+
 		VkCommandBufferBeginInfo cmdBeginInfo{};
 		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		//cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
 		vkBeginCommandBuffer(commandList->commandBuffer, &cmdBeginInfo);
 		{
-
+			
 		}
 		vkEndCommandBuffer(commandList->commandBuffer);
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize();
+		if (submitInfo.waitSemaphoreCount > 0)
+		{
+			submitInfo.pWaitSemaphores = scope->waitSemaphores[currentImageIndex].GetData();
+			submitInfo.pWaitDstStageMask = scope->waitSemaphoreStageFlags.GetData();
+		}
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
+		result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+
+		if (presentRequired)
+		{
+			VkSwapchainKHR swapchainKhr = swapChain->GetHandle();
+
+			VkPresentInfoKHR presentInfo{};
+			presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+			presentInfo.swapchainCount = 1;
+			presentInfo.pSwapchains = &swapchainKhr;
+			presentInfo.pImageIndices = &currentImageIndex;
+			presentInfo.waitSemaphoreCount = 1;
+			presentInfo.pWaitSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
+
+			result = vkQueuePresentKHR(scope->queue->GetHandle(), &presentInfo);
+		}
 
 		return result == VK_SUCCESS;
 	}

@@ -123,6 +123,17 @@ namespace CE
 			count = 0;
 		}
 
+		inline void Resize(u32 newSize)
+		{
+			u32 oldCount = count;
+			count = std::min(newSize, impl.size());
+			
+			for (int i = oldCount; i < count; i++)
+			{
+				impl[i] = {};
+			}
+		}
+
 		inline void Add(const T& item)
 		{
 			if (count >= GetCapacity())

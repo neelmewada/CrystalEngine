@@ -74,5 +74,27 @@ namespace CE::RHI
 		}
 		return false;
 	}
+
+	HashMap<ScopeAttachment*, ScopeAttachment*> Scope::FindCommonFrameAttachments(Scope* from, Scope* to)
+	{
+		if (from == nullptr || to == nullptr)
+			return {};
+
+		HashMap<ScopeAttachment*, ScopeAttachment*> result{};
+
+		for (int i = 0; i < from->attachments.GetSize(); i++)
+		{
+			for (int j = 0; j < to->attachments.GetSize(); j++)
+			{
+				// Matching frame attachments found
+				if (from->attachments[i]->attachment == to->attachments[j]->attachment)
+				{
+					result[from->attachments[i]] = to->attachments[j];
+				}
+			}
+		}
+
+		return result;
+	}
     
 } // namespace CE::RHI

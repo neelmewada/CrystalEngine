@@ -54,8 +54,8 @@ namespace CE::RHI
 		IndexBufferView indexBufferView{};
         DrawListMask drawListMask{};
 
-		FixedArray<ScissorState, Limits::Pipeline::MaxBoundAttachmentCount> scissors{};
-		FixedArray<ViewportState, Limits::Pipeline::MaxBoundAttachmentCount> viewports{};
+		FixedArray<ScissorState, Limits::Pipeline::MaxColorAttachmentCount> scissors{};
+		FixedArray<ViewportState, Limits::Pipeline::MaxColorAttachmentCount> viewports{};
 		StaticArray<ShaderResourceGroup*, Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroups{};
 		u32 shaderResourceGroupCount = 0;
 		StaticArray<DrawItemRequest, DrawItemCountMax> drawRequests{};

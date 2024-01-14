@@ -55,9 +55,11 @@ namespace CE::RHI
 
 		bool UsesAttachment(AttachmentID attachmentId);
 
+		static HashMap<ScopeAttachment*, ScopeAttachment*> FindCommonFrameAttachments(Scope* from, Scope* to);
+
 	protected:
 
-		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) {}
+		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) { return false; }
 
 		//! @brief The frame graph that owns this scope.
 		FrameGraph* frameGraph = nullptr;
@@ -69,6 +71,12 @@ namespace CE::RHI
 
 		Scope* prevSubPass = nullptr;
 		Scope* nextSubPass = nullptr;
+
+		Array<Scope*> producers{};
+		Array<Scope*> consumers{};
+
+		Scope* prev = nullptr;
+		Scope* next = nullptr;
 
 		DrawList drawList{};
 		ThreadLocalContext<DrawList> threadDrawLists{};

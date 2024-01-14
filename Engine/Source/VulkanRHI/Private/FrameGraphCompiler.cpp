@@ -1,4 +1,3 @@
-#include "FrameGraphCompiler.h"
 #include "VulkanRHIPrivate.h"
 
 namespace CE::Vulkan
@@ -106,7 +105,7 @@ namespace CE::Vulkan
 
 		for (auto scope : frameGraph->producers)
 		{
-			CompileCrossQueueDependencies(compileRequest, {}, (Vulkan::Scope*)scope);
+			CompileCrossQueueDependencies(compileRequest, (Vulkan::Scope*)scope);
 		}
 
 		// ---------------------------
@@ -118,7 +117,6 @@ namespace CE::Vulkan
 		// ----------------------------
 		// Create new objects
 
-		FrameGraph* frameGraph = compileRequest.frameGraph;
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 		numFramesInFlight = compileRequest.numFramesInFlight;
@@ -228,28 +226,48 @@ namespace CE::Vulkan
 
     //! If two scopes are executed one different queues and there's a dependency between them, then we
 	//! need to use a wait semaphore for it.
-    void FrameGraphCompiler::CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest, 
-		const Array<RHI::Scope*>& producers, Vulkan::Scope* current)
+    void FrameGraphCompiler::CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
-		u32 numFramesInFlight = compileRequest.numFramesInFlight;
 
-		const auto& consumers = frameGraph->nodes[current->GetId()].consumers;
-		for (RHI::Scope* consumerScope : consumers)
-		{
-
-		}
-
-		if (producers.IsEmpty()) // No need to wait on anything if there aren't any producers for this scope.
-			return;
-
+		const auto& producers = current->producers;
+		
 		for (RHI::Scope* rhiScope : producers)
 		{
 			Vulkan::Scope* producerScope = (Vulkan::Scope*)rhiScope;
-			
 
-			
+			HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerScope, current);
+
+			for (auto [from, to] : commonAttachments)
+			{
+				VkPipelineStageFlags flags{};
+
+				if (to->GetUsage() == RHI::ScopeAttachmentUsage::RenderTarget)
+				{
+					flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				}
+				else if (to->GetUsage() == RHI::ScopeAttachmentUsage::DepthStencil)
+				{
+					flags = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+				}
+				else if (to->GetUsage() == RHI::ScopeAttachmentUsage::SubpassInput || to->GetUsage() == RHI::ScopeAttachmentUsage::Shader)
+				{
+					flags = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+				}
+				else
+				{
+					flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+				}
+
+				for (int i = 0; i < imageCount; i++)
+				{
+					current->waitSemaphores[i].Add(producerScope->renderFinishedSemaphores[i]);
+				}
+				current->waitSemaphoreStageFlags.Add(flags);
+			}
 		}
+
+
 	}
 
 } // namespace CE::Vulkan

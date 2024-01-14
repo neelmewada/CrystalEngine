@@ -38,6 +38,9 @@ namespace CE::RHI
 		for (int i = 0; i < attachments.GetSize(); i++)
 		{
 			auto attachment = attachments[i];
+			if (attachment->GetLifetimeType() != RHI::AttachmentLifetimeType::Transient)
+				continue;
+
 			// Reset the resource pointer, we will be recreating the buffer/image anyway.
 			attachment->SetResource(nullptr);
 
@@ -88,6 +91,8 @@ namespace CE::RHI
 		for (int i = 0; i < attachments.GetSize(); i++)
 		{
 			auto attachment = attachments[i];
+			if (attachment->GetLifetimeType() != RHI::AttachmentLifetimeType::Transient)
+				continue;
 
 			if (attachment->IsBufferAttachment())
 			{

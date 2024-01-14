@@ -8,12 +8,12 @@ namespace CE::Vulkan
 	{
 		struct SubPassDescriptor
 		{
-			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxBoundAttachmentCount> colorAttachmentRefs{};
+			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount> colorAttachmentRefs{};
 			FixedArray<VkAttachmentReference, 1> depthAttachmentRef{};
-			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxBoundAttachmentCount> inputAttachmentRefs{};
+			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount> inputAttachmentRefs{};
 		};
 
-		FixedArray<VkAttachmentDescription, RHI::Limits::Pipeline::MaxBoundAttachmentCount> attachments{};
+		FixedArray<VkAttachmentDescription, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 		FixedArray<SubPassDescriptor, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
 	};
 

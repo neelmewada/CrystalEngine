@@ -23,6 +23,9 @@ namespace CE::Vulkan
 		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedSemaphores{};
 		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedFences{};
 
+		FixedArray<List<VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> waitSemaphores{};
+		List<VkPipelineStageFlags> waitSemaphoreStageFlags{};
+
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;
         

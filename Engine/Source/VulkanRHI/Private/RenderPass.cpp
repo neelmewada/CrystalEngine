@@ -1,43 +1,16 @@
 
-#include "VulkanRenderPass.h"
+#include "VulkanRHIPrivate.h"
 
 namespace CE::Vulkan
 {
 	RenderPass::RenderPass(VulkanDevice* device, const RenderPassDescriptor& desc)
 		: device(device)
 	{
-		FixedArray<VkSubpassDescription, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
-		FixedArray<VkAttachmentDescription, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
-		Array<VkSubpassDependency> dependencies{};
-
-		for (const auto& subPassDesc : desc.subpasses)
-		{
-			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
-
-			subpasses.Add({});
-			VkSubpassDescription& subpass = subpasses.GetLast();
-			subpass.flags = 0;
-
-			subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-			for (int i = 0; i < desc.attachments.GetSize(); i++)
-			{
-
-			}
-		}
+		
 
 		VkRenderPassCreateInfo renderPassCI{};
 		renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCI.flags = 0;
-		
-		renderPassCI.subpassCount = subpasses.GetSize();
-		renderPassCI.pSubpasses = subpasses.GetData();
-
-		renderPassCI.dependencyCount = dependencies.GetSize();
-		renderPassCI.pDependencies = dependencies.GetData();
-
-		renderPassCI.attachmentCount = attachments.GetSize();
-		renderPassCI.pAttachments = attachments.GetData();
 
 
 	}
