@@ -13,6 +13,7 @@ namespace CE::RHI
 		, attachment(attachment)
 		, usage(usage), access(access)
 		, loadStoreAction(descriptor.loadStoreAction)
+		, multisampleState(descriptor.multisampleState)
 	{
 	}
 

@@ -9,6 +9,7 @@ namespace CE::RHI
 	{
 		AttachmentID attachmentId{};
 		AttachmentLoadStoreAction loadStoreAction{};
+		MultisampleState multisampleState{};
 	};
 
 	struct RenderAttachmentDescriptor
@@ -46,6 +47,8 @@ namespace CE::RHI
 
 		inline Scope* GetOwner() const { return scope; }
 
+		inline const MultisampleState& GetMultisampleState() const { return multisampleState; }
+
 	protected:
 
 		AttachmentID id{};
@@ -59,6 +62,8 @@ namespace CE::RHI
 		ScopeAttachmentAccess access{};
 
 		AttachmentLoadStoreAction loadStoreAction{};
+
+		MultisampleState multisampleState{};
 
 		friend class Scope;
 		friend class FrameGraph;

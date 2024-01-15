@@ -158,7 +158,7 @@ namespace CE::RHI
 		{
 			if (scope->producers.GetSize() == 1 && !scope->producers[0]->PresentsSwapChain())
 				scope->prev = scope->producers[0];
-			if (scope->consumers.GetSize() == 1 && !scope->PresentsSwapChain())
+			if (scope->consumers.GetSize() == 1 && !scope->PresentsSwapChain() && scope->consumers[0]->producers.GetSize() == 1)
 				scope->next = scope->consumers[0];
 		}
 	}

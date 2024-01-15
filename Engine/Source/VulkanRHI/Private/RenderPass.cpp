@@ -135,14 +135,17 @@ namespace CE::Vulkan
 				cur = (Vulkan::Scope*)cur->nextSubPass;
 			}
 		}
-		else
+		else // Single subpass
 		{
 			HashMap<AttachmentID, FrameAttachment*> frameAttachments{};
 			
-			for (auto attachment : pass->attachments)
+			for (RHI::ScopeAttachment* attachment : pass->attachments)
 			{
 				auto frameAttachment = attachment->GetFrameAttachment();
 				if (!frameAttachment->IsImageAttachment())
+					continue;
+				if (attachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
+					attachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
 					continue;
 				if (!frameAttachments.KeyExists(frameAttachment->GetId()))
 				{
@@ -161,19 +164,67 @@ namespace CE::Vulkan
 			dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
-			for (auto [id, frameAttachment] : frameAttachments)
+			outDescriptor.dependencies.Add(dependency);
+
+			SubPassDescriptor subpass{};
+			int i = 0;
+
+			for (auto scopeAttachment : pass->attachments)
 			{
-				ImageFrameAttachment* imageAttachment = (ImageFrameAttachment*)frameAttachment;
-				const RHI::ImageDescriptor& imageDesc = imageAttachment->GetImageDescriptor();
+				if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+					!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
+					continue;
+				if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
+					scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
+					continue;
+				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
+				ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+				RHI::Format format = imageFrameAttachment->GetImageDescriptor().format;
 
 				AttachmentBinding attachmentBinding{};
-				
+				attachmentBinding.format = format;
+				attachmentBinding.loadStoreAction = scopeAttachment->GetLoadStoreAction();
+				attachmentBinding.multisampleState = scopeAttachment->GetMultisampleState();
+
+				SubPassAttachment attachmentRef{};
+
+				switch (scopeAttachment->GetUsage())
+				{
+				case RHI::ScopeAttachmentUsage::DepthStencil:
+					attachmentRef.attachmentIndex = i++;
+					if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+					{
+						attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+						attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+						attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+					}
+					else
+					{
+						attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+						attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+						attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+					}
+					subpass.depthStencilAttachment.Add(attachmentRef);
+					break;
+				case RHI::ScopeAttachmentUsage::RenderTarget:
+					attachmentRef.attachmentIndex = i++;
+					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+					attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					break;
+				case RHI::ScopeAttachmentUsage::SubpassInput:
+					attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					break;
+				case RHI::ScopeAttachmentUsage::Resolve:
+					attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+					attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					break;
+				}
 				
 				outDescriptor.attachments.Add(attachmentBinding);
-				attachmentBindingsById[id] = &outDescriptor.attachments.GetLast();
+				attachmentBindingsById[scopeAttachment->GetId()] = &outDescriptor.attachments.GetLast();
 			}
-
-			outDescriptor.dependencies.Add(dependency);
 		}
 	}
     
