@@ -12,15 +12,28 @@ namespace CE::RHI
 	FrameAttachment::~FrameAttachment()
 	{
         // Destroy transient resource
-		if (lifetime == RHI::AttachmentLifetimeType::Transient && resource)
+		if (lifetime == RHI::AttachmentLifetimeType::Transient)
 		{
-			delete resource;
+			for (int i = 0; i < resources.GetSize(); i++)
+			{
+				if (resources[i])
+					delete resources[i];
+				resources[i] = nullptr;
+			}
 		}
 	}
 
 	void FrameAttachment::SetResource(RHIResource* resource)
 	{
-		this->resource = resource;
+		for (int i = 0; i < resources.GetSize(); i++)
+		{
+			resources[i] = resource;
+		}
+	}
+
+	void FrameAttachment::SetResource(u32 index, RHIResource* resource)
+	{
+		resources[index] = resource;
 	}
     
 } // namespace CE::RHI

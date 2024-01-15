@@ -2,6 +2,22 @@
 
 #include "VulkanRHIPrivate.h"
 
+namespace CE
+{
+	template<>
+	inline SIZE_T GetHash<VkSubpassDependency>(const VkSubpassDependency& value)
+	{
+		SIZE_T hash = GetHash(value.srcSubpass);
+		CombineHash(hash, value.dstSubpass);
+		CombineHash(hash, value.srcStageMask);
+		CombineHash(hash, value.dstStageMask);
+		CombineHash(hash, value.srcAccessMask);
+		CombineHash(hash, value.dstAccessMask);
+		CombineHash(hash, value.dependencyFlags);
+		return hash;
+	}
+}
+
 namespace CE::Vulkan
 {
 
@@ -16,6 +32,8 @@ namespace CE::Vulkan
 			VkImageLayout initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			VkImageLayout finalLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			RHI::MultisampleState multisampleState{};
+
+			SIZE_T GetHash() const;
 		};
 
 		struct SubPassAttachment
@@ -24,6 +42,8 @@ namespace CE::Vulkan
 			VkImageLayout imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 			inline bool IsValid() const { return attachmentIndex != u32(-1); }
+
+			SIZE_T GetHash() const;
 		};
 
 		struct SubPassDescriptor
@@ -33,6 +53,8 @@ namespace CE::Vulkan
 			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> subpassInputAttachments{};
 			FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount> preserveAttachments{};
 			FixedArray<SubPassAttachment, 1> depthStencilAttachment{};
+
+			SIZE_T GetHash() const;
 		};
 
 		struct Descriptor
@@ -40,10 +62,16 @@ namespace CE::Vulkan
 			FixedArray<AttachmentBinding, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 			FixedArray<SubPassDescriptor, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
 			Array<VkSubpassDependency> dependencies{};
+
+			SIZE_T GetHash() const;
 		};
 
 		RenderPass(VulkanDevice* device, const Descriptor& desc);
 		virtual ~RenderPass();
+
+		static void BuildDescriptor(Scope* pass, Descriptor& outDescriptor);
+
+		inline const Descriptor& GetDescriptor() const { return desc; }
 		
 	private:
 		VkRenderPass renderPass = nullptr;

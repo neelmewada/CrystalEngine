@@ -34,7 +34,7 @@ namespace CE::RHI
 		virtual bool IsBufferAttachment() const = 0;
 		virtual bool IsImageAttachment() const = 0;
 
-		inline const Name& GetId() const { return id; }
+		inline const AttachmentID& GetId() const { return id; }
 
 		inline FrameAttachment* GetFrameAttachment() const { return attachment; }
 

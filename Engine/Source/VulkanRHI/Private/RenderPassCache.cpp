@@ -11,7 +11,24 @@ namespace CE::Vulkan
 
     RenderPassCache::~RenderPassCache()
     {
-
+		for (auto [hash, renderPass] : renderPassCache)
+		{
+			delete renderPass;
+		}
+		renderPassCache.Clear();
     }
+
+	RenderPass* RenderPassCache::FindOrCreate(const RenderPass::Descriptor& desc)
+	{
+		SIZE_T hash = desc.GetHash();
+		if (hash == 0)
+			return nullptr;
+		if (renderPassCache[hash] != nullptr)
+			return renderPassCache[hash];
+
+		RenderPass* renderPass = new RenderPass(device, desc);
+		renderPassCache[hash] = renderPass;
+		return renderPass;
+	}
 
 } // namespace CE::Vulkan

@@ -26,9 +26,11 @@ namespace CE::Vulkan
 
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;
+		RenderPass* renderPass = nullptr;
         
 		friend class FrameGraphCompiler;
 		friend class FrameGraphExecuter;
+		friend class RenderPass;
 	};
     
 } // namespace CE::Vulkan

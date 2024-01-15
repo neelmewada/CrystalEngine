@@ -102,6 +102,8 @@ namespace CE::Vulkan
 			return memoryProperties;
 		}
 
+		INLINE RenderPassCache* GetRenderPassCache() const { return renderPassCache; }
+
 		const Array<RHI::Format>& GetAvailableDepthStencilFormats();
 
     protected:

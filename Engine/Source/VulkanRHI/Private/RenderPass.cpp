@@ -8,8 +8,6 @@ namespace CE::Vulkan
 		: device(device)
 		, desc(descriptor)
 	{
-
-
 		VkRenderPassCreateInfo renderPassCI{};
 		renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassCI.flags = 0;
@@ -96,6 +94,19 @@ namespace CE::Vulkan
 
 			subpasses.Add(subpass);
 		}
+
+		renderPassCI.subpassCount = subpasses.GetSize();
+		renderPassCI.pSubpasses = subpasses.GetData();
+
+		renderPassCI.dependencyCount = desc.dependencies.GetSize();
+		if (desc.dependencies.NonEmpty())
+			renderPassCI.pDependencies = desc.dependencies.GetData();
+
+		auto result = vkCreateRenderPass(device->GetHandle(), &renderPassCI, nullptr, &renderPass);
+		if (result != VK_SUCCESS)
+		{
+			return;
+		}
 	}
 
 	RenderPass::~RenderPass()
@@ -103,6 +114,66 @@ namespace CE::Vulkan
 		if (renderPass != nullptr)
 		{
 			vkDestroyRenderPass(device->GetHandle(), renderPass, nullptr);
+			renderPass = nullptr;
+		}
+	}
+
+	void RenderPass::BuildDescriptor(Scope* pass, Descriptor& outDescriptor)
+	{
+		outDescriptor = {};
+		if (pass == nullptr)
+			return;
+
+		// Multiple subpasses
+		if (pass->nextSubPass != nullptr && pass->prevSubPass == nullptr)
+		{
+			Scope* cur = pass;
+			
+			while (cur != nullptr)
+			{
+
+				cur = (Vulkan::Scope*)cur->nextSubPass;
+			}
+		}
+		else
+		{
+			HashMap<AttachmentID, FrameAttachment*> frameAttachments{};
+			
+			for (auto attachment : pass->attachments)
+			{
+				auto frameAttachment = attachment->GetFrameAttachment();
+				if (!frameAttachment->IsImageAttachment())
+					continue;
+				if (!frameAttachments.KeyExists(frameAttachment->GetId()))
+				{
+					frameAttachments[frameAttachment->GetId()] = frameAttachment;
+				}
+			}
+
+			outDescriptor.attachments.Clear();
+			HashMap<AttachmentID, AttachmentBinding*> attachmentBindingsById{};
+
+			VkSubpassDependency dependency{};
+			dependency.srcStageMask = VK_SUBPASS_EXTERNAL;
+			dependency.dstSubpass = 0;
+			dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dependency.srcAccessMask = 0;
+			dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+			for (auto [id, frameAttachment] : frameAttachments)
+			{
+				ImageFrameAttachment* imageAttachment = (ImageFrameAttachment*)frameAttachment;
+				const RHI::ImageDescriptor& imageDesc = imageAttachment->GetImageDescriptor();
+
+				AttachmentBinding attachmentBinding{};
+				
+				
+				outDescriptor.attachments.Add(attachmentBinding);
+				attachmentBindingsById[id] = &outDescriptor.attachments.GetLast();
+			}
+
+			outDescriptor.dependencies.Add(dependency);
 		}
 	}
     
@@ -234,6 +305,110 @@ namespace CE::Vulkan
 			return VK_ATTACHMENT_STORE_OP_STORE;
 		}
 		return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+	}
+
+	SIZE_T RenderPass::Descriptor::GetHash() const
+	{
+		SIZE_T hash = 0;
+		for (const auto& attachment : attachments)
+		{
+			if (hash == 0)
+				hash = attachment.GetHash();
+			else
+				CombineHash(hash, attachment);
+		}
+		for (const auto& subpass : subpasses)
+		{
+			if (hash == 0)
+				hash = subpass.GetHash();
+			else
+				CombineHash(hash, subpass);
+		}
+		for (const auto& dependency : dependencies)
+		{
+			if (hash == 0)
+				hash = CE::GetHash(dependency);
+			else
+				CombineHash(hash, dependency);
+		}
+		return hash;
+	}
+
+	SIZE_T RenderPass::SubPassDescriptor::GetHash() const
+	{
+		SIZE_T hash = 0;
+		for (const auto& renderTargetAttachment : renderTargetAttachments)
+		{
+			if (hash == 0)
+				hash = renderTargetAttachment.GetHash();
+			else
+				hash = GetCombinedHash(hash, renderTargetAttachment.GetHash());
+		}
+		for (const auto& resolveAttachment : resolveAttachments)
+		{
+			if (hash == 0)
+				hash = resolveAttachment.GetHash();
+			else
+				hash = GetCombinedHash(hash, resolveAttachment.GetHash());
+		}
+		for (const auto& subpassInputAttachment : subpassInputAttachments)
+		{
+			if (hash == 0)
+				hash = subpassInputAttachment.GetHash();
+			else
+				hash = GetCombinedHash(hash, subpassInputAttachment.GetHash());
+		}
+		for (auto preserveAttachment : preserveAttachments)
+		{
+			if (hash == 0)
+				hash = CE::GetHash(preserveAttachment);
+			else
+				hash = GetCombinedHash(hash, CE::GetHash(preserveAttachment));
+		}
+		for (const auto& depthStencilAttachment : depthStencilAttachment)
+		{
+			if (hash == 0)
+				hash = depthStencilAttachment.GetHash();
+			else
+				hash = GetCombinedHash(hash, depthStencilAttachment.GetHash());
+		}
+
+		return hash;
+	}
+
+	SIZE_T RenderPass::SubPassAttachment::GetHash() const
+	{
+		if (!IsValid())
+			return 0;
+		SIZE_T hash = (SIZE_T)attachmentIndex;
+		hash = GetCombinedHash(hash, (SIZE_T)imageLayout);
+		return hash;
+	}
+
+	SIZE_T RenderPass::AttachmentBinding::GetHash() const
+	{
+		SIZE_T hash = (SIZE_T)format;
+		hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.loadAction));
+		hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.storeAction));
+		if (IsDepthStencilFormat(format))
+		{
+			hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.loadActionStencil));
+			hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.storeActionStencil));
+			hash = GetCombinedHash(hash, CE::GetHash<f32>(loadStoreAction.clearValueDepth));
+			hash = GetCombinedHash(hash, CE::GetHash<f32>(loadStoreAction.clearValueStencil));
+		}
+		else if (IsDepthFormat(format))
+		{
+			hash = GetCombinedHash(hash, CE::GetHash<f32>(loadStoreAction.clearValueDepth));
+		}
+		else
+		{
+			hash = GetCombinedHash(hash, CE::GetHash(loadStoreAction.clearValue));
+		}
+		hash = GetCombinedHash(hash, (SIZE_T)initialLayout);
+		hash = GetCombinedHash(hash, (SIZE_T)finalLayout);
+		hash = GetCombinedHash(hash, (SIZE_T)multisampleState.sampleCount);
+		return hash;
 	}
 
 } // namespace CE

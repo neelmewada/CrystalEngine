@@ -89,4 +89,10 @@ namespace CE::Vulkan
     RHI::TextureFormat VkFormatToRHIFormat(VkFormat format);
     u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel);
 
+	bool IsDepthVkFormat(VkFormat format);
+	bool IsStencilVkFormat(VkFormat format);
+
+	bool IsDepthFormat(RHI::Format format);
+	bool IsDepthStencilFormat(RHI::Format format);
+
 } // namespace CE

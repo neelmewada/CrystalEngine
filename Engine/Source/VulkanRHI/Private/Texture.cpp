@@ -83,7 +83,7 @@ namespace CE::Vulkan
 		return textureFormatToVkFormatMap[format];
     }
 
-	static bool IsDepthFormat(VkFormat format)
+	bool IsDepthVkFormat(VkFormat format)
 	{
 		switch (format)
 		{
@@ -98,7 +98,7 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	static bool IsStencilFormat(VkFormat format)
+	bool IsStencilVkFormat(VkFormat format)
 	{
 		switch (format)
 		{
@@ -136,6 +136,31 @@ namespace CE::Vulkan
 
 		return 0;
     }
+
+	bool IsDepthFormat(RHI::Format format)
+	{
+		switch (format)
+		{
+		case RHI::Format::D16_UNORM_S8_UINT:
+		case RHI::Format::D24_UNORM_S8_UINT:
+		case RHI::Format::D32_SFLOAT_S8_UINT:
+		case RHI::Format::D32_SFLOAT:
+			return true;
+		}
+		return false;
+	}
+
+	bool IsDepthStencilFormat(RHI::Format format)
+	{
+		switch (format)
+		{
+		case RHI::Format::D16_UNORM_S8_UINT:
+		case RHI::Format::D24_UNORM_S8_UINT:
+		case RHI::Format::D32_SFLOAT_S8_UINT:
+			return true;
+		}
+		return false;
+	}
 
 	void VulkanRHI::Blit(RHI::Texture* source, RHI::Texture* destination, RHI::FilterMode filter)
 	{
@@ -296,7 +321,7 @@ namespace CE::Vulkan
 
 		this->vkFormat = imageCI.format;
 
-		bool isDepthFormat = IsDepthFormat(vkFormat);
+		bool isDepthFormat = IsDepthVkFormat(vkFormat);
 		bool isStencilFormat = IsStencilFormat(vkFormat);
 		if (isDepthFormat)
 			aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;

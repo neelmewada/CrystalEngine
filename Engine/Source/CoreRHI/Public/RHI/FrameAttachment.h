@@ -13,6 +13,8 @@ namespace CE::RHI
 
 		void SetResource(RHIResource* resource);
 
+		void SetResource(u32 imageIndex, RHIResource* resource);
+
 		virtual bool IsBufferAttachment() const = 0;
 		virtual bool IsImageAttachment() const = 0;
 
@@ -29,7 +31,8 @@ namespace CE::RHI
         AttachmentID attachmentId{};
         AttachmentLifetimeType lifetime{};
 		//! Either a buffer or texture
-		RHIResource* resource = nullptr;
+		StaticArray<RHIResource*, RHI::Limits::Pipeline::MaxSwapChainImageCount> resources{};
+		//RHIResource* resource = nullptr;
 	};
     
 } // namespace CE::RHI

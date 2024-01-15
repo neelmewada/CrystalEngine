@@ -9,9 +9,12 @@ namespace CE::Vulkan
 		RenderPassCache(VulkanDevice* device);
 		virtual ~RenderPassCache();
 
+		RenderPass* FindOrCreate(const RenderPass::Descriptor& desc);
+
 	private:
 		VulkanDevice* device = nullptr;
 
+		HashMap<SIZE_T, RenderPass*> renderPassCache{};
 	};
     
 } // namespace CE::Vulkan

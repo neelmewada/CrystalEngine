@@ -32,10 +32,15 @@ namespace CE::RHI
 
     void FrameScheduler::Compile()
     {
+		if (frameGraph->presentSwapChain != nullptr)
+		{
+			numFramesInFlight = frameGraph->presentSwapChain->GetImageCount();
+		}
+
         FrameGraphCompileRequest compileRequest{};
         compileRequest.frameGraph = frameGraph;
         compileRequest.transientPool = transientMemoryPool;
-		compileRequest.numFramesInFlight = 1;
+		compileRequest.numFramesInFlight = numFramesInFlight;
 
         compiler->Compile(compileRequest);
     }
