@@ -67,7 +67,7 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			
+			vkCmdPipelineBarrier()
 		}
 
 		return true;

@@ -185,6 +185,7 @@ namespace CE::Vulkan
 				attachmentBinding.format = format;
 				attachmentBinding.loadStoreAction = scopeAttachment->GetLoadStoreAction();
 				attachmentBinding.multisampleState = scopeAttachment->GetMultisampleState();
+				attachmentBinding.attachmentId = scopeAttachment->GetId();
 
 				SubPassAttachment attachmentRef{};
 
@@ -195,7 +196,7 @@ namespace CE::Vulkan
 					if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 					{
 						attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-						attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+						attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 						attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 					}
 					else
@@ -211,20 +212,29 @@ namespace CE::Vulkan
 					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 					attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					subpass.renderTargetAttachments.Add(attachmentRef);
 					break;
 				case RHI::ScopeAttachmentUsage::SubpassInput:
+					attachmentRef.attachmentIndex = i++;
+					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 					attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 					attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					subpass.subpassInputAttachments.Add(attachmentRef);
 					break;
 				case RHI::ScopeAttachmentUsage::Resolve:
+					attachmentRef.attachmentIndex = i++;
+					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 					attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					subpass.resolveAttachments.Add(attachmentRef);
 					break;
 				}
 				
 				outDescriptor.attachments.Add(attachmentBinding);
 				attachmentBindingsById[scopeAttachment->GetId()] = &outDescriptor.attachments.GetLast();
 			}
+
+			outDescriptor.subpasses.Add(subpass);
 		}
 	}
     

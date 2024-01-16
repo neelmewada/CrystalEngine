@@ -27,6 +27,7 @@ namespace CE::Vulkan
 
 		struct AttachmentBinding
 		{
+			AttachmentID attachmentId{};
 			RHI::Format format = RHI::Format::Undefined;
 			RHI::AttachmentLoadStoreAction loadStoreAction{};
 			VkImageLayout initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;

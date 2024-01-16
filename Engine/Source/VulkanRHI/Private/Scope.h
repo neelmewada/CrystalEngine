@@ -9,6 +9,16 @@ namespace CE::Vulkan
 		using Super = RHI::Scope;
 		using Self = Scope;
 
+		struct Barrier
+		{
+			VkPipelineStageFlags srcStageMask{};
+			VkPipelineStageFlags dstStageMask{};
+
+			List<VkMemoryBarrier> memoryBarriers{};
+			List<VkBufferMemoryBarrier> bufferBarriers{};
+			List<VkImageMemoryBarrier> imageBarriers{};
+		};
+
 		Scope(VulkanDevice* device, const RHI::ScopeDescriptor& desc);
 		virtual ~Scope();
 
@@ -23,6 +33,8 @@ namespace CE::Vulkan
 
 		FixedArray<List<VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> waitSemaphores{};
 		List<VkPipelineStageFlags> waitSemaphoreStageFlags{};
+
+		Array<Barrier> barriers{};
 
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;

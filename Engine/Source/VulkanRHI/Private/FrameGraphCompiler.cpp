@@ -182,6 +182,9 @@ namespace CE::Vulkan
 			}
 		}
 
+		// Compile barriers
+		CompileBarriers(compileRequest);
+
 	}
 
     void FrameGraphCompiler::DestroySyncObjects()
@@ -268,6 +271,18 @@ namespace CE::Vulkan
 		}
 		
 		
+	}
+
+	void FrameGraphCompiler::CompileBarriers(const FrameGraphCompileRequest& compileRequest)
+	{
+		FrameGraph* frameGraph = compileRequest.frameGraph;
+		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
+		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
+		numFramesInFlight = compileRequest.numFramesInFlight;
+		imageCount = numFramesInFlight;
+
+
+
 	}
 
 } // namespace CE::Vulkan
