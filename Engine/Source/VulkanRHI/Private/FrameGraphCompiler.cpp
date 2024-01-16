@@ -270,19 +270,42 @@ namespace CE::Vulkan
 			}
 		}
 		
-		
+		for (RHI::Scope* consumer : current->consumers)
+		{
+			CompileCrossQueueDependencies(compileRequest, (Vulkan::Scope*)consumer);
+		}
 	}
 
 	void FrameGraphCompiler::CompileBarriers(const FrameGraphCompileRequest& compileRequest)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
+
+		for (RHI::Scope* scope : frameGraph->producers)
+		{
+			CompileBarriers(compileRequest, (Vulkan::Scope*)scope);
+		}
+	}
+
+	void FrameGraphCompiler::CompileBarriers(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
+	{
+		if (current == nullptr)
+			return;
+
+		FrameGraph* frameGraph = compileRequest.frameGraph;
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
-		numFramesInFlight = compileRequest.numFramesInFlight;
-		imageCount = numFramesInFlight;
+
+		for (RHI::Scope* producerRhiScope : current->producers)
+		{
+			Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
 
 
+		}
 
+		for (auto scope : current->consumers)
+		{
+			CompileBarriers(compileRequest, (Vulkan::Scope*)current);
+		}
 	}
 
 } // namespace CE::Vulkan

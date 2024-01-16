@@ -26,6 +26,8 @@ namespace CE::Vulkan
 
 		void CompileBarriers(const FrameGraphCompileRequest& compileRequest);
 
+		void CompileBarriers(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current);
+
 		VulkanDevice* device = nullptr;
 
 		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> imageAcquiredSemaphores{};
