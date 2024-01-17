@@ -129,7 +129,7 @@ namespace CE::Vulkan
 			imageCount = swapChain->GetImageCount();
 			numFramesInFlight = Math::Min<u32>(imageCount - 1, numFramesInFlight);
 
-			for (int i = 0; i < numFramesInFlight; i++)
+			for (int i = 0; i < imageCount; i++)
 			{
 				VkSemaphoreCreateInfo semaphoreCI{};
 				semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -506,6 +506,8 @@ namespace CE::Vulkan
 					bufferBarrier.buffer = buffer->GetBuffer();
 					bufferBarrier.srcQueueFamilyIndex = producerScope->queue->GetFamilyIndex();
 					bufferBarrier.dstQueueFamilyIndex = current->queue->GetFamilyIndex();
+                    bufferBarrier.offset = 0;
+                    bufferBarrier.size = buffer->GetBufferSize();
 
 					switch (fromBuffer->GetUsage())
 					{

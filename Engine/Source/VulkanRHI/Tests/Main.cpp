@@ -1,4 +1,6 @@
 
+#include <gtest/gtest.h>
+
 #include "Core.h"
 #include "CoreMedia.h"
 #include "CoreRHI.h"
@@ -7,8 +9,6 @@
 #include "VulkanRHIPrivate.h"
 
 #include "VulkanRHITest.h"
-
-#include <gtest/gtest.h>
 
 using namespace CE;
 

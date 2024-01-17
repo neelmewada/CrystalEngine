@@ -26,11 +26,11 @@ namespace CE::Vulkan
 
 		if (swapChain && presentingScope)
 		{
-			result = vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex]);
+			result = vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentImageIndex]);
 
 			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max, 
-				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
-				compiler->imageAcquiredFences[currentSubmissionIndex], &swapChain->currentImageIndex);
+				compiler->imageAcquiredSemaphores[currentImageIndex],
+				compiler->imageAcquiredFences[currentImageIndex], &swapChain->currentImageIndex);
 			
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
@@ -42,7 +42,7 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			currentImageIndex = currentSubmissionIndex;
+			//currentImageIndex = currentSubmissionIndex;
 		}
 
 		bool success = true;
@@ -72,9 +72,6 @@ namespace CE::Vulkan
 		// Wait for rendering from earlier submission to finish.
 		// We cannot record new commands into a command buffer that is currently being executed.
 		result = vkWaitForFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex], VK_TRUE, u64Max);
-
-		// Manually reset (close) the fence. i.e. put it in unsignalled state
-		result = vkResetFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex]);
 		
 		u32 familyIndex = scope->queue->GetFamilyIndex();
 		CommandList* commandList = compiler->commandListsByImageIndex[currentImageIndex][familyIndex];
@@ -130,6 +127,9 @@ namespace CE::Vulkan
 			}
 		}
 		vkEndCommandBuffer(commandList->commandBuffer);
+        
+        // Manually reset (close) the fence. i.e. put it in unsignalled state
+        result = vkResetFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex]);
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

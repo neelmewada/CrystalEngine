@@ -10,6 +10,12 @@ namespace CE::Vulkan
 
 	Scope::~Scope()
 	{
+        if (renderPass)
+        {
+            
+        }
+        renderPass = nullptr;
+        
 		DestroySyncObjects();
 	}
 
@@ -21,12 +27,10 @@ namespace CE::Vulkan
 		SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->GetSwapChain();
 
 		u32 imageCount = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::Pipeline::MaxFramesInFlight);
-		u32 numFramesInFlight = imageCount;
 
 		if (swapChain != nullptr)
 		{
 			imageCount = swapChain->GetImageCount();
-			numFramesInFlight = imageCount - 1;
 		}
 
 		waitSemaphores.Clear();
@@ -67,7 +71,10 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			vkCmdPipelineBarrier()
+            RenderPassCache* rpCache = device->GetRenderPassCache();
+            RenderPass::Descriptor descriptor{};
+            RenderPass::BuildDescriptor(this, descriptor);
+            renderPass = rpCache->FindOrCreate(descriptor);
 		}
 
 		return true;

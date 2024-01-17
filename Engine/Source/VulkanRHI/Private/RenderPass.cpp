@@ -118,13 +118,13 @@ namespace CE::Vulkan
 		}
 	}
 
-	void RenderPass::BuildDescriptor(Scope* pass, Descriptor& outDescriptor)
+	void RenderPass::BuildDescriptor(Vulkan::Scope* pass, RenderPass::Descriptor& outDescriptor)
 	{
 		outDescriptor = {};
 		if (pass == nullptr)
 			return;
 		
-		// Multiple subpasses
+		// TODO: Multiple subpasses
 		if (pass->nextSubPass != nullptr && pass->prevSubPass == nullptr)
 		{
 			Scope* cur = pass;
@@ -177,6 +177,7 @@ namespace CE::Vulkan
 				if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
 					scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
 					continue;
+                
 				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
 				ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 				RHI::Format format = imageFrameAttachment->GetImageDescriptor().format;

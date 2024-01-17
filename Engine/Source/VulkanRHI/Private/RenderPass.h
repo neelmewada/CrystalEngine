@@ -20,6 +20,7 @@ namespace CE
 
 namespace CE::Vulkan
 {
+    class Scope;
 
 	class RenderPass final
 	{
@@ -70,7 +71,7 @@ namespace CE::Vulkan
 		RenderPass(VulkanDevice* device, const Descriptor& desc);
 		virtual ~RenderPass();
 
-		static void BuildDescriptor(Scope* pass, Descriptor& outDescriptor);
+		static void BuildDescriptor(Vulkan::Scope* pass, Descriptor& outDescriptor);
 
 		inline const Descriptor& GetDescriptor() const { return desc; }
 		

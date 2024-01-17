@@ -1,8 +1,6 @@
 #pragma once
 
-#if PAL_TRAIT_BUILD_TESTS
 class RHI_FrameGraphBuilder_Test;
-#endif
 
 namespace CE::Vulkan
 {
@@ -85,9 +83,7 @@ namespace CE::RHI
 		friend class FrameScheduler;
 		friend class FrameGraphExecuter;
 		friend class CE::Vulkan::FrameGraphExecuter;
-#if PAL_TRAIT_BUILD_TESTS
-		friend class RHI_FrameGraphBuilder_Test;
-#endif
+		friend class ::RHI_FrameGraphBuilder_Test;
     };
 
 } // namespace CE::RHI
