@@ -13,7 +13,10 @@ namespace CE::RHI
 
 		void SetResource(RHIResource* resource);
 
-		void SetResource(u32 imageIndex, RHIResource* resource);
+		void SetResource(int imageIndex, RHIResource* resource);
+
+		RHIResource* GetResource(int imageIndex);
+		RHIResource* GetResource();
 
 		virtual bool IsBufferAttachment() const = 0;
 		virtual bool IsImageAttachment() const = 0;

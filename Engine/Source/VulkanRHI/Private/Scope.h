@@ -13,6 +13,7 @@ namespace CE::Vulkan
 		{
 			VkPipelineStageFlags srcStageMask{};
 			VkPipelineStageFlags dstStageMask{};
+			bool supportsRegionalDependency = false;
 
 			List<VkMemoryBarrier> memoryBarriers{};
 			List<VkBufferMemoryBarrier> bufferBarriers{};

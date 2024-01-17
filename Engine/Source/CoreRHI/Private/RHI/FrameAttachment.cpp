@@ -31,9 +31,19 @@ namespace CE::RHI
 		}
 	}
 
-	void FrameAttachment::SetResource(u32 index, RHIResource* resource)
+	void FrameAttachment::SetResource(int index, RHIResource* resource)
 	{
 		resources[index] = resource;
+	}
+
+    RHIResource* FrameAttachment::GetResource(int imageIndex)
+    {
+        return resources[imageIndex];
+    }
+
+	RHIResource* FrameAttachment::GetResource()
+	{
+		return resources[0];
 	}
     
 } // namespace CE::RHI

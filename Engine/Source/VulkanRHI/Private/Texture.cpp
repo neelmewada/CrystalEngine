@@ -322,7 +322,7 @@ namespace CE::Vulkan
 		this->vkFormat = imageCI.format;
 
 		bool isDepthFormat = IsDepthVkFormat(vkFormat);
-		bool isStencilFormat = IsStencilFormat(vkFormat);
+		bool isStencilFormat = IsStencilVkFormat(vkFormat);
 		if (isDepthFormat)
 			aspectMask |= VK_IMAGE_ASPECT_DEPTH_BIT;
 		if (isStencilFormat)
@@ -650,7 +650,7 @@ namespace CE::Vulkan
 			depth
 		};
 
-
+		// TODO: Upload data
 	}
 
     void Texture::CopyPixelsFromBuffer(Buffer* srcBuffer)

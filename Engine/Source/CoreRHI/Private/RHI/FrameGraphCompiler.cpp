@@ -8,7 +8,7 @@ namespace CE::RHI
 		// 1. Compile scope
 		CompileScopes(compileRequest);
 
-		// 2. Compile transient attachments
+		// 2. Compile transient attachments (also allocates heap memory)
 		CompileTransientAttachments(compileRequest);
 
 		// Platform specific compilation

@@ -74,7 +74,9 @@ namespace CE::Vulkan
         {
             Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
             if (scope->queue == nullptr)
-                scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
+			{
+				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
+			}
             
             for (auto consumer : frameGraph->nodes[scope->id].consumers)
             {
@@ -84,7 +86,7 @@ namespace CE::Vulkan
         };
         
         int trackNumber = 0;
-        for (auto scope : frameGraph->producers)
+        for (RHI::Scope* scope : frameGraph->producers)
         {
 			visitor(scope, trackNumber);
 			trackNumber++;
@@ -280,13 +282,42 @@ namespace CE::Vulkan
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 
-		for (RHI::Scope* scope : frameGraph->producers)
+		for (int i = 0; i < imageCount; i++)
 		{
-			CompileBarriers(compileRequest, (Vulkan::Scope*)scope);
+			for (RHI::Scope* scope : frameGraph->producers)
+			{
+				CompileBarriers(i, compileRequest, (Vulkan::Scope*)scope);
+			}
 		}
 	}
 
-	void FrameGraphCompiler::CompileBarriers(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
+	static bool RequiresDependency(ScopeAttachment* from, ScopeAttachment* to)
+	{
+		if (from == nullptr || to == nullptr)
+			return false;
+
+		if (EnumHasFlag(to->GetAccess(), RHI::ScopeAttachmentAccess::Write) ||
+			EnumHasFlag(from->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+			return true;
+
+		switch (to->GetUsage())
+		{
+		case RHI::ScopeAttachmentUsage::RenderTarget:
+		case RHI::ScopeAttachmentUsage::Resolve:
+			return true;
+		}
+
+		switch (from->GetUsage())
+		{
+		case RHI::ScopeAttachmentUsage::RenderTarget:
+		case RHI::ScopeAttachmentUsage::Resolve:
+			return true;
+		}
+
+		return false;
+	}
+
+	void FrameGraphCompiler::CompileBarriers(int imageIndex, const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
 	{
 		if (current == nullptr)
 			return;
@@ -298,13 +329,224 @@ namespace CE::Vulkan
 		for (RHI::Scope* producerRhiScope : current->producers)
 		{
 			Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
+			if (producerScope->queue != current->queue)
+			{
+				current->barriers.Clear();
+				break;
+			}
 
+			HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
 
+			for (auto [from, to] : commonAttachments)
+			{
+				Scope::Barrier barrier{};
+				
+				// Image -> Image barrier
+				if (from->IsImageAttachment() && to->IsImageAttachment() && RequiresDependency(from, to))
+				{
+					ImageScopeAttachment* fromImage = (ImageScopeAttachment*)from;
+					ImageScopeAttachment* toImage = (ImageScopeAttachment*)to;
+					VkImageMemoryBarrier imageBarrier{};
+					imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+
+					ImageFrameAttachment* imageAttachment = (ImageFrameAttachment*)fromImage->GetFrameAttachment();
+					if (imageAttachment == nullptr)
+						continue;
+
+					RHIResource* resource = imageAttachment->GetResource(imageIndex);
+					if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+						continue;
+
+					Vulkan::Texture* image = dynamic_cast<Vulkan::Texture*>(resource);
+					if (image == nullptr || image->GetImage() == nullptr)
+						continue;
+
+					imageBarrier.image = image->GetImage();
+					imageBarrier.srcQueueFamilyIndex = producerScope->queue->GetFamilyIndex();
+					imageBarrier.dstQueueFamilyIndex = current->queue->GetFamilyIndex();
+
+					imageBarrier.subresourceRange.aspectMask = image->GetAspectMask();
+					imageBarrier.subresourceRange.baseArrayLayer = 0;
+					imageBarrier.subresourceRange.layerCount = image->GetArrayLayerCount();
+					imageBarrier.subresourceRange.baseMipLevel = 0;
+					imageBarrier.subresourceRange.levelCount = image->GetMipLevelCount();
+
+					switch (fromImage->GetUsage())
+					{
+					case RHI::ScopeAttachmentUsage::RenderTarget:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::DepthStencil:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+						imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+						imageBarrier.srcAccessMask = 0;
+						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+							imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+							imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::SubpassInput:
+					case RHI::ScopeAttachmentUsage::Shader:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+						imageBarrier.srcAccessMask = 0;
+						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+							imageBarrier.srcAccessMask |= VK_ACCESS_SHADER_READ_BIT;
+						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							imageBarrier.srcAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+						}
+						else // Read only
+						{
+							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::Copy:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+						imageBarrier.srcAccessMask = 0;
+						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+						{
+							imageBarrier.srcAccessMask |= VK_ACCESS_MEMORY_READ_BIT;
+							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+						}
+						else if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							imageBarrier.srcAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
+							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::Resolve:
+						barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						break;
+					default:
+						continue;
+					}
+
+					switch (toImage->GetUsage())
+					{
+					case RHI::ScopeAttachmentUsage::RenderTarget:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						break;
+					case RHI::ScopeAttachmentUsage::DepthStencil:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+						imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+						imageBarrier.dstAccessMask = 0;
+						if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+							imageBarrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+						if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+							imageBarrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::SubpassInput:
+					case RHI::ScopeAttachmentUsage::Shader:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+						imageBarrier.dstAccessMask = 0;
+						if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+							imageBarrier.dstAccessMask |= VK_ACCESS_SHADER_READ_BIT;
+						if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							imageBarrier.dstAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+							imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+						}
+						else // Read only
+						{
+							imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::Copy:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+						imageBarrier.dstAccessMask = 0;
+						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+						{
+							imageBarrier.dstAccessMask |= VK_ACCESS_MEMORY_READ_BIT;
+							imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+						}
+						else if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							imageBarrier.dstAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
+							imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::Resolve:
+						barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						break;
+					default:
+						continue;
+					}
+
+					barrier.imageBarriers.Add(imageBarrier);
+				}
+				else if (from->IsBufferAttachment() && to->IsBufferAttachment() && RequiresDependency(from, to))
+				{
+					// Buffer -> Buffer barrier
+					BufferScopeAttachment* fromBuffer = (BufferScopeAttachment*)from;
+					BufferScopeAttachment* toBuffer = (BufferScopeAttachment*)to;
+					VkBufferMemoryBarrier bufferBarrier{};
+					bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+
+					BufferFrameAttachment* bufferAttachment = (BufferFrameAttachment*)fromBuffer->GetFrameAttachment();
+					if (bufferAttachment == nullptr)
+						continue;
+
+					RHIResource* resource = bufferAttachment->GetResource(imageIndex);
+					if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
+						continue;
+
+					Vulkan::Buffer* buffer = dynamic_cast<Vulkan::Buffer*>(resource);
+					if (buffer == nullptr || buffer->GetBuffer() == nullptr)
+						continue;
+					
+					bufferBarrier.buffer = buffer->GetBuffer();
+					bufferBarrier.srcQueueFamilyIndex = producerScope->queue->GetFamilyIndex();
+					bufferBarrier.dstQueueFamilyIndex = current->queue->GetFamilyIndex();
+
+					switch (fromBuffer->GetUsage())
+					{
+					case RHI::ScopeAttachmentUsage::Copy:
+					case RHI::ScopeAttachmentUsage::Shader:
+						if (EnumHasFlag(fromBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+						{
+							bufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+						}
+						else if (EnumHasFlag(fromBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							bufferBarrier.srcAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
+						}
+						break;
+					default:
+						continue;
+					}
+
+					switch (toBuffer->GetUsage())
+					{
+					case RHI::ScopeAttachmentUsage::Copy:
+					case RHI::ScopeAttachmentUsage::Shader:
+						if (EnumHasFlag(toBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Read))
+						{
+							bufferBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+						}
+						else if (EnumHasFlag(toBuffer->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							bufferBarrier.dstAccessMask |= VK_ACCESS_MEMORY_WRITE_BIT;
+						}
+						break;
+					default:
+						continue;
+					}
+				}
+			}
 		}
 
 		for (auto scope : current->consumers)
 		{
-			CompileBarriers(compileRequest, (Vulkan::Scope*)current);
+			CompileBarriers(imageIndex, compileRequest, (Vulkan::Scope*)current);
 		}
 	}
 

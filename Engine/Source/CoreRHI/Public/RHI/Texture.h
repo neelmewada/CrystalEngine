@@ -29,25 +29,25 @@ namespace CE::RHI
 
 		virtual void* GetHandle() = 0;
         
-        inline u32 GetWidth() const
-        {
-            return width;
-        }
+        inline u32 GetWidth() const { return width; }
         
-		inline u32 GetHeight() const
-        {
-            return height;
-        }
+		inline u32 GetHeight() const { return height; }
         
-		inline u32 GetDepth() const
-        {
-            return depth;
-        }
+		inline u32 GetDepth() const { return depth; }
 
-		inline u32 GetArrayLayers() const
-		{
-			return arrayLayers;
-		}
+		inline u32 GetArrayLayerCount() const { return arrayLayers; }
+
+		inline u32 GetMipLevelCount() const { return mipLevels; }
+
+		inline const Name& GetDebugName() const { return name; }
+
+		inline RHI::Format GetFormat() const { return format; }
+
+		inline Dimension GetDimension() const { return dimension; }
+
+		inline u32 GetSampleCount() const { return sampleCount; }
+
+		inline TextureBindFlags GetBindFlags() const { return bindFlags; }
         
 		virtual u32 GetBytesPerChannel() = 0;
         

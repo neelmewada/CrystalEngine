@@ -154,6 +154,7 @@ namespace CE::RHI
 			}
 		}
 
+		// Form a chain of scopes that don't have any branches
 		for (Scope* scope : scopes)
 		{
 			if (scope->producers.GetSize() == 1 && !scope->producers[0]->PresentsSwapChain())

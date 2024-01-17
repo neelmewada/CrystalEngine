@@ -123,7 +123,7 @@ namespace CE::Vulkan
 		outDescriptor = {};
 		if (pass == nullptr)
 			return;
-
+		
 		// Multiple subpasses
 		if (pass->nextSubPass != nullptr && pass->prevSubPass == nullptr)
 		{

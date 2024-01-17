@@ -26,7 +26,7 @@ namespace CE::Vulkan
 
 		void CompileBarriers(const FrameGraphCompileRequest& compileRequest);
 
-		void CompileBarriers(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current);
+		void CompileBarriers(int imageIndex, const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current);
 
 		VulkanDevice* device = nullptr;
 
@@ -37,6 +37,9 @@ namespace CE::Vulkan
 		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> graphFinishedFences{};
 
 		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::Pipeline::MaxSwapChainImageCount> commandListsByImageIndex{};
+
+		// Keep track of current family index of each attachment
+		HashMap<AttachmentID, u32> familyIndexByAttachment{};
 
 		u32 imageCount = 0;
 		u32 numFramesInFlight = 0;
