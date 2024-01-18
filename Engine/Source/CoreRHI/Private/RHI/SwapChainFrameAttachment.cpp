@@ -7,9 +7,9 @@ namespace CE::RHI
 		: ImageFrameAttachment(id, nullptr)
 		, swapChain(swapChain)
     {
-		for (int i = 0; i < resources.GetSize(); i++)
+		for (int i = 0; i < swapChain->GetImageCount(); i++)
 		{
-			SetResource(swapChain->GetImage(i));
+			SetResource(i, swapChain->GetImage(i));
 		}
     }
 

@@ -42,11 +42,14 @@ namespace CE::Vulkan
 
 		RHI::SwapChainDescriptor desc{};
 
+		//! Used to 
+		StaticArray<VkImageLayout, RHI::Limits::Pipeline::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
+
 		List<VkSurfaceFormatKHR> surfaceFormats{};
 		VkSurfaceCapabilitiesKHR surfaceCapabilities{};
 		List<VkPresentModeKHR> presentationModes{};
 
-		//! @brief We do not support triple buffering, etc for time being.
+		//! @brief We do not support triple buffering, etc for the time being.
 		u32 simultaneousFramesInFlight = 1;
 
 		VkSwapchainKHR swapChain = nullptr;

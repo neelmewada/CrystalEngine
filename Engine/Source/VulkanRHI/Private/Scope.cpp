@@ -23,6 +23,12 @@ namespace CE::Vulkan
 	{
 		DestroySyncObjects();
 
+		for (auto frameBuffer : frameBuffers)
+		{
+			delete frameBuffer;
+		}
+		frameBuffers.Clear();
+
 		auto frameGraph = compileRequest.frameGraph;
 		SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->GetSwapChain();
 
@@ -75,6 +81,11 @@ namespace CE::Vulkan
             RenderPass::Descriptor descriptor{};
             RenderPass::BuildDescriptor(this, descriptor);
             renderPass = rpCache->FindOrCreate(descriptor);
+		}
+
+		for (int i = 0; i < imageCount; i++)
+		{
+			frameBuffers.Add(new FrameBuffer(device, this, i));
 		}
 
 		return true;

@@ -100,11 +100,15 @@ namespace CE
 
         CE_INLINE ElementType* GetData()
         {
+			if (IsEmpty())
+				return nullptr;
             return Impl.data();
         }
 
         CE_INLINE const ElementType* GetData() const
         {
+			if (IsEmpty())
+				return nullptr;
             return Impl.data();
         }
 

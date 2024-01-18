@@ -9,7 +9,8 @@ namespace CE::Vulkan
     public:
         Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc);
 		Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc, const RHI::ResourceMemoryDescriptor& memoryDesc);
-		Texture(VulkanDevice* device, VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags, 
+
+		Texture(VulkanDevice* device, VkImage importedImage, const RHI::TextureDescriptor& imageDesc, 
 			VkImageLayout dstLayout = VK_IMAGE_LAYOUT_UNDEFINED);
 
         virtual ~Texture();
@@ -65,8 +66,6 @@ namespace CE::Vulkan
 		// True if the image is not managed by this Texture object
 		bool importedImage = false;
 
-		//! Queue family index of the queue that this texture is used with the first time
-		int initialFamilyIndex = -1;
 		int curFamilyIndex = -1;
 
         VulkanDevice* device = nullptr;

@@ -18,7 +18,7 @@ namespace CE::Vulkan
 		{
 			VkAttachmentDescription attachmentDesc{};
 			attachmentDesc.initialLayout = attachmentBinding.initialLayout;
-			attachmentDesc.finalLayout = attachmentDesc.finalLayout;
+			attachmentDesc.finalLayout = attachmentBinding.finalLayout;
 			attachmentDesc.format = RHIFormatToVkFormat(attachmentBinding.format);
 			attachmentDesc.loadOp = RHIAttachmentLoadActionToVk(attachmentBinding.loadStoreAction.loadAction);
 			attachmentDesc.storeOp = RHIAttachmentStoreActionToVk(attachmentBinding.loadStoreAction.storeAction);
@@ -137,27 +137,11 @@ namespace CE::Vulkan
 		}
 		else // Single subpass
 		{
-			HashMap<AttachmentID, FrameAttachment*> frameAttachments{};
-			
-			for (RHI::ScopeAttachment* attachment : pass->attachments)
-			{
-				auto frameAttachment = attachment->GetFrameAttachment();
-				if (!frameAttachment->IsImageAttachment())
-					continue;
-				if (attachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
-					attachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
-					continue;
-				if (!frameAttachments.KeyExists(frameAttachment->GetId()))
-				{
-					frameAttachments[frameAttachment->GetId()] = frameAttachment;
-				}
-			}
-
 			outDescriptor.attachments.Clear();
 			HashMap<AttachmentID, AttachmentBinding*> attachmentBindingsById{};
 
 			VkSubpassDependency dependency{};
-			dependency.srcStageMask = VK_SUBPASS_EXTERNAL;
+			dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 			dependency.dstSubpass = 0;
 			dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			dependency.srcAccessMask = 0;
@@ -180,7 +164,19 @@ namespace CE::Vulkan
                 
 				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
 				ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
-				RHI::Format format = imageFrameAttachment->GetImageDescriptor().format;
+				RHI::Format format;
+				if (imageFrameAttachment->GetLifetimeType() == RHI::AttachmentLifetimeType::Transient)
+				{
+					format = imageFrameAttachment->GetImageDescriptor().format;
+				}
+				else
+				{
+					RHIResource* resource = imageFrameAttachment->GetResource();
+					if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+						continue;
+					Texture* image = (Texture*)resource;
+					format = image->GetFormat();
+				}
 
 				AttachmentBinding attachmentBinding{};
 				attachmentBinding.format = format;
@@ -210,7 +206,7 @@ namespace CE::Vulkan
 					break;
 				case RHI::ScopeAttachmentUsage::RenderTarget:
 					attachmentRef.attachmentIndex = i++;
-					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+					attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					subpass.renderTargetAttachments.Add(attachmentRef);
@@ -362,7 +358,7 @@ namespace CE::Vulkan
 		switch (storeAction)
 		{
 		case RHI::AttachmentStoreAction::DontCare:
-			return VK_ATTACHMENT_STORE_OP_NONE;
+			return VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		case RHI::AttachmentStoreAction::Store:
 			return VK_ATTACHMENT_STORE_OP_STORE;
 		}

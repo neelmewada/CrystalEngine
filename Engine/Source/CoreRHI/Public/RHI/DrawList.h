@@ -27,6 +27,7 @@ namespace CE::RHI
 		DrawListTag listTag = DrawListTag::NullValue;
 
 		friend class DrawListContext;
+		friend class Scope;
 	};
 
 	typedef StaticArray<DrawList, Limits::Pipeline::DrawListTagCount> DrawListsByTag;

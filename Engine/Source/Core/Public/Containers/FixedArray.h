@@ -188,7 +188,12 @@ namespace CE
 		constexpr inline const T& GetLast() const { return *(impl.begin() + count - 1); }
 		constexpr inline T& GetLast() { return *(impl.begin() + count - 1); }
 
-		constexpr inline T* GetData() { return impl.data(); }
+		constexpr inline T* GetData() 
+		{ 
+			if (IsEmpty())
+				return nullptr; 
+			return impl.data(); 
+		}
 
 		inline u32 GetSize() const { return count; }
 

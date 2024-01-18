@@ -33,9 +33,11 @@ namespace CE::Vulkan
 		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedFences{};
 
 		FixedArray<List<VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> waitSemaphores{};
+		FixedArray<FrameBuffer*, RHI::Limits::Pipeline::MaxSwapChainImageCount> frameBuffers{};
+
 		List<VkPipelineStageFlags> waitSemaphoreStageFlags{};
 
-		Array<Barrier> barriers{};
+		StaticArray<Array<Barrier>, RHI::Limits::Pipeline::MaxSwapChainImageCount> barriers{};
 
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;
@@ -44,6 +46,7 @@ namespace CE::Vulkan
 		friend class FrameGraphCompiler;
 		friend class FrameGraphExecuter;
 		friend class RenderPass;
+		friend class FrameBuffer;
 	};
     
 } // namespace CE::Vulkan

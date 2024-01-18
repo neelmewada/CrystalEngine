@@ -16,7 +16,7 @@ namespace CE::RHI
 
 		void UpdateImage();
 
-		virtual bool IsSwapChainAttachment() const override { return true; }
+		bool IsSwapChainAttachment() const override final { return true; }
 
 	private:
 

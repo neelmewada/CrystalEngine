@@ -68,6 +68,7 @@ namespace CE::RHI
 
 		ScopeID id{};
 		int scopeGroupIndex = -1;
+		bool usesSwapChainAttachment = false;
 
 		Scope* prevSubPass = nullptr;
 		Scope* nextSubPass = nullptr;

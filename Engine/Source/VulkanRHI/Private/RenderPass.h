@@ -74,6 +74,8 @@ namespace CE::Vulkan
 		static void BuildDescriptor(Vulkan::Scope* pass, Descriptor& outDescriptor);
 
 		inline const Descriptor& GetDescriptor() const { return desc; }
+
+		inline VkRenderPass GetHandle() const { return renderPass; }
 		
 	private:
 		VkRenderPass renderPass = nullptr;

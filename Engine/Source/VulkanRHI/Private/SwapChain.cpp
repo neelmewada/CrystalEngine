@@ -254,13 +254,26 @@ namespace CE::Vulkan
 		images.Clear();
 
 		// Create new images
-		for (const auto& swapChainImage : swapChainImages)
+		for (VkImage swapChainImage : swapChainImages)
 		{
-			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, swapChainSurfaceFormat.format, 
-				VK_IMAGE_VIEW_TYPE_2D, VK_IMAGE_ASPECT_COLOR_BIT);
+			RHI::ImageDescriptor imageDesc{};
+			imageDesc.format = VkFormatToRHIFormat(swapChainSurfaceFormat.format);
+			imageDesc.width = width;
+			imageDesc.height = height;
+			imageDesc.dimension = Dimension::Dim2D;
+			imageDesc.depth = 1;
+			imageDesc.name = "SwapChain";
+			imageDesc.sampleCount = 1;
+			imageDesc.bindFlags = RHI::TextureBindFlags::Color;
+
+			Vulkan::Texture* image = new Vulkan::Texture(device, swapChainImage, imageDesc, VK_IMAGE_LAYOUT_UNDEFINED);
 			images.Add(image);
 		}
 
+		for (int i = 0; i < swapChainInitialImageLayouts.GetSize(); i++)
+		{
+			swapChainInitialImageLayouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
+		}
 	}
 
 } // namespace CE

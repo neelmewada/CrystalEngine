@@ -77,6 +77,12 @@ namespace CE::Vulkan
 			{
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
+
+			for (auto attachment : scope->attachments)
+			{
+				FrameAttachment* frameAttachment = attachment->GetFrameAttachment();
+				scope->usesSwapChainAttachment = frameAttachment->IsSwapChainAttachment();
+			}
             
             for (auto consumer : frameGraph->nodes[scope->id].consumers)
             {
@@ -98,6 +104,17 @@ namespace CE::Vulkan
 		FrameGraph* frameGraph = compileRequest.frameGraph;
 
 		vkDeviceWaitIdle(device->GetHandle());
+
+		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
+		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
+		numFramesInFlight = compileRequest.numFramesInFlight;
+		imageCount = numFramesInFlight;
+
+		if (swapChain && presentingScope)
+		{
+			imageCount = swapChain->GetImageCount();
+			numFramesInFlight = Math::Min<u32>(imageCount - 1, numFramesInFlight);
+		}
 		
 		// Compile sync objects for individual scopes
 		for (auto scope : frameGraph->scopes)
@@ -118,11 +135,6 @@ namespace CE::Vulkan
 
 		// ----------------------------
 		// Create new objects
-
-		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
-		numFramesInFlight = compileRequest.numFramesInFlight;
-		imageCount = numFramesInFlight;
 
 		if (swapChain && presentingScope)
 		{
@@ -331,7 +343,7 @@ namespace CE::Vulkan
 			Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
 			if (producerScope->queue != current->queue)
 			{
-				current->barriers.Clear();
+				current->barriers[imageIndex].Clear();
 				break;
 			}
 
@@ -385,7 +397,13 @@ namespace CE::Vulkan
 						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
 							imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 						if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
 							imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						}
+						else // Read only
+						{
+							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+						}
 						break;
 					case RHI::ScopeAttachmentUsage::SubpassInput:
 					case RHI::ScopeAttachmentUsage::Shader:
@@ -440,7 +458,13 @@ namespace CE::Vulkan
 						if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
 							imageBarrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 						if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
 							imageBarrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						}
+						else // Read only
+						{
+							imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+						}
 						break;
 					case RHI::ScopeAttachmentUsage::SubpassInput:
 					case RHI::ScopeAttachmentUsage::Shader:
@@ -483,9 +507,9 @@ namespace CE::Vulkan
 
 					barrier.imageBarriers.Add(imageBarrier);
 				}
+				// Buffer -> Buffer barrier
 				else if (from->IsBufferAttachment() && to->IsBufferAttachment() && RequiresDependency(from, to))
 				{
-					// Buffer -> Buffer barrier
 					BufferScopeAttachment* fromBuffer = (BufferScopeAttachment*)from;
 					BufferScopeAttachment* toBuffer = (BufferScopeAttachment*)to;
 					VkBufferMemoryBarrier bufferBarrier{};
@@ -542,13 +566,21 @@ namespace CE::Vulkan
 					default:
 						continue;
 					}
+
+					barrier.bufferBarriers.Add(bufferBarrier);
 				}
+				else
+				{
+					continue;
+				}
+
+				current->barriers[imageIndex].Add(barrier);
 			}
 		}
 
 		for (auto scope : current->consumers)
 		{
-			CompileBarriers(imageIndex, compileRequest, (Vulkan::Scope*)current);
+			CompileBarriers(imageIndex, compileRequest, (Vulkan::Scope*)scope);
 		}
 	}
 

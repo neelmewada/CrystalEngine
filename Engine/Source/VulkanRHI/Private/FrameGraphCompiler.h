@@ -34,7 +34,7 @@ namespace CE::Vulkan
 		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> imageAcquiredFences{};
 
 		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> graphExecutedSemaphores{};
-		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> graphFinishedFences{};
+		FixedArray<Array<VkFence>, RHI::Limits::Pipeline::MaxSwapChainImageCount> graphFinishedFences{};
 
 		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::Pipeline::MaxSwapChainImageCount> commandListsByImageIndex{};
 
