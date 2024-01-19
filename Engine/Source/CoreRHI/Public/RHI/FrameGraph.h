@@ -74,6 +74,7 @@ namespace CE::RHI
 		u32 numFramesInFlight = 1;
 		
 		Array<Scope*> producers{};
+		Array<Scope*> endScopes{};
 		Scope* currentScope = nullptr;
 
         friend class FrameAttachmentDatabase;

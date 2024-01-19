@@ -79,6 +79,8 @@ namespace CE::Vulkan
 		VkImageLayout vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         VkImageAspectFlags aspectMask{};
 
+		VkImageLayout curImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
 		friend class RHI::FrameGraph;
 		friend class GraphicsCommandList;
 		friend class FrameGraphExecuter;

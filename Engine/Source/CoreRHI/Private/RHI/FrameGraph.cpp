@@ -103,6 +103,8 @@ namespace CE::RHI
 	{
 		producers.Clear();
 		nodes.Clear();
+		endScopes.Clear();
+
 		HashMap<Scope*, HashSet<Scope*>> producersForEachScope{};
 
 		for (auto& [scope, dependencies] : nodeDependencies)
@@ -161,6 +163,8 @@ namespace CE::RHI
 				scope->prev = scope->producers[0];
 			if (scope->consumers.GetSize() == 1 && !scope->PresentsSwapChain() && scope->consumers[0]->producers.GetSize() == 1)
 				scope->next = scope->consumers[0];
+			if (scope->consumers.IsEmpty())
+				endScopes.Add(scope);
 		}
 	}
 

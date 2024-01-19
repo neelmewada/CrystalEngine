@@ -10,17 +10,27 @@ namespace CE::Vulkan
 
 	Scope::~Scope()
 	{
+		vkDeviceWaitIdle(device->GetHandle());
+
         if (renderPass)
         {
-            
+            // No need to destroy it. RenderPassCache manages it.
         }
         renderPass = nullptr;
+
+		for (auto frameBuffer : frameBuffers)
+		{
+			delete frameBuffer;
+		}
+		frameBuffers.Clear();
         
 		DestroySyncObjects();
 	}
 
 	bool Scope::CompileInternal(const FrameGraphCompileRequest& compileRequest)
 	{
+		vkDeviceWaitIdle(device->GetHandle());
+
 		DestroySyncObjects();
 
 		for (auto frameBuffer : frameBuffers)
@@ -93,6 +103,8 @@ namespace CE::Vulkan
 
 	void Scope::DestroySyncObjects()
 	{
+		vkDeviceWaitIdle(device->GetHandle());
+
 		for (VkSemaphore semaphore : renderFinishedSemaphores)
 		{
 			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);

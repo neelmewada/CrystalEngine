@@ -11,13 +11,10 @@ namespace CE::RHI
 
 	FrameAttachment::~FrameAttachment()
 	{
-        // Destroy transient resource
 		if (lifetime == RHI::AttachmentLifetimeType::Transient)
 		{
 			for (int i = 0; i < resources.GetSize(); i++)
 			{
-				if (resources[i])
-					delete resources[i];
 				resources[i] = nullptr;
 			}
 		}

@@ -318,6 +318,7 @@ namespace CE::Vulkan
 		imageCI.format = RHIFormatToVkFormat(this->format);
 		imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+		curImageLayout = vkImageLayout;
 
 		this->vkFormat = imageCI.format;
 
@@ -447,6 +448,8 @@ namespace CE::Vulkan
 			vkImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
 
+		curImageLayout = vkImageLayout;
+
 		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
 			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, aspectMask);
 	}
@@ -551,11 +554,19 @@ namespace CE::Vulkan
 		}
 
 		if (dstLayout != VK_IMAGE_LAYOUT_UNDEFINED)
+		{
 			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, dstLayout, aspectMask);
+			vkImageLayout = curImageLayout = dstLayout;
+		}
 	}
 
     Texture::~Texture()
     {
+		if (name == "DepthStencil")
+		{
+			name.GetHashValue();
+		}
+
         if (imageView != nullptr)
         {
             vkDestroyImageView(device->GetHandle(), imageView, nullptr);

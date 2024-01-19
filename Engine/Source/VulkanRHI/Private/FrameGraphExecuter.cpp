@@ -26,11 +26,18 @@ namespace CE::Vulkan
 
 		if (swapChain && presentingScope)
 		{
-			result = vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex]);
+			//result = vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex]);
 
 			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max, 
 				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
-				compiler->imageAcquiredFences[currentSubmissionIndex], &swapChain->currentImageIndex);
+				//compiler->imageAcquiredFences[currentSubmissionIndex], 
+				nullptr,
+				&swapChain->currentImageIndex);
+
+			vkWaitForFences(device->GetHandle(),
+				compiler->graphExecutionFences[currentImageIndex].GetSize(),
+				compiler->graphExecutionFences[currentImageIndex].GetData(),
+				VK_TRUE, u64Max);
 			
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
@@ -62,8 +69,6 @@ namespace CE::Vulkan
 		if (!scope)
 			return false;
 
-
-
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
@@ -88,6 +93,7 @@ namespace CE::Vulkan
 
 		Array<Scope*> scopeChain{};
 		Scope* scopeInChain = scope;
+
 		while (scopeInChain != nullptr)
 		{
 			if (scopeInChain->usesSwapChainAttachment)
@@ -104,6 +110,7 @@ namespace CE::Vulkan
 		{
 			consumers = scopeChain.Top()->consumers;
 		}
+
 
 		if (scopeChain.Top()->PresentsSwapChain())
 			presentRequired = true;
@@ -147,17 +154,10 @@ namespace CE::Vulkan
 						memcpy(clearValue.color.float32, loadStoreAction.clearValue.xyzw, sizeof(f32[4]));
 					}
 
-					if (imageFrameAttachment->IsSwapChainAttachment())
-					{
-						Vulkan::Texture* image = (Vulkan::Texture*)swapChain->GetCurrentImage();
-
-
-					}
-
 					clearValues.Add(clearValue);
 				}
 
-				if (usesSwapChainAttachment && swapChain->swapChainInitialImageLayouts[currentImageIndex] == VK_IMAGE_LAYOUT_UNDEFINED)
+				/*if (usesSwapChainAttachment && swapChain->swapChainInitialImageLayouts[currentImageIndex] == VK_IMAGE_LAYOUT_UNDEFINED)
 				{
 					swapChain->swapChainInitialImageLayouts[currentImageIndex] = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
@@ -183,7 +183,7 @@ namespace CE::Vulkan
 						0, nullptr,
 						0, nullptr,
 						1, &imageBarrier);
-				}
+				}*/
 
 				if (currentScope->barriers[currentImageIndex].NonEmpty())
 				{
@@ -195,6 +195,117 @@ namespace CE::Vulkan
 							barrier.memoryBarriers.GetSize(), barrier.memoryBarriers.GetData(),
 							barrier.bufferBarriers.GetSize(), barrier.bufferBarriers.GetData(),
 							barrier.imageBarriers.GetSize(), barrier.imageBarriers.GetData());
+
+						for (const auto& transition : barrier.imageLayoutTransitions)
+						{
+							transition.image->curImageLayout = transition.layout;
+							transition.image->curFamilyIndex = transition.queueFamilyIndex;
+						}
+					}
+				}
+
+				// Do image layout transitions manually
+				for (auto scopeAttachment : currentScope->attachments)
+				{
+					if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+						!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
+						continue;
+
+					ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
+					ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+
+					RHIResource* resource = imageFrameAttachment->GetResource(currentImageIndex);
+					if (resource == nullptr || resource->GetResourceType() != ResourceType::Texture)
+						continue;
+
+					Vulkan::Texture* image = (Vulkan::Texture*)resource;
+
+					VkImageLayout requiredLayout = image->curImageLayout;
+					VkPipelineStageFlags dstStageMask = 0;
+					VkAccessFlags dstAccessMask = 0;
+						
+					switch (scopeAttachment->GetUsage())
+					{
+					case RHI::ScopeAttachmentUsage::RenderTarget:
+					case RHI::ScopeAttachmentUsage::Resolve:
+						requiredLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::DepthStencil:
+						dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+						if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+							dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						}
+						else // Read only
+						{
+							requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+							dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::SubpassInput:
+					case RHI::ScopeAttachmentUsage::Shader:
+						dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+						if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							requiredLayout = VK_IMAGE_LAYOUT_GENERAL;
+							dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+						}
+						else
+						{
+							requiredLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+							dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::Copy:
+						dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+						if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							requiredLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+							dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
+						}
+						else
+						{
+							requiredLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+							dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+						}
+						break;
+					default:
+						continue;
+					}
+
+					if (image->curImageLayout != requiredLayout)
+					{
+						VkImageMemoryBarrier imageBarrier{};
+						imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+						if (image->curFamilyIndex < 0)
+							image->curFamilyIndex = presentQueue->GetFamilyIndex();
+						imageBarrier.srcQueueFamilyIndex = image->curFamilyIndex;
+						imageBarrier.dstQueueFamilyIndex = currentScope->queue->GetFamilyIndex();
+						imageBarrier.image = image->GetImage();
+						imageBarrier.oldLayout = image->curImageLayout;
+						imageBarrier.newLayout = requiredLayout;
+						imageBarrier.srcAccessMask = 0;
+						imageBarrier.dstAccessMask = dstAccessMask;
+
+						imageBarrier.subresourceRange.aspectMask = image->aspectMask;
+						imageBarrier.subresourceRange.baseMipLevel = 0;
+						imageBarrier.subresourceRange.levelCount = 1;
+						imageBarrier.subresourceRange.baseArrayLayer = 0;
+						imageBarrier.subresourceRange.layerCount = 1;
+
+						vkCmdPipelineBarrier(cmdBuffer,
+							VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+							dstStageMask,
+							0,
+							0, nullptr,
+							0, nullptr,
+							1, &imageBarrier);
+
+						image->curImageLayout = requiredLayout;
+						image->curFamilyIndex = currentScope->queue->GetFamilyIndex();
 					}
 				}
 
@@ -226,6 +337,8 @@ namespace CE::Vulkan
 
 				VkImageMemoryBarrier imageBarrier{};
 				imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+				if (image->curFamilyIndex < 0)
+					image->curFamilyIndex = presentQueue->GetFamilyIndex();
 				imageBarrier.srcQueueFamilyIndex = image->curFamilyIndex;
 				imageBarrier.dstQueueFamilyIndex = presentQueue->GetFamilyIndex();
 				imageBarrier.image = image->image;
@@ -247,6 +360,9 @@ namespace CE::Vulkan
 					0, nullptr,
 					0, nullptr,
 					1, &imageBarrier);
+
+				image->curImageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+				image->curFamilyIndex = presentQueue->GetFamilyIndex();
 			}
 		}
 		vkEndCommandBuffer(cmdBuffer);
@@ -310,6 +426,11 @@ namespace CE::Vulkan
 			presentInfo.pWaitSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
 
 			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
+		}
+
+		for (RHI::Scope* consumerScope : scopeChain.Top()->consumers)
+		{
+			ExecuteScope(executeRequest, (Vulkan::Scope*)consumerScope);
 		}
 
 		return result == VK_SUCCESS;

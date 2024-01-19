@@ -9,6 +9,13 @@ namespace CE::Vulkan
 		using Super = RHI::Scope;
 		using Self = Scope;
 
+		struct ImageLayoutTransition
+		{
+			Vulkan::Texture* image{};
+			VkImageLayout layout = VK_IMAGE_LAYOUT_UNDEFINED;
+			u32 queueFamilyIndex = 0;
+		};
+
 		struct Barrier
 		{
 			VkPipelineStageFlags srcStageMask{};
@@ -18,6 +25,9 @@ namespace CE::Vulkan
 			List<VkMemoryBarrier> memoryBarriers{};
 			List<VkBufferMemoryBarrier> bufferBarriers{};
 			List<VkImageMemoryBarrier> imageBarriers{};
+
+			//! Just to keep track of image layout
+			List<ImageLayoutTransition> imageLayoutTransitions{};
 		};
 
 		Scope(VulkanDevice* device, const RHI::ScopeDescriptor& desc);

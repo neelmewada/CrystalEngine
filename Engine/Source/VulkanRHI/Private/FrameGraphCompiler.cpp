@@ -56,12 +56,16 @@ namespace CE::Vulkan
 
 	FrameGraphCompiler::~FrameGraphCompiler()
 	{
+		vkDeviceWaitIdle(device->GetHandle());
+
 		DestroySyncObjects();
 		DestroyCommandLists();
 	}
 
 	void FrameGraphCompiler::CompileScopesInternal(const FrameGraphCompileRequest& compileRequest)
 	{
+		vkDeviceWaitIdle(device->GetHandle());
+
 		FrameGraph* frameGraph = compileRequest.frameGraph;
         QueueAllocator queueAllocator{};
         queueAllocator.queuesByFamily = device->queuesByFamily;
@@ -122,6 +126,20 @@ namespace CE::Vulkan
 			scope->Compile(compileRequest);
 		}
 
+		for (auto& fences : graphExecutionFences)
+		{
+			fences.Clear();
+		}
+
+		for (auto rhiScope : frameGraph->endScopes)
+		{
+			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
+			for (int i = 0; i < imageCount; i++)
+			{
+				graphExecutionFences[i].Add(scope->renderFinishedFences[i]);
+			}
+		}
+
 		for (auto scope : frameGraph->producers)
 		{
 			CompileCrossQueueDependencies(compileRequest, (Vulkan::Scope*)scope);
@@ -159,32 +177,19 @@ namespace CE::Vulkan
 				fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 				fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-				VkFence fence = nullptr;
+				/*VkFence fence = nullptr;
 				result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
 				if (result != VK_SUCCESS)
 				{
 					continue;
 				}
 
-				imageAcquiredFences.Add(fence);
+				imageAcquiredFences.Add(fence);*/
 			}
 		}
 
-		for (int i = 0; i < imageCount; i++)
+		for (int imageIdx = 0; imageIdx < imageCount; imageIdx++)
 		{
-			VkSemaphoreCreateInfo semaphoreCI{};
-			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			VkSemaphore semaphore = nullptr;
-			vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
-			graphExecutedSemaphores.Add(semaphore);
-
-			VkFenceCreateInfo fenceCI{};
-			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-			VkFence fence = nullptr;
-			vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
-			graphFinishedFences.Add(fence);
-
 			commandListsByImageIndex.Add({});
 
 			for (u32 familyIdx = 0; familyIdx < device->queueFamilyPropeties.GetSize(); familyIdx++)
@@ -192,7 +197,7 @@ namespace CE::Vulkan
 				VkCommandBuffer cmdBuffer = nullptr;
 				VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx);
 				CommandList* commandList = new Vulkan::CommandList(device, cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx, pool);
-				commandListsByImageIndex[i].Add(commandList);
+				commandListsByImageIndex[imageIdx].Add(commandList);
 			}
 		}
 
@@ -203,29 +208,19 @@ namespace CE::Vulkan
 
     void FrameGraphCompiler::DestroySyncObjects()
     {
+		vkDeviceWaitIdle(device->GetHandle());
+
 		for (VkSemaphore semaphore : imageAcquiredSemaphores)
 		{
 			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
 		}
 		imageAcquiredSemaphores.Clear();
 
-		for (VkFence fence : imageAcquiredFences)
+		/*for (VkFence fence : imageAcquiredFences)
 		{
 			vkDestroyFence(device->GetHandle(), fence, nullptr);
 		}
-		imageAcquiredFences.Clear();
-
-		for (VkSemaphore semaphore : graphExecutedSemaphores)
-		{
-			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
-		}
-		graphExecutedSemaphores.Clear();
-
-		for (VkFence fence : graphFinishedFences)
-		{
-			vkDestroyFence(device->GetHandle(), fence, nullptr);
-		}
-		graphFinishedFences.Clear();
+		imageAcquiredFences.Clear();*/
     }
 
 	void FrameGraphCompiler::DestroyCommandLists()
@@ -505,7 +500,13 @@ namespace CE::Vulkan
 						continue;
 					}
 
+					Scope::ImageLayoutTransition transition{};
+					transition.image = image;
+					transition.layout = imageBarrier.newLayout;
+					transition.queueFamilyIndex = current->queue->GetFamilyIndex();
+
 					barrier.imageBarriers.Add(imageBarrier);
+					barrier.imageLayoutTransitions.Add(transition);
 				}
 				// Buffer -> Buffer barrier
 				else if (from->IsBufferAttachment() && to->IsBufferAttachment() && RequiresDependency(from, to))

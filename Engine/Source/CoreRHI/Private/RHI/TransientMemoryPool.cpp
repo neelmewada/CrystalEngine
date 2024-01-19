@@ -9,6 +9,18 @@ namespace CE::RHI
 
 	TransientMemoryPool::~TransientMemoryPool()
 	{
+		for (auto buffer : allocatedBuffers)
+		{
+			RHI::gDynamicRHI->DestroyBuffer(buffer);
+		}
+		allocatedBuffers.Clear();
+
+		for (auto image : allocatedImages)
+		{
+			RHI::gDynamicRHI->DestroyTexture(image);
+		}
+		allocatedImages.Clear();
+
 		if (bufferPool)
 			delete bufferPool;
 		if (imagePool)
