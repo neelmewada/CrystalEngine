@@ -215,12 +215,6 @@ namespace CE::Vulkan
 			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
 		}
 		imageAcquiredSemaphores.Clear();
-
-		/*for (VkFence fence : imageAcquiredFences)
-		{
-			vkDestroyFence(device->GetHandle(), fence, nullptr);
-		}
-		imageAcquiredFences.Clear();*/
     }
 
 	void FrameGraphCompiler::DestroyCommandLists()

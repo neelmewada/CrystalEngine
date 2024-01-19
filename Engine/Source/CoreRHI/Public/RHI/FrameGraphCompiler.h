@@ -11,6 +11,8 @@ namespace CE::RHI
 		TransientMemoryPool* transientPool = nullptr;
 
 		u32 numFramesInFlight = 1;
+
+		bool shrinkPool = false;
 	};
     
 	class CORERHI_API FrameGraphCompiler

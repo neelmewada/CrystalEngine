@@ -25,6 +25,9 @@ namespace CE::Vulkan
 		frameBuffers.Clear();
         
 		DestroySyncObjects();
+
+		delete shaderResourceGroup;
+		shaderResourceGroup = nullptr;
 	}
 
 	bool Scope::CompileInternal(const FrameGraphCompileRequest& compileRequest)
@@ -32,6 +35,9 @@ namespace CE::Vulkan
 		vkDeviceWaitIdle(device->GetHandle());
 
 		DestroySyncObjects();
+
+		delete shaderResourceGroup;
+		shaderResourceGroup = nullptr;
 
 		for (auto frameBuffer : frameBuffers)
 		{

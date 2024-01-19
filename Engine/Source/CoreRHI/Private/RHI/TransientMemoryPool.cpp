@@ -27,7 +27,8 @@ namespace CE::RHI
 			delete imagePool;
 	}
 
-    void TransientMemoryPool::AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, bool* bufferPoolRecreated, bool* imagePoolRecreated)
+    void TransientMemoryPool::AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, 
+		bool* bufferPoolRecreated, bool* imagePoolRecreated, bool allowShrink)
     {
 		MemoryHeapDescriptor bufferHeapDesc{};
 		bufferHeapDesc.allocationSize = allocInfo.bufferPool.size;
@@ -42,7 +43,7 @@ namespace CE::RHI
 		}
 		allocatedBuffers.Clear();
 
-		if (bufferPool == nullptr || bufferPool->GetHeapSize() < bufferHeapDesc.allocationSize)
+		if (bufferPool == nullptr || bufferPool->GetHeapSize() < bufferHeapDesc.allocationSize || allowShrink)
 		{
 			if (bufferPool)
 			{
@@ -67,7 +68,7 @@ namespace CE::RHI
 		}
 		allocatedImages.Clear();
 
-		if (imagePool == nullptr || imagePool->GetHeapSize() < imageHeapDesc.allocationSize)
+		if (imagePool == nullptr || imagePool->GetHeapSize() < imageHeapDesc.allocationSize || allowShrink)
 		{
 			if (imagePool)
 			{

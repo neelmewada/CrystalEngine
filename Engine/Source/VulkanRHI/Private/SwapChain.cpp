@@ -10,9 +10,18 @@ namespace CE::Vulkan
 		: rhi(rhi), device(device), window(window), desc(desc)
 	{
 		this->desc.preferredFormats.AddRange({ RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM });
+		this->preferredWidth = desc.preferredWidth;
+		this->preferredHeight = desc.preferredHeight;
 
 		window->GetDrawableWindowSize(&width, &height);
 		surface = VulkanPlatform::CreateSurface((VkInstance)rhi->GetNativeHandle(), window);
+
+		if (preferredWidth != 0 && preferredHeight != 0)
+		{
+			f32 aspect = width / height;
+			width = preferredWidth;
+			height = preferredWidth / aspect;
+		}
 
 		Create();
 
@@ -21,6 +30,8 @@ namespace CE::Vulkan
 
 	SwapChain::~SwapChain()
 	{
+		vkDeviceWaitIdle(device->GetHandle());
+
 		// Delete images
 		for (auto image : images)
 		{
@@ -47,6 +58,13 @@ namespace CE::Vulkan
 	void SwapChain::RebuildSwapChain()
 	{
 		window->GetDrawableWindowSize(&width, &height);
+
+		if (preferredWidth != 0 && preferredHeight != 0)
+		{
+			f32 aspect = width / height;
+			width = preferredWidth;
+			height = preferredWidth / aspect;
+		}
 
 		Create();
 	}

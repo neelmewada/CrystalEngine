@@ -59,9 +59,6 @@ namespace CE::Vulkan
 		VkSurfaceFormatKHR swapChainSurfaceFormat{};
 		RHI::Format swapChainColorFormat{};
 
-		u32 width = 0;
-		u32 height = 0;
-
 		DelegateHandle windowResizeCallback = 0;
 
 		friend class FrameGraphExecuter;

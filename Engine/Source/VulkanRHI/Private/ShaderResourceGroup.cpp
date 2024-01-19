@@ -181,8 +181,13 @@ namespace CE::Vulkan
 	{
 		if (!mergedSRGsBySourceSRG.KeyExists(srg))
 			return;
+
+		Array<MergedShaderResourceGroup*> srgsToDestroy{};
+		srgsToDestroy.Resize(mergedSRGsBySourceSRG[srg].GetSize());
+
+		int i = 0;
 		
-		// Destroy all merged SRGs created from the given source 'srg'
+		// Destroy all Merged SRGs created from the given source 'srg'
 		for (MergedShaderResourceGroup* mergedSRG : mergedSRGsBySourceSRG[srg])
 		{
 			// Get all source SRGs used to create 'mergeSRG'
@@ -193,11 +198,17 @@ namespace CE::Vulkan
 			}
 
 			mergedSRGsByHash.Remove(mergedSRG->GetMergedHash());
-			delete mergedSRG;
+			srgsToDestroy[i++] = mergedSRG;
 		}
 
 		mergedSRGsBySourceSRG[srg].Clear();
 		mergedSRGsBySourceSRG.Remove(srg);
+
+		for (auto srg : srgsToDestroy)
+		{
+			srg->combinedSRGs.Clear();
+			delete srg;
+		}
 	}
 
     ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupLayout& srgLayout)

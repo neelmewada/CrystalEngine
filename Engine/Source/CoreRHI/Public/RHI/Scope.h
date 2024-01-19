@@ -81,6 +81,8 @@ namespace CE::RHI
 
 		DrawList drawList{};
 		ThreadLocalContext<DrawList> threadDrawLists{};
+
+		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
         
 		//! @brief List of all scope attachments owned by this scope.
 		Array<ScopeAttachment*> attachments{};

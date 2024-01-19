@@ -14,6 +14,9 @@ namespace CE::RHI
 
 		//! @brief Array of preferred image formats to use.
 		Array<RHI::Format> preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM, };
+
+		u32 preferredWidth = 0;
+		u32 preferredHeight = 0;
 	};
     
 	class CORERHI_API SwapChain : public RHIResource
@@ -38,12 +41,22 @@ namespace CE::RHI
 
 		inline u32 GetImageCount() const { return images.GetSize(); }
 
+		inline u32 GetWidth() const { return width; }
+		inline u32 GetHeight() const { return height; }
+
+		inline u32 GetPreferredWidth() const { return width; }
+		inline u32 GetPreferredHeight() const { return height; }
+
 	protected:
 
 		Array<Texture*> images{};
 
 		u32 currentImageIndex = 0;
+		u32 width = 0;
+		u32 height = 0;
 
+		u32 preferredWidth = 0;
+		u32 preferredHeight = 0;
 	};
 
 } // namespace CE::RHI

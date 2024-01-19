@@ -63,6 +63,7 @@ static void WindowTestBegin()
 	gProjectPath = PlatformDirectories::GetLaunchDir();
 
 	ModuleManager::Get().LoadModule("Core");
+	ModuleManager::Get().LoadModule("CoreApplication");
 	ModuleManager::Get().LoadModule("CoreMedia");
 	ModuleManager::Get().LoadModule("CoreRHI");
 	ModuleManager::Get().LoadModule("VulkanRHI");
@@ -103,6 +104,7 @@ static void WindowTestEnd()
 	ModuleManager::Get().LoadModule("VulkanRHI");
 	ModuleManager::Get().LoadModule("CoreRHI");
 	ModuleManager::Get().LoadModule("CoreMedia");
+	ModuleManager::Get().LoadModule("CoreApplication");
 	ModuleManager::Get().LoadModule("Core");
 }
 
@@ -435,7 +437,7 @@ TEST(RHI, FrameScheduler)
         if (rebuild == true)
 		{
             width = curWidth;
-            height = curHeight;
+			height = curHeight;
             
             scheduler->BeginFrameGraph();
             {
@@ -534,7 +536,7 @@ TEST(RHI, FrameScheduler)
 			{
 				scheduler->BeginDrawListScope("Depth");
 				{
-
+					
 				}
 				scheduler->EndDrawListScope();
 

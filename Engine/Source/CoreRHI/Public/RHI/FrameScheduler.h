@@ -44,6 +44,8 @@ namespace CE::RHI
         
         FrameAttachment* GetFrameAttachment(AttachmentID id) const;
 
+		inline TransientMemoryPool* GetTransientPool() const { return transientMemoryPool; }
+
 	private:
 
 		u32 numFramesInFlight = 1;

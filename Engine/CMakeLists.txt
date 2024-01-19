@@ -24,6 +24,7 @@ add_subdirectory(Source/CoreSettings)
 # Core Dependencies
 if(${PAL_TRAIT_VULKAN_SUPPORTED})
     add_subdirectory(Source/VulkanRHI)
+    add_subdirectory(Source/VulkanSandbox)
 endif()
 
 add_subdirectory(Source/CoreShader)

@@ -41,7 +41,8 @@ namespace CE::RHI
         compileRequest.frameGraph = frameGraph;
         compileRequest.transientPool = transientMemoryPool;
 		compileRequest.numFramesInFlight = numFramesInFlight;
-
+		compileRequest.shrinkPool = true;
+		
         compiler->Compile(compileRequest);
     }
 

@@ -9,12 +9,15 @@ typedef VkSurfaceKHR_T* VkSurfaceKHR;
 namespace CE
 {
 	typedef void* WindowHandle;
+	class PlatformWindow;
 
-	class IWindowResizeCallback
+	class IWindowCallbacks
 	{
 	public:
 
-		virtual void OnPlatformWindowResized(u32 newWidth, u32 newHeight) {}
+		virtual void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) {}
+
+		virtual void OnWindowDestroyed(PlatformWindow* window) {}
 
 	};
     
@@ -45,7 +48,15 @@ namespace CE
 
         virtual u32 GetWindowId() = 0;
 
+		inline void AddListener(IWindowCallbacks* listener) { windowCallbacks.Add(listener); }
+
+		inline void RemoveListener(IWindowCallbacks* listener) { windowCallbacks.Remove(listener); }
+
     protected:
+
+		List<IWindowCallbacks*> windowCallbacks{};
+
+		friend class PlatformApplication;
     };
 
 } // namespace CE

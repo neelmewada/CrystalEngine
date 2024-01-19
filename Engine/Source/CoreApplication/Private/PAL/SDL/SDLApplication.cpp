@@ -41,7 +41,8 @@ namespace CE
 	{
 		Super::PreShutdown();
 
-		DestroyWindow(mainWindow);
+		if (mainWindow != nullptr)
+			DestroyWindow(mainWindow);
 	}
 
 	void SDLApplication::Shutdown()
@@ -130,13 +131,28 @@ namespace CE
 
 		auto sdlWindow = (SDLPlatformWindow*)window;
 
+		windowList.Remove(sdlWindow);
+
 		if (sdlWindow->GetWindowId() == mainWindow->GetWindowId())
 		{
 			SDL_DelEventWatch(ResizingEventWatch, mainWindow->handle);
+
+			// Destroy all windows (i.e. shutdown application) if main window is destroyed
+			for (auto win : windowList)
+			{
+				DestroyWindow(win);
+			}
+
+			RequestEngineExit("MAIN_WINDOW_CLOSED");
 			this->mainWindow = nullptr;
 		}
 
-		windowList.Remove(sdlWindow);
+		for (auto callback : sdlWindow->windowCallbacks)
+		{
+			if (callback)
+				callback->OnWindowDestroyed(window);
+		}
+
 		delete sdlWindow;
 	}
 
@@ -191,6 +207,17 @@ namespace CE
                 }
             }
 		}
+		else if (event.window.event == SDL_WINDOWEVENT_CLOSE)
+		{
+			for (PlatformWindow* window : windowList)
+			{
+				if (event.window.windowID == window->GetWindowId())
+				{
+					DestroyWindow(window);
+					break;
+				}
+			}
+		}
 	}
 
 	void SDLApplication::ProcessWindowResizeEvent(SDLPlatformWindow* window)
@@ -206,6 +233,12 @@ namespace CE
 					handler->OnMainWindowDrawableSizeChanged(w, h);
 			}
             onWindowDrawableSizeChanged.Broadcast(window, w, h);
+			
+			for (auto callback : window->windowCallbacks)
+			{
+				if (callback)
+					callback->OnWindowResized(window, w, h);
+			}
 		}
 	}
 

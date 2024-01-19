@@ -10,6 +10,12 @@
 
 namespace CE
 {
+	SDLPlatformWindow::~SDLPlatformWindow()
+	{
+		if (handle != nullptr)
+			SDL_DestroyWindow(handle);
+		handle = nullptr;
+	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
 	{
@@ -62,13 +68,6 @@ namespace CE
 	u32 SDLPlatformWindow::GetWindowId()
 	{
 		return SDL_GetWindowID(handle);
-	}
-
-	SDLPlatformWindow::~SDLPlatformWindow()
-	{
-		if (handle != nullptr)
-			SDL_DestroyWindow(handle);
-		handle = nullptr;
 	}
 
 	void* SDLPlatformWindow::GetUnderlyingHandle()

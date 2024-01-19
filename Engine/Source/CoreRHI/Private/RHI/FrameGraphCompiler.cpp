@@ -88,7 +88,7 @@ namespace CE::RHI
 		allocationInfo.imagePool = imageReq;
 
 		// Allocate aliased memory pool
-		pool->AllocateMemoryPool(allocationInfo, &bufferPoolRecreated, &imagePoolRecreated);
+		pool->AllocateMemoryPool(allocationInfo, &bufferPoolRecreated, &imagePoolRecreated, compileRequest.shrinkPool);
 
 		for (int imageIdx = 0; imageIdx < compileRequest.numFramesInFlight; imageIdx++)
 		{

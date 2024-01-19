@@ -15,7 +15,7 @@ namespace CE::RHI
 		TransientMemoryPool();
 		virtual ~TransientMemoryPool();
 
-		void AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, bool* bufferPoolRecreated, bool* imagePoolRecreated);
+		void AllocateMemoryPool(const TransientMemoryAllocation& allocInfo, bool* bufferPoolRecreated, bool* imagePoolRecreated, bool allowShrink = false);
 
 		RHI::Buffer* AllocateBuffer(const RHI::BufferDescriptor& descriptor, u64 memoryOffset);
 		RHI::Texture* AllocateImage(const RHI::ImageDescriptor& descriptor, u64 memoryOffset);
@@ -29,6 +29,9 @@ namespace CE::RHI
 		{
 			return allocatedImages;
 		}
+
+		inline RHI::MemoryHeap* GetBufferPool() const { return bufferPool; }
+		inline RHI::MemoryHeap* GetImagePool() const { return imagePool; }
 
 	private:
 
