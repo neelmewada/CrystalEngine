@@ -1,6 +1,6 @@
 #include "VulkanSandbox.h"
 
-namespace CE
+namespace CE::Sandbox
 {
 
 	static int counter = 0;
@@ -27,6 +27,8 @@ namespace CE
 		
 		BuildFrameGraph();
 		CompileFrameGraph();
+
+		InitModels();
 	}
 
 	void VulkanSandbox::Tick(f32 deltaTime)
@@ -58,12 +60,19 @@ namespace CE
 
 			CompileFrameGraph();
 		}
+		
+		// Submit work
+		{
+
+		}
 
 		scheduler->Execute();
 	}
 
 	void VulkanSandbox::Shutdown()
 	{
+		DestroyModels();
+
 		if (mainWindow)
 		{
 			mainWindow->RemoveListener(this);
@@ -71,6 +80,167 @@ namespace CE
 
 		delete scheduler;
 		delete swapChain;
+	}
+
+	void VulkanSandbox::InitModels()
+	{
+		Mesh* mesh = new Mesh();
+
+		mesh->vertices = {
+				Vec3(0.5, -0.5, 0.5),
+				Vec3(-0.5, -0.5, 0.5),
+				Vec3(0.5, 0.5, 0.5),
+				Vec3(-0.5, 0.5, 0.5),
+
+				Vec3(0.5, 0.5, -0.5),
+				Vec3(-0.5, 0.5, -0.5),
+				Vec3(0.5, -0.5, -0.5),
+				Vec3(-0.5, -0.5, -0.5),
+
+				Vec3(0.5, 0.5, 0.5),
+				Vec3(-0.5, 0.5, 0.5),
+				Vec3(0.5, 0.5, -0.5),
+				Vec3(-0.5, 0.5, -0.5),
+
+				Vec3(0.5, -0.5, -0.5),
+				Vec3(0.5, -0.5, 0.5),
+				Vec3(-0.5, -0.5, 0.5),
+				Vec3(-0.5, -0.5, -0.5),
+
+				Vec3(-0.5, -0.5, 0.5),
+				Vec3(-0.5, 0.5, 0.5),
+				Vec3(-0.5, 0.5, -0.5),
+				Vec3(-0.5, -0.5, -0.5),
+
+				Vec3(0.5, -0.5, -0.5),
+				Vec3(0.5, 0.5, -0.5),
+				Vec3(0.5, 0.5, 0.5),
+				Vec3(0.5, -0.5, 0.5)
+		};
+
+		mesh->indices = {
+			0, 2, 3,
+			0, 3, 1,
+			8, 4, 5,
+			8, 5, 9,
+			10, 6, 7,
+			10, 7, 11,
+			12, 13, 14,
+			12, 14, 15,
+			16, 17, 18,
+			16, 18, 19,
+			20, 21, 22,
+			20, 22, 23
+		};
+
+		mesh->uvCoords = {
+			Vec2(0, 0),
+			Vec2(1, 0),
+			Vec2(0, 1),
+			Vec2(1, 1),
+
+			Vec2(0, 1),
+			Vec2(1, 1),
+			Vec2(0, 1),
+			Vec2(1, 1),
+
+			Vec2(0, 0),
+			Vec2(1, 0),
+			Vec2(0, 0),
+			Vec2(1, 0),
+
+			Vec2(0, 0),
+			Vec2(0, 1),
+			Vec2(1, 1),
+			Vec2(1, 0),
+
+			Vec2(0, 0),
+			Vec2(0, 1),
+			Vec2(1, 1),
+			Vec2(1, 0),
+
+			Vec2(0, 0),
+			Vec2(0, 1),
+			Vec2(1, 1),
+			Vec2(1, 0)
+		};
+
+		mesh->normals = {
+			Vec3(0, 0, 1),
+			Vec3(0, 0, 1),
+			Vec3(0, 0, 1),
+			Vec3(0, 0, 1),
+
+			Vec3(0, 1, 0),
+			Vec3(0, 1, 0),
+			Vec3(0, 0, -1),
+			Vec3(0, 0, -1),
+
+			Vec3(0, 1, 0),
+			Vec3(0, 1, 0),
+			Vec3(0, 0, -1),
+			Vec3(0, 0, -1),
+
+			Vec3(0, -1, 0),
+			Vec3(0, -1, 0),
+			Vec3(0, -1, 0),
+			Vec3(0, -1, 0),
+
+			Vec3(-1, 0, 0),
+			Vec3(-1, 0, 0),
+			Vec3(-1, 0, 0),
+			Vec3(-1, 0, 0),
+
+			Vec3(1, 0, 0),
+			Vec3(1, 0, 0),
+			Vec3(1, 0, 0),
+			Vec3(1, 0, 0)
+		};
+
+		mesh->tangents = {
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+			Vec4(-1, 0, 0, -1),
+
+			Vec4(0, 0, -1, -1),
+			Vec4(0, 0, -1, -1),
+			Vec4(0, 0, -1, -1),
+			Vec4(0, 0, -1, -1),
+
+			Vec4(0, 0, 1, -1),
+			Vec4(0, 0, 1, -1),
+			Vec4(0, 0, 1, -1),
+			Vec4(0, 0, 1, -1),
+		};
+
+		// TODO: Create buffers
+
+		meshes.Add(mesh);
+	}
+
+	void VulkanSandbox::DestroyModels()
+	{
+		for (auto mesh : meshes)
+		{
+			delete mesh;
+		}
+		meshes.Clear();
 	}
 
 	void VulkanSandbox::BuildFrameGraph()
@@ -121,7 +291,7 @@ namespace CE
 
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f * localCounter * 2, 0.5f, 1);
+				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
 				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
@@ -165,6 +335,23 @@ namespace CE
 		{
 			CE_LOG(Info, All, "Transient Image Pool: {} MB", (imageHeap->GetHeapSize() / 1024.0f / 1024.0f));
 		}
+	}
+
+	void VulkanSandbox::SubmitWork()
+	{
+		resubmit = false;
+
+		scheduler->BeginDrawListSubmission();
+		{
+			scheduler->BeginDrawListScope("Depth");
+			{
+
+			}
+			scheduler->EndDrawListScope();
+
+			
+		}
+		scheduler->EndDrawListSubmission();
 	}
 
 	void VulkanSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)

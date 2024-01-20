@@ -13,5 +13,6 @@
         "SYSTEM_API",
         "CORERPI_API=",
         "CORERHI_API=",
-    ]
+    ],
+    "esbonio.sphinx.confDir": ""
 }

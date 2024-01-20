@@ -30,7 +30,7 @@ namespace CE::Vulkan
 		VkCommandPool commandPool = alloc.GetOrCreate(queueFamilyIndex);
 		if (commandPool == nullptr)
 			return nullptr;
-
+		
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.commandPool = commandPool;

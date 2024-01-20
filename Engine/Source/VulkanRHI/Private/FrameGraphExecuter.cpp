@@ -157,34 +157,6 @@ namespace CE::Vulkan
 					clearValues.Add(clearValue);
 				}
 
-				/*if (usesSwapChainAttachment && swapChain->swapChainInitialImageLayouts[currentImageIndex] == VK_IMAGE_LAYOUT_UNDEFINED)
-				{
-					swapChain->swapChainInitialImageLayouts[currentImageIndex] = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-					VkImageMemoryBarrier imageBarrier{};
-					imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-					imageBarrier.srcAccessMask = 0;
-					imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-					imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-					imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-					imageBarrier.image = ((Vulkan::Texture*)swapChain->images[currentImageIndex])->GetImage();
-					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-					imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					imageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-					imageBarrier.subresourceRange.baseArrayLayer = 0;
-					imageBarrier.subresourceRange.layerCount = 1;
-					imageBarrier.subresourceRange.baseMipLevel = 0;
-					imageBarrier.subresourceRange.levelCount = 1;
-
-					vkCmdPipelineBarrier(cmdBuffer,
-						VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-						VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-						0,
-						0, nullptr,
-						0, nullptr,
-						1, &imageBarrier);
-				}*/
-
 				if (currentScope->barriers[currentImageIndex].NonEmpty())
 				{
 					for (const auto& barrier : currentScope->barriers[currentImageIndex])
@@ -309,23 +281,35 @@ namespace CE::Vulkan
 					}
 				}
 
-				VkRenderPassBeginInfo beginInfo{};
-				beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-				beginInfo.renderPass = renderPass->GetHandle();
-				beginInfo.framebuffer = currentScope->frameBuffers[currentImageIndex]->GetHandle();
-				beginInfo.clearValueCount = clearValues.GetSize();
-				beginInfo.pClearValues = clearValues.GetData();
-
-				beginInfo.renderArea.offset.x = 0;
-				beginInfo.renderArea.offset.y = 0;
-				beginInfo.renderArea.extent.width = currentScope->frameBuffers[currentImageIndex]->GetWidth();
-				beginInfo.renderArea.extent.height = currentScope->frameBuffers[currentImageIndex]->GetHeight();
-
-				vkCmdBeginRenderPass(cmdBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+				// Graphics operation
+				if (currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 				{
-					// Execute scope
+					VkRenderPassBeginInfo beginInfo{};
+					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+					beginInfo.renderPass = renderPass->GetHandle();
+					beginInfo.framebuffer = currentScope->frameBuffers[currentImageIndex]->GetHandle();
+					beginInfo.clearValueCount = clearValues.GetSize();
+					beginInfo.pClearValues = clearValues.GetData();
+
+					beginInfo.renderArea.offset.x = 0;
+					beginInfo.renderArea.offset.y = 0;
+					beginInfo.renderArea.extent.width = currentScope->frameBuffers[currentImageIndex]->GetWidth();
+					beginInfo.renderArea.extent.height = currentScope->frameBuffers[currentImageIndex]->GetHeight();
+
+					vkCmdBeginRenderPass(cmdBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+					{
+						// Execute scope
+					}
+					vkCmdEndRenderPass(cmdBuffer);
 				}
-				vkCmdEndRenderPass(cmdBuffer);
+				else if (currentScope->queueClass == RHI::HardwareQueueClass::Compute)
+				{
+					// TODO: Add compute pass
+				}
+				else if (currentScope->queueClass == RHI::HardwareQueueClass::Transfer)
+				{
+					// TODO: Add transfer pass
+				}
 			}
 			
 			// Transition to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR

@@ -7,6 +7,9 @@ namespace CE::RHI
     {
 		this->frameGraph = frameGraph;
 		frameGraph->Clear();
+
+		errorMessages.Clear();
+		success = true;
     }
 
 	void FrameGraphBuilder::BeginScopeGroup(const ScopeID& groupId)
@@ -108,12 +111,26 @@ namespace CE::RHI
 
 		const Array<Scope*>& scopesList = frameGraph->scopeGroups.GetLast().scopes;
 
+		RHI::HardwareQueueClass queueClass{};
+
 		for (int i = 0; i < scopesList.GetSize(); i++)
 		{
 			Scope* cur = scopesList[i];
 			Scope* prev = nullptr;
 			Scope* next = nullptr;
 			cur->scopeGroupIndex = scopeGroupIndex;
+
+			if (i == 0)
+			{
+				queueClass = cur->queueClass;
+			}
+			else if (queueClass != cur->queueClass)
+			{
+				errorMessages.Add("All scopes inside scope group must have same HardwareQueueClass.");
+				CE_LOG(Error, All, errorMessages.Top());
+				success = false;
+				return;
+			}
 
 			if (i < scopesList.GetSize() - 1)
 				next = scopesList[i + 1];

@@ -36,6 +36,7 @@ namespace CE::RHI
 
 		void BeginDrawListSubmission();
 		void BeginDrawListScope(ScopeID scopeId);
+		void SubmitDrawList(const DrawList& drawList);
 		void SubmitDrawItem(DrawItemProperties drawItemProperties);
 		void EndDrawListScope();
 		void EndDrawListSubmission();

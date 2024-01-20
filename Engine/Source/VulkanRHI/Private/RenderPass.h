@@ -76,33 +76,23 @@ namespace CE::Vulkan
 		inline const Descriptor& GetDescriptor() const { return desc; }
 
 		inline VkRenderPass GetHandle() const { return renderPass; }
+
+		inline SIZE_T GetHash() const { return hash; }
 		
 	private:
 		VkRenderPass renderPass = nullptr;
 		VulkanDevice* device = nullptr;
 
 		Descriptor desc{};
+
+		SIZE_T hash = 0;
+
+		friend class RenderPassCache;
 	};
 
 	VkSampleCountFlagBits GetSampleCountFlagBits(int sampleCount);
 	VkAttachmentLoadOp RHIAttachmentLoadActionToVk(RHI::AttachmentLoadAction loadAction);
 	VkAttachmentStoreOp RHIAttachmentStoreActionToVk(RHI::AttachmentStoreAction storeAction);
 
-    /*class VulkanRenderPass
-    {
-    public:
-        VulkanRenderPass(VulkanDevice* device, const VulkanRenderTargetLayout& rtLayout);
-        ~VulkanRenderPass();
-
-        CE_INLINE VkRenderPass GetHandle()
-        {
-            return renderPass;
-        }
-
-    private:
-        VkRenderPass renderPass = nullptr;
-        VulkanDevice* device = nullptr;
-        VulkanRenderTargetLayout layout{};
-    };*/
 
 } // namespace CE

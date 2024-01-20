@@ -66,6 +66,14 @@ namespace CE::RHI
 		}
 	}
 
+	void FrameScheduler::SubmitDrawList(const DrawList& drawList)
+	{
+		if (drawListScope != nullptr)
+		{
+			drawListScope->threadDrawLists.GetStorage().Merge(drawList);
+		}
+	}
+
 	void FrameScheduler::SubmitDrawItem(DrawItemProperties drawItemProperties)
 	{
 		if (drawListScope != nullptr)

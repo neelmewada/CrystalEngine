@@ -11,6 +11,8 @@ namespace CE::RHI
 
 	Scope::~Scope()
 	{
+		delete passPipeline;
+
 		for (RHI::ScopeAttachment* attachment : attachments)
 		{
 			delete attachment;

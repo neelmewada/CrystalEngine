@@ -1,20 +1,20 @@
-
 #include "VulkanRHIPrivate.h"
 
 namespace CE::Vulkan
 {
 
-    PipelineState::PipelineState(VulkanDevice* device) : device(device)
+    PipelineState::PipelineState(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc) : device(device)
     {
-        
+		pipeline = new GraphicsPipeline(device, graphicsDesc);
     }
 
     PipelineState::~PipelineState()
     {
-        
+		delete pipeline;
     }
+
     
-	GraphicsPipelineState::GraphicsPipelineState(VulkanDevice* device, RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc)
+	/*GraphicsPipelineState::GraphicsPipelineState(VulkanDevice* device, RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc)
 		: PipelineState(device)
 	{
 		Create(renderTarget, desc);
@@ -146,25 +146,6 @@ namespace CE::Vulkan
 
 		// - Viewport State -
 
-		/*VkViewport viewport{};
-		viewport.x = viewport.y = 0;
-		viewport.minDepth = 0;
-		viewport.maxDepth = 1;
-		viewport.width = renderTarget->GetWidth();
-		viewport.height = renderTarget->GetHeight();
-
-		VkRect2D scissor{};
-		scissor.offset.x = scissor.offset.y = 0;
-		scissor.extent.width = viewport.width;
-		scissor.extent.height = viewport.height;*/
-
-		/*VkPipelineViewportStateCreateInfo viewportState{};
-		viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-		viewportState.viewportCount = 1;
-		viewportState.pViewports = &viewport;
-		viewportState.scissorCount = 1;
-		viewportState.pScissors = &scissor;*/
-
 		//pipelineCI.pViewportState = &viewportState;
 
 		// - Rasterization State -
@@ -262,7 +243,7 @@ namespace CE::Vulkan
 		setLayouts.Clear();
 		setLayoutBindingsMap.Clear();
 
-		/*for (int i = 0; i < desc.shaderResourceGroups.GetSize(); i++)
+		for (int i = 0; i < desc.shaderResourceGroups.GetSize(); i++)
 		{
 			auto srg = desc.shaderResourceGroups[i];
 
@@ -324,7 +305,7 @@ namespace CE::Vulkan
 			}
 
 			setLayouts.Add(setLayout);
-		}*/
+		}
 
 		pipelineLayoutCI.setLayoutCount = setLayouts.GetSize();
 		pipelineLayoutCI.pSetLayouts = setLayouts.GetData();
@@ -428,6 +409,6 @@ namespace CE::Vulkan
 		pushConstantRanges = copyFrom->pushConstantRanges;
 		setLayouts = copyFrom->setLayouts;
 		setLayoutBindingsMap = copyFrom->setLayoutBindingsMap;
-	}
+	}*/
 
 } // namespace CE

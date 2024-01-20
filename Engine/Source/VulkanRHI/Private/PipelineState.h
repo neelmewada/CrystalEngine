@@ -5,58 +5,19 @@
 namespace CE::Vulkan
 {
 	class PipelineState;
-	class GraphicsPipelineState;
+	class GraphicsPipeline;
 
-	class PipelineLayout : public RHI::IPipelineLayout
-	{
-	public:
-
-		PipelineLayout(VulkanDevice* device, PipelineState* copyFrom);
-
-		PipelineLayout(VulkanDevice* device, VkPipelineLayout pipelineLayout, RHI::PipelineType pipelineType);
-		virtual ~PipelineLayout();
-
-		virtual RHI::PipelineType GetPipelineType() override
-		{
-			return pipelineType;
-		}
-
-		inline VkPipelineLayout GetNativeHandle() const
-		{
-			return handle;
-		}
-
-		void CopyFrom(VulkanDevice* device, PipelineState* copyFrom);
-
-	private:
-		VulkanDevice* device = nullptr;
-		VkPipelineLayout handle = nullptr;
-		
-		RHI::PipelineType pipelineType = RHI::PipelineType::Graphics;
-
-		List<VkDescriptorSetLayout> setLayouts{};
-		List<VkPushConstantRange> pushConstantRanges{};
-		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
-
-		friend class GraphicsPipelineState;
-		friend class GraphicsCommandList;
-		friend class PipelineState;
-	};
-
-    class PipelineState : public RHI::IPipelineState
+    class PipelineState : public RHI::PipelineState
     {
     public:
-        PipelineState(VulkanDevice* device);
+        PipelineState(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc);
         virtual ~PipelineState();
 
     protected:
-        VulkanDevice* device = nullptr;
-		VkPipeline pipeline = nullptr;
-		PipelineLayout* pipelineLayout = nullptr;
 
-		List<VkDescriptorSetLayout> setLayouts{};
-		List<VkPushConstantRange> pushConstantRanges{};
-		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
+        VulkanDevice* device = nullptr;
+
+		Pipeline* pipeline = nullptr;
 
 		friend class GraphicsCommandList;
 		friend class PipelineLayout;
@@ -64,7 +25,7 @@ namespace CE::Vulkan
     };
 
 
-	class GraphicsPipelineState : public PipelineState, public RHI::GraphicsPipelineState
+	/*class GraphicsPipelineState : public PipelineState, public RHI::GraphicsPipelineState
 	{
 	public:
 		GraphicsPipelineState(VulkanDevice* device, RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc);
@@ -97,6 +58,6 @@ namespace CE::Vulkan
 
 		friend class GraphicsCommandList;
 		friend class PipelineLayout;
-	};
+	};*/
     
 } // namespace CE::Editor

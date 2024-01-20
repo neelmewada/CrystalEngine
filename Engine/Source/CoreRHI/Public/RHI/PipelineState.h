@@ -2,6 +2,14 @@
 
 namespace CE::RHI
 {
+	enum class PipelineStateType
+	{
+		Graphics = 0,
+		Compute,
+		RayTracing,
+		COUNT
+	};
+
 	enum class VertexAttributeDataType
 	{
 		Undefined = 0,
@@ -34,40 +42,22 @@ namespace CE::RHI
 		CullMode cullMode = CullMode::Back;
 	};
 
-	class IPipelineLayout
+
+	class PipelineState : public RHIResource
 	{
 	public:
-		virtual ~IPipelineLayout() {}
+		virtual ~PipelineState() = default;
 
-		virtual PipelineType GetPipelineType() = 0;
+		inline PipelineStateType GetPipelineType() const { return pipelineType; }
 
-	};
+		inline bool IsGraphicsPipeline() const { return pipelineType == PipelineStateType::Graphics; }
+		inline bool IsComputePipeline() const { return pipelineType == PipelineStateType::Compute; }
+		inline bool IsRayTracingPipeline() const { return pipelineType == PipelineStateType::RayTracing; }
 
-	class IPipelineState
-	{
-	public:
-
-		virtual ~IPipelineState() {}
-
-		virtual bool IsGraphicsPipelineState() = 0;
-		virtual bool IsComputePipelineState() = 0;
-
-		virtual void* GetNativeHandle() = 0;
-
-		virtual IPipelineLayout* GetPipelineLayout() = 0;
-
-	};
-
-	class CORERHI_API GraphicsPipelineState : public RHIResource, public IPipelineState
-	{
 	protected:
-		GraphicsPipelineState() : RHIResource(ResourceType::GraphicsPipelineState)
-		{}
+		PipelineState() : RHIResource(RHI::ResourceType::PipelineState) {}
 
-	public:
-		virtual ~GraphicsPipelineState() = default;
-
-		// - Public API -
+		PipelineStateType pipelineType{};
 
 	};
     

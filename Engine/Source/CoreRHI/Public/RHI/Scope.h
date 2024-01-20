@@ -65,6 +65,7 @@ namespace CE::RHI
 		FrameGraph* frameGraph = nullptr;
 
 		RHI::HardwareQueueClass queueClass{};
+		RHI::IPipelineState* passPipeline = nullptr;
 
 		ScopeID id{};
 		int scopeGroupIndex = -1;

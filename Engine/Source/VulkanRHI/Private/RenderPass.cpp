@@ -128,11 +128,234 @@ namespace CE::Vulkan
 		if (pass->nextSubPass != nullptr && pass->prevSubPass == nullptr)
 		{
 			Scope* cur = pass;
-			
+			outDescriptor.attachments.Clear();
+			outDescriptor.dependencies.Clear();
+			outDescriptor.subpasses.Clear();
+			HashMap<AttachmentID, ImageFrameAttachment*> attachmentsById{};
+			HashMap<AttachmentID, AttachmentBinding> attachmentBindingsById{};
+			HashMap<AttachmentID, int> attachmentIndicesById{};
+			int totalAttachmentCount = 0;
+
+			VkSubpassDependency dependency{};
+			dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+			dependency.dstSubpass = 0;
+			dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dependency.srcAccessMask = 0;
+			dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+			outDescriptor.dependencies.Add(dependency);
+
 			while (cur != nullptr)
 			{
+				Scope* prev = (Vulkan::Scope*)cur->prevSubPass;
+				Scope* next = (Vulkan::Scope*)cur->nextSubPass;
 
-				cur = (Vulkan::Scope*)cur->nextSubPass;
+				SubPassDescriptor subPassDesc{};
+				HashSet<int> usedAttachmentIndices{};
+				int subpassIndex = 0;
+
+				for (auto scopeAttachment : cur->attachments)
+				{
+					if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+						!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
+						continue;
+					if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
+						scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
+						continue;
+					
+					ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
+					ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+					auto attachmentId = imageFrameAttachment->GetId();
+
+					RHI::Format format;
+
+					if (imageFrameAttachment->GetLifetimeType() == RHI::AttachmentLifetimeType::Transient)
+					{
+						format = imageFrameAttachment->GetImageDescriptor().format;
+					}
+					else
+					{
+						RHIResource* resource = imageFrameAttachment->GetResource();
+						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+							continue;
+						Texture* image = (Texture*)resource;
+						format = image->GetFormat();
+					}
+
+					bool initialUse = false;
+
+					if (!attachmentsById.KeyExists(attachmentId))
+					{
+						initialUse = true;
+						attachmentsById[attachmentId] = imageFrameAttachment;
+
+						AttachmentBinding attachmentBinding{};
+						attachmentBinding.attachmentId = attachmentId;
+						attachmentBinding.format = format;
+						attachmentBinding.loadStoreAction = imageScopeAttachment->GetLoadStoreAction();
+						attachmentBinding.multisampleState = imageScopeAttachment->GetMultisampleState();
+
+						attachmentBindingsById[attachmentId] = attachmentBinding;
+						attachmentIndicesById[attachmentId] = totalAttachmentCount++;
+					}
+
+					SubPassAttachment attachmentRef{};
+					
+					auto loadStoreAction = imageScopeAttachment->GetLoadStoreAction();
+					attachmentBindingsById[attachmentId].loadStoreAction.storeAction = loadStoreAction.storeAction;
+					attachmentBindingsById[attachmentId].loadStoreAction.storeActionStencil = loadStoreAction.storeActionStencil;
+
+					usedAttachmentIndices.Add(attachmentIndicesById[attachmentId]);
+					
+					switch (scopeAttachment->GetUsage())
+					{
+					case RHI::ScopeAttachmentUsage::DepthStencil:
+						attachmentRef.attachmentIndex = attachmentIndicesById[attachmentId];
+						if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						{
+							attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+							if (initialUse)
+								attachmentBindingsById[attachmentId].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+							attachmentBindingsById[attachmentId].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+						}
+						else
+						{
+							attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+							if (initialUse)
+								attachmentBindingsById[attachmentId].initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+							attachmentBindingsById[attachmentId].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+						}
+						subPassDesc.depthStencilAttachment.Add(attachmentRef);
+						break;
+					case RHI::ScopeAttachmentUsage::RenderTarget:
+						attachmentRef.attachmentIndex = attachmentIndicesById[attachmentId];
+						attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						if (initialUse)
+							attachmentBindingsById[attachmentId].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						attachmentBindingsById[attachmentId].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						subPassDesc.renderTargetAttachments.Add(attachmentRef);
+						break;
+					case RHI::ScopeAttachmentUsage::SubpassInput:
+						attachmentRef.attachmentIndex = attachmentIndicesById[attachmentId];
+						attachmentRef.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						if (initialUse)
+							attachmentBindingsById[attachmentId].initialLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						attachmentBindingsById[attachmentId].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+						subPassDesc.subpassInputAttachments.Add(attachmentRef);
+						break;
+					case RHI::ScopeAttachmentUsage::Resolve:
+						attachmentRef.attachmentIndex = attachmentIndicesById[attachmentId];
+						attachmentRef.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						if (initialUse)
+							attachmentBindingsById[attachmentId].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						attachmentBindingsById[attachmentId].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+						subPassDesc.resolveAttachments.Add(attachmentRef);
+						break;
+					}
+				}
+
+				for (auto [attachmentId, attachmentIndex] : attachmentIndicesById)
+				{
+					if (!usedAttachmentIndices.Exists(attachmentIndex))
+					{
+						subPassDesc.preserveAttachments.Add(attachmentIndex);
+					}
+				}
+
+				HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments{};
+				if (prev != nullptr)
+					commonAttachments = Scope::FindCommonFrameAttachments(prev, cur);
+
+				for (auto [from, to] : commonAttachments)
+				{
+					auto fromUsage = from->GetUsage();
+					auto fromAccess = from->GetAccess();
+					auto toUsage = to->GetUsage();
+					auto toAccess = to->GetAccess();
+
+					// No dependency if both usages are Read-Only
+					if (!EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write) &&
+						!EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
+						continue;
+
+					VkSubpassDependency dependency{};
+					dependency.srcSubpass = subpassIndex - 1;
+					dependency.dstSubpass = subpassIndex;
+
+					switch (fromUsage)
+					{
+					case RHI::ScopeAttachmentUsage::RenderTarget:
+						dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::DepthStencil:
+						dependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+						dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+						{
+							dependency.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::SubpassInput:
+						dependency.srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+						dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::Resolve:
+						dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::Shader:
+						dependency.srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+						dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+						{
+							dependency.srcAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+						}
+						break;
+					default:
+						continue;
+					}
+
+					switch (toUsage)
+					{
+					case RHI::ScopeAttachmentUsage::RenderTarget:
+						dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::DepthStencil:
+						dependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+						dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+						{
+							dependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						}
+						break;
+					case RHI::ScopeAttachmentUsage::SubpassInput:
+						dependency.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+						dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::Resolve:
+						dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+						dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+						break;
+					case RHI::ScopeAttachmentUsage::Shader:
+						dependency.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+						dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+						{
+							dependency.dstAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+						}
+						break;
+					default:
+						continue;
+					}
+
+					outDescriptor.dependencies.Add(dependency);
+				}
+
+				subpassIndex++;
+				cur = next;
 			}
 		}
 		else // Single subpass
@@ -165,6 +388,7 @@ namespace CE::Vulkan
 				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
 				ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 				RHI::Format format;
+
 				if (imageFrameAttachment->GetLifetimeType() == RHI::AttachmentLifetimeType::Transient)
 				{
 					format = imageFrameAttachment->GetImageDescriptor().format;
@@ -234,88 +458,6 @@ namespace CE::Vulkan
 			outDescriptor.subpasses.Add(subpass);
 		}
 	}
-    
-    /*class VulkanRenderPassBuilder
-    {
-    public:
-        VulkanRenderPassBuilder(VulkanDevice* device) : device(device)
-        {
-
-        }
-
-        VkRenderPass Build(const VulkanRenderTargetLayout& rtLayout)
-        {
-            u32 subpassCount = 0;
-            u32 dependencyCount = 0;
-
-            // - Forward Rendering -
-
-            // Main Subpass 0
-            {
-                VkSubpassDescription& desc = subpasses[subpassCount++];
-                desc.flags = 0;
-
-                desc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-
-                desc.preserveAttachmentCount = 0;
-                desc.pPreserveAttachments = nullptr;
-
-                desc.inputAttachmentCount = 0;
-                desc.pInputAttachments = nullptr;
-
-                desc.colorAttachmentCount = rtLayout.colorAttachmentCount;
-                desc.pColorAttachments = rtLayout.colorReferences;
-				desc.pResolveAttachments = nullptr; // Count = colorAttachmentCount
-
-                if (rtLayout.HasDepthStencilAttachment())
-                    desc.pDepthStencilAttachment = &rtLayout.depthStencilReference;
-                else
-                    desc.pDepthStencilAttachment = nullptr;
-            }
-
-            // Dependency EXTERNAL -> Subpass 0
-            {
-                VkSubpassDependency& dependency = dependencies[dependencyCount++];
-                
-                dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-                dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-                dependency.srcAccessMask = 0;
-
-                dependency.dstSubpass = 0;
-                dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-                dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-				
-                dependency.dependencyFlags = 0;
-            }
-
-            VkRenderPassCreateInfo renderPassCI{};
-            renderPassCI.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-            renderPassCI.flags = 0;
-
-            renderPassCI.subpassCount = subpassCount;
-            renderPassCI.pSubpasses = subpasses;
-
-            renderPassCI.dependencyCount = dependencyCount;
-            renderPassCI.pDependencies = dependencies;
-
-            renderPassCI.attachmentCount = rtLayout.attachmentDescCount;
-            renderPassCI.pAttachments = rtLayout.attachmentDesc;
-
-            VkRenderPass renderPass = nullptr;
-            if (vkCreateRenderPass(device->GetHandle(), &renderPassCI, nullptr, &renderPass) != VK_SUCCESS)
-            {
-                CE_LOG(Error, All, "Failed to create vulkan render pass.");
-                return nullptr;
-            }
-
-            return renderPass;
-        }
-
-    private:
-        VulkanDevice* device = nullptr;
-		VkSubpassDescription subpasses[RHI::Limits::Pipeline::MaxSubPassCount] = {};
-		VkSubpassDependency dependencies[RHI::Limits::Pipeline::MaxSubPassCount + 2] = {};
-    };*/
 
 	VkSampleCountFlagBits GetSampleCountFlagBits(int sampleCount)
 	{

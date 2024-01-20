@@ -1,0 +1,62 @@
+#pragma once
+
+namespace CE::Vulkan
+{
+	class PipelineLayout
+	{
+	public:
+		virtual ~PipelineLayout();
+
+		inline RHI::PipelineStateType GetPipelineType() const
+		{
+			return pipelineType;
+		}
+
+		inline VkPipelineLayout GetVkPipelineLayout() const
+		{
+			return pipelineLayout;
+		}
+
+	protected:
+		VulkanDevice* device = nullptr;
+		VkPipelineLayout pipelineLayout = nullptr;
+
+		RHI::PipelineStateType pipelineType = RHI::PipelineStateType::Graphics;
+
+		List<VkDescriptorSetLayout> setLayouts{};
+		List<VkPushConstantRange> pushConstantRanges{};
+		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
+
+		friend class GraphicsPipeline;
+		friend class GraphicsCommandList;
+		friend class PipelineState;
+	};
+
+    struct PipelineRenderPass
+    {
+        RenderPass* pass = nullptr;
+        u32 subpass = 0;
+
+        inline SIZE_T GetHash() const
+        {
+            SIZE_T hash = pass->GetHash();
+            CombineHash(hash, subpass);
+            return hash;
+        }
+    };
+
+    class Pipeline : public PipelineLayout, public RHI::RHIResource
+    {
+    public:
+        Pipeline(VulkanDevice* device);
+        ~Pipeline();
+
+        virtual bool IsGraphicsPipeline() const { return false; }
+
+    protected:
+
+        VkPipeline pipeline = nullptr;
+
+    };
+    
+} // namespace CE::Vulkan

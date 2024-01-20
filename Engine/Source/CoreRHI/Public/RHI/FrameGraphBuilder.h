@@ -37,6 +37,9 @@ namespace CE::RHI
 
 	protected:
 
+		bool success = true;
+		Array<String> errorMessages = {};
+
 		FrameGraph* frameGraph = nullptr;
 		Scope* currentScope = nullptr;
 		ScopeGroup curScopeGroup{};

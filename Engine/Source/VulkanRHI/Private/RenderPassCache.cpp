@@ -27,6 +27,7 @@ namespace CE::Vulkan
 			return renderPassCache[hash];
 
 		RenderPass* renderPass = new RenderPass(device, desc);
+		renderPass->hash = hash;
 		renderPassCache[hash] = renderPass;
 		return renderPass;
 	}

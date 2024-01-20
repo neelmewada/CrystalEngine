@@ -19,8 +19,8 @@ namespace CE::RHI
         Texture,
         Sampler,
         ShaderModule,
-        ComputePipelineState,
-        GraphicsPipelineState,
+        Pipeline,
+        PipelineState,
 		ShaderResourceGroup,
 
 		MemoryHeap,
@@ -347,13 +347,6 @@ namespace CE::RHI
     */
 
 	class ShaderModule;
-
-    enum class PipelineType
-    {
-        None = 0,
-        Graphics,
-        Compute
-    };
 
 	ENUM()
     enum class ShaderStage

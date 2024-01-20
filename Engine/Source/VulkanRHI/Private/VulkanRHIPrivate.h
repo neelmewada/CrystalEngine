@@ -23,6 +23,8 @@
 #include "Buffer.h"
 
 #include "ShaderModule.h"
+#include "Pipeline.h"
+#include "GraphicsPipeline.h"
 #include "PipelineState.h"
 
 #include "FrameBuffer.h"
