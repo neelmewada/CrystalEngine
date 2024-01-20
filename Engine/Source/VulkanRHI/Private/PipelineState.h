@@ -23,41 +23,5 @@ namespace CE::Vulkan
 		friend class PipelineLayout;
 		friend class GraphicsPipelineState;
     };
-
-
-	/*class GraphicsPipelineState : public PipelineState, public RHI::GraphicsPipelineState
-	{
-	public:
-		GraphicsPipelineState(VulkanDevice* device, RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc);
-		virtual ~GraphicsPipelineState();
-
-		bool IsGraphicsPipelineState() override final
-		{
-			return true;
-		}
-
-		bool IsComputePipelineState() override final
-		{
-			return false;
-		}
-
-		void* GetNativeHandle() override { return pipeline; }
-
-		RHI::IPipelineLayout* GetPipelineLayout() override
-		{
-			return pipelineLayout;
-		}
-
-	protected:
-
-		void Create(RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc);
-		
-		void Destroy();
-
-	private:
-
-		friend class GraphicsCommandList;
-		friend class PipelineLayout;
-	};*/
     
 } // namespace CE::Editor

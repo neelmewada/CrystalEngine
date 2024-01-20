@@ -2,6 +2,8 @@
 
 namespace CE::Vulkan
 {
+
+
     
     class GraphicsPipeline : public Pipeline
     {
@@ -13,6 +15,10 @@ namespace CE::Vulkan
         virtual bool IsGraphicsPipeline() const override final { return true; }
 
     private:
+
+        void Create(RenderPass* renderPass, int subpass);
+
+        HashMap<PipelineRenderPass, VkPipeline> pipelines{};
 
         RHI::GraphicsPipelineDescriptor desc{};
     };

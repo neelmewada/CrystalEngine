@@ -25,7 +25,7 @@ namespace CE::Vulkan
 
 		List<VkDescriptorSetLayout> setLayouts{};
 		List<VkPushConstantRange> pushConstantRanges{};
-		HashMap<int, Array<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
+		HashMap<int, List<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
 
 		friend class GraphicsPipeline;
 		friend class GraphicsCommandList;
@@ -48,7 +48,7 @@ namespace CE::Vulkan
     class Pipeline : public PipelineLayout, public RHI::RHIResource
     {
     public:
-        Pipeline(VulkanDevice* device);
+        Pipeline(VulkanDevice* device, const PipelineDescriptor& desc);
         ~Pipeline();
 
         virtual bool IsGraphicsPipeline() const { return false; }
@@ -56,6 +56,7 @@ namespace CE::Vulkan
     protected:
 
         VkPipeline pipeline = nullptr;
+		
 
     };
     

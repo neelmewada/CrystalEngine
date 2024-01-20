@@ -32,13 +32,16 @@ namespace CE::RHI
 		Name entryPoint = "";
 	};
 
-	struct GraphicsPipelineDescriptor
+	struct PipelineDescriptor
+	{
+		Array<ShaderStageDescriptor> shaderStages{};
+		Array<ShaderResourceGroupLayout> srgLayouts{};
+	};
+
+	struct GraphicsPipelineDescriptor : PipelineDescriptor
 	{
 		u32 vertexStrideInBytes = 0;
 		Array<VertexAttributeDescriptor> vertexAttribs{};
-		Array<ShaderStageDescriptor> shaderStages{};
-		Array<ShaderResourceGroupLayout> srgLayouts{};
-
 		CullMode cullMode = CullMode::Back;
 	};
 
