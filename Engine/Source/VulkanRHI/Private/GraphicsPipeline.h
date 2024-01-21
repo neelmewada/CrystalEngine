@@ -30,6 +30,11 @@ namespace CE::Vulkan
         void Create(RenderPass* renderPass, int subpass);
 
         void SetupColorBlendState();
+        void SetupDepthStencilState();
+        void SetupShaderStages();
+        void SetupRasterState();
+
+        void SetupVertexInputState();
 
         HashMap<PipelineRenderPass, VkPipeline> pipelines{};
 
@@ -38,6 +43,15 @@ namespace CE::Vulkan
         VkPipelineColorBlendStateCreateInfo colorBlendState{};
         List<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
 
+        VkPipelineDepthStencilStateCreateInfo depthStencilState{};
+        VkPipelineRasterizationStateCreateInfo rasterState{};
+
+        List<VkPipelineShaderStageCreateInfo> shaderStages{};
+
+        List<VkVertexInputAttributeDescription> vertexInputDescriptions{};
+        List<VkVertexInputBindingDescription> vertexBindingDescriptions{};
+
+        VkPipelineMultisampleStateCreateInfo multisampleState{};
     };
 
 } // namespace CE::Vulkan

@@ -60,7 +60,19 @@ namespace CE::RHI
 		OneMinusDstAlpha
 	};
 
-	struct ColorBlendDescriptor
+	enum class CompareOp
+	{
+		Never = 0,
+		Less = 1,
+		Equal = 2,
+		LessOrEqual = 3,
+		Greater = 4,
+		NotEqual = 5,
+		GreaterOrEqual = 6,
+		Always = 7,
+	};
+
+	struct ColorBlendState
 	{
 		bool blendEnable = true;
 		BlendOp colorBlendOp = BlendOp::Add;
@@ -71,12 +83,21 @@ namespace CE::RHI
 		BlendFactor dstAlphaBlend = BlendFactor::Zero;
 	};
 
+	struct DepthStencilState
+	{
+		CompareOp compareOp = CompareOp::Less;
+		bool depthTestEnable = false;
+		bool depthWriteEnable = false;
+		bool stencilEnable = false;
+	};
+
 	struct GraphicsPipelineDescriptor : PipelineDescriptor
 	{
 		u32 vertexStrideInBytes = 0;
 		Array<VertexAttributeDescriptor> vertexAttribs{};
 		CullMode cullMode = CullMode::Back;
-		List<ColorBlendDescriptor> colorBlends{};
+		List<ColorBlendState> colorBlends{};
+		DepthStencilState depthStencil{};
 	};
 
 
