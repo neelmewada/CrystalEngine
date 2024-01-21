@@ -17,6 +17,7 @@ namespace CE::Vulkan
 			return pipelineLayout;
 		}
 
+		//! Returns true IF ALL of the bindings of setLayoutBindingsMap of 'this' pipeline are present in 'other'
 		bool IsCompatibleWith(PipelineLayout* other);
 
 		virtual bool IsCompatibleWith(IPipelineLayout* other) override
