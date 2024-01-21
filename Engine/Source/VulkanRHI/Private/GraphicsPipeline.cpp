@@ -76,6 +76,30 @@ namespace CE::Vulkan
         return {};
     }
 
+    static VkStencilOp RHIStencilOpToVk(RHI::StencilOp stencilOp)
+    {
+        switch (stencilOp)
+        {
+        case RHI::StencilOp::Keep:
+            return VK_STENCIL_OP_KEEP;
+        case RHI::StencilOp::Zero:
+            return VK_STENCIL_OP_ZERO;
+        case RHI::StencilOp::Replace:
+            return VK_STENCIL_OP_REPLACE;
+        case RHI::StencilOp::IncrementAndClamp:
+            return VK_STENCIL_OP_INCREMENT_AND_CLAMP;
+        case RHI::StencilOp::DecrementAndClamp:
+            return VK_STENCIL_OP_DECREMENT_AND_CLAMP;
+        case RHI::StencilOp::Invert:
+            return VK_STENCIL_OP_INVERT;
+        case RHI::StencilOp::Increment:
+            return VK_STENCIL_OP_INCREMENT_AND_WRAP;
+        case RHI::StencilOp::Decrement:
+            return VK_STENCIL_OP_DECREMENT_AND_WRAP;
+        }
+        return {};
+    }
+
     GraphicsPipeline::GraphicsPipeline(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& desc)
         : Pipeline(device, desc)
         , desc(desc)
@@ -85,14 +109,31 @@ namespace CE::Vulkan
         SetupColorBlendState();
         SetupDepthStencilState();
         SetupShaderStages();
+        SetupRasterState();
+        SetupMultisampleState();
+        SetupVertexInputState();
+
+        hash = desc.GetHash();
     }
 
     GraphicsPipeline::~GraphicsPipeline()
     {
+        for (auto [_, pipelineCache] : pipelineCaches)
+        {
+            vkDestroyPipelineCache(device->GetHandle(), pipelineCache, nullptr);
+        }
+        pipelineCaches.Clear();
+        pipelineCachesByHash.Clear();
 
+        for (auto [_, pipeline] : pipelines)
+        {
+            vkDestroyPipeline(device->GetHandle(), pipeline, nullptr);
+        }
+        pipelines.Clear();
+        pipelinesByHash.Clear();
     }
 
-    void GraphicsPipeline::Create(RenderPass* renderPass, int subpass)
+    bool GraphicsPipeline::Create(RenderPass* renderPass, u32 subpass)
     {
         VkGraphicsPipelineCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -115,11 +156,11 @@ namespace CE::Vulkan
         createInfo.pColorBlendState = &colorBlendState;
 
         // - Dynamic State -
-        VkDynamicState dynamicStates[2] = { VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_VIEWPORT };
+        VkDynamicState dynamicStates[] = { VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_STENCIL_REFERENCE };
 
         VkPipelineDynamicStateCreateInfo dynamicState{};
         dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        dynamicState.dynamicStateCount = 2;
+        dynamicState.dynamicStateCount = COUNTOF(dynamicStates);
         dynamicState.pDynamicStates = dynamicStates;
 
         createInfo.pDynamicState = &dynamicState;
@@ -150,21 +191,56 @@ namespace CE::Vulkan
         vertexInputState.vertexAttributeDescriptionCount = vertexInputDescriptions.GetSize();
         vertexInputState.pVertexAttributeDescriptions = vertexInputDescriptions.GetData();
 
-        createInfo.pVertexInputState = &vertexInputState;
+        createInfo.pVertexInputState = &vertexInputState;        
 
-        multisampleState.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-        multisampleState.sampleShadingEnable = VK_FALSE;
-        multisampleState.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-        multisampleState.minSampleShading = 1.0f;
-        multisampleState.pSampleMask = nullptr;
-        multisampleState.alphaToCoverageEnable = VK_FALSE;
-        multisampleState.alphaToOneEnable = VK_FALSE;
-
+        // - Multisample State -
         createInfo.pMultisampleState = &multisampleState;
 
+        // - Extra -
         createInfo.layout = pipelineLayout;
 
+        // Pipeline cache is a combination of hashes of: GraphicsPipelineDescriptor + RenderPass + SubPassIndex
+        SIZE_T instanceHash = hash;
+        CombineHash(instanceHash, *renderPass);
+        CombineHash(instanceHash, subpass);
+
+        PipelineRenderPass pipelinePass{};
+        pipelinePass.pass = renderPass;
+        pipelinePass.subpass = subpass;
+
+        VkResult result;
+
+        VkPipelineCache pipelineCache = nullptr;
+        if (pipelineCaches[pipelinePass] == nullptr)
+        {
+            VkPipelineCacheCreateInfo cacheCI{};
+            cacheCI.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+            cacheCI.initialDataSize = 0;
+            cacheCI.pInitialData = nullptr;
+            
+            result = vkCreatePipelineCache(device->GetHandle(), &cacheCI, nullptr, &pipelineCache);
+            if (result == VK_SUCCESS)
+            {
+                pipelineCaches[pipelinePass] = pipelineCache;
+                pipelineCachesByHash[instanceHash] = pipelineCache;
+            }
+        }
+
+        pipelineCache = pipelineCaches[pipelinePass];
+
+        VkPipeline pipeline = nullptr;
+        result = vkCreateGraphicsPipelines(device->GetHandle(), pipelineCache, 1, &createInfo, nullptr, &pipeline);
+
+        if (result != VK_SUCCESS)
+        {
+            CE_LOG(Error, All, "Failed to create Graphics Pipeline: {}", name);
+            return false;
+        }
         
+        pipelines[pipelinePass] = pipeline;
+        pipelinesByHash[instanceHash] = pipeline;
+
+        return true;
     }
 
     void GraphicsPipeline::SetupColorBlendState()
@@ -177,17 +253,26 @@ namespace CE::Vulkan
 
         colorBlendAttachments.Clear();
 
-        for (int i = 0; i < desc.colorBlends.GetSize(); i++)
+        for (int i = 0; i < desc.blendState.colorBlends.GetSize(); i++)
         {
             VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-            colorBlendAttachment.blendEnable = desc.colorBlends[i].blendEnable ? VK_TRUE : VK_FALSE;
-            colorBlendAttachment.colorBlendOp = RHIBlendOpToVk(desc.colorBlends[i].colorBlendOp);
-            colorBlendAttachment.srcColorBlendFactor = RHIBlendFactorToVk(desc.colorBlends[i].srcColorBlend);
-            colorBlendAttachment.dstColorBlendFactor = RHIBlendFactorToVk(desc.colorBlends[i].dstColorBlend);
-            colorBlendAttachment.alphaBlendOp = RHIBlendOpToVk(desc.colorBlends[i].alphaBlendOp);
-            colorBlendAttachment.srcAlphaBlendFactor = RHIBlendFactorToVk(desc.colorBlends[i].srcAlphaBlend);
-            colorBlendAttachment.dstAlphaBlendFactor = RHIBlendFactorToVk(desc.colorBlends[i].dstAlphaBlend);
-            colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+            colorBlendAttachment.blendEnable = desc.blendState.colorBlends[i].blendEnable ? VK_TRUE : VK_FALSE;
+            colorBlendAttachment.colorBlendOp = RHIBlendOpToVk(desc.blendState.colorBlends[i].colorBlendOp);
+            colorBlendAttachment.srcColorBlendFactor = RHIBlendFactorToVk(desc.blendState.colorBlends[i].srcColorBlend);
+            colorBlendAttachment.dstColorBlendFactor = RHIBlendFactorToVk(desc.blendState.colorBlends[i].dstColorBlend);
+            colorBlendAttachment.alphaBlendOp = RHIBlendOpToVk(desc.blendState.colorBlends[i].alphaBlendOp);
+            colorBlendAttachment.srcAlphaBlendFactor = RHIBlendFactorToVk(desc.blendState.colorBlends[i].srcAlphaBlend);
+            colorBlendAttachment.dstAlphaBlendFactor = RHIBlendFactorToVk(desc.blendState.colorBlends[i].dstAlphaBlend);
+            colorBlendAttachment.colorWriteMask = 0;
+            auto mask = desc.blendState.colorBlends[i].componentMask;
+            if (EnumHasFlag(mask, RHI::ColorComponentMask::R))
+                colorBlendAttachment.colorWriteMask |= VK_COLOR_COMPONENT_R_BIT;
+            if (EnumHasFlag(mask, RHI::ColorComponentMask::G))
+                colorBlendAttachment.colorWriteMask |= VK_COLOR_COMPONENT_G_BIT;
+            if (EnumHasFlag(mask, RHI::ColorComponentMask::B))
+                colorBlendAttachment.colorWriteMask |= VK_COLOR_COMPONENT_B_BIT;
+            if (EnumHasFlag(mask, RHI::ColorComponentMask::A))
+                colorBlendAttachment.colorWriteMask |= VK_COLOR_COMPONENT_A_BIT;
 
             colorBlendAttachments.Add(colorBlendAttachment);
         }
@@ -208,20 +293,42 @@ namespace CE::Vulkan
         }
     }
 
+    static void FillStencilOpState(VkStencilOpState& fill, RHI::StencilOpState state)
+    {
+        fill.compareOp = RHICompareOpToVk(state.compareOp);
+        fill.depthFailOp = RHIStencilOpToVk(state.depthFailOp);
+        fill.failOp = RHIStencilOpToVk(state.failOp);
+        fill.passOp = RHIStencilOpToVk(state.passOp);
+    }
+
     void GraphicsPipeline::SetupDepthStencilState()
     {
         depthStencilState = {};
         depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 
-        depthStencilState.depthCompareOp = RHICompareOpToVk(desc.depthStencil.compareOp);
-        depthStencilState.depthTestEnable = desc.depthStencil.depthTestEnable ? VK_TRUE : VK_FALSE;
-        depthStencilState.depthWriteEnable = desc.depthStencil.depthWriteEnable ? VK_TRUE : VK_FALSE;
+        const auto& depthState = desc.depthStencilState.depthState;
+        const auto& stencilState = desc.depthStencilState.stencilState;
+
+        depthStencilState.depthCompareOp = RHICompareOpToVk(depthState.compareOp);
+        depthStencilState.depthTestEnable = depthState.testEnable ? VK_TRUE : VK_FALSE;
+        depthStencilState.depthWriteEnable = depthState.writeEnable ? VK_TRUE : VK_FALSE;
         depthStencilState.depthBoundsTestEnable = VK_FALSE;
         depthStencilState.maxDepthBounds = 1.0f;
         depthStencilState.minDepthBounds = 0.0f;
+
         depthStencilState.back = {};
         depthStencilState.front = {};
-        depthStencilState.stencilTestEnable = desc.depthStencil.stencilEnable ? VK_TRUE : VK_FALSE;
+        {
+            FillStencilOpState(depthStencilState.back, stencilState.backFace);
+            depthStencilState.back.writeMask = stencilState.writeMask;
+            depthStencilState.back.reference = 0; // Filled via dyanamic state
+
+            FillStencilOpState(depthStencilState.front, stencilState.frontFace);
+            depthStencilState.front.writeMask = stencilState.writeMask;
+            depthStencilState.front.reference = 0; // Filled via dynamic state
+        }
+        
+        depthStencilState.stencilTestEnable = stencilState.enable ? VK_TRUE : VK_FALSE;
     }
 
     void GraphicsPipeline::SetupShaderStages()
@@ -234,11 +341,11 @@ namespace CE::Vulkan
             shaderStageCI.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStageCI.module = ((Vulkan::ShaderModule*)shaderStageDesc.shaderModule)->GetHandle();
             
-            if (shaderStageDesc.stage == RHI::ShaderStage::Vertex)
+            if (shaderStageDesc.GetShaderStage() == RHI::ShaderStage::Vertex)
                 shaderStageCI.stage = VK_SHADER_STAGE_VERTEX_BIT;
-            else if (shaderStageDesc.stage == RHI::ShaderStage::Fragment)
+            else if (shaderStageDesc.GetShaderStage() == RHI::ShaderStage::Fragment)
                 shaderStageCI.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-            else if (shaderStageDesc.stage == RHI::ShaderStage::Geometry)
+            else if (shaderStageDesc.GetShaderStage() == RHI::ShaderStage::Geometry)
                 shaderStageCI.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
             else
                 continue;
@@ -254,12 +361,23 @@ namespace CE::Vulkan
         rasterState = {};
         rasterState.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 
-        rasterState.depthClampEnable = VK_FALSE;
+        const RHI::RasterState& state = desc.rasterState;
+
+        rasterState.depthClampEnable = state.depthClipEnable ? VK_FALSE : VK_TRUE;
         rasterState.rasterizerDiscardEnable = VK_FALSE;
-        rasterState.polygonMode = VK_POLYGON_MODE_FILL;
         rasterState.lineWidth = 1.0f;
 
-        switch (desc.cullMode)
+        switch (state.fillMode)
+        {
+        case RHI::FillMode::Solid:
+            rasterState.polygonMode = VK_POLYGON_MODE_FILL;
+            break;
+        case RHI::FillMode::Wireframe:
+            rasterState.polygonMode = VK_POLYGON_MODE_LINE;
+            break;
+        }
+
+        switch (state.cullMode)
         {
         case RHI::CullMode::None:
             rasterState.cullMode = VK_CULL_MODE_NONE;
@@ -274,6 +392,7 @@ namespace CE::Vulkan
             rasterState.cullMode = VK_CULL_MODE_FRONT_AND_BACK;
             break;
         }
+
         rasterState.frontFace = VK_FRONT_FACE_CLOCKWISE;
         rasterState.depthBiasEnable = VK_FALSE;
         rasterState.depthBiasClamp = 0;
@@ -281,17 +400,29 @@ namespace CE::Vulkan
         rasterState.depthBiasSlopeFactor = 0;
     }
 
+    void GraphicsPipeline::SetupMultisampleState()
+    {
+        multisampleState = {};
+        multisampleState.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        multisampleState.sampleShadingEnable = VK_FALSE;
+        multisampleState.rasterizationSamples = GetSampleCountFlagBits(desc.multisampleState.sampleCount);
+        multisampleState.minSampleShading = 1.0f;
+        multisampleState.pSampleMask = nullptr;
+        multisampleState.alphaToCoverageEnable = VK_FALSE;
+        multisampleState.alphaToOneEnable = VK_FALSE;
+    }
+
     void GraphicsPipeline::SetupVertexInputState()
     {
         vertexBindingDescriptions = {};
         vertexInputDescriptions = {};
 
-        for (int i = 0; i < desc.vertexAttribs.GetSize(); i++)
+        for (int i = 0; i < desc.vertexAttributes.GetSize(); i++)
         {
-            const auto& vertexAttrib = desc.vertexAttribs[i];
+            const auto& vertexAttrib = desc.vertexAttributes[i];
 
             VkVertexInputAttributeDescription attrib{};
-            attrib.binding = 0;
+            attrib.binding = vertexAttrib.inputSlot;
             attrib.location = vertexAttrib.location;
             attrib.offset = vertexAttrib.offset;
             
@@ -326,12 +457,20 @@ namespace CE::Vulkan
             vertexInputDescriptions.Add(attrib);
         }
 
-        VkVertexInputBindingDescription inputBinding{};
-        inputBinding.binding = 0;
-        inputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        inputBinding.stride = desc.vertexStrideInBytes;
+        for (int i = 0; i < desc.vertexInputSlots.GetSize(); i++)
+        {
+            const auto& vertexInput = desc.vertexInputSlots[i];
 
-        vertexBindingDescriptions.Add(inputBinding);
+            VkVertexInputBindingDescription inputBinding{};
+            inputBinding.binding = vertexInput.inputSlot;
+            if (vertexInput.inputRate == RHI::VertexInputRate::PerInstance)
+                inputBinding.inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+            else
+                inputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+            inputBinding.stride = vertexInput.stride;
+
+            vertexBindingDescriptions.Add(inputBinding);
+        }
     }
 
 } // namespace CE::Vulkan

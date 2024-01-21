@@ -399,6 +399,31 @@ namespace CE::RHI
 	};
 	ENUM_CLASS(CullMode);
 
+    ENUM()
+    enum class FillMode
+    {
+        Solid = 0,
+        Wireframe
+    };
+    ENUM_CLASS(FillMode);
+
+    ENUM(Flags)
+    enum class ColorComponentMask
+    {
+        None = 0,
+        R = BIT(0),
+        G = BIT(1),
+        B = BIT(2),
+        A = BIT(3),
+
+        RGB = R | G | B,
+        RG = R | G,
+        RB = R | B,
+        GB = G | B,
+        All = R | G | B | A,
+    };
+    ENUM_CLASS(ColorComponentMask);
+
 } // namespace CE
 
 #include "RHIDefinitions.rtti.h"

@@ -27,16 +27,20 @@ namespace CE::Vulkan
 
     private:
 
-        void Create(RenderPass* renderPass, int subpass);
+        bool Create(RenderPass* renderPass, u32 subpass);
 
         void SetupColorBlendState();
         void SetupDepthStencilState();
         void SetupShaderStages();
         void SetupRasterState();
+        void SetupMultisampleState();
 
         void SetupVertexInputState();
 
+        HashMap<SIZE_T, VkPipeline> pipelinesByHash{};
+        HashMap<SIZE_T, VkPipelineCache> pipelineCachesByHash{};
         HashMap<PipelineRenderPass, VkPipeline> pipelines{};
+        HashMap<PipelineRenderPass, VkPipelineCache> pipelineCaches{};
 
         RHI::GraphicsPipelineDescriptor desc{};
 

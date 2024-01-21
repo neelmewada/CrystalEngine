@@ -17,13 +17,48 @@ namespace CE::Vulkan
         setLayouts.Clear();
     }
 
-    Pipeline::Pipeline(VulkanDevice* device, const PipelineDescriptor& desc) : RHI::RHIResource(RHI::ResourceType::Pipeline)
+    bool PipelineLayout::IsCompatibleWith(PipelineLayout* other)
+    {
+        for (const auto& [set, bindingList] : setLayoutBindingsMap)
+        {
+            if (!other->setLayoutBindingsMap.KeyExists(set))
+                return false;
+            if (bindingList.GetSize() != other->setLayoutBindingsMap[set].GetSize())
+                return false;
+
+            const auto& otherBindingList = other->setLayoutBindingsMap[set];
+
+            for (int i = 0; i < bindingList.GetSize(); i++)
+            {
+                if (bindingList[i].binding != otherBindingList[i].binding)
+                    return false;
+                if (bindingList[i].descriptorCount != otherBindingList[i].descriptorCount)
+                    return false;
+                if (bindingList[i].descriptorType != otherBindingList[i].descriptorType)
+                    return false;
+                if (bindingList[i].stageFlags != otherBindingList[i].stageFlags)
+                    return false;
+                if (bindingList[i].pImmutableSamplers != nullptr &&
+                    otherBindingList[i].pImmutableSamplers == nullptr)
+                    return false;
+                if (bindingList[i].pImmutableSamplers == nullptr &&
+                    otherBindingList[i].pImmutableSamplers != nullptr)
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    Pipeline::Pipeline(VulkanDevice* device, const PipelineDescriptor& desc) 
+        : RHI::RHIResource(RHI::ResourceType::Pipeline)
+        , name(desc.name)
     {
         this->device = device;
         auto srgManager = device->GetShaderResourceManager();
         setLayoutBindingsMap = {};
         setLayouts = {};
-        VkResult result = VK_SUCCESS;
+        VkResult result;
 
         for (const RHI::ShaderResourceGroupLayout& srgLayout : desc.srgLayouts)
         {

@@ -13,6 +13,8 @@ namespace CE::Vulkan
         PipelineState(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc);
         virtual ~PipelineState();
 
+        virtual IPipelineLayout* GetPipelineLayout() override;
+
     protected:
 
         VulkanDevice* device = nullptr;

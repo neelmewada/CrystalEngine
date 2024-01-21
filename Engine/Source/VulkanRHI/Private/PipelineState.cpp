@@ -13,6 +13,11 @@ namespace CE::Vulkan
 		delete pipeline;
     }
 
+	IPipelineLayout* PipelineState::GetPipelineLayout()
+	{
+		return pipeline;
+	}
+
     
 	/*GraphicsPipelineState::GraphicsPipelineState(VulkanDevice* device, RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc)
 		: PipelineState(device)

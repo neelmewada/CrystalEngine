@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	class PipelineLayout
+	class PipelineLayout : public IPipelineLayout
 	{
 	public:
 		virtual ~PipelineLayout();
@@ -15,6 +15,15 @@ namespace CE::Vulkan
 		inline VkPipelineLayout GetVkPipelineLayout() const
 		{
 			return pipelineLayout;
+		}
+
+		bool IsCompatibleWith(PipelineLayout* other);
+
+		virtual bool IsCompatibleWith(IPipelineLayout* other) override
+		{
+			if (other == nullptr)
+				return false;
+			return IsCompatibleWith(static_cast<PipelineLayout*>(other));
 		}
 
 	protected:
@@ -44,7 +53,9 @@ namespace CE::Vulkan
 
         VkPipeline pipeline = nullptr;
 		
+		Name name{};
 
+		SIZE_T hash = 0;
     };
     
 } // namespace CE::Vulkan
