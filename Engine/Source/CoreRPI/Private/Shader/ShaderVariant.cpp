@@ -13,7 +13,7 @@ namespace CE::RPI
 	{
 		for (auto [stage, module] : modulesByStage)
 		{
-			if (module == nullptr)
+			if (module == nullptr) 
 				continue;
 			RHI::gDynamicRHI->DestroyShaderModule(module);
 		}

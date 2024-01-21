@@ -3,7 +3,18 @@
 namespace CE::Vulkan
 {
 
+    struct PipelineRenderPass
+    {
+        RenderPass* pass = nullptr;
+        u32 subpass = 0;
 
+        inline SIZE_T GetHash() const
+        {
+            SIZE_T hash = pass->GetHash();
+            CombineHash(hash, subpass);
+            return hash;
+        }
+    };
     
     class GraphicsPipeline : public Pipeline
     {
@@ -18,9 +29,15 @@ namespace CE::Vulkan
 
         void Create(RenderPass* renderPass, int subpass);
 
+        void SetupColorBlendState();
+
         HashMap<PipelineRenderPass, VkPipeline> pipelines{};
 
         RHI::GraphicsPipelineDescriptor desc{};
+
+        VkPipelineColorBlendStateCreateInfo colorBlendState{};
+        List<VkPipelineColorBlendAttachmentState> colorBlendAttachments{};
+
     };
 
 } // namespace CE::Vulkan

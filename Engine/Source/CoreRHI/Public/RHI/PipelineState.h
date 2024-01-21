@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	enum class PipelineStateType
 	{
-		Graphics = 0,
+		Graphics,
 		Compute,
 		RayTracing,
 		COUNT
@@ -12,7 +12,7 @@ namespace CE::RHI
 
 	enum class VertexAttributeDataType
 	{
-		Undefined = 0,
+		Undefined,
 		Float, Float2, Float3, Float4,
 		Int, Int2, Int3, Int4
 	};
@@ -38,11 +38,45 @@ namespace CE::RHI
 		Array<ShaderResourceGroupLayout> srgLayouts{};
 	};
 
+	enum class BlendOp
+	{
+		Add,
+		Subtract,
+		ReverseSubtract,
+		Min, Max
+	};
+
+	enum class BlendFactor
+	{
+		Zero,
+		One,
+		SrcColor,
+		OneMinusSrcColor,
+		DstColor,
+		OneMinusDstColor,
+		SrcAlpha,
+		OneMinusSrcAlpha,
+		DstAlpha,
+		OneMinusDstAlpha
+	};
+
+	struct ColorBlendDescriptor
+	{
+		bool blendEnable = true;
+		BlendOp colorBlendOp = BlendOp::Add;
+		BlendFactor srcColorBlend = BlendFactor::SrcAlpha;
+		BlendFactor dstColorBlend = BlendFactor::OneMinusSrcAlpha;
+		BlendOp alphaBlendOp = BlendOp::Add;
+		BlendFactor srcAlphaBlend = BlendFactor::One;
+		BlendFactor dstAlphaBlend = BlendFactor::Zero;
+	};
+
 	struct GraphicsPipelineDescriptor : PipelineDescriptor
 	{
 		u32 vertexStrideInBytes = 0;
 		Array<VertexAttributeDescriptor> vertexAttribs{};
 		CullMode cullMode = CullMode::Back;
+		List<ColorBlendDescriptor> colorBlends{};
 	};
 
 

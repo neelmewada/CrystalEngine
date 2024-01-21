@@ -119,6 +119,7 @@ namespace CE::Vulkan
         if (pipeline)
         {
             vkDestroyPipeline(device->GetHandle(), pipeline, nullptr);
+            pipeline = nullptr;
         }
     }
 

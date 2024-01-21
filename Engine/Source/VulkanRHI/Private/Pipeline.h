@@ -32,19 +32,6 @@ namespace CE::Vulkan
 		friend class PipelineState;
 	};
 
-    struct PipelineRenderPass
-    {
-        RenderPass* pass = nullptr;
-        u32 subpass = 0;
-
-        inline SIZE_T GetHash() const
-        {
-            SIZE_T hash = pass->GetHash();
-            CombineHash(hash, subpass);
-            return hash;
-        }
-    };
-
     class Pipeline : public PipelineLayout, public RHI::RHIResource
     {
     public:

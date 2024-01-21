@@ -88,6 +88,7 @@ namespace CE::Vulkan
 		SIZE_T hash = 0;
 
 		friend class RenderPassCache;
+		friend class GraphicsPipeline;
 	};
 
 	VkSampleCountFlagBits GetSampleCountFlagBits(int sampleCount);
