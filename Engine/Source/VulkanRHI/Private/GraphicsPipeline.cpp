@@ -133,7 +133,22 @@ namespace CE::Vulkan
         pipelinesByHash.Clear();
     }
 
-    bool GraphicsPipeline::Create(RenderPass* renderPass, u32 subpass)
+    VkPipeline GraphicsPipeline::FindOrCreate(RenderPass* renderPass, u32 subpass)
+    {
+        if (renderPass == nullptr || subpass >= RHI::Limits::Pipeline::MaxSubPassCount)
+            return nullptr;
+
+        SIZE_T instanceHash = this->hash;
+        CombineHash(instanceHash, *renderPass);
+        CombineHash(instanceHash, subpass);
+
+        if (pipelinesByHash[instanceHash] != nullptr)
+            return pipelinesByHash[instanceHash];
+
+        return Create(renderPass, subpass);
+    }
+
+    VkPipeline GraphicsPipeline::Create(RenderPass* renderPass, u32 subpass)
     {
         VkGraphicsPipelineCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -234,13 +249,13 @@ namespace CE::Vulkan
         if (result != VK_SUCCESS)
         {
             CE_LOG(Error, All, "Failed to create Graphics Pipeline: {}", name);
-            return false;
+            return nullptr;
         }
         
         pipelines[pipelinePass] = pipeline;
         pipelinesByHash[instanceHash] = pipeline;
 
-        return true;
+        return pipeline;
     }
 
     void GraphicsPipeline::SetupColorBlendState()

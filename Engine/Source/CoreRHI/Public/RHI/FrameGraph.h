@@ -21,7 +21,7 @@ namespace CE::RHI
 		{
 			return presentSwapChain;
 		}
-        
+
     private:
 
 		void Clear();

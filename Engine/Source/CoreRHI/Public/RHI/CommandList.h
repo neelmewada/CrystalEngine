@@ -2,7 +2,6 @@
 
 namespace CE::RHI
 {
-	class IPipelineState;
 	class Viewport;
 	class ShaderResourceGroup;
 

@@ -14,6 +14,8 @@ namespace CE::Sandbox
 			buffer = nullptr;
 		}
 
+		void CreateBuffer();
+
 		Array<Vec3> vertices{};
 
 		Array<u32> indices{};
@@ -75,6 +77,9 @@ namespace CE::Sandbox
 
 		Array<Mesh*> meshes{};
 		Array<MeshInstance> meshInstances{};
+		RHI::DrawListContext depthDrawList{};
+		RHI::DrawListContext opaqueDrawList{};
+		RHI::DrawListContext transparentDrawList{};
 
 		u32 width = 0;
 		u32 height = 0;

@@ -46,61 +46,6 @@ namespace CE::RHI
         compiler->Compile(compileRequest);
     }
 
-	void FrameScheduler::BeginDrawListSubmission()
-	{
-
-	}
-
-	void FrameScheduler::BeginDrawListScope(ScopeID scopeId)
-	{
-		RHI::Scope* scope = frameGraph->scopesById[scopeId];
-		if (scope != nullptr)
-		{
-			drawListScope = scope;
-			drawListScope->drawList.Clear();
-			drawListScope->threadDrawLists.Clear();
-		}
-		else
-		{
-			frameGraph->scopesById.Remove(scopeId);
-		}
-	}
-
-	void FrameScheduler::SubmitDrawList(const DrawList& drawList)
-	{
-		if (drawListScope != nullptr)
-		{
-			drawListScope->threadDrawLists.GetStorage().Merge(drawList);
-		}
-	}
-
-	void FrameScheduler::SubmitDrawItem(DrawItemProperties drawItemProperties)
-	{
-		if (drawListScope != nullptr)
-		{
-			drawListScope->threadDrawLists.GetStorage().AddDrawItem(drawItemProperties);
-		}
-	}
-
-	void FrameScheduler::EndDrawListScope()
-	{
-		if (drawListScope != nullptr)
-		{
-			drawListScope->drawList.Clear();
-			drawListScope->threadDrawLists.ForEach([&](RHI::DrawList& drawList)
-				{
-					drawListScope->drawList.Merge(drawList);
-				});
-			drawListScope->threadDrawLists.Clear();
-		}
-		drawListScope = nullptr;
-	}
-
-	void FrameScheduler::EndDrawListSubmission()
-	{
-
-	}
-
 	void FrameScheduler::Execute()
 	{
 		FrameGraphExecuteRequest executeRequest{};
@@ -108,6 +53,18 @@ namespace CE::RHI
 		executeRequest.compiler = compiler;
 
 		executer->Execute(executeRequest);
+	}
+
+	void FrameScheduler::SetScopeDrawList(const ScopeID& scopeId, DrawListContext* drawList)
+	{
+		if (!frameGraph->scopesById.KeyExists(scopeId))
+			return;
+
+		Scope* scope = frameGraph->scopesById[scopeId];
+		if (!scope)
+			return;
+
+		scope->drawList = drawList;
 	}
 
     FrameAttachment* FrameScheduler::GetFrameAttachment(AttachmentID id) const

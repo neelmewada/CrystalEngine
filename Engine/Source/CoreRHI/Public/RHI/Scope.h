@@ -65,7 +65,7 @@ namespace CE::RHI
 		FrameGraph* frameGraph = nullptr;
 
 		RHI::HardwareQueueClass queueClass{};
-		RHI::IPipelineState* passPipeline = nullptr;
+		RHI::PipelineState* passPipeline = nullptr;
 
 		ScopeID id{};
 		int scopeGroupIndex = -1;
@@ -80,8 +80,7 @@ namespace CE::RHI
 		Scope* prev = nullptr;
 		Scope* next = nullptr;
 
-		DrawList drawList{};
-		ThreadLocalContext<DrawList> threadDrawLists{};
+		DrawListContext* drawList = nullptr;
 
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
         

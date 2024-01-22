@@ -229,9 +229,59 @@ namespace CE::Sandbox
 			Vec4(0, 0, 1, -1),
 		};
 
-		// TODO: Create buffers
+		mesh->CreateBuffer();
 
 		meshes.Add(mesh);
+	}
+
+	void Mesh::CreateBuffer()
+	{
+		RHI::BufferDescriptor bufferDesc{};
+		bufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer | RHI::BufferBindFlags::IndexBuffer;
+		bufferDesc.bufferSize = vertices.GetSize() * sizeof(Vec3)
+			+ normals.GetSize() * sizeof(Vec3)
+			+ tangents.GetSize() * sizeof(Vec3)
+			+ uvCoords.GetSize() * sizeof(Vec2)
+			+ indices.GetSize() * sizeof(u16);
+		bufferDesc.name = "Cube Mesh Buffer";
+
+		buffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+		u8* data = (u8*)malloc(bufferDesc.bufferSize);
+		SIZE_T offset = 0;
+		vertexBufferOffset = offset;
+
+		for (int i = 0; i < vertices.GetSize(); i++)
+		{
+			Vec3* vertexPtr = (Vec3*)(data + offset); offset += sizeof(Vec3);
+			Vec3* normalPtr = (Vec3*)(data + offset); offset += sizeof(Vec3);
+			Vec3* tangentPtr = (Vec3*)(data + offset); offset += sizeof(Vec3);
+			Vec2* uvPtr = (Vec2*)(data + offset); offset += sizeof(Vec2);
+
+			*vertexPtr = vertices[i];
+			*normalPtr = normals[i];
+			*tangentPtr = tangents[i];
+			*uvPtr = uvCoords[i];
+		}
+
+		indexBufferOffset = offset;
+
+		for (int i = 0; i < indices.GetSize(); i++)
+		{
+			u16* indexPtr = (u16*)(data + offset); offset += sizeof(u16);
+			*indexPtr = (u16)indices[i];
+		}
+		
+		{
+			RHI::BufferData uploadData{};
+			uploadData.startOffsetInBuffer = 0;
+			uploadData.dataSize = buffer->GetBufferSize();
+			uploadData.data = data;
+			
+			buffer->UploadData(uploadData);
+		}
+
+		free(data);
 	}
 
 	void VulkanSandbox::DestroyModels()
@@ -341,17 +391,23 @@ namespace CE::Sandbox
 	{
 		resubmit = false;
 
-		scheduler->BeginDrawListSubmission();
+		depthDrawList.ClearAll();
 		{
-			scheduler->BeginDrawListScope("Depth");
-			{
 
-			}
-			scheduler->EndDrawListScope();
-
-			
 		}
-		scheduler->EndDrawListSubmission();
+		scheduler->SetScopeDrawList("Depth", &depthDrawList);
+
+		opaqueDrawList.ClearAll();
+		{
+
+		}
+		scheduler->SetScopeDrawList("Opaque", &opaqueDrawList);
+
+		transparentDrawList.ClearAll();
+		{
+
+		}
+		scheduler->SetScopeDrawList("Transparent", &transparentDrawList);
 	}
 
 	void VulkanSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)

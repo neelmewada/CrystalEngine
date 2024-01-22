@@ -25,9 +25,11 @@ namespace CE::Vulkan
 
         virtual bool IsGraphicsPipeline() const override final { return true; }
 
+        VkPipeline FindOrCreate(RenderPass* renderPass, u32 subpass);
+
     private:
 
-        bool Create(RenderPass* renderPass, u32 subpass);
+        VkPipeline Create(RenderPass* renderPass, u32 subpass);
 
         void SetupColorBlendState();
         void SetupDepthStencilState();

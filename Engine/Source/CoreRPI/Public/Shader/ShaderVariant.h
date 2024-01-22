@@ -17,6 +17,8 @@ namespace CE::RPI
 		
 		HashMap<RHI::ShaderStage, RHI::ShaderModule*> modulesByStage{};
 
+		RHI::PipelineState* pipeline = nullptr;
+
 		friend class Shader;
 	};
     

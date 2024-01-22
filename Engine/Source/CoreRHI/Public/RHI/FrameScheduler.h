@@ -34,14 +34,10 @@ namespace CE::RHI
 		//! @brief Compile the transient attachments, and everything.
 		void Compile();
 
-		void BeginDrawListSubmission();
-		void BeginDrawListScope(ScopeID scopeId);
-		void SubmitDrawList(const DrawList& drawList);
-		void SubmitDrawItem(DrawItemProperties drawItemProperties);
-		void EndDrawListScope();
-		void EndDrawListSubmission();
-
 		void Execute();
+
+		void SetScopeDrawList(const ScopeID& scopeId, DrawListContext* drawList);
+		
         
         FrameAttachment* GetFrameAttachment(AttachmentID id) const;
 

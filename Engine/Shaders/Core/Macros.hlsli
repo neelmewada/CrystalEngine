@@ -2,7 +2,7 @@
 #define __MACROS_HLSL__
 
 // TODO: Temp code
-#define LIMITED_SETS 1
+//#define LIMITED_SETS 1
 
 #ifdef LIMITED_SETS // Almost all android phones only support maxBoundDescriptorSets = 4
 

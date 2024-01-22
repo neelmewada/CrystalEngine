@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-	class PipelineLayout : public IPipelineLayout
+	class PipelineLayout : public RHI::IPipelineLayout
 	{
 	public:
 		virtual ~PipelineLayout();
