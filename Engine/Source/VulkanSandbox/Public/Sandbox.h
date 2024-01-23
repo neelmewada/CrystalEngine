@@ -28,7 +28,9 @@ namespace CE::Sandbox
 
 		RHI::Buffer* buffer = nullptr;
 		u64 vertexBufferOffset = 0;
+		u64 vertexBufferSize = 0;
 		u64 indexBufferOffset = 0;
+		u64 indexBufferSize = 0;
 	};
 
 	struct MeshInstance
@@ -50,10 +52,12 @@ namespace CE::Sandbox
 		void Tick(f32 deltaTime);
 
 		void Shutdown();
-
+		
+		void InitPipelines();
 		void InitModels();
 
 		void DestroyModels();
+		void DestroyPipelines();
 
 	private:
 		
@@ -71,6 +75,10 @@ namespace CE::Sandbox
 		bool recompile = true;
 		bool resubmit = true;
 
+		RHI::PipelineState* depthPipeline = nullptr;
+		RHI::PipelineState* opaquePipeline = nullptr;
+		RHI::PipelineState* transparentPipeline = nullptr;
+
 		RHI::FrameScheduler* scheduler = nullptr;
 		RHI::SwapChain* swapChain = nullptr;
 		PlatformWindow* mainWindow = nullptr;
@@ -80,6 +88,8 @@ namespace CE::Sandbox
 		RHI::DrawListContext depthDrawList{};
 		RHI::DrawListContext opaqueDrawList{};
 		RHI::DrawListContext transparentDrawList{};
+
+		DrawPacket* meshDrawPacket = nullptr;
 
 		u32 width = 0;
 		u32 height = 0;

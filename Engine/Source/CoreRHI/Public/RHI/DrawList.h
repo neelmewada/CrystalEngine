@@ -22,7 +22,7 @@ namespace CE::RHI
 
 	private:
 
-		HashMap<RHI::IPipelineState*, Array<DrawItemProperties>> drawItemsByPipeline{};
+		HashMap<RHI::PipelineState*, Array<DrawItemProperties>> drawItemsByPipeline{};
 		Array<DrawItemProperties> drawItems{};
 		DrawListTag listTag = DrawListTag::NullValue;
 

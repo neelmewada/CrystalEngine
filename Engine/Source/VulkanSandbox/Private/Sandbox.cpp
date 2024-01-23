@@ -4,6 +4,7 @@ namespace CE::Sandbox
 {
 
 	static int counter = 0;
+	static RHI::RHISystem rhiSystem{};
 
 	void VulkanSandbox::Init(PlatformWindow* window)
 	{
@@ -82,40 +83,45 @@ namespace CE::Sandbox
 		delete swapChain;
 	}
 
+	void VulkanSandbox::InitPipelines()
+	{
+		
+	}
+
 	void VulkanSandbox::InitModels()
 	{
 		Mesh* mesh = new Mesh();
 
 		mesh->vertices = {
-				Vec3(0.5, -0.5, 0.5),
-				Vec3(-0.5, -0.5, 0.5),
-				Vec3(0.5, 0.5, 0.5),
-				Vec3(-0.5, 0.5, 0.5),
+			Vec3(0.5, -0.5, 0.5),
+			Vec3(-0.5, -0.5, 0.5),
+			Vec3(0.5, 0.5, 0.5),
+			Vec3(-0.5, 0.5, 0.5),
 
-				Vec3(0.5, 0.5, -0.5),
-				Vec3(-0.5, 0.5, -0.5),
-				Vec3(0.5, -0.5, -0.5),
-				Vec3(-0.5, -0.5, -0.5),
+			Vec3(0.5, 0.5, -0.5),
+			Vec3(-0.5, 0.5, -0.5),
+			Vec3(0.5, -0.5, -0.5),
+			Vec3(-0.5, -0.5, -0.5),
 
-				Vec3(0.5, 0.5, 0.5),
-				Vec3(-0.5, 0.5, 0.5),
-				Vec3(0.5, 0.5, -0.5),
-				Vec3(-0.5, 0.5, -0.5),
+			Vec3(0.5, 0.5, 0.5),
+			Vec3(-0.5, 0.5, 0.5),
+			Vec3(0.5, 0.5, -0.5),
+			Vec3(-0.5, 0.5, -0.5),
 
-				Vec3(0.5, -0.5, -0.5),
-				Vec3(0.5, -0.5, 0.5),
-				Vec3(-0.5, -0.5, 0.5),
-				Vec3(-0.5, -0.5, -0.5),
+			Vec3(0.5, -0.5, -0.5),
+			Vec3(0.5, -0.5, 0.5),
+			Vec3(-0.5, -0.5, 0.5),
+			Vec3(-0.5, -0.5, -0.5),
 
-				Vec3(-0.5, -0.5, 0.5),
-				Vec3(-0.5, 0.5, 0.5),
-				Vec3(-0.5, 0.5, -0.5),
-				Vec3(-0.5, -0.5, -0.5),
+			Vec3(-0.5, -0.5, 0.5),
+			Vec3(-0.5, 0.5, 0.5),
+			Vec3(-0.5, 0.5, -0.5),
+			Vec3(-0.5, -0.5, -0.5),
 
-				Vec3(0.5, -0.5, -0.5),
-				Vec3(0.5, 0.5, -0.5),
-				Vec3(0.5, 0.5, 0.5),
-				Vec3(0.5, -0.5, 0.5)
+			Vec3(0.5, -0.5, -0.5),
+			Vec3(0.5, 0.5, -0.5),
+			Vec3(0.5, 0.5, 0.5),
+			Vec3(0.5, -0.5, 0.5)
 		};
 
 		mesh->indices = {
@@ -230,8 +236,44 @@ namespace CE::Sandbox
 		};
 
 		mesh->CreateBuffer();
-
 		meshes.Add(mesh);
+
+		DrawPacketBuilder builder{};
+		RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
+		builder.SetIndexBufferView(indexBufferView);
+
+		// Depth Item
+		{
+			DrawPacketBuilder::DrawItemRequest request{};
+			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(mesh->buffer, mesh->vertexBufferOffset,
+				mesh->vertexBufferSize,
+				sizeof(Vec3) * 3 + sizeof(Vec2));
+			request.vertexBufferViews.Add(vertexBufferView);
+			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthPipeline;
+			builder.AddDrawItem(request);
+		}
+		
+		// Opaque Item
+		{
+			DrawPacketBuilder::DrawItemRequest request{};
+			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(mesh->buffer, mesh->vertexBufferOffset,
+				mesh->vertexBufferSize,
+				sizeof(Vec3) * 3 + sizeof(Vec2));
+			request.vertexBufferViews.Add(vertexBufferView);
+			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = opaquePipeline;
+			builder.AddDrawItem(request);
+		}
+
+		// Transparent Item
+		{
+
+		}
+		
+		meshDrawPacket = builder.Build();
 	}
 
 	void Mesh::CreateBuffer()
@@ -250,6 +292,7 @@ namespace CE::Sandbox
 		u8* data = (u8*)malloc(bufferDesc.bufferSize);
 		SIZE_T offset = 0;
 		vertexBufferOffset = offset;
+		vertexBufferSize = 0;
 
 		for (int i = 0; i < vertices.GetSize(); i++)
 		{
@@ -264,6 +307,7 @@ namespace CE::Sandbox
 			*uvPtr = uvCoords[i];
 		}
 
+		vertexBufferSize = offset;
 		indexBufferOffset = offset;
 
 		for (int i = 0; i < indices.GetSize(); i++)
@@ -271,6 +315,7 @@ namespace CE::Sandbox
 			u16* indexPtr = (u16*)(data + offset); offset += sizeof(u16);
 			*indexPtr = (u16)indices[i];
 		}
+		indexBufferSize = indices.GetSize() * sizeof(u16);
 		
 		{
 			RHI::BufferData uploadData{};
@@ -286,11 +331,18 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyModels()
 	{
+		delete meshDrawPacket;
+
 		for (auto mesh : meshes)
 		{
 			delete mesh;
 		}
 		meshes.Clear();
+	}
+
+	void VulkanSandbox::DestroyPipelines()
+	{
+
 	}
 
 	void VulkanSandbox::BuildFrameGraph()

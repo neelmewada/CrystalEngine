@@ -82,7 +82,7 @@ namespace CE::RHI
 		b8 enabled = true;
 
 		/// @brief The pipeline to use for this draw call.
-		RHI::IPipelineState* pipelineState = nullptr;
+		RHI::PipelineState* pipelineState = nullptr;
 
 		/// @brief Index buffer to bind for this draw call.
 		RHI::IndexBufferView* indexBufferView = nullptr;
@@ -108,14 +108,20 @@ namespace CE::RHI
 
 	};
 
-	typedef u32 DrawFilterMask;
-	constexpr u32 DrawFilterMaskNullValue = u32(-1);
+	//typedef u32 DrawFilterMask;
+	//constexpr DrawFilterMask DrawFilterMaskNullValue = u32(-1);
+
+	enum class DrawFilterMask : u32
+	{
+		None = 0,
+		ALL = UINT_MAX,
+	};
 
 	struct DrawItemProperties
 	{
 		DrawItemProperties() = default;
 
-		DrawItemProperties(const DrawItem* item, const DrawFilterMask filterMask = DrawFilterMaskNullValue)
+		DrawItemProperties(const DrawItem* item, const DrawFilterMask filterMask = DrawFilterMask::ALL)
 			: item(item), drawFilterMask(filterMask)
 		{}
 
@@ -127,7 +133,7 @@ namespace CE::RHI
 		}
 
 		/// @brief A filter mask which helps decide if this item is supposed to be pushed to a CommandList for drawing.
-		DrawFilterMask drawFilterMask = DrawFilterMaskNullValue;
+		DrawFilterMask drawFilterMask = DrawFilterMask::ALL;
 	};
 
 } // namespace CE::RPI

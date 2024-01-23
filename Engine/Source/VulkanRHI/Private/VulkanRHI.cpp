@@ -69,7 +69,7 @@ namespace CE::Vulkan
         {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
         }
-        else 
+        else
         {
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }

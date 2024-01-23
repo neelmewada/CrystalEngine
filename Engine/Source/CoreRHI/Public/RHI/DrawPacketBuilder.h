@@ -24,7 +24,7 @@ namespace CE::RHI
 
 			ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
 
-			IPipelineState* pipelineState = nullptr;
+			PipelineState* pipelineState = nullptr;
 
 			DrawFilterMask drawFilterMask = DrawFilterMaskNullValue;
 		};

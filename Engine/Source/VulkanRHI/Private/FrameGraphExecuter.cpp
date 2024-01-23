@@ -287,18 +287,34 @@ namespace CE::Vulkan
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
-					beginInfo.framebuffer = currentScope->frameBuffers[currentImageIndex]->GetHandle();
+					FrameBuffer* frameBuffer = currentScope->frameBuffers[currentImageIndex];
+					beginInfo.framebuffer = frameBuffer->GetHandle();
 					beginInfo.clearValueCount = clearValues.GetSize();
 					beginInfo.pClearValues = clearValues.GetData();
 
 					beginInfo.renderArea.offset.x = 0;
 					beginInfo.renderArea.offset.y = 0;
-					beginInfo.renderArea.extent.width = currentScope->frameBuffers[currentImageIndex]->GetWidth();
-					beginInfo.renderArea.extent.height = currentScope->frameBuffers[currentImageIndex]->GetHeight();
+					beginInfo.renderArea.extent.width = frameBuffer->GetWidth();
+					beginInfo.renderArea.extent.height = frameBuffer->GetHeight();
 
 					vkCmdBeginRenderPass(cmdBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 					{
-						// Execute scope
+						VkViewport viewport{};
+						viewport.x = viewport.y = 0;
+						viewport.width = frameBuffer->GetWidth();
+						viewport.height = frameBuffer->GetHeight();
+						viewport.minDepth = 0.0f;
+						viewport.maxDepth = 1.0f;
+						vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
+
+						VkRect2D scissor{};
+						scissor.offset.x = scissor.offset.y = 0;
+						scissor.extent.width = viewport.width;
+						scissor.extent.height = viewport.height;
+						vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+
+						// TODO: Execute scope
+
 					}
 					vkCmdEndRenderPass(cmdBuffer);
 				}
