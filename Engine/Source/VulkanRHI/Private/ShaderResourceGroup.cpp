@@ -224,6 +224,8 @@ namespace CE::Vulkan
 
     ShaderResourceGroup::~ShaderResourceGroup()
 	{
+		//vkDeviceWaitIdle(device->GetHandle());
+
 		srgManager->OnSRGDestroyed(this);
 		Destroy();
 	}

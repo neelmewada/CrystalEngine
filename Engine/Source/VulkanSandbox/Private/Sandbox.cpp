@@ -64,9 +64,11 @@ namespace CE::Sandbox
 			CompileFrameGraph();
 		}
 		
-		// Submit work
+		if (resubmit)
 		{
+			resubmit = false;
 
+			SubmitWork();
 		}
 
 		scheduler->Execute();
