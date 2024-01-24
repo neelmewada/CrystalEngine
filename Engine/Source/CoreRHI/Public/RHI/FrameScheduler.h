@@ -37,7 +37,8 @@ namespace CE::RHI
 		void Execute();
 
 		void SetScopeDrawList(const ScopeID& scopeId, DrawListContext* drawList);
-		
+
+		RHI::Scope* FindScope(const ScopeID& scopeId);
         
         FrameAttachment* GetFrameAttachment(AttachmentID id) const;
 

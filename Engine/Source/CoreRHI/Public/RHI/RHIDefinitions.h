@@ -130,6 +130,13 @@ namespace CE::RHI
 	{
 		u16 sampleCount = 1;
 		u16 quality = 0;
+
+        inline SIZE_T GetHash() const
+        {
+            SIZE_T hash = CE::GetHash(sampleCount);
+            CombineHash(hash, quality);
+            return hash;
+        }
 	};
 
     /*

@@ -459,16 +459,15 @@ namespace CE::Vulkan
         VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
     }
 
-	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection)
+	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc)
 	{
-		return nullptr;
+		return new Vulkan::ShaderModule(device, desc);
 	}
 
 	void VulkanRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)
 	{
 		delete shaderModule;
 	}
-
 
 	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout)
 	{
@@ -480,16 +479,15 @@ namespace CE::Vulkan
 		delete shaderResourceGroup;
 	}
 
+    RHI::PipelineState* VulkanRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)
+    {
+        return new Vulkan::PipelineState(device, desc);
+    }
 
-	RHI::GraphicsPipelineState* VulkanRHI::CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc)
-	{
-		return nullptr;
-	}
-
-	void VulkanRHI::DestroyPipelineState(RHI::IPipelineState* pipelineState)
-	{
-		delete pipelineState;
-	}
+    void VulkanRHI::DestroyPipeline(const RHI::PipelineState* pipeline)
+    {
+        delete pipeline;
+    }
 
 	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
 	{

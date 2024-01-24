@@ -133,7 +133,7 @@ namespace CE::Vulkan
         pipelinesByHash.Clear();
     }
 
-    VkPipeline GraphicsPipeline::FindOrCreate(RenderPass* renderPass, u32 subpass)
+    VkPipeline GraphicsPipeline::FindOrCompile(RenderPass* renderPass, u32 subpass)
     {
         if (renderPass == nullptr || subpass >= RHI::Limits::Pipeline::MaxSubPassCount)
             return nullptr;
@@ -145,10 +145,10 @@ namespace CE::Vulkan
         if (pipelinesByHash[instanceHash] != nullptr)
             return pipelinesByHash[instanceHash];
 
-        return Create(renderPass, subpass);
+        return CompileInternal(renderPass, subpass);
     }
 
-    VkPipeline GraphicsPipeline::Create(RenderPass* renderPass, u32 subpass)
+    VkPipeline GraphicsPipeline::CompileInternal(RenderPass* renderPass, u32 subpass)
     {
         VkGraphicsPipelineCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -190,6 +190,16 @@ namespace CE::Vulkan
         // - Raster State -
         createInfo.pRasterizationState = &rasterState;
 
+        // - Viewport & Scissor -
+        VkPipelineViewportStateCreateInfo viewportState{};
+        viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportState.scissorCount = 1;
+        viewportState.pScissors = nullptr;
+        viewportState.viewportCount = 1;
+        viewportState.pViewports = nullptr;
+
+        createInfo.pViewportState = &viewportState;
+
         // - Input Assembly -
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -211,7 +221,7 @@ namespace CE::Vulkan
         // - Multisample State -
         createInfo.pMultisampleState = &multisampleState;
 
-        // - Extra -
+        // - Pipeline Layout -
         createInfo.layout = pipelineLayout;
 
         // Pipeline cache is a combination of hashes of: GraphicsPipelineDescriptor + RenderPass + SubPassIndex

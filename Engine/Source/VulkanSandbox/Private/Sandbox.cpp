@@ -26,6 +26,8 @@ namespace CE::Sandbox
 
 		mainWindow->AddListener(this);
 		
+		InitPipelines();
+
 		BuildFrameGraph();
 		CompileFrameGraph();
 
@@ -80,12 +82,120 @@ namespace CE::Sandbox
 		}
 
 		delete scheduler;
+		DestroyPipelines();
+
 		delete swapChain;
 	}
 
 	void VulkanSandbox::InitPipelines()
 	{
-		
+		// Depth Pipeline
+		{
+			Resource* depthVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Depth.vert.spv", nullptr);
+			RHI::ShaderModuleDescriptor vertDesc{};
+			vertDesc.name = "Depth Vertex";
+			vertDesc.stage = RHI::ShaderStage::Vertex;
+			vertDesc.byteCode = depthVert->GetData();
+			vertDesc.byteSize = depthVert->GetDataSize();
+
+			depthShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
+
+			RHI::GraphicsPipelineDescriptor depthPipelineDesc{};
+			RHI::ColorBlendState colorBlend{};
+			colorBlend.alphaBlendOp = RHI::BlendOp::Add;
+			colorBlend.colorBlendOp = RHI::BlendOp::Add;
+			colorBlend.componentMask = RHI::ColorComponentMask::All;
+			colorBlend.srcColorBlend = RHI::BlendFactor::SrcAlpha;
+			colorBlend.dstColorBlend = RHI::BlendFactor::OneMinusSrcAlpha;
+			colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
+			colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
+			colorBlend.blendEnable = true;
+			depthPipelineDesc.blendState.colorBlends.Add(colorBlend);
+
+			depthPipelineDesc.depthStencilState.depthState.enable = true;
+			depthPipelineDesc.depthStencilState.depthState.testEnable = true;
+			depthPipelineDesc.depthStencilState.depthState.writeEnable = true;
+			depthPipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::Less;
+			depthPipelineDesc.depthStencilState.stencilState.enable = false;
+			
+			depthPipelineDesc.multisampleState.sampleCount = 1;
+			depthPipelineDesc.multisampleState.quality = 0;
+
+			depthPipelineDesc.shaderStages.Add({});
+			depthPipelineDesc.shaderStages[0].entryPoint = "VertMain";
+			depthPipelineDesc.shaderStages[0].shaderModule = depthShaderVert;
+
+			depthPipelineDesc.rasterState = {};
+
+			depthPipelineDesc.vertexInputSlots.Add({});
+			depthPipelineDesc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
+			depthPipelineDesc.vertexInputSlots[0].inputSlot = 0;
+			depthPipelineDesc.vertexInputSlots[0].stride = Mesh::VertexBufferStride;
+
+			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = depthPipelineDesc.vertexAttributes;
+			
+			vertexAttribs.Add({});
+			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3;
+			vertexAttribs[0].inputSlot = 0;
+			vertexAttribs[0].location = 0;
+			vertexAttribs[0].offset = offsetof(VertexStruct, position);
+
+			// Depth shader only uses position
+			/*vertexAttribs.Add({});
+			vertexAttribs[1].dataType = RHI::VertexAttributeDataType::Float3;
+			vertexAttribs[1].inputSlot = 0;
+			vertexAttribs[1].location = 1;
+			vertexAttribs[1].offset = offsetof(VertexStruct, normal);
+
+			vertexAttribs.Add({});
+			vertexAttribs[2].dataType = RHI::VertexAttributeDataType::Float3;
+			vertexAttribs[2].inputSlot = 0;
+			vertexAttribs[2].location = 2;
+			vertexAttribs[2].offset = offsetof(VertexStruct, tangent);
+
+			vertexAttribs.Add({});
+			vertexAttribs[3].dataType = RHI::VertexAttributeDataType::Float2;
+			vertexAttribs[3].inputSlot = 0;
+			vertexAttribs[3].location = 3;
+			vertexAttribs[3].offset = offsetof(VertexStruct, uvCoord);*/
+
+			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = depthPipelineDesc.srgLayouts;
+			RHI::ShaderResourceGroupLayout perViewSRG{};
+			perViewSRG.srgType = RHI::SRGType::PerView;
+			perViewSRG.variables.Add({});
+			perViewSRG.variables[0].arrayCount = 1;
+			perViewSRG.variables[0].name = "_PerViewData";
+			perViewSRG.variables[0].bindingSlot = 0;
+			perViewSRG.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perViewSRG.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			srgLayouts.Add(perViewSRG);
+			
+			RHI::ShaderResourceGroupLayout perObjectSRG{};
+			perObjectSRG.srgType = RHI::SRGType::PerObject;
+			perObjectSRG.variables.Add({});
+			perObjectSRG.variables[0].arrayCount = 1;
+			perObjectSRG.variables[0].name = "_ObjectData";
+			perObjectSRG.variables[0].bindingSlot = 1;
+			perObjectSRG.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perObjectSRG.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			srgLayouts.Add(perObjectSRG);
+
+			depthPipelineDesc.name = "Depth Pipeline";
+
+			depthPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(depthPipelineDesc);
+
+			delete depthVert;
+		}
+
+		// Opaque Pipeline
+		{
+
+		}
+
+		// Transparent Pipeline
+		{
+
+		}
 	}
 
 	void VulkanSandbox::InitModels()
@@ -307,6 +417,8 @@ namespace CE::Sandbox
 			*uvPtr = uvCoords[i];
 		}
 
+		vertexBufferStride = sizeof(Vec3) * 3 + sizeof(Vec2);
+
 		vertexBufferSize = offset;
 		indexBufferOffset = offset;
 
@@ -342,7 +454,14 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyPipelines()
 	{
+		delete depthPipeline; depthPipeline = nullptr;
+		delete depthShaderVert; depthShaderVert = nullptr;
 
+		delete opaquePipeline;
+		opaquePipeline = nullptr;
+
+		delete transparentPipeline;
+		transparentPipeline = nullptr;
 	}
 
 	void VulkanSandbox::BuildFrameGraph()
@@ -377,6 +496,8 @@ namespace CE::Sandbox
 				depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
 
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->UsePipeline(depthPipeline);
 			}
 			scheduler->EndScope();
 
@@ -398,6 +519,8 @@ namespace CE::Sandbox
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+
+				//scheduler->UsePipeline(opaquePipeline);
 			}
 			scheduler->EndScope();
 
@@ -418,6 +541,8 @@ namespace CE::Sandbox
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
+
+				//scheduler->UsePipeline(depthPipeline);
 
 				scheduler->PresentSwapChain(swapChain);
 			}
@@ -445,7 +570,7 @@ namespace CE::Sandbox
 
 		depthDrawList.ClearAll();
 		{
-
+			
 		}
 		scheduler->SetScopeDrawList("Depth", &depthDrawList);
 

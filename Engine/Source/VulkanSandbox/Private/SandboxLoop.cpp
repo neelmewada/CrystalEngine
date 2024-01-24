@@ -2,7 +2,7 @@
 
 #include <cxxopts.hpp>
 
-namespace CE
+namespace CE::Sandbox
 {
 	SandboxLoop::SandboxLoop()
 	{

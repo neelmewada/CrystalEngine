@@ -67,6 +67,11 @@ namespace CE::RHI
 		scope->drawList = drawList;
 	}
 
+	RHI::Scope* FrameScheduler::FindScope(const ScopeID& scopeId)
+	{
+		return frameGraph->scopesById[scopeId];
+	}
+
     FrameAttachment* FrameScheduler::GetFrameAttachment(AttachmentID id) const
     {
         return GetAttachmentDatabase().FindFrameAttachment(id);

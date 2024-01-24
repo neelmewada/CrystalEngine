@@ -3,6 +3,7 @@
 namespace CE::Vulkan
 {
 	class FrameGraphCompiler;
+	class Scope;
 }
 
 namespace CE::RHI
@@ -20,6 +21,15 @@ namespace CE::RHI
 	{
 		ScopeID groupId{};
 		Array<Scope*> scopes{};
+	};
+
+	enum class ScopeOperation
+	{
+		Rasterization = 0,
+		FullScreenPass,
+		Compute,
+		RayTracing,
+		Transfer
 	};
 
     class CORERHI_API Scope
@@ -65,7 +75,7 @@ namespace CE::RHI
 		FrameGraph* frameGraph = nullptr;
 
 		RHI::HardwareQueueClass queueClass{};
-		RHI::PipelineState* passPipeline = nullptr;
+		Array<RHI::PipelineState*> usePipelines{};
 
 		ScopeID id{};
 		int scopeGroupIndex = -1;
@@ -97,6 +107,7 @@ namespace CE::RHI
 		friend class FrameGraph;
         friend class FrameGraphCompiler;
 		friend class CE::Vulkan::FrameGraphCompiler;
+		friend class CE::Vulkan::Scope;
 		friend class FrameGraphBuilder;
 		friend class FrameScheduler;
     };

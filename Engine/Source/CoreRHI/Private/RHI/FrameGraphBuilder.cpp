@@ -80,6 +80,26 @@ namespace CE::RHI
 		return true;
 	}
 
+	bool FrameGraphBuilder::UsePipelines(const Array<RHI::PipelineState*>& pipelines)
+	{
+		if (!currentScope || !frameGraph)
+			return false;
+
+		currentScope->usePipelines.AddRange(pipelines);
+
+		return true;
+	}
+
+	bool FrameGraphBuilder::UsePipeline(RHI::PipelineState* pipeline)
+	{
+		if (!currentScope || !frameGraph || !pipeline)
+			return false;
+
+		currentScope->usePipelines.Add(pipeline);
+
+		return true;
+	}
+
 	bool FrameGraphBuilder::PresentSwapChain(SwapChain* swapChain)
 	{
 		if (!currentScope || !frameGraph)

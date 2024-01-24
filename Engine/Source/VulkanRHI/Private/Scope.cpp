@@ -90,6 +90,31 @@ namespace CE::Vulkan
 		if (prevSubPass == nullptr && nextSubPass != nullptr)
 		{
 			// TODO: RenderPass with multiple subpasses
+
+			RenderPassCache* rpCache = device->GetRenderPassCache();
+			RenderPass::Descriptor descriptor{};
+			RenderPass::BuildDescriptor(this, descriptor);
+			renderPass = rpCache->FindOrCreate(descriptor);
+			this->subpassIndex = 0;
+			int i = 0;
+
+			Vulkan::Scope* next = this;
+
+			while (next != nullptr)
+			{
+				for (RHI::PipelineState* rhiPipelineState : next->usePipelines)
+				{
+					auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
+					Pipeline* pipeline = pipelineState->GetPipeline();
+					if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Graphics)
+						continue;
+					GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
+					graphicsPipeline->Compile(renderPass, subpassIndex);
+				}
+
+				next->subpassIndex = i++;
+				next = (Vulkan::Scope*)next->nextSubPass;
+			}
 		}
 		else
 		{
@@ -97,6 +122,17 @@ namespace CE::Vulkan
             RenderPass::Descriptor descriptor{};
             RenderPass::BuildDescriptor(this, descriptor);
             renderPass = rpCache->FindOrCreate(descriptor);
+			subpassIndex = 0;
+
+			for (RHI::PipelineState* rhiPipelineState : usePipelines)
+			{
+				auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
+				Pipeline* pipeline = pipelineState->GetPipeline();
+				if (!pipeline || pipeline->GetPipelineType() != RHI::PipelineStateType::Graphics)
+					continue;
+				GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
+				graphicsPipeline->Compile(renderPass, subpassIndex);
+			}
 		}
 
 		for (int i = 0; i < imageCount; i++)

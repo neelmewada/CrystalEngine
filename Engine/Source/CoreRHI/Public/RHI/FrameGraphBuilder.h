@@ -27,6 +27,9 @@ namespace CE::RHI
 		bool UseAttachment(const BufferScopeAttachmentDescriptor& descriptor,
 			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
 
+		bool UsePipelines(const Array<RHI::PipelineState*>& pipelines);
+		bool UsePipeline(RHI::PipelineState* pipeline);
+
 		bool PresentSwapChain(SwapChain* swapChain);
 
 		Scope* EndScope();

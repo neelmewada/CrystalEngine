@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE
+namespace CE::Sandbox
 {
 	class VulkanSandbox;
 

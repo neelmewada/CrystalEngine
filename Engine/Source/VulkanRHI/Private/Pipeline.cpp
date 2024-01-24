@@ -10,11 +10,20 @@ namespace CE::Vulkan
             pipelineLayout = nullptr;
         }
 
-        for (auto setLayout : setLayouts)
+        for (VkDescriptorSetLayout setLayout : setLayouts)
         {
+            if (setLayout == emptySetLayout)
+                continue;
+
             vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
         }
         setLayouts.Clear();
+
+        if (emptySetLayout)
+        {
+            vkDestroyDescriptorSetLayout(device->GetHandle(), emptySetLayout, nullptr);
+            emptySetLayout = nullptr;
+        }
     }
 
     bool PipelineLayout::IsCompatibleWith(PipelineLayout* other)
@@ -50,89 +59,124 @@ namespace CE::Vulkan
         return true;
     }
 
-    Pipeline::Pipeline(VulkanDevice* device, const PipelineDescriptor& desc) 
-        : RHI::RHIResource(RHI::ResourceType::Pipeline)
-        , name(desc.name)
+    Pipeline::Pipeline(VulkanDevice* device, const PipelineDescriptor& desc) : RHI::RHIResource(RHI::ResourceType::Pipeline), name(desc.name)
     {
         this->device = device;
         auto srgManager = device->GetShaderResourceManager();
         setLayoutBindingsMap = {};
         setLayouts = {};
         VkResult result;
+        int lowestSetNumber = RHI::Limits::Pipeline::MaxShaderResourceGroupCount;
+        int highestSetNumber = -1;
+
+        {
+            VkDescriptorSetLayoutCreateInfo emptySetCI{};
+            emptySetCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            emptySetCI.bindingCount = 0;
+            emptySetCI.pBindings = nullptr;
+
+            vkCreateDescriptorSetLayout(device->GetHandle(), &emptySetCI, nullptr, &emptySetLayout);
+        }
 
         for (const RHI::ShaderResourceGroupLayout& srgLayout : desc.srgLayouts)
         {
             int setNumber = srgManager->GetDescriptorSetNumber(srgLayout.srgType);
 
-            for (const auto& variable : srgLayout.variables)
+            if (setNumber < lowestSetNumber)
+                lowestSetNumber = setNumber;
+            if (setNumber > highestSetNumber)
+                highestSetNumber = setNumber;
+        }
+        
+        for (int setNumber = 0; setNumber <= highestSetNumber; setNumber++)
+        {
+            bool found = false;
+
+            for (const RHI::ShaderResourceGroupLayout& srgLayout : desc.srgLayouts)
             {
-                VkDescriptorSetLayoutBinding layoutBinding{};
-                layoutBinding.binding = variable.bindingSlot;
-                layoutBinding.descriptorCount = variable.arrayCount;
-                layoutBinding.stageFlags = 0;
-                if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Vertex))
-                {
-                    layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-                }
-                if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Fragment))
-                {
-                    layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-                }
-                if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Geometry))
-                {
-                    layoutBinding.stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
-                }
-                if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Tessellation))
-                {
-                    layoutBinding.stageFlags = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-                }
-
-                switch (variable.type)
-                {
-                case RHI::ShaderResourceType::ConstantBuffer:
-                    layoutBinding.descriptorType = variable.usesDynamicOffset
-                        ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC
-                        : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    break;
-                case RHI::ShaderResourceType::StructuredBuffer:
-                case RHI::ShaderResourceType::RWStructuredBuffer:
-                    layoutBinding.descriptorType = variable.usesDynamicOffset
-                        ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
-                        : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-                    break;
-                case RHI::ShaderResourceType::Texture1D:
-                case RHI::ShaderResourceType::Texture2D:
-                case RHI::ShaderResourceType::Texture3D:
-                case RHI::ShaderResourceType::TextureCube:
-                    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-                    break;
-                case RHI::ShaderResourceType::RWTexture2D:
-                case RHI::ShaderResourceType::RWTexture3D:
-                    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-                    break;
-                case RHI::ShaderResourceType::SamplerState:
-                    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-                    break;
-                case RHI::ShaderResourceType::SubpassInput:
-                    layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-                    break;
-                default:
+                if (srgManager->GetDescriptorSetNumber(srgLayout.srgType) != setNumber)
                     continue;
+
+                found = true;
+
+                for (const auto& variable : srgLayout.variables)
+                {
+                    VkDescriptorSetLayoutBinding layoutBinding{};
+                    layoutBinding.binding = variable.bindingSlot;
+                    layoutBinding.descriptorCount = variable.arrayCount;
+                    layoutBinding.stageFlags = 0;
+                    if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Vertex))
+                    {
+                        layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+                    }
+                    if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Fragment))
+                    {
+                        layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                    }
+                    if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Geometry))
+                    {
+                        layoutBinding.stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
+                    }
+                    if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Tessellation))
+                    {
+                        layoutBinding.stageFlags = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+                    }
+
+                    switch (variable.type)
+                    {
+                    case RHI::ShaderResourceType::ConstantBuffer:
+                        layoutBinding.descriptorType = variable.usesDynamicOffset
+                            ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC
+                            : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                        break;
+                    case RHI::ShaderResourceType::StructuredBuffer:
+                    case RHI::ShaderResourceType::RWStructuredBuffer:
+                        layoutBinding.descriptorType = variable.usesDynamicOffset
+                            ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
+                            : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                        break;
+                    case RHI::ShaderResourceType::Texture1D:
+                    case RHI::ShaderResourceType::Texture2D:
+                    case RHI::ShaderResourceType::Texture3D:
+                    case RHI::ShaderResourceType::TextureCube:
+                        layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+                        break;
+                    case RHI::ShaderResourceType::RWTexture2D:
+                    case RHI::ShaderResourceType::RWTexture3D:
+                        layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                        break;
+                    case RHI::ShaderResourceType::SamplerState:
+                        layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+                        break;
+                    case RHI::ShaderResourceType::SubpassInput:
+                        layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+                        break;
+                    default:
+                        continue;
+                    }
+
+                    setLayoutBindingsMap[setNumber].Add(layoutBinding);
                 }
 
-                setLayoutBindingsMap[setNumber].Add(layoutBinding);
+                VkDescriptorSetLayoutCreateInfo setLayoutCI{};
+                setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+                setLayoutCI.bindingCount = setLayoutBindingsMap[setNumber].GetSize();
+                setLayoutCI.pBindings = setLayoutBindingsMap[setNumber].GetData();
+
+                VkDescriptorSetLayout setLayout = nullptr;
+                result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
+                if (result == VK_SUCCESS)
+                {
+                    setLayouts.Add(setLayout);
+                }
+
+                break;
             }
 
-            VkDescriptorSetLayoutCreateInfo setLayoutCI{};
-            setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-            setLayoutCI.bindingCount = setLayoutBindingsMap[setNumber].GetSize();
-            setLayoutCI.pBindings = setLayoutBindingsMap[setNumber].GetData();
-            
-            VkDescriptorSetLayout setLayout = nullptr;
-            result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
-            if (result == VK_SUCCESS)
+            // Empty descriptor sets
+            if (!found)
             {
-                setLayouts.Add(setLayout);
+                setLayouts.Add(emptySetLayout);
             }
         }
 
@@ -155,6 +199,12 @@ namespace CE::Vulkan
         {
             vkDestroyPipeline(device->GetHandle(), pipeline, nullptr);
             pipeline = nullptr;
+        }
+
+        if (pipelineCache)
+        {
+            vkDestroyPipelineCache(device->GetHandle(), pipelineCache, nullptr);
+            pipelineCache = nullptr;
         }
     }
 

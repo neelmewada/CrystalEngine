@@ -14,6 +14,11 @@ namespace CE::Vulkan
             CombineHash(hash, subpass);
             return hash;
         }
+
+        inline bool operator==(const PipelineRenderPass& other) const
+        {
+            return GetHash() == other.GetHash();
+        }
     };
     
     class GraphicsPipeline : public Pipeline
@@ -25,11 +30,24 @@ namespace CE::Vulkan
 
         virtual bool IsGraphicsPipeline() const override final { return true; }
 
-        VkPipeline FindOrCreate(RenderPass* renderPass, u32 subpass);
+        VkPipeline FindOrCompile(RenderPass* renderPass, u32 subpass);
+
+        inline void Compile(const Array<PipelineRenderPass>& passes)
+        {
+            for (const auto& pass : passes)
+            {
+                Compile(pass.pass, pass.subpass);
+            }
+        }
+
+        inline void Compile(RenderPass* renderPass, u32 subpass)
+        {
+            FindOrCompile(renderPass, subpass);
+        }
 
     private:
 
-        VkPipeline Create(RenderPass* renderPass, u32 subpass);
+        VkPipeline CompileInternal(RenderPass* renderPass, u32 subpass);
 
         void SetupColorBlendState();
         void SetupDepthStencilState();

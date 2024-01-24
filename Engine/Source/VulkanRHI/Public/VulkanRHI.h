@@ -115,7 +115,7 @@ namespace CE::Vulkan
         virtual void* AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler) override;
         virtual void RemoveImGuiTexture(void* imguiTexture) override; 
 
-		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection) override;
+		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc) override;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) override;
 		
 		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout) override;
@@ -123,8 +123,8 @@ namespace CE::Vulkan
 
 		// - Pipeline State -
 
-		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) override;
-		virtual void DestroyPipelineState(RHI::IPipelineState* pipelineState) override;
+        virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) override;
+        virtual void DestroyPipeline(const RHI::PipelineState* pipeline) override;
 
 		// - Utilities -
 

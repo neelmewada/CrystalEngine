@@ -2,10 +2,19 @@
 
 namespace CE::Sandbox
 {
-    
+	struct VertexStruct
+	{
+		Vec3 position;
+		Vec3 normal;
+		Vec3 tangent;
+		Vec2 uvCoord;
+	};
+
 	class Mesh
 	{
 	public:
+
+		constexpr static u64 VertexBufferStride = sizeof(VertexStruct);
 
 		~Mesh()
 		{
@@ -27,6 +36,7 @@ namespace CE::Sandbox
 		Array<Vec3> tangents{};
 
 		RHI::Buffer* buffer = nullptr;
+		u64 vertexBufferStride = 0;
 		u64 vertexBufferOffset = 0;
 		u64 vertexBufferSize = 0;
 		u64 indexBufferOffset = 0;
@@ -76,6 +86,8 @@ namespace CE::Sandbox
 		bool resubmit = true;
 
 		RHI::PipelineState* depthPipeline = nullptr;
+		RHI::ShaderModule* depthShaderVert = nullptr;
+
 		RHI::PipelineState* opaquePipeline = nullptr;
 		RHI::PipelineState* transparentPipeline = nullptr;
 

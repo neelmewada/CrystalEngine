@@ -15,6 +15,8 @@ namespace CE::Vulkan
 
         virtual IPipelineLayout* GetPipelineLayout() override;
 
+        inline Pipeline* GetPipeline() const { return pipeline; }
+
     protected:
 
         VulkanDevice* device = nullptr;

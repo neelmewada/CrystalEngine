@@ -26,7 +26,7 @@ namespace CE::RHI
 
 			PipelineState* pipelineState = nullptr;
 
-			DrawFilterMask drawFilterMask = DrawFilterMaskNullValue;
+			DrawFilterMask drawFilterMask = DrawFilterMask::ALL;
 		};
 
 		void SetRootConstants(const u8* rootConstants, u8 rootConstantSize);

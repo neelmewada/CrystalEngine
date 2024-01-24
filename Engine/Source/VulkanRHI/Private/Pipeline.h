@@ -30,6 +30,7 @@ namespace CE::Vulkan
 	protected:
 		VulkanDevice* device = nullptr;
 		VkPipelineLayout pipelineLayout = nullptr;
+		VkDescriptorSetLayout emptySetLayout = nullptr;
 
 		RHI::PipelineStateType pipelineType = RHI::PipelineStateType::Graphics;
 
@@ -50,9 +51,12 @@ namespace CE::Vulkan
 
         virtual bool IsGraphicsPipeline() const { return false; }
 
+		inline SIZE_T GetHash() const { return hash; }
+
     protected:
 
         VkPipeline pipeline = nullptr;
+		VkPipelineCache pipelineCache = nullptr;
 		
 		Name name{};
 

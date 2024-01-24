@@ -64,9 +64,9 @@ namespace CE::RHI
 		RHI::ShaderModule* shaderModule = nullptr;
 		Name entryPoint = "";
 
-		RHI::ShaderStage GetShaderStage() const;
+		CORERHI_API RHI::ShaderStage GetShaderStage() const;
 
-		SIZE_T GetHash() const;
+		CORERHI_API SIZE_T GetHash() const;
 	};
 
 	struct PipelineDescriptor
@@ -77,7 +77,7 @@ namespace CE::RHI
 		Array<ShaderStageDescriptor> shaderStages{};
 		Array<ShaderResourceGroupLayout> srgLayouts{};
 
-		SIZE_T GetHash() const;
+		CORERHI_API SIZE_T GetHash() const;
 	};
 
 	enum class BlendOp
@@ -246,7 +246,7 @@ namespace CE::RHI
 		CullMode cullMode = CullMode::Back;
 		FillMode fillMode = FillMode::Solid;
 		bool multisampleEnable = false;
-		bool depthClipEnable = false;
+		bool depthClipEnable = true;
 
 		inline SIZE_T GetHash() const
 		{
@@ -268,7 +268,7 @@ namespace CE::RHI
 		DepthStencilState depthStencilState{};
 		MultisampleState multisampleState{};
 
-		SIZE_T GetHash() const;
+		CORERHI_API SIZE_T GetHash() const;
 	};
 
 	class IPipelineLayout

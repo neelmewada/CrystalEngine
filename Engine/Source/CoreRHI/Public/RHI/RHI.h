@@ -118,7 +118,7 @@ namespace CE::RHI
         virtual void* AddImGuiTexture(RHI::Texture* texture, Sampler* sampler) = 0;
         virtual void RemoveImGuiTexture(void* imguiTexture) = 0;
 
-		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc, const ShaderReflection& shaderReflection) = 0;
+		virtual RHI::ShaderModule* CreateShaderModule(const RHI::ShaderModuleDescriptor& desc) = 0;
 		virtual void DestroyShaderModule(RHI::ShaderModule* shaderModule) = 0;
 
 		virtual RHI::ShaderResourceGroup* CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout) = 0;
@@ -126,8 +126,11 @@ namespace CE::RHI
 
 		// - Pipeline State -
 
-		virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) = 0;
-		virtual void DestroyPipelineState(IPipelineState* pipelineState) = 0;
+		virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) = 0;
+		virtual void DestroyPipeline(const RHI::PipelineState* pipeline) = 0;
+
+		//virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) = 0;
+		//virtual void DestroyPipelineState(IPipelineState* pipelineState) = 0;
 
 		// - Helper Operations -
 
