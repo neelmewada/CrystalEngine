@@ -100,6 +100,13 @@ namespace CE
 
 		}
 
+		template<SIZE_T size>
+		ArrayView(const FixedArray<ElementType, size>& array)
+			: first(array.begin()), _end(array.end())
+		{
+
+		}
+
 		ArrayView(const List<ElementType>& array)
 			: first(array.begin()), _end(array.end())
 		{

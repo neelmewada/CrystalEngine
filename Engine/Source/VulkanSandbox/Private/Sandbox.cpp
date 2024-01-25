@@ -142,25 +142,6 @@ namespace CE::Sandbox
 			vertexAttribs[0].location = 0;
 			vertexAttribs[0].offset = offsetof(VertexStruct, position);
 
-			// Depth shader only uses position
-			/*vertexAttribs.Add({});
-			vertexAttribs[1].dataType = RHI::VertexAttributeDataType::Float3;
-			vertexAttribs[1].inputSlot = 0;
-			vertexAttribs[1].location = 1;
-			vertexAttribs[1].offset = offsetof(VertexStruct, normal);
-
-			vertexAttribs.Add({});
-			vertexAttribs[2].dataType = RHI::VertexAttributeDataType::Float3;
-			vertexAttribs[2].inputSlot = 0;
-			vertexAttribs[2].location = 2;
-			vertexAttribs[2].offset = offsetof(VertexStruct, tangent);
-
-			vertexAttribs.Add({});
-			vertexAttribs[3].dataType = RHI::VertexAttributeDataType::Float2;
-			vertexAttribs[3].inputSlot = 0;
-			vertexAttribs[3].location = 3;
-			vertexAttribs[3].offset = offsetof(VertexStruct, uvCoord);*/
-
 			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = depthPipelineDesc.srgLayouts;
 			RHI::ShaderResourceGroupLayout perViewSRG{};
 			perViewSRG.srgType = RHI::SRGType::PerView;
@@ -353,6 +334,15 @@ namespace CE::Sandbox
 		DrawPacketBuilder builder{};
 		RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
 		builder.SetIndexBufferView(indexBufferView);
+
+		RHI::DrawIndexedArguments indexedArgs{};
+		indexedArgs.firstIndex = 0;
+		indexedArgs.firstInstance = 0;
+		indexedArgs.instanceCount = 1;
+		indexedArgs.indexCount = mesh->indices.GetSize();
+		indexedArgs.vertexOffset = 0;
+		RHI::DrawArguments args = RHI::DrawArguments(indexedArgs);
+		builder.SetDrawArguments(args);
 
 		// Depth Item
 		{
@@ -570,19 +560,29 @@ namespace CE::Sandbox
 	{
 		resubmit = false;
 
-		depthDrawList.ClearAll();
+		depthDrawList.Shutdown();
 		{
-			
+			auto depthTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+			RHI::DrawListMask depthDrawListMask{};
+			depthDrawListMask.Set(depthTag);
+			depthDrawList.Init(depthDrawListMask);
+
+			depthDrawList.AddDrawPacket(meshDrawPacket);
 		}
 		scheduler->SetScopeDrawList("Depth", &depthDrawList);
 
-		opaqueDrawList.ClearAll();
+		opaqueDrawList.Shutdown();
 		{
+			auto opaqueTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+			RHI::DrawListMask opaqueDrawListMask{};
+			opaqueDrawListMask.Set(opaqueTag);
+			opaqueDrawList.Init(opaqueDrawListMask);
+
 
 		}
 		scheduler->SetScopeDrawList("Opaque", &opaqueDrawList);
 
-		transparentDrawList.ClearAll();
+		transparentDrawList.Shutdown();
 		{
 
 		}

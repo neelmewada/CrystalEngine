@@ -59,6 +59,8 @@ namespace CE::Vulkan
 
 	ShaderResourceManager::~ShaderResourceManager()
 	{
+		vkDeviceWaitIdle(device->GetHandle());
+
 		for (auto [hash, srg] : mergedSRGsByHash)
 		{
 			delete srg;
@@ -203,11 +205,29 @@ namespace CE::Vulkan
 
 		mergedSRGsBySourceSRG[srg].Clear();
 		mergedSRGsBySourceSRG.Remove(srg);
-
-		for (auto srg : srgsToDestroy)
+		
+		for (auto destroy : srgsToDestroy)
 		{
-			srg->combinedSRGs.Clear();
-			delete srg;
+			destroy->combinedSRGs.Clear();
+			destroy->QueueDestroy();
+			//delete destroy;
+		}
+	}
+
+	void ShaderResourceManager::DestroyQueuedSRG()
+	{
+		if (destroyQueue.NonEmpty())
+		{
+			vkDeviceWaitIdle(device->GetHandle());
+
+			// Do NOT use a for loop here, 'delete srg' can append to destroyQueue recursively!
+			while (destroyQueue.NonEmpty())
+			{
+				auto srg = destroyQueue[0];
+				destroyQueue.RemoveAt(0);
+				delete srg;
+			}
+			destroyQueue.Clear();
 		}
 	}
 
@@ -228,6 +248,15 @@ namespace CE::Vulkan
 
 		srgManager->OnSRGDestroyed(this);
 		Destroy();
+	}
+
+	void ShaderResourceGroup::QueueDestroy()
+	{
+		if (!srgManager->destroyQueue.Exists(this))
+		{
+			srgManager->destroyQueue.Add(this);
+			srgManager->OnSRGDestroyed(this);
+		}
 	}
 
 	ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device)

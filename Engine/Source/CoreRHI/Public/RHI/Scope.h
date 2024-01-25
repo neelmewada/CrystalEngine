@@ -67,6 +67,11 @@ namespace CE::RHI
 
 		static HashMap<ScopeAttachment*, ScopeAttachment*> FindCommonFrameAttachments(Scope* from, Scope* to);
 
+		inline bool IsSubPass() const
+		{
+			return prevSubPass != nullptr || nextSubPass != nullptr;
+		}
+
 	protected:
 
 		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) { return false; }
@@ -92,7 +97,10 @@ namespace CE::RHI
 
 		DrawListContext* drawList = nullptr;
 
-		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+		RHI::ShaderResourceGroup* passShaderResourceGroup = nullptr;
+		RHI::ShaderResourceGroup* subpassShaderResourceGroup = nullptr;
+
+		Array<RHI::ShaderResourceGroup*> externalShaderResourceGroups{};
         
 		//! @brief List of all scope attachments owned by this scope.
 		Array<ScopeAttachment*> attachments{};

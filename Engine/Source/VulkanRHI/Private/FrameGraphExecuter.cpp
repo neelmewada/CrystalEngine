@@ -15,6 +15,8 @@ namespace CE::Vulkan
 
 	bool FrameGraphExecuter::ExecuteInternal(const FrameGraphExecuteRequest& executeRequest)
 	{
+		device->GetShaderResourceManager()->DestroyQueuedSRG();
+
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
@@ -313,7 +315,19 @@ namespace CE::Vulkan
 						scissor.extent.height = viewport.height;
 						vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
-						// TODO: Execute scope
+						// TODO: Execute render pass
+						
+						FixedArray<RHI::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> srgs{};
+						for (auto srg : currentScope->externalShaderResourceGroups)
+						{
+							srgs.Add(srg);
+						}
+						if (currentScope->passShaderResourceGroup)
+							srgs.Add(currentScope->passShaderResourceGroup);
+						if (currentScope->subpassShaderResourceGroup)
+							srgs.Add(currentScope->subpassShaderResourceGroup);
+
+						commandList->SetShaderResourceGroups(srgs);
 
 					}
 					vkCmdEndRenderPass(cmdBuffer);

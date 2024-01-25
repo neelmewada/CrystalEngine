@@ -26,8 +26,8 @@ namespace CE::Vulkan
         
 		DestroySyncObjects();
 
-		delete shaderResourceGroup;
-		shaderResourceGroup = nullptr;
+		delete passShaderResourceGroup;
+		passShaderResourceGroup = nullptr;
 	}
 
 	bool Scope::CompileInternal(const FrameGraphCompileRequest& compileRequest)
@@ -36,8 +36,8 @@ namespace CE::Vulkan
 
 		DestroySyncObjects();
 
-		delete shaderResourceGroup;
-		shaderResourceGroup = nullptr;
+		delete passShaderResourceGroup;
+		passShaderResourceGroup = nullptr;
 
 		for (auto frameBuffer : frameBuffers)
 		{
@@ -102,6 +102,9 @@ namespace CE::Vulkan
 
 			while (next != nullptr)
 			{
+				bool foundPipelineLayout = false;
+				bool foundSubpassPipelineLayout = false;
+
 				for (RHI::PipelineState* rhiPipelineState : next->usePipelines)
 				{
 					auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
@@ -110,6 +113,22 @@ namespace CE::Vulkan
 						continue;
 					GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
 					graphicsPipeline->Compile(renderPass, subpassIndex);
+
+					// Setup SRG
+					auto pipelineLayout = (Vulkan::PipelineLayout*)rhiPipelineState->GetPipelineLayout();
+					if (pipelineLayout != nullptr && !foundPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerPass))
+					{
+						foundPipelineLayout = true;
+						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
+						next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+					}
+
+					if (pipelineLayout != nullptr && !foundSubpassPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerSubPass))
+					{
+						foundSubpassPipelineLayout = true;
+						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerSubPass];
+						next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+					}
 				}
 
 				next->subpassIndex = i++;
@@ -123,6 +142,7 @@ namespace CE::Vulkan
             RenderPass::BuildDescriptor(this, descriptor);
             renderPass = rpCache->FindOrCreate(descriptor);
 			subpassIndex = 0;
+			bool foundPipelineLayout = false;
 
 			for (RHI::PipelineState* rhiPipelineState : usePipelines)
 			{
@@ -132,6 +152,15 @@ namespace CE::Vulkan
 					continue;
 				GraphicsPipeline* graphicsPipeline = (GraphicsPipeline*)pipeline;
 				graphicsPipeline->Compile(renderPass, subpassIndex);
+
+				// Setup SRG
+				auto pipelineLayout = (Vulkan::PipelineLayout*)rhiPipelineState->GetPipelineLayout();
+				if (pipelineLayout != nullptr && !foundPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerPass))
+				{
+					foundPipelineLayout = true;
+					const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
+					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+				}
 			}
 		}
 

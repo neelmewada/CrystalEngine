@@ -17,7 +17,7 @@ namespace CE::Vulkan
 			return mergedHash;
 		}
 
-		virtual bool IsMerged() const override final { return true; }
+		bool IsMerged() const override final { return true; }
 
 	private:
 

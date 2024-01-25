@@ -30,6 +30,8 @@ namespace CE::Vulkan
 		void RemoveMergedSRG(MergedShaderResourceGroup* srg);
 		void OnSRGDestroyed(ShaderResourceGroup* srg);
 
+		void DestroyQueuedSRG();
+
 	private:
         
         struct SRGSlot
@@ -51,6 +53,8 @@ namespace CE::Vulkan
 		/// @brief HashMap of Merged SRG by each source SRG. Used to manage lifetime of Merged SRG.
 		/// If any one of the source SRG that comprises the Merged SRG is destroyed, the Merged SRG should be destroyed.
 		HashMap<Vulkan::ShaderResourceGroup*, Array<MergedShaderResourceGroup*>> mergedSRGsBySourceSRG{};
+
+		Array<Vulkan::ShaderResourceGroup*> destroyQueue{};
 
 		friend class ShaderResourceGroup;
 		friend class MergedShaderResourceGroup;
@@ -79,6 +83,8 @@ namespace CE::Vulkan
 		{
 			return failed;
 		}
+
+		void QueueDestroy();
 
 	protected:
 

@@ -37,10 +37,15 @@ namespace CE::Vulkan
 		List<VkDescriptorSetLayout> setLayouts{};
 		List<VkPushConstantRange> pushConstantRanges{};
 		HashMap<int, List<VkDescriptorSetLayoutBinding>> setLayoutBindingsMap{};
+		HashMap<Name, VkDescriptorSetLayoutBinding> setLayoutBindingsByName{};
+
+		HashMap<RHI::SRGType, ShaderResourceGroupLayout> srgLayouts{};
 
 		friend class GraphicsPipeline;
 		friend class GraphicsCommandList;
 		friend class PipelineState;
+		friend class Scope;
+		friend class FrameGraphCompiler;
 	};
 
     class Pipeline : public PipelineLayout, public RHI::RHIResource

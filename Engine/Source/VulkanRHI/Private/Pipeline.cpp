@@ -62,8 +62,15 @@ namespace CE::Vulkan
     Pipeline::Pipeline(VulkanDevice* device, const PipelineDescriptor& desc) : RHI::RHIResource(RHI::ResourceType::Pipeline), name(desc.name)
     {
         this->device = device;
+        
+        for (const auto& layout : desc.srgLayouts)
+        {
+            srgLayouts[layout.srgType] = layout;
+        }
+
         auto srgManager = device->GetShaderResourceManager();
         setLayoutBindingsMap = {};
+        setLayoutBindingsByName = {};
         setLayouts = {};
         VkResult result;
         int lowestSetNumber = RHI::Limits::Pipeline::MaxShaderResourceGroupCount;
@@ -156,6 +163,8 @@ namespace CE::Vulkan
                     }
 
                     setLayoutBindingsMap[setNumber].Add(layoutBinding);
+
+                    setLayoutBindingsByName[variable.name] = layoutBinding;
                 }
 
                 VkDescriptorSetLayoutCreateInfo setLayoutCI{};

@@ -14,6 +14,8 @@ namespace CE::RPI
 
 		SIZE_T variantId = 0;
 		ShaderReflection reflectionInfo{};
+
+		bool instancingEnabled = false;
 		
 		HashMap<RHI::ShaderStage, RHI::ShaderModule*> modulesByStage{};
 

@@ -178,6 +178,7 @@ namespace CE::RHI
         drawPacket->drawItems = drawItems;
         drawPacket->drawListTags = drawListTags;
         drawPacket->drawFilterMasks = drawFilterMasks;
+		drawPacket->drawItemCount = drawRequestsCount;
         
         for (int i = 0; i < drawRequestsCount; i++)
         {

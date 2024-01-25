@@ -18,6 +18,7 @@ namespace CE::RHI
 
 		// - Command List API -
 
+		virtual void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs) = 0;
 
 	};
 

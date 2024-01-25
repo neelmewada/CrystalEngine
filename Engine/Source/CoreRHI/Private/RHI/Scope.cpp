@@ -15,6 +15,9 @@ namespace CE::RHI
 		{
 			delete attachment;
 		}
+
+		delete passShaderResourceGroup;
+		delete subpassShaderResourceGroup;
 	}
 
 	void Scope::AddScopeAttachment(ScopeAttachment* attachment)
