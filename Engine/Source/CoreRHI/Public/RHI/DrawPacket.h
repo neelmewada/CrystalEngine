@@ -52,9 +52,9 @@ namespace CE::RHI
 
 		const u8* rootConstants = nullptr;
 
-		const ShaderResourceGroup* const* shaderResourceGroups = nullptr;
+		ShaderResourceGroup** shaderResourceGroups = nullptr;
 
-		const ShaderResourceGroup* const* uniqueShaderResourceGroups = nullptr;
+		ShaderResourceGroup** uniqueShaderResourceGroups = nullptr;
 
 		/// @brief Vertex buffer views across all draw items
 		const VertexBufferView* vertexBufferViews = nullptr;

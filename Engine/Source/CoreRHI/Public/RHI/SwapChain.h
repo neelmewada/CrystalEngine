@@ -47,6 +47,8 @@ namespace CE::RHI
 		inline u32 GetPreferredWidth() const { return width; }
 		inline u32 GetPreferredHeight() const { return height; }
 
+		inline f32 GetAspectRatio() const { return (f32)width / (f32)height; }
+
 	protected:
 
 		Array<Texture*> images{};

@@ -2,6 +2,7 @@
 
 namespace CE::Vulkan
 {
+	class Scope;
 	class ShaderResourceManager;
 
 	class CommandList : public RHI::CommandList
@@ -19,6 +20,19 @@ namespace CE::Vulkan
 
 		void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs) override;
 
+		void CommitShaderResources() override;
+
+		void BindPipelineState(RHI::PipelineState* pipelineState) override;
+
+		void BindVertexBuffers(u32 firstInputSlot, u32 count, const RHI::VertexBufferView* bufferViews) override;
+
+		void BindIndexBuffer(const RHI::IndexBufferView& bufferViews) override;
+
+		void DrawIndexed(const DrawIndexedArguments& args) override;
+
+		void Begin() override;
+		void End() override;
+
 	private:
 		
 		VulkanDevice* device = nullptr;
@@ -29,8 +43,12 @@ namespace CE::Vulkan
 		VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		u32 queueFamilyIndex = 0;
 
+		RenderPass* currentPass = nullptr;
+		u32 currentSubpass = 0;
+		Vulkan::Pipeline* boundPipeline = nullptr;
 
-		HashMap<int, Vulkan::ShaderResourceGroup*> boundSRGs{};
+		StaticArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
+		StaticArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> commitedSRGsBySetNumber{};
 
 		friend class FrameGraphCompiler;
 		friend class FrameGraphExecuter;

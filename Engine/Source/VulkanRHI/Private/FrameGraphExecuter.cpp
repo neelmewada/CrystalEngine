@@ -89,7 +89,7 @@ namespace CE::Vulkan
 		result = vkWaitForFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex], VK_TRUE, u64Max);
 		
 		u32 familyIndex = scope->queue->GetFamilyIndex();
-		CommandList* commandList = compiler->commandListsByImageIndex[currentImageIndex][familyIndex];
+		CommandList* commandList = compiler->commandListsByFamilyIndexPerImage[currentImageIndex][familyIndex];
 
 		Array<RHI::Scope*> consumers{};
 
@@ -117,16 +117,15 @@ namespace CE::Vulkan
 		if (scopeChain.Top()->PresentsSwapChain())
 			presentRequired = true;
 
-		VkCommandBufferBeginInfo cmdBeginInfo{};
-		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		//cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
 		auto cmdBuffer = commandList->commandBuffer;
 
-		vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
+		commandList->Begin();
 		{
 			for (Vulkan::Scope* currentScope : scopeChain)
 			{
+				commandList->currentPass = currentScope->renderPass;
+				commandList->currentSubpass = currentScope->subpassIndex;
+
 				bool usesSwapChainAttachment = currentScope->usesSwapChainAttachment;
 				RenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
@@ -299,8 +298,19 @@ namespace CE::Vulkan
 					beginInfo.renderArea.extent.width = frameBuffer->GetWidth();
 					beginInfo.renderArea.extent.height = frameBuffer->GetHeight();
 
+					for (auto srg : currentScope->externalShaderResourceGroups)
+					{
+						commandList->SetShaderResourceGroup(srg);
+					}
+
+					if (currentScope->passShaderResourceGroup)
+						commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+					if (currentScope->subpassShaderResourceGroup)
+						commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+
 					vkCmdBeginRenderPass(cmdBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 					{
+
 						VkViewport viewport{};
 						viewport.x = viewport.y = 0;
 						viewport.width = frameBuffer->GetWidth();
@@ -317,18 +327,44 @@ namespace CE::Vulkan
 
 						// TODO: Execute render pass
 						
-						FixedArray<RHI::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> srgs{};
-						for (auto srg : currentScope->externalShaderResourceGroups)
+						RHI::DrawList& drawList = currentScope->drawList->GetDrawListForTag(currentScope->drawListTag);
+
+						for (int i = 0; i < drawList.GetDrawItemCount(); i++)
 						{
-							srgs.Add(srg);
+							const auto& drawItemProperties = drawList.GetDrawItem(i);
+							const DrawItem* drawItem = drawItemProperties.item;
+							
+							if (drawItem->enabled)
+							{
+								// Bind Pipeline
+								RHI::PipelineState* pipeline = drawItem->pipelineState;
+								if (pipeline)
+									commandList->BindPipelineState(pipeline);
+
+								// Bind SRGs
+								for (int j = 0; j < drawItem->shaderResourceGroupCount; j++)
+								{
+									if (drawItem->shaderResourceGroups[j] != nullptr)
+									{
+										commandList->SetShaderResourceGroup(drawItem->shaderResourceGroups[j]);
+									}
+								}
+
+								if (drawItem->uniqueShaderResourceGroup != nullptr)
+								{
+									commandList->SetShaderResourceGroup(drawItem->uniqueShaderResourceGroup);
+								}
+
+								// Commit SRGs
+								commandList->CommitShaderResources();
+
+								// Draw Indexed
+								commandList->BindVertexBuffers(0, drawItem->vertexBufferViewCount, drawItem->vertexBufferViews);
+								commandList->BindIndexBuffer(*drawItem->indexBufferView);
+
+								commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+							}
 						}
-						if (currentScope->passShaderResourceGroup)
-							srgs.Add(currentScope->passShaderResourceGroup);
-						if (currentScope->subpassShaderResourceGroup)
-							srgs.Add(currentScope->subpassShaderResourceGroup);
-
-						commandList->SetShaderResourceGroups(srgs);
-
 					}
 					vkCmdEndRenderPass(cmdBuffer);
 				}
@@ -341,6 +377,9 @@ namespace CE::Vulkan
 					// TODO: Add transfer pass
 				}
 			}
+
+			commandList->currentPass = nullptr;
+			commandList->currentSubpass = 0;;
 			
 			// Transition to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 			if (presentRequired)
@@ -379,7 +418,7 @@ namespace CE::Vulkan
 				image->curFamilyIndex = presentQueue->GetFamilyIndex();
 			}
 		}
-		vkEndCommandBuffer(cmdBuffer);
+		commandList->End();
         
         // Manually reset (close) the fence. i.e. put it in unsignalled state
         result = vkResetFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex]);

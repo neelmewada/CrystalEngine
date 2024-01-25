@@ -16,7 +16,6 @@ namespace CE::Vulkan
 
 	private:
 
-
 		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope);
 
 		VulkanDevice* device = nullptr;

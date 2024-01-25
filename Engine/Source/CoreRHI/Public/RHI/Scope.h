@@ -96,6 +96,7 @@ namespace CE::RHI
 		Scope* next = nullptr;
 
 		DrawListContext* drawList = nullptr;
+		DrawListTag drawListTag{};
 
 		RHI::ShaderResourceGroup* passShaderResourceGroup = nullptr;
 		RHI::ShaderResourceGroup* subpassShaderResourceGroup = nullptr;

@@ -91,6 +91,46 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitPipelines()
 	{
+		// Per View SRG
+		{
+			RHI::ShaderResourceGroupLayout perViewSrgLayout{};
+			perViewSrgLayout.srgType = RHI::SRGType::PerView;
+
+			SRGVariableDescriptor perViewDataDesc{};
+			perViewDataDesc.bindingSlot = 1;
+			perViewDataDesc.arrayCount = 1;
+			perViewDataDesc.name = "_PerViewData";
+			perViewDataDesc.type = RHI::ShaderResourceType::ConstantBuffer;
+			perViewDataDesc.shaderStages = RHI::ShaderStage::Vertex;
+
+			perViewSrgLayout.variables.Add(perViewDataDesc);
+
+			perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
+
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			bufferDesc.bufferSize = sizeof(PerViewData);
+			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			bufferDesc.name = "PerViewData";
+
+			perViewBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 65, 0.1f, 100.0f);
+			perViewData.viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -10));
+			perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
+
+			RHI::BufferData data{};
+			data.startOffsetInBuffer = 0;
+			data.dataSize = bufferDesc.bufferSize;
+			data.data = &perViewData;
+
+			perViewBuffer->UploadData(data);
+
+			perViewSrg->Bind("_PerViewData", perViewBuffer);
+
+			perViewSrg->Compile();
+		}
+
 		// Depth Pipeline
 		{
 			Resource* depthVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Depth.vert.spv", nullptr);
@@ -143,15 +183,15 @@ namespace CE::Sandbox
 			vertexAttribs[0].offset = offsetof(VertexStruct, position);
 
 			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = depthPipelineDesc.srgLayouts;
-			RHI::ShaderResourceGroupLayout perViewSRG{};
-			perViewSRG.srgType = RHI::SRGType::PerView;
-			perViewSRG.variables.Add({});
-			perViewSRG.variables[0].arrayCount = 1;
-			perViewSRG.variables[0].name = "_PerViewData";
-			perViewSRG.variables[0].bindingSlot = 0;
-			perViewSRG.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perViewSRG.variables[0].shaderStages = RHI::ShaderStage::Vertex;
-			srgLayouts.Add(perViewSRG);
+			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
+			perViewSRGLayout.srgType = RHI::SRGType::PerView;
+			perViewSRGLayout.variables.Add({});
+			perViewSRGLayout.variables[0].arrayCount = 1;
+			perViewSRGLayout.variables[0].name = "_PerViewData";
+			perViewSRGLayout.variables[0].bindingSlot = 0;
+			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			srgLayouts.Add(perViewSRGLayout);
 			
 			RHI::ShaderResourceGroupLayout perObjectSRG{};
 			perObjectSRG.srgType = RHI::SRGType::PerObject;
@@ -344,6 +384,8 @@ namespace CE::Sandbox
 		RHI::DrawArguments args = RHI::DrawArguments(indexedArgs);
 		builder.SetDrawArguments(args);
 
+		builder.AddShaderResourceGroup(perViewSrg);
+
 		// Depth Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
@@ -354,6 +396,7 @@ namespace CE::Sandbox
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthPipeline;
+			
 			builder.AddDrawItem(request);
 		}
 		
@@ -446,6 +489,9 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyPipelines()
 	{
+		delete perViewSrg; perViewSrg = nullptr;
+		delete perViewBuffer; perViewBuffer = nullptr;
+
 		delete depthPipeline; depthPipeline = nullptr;
 		delete depthShaderVert; depthShaderVert = nullptr;
 
@@ -559,14 +605,14 @@ namespace CE::Sandbox
 	void VulkanSandbox::SubmitWork()
 	{
 		resubmit = false;
-
+		
 		depthDrawList.Shutdown();
 		{
 			auto depthTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			RHI::DrawListMask depthDrawListMask{};
 			depthDrawListMask.Set(depthTag);
 			depthDrawList.Init(depthDrawListMask);
-
+			
 			depthDrawList.AddDrawPacket(meshDrawPacket);
 		}
 		scheduler->SetScopeDrawList("Depth", &depthDrawList);

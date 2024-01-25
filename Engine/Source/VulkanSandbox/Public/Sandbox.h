@@ -51,6 +51,13 @@ namespace CE::Sandbox
 		Vec3 scale{};
 	};
 
+	struct PerViewData
+	{
+		Matrix4x4 viewMatrix;
+		Matrix4x4 viewProjectionMatrix;
+		Matrix4x4 projectionMatrix;
+	};
+
 	class VulkanSandbox : IWindowCallbacks
 	{
 	public:
@@ -84,6 +91,10 @@ namespace CE::Sandbox
 		bool rebuild = true;
 		bool recompile = true;
 		bool resubmit = true;
+
+		RHI::ShaderResourceGroup* perViewSrg = nullptr;
+		RHI::Buffer* perViewBuffer = nullptr;
+		PerViewData perViewData{};
 
 		RHI::PipelineState* depthPipeline = nullptr;
 		RHI::ShaderModule* depthShaderVert = nullptr;

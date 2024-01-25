@@ -52,10 +52,10 @@ namespace CE::Vulkan
 				return (int)a->GetSRGType() <= (int)b->GetSRGType();
 			});
 
-		mergedHash = (SIZE_T)combinedSRGs[0];
+		mergedHash = combinedSRGs[0]->GetHash();
 		for (int i = 1; i < combinedSRGs.GetSize(); i++)
 		{
-			mergedHash = GetCombinedHash(mergedHash, (SIZE_T)combinedSRGs[i]);
+			mergedHash = GetCombinedHash(mergedHash, combinedSRGs[i]->GetHash());
 		}
 
 		this->srgType = (RHI::SRGType)curSrgType;

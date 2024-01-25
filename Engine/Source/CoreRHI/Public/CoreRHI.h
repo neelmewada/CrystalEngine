@@ -20,7 +20,6 @@
 #include "RHI/Buffer.h"
 #include "RHI/Texture.h"
 #include "RHI/SwapChain.h"
-#include "RHI/CommandList.h"
 #include "RHI/Sampler.h"
 #include "RHI/PipelineState.h"
 #include "RHI/Shader.h"
@@ -34,6 +33,9 @@
 #include "RHI/DrawPacket.h"
 #include "RHI/DrawPacketBuilder.h"
 #include "RHI/DrawListContext.h"
+
+// Draw Data dependents
+#include "RHI/CommandList.h"
 
 // Frame
 #include "RHI/AttachmentDefines.h"

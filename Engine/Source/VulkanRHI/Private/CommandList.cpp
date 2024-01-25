@@ -22,17 +22,145 @@ namespace CE::Vulkan
 		for (auto rhiSrg : srgs)
 		{
 			auto srg = (Vulkan::ShaderResourceGroup*)rhiSrg;
-			int setNumber = srg->GetSetNumber();
+			boundSRGs[(int)srg->GetSRGType()] = srg;
+		}
+	}
 
-			if (boundSRGs[setNumber] != nullptr)
+	void CommandList::CommitShaderResources()
+	{
+		if (boundPipeline == nullptr)
+			return;
+
+		StaticArray<
+			FixedArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount>,
+			RHI::Limits::Pipeline::MaxShaderResourceGroupCount
+		> srgsToMerge{};
+
+		for (auto srg : boundSRGs)
+		{
+			int setNumber = srg->GetSetNumber();
+			srg->Compile();
+
+			srgsToMerge[setNumber].Add(srg);
+		}
+
+		for (int setNumber = 0; setNumber < RHI::Limits::Pipeline::MaxShaderResourceGroupCount; setNumber++)
+		{
+			if (srgsToMerge[setNumber].GetSize() == 0)
+				continue;
+
+			if (srgsToMerge[setNumber].GetSize() == 1)
 			{
-				boundSRGs[setNumber] = srgManager->FindOrCreateMergedSRG({ boundSRGs[setNumber], srg });
+				commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0];
 			}
-			else
+			else // > 1
 			{
-				boundSRGs[setNumber] = srg;
+				auto first = &*srgsToMerge[setNumber].begin();
+				auto last = &*(srgsToMerge[setNumber].end() - 1);
+				ArrayView<ShaderResourceGroup*> view{ first, last };
+				commitedSRGsBySetNumber[setNumber] = srgManager->FindOrCreateMergedSRG(view);
 			}
 		}
+
+		for (int setNumber = 0; setNumber < RHI::Limits::Pipeline::MaxShaderResourceGroupCount; setNumber++)
+		{
+			if (commitedSRGsBySetNumber[setNumber] != nullptr)
+			{
+				VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetDescriptorSet();
+				uint32_t dynamicOffset = 0;
+				vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
+					boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 1, &dynamicOffset);
+			}
+		}
+	}
+
+	void CommandList::BindPipelineState(RHI::PipelineState* rhiPipelineState)
+	{
+		if (rhiPipelineState == nullptr)
+			return;
+
+		RHI::PipelineStateType pipelineType = rhiPipelineState->GetPipelineType();
+		Vulkan::PipelineState* pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
+		if (boundPipeline == pipelineState->GetPipeline())
+			return;
+		
+		boundPipeline = pipelineState->GetPipeline();
+		
+		if (pipelineType == RHI::PipelineStateType::Graphics)
+		{
+			Vulkan::GraphicsPipeline* gfxPipeline = (Vulkan::GraphicsPipeline*)boundPipeline;
+			VkPipeline vkPipeline = gfxPipeline->FindOrCompile(currentPass, currentSubpass);
+
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline);
+		}
+		else if (pipelineType == RHI::PipelineStateType::Compute)
+		{
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, boundPipeline->GetPipeline());
+		}
+	}
+
+	void CommandList::BindVertexBuffers(u32 firstInputSlot, u32 count, const RHI::VertexBufferView* bufferViews)
+	{
+		count = Math::Min(count, RHI::Limits::Pipeline::MaxVertexInputSlotCount);
+
+		FixedArray<VkBuffer, RHI::Limits::Pipeline::MaxVertexInputSlotCount> buffers{};
+		FixedArray<VkDeviceSize, RHI::Limits::Pipeline::MaxVertexInputSlotCount> offsets{};
+
+		for (int i = 0; i < count; i++)
+		{
+			Vulkan::Buffer* buffer = (Vulkan::Buffer*)bufferViews[i].GetBuffer();
+			buffers.Add(buffer->GetBuffer());
+			offsets.Add((VkDeviceSize)bufferViews[i].GetByteOffset());
+		}
+
+		vkCmdBindVertexBuffers(commandBuffer, firstInputSlot, count, buffers.GetData(), offsets.GetData());
+	}
+
+	void CommandList::BindIndexBuffer(const RHI::IndexBufferView& bufferView)
+	{
+		Vulkan::Buffer* buffer = (Vulkan::Buffer*)bufferView.GetBuffer();
+		VkIndexType indexType;
+
+		switch (bufferView.GetIndexFormat())
+		{
+		case RHI::IndexFormat::Uint16:
+			indexType = VK_INDEX_TYPE_UINT16;
+		case RHI::IndexFormat::Uint32:
+			indexType = VK_INDEX_TYPE_UINT32;
+		}
+
+		vkCmdBindIndexBuffer(commandBuffer, buffer->GetBuffer(), bufferView.GetByteOffset(), indexType);
+	}
+
+	void CommandList::DrawIndexed(const DrawIndexedArguments& args)
+	{
+		vkCmdDrawIndexed(commandBuffer, args.indexCount, args.instanceCount, args.firstIndex, args.vertexOffset, args.firstInstance);
+	}
+
+	void CommandList::Begin()
+	{
+		VkCommandBufferBeginInfo cmdBeginInfo{};
+		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		//cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(commandBuffer, &cmdBeginInfo);
+
+		boundPipeline = nullptr;
+		
+		for (int i = 0; i < boundSRGs.GetSize(); i++)
+		{
+			boundSRGs[i] = nullptr;
+		}
+
+		for (int i = 0; i < commitedSRGsBySetNumber.GetSize(); i++)
+		{
+			commitedSRGsBySetNumber[i] = nullptr;
+		}
+	}
+
+	void CommandList::End()
+	{
+		vkEndCommandBuffer(commandBuffer);
 	}
 
 } // namespace CE::Vulkan

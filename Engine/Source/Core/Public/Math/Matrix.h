@@ -54,6 +54,26 @@ namespace CE
 			return OrthographicProjection(-aspect, aspect, -1, 1, near, far);
 		}
 
+        inline static Matrix4x4 Translation(const Vec3& translation)
+        {
+            return Matrix4x4({
+                { 1, 0, 0, translation.x },
+                { 0, 1, 0, translation.y },
+                { 0, 0, 1, translation.z },
+                { 0, 0, 0, 1             }
+            });
+        }
+
+        inline static Matrix4x4 Scale(const Vec3& scale)
+        {
+            return Matrix4x4({
+                { scale.x,  0,       0,       0 },
+                { 0,        scale.y, 0,       0 },
+                { 0,        0,       scale.z, 0 },
+                { 0,        0,       0,       1 }
+            });
+        }
+
         CE_INLINE static Matrix4x4 Zero()
         {
             static Vec4 rows[4] = {

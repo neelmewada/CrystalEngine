@@ -190,14 +190,14 @@ namespace CE::Vulkan
 
 		for (int imageIdx = 0; imageIdx < imageCount; imageIdx++)
 		{
-			commandListsByImageIndex.Add({});
+			commandListsByFamilyIndexPerImage.Add({});
 
 			for (u32 familyIdx = 0; familyIdx < device->queueFamilyPropeties.GetSize(); familyIdx++)
 			{
 				VkCommandBuffer cmdBuffer = nullptr;
 				VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx);
 				CommandList* commandList = new Vulkan::CommandList(device, cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx, pool);
-				commandListsByImageIndex[imageIdx].Add(commandList);
+				commandListsByFamilyIndexPerImage[imageIdx].Add(commandList);
 			}
 		}
 
@@ -219,7 +219,7 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::DestroyCommandLists()
 	{
-		for (Array<CommandList*>& commandLists : commandListsByImageIndex)
+		for (Array<CommandList*>& commandLists : commandListsByFamilyIndexPerImage)
 		{
 			for (CommandList* commandList : commandLists)
 			{
@@ -227,7 +227,7 @@ namespace CE::Vulkan
 			}
 			commandLists.Clear();
 		}
-		commandListsByImageIndex.Clear();
+		commandListsByFamilyIndexPerImage.Clear();
 	}
 
     //! If two scopes are executed one different queues and there's a dependency between them, then we

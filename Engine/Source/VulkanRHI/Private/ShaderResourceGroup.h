@@ -86,6 +86,8 @@ namespace CE::Vulkan
 
 		void QueueDestroy();
 
+		virtual SIZE_T GetHash() const { return (SIZE_T)this; }
+
 	protected:
 
 		ShaderResourceGroup(VulkanDevice* device);

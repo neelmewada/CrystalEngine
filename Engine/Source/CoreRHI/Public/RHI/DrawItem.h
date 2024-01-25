@@ -94,11 +94,11 @@ namespace CE::RHI
 		const u8* rootConstants = nullptr;
 
 		/// @brief Shader resource groups to be bound for this DrawItem.
-		const RHI::ShaderResourceGroup* const* shaderResourceGroups = nullptr;
+		RHI::ShaderResourceGroup** shaderResourceGroups = nullptr;
 
 		/// @brief A unique shader resource group that is local to this DrawItem and
 		/// is not used outside. Usually a PerDraw SRG.
-		const RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
+		RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
 
 		/// @brief List of scissor states for this draw call.
 		const RHI::ScissorState* scissors = nullptr;

@@ -58,6 +58,10 @@ namespace CE::Vulkan
 
 		inline SIZE_T GetHash() const { return hash; }
 
+		inline VkPipeline GetPipeline() const { return pipeline; }
+
+		virtual VkPipelineBindPoint GetBindPoint() = 0;
+
     protected:
 
         VkPipeline pipeline = nullptr;

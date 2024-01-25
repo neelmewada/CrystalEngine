@@ -19,6 +19,8 @@ namespace CE::Vulkan
 
 		bool IsMerged() const override final { return true; }
 
+		SIZE_T GetHash() const override { return mergedHash; }
+
 	private:
 
 		Array<ShaderResourceGroup*> combinedSRGs{};

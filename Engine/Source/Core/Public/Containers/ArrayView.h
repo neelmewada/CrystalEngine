@@ -102,7 +102,7 @@ namespace CE
 
 		template<SIZE_T size>
 		ArrayView(const FixedArray<ElementType, size>& array)
-			: first(array.begin()), _end(array.end())
+			: first(*array.begin()), _end(*array.end())
 		{
 
 		}

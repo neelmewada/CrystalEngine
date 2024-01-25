@@ -127,9 +127,14 @@ namespace CE::Vulkan
 	MergedShaderResourceGroup* ShaderResourceManager::FindOrCreateMergedSRG(const ArrayView<Vulkan::ShaderResourceGroup*>& srgs)
 	{
 		SIZE_T mergedSRGHash = 0;
-		Array<Vulkan::ShaderResourceGroup*> srgArray = srgs;
+		FixedArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> srgArray{};
+		
+		for (auto srg : srgs)
+		{
+			srgArray.Add(srg);
+		}
         
-		srgArray.Sort(
+		std::sort(srgArray.begin(), srgArray.end(),
             [](Vulkan::ShaderResourceGroup* a, Vulkan::ShaderResourceGroup* b) -> bool
 			{
 				return (int)a->GetSRGType() <= (int)b->GetSRGType();

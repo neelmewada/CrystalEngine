@@ -20,6 +20,10 @@ namespace CE::RHI
 
 		void Merge(const DrawList& other);
 
+		inline u32 GetDrawItemCount() const { return drawItems.GetSize(); }
+
+		inline const DrawItemProperties& GetDrawItem(u32 index) const { return drawItems[index]; }
+
 	private:
 
 		HashMap<RHI::PipelineState*, Array<DrawItemProperties>> drawItemsByPipeline{};

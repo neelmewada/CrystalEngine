@@ -45,6 +45,8 @@ namespace CE::Vulkan
             FindOrCompile(renderPass, subpass);
         }
 
+        virtual VkPipelineBindPoint GetBindPoint() override { return VK_PIPELINE_BIND_POINT_GRAPHICS; }
+
     private:
 
         VkPipeline CompileInternal(RenderPass* renderPass, u32 subpass);

@@ -9,19 +9,19 @@ namespace CE::RHI
 
 		VertexBufferView() = default;
 
-		VertexBufferView(RHI::Buffer* buffer, u32 byteOffset, u32 byteCount, u32 vertexStride);
+		VertexBufferView(RHI::Buffer* buffer, u64 byteOffset, u64 byteCount, u32 vertexStride);
 
 		inline RHI::Buffer* GetBuffer() const
 		{
 			return buffer;
 		}
 
-		inline u32 GetByteOffset() const
+		inline u64 GetByteOffset() const
 		{
 			return byteOffset;
 		}
 
-		inline u32 GetByteCount() const
+		inline u64 GetByteCount() const
 		{
 			return byteCount;
 		}
@@ -34,8 +34,8 @@ namespace CE::RHI
 	private:
 
 		RHI::Buffer* buffer = nullptr;
-		u32 byteOffset = 0;
-		u32 byteCount = 0;
+		u64 byteOffset = 0;
+		u64 byteCount = 0;
 		u32 vertexStride = 0;
 
 	};

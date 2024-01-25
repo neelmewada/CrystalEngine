@@ -112,7 +112,7 @@ namespace CE::RHI
         
         if (shaderResourceGroupCount > 0)
         {
-            const ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<const ShaderResourceGroup**>(allocationData + shaderResourceGroupsOffset);
+            ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<ShaderResourceGroup**>(allocationData + shaderResourceGroupsOffset);
             
             for (int i = 0; i < shaderResourceGroupCount; i++) 
             {
@@ -125,7 +125,7 @@ namespace CE::RHI
         
         if (drawRequestsCount > 0)
         {
-            const ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<const ShaderResourceGroup**>(allocationData + shaderResourceGroupsOffset);
+            ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<ShaderResourceGroup**>(allocationData + shaderResourceGroupsOffset);
             
             for (int i = 0; i < drawRequestsCount; i++)
             {
