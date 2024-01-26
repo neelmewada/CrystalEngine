@@ -193,15 +193,15 @@ namespace CE::Sandbox
 			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
 			srgLayouts.Add(perViewSRGLayout);
 			
-			RHI::ShaderResourceGroupLayout perObjectSRG{};
-			perObjectSRG.srgType = RHI::SRGType::PerObject;
-			perObjectSRG.variables.Add({});
-			perObjectSRG.variables[0].arrayCount = 1;
-			perObjectSRG.variables[0].name = "_ObjectData";
-			perObjectSRG.variables[0].bindingSlot = 1;
-			perObjectSRG.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perObjectSRG.variables[0].shaderStages = RHI::ShaderStage::Vertex;
-			srgLayouts.Add(perObjectSRG);
+			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
+			perObjectSRGLayout.srgType = RHI::SRGType::PerObject;
+			perObjectSRGLayout.variables.Add({});
+			perObjectSRGLayout.variables[0].arrayCount = 1;
+			perObjectSRGLayout.variables[0].name = "_ObjectData";
+			perObjectSRGLayout.variables[0].bindingSlot = 1;
+			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			srgLayouts.Add(perObjectSRGLayout);
 
 			depthPipelineDesc.name = "Depth Pipeline";
 
@@ -212,7 +212,93 @@ namespace CE::Sandbox
 
 		// Opaque Pipeline
 		{
+			Resource* opaqueVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Opaque.vert.spv", nullptr);
+			Resource* opaqueFrag = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Opaque.frag.spv", nullptr);
 
+			RHI::ShaderModuleDescriptor vertDesc{};
+			vertDesc.name = "Opaque Vertex";
+			vertDesc.stage = RHI::ShaderStage::Vertex;
+			vertDesc.byteCode = opaqueVert->GetData();
+			vertDesc.byteSize = opaqueVert->GetDataSize();
+
+			RHI::ShaderModuleDescriptor fragDesc{};
+			fragDesc.name = "Opaque Fragment";
+			fragDesc.stage = RHI::ShaderStage::Fragment;
+			fragDesc.byteCode = opaqueFrag->GetData();
+			fragDesc.byteSize = opaqueFrag->GetDataSize();
+
+			opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
+			opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
+
+			RHI::GraphicsPipelineDescriptor opaquePipelineDesc{};
+			
+			RHI::ColorBlendState colorBlend{};
+			colorBlend.alphaBlendOp = RHI::BlendOp::Add;
+			colorBlend.colorBlendOp = RHI::BlendOp::Add;
+			colorBlend.componentMask = RHI::ColorComponentMask::All;
+			colorBlend.srcColorBlend = RHI::BlendFactor::SrcAlpha;
+			colorBlend.dstColorBlend = RHI::BlendFactor::OneMinusSrcAlpha;
+			colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
+			colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
+			colorBlend.blendEnable = true;
+			opaquePipelineDesc.blendState.colorBlends.Add(colorBlend);
+
+			opaquePipelineDesc.depthStencilState.depthState.enable = true; // Read-Only depth state
+			opaquePipelineDesc.depthStencilState.depthState.testEnable = true;
+			opaquePipelineDesc.depthStencilState.depthState.writeEnable = false;
+			opaquePipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::Less;
+			opaquePipelineDesc.depthStencilState.stencilState.enable = false;
+
+			opaquePipelineDesc.shaderStages.Add({});
+			opaquePipelineDesc.shaderStages[0].entryPoint = "VertMain";
+			opaquePipelineDesc.shaderStages[0].shaderModule = opaqueShaderVert;
+
+			opaquePipelineDesc.shaderStages.Add({});
+			opaquePipelineDesc.shaderStages[1].entryPoint = "FragMain";
+			opaquePipelineDesc.shaderStages[1].shaderModule = opaqueShaderFrag;
+
+			opaquePipelineDesc.rasterState = {};
+
+			opaquePipelineDesc.vertexInputSlots.Add({});
+			opaquePipelineDesc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
+			opaquePipelineDesc.vertexInputSlots[0].inputSlot = 0;
+			opaquePipelineDesc.vertexInputSlots[0].stride = Mesh::VertexBufferStride;
+
+			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = opaquePipelineDesc.vertexAttributes;
+
+			vertexAttribs.Add({});
+			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3;
+			vertexAttribs[0].inputSlot = 0;
+			vertexAttribs[0].location = 0;
+			vertexAttribs[0].offset = 0;
+
+			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = opaquePipelineDesc.srgLayouts;
+			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
+			perViewSRGLayout.srgType = RHI::SRGType::PerView;
+			perViewSRGLayout.variables.Add({});
+			perViewSRGLayout.variables[0].arrayCount = 1;
+			perViewSRGLayout.variables[0].name = "_PerViewData";
+			perViewSRGLayout.variables[0].bindingSlot = 0;
+			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			srgLayouts.Add(perViewSRGLayout);
+
+			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
+			perObjectSRGLayout.srgType = RHI::SRGType::PerObject;
+			perObjectSRGLayout.variables.Add({});
+			perObjectSRGLayout.variables[0].arrayCount = 1;
+			perObjectSRGLayout.variables[0].name = "_ObjectData";
+			perObjectSRGLayout.variables[0].bindingSlot = 1;
+			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			srgLayouts.Add(perObjectSRGLayout);
+
+			opaquePipelineDesc.name = "Opaque Pipeline";
+
+			opaquePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(opaquePipelineDesc);
+
+			delete opaqueVert;
+			delete opaqueFrag;
 		}
 
 		// Transparent Pipeline
@@ -537,11 +623,11 @@ namespace CE::Sandbox
 		delete depthPipeline; depthPipeline = nullptr;
 		delete depthShaderVert; depthShaderVert = nullptr;
 
-		delete opaquePipeline;
-		opaquePipeline = nullptr;
+		delete opaquePipeline; opaquePipeline = nullptr;
+		delete opaqueShaderVert; opaqueShaderVert = nullptr;
+		delete opaqueShaderFrag; opaqueShaderFrag = nullptr;
 
-		delete transparentPipeline;
-		transparentPipeline = nullptr;
+		delete transparentPipeline; transparentPipeline = nullptr;
 	}
 
 	void VulkanSandbox::BuildFrameGraph()
@@ -600,7 +686,7 @@ namespace CE::Sandbox
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
 
-				//scheduler->UsePipeline(opaquePipeline);
+				scheduler->UsePipeline(opaquePipeline);
 			}
 			scheduler->EndScope();
 

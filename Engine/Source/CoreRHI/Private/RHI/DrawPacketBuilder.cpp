@@ -71,8 +71,8 @@ namespace CE::RHI
 		if (request.vertexBufferViews.IsEmpty() || request.pipelineState == nullptr)
 			return;
 		
-		vertexBufferViewCount += request.vertexBufferViews.GetSize();
         drawListMask.Set(request.drawItemTag);
+		vertexBufferViewCount += request.vertexBufferViews.GetSize();
 		drawRequests[drawRequestsCount++] = request;
 	}
 

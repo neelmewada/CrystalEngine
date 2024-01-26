@@ -100,6 +100,9 @@ namespace CE::Sandbox
 		RHI::ShaderModule* depthShaderVert = nullptr;
 
 		RHI::PipelineState* opaquePipeline = nullptr;
+		RHI::ShaderModule* opaqueShaderVert = nullptr;
+		RHI::ShaderModule* opaqueShaderFrag = nullptr;
+
 		RHI::PipelineState* transparentPipeline = nullptr;
 
 		RHI::FrameScheduler* scheduler = nullptr;
