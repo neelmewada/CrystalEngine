@@ -2,21 +2,23 @@
 
 namespace CE::Vulkan
 {
-    MergedShaderResourceGroup::MergedShaderResourceGroup(VulkanDevice* device, const ArrayView<Vulkan::ShaderResourceGroup*>& shaderResourceGroups)
+    MergedShaderResourceGroup::MergedShaderResourceGroup(VulkanDevice* device, u32 srgCount, Vulkan::ShaderResourceGroup** srgs)
 		: ShaderResourceGroup(device)
     {
 		srgLayout = {};
 		int curSrgType = (int)RHI::SRGType::PerScene;
 		setNumber = -1;
 
-		if (shaderResourceGroups.IsEmpty())
+		if (srgCount == 0)
 			return;
 
 		int i = 0;
-		combinedSRGs.Resize(shaderResourceGroups.GetSize());
+		combinedSRGs.Resize(srgCount);
 
-		for (Vulkan::ShaderResourceGroup* srg : shaderResourceGroups)
+		for (int i = 0; i < srgCount; i++)
 		{
+			auto srg = srgs[i];
+
 			combinedSRGs[i++] = srg;
 			srgManager->mergedSRGsBySourceSRG[srg].Add(this);
 
@@ -61,6 +63,7 @@ namespace CE::Vulkan
 		this->srgType = (RHI::SRGType)curSrgType;
 
 		Compile();
+		UpdateBindings();
     }
 
     MergedShaderResourceGroup::~MergedShaderResourceGroup()

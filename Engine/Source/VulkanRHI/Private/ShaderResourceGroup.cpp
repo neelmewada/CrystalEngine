@@ -124,14 +124,14 @@ namespace CE::Vulkan
 		return VK_DESCRIPTOR_TYPE_MAX_ENUM;
 	}
 
-	MergedShaderResourceGroup* ShaderResourceManager::FindOrCreateMergedSRG(const ArrayView<Vulkan::ShaderResourceGroup*>& srgs)
+	MergedShaderResourceGroup* ShaderResourceManager::FindOrCreateMergedSRG(u32 srgCount, ShaderResourceGroup** srgs)
 	{
 		SIZE_T mergedSRGHash = 0;
 		FixedArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> srgArray{};
 		
-		for (auto srg : srgs)
+		for (int i = 0; i < srgCount; i++)
 		{
-			srgArray.Add(srg);
+			srgArray.Add(srgs[i]);
 		}
         
 		std::sort(srgArray.begin(), srgArray.end(),
@@ -151,15 +151,15 @@ namespace CE::Vulkan
 			return mergedSRGsByHash[mergedSRGHash];
 		}
 
-		return CreateMergedSRG(srgArray);
+		return CreateMergedSRG(srgArray.GetSize(), srgArray.GetData());
 	}
 
-	MergedShaderResourceGroup* ShaderResourceManager::CreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs)
+	MergedShaderResourceGroup* ShaderResourceManager::CreateMergedSRG(u32 srgCount, ShaderResourceGroup** srgs)
 	{
-		if (srgs.IsEmpty())
+		if (srgCount)
 			return nullptr;
 
-		MergedShaderResourceGroup* mergedSRG = new MergedShaderResourceGroup(device, srgs);
+		MergedShaderResourceGroup* mergedSRG = new MergedShaderResourceGroup(device, srgCount, srgs);
 		if (mergedSRG->GetMergedHash() == 0)
 		{
 			delete mergedSRG;
@@ -273,10 +273,15 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::Buffer* buffer, SIZE_T offset, SIZE_T size)
 	{
-		// Cannot bind new buffer once SRG is compiled.
-		if (isCompiled)
-			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+
+		// Something was already bound at this position, cannot re-bind here.
+		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
 			return false;
 
 		VkDescriptorBufferInfo bufferWrite{};
@@ -284,8 +289,9 @@ namespace CE::Vulkan
 		bufferWrite.offset = offset;
 		bufferWrite.range = size > 0 ? size : buffer->GetBufferSize();
 		
-		int bindingSlot = bindingSlotsByVariableName[name];
 		bufferInfosBoundBySlot[bindingSlot] = bufferWrite;
+
+		UpdateBindings();
 		
 		return true;
 	}
@@ -351,8 +357,6 @@ namespace CE::Vulkan
 		}
 
 		descriptorSet = allocatedSets[0];
-
-		UpdateBindings();
 	}
 
 	void ShaderResourceGroup::Destroy()

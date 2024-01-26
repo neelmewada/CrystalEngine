@@ -19,6 +19,8 @@ namespace CE::RHI
 
 		bool Execute(const FrameGraphExecuteRequest& executeRequest);
 
+		virtual void WaitUntilIdle() = 0;
+
 	protected:
 		FrameGraphExecuter() = default;
 

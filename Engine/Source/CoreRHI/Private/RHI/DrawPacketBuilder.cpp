@@ -125,7 +125,7 @@ namespace CE::RHI
         
         if (drawRequestsCount > 0)
         {
-            ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<ShaderResourceGroup**>(allocationData + shaderResourceGroupsOffset);
+            ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<ShaderResourceGroup**>(allocationData + uniqueShaderResourceGroupOffset);
             
             for (int i = 0; i < drawRequestsCount; i++)
             {

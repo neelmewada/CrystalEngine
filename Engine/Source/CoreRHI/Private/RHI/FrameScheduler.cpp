@@ -55,7 +55,7 @@ namespace CE::RHI
 		executer->Execute(executeRequest);
 	}
 
-	void FrameScheduler::SetScopeDrawList(const ScopeID& scopeId, DrawListContext* drawList)
+	void FrameScheduler::SetScopeDrawList(const ScopeID& scopeId, DrawList* drawList)
 	{
 		if (!frameGraph->scopesById.KeyExists(scopeId))
 			return;
@@ -76,5 +76,10 @@ namespace CE::RHI
     {
         return GetAttachmentDatabase().FindFrameAttachment(id);
     }
+
+	void FrameScheduler::WaitUntilIdle()
+	{
+		executer->WaitUntilIdle();
+	}
 
 } // namespace CE::RHI

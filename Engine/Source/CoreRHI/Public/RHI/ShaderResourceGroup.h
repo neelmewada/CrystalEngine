@@ -36,6 +36,7 @@ namespace CE::RHI
 
 		b8 isCompiled = false;
 
+		b8 isCommitted = false;
 		SRGType srgType{};
 
 		ShaderResourceGroupLayout srgLayout{};

@@ -108,11 +108,13 @@ namespace CE::Sandbox
 
 		Array<Mesh*> meshes{};
 		Array<MeshInstance> meshInstances{};
-		RHI::DrawListContext depthDrawList{};
-		RHI::DrawListContext opaqueDrawList{};
-		RHI::DrawListContext transparentDrawList{};
+		RHI::DrawListContext drawList{};
 
 		DrawPacket* meshDrawPacket = nullptr;
+
+		RHI::ShaderResourceGroup* meshObjectSrg = nullptr;
+		RHI::Buffer* meshModelBuffer = nullptr;
+		Matrix4x4 meshModelMatrix{};
 
 		u32 width = 0;
 		u32 height = 0;

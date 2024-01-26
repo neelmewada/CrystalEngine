@@ -97,7 +97,7 @@ namespace CE::Sandbox
 			perViewSrgLayout.srgType = RHI::SRGType::PerView;
 
 			SRGVariableDescriptor perViewDataDesc{};
-			perViewDataDesc.bindingSlot = 1;
+			perViewDataDesc.bindingSlot = 0;
 			perViewDataDesc.arrayCount = 1;
 			perViewDataDesc.name = "_PerViewData";
 			perViewDataDesc.type = RHI::ShaderResourceType::ConstantBuffer;
@@ -106,6 +106,7 @@ namespace CE::Sandbox
 			perViewSrgLayout.variables.Add(perViewDataDesc);
 
 			perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
+			perViewSrg->Compile();
 
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -127,8 +128,7 @@ namespace CE::Sandbox
 			perViewBuffer->UploadData(data);
 
 			perViewSrg->Bind("_PerViewData", perViewBuffer);
-
-			perViewSrg->Compile();
+			
 		}
 
 		// Depth Pipeline
@@ -375,6 +375,43 @@ namespace CE::Sandbox
 		RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
 		builder.SetIndexBufferView(indexBufferView);
 
+		// Mesh SRG
+		{
+			RHI::ShaderResourceGroupLayout meshSrgLayout{};
+			meshSrgLayout.srgType = RHI::SRGType::PerObject;
+
+			RHI::SRGVariableDescriptor variable{};
+			variable.name = "_ObjectData";
+			variable.bindingSlot = 1;
+			variable.arrayCount = 1;
+			variable.shaderStages = RHI::ShaderStage::Vertex;
+			variable.type = RHI::ShaderResourceType::ConstantBuffer;
+			
+			meshSrgLayout.variables.Add(variable);
+
+			meshObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
+			meshObjectSrg->Compile();
+
+			meshModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 10)) * Quat::EulerDegrees(Vec3(0, 45, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+
+			RHI::BufferDescriptor desc{};
+			desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			desc.bufferSize = sizeof(Matrix4x4);
+			desc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			desc.name = "_ObjectData";
+
+			meshModelBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
+
+			RHI::BufferData uploadData{};
+			uploadData.dataSize = desc.bufferSize;
+			uploadData.data = &meshModelBuffer;
+			uploadData.startOffsetInBuffer = 0;
+
+			meshModelBuffer->UploadData(uploadData);
+
+			meshObjectSrg->Bind("_ObjectData", meshModelBuffer);
+		}
+
 		RHI::DrawIndexedArguments indexedArgs{};
 		indexedArgs.firstIndex = 0;
 		indexedArgs.firstInstance = 0;
@@ -385,6 +422,7 @@ namespace CE::Sandbox
 		builder.SetDrawArguments(args);
 
 		builder.AddShaderResourceGroup(perViewSrg);
+		builder.AddShaderResourceGroup(meshObjectSrg);
 
 		// Depth Item
 		{
@@ -478,7 +516,11 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyModels()
 	{
-		delete meshDrawPacket;
+		scheduler->WaitUntilIdle();
+
+		delete meshModelBuffer; meshModelBuffer = nullptr;
+		delete meshObjectSrg; meshObjectSrg = nullptr;
+		delete meshDrawPacket; meshDrawPacket = nullptr;
 
 		for (auto mesh : meshes)
 		{
@@ -605,34 +647,24 @@ namespace CE::Sandbox
 	void VulkanSandbox::SubmitWork()
 	{
 		resubmit = false;
+		drawList.Shutdown();
+		RHI::DrawListMask drawListMask{};
+		auto depthTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+		auto opaqueTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+		auto transparentTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("transparent");
+		drawListMask.Set(depthTag);
+		drawListMask.Set(opaqueTag);
+		drawListMask.Set(transparentTag);
+		drawList.Init(drawListMask);
 		
-		depthDrawList.Shutdown();
-		{
-			auto depthTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
-			RHI::DrawListMask depthDrawListMask{};
-			depthDrawListMask.Set(depthTag);
-			depthDrawList.Init(depthDrawListMask);
-			
-			depthDrawList.AddDrawPacket(meshDrawPacket);
-		}
-		scheduler->SetScopeDrawList("Depth", &depthDrawList);
+		// Add items
+		drawList.AddDrawPacket(meshDrawPacket);
 
-		opaqueDrawList.Shutdown();
-		{
-			auto opaqueTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
-			RHI::DrawListMask opaqueDrawListMask{};
-			opaqueDrawListMask.Set(opaqueTag);
-			opaqueDrawList.Init(opaqueDrawListMask);
-
-
-		}
-		scheduler->SetScopeDrawList("Opaque", &opaqueDrawList);
-
-		transparentDrawList.Shutdown();
-		{
-
-		}
-		scheduler->SetScopeDrawList("Transparent", &transparentDrawList);
+		// Finalize
+		drawList.Finalize();
+		scheduler->SetScopeDrawList("Depth", &drawList.GetDrawListForTag(depthTag));
+		scheduler->SetScopeDrawList("Opaque", &drawList.GetDrawListForTag(opaqueTag));
+		scheduler->SetScopeDrawList("Transparent", &drawList.GetDrawListForTag(transparentTag));
 	}
 
 	void VulkanSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)

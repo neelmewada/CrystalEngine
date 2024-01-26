@@ -36,13 +36,15 @@ namespace CE::RHI
 
 		void Execute();
 
-		void SetScopeDrawList(const ScopeID& scopeId, DrawListContext* drawList);
+		void SetScopeDrawList(const ScopeID& scopeId, DrawList* drawList);
 
 		RHI::Scope* FindScope(const ScopeID& scopeId);
         
         FrameAttachment* GetFrameAttachment(AttachmentID id) const;
 
 		inline TransientMemoryPool* GetTransientPool() const { return transientMemoryPool; }
+
+		void WaitUntilIdle();
 
 	private:
 

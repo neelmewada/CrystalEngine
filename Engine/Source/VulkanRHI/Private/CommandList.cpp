@@ -38,6 +38,9 @@ namespace CE::Vulkan
 
 		for (auto srg : boundSRGs)
 		{
+			if (!srg)
+				continue;
+
 			int setNumber = srg->GetSetNumber();
 			srg->Compile();
 
@@ -57,19 +60,17 @@ namespace CE::Vulkan
 			{
 				auto first = &*srgsToMerge[setNumber].begin();
 				auto last = &*(srgsToMerge[setNumber].end() - 1);
-				ArrayView<ShaderResourceGroup*> view{ first, last };
-				commitedSRGsBySetNumber[setNumber] = srgManager->FindOrCreateMergedSRG(view);
+				commitedSRGsBySetNumber[setNumber] = srgManager->FindOrCreateMergedSRG(srgsToMerge[setNumber].GetSize(), srgsToMerge[setNumber].GetData());
 			}
 		}
-
+		
 		for (int setNumber = 0; setNumber < RHI::Limits::Pipeline::MaxShaderResourceGroupCount; setNumber++)
 		{
 			if (commitedSRGsBySetNumber[setNumber] != nullptr)
 			{
 				VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetDescriptorSet();
-				uint32_t dynamicOffset = 0;
 				vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
-					boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 1, &dynamicOffset);
+					boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 0, nullptr);
 			}
 		}
 	}
@@ -125,8 +126,10 @@ namespace CE::Vulkan
 		{
 		case RHI::IndexFormat::Uint16:
 			indexType = VK_INDEX_TYPE_UINT16;
+			break;
 		case RHI::IndexFormat::Uint32:
 			indexType = VK_INDEX_TYPE_UINT32;
+			break;
 		}
 
 		vkCmdBindIndexBuffer(commandBuffer, buffer->GetBuffer(), bufferView.GetByteOffset(), indexType);

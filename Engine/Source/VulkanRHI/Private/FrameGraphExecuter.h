@@ -14,11 +14,14 @@ namespace CE::Vulkan
 
 		bool ExecuteInternal(const FrameGraphExecuteRequest& executeRequest) override;
 
+		void WaitUntilIdle() override;
+
 	private:
 
 		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope);
 
 		VulkanDevice* device = nullptr;
+		FrameGraphCompiler* compiler = nullptr;
 
 		u32 currentSubmissionIndex = 0;
 		u32 currentImageIndex = 0;

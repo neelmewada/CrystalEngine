@@ -24,9 +24,9 @@ namespace CE::Vulkan
 
 		VkDescriptorType GetDescriptorType(ShaderResourceType shaderResourceType, bool usesDynamicOffset = false);
 
-		MergedShaderResourceGroup* FindOrCreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs);
+		MergedShaderResourceGroup* FindOrCreateMergedSRG(u32 srgCount, ShaderResourceGroup** srgs);
 
-		MergedShaderResourceGroup* CreateMergedSRG(const ArrayView<ShaderResourceGroup*>& srgs);
+		MergedShaderResourceGroup* CreateMergedSRG(u32 srgCount, ShaderResourceGroup** srgs);
 		void RemoveMergedSRG(MergedShaderResourceGroup* srg);
 		void OnSRGDestroyed(ShaderResourceGroup* srg);
 

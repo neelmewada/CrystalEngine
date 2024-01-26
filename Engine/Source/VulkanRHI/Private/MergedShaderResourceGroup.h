@@ -8,7 +8,7 @@ namespace CE::Vulkan
 	{
 	public:
 
-		MergedShaderResourceGroup(VulkanDevice* device, const ArrayView<Vulkan::ShaderResourceGroup*>& shaderResourceGroups);
+		MergedShaderResourceGroup(VulkanDevice* device, u32 srgCount, Vulkan::ShaderResourceGroup** srgs);
 
 		~MergedShaderResourceGroup();
 

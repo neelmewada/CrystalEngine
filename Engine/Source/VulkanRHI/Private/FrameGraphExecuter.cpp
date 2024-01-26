@@ -18,7 +18,7 @@ namespace CE::Vulkan
 		device->GetShaderResourceManager()->DestroyQueuedSRG();
 
 		FrameGraph* frameGraph = executeRequest.frameGraph;
-		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
+		compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 
@@ -64,6 +64,35 @@ namespace CE::Vulkan
 		currentSubmissionIndex = (currentSubmissionIndex + 1) % compiler->imageCount;
 
 		return success && result == VK_SUCCESS;
+	}
+
+	void FrameGraphExecuter::WaitUntilIdle()
+	{
+		// Improve this code later
+		vkDeviceWaitIdle(device->GetHandle());
+
+		/*if (compiler)
+		{
+			constexpr u64 u64Max = NumericLimits<u64>::Max();
+
+			List<VkFence> waitFences{};
+
+			for (int i = 0; i < compiler->graphExecutionFences.GetSize(); i++)
+			{
+				int count = compiler->graphExecutionFences[i].GetSize();
+				if (count <= 0)
+					continue;
+				for (int j = 0; j < count; j++)
+				{
+					if (compiler->graphExecutionFences[i][j] == nullptr)
+						continue;
+
+					waitFences.Add(compiler->graphExecutionFences[i][j]);
+				}
+			}
+
+			vkWaitForFences(device->GetHandle(), waitFences.GetSize(), waitFences.GetData(), VK_TRUE, u64Max);
+		}*/
 	}
 
 	bool FrameGraphExecuter::ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope)
@@ -327,11 +356,11 @@ namespace CE::Vulkan
 
 						// TODO: Execute render pass
 						
-						RHI::DrawList& drawList = currentScope->drawList->GetDrawListForTag(currentScope->drawListTag);
+						RHI::DrawList* drawList = currentScope->drawList;
 
-						for (int i = 0; i < drawList.GetDrawItemCount(); i++)
+						for (int i = 0; drawList != nullptr && i < drawList->GetDrawItemCount(); i++)
 						{
-							const auto& drawItemProperties = drawList.GetDrawItem(i);
+							const auto& drawItemProperties = drawList->GetDrawItem(i);
 							const DrawItem* drawItem = drawItemProperties.item;
 							
 							if (drawItem->enabled)
