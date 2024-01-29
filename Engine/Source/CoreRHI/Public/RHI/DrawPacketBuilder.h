@@ -20,6 +20,8 @@ namespace CE::RHI
 
 			DrawListTag drawItemTag;
 
+			IndexBufferView indexBufferView{};
+
 			Array<VertexBufferView> vertexBufferViews{};
 
 			ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
@@ -32,8 +34,6 @@ namespace CE::RHI
 		void SetRootConstants(const u8* rootConstants, u8 rootConstantSize);
 
 		void SetDrawArguments(const DrawArguments& drawArguments);
-
-		void SetIndexBufferView(const IndexBufferView& indexBufferView);
 
 		void AddScissorState(const ScissorState& scissorState);
 		void AddViewportState(const ViewportState& viewportState);
@@ -51,15 +51,13 @@ namespace CE::RHI
 		IAllocator* allocator = nullptr;
 
 		DrawArguments drawArguments;
-		IndexBufferView indexBufferView{};
         DrawListMask drawListMask{};
 
 		FixedArray<ScissorState, Limits::Pipeline::MaxColorAttachmentCount> scissors{};
 		FixedArray<ViewportState, Limits::Pipeline::MaxColorAttachmentCount> viewports{};
 		StaticArray<ShaderResourceGroup*, Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroups{};
 		u32 shaderResourceGroupCount = 0;
-		StaticArray<DrawItemRequest, DrawItemCountMax> drawRequests{};
-		u32 drawRequestsCount = 0;
+		FixedArray<DrawItemRequest, DrawItemCountMax> drawRequests{};
 		u32 vertexBufferViewCount = 0;
 		StaticArray<u8, Limits::Pipeline::MaxRootConstantSize> rootConstants{};
 		u8 rootConstantSize = 0;

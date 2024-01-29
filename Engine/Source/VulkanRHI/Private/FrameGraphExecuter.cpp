@@ -28,11 +28,9 @@ namespace CE::Vulkan
 
 		if (swapChain && presentingScope)
 		{
-			//result = vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex]);
 
 			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max, 
 				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
-				//compiler->imageAcquiredFences[currentSubmissionIndex], 
 				nullptr,
 				&swapChain->currentImageIndex);
 
@@ -353,8 +351,6 @@ namespace CE::Vulkan
 						scissor.extent.width = viewport.width;
 						scissor.extent.height = viewport.height;
 						vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
-
-						// TODO: Execute render pass
 						
 						RHI::DrawList* drawList = currentScope->drawList;
 

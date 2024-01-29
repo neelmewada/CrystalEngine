@@ -54,23 +54,29 @@ namespace CE::Vulkan
 
 			if (srgsToMerge[setNumber].GetSize() == 1)
 			{
-				commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0];
+				if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0])
+				{
+					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0];
+
+					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetDescriptorSet();
+					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
+						boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 0, nullptr);
+				}
 			}
 			else // > 1
 			{
 				auto first = &*srgsToMerge[setNumber].begin();
 				auto last = &*(srgsToMerge[setNumber].end() - 1);
-				commitedSRGsBySetNumber[setNumber] = srgManager->FindOrCreateMergedSRG(srgsToMerge[setNumber].GetSize(), srgsToMerge[setNumber].GetData());
-			}
-		}
-		
-		for (int setNumber = 0; setNumber < RHI::Limits::Pipeline::MaxShaderResourceGroupCount; setNumber++)
-		{
-			if (commitedSRGsBySetNumber[setNumber] != nullptr)
-			{
-				VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetDescriptorSet();
-				vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
-					boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 0, nullptr);
+				auto mergedSrg = srgManager->FindOrCreateMergedSRG(srgsToMerge[setNumber].GetSize(), srgsToMerge[setNumber].GetData());
+
+				if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg)
+				{
+					commitedSRGsBySetNumber[setNumber] = mergedSrg;
+
+					VkDescriptorSet descriptorSet = mergedSrg->GetDescriptorSet();
+					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
+						boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 0, nullptr);
+				}
 			}
 		}
 	}
@@ -82,6 +88,8 @@ namespace CE::Vulkan
 
 		RHI::PipelineStateType pipelineType = rhiPipelineState->GetPipelineType();
 		Vulkan::PipelineState* pipelineState = (Vulkan::PipelineState*)rhiPipelineState;
+
+		// No need to bind the same pipeline again
 		if (boundPipeline == pipelineState->GetPipeline())
 			return;
 		

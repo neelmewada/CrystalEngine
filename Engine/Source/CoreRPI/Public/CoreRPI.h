@@ -30,7 +30,6 @@ namespace CE::RPI
 #include "Pass/PassRegistry.h"
 #include "Pass/PassSystem.h"
 
-#include "RenderTarget.h"
 #include "View.h"
 #include "RenderPipelineBuilder.h"
 #include "RenderPipeline.h"

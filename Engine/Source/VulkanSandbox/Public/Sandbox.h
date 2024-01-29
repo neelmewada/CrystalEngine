@@ -68,6 +68,8 @@ namespace CE::Sandbox
 
 		void Tick(f32 deltaTime);
 
+		void UpdateViewSrg();
+
 		void Shutdown();
 		
 		void InitPipelines();
@@ -77,7 +79,6 @@ namespace CE::Sandbox
 		void DestroyPipelines();
 
 	private:
-		
 
 		void BuildFrameGraph();
 		void CompileFrameGraph();
@@ -118,6 +119,7 @@ namespace CE::Sandbox
 		RHI::ShaderResourceGroup* meshObjectSrg = nullptr;
 		RHI::Buffer* meshModelBuffer = nullptr;
 		Matrix4x4 meshModelMatrix{};
+		f32 meshRotation = 0;
 
 		u32 width = 0;
 		u32 height = 0;

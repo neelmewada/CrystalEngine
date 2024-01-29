@@ -12,7 +12,7 @@ namespace CE::RPI
 
 	private:
 
-		RHI::IPipelineState* pipelineState = nullptr;
+		RHI::PipelineState* pipelineState = nullptr;
 	};
     
 } // namespace CE::RPI

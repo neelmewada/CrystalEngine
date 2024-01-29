@@ -31,6 +31,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PUBLIC
             CE::Core
             CE::CoreRHI
+            $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
     RUNTIME_DEPENDENCIES
         dxcompiler
         SpirvTools

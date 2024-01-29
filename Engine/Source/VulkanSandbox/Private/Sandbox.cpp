@@ -60,6 +60,7 @@ namespace CE::Sandbox
 		if (recompile)
 		{
 			recompile = false;
+			resubmit = true;
 
 			CompileFrameGraph();
 		}
@@ -71,7 +72,34 @@ namespace CE::Sandbox
 			SubmitWork();
 		}
 
+		meshRotation += deltaTime * 30.0f;
+		if (meshRotation >= 360)
+			meshRotation -= 360;
+
+		meshModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+
+		RHI::BufferData uploadData{};
+		uploadData.dataSize = sizeof(meshModelMatrix);
+		uploadData.data = &meshModelMatrix;
+		uploadData.startOffsetInBuffer = 0;
+
+		meshModelBuffer->UploadData(uploadData);
+
 		scheduler->Execute();
+	}
+
+	void VulkanSandbox::UpdateViewSrg()
+	{
+		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 65, 0.1f, 100.0f);
+		perViewData.viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -10));
+		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
+
+		RHI::BufferData data{};
+		data.startOffsetInBuffer = 0;
+		data.dataSize = perViewBuffer->GetBufferSize();
+		data.data = &perViewData;
+
+		perViewBuffer->UploadData(data);
 	}
 
 	void VulkanSandbox::Shutdown()
@@ -458,8 +486,6 @@ namespace CE::Sandbox
 		meshes.Add(mesh);
 
 		DrawPacketBuilder builder{};
-		RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
-		builder.SetIndexBufferView(indexBufferView);
 
 		// Mesh SRG
 		{
@@ -478,8 +504,6 @@ namespace CE::Sandbox
 			meshObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
 			meshObjectSrg->Compile();
 
-			meshModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 10)) * Quat::EulerDegrees(Vec3(0, 45, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
-
 			RHI::BufferDescriptor desc{};
 			desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
 			desc.bufferSize = sizeof(Matrix4x4);
@@ -488,9 +512,11 @@ namespace CE::Sandbox
 
 			meshModelBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
 
+			meshModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+
 			RHI::BufferData uploadData{};
 			uploadData.dataSize = desc.bufferSize;
-			uploadData.data = &meshModelBuffer;
+			uploadData.data = &meshModelMatrix;
 			uploadData.startOffsetInBuffer = 0;
 
 			meshModelBuffer->UploadData(uploadData);
@@ -517,6 +543,10 @@ namespace CE::Sandbox
 				mesh->vertexBufferSize,
 				sizeof(Vec3) * 3 + sizeof(Vec2));
 			request.vertexBufferViews.Add(vertexBufferView);
+
+			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
+			request.indexBufferView = indexBufferView;
+
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthPipeline;
@@ -531,9 +561,14 @@ namespace CE::Sandbox
 				mesh->vertexBufferSize,
 				sizeof(Vec3) * 3 + sizeof(Vec2));
 			request.vertexBufferViews.Add(vertexBufferView);
+
+			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
+			request.indexBufferView = indexBufferView;
+			
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = opaquePipeline;
+
 			builder.AddDrawItem(request);
 		}
 
@@ -732,6 +767,8 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::SubmitWork()
 	{
+		UpdateViewSrg();
+
 		resubmit = false;
 		drawList.Shutdown();
 		RHI::DrawListMask drawListMask{};
