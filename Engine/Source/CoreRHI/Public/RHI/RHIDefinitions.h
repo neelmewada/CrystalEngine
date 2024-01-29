@@ -397,29 +397,28 @@ namespace CE::RHI
 	ENUM_CLASS(ShaderResourceType);
 
     ENUM()
-    enum class ShaderSemantic
+    enum class VertexInputAttribute : u32
     {
         None = 0,
-
-    };
-    ENUM_CLASS(ShaderSemantic);
-
-    ENUM(Flags)
-    enum class VertexInputAttribute
-    {
-        None = 0,
-        Position = BIT(0),
-        Normal = BIT(1),
-        Tangent = BIT(2),
-        Color = BIT(3),
-        UV0 = BIT(4),
-        UV1 = BIT(5),
-        UV2 = BIT(6),
-        UV3 = BIT(7),
+        Position,
+        Normal,
+        Tangent,
+        Color,
+        UV
     };
     ENUM_CLASS_FLAGS(VertexInputAttribute);
 
     CORERHI_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input);
+
+    struct CORERHI_API ShaderSemantic
+    {
+
+        static ShaderSemantic Parse(const String& name);
+
+        VertexInputAttribute attribute{};
+        u8 index = 0;
+
+    };
 
 	ENUM()
 	enum class CullMode

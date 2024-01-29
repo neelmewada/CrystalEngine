@@ -17,6 +17,10 @@ SamplerState _Sampler : SRG_PerPass(s);
 struct VertexInput
 {
     float3 position : POSITION;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float2 uv : TEXCOORD0;
+    float4 color : COLOR0;
 };
 
 struct Varyings
@@ -31,7 +35,7 @@ END_ROOT_CONSTANTS()
 Varyings VertMain(VertexInput input)
 {
     Varyings o;
-    o.position = float4(input.position, 1.0);
+    o.position = float4(input.position, input.normal.r * input.tangent.r * input.uv.r * input.color.r);
     return o;
 }
 

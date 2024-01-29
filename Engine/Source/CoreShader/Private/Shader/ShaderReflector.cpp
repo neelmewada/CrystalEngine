@@ -30,13 +30,11 @@ namespace CE
 		);
 
 		auto resources = reflection->get_shader_resources();
-
-		
 		
 		if (curStage == ShaderStage::Vertex)
 		{
 			// Fetch vertex stage inputs
-			for (const auto& input : resources.stage_inputs)
+			for (const spirv_cross::Resource& input : resources.stage_inputs)
 			{
 				
 			}
