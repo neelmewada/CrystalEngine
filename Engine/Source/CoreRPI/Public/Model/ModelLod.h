@@ -2,6 +2,10 @@
 
 namespace CE::RPI
 {
+	struct Mesh
+	{
+
+	};
 
 	class CORERPI_API ModelLod final
 	{
@@ -10,14 +14,10 @@ namespace CE::RPI
 		ModelLod();
 		virtual ~ModelLod();
 
-		void TrackBuffer(RHI::Buffer* buffer);
 
 	private:
 
-		RHI::Buffer* vertexBuffer = nullptr;
-		RHI::Buffer* indexBuffer = nullptr;
-
-		Array<RHI::Buffer*> trackedBuffers{};
+		Array<Mesh> meshes{};
 
 	};
     
