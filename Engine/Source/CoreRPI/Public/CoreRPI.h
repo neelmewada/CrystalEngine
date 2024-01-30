@@ -17,6 +17,7 @@ namespace CE::RPI
 
 	using PipelineViewTagList = HashSet<PipelineViewTag>;
 
+	using InstanceBase = CE::IntrusiveBase;
 }
 
 // Passes
@@ -37,6 +38,7 @@ namespace CE::RPI
 
 #include "RPISystem.h"
 
+#include "Material/MaterialProperty.h"
 #include "Material/Material.h"
 
 #include "Model/ModelLod.h"

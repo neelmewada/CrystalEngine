@@ -28,8 +28,7 @@ namespace CE::RHI
 			return isCompiled;
 		}
 
-		/// @brief Compile the Shader Resource Group. You cannot bind new buffers or images to the variables
-		/// in this SRG once it's compiled. You will have to create a new SRG to do so.
+		/// @brief Compile the Shader Resource Group.
 		virtual void Compile() = 0;
 
 	protected:

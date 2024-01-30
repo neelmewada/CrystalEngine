@@ -88,6 +88,11 @@ namespace CE::Vulkan
 
 		virtual SIZE_T GetHash() const { return (SIZE_T)this; }
 
+		inline void SetCommitted(bool set)
+		{
+			isCommitted = set;
+		}
+
 	protected:
 
 		ShaderResourceGroup(VulkanDevice* device);
@@ -117,7 +122,7 @@ namespace CE::Vulkan
 		HashMap<int, VkDescriptorImageInfo> imageInfosBoundBySlot{};
 
 		friend class GraphicsPipelineState;
-		friend class GraphicsCommandList;
+		friend class CommandList;
         friend class VulkanDescriptorSet;
 		friend class MergedShaderResourceGroup;
 		friend class ShaderResourceManager;

@@ -74,6 +74,8 @@ namespace CE::Sandbox
 		ModuleManager::Get().LoadModule("CoreMedia");
 		ModuleManager::Get().LoadModule("CoreRHI");
 		ModuleManager::Get().LoadModule("VulkanRHI");
+		ModuleManager::Get().LoadModule("CoreRPI");
+		ModuleManager::Get().LoadModule("CoreShader");
 
 	}
 
@@ -138,11 +140,13 @@ namespace CE::Sandbox
 		delete app;
 		app = nullptr;
 
-		ModuleManager::Get().LoadModule("VulkanRHI");
-		ModuleManager::Get().LoadModule("CoreRHI");
-		ModuleManager::Get().LoadModule("CoreMedia");
-		ModuleManager::Get().LoadModule("CoreApplication");
-		ModuleManager::Get().LoadModule("Core");
+		ModuleManager::Get().UnloadModule("CoreShader");
+		ModuleManager::Get().UnloadModule("CoreRPI");
+		ModuleManager::Get().UnloadModule("VulkanRHI");
+		ModuleManager::Get().UnloadModule("CoreRHI");
+		ModuleManager::Get().UnloadModule("CoreMedia");
+		ModuleManager::Get().UnloadModule("CoreApplication");
+		ModuleManager::Get().UnloadModule("Core");
 	}
 
 

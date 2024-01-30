@@ -9,9 +9,7 @@ namespace CE::RPI
 
 	Material::~Material()
 	{
-		if (pipelineState != nullptr)
-			RHI::gDynamicRHI->DestroyPipeline(pipelineState);
-		pipelineState = nullptr;
+		
 	}
     
 } // namespace CE::RPI

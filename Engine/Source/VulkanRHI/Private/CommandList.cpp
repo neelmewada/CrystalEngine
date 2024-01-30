@@ -57,6 +57,7 @@ namespace CE::Vulkan
 				if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0])
 				{
 					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0];
+					commitedSRGsBySetNumber[setNumber]->SetCommitted(true);
 
 					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetDescriptorSet();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
@@ -72,6 +73,7 @@ namespace CE::Vulkan
 				if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg)
 				{
 					commitedSRGsBySetNumber[setNumber] = mergedSrg;
+					commitedSRGsBySetNumber[setNumber]->SetCommitted(true);
 
 					VkDescriptorSet descriptorSet = mergedSrg->GetDescriptorSet();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),

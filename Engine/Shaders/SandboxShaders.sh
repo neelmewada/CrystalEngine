@@ -1,0 +1,35 @@
+#!/bin/sh
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    platform="linux"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    platform="mac"
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+    platform="windows"
+elif [[ "$OSTYPE" == "msys" ]]; then
+    platform="windows"
+elif [[ "$OSTYPE" == "win32" ]]; then
+    platform="windows"
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+    platform="linux"
+else
+    echo "Unknown Operating System"
+    exit 1
+fi
+
+DxCompiler="../../ThirdParty/dxcompiler-1.7.2212-rev1-${platform}/dxcompiler/Release/dxc.exe"
+
+CompileShader() {
+
+    local FileName=$1".hlsl"
+    local VertOut="../Source/VulkanSandbox/Resources/Shaders/"$1".vert.spv"
+    local FragOut="../Source/VulkanSandbox/Resources/Shaders/"$1".frag.spv"
+
+    ${DxCompiler} -spirv -E VertMain -T vs_6_0 -Fo ${VertOut} ${FileName}
+    ${DxCompiler} -spirv -E FragMain -T ps_6_0 -Fo ${FragOut} ${FileName}
+
+    echo "Compiled:" ${FileName}
+}
+
+CompileShader "Opaque"
+

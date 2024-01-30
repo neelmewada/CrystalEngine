@@ -317,5 +317,17 @@ namespace CE
 		}
 	};
 
+	template<typename T, typename... List>
+	struct TContainsType : TFalseType
+	{};
+
+	template<typename T, typename... Rest>
+	struct TContainsType<T, T, Rest...> : TTrueType
+	{};
+
+	template<typename T, typename First, typename... Rest>
+	struct TContainsType<T, First, Rest...> : TContainsType<T, Rest...>
+	{};
+
 } // namespace CE::Traits
 

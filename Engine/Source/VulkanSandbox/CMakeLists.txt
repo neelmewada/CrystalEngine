@@ -33,6 +33,8 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::CoreMedia
             CE::CoreRHI
             CE::VulkanRHI
+            CE::CoreRPI
+            CE::CoreShader
     RUNTIME_DEPENDENCIES
 
 )

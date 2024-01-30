@@ -40,12 +40,31 @@ namespace CE::RHI
 		{
 			if (String::IsNumeric(string[i]))
 			{
-
+				numberString.Append(string[i]);
 			}
-			else if (String::IsAlphabet(string[i]))
+			else if (String::IsAlphabet(string[i]) && numberString.IsEmpty())
 			{
 				name.Append(string[i]);
 			}
+		}
+
+		String nameUpper = name.ToUpper();
+		EnumType* enumType = GetStaticEnum<VertexInputAttribute>();
+		if (!enumType)
+			return result;
+
+		for (int i = 0; i < enumType->GetConstantsCount(); i++)
+		{
+			if (enumType->GetConstant(i)->GetName().GetString().ToUpper() == nameUpper)
+			{
+				result.attribute = (VertexInputAttribute)enumType->GetConstant(i)->GetValue();
+				break;
+			}
+		}
+
+		if (!numberString.IsEmpty())
+		{
+			String::TryParse(numberString, result.index);
 		}
 
 		return result;

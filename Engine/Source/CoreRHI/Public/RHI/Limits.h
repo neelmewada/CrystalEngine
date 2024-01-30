@@ -12,7 +12,7 @@ namespace CE::RHI
 			constexpr u32 MaxVertexAttribCount = 16;
 
 			//! @brief Max number of vertex buffer input slots.
-			constexpr u32 MaxVertexInputSlotCount = 8;
+			constexpr u32 MaxVertexInputSlotCount = 16;
 
 			//! @brief Max number of back buffers (images) that can be used in swap chain.
 			constexpr u32 MaxSwapChainImageCount = 2;

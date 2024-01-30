@@ -2,8 +2,9 @@
 
 namespace CE::RPI
 {
+	typedef HashMap<Name, MaterialPropertyValue> MaterialPropertyValueMap;
 
-	class CORERPI_API Material final
+	class CORERPI_API Material
 	{
 	public:
 
@@ -11,8 +12,11 @@ namespace CE::RPI
 		~Material();
 
 	private:
+		
+		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
-		RHI::PipelineState* pipelineState = nullptr;
+		MaterialPropertyValueMap properties{};
+
 	};
     
 } // namespace CE::RPI

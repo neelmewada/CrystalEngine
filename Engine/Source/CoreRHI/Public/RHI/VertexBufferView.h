@@ -31,6 +31,16 @@ namespace CE::RHI
 			return vertexStride;
 		}
 
+		inline bool operator==(const VertexBufferView& other) const
+		{
+			return buffer == other.buffer && byteOffset == other.byteCount && byteCount == other.byteCount && vertexStride == other.vertexStride;
+		}
+
+		inline bool operator!=(const VertexBufferView& other) const
+		{
+			return !(*this == other);
+		}
+
 	private:
 
 		RHI::Buffer* buffer = nullptr;

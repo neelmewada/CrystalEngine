@@ -31,6 +31,16 @@ namespace CE::RHI
 			return indexFormat;
 		}
 
+		inline bool operator==(const IndexBufferView& other) const
+		{
+			return buffer == other.buffer && byteOffset == other.byteCount && byteCount == other.byteCount && indexFormat == other.indexFormat;
+		}
+
+		inline bool operator!=(const IndexBufferView& other) const
+		{
+			return !(*this == other);
+		}
+
 	private:
 
 		RHI::Buffer* buffer = nullptr;

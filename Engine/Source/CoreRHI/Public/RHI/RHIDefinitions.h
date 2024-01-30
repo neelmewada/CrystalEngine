@@ -402,6 +402,9 @@ namespace CE::RHI
         None = 0,
         Position,
         Normal,
+        Binormal,
+        BlendWeight,
+        BlendIndices,
         Tangent,
         Color,
         UV
@@ -412,12 +415,10 @@ namespace CE::RHI
 
     struct CORERHI_API ShaderSemantic
     {
-
         static ShaderSemantic Parse(const String& name);
 
-        VertexInputAttribute attribute{};
+        VertexInputAttribute attribute = VertexInputAttribute::None;
         u8 index = 0;
-
     };
 
 	ENUM()
