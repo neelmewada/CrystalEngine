@@ -8,19 +8,32 @@ namespace CE::RPI
 		Array<Name> defineFlags{};
 	};
 
+	enum class ShaderVariantFlag
+	{
+		None = 0,
+		UseInstancing = BIT(0),
+	};
+	ENUM_CLASS_FLAGS(ShaderVariantFlag);
+
 	class CORERPI_API ShaderVariant final
 	{
 	public:
+
+		static constexpr char InstancingFlag[] = "USE_INSTANCING";
 
 		ShaderVariant(const ShaderVariantDescriptor& desc);
 		~ShaderVariant();
 
 		inline SIZE_T GetVariantId() const { return variantId; }
 
+		inline bool UsesInstancing() const { return EnumHasFlag(flags, ShaderVariantFlag::UseInstancing); }
+
 	private:
 
 		SIZE_T variantId = 0;
 		Array<Name> defineFlags{};
+
+		ShaderVariantFlag flags{};
 
 		RHI::GraphicsPipelineDescriptor pipelineDesc{};
 		

@@ -255,8 +255,8 @@ namespace CE::Sandbox
 			fragDesc.byteCode = opaqueFrag->GetData();
 			fragDesc.byteSize = opaqueFrag->GetDataSize();
 
-			opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
-			opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
+			auto opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
+			auto opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
 
 			RHI::GraphicsPipelineDescriptor opaquePipelineDesc{};
 			

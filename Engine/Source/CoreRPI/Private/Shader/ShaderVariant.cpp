@@ -15,6 +15,19 @@ namespace CE::RPI
 				variantId = defineFlags[i].GetHashValue();
 			else
 				variantId = GetCombinedHash(variantId, defineFlags[i].GetHashValue());
+
+			if (defineFlags[i] == InstancingFlag)
+			{
+				flags |= ShaderVariantFlag::UseInstancing;
+			}
+		}
+
+		for (const auto& shaderStage : pipelineDesc.shaderStages)
+		{
+			if (shaderStage.shaderModule)
+			{
+				modulesByStage[shaderStage.shaderModule->GetShaderStage()] = shaderStage.shaderModule;
+			}
 		}
 		
 		pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
