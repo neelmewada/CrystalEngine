@@ -136,7 +136,12 @@ namespace CE::Vulkan
 			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
 			for (int i = 0; i < imageCount; i++)
 			{
-				graphExecutionFences[i].Add(scope->renderFinishedFences[i]);
+                Vulkan::Scope* firstScope = scope;
+                while (firstScope->prev != nullptr)
+                {
+                    firstScope = (Vulkan::Scope*)firstScope->prev;
+                }
+				graphExecutionFences[i].Add(firstScope->renderFinishedFences[i]);
 			}
 		}
 
@@ -177,14 +182,14 @@ namespace CE::Vulkan
 				fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 				fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-				/*VkFence fence = nullptr;
+				VkFence fence = nullptr;
 				result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
 				if (result != VK_SUCCESS)
 				{
 					continue;
 				}
 
-				imageAcquiredFences.Add(fence);*/
+				imageAcquiredFences.Add(fence);
 			}
 		}
 
@@ -215,6 +220,12 @@ namespace CE::Vulkan
 			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
 		}
 		imageAcquiredSemaphores.Clear();
+        
+        for (VkFence fence : imageAcquiredFences)
+        {
+            vkDestroyFence(device->GetHandle(), fence, nullptr);
+        }
+        imageAcquiredFences.Clear();
     }
 
 	void FrameGraphCompiler::DestroyCommandLists()

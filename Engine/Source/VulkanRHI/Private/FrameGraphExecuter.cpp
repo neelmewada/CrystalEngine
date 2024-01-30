@@ -28,16 +28,21 @@ namespace CE::Vulkan
 
 		if (swapChain && presentingScope)
 		{
-
-			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max, 
+            vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex]);
+            
+			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max,
 				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
-				nullptr,
+				compiler->imageAcquiredFences[currentSubmissionIndex],
 				&swapChain->currentImageIndex);
+            
+            vkWaitForFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex], VK_TRUE, u64Max);
 
+            // TODO: graphExecutionFences not working!
 			vkWaitForFences(device->GetHandle(),
 				compiler->graphExecutionFences[currentImageIndex].GetSize(),
 				compiler->graphExecutionFences[currentImageIndex].GetData(),
 				VK_TRUE, u64Max);
+            
 			
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
@@ -502,7 +507,7 @@ namespace CE::Vulkan
 			presentInfo.pImageIndices = &currentImageIndex;
 			presentInfo.waitSemaphoreCount = 1;
 			presentInfo.pWaitSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
-
+            
 			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 		}
 

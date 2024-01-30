@@ -31,6 +31,7 @@ namespace CE::Vulkan
 		VulkanDevice* device = nullptr;
 
 		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> imageAcquiredSemaphores{};
+        FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> imageAcquiredFences{};
 
 		StaticArray<List<VkFence>, RHI::Limits::Pipeline::MaxSwapChainImageCount> graphExecutionFences{};
 
