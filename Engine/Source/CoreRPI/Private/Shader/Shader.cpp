@@ -17,9 +17,10 @@ namespace CE::RPI
 		variants.Clear();
 	}
 
-	void Shader::AddVariant(const ShaderVariantDescriptor& variantDesc)
+    RPI::ShaderVariant* Shader::AddVariant(const ShaderVariantDescriptor& variantDesc)
 	{
 		variants.Add(new ShaderVariant(variantDesc));
+        return variants.Top();
 	}
 
 } // namespace CE::RPI

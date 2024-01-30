@@ -131,7 +131,11 @@ namespace CE::RPI
         
     private:
 
-        union {
+        union U {
+            U() {
+                vec4Value = Vec4();
+            }
+            
             s32 intValue;
             u32 uintValue;
             f32 floatValue;

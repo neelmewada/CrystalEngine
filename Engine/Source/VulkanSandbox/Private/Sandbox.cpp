@@ -257,6 +257,8 @@ namespace CE::Sandbox
 
 			auto opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
 			auto opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
+            
+            opaqueShader = new RPI::Shader();
 
 			RHI::GraphicsPipelineDescriptor opaquePipelineDesc{};
 			
@@ -323,7 +325,12 @@ namespace CE::Sandbox
 
 			opaquePipelineDesc.name = "Opaque Pipeline";
 
-			opaquePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(opaquePipelineDesc);
+			//opaquePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(opaquePipelineDesc);
+            
+            RPI::ShaderVariantDescriptor variantDesc{};
+            variantDesc.defineFlags = {};
+            variantDesc.pipelineDesc = opaquePipelineDesc;
+            opaquePipeline = opaqueShader->AddVariant(variantDesc)->GetPipeline();
 
 			delete opaqueVert;
 			delete opaqueFrag;
@@ -658,9 +665,10 @@ namespace CE::Sandbox
 		delete depthPipeline; depthPipeline = nullptr;
 		delete depthShaderVert; depthShaderVert = nullptr;
 
-		delete opaquePipeline; opaquePipeline = nullptr;
-		delete opaqueShaderVert; opaqueShaderVert = nullptr;
-		delete opaqueShaderFrag; opaqueShaderFrag = nullptr;
+		//delete opaquePipeline; opaquePipeline = nullptr;
+		//delete opaqueShaderVert; opaqueShaderVert = nullptr;
+		//delete opaqueShaderFrag; opaqueShaderFrag = nullptr;
+        delete opaqueShader; opaqueShader = nullptr;
 
 		delete transparentPipeline; transparentPipeline = nullptr;
 	}

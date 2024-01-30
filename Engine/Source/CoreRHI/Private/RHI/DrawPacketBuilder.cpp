@@ -202,7 +202,7 @@ namespace CE::RHI
             drawItem.arguments = drawArguments;
 			drawItem.rootConstants = drawPacket->rootConstants;
 			drawItem.rootConstantSize = drawPacket->rootConstantSize;
-
+            
 			*indexBufferViews++ = drawRequest.indexBufferView;
         }
 

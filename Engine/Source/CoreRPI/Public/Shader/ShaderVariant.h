@@ -27,6 +27,8 @@ namespace CE::RPI
 		inline SIZE_T GetVariantId() const { return variantId; }
 
 		inline bool UsesInstancing() const { return EnumHasFlag(flags, ShaderVariantFlag::UseInstancing); }
+        
+        inline RHI::PipelineState* GetPipeline() const { return pipeline; }
 
 	private:
 

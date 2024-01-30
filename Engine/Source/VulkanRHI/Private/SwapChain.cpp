@@ -174,10 +174,10 @@ namespace CE::Vulkan
 		vkGetPhysicalDeviceSurfacePresentModesKHR(gpu, surface, &presentationCount, presentationModes.GetData());
 
 		VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-		if (!presentationModes.Exists(VK_PRESENT_MODE_FIFO_KHR))
+        //presentMode = VK_PRESENT_MODE_FIFO_RELAXED_KHR;
+		//if (presentationModes.Exists(VK_PRESENT_MODE_MAILBOX_KHR))
 		{
 			//presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-			presentMode = presentationModes[0];
 		}
 
 		this->presentMode = presentMode;
@@ -235,10 +235,28 @@ namespace CE::Vulkan
 
 		// Facilitates quicker recreation of swapchain
 		swapChainCI.oldSwapchain = oldSwapChain;
+        
+        swapChainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        if (surfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_SAMPLED_BIT)
+        {
+            swapChainCI.imageUsage |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        }
+        if (surfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT)
+        {
+            swapChainCI.imageUsage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+        }
+        if (surfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT)
+        {
+            swapChainCI.imageUsage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        }
+        if (surfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+        {
+            swapChainCI.imageUsage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        }
 
 		swapChainCI.preTransform = preTransform;
-		swapChainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | 
-			VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		//swapChainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+		//	VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		swapChainCI.imageFormat = selectedSurfaceFormat.format;
 		swapChainCI.imageColorSpace = selectedSurfaceFormat.colorSpace;
 		swapChainCI.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;

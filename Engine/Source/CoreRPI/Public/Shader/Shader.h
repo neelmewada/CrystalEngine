@@ -14,7 +14,7 @@ namespace CE::RPI
 
 		inline RPI::ShaderVariant* GetVariant(u32 index) const { return variants[index]; }
 
-		void AddVariant(const ShaderVariantDescriptor& variantDesc);
+		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor& variantDesc);
 
 	private:
 
