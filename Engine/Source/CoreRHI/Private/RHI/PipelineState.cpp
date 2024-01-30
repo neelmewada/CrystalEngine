@@ -20,20 +20,6 @@ namespace CE::RHI
         return hash;
     }
 
-    SIZE_T PipelineDescriptor::GetHash() const
-    {
-        SIZE_T hash = 0;
-        for (const auto& shaderStage : shaderStages)
-        {
-            if (hash == 0)
-                hash = shaderStage.GetHash();
-            else
-                CombineHash(hash, shaderStage);
-        }
-
-        return hash;
-    }
-
     SIZE_T GraphicsPipelineDescriptor::GetHash() const
     {
         SIZE_T hash = PipelineDescriptor::GetHash();

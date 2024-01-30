@@ -110,16 +110,16 @@ namespace CE
 
 		inline bool IsValid() const
 		{
-			return resourceGroups.NonEmpty();
+			return srgLayouts.NonEmpty();
 		}
 
-		SRGEntry& FindOrAdd(u32 frequencyId);
+		RHI::ShaderResourceGroupLayout& FindOrAdd(RHI::SRGType srgType);
 
 		FIELD(ReadOnly)
-		Array<SRGEntry> resourceGroups{};
+		Array<RHI::ShaderResourceGroupLayout> srgLayouts{};
 
 		FIELD(ReadOnly)
-		Array<VertexInputAttribute> vertexInputs{};
+		Array<ShaderSemantic> vertexInputs{};
 
 		const VariableBindingMap& GetVariableNameMap() const;
 

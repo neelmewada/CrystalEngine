@@ -17,4 +17,9 @@ namespace CE::RPI
 		variants.Clear();
 	}
 
+	void Shader::AddVariant(const ShaderVariantDescriptor& variantDesc)
+	{
+		variants.Add(new ShaderVariant(variantDesc));
+	}
+
 } // namespace CE::RPI

@@ -69,17 +69,6 @@ namespace CE::RHI
 		CORERHI_API SIZE_T GetHash() const;
 	};
 
-	struct PipelineDescriptor
-	{
-		// Used for debugging purposes.
-		Name name{};
-
-		Array<ShaderStageDescriptor> shaderStages{};
-		Array<ShaderResourceGroupLayout> srgLayouts{};
-
-		CORERHI_API SIZE_T GetHash() const;
-	};
-
 	enum class BlendOp
 	{
 		Add,
@@ -203,6 +192,29 @@ namespace CE::RHI
 			CombineHash(hash, depthFailOp);
 			CombineHash(hash, passOp);
 			CombineHash(hash, compareOp);
+			return hash;
+		}
+	};
+
+	struct PipelineDescriptor
+	{
+		// Used for debugging purposes.
+		Name name{};
+
+		Array<ShaderStageDescriptor> shaderStages{};
+		Array<ShaderResourceGroupLayout> srgLayouts{};
+
+		inline SIZE_T GetHash() const
+		{
+			SIZE_T hash = 0;
+			for (const auto& shaderStage : shaderStages)
+			{
+				if (hash == 0)
+					hash = shaderStage.GetHash();
+				else
+					CombineHash(hash, shaderStage);
+			}
+
 			return hash;
 		}
 	};

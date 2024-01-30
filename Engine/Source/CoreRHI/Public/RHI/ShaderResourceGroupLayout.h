@@ -59,6 +59,20 @@ namespace CE::RHI
 		FIELD()
 		Array<SRGVariableDescriptor> variables{};
 
+		void TryAdd(const SRGVariableDescriptor& variable)
+		{
+			for (int i = 0; i < variables.GetSize(); i++)
+			{
+				if (variables[i].name == variable.name)
+				{
+					variables[i].shaderStages |= variable.shaderStages;
+					return;
+				}
+			}
+
+			variables.Add(variable);
+		}
+
 		/// @brief Merge 'other' SRG layout into 'this' SRG layout.
 		void Merge(const ShaderResourceGroupLayout& other)
 		{

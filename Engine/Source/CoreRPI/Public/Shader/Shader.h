@@ -10,7 +10,15 @@ namespace CE::RPI
 		Shader();
 		~Shader();
 
+		inline u32 GetVariantCount() const { return variants.GetSize(); }
+
+		inline RPI::ShaderVariant* GetVariant(u32 index) const { return variants[index]; }
+
+		void AddVariant(const ShaderVariantDescriptor& variantDesc);
+
 	private:
+
+		u32 defaultVariantIndex = 0;
 
 		Array<RPI::ShaderVariant*> variants{};
 

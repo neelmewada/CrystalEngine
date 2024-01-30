@@ -2,20 +2,27 @@
 
 namespace CE::RPI
 {
+	struct ShaderVariantDescriptor
+	{
+		RHI::GraphicsPipelineDescriptor pipelineDesc{};
+		Array<Name> defineFlags{};
+	};
 
 	class CORERPI_API ShaderVariant final
 	{
 	public:
 
-		ShaderVariant(const ShaderReflection& reflectionInfo);
+		ShaderVariant(const ShaderVariantDescriptor& desc);
 		~ShaderVariant();
+
+		inline SIZE_T GetVariantId() const { return variantId; }
 
 	private:
 
 		SIZE_T variantId = 0;
-		ShaderReflection reflectionInfo{};
+		Array<Name> defineFlags{};
 
-		bool instancingEnabled = false;
+		RHI::GraphicsPipelineDescriptor pipelineDesc{};
 		
 		HashMap<RHI::ShaderStage, RHI::ShaderModule*> modulesByStage{};
 

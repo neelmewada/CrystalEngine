@@ -31,6 +31,11 @@ namespace CE::RHI
 		/// @brief Compile the Shader Resource Group.
 		virtual void Compile() = 0;
 
+		inline bool IsCommitted() const
+		{
+			return isCommitted;
+		}
+
 	protected:
 
 		b8 isCompiled = false;

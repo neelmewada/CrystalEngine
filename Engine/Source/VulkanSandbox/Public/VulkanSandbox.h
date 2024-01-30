@@ -5,6 +5,7 @@
 #include "CoreMedia.h"
 #include "CoreRHI.h"
 #include "VulkanRHI.h"
+#include "CoreRPI.h"
 
 #include "Sandbox.h"
 #include "SandboxLoop.h"

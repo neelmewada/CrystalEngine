@@ -3,28 +3,28 @@
 namespace CE
 {
 
-    SRGEntry& ShaderReflection::FindOrAdd(u32 frequencyId)
+    RHI::ShaderResourceGroupLayout& ShaderReflection::FindOrAdd(RHI::SRGType srgType)
     {
-		for (auto& entry : resourceGroups)
+		for (auto& entry : srgLayouts)
 		{
-			if (entry.GetFrequencyId() == frequencyId)
+			if (entry.srgType == srgType)
 				return entry;
 		}
 
-		SRGEntry entry{};
-		entry.frequencyId = frequencyId;
-		resourceGroups.Add(entry);
+		RHI::ShaderResourceGroupLayout entry{};
+		entry.srgType = srgType;
+		srgLayouts.Add(entry);
 
-		return resourceGroups.Top();
+		return srgLayouts.Top();
     }
 
 	const VariableBindingMap& ShaderReflection::GetVariableNameMap() const
 	{
 		if (variableNameToBindingSlot.IsEmpty())
 		{
-			for (const SRGEntry& srgEntry : resourceGroups)
+			for (const auto& srgEntry : srgLayouts)
 			{
-				for (const SRGVariable& variable : srgEntry.variables)
+				for (const auto& variable : srgEntry.variables)
 				{
 					variableNameToBindingSlot[variable.name] = variable.bindingSlot;
 				}
@@ -38,13 +38,7 @@ namespace CE
 	{
 		variableNameToBindingSlot.Clear();
 
-		for (const SRGEntry& srgEntry : resourceGroups)
-		{
-			for (const SRGVariable& variable : srgEntry.variables)
-			{
-				variableNameToBindingSlot[variable.name] = variable.bindingSlot;
-			}
-		}
+		GetVariableNameMap();
 	}
 
 	void SRGEntry::TryAdd(const SRGVariable& variable, ShaderStage stage)

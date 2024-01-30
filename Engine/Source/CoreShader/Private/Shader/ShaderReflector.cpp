@@ -109,8 +109,8 @@ namespace CE
 				reflectStruct(variable, type, uniformBuffer.base_type_id);
 			}
 
-			auto& entry = outReflection.FindOrAdd(set);
-			entry.TryAdd(variable, curStage);
+			//auto& entry = outReflection.FindOrAdd(set);
+			//entry.TryAdd(variable, curStage);
 		}
 
 		int numStorageBuffers = resources.storage_buffers.size();
@@ -143,8 +143,8 @@ namespace CE
 				reflectStruct(variable, type, storageBuffer.base_type_id);
 			}
 
-			auto& entry = outReflection.FindOrAdd(set);
-			entry.TryAdd(variable, curStage);
+			//auto& entry = outReflection.FindOrAdd(set);
+			//entry.TryAdd(variable, curStage);
 		}
 
 		int numStorageImages = resources.storage_images.size();
@@ -180,8 +180,8 @@ namespace CE
 			variable.count = count;
 			variable.shaderStages = curStage;
 
-			auto& entry = outReflection.FindOrAdd(set);
-			entry.TryAdd(variable, curStage);
+			//auto& entry = outReflection.FindOrAdd(set);
+			//entry.TryAdd(variable, curStage);
 		}
 		
 		int numTextures = resources.separate_images.size();
@@ -201,36 +201,35 @@ namespace CE
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
-			SRGVariable variable{};
+			RHI::SRGVariableDescriptor variable{};
 			variable.bindingSlot = binding;
 			variable.name = name;
-			variable.internalName = internalName;
 			variable.shaderStages = curStage;
 			
 			if (type.image.dim == spv::Dim2D)
 			{
-				variable.resourceType = ShaderResourceType::Texture2D;
+				variable.type = ShaderResourceType::Texture2D;
 			}
 			else if (type.image.dim == spv::Dim1D)
 			{
-				variable.resourceType = ShaderResourceType::Texture1D;
+				variable.type = ShaderResourceType::Texture1D;
 			}
 			else if (type.image.dim == spv::Dim3D)
 			{
-				variable.resourceType = ShaderResourceType::Texture3D;
+				variable.type = ShaderResourceType::Texture3D;
 			}
 			else if (type.image.dim == spv::DimCube)
 			{
-				variable.resourceType = ShaderResourceType::TextureCube;
+				variable.type = ShaderResourceType::TextureCube;
 			}
 			else
 			{
 				continue; // Invalid type
 			}
-			variable.count = count;
+			variable.arrayCount = count;
 
-			auto& entry = outReflection.FindOrAdd(set);
-			entry.TryAdd(variable, curStage);
+			auto& entry = outReflection.FindOrAdd((RHI::SRGType)set);
+			entry.TryAdd(variable);
 		}
 
 		int numSamplers = resources.separate_samplers.size();
@@ -258,8 +257,8 @@ namespace CE
 			variable.count = count;
 			variable.shaderStages = curStage;
 
-			auto& entry = outReflection.FindOrAdd(set);
-			entry.TryAdd(variable, curStage);
+			//auto& entry = outReflection.FindOrAdd(set);
+			//entry.TryAdd(variable, curStage);
 		}
 		return ERR_Success;
 #else

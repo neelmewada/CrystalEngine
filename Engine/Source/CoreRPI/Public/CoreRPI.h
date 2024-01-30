@@ -18,6 +18,8 @@ namespace CE::RPI
 	using PipelineViewTagList = HashSet<PipelineViewTag>;
 
 	using InstanceBase = CE::IntrusiveBase;
+
+
 }
 
 // Passes
