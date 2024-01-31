@@ -9,32 +9,6 @@ namespace CE
 		Spirv = 0
 	};
 
-	ENUM()
-	enum class ShaderStructMemberType
-	{
-		None = 0,
-		Float,
-		Float2,
-		Float3,
-		Float4,
-		Float4x4
-	};
-	ENUM_CLASS_FLAGS(ShaderStructMemberType);
-
-	STRUCT()
-	struct ShaderStructMember
-	{
-		CE_STRUCT(ShaderStructMember)
-	public:
-
-		FIELD(ReadOnly)
-		Name name{};
-
-		FIELD(ReadOnly)
-		ShaderStructMemberType dataType{};
-		
-	};
-
 	STRUCT()
 	struct CORESHADER_API SRGVariable
 	{

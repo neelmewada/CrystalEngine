@@ -51,6 +51,25 @@ namespace CE::RPI
 	{
 		if (shaderResourceGroup)
 		{
+            for (const auto& [name, propertyValue] : properties)
+            {
+                const auto& layout = shaderResourceGroup->GetLayout();
+                if (layout.srgType == RHI::SRGType::PerMaterial)
+                {
+                    for (const auto& variable : layout.variables)
+                    {
+                        int index = variable.structMembers.IndexOf([&](const RHI::ShaderStructMember& member) -> bool { return member.name == variable.name; });
+                        if (index >= 0) // Found variable
+                        {
+                            variable.structMembers[index].offset;
+                            break;
+                        }
+                    }
+                    
+                    break;
+                }
+            }
+            
 			shaderResourceGroup->Compile();
 		}
 	}

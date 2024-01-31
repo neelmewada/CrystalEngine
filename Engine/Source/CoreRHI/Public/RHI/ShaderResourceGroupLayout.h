@@ -16,6 +16,36 @@ namespace CE::RHI
 	};
 	ENUM_CLASS(SRGType);
 
+    ENUM()
+    enum class ShaderStructMemberType
+    {
+        None = 0,
+        Bool,
+        UInt, Int,
+        Float,
+        Float2,
+        Float3,
+        Float4,
+        Float4x4
+    };
+    ENUM_CLASS_FLAGS(ShaderStructMemberType);
+
+    STRUCT()
+    struct ShaderStructMember
+    {
+        CE_STRUCT(ShaderStructMember)
+    public:
+
+        FIELD()
+        Name name{};
+
+        FIELD()
+        ShaderStructMemberType dataType{};
+        
+        FIELD()
+        u64 offset = 0;
+    };
+
 	STRUCT()
 	struct CORERHI_API SRGVariableDescriptor
 	{
@@ -44,7 +74,9 @@ namespace CE::RHI
 
 		FIELD()
 		ShaderStage shaderStages = ShaderStage::Default;
-
+        
+        FIELD()
+        Array<ShaderStructMember> structMembers{};
 	};
 
 	STRUCT()

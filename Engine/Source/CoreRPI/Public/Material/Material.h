@@ -33,6 +33,8 @@ namespace CE::RPI
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
 
 		MaterialPropertyValueMap properties{};
+        
+        Array<RHI::Buffer*> buffers{};
 
 		Shader* shader = nullptr;
 
