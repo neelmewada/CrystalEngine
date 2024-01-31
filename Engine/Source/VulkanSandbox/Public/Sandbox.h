@@ -83,7 +83,7 @@ namespace CE::Sandbox
 	struct CameraData
 	{
 		alignas(16) Vec3 cameraPosition = {};
-		alignas(4) f32 fieldOfView = 60;
+		alignas(4)	f32 fieldOfView = 60;
 
 	};
 
@@ -103,7 +103,9 @@ namespace CE::Sandbox
 		
 		void InitPipelines();
 		void InitModels();
+		void InitLights();
 
+		void DestroyLights();
 		void DestroyModels();
 		void DestroyPipelines();
 
@@ -148,6 +150,9 @@ namespace CE::Sandbox
 		RHI::Buffer* meshModelBuffer = nullptr;
 		Matrix4x4 meshModelMatrix{};
 		f32 meshRotation = 0;
+
+		List<DirectionalLight> directionalLights{};
+		LightData lightData{};
 
 		u32 width = 0;
 		u32 height = 0;

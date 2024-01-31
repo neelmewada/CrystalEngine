@@ -32,6 +32,8 @@ namespace CE::Sandbox
 		CompileFrameGraph();
 
 		InitModels();
+
+		InitLights();
 	}
 
 	void VulkanSandbox::Tick(f32 deltaTime)
@@ -104,6 +106,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::Shutdown()
 	{
+		DestroyLights();
 		DestroyModels();
 
 		if (mainWindow)
@@ -590,6 +593,18 @@ namespace CE::Sandbox
 		meshDrawPacket = builder.Build();
 	}
 
+	void VulkanSandbox::InitLights()
+	{
+		DirectionalLight mainLight{};
+		mainLight.color = Vec3(1.0f, 0.95f, 0.7f);
+		mainLight.direction = Vec3(0, 0, 1);
+		mainLight.intensity = 1.0f;
+		mainLight.temperature = 100;
+
+		directionalLights.Add(mainLight);
+		lightData.totalDirectionalLights = directionalLights.GetSize();
+	}
+
 	void Mesh::CreateBuffer()
 	{
 		RHI::BufferDescriptor bufferDesc{};
@@ -658,6 +673,10 @@ namespace CE::Sandbox
 			delete mesh;
 		}
 		meshes.Clear();
+	}
+
+	void VulkanSandbox::DestroyLights()
+	{
 	}
 
 	void VulkanSandbox::DestroyPipelines()
