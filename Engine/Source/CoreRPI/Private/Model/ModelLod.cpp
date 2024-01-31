@@ -39,4 +39,12 @@ namespace CE::RPI
 		meshes.Add(mesh);
 	}
 
+	void ModelLod::AddVertexBuffer(RHI::Buffer* buffer)
+	{
+		if (buffer && !vertexBuffers.Exists(buffer))
+		{
+			vertexBuffers.Add(buffer);
+		}
+	}
+
 } // namespace CE::RPI

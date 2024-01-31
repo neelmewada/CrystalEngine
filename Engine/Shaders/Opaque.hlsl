@@ -15,12 +15,14 @@ struct VSInput
 struct VSOutput
 {
     float4 position : SV_POSITION;
+    float3 worldPos : TEXCOORD0;
 };
 
 VSOutput VertMain(VSInput input)
 {
     VSOutput output;
     output.position = LOCAL_TO_CLIP_SPACE(input.position, input);
+    output.worldPos = LOCAL_TO_WORLD_SPACE(input.position, input);
     return output;
 }
 

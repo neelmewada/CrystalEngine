@@ -31,5 +31,6 @@ CompileShader() {
     echo "Compiled:" ${FileName}
 }
 
+CompileShader "Depth"
 CompileShader "Opaque"
 

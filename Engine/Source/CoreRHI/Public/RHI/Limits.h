@@ -6,6 +6,10 @@ namespace CE::RHI
 	{
 		constexpr u32 ModelLodCountMax = 8;
 
+		constexpr u64 MaxConstantBufferSize = 16_KB; // 16384 bytes
+
+		constexpr u64 MaxStructuredBufferSize = 128_MB; // 134217728 bytes
+
 		namespace Pipeline
 		{
 			//! @brief Max number of vertex attributes

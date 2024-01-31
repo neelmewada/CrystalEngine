@@ -81,7 +81,7 @@
 #define SRG_PerObject(type) SRG(type, PerObject_Frequency)
 #define SRG_PerDraw(type) SRG(type, PerDraw_Frequency)
 
-#ifdef __spirv__
+#ifdef __spirv__ // Vulkan Shader
 
 #define SUBPASS_INPUT(subpass, name) [[vk::input_attachment_index(subpass)]] [[vk::binding(subpass, PerSubPass_Frequency)]] SubpassInput name
 #define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()
@@ -90,7 +90,7 @@
 #define END_ROOT_CONSTANTS() }; [[vk::push_constant]] RootConstants _RootConstants;
 #define ROOT_CONSTANT(name) _RootConstants.name
 
-#else
+#else // Dx12 Shader
 
 #define SUBPASS_INPUT(subpass, name) SubpassInput name;
 #define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()

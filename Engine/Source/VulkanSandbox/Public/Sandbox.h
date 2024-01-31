@@ -58,6 +58,35 @@ namespace CE::Sandbox
 		Matrix4x4 projectionMatrix;
 	};
 
+	struct DirectionalLight
+	{
+		alignas(16) Vec3 direction;
+		alignas(16) Vec3 color;
+		alignas(4)	float intensity;
+		alignas(4)	float temperature;
+	};
+
+	struct PointLight
+	{
+		alignas(16) Vec3 position;
+		alignas(16) Vec3 color;
+		alignas(4)	float intensity;
+		alignas(4)	float radius;
+		alignas(4)	float attenuation;
+	};
+
+	struct LightData
+	{
+		alignas(4)  u32 totalDirectionalLights;
+	};
+
+	struct CameraData
+	{
+		alignas(16) Vec3 cameraPosition = {};
+		alignas(4) f32 fieldOfView = 60;
+
+	};
+
 	class VulkanSandbox : IWindowCallbacks
 	{
 	public:
@@ -100,10 +129,8 @@ namespace CE::Sandbox
 		RHI::PipelineState* depthPipeline = nullptr;
 		RHI::ShaderModule* depthShaderVert = nullptr;
 
-		RHI::PipelineState* opaquePipeline = nullptr;
 		RPI::Shader* opaqueShader = nullptr;
-		//RHI::ShaderModule* opaqueShaderVert = nullptr;
-		//RHI::ShaderModule* opaqueShaderFrag = nullptr;
+		RPI::Material* opaqueMaterial = nullptr;
 
 		RHI::PipelineState* transparentPipeline = nullptr;
 

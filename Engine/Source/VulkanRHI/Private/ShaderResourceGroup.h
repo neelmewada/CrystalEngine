@@ -70,7 +70,13 @@ namespace CE::Vulkan
 
 		virtual bool IsMerged() const { return false; }
 
-		bool Bind(Name name, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) override;
+		virtual bool Bind(Name name, RHI::BufferView bufferView) override;
+		virtual bool Bind(Name name, RHI::Texture* texture) override;
+		virtual bool Bind(Name name, RHI::Sampler* sampler) override;
+
+		virtual bool Bind(Name name, u32 count, RHI::BufferView* bufferViews) override;
+		virtual bool Bind(Name name, u32 count, RHI::Texture** textures) override;
+		virtual bool Bind(Name name, u32 count, RHI::Sampler** samplers) override;
 		
 		inline int GetSetNumber() const { return setNumber; }
 
@@ -84,7 +90,7 @@ namespace CE::Vulkan
 			return failed;
 		}
 
-		void QueueDestroy();
+		void QueueDestroy() override;
 
 		virtual SIZE_T GetHash() const { return (SIZE_T)this; }
 
@@ -118,8 +124,8 @@ namespace CE::Vulkan
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
 		HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};
 
-		HashMap<int, VkDescriptorBufferInfo> bufferInfosBoundBySlot{};
-		HashMap<int, VkDescriptorImageInfo> imageInfosBoundBySlot{};
+		HashMap<int, List<VkDescriptorBufferInfo>> bufferInfosBoundBySlot{};
+		HashMap<int, List<VkDescriptorImageInfo>> imageInfosBoundBySlot{};
 
 		friend class GraphicsPipelineState;
 		friend class CommandList;

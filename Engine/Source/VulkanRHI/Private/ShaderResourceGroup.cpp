@@ -221,7 +221,7 @@ namespace CE::Vulkan
 
 	void ShaderResourceManager::DestroyQueuedSRG()
 	{
-		if (destroyQueue.NonEmpty())
+		if (destroyQueue.GetSize() >= 32)
 		{
 			vkDeviceWaitIdle(device->GetHandle());
 
@@ -243,65 +243,7 @@ namespace CE::Vulkan
 		this->srgLayout = srgLayout;
 		this->srgManager = device->GetShaderResourceManager();
 		pool = device->GetDescriptorPool();
-
 		setNumber = srgManager->GetDescriptorSetNumber(srgType);
-    }
-
-    ShaderResourceGroup::~ShaderResourceGroup()
-	{
-		//vkDeviceWaitIdle(device->GetHandle());
-
-		srgManager->OnSRGDestroyed(this);
-		Destroy();
-	}
-
-	void ShaderResourceGroup::QueueDestroy()
-	{
-		if (!srgManager->destroyQueue.Exists(this))
-		{
-			srgManager->destroyQueue.Add(this);
-			srgManager->OnSRGDestroyed(this);
-		}
-	}
-
-	ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device)
-		: device(device)
-	{
-		this->srgManager = device->GetShaderResourceManager();
-		pool = device->GetDescriptorPool();
-	}
-
-	bool ShaderResourceGroup::Bind(Name name, RHI::Buffer* buffer, SIZE_T offset, SIZE_T size)
-	{
-		if (!bindingSlotsByVariableName.KeyExists(name))
-			return false;
-
-		int bindingSlot = bindingSlotsByVariableName[name];
-
-		// Something was already bound at this position, cannot re-bind here.
-		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
-			return false;
-		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
-			return false;
-
-		VkDescriptorBufferInfo bufferWrite{};
-		bufferWrite.buffer = (VkBuffer)buffer->GetHandle();
-		bufferWrite.offset = offset;
-		bufferWrite.range = size > 0 ? size : buffer->GetBufferSize();
-		
-		bufferInfosBoundBySlot[bindingSlot] = bufferWrite;
-
-		UpdateBindings();
-		
-		return true;
-	}
-
-	void ShaderResourceGroup::Compile()
-	{
-		if (isCompiled)
-			return;
-
-		isCompiled = true;
 
 		setLayoutBindings.Clear();
 		bindingSlotsByVariableName.Clear();
@@ -334,6 +276,208 @@ namespace CE::Vulkan
 			variableBindingsByName[variable.name] = entry;
 			variableBindingsBySlot[variable.bindingSlot] = entry;
 		}
+    }
+
+    ShaderResourceGroup::~ShaderResourceGroup()
+	{
+		//vkDeviceWaitIdle(device->GetHandle());
+
+		srgManager->OnSRGDestroyed(this);
+		Destroy();
+	}
+
+	void ShaderResourceGroup::QueueDestroy()
+	{
+		if (!srgManager->destroyQueue.Exists(this))
+		{
+			srgManager->destroyQueue.Add(this);
+			srgManager->OnSRGDestroyed(this);
+		}
+	}
+
+	ShaderResourceGroup::ShaderResourceGroup(VulkanDevice* device)
+		: device(device)
+	{
+		this->srgManager = device->GetShaderResourceManager();
+		pool = device->GetDescriptorPool();
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, RHI::BufferView bufferView)
+	{
+		if (!bufferView.GetBuffer())
+			return false;
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+
+		// Something was already bound at this position, cannot re-bind here.
+		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+
+		auto size = bufferView.GetByteCount();
+
+		VkDescriptorBufferInfo bufferWrite{};
+		bufferWrite.buffer = (VkBuffer)bufferView.GetBuffer()->GetHandle();
+		bufferWrite.offset = bufferView.GetByteOffset();
+		bufferWrite.range = size > 0 ? size : bufferView.GetBuffer()->GetBufferSize();
+		
+		bufferInfosBoundBySlot[bindingSlot].Clear();
+		bufferInfosBoundBySlot[bindingSlot].Add(bufferWrite);
+		
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::BufferView* bufferViews)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+
+		// Something was already bound at this position, cannot re-bind here.
+		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+
+		bufferInfosBoundBySlot[bindingSlot].Clear();
+
+		for (int i = 0; i < count; i++)
+		{
+			auto size = bufferViews[i].GetByteCount();
+
+			VkDescriptorBufferInfo bufferWrite{};
+			bufferWrite.buffer = (VkBuffer)bufferViews[i].GetBuffer()->GetHandle();
+			bufferWrite.offset = bufferViews[i].GetByteOffset();
+			bufferWrite.range = size > 0 ? size : bufferViews[i].GetBuffer()->GetBufferSize();
+
+			bufferInfosBoundBySlot[bindingSlot].Add(bufferWrite);
+		}
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, RHI::Texture* rhiTexture)
+	{
+		if (!rhiTexture)
+			return false;
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		Vulkan::Texture* texture = (Vulkan::Texture*)rhiTexture;
+
+		// Something was already bound at this position, cannot re-bind here.
+		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+
+		VkDescriptorImageInfo imageWrite{};
+		imageWrite.imageLayout = texture->GetVkImageLayout();
+		imageWrite.imageView = texture->GetImageView();
+		imageWrite.sampler = nullptr;
+
+		imageInfosBoundBySlot[bindingSlot].Clear();
+		imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Texture** textures)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		// Something was already bound at this position, cannot re-bind here.
+		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+
+		imageInfosBoundBySlot[bindingSlot].Clear();
+
+		for (int i = 0; i < count; i++)
+		{
+			Vulkan::Texture* texture = (Vulkan::Texture*)textures[i];
+
+			VkDescriptorImageInfo imageWrite{};
+			imageWrite.imageLayout = texture->GetVkImageLayout();
+			imageWrite.imageView = texture->GetImageView();
+			imageWrite.sampler = nullptr;
+
+			imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
+		}
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, RHI::Sampler* rhiSampler)
+	{
+		if (!rhiSampler)
+			return false;
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		Vulkan::Sampler* sampler = (Vulkan::Sampler*)rhiSampler;
+
+		// Something was already bound at this position, cannot re-bind here.
+		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+
+		VkDescriptorImageInfo imageWrite{};
+		imageWrite.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageWrite.imageView = VK_NULL_HANDLE;
+		imageWrite.sampler = sampler->GetVkHandle();
+
+		imageInfosBoundBySlot[bindingSlot].Clear();
+		imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Sampler** samplers)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		// Something was already bound at this position, cannot re-bind here.
+		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
+			return false;
+
+		imageInfosBoundBySlot[bindingSlot].Clear();
+
+		for (int i = 0; i < count; i++)
+		{
+			Vulkan::Sampler* sampler = (Vulkan::Sampler*)samplers[i];
+			if (sampler == nullptr)
+				continue;
+
+			VkDescriptorImageInfo imageWrite{};
+			imageWrite.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			imageWrite.imageView = VK_NULL_HANDLE;
+			imageWrite.sampler = sampler->GetVkHandle();
+			
+			imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
+		}
+
+		return true;
+	}
+
+	void ShaderResourceGroup::Compile()
+	{
+		if (isCompiled)
+			return;
 		
 		VkDescriptorSetLayoutCreateInfo layoutCI{};
 		layoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -357,6 +501,10 @@ namespace CE::Vulkan
 		}
 
 		descriptorSet = allocatedSets[0];
+
+		UpdateBindings();
+
+		isCompiled = true;
 	}
 
 	void ShaderResourceGroup::Destroy()
@@ -380,7 +528,7 @@ namespace CE::Vulkan
 		writes.Resize(bufferInfosBoundBySlot.GetSize() + imageInfosBoundBySlot.GetSize());
 		int idx = 0;
 
-		for (const auto& [slot, bufferWrite] : bufferInfosBoundBySlot)
+		for (const auto& [slot, bufferWrites] : bufferInfosBoundBySlot)
 		{
 			if (!variableBindingsBySlot.KeyExists(slot))
 				continue;
@@ -394,10 +542,10 @@ namespace CE::Vulkan
 			write.dstArrayElement = 0;
 			write.dstBinding = variable.binding;
 			write.dstSet = descriptorSet;
-			write.pBufferInfo = &bufferWrite;
+			write.pBufferInfo = bufferWrites.GetData();
 		}
 
-		for (const auto& [slot, imageWrite] : imageInfosBoundBySlot)
+		for (const auto& [slot, imageWrites] : imageInfosBoundBySlot)
 		{
 			if (!variableBindingsBySlot.KeyExists(slot))
 				continue;
@@ -411,7 +559,7 @@ namespace CE::Vulkan
 			write.dstArrayElement = 0;
 			write.dstBinding = variable.binding;
 			write.dstSet = descriptorSet;
-			write.pImageInfo = &imageWrite;
+			write.pImageInfo = imageWrites.GetData();
 		}
 
 		vkUpdateDescriptorSets(device->GetHandle(), writes.GetSize(), writes.GetData(), 0, nullptr);

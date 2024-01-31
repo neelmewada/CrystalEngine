@@ -134,7 +134,6 @@ namespace CE::Sandbox
 			perViewSrgLayout.variables.Add(perViewDataDesc);
 
 			perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
-			perViewSrg->Compile();
 
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -155,8 +154,9 @@ namespace CE::Sandbox
 
 			perViewBuffer->UploadData(data);
 
-			perViewSrg->Bind("_PerViewData", perViewBuffer);
+			perViewSrg->Bind("_PerViewData", RHI::BufferView(perViewBuffer));
 			
+			perViewSrg->Compile();
 		}
 
 		// Depth Pipeline
@@ -330,7 +330,9 @@ namespace CE::Sandbox
             RPI::ShaderVariantDescriptor variantDesc{};
             variantDesc.defineFlags = {};
             variantDesc.pipelineDesc = opaquePipelineDesc;
-            opaquePipeline = opaqueShader->AddVariant(variantDesc)->GetPipeline();
+            opaqueShader->AddVariant(variantDesc);
+
+			opaqueMaterial = new RPI::Material(opaqueShader);
 
 			delete opaqueVert;
 			delete opaqueFrag;
@@ -509,7 +511,6 @@ namespace CE::Sandbox
 			meshSrgLayout.variables.Add(variable);
 
 			meshObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
-			meshObjectSrg->Compile();
 
 			RHI::BufferDescriptor desc{};
 			desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -528,7 +529,9 @@ namespace CE::Sandbox
 
 			meshModelBuffer->UploadData(uploadData);
 
-			meshObjectSrg->Bind("_ObjectData", meshModelBuffer);
+			meshObjectSrg->Bind("_ObjectData", RHI::BufferView(meshModelBuffer));
+
+			meshObjectSrg->Compile();
 		}
 
 		RHI::DrawIndexedArguments indexedArgs{};
@@ -574,7 +577,7 @@ namespace CE::Sandbox
 			
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = opaquePipeline;
+			request.pipelineState = opaqueShader->GetVariant(0)->GetPipeline();
 
 			builder.AddDrawItem(request);
 		}
@@ -665,10 +668,8 @@ namespace CE::Sandbox
 		delete depthPipeline; depthPipeline = nullptr;
 		delete depthShaderVert; depthShaderVert = nullptr;
 
-		//delete opaquePipeline; opaquePipeline = nullptr;
-		//delete opaqueShaderVert; opaqueShaderVert = nullptr;
-		//delete opaqueShaderFrag; opaqueShaderFrag = nullptr;
         delete opaqueShader; opaqueShader = nullptr;
+		delete opaqueMaterial; opaqueMaterial = nullptr;
 
 		delete transparentPipeline; transparentPipeline = nullptr;
 	}
@@ -729,7 +730,7 @@ namespace CE::Sandbox
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
 
-				scheduler->UsePipeline(opaquePipeline);
+				scheduler->UsePipeline(opaqueShader->GetVariant(0)->GetPipeline());
 			}
 			scheduler->EndScope();
 
@@ -750,8 +751,6 @@ namespace CE::Sandbox
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
-
-				//scheduler->UsePipeline(depthPipeline);
 
 				scheduler->PresentSwapChain(swapChain);
 			}

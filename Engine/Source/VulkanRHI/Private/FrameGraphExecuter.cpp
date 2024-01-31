@@ -10,7 +10,7 @@ namespace CE::Vulkan
 
 	FrameGraphExecuter::~FrameGraphExecuter()
 	{
-
+		device->GetShaderResourceManager()->DestroyQueuedSRG();
 	}
 
 	bool FrameGraphExecuter::ExecuteInternal(const FrameGraphExecuteRequest& executeRequest)

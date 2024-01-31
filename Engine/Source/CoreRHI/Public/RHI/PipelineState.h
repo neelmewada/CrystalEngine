@@ -345,11 +345,14 @@ namespace CE::RHI
 
 		virtual IPipelineLayout* GetPipelineLayout() = 0;
 
+		inline const RHI::GraphicsPipelineDescriptor& GetGraphicsDescriptor() const { return graphicsDescriptor; }
+
 	protected:
 		PipelineState() : RHIResource(RHI::ResourceType::PipelineState) {}
 
 		PipelineStateType pipelineType{};
 
+		RHI::GraphicsPipelineDescriptor graphicsDescriptor{};
 	};
     
 } // namespace CE::RHI

@@ -11,7 +11,13 @@ namespace CE::RHI
 
 	public:
 
-		virtual bool Bind(Name name, RHI::Buffer* buffer, SIZE_T offset = 0, SIZE_T size = 0) = 0;
+		virtual bool Bind(Name name, RHI::BufferView bufferView) = 0;
+		virtual bool Bind(Name name, RHI::Texture* texture) = 0;
+		virtual bool Bind(Name name, RHI::Sampler* sampler) = 0;
+
+		virtual bool Bind(Name name, u32 count, RHI::BufferView* bufferViews) = 0;
+		virtual bool Bind(Name name, u32 count, RHI::Texture** textures) = 0;
+		virtual bool Bind(Name name, u32 count, RHI::Sampler** samplers) = 0;
 
 		inline SRGType GetSRGType() const
 		{
@@ -35,6 +41,8 @@ namespace CE::RHI
 		{
 			return isCommitted;
 		}
+
+		virtual void QueueDestroy() = 0;
 
 	protected:
 

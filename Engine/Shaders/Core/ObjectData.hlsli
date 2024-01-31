@@ -1,6 +1,8 @@
 #ifndef __OBJECT_DATA_HLSL__
 #define __OBJECT_DATA_HLSL__
 
+#pragma feature USE_INSTANCING
+
 #ifdef USE_INSTANCING
 
 struct ObjectData
@@ -27,6 +29,9 @@ ConstantBuffer<ObjectData> _ObjectData : SRG_PerObject(b);
 
 #endif
 
-#define LOCAL_TO_CLIP_SPACE(position, input) mul(mul(float4(position, 1.0), MODEL_MATRIX(input)), viewProjectionMatrix)
+#define LOCAL_TO_CLIP_SPACE(position, vertexInput) mul(mul(float4(position, 1.0), MODEL_MATRIX(vertexInput)), viewProjectionMatrix)
+
+#define LOCAL_TO_WORLD_SPACE(position, vertexInput) mul(float4(position, 1.0), MODEL_MATRIX(vertexInput))
+
 
 #endif // __OBJECT_DATA_HLSL__

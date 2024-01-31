@@ -8,4 +8,10 @@ cbuffer _PerViewData : SRG_PerView(b)
     float4x4 projectionMatrix;
 };
 
+cbuffer _CameraData : SRG_PerView(b)
+{
+    float3 cameraPosition;
+    float fieldOfView;
+};
+
 #endif // __VIEW_DATA_HLSL__

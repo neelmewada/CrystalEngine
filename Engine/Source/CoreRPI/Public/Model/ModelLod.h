@@ -33,6 +33,8 @@ namespace CE::RPI
 
 		void AddMesh(const Mesh& mesh);
 
+		void AddVertexBuffer(RHI::Buffer* vertexBuffer);
+
 	private:
 
 		// Each model can have multiple meshes (aka SubMeshes)

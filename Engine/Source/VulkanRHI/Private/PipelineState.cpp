@@ -5,6 +5,7 @@ namespace CE::Vulkan
 
     PipelineState::PipelineState(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& graphicsDesc) : device(device)
     {
+		this->graphicsDescriptor = graphicsDesc;
 		pipeline = new GraphicsPipeline(device, graphicsDesc);
     }
 
