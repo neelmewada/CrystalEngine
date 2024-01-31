@@ -179,17 +179,6 @@ namespace CE::RHI
         const void* data = nullptr;
     };
 
-	struct BufferDesc
-	{
-		Name name{};
-		BufferBindFlags bindFlags{};
-		//BufferAllocMode allocMode{};
-		u64 bufferSize = 0;
-		u64 structureByteStride = 0;
-
-		const BufferData* initialData = nullptr;
-	};
-
     /*
     *   Texture
     */
@@ -452,6 +441,7 @@ namespace CE::RHI
         RG = R | G,
         RB = R | B,
         GB = G | B,
+        RGBA = R | G | B | A,
         All = R | G | B | A,
     };
     ENUM_CLASS(ColorComponentMask);

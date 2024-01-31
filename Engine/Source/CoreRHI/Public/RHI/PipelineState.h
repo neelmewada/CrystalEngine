@@ -10,6 +10,7 @@ namespace CE::RHI
 		COUNT
 	};
 
+	ENUM()
 	enum class VertexAttributeDataType
 	{
 		Undefined,
@@ -25,24 +26,16 @@ namespace CE::RHI
 		u32 offset = 0;
 		u32 inputSlot = 0;
 
-		inline SIZE_T GetHash() const
-		{
-			if (dataType == VertexAttributeDataType::Undefined)
-				return 0;
-
-			SIZE_T hash = CE::GetHash(dataType);
-			CombineHash(hash, location);
-			CombineHash(hash, offset);
-			CombineHash(hash, inputSlot);
-			return hash;
-		}
+		SIZE_T GetHash() const;
 	};
 
+	ENUM()
 	enum class VertexInputRate
 	{
 		PerVertex = 0,
 		PerInstance
 	};
+	ENUM_CLASS(VertexInputRate);
 
 	struct VertexInputSlotDescriptor
 	{
@@ -69,6 +62,7 @@ namespace CE::RHI
 		CORERHI_API SIZE_T GetHash() const;
 	};
 
+	ENUM()
 	enum class BlendOp
 	{
 		Add,
@@ -76,7 +70,9 @@ namespace CE::RHI
 		ReverseSubtract,
 		Min, Max
 	};
+	ENUM_CLASS(BlendOp);
 
+	ENUM()
 	enum class BlendFactor
 	{
 		Zero,
@@ -90,7 +86,9 @@ namespace CE::RHI
 		DstAlpha,
 		OneMinusDstAlpha
 	};
+	ENUM_CLASS(BlendFactor);
 
+	ENUM()
 	enum class CompareOp
 	{
 		Never = 0,
@@ -102,7 +100,9 @@ namespace CE::RHI
 		GreaterOrEqual = 6,
 		Always = 7,
 	};
+	ENUM_CLASS(CompareOp);
 
+	ENUM()
 	enum class StencilOp
 	{
 		Keep,
@@ -114,16 +114,36 @@ namespace CE::RHI
 		Increment,
 		Decrement
 	};
+	ENUM_CLASS(StencilOp);
 
-	struct ColorBlendState
+	STRUCT()
+	struct CORERHI_API ColorBlendState
 	{
+		CE_STRUCT(ColorBlendState)
+	public:
+
+		FIELD()
 		bool blendEnable = true;
+
+		FIELD()
 		BlendOp colorBlendOp = BlendOp::Add;
+
+		FIELD()
 		BlendFactor srcColorBlend = BlendFactor::SrcAlpha;
+
+		FIELD()
 		BlendFactor dstColorBlend = BlendFactor::OneMinusSrcAlpha;
+
+		FIELD()
 		BlendOp alphaBlendOp = BlendOp::Add;
+
+		FIELD()
 		BlendFactor srcAlphaBlend = BlendFactor::One;
+
+		FIELD()
 		BlendFactor dstAlphaBlend = BlendFactor::Zero;
+
+		FIELD()
 		ColorComponentMask componentMask = ColorComponentMask::All;
 
 		inline SIZE_T GetHash() const
@@ -142,8 +162,13 @@ namespace CE::RHI
 		}
 	};
 
-	struct BlendState
+	STRUCT()
+	struct CORERHI_API BlendState
 	{
+		CE_STRUCT(BlendState)
+	public:
+
+		FIELD()
 		Array<ColorBlendState> colorBlends{};
 
 		inline SIZE_T GetHash() const
@@ -160,11 +185,22 @@ namespace CE::RHI
 		}
 	};
 
-	struct DepthState
+	STRUCT()
+	struct CORERHI_API DepthState
 	{
+		CE_STRUCT(DepthState)
+	public:
+
+		FIELD()
 		bool enable = false;
+
+		FIELD()
 		CompareOp compareOp = CompareOp::Less;
+
+		FIELD()
 		bool testEnable = false;
+
+		FIELD()
 		bool writeEnable = false;
 
 		inline SIZE_T GetHash() const
@@ -179,21 +215,25 @@ namespace CE::RHI
 		}
 	};
 
-	struct StencilOpState
+	STRUCT()
+	struct CORERHI_API StencilOpState
 	{
+		CE_STRUCT(StencilOpState)
+	public:
+
+		FIELD()
 		StencilOp failOp = StencilOp::Keep;
+
+		FIELD()
 		StencilOp depthFailOp = StencilOp::Keep;
+
+		FIELD()
 		StencilOp passOp = StencilOp::Keep;
+
+		FIELD()
 		CompareOp compareOp = CompareOp::Always;
 
-		inline SIZE_T GetHash() const
-		{
-			SIZE_T hash = CE::GetHash(failOp);
-			CombineHash(hash, depthFailOp);
-			CombineHash(hash, passOp);
-			CombineHash(hash, compareOp);
-			return hash;
-		}
+		SIZE_T GetHash() const;
 	};
 
 	struct PipelineDescriptor
@@ -204,70 +244,67 @@ namespace CE::RHI
 		Array<ShaderStageDescriptor> shaderStages{};
 		Array<ShaderResourceGroupLayout> srgLayouts{};
 
-		inline SIZE_T GetHash() const
-		{
-			SIZE_T hash = 0;
-			for (const auto& shaderStage : shaderStages)
-			{
-				if (hash == 0)
-					hash = shaderStage.GetHash();
-				else
-					CombineHash(hash, shaderStage);
-			}
-
-			return hash;
-		}
+		SIZE_T GetHash() const;
 	};
 
-	struct StencilState
+	STRUCT()
+	struct CORERHI_API StencilState
 	{
+		CE_STRUCT(StencilState)
+	public:
+
+		FIELD()
 		bool enable = false;
+
+		FIELD()
 		u32 readMask = 0xFF;
+
+		FIELD()
 		u32 writeMask = 0xFF;
+
+		FIELD()
 		StencilOpState frontFace{};
+
+		FIELD()
 		StencilOpState backFace{};
 
-		inline SIZE_T GetHash() const
-		{
-			SIZE_T hash = CE::GetHash(enable);
-			if (!enable)
-				return hash;
-			CombineHash(hash, readMask);
-			CombineHash(hash, writeMask);
-			CombineHash(hash, frontFace);
-			CombineHash(hash, backFace);
-			return hash;
-		}
+		SIZE_T GetHash() const;
 	};
 
-	struct DepthStencilState
+	STRUCT()
+	struct CORERHI_API DepthStencilState
 	{
+		CE_STRUCT(DepthStencilState)
+	public:
+
+		FIELD()
 		DepthState depthState{};
+
+		FIELD()
 		StencilState stencilState{};
 
-		inline SIZE_T GetHash() const
-		{
-			SIZE_T hash = depthState.GetHash();
-			CombineHash(hash, stencilState);
-			return hash;
-		}
+		SIZE_T GetHash() const;
 	};
 
-	struct RasterState
+	STRUCT()
+	struct CORERHI_API RasterState
 	{
+		CE_STRUCT(RasterState)
+	public:
+
+		FIELD()
 		CullMode cullMode = CullMode::Back;
+
+		FIELD()
 		FillMode fillMode = FillMode::Solid;
+
+		FIELD()
 		bool multisampleEnable = false;
+
+		FIELD()
 		bool depthClipEnable = true;
 
-		inline SIZE_T GetHash() const
-		{
-			SIZE_T hash = CE::GetHash(cullMode);
-			CombineHash(hash, fillMode);
-			CombineHash(hash, multisampleEnable);
-			CombineHash(hash, depthClipEnable);
-			return hash;
-		}
+		SIZE_T GetHash() const;
 	};
 
 	struct GraphicsPipelineDescriptor : PipelineDescriptor
@@ -317,3 +354,4 @@ namespace CE::RHI
     
 } // namespace CE::RHI
 
+#include "PipelineState.rtti.h"
