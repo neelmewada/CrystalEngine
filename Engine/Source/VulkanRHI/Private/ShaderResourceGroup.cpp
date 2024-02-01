@@ -304,6 +304,8 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::BufferView bufferView)
 	{
+        if (isCompiled)
+            return failed;
 		if (!bufferView.GetBuffer())
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -332,6 +334,8 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::BufferView* bufferViews)
 	{
+        if (isCompiled)
+            return failed;
 		if (!bindingSlotsByVariableName.KeyExists(name))
 			return false;
 
@@ -362,6 +366,8 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::Texture* rhiTexture)
 	{
+        if (isCompiled)
+            return failed;
 		if (!rhiTexture)
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -389,6 +395,8 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Texture** textures)
 	{
+        if (isCompiled)
+            return failed;
 		if (!bindingSlotsByVariableName.KeyExists(name))
 			return false;
 
@@ -418,6 +426,8 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::Sampler* rhiSampler)
 	{
+        if (isCompiled)
+            return failed;
 		if (!rhiSampler)
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -445,6 +455,8 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Sampler** samplers)
 	{
+        if (isCompiled)
+            return failed;
 		if (!bindingSlotsByVariableName.KeyExists(name))
 			return false;
 

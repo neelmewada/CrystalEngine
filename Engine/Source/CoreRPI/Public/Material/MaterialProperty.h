@@ -9,9 +9,11 @@ namespace CE::RPI
         None = 0,
         Int, UInt,
         Float,
-        Color,
         Vector2, Vector3, Vector4,
+        Color,
         Texture,
+        Sampler,
+        Matrix4x4,
         Enum,
         COUNT
     };
@@ -62,6 +64,16 @@ namespace CE::RPI
         {
             u.textureValue = textureValue;
         }
+        
+        MaterialPropertyValue(RHI::Sampler* samplerValue) : valueType(MaterialPropertyDataType::Sampler)
+        {
+            u.samplerValue = samplerValue;
+        }
+        
+        MaterialPropertyValue(const Matrix4x4& matrixValue) : valueType(MaterialPropertyDataType::Matrix4x4)
+        {
+            u.matrixValue = matrixValue;
+        }
 
         template<typename TEnum> requires TIsEnum<TEnum>::Value
         MaterialPropertyValue(TEnum enumValue) : valueType(MaterialPropertyDataType::Enum)
@@ -79,7 +91,7 @@ namespace CE::RPI
 
         inline MaterialPropertyDataType GetValueType() const { return valueType; }
 
-        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RHI::Texture*>::Value
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RHI::Texture*, RHI::Sampler*, Matrix4x4>::Value
         inline T GetValue() const
         {
             if constexpr (TIsSameType<T, s32>::Value)
@@ -114,10 +126,18 @@ namespace CE::RPI
             {
                 return u.textureValue;
             }
+            else if constexpr (TIsSameType<T, RHI::Sampler*>::Value)
+            {
+                return u.samplerValue;
+            }
+            else if constexpr (TIsSameType<T, Matrix4x4>::Value)
+            {
+                return u.matrixValue;
+            }
             return {};
         }
 
-        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RHI::Texture*>::Value
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RHI::Texture*, RHI::Sampler*, Matrix4x4>::Value
         inline void GetValue(T& outValue) const
         {
             outValue = GetValue<T>();
@@ -127,6 +147,52 @@ namespace CE::RPI
         inline T GetEnumValue() const
         {
             return (T)u.enumValue;
+        }
+        
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RHI::Texture*, RHI::Sampler*, Matrix4x4>::Value
+        inline bool IsOfType() const
+        {
+            if constexpr (TIsSameType<T, s32>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Int;
+            }
+            else if constexpr (TIsSameType<T, u32>::Value)
+            {
+                return valueType == MaterialPropertyDataType::UInt;
+            }
+            else if constexpr (TIsSameType<T, f32>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Float;
+            }
+            else if constexpr (TIsSameType<T, Color>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Color;
+            }
+            else if constexpr (TIsSameType<T, Vec2>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Vector2;
+            }
+            else if constexpr (TIsSameType<T, Vec3>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Vector3;
+            }
+            else if constexpr (TIsSameType<T, Vec4>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Vector4;
+            }
+            else if constexpr (TIsSameType<T, RHI::Texture*>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Texture;
+            }
+            else if constexpr (TIsSameType<T, RHI::Sampler*>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Sampler;
+            }
+            else if constexpr (TIsSameType<T, Matrix4x4>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Matrix4x4;
+            }
+            return false;
         }
         
     private:
@@ -142,8 +208,10 @@ namespace CE::RPI
             Color colorValue;
             Vec2 vec2Value;
             Vec3 vec3Value;
-            Vec4 vec4Value = Vec4();
+            Vec4 vec4Value;
+            Matrix4x4 matrixValue = {};
             RHI::Texture* textureValue;
+            RHI::Sampler* samplerValue;
             s64 enumValue;
         } u;
 

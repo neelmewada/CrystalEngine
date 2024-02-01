@@ -34,7 +34,7 @@ PSInput VertMain(VSInput input)
     return output;
 }
 
-float Map01(in float value)
+inline float Map01(in float value)
 {
     return (value + 1) / 2.0;
 }
@@ -48,6 +48,6 @@ float4 FragMain(PSInput input) : SV_TARGET
     {
         diffuse += max(dot(normal, -_DirectionalLights[i].direction), 0) * _DirectionalLights[i].color;
     }
-    return float4(diffuse * albedo.rgb, 1.0);
+    return float4(diffuse, clamp(albedo.a, 0.99, 1));
     //return float4(1.0, 0, 1.0, 1.0);
 }

@@ -23,8 +23,19 @@ namespace CE::RPI
 		inline u32 GetCurrentVariantIndex() const { return shaderVariantIndex; }
 
 		void SelectVariant(u32 variantIndex);
+        
+        void UpdateBindings();
 
 		void Compile();
+        
+        bool IsCompiled() const
+        {
+            return shaderResourceGroup != nullptr && shaderResourceGroup->IsCompiled();
+        }
+        
+        void SetPropertyValue(Name propertyName, const MaterialPropertyValue& value);
+        
+        inline RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 
 	private:
 
@@ -34,7 +45,8 @@ namespace CE::RPI
 
 		MaterialPropertyValueMap properties{};
         
-        HashMap<Name, RHI::Buffer*> buffers{};
+        HashMap<Name, RHI::Buffer*> buffersByVariableName{};
+        HashMap<Name, Array<u64>> memberOffsetsByVariableName{};
 
 		Shader* shader = nullptr;
 

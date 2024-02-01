@@ -505,7 +505,6 @@ namespace CE::Vulkan
 
         switch (member.dataType)
         {
-        case ShaderStructMemberType::Bool:
         case ShaderStructMemberType::UInt:
         case ShaderStructMemberType::Int:
         case ShaderStructMemberType::Float:
@@ -532,7 +531,6 @@ namespace CE::Vulkan
     {
         switch (member.dataType)
         {
-        case RHI::ShaderStructMemberType::Bool:
         case RHI::ShaderStructMemberType::Float:
         case RHI::ShaderStructMemberType::UInt:
         case RHI::ShaderStructMemberType::Int:
@@ -555,6 +553,7 @@ namespace CE::Vulkan
                     offset = Memory::GetAlignedSize(offset, alignment);
                 offset += GetShaderStructMemberSize(nestedMember);
             }
+            offset = Memory::GetAlignedSize(offset, structAlignment);
             return offset;
         }
         break;

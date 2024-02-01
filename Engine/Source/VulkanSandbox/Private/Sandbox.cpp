@@ -378,6 +378,9 @@ namespace CE::Sandbox
             opaqueShader->AddVariant(variantDesc);
 
 			opaqueMaterial = new RPI::Material(opaqueShader);
+            
+            opaqueMaterial->SetPropertyValue("albedo", RPI::MaterialPropertyValue(Color(1.0f, 0, 0, 1.0f)));
+            opaqueMaterial->Compile();
 
 			delete opaqueVert;
 			delete opaqueFrag;
@@ -845,8 +848,9 @@ namespace CE::Sandbox
 
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
+                scheduler->UseShaderResourceGroup(opaqueMaterial->GetShaderResourceGroup());
 
-				scheduler->UsePipeline(opaqueShader->GetVariant(0)->GetPipeline());
+				scheduler->UsePipeline(opaqueMaterial->GetCurrentShader()->GetPipeline());
 
 				scheduler->PresentSwapChain(swapChain);
 			}

@@ -42,7 +42,6 @@ namespace CE::Vulkan
 				compiler->graphExecutionFences[currentImageIndex].GetSize(),
 				compiler->graphExecutionFences[currentImageIndex].GetData(),
 				VK_TRUE, u64Max);
-            
 			
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{

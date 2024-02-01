@@ -20,7 +20,6 @@ namespace CE::RHI
     enum class ShaderStructMemberType
     {
         None = 0,
-        Bool,
         UInt, Int,
         Float,
         Float2,
@@ -50,6 +49,14 @@ namespace CE::RHI
 		Array<ShaderStructMember> nestedMembers{};
     };
 
+    ENUM()
+    enum class SRGVariableFlags
+    {
+        None = 0,
+        RarelyUpdated = BIT(0)
+    };
+    ENUM_CLASS_FLAGS(SRGVariableFlags);
+
 	STRUCT()
 	struct CORERHI_API SRGVariableDescriptor
 	{
@@ -72,7 +79,10 @@ namespace CE::RHI
 
 		FIELD()
 		b8 usesDynamicOffset = false;
-
+        
+        FIELD()
+        SRGVariableFlags flags = SRGVariableFlags::None;
+        
 		FIELD()
 		RHI::Format format{};
 

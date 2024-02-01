@@ -1,5 +1,7 @@
 #!/bin/sh
 
+exe=""
+
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     platform="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -10,6 +12,7 @@ elif [[ "$OSTYPE" == "msys" ]]; then
     platform="windows"
 elif [[ "$OSTYPE" == "win32" ]]; then
     platform="windows"
+    exe=".exe"
 elif [[ "$OSTYPE" == "freebsd"* ]]; then
     platform="linux"
 else
@@ -17,7 +20,7 @@ else
     exit 1
 fi
 
-DxCompiler="../../ThirdParty/dxcompiler-1.7.2212-rev1-${platform}/dxcompiler/Release/dxc.exe"
+DxCompiler="../../ThirdParty/dxcompiler-1.7.2212-rev1-${platform}/dxcompiler/Release/dxc${exe}"
 
 CompileShader() {
 
