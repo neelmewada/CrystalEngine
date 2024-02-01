@@ -61,7 +61,7 @@ namespace CE::RPI
                         int index = variable.structMembers.IndexOf([&](const RHI::ShaderStructMember& member) -> bool { return member.name == variable.name; });
                         if (index >= 0) // Found variable
                         {
-                            variable.structMembers[index].offset;
+                            
                             break;
                         }
                     }

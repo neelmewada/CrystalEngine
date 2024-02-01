@@ -26,12 +26,13 @@ namespace CE::RHI
         Float2,
         Float3,
         Float4,
-        Float4x4
+        Float4x4,
+		Struct
     };
     ENUM_CLASS_FLAGS(ShaderStructMemberType);
 
     STRUCT()
-    struct ShaderStructMember
+    struct CORERHI_API ShaderStructMember
     {
         CE_STRUCT(ShaderStructMember)
     public:
@@ -42,8 +43,8 @@ namespace CE::RHI
         FIELD()
         ShaderStructMemberType dataType{};
         
-        FIELD()
-        u64 offset = 0;
+		FIELD()
+		Array<ShaderStructMember> nestedMembers{};
     };
 
 	STRUCT()

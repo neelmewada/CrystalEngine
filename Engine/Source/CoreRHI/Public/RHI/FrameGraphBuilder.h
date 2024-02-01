@@ -24,11 +24,15 @@ namespace CE::RHI
 		bool UseAttachment(const ImageScopeAttachmentDescriptor& descriptor,
 			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
 
+		bool UseShaderResourceGroup(RHI::ShaderResourceGroup* srg);
+
 		bool UseAttachment(const BufferScopeAttachmentDescriptor& descriptor,
 			ScopeAttachmentUsage usage, ScopeAttachmentAccess access);
 
 		bool UsePipelines(const Array<RHI::PipelineState*>& pipelines);
 		bool UsePipeline(RHI::PipelineState* pipeline);
+
+		bool SetDispatchGroupCount(u32 groupCountX, u32 groupCountY, u32 groupCountZ);
 
 		bool PresentSwapChain(SwapChain* swapChain);
 

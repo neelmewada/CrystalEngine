@@ -34,55 +34,63 @@ namespace CE::Vulkan
 
 		FixedArray<VkSubpassDescription, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
 
+		StaticArray<FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount>, 
+			RHI::Limits::Pipeline::MaxSubPassCount> colorAttachments{};
+		StaticArray<FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount>,
+			RHI::Limits::Pipeline::MaxSubPassCount> resolveAttachments{};
+		StaticArray<FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount>,
+			RHI::Limits::Pipeline::MaxSubPassCount> subpassInputAttachments{};
+		StaticArray<FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount>,
+			RHI::Limits::Pipeline::MaxSubPassCount> preserveAttachments{};
+		StaticArray<FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount>, 1>
+			depthStencilAttachments{};
+		int i = 0;
+
 		for (const RenderPass::SubPassDescriptor& subpassDesc : desc.subpasses)
 		{
 			VkSubpassDescription subpass{};
 			subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 			
-			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount> colorAttachments{};
 			for (const RenderPass::SubPassAttachment& subpassAttachment : subpassDesc.renderTargetAttachments)
 			{
 				VkAttachmentReference ref{};
 				ref.attachment = subpassAttachment.attachmentIndex;
 				ref.layout = subpassAttachment.imageLayout;
-				colorAttachments.Add(ref);
+				colorAttachments[i].Add(ref);
 			}
 
-			subpass.colorAttachmentCount = colorAttachments.GetSize();
-			subpass.pColorAttachments = colorAttachments.GetData();
+			subpass.colorAttachmentCount = colorAttachments[i].GetSize();
+			subpass.pColorAttachments = colorAttachments[i].GetData();
 
-			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount> resolveAttachments{};
 			for (const RenderPass::SubPassAttachment& subpassAttachment : subpassDesc.resolveAttachments)
 			{
 				VkAttachmentReference ref{};
 				ref.attachment = subpassAttachment.attachmentIndex;
 				ref.layout = subpassAttachment.imageLayout;
-				resolveAttachments.Add(ref);
+				resolveAttachments[i].Add(ref);
 			}
 
-			if (!resolveAttachments.IsEmpty())
-				subpass.pResolveAttachments = resolveAttachments.GetData();
-
-			FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount> subpassInputAttachments{};
+			if (!resolveAttachments[i].IsEmpty())
+				subpass.pResolveAttachments = resolveAttachments[i].GetData();
+			
 			for (const RenderPass::SubPassAttachment& subpassAttachment : subpassDesc.subpassInputAttachments)
 			{
 				VkAttachmentReference ref{};
 				ref.attachment = subpassAttachment.attachmentIndex;
 				ref.layout = subpassAttachment.imageLayout;
-				subpassInputAttachments.Add(ref);
+				subpassInputAttachments[i].Add(ref);
 			}
 
-			subpass.inputAttachmentCount = subpassInputAttachments.GetSize();
-			subpass.pInputAttachments = subpassInputAttachments.GetData();
-
-			FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount> preserveAttachments{};
+			subpass.inputAttachmentCount = subpassInputAttachments[i].GetSize();
+			subpass.pInputAttachments = subpassInputAttachments[i].GetData();
+			
 			for (u32 index : subpassDesc.preserveAttachments)
 			{
-				preserveAttachments.Add(index);
+				preserveAttachments[i].Add(index);
 			}
 
-			subpass.preserveAttachmentCount = preserveAttachments.GetSize();
-			subpass.pPreserveAttachments = preserveAttachments.GetData();
+			subpass.preserveAttachmentCount = preserveAttachments[i].GetSize();
+			subpass.pPreserveAttachments = preserveAttachments[i].GetData();
 
 			subpass.pDepthStencilAttachment = nullptr;
 			if (subpassDesc.depthStencilAttachment.GetSize() > 0)
@@ -90,9 +98,14 @@ namespace CE::Vulkan
 				VkAttachmentReference ref{};
 				ref.attachment = subpassDesc.depthStencilAttachment[0].attachmentIndex;
 				ref.layout = subpassDesc.depthStencilAttachment[0].imageLayout;
+				depthStencilAttachments[i].Add(ref);
+
+				subpass.pDepthStencilAttachment = &depthStencilAttachments[i].GetLast();
 			}
 
 			subpasses.Add(subpass);
+
+			i++;
 		}
 
 		renderPassCI.subpassCount = subpasses.GetSize();

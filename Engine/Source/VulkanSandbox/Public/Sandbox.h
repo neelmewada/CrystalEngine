@@ -10,6 +10,8 @@ namespace CE::Sandbox
 		Vec2 uvCoord;
 	};
 
+	constexpr u32 MaxDirectionalLightCount = 8;
+
 	class Mesh
 	{
 	public:
@@ -149,9 +151,13 @@ namespace CE::Sandbox
 		RHI::ShaderResourceGroup* meshObjectSrg = nullptr;
 		RHI::Buffer* meshModelBuffer = nullptr;
 		Matrix4x4 meshModelMatrix{};
+		f32 cameraRotation = 0.0f;
 		f32 meshRotation = 0;
 
-		List<DirectionalLight> directionalLights{};
+		RHI::ShaderResourceGroup* perSceneSrg = nullptr;
+		RHI::Buffer* directionalLightsBuffer = nullptr;
+		RHI::Buffer* lightDataBuffer = nullptr;
+		FixedArray<DirectionalLight, MaxDirectionalLightCount> directionalLights{};
 		LightData lightData{};
 
 		u32 width = 0;

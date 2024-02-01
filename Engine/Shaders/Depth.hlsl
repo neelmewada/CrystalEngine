@@ -20,7 +20,7 @@ struct VSOutput
 VSOutput VertMain(VSInput input)
 {
     VSOutput output;
-    output.position = LOCAL_TO_CLIP_SPACE(input.position, input);
+    output.position = LOCAL_TO_CLIP_SPACE(float4(input.position, 1.0), input);
     return output;
 }
 

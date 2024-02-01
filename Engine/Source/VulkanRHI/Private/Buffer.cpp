@@ -276,6 +276,54 @@ namespace CE::Vulkan
 		}
 	}
 
+	bool Buffer::Map(u64 offset, u64 size, void** outPtr)
+	{
+		if (isMapped)
+			return false;
+
+		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		{
+			if (bufferMemory != nullptr) // Self allocated memory
+			{
+				isMapped = true;
+				vkMapMemory(device->GetHandle(), bufferMemory, offset, size, 0, outPtr);
+				return true;
+			}
+			else if (memoryHeap != nullptr) // Externally managed memory
+			{
+				isMapped = true;
+				vkMapMemory(device->GetHandle(), memoryHeap->GetHandle(), memoryOffset + offset, size, 0, outPtr);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool Buffer::Unmap()
+	{
+		if (!isMapped)
+			return false;
+
+		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		{
+			if (bufferMemory != nullptr) // Self allocated memory
+			{
+				isMapped = false;
+				vkUnmapMemory(device->GetHandle(), bufferMemory);
+				return true;
+			}
+			else if (memoryHeap != nullptr) // Externally managed memory
+			{
+				isMapped = false;
+				vkUnmapMemory(device->GetHandle(), memoryHeap->GetHandle());
+				return true;
+			}
+		}
+
+		return false;
+	}
+
     void Buffer::CreateUploadContext()
     {
         if (!uploadContextExists)

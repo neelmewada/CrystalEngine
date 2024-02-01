@@ -342,7 +342,6 @@ namespace CE::Vulkan
 
 					vkCmdBeginRenderPass(cmdBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 					{
-
 						VkViewport viewport{};
 						viewport.x = viewport.y = 0;
 						viewport.width = frameBuffer->GetWidth();
@@ -401,6 +400,32 @@ namespace CE::Vulkan
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Compute)
 				{
 					// TODO: Add compute pass
+					RHI::PipelineState* pipelineToUse = nullptr;
+
+					for (RHI::PipelineState* pipeline : currentScope->usePipelines)
+					{
+						if (pipeline != nullptr && pipeline->GetPipelineType() == RHI::PipelineStateType::Compute)
+						{
+							pipelineToUse = pipeline;
+						}
+					}
+
+					if (pipelineToUse != nullptr)
+					{
+						for (auto srg : currentScope->externalShaderResourceGroups)
+						{
+							commandList->SetShaderResourceGroup(srg);
+						}
+
+						if (currentScope->passShaderResourceGroup)
+							commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+						if (currentScope->subpassShaderResourceGroup)
+							commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+
+						commandList->Dispatch(Math::Max((u32)1, currentScope->groupCountX),
+							Math::Max((u32)1, currentScope->groupCountY),
+							Math::Max((u32)1, currentScope->groupCountZ));
+					}					
 				}
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Transfer)
 				{

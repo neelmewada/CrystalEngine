@@ -122,6 +122,27 @@ namespace CE::Vulkan
 		return availableDepthStencilFormats;
 	}
 
+	const Array<RHI::Format>& VulkanDevice::GetAvailableDepthOnlyFormats()
+	{
+		if (availableDepthOnlyFormats.IsEmpty())
+		{
+			StaticArray<VkFormat, 2> formats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D16_UNORM };
+
+			for (VkFormat format : formats)
+			{
+				VkFormatProperties props;
+				vkGetPhysicalDeviceFormatProperties(gpu, format, &props);
+
+				if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+				{
+					availableDepthOnlyFormats.Add(VkFormatToRHIFormat(format));
+				}
+			}
+		}
+
+		return availableDepthOnlyFormats;
+	}
+
 	void VulkanDevice::SelectGpu()
 	{
 		// Fetch all available physical devices

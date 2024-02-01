@@ -71,6 +71,7 @@ namespace CE::Vulkan
 		// - Utils -
 
 		virtual Array<RHI::Format> GetAvailableDepthStencilFormats() override;
+        virtual Array<RHI::Format> GetAvailableDepthOnlyFormats() override;
 
 		void BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message);
 

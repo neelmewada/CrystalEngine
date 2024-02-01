@@ -72,6 +72,9 @@ namespace CE::RHI
 			return prevSubPass != nullptr || nextSubPass != nullptr;
 		}
 
+		void SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs);
+		void AddShaderResourceGroups(RHI::ShaderResourceGroup* srg);
+
 	protected:
 
 		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) { return false; }
@@ -81,6 +84,10 @@ namespace CE::RHI
 
 		RHI::HardwareQueueClass queueClass{};
 		Array<RHI::PipelineState*> usePipelines{};
+
+		u32 groupCountX = 1;
+		u32 groupCountY = 1;
+		u32 groupCountZ = 1;
 
 		ScopeID id{};
 		int scopeGroupIndex = -1;

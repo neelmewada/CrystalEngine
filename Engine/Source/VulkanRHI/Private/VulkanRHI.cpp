@@ -243,6 +243,11 @@ namespace CE::Vulkan
 		return device->GetAvailableDepthStencilFormats();
 	}
 
+    Array<RHI::Format> VulkanRHI::GetAvailableDepthOnlyFormats()
+    {
+        return device->GetAvailableDepthOnlyFormats();
+    }
+
     // - Command List -
 
     void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)

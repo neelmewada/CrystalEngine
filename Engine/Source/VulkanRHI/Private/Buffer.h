@@ -26,6 +26,9 @@ namespace CE::Vulkan
 
 		virtual void ReadData(void* data) override;
 
+        virtual bool Map(u64 offset, u64 size, void** outPtr) override;
+        virtual bool Unmap() override;
+
     private:
         void CreateUploadContext();
         
@@ -42,12 +45,13 @@ namespace CE::Vulkan
 		MemoryHeap* memoryHeap = nullptr;
 		u64 memoryOffset = 0;
 
+        bool isMapped = false;
+
 		//! Queue family index of the queue that this buffer is used with the first time
 		int initialFamilyIndex = -1;
 
         VulkanDevice* device = nullptr;
         VkBuffer buffer = nullptr;
-		RHI::MemoryHeapType heapType = RHI::MemoryHeapType::Default;
         VkDeviceMemory bufferMemory = nullptr;
 
         bool uploadContextExists = false;

@@ -104,7 +104,8 @@ namespace CE::Vulkan
 
 		INLINE RenderPassCache* GetRenderPassCache() const { return renderPassCache; }
 
-		const Array<RHI::Format>& GetAvailableDepthStencilFormats();
+        const Array<RHI::Format>& GetAvailableDepthStencilFormats();
+        const Array<RHI::Format>& GetAvailableDepthOnlyFormats();
 
     protected:
 
@@ -138,7 +139,8 @@ namespace CE::Vulkan
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};
 		Array<VkQueueFamilyProperties> queueFamilyPropeties{};
-		Array<RHI::Format> availableDepthStencilFormats{};
+        Array<RHI::Format> availableDepthStencilFormats{};
+        Array<RHI::Format> availableDepthOnlyFormats{};
 
         GpuMetaData gpuMetaData{};
 

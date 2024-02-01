@@ -41,6 +41,8 @@ namespace CE::RHI
 
 		virtual void DrawIndexed(const DrawIndexedArguments& args) = 0;
 
+		virtual void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) = 0;
+
 	};
 
 } // namespace CE::RHI

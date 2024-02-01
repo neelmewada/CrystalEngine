@@ -57,6 +57,15 @@ namespace CE::RHI
 		return true;
 	}
 
+	bool FrameGraphBuilder::UseShaderResourceGroup(RHI::ShaderResourceGroup* srg)
+	{
+		if (!currentScope || !frameGraph)
+			return false;
+
+		currentScope->AddShaderResourceGroups(srg);
+		return true;
+	}
+
 	bool FrameGraphBuilder::UseAttachment(const BufferScopeAttachmentDescriptor& descriptor, ScopeAttachmentUsage usage, ScopeAttachmentAccess access)
 	{
 		if (!currentScope || !frameGraph)
@@ -96,6 +105,18 @@ namespace CE::RHI
 			return false;
 
 		currentScope->usePipelines.Add(pipeline);
+
+		return true;
+	}
+
+	bool FrameGraphBuilder::SetDispatchGroupCount(u32 groupCountX, u32 groupCountY, u32 groupCountZ)
+	{
+		if (!currentScope || !frameGraph)
+			return false;
+
+		currentScope->groupCountX = groupCountX;
+		currentScope->groupCountY = groupCountY;
+		currentScope->groupCountZ = groupCountZ;
 
 		return true;
 	}
@@ -147,6 +168,14 @@ namespace CE::RHI
 			else if (queueClass != cur->queueClass)
 			{
 				errorMessages.Add("All scopes inside scope group must have same HardwareQueueClass.");
+				CE_LOG(Error, All, errorMessages.Top());
+				success = false;
+				return;
+			}
+
+			if (queueClass != HardwareQueueClass::Graphics)
+			{
+				errorMessages.Add("Scopes can be grouped together only if they are of Graphics type.");
 				CE_LOG(Error, All, errorMessages.Top());
 				success = false;
 				return;

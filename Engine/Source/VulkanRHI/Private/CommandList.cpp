@@ -54,10 +54,10 @@ namespace CE::Vulkan
 
 			if (srgsToMerge[setNumber].GetSize() == 1)
 			{
-				if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0])
+				//if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]) // SRG has changed
 				{
 					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0];
-					commitedSRGsBySetNumber[setNumber]->SetCommitted(true);
+					commitedSRGsBySetNumber[setNumber]->Compile();
 
 					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetDescriptorSet();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
@@ -70,10 +70,10 @@ namespace CE::Vulkan
 				auto last = &*(srgsToMerge[setNumber].end() - 1);
 				auto mergedSrg = srgManager->FindOrCreateMergedSRG(srgsToMerge[setNumber].GetSize(), srgsToMerge[setNumber].GetData());
 
-				if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg)
+				//if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg) // SRG has changed
 				{
 					commitedSRGsBySetNumber[setNumber] = mergedSrg;
-					commitedSRGsBySetNumber[setNumber]->SetCommitted(true);
+					commitedSRGsBySetNumber[setNumber]->Compile();
 
 					VkDescriptorSet descriptorSet = mergedSrg->GetDescriptorSet();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
@@ -130,7 +130,7 @@ namespace CE::Vulkan
 	void CommandList::BindIndexBuffer(const RHI::IndexBufferView& bufferView)
 	{
 		Vulkan::Buffer* buffer = (Vulkan::Buffer*)bufferView.GetBuffer();
-		VkIndexType indexType;
+		VkIndexType indexType = {};
 
 		switch (bufferView.GetIndexFormat())
 		{
@@ -148,6 +148,11 @@ namespace CE::Vulkan
 	void CommandList::DrawIndexed(const DrawIndexedArguments& args)
 	{
 		vkCmdDrawIndexed(commandBuffer, args.indexCount, args.instanceCount, args.firstIndex, args.vertexOffset, args.firstInstance);
+	}
+
+	void CommandList::Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ)
+	{
+		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
 	}
 
 	void CommandList::Begin()

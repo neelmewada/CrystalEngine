@@ -99,5 +99,15 @@ namespace CE::RHI
 
 		return result;
 	}
+
+	void Scope::SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs)
+	{
+		externalShaderResourceGroups = srgs;
+	}
+
+	void Scope::AddShaderResourceGroups(RHI::ShaderResourceGroup* srg)
+	{
+		externalShaderResourceGroups.Add(srg);
+	}
     
 } // namespace CE::RHI

@@ -18,7 +18,7 @@ struct PointLight
     float intensity;
     float radius;
     float attenuation;
-}
+};
 
 cbuffer _DirectionalLightsArray : SRG_PerScene(b)
 {

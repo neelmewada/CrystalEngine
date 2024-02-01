@@ -2,6 +2,10 @@
 
 namespace CE::Sandbox
 {
+	constexpr u32 perViewDataBinding = 2;
+	constexpr u32 perObjectDataBinding = 4;
+	constexpr u32 directionalLightArrayBinding = 0;
+	constexpr u32 lightDataBinding = 1;
 
 	static int counter = 0;
 	static RHI::RHISystem rhiSystem{};
@@ -27,13 +31,12 @@ namespace CE::Sandbox
 		mainWindow->AddListener(this);
 		
 		InitPipelines();
+		InitLights();
 
 		BuildFrameGraph();
 		CompileFrameGraph();
 
 		InitModels();
-
-		InitLights();
 	}
 
 	void VulkanSandbox::Tick(f32 deltaTime)
@@ -74,7 +77,9 @@ namespace CE::Sandbox
 			SubmitWork();
 		}
 
-		meshRotation += deltaTime * 30.0f;
+		UpdateViewSrg();
+
+		meshRotation += deltaTime * 15.0f;
 		if (meshRotation >= 360)
 			meshRotation -= 360;
 
@@ -92,7 +97,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::UpdateViewSrg()
 	{
-		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 65, 0.1f, 100.0f);
+		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, 100.0f);
 		perViewData.viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -10));
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
 
@@ -128,7 +133,7 @@ namespace CE::Sandbox
 			perViewSrgLayout.srgType = RHI::SRGType::PerView;
 
 			SRGVariableDescriptor perViewDataDesc{};
-			perViewDataDesc.bindingSlot = 0;
+			perViewDataDesc.bindingSlot = perViewDataBinding;
 			perViewDataDesc.arrayCount = 1;
 			perViewDataDesc.name = "_PerViewData";
 			perViewDataDesc.type = RHI::ShaderResourceType::ConstantBuffer;
@@ -146,16 +151,7 @@ namespace CE::Sandbox
 
 			perViewBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
 
-			perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 65, 0.1f, 100.0f);
-			perViewData.viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -10));
-			perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
-
-			RHI::BufferData data{};
-			data.startOffsetInBuffer = 0;
-			data.dataSize = bufferDesc.bufferSize;
-			data.data = &perViewData;
-
-			perViewBuffer->UploadData(data);
+			UpdateViewSrg();
 
 			perViewSrg->Bind("_PerViewData", RHI::BufferView(perViewBuffer));
 			
@@ -188,7 +184,7 @@ namespace CE::Sandbox
 			depthPipelineDesc.depthStencilState.depthState.enable = true;
 			depthPipelineDesc.depthStencilState.depthState.testEnable = true;
 			depthPipelineDesc.depthStencilState.depthState.writeEnable = true;
-			depthPipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::Less;
+			depthPipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::LessOrEqual;
 			depthPipelineDesc.depthStencilState.stencilState.enable = false;
 			
 			depthPipelineDesc.multisampleState.sampleCount = 1;
@@ -199,6 +195,7 @@ namespace CE::Sandbox
 			depthPipelineDesc.shaderStages[0].shaderModule = depthShaderVert;
 
 			depthPipelineDesc.rasterState = {};
+			depthPipelineDesc.rasterState.cullMode = RHI::CullMode::None;
 
 			depthPipelineDesc.vertexInputSlots.Add({});
 			depthPipelineDesc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
@@ -219,7 +216,7 @@ namespace CE::Sandbox
 			perViewSRGLayout.variables.Add({});
 			perViewSRGLayout.variables[0].arrayCount = 1;
 			perViewSRGLayout.variables[0].name = "_PerViewData";
-			perViewSRGLayout.variables[0].bindingSlot = 0;
+			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
 			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
 			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
 			srgLayouts.Add(perViewSRGLayout);
@@ -229,7 +226,7 @@ namespace CE::Sandbox
 			perObjectSRGLayout.variables.Add({});
 			perObjectSRGLayout.variables[0].arrayCount = 1;
 			perObjectSRGLayout.variables[0].name = "_ObjectData";
-			perObjectSRGLayout.variables[0].bindingSlot = 1;
+			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
 			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
 			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
 			srgLayouts.Add(perObjectSRGLayout);
@@ -279,7 +276,7 @@ namespace CE::Sandbox
 			opaquePipelineDesc.depthStencilState.depthState.enable = true; // Read-Only depth state
 			opaquePipelineDesc.depthStencilState.depthState.testEnable = true;
 			opaquePipelineDesc.depthStencilState.depthState.writeEnable = false;
-			opaquePipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::Less;
+			opaquePipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::LessOrEqual;
 			opaquePipelineDesc.depthStencilState.stencilState.enable = false;
 
 			opaquePipelineDesc.shaderStages.Add({});
@@ -291,6 +288,7 @@ namespace CE::Sandbox
 			opaquePipelineDesc.shaderStages[1].shaderModule = opaqueShaderFrag;
 
 			opaquePipelineDesc.rasterState = {};
+			opaquePipelineDesc.rasterState.cullMode = RHI::CullMode::None;
 
 			opaquePipelineDesc.vertexInputSlots.Add({});
 			opaquePipelineDesc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
@@ -300,10 +298,16 @@ namespace CE::Sandbox
 			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = opaquePipelineDesc.vertexAttributes;
 
 			vertexAttribs.Add({});
-			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3;
+			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3; // Position
 			vertexAttribs[0].inputSlot = 0;
 			vertexAttribs[0].location = 0;
 			vertexAttribs[0].offset = 0;
+
+			vertexAttribs.Add({});
+			vertexAttribs[1].dataType = RHI::VertexAttributeDataType::Float3; // Normal
+			vertexAttribs[1].inputSlot = 0;
+			vertexAttribs[1].location = 1;
+			vertexAttribs[1].offset = sizeof(f32) * 4;
 
 			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = opaquePipelineDesc.srgLayouts;
 			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
@@ -311,7 +315,7 @@ namespace CE::Sandbox
 			perViewSRGLayout.variables.Add({});
 			perViewSRGLayout.variables[0].arrayCount = 1;
 			perViewSRGLayout.variables[0].name = "_PerViewData";
-			perViewSRGLayout.variables[0].bindingSlot = 0;
+			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
 			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
 			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
 			srgLayouts.Add(perViewSRGLayout);
@@ -321,10 +325,42 @@ namespace CE::Sandbox
 			perObjectSRGLayout.variables.Add({});
 			perObjectSRGLayout.variables[0].arrayCount = 1;
 			perObjectSRGLayout.variables[0].name = "_ObjectData";
-			perObjectSRGLayout.variables[0].bindingSlot = 1;
+			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
 			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
 			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
 			srgLayouts.Add(perObjectSRGLayout);
+
+			/*RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
+			perSceneSRGLayout.srgType = RHI::SRGType::PerScene;
+
+			perSceneSRGLayout.variables.Add({});
+			perSceneSRGLayout.variables.Top().arrayCount = 1;
+			perSceneSRGLayout.variables.Top().name = "_DirectionalLightsArray";
+			perSceneSRGLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
+			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSRGLayout.variables.Add({});
+			perSceneSRGLayout.variables.Top().arrayCount = 1;
+			perSceneSRGLayout.variables.Top().name = "_LightData";
+			perSceneSRGLayout.variables.Top().bindingSlot = lightDataBinding;
+			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayouts.Add(perSceneSRGLayout);*/
+
+			//RHI::ShaderResourceGroupLayout perMaterialSRGLayout{};
+			//perMaterialSRGLayout.srgType = RHI::SRGType::PerMaterial;
+			//perMaterialSRGLayout.variables.Add({});
+			//perMaterialSRGLayout.variables.Top().arrayCount = 1;
+			//perMaterialSRGLayout.variables.Top().name = "_MaterialData";
+			//perMaterialSRGLayout.variables.Top().bindingSlot = 0;
+			//perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			//perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+			// Struct Members
+			{
+
+			}
 
 			opaquePipelineDesc.name = "Opaque Pipeline";
 
@@ -345,6 +381,67 @@ namespace CE::Sandbox
 		{
 
 		}
+	}
+
+	void VulkanSandbox::InitLights()
+	{
+		DirectionalLight mainLight{};
+		mainLight.color = Vec3(1.0f, 0.95f, 0.7f);
+		mainLight.direction = Vec3(0, 0, 1);
+		mainLight.intensity = 1.0f;
+		mainLight.temperature = 100;
+
+		directionalLights.Clear();
+		directionalLights.Add(mainLight);
+		lightData.totalDirectionalLights = directionalLights.GetSize();
+
+		{
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			bufferDesc.bufferSize = directionalLights.GetCapacity() * sizeof(DirectionalLight);
+			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			bufferDesc.name = "Directional Lights Buffer";
+
+			directionalLightsBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			directionalLightsBuffer->UploadData(directionalLights.GetData(), bufferDesc.bufferSize);
+		}
+
+		{
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			bufferDesc.bufferSize = sizeof(LightData);
+			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			bufferDesc.name = "Light Data Buffer";
+
+			lightDataBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			lightDataBuffer->UploadData(&lightData, bufferDesc.bufferSize);
+		}
+
+		RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
+		perSceneSRGLayout.srgType = RHI::SRGType::PerScene;
+
+		perSceneSRGLayout.variables.Add({});
+		perSceneSRGLayout.variables.Top().arrayCount = 1;
+		perSceneSRGLayout.variables.Top().name = "_DirectionalLightsArray";
+		perSceneSRGLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
+		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+		perSceneSRGLayout.variables.Add({});
+		perSceneSRGLayout.variables.Top().arrayCount = 1;
+		perSceneSRGLayout.variables.Top().name = "_LightData";
+		perSceneSRGLayout.variables.Top().bindingSlot = lightDataBinding;
+		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+		perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSRGLayout);
+
+		perSceneSrg->Bind("_DirectionalLightsArray", directionalLightsBuffer);
+		perSceneSrg->Bind("_LightData", lightDataBuffer);
+
+		perSceneSrg->Compile();
 	}
 
 	void VulkanSandbox::InitModels()
@@ -506,7 +603,7 @@ namespace CE::Sandbox
 
 			RHI::SRGVariableDescriptor variable{};
 			variable.name = "_ObjectData";
-			variable.bindingSlot = 1;
+			variable.bindingSlot = perObjectDataBinding;
 			variable.arrayCount = 1;
 			variable.shaderStages = RHI::ShaderStage::Vertex;
 			variable.type = RHI::ShaderResourceType::ConstantBuffer;
@@ -546,7 +643,6 @@ namespace CE::Sandbox
 		RHI::DrawArguments args = RHI::DrawArguments(indexedArgs);
 		builder.SetDrawArguments(args);
 
-		builder.AddShaderResourceGroup(perViewSrg);
 		builder.AddShaderResourceGroup(meshObjectSrg);
 
 		// Depth Item
@@ -591,18 +687,6 @@ namespace CE::Sandbox
 		}
 		
 		meshDrawPacket = builder.Build();
-	}
-
-	void VulkanSandbox::InitLights()
-	{
-		DirectionalLight mainLight{};
-		mainLight.color = Vec3(1.0f, 0.95f, 0.7f);
-		mainLight.direction = Vec3(0, 0, 1);
-		mainLight.intensity = 1.0f;
-		mainLight.temperature = 100;
-
-		directionalLights.Add(mainLight);
-		lightData.totalDirectionalLights = directionalLights.GetSize();
 	}
 
 	void Mesh::CreateBuffer()
@@ -677,6 +761,12 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyLights()
 	{
+		scheduler->WaitUntilIdle();
+
+		delete perSceneSrg; perSceneSrg = nullptr;
+
+		delete directionalLightsBuffer; directionalLightsBuffer = nullptr;
+		delete lightDataBuffer; lightDataBuffer = nullptr;
 	}
 
 	void VulkanSandbox::DestroyPipelines()
@@ -705,8 +795,8 @@ namespace CE::Sandbox
 			RHI::ImageDescriptor depthDesc{};
 			depthDesc.width = swapChain->GetWidth();
 			depthDesc.height = swapChain->GetHeight();
-			depthDesc.bindFlags = RHI::TextureBindFlags::DepthStencil;
-			depthDesc.format = RHI::gDynamicRHI->GetAvailableDepthStencilFormats()[0];
+			depthDesc.bindFlags = RHI::TextureBindFlags::Depth;
+			depthDesc.format = RHI::gDynamicRHI->GetAvailableDepthOnlyFormats()[0];
 			depthDesc.name = "DepthStencil";
 
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
@@ -717,14 +807,14 @@ namespace CE::Sandbox
 			{
 				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
 				depthAttachment.attachmentId = "DepthStencil";
-				depthAttachment.loadStoreAction.clearValueDepth = 0;
+				depthAttachment.loadStoreAction.clearValueDepth = 1.0f;
 				depthAttachment.loadStoreAction.clearValueStencil = 0;
 				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
-				depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
 
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+				
+				scheduler->UseShaderResourceGroup(perViewSrg);
 
 				scheduler->UsePipeline(depthPipeline);
 			}
@@ -736,8 +826,6 @@ namespace CE::Sandbox
 				depthAttachment.attachmentId = "DepthStencil";
 				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::Load;
-				depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
 
@@ -749,18 +837,21 @@ namespace CE::Sandbox
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
 
+				//scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(perViewSrg);
+
 				scheduler->UsePipeline(opaqueShader->GetVariant(0)->GetPipeline());
+
+				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();
 
-			scheduler->BeginScope("Transparent");
+			/*scheduler->BeginScope("Transparent");
 			{
 				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
 				depthAttachment.attachmentId = "DepthStencil";
 				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::Load;
-				depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
 
@@ -773,7 +864,7 @@ namespace CE::Sandbox
 
 				scheduler->PresentSwapChain(swapChain);
 			}
-			scheduler->EndScope();
+			scheduler->EndScope();*/
 		}
 		scheduler->EndFrameGraph();
 	}
@@ -800,10 +891,10 @@ namespace CE::Sandbox
 		RHI::DrawListMask drawListMask{};
 		auto depthTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 		auto opaqueTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
-		auto transparentTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("transparent");
+		//auto transparentTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("transparent");
 		drawListMask.Set(depthTag);
 		drawListMask.Set(opaqueTag);
-		drawListMask.Set(transparentTag);
+		//drawListMask.Set(transparentTag);
 		drawList.Init(drawListMask);
 		
 		// Add items
@@ -813,7 +904,7 @@ namespace CE::Sandbox
 		drawList.Finalize();
 		scheduler->SetScopeDrawList("Depth", &drawList.GetDrawListForTag(depthTag));
 		scheduler->SetScopeDrawList("Opaque", &drawList.GetDrawListForTag(opaqueTag));
-		scheduler->SetScopeDrawList("Transparent", &drawList.GetDrawListForTag(transparentTag));
+		//scheduler->SetScopeDrawList("Transparent", &drawList.GetDrawListForTag(transparentTag));
 	}
 
 	void VulkanSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)

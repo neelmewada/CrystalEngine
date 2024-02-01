@@ -78,7 +78,7 @@ namespace CE::Vulkan
 
 		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
 
-		width = 0; 
+		width = 0;
 		height = 0;
 		
 		for (RHI::ScopeAttachment* attachment : scope->attachments)
