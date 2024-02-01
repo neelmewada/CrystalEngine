@@ -6,6 +6,7 @@ namespace CE::RPI
 	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor& desc)
 		: defineFlags(desc.defineFlags)
 		, pipelineDesc(desc.pipelineDesc)
+		, materialSrgLayout(desc.materialSrgLayout)
 	{
 		variantId = 0;
 

@@ -6,6 +6,7 @@ namespace CE::Sandbox
 	constexpr u32 perObjectDataBinding = 4;
 	constexpr u32 directionalLightArrayBinding = 0;
 	constexpr u32 lightDataBinding = 1;
+	constexpr u32 materialDataBinding = 5;
 
 	static int counter = 0;
 	static RHI::RHISystem rhiSystem{};
@@ -330,7 +331,7 @@ namespace CE::Sandbox
 			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
 			srgLayouts.Add(perObjectSRGLayout);
 
-			/*RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
+			RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
 			perSceneSRGLayout.srgType = RHI::SRGType::PerScene;
 
 			perSceneSRGLayout.variables.Add({});
@@ -347,20 +348,25 @@ namespace CE::Sandbox
 			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
 			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
-			srgLayouts.Add(perSceneSRGLayout);*/
+			srgLayouts.Add(perSceneSRGLayout);
 
-			//RHI::ShaderResourceGroupLayout perMaterialSRGLayout{};
-			//perMaterialSRGLayout.srgType = RHI::SRGType::PerMaterial;
-			//perMaterialSRGLayout.variables.Add({});
-			//perMaterialSRGLayout.variables.Top().arrayCount = 1;
-			//perMaterialSRGLayout.variables.Top().name = "_MaterialData";
-			//perMaterialSRGLayout.variables.Top().bindingSlot = 0;
-			//perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
-			//perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+			RHI::ShaderResourceGroupLayout perMaterialSRGLayout{};
+			perMaterialSRGLayout.srgType = RHI::SRGType::PerMaterial;
+			perMaterialSRGLayout.variables.Add({});
+			perMaterialSRGLayout.variables.Top().arrayCount = 1;
+			perMaterialSRGLayout.variables.Top().name = "_MaterialData";
+			perMaterialSRGLayout.variables.Top().bindingSlot = materialDataBinding;
+			perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 			// Struct Members
 			{
-
+				RHI::ShaderStructMember albedoMember{};
+				albedoMember.dataType = RHI::ShaderStructMemberType::Float4;
+				albedoMember.name = "albedo";
+				perMaterialSRGLayout.variables.Top().structMembers.Add(albedoMember);
 			}
+
+			srgLayouts.Add(perMaterialSRGLayout);
 
 			opaquePipelineDesc.name = "Opaque Pipeline";
 
@@ -387,7 +393,7 @@ namespace CE::Sandbox
 	{
 		DirectionalLight mainLight{};
 		mainLight.color = Vec3(1.0f, 0.95f, 0.7f);
-		mainLight.direction = Vec3(0, 0, 1);
+		mainLight.direction = Vec3(-0.5f, -0.25f, 1);
 		mainLight.intensity = 1.0f;
 		mainLight.temperature = 100;
 
@@ -446,9 +452,9 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitModels()
 	{
-		Mesh* mesh = new Mesh();
+		Mesh* cubeMesh = new Mesh();
 
-		mesh->vertices = {
+		cubeMesh->vertices = {
 			Vec3(0.5, -0.5, 0.5),
 			Vec3(-0.5, -0.5, 0.5),
 			Vec3(0.5, 0.5, 0.5),
@@ -480,7 +486,7 @@ namespace CE::Sandbox
 			Vec3(0.5, -0.5, 0.5)
 		};
 
-		mesh->indices = {
+		cubeMesh->indices = {
 			0, 2, 3,
 			0, 3, 1,
 			8, 4, 5,
@@ -495,7 +501,7 @@ namespace CE::Sandbox
 			20, 22, 23
 		};
 
-		mesh->uvCoords = {
+		cubeMesh->uvCoords = {
 			Vec2(0, 0),
 			Vec2(1, 0),
 			Vec2(0, 1),
@@ -527,7 +533,7 @@ namespace CE::Sandbox
 			Vec2(1, 0)
 		};
 
-		mesh->normals = {
+		cubeMesh->normals = {
 			Vec3(0, 0, 1),
 			Vec3(0, 0, 1),
 			Vec3(0, 0, 1),
@@ -559,7 +565,7 @@ namespace CE::Sandbox
 			Vec3(1, 0, 0)
 		};
 
-		mesh->tangents = {
+		cubeMesh->tangents = {
 			Vec4(-1, 0, 0, -1),
 			Vec4(-1, 0, 0, -1),
 			Vec4(-1, 0, 0, -1),
@@ -591,8 +597,8 @@ namespace CE::Sandbox
 			Vec4(0, 0, 1, -1),
 		};
 
-		mesh->CreateBuffer();
-		meshes.Add(mesh);
+		cubeMesh->CreateBuffer();
+		meshes.Add(cubeMesh);
 
 		DrawPacketBuilder builder{};
 
@@ -638,7 +644,7 @@ namespace CE::Sandbox
 		indexedArgs.firstIndex = 0;
 		indexedArgs.firstInstance = 0;
 		indexedArgs.instanceCount = 1;
-		indexedArgs.indexCount = mesh->indices.GetSize();
+		indexedArgs.indexCount = cubeMesh->indices.GetSize();
 		indexedArgs.vertexOffset = 0;
 		RHI::DrawArguments args = RHI::DrawArguments(indexedArgs);
 		builder.SetDrawArguments(args);
@@ -648,12 +654,12 @@ namespace CE::Sandbox
 		// Depth Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
-			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(mesh->buffer, mesh->vertexBufferOffset,
-				mesh->vertexBufferSize,
+			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(cubeMesh->buffer, cubeMesh->vertexBufferOffset,
+				cubeMesh->vertexBufferSize,
 				sizeof(Vec3) * 3 + sizeof(Vec2));
 			request.vertexBufferViews.Add(vertexBufferView);
 
-			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
+			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(cubeMesh->buffer, cubeMesh->indexBufferOffset, cubeMesh->indexBufferSize, RHI::IndexFormat::Uint16);
 			request.indexBufferView = indexBufferView;
 
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
@@ -666,17 +672,17 @@ namespace CE::Sandbox
 		// Opaque Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
-			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(mesh->buffer, mesh->vertexBufferOffset,
-				mesh->vertexBufferSize,
+			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(cubeMesh->buffer, cubeMesh->vertexBufferOffset,
+				cubeMesh->vertexBufferSize,
 				sizeof(Vec3) * 3 + sizeof(Vec2));
 			request.vertexBufferViews.Add(vertexBufferView);
 
-			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(mesh->buffer, mesh->indexBufferOffset, mesh->indexBufferSize, RHI::IndexFormat::Uint16);
+			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(cubeMesh->buffer, cubeMesh->indexBufferOffset, cubeMesh->indexBufferSize, RHI::IndexFormat::Uint16);
 			request.indexBufferView = indexBufferView;
 			
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = opaqueShader->GetVariant(0)->GetPipeline();
+			request.pipelineState = opaqueMaterial->GetCurrentShader()->GetPipeline();
 
 			builder.AddDrawItem(request);
 		}
@@ -837,7 +843,7 @@ namespace CE::Sandbox
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
 
-				//scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
 
 				scheduler->UsePipeline(opaqueShader->GetVariant(0)->GetPipeline());

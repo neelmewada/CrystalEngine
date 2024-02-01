@@ -46,8 +46,8 @@ float4 FragMain(PSInput input) : SV_TARGET
     float3 normal = normalize(input.normal);
     for (uint i = 0; i < totalDirectionalLights; i++)
     {
-        diffuse += max(dot(normal, _DirectionalLights[i].direction), 0) * _DirectionalLights[i].color;
+        diffuse += max(dot(normal, -_DirectionalLights[i].direction), 0) * _DirectionalLights[i].color;
     }
-    return float4(Map01(normal.x), 0, 0, 1.0);
+    return float4(diffuse * albedo.rgb, 1.0);
     //return float4(1.0, 0, 1.0, 1.0);
 }

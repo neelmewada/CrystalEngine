@@ -34,7 +34,7 @@ namespace CE::RPI
 
 		MaterialPropertyValueMap properties{};
         
-        Array<RHI::Buffer*> buffers{};
+        HashMap<Name, RHI::Buffer*> buffers{};
 
 		Shader* shader = nullptr;
 

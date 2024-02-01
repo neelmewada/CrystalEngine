@@ -42,6 +42,9 @@ namespace CE::RHI
 
         FIELD()
         ShaderStructMemberType dataType{};
+
+		FIELD()
+		u32 arrayCount = 1; // Static arrays
         
 		FIELD()
 		Array<ShaderStructMember> nestedMembers{};

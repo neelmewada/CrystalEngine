@@ -499,4 +499,84 @@ namespace CE::Vulkan
 		return device->GetHardwareQueues(queueMask);
 	}
 
+    u64 VulkanRHI::GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member)
+    {
+        u64 alignment = 0;
+
+        switch (member.dataType)
+        {
+        case ShaderStructMemberType::Bool:
+        case ShaderStructMemberType::UInt:
+        case ShaderStructMemberType::Int:
+        case ShaderStructMemberType::Float:
+            return sizeof(u32); // 4 byte
+        case ShaderStructMemberType::Float2:
+            return sizeof(f32) * 2; // 8 bytes
+        case ShaderStructMemberType::Float3:
+        case ShaderStructMemberType::Float4:
+        case ShaderStructMemberType::Float4x4:
+            return sizeof(f32) * 4; // 16 bytes
+        case ShaderStructMemberType::Struct:
+            alignment = 0;
+            for (const auto& nestedMember : member.nestedMembers)
+            {
+                alignment = Math::Max(alignment, GetShaderStructMemberAlignment(nestedMember));
+            }
+            return alignment;
+        }
+
+        return alignment;
+    }
+
+    u64 VulkanRHI::GetShaderStructMemberSize(const RHI::ShaderStructMember& member)
+    {
+        switch (member.dataType)
+        {
+        case RHI::ShaderStructMemberType::Bool:
+        case RHI::ShaderStructMemberType::Float:
+        case RHI::ShaderStructMemberType::UInt:
+        case RHI::ShaderStructMemberType::Int:
+            return sizeof(u32) * member.arrayCount;
+        case RHI::ShaderStructMemberType::Float2:
+            return sizeof(Vec2) * member.arrayCount;
+        case RHI::ShaderStructMemberType::Float3:
+        case RHI::ShaderStructMemberType::Float4:
+            return sizeof(Vec4) * member.arrayCount;
+        case RHI::ShaderStructMemberType::Float4x4:
+            return sizeof(Matrix4x4);
+        case RHI::ShaderStructMemberType::Struct:
+        {
+            u64 structAlignment = GetShaderStructMemberAlignment(member);
+            u64 offset = 0;
+            for (const auto& nestedMember : member.nestedMembers)
+            {
+                u64 alignment = GetShaderStructMemberAlignment(nestedMember);
+                if (offset > 0)
+                    offset = Memory::GetAlignedSize(offset, alignment);
+                offset += GetShaderStructMemberSize(nestedMember);
+            }
+            return offset;
+        }
+        break;
+        }
+
+        return 0;
+    }
+
+    void VulkanRHI::GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets)
+    {
+        outOffsets.Clear();
+
+        u64 offset = 0;
+
+        for (const auto& member : members)
+        {
+            u64 alignment = GetShaderStructMemberAlignment(member);
+            if (offset > 0)
+                offset = Memory::GetAlignedSize(offset, alignment);
+            outOffsets.Add(offset);
+            offset += GetShaderStructMemberSize(member);
+        }
+    }
+
 } // namespace CE

@@ -14,6 +14,12 @@ namespace CE::RPI
 			shaderResourceGroup->QueueDestroy();
 			shaderResourceGroup = nullptr;
 		}
+
+		for (auto [name, buffer] : buffers)
+		{
+			delete buffer;
+		}
+		buffers.Clear();
 	}
 
 	void Material::SetShader(Shader* shader)
@@ -58,12 +64,16 @@ namespace CE::RPI
                 {
                     for (const auto& variable : layout.variables)
                     {
-                        int index = variable.structMembers.IndexOf([&](const RHI::ShaderStructMember& member) -> bool { return member.name == variable.name; });
-                        if (index >= 0) // Found variable
-                        {
-                            
-                            break;
-                        }
+						u64 offset = 0;
+						for (int i = 0; i < variable.structMembers.GetSize(); i++)
+						{
+							const RHI::ShaderStructMember& member = variable.structMembers[i];
+							u64 memberSize = RHI::gDynamicRHI->GetShaderStructMemberSize(member);
+							if (memberSize == 0)
+							{
+								continue;
+							}
+						}
                     }
                     
                     break;

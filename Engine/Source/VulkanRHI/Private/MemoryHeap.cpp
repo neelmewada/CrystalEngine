@@ -15,6 +15,8 @@ namespace CE::Vulkan
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = heapSize;
 
+		bool useUMA = device->IsUnifiedMemoryArchitecture() && (usageFlags == RHI::MemoryHeapUsageFlags::Buffer);
+
 		switch (heapType)
 		{
 		case MemoryHeapType::Default:
@@ -26,6 +28,11 @@ namespace CE::Vulkan
 		case MemoryHeapType::ReadBack:
 			memoryPropertyFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
 			break;
+		}
+
+		if (useUMA)
+		{
+			memoryPropertyFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		}
 		
 		VkPhysicalDeviceMemoryProperties memoryProps = device->GetMemoryProperties();

@@ -130,12 +130,13 @@ namespace CE::RHI
 		virtual RHI::PipelineState* CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc) = 0;
 		virtual void DestroyPipeline(const RHI::PipelineState* pipeline) = 0;
 
-		//virtual RHI::GraphicsPipelineState* CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDescriptor& desc) = 0;
-		//virtual void DestroyPipelineState(IPipelineState* pipelineState) = 0;
-
 		// - Helper Operations -
 
 		virtual void Blit(Texture* source, Texture* destination, FilterMode filter) = 0;
+
+		virtual u64 GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member) = 0;
+		virtual u64 GetShaderStructMemberSize(const RHI::ShaderStructMember& member) = 0;
+		virtual void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) = 0;
 
 	protected:
 
