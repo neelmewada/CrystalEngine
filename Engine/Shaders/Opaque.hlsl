@@ -35,11 +35,6 @@ PSInput VertMain(VSInput input)
     return output;
 }
 
-inline float Map01(in float value)
-{
-    return (value + 1) / 2.0;
-}
-
 // pixel shader function
 float4 FragMain(PSInput input) : SV_TARGET
 {
@@ -48,15 +43,27 @@ float4 FragMain(PSInput input) : SV_TARGET
     float3 normal = normalize(input.normal);
     float3 viewDir = normalize(viewPosition - input.worldPos);
 
-    for (uint i = 0; i < totalDirectionalLights; i++)
+    uint i = 0;
+    for (i = 0; i < totalDirectionalLights; i++)
     {
-        float3 lightDir = _DirectionalLights[i].direction;
-        float3 lightColor = _DirectionalLights[i].colorAndIntensity.rgb;
-        diffuse += max(dot(normal, -lightDir), 0) * lightColor;
+        float3 lightDir = -_DirectionalLights[i].direction;
+        float4 lightColor = _DirectionalLights[i].colorAndIntensity;
+        diffuse += max(dot(normal, lightDir), 0) * lightColor.rgb * lightColor.a;
 
-        float3 reflectDir = reflect(lightDir, normal);
+        float3 reflectDir = reflect(-lightDir, normal);
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-        specular += _SpecularStrength * spec * lightColor;
+        specular += _SpecularStrength * spec * lightColor.rgb;
+    }
+
+    for (i = 0; i < totalPointLights; i++)
+    {
+        float3 lightDir = normalize(_PointLights[i].position - input.worldPos);
+        float4 lightColor = _PointLights[i].colorAndIntensity;
+        diffuse += max(dot(normal, lightDir), 0) * lightColor.rgb * lightColor.a;
+
+        float3 reflectDir = reflect(-lightDir, normal);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+        specular += _SpecularStrength * spec * lightColor.rgb;
     }
 
     return float4((ambient.rgb + diffuse + specular) * _Albedo.rgb, 1.0);

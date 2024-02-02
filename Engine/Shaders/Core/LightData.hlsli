@@ -13,8 +13,7 @@ struct DirectionalLight
 struct PointLight
 {
     float3 position;
-    float3 color;
-    float intensity;
+    float4 colorAndIntensity;
     float radius;
     float attenuation;
 };
@@ -24,13 +23,13 @@ cbuffer _DirectionalLightsArray : SRG_PerScene(b)
     DirectionalLight _DirectionalLights[MAX_DIRECTIONAL_LIGHTS];
 };
 
-//StructuredBuffer<PointLight> _PointLights : SRG_PerScene(t);
+StructuredBuffer<PointLight> _PointLights : SRG_PerScene(t);
 
 cbuffer _LightData : SRG_PerScene(b)
 {
     float4 ambient;
     uint totalDirectionalLights;
-    //uint maxPointLights;
+    uint totalPointLights;
 };
 
 #endif // __LIGHT_DATA_HLSL__

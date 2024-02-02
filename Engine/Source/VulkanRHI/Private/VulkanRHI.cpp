@@ -567,7 +567,7 @@ namespace CE::Vulkan
         outOffsets.Clear();
 
         u64 offset = 0;
-
+        
         for (const auto& member : members)
         {
             u64 alignment = GetShaderStructMemberAlignment(member);

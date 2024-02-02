@@ -68,19 +68,19 @@ namespace CE::Sandbox
 		float temperature;
 	};
 
-	struct PointLight
+	struct alignas(16) PointLight
 	{
-		alignas(16) Vec3 position;
-		alignas(16) Vec3 color;
-		alignas(4)	float intensity;
-		alignas(4)	float radius;
-		alignas(4)	float attenuation;
+		Vec3 position;
+		Vec4 colorAndIntensity;
+		float radius;
+		float attenuation;
 	};
 
 	struct LightData
 	{
-		alignas(16) Vec4 ambientColor{};
-		alignas(4)  u32 totalDirectionalLights;
+		Vec4 ambientColor{};
+		u32 totalDirectionalLights;
+		u32 totalPointLights;
 	};
 
 	struct CameraData
@@ -158,8 +158,10 @@ namespace CE::Sandbox
 
 		RHI::ShaderResourceGroup* perSceneSrg = nullptr;
 		RHI::Buffer* directionalLightsBuffer = nullptr;
+		RHI::Buffer* pointLightsBuffer = nullptr;
 		RHI::Buffer* lightDataBuffer = nullptr;
 		FixedArray<DirectionalLight, MaxDirectionalLightCount> directionalLights{};
+		Array<PointLight> pointLights{};
 		LightData lightData{};
 
 		u32 width = 0;

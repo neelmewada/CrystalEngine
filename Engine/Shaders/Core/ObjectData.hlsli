@@ -33,5 +33,7 @@ ConstantBuffer<ObjectData> _ObjectData : SRG_PerObject(b);
 
 #define LOCAL_TO_WORLD_SPACE(localSpace, vertexInput) mul(localSpace, MODEL_MATRIX(vertexInput))
 
+#define WORLD_TO_CLIP_SPACE(worldSpace, vertexInput) mul(worldSpace, viewProjectionMatrix)
+
 
 #endif // __OBJECT_DATA_HLSL__

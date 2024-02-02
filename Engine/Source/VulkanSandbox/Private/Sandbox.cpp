@@ -2,11 +2,12 @@
 
 namespace CE::Sandbox
 {
-	constexpr u32 perViewDataBinding = 2;
-	constexpr u32 perObjectDataBinding = 4;
+	constexpr u32 perViewDataBinding = 3;
+	constexpr u32 perObjectDataBinding = 5;
 	constexpr u32 directionalLightArrayBinding = 0;
-	constexpr u32 lightDataBinding = 1;
-	constexpr u32 materialDataBinding = 5;
+	constexpr u32 pointLightsBinding = 1;
+	constexpr u32 lightDataBinding = 2;
+	constexpr u32 materialDataBinding = 6;
 
 	static int counter = 0;
 	static RHI::RHISystem rhiSystem{};
@@ -407,15 +408,38 @@ namespace CE::Sandbox
 	void VulkanSandbox::InitLights()
 	{
 		DirectionalLight mainLight{};
-		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.7f);
 		mainLight.direction = Vec3(-0.5f, -0.25f, 1);
+		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.7f);
 		mainLight.colorAndIntensity.w = 1.0f; // intensity
 		mainLight.temperature = 100;
 
 		directionalLights.Clear();
 		directionalLights.Add(mainLight);
-		lightData.totalDirectionalLights = directionalLights.GetSize();
+
+		PointLight pointLight{};
+		pointLight.position = Vec4(0, 0, 0);
+		pointLight.colorAndIntensity = Vec3(1.0f, 0.5f, 0);
+		pointLight.colorAndIntensity.w = 1.0f; // Intensity
+		pointLight.radius = 35.0f;
+
+		pointLights.Clear();
+		pointLights.Add(pointLight);
+		
+		lightData.totalDirectionalLights = 0;// directionalLights.GetSize();
 		lightData.ambientColor = Color(0, 0.1f, 0.5f, 1).ToVec4();
+		lightData.totalPointLights = pointLights.GetSize();
+
+		{
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			bufferDesc.bufferSize = pointLights.GetSize() * sizeof(PointLight);
+			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			bufferDesc.name = "Point Lights Buffer";
+
+			pointLightsBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			pointLightsBuffer->UploadData(pointLights.GetData(), bufferDesc.bufferSize);
+		}
 
 		{
 			RHI::BufferDescriptor bufferDesc{};
@@ -449,6 +473,13 @@ namespace CE::Sandbox
 		perSceneSRGLayout.variables.Top().name = "_DirectionalLightsArray";
 		perSceneSRGLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
 		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+		perSceneSRGLayout.variables.Add({});
+		perSceneSRGLayout.variables.Top().arrayCount = 1;
+		perSceneSRGLayout.variables.Top().name = "_PointLights";
+		perSceneSRGLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
+		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::StructuredBuffer;
 		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
 		perSceneSRGLayout.variables.Add({});
@@ -787,6 +818,7 @@ namespace CE::Sandbox
 
 		delete perSceneSrg; perSceneSrg = nullptr;
 
+		delete pointLightsBuffer; pointLightsBuffer = nullptr;
 		delete directionalLightsBuffer; directionalLightsBuffer = nullptr;
 		delete lightDataBuffer; lightDataBuffer = nullptr;
 	}
