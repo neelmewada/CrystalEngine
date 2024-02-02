@@ -31,9 +31,9 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
             ThirdParty::sdl
             ${Vulkan_LIBRARIES}
+            CE::CoreApplication
         PUBLIC
             CE::Core
-            CE::CoreApplication
             CE::CoreRHI
             CE::CoreMedia
         TARGETS Config
@@ -44,8 +44,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         sdl
 )
 
-
-if(${PAL_TRAIT_BUILD_ENGINE_TESTS_SUPPORTED})
-    #add_subdirectory(Tests)
+if(${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
+    add_subdirectory(Tests)
 endif()
-

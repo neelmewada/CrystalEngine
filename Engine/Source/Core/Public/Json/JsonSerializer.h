@@ -10,19 +10,21 @@ namespace CE
     public:
         CE_STATIC_CLASS(JsonSerializer);
 
-        static JsonValue* Deserialize(Stream* stream);
+		CE_DEPRECATED(0, "Use Deserialize2 instead.") static JsonValue* Deserialize(Stream* stream);
 
 		static bool Deserialize2(Stream* stream, JValue& out);
 
+		static bool Deserialize2(const String& json, JValue& out);
+		
         template<typename WritePolicy = JsonPrettyPrintPolicy>
-        static void Serialize(Stream* stream, const JsonValue* json)
+		CE_DEPRECATED(0, "Use Serialize2 instead.") static void Serialize(Stream* stream, const JsonValue* json)
         {
             if (stream == nullptr || !stream->CanWrite())
                 return;
             if (json == nullptr || !json->IsContainerType())
                 return;
 
-            auto writer = JsonWriter<WritePolicy>::Create(stream);
+			JsonWriter<WritePolicy> writer = JsonWriter<WritePolicy>::Create(stream);
             bool isObject = json->IsObjectValue();
 
             if (json->IsObjectValue())

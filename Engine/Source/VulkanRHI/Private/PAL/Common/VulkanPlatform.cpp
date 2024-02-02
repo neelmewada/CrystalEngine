@@ -2,15 +2,13 @@
 #include "PAL/Common/VulkanPlatform.h"
 
 #include "VulkanRHIPrivate.h"
-#include "VulkanTexture.h"
-#include "VulkanSampler.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_vulkan.h"
 
-namespace CE
+namespace CE::Vulkan
 {
-    VkDescriptorSet VulkanPlatformBase::AddImGuiTexture(VulkanTexture* texture, VulkanSampler* sampler)
+    VkDescriptorSet VulkanPlatformBase::AddImGuiTexture(Texture* texture, Sampler* sampler)
     {
         if (texture == nullptr)
             return nullptr;

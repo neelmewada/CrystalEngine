@@ -17,21 +17,31 @@ namespace CE
         HashSet(std::initializer_list<T> elements) : impl(elements)
         {}
         
-        void Add(T item)
+        inline void Add(const T& item)
         {
             impl.insert(item);
         }
         
-        void Remove(T item)
+		inline void Remove(const T& item)
         {
             impl.erase(item);
         }
         
-        bool Exists(T item) const
+		inline bool IsEmpty() const
+		{
+			return impl.empty();
+		}
+
+		inline bool Exists(const T& item) const
         {
             return impl.contains(item);
         }
-        
+
+		inline const T& Find(const T& item) const
+		{
+			return *impl.find(item);
+		}
+
         bool Exists(std::function<bool(const T&)> pred) const
         {
             for (auto it = impl.begin(); it != impl.end(); ++it)
@@ -45,10 +55,12 @@ namespace CE
             return false;
         }
         
-        void Clear()
+		inline void Clear()
         {
             impl.clear();
         }
+
+		inline SIZE_T GetSize() const { return impl.size(); }
         
         CE_INLINE auto Begin() { return impl.begin(); }
         CE_INLINE auto End() { return impl.end(); }

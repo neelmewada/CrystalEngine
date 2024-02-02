@@ -695,7 +695,87 @@ TEST(Containers, Defer)
 	TEST_END;
 }
 
+TEST(Container, ArrayView)
+{
+	TEST_BEGIN;
 
+	// View into Array<int>
+	{
+		Array<int> array = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+		ArrayView<int> view = ArrayView<int>(array.Begin() + 2, array.End() - 2);
+		EXPECT_EQ(view.GetSize(), 7);
+		int idx = 2;
+		EXPECT_EQ(view[0], 2);
+		EXPECT_EQ(view[3], 5);
+		EXPECT_EQ(view[6], 8);
+
+		for (int value : view)
+		{
+			EXPECT_EQ(value, array[idx++]);
+		}
+	}
+
+	// View into Array<String>
+	{
+		Array<String> array = { "str0", "str1", "str2", "str3", "str4" };
+
+		ArrayView<String> view = ArrayView<String>(array.Begin() + 1, array.End() - 2);
+
+		EXPECT_EQ(view.GetSize(), 3);
+		EXPECT_EQ(view[0], "str1");
+	}
+
+	// View into initializer list
+	{
+		ArrayView<int> view = ArrayView<int>({ 0, 1, 2, 3, 4 });
+
+		EXPECT_EQ(view.GetSize(), 5);
+		EXPECT_EQ(view[0], 0);
+		EXPECT_EQ(view[4], 4);
+	}
+
+	TEST_END;
+}
+
+TEST(Container, FixedArray)
+{
+	TEST_BEGIN;
+
+	FixedArray<String, 8> array = { "str0", "str1", "str2", "str3" };
+	EXPECT_EQ(array.GetSize(), 4);
+	EXPECT_EQ(array.GetCapacity(), 8);
+	EXPECT_EQ(array[0], "str0");
+	EXPECT_EQ(array[1], "str1");
+	EXPECT_EQ(array[2], "str2");
+	EXPECT_EQ(array[3], "str3");
+
+	EXPECT_EQ(array.GetFirst(), "str0");
+	EXPECT_EQ(array.GetLast(), "str3");
+
+	array.Insert("str_Insert", 2);
+	EXPECT_EQ(array.GetSize(), 5);
+	EXPECT_EQ(array[0], "str0");
+	EXPECT_EQ(array[1], "str1");
+	EXPECT_EQ(array[2], "str_Insert");
+	EXPECT_EQ(array[3], "str2");
+	EXPECT_EQ(array[4], "str3");
+
+	array.Remove("str_Insert");
+	EXPECT_EQ(array[0], "str0");
+	EXPECT_EQ(array[1], "str1");
+	EXPECT_EQ(array[2], "str2");
+	EXPECT_EQ(array[3], "str3");
+
+	int i = 0;
+	for (const String& item : array)
+	{
+		EXPECT_EQ(item, String("str") + i);
+		i++;
+	}
+
+	TEST_END;
+}
 
 #pragma endregion
 
@@ -1633,6 +1713,22 @@ const char JSON_Writer_Test2_Comparison[] = R"([
 	42.212
 ])";
 
+const char JSON_Writer_Test2_Comment_Comparison[] = R"([
+	{
+		// this is a comment
+		"some_array":
+		[
+			"child0", // another comment
+			123,
+			42.212,
+			false// a bad comment
+		],
+		"name": "Some name"// another bad comment
+	},
+	"item0",
+	42.212
+])";
+
 TEST(JSON, Writer)
 {
     TEST_BEGIN;
@@ -1726,7 +1822,7 @@ TEST(JSON, TokenParser)
 {
     TEST_BEGIN;
 
-    auto stream = MemoryStream((void*)JSON_Writer_Test2_Comparison, COUNTOF(JSON_Writer_Test2_Comparison), Stream::Permissions::ReadOnly);
+    auto stream = MemoryStream((void*)JSON_Writer_Test2_Comment_Comparison, COUNTOF(JSON_Writer_Test2_Comment_Comparison), Stream::Permissions::ReadOnly);
     stream.SetAsciiMode(true);
 
     struct TokenPair

@@ -1,0 +1,141 @@
+#pragma once
+
+namespace CE::Vulkan
+{
+	class FrameGraphCompiler;
+	class Scope;
+}
+
+namespace CE::RHI
+{
+	class FrameGraph;
+	struct FrameGraphCompileRequest;
+
+	struct ScopeDescriptor
+	{
+		ScopeID id{};
+		RHI::HardwareQueueClass queueClass{};
+	};
+
+	struct ScopeGroup
+	{
+		ScopeID groupId{};
+		Array<Scope*> scopes{};
+	};
+
+	enum class ScopeOperation
+	{
+		Rasterization = 0,
+		FullScreenPass,
+		Compute,
+		RayTracing,
+		Transfer
+	};
+
+    class CORERHI_API Scope
+    {
+    public:
+        virtual ~Scope();
+        
+	protected:
+
+		Scope(const ScopeDescriptor& desc);
+
+	public:
+
+		inline ScopeID GetId() const { return id; }
+
+		void AddScopeAttachment(ScopeAttachment* attachment);
+
+		bool ScopeAttachmentExists(const Name& id);
+
+		ScopeAttachment* FindScopeAttachment(const Name& id);
+
+		template<typename ScopeAttachmentType, typename DescriptorType = ScopeAttachmentType::DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value
+		ScopeAttachmentType* EmplaceScopeAttachment(FrameAttachment* attachment,
+			ScopeAttachmentUsage usage,
+			ScopeAttachmentAccess access,
+			const DescriptorType& descriptor);
+
+		inline bool PresentsSwapChain() const { return presentsSwapChain; }
+
+		bool Compile(const FrameGraphCompileRequest& compileRequest);
+
+		bool UsesAttachment(FrameAttachment* attachment);
+
+		bool UsesAttachment(AttachmentID attachmentId);
+
+		static HashMap<ScopeAttachment*, ScopeAttachment*> FindCommonFrameAttachments(Scope* from, Scope* to);
+
+		inline bool IsSubPass() const
+		{
+			return prevSubPass != nullptr || nextSubPass != nullptr;
+		}
+
+		void SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs);
+		void AddShaderResourceGroups(RHI::ShaderResourceGroup* srg);
+
+	protected:
+
+		virtual bool CompileInternal(const FrameGraphCompileRequest& compileRequest) { return false; }
+
+		//! @brief The frame graph that owns this scope.
+		FrameGraph* frameGraph = nullptr;
+
+		RHI::HardwareQueueClass queueClass{};
+		Array<RHI::PipelineState*> usePipelines{};
+
+		u32 groupCountX = 1;
+		u32 groupCountY = 1;
+		u32 groupCountZ = 1;
+
+		ScopeID id{};
+		int scopeGroupIndex = -1;
+		bool usesSwapChainAttachment = false;
+
+		Scope* prevSubPass = nullptr;
+		Scope* nextSubPass = nullptr;
+
+		Array<Scope*> producers{};
+		Array<Scope*> consumers{};
+
+		Scope* prev = nullptr;
+		Scope* next = nullptr;
+
+		DrawList* drawList = nullptr;
+
+		RHI::ShaderResourceGroup* passShaderResourceGroup = nullptr;
+		RHI::ShaderResourceGroup* subpassShaderResourceGroup = nullptr;
+
+		Array<RHI::ShaderResourceGroup*> externalShaderResourceGroups{};
+        
+		//! @brief List of all scope attachments owned by this scope.
+		Array<ScopeAttachment*> attachments{};
+
+		Array<ImageScopeAttachment*> imageAttachments{};
+		Array<BufferScopeAttachment*> bufferAttachments{};
+		Array<ScopeAttachment*> readAttachments{};
+		Array<ScopeAttachment*> writeAttachments{};
+
+		bool presentsSwapChain = false;
+
+		friend class FrameGraph;
+        friend class FrameGraphCompiler;
+		friend class CE::Vulkan::FrameGraphCompiler;
+		friend class CE::Vulkan::Scope;
+		friend class FrameGraphBuilder;
+		friend class FrameScheduler;
+    };
+
+	template<typename ScopeAttachmentType, typename DescriptorType> requires TIsBaseClassOf<ScopeAttachment, ScopeAttachmentType>::Value
+	inline ScopeAttachmentType* Scope::EmplaceScopeAttachment(FrameAttachment* attachment, 
+		ScopeAttachmentUsage usage, 
+		ScopeAttachmentAccess access, 
+		const DescriptorType& descriptor)
+	{
+		ScopeAttachmentType* scopeAttachment = new ScopeAttachmentType(this, attachment, usage, access, descriptor);
+		AddScopeAttachment(scopeAttachment);
+		return scopeAttachment;
+	}
+
+} // namespace CE::RHI

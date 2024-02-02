@@ -14,7 +14,7 @@ namespace CE
 	};
 
 	CLASS()
-	class SYSTEM_API AssetRegistry : public Object, IO::IFileWatchListener
+	class SYSTEM_API AssetRegistry : public Object, IO::IFileWatchListener, public IPackageResolver
 	{
 		CE_CLASS(AssetRegistry, Object)
 	public:
@@ -55,7 +55,7 @@ namespace CE
 		Array<String> GetSubDirectoriesAtPath(const Name& path);
 		PathTreeNode* GetDirectoryNode(const Name& path);
 
-
+		virtual Name GetPackagePath(Uuid packageUuid) override;
 
 	protected:
 

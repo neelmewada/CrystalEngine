@@ -10,6 +10,12 @@
 
 namespace CE
 {
+	SDLPlatformWindow::~SDLPlatformWindow()
+	{
+		if (handle != nullptr)
+			SDL_DestroyWindow(handle);
+		handle = nullptr;
+	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
 	{
@@ -36,15 +42,15 @@ namespace CE
 
 	void SDLPlatformWindow::GetDrawableWindowSize(u32* outWidth, u32* outHeight)
 	{
-		int w = 0, h = 0;
 #if PAL_TRAIT_VULKAN_SUPPORTED
+		int w = 0, h = 0;
 		SDL_Vulkan_GetDrawableSize(handle, &w, &h);
+		*outWidth = (u32)w;
+		*outHeight = (u32)h;
 #else
 		GetWindowSize(outWidth, outHeight);
 		return;
 #endif
-		*outWidth = (u32)w;
-		*outHeight = (u32)h;
 	}
 
 	void SDLPlatformWindow::SetResizable(bool resizable)
@@ -64,19 +70,12 @@ namespace CE
 		return SDL_GetWindowID(handle);
 	}
 
-	SDLPlatformWindow::~SDLPlatformWindow()
-	{
-		if (handle != nullptr)
-			SDL_DestroyWindow(handle);
-		handle = nullptr;
-	}
-
 	void* SDLPlatformWindow::GetUnderlyingHandle()
 	{
 		return handle;
 	}
 
-	void* SDLPlatformWindow::GetOSNativeHandle()
+	WindowHandle SDLPlatformWindow::GetOSNativeHandle()
 	{
         SDL_SysWMinfo wmInfo;
         SDL_VERSION(&wmInfo.version);

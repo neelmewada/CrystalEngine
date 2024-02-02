@@ -56,13 +56,13 @@ namespace CE
         ThreadId threadId;
 
         static u32 tlsSlotIndex;
-        static Mutex mutex;
+        static SharedMutex mutex;
     };
 
     template<typename T>
     u32 ThreadSingleton<T>::tlsSlotIndex = 0xFFFFFFFF;
 
     template<typename T>
-    Mutex ThreadSingleton<T>::mutex{};
+	SharedMutex ThreadSingleton<T>::mutex{};
 
 } // namespace CE

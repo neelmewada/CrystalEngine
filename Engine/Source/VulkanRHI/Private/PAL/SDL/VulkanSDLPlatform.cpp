@@ -6,7 +6,7 @@
 #include "backends/imgui_impl_vulkan.h"
 
 
-namespace CE
+namespace CE::Vulkan
 {
 	Vec2i VulkanSDLPlatform::GetScreenSizeForWindow(void* sdlWindowHandle)
 	{

@@ -2,83 +2,11 @@
 
 namespace CE
 {
-	ENUM(Flags)
-	enum class VertexInputAttribute
-	{
-		None = 0,
-		Position = BIT(0),
-		Normal = BIT(1),
-		Tangent = BIT(2),
-		Color = BIT(3),
-		UV0 = BIT(4),
-		UV1 = BIT(5),
-		UV2 = BIT(6),
-		UV3 = BIT(7),
-	};
-	ENUM_CLASS_FLAGS(VertexInputAttribute);
-
-	CORESHADER_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input);
-
-	ENUM(Flags)
-	enum class ShaderStage
-	{
-		None = 0,
-		Vertex = BIT(0),
-		Fragment = BIT(1),
-
-		Default = Vertex | Fragment,
-		All = Vertex | Fragment,
-	};
-	ENUM_CLASS_FLAGS(ShaderStage);
 
 	ENUM()
 	enum class ShaderBlobFormat
 	{
 		Spirv = 0
-	};
-
-	ENUM()
-	enum class ShaderResourceType
-	{
-		None = 0,
-		/// Uniform buffer in vulkan terms
-		ConstantBuffer,
-		/// Storage Buffer in vulkan terms
-		StructuredBuffer,
-		SamplerState,
-		Texture1D,
-		Texture2D,
-		Texture3D,
-		TextureCube,
-		// image2D in vulkan
-		RWTexture2D,
-	};
-	ENUM_CLASS_FLAGS(ShaderResourceType);
-
-	ENUM()
-	enum class ShaderStructMemberType
-	{
-		None = 0,
-		Float,
-		Float2,
-		Float3,
-		Float4,
-		Float4x4
-	};
-	ENUM_CLASS_FLAGS(ShaderStructMemberType);
-
-	STRUCT()
-	struct ShaderStructMember
-	{
-		CE_STRUCT(ShaderStructMember)
-	public:
-
-		FIELD()
-		Name name{};
-
-		FIELD()
-		ShaderStructMemberType dataType{};
-		
 	};
 
 	STRUCT()
@@ -87,17 +15,15 @@ namespace CE
 		CE_STRUCT(SRGVariable)
 	public:
 
-		inline bool IsValid() const { return resourceType != ShaderResourceType::None; }
+		inline bool IsValid() const { return resourceType != RHI::ShaderResourceType::None; }
 
-		inline u32 GetBinding() const { return binding; }
+		inline u32 GetBindingSlot() const { return bindingSlot; }
 
 		inline const Name& GetName() const { return name; }
 		inline const Name& GetInternalName() const { return internalName; }
-
-	protected:
 		
 		FIELD(ReadOnly)
-		u32 binding = 0;
+		u32 bindingSlot = 0;
 
 		FIELD(ReadOnly)
 		Name name{};
@@ -106,12 +32,12 @@ namespace CE
 		Name internalName{};
 
 		FIELD(ReadOnly)
-		ShaderResourceType resourceType = ShaderResourceType::None;
+		RHI::ShaderResourceType resourceType = RHI::ShaderResourceType::None;
 
-		FIELD()
+		FIELD(ReadOnly)
 		ShaderStage shaderStages = ShaderStage::All;
 
-		FIELD()
+		FIELD(ReadOnly)
 		Array<ShaderStructMember> structMembers{};
 
 		FIELD(ReadOnly)
@@ -135,8 +61,6 @@ namespace CE
 		inline const SRGVariable& GetVariable(int index) const { return variables[index]; }
 
 
-	protected:
-
 		FIELD(ReadOnly)
 		u32 frequencyId = 0; // The set number in vulkan, or register space in dx12.
 		
@@ -149,6 +73,8 @@ namespace CE
 		friend struct ShaderReflection;
 		friend class Shader;
 	};
+
+	typedef HashMap<Name, int> VariableBindingMap;
     
 	STRUCT()
 	struct CORESHADER_API ShaderReflection
@@ -158,15 +84,24 @@ namespace CE
 
 		inline bool IsValid() const
 		{
-			return resourceGroups.NonEmpty();
+			return srgLayouts.NonEmpty();
 		}
 
-	protected:
-
-		SRGEntry& FindOrAdd(u32 frequencyId);
+		RHI::ShaderResourceGroupLayout& FindOrAdd(RHI::SRGType srgType);
 
 		FIELD(ReadOnly)
-		Array<SRGEntry> resourceGroups{};
+		Array<RHI::ShaderResourceGroupLayout> srgLayouts{};
+
+		FIELD(ReadOnly)
+		Array<ShaderSemantic> vertexInputs{};
+
+		const VariableBindingMap& GetVariableNameMap() const;
+
+	private:
+
+		void OnAfterDeserialize();
+
+		mutable VariableBindingMap variableNameToBindingSlot{};
 		
 		friend class ShaderReflector;
 		friend class Shader;

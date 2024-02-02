@@ -529,5 +529,11 @@ namespace CE
 		return true;
     }
 
+	bool JsonSerializer::Deserialize2(const String& json, JValue& out)
+	{
+		MemoryStream stream = MemoryStream(json.GetData(), json.GetLength(), Stream::Permissions::ReadOnly);
+		return Deserialize2(&stream, out);
+	}
+
 } // namespace CE
 

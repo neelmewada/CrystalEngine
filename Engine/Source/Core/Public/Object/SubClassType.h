@@ -2,6 +2,8 @@
 
 namespace CE
 {
+	class Object;
+
     template<typename TBaseClass = CE::Object>
 	struct SubClassType
 	{
@@ -19,6 +21,8 @@ namespace CE
 
 			if (subClassType->IsSubclassOf(baseClassType))
 				this->type = subClassType;
+
+			UpdateClassTypeName();
 		}
 
 		SubClassType(const Name& typeName) : baseClassType(TBaseClass::Type()), type(nullptr), classTypeName(typeName)
@@ -32,17 +36,19 @@ namespace CE
 
 			if (classType->IsSubclassOf(baseClassType))
 				this->type = classType;
+
+			UpdateClassTypeName();
 		}
 
 		inline bool IsValid() const
 		{
+			UpdateTypePtr();
 			return type != nullptr;
 		}
 
 		inline operator ClassType*() const
 		{
-			if (type == nullptr && classTypeName.IsValid())
-				return ClassType::FindClass(classTypeName);
+			UpdateTypePtr();
 			return type;
 		}
 
@@ -81,6 +87,7 @@ namespace CE
 			{
 				this->type = copy.type;
 			}
+			UpdateClassTypeName();
 			return *this;
 		}
 
@@ -96,6 +103,8 @@ namespace CE
 			{
 				this->type = assignType;
 			}
+
+			UpdateClassTypeName();
 			return *this;
 		}
 
@@ -107,6 +116,7 @@ namespace CE
 			if (typeName.IsEmpty())
 			{
 				this->type = nullptr;
+				UpdateClassTypeName();
 				return *this;
 			}
 
@@ -116,6 +126,7 @@ namespace CE
 			if (classType->IsSubclassOf(baseClassType))
 				this->type = classType;
 
+			UpdateClassTypeName();
 			return *this;
 		}
 
@@ -138,14 +149,37 @@ namespace CE
 			{
 				this->type = assignClass;
 			}
+
+			UpdateClassTypeName();
 		}
 
 	private:
 
-		ClassType* type = nullptr;
+		inline void UpdateTypePtr() const
+		{
+			if (type == nullptr && classTypeName.IsValid())
+				type = ClassType::FindClass(classTypeName);
+		}
+
+		inline void UpdateClassTypeName()
+		{
+			if (type != nullptr)
+			{
+				classTypeName = type->GetTypeName();
+			}
+			else
+			{
+				classTypeName = "";
+			}
+		}
+
+		mutable ClassType* type = nullptr;
 		ClassType* baseClassType = nullptr;
 		Name classTypeName = "";
 	};
+
+	template<typename TBaseClass>
+	using SubClass = SubClassType<TBaseClass>;
 
 } // namespace CE
 

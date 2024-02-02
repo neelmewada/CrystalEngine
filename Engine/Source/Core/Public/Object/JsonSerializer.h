@@ -13,23 +13,26 @@ namespace CE
         
         bool HasNext();
 
-        bool WriteNext(Stream* stream);
+		int Serialize(Stream* stream);
 
-		bool WriteNext(JsonValue* json);
+		inline bool IsValid() const
+		{
+			return (isMap || isArray) && rawInstance != nullptr;
+		}
+
+        bool WriteNext(Stream* stream);
 
 		bool WriteNext(JValue& json);
 
+	private:
+
+		bool WriteNext(JsonValue* json);
+
         FieldType* GetNext();
-        
-        inline bool IsValid() const
-        {
-            return (isMap || isArray) && rawInstance != nullptr;
-        }
-        
-    private:
 
 		PrettyJsonWriter writer;
         
+		StructType* structType = nullptr;
         Array<FieldType*> fields{};
         void* rawInstance = nullptr;
 
@@ -51,23 +54,26 @@ namespace CE
 
 		bool HasNext();
 
-		bool ReadNext(Stream* stream);
-
-		bool ReadNext(const JValue& json);
+		int Deserialize(Stream* stream);
 
 		inline bool IsValid() const
 		{
 			return (isMap || isArray) && rawInstance != nullptr;
 		}
 
+		bool ReadNext(Stream* stream);
+
+		bool ReadNext(const JValue& json);
+
+	private:
+
 		bool ReadNextField(JsonValue* jsonValue);
 
 		bool ReadField(FieldType* field, JsonValue* jsonValue);
 
-	private:
-
 		JsonValue* rootJson = nullptr;
 
+		StructType* structType = nullptr;
 		Array<FieldType*> fields{};
 		void* rawInstance = nullptr;
 

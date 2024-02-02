@@ -1,14 +1,5 @@
 #pragma once
 
-/*
- * Copyright (c) Contributors to the Open 3D Engine Project.
- * For complete copyright and license terms please see the LICENSE at the root of this distribution.
- *
- * SPDX-License-Identifier: Apache-2.0 OR MIT
- *
- */
-
-
 namespace CE
 {
 	class TypeInfo;
@@ -36,6 +27,13 @@ namespace CE
 	};
 
 	typedef u32 JobThreadTag;
+
+
+	/*
+	 * Copyright (c) Contributors to the Open 3D Engine Project.
+	 *
+	 * Used under MIT License: https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
+	 */
 
 	class CORE_API Job
 	{

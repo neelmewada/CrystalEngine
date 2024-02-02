@@ -18,6 +18,7 @@ namespace CE
         }
         
         Mesh* meshRef = mesh->GetModelData()->lod[0];
+		staticMesh->GetVertexBuffer(0);
         
         materials.Resize(meshRef->GetSubMeshCount());
     }

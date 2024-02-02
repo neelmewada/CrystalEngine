@@ -39,7 +39,13 @@ namespace CE
 
 	}
 
-	JValue::JValue(int numberValue)
+	JValue::JValue(s32 numberValue)
+		: valueType(JsonValueType::Number)
+		, numberValue(numberValue)
+	{
+	}
+
+	JValue::JValue(s64 numberValue)
 		: valueType(JsonValueType::Number)
 		, numberValue(numberValue)
 	{

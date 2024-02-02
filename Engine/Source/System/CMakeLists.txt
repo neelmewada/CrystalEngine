@@ -29,10 +29,11 @@ ce_add_target(System SHARED
             CE::CoreApplication
         PUBLIC
             CE::Core
-            CE::CoreMedia
-            CE::CoreRHI
-            $<${PAL_PLATFORM_IS_DESKTOP}:CE::CoreShader>
             CE::CoreSettings
+            CE::CoreMedia
+            CE::CoreShader
+            CE::CoreRHI
+            CE::CoreRPI
         TARGETS 
             Config EngineAssets
     RUNTIME_DEPENDENCIES

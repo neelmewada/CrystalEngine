@@ -1,5 +1,7 @@
 #pragma once
 
+#define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING
+
 // Basic headers
 #include "CoreTypes.h"
 #include "CoreTemplates.h"
@@ -15,6 +17,8 @@
 #include "Misc/Defer.h"
 #include "Misc/Random.h"
 #include "Memory/Memory.h"
+#include "Memory/IAllocator.h"
+#include "Memory/SystemAllocator.h"
 #include "Memory/FixedSizeAllocator.h"
 #include "Logger/Logger.h"
 #include "PAL/Common/PlatformMisc.h"
@@ -60,6 +64,7 @@
 // Jobs
 #include "Jobs/JobContext.h"
 #include "Jobs/Job.h"
+#include "Jobs/JobCompletion.h"
 #include "Jobs/WorkQueue.h"
 #include "Jobs/WorkThread.h"
 #include "Jobs/JobManager.h"

@@ -1,5 +1,18 @@
 {
     "material-icon-theme.folders.associations": {
-        "Mac": "macOS"
-    }
+        "Mac": "macOS",
+        "Pipeline": "Pipe"
+    },
+    "C_Cpp.default.defines": [
+        "CORE_API=",
+        "COREMEDIA_API=",
+        "CORESETTINGS_API=",
+        "CORESHADER_API=",
+        "GAMESYSTEM_API=",
+        "VULKANRHI_API=",
+        "SYSTEM_API",
+        "CORERPI_API=",
+        "CORERHI_API=",
+    ],
+    "esbonio.sphinx.confDir": ""
 }

@@ -53,7 +53,7 @@ namespace CE
 				name += "_" + components[i];
 		}
 
-		name = name.Replace({ '.', ':' }, '_');
+		name = name.Replace({ '.', ':', ' ' }, '_');
 
 		Resource* resource = CreateObject<Resource>(outer, name);
 		resource->dataSize = node->userDataSize;

@@ -7,7 +7,7 @@
 #include "vulkan/vulkan_win32.h"
 #include "vma/vk_mem_alloc.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     Array<const char*> VulkanWindowsPlatform::GetRequiredInstanceExtensions()
     {

@@ -19,14 +19,17 @@ namespace CE::RHI
         Texture,
         Sampler,
         ShaderModule,
-        ComputePipelineState,
-        GraphicsPipelineState,
+        Pipeline,
+        PipelineState,
 		ShaderResourceGroup,
 
+		MemoryHeap,
         RenderTarget,
         RenderPass,
         Viewport,
+		SwapChain,
 
+		CommandQueue,
         CommandList
     };
 
@@ -44,12 +47,6 @@ namespace CE::RHI
 
         /// Max number of vertex attributes
         MaxVertexAttribs = 8,
-
-        /// Max number of shader resource groups (aka no. of descriptor sets for vulkan)
-        MaxShaderResourceGroups = 4,
-
-        /// Max number of subpasses in a single renderpass
-        MaxSubpasses = 4,
     };
 
     /// Render Target Color Format: Always prefer using Auto
@@ -129,38 +126,48 @@ namespace CE::RHI
         FontDesc* preloadFonts = nullptr;
     };
 
+	struct MultisampleState
+	{
+		u16 sampleCount = 1;
+		u16 quality = 0;
+
+        inline SIZE_T GetHash() const
+        {
+            SIZE_T hash = CE::GetHash(sampleCount);
+            CombineHash(hash, quality);
+            return hash;
+        }
+	};
+
     /*
     *   Buffer
     */
 
+	enum class IndexFormat
+	{
+		Uint16 = 0,
+		Uint32
+	};
+
+	ENUM(Flags)
     enum class BufferBindFlags
     {
         Undefined = 0,
         VertexBuffer = BIT(0),
         IndexBuffer = BIT(1),
         ConstantBuffer = BIT(2),
-        StorageBuffer = BIT(3),
+        StructuredBuffer = BIT(3),
         // Internal usage only!
         StagingBuffer = BIT(4),
     };
-
     ENUM_CLASS_FLAGS(BufferBindFlags);
-
-    /// Features used by the buffer
-    enum class BufferUsageFlags
-    {
-        Default = 0,
-        /// Buffer can be used with dynamic offset
-        DynamicOffset = BIT(0),
-        // TODO: Not implemented yet (Buffer can be resized dynamically)
-        DynamicSize = BIT(1),
-    };
-    ENUM_CLASS_FLAGS(BufferUsageFlags);
 
     enum class BufferAllocMode
     {
         Default = 0,
+        /// @brief Use memory shared with CPU & GPU
         SharedMemory,
+        /// @brief Use only GPU visible memory
         GpuMemory,
     };
     ENUM_CLASS_FLAGS(BufferAllocMode);
@@ -172,31 +179,20 @@ namespace CE::RHI
         const void* data = nullptr;
     };
 
-    struct BufferDesc
-    {
-        Name name{};
-        BufferBindFlags bindFlags{};
-        BufferUsageFlags usageFlags{};
-        BufferAllocMode allocMode{};
-        u64 bufferSize = 0;
-        u64 structureByteStride = 0;
-
-        const BufferData* initialData = nullptr;
-    };
-
     /*
     *   Texture
     */
 
-    enum class TextureDimension
+	ENUM()
+    enum class Dimension
     {
         Dim2D = 0,
         Dim3D,
-        Dim1D,
-        DimCUBE,
+        Dim1D
     };
 
-    enum class TextureFormat
+	ENUM()
+    enum class Format
     {
         Undefined = 0,
         R8_UNORM,
@@ -225,73 +221,83 @@ namespace CE::RHI
         R32_UINT,
         R32_SINT,
         R32_SFLOAT,
-        D32_SFLOAT,
 		R32G32_UINT,
 		R32G32_SINT,
 		R32G32_SFLOAT,
-        D24_UNORM_S8_UINT,
+		D16_UNORM_S8_UINT,
+		D24_UNORM_S8_UINT,
         D32_SFLOAT_S8_UINT,
+		D32_SFLOAT,
 		// Compressed formats
 		BC7_UNORM,
 		BC4_UNORM,
 		BC6H_UFLOAT,
     };
+	ENUM_CLASS(Format);
 
-    enum class TextureUsageFlags
+    typedef Format TextureFormat;
+
+	ENUM(Flags)
+    enum class TextureBindFlags
     {
-		Default,
-        SampledImage = BIT(0),
-        ColorAttachment = BIT(1),
-        DepthStencilAttachment = BIT(2),
+		None = 0,
+		/// @brief Use as shader input.
+		ShaderRead = BIT(0),
+		/// @brief Use as shader output.
+		ShaderWrite = BIT(1),
+		/// @brief Use with shader read & write access.
+		ShaderReadWrite = ShaderRead | ShaderWrite,
+		/// @brief Use as color attachment.
+		Color = BIT(2),
+		/// @brief Use as depth stencil attachment.
+		DepthStencil = BIT(3),
+		/// @brief Use as depth-only attachment.
+		Depth = BIT(4),
+		/// @brief Use as a subpass input.
+		SubpassInput = BIT(5),
     };
-    ENUM_CLASS_FLAGS(TextureUsageFlags);
+    ENUM_CLASS_FLAGS(TextureBindFlags);
 
-	enum FilterMode
+	ENUM()
+	enum class FilterMode
 	{
-		FILTER_MODE_LINEAR = 0,
-		FILTER_MODE_NEAREST = 1,
-		FILTER_MODE_CUBIC = 2
+		Linear = 0,
+		Nearest = 1,
+		Cubic = 2
 	};
-	ENUM_CLASS_FLAGS(FilterMode);
+	ENUM_CLASS(FilterMode);
 
     struct TextureDesc
     {
-        String name{};
+        Name name{};
         u32 width = 128, height = 128, depth = 1;
-        TextureDimension dimension = TextureDimension::Dim2D;
-        TextureFormat format{};
+		Dimension dimension = Dimension::Dim2D;
+        Format format{};
         u32 mipLevels = 1;
         u32 sampleCount = 1;
-        TextureUsageFlags usageFlags = TextureUsageFlags::Default;
-
-		/// Force linear tiling rather than optimal tiling
-        bool forceLinearLayout = false;
+		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
     };
 
-    enum SamplerAddressMode
+	typedef TextureDesc ImageDesc;
+
+    enum class SamplerAddressMode
     {
-        SAMPLER_ADDRESS_MODE_REPEAT = 0,
-        SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT = 1,
-        SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE = 2,
-        SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER = 3,
+        Repeat = 0,
+        MirroredRepeat = 1,
+        ClampToEdge = 2,
+        ClampToBorder = 3,
     };
-    ENUM_CLASS_FLAGS(SamplerAddressMode);
+    ENUM_CLASS(SamplerAddressMode);
 
-    enum SamplerFilterMode
-    {
-        SAMPLER_FILTER_LINEAR = 0,
-        SAMPLER_FILTER_NEAREST = 1,
-    };
-
-    struct SamplerDesc
+    struct SamplerDescriptor
     {
         SamplerAddressMode addressModeU{};
         SamplerAddressMode addressModeV{};
         SamplerAddressMode addressModeW{};
 		FilterMode samplerFilterMode{};
+		Color borderColor{};
         b8 enableAnisotropy = false;
         int maxAnisotropy = 16;
-        Color borderColor{};
     };
 
     /*
@@ -305,26 +311,55 @@ namespace CE::RHI
         Compute,
     };
 
+	struct ViewportState
+	{
+		ViewportState() = default;
+
+		ViewportState(float x, float y,
+			float width, float height,
+			float minDepth = 0.0f, float maxDepth = 1.0f) 
+			: x(x), y(y) , width(width), height(height), minDepth(minDepth), maxDepth(maxDepth)
+		{}
+
+		float x = 0, y = 0;
+		float width = 0, height = 0;
+		float minDepth = 0.0f, maxDepth = 1.0f;
+	};
+
+	struct ScissorState
+	{
+		ScissorState() = default;
+
+		ScissorState(float x, float y, float width, float height)
+			: x(x), y(y), width(width), height(height)
+		{}
+
+		float x = 0, y = 0;
+		float width = 0, height = 0;
+	};
+
     /*
     *   Shader
     */
 
-    enum class PipelineType
-    {
-        None = 0,
-        Graphics,
-        Compute
-    };
+	class ShaderModule;
 
+	ENUM()
     enum class ShaderStage
     {
         None = 0,
         Vertex = BIT(0),
         Fragment = BIT(1),
+		Tessellation = BIT(2),
+		Geometry = BIT(3),
+
+		Default = Vertex | Fragment,
+		All = Vertex | Fragment | Tessellation | Geometry,
+		COUNT = 4,
     };
     ENUM_CLASS_FLAGS(ShaderStage);
 
-	struct ShaderModuleDesc
+	struct ShaderModuleDescriptor
 	{
 		String name = "";
 		ShaderStage stage = ShaderStage::None;
@@ -332,130 +367,85 @@ namespace CE::RHI
 		SIZE_T byteSize = 0;
 	};
 
-    /*
-    *   Graphics Pipeline
-    */
-
-	class ShaderModule;
-	class ShaderResourceGroup;
-
-	enum ShaderResourceType
+	ENUM()
+	enum class ShaderResourceType
 	{
-		SHADER_RESOURCE_TYPE_NONE = 0,
-		SHADER_RESOURCE_TYPE_CONSTANT_BUFFER,
-		SHADER_RESOURCE_TYPE_TEXTURE_BUFFER,
-		SHADER_RESOURCE_TYPE_SAMPLED_IMAGE,
-		SHADER_RESOURCE_TYPE_SAMPLER_STATE,
+		None = 0,
+		ConstantBuffer, // A uniform buffer in vulkan
+		StructuredBuffer, // A storage buffer in vulkan
+		RWStructuredBuffer, // A RW storage buffer in vulkan
+		Texture1D, // A texture1D in vulkan
+		Texture2D, // A texture2D in vulkan
+		Texture3D, // A texture3D in vulkan
+		TextureCube, // A textureCube in vulkan
+		RWTexture2D, // An image2D in vulkan
+		RWTexture3D, // An image3D in vulkan
+		SamplerState, // A sampler in vulkan
+		SubpassInput // A SubpassInput in vulkan
 	};
+	ENUM_CLASS(ShaderResourceType);
 
-	struct ShaderResourceVariableDesc
+    ENUM()
+    enum class VertexInputAttribute : u32
+    {
+        None = 0,
+        Position,
+        Normal,
+        Binormal,
+        BlendWeight,
+        BlendIndices,
+        Tangent,
+        Color,
+        UV
+    };
+    ENUM_CLASS_FLAGS(VertexInputAttribute);
+
+    CORERHI_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input);
+
+    struct CORERHI_API ShaderSemantic
+    {
+        static ShaderSemantic Parse(const String& name);
+
+        VertexInputAttribute attribute = VertexInputAttribute::None;
+        u8 index = 0;
+    };
+
+	ENUM()
+	enum class CullMode
 	{
-		u32 binding = 0;
-		Name name = "";
-		u32 arrayCount = 1;
-		ShaderResourceType type = SHADER_RESOURCE_TYPE_NONE;
-		b8 isDynamic = false;
-
-		ShaderStage stageFlags = ShaderStage::Vertex | ShaderStage::Fragment;
+		None = 0,
+		Back,
+		Front,
+		All
 	};
+	ENUM_CLASS(CullMode);
 
-	struct ShaderResourceGroupDesc
-	{
-		Array<ShaderResourceVariableDesc> variables{};
-	};
+    ENUM()
+    enum class FillMode
+    {
+        Solid = 0,
+        Wireframe
+    };
+    ENUM_CLASS(FillMode);
 
-	struct ShaderStageDesc
-	{
-		RHI::ShaderModule* shaderModule = nullptr;
-		RHI::ShaderStage stage = RHI::ShaderStage::None;
-		String entry = "";
-	};
+    ENUM(Flags)
+    enum class ColorComponentMask
+    {
+        None = 0,
+        R = BIT(0),
+        G = BIT(1),
+        B = BIT(2),
+        A = BIT(3),
 
-	struct VertexAttribDesc
-	{
-		u32 location = 0;
-		TypeId dataType = 0;
-		u32 offset = 0;
-	};
-
-	enum CullMode
-	{
-		CULL_MODE_NONE = 0,
-		CULL_MODE_BACK,
-		CULL_MODE_FRONT,
-		CULL_MODE_ALL
-	};
-
-	struct GraphicsPipelineDesc
-	{
-		u32 vertexSizeInBytes = 0;
-		Array<VertexAttribDesc> vertexAttribs{};
-
-		RHI::ShaderModule* vertexShader = nullptr;
-		String vertexEntry = "VertMain";
-		RHI::ShaderModule* fragmentShader = nullptr;
-		String fragmentEntry = "FragMain";
-		Array<ShaderStageDesc> otherStages{};
-
-		CullMode cullMode = CULL_MODE_BACK;
-
-		Array<RHI::ShaderResourceGroup*> shaderResourceGroups{};
-	};
-
-	struct CORERHI_API GraphicsPipelineBuilder
-	{
-		GraphicsPipelineBuilder() {}
-
-		GraphicsPipelineBuilder& VertexSize(u32 byteSize)
-		{
-			desc.vertexSizeInBytes = byteSize;
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& VertexAttrib(u32 location, TypeId dataType, u32 offset)
-		{
-			VertexAttribDesc attrib{};
-			attrib.location = location;
-			attrib.dataType = dataType;
-			attrib.offset = offset;
-			desc.vertexAttribs.Add(attrib);
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& VertexShader(RHI::ShaderModule* shaderModule, const String& entry = "VertMain")
-		{
-			desc.vertexShader = shaderModule;
-			desc.vertexEntry = entry;
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& FragmentShader(RHI::ShaderModule* shaderModule, const String& entry = "FragMain")
-		{
-			desc.fragmentShader = shaderModule;
-			desc.fragmentEntry = entry;
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& CullMode(CullMode cullMode)
-		{
-			desc.cullMode = cullMode;
-			return *this;
-		}
-
-		GraphicsPipelineBuilder& ShaderResource(RHI::ShaderResourceGroup* srg)
-		{
-			desc.shaderResourceGroups.Add(srg);
-			return *this;
-		}
-
-		const GraphicsPipelineDesc& Build()
-		{
-			return desc;
-		}
-
-	private:
-
-		GraphicsPipelineDesc desc{};
-	};
+        RGB = R | G | B,
+        RG = R | G,
+        RB = R | B,
+        GB = G | B,
+        RGBA = R | G | B | A,
+        All = R | G | B | A,
+    };
+    ENUM_CLASS(ColorComponentMask);
 
 } // namespace CE
+
+#include "RHIDefinitions.rtti.h"

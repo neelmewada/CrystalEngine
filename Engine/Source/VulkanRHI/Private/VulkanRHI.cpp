@@ -6,22 +6,14 @@
 #include "PAL/Common/VulkanPlatform.h"
 #undef max
 
-#include "VulkanBuffer.h"
-#include "VulkanViewport.h"
-#include "VulkanRenderPass.h"
-#include "VulkanSwapChain.h"
-#include "VulkanTexture.h"
-#include "VulkanSampler.h"
-#include "VulkanShaderModule.h"
-#include "VulkanPipeline.h"
-#include "VulkanDescriptorPool.h"
-
 #include <vulkan/vulkan.h>
 
-CE_IMPLEMENT_MODULE(VulkanRHI, CE::VulkanRHIModule)
+CE_IMPLEMENT_MODULE(VulkanRHI, CE::Vulkan::VulkanRHIModule)
 
-namespace CE
+namespace CE::Vulkan
 {
+	static VulkanRHI* gVulkanRHI = nullptr;
+
 	void VulkanRHIModule::StartupModule()
 	{
         //RHI::gDynamicRHI = new VulkanRHI();
@@ -45,18 +37,26 @@ namespace CE
     {
         if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
         {
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Error, pCallbackData->pMessage);
             CE_LOG(Error, All, "Vulkan Error: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
         {
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Info, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Info: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT)
         {
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Verbose, pCallbackData->pMessage);
             CE_LOG(Info, All, "Vulkan Verbose: {}", pCallbackData->pMessage);
         }
         else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
         {
+			if (gVulkanRHI != nullptr)
+				gVulkanRHI->BroadCastValidationMessage(ValidationMessageType::Warning, pCallbackData->pMessage);
             CE_LOG(Warn, All, "Vulkan Warning: {}", pCallbackData->pMessage);
         }
         return VK_FALSE;
@@ -69,7 +69,7 @@ namespace CE
         {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
         }
-        else 
+        else
         {
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
@@ -97,6 +97,8 @@ namespace CE
 
 	void VulkanRHI::Initialize()
 	{
+		gVulkanRHI = this;
+
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.apiVersion = VK_API_VERSION_1_1;
@@ -186,6 +188,8 @@ namespace CE
 
         vkDestroyInstance(vkInstance, nullptr);
         vkInstance = nullptr;
+
+		gVulkanRHI = nullptr;
 	}
 
     void* VulkanRHI::GetNativeHandle()
@@ -200,49 +204,51 @@ namespace CE
 
     // - Render Target -
 
+	RHI::Scope* VulkanRHI::CreateScope(const RHI::ScopeDescriptor& desc)
+	{
+		return new Vulkan::Scope(device, desc);
+	}
+
+	RHI::FrameGraphCompiler* VulkanRHI::CreateFrameGraphCompiler()
+	{
+		return new Vulkan::FrameGraphCompiler(device);
+	}
+
+	RHI::FrameGraphExecuter* VulkanRHI::CreateFrameGraphExecuter()
+	{
+		return new Vulkan::FrameGraphExecuter(device);
+	}
+
+	void VulkanRHI::BroadCastValidationMessage(RHI::ValidationMessageType type, const char* message)
+	{
+		for (auto handler : validationCallbackHandlers[(int)type])
+		{
+			if (handler)
+				handler(type, message);
+		}
+	}
+
+	bool VulkanRHI::IsOffscreenOnly()
+	{
+		return device->IsOffscreenOnly();
+	}
+
 	Vec2i VulkanRHI::GetScreenSizeForWindow(void* platformWindowHandle)
 	{
 		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
 	}
 
-	RHI::RenderTarget* VulkanRHI::CreateRenderTarget(u32 width, u32 height,
-        const RHI::RenderTargetLayout& rtLayout)
-    {
-        return new VulkanRenderTarget(device, VulkanRenderTargetLayout(device, width, height, rtLayout));
-    }
+	Array<RHI::Format> VulkanRHI::GetAvailableDepthStencilFormats()
+	{
+		return device->GetAvailableDepthStencilFormats();
+	}
 
-    void VulkanRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
+    Array<RHI::Format> VulkanRHI::GetAvailableDepthOnlyFormats()
     {
-        delete renderTarget;
-    } 
-
-    RHI::Viewport* VulkanRHI::CreateViewport(PlatformWindow* window, u32 width, u32 height, bool isFullscreen, const RHI::RenderTargetLayout& rtLayout)
-    {
-        return new VulkanViewport(this, device, window, width, height, isFullscreen, rtLayout);
-    }
-
-    void VulkanRHI::DestroyViewport(RHI::Viewport* viewport)
-    {
-        delete viewport;
+        return device->GetAvailableDepthOnlyFormats();
     }
 
     // - Command List -
-
-    RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::Viewport* viewport)
-    {
-        return new VulkanGraphicsCommandList(this, device, (VulkanViewport*)viewport);
-    }
-
-    RHI::GraphicsCommandList* VulkanRHI::CreateGraphicsCommandList(RHI::RenderTarget* renderTarget)
-    {
-        if (renderTarget->IsViewportRenderTarget())
-        {
-            auto vulkanViewport = ((VulkanRenderTarget*)renderTarget)->GetVulkanViewport();
-            return CreateGraphicsCommandList(vulkanViewport);
-        }
-
-        return new VulkanGraphicsCommandList(this, device, (VulkanRenderTarget*)renderTarget);
-    }
 
     void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)
     {
@@ -251,9 +257,9 @@ namespace CE
 
     bool VulkanRHI::ExecuteCommandList(RHI::CommandList* commandList)
     {
-        if (commandList->GetCommandListType() == RHI::CommandListType::Graphics)
+        /*if (commandList->GetCommandListType() == RHI::CommandListType::Graphics)
         {
-            auto vulkanCommandList = (VulkanGraphicsCommandList*)commandList;
+            auto vulkanCommandList = (GraphicsCommandList*)commandList;
             if (vulkanCommandList->IsViewportTarget())
             {
                 return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetViewport());
@@ -262,17 +268,17 @@ namespace CE
             {
                 return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetRenderTarget());
             }
-        }
+        }*/
         return false;
     }
 
-    bool VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanRenderTarget* renderTarget)
+    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, RenderTarget* renderTarget)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
 
         // -- Waiting for Fences --
         // Wait until the rendering from previous call has been finished
-        vkWaitForFences(device->GetHandle(),
+        /*vkWaitForFences(device->GetHandle(),
             1, &commandList->renderFinishedFence[renderTarget->currentImageIndex],
             VK_TRUE, u64Max);
 
@@ -304,115 +310,142 @@ namespace CE
 
         vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo,
             commandList->renderFinishedFence[renderTarget->currentImageIndex]);
-
-		// TODO: For testing purposes only
-		//vkQueueWaitIdle(device->GetGraphicsQueue()->GetHandle());
-
-        renderTarget->isFresh = false;
+        
+        renderTarget->isFresh = false;*/
         return true;
     }
-
-    bool VulkanRHI::ExecuteGraphicsCommandList(VulkanGraphicsCommandList* commandList, VulkanViewport* viewport)
+    
+    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, Viewport* viewport)
     {
         constexpr auto u64Max = std::numeric_limits<u64>::max();
-
+		
         // -- Waiting for Fences --
         // Wait until the rendering from previous call has been finished
-        auto result = vkWaitForFences(device->GetHandle(),
-            1, &commandList->renderFinishedFence[viewport->currentImageIndex],
-            VK_TRUE, u64Max);
-        
-        result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
-            viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
+        //auto result = vkWaitForFences(device->GetHandle(),
+        //    1, &commandList->renderFinishedFence[viewport->currentImageIndex],
+        //    VK_TRUE, u64Max);
+        //
+        //result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
+        //    viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-        {
-            viewport->Rebuild();
-            return false;
-        }
-        
-        // Manually reset (close) the fences
-        result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
+        //if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+        //{
+        //    viewport->Rebuild();
+        //    return false;
+        //}
+        //
+        //// Manually reset (close) the fences
+        //result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
+		
+        //// Submit to Queue
+        //VkSubmitInfo submitInfo = {};
+        //submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        //submitInfo.waitSemaphoreCount = 1;
+        //// List of semaphores to wait on at waitStages[i]
+        //submitInfo.pWaitSemaphores = &viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex];
 
-        // Submit to Queue
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.waitSemaphoreCount = 1;
-        // List of semaphores to wait on at waitStages[i]
-        submitInfo.pWaitSemaphores = &viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex];
+        //// Execute the whole command buffer until the fragment shader stage (so we don't output any data to framebuffer yet)
+        //// and THEN wait for the image to be available (imageAcquiredSemaphore) so fragment shader can output pixels to it.
+        //VkPipelineStageFlags waitStages[] = {
+        //        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        //};
+        //submitInfo.pWaitDstStageMask = waitStages; // Stages to check semaphores at
 
-        // Execute the whole command buffer until the fragment shader stage (so we don't output any data to framebuffer yet)
-        // and THEN wait for the image to be available (imageAcquiredSemaphore) so fragment shader can output pixels to it.
-        VkPipelineStageFlags waitStages[] = {
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        };
-        submitInfo.pWaitDstStageMask = waitStages; // Stages to check semaphores at
+        //// Only submit the command buffer we want to render to since they're 1:1 with SwapChain Images
+        //submitInfo.commandBufferCount = 1;
+        //submitInfo.pCommandBuffers = &commandList->commandBuffers[viewport->currentImageIndex];
 
-        // Only submit the command buffer we want to render to since they're 1:1 with SwapChain Images
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandList->commandBuffers[viewport->currentImageIndex];
+        //// Semaphores to signal when command buffer finishes executing (finished rendering)
+        //submitInfo.signalSemaphoreCount = 1;
+        //submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
 
-        // Semaphores to signal when command buffer finishes executing (finished rendering)
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
-
-        result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
-
+        //result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
+		
         return true;
     }
 
     bool VulkanRHI::PresentViewport(RHI::GraphicsCommandList* viewportCommandList)
     {
-        auto vulkanCommandList = (VulkanGraphicsCommandList*)viewportCommandList;
-        if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
-            return false;
+  //      auto vulkanCommandList = (GraphicsCommandList*)viewportCommandList;
+  //      if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
+  //          return false;
 
-        auto vulkanViewport = vulkanCommandList->GetViewport();
-        auto swapChain = vulkanViewport->GetSwapChain()-> GetHandle();
+  //      auto vulkanViewport = vulkanCommandList->GetViewport();
+		//VkSwapchainKHR swapChain = nullptr;// vulkanViewport->GetSwapChain()->GetHandle();
+		
+  //      VkPresentInfoKHR presentInfo{};
+  //      presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  //      presentInfo.waitSemaphoreCount = 1;
+  //      presentInfo.pWaitSemaphores = &vulkanCommandList->renderFinishedSemaphore[vulkanViewport->currentImageIndex];
+  //      presentInfo.swapchainCount = 1;
+  //      presentInfo.pSwapchains = &swapChain;
+  //      presentInfo.pImageIndices = &vulkanViewport->currentImageIndex;
 
-        VkPresentInfoKHR presentInfo{};
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = &vulkanCommandList->renderFinishedSemaphore[vulkanViewport->currentImageIndex];
-        presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = &swapChain;
-        presentInfo.pImageIndices = &vulkanViewport->currentImageIndex;
+  //      auto result = vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
+  //      if (result != VK_SUCCESS)
+  //          return false;
 
-        auto result = vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
-        if (result != VK_SUCCESS)
-            return false;
-
-        // Next frame index (if we're rendering 2 frames simultaneously for triple buffering)
-        vulkanViewport->currentDrawFrameIndex = (vulkanViewport->currentDrawFrameIndex + 1) % vulkanViewport->GetSimultaneousFrameDrawCount();
+  //      // Next frame index (if we're rendering 2 frames simultaneously for triple buffering)
+  //      vulkanViewport->currentDrawFrameIndex = (vulkanViewport->currentDrawFrameIndex + 1) % vulkanViewport->GetSimultaneousFrameDrawCount();
 
         return true;
     }
 
     // - Resources -
 
-    RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDesc& bufferDesc)
+	RHI::SwapChain* VulkanRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
+	{
+		return new Vulkan::SwapChain(this, device, window, desc);
+	}
+
+	void VulkanRHI::DestroySwapChain(RHI::SwapChain* swapChain)
+	{
+		delete swapChain;
+	}
+
+	RHI::MemoryHeap* VulkanRHI::AllocateMemoryHeap(const MemoryHeapDescriptor& desc)
+	{
+		return new MemoryHeap(device, desc);
+	}
+
+	void VulkanRHI::FreeMemoryHeap(RHI::MemoryHeap* memoryHeap)
+	{
+		delete memoryHeap;
+	}
+
+	RHI::Buffer* VulkanRHI::CreateBuffer(const RHI::BufferDescriptor& bufferDesc)
     {
-        return new VulkanBuffer(device, bufferDesc);
+        return new Buffer(device, bufferDesc);
     }
+
+	RHI::Buffer* VulkanRHI::CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc)
+	{
+		return new Buffer(device, bufferDesc, memoryDesc);
+	}
 
     void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
     {
         delete buffer;
     }
 
-    RHI::Texture* VulkanRHI::CreateTexture(const RHI::TextureDesc& textureDesc)
+    RHI::Texture* VulkanRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc)
     {
-        return new VulkanTexture(device, textureDesc);
+        return new Texture(device, textureDesc);
     }
+
+	RHI::Texture* VulkanRHI::CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc)
+	{
+		return new Texture(device, textureDesc, memoryDesc);
+	}
 
     void VulkanRHI::DestroyTexture(RHI::Texture* texture)
     {
         delete texture;
     }
 
-    RHI::Sampler* VulkanRHI::CreateSampler(const RHI::SamplerDesc& samplerDesc)
+    RHI::Sampler* VulkanRHI::CreateSampler(const RHI::SamplerDescriptor& samplerDesc)
     {
-        return new VulkanSampler(device, samplerDesc);
+        return new Sampler(device, samplerDesc);
     }
 
     void VulkanRHI::DestroySampler(RHI::Sampler* sampler)
@@ -422,7 +455,7 @@ namespace CE
 
     void* VulkanRHI::AddImGuiTexture(RHI::Texture* texture, RHI::Sampler* sampler)
     {
-        return VulkanPlatform::AddImGuiTexture((VulkanTexture*)texture, (VulkanSampler*)sampler);
+        return VulkanPlatform::AddImGuiTexture((Texture*)texture, (Sampler*)sampler);
     }
 
     void VulkanRHI::RemoveImGuiTexture(void* imguiTexture)
@@ -431,9 +464,9 @@ namespace CE
         VulkanPlatform::RemoveImGuiTexture((VkDescriptorSet)imguiTexture);
     }
 
-	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDesc& desc)
+	RHI::ShaderModule* VulkanRHI::CreateShaderModule(const RHI::ShaderModuleDescriptor& desc)
 	{
-		return new VulkanShaderModule(device, desc);
+		return new Vulkan::ShaderModule(device, desc);
 	}
 
 	void VulkanRHI::DestroyShaderModule(RHI::ShaderModule* shaderModule)
@@ -441,9 +474,9 @@ namespace CE
 		delete shaderModule;
 	}
 
-	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupDesc& desc)
+	RHI::ShaderResourceGroup* VulkanRHI::CreateShaderResourceGroup(const RHI::ShaderResourceGroupLayout& srgLayout)
 	{
-		return new VulkanShaderResourceGroup(device, desc);
+		return new Vulkan::ShaderResourceGroup(device, srgLayout);
 	}
 
 	void VulkanRHI::DestroyShaderResourceGroup(RHI::ShaderResourceGroup* shaderResourceGroup)
@@ -451,539 +484,98 @@ namespace CE
 		delete shaderResourceGroup;
 	}
 
-	RHI::GraphicsPipelineState* VulkanRHI::CreateGraphicsPipelineState(RHI::RenderTarget* renderTarget, const RHI::GraphicsPipelineDesc& desc)
+    RHI::PipelineState* VulkanRHI::CreateGraphicsPipeline(const RHI::GraphicsPipelineDescriptor& desc)
+    {
+        return new Vulkan::PipelineState(device, desc);
+    }
+
+    void VulkanRHI::DestroyPipeline(const RHI::PipelineState* pipeline)
+    {
+        delete pipeline;
+    }
+
+	Array<RHI::CommandQueue*> VulkanRHI::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
 	{
-		return new VulkanGraphicsPipeline(device, (VulkanRenderTarget*)renderTarget, desc);
+		return device->GetHardwareQueues(queueMask);
 	}
 
-	void VulkanRHI::DestroyPipelineState(RHI::IPipelineState* pipelineState)
-	{
-		delete pipelineState;
-	}
-
-    /******************************************************************************
-    *  VulkanFrameBuffer
-    */
-
-    VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, VulkanSwapChain* swapChain, u32 swapChainImageIndex, VulkanRenderTarget* renderTarget)
+    u64 VulkanRHI::GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member)
     {
-        this->device = device;
-        const auto& rtLayout = renderTarget->rtLayout;
+        u64 alignment = 0;
 
-        VkFramebufferCreateInfo frameBufferCI{};
-        frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        
-        frameBufferCI.attachmentCount = rtLayout.colorAttachmentCount + (rtLayout.HasDepthStencilAttachment() ? 1 : 0);
-        
-        List<VkImageView> attachments{ frameBufferCI.attachmentCount };
-        attachments[rtLayout.presentationRTIndex] = swapChain->swapChainColorImages[swapChainImageIndex].imageView;
-
-        if (rtLayout.HasDepthStencilAttachment())
+        switch (member.dataType)
         {
-            attachments[attachments.GetSize() - 1] = swapChain->swapChainDepthImage->GetImageView();
-        }
-
-        frameBufferCI.pAttachments = attachments.GetData();
-
-        frameBufferCI.width = swapChain->GetWidth();
-        frameBufferCI.height = swapChain->GetHeight();
-
-        frameBufferCI.renderPass = renderTarget->GetVulkanRenderPass()->GetHandle();
-
-        frameBufferCI.layers = 1;
-
-        if (vkCreateFramebuffer(device->GetHandle(), &frameBufferCI, nullptr, &frameBuffer) != VK_SUCCESS)
-        {
-            CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
-            return;
-        }
-    }
-
-    VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, 
-        VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1], 
-        VulkanRenderTarget* renderTarget)
-    {
-        this->device = device;
-        const auto& rtLayout = renderTarget->rtLayout;
-
-        VkFramebufferCreateInfo frameBufferCI{};
-        frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-
-        frameBufferCI.attachmentCount = rtLayout.colorAttachmentCount + (rtLayout.HasDepthStencilAttachment() ? 1 : 0);
-        frameBufferCI.pAttachments = attachments;
-
-        frameBufferCI.width = renderTarget->GetWidth();
-        frameBufferCI.height = renderTarget->GetHeight();
-
-        frameBufferCI.renderPass = renderTarget->GetVulkanRenderPass()->GetHandle();
-
-        frameBufferCI.layers = 1;
-
-        if (vkCreateFramebuffer(device->GetHandle(), &frameBufferCI, nullptr, &frameBuffer) != VK_SUCCESS)
-        {
-            CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
-            return;
-        }
-    }
-
-    VulkanFrameBuffer::~VulkanFrameBuffer()
-    {
-        vkDestroyFramebuffer(device->GetHandle(), frameBuffer, nullptr);
-    }
-
-    /******************************************************************************
-     *  VulkanGraphicsCommandList
-     */
-
-    VulkanGraphicsCommandList::VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanViewport* viewport)
-        : vulkanRHI(vulkanRHI)
-        , device(device)
-        , viewport(viewport)
-    {
-        this->renderTarget = (VulkanRenderTarget*)viewport->GetRenderTarget();
-        this->numCommandBuffers = viewport->GetBackBufferCount();
-        this->simultaneousFrameDraws = viewport->GetSimultaneousFrameDrawCount();
-
-        VkCommandBufferAllocateInfo commandAllocInfo = {};
-        commandAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandAllocInfo.commandBufferCount = numCommandBuffers;
-        commandAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandAllocInfo.commandPool = device->GetGraphicsCommandPool();
-
-        commandBuffers.Resize(numCommandBuffers);
-
-        if (vkAllocateCommandBuffers(device->GetHandle(), &commandAllocInfo, commandBuffers.GetData()) != VK_SUCCESS)
-        {
-            CE_LOG(Error, All, "Failed to allocate Vulkan Command Buffers for a Graphics Command List object!");
-            return;
-        }
-
-        CreateSyncObjects();
-    }
-
-    VulkanGraphicsCommandList::VulkanGraphicsCommandList(VulkanRHI* vulkanRHI, VulkanDevice* device, VulkanRenderTarget* renderTarget)
-        : vulkanRHI(vulkanRHI)
-        , device(device)
-        , renderTarget(renderTarget)
-    {
-        if (renderTarget->IsViewportRenderTarget())
-        {
-            auto viewport = renderTarget->GetVulkanViewport();
-
-            this->renderTarget = (VulkanRenderTarget*)viewport->GetRenderTarget();
-            this->numCommandBuffers = viewport->GetBackBufferCount();
-            this->simultaneousFrameDraws = viewport->GetSimultaneousFrameDrawCount();
-
-            VkCommandBufferAllocateInfo commandAllocInfo = {};
-            commandAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-            commandAllocInfo.commandBufferCount = numCommandBuffers;
-            commandAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-            commandAllocInfo.commandPool = device->GetGraphicsCommandPool();
-
-            commandBuffers.Resize(numCommandBuffers);
-
-            if (vkAllocateCommandBuffers(device->GetHandle(), &commandAllocInfo, commandBuffers.GetData()) != VK_SUCCESS)
+        case ShaderStructMemberType::UInt:
+        case ShaderStructMemberType::Int:
+        case ShaderStructMemberType::Float:
+            return sizeof(u32); // 4 byte
+        case ShaderStructMemberType::Float2:
+            return sizeof(f32) * 2; // 8 bytes
+        case ShaderStructMemberType::Float3:
+        case ShaderStructMemberType::Float4:
+        case ShaderStructMemberType::Float4x4:
+            return sizeof(f32) * 4; // 16 bytes
+        case ShaderStructMemberType::Struct:
+            alignment = 0;
+            for (const auto& nestedMember : member.nestedMembers)
             {
-                CE_LOG(Error, All, "Failed to allocate Vulkan Command Buffers for a Graphics Command List object!");
-                return;
+                alignment = Math::Max(alignment, GetShaderStructMemberAlignment(nestedMember));
             }
-
-            CreateSyncObjects();
-            return;
+            return alignment;
         }
-        else
-        {
-            this->numCommandBuffers = renderTarget->GetBackBufferCount();
-            this->simultaneousFrameDraws = renderTarget->GetBackBufferCount();
 
-            VkCommandBufferAllocateInfo commandAllocInfo = {};
-            commandAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-            commandAllocInfo.commandBufferCount = numCommandBuffers;
-            commandAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-            commandAllocInfo.commandPool = device->GetGraphicsCommandPool();
-
-            commandBuffers.Resize(numCommandBuffers);
-
-            if (vkAllocateCommandBuffers(device->GetHandle(), &commandAllocInfo, commandBuffers.GetData()) != VK_SUCCESS)
-            {
-                CE_LOG(Error, All, "Failed to allocate Vulkan Command Buffers for a Graphics Command List object!");
-                return;
-            }
-
-            CreateSyncObjects();
-        }
+        return alignment;
     }
 
-    VulkanGraphicsCommandList::~VulkanGraphicsCommandList()
+    u64 VulkanRHI::GetShaderStructMemberSize(const RHI::ShaderStructMember& member)
     {
-        vkDeviceWaitIdle(device->GetHandle());
+        switch (member.dataType)
+        {
+        case RHI::ShaderStructMemberType::Float:
+        case RHI::ShaderStructMemberType::UInt:
+        case RHI::ShaderStructMemberType::Int:
+            return sizeof(u32) * member.arrayCount;
+        case RHI::ShaderStructMemberType::Float2:
+            return sizeof(Vec2) * member.arrayCount;
+        case RHI::ShaderStructMemberType::Float3:
+        case RHI::ShaderStructMemberType::Float4:
+            return sizeof(Vec4) * member.arrayCount;
+        case RHI::ShaderStructMemberType::Float4x4:
+            return sizeof(Matrix4x4);
+        case RHI::ShaderStructMemberType::Struct:
+        {
+            u64 structAlignment = GetShaderStructMemberAlignment(member);
+            u64 offset = 0;
+            for (const auto& nestedMember : member.nestedMembers)
+            {
+                u64 alignment = GetShaderStructMemberAlignment(nestedMember);
+                if (offset > 0)
+                    offset = Memory::GetAlignedSize(offset, alignment);
+                offset += GetShaderStructMemberSize(nestedMember);
+            }
+            offset = Memory::GetAlignedSize(offset, structAlignment);
+            return offset;
+        }
+        break;
+        }
 
-        vkFreeCommandBuffers(device->GetHandle(), device->GetGraphicsCommandPool(), numCommandBuffers, commandBuffers.GetData());
-
-        DestroySyncObjects();
+        return 0;
     }
 
-    void VulkanGraphicsCommandList::Begin()
+    void VulkanRHI::GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets)
     {
-        constexpr auto u64Max = std::numeric_limits<u64>::max();
+        outOffsets.Clear();
 
-        vkWaitForFences(device->GetHandle(), renderFinishedFence.GetSize(), renderFinishedFence.GetData(), VK_TRUE, u64Max);
+        u64 offset = 0;
 
-        VkExtent2D extent{};
-        extent.width = renderTarget->GetWidth();
-        extent.height = renderTarget->GetHeight();
-
-        // - Dynamic Viewport & Scissor -
-        VkViewport viewportSize = {};
-        viewportSize.x = 0;
-        viewportSize.y = 0;
-        viewportSize.width = (float)extent.width;
-        viewportSize.height = (float)extent.height;
-        viewportSize.minDepth = 0.0f;
-        viewportSize.maxDepth = 1.0f;
-
-        VkRect2D scissor = {};
-        scissor.offset = { 0, 0 };
-        scissor.extent = extent;
-
-        // - Command Buffer & Render Pass --
-        VkCommandBufferBeginInfo cmdBufferInfo{};
-        cmdBufferInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = ((VulkanRenderPass*)renderTarget->GetRenderPass())->GetHandle();
-        renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = extent;
-        
-        VkClearValue clearValues[RHI::MaxSimultaneousRenderOutputs + 1] = {};
-        for (int i = 0; i < renderTarget->GetColorAttachmentCount(); ++i)
+        for (const auto& member : members)
         {
-            for (int j = 0; j < 4; ++j)
-            {
-                clearValues[i].color.float32[j] = renderTarget->clearColors[i][j];
-            }
-        }
-
-        if (renderTarget->HasDepthStencilAttachment())
-        {
-            clearValues[renderTarget->GetColorAttachmentCount()].depthStencil.depth = 1.0f;
-            clearValues[renderTarget->GetColorAttachmentCount()].depthStencil.stencil = 0;
-        }
-
-        renderPassInfo.clearValueCount = renderTarget->GetTotalAttachmentCount();
-        renderPassInfo.pClearValues = clearValues;
-
-        for (int i = 0; i < commandBuffers.GetSize(); i++)
-        {
-            if (viewport != nullptr)
-            {
-                renderPassInfo.framebuffer = viewport->frameBuffers[i]->GetHandle();
-            }
-            else
-            {
-                renderPassInfo.framebuffer = renderTarget->colorFrames[i].framebuffer->GetHandle();
-            }
-
-            // Begin Command Buffer
-            vkBeginCommandBuffer(commandBuffers[i], &cmdBufferInfo);
-
-            // Begin Render Pass
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            // Set viewport & scissor dynamic state
-            vkCmdSetViewport(commandBuffers[i], 0, 1, &viewportSize);
-            vkCmdSetScissor(commandBuffers[i], 0, 1, &scissor);
+            u64 alignment = GetShaderStructMemberAlignment(member);
+            if (offset > 0)
+                offset = Memory::GetAlignedSize(offset, alignment);
+            outOffsets.Add(offset);
+            offset += GetShaderStructMemberSize(member);
         }
     }
-
-    void VulkanGraphicsCommandList::End()
-    {
-        for (int i = 0; i < commandBuffers.GetSize(); ++i)
-        {
-            vkCmdEndRenderPass(commandBuffers[i]);
-            vkEndCommandBuffer(commandBuffers[i]);
-        }
-    }
-
-	void VulkanGraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers)
-	{
-		List<VkBuffer> vkBuffers = {};
-		Array<SIZE_T> offsets = {};
-		vkBuffers.Resize(buffers.GetSize());
-		offsets.Resize(buffers.GetSize());
-		for (int i = 0; i < buffers.GetSize(); i++)
-		{
-			vkBuffers[i] = (VkBuffer)buffers[i]->GetHandle();
-			offsets[i] = 0;
-		}
-
-		for (int i = 0; i < commandBuffers.GetSize(); ++i)
-		{
-			vkCmdBindVertexBuffers(commandBuffers[i], firstBinding, vkBuffers.GetSize(), vkBuffers.GetData(), offsets.GetData());
-		}
-	}
-
-	void VulkanGraphicsCommandList::BindVertexBuffers(u32 firstBinding, const Array<RHI::Buffer*>& buffers, const Array<SIZE_T>& bufferOffsets)
-	{
-		if (buffers.GetSize() != bufferOffsets.GetSize())
-		{
-			CE_LOG(Error, All, "BindVertexBuffers() passed with buffers & bufferOffsets array of different size!");
-			return;
-		}
-
-		List<VkBuffer> vkBuffers = {};
-		vkBuffers.Resize(buffers.GetSize());
-		for (int i = 0; i < buffers.GetSize(); i++)
-		{
-			vkBuffers[i] = (VkBuffer)buffers[i]->GetHandle();
-		}
-
-		for (int i = 0; i < commandBuffers.GetSize(); ++i)
-		{
-			vkCmdBindVertexBuffers(commandBuffers[i], firstBinding, vkBuffers.GetSize(), vkBuffers.GetData(), bufferOffsets.GetData());
-		}
-	}
-
-	void VulkanGraphicsCommandList::BindIndexBuffer(RHI::Buffer* buffer, bool use32BitIndex, SIZE_T offset)
-	{
-		for (int i = 0; i < commandBuffers.GetSize(); ++i)
-		{
-			vkCmdBindIndexBuffer(commandBuffers[i], (VkBuffer)buffer->GetHandle(), offset, use32BitIndex ? VK_INDEX_TYPE_UINT32 : VK_INDEX_TYPE_UINT16);
-		}
-	}
-
-	void VulkanGraphicsCommandList::BindPipeline(RHI::IPipelineState* pipeline)
-	{
-		if (pipeline == nullptr)
-			return;
-
-		VkPipeline vkPipeline = (VkPipeline)pipeline->GetNativeHandle();
-
-		RHI::IPipelineLayout* pipelineLayout = pipeline->GetPipelineLayout();
-
-		VkPipelineBindPoint bindPoint{};
-
-		switch (pipelineLayout->GetPipelineType())
-		{
-		case RHI::PipelineType::None:
-			return;
-		case RHI::PipelineType::Graphics:
-			bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			break;
-		case RHI::PipelineType::Compute:
-			bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
-			break;
-		}
-
-		for (int i = 0; i < commandBuffers.GetSize(); ++i)
-		{
-			vkCmdBindPipeline(commandBuffers[i], bindPoint, vkPipeline);
-		}
-	}
-
-	void VulkanGraphicsCommandList::CommitShaderResources(u32 firstFrequencyId, 
-		const List<RHI::ShaderResourceGroup*>& shaderResourceGroups, 
-		RHI::IPipelineLayout* pipelineLayout)
-	{
-		if (shaderResourceGroups.IsEmpty() || pipelineLayout == nullptr)
-			return;
-
-		List<VkDescriptorSet> srgs = shaderResourceGroups.Transform<VkDescriptorSet>(
-			[&](RHI::ShaderResourceGroup* in) { return ((VulkanShaderResourceGroup*)in)->GetDescriptorSet(); });
-		
-		VulkanPipelineLayout* vulkanPipelineLayout = (VulkanPipelineLayout*)pipelineLayout;
-
-		VkPipelineBindPoint bindPoint{};
-
-		switch (pipelineLayout->GetPipelineType())
-		{
-		case RHI::PipelineType::None:
-			return;
-		case RHI::PipelineType::Graphics:
-			bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			break;
-		case RHI::PipelineType::Compute:
-			bindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
-			break;
-		}
-
-		for (int i = 0; i < commandBuffers.GetSize(); ++i)
-		{
-			vkCmdBindDescriptorSets(commandBuffers[i], bindPoint, vulkanPipelineLayout->handle, firstFrequencyId, srgs.GetSize(), srgs.GetData(), 0, nullptr);
-		}
-	}
-
-	void VulkanGraphicsCommandList::WaitForExecution()
-	{
-		constexpr u64 u64Max = NumericLimits<u64>::Max();
-		auto result = vkWaitForFences(device->GetHandle(),
-			renderFinishedFence.GetSize(), renderFinishedFence.GetData(),
-			VK_TRUE, u64Max);
-	}
-
-	void VulkanGraphicsCommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, s32 vertexOffset, u32 firstInstance)
-	{
-		for (int i = 0; i < commandBuffers.GetSize(); ++i)
-		{
-			vkCmdDrawIndexed(commandBuffers[i], indexCount, instanceCount, firstIndex, vertexOffset, firstIndex);
-		}
-	}
-
-    void VulkanGraphicsCommandList::CreateSyncObjects()
-    {
-        VkSemaphoreCreateInfo semaphoreCI{};
-        semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-        renderFinishedSemaphore.Resize(numCommandBuffers);
-        for (int i = 0; i < numCommandBuffers; i++)
-        {
-            if (vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &renderFinishedSemaphore[i]) != VK_SUCCESS)
-            {
-                CE_LOG(Error, All, "Failed to create render finished semaphore for a Vulkan Graphics Command List");
-                return;
-            }
-        }
-
-        VkFenceCreateInfo fenceCI = {};
-        fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Create fence in the signaled state (i.e. fence is open)
-
-        renderFinishedFence.Resize(numCommandBuffers);
-        for (int i = 0; i < numCommandBuffers; i++)
-        {
-            if (vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &renderFinishedFence[i]) != VK_SUCCESS)
-            {
-                CE_LOG(Error, All, "Failed to create render finished fence for a Vulkan Graphics Command List");
-                return;
-            }
-        }
-    }
-
-    void VulkanGraphicsCommandList::DestroySyncObjects()
-    {
-        for (int i = 0; i < renderFinishedFence.GetSize(); ++i)
-        {
-            vkDestroyFence(device->GetHandle(), renderFinishedFence[i], nullptr);
-        }
-        renderFinishedFence.Clear();
-
-        for (int i = 0; i < renderFinishedSemaphore.GetSize(); ++i)
-        {
-            vkDestroySemaphore(device->GetHandle(), renderFinishedSemaphore[i], nullptr);
-        }
-        renderFinishedSemaphore.Clear();
-    }
-
-	/*
-	*	Vulkan Shader Resources
-	*/
-
-	VulkanShaderResourceGroup::VulkanShaderResourceGroup(VulkanDevice* device, const RHI::ShaderResourceGroupDesc& desc) 
-		: device(device), desc(desc)
-	{
-		VkDescriptorSetLayoutCreateInfo setLayoutCI{};
-		setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		
-		bindings.Clear();
-		variableNames.Clear();
-
-		for (int i = 0; i < desc.variables.GetSize(); i++)
-		{
-			const auto& variable = desc.variables[i];
-
-			VkDescriptorSetLayoutBinding binding{};
-			binding.binding = variable.binding;
-			binding.descriptorCount = variable.arrayCount;
-			binding.stageFlags = 0;
-			
-			if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Vertex))
-				binding.stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
-			if (EnumHasFlag(variable.stageFlags, RHI::ShaderStage::Fragment))
-				binding.stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
-
-			if (binding.stageFlags == 0)
-				continue;
-
-			switch (variable.type)
-			{
-			case RHI::SHADER_RESOURCE_TYPE_CONSTANT_BUFFER:
-				binding.descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				break;
-			case RHI::SHADER_RESOURCE_TYPE_TEXTURE_BUFFER:
-				binding.descriptorType = variable.isDynamic ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-				break;
-			case RHI::SHADER_RESOURCE_TYPE_SAMPLED_IMAGE:
-				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-				break;
-			case RHI::SHADER_RESOURCE_TYPE_SAMPLER_STATE:
-				binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-				break;
-			default:
-				continue;
-			}
-			
-			variableNames.Add(variable.name);
-			bindings.Add(binding);
-		}
-
-		setLayoutCI.bindingCount = bindings.GetSize();
-		setLayoutCI.pBindings = bindings.GetData();
-		
-		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
-		if (result != VK_SUCCESS)
-		{
-			CE_LOG(Error, All, "Failed to create Descriptor Set Layout");
-			return;
-		}
-
-		auto pool = device->GetDescriptorPool();
-
-		auto sets = pool->Allocate(1, { setLayout }, descriptorPool);
-		if (sets.IsEmpty())
-		{
-			return;
-		}
-
-		descriptorSet = sets[0];
-	}
-
-	VulkanShaderResourceGroup::~VulkanShaderResourceGroup()
-	{
-		vkFreeDescriptorSets(device->GetHandle(), descriptorPool, 1, &descriptorSet);
-		descriptorPool = nullptr;
-		descriptorSet = nullptr;
-
-		vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
-		setLayout = nullptr;
-	}
-
-	void VulkanShaderResourceGroup::Bind(Name variableName, RHI::Buffer* buffer)
-	{
-		int index = variableNames.IndexOf(variableName);
-		if (index < 0)
-			return;
-
-		bufferVariableBindings[variableName] = buffer;
-
-		VkDescriptorSetLayoutBinding binding = bindings[index];
-
-		VkDescriptorBufferInfo bufferInfo{};
-		bufferInfo.buffer = (VkBuffer)buffer->GetHandle();
-		bufferInfo.offset = 0;
-		bufferInfo.range = buffer->GetBufferSize();
-
-		VkWriteDescriptorSet write{};
-		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		write.dstSet = descriptorSet;
-		write.dstBinding = binding.binding;
-		write.dstArrayElement = 0;
-
-		write.descriptorCount = binding.descriptorCount;
-		write.descriptorType = binding.descriptorType;
-		write.pBufferInfo = &bufferInfo;
-		
-		vkUpdateDescriptorSets(device->GetHandle(), 1, &write, 0, nullptr);
-	}
 
 } // namespace CE

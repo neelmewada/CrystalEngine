@@ -4,16 +4,18 @@
 
 #include "VulkanRHI.h"
 #include "VulkanStructs.h"
-#include "VulkanQueue.h"
 
 #include <vulkan/vulkan.h>
 
-namespace CE
+namespace CE::Vulkan
 {
-    class VulkanQueue;
-    class VulkanSwapChain;
-    class VulkanTexture;
+    class CommandQueue;
+    class SwapChain;
+    class Texture;
 	class VulkanDescriptorPool;
+	class ShaderResourceManager;
+	class CommandBufferAllocator;
+	class RenderPassCache;
 
     class VulkanDevice
     {
@@ -51,15 +53,30 @@ namespace CE
         void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
         void SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
+		VkCommandPool AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, VkCommandBufferLevel level, u32 queueFamilyIndex);
+		void FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers);
+
         // - Getters -
 
-        INLINE VkCommandPool GetGraphicsCommandPool() { return gfxCommandPool; }
+		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask);
+		Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass);
 
-        INLINE VulkanQueue* GetGraphicsQueue() { return graphicsQueue; }
-        INLINE VulkanQueue* GetPresentQueue() { return presentQueue; }
+		INLINE bool IsUnifiedMemoryArchitecture() const
+		{
+			return isUnifiedMemory;
+		}
 
-        INLINE VkDevice GetHandle() { return device; }
-        INLINE VkPhysicalDevice GetPhysicalHandle() { return gpu; }
+		inline CommandBufferAllocator* GetCommandAllocator() const { return commandAllocator; }
+
+		INLINE bool IsOffscreenOnly() const { return !surfaceSupported; }
+
+        INLINE VkCommandPool GetGraphicsCommandPool() const { return gfxCommandPool; }
+
+        INLINE CommandQueue* GetGraphicsQueue() const { return primaryGraphicsQueue; }
+        INLINE CommandQueue* GetPresentQueue() const { return presentQueue; }
+
+        INLINE VkDevice GetHandle() const { return device; }
+        INLINE VkPhysicalDevice GetPhysicalHandle() const { return gpu; }
 
         INLINE const SurfaceSupportInfo& GetSurfaceSupportInfo() const { return surfaceSupport; }
 
@@ -70,6 +87,26 @@ namespace CE
 
 		INLINE VulkanDescriptorPool* GetDescriptorPool() const { return descriptorPool; }
 
+		INLINE const VkPhysicalDeviceLimits& GetDeviceLimits() const
+		{
+			return gpuProperties.limits;
+		}
+
+		INLINE ShaderResourceManager* GetShaderResourceManager() const
+		{
+			return srgManager;
+		}
+
+		INLINE const VkPhysicalDeviceMemoryProperties& GetMemoryProperties() const
+		{
+			return memoryProperties;
+		}
+
+		INLINE RenderPassCache* GetRenderPassCache() const { return renderPassCache; }
+
+        const Array<RHI::Format>& GetAvailableDepthStencilFormats();
+        const Array<RHI::Format>& GetAvailableDepthOnlyFormats();
+
     protected:
 
     private:
@@ -78,27 +115,51 @@ namespace CE
         void InitGpu();
         bool QueryGpu(u32 gpuIndex);
 
+		void FetchQueues(VkPhysicalDevice gpu);
+
         VulkanQueueFamilies GetQueueFamilies(VkPhysicalDevice gpu);
         VkDeviceSize GetPhysicalDeviceLocalMemory(VkPhysicalDevice gpu);
         SurfaceSupportInfo FetchSurfaceSupportInfo(VkPhysicalDevice gpu);
 
         bool isInitialized = false;
+		bool isUnifiedMemory = false;
+
+		/// @brief Vulkan can be initialized without any Native windows (i.e. offscreen mode).
+		/// Potentially useful for command line applications/toos.
+		bool surfaceSupported = false;
+
         VkInstance instance = nullptr;
         VulkanRHI* vulkanRhi = nullptr;
+
+		VkPhysicalDeviceMemoryProperties memoryProperties{};
+		HashSet<int> ignoredHeapIndices{};
 
 		Array<String> supportedDeviceExtensions{};
 
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};
+		Array<VkQueueFamilyProperties> queueFamilyPropeties{};
+        Array<RHI::Format> availableDepthStencilFormats{};
+        Array<RHI::Format> availableDepthOnlyFormats{};
+
         GpuMetaData gpuMetaData{};
 
         VkDevice device = nullptr;
-        VulkanQueueFamilies queueFamilies{};
+        //VulkanQueueFamilies queueFamilies{};
         SurfaceSupportInfo surfaceSupport{};
 
         VkSurfaceKHR testSurface = nullptr;
-        VulkanQueue* graphicsQueue = nullptr;
-        VulkanQueue* presentQueue = nullptr;
+
+		Array<CommandQueue*> queues{};
+        Array<CommandQueue*> presentQueues{};
+		HashMap<int, Array<CommandQueue*>> queuesByFamily{};
+
+		CommandBufferAllocator* commandAllocator = nullptr;
+        CommandQueue* primaryGraphicsQueue = nullptr;
+        CommandQueue* presentQueue = nullptr;
+
+		RenderPassCache* renderPassCache = nullptr;
+		ShaderResourceManager* srgManager = nullptr;
         VkCommandPool gfxCommandPool = nullptr;
 
         HashMap<u32, VkCommandPool> queueFamilyToCmdPool{};
@@ -106,6 +167,8 @@ namespace CE
 		SharedMutex mainThreadMutex{};
 
 		VulkanDescriptorPool* descriptorPool = nullptr;
+        
+        friend class FrameGraphCompiler;
     };
     
 } // namespace CE

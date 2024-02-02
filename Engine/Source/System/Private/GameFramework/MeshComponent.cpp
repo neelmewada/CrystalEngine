@@ -10,11 +10,7 @@ namespace CE
 
     MeshComponent::~MeshComponent()
     {
-		if (vertexBuffer != nullptr)
-		{
-			RHI::gDynamicRHI->DestroyBuffer(vertexBuffer);
-			vertexBuffer = nullptr;
-		}
+		
     }
 
     void MeshComponent::SetMaterialAt(u32 index, MaterialInterface* material)

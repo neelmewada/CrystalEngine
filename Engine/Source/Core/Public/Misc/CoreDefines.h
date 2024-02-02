@@ -12,7 +12,7 @@
 
 #define CE_DEPRECATED(Version, Message) [[deprecated(Message " Please update your code to not use the deprecated API.")]]
 
-#define CE_NO_COPY(Class) Class(Class& Copy) = delete;
+#define CE_NO_COPY(Class) Class(const Class&) = delete; Class& operator=(const Class&) = delete;
 
 #define CE_STATIC_CLASS(Class) Class() = delete; ~Class() = delete;
 

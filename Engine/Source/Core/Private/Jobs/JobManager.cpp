@@ -11,7 +11,7 @@
 
 namespace CE
 {
-	JobManager::JobManager(const String& name, const JobManagerDesc& desc)
+	JobManager::JobManager(const Name& name, const JobManagerDesc& desc)
 		: name (name)
 		, defaultTag(desc.defaultTag)
 		, numThreads(FixNumThreads(desc))
@@ -245,7 +245,7 @@ namespace CE
 
 					bool shouldSleep = false;
 					{
-						LockGuard<Mutex> lock{ jobManagerMutex };
+						LockGuard<SharedMutex> lock{ jobManagerMutex };
 
 						if (globalQueue.empty())
 						{
@@ -274,7 +274,7 @@ namespace CE
 				}
 
 				{
-					LockGuard<Mutex> lock{ jobManagerMutex };
+					LockGuard<SharedMutex> lock{ jobManagerMutex };
 
 					if (!globalQueue.empty())
 					{
@@ -476,7 +476,7 @@ namespace CE
 		}
 		else
 		{
-			LockGuard<Mutex> lock{ jobManagerMutex };
+			LockGuard<SharedMutex> lock{ jobManagerMutex };
 
 			globalQueue.push_back(job);
 			AwakeWorker();

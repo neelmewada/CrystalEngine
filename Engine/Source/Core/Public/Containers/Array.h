@@ -19,6 +19,9 @@ namespace CE
     template<typename ElementType>
     class Array;
 
+	template<typename ElementType>
+	class ArrayView;
+
     template<typename ElementType>
     class List
     {
@@ -27,6 +30,8 @@ namespace CE
         {
 
         }
+
+		List(const ArrayView<ElementType>& view);
 
         List(SIZE_T count) : Impl(count)
         {
@@ -95,11 +100,15 @@ namespace CE
 
         CE_INLINE ElementType* GetData()
         {
+			if (IsEmpty())
+				return nullptr;
             return Impl.data();
         }
 
         CE_INLINE const ElementType* GetData() const
         {
+			if (IsEmpty())
+				return nullptr;
             return Impl.data();
         }
 
@@ -158,7 +167,7 @@ namespace CE
         }
 
         template<typename... Args>
-        CE_INLINE void EmplaceBack(Args... args)
+        CE_INLINE void EmplaceBack(Args&&... args)
         {
             Impl.emplace_back(args...);
         }
@@ -335,6 +344,7 @@ namespace CE
             Iterator& operator++() { ptr++; return *this; }
             Iterator operator++(int) { Iterator Temp = *this; ++(*this); return Temp; }
 			Iterator operator+(difference_type rhs) const { return Iterator(ptr + rhs); }
+            Iterator& operator+=(difference_type rhs) { ptr += rhs; return *this; }
 			Iterator operator+(Iterator rhs) const { return ptr + rhs.ptr; }
 
             // Decrement ops
@@ -420,6 +430,8 @@ namespace CE
         {
             
         }
+
+		Array(const ArrayView<ElementType>& view);
 
         Array(SIZE_T count) : Super(count), ElementTypeId(GetTypeId<ElementType>())
         {
@@ -642,7 +654,7 @@ namespace CE
 		}
 
         template<typename... Args>
-        CE_INLINE void EmplaceBack(Args... args)
+        CE_INLINE void EmplaceBack(Args&&... args)
         {
             Super::Impl.emplace_back(args...);
         }

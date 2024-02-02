@@ -2,17 +2,17 @@
 
 #include <vulkan/vulkan.h>
 
-namespace CE
+namespace CE::Vulkan
 {
-    class VulkanTexture;
-    class VulkanSampler;
+    class Texture;
+    class Sampler;
 
     class VulkanPlatformBase
     {
         CE_STATIC_CLASS(VulkanPlatformBase)
     public:
         
-        static VkDescriptorSet AddImGuiTexture(VulkanTexture* texture, VulkanSampler* sampler);
+        static VkDescriptorSet AddImGuiTexture(Texture* texture, Sampler* sampler);
         
         static void RemoveImGuiTexture(VkDescriptorSet imguiTexture);
         

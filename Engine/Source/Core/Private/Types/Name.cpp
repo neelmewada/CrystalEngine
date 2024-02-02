@@ -5,6 +5,7 @@
 
 namespace CE
 {
+	static SharedMutex nameMutex{};
 	HashMap<SIZE_T, String> Name::nameHashMap = HashMap<SIZE_T, String>{
 		{ 0, "" }
 	};
@@ -79,6 +80,9 @@ namespace CE
 
 		this->hashValue = GetHash(hashString);
 		//this->value = hashString;
+
+		LockGuard<SharedMutex> lock{ nameMutex };
+
 		nameHashMap[this->hashValue] = hashString;
 #if CE_NAME_DEBUG
 		debugString = nameHashMap[this->hashValue].GetCString();
@@ -94,6 +98,7 @@ namespace CE
 	{
 		this->hashValue = copy.hashValue;
 #if CE_NAME_DEBUG
+		LockGuard<SharedMutex> lock{ nameMutex };
 		debugString = nameHashMap[this->hashValue].GetCString();
 #endif
 	}
@@ -102,6 +107,7 @@ namespace CE
 	{
 		this->hashValue = copy.hashValue;
 #if CE_NAME_DEBUG
+		LockGuard<SharedMutex> lock{ nameMutex };
 		debugString = nameHashMap[this->hashValue].GetCString();
 #endif
 		return *this;
@@ -113,12 +119,14 @@ namespace CE
 		move.hashValue = 0;
 
 #if CE_NAME_DEBUG
+		LockGuard<SharedMutex> lock{ nameMutex };
 		debugString = nameHashMap[this->hashValue].GetCString();
 #endif
 	}
 
 	const String& Name::GetString() const
 	{
+		LockGuard<SharedMutex> lock{ nameMutex };
 		return nameHashMap[hashValue];
 	}
 

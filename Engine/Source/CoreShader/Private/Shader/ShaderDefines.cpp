@@ -2,49 +2,50 @@
 
 namespace CE
 {
-	CORESHADER_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input)
-	{
-		switch (input) {
-		case VertexInputAttribute::Position:
-			return sizeof(Vec3);
-		case VertexInputAttribute::UV0:
-		case VertexInputAttribute::UV1:
-		case VertexInputAttribute::UV2:
-		case VertexInputAttribute::UV3:
-			return sizeof(Vec2);
-		case VertexInputAttribute::Normal:
-			return sizeof(Vec3);
-		case VertexInputAttribute::Tangent:
-			return sizeof(Vec3);
-		case VertexInputAttribute::Color:
-			return sizeof(Vec4);
-		default:
-			return 0;
-		}
 
-		return 0;
-	}
-
-    SRGEntry& ShaderReflection::FindOrAdd(u32 frequencyId)
+    RHI::ShaderResourceGroupLayout& ShaderReflection::FindOrAdd(RHI::SRGType srgType)
     {
-		for (auto& entry : resourceGroups)
+		for (auto& entry : srgLayouts)
 		{
-			if (entry.GetFrequencyId() == frequencyId)
+			if (entry.srgType == srgType)
 				return entry;
 		}
 
-		SRGEntry entry{};
-		entry.frequencyId = frequencyId;
-		resourceGroups.Add(entry);
+		RHI::ShaderResourceGroupLayout entry{};
+		entry.srgType = srgType;
+		srgLayouts.Add(entry);
 
-		return resourceGroups.Top();
+		return srgLayouts.Top();
     }
+
+	const VariableBindingMap& ShaderReflection::GetVariableNameMap() const
+	{
+		if (variableNameToBindingSlot.IsEmpty())
+		{
+			for (const auto& srgEntry : srgLayouts)
+			{
+				for (const auto& variable : srgEntry.variables)
+				{
+					variableNameToBindingSlot[variable.name] = variable.bindingSlot;
+				}
+			}
+		}
+
+		return variableNameToBindingSlot;
+	}
+
+	void ShaderReflection::OnAfterDeserialize()
+	{
+		variableNameToBindingSlot.Clear();
+
+		GetVariableNameMap();
+	}
 
 	void SRGEntry::TryAdd(const SRGVariable& variable, ShaderStage stage)
 	{
 		for (auto& var : variables)
 		{
-			if (var.GetName() == variable.GetName() && var.GetBinding() == variable.GetBinding())
+			if (var.GetName() == variable.GetName() && var.GetBindingSlot() == variable.GetBindingSlot())
 			{
 				var.shaderStages |= stage;
 				return;

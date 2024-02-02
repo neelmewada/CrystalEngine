@@ -5,6 +5,7 @@ project(CoreRHI CXX)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
+    AUTORTTI
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER
@@ -28,6 +29,7 @@ ce_add_target(${PROJECT_NAME} SHARED
         PUBLIC
             CE::Core
             CE::CoreMedia
+            CE::CoreApplication
         TARGETS Config
     RUNTIME_DEPENDENCIES
 

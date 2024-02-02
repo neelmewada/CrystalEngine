@@ -290,7 +290,7 @@ namespace CE
 	};
 
 	template<typename T>
-	struct THasOnBeforeSerializeFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TTrueType
+	struct THasOnBeforeSerializeFunction<T, std::void_t<decltype(std::declval<T>().OnBeforeSerialize())>> : TTrueType
 	{
 		static void OnBeforeSerialize(T* instance) { return instance->OnBeforeSerialize(); }
 	};
@@ -302,7 +302,7 @@ namespace CE
 	};
 
 	template<typename T>
-	struct THasOnAfterDeserializeFunction<T, std::void_t<decltype(std::declval<T>().GetHash())>> : TTrueType
+	struct THasOnAfterDeserializeFunction<T, std::void_t<decltype(std::declval<T>().OnAfterDeserialize())>> : TTrueType
 	{
 		static void OnAfterDeserialize(T* instance) { return instance->OnAfterDeserialize(); }
 	};
@@ -316,6 +316,18 @@ namespace CE
 			((T*)instance)->~T();
 		}
 	};
+
+	template<typename T, typename... List>
+	struct TContainsType : TFalseType
+	{};
+
+	template<typename T, typename... Rest>
+	struct TContainsType<T, T, Rest...> : TTrueType
+	{};
+
+	template<typename T, typename First, typename... Rest>
+	struct TContainsType<T, First, Rest...> : TContainsType<T, Rest...>
+	{};
 
 } // namespace CE::Traits
 

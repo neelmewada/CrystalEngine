@@ -1,13 +1,11 @@
 
-#include "VulkanDevice.h"
+#include "VulkanRHIPrivate.h"
 #include "PAL/Common/VulkanPlatform.h"
-
-#include "VulkanDescriptorPool.h"
 
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
-namespace CE
+namespace CE::Vulkan
 {
 
 	VulkanDevice::VulkanDevice(VkInstance instance, VulkanRHI* vulkanRhi)
@@ -23,17 +21,21 @@ namespace CE
 
 	void VulkanDevice::Initialize()
 	{
-		// TODO: pass window handle
+		// Check if a main window exists, otherwise initialize in offscreen mode
 		auto mainWindow = VulkanPlatform::GetMainPlatformWindow();
+		surfaceSupported = true;
+
 		if (mainWindow != nullptr)
 			testSurface = VulkanPlatform::CreateSurface(instance, mainWindow);
+		else
+			surfaceSupported = false; // Initialize vulkan in offscreen mode
 
 		SelectGpu();
 		InitGpu();
 
 		VkCommandPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-		poolInfo.queueFamilyIndex = queueFamilies.graphicsFamily;
+		poolInfo.queueFamilyIndex = primaryGraphicsQueue->GetFamilyIndex();
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		if (vkCreateCommandPool(device, &poolInfo, nullptr, &gfxCommandPool) != VK_SUCCESS)
 		{
@@ -47,6 +49,12 @@ namespace CE
 
 		descriptorPool = new VulkanDescriptorPool(this);
 
+		srgManager = new ShaderResourceManager(this);
+
+		commandAllocator = new CommandBufferAllocator(this);
+
+		renderPassCache = new RenderPassCache(this);
+
 		isInitialized = true;
 
 		CE_LOG(Info, All, "Vulkan device initialized");
@@ -56,14 +64,23 @@ namespace CE
 	{
 		isInitialized = false;
 
+		delete renderPassCache;
+		renderPassCache = nullptr;
+
+		delete commandAllocator;
+		commandAllocator = nullptr;
+
+		delete srgManager;
+		srgManager = nullptr;
+
 		delete descriptorPool;
 		descriptorPool = nullptr;
 
-		delete graphicsQueue;
-		graphicsQueue = nullptr;
-
-		delete presentQueue;
-		presentQueue = nullptr;
+		for (auto queue : queues)
+		{
+			delete queue;
+		}
+		queues.Clear();
 	}
 
 	void VulkanDevice::Shutdown()
@@ -82,6 +99,48 @@ namespace CE
 		device = nullptr;
 
 		CE_LOG(Info, All, "Vulkan device shutdown");
+	}
+
+	const Array<RHI::Format>& VulkanDevice::GetAvailableDepthStencilFormats()
+	{
+		if (availableDepthStencilFormats.IsEmpty())
+		{
+			StaticArray<VkFormat, 3> formats = { VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT };
+
+			for (VkFormat format : formats)
+			{
+				VkFormatProperties props;
+				vkGetPhysicalDeviceFormatProperties(gpu, format, &props);
+
+				if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+				{
+					availableDepthStencilFormats.Add(VkFormatToRHIFormat(format));
+				}
+			}
+		}
+
+		return availableDepthStencilFormats;
+	}
+
+	const Array<RHI::Format>& VulkanDevice::GetAvailableDepthOnlyFormats()
+	{
+		if (availableDepthOnlyFormats.IsEmpty())
+		{
+			StaticArray<VkFormat, 2> formats = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D16_UNORM };
+
+			for (VkFormat format : formats)
+			{
+				VkFormatProperties props;
+				vkGetPhysicalDeviceFormatProperties(gpu, format, &props);
+
+				if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
+				{
+					availableDepthOnlyFormats.Add(VkFormatToRHIFormat(format));
+				}
+			}
+		}
+
+		return availableDepthOnlyFormats;
 	}
 
 	void VulkanDevice::SelectGpu()
@@ -140,27 +199,50 @@ namespace CE
 
 	void VulkanDevice::InitGpu()
 	{
+		// Fetch memory properties
+		vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
+
+		isUnifiedMemory = true;
+
+		for (int i = 0; i < memoryProperties.memoryHeapCount; i++)
+		{
+			if (memoryProperties.memoryHeaps[i].flags != VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+			{
+				isUnifiedMemory = false;
+				break;
+			}
+		}
+
 		vkGetPhysicalDeviceProperties(gpu, &gpuProperties);
 		gpuMetaData.localMemorySize = GetPhysicalDeviceLocalMemory(gpu);
 
 		// Store Queue Families & Surface Support Info for later use
-		queueFamilies = GetQueueFamilies(gpu);
+		//queueFamilies = GetQueueFamilies(gpu);
 		surfaceSupport = FetchSurfaceSupportInfo(gpu);
 
-		Array<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<int> queueFamilyIndices = { queueFamilies.graphicsFamily, queueFamilies.presentFamily };
+		// Fetch Queue properties
+		u32 queuePropertyCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, nullptr);
+		queueFamilyPropeties.Clear();
+		queueFamilyPropeties.Resize(queuePropertyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, queueFamilyPropeties.GetData());
+
+		Array<VkDeviceQueueCreateInfo> queueCreateInfos{};
 		float queuePriority = 1.0f;
+		Array<float> queuePriorities{};
 
-		u32 graphicsQueueIndex = 0;
-		u32 presentQueueIndex = queueFamilyIndices.size() - 1;
-
-		for (const auto& queueFamily : queueFamilyIndices)
+		for (int familyIdx = 0; familyIdx < queueFamilyPropeties.GetSize(); familyIdx++)
 		{
+			int queueCount = queueFamilyPropeties[familyIdx].queueCount;
+			queuePriorities.Resize(queueCount);
+			for (int i = 0; i < queueCount; i++)
+				queuePriorities[i] = 1.0f;
+
 			VkDeviceQueueCreateInfo queueCI = {};
 			queueCI.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			queueCI.queueFamilyIndex = queueFamily;
-			queueCI.queueCount = 1;
-			queueCI.pQueuePriorities = &queuePriority;
+			queueCI.queueFamilyIndex = familyIdx;
+			queueCI.queueCount = queueCount;
+			queueCI.pQueuePriorities = queuePriorities.GetData();
 
 			queueCreateInfos.Add(queueCI);
 		}
@@ -181,7 +263,7 @@ namespace CE
 
 		for (int i = 0; i < deviceExtensionCount; ++i)
 		{
-			// Required rule by Vulkan Specs.
+			// Required rule by Vulkan Specs, especially on Apple platform.
 			if (strcmp(deviceExtensionProperties[i].extensionName, "VK_KHR_portability_subset") == 0)
 			{
 				deviceExtensionNames.Add(deviceExtensionProperties[i].extensionName);
@@ -214,31 +296,16 @@ namespace CE
 			return;
 		}
 
-		VkQueue gfxQueue = nullptr, presentQueue = nullptr;
-		vkGetDeviceQueue(device, queueFamilies.graphicsFamily, graphicsQueueIndex, &gfxQueue);
-		vkGetDeviceQueue(device, queueFamilies.presentFamily, presentQueueIndex, &presentQueue);
+		// Fetch all queues from the GPU
+		FetchQueues(gpu);
 
-		this->graphicsQueue = new VulkanQueue(this, queueFamilies.graphicsFamily, graphicsQueueIndex, gfxQueue);
-		this->presentQueue = new VulkanQueue(this, queueFamilies.presentFamily, presentQueueIndex, presentQueue);
-
-		//VmaAllocatorCreateInfo allocatorCI{};
-		//allocatorCI.instance = instance;
-		//allocatorCI.device = device;
-		//allocatorCI.physicalDevice = gpu;
-
-		//if (vmaCreateAllocator(&allocatorCI, &vmaAllocator) != VK_SUCCESS)
-		//{
-		//	CE_LOG(Error, All, "Failed to create Vulkan VmaAllocator!");
-		//	return;
-		//}
-
-		// Command Pools
-		for (const auto& familyIndex : queueFamilyIndices)
+		// Command Pools for each family
+		for (int familyIdx = 0; familyIdx < queueFamilyPropeties.GetSize(); familyIdx++)
 		{
 			VkCommandPoolCreateInfo commandPoolCI = {};
 			commandPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 			commandPoolCI.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-			commandPoolCI.queueFamilyIndex = familyIndex;
+			commandPoolCI.queueFamilyIndex = familyIdx;
 
 			VkCommandPool commandPool = nullptr;
 			if (vkCreateCommandPool(device, &commandPoolCI, nullptr, &commandPool) != VK_SUCCESS)
@@ -247,13 +314,61 @@ namespace CE
 				return;
 			}
 
-			if (!queueFamilyToCmdPool.KeyExists(familyIndex))
-				queueFamilyToCmdPool.Add({ (u32)familyIndex, nullptr });
+			for (int i = 0; i < queues.GetSize(); i++)
+			{
+				if (queues[i]->GetFamilyIndex() == familyIdx)
+				{
+					queues[i]->commandPool = commandPool;
+				}
+			}
 
-			queueFamilyToCmdPool[familyIndex] = commandPool;
+			queueFamilyToCmdPool[familyIdx] = commandPool;
 		}
+	}
 
-		CE_LOG(Info, All, "Vulkan: Created logical device & queues");
+	void VulkanDevice::FetchQueues(VkPhysicalDevice gpu)
+	{
+		for (int familyIdx = 0; familyIdx < queueFamilyPropeties.GetSize(); familyIdx++)
+		{
+			const VkQueueFamilyProperties& queueFamilyProperty = queueFamilyPropeties[familyIdx];
+			RHI::HardwareQueueClassMask queueMask{};
+			if (queueFamilyProperty.queueFlags & VK_QUEUE_COMPUTE_BIT)
+				queueMask |= RHI::HardwareQueueClassMask::Compute;
+			if (queueFamilyProperty.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+				queueMask |= RHI::HardwareQueueClassMask::Graphics;
+			if (queueFamilyProperty.queueFlags & VK_QUEUE_TRANSFER_BIT)
+				queueMask |= RHI::HardwareQueueClassMask::Transfer;
+
+			VkBool32 presentationSupported = VK_FALSE;
+			if (testSurface != nullptr)
+				vkGetPhysicalDeviceSurfaceSupportKHR(gpu, familyIdx, testSurface, &presentationSupported);
+
+			for (int i = 0; i < queueFamilyProperty.queueCount; i++)
+			{
+				VkQueue vkQueue = nullptr;
+				vkGetDeviceQueue(device, familyIdx, i, &vkQueue);
+
+				CommandQueue* queue = new CommandQueue(this, familyIdx, i, queueMask, vkQueue, presentationSupported > 0);
+				queues.Add(queue);
+				queuesByFamily[familyIdx].Add(queue);
+                if (presentationSupported)
+                {
+                    presentQueues.Add(queue);
+                }
+
+				if (primaryGraphicsQueue == nullptr && 
+					EnumHasAllFlags(queueMask, RHI::HardwareQueueClassMask::Compute | RHI::HardwareQueueClassMask::Graphics))
+				{
+					primaryGraphicsQueue = queue;
+					if (presentationSupported)
+						presentQueue = queue;
+				}
+				else if (presentQueue == nullptr && presentationSupported)
+				{
+					presentQueue = queue;
+				}
+			}
+		}
 	}
 
 	bool VulkanDevice::QueryGpu(u32 gpuIndex)
@@ -266,7 +381,8 @@ namespace CE
 		VkPhysicalDevice gpu = physicalDevices[gpuIndex];
 		auto queueFamilies = GetQueueFamilies(gpu);
 
-		if (!queueFamilies.IsValidGraphicsFamily() || !queueFamilies.IsValidPresentFamily() || !queueFamilies.IsValidComputeFamily() || !queueFamilies.IsValidTransferFamily())
+		if (!queueFamilies.IsValidGraphicsFamily() || !queueFamilies.IsValidPresentFamily() || 
+			!queueFamilies.IsValidComputeFamily() || !queueFamilies.IsValidTransferFamily())
 		{
 			return false;
 		}
@@ -299,7 +415,7 @@ namespace CE
 				return false;
 			}
 		}
-
+		
 		auto surfaceSupportInfo = FetchSurfaceSupportInfo(gpu);
 		bool surfaceSupportsSwapChain = !surfaceSupportInfo.presentationModes.IsEmpty() && !surfaceSupportInfo.surfaceFormats.IsEmpty();
 		if (!surfaceSupportsSwapChain)
@@ -579,7 +695,7 @@ namespace CE
 
 		VkPipelineStageFlags sourceStage = 0;
 		VkPipelineStageFlags destinationStage = 0;
-
+		
 		switch (oldLayout)
 		{
 		case VK_IMAGE_LAYOUT_UNDEFINED:
@@ -604,7 +720,7 @@ namespace CE
 			break;
 		case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
 			barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-			sourceStage = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+			sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		default:
 			return;
@@ -688,10 +804,64 @@ namespace CE
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffer;
 
-        vkQueueSubmit(graphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(graphicsQueue->GetHandle());
+		VkFenceCreateInfo fenceCI{};
+		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        vkQueueSubmit(primaryGraphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(primaryGraphicsQueue->GetHandle());
 
         vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
     }
+
+	VkCommandPool VulkanDevice::AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, VkCommandBufferLevel level, u32 queueFamilyIndex)
+	{
+		return commandAllocator->Allocate(count, outBuffers, level, queueFamilyIndex);
+	}
+
+	void VulkanDevice::FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers)
+	{
+
+	}
+
+	Array<RHI::CommandQueue*> VulkanDevice::GetHardwareQueues(RHI::HardwareQueueClassMask queueMask)
+	{
+		Array<RHI::CommandQueue*> result{};
+
+		for (int i = 0; i < queues.GetSize(); i++)
+		{
+			if ((queues[i]->GetQueueMask() & queueMask) == queueMask)
+				result.Add(queues[i]);
+		}
+
+		return result;
+	}
+
+	Array<RHI::CommandQueue*> VulkanDevice::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)
+	{
+		Array<RHI::CommandQueue*> queues{};
+		int queueFamilyCount = queueFamilyPropeties.GetSize();
+		HashMap<RHI::HardwareQueueClass, int> queueCounts = queueCountByClass;
+
+		int& graphicsQueueCount = queueCounts[RHI::HardwareQueueClass::Graphics];
+		int& transferQueueCount = queueCounts[RHI::HardwareQueueClass::Transfer];
+		int& computeQueueCount = queueCounts[RHI::HardwareQueueClass::Compute];
+
+		for (int familyIdx = 0; familyIdx < queueFamilyCount; familyIdx++)
+		{
+			VkQueueFamilyProperties familyProps = queueFamilyPropeties[familyIdx];
+			
+			if (graphicsQueueCount > 0 && (familyProps.queueFlags & VK_QUEUE_GRAPHICS_BIT))
+			{
+				if (graphicsQueueCount < familyProps.queueCount)
+					graphicsQueueCount = 0;
+				else
+					graphicsQueueCount -= familyProps.queueCount;
+			}
+
+		}
+
+		return queues;
+	}
 
 } // namespace CE

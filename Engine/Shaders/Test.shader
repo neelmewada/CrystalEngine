@@ -2,16 +2,37 @@ Shader "Test Shader"
 {
     Properties 
     {
-        _Material("Material", ConstantBuffer)
-        {
-            [MainColor]
-            albedo("Albedo", Color) = (1, 1, 1, 1)
-            roughness("Roughness", Float) = 1.0
-            normalStrength("Normal Strength", Range(0, 2)) = 1.0
-            metallic("Metallic", Float) = 0.0
+        "_Material": {
+            "Type": "ConstantBuffer",
+            "SRG": "PerMaterial",
+            "albedo": {
+                "Display": "Albedo",
+                "Type": "Color",
+                "Default": [1, 1, 1, 1],
+                "Attribs": ["MainColor"]
+            },
+            "roughness": {
+                "Display": "Roughness",
+                "Type": "Float",
+                "Default": 1.0
+            },
+            "normalStrength": {
+                "Display": "Normal Strength",
+                "Type": "Float",
+                "Range": [0, 2],
+                "Default": 1.0
+            },
+            "metallic": {
+                "Display": "Metallic",
+                "Type": "Float",
+                "Default": 0.0
+            }
+        },
+        "_AlbedoTex": {
+            "Type": "Tex2D",
+            "Display": "Albedo Map",
+            "Default": "black",
         }
-
-        _AlbedoTex("Albedo Map", 2D) = "black"
     }
     SubShader
     {
@@ -27,7 +48,7 @@ Shader "Test Shader"
 
             HLSLPROGRAM
 
-            #include "Macros.hlsl"
+            #include "ShaderLibrary.hlsli"
 
             #pragma vertex VertMain
             #pragma fragment FragMain
@@ -44,22 +65,6 @@ Shader "Test Shader"
                 float4 position : SV_POSITION;
             };
 
-            struct CameraData
-            {
-                float4x4 viewMatrix;
-                float4x4 projectionMatrix;
-                float4x4 viewProjectionMatrix;
-            };
-
-            struct ModelData
-            {
-                float4x4 modelMatrix;
-            };
-            
-            ConstantBuffer<CameraData> _Camera : SRG_PerView(b);
-
-            ConstantBuffer<ModelData> _Model : SRG_PerObject(b);
-
             cbuffer _Material : SRG_PerMaterial(b)
             {
                 float4 albedo;
@@ -73,7 +78,7 @@ Shader "Test Shader"
             v2f VertMain(VertexInfo input)
             {
                 v2f o;
-                o.position = mul(mul(mul(float4(input.position, 1.0), _Model.modelMatrix), _Camera.viewMatrix), _Camera.projectionMatrix);
+                o.position = mul(mul(mul(float4(input.position, 1.0), modelMatrix), viewMatrix), projectionMatrix);
                 return o;
             }
 

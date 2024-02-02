@@ -30,6 +30,8 @@ namespace CE
 		{ TYPEID(Matrix4x4), 0x84 },
 	};
 
+	constexpr u8 customFieldType = 0xFF;
+
 	BinarySerializer::BinarySerializer(TypeInfo* targetType, void* targetInstance)
 		: targetType(targetType), instance(targetInstance)
 	{
@@ -984,7 +986,8 @@ namespace CE
 			*stream >> objectUuid;
 			*stream >> packageUuid;
 			
-			if (packageUuid != 0)
+			// TODO: Better loading mechanism for external object references?
+			if (packageUuid != 0 && field->IsObjectField())
 			{
 				Package* refPackage = Package::LoadPackageByUuid(packageUuid);
 				if (refPackage != nullptr)

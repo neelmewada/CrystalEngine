@@ -2,6 +2,7 @@
 
 namespace CE
 {
+	using Resource = CE::Resource;
     
 	class CORE_API ResourceManager : public Object
 	{
@@ -14,7 +15,7 @@ namespace CE
 
 		void DeregisterResource(const String& moduleName, const String& pathToResource);
 
-		Resource* LoadResource(const Name& path, Object* outer = GetTransientPackage());
+		CE::Resource* LoadResource(const Name& path, Object* outer = GetTransientPackage());
 
 		String LoadTextResource(const Name& path);
 

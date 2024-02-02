@@ -47,6 +47,7 @@ namespace CE
 
 		HashMap<Uuid, Actor*> actorsByUuid{};
 		HashMap<TypeId, HashMap<Uuid, ActorComponent*>> componentsByType{};
+		HashMap<MaterialInterface*, Array<MeshComponent*>> meshesByMaterial{};
 		Array<CameraComponent*> cameras{};
 
 		CameraComponent* mainCamera = nullptr;

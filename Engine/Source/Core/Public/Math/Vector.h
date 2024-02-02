@@ -23,6 +23,14 @@ namespace CE
 
 	typedef Vec4i RectInt;
 
+	typedef Vec2 Range;
+	typedef Vec2i RangeInt;
+
+    inline bool ApproxEquals(f32 lhs, f32 rhs)
+    {
+        return std::abs(lhs - rhs) < std::numeric_limits<f32>::epsilon();
+    }
+
     template<typename T>
     class TVector2
     {
@@ -41,6 +49,9 @@ namespace CE
             struct {
                 T x, y;
             };
+			struct {
+				T min, max;
+			};
 			struct {
 				T left, right;
 			};

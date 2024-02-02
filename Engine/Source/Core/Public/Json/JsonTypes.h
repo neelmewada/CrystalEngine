@@ -199,12 +199,8 @@ namespace CE
 		JValue(bool boolValue);
 		JValue(f64 numberValue);
 
-		//JValue(u64 numberValue) : JValue((f64)numberValue) {}
-		//JValue(s64 numberValue) : JValue((f64)numberValue) {}
-		//JValue(u32 numberValue) : JValue((f64)numberValue) {}
-		//JValue(s32 numberValue) : JValue((f64)numberValue) {}
-
-		JValue(int numberValue);
+		JValue(s32 numberValue);
+		JValue(s64 numberValue);
 		JValue(JObject jsonObject);
 		JValue(JArray jsonArray);
 

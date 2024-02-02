@@ -67,7 +67,12 @@ namespace CE
 
 	CORE_API Package* GetTransientPackage()
 	{
-		return ModuleManager::Get().GetLoadedModuleTransientPackage("Core");
+		return ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
+	}
+
+	CORE_API Package* GetTransientPackage(const String& moduleName)
+	{
+		return ModuleManager::Get().GetLoadedModuleTransientPackage(moduleName);
 	}
 
 	static Package* LoadSettingsPackage()
@@ -75,7 +80,7 @@ namespace CE
 		return Package::LoadPackage(nullptr, Name("/Game/Settings"), LOAD_Full);
 	}
 
-    CORE_API Package* GetSettingsPackage()
+	CORE_API Package* GetSettingsPackage()
     {
 		if (gSettingsPackage == nullptr)
 			gSettingsPackage = LoadSettingsPackage();

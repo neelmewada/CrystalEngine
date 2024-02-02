@@ -17,7 +17,7 @@ namespace CE
 			StaticMeshComponent* meshComponent = meshActor->GetMeshComponent();
 			StaticMesh* cubeStaticMesh = StaticMesh::GetCubeMesh();
 			meshComponent->SetStaticMesh(cubeStaticMesh);
-			meshComponent->SetLocalPosition(Vec3(0, -2, 10));
+			meshComponent->SetLocalPosition(Vec3(0, 0, 10));
 		}
 		root->AttachActor(meshActor);
 

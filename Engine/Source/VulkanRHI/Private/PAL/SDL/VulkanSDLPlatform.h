@@ -8,7 +8,7 @@
 
 #include "CoreApplication.h"
 
-namespace CE
+namespace CE::Vulkan
 {
     
     class VulkanSDLPlatform : public VulkanOSPlatform

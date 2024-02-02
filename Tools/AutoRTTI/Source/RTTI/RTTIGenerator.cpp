@@ -33,17 +33,18 @@ namespace CE
 
 			auto headerPath = entry.path();
 			auto headerRelPath = fs::relative(headerPath, modulePath);
-			fs::path headerGeneratedPath = (fs::path)outputPath / headerPath.filename().replace_extension(".rtti.h");
 
 			std::ifstream inputHeaderFile{ entry.path(), std::ios_base::in };
 			std::string inputHeaderFileContent((std::istreambuf_iterator<char>(inputHeaderFile)),
 				(std::istreambuf_iterator<char>()));
 			std::string searchString = std::string("#include \"") + headerPath.filename().replace_extension(".rtti.h").string() + "\"";
 
-			if (inputHeaderFileContent.find(searchString) == std::string::npos)
+			if (inputHeaderFileContent.find(searchString) == std::string::npos) // Could not find ".rtti.h"
 			{
 				continue;
 			}
+
+			fs::path headerGeneratedPath = (fs::path)outputPath / headerPath.filename().replace_extension(".rtti.h");
 
 			// Do NOT delete this output header file
 			filesToRemove.RemoveAll([headerGeneratedPath](const IO::Path& p) -> bool

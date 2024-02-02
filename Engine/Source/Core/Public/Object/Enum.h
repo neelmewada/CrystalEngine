@@ -85,18 +85,23 @@ namespace CE
 
     public:
 
+		inline bool IsFlagsEnum() const
+		{
+			return HasAnyEnumFlags(ENUM_FlagsEnum);
+		}
+
         virtual String GetDisplayName() override;
 
         virtual bool IsEnum() const override { return true; }
 
         virtual TypeId GetTypeId() const override { return this->typeId; }
 
-		bool HasAnyEnumFlags(EnumFlags flags) const
+		inline bool HasAnyEnumFlags(EnumFlags flags) const
 		{
 			return (enumFlags & flags) != 0;
 		}
 
-		bool HasAllEnumFlags(EnumFlags flags) const
+		inline bool HasAllEnumFlags(EnumFlags flags) const
 		{
 			return (enumFlags & flags) == flags;
 		}

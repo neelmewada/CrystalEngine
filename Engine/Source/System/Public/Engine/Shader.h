@@ -67,7 +67,7 @@ namespace CE
 		Name passName = "Main";
 
 		FIELD()
-		Array<ShaderVariant> variants{};
+		Array<CE::ShaderVariant> variants{};
 
 		friend class Shader;
 	};
@@ -80,15 +80,6 @@ namespace CE
 	};
 	ENUM_CLASS_FLAGS(ShaderFlags);
 
-	struct GPUShaderModule
-	{
-		Name passName = "Main";
-		SIZE_T variantHash = 0;
-
-		RHI::ShaderModule* vertex = nullptr;
-		RHI::ShaderModule* fragment = nullptr;
-	};
-
 	CLASS()
 	class SYSTEM_API Shader : public Asset
 	{
@@ -99,10 +90,6 @@ namespace CE
 		virtual ~Shader(); 
 
 		static Shader* GetErrorShader();
-
-		GPUShaderModule* FindOrCreateModule(Name passName = "", SIZE_T variantHash = 0);
-
-		GPUShaderModule* FindModule(Name passName = "", SIZE_T variantHash = 0);
 
 		inline Name GetShaderName() const
 		{
@@ -124,8 +111,6 @@ namespace CE
 
 		FIELD()
 		ShaderStage stages = ShaderStage::Default;
-
-		Array<GPUShaderModule> allModules{};
 
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::ShaderAssetImportJob;

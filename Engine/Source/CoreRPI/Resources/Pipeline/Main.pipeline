@@ -1,0 +1,195 @@
+{
+    "Name": "DefaultPipeline",
+    "MainViewTag": "Camera",
+    // Root pass (PassRequest)
+    "RootPass": {
+        "PassName": "DefaultPipelineRoot",
+        "PassDefinition": "DefaultPipelineRoot",
+        "Connections": [
+            { // Connect PipelineOutput (as output)
+                "LocalSlot": "PipelineOutput",
+                "AttachmentRef": {
+                    "Pass": "TransparentPass",
+                    "Attachment": "Color"
+                }
+            }
+        ],
+        "ChildPasses": [ // [PassRequest] list
+            {
+                "PassName": "DepthPrePass",
+                "PassDefinition": "DepthPrePassDefinition",
+                "Connections": [],
+                "ChildPasses": [] // No child passes
+            },
+            {
+                "PassName": "OpaquePass",
+                "PassDefinition": "OpaquePassDefinition",
+                "Connections": [
+                    {
+                        "LocalSlot": "DepthStencil",
+                        "AttachmentRef": {
+                            "Pass": "DepthPrePass",
+                            "Attachment": "Output"
+                        }
+                    }
+                ],
+                "ChildPasses": [] // No child passes
+            },
+            {
+                "PassName": "TransparentPass",
+                "PassDefinition": "TransparentPassDefinition",
+                "Connections": [ 
+                    // Only INPUT connections should be defined inside "ChildPasses" list, except for
+                    // parent pass's output connection.
+                    { // Connect TransparentPass's Input to OpaquePass's Output like this:   OpaquePass[Color] -> TransparentPass[Color]
+                        "LocalSlot": "Color",
+                        "AttachmentRef": {
+                            "Pass": "OpaquePass",
+                            "Attachment": "Color"
+                        }
+                    },
+                    {
+                        "LocalSlot": "DepthStencil",
+                        "AttachmentRef": {
+                            "Pass": "DepthPrePass",
+                            "Attachment": "Output"
+                        }
+                    }
+                ],
+                "ChildPasses": [] // No child passes
+            }
+        ]
+    },
+    // List of pass definitions
+    "PassDefinitions": [
+        // Root Pass (DefaultPipelineRoot): The render target image attachment is automaticall inferred, no need to manually define it.
+        {
+            "Name": "DefaultPipelineRoot",
+            "PassClass": "ParentPass",
+            "Slots": [
+                // Final color output. Root pass should always have 1 InputOutput slot, which will always be the render target.
+                {
+                    "Name": "PipelineOutput",
+                    "SlotType": "InputOutput"
+                }
+            ]
+        },
+        //-----------------------------------------------------------------
+        // Depth Pre-Pass Definition
+        {
+            "Name": "DepthPrePassDefinition",
+            "PassClass": "RasterPass",
+            "Slots": [
+                {
+                    "Name": "Output",
+                    "SlotType": "Output",
+                    "LoadStoreAction": {
+                        "ClearValueDepth": 0.0,
+                        "ClearValueStencil": 0,
+                        "LoadAction": "Clear",
+                        "StoreAction": "Store"
+                    }
+                }
+            ],
+            "ImageAttachments": [
+                // Depth Stencil
+                {
+                    "Name": "DepthStencil",
+                    "Lifetime": "Transient", // Transient or External
+                    "SizeSource": { // Size should be same as PipelineOutput
+                        "Source": {
+                            "Pass": "$root", // Specials: $this, $parent, $root
+                            "Attachment": "PipelineOutput"
+                        },
+                        "SizeMultipliers": [1, 1, 1] // (width, height, depth) multipliers
+                    },
+                    "ImageDescriptor": {
+                        "BindFlags": ["DepthStencil"],
+                        "Format": "D32_SFLOAT_S8_UINT"
+                    },
+                    "FallbackFormats": ["D24_UNORM_S8_UINT"]
+                }
+            ],
+            "Connections": [
+                // Connect Depth output slot to the DepthStencil image attachment
+                {
+                    "LocalSlot": "Output",
+                    "AttachmentRef": {
+                        "Pass": "$this",
+                        "Attachment": "DepthStencil"
+                    }
+                }
+            ],
+            "PassData": {
+                "DrawListTag": "depth",
+                "ViewTag": "Camera"
+            }
+        },
+        //-----------------------------------------------------------------
+        // Opaque Pass Definition
+        {
+            "Name": "OpaquePassDefinition",
+            "PassClass": "RasterPass",
+            "Slots": [
+                {
+                    "Name": "DepthStencil",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "Color",
+                    "SlotType": "Output",
+                    "AttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        "ClearValue": [
+                            0.0, 0.0, 0.0, 0.0
+                        ],
+                        "LoadAction": "Clear",
+                        "StoreAction": "Store"
+                    }
+                }
+            ],
+            "Connections": [
+                // We ONLY specify Connections in Pass Definitions if we want to connect local slots to Image Attachments
+                // If you want to connect slots with other slots, specify them under "ChildPasses" instead.
+                {
+                    "LocalSlot": "Color",
+                    "AttachmentRef": {
+                        "Pass": "$root",
+                        "Attachment": "PipelineOutput" // Connect the pipeline's RenderTarget Image Attachment (PipelineOutput) to this pass's "Color" output slot.
+                    }
+                }
+            ],
+            "PassData": {
+                "DrawListTag": "opaque",
+                "ViewTag": "Camera"
+            }
+        },
+        //-----------------------------------------------------------------
+        // Transparent Pass Definition
+        {
+            "Name": "TransparentPassDefinition",
+            "PassClass": "RasterPass",
+            "Slots": [
+                {
+                    "Name": "DepthStencil",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "Color",
+                    "SlotType": "InputOutput",
+                    "LoadStoreAction": {
+                        "LoadAction": "Load",
+                        "StoreAction": "Store"
+                    }
+                }
+            ],
+            "Connections": [
+                // No default connections here
+            ],
+            "PassData": {
+                "DrawListTag": "transparent",
+                "ViewTag": "Camera"
+            }
+        }
+    ]
+}

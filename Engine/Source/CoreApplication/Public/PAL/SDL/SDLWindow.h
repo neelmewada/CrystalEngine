@@ -12,7 +12,7 @@ namespace CE
         ~SDLPlatformWindow();
 
         virtual void* GetUnderlyingHandle() override;
-		virtual void* GetOSNativeHandle() override;
+		virtual WindowHandle GetOSNativeHandle() override;
 
         void Show() override;
 
