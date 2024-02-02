@@ -58,14 +58,14 @@ namespace CE::Sandbox
 		Matrix4x4 viewMatrix;
 		Matrix4x4 viewProjectionMatrix;
 		Matrix4x4 projectionMatrix;
+		Vec3 viewPosition;
 	};
 
 	struct DirectionalLight
 	{
-		alignas(16) Vec3 direction;
-		alignas(16) Vec3 color;
-		alignas(4)	float intensity;
-		alignas(4)	float temperature;
+		Vec3 direction;
+		Vec4 colorAndIntensity;
+		float temperature;
 	};
 
 	struct PointLight
@@ -79,6 +79,7 @@ namespace CE::Sandbox
 
 	struct LightData
 	{
+		alignas(16) Vec4 ambientColor{};
 		alignas(4)  u32 totalDirectionalLights;
 	};
 
@@ -99,7 +100,7 @@ namespace CE::Sandbox
 
 		void Tick(f32 deltaTime);
 
-		void UpdateViewSrg();
+		void UpdatePerViewData();
 
 		void Shutdown();
 		
@@ -126,6 +127,7 @@ namespace CE::Sandbox
 		bool recompile = true;
 		bool resubmit = true;
 
+		RHI::ShaderResourceGroup* depthPerViewSrg = nullptr;
 		RHI::ShaderResourceGroup* perViewSrg = nullptr;
 		RHI::Buffer* perViewBuffer = nullptr;
 		PerViewData perViewData{};

@@ -78,7 +78,7 @@ namespace CE::Sandbox
 			SubmitWork();
 		}
 
-		UpdateViewSrg();
+		UpdatePerViewData();
 
 		meshRotation += deltaTime * 15.0f;
 		if (meshRotation >= 360)
@@ -96,10 +96,11 @@ namespace CE::Sandbox
 		scheduler->Execute();
 	}
 
-	void VulkanSandbox::UpdateViewSrg()
+	void VulkanSandbox::UpdatePerViewData()
 	{
-		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, 100.0f);
-		perViewData.viewMatrix = Matrix4x4::Translation(Vec3(0, 0, -10));
+		perViewData.viewPosition = Vec3(0, 0, -10);
+		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, 1000.0f);
+		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition);
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
 
 		RHI::BufferData data{};
@@ -142,8 +143,11 @@ namespace CE::Sandbox
 
 			perViewSrgLayout.variables.Add(perViewDataDesc);
 
-			perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
+			depthPerViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
 
+			perViewSrgLayout.variables.Top().shaderStages |= RHI::ShaderStage::Fragment;
+			perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
+			
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
 			bufferDesc.bufferSize = sizeof(PerViewData);
@@ -152,11 +156,13 @@ namespace CE::Sandbox
 
 			perViewBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
 
-			UpdateViewSrg();
+			UpdatePerViewData();
 
-			perViewSrg->Bind("_PerViewData", RHI::BufferView(perViewBuffer));
+			perViewSrg->Bind("_PerViewData", perViewBuffer);
+			depthPerViewSrg->Bind("_PerViewData", perViewBuffer);
 			
 			perViewSrg->Compile();
+			depthPerViewSrg->Compile();
 		}
 
 		// Depth Pipeline
@@ -318,7 +324,7 @@ namespace CE::Sandbox
 			perViewSRGLayout.variables[0].name = "_PerViewData";
 			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
 			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 			srgLayouts.Add(perViewSRGLayout);
 
 			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
@@ -362,8 +368,13 @@ namespace CE::Sandbox
 			{
 				RHI::ShaderStructMember albedoMember{};
 				albedoMember.dataType = RHI::ShaderStructMemberType::Float4;
-				albedoMember.name = "albedo";
+				albedoMember.name = "_Albedo";
 				perMaterialSRGLayout.variables.Top().structMembers.Add(albedoMember);
+
+				RHI::ShaderStructMember specularMember{};
+				specularMember.dataType = RHI::ShaderStructMemberType::Float;
+				specularMember.name = "_SpecularStrength";
+				perMaterialSRGLayout.variables.Top().structMembers.Add(specularMember);
 			}
 
 			srgLayouts.Add(perMaterialSRGLayout);
@@ -379,8 +390,9 @@ namespace CE::Sandbox
 
 			opaqueMaterial = new RPI::Material(opaqueShader);
             
-            opaqueMaterial->SetPropertyValue("albedo", RPI::MaterialPropertyValue(Color(1.0f, 0, 0, 1.0f)));
-            opaqueMaterial->Compile();
+            opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
+			opaqueMaterial->SetPropertyValue("_SpecularStrength", 0.5f);
+            opaqueMaterial->FlushBindings();
 
 			delete opaqueVert;
 			delete opaqueFrag;
@@ -395,14 +407,15 @@ namespace CE::Sandbox
 	void VulkanSandbox::InitLights()
 	{
 		DirectionalLight mainLight{};
-		mainLight.color = Vec3(1.0f, 0.95f, 0.7f);
+		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.7f);
 		mainLight.direction = Vec3(-0.5f, -0.25f, 1);
-		mainLight.intensity = 1.0f;
+		mainLight.colorAndIntensity.w = 1.0f; // intensity
 		mainLight.temperature = 100;
 
 		directionalLights.Clear();
 		directionalLights.Add(mainLight);
 		lightData.totalDirectionalLights = directionalLights.GetSize();
+		lightData.ambientColor = Color(0, 0.1f, 0.5f, 1).ToVec4();
 
 		{
 			RHI::BufferDescriptor bufferDesc{};
@@ -780,6 +793,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyPipelines()
 	{
+		delete depthPerViewSrg; depthPerViewSrg = nullptr;
 		delete perViewSrg; perViewSrg = nullptr;
 		delete perViewBuffer; perViewBuffer = nullptr;
 
@@ -823,7 +837,8 @@ namespace CE::Sandbox
 
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
 				
-				scheduler->UseShaderResourceGroup(perViewSrg);
+				scheduler->UseShaderResourceGroup(depthPerViewSrg);
+				//scheduler->UseShaderResourceGroup(perViewSrg);
 
 				scheduler->UsePipeline(depthPipeline);
 			}
@@ -894,7 +909,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::SubmitWork()
 	{
-		UpdateViewSrg();
+		UpdatePerViewData();
 
 		resubmit = false;
 		drawList.Shutdown();

@@ -32,10 +32,12 @@ namespace CE::Vulkan
             
 			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max,
 				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
-				compiler->imageAcquiredFences[currentSubmissionIndex],
+				//compiler->imageAcquiredFences[currentSubmissionIndex],
+				nullptr,
 				&swapChain->currentImageIndex);
             
-            vkWaitForFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex], VK_TRUE, u64Max);
+			// TODO: Uncomment this if things fail
+            //vkWaitForFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex], VK_TRUE, u64Max);
 
             // TODO: graphExecutionFences not working!
 			vkWaitForFences(device->GetHandle(),

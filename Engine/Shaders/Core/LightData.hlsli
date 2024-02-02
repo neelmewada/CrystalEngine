@@ -6,8 +6,7 @@
 struct DirectionalLight
 {
     float3 direction;
-    float3 color;
-    float intensity;
+    float4 colorAndIntensity;
     float temperature;
 };
 
@@ -29,6 +28,7 @@ cbuffer _DirectionalLightsArray : SRG_PerScene(b)
 
 cbuffer _LightData : SRG_PerScene(b)
 {
+    float4 ambient;
     uint totalDirectionalLights;
     //uint maxPointLights;
 };

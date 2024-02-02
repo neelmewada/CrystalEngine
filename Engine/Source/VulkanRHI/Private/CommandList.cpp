@@ -56,15 +56,21 @@ namespace CE::Vulkan
 			{
 				//if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]) // SRG has changed
 				{
-					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0];
-					commitedSRGsBySetNumber[setNumber]->Compile();
+					if (commitedSRGsBySetNumber[setNumber] != nullptr)
+					{
+						commitedSRGsBySetNumber[setNumber]->usageCount--;
+					}
 
-					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetDescriptorSet();
+					srgsToMerge[setNumber][0]->Compile();
+					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0]->GetDescriptorSet();
+					commitedSRGsBySetNumber[setNumber]->usageCount++;
+
+					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetHandle();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
 						boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 0, nullptr);
 				}
 			}
-			else // > 1
+			else // > 1 (Merge SRGs)
 			{
 				auto first = &*srgsToMerge[setNumber].begin();
 				auto last = &*(srgsToMerge[setNumber].end() - 1);
@@ -72,10 +78,16 @@ namespace CE::Vulkan
 
 				//if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg) // SRG has changed
 				{
-					commitedSRGsBySetNumber[setNumber] = mergedSrg;
-					commitedSRGsBySetNumber[setNumber]->Compile();
+					if (commitedSRGsBySetNumber[setNumber] != nullptr)
+					{
+						commitedSRGsBySetNumber[setNumber]->usageCount--;
+					}
 
-					VkDescriptorSet descriptorSet = mergedSrg->GetDescriptorSet();
+					mergedSrg->Compile();
+					commitedSRGsBySetNumber[setNumber] = mergedSrg->GetDescriptorSet();
+					commitedSRGsBySetNumber[setNumber]->usageCount++;
+
+					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetHandle();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
 						boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 0, nullptr);
 				}
@@ -172,6 +184,10 @@ namespace CE::Vulkan
 
 		for (int i = 0; i < commitedSRGsBySetNumber.GetSize(); i++)
 		{
+			if (commitedSRGsBySetNumber[i] != nullptr)
+			{
+				commitedSRGsBySetNumber[i]->usageCount--;
+			}
 			commitedSRGsBySetNumber[i] = nullptr;
 		}
 	}

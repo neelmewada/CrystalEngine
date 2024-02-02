@@ -66,6 +66,12 @@ namespace CE::Vulkan
 			delete srg;
 		}
 		mergedSRGsByHash.Clear();
+
+		for (auto set : queuedDestroySets)
+		{
+			delete set;
+		}
+		queuedDestroySets.Clear();
 	}
 
 	bool ShaderResourceManager::IsSharedDescriptorSet(RHI::SRGType srgType)
@@ -211,11 +217,10 @@ namespace CE::Vulkan
 		mergedSRGsBySourceSRG[srg].Clear();
 		mergedSRGsBySourceSRG.Remove(srg);
 		
-		for (auto destroy : srgsToDestroy)
+		for (auto destroySrg : srgsToDestroy)
 		{
-			destroy->combinedSRGs.Clear();
-			destroy->QueueDestroy();
-			//delete destroy;
+			destroySrg->combinedSRGs.Clear();
+			delete destroySrg;
 		}
 	}
 
@@ -233,6 +238,23 @@ namespace CE::Vulkan
 				delete srg;
 			}
 			destroyQueue.Clear();
+		}
+
+		for (int i = queuedDestroySets.GetSize() - 1; i >= 0; i--)
+		{
+			if (queuedDestroySets[i]->usageCount <= 0)
+			{
+				delete queuedDestroySets[i];
+				queuedDestroySets.RemoveAt(i);
+			}
+		}
+	}
+
+	void ShaderResourceManager::QueueDestroy(DescriptorSet* descriptorSet)
+	{
+		if (descriptorSet)
+		{
+			queuedDestroySets.Add(descriptorSet);
 		}
 	}
 
@@ -283,15 +305,19 @@ namespace CE::Vulkan
 		//vkDeviceWaitIdle(device->GetHandle());
 
 		srgManager->OnSRGDestroyed(this);
-		Destroy();
+		QueueDestroy();
 	}
 
-	void ShaderResourceGroup::QueueDestroy()
+	void ShaderResourceGroup::FlushBindings()
 	{
-		if (!srgManager->destroyQueue.Exists(this))
+		if (!isCompiled)
 		{
-			srgManager->destroyQueue.Add(this);
-			srgManager->OnSRGDestroyed(this);
+			Compile();
+		}
+		else if (needsRecompile) // Free current DescriptorSet and create new one
+		{
+			QueueDestroy();
+			Compile();
 		}
 	}
 
@@ -304,8 +330,6 @@ namespace CE::Vulkan
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::BufferView bufferView)
 	{
-        if (isCompiled)
-            return failed;
 		if (!bufferView.GetBuffer())
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -329,13 +353,12 @@ namespace CE::Vulkan
 		bufferInfosBoundBySlot[bindingSlot].Clear();
 		bufferInfosBoundBySlot[bindingSlot].Add(bufferWrite);
 		
+		needsRecompile = true;
 		return true;
 	}
 
 	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::BufferView* bufferViews)
 	{
-        if (isCompiled)
-            return failed;
 		if (!bindingSlotsByVariableName.KeyExists(name))
 			return false;
 
@@ -361,13 +384,12 @@ namespace CE::Vulkan
 			bufferInfosBoundBySlot[bindingSlot].Add(bufferWrite);
 		}
 
+		needsRecompile = true;
 		return true;
 	}
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::Texture* rhiTexture)
 	{
-        if (isCompiled)
-            return failed;
 		if (!rhiTexture)
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -390,13 +412,12 @@ namespace CE::Vulkan
 		imageInfosBoundBySlot[bindingSlot].Clear();
 		imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
 
+		needsRecompile = true;
 		return true;
 	}
 
 	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Texture** textures)
 	{
-        if (isCompiled)
-            return failed;
 		if (!bindingSlotsByVariableName.KeyExists(name))
 			return false;
 
@@ -421,13 +442,12 @@ namespace CE::Vulkan
 			imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
 		}
 
+		needsRecompile = true;
 		return true;
 	}
 
 	bool ShaderResourceGroup::Bind(Name name, RHI::Sampler* rhiSampler)
 	{
-        if (isCompiled)
-            return failed;
 		if (!rhiSampler)
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -450,13 +470,12 @@ namespace CE::Vulkan
 		imageInfosBoundBySlot[bindingSlot].Clear();
 		imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
 
+		needsRecompile = true;
 		return true;
 	}
 
 	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Sampler** samplers)
 	{
-        if (isCompiled)
-            return failed;
 		if (!bindingSlotsByVariableName.KeyExists(name))
 			return false;
 
@@ -483,6 +502,7 @@ namespace CE::Vulkan
 			imageInfosBoundBySlot[bindingSlot].Add(imageWrite);
 		}
 
+		needsRecompile = true;
 		return true;
 	}
 
@@ -490,52 +510,31 @@ namespace CE::Vulkan
 	{
 		if (isCompiled)
 			return;
-		
-		VkDescriptorSetLayoutCreateInfo layoutCI{};
-		layoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutCI.bindingCount = setLayoutBindings.GetSize();
-		layoutCI.pBindings = setLayoutBindings.GetData();
 
-		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &layoutCI, nullptr, &setLayout);
-		if (result != VK_SUCCESS)
-		{
-			failed = true;
-			CE_LOG(Error, All, "Failed to create vulkan descriptor set layout");
-			return;
-		}
-
-		auto allocatedSets = pool->Allocate(1, { setLayout }, allocPool);
-		if (allocatedSets.IsEmpty())
-		{
-			failed = true;
-			CE_LOG(Error, All, "Failed to allocate descriptor set");
-			return;
-		}
-
-		descriptorSet = allocatedSets[0];
+		descriptorSet = new DescriptorSet(device, srgLayout);
 
 		UpdateBindings();
 
 		isCompiled = true;
+		needsRecompile = false;
 	}
 
-	void ShaderResourceGroup::Destroy()
+	void ShaderResourceGroup::QueueDestroy()
 	{
 		if (descriptorSet)
 		{
-			pool->Free({ descriptorSet });
+			srgManager->QueueDestroy(descriptorSet);
 			descriptorSet = nullptr;
 		}
 
-		if (setLayout)
-		{
-			vkDestroyDescriptorSetLayout(device->GetHandle(), setLayout, nullptr);
-			setLayout = nullptr;
-		}
+		isCommitted = isCompiled = false;
 	}
 
 	void ShaderResourceGroup::UpdateBindings()
 	{
+		if (descriptorSet == nullptr)
+			return;
+
 		Array<VkWriteDescriptorSet> writes{};
 		writes.Resize(bufferInfosBoundBySlot.GetSize() + imageInfosBoundBySlot.GetSize());
 		int idx = 0;
@@ -553,7 +552,7 @@ namespace CE::Vulkan
 			write.descriptorType = variable.descriptorType;
 			write.dstArrayElement = 0;
 			write.dstBinding = variable.binding;
-			write.dstSet = descriptorSet;
+			write.dstSet = descriptorSet->GetHandle();
 			write.pBufferInfo = bufferWrites.GetData();
 		}
 
@@ -570,7 +569,7 @@ namespace CE::Vulkan
 			write.descriptorType = variable.descriptorType;
 			write.dstArrayElement = 0;
 			write.dstBinding = variable.binding;
-			write.dstSet = descriptorSet;
+			write.dstSet = descriptorSet->GetHandle();
 			write.pImageInfo = imageWrites.GetData();
 		}
 

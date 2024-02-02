@@ -22,7 +22,8 @@ struct PSInput
 
 cbuffer _MaterialData : SRG_PerMaterial(b)
 {
-    float4 albedo;
+    float4 _Albedo;
+    float _SpecularStrength;
 };
 
 PSInput VertMain(VSInput input)
@@ -43,11 +44,20 @@ inline float Map01(in float value)
 float4 FragMain(PSInput input) : SV_TARGET
 {
     float3 diffuse = 0;
+    float3 specular = 0;
     float3 normal = normalize(input.normal);
+    float3 viewDir = normalize(viewPosition - input.worldPos);
+
     for (uint i = 0; i < totalDirectionalLights; i++)
     {
-        diffuse += max(dot(normal, -_DirectionalLights[i].direction), 0) * _DirectionalLights[i].color;
+        float3 lightDir = _DirectionalLights[i].direction;
+        float3 lightColor = _DirectionalLights[i].colorAndIntensity.rgb;
+        diffuse += max(dot(normal, -lightDir), 0) * lightColor;
+
+        float3 reflectDir = reflect(lightDir, normal);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+        specular += _SpecularStrength * spec * lightColor;
     }
-    return float4(diffuse, clamp(albedo.a, 0.99, 1));
-    //return float4(1.0, 0, 1.0, 1.0);
+
+    return float4((ambient.rgb + diffuse + specular) * _Albedo.rgb, 1.0);
 }

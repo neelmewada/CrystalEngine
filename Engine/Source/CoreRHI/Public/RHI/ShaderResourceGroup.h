@@ -42,7 +42,8 @@ namespace CE::RHI
 			return isCommitted;
 		}
 
-		virtual void QueueDestroy() = 0;
+		//! @brief Apply the binding updates to the shader resource.
+		virtual void FlushBindings() = 0;
 
 	protected:
 

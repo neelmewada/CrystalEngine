@@ -114,19 +114,19 @@ namespace CE::Vulkan
                     layoutBinding.stageFlags = 0;
                     if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Vertex))
                     {
-                        layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+                        layoutBinding.stageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
                     }
                     if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Fragment))
                     {
-                        layoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+                        layoutBinding.stageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
                     }
                     if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Geometry))
                     {
-                        layoutBinding.stageFlags = VK_SHADER_STAGE_GEOMETRY_BIT;
+                        layoutBinding.stageFlags |= VK_SHADER_STAGE_GEOMETRY_BIT;
                     }
                     if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Tessellation))
                     {
-                        layoutBinding.stageFlags = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+                        layoutBinding.stageFlags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
                     }
 
                     switch (variable.type)

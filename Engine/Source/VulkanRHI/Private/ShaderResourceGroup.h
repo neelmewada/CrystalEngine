@@ -32,6 +32,8 @@ namespace CE::Vulkan
 
 		void DestroyQueuedSRG();
 
+		void QueueDestroy(DescriptorSet* descriptorSet);
+
 	private:
         
         struct SRGSlot
@@ -48,6 +50,8 @@ namespace CE::Vulkan
 		
 		u32 maxBoundDescriptorSets = 0;
 
+		List<DescriptorSet*> queuedDestroySets{};
+
 		HashMap<SIZE_T, MergedShaderResourceGroup*> mergedSRGsByHash{};
 
 		/// @brief HashMap of Merged SRG by each source SRG. Used to manage lifetime of Merged SRG.
@@ -56,6 +60,7 @@ namespace CE::Vulkan
 
 		Array<Vulkan::ShaderResourceGroup*> destroyQueue{};
 
+		friend class DescriptorSet;
 		friend class ShaderResourceGroup;
 		friend class MergedShaderResourceGroup;
 	};
@@ -80,8 +85,8 @@ namespace CE::Vulkan
 		
 		inline int GetSetNumber() const { return setNumber; }
 
-		inline VkDescriptorSet GetDescriptorSet() const { return descriptorSet; }
-		inline VkDescriptorSetLayout GetDescriptorSetLayout() const { return setLayout; }
+		inline DescriptorSet* GetDescriptorSet() const { return descriptorSet; }
+		inline VkDescriptorSetLayout GetDescriptorSetLayout() const { return descriptorSet != nullptr ? descriptorSet->GetSetLayout() : nullptr; }
 
 		void Compile() override;
 
@@ -90,7 +95,7 @@ namespace CE::Vulkan
 			return failed;
 		}
 
-		void QueueDestroy() override;
+		void FlushBindings() override;
 
 		virtual SIZE_T GetHash() const { return (SIZE_T)this; }
 
@@ -103,11 +108,13 @@ namespace CE::Vulkan
 
 		ShaderResourceGroup(VulkanDevice* device);
 
-		void Destroy();
+		// Queue the native DescriptorSet* to be destroyed later
+		void QueueDestroy();
 
 		void UpdateBindings();
 
 		bool failed = false;
+		bool needsRecompile = true;
 
 		VulkanDevice* device = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
@@ -115,8 +122,7 @@ namespace CE::Vulkan
 		VkDescriptorPool allocPool = nullptr;
 
 		int setNumber = -1;
-		VkDescriptorSet descriptorSet = nullptr;
-		VkDescriptorSetLayout setLayout = nullptr;
+		DescriptorSet* descriptorSet = nullptr;
 
 		Array<VkDescriptorSetLayoutBinding> setLayoutBindings{};
 		HashMap<Name, int> bindingSlotsByVariableName{};

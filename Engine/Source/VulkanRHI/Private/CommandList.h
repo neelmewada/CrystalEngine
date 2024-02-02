@@ -50,7 +50,7 @@ namespace CE::Vulkan
 		Vulkan::Pipeline* boundPipeline = nullptr;
 
 		StaticArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
-		StaticArray<Vulkan::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> commitedSRGsBySetNumber{};
+		StaticArray<Vulkan::DescriptorSet*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> commitedSRGsBySetNumber{};
 
 		friend class FrameGraphCompiler;
 		friend class FrameGraphExecuter;

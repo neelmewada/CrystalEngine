@@ -15,6 +15,7 @@
 #include "RenderPassCache.h"
 
 #include "DescriptorPool.h"
+#include "DescriptorSet.h"
 #include "ShaderResourceGroup.h"
 #include "MergedShaderResourceGroup.h"
 #include "MemoryHeap.h"
