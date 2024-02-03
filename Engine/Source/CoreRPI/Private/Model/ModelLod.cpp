@@ -162,7 +162,7 @@ namespace CE::RPI
 			20, 22, 23
 		};
 		
-		constexpr u64 totalBufferSize = sizeof(vertices) + sizeof(uvCoords) + sizeof(normals) + sizeof(tangents) + sizeof(indices);
+		constexpr u64 totalBufferSize = sizeof(vertices) + sizeof(normals) + sizeof(uvCoords) + sizeof(tangents) + sizeof(indices);
 
 		ModelLod* model = new ModelLod();
 		
@@ -200,23 +200,10 @@ namespace CE::RPI
 			vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::Position);
 			mesh.vertexBufferInfos.Add(vertInfo);
 
-			buffer->UploadData(vertices, vertInfo.byteCount, vertInfo.byteCount);
+			buffer->UploadData(vertices, vertInfo.byteCount, vertInfo.byteOffset);
 			offset += vertInfo.byteCount;
 		}
-		{
-			VertexBufferInfo vertInfo{};
-			vertInfo.attributeType = RHI::VertexAttributeDataType::Float2;
-			vertInfo.bufferIndex = 0;
-			vertInfo.byteOffset = offset;
-			vertInfo.byteCount = sizeof(uvCoords);
-			vertInfo.stride = sizeof(Vec2);
 
-			vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::UV, 0);
-			mesh.vertexBufferInfos.Add(vertInfo);
-
-			buffer->UploadData(uvCoords, vertInfo.byteCount, vertInfo.byteCount);
-			offset += vertInfo.byteCount;
-		}
 		{
 			VertexBufferInfo vertInfo{};
 			vertInfo.attributeType = RHI::VertexAttributeDataType::Float3;
@@ -228,9 +215,25 @@ namespace CE::RPI
 			vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::Normal);
 			mesh.vertexBufferInfos.Add(vertInfo);
 
-			buffer->UploadData(normals, vertInfo.byteCount, vertInfo.byteCount);
+			buffer->UploadData(normals, vertInfo.byteCount, vertInfo.byteOffset);
 			offset += vertInfo.byteCount;
 		}
+
+		{
+			VertexBufferInfo vertInfo{};
+			vertInfo.attributeType = RHI::VertexAttributeDataType::Float2;
+			vertInfo.bufferIndex = 0;
+			vertInfo.byteOffset = offset;
+			vertInfo.byteCount = sizeof(uvCoords);
+			vertInfo.stride = sizeof(Vec2);
+
+			vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::UV, 0);
+			mesh.vertexBufferInfos.Add(vertInfo);
+
+			buffer->UploadData(uvCoords, vertInfo.byteCount, vertInfo.byteOffset);
+			offset += vertInfo.byteCount;
+		}
+		
 		{
 			VertexBufferInfo vertInfo{};
 			vertInfo.attributeType = RHI::VertexAttributeDataType::Float4;
@@ -242,7 +245,7 @@ namespace CE::RPI
 			vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::Tangent);
 			mesh.vertexBufferInfos.Add(vertInfo);
 
-			buffer->UploadData(tangents, vertInfo.byteCount, vertInfo.byteCount);
+			buffer->UploadData(tangents, vertInfo.byteCount, vertInfo.byteOffset);
 			offset += vertInfo.byteCount;
 		}
 

@@ -44,12 +44,14 @@ namespace CE::RPI
 
 		inline u32 GetMeshCount() const { return meshes.GetSize(); }
 
-		inline Mesh* GetMesh(u32 index) 
+		inline Mesh* GetMesh(u32 index)
 		{
 			if (index >= meshes.GetSize())
 				return nullptr;
 			return &meshes[index]; 
 		}
+
+		inline RHI::Buffer* GetBuffer(u32 index) const { return trackedBuffers[index]; }
 
 		//! @brief Always add index buffers at the very end!
 		void TrackBuffer(RHI::Buffer* buffer);

@@ -105,11 +105,11 @@ namespace CE::Sandbox
 		void Shutdown();
 		
 		void InitPipelines();
-		void InitModels();
+		void InitDrawPackets();
 		void InitLights();
 
 		void DestroyLights();
-		void DestroyModels();
+		void DestroyDrawPackets();
 		void DestroyPipelines();
 
 	private:
@@ -152,7 +152,7 @@ namespace CE::Sandbox
 		DrawPacket* meshDrawPacket = nullptr;
 
 		RHI::ShaderResourceGroup* meshObjectSrg = nullptr;
-		RHI::Buffer* meshModelBuffer = nullptr;
+		RHI::Buffer* cubeObjectBuffer = nullptr;
 		Matrix4x4 meshModelMatrix{};
 		f32 cameraRotation = 0.0f;
 		f32 meshRotation = 0;

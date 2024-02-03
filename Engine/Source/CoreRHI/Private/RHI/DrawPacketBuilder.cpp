@@ -221,7 +221,7 @@ namespace CE::RHI
 				{
 					DrawItem& drawItem = drawItems[i];
 					drawItem.vertexBufferViews = vertexBufferViews;
-					drawItem.vertexBufferViewCount = vertexBufferViewCount;
+					drawItem.vertexBufferViewCount = drawRequest.vertexBufferViews.GetSize();
 
 					for (const VertexBufferView& vertexBufferView : drawRequest.vertexBufferViews)
 					{

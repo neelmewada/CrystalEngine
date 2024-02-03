@@ -38,7 +38,7 @@ namespace CE::Sandbox
 		BuildFrameGraph();
 		CompileFrameGraph();
 
-		InitModels();
+		InitDrawPackets();
 	}
 
 	void VulkanSandbox::Tick(f32 deltaTime)
@@ -92,7 +92,7 @@ namespace CE::Sandbox
 		uploadData.data = &meshModelMatrix;
 		uploadData.startOffsetInBuffer = 0;
 
-		meshModelBuffer->UploadData(uploadData);
+		cubeObjectBuffer->UploadData(uploadData);
 
 		scheduler->Execute();
 	}
@@ -115,7 +115,7 @@ namespace CE::Sandbox
 	void VulkanSandbox::Shutdown()
 	{
 		DestroyLights();
-		DestroyModels();
+		DestroyDrawPackets();
 
 		if (mainWindow)
 		{
@@ -130,6 +130,9 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitPipelines()
 	{
+		// Load Cube mesh at first
+		cubeModel = RPI::ModelLod::CreateCubeModel();
+
 		// Per View SRG
 		{
 			RHI::ShaderResourceGroupLayout perViewSrgLayout{};
@@ -208,7 +211,7 @@ namespace CE::Sandbox
 			depthPipelineDesc.vertexInputSlots.Add({});
 			depthPipelineDesc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
 			depthPipelineDesc.vertexInputSlots[0].inputSlot = 0;
-			depthPipelineDesc.vertexInputSlots[0].stride = Mesh::VertexBufferStride;
+			depthPipelineDesc.vertexInputSlots[0].stride = sizeof(Vec3);
 
 			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = depthPipelineDesc.vertexAttributes;
 			
@@ -216,7 +219,10 @@ namespace CE::Sandbox
 			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3;
 			vertexAttribs[0].inputSlot = 0;
 			vertexAttribs[0].location = 0;
-			vertexAttribs[0].offset = offsetof(VertexStruct, position);
+			vertexAttribs[0].offset = 0;
+
+			//cubeModel->BuildVertexInputSlotDescriptorList(0, depthPipelineDesc.vertexInputSlots);
+			//cubeModel->BuildVertexInputAttributeList(0, depthPipelineDesc.vertexAttributes);
 
 			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = depthPipelineDesc.srgLayouts;
 			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
@@ -299,9 +305,14 @@ namespace CE::Sandbox
 			opaquePipelineDesc.rasterState.cullMode = RHI::CullMode::None;
 
 			opaquePipelineDesc.vertexInputSlots.Add({});
-			opaquePipelineDesc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
-			opaquePipelineDesc.vertexInputSlots[0].inputSlot = 0;
-			opaquePipelineDesc.vertexInputSlots[0].stride = Mesh::VertexBufferStride;
+			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
+			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 0;
+			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3); // float3 Position;
+
+			opaquePipelineDesc.vertexInputSlots.Add({});
+			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
+			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 1;
+			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3); // float3 Normal;
 
 			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = opaquePipelineDesc.vertexAttributes;
 
@@ -313,9 +324,12 @@ namespace CE::Sandbox
 
 			vertexAttribs.Add({});
 			vertexAttribs[1].dataType = RHI::VertexAttributeDataType::Float3; // Normal
-			vertexAttribs[1].inputSlot = 0;
+			vertexAttribs[1].inputSlot = 1;
 			vertexAttribs[1].location = 1;
-			vertexAttribs[1].offset = sizeof(f32) * 4;
+			vertexAttribs[1].offset = 0;
+
+			//cubeModel->BuildVertexInputSlotDescriptorList(0, opaquePipelineDesc.vertexInputSlots);
+			//cubeModel->BuildVertexInputAttributeList(0, opaquePipelineDesc.vertexAttributes);
 
 			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = opaquePipelineDesc.srgLayouts;
 			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
@@ -404,7 +418,7 @@ namespace CE::Sandbox
 			opaqueMaterial = new RPI::Material(opaqueShader);
             
             opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
-			opaqueMaterial->SetPropertyValue("_SpecularStrength", 0.5f);
+			opaqueMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 			opaqueMaterial->SetPropertyValue("_Shininess", (u32)256);
             opaqueMaterial->FlushProperties();
 
@@ -511,158 +525,8 @@ namespace CE::Sandbox
 		perSceneSrg->Compile();
 	}
 
-	void VulkanSandbox::InitModels()
+	void VulkanSandbox::InitDrawPackets()
 	{
-		Mesh* cubeMesh = new Mesh();
-
-		cubeMesh->vertices = {
-			Vec3(0.5, -0.5, 0.5),
-			Vec3(-0.5, -0.5, 0.5),
-			Vec3(0.5, 0.5, 0.5),
-			Vec3(-0.5, 0.5, 0.5),
-
-			Vec3(0.5, 0.5, -0.5),
-			Vec3(-0.5, 0.5, -0.5),
-			Vec3(0.5, -0.5, -0.5),
-			Vec3(-0.5, -0.5, -0.5),
-
-			Vec3(0.5, 0.5, 0.5),
-			Vec3(-0.5, 0.5, 0.5),
-			Vec3(0.5, 0.5, -0.5),
-			Vec3(-0.5, 0.5, -0.5),
-
-			Vec3(0.5, -0.5, -0.5),
-			Vec3(0.5, -0.5, 0.5),
-			Vec3(-0.5, -0.5, 0.5),
-			Vec3(-0.5, -0.5, -0.5),
-
-			Vec3(-0.5, -0.5, 0.5),
-			Vec3(-0.5, 0.5, 0.5),
-			Vec3(-0.5, 0.5, -0.5),
-			Vec3(-0.5, -0.5, -0.5),
-
-			Vec3(0.5, -0.5, -0.5),
-			Vec3(0.5, 0.5, -0.5),
-			Vec3(0.5, 0.5, 0.5),
-			Vec3(0.5, -0.5, 0.5)
-		};
-
-		cubeMesh->indices = {
-			0, 2, 3,
-			0, 3, 1,
-			8, 4, 5,
-			8, 5, 9,
-			10, 6, 7,
-			10, 7, 11,
-			12, 13, 14,
-			12, 14, 15,
-			16, 17, 18,
-			16, 18, 19,
-			20, 21, 22,
-			20, 22, 23
-		};
-
-		cubeMesh->uvCoords = {
-			Vec2(0, 0),
-			Vec2(1, 0),
-			Vec2(0, 1),
-			Vec2(1, 1),
-
-			Vec2(0, 1),
-			Vec2(1, 1),
-			Vec2(0, 1),
-			Vec2(1, 1),
-
-			Vec2(0, 0),
-			Vec2(1, 0),
-			Vec2(0, 0),
-			Vec2(1, 0),
-
-			Vec2(0, 0),
-			Vec2(0, 1),
-			Vec2(1, 1),
-			Vec2(1, 0),
-
-			Vec2(0, 0),
-			Vec2(0, 1),
-			Vec2(1, 1),
-			Vec2(1, 0),
-
-			Vec2(0, 0),
-			Vec2(0, 1),
-			Vec2(1, 1),
-			Vec2(1, 0)
-		};
-
-		cubeMesh->normals = {
-			Vec3(0, 0, 1),
-			Vec3(0, 0, 1),
-			Vec3(0, 0, 1),
-			Vec3(0, 0, 1),
-
-			Vec3(0, 1, 0),
-			Vec3(0, 1, 0),
-			Vec3(0, 0, -1),
-			Vec3(0, 0, -1),
-
-			Vec3(0, 1, 0),
-			Vec3(0, 1, 0),
-			Vec3(0, 0, -1),
-			Vec3(0, 0, -1),
-
-			Vec3(0, -1, 0),
-			Vec3(0, -1, 0),
-			Vec3(0, -1, 0),
-			Vec3(0, -1, 0),
-
-			Vec3(-1, 0, 0),
-			Vec3(-1, 0, 0),
-			Vec3(-1, 0, 0),
-			Vec3(-1, 0, 0),
-
-			Vec3(1, 0, 0),
-			Vec3(1, 0, 0),
-			Vec3(1, 0, 0),
-			Vec3(1, 0, 0)
-		};
-
-		cubeMesh->tangents = {
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-			Vec4(-1, 0, 0, -1),
-
-			Vec4(0, 0, -1, -1),
-			Vec4(0, 0, -1, -1),
-			Vec4(0, 0, -1, -1),
-			Vec4(0, 0, -1, -1),
-
-			Vec4(0, 0, 1, -1),
-			Vec4(0, 0, 1, -1),
-			Vec4(0, 0, 1, -1),
-			Vec4(0, 0, 1, -1),
-		};
-
-		cubeMesh->CreateBuffer();
-		meshes.Add(cubeMesh);
-
-		cubeModel = RPI::ModelLod::CreateCubeModel();
-
 		DrawPacketBuilder builder{};
 
 		// Mesh SRG
@@ -687,61 +551,56 @@ namespace CE::Sandbox
 			desc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			desc.name = "_ObjectData";
 
-			meshModelBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
+			cubeObjectBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
 
 			meshModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
-
+			
 			RHI::BufferData uploadData{};
 			uploadData.dataSize = desc.bufferSize;
 			uploadData.data = &meshModelMatrix;
 			uploadData.startOffsetInBuffer = 0;
 
-			meshModelBuffer->UploadData(uploadData);
+			cubeObjectBuffer->UploadData(uploadData);
 
-			meshObjectSrg->Bind("_ObjectData", RHI::BufferView(meshModelBuffer));
+			meshObjectSrg->Bind("_ObjectData", RHI::BufferView(cubeObjectBuffer));
 
 			meshObjectSrg->Compile();
 		}
 
-		RHI::DrawIndexedArguments indexedArgs{};
-		indexedArgs.firstIndex = 0;
-		indexedArgs.firstInstance = 0;
-		indexedArgs.instanceCount = 1;
-		indexedArgs.indexCount = cubeMesh->indices.GetSize();
-		indexedArgs.vertexOffset = 0;
-		RHI::DrawArguments args = RHI::DrawArguments(indexedArgs);
-		builder.SetDrawArguments(args);
+		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
 
 		builder.AddShaderResourceGroup(meshObjectSrg);
+
+		RPI::Mesh* cubeModelMesh = cubeModel->GetMesh(0);
 
 		// Depth Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
-			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(cubeMesh->buffer, cubeMesh->vertexBufferOffset,
-				cubeMesh->vertexBufferSize,
-				sizeof(Vec3) * 3 + sizeof(Vec2));
-			request.vertexBufferViews.Add(vertexBufferView);
-
-			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(cubeMesh->buffer, cubeMesh->indexBufferOffset, cubeMesh->indexBufferSize, RHI::IndexFormat::Uint16);
-			request.indexBufferView = indexBufferView;
+			const auto& vertInfo = cubeModelMesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = cubeModelMesh->indexBufferView;
 
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthPipeline;
-			
+
 			builder.AddDrawItem(request);
 		}
 		
 		// Opaque Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
-			RHI::VertexBufferView vertexBufferView = RHI::VertexBufferView(cubeMesh->buffer, cubeMesh->vertexBufferOffset,
-				cubeMesh->vertexBufferSize,
-				sizeof(Vec3) * 3 + sizeof(Vec2));
-			request.vertexBufferViews.Add(vertexBufferView);
+			for (const auto& vertInfo : cubeModelMesh->vertexBufferInfos)
+			{
+				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position &&
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal)
+					continue;
 
-			RHI::IndexBufferView indexBufferView = RHI::IndexBufferView(cubeMesh->buffer, cubeMesh->indexBufferOffset, cubeMesh->indexBufferSize, RHI::IndexFormat::Uint16);
-			request.indexBufferView = indexBufferView;
+				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+				request.vertexBufferViews.Add(vertBufferView);
+			}
+			request.indexBufferView = cubeModelMesh->indexBufferView;
 			
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
@@ -813,11 +672,11 @@ namespace CE::Sandbox
 		free(data);
 	}
 
-	void VulkanSandbox::DestroyModels()
+	void VulkanSandbox::DestroyDrawPackets()
 	{
 		scheduler->WaitUntilIdle();
 
-		delete meshModelBuffer; meshModelBuffer = nullptr;
+		delete cubeObjectBuffer; cubeObjectBuffer = nullptr;
 		delete meshObjectSrg; meshObjectSrg = nullptr;
 		delete meshDrawPacket; meshDrawPacket = nullptr;
 

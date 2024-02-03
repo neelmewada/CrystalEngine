@@ -401,11 +401,6 @@ namespace CE::Vulkan
 			return;
 		}
 
-		RHI::BufferData stagingBufferData{};
-		stagingBufferData.data = bufferData.data;
-		stagingBufferData.dataSize = bufferData.dataSize;
-		stagingBufferData.startOffsetInBuffer = 0;
-
 		RHI::BufferDescriptor stagingBufferDesc{};
 		stagingBufferDesc.name = "Staging Buffer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
@@ -415,6 +410,10 @@ namespace CE::Vulkan
 
 		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
 
+		RHI::BufferData stagingBufferData{};
+		stagingBufferData.data = bufferData.data;
+		stagingBufferData.dataSize = bufferData.dataSize;
+		stagingBufferData.startOffsetInBuffer = 0;
 		stagingBuffer->UploadData(stagingBufferData);
 
 		VkCommandBufferBeginInfo beginInfo{};
