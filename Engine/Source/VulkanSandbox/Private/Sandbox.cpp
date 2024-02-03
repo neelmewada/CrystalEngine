@@ -168,7 +168,7 @@ namespace CE::Sandbox
 
 			cubeObjectSrg->Bind("_ObjectData", RHI::BufferView(cubeObjectBuffer));
 
-			cubeObjectSrg->Compile();
+			cubeObjectSrg->FlushBindings();
 		}
 
 		// Per View SRG
@@ -203,8 +203,8 @@ namespace CE::Sandbox
 			perViewSrg->Bind("_PerViewData", perViewBuffer);
 			depthPerViewSrg->Bind("_PerViewData", perViewBuffer);
 			
-			perViewSrg->Compile();
-			depthPerViewSrg->Compile();
+			perViewSrg->FlushBindings();
+			depthPerViewSrg->FlushBindings();
 		}
 
 		// Depth Pipeline
@@ -451,7 +451,7 @@ namespace CE::Sandbox
             
             opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
 			opaqueMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
-			opaqueMaterial->SetPropertyValue("_Shininess", (u32)256);
+			opaqueMaterial->SetPropertyValue("_Shininess", (u32)64);
             opaqueMaterial->FlushProperties();
 
 			delete opaqueVert;
@@ -554,26 +554,26 @@ namespace CE::Sandbox
 		perSceneSrg->Bind("_PointLights", pointLightsBuffer);
 		perSceneSrg->Bind("_LightData", lightDataBuffer);
 
-		perSceneSrg->Compile();
+		perSceneSrg->FlushBindings();
 	}
 
 	void VulkanSandbox::InitDrawPackets()
 	{
 		DrawPacketBuilder builder{};
 
-		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
+		builder.SetDrawArguments(sphereModel->GetMesh(0)->drawArguments);
 
 		builder.AddShaderResourceGroup(cubeObjectSrg);
 
-		RPI::Mesh* cubeModelMesh = cubeModel->GetMesh(0);
+		RPI::Mesh* mesh = sphereModel->GetMesh(0);
 
 		// Depth Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
-			const auto& vertInfo = cubeModelMesh->vertexBufferInfos[0];
-			auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
 			request.vertexBufferViews.Add(vertBufferView);
-			request.indexBufferView = cubeModelMesh->indexBufferView;
+			request.indexBufferView = mesh->indexBufferView;
 
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
@@ -585,16 +585,16 @@ namespace CE::Sandbox
 		// Opaque Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
-			for (const auto& vertInfo : cubeModelMesh->vertexBufferInfos)
+			for (const auto& vertInfo : mesh->vertexBufferInfos)
 			{
 				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position &&
 					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal)
 					continue;
 
-				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+				auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
 				request.vertexBufferViews.Add(vertBufferView);
 			}
-			request.indexBufferView = cubeModelMesh->indexBufferView;
+			request.indexBufferView = mesh->indexBufferView;
 			
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
