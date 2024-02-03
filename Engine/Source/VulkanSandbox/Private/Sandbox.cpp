@@ -350,6 +350,13 @@ namespace CE::Sandbox
 
 			perSceneSRGLayout.variables.Add({});
 			perSceneSRGLayout.variables.Top().arrayCount = 1;
+			perSceneSRGLayout.variables.Top().name = "_PointLights";
+			perSceneSRGLayout.variables.Top().bindingSlot = pointLightsBinding;
+			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::StructuredBuffer;
+			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSRGLayout.variables.Add({});
+			perSceneSRGLayout.variables.Top().arrayCount = 1;
 			perSceneSRGLayout.variables.Top().name = "_LightData";
 			perSceneSRGLayout.variables.Top().bindingSlot = lightDataBinding;
 			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
@@ -376,6 +383,11 @@ namespace CE::Sandbox
 				specularMember.dataType = RHI::ShaderStructMemberType::Float;
 				specularMember.name = "_SpecularStrength";
 				perMaterialSRGLayout.variables.Top().structMembers.Add(specularMember);
+
+				RHI::ShaderStructMember shininessMember{};
+				shininessMember.dataType = RHI::ShaderStructMemberType::UInt;
+				shininessMember.name = "_Shininess";
+				perMaterialSRGLayout.variables.Top().structMembers.Add(shininessMember);
 			}
 
 			srgLayouts.Add(perMaterialSRGLayout);
@@ -393,7 +405,8 @@ namespace CE::Sandbox
             
             opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
 			opaqueMaterial->SetPropertyValue("_SpecularStrength", 0.5f);
-            opaqueMaterial->FlushBindings();
+			opaqueMaterial->SetPropertyValue("_Shininess", (u32)256);
+            opaqueMaterial->FlushProperties();
 
 			delete opaqueVert;
 			delete opaqueFrag;
@@ -431,7 +444,7 @@ namespace CE::Sandbox
 
 		{
 			RHI::BufferDescriptor bufferDesc{};
-			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			bufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
 			bufferDesc.bufferSize = pointLights.GetSize() * sizeof(PointLight);
 			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDesc.name = "Point Lights Buffer";
@@ -478,7 +491,7 @@ namespace CE::Sandbox
 		perSceneSRGLayout.variables.Add({});
 		perSceneSRGLayout.variables.Top().arrayCount = 1;
 		perSceneSRGLayout.variables.Top().name = "_PointLights";
-		perSceneSRGLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
+		perSceneSRGLayout.variables.Top().bindingSlot = pointLightsBinding;
 		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::StructuredBuffer;
 		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
@@ -492,6 +505,7 @@ namespace CE::Sandbox
 		perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSRGLayout);
 
 		perSceneSrg->Bind("_DirectionalLightsArray", directionalLightsBuffer);
+		perSceneSrg->Bind("_PointLights", pointLightsBuffer);
 		perSceneSrg->Bind("_LightData", lightDataBuffer);
 
 		perSceneSrg->Compile();
@@ -646,6 +660,8 @@ namespace CE::Sandbox
 
 		cubeMesh->CreateBuffer();
 		meshes.Add(cubeMesh);
+
+		cubeModel = RPI::ModelLod::CreateCubeModel();
 
 		DrawPacketBuilder builder{};
 
@@ -810,6 +826,8 @@ namespace CE::Sandbox
 			delete mesh;
 		}
 		meshes.Clear();
+
+		delete cubeModel;
 	}
 
 	void VulkanSandbox::DestroyLights()

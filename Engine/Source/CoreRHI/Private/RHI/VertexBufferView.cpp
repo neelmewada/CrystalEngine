@@ -3,7 +3,7 @@
 namespace CE::RHI
 {
 
-    VertexBufferView::VertexBufferView(RHI::Buffer* buffer, u64 byteOffset, u64 byteCount, u32 vertexStride)
+    VertexBufferView::VertexBufferView(RHI::Buffer* buffer, u64 byteOffset, u64 byteCount, u64 vertexStride)
 		: buffer(buffer)
 		, byteOffset(byteOffset)
 		, byteCount(byteCount)

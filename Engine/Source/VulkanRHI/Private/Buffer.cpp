@@ -93,7 +93,7 @@ namespace CE::Vulkan
 		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			if (heapType == RHI::MemoryHeapType::ReadBack)
+			if (heapType == RHI::MemoryHeapType::ReadBack && device->SupportsHostCachedMemory())
 				memoryFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
 			if (device->IsUnifiedMemoryArchitecture())
 				memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;

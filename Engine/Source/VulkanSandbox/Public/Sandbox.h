@@ -144,6 +144,7 @@ namespace CE::Sandbox
 		RHI::SwapChain* swapChain = nullptr;
 		PlatformWindow* mainWindow = nullptr;
 
+		RPI::ModelLod* cubeModel = nullptr;
 		Array<Mesh*> meshes{};
 		Array<MeshInstance> meshInstances{};
 		RHI::DrawListContext drawList{};

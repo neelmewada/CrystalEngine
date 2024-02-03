@@ -24,7 +24,7 @@ namespace CE::RPI
 
 		void SelectVariant(u32 variantIndex);
         
-        void FlushBindings();
+        void FlushProperties();
 
 		void Compile();
         

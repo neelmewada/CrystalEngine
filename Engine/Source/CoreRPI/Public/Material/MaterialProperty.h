@@ -19,6 +19,8 @@ namespace CE::RPI
     };
     ENUM_CLASS(MaterialPropertyDataType);
 
+    using MaterialSlotId = u32;
+
     struct CORERPI_API MaterialPropertyValue final
     {
     public:

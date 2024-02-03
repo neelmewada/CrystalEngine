@@ -66,6 +66,11 @@ namespace CE::Vulkan
 			return isUnifiedMemory;
 		}
 
+        inline bool SupportsHostCachedMemory() const
+        {
+            return supportsHostCachedMemory;
+        }
+
 		inline CommandBufferAllocator* GetCommandAllocator() const { return commandAllocator; }
 
 		INLINE bool IsOffscreenOnly() const { return !surfaceSupported; }
@@ -123,6 +128,7 @@ namespace CE::Vulkan
 
         bool isInitialized = false;
 		bool isUnifiedMemory = false;
+        bool supportsHostCachedMemory = false;
 
 		/// @brief Vulkan can be initialized without any Native windows (i.e. offscreen mode).
 		/// Potentially useful for command line applications/toos.

@@ -145,7 +145,7 @@ namespace CE::Vulkan
 			subpassIndex = 0;
 			bool foundPipelineLayout = false;
 
-			// Pre-Compile Pipelines
+			// Pre-Compile Shader Pipelines
 			for (RHI::PipelineState* rhiPipelineState : usePipelines)
 			{
 				auto pipelineState = (Vulkan::PipelineState*)rhiPipelineState;

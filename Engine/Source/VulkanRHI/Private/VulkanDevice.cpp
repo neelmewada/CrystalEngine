@@ -213,6 +213,17 @@ namespace CE::Vulkan
 			}
 		}
 
+		supportsHostCachedMemory = false;
+
+		for (int i = 0; i < memoryProperties.memoryTypeCount; i++)
+		{
+			if (memoryProperties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
+			{
+				supportsHostCachedMemory = true;
+				break;
+			}
+		}
+
 		vkGetPhysicalDeviceProperties(gpu, &gpuProperties);
 		gpuMetaData.localMemorySize = GetPhysicalDeviceLocalMemory(gpu);
 
@@ -270,6 +281,19 @@ namespace CE::Vulkan
 			}
 
 			supportedDeviceExtensions.Add(deviceExtensionProperties[i].extensionName);
+
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+			}
+
+#if CE_DEBUG && PLATFORM_DESKTOP
+			// Debugging Extensions
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(deviceExtensionProperties[i].extensionName);
+			}
+#endif
 		}
 
 		auto requiredDeviceExtensions = VulkanPlatform::GetRequiredVulkanDeviceExtensions();
@@ -278,9 +302,6 @@ namespace CE::Vulkan
 		{
 			deviceExtensionNames.Add(requiredExtension);
 		}
-
-		// Allow descriptor set bindings to change after binding it once
-		deviceExtensionNames.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
 		deviceCI.enabledExtensionCount = static_cast<uint32_t>(deviceExtensionNames.GetSize());
 		deviceCI.ppEnabledExtensionNames = !deviceExtensionNames.IsEmpty() ? deviceExtensionNames.GetData() : nullptr;

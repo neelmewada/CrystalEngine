@@ -36,8 +36,6 @@ namespace CE::RPI
 		this->shader = shader;
 		this->shaderVariantIndex = shader->defaultVariantIndex;
 
-        memberOffsetsByVariableName.Clear();
-
         for (auto [name, buffer] : buffersByVariableName)
         {
             delete buffer;
@@ -45,7 +43,7 @@ namespace CE::RPI
         buffersByVariableName.Clear();
 
 		RecreateShaderResourceGroup();
-        FlushBindings();
+        FlushProperties();
 	}
 
 	ShaderVariant* Material::GetCurrentShader() const
@@ -67,7 +65,7 @@ namespace CE::RPI
         properties[propertyName] = value;
     }
 
-    void Material::FlushBindings()
+    void Material::FlushProperties()
     {
         if (!shaderResourceGroup)
             RecreateShaderResourceGroup();
@@ -81,23 +79,23 @@ namespace CE::RPI
             {
                 if (variable.structMembers.IsEmpty())
                     continue;
-                    
+
                 Array<u64>& offsets = memberOffsetsByVariableName[variable.name];
-                    
+
                 if (offsets.IsEmpty())
                 {
                     RHI::gDynamicRHI->GetShaderStructMemberOffsets(variable.structMembers, offsets);
                 }
-                    
+
                 u64 totalSize = 0;
                 if (!offsets.IsEmpty())
                 {
                     totalSize = offsets.Top() + RHI::gDynamicRHI->GetShaderStructMemberSize(variable.structMembers.Top());
                 }
-                    
+                
                 RHI::Buffer* buffer = buffersByVariableName[variable.name];
                 bool bufferRecreated = false;
-                    
+
                 if (buffer != nullptr && buffer->GetBufferSize() < totalSize)
                 {
                     delete buffer;
@@ -126,9 +124,9 @@ namespace CE::RPI
                         
                     buffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
                 }
-                    
+
                 buffersByVariableName[variable.name] = buffer;
-                    
+
                 void* data = nullptr;
                 if (buffer->Map(0, totalSize, &data))
                 {
@@ -143,10 +141,14 @@ namespace CE::RPI
                                 case RHI::ShaderStructMemberType::UInt:
                                     if (value.IsOfType<u32>())
                                         *((u32*)ptr) = value.GetValue<u32>();
+                                    else if (value.IsOfType<s32>())
+                                        *((u32*)ptr) = (u32)value.GetValue<s32>();
                                     break;
                                 case RHI::ShaderStructMemberType::Int:
                                     if (value.IsOfType<s32>())
                                         *((s32*)ptr) = value.GetValue<s32>();
+                                    else if (value.IsOfType<u32>())
+                                        *((s32*)ptr) = (s32)value.GetValue<u32>();
                                     break;
                                 case RHI::ShaderStructMemberType::Float:
                                     if (value.IsOfType<f32>())
@@ -179,7 +181,7 @@ namespace CE::RPI
                     }
                     buffer->Unmap();
                 }
-                    
+
                 if (bufferRecreated)
                 {
                     shaderResourceGroup->Bind(variable.name, buffer);
@@ -230,7 +232,7 @@ namespace CE::RPI
 	{
 		if (shaderResourceGroup)
 		{
-            FlushBindings();
+            FlushProperties();
             
 			shaderResourceGroup->Compile();
 		}
@@ -243,6 +245,8 @@ namespace CE::RPI
             delete shaderResourceGroup;
 			shaderResourceGroup = nullptr;
 		}
+
+        memberOffsetsByVariableName.Clear();
 
 		ShaderVariant* currentShader = GetCurrentShader();
 		if (!currentShader || !currentShader->GetPipeline())

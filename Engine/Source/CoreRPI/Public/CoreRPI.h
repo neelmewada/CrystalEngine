@@ -43,6 +43,7 @@ namespace CE::RPI
 #include "Material/MaterialProperty.h"
 #include "Material/Material.h"
 
+#include "VertexBuffer.h"
 #include "Model/ModelLod.h"
 #include "Model/Model.h"
 

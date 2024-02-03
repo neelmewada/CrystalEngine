@@ -404,6 +404,13 @@ namespace CE::RHI
 
     struct CORERHI_API ShaderSemantic
     {
+        ShaderSemantic() = default;
+
+        ShaderSemantic(VertexInputAttribute attribute, u8 index = 0) : attribute(attribute), index(index)
+        {
+
+        }
+
         static ShaderSemantic Parse(const String& name);
 
         VertexInputAttribute attribute = VertexInputAttribute::None;

@@ -24,6 +24,7 @@ cbuffer _MaterialData : SRG_PerMaterial(b)
 {
     float4 _Albedo;
     float _SpecularStrength;
+    uint _Shininess;
 };
 
 PSInput VertMain(VSInput input)
@@ -62,7 +63,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         diffuse += max(dot(normal, lightDir), 0) * lightColor.rgb * lightColor.a;
 
         float3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Shininess);
         specular += _SpecularStrength * spec * lightColor.rgb;
     }
 
