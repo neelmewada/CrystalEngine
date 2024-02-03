@@ -40,6 +40,8 @@ namespace CE::RPI
 
 		static ModelLod* CreateCubeModel();
 
+		static ModelLod* CreateSphereModel();
+
 		void AddMesh(const Mesh& mesh);
 
 		inline u32 GetMeshCount() const { return meshes.GetSize(); }

@@ -2,56 +2,9 @@
 
 namespace CE::Sandbox
 {
-	struct VertexStruct
-	{
-		Vec3 position;
-		Vec3 normal;
-		Vec3 tangent;
-		Vec2 uvCoord;
-	};
-
 	constexpr u32 MaxDirectionalLightCount = 8;
 
-	class Mesh
-	{
-	public:
 
-		constexpr static u64 VertexBufferStride = sizeof(VertexStruct);
-
-		~Mesh()
-		{
-			if (buffer)
-				RHI::gDynamicRHI->DestroyBuffer(buffer);
-			buffer = nullptr;
-		}
-
-		void CreateBuffer();
-
-		Array<Vec3> vertices{};
-
-		Array<u32> indices{};
-
-		Array<Vec2> uvCoords{};
-
-		Array<Vec3> normals{};
-
-		Array<Vec3> tangents{};
-
-		RHI::Buffer* buffer = nullptr;
-		u64 vertexBufferStride = 0;
-		u64 vertexBufferOffset = 0;
-		u64 vertexBufferSize = 0;
-		u64 indexBufferOffset = 0;
-		u64 indexBufferSize = 0;
-	};
-
-	struct MeshInstance
-	{
-		Mesh* mesh = nullptr;
-		Vec3 position{};
-		Quat rotation{};
-		Vec3 scale{};
-	};
 
 	struct PerViewData
 	{
@@ -145,13 +98,12 @@ namespace CE::Sandbox
 		PlatformWindow* mainWindow = nullptr;
 
 		RPI::ModelLod* cubeModel = nullptr;
-		Array<Mesh*> meshes{};
-		Array<MeshInstance> meshInstances{};
+		RPI::ModelLod* sphereModel = nullptr;
 		RHI::DrawListContext drawList{};
 
 		DrawPacket* meshDrawPacket = nullptr;
 
-		RHI::ShaderResourceGroup* meshObjectSrg = nullptr;
+		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
 		RHI::Buffer* cubeObjectBuffer = nullptr;
 		Matrix4x4 meshModelMatrix{};
 		f32 cameraRotation = 0.0f;
