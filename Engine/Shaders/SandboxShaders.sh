@@ -28,8 +28,8 @@ CompileShader() {
     local VertOut="../Source/VulkanSandbox/Resources/Shaders/"$1".vert.spv"
     local FragOut="../Source/VulkanSandbox/Resources/Shaders/"$1".frag.spv"
 
-    ${DxCompiler} -spirv -E VertMain -T vs_6_0 -fspv-debug=vulkan-with-source -Fo ${VertOut} ${FileName} #-fvk-use-dx-layout
-    ${DxCompiler} -spirv -E FragMain -T ps_6_0 -fspv-debug=vulkan-with-source -Fo ${FragOut} ${FileName} #-fvk-use-dx-layout
+    ${DxCompiler} -spirv -E VertMain -T vs_6_0 -Fo ${VertOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
+    ${DxCompiler} -spirv -E FragMain -T ps_6_0 -Fo ${FragOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
 
     echo "Compiled:" ${FileName}
 }

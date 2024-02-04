@@ -184,7 +184,7 @@ namespace CE::Sandbox
 		cubeMapDesc.height = back.GetHeight();
 		cubeMapDesc.depth = 1;
 		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
-		cubeMapDesc.format = RHI::Format::BC7_SRGB;//RHI::Format::R8G8B8A8_SRGB;
+		cubeMapDesc.format = RHI::Format::R8G8B8A8_SRGB;// RHI::Format::BC7_SRGB;
 
 		const u32 height = cubeMapDesc.height;
 		const u32 width = cubeMapDesc.width;
@@ -641,7 +641,8 @@ namespace CE::Sandbox
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-			bufferDesc.bufferSize = directionalLights.GetCapacity() * sizeof(DirectionalLight);
+            auto structSize = sizeof(DirectionalLight);
+            bufferDesc.bufferSize = directionalLights.GetCapacity() * structSize;
 			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDesc.name = "Directional Lights Buffer";
 

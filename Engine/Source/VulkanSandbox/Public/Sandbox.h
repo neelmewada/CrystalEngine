@@ -14,7 +14,7 @@ namespace CE::Sandbox
 		Vec3 viewPosition;
 	};
 
-	struct DirectionalLight
+	struct alignas(16) DirectionalLight
 	{
 		Vec3 direction;
 		Vec4 colorAndIntensity;
