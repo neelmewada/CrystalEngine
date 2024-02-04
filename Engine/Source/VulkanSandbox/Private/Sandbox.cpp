@@ -171,6 +171,8 @@ namespace CE::Sandbox
 		CMImage bottom = LOAD_SKYBOX(bottom); // 3
 		CMImage front = LOAD_SKYBOX(front); // 4
 		CMImage back = LOAD_SKYBOX(back); // 5
+		
+		CMImage* layers[] = { &right, &left, &top, &bottom, &front, &back };
 
 		RHI::TextureDescriptor cubeMapDesc{};
 		cubeMapDesc.name = "Skybox";
@@ -192,7 +194,7 @@ namespace CE::Sandbox
 		RHI::BufferDescriptor stagingBufferDesc{};
 		stagingBufferDesc.name = "CubeMap Transfer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		stagingBufferDesc.bufferSize = cubeMapDesc.width * cubeMapDesc.height * 4;
+		stagingBufferDesc.bufferSize = height * width * 4 * 6; // 4 bytes per pixel * 6 array layers
 		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 
 		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
@@ -204,7 +206,6 @@ namespace CE::Sandbox
 
 		commandList->Begin();
 		
-		// Right face
 		{
 			RHI::ResourceBarrierDescriptor barrier{};
 			barrier.resource = skyboxCubeMap;
@@ -215,23 +216,36 @@ namespace CE::Sandbox
 			void* dataPtr = nullptr;
 			stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
 			{
-				u8* dstData = (u8*)dataPtr;
-				u8* srcData = right.GetDataPtr();
-				for (int y = 0; y < height; y++)
+				for (int face = 0; face < 6; face++)
 				{
-					for (int x = 0; x < width; x++)
+					u8* dstData = (u8*)dataPtr + height * width * 4 * face;
+					u8* srcData = right.GetDataPtr();
+					for (int y = 0; y < height; y++)
 					{
-						int srcPixelIndex = (y * height + x) * 3; // Assuming all CMImage's are RGB8 (3 channels only)
-						int dstPixelIndex = (y * height + x) * 4;
-						
-						*(dstData + dstPixelIndex) = *(srcData + srcPixelIndex); // R
-						*(dstData + dstPixelIndex + 1) = *(srcData + srcPixelIndex + 1); // G
-						*(dstData + dstPixelIndex + 2) = *(srcData + srcPixelIndex + 2); // B
-						*(dstData + dstPixelIndex + 3) = 0; // A
+						for (int x = 0; x < width; x++)
+						{
+							int srcPixelIndex = (y * height + x) * 3; // Assuming all CMImage's are RGB8 (3 channels only)
+							int dstPixelIndex = (y * height + x) * 4;
+
+							*(dstData + dstPixelIndex) = *(srcData + srcPixelIndex); // R
+							*(dstData + dstPixelIndex + 1) = *(srcData + srcPixelIndex + 1); // G
+							*(dstData + dstPixelIndex + 2) = *(srcData + srcPixelIndex + 2); // B
+							*(dstData + dstPixelIndex + 3) = 0; // A
+						}
 					}
 				}
 			}
 			stagingBuffer->Unmap();
+
+			RHI::BufferToTextureCopy copyRegion{};
+			copyRegion.dstTexture = skyboxCubeMap;
+			copyRegion.baseArrayLayer = 0;
+			copyRegion.layerCount = 6;
+			copyRegion.mipSlice = 0;
+			copyRegion.srcBuffer = stagingBuffer;
+			copyRegion.bufferOffset = 0;
+
+			commandList->CopyTextureRegion(copyRegion);
 
 			barrier.resource = skyboxCubeMap;
 			barrier.fromState = RHI::ResourceState::CopyDestination;

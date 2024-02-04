@@ -466,6 +466,36 @@ namespace CE::Vulkan
 
 	}
 
+	void CommandList::CopyTextureRegion(const BufferToTextureCopy& region)
+	{
+		if (region.srcBuffer == nullptr || region.dstTexture == nullptr)
+			return;
+
+		Vulkan::Texture* dstTexture = (Vulkan::Texture*)region.dstTexture;
+		Vulkan::Buffer* srcBuffer = (Vulkan::Buffer*)region.srcBuffer;
+
+		VkBufferImageCopy copy{};
+		copy.bufferOffset = region.bufferOffset;
+		copy.bufferImageHeight = 0; // 0 means data is tightly packed
+		copy.bufferRowLength = 0; // 
+		
+		copy.imageOffset = { 0, 0, 0 };
+		copy.imageExtent.width = dstTexture->GetWidth();
+		copy.imageExtent.height = dstTexture->GetHeight();
+		copy.imageExtent.depth = dstTexture->GetDepth();
+
+		copy.imageSubresource.aspectMask = dstTexture->aspectMask;
+		copy.imageSubresource.baseArrayLayer = region.baseArrayLayer;
+		copy.imageSubresource.layerCount = region.layerCount;
+		copy.imageSubresource.mipLevel = region.mipSlice;
+
+		vkCmdCopyBufferToImage(commandBuffer,
+			srcBuffer->GetBuffer(),
+			dstTexture->GetImage(),
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1, &copy);
+	}
+
 	void CommandList::Begin()
 	{
 		VkCommandBufferBeginInfo cmdBeginInfo{};

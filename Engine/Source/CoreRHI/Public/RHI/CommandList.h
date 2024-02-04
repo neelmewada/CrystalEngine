@@ -22,6 +22,17 @@ namespace CE::RHI
 		ResourceState toState;
 	};
 
+	struct BufferToTextureCopy
+	{
+		RHI::Buffer* srcBuffer = nullptr;
+		u64 bufferOffset = 0;
+
+		RHI::Texture* dstTexture = nullptr;
+		u16 mipSlice = 0;
+		u16 baseArrayLayer = 0;
+		u16 layerCount = 1;
+	};
+
 	class CORERHI_API CommandList : public RHIResource
 	{
 	protected:
@@ -65,6 +76,8 @@ namespace CE::RHI
 		virtual void DrawIndexed(const DrawIndexedArguments& args) = 0;
 
 		virtual void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) = 0;
+
+		virtual void CopyTextureRegion(const BufferToTextureCopy& region) = 0;
 
 	protected:
 

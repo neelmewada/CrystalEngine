@@ -34,6 +34,8 @@ namespace CE::Vulkan
 
 		void ResourceBarrier(u32 count, RHI::ResourceBarrierDescriptor* barriers) override;
 
+		void CopyTextureRegion(const BufferToTextureCopy& region) override;
+
 		void Begin() override;
 		void End() override;
 
