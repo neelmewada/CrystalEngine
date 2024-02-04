@@ -30,7 +30,7 @@ namespace CE::RHI
     public:
         virtual ~IDeviceObject() {}
 
-        virtual DeviceObjectType GetDeviceObjectType() const
+        inline DeviceObjectType GetDeviceObjectType() const
         {
             return deviceObjectType;
         }

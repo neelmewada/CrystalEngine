@@ -441,6 +441,8 @@ namespace CE::Vulkan
 		submitInfo.signalSemaphoreCount = 0;
 		submitInfo.pSignalSemaphores = nullptr;
 
+		curFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
+
 		vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
 
 		constexpr auto u64Max = std::numeric_limits<u64>::max();
@@ -529,6 +531,8 @@ namespace CE::Vulkan
         submitInfo.pWaitSemaphores = nullptr;
         submitInfo.signalSemaphoreCount = 0;
         submitInfo.pSignalSemaphores = nullptr;
+
+		curFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
         
         vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
         
@@ -614,6 +618,8 @@ namespace CE::Vulkan
 		submitInfo.pWaitSemaphores = nullptr;
 		submitInfo.signalSemaphoreCount = 0;
 		submitInfo.pSignalSemaphores = nullptr;
+
+		curFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
 
 		vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
 

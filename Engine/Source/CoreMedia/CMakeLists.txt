@@ -26,6 +26,7 @@ ce_add_target(${PROJECT_NAME} SHARED
     BUILD_DEPENDENCIES
         PRIVATE
             ThirdParty::stb
+            ThirdParty::miniz
             $<${PAL_PLATFORM_IS_DESKTOP}:ThirdParty::dxcompiler>
             $<${PAL_PLATFORM_IS_DESKTOP}:ThirdParty::compressonator>
             $<${PAL_PLATFORM_IS_WINDOWS}:d3d11.lib>

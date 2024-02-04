@@ -4,6 +4,23 @@ namespace CE::RHI
 {
 	class Viewport;
 	class ShaderResourceGroup;
+	class Texture;
+	class Buffer;
+	class CommandList;
+	class IDeviceObject;
+
+	enum class CommandListType
+	{
+		Direct = 0,
+		Indirect
+	};
+
+	struct ResourceBarrierDescriptor
+	{
+		IDeviceObject* resource;
+		ResourceState fromState;
+		ResourceState toState;
+	};
 
 	class CORERHI_API CommandList : public RHIResource
 	{
@@ -15,11 +32,17 @@ namespace CE::RHI
 
 		// - Public API -
 
+		inline RHI::CommandListType GetCommandListType() const 
+		{
+			return commandListType;
+		}
 
 		// - Command List API -
 
 		virtual void Begin() = 0;
 		virtual void End() = 0;
+
+		virtual void ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers) = 0;
 
 		virtual void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs) = 0;
 
@@ -42,6 +65,10 @@ namespace CE::RHI
 		virtual void DrawIndexed(const DrawIndexedArguments& args) = 0;
 
 		virtual void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) = 0;
+
+	protected:
+
+		RHI::CommandListType commandListType = RHI::CommandListType::Direct;
 
 	};
 

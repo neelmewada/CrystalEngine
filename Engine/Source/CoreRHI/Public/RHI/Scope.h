@@ -72,6 +72,8 @@ namespace CE::RHI
 			return prevSubPass != nullptr || nextSubPass != nullptr;
 		}
 
+		inline RHI::HardwareQueueClass GetQueueClass() const { return queueClass; }
+
 		void SetShaderResourceGroups(const Array<RHI::ShaderResourceGroup*>& srgs);
 		void AddShaderResourceGroups(RHI::ShaderResourceGroup* srg);
 

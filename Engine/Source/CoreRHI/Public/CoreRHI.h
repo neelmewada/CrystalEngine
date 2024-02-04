@@ -14,6 +14,7 @@
 #include "RHI/ClearValue.h"
 #include "RHI/ShaderResourceGroupLayout.h"
 #include "RHI/Resources.h"
+#include "RHI/Fence.h"
 #include "RHI/CommandQueue.h"
 #include "RHI/MemoryHeap.h"
 #include "RHI/BufferView.h"

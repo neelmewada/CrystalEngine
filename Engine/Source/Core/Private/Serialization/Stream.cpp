@@ -97,7 +97,12 @@ namespace CE
 
     Stream& Stream::operator<<(const char* cString)
     {
-        return *this << String(cString);
+        Write(cString, strlen(cString));
+        if (IsBinaryMode())
+        {
+            Write('\0'); // null terminator
+        }
+        return *this;
     }
 
     Stream& Stream::operator<<(const Uuid& uuid)

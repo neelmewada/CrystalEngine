@@ -212,7 +212,8 @@ namespace CE::Vulkan
         imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         switch (desc.dimension)
         {
-        case RHI::Dimension::Dim2D:
+		case RHI::Dimension::Dim2D:
+		case RHI::Dimension::DimCUBE:
             imageCI.imageType = VK_IMAGE_TYPE_2D;
             break;
         case RHI::Dimension::Dim3D:
@@ -227,7 +228,7 @@ namespace CE::Vulkan
         imageCI.extent.height = desc.height;
         imageCI.extent.depth = desc.depth;
 
-		if (device->IsUnifiedMemoryArchitecture() || desc.defaultHeapType == RHI::MemoryHeapType::Default)
+		if (desc.defaultHeapType == RHI::MemoryHeapType::Default)
 			imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
 		else
 			imageCI.tiling = VK_IMAGE_TILING_LINEAR;
@@ -297,6 +298,7 @@ namespace CE::Vulkan
 		switch (desc.dimension)
 		{
 		case RHI::Dimension::Dim2D:
+		case RHI::Dimension::DimCUBE:
 			imageCI.imageType = VK_IMAGE_TYPE_2D;
 			break;
 		case RHI::Dimension::Dim3D:
@@ -311,10 +313,11 @@ namespace CE::Vulkan
 		imageCI.extent.height = height;
 		imageCI.extent.depth = depth;
 
-		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Default)
+		if (heapType == RHI::MemoryHeapType::Default)
 			imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
 		else
 			imageCI.tiling = VK_IMAGE_TILING_LINEAR;
+
 		imageCI.format = RHIFormatToVkFormat(this->format);
 		imageCI.initialLayout = vkImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageCI.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
@@ -368,6 +371,11 @@ namespace CE::Vulkan
 		imageCI.queueFamilyIndexCount = 0;
 		imageCI.pQueueFamilyIndices = nullptr;
 
+		if (arrayLayers == 6 && desc.dimension == RHI::Dimension::DimCUBE)
+		{
+			imageCI.flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+		}
+
 		if (vkCreateImage(device->GetHandle(), &imageCI, nullptr, &image) != VK_SUCCESS)
 		{
 			CE_LOG(Error, All, "Failed to create Vulkan Image");
@@ -411,6 +419,9 @@ namespace CE::Vulkan
 		{
 		case RHI::Dimension::Dim2D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			break;
+		case RHI::Dimension::DimCUBE:
+			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
 			break;
 		case RHI::Dimension::Dim3D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_3D;
@@ -524,6 +535,9 @@ namespace CE::Vulkan
 		{
 		case RHI::Dimension::Dim2D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			break;
+		case RHI::Dimension::DimCUBE:
+			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
 			break;
 		case RHI::Dimension::Dim3D:
 			imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_3D;

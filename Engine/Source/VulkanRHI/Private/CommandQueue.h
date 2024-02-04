@@ -38,6 +38,8 @@ namespace CE::Vulkan
 			return commandPool;
 		}
 
+        virtual bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) override;
+
     private:
         VulkanDevice* device;
         u32 familyIndex;

@@ -2,13 +2,14 @@
 
 namespace CE::Vulkan
 {
-	CommandList::CommandList(VulkanDevice* device, VkCommandBuffer commandBuffer, VkCommandBufferLevel level, u32 queueFamilyIndex, VkCommandPool pool)
+	CommandList::CommandList(VulkanDevice* device, VkCommandBuffer commandBuffer, RHI::CommandListType type, u32 queueFamilyIndex, VkCommandPool pool)
 		: device(device)
 		, commandBuffer(commandBuffer)
-		, level(level)
+		, level(type == RHI::CommandListType::Direct ? VK_COMMAND_BUFFER_LEVEL_PRIMARY : VK_COMMAND_BUFFER_LEVEL_SECONDARY)
 		, queueFamilyIndex(queueFamilyIndex)
 		, pool(pool)
 	{
+		this->commandListType = type;
 		srgManager = device->GetShaderResourceManager();
 	}
 
@@ -165,6 +166,204 @@ namespace CE::Vulkan
 	void CommandList::Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ)
 	{
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
+	}
+
+	void CommandList::ResourceBarrier(u32 count, RHI::ResourceBarrierDescriptor* barriers)
+	{
+		if (count == 0)
+			return;
+
+		for (int i = 0; i < count; i++)
+		{
+			VkPipelineStageFlags srcStageMask = 0;
+			VkPipelineStageFlags dstStageMask = 0;
+
+			List<VkBufferMemoryBarrier> bufferBarriers{};
+			List<VkImageMemoryBarrier> imageBarriers{};
+
+			const RHI::ResourceBarrierDescriptor& barrierInfo = barriers[i];
+			if (barrierInfo.resource == nullptr)
+				continue;
+			
+			RHI::DeviceObjectType resourceType = barrierInfo.resource->GetDeviceObjectType();
+			if (resourceType == RHI::DeviceObjectType::Texture)
+			{
+				Vulkan::Texture* texture = (Vulkan::Texture*)barrierInfo.resource;
+				if (texture->GetImage() == nullptr)
+					continue;
+
+				VkImageMemoryBarrier imageBarrier{};
+				imageBarrier.image = texture->GetImage();
+				
+				if (texture->curFamilyIndex >= 0 && texture->curFamilyIndex != queueFamilyIndex)
+				{
+					imageBarrier.srcQueueFamilyIndex = texture->curFamilyIndex;
+					imageBarrier.dstQueueFamilyIndex = queueFamilyIndex;
+				}
+				else
+				{
+					imageBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+					imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+				}
+
+				switch (barrierInfo.fromState) // OLD state
+				{
+				case RHI::ResourceState::Undefined:
+					srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+					imageBarrier.srcAccessMask = 0;
+					break;
+				case RHI::ResourceState::General:
+					srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT | 
+						VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT |
+						VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+					break;
+				case RHI::ResourceState::CopySource:
+					srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+					break;
+				case RHI::ResourceState::CopyDestination:
+					srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+					break;
+				case RHI::ResourceState::DepthRead:
+					srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+					break;
+				case RHI::ResourceState::DepthWrite:
+					srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+					break;
+				case RHI::ResourceState::FragmentShaderResource:
+					srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::NonFragmentShaderResource:
+					srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT | 
+						VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT |
+						VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::RenderTarget:
+					srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+					break;
+				case RHI::ResourceState::ShaderWrite:
+					srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+					break;
+				case RHI::ResourceState::Present:
+					srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+					imageBarrier.srcAccessMask = 0;
+					break;
+				default:
+					continue;
+				}
+
+				switch (barrierInfo.toState) // NEW state
+				{
+				case RHI::ResourceState::Undefined: // Cannot transition into Undefined state.
+					continue;
+				case RHI::ResourceState::General:
+					dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT |
+						VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT |
+						VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+					break;
+				case RHI::ResourceState::CopySource:
+					dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+					break;
+				case RHI::ResourceState::CopyDestination:
+					dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+					break;
+				case RHI::ResourceState::DepthRead:
+					dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+					break;
+				case RHI::ResourceState::DepthWrite:
+					dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+					break;
+				case RHI::ResourceState::FragmentShaderResource:
+					dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::NonFragmentShaderResource:
+					dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
+						VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT |
+						VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::RenderTarget:
+					dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+					break;
+				case RHI::ResourceState::ShaderWrite:
+					dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+					imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+					break;
+				case RHI::ResourceState::Present:
+					dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+					imageBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+					imageBarrier.dstAccessMask = 0;
+					break;
+				default:
+					continue;
+				}
+
+				vkCmdPipelineBarrier(commandBuffer,
+					srcStageMask, dstStageMask,
+					0,
+					0, nullptr,
+					0, nullptr,
+					1, &imageBarrier);
+
+				texture->curImageLayout = imageBarrier.newLayout;
+			}
+			else if (resourceType == RHI::DeviceObjectType::Buffer)
+			{
+				Vulkan::Buffer* buffer = (Vulkan::Buffer*)barrierInfo.resource;
+				if (buffer->GetBuffer() == nullptr)
+					continue;
+
+				VkBufferMemoryBarrier bufferBarrier{};
+
+				if (buffer->curFamilyIndex >= 0 && buffer->curFamilyIndex != queueFamilyIndex)
+				{
+					bufferBarrier.srcQueueFamilyIndex = buffer->curFamilyIndex;
+					bufferBarrier.dstQueueFamilyIndex = queueFamilyIndex;
+				}
+				else
+				{
+					bufferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+					bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+				}
+
+			}
+
+		}
+
 	}
 
 	void CommandList::Begin()

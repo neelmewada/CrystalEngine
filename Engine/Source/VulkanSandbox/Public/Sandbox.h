@@ -57,6 +57,7 @@ namespace CE::Sandbox
 
 		void Shutdown();
 		
+		void InitCubeMaps();
 		void InitPipelines();
 		void InitDrawPackets();
 		void InitLights();
@@ -64,6 +65,7 @@ namespace CE::Sandbox
 		void DestroyLights();
 		void DestroyDrawPackets();
 		void DestroyPipelines();
+		void DestroyCubeMaps();
 
 	private:
 
@@ -79,6 +81,9 @@ namespace CE::Sandbox
 		bool rebuild = true;
 		bool recompile = true;
 		bool resubmit = true;
+
+		RHI::Texture* skyboxCubeMap = nullptr;
+		RHI::Sampler* skyboxSampler = nullptr;
 
 		RHI::ShaderResourceGroup* depthPerViewSrg = nullptr;
 		RHI::ShaderResourceGroup* perViewSrg = nullptr;

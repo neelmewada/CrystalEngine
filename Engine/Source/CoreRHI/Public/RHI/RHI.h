@@ -16,6 +16,7 @@ namespace CE::RHI
     class Viewport;
     class RenderPass;
     class CommandList;
+	class CommandQueue;
     class GraphicsCommandList;
 	struct BufferDescriptor;
 
@@ -80,6 +81,8 @@ namespace CE::RHI
 
 		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) = 0;
 
+		virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() = 0;
+
 		//! Returns true if RHI was initialized in Offscreen mode, i.e. there was no main window when RHI was initialized. 
 		virtual bool IsOffscreenOnly() = 0;
 
@@ -88,11 +91,16 @@ namespace CE::RHI
 
         // - Command List -
 
-        virtual void DestroyCommandList(CommandList* commandList) = 0;
+		virtual RHI::Fence* CreateFence(bool initiallySignalled = false) = 0;
+		virtual void DestroyFence(RHI::Fence* fence) = 0;
 
-        virtual bool ExecuteCommandList(CommandList* commandList) = 0;
+		virtual RHI::CommandList* AllocateCommandList(RHI::CommandQueue* associatedQueue, 
+			CommandListType commandListType = CommandListType::Direct) = 0;
 
-        virtual bool PresentViewport(GraphicsCommandList* viewportCommandList) = 0;
+		virtual Array<RHI::CommandList*> AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue,
+			CommandListType commandListType = CommandListType::Direct) = 0;
+
+		virtual void FreeCommandLists(u32 count, RHI::CommandList** commandLists) = 0;
 
         // - Resources -
 

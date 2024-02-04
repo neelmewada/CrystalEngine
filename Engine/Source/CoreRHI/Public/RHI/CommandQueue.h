@@ -2,6 +2,7 @@
 
 namespace CE::RHI
 {
+	class CommandList;
 
 	enum class HardwareQueueClass
 	{
@@ -28,6 +29,7 @@ namespace CE::RHI
 	};
 	ENUM_CLASS_FLAGS(HardwareQueueClassMask);
 
+
 	class CORERHI_API CommandQueue : RHIResource
 	{
 	protected:
@@ -45,6 +47,8 @@ namespace CE::RHI
 		{
 			return (queueMask & (1 << (u32)operationType)) != 0;
 		}
+
+		virtual bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) = 0;
 
 	protected:
 

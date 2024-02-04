@@ -1,5 +1,32 @@
 #include "VulkanSandbox.h"
 
+#ifndef __INTELLISENSE__
+#include "skybox/back.jpg.h"
+#include "skybox/bottom.jpg.h"
+#include "skybox/front.jpg.h"
+#include "skybox/left.jpg.h"
+#include "skybox/right.jpg.h"
+#include "skybox/top.jpg.h"
+#else
+static const char skybox_back_jpg_Data[] = { 0 };
+static const u32 skybox_back_jpg_Length = 2;
+
+static const char skybox_bottom_jpg_Data[] = { 0 };
+static const u32 skybox_bottom_jpg_Length = 2;
+
+static const char skybox_front_jpg_Data[] = { 0 };
+static const u32 skybox_front_jpg_Length = 2;
+
+static const char skybox_left_jpg_Data[] = { 0 };
+static const u32 skybox_left_jpg_Length = 2;
+
+static const char skybox_right_jpg_Data[] = { 0 };
+static const u32 skybox_right_jpg_Length = 2;
+
+static const char skybox_top_jpg_Data[] = { 0 };
+static const u32 skybox_top_jpg_Length = 2;
+#endif
+
 namespace CE::Sandbox
 {
 	constexpr u32 perViewDataBinding = 3;
@@ -32,6 +59,7 @@ namespace CE::Sandbox
 
 		mainWindow->AddListener(this);
 		
+		InitCubeMaps();
 		InitPipelines();
 		InitLights();
 		InitDrawPackets();
@@ -115,6 +143,7 @@ namespace CE::Sandbox
 	{
 		DestroyLights();
 		DestroyDrawPackets();
+		DestroyCubeMaps();
 
 		if (mainWindow)
 		{
@@ -125,6 +154,89 @@ namespace CE::Sandbox
 		DestroyPipelines();
 
 		delete swapChain;
+	}
+	
+	inline CMImage LoadImage(const char* data, u32 size)
+	{
+		return CMImage::LoadFromMemory((unsigned char*)data, size);
+	}
+
+#define LOAD_SKYBOX(side) LoadImage(skybox_##side##_jpg_Data, skybox_##side##_jpg_Length)
+
+	void VulkanSandbox::InitCubeMaps()
+	{
+		CMImage right = LOAD_SKYBOX(right); // 0
+		CMImage left = LOAD_SKYBOX(left); // 1
+		CMImage top = LOAD_SKYBOX(top); // 2
+		CMImage bottom = LOAD_SKYBOX(bottom); // 3
+		CMImage front = LOAD_SKYBOX(front); // 4
+		CMImage back = LOAD_SKYBOX(back); // 5
+
+		RHI::TextureDescriptor cubeMapDesc{};
+		cubeMapDesc.name = "Skybox";
+		cubeMapDesc.sampleCount = 1;
+		cubeMapDesc.arrayLayers = 6;
+		cubeMapDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
+		cubeMapDesc.mipLevels = 1;
+		cubeMapDesc.width = back.GetWidth();
+		cubeMapDesc.height = back.GetHeight();
+		cubeMapDesc.depth = 1;
+		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
+		cubeMapDesc.format = RHI::Format::R8G8B8A8_SRGB;
+
+		const u32 height = cubeMapDesc.height;
+		const u32 width = cubeMapDesc.width;
+
+		skyboxCubeMap = RHI::gDynamicRHI->CreateTexture(cubeMapDesc);
+
+		RHI::BufferDescriptor stagingBufferDesc{};
+		stagingBufferDesc.name = "CubeMap Transfer";
+		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		stagingBufferDesc.bufferSize = cubeMapDesc.width * cubeMapDesc.height * 4;
+		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+
+		//Array<RHI::CommandQueue*> queues = RHI::gDynamicRHI->GetHardwareQueues(RHI::HardwareQueueClassMask::Transfer);
+		//if (queues.IsEmpty())
+		//{
+		//	queues = RHI::gDynamicRHI->GetHardwareQueues(RHI::HardwareQueueClassMask::Graphics);
+		//}
+
+		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+
+		RHI::CommandList* commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
+		RHI::Fence* commandListFence = RHI::gDynamicRHI->CreateFence();
+		
+		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
+		
+		// Right
+		{
+			void* dataPtr = nullptr;
+			stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
+			{
+				u8* dstData = (u8*)dataPtr;
+				u8* srcData = right.GetDataPtr();
+				for (int y = 0; y < height; y++)
+				{
+					for (int x = 0; x < width; x++)
+					{
+						int srcPixelIndex = (y * height + x) * 3; // Assuming all CMImage's are RGB8 (3 channels only)
+						int dstPixelIndex = (y * height + x) * 4;
+						
+						*(dstData + dstPixelIndex) = *(srcData + srcPixelIndex); // R
+						*(dstData + dstPixelIndex + 1) = *(srcData + srcPixelIndex + 1); // G
+						*(dstData + dstPixelIndex + 2) = *(srcData + srcPixelIndex + 2); // B
+						*(dstData + dstPixelIndex + 3) = 0; // A
+					}
+				}
+			}
+			stagingBuffer->Unmap();
+		}
+
+		RHI::gDynamicRHI->DestroyFence(commandListFence);
+		RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
+
+		back.Free(); front.Free(); left.Free(); right.Free(); top.Free(); bottom.Free();
+		delete stagingBuffer; stagingBuffer = nullptr;
 	}
 
 	void VulkanSandbox::InitPipelines()
@@ -648,6 +760,11 @@ namespace CE::Sandbox
 		delete opaqueMaterial; opaqueMaterial = nullptr;
 
 		delete transparentPipeline; transparentPipeline = nullptr;
+	}
+
+	void VulkanSandbox::DestroyCubeMaps()
+	{
+		delete skyboxCubeMap; skyboxCubeMap = nullptr;
 	}
 
 	void VulkanSandbox::BuildFrameGraph()

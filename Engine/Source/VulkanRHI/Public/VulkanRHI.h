@@ -79,16 +79,24 @@ namespace CE::Vulkan
 
 		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
 
+        virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() override;
+
 		// TODO: move this function to CoreApplication instead of VulkanRHI
 		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
 
         // - Command List -
 
-        virtual void DestroyCommandList(RHI::CommandList* commandList) override;
+        virtual RHI::Fence* CreateFence(bool initiallySignalled = false) override;
 
-        virtual bool ExecuteCommandList(RHI::CommandList* commandList) override;
+        virtual void DestroyFence(RHI::Fence* fence) override;
 
-        virtual bool PresentViewport(RHI::GraphicsCommandList* viewportCommandList) override;
+        virtual RHI::CommandList* AllocateCommandList(RHI::CommandQueue* associatedQueue,
+            CommandListType commandListType = CommandListType::Direct) override;
+
+        virtual Array<RHI::CommandList*> AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue,
+            CommandListType commandListType = CommandListType::Direct) override;
+
+        virtual void FreeCommandLists(u32 count, RHI::CommandList** commandLists) override;
 
         // - Resources -
 
@@ -136,9 +144,6 @@ namespace CE::Vulkan
         virtual void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) override;
 
     protected:
-
-        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, Viewport* viewport);
-        bool ExecuteGraphicsCommandList(GraphicsCommandList* commandList, RenderTarget* renderTarget);
 
     private:
         VkInstance vkInstance = nullptr;

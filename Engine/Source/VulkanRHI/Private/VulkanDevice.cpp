@@ -835,9 +835,11 @@ namespace CE::Vulkan
         vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
     }
 
-	VkCommandPool VulkanDevice::AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, VkCommandBufferLevel level, u32 queueFamilyIndex)
+	VkCommandPool VulkanDevice::AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, RHI::CommandListType type, u32 queueFamilyIndex)
 	{
-		return commandAllocator->Allocate(count, outBuffers, level, queueFamilyIndex);
+		return commandAllocator->Allocate(count, outBuffers, 
+			type == RHI::CommandListType::Indirect ? VK_COMMAND_BUFFER_LEVEL_SECONDARY : VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+			queueFamilyIndex);
 	}
 
 	void VulkanDevice::FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers)

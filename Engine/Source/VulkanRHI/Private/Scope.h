@@ -16,6 +16,12 @@ namespace CE::Vulkan
 			u32 queueFamilyIndex = 0;
 		};
 
+		struct BufferFamilyTransition
+		{
+			Vulkan::Buffer* buffer = nullptr;
+			u32 queueFamilyIndex = 0;
+		};
+
 		struct Barrier
 		{
 			VkPipelineStageFlags srcStageMask{};
@@ -28,6 +34,7 @@ namespace CE::Vulkan
 
 			//! Just to keep track of image layout
 			List<ImageLayoutTransition> imageLayoutTransitions{};
+			List<BufferFamilyTransition> bufferFamilyTransitions{};
 		};
 
 		Scope(VulkanDevice* device, const RHI::ScopeDescriptor& desc);

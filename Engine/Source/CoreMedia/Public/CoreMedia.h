@@ -4,6 +4,7 @@
 
 // Media
 #include "CoreMedia/Image.h"
+#include "CoreMedia/CubeMap.h"
 
 namespace CE
 {

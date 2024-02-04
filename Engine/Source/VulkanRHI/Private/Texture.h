@@ -82,7 +82,7 @@ namespace CE::Vulkan
 		VkImageLayout curImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 		friend class RHI::FrameGraph;
-		friend class GraphicsCommandList;
+		friend class CommandList;
 		friend class FrameGraphExecuter;
     };
     

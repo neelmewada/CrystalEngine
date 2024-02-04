@@ -3,6 +3,9 @@
 
 #include "cxxopts.hpp"
 
+#include <iostream>
+#include <chrono>
+
 #define MAX_RESOURCE_SIZE 12_MB
 
 using namespace CE;
@@ -46,6 +49,8 @@ CE_RTTI_STRUCT(, , ResourceStampManifest,
 )
 CE_RTTI_STRUCT_IMPL(, , ResourceStampManifest)
 
+
+typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char** argv)
 {
@@ -154,6 +159,7 @@ int main(int argc, char** argv)
 
 		for (const auto& srcFileRelative : resourceFilesRelative)
 		{
+			String fileName = srcFileRelative.GetFilename().GetString();
 			auto fullPath = resourceDirPath / srcFileRelative;
 			if (!fullPath.Exists())
 				continue;
@@ -184,6 +190,9 @@ int main(int argc, char** argv)
 
 			data << "static const char " << relativePathIdentifier << "_Data[] = {\n\t";
 			int counter = 0;
+
+			auto t1 = Clock::now();
+
 			while (!reader.IsOutOfBounds())
 			{
 				if (counter >= 64)
@@ -193,10 +202,16 @@ int main(int argc, char** argv)
 				}
 
 				auto byte = reader.ReadByte();
-				data << "(char)" << String::Format("{0:#x}", byte) << ", ";
+				data << "(char)" << (int)byte << ", ";
 				counter++;
 			}
 			data << "};\n";
+
+			auto t2 = Clock::now();
+			std::cout << fileName.GetCString() << ": " <<
+				std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000.0f / 1000.0f
+				<< " milli seconds"
+				<< std::endl;
 
 			data << "static const u32 " << relativePathIdentifier << "_Length = " << length << ";\n";
 			

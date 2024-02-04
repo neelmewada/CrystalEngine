@@ -17,7 +17,7 @@ namespace CE
 	enum class CMImageSourceFormat
 	{
 		None = 0,
-		PNG,
+		PNG, JPG,
 		HDR, EXR,
 		BC1,
 		BC3,
@@ -105,6 +105,9 @@ namespace CE
 
 		static CMImageInfo GetPNGImageInfo(MemoryStream* stream);
 		static CMImage LoadPNGImage(MemoryStream* stream);
+
+		static CMImageInfo GetJPGImageInfo(MemoryStream* stream);
+		static CMImage LoadJPGImage(MemoryStream* stream);
 
         unsigned char* data = nullptr;
 		bool allocated = true;

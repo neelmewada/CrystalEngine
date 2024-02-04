@@ -53,7 +53,7 @@ namespace CE::Vulkan
         void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
         void SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
-		VkCommandPool AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, VkCommandBufferLevel level, u32 queueFamilyIndex);
+		VkCommandPool AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, RHI::CommandListType type, u32 queueFamilyIndex);
 		void FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers);
 
         // - Getters -
@@ -175,6 +175,7 @@ namespace CE::Vulkan
 		VulkanDescriptorPool* descriptorPool = nullptr;
         
         friend class FrameGraphCompiler;
+        friend class VulkanRHI;
     };
     
 } // namespace CE

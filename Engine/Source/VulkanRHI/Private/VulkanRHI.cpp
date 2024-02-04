@@ -238,6 +238,16 @@ namespace CE::Vulkan
 		return VulkanPlatform::GetScreenSizeForWindow(platformWindowHandle);
 	}
 
+    RHI::Fence* VulkanRHI::CreateFence(bool initiallySignalled)
+    {
+        return new Vulkan::Fence(device, initiallySignalled);
+    }
+
+    void VulkanRHI::DestroyFence(RHI::Fence* fence)
+    {
+        delete fence;
+    }
+
 	Array<RHI::Format> VulkanRHI::GetAvailableDepthStencilFormats()
 	{
 		return device->GetAvailableDepthStencilFormats();
@@ -250,145 +260,44 @@ namespace CE::Vulkan
 
     // - Command List -
 
-    void VulkanRHI::DestroyCommandList(RHI::CommandList* commandList)
+    RHI::CommandList* VulkanRHI::AllocateCommandList(RHI::CommandQueue* associatedQueue, CommandListType commandListType)
     {
-        delete commandList;
+        if (associatedQueue == nullptr)
+            return nullptr;
+
+        Vulkan::CommandQueue* vulkanQueue = (Vulkan::CommandQueue*)associatedQueue;
+        VkCommandBuffer outCmdBuffer = nullptr;
+        VkCommandPool cmdPool = device->AllocateCommandBuffers(1, &outCmdBuffer, commandListType, vulkanQueue->GetFamilyIndex());
+        return new Vulkan::CommandList(device, outCmdBuffer, commandListType, vulkanQueue->GetFamilyIndex(), cmdPool);
     }
 
-    bool VulkanRHI::ExecuteCommandList(RHI::CommandList* commandList)
+    Array<RHI::CommandList*> VulkanRHI::AllocateCommandLists(u32 count, RHI::CommandQueue* associatedQueue, CommandListType commandListType)
     {
-        /*if (commandList->GetCommandListType() == RHI::CommandListType::Graphics)
+        if (associatedQueue == nullptr)
+            return {};
+
+        Array<RHI::CommandList*> result{};
+        List<VkCommandBuffer> outCmdBuffers{};
+        result.Resize(count);
+        outCmdBuffers.Resize(count);
+
+        Vulkan::CommandQueue* vulkanQueue = (Vulkan::CommandQueue*)associatedQueue;
+        VkCommandPool cmdPool = device->AllocateCommandBuffers(count, outCmdBuffers.GetData(), commandListType, vulkanQueue->GetFamilyIndex());
+
+        for (int i = 0; i < count; i++)
         {
-            auto vulkanCommandList = (GraphicsCommandList*)commandList;
-            if (vulkanCommandList->IsViewportTarget())
-            {
-                return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetViewport());
-            }
-            else
-            {
-                return ExecuteGraphicsCommandList(vulkanCommandList, vulkanCommandList->GetRenderTarget());
-            }
-        }*/
-        return false;
+            result[i] = new Vulkan::CommandList(device, outCmdBuffers[i], commandListType, vulkanQueue->GetFamilyIndex(), cmdPool);
+        }
+
+        return result;
     }
 
-    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, RenderTarget* renderTarget)
+    void VulkanRHI::FreeCommandLists(u32 count, RHI::CommandList** commandLists)
     {
-        constexpr auto u64Max = std::numeric_limits<u64>::max();
-
-        // -- Waiting for Fences --
-        // Wait until the rendering from previous call has been finished
-        /*vkWaitForFences(device->GetHandle(),
-            1, &commandList->renderFinishedFence[renderTarget->currentImageIndex],
-            VK_TRUE, u64Max);
-
-        // Manually reset (close) the fences
-        vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[renderTarget->currentImageIndex]);
-
-        // Submit to Queue
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        // Wait until rendering is finished on this frame
-        submitInfo.waitSemaphoreCount = renderTarget->isFresh ? 0 : 1;
-        submitInfo.pWaitSemaphores = &commandList->renderFinishedSemaphore[renderTarget->currentImageIndex];
-
-        // Execute the whole command buffer until the fragment shader stage (so we don't output any data to framebuffer yet)
-        // and THEN wait for the image to be available (m_ImageAvailableForRendering) so fragment pShader can output pixels to it.
-        VkPipelineStageFlags waitStages[] = {
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        };
-        submitInfo.pWaitDstStageMask = waitStages;
-
-        // Only submit the command buffer we want to render to since they're 1:1 with SwapChain Images
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandList->commandBuffers[renderTarget->currentImageIndex];
-
-        // Semaphores to signal when command buffer finishes executing (finished rendering)
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[renderTarget->currentImageIndex]; // 1:1 with frames (0..<=MaxSimultaneousFrameDraws)
-
-        vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo,
-            commandList->renderFinishedFence[renderTarget->currentImageIndex]);
-        
-        renderTarget->isFresh = false;*/
-        return true;
-    }
-    
-    bool VulkanRHI::ExecuteGraphicsCommandList(GraphicsCommandList* commandList, Viewport* viewport)
-    {
-        constexpr auto u64Max = std::numeric_limits<u64>::max();
-		
-        // -- Waiting for Fences --
-        // Wait until the rendering from previous call has been finished
-        //auto result = vkWaitForFences(device->GetHandle(),
-        //    1, &commandList->renderFinishedFence[viewport->currentImageIndex],
-        //    VK_TRUE, u64Max);
-        //
-        //result = vkAcquireNextImageKHR(device->GetHandle(), viewport->swapChain->GetHandle(), u64Max,
-        //    viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex], VK_NULL_HANDLE, &viewport->currentImageIndex);
-
-        //if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-        //{
-        //    viewport->Rebuild();
-        //    return false;
-        //}
-        //
-        //// Manually reset (close) the fences
-        //result = vkResetFences(device->GetHandle(), 1, &commandList->renderFinishedFence[viewport->currentImageIndex]);
-		
-        //// Submit to Queue
-        //VkSubmitInfo submitInfo = {};
-        //submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        //submitInfo.waitSemaphoreCount = 1;
-        //// List of semaphores to wait on at waitStages[i]
-        //submitInfo.pWaitSemaphores = &viewport->imageAcquiredSemaphore[viewport->currentDrawFrameIndex];
-
-        //// Execute the whole command buffer until the fragment shader stage (so we don't output any data to framebuffer yet)
-        //// and THEN wait for the image to be available (imageAcquiredSemaphore) so fragment shader can output pixels to it.
-        //VkPipelineStageFlags waitStages[] = {
-        //        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        //};
-        //submitInfo.pWaitDstStageMask = waitStages; // Stages to check semaphores at
-
-        //// Only submit the command buffer we want to render to since they're 1:1 with SwapChain Images
-        //submitInfo.commandBufferCount = 1;
-        //submitInfo.pCommandBuffers = &commandList->commandBuffers[viewport->currentImageIndex];
-
-        //// Semaphores to signal when command buffer finishes executing (finished rendering)
-        //submitInfo.signalSemaphoreCount = 1;
-        //submitInfo.pSignalSemaphores = &commandList->renderFinishedSemaphore[viewport->currentImageIndex]; // 1:1 with frames (NumCommandBuffers)
-
-        //result = vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, commandList->renderFinishedFence[viewport->currentImageIndex]);
-		
-        return true;
-    }
-
-    bool VulkanRHI::PresentViewport(RHI::GraphicsCommandList* viewportCommandList)
-    {
-  //      auto vulkanCommandList = (GraphicsCommandList*)viewportCommandList;
-  //      if (!vulkanCommandList->IsViewportTarget() || vulkanCommandList->viewport == nullptr)
-  //          return false;
-
-  //      auto vulkanViewport = vulkanCommandList->GetViewport();
-		//VkSwapchainKHR swapChain = nullptr;// vulkanViewport->GetSwapChain()->GetHandle();
-		
-  //      VkPresentInfoKHR presentInfo{};
-  //      presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-  //      presentInfo.waitSemaphoreCount = 1;
-  //      presentInfo.pWaitSemaphores = &vulkanCommandList->renderFinishedSemaphore[vulkanViewport->currentImageIndex];
-  //      presentInfo.swapchainCount = 1;
-  //      presentInfo.pSwapchains = &swapChain;
-  //      presentInfo.pImageIndices = &vulkanViewport->currentImageIndex;
-
-  //      auto result = vkQueuePresentKHR(device->GetGraphicsQueue()->GetHandle(), &presentInfo);
-  //      if (result != VK_SUCCESS)
-  //          return false;
-
-  //      // Next frame index (if we're rendering 2 frames simultaneously for triple buffering)
-  //      vulkanViewport->currentDrawFrameIndex = (vulkanViewport->currentDrawFrameIndex + 1) % vulkanViewport->GetSimultaneousFrameDrawCount();
-
-        return true;
+        for (int i = 0; i < count; i++)
+        {
+            delete commandLists[i];
+        }
     }
 
     // - Resources -
@@ -498,6 +407,11 @@ namespace CE::Vulkan
 	{
 		return device->GetHardwareQueues(queueMask);
 	}
+
+    RHI::CommandQueue* VulkanRHI::GetPrimaryGraphicsQueue()
+    {
+        return device->primaryGraphicsQueue;
+    }
 
     u64 VulkanRHI::GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member)
     {

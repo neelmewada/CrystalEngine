@@ -49,6 +49,7 @@ namespace CE::Vulkan
 
 		//! Queue family index of the queue that this buffer is used with the first time
 		int initialFamilyIndex = -1;
+        int curFamilyIndex = -1;
 
         VulkanDevice* device = nullptr;
         VkBuffer buffer = nullptr;
@@ -58,6 +59,8 @@ namespace CE::Vulkan
         VkFence uploadFence = nullptr;
         VkCommandPool uploadCmdPool = nullptr;
         VkCommandBuffer uploadCmdBuffer = nullptr;
+
+        friend class CommandList;
     };
 
 } // namespace CE

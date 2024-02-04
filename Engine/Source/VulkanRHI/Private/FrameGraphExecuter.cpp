@@ -210,7 +210,7 @@ namespace CE::Vulkan
 					}
 				}
 
-				// Do image layout transitions manually
+				// Do image layout transitions manually (if required)
 				for (auto scopeAttachment : currentScope->attachments)
 				{
 					if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
@@ -282,6 +282,7 @@ namespace CE::Vulkan
 						continue;
 					}
 
+					// Usually only required for Output image, because it transitions to PRESENT_SRC_KHR at the end of rendering.
 					if (image->curImageLayout != requiredLayout)
 					{
 						VkImageMemoryBarrier imageBarrier{};
@@ -298,9 +299,9 @@ namespace CE::Vulkan
 
 						imageBarrier.subresourceRange.aspectMask = image->aspectMask;
 						imageBarrier.subresourceRange.baseMipLevel = 0;
-						imageBarrier.subresourceRange.levelCount = 1;
+						imageBarrier.subresourceRange.levelCount = image->mipLevels;
 						imageBarrier.subresourceRange.baseArrayLayer = 0;
-						imageBarrier.subresourceRange.layerCount = 1;
+						imageBarrier.subresourceRange.layerCount = image->arrayLayers;
 
 						vkCmdPipelineBarrier(cmdBuffer,
 							VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
@@ -493,12 +494,14 @@ namespace CE::Vulkan
 			if (waitStages.GetSize() < submitInfo.waitSemaphoreCount)
 				waitStages.Resize(submitInfo.waitSemaphoreCount);
 
+			// Wait semaphores from compiled FrameGraph, i.e. dependency on previous pass submissions.
 			for (int i = 0; i < scope->waitSemaphores[currentImageIndex].GetSize(); i++)
 			{
 				waitSemaphores[i] = scope->waitSemaphores[currentImageIndex][i];
 				waitStages[i] = scope->waitSemaphoreStageFlags[i];
 			}
 
+			// We need to wait on image acquired semaphore too
 			waitSemaphores[submitInfo.waitSemaphoreCount - 1] = compiler->imageAcquiredSemaphores[currentSubmissionIndex];
 			waitStages[submitInfo.waitSemaphoreCount - 1] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 

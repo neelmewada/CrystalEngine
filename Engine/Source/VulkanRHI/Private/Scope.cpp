@@ -144,7 +144,7 @@ namespace CE::Vulkan
             renderPass = rpCache->FindOrCreate(descriptor);
 			subpassIndex = 0;
 			bool foundPipelineLayout = false;
-
+			
 			// Pre-Compile Shader Pipelines
 			for (RHI::PipelineState* rhiPipelineState : usePipelines)
 			{

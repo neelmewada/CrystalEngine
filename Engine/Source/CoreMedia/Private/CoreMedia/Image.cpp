@@ -14,6 +14,7 @@
 namespace CE
 {
 	static const u8 pngHeader[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, };
+	static const u8 jpgHeader[3] = { 0xFF, 0xD8, 0xFF };
 	static const u8 hdrHeader[10] = { '#', '?', 'R', 'A', 'D', 'I', 'A', 'N', 'C', 'E' }; // #?RADIANCE
 	static const u8 exrHeader[4] = { 0x76, 0x2F, 0x31, 0x01 };
 
@@ -31,6 +32,19 @@ namespace CE
 
 		if (isPNG)
 			return CMImageSourceFormat::PNG;
+
+		bool isJPG = true;
+		for (int i = 0; i < COUNTOF(jpgHeader); i++)
+		{
+			if (header[i] != jpgHeader[i])
+			{
+				isJPG = false;
+				break;
+			}
+		}
+
+		if (isJPG)
+			return CMImageSourceFormat::JPG;
 
 		bool isHDR = true;
 		for (int i = 0; i < COUNTOF(hdrHeader); i++)
@@ -102,6 +116,12 @@ namespace CE
 			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
 			return GetPNGImageInfo(&memStream);
 		}
+		else if (sourceType == CMImageSourceFormat::JPG)
+		{
+			MemoryStream memStream = MemoryStream(stream.GetLength());
+			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
+			return GetJPGImageInfo(&memStream);
+		}
 
 		info.failureReason = "Unsupported image format";
         return info;
@@ -124,6 +144,12 @@ namespace CE
 			MemoryStream stream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
 			stream.SetBinaryMode(true);
 			return GetPNGImageInfo(&stream);
+		}
+		else if (sourceType == CMImageSourceFormat::JPG)
+		{
+			MemoryStream stream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
+			stream.SetBinaryMode(true);
+			return GetJPGImageInfo(&stream);
 		}
 
 		info.failureReason = "Unsupported image format";
@@ -233,6 +259,75 @@ namespace CE
 		return image;
 	}
 
+	CMImageInfo CMImage::GetJPGImageInfo(MemoryStream* stream)
+	{
+		CMImageInfo info{};
+		if (!stream->CanRead())
+		{
+			info.failureReason = "Cannot read stream";
+			return info;
+		}
+
+		stream->SetBinaryMode(true);
+
+		int x = 0, y = 0, channels = 0;
+
+		int result = stbi_info_from_memory((const stbi_uc*)stream->GetRawDataPtr(), stream->GetLength(), &x, &y, &channels);
+
+		if (channels == 1)
+			info.format = CMImageFormat::R;
+		else if (channels == 2)
+			info.format = CMImageFormat::RG;
+		else if (channels == 3)
+			info.format = CMImageFormat::RGB;
+		else if (channels == 4)
+			info.format = CMImageFormat::RGBA;
+
+		info.x = x;
+		info.y = y;
+		info.numChannels = channels;
+		info.bitsPerPixel = 8 * channels;
+		info.bitDepth = 8;
+		info.sourceFormat = CMImageSourceFormat::JPG;
+
+		return info;
+	}
+
+	CMImage CMImage::LoadJPGImage(MemoryStream* stream)
+	{
+		CMImage image{};
+		if (!stream->CanRead())
+		{
+			image.failureReason = "Cannot read stream";
+			return image;
+		}
+
+		stream->SetBinaryMode(true);
+
+		int x = 0, y = 0, channels = 0;
+
+		unsigned char* imageData = stbi_load_from_memory((const stbi_uc*)stream->GetRawDataPtr(), stream->GetLength(), &x, &y, &channels, 3);
+
+		if (channels == 1)
+			image.format = CMImageFormat::R;
+		else if (channels == 2)
+			image.format = CMImageFormat::RG;
+		else if (channels == 3)
+			image.format = CMImageFormat::RGB;
+		else if (channels == 4)
+			image.format = CMImageFormat::RGBA;
+
+		image.x = x;
+		image.y = y;
+		image.numChannels = channels;
+		image.bitsPerPixel = 8 * channels;
+		image.bitDepth = 8;
+		image.sourceFormat = CMImageSourceFormat::JPG;
+		image.data = imageData;
+
+		return image;
+	}
+
     CMImage CMImage::LoadFromFile(IO::Path filePath)
     {
         CMImage image{};
@@ -265,6 +360,12 @@ namespace CE
 			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
 			return LoadPNGImage(&memStream);
 		}
+		else if (sourceType == CMImageSourceFormat::JPG) // Is JPG
+		{
+			MemoryStream memStream = MemoryStream(stream.GetLength());
+			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
+			return LoadJPGImage(&memStream);
+		}
 
 		image.failureReason = "Unsupported image format";
         return image;
@@ -286,6 +387,11 @@ namespace CE
 		{
 			MemoryStream memStream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
 			return LoadPNGImage(&memStream);
+		}
+		else if (sourceType == CMImageSourceFormat::JPG)
+		{
+			MemoryStream memStream = MemoryStream(buffer, bufferLength, Stream::Permissions::ReadOnly);
+			return LoadJPGImage(&memStream);
 		}
 
 		image.failureReason = "Unsupported image format";
@@ -633,7 +739,14 @@ namespace CE
     {
 		if (data != nullptr && allocated)
 		{
-			Memory::Free(data);
+			if (sourceFormat == CMImageSourceFormat::JPG) // We use stbi image loader for JPEG
+			{
+				stbi_image_free(data);
+			}
+			else
+			{
+				Memory::Free(data);
+			}
 		}
 
         data = nullptr;

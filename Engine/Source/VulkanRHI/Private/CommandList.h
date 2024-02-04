@@ -8,7 +8,7 @@ namespace CE::Vulkan
 	class CommandList : public RHI::CommandList
 	{
 	public:
-		CommandList(VulkanDevice* device, VkCommandBuffer commandBuffer, VkCommandBufferLevel level, u32 queueFamilyIndex, VkCommandPool pool);
+		CommandList(VulkanDevice* device, VkCommandBuffer commandBuffer, RHI::CommandListType type, u32 queueFamilyIndex, VkCommandPool pool);
 
 		virtual ~CommandList();
 
@@ -31,6 +31,8 @@ namespace CE::Vulkan
 		void DrawIndexed(const DrawIndexedArguments& args) override;
 
 		void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) override;
+
+		void ResourceBarrier(u32 count, RHI::ResourceBarrierDescriptor* barriers) override;
 
 		void Begin() override;
 		void End() override;

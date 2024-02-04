@@ -200,8 +200,8 @@ namespace CE::Vulkan
 			for (u32 familyIdx = 0; familyIdx < device->queueFamilyPropeties.GetSize(); familyIdx++)
 			{
 				VkCommandBuffer cmdBuffer = nullptr;
-				VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx);
-				CommandList* commandList = new Vulkan::CommandList(device, cmdBuffer, VK_COMMAND_BUFFER_LEVEL_PRIMARY, familyIdx, pool);
+				VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, RHI::CommandListType::Direct, familyIdx);
+				CommandList* commandList = new Vulkan::CommandList(device, cmdBuffer, RHI::CommandListType::Direct, familyIdx, pool);
 				commandListsByFamilyIndexPerImage[imageIdx].Add(commandList);
 			}
 		}
@@ -348,6 +348,10 @@ namespace CE::Vulkan
 			}
 
 			HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
+
+			// TODO: Add support for Compute Shader barriers
+			// Currently, Shader attachments only consider Vertex/Fragment shaders
+			// We can use producerScope and current to determine which one is a Raster pass or a compute pass
 
 			for (auto [from, to] : commonAttachments)
 			{
@@ -573,7 +577,12 @@ namespace CE::Vulkan
 						continue;
 					}
 
+					Scope::BufferFamilyTransition transition{};
+					transition.buffer = buffer;
+					transition.queueFamilyIndex = current->queue->GetFamilyIndex();
+
 					barrier.bufferBarriers.Add(bufferBarrier);
+					barrier.bufferFamilyTransitions.Add(transition);
 				}
 				else
 				{

@@ -31,6 +31,7 @@
 #include "FrameBuffer.h"
 #include "SwapChain.h"
 #include "ShaderResourceGroup.h"
+#include "Fence.h"
 #include "CommandList.h"
 #include "CommandBufferAllocator.h"
 

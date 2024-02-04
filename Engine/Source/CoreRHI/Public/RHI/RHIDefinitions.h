@@ -29,6 +29,7 @@ namespace CE::RHI
         Viewport,
 		SwapChain,
 
+        Fence,
 		CommandQueue,
         CommandList
     };
@@ -187,6 +188,8 @@ namespace CE::RHI
     enum class Dimension
     {
         Dim2D = 0,
+        //! Exactly same as Dim2D but is reserved for CubeMaps.
+        DimCUBE,
         Dim3D,
         Dim1D
     };
@@ -267,19 +270,6 @@ namespace CE::RHI
 	};
 	ENUM_CLASS(FilterMode);
 
-    struct TextureDesc
-    {
-        Name name{};
-        u32 width = 128, height = 128, depth = 1;
-		Dimension dimension = Dimension::Dim2D;
-        Format format{};
-        u32 mipLevels = 1;
-        u32 sampleCount = 1;
-		TextureBindFlags bindFlags = TextureBindFlags::ShaderRead;
-    };
-
-	typedef TextureDesc ImageDesc;
-
     enum class SamplerAddressMode
     {
         Repeat = 0,
@@ -303,13 +293,6 @@ namespace CE::RHI
     /*
     *   Command List
     */
-
-    enum class CommandListType
-    {
-        None = 0,
-        Graphics,
-        Compute,
-    };
 
 	struct ViewportState
 	{
@@ -452,6 +435,27 @@ namespace CE::RHI
         All = R | G | B | A,
     };
     ENUM_CLASS(ColorComponentMask);
+
+    enum class ResourceState
+    {
+        Undefined = 0,
+        General = BIT(0),
+        CopyDestination = BIT(1),
+        CopySource = BIT(2),
+        DepthWrite = BIT(3),
+        DepthRead = BIT(4),
+        // Read only resource
+        FragmentShaderResource = BIT(5),
+        // Read only resource
+        NonFragmentShaderResource = BIT(6),
+        RenderTarget = BIT(7),
+        VertexBuffer = BIT(8),
+        IndexBuffer = BIT(9),
+        ConstantBuffer = BIT(10),
+        Present = BIT(11),
+        // Read/Write resource
+        ShaderWrite = BIT(12),
+    };
 
 } // namespace CE
 
