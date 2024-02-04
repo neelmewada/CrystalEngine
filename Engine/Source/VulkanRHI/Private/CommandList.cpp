@@ -236,6 +236,7 @@ namespace CE::Vulkan
 				case RHI::ResourceState::CopyDestination:
 					srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+					imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 					break;
 				case RHI::ResourceState::DepthRead:
 					srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;

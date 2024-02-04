@@ -184,7 +184,7 @@ namespace CE::Sandbox
 		cubeMapDesc.height = back.GetHeight();
 		cubeMapDesc.depth = 1;
 		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
-		cubeMapDesc.format = RHI::Format::R8G8B8A8_SRGB;
+		cubeMapDesc.format = RHI::Format::BC7_SRGB;//RHI::Format::R8G8B8A8_SRGB;
 
 		const u32 height = cubeMapDesc.height;
 		const u32 width = cubeMapDesc.width;
