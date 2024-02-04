@@ -61,6 +61,7 @@ namespace CE::Vulkan
         VkCommandBuffer uploadCmdBuffer = nullptr;
 
         friend class CommandList;
+        friend class FrameGraphExecuter;
     };
 
 } // namespace CE

@@ -697,7 +697,7 @@ namespace CE::Vulkan
 		return imageView;
 	}
 
-	void VulkanDevice::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask)
+	int VulkanDevice::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask)
 	{
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -744,7 +744,7 @@ namespace CE::Vulkan
 			sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			break;
 		default:
-			return;
+			return -1;
 		}
 
 		destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
@@ -775,7 +775,7 @@ namespace CE::Vulkan
 			barrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 			break;
 		default:
-			return;
+			return -1;
 		}
 
 		auto commandBuffer = BeginSingleUseCommandBuffer();
@@ -790,7 +790,9 @@ namespace CE::Vulkan
 		);
 
 		EndSingleUseCommandBuffer(commandBuffer);
-		SubmitAndWaitSingleUseCommandBuffer(commandBuffer);
+		int familyIndex = SubmitAndWaitSingleUseCommandBuffer(commandBuffer);
+
+		return familyIndex;
 	}
 
 	VkCommandBuffer VulkanDevice::BeginSingleUseCommandBuffer()
@@ -818,7 +820,7 @@ namespace CE::Vulkan
         vkEndCommandBuffer(commandBuffer);
 	}
 
-    void VulkanDevice::SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
+    int VulkanDevice::SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer)
     {
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -833,6 +835,8 @@ namespace CE::Vulkan
         vkQueueWaitIdle(primaryGraphicsQueue->GetHandle());
 
         vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
+
+		return primaryGraphicsQueue->familyIndex;
     }
 
 	VkCommandPool VulkanDevice::AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, RHI::CommandListType type, u32 queueFamilyIndex)

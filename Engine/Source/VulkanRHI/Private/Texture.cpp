@@ -462,7 +462,9 @@ namespace CE::Vulkan
 		curImageLayout = vkImageLayout;
 
 		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
-			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, aspectMask);
+		{
+			curFamilyIndex = device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, aspectMask);
+		}
 	}
 
     Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc)

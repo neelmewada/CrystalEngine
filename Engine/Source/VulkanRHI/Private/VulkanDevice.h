@@ -47,11 +47,11 @@ namespace CE::Vulkan
 
         VkImageView CreateImageView(VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags);
 
-        void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
+        int TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
 
         VkCommandBuffer BeginSingleUseCommandBuffer();
         void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
-        void SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
+        int SubmitAndWaitSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
 
 		VkCommandPool AllocateCommandBuffers(u32 count, VkCommandBuffer* outBuffers, RHI::CommandListType type, u32 queueFamilyIndex);
 		void FreeCommandBuffers(VkCommandPool pool, u32 count, VkCommandBuffer* buffers);

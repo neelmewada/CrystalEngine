@@ -193,7 +193,14 @@ namespace CE::Vulkan
 					continue;
 
 				VkImageMemoryBarrier imageBarrier{};
+				imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 				imageBarrier.image = texture->GetImage();
+
+				imageBarrier.subresourceRange.aspectMask = texture->aspectMask;
+				imageBarrier.subresourceRange.baseArrayLayer = 0;
+				imageBarrier.subresourceRange.layerCount = texture->arrayLayers;
+				imageBarrier.subresourceRange.baseMipLevel = 0;
+				imageBarrier.subresourceRange.levelCount = texture->mipLevels;
 				
 				if (texture->curFamilyIndex >= 0 && texture->curFamilyIndex != queueFamilyIndex)
 				{
@@ -340,6 +347,7 @@ namespace CE::Vulkan
 					1, &imageBarrier);
 
 				texture->curImageLayout = imageBarrier.newLayout;
+				texture->curFamilyIndex = queueFamilyIndex;
 			}
 			else if (resourceType == RHI::DeviceObjectType::Buffer)
 			{
@@ -348,6 +356,11 @@ namespace CE::Vulkan
 					continue;
 
 				VkBufferMemoryBarrier bufferBarrier{};
+				bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+
+				bufferBarrier.buffer = buffer->GetBuffer();
+				bufferBarrier.offset = 0;
+				bufferBarrier.size = buffer->GetBufferSize();
 
 				if (buffer->curFamilyIndex >= 0 && buffer->curFamilyIndex != queueFamilyIndex)
 				{
@@ -360,6 +373,92 @@ namespace CE::Vulkan
 					bufferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 				}
 
+				switch (barrierInfo.fromState) // OLD state
+				{
+				case RHI::ResourceState::General: // A "general" buffer
+				case RHI::ResourceState::ConstantBuffer:
+					srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::VertexBuffer:
+					srcStageMask = VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+					break;
+				case RHI::ResourceState::IndexBuffer:
+					srcStageMask = VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_INDEX_READ_BIT;
+					break;
+				case RHI::ResourceState::CopySource:
+					srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+					break;
+				case RHI::ResourceState::CopyDestination:
+					srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+					break;
+				case RHI::ResourceState::FragmentShaderResource:
+					srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::NonFragmentShaderResource:
+					srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
+						VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT |
+						VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::ShaderWrite:
+					srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+					break;
+				}
+
+				switch (barrierInfo.fromState) // NEW state
+				{
+				case RHI::ResourceState::General: // A "general" buffer
+				case RHI::ResourceState::ConstantBuffer:
+					dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::VertexBuffer:
+					dstStageMask = VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+					break;
+				case RHI::ResourceState::IndexBuffer:
+					dstStageMask = VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_INDEX_READ_BIT;
+					break;
+				case RHI::ResourceState::CopySource:
+					dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+					break;
+				case RHI::ResourceState::CopyDestination:
+					dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+					break;
+				case RHI::ResourceState::FragmentShaderResource:
+					dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::NonFragmentShaderResource:
+					dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT |
+						VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT | VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT |
+						VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+					break;
+				case RHI::ResourceState::ShaderWrite:
+					dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+					break;
+				}
+
+				vkCmdPipelineBarrier(commandBuffer,
+					srcStageMask, dstStageMask,
+					0,
+					0, nullptr,
+					1, &bufferBarrier,
+					0, nullptr);
+
+				buffer->curFamilyIndex = queueFamilyIndex;
 			}
 
 		}
