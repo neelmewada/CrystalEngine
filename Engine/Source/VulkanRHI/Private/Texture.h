@@ -44,6 +44,8 @@ namespace CE::Vulkan
         virtual u32 GetNumberOfChannels() override;
 
 		inline VkImageLayout GetVkImageLayout() const { return vkImageLayout; }
+        
+        inline VkImageLayout GetCurrentImageLayout() const { return curImageLayout; }
 
     protected:
 

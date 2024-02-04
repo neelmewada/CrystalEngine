@@ -35,6 +35,8 @@ namespace CE::Sandbox
 	constexpr u32 pointLightsBinding = 1;
 	constexpr u32 lightDataBinding = 2;
 	constexpr u32 materialDataBinding = 6;
+    constexpr u32 skyboxBinding = 7;
+    constexpr u32 skyboxSamplerBinding = 8;
 
 	static int counter = 0;
 	static RHI::RHISystem rhiSystem{};
@@ -184,7 +186,7 @@ namespace CE::Sandbox
 		cubeMapDesc.height = back.GetHeight();
 		cubeMapDesc.depth = 1;
 		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
-		cubeMapDesc.format = RHI::Format::R8G8B8A8_SRGB;// RHI::Format::BC7_SRGB;
+        cubeMapDesc.format = RHI::Format::R8G8B8A8_SRGB; //RHI::Format::BC7_SRGB
 
 		const u32 height = cubeMapDesc.height;
 		const u32 width = cubeMapDesc.width;
@@ -263,6 +265,14 @@ namespace CE::Sandbox
 
 		back.Free(); front.Free(); left.Free(); right.Free(); top.Free(); bottom.Free();
 		delete stagingBuffer; stagingBuffer = nullptr;
+        
+        RHI::SamplerDescriptor samplerDesc{};
+        samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
+        samplerDesc.enableAnisotropy = true;
+        samplerDesc.maxAnisotropy = 8;
+        samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+        
+        defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 	}
 
 	void VulkanSandbox::InitPipelines()
@@ -573,6 +583,20 @@ namespace CE::Sandbox
 				shininessMember.name = "_Shininess";
 				perMaterialSRGLayout.variables.Top().structMembers.Add(shininessMember);
 			}
+            
+            perMaterialSRGLayout.variables.Add({});
+            perMaterialSRGLayout.variables.Top().arrayCount = 1;
+            perMaterialSRGLayout.variables.Top().name = "_Skybox";
+            perMaterialSRGLayout.variables.Top().bindingSlot = skyboxBinding;
+            perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
+            perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+            
+            perMaterialSRGLayout.variables.Add({});
+            perMaterialSRGLayout.variables.Top().arrayCount = 1;
+            perMaterialSRGLayout.variables.Top().name = "_SkyboxSampler";
+            perMaterialSRGLayout.variables.Top().bindingSlot = skyboxSamplerBinding;
+            perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+            perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
 			srgLayouts.Add(perMaterialSRGLayout);
 
@@ -590,6 +614,8 @@ namespace CE::Sandbox
             opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
 			opaqueMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 			opaqueMaterial->SetPropertyValue("_Shininess", (u32)64);
+            opaqueMaterial->SetPropertyValue("_Skybox", skyboxCubeMap);
+            opaqueMaterial->SetPropertyValue("_SkyboxSampler", defaultSampler);
             opaqueMaterial->FlushProperties();
 
 			delete opaqueVert;
@@ -641,8 +667,7 @@ namespace CE::Sandbox
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-            auto structSize = sizeof(DirectionalLight);
-            bufferDesc.bufferSize = directionalLights.GetCapacity() * structSize;
+            bufferDesc.bufferSize = directionalLights.GetCapacity() * sizeof(DirectionalLight);
 			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDesc.name = "Directional Lights Buffer";
 
@@ -791,6 +816,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyCubeMaps()
 	{
+        delete defaultSampler; defaultSampler = nullptr;
 		delete skyboxCubeMap; skyboxCubeMap = nullptr;
 	}
 

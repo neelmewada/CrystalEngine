@@ -126,6 +126,7 @@ namespace CE::Vulkan
 
 		Array<VkDescriptorSetLayoutBinding> setLayoutBindings{};
 		HashMap<Name, int> bindingSlotsByVariableName{};
+        HashMap<Name, SRGVariableDescriptor> variableDescriptorsByName{};
 		
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
 		HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};

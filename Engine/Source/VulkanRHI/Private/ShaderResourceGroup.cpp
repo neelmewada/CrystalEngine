@@ -267,6 +267,7 @@ namespace CE::Vulkan
 		pool = device->GetDescriptorPool();
 		setNumber = srgManager->GetDescriptorSetNumber(srgType);
 
+        variableDescriptorsByName.Clear();
 		setLayoutBindings.Clear();
 		bindingSlotsByVariableName.Clear();
 		variableBindingsByName.Clear();
@@ -275,6 +276,8 @@ namespace CE::Vulkan
 		for (const RHI::SRGVariableDescriptor& variable : srgLayout.variables)
 		{
 			setLayoutBindings.Add({});
+            variableDescriptorsByName[variable.name] = variable;
+            
 			VkDescriptorSetLayoutBinding& entry = setLayoutBindings.GetLast();
 			entry.binding = variable.bindingSlot;
 			entry.descriptorCount = variable.arrayCount;
@@ -394,18 +397,38 @@ namespace CE::Vulkan
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
 			return false;
-
+        
 		int bindingSlot = bindingSlotsByVariableName[name];
+        
 		Vulkan::Texture* texture = (Vulkan::Texture*)rhiTexture;
-
+        
 		// Something was already bound at this position, cannot re-bind here.
 		if (bufferInfosBoundBySlot.KeyExists(bindingSlot))
 			return false;
 		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
 			return false;
+        if (!variableBindingsBySlot.KeyExists(bindingSlot))
+            return false;
+        
+        const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
+        
+        VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        switch (binding.descriptorType)
+        {
+        case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+        case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+        case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+            expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            break;
+        case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+            expectedLayout = VK_IMAGE_LAYOUT_GENERAL;
+            break;
+        default:
+            break;
+        }
 
 		VkDescriptorImageInfo imageWrite{};
-		imageWrite.imageLayout = texture->GetVkImageLayout();
+		imageWrite.imageLayout = expectedLayout;
 		imageWrite.imageView = texture->GetImageView();
 		imageWrite.sampler = nullptr;
 
@@ -427,15 +450,34 @@ namespace CE::Vulkan
 			return false;
 		if (imageInfosBoundBySlot.KeyExists(bindingSlot))
 			return false;
-
-		imageInfosBoundBySlot[bindingSlot].Clear();
+        if (!variableBindingsBySlot.KeyExists(bindingSlot))
+            return false;
+        
+        const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
+        
+        VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        switch (binding.descriptorType)
+        {
+        case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+        case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+        case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+            expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            break;
+        case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+            expectedLayout = VK_IMAGE_LAYOUT_GENERAL;
+            break;
+        default:
+            break;
+        }
+        
+        imageInfosBoundBySlot[bindingSlot].Clear();imageInfosBoundBySlot[bindingSlot].Clear();
 
 		for (int i = 0; i < count; i++)
 		{
 			Vulkan::Texture* texture = (Vulkan::Texture*)textures[i];
 
 			VkDescriptorImageInfo imageWrite{};
-			imageWrite.imageLayout = texture->GetVkImageLayout();
+			imageWrite.imageLayout = expectedLayout;
 			imageWrite.imageView = texture->GetImageView();
 			imageWrite.sampler = nullptr;
 

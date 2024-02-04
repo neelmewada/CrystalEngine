@@ -95,6 +95,7 @@ namespace CE::Sandbox
 
 		RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* opaqueMaterial = nullptr;
+        RHI::Sampler* defaultSampler = nullptr;
 
 		RHI::PipelineState* transparentPipeline = nullptr;
 
