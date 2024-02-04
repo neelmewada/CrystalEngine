@@ -46,6 +46,7 @@ namespace CE::Vulkan
 		VkCommandPool pool = nullptr;
 		VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		u32 queueFamilyIndex = 0;
+		VkQueueFlags curQueueFlags{};
 
 		RenderPass* currentPass = nullptr;
 		u32 currentSubpass = 0;

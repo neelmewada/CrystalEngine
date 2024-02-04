@@ -53,10 +53,6 @@ namespace CE::RHI
         
 		virtual u32 GetNumberOfChannels() = 0;
 
-		virtual void UploadData(const void* pixels, u64 dataSize) = 0;
-
-		virtual void ReadData(u8** outPixels, u64* outDataSize) = 0;
-
 	protected:
 
 		Name name{};

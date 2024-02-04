@@ -197,7 +197,7 @@ namespace CE::Vulkan
 		{
 			commandListsByFamilyIndexPerImage.Add({});
 
-			for (u32 familyIdx = 0; familyIdx < device->queueFamilyPropeties.GetSize(); familyIdx++)
+			for (u32 familyIdx = 0; familyIdx < device->queueFamilyProperties.GetSize(); familyIdx++)
 			{
 				VkCommandBuffer cmdBuffer = nullptr;
 				VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, RHI::CommandListType::Direct, familyIdx);

@@ -234,17 +234,17 @@ namespace CE::Vulkan
 		// Fetch Queue properties
 		u32 queuePropertyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, nullptr);
-		queueFamilyPropeties.Clear();
-		queueFamilyPropeties.Resize(queuePropertyCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, queueFamilyPropeties.GetData());
+		queueFamilyProperties.Clear();
+		queueFamilyProperties.Resize(queuePropertyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, queueFamilyProperties.GetData());
 
 		Array<VkDeviceQueueCreateInfo> queueCreateInfos{};
 		float queuePriority = 1.0f;
 		Array<float> queuePriorities{};
 
-		for (int familyIdx = 0; familyIdx < queueFamilyPropeties.GetSize(); familyIdx++)
+		for (int familyIdx = 0; familyIdx < queueFamilyProperties.GetSize(); familyIdx++)
 		{
-			int queueCount = queueFamilyPropeties[familyIdx].queueCount;
+			int queueCount = queueFamilyProperties[familyIdx].queueCount;
 			queuePriorities.Resize(queueCount);
 			for (int i = 0; i < queueCount; i++)
 				queuePriorities[i] = 1.0f;
@@ -321,7 +321,7 @@ namespace CE::Vulkan
 		FetchQueues(gpu);
 
 		// Command Pools for each family
-		for (int familyIdx = 0; familyIdx < queueFamilyPropeties.GetSize(); familyIdx++)
+		for (int familyIdx = 0; familyIdx < queueFamilyProperties.GetSize(); familyIdx++)
 		{
 			VkCommandPoolCreateInfo commandPoolCI = {};
 			commandPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -349,9 +349,9 @@ namespace CE::Vulkan
 
 	void VulkanDevice::FetchQueues(VkPhysicalDevice gpu)
 	{
-		for (int familyIdx = 0; familyIdx < queueFamilyPropeties.GetSize(); familyIdx++)
+		for (int familyIdx = 0; familyIdx < queueFamilyProperties.GetSize(); familyIdx++)
 		{
-			const VkQueueFamilyProperties& queueFamilyProperty = queueFamilyPropeties[familyIdx];
+			const VkQueueFamilyProperties& queueFamilyProperty = queueFamilyProperties[familyIdx];
 			RHI::HardwareQueueClassMask queueMask{};
 			if (queueFamilyProperty.queueFlags & VK_QUEUE_COMPUTE_BIT)
 				queueMask |= RHI::HardwareQueueClassMask::Compute;
@@ -697,7 +697,9 @@ namespace CE::Vulkan
 		return imageView;
 	}
 
-	int VulkanDevice::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask)
+	int VulkanDevice::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, 
+		const VkImageSubresourceRange& subresource,
+		VkImageAspectFlags aspectMask)
 	{
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -708,11 +710,11 @@ namespace CE::Vulkan
 		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
 		barrier.image = image;
-		barrier.subresourceRange.aspectMask = aspectMask;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange = subresource;
+		//barrier.subresourceRange.aspectMask = aspectMask;
+		//barrier.subresourceRange.levelCount = 1;
+		//barrier.subresourceRange.baseArrayLayer = 0;
+		//barrier.subresourceRange.layerCount = 1;
 
 		VkPipelineStageFlags sourceStage = 0;
 		VkPipelineStageFlags destinationStage = 0;
@@ -867,7 +869,7 @@ namespace CE::Vulkan
 	Array<RHI::CommandQueue*> VulkanDevice::AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass)
 	{
 		Array<RHI::CommandQueue*> queues{};
-		int queueFamilyCount = queueFamilyPropeties.GetSize();
+		int queueFamilyCount = queueFamilyProperties.GetSize();
 		HashMap<RHI::HardwareQueueClass, int> queueCounts = queueCountByClass;
 
 		int& graphicsQueueCount = queueCounts[RHI::HardwareQueueClass::Graphics];
@@ -876,7 +878,7 @@ namespace CE::Vulkan
 
 		for (int familyIdx = 0; familyIdx < queueFamilyCount; familyIdx++)
 		{
-			VkQueueFamilyProperties familyProps = queueFamilyPropeties[familyIdx];
+			VkQueueFamilyProperties familyProps = queueFamilyProperties[familyIdx];
 			
 			if (graphicsQueueCount > 0 && (familyProps.queueFlags & VK_QUEUE_GRAPHICS_BIT))
 			{

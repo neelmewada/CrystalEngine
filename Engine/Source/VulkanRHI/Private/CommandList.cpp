@@ -9,6 +9,7 @@ namespace CE::Vulkan
 		, queueFamilyIndex(queueFamilyIndex)
 		, pool(pool)
 	{
+		curQueueFlags = device->queueFamilyProperties[queueFamilyIndex].queueFlags;
 		this->commandListType = type;
 		srgManager = device->GetShaderResourceManager();
 	}
@@ -412,7 +413,7 @@ namespace CE::Vulkan
 					break;
 				}
 
-				switch (barrierInfo.fromState) // NEW state
+				switch (barrierInfo.toState) // NEW state
 				{
 				case RHI::ResourceState::General: // A "general" buffer
 				case RHI::ResourceState::ConstantBuffer:

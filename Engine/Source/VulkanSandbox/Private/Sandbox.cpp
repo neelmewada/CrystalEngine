@@ -195,21 +195,23 @@ namespace CE::Sandbox
 		stagingBufferDesc.bufferSize = cubeMapDesc.width * cubeMapDesc.height * 4;
 		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 
-		//Array<RHI::CommandQueue*> queues = RHI::gDynamicRHI->GetHardwareQueues(RHI::HardwareQueueClassMask::Transfer);
-		//if (queues.IsEmpty())
-		//{
-		//	queues = RHI::gDynamicRHI->GetHardwareQueues(RHI::HardwareQueueClassMask::Graphics);
-		//}
-
 		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 
 		RHI::CommandList* commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
-		RHI::Fence* commandListFence = RHI::gDynamicRHI->CreateFence();
+		RHI::Fence* commandListFence = RHI::gDynamicRHI->CreateFence(false);
 		
 		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
+
+		commandList->Begin();
 		
-		// Right
+		// Right face
 		{
+			RHI::ResourceBarrierDescriptor barrier{};
+			barrier.resource = skyboxCubeMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::CopyDestination;
+			commandList->ResourceBarrier(1, &barrier);
+
 			void* dataPtr = nullptr;
 			stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
 			{
@@ -230,7 +232,17 @@ namespace CE::Sandbox
 				}
 			}
 			stagingBuffer->Unmap();
+
+			barrier.resource = skyboxCubeMap;
+			barrier.fromState = RHI::ResourceState::CopyDestination;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			commandList->ResourceBarrier(1, &barrier);
 		}
+
+		commandList->End();
+
+		queue->Execute(1, &commandList, commandListFence);
+		commandListFence->WaitForFence();
 
 		RHI::gDynamicRHI->DestroyFence(commandListFence);
 		RHI::gDynamicRHI->FreeCommandLists(1, &commandList);

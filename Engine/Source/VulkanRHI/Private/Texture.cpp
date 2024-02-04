@@ -446,7 +446,7 @@ namespace CE::Vulkan
 
 		// Transition image layout
 
-		if (desc.bindFlags == RHI::TextureBindFlags::ShaderRead || desc.bindFlags == RHI::TextureBindFlags::SubpassInput)
+		if (desc.bindFlags == RHI::TextureBindFlags::SubpassInput)
 		{
 			vkImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		}
@@ -463,7 +463,7 @@ namespace CE::Vulkan
 
 		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
 		{
-			curFamilyIndex = device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, aspectMask);
+			curFamilyIndex = device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, imageViewCI.subresourceRange, aspectMask);
 		}
 	}
 
@@ -571,7 +571,7 @@ namespace CE::Vulkan
 
 		if (dstLayout != VK_IMAGE_LAYOUT_UNDEFINED)
 		{
-			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, dstLayout, aspectMask);
+			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, dstLayout, imageViewCI.subresourceRange, aspectMask);
 			vkImageLayout = curImageLayout = dstLayout;
 		}
 	}
@@ -615,102 +615,6 @@ namespace CE::Vulkan
         u32 bytesPerChannel = 0;
         return GetNumberOfChannelsForFormat(format, bytesPerChannel);
     }
-
-    void Texture::UploadData(const void* pixels, u64 dataSize)
-    {
-        u32 bytesPerChannel = 0;
-        u32 numChannels = GetNumberOfChannelsForFormat(format, bytesPerChannel);
-        u64 totalSize = (u64)width * (u64)height * (u64)depth * bytesPerChannel * numChannels;
-
-		if (totalSize != dataSize)
-		{
-			totalSize = dataSize;
-		}
-
-		if (totalSize == 0)
-			return;
-
-        RHI::BufferData stagingBufferData{};
-        stagingBufferData.startOffsetInBuffer = 0;
-        stagingBufferData.data = pixels;
-        stagingBufferData.dataSize = totalSize;
-
-        RHI::BufferDescriptor stagingBufferDesc{};
-        stagingBufferDesc.name = "Staging Texture Buffer";
-        stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-        stagingBufferDesc.bufferSize = totalSize;
-        stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
-		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-
-		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
-		stagingBuffer->UploadData(stagingBufferData);
-
-        device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, aspectMask);
-        CopyPixelsFromBuffer(stagingBuffer);
-		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
-			device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, vkImageLayout, aspectMask);
-
-        delete stagingBuffer;
-        stagingBuffer = nullptr;
-    }
-
-	void Texture::ReadData(u8** outPixels, u64* outDataSize)
-	{
-		if (outPixels == nullptr || outDataSize == nullptr)
-			return;
-
-		u32 bytesPerChannel = 0;
-		u32 numChannels = GetNumberOfChannelsForFormat(format, bytesPerChannel);
-		u64 totalSize = (u64)width * (u64)height * (u64)depth * bytesPerChannel * numChannels;
-
-		if (totalSize == 0)
-			return;
-
-		RHI::BufferDescriptor stagingBufferDesc{};
-		stagingBufferDesc.name = "Staging Texture Buffer";
-		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::ReadBack;
-		stagingBufferDesc.bufferSize = totalSize;
-		stagingBufferDesc.structureByteStride = bytesPerChannel * numChannels;
-
-		Buffer* stagingBuffer = new Buffer(device, stagingBufferDesc);
-
-		device->TransitionImageLayout(image, vkFormat, vkImageLayout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, aspectMask);
-		CopyPixelsToBuffer(stagingBuffer);
-		device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, vkImageLayout, aspectMask);
-
-		stagingBuffer->ReadData(outPixels, outDataSize);
-
-		delete stagingBuffer;
-		stagingBuffer = nullptr;
-	}
-
-	void Texture::UploadData(RHI::Buffer* buffer, u64 offsetInBuffer, u32 mipLevel, u32 arrayLayer)
-	{
-		if (!buffer)
-			return;
-
-		Vulkan::Buffer* srcBuffer = (Vulkan::Buffer*)buffer;
-
-		VkBufferImageCopy region{};
-		region.bufferOffset = offsetInBuffer;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
-		
-		region.imageSubresource.aspectMask = aspectMask;
-		region.imageSubresource.mipLevel = mipLevel;
-		region.imageSubresource.baseArrayLayer = arrayLayer;
-		region.imageSubresource.layerCount = 1;
-
-		region.imageOffset = { 0, 0, 0 };
-		region.imageExtent = {
-			width,
-			height,
-			depth
-		};
-
-		// TODO: Upload data
-	}
 
     void Texture::CopyPixelsFromBuffer(Buffer* srcBuffer)
     {

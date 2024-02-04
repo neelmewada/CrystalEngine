@@ -10,6 +10,7 @@
 namespace CE::Vulkan
 {
     class CommandQueue;
+    class CommandList;
     class SwapChain;
     class Texture;
 	class VulkanDescriptorPool;
@@ -47,7 +48,9 @@ namespace CE::Vulkan
 
         VkImageView CreateImageView(VkImage image, VkFormat format, VkImageViewType imageViewType, VkImageAspectFlags aspectFlags);
 
-        int TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
+        int TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout,
+            const VkImageSubresourceRange& subresource,
+            VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
 
         VkCommandBuffer BeginSingleUseCommandBuffer();
         void EndSingleUseCommandBuffer(VkCommandBuffer commandBuffer);
@@ -144,7 +147,7 @@ namespace CE::Vulkan
 
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};
-		Array<VkQueueFamilyProperties> queueFamilyPropeties{};
+		Array<VkQueueFamilyProperties> queueFamilyProperties{};
         Array<RHI::Format> availableDepthStencilFormats{};
         Array<RHI::Format> availableDepthOnlyFormats{};
 
@@ -176,6 +179,7 @@ namespace CE::Vulkan
         
         friend class FrameGraphCompiler;
         friend class VulkanRHI;
+        friend class CE::Vulkan::CommandList;
     };
     
 } // namespace CE

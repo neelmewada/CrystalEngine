@@ -43,12 +43,6 @@ namespace CE::Vulkan
         virtual u32 GetBytesPerChannel() override;
         virtual u32 GetNumberOfChannels() override;
 
-        virtual void UploadData(const void* pixels, u64 dataSize) override;
-
-		virtual void ReadData(u8** outPixels, u64* outDataSize) override;
-
-		virtual void UploadData(RHI::Buffer* srcBuffer, u64 offsetInBuffer = 0, u32 mipLevel = 0, u32 arrayLayer = 0);
-
 		inline VkImageLayout GetVkImageLayout() const { return vkImageLayout; }
 
     protected:
