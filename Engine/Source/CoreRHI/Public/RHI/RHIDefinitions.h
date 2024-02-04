@@ -232,9 +232,11 @@ namespace CE::RHI
         D32_SFLOAT_S8_UINT,
 		D32_SFLOAT,
 		// Compressed formats
-		BC7_UNORM,
+        BC7_UNORM,
+        BC7_SRGB,
 		BC4_UNORM,
-		BC6H_UFLOAT,
+        BC6H_UFLOAT,
+        BC6H_SFLOAT,
     };
 	ENUM_CLASS(Format);
 

@@ -55,7 +55,10 @@ namespace CE::Vulkan
 		{ RHI::TextureFormat::B8G8R8_SRGB, VK_FORMAT_B8G8R8_SRGB, 3, 1 },
 
 		{ RHI::TextureFormat::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK, 4, 1 },
+		{ RHI::TextureFormat::BC7_SRGB, VK_FORMAT_BC7_SRGB_BLOCK, 4, 1 },
 		{ RHI::TextureFormat::BC4_UNORM, VK_FORMAT_BC4_UNORM_BLOCK, 1, 1 },
+		{ RHI::TextureFormat::BC6H_UFLOAT, VK_FORMAT_BC6H_UFLOAT_BLOCK, 4, 2 },
+		{ RHI::TextureFormat::BC6H_SFLOAT, VK_FORMAT_BC6H_SFLOAT_BLOCK, 4, 2 },
 	};
 
 	static HashMap<RHI::TextureFormat, VkFormat> textureFormatToVkFormatMap{};
