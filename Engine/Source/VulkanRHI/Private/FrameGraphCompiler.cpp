@@ -82,10 +82,21 @@ namespace CE::Vulkan
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
 
+			bool swapChainFound = false;
+
 			for (auto attachment : scope->attachments)
 			{
 				FrameAttachment* frameAttachment = attachment->GetFrameAttachment();
-				scope->usesSwapChainAttachment = frameAttachment->IsSwapChainAttachment();
+				if (frameAttachment->IsSwapChainAttachment())
+				{
+					swapChainFound = true;
+					scope->usesSwapChainAttachment = true;
+				}
+			}
+
+			if (!swapChainFound)
+			{
+				scope->usesSwapChainAttachment = false;
 			}
             
             for (auto consumer : frameGraph->nodes[scope->id].consumers)
@@ -119,7 +130,7 @@ namespace CE::Vulkan
 		if (swapChain && presentingScope)
 		{
 			imageCount = swapChain->GetImageCount();
-			numFramesInFlight = Math::Min<u32>(imageCount - 1, numFramesInFlight);
+			numFramesInFlight = imageCount;
 		}
 		
 		// Compile sync objects for individual scopes
@@ -147,10 +158,8 @@ namespace CE::Vulkan
 			}
 		}
 
-		for (auto scope : frameGraph->producers)
-		{
-			CompileCrossQueueDependencies(compileRequest, (Vulkan::Scope*)scope);
-		}
+		// Compile cross queue dependencies, i.e. Wait Semaphores
+		CompileCrossQueueDependencies(compileRequest);
 
 		// ---------------------------
 		// Destroy old objects
@@ -164,7 +173,7 @@ namespace CE::Vulkan
 		if (swapChain && presentingScope)
 		{
 			imageCount = swapChain->GetImageCount();
-			numFramesInFlight = Math::Min<u32>(imageCount - 1, numFramesInFlight);
+			numFramesInFlight = imageCount;
 
 			for (int i = 0; i < imageCount; i++)
 			{
@@ -195,16 +204,20 @@ namespace CE::Vulkan
 			}
 		}
 
-		for (int imageIdx = 0; imageIdx < imageCount; imageIdx++)
+		for (const auto& rhiScope : frameGraph->scopes)
 		{
-			commandListsByFamilyIndexPerImage.Add({});
-
-			for (u32 familyIdx = 0; familyIdx < device->queueFamilyProperties.GetSize(); familyIdx++)
+			Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
+			for (int imageIdx = 0; imageIdx < imageCount; imageIdx++)
 			{
-				VkCommandBuffer cmdBuffer = nullptr;
-				VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, RHI::CommandListType::Direct, familyIdx);
-				CommandList* commandList = new Vulkan::CommandList(device, cmdBuffer, RHI::CommandListType::Direct, familyIdx, pool);
-				commandListsByFamilyIndexPerImage[imageIdx].Add(commandList);
+				scope->commandListsByFamilyIndexPerImage.Add({});
+
+				for (u32 familyIdx = 0; familyIdx < device->queueFamilyProperties.GetSize(); familyIdx++)
+				{
+					VkCommandBuffer cmdBuffer = nullptr;
+					VkCommandPool pool = device->AllocateCommandBuffers(1, &cmdBuffer, RHI::CommandListType::Direct, familyIdx);
+					CommandList* commandList = new Vulkan::CommandList(device, cmdBuffer, RHI::CommandListType::Direct, familyIdx, pool);
+					scope->commandListsByFamilyIndexPerImage[imageIdx].Add(commandList);
+				}
 			}
 		}
 
@@ -232,25 +245,31 @@ namespace CE::Vulkan
 
 	void FrameGraphCompiler::DestroyCommandLists()
 	{
-		for (Array<CommandList*>& commandLists : commandListsByFamilyIndexPerImage)
-		{
-			for (CommandList* commandList : commandLists)
-			{
-				delete commandList;
-			}
-			commandLists.Clear();
-		}
-		commandListsByFamilyIndexPerImage.Clear();
+		
 	}
 
     //! If two scopes are executed one different queues and there's a dependency between them, then we
 	//! need to use a wait semaphore for it.
-    void FrameGraphCompiler::CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current)
+    void FrameGraphCompiler::CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest)
+	{
+		HashSet<ScopeID> visitedScopes{};
+		for (auto scope : compileRequest.frameGraph->producers)
+		{
+			CompileCrossQueueDependenciesInternal(compileRequest, (Vulkan::Scope*)scope, visitedScopes);
+		}
+	}
+
+	void FrameGraphCompiler::CompileCrossQueueDependenciesInternal(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current, 
+		HashSet<ScopeID>& visitedScopes)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
+		if (visitedScopes.Exists(current->GetId()))
+			return;
+
+		visitedScopes.Add(current->GetId());
 
 		const auto& producers = current->producers;
-		
+
 		for (RHI::Scope* rhiScope : producers)
 		{
 			Vulkan::Scope* producerScope = (Vulkan::Scope*)rhiScope;
@@ -285,10 +304,10 @@ namespace CE::Vulkan
 				current->waitSemaphoreStageFlags.Add(flags);
 			}
 		}
-		
+
 		for (RHI::Scope* consumer : current->consumers)
 		{
-			CompileCrossQueueDependencies(compileRequest, (Vulkan::Scope*)consumer);
+			CompileCrossQueueDependenciesInternal(compileRequest, (Vulkan::Scope*)consumer, visitedScopes);
 		}
 	}
 

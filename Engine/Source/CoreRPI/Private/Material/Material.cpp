@@ -67,8 +67,10 @@ namespace CE::RPI
 
     void Material::FlushProperties()
     {
-        if (!shaderResourceGroup)
+        if (shaderResourceGroup == nullptr)
             RecreateShaderResourceGroup();
+        if (shaderResourceGroup == nullptr)
+            return;
 
         const auto& layout = shaderResourceGroup->GetLayout();
         for (const auto& variable : layout.variables)

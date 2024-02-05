@@ -18,6 +18,8 @@ namespace CE::Vulkan
 
 	private:
 
+		void ExecuteScopesRecursively(Vulkan::Scope* scope);
+
 		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope);
 
 		VulkanDevice* device = nullptr;

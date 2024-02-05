@@ -21,8 +21,10 @@ namespace CE::Vulkan
 		void DestroySyncObjects();
 		void DestroyCommandLists();
 
-		void CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest, 
-			Vulkan::Scope* current = nullptr);
+		void CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest);
+
+		void CompileCrossQueueDependenciesInternal(const FrameGraphCompileRequest& compileRequest,
+			Vulkan::Scope* current, HashSet<ScopeID>& visitedScopes);
 
 		void CompileBarriers(const FrameGraphCompileRequest& compileRequest);
 
@@ -34,8 +36,6 @@ namespace CE::Vulkan
         FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> imageAcquiredFences{};
 
 		StaticArray<List<VkFence>, RHI::Limits::Pipeline::MaxSwapChainImageCount> graphExecutionFences{};
-
-		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::Pipeline::MaxSwapChainImageCount> commandListsByFamilyIndexPerImage{};
 
 		// Keep track of current family index of each attachment
 		HashMap<AttachmentID, u32> familyIndexByAttachment{};

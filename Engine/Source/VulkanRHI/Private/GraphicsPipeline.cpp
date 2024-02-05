@@ -418,7 +418,7 @@ namespace CE::Vulkan
             break;
         }
 
-        rasterState.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterState.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;//VK_FRONT_FACE_CLOCKWISE;
         rasterState.depthBiasEnable = VK_FALSE;
         rasterState.depthBiasClamp = 0;
         rasterState.depthBiasConstantFactor = 0;

@@ -128,10 +128,16 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::UpdatePerViewData()
 	{
+		float farPlane = 1000.0f;
+
 		perViewData.viewPosition = Vec3(0, 0, -10);
-		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, 1000.0f);
+		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, farPlane);
 		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition);
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
+
+		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(farPlane, farPlane, farPlane));
+
+		skyboxObjectBuffer->UploadData(&skyboxObjectBuffer, sizeof(skyboxModelMatrix));
 
 		RHI::BufferData data{};
 		data.startOffsetInBuffer = 0;
@@ -295,7 +301,7 @@ namespace CE::Sandbox
 
 			meshSrgLayout.variables.Add(variable);
 
-			cubeObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
+			sphereObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
 
 			RHI::BufferDescriptor desc{};
 			desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -314,9 +320,9 @@ namespace CE::Sandbox
 
 			cubeObjectBuffer->UploadData(uploadData);
 
-			cubeObjectSrg->Bind("_ObjectData", RHI::BufferView(cubeObjectBuffer));
+			sphereObjectSrg->Bind("_ObjectData", RHI::BufferView(cubeObjectBuffer));
 
-			cubeObjectSrg->FlushBindings();
+			sphereObjectSrg->FlushBindings();
 		}
 
 		// Per View SRG
@@ -345,8 +351,6 @@ namespace CE::Sandbox
 			bufferDesc.name = "PerViewData";
 
 			perViewBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-
-			UpdatePerViewData();
 
 			perViewSrg->Bind("_PerViewData", perViewBuffer);
 			depthPerViewSrg->Bind("_PerViewData", perViewBuffer);
@@ -435,6 +439,140 @@ namespace CE::Sandbox
 			delete depthVert;
 		}
 
+		// Skybox Pipeline
+		{
+			Resource* skyboxVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Skybox.vert.spv", nullptr);
+			Resource* skyboxFrag = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Skybox.frag.spv", nullptr);
+
+			RHI::ShaderModuleDescriptor vertDesc{};
+			vertDesc.name = "Skybox Vertex";
+			vertDesc.stage = RHI::ShaderStage::Vertex;
+			vertDesc.byteCode = skyboxVert->GetData();
+			vertDesc.byteSize = skyboxVert->GetDataSize();
+
+			RHI::ShaderModuleDescriptor fragDesc{};
+			fragDesc.name = "Skybox Fragment";
+			fragDesc.stage = RHI::ShaderStage::Fragment;
+			fragDesc.byteCode = skyboxFrag->GetData();
+			fragDesc.byteSize = skyboxFrag->GetDataSize();
+
+			auto skyboxShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
+			auto skyboxShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
+
+			RHI::GraphicsPipelineDescriptor skyboxPipelineDesc{};
+
+			RHI::ColorBlendState colorBlend{};
+			colorBlend.alphaBlendOp = RHI::BlendOp::Add;
+			colorBlend.colorBlendOp = RHI::BlendOp::Add;
+			colorBlend.componentMask = RHI::ColorComponentMask::All;
+			colorBlend.srcColorBlend = RHI::BlendFactor::SrcAlpha;
+			colorBlend.dstColorBlend = RHI::BlendFactor::OneMinusSrcAlpha;
+			colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
+			colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
+			colorBlend.blendEnable = true;
+			skyboxPipelineDesc.blendState.colorBlends.Add(colorBlend);
+
+			skyboxPipelineDesc.depthStencilState.depthState.enable = false;
+
+			skyboxPipelineDesc.shaderStages.Add({});
+			skyboxPipelineDesc.shaderStages.Top().entryPoint = "VertMain";
+			skyboxPipelineDesc.shaderStages.Top().shaderModule = skyboxShaderVert;
+			skyboxPipelineDesc.shaderStages.Add({});
+			skyboxPipelineDesc.shaderStages.Top().entryPoint = "FragMain";
+			skyboxPipelineDesc.shaderStages.Top().shaderModule = skyboxShaderFrag;
+
+			skyboxPipelineDesc.rasterState = {};
+			skyboxPipelineDesc.rasterState.cullMode = RHI::CullMode::Front;
+
+			skyboxPipelineDesc.vertexInputSlots.Add({});
+			skyboxPipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
+			skyboxPipelineDesc.vertexInputSlots.Top().inputSlot = 0;
+			skyboxPipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3); // float3 Position;
+
+			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = skyboxPipelineDesc.vertexAttributes;
+
+			vertexAttribs.Add({});
+			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3; // Position
+			vertexAttribs[0].inputSlot = 0;
+			vertexAttribs[0].location = 0;
+			vertexAttribs[0].offset = 0;
+
+			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = skyboxPipelineDesc.srgLayouts;
+			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
+			perViewSRGLayout.srgType = RHI::SRGType::PerView;
+			perViewSRGLayout.variables.Add({});
+			perViewSRGLayout.variables[0].arrayCount = 1;
+			perViewSRGLayout.variables[0].name = "_PerViewData";
+			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
+			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
+			srgLayouts.Add(perViewSRGLayout);
+			
+
+			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
+			perObjectSRGLayout.srgType = RHI::SRGType::PerObject;
+			perObjectSRGLayout.variables.Add({});
+			perObjectSRGLayout.variables[0].arrayCount = 1;
+			perObjectSRGLayout.variables[0].name = "_ObjectData";
+			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
+			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
+			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			srgLayouts.Add(perObjectSRGLayout);
+
+			RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
+			perSceneSRGLayout.srgType = RHI::SRGType::PerScene;
+
+			perSceneSRGLayout.variables.Add({});
+			perSceneSRGLayout.variables.Top().arrayCount = 1;
+			perSceneSRGLayout.variables.Top().name = "_Skybox";
+			perSceneSRGLayout.variables.Top().bindingSlot = skyboxBinding;
+			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
+			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSRGLayout.variables.Add({});
+			perSceneSRGLayout.variables.Top().arrayCount = 1;
+			perSceneSRGLayout.variables.Top().name = "_DefaultSampler";
+			perSceneSRGLayout.variables.Top().bindingSlot = defaultSamplerBinding;
+			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayouts.Add(perSceneSRGLayout);
+
+			skyboxPipelineDesc.name = "Skybox Pipeline";
+
+			skyboxShader = new RPI::Shader();
+			RPI::ShaderVariantDescriptor variant{};
+			variant.pipelineDesc = skyboxPipelineDesc;
+			skyboxShader->AddVariant(variant);
+
+			skyboxMaterial = new RPI::Material(skyboxShader);
+
+			skyboxPerSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSRGLayout);
+
+			skyboxPerSceneSrg->Bind("_Skybox", skyboxCubeMap);
+			skyboxPerSceneSrg->Bind("_DefaultSampler", defaultSampler);
+
+			skyboxPerSceneSrg->FlushBindings();
+
+			RHI::BufferDescriptor desc{};
+			desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			desc.bufferSize = sizeof(Matrix4x4);
+			desc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			desc.name = "_ObjectData";
+
+			skyboxObjectBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
+
+			skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1000, 1000, 1000));
+
+			skyboxObjectBuffer->UploadData(&skyboxObjectBuffer, sizeof(skyboxModelMatrix));
+
+			skyboxObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
+			skyboxObjectSrg->Bind("_ObjectData", skyboxObjectBuffer);
+			skyboxObjectSrg->FlushBindings();
+
+			delete skyboxVert; delete skyboxFrag;
+		}
+
 		// Opaque Pipeline
 		{
 			Resource* opaqueVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Opaque.vert.spv", nullptr);
@@ -485,7 +623,7 @@ namespace CE::Sandbox
 			opaquePipelineDesc.shaderStages[1].shaderModule = opaqueShaderFrag;
 
 			opaquePipelineDesc.rasterState = {};
-			opaquePipelineDesc.rasterState.cullMode = RHI::CullMode::None;
+			opaquePipelineDesc.rasterState.cullMode = RHI::CullMode::Back;
 
 			opaquePipelineDesc.vertexInputSlots.Add({});
 			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
@@ -587,8 +725,6 @@ namespace CE::Sandbox
 			srgLayouts.Add(perMaterialSRGLayout);
 
 			opaquePipelineDesc.name = "Opaque Pipeline";
-
-			//opaquePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(opaquePipelineDesc);
             
             RPI::ShaderVariantDescriptor variantDesc{};
             variantDesc.defineFlags = {};
@@ -596,7 +732,7 @@ namespace CE::Sandbox
             opaqueShader->AddVariant(variantDesc);
 
 			opaqueMaterial = new RPI::Material(opaqueShader);
-            
+			
             opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
 			opaqueMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 			opaqueMaterial->SetPropertyValue("_Shininess", (u32)64);
@@ -610,6 +746,8 @@ namespace CE::Sandbox
 		{
 
 		}
+
+		UpdatePerViewData();
 	}
 
 	void VulkanSandbox::InitLights()
@@ -705,13 +843,13 @@ namespace CE::Sandbox
 		perSceneSrg->FlushBindings();
 	}
 
-	void VulkanSandbox::InitDrawPackets()
+	void VulkanSandbox::BuildCubeMeshDrawPacket()
 	{
 		DrawPacketBuilder builder{};
 
 		builder.SetDrawArguments(sphereModel->GetMesh(0)->drawArguments);
 
-		builder.AddShaderResourceGroup(cubeObjectSrg);
+		builder.AddShaderResourceGroup(sphereObjectSrg);
 
 		RPI::Mesh* mesh = sphereModel->GetMesh(0);
 
@@ -729,7 +867,7 @@ namespace CE::Sandbox
 
 			builder.AddDrawItem(request);
 		}
-		
+
 		// Opaque Item
 		{
 			DrawPacketBuilder::DrawItemRequest request{};
@@ -743,7 +881,7 @@ namespace CE::Sandbox
 				request.vertexBufferViews.Add(vertBufferView);
 			}
 			request.indexBufferView = mesh->indexBufferView;
-			
+
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = opaqueMaterial->GetCurrentShader()->GetPipeline();
@@ -755,8 +893,41 @@ namespace CE::Sandbox
 		{
 
 		}
-		
+
 		meshDrawPacket = builder.Build();
+	}
+
+	void VulkanSandbox::BuildSkyboxDrawPacket()
+	{
+		DrawPacketBuilder builder{};
+
+		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
+
+		builder.AddShaderResourceGroup(skyboxPerSceneSrg);
+		builder.AddShaderResourceGroup(skyboxObjectSrg);
+
+		RPI::Mesh* mesh = cubeModel->GetMesh(0);
+
+		// Skybox Item
+		{
+			DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = skyboxMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
+	}
+
+	void VulkanSandbox::InitDrawPackets()
+	{
+		BuildCubeMeshDrawPacket();
+		BuildSkyboxDrawPacket();
 	}
 
 	void VulkanSandbox::DestroyDrawPackets()
@@ -764,6 +935,7 @@ namespace CE::Sandbox
 		scheduler->WaitUntilIdle();
 		
 		delete meshDrawPacket; meshDrawPacket = nullptr;
+		delete skyboxDrawPacket; skyboxDrawPacket = nullptr;
 	}
 
 	void VulkanSandbox::DestroyLights()
@@ -783,7 +955,7 @@ namespace CE::Sandbox
 		delete sphereModel; sphereModel = nullptr;
 
 		delete cubeObjectBuffer; cubeObjectBuffer = nullptr;
-		delete cubeObjectSrg; cubeObjectSrg = nullptr;
+		delete sphereObjectSrg; sphereObjectSrg = nullptr;
 
 		delete depthPerViewSrg; depthPerViewSrg = nullptr;
 		delete perViewSrg; perViewSrg = nullptr;
@@ -791,6 +963,12 @@ namespace CE::Sandbox
 
 		delete depthPipeline; depthPipeline = nullptr;
 		delete depthShaderVert; depthShaderVert = nullptr;
+
+		delete skyboxObjectBuffer; skyboxObjectBuffer = nullptr;
+		delete skyboxShader; skyboxShader = nullptr;
+		delete skyboxMaterial; skyboxMaterial = nullptr;
+		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
+		delete skyboxPerSceneSrg; skyboxPerSceneSrg = nullptr;
 
         delete opaqueShader; opaqueShader = nullptr;
 		delete opaqueMaterial; opaqueMaterial = nullptr;
@@ -823,6 +1001,23 @@ namespace CE::Sandbox
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 
+			//scheduler->BeginScope("Skybox");
+			//{
+			//	RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+			//	swapChainAttachment.attachmentId = "SwapChain";
+			//	swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
+			//	swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+			//	swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+			//	scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+
+			//	scheduler->UseShaderResourceGroup(skyboxPerSceneSrg);
+			//	scheduler->UseShaderResourceGroup(perViewSrg);
+			//	
+			//	scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
+			//}
+			//scheduler->EndScope();
+
 			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Depth");
 			{
@@ -836,7 +1031,6 @@ namespace CE::Sandbox
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
 				
 				scheduler->UseShaderResourceGroup(depthPerViewSrg);
-				//scheduler->UseShaderResourceGroup(perViewSrg);
 
 				scheduler->UsePipeline(depthPipeline);
 			}
@@ -853,8 +1047,9 @@ namespace CE::Sandbox
 
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				//swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
+				//swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
@@ -913,9 +1108,11 @@ namespace CE::Sandbox
 		resubmit = false;
 		drawList.Shutdown();
 		RHI::DrawListMask drawListMask{};
+		auto skyboxTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
 		auto depthTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 		auto opaqueTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 		//auto transparentTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("transparent");
+		drawListMask.Set(skyboxTag);
 		drawListMask.Set(depthTag);
 		drawListMask.Set(opaqueTag);
 		//drawListMask.Set(transparentTag);
@@ -926,6 +1123,7 @@ namespace CE::Sandbox
 
 		// Finalize
 		drawList.Finalize();
+		scheduler->SetScopeDrawList("Skybox", &drawList.GetDrawListForTag(skyboxTag));
 		scheduler->SetScopeDrawList("Depth", &drawList.GetDrawListForTag(depthTag));
 		scheduler->SetScopeDrawList("Opaque", &drawList.GetDrawListForTag(opaqueTag));
 		//scheduler->SetScopeDrawList("Transparent", &drawList.GetDrawListForTag(transparentTag));

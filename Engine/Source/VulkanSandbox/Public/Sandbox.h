@@ -62,6 +62,10 @@ namespace CE::Sandbox
 		void InitDrawPackets();
 		void InitLights();
 
+		// DrawPackets
+		void BuildCubeMeshDrawPacket();
+		void BuildSkyboxDrawPacket();
+
 		void DestroyLights();
 		void DestroyDrawPackets();
 		void DestroyPipelines();
@@ -96,6 +100,9 @@ namespace CE::Sandbox
 		RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* opaqueMaterial = nullptr;
         RHI::Sampler* defaultSampler = nullptr;
+		
+		RPI::Shader* skyboxShader = nullptr;
+		RPI::Material* skyboxMaterial = nullptr;
 
 		RHI::PipelineState* transparentPipeline = nullptr;
 
@@ -108,8 +115,17 @@ namespace CE::Sandbox
 		RHI::DrawListContext drawList{};
 
 		DrawPacket* meshDrawPacket = nullptr;
+		DrawPacket* skyboxDrawPacket = nullptr;
 
-		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
+		RHI::ShaderResourceGroup* skyboxPerSceneSrg = nullptr;
+		//RHI::ShaderResourceGroup* skyboxPerViewSrg = nullptr;
+		RHI::ShaderResourceGroup* skyboxObjectSrg = nullptr;
+		RHI::Buffer* skyboxObjectBuffer = nullptr;
+		RHI::Buffer* skyboxViewBuffer = nullptr;
+		Matrix4x4 skyboxModelMatrix{};
+		PerViewData skyboxViewData{};
+
+		RHI::ShaderResourceGroup* sphereObjectSrg = nullptr;
 		RHI::Buffer* cubeObjectBuffer = nullptr;
 		Matrix4x4 meshModelMatrix{};
 		f32 cameraRotation = 0.0f;

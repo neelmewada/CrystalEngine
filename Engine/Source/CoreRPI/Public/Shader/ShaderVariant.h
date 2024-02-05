@@ -5,7 +5,6 @@ namespace CE::RPI
 	struct ShaderVariantDescriptor
 	{
 		RHI::GraphicsPipelineDescriptor pipelineDesc{};
-		RHI::ShaderResourceGroupLayout materialSrgLayout{};
 		Array<Name> defineFlags{};
 	};
 
@@ -38,7 +37,6 @@ namespace CE::RPI
 
 		ShaderVariantFlag flags{};
 
-		RHI::ShaderResourceGroupLayout materialSrgLayout{};
 		RHI::GraphicsPipelineDescriptor pipelineDesc{};
 		
 		HashMap<RHI::ShaderStage, RHI::ShaderModule*> modulesByStage{};

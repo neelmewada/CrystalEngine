@@ -59,10 +59,15 @@ namespace CE::Vulkan
 		}
 
 		bool success = true;
+
+		for (auto rhiScope : frameGraph->endScopes)
+		{
+			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope);
+		}
         
 		for (auto rhiScope : frameGraph->producers)
 		{
-			success = ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope);
+			//success = ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope);
 		}
 
 		currentSubmissionIndex = (currentSubmissionIndex + 1) % compiler->imageCount;
@@ -76,10 +81,28 @@ namespace CE::Vulkan
 		vkDeviceWaitIdle(device->GetHandle());
 	}
 
+	void FrameGraphExecuter::ExecuteScopesRecursively(Vulkan::Scope* scope)
+	{
+		if (scope == nullptr)
+			return;
+
+		for (auto rhiProducer : scope->producers)
+		{
+			ExecuteScopesRecursively((Vulkan::Scope*)rhiProducer);
+		}
+
+
+	}
+
 	bool FrameGraphExecuter::ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope)
 	{
 		if (!scope)
 			return false;
+
+		for (auto rhiProducer : scope->producers)
+		{
+			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiProducer);
+		}
 
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
@@ -99,7 +122,7 @@ namespace CE::Vulkan
 		result = vkWaitForFences(device->GetHandle(), 1, &scope->renderFinishedFences[currentImageIndex], VK_TRUE, u64Max);
 		
 		u32 familyIndex = scope->queue->GetFamilyIndex();
-		CommandList* commandList = compiler->commandListsByFamilyIndexPerImage[currentImageIndex][familyIndex];
+		CommandList* commandList = scope->commandListsByFamilyIndexPerImage[currentImageIndex][familyIndex];
 
 		Array<RHI::Scope*> consumers{};
 
@@ -214,8 +237,8 @@ namespace CE::Vulkan
 					while (currentSubPassScope != nullptr)
 					{
 						// Do image-layout/buffer transitions manually (if required)
-					// This is only required for first-time use of an attachment
-					// The FrameGraph handles the internal resource transitions through compiled pipeline barriers.
+						// This is only required for first-time use of an attachment
+						// The FrameGraph handles the internal resource transitions through compiled pipeline barriers.
 						for (auto scopeAttachment : currentSubPassScope->attachments)
 						{
 							if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
@@ -425,20 +448,20 @@ namespace CE::Vulkan
 
 						while (currentScope != nullptr)
 						{
-							for (auto srg : currentScope->externalShaderResourceGroups)
-							{
-								commandList->SetShaderResourceGroup(srg);
-							}
-
-							if (currentScope->passShaderResourceGroup)
-								commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
-							if (currentScope->subpassShaderResourceGroup)
-								commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
-
 							RHI::DrawList* drawList = currentScope->drawList;
 
 							for (int i = 0; drawList != nullptr && i < drawList->GetDrawItemCount(); i++)
 							{
+								for (auto srg : currentScope->externalShaderResourceGroups)
+								{
+									commandList->SetShaderResourceGroup(srg);
+								}
+
+								if (currentScope->passShaderResourceGroup)
+									commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+								if (currentScope->subpassShaderResourceGroup)
+									commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+
 								const auto& drawItemProperties = drawList->GetDrawItem(i);
 								const DrawItem* drawItem = drawItemProperties.item;
 
@@ -598,7 +621,7 @@ namespace CE::Vulkan
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		
-		if (isSwapChainImageUsed) // Frame graph uses a swapchain image
+		if (isSwapChainImageUsed && scope->producers.IsEmpty()) // Frame graph uses a swapchain image
 		{
 			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + 1;
 			if (waitSemaphores.GetSize() < submitInfo.waitSemaphoreCount)
@@ -654,7 +677,7 @@ namespace CE::Vulkan
 
 		for (RHI::Scope* consumerScope : scopeChain.Top()->consumers)
 		{
-			ExecuteScope(executeRequest, (Vulkan::Scope*)consumerScope);
+			//ExecuteScope(executeRequest, (Vulkan::Scope*)consumerScope, executedScopes);
 		}
 
 		return result == VK_SUCCESS;

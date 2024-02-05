@@ -56,6 +56,8 @@ namespace CE::Vulkan
 
 		StaticArray<Array<Barrier>, RHI::Limits::Pipeline::MaxSwapChainImageCount> barriers{};
 
+		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::Pipeline::MaxSwapChainImageCount> commandListsByFamilyIndexPerImage{};
+
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;
 		RenderPass* renderPass = nullptr;
