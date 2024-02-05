@@ -29,14 +29,14 @@ static const u32 skybox_top_jpg_Length = 2;
 
 namespace CE::Sandbox
 {
-	constexpr u32 perViewDataBinding = 3;
-	constexpr u32 perObjectDataBinding = 5;
 	constexpr u32 directionalLightArrayBinding = 0;
 	constexpr u32 pointLightsBinding = 1;
 	constexpr u32 lightDataBinding = 2;
-	constexpr u32 materialDataBinding = 6;
-    constexpr u32 skyboxBinding = 7;
-    constexpr u32 skyboxSamplerBinding = 8;
+	constexpr u32 perViewDataBinding = 5;
+	constexpr u32 perObjectDataBinding = 7;
+	constexpr u32 materialDataBinding = 8;
+    constexpr u32 skyboxBinding = 3;
+    constexpr u32 defaultSamplerBinding = 4;
 
 	static int counter = 0;
 	static RHI::RHISystem rhiSystem{};
@@ -583,20 +583,6 @@ namespace CE::Sandbox
 				shininessMember.name = "_Shininess";
 				perMaterialSRGLayout.variables.Top().structMembers.Add(shininessMember);
 			}
-            
-            perMaterialSRGLayout.variables.Add({});
-            perMaterialSRGLayout.variables.Top().arrayCount = 1;
-            perMaterialSRGLayout.variables.Top().name = "_Skybox";
-            perMaterialSRGLayout.variables.Top().bindingSlot = skyboxBinding;
-            perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
-            perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-            
-            perMaterialSRGLayout.variables.Add({});
-            perMaterialSRGLayout.variables.Top().arrayCount = 1;
-            perMaterialSRGLayout.variables.Top().name = "_SkyboxSampler";
-            perMaterialSRGLayout.variables.Top().bindingSlot = skyboxSamplerBinding;
-            perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
-            perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
 			srgLayouts.Add(perMaterialSRGLayout);
 
@@ -614,8 +600,6 @@ namespace CE::Sandbox
             opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
 			opaqueMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 			opaqueMaterial->SetPropertyValue("_Shininess", (u32)64);
-            opaqueMaterial->SetPropertyValue("_Skybox", skyboxCubeMap);
-            opaqueMaterial->SetPropertyValue("_SkyboxSampler", defaultSampler);
             opaqueMaterial->FlushProperties();
 
 			delete opaqueVert;

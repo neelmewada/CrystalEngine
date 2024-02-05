@@ -36,4 +36,5 @@ CompileShader() {
 
 CompileShader "Depth"
 CompileShader "Opaque"
+CompileShader "Skybox"
 

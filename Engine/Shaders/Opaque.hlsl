@@ -27,9 +27,6 @@ cbuffer _MaterialData : SRG_PerMaterial(b)
     uint _Shininess;
 };
 
-TextureCube<float4> _Skybox : SRG_PerMaterial(t);
-SamplerState _SkyboxSampler : SRG_PerMaterial(t);
-
 PSInput VertMain(VSInput input)
 {
     PSInput output;
@@ -70,7 +67,5 @@ float4 FragMain(PSInput input) : SV_TARGET
         specular += _SpecularStrength * spec * lightColor.rgb;
     }
 
-    float4 skyValue = _Skybox.Sample(_SkyboxSampler, normal);
-
-    return float4((ambient.rgb + diffuse + specular) * _Albedo.rgb * 0.1 + skyValue.rgb * 1.5, 1.0);
+    return float4((ambient.rgb + diffuse + specular) * _Albedo.rgb, 1.0);
 }
