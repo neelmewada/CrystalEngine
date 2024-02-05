@@ -20,6 +20,8 @@ namespace CE::Vulkan
 
 		void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs) override;
 
+		void ClearShaderResourceGroups() override;
+
 		void CommitShaderResources() override;
 
 		void BindPipelineState(RHI::PipelineState* pipelineState) override;

@@ -131,11 +131,12 @@ namespace CE::Vulkan
 					}
 				}
 
+				next->renderPass = renderPass;
 				next->subpassIndex = i++;
 				next = (Vulkan::Scope*)next->nextSubPass;
 			}
 		}
-		else
+		else if (!IsSubPass())
 		{
 			// Compile Render Pass
             RenderPassCache* rpCache = device->GetRenderPassCache();
@@ -164,6 +165,10 @@ namespace CE::Vulkan
 					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
 				}
 			}
+		}
+		else
+		{
+			return true;
 		}
 
 		for (int i = 0; i < imageCount; i++)

@@ -101,6 +101,8 @@ namespace CE::Vulkan
 			visitor(scope, trackNumber);
 			trackNumber++;
         }
+
+		trackNumber = 0;
 	}
 
 	void FrameGraphCompiler::CompileInternal(const FrameGraphCompileRequest& compileRequest)

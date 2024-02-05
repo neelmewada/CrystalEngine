@@ -28,6 +28,14 @@ namespace CE::Vulkan
 		}
 	}
 
+	void CommandList::ClearShaderResourceGroups()
+	{
+		for (int i = 0; i < boundSRGs.GetSize(); i++)
+		{
+			boundSRGs[i] = nullptr;
+		}
+	}
+
 	void CommandList::CommitShaderResources()
 	{
 		if (boundPipeline == nullptr)

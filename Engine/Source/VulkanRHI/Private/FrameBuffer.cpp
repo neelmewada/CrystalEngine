@@ -80,45 +80,60 @@ namespace CE::Vulkan
 
 		width = 0;
 		height = 0;
+
+		Vulkan::Scope* current = scope;
+		HashSet<AttachmentID> addedAttachments{};
 		
-		for (RHI::ScopeAttachment* attachment : scope->attachments)
+		while (current != nullptr)
 		{
-			if (!attachment->IsImageAttachment())
-				continue;
-			switch (attachment->GetUsage())
+			for (RHI::ScopeAttachment* attachment : current->attachments)
 			{
-			case RHI::ScopeAttachmentUsage::None:
-			case RHI::ScopeAttachmentUsage::Copy:
-			case RHI::ScopeAttachmentUsage::Shader:
-			case RHI::ScopeAttachmentUsage::COUNT:
-				continue;
-			}
+				if (!attachment->IsImageAttachment())
+					continue;
+				auto frameAttachment = attachment->GetFrameAttachment();
+				if (!frameAttachment)
+					continue;
+				if (addedAttachments.Exists(frameAttachment->GetId()))
+					continue;
 
-			ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)attachment;
-			RHIResource* resource = imageScopeAttachment->GetFrameAttachment()->GetResource(imageIndex);
-			if (!resource)
-				continue;
-
-			Texture* image = dynamic_cast<Texture*>(resource);
-			if (!image || image->GetImageView() == nullptr)
-				continue;
-
-			if (width == 0 || height == 0)
-			{
-				width = image->GetWidth();
-				height = image->GetHeight();
-			}
-			else
-			{
-				if (width != image->GetWidth() || height != image->GetHeight())
+				switch (attachment->GetUsage())
 				{
-					width = height = 0;
-					CE_LOG(Error, All, "Failed to create vulkan framebuffer: Width or height mismatch!");
-					return;
+				case RHI::ScopeAttachmentUsage::None:
+				case RHI::ScopeAttachmentUsage::Copy:
+				case RHI::ScopeAttachmentUsage::Shader:
+				case RHI::ScopeAttachmentUsage::COUNT:
+					continue;
 				}
+
+				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)attachment;
+				RHIResource* resource = imageScopeAttachment->GetFrameAttachment()->GetResource(imageIndex);
+				if (!resource)
+					continue;
+
+				Texture* image = dynamic_cast<Texture*>(resource);
+				if (!image || image->GetImageView() == nullptr)
+					continue;
+
+				if (width == 0 || height == 0)
+				{
+					width = image->GetWidth();
+					height = image->GetHeight();
+				}
+				else
+				{
+					if (width != image->GetWidth() || height != image->GetHeight())
+					{
+						width = height = 0;
+						CE_LOG(Error, All, "Failed to create vulkan framebuffer: Width or height mismatch!");
+						return;
+					}
+				}
+
+				attachments.Add(image->GetImageView());
+				addedAttachments.Add(frameAttachment->GetId());
 			}
 
-			attachments.Add(image->GetImageView());
+			current = (Vulkan::Scope*)current->nextSubPass;
 		}
 
 		framebufferCI.attachmentCount = attachments.GetSize();

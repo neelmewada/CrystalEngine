@@ -65,6 +65,8 @@ namespace CE::RHI
 			}
 		}
 
+		virtual void ClearShaderResourceGroups() = 0;
+
 		virtual void CommitShaderResources() = 0;
 
 		virtual void BindPipelineState(RHI::PipelineState* pipelineState) = 0;

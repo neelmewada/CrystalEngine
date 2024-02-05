@@ -884,6 +884,7 @@ namespace CE::Sandbox
 				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();
+			//scheduler->EndScopeGroup();
 
 			/*scheduler->BeginScope("Transparent");
 			{

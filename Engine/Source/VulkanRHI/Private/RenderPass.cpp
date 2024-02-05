@@ -42,8 +42,8 @@ namespace CE::Vulkan
 			RHI::Limits::Pipeline::MaxSubPassCount> subpassInputAttachments{};
 		StaticArray<FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount>,
 			RHI::Limits::Pipeline::MaxSubPassCount> preserveAttachments{};
-		StaticArray<FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount>, 1>
-			depthStencilAttachments{};
+		StaticArray<FixedArray<VkAttachmentReference, RHI::Limits::Pipeline::MaxColorAttachmentCount>,
+			RHI::Limits::Pipeline::MaxSubPassCount> depthStencilAttachments{};
 		int i = 0;
 
 		for (const RenderPass::SubPassDescriptor& subpassDesc : desc.subpasses)
@@ -147,6 +147,7 @@ namespace CE::Vulkan
 			HashMap<AttachmentID, ImageFrameAttachment*> attachmentsById{};
 			HashMap<AttachmentID, AttachmentBinding> attachmentBindingsById{};
 			HashMap<AttachmentID, int> attachmentIndicesById{};
+			Array<AttachmentID> attachmentIdsInOrder{};
 			int totalAttachmentCount = 0;
 
 			VkSubpassDependency dependency{};
@@ -158,6 +159,7 @@ namespace CE::Vulkan
 			dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 			outDescriptor.dependencies.Add(dependency);
+			int subpassIndex = 0;
 
 			while (cur != nullptr)
 			{
@@ -166,7 +168,6 @@ namespace CE::Vulkan
 
 				SubPassDescriptor subPassDesc{};
 				HashSet<int> usedAttachmentIndices{};
-				int subpassIndex = 0;
 
 				for (auto scopeAttachment : cur->attachments)
 				{
@@ -211,6 +212,7 @@ namespace CE::Vulkan
 
 						attachmentBindingsById[attachmentId] = attachmentBinding;
 						attachmentIndicesById[attachmentId] = totalAttachmentCount++;
+						attachmentIdsInOrder.Add(attachmentId);
 					}
 
 					SubPassAttachment attachmentRef{};
@@ -339,7 +341,7 @@ namespace CE::Vulkan
 					case RHI::ScopeAttachmentUsage::DepthStencil:
 						dependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 						dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+						if (EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
 						{
 							dependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 						}
@@ -355,7 +357,7 @@ namespace CE::Vulkan
 					case RHI::ScopeAttachmentUsage::Shader:
 						dependency.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
 						dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+						if (EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
 						{
 							dependency.dstAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
 						}
@@ -367,8 +369,15 @@ namespace CE::Vulkan
 					outDescriptor.dependencies.Add(dependency);
 				}
 
+				outDescriptor.subpasses.Add(subPassDesc);
+
 				subpassIndex++;
 				cur = next;
+			}
+
+			for (const auto& attachmentId : attachmentIdsInOrder)
+			{
+				outDescriptor.attachments.Add(attachmentBindingsById[attachmentId]);
 			}
 		}
 		else // Single subpass

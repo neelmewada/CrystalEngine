@@ -131,41 +131,55 @@ namespace CE::Vulkan
 
 		commandList->Begin();
 		{
-			for (Vulkan::Scope* currentScope : scopeChain)
+			//for (Vulkan::Scope* currentScope : scopeChain)
+			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{
+				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
+
 				commandList->currentPass = currentScope->renderPass;
 				commandList->currentSubpass = currentScope->subpassIndex;
 
 				bool usesSwapChainAttachment = currentScope->usesSwapChainAttachment;
 				RenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
+				HashSet<AttachmentID> clearedAttachments{};
 
-				for (auto scopeAttachment : currentScope->attachments)
+				Vulkan::Scope* scopeLoop = currentScope;
+				while (scopeLoop != nullptr)
 				{
-					if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
-						!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
-						continue;
-					if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
-						scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
-						continue;
-
-					ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
-					ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
-
-					VkClearValue clearValue{};
-					
-					if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::DepthStencil)
+					for (auto scopeAttachment : scopeLoop->attachments)
 					{
-						clearValue.depthStencil.depth = scopeAttachment->GetLoadStoreAction().clearValueDepth;
-						clearValue.depthStencil.stencil = scopeAttachment->GetLoadStoreAction().clearValueStencil;
-					}
-					else
-					{
-						const RHI::AttachmentLoadStoreAction& loadStoreAction = scopeAttachment->GetLoadStoreAction();
-						memcpy(clearValue.color.float32, loadStoreAction.clearValue.xyzw, sizeof(f32[4]));
+						if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+							!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
+							continue;
+						if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Shader ||
+							scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::Copy)
+							continue;
+						if (clearedAttachments.Exists(scopeAttachment->GetFrameAttachment()->GetId()))
+							continue;
+
+						ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
+						ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+
+						VkClearValue clearValue{};
+
+						if (scopeAttachment->GetUsage() == RHI::ScopeAttachmentUsage::DepthStencil)
+						{
+							clearValue.depthStencil.depth = scopeAttachment->GetLoadStoreAction().clearValueDepth;
+							clearValue.depthStencil.stencil = scopeAttachment->GetLoadStoreAction().clearValueStencil;
+						}
+						else
+						{
+							const RHI::AttachmentLoadStoreAction& loadStoreAction = scopeAttachment->GetLoadStoreAction();
+							memcpy(clearValue.color.float32, loadStoreAction.clearValue.xyzw, sizeof(f32[4]));
+						}
+
+						clearedAttachments.Add(scopeAttachment->GetFrameAttachment()->GetId());
+
+						clearValues.Add(clearValue);
 					}
 
-					clearValues.Add(clearValue);
+					scopeLoop = (Vulkan::Scope*)scopeLoop->nextSubPass;
 				}
 
 				// Execute compiled pipeline barriers
@@ -193,173 +207,187 @@ namespace CE::Vulkan
 					}
 				}
 
-				// Do image-layout/buffer transitions manually (if required)
-				// This is only required for first-time use of an attachment
-				// The FrameGraph handles the internal resource transitions through compiled pipeline barriers.
-				for (auto scopeAttachment : currentScope->attachments)
 				{
-					if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
-						!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
-						continue;
+					Vulkan::Scope* currentSubPassScope = currentScope;
+					HashSet<AttachmentID> initializedAttachmentIds{};
 
-					ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
-					ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
-
-					RHIResource* resource = imageFrameAttachment->GetResource(currentImageIndex);
-					if (resource == nullptr || resource->GetResourceType() != ResourceType::Texture)
-						continue;
-
-					if (resource->GetResourceType() == ResourceType::Texture)
+					while (currentSubPassScope != nullptr)
 					{
-						Vulkan::Texture* image = (Vulkan::Texture*)resource;
-
-						VkImageLayout requiredLayout = image->curImageLayout;
-						VkPipelineStageFlags dstStageMask = 0;
-						VkAccessFlags dstAccessMask = 0;
-
-						switch (scopeAttachment->GetUsage())
+						// Do image-layout/buffer transitions manually (if required)
+					// This is only required for first-time use of an attachment
+					// The FrameGraph handles the internal resource transitions through compiled pipeline barriers.
+						for (auto scopeAttachment : currentSubPassScope->attachments)
 						{
-						case RHI::ScopeAttachmentUsage::RenderTarget:
-						case RHI::ScopeAttachmentUsage::Resolve:
-							requiredLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-							dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-							dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-							break;
-						case RHI::ScopeAttachmentUsage::DepthStencil:
-							dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-							if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-								dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-							}
-							else // Read only
-							{
-								requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
-								dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::SubpassInput:
-						case RHI::ScopeAttachmentUsage::Shader:
-							dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-							if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								requiredLayout = VK_IMAGE_LAYOUT_GENERAL;
-								dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-							}
-							else
-							{
-								requiredLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-								dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-							}
-							break;
-						case RHI::ScopeAttachmentUsage::Copy:
-							dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
-							if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-							{
-								requiredLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-								dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
-							}
-							else
-							{
-								requiredLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-								dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-							}
-							break;
-						default:
-							continue;
-						}
-
-						// Usually only required for Output image, because it transitions to PRESENT_SRC_KHR at the end of rendering.
-						// Also useful when queue family index of image doesn't match to what's required.
-						if (image->curImageLayout != requiredLayout || (image->curFamilyIndex >= 0 && image->curFamilyIndex != currentScope->queue->GetFamilyIndex()))
-						{
-							VkImageMemoryBarrier imageBarrier{};
-							imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-							if (image->curFamilyIndex < 0)
-								image->curFamilyIndex = presentQueue->GetFamilyIndex();
-							imageBarrier.srcQueueFamilyIndex = image->curFamilyIndex;
-							imageBarrier.dstQueueFamilyIndex = currentScope->queue->GetFamilyIndex();
-							imageBarrier.image = image->GetImage();
-							imageBarrier.oldLayout = image->curImageLayout;
-							imageBarrier.newLayout = requiredLayout;
-							imageBarrier.srcAccessMask = 0;
-							imageBarrier.dstAccessMask = dstAccessMask;
-
-							imageBarrier.subresourceRange.aspectMask = image->aspectMask;
-							imageBarrier.subresourceRange.baseMipLevel = 0;
-							imageBarrier.subresourceRange.levelCount = image->mipLevels;
-							imageBarrier.subresourceRange.baseArrayLayer = 0;
-							imageBarrier.subresourceRange.layerCount = image->arrayLayers;
-
-							vkCmdPipelineBarrier(cmdBuffer,
-								VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-								dstStageMask,
-								0,
-								0, nullptr,
-								0, nullptr,
-								1, &imageBarrier);
-
-							image->curImageLayout = requiredLayout;
-							image->curFamilyIndex = currentScope->queue->GetFamilyIndex();
-						}
-					}
-					else if (resource->GetResourceType() == ResourceType::Buffer)
-					{
-						Vulkan::Buffer* buffer = (Vulkan::Buffer*)resource;
-
-						if (buffer->curFamilyIndex >= 0 && buffer->curFamilyIndex != currentScope->queue->GetFamilyIndex())
-						{
-							VkPipelineStageFlags dstStageMask = 0;
-							VkAccessFlags dstAccessMask = 0;
-
-							switch (scopeAttachment->GetUsage())
-							{
-							case RHI::ScopeAttachmentUsage::Shader:
-								dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-								if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-								{
-									dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
-								}
-								else
-								{
-									dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-								}
-								break;
-							case RHI::ScopeAttachmentUsage::Copy:
-								dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
-								if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-								{
-									dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
-								}
-								else
-								{
-									dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-								}
-								break;
-							default:
+							if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
+								!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
 								continue;
+
+							ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)scopeAttachment;
+							ImageFrameAttachment* imageFrameAttachment = (ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
+
+							RHIResource* resource = imageFrameAttachment->GetResource(currentImageIndex);
+							if (resource == nullptr || resource->GetResourceType() != ResourceType::Texture)
+								continue;
+							if (initializedAttachmentIds.Exists(imageFrameAttachment->GetId()))
+								continue;
+
+							initializedAttachmentIds.Add(imageFrameAttachment->GetId());
+
+							if (resource->GetResourceType() == ResourceType::Texture)
+							{
+								Vulkan::Texture* image = (Vulkan::Texture*)resource;
+
+								VkImageLayout requiredLayout = image->curImageLayout;
+								VkPipelineStageFlags dstStageMask = 0;
+								VkAccessFlags dstAccessMask = 0;
+
+								switch (scopeAttachment->GetUsage())
+								{
+								case RHI::ScopeAttachmentUsage::RenderTarget:
+								case RHI::ScopeAttachmentUsage::Resolve:
+									requiredLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+									dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+									dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+									break;
+								case RHI::ScopeAttachmentUsage::DepthStencil:
+									dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+									if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+									{
+										requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+										dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+									}
+									else // Read only
+									{
+										requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+										dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+									}
+									break;
+								case RHI::ScopeAttachmentUsage::SubpassInput:
+								case RHI::ScopeAttachmentUsage::Shader:
+									dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+									if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+									{
+										requiredLayout = VK_IMAGE_LAYOUT_GENERAL;
+										dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+									}
+									else
+									{
+										requiredLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+										dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+									}
+									break;
+								case RHI::ScopeAttachmentUsage::Copy:
+									dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+									if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+									{
+										requiredLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+										dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
+									}
+									else
+									{
+										requiredLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+										dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+									}
+									break;
+								default:
+									continue;
+								}
+
+								// Usually only required for Output image, because it transitions to PRESENT_SRC_KHR at the end of rendering.
+								// Also useful when queue family index of image doesn't match to what's required.
+								if (image->curImageLayout != requiredLayout || (image->curFamilyIndex >= 0 && image->curFamilyIndex != currentScope->queue->GetFamilyIndex()))
+								{
+									VkImageMemoryBarrier imageBarrier{};
+									imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+									if (image->curFamilyIndex < 0)
+										image->curFamilyIndex = presentQueue->GetFamilyIndex();
+									imageBarrier.srcQueueFamilyIndex = image->curFamilyIndex;
+									imageBarrier.dstQueueFamilyIndex = currentScope->queue->GetFamilyIndex();
+									imageBarrier.image = image->GetImage();
+									imageBarrier.oldLayout = image->curImageLayout;
+									imageBarrier.newLayout = requiredLayout;
+									imageBarrier.srcAccessMask = 0;
+									imageBarrier.dstAccessMask = dstAccessMask;
+
+									imageBarrier.subresourceRange.aspectMask = image->aspectMask;
+									imageBarrier.subresourceRange.baseMipLevel = 0;
+									imageBarrier.subresourceRange.levelCount = image->mipLevels;
+									imageBarrier.subresourceRange.baseArrayLayer = 0;
+									imageBarrier.subresourceRange.layerCount = image->arrayLayers;
+
+									vkCmdPipelineBarrier(cmdBuffer,
+										VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+										dstStageMask,
+										0,
+										0, nullptr,
+										0, nullptr,
+										1, &imageBarrier);
+
+									image->curImageLayout = requiredLayout;
+									image->curFamilyIndex = currentScope->queue->GetFamilyIndex();
+								}
 							}
+							else if (resource->GetResourceType() == ResourceType::Buffer)
+							{
+								Vulkan::Buffer* buffer = (Vulkan::Buffer*)resource;
 
-							VkBufferMemoryBarrier bufferBarrier{};
-							bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-							bufferBarrier.srcAccessMask = 0;
-							bufferBarrier.dstAccessMask = dstAccessMask;
-							bufferBarrier.srcQueueFamilyIndex = buffer->curFamilyIndex;
-							bufferBarrier.dstQueueFamilyIndex = currentScope->queue->GetFamilyIndex();
-							bufferBarrier.buffer = buffer->GetBuffer();
-							bufferBarrier.offset = 0;
-							bufferBarrier.size = buffer->GetBufferSize();
+								if (buffer->curFamilyIndex >= 0 && buffer->curFamilyIndex != currentScope->queue->GetFamilyIndex())
+								{
+									VkPipelineStageFlags dstStageMask = 0;
+									VkAccessFlags dstAccessMask = 0;
 
-							vkCmdPipelineBarrier(cmdBuffer,
-								VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-								dstStageMask,
-								0,
-								0, nullptr,
-								1, &bufferBarrier,
-								0, nullptr);
+									switch (scopeAttachment->GetUsage())
+									{
+									case RHI::ScopeAttachmentUsage::Shader:
+										dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+										if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+										{
+											dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT;
+										}
+										else
+										{
+											dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+										}
+										break;
+									case RHI::ScopeAttachmentUsage::Copy:
+										dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+										if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+										{
+											dstAccessMask = VK_ACCESS_MEMORY_WRITE_BIT | VK_ACCESS_MEMORY_READ_BIT;
+										}
+										else
+										{
+											dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+										}
+										break;
+									default:
+										continue;
+									}
 
-							buffer->curFamilyIndex = currentScope->queue->GetFamilyIndex();
+									VkBufferMemoryBarrier bufferBarrier{};
+									bufferBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+									bufferBarrier.srcAccessMask = 0;
+									bufferBarrier.dstAccessMask = dstAccessMask;
+									bufferBarrier.srcQueueFamilyIndex = buffer->curFamilyIndex;
+									bufferBarrier.dstQueueFamilyIndex = currentScope->queue->GetFamilyIndex();
+									bufferBarrier.buffer = buffer->GetBuffer();
+									bufferBarrier.offset = 0;
+									bufferBarrier.size = buffer->GetBufferSize();
+
+									vkCmdPipelineBarrier(cmdBuffer,
+										VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+										dstStageMask,
+										0,
+										0, nullptr,
+										1, &bufferBarrier,
+										0, nullptr);
+
+									buffer->curFamilyIndex = currentScope->queue->GetFamilyIndex();
+								}
+							}
 						}
+
+						currentSubPassScope = (Vulkan::Scope*)currentSubPassScope->nextSubPass;
 					}
 				}
 
@@ -379,16 +407,6 @@ namespace CE::Vulkan
 					beginInfo.renderArea.extent.width = frameBuffer->GetWidth();
 					beginInfo.renderArea.extent.height = frameBuffer->GetHeight();
 
-					for (auto srg : currentScope->externalShaderResourceGroups)
-					{
-						commandList->SetShaderResourceGroup(srg);
-					}
-
-					if (currentScope->passShaderResourceGroup)
-						commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
-					if (currentScope->subpassShaderResourceGroup)
-						commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
-
 					vkCmdBeginRenderPass(cmdBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 					{
 						VkViewport viewport{};
@@ -404,43 +422,90 @@ namespace CE::Vulkan
 						scissor.extent.width = viewport.width;
 						scissor.extent.height = viewport.height;
 						vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
-						
-						RHI::DrawList* drawList = currentScope->drawList;
 
-						for (int i = 0; drawList != nullptr && i < drawList->GetDrawItemCount(); i++)
+						while (currentScope != nullptr)
 						{
-							const auto& drawItemProperties = drawList->GetDrawItem(i);
-							const DrawItem* drawItem = drawItemProperties.item;
-							
-							if (drawItem->enabled)
+							for (auto srg : currentScope->externalShaderResourceGroups)
 							{
-								// Bind Pipeline
-								RHI::PipelineState* pipeline = drawItem->pipelineState;
-								if (pipeline)
-									commandList->BindPipelineState(pipeline);
+								commandList->SetShaderResourceGroup(srg);
+							}
 
-								// Bind SRGs
-								for (int j = 0; j < drawItem->shaderResourceGroupCount; j++)
+							if (currentScope->passShaderResourceGroup)
+								commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
+							if (currentScope->subpassShaderResourceGroup)
+								commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+
+							RHI::DrawList* drawList = currentScope->drawList;
+
+							for (int i = 0; drawList != nullptr && i < drawList->GetDrawItemCount(); i++)
+							{
+								const auto& drawItemProperties = drawList->GetDrawItem(i);
+								const DrawItem* drawItem = drawItemProperties.item;
+
+								if (drawItem->enabled)
 								{
-									if (drawItem->shaderResourceGroups[j] != nullptr)
+									// Bind Pipeline
+									RHI::PipelineState* pipeline = drawItem->pipelineState;
+									if (pipeline)
+										commandList->BindPipelineState(pipeline);
+
+									// Bind SRGs
+									for (int j = 0; j < drawItem->shaderResourceGroupCount; j++)
 									{
-										commandList->SetShaderResourceGroup(drawItem->shaderResourceGroups[j]);
+										if (drawItem->shaderResourceGroups[j] != nullptr)
+										{
+											commandList->SetShaderResourceGroup(drawItem->shaderResourceGroups[j]);
+										}
+									}
+
+									if (drawItem->uniqueShaderResourceGroup != nullptr)
+									{
+										commandList->SetShaderResourceGroup(drawItem->uniqueShaderResourceGroup);
+									}
+
+									// Commit SRGs
+									commandList->CommitShaderResources();
+
+									// Draw Indexed
+									commandList->BindVertexBuffers(0, drawItem->vertexBufferViewCount, drawItem->vertexBufferViews);
+									commandList->BindIndexBuffer(*drawItem->indexBufferView);
+
+									commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+								}
+							}
+
+							if (currentScope->nextSubPass == nullptr) // No more subpasses left
+							{
+								if (currentScope->IsSubPass())
+								{
+									const auto& renderPassDesc = currentScope->renderPass->desc;
+
+									for (int i = 0; i < renderPassDesc.attachments.GetSize(); i++)
+									{
+										const auto& attachmentBinding = renderPassDesc.attachments[i];
+										RHI::ScopeAttachment* scopeAttachment = currentScope->FindScopeAttachment(attachmentBinding.attachmentId);
+										if (scopeAttachment == nullptr || scopeAttachment->GetFrameAttachment() == nullptr || 
+											!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
+											continue;
+
+										Vulkan::Texture* texture = (Vulkan::Texture*)scopeAttachment->GetFrameAttachment()->GetResource(currentImageIndex);
+										if (texture == nullptr)
+											continue;
+
+										texture->curImageLayout = attachmentBinding.finalLayout;
 									}
 								}
 
-								if (drawItem->uniqueShaderResourceGroup != nullptr)
-								{
-									commandList->SetShaderResourceGroup(drawItem->uniqueShaderResourceGroup);
-								}
-
-								// Commit SRGs
-								commandList->CommitShaderResources();
-
-								// Draw Indexed
-								commandList->BindVertexBuffers(0, drawItem->vertexBufferViewCount, drawItem->vertexBufferViews);
-								commandList->BindIndexBuffer(*drawItem->indexBufferView);
-
-								commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+								commandList->currentSubpass = 0;
+								break;
+							}
+							else
+							{
+								scopeIndex++;
+								currentScope = (Vulkan::Scope*)currentScope->nextSubPass;
+								vkCmdNextSubpass(cmdBuffer, VK_SUBPASS_CONTENTS_INLINE);
+								commandList->currentSubpass++;
+								//commandList->ClearShaderResourceGroups();
 							}
 						}
 					}
@@ -483,7 +548,7 @@ namespace CE::Vulkan
 			}
 
 			commandList->currentPass = nullptr;
-			commandList->currentSubpass = 0;;
+			commandList->currentSubpass = 0;
 			
 			// Transition to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 			if (presentRequired)

@@ -188,6 +188,9 @@ namespace CE::RHI
 
 			cur->prevSubPass = prev;
 			cur->nextSubPass = next;
+
+			cur->prev = prev;
+			cur->next = next;
 		}
 	}
 

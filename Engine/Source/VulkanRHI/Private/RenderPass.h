@@ -89,6 +89,9 @@ namespace CE::Vulkan
 
 		friend class RenderPassCache;
 		friend class GraphicsPipeline;
+		friend class FrameGraphExecuter;
+		friend class FrameGraphCompiler;
+		friend class Scope;
 	};
 
 	VkSampleCountFlagBits GetSampleCountFlagBits(int sampleCount);
