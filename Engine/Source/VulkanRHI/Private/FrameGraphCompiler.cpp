@@ -320,6 +320,11 @@ namespace CE::Vulkan
 			visitedScopes[i].Clear();
 		}
 
+		for (int i = 0; i < usedAttachments.GetSize(); i++)
+		{
+			usedAttachments[i].Clear();
+		}
+
 		for (int i = 0; i < imageCount; i++)
 		{
 			for (RHI::Scope* scope : frameGraph->producers)
@@ -370,11 +375,32 @@ namespace CE::Vulkan
 			{
 				Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
 
-				//if (producerScope->queue != current->queue)
+				/*for (auto attachment : current->attachments)
 				{
-					//current->barriers[imageIndex].Clear();
-					//break;
-				}
+					auto frameAttachment = attachment->GetFrameAttachment();
+					if (!usedAttachments[imageIndex].Exists(frameAttachment->GetId()))
+					{
+						if (frameAttachment->IsSwapChainAttachment())
+						{
+							VkImageMemoryBarrier imageBarrier{};
+
+							RHI::RHIResource* resource = frameAttachment->GetResource(imageIndex);
+							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+								continue;
+
+							Vulkan::Texture* image = (Vulkan::Texture*)resource;
+							if (image == nullptr || image->GetImage() == nullptr)
+								continue;
+							
+							imageBarrier.image = image->GetImage();
+							
+						}
+						else if (frameAttachment->IsImageAttachment())
+						{
+
+						}
+					}
+				}*/
 
 				HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
 
@@ -618,7 +644,8 @@ namespace CE::Vulkan
 						continue;
 					}
 
-					current->barriers[imageIndex].Add(barrier);
+					//current->barriers[imageIndex].Add(barrier);
+					producerScope->barriers[imageIndex].Add(barrier);
 				}
 			}
 		}

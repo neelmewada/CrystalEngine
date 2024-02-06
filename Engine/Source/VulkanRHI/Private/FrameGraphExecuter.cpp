@@ -203,7 +203,7 @@ namespace CE::Vulkan
 				}
 
 				// Execute compiled pipeline barriers
-				if (currentScope->barriers[currentImageIndex].NonEmpty())
+				if (currentScope->initialBarriers[currentImageIndex].NonEmpty())
 				{
 					for (const auto& barrier : currentScope->barriers[currentImageIndex])
 					{
@@ -564,6 +564,31 @@ namespace CE::Vulkan
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Transfer)
 				{
 					// TODO: Add transfer pass
+				}
+
+				// Execute compiled pipeline barriers
+				if (currentScope->barriers[currentImageIndex].NonEmpty())
+				{
+					for (const auto& barrier : currentScope->barriers[currentImageIndex])
+					{
+						vkCmdPipelineBarrier(cmdBuffer,
+							barrier.srcStageMask, barrier.dstStageMask,
+							0,
+							barrier.memoryBarriers.GetSize(), barrier.memoryBarriers.GetData(),
+							barrier.bufferBarriers.GetSize(), barrier.bufferBarriers.GetData(),
+							barrier.imageBarriers.GetSize(), barrier.imageBarriers.GetData());
+
+						for (const auto& transition : barrier.imageLayoutTransitions)
+						{
+							transition.image->curImageLayout = transition.layout;
+							transition.image->curFamilyIndex = transition.queueFamilyIndex;
+						}
+
+						for (const auto& bufferTransition : barrier.bufferFamilyTransitions)
+						{
+							bufferTransition.buffer->curFamilyIndex = bufferTransition.queueFamilyIndex;
+						}
+					}
 				}
 			}
 

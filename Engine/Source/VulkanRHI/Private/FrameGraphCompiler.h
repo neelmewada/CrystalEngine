@@ -38,6 +38,7 @@ namespace CE::Vulkan
 		StaticArray<List<VkFence>, RHI::Limits::Pipeline::MaxSwapChainImageCount> graphExecutionFences{};
 
 		StaticArray<HashSet<ScopeID>, RHI::Limits::Pipeline::MaxSwapChainImageCount> visitedScopes{};
+		StaticArray<HashSet<AttachmentID>, RHI::Limits::Pipeline::MaxSwapChainImageCount> usedAttachments{};
 
 		// Keep track of current family index of each attachment
 		HashMap<AttachmentID, u32> familyIndexByAttachment{};

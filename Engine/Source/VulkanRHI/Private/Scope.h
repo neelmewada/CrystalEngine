@@ -54,6 +54,7 @@ namespace CE::Vulkan
 
 		List<VkPipelineStageFlags> waitSemaphoreStageFlags{};
 
+		StaticArray<Array<Barrier>, RHI::Limits::Pipeline::MaxSwapChainImageCount> initialBarriers{};
 		StaticArray<Array<Barrier>, RHI::Limits::Pipeline::MaxSwapChainImageCount> barriers{};
 
 		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::Pipeline::MaxSwapChainImageCount> commandListsByFamilyIndexPerImage{};
