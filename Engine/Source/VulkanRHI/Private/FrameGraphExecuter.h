@@ -20,7 +20,7 @@ namespace CE::Vulkan
 
 		void ExecuteScopesRecursively(Vulkan::Scope* scope);
 
-		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope);
+		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<ScopeID>& executedScopes);
 
 		VulkanDevice* device = nullptr;
 		FrameGraphCompiler* compiler = nullptr;

@@ -60,9 +60,11 @@ namespace CE::Vulkan
 
 		bool success = true;
 
+		HashSet<ScopeID> executedScopes{};
+
 		for (auto rhiScope : frameGraph->endScopes)
 		{
-			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope);
+			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope, executedScopes);
 		}
         
 		for (auto rhiScope : frameGraph->producers)
@@ -82,27 +84,22 @@ namespace CE::Vulkan
 	}
 
 	void FrameGraphExecuter::ExecuteScopesRecursively(Vulkan::Scope* scope)
-	{
-		if (scope == nullptr)
-			return;
-
-		for (auto rhiProducer : scope->producers)
-		{
-			ExecuteScopesRecursively((Vulkan::Scope*)rhiProducer);
-		}
-
+	{	
 
 	}
 
-	bool FrameGraphExecuter::ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope)
+	bool FrameGraphExecuter::ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<ScopeID>& executedScopes)
 	{
 		if (!scope)
 			return false;
 
 		for (auto rhiProducer : scope->producers)
 		{
-			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiProducer);
+			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiProducer, executedScopes);
 		}
+
+		if (executedScopes.Exists(scope->id))
+			return false;
 
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
@@ -158,6 +155,8 @@ namespace CE::Vulkan
 			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{
 				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
+
+				executedScopes.Add(currentScope->id);
 
 				commandList->currentPass = currentScope->renderPass;
 				commandList->currentSubpass = currentScope->subpassIndex;
