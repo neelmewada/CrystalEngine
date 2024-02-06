@@ -644,6 +644,7 @@ namespace CE::Vulkan
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		
 		if (isSwapChainImageUsed && scope->producers.IsEmpty()) // Frame graph uses a swapchain image
+        //if (scope->producers.IsEmpty()) // Frame graph uses a swapchain image
 		{
 			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + 1;
 			if (waitSemaphores.GetSize() < submitInfo.waitSemaphoreCount)
