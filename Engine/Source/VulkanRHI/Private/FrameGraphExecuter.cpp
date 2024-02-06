@@ -66,13 +66,9 @@ namespace CE::Vulkan
 		{
 			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope, executedScopes);
 		}
-        
-		for (auto rhiScope : frameGraph->producers)
-		{
-			//success = ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope);
-		}
 
 		currentSubmissionIndex = (currentSubmissionIndex + 1) % compiler->imageCount;
+		totalFramesSubmitted++;
 
 		return success && result == VK_SUCCESS;
 	}
@@ -155,6 +151,8 @@ namespace CE::Vulkan
 			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{
 				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
+				if (currentScope == nullptr)
+					continue;
 
 				executedScopes.Add(currentScope->id);
 
@@ -627,7 +625,7 @@ namespace CE::Vulkan
 				waitSemaphores.Resize(submitInfo.waitSemaphoreCount);
 			if (waitStages.GetSize() < submitInfo.waitSemaphoreCount)
 				waitStages.Resize(submitInfo.waitSemaphoreCount);
-
+			
 			// Wait semaphores from compiled FrameGraph, i.e. dependency on previous pass submissions.
 			for (int i = 0; i < scope->waitSemaphores[currentImageIndex].GetSize(); i++)
 			{
@@ -637,7 +635,7 @@ namespace CE::Vulkan
 
 			// We need to wait on image acquired semaphore too
 			waitSemaphores[submitInfo.waitSemaphoreCount - 1] = compiler->imageAcquiredSemaphores[currentSubmissionIndex];
-			waitStages[submitInfo.waitSemaphoreCount - 1] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			waitStages[submitInfo.waitSemaphoreCount - 1] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;//VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 			submitInfo.pWaitSemaphores = waitSemaphores.GetData();
 			submitInfo.pWaitDstStageMask = waitStages.GetData();
@@ -672,11 +670,6 @@ namespace CE::Vulkan
 			presentInfo.pWaitSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
             
 			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
-		}
-
-		for (RHI::Scope* consumerScope : scopeChain.Top()->consumers)
-		{
-			//ExecuteScope(executeRequest, (Vulkan::Scope*)consumerScope, executedScopes);
 		}
 
 		return result == VK_SUCCESS;

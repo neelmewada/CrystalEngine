@@ -1001,7 +1001,7 @@ namespace CE::Sandbox
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 
-			/*scheduler->BeginScope("Skybox");
+			scheduler->BeginScope("Skybox");
 			{
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
@@ -1014,7 +1014,7 @@ namespace CE::Sandbox
 				
 				//scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
 			}
-			scheduler->EndScope();*/
+			scheduler->EndScope();
 
 			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Depth");
@@ -1046,8 +1046,8 @@ namespace CE::Sandbox
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
 				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				//swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
+				//swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);

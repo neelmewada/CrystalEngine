@@ -287,6 +287,11 @@ namespace CE::Vulkan
 				deviceExtensionNames.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 			}
 
+			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME) == 0)
+			{
+				deviceExtensionNames.Add(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
+			}
+
 #if CE_DEBUG && PLATFORM_DESKTOP
 			// Debugging Extensions
 			if (strcmp(deviceExtensionProperties[i].extensionName, VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME) == 0)

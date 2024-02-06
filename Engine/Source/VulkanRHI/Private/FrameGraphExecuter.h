@@ -27,6 +27,8 @@ namespace CE::Vulkan
 
 		u32 currentSubmissionIndex = 0;
 		u32 currentImageIndex = 0;
+
+		u64 totalFramesSubmitted = 0;
 	};
     
 } // namespace CE::Vulkan
