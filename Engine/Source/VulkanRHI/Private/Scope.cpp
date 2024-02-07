@@ -75,13 +75,15 @@ namespace CE::Vulkan
 			VkSemaphoreCreateInfo semaphoreCI{};
 			semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-			VkSemaphore semaphore = nullptr;
-			auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
+			VkResult result = VK_SUCCESS;
+
+			//VkSemaphore semaphore = nullptr;
+			//result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
 			if (result != VK_SUCCESS)
 			{
 				continue;
 			}
-			renderFinishedSemaphores.Add(semaphore);
+			//renderFinishedSemaphores.Add(semaphore);
 
 			VkFenceCreateInfo fenceCI{};
 			fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -95,6 +97,24 @@ namespace CE::Vulkan
 			}
 
 			renderFinishedFences.Add(fence);
+
+			// 1 signal semaphore for 1 consumer
+			for (auto consumerRhiScope : consumers)
+			{
+				Vulkan::Scope* consumerScope = (Vulkan::Scope*)consumerRhiScope;
+
+				VkSemaphore signalSemaphore = nullptr;
+				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &signalSemaphore);
+				signalSemaphores[i].Add(signalSemaphore);
+				signalSemaphoresByConsumerScope[i].Add(consumerScope->id, signalSemaphore);
+			}
+			// No consumers exist, then just signal 1 semaphore
+			if (consumers.IsEmpty())
+			{
+				VkSemaphore signalSemaphore = nullptr;
+				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &signalSemaphore);
+				signalSemaphores[i].Add(signalSemaphore);
+			}
 		}
 
 		if (prevSubPass == nullptr && nextSubPass != nullptr)
@@ -193,11 +213,21 @@ namespace CE::Vulkan
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
-		for (VkSemaphore semaphore : renderFinishedSemaphores)
+		for (int i = 0; i < signalSemaphores.GetSize(); i++)
 		{
-			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+			for (auto semaphore : signalSemaphores[i])
+			{
+				vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+			}
+			signalSemaphores[i].Clear();
+			signalSemaphoresByConsumerScope[i].Clear();
 		}
-		renderFinishedSemaphores.Clear();
+
+		//for (VkSemaphore semaphore : renderFinishedSemaphores)
+		//{
+		//	vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+		//}
+		//renderFinishedSemaphores.Clear();
 
 		for (VkFence fence : renderFinishedFences)
 		{

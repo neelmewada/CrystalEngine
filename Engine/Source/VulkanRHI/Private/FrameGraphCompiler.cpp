@@ -36,7 +36,7 @@ namespace CE::Vulkan
 				return graphicsQueues[trackNumber];
 			else if (queueClass == RHI::HardwareQueueClass::Compute && (trackNumber - graphicsQueues.GetSize()) < computeQueues.GetSize())
 				return computeQueues[trackNumber - graphicsQueues.GetSize()];
-            return graphicsQueues.GetLast();
+            return primaryQueue;
         }
         
 		Array<CommandQueue*> graphicsQueues{};
@@ -79,7 +79,7 @@ namespace CE::Vulkan
             Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
             if (scope->queue == nullptr)
 			{
-                i = 0; // Temp code to force same queue
+                //i = 0; // Temp code to force same queue
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
 
@@ -300,7 +300,8 @@ namespace CE::Vulkan
 
 				for (int i = 0; i < imageCount; i++)
 				{
-					current->waitSemaphores[i].Add(producerScope->renderFinishedSemaphores[i]);
+					//current->waitSemaphores[i].Add(producerScope->renderFinishedSemaphores[i]);
+					current->waitSemaphores[i].Add(producerScope->signalSemaphoresByConsumerScope[i][current->id]);
 				}
 				current->waitSemaphoreStageFlags.Add(flags);
 				//current->waitSemaphoreStageFlags.Add(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT | VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);

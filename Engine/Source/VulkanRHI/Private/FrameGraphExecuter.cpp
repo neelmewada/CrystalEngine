@@ -62,6 +62,11 @@ namespace CE::Vulkan
 
 		HashSet<ScopeID> executedScopes{};
 
+		if (totalFramesSubmitted == 4)
+		{
+			String::CharToNumber('0');
+		}
+
 		for (auto rhiScope : frameGraph->endScopes)
 		{
 			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope, executedScopes);
@@ -103,7 +108,7 @@ namespace CE::Vulkan
 		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 		bool presentRequired = false;
 		auto presentQueue = device->GetPresentQueue();
-		bool isSwapChainImageUsed = false;
+		bool isFirstSwapChainUse = false;
 		
 		const RHI::FrameGraph::GraphNode& graphNode = frameGraph->nodes[scope->id];
 		
@@ -125,9 +130,19 @@ namespace CE::Vulkan
 		while (scopeInChain != nullptr)
 		{
 			if (scopeInChain->usesSwapChainAttachment)
-				isSwapChainImageUsed = true;
+				isFirstSwapChainUse = true;
 			scopeChain.Add(scopeInChain);
 			scopeInChain = (Vulkan::Scope*)scopeInChain->next;
+		}
+
+		for (auto executedScopeId : executedScopes)
+		{
+			Vulkan::Scope* executedScope = (Vulkan::Scope*)frameGraph->scopesById[executedScopeId];
+			if (executedScope->usesSwapChainAttachment)
+			{
+				isFirstSwapChainUse = false;
+				break;
+			}
 		}
 
 		if (scope->consumers.GetSize() > 1)
@@ -643,7 +658,7 @@ namespace CE::Vulkan
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		
-		if (isSwapChainImageUsed && scope->producers.IsEmpty()) // Frame graph uses a swapchain image
+		if (isFirstSwapChainUse && scope->producers.IsEmpty()) // Frame graph uses a swapchain image
         //if (scope->producers.IsEmpty()) // Frame graph uses a swapchain image
 		{
 			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + 1;
@@ -665,7 +680,6 @@ namespace CE::Vulkan
 
 			submitInfo.pWaitSemaphores = waitSemaphores.GetData();
 			submitInfo.pWaitDstStageMask = waitStages.GetData();
-			submitInfo.signalSemaphoreCount = 1;
 		}
 		else
 		{
@@ -675,9 +689,9 @@ namespace CE::Vulkan
 				submitInfo.pWaitSemaphores = scope->waitSemaphores[currentImageIndex].GetData();
 				submitInfo.pWaitDstStageMask = scope->waitSemaphoreStageFlags.GetData();
 			}
-			submitInfo.signalSemaphoreCount = 1;
 		}
-		submitInfo.pSignalSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
+		submitInfo.signalSemaphoreCount = scope->signalSemaphores[currentImageIndex].GetSize();
+		submitInfo.pSignalSemaphores = scope->signalSemaphores[currentImageIndex].GetData();//&scope->renderFinishedSemaphores[currentImageIndex];
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
@@ -693,7 +707,7 @@ namespace CE::Vulkan
 			presentInfo.pSwapchains = &swapchainKhr;
 			presentInfo.pImageIndices = &currentImageIndex;
 			presentInfo.waitSemaphoreCount = 1;
-			presentInfo.pWaitSemaphores = &scope->renderFinishedSemaphores[currentImageIndex];
+			presentInfo.pWaitSemaphores = &scope->signalSemaphores[currentImageIndex][0];
             
 			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 		}

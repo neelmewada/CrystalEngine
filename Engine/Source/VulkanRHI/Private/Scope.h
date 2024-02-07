@@ -46,7 +46,10 @@ namespace CE::Vulkan
 
 		void DestroySyncObjects();
 		
-		FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedSemaphores{};
+		//FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedSemaphores{};
+		FixedArray<HashMap<ScopeID, VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> signalSemaphoresByConsumerScope{};
+		FixedArray<List<VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> signalSemaphores{};
+
 		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedFences{};
 
 		FixedArray<List<VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> waitSemaphores{};
