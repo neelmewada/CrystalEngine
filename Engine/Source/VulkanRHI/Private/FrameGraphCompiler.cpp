@@ -79,7 +79,7 @@ namespace CE::Vulkan
             Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
             if (scope->queue == nullptr)
 			{
-                //i = 0; // Temp code to force same queue
+                i = 0; // Temp code to force same queue
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
 

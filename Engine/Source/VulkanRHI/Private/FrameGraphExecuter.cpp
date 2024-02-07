@@ -38,8 +38,7 @@ namespace CE::Vulkan
             
 			// TODO: Uncomment this if things fail
             //vkWaitForFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex], VK_TRUE, u64Max);
-
-            // TODO: graphExecutionFences not working!
+            
 			vkWaitForFences(device->GetHandle(),
 				compiler->graphExecutionFences[currentImageIndex].GetSize(),
 				compiler->graphExecutionFences[currentImageIndex].GetData(),
@@ -61,11 +60,6 @@ namespace CE::Vulkan
 		bool success = true;
 
 		HashSet<ScopeID> executedScopes{};
-
-		if (totalFramesSubmitted == 4)
-		{
-			String::CharToNumber('0');
-		}
 
 		for (auto rhiScope : frameGraph->endScopes)
 		{
