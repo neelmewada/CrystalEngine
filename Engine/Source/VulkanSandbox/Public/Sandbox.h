@@ -29,7 +29,7 @@ namespace CE::Sandbox
 		float attenuation;
 	};
 
-	struct LightData
+	struct alignas(16) LightData
 	{
 		Vec4 ambientColor{};
 		u32 totalDirectionalLights;

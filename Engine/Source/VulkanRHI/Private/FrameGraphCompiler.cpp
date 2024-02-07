@@ -558,7 +558,7 @@ namespace CE::Vulkan
 
 						barrier.imageBarriers.Add(imageBarrier);
 						barrier.imageLayoutTransitions.Add(transition);
-
+						
 						producerScope->barriers[imageIndex].Add(barrier);
 
 						if (isDifferentQueue)
@@ -567,7 +567,7 @@ namespace CE::Vulkan
 							imageBarrier.dstAccessMask = originalDstAccessMask;
 							barrier.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
 							imageBarrier.srcAccessMask = 0;
-
+							
 							current->initialBarriers[imageIndex].Add(barrier);
 						}
 					}
