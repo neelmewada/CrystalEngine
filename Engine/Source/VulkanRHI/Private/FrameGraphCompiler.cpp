@@ -373,36 +373,16 @@ namespace CE::Vulkan
 
 		if (!visitedScopes[imageIndex].Exists(current->id))
 		{
+			current->initialBarriers[imageIndex].Clear();
+			current->barriers[imageIndex].Clear();
+
 			for (RHI::Scope* producerRhiScope : current->producers)
 			{
 				Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
 
-				/*for (auto attachment : current->attachments)
-				{
-					auto frameAttachment = attachment->GetFrameAttachment();
-					if (!usedAttachments[imageIndex].Exists(frameAttachment->GetId()))
-					{
-						if (frameAttachment->IsSwapChainAttachment())
-						{
-							VkImageMemoryBarrier imageBarrier{};
-
-							RHI::RHIResource* resource = frameAttachment->GetResource(imageIndex);
-							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
-								continue;
-
-							Vulkan::Texture* image = (Vulkan::Texture*)resource;
-							if (image == nullptr || image->GetImage() == nullptr)
-								continue;
-							
-							imageBarrier.image = image->GetImage();
-							
-						}
-						else if (frameAttachment->IsImageAttachment())
-						{
-
-						}
-					}
-				}*/
+				bool isDifferentQueue = producerScope->queue != current->queue;
+				//if (producerScope->queue != current->queue)
+				//	continue;
 
 				HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
 
@@ -455,30 +435,28 @@ namespace CE::Vulkan
 							barrier.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 							imageBarrier.srcAccessMask = 0;
-							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-								imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
-								imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+								imageBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 							}
 							else // Read only
 							{
-								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+								imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+								//imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:
 						case RHI::ScopeAttachmentUsage::Shader:
 							barrier.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 							imageBarrier.srcAccessMask = 0;
-							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-								imageBarrier.srcAccessMask |= VK_ACCESS_SHADER_READ_BIT;
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
-								imageBarrier.srcAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+								imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
 								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
 							}
 							else // Read only
 							{
+								imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
 								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 							}
 							break;
@@ -516,30 +494,28 @@ namespace CE::Vulkan
 							barrier.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
 							imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 							imageBarrier.dstAccessMask = 0;
-							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-								imageBarrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
-								imageBarrier.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+								imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 							}
 							else // Read only
 							{
-								imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+								imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+								//imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:
 						case RHI::ScopeAttachmentUsage::Shader:
 							barrier.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
 							imageBarrier.dstAccessMask = 0;
-							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Read))
-								imageBarrier.dstAccessMask |= VK_ACCESS_SHADER_READ_BIT;
 							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
-								imageBarrier.dstAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+								imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
 								imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
 							}
 							else // Read only
 							{
+								imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 								imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 							}
 							break;
@@ -566,6 +542,15 @@ namespace CE::Vulkan
 							continue;
 						}
 
+						VkPipelineStageFlags originalDstStageMask = barrier.dstStageMask;
+						VkAccessFlags originalDstAccessMask = imageBarrier.dstAccessMask;
+
+						if (isDifferentQueue)
+						{
+							barrier.dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+							imageBarrier.dstAccessMask = 0;
+						}
+
 						Scope::ImageLayoutTransition transition{};
 						transition.image = image;
 						transition.layout = imageBarrier.newLayout;
@@ -573,6 +558,18 @@ namespace CE::Vulkan
 
 						barrier.imageBarriers.Add(imageBarrier);
 						barrier.imageLayoutTransitions.Add(transition);
+
+						producerScope->barriers[imageIndex].Add(barrier);
+
+						if (isDifferentQueue)
+						{
+							barrier.dstStageMask = originalDstStageMask;
+							imageBarrier.dstAccessMask = originalDstAccessMask;
+							barrier.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+							imageBarrier.srcAccessMask = 0;
+
+							current->initialBarriers[imageIndex].Add(barrier);
+						}
 					}
 					// Buffer -> Buffer barrier
 					else if (from->IsBufferAttachment() && to->IsBufferAttachment() && RequiresDependency(from, to))
@@ -640,14 +637,10 @@ namespace CE::Vulkan
 
 						barrier.bufferBarriers.Add(bufferBarrier);
 						barrier.bufferFamilyTransitions.Add(transition);
-					}
-					else
-					{
-						continue;
-					}
 
-					//current->barriers[imageIndex].Add(barrier);
-					producerScope->barriers[imageIndex].Add(barrier);
+						producerScope->barriers[imageIndex].Add(barrier);
+					}
+					
 				}
 			}
 		}

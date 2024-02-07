@@ -47,7 +47,7 @@ namespace CE::Sandbox
 
 		RHI::FrameSchedulerDescriptor desc{};
 		
-		scheduler = new FrameScheduler(desc);
+		scheduler = new RHI::FrameScheduler(desc);
 
 		mainWindow = window;
 
@@ -330,7 +330,7 @@ namespace CE::Sandbox
 			RHI::ShaderResourceGroupLayout perViewSrgLayout{};
 			perViewSrgLayout.srgType = RHI::SRGType::PerView;
 
-			SRGVariableDescriptor perViewDataDesc{};
+			RHI::SRGVariableDescriptor perViewDataDesc{};
 			perViewDataDesc.bindingSlot = perViewDataBinding;
 			perViewDataDesc.arrayCount = 1;
 			perViewDataDesc.name = "_PerViewData";
@@ -845,7 +845,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::BuildCubeMeshDrawPacket()
 	{
-		DrawPacketBuilder builder{};
+		RHI::DrawPacketBuilder builder{};
 
 		builder.SetDrawArguments(sphereModel->GetMesh(0)->drawArguments);
 
@@ -855,7 +855,7 @@ namespace CE::Sandbox
 
 		// Depth Item
 		{
-			DrawPacketBuilder::DrawItemRequest request{};
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
 			const auto& vertInfo = mesh->vertexBufferInfos[0];
 			auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
 			request.vertexBufferViews.Add(vertBufferView);
@@ -870,7 +870,7 @@ namespace CE::Sandbox
 
 		// Opaque Item
 		{
-			DrawPacketBuilder::DrawItemRequest request{};
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
 			for (const auto& vertInfo : mesh->vertexBufferInfos)
 			{
 				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position &&
@@ -899,7 +899,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::BuildSkyboxDrawPacket()
 	{
-		DrawPacketBuilder builder{};
+		RHI::DrawPacketBuilder builder{};
 
 		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
 
@@ -910,7 +910,7 @@ namespace CE::Sandbox
 
 		// Skybox Item
 		{
-			DrawPacketBuilder::DrawItemRequest request{};
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
 			const auto& vertInfo = mesh->vertexBufferInfos[0];
 			auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
 			request.vertexBufferViews.Add(vertBufferView);
@@ -922,6 +922,8 @@ namespace CE::Sandbox
 
 			builder.AddDrawItem(request);
 		}
+
+		skyboxDrawPacket = builder.Build();
 	}
 
 	void VulkanSandbox::InitDrawPackets()
@@ -989,7 +991,7 @@ namespace CE::Sandbox
 
 		scheduler->BeginFrameGraph();
 		{
-			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
+			RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
 
 			RHI::ImageDescriptor depthDesc{};
 			depthDesc.width = swapChain->GetWidth();
@@ -1001,6 +1003,7 @@ namespace CE::Sandbox
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 
+			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Skybox");
 			{
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
@@ -1015,8 +1018,7 @@ namespace CE::Sandbox
 				//scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
 			}
 			scheduler->EndScope();
-
-			//scheduler->BeginScopeGroup("MainPass");
+			
 			scheduler->BeginScope("Depth");
 			{
 				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
@@ -1091,7 +1093,7 @@ namespace CE::Sandbox
 		recompile = false;
 		scheduler->Compile();
 
-		TransientMemoryPool* pool = scheduler->GetTransientPool();
+		RHI::TransientMemoryPool* pool = scheduler->GetTransientPool();
 		RHI::MemoryHeap* imageHeap = pool->GetImagePool();
 		if (imageHeap != nullptr)
 		{

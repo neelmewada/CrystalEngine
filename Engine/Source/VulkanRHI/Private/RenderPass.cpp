@@ -163,7 +163,6 @@ namespace CE::Vulkan
 
 			while (cur != nullptr)
 			{
-				Scope* prev = (Vulkan::Scope*)cur->prevSubPass;
 				Scope* next = (Vulkan::Scope*)cur->nextSubPass;
 
 				SubPassDescriptor subPassDesc{};
@@ -227,7 +226,8 @@ namespace CE::Vulkan
 					{
 					case RHI::ScopeAttachmentUsage::DepthStencil:
 						attachmentRef.attachmentIndex = attachmentIndicesById[attachmentId];
-						if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						//if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						if (true)
 						{
 							attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 							if (initialUse)
@@ -278,95 +278,114 @@ namespace CE::Vulkan
 					}
 				}
 
-				HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments{};
-				if (prev != nullptr)
-					commonAttachments = Scope::FindCommonFrameAttachments(prev, cur);
+				Scope* prev = (Vulkan::Scope*)cur->prevSubPass;
 
-				for (auto [from, to] : commonAttachments)
+				while (prev != nullptr)
 				{
-					auto fromUsage = from->GetUsage();
-					auto fromAccess = from->GetAccess();
-					auto toUsage = to->GetUsage();
-					auto toAccess = to->GetAccess();
+					HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments{};
+					if (prev != nullptr)
+						commonAttachments = Scope::FindCommonFrameAttachments(prev, cur);
 
-					// No dependency if both usages are Read-Only
-					if (!EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write) &&
-						!EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
-						continue;
-
-					VkSubpassDependency dependency{};
-					dependency.srcSubpass = subpassIndex - 1;
-					dependency.dstSubpass = subpassIndex;
-
-					switch (fromUsage)
+					for (auto [from, to] : commonAttachments)
 					{
-					case RHI::ScopeAttachmentUsage::RenderTarget:
-						dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-						break;
-					case RHI::ScopeAttachmentUsage::DepthStencil:
-						dependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-						dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+						auto fromUsage = from->GetUsage();
+						auto fromAccess = from->GetAccess();
+						auto toUsage = to->GetUsage();
+						auto toAccess = to->GetAccess();
+
+						// No dependency if both usages are Read-Only
+						if (!EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write) &&
+							!EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
+							continue;
+
+						VkSubpassDependency dependency{};
+						dependency.srcSubpass = prev->subpassIndex;//subpassIndex - 1;
+						dependency.dstSubpass = cur->subpassIndex;//subpassIndex;
+						dependency.dependencyFlags = 0;
+
+						bool isRegional = true;
+
+						switch (fromUsage)
 						{
-							dependency.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+						case RHI::ScopeAttachmentUsage::RenderTarget:
+							dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+							dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+							break;
+						case RHI::ScopeAttachmentUsage::DepthStencil:
+							dependency.srcStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+							dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+							if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+							{
+								dependency.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+							}
+							break;
+						case RHI::ScopeAttachmentUsage::SubpassInput:
+							isRegional = false;
+							dependency.srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+							dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+							break;
+						case RHI::ScopeAttachmentUsage::Resolve:
+							dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+							dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+							break;
+						case RHI::ScopeAttachmentUsage::Shader:
+							isRegional = false;
+							dependency.srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+							dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+							if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+							{
+								dependency.srcAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+							}
+							break;
+						default:
+							continue;
 						}
-						break;
-					case RHI::ScopeAttachmentUsage::SubpassInput:
-						dependency.srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
-						dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-						break;
-					case RHI::ScopeAttachmentUsage::Resolve:
-						dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						dependency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-						break;
-					case RHI::ScopeAttachmentUsage::Shader:
-						dependency.srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
-						dependency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-						if (EnumHasFlag(fromAccess, RHI::ScopeAttachmentAccess::Write))
+
+						switch (toUsage)
 						{
-							dependency.srcAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+						case RHI::ScopeAttachmentUsage::RenderTarget:
+							dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+							dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+							break;
+						case RHI::ScopeAttachmentUsage::DepthStencil:
+							dependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+							dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+							if (EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
+							{
+								dependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+							}
+							break;
+						case RHI::ScopeAttachmentUsage::SubpassInput:
+							isRegional = false;
+							dependency.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+							dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+							break;
+						case RHI::ScopeAttachmentUsage::Resolve:
+							dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+							dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+							break;
+						case RHI::ScopeAttachmentUsage::Shader:
+							isRegional = false;
+							dependency.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+							dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+							if (EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
+							{
+								dependency.dstAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
+							}
+							break;
+						default:
+							continue;
 						}
-						break;
-					default:
-						continue;
+
+						if (isRegional)
+						{
+							dependency.dependencyFlags |= VK_DEPENDENCY_BY_REGION_BIT;
+						}
+
+						outDescriptor.dependencies.Add(dependency);
 					}
 
-					switch (toUsage)
-					{
-					case RHI::ScopeAttachmentUsage::RenderTarget:
-						dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-						break;
-					case RHI::ScopeAttachmentUsage::DepthStencil:
-						dependency.dstStageMask = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-						dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-						if (EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
-						{
-							dependency.dstAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-						}
-						break;
-					case RHI::ScopeAttachmentUsage::SubpassInput:
-						dependency.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
-						dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-						break;
-					case RHI::ScopeAttachmentUsage::Resolve:
-						dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-						dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-						break;
-					case RHI::ScopeAttachmentUsage::Shader:
-						dependency.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
-						dependency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-						if (EnumHasFlag(toAccess, RHI::ScopeAttachmentAccess::Write))
-						{
-							dependency.dstAccessMask |= VK_ACCESS_SHADER_WRITE_BIT;
-						}
-						break;
-					default:
-						continue;
-					}
-
-					outDescriptor.dependencies.Add(dependency);
+					prev = (Vulkan::Scope*)prev->prevSubPass;
 				}
 
 				outDescriptor.subpasses.Add(subPassDesc);
@@ -436,7 +455,8 @@ namespace CE::Vulkan
 				{
 				case RHI::ScopeAttachmentUsage::DepthStencil:
 					attachmentRef.attachmentIndex = i++;
-					if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+					//if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+					if (true)
 					{
 						attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 						attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;

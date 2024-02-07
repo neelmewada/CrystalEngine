@@ -101,6 +101,8 @@ namespace CE::Vulkan
 
 		if (executedScopes.Exists(scope->id))
 			return false;
+		if (scope->IsSubPass() && scope->prevSubPass != nullptr)
+			return false;
 
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
@@ -293,7 +295,7 @@ namespace CE::Vulkan
 									}
 									else // Read only
 									{
-										requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+										//requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 										dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 									}
 									break;
@@ -676,7 +678,7 @@ namespace CE::Vulkan
 
 			// We need to wait on image acquired semaphore too
 			waitSemaphores[submitInfo.waitSemaphoreCount - 1] = compiler->imageAcquiredSemaphores[currentSubmissionIndex];
-			waitStages[submitInfo.waitSemaphoreCount - 1] = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;//VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			waitStages[submitInfo.waitSemaphoreCount - 1] = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 			submitInfo.pWaitSemaphores = waitSemaphores.GetData();
 			submitInfo.pWaitDstStageMask = waitStages.GetData();

@@ -97,6 +97,8 @@ namespace CE::Vulkan
 			}
 
 			renderFinishedFences.Add(fence);
+			signalSemaphores.Add({});
+			signalSemaphoresByConsumerScope.Add({});
 
 			// 1 signal semaphore for 1 consumer
 			for (auto consumerRhiScope : consumers)
@@ -120,15 +122,23 @@ namespace CE::Vulkan
 		if (prevSubPass == nullptr && nextSubPass != nullptr)
 		{
 			// TODO: RenderPass with multiple subpasses
+			Vulkan::Scope* next = this;
+			this->subpassIndex = 0;
+			int i = 0;
+
+			while (next != nullptr)
+			{
+				// Assign appropriate subpass indices
+				next->subpassIndex = i++;
+				next = (Vulkan::Scope*)next->nextSubPass;
+			}
 
 			RenderPassCache* rpCache = device->GetRenderPassCache();
 			RenderPass::Descriptor descriptor{};
 			RenderPass::BuildDescriptor(this, descriptor);
 			renderPass = rpCache->FindOrCreate(descriptor);
-			this->subpassIndex = 0;
-			int i = 0;
 
-			Vulkan::Scope* next = this;
+			next = this;
 
 			while (next != nullptr)
 			{
@@ -162,7 +172,6 @@ namespace CE::Vulkan
 				}
 
 				next->renderPass = renderPass;
-				next->subpassIndex = i++;
 				next = (Vulkan::Scope*)next->nextSubPass;
 			}
 		}
@@ -222,6 +231,8 @@ namespace CE::Vulkan
 			signalSemaphores[i].Clear();
 			signalSemaphoresByConsumerScope[i].Clear();
 		}
+		signalSemaphores.Clear();
+		signalSemaphoresByConsumerScope.Clear();
 
 		//for (VkSemaphore semaphore : renderFinishedSemaphores)
 		//{
