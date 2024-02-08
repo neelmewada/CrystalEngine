@@ -79,6 +79,9 @@ namespace CE::Vulkan
             Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
             if (scope->queue == nullptr)
 			{
+#if PLATFORM_MAC
+                i = 0; // Temp code to force same queue
+#endif
                 //i = 0; // Temp code to force same queue
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
@@ -295,7 +298,7 @@ namespace CE::Vulkan
 				}
 				else
 				{
-					flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+					flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 				}
 
 				for (int i = 0; i < imageCount; i++)
