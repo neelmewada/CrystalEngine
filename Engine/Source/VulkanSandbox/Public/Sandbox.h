@@ -29,6 +29,11 @@ namespace CE::Sandbox
 		float attenuation;
 	};
 
+	struct alignas(8) SceneConstants
+	{
+		f64 timeElapsed;
+	};
+
 	struct alignas(16) LightData
 	{
 		Vec4 ambientColor{};
@@ -117,8 +122,10 @@ namespace CE::Sandbox
 		DrawPacket* meshDrawPacket = nullptr;
 		DrawPacket* skyboxDrawPacket = nullptr;
 
-		RHI::ShaderResourceGroup* skyboxPerSceneSrg = nullptr;
-		//RHI::ShaderResourceGroup* skyboxPerViewSrg = nullptr;
+		RHI::ShaderResourceGroupLayout perSceneSrgLayout{};
+
+		Vec3 skyboxScale = Vec3(1000, 1000, 1000);
+		float skyboxRotation = 0;
 		RHI::ShaderResourceGroup* skyboxObjectSrg = nullptr;
 		RHI::Buffer* skyboxObjectBuffer = nullptr;
 		RHI::Buffer* skyboxViewBuffer = nullptr;

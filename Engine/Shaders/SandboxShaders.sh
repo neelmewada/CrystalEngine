@@ -20,7 +20,7 @@ else
     exit 1
 fi
 
-DxCompiler="../../ThirdParty/dxcompiler-1.7.2212-rev1-${platform}/dxcompiler/Release/dxc${exe}"
+DxCompiler=${DXC}
 
 CompileShader() {
 
@@ -28,8 +28,8 @@ CompileShader() {
     local VertOut="../Source/VulkanSandbox/Resources/Shaders/"$1".vert.spv"
     local FragOut="../Source/VulkanSandbox/Resources/Shaders/"$1".frag.spv"
 
-    ${DxCompiler} -spirv -E VertMain -T vs_6_0 -Fo ${VertOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
-    ${DxCompiler} -spirv -E FragMain -T ps_6_0 -Fo ${FragOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
+    ${DxCompiler} -spirv -E VertMain -T vs_6_0 -D VERTEX=1 -fspv-preserve-bindings -Fo ${VertOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
+    ${DxCompiler} -spirv -E FragMain -T ps_6_0 -D FRAGMENT=1 -fspv-preserve-bindings -Fo ${FragOut} ${FileName} #-fspv-debug=vulkan-with-source #-fvk-use-dx-layout
 
     echo "Compiled:" ${FileName}
 }

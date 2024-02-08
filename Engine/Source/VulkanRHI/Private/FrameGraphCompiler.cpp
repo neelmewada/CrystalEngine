@@ -79,7 +79,7 @@ namespace CE::Vulkan
             Vulkan::Scope* scope = (Vulkan::Scope*)rhiScope;
             if (scope->queue == nullptr)
 			{
-                i = 0; // Temp code to force same queue
+                //i = 0; // Temp code to force same queue
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
 
@@ -556,6 +556,14 @@ namespace CE::Vulkan
 						transition.layout = imageBarrier.newLayout;
 						transition.queueFamilyIndex = current->queue->GetFamilyIndex();
 
+						if (isDifferentQueue)
+						{
+							barrier.dstStageMask = originalDstStageMask;
+							imageBarrier.dstAccessMask = originalDstAccessMask;
+							barrier.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+							imageBarrier.srcAccessMask = 0;
+						}
+
 						barrier.imageBarriers.Add(imageBarrier);
 						barrier.imageLayoutTransitions.Add(transition);
 						
@@ -563,11 +571,6 @@ namespace CE::Vulkan
 
 						if (isDifferentQueue)
 						{
-							barrier.dstStageMask = originalDstStageMask;
-							imageBarrier.dstAccessMask = originalDstAccessMask;
-							barrier.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-							imageBarrier.srcAccessMask = 0;
-							
 							current->initialBarriers[imageIndex].Add(barrier);
 						}
 					}

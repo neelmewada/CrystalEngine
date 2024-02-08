@@ -10,7 +10,7 @@ struct ObjectData
     float4x4 modelMatrix;
 };
 
-StructuredBuffer<ObjectData> _ObjectData : SRG_PerObject(t);
+StructuredBuffer<ObjectData> _ObjectData : SRG_PerObject(t0);
 
 #define MODEL_MATRIX(input) _ObjectData[input.instanceId].modelMatrix
 #define INSTANCING() uint instanceId : SV_InstanceID;
@@ -22,7 +22,7 @@ struct ObjectData
     float4x4 modelMatrix;
 };
 
-ConstantBuffer<ObjectData> _ObjectData : SRG_PerObject(b);
+ConstantBuffer<ObjectData> _ObjectData : SRG_PerObject(b0);
 
 #define MODEL_MATRIX(input) _ObjectData.modelMatrix
 #define INSTANCING()

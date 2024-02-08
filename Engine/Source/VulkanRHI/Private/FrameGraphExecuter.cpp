@@ -54,7 +54,7 @@ namespace CE::Vulkan
 		}
 		else
 		{
-			//currentImageIndex = currentSubmissionIndex;
+			currentImageIndex = currentSubmissionIndex;
 		}
 
 		bool success = true;
@@ -216,7 +216,7 @@ namespace CE::Vulkan
 				// Execute compiled pipeline barriers
 				if (currentScope->initialBarriers[currentImageIndex].NonEmpty())
 				{
-					for (const auto& barrier : currentScope->barriers[currentImageIndex])
+					for (const auto& barrier : currentScope->initialBarriers[currentImageIndex])
 					{
 						vkCmdPipelineBarrier(cmdBuffer,
 							barrier.srcStageMask, barrier.dstStageMask,

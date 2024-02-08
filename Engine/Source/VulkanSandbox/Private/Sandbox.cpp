@@ -32,11 +32,12 @@ namespace CE::Sandbox
 	constexpr u32 directionalLightArrayBinding = 0;
 	constexpr u32 pointLightsBinding = 1;
 	constexpr u32 lightDataBinding = 2;
-	constexpr u32 perViewDataBinding = 5;
-	constexpr u32 perObjectDataBinding = 7;
-	constexpr u32 materialDataBinding = 8;
-    constexpr u32 skyboxBinding = 3;
-    constexpr u32 defaultSamplerBinding = 4;
+	constexpr u32 sceneDataBinding = 3;
+	constexpr u32 skyboxBinding = 4;
+	constexpr u32 defaultSamplerBinding = 5;
+	constexpr u32 perViewDataBinding = 0;
+	constexpr u32 perObjectDataBinding = 0;
+	constexpr u32 materialDataBinding = 0;
 
 	static int counter = 0;
 	static RHI::RHISystem rhiSystem{};
@@ -135,9 +136,10 @@ namespace CE::Sandbox
 		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition);
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
 
-		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(farPlane, farPlane, farPlane));
+		
+		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
-		skyboxObjectBuffer->UploadData(&skyboxObjectBuffer, sizeof(skyboxModelMatrix));
+		skyboxObjectBuffer->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
 
 		RHI::BufferData data{};
 		data.startOffsetInBuffer = 0;
@@ -192,7 +194,7 @@ namespace CE::Sandbox
 		cubeMapDesc.height = back.GetHeight();
 		cubeMapDesc.depth = 1;
 		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
-        cubeMapDesc.format = RHI::Format::R8G8B8A8_SRGB; //RHI::Format::BC7_SRGB
+        cubeMapDesc.format = RHI::Format::R8G8B8A8_UNORM; //RHI::Format::BC7_SRGB
 
 		const u32 height = cubeMapDesc.height;
 		const u32 width = cubeMapDesc.width;
@@ -287,6 +289,57 @@ namespace CE::Sandbox
 		cubeModel = RPI::ModelLod::CreateCubeModel();
 		sphereModel = RPI::ModelLod::CreateSphereModel();
 
+		// Main SRG Layouts
+		{
+			perSceneSrgLayout.variables.Clear();
+			perSceneSrgLayout.srgType = RHI::SRGType::PerScene;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_DirectionalLightsArray";
+			perSceneSrgLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_PointLights";
+			perSceneSrgLayout.variables.Top().bindingSlot = pointLightsBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::StructuredBuffer;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_LightData";
+			perSceneSrgLayout.variables.Top().bindingSlot = lightDataBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_Skybox";
+			perSceneSrgLayout.variables.Top().bindingSlot = skyboxBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_DefaultSampler";
+			perSceneSrgLayout.variables.Top().bindingSlot = defaultSamplerBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_SceneData";
+			perSceneSrgLayout.variables.Top().bindingSlot = sceneDataBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
+
+			perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
+		}
+
+
 		// Mesh SRG
 		{
 			RHI::ShaderResourceGroupLayout meshSrgLayout{};
@@ -296,7 +349,7 @@ namespace CE::Sandbox
 			variable.name = "_ObjectData";
 			variable.bindingSlot = perObjectDataBinding;
 			variable.arrayCount = 1;
-			variable.shaderStages = RHI::ShaderStage::Vertex;
+			variable.shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 			variable.type = RHI::ShaderResourceType::ConstantBuffer;
 
 			meshSrgLayout.variables.Add(variable);
@@ -335,7 +388,7 @@ namespace CE::Sandbox
 			perViewDataDesc.arrayCount = 1;
 			perViewDataDesc.name = "_PerViewData";
 			perViewDataDesc.type = RHI::ShaderResourceType::ConstantBuffer;
-			perViewDataDesc.shaderStages = RHI::ShaderStage::Vertex;
+			perViewDataDesc.shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 
 			perViewSrgLayout.variables.Add(perViewDataDesc);
 
@@ -419,7 +472,7 @@ namespace CE::Sandbox
 			perViewSRGLayout.variables[0].name = "_PerViewData";
 			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
 			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 			srgLayouts.Add(perViewSRGLayout);
 			
 			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
@@ -429,8 +482,10 @@ namespace CE::Sandbox
 			perObjectSRGLayout.variables[0].name = "_ObjectData";
 			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
 			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 			srgLayouts.Add(perObjectSRGLayout);
+
+			srgLayouts.Add(perSceneSrgLayout);
 
 			depthPipelineDesc.name = "Depth Pipeline";
 
@@ -482,7 +537,7 @@ namespace CE::Sandbox
 			skyboxPipelineDesc.shaderStages.Top().shaderModule = skyboxShaderFrag;
 
 			skyboxPipelineDesc.rasterState = {};
-			skyboxPipelineDesc.rasterState.cullMode = RHI::CullMode::Front;
+			skyboxPipelineDesc.rasterState.cullMode = RHI::CullMode::None;
 
 			skyboxPipelineDesc.vertexInputSlots.Add({});
 			skyboxPipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
@@ -507,7 +562,6 @@ namespace CE::Sandbox
 			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
 			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 			srgLayouts.Add(perViewSRGLayout);
-			
 
 			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
 			perObjectSRGLayout.srgType = RHI::SRGType::PerObject;
@@ -516,27 +570,10 @@ namespace CE::Sandbox
 			perObjectSRGLayout.variables[0].name = "_ObjectData";
 			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
 			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 			srgLayouts.Add(perObjectSRGLayout);
 
-			RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
-			perSceneSRGLayout.srgType = RHI::SRGType::PerScene;
-
-			perSceneSRGLayout.variables.Add({});
-			perSceneSRGLayout.variables.Top().arrayCount = 1;
-			perSceneSRGLayout.variables.Top().name = "_Skybox";
-			perSceneSRGLayout.variables.Top().bindingSlot = skyboxBinding;
-			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
-			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			perSceneSRGLayout.variables.Add({});
-			perSceneSRGLayout.variables.Top().arrayCount = 1;
-			perSceneSRGLayout.variables.Top().name = "_DefaultSampler";
-			perSceneSRGLayout.variables.Top().bindingSlot = defaultSamplerBinding;
-			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
-			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			srgLayouts.Add(perSceneSRGLayout);
+			srgLayouts.Add(perSceneSrgLayout);
 
 			skyboxPipelineDesc.name = "Skybox Pipeline";
 
@@ -547,12 +584,10 @@ namespace CE::Sandbox
 
 			skyboxMaterial = new RPI::Material(skyboxShader);
 
-			skyboxPerSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSRGLayout);
+			perSceneSrg->Bind("_Skybox", skyboxCubeMap);
+			perSceneSrg->Bind("_DefaultSampler", defaultSampler);
 
-			skyboxPerSceneSrg->Bind("_Skybox", skyboxCubeMap);
-			skyboxPerSceneSrg->Bind("_DefaultSampler", defaultSampler);
-
-			skyboxPerSceneSrg->FlushBindings();
+			perSceneSrg->FlushBindings();
 
 			RHI::BufferDescriptor desc{};
 			desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -562,9 +597,10 @@ namespace CE::Sandbox
 
 			skyboxObjectBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
 
-			skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1000, 1000, 1000));
+			skyboxScale = Vec3(500, 500, 500);
+			skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
-			skyboxObjectBuffer->UploadData(&skyboxObjectBuffer, sizeof(skyboxModelMatrix));
+			skyboxObjectBuffer->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
 
 			skyboxObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
 			skyboxObjectSrg->Bind("_ObjectData", skyboxObjectBuffer);
@@ -667,34 +703,10 @@ namespace CE::Sandbox
 			perObjectSRGLayout.variables[0].name = "_ObjectData";
 			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
 			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex;
+			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 			srgLayouts.Add(perObjectSRGLayout);
 
-			RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
-			perSceneSRGLayout.srgType = RHI::SRGType::PerScene;
-
-			perSceneSRGLayout.variables.Add({});
-			perSceneSRGLayout.variables.Top().arrayCount = 1;
-			perSceneSRGLayout.variables.Top().name = "_DirectionalLightsArray";
-			perSceneSRGLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
-			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
-			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			perSceneSRGLayout.variables.Add({});
-			perSceneSRGLayout.variables.Top().arrayCount = 1;
-			perSceneSRGLayout.variables.Top().name = "_PointLights";
-			perSceneSRGLayout.variables.Top().bindingSlot = pointLightsBinding;
-			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::StructuredBuffer;
-			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			perSceneSRGLayout.variables.Add({});
-			perSceneSRGLayout.variables.Top().arrayCount = 1;
-			perSceneSRGLayout.variables.Top().name = "_LightData";
-			perSceneSRGLayout.variables.Top().bindingSlot = lightDataBinding;
-			perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
-			perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			srgLayouts.Add(perSceneSRGLayout);
+			srgLayouts.Add(perSceneSrgLayout);
 
 			RHI::ShaderResourceGroupLayout perMaterialSRGLayout{};
 			perMaterialSRGLayout.srgType = RHI::SRGType::PerMaterial;
@@ -810,32 +822,6 @@ namespace CE::Sandbox
 			lightDataBuffer->UploadData(&lightData, bufferDesc.bufferSize);
 		}
 
-		RHI::ShaderResourceGroupLayout perSceneSRGLayout{};
-		perSceneSRGLayout.srgType = RHI::SRGType::PerScene;
-
-		perSceneSRGLayout.variables.Add({});
-		perSceneSRGLayout.variables.Top().arrayCount = 1;
-		perSceneSRGLayout.variables.Top().name = "_DirectionalLightsArray";
-		perSceneSRGLayout.variables.Top().bindingSlot = directionalLightArrayBinding;
-		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
-		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-		perSceneSRGLayout.variables.Add({});
-		perSceneSRGLayout.variables.Top().arrayCount = 1;
-		perSceneSRGLayout.variables.Top().name = "_PointLights";
-		perSceneSRGLayout.variables.Top().bindingSlot = pointLightsBinding;
-		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::StructuredBuffer;
-		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-		perSceneSRGLayout.variables.Add({});
-		perSceneSRGLayout.variables.Top().arrayCount = 1;
-		perSceneSRGLayout.variables.Top().name = "_LightData";
-		perSceneSRGLayout.variables.Top().bindingSlot = lightDataBinding;
-		perSceneSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
-		perSceneSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-		perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSRGLayout);
-
 		perSceneSrg->Bind("_DirectionalLightsArray", directionalLightsBuffer);
 		perSceneSrg->Bind("_PointLights", pointLightsBuffer);
 		perSceneSrg->Bind("_LightData", lightDataBuffer);
@@ -903,7 +889,7 @@ namespace CE::Sandbox
 
 		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
 
-		builder.AddShaderResourceGroup(skyboxPerSceneSrg);
+		builder.AddShaderResourceGroup(perSceneSrg);
 		builder.AddShaderResourceGroup(skyboxObjectSrg);
 
 		RPI::Mesh* mesh = cubeModel->GetMesh(0);
@@ -911,9 +897,14 @@ namespace CE::Sandbox
 		// Skybox Item
 		{
 			RHI::DrawPacketBuilder::DrawItemRequest request{};
-			const auto& vertInfo = mesh->vertexBufferInfos[0];
-			auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-			request.vertexBufferViews.Add(vertBufferView);
+			for (const auto& vertInfo : mesh->vertexBufferInfos)
+			{
+				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position)
+					continue;
+
+				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+				request.vertexBufferViews.Add(vertBufferView);
+			}
 			request.indexBufferView = mesh->indexBufferView;
 
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
@@ -944,8 +935,6 @@ namespace CE::Sandbox
 	{
 		scheduler->WaitUntilIdle();
 
-		delete perSceneSrg; perSceneSrg = nullptr;
-
 		delete pointLightsBuffer; pointLightsBuffer = nullptr;
 		delete directionalLightsBuffer; directionalLightsBuffer = nullptr;
 		delete lightDataBuffer; lightDataBuffer = nullptr;
@@ -970,7 +959,7 @@ namespace CE::Sandbox
 		delete skyboxShader; skyboxShader = nullptr;
 		delete skyboxMaterial; skyboxMaterial = nullptr;
 		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
-		delete skyboxPerSceneSrg; skyboxPerSceneSrg = nullptr;
+		delete perSceneSrg; perSceneSrg = nullptr;
 
         delete opaqueShader; opaqueShader = nullptr;
 		delete opaqueMaterial; opaqueMaterial = nullptr;
@@ -1002,9 +991,8 @@ namespace CE::Sandbox
 
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
-
-			//scheduler->BeginScopeGroup("MainPass");
-			scheduler->BeginScope("Skybox");
+			
+			scheduler->BeginScope("ClearPass"); // Very important for synchronization
 			{
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
@@ -1012,10 +1000,29 @@ namespace CE::Sandbox
 				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
-				//scheduler->UseShaderResourceGroup(skyboxPerSceneSrg);
-				//scheduler->UseShaderResourceGroup(perViewSrg);
+
+				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
+				depthAttachment.attachmentId = "DepthStencil";
+				depthAttachment.loadStoreAction.clearValueDepth = 1.0f;
+				depthAttachment.loadStoreAction.clearValueStencil = 0;
+				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+			}
+			scheduler->EndScope();
+			
+			scheduler->BeginScope("Skybox");
+			{
+				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				swapChainAttachment.attachmentId = "SwapChain";
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(perViewSrg);
 				
-				//scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
+				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
 			}
 			scheduler->EndScope();
 			
@@ -1023,11 +1030,8 @@ namespace CE::Sandbox
 			{
 				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
 				depthAttachment.attachmentId = "DepthStencil";
-				depthAttachment.loadStoreAction.clearValueDepth = 1.0f;
-				depthAttachment.loadStoreAction.clearValueStencil = 0;
-				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
 				
 				scheduler->UseShaderResourceGroup(depthPerViewSrg);
@@ -1048,8 +1052,6 @@ namespace CE::Sandbox
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
 				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-				//swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
-				//swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
@@ -1063,7 +1065,6 @@ namespace CE::Sandbox
 				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();
-			//scheduler->EndScopeGroup();
 
 			/*scheduler->BeginScope("Transparent");
 			{
@@ -1120,6 +1121,7 @@ namespace CE::Sandbox
 		
 		// Add items
 		drawList.AddDrawPacket(meshDrawPacket);
+		drawList.AddDrawPacket(skyboxDrawPacket);
 
 		// Finalize
 		drawList.Finalize();

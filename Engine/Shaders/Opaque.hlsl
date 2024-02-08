@@ -20,13 +20,7 @@ struct PSInput
     float3 normal : TEXCOORD1;
 };
 
-cbuffer _MaterialData : SRG_PerMaterial(b)
-{
-    float4 _Albedo;
-    float _SpecularStrength;
-    uint _Shininess;
-};
-
+#if VERTEX
 PSInput VertMain(VSInput input)
 {
     PSInput output;
@@ -35,6 +29,16 @@ PSInput VertMain(VSInput input)
     output.normal = LOCAL_TO_WORLD_SPACE(float4(input.normal, 0), input).xyz;
     return output;
 }
+#endif
+
+#if FRAGMENT
+
+cbuffer _MaterialData : SRG_PerMaterial(b0)
+{
+    float4 _Albedo;
+    float _SpecularStrength;
+    uint _Shininess;
+};
 
 // pixel shader function
 float4 FragMain(PSInput input) : SV_TARGET
@@ -69,3 +73,4 @@ float4 FragMain(PSInput input) : SV_TARGET
 
     return float4((ambient.rgb + diffuse + specular) * _Albedo.rgb, 1.0);
 }
+#endif

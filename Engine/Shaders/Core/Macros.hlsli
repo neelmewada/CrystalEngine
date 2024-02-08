@@ -71,7 +71,8 @@
 #define __CONCATENATE1(arg1, arg2)  __CONCATENATE2(arg1, arg2)
 #define __CONCATENATE2(arg1, arg2)  arg1 ## arg2
 
-#define SRG(type, frequencyId) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, frequencyId)))
+//#define SRG(type, frequencyId) register(EXPAND(CONCATENATE(type, __COUNTER__)), EXPAND(CONCATENATE(space, frequencyId)))
+#define SRG(type, frequencyId) register(type, EXPAND(CONCATENATE(space, frequencyId)))
 
 #define SRG_PerScene(type) SRG(type, PerScene_Frequency)
 #define SRG_PerView(type) SRG(type, PerView_Frequency)
