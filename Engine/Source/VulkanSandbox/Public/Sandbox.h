@@ -29,9 +29,9 @@ namespace CE::Sandbox
 		float attenuation;
 	};
 
-	struct alignas(8) SceneConstants
+	struct SceneConstants
 	{
-		f64 timeElapsed;
+		f32 timeElapsed;
 	};
 
 	struct alignas(16) LightData
@@ -123,6 +123,8 @@ namespace CE::Sandbox
 		DrawPacket* skyboxDrawPacket = nullptr;
 
 		RHI::ShaderResourceGroupLayout perSceneSrgLayout{};
+		SceneConstants sceneConstants{};
+		RHI::Buffer* sceneConstantBuffer = nullptr;
 
 		Vec3 skyboxScale = Vec3(1000, 1000, 1000);
 		float skyboxRotation = 0;

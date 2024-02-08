@@ -76,6 +76,10 @@ namespace CE::Sandbox
 		if (destroyed)
 			return;
 
+		sceneConstants.timeElapsed += deltaTime;
+
+		sceneConstantBuffer->UploadData(&sceneConstants, sizeof(sceneConstants));
+
 		u32 curWidth = 0, curHeight = 0;
 		mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
 
@@ -111,6 +115,10 @@ namespace CE::Sandbox
 
 		UpdatePerViewData();
 
+		cameraRotation += deltaTime * 5;
+		if (cameraRotation >= 360)
+			cameraRotation -= 360;
+
 		meshRotation += deltaTime * 15.0f;
 		if (meshRotation >= 360)
 			meshRotation -= 360;
@@ -133,9 +141,8 @@ namespace CE::Sandbox
 
 		perViewData.viewPosition = Vec3(0, 0, -10);
 		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, farPlane);
-		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition);
+		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition) * Quat::EulerDegrees(Vec3(0, cameraRotation, 0)).ToMatrix();
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
-
 		
 		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
@@ -194,7 +201,7 @@ namespace CE::Sandbox
 		cubeMapDesc.height = back.GetHeight();
 		cubeMapDesc.depth = 1;
 		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
-        cubeMapDesc.format = RHI::Format::R8G8B8A8_UNORM; //RHI::Format::BC7_SRGB
+        cubeMapDesc.format = RHI::Format::R8G8B8A8_UNORM;
 
 		const u32 height = cubeMapDesc.height;
 		const u32 width = cubeMapDesc.width;
@@ -229,7 +236,7 @@ namespace CE::Sandbox
 				for (int face = 0; face < 6; face++)
 				{
 					u8* dstData = (u8*)dataPtr + height * width * 4 * face;
-					u8* srcData = right.GetDataPtr();
+					u8* srcData = layers[face]->GetDataPtr();
 					for (int y = 0; y < height; y++)
 					{
 						for (int x = 0; x < width; x++)
@@ -337,8 +344,20 @@ namespace CE::Sandbox
 			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 
 			perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
-		}
 
+			RHI::BufferDescriptor sceneConstantBufferDesc{};
+			sceneConstantBufferDesc.name = "Scene Constants";
+			sceneConstantBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			sceneConstantBufferDesc.bufferSize = sizeof(sceneConstants);
+			sceneConstantBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			
+			sceneConstantBuffer = RHI::gDynamicRHI->CreateBuffer(sceneConstantBufferDesc);
+
+			sceneConstantBuffer->UploadData(&sceneConstants, sizeof(sceneConstants));
+
+			perSceneSrg->Bind("_SceneData", sceneConstantBuffer);
+			perSceneSrg->FlushBindings();
+		}
 
 		// Mesh SRG
 		{
@@ -942,6 +961,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyPipelines()
 	{
+		delete sceneConstantBuffer; sceneConstantBuffer = nullptr;
 		delete cubeModel; cubeModel = nullptr;
 		delete sphereModel; sphereModel = nullptr;
 
