@@ -69,6 +69,7 @@ namespace CE::Sandbox
 
 		// DrawPackets
 		void BuildCubeMeshDrawPacket();
+		void BuildSphereMeshDrawPacket();
 		void BuildSkyboxDrawPacket();
 
 		void DestroyLights();
@@ -119,7 +120,8 @@ namespace CE::Sandbox
 		RPI::ModelLod* sphereModel = nullptr;
 		RHI::DrawListContext drawList{};
 
-		DrawPacket* meshDrawPacket = nullptr;
+		DrawPacket* sphereDrawPacket = nullptr;
+		DrawPacket* cubeDrawPacket = nullptr;
 		DrawPacket* skyboxDrawPacket = nullptr;
 
 		RHI::ShaderResourceGroupLayout perSceneSrgLayout{};
@@ -135,10 +137,14 @@ namespace CE::Sandbox
 		PerViewData skyboxViewData{};
 
 		RHI::ShaderResourceGroup* sphereObjectSrg = nullptr;
-		RHI::Buffer* cubeObjectBuffer = nullptr;
-		Matrix4x4 meshModelMatrix{};
+		RHI::Buffer* sphereObjectBuffer = nullptr;
+		Matrix4x4 sphereModelMatrix{};
 		f32 cameraRotation = 0.0f;
 		f32 meshRotation = 0;
+		
+		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
+		RHI::Buffer* cubeObjectBuffer = nullptr;
+		Matrix4x4 cubeModelMatrix{};
 
 		RHI::ShaderResourceGroup* perSceneSrg = nullptr;
 		RHI::Buffer* directionalLightsBuffer = nullptr;

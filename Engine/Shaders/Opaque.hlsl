@@ -70,7 +70,7 @@ float4 FragMain(PSInput input) : SV_TARGET
         float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Shininess);
         specular += _SpecularStrength * spec * lightColor.rgb;
     }
-
+    
     return float4((ambient.rgb + diffuse + specular) * _Albedo.rgb, 1.0);
 }
 #endif

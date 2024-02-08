@@ -123,14 +123,14 @@ namespace CE::Sandbox
 		if (meshRotation >= 360)
 			meshRotation -= 360;
 
-		meshModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+		sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
 		RHI::BufferData uploadData{};
-		uploadData.dataSize = sizeof(meshModelMatrix);
-		uploadData.data = &meshModelMatrix;
+		uploadData.dataSize = sizeof(sphereModelMatrix);
+		uploadData.data = &sphereModelMatrix;
 		uploadData.startOffsetInBuffer = 0;
 
-		cubeObjectBuffer->UploadData(uploadData);
+		sphereObjectBuffer->UploadData(uploadData);
 
 		scheduler->Execute();
 	}
@@ -296,6 +296,38 @@ namespace CE::Sandbox
 		cubeModel = RPI::ModelLod::CreateCubeModel();
 		sphereModel = RPI::ModelLod::CreateSphereModel();
 
+		RHI::ShaderResourceGroupLayout meshSrgLayout{};
+		meshSrgLayout.srgType = RHI::SRGType::PerObject;
+
+		RHI::SRGVariableDescriptor variable{};
+		variable.name = "_ObjectData";
+		variable.bindingSlot = perObjectDataBinding;
+		variable.arrayCount = 1;
+		variable.shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
+		variable.type = RHI::ShaderResourceType::ConstantBuffer;
+
+		meshSrgLayout.variables.Add(variable);
+
+		{
+			cubeObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
+
+			cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -25, 0)) * Quat::EulerDegrees(Vec3()).ToMatrix() * Matrix4x4::Scale(Vec3(10, 10, 10));
+			
+			RHI::BufferDescriptor cubeObjectBufferDesc{};
+			cubeObjectBufferDesc.name = "Cube Object Matrix";
+			cubeObjectBufferDesc.bufferSize = sizeof(cubeModelMatrix);
+			cubeObjectBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			cubeObjectBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+
+			cubeObjectBuffer = RHI::gDynamicRHI->CreateBuffer(cubeObjectBufferDesc);
+
+			cubeObjectBuffer->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix));
+
+			cubeObjectSrg->Bind("_ObjectData", RHI::BufferView(cubeObjectBuffer));
+
+			cubeObjectSrg->FlushBindings();
+		}
+
 		// Main SRG Layouts
 		{
 			perSceneSrgLayout.variables.Clear();
@@ -361,18 +393,6 @@ namespace CE::Sandbox
 
 		// Mesh SRG
 		{
-			RHI::ShaderResourceGroupLayout meshSrgLayout{};
-			meshSrgLayout.srgType = RHI::SRGType::PerObject;
-
-			RHI::SRGVariableDescriptor variable{};
-			variable.name = "_ObjectData";
-			variable.bindingSlot = perObjectDataBinding;
-			variable.arrayCount = 1;
-			variable.shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-			variable.type = RHI::ShaderResourceType::ConstantBuffer;
-
-			meshSrgLayout.variables.Add(variable);
-
 			sphereObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
 
 			RHI::BufferDescriptor desc{};
@@ -381,18 +401,18 @@ namespace CE::Sandbox
 			desc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			desc.name = "_ObjectData";
 
-			cubeObjectBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
+			sphereObjectBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
 
-			meshModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+			sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
 			RHI::BufferData uploadData{};
 			uploadData.dataSize = desc.bufferSize;
-			uploadData.data = &meshModelMatrix;
+			uploadData.data = &sphereModelMatrix;
 			uploadData.startOffsetInBuffer = 0;
 
-			cubeObjectBuffer->UploadData(uploadData);
+			sphereObjectBuffer->UploadData(uploadData);
 
-			sphereObjectSrg->Bind("_ObjectData", RHI::BufferView(cubeObjectBuffer));
+			sphereObjectSrg->Bind("_ObjectData", RHI::BufferView(sphereObjectBuffer));
 
 			sphereObjectSrg->FlushBindings();
 		}
@@ -783,24 +803,37 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitLights()
 	{
+		directionalLights.Clear();
+
 		DirectionalLight mainLight{};
 		mainLight.direction = Vec3(-0.5f, -0.25f, 1);
 		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.7f);
 		mainLight.colorAndIntensity.w = 1.0f; // intensity
 		mainLight.temperature = 100;
 
-		directionalLights.Clear();
 		directionalLights.Add(mainLight);
 
-		PointLight pointLight{};
-		pointLight.position = Vec4(0, 0, 0);
-		pointLight.colorAndIntensity = Vec3(1.0f, 0.5f, 0);
-		pointLight.colorAndIntensity.w = 1.0f; // Intensity
-		pointLight.radius = 35.0f;
-
 		pointLights.Clear();
-		pointLights.Add(pointLight);
-		
+
+		{
+			PointLight pointLight{};
+			pointLight.position = Vec4(0, 0, 0);
+			pointLight.colorAndIntensity = Vec3(1.0f, 0.5f, 0);
+			pointLight.colorAndIntensity.w = 1.0f; // Intensity
+			pointLight.radius = 35.0f;
+
+			pointLights.Add(pointLight);
+		}
+		{
+			PointLight pointLight{};
+			pointLight.position = Vec4(15, 0, 0);
+			pointLight.colorAndIntensity = Vec3(1.0f, 0.5f, 0);
+			pointLight.colorAndIntensity.w = 1.0f; // Intensity
+			pointLight.radius = 35.0f;
+
+			//pointLights.Add(pointLight);
+		}
+
 		lightData.totalDirectionalLights = 0;// directionalLights.GetSize();
 		lightData.ambientColor = Color(0, 0.1f, 0.5f, 1).ToVec4();
 		lightData.totalPointLights = pointLights.GetSize();
@@ -820,7 +853,7 @@ namespace CE::Sandbox
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-            bufferDesc.bufferSize = directionalLights.GetCapacity() * sizeof(DirectionalLight);
+			bufferDesc.bufferSize = directionalLights.GetCapacity() * sizeof(DirectionalLight);
 			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDesc.name = "Directional Lights Buffer";
 
@@ -849,6 +882,55 @@ namespace CE::Sandbox
 	}
 
 	void VulkanSandbox::BuildCubeMeshDrawPacket()
+	{
+		RHI::DrawPacketBuilder builder{};
+
+		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
+
+		builder.AddShaderResourceGroup(cubeObjectSrg);
+
+		RPI::Mesh* mesh = cubeModel->GetMesh(0);
+
+		// Depth Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthPipeline;
+
+			builder.AddDrawItem(request);
+		}
+
+		// Opaque Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			for (const auto& vertInfo : mesh->vertexBufferInfos)
+			{
+				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position &&
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal)
+					continue;
+
+				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+				request.vertexBufferViews.Add(vertBufferView);
+			}
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = opaqueMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
+
+		cubeDrawPacket = builder.Build();
+	}
+
+	void VulkanSandbox::BuildSphereMeshDrawPacket()
 	{
 		RHI::DrawPacketBuilder builder{};
 
@@ -899,7 +981,7 @@ namespace CE::Sandbox
 
 		}
 
-		meshDrawPacket = builder.Build();
+		sphereDrawPacket = builder.Build();
 	}
 
 	void VulkanSandbox::BuildSkyboxDrawPacket()
@@ -939,6 +1021,7 @@ namespace CE::Sandbox
 	void VulkanSandbox::InitDrawPackets()
 	{
 		BuildCubeMeshDrawPacket();
+		BuildSphereMeshDrawPacket();
 		BuildSkyboxDrawPacket();
 	}
 
@@ -946,7 +1029,8 @@ namespace CE::Sandbox
 	{
 		scheduler->WaitUntilIdle();
 		
-		delete meshDrawPacket; meshDrawPacket = nullptr;
+		delete cubeDrawPacket; cubeDrawPacket = nullptr;
+		delete sphereDrawPacket; sphereDrawPacket = nullptr;
 		delete skyboxDrawPacket; skyboxDrawPacket = nullptr;
 	}
 
@@ -966,6 +1050,8 @@ namespace CE::Sandbox
 		delete sphereModel; sphereModel = nullptr;
 
 		delete cubeObjectBuffer; cubeObjectBuffer = nullptr;
+		delete cubeObjectSrg; cubeObjectSrg = nullptr;
+		delete sphereObjectBuffer; sphereObjectBuffer = nullptr;
 		delete sphereObjectSrg; sphereObjectSrg = nullptr;
 
 		delete depthPerViewSrg; depthPerViewSrg = nullptr;
@@ -1142,7 +1228,8 @@ namespace CE::Sandbox
 		drawList.Init(drawListMask);
 		
 		// Add items
-		drawList.AddDrawPacket(meshDrawPacket);
+		drawList.AddDrawPacket(sphereDrawPacket);
+		drawList.AddDrawPacket(cubeDrawPacket);
 		drawList.AddDrawPacket(skyboxDrawPacket);
 
 		// Finalize
