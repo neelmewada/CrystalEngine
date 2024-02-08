@@ -104,6 +104,13 @@ namespace CE::Vulkan
 			for (auto consumerRhiScope : consumers)
 			{
 				Vulkan::Scope* consumerScope = (Vulkan::Scope*)consumerRhiScope;
+				while (consumerScope->prevSubPass != nullptr)
+				{
+					consumerScope = (Vulkan::Scope*)consumerScope->prevSubPass;
+				}
+
+				if (signalSemaphoresByConsumerScope[i].KeyExists(consumerScope->id))
+					continue;
 
 				VkSemaphore signalSemaphore = nullptr;
 				vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &signalSemaphore);

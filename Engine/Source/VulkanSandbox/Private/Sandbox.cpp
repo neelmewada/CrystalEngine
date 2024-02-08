@@ -141,7 +141,7 @@ namespace CE::Sandbox
 
 		perViewData.viewPosition = Vec3(0, 0, -10);
 		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, farPlane);
-		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition) * Quat::EulerDegrees(Vec3(0, cameraRotation, 0)).ToMatrix();
+		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix();
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
 		
 		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
@@ -1012,7 +1012,7 @@ namespace CE::Sandbox
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 			
-			scheduler->BeginScope("ClearPass"); // Very important for synchronization
+			scheduler->BeginScope("ClearPass"); // Important for synchronization
 			{
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
@@ -1031,6 +1031,7 @@ namespace CE::Sandbox
 			}
 			scheduler->EndScope();
 			
+			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Skybox");
 			{
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
@@ -1085,6 +1086,7 @@ namespace CE::Sandbox
 				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();
+			//scheduler->EndScopeGroup();
 
 			/*scheduler->BeginScope("Transparent");
 			{
