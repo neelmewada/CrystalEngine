@@ -391,6 +391,7 @@ namespace CE::Vulkan
 		// Custom allocation
 		VkMemoryRequirements memRequirements{};
 		vkGetImageMemoryRequirements(device->GetHandle(), image, &memRequirements);
+		byteSize = memRequirements.size;
 
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -493,6 +494,10 @@ namespace CE::Vulkan
 
 		this->heapType = memoryDesc.memoryHeap->GetHeapType();
 		Init(desc);
+
+		VkMemoryRequirements memRequirements{};
+		vkGetImageMemoryRequirements(device->GetHandle(), image, &memRequirements);
+		byteSize = memRequirements.size;
 
 		Vulkan::MemoryHeap* heap = (Vulkan::MemoryHeap*)memoryDesc.memoryHeap;
 

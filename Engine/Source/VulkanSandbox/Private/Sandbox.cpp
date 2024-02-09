@@ -1,5 +1,7 @@
 #include "VulkanSandbox.h"
 
+#include <algorithm>
+
 #ifndef __INTELLISENSE__
 #include "skybox/back.jpg.h"
 #include "skybox/bottom.jpg.h"
@@ -63,6 +65,7 @@ namespace CE::Sandbox
 		mainWindow->AddListener(this);
 		
 		InitCubeMaps();
+		InitTextures();
 		InitPipelines();
 		InitLights();
 		InitDrawPackets();
@@ -160,6 +163,7 @@ namespace CE::Sandbox
 	{
 		DestroyLights();
 		DestroyDrawPackets();
+		DestroyTextures();
 		DestroyCubeMaps();
 
 		if (mainWindow)
@@ -290,6 +294,12 @@ namespace CE::Sandbox
         defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 	}
 
+	void VulkanSandbox::InitTextures()
+	{
+		woodFloorTextures = MaterialTextureGroup::Load("WoodFloor");
+		plasticTextures = MaterialTextureGroup::Load("Plastic");
+	}
+
 	void VulkanSandbox::InitPipelines()
 	{
 		// Load Cube mesh at first
@@ -311,7 +321,7 @@ namespace CE::Sandbox
 		{
 			cubeObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
 
-			cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -25, 0)) * Quat::EulerDegrees(Vec3()).ToMatrix() * Matrix4x4::Scale(Vec3(10, 10, 10));
+			cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -0.75f, 15)) * Quat::EulerDegrees(Vec3()).ToMatrix() * Matrix4x4::Scale(Vec3(5, 0.2f, 5));
 			
 			RHI::BufferDescriptor cubeObjectBufferDesc{};
 			cubeObjectBufferDesc.name = "Cube Object Matrix";
@@ -698,7 +708,7 @@ namespace CE::Sandbox
 			opaquePipelineDesc.shaderStages[1].shaderModule = opaqueShaderFrag;
 
 			opaquePipelineDesc.rasterState = {};
-			opaquePipelineDesc.rasterState.cullMode = RHI::CullMode::Back;
+			opaquePipelineDesc.rasterState.cullMode = RHI::CullMode::None;
 
 			opaquePipelineDesc.vertexInputSlots.Add({});
 			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
@@ -709,6 +719,16 @@ namespace CE::Sandbox
 			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
 			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 1;
 			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3); // float3 Normal;
+
+			opaquePipelineDesc.vertexInputSlots.Add({});
+			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
+			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 2;
+			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec4); // float4 Tangent;
+
+			opaquePipelineDesc.vertexInputSlots.Add({});
+			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
+			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 3;
+			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec2); // float2 UV;
 
 			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = opaquePipelineDesc.vertexAttributes;
 
@@ -723,6 +743,18 @@ namespace CE::Sandbox
 			vertexAttribs[1].inputSlot = 1;
 			vertexAttribs[1].location = 1;
 			vertexAttribs[1].offset = 0;
+
+			vertexAttribs.Add({});
+			vertexAttribs[2].dataType = RHI::VertexAttributeDataType::Float4; // Tangent
+			vertexAttribs[2].inputSlot = 2;
+			vertexAttribs[2].location = 2;
+			vertexAttribs[2].offset = 0;
+
+			vertexAttribs.Add({});
+			vertexAttribs[3].dataType = RHI::VertexAttributeDataType::Float2; // UV
+			vertexAttribs[3].inputSlot = 3;
+			vertexAttribs[3].location = 3;
+			vertexAttribs[3].offset = 0;
 
 			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = opaquePipelineDesc.srgLayouts;
 			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
@@ -767,6 +799,16 @@ namespace CE::Sandbox
 				specularMember.name = "_SpecularStrength";
 				perMaterialSRGLayout.variables.Top().structMembers.Add(specularMember);
 
+				RHI::ShaderStructMember metallicMember{};
+				metallicMember.dataType = RHI::ShaderStructMemberType::Float;
+				metallicMember.name = "_Metallic";
+				perMaterialSRGLayout.variables.Top().structMembers.Add(metallicMember);
+
+				RHI::ShaderStructMember roughnessMember{};
+				roughnessMember.dataType = RHI::ShaderStructMemberType::Float;
+				roughnessMember.name = "_Roughness";
+				perMaterialSRGLayout.variables.Top().structMembers.Add(roughnessMember);
+
 				RHI::ShaderStructMember shininessMember{};
 				shininessMember.dataType = RHI::ShaderStructMemberType::UInt;
 				shininessMember.name = "_Shininess";
@@ -782,12 +824,23 @@ namespace CE::Sandbox
             variantDesc.pipelineDesc = opaquePipelineDesc;
             opaqueShader->AddVariant(variantDesc);
 
-			opaqueMaterial = new RPI::Material(opaqueShader);
+			sphereMaterial = new RPI::Material(opaqueShader);
 			
-            opaqueMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
-			opaqueMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
-			opaqueMaterial->SetPropertyValue("_Shininess", (u32)64);
-            opaqueMaterial->FlushProperties();
+            sphereMaterial->SetPropertyValue("_Albedo", Color(1.0f, 0, 0, 1.0f));
+			sphereMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
+			sphereMaterial->SetPropertyValue("_Shininess", (u32)64);
+			sphereMaterial->SetPropertyValue("_Metallic", 0.05f);
+			sphereMaterial->SetPropertyValue("_Roughness", 0.6f);
+            sphereMaterial->FlushProperties();
+
+			cubeMaterial = new RPI::Material(opaqueShader);
+
+			cubeMaterial->SetPropertyValue("_Albedo", Color(0.5f, 0.5f, 0.25f, 1.0f));
+			cubeMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
+			cubeMaterial->SetPropertyValue("_Shininess", (u32)64);
+			cubeMaterial->SetPropertyValue("_Metallic", 0.05f);
+			cubeMaterial->SetPropertyValue("_Roughness", 0.12f);
+			cubeMaterial->FlushProperties();
 
 			delete opaqueVert;
 			delete opaqueFrag;
@@ -806,9 +859,9 @@ namespace CE::Sandbox
 		directionalLights.Clear();
 
 		DirectionalLight mainLight{};
-		mainLight.direction = Vec3(-0.5f, -0.25f, 1);
+		mainLight.direction = Vec3(-0.25f, -0.5f, 1).GetNormalized();
 		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.7f);
-		mainLight.colorAndIntensity.w = 1.0f; // intensity
+		mainLight.colorAndIntensity.w = 5.0f; // intensity
 		mainLight.temperature = 100;
 
 		directionalLights.Add(mainLight);
@@ -818,9 +871,9 @@ namespace CE::Sandbox
 		{
 			PointLight pointLight{};
 			pointLight.position = Vec4(0, 0, 0);
-			pointLight.colorAndIntensity = Vec3(1.0f, 0.5f, 0);
+			pointLight.colorAndIntensity = Vec3(0.5f, 0.5f, 0);
 			pointLight.colorAndIntensity.w = 1.0f; // Intensity
-			pointLight.radius = 35.0f;
+			pointLight.radius = 25.0f;
 
 			pointLights.Add(pointLight);
 		}
@@ -834,7 +887,7 @@ namespace CE::Sandbox
 			//pointLights.Add(pointLight);
 		}
 
-		lightData.totalDirectionalLights = 0;// directionalLights.GetSize();
+		lightData.totalDirectionalLights = directionalLights.GetSize();
 		lightData.ambientColor = Color(0, 0.1f, 0.5f, 1).ToVec4();
 		lightData.totalPointLights = pointLights.GetSize();
 
@@ -912,7 +965,9 @@ namespace CE::Sandbox
 			for (const auto& vertInfo : mesh->vertexBufferInfos)
 			{
 				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position &&
-					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal)
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal &&
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::UV &&
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Tangent)
 					continue;
 
 				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
@@ -922,7 +977,9 @@ namespace CE::Sandbox
 
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = opaqueMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+
+			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
 
 			builder.AddDrawItem(request);
 		}
@@ -951,7 +1008,7 @@ namespace CE::Sandbox
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthPipeline;
-
+			
 			builder.AddDrawItem(request);
 		}
 
@@ -961,7 +1018,9 @@ namespace CE::Sandbox
 			for (const auto& vertInfo : mesh->vertexBufferInfos)
 			{
 				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position &&
-					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal)
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal &&
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::UV &&
+					vertInfo.semantic.attribute != RHI::VertexInputAttribute::Tangent)
 					continue;
 
 				auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
@@ -971,7 +1030,9 @@ namespace CE::Sandbox
 
 			request.drawItemTag = rhiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = opaqueMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+
+			request.uniqueShaderResourceGroups.Add(sphereMaterial->GetShaderResourceGroup());
 
 			builder.AddDrawItem(request);
 		}
@@ -1068,9 +1129,19 @@ namespace CE::Sandbox
 		delete perSceneSrg; perSceneSrg = nullptr;
 
         delete opaqueShader; opaqueShader = nullptr;
-		delete opaqueMaterial; opaqueMaterial = nullptr;
+		delete sphereMaterial; sphereMaterial = nullptr;
+		delete cubeMaterial; cubeMaterial = nullptr;
 
 		delete transparentPipeline; transparentPipeline = nullptr;
+	}
+
+	void VulkanSandbox::DestroyTextures()
+	{
+		woodFloorTextures.Release();
+		woodFloorTextures = {};
+
+		plasticTextures.Release();
+		plasticTextures = {};
 	}
 
 	void VulkanSandbox::DestroyCubeMaps()
@@ -1165,9 +1236,12 @@ namespace CE::Sandbox
 
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
-                scheduler->UseShaderResourceGroup(opaqueMaterial->GetShaderResourceGroup());
+                //scheduler->UseShaderResourceGroup(sphereMaterial->GetShaderResourceGroup());
 
-				scheduler->UsePipeline(opaqueMaterial->GetCurrentShader()->GetPipeline());
+				for (int i = 0; i < opaqueShader->GetVariantCount(); i++)
+				{
+					scheduler->UsePipeline(opaqueShader->GetVariant(i)->GetPipeline());
+				}
 
 				scheduler->PresentSwapChain(swapChain);
 			}
@@ -1253,6 +1327,227 @@ namespace CE::Sandbox
 			destroyed = true;
 			this->mainWindow = nullptr;
 		}
+	}
+
+	template<class Func>
+	void ParallelFor(int numThreads, int start, int end, Func&& func) {
+		std::vector<std::thread> threads;
+		int chunkSize = (end - start) / numThreads;
+
+		for (int i = 0; i < numThreads; ++i) {
+			int chunkStart = start + i * chunkSize;
+			int chunkEnd = (i == numThreads - 1) ? end : chunkStart + chunkSize;
+			threads.emplace_back([chunkStart, chunkEnd, &func]() {
+				for (int j = chunkStart; j < chunkEnd; ++j) {
+					func(j);
+				}
+				});
+		}
+
+		for (auto& t : threads) {
+			t.join();
+		}
+	}
+
+	MaterialTextureGroup MaterialTextureGroup::Load(const Name& pathName)
+	{
+		MaterialTextureGroup result{};
+
+		IO::Path basePath = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/" / pathName.GetString();
+		if (!basePath.Exists())
+			return {};
+
+		IO::Path albedoPath = basePath / "albedo.png";
+		IO::Path normalPath = basePath / "normal.png";
+		IO::Path roughnessPath = basePath / "roughness.png";
+
+		if (!albedoPath.Exists() || !normalPath.Exists() || !roughnessPath.Exists())
+			return {};
+
+		CMImage albedoImage = CMImage::LoadFromFile(albedoPath);
+		CMImage normalImage = CMImage::LoadFromFile(normalPath);
+		CMImage roughnessImage = CMImage::LoadFromFile(roughnessPath);
+
+		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+		auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
+		auto uploadFence = RHI::gDynamicRHI->CreateFence(false);
+
+		RHI::TextureDescriptor textureDesc{};
+		textureDesc.name = pathName.GetString() + " Albedo";
+		textureDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
+		textureDesc.defaultHeapType = RHI::MemoryHeapType::Default;
+		textureDesc.width = albedoImage.GetWidth();
+		textureDesc.height = albedoImage.GetHeight();
+		textureDesc.mipLevels = 1;
+		textureDesc.depth = 1;
+		textureDesc.dimension = RHI::Dimension::Dim2D;
+		textureDesc.sampleCount = 1;
+		textureDesc.format = RHI::Format::R8G8B8A8_UNORM;
+
+		result.albedo = RHI::gDynamicRHI->CreateTexture(textureDesc);
+
+		textureDesc.name = pathName.GetString() + " Normal";
+		textureDesc.width = normalImage.GetWidth();
+		textureDesc.height = normalImage.GetHeight();
+		
+		result.normalMap = RHI::gDynamicRHI->CreateTexture(textureDesc);
+
+		textureDesc.name = pathName.GetString() + " Roughness";
+		textureDesc.width = roughnessImage.GetWidth();
+		textureDesc.height = roughnessImage.GetHeight();
+		textureDesc.format = RHI::Format::R8_UNORM;
+
+		result.roughnessMap = RHI::gDynamicRHI->CreateTexture(textureDesc);
+
+		const u32 albedoNumPixels = albedoImage.GetWidth() * albedoImage.GetHeight();
+		const u32 normalNumPixels = normalImage.GetWidth() * normalImage.GetHeight();
+		const u32 roughnessNumPixels = roughnessImage.GetWidth() * roughnessImage.GetHeight();
+
+		const u64 albedoByteSize = albedoImage.GetWidth() * albedoImage.GetHeight() * 4; // RGBA32
+		const u64 normalByteSize = normalImage.GetWidth() * normalImage.GetHeight() * 4; // RGBA32
+		const u64 roughnessByteSize = roughnessImage.GetWidth() * roughnessImage.GetHeight() * 1; // R8
+		
+		RHI::BufferDescriptor bufferDesc{};
+		bufferDesc.name = "Texture Copy Buffer";
+		bufferDesc.bufferSize = albedoByteSize + normalByteSize + roughnessByteSize;
+		bufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+		bufferDesc.structureByteStride = result.albedo->GetByteSize();
+
+		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+		auto prevTime = clock();
+
+		void* dataPtr = nullptr;
+		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
+		{
+			u8* albedoPtr = ((u8*)dataPtr);
+			u8* normalPtr = ((u8*)dataPtr + albedoByteSize);
+			u8* roughnessPtr = ((u8*)dataPtr + albedoByteSize + normalByteSize);
+
+			int numThreads = Thread::GetHardwareConcurrency();
+
+			auto t1 = Thread([&]()
+				{
+					for (int i = 0; i < albedoByteSize; i++)
+					{
+						*(albedoPtr + i) = *((u8*)albedoImage.GetDataPtr() + i);
+					}
+				});
+
+			auto t2 = Thread([&]()
+				{
+					for (int i = 0; i < normalByteSize; i++)
+					{
+						*(normalPtr + i) = *((u8*)normalImage.GetDataPtr() + i);
+					}
+				});
+
+			auto t3 = Thread([&]()
+				{
+					for (int i = 0; i < roughnessByteSize; i++)
+					{
+						*(roughnessPtr + i) = *((u8*)roughnessImage.GetDataPtr() + i * 4);
+					}
+				});
+
+			t1.Join();
+			t2.Join();
+			t3.Join();
+		}
+		stagingBuffer->Unmap();
+
+		f32 timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
+		commandList->Begin();
+		{
+			RHI::ResourceBarrierDescriptor barrier{};
+			barrier.resource = result.albedo;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::CopyDestination;
+			commandList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = result.normalMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::CopyDestination;
+			commandList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = result.roughnessMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::CopyDestination;
+			commandList->ResourceBarrier(1, &barrier);
+
+			RHI::BufferToTextureCopy bufferCopy{};
+			bufferCopy.srcBuffer = stagingBuffer;
+			bufferCopy.bufferOffset = 0;
+			bufferCopy.dstTexture = result.albedo;
+			bufferCopy.baseArrayLayer = 0;
+			bufferCopy.layerCount = 1;
+			bufferCopy.mipSlice = 0;
+
+			commandList->CopyTextureRegion(bufferCopy);
+
+			bufferCopy.srcBuffer = stagingBuffer;
+			bufferCopy.bufferOffset = albedoByteSize;
+			bufferCopy.dstTexture = result.normalMap;
+			bufferCopy.baseArrayLayer = 0;
+			bufferCopy.layerCount = 1;
+			bufferCopy.mipSlice = 0;
+
+			commandList->CopyTextureRegion(bufferCopy);
+
+			bufferCopy.srcBuffer = stagingBuffer;
+			bufferCopy.bufferOffset = albedoByteSize + normalByteSize;
+			bufferCopy.dstTexture = result.roughnessMap;
+			bufferCopy.baseArrayLayer = 0;
+			bufferCopy.layerCount = 1;
+			bufferCopy.mipSlice = 0;
+
+			commandList->CopyTextureRegion(bufferCopy);
+
+			barrier.resource = result.albedo;
+			barrier.fromState = RHI::ResourceState::CopyDestination;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			commandList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = result.normalMap;
+			barrier.fromState = RHI::ResourceState::CopyDestination;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			commandList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = result.roughnessMap;
+			barrier.fromState = RHI::ResourceState::CopyDestination;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			commandList->ResourceBarrier(1, &barrier);
+		}
+		commandList->End();
+
+		queue->Execute(1, &commandList, uploadFence);
+
+		uploadFence->WaitForFence();
+
+		// Cleanup
+		RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
+		delete uploadFence;
+		delete stagingBuffer;
+
+		if (albedoImage.IsValid())
+			albedoImage.Free();
+		if (normalImage.IsValid())
+			normalImage.Free();
+		if (roughnessImage.IsValid())
+			roughnessImage.Free();
+
+		return result;
+	}
+
+	void MaterialTextureGroup::Release()
+	{
+		delete albedo; albedo = nullptr;
+		delete normalMap; normalMap = nullptr;
+		delete roughnessMap; roughnessMap = nullptr;
+
+		delete memoryAllocation; memoryAllocation = nullptr;
 	}
 
 } // namespace CE

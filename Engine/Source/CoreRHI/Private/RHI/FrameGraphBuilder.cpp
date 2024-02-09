@@ -103,6 +103,8 @@ namespace CE::RHI
 	{
 		if (!currentScope || !frameGraph || !pipeline)
 			return false;
+		if (currentScope->usePipelines.Exists(pipeline))
+			return false;
 
 		currentScope->usePipelines.Add(pipeline);
 

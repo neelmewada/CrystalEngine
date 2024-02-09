@@ -489,9 +489,12 @@ namespace CE::Vulkan
 										}
 									}
 
-									if (drawItem->uniqueShaderResourceGroup != nullptr)
+									for (int j = 0; j < drawItem->uniqueShaderResourceGroupCount; j++)
 									{
-										commandList->SetShaderResourceGroup(drawItem->uniqueShaderResourceGroup);
+										if (drawItem->uniqueShaderResourceGroups[j] != nullptr)
+										{
+											commandList->SetShaderResourceGroup(drawItem->uniqueShaderResourceGroups[j]);
+										}
 									}
 
 									// Commit SRGs

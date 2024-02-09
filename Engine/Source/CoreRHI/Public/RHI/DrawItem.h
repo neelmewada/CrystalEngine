@@ -74,6 +74,7 @@ namespace CE::RHI
 		u8 stencilRef = 0;
 		u8 vertexBufferViewCount = 0;
 		u8 shaderResourceGroupCount = 0;
+		u8 uniqueShaderResourceGroupCount = 0;
 		u8 rootConstantSize = 0;
 		u8 scissorCount = 0;
 		u8 viewportCount = 0;
@@ -98,7 +99,7 @@ namespace CE::RHI
 
 		/// @brief A unique shader resource group that is local to this DrawItem and
 		/// is not used outside. Usually a PerDraw SRG.
-		RHI::ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
+		RHI::ShaderResourceGroup** uniqueShaderResourceGroups = nullptr;
 
 		/// @brief List of scissor states for this draw call.
 		const RHI::ScissorState* scissors = nullptr;

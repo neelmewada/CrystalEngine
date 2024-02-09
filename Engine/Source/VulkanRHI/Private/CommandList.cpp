@@ -385,7 +385,14 @@ namespace CE::Vulkan
 
 				switch (barrierInfo.fromState) // OLD state
 				{
+				case RHI::ResourceState::Undefined:
+					srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+					bufferBarrier.srcAccessMask = 0;
+					break;
 				case RHI::ResourceState::General: // A "general" buffer
+					srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+					bufferBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
+					break;
 				case RHI::ResourceState::ConstantBuffer:
 					srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 					bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -486,7 +493,7 @@ namespace CE::Vulkan
 		VkBufferImageCopy copy{};
 		copy.bufferOffset = region.bufferOffset;
 		copy.bufferImageHeight = 0; // 0 means data is tightly packed
-		copy.bufferRowLength = 0; // 
+		copy.bufferRowLength = 0; // 0 means data is tightly packed
 		
 		copy.imageOffset = { 0, 0, 0 };
 		copy.imageExtent.width = dstTexture->GetWidth();

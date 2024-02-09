@@ -4,6 +4,8 @@
 // TODO: Temp code
 //#define LIMITED_SETS 1
 
+#define PI 3.14159265359
+
 #ifdef LIMITED_SETS // Almost all android phones only support maxBoundDescriptorSets = 4
 
 #ifndef PerScene_Frequency

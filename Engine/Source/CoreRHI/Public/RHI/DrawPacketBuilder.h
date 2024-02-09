@@ -24,7 +24,7 @@ namespace CE::RHI
 
 			Array<VertexBufferView> vertexBufferViews{};
 
-			ShaderResourceGroup* uniqueShaderResourceGroup = nullptr;
+			Array<ShaderResourceGroup*> uniqueShaderResourceGroups{};
 
 			PipelineState* pipelineState = nullptr;
 
@@ -57,6 +57,7 @@ namespace CE::RHI
 		FixedArray<ViewportState, Limits::Pipeline::MaxColorAttachmentCount> viewports{};
 		StaticArray<ShaderResourceGroup*, Limits::Pipeline::MaxShaderResourceGroupCount> shaderResourceGroups{};
 		u32 shaderResourceGroupCount = 0;
+		u32 uniqueShaderResourceGroupCount = 0;
 		FixedArray<DrawItemRequest, DrawItemCountMax> drawRequests{};
 		u32 vertexBufferViewCount = 0;
 		StaticArray<u8, Limits::Pipeline::MaxRootConstantSize> rootConstants{};

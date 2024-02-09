@@ -113,6 +113,8 @@ namespace CE::RHI
 		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements) = 0;
         virtual void GetTextureMemoryRequirements(const TextureDescriptor& textureDesc, ResourceMemoryRequirements& outRequirements) = 0;
 
+		virtual ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList) = 0;
+
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc) = 0;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;
         virtual void DestroyBuffer(Buffer* buffer) = 0;

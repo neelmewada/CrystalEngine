@@ -49,6 +49,8 @@ namespace CE::RHI
 
 		inline TextureBindFlags GetBindFlags() const { return bindFlags; }
         
+		inline u64 GetByteSize() const { return byteSize; }
+
 		virtual u32 GetBytesPerChannel() = 0;
         
 		virtual u32 GetNumberOfChannels() = 0;
@@ -57,6 +59,7 @@ namespace CE::RHI
 
 		Name name{};
 
+		u64 byteSize = 0;
 		u32 width = 0, height = 0, depth = 0;
 		Dimension dimension = Dimension::Dim2D;
 		Format format{};

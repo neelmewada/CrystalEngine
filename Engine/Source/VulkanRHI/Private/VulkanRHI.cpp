@@ -492,4 +492,30 @@ namespace CE::Vulkan
         }
     }
 
+    ResourceMemoryRequirements VulkanRHI::GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList)
+    {
+        if (count == 0)
+            return {};
+        
+        ResourceMemoryRequirements result{};
+        u64 offset = 0;
+        result.flags = requirementsList[0].flags;
+        result.size = requirementsList[0].size;
+        result.offsetAlignment = requirementsList[0].offsetAlignment;
+
+        for (int i = 1; i < count; i++)
+        {
+            result.offsetAlignment = 0;
+            result.flags &= requirementsList[i].flags;
+
+            if (offset > 0)
+                offset = Memory::GetAlignedSize(offset, requirementsList[i].offsetAlignment);
+            offset += requirementsList[i].size;
+        }
+
+        result.size = offset;
+
+        return result;
+    }
+
 } // namespace CE

@@ -32,7 +32,7 @@ PSInput VertMain(VSInput input)
 float4 FragMain(PSInput input) : SV_TARGET
 {
     float3 direction = normalize(input.worldPos - viewPosition);
-    direction.y *= -1;
+    //direction.y *= -1;
     float3 cubemapSample = _Skybox.Sample(_DefaultSampler, direction).rgb;
     return float4(lerp(float3(1.0, 0, 1.0), _Skybox.Sample(_DefaultSampler, direction).rgb, 0.9999), 1);
 }

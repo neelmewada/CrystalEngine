@@ -450,7 +450,7 @@ namespace CE::Vulkan
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:
 						case RHI::ScopeAttachmentUsage::Shader:
-							barrier.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+							barrier.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 							imageBarrier.srcAccessMask = 0;
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
@@ -509,7 +509,7 @@ namespace CE::Vulkan
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:
 						case RHI::ScopeAttachmentUsage::Shader:
-							barrier.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+							barrier.dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 							imageBarrier.dstAccessMask = 0;
 							if (EnumHasFlag(toImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
@@ -559,14 +559,6 @@ namespace CE::Vulkan
 						transition.layout = imageBarrier.newLayout;
 						transition.queueFamilyIndex = current->queue->GetFamilyIndex();
 
-						if (isDifferentQueue)
-						{
-							barrier.dstStageMask = originalDstStageMask;
-							imageBarrier.dstAccessMask = originalDstAccessMask;
-							barrier.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-							imageBarrier.srcAccessMask = 0;
-						}
-
 						barrier.imageBarriers.Add(imageBarrier);
 						barrier.imageLayoutTransitions.Add(transition);
 						
@@ -574,6 +566,14 @@ namespace CE::Vulkan
 
 						if (isDifferentQueue)
 						{
+							barrier.imageBarriers.Clear();
+							barrier.dstStageMask = originalDstStageMask;
+							imageBarrier.dstAccessMask = originalDstAccessMask;
+							barrier.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+							imageBarrier.srcAccessMask = 0;
+
+							barrier.imageBarriers.Add(imageBarrier);
+
 							current->initialBarriers[imageIndex].Add(barrier);
 						}
 					}

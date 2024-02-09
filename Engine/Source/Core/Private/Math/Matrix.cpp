@@ -9,7 +9,7 @@ namespace CE
 
         return Matrix4x4({
 			{ 1 / (aspect * tanHalfFOV), 0, 0, 0 },
-			{ 0, 1 / tanHalfFOV, 0, 0 },
+			{ 0, -1 / tanHalfFOV, 0, 0 },
 			{ 0, 0, f / (f - n), -f * n / (f - n) },
 			{ 0, 0, 1, 0 }
 		});

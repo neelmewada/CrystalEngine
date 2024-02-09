@@ -41,11 +41,23 @@ namespace CE::Sandbox
 		u32 totalPointLights;
 	};
 
-	struct CameraData
+	struct alignas(16) CameraData
 	{
-		alignas(16) Vec3 cameraPosition = {};
-		alignas(4)	f32 fieldOfView = 60;
+		Vec3 cameraPosition = {};
+		f32 fieldOfView = 60;
+	};
 
+	struct MaterialTextureGroup
+	{
+		Name name{};
+		RHI::Texture* albedo = nullptr;
+		RHI::Texture* normalMap = nullptr;
+		RHI::Texture* roughnessMap = nullptr;
+		RHI::MemoryHeap* memoryAllocation = nullptr;
+
+		static MaterialTextureGroup Load(const Name& pathName);
+
+		void Release();
 	};
 
 	class VulkanSandbox : IWindowCallbacks
@@ -63,6 +75,7 @@ namespace CE::Sandbox
 		void Shutdown();
 		
 		void InitCubeMaps();
+		void InitTextures();
 		void InitPipelines();
 		void InitDrawPackets();
 		void InitLights();
@@ -75,6 +88,7 @@ namespace CE::Sandbox
 		void DestroyLights();
 		void DestroyDrawPackets();
 		void DestroyPipelines();
+		void DestroyTextures();
 		void DestroyCubeMaps();
 
 	private:
@@ -95,6 +109,9 @@ namespace CE::Sandbox
 		RHI::Texture* skyboxCubeMap = nullptr;
 		RHI::Sampler* skyboxSampler = nullptr;
 
+		MaterialTextureGroup woodFloorTextures{};
+		MaterialTextureGroup plasticTextures{};
+
 		RHI::ShaderResourceGroup* depthPerViewSrg = nullptr;
 		RHI::ShaderResourceGroup* perViewSrg = nullptr;
 		RHI::Buffer* perViewBuffer = nullptr;
@@ -102,9 +119,10 @@ namespace CE::Sandbox
 
 		RHI::PipelineState* depthPipeline = nullptr;
 		RHI::ShaderModule* depthShaderVert = nullptr;
-
+		
 		RPI::Shader* opaqueShader = nullptr;
-		RPI::Material* opaqueMaterial = nullptr;
+		RPI::Material* sphereMaterial = nullptr;
+		RPI::Material* cubeMaterial = nullptr;
         RHI::Sampler* defaultSampler = nullptr;
 		
 		RPI::Shader* skyboxShader = nullptr;
@@ -120,9 +138,9 @@ namespace CE::Sandbox
 		RPI::ModelLod* sphereModel = nullptr;
 		RHI::DrawListContext drawList{};
 
-		DrawPacket* sphereDrawPacket = nullptr;
-		DrawPacket* cubeDrawPacket = nullptr;
-		DrawPacket* skyboxDrawPacket = nullptr;
+		RHI::DrawPacket* sphereDrawPacket = nullptr;
+		RHI::DrawPacket* cubeDrawPacket = nullptr;
+		RHI::DrawPacket* skyboxDrawPacket = nullptr;
 
 		RHI::ShaderResourceGroupLayout perSceneSrgLayout{};
 		SceneConstants sceneConstants{};

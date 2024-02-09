@@ -68,6 +68,7 @@ namespace CE::RHI
 		
         drawListMask.Set(request.drawItemTag);
 		vertexBufferViewCount += request.vertexBufferViews.GetSize();
+		uniqueShaderResourceGroupCount += request.uniqueShaderResourceGroups.GetSize();
 		drawRequests.Add(request);
 	}
 
@@ -88,7 +89,7 @@ namespace CE::RHI
 
 		SIZE_T shaderResourceGroupsOffset = AllocateOffset(sizeof(ShaderResourceGroup*) * shaderResourceGroupCount, alignof(ShaderResourceGroup*));
 
-		SIZE_T uniqueShaderResourceGroupOffset = AllocateOffset(sizeof(ShaderResourceGroup*) * drawRequests.GetSize(), alignof(ShaderResourceGroup*));
+		SIZE_T uniqueShaderResourceGroupOffset = AllocateOffset(sizeof(ShaderResourceGroup*) * uniqueShaderResourceGroupCount, alignof(ShaderResourceGroup*));
 
 		SIZE_T vertexBufferViewsOffset = AllocateOffset(sizeof(VertexBufferView) * vertexBufferViewCount, alignof(VertexBufferView));
 
@@ -117,19 +118,6 @@ namespace CE::RHI
             
             drawPacket->shaderResourceGroups = shaderResourceGroups;
             drawPacket->shaderResourceGroupCount = shaderResourceGroupCount;
-        }
-        
-        if (drawRequests.GetSize() > 0)
-        {
-            ShaderResourceGroup** shaderResourceGroups = reinterpret_cast<ShaderResourceGroup**>(allocationData + uniqueShaderResourceGroupOffset);
-            
-            for (int i = 0; i < drawRequests.GetSize(); i++)
-            {
-                shaderResourceGroups[i] = this->drawRequests[i].uniqueShaderResourceGroup;
-            }
-			
-            drawPacket->uniqueShaderResourceGroups = shaderResourceGroups;
-            drawPacket->uniqueShaderResourceGroupCount = drawRequests.GetSize();
         }
         
         if (scissors.GetSize() > 0)
@@ -196,7 +184,8 @@ namespace CE::RHI
             drawItem.viewports = drawPacket->viewports;
             drawItem.shaderResourceGroups = drawPacket->shaderResourceGroups;
             drawItem.shaderResourceGroupCount = drawPacket->shaderResourceGroupCount;
-            drawItem.uniqueShaderResourceGroup = drawPacket->uniqueShaderResourceGroups[i];
+			drawItem.uniqueShaderResourceGroups = nullptr;
+			drawItem.uniqueShaderResourceGroupCount = 0;
             drawItem.stencilRef = drawRequest.stencilRef;
             drawItem.pipelineState = drawRequest.pipelineState;
             drawItem.arguments = drawArguments;
@@ -226,6 +215,31 @@ namespace CE::RHI
 					for (const VertexBufferView& vertexBufferView : drawRequest.vertexBufferViews)
 					{
 						*vertexBufferViews++ = vertexBufferView;
+					}
+				}
+			}
+		}
+
+		if (uniqueShaderResourceGroupCount > 0)
+		{
+			ShaderResourceGroup** uniqueShaderResourceGroups = reinterpret_cast<ShaderResourceGroup**>(allocationData + uniqueShaderResourceGroupOffset);
+
+			drawPacket->uniqueShaderResourceGroups = uniqueShaderResourceGroups;
+			drawPacket->uniqueShaderResourceGroupCount = uniqueShaderResourceGroupCount;
+
+			for (int i = 0; i < drawRequests.GetSize(); i++)
+			{
+				const DrawItemRequest& drawRequest = this->drawRequests[i];
+
+				if (!drawRequest.uniqueShaderResourceGroups.IsEmpty())
+				{
+					DrawItem& drawItem = drawItems[i];
+					drawItem.uniqueShaderResourceGroups = uniqueShaderResourceGroups;
+					drawItem.uniqueShaderResourceGroupCount = drawRequest.uniqueShaderResourceGroups.GetSize();
+
+					for (RHI::ShaderResourceGroup* uniqueSrg : drawRequest.uniqueShaderResourceGroups)
+					{
+						*uniqueShaderResourceGroups++ = uniqueSrg;
 					}
 				}
 			}

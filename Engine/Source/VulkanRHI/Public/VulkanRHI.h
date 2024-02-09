@@ -110,6 +110,8 @@ namespace CE::Vulkan
         
         virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, ResourceMemoryRequirements& outRequirements) override;
 
+        virtual ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList) override;
+
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) override;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
