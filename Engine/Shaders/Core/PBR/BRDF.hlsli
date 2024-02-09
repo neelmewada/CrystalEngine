@@ -57,6 +57,9 @@ inline float GeometrySmith(float NdotV, float NdotL, float roughness)
 
 float3 CalculateBRDF(LightInput light, MaterialInput material)
 {
+    // Just for experimenting with roughness value
+    material.roughness = material.roughness * material.roughness;
+
     float NdotH = max(dot(light.normal, light.halfway), 0.0);
     float NdotL = max(dot(light.normal, light.lightDir), 0.0);
     float NdotV = max(dot(light.normal, light.viewDir), 0.0);

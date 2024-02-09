@@ -115,16 +115,30 @@ namespace CE::Sandbox
 
 			SubmitWork();
 		}
+        
+        // TODO: This is the real problem with depth buffer artifact/issue
+        // We are modifying the model matrix buffers which is same for all swap chain images.
+        // Possible solution: 1 buffer per swap chain image
+        // We should never use WaitUntilIdle every frame
+        scheduler->WaitUntilIdle();
 
 		UpdatePerViewData();
 
 		cameraRotation += deltaTime * 5;
 		if (cameraRotation >= 360)
 			cameraRotation -= 360;
-
+        
 		meshRotation += deltaTime * 15.0f;
 		if (meshRotation >= 360)
 			meshRotation -= 360;
+        
+        cubeRotation += deltaTime * 5;
+        if (cubeRotation >= 360)
+            cubeRotation -= 360;
+        
+        cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -0.75f, 15)) * Quat::EulerDegrees(Vec3(0, cubeRotation)).ToMatrix() * Matrix4x4::Scale(Vec3(5, 0.2f, 5));
+        
+        cubeObjectBuffer->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix), 0);
 
 		sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
@@ -1169,7 +1183,7 @@ namespace CE::Sandbox
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 			
-			scheduler->BeginScope("ClearPass"); // Important for synchronization
+			/*scheduler->BeginScope("ClearPass"); // Important for synchronization
 			{
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
@@ -1186,14 +1200,15 @@ namespace CE::Sandbox
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
 			}
-			scheduler->EndScope();
+			scheduler->EndScope();*/
 			
 			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Skybox");
 			{
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
+                swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
 
@@ -1208,7 +1223,9 @@ namespace CE::Sandbox
 			{
 				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
 				depthAttachment.attachmentId = "DepthStencil";
-				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                depthAttachment.loadStoreAction.clearValueDepth = 1.0f;
+                depthAttachment.loadStoreAction.clearValueStencil = 0;
+                depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
 				
@@ -1229,7 +1246,7 @@ namespace CE::Sandbox
 
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                 swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);

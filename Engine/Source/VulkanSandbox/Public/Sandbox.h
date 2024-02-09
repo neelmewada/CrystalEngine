@@ -159,6 +159,7 @@ namespace CE::Sandbox
 		Matrix4x4 sphereModelMatrix{};
 		f32 cameraRotation = 0.0f;
 		f32 meshRotation = 0;
+        f32 cubeRotation = 0;
 		
 		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
 		RHI::Buffer* cubeObjectBuffer = nullptr;

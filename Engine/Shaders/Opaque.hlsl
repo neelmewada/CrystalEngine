@@ -71,7 +71,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     MaterialInput material;
     material.albedo = _Albedo.rgb;
     material.metallic = _Metallic;
-    material.roughness = clamp(_Roughness * _Roughness, 0, 1); // Just for experimenting with roughness value
+    material.roughness = _Roughness;
 
     float3 color = float3(0, 0, 0);
 
