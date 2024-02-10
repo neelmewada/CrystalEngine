@@ -8,11 +8,15 @@ namespace CE
 
     
 
-	Quat::Quat()
+	Quat::Quat() : w(1), x(0), y(0), z(0)
 	{
 	}
 
 	Quat::Quat(float w, float x, float y, float z) : w(w), x(x), y(y), z(z)
+	{
+	}
+
+	Quat::Quat(const Vec4& vec4) : w(vec4.w), x(vec4.x), y(vec4.y), z(vec4.z)
 	{
 	}
 
@@ -153,17 +157,94 @@ namespace CE
 		return ToMatrix(*this);
 	}
 
-	Quat Quat::LookRotation(Vec4& lookAt)
+	Quat Quat::FromToRotation(const Vec3& from, const Vec3& to)
 	{
+		const Vec3 unitFrom = from.GetNormalized();
+		const Vec3 unitTo = to.GetNormalized();
+		const float dot = Vec3::Dot(unitFrom, unitTo);
+
+		Vec3 cross = Vec3::Cross(unitFrom, unitTo);
+		float w = sqrt((1 + dot) * 0.5);
+		float k = sqrt((1 - dot) * 0.5);
+		float scale = (w > 0) ? (1.0 / w) : 0;
+
+		//return Quat(w, cross.x * scale, cross.y * scale, cross.z * scale);
+
+		if (dot >= 1.0f)
+		{
+			return Quat(); // identity
+		}
+		else if (dot <= -1.0f)
+		{
+			// If the two vectors are pointing in opposite directions then we
+			// need to supply a quaternion corresponding to a rotation of
+			// PI-radians about an axis orthogonal to the fromDirection.
+			Vec3 axis = Vec3::Cross(unitFrom, Vec3(1, 0, 0));
+			if (axis.GetSqrMagnitude() < 1e-6)
+			{
+				// Bad luck. The x-axis and fromDirection are linearly
+				// dependent (colinear). We'll take the axis as the vector
+				// orthogonal to both the y-axis and fromDirection instead.
+				// The y-axis and fromDirection will clearly not be linearly
+				// dependent.
+				axis = Vec3::Cross(unitFrom, Vec3(0, 1, 0));
+			}
+
+			// Note that we need to normalize the axis as the cross product of
+			// two unit vectors is not nececessarily a unit vector.
+			return Quat::AngleAxis(180, axis.GetNormalized()); // 180 Degrees = PI radians
+		}
+		else
+		{
+			// Scalar component.
+			const float s = sqrt(unitFrom.GetSqrMagnitude() * unitTo.GetSqrMagnitude())
+				+ Vec3::Dot(unitFrom, unitTo);
+
+			// Vector component.
+			Vec3 v = Vec3::Cross(unitFrom, unitTo);
+			v.x *= -1;
+			v.y *= -1;
+
+			// Return the normalized quaternion rotation.
+			return Quat(Vec4(v, s)).GetNormalized();
+		}
+
 		return Quat();
 	}
 
-	Quat Quat::LookRotation(Vec4& lookAt, Vec4& upDirection)
+	Quat Quat::LookRotation(const Vec3& lookAt)
 	{
-		return Quat();
+		return Quat::FromToRotation(Vec3(0, 0, 1), lookAt);
 	}
 
-	Quat Quat::Slerp(Quat& from, Quat& to, float t)
+	Quat Quat::LookRotation(const Vec3& lookAt, const Vec3& upDirection)
+	{
+		// Calculate the unit quaternion that rotates Vector3::FORWARD to face
+		// in the specified forward direction.
+		const Quat q1 = Quat::LookRotation(lookAt);
+
+		// We can't preserve the upwards direction if the forward and upwards
+		// vectors are linearly dependent (colinear).
+		if (Vec3::Cross(lookAt, upDirection).GetSqrMagnitude() < 1e-6)
+		{
+			return q1;
+		}
+
+		// Determine the upwards direction obtained after applying q1.
+		const Vec3 newUp = q1 * Vec3(0, 1, 0);
+
+		// Calculate the unit quaternion rotation that rotates the newUp
+		// direction to look in the specified upward direction.
+		const Quat q2 = Quat::FromToRotation(newUp, upDirection);
+
+		// Return the combined rotation so that we first rotate to look in the
+		// forward direction and then rotate to align Vector3::UPWARD with the
+		// specified upward direction. There is no need to normalize the result
+		// as both q1 and q2 are unit quaternions.
+		return q2 * q1;
+	}
+
+	Quat Quat::Slerp(const Quat& from, const Quat& to, float t)
 	{
 		float cosTheta = Quat::Dot(from, to);
 		Quat temp(to);
@@ -182,7 +263,7 @@ namespace CE
 			);
 	}
 
-	Quat Quat::Lerp(Quat& from, Quat& to, float t)
+	Quat Quat::Lerp(const Quat& from, const Quat& to, float t)
 	{
 		Quat src = from * (1.0f - t);
 		Quat dst = to * t;
@@ -191,9 +272,9 @@ namespace CE
 		return q;
 	}
 
-	float Quat::Angle(Quat& a, Quat& b)
+	float Quat::Angle(const Quat& a, const Quat& b)
 	{
-		float degrees = acosf((b * Quat::Inverse(a)).w) * 2.0f * 57.2957795f;
+		float degrees = acosf((b * a.GetInversed()).w) * 2.0f * 57.2957795f;
 		if (degrees > 180.0f)
 			return 360.0f - degrees;
 		return degrees;
@@ -204,7 +285,7 @@ namespace CE
 		return a.Dot(b);
 	}
 
-	Quat Quat::AngleAxis(float angle, Vec4& axis)
+	Quat Quat::AngleAxis(float angle, const Vec4& axis)
 	{
 		Vec4 vn = axis.GetNormalized();
 
@@ -215,9 +296,13 @@ namespace CE
 		return Quat(cos(angle), vn.x * sinAngle, vn.y * sinAngle, vn.z * sinAngle);
 	}
 
-	Quat Quat::Inverse(Quat& rotation)
+	Quat Quat::GetInversed() const
 	{
-		return Quat(rotation.w, -1.0f * rotation.x, -1.0f * rotation.y, -1.0f * rotation.z);
+		const float sqr = GetSqrMagnitude();
+
+		const float invSqr = 1.0f / sqr;
+
+		return Quat(w * invSqr, -x * invSqr, -y * invSqr, -z * invSqr);
 	}
 
 	Quat Quat::EulerDegrees(float X, float Y, float Z)
@@ -231,6 +316,22 @@ namespace CE
 
 	Quat Quat::EulerRadians(float X, float Y, float Z)
 	{
+		// NEW
+		double cy = cos(Z * 0.5);
+		double sy = sin(Z * 0.5);
+		double cp = cos(Y * 0.5);
+		double sp = sin(Y * 0.5);
+		double cr = cos(X * 0.5);
+		double sr = sin(X * 0.5);
+
+		double qw = cr * cp * cy + sr * sp * sy;
+		double qx = -sr * cp * cy + cr * sp * sy; // Adjusted X-axis orientation
+		double qy = cr * sp * cy + sr * cp * sy;
+		double qz = cr * cp * sy - sr * sp * cy; // Adjusted Z-axis orientation
+
+		return Quat(qw, qx, qy, qz);
+
+		// OLD
 		X *= 0.5f;
 		Y *= 0.5f;
 		Z *= 0.5f;

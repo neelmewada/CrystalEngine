@@ -12,6 +12,7 @@ namespace CE
 
 		Quat();
 		Quat(float w, float x, float y, float z);
+		Quat(const Vec4& vec4);
 		Quat(const Quat& q);
 		~Quat();
 		Quat& operator=(const Quat&);
@@ -36,17 +37,24 @@ namespace CE
 
 		Matrix4x4 ToMatrix() const;
 
-		static Quat LookRotation(Vec4& lookAt);
-		static Quat LookRotation(Vec4& lookAt, Vec4& upDirection);
-		static Quat Slerp(Quat& from, Quat& to, float t);
-		static Quat Lerp(Quat& from, Quat& to, float t);
-		static float Angle(Quat& a, Quat& b);
+		static Quat FromToRotation(const Vec3& from, const Vec3& to);
+
+		static Quat LookRotation(const Vec3& lookAt);
+		static Quat LookRotation(const Vec3& lookAt, const Vec3& upDirection);
+		static Quat Slerp(const Quat& from, const Quat& to, float t);
+		static Quat Lerp(const Quat& from, const Quat& to, float t);
+		static float Angle(const Quat& a, const Quat& b);
 		static float Dot(const Quat& a, const Quat& b);
-		static Quat AngleAxis(float angle, Vec4& axis);
-		static Quat Inverse(Quat& rotation);
+		static Quat AngleAxis(float angle, const Vec4& axis);
+		Quat GetInversed() const;
 		static Quat EulerDegrees(float x, float y, float z);
 		static Quat EulerRadians(float x, float y, float z);
 		static Matrix4x4 ToMatrix(const Quat& q);
+
+		inline f32 GetSqrMagnitude() const
+		{
+			return x * x + y * y + z * z + w * w;
+		}
 
 		inline static Quat EulerDegrees(Vec3 euler)
 		{

@@ -49,6 +49,9 @@ namespace CE::Vulkan
 		delete passShaderResourceGroup;
 		passShaderResourceGroup = nullptr;
 
+		delete subpassShaderResourceGroup;
+		subpassShaderResourceGroup = nullptr;
+
 		for (auto frameBuffer : frameBuffers)
 		{
 			delete frameBuffer;
@@ -168,6 +171,8 @@ namespace CE::Vulkan
 						foundPipelineLayout = true;
 						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
 						next->passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+						// Bind Pass attachments to SRG
 					}
 
 					if (pipelineLayout != nullptr && !foundSubpassPipelineLayout && pipelineLayout->srgLayouts.KeyExists(RHI::SRGType::PerSubPass))
@@ -175,6 +180,8 @@ namespace CE::Vulkan
 						foundSubpassPipelineLayout = true;
 						const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerSubPass];
 						next->subpassShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+						// Bind Pass attachments to SRG
 					}
 				}
 
@@ -209,6 +216,45 @@ namespace CE::Vulkan
 					foundPipelineLayout = true;
 					const RHI::ShaderResourceGroupLayout& srgLayout = pipelineLayout->srgLayouts[RHI::SRGType::PerPass];
 					passShaderResourceGroup = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+					// Bind Pass attachments to SRG
+					
+					for (auto scopeAttachment : attachments)
+					{
+						Name attachmentName = scopeAttachment->GetId();
+						if (scopeAttachment->GetFrameAttachment() == nullptr)
+							continue;
+						if (scopeAttachment->GetUsage() != RHI::ScopeAttachmentUsage::Shader)
+							continue;
+
+						FrameAttachment* frameAttachment = scopeAttachment->GetFrameAttachment();
+
+						for (int imageIdx = 0; imageIdx < RHI::Limits::MaxSwapChainImageCount; imageIdx++)
+						{
+							if (frameAttachment->IsImageAttachment())
+							{
+								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
+								if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+									break;
+
+								RHI::Texture* image = (RHI::Texture*)resource;
+								
+								passShaderResourceGroup->Bind(imageIdx, attachmentName, image);
+							}
+							else if (frameAttachment->IsBufferAttachment())
+							{
+								RHI::RHIResource* resource = frameAttachment->GetResource(imageIdx);
+								if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Buffer)
+									break;
+
+								RHI::Buffer* buffer = (RHI::Buffer*)resource;
+
+								passShaderResourceGroup->Bind(imageIdx, attachmentName, buffer);
+							}
+						}
+					}
+
+					passShaderResourceGroup->FlushBindings();
 				}
 			}
 		}

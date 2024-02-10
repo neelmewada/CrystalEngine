@@ -46,6 +46,7 @@ namespace CE::Sandbox
 	constexpr u32 roughnessTexBinding = 2;
 	constexpr u32 normalTexBinding = 3;
 	constexpr u32 metallicTexBinding = 4;
+	constexpr u32 directionalShadowMapBinding = 0;
 
 	static int counter = 0;
 	static RPI::RPISystem& rpiSystem = RPI::RPISystem::Get();
@@ -150,7 +151,7 @@ namespace CE::Sandbox
 		if (meshRotation >= 360)
 			meshRotation -= 360;
         
-        cubeRotation += deltaTime * 5;
+        //cubeRotation += deltaTime * 5;
         if (cubeRotation >= 360)
             cubeRotation -= 360;
         
@@ -178,10 +179,8 @@ namespace CE::Sandbox
 		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, farPlane);
 		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix();
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
-		
-		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
-		skyboxObjectBufferPerImage[imageIndex]->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
+		perViewData = directionalLightViewData;
 
 		RHI::BufferData data{};
 		data.startOffsetInBuffer = 0;
@@ -189,6 +188,10 @@ namespace CE::Sandbox
 		data.data = &perViewData;
 
 		perViewBufferPerImage[imageIndex]->UploadData(data);
+
+		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
+
+		skyboxObjectBufferPerImage[imageIndex]->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
 	}
 
 	void VulkanSandbox::Shutdown()
@@ -831,6 +834,18 @@ namespace CE::Sandbox
 
 			srgLayouts.Add(perSceneSrgLayout);
 
+			RHI::ShaderResourceGroupLayout perPassSRGLayout{};
+			perPassSRGLayout.srgType = RHI::SRGType::PerPass;
+			perPassSRGLayout.variables.Add({});
+			perPassSRGLayout.variables.Top().arrayCount = 1;
+			perPassSRGLayout.variables.Top().name = "DirectionalShadowMap";
+			perPassSRGLayout.variables.Top().bindingSlot = directionalShadowMapBinding;
+			perPassSRGLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			perPassSRGLayout.variables.Top().format = RHI::Format::R8_UNORM;
+			perPassSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayouts.Add(perPassSRGLayout);
+
 			RHI::ShaderResourceGroupLayout perMaterialSRGLayout{};
 			perMaterialSRGLayout.srgType = RHI::SRGType::PerMaterial;
 			perMaterialSRGLayout.variables.Add({});
@@ -981,11 +996,50 @@ namespace CE::Sandbox
 
 		DirectionalLight mainLight{};
 		mainLight.direction = Vec3(-0.25f, -0.5f, 0.5f).GetNormalized();
+		//mainLight.direction = Vec3(0, 0, 1);
 		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.7f);
 		mainLight.colorAndIntensity.w = 5.0f; // intensity
 		mainLight.temperature = 100;
 
 		directionalLights.Add(mainLight);
+
+		// Directional Light Shadow
+		{
+			RHI::ShaderResourceGroupLayout directionalLightViewSrgLayout{};
+			directionalLightViewSrgLayout.srgType = RHI::SRGType::PerView;
+			directionalLightViewSrgLayout.variables.Add({});
+			directionalLightViewSrgLayout.variables.Top().arrayCount = 1;
+			directionalLightViewSrgLayout.variables.Top().name = "_PerViewData";
+			directionalLightViewSrgLayout.variables.Top().bindingSlot = perViewDataBinding;
+			directionalLightViewSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+			directionalLightViewSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
+
+			directionalLightViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(directionalLightViewSrgLayout);
+
+			directionalLightViewData.viewPosition = Vec3(0, -8, 0);
+			directionalLightViewData.projectionMatrix = Matrix4x4::OrthographicProjection(-10, 10, 10, -10, 1.0f, 500.0f);
+			directionalLightViewData.viewMatrix = Matrix4x4::Translation(directionalLightViewData.viewPosition) *
+				Quat::FromToRotation(Vec3(0, 0, 1), mainLight.direction).ToMatrix();
+
+			directionalLightViewData.viewProjectionMatrix = directionalLightViewData.projectionMatrix * directionalLightViewData.viewMatrix;
+
+			for (int i = 0; i < directionalLightViewPerImage.GetSize(); i++)
+			{
+				RHI::BufferDescriptor desc{};
+				desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+				desc.bufferSize = sizeof(directionalLightViewData);
+				desc.defaultHeapType = RHI::MemoryHeapType::Upload;
+				desc.name = "Directional Light View";
+
+				directionalLightViewPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
+
+				directionalLightViewPerImage[i]->UploadData(&directionalLightViewData, sizeof(directionalLightViewData));
+
+				directionalLightViewSrg->Bind(i, "_PerViewData", directionalLightViewPerImage[i]);
+			}
+
+			directionalLightViewSrg->FlushBindings();
+		}
 
 		pointLights.Clear();
 
@@ -1264,6 +1318,14 @@ namespace CE::Sandbox
 	{
 		scheduler->WaitUntilIdle();
 
+		for (int i = 0; i < directionalLightViewPerImage.GetSize(); i++)
+		{
+			delete directionalLightViewPerImage[i];
+			directionalLightViewPerImage[i] = nullptr;
+		}
+
+		delete directionalLightViewSrg; directionalLightViewSrg = nullptr;
+
 		delete pointLightsBuffer; pointLightsBuffer = nullptr;
 		delete directionalLightsBuffer; directionalLightsBuffer = nullptr;
 		delete lightDataBuffer; lightDataBuffer = nullptr;
@@ -1333,31 +1395,23 @@ namespace CE::Sandbox
 			RHI::ImageDescriptor depthDesc{};
 			depthDesc.width = swapChain->GetWidth();
 			depthDesc.height = swapChain->GetHeight();
+			depthDesc.depth = 1;
 			depthDesc.bindFlags = RHI::TextureBindFlags::Depth;
 			depthDesc.format = RHI::gDynamicRHI->GetAvailableDepthOnlyFormats()[0];
 			depthDesc.name = "DepthStencil";
 
+			RHI::ImageDescriptor shadowMapDesc{};
+			shadowMapDesc.width = 1024;
+			shadowMapDesc.height = 1024;
+			shadowMapDesc.depth = 1;
+			shadowMapDesc.dimension = RHI::Dimension::Dim2D;
+			shadowMapDesc.bindFlags = RHI::TextureBindFlags::Depth | RHI::TextureBindFlags::ShaderRead;
+			shadowMapDesc.format = RHI::gDynamicRHI->GetAvailableDepthOnlyFormats()[0];
+			shadowMapDesc.name = "DirectionalShadowMap";
+
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
-			
-			/*scheduler->BeginScope("ClearPass"); // Important for synchronization
-			{
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
-
-				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
-				depthAttachment.attachmentId = "DepthStencil";
-				depthAttachment.loadStoreAction.clearValueDepth = 1.0f;
-				depthAttachment.loadStoreAction.clearValueStencil = 0;
-				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
-			}
-			scheduler->EndScope();*/
+			attachmentDatabase.EmplaceFrameAttachment("DirectionalShadowMap", shadowMapDesc);
 			
 			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Skybox");
@@ -1373,6 +1427,22 @@ namespace CE::Sandbox
 				scheduler->UseShaderResourceGroup(perViewSrg);
 				
 				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
+			}
+			scheduler->EndScope();
+
+			scheduler->BeginScope("DirectionalShadowCast");
+			{
+				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
+				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
+				shadowMapAttachment.loadStoreAction.clearValueDepth = 1.0f;
+				shadowMapAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				shadowMapAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				scheduler->UseAttachment(shadowMapAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(directionalLightViewSrg);
+
+				scheduler->UsePipeline(depthPipeline);
 			}
 			scheduler->EndScope();
 			
@@ -1408,9 +1478,15 @@ namespace CE::Sandbox
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
 
+				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
+				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
+				shadowMapAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				shadowMapAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+
+				scheduler->UseAttachment(shadowMapAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
+
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
-                //scheduler->UseShaderResourceGroup(sphereMaterial->GetShaderResourceGroup());
 
 				for (int i = 0; i < opaqueShader->GetVariantCount(); i++)
 				{
@@ -1481,6 +1557,7 @@ namespace CE::Sandbox
 		// Finalize
 		drawList.Finalize();
 		scheduler->SetScopeDrawList("Skybox", &drawList.GetDrawListForTag(skyboxTag));
+		scheduler->SetScopeDrawList("DirectionalShadowCast", &drawList.GetDrawListForTag(depthTag));
 		scheduler->SetScopeDrawList("Depth", &drawList.GetDrawListForTag(depthTag));
 		scheduler->SetScopeDrawList("Opaque", &drawList.GetDrawListForTag(opaqueTag));
 		//scheduler->SetScopeDrawList("Transparent", &drawList.GetDrawListForTag(transparentTag));

@@ -119,6 +119,10 @@ namespace CE::Sandbox
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perViewBufferPerImage{};
 		PerViewData perViewData{};
 
+		PerViewData directionalLightViewData{};
+		RHI::ShaderResourceGroup* directionalLightViewSrg = nullptr;
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> directionalLightViewPerImage{};
+
 		RHI::PipelineState* depthPipeline = nullptr;
 		RHI::ShaderModule* depthShaderVert = nullptr;
 		

@@ -3,7 +3,7 @@
 
 #define MAX_DIRECTIONAL_LIGHTS 8
 
-#if defined(FRAGMENT)
+#if FRAGMENT
 
 struct DirectionalLight
 {
@@ -33,6 +33,8 @@ cbuffer _LightData : SRG_PerScene(b2)
     uint totalDirectionalLights;
     uint totalPointLights;
 };
+
+Texture2D<float> DirectionalShadowMap : SRG_PerPass(t0);
 
 #endif // FRAGMENT
 

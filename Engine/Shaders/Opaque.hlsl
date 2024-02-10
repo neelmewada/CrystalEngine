@@ -112,7 +112,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     float3 ambient = float3(0.03, 0.03, 0.03) * material.albedo * _AmbientOcclusion;
     float3 color = Lo;//ambient + Lo;
 
-    color = color / (color + float3(1.0, 1.0, 1.0));
+    color = color / (color + float3(1.0, 1.0, 1.0)); // Tonemapping (optional)
     color = LinearToGamma(color);
     return float4(color, 1.0);
 }

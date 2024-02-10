@@ -546,6 +546,11 @@ TEST(Containers, Matrix)
 		vec = Vec4(0, 1, 0, 1);
 		out = rotator * vec;
 		EXPECT_EQ(out, Vec4(0, -1, 0, 1));
+
+		Quat lookRotation = Quat::LookRotation(Vec3(1, 0, 0));
+		vec = Vec4(0, 0, 1, 0);
+		out = lookRotation * vec;
+		EXPECT_EQ(out, Vec4(1, 0, 0, 0));
 	}
 
     // Multiplication
