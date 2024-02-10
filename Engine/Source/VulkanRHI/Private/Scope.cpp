@@ -58,7 +58,7 @@ namespace CE::Vulkan
 		auto frameGraph = compileRequest.frameGraph;
 		SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->GetSwapChain();
 
-		u32 imageCount = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::Pipeline::MaxFramesInFlight);
+		u32 imageCount = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::MaxSwapChainImageCount);
 
 		if (swapChain != nullptr)
 		{

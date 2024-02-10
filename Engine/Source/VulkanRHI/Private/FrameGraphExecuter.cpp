@@ -36,9 +36,6 @@ namespace CE::Vulkan
 				nullptr,
 				&swapChain->currentImageIndex);
             
-			// TODO: Uncomment this if things fail
-            //vkWaitForFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex], VK_TRUE, u64Max);
-            
 			vkWaitForFences(device->GetHandle(),
 				compiler->graphExecutionFences[currentImageIndex].GetSize(),
 				compiler->graphExecutionFences[currentImageIndex].GetData(),
@@ -47,7 +44,7 @@ namespace CE::Vulkan
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{
 				swapChain->RebuildSwapChain();
-				return false; // TODO: Try acquiring image again...
+				return false; // TODO: Try acquiring image again next frame...
 			}
 
 			currentImageIndex = swapChain->currentImageIndex;
@@ -76,6 +73,65 @@ namespace CE::Vulkan
 	{
 		// TODO: Improve this code later using fences
 		vkDeviceWaitIdle(device->GetHandle());
+	}
+
+	u32 FrameGraphExecuter::BeginExecution(const FrameGraphExecuteRequest& executeRequest)
+	{
+		device->GetShaderResourceManager()->DestroyQueuedSRG();
+
+		FrameGraph* frameGraph = executeRequest.frameGraph;
+		compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
+		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
+		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
+
+		const Array<RHI::Scope*>& producers = frameGraph->producers;
+		constexpr u64 u64Max = NumericLimits<u64>::Max();
+		VkResult result = VK_SUCCESS;
+
+		if (swapChain && presentingScope)
+		{
+			vkResetFences(device->GetHandle(), 1, &compiler->imageAcquiredFences[currentSubmissionIndex]);
+
+			result = vkAcquireNextImageKHR(device->GetHandle(), swapChain->GetHandle(), u64Max,
+				compiler->imageAcquiredSemaphores[currentSubmissionIndex],
+				//compiler->imageAcquiredFences[currentSubmissionIndex],
+				nullptr,
+				&swapChain->currentImageIndex);
+
+			vkWaitForFences(device->GetHandle(),
+				compiler->graphExecutionFences[currentImageIndex].GetSize(),
+				compiler->graphExecutionFences[currentImageIndex].GetData(),
+				VK_TRUE, u64Max);
+
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+			{
+				swapChain->RebuildSwapChain();
+				return false; // TODO: Try acquiring image again next frame...
+			}
+
+			currentImageIndex = swapChain->currentImageIndex;
+		}
+		else
+		{
+			currentImageIndex = currentSubmissionIndex;
+		}
+
+		return currentImageIndex;
+	}
+
+	void FrameGraphExecuter::EndExecution(const FrameGraphExecuteRequest& executeRequest)
+	{
+		FrameGraph* frameGraph = executeRequest.frameGraph;
+
+		HashSet<ScopeID> executedScopes{};
+
+		for (auto rhiScope : frameGraph->endScopes)
+		{
+			ExecuteScope(executeRequest, (Vulkan::Scope*)rhiScope, executedScopes);
+		}
+
+		currentSubmissionIndex = (currentSubmissionIndex + 1) % compiler->imageCount;
+		totalFramesSubmitted++;
 	}
 
 	void FrameGraphExecuter::ExecuteScopesRecursively(Vulkan::Scope* scope)
@@ -158,6 +214,8 @@ namespace CE::Vulkan
 
 		commandList->Begin();
 		{
+			commandList->SetCurrentImageIndex(currentImageIndex);
+
 			//for (Vulkan::Scope* currentScope : scopeChain)
 			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{

@@ -10,6 +10,18 @@ namespace CE::RHI
 
 		constexpr u64 MaxStructuredBufferSize = 128_MB; // 134217728 bytes
 
+		//! @brief Max number of back buffers (images) that can be used in swap chain.
+		constexpr u32 MaxSwapChainImageCount = 2;
+
+#if PLATFORM_DESKTOP
+		//! @brief Max number of FrameScheduler instances a program can have simultaneously
+		constexpr u32 MaxFrameSchedulerCount = 4;
+#elif PLATFORM_MOBILE
+		constexpr u32 MaxFrameSchedulerCount = 1;
+#else
+		constexpr u32 MaxFrameSchedulerCount = 2;
+#endif
+
 		namespace Pipeline
 		{
 			//! @brief Max number of vertex attributes
@@ -17,12 +29,6 @@ namespace CE::RHI
 
 			//! @brief Max number of vertex buffer input slots.
 			constexpr u32 MaxVertexInputSlotCount = 16;
-
-			//! @brief Max number of back buffers (images) that can be used in swap chain.
-			constexpr u32 MaxSwapChainImageCount = 2;
-
-			/// @brief Max number of simultaneous frames that can be rendered simultaneously (triple buffering, etc).
-			constexpr u32 MaxFramesInFlight = MaxSwapChainImageCount - 1;
 
 			//! @brief Max number of color attachment counts.
 			constexpr u32 MaxColorAttachmentCount = 8;

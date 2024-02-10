@@ -90,12 +90,14 @@ namespace CE::Vulkan
 		vkGetBufferMemoryRequirements(device->GetHandle(), buffer, &memRequirements);
 
 		VkMemoryPropertyFlags memoryFlags{};
-		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			if (heapType == RHI::MemoryHeapType::ReadBack && device->SupportsHostCachedMemory())
+			if (heapType == RHI::MemoryHeapType::ReadBack && device->SupportsHostCachedMemory() && 
+				!device->IsUnifiedMemoryArchitecture() &&
+				!device->SupportsReBar())
 				memoryFlags |= VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
-			if (device->IsUnifiedMemoryArchitecture())
+			if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar())
 				memoryFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		}
 		else
@@ -191,7 +193,7 @@ namespace CE::Vulkan
 
 	void Buffer::UploadData(const RHI::BufferData& bufferData)
 	{
-		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			if (bufferMemory != nullptr) // Self allocated memory
 			{
@@ -223,7 +225,7 @@ namespace CE::Vulkan
 		*outData = nullptr;
 		*outDataSize = 0;
 
-		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			// Shared memory
 			*outDataSize = bufferSize;
@@ -252,7 +254,7 @@ namespace CE::Vulkan
 
 	void Buffer::ReadData(void* data)
 	{
-		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			if (bufferMemory != nullptr) // Self allocated memory
 			{
@@ -281,7 +283,7 @@ namespace CE::Vulkan
 		if (isMapped)
 			return false;
 
-		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			if (bufferMemory != nullptr) // Self allocated memory
 			{
@@ -305,7 +307,7 @@ namespace CE::Vulkan
 		if (!isMapped)
 			return false;
 
-		if (device->IsUnifiedMemoryArchitecture() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
+		if (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack)
 		{
 			if (bufferMemory != nullptr) // Self allocated memory
 			{

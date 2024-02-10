@@ -8,13 +8,11 @@ namespace CE::Vulkan
     class DescriptorSet
     {
     public:
-        DescriptorSet(VulkanDevice* device, const RHI::ShaderResourceGroupLayout& srgLayout);
+        DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout);
 
         virtual ~DescriptorSet();
 
         inline VkDescriptorSet GetHandle() const { return descriptorSet; }
-
-        inline VkDescriptorSetLayout GetSetLayout() const { return setLayout; }
 
     private:
 
@@ -24,16 +22,9 @@ namespace CE::Vulkan
         int setNumber = -1;
 
         VkDescriptorSet descriptorSet = nullptr;
-        VkDescriptorSetLayout setLayout = nullptr;
         VkDescriptorPool descriptorPool = nullptr;
         ShaderResourceManager* srgManager = nullptr;
         VulkanDescriptorPool* pool = nullptr;
-
-        Array<VkDescriptorSetLayoutBinding> setLayoutBindings{};
-        HashMap<Name, int> bindingSlotsByVariableName{};
-
-        HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
-        HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};
 
         Atomic<int> usageCount = 0;
 

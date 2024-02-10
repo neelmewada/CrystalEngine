@@ -46,21 +46,21 @@ namespace CE::Vulkan
 
 		void DestroySyncObjects();
 		
-		//FixedArray<VkSemaphore, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedSemaphores{};
-		FixedArray<HashMap<ScopeID, VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> signalSemaphoresByConsumerScope{};
-		FixedArray<List<VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> signalSemaphores{};
+		//FixedArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> renderFinishedSemaphores{};
+		FixedArray<HashMap<ScopeID, VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> signalSemaphoresByConsumerScope{};
+		FixedArray<List<VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> signalSemaphores{};
 
-		FixedArray<VkFence, RHI::Limits::Pipeline::MaxSwapChainImageCount> renderFinishedFences{};
+		FixedArray<VkFence, RHI::Limits::MaxSwapChainImageCount> renderFinishedFences{};
 
-		FixedArray<List<VkSemaphore>, RHI::Limits::Pipeline::MaxSwapChainImageCount> waitSemaphores{};
-		FixedArray<FrameBuffer*, RHI::Limits::Pipeline::MaxSwapChainImageCount> frameBuffers{};
+		FixedArray<List<VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> waitSemaphores{};
+		FixedArray<FrameBuffer*, RHI::Limits::MaxSwapChainImageCount> frameBuffers{};
 
 		List<VkPipelineStageFlags> waitSemaphoreStageFlags{};
 
-		StaticArray<Array<Barrier>, RHI::Limits::Pipeline::MaxSwapChainImageCount> initialBarriers{};
-		StaticArray<Array<Barrier>, RHI::Limits::Pipeline::MaxSwapChainImageCount> barriers{};
+		StaticArray<Array<Barrier>, RHI::Limits::MaxSwapChainImageCount> initialBarriers{};
+		StaticArray<Array<Barrier>, RHI::Limits::MaxSwapChainImageCount> barriers{};
 
-		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::Pipeline::MaxSwapChainImageCount> commandListsByFamilyIndexPerImage{};
+		FixedArray<Array<Vulkan::CommandList*>, RHI::Limits::MaxSwapChainImageCount> commandListsByFamilyIndexPerImage{};
 
 		VulkanDevice* device = nullptr;
         CommandQueue* queue = nullptr;

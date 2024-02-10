@@ -203,24 +203,39 @@ namespace CE::Vulkan
 		vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
 
 		isUnifiedMemory = true;
+		int dedicatedHeapIndex = -1;
+		u64 dedicatedHeapSize = 0;
 
 		for (int i = 0; i < memoryProperties.memoryHeapCount; i++)
 		{
+			if ((memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) && memoryProperties.memoryHeaps[i].size > dedicatedHeapSize)
+			{
+				dedicatedHeapSize = memoryProperties.memoryHeaps[i].size;
+				dedicatedHeapIndex = i;
+			}
+
 			if (memoryProperties.memoryHeaps[i].flags != VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
 			{
 				isUnifiedMemory = false;
-				break;
 			}
 		}
 
 		supportsHostCachedMemory = false;
+		supportsReBar = false;
 
 		for (int i = 0; i < memoryProperties.memoryTypeCount; i++)
 		{
-			if (memoryProperties.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
+			VkMemoryType memType = memoryProperties.memoryTypes[i];
+			VkMemoryPropertyFlags rebarFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+			if ((memType.propertyFlags & rebarFlags) == rebarFlags && memType.heapIndex == dedicatedHeapIndex)
+			{
+				supportsReBar = true;
+			}
+
+			if (memType.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT)
 			{
 				supportsHostCachedMemory = true;
-				break;
 			}
 		}
 

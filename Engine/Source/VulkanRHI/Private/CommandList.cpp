@@ -52,7 +52,7 @@ namespace CE::Vulkan
 				continue;
 
 			int setNumber = srg->GetSetNumber();
-			srg->Compile();
+			srg->FlushBindings();
 
 			srgsToMerge[setNumber].Add(srg);
 		}
@@ -66,12 +66,13 @@ namespace CE::Vulkan
 			{
 				//if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]) // SRG has changed
 				{
+					srgsToMerge[setNumber][0]->currentImageIndex = currentImageIndex;
+					srgsToMerge[setNumber][0]->FlushBindings();
+
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
 					{
 						commitedSRGsBySetNumber[setNumber]->usageCount--;
 					}
-
-					srgsToMerge[setNumber][0]->Compile();
 					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0]->GetDescriptorSet();
 					commitedSRGsBySetNumber[setNumber]->usageCount++;
 
@@ -88,12 +89,13 @@ namespace CE::Vulkan
 
 				//if (commitedSRGsBySetNumber[setNumber] != (Vulkan::ShaderResourceGroup*)mergedSrg) // SRG has changed
 				{
+					mergedSrg->currentImageIndex = currentImageIndex;
+					mergedSrg->FlushBindings();
+
 					if (commitedSRGsBySetNumber[setNumber] != nullptr)
 					{
 						commitedSRGsBySetNumber[setNumber]->usageCount--;
 					}
-
-					mergedSrg->Compile();
 					commitedSRGsBySetNumber[setNumber] = mergedSrg->GetDescriptorSet();
 					commitedSRGsBySetNumber[setNumber]->usageCount++;
 

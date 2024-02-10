@@ -82,11 +82,19 @@ namespace CE::Vulkan
 		virtual bool Bind(Name name, u32 count, RHI::BufferView* bufferViews) override;
 		virtual bool Bind(Name name, u32 count, RHI::Texture** textures) override;
 		virtual bool Bind(Name name, u32 count, RHI::Sampler** samplers) override;
+
+		virtual bool Bind(u32 imageIndex, Name name, RHI::BufferView bufferView) override;
+		virtual bool Bind(u32 imageIndex, Name name, RHI::Texture* texture) override;
+		virtual bool Bind(u32 imageIndex, Name name, RHI::Sampler* sampler) override;
+
+		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::BufferView* bufferViews) override;
+		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures) override;
+		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) override;
 		
 		inline int GetSetNumber() const { return setNumber; }
 
-		inline DescriptorSet* GetDescriptorSet() const { return descriptorSet; }
-		inline VkDescriptorSetLayout GetDescriptorSetLayout() const { return descriptorSet != nullptr ? descriptorSet->GetSetLayout() : nullptr; }
+		inline DescriptorSet* GetDescriptorSet() const { return descriptorSets[currentImageIndex]; }
+		inline VkDescriptorSetLayout GetDescriptorSetLayout() const { return setLayout; }
 
 		void Compile() override;
 
@@ -121,8 +129,11 @@ namespace CE::Vulkan
 		VulkanDescriptorPool* pool = nullptr;
 		VkDescriptorPool allocPool = nullptr;
 
+		u32 currentImageIndex = 0;
 		int setNumber = -1;
-		DescriptorSet* descriptorSet = nullptr;
+		//DescriptorSet* descriptorSet = nullptr;
+		StaticArray<DescriptorSet*, RHI::Limits::MaxSwapChainImageCount> descriptorSets{};
+		VkDescriptorSetLayout setLayout = nullptr;
 
 		Array<VkDescriptorSetLayoutBinding> setLayoutBindings{};
 		HashMap<Name, int> bindingSlotsByVariableName{};
@@ -131,8 +142,8 @@ namespace CE::Vulkan
 		HashMap<Name, VkDescriptorSetLayoutBinding> variableBindingsByName{};
 		HashMap<int, VkDescriptorSetLayoutBinding> variableBindingsBySlot{};
 
-		HashMap<int, List<VkDescriptorBufferInfo>> bufferInfosBoundBySlot{};
-		HashMap<int, List<VkDescriptorImageInfo>> imageInfosBoundBySlot{};
+		StaticArray<HashMap<int, List<VkDescriptorBufferInfo>>, RHI::Limits::MaxSwapChainImageCount> bufferInfosBoundBySlot{};
+		StaticArray<HashMap<int, List<VkDescriptorImageInfo>>, RHI::Limits::MaxSwapChainImageCount> imageInfosBoundBySlot{};
 
 		friend class GraphicsPipelineState;
 		friend class CommandList;

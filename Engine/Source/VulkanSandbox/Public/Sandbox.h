@@ -70,7 +70,7 @@ namespace CE::Sandbox
 
 		void Tick(f32 deltaTime);
 
-		void UpdatePerViewData();
+		void UpdatePerViewData(int imageIndex);
 
 		void Shutdown();
 		
@@ -114,7 +114,7 @@ namespace CE::Sandbox
 
 		RHI::ShaderResourceGroup* depthPerViewSrg = nullptr;
 		RHI::ShaderResourceGroup* perViewSrg = nullptr;
-		RHI::Buffer* perViewBuffer = nullptr;
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> perViewBufferPerImage{};
 		PerViewData perViewData{};
 
 		RHI::PipelineState* depthPipeline = nullptr;
@@ -149,20 +149,19 @@ namespace CE::Sandbox
 		Vec3 skyboxScale = Vec3(1000, 1000, 1000);
 		float skyboxRotation = 0;
 		RHI::ShaderResourceGroup* skyboxObjectSrg = nullptr;
-		RHI::Buffer* skyboxObjectBuffer = nullptr;
-		RHI::Buffer* skyboxViewBuffer = nullptr;
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> skyboxObjectBufferPerImage{};
 		Matrix4x4 skyboxModelMatrix{};
 		PerViewData skyboxViewData{};
 
 		RHI::ShaderResourceGroup* sphereObjectSrg = nullptr;
-		RHI::Buffer* sphereObjectBuffer = nullptr;
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> sphereObjectBufferPerImage{};
 		Matrix4x4 sphereModelMatrix{};
 		f32 cameraRotation = 0.0f;
 		f32 meshRotation = 0;
         f32 cubeRotation = 0;
 		
 		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
-		RHI::Buffer* cubeObjectBuffer = nullptr;
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> cubeObjectBufferPerImage{};
 		Matrix4x4 cubeModelMatrix{};
 
 		RHI::ShaderResourceGroup* perSceneSrg = nullptr;

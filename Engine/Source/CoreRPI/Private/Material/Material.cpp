@@ -103,7 +103,7 @@ namespace CE::RPI
                     delete buffer;
                     buffer = nullptr;
                 }
-                if (buffer == nullptr)
+                if (buffer == nullptr) // Create the buffer if it does not exist
                 {
                     bufferRecreated = true;
                     RHI::BufferDescriptor bufferDesc{};

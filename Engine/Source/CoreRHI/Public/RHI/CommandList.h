@@ -53,6 +53,11 @@ namespace CE::RHI
 		virtual void Begin() = 0;
 		virtual void End() = 0;
 
+		inline void SetCurrentImageIndex(u32 imageIndex)
+		{
+			currentImageIndex = imageIndex;
+		}
+
 		virtual void ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers) = 0;
 
 		virtual void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs) = 0;
@@ -82,6 +87,8 @@ namespace CE::RHI
 		virtual void CopyTextureRegion(const BufferToTextureCopy& region) = 0;
 
 	protected:
+
+		u32 currentImageIndex = 0;
 
 		RHI::CommandListType commandListType = RHI::CommandListType::Direct;
 

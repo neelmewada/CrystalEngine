@@ -27,6 +27,7 @@ namespace CE::Vulkan
 		SIZE_T mergedHash = 0;
 
 		friend class ShaderResourceManager;
+		friend class CommandList;
 	};
 
 } // namespace CE::Vulkan

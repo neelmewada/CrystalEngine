@@ -43,7 +43,7 @@ namespace CE::Vulkan
 		RHI::SwapChainDescriptor desc{};
 
 		//! Used to 
-		StaticArray<VkImageLayout, RHI::Limits::Pipeline::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
+		StaticArray<VkImageLayout, RHI::Limits::MaxSwapChainImageCount> swapChainInitialImageLayouts{};
 
 		List<VkSurfaceFormatKHR> surfaceFormats{};
 		VkSurfaceCapabilitiesKHR surfaceCapabilities{};

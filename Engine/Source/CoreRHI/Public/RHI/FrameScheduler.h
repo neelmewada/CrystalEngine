@@ -17,9 +17,13 @@ namespace CE::RHI
 	class CORERHI_API FrameScheduler final : public FrameGraphBuilder
 	{
 		CE_NO_COPY(FrameScheduler)
-	public:
+	private:
 
 		FrameScheduler(const FrameSchedulerDescriptor& descriptor);
+
+	public:
+		static FrameScheduler* Create(const FrameSchedulerDescriptor& descriptor);
+
 		virtual ~FrameScheduler();
 		
 		inline FrameAttachmentDatabase& GetAttachmentDatabase() const { return frameGraph->attachmentDatabase; }
@@ -36,6 +40,10 @@ namespace CE::RHI
 
 		void Execute();
 
+		u32 BeginExecution();
+
+		void EndExecution();
+
 		void SetScopeDrawList(const ScopeID& scopeId, DrawList* drawList);
 
 		RHI::Scope* FindScope(const ScopeID& scopeId);
@@ -46,7 +54,12 @@ namespace CE::RHI
 
 		void WaitUntilIdle();
 
+		static FrameScheduler* GetFrameScheduler(int instanceIndex);
+		static int GetTotalFrameSchedulerCount();
+
 	private:
+		
+		static Array<FrameScheduler*> frameSchedulerInstances;
 
 		u32 numFramesInFlight = 1;
 

@@ -50,7 +50,7 @@ namespace CE::Sandbox
 
 		RHI::FrameSchedulerDescriptor desc{};
 		
-		scheduler = new RHI::FrameScheduler(desc);
+		scheduler = RHI::FrameScheduler::Create(desc);
 
 		mainWindow = window;
 
@@ -120,9 +120,11 @@ namespace CE::Sandbox
         // We are modifying the model matrix buffers which is same for all swap chain images.
         // Possible solution: 1 buffer per swap chain image
         // We should never use WaitUntilIdle every frame
-        scheduler->WaitUntilIdle();
+        //scheduler->WaitUntilIdle();
 
-		UpdatePerViewData();
+		u32 imageIndex = scheduler->BeginExecution();
+
+		UpdatePerViewData(imageIndex);
 
 		cameraRotation += deltaTime * 5;
 		if (cameraRotation >= 360)
@@ -138,7 +140,7 @@ namespace CE::Sandbox
         
         cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -0.75f, 15)) * Quat::EulerDegrees(Vec3(0, cubeRotation)).ToMatrix() * Matrix4x4::Scale(Vec3(5, 0.2f, 5));
         
-        cubeObjectBuffer->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix), 0);
+        cubeObjectBufferPerImage[imageIndex]->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix), 0);
 
 		sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
@@ -147,12 +149,12 @@ namespace CE::Sandbox
 		uploadData.data = &sphereModelMatrix;
 		uploadData.startOffsetInBuffer = 0;
 
-		sphereObjectBuffer->UploadData(uploadData);
+		sphereObjectBufferPerImage[imageIndex]->UploadData(uploadData);
 
-		scheduler->Execute();
+		scheduler->EndExecution();
 	}
 
-	void VulkanSandbox::UpdatePerViewData()
+	void VulkanSandbox::UpdatePerViewData(int imageIndex)
 	{
 		float farPlane = 1000.0f;
 
@@ -163,14 +165,14 @@ namespace CE::Sandbox
 		
 		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
-		skyboxObjectBuffer->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
+		skyboxObjectBufferPerImage[imageIndex]->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
 
 		RHI::BufferData data{};
 		data.startOffsetInBuffer = 0;
-		data.dataSize = perViewBuffer->GetBufferSize();
+		data.dataSize = perViewBufferPerImage[imageIndex]->GetBufferSize();
 		data.data = &perViewData;
 
-		perViewBuffer->UploadData(data);
+		perViewBufferPerImage[imageIndex]->UploadData(data);
 	}
 
 	void VulkanSandbox::Shutdown()
@@ -343,11 +345,14 @@ namespace CE::Sandbox
 			cubeObjectBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			cubeObjectBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
 
-			cubeObjectBuffer = RHI::gDynamicRHI->CreateBuffer(cubeObjectBufferDesc);
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+			{
+				cubeObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(cubeObjectBufferDesc);
 
-			cubeObjectBuffer->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix));
+				cubeObjectBufferPerImage[i]->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix));
 
-			cubeObjectSrg->Bind("_ObjectData", RHI::BufferView(cubeObjectBuffer));
+				cubeObjectSrg->Bind(i, "_ObjectData", RHI::BufferView(cubeObjectBufferPerImage[i]));
+			}
 
 			cubeObjectSrg->FlushBindings();
 		}
@@ -425,18 +430,21 @@ namespace CE::Sandbox
 			desc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			desc.name = "_ObjectData";
 
-			sphereObjectBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+			{
+				sphereObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
 
-			sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+				sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
-			RHI::BufferData uploadData{};
-			uploadData.dataSize = desc.bufferSize;
-			uploadData.data = &sphereModelMatrix;
-			uploadData.startOffsetInBuffer = 0;
+				RHI::BufferData uploadData{};
+				uploadData.dataSize = desc.bufferSize;
+				uploadData.data = &sphereModelMatrix;
+				uploadData.startOffsetInBuffer = 0;
 
-			sphereObjectBuffer->UploadData(uploadData);
+				sphereObjectBufferPerImage[i]->UploadData(uploadData);
 
-			sphereObjectSrg->Bind("_ObjectData", RHI::BufferView(sphereObjectBuffer));
+				sphereObjectSrg->Bind(i, "_ObjectData", sphereObjectBufferPerImage[i]);
+			}
 
 			sphereObjectSrg->FlushBindings();
 		}
@@ -466,10 +474,13 @@ namespace CE::Sandbox
 			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			bufferDesc.name = "PerViewData";
 
-			perViewBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+			{
+				perViewBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
 
-			perViewSrg->Bind("_PerViewData", perViewBuffer);
-			depthPerViewSrg->Bind("_PerViewData", perViewBuffer);
+				perViewSrg->Bind(i, "_PerViewData", perViewBufferPerImage[i]);
+				depthPerViewSrg->Bind(i, "_PerViewData", perViewBufferPerImage[i]);
+			}
 			
 			perViewSrg->FlushBindings();
 			depthPerViewSrg->FlushBindings();
@@ -658,15 +669,20 @@ namespace CE::Sandbox
 			desc.defaultHeapType = RHI::MemoryHeapType::Upload;
 			desc.name = "_ObjectData";
 
-			skyboxObjectBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
+			skyboxObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
 
 			skyboxScale = Vec3(500, 500, 500);
 			skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
-			skyboxObjectBuffer->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+			{
+				skyboxObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
 
-			skyboxObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
-			skyboxObjectSrg->Bind("_ObjectData", skyboxObjectBuffer);
+				skyboxObjectBufferPerImage[i]->UploadData(&skyboxModelMatrix, sizeof(skyboxModelMatrix));
+
+				skyboxObjectSrg->Bind(i, "_ObjectData", skyboxObjectBufferPerImage[i]);
+			}
+			
 			skyboxObjectSrg->FlushBindings();
 
 			delete skyboxVert; delete skyboxFrag;
@@ -865,7 +881,8 @@ namespace CE::Sandbox
 
 		}
 
-		UpdatePerViewData();
+		UpdatePerViewData(0);
+		UpdatePerViewData(1);
 	}
 
 	void VulkanSandbox::InitLights()
@@ -1124,19 +1141,22 @@ namespace CE::Sandbox
 		delete cubeModel; cubeModel = nullptr;
 		delete sphereModel; sphereModel = nullptr;
 
-		delete cubeObjectBuffer; cubeObjectBuffer = nullptr;
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+		{
+			delete cubeObjectBufferPerImage[i]; cubeObjectBufferPerImage[i] = nullptr;
+			delete sphereObjectBufferPerImage[i]; sphereObjectBufferPerImage[i] = nullptr;
+			delete skyboxObjectBufferPerImage[i]; skyboxObjectBufferPerImage[i] = nullptr;
+			delete perViewBufferPerImage[i]; perViewBufferPerImage[i] = nullptr;
+		}
 		delete cubeObjectSrg; cubeObjectSrg = nullptr;
-		delete sphereObjectBuffer; sphereObjectBuffer = nullptr;
 		delete sphereObjectSrg; sphereObjectSrg = nullptr;
 
 		delete depthPerViewSrg; depthPerViewSrg = nullptr;
 		delete perViewSrg; perViewSrg = nullptr;
-		delete perViewBuffer; perViewBuffer = nullptr;
 
 		delete depthPipeline; depthPipeline = nullptr;
 		delete depthShaderVert; depthShaderVert = nullptr;
-
-		delete skyboxObjectBuffer; skyboxObjectBuffer = nullptr;
+		
 		delete skyboxShader; skyboxShader = nullptr;
 		delete skyboxMaterial; skyboxMaterial = nullptr;
 		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
@@ -1303,8 +1323,6 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::SubmitWork()
 	{
-		UpdatePerViewData();
-
 		resubmit = false;
 		drawList.Shutdown();
 		RHI::DrawListMask drawListMask{};

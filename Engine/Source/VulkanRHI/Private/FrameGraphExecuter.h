@@ -16,6 +16,10 @@ namespace CE::Vulkan
 
 		void WaitUntilIdle() override;
 
+		u32 BeginExecution(const FrameGraphExecuteRequest& executeRequest) override;
+
+		void EndExecution(const FrameGraphExecuteRequest& executeRequest) override;
+
 	private:
 
 		void ExecuteScopesRecursively(Vulkan::Scope* scope);

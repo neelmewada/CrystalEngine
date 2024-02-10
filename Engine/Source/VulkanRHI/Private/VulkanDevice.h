@@ -64,15 +64,11 @@ namespace CE::Vulkan
 		Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask);
 		Array<RHI::CommandQueue*> AllocateHardwareQueues(const HashMap<RHI::HardwareQueueClass, int>& queueCountByClass);
 
-		INLINE bool IsUnifiedMemoryArchitecture() const
-		{
-			return isUnifiedMemory;
-		}
+		inline bool IsUnifiedMemoryArchitecture() const { return isUnifiedMemory; }
 
-        inline bool SupportsHostCachedMemory() const
-        {
-            return supportsHostCachedMemory;
-        }
+        inline bool SupportsHostCachedMemory() const { return supportsHostCachedMemory; }
+
+        inline bool SupportsReBar() const { return supportsReBar; }
 
 		inline CommandBufferAllocator* GetCommandAllocator() const { return commandAllocator; }
 
@@ -131,6 +127,7 @@ namespace CE::Vulkan
 
         bool isInitialized = false;
 		bool isUnifiedMemory = false;
+        bool supportsReBar = false;
         bool supportsHostCachedMemory = false;
 
 		/// @brief Vulkan can be initialized without any Native windows (i.e. offscreen mode).
