@@ -19,14 +19,34 @@ namespace CE::RPI
 
 		void Shutdown();
 
+		inline RHI::Texture* GetDefaultAlbedoTex() const
+		{
+			return defaultAlbedoTex;
+		}
+
+		inline RHI::Texture* GetDefaultRoughnessTex() const
+		{
+			return defaultRoughnessTex;
+		}
+
+		inline RHI::Texture* GetDefaultNormalTex() const
+		{
+			return defaultNormalTex;
+		}
+
 	private:
 
 		RPISystem() = default;
+
+		void CreateDefaultTextures();
 
 		RHI::RHISystem rhiSystem{};
 
 		Array<ScenePtr> scenes{};
 
+		RHI::Texture* defaultAlbedoTex = nullptr;
+		RHI::Texture* defaultNormalTex = nullptr;
+		RHI::Texture* defaultRoughnessTex = nullptr;
 	};
     
 } // namespace CE::RPI

@@ -15,7 +15,7 @@ namespace CE::Vulkan
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = heapSize;
 
-		bool useUMA = device->IsUnifiedMemoryArchitecture() && (usageFlags == RHI::MemoryHeapUsageFlags::Buffer);
+		bool useUnifiedMemory = (device->IsUnifiedMemoryArchitecture() || device->SupportsReBar()) && (usageFlags == RHI::MemoryHeapUsageFlags::Buffer);
 
 		switch (heapType)
 		{
@@ -30,7 +30,7 @@ namespace CE::Vulkan
 			break;
 		}
 
-		if (useUMA)
+		if (useUnifiedMemory)
 		{
 			memoryPropertyFlags |= VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 		}

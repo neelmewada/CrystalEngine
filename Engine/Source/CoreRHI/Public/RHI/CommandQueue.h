@@ -36,6 +36,8 @@ namespace CE::RHI
 		CommandQueue() : RHIResource(ResourceType::CommandQueue)
 		{}
 
+		virtual ~CommandQueue() = default;
+
 	public:
 
 		inline HardwareQueueClassMask GetQueueMask() const

@@ -24,7 +24,9 @@ namespace CE::RPI
 
 		void SelectVariant(u32 variantIndex);
         
-        void FlushProperties();
+        void FlushProperties(u32 imageIndex);
+
+		void FlushProperties();
 
 		void Compile();
         
@@ -45,7 +47,7 @@ namespace CE::RPI
 
 		MaterialPropertyValueMap properties{};
         
-        HashMap<Name, RHI::Buffer*> buffersByVariableName{};
+        StaticArray<HashMap<Name, RHI::Buffer*>, RHI::Limits::MaxSwapChainImageCount> buffersByVariableNamePerImage{};
         HashMap<Name, Array<u64>> memberOffsetsByVariableName{};
 
 		Shader* shader = nullptr;

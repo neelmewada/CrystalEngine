@@ -53,6 +53,7 @@ namespace CE::Sandbox
 		RHI::Texture* albedo = nullptr;
 		RHI::Texture* normalMap = nullptr;
 		RHI::Texture* roughnessMap = nullptr;
+		RHI::Texture* metallicMap = nullptr;
 		RHI::MemoryHeap* memoryAllocation = nullptr;
 
 		static MaterialTextureGroup Load(const Name& pathName);
@@ -111,6 +112,7 @@ namespace CE::Sandbox
 
 		MaterialTextureGroup woodFloorTextures{};
 		MaterialTextureGroup plasticTextures{};
+		MaterialTextureGroup rustedTextures{};
 
 		RHI::ShaderResourceGroup* depthPerViewSrg = nullptr;
 		RHI::ShaderResourceGroup* perViewSrg = nullptr;

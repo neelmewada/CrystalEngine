@@ -11,6 +11,7 @@
 #include "Core/ViewData.hlsli"
 #include "Core/ObjectData.hlsli"
 
+#include "Core/Gamma.hlsli"
 #include "Core/PBR/BRDF.hlsli"
 
 struct VSInput
@@ -39,8 +40,9 @@ PSInput VertMain(VSInput input)
     output.position = LOCAL_TO_CLIP_SPACE(float4(input.position, 1.0), input);
     output.worldPos = LOCAL_TO_WORLD_SPACE(float4(input.position, 1.0), input).xyz;
     output.normal = LOCAL_TO_WORLD_SPACE(float4(input.normal, 0), input).xyz;
-    output.tangent = LOCAL_TO_WORLD_SPACE(input.tangent, input).xyz;
-    output.bitangent = cross(output.normal, output.tangent);
+    //output.normal = input.normal;
+    output.tangent = LOCAL_TO_WORLD_SPACE(float4(input.tangent.xyz, 0), input).xyz;
+    output.bitangent = -cross(output.normal, output.tangent);
     output.uv = input.uv;
     return output;
 }
@@ -55,10 +57,15 @@ cbuffer _MaterialData : SRG_PerMaterial(b0)
     float _SpecularStrength;
     float _Metallic;
     float _Roughness;
+    float _NormalStrength;
     uint _Shininess;
+    float _AmbientOcclusion;
 };
 
-//Texture2D<float4> _Albedo : SRG_PerMaterial(t1);
+Texture2D<float4> _AlbedoTex : SRG_PerMaterial(t1);
+Texture2D<float> _RoughnessTex : SRG_PerMaterial(t2);
+Texture2D<float4> _NormalMap : SRG_PerMaterial(t3);
+Texture2D<float> _MetallicTex : SRG_PerMaterial(t4);
 
 // pixel shader function
 float4 FragMain(PSInput input) : SV_TARGET
@@ -67,13 +74,22 @@ float4 FragMain(PSInput input) : SV_TARGET
     float3 specular = 0;
     float3 normal = normalize(input.normal);
     float3 viewDir = normalize(viewPosition - input.worldPos);
+    float3 tangent = normalize(input.tangent);
+    float3 bitangent = normalize(input.bitangent);
+
+    float4 normalMapSample = _NormalMap.Sample(_DefaultSampler, input.uv);
+    float3 tangentSpaceNormal = normalize(normalMapSample.xyz * 2.0 - 1.0);
+
+    float3x3 tangentToWorld = float3x3(tangent, bitangent, normal);
+    normal = normalize(mul(tangentSpaceNormal, tangentToWorld));
 
     MaterialInput material;
-    material.albedo = _Albedo.rgb;
-    material.metallic = _Metallic;
-    material.roughness = _Roughness;
+    material.albedo = _Albedo.rgb * GammaToLinear(_AlbedoTex.Sample(_DefaultSampler, input.uv).rgb);
+    //material.albedo = _Albedo.rgb * _AlbedoTex.Sample(_DefaultSampler, input.uv).rgb;
+    material.metallic = _Metallic * _MetallicTex.Sample(_DefaultSampler, input.uv);
+    material.roughness = _Roughness * _RoughnessTex.Sample(_DefaultSampler, input.uv);
 
-    float3 color = float3(0, 0, 0);
+    float3 Lo = float3(0, 0, 0);
 
     uint i = 0;
     for (i = 0; i < totalDirectionalLights; i++)
@@ -85,27 +101,19 @@ float4 FragMain(PSInput input) : SV_TARGET
         light.viewDir = viewDir;
         light.halfway = normalize(viewDir + light.lightDir);
 
-        color += CalculateBRDF(light, material);
-
-        // float4 lightColor = _DirectionalLights[i].colorAndIntensity;
-        // diffuse += max(dot(normal, lightDir), 0) * lightColor.rgb * lightColor.a;
-
-        // float3 reflectDir = reflect(-lightDir, normal);
-        // float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-        // specular += _SpecularStrength * spec * lightColor.rgb;
+        Lo += CalculateBRDF(light, material);
     }
 
     for (i = 0; i < totalPointLights; i++)
     {
-        // float3 lightDir = normalize(_PointLights[i].position - input.worldPos);
-        // float4 lightColor = _PointLights[i].colorAndIntensity;
-        // diffuse += max(dot(normal, lightDir), 0) * lightColor.rgb * lightColor.a;
 
-        // float3 halfwayDir = normalize(lightDir + viewDir);  
-        // float spec = pow(max(dot(normal, halfwayDir), 0.0), _Shininess);
-        // specular += _SpecularStrength * spec * lightColor.rgb;
     }
     
+    float3 ambient = float3(0.03, 0.03, 0.03) * material.albedo * _AmbientOcclusion;
+    float3 color = Lo;//ambient + Lo;
+
+    color = color / (color + float3(1.0, 1.0, 1.0));
+    color = LinearToGamma(color);
     return float4(color, 1.0);
 }
 #endif
