@@ -84,7 +84,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     normal = normalize(mul(tangentSpaceNormal, tangentToWorld));
 
     MaterialInput material;
-    material.albedo = _Albedo.rgb * GammaToLinear(_AlbedoTex.Sample(_DefaultSampler, input.uv).rgb);
+    material.albedo = GammaToLinear(_Albedo.rgb * _AlbedoTex.Sample(_DefaultSampler, input.uv).rgb);
     //material.albedo = _Albedo.rgb * _AlbedoTex.Sample(_DefaultSampler, input.uv).rgb;
     material.metallic = _Metallic * _MetallicTex.Sample(_DefaultSampler, input.uv);
     material.roughness = _Roughness * _RoughnessTex.Sample(_DefaultSampler, input.uv);

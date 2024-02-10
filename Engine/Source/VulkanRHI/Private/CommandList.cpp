@@ -16,6 +16,15 @@ namespace CE::Vulkan
 
 	CommandList::~CommandList()
 	{
+		for (int setNumber = 0; setNumber < RHI::Limits::Pipeline::MaxShaderResourceGroupCount; setNumber++)
+		{
+			if (commitedSRGsBySetNumber[setNumber] != nullptr)
+			{
+				commitedSRGsBySetNumber[setNumber]->usageCount--;
+			}
+			commitedSRGsBySetNumber[setNumber] = nullptr;
+		}
+
 		vkFreeCommandBuffers(device->GetHandle(), pool, 1, &commandBuffer);
 	}
 

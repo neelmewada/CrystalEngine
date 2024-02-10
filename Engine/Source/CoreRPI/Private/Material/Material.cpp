@@ -68,6 +68,11 @@ namespace CE::RPI
 
     void Material::SetPropertyValue(Name propertyName, const MaterialPropertyValue& value)
     {
+        for (int i = 0; i < updateRequired.GetSize(); i++)
+        {
+            updateRequired[i] = true;
+        }
+
         properties[propertyName] = value;
     }
 
@@ -77,6 +82,11 @@ namespace CE::RPI
             RecreateShaderResourceGroup();
         if (shaderResourceGroup == nullptr)
             return;
+
+        if (!updateRequired[imageIndex])
+            return;
+
+        updateRequired[imageIndex] = false;
 
         const auto& layout = shaderResourceGroup->GetLayout();
         for (const auto& variable : layout.variables)
@@ -419,6 +429,10 @@ namespace CE::RPI
 
 	void Material::RecreateShaderResourceGroup()
 	{
+        ShaderVariant* currentShader = GetCurrentShader();
+        if (!currentShader || !currentShader->GetPipeline())
+            return;
+
 		if (shaderResourceGroup)
 		{
             delete shaderResourceGroup;
@@ -427,9 +441,10 @@ namespace CE::RPI
 
         memberOffsetsByVariableName.Clear();
 
-		ShaderVariant* currentShader = GetCurrentShader();
-		if (!currentShader || !currentShader->GetPipeline())
-			return;
+        for (int i = 0; i < updateRequired.GetSize(); i++)
+        {
+            updateRequired[i] = true;
+        }
 
 		const auto& graphicsDesc = currentShader->GetPipeline()->GetGraphicsDescriptor();
 

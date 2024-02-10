@@ -48,6 +48,8 @@ namespace CE::RPI
 		MaterialPropertyValueMap properties{};
         
         StaticArray<HashMap<Name, RHI::Buffer*>, RHI::Limits::MaxSwapChainImageCount> buffersByVariableNamePerImage{};
+		StaticArray<bool, RHI::Limits::MaxSwapChainImageCount> updateRequired{};
+
         HashMap<Name, Array<u64>> memberOffsetsByVariableName{};
 
 		Shader* shader = nullptr;

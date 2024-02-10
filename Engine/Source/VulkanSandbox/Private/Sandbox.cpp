@@ -917,7 +917,7 @@ namespace CE::Sandbox
 			sphereMaterial = new RPI::Material(opaqueShader);
 			
 			{
-				sphereMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));//Color(1.0f, 0, 0, 1.0f));
+				sphereMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
 				sphereMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 				sphereMaterial->SetPropertyValue("_Shininess", (u32)64);
 				sphereMaterial->SetPropertyValue("_Metallic", 1.0f);
@@ -946,7 +946,7 @@ namespace CE::Sandbox
 			cubeMaterial = new RPI::Material(opaqueShader);
 
 			{
-				cubeMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));// Color(1, 1, 1, 1));
+				cubeMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
 				cubeMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 				cubeMaterial->SetPropertyValue("_Shininess", (u32)64);
 				cubeMaterial->SetPropertyValue("_Metallic", 1.0f);
