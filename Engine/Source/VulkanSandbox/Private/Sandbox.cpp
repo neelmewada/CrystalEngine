@@ -1503,6 +1503,22 @@ namespace CE::Sandbox
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 			attachmentDatabase.EmplaceFrameAttachment("DirectionalShadowMap", shadowMapDesc);
 			
+			scheduler->BeginScope("DirectionalShadowCast");
+			{
+				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
+				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
+				shadowMapAttachment.loadStoreAction.clearValueDepth = 1.0f;
+				shadowMapAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				shadowMapAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				scheduler->UseAttachment(shadowMapAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(directionalLightViewSrg);
+
+				scheduler->UsePipeline(depthPipeline);
+			}
+			scheduler->EndScope();
+
 			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Skybox");
 			{
@@ -1517,22 +1533,6 @@ namespace CE::Sandbox
 				scheduler->UseShaderResourceGroup(perViewSrg);
 				
 				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
-			}
-			scheduler->EndScope();
-
-			scheduler->BeginScope("DirectionalShadowCast");
-			{
-				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
-				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
-				shadowMapAttachment.loadStoreAction.clearValueDepth = 1.0f;
-				shadowMapAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				shadowMapAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				scheduler->UseAttachment(shadowMapAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
-
-				scheduler->UseShaderResourceGroup(perSceneSrg);
-				scheduler->UseShaderResourceGroup(directionalLightViewSrg);
-
-				scheduler->UsePipeline(depthPipeline);
 			}
 			scheduler->EndScope();
 			

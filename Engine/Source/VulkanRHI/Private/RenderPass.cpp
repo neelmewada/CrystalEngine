@@ -137,8 +137,7 @@ namespace CE::Vulkan
 		if (pass == nullptr)
 			return;
 		
-		// TODO: Multiple subpasses
-		if (pass->nextSubPass != nullptr && pass->prevSubPass == nullptr)
+		if (pass->nextSubPass != nullptr && pass->prevSubPass == nullptr) // Multiple subpasses
 		{
 			Scope* cur = pass;
 			outDescriptor.attachments.Clear();
@@ -226,8 +225,8 @@ namespace CE::Vulkan
 					{
 					case RHI::ScopeAttachmentUsage::DepthStencil:
 						attachmentRef.attachmentIndex = attachmentIndicesById[attachmentId];
-						//if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-						if (true)
+						if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+						//if (true)
 						{
 							attachmentRef.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 							if (initialUse)
@@ -280,7 +279,7 @@ namespace CE::Vulkan
 
 				Scope* prev = (Vulkan::Scope*)cur->prevSubPass;
 
-				while (prev != nullptr)
+				while (prev != nullptr) // Compile Subpass dependencies with ALL of previous passes
 				{
 					HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments{};
 					if (prev != nullptr)
@@ -455,8 +454,8 @@ namespace CE::Vulkan
 				{
 				case RHI::ScopeAttachmentUsage::DepthStencil:
 					attachmentRef.attachmentIndex = i++;
-					//if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
-					if (true)
+					if (EnumHasFlag(scopeAttachment->GetAccess(), RHI::ScopeAttachmentAccess::Write))
+					//if (true)
 					{
 						attachmentBinding.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 						attachmentBinding.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;

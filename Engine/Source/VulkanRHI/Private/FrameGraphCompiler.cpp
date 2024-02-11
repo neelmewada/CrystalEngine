@@ -137,6 +137,14 @@ namespace CE::Vulkan
 			imageCount = swapChain->GetImageCount();
 			numFramesInFlight = imageCount;
 		}
+
+		for (auto scope : frameGraph->scopes)
+		{
+			delete scope->passShaderResourceGroup;
+			scope->passShaderResourceGroup = nullptr;
+			delete scope->subpassShaderResourceGroup;
+			scope->subpassShaderResourceGroup = nullptr;
+		}
 		
 		// Compile sync objects for individual scopes
 		for (auto scope : frameGraph->scopes)
@@ -446,7 +454,7 @@ namespace CE::Vulkan
 							else // Read only
 							{
 								imageBarrier.srcAccessMask |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-								//imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:
@@ -505,7 +513,7 @@ namespace CE::Vulkan
 							else // Read only
 							{
 								imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-								//imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+								imageBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::SubpassInput:

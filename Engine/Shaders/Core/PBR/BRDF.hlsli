@@ -37,15 +37,15 @@ float DistributionGGX(float NdotH, float roughness)
     return num / denom;
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness)
+float GeometrySchlickGGX(float dotProduct, float roughness)
 {
     float r = (roughness + 1.0);
     float a = roughness * roughness;
     float k = (r*r) / 8.0;
     //float k = a / 2;
 
-    float num   = NdotV;
-    float denom = NdotV * (1.0 - k) + k;
+    float num   = dotProduct;
+    float denom = dotProduct * (1.0 - k) + k;
 	denom = max(denom, 0.0001);
 
     return num / denom;

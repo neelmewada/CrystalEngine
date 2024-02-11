@@ -216,7 +216,6 @@ namespace CE::Vulkan
 		{
 			commandList->SetCurrentImageIndex(currentImageIndex);
 
-			//for (Vulkan::Scope* currentScope : scopeChain)
 			for (int scopeIndex = 0; scopeIndex < scopeChain.GetSize(); scopeIndex++)
 			{
 				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
@@ -271,7 +270,7 @@ namespace CE::Vulkan
 					scopeLoop = (Vulkan::Scope*)scopeLoop->nextSubPass;
 				}
 
-				// Execute compiled pipeline barriers
+				// Execute compiled pipeline barriers (initial barriers)
 				if (currentScope->initialBarriers[currentImageIndex].NonEmpty())
 				{
 					for (const auto& barrier : currentScope->initialBarriers[currentImageIndex])
@@ -296,6 +295,9 @@ namespace CE::Vulkan
 					}
 				}
 
+				// Additional pipeline barriers if required, for VkImageLayout and/or queue family ownership transition
+				// This is 'usually' only required for first-time use of an attachment
+				// The FrameGraph handles the internal resource transitions through compiled pipeline barriers.
 				{
 					Vulkan::Scope* currentSubPassScope = currentScope;
 					HashSet<AttachmentID> initializedAttachmentIds{};
@@ -303,8 +305,7 @@ namespace CE::Vulkan
 					while (currentSubPassScope != nullptr)
 					{
 						// Do image-layout/buffer transitions manually (if required)
-						// This is only required for first-time use of an attachment
-						// The FrameGraph handles the internal resource transitions through compiled pipeline barriers.
+						
 						for (auto scopeAttachment : currentSubPassScope->attachments)
 						{
 							if (!scopeAttachment->IsImageAttachment() || scopeAttachment->GetFrameAttachment() == nullptr ||
@@ -347,7 +348,7 @@ namespace CE::Vulkan
 									}
 									else // Read only
 									{
-										//requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+										requiredLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 										dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
 									}
 									break;

@@ -46,11 +46,10 @@ namespace CE::Vulkan
 
 		DestroySyncObjects();
 
-		delete passShaderResourceGroup;
-		passShaderResourceGroup = nullptr;
-
-		delete subpassShaderResourceGroup;
-		subpassShaderResourceGroup = nullptr;
+		//delete passShaderResourceGroup;
+		//passShaderResourceGroup = nullptr;
+		//delete subpassShaderResourceGroup;
+		//subpassShaderResourceGroup = nullptr;
 
 		for (auto frameBuffer : frameBuffers)
 		{

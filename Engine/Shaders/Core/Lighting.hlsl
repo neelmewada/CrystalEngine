@@ -37,7 +37,7 @@ cbuffer _LightData : SRG_PerScene(b2)
     uint totalPointLights;
 };
 
-SamplerState _ShadowMapSampler : SRG_PerScene(t3);
+SamplerState _ShadowMapSampler : SRG_PerScene(s3);
 
 Texture2D<float> DirectionalShadowMap : SRG_PerPass(t0);
 
