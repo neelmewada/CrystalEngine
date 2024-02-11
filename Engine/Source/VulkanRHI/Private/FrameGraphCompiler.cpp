@@ -36,7 +36,7 @@ namespace CE::Vulkan
 				return graphicsQueues[trackNumber];
 			else if (queueClass == RHI::HardwareQueueClass::Compute && (trackNumber - graphicsQueues.GetSize()) < computeQueues.GetSize())
 				return computeQueues[trackNumber - graphicsQueues.GetSize()];
-            return primaryQueue;
+            return graphicsQueues.GetLast();
         }
         
 		Array<CommandQueue*> graphicsQueues{};
@@ -66,6 +66,8 @@ namespace CE::Vulkan
 	{
 		vkDeviceWaitIdle(device->GetHandle());
 
+		// Queue allocation logic...
+
 		FrameGraph* frameGraph = compileRequest.frameGraph;
         QueueAllocator queueAllocator{};
         queueAllocator.queuesByFamily = device->queuesByFamily;
@@ -82,7 +84,6 @@ namespace CE::Vulkan
 #if PLATFORM_MAC
                 i = 0; // Temp code to force same queue
 #endif
-                //i = 0; // Temp code to force same queue
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
 

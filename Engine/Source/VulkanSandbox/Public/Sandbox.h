@@ -16,6 +16,7 @@ namespace CE::Sandbox
 
 	struct alignas(16) DirectionalLight
 	{
+		Matrix4x4 lightSpaceMatrix;
 		Vec3 direction;
 		Vec4 colorAndIntensity;
 		float temperature;
@@ -122,6 +123,7 @@ namespace CE::Sandbox
 		PerViewData directionalLightViewData{};
 		RHI::ShaderResourceGroup* directionalLightViewSrg = nullptr;
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> directionalLightViewPerImage{};
+		RHI::Sampler* shadowMapSampler = nullptr;
 
 		RHI::PipelineState* depthPipeline = nullptr;
 		RHI::ShaderModule* depthShaderVert = nullptr;
@@ -163,9 +165,9 @@ namespace CE::Sandbox
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> sphereObjectBufferPerImage{};
 		Matrix4x4 sphereModelMatrix{};
 		f32 cameraRotation = 0.0f;
-		f32 meshRotation = 0;
+		f32 sphereRotation = 0;
         f32 cubeRotation = 0;
-		
+
 		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> cubeObjectBufferPerImage{};
 		Matrix4x4 cubeModelMatrix{};

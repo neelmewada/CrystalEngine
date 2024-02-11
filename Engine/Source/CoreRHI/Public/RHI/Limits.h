@@ -8,7 +8,11 @@ namespace CE::RHI
 
 		constexpr u64 MaxConstantBufferSize = 16_KB; // 16384 bytes
 
+#if PLATFORM_DESKTOP
+		constexpr u64 MaxStructuredBufferSize = 512_MB;
+#else
 		constexpr u64 MaxStructuredBufferSize = 128_MB; // 134217728 bytes
+#endif
 
 		//! @brief Max number of back buffers (images) that can be used in swap chain.
 		constexpr u32 MaxSwapChainImageCount = 2;

@@ -212,49 +212,27 @@ namespace CE
 
 		stream->SetBinaryMode(true);
 
-		std::vector<unsigned char> data{};
-		u32 w, h;
-		lodepng::State state{};
+		int x = 0, y = 0, channels = 0;
+		stbi_info_from_memory((const stbi_uc*)stream->GetRawDataPtr(), stream->GetLength(), &x, &y, &channels);
 
-		int length = stream->GetLength();
-		if (length <= 0)
-			length = stream->GetCapacity();
+		unsigned char* imageData = stbi_load_from_memory((const stbi_uc*)stream->GetRawDataPtr(), stream->GetLength(), &x, &y, &channels, channels);
 
-		u32 result = lodepng::decode(data, w, h, state, (unsigned char*)stream->GetRawDataPtr(), length);
-		if (result > 0)
-		{
-			image.failureReason = "Decoding failed";
-			return image;
-		}
-		
-		image.x = w;
-		image.y = h;
-		image.numChannels = lodepng_get_channels(&state.info_png.color);
-		image.bitDepth = state.info_png.color.bitdepth;
-		image.bitsPerPixel = lodepng_get_bpp(&state.info_png.color);
-		image.sourceFormat = CMImageSourceFormat::PNG;
-
-		switch (state.info_png.color.colortype)
-		{
-		case LCT_GREY:
+		if (channels == 1)
 			image.format = CMImageFormat::R;
-			break;
-		case LCT_GREY_ALPHA:
+		else if (channels == 2)
 			image.format = CMImageFormat::RG;
-			break;
-		case LCT_RGB:
+		else if (channels == 3)
 			image.format = CMImageFormat::RGB;
-			break;
-		case LCT_RGBA:
+		else if (channels == 4)
 			image.format = CMImageFormat::RGBA;
-			break;
-		default:
-			image.failureReason = "Invalid format";
-			return image;
-		}
 
-		image.data = (unsigned char*)Memory::Malloc(data.size());
-		memcpy(image.data, data.data(), data.size());
+		image.x = x;
+		image.y = y;
+		image.numChannels = channels;
+		image.bitsPerPixel = 8 * channels;
+		image.bitDepth = 8;
+		image.sourceFormat = CMImageSourceFormat::PNG;
+		image.data = imageData;
 
 		return image;
 	}
@@ -342,7 +320,7 @@ namespace CE
 		FileStream stream = FileStream(filePath, Stream::Permissions::ReadOnly);
 		stream.SetBinaryMode(true);
 		
-		if (stream.GetLength() < 8)
+		if (stream.GetLength() < 10)
 		{
 			image.failureReason = "Invalid file";
 			return image;
@@ -356,15 +334,59 @@ namespace CE
 
 		if (sourceType == CMImageSourceFormat::PNG) // Is PNG
 		{
-			MemoryStream memStream = MemoryStream(stream.GetLength());
-			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
-			return LoadPNGImage(&memStream);
+			stream.Close(); // Close the stream
+
+			int x = 0, y = 0, channels = 0;
+			stbi_info(filePathStr.GetCString(), &x, &y, &channels);
+
+			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, 4);
+
+			if (channels == 1)
+				image.format = CMImageFormat::R;
+			else if (channels == 2)
+				image.format = CMImageFormat::RG;
+			else if (channels == 3)
+				image.format = CMImageFormat::RGB;
+			else if (channels == 4)
+				image.format = CMImageFormat::RGBA;
+
+			image.x = x;
+			image.y = y;
+			image.numChannels = channels;
+			image.bitsPerPixel = 8 * channels;
+			image.bitDepth = 8;
+			image.sourceFormat = CMImageSourceFormat::PNG;
+			image.data = imageData;
+
+			return image;
 		}
 		else if (sourceType == CMImageSourceFormat::JPG) // Is JPG
 		{
-			MemoryStream memStream = MemoryStream(stream.GetLength());
-			stream.Read(memStream.GetRawDataPtr(), stream.GetLength());
-			return LoadJPGImage(&memStream);
+			stream.Close(); // Close the stream
+
+			int x = 0, y = 0, channels = 0;
+			stbi_info(filePathStr.GetCString(), &x, &y, &channels);
+
+			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, 4);
+
+			if (channels == 1)
+				image.format = CMImageFormat::R;
+			else if (channels == 2)
+				image.format = CMImageFormat::RG;
+			else if (channels == 3)
+				image.format = CMImageFormat::RGB;
+			else if (channels == 4)
+				image.format = CMImageFormat::RGBA;
+
+			image.x = x;
+			image.y = y;
+			image.numChannels = channels;
+			image.bitsPerPixel = 8 * channels;
+			image.bitDepth = 8;
+			image.sourceFormat = CMImageSourceFormat::JPG;
+			image.data = imageData;
+
+			return image;
 		}
 
 		image.failureReason = "Unsupported image format";
@@ -739,14 +761,7 @@ namespace CE
     {
 		if (data != nullptr && allocated)
 		{
-			if (sourceFormat == CMImageSourceFormat::JPG) // We use stbi image loader for JPEG
-			{
-				stbi_image_free(data);
-			}
-			else
-			{
-				Memory::Free(data);
-			}
+			stbi_image_free(data);
 		}
 
         data = nullptr;

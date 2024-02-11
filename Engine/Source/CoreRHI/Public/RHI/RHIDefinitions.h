@@ -281,13 +281,23 @@ namespace CE::RHI
     };
     ENUM_CLASS(SamplerAddressMode);
 
+    enum class SamplerBorderColor
+    {
+        FloatTransparentBlack = 0,
+        IntTransparentBlack = 1,
+        FloatOpaqueBlack = 2,
+        IntOpaqueBlack = 3,
+        FloatOpaqueWhite = 4,
+        IntOpaqueWhite = 5,
+    };
+
     struct SamplerDescriptor
     {
         SamplerAddressMode addressModeU{};
         SamplerAddressMode addressModeV{};
         SamplerAddressMode addressModeW{};
 		FilterMode samplerFilterMode{};
-		Color borderColor{};
+        SamplerBorderColor borderColor{};
         b8 enableAnisotropy = false;
         int maxAnisotropy = 16;
     };

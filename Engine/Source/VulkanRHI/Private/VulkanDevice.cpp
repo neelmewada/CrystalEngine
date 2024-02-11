@@ -239,13 +239,18 @@ namespace CE::Vulkan
 			}
 		}
 
+		// TODO: Temporary code
+		// Using ReBar and skipping staging buffers leads to crash ONLY when using Nsight frame debugger.
+		// Should be enabled for production code.
+		supportsReBar = false;
+
 		vkGetPhysicalDeviceProperties(gpu, &gpuProperties);
 		gpuMetaData.localMemorySize = GetPhysicalDeviceLocalMemory(gpu);
 
 		// Store Queue Families & Surface Support Info for later use
 		//queueFamilies = GetQueueFamilies(gpu);
 		surfaceSupport = FetchSurfaceSupportInfo(gpu);
-
+		
 		// Fetch Queue properties
 		u32 queuePropertyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queuePropertyCount, nullptr);

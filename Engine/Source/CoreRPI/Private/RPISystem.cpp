@@ -23,6 +23,8 @@ namespace CE::RPI
 
     void RPISystem::CreateDefaultTextures()
     {
+        auto prevTime = clock();
+
         RHI::TextureDescriptor textureDesc{};
         textureDesc.name = "Default Albedo";
         textureDesc.arrayLayers = 1;
@@ -160,6 +162,8 @@ namespace CE::RPI
         RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
         delete stagingBuffer; stagingBuffer = nullptr;
         delete fence; fence = nullptr;
+
+        auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
     }
 
 } // namespace CE::RPI

@@ -12,7 +12,6 @@
 #include "Core/ObjectData.hlsli"
 
 #include "Core/Gamma.hlsli"
-#include "Core/PBR/BRDF.hlsli"
 
 struct VSInput
 {
@@ -67,12 +66,22 @@ Texture2D<float> _RoughnessTex : SRG_PerMaterial(t2);
 Texture2D<float4> _NormalMap : SRG_PerMaterial(t3);
 Texture2D<float> _MetallicTex : SRG_PerMaterial(t4);
 
+inline float3 GetShadowMapDebug(in float4 lightSpacePos)
+{
+    float3 projectionCoords = lightSpacePos.xyz / lightSpacePos.w;
+    projectionCoords = projectionCoords * float3(0.5, 0.5, 1.0) + float3(0.5, 0.5, 0); // In Vulkan, Z axis is already if [0, 1] range, so we only map X and Y to [0, 1] range FROM [-1, 1] range
+    float closestDepth = DirectionalShadowMap.Sample(_ShadowMapSampler, projectionCoords.xy); // This works perfectly fine!
+    float currentDepth = projectionCoords.z;
+    float bias = 0.005;
+    return currentDepth > closestDepth  ? 1.0 : 0.0;
+}
+
 // pixel shader function
 float4 FragMain(PSInput input) : SV_TARGET
 {
     float3 diffuse = 0;
     float3 specular = 0;
-    float3 normal = normalize(input.normal);
+    float3 vertNormal = normalize(input.normal);
     float3 viewDir = normalize(viewPosition - input.worldPos);
     float3 tangent = normalize(input.tangent);
     float3 bitangent = normalize(input.bitangent);
@@ -80,8 +89,8 @@ float4 FragMain(PSInput input) : SV_TARGET
     float4 normalMapSample = _NormalMap.Sample(_DefaultSampler, input.uv);
     float3 tangentSpaceNormal = normalize(normalMapSample.xyz * 2.0 - 1.0);
 
-    float3x3 tangentToWorld = float3x3(tangent, bitangent, normal);
-    normal = normalize(mul(tangentSpaceNormal, tangentToWorld));
+    float3x3 tangentToWorld = float3x3(tangent, bitangent, vertNormal);
+    float3 normal = normalize(mul(tangentSpaceNormal, tangentToWorld));
 
     MaterialInput material;
     material.albedo = GammaToLinear(_Albedo.rgb * _AlbedoTex.Sample(_DefaultSampler, input.uv).rgb);
@@ -101,7 +110,11 @@ float4 FragMain(PSInput input) : SV_TARGET
         light.viewDir = viewDir;
         light.halfway = normalize(viewDir + light.lightDir);
 
-        Lo += CalculateBRDF(light, material);
+        float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
+        float shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
+        shadow = clamp(shadow, 0, 1);
+
+        Lo += CalculateBRDF(light, material) * (1.0 - shadow);
     }
 
     for (i = 0; i < totalPointLights; i++)
@@ -113,7 +126,7 @@ float4 FragMain(PSInput input) : SV_TARGET
     float3 color = Lo;//ambient + Lo;
 
     color = color / (color + float3(1.0, 1.0, 1.0)); // Tonemapping (optional)
-    color = LinearToGamma(color);
+    color = LinearToGamma(color); // Convert to Gamma space
     return float4(color, 1.0);
 }
 #endif

@@ -177,7 +177,7 @@ namespace CE::RHI
 
 			if (queueClass != HardwareQueueClass::Graphics)
 			{
-				errorMessages.Add("Scopes can be grouped together only if they are of Graphics type.");
+				errorMessages.Add("Scopes can be grouped together only if they are of Graphics queue class.");
 				CE_LOG(Error, All, errorMessages.Top());
 				success = false;
 				return;

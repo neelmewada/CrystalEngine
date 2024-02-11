@@ -110,10 +110,21 @@ namespace CE::Vulkan
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = device->FindMemoryType(memRequirements.memoryTypeBits, memoryFlags);
 		allocInfo.pNext = nullptr;
+
+		auto result = vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &bufferMemory);
+
+		const auto& memoryProps = device->GetMemoryProperties();
 		
-		if (vkAllocateMemory(device->GetHandle(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+		if (result != VK_SUCCESS)
 		{
-			CE_LOG(Error, All, "Failed to allocate memory to buffer with name {} of size {} bytes", name, bufferSize);
+			int heapIdx = memoryProps.memoryTypes[allocInfo.memoryTypeIndex].heapIndex;
+
+			CE_LOG(Error, All, "Failed to allocate memory to buffer with name {} of size {} bytes.\n"
+				"Memory Type Index: {}; Type Bits: {}; Memory Flags: {}; Error: {}\n"
+				"Heap Index: {}, Heap Size: {} bytes", 
+				name, bufferSize, 
+				allocInfo.memoryTypeIndex, memRequirements.memoryTypeBits, (int)memoryFlags, (int)result,
+				heapIdx, memoryProps.memoryHeaps[heapIdx].size);
 			return;
 		}
 

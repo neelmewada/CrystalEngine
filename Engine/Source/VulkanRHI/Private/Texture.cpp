@@ -447,28 +447,6 @@ namespace CE::Vulkan
 			CE_LOG(Error, All, "Failed to create Vulkan Image View");
 			return;
 		}
-
-		// Transition image layout
-
-		if (desc.bindFlags == RHI::TextureBindFlags::SubpassInput)
-		{
-			vkImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		}
-		else if (desc.bindFlags == RHI::TextureBindFlags::Color)
-		{
-			vkImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		}
-		else if (desc.bindFlags == RHI::TextureBindFlags::DepthStencil)
-		{
-			vkImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-		}
-
-		curImageLayout = vkImageLayout;
-
-		if (vkImageLayout != VK_IMAGE_LAYOUT_UNDEFINED)
-		{
-			curFamilyIndex = device->TransitionImageLayout(image, vkFormat, VK_IMAGE_LAYOUT_UNDEFINED, vkImageLayout, imageViewCI.subresourceRange, aspectMask);
-		}
 	}
 
     Texture::Texture(VulkanDevice* device, const RHI::TextureDescriptor& desc)

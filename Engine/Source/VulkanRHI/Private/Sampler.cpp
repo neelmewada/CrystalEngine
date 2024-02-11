@@ -45,7 +45,7 @@ namespace CE::Vulkan
         samplerCI.addressModeU = ToVkSamplerAddressMode(samplerDesc.addressModeU);
         samplerCI.addressModeV = ToVkSamplerAddressMode(samplerDesc.addressModeV);
         samplerCI.addressModeW = ToVkSamplerAddressMode(samplerDesc.addressModeW);
-        samplerCI.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+        samplerCI.borderColor = (VkBorderColor)samplerDesc.borderColor;
         samplerCI.anisotropyEnable = samplerDesc.enableAnisotropy ? VK_TRUE : VK_FALSE;
         samplerCI.maxAnisotropy = samplerDesc.maxAnisotropy;
         samplerCI.minFilter = ToVkFilter(samplerDesc.samplerFilterMode);

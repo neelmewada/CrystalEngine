@@ -25,7 +25,7 @@ namespace CE::Vulkan
         
         VulkanDevice* device = nullptr;
         VkSampler sampler{};
-        Color borderColor{};
+        SamplerBorderColor borderColor{};
     };
 
 } // namespace CE

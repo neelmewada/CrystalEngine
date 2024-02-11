@@ -36,9 +36,11 @@ namespace CE::Sandbox
 	constexpr u32 directionalLightArrayBinding = 0;
 	constexpr u32 pointLightsBinding = 1;
 	constexpr u32 lightDataBinding = 2;
-	constexpr u32 sceneDataBinding = 3;
-	constexpr u32 skyboxBinding = 4;
-	constexpr u32 defaultSamplerBinding = 5;
+	constexpr u32 shadowSamplerBinding = 3;
+	constexpr u32 sceneDataBinding = 4;
+	constexpr u32 skyboxBinding = 5;
+	constexpr u32 defaultSamplerBinding = 6;
+
 	constexpr u32 perViewDataBinding = 0;
 	constexpr u32 perObjectDataBinding = 0;
 	constexpr u32 materialDataBinding = 0;
@@ -53,6 +55,8 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::Init(PlatformWindow* window)
 	{
+		auto prevTime = clock();
+
 		localCounter = counter++;
 		rpiSystem.Initialize();
 
@@ -77,12 +81,17 @@ namespace CE::Sandbox
 		
 		InitCubeMaps();
 		InitTextures();
+
 		InitPipelines();
 		InitLights();
 		InitDrawPackets();
 
 		BuildFrameGraph();
 		CompileFrameGraph();
+
+		f32 timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
+		CE_LOG(Info, All, "Initialization time: {} seconds", timeTaken);
 	}
 
 	float sphereRoughness = 0.0f;
@@ -147,19 +156,19 @@ namespace CE::Sandbox
 		if (cameraRotation >= 360)
 			cameraRotation -= 360;
         
-		meshRotation += deltaTime * 15.0f;
-		if (meshRotation >= 360)
-			meshRotation -= 360;
-        
+		sphereRotation += deltaTime * 15.0f;
+		if (sphereRotation >= 360)
+			sphereRotation -= 360;
+		
         //cubeRotation += deltaTime * 5;
         if (cubeRotation >= 360)
             cubeRotation -= 360;
         
-        cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -0.75f, 15)) * Quat::EulerDegrees(Vec3(0, cubeRotation)).ToMatrix() * Matrix4x4::Scale(Vec3(5, 0.2f, 5));
+        cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -0.75f, 5)) * Quat::EulerDegrees(Vec3(0, cubeRotation)).ToMatrix() * Matrix4x4::Scale(Vec3(5, 0.2f, 5));
         
         cubeObjectBufferPerImage[imageIndex]->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix), 0);
 
-		sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+		sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 5)) * Quat::EulerDegrees(Vec3(0, sphereRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
 		RHI::BufferData uploadData{};
 		uploadData.dataSize = sizeof(sphereModelMatrix);
@@ -175,12 +184,13 @@ namespace CE::Sandbox
 	{
 		float farPlane = 1000.0f;
 
-		perViewData.viewPosition = Vec3(0, 0, -10);
+		perViewData.viewPosition = Vec3(0, 2, 0);
 		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, farPlane);
-		perViewData.viewMatrix = Matrix4x4::Translation(perViewData.viewPosition) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix();
+		perViewData.viewMatrix = Matrix4x4::Translation(-perViewData.viewPosition) * Quat::EulerDegrees(Vec3(20, 0, 0)).ToMatrix();
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
-
-		perViewData = directionalLightViewData;
+		
+		// Temp code to test directional light view/proj matrix
+		//perViewData = directionalLightViewData;
 
 		RHI::BufferData data{};
 		data.startOffsetInBuffer = 0;
@@ -223,14 +233,50 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitCubeMaps()
 	{
-		CMImage right = LOAD_SKYBOX(right); // 0
-		CMImage left = LOAD_SKYBOX(left); // 1
-		CMImage top = LOAD_SKYBOX(top); // 2
-		CMImage bottom = LOAD_SKYBOX(bottom); // 3
-		CMImage front = LOAD_SKYBOX(front); // 4
-		CMImage back = LOAD_SKYBOX(back); // 5
+		auto prevTime = clock();
+
+		// Order: &right, &left, &top, &bottom, &front, &back
+		CMImage loadedImages[6] = {};
+
+		{
+			auto t0 = Thread([&]
+				{
+					loadedImages[0] = LOAD_SKYBOX(right);
+				});
+			auto t1 = Thread([&]
+				{
+					loadedImages[1] = LOAD_SKYBOX(left);
+				});
+			auto t2 = Thread([&]
+				{
+					loadedImages[2] = LOAD_SKYBOX(top);
+				});
+			auto t3 = Thread([&]
+				{
+					loadedImages[3] = LOAD_SKYBOX(bottom);
+				});
+			auto t4 = Thread([&]
+				{
+					loadedImages[4] = LOAD_SKYBOX(front);
+				});
+			auto t5 = Thread([&]
+				{
+					loadedImages[5] = LOAD_SKYBOX(back);
+				});
+
+			t0.Join();
+			t1.Join();
+			t2.Join();
+			t3.Join();
+			t4.Join();
+			t5.Join();
+		}
 		
-		CMImage* layers[] = { &right, &left, &top, &bottom, &front, &back };
+		CMImage* layers[6] = {};
+		for (int i = 0; i < 6; i++)
+		{
+			layers[i] = &loadedImages[i];
+		}
 
 		RHI::TextureDescriptor cubeMapDesc{};
 		cubeMapDesc.name = "Skybox";
@@ -238,8 +284,8 @@ namespace CE::Sandbox
 		cubeMapDesc.arrayLayers = 6;
 		cubeMapDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
 		cubeMapDesc.mipLevels = 1;
-		cubeMapDesc.width = back.GetWidth();
-		cubeMapDesc.height = back.GetHeight();
+		cubeMapDesc.width = loadedImages[0].GetWidth();
+		cubeMapDesc.height = loadedImages[0].GetHeight();
 		cubeMapDesc.depth = 1;
 		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
 		cubeMapDesc.format = RHI::Format::R8G8B8A8_UNORM;
@@ -265,6 +311,41 @@ namespace CE::Sandbox
 		
 		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
 
+		void* dataPtr = nullptr;
+		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
+		{
+			std::vector<Thread> threads{};
+
+			for (int face = 0; face < 6; face++)
+			{
+				threads.emplace_back([=]()
+					{
+						u8* dstData = (u8*)dataPtr + height * width * 4 * face;
+						u8* srcData = layers[face]->GetDataPtr();
+						for (int y = 0; y < height; y++)
+						{
+							for (int x = 0; x < width; x++)
+							{
+								int srcPixelIndex = (y * height + x) * 3; // Assuming all CMImage's are RGB8 (3 channels only)
+								int dstPixelIndex = (y * height + x) * 4;
+
+								*(dstData + dstPixelIndex) = *(srcData + srcPixelIndex); // R
+								*(dstData + dstPixelIndex + 1) = *(srcData + srcPixelIndex + 1); // G
+								*(dstData + dstPixelIndex + 2) = *(srcData + srcPixelIndex + 2); // B
+								*(dstData + dstPixelIndex + 3) = 0; // A
+							}
+						}
+					});
+			}
+
+			for (auto& thread : threads)
+			{
+				thread.Join();
+			}
+			threads.clear();
+		}
+		stagingBuffer->Unmap();
+
 		commandList->Begin();
 		
 		{
@@ -273,30 +354,6 @@ namespace CE::Sandbox
 			barrier.fromState = RHI::ResourceState::Undefined;
 			barrier.toState = RHI::ResourceState::CopyDestination;
 			commandList->ResourceBarrier(1, &barrier);
-
-			void* dataPtr = nullptr;
-			stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
-			{
-				for (int face = 0; face < 6; face++)
-				{
-					u8* dstData = (u8*)dataPtr + height * width * 4 * face;
-					u8* srcData = layers[face]->GetDataPtr();
-					for (int y = 0; y < height; y++)
-					{
-						for (int x = 0; x < width; x++)
-						{
-							int srcPixelIndex = (y * height + x) * 3; // Assuming all CMImage's are RGB8 (3 channels only)
-							int dstPixelIndex = (y * height + x) * 4;
-
-							*(dstData + dstPixelIndex) = *(srcData + srcPixelIndex); // R
-							*(dstData + dstPixelIndex + 1) = *(srcData + srcPixelIndex + 1); // G
-							*(dstData + dstPixelIndex + 2) = *(srcData + srcPixelIndex + 2); // B
-							*(dstData + dstPixelIndex + 3) = 0; // A
-						}
-					}
-				}
-			}
-			stagingBuffer->Unmap();
 
 			RHI::BufferToTextureCopy copyRegion{};
 			copyRegion.dstTexture = skyboxCubeMap;
@@ -322,7 +379,10 @@ namespace CE::Sandbox
 		RHI::gDynamicRHI->DestroyFence(commandListFence);
 		RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
 
-		back.Free(); front.Free(); left.Free(); right.Free(); top.Free(); bottom.Free();
+		for (int i = 0; i < 6; i++)
+		{
+			loadedImages[i].Free();
+		}
 		delete stagingBuffer; stagingBuffer = nullptr;
         
         RHI::SamplerDescriptor samplerDesc{};
@@ -330,15 +390,25 @@ namespace CE::Sandbox
         samplerDesc.enableAnisotropy = true;
         samplerDesc.maxAnisotropy = 8;
         samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
-        
+
+		auto curTime = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
         defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 	}
 
 	void VulkanSandbox::InitTextures()
 	{
+		auto prevTime = clock();
 		woodFloorTextures = MaterialTextureGroup::Load("WoodFloor");
+		auto timeTaken0 = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
+		prevTime = clock();
 		plasticTextures = MaterialTextureGroup::Load("Plastic");
-		rustedTextures = MaterialTextureGroup::Load("RustedIron");
+		auto timeTaken1 = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
+		prevTime = clock();
+		//rustedTextures = MaterialTextureGroup::Load("RustedIron");
+		auto timeTaken2 = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 	}
 
 	void VulkanSandbox::InitPipelines()
@@ -410,6 +480,13 @@ namespace CE::Sandbox
 
 			perSceneSrgLayout.variables.Add({});
 			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_ShadowMapSampler";
+			perSceneSrgLayout.variables.Top().bindingSlot = shadowSamplerBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
 			perSceneSrgLayout.variables.Top().name = "_Skybox";
 			perSceneSrgLayout.variables.Top().bindingSlot = skyboxBinding;
 			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
@@ -441,7 +518,17 @@ namespace CE::Sandbox
 
 			sceneConstantBuffer->UploadData(&sceneConstants, sizeof(sceneConstants));
 
+			RHI::SamplerDescriptor shadowSamplerDesc{};
+			shadowSamplerDesc.borderColor = RHI::SamplerBorderColor::FloatOpaqueWhite;
+			shadowSamplerDesc.addressModeU = shadowSamplerDesc.addressModeV = shadowSamplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToBorder;
+			shadowSamplerDesc.enableAnisotropy = false;
+			shadowSamplerDesc.maxAnisotropy = 8;
+			shadowSamplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+			
+			shadowMapSampler = RHI::gDynamicRHI->CreateSampler(shadowSamplerDesc);
+
 			perSceneSrg->Bind("_SceneData", sceneConstantBuffer);
+			perSceneSrg->Bind("_ShadowMapSampler", shadowMapSampler);
 			perSceneSrg->FlushBindings();
 		}
 
@@ -459,7 +546,7 @@ namespace CE::Sandbox
 			{
 				sphereObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
 
-				sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, meshRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+				sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, sphereRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
 				RHI::BufferData uploadData{};
 				uploadData.dataSize = desc.bufferSize;
@@ -1001,8 +1088,6 @@ namespace CE::Sandbox
 		mainLight.colorAndIntensity.w = 5.0f; // intensity
 		mainLight.temperature = 100;
 
-		directionalLights.Add(mainLight);
-
 		// Directional Light Shadow
 		{
 			RHI::ShaderResourceGroupLayout directionalLightViewSrgLayout{};
@@ -1016,12 +1101,14 @@ namespace CE::Sandbox
 
 			directionalLightViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(directionalLightViewSrgLayout);
 
-			directionalLightViewData.viewPosition = Vec3(0, -8, 0);
-			directionalLightViewData.projectionMatrix = Matrix4x4::OrthographicProjection(-10, 10, 10, -10, 1.0f, 500.0f);
-			directionalLightViewData.viewMatrix = Matrix4x4::Translation(directionalLightViewData.viewPosition) *
-				Quat::FromToRotation(Vec3(0, 0, 1), mainLight.direction).ToMatrix();
+			directionalLightViewData.viewPosition = Vec3(0, 5, 0);
+			directionalLightViewData.projectionMatrix = Matrix4x4::OrthographicProjection(-5, 5, 5, -5, 1.0f, 100.0f);
+			directionalLightViewData.viewMatrix = Matrix4x4::Translation(-directionalLightViewData.viewPosition) *
+				Quat::FromToRotation(Vec3(0, 0, 1), Vec3(mainLight.direction.x, mainLight.direction.y, mainLight.direction.z)).ToMatrix();
 
 			directionalLightViewData.viewProjectionMatrix = directionalLightViewData.projectionMatrix * directionalLightViewData.viewMatrix;
+
+			mainLight.lightSpaceMatrix = directionalLightViewData.viewProjectionMatrix;
 
 			for (int i = 0; i < directionalLightViewPerImage.GetSize(); i++)
 			{
@@ -1040,6 +1127,8 @@ namespace CE::Sandbox
 
 			directionalLightViewSrg->FlushBindings();
 		}
+
+		directionalLights.Add(mainLight);
 
 		pointLights.Clear();
 
@@ -1333,6 +1422,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::DestroyPipelines()
 	{
+		delete shadowMapSampler; shadowMapSampler = nullptr;
 		delete sceneConstantBuffer; sceneConstantBuffer = nullptr;
 		delete cubeModel; cubeModel = nullptr;
 		delete sphereModel; sphereModel = nullptr;
@@ -1497,26 +1587,6 @@ namespace CE::Sandbox
 			}
 			scheduler->EndScope();
 			//scheduler->EndScopeGroup();
-
-			/*scheduler->BeginScope("Transparent");
-			{
-				RHI::ImageScopeAttachmentDescriptor depthAttachment{};
-				depthAttachment.attachmentId = "DepthStencil";
-				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
-				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
-
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
-
-				scheduler->PresentSwapChain(swapChain);
-			}
-			scheduler->EndScope();*/
 		}
 		scheduler->EndFrameGraph();
 	}
@@ -1611,13 +1681,41 @@ namespace CE::Sandbox
 		IO::Path roughnessPath = basePath / "roughness.png";
 		IO::Path metallicPath = basePath / "metallic.png";
 
-		if (!albedoPath.Exists() || !normalPath.Exists() || !roughnessPath.Exists())
+		if (!albedoPath.Exists() || !normalPath.Exists() || !roughnessPath.Exists() || !metallicPath.Exists())
 			return {};
 
-		CMImage albedoImage = CMImage::LoadFromFile(albedoPath);
-		CMImage normalImage = CMImage::LoadFromFile(normalPath);
-		CMImage roughnessImage = CMImage::LoadFromFile(roughnessPath);
-		CMImage metallicImage = CMImage::LoadFromFile(metallicPath);
+		auto prevTime = clock();
+
+		CMImage imageArray[4] = { CMImage(), CMImage(), CMImage(), CMImage() };
+
+		CMImage& albedoImage = imageArray[0];
+		CMImage& normalImage = imageArray[1];
+		CMImage& roughnessImage = imageArray[2];
+		CMImage& metallicImage = imageArray[3];
+
+		{
+			auto t1 = Thread([&]()
+				{
+					albedoImage = CMImage::LoadFromFile(albedoPath);
+				});
+			auto t2 = Thread([&]()
+				{
+					normalImage = CMImage::LoadFromFile(normalPath);
+				});
+			auto t3 = Thread([&]()
+				{
+					roughnessImage = CMImage::LoadFromFile(roughnessPath);
+				});
+			auto t4 = Thread([&]()
+				{
+					metallicImage = CMImage::LoadFromFile(metallicPath);
+				});
+
+			t1.Join();
+			t2.Join();
+			t3.Join();
+			t4.Join();
+		}
 
 		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 		auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
@@ -1660,6 +1758,7 @@ namespace CE::Sandbox
 		const u32 albedoNumPixels = albedoImage.GetWidth() * albedoImage.GetHeight();
 		const u32 normalNumPixels = normalImage.GetWidth() * normalImage.GetHeight();
 		const u32 roughnessNumPixels = roughnessImage.GetWidth() * roughnessImage.GetHeight();
+		const u32 metallicNumPixels = metallicImage.GetWidth() * metallicImage.GetHeight();
 
 		const u64 albedoByteSize = albedoImage.GetWidth() * albedoImage.GetHeight() * 4; // RGBA32
 		const u64 normalByteSize = normalImage.GetWidth() * normalImage.GetHeight() * 4; // RGBA32
@@ -1675,8 +1774,6 @@ namespace CE::Sandbox
 
 		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
 
-		auto prevTime = clock();
-
 		void* dataPtr = nullptr;
 		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
 		{
@@ -1685,21 +1782,34 @@ namespace CE::Sandbox
 			u8* roughnessPtr = ((u8*)dataPtr + albedoByteSize + normalByteSize);
 			u8* metallicPtr = ((u8*)dataPtr + albedoByteSize + normalByteSize + roughnessByteSize);
 
+			u32 albedoBytesPerPixel = albedoImage.GetBitsPerPixel() / 8;
+			u32 normalBytesPerPixel = normalImage.GetBitsPerPixel() / 8;
+			u32 roughnessBytesPerPixel = roughnessImage.GetBitsPerPixel() / 8;
+			u32 metallicBytesPerPixel = metallicImage.GetBitsPerPixel() / 8;
+			albedoBytesPerPixel = 4;
+			normalBytesPerPixel = 4;
+
 			int numThreads = Thread::GetHardwareConcurrency();
 
 			auto t1 = Thread([&]()
 				{
-					for (int i = 0; i < albedoByteSize; i++)
+					for (int i = 0; i < albedoNumPixels; i++)
 					{
-						*(albedoPtr + i) = *((u8*)albedoImage.GetDataPtr() + i);
+						*(albedoPtr + i * 4 + 0) = *((u8*)albedoImage.GetDataPtr() + i * albedoBytesPerPixel + 0);
+						*(albedoPtr + i * 4 + 1) = *((u8*)albedoImage.GetDataPtr() + i * albedoBytesPerPixel + 1);
+						*(albedoPtr + i * 4 + 2) = *((u8*)albedoImage.GetDataPtr() + i * albedoBytesPerPixel + 2);
+						*(albedoPtr + i * 4 + 3) = (u8)0xff;
 					}
 				});
 
 			auto t2 = Thread([&]()
 				{
-					for (int i = 0; i < normalByteSize; i++)
+					for (int i = 0; i < normalNumPixels; i++)
 					{
-						*(normalPtr + i) = *((u8*)normalImage.GetDataPtr() + i);
+						*(normalPtr + i * 4 + 0) = *((u8*)normalImage.GetDataPtr() + i * normalBytesPerPixel + 0);
+						*(normalPtr + i * 4 + 1) = *((u8*)normalImage.GetDataPtr() + i * normalBytesPerPixel + 1);
+						*(normalPtr + i * 4 + 2) = *((u8*)normalImage.GetDataPtr() + i * normalBytesPerPixel + 2);
+						*(normalPtr + i * 4 + 3) = (u8)0xff;
 					}
 				});
 
@@ -1725,8 +1835,6 @@ namespace CE::Sandbox
 			t4.Join();
 		}
 		stagingBuffer->Unmap();
-
-		f32 timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
 		commandList->Begin();
 		{
@@ -1827,6 +1935,8 @@ namespace CE::Sandbox
 			roughnessImage.Free();
 		if (metallicImage.IsValid())
 			metallicImage.Free();
+
+		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
 		return result;
 	}

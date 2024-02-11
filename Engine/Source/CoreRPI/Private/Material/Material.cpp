@@ -221,7 +221,7 @@ namespace CE::RPI
                         RHI::Texture* texture = value.GetValue<RHI::Texture*>();
                         if (texture != nullptr)
                         {
-                            shaderResourceGroup->Bind(variable.name, texture);
+                            shaderResourceGroup->Bind(imageIndex, variable.name, texture);
                         }
                     }
                 }
@@ -236,7 +236,7 @@ namespace CE::RPI
                         RHI::Sampler* sampler = value.GetValue<RHI::Sampler*>();
                         if (sampler != nullptr)
                         {
-                            shaderResourceGroup->Bind(variable.name, sampler);
+                            shaderResourceGroup->Bind(imageIndex, variable.name, sampler);
                         }
                     }
                 }
