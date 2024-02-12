@@ -399,6 +399,21 @@ namespace CE::Sandbox
         defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 	}
 
+    u16 Float32ToFloat16(f32 floatValue)
+    {
+        f32* ptr = &floatValue;
+        unsigned int fltInt32 = *((u32*)ptr);
+        u16 fltInt16;
+
+        fltInt16 = (fltInt32 >> 31) << 5;
+        u16 tmp = (fltInt32 >> 23) & 0xff;
+        tmp = (tmp - 0x70) & ((unsigned int)((int)(0x70 - tmp) >> 4) >> 27);
+        fltInt16 = (fltInt16 | tmp) << 10;
+        fltInt16 |= (fltInt32 >> 13) & 0x3ff;
+        
+        return fltInt16;
+    }
+
 	void VulkanSandbox::InitHDRIs()
 	{
 		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_day.hdr";
@@ -433,14 +448,14 @@ namespace CE::Sandbox
 		void* dataPtr = nullptr;
 		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
 		{
-			f32* dstData = (f32*)dataPtr;
+			u16* dstData = (u16*)dataPtr;
 
 			for (int i = 0; i < numPixels; i++)
 			{
-				*(dstData + 4 * i + 0) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 0);
-				*(dstData + 4 * i + 1) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 1);
-				*(dstData + 4 * i + 2) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 2);
-				*(dstData + 4 * i + 3) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 3);
+				*(dstData + 4 * i + 0) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 0));
+				*(dstData + 4 * i + 1) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 1));
+				*(dstData + 4 * i + 2) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 2));
+                *(dstData + 4 * i + 3) = Float32ToFloat16(1.0f);//*((f32*)hdrImage.GetDataPtr() + 4 * i + 3);
 			}
 		}
 		stagingBuffer->Unmap();

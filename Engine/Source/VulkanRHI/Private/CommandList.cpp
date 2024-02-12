@@ -511,15 +511,6 @@ namespace CE::Vulkan
 		copy.bufferImageHeight = 0; // 0 means data is tightly packed
 		copy.bufferRowLength = 0; // 0 means data is tightly packed
 
-		if (IsFloat16Format(dstTexture->vkFormat))
-		{
-			u32 bytesPerChannel = 0;
-			u32 numChannels = GetNumberOfChannelsForFormat(dstTexture->format, bytesPerChannel);
-
-			//copy.bufferRowLength = copy.imageExtent.width;
-			//copy.bufferImageHeight = copy.imageExtent.height;
-		}
-
 		copy.imageSubresource.aspectMask = dstTexture->aspectMask;
 		copy.imageSubresource.baseArrayLayer = region.baseArrayLayer;
 		copy.imageSubresource.layerCount = region.layerCount;
