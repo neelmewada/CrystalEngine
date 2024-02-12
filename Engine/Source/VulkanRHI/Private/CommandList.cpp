@@ -502,14 +502,23 @@ namespace CE::Vulkan
 		Vulkan::Buffer* srcBuffer = (Vulkan::Buffer*)region.srcBuffer;
 
 		VkBufferImageCopy copy{};
-		copy.bufferOffset = region.bufferOffset;
-		copy.bufferImageHeight = 0; // 0 means data is tightly packed
-		copy.bufferRowLength = 0; // 0 means data is tightly packed
-		
 		copy.imageOffset = { 0, 0, 0 };
 		copy.imageExtent.width = dstTexture->GetWidth();
 		copy.imageExtent.height = dstTexture->GetHeight();
 		copy.imageExtent.depth = dstTexture->GetDepth();
+
+		copy.bufferOffset = region.bufferOffset;
+		copy.bufferImageHeight = 0; // 0 means data is tightly packed
+		copy.bufferRowLength = 0; // 0 means data is tightly packed
+
+		if (IsFloat16Format(dstTexture->vkFormat))
+		{
+			u32 bytesPerChannel = 0;
+			u32 numChannels = GetNumberOfChannelsForFormat(dstTexture->format, bytesPerChannel);
+
+			//copy.bufferRowLength = copy.imageExtent.width;
+			//copy.bufferImageHeight = copy.imageExtent.height;
+		}
 
 		copy.imageSubresource.aspectMask = dstTexture->aspectMask;
 		copy.imageSubresource.baseArrayLayer = region.baseArrayLayer;

@@ -629,7 +629,7 @@ namespace CE::Vulkan
 
 								break;
 							}
-							else
+							else // Go to next subpass
 							{
 								scopeIndex++;
 								currentScope = (Vulkan::Scope*)currentScope->nextSubPass;

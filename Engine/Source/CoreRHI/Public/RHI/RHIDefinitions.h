@@ -221,6 +221,7 @@ namespace CE::RHI
 		R16G16_UINT,
 		R16G16_SINT,
 		R16G16_SFLOAT,
+        R16G16B16A16_SFLOAT,
         R32_UINT,
         R32_SINT,
         R32_SFLOAT,

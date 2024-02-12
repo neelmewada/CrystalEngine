@@ -50,7 +50,7 @@ TEST(CoreMedia, PNG)
 		auto info = CMImage::GetImageInfoFromMemory(resource->GetData(), resource->GetDataSize());
 		EXPECT_EQ(info.bitDepth, 8);
 		EXPECT_EQ(info.bitsPerPixel, 32);
-		EXPECT_EQ(info.format, CMImageFormat::RGBA);
+		EXPECT_EQ(info.format, CMImageFormat::RGBA8);
 		EXPECT_EQ(info.x, 512); EXPECT_EQ(info.y, 512);
 		EXPECT_EQ(info.numChannels, 4);
 		EXPECT_EQ(info.failureReason, nullptr);
@@ -65,7 +65,7 @@ TEST(CoreMedia, PNG)
 		auto info = CMImage::GetImageInfoFromMemory(resource->GetData(), resource->GetDataSize());
 		EXPECT_EQ(info.bitDepth, 16);
 		EXPECT_EQ(info.bitsPerPixel, 32);
-		EXPECT_EQ(info.format, CMImageFormat::RG);
+		EXPECT_EQ(info.format, CMImageFormat::RG8);
 		EXPECT_EQ(info.x, 32); EXPECT_EQ(info.y, 32);
 		EXPECT_EQ(info.numChannels, 2);
 		EXPECT_EQ(info.failureReason, nullptr);
@@ -80,7 +80,7 @@ TEST(CoreMedia, PNG)
 		auto info = CMImage::GetImageInfoFromMemory(resource->GetData(), resource->GetDataSize());
 		EXPECT_EQ(info.bitDepth, 8);
 		EXPECT_EQ(info.bitsPerPixel, 32);
-		EXPECT_EQ(info.format, CMImageFormat::RGBA);
+		EXPECT_EQ(info.format, CMImageFormat::RGBA8);
 		EXPECT_EQ(info.x, 32); EXPECT_EQ(info.y, 32);
 		EXPECT_EQ(info.numChannels, 4);
 		EXPECT_EQ(info.failureReason, nullptr);

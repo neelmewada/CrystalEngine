@@ -6,63 +6,65 @@ namespace CE::Vulkan
 {
 	struct FormatEntry
 	{
-		RHI::TextureFormat rhiFormat = RHI::TextureFormat::Undefined;
+		RHI::Format rhiFormat = RHI::Format::Undefined;
 		VkFormat vkFormat = VK_FORMAT_UNDEFINED;
 		u32 numChannels = 0;
 		u32 bytesPerChannel = 0;
 	};
 
 	static Array<FormatEntry> formatEntries{
-		// RHI::TextureFormat, VkFormat, numChannels, bytesPerChannel
-		{ RHI::TextureFormat::R8_UNORM, VK_FORMAT_R8_UNORM, 1, 1 },
-		{ RHI::TextureFormat::R8_SNORM, VK_FORMAT_R8_SNORM, 1, 1 },
-		{ RHI::TextureFormat::R8_SRGB, VK_FORMAT_R8_SRGB, 1, 1 },
+		// RHI::Format, VkFormat, numChannels, bytesPerChannel
+		{ RHI::Format::R8_UNORM, VK_FORMAT_R8_UNORM, 1, 1 },
+		{ RHI::Format::R8_SNORM, VK_FORMAT_R8_SNORM, 1, 1 },
+		{ RHI::Format::R8_SRGB, VK_FORMAT_R8_SRGB, 1, 1 },
 
-		{ RHI::TextureFormat::R16G16_UNORM, VK_FORMAT_R16G16_UNORM, 2, 2 },
-		{ RHI::TextureFormat::R16G16_SNORM, VK_FORMAT_R16G16_SNORM, 2, 2 },
-		{ RHI::TextureFormat::R16G16_SINT, VK_FORMAT_R16G16_SINT, 2, 2 },
-		{ RHI::TextureFormat::R16G16_SFLOAT, VK_FORMAT_R16G16_SFLOAT, 2, 2 },
+		{ RHI::Format::R16G16_UNORM, VK_FORMAT_R16G16_UNORM, 2, 2 },
+		{ RHI::Format::R16G16_SNORM, VK_FORMAT_R16G16_SNORM, 2, 2 },
+		{ RHI::Format::R16G16_SINT, VK_FORMAT_R16G16_SINT, 2, 2 },
+		{ RHI::Format::R16G16_SFLOAT, VK_FORMAT_R16G16_SFLOAT, 2, 2 },
 
-		{ RHI::TextureFormat::R32G32_UINT, VK_FORMAT_R32G32_UINT, 2, 4 },
-		{ RHI::TextureFormat::R32G32_SINT, VK_FORMAT_R32G32_SINT, 2, 4 },
-		{ RHI::TextureFormat::R32G32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, 2, 4 },
+		{ RHI::Format::R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT, 4, 2 },
 
-		{ RHI::TextureFormat::R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_SRGB, 4, 1 },
-		{ RHI::TextureFormat::R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, 4, 1 },
-		{ RHI::TextureFormat::R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_SNORM, 4, 1 },
+		{ RHI::Format::R32G32_UINT, VK_FORMAT_R32G32_UINT, 2, 4 },
+		{ RHI::Format::R32G32_SINT, VK_FORMAT_R32G32_SINT, 2, 4 },
+		{ RHI::Format::R32G32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, 2, 4 },
 
-		{ RHI::TextureFormat::B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_SRGB, 4, 1 },
-		{ RHI::TextureFormat::B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, 4, 1 },
-		{ RHI::TextureFormat::B8G8R8A8_SNORM, VK_FORMAT_B8G8R8A8_SNORM, 4, 1 },
+		{ RHI::Format::R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_SRGB, 4, 1 },
+		{ RHI::Format::R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, 4, 1 },
+		{ RHI::Format::R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_SNORM, 4, 1 },
 
-		{ RHI::TextureFormat::R8G8B8_UNORM, VK_FORMAT_R8G8B8_UNORM, 3, 1 },
-		{ RHI::TextureFormat::R8G8B8_SNORM, VK_FORMAT_R8G8B8_SNORM, 3, 1 },
-		{ RHI::TextureFormat::R8G8B8_SRGB, VK_FORMAT_R8G8B8_SRGB, 3, 1 },
+		{ RHI::Format::B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_SRGB, 4, 1 },
+		{ RHI::Format::B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, 4, 1 },
+		{ RHI::Format::B8G8R8A8_SNORM, VK_FORMAT_B8G8R8A8_SNORM, 4, 1 },
 
-		{ RHI::TextureFormat::R16_UNORM, VK_FORMAT_R16_UNORM, 1, 2 },
-		{ RHI::TextureFormat::R16_SNORM, VK_FORMAT_R16_SNORM, 1, 2 },
-		{ RHI::TextureFormat::R16_SFLOAT, VK_FORMAT_R16_SFLOAT, 1, 2 },
-		{ RHI::TextureFormat::R32_UINT, VK_FORMAT_R32_UINT, 1, 4 },
-		{ RHI::TextureFormat::R32_SINT, VK_FORMAT_R32_SINT, 1, 4 },
-		{ RHI::TextureFormat::R32_SFLOAT, VK_FORMAT_R32_SFLOAT, 1, 4 },
-		{ RHI::TextureFormat::D32_SFLOAT, VK_FORMAT_D32_SFLOAT, 1, 4 },
-		{ RHI::TextureFormat::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 5 },
-		{ RHI::TextureFormat::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 4 },
-		{ RHI::TextureFormat::D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, 1, 3 },
+		{ RHI::Format::R8G8B8_UNORM, VK_FORMAT_R8G8B8_UNORM, 3, 1 },
+		{ RHI::Format::R8G8B8_SNORM, VK_FORMAT_R8G8B8_SNORM, 3, 1 },
+		{ RHI::Format::R8G8B8_SRGB, VK_FORMAT_R8G8B8_SRGB, 3, 1 },
 
-		{ RHI::TextureFormat::B8G8R8_UNORM, VK_FORMAT_B8G8R8_UNORM, 3, 1 },
-		{ RHI::TextureFormat::B8G8R8_SNORM, VK_FORMAT_B8G8R8_SNORM, 3, 1 },
-		{ RHI::TextureFormat::B8G8R8_SRGB, VK_FORMAT_B8G8R8_SRGB, 3, 1 },
+		{ RHI::Format::R16_UNORM, VK_FORMAT_R16_UNORM, 1, 2 },
+		{ RHI::Format::R16_SNORM, VK_FORMAT_R16_SNORM, 1, 2 },
+		{ RHI::Format::R16_SFLOAT, VK_FORMAT_R16_SFLOAT, 1, 2 },
+		{ RHI::Format::R32_UINT, VK_FORMAT_R32_UINT, 1, 4 },
+		{ RHI::Format::R32_SINT, VK_FORMAT_R32_SINT, 1, 4 },
+		{ RHI::Format::R32_SFLOAT, VK_FORMAT_R32_SFLOAT, 1, 4 },
+		{ RHI::Format::D32_SFLOAT, VK_FORMAT_D32_SFLOAT, 1, 4 },
+		{ RHI::Format::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 5 },
+		{ RHI::Format::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 4 },
+		{ RHI::Format::D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, 1, 3 },
 
-		{ RHI::TextureFormat::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK, 4, 1 },
-		{ RHI::TextureFormat::BC7_SRGB, VK_FORMAT_BC7_SRGB_BLOCK, 4, 1 },
-		{ RHI::TextureFormat::BC4_UNORM, VK_FORMAT_BC4_UNORM_BLOCK, 1, 1 },
-		{ RHI::TextureFormat::BC6H_UFLOAT, VK_FORMAT_BC6H_UFLOAT_BLOCK, 4, 2 },
-		{ RHI::TextureFormat::BC6H_SFLOAT, VK_FORMAT_BC6H_SFLOAT_BLOCK, 4, 2 },
+		{ RHI::Format::B8G8R8_UNORM, VK_FORMAT_B8G8R8_UNORM, 3, 1 },
+		{ RHI::Format::B8G8R8_SNORM, VK_FORMAT_B8G8R8_SNORM, 3, 1 },
+		{ RHI::Format::B8G8R8_SRGB, VK_FORMAT_B8G8R8_SRGB, 3, 1 },
+
+		{ RHI::Format::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK, 4, 1 },
+		{ RHI::Format::BC7_SRGB, VK_FORMAT_BC7_SRGB_BLOCK, 4, 1 },
+		{ RHI::Format::BC4_UNORM, VK_FORMAT_BC4_UNORM_BLOCK, 1, 1 },
+		{ RHI::Format::BC6H_UFLOAT, VK_FORMAT_BC6H_UFLOAT_BLOCK, 4, 2 },
+		{ RHI::Format::BC6H_SFLOAT, VK_FORMAT_BC6H_SFLOAT_BLOCK, 4, 2 },
 	};
 
-	static HashMap<RHI::TextureFormat, VkFormat> textureFormatToVkFormatMap{};
-	static HashMap<VkFormat, RHI::TextureFormat> vkFormatToTextureFormatMap{};
+	static HashMap<RHI::Format, VkFormat> textureFormatToVkFormatMap{};
+	static HashMap<VkFormat, RHI::Format> vkFormatToTextureFormatMap{};
 
 	static void LoadMappings()
 	{
@@ -76,7 +78,7 @@ namespace CE::Vulkan
 		}
 	}
 
-	VkFormat RHIFormatToVkFormat(RHI::TextureFormat format)
+	VkFormat RHIFormatToVkFormat(RHI::Format format)
     {
 		LoadMappings();
 
@@ -114,17 +116,31 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	RHI::TextureFormat VkFormatToRHIFormat(VkFormat format)
+	bool IsFloat16Format(VkFormat format)
+	{
+		switch (format)
+		{
+		case VK_FORMAT_R16_SFLOAT:
+		case VK_FORMAT_R16G16_SFLOAT:
+		case VK_FORMAT_R16G16B16_SFLOAT:
+		case VK_FORMAT_R16G16B16A16_SFLOAT:
+			return true;
+		}
+
+		return false;
+	}
+
+	RHI::Format VkFormatToRHIFormat(VkFormat format)
     {
 		LoadMappings();
 
 		if (!vkFormatToTextureFormatMap.KeyExists(format))
-			return RHI::TextureFormat::Undefined;
+			return RHI::Format::Undefined;
 
 		return vkFormatToTextureFormatMap[format];
     }
 
-	u32 GetNumberOfChannelsForFormat(RHI::TextureFormat format, u32& outByteSizePerChannel)
+	u32 GetNumberOfChannelsForFormat(RHI::Format format, u32& outByteSizePerChannel)
     {
 		LoadMappings();
 
@@ -244,6 +260,10 @@ namespace CE::Vulkan
         {
             imageCI.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
         }
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::ShaderWrite))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
+		}
         if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Color))
         {
             imageCI.usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -252,6 +272,10 @@ namespace CE::Vulkan
         {
             imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         }
+		if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::Depth))
+		{
+			imageCI.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		}
         if (EnumHasFlag(desc.bindFlags, RHI::TextureBindFlags::SubpassInput))
         {
             imageCI.usage |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;

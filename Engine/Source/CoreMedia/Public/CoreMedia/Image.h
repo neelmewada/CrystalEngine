@@ -6,11 +6,16 @@ namespace CE
 	{
 		Undefined = 0,
 		// Grayscale
-		R,
+		R8,
 		// Gray + Alpha
-		RG,
-		RGB,
-		RGBA
+		RG8,
+		RGB8,
+		RGBA8,
+
+		R16,
+		RG16,
+		RGB16,
+		RGBA16
 	};
 	ENUM_CLASS_FLAGS(CMImageFormat);
 
@@ -87,7 +92,7 @@ namespace CE
         /// Always call the Free() function when image is no longer needed!
         void Free();
 
-        inline unsigned char* GetDataPtr() const { return data; }
+        inline void* GetDataPtr() const { return data; }
 		inline u32 GetDataSize() const { return bitsPerPixel / 8 * x * y; }
         inline u32 GetWidth() const { return x; }
         inline u32 GetHeight() const { return y; }
@@ -109,7 +114,7 @@ namespace CE
 		static CMImageInfo GetJPGImageInfo(MemoryStream* stream);
 		static CMImage LoadJPGImage(MemoryStream* stream);
 
-        unsigned char* data = nullptr;
+        void* data = nullptr;
 		bool allocated = true;
     };
 

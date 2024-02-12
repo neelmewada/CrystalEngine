@@ -88,6 +88,7 @@ namespace CE::Vulkan
 
 	bool IsDepthVkFormat(VkFormat format);
 	bool IsStencilVkFormat(VkFormat format);
+    bool IsFloat16Format(VkFormat format);
 
 	bool IsDepthFormat(RHI::Format format);
 	bool IsDepthStencilFormat(RHI::Format format);

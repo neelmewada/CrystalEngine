@@ -45,10 +45,9 @@ float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {
     float3 projectionCoords = lightSpacePos.xyz / lightSpacePos.w;
     projectionCoords = projectionCoords * float3(0.5, 0.5, 1.0) + float3(0.5, 0.5, 0); // In Vulkan, Z axis is already if [0, 1] range, so we only map X and Y to [0, 1] range FROM [-1, 1] range
-    //projectionCoords.z = clamp(projectionCoords.z, 0, 1);
+    projectionCoords.z = clamp(projectionCoords.z, 0, 1);
     //float closestDepth = DirectionalShadowMap.Sample(_ShadowMapSampler, projectionCoords.xy); // This works perfectly fine!
     float currentDepth = projectionCoords.z;
-    //float bias = max(0.05 * (1.0 - NdotL), 0.005);
     float bias = 0.005;
     bias = max(0.01 * (1.0 - NdotL), 0.005);
     //return (currentDepth - bias) > closestDepth ? 1.0 : 0.0;

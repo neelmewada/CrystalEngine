@@ -119,16 +119,16 @@ namespace CE::Widgets
         desc.name = "";
 		switch (image.GetFormat())
 		{
-		case CMImageFormat::R:
+		case CMImageFormat::R8:
 			desc.format = RHI::TextureFormat::R8G8B8_UNORM;
 			break;
-		case CMImageFormat::RG:
+		case CMImageFormat::RG8:
 			desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;// R16G16_UNORM;
 			break;
-		case CMImageFormat::RGB:
+		case CMImageFormat::RGB8:
 			desc.format = RHI::TextureFormat::R8G8B8_UNORM;
 			break;
-		case CMImageFormat::RGBA:
+		case CMImageFormat::RGBA8:
 			desc.format = RHI::TextureFormat::R8G8B8A8_UNORM;
 			break;
 		default:

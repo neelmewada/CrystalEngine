@@ -182,16 +182,16 @@ namespace CE
 		switch (state.info_png.color.colortype)
 		{
 		case LCT_GREY:
-			info.format = CMImageFormat::R;
+			info.format = CMImageFormat::R8;
 			break;
 		case LCT_GREY_ALPHA:
-			info.format = CMImageFormat::RG;
+			info.format = CMImageFormat::RG8;
 			break;
 		case LCT_RGB:
-			info.format = CMImageFormat::RGB;
+			info.format = CMImageFormat::RGB8;
 			break;
 		case LCT_RGBA:
-			info.format = CMImageFormat::RGBA;
+			info.format = CMImageFormat::RGBA8;
 			break;
 		default:
 			info.failureReason = "Invalid format";
@@ -218,13 +218,13 @@ namespace CE
 		unsigned char* imageData = stbi_load_from_memory((const stbi_uc*)stream->GetRawDataPtr(), stream->GetLength(), &x, &y, &channels, channels);
 
 		if (channels == 1)
-			image.format = CMImageFormat::R;
+			image.format = CMImageFormat::R8;
 		else if (channels == 2)
-			image.format = CMImageFormat::RG;
+			image.format = CMImageFormat::RG8;
 		else if (channels == 3)
-			image.format = CMImageFormat::RGB;
+			image.format = CMImageFormat::RGB8;
 		else if (channels == 4)
-			image.format = CMImageFormat::RGBA;
+			image.format = CMImageFormat::RGBA8;
 
 		image.x = x;
 		image.y = y;
@@ -253,13 +253,13 @@ namespace CE
 		int result = stbi_info_from_memory((const stbi_uc*)stream->GetRawDataPtr(), stream->GetLength(), &x, &y, &channels);
 
 		if (channels == 1)
-			info.format = CMImageFormat::R;
+			info.format = CMImageFormat::R8;
 		else if (channels == 2)
-			info.format = CMImageFormat::RG;
+			info.format = CMImageFormat::RG8;
 		else if (channels == 3)
-			info.format = CMImageFormat::RGB;
+			info.format = CMImageFormat::RGB8;
 		else if (channels == 4)
-			info.format = CMImageFormat::RGBA;
+			info.format = CMImageFormat::RGBA8;
 
 		info.x = x;
 		info.y = y;
@@ -287,13 +287,13 @@ namespace CE
 		unsigned char* imageData = stbi_load_from_memory((const stbi_uc*)stream->GetRawDataPtr(), stream->GetLength(), &x, &y, &channels, 3);
 
 		if (channels == 1)
-			image.format = CMImageFormat::R;
+			image.format = CMImageFormat::R8;
 		else if (channels == 2)
-			image.format = CMImageFormat::RG;
+			image.format = CMImageFormat::RG8;
 		else if (channels == 3)
-			image.format = CMImageFormat::RGB;
+			image.format = CMImageFormat::RGB8;
 		else if (channels == 4)
-			image.format = CMImageFormat::RGBA;
+			image.format = CMImageFormat::RGBA8;
 
 		image.x = x;
 		image.y = y;
@@ -342,13 +342,13 @@ namespace CE
 			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, 4);
 
 			if (channels == 1)
-				image.format = CMImageFormat::R;
+				image.format = CMImageFormat::R8;
 			else if (channels == 2)
-				image.format = CMImageFormat::RG;
+				image.format = CMImageFormat::RG8;
 			else if (channels == 3)
-				image.format = CMImageFormat::RGB;
+				image.format = CMImageFormat::RGB8;
 			else if (channels == 4)
-				image.format = CMImageFormat::RGBA;
+				image.format = CMImageFormat::RGBA8;
 
 			image.x = x;
 			image.y = y;
@@ -370,13 +370,13 @@ namespace CE
 			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, 4);
 
 			if (channels == 1)
-				image.format = CMImageFormat::R;
+				image.format = CMImageFormat::R8;
 			else if (channels == 2)
-				image.format = CMImageFormat::RG;
+				image.format = CMImageFormat::RG8;
 			else if (channels == 3)
-				image.format = CMImageFormat::RGB;
+				image.format = CMImageFormat::RGB8;
 			else if (channels == 4)
-				image.format = CMImageFormat::RGBA;
+				image.format = CMImageFormat::RGBA8;
 
 			image.x = x;
 			image.y = y;
@@ -384,6 +384,34 @@ namespace CE
 			image.bitsPerPixel = 8 * channels;
 			image.bitDepth = 8;
 			image.sourceFormat = CMImageSourceFormat::JPG;
+			image.data = imageData;
+
+			return image;
+		}
+		else if (sourceType == CMImageSourceFormat::HDR)
+		{
+			stream.Close();
+
+			int x = 0, y = 0, channels = 0;
+			stbi_info(filePathStr.GetCString(), &x, &y, &channels);
+
+			float* imageData = stbi_loadf(filePathStr.GetCString(), &x, &y, &channels, STBI_rgb_alpha);
+
+			if (channels == 1)
+				image.format = CMImageFormat::R16;
+			else if (channels == 2)
+				image.format = CMImageFormat::RG16;
+			else if (channels == 3)
+				image.format = CMImageFormat::RGB16;
+			else if (channels == 4)
+				image.format = CMImageFormat::RGBA16;
+
+			image.x = x;
+			image.y = y;
+			image.numChannels = channels;
+			image.bitsPerPixel = 16 * channels;
+			image.bitDepth = 8;
+			image.sourceFormat = CMImageSourceFormat::HDR;
 			image.data = imageData;
 
 			return image;
@@ -436,7 +464,7 @@ namespace CE
 	{
 		switch (format)
 		{
-		case CE::CMImageFormat::R:
+		case CE::CMImageFormat::R8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_R_8;
 			else if (bitDepth == 16)
@@ -444,7 +472,7 @@ namespace CE
 			else if (bitDepth == 32)
 				return CMP_FORMAT_R_32F;
 			break;
-		case CE::CMImageFormat::RG:
+		case CE::CMImageFormat::RG8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RG_8;
 			else if (bitDepth == 16)
@@ -452,11 +480,11 @@ namespace CE
 			else if (bitDepth == 32)
 				return CMP_FORMAT_RG_32F;
 			break;
-		case CE::CMImageFormat::RGB:
+		case CE::CMImageFormat::RGB8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RGB_888;
 			break;
-		case CE::CMImageFormat::RGBA:
+		case CE::CMImageFormat::RGBA8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RGBA_8888;
 			else if (bitDepth == 16)
@@ -473,15 +501,15 @@ namespace CE
 	{
 		switch (format)
 		{
-		case CE::CMImageFormat::R:
+		case CE::CMImageFormat::R8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_BC4;
 			break;
-		case CE::CMImageFormat::RG:
+		case CE::CMImageFormat::RG8:
 			break;
-		case CE::CMImageFormat::RGB:
+		case CE::CMImageFormat::RGB8:
 			break;
-		case CE::CMImageFormat::RGBA:
+		case CE::CMImageFormat::RGBA8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_BC7;
 			break;
@@ -524,13 +552,13 @@ namespace CE
 
 		switch (format)
 		{
-		case CMImageFormat::R:
+		case CMImageFormat::R8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_R_8;
 			else if (bitDepth == 16)
 				return CMP_FORMAT_R_16;
 			break;
-		case CMImageFormat::RG:
+		case CMImageFormat::RG8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RG_8;
 			else if (bitDepth == 16)
@@ -538,13 +566,13 @@ namespace CE
 			else if (bitDepth == 32)
 				return CMP_FORMAT_RG_32F;
 			break;
-		case CMImageFormat::RGB:
+		case CMImageFormat::RGB8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RGB_888;
 			else if (bitDepth == 32)
 				return CMP_FORMAT_RGB_32F;
 			break;
-		case CMImageFormat::RGBA:
+		case CMImageFormat::RGBA8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RGBA_8888;
 			else if (bitDepth == 16)
@@ -561,19 +589,19 @@ namespace CE
 	{
 		switch (pixelFormat)
 		{
-		case CMImageFormat::R:
+		case CMImageFormat::R8:
 			if (outputFormat == CMImageSourceFormat::BC4 && bitDepth == 8)
 				return true;
 			break;
-		case CMImageFormat::RG:
+		case CMImageFormat::RG8:
 			if (outputFormat == CMImageSourceFormat::BC5 && bitDepth == 8)
 				return true;
 			break;
-		case CMImageFormat::RGB:
+		case CMImageFormat::RGB8:
 			if ((outputFormat == CMImageSourceFormat::BC1 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
 				return true;
 			break;
-		case CMImageFormat::RGBA:
+		case CMImageFormat::RGBA8:
 			if ((outputFormat == CMImageSourceFormat::BC3 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
 				return true;
 			break;
@@ -665,16 +693,16 @@ namespace CE
 		state.info_raw.bitdepth = bitDepth;
 		switch (pixelFormat)
 		{
-		case CMImageFormat::R:
+		case CMImageFormat::R8:
 			state.info_raw.colortype = LCT_GREY;
 			break;
-		case CMImageFormat::RG:
+		case CMImageFormat::RG8:
 			state.info_raw.colortype = LCT_GREY_ALPHA;
 			break;
-		case CMImageFormat::RGB:
+		case CMImageFormat::RGB8:
 			state.info_raw.colortype = LCT_RGB;
 			break;
-		case CMImageFormat::RGBA:
+		case CMImageFormat::RGBA8:
 			state.info_raw.colortype = LCT_RGBA;
 			break;
 		default:
@@ -682,7 +710,7 @@ namespace CE
 			return false;
 		}
 
-		u32 result = lodepng::encode(encoded, source.data, source.GetWidth(), source.GetHeight(), state);
+		u32 result = lodepng::encode(encoded, (unsigned char*)source.data, source.GetWidth(), source.GetHeight(), state);
 		if (result > 0)
 		{
 			CE_LOG(Error, All, "Failed to encode png. {}.", lodepng_error_text(result));
@@ -735,16 +763,16 @@ namespace CE
 		switch (state.info_png.color.colortype)
 		{
 		case LCT_GREY:
-			image.format = CMImageFormat::R;
+			image.format = CMImageFormat::R8;
 			break;
 		case LCT_GREY_ALPHA:
-			image.format = CMImageFormat::RG;
+			image.format = CMImageFormat::RG8;
 			break;
 		case LCT_RGB:
-			image.format = CMImageFormat::RGB;
+			image.format = CMImageFormat::RGB8;
 			break;
 		case LCT_RGBA:
-			image.format = CMImageFormat::RGBA;
+			image.format = CMImageFormat::RGBA8;
 			break;
 		default:
 			image.failureReason = "Invalid format";

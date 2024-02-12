@@ -81,8 +81,8 @@ namespace CE::Sandbox
 		
 		InitCubeMaps();
 		InitTextures();
-
 		InitPipelines();
+		InitHDRIs();
 		InitLights();
 		InitDrawPackets();
 
@@ -212,6 +212,7 @@ namespace CE::Sandbox
 		DestroyDrawPackets();
 		DestroyTextures();
 		DestroyCubeMaps();
+		DestroyHDRIs();
 
 		if (mainWindow)
 		{
@@ -323,7 +324,7 @@ namespace CE::Sandbox
 				threads.emplace_back([=]()
 					{
 						u8* dstData = (u8*)dataPtr + height * width * 4 * face;
-						u8* srcData = layers[face]->GetDataPtr();
+						u8* srcData = (u8*)layers[face]->GetDataPtr();
 						for (int y = 0; y < height; y++)
 						{
 							for (int x = 0; x < width; x++)
@@ -396,6 +397,89 @@ namespace CE::Sandbox
 		auto curTime = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
         defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
+	}
+
+	void VulkanSandbox::InitHDRIs()
+	{
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_day.hdr";
+		
+		CMImage hdrImage = CMImage::LoadFromFile(path);
+
+		RHI::TextureDescriptor hdriFlatMapDesc{};
+		hdriFlatMapDesc.name = "HDRI Texture";
+		hdriFlatMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+		hdriFlatMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
+		hdriFlatMapDesc.width = hdrImage.GetWidth();
+		hdriFlatMapDesc.height = hdrImage.GetHeight();
+		hdriFlatMapDesc.depth = 1;
+		hdriFlatMapDesc.dimension = RHI::Dimension::Dim2D;
+		hdriFlatMapDesc.mipLevels = 1;
+		hdriFlatMapDesc.arrayLayers = 1;
+		hdriFlatMapDesc.sampleCount = 1;
+		hdriFlatMapDesc.defaultHeapType = RHI::MemoryHeapType::Default;
+		
+		hdriMap = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+
+		u32 numPixels = hdrImage.GetWidth() * hdrImage.GetHeight();
+
+		RHI::BufferDescriptor stagingDesc{};
+		stagingDesc.name = "Staging Buffer";
+		stagingDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		stagingDesc.bufferSize = numPixels * 4 * 4; // f32 * 4: per pixel
+		stagingDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+		
+		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingDesc);
+
+		void* dataPtr = nullptr;
+		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
+		{
+			f32* dstData = (f32*)dataPtr;
+
+			for (int i = 0; i < numPixels; i++)
+			{
+				*(dstData + 4 * i + 0) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 0);
+				*(dstData + 4 * i + 1) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 1);
+				*(dstData + 4 * i + 2) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 2);
+				*(dstData + 4 * i + 3) = *((f32*)hdrImage.GetDataPtr() + 4 * i + 3);
+			}
+		}
+		stagingBuffer->Unmap();
+
+		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+		RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+		RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
+
+		cmdList->Begin();
+		{
+			RHI::ResourceBarrierDescriptor barrier{};
+			barrier.resource = hdriMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::CopyDestination;
+			cmdList->ResourceBarrier(1, &barrier);
+
+			RHI::BufferToTextureCopy copy{};
+			copy.srcBuffer = stagingBuffer;
+			copy.bufferOffset = 0;
+			copy.dstTexture = hdriMap;
+			copy.layerCount = 1;
+			copy.mipSlice = 0;
+			copy.baseArrayLayer = 0;
+			cmdList->CopyTextureRegion(copy);
+
+			barrier.resource = hdriMap;
+			barrier.fromState = RHI::ResourceState::CopyDestination;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			cmdList->ResourceBarrier(1, &barrier);
+		}
+		cmdList->End();
+
+		queue->Execute(1, &cmdList, fence);
+		fence->WaitForFence();
+
+		hdrImage.Free();
+		RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
+		delete stagingBuffer;
+		delete fence;
 	}
 
 	void VulkanSandbox::InitTextures()
@@ -1467,6 +1551,12 @@ namespace CE::Sandbox
 
 		rustedTextures.Release();
 		rustedTextures = {};
+	}
+
+	void VulkanSandbox::DestroyHDRIs()
+	{
+		delete hdriMap;
+		hdriMap = nullptr;
 	}
 
 	void VulkanSandbox::DestroyCubeMaps()

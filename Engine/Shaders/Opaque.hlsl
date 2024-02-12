@@ -33,6 +33,7 @@ struct PSInput
 };
 
 #if VERTEX
+
 PSInput VertMain(VSInput input)
 {
     PSInput output;
