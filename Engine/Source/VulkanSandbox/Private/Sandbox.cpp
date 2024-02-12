@@ -161,13 +161,6 @@ namespace CE::Sandbox
 			sphereRotation -= 360;
 		Vec3 spherePivot = Vec3(0, 0, 5);
 		Vec3 spherePos = spherePivot;// + Vec3(Math::Cos(TO_RADIANS(sphereRotation)), 0, Math::Sin(TO_RADIANS(sphereRotation))) * 0.5f;
-
-		static bool shadowUpdated = false;
-		if (!shadowUpdated && sphereRotation > 90)
-		{
-			shadowUpdated = true;
-			scheduler->SetFrameGraphVariable("DrawSunShadows", true);
-		}
 		
         //cubeRotation += deltaTime * 5;
         if (cubeRotation >= 360)
@@ -1516,7 +1509,7 @@ namespace CE::Sandbox
 			
 			scheduler->BeginScope("DirectionalShadowCast");
 			{
-				scheduler->ExecuteOnlyIf("DrawSunShadows", RHI::FrameGraphVariableComparison::Equal, true);
+				//scheduler->ExecuteOnlyIf("DrawSunShadows", RHI::FrameGraphVariableComparison::Equal, true);
 
 				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
 				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
@@ -1530,7 +1523,7 @@ namespace CE::Sandbox
 
 				scheduler->UsePipeline(depthPipeline);
 
-				scheduler->SetVariableAfterExecution("DrawSunShadows", false);
+				//scheduler->SetVariableAfterExecution("DrawSunShadows", false);
 			}
 			scheduler->EndScope();
 
