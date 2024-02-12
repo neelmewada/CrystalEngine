@@ -438,6 +438,8 @@ namespace CE::Vulkan
 					srcStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 					bufferBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
 					break;
+                default:
+                    continue;
 				}
 
 				switch (barrierInfo.toState) // NEW state
@@ -477,6 +479,8 @@ namespace CE::Vulkan
 					dstStageMask = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 					bufferBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
 					break;
+                default:
+                    continue;
 				}
 
 				vkCmdPipelineBarrier(commandBuffer,

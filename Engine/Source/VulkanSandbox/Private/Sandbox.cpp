@@ -455,7 +455,7 @@ namespace CE::Sandbox
 				*(dstData + 4 * i + 0) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 0));
 				*(dstData + 4 * i + 1) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 1));
 				*(dstData + 4 * i + 2) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 2));
-                *(dstData + 4 * i + 3) = Float32ToFloat16(1.0f);//*((f32*)hdrImage.GetDataPtr() + 4 * i + 3);
+                *(dstData + 4 * i + 3) = Float32ToFloat16(1.0f);
 			}
 		}
 		stagingBuffer->Unmap();
@@ -487,7 +487,7 @@ namespace CE::Sandbox
 			cmdList->ResourceBarrier(1, &barrier);
 		}
 		cmdList->End();
-
+        
 		queue->Execute(1, &cmdList, fence);
 		fence->WaitForFence();
 
