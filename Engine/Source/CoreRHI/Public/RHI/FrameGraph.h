@@ -10,6 +10,7 @@ namespace CE::Vulkan
 
 namespace CE::RHI
 {
+	class FrameGraphVariable;
 
     class CORERHI_API FrameGraph final
     {
@@ -27,6 +28,26 @@ namespace CE::RHI
 		void Clear();
         
 		bool Build();
+
+		inline void SetVariable(int imageIndex, const Name& name, const FrameGraphVariable& value)
+		{
+			frameGraphVariables[name][imageIndex] = value;
+		}
+
+		inline void SetVariable(const Name& name, const FrameGraphVariable& value)
+		{
+			for (int i = 0; i < frameGraphVariables[name].GetSize(); i++)
+			{
+				frameGraphVariables[name][i] = value;
+			}
+		}
+
+		inline const FrameGraphVariable& GetVariable(int imageIndex, const Name& name)
+		{
+			return frameGraphVariables[name][imageIndex];
+		}
+
+		inline bool VariableExists(const Name& name) const { return frameGraphVariables.KeyExists(name); }
 
 		struct GraphNode
 		{
@@ -58,6 +79,8 @@ namespace CE::RHI
 		HashMap<AttachmentID, HashSet<Scope*>> attachmentReadSchedule{};
 		HashMap<Scope*, HashSet<Scope*>> nodeDependencies{};
 		HashMap<ScopeID, GraphNode> nodes{};
+
+		HashMap<Name, StaticArray<FrameGraphVariable, RHI::Limits::MaxSwapChainImageCount>> frameGraphVariables{};
 
         //! A database of all attachments used in this frame graph.
         FrameAttachmentDatabase attachmentDatabase{};

@@ -142,7 +142,7 @@ namespace CE::Sandbox
 
 		sphereRoughness += deltaTime * 0.2f;
 		if (sphereRoughness >= 1)
-			sphereRoughness = 0.01;
+			sphereRoughness = 0.001f;
 
 		//sphereMaterial->SetPropertyValue("_Roughness", sphereRoughness);
 
@@ -159,16 +159,25 @@ namespace CE::Sandbox
 		sphereRotation += deltaTime * 15.0f;
 		if (sphereRotation >= 360)
 			sphereRotation -= 360;
+		Vec3 spherePivot = Vec3(0, 0, 5);
+		Vec3 spherePos = spherePivot;// + Vec3(Math::Cos(TO_RADIANS(sphereRotation)), 0, Math::Sin(TO_RADIANS(sphereRotation))) * 0.5f;
+
+		static bool shadowUpdated = false;
+		if (!shadowUpdated && sphereRotation > 90)
+		{
+			shadowUpdated = true;
+			scheduler->SetFrameGraphVariable("DrawSunShadows", true);
+		}
 		
         //cubeRotation += deltaTime * 5;
         if (cubeRotation >= 360)
             cubeRotation -= 360;
-        
-        cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -0.75f, 5)) * Quat::EulerDegrees(Vec3(0, cubeRotation)).ToMatrix() * Matrix4x4::Scale(Vec3(5, 0.2f, 5));
+		
+        cubeModelMatrix = Matrix4x4::Translation(Vec3(0, -0.75f, 5)) * Quat::EulerDegrees(Vec3(0, cubeRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(5, 0.2f, 5));
         
         cubeObjectBufferPerImage[imageIndex]->UploadData(&cubeModelMatrix, sizeof(cubeModelMatrix), 0);
 
-		sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 5)) * Quat::EulerDegrees(Vec3(0, sphereRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
+		sphereModelMatrix = Matrix4x4::Translation(spherePos) * Quat::EulerDegrees(Vec3(0, sphereRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
 		RHI::BufferData uploadData{};
 		uploadData.dataSize = sizeof(sphereModelMatrix);
@@ -1502,9 +1511,13 @@ namespace CE::Sandbox
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 			attachmentDatabase.EmplaceFrameAttachment("DirectionalShadowMap", shadowMapDesc);
+
+			scheduler->SetVariableInitialValue("DrawSunShadows", true);
 			
 			scheduler->BeginScope("DirectionalShadowCast");
 			{
+				scheduler->ExecuteOnlyIf("DrawSunShadows", RHI::FrameGraphVariableComparison::Equal, true);
+
 				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
 				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
 				shadowMapAttachment.loadStoreAction.clearValueDepth = 1.0f;
@@ -1516,6 +1529,8 @@ namespace CE::Sandbox
 				scheduler->UseShaderResourceGroup(directionalLightViewSrg);
 
 				scheduler->UsePipeline(depthPipeline);
+
+				scheduler->SetVariableAfterExecution("DrawSunShadows", false);
 			}
 			scheduler->EndScope();
 
@@ -1563,7 +1578,7 @@ namespace CE::Sandbox
 
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-                 swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+                swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);

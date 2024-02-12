@@ -155,6 +155,7 @@ namespace CE::Vulkan
 			return false;
 
 		FrameGraph* frameGraph = executeRequest.frameGraph;
+		FrameScheduler* scheduler = executeRequest.scheduler;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
 		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
 		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
@@ -481,8 +482,37 @@ namespace CE::Vulkan
 					}
 				}
 
+				bool shouldNotExecuteAtAll = false;
+				bool shouldNotExecuteButShouldClear = false;
+
+				for (const auto& cond : currentScope->executeConditions)
+				{
+					if (!frameGraph->VariableExists(cond.variableName))
+					{
+						shouldNotExecuteAtAll = true;
+						break;
+					}
+					const auto& value = frameGraph->GetVariable(currentImageIndex, cond.variableName);
+					bool result = cond.Compare(value);
+
+					if (!result)
+					{
+						if (cond.shouldClear)
+						{
+							shouldNotExecuteButShouldClear = true;
+							shouldNotExecuteAtAll = false;
+						}
+						else
+						{
+							shouldNotExecuteButShouldClear = false;
+							shouldNotExecuteAtAll = true;
+						}
+						break;
+					}
+				}
+
 				// Graphics operation
-				if (currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
+				if (!shouldNotExecuteAtAll && currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 				{
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -513,10 +543,11 @@ namespace CE::Vulkan
 						scissor.extent.height = viewport.height;
 						vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
-						while (currentScope != nullptr)
+						while (!shouldNotExecuteButShouldClear && currentScope != nullptr)
 						{
 							RHI::DrawList* drawList = currentScope->drawList;
 
+							// Submit draw items
 							for (int i = 0; drawList != nullptr && i < drawList->GetDrawItemCount(); i++)
 							{
 								for (auto srg : currentScope->externalShaderResourceGroups)
@@ -590,6 +621,12 @@ namespace CE::Vulkan
 								}
 
 								commandList->currentSubpass = 0;
+
+								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecution)
+								{
+									scheduler->SetFrameGraphVariable(currentImageIndex, variableName, value);
+								}
+
 								break;
 							}
 							else
@@ -599,6 +636,11 @@ namespace CE::Vulkan
 								vkCmdNextSubpass(cmdBuffer, VK_SUBPASS_CONTENTS_INLINE);
 								commandList->currentSubpass++;
 								//commandList->ClearShaderResourceGroups();
+
+								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecution)
+								{
+									scheduler->SetFrameGraphVariable(currentImageIndex, variableName, value);
+								}
 							}
 						}
 					}
@@ -639,7 +681,7 @@ namespace CE::Vulkan
 					// TODO: Add transfer pass
 				}
 
-				// Execute compiled pipeline barriers
+				// Execute compiled pipeline barriers (exit barriers)
 				if (currentScope->barriers[currentImageIndex].NonEmpty())
 				{
 					for (const auto& barrier : currentScope->barriers[currentImageIndex])
@@ -668,7 +710,7 @@ namespace CE::Vulkan
 			commandList->currentPass = nullptr;
 			commandList->currentSubpass = 0;
 			
-			// Transition to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			// Transition to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR if required
 			if (presentRequired)
 			{
 				Vulkan::Texture* image = (Vulkan::Texture*)swapChain->GetCurrentImage();
@@ -717,7 +759,6 @@ namespace CE::Vulkan
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		
 		if (isFirstSwapChainUse && scope->producers.IsEmpty()) // Frame graph uses a swapchain image
-        //if (scope->producers.IsEmpty()) // Frame graph uses a swapchain image
 		{
 			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + 1;
 			if (waitSemaphores.GetSize() < submitInfo.waitSemaphoreCount)

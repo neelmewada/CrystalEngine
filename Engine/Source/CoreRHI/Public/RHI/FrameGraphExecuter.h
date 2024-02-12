@@ -5,10 +5,12 @@ namespace CE::RHI
 	class FrameGraph;
 	struct FrameGraphCompileRequest;
 	class FrameGraphCompiler;
+	class FrameScheduler;
 
 	struct FrameGraphExecuteRequest
 	{
 		FrameGraph* frameGraph = nullptr;
+		FrameScheduler* scheduler = nullptr;
 		FrameGraphCompiler* compiler = nullptr;
 	};
     

@@ -78,6 +78,7 @@ namespace CE::RHI
 	{
 		FrameGraphExecuteRequest executeRequest{};
 		executeRequest.frameGraph = frameGraph;
+		executeRequest.scheduler = this;
 		executeRequest.compiler = compiler;
 
 		return executer->BeginExecution(executeRequest);
@@ -87,6 +88,7 @@ namespace CE::RHI
 	{
 		FrameGraphExecuteRequest executeRequest{};
 		executeRequest.frameGraph = frameGraph;
+		executeRequest.scheduler = this;
 		executeRequest.compiler = compiler;
 
 		executer->EndExecution(executeRequest);
@@ -133,6 +135,16 @@ namespace CE::RHI
 		LockGuard<SharedMutex> lock{ frameSchedulerInstancesMutex };
 
 		return frameSchedulerInstances.GetSize();
+	}
+
+	void FrameScheduler::SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value)
+	{
+		frameGraph->SetVariable(variableName, value);
+	}
+
+	void FrameScheduler::SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value)
+	{
+		frameGraph->SetVariable(imageIndex, variableName, value);
 	}
 
 } // namespace CE::RHI

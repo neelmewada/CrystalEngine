@@ -57,8 +57,11 @@ namespace CE::RHI
 		static FrameScheduler* GetFrameScheduler(int instanceIndex);
 		static int GetTotalFrameSchedulerCount();
 
+		void SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value);
+		void SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value);
+
 	private:
-		
+
 		static Array<FrameScheduler*> frameSchedulerInstances;
 
 		u32 numFramesInFlight = 1;
