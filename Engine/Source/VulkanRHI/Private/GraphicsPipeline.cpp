@@ -114,6 +114,15 @@ namespace CE::Vulkan
         SetupVertexInputState();
 
         hash = desc.GetHash();
+
+        if (desc.precompileForTarget != nullptr)
+        {
+            Vulkan::RenderTarget* renderTarget = (Vulkan::RenderTarget*)desc.precompileForTarget;
+            if (renderTarget->GetRenderPass() != nullptr)
+            {
+                FindOrCompile(renderTarget->GetRenderPass(), 0);
+            }
+        }
     }
 
     GraphicsPipeline::~GraphicsPipeline()
@@ -160,12 +169,12 @@ namespace CE::Vulkan
 
         // - Color Blend State -
 
-        while (colorBlendAttachments.GetSize() < renderPassDesc.subpasses[subpass].renderTargetAttachments.GetSize())
+        while (colorBlendAttachments.GetSize() < renderPassDesc.subpasses[subpass].colorAttachments.GetSize())
         {
             colorBlendAttachments.Add(colorBlendAttachments.GetLast());
         }
 
-        colorBlendState.attachmentCount = renderPassDesc.subpasses[subpass].renderTargetAttachments.GetSize();
+        colorBlendState.attachmentCount = renderPassDesc.subpasses[subpass].colorAttachments.GetSize();
         colorBlendState.pAttachments = colorBlendAttachments.GetData();
 
         createInfo.pColorBlendState = &colorBlendState;
@@ -193,9 +202,9 @@ namespace CE::Vulkan
         // - Viewport & Scissor -
         VkPipelineViewportStateCreateInfo viewportState{};
         viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        viewportState.scissorCount = 1;
+        viewportState.scissorCount = desc.numScissors;
         viewportState.pScissors = nullptr;
-        viewportState.viewportCount = 1;
+        viewportState.viewportCount = desc.numViewports;
         viewportState.pViewports = nullptr;
 
         createInfo.pViewportState = &viewportState;

@@ -45,6 +45,41 @@ namespace CE::Vulkan
 		}
 	}
 
+	void CommandList::SetViewports(u32 count, ViewportState* viewports)
+	{
+		static Array<VkViewport> vkViewports{};
+		if (vkViewports.GetSize() < count)
+			vkViewports.Resize(count);
+
+		for (int i = 0; i < count; i++)
+		{
+			vkViewports[i].x = viewports[i].x;
+			vkViewports[i].y = viewports[i].y;
+			vkViewports[i].width = viewports[i].width;
+			vkViewports[i].height = viewports[i].height;
+			vkViewports[i].minDepth = 0.0f;
+			vkViewports[i].maxDepth = 1.0f;
+		}
+		vkCmdSetViewport(commandBuffer, 0, count, vkViewports.GetData());
+	}
+
+	void CommandList::SetScissors(u32 count, ScissorState* scissors)
+	{
+		static Array<VkRect2D> vkScissors{};
+		if (vkScissors.GetSize() < count)
+			vkScissors.Resize(count);
+
+		for (int i = 0; i < count; i++)
+		{
+			vkScissors[i].offset.x = scissors[i].x;
+			vkScissors[i].offset.y = scissors[i].y;
+			vkScissors[i].extent.width = scissors[i].width;
+			vkScissors[i].extent.height = scissors[i].height;
+		}
+
+		vkCmdSetScissor(commandBuffer, 0, count, vkScissors.GetData());
+	}
+
 	void CommandList::CommitShaderResources()
 	{
 		if (boundPipeline == nullptr)
@@ -183,6 +218,11 @@ namespace CE::Vulkan
 		vkCmdDrawIndexed(commandBuffer, args.indexCount, args.instanceCount, args.firstIndex, args.vertexOffset, args.firstInstance);
 	}
 
+	void CommandList::DrawLinear(const DrawLinearArguments& args)
+	{
+		vkCmdDraw(commandBuffer, args.vertexCount, args.instanceCount, args.vertexOffset, args.firstInstance);
+	}
+
 	void CommandList::Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ)
 	{
 		vkCmdDispatch(commandBuffer, groupCountX, groupCountY, groupCountZ);
@@ -217,10 +257,20 @@ namespace CE::Vulkan
 				imageBarrier.image = texture->GetImage();
 
 				imageBarrier.subresourceRange.aspectMask = texture->aspectMask;
-				imageBarrier.subresourceRange.baseArrayLayer = 0;
-				imageBarrier.subresourceRange.layerCount = texture->arrayLayers;
-				imageBarrier.subresourceRange.baseMipLevel = 0;
-				imageBarrier.subresourceRange.levelCount = texture->mipLevels;
+				if (barrierInfo.subresourceRange.IsAll())
+				{
+					imageBarrier.subresourceRange.baseArrayLayer = 0;
+					imageBarrier.subresourceRange.layerCount = texture->arrayLayers;
+					imageBarrier.subresourceRange.baseMipLevel = 0;
+					imageBarrier.subresourceRange.levelCount = texture->mipLevels;
+				}
+				else
+				{
+					imageBarrier.subresourceRange.baseArrayLayer = barrierInfo.subresourceRange.baseArrayLayer;
+					imageBarrier.subresourceRange.layerCount = barrierInfo.subresourceRange.layerCount;
+					imageBarrier.subresourceRange.baseMipLevel = barrierInfo.subresourceRange.baseMipLevel;
+					imageBarrier.subresourceRange.levelCount = barrierInfo.subresourceRange.levelCount;
+				}
 				
 				if (texture->curFamilyIndex >= 0 && texture->curFamilyIndex != queueFamilyIndex)
 				{
@@ -279,7 +329,7 @@ namespace CE::Vulkan
 					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 					imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
 					break;
-				case RHI::ResourceState::RenderTarget:
+				case RHI::ResourceState::ColorOutput:
 					srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
@@ -341,7 +391,7 @@ namespace CE::Vulkan
 					imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 					imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 					break;
-				case RHI::ResourceState::RenderTarget:
+				case RHI::ResourceState::ColorOutput:
 					dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 					imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 					imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
@@ -532,7 +582,7 @@ namespace CE::Vulkan
 		VkCommandBufferBeginInfo cmdBeginInfo{};
 		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		//cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
+		
 		vkBeginCommandBuffer(commandBuffer, &cmdBeginInfo);
 
 		boundPipeline = nullptr;
@@ -555,6 +605,64 @@ namespace CE::Vulkan
 	void CommandList::End()
 	{
 		vkEndCommandBuffer(commandBuffer);
+	}
+
+	void CommandList::BeginRenderTarget(RHI::RenderTarget* rhiRenderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment)
+	{
+		if (rhiRenderTarget == nullptr || renderTargetBuffer == nullptr)
+			return;
+
+		Vulkan::RenderTarget* renderTarget = (Vulkan::RenderTarget*)rhiRenderTarget;
+		Vulkan::FrameBuffer* framebuffer = (Vulkan::FrameBuffer*)renderTargetBuffer;
+		currentPass = renderTarget->renderPass;
+		currentSubpass = 0;
+
+		u32 attachmentCount = renderTarget->GetAttachmentCount();
+
+		FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
+		for (int i = 0; i < attachmentCount; i++)
+		{
+			auto attachmentUsage = renderTarget->renderPass->GetAttachmentUsage(i);
+			
+			VkClearValue clearValue;
+			memset(&clearValue, 0, sizeof(clearValue));
+
+			switch (attachmentUsage)
+			{
+			case ScopeAttachmentUsage::Color:
+			case ScopeAttachmentUsage::Resolve:
+				memcpy(clearValue.color.float32, clearValuesPerAttachment[i].clearValue.xyzw, sizeof(f32[4]));
+				break;
+			case ScopeAttachmentUsage::DepthStencil:
+				clearValue.depthStencil.depth = clearValuesPerAttachment[i].clearValueDepth;
+				clearValue.depthStencil.stencil = clearValuesPerAttachment[i].clearValueStencil;
+				break;
+			}
+
+			clearValues.Add(clearValue);
+		}
+
+		VkRenderPassBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		beginInfo.clearValueCount = attachmentCount;
+		beginInfo.pClearValues = clearValues.GetData();
+		
+		beginInfo.renderPass = renderTarget->renderPass->GetHandle();
+		beginInfo.framebuffer = framebuffer->GetHandle();
+
+		beginInfo.renderArea.offset = { 0, 0 };
+		beginInfo.renderArea.extent.width = framebuffer->GetWidth();
+		beginInfo.renderArea.extent.height = framebuffer->GetHeight();
+		
+		vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
+	}
+
+	void CommandList::EndRenderTarget()
+	{
+		currentPass = nullptr;
+		currentSubpass = 0;
+
+		vkCmdEndRenderPass(commandBuffer);
 	}
 
 } // namespace CE::Vulkan

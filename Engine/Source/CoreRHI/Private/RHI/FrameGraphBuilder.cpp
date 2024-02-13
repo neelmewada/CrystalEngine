@@ -133,9 +133,19 @@ namespace CE::RHI
 	{
 		if (!currentScope || !frameGraph)
 			return false;
-
-		currentScope->setVariablesAfterExecution.Add(variableName, value);
 		
+		currentScope->setVariablesAfterExecutionPerFrame.Add(variableName, value);
+		
+		return true;
+	}
+
+	bool FrameGraphBuilder::SetVariableAfterExecutionForAllFrames(const Name& variableName, const FrameGraphVariable& value)
+	{
+		if (!currentScope || !frameGraph)
+			return false;
+
+		currentScope->setVariablesAfterExecutionAllFrames.Add(variableName, value);
+
 		return true;
 	}
 

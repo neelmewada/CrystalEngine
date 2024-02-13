@@ -110,7 +110,8 @@ namespace CE::RHI
 
 		Array<ExecuteCondition> executeConditions{};
 		
-		HashMap<Name, FrameGraphVariable> setVariablesAfterExecution{};
+		HashMap<Name, FrameGraphVariable> setVariablesAfterExecutionPerFrame{};
+		HashMap<Name, FrameGraphVariable> setVariablesAfterExecutionAllFrames{};
 
 		RHI::ShaderResourceGroup* passShaderResourceGroup = nullptr;
 		RHI::ShaderResourceGroup* subpassShaderResourceGroup = nullptr;

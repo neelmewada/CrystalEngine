@@ -292,7 +292,7 @@ TEST(RHI, FrameGraphBuilder)
 				ImageScopeAttachmentDescriptor a1{};
 				a1.attachmentId = "1";
 				
-				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 			}
 			builder.EndScope();
 
@@ -313,7 +313,7 @@ TEST(RHI, FrameGraphBuilder)
 				a2.attachmentId = "2";
 
 				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
-				builder.UseAttachment(a2, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+				builder.UseAttachment(a2, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 			}
 			builder.EndScope();
@@ -323,7 +323,7 @@ TEST(RHI, FrameGraphBuilder)
 				ImageScopeAttachmentDescriptor a3{};
 				a3.attachmentId = "3";
 
-				builder.UseAttachment(a3, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+				builder.UseAttachment(a3, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 			}
 			builder.EndScope();
 
@@ -339,7 +339,7 @@ TEST(RHI, FrameGraphBuilder)
 				builder.UseAttachment(a1, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
 				builder.UseAttachment(a2, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
 
-				builder.UseAttachment(a4, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+				builder.UseAttachment(a4, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 			}
 			builder.EndScope();
@@ -359,7 +359,7 @@ TEST(RHI, FrameGraphBuilder)
 				builder.UseAttachment(a2, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
 				builder.UseAttachment(a3, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
 
-				builder.UseAttachment(a4, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+				builder.UseAttachment(a4, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 			}
 			builder.EndScope();
 		}
@@ -486,7 +486,7 @@ TEST(RHI, FrameScheduler)
                     swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
                     swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                     
-                    scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+                    scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
                 }
                 scheduler->EndScope();
                 
@@ -506,7 +506,7 @@ TEST(RHI, FrameScheduler)
                     swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
                     swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
                     
-                    scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::ReadWrite);
+                    scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::ReadWrite);
 
 					scheduler->PresentSwapChain(swapChain);
                 }

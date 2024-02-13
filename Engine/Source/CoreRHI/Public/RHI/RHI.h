@@ -104,6 +104,13 @@ namespace CE::RHI
 
         // - Resources -
 
+		virtual RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) = 0;
+		virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) = 0;
+
+		virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex = 0) = 0;
+		virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex = 0) = 0;
+		virtual void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) = 0;
+
 		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) = 0;
 		virtual void DestroySwapChain(RHI::SwapChain* swapChain) = 0;
 
@@ -118,6 +125,9 @@ namespace CE::RHI
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc) = 0;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;
         virtual void DestroyBuffer(Buffer* buffer) = 0;
+
+		virtual RHI::TextureView* CreateTextureView(const TextureViewDescriptor& desc) = 0;
+		virtual void DestroyTextureView(RHI::TextureView* textureView) = 0;
         
 		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc) = 0;
 		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;

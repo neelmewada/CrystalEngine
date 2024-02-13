@@ -1,11 +1,5 @@
 
 
-// Helpful for intellisense
-#ifndef COMPILE
-#define VERTEX 1
-#define FRAGMENT 1
-#endif
-
 #include "Core/Macros.hlsli"
 #include "Core/SceneData.hlsli"
 #include "Core/ViewData.hlsli"

@@ -38,7 +38,7 @@ CompileCS() {
     local FileName=$1".hlsl"
     local Out="../Source/VulkanSandbox/Resources/Shaders/"$1".spv"
 
-    ${DxCompiler} -spirv -E CSMain -T cs_6_0 -D PLATFORM_DESKTOP=1 -fspv-preserve-bindings -Fo ${Out} ${FileName}
+    ${DxCompiler} -spirv -E CSMain -T cs_6_0 -D PLATFORM_DESKTOP=1 -fspv-preserve-bindings -fspv-extension=KHR -Fo ${Out} ${FileName}
 
     echo "Compiled: " ${FileName}
 }
@@ -46,5 +46,5 @@ CompileCS() {
 CompileShader "Depth"
 CompileShader "Opaque"
 CompileShader "Skybox"
-CompileCS "EnvironmentMapCS"
+CompileShader "Equirectangular"
 

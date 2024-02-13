@@ -8,6 +8,9 @@ namespace CE::RHI
 	class Buffer;
 	class CommandList;
 	class IDeviceObject;
+	class RenderTarget;
+	class RenderTargetBuffer;
+	struct AttachmentClearValue;
 
 	enum class CommandListType
 	{
@@ -15,11 +18,32 @@ namespace CE::RHI
 		Indirect
 	};
 
+	struct SubresourceRange
+	{
+		u32 baseMipLevel = 0;
+		u32 levelCount = 0;
+		u32 baseArrayLayer = 0;
+		u32 layerCount = 0;
+
+		constexpr static SubresourceRange All()
+		{
+			SubresourceRange result;
+			result.baseMipLevel = result.levelCount = result.baseArrayLayer = result.layerCount = 0;
+			return result;
+		}
+
+		inline bool IsAll() const
+		{
+			return baseMipLevel == 0 && levelCount == 0 && baseArrayLayer == 0 && layerCount == 0;
+		}
+	};
+
 	struct ResourceBarrierDescriptor
 	{
 		IDeviceObject* resource;
 		ResourceState fromState;
 		ResourceState toState;
+		SubresourceRange subresourceRange = SubresourceRange::All();
 	};
 
 	struct BufferToTextureCopy
@@ -53,6 +77,9 @@ namespace CE::RHI
 		virtual void Begin() = 0;
 		virtual void End() = 0;
 
+		virtual void BeginRenderTarget(RenderTarget* renderTarget, RenderTargetBuffer* renderTargetBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
+		virtual void EndRenderTarget() = 0;
+
 		inline void SetCurrentImageIndex(u32 imageIndex)
 		{
 			currentImageIndex = imageIndex;
@@ -72,6 +99,9 @@ namespace CE::RHI
 
 		virtual void ClearShaderResourceGroups() = 0;
 
+		virtual void SetViewports(u32 count, ViewportState* viewports) = 0;
+		virtual void SetScissors(u32 count, ScissorState* scissors) = 0;
+
 		virtual void CommitShaderResources() = 0;
 
 		virtual void BindPipelineState(RHI::PipelineState* pipelineState) = 0;
@@ -81,6 +111,8 @@ namespace CE::RHI
 		virtual void BindIndexBuffer(const RHI::IndexBufferView& bufferView) = 0;
 
 		virtual void DrawIndexed(const DrawIndexedArguments& args) = 0;
+
+		virtual void DrawLinear(const DrawLinearArguments& args) = 0;
 
 		virtual void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) = 0;
 

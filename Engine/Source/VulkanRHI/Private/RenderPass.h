@@ -50,7 +50,7 @@ namespace CE::Vulkan
 
 		struct SubPassDescriptor
 		{
-			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> renderTargetAttachments{};
+			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> colorAttachments{};
 			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> resolveAttachments{};
 			FixedArray<SubPassAttachment, RHI::Limits::Pipeline::MaxColorAttachmentCount> subpassInputAttachments{};
 			FixedArray<u32, RHI::Limits::Pipeline::MaxColorAttachmentCount> preserveAttachments{};
@@ -72,6 +72,10 @@ namespace CE::Vulkan
 		virtual ~RenderPass();
 
 		static void BuildDescriptor(Vulkan::Scope* pass, Descriptor& outDescriptor);
+
+		static void BuildDescriptor(const RHI::RenderTargetLayout& rtLayout, Descriptor& outDescriptor);
+
+		RHI::ScopeAttachmentUsage GetAttachmentUsage(u32 attachmentIndex);
 
 		inline const Descriptor& GetDescriptor() const { return desc; }
 

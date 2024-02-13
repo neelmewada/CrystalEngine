@@ -2,72 +2,6 @@
 
 namespace CE::Vulkan
 {
-    
-	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device, SwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget)
-	{
-		this->device = device;
-		/*const auto& rtLayout = renderTarget->rtLayout;
-
-		VkFramebufferCreateInfo frameBufferCI{};
-		frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-
-		frameBufferCI.attachmentCount = rtLayout.colorAttachmentCount + (rtLayout.HasDepthStencilAttachment() ? 1 : 0);
-
-		List<VkImageView> attachments{ frameBufferCI.attachmentCount };
-		attachments[rtLayout.presentationRTIndex] = swapChain->swapChainColorImages[swapChainImageIndex].imageView;
-
-		if (rtLayout.HasDepthStencilAttachment())
-		{
-			attachments[attachments.GetSize() - 1] = swapChain->swapChainDepthImage->GetImageView();
-		}
-
-		frameBufferCI.pAttachments = attachments.GetData();
-
-		frameBufferCI.width = swapChain->GetWidth();
-		frameBufferCI.height = swapChain->GetHeight();
-
-		frameBufferCI.renderPass = renderTarget->GetVulkanRenderPass()->GetHandle();
-
-		frameBufferCI.layers = 1;
-
-		if (vkCreateFramebuffer(device->GetHandle(), &frameBufferCI, nullptr, &frameBuffer) != VK_SUCCESS)
-		{
-			CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
-			return;
-		}*/
-	}
-
-	VulkanFrameBuffer::VulkanFrameBuffer(VulkanDevice* device,
-		VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1],
-		RenderTarget* renderTarget)
-	{
-		this->device = device;
-		/*const auto& rtLayout = renderTarget->rtLayout;
-
-		VkFramebufferCreateInfo frameBufferCI{};
-		frameBufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-
-		frameBufferCI.attachmentCount = rtLayout.colorAttachmentCount + (rtLayout.HasDepthStencilAttachment() ? 1 : 0);
-		frameBufferCI.pAttachments = attachments;
-
-		frameBufferCI.width = renderTarget->GetWidth();
-		frameBufferCI.height = renderTarget->GetHeight();
-
-		frameBufferCI.renderPass = renderTarget->GetVulkanRenderPass()->GetHandle();
-
-		frameBufferCI.layers = 1;
-
-		if (vkCreateFramebuffer(device->GetHandle(), &frameBufferCI, nullptr, &frameBuffer) != VK_SUCCESS)
-		{
-			CE_LOG(Error, All, "Failed to create Vulkan Frame Buffer");
-			return;
-		}*/
-	}
-
-	VulkanFrameBuffer::~VulkanFrameBuffer()
-	{
-		vkDestroyFramebuffer(device->GetHandle(), frameBuffer, nullptr);
-	}
 
 	FrameBuffer::FrameBuffer(VulkanDevice* device, Scope* scope, u32 imageIndex)
 		: device(device)
@@ -106,7 +40,7 @@ namespace CE::Vulkan
 				}
 
 				ImageScopeAttachment* imageScopeAttachment = (ImageScopeAttachment*)attachment;
-				RHIResource* resource = imageScopeAttachment->GetFrameAttachment()->GetResource(imageIndex);
+				RHI::RHIResource* resource = imageScopeAttachment->GetFrameAttachment()->GetResource(imageIndex);
 				if (!resource)
 					continue;
 
@@ -145,13 +79,111 @@ namespace CE::Vulkan
 		framebufferCI.height = height;
 		
 		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, nullptr, &frameBuffer);
+
+		renderTarget = new Vulkan::RenderTarget(device, scope->renderPass);
 	}
 
 	FrameBuffer::~FrameBuffer()
 	{
-		vkDestroyFramebuffer(device->GetHandle(), frameBuffer, nullptr);
-		frameBuffer = nullptr;
+		if (frameBuffer)
+		{
+			vkDestroyFramebuffer(device->GetHandle(), frameBuffer, nullptr);
+			frameBuffer = nullptr;
+		}
+
+		delete renderTarget; renderTarget = nullptr;
+		
 		device = nullptr;
+	}
+
+	FrameBuffer::FrameBuffer(VulkanDevice* device, const Array<Vulkan::Texture*>& images, RenderPass* renderPass, u32 imageIndex)
+		: device(device), imageIndex(imageIndex)
+	{
+		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
+
+		width = 0;
+		height = 0;
+
+		VkFramebufferCreateInfo framebufferCI{};
+		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+
+		for (Vulkan::Texture* image : images)
+		{
+			if (image != nullptr && image->GetImageView() != nullptr)
+			{
+				if (width == 0 || height == 0)
+				{
+					width = image->GetWidth();
+					height = image->GetHeight();
+				}
+				else if (width != image->GetWidth() || height != image->GetHeight())
+				{
+					width = height = 0;
+					CE_LOG(Error, All, "Failed to create vulkan framebuffer: Width and/or height mismatch!");
+					return;
+				}
+
+				attachments.Add(image->GetImageView());
+			}
+		}
+
+		framebufferCI.renderPass = renderPass->GetHandle();
+		framebufferCI.layers = 1;
+		framebufferCI.width = width;
+		framebufferCI.height = height;
+
+		framebufferCI.attachmentCount = attachments.GetSize();
+		framebufferCI.pAttachments = attachments.GetData();
+
+		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, nullptr, &frameBuffer);
+
+		renderTarget = new RenderTarget(device, renderPass);
+	}
+
+	FrameBuffer::FrameBuffer(VulkanDevice* device, const Array<Vulkan::TextureView*>& imageViews, RenderPass* renderPass, u32 imageIndex)
+		: device(device), imageIndex(imageIndex)
+	{
+		FixedArray<VkImageView, RHI::Limits::Pipeline::MaxRenderAttachmentCount> attachments{};
+
+		width = 0;
+		height = 0;
+
+		VkFramebufferCreateInfo framebufferCI{};
+		framebufferCI.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+
+		for (Vulkan::TextureView* imageView : imageViews)
+		{
+			if (imageView != nullptr && imageView->GetImageView() != nullptr)
+			{
+				RHI::Texture* image = imageView->GetTexture();
+
+				if (width == 0 || height == 0)
+				{
+					width = image->GetWidth();
+					height = image->GetHeight();
+				}
+				else if (width != image->GetWidth() || height != image->GetHeight())
+				{
+					width = height = 0;
+					CE_LOG(Error, All, "Failed to create vulkan framebuffer: Width and/or height mismatch!");
+					return;
+				}
+
+				attachments.Add(imageView->GetImageView());
+			}
+		}
+
+		framebufferCI.renderPass = renderPass->GetHandle();
+		framebufferCI.layers = 1;
+		framebufferCI.width = width;
+		framebufferCI.height = height;
+
+		framebufferCI.attachmentCount = attachments.GetSize();
+		framebufferCI.pAttachments = attachments.GetData();
+
+		vkCreateFramebuffer(device->GetHandle(), &framebufferCI, nullptr, &frameBuffer);
+
+		renderTarget = new RenderTarget(device, renderPass);
 	}
 
 } // namespace CE::Vulkan

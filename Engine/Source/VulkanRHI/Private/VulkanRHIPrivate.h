@@ -22,6 +22,7 @@
 #include "Sampler.h"
 #include "Texture.h"
 #include "Buffer.h"
+#include "TextureView.h"
 
 #include "ShaderModule.h"
 #include "Pipeline.h"
@@ -30,6 +31,7 @@
 
 #include "FrameBuffer.h"
 #include "SwapChain.h"
+#include "RenderTarget.h"
 #include "ShaderResourceGroup.h"
 #include "Fence.h"
 #include "CommandList.h"

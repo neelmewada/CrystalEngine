@@ -36,6 +36,8 @@ namespace CE::RHI
 		 
 		bool SetVariableAfterExecution(const Name& variableName, const FrameGraphVariable& value);
 
+		bool SetVariableAfterExecutionForAllFrames(const Name& variableName, const FrameGraphVariable& value);
+
 		bool SetVariableInitialValue(const Name& variableName, const FrameGraphVariable& value);
 
 		bool SetDispatchGroupCount(u32 groupCountX, u32 groupCountY, u32 groupCountZ);

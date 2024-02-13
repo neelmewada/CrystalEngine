@@ -55,15 +55,23 @@ namespace CE::RHI
 	enum class ScopeAttachmentUsage
 	{
 		None = 0,
-		RenderTarget,
+		//! Color output attachment
+		Color,
+		//! Depth stencil attachment
 		DepthStencil,
+		//! Transfer/Copy attachment
 		Copy,
+		//! Shader read/write attachment
 		Shader,
+		//! Resolve attachment
 		Resolve,
+		//! Subpass input attachment
 		SubpassInput,
 		COUNT
 	};
 	ENUM_CLASS(ScopeAttachmentUsage);
+
+	typedef ScopeAttachmentUsage AttachmentUsage;
 
 	struct UnifiedScopeAttachmentDesc
 	{
@@ -102,6 +110,13 @@ namespace CE::RHI
 			BufferDescriptor bufferDesc;
 		};
 	};
+
+	struct AttachmentClearValue
+	{
+		Vec4 clearValue{};
+		f32 clearValueDepth = 1.0;
+		u8 clearValueStencil = 0;
+	};
     
 	STRUCT()
     struct CORERHI_API AttachmentLoadStoreAction
@@ -113,7 +128,7 @@ namespace CE::RHI
 		Vec4 clearValue{};
 
 		FIELD()
-		f32 clearValueDepth = 0.0f;
+		f32 clearValueDepth = 1.0f;
 
 		FIELD()
 		u8 clearValueStencil = 0;

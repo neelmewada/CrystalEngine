@@ -100,6 +100,13 @@ namespace CE::Vulkan
 
         // - Resources -
 
+        virtual RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) override;
+        virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) override;
+
+        virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex = 0) override;
+        virtual RHI::RenderTargetBuffer* CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex = 0) override;
+        virtual void DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer) override;
+
 		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) override;
 		virtual void DestroySwapChain(RHI::SwapChain* swapChain) override;
 
@@ -115,6 +122,9 @@ namespace CE::Vulkan
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) override;
 		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
+
+        virtual RHI::TextureView* CreateTextureView(const TextureViewDescriptor& desc) override;
+        virtual void DestroyTextureView(RHI::TextureView* textureView) override;
         
         virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc) override;
 		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc) override;

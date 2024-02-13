@@ -6,6 +6,13 @@
 
 #define PI 3.14159265359
 
+// Helpful for intellisense
+#ifndef COMPILE
+#define VERTEX 1
+#define FRAGMENT 1
+#endif
+
+
 #ifdef LIMITED_SETS // Almost all android phones only support maxBoundDescriptorSets = 4
 
 #ifndef PerScene_Frequency
@@ -93,10 +100,14 @@
 #define END_ROOT_CONSTANTS() }; [[vk::push_constant]] RootConstants _RootConstants;
 #define ROOT_CONSTANT(name) _RootConstants.name
 
+#define IMAGE_FORMAT(format) [[vk::image_format(#format)]]
+
 #else // Dx12 Shader
 
 #define SUBPASS_INPUT(subpass, name) SubpassInput name;
 #define SUBPASS_LOAD(subpassName) subpassName.SubpassLoad()
+
+#define IMAGE_FORMAT(format)
 
 #endif
 

@@ -2,6 +2,8 @@
 
 namespace CE::RHI
 {
+	class RenderTarget;
+
 	enum class PipelineStateType
 	{
 		Graphics,
@@ -317,6 +319,11 @@ namespace CE::RHI
 		DepthStencilState depthStencilState{};
 		MultisampleState multisampleState{};
 
+		RHI::RenderTarget* precompileForTarget = nullptr;
+
+		u32 numViewports = 1;
+		u32 numScissors = 1;
+
 		CORERHI_API SIZE_T GetHash() const;
 	};
 
@@ -344,7 +351,7 @@ namespace CE::RHI
 		inline bool IsRayTracingPipeline() const { return pipelineType == PipelineStateType::RayTracing; }
 
 		virtual IPipelineLayout* GetPipelineLayout() = 0;
-
+		
 		inline const RHI::GraphicsPipelineDescriptor& GetGraphicsDescriptor() const { return graphicsDescriptor; }
 
 	protected:

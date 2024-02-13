@@ -293,7 +293,7 @@ namespace CE::Vulkan
 			{
 				VkPipelineStageFlags flags{};
 
-				if (to->GetUsage() == RHI::ScopeAttachmentUsage::RenderTarget)
+				if (to->GetUsage() == RHI::ScopeAttachmentUsage::Color)
 				{
 					flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 				}
@@ -359,14 +359,14 @@ namespace CE::Vulkan
 
 		switch (to->GetUsage())
 		{
-		case RHI::ScopeAttachmentUsage::RenderTarget:
+		case RHI::ScopeAttachmentUsage::Color:
 		case RHI::ScopeAttachmentUsage::Resolve:
 			return true;
 		}
 
 		switch (from->GetUsage())
 		{
-		case RHI::ScopeAttachmentUsage::RenderTarget:
+		case RHI::ScopeAttachmentUsage::Color:
 		case RHI::ScopeAttachmentUsage::Resolve:
 			return true;
 		}
@@ -438,7 +438,7 @@ namespace CE::Vulkan
 
 						switch (fromImage->GetUsage())
 						{
-						case RHI::ScopeAttachmentUsage::RenderTarget:
+						case RHI::ScopeAttachmentUsage::Color:
 							barrier.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 							imageBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 							imageBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
@@ -497,7 +497,7 @@ namespace CE::Vulkan
 
 						switch (toImage->GetUsage())
 						{
-						case RHI::ScopeAttachmentUsage::RenderTarget:
+						case RHI::ScopeAttachmentUsage::Color:
 							barrier.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 							imageBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 							imageBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;

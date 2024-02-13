@@ -7,12 +7,16 @@ namespace CE::Vulkan
 	class RenderTarget;
 	class Texture;
 
-	class FrameBuffer
+	class FrameBuffer : public RHI::RenderTargetBuffer
 	{
 	public:
 
 		FrameBuffer(VulkanDevice* device, Scope* scope, u32 imageIndex);
 		virtual ~FrameBuffer();
+
+		FrameBuffer(VulkanDevice* device, const Array<Vulkan::Texture*>& images, RenderPass* renderPass, u32 imageIndex = 0);
+
+		FrameBuffer(VulkanDevice* device, const Array<Vulkan::TextureView*>& imageViews, RenderPass* renderPass, u32 imageIndex = 0);
 
 		inline VkFramebuffer GetHandle() const { return frameBuffer; }
 
@@ -27,23 +31,6 @@ namespace CE::Vulkan
 		u32 width = 0;
 		u32 height = 0;
 		u32 imageIndex = 0;
-	};
-
-	class VulkanFrameBuffer
-	{
-	public:
-		VulkanFrameBuffer(VulkanDevice* device, SwapChain* swapChain, u32 swapChainImageIndex, RenderTarget* renderTarget);
-		VulkanFrameBuffer(VulkanDevice* device, VkImageView attachments[RHI::MaxSimultaneousRenderOutputs + 1], RenderTarget* renderTarget);
-
-		~VulkanFrameBuffer();
-
-		
-
-	private:
-		VulkanDevice* device = nullptr;
-		VkFramebuffer frameBuffer = nullptr;
-
-		
 	};
     
 } // namespace CE::Vulkan

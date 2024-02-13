@@ -334,7 +334,7 @@ namespace CE::Vulkan
 
 								switch (scopeAttachment->GetUsage())
 								{
-								case RHI::ScopeAttachmentUsage::RenderTarget:
+								case RHI::ScopeAttachmentUsage::Color:
 								case RHI::ScopeAttachmentUsage::Resolve:
 									requiredLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 									dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
@@ -622,7 +622,7 @@ namespace CE::Vulkan
 
 								commandList->currentSubpass = 0;
 
-								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecution)
+								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
 								{
 									scheduler->SetFrameGraphVariable(currentImageIndex, variableName, value);
 								}
@@ -637,9 +637,17 @@ namespace CE::Vulkan
 								commandList->currentSubpass++;
 								//commandList->ClearShaderResourceGroups();
 
-								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecution)
+								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
 								{
 									scheduler->SetFrameGraphVariable(currentImageIndex, variableName, value);
+								}
+
+								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionAllFrames)
+								{
+									for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+									{
+										scheduler->SetFrameGraphVariable(i, variableName, value);
+									}
 								}
 							}
 						}

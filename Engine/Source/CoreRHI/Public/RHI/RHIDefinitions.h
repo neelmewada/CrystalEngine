@@ -17,6 +17,7 @@ namespace CE::RHI
         None,
         Buffer,
         Texture,
+        TextureView,
         Sampler,
         ShaderModule,
         Pipeline,
@@ -25,6 +26,7 @@ namespace CE::RHI
 
 		MemoryHeap,
         RenderTarget,
+        RenderTargetBuffer,
         RenderPass,
         Viewport,
 		SwapChain,
@@ -39,76 +41,6 @@ namespace CE::RHI
         None,
         Buffer,
         Texture
-    };
-    
-    enum Constants
-    {
-        /// Max number of color render outputs per RenderTarget
-        MaxSimultaneousRenderOutputs = 4,
-
-        /// Max number of vertex attributes
-        MaxVertexAttribs = 8,
-    };
-
-    /// Render Target Color Format: Always prefer using Auto
-    enum class ColorFormat
-    {
-        // Auto uses the same format as SwapChain. Always prefer using Auto over others.
-        Auto,
-        RGBA32,
-        BGRA32,
-    };
-
-    /// Render Target Depth Format: Always prefer using Auto or None
-    enum class DepthStencilFormat
-    {
-        None,
-        Auto,
-        D32_S8,
-        D24_S8,
-        D32
-    };
-
-    enum class RenderPassLoadAction : u8
-    {
-        // Contents are undefined and not preserved
-        None,
-
-        // Load existing content
-        Load,
-
-        // Clear existing content to a specified clear value
-        Clear
-    };
-
-    enum class RenderPassStoreAction : u8
-    {
-        // Contents are not stored in the memory, i.e. they are discarded. For ex: depth/stencil buffer content doesn't need to be stored
-        None,
-
-        // Contents of render target is stored to the memory
-        Store,
-    };
-    
-    struct RenderTargetColorOutputDesc
-    {
-        ColorFormat preferredFormat{};
-        RenderPassLoadAction loadAction{};
-        RenderPassStoreAction storeAction{};
-        u32 sampleCount = 1;
-    };
-
-    struct RenderTargetLayout
-    {
-        u32 numColorOutputs = 0;
-        RenderTargetColorOutputDesc colorOutputs[RHI::MaxSimultaneousRenderOutputs] = {};
-        DepthStencilFormat depthStencilFormat = DepthStencilFormat::Auto;
-
-        /// Index in renderOutputs[] of the render target that is going to be presented on screen.
-        /// Or -1 if none are supposed to be consumed by SwapChain for presentation.
-        s32 presentationRTIndex = -1;
-
-        u32 backBufferCount = 2, simultaneousFrameDraws = 1;
     };
 
     struct FontDesc
@@ -376,6 +308,7 @@ namespace CE::RHI
 		TextureCube, // A textureCube in vulkan
 		RWTexture2D, // An image2D in vulkan
 		RWTexture3D, // An image3D in vulkan
+        RWTexture2DArray,
 		SamplerState, // A sampler in vulkan
 		SubpassInput // A SubpassInput in vulkan
 	};
@@ -461,7 +394,7 @@ namespace CE::RHI
         FragmentShaderResource = BIT(5),
         // Read only resource
         NonFragmentShaderResource = BIT(6),
-        RenderTarget = BIT(7),
+        ColorOutput = BIT(7),
         VertexBuffer = BIT(8),
         IndexBuffer = BIT(9),
         ConstantBuffer = BIT(10),

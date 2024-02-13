@@ -27,6 +27,7 @@
 #include "RHI/ShaderResourceGroup.h"
 #include "RHI/IndexBufferView.h"
 #include "RHI/VertexBufferView.h"
+#include "RHI/TextureView.h"
 
 // Draw Data
 #include "RHI/DrawItem.h"
@@ -40,6 +41,8 @@
 
 // Frame
 #include "RHI/AttachmentDefines.h"
+#include "RHI/RenderTarget.h"
+#include "RHI/RenderTargetBuffer.h"
 #include "RHI/FrameAttachment.h"
 #include "RHI/BufferFrameAttachment.h"
 #include "RHI/ImageFrameAttachment.h"

@@ -78,11 +78,15 @@ namespace CE::Sandbox
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
 		mainWindow->AddListener(this);
+
+		// Load Cube mesh at first
+		cubeModel = RPI::ModelLod::CreateCubeModel();
+		sphereModel = RPI::ModelLod::CreateSphereModel();
 		
 		InitCubeMaps();
 		InitTextures();
-		InitPipelines();
 		InitHDRIs();
+		InitPipelines();
 		InitLights();
 		InitDrawPackets();
 
@@ -152,7 +156,7 @@ namespace CE::Sandbox
 
 		UpdatePerViewData(imageIndex);
 
-		cameraRotation += deltaTime * 5;
+		cameraRotation += deltaTime * 25.0f;
 		if (cameraRotation >= 360)
 			cameraRotation -= 360;
         
@@ -186,9 +190,10 @@ namespace CE::Sandbox
 	{
 		float farPlane = 1000.0f;
 
-		perViewData.viewPosition = Vec3(0, 2, 0);
-		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 60, 0.1f, farPlane);
-		perViewData.viewMatrix = Matrix4x4::Translation(-perViewData.viewPosition) * Quat::EulerDegrees(Vec3(20, 0, 0)).ToMatrix();
+		cameraRotation = 0;
+		perViewData.viewPosition = Vec3(0, 1, 0);
+		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 75, 0.1f, farPlane);
+		perViewData.viewMatrix = Matrix4x4::Translation(-perViewData.viewPosition) * Quat::EulerDegrees(Vec3(cameraRotation, 0, 0)).ToMatrix();
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
 		
 		// Temp code to test directional light view/proj matrix
@@ -399,7 +404,7 @@ namespace CE::Sandbox
         defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 	}
 
-    u16 Float32ToFloat16(f32 floatValue)
+    static u16 Float32ToFloat16(f32 floatValue)
     {
         f32* ptr = &floatValue;
         unsigned int fltInt32 = *((u32*)ptr);
@@ -413,89 +418,6 @@ namespace CE::Sandbox
         
         return fltInt16;
     }
-
-	void VulkanSandbox::InitHDRIs()
-	{
-		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_day.hdr";
-		
-		CMImage hdrImage = CMImage::LoadFromFile(path);
-
-		RHI::TextureDescriptor hdriFlatMapDesc{};
-		hdriFlatMapDesc.name = "HDRI Texture";
-		hdriFlatMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
-		hdriFlatMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
-		hdriFlatMapDesc.width = hdrImage.GetWidth();
-		hdriFlatMapDesc.height = hdrImage.GetHeight();
-		hdriFlatMapDesc.depth = 1;
-		hdriFlatMapDesc.dimension = RHI::Dimension::Dim2D;
-		hdriFlatMapDesc.mipLevels = 1;
-		hdriFlatMapDesc.arrayLayers = 1;
-		hdriFlatMapDesc.sampleCount = 1;
-		hdriFlatMapDesc.defaultHeapType = RHI::MemoryHeapType::Default;
-		
-		hdriMap = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
-
-		u32 numPixels = hdrImage.GetWidth() * hdrImage.GetHeight();
-
-		RHI::BufferDescriptor stagingDesc{};
-		stagingDesc.name = "Staging Buffer";
-		stagingDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		stagingDesc.bufferSize = numPixels * 4 * 4; // f32 * 4: per pixel
-		stagingDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-		
-		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingDesc);
-
-		void* dataPtr = nullptr;
-		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
-		{
-			u16* dstData = (u16*)dataPtr;
-
-			for (int i = 0; i < numPixels; i++)
-			{
-				*(dstData + 4 * i + 0) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 0));
-				*(dstData + 4 * i + 1) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 1));
-				*(dstData + 4 * i + 2) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 2));
-                *(dstData + 4 * i + 3) = Float32ToFloat16(1.0f);
-			}
-		}
-		stagingBuffer->Unmap();
-
-		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
-		RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
-		RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
-
-		cmdList->Begin();
-		{
-			RHI::ResourceBarrierDescriptor barrier{};
-			barrier.resource = hdriMap;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::CopyDestination;
-			cmdList->ResourceBarrier(1, &barrier);
-
-			RHI::BufferToTextureCopy copy{};
-			copy.srcBuffer = stagingBuffer;
-			copy.bufferOffset = 0;
-			copy.dstTexture = hdriMap;
-			copy.layerCount = 1;
-			copy.mipSlice = 0;
-			copy.baseArrayLayer = 0;
-			cmdList->CopyTextureRegion(copy);
-
-			barrier.resource = hdriMap;
-			barrier.fromState = RHI::ResourceState::CopyDestination;
-			barrier.toState = RHI::ResourceState::FragmentShaderResource;
-			cmdList->ResourceBarrier(1, &barrier);
-		}
-		cmdList->End();
-        
-		queue->Execute(1, &cmdList, fence);
-		fence->WaitForFence();
-
-		hdrImage.Free();
-		RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
-		delete stagingBuffer;
-		delete fence;
-	}
 
 	void VulkanSandbox::InitTextures()
 	{
@@ -514,10 +436,6 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitPipelines()
 	{
-		// Load Cube mesh at first
-		cubeModel = RPI::ModelLod::CreateCubeModel();
-		sphereModel = RPI::ModelLod::CreateSphereModel();
-
 		RHI::ShaderResourceGroupLayout meshSrgLayout{};
 		meshSrgLayout.srgType = RHI::SRGType::PerObject;
 
@@ -871,7 +789,8 @@ namespace CE::Sandbox
 
 			skyboxMaterial = new RPI::Material(skyboxShader);
 
-			perSceneSrg->Bind("_Skybox", skyboxCubeMap);
+			//perSceneSrg->Bind("_Skybox", skyboxCubeMap);
+			perSceneSrg->Bind("_Skybox", hdriCubeMap);
 			perSceneSrg->Bind("_DefaultSampler", defaultSampler);
 
 			perSceneSrg->FlushBindings();
@@ -1205,7 +1124,8 @@ namespace CE::Sandbox
 			directionalLightViewData.viewPosition = Vec3(0, 5, 0);
 			directionalLightViewData.projectionMatrix = Matrix4x4::OrthographicProjection(-5, 5, 5, -5, 1.0f, 100.0f);
 			directionalLightViewData.viewMatrix = Matrix4x4::Translation(-directionalLightViewData.viewPosition) *
-				Quat::FromToRotation(Vec3(0, 0, 1), Vec3(mainLight.direction.x, mainLight.direction.y, mainLight.direction.z)).ToMatrix();
+				Quat::LookRotation(mainLight.direction).ToMatrix();
+				//Quat::FromToRotation(Vec3(0, 0, 1), Vec3(mainLight.direction.x, mainLight.direction.y, mainLight.direction.z)).ToMatrix();
 
 			directionalLightViewData.viewProjectionMatrix = directionalLightViewData.projectionMatrix * directionalLightViewData.viewMatrix;
 
@@ -1568,12 +1488,6 @@ namespace CE::Sandbox
 		rustedTextures = {};
 	}
 
-	void VulkanSandbox::DestroyHDRIs()
-	{
-		delete hdriMap;
-		hdriMap = nullptr;
-	}
-
 	void VulkanSandbox::DestroyCubeMaps()
 	{
         delete defaultSampler; defaultSampler = nullptr;
@@ -1640,7 +1554,7 @@ namespace CE::Sandbox
                 swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
                 swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
@@ -1679,7 +1593,7 @@ namespace CE::Sandbox
                 swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::RenderTarget, RHI::ScopeAttachmentAccess::Write);
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
 				shadowMapAttachment.attachmentId = "DirectionalShadowMap";

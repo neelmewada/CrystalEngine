@@ -6,7 +6,7 @@ namespace CE::Sandbox
 
 
 
-	struct PerViewData
+	struct alignas(16) PerViewData
 	{
 		Matrix4x4 viewMatrix;
 		Matrix4x4 viewProjectionMatrix;
@@ -111,6 +111,8 @@ namespace CE::Sandbox
 		bool resubmit = true;
 
 		RHI::Texture* hdriMap = nullptr;
+		RHI::Texture* hdriCubeMap = nullptr;
+
 		RHI::Texture* skyboxCubeMap = nullptr;
 		RHI::Sampler* skyboxSampler = nullptr;
 

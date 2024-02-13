@@ -22,6 +22,9 @@ namespace CE::Vulkan
 
 		void ClearShaderResourceGroups() override;
 
+		void SetViewports(u32 count, ViewportState* viewports) override;
+		void SetScissors(u32 count, ScissorState* scissors) override;
+
 		void CommitShaderResources() override;
 
 		void BindPipelineState(RHI::PipelineState* pipelineState) override;
@@ -32,6 +35,8 @@ namespace CE::Vulkan
 
 		void DrawIndexed(const DrawIndexedArguments& args) override;
 
+		virtual void DrawLinear(const DrawLinearArguments& args) override;
+
 		void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) override;
 
 		void ResourceBarrier(u32 count, RHI::ResourceBarrierDescriptor* barriers) override;
@@ -40,6 +45,9 @@ namespace CE::Vulkan
 
 		void Begin() override;
 		void End() override;
+
+		void BeginRenderTarget(RHI::RenderTarget* renderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment) override;
+		void EndRenderTarget() override;
 
 	private:
 		

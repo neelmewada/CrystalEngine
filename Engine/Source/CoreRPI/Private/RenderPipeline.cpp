@@ -267,7 +267,7 @@ namespace CE::RPI
 						}
 						else if (EnumHasFlag(imageDesc.bindFlags, RHI::TextureBindFlags::Color))
 						{
-							localSlot->attachmentUsage = RHI::ScopeAttachmentUsage::RenderTarget;
+							localSlot->attachmentUsage = RHI::ScopeAttachmentUsage::Color;
 						}
 						else if (EnumHasFlag(imageDesc.bindFlags, RHI::TextureBindFlags::SubpassInput))
 						{

@@ -302,7 +302,51 @@ namespace CE::Vulkan
 
     // - Resources -
 
-	RHI::SwapChain* VulkanRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
+    RHI::RenderTarget* VulkanRHI::CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout)
+    {
+        return new Vulkan::RenderTarget(device, rtLayout);
+    }
+
+    void VulkanRHI::DestroyRenderTarget(RHI::RenderTarget* renderTarget)
+    {
+        delete renderTarget;
+    }
+
+    RHI::RenderTargetBuffer* VulkanRHI::CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, const Array<RHI::Texture*>& imageAttachments, u32 imageIndex)
+    {
+        Vulkan::RenderTarget* vkRenderTarget = (Vulkan::RenderTarget*)renderTarget;
+        if (vkRenderTarget == nullptr)
+            return nullptr;
+        Array<Vulkan::Texture*> textures{};
+        textures.Resize(imageAttachments.GetSize());
+        for (int i = 0; i < imageAttachments.GetSize(); i++)
+        {
+            textures[i] = (Vulkan::Texture*)imageAttachments[i];
+        }
+        return new FrameBuffer(device, textures, vkRenderTarget->GetRenderPass(), 0);
+    }
+
+    RHI::RenderTargetBuffer* VulkanRHI::CreateRenderTargetBuffer(RHI::RenderTarget* renderTarget, 
+        const Array<RHI::TextureView*>& imageAttachments, u32 imageIndex)
+    {
+        Vulkan::RenderTarget* vkRenderTarget = (Vulkan::RenderTarget*)renderTarget;
+        if (vkRenderTarget == nullptr)
+            return nullptr;
+        Array<Vulkan::TextureView*> textureViews{};
+        textureViews.Resize(imageAttachments.GetSize());
+        for (int i = 0; i < imageAttachments.GetSize(); i++)
+        {
+            textureViews[i] = (Vulkan::TextureView*)imageAttachments[i];
+        }
+        return new FrameBuffer(device, textureViews, vkRenderTarget->GetRenderPass(), 0);
+    }
+
+    void VulkanRHI::DestroyRenderTargetBuffer(RHI::RenderTargetBuffer* renderTargetBuffer)
+    {
+        delete renderTargetBuffer;
+    }
+
+    RHI::SwapChain* VulkanRHI::CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc)
 	{
 		return new Vulkan::SwapChain(this, device, window, desc);
 	}
@@ -335,6 +379,16 @@ namespace CE::Vulkan
     void VulkanRHI::DestroyBuffer(RHI::Buffer* buffer)
     {
         delete buffer;
+    }
+
+    RHI::TextureView* VulkanRHI::CreateTextureView(const TextureViewDescriptor& desc)
+    {
+        return new Vulkan::TextureView(device, desc);
+    }
+
+    void VulkanRHI::DestroyTextureView(RHI::TextureView* textureView)
+    {
+        delete textureView;
     }
 
     RHI::Texture* VulkanRHI::CreateTexture(const RHI::TextureDescriptor& textureDesc)
