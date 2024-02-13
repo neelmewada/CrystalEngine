@@ -78,6 +78,7 @@ namespace CE::Sandbox
 		
 		void InitCubeMaps();
 		void InitHDRIs();
+        void InitIrradiancePipeline(const RHI::ShaderResourceGroupLayout& irradianceSrgLayout);
 		void InitTextures();
 		void InitPipelines();
 		void InitDrawPackets();
@@ -112,6 +113,10 @@ namespace CE::Sandbox
 
 		RHI::Texture* hdriMap = nullptr;
 		RHI::Texture* hdriCubeMap = nullptr;
+        RHI::Texture* irradianceMap = nullptr;
+        RHI::PipelineState* irradiancePipeline = nullptr;
+        RHI::ShaderModule* convolutionVertShader = nullptr;
+        RHI::ShaderModule* convolutionFragShader = nullptr;
 
 		RHI::Texture* skyboxCubeMap = nullptr;
 		RHI::Sampler* skyboxSampler = nullptr;

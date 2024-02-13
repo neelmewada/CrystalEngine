@@ -17,61 +17,8 @@ namespace CE::Sandbox
 		return fltInt16;
 	}
 
-	static float CubeVertices[] = {
-		-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-		1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-		1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
-		1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-		-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-		-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
-		// front face
-		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-		1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
-		1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-		1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-		-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
-		-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-		// left face
-		-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-		-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
-		-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-		-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-		-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-		-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-		// right face
-		1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-		1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-		1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
-		1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-		1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-		1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
-		// bottom face
-		-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-		1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
-		1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-		1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-		-1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-		-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-		// top face
-		-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-		1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-		1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
-		1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-		-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-		-1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left     
-	};
-
 	void VulkanSandbox::InitHDRIs()
 	{
-		RHI::BufferDescriptor vertexBufferDesc{};
-		vertexBufferDesc.name = "Cube Vertices";
-		vertexBufferDesc.bufferSize = sizeof(CubeVertices);
-		vertexBufferDesc.defaultHeapType = RHI::MemoryHeapType::Default;
-		vertexBufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
-		
-		RHI::Buffer* vertexBuffer = RHI::gDynamicRHI->CreateBuffer(vertexBufferDesc);
-		vertexBuffer->UploadData(CubeVertices, sizeof(CubeVertices));
-
 		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_day.hdr";
 
 		Resource* equirectVertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.vert.spv", nullptr);
@@ -94,6 +41,22 @@ namespace CE::Sandbox
 			equirectVertShader = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
 			equirectFragShader = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
 		}
+        
+        // Irradiance map
+        {
+            RHI::TextureDescriptor irradianceMapDesc{};
+            irradianceMapDesc.name = "HDRI Irradiance Map";
+            irradianceMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+            irradianceMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
+            irradianceMapDesc.width = 32;
+            irradianceMapDesc.height = 32;
+            irradianceMapDesc.depth = 1;
+            irradianceMapDesc.dimension = RHI::Dimension::DimCUBE;
+            irradianceMapDesc.mipLevels = 1;
+            irradianceMapDesc.arrayLayers = 6;
+            
+            irradianceMap = RHI::gDynamicRHI->CreateTexture(irradianceMapDesc);
+        }
 
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 
@@ -301,6 +264,41 @@ namespace CE::Sandbox
 
 			equirectangularPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
 		}
+        
+        RHI::ShaderResourceGroupLayout irradianceSrgLayout{};
+        irradianceSrgLayout.srgType = RHI::SRGType::PerPass;
+        irradianceSrgLayout.variables.Add({});
+        irradianceSrgLayout.variables.Top().arrayCount = 1;
+        irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+        irradianceSrgLayout.variables.Top().name = "_PerViewData";
+        irradianceSrgLayout.variables.Top().bindingSlot = 0;
+        irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
+        
+        irradianceSrgLayout.variables.Add({});
+        irradianceSrgLayout.variables.Top().arrayCount = 1;
+        irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
+        irradianceSrgLayout.variables.Top().name = "_CubeMap";
+        irradianceSrgLayout.variables.Top().bindingSlot = 1;
+        irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+        
+        irradianceSrgLayout.variables.Add({});
+        irradianceSrgLayout.variables.Top().arrayCount = 1;
+        irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+        irradianceSrgLayout.variables.Top().name = "_CubeMapSampler";
+        irradianceSrgLayout.variables.Top().bindingSlot = 2;
+        irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+        
+        InitIrradiancePipeline(irradianceSrgLayout);
+        
+        RHI::ShaderResourceGroup* irradianceSrgs[6] = {};
+        for (int i = 0; i < 6; i++)
+        {
+            irradianceSrgs[i] = RHI::gDynamicRHI->CreateShaderResourceGroup(irradianceSrgLayout);
+            irradianceSrgs[i]->Bind("_CubeMap", irradianceMap);
+            irradianceSrgs[i]->Bind("_PerViewData", viewDataBuffers[i]);
+            irradianceSrgs[i]->Bind("_CubeMapSampler", sampler);
+            irradianceSrgs[i]->FlushBindings();
+        }
 
 		RPI::Mesh* cubeMesh = cubeModel->GetMesh(0);
 		const auto& vertInfo = cubeMesh->vertexBufferInfos[0];
@@ -325,6 +323,11 @@ namespace CE::Sandbox
 
 			renderTargetBuffers[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { textureViews[i] });
 		}
+        
+        for (int i = 0; i < 6; i++)
+        {
+            
+        }
 		
 		cmdList->Begin();
 		{
@@ -334,6 +337,12 @@ namespace CE::Sandbox
 			barrier.toState = RHI::ResourceState::CopyDestination;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
+            
+            barrier.resource = irradianceMap;
+            barrier.fromState = RHI::ResourceState::Undefined;
+            barrier.toState = RHI::ResourceState::FragmentShaderResource;
+            barrier.subresourceRange = RHI::SubresourceRange::All();
+            cmdList->ResourceBarrier(1, &barrier);
 
 			RHI::BufferToTextureCopy copy{};
 			copy.srcBuffer = stagingBuffer;
@@ -387,14 +396,7 @@ namespace CE::Sandbox
 				cmdList->CommitShaderResources();
 
 				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
-
-				RHI::DrawLinearArguments args{};
-				args.firstInstance = 0;
-				args.instanceCount = 1;
-				args.vertexCount = COUNTOF(CubeVertices);
-				args.vertexOffset = 0;
-				//cmdList->DrawLinear(args);
-
+                
 				cmdList->EndRenderTarget();
 			}
 
@@ -420,10 +422,10 @@ namespace CE::Sandbox
 		delete equirectFragSpv; delete equirectFragShader;
 		delete equirectangularPipeline;
 		delete sampler;
-		delete vertexBuffer;
-
+        
 		for (int i = 0; i < 6; i++)
 		{
+            delete irradianceSrgs[i];
 			delete renderTargetBuffers[i];
 			delete textureViews[i];
 			delete viewDataBuffers[i];
@@ -435,6 +437,84 @@ namespace CE::Sandbox
 	{
 		delete hdriMap; hdriMap = nullptr;
 		delete hdriCubeMap; hdriCubeMap = nullptr;
+        delete irradianceMap; irradianceMap = nullptr;
+        
+        delete irradiancePipeline; irradiancePipeline = nullptr;
+        delete convolutionVertShader; convolutionVertShader = nullptr;
+        delete convolutionFragShader; convolutionFragShader = nullptr;
 	}
+
+    void VulkanSandbox::InitIrradiancePipeline(const RHI::ShaderResourceGroupLayout& irradianceSrgLayout)
+    {
+        Resource* convolutionVertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/EnvMapConvolution.vert.spv", nullptr);
+        Resource* convolutionFragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/EnvMapConvolution.frag.spv", nullptr);
+        
+        RHI::ShaderModuleDescriptor vertShaderDesc{};
+        vertShaderDesc.name = "VertMain";
+        vertShaderDesc.stage = RHI::ShaderStage::Vertex;
+        vertShaderDesc.byteCode = convolutionVertSpv->GetData();
+        vertShaderDesc.byteSize = convolutionVertSpv->GetDataSize();
+        RHI::ShaderModule* convolutionVertShader = RHI::gDynamicRHI->CreateShaderModule(vertShaderDesc);
+        
+        RHI::ShaderModuleDescriptor fragShaderDesc{};
+        fragShaderDesc.name = "FragMain";
+        fragShaderDesc.stage = RHI::ShaderStage::Fragment;
+        fragShaderDesc.byteCode = convolutionFragSpv->GetData();
+        fragShaderDesc.byteSize = convolutionFragSpv->GetDataSize();
+        RHI::ShaderModule* convolutionFragShader = RHI::gDynamicRHI->CreateShaderModule(fragShaderDesc);
+        
+        {
+            RHI::GraphicsPipelineDescriptor pipelineDesc{};
+            pipelineDesc.name = "Irradiance Convolution";
+            
+            RHI::ColorBlendState colorBlend{};
+            colorBlend.alphaBlendOp = RHI::BlendOp::Add;
+            colorBlend.colorBlendOp = RHI::BlendOp::Add;
+            colorBlend.componentMask = RHI::ColorComponentMask::All;
+            colorBlend.srcColorBlend = RHI::BlendFactor::One;
+            colorBlend.dstColorBlend = RHI::BlendFactor::Zero;
+            colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
+            colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
+            colorBlend.blendEnable = true;
+            pipelineDesc.blendState.colorBlends.Add(colorBlend);
+
+            pipelineDesc.depthStencilState.depthState.enable = false;
+            pipelineDesc.depthStencilState.stencilState.enable = false;
+
+            pipelineDesc.numViewports = 1;
+            pipelineDesc.numScissors = 1;
+
+            pipelineDesc.multisampleState.sampleCount = 1;
+
+            pipelineDesc.vertexInputSlots.Add({});
+            pipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
+            pipelineDesc.vertexInputSlots.Top().inputSlot = 0;
+            pipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3);
+
+            pipelineDesc.vertexAttributes.Add({});
+            pipelineDesc.vertexAttributes.Top().dataType = RHI::VertexAttributeDataType::Float3;
+            pipelineDesc.vertexAttributes.Top().inputSlot = 0;
+            pipelineDesc.vertexAttributes.Top().location = 0;
+            pipelineDesc.vertexAttributes.Top().offset = 0;
+            
+            pipelineDesc.rasterState.cullMode = RHI::CullMode::None;
+            pipelineDesc.rasterState.multisampleEnable = false;
+            pipelineDesc.rasterState.fillMode = RHI::FillMode::Solid;
+
+            pipelineDesc.srgLayouts.Add(irradianceSrgLayout);
+
+            pipelineDesc.shaderStages.Add({});
+            pipelineDesc.shaderStages.Top().entryPoint = "VertMain";
+            pipelineDesc.shaderStages.Top().shaderModule = convolutionVertShader;
+            pipelineDesc.shaderStages.Add({});
+            pipelineDesc.shaderStages.Top().entryPoint = "FragMain";
+            pipelineDesc.shaderStages.Top().shaderModule = convolutionFragShader;
+            
+            irradiancePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
+        }
+        
+        delete convolutionVertSpv;
+        delete convolutionFragSpv;
+    }
 
 } // namespace CE::Sandbox
