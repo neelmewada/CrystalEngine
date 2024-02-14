@@ -92,7 +92,7 @@ float4 FragMain(PSInput input) : SV_Target
 
     float sampleDelta = 0.025;
     float nrSamples = 0.0;
-    const uint sampleCount = 4096;
+    const uint sampleCount = 16384;
 
     float totalWeight = 0.0f;
 
