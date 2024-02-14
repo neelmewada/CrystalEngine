@@ -19,7 +19,7 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitHDRIs()
 	{
-		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_day.hdr";
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_day2.hdr";
 
 		Resource* equirectVertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.vert.spv", nullptr);
 		Resource* equirectFragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.frag.spv", nullptr);

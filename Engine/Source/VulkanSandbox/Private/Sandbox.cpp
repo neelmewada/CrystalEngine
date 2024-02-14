@@ -1057,7 +1057,7 @@ namespace CE::Sandbox
 				sphereMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
 				sphereMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 				sphereMaterial->SetPropertyValue("_Shininess", (u32)64);
-				sphereMaterial->SetPropertyValue("_Metallic", 1.0f);
+				sphereMaterial->SetPropertyValue("_Metallic", 0.0f);
 				sphereMaterial->SetPropertyValue("_Roughness", 1.0f);
 				sphereMaterial->SetPropertyValue("_NormalStrength", 1.0f);
 				sphereMaterial->SetPropertyValue("_AmbientOcclusion", 1.0f);
@@ -1066,6 +1066,11 @@ namespace CE::Sandbox
 				sphereMaterial->SetPropertyValue("_RoughnessTex", plasticTextures.roughnessMap);
 				sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap);
 				sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap);
+                
+                sphereMaterial->SetPropertyValue("_AlbedoTex", rpiSystem.GetDefaultAlbedoTex());
+                sphereMaterial->SetPropertyValue("_RoughnessTex", rpiSystem.GetDefaultRoughnessTex());
+                sphereMaterial->SetPropertyValue("_NormalTex", rpiSystem.GetDefaultNormalTex());
+                sphereMaterial->SetPropertyValue("_MetallicTex", rpiSystem.GetDefaultAlbedoTex());
 
 				//sphereMaterial->SetPropertyValue("_AlbedoTex", rustedTextures.albedo);
 				//sphereMaterial->SetPropertyValue("_RoughnessTex", rustedTextures.roughnessMap);
