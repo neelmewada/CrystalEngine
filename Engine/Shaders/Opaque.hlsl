@@ -89,9 +89,9 @@ float4 FragMain(PSInput input) : SV_TARGET
 
     MaterialInput material;
     material.albedo = GammaToLinear(_Albedo.rgb * _AlbedoTex.Sample(_DefaultSampler, input.uv).rgb);
-    //material.albedo = _Albedo.rgb * _AlbedoTex.Sample(_DefaultSampler, input.uv).rgb;
     material.metallic = _Metallic * _MetallicTex.Sample(_DefaultSampler, input.uv);
     material.roughness = _Roughness * _RoughnessTex.Sample(_DefaultSampler, input.uv);
+    material.ambient = _AmbientOcclusion;
 
     float3 Lo = float3(0, 0, 0);
 
@@ -112,15 +112,11 @@ float4 FragMain(PSInput input) : SV_TARGET
         Lo += CalculateBRDF(light, material) * (1.0 - shadow);
     }
 
-    for (i = 0; i < totalPointLights; i++)
-    {
+    float3 color = CalculateDiffuseIrradiance(material, normal, viewDir).rgb;
+    color += Lo;
+    //float3 color = Lo + CalculateDiffuseIrradiance(material, normal, viewDir);
 
-    }
-    
-    float3 ambient = float3(0.03, 0.03, 0.03) * material.albedo * _AmbientOcclusion;
-    float3 color = Lo;//ambient + Lo;
-
-    color = color / (color + float3(1.0, 1.0, 1.0)); // HDR Tonemapping (optional)
+    color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)
     color = LinearToGamma(color); // Convert to Gamma space
     return float4(color, 1.0);
 }

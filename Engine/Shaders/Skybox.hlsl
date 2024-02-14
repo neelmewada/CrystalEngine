@@ -34,8 +34,8 @@ PSInput VertMain(VSInput input)
 float4 FragMain(PSInput input) : SV_TARGET
 {
     float3 direction = normalize(input.worldPos - viewPosition);
-    float3 cubemapSample = _Skybox.Sample(_DefaultSampler, direction).rgb;
-    //cubemapSample = EncodeSRGB(cubemapSample);
-    return float4(cubemapSample, 1);
+    float3 color = _Skybox.Sample(_DefaultSampler, direction).rgb;
+    color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR tonemapping (optional)
+    return float4(color, 1);
 }
 #endif

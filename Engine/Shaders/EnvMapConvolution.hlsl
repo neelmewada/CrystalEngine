@@ -46,12 +46,14 @@ float4 FragMain(PSInput input) : SV_Target
     float3 normal = normalize(input.localPosition);
     float3 irradiance = float3(0, 0, 0);
 
+    //return float4(_CubeMap.Sample(_CubeMapSampler, normal).rgb, 1.0);
+
     float3 up = float3(0, 1, 0);
     float3 right = normalize(cross(up, normal));
     up = normalize(cross(normal, right));
 
     float sampleDelta = 0.025;
-    float nrSamples = 0.0; 
+    float nrSamples = 0.0;
 
     for(float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta)
     {
@@ -62,7 +64,9 @@ float4 FragMain(PSInput input) : SV_Target
             // tangent space to world
             float3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-            irradiance += _CubeMap.Sample(_CubeMapSampler, sampleVec).rgb * cos(theta) * sin(theta);
+            float3 color = _CubeMap.Sample(_CubeMapSampler, sampleVec).rgb * cos(theta) * sin(theta);
+            //irradiance += color;
+            irradiance += GammaToLinear(color);
             nrSamples++;
         }
     }

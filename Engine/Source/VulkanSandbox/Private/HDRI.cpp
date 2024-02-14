@@ -48,8 +48,8 @@ namespace CE::Sandbox
             irradianceMapDesc.name = "HDRI Irradiance Map";
             irradianceMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
             irradianceMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
-            irradianceMapDesc.width = 32;
-            irradianceMapDesc.height = 32;
+            irradianceMapDesc.width = 64;
+            irradianceMapDesc.height = 64;
             irradianceMapDesc.depth = 1;
             irradianceMapDesc.dimension = RHI::Dimension::DimCUBE;
             irradianceMapDesc.mipLevels = 1;
@@ -157,14 +157,39 @@ namespace CE::Sandbox
 		equirectangulerSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
 		equirectangulerSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
+		RHI::ShaderResourceGroupLayout irradianceSrgLayout{};
+		irradianceSrgLayout.srgType = RHI::SRGType::PerPass;
+		irradianceSrgLayout.variables.Add({});
+		irradianceSrgLayout.variables.Top().arrayCount = 1;
+		irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
+		irradianceSrgLayout.variables.Top().name = "_PerViewData";
+		irradianceSrgLayout.variables.Top().bindingSlot = 0;
+		irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
+
+		irradianceSrgLayout.variables.Add({});
+		irradianceSrgLayout.variables.Top().arrayCount = 1;
+		irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
+		irradianceSrgLayout.variables.Top().name = "_CubeMap";
+		irradianceSrgLayout.variables.Top().bindingSlot = 1;
+		irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+		irradianceSrgLayout.variables.Add({});
+		irradianceSrgLayout.variables.Top().arrayCount = 1;
+		irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+		irradianceSrgLayout.variables.Top().name = "_CubeMapSampler";
+		irradianceSrgLayout.variables.Top().bindingSlot = 2;
+		irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+
 		RHI::ShaderResourceGroup* equirectangulerSrgs[6] = {};
 
 		RHI::Sampler* sampler = nullptr;
 		RHI::Buffer* viewDataBuffers[6] = {};
 		
-		// Order: right, left, top, bottom, front, back
+		
 		Matrix4x4 captureProjection = Matrix4x4::PerspectiveProjection(1.0f, 90.0f, 0.1f, 10.0f);
 
+		// Order: right, left, top, bottom, front, back
 		Matrix4x4 captureViews[] = {
 			Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
 			Quat::LookRotation(Vec3( 1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
@@ -202,6 +227,36 @@ namespace CE::Sandbox
 			sampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 		}
 
+		// Order: right, left, top, bottom, front, back
+		Matrix4x4 captureViews2[] = {
+			Quat::LookRotation(Vec3( 1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3( 0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3( 0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3( 0.0f,  0.0f,  1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3( 0.0f,  0.0f, -1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix()
+		};
+
+		RHI::Buffer* viewDataBuffers2[6] = {};
+
+		for (int i = 0; i < 6; i++)
+		{
+			RHI::BufferDescriptor viewBufferDesc{};
+			viewBufferDesc.name = "View Data Buffer 2";
+			viewBufferDesc.bufferSize = sizeof(PerViewData);
+			viewBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			viewBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+
+			PerViewData viewData{};
+			viewData.viewPosition = Vec3(0, 0, 0);
+			viewData.projectionMatrix = captureProjection;
+			viewData.viewMatrix = captureViews2[i];
+			viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
+
+			viewDataBuffers2[i] = RHI::gDynamicRHI->CreateBuffer(viewBufferDesc);
+			viewDataBuffers2[i]->UploadData(&viewData, sizeof(viewData));
+		}
+
 		for (int i = 0; i < 6; i++)
 		{
 			equirectangulerSrgs[i] = RHI::gDynamicRHI->CreateShaderResourceGroup(equirectangulerSrgLayout);
@@ -209,6 +264,16 @@ namespace CE::Sandbox
 			equirectangulerSrgs[i]->Bind("_InputTexture", hdriMap);
 			equirectangulerSrgs[i]->Bind("_PerViewData", viewDataBuffers[i]);
 			equirectangulerSrgs[i]->FlushBindings();
+		}
+
+		RHI::ShaderResourceGroup* irradianceSrgs[6] = {};
+		for (int i = 0; i < 6; i++)
+		{
+			irradianceSrgs[i] = RHI::gDynamicRHI->CreateShaderResourceGroup(irradianceSrgLayout);
+			irradianceSrgs[i]->Bind("_CubeMap", hdriCubeMap);
+			irradianceSrgs[i]->Bind("_PerViewData", viewDataBuffers2[i]);
+			irradianceSrgs[i]->Bind("_CubeMapSampler", sampler);
+			irradianceSrgs[i]->FlushBindings();
 		}
 
 		RHI::PipelineState* equirectangularPipeline = nullptr;
@@ -265,48 +330,17 @@ namespace CE::Sandbox
 			equirectangularPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
 		}
         
-        RHI::ShaderResourceGroupLayout irradianceSrgLayout{};
-        irradianceSrgLayout.srgType = RHI::SRGType::PerPass;
-        irradianceSrgLayout.variables.Add({});
-        irradianceSrgLayout.variables.Top().arrayCount = 1;
-        irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
-        irradianceSrgLayout.variables.Top().name = "_PerViewData";
-        irradianceSrgLayout.variables.Top().bindingSlot = 0;
-        irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-        
-        irradianceSrgLayout.variables.Add({});
-        irradianceSrgLayout.variables.Top().arrayCount = 1;
-        irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
-        irradianceSrgLayout.variables.Top().name = "_CubeMap";
-        irradianceSrgLayout.variables.Top().bindingSlot = 1;
-        irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-        
-        irradianceSrgLayout.variables.Add({});
-        irradianceSrgLayout.variables.Top().arrayCount = 1;
-        irradianceSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
-        irradianceSrgLayout.variables.Top().name = "_CubeMapSampler";
-        irradianceSrgLayout.variables.Top().bindingSlot = 2;
-        irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-        
         InitIrradiancePipeline(irradianceSrgLayout);
-        
-        RHI::ShaderResourceGroup* irradianceSrgs[6] = {};
-        for (int i = 0; i < 6; i++)
-        {
-            irradianceSrgs[i] = RHI::gDynamicRHI->CreateShaderResourceGroup(irradianceSrgLayout);
-            irradianceSrgs[i]->Bind("_CubeMap", irradianceMap);
-            irradianceSrgs[i]->Bind("_PerViewData", viewDataBuffers[i]);
-            irradianceSrgs[i]->Bind("_CubeMapSampler", sampler);
-            irradianceSrgs[i]->FlushBindings();
-        }
 
 		RPI::Mesh* cubeMesh = cubeModel->GetMesh(0);
 		const auto& vertInfo = cubeMesh->vertexBufferInfos[0];
 		auto vertexBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-		//auto vertexBufferView = RHI::VertexBufferView(vertexBuffer, 0, vertexBuffer->GetBufferSize(), sizeof(Vec4));
 
 		RHI::RenderTargetBuffer* renderTargetBuffers[6] = {};
 		RHI::TextureView* textureViews[6] = {};
+
+		RHI::RenderTargetBuffer* convolutionRenderTargetBuffers[6] = {};
+		RHI::TextureView* convolutionTextureViews[6] = {};
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -326,7 +360,18 @@ namespace CE::Sandbox
         
         for (int i = 0; i < 6; i++)
         {
-            
+			RHI::TextureViewDescriptor imageViewDesc{};
+			imageViewDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+			imageViewDesc.texture = irradianceMap;
+			imageViewDesc.dimension = RHI::Dimension::Dim2D;
+			imageViewDesc.mipLevelCount = 1;
+			imageViewDesc.baseMipLevel = 0;
+			imageViewDesc.baseArrayLayer = i;
+			imageViewDesc.arrayLayerCount = 1;
+
+			convolutionTextureViews[i] = RHI::gDynamicRHI->CreateTextureView(imageViewDesc);
+
+			convolutionRenderTargetBuffers[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { convolutionTextureViews[i] });
         }
 		
 		cmdList->Begin();
@@ -340,7 +385,7 @@ namespace CE::Sandbox
             
             barrier.resource = irradianceMap;
             barrier.fromState = RHI::ResourceState::Undefined;
-            barrier.toState = RHI::ResourceState::FragmentShaderResource;
+            barrier.toState = RHI::ResourceState::ColorOutput;
             barrier.subresourceRange = RHI::SubresourceRange::All();
             cmdList->ResourceBarrier(1, &barrier);
 
@@ -405,6 +450,44 @@ namespace CE::Sandbox
 			barrier.toState = RHI::ResourceState::FragmentShaderResource;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
+
+			for (int i = 0; i < 6; i++)
+			{
+				cmdList->BeginRenderTarget(renderTarget, convolutionRenderTargetBuffers[i], &clearValue);
+
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = convolutionTextureViews[i]->GetTexture()->GetWidth();
+				viewportState.height = convolutionTextureViews[i]->GetTexture()->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(irradiancePipeline);
+
+				cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
+				cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
+
+				cmdList->SetShaderResourceGroup(irradianceSrgs[i]);
+
+				cmdList->CommitShaderResources();
+
+				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+
+				cmdList->EndRenderTarget();
+			}
+
+			barrier.resource = irradianceMap;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
 		}
 		cmdList->End();
 
@@ -425,6 +508,9 @@ namespace CE::Sandbox
         
 		for (int i = 0; i < 6; i++)
 		{
+			delete viewDataBuffers2[i];
+			delete convolutionTextureViews[i];
+			delete convolutionRenderTargetBuffers[i];
             delete irradianceSrgs[i];
 			delete renderTargetBuffers[i];
 			delete textureViews[i];
@@ -454,14 +540,14 @@ namespace CE::Sandbox
         vertShaderDesc.stage = RHI::ShaderStage::Vertex;
         vertShaderDesc.byteCode = convolutionVertSpv->GetData();
         vertShaderDesc.byteSize = convolutionVertSpv->GetDataSize();
-        RHI::ShaderModule* convolutionVertShader = RHI::gDynamicRHI->CreateShaderModule(vertShaderDesc);
+        convolutionVertShader = RHI::gDynamicRHI->CreateShaderModule(vertShaderDesc);
         
         RHI::ShaderModuleDescriptor fragShaderDesc{};
         fragShaderDesc.name = "FragMain";
         fragShaderDesc.stage = RHI::ShaderStage::Fragment;
         fragShaderDesc.byteCode = convolutionFragSpv->GetData();
         fragShaderDesc.byteSize = convolutionFragSpv->GetDataSize();
-        RHI::ShaderModule* convolutionFragShader = RHI::gDynamicRHI->CreateShaderModule(fragShaderDesc);
+        convolutionFragShader = RHI::gDynamicRHI->CreateShaderModule(fragShaderDesc);
         
         {
             RHI::GraphicsPipelineDescriptor pipelineDesc{};

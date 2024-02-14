@@ -8,6 +8,7 @@ struct MaterialInput
     float3 albedo;
     float metallic;
     float roughness;
+    float ambient;
 };
 
 struct LightInput
@@ -19,7 +20,7 @@ struct LightInput
     float3 viewDir;
 };
 
-inline float3 FresnelSchlick(float3 F0, float3 HdotV)
+inline float3 FresnelSchlick(float3 F0, float HdotV)
 {
     return F0 + (1 - F0) * pow(clamp(1 - HdotV, 0, 1), 5);
 }
@@ -60,7 +61,12 @@ inline float GeometrySmith(float NdotV, float NdotL, float roughness)
 
 float FresnelSchlick90(float cosTheta, float F0, float F90) {
   return F0 + (F90 - F0) * pow(1.0 - cosTheta, 5.0);
-} 
+}
+
+float3 FresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
+{
+    return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}   
 
 float DisneyDiffuseFactor(float NdotV, float NdotL, float VdotH, float roughness) {
   float alpha = roughness * roughness;

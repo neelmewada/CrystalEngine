@@ -40,6 +40,7 @@ namespace CE::Sandbox
 	constexpr u32 sceneDataBinding = 4;
 	constexpr u32 skyboxBinding = 5;
 	constexpr u32 defaultSamplerBinding = 6;
+	constexpr u32 skyboxIrradianceBinding = 7;
 
 	constexpr u32 perViewDataBinding = 0;
 	constexpr u32 perObjectDataBinding = 0;
@@ -156,7 +157,7 @@ namespace CE::Sandbox
 
 		UpdatePerViewData(imageIndex);
 
-		cameraRotation += deltaTime * 25.0f;
+		cameraRotation += deltaTime * 20.0f;
 		if (cameraRotation >= 360)
 			cameraRotation -= 360;
         
@@ -164,7 +165,7 @@ namespace CE::Sandbox
 		if (sphereRotation >= 360)
 			sphereRotation -= 360;
 		Vec3 spherePivot = Vec3(0, 0, 5);
-		Vec3 spherePos = spherePivot;// + Vec3(Math::Cos(TO_RADIANS(sphereRotation)), 0, Math::Sin(TO_RADIANS(sphereRotation))) * 0.5f;
+		Vec3 spherePos = spherePivot;
 		
         //cubeRotation += deltaTime * 5;
         if (cubeRotation >= 360)
@@ -189,14 +190,21 @@ namespace CE::Sandbox
 	void VulkanSandbox::UpdatePerViewData(int imageIndex)
 	{
 		float farPlane = 1000.0f;
-
-		cameraRotation = 0;
-		perViewData.viewPosition = Vec3(0, 1, 0);
-		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 75, 0.1f, farPlane);
-		perViewData.viewMatrix = Matrix4x4::Translation(-perViewData.viewPosition) * Quat::EulerDegrees(Vec3(cameraRotation, 0, 0)).ToMatrix();
-		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
 		
-		// Temp code to test directional light view/proj matrix
+		//cameraRotation = 0;
+		Vec3 spherePos = Vec3(0, 0.5f, 5);
+		perViewData.viewPosition = Vec3(-2.5f, 0.5f, 5);
+		perViewData.viewPosition = Vec3(0, 0.5f, 5) + Vec3(Math::Cos(TO_RADIANS(cameraRotation)), 0, Math::Sin(TO_RADIANS(cameraRotation))) * 2.0f;
+		Vec3 camRot = Vec3(0, 0, 0);
+		Vec3 lookDir = spherePos - perViewData.viewPosition;
+		//camRot = Quat::LookRotation(lookDir) * Vec3(0, 0, 1);
+
+		perViewData.projectionMatrix = Matrix4x4::PerspectiveProjection(swapChain->GetAspectRatio(), 65, 0.1f, farPlane);
+		// View matrix has the order inverted compared to model matrix, i.e. order is S * R * T and all positions and rotations are negated.
+		//perViewData.viewMatrix = Quat::EulerRadians(-camRot).ToMatrix() * Matrix4x4::Translation(-perViewData.viewPosition);
+		perViewData.viewMatrix = Quat::LookRotation(lookDir).ToMatrix() * Matrix4x4::Translation(-perViewData.viewPosition);
+		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
+
 		//perViewData = directionalLightViewData;
 
 		RHI::BufferData data{};
@@ -337,7 +345,7 @@ namespace CE::Sandbox
 								int srcPixelIndex = (y * height + x) * 3; // Assuming all CMImage's are RGB8 (3 channels only)
 								int dstPixelIndex = (y * height + x) * 4;
 
-								*(dstData + dstPixelIndex) = *(srcData + srcPixelIndex); // R
+								*(dstData + dstPixelIndex + 0) = *(srcData + srcPixelIndex); // R
 								*(dstData + dstPixelIndex + 1) = *(srcData + srcPixelIndex + 1); // G
 								*(dstData + dstPixelIndex + 2) = *(srcData + srcPixelIndex + 2); // B
 								*(dstData + dstPixelIndex + 3) = 0; // A
@@ -516,6 +524,13 @@ namespace CE::Sandbox
 			perSceneSrgLayout.variables.Top().name = "_DefaultSampler";
 			perSceneSrgLayout.variables.Top().bindingSlot = defaultSamplerBinding;
 			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_SkyboxIrradiance";
+			perSceneSrgLayout.variables.Top().bindingSlot = skyboxIrradianceBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::TextureCube;
 			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
 			perSceneSrgLayout.variables.Add({});
@@ -788,9 +803,9 @@ namespace CE::Sandbox
 			skyboxShader->AddVariant(variant);
 
 			skyboxMaterial = new RPI::Material(skyboxShader);
-
-			//perSceneSrg->Bind("_Skybox", skyboxCubeMap);
+			
 			perSceneSrg->Bind("_Skybox", hdriCubeMap);
+			perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
 			perSceneSrg->Bind("_DefaultSampler", defaultSampler);
 
 			perSceneSrg->FlushBindings();
@@ -803,7 +818,7 @@ namespace CE::Sandbox
 
 			skyboxObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
 
-			skyboxScale = Vec3(500, 500, 500);
+			skyboxScale = Vec3(1000, 1000, 1000);
 			skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
 			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
@@ -1104,8 +1119,8 @@ namespace CE::Sandbox
 		DirectionalLight mainLight{};
 		mainLight.direction = Vec3(-0.25f, -0.5f, 0.5f).GetNormalized();
 		//mainLight.direction = Vec3(0, 0, 1);
-		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.7f);
-		mainLight.colorAndIntensity.w = 5.0f; // intensity
+		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.75f);
+		mainLight.colorAndIntensity.w = 25.0f; // intensity
 		mainLight.temperature = 100;
 
 		// Directional Light Shadow
@@ -1121,11 +1136,17 @@ namespace CE::Sandbox
 
 			directionalLightViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(directionalLightViewSrgLayout);
 
+			Matrix4x4 multiplier = Matrix4x4({
+				{ 1, 0, 0, 0 },
+				{ 0, -1, 0, 0 },
+				{ 0, 0, 0.5f, 0.5f },
+				{ 0, 0, 0, 1 },
+			});
+
 			directionalLightViewData.viewPosition = Vec3(0, 5, 0);
 			directionalLightViewData.projectionMatrix = Matrix4x4::OrthographicProjection(-5, 5, 5, -5, 1.0f, 100.0f);
 			directionalLightViewData.viewMatrix = Matrix4x4::Translation(-directionalLightViewData.viewPosition) *
 				Quat::LookRotation(mainLight.direction).ToMatrix();
-				//Quat::FromToRotation(Vec3(0, 0, 1), Vec3(mainLight.direction.x, mainLight.direction.y, mainLight.direction.z)).ToMatrix();
 
 			directionalLightViewData.viewProjectionMatrix = directionalLightViewData.projectionMatrix * directionalLightViewData.viewMatrix;
 
@@ -1173,6 +1194,7 @@ namespace CE::Sandbox
 		}
 
 		lightData.totalDirectionalLights = directionalLights.GetSize();
+		lightData.totalDirectionalLights = 0;
 		lightData.ambientColor = Color(0, 0.1f, 0.5f, 1).ToVec4();
 		lightData.totalPointLights = pointLights.GetSize();
 
@@ -1378,12 +1400,15 @@ namespace CE::Sandbox
 	{
 		RHI::DrawPacketBuilder builder{};
 
-		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
+		//auto model = cubeModel;
+		auto model = sphereModel;
+
+		builder.SetDrawArguments(model->GetMesh(0)->drawArguments);
 
 		builder.AddShaderResourceGroup(perSceneSrg);
 		builder.AddShaderResourceGroup(skyboxObjectSrg);
 
-		RPI::Mesh* mesh = cubeModel->GetMesh(0);
+		RPI::Mesh* mesh = model->GetMesh(0);
 
 		// Skybox Item
 		{
@@ -1393,7 +1418,7 @@ namespace CE::Sandbox
 				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position)
 					continue;
 
-				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+				auto vertBufferView = RHI::VertexBufferView(model->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
 				request.vertexBufferViews.Add(vertBufferView);
 			}
 			request.indexBufferView = mesh->indexBufferView;
