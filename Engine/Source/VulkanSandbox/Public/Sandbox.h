@@ -112,11 +112,14 @@ namespace CE::Sandbox
 		bool resubmit = true;
 
 		RHI::Texture* hdriMap = nullptr;
+		RHI::Texture* hdriGrayscaleMap = nullptr;
 		RHI::Texture* hdriCubeMap = nullptr;
         RHI::Texture* irradianceMap = nullptr;
         RHI::PipelineState* irradiancePipeline = nullptr;
         RHI::ShaderModule* convolutionVertShader = nullptr;
         RHI::ShaderModule* convolutionFragShader = nullptr;
+		RHI::ShaderModule* grayscaleVertShader = nullptr;
+		RHI::ShaderModule* grayscaleFragShader = nullptr;
 
 		RHI::Texture* skyboxCubeMap = nullptr;
 		RHI::Sampler* skyboxSampler = nullptr;

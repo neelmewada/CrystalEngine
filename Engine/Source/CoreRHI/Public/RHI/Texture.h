@@ -35,6 +35,12 @@ namespace CE::RHI
         
 		inline u32 GetDepth() const { return depth; }
 
+		inline u32 GetWidth(u32 mipSlice) const { return Math::Max((u32)0, width / (u32)pow(2, mipSlice)); }
+
+		inline u32 GetHeight(u32 mipSlice) const { return Math::Max((u32)0, height / (u32)pow(2, mipSlice)); }
+
+		inline u32 GetDepth(u32 mipSlice) const { return Math::Max((u32)1, depth / (u32)pow(2, mipSlice)); }
+
 		inline u32 GetArrayLayerCount() const { return arrayLayers; }
 
 		inline u32 GetMipLevelCount() const { return mipLevels; }

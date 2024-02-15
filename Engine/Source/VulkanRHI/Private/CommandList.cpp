@@ -297,11 +297,13 @@ namespace CE::Vulkan
 						VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT |
 						VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
 					break;
+				case RHI::ResourceState::BlitSource:
 				case RHI::ResourceState::CopySource:
 					srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 					imageBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 					break;
+				case RHI::ResourceState::BlitDestination:
 				case RHI::ResourceState::CopyDestination:
 					srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 					imageBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -359,11 +361,13 @@ namespace CE::Vulkan
 						VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT |
 						VK_ACCESS_MEMORY_READ_BIT | VK_ACCESS_MEMORY_WRITE_BIT;
 					break;
+				case RHI::ResourceState::BlitSource:
 				case RHI::ResourceState::CopySource:
 					dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 					imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 					imageBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 					break;
+				case RHI::ResourceState::BlitDestination:
 				case RHI::ResourceState::CopyDestination:
 					dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 					imageBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -575,6 +579,70 @@ namespace CE::Vulkan
 			dstTexture->GetImage(),
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1, &copy);
+	}
+
+	void CommandList::BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter)
+	{
+		if (!source || !destination || regionCount == 0 || !regions)
+			return;
+
+		static Array<VkImageBlit> blitRegions{};
+		if (blitRegions.GetSize() < regionCount)
+		{
+			blitRegions.Resize(regionCount);
+		}
+
+		VkImage src = ((Vulkan::Texture*)source)->GetImage();
+		VkImage dst = ((Vulkan::Texture*)destination)->GetImage();
+
+		for (int i = 0; i < regionCount; i++)
+		{
+			u32 srcMipLevel = regions[i].srcSubresource.mipSlice;
+			u32 dstMipLevel = regions[i].dstSubresource.mipSlice;
+
+			VkImageBlit blit{};
+			blit.srcOffsets[0].x = regions[i].srcOffset.x;
+			blit.srcOffsets[0].y = regions[i].srcOffset.y;
+			blit.srcOffsets[0].z = regions[i].srcOffset.z;
+
+			blit.srcOffsets[1].x = regions[i].srcOffset.x + (regions[i].srcExtent.x > 0 ? regions[i].srcExtent.x : source->GetWidth(srcMipLevel));
+			blit.srcOffsets[1].y = regions[i].srcOffset.y + (regions[i].srcExtent.y > 0 ? regions[i].srcExtent.y : source->GetHeight(srcMipLevel));
+			blit.srcOffsets[1].z = regions[i].srcOffset.z + (regions[i].srcExtent.z > 0 ? regions[i].srcExtent.z : source->GetDepth(srcMipLevel));
+
+			blit.dstOffsets[0].x = regions[i].dstOffset.x;
+			blit.dstOffsets[0].y = regions[i].dstOffset.y;
+			blit.dstOffsets[0].z = regions[i].dstOffset.z;
+
+			blit.dstOffsets[1].x = regions[i].dstOffset.x + (regions[i].dstExtent.x > 0 ? regions[i].dstExtent.x : destination->GetWidth(dstMipLevel));
+			blit.dstOffsets[1].y = regions[i].dstOffset.y + (regions[i].dstExtent.y > 0 ? regions[i].dstExtent.y : destination->GetHeight(dstMipLevel));
+			blit.dstOffsets[1].z = regions[i].dstOffset.z + (regions[i].dstExtent.z > 0 ? regions[i].dstExtent.z : destination->GetDepth(dstMipLevel));
+
+			blit.srcSubresource.aspectMask = ((Vulkan::Texture*)source)->GetAspectMask();
+			blit.srcSubresource.baseArrayLayer = regions[i].srcSubresource.baseArrayLayer;
+			blit.srcSubresource.layerCount = regions[i].srcSubresource.layerCount;
+			blit.srcSubresource.mipLevel = regions[i].srcSubresource.mipSlice;
+
+			blit.dstSubresource.aspectMask = ((Vulkan::Texture*)destination)->GetAspectMask();
+			blit.dstSubresource.baseArrayLayer = regions[i].dstSubresource.baseArrayLayer;
+			blit.dstSubresource.layerCount = regions[i].dstSubresource.layerCount;
+			blit.dstSubresource.mipLevel = regions[i].dstSubresource.mipSlice;
+
+			blitRegions[i] = blit;
+		}
+
+		VkFilter vkFilter = VK_FILTER_LINEAR;
+		switch (filter)
+		{
+		case CE::RHI::FilterMode::Nearest:
+			vkFilter = VK_FILTER_NEAREST;
+			break;
+		case CE::RHI::FilterMode::Cubic:
+			if (device->IsDeviceExtensionSupported(VK_EXT_FILTER_CUBIC_EXTENSION_NAME))
+				vkFilter = VK_FILTER_CUBIC_EXT;
+			break;
+		}
+
+		vkCmdBlitImage(commandBuffer, src, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regionCount, blitRegions.GetData(), vkFilter);
 	}
 
 	void CommandList::Begin()

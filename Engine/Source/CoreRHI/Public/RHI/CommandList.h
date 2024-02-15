@@ -38,6 +38,30 @@ namespace CE::RHI
 		}
 	};
 
+	struct SubresourceLayers
+	{
+		u32 mipSlice = 0;
+		u32 baseArrayLayer = 0;
+		u32 layerCount = 0;
+
+		constexpr static SubresourceLayers All()
+		{
+			SubresourceLayers result;
+			result.mipSlice = result.baseArrayLayer = result.layerCount = 0;
+			return result;
+		}
+	};
+
+	struct BlitRegion
+	{
+		SubresourceLayers srcSubresource{};
+		Vec3i srcOffset{};
+		Vec3i srcExtent{};
+		SubresourceLayers dstSubresource{};
+		Vec3i dstOffset{};
+		Vec3i dstExtent{};
+	};
+
 	struct ResourceBarrierDescriptor
 	{
 		IDeviceObject* resource;
@@ -117,6 +141,8 @@ namespace CE::RHI
 		virtual void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) = 0;
 
 		virtual void CopyTextureRegion(const BufferToTextureCopy& region) = 0;
+
+		virtual void BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter = RHI::FilterMode::Linear) = 0;
 
 	protected:
 

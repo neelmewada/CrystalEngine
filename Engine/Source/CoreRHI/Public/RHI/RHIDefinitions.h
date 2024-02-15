@@ -401,6 +401,8 @@ namespace CE::RHI
         Present = BIT(11),
         // Read/Write resource
         ShaderWrite = BIT(12),
+        BlitSource = BIT(13),
+        BlitDestination = BIT(14)
     };
 
 } // namespace CE

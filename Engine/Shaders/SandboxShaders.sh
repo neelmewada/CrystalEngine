@@ -48,4 +48,5 @@ CompileShader "Opaque"
 CompileShader "Skybox"
 CompileShader "Equirectangular"
 CompileShader "EnvMapConvolution"
+CompileShader "Grayscale"
 

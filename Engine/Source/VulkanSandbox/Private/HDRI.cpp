@@ -17,9 +17,34 @@ namespace CE::Sandbox
 		return fltInt16;
 	}
 
+	struct QuadVertex
+	{
+		Vec3 position{};
+		Vec2 uv{};
+	};
+
+	static QuadVertex quadVertices[] = {
+		{{-1.0f, -1.0f, 0}, {0.0f, 0.0f}},  // Bottom-left
+		{{1.0f, -1.0f, 0}, {1.0f, 0.0f}},   // Bottom-right
+		{{-1.0f, 1.0f, 0}, {0.0f, 1.0f}},   // Top-left
+		// Triangle 2
+		{{-1.0f, 1.0f, 0}, {0.0f, 1.0f}},   // Top-left
+		{{1.0f, -1.0f, 0}, {1.0f, 0.0f}},   // Bottom-right
+		{{1.0f, 1.0f, 0}, {1.0f, 1.0f}}     // Top-right
+	};
+
 	void VulkanSandbox::InitHDRIs()
 	{
-		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_day2.hdr";
+		RHI::BufferDescriptor quadVertexBufferDesc{};
+		quadVertexBufferDesc.name = "Quad Vertex Buffer";
+		quadVertexBufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
+		quadVertexBufferDesc.defaultHeapType = RHI::MemoryHeapType::Default;
+		quadVertexBufferDesc.bufferSize = COUNTOF(quadVertices) * sizeof(QuadVertex);
+
+		RHI::Buffer* quadVertexBuffer = RHI::gDynamicRHI->CreateBuffer(quadVertexBufferDesc);
+		quadVertexBuffer->UploadData(quadVertices, quadVertexBuffer->GetBufferSize(), 0);
+
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night2.hdr";
 
 		Resource* equirectVertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.vert.spv", nullptr);
 		Resource* equirectFragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.frag.spv", nullptr);
@@ -58,6 +83,17 @@ namespace CE::Sandbox
             irradianceMap = RHI::gDynamicRHI->CreateTexture(irradianceMapDesc);
         }
 
+		RHI::Sampler* sampler = nullptr;
+		{
+			RHI::SamplerDescriptor samplerDesc{};
+			samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToBorder;
+			samplerDesc.borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
+			samplerDesc.enableAnisotropy = false;
+			samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+
+			sampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
+		}
+
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 
 		RHI::TextureDescriptor hdriFlatMapDesc{};
@@ -75,6 +111,115 @@ namespace CE::Sandbox
 
 		hdriMap = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 
+		hdriFlatMapDesc.name = "HDRI Grayscale";
+		hdriFlatMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+		hdriGrayscaleMap = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+
+		RHI::RenderTarget* renderTarget = nullptr;
+
+		{
+			RHI::RenderTargetLayout rtLayout{};
+
+			RHI::RenderAttachmentLayout colorAttachment{};
+			colorAttachment.attachmentId = "Color";
+			colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+			colorAttachment.format = RHI::Format::R16G16B16A16_SFLOAT;
+			colorAttachment.loadAction = RHI::AttachmentLoadAction::Clear;
+			colorAttachment.storeAction = RHI::AttachmentStoreAction::Store;
+			colorAttachment.multisampleState.sampleCount = 1;
+			rtLayout.attachmentLayouts.Add(colorAttachment);
+
+			renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+		}
+
+		RHI::ShaderResourceGroup* grayscaleSrg = nullptr;
+		RHI::PipelineState* grayscalePipeline = nullptr;
+		{
+			Resource* grayscaleVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Grayscale.vert.spv", nullptr);
+			Resource* grayscaleFrag = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Grayscale.frag.spv", nullptr);
+
+			RHI::ShaderModuleDescriptor vertModuleDesc{};
+			vertModuleDesc.name = "Grayscale Vertex";
+			vertModuleDesc.stage = RHI::ShaderStage::Vertex;
+			vertModuleDesc.byteCode = grayscaleVert->GetData();
+			vertModuleDesc.byteSize = grayscaleVert->GetDataSize();
+
+			grayscaleVertShader = RHI::gDynamicRHI->CreateShaderModule(vertModuleDesc);
+
+			RHI::ShaderModuleDescriptor fragModuleDesc{};
+			fragModuleDesc.name = "Grayscale Fragment";
+			fragModuleDesc.stage = RHI::ShaderStage::Fragment;
+			fragModuleDesc.byteCode = grayscaleFrag->GetData();
+			fragModuleDesc.byteSize = grayscaleFrag->GetDataSize();
+
+			grayscaleFragShader = RHI::gDynamicRHI->CreateShaderModule(fragModuleDesc);
+
+			RHI::ShaderResourceGroupLayout grayscaleSrgLayout{};
+			grayscaleSrgLayout.srgType = RHI::SRGType::PerPass;
+			grayscaleSrgLayout.variables.Add({});
+			grayscaleSrgLayout.variables.Top().arrayCount = 1;
+			grayscaleSrgLayout.variables.Top().name = "_InputTexture";
+			grayscaleSrgLayout.variables.Top().bindingSlot = 0;
+			grayscaleSrgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			grayscaleSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			grayscaleSrgLayout.variables.Add({});
+			grayscaleSrgLayout.variables.Top().arrayCount = 1;
+			grayscaleSrgLayout.variables.Top().name = "_InputSampler";
+			grayscaleSrgLayout.variables.Top().bindingSlot = 1;
+			grayscaleSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			grayscaleSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			grayscaleSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(grayscaleSrgLayout);
+
+			grayscaleSrg->Bind("_InputSampler", sampler);
+			grayscaleSrg->Bind("_InputTexture", hdriMap);
+			grayscaleSrg->FlushBindings();
+
+			RHI::GraphicsPipelineDescriptor grayscalePipelineDesc{};
+			grayscalePipelineDesc.name = "Grayscale Pipeline";
+
+			RHI::ShaderStageDescriptor vertStageDesc{};
+			vertStageDesc.entryPoint = "VertMain";
+			vertStageDesc.shaderModule = grayscaleVertShader;
+			grayscalePipelineDesc.shaderStages.Add(vertStageDesc);
+
+			RHI::ShaderStageDescriptor fragStageDesc{};
+			fragStageDesc.entryPoint = "FragMain";
+			fragStageDesc.shaderModule = grayscaleFragShader;
+			grayscalePipelineDesc.shaderStages.Add(fragStageDesc);
+
+			grayscalePipelineDesc.rasterState.cullMode = RHI::CullMode::None;
+			grayscalePipelineDesc.multisampleState.sampleCount = 1;
+			grayscalePipelineDesc.depthStencilState.stencilState.enable = false;
+			grayscalePipelineDesc.depthStencilState.depthState.enable = false;
+			grayscalePipelineDesc.numScissors = 1;
+			grayscalePipelineDesc.numViewports = 1;
+
+			grayscalePipelineDesc.vertexInputSlots.Add({});
+			grayscalePipelineDesc.vertexInputSlots.Top().inputRate = VertexInputRate::PerVertex;
+			grayscalePipelineDesc.vertexInputSlots.Top().inputSlot = 0;
+			grayscalePipelineDesc.vertexInputSlots.Top().stride = sizeof(QuadVertex);
+
+			grayscalePipelineDesc.vertexAttributes.Add({});
+			grayscalePipelineDesc.vertexAttributes.Top().dataType = VertexAttributeDataType::Float3;
+			grayscalePipelineDesc.vertexAttributes.Top().inputSlot = 0;
+			grayscalePipelineDesc.vertexAttributes.Top().location = 0;
+			grayscalePipelineDesc.vertexAttributes.Top().offset = offsetof(QuadVertex, position);
+
+			grayscalePipelineDesc.vertexAttributes.Add({});
+			grayscalePipelineDesc.vertexAttributes.Top().dataType = VertexAttributeDataType::Float2;
+			grayscalePipelineDesc.vertexAttributes.Top().inputSlot = 0;
+			grayscalePipelineDesc.vertexAttributes.Top().location = 1;
+			grayscalePipelineDesc.vertexAttributes.Top().offset = offsetof(QuadVertex, uv);
+			grayscalePipelineDesc.srgLayouts.Add(grayscaleSrgLayout);
+
+			grayscalePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(grayscalePipelineDesc);
+
+			delete grayscaleVert;
+			delete grayscaleFrag;
+		}
+		
 		RHI::TextureDescriptor hdriCubeMapDesc{};
 		hdriCubeMapDesc.name = "HDRI CubeMap";
 		hdriCubeMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
@@ -116,23 +261,6 @@ namespace CE::Sandbox
 		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 		RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
 		RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
-
-		RHI::RenderTarget* renderTarget = nullptr;
-
-		{
-			RHI::RenderTargetLayout rtLayout{};
-
-			RHI::RenderAttachmentLayout colorAttachment{};
-			colorAttachment.attachmentId = "Color";
-			colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
-			colorAttachment.format = RHI::Format::R16G16B16A16_SFLOAT;
-			colorAttachment.loadAction = RHI::AttachmentLoadAction::Clear;
-			colorAttachment.storeAction = RHI::AttachmentStoreAction::Store;
-			colorAttachment.multisampleState.sampleCount = 1;
-			rtLayout.attachmentLayouts.Add(colorAttachment);
-
-			renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
-		}
 
 		RHI::ShaderResourceGroupLayout equirectangulerSrgLayout{};
 		equirectangulerSrgLayout.srgType = RHI::SRGType::PerPass;
@@ -182,8 +310,7 @@ namespace CE::Sandbox
 
 
 		RHI::ShaderResourceGroup* equirectangulerSrgs[6] = {};
-
-		RHI::Sampler* sampler = nullptr;
+		
 		RHI::Buffer* viewDataBuffers[6] = {};
 		
 		
@@ -215,16 +342,6 @@ namespace CE::Sandbox
 			
 			viewDataBuffers[i] = RHI::gDynamicRHI->CreateBuffer(viewBufferDesc);
 			viewDataBuffers[i]->UploadData(&viewData, sizeof(viewData));
-		}
-
-		{
-			RHI::SamplerDescriptor samplerDesc{};
-			samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToBorder;
-			samplerDesc.borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
-			samplerDesc.enableAnisotropy = false;
-			samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
-			
-			sampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 		}
 
 		// Order: right, left, top, bottom, front, back
@@ -336,11 +453,32 @@ namespace CE::Sandbox
 		const auto& vertInfo = cubeMesh->vertexBufferInfos[0];
 		auto vertexBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
 
+		RPI::Mesh* sphereMesh = sphereModel->GetMesh(0);
+		const auto& sphereVertInfo = sphereMesh->vertexBufferInfos[0];
+		auto sphereVertexBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(sphereVertInfo.bufferIndex), sphereVertInfo.byteOffset, 
+			sphereVertInfo.byteCount, sphereVertInfo.stride);
+
 		RHI::RenderTargetBuffer* renderTargetBuffers[6] = {};
 		RHI::TextureView* textureViews[6] = {};
 
 		RHI::RenderTargetBuffer* convolutionRenderTargetBuffers[6] = {};
 		RHI::TextureView* convolutionTextureViews[6] = {};
+
+		RHI::RenderTargetBuffer* grayscaleRTBuffer = nullptr;
+		RHI::TextureView* grayscaleRTV = nullptr;
+		{
+			RHI::TextureViewDescriptor viewDesc{};
+			viewDesc.texture = hdriGrayscaleMap;
+			viewDesc.dimension = RHI::Dimension::Dim2D;
+			viewDesc.format = hdriGrayscaleMap->GetFormat();
+			viewDesc.baseArrayLayer = 0;
+			viewDesc.arrayLayerCount = 1;
+			viewDesc.baseMipLevel = 0;
+			viewDesc.mipLevelCount = 1;
+
+			grayscaleRTV = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+			grayscaleRTBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { grayscaleRTV });
+		}
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -413,7 +551,7 @@ namespace CE::Sandbox
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++) // Convert equirectangular HDR flat image to HDR CubeMap
 			{
 				cmdList->BeginRenderTarget(renderTarget, renderTargetBuffers[i], &clearValue);
 
@@ -451,7 +589,7 @@ namespace CE::Sandbox
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
-			for (int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++) // Convolute the CubeMap
 			{
 				cmdList->BeginRenderTarget(renderTarget, convolutionRenderTargetBuffers[i], &clearValue);
 
@@ -483,6 +621,19 @@ namespace CE::Sandbox
 				cmdList->EndRenderTarget();
 			}
 
+
+			barrier.resource = hdriGrayscaleMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+
+
+
+			barrier.resource = hdriGrayscaleMap;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+
 			barrier.resource = irradianceMap;
 			barrier.fromState = RHI::ResourceState::ColorOutput;
 			barrier.toState = RHI::ResourceState::FragmentShaderResource;
@@ -505,7 +656,12 @@ namespace CE::Sandbox
 		delete equirectFragSpv; delete equirectFragShader;
 		delete equirectangularPipeline;
 		delete sampler;
-        
+		delete quadVertexBuffer;
+		delete grayscaleSrg;
+		delete grayscaleRTV;
+		delete grayscaleRTBuffer;
+		delete grayscalePipeline;
+
 		for (int i = 0; i < 6; i++)
 		{
 			delete viewDataBuffers2[i];
@@ -522,6 +678,7 @@ namespace CE::Sandbox
 	void VulkanSandbox::DestroyHDRIs()
 	{
 		delete hdriMap; hdriMap = nullptr;
+		delete hdriGrayscaleMap; hdriGrayscaleMap = nullptr;
 		delete hdriCubeMap; hdriCubeMap = nullptr;
         delete irradianceMap; irradianceMap = nullptr;
         
