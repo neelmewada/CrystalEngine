@@ -38,6 +38,8 @@ float4 FragMain(PSInput input) : SV_TARGET
 {
     float3 texColor = _InputTexture.Sample(_InputSampler, input.uv).rgb;
     float gray = dot(float3(0.2126, 0.7152, 0.0722), texColor);
+    if (isnan(gray))
+        gray = 0;
     return float4(gray, gray, gray, 1.0);
 }
 #endif

@@ -2,35 +2,6 @@
 
 #include <algorithm>
 
-#ifndef __INTELLISENSE__
-#include "skybox/back.jpg.h"
-#include "skybox/bottom.jpg.h"
-#include "skybox/front.jpg.h"
-#include "skybox/left.jpg.h"
-#include "skybox/right.jpg.h"
-#include "skybox/top.jpg.h"
-#else
-static const char skybox_back_jpg_Data[] = { 0 };
-static const u32 skybox_back_jpg_Length = 2;
-
-static const char skybox_bottom_jpg_Data[] = { 0 };
-static const u32 skybox_bottom_jpg_Length = 2;
-
-static const char skybox_front_jpg_Data[] = { 0 };
-static const u32 skybox_front_jpg_Length = 2;
-
-static const char skybox_left_jpg_Data[] = { 0 };
-static const u32 skybox_left_jpg_Length = 2;
-
-static const char skybox_right_jpg_Data[] = { 0 };
-static const u32 skybox_right_jpg_Length = 2;
-
-static const char skybox_top_jpg_Data[] = { 0 };
-static const u32 skybox_top_jpg_Length = 2;
-#endif
-
-//#define FORCE_SRGB 1
-
 namespace CE::Sandbox
 {
 	constexpr u32 directionalLightArrayBinding = 0;
@@ -240,176 +211,10 @@ namespace CE::Sandbox
 		rpiSystem.Shutdown();
 	}
 	
-	inline CMImage LoadImage(const char* data, u32 size)
-	{
-		return CMImage::LoadFromMemory((unsigned char*)data, size);
-	}
-
-#define LOAD_SKYBOX(side) LoadImage(skybox_##side##_jpg_Data, skybox_##side##_jpg_Length)
 
 	void VulkanSandbox::InitCubeMaps()
 	{
-		auto prevTime = clock();
-
-		// Order: &right, &left, &top, &bottom, &front, &back
-		CMImage loadedImages[6] = {};
-
-		{
-			auto t0 = Thread([&]
-				{
-					loadedImages[0] = LOAD_SKYBOX(right);
-				});
-			auto t1 = Thread([&]
-				{
-					loadedImages[1] = LOAD_SKYBOX(left);
-				});
-			auto t2 = Thread([&]
-				{
-					loadedImages[2] = LOAD_SKYBOX(top);
-				});
-			auto t3 = Thread([&]
-				{
-					loadedImages[3] = LOAD_SKYBOX(bottom);
-				});
-			auto t4 = Thread([&]
-				{
-					loadedImages[4] = LOAD_SKYBOX(front);
-				});
-			auto t5 = Thread([&]
-				{
-					loadedImages[5] = LOAD_SKYBOX(back);
-				});
-
-			t0.Join();
-			t1.Join();
-			t2.Join();
-			t3.Join();
-			t4.Join();
-			t5.Join();
-		}
 		
-		CMImage* layers[6] = {};
-		for (int i = 0; i < 6; i++)
-		{
-			layers[i] = &loadedImages[i];
-		}
-
-		RHI::TextureDescriptor cubeMapDesc{};
-		cubeMapDesc.name = "Skybox";
-		cubeMapDesc.sampleCount = 1;
-		cubeMapDesc.arrayLayers = 6;
-		cubeMapDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
-		cubeMapDesc.mipLevels = 1;
-		cubeMapDesc.width = loadedImages[0].GetWidth();
-		cubeMapDesc.height = loadedImages[0].GetHeight();
-		cubeMapDesc.depth = 1;
-		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
-		cubeMapDesc.format = RHI::Format::R8G8B8A8_UNORM;
-#if FORCE_SRGB
-        cubeMapDesc.format = RHI::Format::R8G8B8A8_SRGB;
-#endif
-
-		const u32 height = cubeMapDesc.height;
-		const u32 width = cubeMapDesc.width;
-
-		skyboxCubeMap = RHI::gDynamicRHI->CreateTexture(cubeMapDesc);
-
-		RHI::BufferDescriptor stagingBufferDesc{};
-		stagingBufferDesc.name = "CubeMap Transfer";
-		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		stagingBufferDesc.bufferSize = height * width * 4 * 6; // 4 bytes per pixel * 6 array layers
-		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-
-		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
-
-		RHI::CommandList* commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
-		RHI::Fence* commandListFence = RHI::gDynamicRHI->CreateFence(false);
-		
-		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
-
-		void* dataPtr = nullptr;
-		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
-		{
-			std::vector<Thread> threads{};
-
-			for (int face = 0; face < 6; face++)
-			{
-				threads.emplace_back([=]()
-					{
-						u8* dstData = (u8*)dataPtr + height * width * 4 * face;
-						u8* srcData = (u8*)layers[face]->GetDataPtr();
-						for (int y = 0; y < height; y++)
-						{
-							for (int x = 0; x < width; x++)
-							{
-								int srcPixelIndex = (y * height + x) * 3; // Assuming all CMImage's are RGB8 (3 channels only)
-								int dstPixelIndex = (y * height + x) * 4;
-
-								*(dstData + dstPixelIndex + 0) = *(srcData + srcPixelIndex); // R
-								*(dstData + dstPixelIndex + 1) = *(srcData + srcPixelIndex + 1); // G
-								*(dstData + dstPixelIndex + 2) = *(srcData + srcPixelIndex + 2); // B
-								*(dstData + dstPixelIndex + 3) = 0; // A
-							}
-						}
-					});
-			}
-
-			for (auto& thread : threads)
-			{
-				thread.Join();
-			}
-			threads.clear();
-		}
-		stagingBuffer->Unmap();
-
-		commandList->Begin();
-		
-		{
-			RHI::ResourceBarrierDescriptor barrier{};
-			barrier.resource = skyboxCubeMap;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::CopyDestination;
-			commandList->ResourceBarrier(1, &barrier);
-
-			RHI::BufferToTextureCopy copyRegion{};
-			copyRegion.dstTexture = skyboxCubeMap;
-			copyRegion.baseArrayLayer = 0;
-			copyRegion.layerCount = 6;
-			copyRegion.mipSlice = 0;
-			copyRegion.srcBuffer = stagingBuffer;
-			copyRegion.bufferOffset = 0;
-
-			commandList->CopyTextureRegion(copyRegion);
-
-			barrier.resource = skyboxCubeMap;
-			barrier.fromState = RHI::ResourceState::CopyDestination;
-			barrier.toState = RHI::ResourceState::FragmentShaderResource;
-			commandList->ResourceBarrier(1, &barrier);
-		}
-
-		commandList->End();
-
-		queue->Execute(1, &commandList, commandListFence);
-		commandListFence->WaitForFence();
-
-		RHI::gDynamicRHI->DestroyFence(commandListFence);
-		RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
-
-		for (int i = 0; i < 6; i++)
-		{
-			loadedImages[i].Free();
-		}
-		delete stagingBuffer; stagingBuffer = nullptr;
-        
-        RHI::SamplerDescriptor samplerDesc{};
-        samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
-        samplerDesc.enableAnisotropy = true;
-        samplerDesc.maxAnisotropy = 8;
-        samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
-
-		auto curTime = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
-
-        defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 	}
 
     static u16 Float32ToFloat16(f32 floatValue)
@@ -444,6 +249,13 @@ namespace CE::Sandbox
 
 	void VulkanSandbox::InitPipelines()
 	{
+		RHI::SamplerDescriptor samplerDesc{};
+		samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
+		samplerDesc.enableAnisotropy = true;
+		samplerDesc.maxAnisotropy = 8;
+		samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+		defaultSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
+
 		RHI::ShaderResourceGroupLayout meshSrgLayout{};
 		meshSrgLayout.srgType = RHI::SRGType::PerObject;
 

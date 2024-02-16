@@ -77,18 +77,22 @@ namespace CE::Vulkan
 
 		virtual bool Bind(Name name, RHI::BufferView bufferView) override;
 		virtual bool Bind(Name name, RHI::Texture* texture) override;
+		virtual bool Bind(Name name, RHI::TextureView* textureView) override;
 		virtual bool Bind(Name name, RHI::Sampler* sampler) override;
 
 		virtual bool Bind(Name name, u32 count, RHI::BufferView* bufferViews) override;
 		virtual bool Bind(Name name, u32 count, RHI::Texture** textures) override;
+		virtual bool Bind(Name name, u32 count, RHI::TextureView** textureViews) override;
 		virtual bool Bind(Name name, u32 count, RHI::Sampler** samplers) override;
 
 		virtual bool Bind(u32 imageIndex, Name name, RHI::BufferView bufferView) override;
 		virtual bool Bind(u32 imageIndex, Name name, RHI::Texture* texture) override;
+		virtual bool Bind(u32 imageIndex, Name name, RHI::TextureView* textureView) override;
 		virtual bool Bind(u32 imageIndex, Name name, RHI::Sampler* sampler) override;
 
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::BufferView* bufferViews) override;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures) override;
+		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews) override;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) override;
 		
 		inline int GetSetNumber() const { return setNumber; }

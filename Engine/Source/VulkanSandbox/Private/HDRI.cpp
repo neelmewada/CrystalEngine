@@ -23,6 +23,39 @@ namespace CE::Sandbox
 		Vec2 uv{};
 	};
 
+	struct ShaderPipeline
+	{
+		RHI::ShaderModule* vertShader = nullptr;
+		RHI::ShaderModule* fragShader = nullptr;
+		RHI::ShaderResourceGroup* srg = nullptr;
+		RHI::PipelineState* pipeline = nullptr;
+
+		inline void Destroy()
+		{
+			delete pipeline;
+			delete srg;
+			delete vertShader;
+			delete fragShader;
+		}
+
+		inline void CreateShaderModules(const String& name, Resource* vertSpv, Resource* fragSpv)
+		{
+			RHI::ShaderModuleDescriptor vertModuleDesc{};
+			vertModuleDesc.name = name + "Vert";
+			vertModuleDesc.stage = RHI::ShaderStage::Vertex;
+			vertModuleDesc.byteCode = vertSpv->GetData();
+			vertModuleDesc.byteSize = vertSpv->GetDataSize();
+			vertShader = RHI::gDynamicRHI->CreateShaderModule(vertModuleDesc);
+
+			RHI::ShaderModuleDescriptor fragModuleDesc{};
+			fragModuleDesc.name = name + "Frag";
+			fragModuleDesc.stage = RHI::ShaderStage::Fragment;
+			fragModuleDesc.byteCode = fragSpv->GetData();
+			fragModuleDesc.byteSize = fragSpv->GetDataSize();
+			fragShader = RHI::gDynamicRHI->CreateShaderModule(fragModuleDesc);
+		}
+	};
+
 	static QuadVertex quadVertices[] = {
 		{{-1.0f, -1.0f, 0}, {0.0f, 0.0f}},  // Bottom-left
 		{{1.0f, -1.0f, 0}, {1.0f, 0.0f}},   // Bottom-right
@@ -32,6 +65,46 @@ namespace CE::Sandbox
 		{{1.0f, -1.0f, 0}, {1.0f, 0.0f}},   // Bottom-right
 		{{1.0f, 1.0f, 0}, {1.0f, 1.0f}}     // Top-right
 	};
+
+	static void InitFullScreenQuadPipeline(RHI::GraphicsPipelineDescriptor& pipelineDesc, RHI::ShaderModule* vert, RHI::ShaderModule* frag, 
+		RHI::RenderTarget * precompileTarget = nullptr)
+	{
+		pipelineDesc.rasterState.cullMode = RHI::CullMode::None;
+		pipelineDesc.multisampleState.sampleCount = 1;
+		pipelineDesc.depthStencilState.stencilState.enable = false;
+		pipelineDesc.depthStencilState.depthState.enable = false;
+		pipelineDesc.numScissors = 1;
+		pipelineDesc.numViewports = 1;
+
+		pipelineDesc.vertexInputSlots.Add({});
+		pipelineDesc.vertexInputSlots.Top().inputRate = VertexInputRate::PerVertex;
+		pipelineDesc.vertexInputSlots.Top().inputSlot = 0;
+		pipelineDesc.vertexInputSlots.Top().stride = sizeof(QuadVertex);
+
+		pipelineDesc.vertexAttributes.Add({});
+		pipelineDesc.vertexAttributes.Top().dataType = VertexAttributeDataType::Float3;
+		pipelineDesc.vertexAttributes.Top().inputSlot = 0;
+		pipelineDesc.vertexAttributes.Top().location = 0;
+		pipelineDesc.vertexAttributes.Top().offset = offsetof(QuadVertex, position);
+
+		pipelineDesc.vertexAttributes.Add({});
+		pipelineDesc.vertexAttributes.Top().dataType = VertexAttributeDataType::Float2;
+		pipelineDesc.vertexAttributes.Top().inputSlot = 0;
+		pipelineDesc.vertexAttributes.Top().location = 1;
+		pipelineDesc.vertexAttributes.Top().offset = offsetof(QuadVertex, uv);
+
+		RHI::ShaderStageDescriptor vertDesc{};
+		vertDesc.entryPoint = "VertMain";
+		vertDesc.shaderModule = vert;
+		pipelineDesc.shaderStages.Add(vertDesc);
+
+		RHI::ShaderStageDescriptor fragDesc{};
+		fragDesc.entryPoint = "FragMain";
+		fragDesc.shaderModule = frag;
+		pipelineDesc.shaderStages.Add(fragDesc);
+
+		pipelineDesc.precompileForTarget = precompileTarget;
+	}
 
 	void VulkanSandbox::InitHDRIs()
 	{
@@ -43,8 +116,8 @@ namespace CE::Sandbox
 
 		RHI::Buffer* quadVertexBuffer = RHI::gDynamicRHI->CreateBuffer(quadVertexBufferDesc);
 		quadVertexBuffer->UploadData(quadVertices, quadVertexBuffer->GetBufferSize(), 0);
-        RHI::VertexBufferView quadVertBufferView = RHI::VertexBufferView(quadVertexBuffer, 0, quadVertexBuffer->GetBufferSize(), sizeof(QuadVertex));
-        
+		RHI::VertexBufferView quadVertBufferView = RHI::VertexBufferView(quadVertexBuffer, 0, quadVertexBuffer->GetBufferSize(), sizeof(QuadVertex));
+
 		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night2.hdr";
 
 		Resource* equirectVertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.vert.spv", nullptr);
@@ -67,22 +140,22 @@ namespace CE::Sandbox
 			equirectVertShader = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
 			equirectFragShader = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
 		}
-        
-        // Irradiance map
-        {
-            RHI::TextureDescriptor irradianceMapDesc{};
-            irradianceMapDesc.name = "HDRI Irradiance Map";
-            irradianceMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
-            irradianceMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
-            irradianceMapDesc.width = 64;
-            irradianceMapDesc.height = 64;
-            irradianceMapDesc.depth = 1;
-            irradianceMapDesc.dimension = RHI::Dimension::DimCUBE;
-            irradianceMapDesc.mipLevels = 1;
-            irradianceMapDesc.arrayLayers = 6;
-            
-            irradianceMap = RHI::gDynamicRHI->CreateTexture(irradianceMapDesc);
-        }
+
+		// Irradiance map
+		{
+			RHI::TextureDescriptor irradianceMapDesc{};
+			irradianceMapDesc.name = "HDRI Irradiance Map";
+			irradianceMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+			irradianceMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
+			irradianceMapDesc.width = 64;
+			irradianceMapDesc.height = 64;
+			irradianceMapDesc.depth = 1;
+			irradianceMapDesc.dimension = RHI::Dimension::DimCUBE;
+			irradianceMapDesc.mipLevels = 1;
+			irradianceMapDesc.arrayLayers = 6;
+
+			irradianceMap = RHI::gDynamicRHI->CreateTexture(irradianceMapDesc);
+		}
 
 		RHI::Sampler* sampler = nullptr;
 		{
@@ -93,6 +166,17 @@ namespace CE::Sandbox
 			samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
 
 			sampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
+		}
+
+		RHI::Sampler* nearestSampler = nullptr;
+		{
+			RHI::SamplerDescriptor samplerDesc{};
+			samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = RHI::SamplerAddressMode::ClampToEdge;
+			samplerDesc.borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
+			samplerDesc.enableAnisotropy = false;
+			samplerDesc.samplerFilterMode = RHI::FilterMode::Nearest;
+
+			nearestSampler = RHI::gDynamicRHI->CreateSampler(samplerDesc);
 		}
 
 		CMImage hdrImage = CMImage::LoadFromFile(path);
@@ -116,6 +200,19 @@ namespace CE::Sandbox
 		hdriFlatMapDesc.format = RHI::Format::R16_SFLOAT;
 		hdriGrayscaleMap = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 
+		hdriPDFConditional = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+		hdriCDFConditionalInverse = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+
+		hdriFlatMapDesc.width = 40;
+		hdriRowAverage = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+
+		hdriFlatMapDesc.width = 40;
+		hdriPDFMarginal = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+		hdriCDFMarginalInverse = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+
+		hdriFlatMapDesc.width = hdriFlatMapDesc.height = 1;
+		hdriColumnAverage = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+
 		RHI::RenderTarget* renderTarget = nullptr;
 		{
 			RHI::RenderTargetLayout rtLayout{};
@@ -131,25 +228,29 @@ namespace CE::Sandbox
 
 			renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
 		}
-        
-        RHI::RenderTarget* grayscaleRenderTarget = nullptr;
-        RHI::RenderTargetBuffer* grayscaleRTV = nullptr;
-        {
-            RHI::RenderTargetLayout rtLayout{};
-            
-            RHI::RenderAttachmentLayout colorAttachment{};
-            colorAttachment.attachmentId = "Color";
-            colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
-            colorAttachment.format = RHI::Format::R16_SFLOAT;
-            colorAttachment.loadAction = RHI::AttachmentLoadAction::Clear;
-            colorAttachment.storeAction = RHI::AttachmentStoreAction::Store;
-            colorAttachment.multisampleState.sampleCount = 1;
-            rtLayout.attachmentLayouts.Add(colorAttachment);
 
-            grayscaleRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
-            
-            grayscaleRTV = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriGrayscaleMap });
-        }
+		RHI::RenderTarget* grayscaleRenderTarget = nullptr;
+		RHI::RenderTargetBuffer* grayscaleRTV = nullptr;
+		RHI::RenderTargetBuffer* pdfConditionalRTB = nullptr;
+
+		{
+			RHI::RenderTargetLayout rtLayout{};
+
+			RHI::RenderAttachmentLayout colorAttachment{};
+			colorAttachment.attachmentId = "Color";
+			colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
+			colorAttachment.format = RHI::Format::R16_SFLOAT;
+			colorAttachment.loadAction = RHI::AttachmentLoadAction::Clear;
+			colorAttachment.storeAction = RHI::AttachmentStoreAction::Store;
+			colorAttachment.multisampleState.sampleCount = 1;
+			rtLayout.attachmentLayouts.Add(colorAttachment);
+
+			grayscaleRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+
+			grayscaleRTV = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriGrayscaleMap });
+
+			pdfConditionalRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriPDFConditional });
+		}
 
 		RHI::ShaderResourceGroup* grayscaleSrg = nullptr;
 		RHI::PipelineState* grayscalePipeline = nullptr;
@@ -198,49 +299,192 @@ namespace CE::Sandbox
 			RHI::GraphicsPipelineDescriptor grayscalePipelineDesc{};
 			grayscalePipelineDesc.name = "Grayscale Pipeline";
 
-			RHI::ShaderStageDescriptor vertStageDesc{};
-			vertStageDesc.entryPoint = "VertMain";
-			vertStageDesc.shaderModule = grayscaleVertShader;
-			grayscalePipelineDesc.shaderStages.Add(vertStageDesc);
-
-			RHI::ShaderStageDescriptor fragStageDesc{};
-			fragStageDesc.entryPoint = "FragMain";
-			fragStageDesc.shaderModule = grayscaleFragShader;
-			grayscalePipelineDesc.shaderStages.Add(fragStageDesc);
-
-			grayscalePipelineDesc.rasterState.cullMode = RHI::CullMode::None;
-			grayscalePipelineDesc.multisampleState.sampleCount = 1;
-			grayscalePipelineDesc.depthStencilState.stencilState.enable = false;
-			grayscalePipelineDesc.depthStencilState.depthState.enable = false;
-			grayscalePipelineDesc.numScissors = 1;
-			grayscalePipelineDesc.numViewports = 1;
-
-			grayscalePipelineDesc.vertexInputSlots.Add({});
-			grayscalePipelineDesc.vertexInputSlots.Top().inputRate = VertexInputRate::PerVertex;
-			grayscalePipelineDesc.vertexInputSlots.Top().inputSlot = 0;
-			grayscalePipelineDesc.vertexInputSlots.Top().stride = sizeof(QuadVertex);
-
-			grayscalePipelineDesc.vertexAttributes.Add({});
-			grayscalePipelineDesc.vertexAttributes.Top().dataType = VertexAttributeDataType::Float3;
-			grayscalePipelineDesc.vertexAttributes.Top().inputSlot = 0;
-			grayscalePipelineDesc.vertexAttributes.Top().location = 0;
-			grayscalePipelineDesc.vertexAttributes.Top().offset = offsetof(QuadVertex, position);
-
-			grayscalePipelineDesc.vertexAttributes.Add({});
-			grayscalePipelineDesc.vertexAttributes.Top().dataType = VertexAttributeDataType::Float2;
-			grayscalePipelineDesc.vertexAttributes.Top().inputSlot = 0;
-			grayscalePipelineDesc.vertexAttributes.Top().location = 1;
-			grayscalePipelineDesc.vertexAttributes.Top().offset = offsetof(QuadVertex, uv);
 			grayscalePipelineDesc.srgLayouts.Add(grayscaleSrgLayout);
-            
-            grayscalePipelineDesc.precompileForTarget = grayscaleRenderTarget;
+
+			InitFullScreenQuadPipeline(grayscalePipelineDesc, grayscaleVertShader, grayscaleFragShader, grayscaleRenderTarget);
 
 			grayscalePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(grayscalePipelineDesc);
 
 			delete grayscaleVert;
 			delete grayscaleFrag;
 		}
-		
+
+		ShaderPipeline rowAveragePipeline{};
+		RHI::RenderTargetBuffer* rowAverageRTB = nullptr;
+		{
+			Resource* vertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/ImageRowAverage.vert.spv", nullptr);
+			Resource* fragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/ImageRowAverage.frag.spv", nullptr);
+
+			rowAveragePipeline.CreateShaderModules("ImageRowAverage", vertSpv, fragSpv);
+
+			RHI::GraphicsPipelineDescriptor rowAverageDesc{};
+			rowAverageDesc.name = "Row Average Shader";
+
+			RHI::ShaderResourceGroupLayout rowAverageSrgLayout{};
+			rowAverageSrgLayout.srgType = RHI::SRGType::PerPass;
+			rowAverageSrgLayout.variables.Add({});
+			rowAverageSrgLayout.variables.Top().arrayCount = 1;
+			rowAverageSrgLayout.variables.Top().name = "_InputTexture";
+			rowAverageSrgLayout.variables.Top().bindingSlot = 0;
+			rowAverageSrgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			rowAverageSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			rowAverageSrgLayout.variables.Add({});
+			rowAverageSrgLayout.variables.Top().arrayCount = 1;
+			rowAverageSrgLayout.variables.Top().name = "_InputSampler";
+			rowAverageSrgLayout.variables.Top().bindingSlot = 1;
+			rowAverageSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			rowAverageSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			rowAverageDesc.srgLayouts.Add(rowAverageSrgLayout);
+
+			InitFullScreenQuadPipeline(rowAverageDesc, rowAveragePipeline.vertShader, rowAveragePipeline.fragShader, grayscaleRenderTarget);
+
+			rowAveragePipeline.srg = RHI::gDynamicRHI->CreateShaderResourceGroup(rowAverageSrgLayout);
+
+			rowAveragePipeline.srg->Bind("_InputTexture", hdriGrayscaleMap);
+			rowAveragePipeline.srg->Bind("_InputSampler", sampler);
+			rowAveragePipeline.srg->FlushBindings();
+
+			rowAveragePipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(rowAverageDesc);
+
+			vertSpv->Destroy();
+			fragSpv->Destroy();
+
+			rowAverageRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriRowAverage });
+		}
+
+		ShaderPipeline columnAveragePipeline{};
+		RHI::RenderTargetBuffer* columnAverageRTB = nullptr;
+		ShaderPipeline cdfMarginalInversePipeline{};
+		RHI::RenderTargetBuffer* cdfMarginalInverseRTB = nullptr;
+		{
+			Resource* vertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/ImageColumnAverage.vert.spv", nullptr);
+			Resource* fragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/ImageColumnAverage.frag.spv", nullptr);
+
+			Resource* cdfMarginalInvVertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/CDFMarginalInverse.vert.spv", nullptr);
+			Resource* cdfMarginalInvFragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/CDFMarginalInverse.frag.spv", nullptr);
+
+			columnAveragePipeline.CreateShaderModules("ImageColumnAverage", vertSpv, fragSpv);
+			cdfMarginalInversePipeline.CreateShaderModules("CDFMarginalInverse", cdfMarginalInvVertSpv, cdfMarginalInvFragSpv);
+
+			RHI::GraphicsPipelineDescriptor columnAverageDesc{};
+			columnAverageDesc.name = "Column Average Shader";
+
+			RHI::ShaderResourceGroupLayout srgLayout{};
+			srgLayout.srgType = RHI::SRGType::PerPass;
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputTexture";
+			srgLayout.variables.Top().bindingSlot = 0;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputSampler";
+			srgLayout.variables.Top().bindingSlot = 1;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			columnAverageDesc.srgLayouts.Add(srgLayout);
+
+			InitFullScreenQuadPipeline(columnAverageDesc, columnAveragePipeline.vertShader, columnAveragePipeline.fragShader, grayscaleRenderTarget);
+
+			columnAveragePipeline.srg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+			columnAveragePipeline.srg->Bind("_InputTexture", hdriRowAverage);
+			columnAveragePipeline.srg->Bind("_InputSampler", sampler);
+			columnAveragePipeline.srg->FlushBindings();
+
+			columnAveragePipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(columnAverageDesc);
+
+			columnAverageRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriColumnAverage });
+
+			cdfMarginalInverseRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriCDFMarginalInverse });
+
+			RHI::GraphicsPipelineDescriptor cdfMarginalInverseDesc{};
+			cdfMarginalInverseDesc.name = "CDF Marginal Inverse";
+
+			cdfMarginalInverseDesc.srgLayouts.Add(srgLayout);
+
+			InitFullScreenQuadPipeline(cdfMarginalInverseDesc, cdfMarginalInversePipeline.vertShader, cdfMarginalInversePipeline.fragShader, grayscaleRenderTarget);
+
+			cdfMarginalInversePipeline.srg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+			cdfMarginalInversePipeline.srg->Bind("_InputTexture", hdriPDFMarginal);
+			cdfMarginalInversePipeline.srg->Bind("_InputSampler", nearestSampler);
+			cdfMarginalInversePipeline.srg->FlushBindings();
+
+			cdfMarginalInversePipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(cdfMarginalInverseDesc);
+
+			vertSpv->Destroy();
+			fragSpv->Destroy();
+			cdfMarginalInvVertSpv->Destroy();
+			cdfMarginalInvFragSpv->Destroy();
+		}
+
+		ShaderPipeline divisionPipeline{};
+		RHI::RenderTargetBuffer* pdfMarginalRTB = nullptr;
+		RHI::ShaderResourceGroup* pdfMarginalSrg = nullptr;
+		RHI::ShaderResourceGroup* pdfConditionalSrg = nullptr;
+
+		{
+			Resource* vertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/PDFDivision.vert.spv", nullptr);
+			Resource* fragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/PDFDivision.frag.spv", nullptr);
+
+			divisionPipeline.CreateShaderModules("PDFDivision", vertSpv, fragSpv);
+
+			RHI::GraphicsPipelineDescriptor divisionDesc{};
+			divisionDesc.name = "Division Shader";
+
+			RHI::ShaderResourceGroupLayout srgLayout{};
+			srgLayout.srgType = RHI::SRGType::PerPass;
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputA";
+			srgLayout.variables.Top().bindingSlot = 0;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputB";
+			srgLayout.variables.Top().bindingSlot = 1;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputSampler";
+			srgLayout.variables.Top().bindingSlot = 2;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			divisionDesc.srgLayouts.Add(srgLayout);
+
+			InitFullScreenQuadPipeline(divisionDesc, divisionPipeline.vertShader, divisionPipeline.fragShader, grayscaleRenderTarget);
+
+			pdfMarginalSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+			pdfMarginalSrg->Bind("_InputA", hdriRowAverage);
+			pdfMarginalSrg->Bind("_InputB", hdriColumnAverage);
+			pdfMarginalSrg->Bind("_InputSampler", nearestSampler);
+			pdfMarginalSrg->FlushBindings();
+
+			pdfConditionalSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+			pdfConditionalSrg->Bind("_InputA", hdriGrayscaleMap);
+			pdfConditionalSrg->Bind("_InputB", hdriRowAverage);
+			pdfConditionalSrg->Bind("_InputSampler", nearestSampler);
+			pdfConditionalSrg->FlushBindings();
+
+			divisionPipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(divisionDesc);
+
+			pdfMarginalRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriPDFMarginal });
+
+			vertSpv->Destroy();
+			fragSpv->Destroy();
+		}
+
 		RHI::TextureDescriptor hdriCubeMapDesc{};
 		hdriCubeMapDesc.name = "HDRI CubeMap";
 		hdriCubeMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
@@ -263,7 +507,7 @@ namespace CE::Sandbox
 		stagingDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 
 		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingDesc);
-		
+
 		void* dataPtr = nullptr;
 		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
 		{
@@ -330,19 +574,19 @@ namespace CE::Sandbox
 		irradianceSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
 		RHI::ShaderResourceGroup* equirectangulerSrgs[6] = {};
-		
+
 		RHI::Buffer* viewDataBuffers[6] = {};
-		
+
 		Matrix4x4 captureProjection = Matrix4x4::PerspectiveProjection(1.0f, 90.0f, 0.1f, 10.0f);
 
 		// Order: right, left, top, bottom, front, back
 		Matrix4x4 captureViews[] = {
 			Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f,  0.0f,  1.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f,  0.0f, -1.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix()
+			Quat::LookRotation(Vec3(1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f,  1.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix()
 		};
 
 		for (int i = 0; i < 6; i++)
@@ -358,19 +602,19 @@ namespace CE::Sandbox
 			viewData.projectionMatrix = captureProjection;
 			viewData.viewMatrix = captureViews[i];
 			viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
-			
+
 			viewDataBuffers[i] = RHI::gDynamicRHI->CreateBuffer(viewBufferDesc);
 			viewDataBuffers[i]->UploadData(&viewData, sizeof(viewData));
 		}
 
 		// Order: right, left, top, bottom, front, back
 		Matrix4x4 captureViews2[] = {
-			Quat::LookRotation(Vec3( 1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
 			Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f,  0.0f,  1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3( 0.0f,  0.0f, -1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix()
+			Quat::LookRotation(Vec3(0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f,  1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix()
 		};
 
 		RHI::Buffer* viewDataBuffers2[6] = {};
@@ -465,8 +709,8 @@ namespace CE::Sandbox
 
 			equirectangularPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
 		}
-        
-        InitIrradiancePipeline(irradianceSrgLayout);
+
+		InitIrradiancePipeline(irradianceSrgLayout);
 
 		RPI::Mesh* cubeMesh = cubeModel->GetMesh(0);
 		const auto& vertInfo = cubeMesh->vertexBufferInfos[0];
@@ -474,7 +718,7 @@ namespace CE::Sandbox
 
 		RPI::Mesh* sphereMesh = sphereModel->GetMesh(0);
 		const auto& sphereVertInfo = sphereMesh->vertexBufferInfos[0];
-		auto sphereVertexBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(sphereVertInfo.bufferIndex), sphereVertInfo.byteOffset, 
+		auto sphereVertexBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(sphereVertInfo.bufferIndex), sphereVertInfo.byteOffset,
 			sphereVertInfo.byteCount, sphereVertInfo.stride);
 
 		RHI::RenderTargetBuffer* renderTargetBuffers[6] = {};
@@ -493,14 +737,14 @@ namespace CE::Sandbox
 			imageViewDesc.baseMipLevel = 0;
 			imageViewDesc.baseArrayLayer = i;
 			imageViewDesc.arrayLayerCount = 1;
-			
+
 			textureViews[i] = RHI::gDynamicRHI->CreateTextureView(imageViewDesc);
 
 			renderTargetBuffers[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { textureViews[i] });
 		}
-        
-        for (int i = 0; i < 6; i++)
-        {
+
+		for (int i = 0; i < 6; i++)
+		{
 			RHI::TextureViewDescriptor imageViewDesc{};
 			imageViewDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
 			imageViewDesc.texture = irradianceMap;
@@ -513,8 +757,8 @@ namespace CE::Sandbox
 			convolutionTextureViews[i] = RHI::gDynamicRHI->CreateTextureView(imageViewDesc);
 
 			convolutionRenderTargetBuffers[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { convolutionTextureViews[i] });
-        }
-		
+		}
+
 		cmdList->Begin();
 		{
 			RHI::ResourceBarrierDescriptor barrier{};
@@ -523,12 +767,12 @@ namespace CE::Sandbox
 			barrier.toState = RHI::ResourceState::CopyDestination;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
-            
-            barrier.resource = irradianceMap;
-            barrier.fromState = RHI::ResourceState::Undefined;
-            barrier.toState = RHI::ResourceState::ColorOutput;
-            barrier.subresourceRange = RHI::SubresourceRange::All();
-            cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = irradianceMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
 
 			RHI::BufferToTextureCopy copy{};
 			copy.srcBuffer = stagingBuffer;
@@ -582,7 +826,7 @@ namespace CE::Sandbox
 				cmdList->CommitShaderResources();
 
 				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
-                
+
 				cmdList->EndRenderTarget();
 			}
 
@@ -591,16 +835,22 @@ namespace CE::Sandbox
 			barrier.toState = RHI::ResourceState::FragmentShaderResource;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
-            
-            // Disabled
-			for (int i = 6; i < 6; i++) // Convolute the CubeMap
-			{
-				cmdList->BeginRenderTarget(renderTarget, convolutionRenderTargetBuffers[i], &clearValue);
 
+			barrier.resource = hdriGrayscaleMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			cmdList->ClearShaderResourceGroups();
+
+			clearValue.clearValue = Vec4(0, 0, 0, 1.0f);
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, grayscaleRTV, &clearValue);
+			{
 				RHI::ViewportState viewportState{};
 				viewportState.x = viewportState.y = 0;
-				viewportState.width = convolutionTextureViews[i]->GetTexture()->GetWidth();
-				viewportState.height = convolutionTextureViews[i]->GetTexture()->GetHeight();
+				viewportState.width = hdriGrayscaleMap->GetWidth();
+				viewportState.height = hdriGrayscaleMap->GetHeight();
 				viewportState.minDepth = 0;
 				viewportState.maxDepth = 1;
 				cmdList->SetViewports(1, &viewportState);
@@ -611,67 +861,258 @@ namespace CE::Sandbox
 				scissorState.height = viewportState.height;
 				cmdList->SetScissors(1, &scissorState);
 
-				cmdList->BindPipelineState(irradiancePipeline);
+				cmdList->BindPipelineState(grayscalePipeline);
 
-				cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
-				cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
-
-				cmdList->SetShaderResourceGroup(irradianceSrgs[i]);
-
+				cmdList->SetShaderResourceGroup(grayscaleSrg);
 				cmdList->CommitShaderResources();
 
-				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
 
-				cmdList->EndRenderTarget();
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
 			}
-
-			barrier.resource = hdriGrayscaleMap;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::ColorOutput;
-			barrier.subresourceRange = RHI::SubresourceRange::All();
-            cmdList->ResourceBarrier(1, &barrier);
-            
-            cmdList->ClearShaderResourceGroups();
-            
-            clearValue.clearValue = Vec4(0, 0, 0, 1.0f);
-            cmdList->BeginRenderTarget(grayscaleRenderTarget, grayscaleRTV, &clearValue);
-            {
-                RHI::ViewportState viewportState{};
-                viewportState.x = viewportState.y = 0;
-                viewportState.width = hdriGrayscaleMap->GetWidth();
-                viewportState.height = hdriGrayscaleMap->GetHeight();
-                viewportState.minDepth = 0;
-                viewportState.maxDepth = 1;
-                cmdList->SetViewports(1, &viewportState);
-
-                RHI::ScissorState scissorState{};
-                scissorState.x = scissorState.y = 0;
-                scissorState.width = viewportState.width;
-                scissorState.height = viewportState.height;
-                cmdList->SetScissors(1, &scissorState);
-                
-                cmdList->BindPipelineState(grayscalePipeline);
-                
-                cmdList->SetShaderResourceGroup(grayscaleSrg);
-                
-                cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
-                
-                cmdList->CommitShaderResources();
-                
-                RHI::DrawLinearArguments args{};
-                args.firstInstance = 0;
-                args.instanceCount = 1;
-                args.vertexOffset = 0;
-                args.vertexCount = COUNTOF(quadVertices);
-                cmdList->DrawLinear(args);
-            }
-            cmdList->EndRenderTarget();
+			cmdList->EndRenderTarget();
 
 			barrier.resource = hdriGrayscaleMap;
 			barrier.fromState = RHI::ResourceState::ColorOutput;
 			barrier.toState = RHI::ResourceState::FragmentShaderResource;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
-            cmdList->ResourceBarrier(1, &barrier);
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = hdriRowAverage;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			cmdList->ClearShaderResourceGroups();
+
+			// Row Average
+			clearValue.clearValue = Vec4(0, 0, 0, 1);
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, rowAverageRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriRowAverage->GetWidth();
+				viewportState.height = hdriRowAverage->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(rowAveragePipeline.pipeline);
+
+				cmdList->SetShaderResourceGroup(rowAveragePipeline.srg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriRowAverage;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = hdriColumnAverage;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			// Column Average
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, columnAverageRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriColumnAverage->GetWidth();
+				viewportState.height = hdriColumnAverage->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(columnAveragePipeline.pipeline);
+
+				cmdList->SetShaderResourceGroup(columnAveragePipeline.srg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriColumnAverage;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = hdriPDFMarginal;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+			
+			// PDF Marginal
+			cmdList->ClearShaderResourceGroups();
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfMarginalRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriPDFMarginal->GetWidth();
+				viewportState.height = hdriPDFMarginal->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(divisionPipeline.pipeline);
+
+				cmdList->SetShaderResourceGroup(pdfMarginalSrg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriPDFMarginal;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = hdriCDFMarginalInverse;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			// CDF Marginal Inverse
+			cmdList->ClearShaderResourceGroups();
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, cdfMarginalInverseRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriCDFMarginalInverse->GetWidth();
+				viewportState.height = hdriCDFMarginalInverse->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(cdfMarginalInversePipeline.pipeline);
+
+				cmdList->SetShaderResourceGroup(cdfMarginalInversePipeline.srg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriCDFMarginalInverse;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = hdriPDFConditional;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			// PDF Conditional
+			cmdList->ClearShaderResourceGroups();
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfConditionalRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriPDFConditional->GetWidth();
+				viewportState.height = hdriPDFConditional->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(divisionPipeline.pipeline);
+
+				cmdList->SetShaderResourceGroup(pdfConditionalSrg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriPDFConditional;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
 
 			barrier.resource = irradianceMap;
 			barrier.fromState = RHI::ResourceState::ColorOutput;
@@ -694,12 +1135,28 @@ namespace CE::Sandbox
 		delete equirectVertSpv; delete equirectVertShader;
 		delete equirectFragSpv; delete equirectFragShader;
 		delete equirectangularPipeline;
-		delete sampler;
+		delete sampler; delete nearestSampler;
 		delete quadVertexBuffer;
 		delete grayscaleSrg;
 		delete grayscaleRTV;
 		delete grayscalePipeline;
-        delete grayscaleRenderTarget;
+		delete grayscaleRenderTarget;
+		delete grayscaleVertShader; delete grayscaleFragShader;
+		delete rowAverageRTB;
+		rowAveragePipeline.Destroy();
+		rowAveragePipeline = {};
+		columnAveragePipeline.Destroy();
+		columnAveragePipeline = {};
+		divisionPipeline.Destroy();
+		divisionPipeline = {};
+		cdfMarginalInversePipeline.Destroy();
+		cdfMarginalInversePipeline = {};
+		delete columnAverageRTB;
+		delete pdfMarginalRTB;
+		delete cdfMarginalInverseRTB;
+		delete pdfMarginalSrg;
+		delete pdfConditionalRTB;
+		delete pdfConditionalSrg;
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -718,6 +1175,12 @@ namespace CE::Sandbox
 	{
 		delete hdriMap; hdriMap = nullptr;
 		delete hdriGrayscaleMap; hdriGrayscaleMap = nullptr;
+		delete hdriRowAverage; hdriRowAverage = nullptr;
+		delete hdriColumnAverage; hdriColumnAverage = nullptr;
+		delete hdriCDFMarginalInverse; hdriCDFMarginalInverse = nullptr;
+		delete hdriPDFConditional; hdriPDFConditional = nullptr;
+		delete hdriCDFConditionalInverse; hdriCDFConditionalInverse = nullptr;
+		delete hdriPDFMarginal; hdriPDFMarginal = nullptr;
 		delete hdriCubeMap; hdriCubeMap = nullptr;
         delete irradianceMap; irradianceMap = nullptr;
         

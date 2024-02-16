@@ -272,6 +272,7 @@ namespace CE::Vulkan
 					imageBarrier.subresourceRange.levelCount = barrierInfo.subresourceRange.levelCount;
 				}
 				
+				// Change queue family ownership of the image
 				if (texture->curFamilyIndex >= 0 && texture->curFamilyIndex != queueFamilyIndex)
 				{
 					imageBarrier.srcQueueFamilyIndex = texture->curFamilyIndex;

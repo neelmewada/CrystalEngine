@@ -38,7 +38,7 @@ CompileCS() {
     local FileName=$1".hlsl"
     local Out="../Source/VulkanSandbox/Resources/Shaders/"$1".spv"
 
-    ${DxCompiler} -spirv -E CSMain -T cs_6_0 -D PLATFORM_DESKTOP=1 -fspv-preserve-bindings -fspv-extension=KHR -Fo ${Out} ${FileName}
+    ${DxCompiler} -spirv -E $2 -T cs_6_0 -D PLATFORM_DESKTOP=1 -fspv-preserve-bindings -fspv-extension=KHR -Fo ${Out} ${FileName}
 
     echo "Compiled: " ${FileName}
 }
@@ -49,4 +49,8 @@ CompileShader "Skybox"
 CompileShader "Equirectangular"
 CompileShader "EnvMapConvolution"
 CompileShader "Grayscale"
+CompileShader "ImageRowAverage"
+CompileShader "ImageColumnAverage"
+CompileShader "CDFMarginalInverse"
+CompileShader "PDFDivision"
 

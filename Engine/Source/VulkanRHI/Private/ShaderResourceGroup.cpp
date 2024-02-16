@@ -388,6 +388,25 @@ namespace CE::Vulkan
 		return true;
 	}
 
+	bool ShaderResourceGroup::Bind(Name name, RHI::TextureView* rhiTextureView)
+	{
+		if (!rhiTextureView)
+			return false;
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+		{
+			Bind(i, name, rhiTextureView);
+
+			needsRecompile = true;
+		}
+
+		return true;
+	}
+
 	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::Texture** textures)
 	{
 		if (!bindingSlotsByVariableName.KeyExists(name))
@@ -402,6 +421,23 @@ namespace CE::Vulkan
 			needsRecompile = true;
 		}
 		
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(Name name, u32 count, RHI::TextureView** textureViews)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+		{
+			Bind(i, name, count, textureViews);
+
+			needsRecompile = true;
+		}
+
 		return true;
 	}
 
@@ -511,6 +547,50 @@ namespace CE::Vulkan
 		return true;
 	}
 
+	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::TextureView* rhiTextureView)
+	{
+		if (!rhiTextureView)
+			return false;
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int i = imageIndex;
+		int bindingSlot = bindingSlotsByVariableName[name];
+		Vulkan::TextureView* textureView = (Vulkan::TextureView*)rhiTextureView;
+
+		if (!variableBindingsBySlot.KeyExists(bindingSlot))
+			return false;
+
+		const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
+
+		VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		switch (binding.descriptorType)
+		{
+		case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+		case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+		case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			break;
+		case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+			expectedLayout = VK_IMAGE_LAYOUT_GENERAL;
+			break;
+		default:
+			break;
+		}
+
+		VkDescriptorImageInfo imageWrite{};
+		imageWrite.imageLayout = expectedLayout;
+		imageWrite.imageView = textureView->GetImageView();
+		imageWrite.sampler = nullptr;
+
+		imageInfosBoundBySlot[i][bindingSlot].Clear();
+		imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+
+		needsRecompile = true;
+
+		return true;
+	}
+
 	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, RHI::Sampler* rhiSampler)
 	{
 		if (!rhiSampler)
@@ -596,6 +676,54 @@ namespace CE::Vulkan
 		for (int j = 0; j < count; j++)
 		{
 			Vulkan::Texture* texture = (Vulkan::Texture*)textures[j];
+
+			VkDescriptorImageInfo imageWrite{};
+			imageWrite.imageLayout = expectedLayout;
+			imageWrite.imageView = texture->GetImageView();
+			imageWrite.sampler = nullptr;
+
+			imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
+		}
+
+		needsRecompile = true;
+
+		return true;
+	}
+
+	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews)
+	{
+		if (!bindingSlotsByVariableName.KeyExists(name))
+			return false;
+
+		int bindingSlot = bindingSlotsByVariableName[name];
+		int i = imageIndex;
+
+		if (!variableBindingsBySlot.KeyExists(bindingSlot))
+			return false;
+
+		const VkDescriptorSetLayoutBinding& binding = variableBindingsBySlot[bindingSlot];
+
+		VkImageLayout expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		switch (binding.descriptorType)
+		{
+		case VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT:
+		case VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+		case VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+			expectedLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			break;
+		case VK_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+			expectedLayout = VK_IMAGE_LAYOUT_GENERAL;
+			break;
+		default:
+			break;
+		}
+
+		imageInfosBoundBySlot[i][bindingSlot].Clear();
+		imageInfosBoundBySlot[i][bindingSlot].Clear();
+
+		for (int j = 0; j < count; j++)
+		{
+			Vulkan::TextureView* texture = (Vulkan::TextureView*)textureViews[j];
 
 			VkDescriptorImageInfo imageWrite{};
 			imageWrite.imageLayout = expectedLayout;

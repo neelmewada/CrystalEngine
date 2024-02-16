@@ -2,6 +2,7 @@
 
 namespace CE::RHI
 {
+	class TextureView;
 
 	class CORERHI_API ShaderResourceGroup : public RHIResource
 	{
@@ -13,18 +14,22 @@ namespace CE::RHI
 
 		virtual bool Bind(Name name, RHI::BufferView bufferView) = 0;
 		virtual bool Bind(Name name, RHI::Texture* texture) = 0;
+		virtual bool Bind(Name name, RHI::TextureView* textureViews) = 0;
 		virtual bool Bind(Name name, RHI::Sampler* sampler) = 0;
 
 		virtual bool Bind(Name name, u32 count, RHI::BufferView* bufferViews) = 0;
 		virtual bool Bind(Name name, u32 count, RHI::Texture** textures) = 0;
+		virtual bool Bind(Name name, u32 count, RHI::TextureView** textureViews) = 0;
 		virtual bool Bind(Name name, u32 count, RHI::Sampler** samplers) = 0;
 
 		virtual bool Bind(u32 imageIndex, Name name, RHI::BufferView bufferView) = 0;
 		virtual bool Bind(u32 imageIndex, Name name, RHI::Texture* texture) = 0;
+		virtual bool Bind(u32 imageIndex, Name name, RHI::TextureView* textureView) = 0;
 		virtual bool Bind(u32 imageIndex, Name name, RHI::Sampler* sampler) = 0;
 
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::BufferView* bufferViews) = 0;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures) = 0;
+		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::TextureView** textureViews) = 0;
 		virtual bool Bind(u32 imageIndex, Name name, u32 count, RHI::Sampler** samplers) = 0;
 
 		inline SRGType GetSRGType() const

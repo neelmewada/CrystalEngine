@@ -113,6 +113,13 @@ namespace CE::Sandbox
 
 		RHI::Texture* hdriMap = nullptr;
 		RHI::Texture* hdriGrayscaleMap = nullptr;
+		RHI::Texture* hdriRowAverage = nullptr;
+		RHI::Texture* hdriColumnAverage = nullptr;
+		RHI::Texture* hdriCDFMarginalInverse = nullptr;
+		RHI::Texture* hdriPDFConditional = nullptr;
+		RHI::Texture* hdriCDFConditionalInverse = nullptr;
+		RHI::Texture* hdriPDFMarginal = nullptr;
+
 		RHI::Texture* hdriCubeMap = nullptr;
         RHI::Texture* irradianceMap = nullptr;
         RHI::PipelineState* irradiancePipeline = nullptr;
