@@ -195,11 +195,12 @@ namespace CE::Sandbox
 		hdriFlatMapDesc.defaultHeapType = RHI::MemoryHeapType::Default;
 
 		hdriMap = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
+		hdriIrradiance = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 
 		hdriFlatMapDesc.name = "HDRI Grayscale";
 		hdriFlatMapDesc.format = RHI::Format::R16_SFLOAT;
 		hdriGrayscaleMap = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
-
+		hdriPDFJoint = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 		hdriPDFConditional = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 		hdriCDFConditionalInverse = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 
@@ -354,6 +355,75 @@ namespace CE::Sandbox
 			rowAverageRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriRowAverage });
 		}
 
+		ShaderPipeline convolutionPipeline{};
+		RHI::RenderTargetBuffer* convolutionRTB = nullptr;
+		{
+			Resource* vertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/FlatConvolution.vert.spv", nullptr);
+			Resource* fragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/FlatConvolution.frag.spv", nullptr);
+
+			convolutionPipeline.CreateShaderModules("FlatConvolution", vertSpv, fragSpv);
+
+			RHI::GraphicsPipelineDescriptor convolutionDesc{};
+			convolutionDesc.name = "Flat Convolution";
+
+			RHI::ShaderResourceGroupLayout srgLayout{};
+			srgLayout.srgType = RHI::SRGType::PerPass;
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputTexture";
+			srgLayout.variables.Top().bindingSlot = 0;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "pdfJoint";
+			srgLayout.variables.Top().bindingSlot = 1;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "cdfYInv";
+			srgLayout.variables.Top().bindingSlot = 2;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "cdfXInv";
+			srgLayout.variables.Top().bindingSlot = 3;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputSampler";
+			srgLayout.variables.Top().bindingSlot = 4;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			convolutionDesc.srgLayouts.Add(srgLayout);
+
+			InitFullScreenQuadPipeline(convolutionDesc, convolutionPipeline.vertShader, convolutionPipeline.fragShader, grayscaleRenderTarget);
+
+			convolutionPipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(convolutionDesc);
+
+			convolutionPipeline.srg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+			
+			convolutionPipeline.srg->Bind("_InputTexture", hdriMap);
+			convolutionPipeline.srg->Bind("pdfJoint", hdriPDFJoint);
+			convolutionPipeline.srg->Bind("cdfYInv", hdriCDFMarginalInverse);
+			convolutionPipeline.srg->Bind("cdfXInv", hdriCDFConditionalInverse);
+			convolutionPipeline.srg->Bind("_InputSampler", nearestSampler);
+			convolutionPipeline.srg->FlushBindings();
+
+			convolutionRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { hdriIrradiance });
+
+			vertSpv->Destroy();
+			fragSpv->Destroy();
+		}
+
 		ShaderPipeline columnAveragePipeline{};
 		RHI::RenderTargetBuffer* columnAverageRTB = nullptr;
 		ShaderPipeline cdfMarginalInversePipeline{};
@@ -424,10 +494,58 @@ namespace CE::Sandbox
 			cdfMarginalInvFragSpv->Destroy();
 		}
 
+		ShaderPipeline cdfCondInversePipeline{};
+		RHI::RenderTargetBuffer* cdfCondInverseRTB = nullptr;
+		{
+			Resource* vertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/CDFConditionalInverse.vert.spv", nullptr);
+			Resource* fragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/CDFConditionalInverse.frag.spv", nullptr);
+
+			cdfCondInversePipeline.CreateShaderModules("CDFConditionalInverse", vertSpv, fragSpv);
+
+			RHI::GraphicsPipelineDescriptor cdfCondInverseDesc{};
+			cdfCondInverseDesc.name = "Column Average Shader";
+
+			RHI::ShaderResourceGroupLayout srgLayout{};
+			srgLayout.srgType = RHI::SRGType::PerPass;
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputTexture";
+			srgLayout.variables.Top().bindingSlot = 0;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			srgLayout.variables.Add({});
+			srgLayout.variables.Top().arrayCount = 1;
+			srgLayout.variables.Top().name = "_InputSampler";
+			srgLayout.variables.Top().bindingSlot = 1;
+			srgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			srgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
+			cdfCondInverseDesc.srgLayouts.Add(srgLayout);
+
+			InitFullScreenQuadPipeline(cdfCondInverseDesc, cdfCondInversePipeline.vertShader, cdfCondInversePipeline.fragShader, grayscaleRenderTarget);
+
+			cdfCondInversePipeline.srg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+
+			cdfCondInversePipeline.srg->Bind("_InputTexture", hdriPDFConditional);
+			cdfCondInversePipeline.srg->Bind("_InputSampler", nearestSampler);
+			cdfCondInversePipeline.srg->FlushBindings();
+
+			cdfCondInversePipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(cdfCondInverseDesc);
+
+			cdfCondInverseRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriCDFConditionalInverse });
+
+			vertSpv->Destroy();
+			fragSpv->Destroy();
+		}
+
 		ShaderPipeline divisionPipeline{};
 		RHI::RenderTargetBuffer* pdfMarginalRTB = nullptr;
 		RHI::ShaderResourceGroup* pdfMarginalSrg = nullptr;
 		RHI::ShaderResourceGroup* pdfConditionalSrg = nullptr;
+
+		RHI::RenderTargetBuffer* pdfJointRTB = nullptr;
+		RHI::ShaderResourceGroup* pdfJointSrg = nullptr;
 
 		{
 			Resource* vertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/PDFDivision.vert.spv", nullptr);
@@ -476,6 +594,14 @@ namespace CE::Sandbox
 			pdfConditionalSrg->Bind("_InputB", hdriRowAverage);
 			pdfConditionalSrg->Bind("_InputSampler", nearestSampler);
 			pdfConditionalSrg->FlushBindings();
+
+			pdfJointSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(srgLayout);
+			pdfJointSrg->Bind("_InputA", hdriGrayscaleMap);
+			pdfJointSrg->Bind("_InputB", hdriColumnAverage);
+			pdfJointSrg->Bind("_InputSampler", nearestSampler);
+			pdfJointSrg->FlushBindings();
+
+			pdfJointRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { hdriPDFJoint });
 
 			divisionPipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(divisionDesc);
 
@@ -1114,6 +1240,139 @@ namespace CE::Sandbox
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
+			barrier.resource = hdriCDFConditionalInverse;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, cdfCondInverseRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriCDFConditionalInverse->GetWidth();
+				viewportState.height = hdriCDFConditionalInverse->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(cdfCondInversePipeline.pipeline);
+
+				cmdList->SetShaderResourceGroup(cdfCondInversePipeline.srg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriCDFConditionalInverse;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = hdriPDFJoint;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfJointRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriPDFJoint->GetWidth();
+				viewportState.height = hdriPDFJoint->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(divisionPipeline.pipeline);
+				
+				cmdList->SetShaderResourceGroup(pdfJointSrg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriPDFJoint;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = hdriIrradiance;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			cmdList->ClearShaderResourceGroups();
+			cmdList->BeginRenderTarget(renderTarget, convolutionRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriIrradiance->GetWidth();
+				viewportState.height = hdriIrradiance->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(convolutionPipeline.pipeline);
+
+				cmdList->SetShaderResourceGroup(convolutionPipeline.srg);
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, 1, &quadVertBufferView);
+
+				RHI::DrawLinearArguments args{};
+				args.firstInstance = 0;
+				args.instanceCount = 1;
+				args.vertexOffset = 0;
+				args.vertexCount = COUNTOF(quadVertices);
+				cmdList->DrawLinear(args);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = hdriIrradiance;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
 			barrier.resource = irradianceMap;
 			barrier.fromState = RHI::ResourceState::ColorOutput;
 			barrier.toState = RHI::ResourceState::FragmentShaderResource;
@@ -1151,12 +1410,20 @@ namespace CE::Sandbox
 		divisionPipeline = {};
 		cdfMarginalInversePipeline.Destroy();
 		cdfMarginalInversePipeline = {};
+		cdfCondInversePipeline.Destroy();
+		cdfCondInversePipeline = {};
+		convolutionPipeline.Destroy();
+		convolutionPipeline = {};
+		delete convolutionRTB;
+		delete cdfCondInverseRTB;
 		delete columnAverageRTB;
 		delete pdfMarginalRTB;
 		delete cdfMarginalInverseRTB;
 		delete pdfMarginalSrg;
 		delete pdfConditionalRTB;
 		delete pdfConditionalSrg;
+		delete pdfJointRTB;
+		delete pdfJointSrg;
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -1174,6 +1441,7 @@ namespace CE::Sandbox
 	void VulkanSandbox::DestroyHDRIs()
 	{
 		delete hdriMap; hdriMap = nullptr;
+		delete hdriIrradiance; hdriIrradiance = nullptr;
 		delete hdriGrayscaleMap; hdriGrayscaleMap = nullptr;
 		delete hdriRowAverage; hdriRowAverage = nullptr;
 		delete hdriColumnAverage; hdriColumnAverage = nullptr;
@@ -1181,6 +1449,7 @@ namespace CE::Sandbox
 		delete hdriPDFConditional; hdriPDFConditional = nullptr;
 		delete hdriCDFConditionalInverse; hdriCDFConditionalInverse = nullptr;
 		delete hdriPDFMarginal; hdriPDFMarginal = nullptr;
+		delete hdriPDFJoint; hdriPDFJoint = nullptr;
 		delete hdriCubeMap; hdriCubeMap = nullptr;
         delete irradianceMap; irradianceMap = nullptr;
         

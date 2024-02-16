@@ -1,8 +1,6 @@
 #ifndef __BRDF_HLSL__
 #define __BRDF_HLSL__
 
-#define PI 3.14159265359
-
 struct MaterialInput
 {
     float3 albedo;
