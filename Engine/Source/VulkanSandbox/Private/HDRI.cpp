@@ -204,10 +204,8 @@ namespace CE::Sandbox
 		hdriPDFConditional = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 		hdriCDFConditionalInverse = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 
-		hdriFlatMapDesc.width = 40;
+		hdriFlatMapDesc.width = 1; // Only set higher width when needed for debugging purposes
 		hdriRowAverage = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
-
-		hdriFlatMapDesc.width = 40;
 		hdriPDFMarginal = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 		hdriCDFMarginalInverse = RHI::gDynamicRHI->CreateTexture(hdriFlatMapDesc);
 
@@ -743,6 +741,44 @@ namespace CE::Sandbox
 			Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix()
 		};
 
+		RHI::RenderTargetBuffer* renderTargetBuffers[6] = {};
+		RHI::TextureView* textureViews[6] = {};
+
+		RHI::RenderTargetBuffer* irradianceRTBs[6] = {};
+		RHI::TextureView* irradianceTextureViews[6] = {};
+
+		for (int i = 0; i < 6; i++)
+		{
+			RHI::TextureViewDescriptor imageViewDesc{};
+			imageViewDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+			imageViewDesc.texture = hdriCubeMap;
+			imageViewDesc.dimension = RHI::Dimension::Dim2D;
+			imageViewDesc.mipLevelCount = 1;
+			imageViewDesc.baseMipLevel = 0;
+			imageViewDesc.baseArrayLayer = i;
+			imageViewDesc.arrayLayerCount = 1;
+
+			textureViews[i] = RHI::gDynamicRHI->CreateTextureView(imageViewDesc);
+
+			renderTargetBuffers[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { textureViews[i] });
+		}
+
+		for (int i = 0; i < 6; i++)
+		{
+			RHI::TextureViewDescriptor imageViewDesc{};
+			imageViewDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+			imageViewDesc.texture = irradianceMap;
+			imageViewDesc.dimension = RHI::Dimension::Dim2D;
+			imageViewDesc.mipLevelCount = 1;
+			imageViewDesc.baseMipLevel = 0;
+			imageViewDesc.baseArrayLayer = i;
+			imageViewDesc.arrayLayerCount = 1;
+
+			irradianceTextureViews[i] = RHI::gDynamicRHI->CreateTextureView(imageViewDesc);
+
+			irradianceRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { irradianceTextureViews[i] });
+		}
+
 		RHI::Buffer* viewDataBuffers2[6] = {};
 
 		for (int i = 0; i < 6; i++)
@@ -773,12 +809,13 @@ namespace CE::Sandbox
 		}
 
 		RHI::ShaderResourceGroup* irradianceSrgs[6] = {};
+
 		for (int i = 0; i < 6; i++)
 		{
-			irradianceSrgs[i] = RHI::gDynamicRHI->CreateShaderResourceGroup(irradianceSrgLayout);
-			irradianceSrgs[i]->Bind("_CubeMap", hdriCubeMap);
-			irradianceSrgs[i]->Bind("_PerViewData", viewDataBuffers2[i]);
-			irradianceSrgs[i]->Bind("_CubeMapSampler", sampler);
+			irradianceSrgs[i] = RHI::gDynamicRHI->CreateShaderResourceGroup(equirectangulerSrgLayout);
+			irradianceSrgs[i]->Bind("_InputSampler", sampler);
+			irradianceSrgs[i]->Bind("_InputTexture", hdriIrradiance);
+			irradianceSrgs[i]->Bind("_PerViewData", viewDataBuffers[i]);
 			irradianceSrgs[i]->FlushBindings();
 		}
 
@@ -847,56 +884,12 @@ namespace CE::Sandbox
 		auto sphereVertexBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(sphereVertInfo.bufferIndex), sphereVertInfo.byteOffset,
 			sphereVertInfo.byteCount, sphereVertInfo.stride);
 
-		RHI::RenderTargetBuffer* renderTargetBuffers[6] = {};
-		RHI::TextureView* textureViews[6] = {};
-
-		RHI::RenderTargetBuffer* convolutionRenderTargetBuffers[6] = {};
-		RHI::TextureView* convolutionTextureViews[6] = {};
-
-		for (int i = 0; i < 6; i++)
-		{
-			RHI::TextureViewDescriptor imageViewDesc{};
-			imageViewDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
-			imageViewDesc.texture = hdriCubeMap;
-			imageViewDesc.dimension = RHI::Dimension::Dim2D;
-			imageViewDesc.mipLevelCount = 1;
-			imageViewDesc.baseMipLevel = 0;
-			imageViewDesc.baseArrayLayer = i;
-			imageViewDesc.arrayLayerCount = 1;
-
-			textureViews[i] = RHI::gDynamicRHI->CreateTextureView(imageViewDesc);
-
-			renderTargetBuffers[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { textureViews[i] });
-		}
-
-		for (int i = 0; i < 6; i++)
-		{
-			RHI::TextureViewDescriptor imageViewDesc{};
-			imageViewDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
-			imageViewDesc.texture = irradianceMap;
-			imageViewDesc.dimension = RHI::Dimension::Dim2D;
-			imageViewDesc.mipLevelCount = 1;
-			imageViewDesc.baseMipLevel = 0;
-			imageViewDesc.baseArrayLayer = i;
-			imageViewDesc.arrayLayerCount = 1;
-
-			convolutionTextureViews[i] = RHI::gDynamicRHI->CreateTextureView(imageViewDesc);
-
-			convolutionRenderTargetBuffers[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { convolutionTextureViews[i] });
-		}
-
 		cmdList->Begin();
 		{
 			RHI::ResourceBarrierDescriptor barrier{};
 			barrier.resource = hdriMap;
 			barrier.fromState = RHI::ResourceState::Undefined;
 			barrier.toState = RHI::ResourceState::CopyDestination;
-			barrier.subresourceRange = RHI::SubresourceRange::All();
-			cmdList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = irradianceMap;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::ColorOutput;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
@@ -1367,11 +1360,48 @@ namespace CE::Sandbox
 			}
 			cmdList->EndRenderTarget();
 
+			barrier.resource = irradianceMap;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
 			barrier.resource = hdriIrradiance;
 			barrier.fromState = RHI::ResourceState::ColorOutput;
 			barrier.toState = RHI::ResourceState::FragmentShaderResource;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
+
+			for (int i = 0; i < 6; i++) // Convert equirectangular HDR flat image to HDR CubeMap
+			{
+				cmdList->BeginRenderTarget(renderTarget, irradianceRTBs[i], &clearValue);
+
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = irradianceTextureViews[i]->GetTexture()->GetWidth();
+				viewportState.height = irradianceTextureViews[i]->GetTexture()->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(equirectangularPipeline);
+
+				cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
+				cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
+
+				cmdList->SetShaderResourceGroup(irradianceSrgs[i]);
+				cmdList->CommitShaderResources();
+
+				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+
+				cmdList->EndRenderTarget();
+			}
 
 			barrier.resource = irradianceMap;
 			barrier.fromState = RHI::ResourceState::ColorOutput;
@@ -1428,8 +1458,8 @@ namespace CE::Sandbox
 		for (int i = 0; i < 6; i++)
 		{
 			delete viewDataBuffers2[i];
-			delete convolutionTextureViews[i];
-			delete convolutionRenderTargetBuffers[i];
+			delete irradianceTextureViews[i];
+			delete irradianceRTBs[i];
             delete irradianceSrgs[i];
 			delete renderTargetBuffers[i];
 			delete textureViews[i];
