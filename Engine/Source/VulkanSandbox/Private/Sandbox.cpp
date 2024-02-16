@@ -937,7 +937,7 @@ namespace CE::Sandbox
 		mainLight.direction = Vec3(-0.25f, -0.5f, 0.5f).GetNormalized();
 		//mainLight.direction = Vec3(0, 0, 1);
 		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.75f);
-		mainLight.colorAndIntensity.w = 25.0f; // intensity
+		mainLight.colorAndIntensity.w = 5.0f; // intensity
 		mainLight.temperature = 100;
 
 		// Directional Light Shadow

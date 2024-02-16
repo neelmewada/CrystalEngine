@@ -147,8 +147,8 @@ namespace CE::Sandbox
 			irradianceMapDesc.name = "HDRI Irradiance Map";
 			irradianceMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
 			irradianceMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
-			irradianceMapDesc.width = 64;
-			irradianceMapDesc.height = 64;
+			irradianceMapDesc.width = 32;
+			irradianceMapDesc.height = 32;
 			irradianceMapDesc.depth = 1;
 			irradianceMapDesc.dimension = RHI::Dimension::DimCUBE;
 			irradianceMapDesc.mipLevels = 1;

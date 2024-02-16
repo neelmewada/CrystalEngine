@@ -114,7 +114,6 @@ float4 FragMain(PSInput input) : SV_TARGET
 
     float3 color = CalculateDiffuseIrradiance(material, normal, viewDir).rgb;
     color += Lo;
-    //float3 color = Lo + CalculateDiffuseIrradiance(material, normal, viewDir);
 
     color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)
     color = LinearToGamma(color); // Convert to Gamma space
