@@ -635,7 +635,7 @@ namespace CE::Vulkan
 								currentScope = (Vulkan::Scope*)currentScope->nextSubPass;
 								vkCmdNextSubpass(cmdBuffer, VK_SUBPASS_CONTENTS_INLINE);
 								commandList->currentSubpass++;
-								//commandList->ClearShaderResourceGroups();
+								commandList->ClearShaderResourceGroups();
 
 								for (const auto& [variableName, value] : currentScope->setVariablesAfterExecutionPerFrame)
 								{
