@@ -325,11 +325,11 @@ namespace CE
 		double sr = sin(X * 0.5);
 
 		double qw = cr * cp * cy + sr * sp * sy;
-		double qx = -sr * cp * cy + cr * sp * sy; // Adjusted X-axis orientation
+		double qx = -sr * cp * cy + cr * sp * sy;
 		double qy = cr * sp * cy + sr * cp * sy;
-		double qz = cr * cp * sy - sr * sp * cy; // Adjusted Z-axis orientation
+		double qz = cr * cp * sy - sr * sp * cy;
 
-		return Quat(qw, qx, qy, qz);
+		//return Quat(qw, qx, qy, qz);
 
 		// OLD
 		X *= 0.5f;

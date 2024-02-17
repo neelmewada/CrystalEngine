@@ -627,6 +627,7 @@ namespace CE::Vulkan
 									scheduler->SetFrameGraphVariable(currentImageIndex, variableName, value);
 								}
 
+								commandList->ClearShaderResourceGroups();
 								break;
 							}
 							else // Go to next subpass
