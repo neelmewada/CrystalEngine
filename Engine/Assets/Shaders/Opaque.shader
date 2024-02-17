@@ -2,16 +2,17 @@ Shader "Test Shader"
 {
     Properties 
     {
+        _Albedo ("Albedo", Color) = (1, 1, 1, 1)
+        _Metallic ("Metallic", Float) = 1.0
 
     }
-
-    Meta
-    {
-
-    }
-
+    
     SubShader
     {
+        Tags {
+            "Blend" = "SrcAlpha,OneMinusSrcAlpha",
+        }
+
         Pass
         {
             Name "Opaque"
@@ -48,7 +49,6 @@ Shader "Test Shader"
             cbuffer _MaterialData : SRG_PerMaterial(b0)
             {
                 float4 _Albedo;
-                float  _SpecularStrength;
                 float  _Metallic;
                 float  _Roughness;
                 float  _NormalStrength;

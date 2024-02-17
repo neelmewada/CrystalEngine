@@ -71,8 +71,8 @@ namespace CE::Editor
 
 			ShaderPass* pass = CreateObject<ShaderPass>(shader, passEntry.passName.GetString());
 			shader->passes.Add(pass);
-			pass->variants.Add(ShaderVariant());
-			ShaderVariant& variant = pass->variants[0];
+			pass->variants.Add(CE::ShaderVariant());
+			CE::ShaderVariant& variant = pass->variants[0];
 			variant.variantHash = 0;
 			variant.shaderStageBlobs.Add(ShaderBlob{});
 			variant.shaderStageBlobs.Add(ShaderBlob{});

@@ -155,28 +155,63 @@ int AssetProcessor::Run()
 void AssetProcessor::Initialize()
 {
 	ModuleManager::Get().LoadModule("Core");
+	ModuleManager::Get().LoadModule("CoreApplication");
 	ModuleManager::Get().LoadModule("CoreMedia");
+	ModuleManager::Get().LoadModule("CoreRHI");
+	ModuleManager::Get().LoadModule("VulkanRHI");
+	ModuleManager::Get().LoadModule("CoreRPI");
 	ModuleManager::Get().LoadModule("CoreShader");
+
 	
-	ModuleManager::Get().LoadModule("System");
-	ModuleManager::Get().LoadModule("EditorCore");
+}
+
+void AssetProcessor::PostInit()
+{
+	auto app = PlatformApplication::Get();
+	app->Initialize();
+
+	gDefaultWindowWidth = 1280;
+	gDefaultWindowHeight = 720;
+
+	PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+
+	RHI::gDynamicRHI = new CE::Vulkan::VulkanRHI();
+
+	RHI::gDynamicRHI->Initialize();
+	RHI::gDynamicRHI->PostInitialize();
 
 	assetDefRegistry = CreateObject<AssetDefinitionRegistry>(GetTransientPackage(), "AssetDefinitionRegistry");
 
 	Logger::Initialize();
 }
 
+void AssetProcessor::PreShutdown()
+{
+	auto app = PlatformApplication::Get();
+
+	RHI::gDynamicRHI->PreShutdown();
+
+	app->PreShutdown();
+}
+
 void AssetProcessor::Shutdown()
 {
-	Logger::Shutdown();
+	auto app = PlatformApplication::Get();
 
-	assetDefRegistry->Destroy();
-	assetDefRegistry = nullptr;
+	RHI::gDynamicRHI->Shutdown();
+	app->Shutdown();
 
-	ModuleManager::Get().UnloadModule("EditorCore");
-	ModuleManager::Get().UnloadModule("System");
+	delete RHI::gDynamicRHI;
+	RHI::gDynamicRHI = nullptr;
+
+	delete app;
+	app = nullptr;
 
 	ModuleManager::Get().UnloadModule("CoreShader");
+	ModuleManager::Get().UnloadModule("CoreRPI");
+	ModuleManager::Get().UnloadModule("VulkanRHI");
+	ModuleManager::Get().UnloadModule("CoreRHI");
 	ModuleManager::Get().UnloadModule("CoreMedia");
+	ModuleManager::Get().UnloadModule("CoreApplication");
 	ModuleManager::Get().UnloadModule("Core");
 }

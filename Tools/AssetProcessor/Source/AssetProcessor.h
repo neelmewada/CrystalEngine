@@ -3,12 +3,15 @@
 #include "CoreMinimal.h"
 #include "CoreMedia.h"
 #include "CoreShader.h"
+#include "CoreRHI.h"
+#include "VulkanRHI.h"
 #include "System.h"
 #include "EditorCore.h"
 
 #include "cxxopts.hpp"
 
 using namespace CE;
+using namespace CE::Editor;
 
 class AssetProcessor
 {
@@ -35,7 +38,9 @@ public:
 	int Run();
 
 	void Initialize();
+	void PostInit();
 
+	void PreShutdown();
 	void Shutdown();
 
 private:

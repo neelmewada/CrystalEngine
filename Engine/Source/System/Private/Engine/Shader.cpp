@@ -2,17 +2,18 @@
 
 namespace CE
 {
+
 	void ShaderBlob::Release()
 	{
 		byteCode.Free();
 	}
 
-	void ShaderVariant::Release()
+	void CE::ShaderVariant::Release()
 	{
 		
 	}
 
-	ShaderBlob* ShaderVariant::GetShaderBlobForStage(ShaderStage stage)
+	ShaderBlob* CE::ShaderVariant::GetShaderBlobForStage(ShaderStage stage)
 	{
 		for (int i = 0; i < shaderStageBlobs.GetSize(); i++)
 		{
@@ -23,17 +24,17 @@ namespace CE
 		return nullptr;
 	}
 
-	Shader::Shader()
+	CE::Shader::Shader()
 	{
 		
 	}
 
-	Shader::~Shader()
+	CE::Shader::~Shader()
 	{
 		
 	}
 
-	Shader* Shader::GetErrorShader()
+	CE::Shader* CE::Shader::GetErrorShader()
 	{
 		auto transient = ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
 		if (transient == nullptr)
@@ -62,7 +63,7 @@ namespace CE
 		shader->passes.Add(CreateObject<ShaderPass>(shader, TEXT("Main")));
 		shader->passes[0]->variants.Add({});
 
-		ShaderVariant& variant = shader->passes[0]->variants[0];
+		CE::ShaderVariant& variant = shader->passes[0]->variants[0];
 		variant.shaderStageBlobs.Add(ShaderBlob{});
 		variant.shaderStageBlobs.Top().shaderStage = ShaderStage::Vertex;
 		variant.shaderStageBlobs.Top().byteCode.LoadData(vertSpv->GetData(), vertSpv->GetDataSize());

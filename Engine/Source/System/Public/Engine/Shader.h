@@ -29,7 +29,7 @@ namespace CE
 		FIELD()
 		BinaryBlob byteCode{};
 
-		friend class Shader;
+		friend class CE::Shader;
 	};
 
 	STRUCT()
@@ -54,7 +54,7 @@ namespace CE
 
 		ShaderBlob* GetShaderBlobForStage(ShaderStage stage);
 
-		friend class Shader;
+		friend class CE::Shader;
 	};
 
 	CLASS()
@@ -69,7 +69,7 @@ namespace CE
 		FIELD()
 		Array<CE::ShaderVariant> variants{};
 
-		friend class Shader;
+		friend class CE::Shader;
 	};
 
 

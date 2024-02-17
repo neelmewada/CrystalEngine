@@ -18,9 +18,7 @@ namespace CE
 		Vector,
 		Tex2D,
 		Tex3D,
-		TexCube,
-		RWTex2D,
-		RWTex3D
+		TexCube
 	};
 	ENUM_CLASS_FLAGS(ShaderPropertyType);
 

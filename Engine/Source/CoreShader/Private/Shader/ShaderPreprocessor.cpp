@@ -132,7 +132,7 @@ namespace CE
 					defaultValueIdx = 0;
 				}
 				else if (curToken.token == TK_IDENTIFIER && currentProperty.name.IsValid() && 
-					currentProperty.displayName.IsValid() &&  
+					currentProperty.displayName.IsValid() && 
 					currentProperty.propertyType == ShaderPropertyType::None)
 				{
 					defaultValueIdx = 0;
@@ -155,14 +155,6 @@ namespace CE
 					else if (curToken.lexeme == "Tex3D")
 					{
 						currentProperty.propertyType = ShaderPropertyType::Tex3D;
-					}
-					else if (curToken.lexeme == "RWTex2D")
-					{
-						currentProperty.propertyType = ShaderPropertyType::RWTex2D;
-					}
-					else if (curToken.lexeme == "RWTex3D")
-					{
-						currentProperty.propertyType = ShaderPropertyType::RWTex3D;
 					}
 					else if (curToken.lexeme == "TexCube")
 					{
