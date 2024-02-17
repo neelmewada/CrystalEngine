@@ -156,17 +156,17 @@ namespace CE
 					{
 						currentProperty.propertyType = ShaderPropertyType::Tex3D;
 					}
+					else if (curToken.lexeme == "RWTex2D")
+					{
+						currentProperty.propertyType = ShaderPropertyType::RWTex2D;
+					}
+					else if (curToken.lexeme == "RWTex3D")
+					{
+						currentProperty.propertyType = ShaderPropertyType::RWTex3D;
+					}
 					else if (curToken.lexeme == "TexCube")
 					{
 						currentProperty.propertyType = ShaderPropertyType::TexCube;
-					}
-					else if (curToken.lexeme == "ConstantBuffer")
-					{
-						currentProperty.propertyType = ShaderPropertyType::ConstantBuffer;
-					}
-					else if (curToken.lexeme == "StructuredBuffer")
-					{
-						currentProperty.propertyType = ShaderPropertyType::StructuredBuffer;
 					}
 					else
 					{

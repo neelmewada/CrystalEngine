@@ -208,10 +208,10 @@ int main(int argc, char** argv)
 			data << "};\n";
 
 			auto t2 = Clock::now();
-			std::cout << fileName.GetCString() << ": " <<
+			/*std::cout << fileName.GetCString() << ": " <<
 				std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000.0f / 1000.0f
 				<< " milli seconds"
-				<< std::endl;
+				<< std::endl;*/
 
 			data << "static const u32 " << relativePathIdentifier << "_Length = " << length << ";\n";
 			

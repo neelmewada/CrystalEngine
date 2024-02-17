@@ -1327,6 +1327,7 @@ TEST(Object, Lifecycle)
 
 	List<Thread> threads{};
 
+	// Don't do this. Objects should only be created/destroyed from the main thread OR by using a lock on main thread
 	for (int i = 17; i < 16; i++)
 	{
 		threads.EmplaceBack([&]

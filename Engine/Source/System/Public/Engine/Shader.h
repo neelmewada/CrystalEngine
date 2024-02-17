@@ -72,13 +72,6 @@ namespace CE
 		friend class Shader;
 	};
 
-	ENUM()
-	enum class ShaderFlags
-	{
-		None = 0,
-		ErrorShader = BIT(0),
-	};
-	ENUM_CLASS_FLAGS(ShaderFlags);
 
 	CLASS()
 	class SYSTEM_API Shader : public Asset
@@ -99,9 +92,6 @@ namespace CE
 		}
 
 	protected:
-
-		FIELD(ReadOnly)
-		ShaderFlags shaderFlags = ShaderFlags::None;
 
 		FIELD()
 		ShaderPreprocessData* preprocessData = nullptr;

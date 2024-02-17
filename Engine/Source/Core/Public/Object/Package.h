@@ -175,11 +175,11 @@ namespace CE
 		};
 
 		HashMap<Uuid, ObjectEntryMetaData> objectUuidToEntryMap{};
-
 		HashMap<Uuid, Object*> loadedObjects{};
         
 		IO::Path fullPackagePath{};
 
+		static SharedMutex packageRegistryMutex;
 		static HashMap<Name, Package*> loadedPackages;
 		static HashMap<Uuid, Package*> loadedPackagesByUuid;
 		static HashMap<Uuid, Name> loadedPackageUuidToPath;

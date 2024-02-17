@@ -417,7 +417,7 @@ namespace CE
 
 		// Inherited + Local fields
 		CE::Array<FieldType> cachedFields{};
-		CE::HashMap<CE::Name, Array<FieldType*>> cachedFieldsMap{};
+		CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
         
 		CE::Array<FunctionType> cachedFunctions{};
         CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionsMap{};

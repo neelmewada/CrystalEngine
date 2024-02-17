@@ -280,6 +280,7 @@ namespace CE::RHI
         Fragment = BIT(1),
 		Tessellation = BIT(2),
 		Geometry = BIT(3),
+        Compute = BIT(4),
 
 		Default = Vertex | Fragment,
 		All = Vertex | Fragment | Tessellation | Geometry,
@@ -341,6 +342,8 @@ namespace CE::RHI
         }
 
         static ShaderSemantic Parse(const String& name);
+
+        String ToString() const;
 
         VertexInputAttribute attribute = VertexInputAttribute::None;
         u8 index = 0;

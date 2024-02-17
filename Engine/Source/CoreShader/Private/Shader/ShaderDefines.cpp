@@ -41,19 +41,4 @@ namespace CE
 		GetVariableNameMap();
 	}
 
-	void SRGEntry::TryAdd(const SRGVariable& variable, ShaderStage stage)
-	{
-		for (auto& var : variables)
-		{
-			if (var.GetName() == variable.GetName() && var.GetBindingSlot() == variable.GetBindingSlot())
-			{
-				var.shaderStages |= stage;
-				return;
-			}
-		}
-		
-		variables.Add(variable);
-		variables.Top().shaderStages |= stage;
-	}
-
 } // namespace CE

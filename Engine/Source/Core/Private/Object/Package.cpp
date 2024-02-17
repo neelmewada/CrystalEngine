@@ -4,6 +4,8 @@
 
 namespace CE
 {
+	SharedMutex Package::packageRegistryMutex{};
+
 	HashMap<Name, Package*> Package::loadedPackages{};
 	HashMap<Uuid, Package*> Package::loadedPackagesByUuid{};
 	HashMap<Uuid, Name> Package::loadedPackageUuidToPath{};
@@ -17,6 +19,8 @@ namespace CE
 
 	Package::~Package()
 	{
+		LockGuard<SharedMutex> lock{ packageRegistryMutex };
+
         loadedPackages.Remove(packageName);
 		loadedPackagesByUuid.Remove(GetUuid());
 		loadedPackageUuidToPath.Remove(GetUuid());
@@ -24,6 +28,8 @@ namespace CE
 
 	Package* Package::LoadPackageByUuid(Uuid packageUuid, LoadFlags loadFlags)
 	{
+		LockGuard<SharedMutex> lock{ packageRegistryMutex };
+
 		if (loadedPackagesByUuid.KeyExists(packageUuid))
 			return loadedPackagesByUuid[packageUuid];
 		if (packageResolvers.IsEmpty())
@@ -66,6 +72,8 @@ namespace CE
 
 	bool Package::DestroyLoadedPackage(const Name& packageName)
 	{
+		LockGuard<SharedMutex> lock{ packageRegistryMutex };
+
 		if (!loadedPackages.KeyExists(packageName))
 			return false;
 		loadedPackages[packageName]->Destroy(); // Destroying package automatically removes it from the HashMap.
@@ -74,6 +82,8 @@ namespace CE
 
 	void Package::DestroyAllPackages()
 	{
+		LockGuard<SharedMutex> lock{ packageRegistryMutex };
+
 		Array<Package*> packagesToDestroy{};
 		for (auto& [packageName, package] : loadedPackages)
 		{

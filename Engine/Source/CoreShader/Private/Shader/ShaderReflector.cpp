@@ -21,7 +21,7 @@ namespace CE
     }
 
 
-	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection)
+	ShaderReflector::ErrorCode ShaderReflector::ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection)
 	{
 #if PLATFORM_DESKTOP
 		spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)byteCode, byteSize / 4);
@@ -31,7 +31,7 @@ namespace CE
 
 		auto resources = reflection->get_shader_resources();
 		
-		if (curStage == ShaderStage::Vertex)
+		if (curStage == RHI::ShaderStage::Vertex)
 		{
 			// Fetch vertex stage inputs
 			for (const spirv_cross::Resource& input : resources.stage_inputs)
@@ -49,7 +49,7 @@ namespace CE
 					String name = reflection->get_member_name(baseTypeId, i);
 					auto memberType = reflection->get_type(memberTypeId);
 
-					ShaderStructMember structMember{};
+					RHI::ShaderStructMember structMember{};
 					structMember.name = name;
 
 					if (memberType.basetype != spirv_cross::SPIRType::Float)
@@ -57,19 +57,19 @@ namespace CE
 					if (memberType.columns == 1)
 					{
 						if (memberType.vecsize == 1)
-							structMember.dataType = ShaderStructMemberType::Float;
+							structMember.dataType = RHI::ShaderStructMemberType::Float;
 						else if (memberType.vecsize == 2)
-							structMember.dataType = ShaderStructMemberType::Float2;
+							structMember.dataType = RHI::ShaderStructMemberType::Float2;
 						else if (memberType.vecsize == 3)
-							structMember.dataType = ShaderStructMemberType::Float3;
+							structMember.dataType = RHI::ShaderStructMemberType::Float3;
 						else if (memberType.vecsize == 4)
-							structMember.dataType = ShaderStructMemberType::Float4;
+							structMember.dataType = RHI::ShaderStructMemberType::Float4;
 						else
 							continue;
 					}
 					else if (memberType.columns == 4)
 					{
-						structMember.dataType = ShaderStructMemberType::Float4x4;
+						structMember.dataType = RHI::ShaderStructMemberType::Float4x4;
 					}
 					else
 					{
@@ -100,7 +100,7 @@ namespace CE
 			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
-			variable.resourceType = ShaderResourceType::ConstantBuffer;
+			variable.resourceType = RHI::ShaderResourceType::ConstantBuffer;
 			variable.count = count;
 			variable.shaderStages = curStage;
 
@@ -134,7 +134,7 @@ namespace CE
 			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
-			variable.resourceType = ShaderResourceType::StructuredBuffer;
+			variable.resourceType = RHI::ShaderResourceType::StructuredBuffer;
 			variable.count = count;
 			variable.shaderStages = curStage;
 			
@@ -170,13 +170,13 @@ namespace CE
 			variable.internalName = internalName;
 			if (type.image.dim == spv::Dim2D)
 			{
-				variable.resourceType = ShaderResourceType::RWTexture2D;
+				variable.resourceType = RHI::ShaderResourceType::RWTexture2D;
 			}
 			else
 			{
 				continue; // Invalid type
 			}
-			variable.resourceType = ShaderResourceType::RWTexture2D;
+			variable.resourceType = RHI::ShaderResourceType::RWTexture2D;
 			variable.count = count;
 			variable.shaderStages = curStage;
 
@@ -208,19 +208,19 @@ namespace CE
 			
 			if (type.image.dim == spv::Dim2D)
 			{
-				variable.type = ShaderResourceType::Texture2D;
+				variable.type = RHI::ShaderResourceType::Texture2D;
 			}
 			else if (type.image.dim == spv::Dim1D)
 			{
-				variable.type = ShaderResourceType::Texture1D;
+				variable.type = RHI::ShaderResourceType::Texture1D;
 			}
 			else if (type.image.dim == spv::Dim3D)
 			{
-				variable.type = ShaderResourceType::Texture3D;
+				variable.type = RHI::ShaderResourceType::Texture3D;
 			}
 			else if (type.image.dim == spv::DimCube)
 			{
-				variable.type = ShaderResourceType::TextureCube;
+				variable.type = RHI::ShaderResourceType::TextureCube;
 			}
 			else
 			{
@@ -253,7 +253,7 @@ namespace CE
 			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.internalName = internalName;
-			variable.resourceType = ShaderResourceType::SamplerState;
+			variable.resourceType = RHI::ShaderResourceType::SamplerState;
 			variable.count = count;
 			variable.shaderStages = curStage;
 

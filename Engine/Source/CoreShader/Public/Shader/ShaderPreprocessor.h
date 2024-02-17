@@ -19,8 +19,8 @@ namespace CE
 		Tex2D,
 		Tex3D,
 		TexCube,
-		ConstantBuffer,
-		StructuredBuffer
+		RWTex2D,
+		RWTex3D
 	};
 	ENUM_CLASS_FLAGS(ShaderPropertyType);
 

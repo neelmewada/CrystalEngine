@@ -1064,7 +1064,7 @@ namespace CE
 	// - Bindings API -
 
 	// TODO: Change it to a SharedMutex & run tests.
-	static RecursiveMutex bindingsMutex{};
+	static SharedRecursiveMutex bindingsMutex{};
 
 	HashMap<void*, Array<SignalBinding>> Object::outgoingBindingsMap{};
 	HashMap<void*, Array<SignalBinding>> Object::incomingBindingsMap{};
@@ -1079,7 +1079,7 @@ namespace CE
 		if (sourceInstance == nullptr || sourceFunction == nullptr || !delegate.IsValid())
 			return 0;
 
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 		
 		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
 
@@ -1098,7 +1098,7 @@ namespace CE
 
 	void Object::EmitSignal(void* signalInstance, const String& name, const Array<Variant>& args)
 	{
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 
 		Array<TypeId> argHashes{};
 		for (const Variant& arg : args)
@@ -1144,7 +1144,7 @@ namespace CE
 		if (sourceFunction->GetFunctionSignature() != destinationFunction->GetFunctionSignature())
 			return false;
 
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 
 		auto& outgoingBindings = outgoingBindingsMap[sourceInstance];
 		auto& incomingBindings = incomingBindingsMap[destinationInstance];
@@ -1163,7 +1163,7 @@ namespace CE
 
 	void Object::UnbindSignals(void* toInstance, void* fromInstance)
 	{
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 
 		auto& incoming = incomingBindingsMap[toInstance];
 
@@ -1176,7 +1176,7 @@ namespace CE
 
 	void Object::UnbindAllIncomingSignals(void* toInstance)
 	{
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 
 		auto& incoming = incomingBindingsMap[toInstance];
 
@@ -1188,7 +1188,7 @@ namespace CE
 
 	void Object::UnbindAllOutgoingSignals(void* fromInstance)
 	{
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 
 		auto& outgoing = outgoingBindingsMap[fromInstance];
 
@@ -1200,7 +1200,7 @@ namespace CE
 
 	void Object::UnbindAllSignals(void* instance)
 	{
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 
 		if (outgoingBindingsMap.KeyExists(instance))
 		{
@@ -1242,7 +1242,7 @@ namespace CE
 
     void Object::Unbind(void* instance, DelegateHandle delegateInstance)
     {
-		LockGuard<RecursiveMutex> lock{ bindingsMutex };
+		LockGuard<SharedRecursiveMutex> lock{ bindingsMutex };
 
         auto& outgoing = outgoingBindingsMap[instance];
         for (int i = outgoing.GetSize() - 1; i >= 0; i--) // OUTGOING

@@ -206,35 +206,39 @@ namespace CE
 
 		Package* package = nullptr;
 
-		if (loadedPackages.KeyExists(packageName))
 		{
-			package = loadedPackages[packageName];
-			package->packageDependencies = packageDependendies;
-		}
-		else if (loadedPackagesByUuid.KeyExists(packageUuid))
-		{
-			package = loadedPackagesByUuid[packageUuid];
-			package->packageDependencies = packageDependendies;
-		}
-		else
-		{
-			Internal::ConstructObjectParams params{ Package::Type() };
-			params.name = packageName;
-			params.uuid = packageUuid;
-			params.templateObject = nullptr;
-			params.objectFlags = OF_NoFlags;
-			params.outer = nullptr;
+			LockGuard<SharedMutex> lock{ Package::packageRegistryMutex };
 
-			package = (Package*)Internal::StaticConstructObject(params);
-			package->fullPackagePath = fullPackagePath;
-			package->packageDependencies = packageDependendies;
-			package->isFullyLoaded = false;
-			package->objectUuidToEntryMap.Clear();
-		}
+			if (loadedPackages.KeyExists(packageName))
+			{
+				package = loadedPackages[packageName];
+				package->packageDependencies = packageDependendies;
+			}
+			else if (loadedPackagesByUuid.KeyExists(packageUuid))
+			{
+				package = loadedPackagesByUuid[packageUuid];
+				package->packageDependencies = packageDependendies;
+			}
+			else
+			{
+				Internal::ConstructObjectParams params{ Package::Type() };
+				params.name = packageName;
+				params.uuid = packageUuid;
+				params.templateObject = nullptr;
+				params.objectFlags = OF_NoFlags;
+				params.outer = nullptr;
 
-		loadedPackages[packageName] = package;
-		loadedPackagesByUuid[packageUuid] = package;
-		loadedPackageUuidToPath[packageUuid] = packageName;
+				package = (Package*)Internal::StaticConstructObject(params);
+				package->fullPackagePath = fullPackagePath;
+				package->packageDependencies = packageDependendies;
+				package->isFullyLoaded = false;
+				package->objectUuidToEntryMap.Clear();
+			}
+
+			loadedPackages[packageName] = package;
+			loadedPackagesByUuid[packageUuid] = package;
+			loadedPackageUuidToPath[packageUuid] = packageName;
+		}
 
 		package->isCooked = isCooked > 0 ? true : false;
 		package->majorVersion = majorVersion;

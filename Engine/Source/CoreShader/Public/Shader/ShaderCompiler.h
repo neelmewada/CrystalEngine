@@ -13,7 +13,7 @@ namespace CE
 	{
 		String debugName = "";
 		String entry = "VertMain";
-		ShaderStage stage = ShaderStage::Vertex;
+		RHI::ShaderStage stage = RHI::ShaderStage::Vertex;
 
 		HlslShaderModel shaderModel = HlslShaderModel::SM_6_0;
 

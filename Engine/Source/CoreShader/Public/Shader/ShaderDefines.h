@@ -48,32 +48,6 @@ namespace CE
 		friend struct SRGEntry;
 	};
 
-	STRUCT()
-	struct CORESHADER_API SRGEntry
-	{
-		CE_STRUCT(SRGEntry)
-	public:
-
-		inline u32 GetFrequencyId() const { return frequencyId; }
-
-		inline u32 GetNumVariables() const { return variables.GetSize(); }
-
-		inline const SRGVariable& GetVariable(int index) const { return variables[index]; }
-
-
-		FIELD(ReadOnly)
-		u32 frequencyId = 0; // The set number in vulkan, or register space in dx12.
-		
-		FIELD(ReadOnly)
-		Array<SRGVariable> variables{};
-
-		void TryAdd(const SRGVariable& variable, ShaderStage stage);
-
-		friend class ShaderReflector;
-		friend struct ShaderReflection;
-		friend class Shader;
-	};
-
 	typedef HashMap<Name, int> VariableBindingMap;
     
 	STRUCT()

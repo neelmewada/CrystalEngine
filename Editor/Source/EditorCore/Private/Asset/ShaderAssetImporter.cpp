@@ -23,12 +23,12 @@ namespace CE::Editor
 
 		if (!sourcePath.Exists())
 			return false;
-
-		Shader* shader = package->LoadObject<Shader>();
+		
+		CE::Shader* shader = package->LoadObject<CE::Shader>();
 
 		if (shader == nullptr)
 		{
-			shader = CreateObject<Shader>(package, TEXT("Shader"));
+			shader = CreateObject<CE::Shader>(package, TEXT("Shader"));
 		}
 		else
 		{
@@ -65,7 +65,7 @@ namespace CE::Editor
 			
 			ShaderBuildConfig buildConfig{};
 			buildConfig.entry = passEntry.vertexEntry.GetString();
-			buildConfig.stage = ShaderStage::Vertex;
+			buildConfig.stage = RHI::ShaderStage::Vertex;
 			buildConfig.includeSearchPaths = includePaths;
 			buildConfig.debugName = shader->preprocessData->shaderName.GetString();
 
@@ -81,7 +81,7 @@ namespace CE::Editor
 
 			ShaderBlob& vertBlob = variant.shaderStageBlobs[0];
 			vertBlob.format = ShaderBlobFormat::Spirv;
-			vertBlob.shaderStage = ShaderStage::Vertex;
+			vertBlob.shaderStage = RHI::ShaderStage::Vertex;
 
 			Array<std::wstring> extraArgs{};
 
@@ -95,7 +95,7 @@ namespace CE::Editor
 			ShaderReflector shaderReflector{};
 			ShaderReflector::ErrorCode reflectionResult = 
 				shaderReflector.Reflect(ShaderBlobFormat::Spirv, vertBlob.byteCode.GetDataPtr(), vertBlob.byteCode.GetDataSize(), 
-					ShaderStage::Vertex, variant.reflectionInfo);
+					RHI::ShaderStage::Vertex, variant.reflectionInfo);
 			if (reflectionResult != ShaderReflector::ERR_Success)
 			{
 				errorMessage = "Failed to reflect vertex shader. Error: " + compiler.GetErrorMessage();
@@ -105,10 +105,10 @@ namespace CE::Editor
 			// - Fragment -
 
 			buildConfig.entry = passEntry.fragmentEntry.GetString();
-			buildConfig.stage = ShaderStage::Fragment;
+			buildConfig.stage = RHI::ShaderStage::Fragment;
 			ShaderBlob& fragBlob = variant.shaderStageBlobs[1];
 			fragBlob.format = ShaderBlobFormat::Spirv;
-			fragBlob.shaderStage = ShaderStage::Fragment;
+			fragBlob.shaderStage = RHI::ShaderStage::Fragment;
 
 			result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, fragBlob.byteCode, extraArgs);
 			if (result != ShaderCompiler::ERR_Success)
@@ -118,7 +118,7 @@ namespace CE::Editor
 			}
 
 			reflectionResult = shaderReflector.Reflect(ShaderBlobFormat::Spirv, fragBlob.byteCode.GetDataPtr(), fragBlob.byteCode.GetDataSize(),
-				ShaderStage::Fragment, variant.reflectionInfo);
+				RHI::ShaderStage::Fragment, variant.reflectionInfo);
 			if (reflectionResult != ShaderReflector::ERR_Success)
 			{
 				errorMessage = "Failed to reflect fragment shader. Error: " + compiler.GetErrorMessage();

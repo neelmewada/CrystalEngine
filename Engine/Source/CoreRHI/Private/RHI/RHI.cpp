@@ -29,6 +29,8 @@ namespace CE::RHI
 	ShaderSemantic ShaderSemantic::Parse(const String& string)
 	{
 		ShaderSemantic result{};
+		result.index = 0;
+
 		if (string.GetLength() < 2)
 			return result;
 		
@@ -66,6 +68,26 @@ namespace CE::RHI
 		{
 			String::TryParse(numberString, result.index);
 		}
+
+		return result;
+	}
+
+	String ShaderSemantic::ToString() const
+	{
+		String result{};
+
+		EnumType* enumType = GetStaticEnum<VertexInputAttribute>();
+		if (!enumType)
+			return result;
+
+		EnumConstant* enumConst = enumType->FindConstantWithValue((s64)attribute);
+		if (!enumConst)
+			return result;
+
+		result = enumConst->GetName().GetString();
+
+		if (index > 0)
+			result.Concatenate((s64)index);
 
 		return result;
 	}

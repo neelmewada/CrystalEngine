@@ -161,14 +161,9 @@ namespace CE
         if (!fieldsCached)
             CacheAllFields();
         
-        if (cachedFieldsMap[name].NonEmpty())
+        if (cachedFieldsMap[name] != nullptr)
 		{
-			const auto& fields = cachedFieldsMap[name];
-			for (auto field : fields)
-			{
-				if (fieldTypeId == 0 || (field != nullptr && field->GetDeclarationTypeId() == fieldTypeId))
-					return field;
-			}
+            return cachedFieldsMap[name];
 		}
 
         return nullptr;
@@ -301,7 +296,7 @@ namespace CE
                 cachedFields[i].next = &cachedFields[i + 1];
             }
 
-			cachedFieldsMap[cachedFields[i].GetName()].Add(&cachedFields[i]);
+			cachedFieldsMap[cachedFields[i].GetName()] = &cachedFields[i];
         }
 
 		
@@ -491,6 +486,7 @@ namespace CE
 		{
 			if (type->IsClass())
 			{
+                ((ClassType*)type)->defaultInstance->Destroy();
 				((ClassType*)type)->defaultInstance = nullptr;
 			}
 		}

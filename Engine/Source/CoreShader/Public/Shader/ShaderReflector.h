@@ -21,9 +21,9 @@ namespace CE
 			ERR_UnsupportedPlatform
 		};
 
-		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection);
+		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection);
 
-		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, ShaderStage curStage, ShaderReflection& outReflection)
+		inline ErrorCode Reflect(ShaderBlobFormat shaderFormat, const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection)
 		{
 			if (shaderFormat == ShaderBlobFormat::Spirv)
 			{

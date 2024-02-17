@@ -141,11 +141,11 @@ namespace CE
 
 		wcharArgs.AddRange({ L"-E", entryName.data() });
 
-		if (buildConfig.stage == ShaderStage::Vertex)
+		if (buildConfig.stage == RHI::ShaderStage::Vertex)
 		{
 			wcharArgs.AddRange({ L"-T", L"vs_6_0" });
 		}
-		else if (buildConfig.stage == ShaderStage::Fragment)
+		else if (buildConfig.stage == RHI::ShaderStage::Fragment)
 		{
 			wcharArgs.AddRange({ L"-T", L"ps_6_0" });
 		}
