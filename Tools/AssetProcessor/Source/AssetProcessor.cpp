@@ -102,6 +102,7 @@ AssetProcessor::~AssetProcessor()
 int AssetProcessor::Run()
 {
 	Initialize();
+	PostInit();
 	
 	JobContext* jobContext = JobContext::GetGlobalContext();
 	JobManager* jobManager = jobContext->GetJobManager();
@@ -147,6 +148,7 @@ int AssetProcessor::Run()
 	// Wait for all jobs to complete
 	jobManager->Complete();
 
+	PreShutdown();
 	Shutdown();
 
 	return 0;
