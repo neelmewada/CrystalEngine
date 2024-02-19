@@ -19,7 +19,7 @@ namespace CE
 		Super::Initialize();
 
 		// Create & set an empty scene by default
-		scene = CreateObject<Scene>(this, TEXT("EmptyScene"));
+		scene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
 	void SceneSubsystem::Shutdown()

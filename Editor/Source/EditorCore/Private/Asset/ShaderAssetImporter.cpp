@@ -35,10 +35,6 @@ namespace CE::Editor
 			// Clean up old data
 			if (shader->preprocessData != nullptr)
 				shader->preprocessData->Destroy();
-			for (auto pass : shader->passes)
-			{
-				pass->Destroy();
-			}
 			shader->passes.Clear();
 		}
 
@@ -69,23 +65,30 @@ namespace CE::Editor
 			buildConfig.includeSearchPaths = includePaths;
 			buildConfig.debugName = shader->preprocessData->shaderName.GetString();
 
-			ShaderPass* pass = CreateObject<ShaderPass>(shader, passEntry.passName.GetString());
+			ShaderPass pass = {};
+			pass.passName = passEntry.passName.GetString();
 			shader->passes.Add(pass);
-			pass->variants.Add(CE::ShaderVariant());
-			CE::ShaderVariant& variant = pass->variants[0];
+			pass.variants.Add(CE::ShaderVariant());
+			CE::ShaderVariant& variant = pass.variants[0];
 			variant.variantHash = 0;
-			variant.shaderStageBlobs.Add(ShaderBlob{});
-			variant.shaderStageBlobs.Add(ShaderBlob{});
+			variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, "VertexBlob"));
+			variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, "FragmentBlob"));
 
 			// - Vertex -
 
-			ShaderBlob& vertBlob = variant.shaderStageBlobs[0];
-			vertBlob.format = ShaderBlobFormat::Spirv;
-			vertBlob.shaderStage = RHI::ShaderStage::Vertex;
+			ShaderBlob* vertBlob = variant.shaderStageBlobs[0];
+			vertBlob->format = ShaderBlobFormat::Spirv;
+			vertBlob->shaderStage = RHI::ShaderStage::Vertex;
 
-			Array<std::wstring> extraArgs{};
+			Array<std::wstring> vertexExtraArgs{};
+			// -D COMPILE=1 -D VERTEX=1 -fspv-preserve-bindings
+			vertexExtraArgs.AddRange({
+				L"-D", L"COMPILE=1",
+				L"-D", L"VERTEX=1",
+				L"-fspv-preserve-bindings",
+			});
 
-			ShaderCompiler::ErrorCode result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, vertBlob.byteCode, extraArgs);
+			ShaderCompiler::ErrorCode result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, vertBlob->byteCode, vertexExtraArgs);
 			if (result != ShaderCompiler::ERR_Success)
 			{
 				errorMessage = "Failed to compile vertex shader. Error: " + compiler.GetErrorMessage();
@@ -94,7 +97,7 @@ namespace CE::Editor
 
 			ShaderReflector shaderReflector{};
 			ShaderReflector::ErrorCode reflectionResult = 
-				shaderReflector.Reflect(ShaderBlobFormat::Spirv, vertBlob.byteCode.GetDataPtr(), vertBlob.byteCode.GetDataSize(), 
+				shaderReflector.Reflect(ShaderBlobFormat::Spirv, vertBlob->byteCode.GetDataPtr(), vertBlob->byteCode.GetDataSize(),
 					RHI::ShaderStage::Vertex, variant.reflectionInfo);
 			if (reflectionResult != ShaderReflector::ERR_Success)
 			{
@@ -106,18 +109,25 @@ namespace CE::Editor
 
 			buildConfig.entry = passEntry.fragmentEntry.GetString();
 			buildConfig.stage = RHI::ShaderStage::Fragment;
-			ShaderBlob& fragBlob = variant.shaderStageBlobs[1];
-			fragBlob.format = ShaderBlobFormat::Spirv;
-			fragBlob.shaderStage = RHI::ShaderStage::Fragment;
+			ShaderBlob* fragBlob = variant.shaderStageBlobs[1];
+			fragBlob->format = ShaderBlobFormat::Spirv;
+			fragBlob->shaderStage = RHI::ShaderStage::Fragment;
 
-			result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, fragBlob.byteCode, extraArgs);
+			Array<std::wstring> fragmentExtraArgs{};
+			fragmentExtraArgs.AddRange({
+				L"-D", L"COMPILE=1",
+				L"-D", L"FRAGMENT=1",
+				L"-fspv-preserve-bindings",
+			});
+
+			result = compiler.BuildSpirv(passEntry.source.GetDataPtr(), (u32)passEntry.source.GetDataSize(), buildConfig, fragBlob->byteCode, fragmentExtraArgs);
 			if (result != ShaderCompiler::ERR_Success)
 			{
 				errorMessage = "Failed to compile fragment shader. Error: " + compiler.GetErrorMessage();
 				return false;
 			}
 
-			reflectionResult = shaderReflector.Reflect(ShaderBlobFormat::Spirv, fragBlob.byteCode.GetDataPtr(), fragBlob.byteCode.GetDataSize(),
+			reflectionResult = shaderReflector.Reflect(ShaderBlobFormat::Spirv, fragBlob->byteCode.GetDataPtr(), fragBlob->byteCode.GetDataSize(),
 				RHI::ShaderStage::Fragment, variant.reflectionInfo);
 			if (reflectionResult != ShaderReflector::ERR_Success)
 			{
@@ -125,7 +135,7 @@ namespace CE::Editor
 				return false;
 			}
 		}
-
+		
 		return true;
 	}
 

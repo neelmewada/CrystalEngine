@@ -33,7 +33,6 @@ namespace CE
 
 		// Temporary stuff
 
-		RHI::GraphicsPipelineState* errorPipeline = nullptr;
 
 		RHI::ShaderResourceGroup* srg0 = nullptr;
 		RHI::ShaderResourceGroup* srgEmpty = nullptr;

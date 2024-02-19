@@ -25,7 +25,7 @@ namespace CE::Editor
 		ShaderAssetImportJob(AssetImporter* importer, const IO::Path& sourcePath, const IO::Path& outPath)
 			: Super(importer, sourcePath, outPath)
 		{
-
+			
 		}
 
 		virtual bool ProcessAsset(Package* package) override;

@@ -29,7 +29,6 @@ ce_add_target(${PROJECT_NAME} SHARED
         PRIVATE
         PUBLIC
             CE::Core
-            CE::CoreWidgets
             CE::EditorCore
     RUNTIME_DEPENDENCIES
 

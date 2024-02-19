@@ -39,7 +39,7 @@ namespace CE
 		BC6H,
 		BC7,
 	};
-	ENUM_CLASS_FLAGS(TextureFormat);
+	ENUM_CLASS_FLAGS(CE::TextureFormat);
 
 	/// Texture source data format
 	ENUM()
@@ -107,6 +107,7 @@ namespace CE
 		SRGB
 	};
 	ENUM_CLASS_FLAGS(TextureColorSpace);
+
     
 } // namespace CE
 

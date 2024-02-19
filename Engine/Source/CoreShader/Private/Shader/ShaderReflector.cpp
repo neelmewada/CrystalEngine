@@ -9,7 +9,7 @@
 
 namespace CE
 {   
-    
+
     ShaderReflector::ShaderReflector()
     {
 		
@@ -36,11 +36,21 @@ namespace CE
 			// Fetch vertex stage inputs
 			for (const spirv_cross::Resource& input : resources.stage_inputs)
 			{
-				
+				u32 vecSize = reflection->get_type(input.base_type_id).vecsize;
+				String name = input.name;
+				if (!name.StartsWith("in.var."))
+				{
+					return ERR_InvalidVertexInputNames;
+				}
+
+				String shaderSemanticName = name.GetSubstring(7);
+				RHI::ShaderSemantic semantic = RHI::ShaderSemantic::Parse(shaderSemanticName);
+				outReflection.vertexInputs.Add(semantic);
 			}
 		}
 
-		auto reflectStruct = [&](SRGVariable& variable, spirv_cross::SPIRType type, spirv_cross::TypeID baseTypeId)
+		std::function<void(Array<RHI::ShaderStructMember>&, spirv_cross::SPIRType, spirv_cross::TypeID)> reflectStruct = 
+			[&](Array<RHI::ShaderStructMember>& outStructMembers, spirv_cross::SPIRType type, spirv_cross::TypeID baseTypeId)
 			{
 				int numMembers = type.member_types.size();
 				for (int i = 0; i < numMembers; i++)
@@ -52,31 +62,67 @@ namespace CE
 					RHI::ShaderStructMember structMember{};
 					structMember.name = name;
 
-					if (memberType.basetype != spirv_cross::SPIRType::Float)
-						continue;
-					if (memberType.columns == 1)
+					if (memberType.basetype == spirv_cross::SPIRType::Float)
 					{
-						if (memberType.vecsize == 1)
-							structMember.dataType = RHI::ShaderStructMemberType::Float;
-						else if (memberType.vecsize == 2)
-							structMember.dataType = RHI::ShaderStructMemberType::Float2;
-						else if (memberType.vecsize == 3)
-							structMember.dataType = RHI::ShaderStructMemberType::Float3;
-						else if (memberType.vecsize == 4)
-							structMember.dataType = RHI::ShaderStructMemberType::Float4;
+						if (memberType.columns == 1)
+						{
+							if (memberType.vecsize == 1)
+								structMember.dataType = RHI::ShaderStructMemberType::Float;
+							else if (memberType.vecsize == 2)
+								structMember.dataType = RHI::ShaderStructMemberType::Float2;
+							else if (memberType.vecsize == 3)
+								structMember.dataType = RHI::ShaderStructMemberType::Float3;
+							else if (memberType.vecsize == 4)
+								structMember.dataType = RHI::ShaderStructMemberType::Float4;
+							else
+								continue;
+						}
+						else if (memberType.columns == 4)
+						{
+							structMember.dataType = RHI::ShaderStructMemberType::Float4x4;
+						}
 						else
+						{
 							continue;
+						}
 					}
-					else if (memberType.columns == 4)
+					else if (memberType.basetype == spirv_cross::SPIRType::UInt)
 					{
-						structMember.dataType = RHI::ShaderStructMemberType::Float4x4;
+						if (memberType.columns == 1 && memberType.vecsize == 1)
+						{
+							structMember.dataType = RHI::ShaderStructMemberType::UInt;
+						}
+						else
+						{
+							continue;
+						}
+					}
+					else if (memberType.basetype == spirv_cross::SPIRType::Int)
+					{
+						if (memberType.columns == 1 && memberType.vecsize == 1)
+						{
+							structMember.dataType = RHI::ShaderStructMemberType::Int;
+						}
+						else
+						{
+							continue;
+						}
+					}
+					else if (memberType.basetype == spirv_cross::SPIRType::Struct)
+					{
+						structMember.dataType = RHI::ShaderStructMemberType::Struct;
+						reflectStruct(structMember.nestedMembers, memberType, reflection->get_type(memberTypeId).self);
 					}
 					else
 					{
 						continue;
 					}
 
-					variable.structMembers.Add(structMember);
+					structMember.arrayCount = 1;
+					if (memberType.array.size() > 0)
+						structMember.arrayCount = memberType.array[0];
+
+					outStructMembers.Add(structMember);
 				}
 			};
 		
@@ -95,22 +141,21 @@ namespace CE
 
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
-
-			SRGVariable variable{};
+			
+			RHI::SRGVariableDescriptor variable{};
 			variable.bindingSlot = binding;
 			variable.name = name;
-			variable.internalName = internalName;
-			variable.resourceType = RHI::ShaderResourceType::ConstantBuffer;
-			variable.count = count;
+			variable.type = RHI::ShaderResourceType::ConstantBuffer;
+			variable.arrayCount = count;
 			variable.shaderStages = curStage;
 
 			if (type.basetype == spirv_cross::SPIRType::Struct)
 			{
-				reflectStruct(variable, type, uniformBuffer.base_type_id);
+				reflectStruct(variable.structMembers, type, uniformBuffer.base_type_id);
 			}
 
-			//auto& entry = outReflection.FindOrAdd(set);
-			//entry.TryAdd(variable, curStage);
+			auto& entry = outReflection.FindOrAdd((RHI::SRGType)set);
+			entry.TryAdd(variable);
 		}
 
 		int numStorageBuffers = resources.storage_buffers.size();
@@ -130,21 +175,20 @@ namespace CE
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
-			SRGVariable variable{};
+			RHI::SRGVariableDescriptor variable{};
 			variable.bindingSlot = binding;
 			variable.name = name;
-			variable.internalName = internalName;
-			variable.resourceType = RHI::ShaderResourceType::StructuredBuffer;
-			variable.count = count;
+			variable.type = RHI::ShaderResourceType::StructuredBuffer;
+			variable.arrayCount = count;
 			variable.shaderStages = curStage;
 			
 			if (type.basetype == spirv_cross::SPIRType::Struct)
 			{
-				reflectStruct(variable, type, storageBuffer.base_type_id);
+				reflectStruct(variable.structMembers, type, storageBuffer.base_type_id);
 			}
 
-			//auto& entry = outReflection.FindOrAdd(set);
-			//entry.TryAdd(variable, curStage);
+			auto& entry = outReflection.FindOrAdd((RHI::SRGType)set);
+			entry.TryAdd(variable);
 		}
 
 		int numStorageImages = resources.storage_images.size();
@@ -164,24 +208,27 @@ namespace CE
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 			
-			SRGVariable variable{};
+			RHI::SRGVariableDescriptor variable{};
 			variable.bindingSlot = binding;
 			variable.name = name;
-			variable.internalName = internalName;
 			if (type.image.dim == spv::Dim2D)
 			{
-				variable.resourceType = RHI::ShaderResourceType::RWTexture2D;
+				variable.type = RHI::ShaderResourceType::RWTexture2D;
+			}
+			else if (type.image.dim == spv::Dim3D)
+			{
+				variable.type = RHI::ShaderResourceType::RWTexture3D;
 			}
 			else
 			{
 				continue; // Invalid type
 			}
-			variable.resourceType = RHI::ShaderResourceType::RWTexture2D;
-			variable.count = count;
+			variable.type = RHI::ShaderResourceType::RWTexture2D;
+			variable.arrayCount = count;
 			variable.shaderStages = curStage;
 
-			//auto& entry = outReflection.FindOrAdd(set);
-			//entry.TryAdd(variable, curStage);
+			auto& entry = outReflection.FindOrAdd((RHI::SRGType)set);
+			entry.TryAdd(variable);
 		}
 		
 		int numTextures = resources.separate_images.size();
@@ -201,7 +248,7 @@ namespace CE
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
-			RHI::SRGVariableDescriptor variable{};
+			RHI:SRGVariableDescriptor variable{};
 			variable.bindingSlot = binding;
 			variable.name = name;
 			variable.shaderStages = curStage;
@@ -249,16 +296,15 @@ namespace CE
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
 
-			SRGVariable variable{};
+			RHI::SRGVariableDescriptor variable{};
 			variable.bindingSlot = binding;
 			variable.name = name;
-			variable.internalName = internalName;
-			variable.resourceType = RHI::ShaderResourceType::SamplerState;
-			variable.count = count;
+			variable.type = RHI::ShaderResourceType::SamplerState;
+			variable.arrayCount = count;
 			variable.shaderStages = curStage;
 
-			//auto& entry = outReflection.FindOrAdd(set);
-			//entry.TryAdd(variable, curStage);
+			auto& entry = outReflection.FindOrAdd((RHI::SRGType)set);
+			entry.TryAdd(variable);
 		}
 		return ERR_Success;
 #else

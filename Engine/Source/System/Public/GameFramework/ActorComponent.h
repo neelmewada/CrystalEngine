@@ -24,7 +24,7 @@ namespace CE
 
 		inline Actor* GetActor() const { return owner; }
 
-		Scene* GetScene() const;
+		CE::Scene* GetScene() const;
 
 		inline bool IsEnabled() const { return isEnabled; }
 

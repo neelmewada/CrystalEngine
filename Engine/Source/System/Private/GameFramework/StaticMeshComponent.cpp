@@ -8,19 +8,4 @@ namespace CE
 		canTick = true;
     }
 
-    void StaticMeshComponent::SetStaticMesh(StaticMesh* mesh)
-    {
-        this->staticMesh = mesh;
-        if (mesh == nullptr || mesh->GetModelData() == nullptr)
-        {
-            materials.Resize(0);
-            return;
-        }
-        
-        Mesh* meshRef = mesh->GetModelData()->lod[0];
-		staticMesh->GetVertexBuffer(0);
-        
-        materials.Resize(meshRef->GetSubMeshCount());
-    }
-
 } // namespace CE

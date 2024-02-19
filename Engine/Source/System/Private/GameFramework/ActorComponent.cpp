@@ -18,7 +18,7 @@ namespace CE
 
 	}
 
-	Scene* ActorComponent::GetScene() const
+	CE::Scene* ActorComponent::GetScene() const
 	{
 		return owner != nullptr ? owner->GetScene() : nullptr;
 	}

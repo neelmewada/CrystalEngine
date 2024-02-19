@@ -7,9 +7,9 @@ namespace CE
 #endif
 
 	CLASS()
-	class SYSTEM_API Texture2D : public Texture
+	class SYSTEM_API Texture2D : public CE::Texture
 	{
-		CE_CLASS(Texture2D, Texture)
+		CE_CLASS(Texture2D, CE::Texture)
 	public:
 
 

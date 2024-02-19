@@ -7,10 +7,10 @@ namespace CE
 	namespace Editor { class ShaderAssetImportJob; }
 #endif
 
-	STRUCT()
-	struct SYSTEM_API ShaderBlob
+	CLASS()
+	class SYSTEM_API ShaderBlob : public Object
 	{
-		CE_STRUCT(ShaderBlob)
+		CE_CLASS(ShaderBlob, Object)
 	public:
 
 		void Release();
@@ -47,7 +47,7 @@ namespace CE
 		SIZE_T variantHash = 0;
 
 		FIELD()
-		Array<ShaderBlob> shaderStageBlobs{};
+		Array<ShaderBlob*> shaderStageBlobs{};
 
 		FIELD()
 		ShaderReflection reflectionInfo{};
@@ -57,10 +57,10 @@ namespace CE
 		friend class CE::Shader;
 	};
 
-	CLASS()
-	class SYSTEM_API ShaderPass : public Object
+	STRUCT()
+	struct SYSTEM_API ShaderPass 
 	{
-		CE_CLASS(ShaderPass, Object)
+		CE_STRUCT(ShaderPass)
 	public:
 
 		FIELD()
@@ -97,7 +97,7 @@ namespace CE
 		ShaderPreprocessData* preprocessData = nullptr;
 
 		FIELD()
-		Array<ShaderPass*> passes{};
+		Array<ShaderPass> passes{};
 
 		FIELD()
 		ShaderStage stages = ShaderStage::Default;

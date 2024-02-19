@@ -30,8 +30,6 @@ ce_add_target(${PROJECT_NAME} SHARED
             ThirdParty::cxxopts
         PUBLIC
             CE::Core
-            CE::CoreGUI
-            CE::CoreWidgets
             CE::EditorCore
             CE::EditorWidgets
             CE::EditorSystem

@@ -5,7 +5,7 @@ namespace CE::Editor
 
 	const Array<String>& ShaderAssetDefinition::GetSourceExtensions()
 	{
-		static Array<String> extensions = {
+		static const Array<String> extensions = {
 			".shader"
 		};
 		return extensions;
@@ -13,12 +13,12 @@ namespace CE::Editor
 
 	SubClassType<Asset> ShaderAssetDefinition::GetDefaultAssetClass()
 	{
-		return GetStaticClass<Shader>();
+		return GetStaticClass<CE::Shader>();
 	}
 
 	SubClassType<Asset> ShaderAssetDefinition::GetAssetClass(const String& extension)
 	{
-		return GetStaticClass<Shader>();
+		return GetStaticClass<CE::Shader>();
 	}
 
 	SubClassType<AssetImporter> ShaderAssetDefinition::GetAssetImporterClass()

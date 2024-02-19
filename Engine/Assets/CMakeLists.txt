@@ -5,7 +5,10 @@ project(EngineAssets)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_assets(${PROJECT_NAME}
+    TYPE Engine
     ASSET_FILES
         "asset_files.cmake"
     OUTPUT_DIRECTORY "Engine/Assets"
+    INCLUDE_DIRECTORIES
+        "../Shaders"
 )

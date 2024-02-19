@@ -2,218 +2,262 @@
 
 #define LOG(x) std::cout << x << std::endl;
 
-AssetProcessor::AssetProcessor(int argc, char** argv)
+namespace CE
 {
-	options.add_options()
-		("h,help", "Print this help info.")
-		("p,pack", "Package the assets for final distribution build. (Not implemented yet)")
-		("I,include", "Include path directories for shaders, etc.", cxxopts::value<std::vector<std::string>>())
-		("M,mode", "Processing mode: either Engine or Game. If assets should be processed as engine or game assets", cxxopts::value<std::string>()->default_value("Game"))
-		("i,input", "Paths to the input assets that is to be processed.", cxxopts::value<std::vector<std::string>>())
-		("R,root", "Path to root of the assets directory.", cxxopts::value<std::string>())
-		("A,all", "Process all assets, including the one that are already processed.")
-		("N,new", "Only process assets that haven't been processed.")
-		;
-
-	try
+	AssetProcessor::AssetProcessor(int argc, char** argv)
 	{
-		parsedOptions = options.parse(argc, argv);
-		
-		if (parsedOptions["h"].as<bool>())
+		options.add_options()
+			("h,help", "Print this help info.")
+			("p,pack", "Package the assets for final distribution build. (Not implemented yet)")
+			("I,include", "Include path directories for shaders, etc.", cxxopts::value<std::vector<std::string>>())
+			("M,mode", "Processing mode: either Engine or Game. If assets should be processed as engine or game assets", cxxopts::value<std::string>()->default_value("Game"))
+			("i,input", "Paths to the input assets that is to be processed.", cxxopts::value<std::vector<std::string>>())
+			("R,output-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
+			("D,input-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
+			;
+
+		try
 		{
-			LOG(options.help());
-			exit(0);
-		}
-	}
-	catch (std::exception exc)
-	{
-		LOG("Failed to parse arguments: " << exc.what());
-		exit(-1);
-	}
-
-	String mode = parsedOptions["M"].as<std::string>();
-	if (mode == "Game")
-	{
-		this->mode = AssetMode::Game;
-	}
-	else if (mode == "Engine")
-	{
-		this->mode = AssetMode::Engine;
-	}
-	else
-	{
-		LOG("Invalid mode passed: " << mode);
-		exit(-2);
-	}
-
-	if (parsedOptions.count("I") > 0)
-	{
-		std::vector<std::string> includePaths = parsedOptions["I"].as<std::vector<std::string>>();
+			parsedOptions = options.parse(argc, argv);
 		
-		for (const auto& path : includePaths)
-		{
-			this->includePaths.Add(path);
-		}
-	}
-
-	if (parsedOptions["A"].as<bool>())
-	{
-		processMode = ProcessMode::All;
-	}
-	else if (parsedOptions["N"].as<bool>())
-	{
-		processMode = ProcessMode::New;
-	}
-	else if (parsedOptions.count("i") > 0)
-	{
-		processMode = ProcessMode::Individual;
-		
-		auto inputs = parsedOptions["i"].as<std::vector<std::string>>();
-		
-		for (const auto& input : inputs)
-		{
-			individualAssetPaths.Add(input);
-		}
-	}
-
-	assetsDir = parsedOptions["R"].as<std::string>();
-	assetsDir = assetsDir.GetString().Replace({ '\\' }, '/');
-
-	gProjectPath = assetsDir.GetParentPath().GetParentPath();
-	gProjectName = "AssetProcessor";
-
-	assetsDir.RecursivelyIterateChildren([&](const IO::Path& path)
-		{
-			auto extension = path.GetExtension();
-			if (!path.IsDirectory() && extension != ".casset")
+			if (parsedOptions["h"].as<bool>())
 			{
-				auto relative = IO::Path::GetRelative(path, assetsDir).GetString().Replace({ '\\' }, '/');
-				allSourceAssetPaths.Add(path);
+				LOG(options.help());
+				exit(0);
 			}
-		});
-	
-	allSourceAssetPaths.GetSize();
-}
-
-AssetProcessor::~AssetProcessor()
-{
-}
-
-int AssetProcessor::Run()
-{
-	Initialize();
-	PostInit();
-	
-	JobContext* jobContext = JobContext::GetGlobalContext();
-	JobManager* jobManager = jobContext->GetJobManager();
-
-	HashMap<AssetDefinition*, Array<IO::Path>> sourcePathsByAssetDef{};
-
-	for (const auto& sourcePath : allSourceAssetPaths)
-	{
-		if (!sourcePath.Exists())
-			continue;
-
-		String extension = sourcePath.GetExtension().GetString();
-
-		AssetDefinition* assetDef = assetDefRegistry->FindAssetDefinition(extension);
-
-		if (assetDef != nullptr)
+		}
+		catch (std::exception exc)
 		{
-			sourcePathsByAssetDef[assetDef].Add(sourcePath);
+			LOG("Failed to parse arguments: " << exc.what());
+			exit(-1);
+		}
+
+		inputRoot = parsedOptions["D"].as<std::string>();
+		outputRoot = parsedOptions["R"].as<std::string>();
+
+		String mode = parsedOptions["M"].as<std::string>();
+		if (mode == "Game")
+		{
+			this->mode = AssetMode::Game;
+		}
+		else if (mode == "Engine")
+		{
+			this->mode = AssetMode::Engine;
+		}
+		else if (mode == "Editor")
+		{
+			this->mode = AssetMode::Editor;
+		}
+		else
+		{
+			LOG("Invalid mode passed: " << mode);
+			exit(-2);
+		}
+
+		if (parsedOptions.count("I") > 0)
+		{
+			std::vector<std::string> includePaths = parsedOptions["I"].as<std::vector<std::string>>();
+		
+			for (const auto& path : includePaths)
+			{
+				this->includePaths.Add(path);
+			}
+		}
+
+		individualAssetPaths.Clear();
+
+		if (parsedOptions.count("i") > 0)
+		{
+			processMode = ProcessMode::Individual;
+		
+			auto inputs = parsedOptions["i"].as<std::vector<std::string>>();
+		
+			for (const auto& input : inputs)
+			{
+				individualAssetPaths.Add(input);
+			}
+		}
+	
+		gProjectPath = PlatformDirectories::GetLaunchDir();
+		gProjectName = "AssetProcessor";
+	
+		allSourceAssetPaths.Clear();
+		allProductAssetPaths.Clear();
+
+		if (individualAssetPaths.NonEmpty())
+		{
+			allSourceAssetPaths.AddRange(individualAssetPaths);
+			
+			for (const auto& sourcePath : allSourceAssetPaths)
+			{
+				if (inputRoot != outputRoot)
+				{
+					IO::Path relativeSourcePath = IO::Path::GetRelative(sourcePath, inputRoot);
+					IO::Path productPath = outputRoot / relativeSourcePath;
+					productPath = productPath.ReplaceExtension(".casset");
+					if (!productPath.GetParentPath().Exists())
+					{
+						IO::Path::CreateDirectories(productPath.GetParentPath());
+					}
+					allProductAssetPaths.Add(productPath);
+				}
+				else
+				{
+					IO::Path productPath = sourcePath.ReplaceExtension(".casset");
+					allProductAssetPaths.Add(productPath);
+				}
+			}
+		}
+		else // non-individual modes
+		{
+
 		}
 	}
 
-	Array<AssetImporter*> importers{};
-
-	for (const auto& [assetDef, sourcePaths] : sourcePathsByAssetDef)
+	AssetProcessor::~AssetProcessor()
 	{
-		if (assetDef == nullptr || sourcePaths.IsEmpty())
-			continue;
-
-		ClassType* assetImporterClass = assetDef->GetAssetImporterClass();
-		if (assetImporterClass == nullptr || !assetImporterClass->CanBeInstantiated())
-			continue;
-		auto assetImporter = CreateObject<AssetImporter>(nullptr, "AssetImporter", OF_Transient, assetImporterClass);
-		if (assetImporter == nullptr)
-			continue;
-
-		assetImporter->SetIncludePaths(includePaths);
-		assetImporter->SetLogging(true);
-
-		importers.Add(assetImporter);
-		assetImporter->ImportSourceAssetsAsync(sourcePaths);
 	}
 
-	// Wait for all jobs to complete
-	jobManager->Complete();
+	int AssetProcessor::Run()
+	{
+		Initialize();
+		PostInit();
 
-	PreShutdown();
-	Shutdown();
-
-	return 0;
-}
-
-void AssetProcessor::Initialize()
-{
-	ModuleManager::Get().LoadModule("Core");
-	ModuleManager::Get().LoadModule("CoreApplication");
-	ModuleManager::Get().LoadModule("CoreMedia");
-	ModuleManager::Get().LoadModule("CoreRHI");
-	ModuleManager::Get().LoadModule("VulkanRHI");
-	ModuleManager::Get().LoadModule("CoreRPI");
-	ModuleManager::Get().LoadModule("CoreShader");
-
+		Logger::Initialize();
 	
-}
+		JobContext* jobContext = JobContext::GetGlobalContext();
+		JobManager* jobManager = jobContext->GetJobManager();
 
-void AssetProcessor::PostInit()
-{
-	auto app = PlatformApplication::Get();
-	app->Initialize();
+		HashMap<AssetDefinition*, Array<IO::Path>> sourcePathsByAssetDef{};
+		HashMap<AssetDefinition*, Array<IO::Path>> productPathsByAssetDef{};
 
-	gDefaultWindowWidth = 1280;
-	gDefaultWindowHeight = 720;
+		for (int i = 0; i < allSourceAssetPaths.GetSize(); i++)
+		{
+			auto sourcePath = allSourceAssetPaths[i];
+			auto productPath = allProductAssetPaths[i];
+			if (!sourcePath.Exists())
+				continue;
 
-	PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+			String extension = sourcePath.GetExtension().GetString();
 
-	RHI::gDynamicRHI = new CE::Vulkan::VulkanRHI();
+			AssetDefinition* assetDef = assetDefRegistry->FindAssetDefinition(extension);
 
-	RHI::gDynamicRHI->Initialize();
-	RHI::gDynamicRHI->PostInitialize();
+			if (assetDef != nullptr)
+			{
+				sourcePathsByAssetDef[assetDef].Add(sourcePath);
+				productPathsByAssetDef[assetDef].Add(productPath);
+			}
+		}
 
-	assetDefRegistry = CreateObject<AssetDefinitionRegistry>(GetTransientPackage(), "AssetDefinitionRegistry");
+		Array<AssetImporter*> importers{};
 
-	Logger::Initialize();
-}
+		for (const auto& [assetDef, sourcePaths] : sourcePathsByAssetDef)
+		{
+			if (assetDef == nullptr || sourcePaths.IsEmpty())
+				continue;
+			if (!productPathsByAssetDef.KeyExists(assetDef) ||
+				productPathsByAssetDef[assetDef].GetSize() != sourcePaths.GetSize())
+				continue;
 
-void AssetProcessor::PreShutdown()
-{
-	auto app = PlatformApplication::Get();
+			ClassType* assetImporterClass = assetDef->GetAssetImporterClass();
+			if (assetImporterClass == nullptr || !assetImporterClass->CanBeInstantiated())
+				continue;
+			auto assetImporter = CreateObject<AssetImporter>(nullptr, "AssetImporter", OF_Transient, assetImporterClass);
+			if (assetImporter == nullptr)
+				continue;
 
-	RHI::gDynamicRHI->PreShutdown();
+			assetImporter->SetIncludePaths(includePaths);
+			assetImporter->SetLogging(true);
 
-	app->PreShutdown();
-}
+			importers.Add(assetImporter);
+			assetImporter->ImportSourceAssetsAsync(sourcePaths, productPathsByAssetDef[assetDef]);
+		}
 
-void AssetProcessor::Shutdown()
-{
-	auto app = PlatformApplication::Get();
+		// Wait for all jobs to complete
+		jobManager->Complete();
 
-	RHI::gDynamicRHI->Shutdown();
-	app->Shutdown();
+		for (auto importer : importers)
+		{
+			importer->Destroy();
+		}
+		importers.Clear();
 
-	delete RHI::gDynamicRHI;
-	RHI::gDynamicRHI = nullptr;
+		Logger::Shutdown();
 
-	delete app;
-	app = nullptr;
+		PreShutdown();
+		Shutdown();
 
-	ModuleManager::Get().UnloadModule("CoreShader");
-	ModuleManager::Get().UnloadModule("CoreRPI");
-	ModuleManager::Get().UnloadModule("VulkanRHI");
-	ModuleManager::Get().UnloadModule("CoreRHI");
-	ModuleManager::Get().UnloadModule("CoreMedia");
-	ModuleManager::Get().UnloadModule("CoreApplication");
-	ModuleManager::Get().UnloadModule("Core");
+		return 0;
+	}
+
+	void AssetProcessor::Initialize()
+	{
+		ModuleManager::Get().LoadModule("Core");
+		ModuleManager::Get().LoadModule("CoreSettings");
+		ModuleManager::Get().LoadModule("CoreApplication");
+		ModuleManager::Get().LoadModule("CoreMedia");
+		ModuleManager::Get().LoadModule("CoreRHI");
+#if PAL_TRAIT_VULKAN_SUPPORTED
+		ModuleManager::Get().LoadModule("VulkanRHI");
+#endif
+		ModuleManager::Get().LoadModule("CoreRPI");
+		ModuleManager::Get().LoadModule("CoreShader");
+
+		ModuleManager::Get().LoadModule("System");
+		ModuleManager::Get().LoadModule("EditorCore");
+	}
+
+	void AssetProcessor::PostInit()
+	{
+		auto app = PlatformApplication::Get();
+		app->Initialize();
+
+		gDefaultWindowWidth = 1280;
+		gDefaultWindowHeight = 720;
+
+		RHI::gDynamicRHI = new CE::Vulkan::VulkanRHI();
+
+		RHI::gDynamicRHI->Initialize();
+		RHI::gDynamicRHI->PostInitialize();
+
+		assetDefRegistry = CreateObject<AssetDefinitionRegistry>(GetTransientPackage(), "AssetDefinitionRegistry");
+	}
+
+	void AssetProcessor::PreShutdown()
+	{
+		auto app = PlatformApplication::Get();
+
+		RHI::gDynamicRHI->PreShutdown();
+
+		app->PreShutdown();
+	}
+
+	void AssetProcessor::Shutdown()
+	{
+		auto app = PlatformApplication::Get();
+
+		RHI::gDynamicRHI->Shutdown();
+		app->Shutdown();
+
+		delete RHI::gDynamicRHI;
+		RHI::gDynamicRHI = nullptr;
+
+		delete app;
+		app = nullptr;
+
+		ModuleManager::Get().UnloadModule("EditorCore");
+		ModuleManager::Get().UnloadModule("System");
+
+		ModuleManager::Get().UnloadModule("CoreShader");
+		ModuleManager::Get().UnloadModule("CoreRPI");
+#if PAL_TRAIT_VULKAN_SUPPORTED
+		ModuleManager::Get().UnloadModule("VulkanRHI");
+#endif
+		ModuleManager::Get().UnloadModule("CoreRHI");
+		ModuleManager::Get().UnloadModule("CoreMedia");
+		ModuleManager::Get().UnloadModule("CoreApplication");
+		ModuleManager::Get().UnloadModule("CoreSettings");
+		ModuleManager::Get().UnloadModule("Core");
+	}
+
 }

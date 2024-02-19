@@ -34,17 +34,12 @@
 #include "Engine/Texture2D.h"
 #include "Engine/Shader.h"
 #include "Engine/Scene.h"
-#include "Engine/StaticMesh.h"
-#include "Engine/MaterialInterface.h"
-#include "Engine/Material.h"
-#include "Engine/MaterialAsset.h"
 
 // Engine
 #include "Engine/Subsystem.h"
 #include "Engine/EngineSubsystem.h"
 #include "Engine/Subsystems/SceneSubsystem.h"
 #include "Engine/Subsystems/RendererSubsystem.h"
-#include "Engine/GameViewport.h"
 #include "Engine/GameInstanceSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Engine.h"

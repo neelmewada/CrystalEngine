@@ -18,7 +18,8 @@ namespace CE
 			ERR_FailedToLoadFile,
 			ERR_FailedToReflect,
 			ERR_InvalidArgs,
-			ERR_UnsupportedPlatform
+			ERR_UnsupportedPlatform,
+			ERR_InvalidVertexInputNames,
 		};
 
 		ErrorCode ReflectSpirv(const void* byteCode, u32 byteSize, RHI::ShaderStage curStage, ShaderReflection& outReflection);

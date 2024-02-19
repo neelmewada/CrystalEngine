@@ -36,12 +36,12 @@ namespace CE
 		return false;
 	}
 
-	Texture::Texture()
+	CE::Texture::Texture()
 	{
 		
 	}
 
-	Texture::~Texture()
+	CE::Texture::~Texture()
 	{
 
 	}

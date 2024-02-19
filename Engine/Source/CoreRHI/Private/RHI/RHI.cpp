@@ -57,7 +57,13 @@ namespace CE::RHI
 
 		for (int i = 0; i < enumType->GetConstantsCount(); i++)
 		{
-			if (enumType->GetConstant(i)->GetName().GetString().ToUpper() == nameUpper)
+			String enumName = enumType->GetConstant(i)->GetName().GetString().ToUpper();
+			String alternativeEnumName = "";
+			if (enumName == "UV")
+			{
+				alternativeEnumName = "TEXCOORD";
+			}
+			if (enumName == nameUpper || alternativeEnumName == nameUpper)
 			{
 				result.attribute = (VertexInputAttribute)enumType->GetConstant(i)->GetValue();
 				break;

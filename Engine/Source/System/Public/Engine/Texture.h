@@ -33,7 +33,7 @@ namespace CE
 			BinaryBlob rawData{};
 
 			FIELD()
-			TextureFormat sourcePixelFormat = TextureFormat::None;
+			CE::TextureFormat sourcePixelFormat = CE::TextureFormat::None;
 
 			FIELD()
 			TextureSourceCompressionFormat sourceCompression = TextureSourceCompressionFormat::PNG;
@@ -53,19 +53,22 @@ namespace CE
 	protected:
 
 		FIELD(ReadOnly, Hidden)
-		Private::TextureSource source{};
+		Private::TextureSource rawData{};
 
 		FIELD()
-		TextureFormat pixelFormat = TextureFormat::None;
+		CE::TextureFormat pixelFormat = CE::TextureFormat::None;
 
 		FIELD()
 		TextureCompressionSettings compression = TextureCompressionSettings::Default;
 
 		FIELD()
-		TextureFilter filter = TextureFilter::Linear;
+		RHI::FilterMode filter = RHI::FilterMode::Linear;
 
 		FIELD()
 		TextureAddressMode addressMode = TextureAddressMode::Wrap;
+
+		FIELD()
+		u8 anisotropy = 0;
 
 		FIELD()
 		u32 width = 0;

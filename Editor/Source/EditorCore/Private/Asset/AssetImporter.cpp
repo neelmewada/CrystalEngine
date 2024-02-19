@@ -63,7 +63,7 @@ namespace CE::Editor
 
 		if (job->success && enableLogging)
 		{
-			CE_LOG(Info, All, "Source Asset Processed: {}", job->sourcePath);
+			CE_LOG(Info, All, "Source Asset Processed: {}\nGenerated Asset: {}", job->sourcePath, job->productPath);
 		}
 
 		importResults.Add(importResult);
@@ -149,20 +149,10 @@ namespace CE::Editor
 		
 		Package* package = nullptr;
 
-		if (IsGeneratingDistributionAsset())
-		{
-			if (editorProductPath.Exists())
-				package = Package::LoadPackage(nullptr, editorProductPath, LOAD_Full);
-			else
-				package = CreateObject<Package>(nullptr, packageName);
-		}
+		if (productPath.Exists())
+			package = Package::LoadPackage(nullptr, productPath, LOAD_Full);
 		else
-		{
-			if (productPath.Exists())
-				package = Package::LoadPackage(nullptr, productPath, LOAD_Full);
-			else
-				package = CreateObject<Package>(nullptr, packageName);
-		}
+			package = CreateObject<Package>(nullptr, packageName);
 
 		success = ProcessAsset(package);
 

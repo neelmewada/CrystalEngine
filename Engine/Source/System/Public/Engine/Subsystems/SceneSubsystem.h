@@ -12,7 +12,7 @@ namespace CE
 		SceneSubsystem();
 		
 
-		inline Scene* GetActiveScene() { return scene; }
+		inline CE::Scene* GetActiveScene() { return scene; }
 
 		void OnBeginPlay();
 
@@ -24,7 +24,7 @@ namespace CE
 		void Tick(f32 deltaTime) override;
 
 		FIELD()
-		Scene* scene = nullptr;
+		CE::Scene* scene = nullptr;
 	};
 
 } // namespace CE

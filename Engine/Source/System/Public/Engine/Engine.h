@@ -69,7 +69,7 @@ namespace CE
 		FIELD()
 		Array<EngineSubsystem*> engineSubsystems{};
 
-		CommandQueue<Delegate<void()>> mainThreadQueue{};
+		CE::Queue<Delegate<void()>> mainThreadQueue{};
 		SharedMutex mainThreadQueueMutex{};
 
 		b8 isInitialized = false;

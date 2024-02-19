@@ -21,8 +21,6 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
         PRIVATE
             ThirdParty::cxxopts
             CE::Core
-            CE::CoreGUI
-            CE::CoreWidgets
             CE::EditorCore
             CE::EditorWidgets
     RUNTIME_DEPENDENCIES

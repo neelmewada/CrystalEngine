@@ -35,7 +35,7 @@ ce_add_target(System SHARED
             CE::CoreRHI
             CE::CoreRPI
         TARGETS 
-            Config EngineAssets
+            Config
     RUNTIME_DEPENDENCIES
         
 )

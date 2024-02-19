@@ -29,7 +29,7 @@ namespace CE
 
 		if (GetScene() != nullptr)
 		{
-			Scene* scene = GetScene();
+			CE::Scene* scene = GetScene();
 			scene->componentsByType[component->GetTypeId()][component->GetUuid()] = component;
 		}
 	}

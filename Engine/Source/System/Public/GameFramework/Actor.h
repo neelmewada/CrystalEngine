@@ -31,7 +31,7 @@ namespace CE
 
 		inline Actor* GetParentActor() const { return parent; }
 
-		inline Scene* GetScene() const { return scene; }
+		inline CE::Scene* GetScene() const { return scene; }
 
 		virtual void OnBeginPlay();
 
@@ -64,11 +64,11 @@ namespace CE
 		Actor* parent = nullptr;
 
 		FIELD()
-		Scene* scene = nullptr;
+		CE::Scene* scene = nullptr;
 
 		b8 hasBegunPlaying = false;
 
-		friend class Scene;
+		friend class CE::Scene;
 		friend class SceneComponent;
 	};
 

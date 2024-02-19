@@ -3,18 +3,18 @@
 namespace CE
 {
 
-	Scene::Scene()
+	CE::Scene::Scene()
 	{
 		root = CreateDefaultSubobject<Actor>("SceneRoot");
 		root->scene = this;
 	}
 
-	Scene::~Scene()
+	CE::Scene::~Scene()
 	{
         
 	}
 
-	void Scene::OnBeginPlay()
+	void CE::Scene::OnBeginPlay()
 	{
 		isPlaying = true;
 
@@ -24,7 +24,7 @@ namespace CE
 		}
 	}
 
-	void Scene::Tick(f32 delta)
+	void CE::Scene::Tick(f32 delta)
 	{
 		if (root != nullptr)
 		{
@@ -32,7 +32,7 @@ namespace CE
 		}
 	}
 
-	void Scene::OnActorChainAttached(Actor* actor)
+	void CE::Scene::OnActorChainAttached(Actor* actor)
 	{
 		if (!actor)
 			return;
@@ -106,7 +106,7 @@ namespace CE
 		}
 	}
 
-	void Scene::OnActorChainDetached(Actor* actor)
+	void CE::Scene::OnActorChainDetached(Actor* actor)
 	{
 		if (!actor)
 			return;

@@ -17,8 +17,8 @@ add_subdirectory(Source/CoreApplication)
 add_subdirectory(Source/CoreMedia)
 add_subdirectory(Source/CoreRHI)
 add_subdirectory(Source/CoreRPI)
-add_subdirectory(Source/CoreGUI)
-add_subdirectory(Source/CoreWidgets)
+#add_subdirectory(Source/CoreGUI)
+#add_subdirectory(Source/CoreWidgets)
 add_subdirectory(Source/CoreSettings)
 
 # Core Dependencies

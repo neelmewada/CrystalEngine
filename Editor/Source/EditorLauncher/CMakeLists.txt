@@ -23,8 +23,6 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             ThirdParty::cxxopts
             CE::Core
             CE::CoreApplication
-            CE::CoreGUI
-            CE::CoreWidgets
             CE::EditorCore
             CE::EditorWidgets
             CE::CrystalEditor
