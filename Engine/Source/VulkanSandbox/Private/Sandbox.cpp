@@ -667,7 +667,9 @@ namespace CE::Sandbox
 			auto opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
 			auto opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
             
-            opaqueShader = new RPI::Shader();
+            //opaqueShader = new RPI::Shader();
+			AssetManager* assetManager = gEngine->GetAssetManager();
+			
 
 			RHI::GraphicsPipelineDescriptor opaquePipelineDesc{};
 			
@@ -1311,7 +1313,8 @@ namespace CE::Sandbox
 		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
 		delete perSceneSrg; perSceneSrg = nullptr;
 
-        delete opaqueShader; opaqueShader = nullptr;
+        //delete opaqueShader; opaqueShader = nullptr;
+		opaqueShader->Destroy(); opaqueShader = nullptr;
 		delete sphereMaterial; sphereMaterial = nullptr;
 		delete cubeMaterial; cubeMaterial = nullptr;
 

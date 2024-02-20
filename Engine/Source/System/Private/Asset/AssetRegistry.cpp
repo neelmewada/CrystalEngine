@@ -145,7 +145,6 @@ namespace CE
 		sourceAssetRelativePath = load->GetPrimarySourceAssetRelativePath();
 		assetData->sourceAssetPath = sourceAssetRelativePath;
 #endif
-
 		
 		if (newEntry && relativePathStr.NonEmpty())
 		{
@@ -213,6 +212,7 @@ namespace CE
 		//pathTree.AddPath("/Editor"); directoryTree.AddPath("/Editor");
 #endif
 		
+		// Game assets
 		if (gProjectPath.Exists() && (gProjectPath / "Game/Assets").Exists())
 		{
 			auto projectAssetsPath = gProjectPath / "Game/Assets";
@@ -273,6 +273,7 @@ namespace CE
 #endif
 		}
 
+		// Engine assets
 		if (gProjectPath.Exists() && (gProjectPath / "Engine/Assets").Exists())
 		{
 			auto projectAssetsPath = gProjectPath / "Engine/Assets";

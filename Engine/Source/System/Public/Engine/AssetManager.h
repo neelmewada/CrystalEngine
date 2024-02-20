@@ -21,7 +21,22 @@ namespace CE
 
 		virtual void Tick(f32 deltaTime);
 
+		AssetData* GetPrimaryAssetDataAtPath(const Name& path);
+
+		Asset* LoadAssetAtPath(const Name& path);
+
+		template<typename TAsset> requires TIsBaseClassOf<Asset, TAsset>::Value
+		inline TAsset* LoadAssetAtPath(const Name& path)
+		{
+			Asset* asset = LoadAssetAtPath(path);
+			if (!asset)
+				return nullptr;
+			return Object::CastTo<TAsset>(asset);
+		}
+
 	protected:
+
+		HashMap<Uuid, Package*> loadedAssets{};
 
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;

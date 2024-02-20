@@ -150,7 +150,8 @@ namespace CE::Sandbox
 		RHI::PipelineState* depthPipeline = nullptr;
 		RHI::ShaderModule* depthShaderVert = nullptr;
 		
-		RPI::Shader* opaqueShader = nullptr;
+		CE::Shader* opaqueShader = nullptr;
+		//RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* sphereMaterial = nullptr;
 		RPI::Material* cubeMaterial = nullptr;
         RHI::Sampler* defaultSampler = nullptr;

@@ -982,7 +982,7 @@ namespace CE
 		else if (isObjectRef)
 		{
 			u64 objectUuid = 0;
-			u64 packageUuid = 0;
+			Uuid packageUuid = 0;
 			*stream >> objectUuid;
 			*stream >> packageUuid;
 			
