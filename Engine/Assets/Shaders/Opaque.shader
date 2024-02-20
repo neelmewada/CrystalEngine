@@ -23,7 +23,10 @@ Shader "Test Shader"
         Pass
         {
             Name "Opaque"
-            Tags { "Vertex"="VertMain", "Fragment"="FragMain" }
+            Tags { "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque" }
+            ZWrite Off
+            ZTest LEqual
+            Cull Back
 
             HLSLPROGRAM
             

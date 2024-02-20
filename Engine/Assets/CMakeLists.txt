@@ -10,5 +10,5 @@ ce_add_assets(${PROJECT_NAME}
         "asset_files.cmake"
     OUTPUT_DIRECTORY "Engine/Assets"
     INCLUDE_DIRECTORIES
-        "../Shaders"
+        "${CMAKE_SOURCE_DIR}/Engine/Shaders"
 )

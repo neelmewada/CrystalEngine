@@ -89,6 +89,23 @@ namespace CE
 		FIELD()
 		BinaryBlob source{};
 
+		FIELD()
+		Array<String> features{};
+
+		inline bool TagExists(const Name& key) const
+		{
+			return passTags.Exists([&](const ShaderTagEntry& entry) { return entry.key == key; });
+		}
+
+		inline String GetTagValue(const Name& key) const
+		{
+			int index = passTags.IndexOf([&](const ShaderTagEntry& entry) { return entry.key == key; });
+			if (index >= 0 && index < passTags.GetSize())
+			{
+				return passTags[index].value;
+			}
+			return "";
+		}
 	};
 
 	STRUCT()
@@ -105,6 +122,21 @@ namespace CE
 
 		FIELD()
 		Array<SubShaderPassEntry> passes{};
+
+		inline bool TagExists(const Name& key) const
+		{
+			return subShaderTags.Exists([&](const ShaderTagEntry& entry) { return entry.key == key; });
+		}
+
+		inline String GetTagValue(const Name& key) const
+		{
+			int index = subShaderTags.IndexOf([&](const ShaderTagEntry& entry) { return entry.key == key; });
+			if (index >= 0 && index < subShaderTags.GetSize())
+			{
+				return subShaderTags[index].value;
+			}
+			return "";
+		}
 	};
 
 	CLASS()
@@ -137,6 +169,11 @@ namespace CE
 
 	private:
 
+		struct HlslPreprocessData
+		{
+			Array<String> features{};
+		};
+
 		enum TokenType
 		{
 			TK_WHITESPACE = 0,
@@ -148,6 +185,8 @@ namespace CE
 			TK_KW_SUBSHADER,
 			TK_KW_TAGS,
 			TK_KW_PASS,
+			TK_KW_ZTEST,
+			TK_KW_ZWRITE,
 			TK_KW_PROPERTIES,
 			TK_KW_INCLUDE,
 			TK_LITERAL_STRING,
@@ -161,7 +200,8 @@ namespace CE
 			TK_COLON,
 			TK_SEMICOLON,
 			TK_NEWLINE,
-			TK_KW_PRAGMA
+			TK_KW_PRAGMA,
+			TK_KW_CULL
 		};
 
 		enum ScopeType
@@ -203,8 +243,11 @@ namespace CE
 		Token prevToken{};
 
 		Array<BinaryBlob> passSources{};
+		Array<HlslPreprocessData> passPreprocessData{};
 
+		// Per HLSL program
 		MemoryStream* curPassSource = nullptr;
+		HlslPreprocessData curPassPreprocess{};
     };
 
 } // namespace CE

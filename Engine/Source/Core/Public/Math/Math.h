@@ -18,6 +18,21 @@ namespace CE
 
         static constexpr f32 PI = M_PI;
 
+        static u16 ToFloat16(f32 floatValue)
+        {
+            f32* ptr = &floatValue;
+            unsigned int fltInt32 = *((u32*)ptr);
+            u16 fltInt16;
+
+            fltInt16 = (fltInt32 >> 31) << 5;
+            u16 tmp = (fltInt32 >> 23) & 0xff;
+            tmp = (tmp - 0x70) & ((unsigned int)((int)(0x70 - tmp) >> 4) >> 27);
+            fltInt16 = (fltInt16 | tmp) << 10;
+            fltInt16 |= (fltInt32 >> 13) & 0x3ff;
+
+            return fltInt16;
+        }
+
         CE_INLINE static f32 ToDegrees(f32 radians) { return TO_DEGREES(radians); }
         CE_INLINE static f32 ToRadians(f32 degrees) { return TO_RADIANS(degrees); }
 

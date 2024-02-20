@@ -194,7 +194,7 @@ namespace CE
 						}
 						else if (defaultValueIdx == 3)
 						{
-							currentProperty.defaultVectorValue.z = intValue;
+							currentProperty.defaultVectorValue.w = intValue;
 							defaultValueIdx++;
 						}
 					}
@@ -222,7 +222,7 @@ namespace CE
 						}
 						else if (defaultValueIdx == 3)
 						{
-							currentProperty.defaultVectorValue.z = floatValue;
+							currentProperty.defaultVectorValue.w = floatValue;
 							defaultValueIdx++;
 						}
 					}
@@ -264,6 +264,39 @@ namespace CE
 				{
 					preprocessData->subShaders.Top().passes.Add({});
 					curScope = SCOPE_PASS;
+				}
+				else if (curToken.token == TK_KW_ZTEST && i < tokens.GetSize() - 1)
+				{
+					Token next = tokens[i + 1];
+					if (next.token == TK_IDENTIFIER)
+					{
+						ShaderTagEntry tagEntry{};
+						tagEntry.key = "ZTest";
+						tagEntry.value = next.lexeme;
+						preprocessData->subShaders.Top().subShaderTags.Add(tagEntry);
+					}
+				}
+				else if (curToken.token == TK_KW_ZWRITE && i < tokens.GetSize() - 1)
+				{
+					Token next = tokens[i + 1];
+					if (next.token == TK_IDENTIFIER)
+					{
+						ShaderTagEntry tagEntry{};
+						tagEntry.key = "ZWrite";
+						tagEntry.value = next.lexeme;
+						preprocessData->subShaders.Top().subShaderTags.Add(tagEntry);
+					}
+				}
+				else if (curToken.token == TK_KW_CULL && i < tokens.GetSize() - 1)
+				{
+					Token next = tokens[i + 1];
+					if (next.token == TK_IDENTIFIER)
+					{
+						ShaderTagEntry tagEntry{};
+						tagEntry.key = "Cull";
+						tagEntry.value = next.lexeme;
+						preprocessData->subShaders.Top().subShaderTags.Add(tagEntry);
+					}
 				}
 			}
 			else if (lastScope == SCOPE_TAGS)
@@ -333,10 +366,44 @@ namespace CE
 						preprocessData->subShaders.Top().passes.Top().passName = next.lexeme;
 					}
 				}
+				else if (curToken.token == TK_KW_ZTEST && i < tokens.GetSize() - 1)
+				{
+					Token next = tokens[i + 1];
+					if (next.token == TK_IDENTIFIER)
+					{
+						ShaderTagEntry tagEntry{};
+						tagEntry.key = "ZTest";
+						tagEntry.value = next.lexeme;
+						preprocessData->subShaders.Top().passes.Top().passTags.Add(tagEntry);
+					}
+				}
+				else if (curToken.token == TK_KW_ZWRITE && i < tokens.GetSize() - 1)
+				{
+					Token next = tokens[i + 1];
+					if (next.token == TK_IDENTIFIER)
+					{
+						ShaderTagEntry tagEntry{};
+						tagEntry.key = "ZWrite";
+						tagEntry.value = next.lexeme;
+						preprocessData->subShaders.Top().passes.Top().passTags.Add(tagEntry);
+					}
+				}
+				else if (curToken.token == TK_KW_CULL && i < tokens.GetSize() - 1)
+				{
+					Token next = tokens[i + 1];
+					if (next.token == TK_IDENTIFIER)
+					{
+						ShaderTagEntry tagEntry{};
+						tagEntry.key = "Cull";
+						tagEntry.value = next.lexeme;
+						preprocessData->subShaders.Top().passes.Top().passTags.Add(tagEntry);
+					}
+				}
 				else if (curToken.token == TK_HLSLPROGRAM)
 				{
 					BinaryBlob& passSource = passSources[passIndex];
 					preprocessData->subShaders.Top().passes.Top().source = passSource;
+					preprocessData->subShaders.Top().passes.Top().features.AddRange(passPreprocessData[passIndex].features);
 					passIndex++;
 				}
 			}
@@ -361,6 +428,7 @@ namespace CE
 				passSources.Push({});
 				BinaryBlob& blob = passSources.Top();
 				blob.LoadData(data, dataSize);
+
 				delete curPassSource;
 				curPassSource = nullptr;
 			}
@@ -511,6 +579,21 @@ namespace CE
 					outToken = Token{ TK_KW_PASS, identifier };
 					return true;
 				}
+				else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && identifier == "ZTest")
+				{
+					outToken = Token{ TK_KW_ZTEST, identifier };
+					return true;
+				}
+				else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && identifier == "ZWrite")
+				{
+					outToken = Token{ TK_KW_ZWRITE, identifier };
+					return true;
+				}
+				else if ((lastScope == SCOPE_SUBSHADER || lastScope == SCOPE_PASS) && identifier == "Cull")
+				{
+					outToken = Token{ TK_KW_CULL, identifier };
+					return true;
+				}
 				else if (lastScope == SCOPE_PASS && identifier == "HLSLPROGRAM")
 				{
 					curScope = SCOPE_HLSLPROGRAM;
@@ -519,6 +602,7 @@ namespace CE
 					{
 						delete curPassSource;
 					}
+					curPassPreprocess = {};
 					curPassSource = new MemoryStream(1024);
 					curPassSource->SetAutoResizeIncrement(1024);
 					curPassSource->SetAsciiMode(true);
@@ -614,6 +698,8 @@ namespace CE
 				
 				if (string == "ENDHLSL")
 				{
+					passPreprocessData.Add(curPassPreprocess);
+					curPassPreprocess = {};
 					break;
 				}
 
@@ -716,11 +802,22 @@ namespace CE
 						}
 						else if (keyword == "pragma")
 						{
+							String value = "";
+
 							while (!stream->IsOutOfBounds())
 							{
 								next2 = stream->Read();
 								if (next2 == '\n')
 									break;
+								if (next2 != '\r')
+									value.Append(next2);
+							}
+
+							Array<String> splits = value.Split(' ');
+
+							if (splits.GetSize() >= 2 && splits[0] == "shader_feature")
+							{
+								curPassPreprocess.features.Add(splits[1]);
 							}
 
 							shouldContinue = true;

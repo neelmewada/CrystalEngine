@@ -23,4 +23,10 @@ namespace CE::RPI
         return variants.Top();
 	}
 
+	RPI::ShaderVariant* Shader::AddVariant(const ShaderVariantDescriptor2& variantDesc)
+	{
+		variants.Add(new ShaderVariant(variantDesc));
+		return variants.Top();
+	}
+
 } // namespace CE::RPI

@@ -6,9 +6,7 @@ namespace CE
 
 	void Engine::PreInit()
 	{
-		// Init asset manager & asset registry
-		if (assetManager)
-			assetManager->Initialize();
+		
 	}
 
 	void Engine::Initialize()
@@ -40,6 +38,9 @@ namespace CE
 	{
 		if (assetManager)
 			assetManager->Shutdown();
+		
+		for (auto subsystem : engineSubsystems) // PreShutdown
+			subsystem->PreShutdown();
 	}
 
 	void Engine::Shutdown()
@@ -47,8 +48,6 @@ namespace CE
 		isInitialized = false;
 
 		// Shutdown Engine Subsystems
-		for (auto subsystem : engineSubsystems) // Shutdown
-			subsystem->PreShutdown();
 		for (auto subsystem : engineSubsystems) // Shutdown
 			subsystem->Shutdown();
 		for (auto subsystem : engineSubsystems) // Destroy

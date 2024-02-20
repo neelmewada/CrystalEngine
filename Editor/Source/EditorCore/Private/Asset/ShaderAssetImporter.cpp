@@ -81,7 +81,6 @@ namespace CE::Editor
 			vertBlob->shaderStage = RHI::ShaderStage::Vertex;
 
 			Array<std::wstring> vertexExtraArgs{};
-			// -D COMPILE=1 -D VERTEX=1 -fspv-preserve-bindings
 			vertexExtraArgs.AddRange({
 				L"-D", L"COMPILE=1",
 				L"-D", L"VERTEX=1",

@@ -133,6 +133,8 @@ namespace CE::RHI
         R8_UNORM,
         R8_SNORM,
         R8_SRGB,
+        R8G8_UNORM,
+        R8G8_SRGB,
         R8G8B8A8_SRGB,
         R8G8B8A8_UNORM,
         R8G8B8A8_SNORM,
@@ -145,6 +147,8 @@ namespace CE::RHI
         B8G8R8_UNORM,
         B8G8R8_SNORM,
         B8G8R8_SRGB,
+        R5G6B5_UNORM,
+        B5G6R5_UNORM,
         R16_UNORM,
         R16_SNORM,
         R16_SFLOAT,
@@ -160,11 +164,19 @@ namespace CE::RHI
 		R32G32_UINT,
 		R32G32_SINT,
 		R32G32_SFLOAT,
+        R32G32B32A32_SFLOAT,
 		D16_UNORM_S8_UINT,
 		D24_UNORM_S8_UINT,
         D32_SFLOAT_S8_UINT,
 		D32_SFLOAT,
+        A4R4G4B4_UNORM,
 		// Compressed formats
+        BC1_RGB_UNORM,
+        BC1_RGB_SRGB,
+        BC1_RGBA_UNORM,
+        BC1_RGBA_SRGB,
+        BC3_UNORM,
+        BC3_SRGB,
         BC7_UNORM,
         BC7_SRGB,
 		BC4_UNORM,
@@ -172,8 +184,6 @@ namespace CE::RHI
         BC6H_SFLOAT,
     };
 	ENUM_CLASS(Format);
-
-    typedef Format TextureFormat;
 
 	ENUM(Flags)
     enum class TextureBindFlags
@@ -223,6 +233,7 @@ namespace CE::RHI
         FloatOpaqueWhite = 4,
         IntOpaqueWhite = 5,
     };
+    ENUM_CLASS(SamplerBorderColor);
 
     struct SamplerDescriptor
     {
@@ -232,7 +243,7 @@ namespace CE::RHI
 		FilterMode samplerFilterMode{};
         SamplerBorderColor borderColor{};
         b8 enableAnisotropy = false;
-        int maxAnisotropy = 16;
+        u8 maxAnisotropy = 16;
     };
 
     /*

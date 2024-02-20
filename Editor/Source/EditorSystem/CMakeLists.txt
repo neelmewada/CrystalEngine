@@ -34,7 +34,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::System
             CE::EditorCore
     RUNTIME_DEPENDENCIES
-
+        
 )
 
 

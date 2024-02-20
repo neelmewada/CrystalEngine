@@ -30,7 +30,7 @@ namespace CE::Vulkan
 
         virtual bool IsGraphicsPipeline() const override final { return true; }
 
-        VkPipeline FindOrCompile(RenderPass* renderPass, u32 subpass);
+        VkPipeline FindOrCompile(RenderPass* renderPass, u32 subpass, u32 numViewports = 1, u32 numScissors = 1);
 
         inline void Compile(const Array<PipelineRenderPass>& passes)
         {
@@ -49,7 +49,7 @@ namespace CE::Vulkan
 
     private:
 
-        VkPipeline CompileInternal(RenderPass* renderPass, u32 subpass);
+        VkPipeline CompileInternal(RenderPass* renderPass, u32 subpass, u32 numViewports = 1, u32 numScissors = 1);
 
         void SetupColorBlendState();
         void SetupDepthStencilState();

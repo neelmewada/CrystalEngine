@@ -3,7 +3,7 @@
 namespace CE
 {
 
-	void ShaderBlob::Release()
+	ShaderBlob::~ShaderBlob()
 	{
 		byteCode.Free();
 	}
@@ -31,7 +31,11 @@ namespace CE
 
 	CE::Shader::~Shader()
 	{
-		
+		for (auto rpiShader : rpiShaderPerPass)
+		{
+			delete rpiShader;
+		}
+		rpiShaderPerPass.Clear();
 	}
 
 	CE::Shader* CE::Shader::GetErrorShader()
@@ -76,6 +80,43 @@ namespace CE
 		fragSpv->Destroy();
 
 		return shader;
+	}
+
+	RPI::Shader* CE::Shader::GetOrCreateRPIShader(int passIndex)
+	{
+		if (rpiShaderPerPass.GetSize() == 0)
+		{
+			for (int i = 0; i < passes.GetSize(); i++)
+			{
+				RPI::Shader* rpiShader = new RPI::Shader();
+
+				for (int j = 0; j < passes[i].variants.GetSize(); j++)
+				{
+					const CE::ShaderVariant& variant = passes[i].variants[j];
+					
+					RPI::ShaderVariantDescriptor2 variantDesc{};
+					variantDesc.preprocessData = preprocessData;
+					variantDesc.reflectionInfo = variant.reflectionInfo;
+					variantDesc.passIndex = i;
+					variantDesc.subShaderIndex = 0;
+
+					for (ShaderBlob* curShaderBlob : variant.shaderStageBlobs)
+					{
+						variantDesc.moduleDesc.Add({});
+						variantDesc.moduleDesc.Top().byteCode = curShaderBlob->byteCode.GetDataPtr();
+						variantDesc.moduleDesc.Top().byteSize = curShaderBlob->byteCode.GetDataSize();
+						variantDesc.moduleDesc.Top().name = curShaderBlob->GetName().GetString();
+						variantDesc.moduleDesc.Top().stage = curShaderBlob->shaderStage;
+					}
+					
+					rpiShader->AddVariant(variantDesc);
+				}
+
+				rpiShaderPerPass.Add(rpiShader);
+			}
+		}
+
+		return rpiShaderPerPass[passIndex];
 	}
 
 } // namespace CE

@@ -52,7 +52,7 @@ namespace CE
 
 	protected:
 
-		FIELD(ReadOnly, Hidden)
+		FIELD(Hidden)
 		Private::TextureSource rawData{};
 
 		FIELD()

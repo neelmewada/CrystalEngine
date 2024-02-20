@@ -8,6 +8,15 @@ namespace CE::RPI
 		Array<Name> defineFlags{};
 	};
 
+	struct ShaderVariantDescriptor2
+	{
+		ShaderPreprocessData* preprocessData; 
+		int subShaderIndex;
+		int passIndex;
+		ShaderReflection reflectionInfo;
+		Array<RHI::ShaderModuleDescriptor> moduleDesc{};
+	};
+
 	enum class ShaderVariantFlag
 	{
 		None = 0,
@@ -22,6 +31,8 @@ namespace CE::RPI
 		static constexpr char InstancingFlag[] = "USE_INSTANCING";
 
 		ShaderVariant(const ShaderVariantDescriptor& desc);
+		ShaderVariant(const ShaderVariantDescriptor2& desc);
+
 		~ShaderVariant();
 
 		inline SIZE_T GetVariantId() const { return variantId; }

@@ -73,14 +73,12 @@ namespace CE::Sandbox
 		pipelineDesc.multisampleState.sampleCount = 1;
 		pipelineDesc.depthStencilState.stencilState.enable = false;
 		pipelineDesc.depthStencilState.depthState.enable = false;
-		pipelineDesc.numScissors = 1;
-		pipelineDesc.numViewports = 1;
 
 		pipelineDesc.vertexInputSlots.Add({});
 		pipelineDesc.vertexInputSlots.Top().inputRate = VertexInputRate::PerVertex;
 		pipelineDesc.vertexInputSlots.Top().inputSlot = 0;
 		pipelineDesc.vertexInputSlots.Top().stride = sizeof(QuadVertex);
-
+		
 		pipelineDesc.vertexAttributes.Add({});
 		pipelineDesc.vertexAttributes.Top().dataType = VertexAttributeDataType::Float3;
 		pipelineDesc.vertexAttributes.Top().inputSlot = 0;
@@ -837,9 +835,6 @@ namespace CE::Sandbox
 			pipelineDesc.depthStencilState.depthState.enable = false;
 			pipelineDesc.depthStencilState.stencilState.enable = false;
 
-			pipelineDesc.numViewports = 1;
-			pipelineDesc.numScissors = 1;
-
 			pipelineDesc.multisampleState.sampleCount = 1;
 
 			pipelineDesc.vertexInputSlots.Add({});
@@ -1524,9 +1519,6 @@ namespace CE::Sandbox
 
             pipelineDesc.depthStencilState.depthState.enable = false;
             pipelineDesc.depthStencilState.stencilState.enable = false;
-
-            pipelineDesc.numViewports = 1;
-            pipelineDesc.numScissors = 1;
 
             pipelineDesc.multisampleState.sampleCount = 1;
 

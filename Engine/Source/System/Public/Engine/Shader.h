@@ -13,7 +13,7 @@ namespace CE
 		CE_CLASS(ShaderBlob, Object)
 	public:
 
-		void Release();
+		virtual ~ShaderBlob();
 
 		inline bool IsValid() const
 		{
@@ -91,7 +91,23 @@ namespace CE
 			return GetName();
 		}
 
+		inline u32 GetShaderPassCount() const { return passes.GetSize(); }
+
+		inline const ShaderPass* GetShaderPass(int index) const
+		{
+			return &passes[index];
+		}
+
+		inline Name GetPassName(int index) const
+		{
+			return passes[index].passName;
+		}
+
+		RPI::Shader* GetOrCreateRPIShader(int passIndex);
+
 	protected:
+
+		Array<RPI::Shader*> rpiShaderPerPass{};
 
 		FIELD()
 		ShaderPreprocessData* preprocessData = nullptr;

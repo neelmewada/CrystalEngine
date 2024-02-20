@@ -20,12 +20,7 @@ namespace CE::Editor
 
 		void Tick(f32 deltaTime) override;
 
-		void ImportSourceAssets();
-
 	protected:
-
-		FUNCTION()
-		void OnAssetImportResult(bool success, IO::Path sourcePath, Name packageName);
 
 		Array<IO::Path> sourceAssetsToImport{};
 		Array<Name> recentlyProcessedPackageNames{};
@@ -35,9 +30,6 @@ namespace CE::Editor
 		f32 waitToImportSourceAssets = 0;
 
 		int numAssetsBeingImported = 0;
-
-		Package* cachePackage = nullptr;
-		AssetCache* cache = nullptr;
 
 		PlatformWindow* mainWindow = nullptr;
 

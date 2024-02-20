@@ -34,8 +34,6 @@ function(ce_add_assets NAME)
         list(APPEND INCLUDE_DIRECTORIES_COMMAND "-I ${include_dir}")
     endforeach()
 
-    message("Input: ${INCLUDE_DIRECTORIES_COMMAND}")
-
     # OUTPUT_DIRECTORY
     set(OUTPUT_DIRECTORY "${CE_OUTPUT_DIR}/${ce_add_assets_OUTPUT_DIRECTORY}")
 
@@ -75,7 +73,7 @@ function(ce_add_assets NAME)
 
         if(${is_file_supported})
             add_custom_command(OUTPUT ${dest_asset_file}
-                COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" -i "${asset_file}"
+                COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" -i "${asset_file}"
                 DEPENDS ${asset_file}
                 VERBATIM
             )

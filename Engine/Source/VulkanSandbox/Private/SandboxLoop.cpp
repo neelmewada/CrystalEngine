@@ -57,8 +57,6 @@ namespace CE::Sandbox
 				exit(0);
 				return;
 			}
-
-
 		}
 		catch (std::exception exc)
 		{
@@ -76,6 +74,8 @@ namespace CE::Sandbox
 		ModuleManager::Get().LoadModule("VulkanRHI");
 		ModuleManager::Get().LoadModule("CoreRPI");
 		ModuleManager::Get().LoadModule("CoreShader");
+		ModuleManager::Get().LoadModule("System");
+		ModuleManager::Get().LoadModule("GameSystem");
 
 	}
 
@@ -83,6 +83,8 @@ namespace CE::Sandbox
 	{
 		auto app = PlatformApplication::Get();
 		app->Initialize();
+
+		gEngine->PreInit();
 
 		gDefaultWindowWidth = 1280;
 		gDefaultWindowHeight = 720;
@@ -94,9 +96,13 @@ namespace CE::Sandbox
 		RHI::gDynamicRHI->Initialize();
 		RHI::gDynamicRHI->PostInitialize();
 
+		gEngine->Initialize();
+
 		main = new VulkanSandbox();
 
 		main->Init(mainWindow);
+
+		gEngine->PostInitialize();
 	}
 
 	void SandboxLoop::RunLoop()
@@ -120,6 +126,8 @@ namespace CE::Sandbox
 	{
 		main->Shutdown();
 
+		gEngine->PreShutdown();
+
 		auto app = PlatformApplication::Get();
 
 		RHI::gDynamicRHI->PreShutdown();
@@ -131,6 +139,8 @@ namespace CE::Sandbox
 	{
 		auto app = PlatformApplication::Get();
 
+		gEngine->Shutdown();
+
 		RHI::gDynamicRHI->Shutdown();
 		app->Shutdown();
 
@@ -140,6 +150,8 @@ namespace CE::Sandbox
 		delete app;
 		app = nullptr;
 
+		ModuleManager::Get().UnloadModule("GameSystem");
+		ModuleManager::Get().UnloadModule("System");
 		ModuleManager::Get().UnloadModule("CoreShader");
 		ModuleManager::Get().UnloadModule("CoreRPI");
 		ModuleManager::Get().UnloadModule("VulkanRHI");

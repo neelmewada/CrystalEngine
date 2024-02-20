@@ -1,9 +1,9 @@
 #ifndef __OBJECT_DATA_HLSL__
 #define __OBJECT_DATA_HLSL__
 
-#pragma feature USE_INSTANCING
+#pragma shader_feature USE_INSTANCING
 
-#ifdef USE_INSTANCING
+#if USE_INSTANCING
 
 struct ObjectData
 {
@@ -15,7 +15,7 @@ StructuredBuffer<ObjectData> _ObjectData : SRG_PerObject(t0);
 #define MODEL_MATRIX(input) _ObjectData[input.instanceId].modelMatrix
 #define INSTANCING() uint instanceId : SV_InstanceID;
 
-#else // USE_INSTANCING
+#else // !USE_INSTANCING
 
 struct ObjectData
 {
@@ -27,7 +27,7 @@ ConstantBuffer<ObjectData> _ObjectData : SRG_PerObject(b0);
 #define MODEL_MATRIX(input) _ObjectData.modelMatrix
 #define INSTANCING()
 
-#endif
+#endif // !USE_INSTANCING
 
 #define LOCAL_TO_CLIP_SPACE(localSpace, vertexInput) mul(mul(localSpace, MODEL_MATRIX(vertexInput)), viewProjectionMatrix)
 

@@ -9,8 +9,8 @@ namespace CE
 		None = 0,
 		RGBA32,
 		BGRA32,
-		ARGB32,
 		RGB24,
+		BGR24,
 		ARGB4444,
 
 		RGB565,
@@ -32,14 +32,18 @@ namespace CE
 		RGBAFloat,
 
 		// Compressed pixel formats
-		BC1,
+		ECONST(Display = "BC1 (RGB)")
+		BC1_RGB,
+		ECONST(Display = "BC1 (RGBA)")
+		BC1_RGBA,
 		BC3,
 		BC4,
-		BC5,
 		BC6H,
 		BC7,
 	};
 	ENUM_CLASS_FLAGS(CE::TextureFormat);
+
+	SYSTEM_API RHI::Format ToRHIFormat(CE::TextureFormat format, bool isSrgb = false);
 
 	/// Texture source data format
 	ENUM()

@@ -11,13 +11,15 @@ namespace CE
 			("p,pack", "Package the assets for final distribution build. (Not implemented yet)")
 			("I,include", "Include path directories for shaders, etc.", cxxopts::value<std::vector<std::string>>())
 			("M,mode", "Processing mode: either Engine or Game. If assets should be processed as engine or game assets", cxxopts::value<std::string>()->default_value("Game"))
-			("i,input", "Paths to the input assets that is to be processed.", cxxopts::value<std::vector<std::string>>())
+			("i,input", "Use this flag if you want to input multiple files")
 			("R,output-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
 			("D,input-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
 			;
 
 		try
 		{
+			options.allow_unrecognised_options();
+
 			parsedOptions = options.parse(argc, argv);
 		
 			if (parsedOptions["h"].as<bool>())
@@ -66,11 +68,13 @@ namespace CE
 
 		individualAssetPaths.Clear();
 
-		if (parsedOptions.count("i") > 0)
+		bool isMultipleFileInput = parsedOptions["i"].as<bool>();
+
+		if (isMultipleFileInput)
 		{
 			processMode = ProcessMode::Individual;
-		
-			auto inputs = parsedOptions["i"].as<std::vector<std::string>>();
+			
+			auto inputs = parsedOptions.unmatched();//parsedOptions["i"].as<std::vector<std::string>>();
 		
 			for (const auto& input : inputs)
 			{

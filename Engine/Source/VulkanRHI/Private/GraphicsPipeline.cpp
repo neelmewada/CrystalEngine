@@ -142,7 +142,7 @@ namespace CE::Vulkan
         pipelinesByHash.Clear();
     }
 
-    VkPipeline GraphicsPipeline::FindOrCompile(RenderPass* renderPass, u32 subpass)
+    VkPipeline GraphicsPipeline::FindOrCompile(RenderPass* renderPass, u32 subpass, u32 numViewports, u32 numScissors)
     {
         if (renderPass == nullptr || subpass >= RHI::Limits::Pipeline::MaxSubPassCount)
             return nullptr;
@@ -150,14 +150,16 @@ namespace CE::Vulkan
         SIZE_T instanceHash = this->hash;
         CombineHash(instanceHash, *renderPass);
         CombineHash(instanceHash, subpass);
+        CombineHash(instanceHash, numViewports);
+        CombineHash(instanceHash, numScissors);
 
         if (pipelinesByHash[instanceHash] != nullptr)
             return pipelinesByHash[instanceHash];
 
-        return CompileInternal(renderPass, subpass);
+        return CompileInternal(renderPass, subpass, numViewports, numScissors);
     }
 
-    VkPipeline GraphicsPipeline::CompileInternal(RenderPass* renderPass, u32 subpass)
+    VkPipeline GraphicsPipeline::CompileInternal(RenderPass* renderPass, u32 subpass, u32 numViewports, u32 numScissors)
     {
         VkGraphicsPipelineCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -202,9 +204,9 @@ namespace CE::Vulkan
         // - Viewport & Scissor -
         VkPipelineViewportStateCreateInfo viewportState{};
         viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        viewportState.scissorCount = desc.numScissors;
+        viewportState.scissorCount = numScissors;
         viewportState.pScissors = nullptr;
-        viewportState.viewportCount = desc.numViewports;
+        viewportState.viewportCount = numViewports;
         viewportState.pViewports = nullptr;
 
         createInfo.pViewportState = &viewportState;
@@ -237,6 +239,8 @@ namespace CE::Vulkan
         SIZE_T instanceHash = hash;
         CombineHash(instanceHash, *renderPass);
         CombineHash(instanceHash, subpass);
+        CombineHash(instanceHash, numViewports);
+        CombineHash(instanceHash, numScissors);
 
         PipelineRenderPass pipelinePass{};
         pipelinePass.pass = renderPass;
@@ -485,6 +489,18 @@ namespace CE::Vulkan
                 break;
             case VertexAttributeDataType::Int4:
                 attrib.format = VK_FORMAT_R32G32B32A32_SINT;
+                break;
+            case VertexAttributeDataType::UInt:
+                attrib.format = VK_FORMAT_R32_UINT;
+                break;
+            case VertexAttributeDataType::UInt2:
+                attrib.format = VK_FORMAT_R32G32_UINT;
+                break;
+            case VertexAttributeDataType::UInt3:
+                attrib.format = VK_FORMAT_R32G32B32_UINT;
+                break;
+            case VertexAttributeDataType::UInt4:
+                attrib.format = VK_FORMAT_R32G32B32A32_UINT;
                 break;
             }
 

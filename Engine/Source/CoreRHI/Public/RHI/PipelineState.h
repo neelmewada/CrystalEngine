@@ -17,7 +17,8 @@ namespace CE::RHI
 	{
 		Undefined,
 		Float, Float2, Float3, Float4,
-		Int, Int2, Int3, Int4
+		Int, Int2, Int3, Int4,
+		UInt, UInt2, UInt3, UInt4
 	};
 	ENUM_CLASS(VertexAttributeDataType);
 
@@ -91,15 +92,17 @@ namespace CE::RHI
 	ENUM_CLASS(BlendFactor);
 
 	ENUM()
-	enum class CompareOp
+	enum class CompareOp : int
 	{
 		Never = 0,
 		Less = 1,
 		Equal = 2,
 		LessOrEqual = 3,
+		LEqual = LessOrEqual,
 		Greater = 4,
 		NotEqual = 5,
 		GreaterOrEqual = 6,
+		GEqual = GreaterOrEqual,
 		Always = 7,
 	};
 	ENUM_CLASS(CompareOp);
@@ -320,9 +323,6 @@ namespace CE::RHI
 		MultisampleState multisampleState{};
 
 		RHI::RenderTarget* precompileForTarget = nullptr;
-
-		u32 numViewports = 1;
-		u32 numScissors = 1;
 
 		CORERHI_API SIZE_T GetHash() const;
 	};

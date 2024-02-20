@@ -21,6 +21,8 @@ namespace CE::RPI
 
 		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor& variantDesc);
 
+		RPI::ShaderVariant* AddVariant(const ShaderVariantDescriptor2& variantDesc);
+
 		inline u32 GetDefaultVariantIndex() const { return defaultVariantIndex; }
 
 		inline void SetDefaultVariantIndex(u32 index) { defaultVariantIndex = index; }

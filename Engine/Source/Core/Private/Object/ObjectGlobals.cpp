@@ -50,7 +50,7 @@ namespace CE
 			if (params.outer != nullptr)
 				params.outer->AttachSubobject(instance);
 
-			if (instance->HasAnyObjectFlags(OF_ClassDefaultInstance))
+			if (!instance->HasAnyObjectFlags(OF_ClassDefaultInstance))
 				instance->OnAfterConstruct();
 			return instance;
 		}
