@@ -16,7 +16,7 @@ namespace CE
 
 	}
 
-	ShaderPreprocessData* ShaderPreprocessor::PreprocessShader(Object* outer)
+	void ShaderPreprocessor::PreprocessShader(ShaderPreprocessData* preprocessData)
 	{
 		errorMessage = "";
 
@@ -30,7 +30,7 @@ namespace CE
 		if (stream == nullptr || !stream->CanRead())
 		{
 			errorMessage = "Invalid input stream";
-			return nullptr;
+			return;
 		}
 
 		tokens.Clear();
@@ -39,9 +39,7 @@ namespace CE
 
 		bool success = Tokenize(tokens);
 		if (!success)
-			return nullptr;
-
-		ShaderPreprocessData* preprocessData = CreateObject<ShaderPreprocessData>(outer, "ShaderPreprocessData");
+			return;
 
 		scopeStack.Clear();
 		allScopeStack.Clear();
@@ -92,8 +90,7 @@ namespace CE
 				else
 				{
 					errorMessage = "Mismatching scope bracket '}' found";
-					preprocessData->Destroy();
-					return nullptr;
+					return;
 				}
 			}
 			else if (lastScope == SCOPE_PROPERTIES) // Parse properties
@@ -163,8 +160,7 @@ namespace CE
 					else
 					{
 						errorMessage = "Invalid property type: " + curToken.lexeme;
-						preprocessData->Destroy();
-						return nullptr;
+						return;
 					}
 				}
 				else if (curToken.token == TK_LITERAL_STRING)
@@ -409,7 +405,7 @@ namespace CE
 			}
 		}
 
-		return preprocessData;
+		return;
 	}
 
 	bool ShaderPreprocessor::Tokenize(Array<Token>& tokens)

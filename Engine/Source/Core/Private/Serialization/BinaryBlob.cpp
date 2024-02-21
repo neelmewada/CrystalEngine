@@ -134,9 +134,9 @@ namespace CE
 
     bool BinaryBlob::Serialize(Stream* stream) const
     {
-        if (!IsValid() || stream == nullptr || !stream->IsOpen() || !stream->CanWrite())
-            return false;
-        
+        if (stream == nullptr || !stream->IsOpen() || !stream->CanWrite())
+			return false;
+
         *stream << (s64)dataSize;
 
 		*stream << (u64)flags;

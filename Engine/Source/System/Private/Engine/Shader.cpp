@@ -38,67 +38,26 @@ namespace CE
 		rpiShaderPerPass.Clear();
 	}
 
-	CE::Shader* CE::Shader::GetErrorShader()
-	{
-		auto transient = ModuleManager::Get().GetLoadedModuleTransientPackage(MODULE_NAME);
-		if (transient == nullptr)
-		{
-			CE_LOG(Error, All, "Cannot find transient package for module: {}", MODULE_NAME);
-			return nullptr;
-		}
-
-		if (RHI::gDynamicRHI->GetGraphicsBackend() != RHI::GraphicsBackend::Vulkan)
-		{
-			return nullptr;
-		}
-
-		for (auto object : transient->GetSubObjectMap())
-		{
-			if (object != nullptr && object->IsOfType<Shader>() && object->GetName() == "ErrorShader")
-			{
-				return Object::CastTo<Shader>(object);
-			}
-		}
-		
-		Resource* vertSpv = GetResourceManager()->LoadResource("/System/Resources/TestShaderVert.spv", transient);
-		Resource* fragSpv = GetResourceManager()->LoadResource("/System/Resources/TestShaderFrag.spv", transient);
-
-		Shader* shader = CreateObject<Shader>(transient, "ErrorShader", OF_Transient);
-		shader->passes.Add({});
-		shader->passes[0].variants.Add({});
-
-		CE::ShaderVariant& variant = shader->passes[0].variants[0];
-		variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, TEXT("VertexBlob")));
-		variant.shaderStageBlobs.Top()->shaderStage = ShaderStage::Vertex;
-		variant.shaderStageBlobs.Top()->byteCode.LoadData(vertSpv->GetData(), vertSpv->GetDataSize());
-
-		variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, TEXT("FragmentBlob")));
-		variant.shaderStageBlobs.Top()->shaderStage = ShaderStage::Fragment;
-		variant.shaderStageBlobs.Top()->byteCode.LoadData(fragSpv->GetData(), fragSpv->GetDataSize());
-
-		vertSpv->Destroy();
-		fragSpv->Destroy();
-
-		return shader;
-	}
-
 	RPI::Shader* CE::Shader::GetOrCreateRPIShader(int passIndex)
 	{
 		if (rpiShaderPerPass.GetSize() == 0)
 		{
-			for (int i = 0; i < passes.GetSize(); i++)
+			SubShader* subShader = GetSubshader();
+
+			for (int i = 0; i < GetShaderPassCount(); i++)
 			{
 				RPI::Shader* rpiShader = new RPI::Shader();
+				CE::ShaderPass* shaderPass = GetShaderPass(i);
 
-				for (int j = 0; j < passes[i].variants.GetSize(); j++)
+				for (int j = 0; j < shaderPass->variants.GetSize(); j++)
 				{
-					const CE::ShaderVariant& variant = passes[i].variants[j];
+					const CE::ShaderVariant& variant = shaderPass->variants[j];
 					
 					RPI::ShaderVariantDescriptor2 variantDesc{};
-					variantDesc.preprocessData = preprocessData;
 					variantDesc.reflectionInfo = variant.reflectionInfo;
-					variantDesc.passIndex = i;
-					variantDesc.subShaderIndex = 0;
+					variantDesc.tags = {};
+					variantDesc.tags.AddRange(subShader->tags);
+					variantDesc.tags.AddRange(shaderPass->tags);
 
 					for (ShaderBlob* curShaderBlob : variant.shaderStageBlobs)
 					{
@@ -107,6 +66,25 @@ namespace CE
 						variantDesc.moduleDesc.Top().byteSize = curShaderBlob->byteCode.GetDataSize();
 						variantDesc.moduleDesc.Top().name = curShaderBlob->GetName().GetString();
 						variantDesc.moduleDesc.Top().stage = curShaderBlob->shaderStage;
+
+						Name entryPoint = "Main";
+
+						if (curShaderBlob->shaderStage == RHI::ShaderStage::Vertex)
+							entryPoint = shaderPass->vertexEntry;
+						else if (curShaderBlob->shaderStage == RHI::ShaderStage::Fragment)
+							entryPoint = shaderPass->fragmentEntry;
+						else
+						{
+							EnumType* shaderStageEnum = GetStaticEnum<RHI::ShaderStage>();
+							EnumConstant* constant = shaderStageEnum->FindConstantWithValue((s64)curShaderBlob->shaderStage);
+							
+							if (constant != nullptr && shaderPass->TagExists(constant->GetName()))
+							{
+								entryPoint = shaderPass->GetTagValue(constant->GetName());
+							}
+						}
+
+						variantDesc.entryPoints.Add(entryPoint);
 					}
 					
 					rpiShader->AddVariant(variantDesc);
@@ -117,6 +95,36 @@ namespace CE
 		}
 
 		return rpiShaderPerPass[passIndex];
+	}
+
+	SubShader* CE::Shader::GetSubshader()
+	{
+		String platformName = PlatformMisc::GetPlatformName();
+#if PLATFORM_DESKTOP
+		String platformGroup = "Desktop";
+#elif PLATFORM_MOBILE
+		String platformGroup = "Mobile";
+#endif
+
+		for (int i = 0; i < subShaders.GetSize(); i++)
+		{
+			const Array<ShaderTagEntry>& subShaderTags = subShaders[i].tags;
+
+			bool valid = true;
+
+			for (const ShaderTagEntry& tag : subShaderTags)
+			{
+				if (tag.key == "Platform" && (tag.value != platformName && (platformGroup.IsEmpty() || tag.value != platformGroup)))
+				{
+					valid = false;
+				}
+			}
+
+			if (valid)
+				return &subShaders[i];
+		}
+
+		return nullptr;
 	}
 
 } // namespace CE

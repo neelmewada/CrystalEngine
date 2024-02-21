@@ -209,12 +209,12 @@ namespace CE
 		{
 			LockGuard<SharedMutex> lock{ Package::packageRegistryMutex };
 
-			if (loadedPackages.KeyExists(packageName))
+			if (loadedPackages.KeyExists(packageName)) // Package is already loaded
 			{
 				package = loadedPackages[packageName];
 				package->packageDependencies = packageDependendies;
 			}
-			else if (loadedPackagesByUuid.KeyExists(packageUuid))
+			else if (loadedPackagesByUuid.KeyExists(packageUuid)) // Package is already loaded
 			{
 				package = loadedPackagesByUuid[packageUuid];
 				package->packageDependencies = packageDependendies;
@@ -248,6 +248,8 @@ namespace CE
 
 		u64 magicObjectNumber = 0;
 		*stream >> magicObjectNumber;
+
+		package->objectUuidToEntryMap.Clear();
 
 		while (magicObjectNumber == PACKAGE_OBJECT_MAGIC_NUMBER)
 		{

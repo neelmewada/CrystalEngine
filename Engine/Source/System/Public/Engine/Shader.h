@@ -67,9 +67,67 @@ namespace CE
 		Name passName = "Main";
 
 		FIELD()
+		Array<ShaderTagEntry> tags{};
+
+		FIELD()
 		Array<CE::ShaderVariant> variants{};
 
+		FIELD()
+		Name vertexEntry = "VertMain";
+
+		FIELD()
+		Name fragmentEntry = "FragMain";
+
+		FIELD()
+		BinaryBlob hlslSource{};
+
+		FIELD()
+		Array<String> features{};
+
+		inline bool TagExists(const Name& key) const
+		{
+			return tags.Exists([&](const ShaderTagEntry& entry) { return entry.key == key; });
+		}
+
+		inline String GetTagValue(const Name& key) const
+		{
+			int index = tags.IndexOf([&](const ShaderTagEntry& entry) { return entry.key == key; });
+			if (index >= 0 && index < tags.GetSize())
+			{
+				return tags[index].value;
+			}
+			return "";
+		}
+
 		friend class CE::Shader;
+	};
+
+	STRUCT()
+	struct SYSTEM_API SubShader
+	{
+		CE_STRUCT(SubShader)
+	public:
+
+		FIELD()
+		Array<ShaderTagEntry> tags{};
+
+		FIELD()
+		Array<ShaderPass> passes{};
+
+		inline bool TagExists(const Name& key) const
+		{
+			return tags.Exists([&](const ShaderTagEntry& entry) { return entry.key == key; });
+		}
+
+		inline String GetTagValue(const Name& key) const
+		{
+			int index = tags.IndexOf([&](const ShaderTagEntry& entry) { return entry.key == key; });
+			if (index >= 0 && index < tags.GetSize())
+			{
+				return tags[index].value;
+			}
+			return "";
+		}
 	};
 
 
@@ -82,38 +140,39 @@ namespace CE
 		Shader();
 		virtual ~Shader(); 
 
-		static Shader* GetErrorShader();
-
 		inline Name GetShaderName() const
 		{
-			if (preprocessData != nullptr)
-				return preprocessData->shaderName;
-			return GetName();
+			return shaderName;
 		}
 
-		inline u32 GetShaderPassCount() const { return passes.GetSize(); }
+		inline u32 GetShaderPassCount() { return GetSubshader()->passes.GetSize(); }
 
-		inline const ShaderPass* GetShaderPass(int index) const
+		inline ShaderPass* GetShaderPass(int index)
 		{
-			return &passes[index];
+			return &GetSubshader()->passes[index];
 		}
 
-		inline Name GetPassName(int index) const
+		inline Name GetShaderPassName(int index)
 		{
-			return passes[index].passName;
+			return GetSubshader()->passes[index].passName;
 		}
 
 		RPI::Shader* GetOrCreateRPIShader(int passIndex);
 
 	protected:
 
+		SubShader* GetSubshader();
+
 		Array<RPI::Shader*> rpiShaderPerPass{};
 
 		FIELD()
-		ShaderPreprocessData* preprocessData = nullptr;
+		Name shaderName{};
 
 		FIELD()
-		Array<ShaderPass> passes{};
+		Array<ShaderPropertyEntry> properties{};
+
+		FIELD()
+		Array<SubShader> subShaders{};
 
 		FIELD()
 		ShaderStage stages = ShaderStage::Default;

@@ -115,9 +115,6 @@ namespace CE
 	public:
 
 		FIELD()
-		int lod = 100;
-
-		FIELD()
 		Array<ShaderTagEntry> subShaderTags{};
 
 		FIELD()
@@ -139,10 +136,10 @@ namespace CE
 		}
 	};
 
-	CLASS()
-	class CORESHADER_API ShaderPreprocessData : public Object
+	STRUCT()
+	struct CORESHADER_API ShaderPreprocessData
 	{
-		CE_CLASS(ShaderPreprocessData, Object)
+		CE_STRUCT(ShaderPreprocessData)
 	public:
 
 		FIELD()
@@ -163,7 +160,7 @@ namespace CE
 		ShaderPreprocessor(Stream* stream, const Array<IO::Path>& includePaths);
 		~ShaderPreprocessor();
         
-		ShaderPreprocessData* PreprocessShader(Object* outer = nullptr);
+		void PreprocessShader(ShaderPreprocessData* outData);
 
 		inline const String& GetErrorMessage() const { return errorMessage; }
 

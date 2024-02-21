@@ -35,7 +35,11 @@ namespace CE::RHI
 			constexpr u32 MaxVertexInputSlotCount = 16;
 
 			//! @brief Max number of color attachment counts.
+#if PLATFORM_ANDROID
+			constexpr u32 MaxColorAttachmentCount = 4;
+#else
 			constexpr u32 MaxColorAttachmentCount = 8;
+#endif
 
 			//! @brief Max number of output attachments. Resolve + Color + DepthStencil
 			constexpr u32 MaxRenderAttachmentCount = 2 * MaxColorAttachmentCount + 1;

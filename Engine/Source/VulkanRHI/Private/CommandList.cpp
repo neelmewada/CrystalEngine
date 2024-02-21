@@ -108,7 +108,7 @@ namespace CE::Vulkan
 
 			if (srgsToMerge[setNumber].GetSize() == 1)
 			{
-				//if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]->GetDescriptorSet()) // SRG has changed
+				if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]->GetDescriptorSet()) // SRG has changed
 				{
 					DescriptorSet* descriptorSet = srgsToMerge[setNumber][0]->GetDescriptorSet();
 

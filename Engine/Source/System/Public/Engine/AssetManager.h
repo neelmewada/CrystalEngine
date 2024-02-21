@@ -36,8 +36,6 @@ namespace CE
 
 	protected:
 
-		HashMap<Uuid, Package*> loadedAssets{};
-
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;
 

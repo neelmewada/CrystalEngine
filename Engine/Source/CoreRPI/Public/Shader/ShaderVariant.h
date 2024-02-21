@@ -10,11 +10,31 @@ namespace CE::RPI
 
 	struct ShaderVariantDescriptor2
 	{
-		ShaderPreprocessData* preprocessData; 
-		int subShaderIndex;
-		int passIndex;
+		Name shaderName{};
 		ShaderReflection reflectionInfo;
+		Array<ShaderTagEntry> tags{};
 		Array<RHI::ShaderModuleDescriptor> moduleDesc{};
+		Array<Name> entryPoints{};
+
+		inline bool TagExists(const Name& key) const
+		{
+			for (int i = tags.GetSize() - 1; i >= 0; i--)
+			{
+				if (tags[i].key == key)
+					return true;
+			}
+			return false;
+		}
+
+		inline String GetTagValue(const Name& key) const
+		{
+			for (int i = tags.GetSize() - 1; i >= 0; i--)
+			{
+				if (tags[i].key == key)
+					return tags[i].value;
+			}
+			return "";
+		}
 	};
 
 	enum class ShaderVariantFlag

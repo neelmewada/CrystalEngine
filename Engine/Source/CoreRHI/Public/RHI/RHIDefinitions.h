@@ -295,7 +295,6 @@ namespace CE::RHI
 
 		Default = Vertex | Fragment,
 		All = Vertex | Fragment | Tessellation | Geometry,
-		COUNT = 4,
     };
     ENUM_CLASS_FLAGS(ShaderStage);
 
@@ -358,6 +357,16 @@ namespace CE::RHI
 
         VertexInputAttribute attribute = VertexInputAttribute::None;
         u8 index = 0;
+
+        inline bool operator==(const ShaderSemantic& rhs) const
+        {
+            return attribute == rhs.attribute && index == rhs.index;
+        }
+
+        inline bool operator!=(const ShaderSemantic& rhs) const
+        {
+            return !(*this == rhs);
+        }
     };
 
 	ENUM()

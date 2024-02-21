@@ -664,207 +664,10 @@ namespace CE::Sandbox
 			fragDesc.byteCode = opaqueFrag->GetData();
 			fragDesc.byteSize = opaqueFrag->GetDataSize();
             
-            //opaqueShader = new RPI::Shader();
 			AssetManager* assetManager = gEngine->GetAssetManager();
-			opaqueShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Opaque");
+			opaqueShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
 
-			/*
-			auto opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
-			auto opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
-			RHI::GraphicsPipelineDescriptor opaquePipelineDesc{};
-			
-			RHI::ColorBlendState colorBlend{};
-			colorBlend.alphaBlendOp = RHI::BlendOp::Add;
-			colorBlend.colorBlendOp = RHI::BlendOp::Add;
-			colorBlend.componentMask = RHI::ColorComponentMask::All;
-			colorBlend.srcColorBlend = RHI::BlendFactor::One;
-			colorBlend.dstColorBlend = RHI::BlendFactor::Zero;
-			colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
-			colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
-			colorBlend.blendEnable = true;
-			opaquePipelineDesc.blendState.colorBlends.Add(colorBlend);
-
-			opaquePipelineDesc.depthStencilState.depthState.enable = true; // Read-Only depth state
-			opaquePipelineDesc.depthStencilState.depthState.testEnable = true;
-			opaquePipelineDesc.depthStencilState.depthState.writeEnable = false;
-			opaquePipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::LessOrEqual;
-			opaquePipelineDesc.depthStencilState.stencilState.enable = false;
-
-			opaquePipelineDesc.shaderStages.Add({});
-			opaquePipelineDesc.shaderStages[0].entryPoint = "VertMain";
-			opaquePipelineDesc.shaderStages[0].shaderModule = opaqueShaderVert;
-
-			opaquePipelineDesc.shaderStages.Add({});
-			opaquePipelineDesc.shaderStages[1].entryPoint = "FragMain";
-			opaquePipelineDesc.shaderStages[1].shaderModule = opaqueShaderFrag;
-
-			opaquePipelineDesc.rasterState = {};
-			opaquePipelineDesc.rasterState.cullMode = RHI::CullMode::None;
-
-			opaquePipelineDesc.vertexInputSlots.Add({});
-			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
-			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 0;
-			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3); // float3 Position;
-
-			opaquePipelineDesc.vertexInputSlots.Add({});
-			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
-			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 1;
-			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3); // float3 Normal;
-
-			opaquePipelineDesc.vertexInputSlots.Add({});
-			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
-			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 2;
-			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec4); // float4 Tangent;
-
-			opaquePipelineDesc.vertexInputSlots.Add({});
-			opaquePipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
-			opaquePipelineDesc.vertexInputSlots.Top().inputSlot = 3;
-			opaquePipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec2); // float2 UV;
-
-			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = opaquePipelineDesc.vertexAttributes;
-
-			vertexAttribs.Add({});
-			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3; // float3 Position
-			vertexAttribs[0].inputSlot = 0;
-			vertexAttribs[0].location = 0;
-			vertexAttribs[0].offset = 0;
-
-			vertexAttribs.Add({});
-			vertexAttribs[1].dataType = RHI::VertexAttributeDataType::Float3; // float3 Normal
-			vertexAttribs[1].inputSlot = 1;
-			vertexAttribs[1].location = 1;
-			vertexAttribs[1].offset = 0;
-
-			vertexAttribs.Add({});
-			vertexAttribs[2].dataType = RHI::VertexAttributeDataType::Float4; // float4 Tangent
-			vertexAttribs[2].inputSlot = 2;
-			vertexAttribs[2].location = 2;
-			vertexAttribs[2].offset = 0;
-
-			vertexAttribs.Add({});
-			vertexAttribs[3].dataType = RHI::VertexAttributeDataType::Float2; // float2 UV
-			vertexAttribs[3].inputSlot = 3;
-			vertexAttribs[3].location = 3;
-			vertexAttribs[3].offset = 0;
-
-			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = opaquePipelineDesc.srgLayouts;
-			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
-			perViewSRGLayout.srgType = RHI::SRGType::PerView;
-			perViewSRGLayout.variables.Add({});
-			perViewSRGLayout.variables[0].arrayCount = 1;
-			perViewSRGLayout.variables[0].name = "_PerViewData";
-			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
-			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-			srgLayouts.Add(perViewSRGLayout);
-
-			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
-			perObjectSRGLayout.srgType = RHI::SRGType::PerObject;
-			perObjectSRGLayout.variables.Add({});
-			perObjectSRGLayout.variables[0].arrayCount = 1;
-			perObjectSRGLayout.variables[0].name = "_ObjectData";
-			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
-			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-			srgLayouts.Add(perObjectSRGLayout);
-
-			srgLayouts.Add(perSceneSrgLayout);
-
-			RHI::ShaderResourceGroupLayout perPassSRGLayout{};
-			perPassSRGLayout.srgType = RHI::SRGType::PerPass;
-			perPassSRGLayout.variables.Add({});
-			perPassSRGLayout.variables.Top().arrayCount = 1;
-			perPassSRGLayout.variables.Top().name = "DirectionalShadowMap";
-			perPassSRGLayout.variables.Top().bindingSlot = directionalShadowMapBinding;
-			perPassSRGLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
-			perPassSRGLayout.variables.Top().format = RHI::Format::R8_UNORM;
-			perPassSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			srgLayouts.Add(perPassSRGLayout);
-
-			RHI::ShaderResourceGroupLayout perMaterialSRGLayout{};
-			perMaterialSRGLayout.srgType = RHI::SRGType::PerMaterial;
-			perMaterialSRGLayout.variables.Add({});
-			perMaterialSRGLayout.variables.Top().arrayCount = 1;
-			perMaterialSRGLayout.variables.Top().name = "_MaterialData";
-			perMaterialSRGLayout.variables.Top().bindingSlot = materialDataBinding;
-			perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
-			perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-			// Struct Members
-			{
-				RHI::ShaderStructMember albedoMember{};
-				albedoMember.dataType = RHI::ShaderStructMemberType::Float4;
-				albedoMember.name = "_Albedo";
-				perMaterialSRGLayout.variables.Top().structMembers.Add(albedoMember);
-
-				RHI::ShaderStructMember specularMember{};
-				specularMember.dataType = RHI::ShaderStructMemberType::Float;
-				specularMember.name = "_SpecularStrength";
-				perMaterialSRGLayout.variables.Top().structMembers.Add(specularMember);
-
-				RHI::ShaderStructMember metallicMember{};
-				metallicMember.dataType = RHI::ShaderStructMemberType::Float;
-				metallicMember.name = "_Metallic";
-				perMaterialSRGLayout.variables.Top().structMembers.Add(metallicMember);
-
-				RHI::ShaderStructMember roughnessMember{};
-				roughnessMember.dataType = RHI::ShaderStructMemberType::Float;
-				roughnessMember.name = "_Roughness";
-				perMaterialSRGLayout.variables.Top().structMembers.Add(roughnessMember);
-
-				RHI::ShaderStructMember normalMember{};
-				normalMember.dataType = RHI::ShaderStructMemberType::Float;
-				normalMember.name = "_NormalStrength";
-				perMaterialSRGLayout.variables.Top().structMembers.Add(normalMember);
-
-				RHI::ShaderStructMember shininessMember{};
-				shininessMember.dataType = RHI::ShaderStructMemberType::UInt;
-				shininessMember.name = "_Shininess";
-				perMaterialSRGLayout.variables.Top().structMembers.Add(shininessMember);
-
-				RHI::ShaderStructMember aoMember{};
-				aoMember.dataType = RHI::ShaderStructMemberType::Float;
-				aoMember.name = "_AmbientOcclusion";
-				perMaterialSRGLayout.variables.Top().structMembers.Add(aoMember);
-			}
-
-			perMaterialSRGLayout.variables.Add({});
-			perMaterialSRGLayout.variables.Top().arrayCount = 1;
-			perMaterialSRGLayout.variables.Top().name = "_AlbedoTex";
-			perMaterialSRGLayout.variables.Top().bindingSlot = albedoTexBinding;
-			perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
-			perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-			
-			perMaterialSRGLayout.variables.Add({});
-			perMaterialSRGLayout.variables.Top().arrayCount = 1;
-			perMaterialSRGLayout.variables.Top().name = "_RoughnessTex";
-			perMaterialSRGLayout.variables.Top().bindingSlot = roughnessTexBinding;
-			perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
-			perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			perMaterialSRGLayout.variables.Add({});
-			perMaterialSRGLayout.variables.Top().arrayCount = 1;
-			perMaterialSRGLayout.variables.Top().name = "_NormalTex";
-			perMaterialSRGLayout.variables.Top().bindingSlot = normalTexBinding;
-			perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
-			perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			perMaterialSRGLayout.variables.Add({});
-			perMaterialSRGLayout.variables.Top().arrayCount = 1;
-			perMaterialSRGLayout.variables.Top().name = "_MetallicTex";
-			perMaterialSRGLayout.variables.Top().bindingSlot = metallicTexBinding;
-			perMaterialSRGLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
-			perMaterialSRGLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
-
-			srgLayouts.Add(perMaterialSRGLayout);
-
-			opaquePipelineDesc.name = "Opaque Pipeline";*/
-            
-			opaqueRpiShader = opaqueShader->GetOrCreateRPIShader(0);
-            //RPI::ShaderVariantDescriptor variantDesc{};
-            //variantDesc.defineFlags = {};
-            //variantDesc.pipelineDesc = opaquePipelineDesc;
-            //opaqueShader->AddVariant(variantDesc);
+			opaqueRpiShader = opaqueShader->GetOrCreateRPIShader(0); // 0 pass index
 
 			sphereMaterial = new RPI::Material(opaqueRpiShader);
 			
@@ -1088,41 +891,26 @@ namespace CE::Sandbox
 
 		// Opaque Item
 		{
+			u32 variantIdx = cubeMaterial->GetCurrentVariantIndex();
+			const Array<Name>& vertexInputs = opaqueShader->GetShaderPass(0)->variants[variantIdx].reflectionInfo.vertexInputs;
+
 			RHI::DrawPacketBuilder::DrawItemRequest request{};
 
-			// The order here should MATCH with the graphics pipeline's vertex input order
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
+			for (const auto& vertexInputName : vertexInputs)
 			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position)
-					continue;
+				RHI::ShaderSemantic curSemantic = RHI::ShaderSemantic::Parse(vertexInputName.GetString());
 
-				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
+				for (const auto& vertInfo : mesh->vertexBufferInfos)
+				{
+					if (vertInfo.semantic == curSemantic)
+					{
+						auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+						request.vertexBufferViews.Add(vertBufferView);
+						break;
+					}
+				}
 			}
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
-			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal)
-					continue;
 
-				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
-			}
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
-			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Tangent)
-					continue;
-
-				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
-			}
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
-			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::UV)
-					continue;
-
-				auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
-			}
 			request.indexBufferView = mesh->indexBufferView;
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
@@ -1161,42 +949,29 @@ namespace CE::Sandbox
 			
 			builder.AddDrawItem(request);
 		}
-
+		
 		// Opaque Item
 		{
+			u32 variantIdx = sphereMaterial->GetCurrentVariantIndex();
+			const Array<Name>& vertexInputs = opaqueShader->GetShaderPass(0)->variants[variantIdx].reflectionInfo.vertexInputs;
+
 			RHI::DrawPacketBuilder::DrawItemRequest request{};
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
-			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Position)
-					continue;
 
-				auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
-			}
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
+			for (const auto& vertexInputName : vertexInputs)
 			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Normal)
-					continue;
+				RHI::ShaderSemantic curSemantic = RHI::ShaderSemantic::Parse(vertexInputName.GetString());
 
-				auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
+				for (const auto& vertInfo : mesh->vertexBufferInfos)
+				{
+					if (vertInfo.semantic == curSemantic)
+					{
+						auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+						request.vertexBufferViews.Add(vertBufferView);
+						break;
+					}
+				}
 			}
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
-			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::Tangent)
-					continue;
 
-				auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
-			}
-			for (const auto& vertInfo : mesh->vertexBufferInfos)
-			{
-				if (vertInfo.semantic.attribute != RHI::VertexInputAttribute::UV)
-					continue;
-
-				auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
-				request.vertexBufferViews.Add(vertBufferView);
-			}
 			request.indexBufferView = mesh->indexBufferView;
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
