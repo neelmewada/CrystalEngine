@@ -56,8 +56,11 @@ namespace CE::Vulkan
         void SetupShaderStages();
         void SetupRasterState();
         void SetupMultisampleState();
+        void SetupDefaultRenderPass();
 
         void SetupVertexInputState();
+
+        RenderPass* defaultRenderPass = nullptr;
 
         HashMap<SIZE_T, VkPipeline> pipelinesByHash{};
         HashMap<SIZE_T, VkPipelineCache> pipelineCachesByHash{};

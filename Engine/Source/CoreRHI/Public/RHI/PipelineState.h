@@ -322,7 +322,8 @@ namespace CE::RHI
 		DepthStencilState depthStencilState{};
 		MultisampleState multisampleState{};
 
-		RHI::RenderTarget* precompileForTarget = nullptr;
+		FixedArray<RHI::Format, RHI::Limits::Pipeline::MaxColorAttachmentCount> colorOutputFormats{};
+		RHI::Format depthStencilFormat = RHI::Format::Undefined;
 
 		CORERHI_API SIZE_T GetHash() const;
 	};

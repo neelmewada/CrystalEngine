@@ -738,20 +738,10 @@ namespace CE::Vulkan
 		SIZE_T hash = (SIZE_T)format;
 		hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.loadAction));
 		hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.storeAction));
-		if (IsDepthStencilFormat(format))
+		if (IsStencilVkFormat(RHIFormatToVkFormat(format)))
 		{
 			hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.loadActionStencil));
 			hash = GetCombinedHash(hash, CE::GetHash((int)loadStoreAction.storeActionStencil));
-			hash = GetCombinedHash(hash, CE::GetHash<f32>(loadStoreAction.clearValueDepth));
-			hash = GetCombinedHash(hash, CE::GetHash<f32>(loadStoreAction.clearValueStencil));
-		}
-		else if (IsDepthFormat(format))
-		{
-			hash = GetCombinedHash(hash, CE::GetHash<f32>(loadStoreAction.clearValueDepth));
-		}
-		else
-		{
-			hash = GetCombinedHash(hash, CE::GetHash(loadStoreAction.clearValue));
 		}
 		hash = GetCombinedHash(hash, (SIZE_T)initialLayout);
 		hash = GetCombinedHash(hash, (SIZE_T)finalLayout);

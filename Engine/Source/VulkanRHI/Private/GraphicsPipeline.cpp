@@ -112,17 +112,9 @@ namespace CE::Vulkan
         SetupRasterState();
         SetupMultisampleState();
         SetupVertexInputState();
+        SetupDefaultRenderPass();
 
         hash = desc.GetHash();
-
-        if (desc.precompileForTarget != nullptr)
-        {
-            Vulkan::RenderTarget* renderTarget = (Vulkan::RenderTarget*)desc.precompileForTarget;
-            if (renderTarget->GetRenderPass() != nullptr)
-            {
-                FindOrCompile(renderTarget->GetRenderPass(), 0);
-            }
-        }
     }
 
     GraphicsPipeline::~GraphicsPipeline()
@@ -178,7 +170,7 @@ namespace CE::Vulkan
 
         colorBlendState.attachmentCount = renderPassDesc.subpasses[subpass].colorAttachments.GetSize();
         colorBlendState.pAttachments = colorBlendAttachments.GetData();
-
+        
         createInfo.pColorBlendState = &colorBlendState;
 
         // - Dynamic State -
@@ -329,6 +321,59 @@ namespace CE::Vulkan
 
             colorBlendAttachments.Add(colorBlendAttachment);
         }
+
+        u32 numColorTargets = desc.colorOutputFormats.GetSize();
+        while (colorBlendAttachments.GetSize() < numColorTargets)
+        {
+            colorBlendAttachments.Add(colorBlendAttachments.GetLast());
+        }
+        while (colorBlendAttachments.GetSize() > numColorTargets) // Remove extra color blend states
+        {
+            colorBlendAttachments.RemoveAt(colorBlendAttachments.GetSize() - 1);
+        }
+    }
+
+    void GraphicsPipeline::SetupDefaultRenderPass()
+    {
+        RenderPass::Descriptor rpDesc{};
+        RenderPassCache* rpCache = device->GetRenderPassCache();
+
+        u32 numColorAttachments = colorBlendAttachments.GetSize();
+        for (int i = 0; i < colorBlendAttachments.GetSize(); i++)
+        {
+            RenderPass::AttachmentBinding colorAttachment{};
+            colorAttachment.attachmentId = String("Color ") + i;
+            colorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+            colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+            colorAttachment.multisampleState = desc.multisampleState;
+            colorAttachment.format = desc.colorOutputFormats[i];
+            rpDesc.attachments.Add(colorAttachment);
+        }
+
+        if (desc.depthStencilState.depthState.enable)
+        {
+            RenderPass::AttachmentBinding depthAttachment{};
+            depthAttachment.attachmentId = "DepthStencil";
+            depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+            depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+            depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
+            depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
+            if (desc.depthStencilState.stencilState.enable)
+            {
+                depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::Load;
+                depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::Store;
+            }
+            depthAttachment.format = desc.depthStencilFormat;
+            depthAttachment.multisampleState.sampleCount = 1;
+            depthAttachment.multisampleState.quality = 0;
+            rpDesc.attachments.Add(depthAttachment);
+        }
+
+        
     }
 
     static void FillStencilOpState(VkStencilOpState& fill, RHI::StencilOpState state)
