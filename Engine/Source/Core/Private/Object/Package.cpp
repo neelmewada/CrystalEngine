@@ -80,6 +80,19 @@ namespace CE
 		return true;
 	}
 
+	void Package::DestroyAllSubobjects()
+	{
+		for (int i = 0; i < GetSubObjectCount(); i++)
+		{
+			Object* subobject = GetSubobject(i);
+			DetachSubobject(subobject);
+			subobject->Destroy();
+		}
+
+		loadedObjects.Clear();
+		objectUuidToEntryMap.Clear();
+	}
+
 	void Package::DestroyAllPackages()
 	{
 		LockGuard<SharedMutex> lock{ packageRegistryMutex };

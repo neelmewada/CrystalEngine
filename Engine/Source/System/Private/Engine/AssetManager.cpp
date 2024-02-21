@@ -76,7 +76,7 @@ namespace CE
 		Object* object = package->LoadObject(assetData->assetUuid);
 		if (!object || !object->IsOfType<Asset>())
 			return nullptr;
-
+		
 		return (Asset*)object;
 	}
 

@@ -110,6 +110,8 @@ namespace CE::Vulkan
 			{
 				//if (commitedSRGsBySetNumber[setNumber] != srgsToMerge[setNumber][0]->GetDescriptorSet()) // SRG has changed
 				{
+					DescriptorSet* descriptorSet = srgsToMerge[setNumber][0]->GetDescriptorSet();
+
 					srgsToMerge[setNumber][0]->currentImageIndex = currentImageIndex;
 					srgsToMerge[setNumber][0]->FlushBindings();
 
@@ -120,9 +122,9 @@ namespace CE::Vulkan
 					commitedSRGsBySetNumber[setNumber] = srgsToMerge[setNumber][0]->GetDescriptorSet();
 					commitedSRGsBySetNumber[setNumber]->usageCount++;
 
-					VkDescriptorSet descriptorSet = commitedSRGsBySetNumber[setNumber]->GetHandle();
+					VkDescriptorSet descriptorSetHandle = commitedSRGsBySetNumber[setNumber]->GetHandle();
 					vkCmdBindDescriptorSets(commandBuffer, boundPipeline->GetBindPoint(),
-						boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSet, 0, nullptr);
+						boundPipeline->GetVkPipelineLayout(), setNumber, 1, &descriptorSetHandle, 0, nullptr);
 				}
 			}
 			else // > 1 (Merge SRGs)

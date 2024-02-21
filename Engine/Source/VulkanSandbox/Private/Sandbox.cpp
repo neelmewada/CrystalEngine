@@ -663,14 +663,14 @@ namespace CE::Sandbox
 			fragDesc.stage = RHI::ShaderStage::Fragment;
 			fragDesc.byteCode = opaqueFrag->GetData();
 			fragDesc.byteSize = opaqueFrag->GetDataSize();
-
-			auto opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
-			auto opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
             
             //opaqueShader = new RPI::Shader();
 			AssetManager* assetManager = gEngine->GetAssetManager();
-			
+			opaqueShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Opaque");
 
+			/*
+			auto opaqueShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
+			auto opaqueShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
 			RHI::GraphicsPipelineDescriptor opaquePipelineDesc{};
 			
 			RHI::ColorBlendState colorBlend{};
@@ -858,14 +858,15 @@ namespace CE::Sandbox
 
 			srgLayouts.Add(perMaterialSRGLayout);
 
-			opaquePipelineDesc.name = "Opaque Pipeline";
+			opaquePipelineDesc.name = "Opaque Pipeline";*/
             
-            RPI::ShaderVariantDescriptor variantDesc{};
-            variantDesc.defineFlags = {};
-            variantDesc.pipelineDesc = opaquePipelineDesc;
-            opaqueShader->AddVariant(variantDesc);
+			opaqueRpiShader = opaqueShader->GetOrCreateRPIShader(0);
+            //RPI::ShaderVariantDescriptor variantDesc{};
+            //variantDesc.defineFlags = {};
+            //variantDesc.pipelineDesc = opaquePipelineDesc;
+            //opaqueShader->AddVariant(variantDesc);
 
-			sphereMaterial = new RPI::Material(opaqueShader);
+			sphereMaterial = new RPI::Material(opaqueRpiShader);
 			
 			{
 				sphereMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
@@ -899,7 +900,7 @@ namespace CE::Sandbox
 
             sphereMaterial->FlushProperties();
 
-			cubeMaterial = new RPI::Material(opaqueShader);
+			cubeMaterial = new RPI::Material(opaqueRpiShader);
 
 			{
 				cubeMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
@@ -1450,9 +1451,9 @@ namespace CE::Sandbox
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
 
-				for (int i = 0; i < opaqueShader->GetVariantCount(); i++)
+				for (int i = 0; i < opaqueRpiShader->GetVariantCount(); i++)
 				{
-					scheduler->UsePipeline(opaqueShader->GetVariant(i)->GetPipeline());
+					scheduler->UsePipeline(opaqueRpiShader->GetVariant(i)->GetPipeline());
 				}
 
 				scheduler->PresentSwapChain(swapChain);

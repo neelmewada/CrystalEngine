@@ -104,6 +104,8 @@ namespace CE
         Object* LoadObject(Uuid objectUuid);
 		Object* LoadObject(const Name& objectClassName);
 
+		void DestroyAllSubobjects();
+
 		template<typename TObject> requires TIsBaseClassOf<CE::Object, TObject>::Value
 		TObject* LoadObject()
 		{
@@ -152,9 +154,9 @@ namespace CE
 		// Name of first object in package
 		Name primaryObjectName{};
 		// Long type name of first object in package
-		Name primaryObjectTypeName;
+		Name primaryObjectTypeName = Name();
 		// Primary object uuid
-		Uuid primaryObjectUuid;
+		Uuid primaryObjectUuid = 0;
 
 		Array<Name> packageDependencies{};
         

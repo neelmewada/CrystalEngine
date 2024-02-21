@@ -151,6 +151,7 @@ namespace CE::Sandbox
 		RHI::ShaderModule* depthShaderVert = nullptr;
 		
 		CE::Shader* opaqueShader = nullptr;
+		RPI::Shader* opaqueRpiShader = nullptr;
 		//RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* sphereMaterial = nullptr;
 		RPI::Material* cubeMaterial = nullptr;

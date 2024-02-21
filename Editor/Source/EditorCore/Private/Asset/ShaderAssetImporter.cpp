@@ -23,19 +23,18 @@ namespace CE::Editor
 
 		if (!sourcePath.Exists())
 			return false;
+
+		// NOTE: The package might already have assets & objects stored in it if asset already existed
+		// It is responsibilty of the derived asset importer to clear the old objects or just modify them as per need.
 		
+		// Clear the package of any subobjects, we will build the asset from scratch
+		package->DestroyAllSubobjects();
+
 		CE::Shader* shader = package->LoadObject<CE::Shader>();
 
-		if (shader == nullptr)
+		if (shader == nullptr) // Create new object from scratch
 		{
 			shader = CreateObject<CE::Shader>(package, TEXT("Shader"));
-		}
-		else
-		{
-			// Clean up old data
-			if (shader->preprocessData != nullptr)
-				shader->preprocessData->Destroy();
-			shader->passes.Clear();
 		}
 
 		shader->GetClass()->FindFieldWithName("sourceAssetRelativePath", TYPEID(String))->SetFieldValue(shader, sourceAssetRelativePath);
@@ -64,10 +63,10 @@ namespace CE::Editor
 			buildConfig.stage = RHI::ShaderStage::Vertex;
 			buildConfig.includeSearchPaths = includePaths;
 			buildConfig.debugName = shader->preprocessData->shaderName.GetString();
-
-			ShaderPass pass = {};
+			
+			shader->passes.Add({});
+			ShaderPass& pass = shader->passes.Top();
 			pass.passName = passEntry.passName.GetString();
-			shader->passes.Add(pass);
 			pass.variants.Add(CE::ShaderVariant());
 			CE::ShaderVariant& variant = pass.variants[0];
 			variant.variantHash = 0;

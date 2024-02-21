@@ -364,6 +364,7 @@ namespace CE::RHI
 	enum class CullMode
 	{
 		None = 0,
+        Off = None,
 		Back,
 		Front,
 		All

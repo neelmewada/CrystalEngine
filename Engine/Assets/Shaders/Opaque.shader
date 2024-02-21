@@ -10,7 +10,7 @@ Shader "Test Shader"
 
         _AlbedoTex ("Albedo Map", Tex2D) = "white"
         _RoughnessTex ("Roughness Map", Tex2D) = "white"
-        _NormalMap ("Normal Map", Tex2D) = "bump"
+        _NormalTex ("Normal Map", Tex2D) = "bump"
         _MetallicTex ("Metallic Map", Tex2D) = "white"
     }
 
@@ -26,7 +26,7 @@ Shader "Test Shader"
             Tags { "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque" }
             ZWrite Off
             ZTest LEqual
-            Cull Back
+            Cull Off
 
             HLSLPROGRAM
             
@@ -84,12 +84,55 @@ Shader "Test Shader"
 
             Texture2D<float4> _AlbedoTex : SRG_PerMaterial(t1);
             Texture2D<float> _RoughnessTex : SRG_PerMaterial(t2);
-            Texture2D<float4> _NormalMap : SRG_PerMaterial(t3);
+            Texture2D<float4> _NormalTex : SRG_PerMaterial(t3);
             Texture2D<float> _MetallicTex : SRG_PerMaterial(t4);
 
             float4 FragMain(PSInput input) : SV_TARGET
             {
-                return float4(0, 0, 0, 1);
+                float3 diffuse = 0;
+                float3 specular = 0;
+                float3 vertNormal = normalize(input.normal);
+                float3 viewDir = normalize(viewPosition - input.worldPos);
+                float3 tangent = normalize(input.tangent);
+                float3 bitangent = normalize(input.bitangent);
+
+                float4 normalMapSample = _NormalTex.Sample(_DefaultSampler, input.uv);
+                float3 tangentSpaceNormal = normalize(normalMapSample.xyz * 2.0 - 1.0);
+
+                float3x3 tangentToWorld = float3x3(tangent, bitangent, vertNormal);
+                float3 normal = normalize(mul(tangentSpaceNormal, tangentToWorld));
+
+                MaterialInput material;
+                material.albedo = GammaToLinear(_Albedo.rgb * _AlbedoTex.Sample(_DefaultSampler, input.uv).rgb);
+                material.metallic = _Metallic * _MetallicTex.Sample(_DefaultSampler, input.uv);
+                material.roughness = _Roughness * _RoughnessTex.Sample(_DefaultSampler, input.uv);
+                material.ambient = _AmbientOcclusion;
+
+                float3 Lo = float3(0, 0, 0);
+
+                uint i = 0;
+                for (i = 0; i < totalDirectionalLights; i++)
+                {
+                    LightInput light;
+                    light.lightRadiance = _DirectionalLights[i].colorAndIntensity.rgb * _DirectionalLights[i].colorAndIntensity.a;
+                    light.lightDir = -_DirectionalLights[i].direction;
+                    light.normal = normal;
+                    light.viewDir = viewDir;
+                    light.halfway = normalize(viewDir + light.lightDir);
+
+                    float4 lightSpacePos = mul(float4(input.worldPos, 1.0), _DirectionalLights[i].lightSpaceMatrix);
+                    float shadow = CalculateDirectionalShadow(lightSpacePos, dot(vertNormal, light.lightDir));
+                    shadow = clamp(shadow, 0, 1);
+
+                    Lo += CalculateBRDF(light, material) * (1.0 - shadow);
+                }
+
+                float3 color = CalculateDiffuseIrradiance(material, normal, viewDir).rgb;
+                color += Lo;
+
+                color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)
+                color = LinearToGamma(color); // Convert to Gamma space
+                return float4(color, 1.0);
             }
 
             #endif

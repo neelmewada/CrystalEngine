@@ -218,7 +218,7 @@ namespace CE::RPI
 
 		for (int i = 0; i < desc.reflectionInfo.vertexInputs.GetSize(); i++)
 		{
-			const RHI::ShaderSemantic& shaderSemantic = desc.reflectionInfo.vertexInputs[i];
+			RHI::ShaderSemantic shaderSemantic = RHI::ShaderSemantic::Parse(desc.reflectionInfo.vertexInputs[i].GetString());
 			
 			RHI::VertexInputSlotDescriptor inputSlotDesc{};
 			inputSlotDesc.inputSlot = i;
@@ -270,6 +270,8 @@ namespace CE::RPI
 			pipelineDesc.vertexInputSlots.Add(inputSlotDesc);
 			pipelineDesc.vertexAttributes.Add(vertexAttrib);
 		}
+
+		modulesByStage.Clear();
 
 		for (const auto& moduleDesc : desc.moduleDesc)
 		{

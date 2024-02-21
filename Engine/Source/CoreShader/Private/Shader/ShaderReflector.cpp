@@ -45,7 +45,7 @@ namespace CE
 
 				String shaderSemanticName = name.GetSubstring(7);
 				RHI::ShaderSemantic semantic = RHI::ShaderSemantic::Parse(shaderSemanticName);
-				outReflection.vertexInputs.Add(semantic);
+				outReflection.vertexInputs.Add(semantic.ToString());
 			}
 		}
 

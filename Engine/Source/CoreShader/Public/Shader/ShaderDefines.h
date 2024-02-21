@@ -28,7 +28,7 @@ namespace CE
 		Array<RHI::ShaderResourceGroupLayout> srgLayouts{};
 
 		FIELD(ReadOnly)
-		Array<ShaderSemantic> vertexInputs{};
+		Array<Name> vertexInputs{};
 
 		const VariableBindingMap& GetVariableNameMap() const;
 
