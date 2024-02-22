@@ -34,6 +34,8 @@ namespace CE::RPI
 			return defaultNormalTex;
 		}
 
+		RHI::Sampler* FindOrCreateSampler(const RHI::SamplerDescriptor& desc);
+
 	private:
 
 		RPISystem() = default;
@@ -47,6 +49,8 @@ namespace CE::RPI
 		RHI::Texture* defaultAlbedoTex = nullptr;
 		RHI::Texture* defaultNormalTex = nullptr;
 		RHI::Texture* defaultRoughnessTex = nullptr;
+
+		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};
 	};
     
 } // namespace CE::RPI

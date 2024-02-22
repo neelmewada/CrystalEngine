@@ -3,19 +3,23 @@
 namespace CE::Vulkan
 {
 
-    struct PipelineRenderPass
+    struct PipelineVariant
     {
         RenderPass* pass = nullptr;
         u32 subpass = 0;
+        u32 numViewports = 1;
+        u32 numScissors = 1;
 
         inline SIZE_T GetHash() const
         {
             SIZE_T hash = pass->GetHash();
             CombineHash(hash, subpass);
+            CombineHash(hash, numViewports);
+            CombineHash(hash, numScissors);
             return hash;
         }
 
-        inline bool operator==(const PipelineRenderPass& other) const
+        inline bool operator==(const PipelineVariant& other) const
         {
             return GetHash() == other.GetHash();
         }
@@ -32,7 +36,7 @@ namespace CE::Vulkan
 
         VkPipeline FindOrCompile(RenderPass* renderPass, u32 subpass, u32 numViewports = 1, u32 numScissors = 1);
 
-        inline void Compile(const Array<PipelineRenderPass>& passes)
+        inline void Compile(const Array<PipelineVariant>& passes)
         {
             for (const auto& pass : passes)
             {
@@ -56,7 +60,6 @@ namespace CE::Vulkan
         void SetupShaderStages();
         void SetupRasterState();
         void SetupMultisampleState();
-        void SetupDefaultRenderPass();
 
         void SetupVertexInputState();
 
@@ -64,8 +67,8 @@ namespace CE::Vulkan
 
         HashMap<SIZE_T, VkPipeline> pipelinesByHash{};
         HashMap<SIZE_T, VkPipelineCache> pipelineCachesByHash{};
-        HashMap<PipelineRenderPass, VkPipeline> pipelines{};
-        HashMap<PipelineRenderPass, VkPipelineCache> pipelineCaches{};
+        HashMap<PipelineVariant, VkPipeline> pipelines{};
+        HashMap<PipelineVariant, VkPipelineCache> pipelineCaches{};
 
         RHI::GraphicsPipelineDescriptor desc{};
 

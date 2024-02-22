@@ -1,5 +1,12 @@
 #pragma once
 
+namespace CE
+{
+	class Material;
+	class MaterialInstance;
+	class MaterialInterface;
+}
+
 namespace CE::RPI
 {
 	class Shader;
@@ -55,6 +62,10 @@ namespace CE::RPI
 		Shader* shader = nullptr;
 
 		u32 shaderVariantIndex = 0;
+
+		friend class MaterialInstance;
+		friend class MaterialInterface;
+		friend class CE::Material;
 	};
     
 } // namespace CE::RPI

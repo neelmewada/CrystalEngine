@@ -101,7 +101,7 @@ namespace CE::Sandbox
 		fragDesc.shaderModule = frag;
 		pipelineDesc.shaderStages.Add(fragDesc);
 
-		pipelineDesc.precompileForTarget = precompileTarget;
+		pipelineDesc.renderTarget = precompileTarget;
 	}
 
 	void VulkanSandbox::InitHDRIs()
@@ -863,7 +863,7 @@ namespace CE::Sandbox
 			pipelineDesc.shaderStages.Top().entryPoint = "FragMain";
 			pipelineDesc.shaderStages.Top().shaderModule = equirectFragShader;
 
-			pipelineDesc.precompileForTarget = renderTarget;
+			pipelineDesc.renderTarget = renderTarget;
 
 			equirectangularPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
 		}

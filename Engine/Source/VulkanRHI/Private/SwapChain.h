@@ -57,7 +57,6 @@ namespace CE::Vulkan
 
 		VkPresentModeKHR presentMode{};
 		VkSurfaceFormatKHR swapChainSurfaceFormat{};
-		RHI::Format swapChainColorFormat{};
 
 		DelegateHandle windowResizeCallback = 0;
 

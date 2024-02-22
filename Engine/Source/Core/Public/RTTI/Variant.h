@@ -72,6 +72,7 @@ namespace CE
 		Variant(s16 value) { SetInternalValue(value); }
 		Variant(s32 value) { SetInternalValue(value); }
 		Variant(s64 value) { SetInternalValue(value); }
+		Variant(const Matrix4x4& value) { SetInternalValue(value); }
 
 		Variant(bool value) { SetInternalValue(value); }
         
@@ -335,6 +336,7 @@ namespace CE
             Vec3   Vec3Value;
             Vec4   Vec4Value;
 			Quat   QuatValue;
+			Matrix4x4 MatrixValue;
 
 			Color  ColorValue;
 

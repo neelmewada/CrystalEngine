@@ -50,16 +50,47 @@ namespace CE
 		return assetRegistry->GetPrimaryAssetByPath(path);
 	}
 
+	Array<AssetData*> AssetManager::GetAssetsDataAtPath(const Name& path)
+	{
+		if (!assetRegistry)
+			return {};
+		return assetRegistry->GetAssetsByPath(path);
+	}
+
+	Array<Asset*> AssetManager::LoadAssetsAtPath(const Name& path, SubClass<Asset> classType)
+	{
+		Array<AssetData*> assetDatas = GetAssetsDataAtPath(path);
+		if (assetDatas.IsEmpty())
+			return {};
+
+		Package* package = Package::LoadPackage(nullptr, path, LOAD_Default);
+		if (!package)
+			return {};
+
+		Array<Asset*> assets{};
+
+		if (classType == nullptr || !classType->IsSubclassOf<Asset>())
+			classType = Asset::StaticType();
+
+		for (auto assetData : assetDatas)
+		{
+			Object* object = package->LoadObject(assetData->assetUuid);
+			if (object && object->IsOfType(classType))
+			{
+				assets.Add((Asset*)object);
+			}
+		}
+
+		return assets;
+	}
+
 	Asset* AssetManager::LoadAssetAtPath(const Name& path)
 	{
 		AssetData* assetData = GetPrimaryAssetDataAtPath(path);
 		if (!assetData)
 			return nullptr;
 
-		Package* package = nullptr;
-
-		if (!package)
-			package = Package::LoadPackage(nullptr, path, LOAD_Default);
+		Package* package = Package::LoadPackage(nullptr, path, LOAD_Default);
 
 		if (!package)
 			return nullptr;

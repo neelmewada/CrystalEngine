@@ -16,9 +16,27 @@ namespace CE::RPI
 
     void RPISystem::Shutdown()
     {
+        for (auto [_, sampler] : samplerCache)
+        {
+            RHI::gDynamicRHI->DestroySampler(sampler);
+        }
+        samplerCache.Clear();
+
         delete defaultNormalTex; defaultNormalTex = nullptr;
         delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
         delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
+    }
+
+    RHI::Sampler* RPISystem::FindOrCreateSampler(const RHI::SamplerDescriptor& desc)
+    {
+        SIZE_T hash = desc.GetHash();
+        RHI::Sampler* sampler = samplerCache[hash];
+        if (sampler != nullptr)
+            return sampler;
+
+        sampler = RHI::gDynamicRHI->CreateSampler(desc);
+        samplerCache[hash] = sampler;
+        return sampler;
     }
 
     void RPISystem::CreateDefaultTextures()

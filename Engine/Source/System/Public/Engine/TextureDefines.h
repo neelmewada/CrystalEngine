@@ -108,6 +108,7 @@ namespace CE
 	enum class TextureColorSpace : int
 	{
 		None = 0,
+		ECONST(Display = "sRGB")
 		SRGB
 	};
 	ENUM_CLASS_FLAGS(TextureColorSpace);

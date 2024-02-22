@@ -215,6 +215,7 @@ namespace CE::RHI
 	};
 	ENUM_CLASS(FilterMode);
 
+    ENUM()
     enum class SamplerAddressMode
     {
         Repeat = 0,
@@ -224,6 +225,7 @@ namespace CE::RHI
     };
     ENUM_CLASS(SamplerAddressMode);
 
+    ENUM()
     enum class SamplerBorderColor
     {
         FloatTransparentBlack = 0,
@@ -235,7 +237,7 @@ namespace CE::RHI
     };
     ENUM_CLASS(SamplerBorderColor);
 
-    struct SamplerDescriptor
+    struct CORERHI_API SamplerDescriptor
     {
         SamplerAddressMode addressModeU{};
         SamplerAddressMode addressModeV{};
@@ -244,6 +246,8 @@ namespace CE::RHI
         SamplerBorderColor borderColor{};
         b8 enableAnisotropy = false;
         u8 maxAnisotropy = 16;
+
+        SIZE_T GetHash() const;
     };
 
     /*

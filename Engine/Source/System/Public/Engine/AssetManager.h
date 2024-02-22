@@ -22,8 +22,27 @@ namespace CE
 		virtual void Tick(f32 deltaTime);
 
 		AssetData* GetPrimaryAssetDataAtPath(const Name& path);
+		Array<AssetData*> GetAssetsDataAtPath(const Name& path);
 
 		Asset* LoadAssetAtPath(const Name& path);
+
+		Array<Asset*> LoadAssetsAtPath(const Name& path, SubClass<Asset> classType = Asset::StaticType());
+
+		template<typename TAsset> requires TIsBaseClassOf<Asset, TAsset>::Value
+		inline Array<TAsset*> LoadAssetAtPath(const Name& path)
+		{
+			Array<Asset*> assets = LoadAssetsAtPath(path, TAsset::StaticType());
+			Array<TAsset*> outAssets{};
+			for (auto asset : assets)
+			{
+				TAsset* cast = Object::CastTo<TAsset>(asset);
+				if (cast)
+				{
+					outAssets.Add(cast);
+				}
+			}
+			return outAssets;
+		}
 
 		template<typename TAsset> requires TIsBaseClassOf<Asset, TAsset>::Value
 		inline TAsset* LoadAssetAtPath(const Name& path)

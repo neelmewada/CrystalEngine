@@ -97,4 +97,20 @@ namespace CE::RHI
 
 		return result;
 	}
+
+	SIZE_T CE::RHI::SamplerDescriptor::GetHash() const
+	{
+		SIZE_T hash = CE::GetHash(addressModeU);
+		CombineHash(hash, addressModeV);
+		CombineHash(hash, addressModeW);
+		CombineHash(hash, samplerFilterMode);
+		CombineHash(hash, borderColor);
+		CombineHash(hash, enableAnisotropy);
+		if (enableAnisotropy)
+		{
+			CombineHash(hash, maxAnisotropy);
+		}
+
+		return hash;
+	}
 }

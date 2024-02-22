@@ -112,21 +112,29 @@ namespace CE::Vulkan
         SetupRasterState();
         SetupMultisampleState();
         SetupVertexInputState();
-        SetupDefaultRenderPass();
+        
+        if (desc.renderTarget != nullptr)
+        {
+            RenderPass* rp = ((Vulkan::RenderTarget*)desc.renderTarget)->GetRenderPass();
+            if (rp != nullptr)
+            {
+                FindOrCompile(rp, 0);
+            }
+        }
 
         hash = desc.GetHash();
     }
 
     GraphicsPipeline::~GraphicsPipeline()
     {
-        for (auto [_, pipelineCache] : pipelineCaches)
+        for (auto [_, pipelineCache] : pipelineCachesByHash)
         {
             vkDestroyPipelineCache(device->GetHandle(), pipelineCache, nullptr);
         }
         pipelineCaches.Clear();
         pipelineCachesByHash.Clear();
 
-        for (auto [_, pipeline] : pipelines)
+        for (auto [_, pipeline] : pipelinesByHash)
         {
             vkDestroyPipeline(device->GetHandle(), pipeline, nullptr);
         }
@@ -139,11 +147,14 @@ namespace CE::Vulkan
         if (renderPass == nullptr || subpass >= RHI::Limits::Pipeline::MaxSubPassCount)
             return nullptr;
 
+        PipelineVariant variant{};
+        variant.pass = renderPass;
+        variant.subpass = subpass;
+        variant.numViewports = numViewports;
+        variant.numScissors = numScissors;
+
         SIZE_T instanceHash = this->hash;
-        CombineHash(instanceHash, *renderPass);
-        CombineHash(instanceHash, subpass);
-        CombineHash(instanceHash, numViewports);
-        CombineHash(instanceHash, numScissors);
+        CombineHash(instanceHash, variant);
 
         if (pipelinesByHash[instanceHash] != nullptr)
             return pipelinesByHash[instanceHash];
@@ -227,21 +238,20 @@ namespace CE::Vulkan
         // - Pipeline Layout -
         createInfo.layout = pipelineLayout;
 
-        // Pipeline cache is a combination of hashes of: GraphicsPipelineDescriptor + RenderPass + SubPassIndex
-        SIZE_T instanceHash = hash;
-        CombineHash(instanceHash, *renderPass);
-        CombineHash(instanceHash, subpass);
-        CombineHash(instanceHash, numViewports);
-        CombineHash(instanceHash, numScissors);
+        PipelineVariant variant{};
+        variant.pass = renderPass;
+        variant.subpass = subpass;
+        variant.numViewports = numViewports;
+        variant.numScissors = numScissors;
 
-        PipelineRenderPass pipelinePass{};
-        pipelinePass.pass = renderPass;
-        pipelinePass.subpass = subpass;
+        // Pipeline cache is a combination of hashes of: GraphicsPipelineDescriptor + Variant
+        SIZE_T instanceHash = hash;
+        CombineHash(instanceHash, variant);
 
         VkResult result;
 
         VkPipelineCache pipelineCache = nullptr;
-        if (pipelineCaches[pipelinePass] == nullptr)
+        if (pipelineCaches[variant] == nullptr)
         {
             VkPipelineCacheCreateInfo cacheCI{};
             cacheCI.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
@@ -251,13 +261,13 @@ namespace CE::Vulkan
             result = vkCreatePipelineCache(device->GetHandle(), &cacheCI, nullptr, &pipelineCache);
             if (result == VK_SUCCESS)
             {
-                pipelineCaches[pipelinePass] = pipelineCache;
+                pipelineCaches[variant] = pipelineCache;
                 pipelineCachesByHash[instanceHash] = pipelineCache;
             }
         }
 
-        pipelineCache = pipelineCaches[pipelinePass];
-
+        pipelineCache = pipelineCaches[variant];
+        
         VkPipeline pipeline = nullptr;
         result = vkCreateGraphicsPipelines(device->GetHandle(), pipelineCache, 1, &createInfo, nullptr, &pipeline);
 
@@ -267,7 +277,7 @@ namespace CE::Vulkan
             return nullptr;
         }
         
-        pipelines[pipelinePass] = pipeline;
+        pipelines[variant] = pipeline;
         pipelinesByHash[instanceHash] = pipeline;
 
         return pipeline;
@@ -322,58 +332,22 @@ namespace CE::Vulkan
             colorBlendAttachments.Add(colorBlendAttachment);
         }
 
-        u32 numColorTargets = desc.colorOutputFormats.GetSize();
-        while (colorBlendAttachments.GetSize() < numColorTargets)
+        if (desc.renderTarget != nullptr)
         {
-            colorBlendAttachments.Add(colorBlendAttachments.GetLast());
-        }
-        while (colorBlendAttachments.GetSize() > numColorTargets) // Remove extra color blend states
-        {
-            colorBlendAttachments.RemoveAt(colorBlendAttachments.GetSize() - 1);
-        }
-    }
+            Vulkan::RenderTarget* rt = (Vulkan::RenderTarget*)desc.renderTarget;
+            RenderPass* rp = rt->GetRenderPass();
 
-    void GraphicsPipeline::SetupDefaultRenderPass()
-    {
-        RenderPass::Descriptor rpDesc{};
-        RenderPassCache* rpCache = device->GetRenderPassCache();
+            u32 numColorTargets = rp->desc.subpasses[0].colorAttachments.GetSize();
 
-        u32 numColorAttachments = colorBlendAttachments.GetSize();
-        for (int i = 0; i < colorBlendAttachments.GetSize(); i++)
-        {
-            RenderPass::AttachmentBinding colorAttachment{};
-            colorAttachment.attachmentId = String("Color ") + i;
-            colorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            colorAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-            colorAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-            colorAttachment.multisampleState = desc.multisampleState;
-            colorAttachment.format = desc.colorOutputFormats[i];
-            rpDesc.attachments.Add(colorAttachment);
-        }
-
-        if (desc.depthStencilState.depthState.enable)
-        {
-            RenderPass::AttachmentBinding depthAttachment{};
-            depthAttachment.attachmentId = "DepthStencil";
-            depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-            depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-            depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-            depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-            depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::DontCare;
-            depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::DontCare;
-            if (desc.depthStencilState.stencilState.enable)
+            while (colorBlendAttachments.GetSize() < numColorTargets)
             {
-                depthAttachment.loadStoreAction.loadActionStencil = RHI::AttachmentLoadAction::Load;
-                depthAttachment.loadStoreAction.storeActionStencil = RHI::AttachmentStoreAction::Store;
+                colorBlendAttachments.Add(colorBlendAttachments.GetLast());
             }
-            depthAttachment.format = desc.depthStencilFormat;
-            depthAttachment.multisampleState.sampleCount = 1;
-            depthAttachment.multisampleState.quality = 0;
-            rpDesc.attachments.Add(depthAttachment);
+            while (colorBlendAttachments.GetSize() > numColorTargets) // Remove extra color blend states
+            {
+                colorBlendAttachments.RemoveAt(colorBlendAttachments.GetSize() - 1);
+            }
         }
-
-        
     }
 
     static void FillStencilOpState(VkStencilOpState& fill, RHI::StencilOpState state)

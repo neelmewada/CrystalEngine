@@ -49,9 +49,12 @@ namespace CE::RHI
 
 		inline f32 GetAspectRatio() const { return (f32)width / (f32)height; }
 
+		inline RHI::Format GetSwapChainFormat() const { return swapChainColorFormat; }
+
 	protected:
 
 		Array<Texture*> images{};
+		RHI::Format swapChainColorFormat{};
 
 		u32 currentImageIndex = 0;
 		u32 width = 0;
