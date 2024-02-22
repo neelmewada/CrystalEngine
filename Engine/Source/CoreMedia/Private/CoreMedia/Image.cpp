@@ -643,10 +643,8 @@ namespace CE
 
 		CMP_CompressOptions options = CMP_CompressOptions();
 		options.dwSize = sizeof(options);
-		options.nEncodeWith = CMP_GPU_DXC;//CMP_GPU_HW;
-		options.fquality = quality;
-		options.nGPUDecode = GPUDecode_DIRECTX;
-		options.bUseGPUDecompress = true;
+		options.nEncodeWith = CMP_GPU_HW;
+		options.fquality = 0.01f;
 
 		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
 		if (status != CMP_OK)
