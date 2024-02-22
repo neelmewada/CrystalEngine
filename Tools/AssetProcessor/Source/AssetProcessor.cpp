@@ -10,10 +10,11 @@ namespace CE
 			("h,help", "Print this help info.")
 			("p,pack", "Package the assets for final distribution build. (Not implemented yet)")
 			("I,include", "Include path directories for shaders, etc.", cxxopts::value<std::vector<std::string>>())
-			("M,mode", "Processing mode: either Engine or Game. If assets should be processed as engine or game assets", cxxopts::value<std::string>()->default_value("Game"))
-			("i,input", "Use this flag if you want to input multiple files")
+			("M,mode", "Processing mode: either Engine or Game. If assets should be processed as engine or game assets.", cxxopts::value<std::string>()->default_value("Game"))
+			("i,input", "Use this flag to add input files.")
 			("R,output-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
 			("D,input-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
+			("T,target", "Target platform. Values: Windows, Linux, Mac, Android, iOS", cxxopts::value<std::string>())
 			;
 
 		try
@@ -36,6 +37,33 @@ namespace CE
 
 		inputRoot = parsedOptions["D"].as<std::string>();
 		outputRoot = parsedOptions["R"].as<std::string>();
+
+		String targetName = parsedOptions["T"].as<std::string>();
+
+		if (targetName == "Windows")
+		{
+			targetPlatform = PlatformName::Windows;
+		}
+		else if (targetName == "Mac")
+		{
+			targetPlatform = PlatformName::Mac;
+		}
+		else if (targetName == "Linux")
+		{
+			targetPlatform = PlatformName::Linux;
+		}
+		else if (targetName == "Android")
+		{
+			targetPlatform = PlatformName::Android;
+		}
+		else if (targetName == "iOS")
+		{
+			targetPlatform = PlatformName::iOS;
+		}
+		else
+		{
+			targetPlatform = PlatformMisc::GetCurrentPlatform();
+		}
 
 		String mode = parsedOptions["M"].as<std::string>();
 		if (mode == "Game")
@@ -172,6 +200,7 @@ namespace CE
 
 			assetImporter->SetIncludePaths(includePaths);
 			assetImporter->SetLogging(true);
+			assetImporter->SetTargetPlatform(targetPlatform);
 
 			importers.Add(assetImporter);
 			assetImporter->ImportSourceAssetsAsync(sourcePaths, productPathsByAssetDef[assetDef]);
@@ -215,9 +244,6 @@ namespace CE
 	{
 		auto app = PlatformApplication::Get();
 		app->Initialize();
-
-		gDefaultWindowWidth = 1280;
-		gDefaultWindowHeight = 720;
 
 		RHI::gDynamicRHI = new CE::Vulkan::VulkanRHI();
 

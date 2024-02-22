@@ -16,6 +16,7 @@
 #include "Misc/ByteUtils.h"
 #include "Misc/Defer.h"
 #include "Misc/Random.h"
+#include "Misc/Platform.h"
 #include "Memory/Memory.h"
 #include "Memory/IAllocator.h"
 #include "Memory/SystemAllocator.h"

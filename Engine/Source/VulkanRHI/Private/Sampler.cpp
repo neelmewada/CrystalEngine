@@ -50,6 +50,14 @@ namespace CE::Vulkan
         samplerCI.maxAnisotropy = samplerDesc.maxAnisotropy;
         samplerCI.minFilter = ToVkFilter(samplerDesc.samplerFilterMode);
         samplerCI.magFilter = ToVkFilter(samplerDesc.samplerFilterMode);
+        samplerCI.minLod = 0;
+        samplerCI.maxLod = VK_LOD_CLAMP_NONE;
+        samplerCI.compareEnable = VK_FALSE;
+        
+        if (samplerDesc.samplerFilterMode == RHI::FilterMode::Nearest)
+            samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+        else
+            samplerCI.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		
         if (vkCreateSampler(device->GetHandle(), &samplerCI, nullptr, &sampler) != VK_SUCCESS)
         {

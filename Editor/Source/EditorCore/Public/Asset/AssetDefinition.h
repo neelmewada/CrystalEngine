@@ -17,10 +17,6 @@ namespace CE::Editor
         /// Return an array of extensions of source files that produce this asset type.
         virtual const Array<String>& GetSourceExtensions() = 0;
         
-        virtual SubClassType<Asset> GetDefaultAssetClass() = 0;
-        
-        virtual SubClassType<Asset> GetAssetClass(const String& extension) = 0;
-        
         virtual SubClassType<AssetImporter> GetAssetImporterClass() = 0;
         
     protected:

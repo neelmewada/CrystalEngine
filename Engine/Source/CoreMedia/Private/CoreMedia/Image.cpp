@@ -127,7 +127,7 @@ namespace CE
         return info;
     }
 
-    CMImageInfo CMImage::GetImageInfoFromMemory(unsigned char* buffer, int bufferLength)
+    CMImageInfo CMImage::GetImageInfoFromMemory(unsigned char* buffer, u32 bufferLength)
     {
 		CMImageInfo info{};
 
@@ -367,7 +367,7 @@ namespace CE
 			int x = 0, y = 0, channels = 0;
 			stbi_info(filePathStr.GetCString(), &x, &y, &channels);
 
-			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, 4);
+			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, STBI_rgb_alpha);
 
 			if (channels == 1)
 				image.format = CMImageFormat::R8;
@@ -398,19 +398,19 @@ namespace CE
 			float* imageData = stbi_loadf(filePathStr.GetCString(), &x, &y, &channels, STBI_rgb_alpha);
 
 			if (channels == 1)
-				image.format = CMImageFormat::R16;
+				image.format = CMImageFormat::R32;
 			else if (channels == 2)
-				image.format = CMImageFormat::RG16;
+				image.format = CMImageFormat::RG32;
 			else if (channels == 3)
-				image.format = CMImageFormat::RGB16;
+				image.format = CMImageFormat::RGB32;
 			else if (channels == 4)
-				image.format = CMImageFormat::RGBA16;
-
+				image.format = CMImageFormat::RGBA32;
+			
 			image.x = x;
 			image.y = y;
 			image.numChannels = channels;
 			image.bitsPerPixel = 16 * channels;
-			image.bitDepth = 8;
+			image.bitDepth = 16;
 			image.sourceFormat = CMImageSourceFormat::HDR;
 			image.data = imageData;
 
@@ -421,7 +421,7 @@ namespace CE
         return image;
     }
 
-    CMImage CMImage::LoadFromMemory(unsigned char* buffer, int bufferLength)
+    CMImage CMImage::LoadFromMemory(unsigned char* buffer, u32 bufferLength)
     {
 		CMImage image{};
 
@@ -459,7 +459,7 @@ namespace CE
 		image.sourceFormat = CMImageSourceFormat::None;
 		return image;
 	}
-
+#if PLATFORM_DESKTOP
 	static CMP_FORMAT CMImageFormatToSourceCMPFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
 	{
 		switch (format)
@@ -472,6 +472,8 @@ namespace CE
 			else if (bitDepth == 32)
 				return CMP_FORMAT_R_32F;
 			break;
+		case CE::CMImageFormat::R32:
+			return CMP_FORMAT_R_32F;
 		case CE::CMImageFormat::RG8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RG_8;
@@ -480,41 +482,26 @@ namespace CE
 			else if (bitDepth == 32)
 				return CMP_FORMAT_RG_32F;
 			break;
+		case CE::CMImageFormat::RG32:
+			return CMP_FORMAT_RG_32F;
 		case CE::CMImageFormat::RGB8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RGB_888;
 			break;
+		case CE::CMImageFormat::RGB32:
+			return CMP_FORMAT_RGB_32F;
 		case CE::CMImageFormat::RGBA8:
 			if (bitDepth == 8)
 				return CMP_FORMAT_RGBA_8888;
 			else if (bitDepth == 16)
 				return CMP_FORMAT_RGBA_16;
 			break;
+		case CE::CMImageFormat::RGBA32:
+			return CMP_FORMAT_RGBA_32F;
 		default:
 			break;
 		}
-
-		return CMP_FORMAT_Unknown;
-	}
-
-	static CMP_FORMAT CMImageFormatToBCnFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
-	{
-		switch (format)
-		{
-		case CE::CMImageFormat::R8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_BC4;
-			break;
-		case CE::CMImageFormat::RG8:
-			break;
-		case CE::CMImageFormat::RGB8:
-			break;
-		case CE::CMImageFormat::RGBA8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_BC7;
-			break;
-		}
-
+		
 		return CMP_FORMAT_Unknown;
 	}
 
@@ -549,7 +536,7 @@ namespace CE
 		case CMImageSourceFormat::BC7:
 			return CMP_FORMAT_BC7;
 		}
-
+		
 		switch (format)
 		{
 		case CMImageFormat::R8:
@@ -585,7 +572,7 @@ namespace CE
 		return CMP_FORMAT_Unknown;
 	}
 
-	static bool IsFormatSupported(CMImageFormat pixelFormat, u32 bitDepth, CMImageSourceFormat outputFormat)
+	static bool IsFormatSupportedForBCn(CMImageFormat pixelFormat, u32 bitDepth, CMImageSourceFormat outputFormat)
 	{
 		switch (pixelFormat)
 		{
@@ -605,21 +592,26 @@ namespace CE
 			if ((outputFormat == CMImageSourceFormat::BC3 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
 				return true;
 			break;
+		case CMImageFormat::RGB32:
+		case CMImageFormat::RGBA32:
+			if (outputFormat == CMImageSourceFormat::BC6H)
+				return true;
+			break;
 		}
-
+		
 		return false;
 	}
-
-#if PLATFORM_DESKTOP
+#endif
 
 	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat destFormat, float quality)
 	{
+#if PLATFORM_DESKTOP
 		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
 			return false;
 		if ((int)destFormat < (int)CMImageSourceFormat::BC1 ||
 			(int)destFormat > (int)CMImageSourceFormat::BC7)
 			return false;
-		if (!IsFormatSupported(source.format, source.bitDepth, destFormat))
+		if (!IsFormatSupportedForBCn(source.format, source.bitDepth, destFormat))
 			return false;
 
 		CMP_Texture src{};
@@ -651,8 +643,10 @@ namespace CE
 
 		CMP_CompressOptions options = CMP_CompressOptions();
 		options.dwSize = sizeof(options);
-		options.nEncodeWith = CMP_GPU_HW;
+		options.nEncodeWith = CMP_GPU_DXC;//CMP_GPU_HW;
 		options.fquality = quality;
+		options.nGPUDecode = GPUDecode_DIRECTX;
+		options.bUseGPUDecompress = true;
 
 		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
 		if (status != CMP_OK)
@@ -680,8 +674,10 @@ namespace CE
 		outStream->Write(dest.pData, dest.dwDataSize);
 
 		return true;
-	}
+#else // !PLATFORM_DESKTOP
+		return false;
 #endif
+	}
 
 	bool CMImage::EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth)
 	{

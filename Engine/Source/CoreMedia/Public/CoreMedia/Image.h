@@ -12,10 +12,10 @@ namespace CE
 		RGB8,
 		RGBA8,
 
-		R16,
-		RG16,
-		RGB16,
-		RGBA16
+		R32,
+		RG32,
+		RGB32,
+		RGBA32
 	};
 	ENUM_CLASS_FLAGS(CMImageFormat);
 
@@ -50,9 +50,9 @@ namespace CE
     };
 
 	/*
-	* CMImage is a low-level image that can be used by RHI, Engine, Editor, etc.
+	* CMImage is a low-level image handling library.
 	* It abstracts away all the image loading mechanisms to provide a 'raw' image to be used across the engine.
-	* Currently, only PNG file format is supported.
+	* You have to manually call Free() function to destroy the image!
 	*/
     class COREMEDIA_API CMImage : private CMImageInfo
     {
@@ -63,13 +63,11 @@ namespace CE
         // - Static API -
 
         static CMImageInfo GetImageInfoFromFile(const IO::Path& filePath);
-        static CMImageInfo GetImageInfoFromMemory(unsigned char* buffer, int bufferLength);
+        static CMImageInfo GetImageInfoFromMemory(unsigned char* buffer, u32 bufferLength);
 
-		// Only supports PNG for now
         static CMImage LoadFromFile(IO::Path filePath);
 
-		// Only supports PNG for now
-        static CMImage LoadFromMemory(unsigned char* buffer, int bufferLength);
+        static CMImage LoadFromMemory(unsigned char* buffer, u32 bufferLength);
 
 		/// Loads raw image from memory without allocating any memory
 		static CMImage LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, u32 bitDepth, u32 bitsPerPixel);
@@ -82,10 +80,9 @@ namespace CE
 		// Decodes raw image pixel data from PNG format
 		static CMImage DecodePNG(const CMImage& source, MemoryStream* inStream);
 
-#if PLATFORM_DESKTOP
-		// Encodes raw image data to BCn format (BC7, BC1, etc)
-		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat toBCnFormat, float quality = 0.25f);
-#endif
+		// Encodes raw image data to BCn format (BC7, BC1, etc). NOTE: Only supported on Desktop platforms!
+		// Quality: 0 to 1. Higher the quality, slower the processing.
+		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat toBCnFormat, float quality = 0.1f);
 
         // - Public API -
 

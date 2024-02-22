@@ -35,6 +35,8 @@ namespace CE::Editor
 
 		inline void SetLogging(bool enabled) { enableLogging = enabled; }
 
+		inline void SetTargetPlatform(PlatformName targetPlatform) { this->targetPlatform = targetPlatform; }
+
     protected:
 
 		void OnAssetImportJobFinish(AssetImportJob* job);
@@ -44,6 +46,8 @@ namespace CE::Editor
 		SharedMutex mutex{};
 		int numJobsInProgress = 0;
 		bool enableLogging = false;
+
+		PlatformName targetPlatform;
 
 		Array<AssetImportJobResult> importResults{};
 
@@ -64,7 +68,7 @@ namespace CE::Editor
 			, sourcePath(sourcePath)
 			, productPath(productPath)
 		{
-
+			targetPlatform = PlatformMisc::GetCurrentPlatform();
 		}
 
 		void Finish() override;
@@ -84,6 +88,8 @@ namespace CE::Editor
 	protected:
 
 		Array<IO::Path> includePaths{};
+
+		PlatformName targetPlatform;
 
 		String sourceAssetRelativePath = "";
 		String packageName = "";

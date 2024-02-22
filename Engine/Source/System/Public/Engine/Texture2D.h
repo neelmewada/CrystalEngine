@@ -18,6 +18,9 @@ namespace CE
 		FIELD()
 		TextureColorSpace colorSpace = TextureColorSpace::None;
 
+		FIELD()
+		u32 arrayCount = 1;
+
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::TextureImportJob;
 #endif

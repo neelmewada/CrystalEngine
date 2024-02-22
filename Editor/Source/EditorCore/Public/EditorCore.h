@@ -22,4 +22,6 @@
 // Assets
 #include "Asset/ShaderAssetDefinition.h"
 #include "Asset/ShaderAssetImporter.h"
+#include "Asset/TextureAssetDefinition.h"
+#include "Asset/TextureAssetImporter.h"
 

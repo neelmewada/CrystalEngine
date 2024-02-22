@@ -8,7 +8,7 @@ set(SUPPORTED_ASSET_FILE_EXTENSIONS ".shader")
 function(ce_add_assets NAME)
     set(options GENERATED)
     set(oneValueArgs OUTPUT_DIRECTORY TYPE)
-    set(multiValueArgs ASSET_FILES INCLUDE_DIRECTORIES)
+    set(multiValueArgs ASSET_FILES INCLUDE_DIRECTORIES ASSET_EXTENSIONS)
 
     set(ce_add_assets_TYPE_Engine "Engine")
     set(ce_add_assets_TYPE_Editor "Editor")
@@ -21,6 +21,11 @@ function(ce_add_assets NAME)
         message(FATAL_ERROR "Invalid asset type: ${ce_add_assets_TYPE}")
         return()
     endif()
+
+    foreach(asset_ext ${ce_add_assets_ASSET_EXTENSIONS})
+        list(APPEND SUPPORTED_ASSET_FILE_EXTENSIONS "${asset_ext}")
+    endforeach()
+    
 
     # INCLUDE_DIRECTORIES
     set(INCLUDE_DIRECTORIES_COMMAND "")
@@ -73,7 +78,7 @@ function(ce_add_assets NAME)
 
         if(${is_file_supported})
             add_custom_command(OUTPUT ${dest_asset_file}
-                COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" -i "${asset_file}"
+                COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" -i "${asset_file}"
                 DEPENDS ${asset_file}
                 VERBATIM
             )

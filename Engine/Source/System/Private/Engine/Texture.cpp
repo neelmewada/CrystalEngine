@@ -1,23 +1,5 @@
 #include "System.h"
 
-namespace CE::Private
-{
-	TextureSource::TextureSource()
-	{
-
-	}
-
-	bool TextureSource::IsValid()
-	{
-		return rawData.IsValid();
-	}
-
-	void TextureSource::Release()
-	{
-		rawData.Free();
-	}
-}
-
 namespace CE
 {
 	SYSTEM_API RHI::Format CE::ToRHIFormat(CE::TextureFormat format, bool isSrgb)

@@ -5,42 +5,11 @@
 namespace CE
 {
 #if PAL_TRAIT_BUILD_EDITOR
-	namespace Editor { class TextureImportJob; }
+	namespace Editor { class TextureAssetImportJob; }
 #endif
 
-	namespace Private
-	{
-		STRUCT()
-		struct SYSTEM_API TextureSource
-		{
-			CE_STRUCT(TextureSource)
-		public:
-
-			TextureSource();
-
-			bool IsValid();
-
-		private:
-			
-			// Automatically called when struct is destroyed
-			void Release();
-
-#if PAL_TRAIT_BUILD_EDITOR
-			friend class CE::Editor::TextureImportJob;
-#endif
-
-			FIELD()
-			BinaryBlob rawData{};
-
-			FIELD()
-			CE::TextureFormat sourcePixelFormat = CE::TextureFormat::None;
-
-			FIELD()
-			TextureSourceCompressionFormat sourceCompression = TextureSourceCompressionFormat::PNG;
-
-		};
-	}
-
+	class Texture;
+	
 	CLASS(Abstract)
 	class SYSTEM_API Texture : public Asset
 	{
@@ -52,8 +21,8 @@ namespace CE
 
 	protected:
 
-		FIELD(Hidden)
-		Private::TextureSource rawData{};
+		FIELD()
+		BinaryBlob source{};
 
 		FIELD()
 		CE::TextureFormat pixelFormat = CE::TextureFormat::None;
@@ -65,10 +34,16 @@ namespace CE
 		RHI::FilterMode filter = RHI::FilterMode::Linear;
 
 		FIELD()
-		TextureAddressMode addressMode = TextureAddressMode::Wrap;
+		TextureAddressMode addressModeU = TextureAddressMode::Wrap;
 
 		FIELD()
-		u8 anisotropy = 0;
+		TextureAddressMode addressModeV = TextureAddressMode::Wrap;
+
+		FIELD()
+		TextureDimension dimension = TextureDimension::None;
+
+		FIELD()
+		u8 anisoLevel = 0;
 
 		FIELD()
 		u32 width = 0;
@@ -77,8 +52,7 @@ namespace CE
 		u32 height = 0;
 
 		FIELD()
-		u32 depth = 1;
-
+		u32 mipLevels = 1;
 	};
     
 } // namespace CE

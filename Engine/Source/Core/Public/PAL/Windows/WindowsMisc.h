@@ -8,7 +8,7 @@
 namespace CE
 {
     
-    class CORE_API WindowsMisc
+    class CORE_API WindowsMisc : public PlatformMiscBase
     {
     public:
         CE_STATIC_CLASS(WindowsMisc);
@@ -16,6 +16,11 @@ namespace CE
         inline static String GetPlatformName()
         {
             return "Windows";
+        }
+
+        inline static PlatformName GetCurrentPlatform()
+        {
+            return PlatformName::Windows;
         }
 
         /*

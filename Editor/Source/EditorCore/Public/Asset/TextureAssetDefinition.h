@@ -2,11 +2,11 @@
 
 namespace CE::Editor
 {
-
-	CLASS()
-	class EDITORCORE_API ShaderAssetDefinition : public AssetDefinition
+    
+    CLASS()
+	class EDITORCORE_API TextureAssetDefinition : public AssetDefinition
 	{
-		CE_CLASS(ShaderAssetDefinition, AssetDefinition)
+		CE_CLASS(TextureAssetDefinition, AssetDefinition)
 	public:
 
 		/// Return an array of extensions of source files that produce this asset type.
@@ -15,7 +15,7 @@ namespace CE::Editor
 		virtual SubClassType<AssetImporter> GetAssetImporterClass() override;
 
 	};
-    
+
 } // namespace CE::Editor
 
-#include "ShaderAssetDefinition.rtti.h"
+#include "TextureAssetDefinition.rtti.h"

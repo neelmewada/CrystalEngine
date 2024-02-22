@@ -11,4 +11,6 @@ ce_add_assets(${PROJECT_NAME}
     OUTPUT_DIRECTORY "Engine/Assets"
     INCLUDE_DIRECTORIES
         "${CMAKE_SOURCE_DIR}/Engine/Shaders"
+    ASSET_EXTENSIONS
+        ".shader"
 )

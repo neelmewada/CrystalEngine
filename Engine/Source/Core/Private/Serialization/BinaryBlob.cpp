@@ -114,7 +114,7 @@ namespace CE
         
         s64 size = 0;
 		*stream >> size;
-        if (size < 0)
+        if (size <= 0)
         {
 			this->flags = BLOB_None;
             Free();

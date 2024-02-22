@@ -65,6 +65,18 @@ namespace CE
 	SYSTEM_API bool TextureSourceCompressionFormatIsBCn(TextureSourceCompressionFormat sourceCompressionFormat);
 
 	ENUM()
+	enum class TextureCompressionQuality
+	{
+		//! @brief No compression. Uses highest memory footprint.
+		None = 0,
+		Normal,
+		High,
+		Low,
+		Default = Normal
+	};
+	ENUM_CLASS(TextureCompressionQuality);
+
+	ENUM()
 	enum class TextureCompressionSettings : int
 	{
 		ECONST(Display = "Default (Color BC1/3)")
@@ -84,7 +96,7 @@ namespace CE
 		ECONST(Display = "Color Uncompressed RGB(A)")
 		ColorUncompressed,
 	};
-	ENUM_CLASS_FLAGS(TextureCompressionSettings);
+	ENUM_CLASS(TextureCompressionSettings);
 
 	ENUM()
 	enum class TextureFilter : int
@@ -93,7 +105,7 @@ namespace CE
 		Nearest,
 		Cubic
 	};
-	ENUM_CLASS_FLAGS(TextureFilter);
+	ENUM_CLASS(TextureFilter);
 
 	ENUM()
 	enum class TextureAddressMode : int
@@ -102,7 +114,7 @@ namespace CE
 		Clamp,
 		Repeat,
 	};
-	ENUM_CLASS_FLAGS(TextureAddressMode);
+	ENUM_CLASS(TextureAddressMode);
 
 	ENUM()
 	enum class TextureColorSpace : int
@@ -111,9 +123,20 @@ namespace CE
 		ECONST(Display = "sRGB")
 		SRGB
 	};
-	ENUM_CLASS_FLAGS(TextureColorSpace);
+	ENUM_CLASS(TextureColorSpace);
 
-    
+	ENUM()
+	enum class TextureDimension
+	{
+		None = 0,
+		Tex2D,
+		Tex3D,
+		TexCube,
+		Tex2DArray,
+		TexCubeArray
+	};
+	ENUM_CLASS(TextureDimension);
+
 } // namespace CE
 
 #include "TextureDefines.rtti.h"

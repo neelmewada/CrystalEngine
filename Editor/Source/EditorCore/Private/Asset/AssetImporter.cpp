@@ -5,7 +5,7 @@ namespace CE::Editor
 
     AssetImporter::AssetImporter()
     {
-        
+		targetPlatform = PlatformMisc::GetCurrentPlatform();
     }
 
     AssetImporter::~AssetImporter()
@@ -38,6 +38,7 @@ namespace CE::Editor
 		for (auto job : jobs)
 		{
 			job->includePaths = includePaths;
+			job->targetPlatform = targetPlatform;
 			job->SetAutoDelete(true);
 			
 			job->Start();

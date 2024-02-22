@@ -57,6 +57,7 @@ namespace CE
 
 		IO::Path inputRoot{};
 		IO::Path outputRoot{};
+		PlatformName targetPlatform{};
 
 		Array<IO::Path> individualAssetPaths{};
 
