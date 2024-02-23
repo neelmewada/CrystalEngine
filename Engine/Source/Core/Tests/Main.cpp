@@ -493,6 +493,37 @@ TEST(Containers, Name)
     TEST_END;
 }
 
+TEST(Containers, DateTime)
+{
+	TEST_BEGIN;
+
+	{
+		DateTime now = DateTime::Now();
+		DateTime copy = now;
+		copy.AddSeconds(86'401);
+		
+		EXPECT_EQ(copy.Day(), now.Day() + 1);
+		EXPECT_EQ(copy.Second(), now.Second() + 1);
+
+		u64 num = copy.ToNumber();
+		EXPECT_EQ(DateTime::FromNumber(num).ToNumber(), num);
+
+		EXPECT_EQ(DateTime::FromNumber(num), copy);
+	}
+
+	{
+		DateTime now = DateTime::Now();
+
+		String str = now.ToString();
+		DateTime parsed = DateTime::Parse(str);
+
+		EXPECT_EQ(now, parsed);
+		EXPECT_EQ(parsed.ToString(), str);
+	}
+
+	TEST_END;
+}
+
 TEST(Containers, Variant)
 {
 	TEST_BEGIN;

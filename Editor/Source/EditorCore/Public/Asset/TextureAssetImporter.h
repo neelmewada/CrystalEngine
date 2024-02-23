@@ -13,8 +13,14 @@ namespace CE::Editor
 
 	private:
 
-		FIELD()
-		TextureCompressionQuality defaultQompressionQuality = TextureCompressionQuality::Default;
+		FIELD(Config)
+		TextureCompressionQuality compressionQuality = TextureCompressionQuality::Default;
+
+		FIELD(Config)
+		u8 anisotropy = 0;
+
+		FIELD(Config)
+		bool importHdrAsCubemap = false;
 	};
 
 	class EDITORCORE_API TextureAssetImportJob : public AssetImportJob
@@ -34,6 +40,8 @@ namespace CE::Editor
 	private:
 
 		TextureCompressionQuality compressionQuality = TextureCompressionQuality::Default;
+
+		u8 anisotropy = 0;
 
 		friend class TextureAssetImporter;
 	};

@@ -55,6 +55,7 @@ namespace CE
 		AssetMode mode{};
 		ProcessMode processMode{};
 
+		IO::Path tempDir{};
 		IO::Path inputRoot{};
 		IO::Path outputRoot{};
 		PlatformName targetPlatform{};

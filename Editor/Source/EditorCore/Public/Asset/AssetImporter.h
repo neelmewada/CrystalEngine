@@ -37,6 +37,8 @@ namespace CE::Editor
 
 		inline void SetTargetPlatform(PlatformName targetPlatform) { this->targetPlatform = targetPlatform; }
 
+		inline void SetTempDirectoryPath(const IO::Path& tempDir) { this->tempDirectory = tempDir; }
+
     protected:
 
 		void OnAssetImportJobFinish(AssetImportJob* job);
@@ -46,6 +48,7 @@ namespace CE::Editor
 		SharedMutex mutex{};
 		int numJobsInProgress = 0;
 		bool enableLogging = false;
+		IO::Path tempDirectory{};
 
 		PlatformName targetPlatform;
 

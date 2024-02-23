@@ -61,10 +61,9 @@ namespace CE::Editor
 		{
 			CE_LOG(Error, All, "Failed to import asset {}. Error: {}", job->sourcePath, job->errorMessage);
 		}
-
-		if (job->success && enableLogging)
+		else if (enableLogging)
 		{
-			CE_LOG(Info, All, "Source Asset Processed: {}\nGenerated Asset: {}", job->sourcePath, job->productPath);
+			CE_LOG(Info, All, "Generated Asset: {}", job->productPath);
 		}
 
 		importResults.Add(importResult);

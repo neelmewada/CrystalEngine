@@ -6,6 +6,8 @@
 #include "CoreMedia/Image.h"
 #include "CoreMedia/CubeMap.h"
 
+#include "CoreMedia/ImageEncoder.h"
+
 namespace CE
 {
     class COREMEDIA_API CoreMediaModule : public CE::Module

@@ -15,7 +15,12 @@ namespace CE
 		R32,
 		RG32,
 		RGB32,
-		RGBA32
+		RGBA32,
+
+		R16,
+		RG16,
+		RGB16,
+		RGBA16
 	};
 	ENUM_CLASS_FLAGS(CMImageFormat);
 
@@ -113,6 +118,8 @@ namespace CE
 
         void* data = nullptr;
 		bool allocated = true;
+
+		friend class CMImageEncoder;
     };
 
 }

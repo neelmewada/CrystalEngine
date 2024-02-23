@@ -84,13 +84,13 @@ namespace CE
 	int JobManager::FixNumThreads(const JobManagerDesc& desc)
 	{
 		int totalThreads = desc.totalThreads;
-
+		
 		if (totalThreads == 0)
-			totalThreads = Thread::GetHardwareConcurrency() - 1;
+			totalThreads = Thread::GetHardwareConcurrency() - 1; // Subtract 1 thread so we have extra logical core remaining for Main Thread
 		if (totalThreads < 2)
 			totalThreads = 2;
-		if (totalThreads > 64)
-			totalThreads = 64;
+		if (totalThreads > 128)
+			totalThreads = 128;
 
 		return totalThreads;
 	}

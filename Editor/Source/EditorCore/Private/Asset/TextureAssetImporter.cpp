@@ -10,7 +10,8 @@ namespace CE::Editor
 		for (int i = 0; i < sourceAssets.GetSize(); i++)
 		{
 			auto job = new TextureAssetImportJob(this, sourceAssets[i], productAssets[i]);
-			job->compressionQuality = defaultQompressionQuality;
+			job->compressionQuality = compressionQuality;
+			job->anisotropy = anisotropy;
 
 			jobs.Add(job);
 		}
@@ -22,7 +23,6 @@ namespace CE::Editor
 	{
 		if (package == nullptr)
 			return false;
-
 		if (!sourcePath.Exists())
 			return false;
 
@@ -39,6 +39,39 @@ namespace CE::Editor
 
 		CMImageFormat imageFormat = image.GetFormat();
 		CMImageSourceFormat targetSourceFormat = CMImageSourceFormat::None;
+
+		TextureFormat pixelFormat = TextureFormat::None;
+		TextureSourceCompressionFormat compressionFormat = TextureSourceCompressionFormat::None;
+
+		switch (imageFormat)
+		{
+		case CMImageFormat::R8:
+			pixelFormat = TextureFormat::R8;
+			break;
+		case CMImageFormat::RG8:
+			pixelFormat = TextureFormat::RG8;
+			break;
+		case CMImageFormat::RGB8:
+			pixelFormat = TextureFormat::RGB8;
+			break;
+		case CMImageFormat::RGBA8:
+			pixelFormat = TextureFormat::RGBA8;
+			break;
+		case CMImageFormat::RG32:
+			pixelFormat = TextureFormat::RGFloat;
+			break;
+		case CMImageFormat::RG16:
+			pixelFormat = TextureFormat::RGHalf;
+			break;
+		case CMImageFormat::RGB16:
+		case CMImageFormat::RGBA16:
+			pixelFormat = TextureFormat::RGBAHalf;
+			break;
+		case CMImageFormat::RGB32:
+		case CMImageFormat::RGBA32:
+			pixelFormat = TextureFormat::RGBAFloat;
+			break;
+		}
 		
 		if (compressionQuality != TextureCompressionQuality::None && PlatformMisc::IsDesktopPlatform(targetPlatform))
 		{
@@ -46,34 +79,56 @@ namespace CE::Editor
 			{
 			case CMImageFormat::R8:
 				targetSourceFormat = CMImageSourceFormat::BC4;
+				compressionFormat = TextureSourceCompressionFormat::BC4;
 				break;
 			case CMImageFormat::RG8:
 				targetSourceFormat = CMImageSourceFormat::BC5;
+				compressionFormat = TextureSourceCompressionFormat::BC5;
 				break;
 			case CMImageFormat::RGB8:
 				if (compressionQuality == TextureCompressionQuality::High)
+				{
 					targetSourceFormat = CMImageSourceFormat::BC7;
+					compressionFormat = TextureSourceCompressionFormat::BC7;
+				}
 				else
+				{
 					targetSourceFormat = CMImageSourceFormat::BC1;
+					compressionFormat = TextureSourceCompressionFormat::BC1;
+				}
 				break;
 			case CMImageFormat::RGBA8:
 				targetSourceFormat = CMImageSourceFormat::BC7;
+				compressionFormat = TextureSourceCompressionFormat::BC7;
 				break;
 			case CMImageFormat::RGB32:
 			case CMImageFormat::RGBA32:
 				targetSourceFormat = CMImageSourceFormat::BC6H;
+				targetSourceFormat = CMImageSourceFormat::BC6H;
+				compressionFormat = TextureSourceCompressionFormat::BC6H;
 				break;
 			}
 		}
+		
+		Texture2D* texture = CreateObject<Texture2D>(package, TEXT("Texture2D"));
 
-		MemoryStream stream = MemoryStream(4_MB, true);
-		stream.SetBinaryMode(true);
-		stream.SetAutoResizeIncrement(4_MB);
+		texture->anisoLevel = anisotropy;
+		texture->width = image.GetWidth();
+		texture->height = image.GetHeight();
+		texture->arrayCount = 1;
+		texture->mipLevels = 1;
+		texture->addressModeU = texture->addressModeV = TextureAddressMode::Wrap;
+		texture->filter = RHI::FilterMode::Linear;
+		texture->dimension = TextureDimension::Tex2D;
+		texture->pixelFormat = pixelFormat;
+		texture->compressionQuality = compressionQuality;
+		texture->sourceCompressionFormat = compressionFormat;
 
 		if (targetSourceFormat != CMImageSourceFormat::None) // Use BCn format
 		{
 			float quality = 0.05f;
-			bool success = CMImage::EncodeToBCn(image, &stream, targetSourceFormat, quality);
+			CMImageEncoder encoder{};
+			bool success = encoder.EncodeToBCn(sourcePath, texture->source, targetSourceFormat, quality);
 			if (!success)
 			{
 				errorMessage = "Failed to encode to BCn format!";
@@ -82,6 +137,10 @@ namespace CE::Editor
 		}
 		else // Store raw pixels
 		{
+			MemoryStream stream = MemoryStream(image.GetDataSize(), true);
+			stream.SetBinaryMode(true);
+			stream.SetAutoResizeIncrement(4_MB);
+
 			u32 width = image.GetWidth();
 			u32 height = image.GetHeight();
 
@@ -145,9 +204,11 @@ namespace CE::Editor
 						stream << a;
 				}
 			}
+
+			texture->source.LoadData(stream.GetRawDataPtr(), stream.GetLength());
 		}
 
-		return false;
+		return true;
 	}
 
 } // namespace CE::Editor

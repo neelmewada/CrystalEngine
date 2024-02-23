@@ -14,7 +14,8 @@ namespace CE
 			("i,input", "Use this flag to add input files.")
 			("R,output-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
 			("D,input-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
-			("T,target", "Target platform. Values: Windows, Linux, Mac, Android, iOS", cxxopts::value<std::string>())
+			("T,target", "Target platform. Values: Windows, Linux, Mac, Android, iOS", cxxopts::value<std::string>()->default_value(""))
+			("t,temp", "Temporary directory path", cxxopts::value<std::string>())
 			;
 
 		try
@@ -35,8 +36,11 @@ namespace CE
 			exit(-1);
 		}
 
+		tempDir = parsedOptions["t"].as<std::string>();
 		inputRoot = parsedOptions["D"].as<std::string>();
 		outputRoot = parsedOptions["R"].as<std::string>();
+
+		tempDir = tempDir / "AssetCache";
 
 		String targetName = parsedOptions["T"].as<std::string>();
 
@@ -69,14 +73,17 @@ namespace CE
 		if (mode == "Game")
 		{
 			this->mode = AssetMode::Game;
+			tempDir = tempDir / "Game";
 		}
 		else if (mode == "Engine")
 		{
 			this->mode = AssetMode::Engine;
+			tempDir = tempDir / "Engine";
 		}
 		else if (mode == "Editor")
 		{
 			this->mode = AssetMode::Editor;
+			tempDir = tempDir / "Editor";
 		}
 		else
 		{

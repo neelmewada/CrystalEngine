@@ -7,9 +7,9 @@ namespace CE
 	enum class TextureFormat
 	{
 		None = 0,
-		RGBA32,
+		RGBA8,
 		BGRA32,
-		RGB24,
+		RGB8,
 		BGR24,
 		ARGB4444,
 
@@ -18,7 +18,7 @@ namespace CE
 		R8,
 		// Single channel 16-bit integer
 		R16,
-		RG16,
+		RG8,
 		RG32,
 
 		// Single channel 16-bit float
@@ -31,15 +31,6 @@ namespace CE
 		RGFloat,
 		RGBAFloat,
 
-		// Compressed pixel formats
-		ECONST(Display = "BC1 (RGB)")
-		BC1_RGB,
-		ECONST(Display = "BC1 (RGBA)")
-		BC1_RGBA,
-		BC3,
-		BC4,
-		BC6H,
-		BC7,
 	};
 	ENUM_CLASS_FLAGS(CE::TextureFormat);
 

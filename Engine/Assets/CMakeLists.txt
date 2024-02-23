@@ -13,4 +13,7 @@ ce_add_assets(${PROJECT_NAME}
         "${CMAKE_SOURCE_DIR}/Engine/Shaders"
     ASSET_EXTENSIONS
         ".shader"
+        ".png"
+        ".jpg"
+        ".jpeg"
 )

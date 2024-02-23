@@ -3,7 +3,7 @@
 namespace CE
 {
 #if PAL_TRAIT_BUILD_EDITOR
-	namespace Editor { class TextureImportJob; }
+	namespace Editor { class TextureAssetImportJob; }
 #endif
 
 	CLASS()
@@ -22,7 +22,7 @@ namespace CE
 		u32 arrayCount = 1;
 
 #if PAL_TRAIT_BUILD_EDITOR
-		friend class CE::Editor::TextureImportJob;
+		friend class CE::Editor::TextureAssetImportJob;
 #endif
 	};
     

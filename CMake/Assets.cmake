@@ -1,8 +1,7 @@
 
 include_guard(GLOBAL)
 
-set(SUPPORTED_ASSET_FILE_EXTENSIONS ".shader")
-#list(APPEND SUPPORTED_ASSET_FILE_EXTENSIONS ".png")
+set(SUPPORTED_ASSET_FILE_EXTENSIONS "")
 
 # Add assets
 function(ce_add_assets NAME)
@@ -25,7 +24,6 @@ function(ce_add_assets NAME)
     foreach(asset_ext ${ce_add_assets_ASSET_EXTENSIONS})
         list(APPEND SUPPORTED_ASSET_FILE_EXTENSIONS "${asset_ext}")
     endforeach()
-    
 
     # INCLUDE_DIRECTORIES
     set(INCLUDE_DIRECTORIES_COMMAND "")
@@ -73,12 +71,11 @@ function(ce_add_assets NAME)
 
         cmake_path(GET dest_asset_file PARENT_PATH dest_asset_file_parent)
         list(APPEND DEST_ASSET_FILES "${dest_asset_file}")
-
-        #message("Dest file: ${dest_asset_file}")
+        set(TEMP_DIR "${CE_OUTPUT_DIR}/Temp")
 
         if(${is_file_supported})
             add_custom_command(OUTPUT ${dest_asset_file}
-                COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" -i "${asset_file}"
+                COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" -i "${asset_file}" --temp "${TEMP_DIR}"
                 DEPENDS ${asset_file}
                 VERBATIM
             )

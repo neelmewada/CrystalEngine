@@ -6,7 +6,7 @@ if (TARGET ${TARGET_WITH_NAMESPACE})
 endif()
 
 set(PACKAGE_NAME "compressonator")
-set(PACKAGE_VERISON "4.4.19")
+set(PACKAGE_VERISON "4.5.52")
 set(PACKAGE_REVISION 1)
 
 set(PACKAGE_FULL_NAME "${PACKAGE_NAME}-${PACKAGE_VERISON}-rev${PACKAGE_REVISION}-${PAL_PLATFORM_NAME_LOWERCASE}")
@@ -25,8 +25,8 @@ macro(windows_add_cmp_lib NAME)
     set_target_properties(${NAME}
         PROPERTIES
             IMPORTED_LOCATION_DEBUG       ${${LIB_NAME}_LIBS_DIR}/Debug/${NAME}.lib
-            IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_LIBS_DIR}/Development/${NAME}.lib
-            IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_LIBS_DIR}/Development/${NAME}.lib
+            IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_LIBS_DIR}/Release/${NAME}.lib
+            IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_LIBS_DIR}/Release/${NAME}.lib
             IMPORTED_LOCATION_RELEASE     ${${LIB_NAME}_LIBS_DIR}/Release/${NAME}.lib
     )
 endmacro()
@@ -36,8 +36,8 @@ macro(mac_add_cmp_lib NAME)
     set_target_properties(${NAME}
         PROPERTIES
             IMPORTED_LOCATION_DEBUG       ${${LIB_NAME}_LIBS_DIR}/Debug/lib${NAME}.dylib
-            IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_LIBS_DIR}/Development/lib${NAME}.dylib
-            IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_LIBS_DIR}/Development/lib${NAME}.dylib
+            IMPORTED_LOCATION_DEVELOPMENT ${${LIB_NAME}_LIBS_DIR}/Release/lib${NAME}.dylib
+            IMPORTED_LOCATION_PROFILE     ${${LIB_NAME}_LIBS_DIR}/Release/lib${NAME}.dylib
             IMPORTED_LOCATION_RELEASE     ${${LIB_NAME}_LIBS_DIR}/Release/lib${NAME}.dylib
             #IMPORTED_LOCATION "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>/lib${NAME}.dylib"
     )
@@ -46,7 +46,7 @@ endmacro()
 
 add_library(${TARGET_WITH_NAMESPACE} INTERFACE IMPORTED)
 
-if (${PAL_PLATFORM_NAME} STREQUAL "Mac")
+if (${PAL_PLATFORM_NAME} STREQUAL "Mac") # Mac
     mac_add_cmp_lib(CMP_Compressonator)
     mac_add_cmp_lib(CMP_Core)
     mac_add_cmp_lib(CMP_Framework)
@@ -58,7 +58,15 @@ if (${PAL_PLATFORM_NAME} STREQUAL "Mac")
             CMP_Framework
     )
 
-elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
+    ce_add_rt_deps(compressonator
+        ROOT_PATH "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Release,$<CONFIG>>"
+        COPY_FILES_MAC
+            libCMP_Compressonator.dylib
+            libCMP_Core.dylib
+            libCMP_Framework.dylib
+    )
+
+elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows") # Windows
     windows_add_cmp_lib(CMP_Compressonator)
     windows_add_cmp_lib(CMP_Core_AVX)
     windows_add_cmp_lib(CMP_Core_AVX512)
@@ -69,10 +77,7 @@ elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
     windows_add_cmp_lib(CMP_GpuDecode)
     windows_add_cmp_lib(GPUDecode_DirectX)
     windows_add_cmp_lib(GPUDecode_Vulkan)
-    windows_add_cmp_lib(Image_BRLG)
     windows_add_cmp_lib(EncodeWith_GPU)
-    windows_add_cmp_lib(brotlig)
-    windows_add_cmp_lib(brotli)
     set(GPU_DECODE_LIBS GPUDecode_DirectX GPUDecode_Vulkan)
 
     target_link_libraries(${TARGET_WITH_NAMESPACE} 
@@ -86,10 +91,15 @@ elseif (${PAL_PLATFORM_NAME} STREQUAL "Windows")
             CMP_GpuDecode
             CMP_Common
             ${GPU_DECODE_LIBS}
-            Image_BRLG
             EncodeWith_GPU
-            brotlig
-            brotli
+    )
+
+    ce_add_rt_deps(compressonator
+        ROOT_PATH "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Release,$<CONFIG>>"
+        COPY_LIBS
+            EncodeWith_DXC
+            EncodeWith_GPU
+            EncodeWith_OCL
     )
 
 else()
@@ -100,16 +110,6 @@ endif()
 target_include_directories(${TARGET_WITH_NAMESPACE}
     INTERFACE
         ${${LIB_NAME}_INCLUDE_DIR}
-)
-
-# Runtime Dependencies
-
-ce_add_rt_deps(compressonator
-    ROOT_PATH "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>"
-    COPY_FILES
-        $<${PAL_PLATFORM_IS_MAC}:libCMP_Compressonator.dylib>
-        $<${PAL_PLATFORM_IS_MAC}:libCMP_Core.dylib>
-        $<${PAL_PLATFORM_IS_MAC}:libCMP_Framework.dylib>
 )
 
 set(${LIB_NAME}_FOUND True)

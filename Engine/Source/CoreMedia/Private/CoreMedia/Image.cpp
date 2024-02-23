@@ -459,153 +459,10 @@ namespace CE
 		image.sourceFormat = CMImageSourceFormat::None;
 		return image;
 	}
-#if PLATFORM_DESKTOP
-	static CMP_FORMAT CMImageFormatToSourceCMPFormat(CMImageFormat format, u32 bitDepth, u32 bitsPerPixel)
-	{
-		switch (format)
-		{
-		case CE::CMImageFormat::R8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_R_8;
-			else if (bitDepth == 16)
-				return CMP_FORMAT_R_16;
-			else if (bitDepth == 32)
-				return CMP_FORMAT_R_32F;
-			break;
-		case CE::CMImageFormat::R32:
-			return CMP_FORMAT_R_32F;
-		case CE::CMImageFormat::RG8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_RG_8;
-			else if (bitDepth == 16)
-				return CMP_FORMAT_RG_16;
-			else if (bitDepth == 32)
-				return CMP_FORMAT_RG_32F;
-			break;
-		case CE::CMImageFormat::RG32:
-			return CMP_FORMAT_RG_32F;
-		case CE::CMImageFormat::RGB8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_RGB_888;
-			break;
-		case CE::CMImageFormat::RGB32:
-			return CMP_FORMAT_RGB_32F;
-		case CE::CMImageFormat::RGBA8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_RGBA_8888;
-			else if (bitDepth == 16)
-				return CMP_FORMAT_RGBA_16;
-			break;
-		case CE::CMImageFormat::RGBA32:
-			return CMP_FORMAT_RGBA_32F;
-		default:
-			break;
-		}
-		
-		return CMP_FORMAT_Unknown;
-	}
-
-	static CMImageSourceFormat CMPFormatToCMImageSourceFormat(CMP_FORMAT format)
-	{
-		switch (format)
-		{
-		case CMP_FORMAT_BC7:
-			return CMImageSourceFormat::BC7;
-		case CMP_FORMAT_BC4:
-			return CMImageSourceFormat::BC4;
-		case CMP_FORMAT_BC6H:
-			return CMImageSourceFormat::BC6H;
-		}
-		return CMImageSourceFormat::None;
-	}
-
-	static CMP_FORMAT CalculateDestinationCMPFormat(CMImageFormat format, CMImageSourceFormat outputFormat, u32 bitDepth, u32 bitsPerPixel)
-	{
-		switch (outputFormat)
-		{
-		case CMImageSourceFormat::BC1:
-			return CMP_FORMAT_BC1;
-		case CMImageSourceFormat::BC3:
-			return CMP_FORMAT_BC3;
-		case CMImageSourceFormat::BC4:
-			return CMP_FORMAT_BC4;
-		case CMImageSourceFormat::BC5:
-			return CMP_FORMAT_BC5;
-		case CMImageSourceFormat::BC6H:
-			return CMP_FORMAT_BC6H;
-		case CMImageSourceFormat::BC7:
-			return CMP_FORMAT_BC7;
-		}
-		
-		switch (format)
-		{
-		case CMImageFormat::R8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_R_8;
-			else if (bitDepth == 16)
-				return CMP_FORMAT_R_16;
-			break;
-		case CMImageFormat::RG8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_RG_8;
-			else if (bitDepth == 16)
-				return CMP_FORMAT_RG_16;
-			else if (bitDepth == 32)
-				return CMP_FORMAT_RG_32F;
-			break;
-		case CMImageFormat::RGB8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_RGB_888;
-			else if (bitDepth == 32)
-				return CMP_FORMAT_RGB_32F;
-			break;
-		case CMImageFormat::RGBA8:
-			if (bitDepth == 8)
-				return CMP_FORMAT_RGBA_8888;
-			else if (bitDepth == 16)
-				return CMP_FORMAT_RGBA_16F;
-			else if (bitDepth == 32)
-				return CMP_FORMAT_RGBA_32F;
-			break;
-		}
-		
-		return CMP_FORMAT_Unknown;
-	}
-
-	static bool IsFormatSupportedForBCn(CMImageFormat pixelFormat, u32 bitDepth, CMImageSourceFormat outputFormat)
-	{
-		switch (pixelFormat)
-		{
-		case CMImageFormat::R8:
-			if (outputFormat == CMImageSourceFormat::BC4 && bitDepth == 8)
-				return true;
-			break;
-		case CMImageFormat::RG8:
-			if (outputFormat == CMImageSourceFormat::BC5 && bitDepth == 8)
-				return true;
-			break;
-		case CMImageFormat::RGB8:
-			if ((outputFormat == CMImageSourceFormat::BC1 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
-				return true;
-			break;
-		case CMImageFormat::RGBA8:
-			if ((outputFormat == CMImageSourceFormat::BC3 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
-				return true;
-			break;
-		case CMImageFormat::RGB32:
-		case CMImageFormat::RGBA32:
-			if (outputFormat == CMImageSourceFormat::BC6H)
-				return true;
-			break;
-		}
-		
-		return false;
-	}
-#endif
 
 	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat destFormat, float quality)
 	{
-#if PLATFORM_DESKTOP
+#if false
 		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
 			return false;
 		if ((int)destFormat < (int)CMImageSourceFormat::BC1 ||
@@ -643,10 +500,8 @@ namespace CE
 
 		CMP_CompressOptions options = CMP_CompressOptions();
 		options.dwSize = sizeof(options);
-		options.nEncodeWith = CMP_GPU_DXC;//CMP_GPU_HW;
-		options.fquality = quality;
-		options.nGPUDecode = GPUDecode_DIRECTX;
-		options.bUseGPUDecompress = true;
+		options.nEncodeWith = CMP_GPU_HW;
+		options.fquality = 0.01f;
 
 		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
 		if (status != CMP_OK)

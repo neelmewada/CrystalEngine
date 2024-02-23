@@ -28,7 +28,10 @@ namespace CE
 		CE::TextureFormat pixelFormat = CE::TextureFormat::None;
 
 		FIELD()
-		TextureCompressionSettings compression = TextureCompressionSettings::Default;
+		TextureCompressionQuality compressionQuality = TextureCompressionQuality::Default;
+
+		FIELD()
+		TextureSourceCompressionFormat sourceCompressionFormat = TextureSourceCompressionFormat::None;
 
 		FIELD()
 		RHI::FilterMode filter = RHI::FilterMode::Linear;
@@ -53,6 +56,10 @@ namespace CE
 
 		FIELD()
 		u32 mipLevels = 1;
+
+#if PAL_TRAIT_BUILD_EDITOR
+		friend class CE::Editor::TextureAssetImportJob;
+#endif
 	};
     
 } // namespace CE

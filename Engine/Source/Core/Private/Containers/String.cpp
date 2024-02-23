@@ -952,12 +952,13 @@ namespace CE
 
     bool String::TryParse(const String& string, b8& outValue)
     {
-        if (string == "true" || string == "True")
+        String lower = string.ToLower();
+        if (lower == "true")
         {
             outValue = true;
             return true;
         }
-        else if (string == "false" || string == "False")
+        else if (lower == "false")
         {
             outValue = false;
             return true;

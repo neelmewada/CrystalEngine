@@ -47,6 +47,7 @@ namespace CE
         
         auto len = inFile.GetLength();
         char* buffer = new char[len + 1];
+        memset(buffer, 0, len + 1);
         char* bufferPtr = buffer;
         inFile.Read(len, buffer);
         inFile.Close();

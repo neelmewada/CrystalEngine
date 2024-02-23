@@ -371,7 +371,16 @@ namespace CE
 			if (stringValue.EndsWith("\""))
 				stringValue = stringValue.GetSubstringView(0, stringValue.GetLength() - 1);
             
-            if (fieldTypeId == TYPEID(String))
+			if (field->IsEnumField())
+			{
+				EnumType* enumType = (EnumType*)fieldDeclType;
+				EnumConstant* enumValue = enumType->FindConstantWithName(stringValue);
+				if (enumValue)
+				{
+					field->SetFieldEnumValue(this, enumValue->GetValue());
+				}
+			}
+            else if (fieldTypeId == TYPEID(String))
             {
                 field->SetFieldValue<String>(this, stringValue);
             }

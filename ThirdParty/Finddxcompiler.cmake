@@ -58,11 +58,6 @@ ce_add_rt_deps(dxcompiler
     ROOT_PATH "${${LIB_NAME}_LIBS_DIR}/$<IF:$<CONFIG:Development,Profile>,Development,$<CONFIG>>"
     COPY_LIBS
         dxcompiler
-    COPY_FILES
-        $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler.pdb>
-        $<${PAL_PLATFORM_IS_WINDOWS}:dxcompiler.exp>
-        $<${PAL_PLATFORM_IS_WINDOWS}:dxc.exe>
-        $<${PAL_PLATFORM_IS_WINDOWS}:dxc.pdb>
 )
 
 
