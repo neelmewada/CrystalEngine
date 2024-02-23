@@ -109,7 +109,7 @@ namespace CE
 		{
 			processMode = ProcessMode::Individual;
 			
-			auto inputs = parsedOptions.unmatched();//parsedOptions["i"].as<std::vector<std::string>>();
+			auto inputs = parsedOptions.unmatched();
 		
 			for (const auto& input : inputs)
 			{
@@ -215,9 +215,11 @@ namespace CE
 
 		// Wait for all jobs to complete
 		jobManager->Complete();
+		int failCounter = 0;
 
 		for (auto importer : importers)
 		{
+			failCounter += importer->GetNumFailedJobs();
 			importer->Destroy();
 		}
 		importers.Clear();
@@ -227,7 +229,7 @@ namespace CE
 		PreShutdown();
 		Shutdown();
 
-		return 0;
+		return failCounter;
 	}
 
 	void AssetProcessor::Initialize()

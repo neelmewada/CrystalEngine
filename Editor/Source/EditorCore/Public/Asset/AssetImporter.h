@@ -39,6 +39,8 @@ namespace CE::Editor
 
 		inline void SetTempDirectoryPath(const IO::Path& tempDir) { this->tempDirectory = tempDir; }
 
+		inline int GetNumFailedJobs() const { return numFailedJobs; }
+
     protected:
 
 		void OnAssetImportJobFinish(AssetImportJob* job);
@@ -47,6 +49,7 @@ namespace CE::Editor
 
 		SharedMutex mutex{};
 		int numJobsInProgress = 0;
+		int numFailedJobs = 0;
 		bool enableLogging = false;
 		IO::Path tempDirectory{};
 
