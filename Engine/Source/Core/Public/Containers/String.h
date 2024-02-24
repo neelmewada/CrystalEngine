@@ -379,8 +379,10 @@ namespace CE
 		char* Buffer = nullptr;
 		u32 Capacity = 0; // Size of dynamic buffer in bytes
 
-		bool bIsUsingDynamicBuffer = false;
+		//bool bIsUsingDynamicBuffer = false;
 		u32 StringLength = 0;
+
+        //void* impl = nullptr;
 	};
 
     template<>

@@ -705,7 +705,7 @@ namespace CE
 
 		for (auto field = templateClass->GetFirstField(); field != nullptr; field = field->GetNext())
 		{
-			auto destField = thisClass->FindFieldWithName(field->GetName(), field->GetTypeId());
+			auto destField = thisClass->FindFieldWithName(field->GetName());
 			if (destField->GetTypeId() != field->GetTypeId()) // Type mismatch
 				continue;
 			if (destField->IsInternal()) // Do NOT modify name & uuid fields

@@ -52,8 +52,8 @@ namespace CE
 
     private:
 
-        u32 slotIndex;
-        ThreadId threadId;
+        u32 slotIndex = 0;
+        ThreadId threadId = 0;
 
         static u32 tlsSlotIndex;
         static SharedMutex mutex;

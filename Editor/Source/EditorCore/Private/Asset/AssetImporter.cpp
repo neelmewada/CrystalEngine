@@ -47,6 +47,31 @@ namespace CE::Editor
 		return true;
 	}
 
+	bool AssetImporter::ImportSourceAssets(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets)
+	{
+		if (productAssets.GetSize() != sourceAssets.GetSize())
+		{
+			CE_LOG(Error, All, "Failed to ImportSourceAssetsAsync(): productAssets array does not match the size of sourceAssets");
+			return false;
+		}
+
+		auto jobs = CreateImportJobs(sourceAssets, productAssets);
+
+		for (auto job : jobs)
+		{
+			job->includePaths = includePaths;
+			job->targetPlatform = targetPlatform;
+			job->SetAutoDelete(true);
+
+			job->Process();
+			job->Finish();
+			delete job;
+		}
+		jobs.Clear();
+
+		return true;
+	}
+
 	void AssetImporter::OnAssetImportJobFinish(AssetImportJob* job)
 	{
 		LockGuard<SharedMutex> lock{ mutex };

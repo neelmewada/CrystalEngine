@@ -25,6 +25,8 @@ namespace CE::Editor
 
 		bool ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
 
+		bool ImportSourceAssets(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
+
 		inline void ClearImportResults() { importResults.Clear(); }
         
 		inline bool IsImportInProgress() const { return numJobsInProgress > 0; }

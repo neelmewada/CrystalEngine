@@ -11,8 +11,6 @@ namespace CE
 {
     static FixedSizeFreeListAllocator<STRING_BUFFER_SIZE, STRING_BUFFER_GROW_COUNT> StaticBufferAllocator{ STRING_BUFFER_GROW_COUNT };
 
-    static Mutex stringAllocMutex{};
-
     static ThreadId gMainThreadId = Thread::GetCurrentThreadId();
 
     namespace Internal
@@ -20,7 +18,11 @@ namespace CE
         class CORE_API StaticStringBlockAllocator : public ThreadSingleton<StaticStringBlockAllocator>
         {
         public:
-            StaticStringBlockAllocator() {}
+            StaticStringBlockAllocator() 
+            {
+                
+            }
+
             virtual ~StaticStringBlockAllocator()
             {
                 if (Thread::GetCurrentThreadId() == gMainThreadId)
@@ -33,7 +35,32 @@ namespace CE
                 staticBufferAllocator.FreeAll();
             }
 			
+            inline void Free(char* buffer)
+            {
+                ThreadId curThreadId = Thread::GetCurrentThreadId();
+                ThreadId creationThreadId = GetThreadId();
+
+                if (creationThreadId != curThreadId)
+                {
+                    Uuid();
+                }
+
+                staticBufferAllocator.Free(buffer);
+            }
+
+            inline char* Allocate()
+            {
+                ThreadId curThreadId = Thread::GetCurrentThreadId();
+
+                return (char*)staticBufferAllocator.Allocate();
+            }
+
+        private:
+
             FixedSizeFreeListAllocator<STRING_BUFFER_SIZE, STRING_BUFFER_GROW_COUNT> staticBufferAllocator{ STRING_BUFFER_GROW_COUNT };
+
+            SharedMutex blocksToFreeMutex{};
+            List<char*> blocksToFree{};
         };
     }
 
@@ -88,14 +115,12 @@ namespace CE
     String::String(String&& move) noexcept
         : Buffer(move.Buffer)
         , Capacity(move.Capacity)
-        , bIsUsingDynamicBuffer(move.bIsUsingDynamicBuffer)
         , StringLength(move.StringLength)
     {
         // Zero out 'move'
         move.Buffer = nullptr;
         move.Capacity = 0;
         move.StringLength = 0;
-        move.bIsUsingDynamicBuffer = false;
     }
 
     String::String(const String& copy)
@@ -127,15 +152,12 @@ namespace CE
 
     String::~String()
 	{
-        if (!bIsUsingDynamicBuffer && Buffer != nullptr)
-        {
-            Internal::StaticStringBlockAllocator::Get().staticBufferAllocator.Free(Buffer);
-            //StaticBufferAllocator.Free(Buffer);
-        }
-        else
         {
             delete[] Buffer;
         }
+
+        Buffer = nullptr;
+        Capacity = StringLength = 0;
     }
 
     void String::Reserve(u32 reserveCharacterCount)
@@ -149,33 +171,29 @@ namespace CE
 			return;
         }
 
-		if (Buffer == nullptr)
-			bIsUsingDynamicBuffer = false;
-
         reserveCharacterCount++; // Add extra byte for null terminator
 
-        if (reserveCharacterCount > STRING_BUFFER_SIZE) // Use dynamic buffer
+        //if (reserveCharacterCount > STRING_BUFFER_SIZE) // Use dynamic buffer
         {
-            if (!bIsUsingDynamicBuffer && Buffer == nullptr) // If we need a dynamic buffer from the get-go
+            if (Buffer == nullptr) // If we need a dynamic buffer from the get-go
             {
                 Capacity = reserveCharacterCount;
                 Buffer = new char[Capacity];
                 Buffer[0] = 0;
             }
-            else if (!bIsUsingDynamicBuffer && Buffer != nullptr) // If we were using static buffer earlier
-            {
-                auto staticBuffer = Buffer;
-
-                Capacity = reserveCharacterCount;
-                Buffer = new char[Capacity];
-                if (StringLength > 0)
-                    memcpy(Buffer, staticBuffer, StringLength + 1);
-                else
-                    Buffer[0] = 0;
-
-                Internal::StaticStringBlockAllocator::Get().staticBufferAllocator.Free(staticBuffer);
-            }
-            else if (bIsUsingDynamicBuffer && reserveCharacterCount > Capacity && Buffer != nullptr) // If we were already using dynamic buffer, but need more capacity
+            //else if (impl != nullptr && Buffer != nullptr) // If we were using static buffer earlier
+            //{
+            //    auto staticBuffer = Buffer;
+            //    Capacity = reserveCharacterCount;
+            //    Buffer = new char[Capacity];
+            //    if (StringLength > 0)
+            //        memcpy(Buffer, staticBuffer, StringLength + 1);
+            //    else
+            //        Buffer[0] = 0;
+            //    ((Internal::StaticStringBlockAllocator*)impl)->Free(staticBuffer);
+            //    impl = nullptr;
+            //}
+            else if (reserveCharacterCount > Capacity && Buffer != nullptr) // If we were already using dynamic buffer, but need more capacity
             {
                 auto stagingBuffer = new char[reserveCharacterCount];
                 if (StringLength > 0)
@@ -187,37 +205,34 @@ namespace CE
                 delete[] Buffer;
                 Buffer = stagingBuffer;
             }
-
-            bIsUsingDynamicBuffer = true;
         }
-        else if (!bIsUsingDynamicBuffer && Buffer == nullptr) // If static buffer is enough, and it is not yet created
-        {
-            Capacity = reserveCharacterCount;
-            Buffer = (char*)Internal::StaticStringBlockAllocator::Get().staticBufferAllocator.Allocate();
-            //Buffer = (char*)StaticBufferAllocator.Allocate();
-            Buffer[0] = 0;
-            bIsUsingDynamicBuffer = false;
-        }
-		else if (!bIsUsingDynamicBuffer && Buffer != nullptr && reserveCharacterCount > Capacity) // If static buffer is enough, but we need more capacity
-		{
-			Capacity = reserveCharacterCount;
-		}
+  //      else if (Buffer == nullptr) // If static buffer is enough, and it is not yet created
+  //      {
+  //          impl = &Internal::StaticStringBlockAllocator::Get();
+  //          Capacity = reserveCharacterCount;
+  //          Buffer = (char*)((Internal::StaticStringBlockAllocator*)impl)->Allocate();
+  //          Buffer[0] = 0;
+  //      }
+		//else if (impl != nullptr && Buffer != nullptr && reserveCharacterCount > Capacity) // If static buffer is enough, but we need more capacity
+		//{
+		//	Capacity = reserveCharacterCount;
+		//}
     }
 
     void String::Free()
     {
-		if (!bIsUsingDynamicBuffer && Buffer != nullptr)
-		{
-			Internal::StaticStringBlockAllocator::Get().staticBufferAllocator.Free(Buffer);
-		}
-		else
+		//if (impl != nullptr && Buffer != nullptr)
+		//{
+  //          ((Internal::StaticStringBlockAllocator*)impl)->Free(Buffer);
+		//}
+		//else
 		{
 			delete[] Buffer;
 		}
 
 		Buffer = nullptr;
 		Capacity = StringLength = 0;
-		bIsUsingDynamicBuffer = false;
+        //impl = nullptr;
     }
 
     char* String::GetCString() const
