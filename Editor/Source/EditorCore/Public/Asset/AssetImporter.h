@@ -24,6 +24,8 @@ namespace CE::Editor
 		void ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets);
 
 		bool ImportSourceAssetsAsync(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
+
+		inline void ClearImportResults() { importResults.Clear(); }
         
 		inline bool IsImportInProgress() const { return numJobsInProgress > 0; }
 
@@ -39,8 +41,6 @@ namespace CE::Editor
 
 		inline void SetTempDirectoryPath(const IO::Path& tempDir) { this->tempDirectory = tempDir; }
 
-		inline int GetNumFailedJobs() const { return numFailedJobs; }
-
     protected:
 
 		void OnAssetImportJobFinish(AssetImportJob* job);
@@ -49,7 +49,6 @@ namespace CE::Editor
 
 		SharedMutex mutex{};
 		int numJobsInProgress = 0;
-		int numFailedJobs = 0;
 		bool enableLogging = false;
 		IO::Path tempDirectory{};
 

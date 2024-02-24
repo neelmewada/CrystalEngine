@@ -497,6 +497,9 @@ TEST(Containers, DateTime)
 {
 	TEST_BEGIN;
 
+	DateTime utcTime = DateTime::UtcNow();
+	DateTime localTime = DateTime::Now();
+
 	{
 		DateTime now = DateTime::Now();
 		DateTime copy = now;

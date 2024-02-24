@@ -811,7 +811,12 @@ namespace CE
 			TYPEID(ClassType), TYPEID(StructType), TYPEID(EnumType), TYPEID(SubClassType<>)
 		};
 
-		if (fieldDeclType->IsPOD())
+		if (fieldDeclType->IsEnum())
+		{
+			auto value = srcField->GetFieldEnumValue(srcInstance);
+			dstField->ForceSetFieldEnumValue(dstInstance, value);
+		}
+		else if (fieldDeclType->IsPOD())
 		{
 			if (fieldDeclId == TYPEID(String))
 			{

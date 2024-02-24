@@ -11,7 +11,6 @@ namespace CE
 			("p,pack", "Package the assets for final distribution build. (Not implemented yet)")
 			("I,include", "Include path directories for shaders, etc.", cxxopts::value<std::vector<std::string>>())
 			("M,mode", "Processing mode: either Engine or Game. If assets should be processed as engine or game assets.", cxxopts::value<std::string>()->default_value("Game"))
-			("i,input", "Use this flag to add input files.")
 			("R,output-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
 			("D,input-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
 			("T,target", "Target platform. Values: Windows, Linux, Mac, Android, iOS", cxxopts::value<std::string>()->default_value(""))
@@ -102,19 +101,12 @@ namespace CE
 		}
 
 		individualAssetPaths.Clear();
-
-		bool isMultipleFileInput = parsedOptions["i"].as<bool>();
-
-		if (isMultipleFileInput)
-		{
-			processMode = ProcessMode::Individual;
-			
-			auto inputs = parsedOptions.unmatched();
+	
+		auto inputs = parsedOptions.unmatched();
 		
-			for (const auto& input : inputs)
-			{
-				individualAssetPaths.Add(input);
-			}
+		for (const auto& input : inputs)
+		{
+			individualAssetPaths.Add(input);
 		}
 	
 		gProjectPath = PlatformDirectories::GetLaunchDir();
@@ -126,30 +118,71 @@ namespace CE
 		if (individualAssetPaths.NonEmpty())
 		{
 			allSourceAssetPaths.AddRange(individualAssetPaths);
-			
-			for (const auto& sourcePath : allSourceAssetPaths)
-			{
-				if (inputRoot != outputRoot)
-				{
-					IO::Path relativeSourcePath = IO::Path::GetRelative(sourcePath, inputRoot);
-					IO::Path productPath = outputRoot / relativeSourcePath;
-					productPath = productPath.ReplaceExtension(".casset");
-					if (!productPath.GetParentPath().Exists())
-					{
-						IO::Path::CreateDirectories(productPath.GetParentPath());
-					}
-					allProductAssetPaths.Add(productPath);
-				}
-				else
-				{
-					IO::Path productPath = sourcePath.ReplaceExtension(".casset");
-					allProductAssetPaths.Add(productPath);
-				}
-			}
 		}
-		else // non-individual modes
+		else // process only modified files
 		{
+			inputRoot.RecursivelyIterateChildren([&](const IO::Path& path)
+				{
+					if (path.IsDirectory())
+						return;
+					String fileName = path.GetFilename().GetString();
+					String extension = path.GetExtension().GetString();
+					if (extension == ".cmake" || fileName == "CMakeLists.txt")
+						return;
 
+					DateTime lastWriteTime = path.GetLastWriteTime();
+
+					IO::Path relativePath = IO::Path::GetRelative(path, inputRoot);
+					IO::Path stampFilePath = tempDir / relativePath.ReplaceExtension(".stamp");
+
+					if (!stampFilePath.GetParentPath().Exists())
+					{
+						IO::Path::CreateDirectories(stampFilePath.GetParentPath());
+					}
+
+					if (!stampFilePath.Exists())
+					{
+						allSourceAssetPaths.Add(path);
+					}
+					else // File exists
+					{
+						FileStream reader = FileStream(stampFilePath, Stream::Permissions::ReadOnly);
+						reader.SetBinaryMode(true);
+						
+						u32 version = 0;
+						reader >> version;
+						
+						u64 stampedTimeInt = 0;
+						reader >> stampedTimeInt;
+
+						DateTime stampedTime = DateTime::FromNumber(stampedTimeInt);
+
+						if (lastWriteTime != stampedTime) // Source asset modified
+						{
+							allSourceAssetPaths.Add(path);
+						}
+					}
+				});
+		}
+
+		for (const auto& sourcePath : allSourceAssetPaths)
+		{
+			if (inputRoot != outputRoot)
+			{
+				IO::Path relativeSourcePath = IO::Path::GetRelative(sourcePath, inputRoot);
+				IO::Path productPath = outputRoot / relativeSourcePath;
+				productPath = productPath.ReplaceExtension(".casset");
+				if (!productPath.GetParentPath().Exists())
+				{
+					IO::Path::CreateDirectories(productPath.GetParentPath());
+				}
+				allProductAssetPaths.Add(productPath);
+			}
+			else
+			{
+				IO::Path productPath = sourcePath.ReplaceExtension(".casset");
+				allProductAssetPaths.Add(productPath);
+			}
 		}
 	}
 
@@ -208,6 +241,7 @@ namespace CE
 			assetImporter->SetIncludePaths(includePaths);
 			assetImporter->SetLogging(true);
 			assetImporter->SetTargetPlatform(targetPlatform);
+			assetImporter->SetTempDirectoryPath(tempDir);
 
 			importers.Add(assetImporter);
 			assetImporter->ImportSourceAssetsAsync(sourcePaths, productPathsByAssetDef[assetDef]);
@@ -215,14 +249,35 @@ namespace CE
 
 		// Wait for all jobs to complete
 		jobManager->Complete();
-		int failCounter = 0;
+		Array<AssetImportJobResult> assetImportResults{};
 
 		for (auto importer : importers)
 		{
-			failCounter += importer->GetNumFailedJobs();
+			assetImportResults.AddRange(importer->GetResults());
 			importer->Destroy();
 		}
 		importers.Clear();
+
+		int failCounter = 0;
+
+		// Update time stamps
+		//for (const auto& result : assetImportResults)
+		//{
+		//	IO::Path relativePath = IO::Path::GetRelative(result.sourcePath, inputRoot);
+		//	IO::Path stampFilePath = tempDir / relativePath.ReplaceExtension(".stamp");
+		//	if (result.success)
+		//	{
+		//		FileStream writer = FileStream(stampFilePath, Stream::Permissions::WriteOnly);
+		//		writer.SetBinaryMode(true);
+		//		u32 version = 0;
+		//		writer << version;
+		//		writer << result.sourcePath.GetLastWriteTime().ToNumber();
+		//	}
+		//	else
+		//	{
+		//		failCounter++;
+		//	}
+		//}
 
 		Logger::Shutdown();
 

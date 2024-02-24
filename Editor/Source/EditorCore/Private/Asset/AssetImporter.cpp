@@ -34,7 +34,6 @@ namespace CE::Editor
 		}
 
 		auto jobs = CreateImportJobs(sourceAssets, productAssets);
-		numFailedJobs = 0;
 
 		for (auto job : jobs)
 		{
@@ -60,7 +59,6 @@ namespace CE::Editor
 
 		if (!job->success)
 		{
-			numFailedJobs++;
 			CE_LOG(Error, All, "Failed to import asset {}. Error: {}", job->sourcePath, job->errorMessage);
 		}
 		else if (enableLogging)

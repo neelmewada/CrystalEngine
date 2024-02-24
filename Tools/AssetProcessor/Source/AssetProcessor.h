@@ -27,13 +27,6 @@ namespace CE
 			Plugin,
 		};
 
-		enum class ProcessMode
-		{
-			Individual,
-			All,
-			New
-		};
-
 		AssetProcessor(int argc, char** argv);
 
 		~AssetProcessor();
@@ -53,7 +46,6 @@ namespace CE
 		cxxopts::ParseResult parsedOptions{};
 
 		AssetMode mode{};
-		ProcessMode processMode{};
 
 		IO::Path tempDir{};
 		IO::Path inputRoot{};

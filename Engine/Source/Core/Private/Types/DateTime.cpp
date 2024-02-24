@@ -1,17 +1,30 @@
 #include "CoreMinimal.h"
 
+#include <chrono>
+#include <ctime>
 #include <spdlog/fmt/chrono.h>
 
 namespace CE
 {
     DateTime::DateTime()
     {
+        auto now = std::chrono::system_clock::now();
 
+        time_t timeUtc = std::chrono::system_clock::to_time_t(now);
+
+        timeInfo = *std::localtime(&timeUtc);
     }
 
     DateTime::~DateTime()
     {
 
+    }
+
+    DateTime::DateTime(fs::file_time_type fileTime)
+    {
+        const auto systemTime = std::chrono::clock_cast<std::chrono::system_clock>(fileTime);
+        const auto time = std::chrono::system_clock::to_time_t(systemTime);
+        timeInfo = *std::localtime(&time);
     }
 
     DateTime DateTime::Now()

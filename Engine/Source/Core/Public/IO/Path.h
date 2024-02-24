@@ -59,7 +59,7 @@ namespace CE::IO
             return impl.is_absolute();
         }
 
-		inline auto GetLastWriteTime()
+		inline DateTime GetLastWriteTime() const
 		{
 			return fs::last_write_time(impl);
 		}

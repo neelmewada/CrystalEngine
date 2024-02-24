@@ -1,6 +1,10 @@
 #pragma once
 
 #include <chrono>
+#include <filesystem>
+#include <fstream>
+
+namespace fs = std::filesystem;
 
 namespace CE
 {
@@ -11,6 +15,8 @@ namespace CE
 
         DateTime();
         ~DateTime();
+
+        DateTime(fs::file_time_type fileTime);
 
         static DateTime Now();
 
