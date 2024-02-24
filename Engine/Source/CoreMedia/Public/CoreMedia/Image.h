@@ -82,13 +82,6 @@ namespace CE
 		// Encodes raw image pixel data to PNG format
 		static bool EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth = 8);
 
-		// Decodes raw image pixel data from PNG format
-		static CMImage DecodePNG(const CMImage& source, MemoryStream* inStream);
-
-		// Encodes raw image data to BCn format (BC7, BC1, etc). NOTE: Only supported on Desktop platforms!
-		// Quality: 0 to 1. Higher the quality, slower the processing.
-		static bool EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat toBCnFormat, float quality = 0.1f);
-
         // - Public API -
 
         /// Always call the Free() function when image is no longer needed!

@@ -94,7 +94,7 @@ function(ce_add_assets NAME)
     
     add_custom_command(TARGET ${NAME}
         PRE_BUILD
-        COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" --temp "${TEMP_DIR}"
+        COMMAND "AssetProcessor" --mode "${ce_add_assets_TYPE}" -I "${CMAKE_SOURCE_DIR}/Engine/Shaders" --target "${PAL_PLATFORM_NAME}" --input-root "${CMAKE_CURRENT_SOURCE_DIR}" --output-root "${OUTPUT_DIRECTORY}" --temp "${TEMP_DIR}" --project "${CE_OUTPUT_DIR}"
     )
 
     set_target_properties(${NAME} 

@@ -427,9 +427,9 @@ namespace CE
 		CE::Array<FieldType> localFields{};
 		CE::Array<TypeId> superTypeIds{};
 		CE::Array<FunctionType> localFunctions{};
-		bool fieldsCached = false;
-		bool functionsCached = false;
-		bool attributesCached = false;
+		Atomic<bool> fieldsCached = false;
+		Atomic<bool> functionsCached = false;
+		Atomic<bool> attributesCached = false;
 		u32 size = 0;
 
 		//RecursiveMutex rttiMutex{};

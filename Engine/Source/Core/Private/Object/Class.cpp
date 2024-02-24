@@ -113,8 +113,7 @@ namespace CE
 
     FieldType* StructType::GetFirstField()
     {
-        if (!fieldsCached)
-            CacheAllFields();
+        CacheAllFields();
 
         if (cachedFields.GetSize() == 0)
             return nullptr;
@@ -142,24 +141,21 @@ namespace CE
 
     u32 StructType::GetFieldCount()
     {
-        if (!fieldsCached)
-            CacheAllFields();
+        CacheAllFields();
 
         return cachedFields.GetSize();
     }
 
     FieldType* StructType::GetFieldAt(u32 index)
     {
-        if (!fieldsCached)
-            CacheAllFields();
+        CacheAllFields();
 
         return index < GetFieldCount() ? &cachedFields[index] : nullptr;
     }
 
     FieldType* StructType::FindFieldWithName(const Name& name, TypeId fieldTypeId)
     {
-        if (!fieldsCached)
-            CacheAllFields();
+        CacheAllFields();
         
         if (cachedFieldsMap[name] != nullptr)
 		{

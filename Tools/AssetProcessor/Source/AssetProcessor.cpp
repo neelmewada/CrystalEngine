@@ -1,6 +1,7 @@
 #include "AssetProcessor.h"
 
 #define LOG(x) std::cout << x << std::endl;
+#define LOGERR(x) std::cerr << x << std::endl;
 
 namespace CE
 {
@@ -15,6 +16,7 @@ namespace CE
 			("D,input-root", "Path to root of the assets directory.", cxxopts::value<std::string>())
 			("T,target", "Target platform. Values: Windows, Linux, Mac, Android, iOS", cxxopts::value<std::string>()->default_value(""))
 			("t,temp", "Temporary directory path", cxxopts::value<std::string>())
+			("P,project", "Project root directory", cxxopts::value<std::string>()->default_value(""))
 			;
 
 		try
@@ -31,7 +33,7 @@ namespace CE
 		}
 		catch (std::exception exc)
 		{
-			LOG("Failed to parse arguments: " << exc.what());
+			LOGERR("Failed to parse arguments: " << exc.what());
 			exit(-1);
 		}
 
@@ -42,6 +44,7 @@ namespace CE
 		tempDir = tempDir / "AssetCache";
 
 		String targetName = parsedOptions["T"].as<std::string>();
+		String projectPath = parsedOptions["P"].as<std::string>();
 
 		if (targetName == "Windows")
 		{
@@ -110,6 +113,8 @@ namespace CE
 		}
 	
 		gProjectPath = PlatformDirectories::GetLaunchDir();
+		if (projectPath.NonEmpty())
+			gProjectPath = projectPath;
 		gProjectName = "AssetProcessor";
 	
 		allSourceAssetPaths.Clear();
@@ -261,23 +266,26 @@ namespace CE
 		int failCounter = 0;
 
 		// Update time stamps
-		//for (const auto& result : assetImportResults)
-		//{
-		//	IO::Path relativePath = IO::Path::GetRelative(result.sourcePath, inputRoot);
-		//	IO::Path stampFilePath = tempDir / relativePath.ReplaceExtension(".stamp");
-		//	if (result.success)
-		//	{
-		//		FileStream writer = FileStream(stampFilePath, Stream::Permissions::WriteOnly);
-		//		writer.SetBinaryMode(true);
-		//		u32 version = 0;
-		//		writer << version;
-		//		writer << result.sourcePath.GetLastWriteTime().ToNumber();
-		//	}
-		//	else
-		//	{
-		//		failCounter++;
-		//	}
-		//}
+		if (false)
+		{
+			for (const auto& result : assetImportResults)
+			{
+				IO::Path relativePath = IO::Path::GetRelative(result.sourcePath, inputRoot);
+				IO::Path stampFilePath = tempDir / relativePath.ReplaceExtension(".stamp");
+				if (result.success)
+				{
+					FileStream writer = FileStream(stampFilePath, Stream::Permissions::WriteOnly);
+					writer.SetBinaryMode(true);
+					u32 version = 0;
+					writer << version;
+					writer << result.sourcePath.GetLastWriteTime().ToNumber();
+				}
+				else
+				{
+					failCounter++;
+				}
+			}
+		}
 
 		Logger::Shutdown();
 

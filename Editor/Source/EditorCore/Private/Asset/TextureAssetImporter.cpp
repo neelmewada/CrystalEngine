@@ -128,7 +128,7 @@ namespace CE::Editor
 		{
 			float quality = 0.05f;
 			CMImageEncoder encoder{};
-			bool success = encoder.EncodeToBCn(sourcePath, texture->source, targetSourceFormat, quality);
+			bool success = encoder.EncodeToBCn(image, texture->source, targetSourceFormat, CMImageEncoder::Quality_Normal);
 			if (!success)
 			{
 				errorMessage = "Failed to encode to BCn format!";

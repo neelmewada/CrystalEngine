@@ -7,12 +7,20 @@ namespace CE
     {
     public:
 
+        enum Quality
+        {
+            Quality_Preview = 0,
+            Quality_Fast,
+            Quality_Normal,
+            Quality_Slow
+        };
+
         CMImageEncoder();
         ~CMImageEncoder();
 
         inline const String& GetErrorMessage() const { return errorMessage; }
 
-        bool EncodeToBCn(const IO::Path& sourceFile, BinaryBlob& outData, CMImageSourceFormat destBCnFormat, float quality = 0.1f);
+        bool EncodeToBCn(const CMImage& image, BinaryBlob& outData, CMImageSourceFormat destBCnFormat, Quality quality = Quality_Normal);
 
     private:
 

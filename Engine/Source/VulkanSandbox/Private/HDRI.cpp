@@ -704,11 +704,11 @@ namespace CE::Sandbox
 		// Order: right, left, top, bottom, front, back
 		Matrix4x4 captureViews[] = {
 			Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f,  0.0f,  1.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix()
+			Quat::LookRotation(Vec3(1.0f,  0.0f,  0.0f),  Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  1.0f,  0.0f),  Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f, -1.0f,  0.0f),  Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f,  1.0f),  Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f),  Vec3(0.0f, -1.0f,  0.0f)).ToMatrix()
 		};
 
 		for (int i = 0; i < 6; i++)

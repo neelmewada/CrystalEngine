@@ -4,11 +4,6 @@
 #include "lodepng.h"
 #include "lodepng_util.h"
 
-#if PLATFORM_DESKTOP
-#define CMP_STATIC
-#include "compressonator.h"
-#endif
-
 #include "stb_image.h"
 
 namespace CE
@@ -460,80 +455,6 @@ namespace CE
 		return image;
 	}
 
-	bool CMImage::EncodeToBCn(const CMImage& source, Stream* outStream, CMImageSourceFormat destFormat, float quality)
-	{
-#if false
-		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
-			return false;
-		if ((int)destFormat < (int)CMImageSourceFormat::BC1 ||
-			(int)destFormat > (int)CMImageSourceFormat::BC7)
-			return false;
-		if (!IsFormatSupportedForBCn(source.format, source.bitDepth, destFormat))
-			return false;
-
-		CMP_Texture src{};
-		src.dwWidth = source.GetWidth();
-		src.dwHeight = source.GetHeight();
-		src.dwSize = sizeof(CMP_Texture);
-		src.format = CMImageFormatToSourceCMPFormat(source.format, source.bitDepth, source.bitsPerPixel);
-		src.pData = (CMP_BYTE*)source.data;
-		src.dwDataSize = source.GetDataSize();
-
-		if (src.format == CMP_FORMAT_Unknown)
-			return false;
-
-		CMP_Texture dest{};
-		dest.dwPitch = 0;
-		dest.dwWidth = source.GetWidth();
-		dest.dwHeight = source.GetHeight();
-		dest.dwSize = sizeof(CMP_Texture);
-		dest.format = CalculateDestinationCMPFormat(source.format, destFormat, source.bitDepth, source.bitsPerPixel);
-		if (dest.format == CMP_FORMAT_Unknown)
-			return false;
-
-		dest.dwDataSize = CMP_CalculateBufferSize(&dest);
-		dest.pData = (CMP_BYTE*)Memory::Malloc(dest.dwDataSize);
-
-		defer(
-			Memory::Free(dest.pData);
-		);
-
-		CMP_CompressOptions options = CMP_CompressOptions();
-		options.dwSize = sizeof(options);
-		options.nEncodeWith = CMP_GPU_HW;
-		options.fquality = 0.01f;
-
-		CMP_ERROR status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
-		if (status != CMP_OK)
-		{
-#if PLATFORM_WINDOWS
-			options.nEncodeWith = CMP_GPU_DXC;
-			status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
-#endif
-			if (status != CMP_OK)
-			{
-				options.nEncodeWith = CMP_GPU_VLK;
-				status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
-			}
-
-			if (status != CMP_OK)
-			{
-				options.nEncodeWith = CMP_HPC;
-				status = CMP_ConvertTexture(&src, &dest, &options, nullptr);
-			}
-
-			CE_LOG(Error, All, "BCn Encoding failed: {}", (int)status);
-			return false;
-		}
-
-		outStream->Write(dest.pData, dest.dwDataSize);
-
-		return true;
-#else // !PLATFORM_DESKTOP
-		return false;
-#endif
-	}
-
 	bool CMImage::EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth)
 	{
 		if (!source.IsValid() || outStream == nullptr || !outStream->CanWrite())
@@ -579,61 +500,6 @@ namespace CE
 		}
 
 		return true;
-	}
-
-	CMImage CMImage::DecodePNG(const CMImage& source, MemoryStream* inStream)
-	{
-		if (!source.IsValid() || inStream == nullptr || !inStream->CanRead())
-			return CMImage();
-
-		CMImage image{};
-		inStream->SetBinaryMode(true);
-
-		std::vector<unsigned char> data{};
-		u32 w, h;
-		lodepng::State state{};
-
-		int length = inStream->GetLength();
-		if (length <= 0)
-			length = inStream->GetCapacity();
-
-		u32 result = lodepng::decode(data, w, h, state, (unsigned char*)inStream->GetRawDataPtr(), length);
-		if (result > 0)
-		{
-			image.failureReason = "Decoding failed";
-			return image;
-		}
-
-		image.x = w;
-		image.y = h;
-		image.numChannels = lodepng_get_channels(&state.info_png.color);
-		image.bitDepth = state.info_png.color.bitdepth;
-		image.bitsPerPixel = lodepng_get_bpp(&state.info_png.color);
-		image.sourceFormat = CMImageSourceFormat::PNG;
-
-		switch (state.info_png.color.colortype)
-		{
-		case LCT_GREY:
-			image.format = CMImageFormat::R8;
-			break;
-		case LCT_GREY_ALPHA:
-			image.format = CMImageFormat::RG8;
-			break;
-		case LCT_RGB:
-			image.format = CMImageFormat::RGB8;
-			break;
-		case LCT_RGBA:
-			image.format = CMImageFormat::RGBA8;
-			break;
-		default:
-			image.failureReason = "Invalid format";
-			return image;
-		}
-
-		image.data = (unsigned char*)Memory::Malloc(data.size());
-		memcpy(image.data, data.data(), data.size());
-
-		return image;
 	}
 
     void CMImage::Free()
