@@ -50,6 +50,7 @@ namespace CE::RPI
 		RHI::Texture* defaultNormalTex = nullptr;
 		RHI::Texture* defaultRoughnessTex = nullptr;
 
+		SharedMutex samplerCacheMutex{};
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};
 	};
     

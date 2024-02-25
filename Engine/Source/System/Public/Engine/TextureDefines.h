@@ -8,9 +8,9 @@ namespace CE
 	{
 		None = 0,
 		RGBA8,
-		BGRA32,
+		BGRA8,
 		RGB8,
-		BGR24,
+		BGR8,
 		ARGB4444,
 
 		RGB565,
@@ -19,7 +19,7 @@ namespace CE
 		// Single channel 16-bit integer
 		R16,
 		RG8,
-		RG32,
+		RG16,
 
 		// Single channel 16-bit float
 		RHalf,
@@ -101,11 +101,13 @@ namespace CE
 	ENUM()
 	enum class TextureAddressMode : int
 	{
-		Wrap = 0,
+		Repeat = 0,
 		Clamp,
-		Repeat,
+		ClampToBorder
 	};
 	ENUM_CLASS(TextureAddressMode);
+
+	SYSTEM_API RHI::SamplerAddressMode TextureAddressModeToSamplerMode(TextureAddressMode mode);
 
 	ENUM()
 	enum class TextureColorSpace : int

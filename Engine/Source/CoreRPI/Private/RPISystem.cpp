@@ -16,11 +16,15 @@ namespace CE::RPI
 
     void RPISystem::Shutdown()
     {
-        for (auto [_, sampler] : samplerCache)
         {
-            RHI::gDynamicRHI->DestroySampler(sampler);
+            LockGuard<SharedMutex> lock{ samplerCacheMutex };
+
+            for (auto [_, sampler] : samplerCache)
+            {
+                RHI::gDynamicRHI->DestroySampler(sampler);
+            }
+            samplerCache.Clear();
         }
-        samplerCache.Clear();
 
         delete defaultNormalTex; defaultNormalTex = nullptr;
         delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
@@ -29,6 +33,8 @@ namespace CE::RPI
 
     RHI::Sampler* RPISystem::FindOrCreateSampler(const RHI::SamplerDescriptor& desc)
     {
+        LockGuard<SharedMutex> lock{ samplerCacheMutex };
+
         SIZE_T hash = desc.GetHash();
         RHI::Sampler* sampler = samplerCache[hash];
         if (sampler != nullptr)

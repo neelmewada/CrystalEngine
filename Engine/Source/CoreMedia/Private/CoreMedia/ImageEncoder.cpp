@@ -134,7 +134,7 @@ namespace CE
 			image.format == CMImageFormat::RGBA16 ||
 			image.format == CMImageFormat::RGBA32)
 			useAlpha = true;
-
+		
 		switch (destFormat)
 		{
 		case CMImageSourceFormat::BC1:

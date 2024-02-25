@@ -19,7 +19,11 @@ namespace CE
 		Texture();
 		virtual ~Texture();
 
+		virtual RPI::Texture* GetRpiTexture() = 0;
+
 	protected:
+
+		RPI::Texture* rpiTexture = nullptr;
 
 		FIELD()
 		BinaryBlob source{};
@@ -37,10 +41,13 @@ namespace CE
 		RHI::FilterMode filter = RHI::FilterMode::Linear;
 
 		FIELD()
-		TextureAddressMode addressModeU = TextureAddressMode::Wrap;
+		TextureAddressMode addressModeU = TextureAddressMode::Repeat;
 
 		FIELD()
-		TextureAddressMode addressModeV = TextureAddressMode::Wrap;
+		TextureAddressMode addressModeV = TextureAddressMode::Repeat;
+
+		FIELD()
+		RHI::SamplerBorderColor borderColor = RHI::SamplerBorderColor::FloatTransparentBlack;
 
 		FIELD()
 		TextureDimension dimension = TextureDimension::None;

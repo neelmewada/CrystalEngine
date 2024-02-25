@@ -416,12 +416,15 @@ namespace CE
 		CE_INLINE void AddSuper<>() {}
 
 		// Inherited + Local fields
+		SharedMutex cachedFieldsMutex{};
 		CE::Array<FieldType> cachedFields{};
 		CE::HashMap<CE::Name, FieldType*> cachedFieldsMap{};
         
+		SharedMutex cachedFunctionsMutex{};
 		CE::Array<FunctionType> cachedFunctions{};
         CE::HashMap<CE::Name, Array<FunctionType*>> cachedFunctionsMap{};
 
+		SharedMutex cachedAttributesMutex{};
         Attribute cachedAttributes{};
 
 		CE::Array<FieldType> localFields{};

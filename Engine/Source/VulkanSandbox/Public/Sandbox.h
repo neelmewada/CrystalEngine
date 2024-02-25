@@ -51,11 +51,10 @@ namespace CE::Sandbox
 	struct MaterialTextureGroup
 	{
 		Name name{};
-		RHI::Texture* albedo = nullptr;
-		RHI::Texture* normalMap = nullptr;
-		RHI::Texture* roughnessMap = nullptr;
-		RHI::Texture* metallicMap = nullptr;
-		RHI::MemoryHeap* memoryAllocation = nullptr;
+		CE::Texture* albedo = nullptr;
+		CE::Texture* normalMap = nullptr;
+		CE::Texture* roughnessMap = nullptr;
+		CE::Texture* metallicMap = nullptr;
 
 		static MaterialTextureGroup Load(const Name& pathName);
 

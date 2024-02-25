@@ -40,7 +40,6 @@ namespace CE::Vulkan
 			return aspectMask;
 		}
         
-        virtual u32 GetBytesPerChannel() override;
         virtual u32 GetNumberOfChannels() override;
 
 		inline VkImageLayout GetVkImageLayout() const { return vkImageLayout; }
@@ -84,7 +83,7 @@ namespace CE::Vulkan
     
     VkFormat RHIFormatToVkFormat(RHI::Format format);
     RHI::Format VkFormatToRHIFormat(VkFormat format);
-    u32 GetNumberOfChannelsForFormat(RHI::Format format, u32& outByteSizePerChannel);
+    u32 GetNumberOfChannelsForFormat(RHI::Format format);
 
 	bool IsDepthVkFormat(VkFormat format);
 	bool IsStencilVkFormat(VkFormat format);

@@ -190,6 +190,7 @@ namespace CE
             return;
 
         attributesCached = true;
+        LockGuard<SharedMutex> lock{ cachedAttributesMutex };
 
         cachedAttributes.isMap = true;
         cachedAttributes.tableValue = {};
@@ -254,6 +255,7 @@ namespace CE
 
         fieldsCached = true;
 
+        LockGuard<SharedMutex> lock{ cachedFieldsMutex };
         cachedFields.Clear();
 
         for (int i = 0; i < superTypeIds.GetSize(); i++)
@@ -306,6 +308,7 @@ namespace CE
 
         functionsCached = true;
 
+        LockGuard<SharedMutex> lock{ cachedFunctionsMutex };
         cachedFunctions.Clear();
 		cachedFunctionsMap.Clear();
 
@@ -368,8 +371,6 @@ namespace CE
 			else
 				cachedFunctionsMap.Add({ cachedFunctions[i].GetName(), { &cachedFunctions[i] } });
 		}
-
-		
     }
 
     void StructType::RegisterStructType(StructType* type)

@@ -42,7 +42,7 @@ namespace CE::Editor
 
 		TextureFormat pixelFormat = TextureFormat::None;
 		TextureSourceCompressionFormat compressionFormat = TextureSourceCompressionFormat::None;
-
+		
 		switch (imageFormat)
 		{
 		case CMImageFormat::R8:
@@ -117,7 +117,7 @@ namespace CE::Editor
 		texture->height = image.GetHeight();
 		texture->arrayCount = 1;
 		texture->mipLevels = 1;
-		texture->addressModeU = texture->addressModeV = TextureAddressMode::Wrap;
+		texture->addressModeU = texture->addressModeV = TextureAddressMode::Repeat;
 		texture->filter = RHI::FilterMode::Linear;
 		texture->dimension = TextureDimension::Tex2D;
 		texture->pixelFormat = pixelFormat;

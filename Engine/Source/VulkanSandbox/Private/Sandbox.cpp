@@ -1320,49 +1320,52 @@ namespace CE::Sandbox
 	{
 		MaterialTextureGroup result{};
 
-		IO::Path basePath = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/" / pathName.GetString();
-		if (!basePath.Exists())
-			return {};
+		String basePath = "/Engine/Assets/Textures/" + pathName.GetString();
 
-		IO::Path albedoPath = basePath / "albedo.png";
-		IO::Path normalPath = basePath / "normal.png";
-		IO::Path roughnessPath = basePath / "roughness.png";
-		IO::Path metallicPath = basePath / "metallic.png";
-
-		if (!albedoPath.Exists() || !normalPath.Exists() || !roughnessPath.Exists() || !metallicPath.Exists())
-			return {};
+		Name albedoPath = basePath + "/albedo";
+		Name normalPath = basePath + "/normal";
+		Name roughnessPath = basePath + "/roughness";
+		Name metallicPath = basePath + "/metallic";
 
 		auto prevTime = clock();
 
-		CMImage imageArray[4] = { CMImage(), CMImage(), CMImage(), CMImage() };
+		CE::Texture2D* albedoImage = nullptr;
+		CE::Texture2D* normalImage = nullptr;
+		CE::Texture2D* roughnessImage = nullptr;
+		CE::Texture2D* metallicImage = nullptr;
 
-		CMImage& albedoImage = imageArray[0];
-		CMImage& normalImage = imageArray[1];
-		CMImage& roughnessImage = imageArray[2];
-		CMImage& metallicImage = imageArray[3];
+		auto assetManager = AssetManager::Get();
 
+		if (false)
 		{
 			auto t1 = Thread([&]()
 				{
-					albedoImage = CMImage::LoadFromFile(albedoPath);
+					albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
 				});
 			auto t2 = Thread([&]()
 				{
-					normalImage = CMImage::LoadFromFile(normalPath);
+					normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
 				});
 			auto t3 = Thread([&]()
 				{
-					roughnessImage = CMImage::LoadFromFile(roughnessPath);
+					roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
 				});
 			auto t4 = Thread([&]()
 				{
-					metallicImage = CMImage::LoadFromFile(metallicPath);
+					metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
 				});
 
 			t1.Join();
 			t2.Join();
 			t3.Join();
 			t4.Join();
+		}
+		else
+		{
+			albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
+			normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
+			roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
+			metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
 		}
 
 		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();

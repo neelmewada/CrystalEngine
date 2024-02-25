@@ -333,6 +333,9 @@ namespace CE::Vulkan
 
 		VkPhysicalDeviceFeatures deviceFeaturesToUse{};
 		deviceFeaturesToUse.samplerAnisotropy = VK_TRUE;
+#if PLATFORM_DESKTOP
+		deviceFeaturesToUse.textureCompressionBC = VK_TRUE;
+#endif
 
 		deviceCI.pEnabledFeatures = &deviceFeaturesToUse;
 

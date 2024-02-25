@@ -56,8 +56,6 @@ namespace CE::RHI
 		inline TextureBindFlags GetBindFlags() const { return bindFlags; }
         
 		inline u64 GetByteSize() const { return byteSize; }
-
-		virtual u32 GetBytesPerChannel() = 0;
         
 		virtual u32 GetNumberOfChannels() = 0;
 

@@ -218,10 +218,15 @@ namespace CE::RPI
                     const MaterialPropertyValue& value = properties[variable.name];
                     if (value.GetValueType() == MaterialPropertyDataType::Texture)
                     {
-                        RHI::Texture* texture = value.GetValue<RHI::Texture*>();
+                        RPI::Texture* texture = value.GetValue<RPI::Texture*>();
                         if (texture != nullptr)
                         {
-                            shaderResourceGroup->Bind(imageIndex, variable.name, texture);
+                            shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTexture());
+                            RHI::Sampler* sampler = texture->GetSamplerState();
+                            if (sampler != nullptr)
+                            {
+                                shaderResourceGroup->Bind(imageIndex, variable.name.GetString() + "_Sampler", sampler);
+                            }
                         }
                     }
                 }
@@ -387,12 +392,18 @@ namespace CE::RPI
                 if (properties.KeyExists(variable.name))
                 {
                     const MaterialPropertyValue& value = properties[variable.name];
+
                     if (value.GetValueType() == MaterialPropertyDataType::Texture)
                     {
-                        RHI::Texture* texture = value.GetValue<RHI::Texture*>();
+                        RPI::Texture* texture = value.GetValue<RPI::Texture*>();
                         if (texture != nullptr)
                         {
-                            shaderResourceGroup->Bind(variable.name, texture);
+                            shaderResourceGroup->Bind(variable.name, texture->GetRhiTexture());
+                            RHI::Sampler* sampler = texture->GetSamplerState();
+                            if (sampler != nullptr)
+                            {
+                                shaderResourceGroup->Bind(variable.name.GetString() + "_Sampler", sampler);
+                            }
                         }
                     }
                 }

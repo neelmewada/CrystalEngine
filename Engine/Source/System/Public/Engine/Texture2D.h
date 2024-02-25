@@ -12,6 +12,7 @@ namespace CE
 		CE_CLASS(Texture2D, CE::Texture)
 	public:
 
+		RPI::Texture* GetRpiTexture() override;
 
 	protected:
 

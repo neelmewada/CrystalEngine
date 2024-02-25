@@ -177,9 +177,10 @@ namespace CE::RHI
         BC1_RGBA_SRGB,
         BC3_UNORM,
         BC3_SRGB,
+        BC4_UNORM,
+        BC5_UNORM,
         BC7_UNORM,
         BC7_SRGB,
-		BC4_UNORM,
         BC6H_UFLOAT,
         BC6H_SFLOAT,
     };
