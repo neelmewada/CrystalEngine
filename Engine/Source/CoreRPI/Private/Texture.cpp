@@ -16,8 +16,7 @@ namespace CE::RPI
 
         texture = RHI::gDynamicRHI->CreateTexture(desc.texture);
 
-        RPISystem::Get().FindOrCreateSampler(desc.samplerDesc);
-        samplerState = RHI::gDynamicRHI->CreateSampler(desc.samplerDesc);
+        samplerState = RPISystem::Get().FindOrCreateSampler(desc.samplerDesc);
 
         RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
         auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
@@ -40,14 +39,20 @@ namespace CE::RPI
             barrier.toState = ResourceState::CopySource;
             commandList->ResourceBarrier(1, &barrier);
 
-            ResourceBarrierDescriptor barrier{};
             barrier.resource = texture;
             barrier.fromState = ResourceState::Undefined;
             barrier.toState = ResourceState::CopyDestination;
             commandList->ResourceBarrier(1, &barrier);
 
             RHI::BufferToTextureCopy copyRegion{};
-            copyRegion.
+            copyRegion.srcBuffer = stagingBuffer;
+            copyRegion.bufferOffset = 0;
+            copyRegion.dstTexture = texture;
+            copyRegion.baseArrayLayer = 0;
+            copyRegion.layerCount = texture->GetArrayLayerCount();
+            copyRegion.mipSlice = 0;
+
+            commandList->CopyTextureRegion(copyRegion);
 
             barrier.resource = texture;
             barrier.fromState = ResourceState::CopyDestination;
@@ -62,6 +67,12 @@ namespace CE::RPI
         delete stagingBuffer;
         RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
         delete uploadFence;
+    }
+
+    Texture::Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc)
+        : texture(texture)
+    {
+        samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
     }
 
     Texture::~Texture()

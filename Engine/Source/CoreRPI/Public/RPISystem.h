@@ -2,6 +2,8 @@
 
 namespace CE::RPI
 {
+	class Texture;
+
 	/// @brief RPISystem owns all scenes.
 	class CORERPI_API RPISystem final
 	{
@@ -19,17 +21,17 @@ namespace CE::RPI
 
 		void Shutdown();
 
-		inline RHI::Texture* GetDefaultAlbedoTex() const
+		inline RPI::Texture* GetDefaultAlbedoTex() const
 		{
 			return defaultAlbedoTex;
 		}
 
-		inline RHI::Texture* GetDefaultRoughnessTex() const
+		inline RPI::Texture* GetDefaultRoughnessTex() const
 		{
 			return defaultRoughnessTex;
 		}
 
-		inline RHI::Texture* GetDefaultNormalTex() const
+		inline RPI::Texture* GetDefaultNormalTex() const
 		{
 			return defaultNormalTex;
 		}
@@ -46,9 +48,9 @@ namespace CE::RPI
 
 		Array<ScenePtr> scenes{};
 
-		RHI::Texture* defaultAlbedoTex = nullptr;
-		RHI::Texture* defaultNormalTex = nullptr;
-		RHI::Texture* defaultRoughnessTex = nullptr;
+		RPI::Texture* defaultAlbedoTex = nullptr;
+		RPI::Texture* defaultNormalTex = nullptr;
+		RPI::Texture* defaultRoughnessTex = nullptr;
 
 		SharedMutex samplerCacheMutex{};
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};

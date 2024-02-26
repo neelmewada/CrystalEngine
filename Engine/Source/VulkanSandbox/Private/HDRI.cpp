@@ -1,6 +1,6 @@
 #include "VulkanSandbox.h"
 
-namespace CE::Sandbox
+namespace CE
 {
 	static u16 Float32ToFloat16(f32 floatValue)
 	{

@@ -65,7 +65,7 @@ namespace CE
 
 	CE::Texture::~Texture()
 	{
-
+		delete rpiTexture;
 	}
 
 	SYSTEM_API RHI::SamplerAddressMode TextureAddressModeToSamplerMode(TextureAddressMode mode)

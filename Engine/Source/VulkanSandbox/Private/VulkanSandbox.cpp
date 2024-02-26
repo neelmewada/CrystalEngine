@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {	
-	CE::Sandbox::SandboxLoop sandbox{};
+	CE::SandboxLoop sandbox{};
 
 	sandbox.PreInit(argc, argv);
 

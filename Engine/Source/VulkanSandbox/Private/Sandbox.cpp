@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace CE::Sandbox
+namespace CE
 {
 	constexpr u32 directionalLightArrayBinding = 0;
 	constexpr u32 pointLightsBinding = 1;
@@ -680,10 +680,10 @@ namespace CE::Sandbox
 				sphereMaterial->SetPropertyValue("_NormalStrength", 1.0f);
 				sphereMaterial->SetPropertyValue("_AmbientOcclusion", 1.0f);
 
-				sphereMaterial->SetPropertyValue("_AlbedoTex", plasticTextures.albedo);
-				sphereMaterial->SetPropertyValue("_RoughnessTex", plasticTextures.roughnessMap);
-				sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap);
-				sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap);
+				//sphereMaterial->SetPropertyValue("_AlbedoTex", plasticTextures.albedo);
+				//sphereMaterial->SetPropertyValue("_RoughnessTex", plasticTextures.roughnessMap);
+				//sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap);
+				//sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap);
                 
                 sphereMaterial->SetPropertyValue("_AlbedoTex", rpiSystem.GetDefaultAlbedoTex());
                 sphereMaterial->SetPropertyValue("_RoughnessTex", rpiSystem.GetDefaultRoughnessTex());
@@ -704,7 +704,7 @@ namespace CE::Sandbox
             sphereMaterial->FlushProperties();
 
 			cubeMaterial = new RPI::Material(opaqueRpiShader);
-
+			
 			{
 				cubeMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
 				cubeMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
@@ -714,10 +714,10 @@ namespace CE::Sandbox
 				cubeMaterial->SetPropertyValue("_NormalStrength", 1.0f);
 				cubeMaterial->SetPropertyValue("_AmbientOcclusion", 1.0f);
 
-				cubeMaterial->SetPropertyValue("_AlbedoTex", woodFloorTextures.albedo); //rpiSystem.GetDefaultAlbedoTex());
-				cubeMaterial->SetPropertyValue("_RoughnessTex", woodFloorTextures.roughnessMap); //rpiSystem.GetDefaultRoughnessTex());
-				cubeMaterial->SetPropertyValue("_NormalTex", woodFloorTextures.normalMap); //rpiSystem.GetDefaultNormalTex());
-				cubeMaterial->SetPropertyValue("_MetallicTex", woodFloorTextures.metallicMap); // White metallic tex
+				cubeMaterial->SetPropertyValue("_AlbedoTex", woodFloorTextures.albedo->GetRpiTexture()); //rpiSystem.GetDefaultAlbedoTex());
+				cubeMaterial->SetPropertyValue("_RoughnessTex", woodFloorTextures.roughnessMap->GetRpiTexture()); //rpiSystem.GetDefaultRoughnessTex());
+				cubeMaterial->SetPropertyValue("_NormalTex", woodFloorTextures.normalMap->GetRpiTexture()); //rpiSystem.GetDefaultNormalTex());
+				cubeMaterial->SetPropertyValue("_MetallicTex", woodFloorTextures.metallicMap->GetRpiTexture()); // White metallic tex
 			}
 
 			cubeMaterial->FlushProperties();
@@ -1368,7 +1368,15 @@ namespace CE::Sandbox
 			metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
 		}
 
-		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+		result.name = pathName;
+		result.albedo = albedoImage;
+		result.normalMap = normalImage;
+		result.roughnessMap = roughnessImage;
+		result.metallicMap = metallicImage;
+
+		return result;
+
+		/*RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 		auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
 		auto uploadFence = RHI::gDynamicRHI->CreateFence(false);
 
@@ -1589,7 +1597,7 @@ namespace CE::Sandbox
 
 		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
-		return result;
+		return result;*/
 	}
 
 	void MaterialTextureGroup::Release()
@@ -1598,8 +1606,6 @@ namespace CE::Sandbox
 		delete normalMap; normalMap = nullptr;
 		delete roughnessMap; roughnessMap = nullptr;
 		delete metallicMap; metallicMap = nullptr;
-
-		delete memoryAllocation; memoryAllocation = nullptr;
 	}
 
 } // namespace CE

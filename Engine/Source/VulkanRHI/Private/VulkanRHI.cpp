@@ -111,6 +111,19 @@ namespace CE::Vulkan
         bool enableValidation = VulkanPlatform::IsValidationEnabled();
         Array<const char*> instanceExtensions = VulkanPlatform::GetRequiredInstanceExtensions();
 
+        u32 extensionCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+        Array<VkExtensionProperties> extensionProps{}; extensionProps.Resize(extensionCount);
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensionProps.GetData());
+
+        for (int i = 0; i < extensionCount; i++)
+        {
+            if (strcmp(extensionProps[i].extensionName, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME) == 0)
+            {
+                instanceExtensions.Add(extensionProps[i].extensionName);
+            }
+        }
+
         VkInstanceCreateInfo instanceCI{};
         instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         instanceCI.pApplicationInfo = &appInfo;

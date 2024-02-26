@@ -6,6 +6,7 @@
 #include "CoreRHI.h"
 #include "VulkanRHI.h"
 #include "CoreRPI.h"
+#include "System.h"
 
 #include "Sandbox.h"
 #include "SandboxLoop.h"

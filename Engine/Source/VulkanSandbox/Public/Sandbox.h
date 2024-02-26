@@ -1,10 +1,10 @@
 #pragma once
 
-namespace CE::Sandbox
+namespace CE
 {
 	constexpr u32 MaxDirectionalLightCount = 8;
 
-
+	
 
 	struct alignas(16) PerViewData
 	{

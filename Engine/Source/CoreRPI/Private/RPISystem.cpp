@@ -16,6 +16,10 @@ namespace CE::RPI
 
     void RPISystem::Shutdown()
     {
+        delete defaultNormalTex; defaultNormalTex = nullptr;
+        delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
+        delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
+
         {
             LockGuard<SharedMutex> lock{ samplerCacheMutex };
 
@@ -25,10 +29,6 @@ namespace CE::RPI
             }
             samplerCache.Clear();
         }
-
-        delete defaultNormalTex; defaultNormalTex = nullptr;
-        delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
-        delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
     }
 
     RHI::Sampler* RPISystem::FindOrCreateSampler(const RHI::SamplerDescriptor& desc)
@@ -49,6 +49,12 @@ namespace CE::RPI
     {
         auto prevTime = clock();
 
+        RHI::SamplerDescriptor samplerDesc{};
+        samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = 
+            SamplerAddressMode::Repeat;
+        samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+        samplerDesc.enableAnisotropy = false;
+
         RHI::TextureDescriptor textureDesc{};
         textureDesc.name = "Default Albedo";
         textureDesc.arrayLayers = 1;
@@ -61,15 +67,21 @@ namespace CE::RPI
         textureDesc.sampleCount = 1;
         textureDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
         textureDesc.format = RHI::Format::R8G8B8A8_UNORM;
-        defaultAlbedoTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
+        auto albedoTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
+
+        defaultAlbedoTex = new RPI::Texture(albedoTex, samplerDesc);
 
         textureDesc.name = "Default Normal";
         textureDesc.format = RHI::Format::R8G8B8A8_UNORM;
-        defaultNormalTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
+        auto normalTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
+
+        defaultNormalTex = new RPI::Texture(normalTex, samplerDesc);
 
         textureDesc.name = "Default Roughness";
         textureDesc.format = RHI::Format::R8_UNORM;
-        defaultRoughnessTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
+        auto roughnessTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
+
+        defaultRoughnessTex = new RPI::Texture(roughnessTex, samplerDesc);
 
         const int numPixels = textureDesc.width * textureDesc.height;
         const u64 albedoSize = textureDesc.width * textureDesc.height * 4;
@@ -125,17 +137,17 @@ namespace CE::RPI
             barrier.toState = ResourceState::CopySource;
             cmdList->ResourceBarrier(1, &barrier);
 
-            barrier.resource = defaultAlbedoTex;
+            barrier.resource = albedoTex;
             barrier.fromState = ResourceState::Undefined;
             barrier.toState = ResourceState::CopyDestination;
             cmdList->ResourceBarrier(1, &barrier);
 
-            barrier.resource = defaultRoughnessTex;
+            barrier.resource = roughnessTex;
             barrier.fromState = ResourceState::Undefined;
             barrier.toState = ResourceState::CopyDestination;
             cmdList->ResourceBarrier(1, &barrier);
 
-            barrier.resource = defaultNormalTex;
+            barrier.resource = normalTex;
             barrier.fromState = ResourceState::Undefined;
             barrier.toState = ResourceState::CopyDestination;
             cmdList->ResourceBarrier(1, &barrier);
@@ -144,7 +156,7 @@ namespace CE::RPI
             RHI::BufferToTextureCopy copy{};
             copy.srcBuffer = stagingBuffer;
             copy.bufferOffset = 0;
-            copy.dstTexture = defaultAlbedoTex;
+            copy.dstTexture = albedoTex;
             copy.baseArrayLayer = 0;
             copy.layerCount = 1;
             copy.mipSlice = 0;
@@ -153,26 +165,26 @@ namespace CE::RPI
             // Roughness Copy
             copy.srcBuffer = stagingBuffer;
             copy.bufferOffset = roughnessOffset;
-            copy.dstTexture = defaultRoughnessTex;
+            copy.dstTexture = roughnessTex;
             cmdList->CopyTextureRegion(copy);
 
             // Normal copy
             copy.srcBuffer = stagingBuffer;
             copy.bufferOffset = normalOffset;
-            copy.dstTexture = defaultNormalTex;
+            copy.dstTexture = normalTex;
             cmdList->CopyTextureRegion(copy);
             
-            barrier.resource = defaultAlbedoTex;
+            barrier.resource = albedoTex;
             barrier.fromState = ResourceState::CopyDestination;
             barrier.toState = ResourceState::FragmentShaderResource;
             cmdList->ResourceBarrier(1, &barrier);
 
-            barrier.resource = defaultRoughnessTex;
+            barrier.resource = roughnessTex;
             barrier.fromState = ResourceState::CopyDestination;
             barrier.toState = ResourceState::FragmentShaderResource;
             cmdList->ResourceBarrier(1, &barrier);
 
-            barrier.resource = defaultNormalTex;
+            barrier.resource = normalTex;
             barrier.fromState = ResourceState::CopyDestination;
             barrier.toState = ResourceState::FragmentShaderResource;
             cmdList->ResourceBarrier(1, &barrier);
