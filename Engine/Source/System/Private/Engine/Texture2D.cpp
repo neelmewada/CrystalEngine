@@ -10,7 +10,7 @@ namespace CE
 			desc.samplerDesc.addressModeU = TextureAddressModeToSamplerMode(addressModeU);
 			desc.samplerDesc.addressModeV = TextureAddressModeToSamplerMode(addressModeV);
 			desc.samplerDesc.addressModeW = desc.samplerDesc.addressModeU;
-
+			
 			desc.texture.width = width;
 			desc.texture.height = height;
 			desc.texture.depth = 1;

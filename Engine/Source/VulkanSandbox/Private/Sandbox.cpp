@@ -718,6 +718,11 @@ namespace CE
 				cubeMaterial->SetPropertyValue("_RoughnessTex", woodFloorTextures.roughnessMap->GetRpiTexture()); //rpiSystem.GetDefaultRoughnessTex());
 				cubeMaterial->SetPropertyValue("_NormalTex", woodFloorTextures.normalMap->GetRpiTexture()); //rpiSystem.GetDefaultNormalTex());
 				cubeMaterial->SetPropertyValue("_MetallicTex", woodFloorTextures.metallicMap->GetRpiTexture()); // White metallic tex
+
+				//cubeMaterial->SetPropertyValue("_AlbedoTex", rpiSystem.GetDefaultAlbedoTex());
+				//cubeMaterial->SetPropertyValue("_RoughnessTex", rpiSystem.GetDefaultRoughnessTex());
+				//cubeMaterial->SetPropertyValue("_NormalTex", rpiSystem.GetDefaultNormalTex());
+				//cubeMaterial->SetPropertyValue("_MetallicTex", rpiSystem.GetDefaultAlbedoTex());
 			}
 
 			cubeMaterial->FlushProperties();
