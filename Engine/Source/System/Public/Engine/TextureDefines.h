@@ -31,6 +31,12 @@ namespace CE
 		RGFloat,
 		RGBAFloat,
 
+		BC1,
+		BC3,
+		BC4,
+		BC5,
+		BC6H,
+		BC7
 	};
 	ENUM_CLASS_FLAGS(CE::TextureFormat);
 

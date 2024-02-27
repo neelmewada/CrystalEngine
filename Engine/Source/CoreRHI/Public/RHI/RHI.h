@@ -19,6 +19,8 @@ namespace CE::RHI
 	class CommandQueue;
     class GraphicsCommandList;
 	struct BufferDescriptor;
+	struct TextureDescriptor;
+	struct ResourceMemoryRequirements;
 
 	enum class ValidationMessageType
 	{
@@ -82,6 +84,7 @@ namespace CE::RHI
 		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) = 0;
 
 		virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() = 0;
+		virtual RHI::CommandQueue* GetPrimaryTransferQueue() = 0;
 
 		//! Returns true if RHI was initialized in Offscreen mode, i.e. there was no main window when RHI was initialized. 
 		virtual bool IsOffscreenOnly() = 0;
@@ -114,23 +117,23 @@ namespace CE::RHI
 		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) = 0;
 		virtual void DestroySwapChain(RHI::SwapChain* swapChain) = 0;
 
-		virtual RHI::MemoryHeap* AllocateMemoryHeap(const MemoryHeapDescriptor& desc) = 0;
+		virtual RHI::MemoryHeap* AllocateMemoryHeap(const RHI::MemoryHeapDescriptor& desc) = 0;
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) = 0;
 
-		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements) = 0;
-        virtual void GetTextureMemoryRequirements(const TextureDescriptor& textureDesc, ResourceMemoryRequirements& outRequirements) = 0;
+		virtual void GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements) = 0;
+        virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements) = 0;
 
-		virtual ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList) = 0;
+		virtual RHI::ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList) = 0;
 
-		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc) = 0;
-		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;
-        virtual void DestroyBuffer(Buffer* buffer) = 0;
+		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) = 0;
+		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) = 0;
+        virtual void DestroyBuffer(RHI::Buffer* buffer) = 0;
 
-		virtual RHI::TextureView* CreateTextureView(const TextureViewDescriptor& desc) = 0;
+		virtual RHI::TextureView* CreateTextureView(const RHI::TextureViewDescriptor& desc) = 0;
 		virtual void DestroyTextureView(RHI::TextureView* textureView) = 0;
         
-		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc) = 0;
-		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc) = 0;
+		virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc) = 0;
+		virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) = 0;
         virtual void DestroyTexture(RHI::Texture* texture) = 0;
         
         virtual RHI::Sampler* CreateSampler(const SamplerDescriptor& samplerDesc) = 0;

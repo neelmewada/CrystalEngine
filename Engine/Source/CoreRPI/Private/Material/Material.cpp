@@ -125,8 +125,9 @@ namespace CE::RPI
                     RHI::BufferDescriptor bufferDesc{};
                     bufferDesc.name = variable.name;
                     bufferDesc.bufferSize = totalSize;
-                        
-                    switch (variable.type) {
+
+                    switch (variable.type) 
+                    {
                         case RHI::ShaderResourceType::ConstantBuffer:
                             bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
                             break;
@@ -137,9 +138,9 @@ namespace CE::RPI
                         default:
                             continue;
                     }
-                        
+
                     bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-                        
+
                     buffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
                 }
 

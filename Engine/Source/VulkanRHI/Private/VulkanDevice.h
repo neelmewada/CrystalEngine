@@ -162,6 +162,7 @@ namespace CE::Vulkan
 
 		CommandBufferAllocator* commandAllocator = nullptr;
         CommandQueue* primaryGraphicsQueue = nullptr;
+        CommandQueue* primaryTransferQueue = nullptr;
         CommandQueue* presentQueue = nullptr;
 
 		RenderPassCache* renderPassCache = nullptr;

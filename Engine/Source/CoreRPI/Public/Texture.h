@@ -20,6 +20,8 @@ namespace CE::RPI
         inline RHI::Texture* GetRhiTexture() const { return texture; }
         inline RHI::Sampler* GetSamplerState() const { return samplerState; }
 
+        virtual void UploadData(BinaryBlob* source, int totalMipLevels = 1);
+
     protected:
 
         RHI::Texture* texture = nullptr;

@@ -9,79 +9,79 @@ namespace CE::Vulkan
 		RHI::Format rhiFormat = RHI::Format::Undefined;
 		VkFormat vkFormat = VK_FORMAT_UNDEFINED;
 		u32 numChannels = 0;
-		f32 totalBytes = 0;
+		u32 totalBits = 0;
 	};
 
-	static Array<FormatEntry> formatEntries{
+	thread_local static Array<FormatEntry> formatEntries{
 		// RHI::Format, VkFormat, numChannels, totalBytes
-		{ RHI::Format::R8_UNORM, VK_FORMAT_R8_UNORM, 1, 1 },
-		{ RHI::Format::R8_SNORM, VK_FORMAT_R8_SNORM, 1, 1 },
-		{ RHI::Format::R8_SRGB, VK_FORMAT_R8_SRGB, 1, 1 },
+		{ RHI::Format::R8_UNORM, VK_FORMAT_R8_UNORM, 1, 8 },
+		{ RHI::Format::R8_SNORM, VK_FORMAT_R8_SNORM, 1, 8 },
+		{ RHI::Format::R8_SRGB, VK_FORMAT_R8_SRGB, 1, 8 },
 
-		{ RHI::Format::R8G8_SRGB, VK_FORMAT_R8G8_SRGB, 2, 2 },
-		{ RHI::Format::R8G8_UNORM, VK_FORMAT_R8G8_UNORM, 2, 2 },
+		{ RHI::Format::R8G8_SRGB, VK_FORMAT_R8G8_SRGB, 2, 16 },
+		{ RHI::Format::R8G8_UNORM, VK_FORMAT_R8G8_UNORM, 2, 16 },
 
-		{ RHI::Format::R16G16_UNORM, VK_FORMAT_R16G16_UNORM, 2, 4 },
-		{ RHI::Format::R16G16_SNORM, VK_FORMAT_R16G16_SNORM, 2, 4 },
-		{ RHI::Format::R16G16_SINT, VK_FORMAT_R16G16_SINT, 2, 4 },
-		{ RHI::Format::R16G16_SFLOAT, VK_FORMAT_R16G16_SFLOAT, 2, 4 },
+		{ RHI::Format::R16G16_UNORM, VK_FORMAT_R16G16_UNORM, 2, 32 },
+		{ RHI::Format::R16G16_SNORM, VK_FORMAT_R16G16_SNORM, 2, 32 },
+		{ RHI::Format::R16G16_SINT, VK_FORMAT_R16G16_SINT, 2, 32 },
+		{ RHI::Format::R16G16_SFLOAT, VK_FORMAT_R16G16_SFLOAT, 2, 32 },
 
-		{ RHI::Format::R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT, 4, 8 },
-		{ RHI::Format::R32G32B32A32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, 4, 16 },
+		{ RHI::Format::R16G16B16A16_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT, 4, 8*8 },
+		{ RHI::Format::R32G32B32A32_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, 4, 16*8 },
 
-		{ RHI::Format::R32G32_UINT, VK_FORMAT_R32G32_UINT, 2, 8 },
-		{ RHI::Format::R32G32_SINT, VK_FORMAT_R32G32_SINT, 2, 8 },
-		{ RHI::Format::R32G32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, 2, 8 },
+		{ RHI::Format::R32G32_UINT, VK_FORMAT_R32G32_UINT, 2, 8*8 },
+		{ RHI::Format::R32G32_SINT, VK_FORMAT_R32G32_SINT, 2, 8*8 },
+		{ RHI::Format::R32G32_SFLOAT, VK_FORMAT_R32G32_SFLOAT, 2, 8 * 8 },
 
-		{ RHI::Format::R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_SRGB, 4, 4 },
-		{ RHI::Format::R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, 4, 4 },
-		{ RHI::Format::R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_SNORM, 4, 4 },
+		{ RHI::Format::R8G8B8A8_SRGB, VK_FORMAT_R8G8B8A8_SRGB, 4, 4 * 8 },
+		{ RHI::Format::R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, 4, 4 * 8 },
+		{ RHI::Format::R8G8B8A8_SNORM, VK_FORMAT_R8G8B8A8_SNORM, 4, 4 * 8 },
 
-		{ RHI::Format::R5G6B5_UNORM, VK_FORMAT_R5G6B5_UNORM_PACK16, 3, 2 },
-		{ RHI::Format::B5G6R5_UNORM, VK_FORMAT_B5G6R5_UNORM_PACK16, 3, 2 },
+		{ RHI::Format::R5G6B5_UNORM, VK_FORMAT_R5G6B5_UNORM_PACK16, 3, 2 * 8 },
+		{ RHI::Format::B5G6R5_UNORM, VK_FORMAT_B5G6R5_UNORM_PACK16, 3, 2 * 8 },
 
-		{ RHI::Format::B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_SRGB, 4, 4 },
-		{ RHI::Format::B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, 4, 4 },
-		{ RHI::Format::B8G8R8A8_SNORM, VK_FORMAT_B8G8R8A8_SNORM, 4, 4 },
-		{ RHI::Format::A4R4G4B4_UNORM, VK_FORMAT_A4R4G4B4_UNORM_PACK16, 4, 4 },
+		{ RHI::Format::B8G8R8A8_SRGB, VK_FORMAT_B8G8R8A8_SRGB, 4, 4 * 8 },
+		{ RHI::Format::B8G8R8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, 4, 4 * 8 },
+		{ RHI::Format::B8G8R8A8_SNORM, VK_FORMAT_B8G8R8A8_SNORM, 4, 4 * 8 },
+		{ RHI::Format::A4R4G4B4_UNORM, VK_FORMAT_A4R4G4B4_UNORM_PACK16, 4, 4 * 8 },
 
-		{ RHI::Format::R8G8B8_UNORM, VK_FORMAT_R8G8B8_UNORM, 3, 3 },
-		{ RHI::Format::R8G8B8_SNORM, VK_FORMAT_R8G8B8_SNORM, 3, 3 },
-		{ RHI::Format::R8G8B8_SRGB, VK_FORMAT_R8G8B8_SRGB, 3, 3 },
+		{ RHI::Format::R8G8B8_UNORM, VK_FORMAT_R8G8B8_UNORM, 3, 3 * 8 },
+		{ RHI::Format::R8G8B8_SNORM, VK_FORMAT_R8G8B8_SNORM, 3, 3 * 8 },
+		{ RHI::Format::R8G8B8_SRGB, VK_FORMAT_R8G8B8_SRGB, 3, 3 * 8 },
 
-		{ RHI::Format::R16_UNORM, VK_FORMAT_R16_UNORM, 1, 2 },
-		{ RHI::Format::R16_SNORM, VK_FORMAT_R16_SNORM, 1, 2 },
-		{ RHI::Format::R16_SFLOAT, VK_FORMAT_R16_SFLOAT, 1, 2 },
-		{ RHI::Format::R32_UINT, VK_FORMAT_R32_UINT, 1, 4 },
-		{ RHI::Format::R32_SINT, VK_FORMAT_R32_SINT, 1, 4 },
-		{ RHI::Format::R32_SFLOAT, VK_FORMAT_R32_SFLOAT, 1, 4 },
-		{ RHI::Format::D32_SFLOAT, VK_FORMAT_D32_SFLOAT, 1, 4 },
-		{ RHI::Format::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 5 },
-		{ RHI::Format::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 4 },
-		{ RHI::Format::D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, 1, 3 },
+		{ RHI::Format::R16_UNORM, VK_FORMAT_R16_UNORM, 1, 2 * 8 },
+		{ RHI::Format::R16_SNORM, VK_FORMAT_R16_SNORM, 1, 2 * 8 },
+		{ RHI::Format::R16_SFLOAT, VK_FORMAT_R16_SFLOAT, 1, 2 * 8 },
+		{ RHI::Format::R32_UINT, VK_FORMAT_R32_UINT, 1, 4 * 8 },
+		{ RHI::Format::R32_SINT, VK_FORMAT_R32_SINT, 1, 4 * 8 },
+		{ RHI::Format::R32_SFLOAT, VK_FORMAT_R32_SFLOAT, 1, 4 * 8 },
+		{ RHI::Format::D32_SFLOAT, VK_FORMAT_D32_SFLOAT, 1, 4 * 8 },
+		{ RHI::Format::D32_SFLOAT_S8_UINT, VK_FORMAT_D32_SFLOAT_S8_UINT, 1, 5 * 8 },
+		{ RHI::Format::D24_UNORM_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, 1, 4 * 8 },
+		{ RHI::Format::D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, 1, 3 * 8 },
 
-		{ RHI::Format::B8G8R8_UNORM, VK_FORMAT_B8G8R8_UNORM, 3, 3 },
-		{ RHI::Format::B8G8R8_SNORM, VK_FORMAT_B8G8R8_SNORM, 3, 3 },
-		{ RHI::Format::B8G8R8_SRGB, VK_FORMAT_B8G8R8_SRGB, 3, 3 },
+		{ RHI::Format::B8G8R8_UNORM, VK_FORMAT_B8G8R8_UNORM, 3, 3 * 8 },
+		{ RHI::Format::B8G8R8_SNORM, VK_FORMAT_B8G8R8_SNORM, 3, 3 * 8 },
+		{ RHI::Format::B8G8R8_SRGB, VK_FORMAT_B8G8R8_SRGB, 3, 3 * 8 },
 
-		{ RHI::Format::BC1_RGB_UNORM, VK_FORMAT_BC1_RGB_UNORM_BLOCK, 3, 0.5f },
-		{ RHI::Format::BC1_RGBA_UNORM, VK_FORMAT_BC1_RGBA_UNORM_BLOCK, 4, 0.5f },
-		{ RHI::Format::BC1_RGB_SRGB, VK_FORMAT_BC1_RGB_SRGB_BLOCK, 3, 0.5f },
-		{ RHI::Format::BC1_RGBA_SRGB, VK_FORMAT_BC1_RGBA_SRGB_BLOCK, 4, 0.5f },
+		{ RHI::Format::BC1_RGB_UNORM, VK_FORMAT_BC1_RGB_UNORM_BLOCK, 3, 4 },
+		{ RHI::Format::BC1_RGBA_UNORM, VK_FORMAT_BC1_RGBA_UNORM_BLOCK, 4, 4 },
+		{ RHI::Format::BC1_RGB_SRGB, VK_FORMAT_BC1_RGB_SRGB_BLOCK, 3, 4 },
+		{ RHI::Format::BC1_RGBA_SRGB, VK_FORMAT_BC1_RGBA_SRGB_BLOCK, 4, 4 },
 
-		{ RHI::Format::BC3_SRGB, VK_FORMAT_BC3_SRGB_BLOCK, 4, 1 },
-		{ RHI::Format::BC3_UNORM, VK_FORMAT_BC3_UNORM_BLOCK, 4, 1 },
-		{ RHI::Format::BC5_UNORM, VK_FORMAT_BC5_UNORM_BLOCK, 2, 1 },
+		{ RHI::Format::BC3_SRGB, VK_FORMAT_BC3_SRGB_BLOCK, 4, 8 },
+		{ RHI::Format::BC3_UNORM, VK_FORMAT_BC3_UNORM_BLOCK, 4, 8 },
+		{ RHI::Format::BC5_UNORM, VK_FORMAT_BC5_UNORM_BLOCK, 2, 8 },
 
-		{ RHI::Format::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK, 4, 1 },
-		{ RHI::Format::BC7_SRGB, VK_FORMAT_BC7_SRGB_BLOCK, 4, 1 },
-		{ RHI::Format::BC4_UNORM, VK_FORMAT_BC4_UNORM_BLOCK, 1, 0.5f },
-		{ RHI::Format::BC6H_UFLOAT, VK_FORMAT_BC6H_UFLOAT_BLOCK, 4, 1 },
-		{ RHI::Format::BC6H_SFLOAT, VK_FORMAT_BC6H_SFLOAT_BLOCK, 4, 1 },
+		{ RHI::Format::BC7_UNORM, VK_FORMAT_BC7_UNORM_BLOCK, 4, 8 },
+		{ RHI::Format::BC7_SRGB, VK_FORMAT_BC7_SRGB_BLOCK, 4, 8 },
+		{ RHI::Format::BC4_UNORM, VK_FORMAT_BC4_UNORM_BLOCK, 1, 4 },
+		{ RHI::Format::BC6H_UFLOAT, VK_FORMAT_BC6H_UFLOAT_BLOCK, 4, 8 },
+		{ RHI::Format::BC6H_SFLOAT, VK_FORMAT_BC6H_SFLOAT_BLOCK, 4, 8 },
 	};
 
-	static HashMap<RHI::Format, VkFormat> textureFormatToVkFormatMap{};
-	static HashMap<VkFormat, RHI::Format> vkFormatToTextureFormatMap{};
+	thread_local static HashMap<RHI::Format, FormatEntry> textureFormatToVkFormatMap{};
+	thread_local static HashMap<VkFormat, FormatEntry> vkFormatToTextureFormatMap{};
 
 	static void LoadMappings()
 	{
@@ -89,8 +89,8 @@ namespace CE::Vulkan
 		{
 			for (const auto& entry : formatEntries)
 			{
-				textureFormatToVkFormatMap[entry.rhiFormat] = entry.vkFormat;
-				vkFormatToTextureFormatMap[entry.vkFormat] = entry.rhiFormat;
+				textureFormatToVkFormatMap[entry.rhiFormat] = entry;
+				vkFormatToTextureFormatMap[entry.vkFormat] = entry;
 			}
 		}
 	}
@@ -102,7 +102,7 @@ namespace CE::Vulkan
 		if (!textureFormatToVkFormatMap.KeyExists(format))
 			return VK_FORMAT_UNDEFINED;
 
-		return textureFormatToVkFormatMap[format];
+		return textureFormatToVkFormatMap[format].vkFormat;
     }
 
 	bool IsDepthVkFormat(VkFormat format)
@@ -154,7 +154,7 @@ namespace CE::Vulkan
 		if (!vkFormatToTextureFormatMap.KeyExists(format))
 			return RHI::Format::Undefined;
 
-		return vkFormatToTextureFormatMap[format];
+		return vkFormatToTextureFormatMap[format].rhiFormat;
     }
 
 	u32 GetNumberOfChannelsForFormat(RHI::Format format)
@@ -171,6 +171,21 @@ namespace CE::Vulkan
 
 		return 0;
     }
+
+	u32 GetBitsPerPixelForFormat(RHI::Format format)
+	{
+		LoadMappings();
+
+		for (const auto& entry : formatEntries)
+		{
+			if (entry.rhiFormat == format)
+			{
+				return entry.totalBits;
+			}
+		}
+
+		return 0;
+	}
 
 	bool IsDepthFormat(RHI::Format format)
 	{
@@ -633,6 +648,11 @@ namespace CE::Vulkan
     {
         return GetNumberOfChannelsForFormat(format);
     }
+
+	u32 Texture::GetBitsPerPixel()
+	{
+		return GetBitsPerPixelForFormat(format);
+	}
 
     void Texture::CopyPixelsFromBuffer(Buffer* srcBuffer)
     {

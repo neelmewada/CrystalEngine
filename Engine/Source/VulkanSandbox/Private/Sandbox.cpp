@@ -680,15 +680,15 @@ namespace CE
 				sphereMaterial->SetPropertyValue("_NormalStrength", 1.0f);
 				sphereMaterial->SetPropertyValue("_AmbientOcclusion", 1.0f);
 
-				//sphereMaterial->SetPropertyValue("_AlbedoTex", plasticTextures.albedo);
-				//sphereMaterial->SetPropertyValue("_RoughnessTex", plasticTextures.roughnessMap);
-				//sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap);
-				//sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap);
-                
                 sphereMaterial->SetPropertyValue("_AlbedoTex", rpiSystem.GetDefaultAlbedoTex());
                 sphereMaterial->SetPropertyValue("_RoughnessTex", rpiSystem.GetDefaultRoughnessTex());
                 sphereMaterial->SetPropertyValue("_NormalTex", rpiSystem.GetDefaultNormalTex());
                 sphereMaterial->SetPropertyValue("_MetallicTex", rpiSystem.GetDefaultAlbedoTex());
+
+				//sphereMaterial->SetPropertyValue("_AlbedoTex", plasticTextures.albedo->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_RoughnessTex", plasticTextures.roughnessMap->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap->GetRpiTexture());
 
 				//sphereMaterial->SetPropertyValue("_AlbedoTex", rustedTextures.albedo);
 				//sphereMaterial->SetPropertyValue("_RoughnessTex", rustedTextures.roughnessMap);
@@ -709,7 +709,7 @@ namespace CE
 				cubeMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
 				cubeMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
 				cubeMaterial->SetPropertyValue("_Shininess", (u32)64);
-				cubeMaterial->SetPropertyValue("_Metallic", 1.0f);
+				cubeMaterial->SetPropertyValue("_Metallic", 0.0f);
 				cubeMaterial->SetPropertyValue("_Roughness", 1.0f);
 				cubeMaterial->SetPropertyValue("_NormalStrength", 1.0f);
 				cubeMaterial->SetPropertyValue("_AmbientOcclusion", 1.0f);
@@ -822,7 +822,7 @@ namespace CE
 		}
 
 		lightData.totalDirectionalLights = directionalLights.GetSize();
-		lightData.totalDirectionalLights = 0;
+		//lightData.totalDirectionalLights = 0;
 		lightData.ambientColor = Color(0, 0.1f, 0.5f, 1).ToVec4();
 		lightData.totalPointLights = pointLights.GetSize();
 
@@ -1332,8 +1332,6 @@ namespace CE
 		Name roughnessPath = basePath + "/roughness";
 		Name metallicPath = basePath + "/metallic";
 
-		auto prevTime = clock();
-
 		CE::Texture2D* albedoImage = nullptr;
 		CE::Texture2D* normalImage = nullptr;
 		CE::Texture2D* roughnessImage = nullptr;
@@ -1341,7 +1339,9 @@ namespace CE
 
 		auto assetManager = AssetManager::Get();
 
-		if (false)
+		auto prevTime = clock();
+
+		if (true)
 		{
 			auto t1 = Thread([&]()
 				{
@@ -1373,6 +1373,8 @@ namespace CE
 			metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
 		}
 
+		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
 		result.name = pathName;
 		result.albedo = albedoImage;
 		result.normalMap = normalImage;
@@ -1380,229 +1382,6 @@ namespace CE
 		result.metallicMap = metallicImage;
 
 		return result;
-
-		/*RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
-		auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
-		auto uploadFence = RHI::gDynamicRHI->CreateFence(false);
-
-		RHI::TextureDescriptor textureDesc{};
-		textureDesc.name = pathName.GetString() + " Albedo";
-		textureDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
-		textureDesc.defaultHeapType = RHI::MemoryHeapType::Default;
-		textureDesc.width = albedoImage.GetWidth();
-		textureDesc.height = albedoImage.GetHeight();
-		textureDesc.mipLevels = 1;
-		textureDesc.depth = 1;
-		textureDesc.dimension = RHI::Dimension::Dim2D;
-		textureDesc.sampleCount = 1;
-		textureDesc.format = RHI::Format::R8G8B8A8_UNORM;
-
-		result.albedo = RHI::gDynamicRHI->CreateTexture(textureDesc);
-
-		textureDesc.name = pathName.GetString() + " Normal";
-		textureDesc.width = normalImage.GetWidth();
-		textureDesc.height = normalImage.GetHeight();
-		
-		result.normalMap = RHI::gDynamicRHI->CreateTexture(textureDesc);
-
-		textureDesc.name = pathName.GetString() + " Roughness";
-		textureDesc.width = roughnessImage.GetWidth();
-		textureDesc.height = roughnessImage.GetHeight();
-		textureDesc.format = RHI::Format::R8_UNORM;
-
-		result.roughnessMap = RHI::gDynamicRHI->CreateTexture(textureDesc);
-
-		textureDesc.name = pathName.GetString() + " Metallic";
-		textureDesc.width = metallicImage.GetWidth();
-		textureDesc.height = metallicImage.GetHeight();
-		textureDesc.format = RHI::Format::R8_UNORM;
-
-		result.metallicMap = RHI::gDynamicRHI->CreateTexture(textureDesc);
-
-		const u32 albedoNumPixels = albedoImage.GetWidth() * albedoImage.GetHeight();
-		const u32 normalNumPixels = normalImage.GetWidth() * normalImage.GetHeight();
-		const u32 roughnessNumPixels = roughnessImage.GetWidth() * roughnessImage.GetHeight();
-		const u32 metallicNumPixels = metallicImage.GetWidth() * metallicImage.GetHeight();
-
-		const u64 albedoByteSize = albedoImage.GetWidth() * albedoImage.GetHeight() * 4; // RGBA32
-		const u64 normalByteSize = normalImage.GetWidth() * normalImage.GetHeight() * 4; // RGBA32
-		const u64 roughnessByteSize = roughnessImage.GetWidth() * roughnessImage.GetHeight() * 1; // R8
-		const u64 metallicByteSize = metallicImage.GetWidth() * metallicImage.GetHeight() * 1; // R8
-		
-		RHI::BufferDescriptor bufferDesc{};
-		bufferDesc.name = "Texture Copy Buffer";
-		bufferDesc.bufferSize = albedoByteSize + normalByteSize + roughnessByteSize + metallicByteSize;
-		bufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-		bufferDesc.structureByteStride = result.albedo->GetByteSize();
-
-		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-
-		void* dataPtr = nullptr;
-		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
-		{
-			u8* albedoPtr = ((u8*)dataPtr);
-			u8* normalPtr = ((u8*)dataPtr + albedoByteSize);
-			u8* roughnessPtr = ((u8*)dataPtr + albedoByteSize + normalByteSize);
-			u8* metallicPtr = ((u8*)dataPtr + albedoByteSize + normalByteSize + roughnessByteSize);
-
-			u32 albedoBytesPerPixel = albedoImage.GetBitsPerPixel() / 8;
-			u32 normalBytesPerPixel = normalImage.GetBitsPerPixel() / 8;
-			u32 roughnessBytesPerPixel = roughnessImage.GetBitsPerPixel() / 8;
-			u32 metallicBytesPerPixel = metallicImage.GetBitsPerPixel() / 8;
-			albedoBytesPerPixel = 4;
-			normalBytesPerPixel = 4;
-
-			int numThreads = Thread::GetHardwareConcurrency();
-
-			auto t1 = Thread([&]()
-				{
-					for (int i = 0; i < albedoNumPixels; i++)
-					{
-						*(albedoPtr + i * 4 + 0) = *((u8*)albedoImage.GetDataPtr() + i * albedoBytesPerPixel + 0);
-						*(albedoPtr + i * 4 + 1) = *((u8*)albedoImage.GetDataPtr() + i * albedoBytesPerPixel + 1);
-						*(albedoPtr + i * 4 + 2) = *((u8*)albedoImage.GetDataPtr() + i * albedoBytesPerPixel + 2);
-						*(albedoPtr + i * 4 + 3) = (u8)0xff;
-					}
-				});
-
-			auto t2 = Thread([&]()
-				{
-					for (int i = 0; i < normalNumPixels; i++)
-					{
-						*(normalPtr + i * 4 + 0) = *((u8*)normalImage.GetDataPtr() + i * normalBytesPerPixel + 0);
-						*(normalPtr + i * 4 + 1) = *((u8*)normalImage.GetDataPtr() + i * normalBytesPerPixel + 1);
-						*(normalPtr + i * 4 + 2) = *((u8*)normalImage.GetDataPtr() + i * normalBytesPerPixel + 2);
-						*(normalPtr + i * 4 + 3) = (u8)0xff;
-					}
-				});
-
-			auto t3 = Thread([&]()
-				{
-					for (int i = 0; i < roughnessByteSize; i++)
-					{
-						*(roughnessPtr + i) = *((u8*)roughnessImage.GetDataPtr() + i * 4);
-					}
-				});
-
-			auto t4 = Thread([&]()
-				{
-					for (int i = 0; i < metallicByteSize; i++)
-					{
-						*(metallicPtr + i) = *((u8*)metallicImage.GetDataPtr() + i * 4);
-					}
-				});
-
-			t1.Join();
-			t2.Join();
-			t3.Join();
-			t4.Join();
-		}
-		stagingBuffer->Unmap();
-
-		commandList->Begin();
-		{
-			RHI::ResourceBarrierDescriptor barrier{};
-			barrier.resource = result.albedo;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::CopyDestination;
-			commandList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = result.normalMap;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::CopyDestination;
-			commandList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = result.roughnessMap;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::CopyDestination;
-			commandList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = result.metallicMap;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::CopyDestination;
-			commandList->ResourceBarrier(1, &barrier);
-
-			RHI::BufferToTextureCopy bufferCopy{};
-			bufferCopy.srcBuffer = stagingBuffer;
-			bufferCopy.bufferOffset = 0;
-			bufferCopy.dstTexture = result.albedo;
-			bufferCopy.baseArrayLayer = 0;
-			bufferCopy.layerCount = 1;
-			bufferCopy.mipSlice = 0;
-
-			commandList->CopyTextureRegion(bufferCopy);
-
-			bufferCopy.srcBuffer = stagingBuffer;
-			bufferCopy.bufferOffset = albedoByteSize;
-			bufferCopy.dstTexture = result.normalMap;
-			bufferCopy.baseArrayLayer = 0;
-			bufferCopy.layerCount = 1;
-			bufferCopy.mipSlice = 0;
-
-			commandList->CopyTextureRegion(bufferCopy);
-
-			bufferCopy.srcBuffer = stagingBuffer;
-			bufferCopy.bufferOffset = albedoByteSize + normalByteSize;
-			bufferCopy.dstTexture = result.roughnessMap;
-			bufferCopy.baseArrayLayer = 0;
-			bufferCopy.layerCount = 1;
-			bufferCopy.mipSlice = 0;
-
-			commandList->CopyTextureRegion(bufferCopy);
-
-			bufferCopy.srcBuffer = stagingBuffer;
-			bufferCopy.bufferOffset = albedoByteSize + normalByteSize + roughnessByteSize;
-			bufferCopy.dstTexture = result.metallicMap;
-			bufferCopy.baseArrayLayer = 0;
-			bufferCopy.layerCount = 1;
-			bufferCopy.mipSlice = 0;
-
-			commandList->CopyTextureRegion(bufferCopy);
-
-			barrier.resource = result.albedo;
-			barrier.fromState = RHI::ResourceState::CopyDestination;
-			barrier.toState = RHI::ResourceState::FragmentShaderResource;
-			commandList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = result.normalMap;
-			barrier.fromState = RHI::ResourceState::CopyDestination;
-			barrier.toState = RHI::ResourceState::FragmentShaderResource;
-			commandList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = result.roughnessMap;
-			barrier.fromState = RHI::ResourceState::CopyDestination;
-			barrier.toState = RHI::ResourceState::FragmentShaderResource;
-			commandList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = result.metallicMap;
-			barrier.fromState = RHI::ResourceState::CopyDestination;
-			barrier.toState = RHI::ResourceState::FragmentShaderResource;
-			commandList->ResourceBarrier(1, &barrier);
-		}
-		commandList->End();
-
-		queue->Execute(1, &commandList, uploadFence);
-
-		uploadFence->WaitForFence();
-
-		// Cleanup
-		RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
-		delete uploadFence;
-		delete stagingBuffer;
-
-		if (albedoImage.IsValid())
-			albedoImage.Free();
-		if (normalImage.IsValid())
-			normalImage.Free();
-		if (roughnessImage.IsValid())
-			roughnessImage.Free();
-		if (metallicImage.IsValid())
-			metallicImage.Free();
-
-		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
-
-		return result;*/
 	}
 
 	void MaterialTextureGroup::Release()

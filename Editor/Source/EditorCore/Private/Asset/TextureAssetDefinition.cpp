@@ -6,7 +6,7 @@ namespace CE::Editor
 	const Array<String>& TextureAssetDefinition::GetSourceExtensions()
 	{
 		static const Array<String> extensions = {
-			".png", ".jpg", ".jpeg"
+			".png", ".jpg", ".jpeg", ".hdr"
 		};
 		return extensions;
 	}

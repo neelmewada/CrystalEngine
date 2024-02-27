@@ -31,7 +31,7 @@ namespace CE
 			CE_LOG(Error, All, "Could not save a transient package: {}", package->GetPackageName());
 			return SavePackageResult::InvalidPackage;
 		}
-		if (stream == nullptr)
+		if (stream == nullptr || !stream->CanWrite())
 		{
 			return SavePackageResult::UnknownError;
 		}
@@ -226,7 +226,7 @@ namespace CE
 				params.uuid = packageUuid;
 				params.templateObject = nullptr;
 				params.objectFlags = OF_NoFlags;
-				params.outer = nullptr;
+				params.outer = outer;
 
 				package = (Package*)Internal::StaticConstructObject(params);
 				package->fullPackagePath = fullPackagePath;

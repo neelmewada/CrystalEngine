@@ -14,6 +14,11 @@ namespace CE
 
 		RPI::Texture* GetRpiTexture() override;
 
+		TextureDimension GetDimension() override
+		{
+			return TextureDimension::Tex2D;
+		}
+
 	protected:
 
 		FIELD()

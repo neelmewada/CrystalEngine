@@ -113,4 +113,5 @@ namespace CE::RHI
 
 		return hash;
 	}
+
 }

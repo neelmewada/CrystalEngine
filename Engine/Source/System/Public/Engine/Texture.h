@@ -21,6 +21,10 @@ namespace CE
 
 		virtual RPI::Texture* GetRpiTexture() = 0;
 
+		virtual TextureDimension GetDimension() = 0;
+
+		CMImageFormat GetCMPixelFormat();
+
 	protected:
 
 		RPI::Texture* rpiTexture = nullptr;
@@ -48,9 +52,6 @@ namespace CE
 
 		FIELD()
 		RHI::SamplerBorderColor borderColor = RHI::SamplerBorderColor::FloatTransparentBlack;
-
-		FIELD()
-		TextureDimension dimension = TextureDimension::None;
 
 		FIELD()
 		u8 anisoLevel = 0;

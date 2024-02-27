@@ -69,6 +69,8 @@ namespace CE
 		FIELD()
 		Array<EngineSubsystem*> engineSubsystems{};
 
+		CE::Shader* equirectShader = nullptr;
+
 		CE::Queue<Delegate<void()>> mainThreadQueue{};
 		SharedMutex mainThreadQueueMutex{};
 

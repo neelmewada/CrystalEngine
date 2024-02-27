@@ -204,7 +204,7 @@ namespace CE
         
         package->fullPackagePath = path;
 
-		FileStream stream = FileStream(path, Stream::Permissions::ReadWrite);
+		FileStream stream = FileStream(path, Stream::Permissions::WriteOnly);
 		
 		return SavePackage(package, asset, &stream, saveArgs);
 	}

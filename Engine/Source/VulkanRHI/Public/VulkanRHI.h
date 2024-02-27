@@ -80,6 +80,7 @@ namespace CE::Vulkan
 		virtual Array<RHI::CommandQueue*> GetHardwareQueues(RHI::HardwareQueueClassMask queueMask) override;
 
         virtual RHI::CommandQueue* GetPrimaryGraphicsQueue() override;
+        virtual RHI::CommandQueue* GetPrimaryTransferQueue() override;
 
 		// TODO: move this function to CoreApplication instead of VulkanRHI
 		Vec2i GetScreenSizeForWindow(void* platformWindowHandle) override;
@@ -110,24 +111,24 @@ namespace CE::Vulkan
 		virtual RHI::SwapChain* CreateSwapChain(PlatformWindow* window, const RHI::SwapChainDescriptor& desc) override;
 		virtual void DestroySwapChain(RHI::SwapChain* swapChain) override;
 
-		virtual RHI::MemoryHeap* AllocateMemoryHeap(const MemoryHeapDescriptor& desc) override;
+		virtual RHI::MemoryHeap* AllocateMemoryHeap(const RHI::MemoryHeapDescriptor& desc) override;
 		virtual void FreeMemoryHeap(RHI::MemoryHeap* memoryHeap) override;
 
-		virtual void GetBufferMemoryRequirements(const BufferDescriptor& bufferDesc, ResourceMemoryRequirements& outRequirements) override;
+		virtual void GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements) override;
         
-        virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, ResourceMemoryRequirements& outRequirements) override;
+        virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements) override;
 
-        virtual ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList) override;
+        virtual RHI::ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList) override;
 
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) override;
-		virtual RHI::Buffer* CreateBuffer(const BufferDescriptor& bufferDesc, const ResourceMemoryDescriptor& memoryDesc) override;
+		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) override;
         virtual void DestroyBuffer(RHI::Buffer* buffer) override;
 
         virtual RHI::TextureView* CreateTextureView(const TextureViewDescriptor& desc) override;
         virtual void DestroyTextureView(RHI::TextureView* textureView) override;
         
         virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc) override;
-		virtual RHI::Texture* CreateTexture(const TextureDescriptor& textureDesc, const ResourceMemoryDescriptor& memoryDesc) override;
+		virtual RHI::Texture* CreateTexture(const RHI::TextureDescriptor& textureDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) override;
         virtual void DestroyTexture(RHI::Texture* texture) override;
         
         virtual RHI::Sampler* CreateSampler(const RHI::SamplerDescriptor& samplerDesc) override;

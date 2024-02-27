@@ -5,20 +5,49 @@ namespace CE::RPI
     
     Texture::Texture(const TextureDescriptor& desc)
     {
-        u8* src = desc.source->GetDataPtr();
-        u64 dataSize = desc.source->GetDataSize();
-
-        if (src == nullptr || dataSize == 0)
-        {
-            CE_LOG(Error, All, "Failed to create texture {}. source data is empty!", desc.texture.name);
-            return;
-        }
-
         texture = RHI::gDynamicRHI->CreateTexture(desc.texture);
 
         samplerState = RPISystem::Get().FindOrCreateSampler(desc.samplerDesc);
 
-        RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+        if (desc.source == nullptr)
+        {
+            return;
+        }
+
+        UploadData(desc.source);
+    }
+
+    Texture::Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc)
+        : texture(texture)
+    {
+        samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
+    }
+
+    Texture::~Texture()
+    {
+        delete texture;
+        texture = nullptr;
+    }
+
+    void Texture::UploadData(BinaryBlob* source, int totalMipLevels)
+    {
+        if (source == nullptr)
+            return;
+
+        u8* src = (u8*)source->GetDataPtr();
+        u64 dataSize = source->GetDataSize();
+
+        if (src == nullptr || dataSize == 0)
+        {
+            return;
+        }
+
+        if (totalMipLevels <= 0)
+        {
+            totalMipLevels = texture->GetMipLevelCount();
+        }
+
+        RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryTransferQueue();
         auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
         auto uploadFence = RHI::gDynamicRHI->CreateFence(false);
 
@@ -44,15 +73,22 @@ namespace CE::RPI
             barrier.toState = ResourceState::CopyDestination;
             commandList->ResourceBarrier(1, &barrier);
 
-            RHI::BufferToTextureCopy copyRegion{};
-            copyRegion.srcBuffer = stagingBuffer;
-            copyRegion.bufferOffset = 0;
-            copyRegion.dstTexture = texture;
-            copyRegion.baseArrayLayer = 0;
-            copyRegion.layerCount = texture->GetArrayLayerCount();
-            copyRegion.mipSlice = 0;
+            u64 bufferOffset = 0;
 
-            commandList->CopyTextureRegion(copyRegion);
+            for (int mip = 0; mip < texture->GetMipLevelCount(); mip++)
+            {
+                RHI::BufferToTextureCopy copyRegion{};
+                copyRegion.srcBuffer = stagingBuffer;
+                copyRegion.bufferOffset = bufferOffset;
+                copyRegion.dstTexture = texture;
+                copyRegion.baseArrayLayer = 0;
+                copyRegion.layerCount = texture->GetArrayLayerCount();
+                copyRegion.mipSlice = mip;
+
+                commandList->CopyTextureRegion(copyRegion);
+                
+                bufferOffset += texture->GetWidth() / (mip + 1) * texture->GetHeight() / (mip + 1) * texture->GetBitsPerPixel() / 8;
+            }
 
             barrier.resource = texture;
             barrier.fromState = ResourceState::CopyDestination;
@@ -67,18 +103,6 @@ namespace CE::RPI
         delete stagingBuffer;
         RHI::gDynamicRHI->FreeCommandLists(1, &commandList);
         delete uploadFence;
-    }
-
-    Texture::Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc)
-        : texture(texture)
-    {
-        samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
-    }
-
-    Texture::~Texture()
-    {
-        delete texture;
-        texture = nullptr;
     }
 
 } // namespace CE::RPI

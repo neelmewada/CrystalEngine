@@ -397,8 +397,12 @@ namespace CE::Vulkan
 			if (testSurface != nullptr)
 				vkGetPhysicalDeviceSurfaceSupportKHR(gpu, familyIdx, testSurface, &presentationSupported);
 
+			bool graphicsQueueAllocated = false;
+
 			for (int i = 0; i < queueFamilyProperty.queueCount; i++)
 			{
+				bool isLast = (i == (queueFamilyProperty.queueCount - 1));
+
 				VkQueue vkQueue = nullptr;
 				vkGetDeviceQueue(device, familyIdx, i, &vkQueue);
 
@@ -411,8 +415,10 @@ namespace CE::Vulkan
                 }
 
 				if (primaryGraphicsQueue == nullptr && 
-					EnumHasAllFlags(queueMask, RHI::HardwareQueueClassMask::Compute | RHI::HardwareQueueClassMask::Graphics))
+					EnumHasAllFlags(queueMask, RHI::HardwareQueueClassMask::Compute | RHI::HardwareQueueClassMask::Graphics) &&
+					isLast)
 				{
+					graphicsQueueAllocated = true;
 					primaryGraphicsQueue = queue;
 					if (presentationSupported)
 						presentQueue = queue;
@@ -421,6 +427,15 @@ namespace CE::Vulkan
 				{
 					presentQueue = queue;
 				}
+			}
+
+			int queueCount = queueFamilyProperty.queueCount;
+
+			// Get the last queue of this family as primary transfer queue
+			if (EnumHasFlag(queueMask, RHI::HardwareQueueClassMask::Transfer) && primaryTransferQueue == nullptr &&
+				(!graphicsQueueAllocated || queueCount >= 2))
+			{
+				primaryTransferQueue = queuesByFamily[familyIdx][queueCount - 2];
 			}
 		}
 	}

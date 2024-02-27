@@ -41,6 +41,7 @@ namespace CE::RPI
 #include "RPISystem.h"
 
 #include "Texture.h"
+#include "CubeMap.h"
 #include "Material/MaterialProperty.h"
 #include "Material/Material.h"
 

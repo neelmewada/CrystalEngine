@@ -33,6 +33,7 @@
 #include "Engine/SamplerState.h"
 #include "Engine/Texture.h"
 #include "Engine/Texture2D.h"
+#include "Engine/TextureCube.h"
 #include "Engine/Shader.h"
 #include "Engine/MaterialInterface.h"
 #include "Engine/Material.h"

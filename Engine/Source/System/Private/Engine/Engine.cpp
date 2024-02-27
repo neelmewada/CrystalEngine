@@ -32,10 +32,14 @@ namespace CE
 		{
 			subsystem->PostInitialize();
 		}
+
+		equirectShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 	}
 
 	void Engine::PreShutdown()
 	{
+		equirectShader->Destroy();
+
 		if (assetManager)
 			assetManager->Shutdown();
 		

@@ -5,6 +5,8 @@
 
 namespace CE
 {
+	constexpr u32 StampFileVersion = 0;
+
 	AssetProcessor::AssetProcessor(int argc, char** argv)
 	{
 		options.add_options()
@@ -145,9 +147,27 @@ namespace CE
 						IO::Path::CreateDirectories(stampFilePath.GetParentPath());
 					}
 
-					if (!stampFilePath.Exists())
+					IO::Path productPath{};
+
+					if (inputRoot != outputRoot)
+					{
+						IO::Path relativeSourcePath = IO::Path::GetRelative(path, inputRoot);
+						productPath = outputRoot / relativeSourcePath;
+						productPath = productPath.ReplaceExtension(".casset");
+						if (!productPath.GetParentPath().Exists())
+						{
+							IO::Path::CreateDirectories(productPath.GetParentPath());
+						}
+					}
+					else
+					{
+						productPath = path.ReplaceExtension(".casset");
+					}
+
+					if (!stampFilePath.Exists() || !productPath.Exists())
 					{
 						allSourceAssetPaths.Add(path);
+						allProductAssetPaths.Add(productPath);
 					}
 					else // File exists
 					{
@@ -165,29 +185,10 @@ namespace CE
 						if (lastWriteTime != stampedTime) // Source asset modified
 						{
 							allSourceAssetPaths.Add(path);
+							allProductAssetPaths.Add(productPath);
 						}
 					}
 				});
-		}
-
-		for (const auto& sourcePath : allSourceAssetPaths)
-		{
-			if (inputRoot != outputRoot)
-			{
-				IO::Path relativeSourcePath = IO::Path::GetRelative(sourcePath, inputRoot);
-				IO::Path productPath = outputRoot / relativeSourcePath;
-				productPath = productPath.ReplaceExtension(".casset");
-				if (!productPath.GetParentPath().Exists())
-				{
-					IO::Path::CreateDirectories(productPath.GetParentPath());
-				}
-				allProductAssetPaths.Add(productPath);
-			}
-			else
-			{
-				IO::Path productPath = sourcePath.ReplaceExtension(".casset");
-				allProductAssetPaths.Add(productPath);
-			}
 		}
 	}
 
@@ -276,8 +277,8 @@ namespace CE
 				{
 					FileStream writer = FileStream(stampFilePath, Stream::Permissions::WriteOnly);
 					writer.SetBinaryMode(true);
-					u32 version = 0;
-					writer << version;
+					
+					writer << StampFileVersion;
 					writer << result.sourcePath.GetLastWriteTime().ToNumber();
 				}
 				else

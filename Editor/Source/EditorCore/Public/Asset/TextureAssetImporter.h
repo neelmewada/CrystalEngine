@@ -21,6 +21,10 @@ namespace CE::Editor
 
 		FIELD(Config)
 		bool importHdrAsCubemap = false;
+
+		FIELD(Config)
+		bool convoluteCubemap = false;
+		
 	};
 
 	class EDITORCORE_API TextureAssetImportJob : public AssetImportJob
@@ -37,11 +41,20 @@ namespace CE::Editor
 
 		virtual bool ProcessAsset(Package* package) override;
 
+		bool ProcessTex2D(const String& name, Package* package, const CMImage& image, TextureFormat pixelFormat, 
+			TextureSourceCompressionFormat compressionFormat,
+			CMImageSourceFormat targetSourceFormat);
+
+		bool ProcessCubeMap(const String& name, Package* package, const CMImage& sourceImage, TextureFormat pixelFormat,
+			TextureSourceCompressionFormat compressionFormat,
+			CMImageSourceFormat targetSourceFormat);
+
 	private:
 
 		TextureCompressionQuality compressionQuality = TextureCompressionQuality::Default;
 
 		u8 anisotropy = 0;
+		bool importHdrAsCubemap = false;
 
 		friend class TextureAssetImporter;
 	};

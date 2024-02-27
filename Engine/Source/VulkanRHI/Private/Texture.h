@@ -42,6 +42,8 @@ namespace CE::Vulkan
         
         virtual u32 GetNumberOfChannels() override;
 
+        virtual u32 GetBitsPerPixel() override;
+
 		inline VkImageLayout GetVkImageLayout() const { return vkImageLayout; }
         
         inline VkImageLayout GetCurrentImageLayout() const { return curImageLayout; }
@@ -61,7 +63,7 @@ namespace CE::Vulkan
 		// True if the image is not managed by this Texture object
 		bool importedImage = false;
 
-		int curFamilyIndex = -1;
+        Atomic<int> curFamilyIndex = -1;
 
         VulkanDevice* device = nullptr;
         VkImage image = nullptr;
@@ -84,6 +86,7 @@ namespace CE::Vulkan
     VkFormat RHIFormatToVkFormat(RHI::Format format);
     RHI::Format VkFormatToRHIFormat(VkFormat format);
     u32 GetNumberOfChannelsForFormat(RHI::Format format);
+    u32 GetBitsPerPixelForFormat(RHI::Format format);
 
 	bool IsDepthVkFormat(VkFormat format);
 	bool IsStencilVkFormat(VkFormat format);

@@ -333,8 +333,14 @@ namespace CE
 
 			int x = 0, y = 0, channels = 0;
 			stbi_info(filePathStr.GetCString(), &x, &y, &channels);
+			int desiredChannels = channels;
+			if (desiredChannels == 3) // Never load image as 3 channels. Use either 1, 2 or 4 channels.
+				desiredChannels = 4;
 
-			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, 4);
+			unsigned char* imageData = stbi_load(filePathStr.GetCString(), &x, &y, &channels, desiredChannels);
+
+			// To check allocated size only on windows
+			//auto size = _msize(imageData);
 
 			if (channels == 1)
 				image.format = CMImageFormat::R8;
@@ -443,7 +449,7 @@ namespace CE
 		return image;
     }
 
-	CMImage CMImage::LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, u32 bitDepth, u32 bitsPerPixel)
+	CMImage CMImage::LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel)
 	{
 		CMImage image{};
 		image.allocated = false;
@@ -451,7 +457,7 @@ namespace CE
 		image.bitDepth = bitDepth;
 		image.bitsPerPixel = bitsPerPixel;
 		image.format = pixelFormat;
-		image.sourceFormat = CMImageSourceFormat::None;
+		image.sourceFormat = sourceFormat;
 		return image;
 	}
 

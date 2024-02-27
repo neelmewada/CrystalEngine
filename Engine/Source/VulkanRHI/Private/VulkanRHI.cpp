@@ -480,6 +480,11 @@ namespace CE::Vulkan
         return device->primaryGraphicsQueue;
     }
 
+    RHI::CommandQueue* VulkanRHI::GetPrimaryTransferQueue()
+    {
+        return device->primaryTransferQueue;
+    }
+
     u64 VulkanRHI::GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member)
     {
         u64 alignment = 0;

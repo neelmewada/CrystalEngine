@@ -12,6 +12,7 @@ namespace CE::Editor
 			auto job = new TextureAssetImportJob(this, sourceAssets[i], productAssets[i]);
 			job->compressionQuality = compressionQuality;
 			job->anisotropy = anisotropy;
+			job->importHdrAsCubemap = importHdrAsCubemap;
 
 			jobs.Add(job);
 		}
@@ -28,6 +29,11 @@ namespace CE::Editor
 
 		// Clear the package of any subobjects/assets, we will build the asset from scratch
 		package->DestroyAllSubobjects();
+		
+		String extension = sourcePath.GetFilename().GetExtension().GetString();
+		String fileName = sourcePath.GetFilename().RemoveExtension().GetString();
+		// Make sure we can use the fileName as name of an object
+		fileName = FixObjectName(fileName);
 
 		CMImage image = CMImage::LoadFromFile(sourcePath);
 		if (!image.IsValid())
@@ -36,6 +42,12 @@ namespace CE::Editor
 		defer(
 			image.Free();
 		);
+		
+		bool isCubeMap = false;
+		if (extension == ".hdr" && image.GetWidth() == image.GetHeight() * 2)
+		{
+			//isCubeMap = importHdrAsCubemap;
+		}
 
 		CMImageFormat imageFormat = image.GetFormat();
 		CMImageSourceFormat targetSourceFormat = CMImageSourceFormat::None;
@@ -78,39 +90,88 @@ namespace CE::Editor
 			switch (imageFormat)
 			{
 			case CMImageFormat::R8:
+				pixelFormat = TextureFormat::BC4;
 				targetSourceFormat = CMImageSourceFormat::BC4;
 				compressionFormat = TextureSourceCompressionFormat::BC4;
 				break;
 			case CMImageFormat::RG8:
+				pixelFormat = TextureFormat::BC5;
 				targetSourceFormat = CMImageSourceFormat::BC5;
 				compressionFormat = TextureSourceCompressionFormat::BC5;
 				break;
 			case CMImageFormat::RGB8:
 				if (compressionQuality == TextureCompressionQuality::High)
 				{
+					pixelFormat = TextureFormat::BC7;
 					targetSourceFormat = CMImageSourceFormat::BC7;
 					compressionFormat = TextureSourceCompressionFormat::BC7;
 				}
 				else
 				{
+					pixelFormat = TextureFormat::BC1;
 					targetSourceFormat = CMImageSourceFormat::BC1;
 					compressionFormat = TextureSourceCompressionFormat::BC1;
 				}
 				break;
 			case CMImageFormat::RGBA8:
-				targetSourceFormat = CMImageSourceFormat::BC7;
-				compressionFormat = TextureSourceCompressionFormat::BC7;
+				if (compressionQuality == TextureCompressionQuality::High)
+				{
+					pixelFormat = TextureFormat::BC7;
+					targetSourceFormat = CMImageSourceFormat::BC7;
+					compressionFormat = TextureSourceCompressionFormat::BC7;
+				}
+				else
+				{
+					pixelFormat = TextureFormat::BC3;
+					targetSourceFormat = CMImageSourceFormat::BC3;
+					compressionFormat = TextureSourceCompressionFormat::BC3;
+				}
 				break;
 			case CMImageFormat::RGB32:
 			case CMImageFormat::RGBA32:
+				pixelFormat = TextureFormat::BC6H;
 				targetSourceFormat = CMImageSourceFormat::BC6H;
 				targetSourceFormat = CMImageSourceFormat::BC6H;
 				compressionFormat = TextureSourceCompressionFormat::BC6H;
 				break;
 			}
 		}
-		
-		Texture2D* texture = CreateObject<Texture2D>(package, TEXT("Texture2D"));
+
+		if (isCubeMap) // Process CubeMap
+		{
+			return ProcessCubeMap(fileName, package, image, pixelFormat, compressionFormat, targetSourceFormat);
+		}
+		else
+		{
+			return ProcessTex2D(fileName, package, image, pixelFormat, compressionFormat, targetSourceFormat);
+		}
+
+		return true;
+	}
+
+	bool TextureAssetImportJob::ProcessCubeMap(const String& name, Package* package, const CMImage& sourceImage, TextureFormat pixelFormat,
+		TextureSourceCompressionFormat compressionFormat,
+		CMImageSourceFormat targetSourceFormat)
+	{
+		TextureCube* texture = CreateObject<TextureCube>(package, name);
+
+		texture->anisoLevel = anisotropy;
+		texture->width = texture->height = sourceImage.GetHeight();
+		texture->mipLevels = 1;
+		texture->addressModeU = texture->addressModeV = TextureAddressMode::Repeat;
+		texture->filter = RHI::FilterMode::Linear;
+		texture->pixelFormat = pixelFormat;
+		texture->compressionQuality = compressionQuality;
+		texture->sourceCompressionFormat = compressionFormat;
+
+		return true;
+	}
+
+	bool TextureAssetImportJob::ProcessTex2D(const String& name, Package* package, const CMImage& image, TextureFormat pixelFormat,
+		TextureSourceCompressionFormat compressionFormat,
+		CMImageSourceFormat targetSourceFormat)
+	{
+		Texture2D* texture = CreateObject<Texture2D>(package, name);
 
 		texture->anisoLevel = anisotropy;
 		texture->width = image.GetWidth();
@@ -119,7 +180,6 @@ namespace CE::Editor
 		texture->mipLevels = 1;
 		texture->addressModeU = texture->addressModeV = TextureAddressMode::Repeat;
 		texture->filter = RHI::FilterMode::Linear;
-		texture->dimension = TextureDimension::Tex2D;
 		texture->pixelFormat = pixelFormat;
 		texture->compressionQuality = compressionQuality;
 		texture->sourceCompressionFormat = compressionFormat;
@@ -146,9 +206,12 @@ namespace CE::Editor
 
 			u32 numPixels = width * height;
 			u32 numChannels = image.GetNumChannels();
+			u32 channelStride = numChannels;
+			if (numChannels == 3)
+				channelStride = 4;
 
 			bool isFloat = false;
-			switch (imageFormat)
+			switch (image.GetFormat())
 			{
 			case CMImageFormat::R32:
 			case CMImageFormat::RG32:
@@ -162,10 +225,16 @@ namespace CE::Editor
 			{
 				if (isFloat)
 				{
-					f32 r = *((f32*)image.GetDataPtr() + 4 * i + 0);
-					f32 g = *((f32*)image.GetDataPtr() + 4 * i + 1);
-					f32 b = *((f32*)image.GetDataPtr() + 4 * i + 2);
-					f32 a = *((f32*)image.GetDataPtr() + 4 * i + 3);
+					f32 r = *((f32*)image.GetDataPtr() + channelStride * i + 0);
+					f32 g = 0;
+					if (channelStride >= 2)
+						g = *((f32*)image.GetDataPtr() + channelStride * i + 1);
+					f32 b = 0;
+					if (channelStride >= 3)
+						b = *((f32*)image.GetDataPtr() + channelStride * i + 2);
+					f32 a = 0;
+					if (channelStride >= 4)
+						a = *((f32*)image.GetDataPtr() + channelStride * i + 3);
 
 					if (compressionQuality == TextureCompressionQuality::None) // Store full float32
 					{
@@ -190,10 +259,16 @@ namespace CE::Editor
 				}
 				else
 				{
-					u8 r = *((u8*)image.GetDataPtr() + 4 * i + 0);
-					u8 g = *((u8*)image.GetDataPtr() + 4 * i + 1);
-					u8 b = *((u8*)image.GetDataPtr() + 4 * i + 2);
-					u8 a = *((u8*)image.GetDataPtr() + 4 * i + 3);
+					u8 r = *((u8*)image.GetDataPtr() + channelStride * i + 0);
+					u8 g = 0;
+					if (channelStride >= 2)
+						g = *((u8*)image.GetDataPtr() + channelStride * i + 1);
+					u8 b = 0;
+					if (channelStride >= 3)
+						b = *((u8*)image.GetDataPtr() + channelStride * i + 2);
+					u8 a = 0;
+					if (channelStride >= 4)
+						a = *((u8*)image.GetDataPtr() + channelStride * i + 3);
 
 					stream << r;
 					if (numChannels >= 2)

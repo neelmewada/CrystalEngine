@@ -118,12 +118,16 @@ namespace CE
 			errorMessage = "Width or height not divisible by 4";
 			return false;
 		}
+
+		u32 pixelStride = image.GetBitsPerPixel() / 8;
+		if (image.GetNumChannels() == 3) // Input image is always in either layouts: 1, 2 or 4 channels
+			pixelStride = image.GetBitsPerPixel() * 4 / 3 / 8;
 		
 		rgba_surface surface{};
 		surface.ptr = (u8*)image.GetDataPtr();
 		surface.width = image.GetWidth();
 		surface.height = image.GetHeight();
-		surface.stride = surface.width * 4; // CMImage always loads 4 bytes per pixel no matter how many channels exist
+		surface.stride = surface.width * pixelStride;
 
 		u32 destSize = 0;
 		bc6h_enc_settings bc6Settings{};

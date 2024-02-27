@@ -49,7 +49,7 @@ namespace CE
 			{
 				desc.texture.format = ToRHIFormat(pixelFormat);
 			}
-
+			
 			desc.source = &source;
 
 			rpiTexture = new RPI::Texture(desc);

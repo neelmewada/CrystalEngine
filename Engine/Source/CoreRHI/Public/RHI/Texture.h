@@ -59,6 +59,8 @@ namespace CE::RHI
         
 		virtual u32 GetNumberOfChannels() = 0;
 
+		virtual u32 GetBitsPerPixel() = 0;
+
 	protected:
 
 		Name name{};

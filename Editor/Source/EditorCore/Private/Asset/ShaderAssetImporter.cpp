@@ -51,7 +51,16 @@ namespace CE::Editor
 		if (preprocessor.GetErrorMessage().NonEmpty())
 		{
 			errorMessage = preprocessor.GetErrorMessage();
+			shader->Destroy();
 			return false;
+		}
+
+		shader->shaderName = preprocessData.shaderName;
+
+		shader->properties.Clear();
+		for (int i = 0; i < preprocessData.properties.GetSize(); i++)
+		{
+			shader->properties.Add(preprocessData.properties[i]);
 		}
 
 		for (SubShaderEntry& subShaderEntry : preprocessData.subShaders)

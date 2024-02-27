@@ -75,7 +75,7 @@ namespace CE
         static CMImage LoadFromMemory(unsigned char* buffer, u32 bufferLength);
 
 		/// Loads raw image from memory without allocating any memory
-		static CMImage LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, u32 bitDepth, u32 bitsPerPixel);
+		static CMImage LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel);
 
 		// - Encode API -
 
