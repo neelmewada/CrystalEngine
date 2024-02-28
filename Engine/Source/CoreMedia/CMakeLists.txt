@@ -36,6 +36,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             CE::Core
     RUNTIME_DEPENDENCIES
         dxcompiler
+        ispctexturecompressor
 )
 
 

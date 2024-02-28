@@ -448,14 +448,14 @@ namespace CE::RPI
 				
 				cmdList->BindPipelineState(equirectMaterials[i]->GetCurrentShader()->GetPipeline());
 
-				cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
-				cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
+				//cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
+				//cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
 
-				cmdList->SetShaderResourceGroup(equirectangulerSrgs[i]);
+				//cmdList->SetShaderResourceGroup(equirectangulerSrgs[i]);
 
-				cmdList->CommitShaderResources();
+				//cmdList->CommitShaderResources();
 
-				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+				//cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
 
 				cmdList->EndRenderTarget();
 			}

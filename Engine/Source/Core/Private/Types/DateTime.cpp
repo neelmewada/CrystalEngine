@@ -22,7 +22,8 @@ namespace CE
 
     DateTime::DateTime(fs::file_time_type fileTime)
     {
-        const auto systemTime = std::chrono::clock_cast<std::chrono::system_clock>(fileTime);
+        //const auto systemTime = std::chrono::clock_cast<std::chrono::system_clock>(fileTime);
+        const auto systemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(fileTime - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
         const auto time = std::chrono::system_clock::to_time_t(systemTime);
         timeInfo = *std::localtime(&time);
     }
