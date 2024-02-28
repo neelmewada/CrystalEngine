@@ -101,6 +101,8 @@ namespace CE::Vulkan
 
         // - Resources -
 
+        virtual RHI::DeviceLimits* GetDeviceLimits() override;
+
         virtual RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) override;
         virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) override;
 
@@ -118,7 +120,7 @@ namespace CE::Vulkan
         
         virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements) override;
 
-        virtual RHI::ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList) override;
+        virtual RHI::ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList = nullptr) override;
 
         virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) override;
 		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) override;
@@ -163,6 +165,7 @@ namespace CE::Vulkan
         VkDebugUtilsMessengerEXT vkMessenger = nullptr;
 
         VulkanDevice* device = nullptr;
+        Array<const char*> instanceExtensions{};
     };
     
 } // namespace CE

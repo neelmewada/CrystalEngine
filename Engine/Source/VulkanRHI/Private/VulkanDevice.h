@@ -17,6 +17,7 @@ namespace CE::Vulkan
 	class ShaderResourceManager;
 	class CommandBufferAllocator;
 	class RenderPassCache;
+    class DeviceLimits;
 
     class VulkanDevice
     {
@@ -136,6 +137,7 @@ namespace CE::Vulkan
 
         VkInstance instance = nullptr;
         VulkanRHI* vulkanRhi = nullptr;
+        DeviceLimits* deviceLimits = nullptr;
 
 		VkPhysicalDeviceMemoryProperties memoryProperties{};
 		HashSet<int> ignoredHeapIndices{};
@@ -178,6 +180,7 @@ namespace CE::Vulkan
         friend class FrameGraphCompiler;
         friend class VulkanRHI;
         friend class CE::Vulkan::CommandList;
+        friend class DeviceLimits;
     };
     
 } // namespace CE

@@ -85,6 +85,8 @@ namespace CE::Vulkan
 
 	void VulkanDevice::Shutdown()
 	{
+		delete deviceLimits; deviceLimits = nullptr;
+
 		vkDestroyCommandPool(device, gfxCommandPool, nullptr);
 		gfxCommandPool = nullptr;
 
@@ -378,6 +380,9 @@ namespace CE::Vulkan
 
 			queueFamilyToCmdPool[familyIdx] = commandPool;
 		}
+
+		// Initialize device limits
+		deviceLimits = new Vulkan::DeviceLimits(this);
 	}
 
 	void VulkanDevice::FetchQueues(VkPhysicalDevice gpu)

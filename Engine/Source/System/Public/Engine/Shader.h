@@ -174,9 +174,6 @@ namespace CE
 		FIELD()
 		Array<SubShader> subShaders{};
 
-		FIELD()
-		ShaderStage stages = ShaderStage::Default;
-
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::ShaderAssetImportJob;
 #endif

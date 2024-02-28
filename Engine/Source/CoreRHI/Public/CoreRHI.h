@@ -60,6 +60,7 @@
 #include "RHI/FrameGraphExecuter.h"
 #include "RHI/FrameScheduler.h"
 
+#include "RHI/DeviceLimits.h"
 #include "RHI/RHI.h"
 #include "RHI/RHISystem.h"
 

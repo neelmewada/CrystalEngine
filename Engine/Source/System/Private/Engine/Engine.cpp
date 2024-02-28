@@ -34,11 +34,15 @@ namespace CE
 		}
 
 		equirectShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
+		iblShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
 	}
 
 	void Engine::PreShutdown()
 	{
-		equirectShader->Destroy();
+		equirectShader->GetPackage()->Destroy();
+		equirectShader = nullptr;
+		iblShader->GetPackage()->Destroy();
+		iblShader = nullptr;
 
 		if (assetManager)
 			assetManager->Shutdown();
@@ -90,7 +94,7 @@ namespace CE
 		}
 	}
 
-	void Engine::DispatchOnMainThread(Delegate<void(void)> action)
+	void Engine::DispatchOnMainThread(const Delegate<void(void)>& action)
 	{
 		mainThreadQueueMutex.Lock();
 		mainThreadQueue.PushBack(action);
@@ -115,11 +119,6 @@ namespace CE
 		}
 
 		return nullptr;
-	}
-
-	void Engine::SetPrimaryGameViewport(GameViewport* gameViewport)
-	{
-		this->primaryViewport = gameViewport;
 	}
 
 	EngineSubsystem* Engine::CreateSubsystem(ClassType* type)

@@ -5,7 +5,6 @@ namespace CE
 	class AssetManager;
 	class GameInstance;
 	class EngineSubsystem;
-	class GameViewport;
 
 	CLASS(Abstract, NonSerialized, Config = Engine)
 	class SYSTEM_API Engine : public Object
@@ -25,7 +24,7 @@ namespace CE
 
 		virtual void Render();
 
-		void DispatchOnMainThread(Delegate<void(void)> action);
+		void DispatchOnMainThread(const Delegate<void(void)>& action);
 
 		virtual GameInstance* GetGameInstance();
 
@@ -41,9 +40,9 @@ namespace CE
 			return (TSubsystem*)GetSubsystem(TSubsystem::StaticType());
 		}
 
-		void SetPrimaryGameViewport(GameViewport* gameViewport);
+		inline CE::Shader* GetEquirectProjectionShader() const { return equirectShader; }
 
-		inline GameViewport* GetPrimaryGameViewport() const { return primaryViewport; }
+		inline CE::Shader* GetIBLShader() const { return iblShader; }
 
 	system_internal:
 
@@ -69,14 +68,15 @@ namespace CE
 		FIELD()
 		Array<EngineSubsystem*> engineSubsystems{};
 
+		// Builtin Shaders
+
 		CE::Shader* equirectShader = nullptr;
+		CE::Shader* iblShader = nullptr;
 
 		CE::Queue<Delegate<void()>> mainThreadQueue{};
 		SharedMutex mainThreadQueueMutex{};
 
 		b8 isInitialized = false;
-
-		GameViewport* primaryViewport = nullptr;
 
 	system_internal:
 		static Array<ClassType*> subsystemClassQueue;

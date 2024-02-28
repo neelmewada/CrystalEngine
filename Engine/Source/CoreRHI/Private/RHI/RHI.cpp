@@ -6,6 +6,94 @@ namespace CE::RHI
 {
 	CORERHI_API DynamicRHI* gDynamicRHI = nullptr;
 
+	struct FormatEntry
+	{
+		RHI::Format format;
+		u32 numChannels;
+		u32 bitsPerPixel;
+	};
+
+	static Array<FormatEntry> formatEntries = {
+		{ RHI::Format::R8_UNORM,			1, 8 },
+		{ RHI::Format::R8_SNORM,			1, 8 },
+		{ RHI::Format::R8_SRGB,				1, 8 },
+		{ RHI::Format::R8G8_UNORM,			2, 16 },
+		{ RHI::Format::R8G8_SRGB,			2, 16 },
+		{ RHI::Format::R8G8B8A8_SRGB,		4, 32 },
+		{ RHI::Format::R8G8B8A8_UNORM,		4, 32 },
+		{ RHI::Format::R8G8B8A8_SNORM,		4, 32 },
+		{ RHI::Format::B8G8R8A8_SRGB,		4, 32 },
+		{ RHI::Format::B8G8R8A8_UNORM,		4, 32 },
+		{ RHI::Format::B8G8R8A8_SNORM,		4, 32 },
+		{ RHI::Format::R8G8B8_UNORM,		3, 24 },
+		{ RHI::Format::R8G8B8_SNORM,		3, 24 },
+		{ RHI::Format::R8G8B8_SRGB,			3, 24 },
+		{ RHI::Format::B8G8R8_UNORM,		3, 24 },
+		{ RHI::Format::B8G8R8_SNORM,		3, 24 },
+		{ RHI::Format::B8G8R8_SRGB,			3, 24 },
+		{ RHI::Format::R5G6B5_UNORM,		3, 16 },
+		{ RHI::Format::B5G6R5_UNORM,		3, 16 },
+		{ RHI::Format::R16_UNORM,			1, 16 },
+		{ RHI::Format::R16_SNORM,			1, 16 },
+		{ RHI::Format::R16_SFLOAT,			1, 16 },
+		{ RHI::Format::R16G16_UNORM,		2, 32 },
+		{ RHI::Format::R16G16_SNORM,		2, 32 },
+		{ RHI::Format::R16G16_UINT,			2, 32 },
+		{ RHI::Format::R16G16_SINT,			2, 32 },
+		{ RHI::Format::R16G16_SFLOAT,		2, 32 },
+		{ RHI::Format::R16G16B16A16_SFLOAT, 4, 64 },
+		{ RHI::Format::R32_UINT,			1, 32 },
+		{ RHI::Format::R32_SINT,			1, 32 },
+		{ RHI::Format::R32_SFLOAT,			1, 32 },
+		{ RHI::Format::R32G32_UINT,			2, 64 },
+		{ RHI::Format::R32G32_SINT,			2, 64 },
+		{ RHI::Format::R32G32_SFLOAT,		2, 64 },
+		{ RHI::Format::R32G32B32A32_SFLOAT,	4, 128 },
+		{ RHI::Format::D16_UNORM_S8_UINT,	2, 24 },
+		{ RHI::Format::D24_UNORM_S8_UINT,	2, 32 },
+		{ RHI::Format::D32_SFLOAT_S8_UINT,	2, 40 },
+		{ RHI::Format::D32_SFLOAT,			1, 32 },
+		{ RHI::Format::A4R4G4B4_UNORM,		3, 16 },
+		{ RHI::Format::BC1_RGB_UNORM,		3, 4 },
+		{ RHI::Format::BC1_RGB_SRGB,		3, 4 },
+		{ RHI::Format::BC1_RGBA_UNORM,		4, 4 },
+		{ RHI::Format::BC1_RGBA_SRGB,		4, 4 },
+		{ RHI::Format::BC3_UNORM,			4, 8 },
+		{ RHI::Format::BC3_SRGB,			4, 8 },
+		{ RHI::Format::BC4_UNORM,			1, 4 },
+		{ RHI::Format::BC5_UNORM,			2, 8 },
+		{ RHI::Format::BC7_UNORM,			4, 8 },
+		{ RHI::Format::BC7_SRGB,			4, 8 },
+		{ RHI::Format::BC6H_UFLOAT,			3, 8 },
+		{ RHI::Format::BC6H_SFLOAT,			3, 8 }
+	};
+
+	CORERHI_API u32 GetBitsPerPixelForFormat(RHI::Format format)
+	{
+		for (int i = 0; i < formatEntries.GetSize(); i++)
+		{
+			if (formatEntries[i].format == format)
+			{
+				return formatEntries[i].bitsPerPixel;
+			}
+		}
+
+		return 0;
+	}
+
+	CORERHI_API u32 GetNumChannelsForFormat(RHI::Format format)
+	{
+		for (int i = 0; i < formatEntries.GetSize(); i++)
+		{
+			if (formatEntries[i].format == format)
+			{
+				return formatEntries[i].numChannels;
+			}
+		}
+
+		return 0;
+	}
+
 	CORERHI_API SIZE_T GetVertexInputTypeSize(VertexInputAttribute input)
 	{
 		switch (input) {

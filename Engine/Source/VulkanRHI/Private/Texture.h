@@ -86,7 +86,6 @@ namespace CE::Vulkan
     VkFormat RHIFormatToVkFormat(RHI::Format format);
     RHI::Format VkFormatToRHIFormat(VkFormat format);
     u32 GetNumberOfChannelsForFormat(RHI::Format format);
-    u32 GetBitsPerPixelForFormat(RHI::Format format);
 
 	bool IsDepthVkFormat(VkFormat format);
 	bool IsStencilVkFormat(VkFormat format);

@@ -1,7 +1,5 @@
 
 #include "Core/Macros.hlsli"
-
-#include "Core/Macros.hlsli"
 #include "Core/Gamma.hlsli"
 
 

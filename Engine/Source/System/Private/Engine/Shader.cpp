@@ -104,6 +104,8 @@ namespace CE
 		String platformGroup = "Desktop";
 #elif PLATFORM_MOBILE
 		String platformGroup = "Mobile";
+#else
+		String platformGroup = "";
 #endif
 
 		for (int i = 0; i < subShaders.GetSize(); i++)

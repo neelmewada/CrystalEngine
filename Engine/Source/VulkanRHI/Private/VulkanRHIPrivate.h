@@ -6,6 +6,7 @@
 
 #include "vulkan/vulkan.h"
 
+#include "DeviceLimits.h"
 #include "VulkanRHI.h"
 #include "CommandQueue.h"
 #include "VulkanDevice.h"

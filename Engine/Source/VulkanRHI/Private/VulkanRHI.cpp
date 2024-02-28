@@ -118,10 +118,15 @@ namespace CE::Vulkan
 
         for (int i = 0; i < extensionCount; i++)
         {
-            if (strcmp(extensionProps[i].extensionName, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME) == 0)
-            {
-                instanceExtensions.Add(extensionProps[i].extensionName);
-            }
+            auto tryAddExtension = [&](const char* extName)
+                {
+                    if (strcmp(extensionProps[i].extensionName, extName) == 0)
+                    {
+                        instanceExtensions.Add(extensionProps[i].extensionName);
+                    }
+                };
+
+            tryAddExtension(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
         }
 
         VkInstanceCreateInfo instanceCI{};
@@ -135,6 +140,8 @@ namespace CE::Vulkan
 
         instanceCI.enabledExtensionCount = instanceExtensions.GetSize();
         instanceCI.ppEnabledExtensionNames = instanceExtensions.GetData();
+
+        this->instanceExtensions = instanceExtensions;
 
         if (enableValidation)
         {
@@ -314,6 +321,11 @@ namespace CE::Vulkan
     }
 
     // - Resources -
+
+    RHI::DeviceLimits* VulkanRHI::GetDeviceLimits()
+    {
+        return device->deviceLimits;
+    }
 
     RHI::RenderTarget* VulkanRHI::CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout)
     {
@@ -564,7 +576,7 @@ namespace CE::Vulkan
         }
     }
 
-    ResourceMemoryRequirements VulkanRHI::GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList)
+    ResourceMemoryRequirements VulkanRHI::GetCombinedResourceRequirements(u32 count, ResourceMemoryRequirements* requirementsList, u64* outOffsetsList)
     {
         if (count == 0)
             return {};
@@ -574,6 +586,9 @@ namespace CE::Vulkan
         result.flags = requirementsList[0].flags;
         result.size = requirementsList[0].size;
         result.offsetAlignment = requirementsList[0].offsetAlignment;
+        if (outOffsetsList)
+            outOffsetsList[0] = offset;
+        offset += requirementsList[0].size;
 
         for (int i = 1; i < count; i++)
         {
@@ -582,6 +597,9 @@ namespace CE::Vulkan
 
             if (offset > 0)
                 offset = Memory::GetAlignedSize(offset, requirementsList[i].offsetAlignment);
+            if (outOffsetsList)
+                outOffsetsList[i] = offset;
+
             offset += requirementsList[i].size;
         }
 

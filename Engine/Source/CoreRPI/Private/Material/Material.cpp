@@ -222,7 +222,14 @@ namespace CE::RPI
                         RPI::Texture* texture = value.GetValue<RPI::Texture*>();
                         if (texture != nullptr)
                         {
-                            shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTexture());
+                            if (texture->GetRhiTextureView() != nullptr)
+                            {
+                                shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTextureView());
+                            }
+                            else
+                            {
+                                shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTexture());
+                            }
                             RHI::Sampler* sampler = texture->GetSamplerState();
                             if (sampler != nullptr)
                             {
@@ -399,7 +406,14 @@ namespace CE::RPI
                         RPI::Texture* texture = value.GetValue<RPI::Texture*>();
                         if (texture != nullptr)
                         {
-                            shaderResourceGroup->Bind(variable.name, texture->GetRhiTexture());
+                            if (texture->GetRhiTextureView() != nullptr)
+                            {
+                                shaderResourceGroup->Bind(variable.name, texture->GetRhiTextureView());
+                            }
+                            else
+                            {
+                                shaderResourceGroup->Bind(variable.name, texture->GetRhiTexture());
+                            }
                             RHI::Sampler* sampler = texture->GetSamplerState();
                             if (sampler != nullptr)
                             {

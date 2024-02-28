@@ -14,13 +14,13 @@ Shader "CubeMap/Equirectangular Projection"
 
         Pass
         {
-            Name "Opaque"
+            Name "Main"
             Tags { 
-                "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="opaque"
+                "Vertex"="VertMain", "Fragment"="FragMain"
             }
             ZWrite Off
-            ZTest LEqual
-            Cull Back
+            ZTest Off
+            Cull Off
 
             HLSLPROGRAM
             

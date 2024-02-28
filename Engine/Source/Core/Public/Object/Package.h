@@ -176,6 +176,7 @@ namespace CE
             b8 isLoaded = false;
 		};
 
+		SharedMutex loadedObjectsMutex{};
 		HashMap<Uuid, ObjectEntryMetaData> objectUuidToEntryMap{};
 		HashMap<Uuid, Object*> loadedObjects{};
         

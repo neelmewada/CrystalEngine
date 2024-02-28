@@ -102,6 +102,7 @@ namespace CE
 		auto package = GetPackage();
 		if (package != nullptr)
 		{
+			LockGuard<SharedMutex> lock{ package->loadedObjectsMutex };
 			package->loadedObjects[subobject->GetUuid()] = subobject;
 		}
 
@@ -119,6 +120,7 @@ namespace CE
 		auto package = GetPackage();
 		if (package != nullptr)
 		{
+			LockGuard<SharedMutex> lock{ package->loadedObjectsMutex };
 			package->loadedObjects.Remove(subobject->GetUuid());
 		}
 

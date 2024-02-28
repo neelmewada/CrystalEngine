@@ -30,6 +30,9 @@ namespace CE::Editor
 		// Clear the package of any subobjects, we will build the asset from scratch
 		package->DestroyAllSubobjects();
 
+		Array<IO::Path> includePaths = this->includePaths;
+		includePaths.Add(sourcePath.GetParentPath());
+
 		CE::Shader* shader = package->LoadObject<CE::Shader>();
 
 		if (shader == nullptr) // Create new object from scratch

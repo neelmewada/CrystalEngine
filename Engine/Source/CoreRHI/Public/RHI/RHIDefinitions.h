@@ -30,6 +30,7 @@ namespace CE::RHI
         RenderPass,
         Viewport,
 		SwapChain,
+        DeviceLimits,
 
         Fence,
 		CommandQueue,
@@ -186,6 +187,9 @@ namespace CE::RHI
     };
 	ENUM_CLASS(Format);
 
+    CORERHI_API u32 GetBitsPerPixelForFormat(RHI::Format format);
+    CORERHI_API u32 GetNumChannelsForFormat(RHI::Format format);
+
 	ENUM(Flags)
     enum class TextureBindFlags
     {
@@ -215,6 +219,16 @@ namespace CE::RHI
 		Cubic = 2
 	};
 	ENUM_CLASS(FilterMode);
+
+    ENUM()
+	enum class FilterModeMask
+	{
+        None = 0,
+		Linear = BIT((u32)FilterMode::Linear),
+		Nearest = BIT((u32)FilterMode::Nearest),
+		Cubic = BIT((u32)FilterMode::Cubic)
+	};
+	ENUM_CLASS_FLAGS(FilterModeMask);
 
     ENUM()
     enum class SamplerAddressMode

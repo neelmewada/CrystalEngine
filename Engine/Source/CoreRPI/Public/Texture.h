@@ -13,18 +13,20 @@ namespace CE::RPI
     {
     public:
         Texture(const TextureDescriptor& desc);
-        Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc);
+        Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc = {});
 
         virtual ~Texture();
 
         inline RHI::Texture* GetRhiTexture() const { return texture; }
         inline RHI::Sampler* GetSamplerState() const { return samplerState; }
+        inline RHI::TextureView* GetRhiTextureView() const { return textureView; }
 
         virtual void UploadData(BinaryBlob* source, int totalMipLevels = 1);
 
     protected:
 
         RHI::Texture* texture = nullptr;
+        RHI::TextureView* textureView = nullptr;
         RHI::Sampler* samplerState = nullptr;
     };
 

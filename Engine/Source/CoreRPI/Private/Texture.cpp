@@ -27,6 +27,8 @@ namespace CE::RPI
     {
         delete texture;
         texture = nullptr;
+        delete textureView;
+        textureView = nullptr;
     }
 
     void Texture::UploadData(BinaryBlob* source, int totalMipLevels)

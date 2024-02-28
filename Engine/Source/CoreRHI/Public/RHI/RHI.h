@@ -21,6 +21,7 @@ namespace CE::RHI
 	struct BufferDescriptor;
 	struct TextureDescriptor;
 	struct ResourceMemoryRequirements;
+	class DeviceLimits;
 
 	enum class ValidationMessageType
 	{
@@ -107,6 +108,8 @@ namespace CE::RHI
 
         // - Resources -
 
+		virtual RHI::DeviceLimits* GetDeviceLimits() = 0;
+
 		virtual RHI::RenderTarget* CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout) = 0;
 		virtual void DestroyRenderTarget(RHI::RenderTarget* renderTarget) = 0;
 
@@ -123,7 +126,7 @@ namespace CE::RHI
 		virtual void GetBufferMemoryRequirements(const RHI::BufferDescriptor& bufferDesc, RHI::ResourceMemoryRequirements& outRequirements) = 0;
         virtual void GetTextureMemoryRequirements(const RHI::TextureDescriptor& textureDesc, RHI::ResourceMemoryRequirements& outRequirements) = 0;
 
-		virtual RHI::ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList) = 0;
+		virtual RHI::ResourceMemoryRequirements GetCombinedResourceRequirements(u32 count, RHI::ResourceMemoryRequirements* requirementsList, u64* outOffsetsList = nullptr) = 0;
 
 		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc) = 0;
 		virtual RHI::Buffer* CreateBuffer(const RHI::BufferDescriptor& bufferDesc, const RHI::ResourceMemoryDescriptor& memoryDesc) = 0;

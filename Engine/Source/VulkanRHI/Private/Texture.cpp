@@ -172,21 +172,6 @@ namespace CE::Vulkan
 		return 0;
     }
 
-	u32 GetBitsPerPixelForFormat(RHI::Format format)
-	{
-		LoadMappings();
-
-		for (const auto& entry : formatEntries)
-		{
-			if (entry.rhiFormat == format)
-			{
-				return entry.totalBits;
-			}
-		}
-
-		return 0;
-	}
-
 	bool IsDepthFormat(RHI::Format format)
 	{
 		switch (format)
