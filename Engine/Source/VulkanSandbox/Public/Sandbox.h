@@ -92,6 +92,7 @@ namespace CE
 		void DestroyDrawPackets();
 		void DestroyPipelines();
 		void DestroyTextures();
+		void DestroyIntermediateHDRIs();
 		void DestroyHDRIs();
 		void DestroyCubeMaps();
 
@@ -149,6 +150,7 @@ namespace CE
 		RHI::PipelineState* depthPipeline = nullptr;
 		RHI::ShaderModule* depthShaderVert = nullptr;
 		
+		CE::Shader* equirectShader = nullptr;
 		CE::Shader* opaqueShader = nullptr;
 		RPI::Shader* opaqueRpiShader = nullptr;
 		//RPI::Shader* opaqueShader = nullptr;

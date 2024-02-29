@@ -56,7 +56,7 @@ namespace CE::Editor
 		bool isCubeMap = false;
 		if (extension == ".hdr" && image.GetWidth() == image.GetHeight() * 2)
 		{
-			//isCubeMap = importHdrAsCubemap;
+			isCubeMap = importHdrAsCubemap;
 		}
 
 		CMImageFormat imageFormat = image.GetFormat();
@@ -178,10 +178,10 @@ namespace CE::Editor
 
 		RPI::CubeMapProcessInfo processInfo{};
 		processInfo.name = name;
-		processInfo.preferredFormat = RHI::Format::R16G16B16A16_SFLOAT;
 		processInfo.sourceImage = sourceImage;
 		processInfo.diffuseIrradianceResolution = 0;
 		processInfo.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
+		processInfo.useCompression = false;
 
 		RPI::CubeMapProcessor processor{};
 
@@ -212,7 +212,16 @@ namespace CE::Editor
 		{
 			float quality = 0.05f;
 			CMImageEncoder encoder{};
-			bool success = encoder.EncodeToBCn(image, texture->source, targetSourceFormat, CMImageEncoder::Quality_Normal);
+			u64 reserveSize = encoder.GetCompressedSizeRequirement(image, targetSourceFormat);
+			if (reserveSize == 0)
+			{
+				errorMessage = "Invalid compression format!";
+				return false;
+			}
+
+			texture->source.Reserve(reserveSize);
+
+			bool success = encoder.EncodeToBCn(image, texture->source.GetDataPtr(), targetSourceFormat, CMImageEncoder::Quality_Normal);
 			if (!success)
 			{
 				errorMessage = "Failed to encode to BCn format!";

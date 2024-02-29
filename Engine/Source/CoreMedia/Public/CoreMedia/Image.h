@@ -40,8 +40,14 @@ namespace CE
     struct CMImageInfo
     {
     public:
-        u32 x = 0;
-		u32 y = 0;
+		union {
+			u32 x = 0;
+			u32 width;
+		};
+		union {
+			u32 y = 0;
+			u32 height;
+		};
 		u32 numChannels = 0;
 		CMImageFormat format = CMImageFormat::Undefined;
 		CMImageSourceFormat sourceFormat = CMImageSourceFormat::None;
@@ -51,7 +57,7 @@ namespace CE
         const char* failureReason = nullptr;
 
         virtual bool IsValid() const { return x > 0 && y > 0 && bitDepth > 0 && bitsPerPixel > 0 && numChannels > 0 && numChannels <= 4 && 
-			format != CMImageFormat::Undefined && sourceFormat != CMImageSourceFormat::None; }
+			format != CMImageFormat::Undefined; }
     };
 
 	/*
@@ -75,7 +81,7 @@ namespace CE
         static CMImage LoadFromMemory(unsigned char* buffer, u32 bufferLength);
 
 		/// Loads raw image from memory without allocating any memory
-		static CMImage LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel);
+		static CMImage LoadRawImageFromMemory(unsigned char* buffer, u32 width, u32 height, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel);
 
 		// - Encode API -
 

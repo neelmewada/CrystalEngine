@@ -82,7 +82,37 @@ namespace CE
 		return false;
 	}
 
-	bool CMImageEncoder::EncodeToBCn(const CMImage& image, BinaryBlob& outData, CMImageSourceFormat destFormat, Quality quality)
+	u64 CMImageEncoder::GetCompressedSizeRequirement(const CMImage& surface, CMImageSourceFormat destFormat)
+	{
+		u64 destSize = 0;
+		switch (destFormat)
+		{
+		case CMImageSourceFormat::BC1:
+			destSize = surface.width * surface.height / 2;
+			break;
+		case CMImageSourceFormat::BC3:
+			destSize = surface.width * surface.height;
+			break;
+		case CMImageSourceFormat::BC4:
+			destSize = surface.width * surface.height / 2;
+			break;
+		case CMImageSourceFormat::BC5:
+			destSize = surface.width * surface.height;
+			break;
+		case CMImageSourceFormat::BC6H:
+			destSize = surface.width * surface.height;
+			break;
+		case CMImageSourceFormat::BC7:
+			destSize = surface.width * surface.height;
+			break;
+		default:
+			return 0; // Should never happen
+		}
+
+		return 0;
+	}
+
+	bool CMImageEncoder::EncodeToBCn(const CMImage& image, void* outData, CMImageSourceFormat destFormat, Quality quality)
 	{
 #if PLATFORM_DESKTOP
 		errorMessage = "";
@@ -143,35 +173,29 @@ namespace CE
 		{
 		case CMImageSourceFormat::BC1:
 			destSize = surface.width * surface.height / 2;
-			outData.Reserve(destSize);
-			CompressBlocksBC1(&surface, outData.GetDataPtr());
+			CompressBlocksBC1(&surface, (uint8_t*)outData);
 			break;
 		case CMImageSourceFormat::BC3:
 			destSize = surface.width * surface.height;
-			outData.Reserve(destSize);
-			CompressBlocksBC3(&surface, outData.GetDataPtr());
+			CompressBlocksBC3(&surface, (uint8_t*)outData);
 			break;
 		case CMImageSourceFormat::BC4:
 			destSize = surface.width * surface.height / 2;
-			outData.Reserve(destSize);
-			CompressBlocksBC4(&surface, outData.GetDataPtr());
+			CompressBlocksBC4(&surface, (uint8_t*)outData);
 			break;
 		case CMImageSourceFormat::BC5:
 			destSize = surface.width * surface.height;
-			outData.Reserve(destSize);
-			CompressBlocksBC5(&surface, outData.GetDataPtr());
+			CompressBlocksBC5(&surface, (uint8_t*)outData);
 			break;
 		case CMImageSourceFormat::BC6H:
 			destSize = surface.width * surface.height;
-			outData.Reserve(destSize);
 			qualityMap[quality].second.GetBC6()(&bc6Settings);
-			CompressBlocksBC6H(&surface, outData.GetDataPtr(), &bc6Settings);
+			CompressBlocksBC6H(&surface, (uint8_t*)outData, &bc6Settings);
 			break;
 		case CMImageSourceFormat::BC7:
 			destSize = surface.width * surface.height;
-			outData.Reserve(destSize);
 			qualityMap[quality].second.GetBC7(!useAlpha)(&bc7Settings);
-			CompressBlocksBC7(&surface, outData.GetDataPtr(), &bc7Settings);
+			CompressBlocksBC7(&surface, (uint8_t*)outData, &bc7Settings);
 			break;
 		default:
 			return false; // Should never happen

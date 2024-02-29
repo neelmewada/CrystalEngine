@@ -123,6 +123,11 @@ namespace CE::RPI
 			}
 		}
 
+		if (!pipelineDesc.depthStencilState.depthState.testEnable)
+		{
+			pipelineDesc.depthStencilState.depthState.enable = false;
+		}
+
 		if (desc.TagExists("Cull"))
 		{
 			String cullValue = desc.GetTagValue("Cull");

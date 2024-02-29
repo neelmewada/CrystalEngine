@@ -8,7 +8,7 @@ Shader "CubeMap/Equirectangular Projection"
     SubShader
     {
         Tags {
-            "Blend" = "SrcAlpha,OneMinusSrcAlpha",
+            "Blend" = "One,Zero",
             "Platform" = "Desktop"
         }
 
@@ -76,6 +76,12 @@ Shader "CubeMap/Equirectangular Projection"
             {
                 float2 uv = SampleSphericalMap(normalize(input.localPosition));
                 float3 color = _InputTexture.Sample(_InputSampler, uv).rgb;
+                if (isnan(color.r))
+                    color.r = 65000;
+                if (isnan(color.g))
+                    color.g = 65000;
+                if (isnan(color.b))
+                    color.b = 65000;
                 return float4(color, 1);
             }
 

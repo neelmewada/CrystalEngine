@@ -89,7 +89,7 @@ namespace CE::RPI
 
                 commandList->CopyTextureRegion(copyRegion);
                 
-                bufferOffset += texture->GetWidth() / (mip + 1) * texture->GetHeight() / (mip + 1) * texture->GetBitsPerPixel() / 8;
+                bufferOffset += texture->GetWidth() / (mip + 1) * texture->GetHeight() / (mip + 1) * texture->GetBitsPerPixel() / 8 * copyRegion.layerCount;
             }
 
             barrier.resource = texture;

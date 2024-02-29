@@ -391,15 +391,19 @@ namespace CE
 		RHI::gDynamicRHI->PostInitialize();
 
 		gEngine->Initialize();
-
+		
 		gEngine->PostInitialize();
 
 		assetDefRegistry = Editor::GetAssetDefinitionRegistry();
+
+		RPISystem::Get().Initialize();
 	}
 
 	void AssetProcessor::PreShutdown()
 	{
 		auto app = PlatformApplication::Get();
+
+		RPISystem::Get().Shutdown();
 
 		gEngine->PreShutdown();
 

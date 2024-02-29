@@ -50,9 +50,8 @@ namespace CE::RPI
 		RPI::Shader* cdfConditionalInverseShader = nullptr;
 		RPI::Shader* cdfMarginalInverseShader = nullptr;
 
-		// The preferred color format for the cubemap. Do NOT use compressed format here!
-		RHI::Format preferredFormat = RHI::Format::R16G16B16A16_SFLOAT;
 		HdrEncoding hdrEncoding = HdrEncoding::None;
+		bool useCompression = false;
 
 		// Use 0 to auto choose resolution based on source image
 		u32 cubeMapResolution = 0;

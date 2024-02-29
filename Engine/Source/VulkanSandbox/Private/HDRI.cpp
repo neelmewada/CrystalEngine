@@ -179,6 +179,35 @@ namespace CE
 
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 
+		//if (false) // Skip the block
+		{
+			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
+
+			CubeMapProcessor cubeMapProcessor{};
+			CubeMapProcessInfo info{};
+			info.name = "Test HDR";
+			info.sourceImage = hdrImage;
+			info.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
+			info.useCompression = false;
+			info.diffuseIrradianceResolution = 0;
+
+			BinaryBlob testBlob{};
+			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob);
+
+			equirectShader->Destroy();
+			equirectShader = nullptr;
+		}
+
+		if (false)
+		{
+			CE::Texture* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/HDRI/sample_night");
+
+			if (cubeMapTex != nullptr)
+			{
+				cubeMapTex->GetRpiTexture();
+			}
+		}
+
 		RHI::TextureDescriptor hdriFlatMapDesc{};
 		hdriFlatMapDesc.name = "HDRI Texture";
 		hdriFlatMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
@@ -1461,12 +1490,13 @@ namespace CE
 			delete viewDataBuffers[i];
 			delete equirectangulerSrgs[i];
 		}
+
+		DestroyIntermediateHDRIs();
 	}
 
-	void VulkanSandbox::DestroyHDRIs()
+	void VulkanSandbox::DestroyIntermediateHDRIs()
 	{
 		delete hdriMap; hdriMap = nullptr;
-		delete hdriIrradiance; hdriIrradiance = nullptr;
 		delete hdriGrayscaleMap; hdriGrayscaleMap = nullptr;
 		delete hdriRowAverage; hdriRowAverage = nullptr;
 		delete hdriColumnAverage; hdriColumnAverage = nullptr;
@@ -1475,6 +1505,13 @@ namespace CE
 		delete hdriCDFConditionalInverse; hdriCDFConditionalInverse = nullptr;
 		delete hdriPDFMarginal; hdriPDFMarginal = nullptr;
 		delete hdriPDFJoint; hdriPDFJoint = nullptr;
+	}
+
+	void VulkanSandbox::DestroyHDRIs()
+	{
+		DestroyIntermediateHDRIs();
+		
+		delete hdriIrradiance; hdriIrradiance = nullptr;
 		delete hdriCubeMap; hdriCubeMap = nullptr;
         delete irradianceMap; irradianceMap = nullptr;
         

@@ -822,7 +822,7 @@ namespace CE
 		}
 
 		lightData.totalDirectionalLights = directionalLights.GetSize();
-		//lightData.totalDirectionalLights = 0;
+		lightData.totalDirectionalLights = 0;
 		lightData.ambientColor = Color(0, 0.1f, 0.5f, 1).ToVec4();
 		lightData.totalPointLights = pointLights.GetSize();
 

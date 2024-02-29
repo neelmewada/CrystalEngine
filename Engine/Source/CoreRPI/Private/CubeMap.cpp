@@ -37,19 +37,18 @@ namespace CE::RPI
 			return;
 		}
 
-		bool isDestFloatFormat = false;
-		EnumType* formatEnum = GetStaticEnum<RHI::Format>();
-		EnumConstant* formatConst = formatEnum->FindConstantWithValue((s64)desc.preferredFormat);
-		if (formatConst)
-		{
-			String name = formatConst->GetName().GetString();
-			if (name.EndsWith("FLOAT"))
-				isDestFloatFormat = true;
-		}
-
 		u32 cubeMapRes = desc.cubeMapResolution;
 		if (cubeMapRes == 0)
 			cubeMapRes = desc.sourceImage.GetHeight();
+
+		RHI::Format hdriFormat = RHI::Format::R16G16B16A16_SFLOAT;
+		bool usesHalfPrecision = true;
+		// If we want to compress to BC6H, then we need the final image to be in 32-bit float format
+		if (desc.useCompression)
+		{
+			hdriFormat = RHI::Format::R32G32B32A32_SFLOAT;
+			usesHalfPrecision = false;
+		}
 
 		/////////////////////////////////////////////
 		// - Input Resources -
@@ -60,15 +59,15 @@ namespace CE::RPI
 		hdriMapDesc.width = desc.sourceImage.GetWidth();
 		hdriMapDesc.height = desc.sourceImage.GetHeight();
 		hdriMapDesc.depth = 1;
-		hdriMapDesc.dimension = RHI::Dimension::DimCUBE;
+		hdriMapDesc.dimension = RHI::Dimension::Dim2D;
 		hdriMapDesc.mipLevels = 1;
 		hdriMapDesc.sampleCount = 1;
 		hdriMapDesc.arrayLayers = 1;
-		hdriMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+		hdriMapDesc.format = hdriFormat;
 
 		RHI::Texture* hdriMap = RHI::gDynamicRHI->CreateTexture(hdriMapDesc);
 		RPI::Texture* hdriMapRpi = new RPI::Texture(hdriMap);
-
+		
 		/////////////////////////////////////////////
 		// - Output Resources -
 
@@ -82,7 +81,7 @@ namespace CE::RPI
 		cubeMapDesc.mipLevels = 1;
 		cubeMapDesc.sampleCount = 1;
 		cubeMapDesc.arrayLayers = 6;
-		cubeMapDesc.format = desc.preferredFormat;
+		cubeMapDesc.format = hdriFormat;
 		
 		// Final CubeMap texture with 6 faces
 		RHI::Texture* cubeMap = RHI::gDynamicRHI->CreateTexture(cubeMapDesc);
@@ -101,7 +100,7 @@ namespace CE::RPI
 			irradianceDesc.mipLevels = 1;
 			irradianceDesc.sampleCount = 1;
 			irradianceDesc.arrayLayers = 6;
-			irradianceDesc.format = desc.preferredFormat;
+			irradianceDesc.format = hdriFormat;
 
 			diffuseIrradiance = RHI::gDynamicRHI->CreateTexture(irradianceDesc);
 		}
@@ -129,7 +128,7 @@ namespace CE::RPI
 		stagingBufferDesc.name = "Staging Buffer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
 		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-		stagingBufferDesc.bufferSize = hdriMapDesc.width * hdriMapDesc.height * 2 * 4;
+		stagingBufferDesc.bufferSize = hdriMap->GetByteSize();
 
 		// To upload input HDRI equirect image to a texture
 		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
@@ -143,28 +142,33 @@ namespace CE::RPI
 			for (int i = 0; i < numPixels; i++)
 			{
 				u16* u16Data = (u16*)dataPtr;
+				f32* f32Data = (f32*)dataPtr;
 
-				if (isSourceFloatFormat)
+				f32 r = *((f32*)srcPtr + 4 * i + 0);
+				f32 g = *((f32*)srcPtr + 4 * i + 1);
+				f32 b = *((f32*)srcPtr + 4 * i + 2);
+
+				if (usesHalfPrecision)
 				{
-					f32 r = *((f32*)srcPtr + 4 * i + 0);
-					f32 g = *((f32*)srcPtr + 4 * i + 1);
-					f32 b = *((f32*)srcPtr + 4 * i + 2);
-					
-					*(u16Data + 4 + i + 0) = Math::ToFloat16(r);
-					*(u16Data + 4 + i + 1) = Math::ToFloat16(g);
-					*(u16Data + 4 + i + 2) = Math::ToFloat16(b);
-					*(u16Data + 4 + i + 3) = Math::ToFloat16(1.0f);
+					// 16 bit float cannot store value higher than 65,000
+					if (r > 65000)
+						r = 65000;
+					if (g > 65000)
+						g = 65000;
+					if (b > 65000)
+						b = 65000;
+
+					*(u16Data + 4 * i + 0) = Math::ToFloat16(r);
+					*(u16Data + 4 * i + 1) = Math::ToFloat16(g);
+					*(u16Data + 4 * i + 2) = Math::ToFloat16(b);
+					*(u16Data + 4 * i + 3) = Math::ToFloat16(1.0f);
 				}
 				else
 				{
-					u8 r = *((u8*)srcPtr + 4 * i + 0);
-					u8 g = *((u8*)srcPtr + 4 * i + 1);
-					u8 b = *((u8*)srcPtr + 4 * i + 2);
-
-					*(u16Data + 4 + i + 0) = Math::ToFloat16(r);
-					*(u16Data + 4 + i + 1) = Math::ToFloat16(g);
-					*(u16Data + 4 + i + 2) = Math::ToFloat16(b);
-					*(u16Data + 4 + i + 3) = Math::ToFloat16(1.0f);
+					*(f32Data + 4 * i + 0) = r;
+					*(f32Data + 4 * i + 1) = g;
+					*(f32Data + 4 * i + 2) = b;
+					*(f32Data + 4 * i + 3) = 1.0f;
 				}
 			}
 		}
@@ -284,7 +288,7 @@ namespace CE::RPI
 			RHI::RenderTargetLayout rtLayout{};
 			RHI::RenderAttachmentLayout colorAttachment{};
 			colorAttachment.attachmentId = "Color";
-			colorAttachment.format = desc.preferredFormat;
+			colorAttachment.format = hdriFormat;
 			colorAttachment.attachmentUsage = RHI::ScopeAttachmentUsage::Color;
 			colorAttachment.loadAction = RHI::AttachmentLoadAction::Clear;
 			colorAttachment.storeAction = RHI::AttachmentStoreAction::Store;
@@ -418,6 +422,12 @@ namespace CE::RPI
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
+			barrier.resource = outputBuffer;
+			barrier.fromState = ResourceState::Undefined;
+			barrier.toState = ResourceState::CopyDestination;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
 			{
 				RHI::BufferToTextureCopy copyRegion{};
 				copyRegion.srcBuffer = stagingBuffer;
@@ -464,7 +474,8 @@ namespace CE::RPI
 				scissorState.height = viewportState.height;
 				cmdList->SetScissors(1, &scissorState);
 				
-				cmdList->BindPipelineState(equirectMaterials[i]->GetCurrentShader()->GetPipeline());
+				RHI::PipelineState* pipeline = equirectMaterials[i]->GetCurrentShader()->GetPipeline();
+				cmdList->BindPipelineState(pipeline);
 
 				cmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
 				cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
@@ -489,13 +500,7 @@ namespace CE::RPI
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
-			barrier.resource = outputBuffer;
-			barrier.fromState = ResourceState::Undefined;
-			barrier.toState = ResourceState::CopyDestination;
-			barrier.subresourceRange = RHI::SubresourceRange::All();
-			cmdList->ResourceBarrier(1, &barrier);
-
-			for (int i = 0; i < 6; i++)
+			for (int i = 9; i < 6; i++)
 			{
 				RHI::TextureToBufferCopy copyRegion{};
 				copyRegion.srcTexture = cubeMap;
@@ -518,8 +523,33 @@ namespace CE::RPI
 
 		outputBuffer->Map(0, outputBuffer->GetBufferSize(), &dataPtr);
 		{
-			output.Reserve(outputBuffer->GetBufferSize());
-			memcpy(output.GetDataPtr(), dataPtr, outputBuffer->GetBufferSize());
+			if (!desc.useCompression)
+			{
+				output.Reserve(outputBuffer->GetBufferSize());
+				memcpy(output.GetDataPtr(), dataPtr, outputBuffer->GetBufferSize());
+			}
+			else // BC6H compression
+			{
+				int numPixelsPerFace = cubeMapRes * cubeMapRes;
+				u64 compressedByteSizePerFace = numPixelsPerFace; // BC6H uses 1 byte per pixel
+				output.Reserve(compressedByteSizePerFace * 6);
+
+				for (int face = 0; face < 6; face++)
+				{
+					CMImage image = 
+						CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
+							cubeMapRes, cubeMapRes,
+							CMImageFormat::RGBA32, CMImageSourceFormat::None, 16, 64);
+
+					CMImageEncoder encoder{};
+					
+					bool result = encoder.EncodeToBCn(image, output.GetDataPtr() + compressedByteSizePerFace * face, CMImageSourceFormat::BC6H);
+					if (!result)
+					{
+						CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
+					}
+				}
+			}
 		}
 		outputBuffer->Unmap();
 
@@ -535,12 +565,12 @@ namespace CE::RPI
 			equirectMaterials[i] = nullptr;
 		}
 
-		delete cubeMap;
+		//delete cubeMap;
+		//delete hdriMapRpi;
+		delete diffuseIrradiance;
 		delete outputBuffer;
 		delete cubeModel;
 		delete stagingBuffer;
-		delete hdriMap;
-		delete hdriMapRpi;
 		delete grayscale;
 		delete rowAverage;
 		delete columnAverage;

@@ -23,6 +23,9 @@ namespace CE
 			subsystem->Initialize();
 		}
 
+		if (assetManager)
+			assetManager->Initialize();
+
 		isInitialized = true;
 	}
 

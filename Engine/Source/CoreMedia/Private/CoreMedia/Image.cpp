@@ -449,15 +449,59 @@ namespace CE
 		return image;
     }
 
-	CMImage CMImage::LoadRawImageFromMemory(unsigned char* buffer, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel)
+	CMImage CMImage::LoadRawImageFromMemory(unsigned char* buffer, u32 width, u32 height, CMImageFormat pixelFormat, CMImageSourceFormat sourceFormat, u32 bitDepth, u32 bitsPerPixel)
 	{
 		CMImage image{};
+		image.width = width;
+		image.height = height;
 		image.allocated = false;
 		image.data = buffer;
 		image.bitDepth = bitDepth;
 		image.bitsPerPixel = bitsPerPixel;
 		image.format = pixelFormat;
 		image.sourceFormat = sourceFormat;
+
+		switch (pixelFormat)
+		{
+			case CMImageFormat::R8:
+				image.numChannels = 1;
+				break;
+			case CMImageFormat::RG8:
+				image.numChannels = 2;
+				break;
+			case CMImageFormat::RGB8:
+				image.numChannels = 3;
+				break;
+			case CMImageFormat::RGBA8:
+				image.numChannels = 4;
+				break;
+			case CMImageFormat::R32:
+				image.numChannels = 1;
+				break;
+			case CMImageFormat::RG32:
+				image.numChannels = 2;
+				break;
+			case CMImageFormat::RGB32:
+				image.numChannels = 3;
+				break;
+			case CMImageFormat::RGBA32:
+				image.numChannels = 4;
+				break;
+			case CMImageFormat::R16:
+				image.numChannels = 1;
+				break;
+			case CMImageFormat::RG16:
+				image.numChannels = 2;
+				break;
+			case CMImageFormat::RGB16:
+				image.numChannels = 3;
+				break;
+			case CMImageFormat::RGBA16:
+				image.numChannels = 4;
+				break;
+
+		}
+
 		return image;
 	}
 
