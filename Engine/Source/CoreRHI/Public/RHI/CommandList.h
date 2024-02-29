@@ -81,6 +81,17 @@ namespace CE::RHI
 		u16 layerCount = 1;
 	};
 
+	struct TextureToBufferCopy
+	{
+		RHI::Texture* srcTexture = nullptr;
+		u16 mipSlice = 0;
+		u16 baseArrayLayer = 0;
+		u16 layerCount = 1;
+
+		RHI::Buffer* dstBuffer = nullptr;
+		u64 bufferOffset = 0;
+	};
+
 	class CORERHI_API CommandList : public RHIResource
 	{
 	protected:
@@ -141,6 +152,7 @@ namespace CE::RHI
 		virtual void Dispatch(u32 groupCountX, u32 groupCountY, u32 groupCountZ) = 0;
 
 		virtual void CopyTextureRegion(const BufferToTextureCopy& region) = 0;
+		virtual void CopyTextureRegion(const TextureToBufferCopy& region) = 0;
 
 		virtual void BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter = RHI::FilterMode::Linear) = 0;
 

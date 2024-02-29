@@ -27,6 +27,8 @@ namespace CE::Editor
 
 		bool ImportSourceAssets(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
 
+		virtual Array<AssetImportJob*> PrepareImportJobs(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets);
+
 		inline void ClearImportResults() { importResults.Clear(); }
         
 		inline bool IsImportInProgress() const { return numJobsInProgress > 0; }
@@ -42,6 +44,8 @@ namespace CE::Editor
 		inline void SetTargetPlatform(PlatformName targetPlatform) { this->targetPlatform = targetPlatform; }
 
 		inline void SetTempDirectoryPath(const IO::Path& tempDir) { this->tempDirectory = tempDir; }
+
+		virtual Array<Name> GetProductAssetDependencies() { return {}; }
 
     protected:
 
@@ -91,6 +95,9 @@ namespace CE::Editor
 		{
 			return generateDistributionAsset;
 		}
+
+		inline const IO::Path& GetSourcePath() const { return sourcePath; }
+		inline const IO::Path& GetProductPath() const { return productPath; }
 
 	protected:
 

@@ -8,7 +8,8 @@ Shader "CubeMap/IBL"
     SubShader
     {
         Tags {
-            "Blend" = "SrcAlpha,OneMinusSrcAlpha"
+            "Blend" = "SrcAlpha,OneMinusSrcAlpha",
+            "Platform" = "Desktop"
         }
 
         Pass

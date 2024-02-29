@@ -584,6 +584,36 @@ namespace CE::Vulkan
 			1, &copy);
 	}
 
+	void CommandList::CopyTextureRegion(const TextureToBufferCopy& region)
+	{
+		if (region.srcTexture == nullptr || region.dstBuffer == nullptr)
+			return;
+
+		Vulkan::Texture* srcTexture = (Vulkan::Texture*)region.srcTexture;
+		Vulkan::Buffer* dstBuffer = (Vulkan::Buffer*)region.dstBuffer;
+
+		VkBufferImageCopy copy{};
+		copy.imageOffset = { 0, 0, 0 };
+		copy.imageExtent.width = srcTexture->GetWidth();
+		copy.imageExtent.height = srcTexture->GetHeight();
+		copy.imageExtent.depth = srcTexture->GetDepth();
+		
+		copy.bufferOffset = region.bufferOffset;
+		copy.bufferImageHeight = 0; // 0 means data is tightly packed
+		copy.bufferRowLength = 0; // 0 means data is tightly packed
+
+		copy.imageSubresource.aspectMask = srcTexture->aspectMask;
+		copy.imageSubresource.baseArrayLayer = region.baseArrayLayer;
+		copy.imageSubresource.layerCount = region.layerCount;
+		copy.imageSubresource.mipLevel = region.mipSlice;
+
+		vkCmdCopyImageToBuffer(commandBuffer,
+			srcTexture->GetImage(),
+			VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			dstBuffer->GetBuffer(),
+			1, &copy);
+	}
+
 	void CommandList::BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter)
 	{
 		if (!source || !destination || regionCount == 0 || !regions)

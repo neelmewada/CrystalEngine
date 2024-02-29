@@ -11,6 +11,8 @@ namespace CE::Editor
 
 		virtual Array<AssetImportJob*> CreateImportJobs(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets) override;
 
+		Array<Name> GetProductAssetDependencies() override;
+
 	private:
 
 		FIELD(Config)

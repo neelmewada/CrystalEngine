@@ -40,10 +40,6 @@ namespace CE
 			return (TSubsystem*)GetSubsystem(TSubsystem::StaticType());
 		}
 
-		inline CE::Shader* GetEquirectProjectionShader() const { return equirectShader; }
-
-		inline CE::Shader* GetIBLShader() const { return iblShader; }
-
 	system_internal:
 
 		// - Internal API -
@@ -67,11 +63,6 @@ namespace CE
 
 		FIELD()
 		Array<EngineSubsystem*> engineSubsystems{};
-
-		// Builtin Shaders
-
-		CE::Shader* equirectShader = nullptr;
-		CE::Shader* iblShader = nullptr;
 
 		CE::Queue<Delegate<void()>> mainThreadQueue{};
 		SharedMutex mainThreadQueueMutex{};

@@ -20,7 +20,7 @@ namespace CE::Editor
 	void EditorAssetManager::Initialize()
 	{
 		Super::Initialize();
-
+		
 		assetRegistry->listener = this;
 	}
 

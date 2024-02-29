@@ -7,6 +7,7 @@
 #include "VulkanRHI.h"
 #include "System.h"
 #include "EditorCore.h"
+#include "EditorSystem.h"
 
 #include "cxxopts.hpp"
 

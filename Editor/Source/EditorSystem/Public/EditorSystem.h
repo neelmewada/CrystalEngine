@@ -14,3 +14,7 @@
 #include "Editor/EditorEngine.h"
 #include "Editor/EditorAssetManager.h"
 
+namespace CE::Editor
+{
+	EDITORSYSTEM_API AssetDefinitionRegistry* GetAssetDefinitionRegistry();
+}

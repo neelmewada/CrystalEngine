@@ -13,14 +13,14 @@ namespace CE::RPI
 		delete diffuseIrradiance; diffuseIrradiance = nullptr;
 	}
 
-	CubeMap* CubeMap::ProcessCubeMap(const CubeMapProcessInfo& desc)
+	void CubeMapProcessor::ProcessCubeMapOffline(const CubeMapProcessInfo& desc, BinaryBlob& output)
 	{
 #if !PLATFORM_DESKTOP
 		return nullptr; // Only for desktop platforms
 #endif
 
 		if (!desc.sourceImage.IsValid())
-			return nullptr;
+			return;
 		
 		CMImageFormat sourceFormat = desc.sourceImage.GetFormat();
 		bool isSourceFloatFormat = false;
@@ -34,7 +34,7 @@ namespace CE::RPI
 		}
 		else
 		{
-			return nullptr;
+			return;
 		}
 
 		bool isDestFloatFormat = false;
@@ -106,10 +106,25 @@ namespace CE::RPI
 			diffuseIrradiance = RHI::gDynamicRHI->CreateTexture(irradianceDesc);
 		}
 
+		// CubeMap output buffer
+		RHI::BufferDescriptor outputBufferDesc{};
+		outputBufferDesc.name = "Output Buffer";
+		outputBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		outputBufferDesc.bufferSize = cubeMapRes * cubeMapRes * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8 * 6;
+		outputBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+		
+		RHI::Buffer* outputBuffer = RHI::gDynamicRHI->CreateBuffer(outputBufferDesc);
+
 		/////////////////////////////////////////////
 		// - Intermediate Resources -
 
+		// Cube Model
+		RPI::ModelLod* cubeModel = RPI::ModelLod::CreateCubeModel();
+		RPI::Mesh* cubeMesh = cubeModel->GetMesh(0);
+		const auto& cubeVertInfo = cubeMesh->vertexBufferInfos[0];
+		auto cubeVertexBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(cubeVertInfo.bufferIndex), cubeVertInfo.byteOffset, cubeVertInfo.byteCount, cubeVertInfo.stride);
 		
+		// Staging buffer
 		RHI::BufferDescriptor stagingBufferDesc{};
 		stagingBufferDesc.name = "Staging Buffer";
 		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
@@ -154,6 +169,7 @@ namespace CE::RPI
 			}
 		}
 		stagingBuffer->Unmap();
+		dataPtr = nullptr;
 
 		RHI::Texture* grayscale = nullptr;
 		RHI::Texture* rowAverage = nullptr;
@@ -402,15 +418,17 @@ namespace CE::RPI
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
-			RHI::BufferToTextureCopy copyRegion{};
-			copyRegion.srcBuffer = stagingBuffer;
-			copyRegion.bufferOffset = 0;
-			copyRegion.dstTexture = hdriMap;
-			copyRegion.baseArrayLayer = 0;
-			copyRegion.layerCount = 1;
-			copyRegion.mipSlice = 0;
+			{
+				RHI::BufferToTextureCopy copyRegion{};
+				copyRegion.srcBuffer = stagingBuffer;
+				copyRegion.bufferOffset = 0;
+				copyRegion.dstTexture = hdriMap;
+				copyRegion.baseArrayLayer = 0;
+				copyRegion.layerCount = 1;
+				copyRegion.mipSlice = 0;
 
-			cmdList->CopyTextureRegion(copyRegion);
+				cmdList->CopyTextureRegion(copyRegion);
+			}
 
 			barrier.resource = hdriMap;
 			barrier.fromState = ResourceState::CopyDestination;
@@ -448,14 +466,14 @@ namespace CE::RPI
 				
 				cmdList->BindPipelineState(equirectMaterials[i]->GetCurrentShader()->GetPipeline());
 
-				//cmdList->BindVertexBuffers(0, 1, &vertexBufferView);
-				//cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
+				cmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
+				cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
 
-				//cmdList->SetShaderResourceGroup(equirectangulerSrgs[i]);
+				cmdList->SetShaderResourceGroup(equirectMaterials[i]->GetShaderResourceGroup());
 
-				//cmdList->CommitShaderResources();
+				cmdList->CommitShaderResources();
 
-				//cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+				cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
 
 				cmdList->EndRenderTarget();
 			}
@@ -464,19 +482,46 @@ namespace CE::RPI
 			{
 
 			}
+
+			barrier.resource = cubeMap;
+			barrier.fromState = ResourceState::ColorOutput;
+			barrier.toState = ResourceState::CopySource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = outputBuffer;
+			barrier.fromState = ResourceState::Undefined;
+			barrier.toState = ResourceState::CopyDestination;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			for (int i = 0; i < 6; i++)
+			{
+				RHI::TextureToBufferCopy copyRegion{};
+				copyRegion.srcTexture = cubeMap;
+				copyRegion.mipSlice = 0;
+				copyRegion.baseArrayLayer = i;
+				copyRegion.layerCount = 1;
+				copyRegion.dstBuffer = outputBuffer;
+				copyRegion.bufferOffset = i * cubeMapRes * cubeMapRes * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8;
+
+				cmdList->CopyTextureRegion(copyRegion);
+			}
 		}
 		cmdList->End();
 
 		queue->Execute(1, &cmdList, fence);
 		fence->WaitForFence();
 
-		CubeMap* result = new CubeMap();
+		/////////////////////////////////////////////
+		// - Output Data -
 
-		result->cubeMap = new RPI::Texture(cubeMap, linearSamplerDesc);
-		if (diffuseIrradiance != nullptr)
+		outputBuffer->Map(0, outputBuffer->GetBufferSize(), &dataPtr);
 		{
-			result->diffuseIrradiance = new RPI::Texture(diffuseIrradiance, linearSamplerDesc);
+			output.Reserve(outputBuffer->GetBufferSize());
+			memcpy(output.GetDataPtr(), dataPtr, outputBuffer->GetBufferSize());
 		}
+		outputBuffer->Unmap();
 
 		/////////////////////////////////////////////
 		// - Free up memory -
@@ -490,6 +535,9 @@ namespace CE::RPI
 			equirectMaterials[i] = nullptr;
 		}
 
+		delete cubeMap;
+		delete outputBuffer;
+		delete cubeModel;
 		delete stagingBuffer;
 		delete hdriMap;
 		delete hdriMapRpi;
@@ -501,7 +549,6 @@ namespace CE::RPI
 		delete pdfConditional;
 		delete cdfMarginalInverse;
 		delete cdfConditionalInverse;
-		return result;
 	}
 
 } // namespace CE::RPI

@@ -18,10 +18,10 @@ namespace CE::Editor
 
         virtual void ShutdownModule() override
         {
-			gAssetDefinitionRegistry->RequestDestroy();
+			gAssetDefinitionRegistry->Destroy();
 			gAssetDefinitionRegistry = nullptr;
 
-			gEngine->RequestDestroy();
+			gEngine->Destroy();
 			gEngine = nullptr;
         }
 
@@ -32,6 +32,11 @@ namespace CE::Editor
 			gAssetDefinitionRegistry = CreateObject<AssetDefinitionRegistry>(nullptr, "AssetDefinitionRegistry");
         }
     };
+
+    EDITORSYSTEM_API AssetDefinitionRegistry* GetAssetDefinitionRegistry()
+    {
+        return gAssetDefinitionRegistry;
+    }
 }
 
 CE_IMPLEMENT_MODULE(EditorSystem, CE::Editor::EditorSystemModule)

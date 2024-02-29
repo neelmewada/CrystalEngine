@@ -209,10 +209,16 @@ namespace CE
 		HashMap<AssetDefinition*, Array<IO::Path>> sourcePathsByAssetDef{};
 		HashMap<AssetDefinition*, Array<IO::Path>> productPathsByAssetDef{};
 
+		// Paths to product assets to be generated in this run
+		HashSet<IO::Path> productAssetPaths{};
+
 		for (int i = 0; i < allSourceAssetPaths.GetSize(); i++)
 		{
 			auto sourcePath = allSourceAssetPaths[i];
 			auto productPath = allProductAssetPaths[i];
+			sourcePath = sourcePath.GetString().Replace({ '\\' }, '/');
+			productPath = productPath.GetString().Replace({ '\\' }, '/');
+
 			if (!sourcePath.Exists())
 				continue;
 
@@ -224,10 +230,20 @@ namespace CE
 			{
 				sourcePathsByAssetDef[assetDef].Add(sourcePath);
 				productPathsByAssetDef[assetDef].Add(productPath);
+				productAssetPaths.Add(productPath);
 			}
 		}
 
 		Array<AssetImporter*> importers{};
+
+		struct ImportJobEntry
+		{
+			Array<IO::Path> productAssetDependencies{};
+			AssetImportJob* job = nullptr;
+		};
+
+		Array<ImportJobEntry> importJobs{};
+		HashMap<IO::Path, AssetImportJob*> importJobsByProductPath{};
 
 		for (const auto& [assetDef, sourcePaths] : sourcePathsByAssetDef)
 		{
@@ -244,13 +260,61 @@ namespace CE
 			if (assetImporter == nullptr)
 				continue;
 
+			Array<Name> productAssetDependencies = assetImporter->GetProductAssetDependencies();
+			Array<IO::Path> productDependencies{};
+			for (const Name& productAssetName : productAssetDependencies)
+			{
+				IO::Path assetPath = Package::GetPackagePath(productAssetName);
+				if (productAssetPaths.Exists(assetPath))
+				{
+					productDependencies.Add(assetPath);
+				}
+				else if (assetPath.Exists()) // Nothing needed to be done
+				{
+					
+				}
+				else
+				{
+					CE_LOG(Warn, All, "Could not process assets of type {}. Product asset dependency not found: {}.", 
+						assetImporterClass->GetName(), productAssetName);
+					continue;
+				}
+			}
+
 			assetImporter->SetIncludePaths(includePaths);
 			assetImporter->SetLogging(true);
 			assetImporter->SetTargetPlatform(targetPlatform);
 			assetImporter->SetTempDirectoryPath(tempDir);
 
 			importers.Add(assetImporter);
-			assetImporter->ImportSourceAssetsAsync(sourcePaths, productPathsByAssetDef[assetDef]);
+			
+			Array<AssetImportJob*> jobs = assetImporter->PrepareImportJobs(sourcePaths, productPathsByAssetDef[assetDef]);
+
+			for (AssetImportJob* job : jobs)
+			{
+				job->SetAutoDelete(true);
+				importJobsByProductPath[job->GetProductPath()] = job;
+
+				importJobs.Add({ productDependencies, job });
+			}
+		}
+
+		// Setup job dependencies
+		for (const ImportJobEntry& entry : importJobs)
+		{
+			for (const IO::Path& productDependency : entry.productAssetDependencies)
+			{
+				if (importJobsByProductPath[productDependency] != nullptr)
+				{
+					importJobsByProductPath[productDependency]->SetDependent(entry.job);
+				}
+			}
+		}
+
+		// Launch the jobs
+		for (const ImportJobEntry& entry : importJobs)
+		{
+			entry.job->Start();
 		}
 
 		// Wait for all jobs to complete
@@ -311,6 +375,7 @@ namespace CE
 
 		ModuleManager::Get().LoadModule("System");
 		ModuleManager::Get().LoadModule("EditorCore");
+		ModuleManager::Get().LoadModule("EditorSystem");
 	}
 
 	void AssetProcessor::PostInit()
@@ -318,17 +383,25 @@ namespace CE
 		auto app = PlatformApplication::Get();
 		app->Initialize();
 
+		gEngine->PreInit();
+
 		RHI::gDynamicRHI = new CE::Vulkan::VulkanRHI();
 
 		RHI::gDynamicRHI->Initialize();
 		RHI::gDynamicRHI->PostInitialize();
 
-		assetDefRegistry = CreateObject<AssetDefinitionRegistry>(GetTransientPackage(), "AssetDefinitionRegistry");
+		gEngine->Initialize();
+
+		gEngine->PostInitialize();
+
+		assetDefRegistry = Editor::GetAssetDefinitionRegistry();
 	}
 
 	void AssetProcessor::PreShutdown()
 	{
 		auto app = PlatformApplication::Get();
+
+		gEngine->PreShutdown();
 
 		RHI::gDynamicRHI->PreShutdown();
 
@@ -339,6 +412,8 @@ namespace CE
 	{
 		auto app = PlatformApplication::Get();
 
+		gEngine->Shutdown();
+
 		RHI::gDynamicRHI->Shutdown();
 		app->Shutdown();
 
@@ -348,6 +423,7 @@ namespace CE
 		delete app;
 		app = nullptr;
 
+		ModuleManager::Get().UnloadModule("EditorSystem");
 		ModuleManager::Get().UnloadModule("EditorCore");
 		ModuleManager::Get().UnloadModule("System");
 

@@ -61,7 +61,7 @@ namespace CE::Editor
 		{
 			job->includePaths = includePaths;
 			job->targetPlatform = targetPlatform;
-			job->SetAutoDelete(true);
+			job->SetAutoDelete(false);
 
 			job->Process();
 			job->Finish();
@@ -70,6 +70,26 @@ namespace CE::Editor
 		jobs.Clear();
 
 		return true;
+	}
+
+	Array<AssetImportJob*> AssetImporter::PrepareImportJobs(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets)
+	{
+		if (productAssets.GetSize() != sourceAssets.GetSize())
+		{
+			CE_LOG(Error, All, "Failed to PrepareImportJobs(): productAssets array does not match the size of sourceAssets");
+			return {};
+		}
+
+		auto jobs = CreateImportJobs(sourceAssets, productAssets);
+
+		for (auto job : jobs)
+		{
+			job->includePaths = includePaths;
+			job->targetPlatform = targetPlatform;
+			job->SetAutoDelete(true);
+		}
+
+		return jobs;
 	}
 
 	void AssetImporter::OnAssetImportJobFinish(AssetImportJob* job)

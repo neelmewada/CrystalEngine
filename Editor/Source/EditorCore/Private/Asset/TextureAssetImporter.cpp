@@ -20,6 +20,16 @@ namespace CE::Editor
 		return jobs;
 	}
 
+	Array<Name> TextureAssetImporter::GetProductAssetDependencies()
+	{
+		static Array<Name> dependencies{
+			"/Engine/Assets/Shaders/CubeMap/Equirectangular",
+			"/Engine/Assets/Shaders/CubeMap/IBL"
+		};
+
+		return dependencies;
+	}
+
 	bool TextureAssetImportJob::ProcessAsset(Package* package)
 	{
 		if (package == nullptr)
@@ -164,20 +174,20 @@ namespace CE::Editor
 		texture->compressionQuality = compressionQuality;
 		texture->sourceCompressionFormat = compressionFormat;
 
+		CE::Shader* equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
+
 		RPI::CubeMapProcessInfo processInfo{};
 		processInfo.name = name;
 		processInfo.preferredFormat = RHI::Format::R16G16B16A16_SFLOAT;
 		processInfo.sourceImage = sourceImage;
 		processInfo.diffuseIrradianceResolution = 0;
-		processInfo.equirectangularShader = gEngine->GetEquirectProjectionShader()->GetOrCreateRPIShader(0);
+		processInfo.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
 
-		RPI::CubeMap* cubeMap = RPI::CubeMap::ProcessCubeMap(processInfo);
-		if (cubeMap == nullptr)
-		{
-			errorMessage = "Failed to process CubeMap";
-			return false;
-		}
+		RPI::CubeMapProcessor processor{};
 
+		processor.ProcessCubeMapOffline(processInfo, texture->source);
+
+		equirectShader->Destroy();
 		return true;
 	}
 

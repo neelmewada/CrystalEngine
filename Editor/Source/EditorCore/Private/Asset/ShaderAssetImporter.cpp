@@ -15,7 +15,6 @@ namespace CE::Editor
 		return jobs;
 	}
 
-
 	bool ShaderAssetImportJob::ProcessAsset(Package* package)
 	{
 		if (package == nullptr)

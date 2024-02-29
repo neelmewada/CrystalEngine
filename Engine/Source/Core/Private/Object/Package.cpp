@@ -56,7 +56,11 @@ namespace CE
 
 		if (packageNameStr.StartsWith("/Engine/") || packageNameStr == "/Engine") // Example: /Engine/Assets/Textures/Noise/Perlin/Perlin04
 		{
-			return PlatformDirectories::GetEngineRootDir() / (packageNameStr.GetSubstring(1) + ".casset");
+			if (!gProjectPath.Exists() || !(gProjectPath / "Engine/Assets").Exists())
+			{
+				return PlatformDirectories::GetEngineRootDir() / (packageNameStr.GetSubstring(1) + ".casset");
+			}
+			return gProjectPath / (packageNameStr.GetSubstring(1) + ".casset");
 		}
 		else if (packageNameStr.StartsWith("/Game/") || packageNameStr == "/Game")
 		{

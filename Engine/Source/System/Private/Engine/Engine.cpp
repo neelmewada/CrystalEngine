@@ -32,18 +32,10 @@ namespace CE
 		{
 			subsystem->PostInitialize();
 		}
-
-		equirectShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
-		iblShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
 	}
 
 	void Engine::PreShutdown()
 	{
-		equirectShader->GetPackage()->Destroy();
-		equirectShader = nullptr;
-		iblShader->GetPackage()->Destroy();
-		iblShader = nullptr;
-
 		if (assetManager)
 			assetManager->Shutdown();
 		
