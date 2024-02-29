@@ -65,7 +65,7 @@ namespace CE
 		bool IsFinished();
 		bool IsCancelled();
 
-		Job* GetDependent();
+		//Job* GetDependent();
 
 		FORCE_INLINE JobThreadTag GetThreadFilter() const { return threadFilter; }
 
@@ -98,6 +98,7 @@ namespace CE
 
 		void IncrementDependentCountAndSetChildFlag();
 
+		void ClearDependents();
 		void StoreDependent(Job* dependent);
 		u32 GetDependentCountAndFlags();
 		void SetDependentCountAndFlags(u32 countAndFlags);
@@ -126,7 +127,10 @@ namespace CE
 		Atomic<u32> dependentCountAndFlags = 0;
 
 		// Job which is dependent on us, and and will be notified once we are finished
-		Atomic<Job*> dependent = nullptr;
+		//Atomic<Job*> dependent = nullptr;
+
+		SharedMutex dependentJobsMutex{};
+		Array<Job*> dependentJobs{};
 
 		friend class WorkQueue;
 		friend class JobManager;

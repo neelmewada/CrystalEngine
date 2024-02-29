@@ -393,7 +393,7 @@ namespace CE
 
 	void JobManager::Process(Job* job)
 	{
-		Job* dependent = job->GetDependent();
+		//Job* dependent = job->GetDependent();
 		bool isAutoDelete = job->IsAutoDelete();
 
 		job->Process();
@@ -403,14 +403,21 @@ namespace CE
 
 		job->Finish();
 
+		{
+			LockGuard<SharedMutex> lock{ job->dependentJobsMutex };
+
+			for (auto dependent : job->dependentJobs)
+			{
+				if (dependent != nullptr)
+				{
+					dependent->DecrementDependentCount();
+				}
+			}
+		}
+
 		if (isAutoDelete)
 		{
 			delete job;
-		}
-
-		if (dependent)
-		{
-			dependent->DecrementDependentCount();
 		}
 	}
 

@@ -23,7 +23,7 @@ namespace CE
 		}
 
 		SetDependentCountAndFlags(countAndFlags);
-		StoreDependent(nullptr);
+		ClearDependents();
 	}
 
 	Job::~Job()
@@ -50,12 +50,12 @@ namespace CE
 
 		if (clearDependent)
 		{
-			StoreDependent(nullptr);
+			ClearDependents();
 		}
 		else
 		{
-			Job* dependent = GetDependent();
-			if (dependent)
+			LockGuard<SharedMutex> lock{ dependentJobsMutex };
+			for (auto dependent : dependentJobs)
 			{
 				dependent->IncrementDependentCount();
 			}
@@ -167,14 +167,25 @@ namespace CE
 		} while (!dependentCountAndFlags.compare_exchange_weak(oldCountAndFlags, newCountAndFlags, std::memory_order_acq_rel, std::memory_order_acquire));
 	}
 
-	Job* Job::GetDependent()
+	//Job* Job::GetDependent()
+	//{
+	//	return this->dependent.load(std::memory_order_acquire);
+	//}
+
+	void Job::ClearDependents()
 	{
-		return this->dependent.load(std::memory_order_acquire);
+		LockGuard<SharedMutex> lock{ dependentJobsMutex };
+		dependentJobs.Clear();
 	}
 
 	void Job::StoreDependent(Job* dependent)
 	{
-		this->dependent.store(dependent, std::memory_order_release);
+		if (dependent == nullptr)
+			return;
+
+		LockGuard<SharedMutex> lock{ dependentJobsMutex };
+		dependentJobs.Add(dependent);
+		//this->dependent.store(dependent, std::memory_order_release);
 	}
 
 	void Job::SetDependentCountAndFlags(u32 countAndFlags)
