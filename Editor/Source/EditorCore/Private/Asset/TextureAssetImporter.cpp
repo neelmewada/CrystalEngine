@@ -56,7 +56,7 @@ namespace CE::Editor
 		bool isCubeMap = false;
 		if (extension == ".hdr" && image.GetWidth() == image.GetHeight() * 2)
 		{
-			isCubeMap = importHdrAsCubemap;
+			//isCubeMap = importHdrAsCubemap;
 		}
 
 		CMImageFormat imageFormat = image.GetFormat();

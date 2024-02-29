@@ -106,10 +106,10 @@ namespace CE
 			destSize = surface.width * surface.height;
 			break;
 		default:
-			return 0; // Should never happen
+			return destSize; // Should never happen
 		}
 
-		return 0;
+		return destSize;
 	}
 
 	bool CMImageEncoder::EncodeToBCn(const CMImage& image, void* outData, CMImageSourceFormat destFormat, Quality quality)
