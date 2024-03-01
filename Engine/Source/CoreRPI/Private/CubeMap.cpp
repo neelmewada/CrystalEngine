@@ -15,14 +15,16 @@ namespace CE::RPI
 		delete diffuseIrradiance; diffuseIrradiance = nullptr;
 	}
 
-	void CubeMapProcessor::ProcessCubeMapOffline(const CubeMapProcessInfo& desc, BinaryBlob& output)
+	bool CubeMapProcessor::ProcessCubeMapOffline(const CubeMapProcessInfo& desc, BinaryBlob& output)
 	{
 #if !PLATFORM_DESKTOP
-		return nullptr; // Only for desktop platforms
+		return false; // Only for desktop platforms
 #endif
 
 		if (!desc.sourceImage.IsValid())
-			return;
+			return false;
+		if (desc.sourceImage.GetWidth() != desc.sourceImage.GetHeight() * 2)
+			return false;
 		
 		CMImageFormat sourceFormat = desc.sourceImage.GetFormat();
 		bool isSourceFloatFormat = false;
@@ -36,7 +38,7 @@ namespace CE::RPI
 		}
 		else
 		{
-			return;
+			return false;
 		}
 
 		u32 cubeMapRes = desc.cubeMapResolution;
@@ -106,32 +108,54 @@ namespace CE::RPI
 		RPI::Texture* cubeMapRpi = new RPI::Texture(cubeMap);
 
 		RHI::Texture* diffuseIrradiance = nullptr;
+		RPI::Texture* diffuseIrradianceRpi = nullptr;
+
+		RHI::Texture* diffuseIrradianceCubeMap = nullptr;
 		u32 diffuseIrradianceResolution = desc.diffuseIrradianceResolution;
+		if (desc.diffuseConvolutionShader == nullptr)
+			diffuseIrradianceResolution = 0;
 
 		if (diffuseIrradianceResolution > 0) // Diffuse irradiance map
 		{
 			RHI::TextureDescriptor irradianceDesc{};
-			irradianceDesc.name = "Diffuse Irradiance";
+			irradianceDesc.name = "Diffuse Irradiance Image";
 			irradianceDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
-			irradianceDesc.width = irradianceDesc.height = diffuseIrradianceResolution;
+			irradianceDesc.width = cubeMapRes * 2;
+			irradianceDesc.height = cubeMapRes;
 			irradianceDesc.depth = 1;
-			irradianceDesc.dimension = RHI::Dimension::DimCUBE;
+			irradianceDesc.dimension = RHI::Dimension::Dim2D;
 			irradianceDesc.mipLevels = 1;
 			irradianceDesc.sampleCount = 1;
-			irradianceDesc.arrayLayers = 6;
+			irradianceDesc.arrayLayers = 1;
 			irradianceDesc.format = hdriFormat;
 
 			diffuseIrradiance = RHI::gDynamicRHI->CreateTexture(irradianceDesc);
+			diffuseIrradianceRpi = new RPI::Texture(diffuseIrradiance);
+
+			irradianceDesc.dimension = RHI::Dimension::DimCUBE;
+			irradianceDesc.width = diffuseIrradianceResolution;
+			irradianceDesc.height = diffuseIrradianceResolution;
+			irradianceDesc.arrayLayers = 6;
+
+			diffuseIrradianceCubeMap = RHI::gDynamicRHI->CreateTexture(irradianceDesc);
 		}
 
 		// CubeMap output buffer
 		RHI::BufferDescriptor outputBufferDesc{};
-		outputBufferDesc.name = "Output Buffer";
+		outputBufferDesc.name = "Output";
 		outputBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
 		outputBufferDesc.bufferSize = cubeMapRes * cubeMapRes * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8 * 6;
 		outputBufferDesc.defaultHeapType = MemoryHeapType::Upload;
 		
 		RHI::Buffer* outputBuffer = RHI::gDynamicRHI->CreateBuffer(outputBufferDesc);
+
+		RHI::BufferDescriptor diffuseIrradianceOutputBufferDesc{};
+		diffuseIrradianceOutputBufferDesc.name = "Diffuse Output";
+		diffuseIrradianceOutputBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		diffuseIrradianceOutputBufferDesc.bufferSize = diffuseIrradianceResolution * diffuseIrradianceResolution * GetBitsPerPixelForFormat(hdriFormat) / 8 * 6;
+		diffuseIrradianceOutputBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+
+		RHI::Buffer* diffuseIrradianceOutputBuffer = RHI::gDynamicRHI->CreateBuffer(diffuseIrradianceOutputBufferDesc);
 
 		/////////////////////////////////////////////
 		// - Intermediate Resources -
@@ -304,9 +328,11 @@ namespace CE::RPI
 		/////////////////////////////////////////////
 		// - Render Targets & RTBs -
 
-		RHI::RenderTarget* cubeMapRenderTarget = nullptr;
+		RHI::RenderTarget* hdrRenderTarget = nullptr;
 		RHI::TextureView* cubeMapRTVs[6] = {};
 		RHI::RenderTargetBuffer* cubeMapRTBs[6] = {};
+		RHI::TextureView* irradianceCubeMapRTVs[6] = {};
+		RHI::RenderTargetBuffer* irradianceCubeMapRTBs[6] = {};
 
 		{
 			RHI::RenderTargetLayout rtLayout{};
@@ -322,7 +348,7 @@ namespace CE::RPI
 
 			rtLayout.attachmentLayouts.Add(colorAttachment);
 
-			cubeMapRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+			hdrRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
 
 			for (int i = 0; i < 6; i++)
 			{
@@ -336,7 +362,11 @@ namespace CE::RPI
 				viewDesc.format = cubeMap->GetFormat();
 
 				cubeMapRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
-				cubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(cubeMapRenderTarget, { cubeMapRTVs[i] });
+				cubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { cubeMapRTVs[i] });
+
+				viewDesc.texture = diffuseIrradianceCubeMap;
+				irradianceCubeMapRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+				irradianceCubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { irradianceCubeMapRTVs[i] });
 			}
 		}
 
@@ -349,6 +379,7 @@ namespace CE::RPI
 		RHI::RenderTargetBuffer* pdfConditionalRTB = nullptr;
 		RHI::RenderTargetBuffer* cdfMarginalInverseRTB = nullptr;
 		RHI::RenderTargetBuffer* cdfConditionalInverseRTB = nullptr;
+		RHI::RenderTargetBuffer* diffuseConvolutionRTB = nullptr;
 
 		if (diffuseIrradiance != nullptr)
 		{
@@ -375,12 +406,16 @@ namespace CE::RPI
 			pdfConditionalRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { pdfConditional });
 			cdfMarginalInverseRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { cdfMarginalInverse });
 			cdfConditionalInverseRTB = gDynamicRHI->CreateRenderTargetBuffer(grayscaleRenderTarget, { cdfConditionalInverse });
+
+			diffuseConvolutionRTB = gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { diffuseIrradiance });
 		}
 		
 		defer(
-			delete cubeMapRenderTarget;
+			delete hdrRenderTarget;
 			for (int i = 0; i < 6; i++)
 			{
+				delete irradianceCubeMapRTVs[i];
+				delete irradianceCubeMapRTBs[i];
 				delete cubeMapRTVs[i];
 				delete cubeMapRTBs[i];
 			}
@@ -394,10 +429,12 @@ namespace CE::RPI
 			delete pdfConditionalRTB;
 			delete cdfMarginalInverseRTB;
 			delete cdfConditionalInverseRTB;
+			
+			delete diffuseConvolutionRTB;
 		);
 
 		/////////////////////////////////////////////
-		// - Matrices/Data -
+		// - Materials & Data -
 
 		static Matrix4x4 captureProjection = Matrix4x4::PerspectiveProjection(1.0f, 90.0f, 0.1f, 10.0f);
 
@@ -413,6 +450,7 @@ namespace CE::RPI
 
 		RPI::Shader* equirectShader = desc.equirectangularShader;
 		RPI::Material* equirectMaterials[6] = {};
+		RPI::Material* equirectDiffuseIrradianceMaterials[6] = {};
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -426,6 +464,20 @@ namespace CE::RPI
 			equirectMaterials[i]->SetPropertyValue("_InputSampler", linearSampler);
 			equirectMaterials[i]->SetPropertyValue("_InputTexture", hdriMapRpi);
 			equirectMaterials[i]->FlushProperties();
+
+			if (diffuseIrradianceRpi != nullptr)
+			{
+				equirectDiffuseIrradianceMaterials[i] = new RPI::Material(equirectShader);
+				equirectDiffuseIrradianceMaterials[i]->SelectVariant(0);
+
+				equirectDiffuseIrradianceMaterials[i]->SetPropertyValue("viewMatrix", captureViewMatrices[i]);
+				equirectDiffuseIrradianceMaterials[i]->SetPropertyValue("projectionMatrix", captureProjection);
+				equirectDiffuseIrradianceMaterials[i]->SetPropertyValue("viewProjectionMatrix", captureProjection * captureViewMatrices[i]);
+				equirectDiffuseIrradianceMaterials[i]->SetPropertyValue("viewPosition", Vec4(0, 0, 0, 0));
+				equirectDiffuseIrradianceMaterials[i]->SetPropertyValue("_InputSampler", linearSampler);
+				equirectDiffuseIrradianceMaterials[i]->SetPropertyValue("_InputTexture", diffuseIrradianceRpi);
+				equirectDiffuseIrradianceMaterials[i]->FlushProperties();
+			}
 		}
 
 		RPI::Material* grayscaleMaterial = new RPI::Material(desc.grayscaleShader);
@@ -438,9 +490,57 @@ namespace CE::RPI
 		rowAverageMaterial->SetPropertyValue("_InputSampler", nearestClamped);
 		rowAverageMaterial->FlushProperties();
 
+		RPI::Material* columnAverageMaterial = new RPI::Material(desc.columnAverageShader);
+		columnAverageMaterial->SetPropertyValue("_InputTexture", rowAverageRpi);
+		columnAverageMaterial->SetPropertyValue("_InputSampler", nearestClamped);
+		columnAverageMaterial->FlushProperties();
+
+		RPI::Material* pdfConditionalMaterial = new RPI::Material(desc.divisionShader);
+		pdfConditionalMaterial->SetPropertyValue("_InputA", grayscaleRpi);
+		pdfConditionalMaterial->SetPropertyValue("_InputB", rowAverageRpi);
+		pdfConditionalMaterial->SetPropertyValue("_InputSampler", nearestClamped);
+		pdfConditionalMaterial->FlushProperties();
+
+		RPI::Material* pdfMarginalMaterial = new RPI::Material(desc.divisionShader);
+		pdfMarginalMaterial->SetPropertyValue("_InputA", rowAverageRpi);
+		pdfMarginalMaterial->SetPropertyValue("_InputB", columnAverageRpi);
+		pdfMarginalMaterial->SetPropertyValue("_InputSampler", nearestClamped);
+		pdfMarginalMaterial->FlushProperties();
+
+		RPI::Material* cdfConditionalInverseMaterial = new RPI::Material(desc.cdfConditionalInverseShader);
+		cdfConditionalInverseMaterial->SetPropertyValue("_InputTexture", pdfConditionalRpi);
+		cdfConditionalInverseMaterial->SetPropertyValue("_InputSampler", nearestClamped);
+		cdfConditionalInverseMaterial->FlushProperties();
+
+		RPI::Material* pdfJointMaterial = new RPI::Material(desc.divisionShader);
+		pdfJointMaterial->SetPropertyValue("_InputA", grayscaleRpi);
+		pdfJointMaterial->SetPropertyValue("_InputB", columnAverageRpi);
+		pdfJointMaterial->SetPropertyValue("_InputSampler", nearestClamped);
+		pdfJointMaterial->FlushProperties();
+
+		RPI::Material* cdfMarginalInverseMaterial = new RPI::Material(desc.cdfMarginalInverseShader);
+		cdfMarginalInverseMaterial->SetPropertyValue("_InputTexture", pdfMarginalRpi);
+		cdfMarginalInverseMaterial->SetPropertyValue("_InputSampler", nearestClamped);
+		cdfMarginalInverseMaterial->FlushProperties();
+
+		RPI::Material* diffuseConvolutionMaterial = new RPI::Material(desc.diffuseConvolutionShader);
+		diffuseConvolutionMaterial->SetPropertyValue("_InputTexture", hdriMapRpi);
+		diffuseConvolutionMaterial->SetPropertyValue("pdfJoint", pdfJointRpi);
+		diffuseConvolutionMaterial->SetPropertyValue("cdfYInv", cdfMarginalInverseRpi);
+		diffuseConvolutionMaterial->SetPropertyValue("cdfXInv", cdfConditionalInverseRpi);
+		diffuseConvolutionMaterial->SetPropertyValue("_InputSampler", nearest);
+		diffuseConvolutionMaterial->FlushProperties();
+
 		defer(
 			delete grayscaleMaterial;
 			delete rowAverageMaterial;
+			delete columnAverageMaterial;
+			delete pdfConditionalMaterial;
+			delete pdfMarginalMaterial;
+			delete cdfConditionalInverseMaterial;
+			delete pdfJointMaterial;
+			delete cdfMarginalInverseMaterial;
+			delete diffuseConvolutionMaterial;
 		);
 
 		/////////////////////////////////////////////
@@ -449,7 +549,7 @@ namespace CE::RPI
 		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 		RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
 		RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
-
+		
 		cmdList->Begin();
 		{
 			// - Load Input HDRI Image as a Flat 2D HDR texture -
@@ -497,7 +597,7 @@ namespace CE::RPI
 			// Convert equirectangular HDR flat image to HDR CubeMap
 			for (int i = 0; i < 6; i++) 
 			{
-				cmdList->BeginRenderTarget(cubeMapRenderTarget, cubeMapRTBs[i], &clearValue);
+				cmdList->BeginRenderTarget(hdrRenderTarget, cubeMapRTBs[i], &clearValue);
 
 				RHI::ViewportState viewportState{};
 				viewportState.x = viewportState.y = 0;
@@ -586,6 +686,42 @@ namespace CE::RPI
 				barrier.subresourceRange = RHI::SubresourceRange::All();
 				cmdList->ResourceBarrier(1, &barrier);
 
+				barrier.resource = columnAverage;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = pdfConditional;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = pdfMarginal;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = cdfConditionalInverse;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = pdfJoint;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = cdfMarginalInverse;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
 				cmdList->ClearShaderResourceGroups();
 
 				// Row Average
@@ -618,12 +754,361 @@ namespace CE::RPI
 				}
 				cmdList->EndRenderTarget();
 
+				cmdList->ClearShaderResourceGroups();
+
 				barrier.resource = rowAverage;
 				barrier.fromState = ResourceState::ColorOutput;
 				barrier.toState = ResourceState::FragmentShaderResource;
 				barrier.subresourceRange = RHI::SubresourceRange::All();
 				cmdList->ResourceBarrier(1, &barrier);
+
+				///////////////////////////////////////////////////////////////////////
+
+				// Column Average
+				cmdList->BeginRenderTarget(grayscaleRenderTarget, columnAverageRTB, &clearValue);
+				{
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = columnAverage->GetWidth();
+					viewportState.height = columnAverage->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = columnAverageMaterial->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(columnAverageMaterial->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+				}
+				cmdList->EndRenderTarget();
+
+				cmdList->ClearShaderResourceGroups();
+
+				// PDF Conditional
+				cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfConditionalRTB, &clearValue);
+				{
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = pdfConditional->GetWidth();
+					viewportState.height = pdfConditional->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = pdfConditionalMaterial->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(pdfConditionalMaterial->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+				}
+				cmdList->EndRenderTarget();
+
+				cmdList->ClearShaderResourceGroups();
+
+				barrier.resource = columnAverage;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = pdfConditional;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				///////////////////////////////////////////////////////////////////////
+
+				// PDF Marginal
+				cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfMarginalRTB, &clearValue);
+				{
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = pdfMarginal->GetWidth();
+					viewportState.height = pdfMarginal->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = pdfMarginalMaterial->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(pdfMarginalMaterial->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+				}
+				cmdList->EndRenderTarget();
+
+				cmdList->ClearShaderResourceGroups();
+
+				// CDF Conditional Inverse
+				cmdList->BeginRenderTarget(grayscaleRenderTarget, cdfConditionalInverseRTB, &clearValue);
+				{
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = cdfConditionalInverse->GetWidth();
+					viewportState.height = cdfConditionalInverse->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = cdfConditionalInverseMaterial->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(cdfConditionalInverseMaterial->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+				}
+				cmdList->EndRenderTarget();
+
+				cmdList->ClearShaderResourceGroups();
+
+				// PDF Joint
+				cmdList->BeginRenderTarget(grayscaleRenderTarget, pdfJointRTB, &clearValue);
+				{
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = pdfJoint->GetWidth();
+					viewportState.height = pdfJoint->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = pdfJointMaterial->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(pdfJointMaterial->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+				}
+				cmdList->EndRenderTarget();
+
+				cmdList->ClearShaderResourceGroups();
+
+				barrier.resource = pdfMarginal;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = cdfConditionalInverse;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = pdfJoint;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				///////////////////////////////////////////////////////////////////////
+
+				// CDF Marginal Inverse
+
+				cmdList->BeginRenderTarget(grayscaleRenderTarget, cdfMarginalInverseRTB, &clearValue);
+				{
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = cdfMarginalInverse->GetWidth();
+					viewportState.height = cdfMarginalInverse->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = cdfMarginalInverseMaterial->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(cdfMarginalInverseMaterial->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+				}
+				cmdList->EndRenderTarget();
+
+				cmdList->ClearShaderResourceGroups();
+
+				barrier.resource = cdfMarginalInverse;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				///////////////////////////////////////////////////////////////////////
+
+				// Diffuse Convolution
+
+				barrier.resource = diffuseIrradiance;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				cmdList->BeginRenderTarget(hdrRenderTarget, diffuseConvolutionRTB, &clearValue);
+				{
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = diffuseIrradiance->GetWidth();
+					viewportState.height = diffuseIrradiance->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = diffuseConvolutionMaterial->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(diffuseConvolutionMaterial->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+				}
+				cmdList->EndRenderTarget();
+
+				cmdList->ClearShaderResourceGroups();
+
+				barrier.resource = diffuseIrradiance;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				/////////////////////////////////////////////////////////////////////////////
+
+				// Diffuse Irradiance CubeMap
+
+				barrier.resource = diffuseIrradianceCubeMap;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				for (int i = 0; i < 6; i++)
+				{
+					cmdList->BeginRenderTarget(hdrRenderTarget, irradianceCubeMapRTBs[i], &clearValue);
+
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = diffuseIrradianceCubeMap->GetWidth();
+					viewportState.height = diffuseIrradianceCubeMap->GetHeight();
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = equirectDiffuseIrradianceMaterials[i]->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
+					cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
+
+					cmdList->SetShaderResourceGroup(equirectDiffuseIrradianceMaterials[i]->GetShaderResourceGroup());
+					
+					cmdList->CommitShaderResources();
+					
+					cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+
+					cmdList->EndRenderTarget();
+				}
+
+				barrier.resource = diffuseIrradianceCubeMap;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::CopySource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				for (int i = 0; i < 6; i++)
+				{
+					RHI::TextureToBufferCopy copyRegion{};
+					copyRegion.srcTexture = diffuseIrradianceCubeMap;
+					copyRegion.mipSlice = 0;
+					copyRegion.baseArrayLayer = i;
+					copyRegion.layerCount = 1;
+					copyRegion.dstBuffer = diffuseIrradianceOutputBuffer;
+					copyRegion.bufferOffset = i * diffuseIrradianceCubeMap->GetWidth() * diffuseIrradianceCubeMap->GetHeight() * 
+						GetBitsPerPixelForFormat(cubeMapDesc.format) / 8;
+					
+					cmdList->CopyTextureRegion(copyRegion);
+				}
 			}
+
+			// Copy CubeMap to buffer
 
 			barrier.resource = cubeMap;
 			barrier.fromState = ResourceState::FragmentShaderResource;
@@ -639,10 +1124,16 @@ namespace CE::RPI
 				copyRegion.baseArrayLayer = i;
 				copyRegion.layerCount = 1;
 				copyRegion.dstBuffer = outputBuffer;
-				copyRegion.bufferOffset = i * cubeMapRes * cubeMapRes * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8;
+				copyRegion.bufferOffset = i * cubeMap->GetWidth() * cubeMap->GetHeight() * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8;
 
 				cmdList->CopyTextureRegion(copyRegion);
 			}
+
+			barrier.resource = cubeMap;
+			barrier.fromState = ResourceState::CopySource;
+			barrier.toState = ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
 		}
 		cmdList->End();
 
@@ -684,6 +1175,15 @@ namespace CE::RPI
 		}
 		outputBuffer->Unmap();
 
+		if (diffuseIrradiance != nullptr && desc.diffuseIrradianceOutput != nullptr)
+		{
+			if (!desc.useCompression)
+			{
+				desc.diffuseIrradianceOutput->Reserve(outputBuffer->GetBufferSize());
+				
+			}
+		}
+
 		/////////////////////////////////////////////
 		// - Free up memory -
 
@@ -694,22 +1194,27 @@ namespace CE::RPI
 		{
 			delete equirectMaterials[i];
 			equirectMaterials[i] = nullptr;
+			delete equirectDiffuseIrradianceMaterials[i];
+			equirectDiffuseIrradianceMaterials[i] = nullptr;
 		}
 
 		delete cubeMapRpi;
-		//delete hdriMapRpi;
-		delete diffuseIrradiance;
-		delete outputBuffer;
+		delete hdriMapRpi;
+		delete diffuseIrradianceRpi;
+		delete diffuseIrradianceCubeMap;
+		delete outputBuffer; delete diffuseIrradianceOutputBuffer;
 		delete cubeModel;
 		delete stagingBuffer;
 		delete grayscaleRpi;
-		//delete rowAverageRpi;
+		delete rowAverageRpi;
 		delete columnAverageRpi;
 		delete pdfJointRpi;
 		delete pdfMarginalRpi;
 		delete pdfConditionalRpi;
 		delete cdfMarginalInverseRpi;
 		delete cdfConditionalInverseRpi;
+
+		return true;
 	}
 
 } // namespace CE::RPI

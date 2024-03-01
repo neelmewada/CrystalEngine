@@ -49,6 +49,7 @@ namespace CE::RPI
 		RPI::Shader* divisionShader = nullptr;
 		RPI::Shader* cdfConditionalInverseShader = nullptr;
 		RPI::Shader* cdfMarginalInverseShader = nullptr;
+		RPI::Shader* diffuseConvolutionShader = nullptr;
 
 		HdrEncoding hdrEncoding = HdrEncoding::None;
 		bool useCompression = false;
@@ -58,6 +59,8 @@ namespace CE::RPI
 
 		// Set to 0 to disable irradiance computation
 		u32 diffuseIrradianceResolution = 32;
+
+		BinaryBlob* diffuseIrradianceOutput = nullptr;
 	};
 
 	class CORERPI_API CubeMapProcessor
@@ -68,7 +71,7 @@ namespace CE::RPI
 		virtual ~CubeMapProcessor() = default;
 
 		// Takes an equirectangular HDRI texture and generates a cubemap out of it, and optionally generate IBL maps.
-		void ProcessCubeMapOffline(const CubeMapProcessInfo& processInfo, BinaryBlob& cubeMapOutput);
+		bool ProcessCubeMapOffline(const CubeMapProcessInfo& processInfo, BinaryBlob& cubeMapOutput);
 
 	private:
 

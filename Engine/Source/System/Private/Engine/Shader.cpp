@@ -54,6 +54,7 @@ namespace CE
 					const CE::ShaderVariant& variant = shaderPass->variants[j];
 					
 					RPI::ShaderVariantDescriptor2 variantDesc{};
+					variantDesc.shaderName = shaderPass->passName;
 					variantDesc.reflectionInfo = variant.reflectionInfo;
 					variantDesc.tags = {};
 					variantDesc.tags.AddRange(subShader->tags);

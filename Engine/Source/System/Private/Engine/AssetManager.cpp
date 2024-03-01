@@ -91,7 +91,7 @@ namespace CE
 			return nullptr;
 
 		Package* package = Package::LoadPackage(nullptr, path, LOAD_Default);
-
+		
 		if (!package)
 			return nullptr;
 

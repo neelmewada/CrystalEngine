@@ -470,11 +470,6 @@ namespace CE
 			return false;
 		}
 
-		if (field->GetName() == "features")
-		{
-			String::IsAlphabet('a');
-		}
-
 		u8 typeByte = 0;
 		*stream >> typeByte;
 		

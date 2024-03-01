@@ -183,7 +183,8 @@ namespace CE
 		{
 			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 			iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
-
+			iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+			
 			CubeMapProcessor cubeMapProcessor{};
 			CubeMapProcessInfo info{};
 			info.name = "Test HDR";
@@ -195,15 +196,16 @@ namespace CE
 			info.divisionShader = iblShader->GetOrCreateRPIShader(3);
 			info.cdfMarginalInverseShader = iblShader->GetOrCreateRPIShader(4);
 			info.cdfConditionalInverseShader = iblShader->GetOrCreateRPIShader(5);
+			info.diffuseConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(0);
 			info.useCompression = false;
 			info.diffuseIrradianceResolution = 32;
 
 			BinaryBlob testBlob{};
 			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob);
 
-			equirectShader->Destroy();
-			iblShader->Destroy();
-			equirectShader = nullptr;
+			equirectShader->Destroy(); equirectShader = nullptr;
+			iblShader->Destroy(); iblShader = nullptr;
+			iblConvolutionShader->Destroy(); iblConvolutionShader = nullptr;
 		}
 
 		if (false)
@@ -674,9 +676,19 @@ namespace CE
 
 			for (int i = 0; i < numPixels; i++)
 			{
-				*(dstData + 4 * i + 0) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 0));
-				*(dstData + 4 * i + 1) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 1));
-				*(dstData + 4 * i + 2) = Float32ToFloat16(*((f32*)hdrImage.GetDataPtr() + 4 * i + 2));
+				f32 r = *((f32*)hdrImage.GetDataPtr() + 4 * i + 0);
+				f32 g = *((f32*)hdrImage.GetDataPtr() + 4 * i + 1);
+				f32 b = *((f32*)hdrImage.GetDataPtr() + 4 * i + 2);
+				if (r > 65000)
+					r = 65000;
+				if (g > 65000)
+					g = 65000;
+				if (b > 65000)
+					b = 65000;
+
+				*(dstData + 4 * i + 0) = Float32ToFloat16(r);
+				*(dstData + 4 * i + 1) = Float32ToFloat16(g);
+				*(dstData + 4 * i + 2) = Float32ToFloat16(b);
 				*(dstData + 4 * i + 3) = Float32ToFloat16(1.0f);
 			}
 		}

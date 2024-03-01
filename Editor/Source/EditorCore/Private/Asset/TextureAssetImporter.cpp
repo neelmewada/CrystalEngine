@@ -24,7 +24,8 @@ namespace CE::Editor
 	{
 		static Array<Name> dependencies{
 			"/Engine/Assets/Shaders/CubeMap/Equirectangular",
-			"/Engine/Assets/Shaders/CubeMap/IBL"
+			"/Engine/Assets/Shaders/CubeMap/IBL",
+			"/Engine/Assets/Shaders/CubeMap/IBLConvolution"
 		};
 
 		return dependencies;
@@ -175,20 +176,32 @@ namespace CE::Editor
 		texture->sourceCompressionFormat = compressionFormat;
 
 		CE::Shader* equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
+		CE::Shader* iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
+		CE::Shader* iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
 
 		RPI::CubeMapProcessInfo processInfo{};
 		processInfo.name = name;
 		processInfo.sourceImage = sourceImage;
 		processInfo.diffuseIrradianceResolution = 0;
 		processInfo.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
+		processInfo.grayscaleShader = iblShader->GetOrCreateRPIShader(0);
+		processInfo.rowAverageShader = iblShader->GetOrCreateRPIShader(1);
+		processInfo.columnAverageShader = iblShader->GetOrCreateRPIShader(2);
+		processInfo.divisionShader = iblShader->GetOrCreateRPIShader(3);
+		processInfo.cdfMarginalInverseShader = iblShader->GetOrCreateRPIShader(4);
+		processInfo.cdfConditionalInverseShader = iblShader->GetOrCreateRPIShader(5);
+		processInfo.diffuseConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(0);
 		processInfo.useCompression = false;
+		processInfo.diffuseIrradianceResolution = 32;
 
 		RPI::CubeMapProcessor processor{};
-
-		processor.ProcessCubeMapOffline(processInfo, texture->source);
+		
+		bool result = processor.ProcessCubeMapOffline(processInfo, texture->source);
 
 		equirectShader->Destroy();
-		return true;
+		iblShader->Destroy();
+		iblConvolutionShader->Destroy();
+		return result;
 	}
 
 	bool TextureAssetImportJob::ProcessTex2D(const String& name, Package* package, const CMImage& image, TextureFormat pixelFormat,

@@ -1,7 +1,6 @@
 
 
 #include "Core/Macros.hlsli"
-
 #include "Core/Gamma.hlsli"
 
 struct VSInput
