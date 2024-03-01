@@ -759,14 +759,14 @@ namespace CE
 		}
 
 		// Order: right, left, top, bottom, front, back
-		Matrix4x4 captureViews2[] = {
-			Quat::LookRotation(Vec3(1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f,  0.0f,  1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
-			Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix()
-		};
+		//Matrix4x4 captureViews2[] = {
+		//	Quat::LookRotation(Vec3(1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+		//	Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+		//	Quat::LookRotation(Vec3(0.0f,  1.0f,  0.0f), Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
+		//	Quat::LookRotation(Vec3(0.0f, -1.0f,  0.0f), Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
+		//	Quat::LookRotation(Vec3(0.0f,  0.0f,  1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix(),
+		//	Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f), Vec3(0.0f,  1.0f,  0.0f)).ToMatrix()
+		//};
 
 		RHI::RenderTargetBuffer* renderTargetBuffers[6] = {};
 		RHI::TextureView* textureViews[6] = {};
@@ -806,25 +806,25 @@ namespace CE
 			irradianceRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { irradianceTextureViews[i] });
 		}
 
-		RHI::Buffer* viewDataBuffers2[6] = {};
+		//RHI::Buffer* viewDataBuffers2[6] = {};
 
-		for (int i = 0; i < 6; i++)
-		{
-			RHI::BufferDescriptor viewBufferDesc{};
-			viewBufferDesc.name = "View Data Buffer 2";
-			viewBufferDesc.bufferSize = sizeof(PerViewData);
-			viewBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
-			viewBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+		//for (int i = 0; i < 6; i++)
+		//{
+		//	RHI::BufferDescriptor viewBufferDesc{};
+		//	viewBufferDesc.name = "View Data Buffer 2";
+		//	viewBufferDesc.bufferSize = sizeof(PerViewData);
+		//	viewBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+		//	viewBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
 
-			PerViewData viewData{};
-			viewData.viewPosition = Vec3(0, 0, 0);
-			viewData.projectionMatrix = captureProjection;
-			viewData.viewMatrix = captureViews2[i];
-			viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
+		//	PerViewData viewData{};
+		//	viewData.viewPosition = Vec3(0, 0, 0);
+		//	viewData.projectionMatrix = captureProjection;
+		//	viewData.viewMatrix = captureViews2[i];
+		//	viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
 
-			viewDataBuffers2[i] = RHI::gDynamicRHI->CreateBuffer(viewBufferDesc);
-			viewDataBuffers2[i]->UploadData(&viewData, sizeof(viewData));
-		}
+		//	viewDataBuffers2[i] = RHI::gDynamicRHI->CreateBuffer(viewBufferDesc);
+		//	viewDataBuffers2[i]->UploadData(&viewData, sizeof(viewData));
+		//}
 
 		for (int i = 0; i < 6; i++)
 		{
@@ -1481,7 +1481,7 @@ namespace CE
 
 		for (int i = 0; i < 6; i++)
 		{
-			delete viewDataBuffers2[i];
+			//delete viewDataBuffers2[i];
 			delete irradianceTextureViews[i];
 			delete irradianceRTBs[i];
             delete irradianceSrgs[i];

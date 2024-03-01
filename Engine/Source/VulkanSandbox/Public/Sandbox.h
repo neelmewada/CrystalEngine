@@ -70,6 +70,7 @@ namespace CE
 		void Init(PlatformWindow* window);
 
 		void Tick(f32 deltaTime);
+		void CubeMapDemoTick(f32 deltaTime);
 
 		void UpdatePerViewData(int imageIndex);
 
@@ -79,6 +80,7 @@ namespace CE
 		void InitHDRIs();
         void InitIrradiancePipeline(const RHI::ShaderResourceGroupLayout& irradianceSrgLayout);
 		void InitTextures();
+		void InitCubeMapDemo();
 		void InitPipelines();
 		void InitDrawPackets();
 		void InitLights();
@@ -110,6 +112,18 @@ namespace CE
 		bool rebuild = true;
 		bool recompile = true;
 		bool resubmit = true;
+		
+
+		// HDRI Demo
+		RPI::Texture* hdriMapRpi = nullptr;
+		RHI::Texture* cubeMapDemo = nullptr;
+		RHI::CommandList* hdrCmdList = nullptr;
+		RHI::CommandQueue* hdrQueue = nullptr;
+		RHI::Fence* hdrFence = nullptr;
+		RHI::RenderTarget* hdrRenderTarget = nullptr;
+		RHI::RenderTargetBuffer* hdrFaceRTBs[6] = {};
+		RHI::TextureView* hdrFaceRTVs[6] = {};
+		RPI::Material* equirectMaterials[6] = {};
 
 		RHI::Texture* hdriMap = nullptr;
 		RHI::Texture* hdriGrayscaleMap = nullptr;

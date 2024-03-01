@@ -58,6 +58,7 @@ namespace CE
 		InitCubeMaps();
 		InitTextures();
 		InitHDRIs();
+		//InitCubeMapDemo();
 		InitPipelines();
 		InitLights();
 		InitDrawPackets();
@@ -115,6 +116,8 @@ namespace CE
 		}
 
 		u32 imageIndex = scheduler->BeginExecution();
+
+		//CubeMapDemoTick(deltaTime);
 
 		sphereRoughness += deltaTime * 0.2f;
 		if (sphereRoughness >= 1)
@@ -245,6 +248,264 @@ namespace CE
 		prevTime = clock();
 		//rustedTextures = MaterialTextureGroup::Load("RustedIron");
 		auto timeTaken2 = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+	}
+
+	void VulkanSandbox::InitCubeMapDemo()
+	{
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night2.hdr";
+		equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
+
+		CMImage hdrImage = CMImage::LoadFromFile(path);
+		defer(
+			hdrImage.Free();
+		);
+
+		/////////////////////////////////////////////
+		// - Input Resources -
+
+		RHI::TextureDescriptor hdriMapDesc{};
+		hdriMapDesc.name = "HDRI FlatMap";
+		hdriMapDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
+		hdriMapDesc.width = hdrImage.GetWidth();
+		hdriMapDesc.height = hdrImage.GetHeight();
+		hdriMapDesc.depth = 1;
+		hdriMapDesc.dimension = RHI::Dimension::Dim2D;
+		hdriMapDesc.mipLevels = 1;
+		hdriMapDesc.sampleCount = 1;
+		hdriMapDesc.arrayLayers = 1;
+		hdriMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+
+		RHI::Texture* hdriMap = RHI::gDynamicRHI->CreateTexture(hdriMapDesc);
+		hdriMapRpi = new RPI::Texture(hdriMap);
+
+		static Matrix4x4 captureProjection = Matrix4x4::PerspectiveProjection(1.0f, 90.0f, 0.1f, 10.0f);
+
+		// Order: right, left, top, bottom, front, back
+		static Matrix4x4 captureViewMatrices[] = {
+			Quat::LookRotation(Vec3(-1.0f,  0.0f,  0.0f), Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(1.0f,  0.0f,  0.0f),  Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  1.0f,  0.0f),  Vec3(0.0f,  0.0f, -1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f, -1.0f,  0.0f),  Vec3(0.0f,  0.0f,  1.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f,  1.0f),  Vec3(0.0f, -1.0f,  0.0f)).ToMatrix(),
+			Quat::LookRotation(Vec3(0.0f,  0.0f, -1.0f),  Vec3(0.0f, -1.0f,  0.0f)).ToMatrix()
+		};
+
+		RPI::Shader* equirectShader = this->equirectShader->GetOrCreateRPIShader(0);
+
+		RHI::SamplerDescriptor samplerDesc{};
+		samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = SamplerAddressMode::Repeat;
+		samplerDesc.enableAnisotropy = false;
+		samplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+		RHI::Sampler* cubeMapSampler = RPISystem::Get().FindOrCreateSampler(samplerDesc);
+
+		for (int i = 0; i < 6; i++)
+		{
+			equirectMaterials[i] = new RPI::Material(equirectShader);
+			equirectMaterials[i]->SelectVariant(0);
+
+			equirectMaterials[i]->SetPropertyValue("viewMatrix", captureViewMatrices[i]);
+			equirectMaterials[i]->SetPropertyValue("projectionMatrix", captureProjection);
+			equirectMaterials[i]->SetPropertyValue("viewProjectionMatrix", captureProjection * captureViewMatrices[i]);
+			equirectMaterials[i]->SetPropertyValue("viewPosition", Vec4(0, 0, 0, 0));
+			equirectMaterials[i]->SetPropertyValue("_InputSampler", cubeMapSampler);
+			equirectMaterials[i]->SetPropertyValue("_InputTexture", hdriMapRpi);
+			equirectMaterials[i]->FlushProperties();
+		}
+
+		/////////////////////////////////////////////
+		// - Output Resources -
+
+		RHI::TextureDescriptor cubeMapDesc{};
+		cubeMapDesc.name = "HDRI CubeMap";
+		cubeMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
+		cubeMapDesc.defaultHeapType = MemoryHeapType::Default;
+		cubeMapDesc.width = cubeMapDesc.height = 1024;
+		cubeMapDesc.depth = 1;
+		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
+		cubeMapDesc.mipLevels = 1;
+		cubeMapDesc.sampleCount = 1;
+		cubeMapDesc.arrayLayers = 6;
+		cubeMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
+
+		// Final CubeMap texture with 6 faces
+		cubeMapDemo = RHI::gDynamicRHI->CreateTexture(cubeMapDesc);
+
+		/////////////////////////////////////////////
+		// - Intermediate Resources -
+		
+		// Staging buffer
+		RHI::BufferDescriptor stagingBufferDesc{};
+		stagingBufferDesc.name = "Staging Buffer";
+		stagingBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
+		stagingBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+		stagingBufferDesc.bufferSize = hdriMap->GetByteSize();
+
+		// To upload input HDRI equirect image to a texture
+		RHI::Buffer* stagingBuffer = RHI::gDynamicRHI->CreateBuffer(stagingBufferDesc);
+
+		void* dataPtr;
+		stagingBuffer->Map(0, stagingBuffer->GetBufferSize(), &dataPtr);
+		{
+			void* srcPtr = hdrImage.GetDataPtr();
+			int numPixels = hdriMapDesc.width * hdriMapDesc.height;
+
+			for (int i = 0; i < numPixels; i++)
+			{
+				u16* u16Data = (u16*)dataPtr;
+				f32* f32Data = (f32*)dataPtr;
+
+				f32 r = *((f32*)srcPtr + 4 * i + 0);
+				f32 g = *((f32*)srcPtr + 4 * i + 1);
+				f32 b = *((f32*)srcPtr + 4 * i + 2);
+
+				// 16 bit float cannot store value higher than 65,000
+				if (r > 65000)
+					r = 65000;
+				if (g > 65000)
+					g = 65000;
+				if (b > 65000)
+					b = 65000;
+
+				*(u16Data + 4 * i + 0) = Math::ToFloat16(r);
+				*(u16Data + 4 * i + 1) = Math::ToFloat16(g);
+				*(u16Data + 4 * i + 2) = Math::ToFloat16(b);
+				*(u16Data + 4 * i + 3) = Math::ToFloat16(1.0f);
+			}
+		}
+		stagingBuffer->Unmap();
+		dataPtr = nullptr;
+
+		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+		RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+		RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
+
+		cmdList->Begin();
+		{
+			// - Load Input HDRI Image as a Flat 2D HDR texture -
+
+			RHI::ResourceBarrierDescriptor barrier{};
+			barrier.resource = hdriMap;
+			barrier.fromState = ResourceState::Undefined;
+			barrier.toState = ResourceState::CopyDestination;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			{
+				RHI::BufferToTextureCopy copyRegion{};
+				copyRegion.srcBuffer = stagingBuffer;
+				copyRegion.bufferOffset = 0;
+				copyRegion.dstTexture = hdriMap;
+				copyRegion.baseArrayLayer = 0;
+				copyRegion.layerCount = 1;
+				copyRegion.mipSlice = 0;
+
+				cmdList->CopyTextureRegion(copyRegion);
+			}
+
+			barrier.resource = hdriMap;
+			barrier.fromState = ResourceState::CopyDestination;
+			barrier.toState = ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = cubeMapDemo;
+			barrier.fromState = ResourceState::Undefined;
+			barrier.toState = ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+		}
+		cmdList->End();
+
+		queue->Execute(1, &cmdList, fence);
+		fence->WaitForFence();
+
+		RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
+		RHI::gDynamicRHI->DestroyFence(fence);
+		hdrFence = RHI::gDynamicRHI->CreateFence(false);
+
+		hdrCmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+		hdrQueue = queue;
+
+		RHI::RenderTargetLayout rtLayout{};
+		RHI::RenderAttachmentLayout colorAttachment{};
+		colorAttachment.attachmentId = "Color";
+		colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+		colorAttachment.format = RHI::Format::R16G16B16A16_SFLOAT;
+		colorAttachment.multisampleState.sampleCount = 1;
+		colorAttachment.loadAction = AttachmentLoadAction::Clear;
+		colorAttachment.storeAction = AttachmentStoreAction::Store;
+		colorAttachment.loadActionStencil = AttachmentLoadAction::DontCare;
+		colorAttachment.storeActionStencil = AttachmentStoreAction::DontCare;
+		rtLayout.attachmentLayouts.Add(colorAttachment);
+		hdrRenderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+
+		for (int i = 0; i < 6; i++)
+		{
+			RHI::TextureViewDescriptor viewDesc{};
+			viewDesc.texture = cubeMapDemo;
+			viewDesc.baseArrayLayer = i;
+			viewDesc.arrayLayerCount = 1;
+			viewDesc.baseMipLevel = 0;
+			viewDesc.mipLevelCount = 1;
+			viewDesc.dimension = RHI::Dimension::Dim2D;
+			viewDesc.format = Format::R16G16B16A16_SFLOAT;
+
+			hdrFaceRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+			hdrFaceRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { hdrFaceRTVs[i] });
+		}
+	}
+
+	void VulkanSandbox::CubeMapDemoTick(f32 deltaTime)
+	{
+		// Cube Model
+		RPI::Mesh* cubeMesh = cubeModel->GetMesh(0);
+		const auto& cubeVertInfo = cubeMesh->vertexBufferInfos[0];
+		auto cubeVertexBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(cubeVertInfo.bufferIndex), cubeVertInfo.byteOffset, cubeVertInfo.byteCount, cubeVertInfo.stride);
+
+		RHI::AttachmentClearValue clearValue{};
+		clearValue.clearValue = Vec4(0, 0, 0, 1);
+
+		hdrCmdList->Begin();
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				hdrCmdList->BeginRenderTarget(hdrRenderTarget, hdrFaceRTBs[i], &clearValue);
+				{
+					RHI::ViewportState viewport{};
+					viewport.x = viewport.y = 0;
+					viewport.width = cubeMapDemo->GetWidth();
+					viewport.height = cubeMapDemo->GetHeight();
+					viewport.minDepth = 0;
+					viewport.maxDepth = 1;
+					hdrCmdList->SetViewports(1, &viewport);
+
+					RHI::ScissorState scissor{};
+					scissor.x = scissor.y = 0;
+					scissor.width = viewport.width;
+					scissor.height = viewport.height;
+					hdrCmdList->SetScissors(1, &scissor);
+
+					RHI::PipelineState* pipeline = equirectMaterials[i]->GetCurrentShader()->GetPipeline();
+					hdrCmdList->BindPipelineState(pipeline);
+
+					hdrCmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
+					hdrCmdList->BindIndexBuffer(cubeMesh->indexBufferView);
+
+					hdrCmdList->SetShaderResourceGroup(equirectMaterials[i]->GetShaderResourceGroup());
+
+					hdrCmdList->CommitShaderResources();
+
+					hdrCmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+				}
+				hdrCmdList->EndRenderTarget();
+			}
+		}
+		hdrCmdList->End();
+
+		hdrQueue->Execute(1, &hdrCmdList, hdrFence);
+		hdrFence->WaitForFence();
+		hdrFence->Reset();
+
 	}
 
 	void VulkanSandbox::InitPipelines()
@@ -1068,6 +1329,7 @@ namespace CE
 
 	void VulkanSandbox::DestroyPipelines()
 	{
+		equirectShader->Destroy(); equirectShader = nullptr;
 		delete shadowMapSampler; shadowMapSampler = nullptr;
 		delete sceneConstantBuffer; sceneConstantBuffer = nullptr;
 		delete cubeModel; cubeModel = nullptr;

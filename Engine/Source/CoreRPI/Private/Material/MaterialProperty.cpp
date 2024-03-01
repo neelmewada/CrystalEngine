@@ -38,6 +38,9 @@ namespace CE::RPI
         case MaterialPropertyDataType::Enum:
             u.enumValue = copy.u.enumValue;
             break;
+        case MaterialPropertyDataType::Matrix4x4:
+            u.matrixValue = copy.u.matrixValue;
+            break;
         }
     }
 
@@ -76,6 +79,9 @@ namespace CE::RPI
             break;
         case MaterialPropertyDataType::Enum:
             u.enumValue = copy.u.enumValue;
+            break;
+        case MaterialPropertyDataType::Matrix4x4:
+            u.matrixValue = copy.u.matrixValue;
             break;
         }
 
