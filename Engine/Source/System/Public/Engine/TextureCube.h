@@ -19,10 +19,12 @@ namespace CE
             return TextureDimension::TexCube;
         }
 
+        inline TextureCube* GetDiffuseConvolution() const { return diffuseConvolution; }
+
     private:
 
         FIELD()
-        TextureCube* diffuseIrradiance = nullptr;
+        TextureCube* diffuseConvolution = nullptr;
 
 
 #if PAL_TRAIT_BUILD_EDITOR

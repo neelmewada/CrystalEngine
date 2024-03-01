@@ -13,6 +13,8 @@ namespace CE::Editor
 			job->compressionQuality = compressionQuality;
 			job->anisotropy = anisotropy;
 			job->importHdrAsCubemap = importHdrAsCubemap;
+			job->convoluteCubemap = convoluteCubemap;
+			job->diffuseConvolutionResolution = diffuseConvolutionResolution;
 
 			jobs.Add(job);
 		}
@@ -57,7 +59,7 @@ namespace CE::Editor
 		bool isCubeMap = false;
 		if (extension == ".hdr" && image.GetWidth() == image.GetHeight() * 2)
 		{
-			//isCubeMap = importHdrAsCubemap;
+			isCubeMap = importHdrAsCubemap;
 		}
 
 		CMImageFormat imageFormat = image.GetFormat();
@@ -166,6 +168,10 @@ namespace CE::Editor
 	{
 		TextureCube* texture = CreateObject<TextureCube>(package, name);
 
+		// Temporary code
+		//pixelFormat = TextureFormat::RGBAHalf;
+		//compressionFormat = TextureSourceCompressionFormat::None;
+
 		texture->anisoLevel = anisotropy;
 		texture->width = texture->height = sourceImage.GetHeight();
 		texture->mipLevels = 1;
@@ -182,7 +188,6 @@ namespace CE::Editor
 		RPI::CubeMapProcessInfo processInfo{};
 		processInfo.name = name;
 		processInfo.sourceImage = sourceImage;
-		processInfo.diffuseIrradianceResolution = 0;
 		processInfo.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
 		processInfo.grayscaleShader = iblShader->GetOrCreateRPIShader(0);
 		processInfo.rowAverageShader = iblShader->GetOrCreateRPIShader(1);
@@ -191,8 +196,26 @@ namespace CE::Editor
 		processInfo.cdfMarginalInverseShader = iblShader->GetOrCreateRPIShader(4);
 		processInfo.cdfConditionalInverseShader = iblShader->GetOrCreateRPIShader(5);
 		processInfo.diffuseConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(0);
-		processInfo.useCompression = false;
-		processInfo.diffuseIrradianceResolution = 32;
+		processInfo.useCompression = true;
+		processInfo.diffuseIrradianceResolution = convoluteCubemap ? diffuseConvolutionResolution : 0;
+		processInfo.diffuseIrradianceOutput = nullptr;
+
+		if (convoluteCubemap && diffuseConvolutionResolution > 0)
+		{
+			TextureCube* diffuseConvolution = CreateObject<TextureCube>(texture, name + "_Diffuse");
+
+			diffuseConvolution->anisoLevel = 0;
+			diffuseConvolution->width = diffuseConvolution->height = diffuseConvolutionResolution;
+			diffuseConvolution->mipLevels = 1;
+			diffuseConvolution->addressModeU = diffuseConvolution->addressModeV = TextureAddressMode::Repeat;
+			diffuseConvolution->filter = RHI::FilterMode::Linear;
+			diffuseConvolution->pixelFormat = TextureFormat::RGBAHalf;
+			diffuseConvolution->compressionQuality = compressionQuality;
+			diffuseConvolution->sourceCompressionFormat = TextureSourceCompressionFormat::None;
+
+			processInfo.diffuseIrradianceOutput = &diffuseConvolution->source;
+			texture->diffuseConvolution = diffuseConvolution;
+		}
 
 		RPI::CubeMapProcessor processor{};
 		

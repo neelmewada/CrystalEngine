@@ -26,6 +26,9 @@ namespace CE::Editor
 
 		FIELD(Config)
 		bool convoluteCubemap = false;
+
+		FIELD(Config)
+		u32 diffuseConvolutionResolution = 32;
 		
 	};
 
@@ -57,6 +60,8 @@ namespace CE::Editor
 
 		u8 anisotropy = 0;
 		bool importHdrAsCubemap = false;
+		bool convoluteCubemap = false;
+		u32 diffuseConvolutionResolution = 32;
 
 		friend class TextureAssetImporter;
 	};

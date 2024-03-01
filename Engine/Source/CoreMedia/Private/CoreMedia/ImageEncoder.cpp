@@ -72,8 +72,8 @@ namespace CE
 			if ((outputFormat == CMImageSourceFormat::BC3 || outputFormat == CMImageSourceFormat::BC7) && bitDepth == 8)
 				return true;
 			break;
-		case CMImageFormat::RGB32:
-		case CMImageFormat::RGBA32:
+		case CMImageFormat::RGB16:
+		case CMImageFormat::RGBA16:
 			if (outputFormat == CMImageSourceFormat::BC6H)
 				return true;
 			break;

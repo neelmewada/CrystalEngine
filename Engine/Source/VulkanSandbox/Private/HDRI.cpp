@@ -179,12 +179,14 @@ namespace CE
 
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 
-		//if (false) // Skip the block
+		if (false) // Skip the block
 		{
 			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 			iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
 			iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
-			
+
+			BinaryBlob irradianceBlob{};
+
 			CubeMapProcessor cubeMapProcessor{};
 			CubeMapProcessInfo info{};
 			info.name = "Test HDR";
@@ -199,6 +201,7 @@ namespace CE
 			info.diffuseConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(0);
 			info.useCompression = false;
 			info.diffuseIrradianceResolution = 32;
+			info.diffuseIrradianceOutput = &irradianceBlob;
 
 			BinaryBlob testBlob{};
 			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob);
@@ -208,20 +211,25 @@ namespace CE
 			iblConvolutionShader->Destroy(); iblConvolutionShader = nullptr;
 		}
 
-		if (false)
+		//if (false)
 		{
-			CE::Texture* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Textures/HDRI/sample_night");
+			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night2");
 
 			if (cubeMapTex != nullptr)
 			{
 				cubeMapTex->GetRpiTexture();
+
+				if (cubeMapTex->GetDiffuseConvolution() != nullptr)
+				{
+					cubeMapTex->GetDiffuseConvolution()->GetRpiTexture();
+				}
 			}
 		}
 
 		RHI::TextureDescriptor hdriFlatMapDesc{};
 		hdriFlatMapDesc.name = "HDRI Texture";
 		hdriFlatMapDesc.format = RHI::Format::R16G16B16A16_SFLOAT;
-		hdriFlatMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderReadWrite;
+		hdriFlatMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
 		hdriFlatMapDesc.width = hdrImage.GetWidth();
 		hdriFlatMapDesc.height = hdrImage.GetHeight();
 		hdriFlatMapDesc.depth = 1;

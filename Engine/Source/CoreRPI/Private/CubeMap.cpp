@@ -48,11 +48,11 @@ namespace CE::RPI
 		RHI::Format hdriFormat = RHI::Format::R16G16B16A16_SFLOAT;
 		bool usesHalfPrecision = true;
 		// If we want to compress to BC6H, then we need the final image to be in 32-bit float format
-		if (desc.useCompression)
-		{
-			hdriFormat = RHI::Format::R32G32B32A32_SFLOAT;
-			usesHalfPrecision = false;
-		}
+		//if (desc.useCompression)
+		//{
+		//	hdriFormat = RHI::Format::R32G32B32A32_SFLOAT;
+		//	usesHalfPrecision = false;
+		//}
 
 		/////////////////////////////////////////////
 		// - Samplers -
@@ -1161,7 +1161,7 @@ namespace CE::RPI
 					CMImage image = 
 						CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
 							cubeMapRes, cubeMapRes,
-							CMImageFormat::RGBA32, CMImageSourceFormat::None, 16, 64);
+							CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
 
 					CMImageEncoder encoder{};
 					
@@ -1177,11 +1177,38 @@ namespace CE::RPI
 
 		if (diffuseIrradiance != nullptr && desc.diffuseIrradianceOutput != nullptr)
 		{
-			if (!desc.useCompression)
+			diffuseIrradianceOutputBuffer->Map(0, diffuseIrradianceOutputBuffer->GetBufferSize(), &dataPtr);
 			{
-				desc.diffuseIrradianceOutput->Reserve(outputBuffer->GetBufferSize());
-				
+				//if (!desc.useCompression)
+				if (true)
+				{
+					desc.diffuseIrradianceOutput->Reserve(diffuseIrradianceOutputBuffer->GetBufferSize());
+					memcpy(desc.diffuseIrradianceOutput->GetDataPtr(), dataPtr, diffuseIrradianceOutputBuffer->GetBufferSize());
+				}
+				else // BC6H compression
+				{
+					int numPixelsPerFace = diffuseIrradianceCubeMap->GetWidth() * diffuseIrradianceCubeMap->GetHeight();
+					u64 compressedByteSizePerFace = numPixelsPerFace; // BC6H uses 1 byte per pixel
+					desc.diffuseIrradianceOutput->Reserve(compressedByteSizePerFace * 6);
+
+					for (int face = 0; face < 6; face++)
+					{
+						CMImage image =
+							CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
+								diffuseIrradianceCubeMap->GetWidth(), diffuseIrradianceCubeMap->GetHeight(),
+								CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
+
+						CMImageEncoder encoder{};
+						
+						bool result = encoder.EncodeToBCn(image, desc.diffuseIrradianceOutput->GetDataPtr() + compressedByteSizePerFace * face, CMImageSourceFormat::BC6H);
+						if (!result)
+						{
+							CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
+						}
+					}
+				}
 			}
+			diffuseIrradianceOutputBuffer->Unmap();
 		}
 
 		/////////////////////////////////////////////
