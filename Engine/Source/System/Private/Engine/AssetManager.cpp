@@ -63,7 +63,21 @@ namespace CE
 		if (assetDatas.IsEmpty())
 			return {};
 
-		Package* package = Package::LoadPackage(nullptr, path, LOAD_Default);
+		Package* package = nullptr;
+
+		loadedAssetsMutex.Lock();
+		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
+		{
+			package = loadedAssetsByPath[path];
+			loadedAssetsMutex.Unlock();
+		}
+		else
+		{
+			package = Package::LoadPackage(nullptr, path, LOAD_Full);
+			loadedAssetsByPath[path] = package;
+			loadedAssetsMutex.Unlock();
+		}
+		
 		if (!package)
 			return {};
 
@@ -90,7 +104,20 @@ namespace CE
 		if (!assetData)
 			return nullptr;
 
-		Package* package = Package::LoadPackage(nullptr, path, LOAD_Default);
+		Package* package = nullptr;
+
+		loadedAssetsMutex.Lock();
+		if (loadedAssetsByPath.KeyExists(path) && loadedAssetsByPath[path] != nullptr)
+		{
+			package = loadedAssetsByPath[path];
+			loadedAssetsMutex.Unlock();
+		}
+		else
+		{
+			package = Package::LoadPackage(nullptr, path, LOAD_Full);
+			loadedAssetsByPath[path] = package;
+			loadedAssetsMutex.Unlock();
+		}
 		
 		if (!package)
 			return nullptr;

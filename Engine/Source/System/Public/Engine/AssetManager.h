@@ -58,6 +58,9 @@ namespace CE
 		FIELD()
 		AssetRegistry* assetRegistry = nullptr;
 
+		SharedMutex loadedAssetsMutex{};
+		HashMap<Name, Package*> loadedAssetsByPath{};
+
 		friend class Engine;
 	};
     

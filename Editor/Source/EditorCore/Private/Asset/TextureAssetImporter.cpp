@@ -220,10 +220,6 @@ namespace CE::Editor
 		RPI::CubeMapProcessor processor{};
 		
 		bool result = processor.ProcessCubeMapOffline(processInfo, texture->source);
-
-		equirectShader->Destroy();
-		iblShader->Destroy();
-		iblConvolutionShader->Destroy();
 		return result;
 	}
 
