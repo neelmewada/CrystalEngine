@@ -38,13 +38,20 @@ namespace CE::RPI
 
 		RHI::Sampler* FindOrCreateSampler(const RHI::SamplerDescriptor& desc);
 
+		inline const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }
+		inline RHI::DrawLinearArguments GetFullScreenQuadDrawArgs() const { return quadDrawArgs; }
+
 	private:
 
 		RPISystem() = default;
 
 		void CreateDefaultTextures();
+		void CreateFullScreenQuad();
 
 		RHI::RHISystem rhiSystem{};
+		Array<RHI::Buffer*> vertexBuffers{};
+		Array<RHI::VertexBufferView> quadVertexBufferViews{};
+		RHI::DrawLinearArguments quadDrawArgs{};
 
 		Array<ScenePtr> scenes{};
 

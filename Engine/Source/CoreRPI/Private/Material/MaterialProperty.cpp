@@ -41,6 +41,8 @@ namespace CE::RPI
         case MaterialPropertyDataType::Matrix4x4:
             u.matrixValue = copy.u.matrixValue;
             break;
+        default:
+            throw std::runtime_error("Invalid or unimplemented MaterialPropertyDataType!");
         }
     }
 
@@ -83,6 +85,8 @@ namespace CE::RPI
         case MaterialPropertyDataType::Matrix4x4:
             u.matrixValue = copy.u.matrixValue;
             break;
+        default:
+            throw std::runtime_error("Invalid or unimplemented MaterialPropertyDataType!");
         }
 
         return *this;
@@ -124,6 +128,11 @@ namespace CE::RPI
         case MaterialPropertyDataType::Enum:
             u.enumValue = move.u.enumValue;
             break;
+        case MaterialPropertyDataType::Matrix4x4:
+            u.matrixValue = move.u.matrixValue;
+            break;
+        default:
+            throw std::runtime_error("Invalid or unimplemented MaterialPropertyDataType!");
         }
 
         move.valueType = MaterialPropertyDataType::None;

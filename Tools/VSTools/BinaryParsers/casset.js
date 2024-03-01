@@ -221,7 +221,9 @@ function parseFieldValue() {
             read(8)
             const byteSize = getNumberValue()
             addRow('Binary Data (Byte Size)', byteSize)
-            
+            read(8)
+            const flags = getNumberValue()
+            addRow('Binary Data (Flags)', flags)
             read(byteSize)
             addDetails(() => {
                 read(byteSize)

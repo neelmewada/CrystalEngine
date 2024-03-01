@@ -2,6 +2,22 @@
 
 namespace CE::RPI
 {
+    static f32 quadVertexData[] = {
+        // Positions
+        -1.0f, -1.0f, 0, 0,
+        1.0f, -1.0f, 0, 0,
+        -1.0f, 1.0f, 0, 0,
+        -1.0f, 1.0f, 0, 0,
+        1.0f, -1.0f, 0, 0,
+        1.0f, 1.0f, 0, 0,
+        // UVs
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+    };
 
     RPISystem& RPISystem::Get()
     {
@@ -12,10 +28,17 @@ namespace CE::RPI
     void RPISystem::Initialize()
     {
         CreateDefaultTextures();
+        CreateFullScreenQuad();
     }
 
     void RPISystem::Shutdown()
     {
+        for (auto buffer : vertexBuffers)
+        {
+            RHI::gDynamicRHI->DestroyBuffer(buffer);
+        }
+        vertexBuffers.Clear();
+
         delete defaultNormalTex; defaultNormalTex = nullptr;
         delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
         delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
@@ -29,6 +52,27 @@ namespace CE::RPI
             }
             samplerCache.Clear();
         }
+    }
+
+    void RPISystem::CreateFullScreenQuad()
+    {
+        RHI::BufferDescriptor quadVertexBufferDesc{};
+        quadVertexBufferDesc.name = "Quad Vertex Buffer";
+        quadVertexBufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer;
+        quadVertexBufferDesc.defaultHeapType = RHI::MemoryHeapType::Default;
+        quadVertexBufferDesc.bufferSize = sizeof(quadVertexData);
+
+        RHI::Buffer* quadVertexBuffer = RHI::gDynamicRHI->CreateBuffer(quadVertexBufferDesc);
+        quadVertexBuffer->UploadData(quadVertexData, quadVertexBuffer->GetBufferSize(), 0);
+        vertexBuffers.Add(quadVertexBuffer);
+
+        quadVertexBufferViews.Add(RHI::VertexBufferView(quadVertexBuffer, 0, sizeof(Vec4) * 6, sizeof(Vec4)));
+        quadVertexBufferViews.Add(RHI::VertexBufferView(quadVertexBuffer, sizeof(Vec4) * 6, sizeof(Vec2) * 6, sizeof(Vec2)));
+
+        quadDrawArgs.firstInstance = 0;
+        quadDrawArgs.instanceCount = 1;
+        quadDrawArgs.vertexOffset = 0;
+        quadDrawArgs.vertexCount = 6;
     }
 
     RHI::Sampler* RPISystem::FindOrCreateSampler(const RHI::SamplerDescriptor& desc)

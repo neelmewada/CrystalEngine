@@ -72,6 +72,7 @@ namespace CE::Editor
 			shader->subShaders.Add({});
 			SubShader& subShader = shader->subShaders.Top();
 			subShader.tags.AddRange(subShaderEntry.subShaderTags);
+			int passIndex = 0;
 
 			for (SubShaderPassEntry& passEntry : passEntries)
 			{
@@ -91,8 +92,8 @@ namespace CE::Editor
 
 				CE::ShaderVariant& variant = pass.variants[0];
 				variant.variantHash = 0;
-				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, "VertexBlob"));
-				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, "FragmentBlob"));
+				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, String("VertexBlob_") + passIndex));
+				variant.shaderStageBlobs.Add(CreateObject<ShaderBlob>(shader, String("FragmentBlob_") + passIndex));
 
 				// - Vertex -
 
@@ -156,6 +157,7 @@ namespace CE::Editor
 
 				// Clear the original HLSL source
 				passEntry.source.Free();
+				passIndex++;
 			}
 		}
 		

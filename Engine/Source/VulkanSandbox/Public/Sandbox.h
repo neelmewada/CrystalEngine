@@ -165,6 +165,7 @@ namespace CE
 		RHI::ShaderModule* depthShaderVert = nullptr;
 		
 		CE::Shader* equirectShader = nullptr;
+		CE::Shader* iblShader = nullptr;
 		CE::Shader* opaqueShader = nullptr;
 		RPI::Shader* opaqueRpiShader = nullptr;
 		//RPI::Shader* opaqueShader = nullptr;

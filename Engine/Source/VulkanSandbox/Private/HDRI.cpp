@@ -182,19 +182,27 @@ namespace CE
 		//if (false) // Skip the block
 		{
 			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
+			iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
 
 			CubeMapProcessor cubeMapProcessor{};
 			CubeMapProcessInfo info{};
 			info.name = "Test HDR";
 			info.sourceImage = hdrImage;
 			info.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
+			info.grayscaleShader = iblShader->GetOrCreateRPIShader(0);
+			info.rowAverageShader = iblShader->GetOrCreateRPIShader(1);
+			info.columnAverageShader = iblShader->GetOrCreateRPIShader(2);
+			info.divisionShader = iblShader->GetOrCreateRPIShader(3);
+			info.cdfMarginalInverseShader = iblShader->GetOrCreateRPIShader(4);
+			info.cdfConditionalInverseShader = iblShader->GetOrCreateRPIShader(5);
 			info.useCompression = false;
-			info.diffuseIrradianceResolution = 0;
+			info.diffuseIrradianceResolution = 32;
 
 			BinaryBlob testBlob{};
 			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob);
 
 			equirectShader->Destroy();
+			iblShader->Destroy();
 			equirectShader = nullptr;
 		}
 
