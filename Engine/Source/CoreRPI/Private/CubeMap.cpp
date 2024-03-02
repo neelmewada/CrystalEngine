@@ -47,12 +47,6 @@ namespace CE::RPI
 
 		RHI::Format hdriFormat = RHI::Format::R16G16B16A16_SFLOAT;
 		bool usesHalfPrecision = true;
-		// If we want to compress to BC6H, then we need the final image to be in 32-bit float format
-		//if (desc.useCompression)
-		//{
-		//	hdriFormat = RHI::Format::R32G32B32A32_SFLOAT;
-		//	usesHalfPrecision = false;
-		//}
 
 		/////////////////////////////////////////////
 		// - Samplers -

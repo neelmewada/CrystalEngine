@@ -877,22 +877,20 @@ namespace CE
 
 			skyboxMaterial = new RPI::Material(skyboxShader);
 
-			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night2");
-
-			if (cubeMapTex != nullptr)
-			{
-				perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
-
-				if (cubeMapTex->GetDiffuseConvolution() != nullptr)
-				{
-					perSceneSrg->Bind("_SkyboxIrradiance", cubeMapTex->GetDiffuseConvolution()->GetRpiTexture()->GetRhiTexture());
-				}
-				else
-				{
-					perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
-				}
-			}
-			else
+			//CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
+			//if (cubeMapTex != nullptr)
+			//{
+			//	perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
+			//	if (cubeMapTex->GetDiffuseConvolution() != nullptr)
+			//	{
+			//		perSceneSrg->Bind("_SkyboxIrradiance", cubeMapTex->GetDiffuseConvolution()->GetRpiTexture()->GetRhiTexture());
+			//	}
+			//	else
+			//	{
+			//		perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
+			//	}
+			//}
+			//else
 			{
 				perSceneSrg->Bind("_Skybox", hdriCubeMap);
 				perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);

@@ -179,7 +179,7 @@ namespace CE
 
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 
-		if (false) // Skip the block
+		//if (false) // Skip the block
 		{
 			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 			iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
@@ -202,6 +202,7 @@ namespace CE
 			info.useCompression = false;
 			info.diffuseIrradianceResolution = 32;
 			info.diffuseIrradianceOutput = &irradianceBlob;
+			info.compressDiffuseIrradiance = false;
 
 			BinaryBlob testBlob{};
 			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob);
