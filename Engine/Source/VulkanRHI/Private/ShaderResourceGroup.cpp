@@ -67,6 +67,8 @@ namespace CE::Vulkan
 		}
 		mergedSRGsByHash.Clear();
 
+		LockGuard<SharedMutex> lock{ queuedDestroySetMutex };
+
 		for (auto set : queuedDestroySets)
 		{
 			delete set;
@@ -226,6 +228,8 @@ namespace CE::Vulkan
 
 	void ShaderResourceManager::DestroyQueuedSRG()
 	{
+		LockGuard<SharedMutex> lock{ queuedDestroySetMutex };
+
 		for (int i = queuedDestroySets.GetSize() - 1; i >= 0; i--)
 		{
 			if (queuedDestroySets[i]->usageCount <= 0)
@@ -240,6 +244,8 @@ namespace CE::Vulkan
 	{
 		if (descriptorSet)
 		{
+			LockGuard<SharedMutex> lock{ queuedDestroySetMutex };
+
 			queuedDestroySets.Add(descriptorSet);
 		}
 	}

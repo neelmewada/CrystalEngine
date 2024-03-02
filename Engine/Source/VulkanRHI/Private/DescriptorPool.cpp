@@ -5,19 +5,18 @@
 namespace CE::Vulkan
 {
     
-    VulkanDescriptorPool::VulkanDescriptorPool(VulkanDevice* device, u32 initialPoolSize, u32 poolSizeIncrement)
+    DescriptorPool::DescriptorPool(VulkanDevice* device, u32 initialPoolSize, u32 poolSizeIncrement)
         : device(device), initialSize(initialPoolSize), incrementSize(poolSizeIncrement)
     {
 		VkDescriptorPoolSize poolSizes[] = {
-			{.type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = initialPoolSize / 2 },
-			{.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
-			{.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, .descriptorCount = initialPoolSize / 2 }
+			{ .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = initialPoolSize },
+			{ .type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = initialPoolSize },
+			{ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = initialPoolSize },
+			{ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = initialPoolSize },
+			{ .type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
+			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = initialPoolSize },
+			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = initialPoolSize },
+			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
 		};
         
         VkDescriptorPoolCreateInfo info{};
@@ -39,7 +38,7 @@ namespace CE::Vulkan
         descriptorPools.Add(pool);
     }
 
-    VulkanDescriptorPool::~VulkanDescriptorPool()
+    DescriptorPool::~DescriptorPool()
     {
         for (VkDescriptorPool pool : descriptorPools)
         {
@@ -48,7 +47,7 @@ namespace CE::Vulkan
         descriptorPools.Clear();
     }
 
-	List<VkDescriptorSet> VulkanDescriptorPool::Allocate(u32 numDescriptorSets, List<VkDescriptorSetLayout> setLayouts, VkDescriptorPool& outPool)
+	List<VkDescriptorSet> DescriptorPool::Allocate(u32 numDescriptorSets, List<VkDescriptorSetLayout> setLayouts, VkDescriptorPool& outPool)
 	{
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -102,7 +101,7 @@ namespace CE::Vulkan
 		return sets;
 	}
 
-	void VulkanDescriptorPool::Free(const List<VkDescriptorSet>& sets)
+	void DescriptorPool::Free(const List<VkDescriptorSet>& sets)
 	{
 		if (sets.IsEmpty())
 			return;
@@ -116,18 +115,17 @@ namespace CE::Vulkan
 		}
 	}
 
-    void VulkanDescriptorPool::Increment(u32 incrementSize)
+    void DescriptorPool::Increment(u32 incrementSize)
     {
         VkDescriptorPoolSize poolSizes[] = {
             { .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = incrementSize },
             { .type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = incrementSize },
+			{ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = incrementSize },
             { .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = incrementSize },
             { .type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = incrementSize },
-            { .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = incrementSize / 2 },
             { .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = incrementSize },
 			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = incrementSize },
 			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = incrementSize },
-			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, .descriptorCount = incrementSize / 2 }
         };
         
         VkDescriptorPoolCreateInfo info{};

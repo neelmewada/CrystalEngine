@@ -10,6 +10,15 @@ namespace CE::Vulkan
     class CommandQueue : public RHI::CommandQueue
     {
     public:
+
+        struct SubmitInfo
+        {
+            List<VkCommandBuffer> commandBuffers{};
+            List<VkSemaphore> signalSemaphores{};
+            List<VkSemaphore> waitSemaphores{};
+            List<VkPipelineStageFlags> waitDstStageMask{};
+        };
+
         CommandQueue(VulkanDevice* device, u32 familyIndex, u32 queueIndex, RHI::HardwareQueueClassMask queueMask, VkQueue queue, bool presentSupported);
         virtual ~CommandQueue();
 
@@ -40,7 +49,33 @@ namespace CE::Vulkan
 
         virtual bool Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence = nullptr) override;
 
+        bool Submit(u32 count, VkSubmitInfo* submitInfos, VkFence fence);
+
     private:
+
+        struct SubmitBatch
+        {
+            List<SubmitInfo> submitInfos{};
+            VkFence fence = nullptr;
+        };
+
+        struct SubmissionThread
+        {
+            std::counting_semaphore<> sleepEvent{ 0 };
+
+            Thread thread;
+
+            Atomic<bool> terminate = false;
+        };
+
+        void ProcessSubmissionThread();
+
+        SubmissionThread* thread = nullptr;
+        std::counting_semaphore<> submitEvent{ 0 };
+
+        SharedMutex submissionMutex{};
+        Array<SubmitBatch> submissions{};
+
         VulkanDevice* device;
         u32 familyIndex;
         u32 queueIndex;
@@ -48,7 +83,8 @@ namespace CE::Vulkan
 		bool presentSupported = false;
 		VkCommandPool commandPool = nullptr;
 
-		friend class VulkanDevice;
+        friend class VulkanDevice;
+        friend class FrameGraphExecuter;
     };
     
 } // namespace CE

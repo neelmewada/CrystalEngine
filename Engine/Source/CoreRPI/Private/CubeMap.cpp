@@ -1155,21 +1155,33 @@ namespace CE::RPI
 				int numPixelsPerFace = cubeMapRes * cubeMapRes;
 				u64 compressedByteSizePerFace = numPixelsPerFace; // BC6H uses 1 byte per pixel
 				output.Reserve(compressedByteSizePerFace * 6);
+				void* outputDataPtr = output.GetDataPtr();
+
+				Array<Thread> threads{};
 
 				for (int face = 0; face < 6; face++)
 				{
-					CMImage image = 
-						CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
-							cubeMapRes, cubeMapRes,
-							CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
+					threads.EmplaceBack([dataPtr, face, outputDataPtr, compressedByteSizePerFace, numPixelsPerFace, cubeMapRes, &cubeMapDesc]
+						{
+							CMImage image =
+								CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
+									cubeMapRes, cubeMapRes,
+									CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
 
-					CMImageEncoder encoder{};
-					
-					bool result = encoder.EncodeToBCn(image, output.GetDataPtr() + compressedByteSizePerFace * face, CMImageSourceFormat::BC6H);
-					if (!result)
-					{
-						CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
-					}
+							CMImageEncoder encoder{};
+
+							bool result = encoder.EncodeToBCn(image, (u8*)outputDataPtr + compressedByteSizePerFace * face, CMImageSourceFormat::BC6H);
+							if (!result)
+							{
+								CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
+							}
+						});
+				}
+
+				for (int face = 0; face < 6; face++)
+				{
+					if (threads[face].IsJoinable())
+						threads[face].Join();
 				}
 			}
 		}
@@ -1179,8 +1191,7 @@ namespace CE::RPI
 		{
 			diffuseIrradianceOutputBuffer->Map(0, diffuseIrradianceOutputBuffer->GetBufferSize(), &dataPtr);
 			{
-				//if (!desc.useCompression)
-				if (true)
+				if (!desc.compressDiffuseIrradiance)
 				{
 					desc.diffuseIrradianceOutput->Reserve(diffuseIrradianceOutputBuffer->GetBufferSize());
 					memcpy(desc.diffuseIrradianceOutput->GetDataPtr(), dataPtr, diffuseIrradianceOutputBuffer->GetBufferSize());
@@ -1190,20 +1201,34 @@ namespace CE::RPI
 					int numPixelsPerFace = diffuseIrradianceCubeMap->GetWidth() * diffuseIrradianceCubeMap->GetHeight();
 					u64 compressedByteSizePerFace = numPixelsPerFace; // BC6H uses 1 byte per pixel
 					desc.diffuseIrradianceOutput->Reserve(compressedByteSizePerFace * 6);
+					void* outputDataPtr = desc.diffuseIrradianceOutput->GetDataPtr();
+
+					Array<Thread> threads{};
 
 					for (int face = 0; face < 6; face++)
 					{
-						CMImage image =
-							CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
-								diffuseIrradianceCubeMap->GetWidth(), diffuseIrradianceCubeMap->GetHeight(),
-								CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
+						threads.EmplaceBack([outputDataPtr, dataPtr, compressedByteSizePerFace, face, numPixelsPerFace, diffuseIrradianceCubeMap , &cubeMapDesc]
+							{
+								CMImage image =
+									CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
+										diffuseIrradianceCubeMap->GetWidth(), diffuseIrradianceCubeMap->GetHeight(),
+										CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
 
-						CMImageEncoder encoder{};
-						
-						bool result = encoder.EncodeToBCn(image, desc.diffuseIrradianceOutput->GetDataPtr() + compressedByteSizePerFace * face, CMImageSourceFormat::BC6H);
-						if (!result)
+								CMImageEncoder encoder{};
+
+								bool result = encoder.EncodeToBCn(image, (u8*)outputDataPtr + compressedByteSizePerFace * face, CMImageSourceFormat::BC6H);
+								if (!result)
+								{
+									CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
+								}
+							});
+					}
+
+					for (int face = 0; face < 6; face++)
+					{
+						if (threads[face].IsJoinable())
 						{
-							CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
+							threads[face].Join();
 						}
 					}
 				}

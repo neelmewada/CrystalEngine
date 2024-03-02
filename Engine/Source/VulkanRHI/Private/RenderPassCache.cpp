@@ -11,6 +11,8 @@ namespace CE::Vulkan
 
     RenderPassCache::~RenderPassCache()
     {
+		LockGuard<SharedMutex> lock{ mutex };
+
 		for (auto [hash, renderPass] : renderPassCache)
 		{
 			delete renderPass;
@@ -20,6 +22,8 @@ namespace CE::Vulkan
 
 	RenderPass* RenderPassCache::FindOrCreate(const RenderPass::Descriptor& desc)
 	{
+		LockGuard<SharedMutex> lock{ mutex };
+
 		SIZE_T hash = desc.GetHash();
 		if (hash == 0)
 			return nullptr;

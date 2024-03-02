@@ -803,7 +803,8 @@ namespace CE::Vulkan
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
-		result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
 
 		if (presentRequired && swapChain != nullptr)
 		{
@@ -816,7 +817,7 @@ namespace CE::Vulkan
 			presentInfo.pImageIndices = &currentImageIndex;
 			presentInfo.waitSemaphoreCount = 1;
 			presentInfo.pWaitSemaphores = &scope->signalSemaphores[currentImageIndex][0];
-            
+			
 			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 		}
 

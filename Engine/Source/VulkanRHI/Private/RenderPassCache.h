@@ -14,6 +14,7 @@ namespace CE::Vulkan
 	private:
 		VulkanDevice* device = nullptr;
 
+		SharedMutex mutex{};
 		HashMap<SIZE_T, RenderPass*> renderPassCache{};
 	};
     

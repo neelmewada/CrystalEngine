@@ -35,6 +35,21 @@ namespace CE
 
 	void AssetManager::Shutdown()
 	{
+		{
+			LockGuard<SharedMutex> lock{ loadedAssetsMutex };
+
+			for (auto [uuid, package] : loadedAssetsByUuid)
+			{
+				if (package != nullptr)
+				{
+					package->Destroy();
+				}
+			}
+
+			loadedAssetsByUuid.Clear();
+			loadedAssetsByPath.Clear();
+		}
+
 		assetRegistry->Shutdown();
 	}
 
@@ -74,7 +89,13 @@ namespace CE
 		else
 		{
 			package = Package::LoadPackage(nullptr, path, LOAD_Full);
+			if (package == nullptr)
+			{
+				loadedAssetsMutex.Unlock();
+				return {};
+			}
 			loadedAssetsByPath[path] = package;
+			loadedAssetsByUuid[package->GetUuid()] = package;
 			loadedAssetsMutex.Unlock();
 		}
 		
@@ -98,12 +119,27 @@ namespace CE
 		return assets;
 	}
 
+	void AssetManager::UnloadAsset(Asset* asset)
+	{
+		if (asset == nullptr)
+			return;
+		Package* package = asset->GetPackage();
+		if (package == nullptr)
+			return;
+
+		loadedAssetsMutex.Lock();
+		loadedAssetsByPath.Remove(package->GetPackageName());
+		loadedAssetsByUuid.Remove(package->GetPackageUuid());
+		package->Destroy();
+		loadedAssetsMutex.Unlock();
+	}
+
 	Asset* AssetManager::LoadAssetAtPath(const Name& path)
 	{
 		AssetData* assetData = GetPrimaryAssetDataAtPath(path);
 		if (!assetData)
 			return nullptr;
-
+		
 		Package* package = nullptr;
 
 		loadedAssetsMutex.Lock();
@@ -115,7 +151,13 @@ namespace CE
 		else
 		{
 			package = Package::LoadPackage(nullptr, path, LOAD_Full);
+			if (package == nullptr)
+			{
+				loadedAssetsMutex.Unlock();
+				return nullptr;
+			}
 			loadedAssetsByPath[path] = package;
+			loadedAssetsByUuid[package->GetUuid()] = package;
 			loadedAssetsMutex.Unlock();
 		}
 		

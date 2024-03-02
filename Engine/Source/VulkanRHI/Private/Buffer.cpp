@@ -456,7 +456,8 @@ namespace CE::Vulkan
 
 		curFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
 
-		vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
+		device->GetGraphicsQueue()->Submit(1, &submitInfo, uploadFence);
+		//vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
 
 		constexpr auto u64Max = std::numeric_limits<u64>::max();
 		vkWaitForFences(device->GetHandle(), 1, &uploadFence, VK_TRUE, u64Max);
@@ -547,7 +548,8 @@ namespace CE::Vulkan
 
 		curFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
         
-        vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
+		device->GetGraphicsQueue()->Submit(1, &submitInfo, uploadFence);
+        //vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
         
         constexpr u64 u64Max = std::numeric_limits<u64>::max();
         vkWaitForFences(device->GetHandle(), 1, &uploadFence, VK_TRUE, u64Max);
@@ -634,7 +636,8 @@ namespace CE::Vulkan
 
 		curFamilyIndex = device->GetGraphicsQueue()->GetFamilyIndex();
 
-		vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
+		device->GetGraphicsQueue()->Submit(1, &submitInfo, uploadFence);
+		//vkQueueSubmit(device->GetGraphicsQueue()->GetHandle(), 1, &submitInfo, uploadFence);
 
 		constexpr u64 u64Max = std::numeric_limits<u64>::max();
 		vkWaitForFences(device->GetHandle(), 1, &uploadFence, VK_TRUE, u64Max);

@@ -50,6 +50,7 @@ namespace CE::Vulkan
 		
 		u32 maxBoundDescriptorSets = 0;
 
+		SharedMutex queuedDestroySetMutex{};
 		List<DescriptorSet*> queuedDestroySets{};
 
 		HashMap<SIZE_T, MergedShaderResourceGroup*> mergedSRGsByHash{};
@@ -130,7 +131,7 @@ namespace CE::Vulkan
 
 		VulkanDevice* device = nullptr;
 		ShaderResourceManager* srgManager = nullptr;
-		VulkanDescriptorPool* pool = nullptr;
+		DescriptorPool* pool = nullptr;
 		VkDescriptorPool allocPool = nullptr;
 
 		u32 currentImageIndex = 0;

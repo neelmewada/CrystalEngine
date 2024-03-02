@@ -53,6 +53,7 @@ namespace CE::RPI
 
 		HdrEncoding hdrEncoding = HdrEncoding::None;
 		bool useCompression = false;
+		bool compressDiffuseIrradiance = false;
 
 		// Use 0 to auto choose resolution based on source image
 		u32 cubeMapResolution = 0;

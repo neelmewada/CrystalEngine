@@ -53,6 +53,8 @@ namespace CE
 			return Object::CastTo<TAsset>(asset);
 		}
 
+		void UnloadAsset(Asset* asset);
+
 	protected:
 
 		FIELD()
@@ -60,6 +62,7 @@ namespace CE
 
 		SharedMutex loadedAssetsMutex{};
 		HashMap<Name, Package*> loadedAssetsByPath{};
+		HashMap<Uuid, Package*> loadedAssetsByUuid{};
 
 		friend class Engine;
 	};

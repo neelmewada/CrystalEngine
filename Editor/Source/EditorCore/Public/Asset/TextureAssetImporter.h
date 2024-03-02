@@ -30,6 +30,8 @@ namespace CE::Editor
 		FIELD(Config)
 		u32 diffuseConvolutionResolution = 32;
 		
+		FIELD(Config)
+		bool compressConvolution = false;
 	};
 
 	class EDITORCORE_API TextureAssetImportJob : public AssetImportJob
@@ -62,6 +64,7 @@ namespace CE::Editor
 		bool importHdrAsCubemap = false;
 		bool convoluteCubemap = false;
 		u32 diffuseConvolutionResolution = 32;
+		bool compressConvolution = false;
 
 		friend class TextureAssetImporter;
 	};

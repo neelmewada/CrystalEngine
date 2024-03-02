@@ -211,7 +211,7 @@ namespace CE
 			iblConvolutionShader->Destroy(); iblConvolutionShader = nullptr;
 		}
 
-		//if (false)
+		if (false)
 		{
 			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night2");
 

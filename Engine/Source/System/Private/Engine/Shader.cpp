@@ -38,8 +38,15 @@ namespace CE
 		rpiShaderPerPass.Clear();
 	}
 
+	void CE::Shader::OnAfterConstruct()
+	{
+		Super::OnAfterConstruct();
+	}
+
 	RPI::Shader* CE::Shader::GetOrCreateRPIShader(int passIndex)
 	{
+		LockGuard<SharedMutex> lock{ rpiShaderMutex };
+
 		if (rpiShaderPerPass.GetSize() == 0)
 		{
 			SubShader* subShader = GetSubshader();

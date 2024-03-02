@@ -876,9 +876,28 @@ namespace CE
 			skyboxShader->AddVariant(variant);
 
 			skyboxMaterial = new RPI::Material(skyboxShader);
-			
-			perSceneSrg->Bind("_Skybox", hdriCubeMap);
-			perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
+
+			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night2");
+
+			if (cubeMapTex != nullptr)
+			{
+				perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
+
+				if (cubeMapTex->GetDiffuseConvolution() != nullptr)
+				{
+					perSceneSrg->Bind("_SkyboxIrradiance", cubeMapTex->GetDiffuseConvolution()->GetRpiTexture()->GetRhiTexture());
+				}
+				else
+				{
+					perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
+				}
+			}
+			else
+			{
+				perSceneSrg->Bind("_Skybox", hdriCubeMap);
+				perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
+			}
+
 			perSceneSrg->Bind("_DefaultSampler", defaultSampler);
 
 			perSceneSrg->FlushBindings();
@@ -1648,10 +1667,10 @@ namespace CE
 
 	void MaterialTextureGroup::Release()
 	{
-		delete albedo; albedo = nullptr;
-		delete normalMap; normalMap = nullptr;
-		delete roughnessMap; roughnessMap = nullptr;
-		delete metallicMap; metallicMap = nullptr;
+		//delete albedo; albedo = nullptr;
+		//delete normalMap; normalMap = nullptr;
+		//delete roughnessMap; roughnessMap = nullptr;
+		//delete metallicMap; metallicMap = nullptr;
 	}
 
 } // namespace CE

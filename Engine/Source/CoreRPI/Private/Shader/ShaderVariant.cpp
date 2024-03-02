@@ -32,9 +32,6 @@ namespace CE::RPI
 	{
 		variantId = 0;
 
-		//const auto& subShaderEntry = desc.preprocessData->subShaders[desc.subShaderIndex];
-		//const auto& passEntry = subShaderEntry.passes[desc.passIndex];
-
 		pipelineDesc = {};
 		pipelineDesc.name = desc.shaderName;
 

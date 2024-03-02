@@ -140,6 +140,8 @@ namespace CE
 		Shader();
 		virtual ~Shader(); 
 
+		void OnAfterConstruct() override;
+
 		inline Name GetShaderName() const
 		{
 			return shaderName;
@@ -163,6 +165,7 @@ namespace CE
 
 		SubShader* GetSubshader();
 
+		SharedMutex rpiShaderMutex{};
 		Array<RPI::Shader*> rpiShaderPerPass{};
 
 		FIELD()

@@ -112,7 +112,7 @@ namespace CE::Vulkan
         SetupRasterState();
         SetupMultisampleState();
         SetupVertexInputState();
-        
+
         if (desc.renderTarget != nullptr)
         {
             RenderPass* rp = ((Vulkan::RenderTarget*)desc.renderTarget)->GetRenderPass();
@@ -127,6 +127,8 @@ namespace CE::Vulkan
 
     GraphicsPipeline::~GraphicsPipeline()
     {
+        LockGuard<SharedMutex> lock{ pipelineMutex };
+
         for (auto [_, pipelineCache] : pipelineCachesByHash)
         {
             vkDestroyPipelineCache(device->GetHandle(), pipelineCache, nullptr);
@@ -156,8 +158,14 @@ namespace CE::Vulkan
         SIZE_T instanceHash = this->hash;
         CombineHash(instanceHash, variant);
 
+        pipelineMutex.Lock();
         if (pipelinesByHash[instanceHash] != nullptr)
-            return pipelinesByHash[instanceHash];
+        {
+            VkPipeline pipeline = pipelinesByHash[instanceHash];
+            pipelineMutex.Unlock();
+            return pipeline;
+        }
+        pipelineMutex.Unlock();
 
         return CompileInternal(renderPass, subpass, numViewports, numScissors);
     }
@@ -181,7 +189,7 @@ namespace CE::Vulkan
 
         colorBlendState.attachmentCount = renderPassDesc.subpasses[subpass].colorAttachments.GetSize();
         colorBlendState.pAttachments = colorBlendAttachments.GetData();
-        
+
         createInfo.pColorBlendState = &colorBlendState;
 
         // - Dynamic State -
@@ -219,7 +227,7 @@ namespace CE::Vulkan
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         inputAssembly.primitiveRestartEnable = VK_FALSE;
         inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        
+
         createInfo.pInputAssemblyState = &inputAssembly;
 
         // - Vertex Input -
@@ -230,7 +238,7 @@ namespace CE::Vulkan
         vertexInputState.vertexAttributeDescriptionCount = vertexInputDescriptions.GetSize();
         vertexInputState.pVertexAttributeDescriptions = vertexInputDescriptions.GetData();
 
-        createInfo.pVertexInputState = &vertexInputState;        
+        createInfo.pVertexInputState = &vertexInputState;
 
         // - Multisample State -
         createInfo.pMultisampleState = &multisampleState;
@@ -249,6 +257,8 @@ namespace CE::Vulkan
         CombineHash(instanceHash, variant);
 
         VkResult result;
+        
+        LockGuard<SharedMutex> lock{ pipelineMutex };
 
         VkPipelineCache pipelineCache = nullptr;
         if (pipelineCaches[variant] == nullptr)
@@ -257,7 +267,7 @@ namespace CE::Vulkan
             cacheCI.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
             cacheCI.initialDataSize = 0;
             cacheCI.pInitialData = nullptr;
-            
+
             result = vkCreatePipelineCache(device->GetHandle(), &cacheCI, nullptr, &pipelineCache);
             if (result == VK_SUCCESS)
             {
@@ -267,7 +277,7 @@ namespace CE::Vulkan
         }
 
         pipelineCache = pipelineCaches[variant];
-        
+
         VkPipeline pipeline = nullptr;
         result = vkCreateGraphicsPipelines(device->GetHandle(), pipelineCache, 1, &createInfo, nullptr, &pipeline);
 
@@ -276,7 +286,7 @@ namespace CE::Vulkan
             CE_LOG(Error, All, "Failed to create Graphics Pipeline: {}", name);
             return nullptr;
         }
-        
+
         pipelines[variant] = pipeline;
         pipelinesByHash[instanceHash] = pipeline;
 
@@ -287,7 +297,7 @@ namespace CE::Vulkan
     {
         colorBlendState = {};
         colorBlendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        
+
         colorBlendState.logicOpEnable = VK_FALSE;
         colorBlendState.logicOp = VK_LOGIC_OP_CLEAR;
 
@@ -384,7 +394,7 @@ namespace CE::Vulkan
             depthStencilState.front.writeMask = stencilState.writeMask;
             depthStencilState.front.reference = 0; // Filled via dynamic state
         }
-        
+
         depthStencilState.stencilTestEnable = stencilState.enable ? VK_TRUE : VK_FALSE;
     }
 
@@ -397,7 +407,7 @@ namespace CE::Vulkan
             VkPipelineShaderStageCreateInfo shaderStageCI{};
             shaderStageCI.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStageCI.module = ((Vulkan::ShaderModule*)shaderStageDesc.shaderModule)->GetHandle();
-            
+
             if (shaderStageDesc.GetShaderStage() == RHI::ShaderStage::Vertex)
                 shaderStageCI.stage = VK_SHADER_STAGE_VERTEX_BIT;
             else if (shaderStageDesc.GetShaderStage() == RHI::ShaderStage::Fragment)
@@ -408,7 +418,7 @@ namespace CE::Vulkan
                 continue;
 
             shaderStageCI.pName = shaderStageDesc.entryPoint.GetCString();
-            
+
             shaderStages.Add(shaderStageCI);
         }
     }
@@ -482,7 +492,7 @@ namespace CE::Vulkan
             attrib.binding = vertexAttrib.inputSlot;
             attrib.location = vertexAttrib.location;
             attrib.offset = vertexAttrib.offset;
-            
+
             switch (vertexAttrib.dataType)
             {
             case VertexAttributeDataType::Float:

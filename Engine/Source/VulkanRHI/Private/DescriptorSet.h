@@ -24,7 +24,7 @@ namespace CE::Vulkan
         VkDescriptorSet descriptorSet = nullptr;
         VkDescriptorPool descriptorPool = nullptr;
         ShaderResourceManager* srgManager = nullptr;
-        VulkanDescriptorPool* pool = nullptr;
+        DescriptorPool* pool = nullptr;
 
         Atomic<int> usageCount = 0;
 

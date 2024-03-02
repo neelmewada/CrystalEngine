@@ -47,7 +47,7 @@ namespace CE::Vulkan
 			VulkanPlatform::DestroySurface(instance, testSurface);
 		testSurface = nullptr;
 
-		descriptorPool = new VulkanDescriptorPool(this);
+		descriptorPool = new DescriptorPool(this);
 
 		srgManager = new ShaderResourceManager(this);
 

@@ -15,6 +15,7 @@ namespace CE::Editor
 			job->importHdrAsCubemap = importHdrAsCubemap;
 			job->convoluteCubemap = convoluteCubemap;
 			job->diffuseConvolutionResolution = diffuseConvolutionResolution;
+			job->compressConvolution = compressConvolution;
 
 			jobs.Add(job);
 		}
@@ -199,6 +200,7 @@ namespace CE::Editor
 		processInfo.useCompression = true;
 		processInfo.diffuseIrradianceResolution = convoluteCubemap ? diffuseConvolutionResolution : 0;
 		processInfo.diffuseIrradianceOutput = nullptr;
+		processInfo.compressDiffuseIrradiance = compressConvolution;
 
 		if (convoluteCubemap && diffuseConvolutionResolution > 0)
 		{
@@ -209,9 +211,15 @@ namespace CE::Editor
 			diffuseConvolution->mipLevels = 1;
 			diffuseConvolution->addressModeU = diffuseConvolution->addressModeV = TextureAddressMode::Repeat;
 			diffuseConvolution->filter = RHI::FilterMode::Linear;
-			diffuseConvolution->pixelFormat = TextureFormat::RGBAHalf;
+			diffuseConvolution->pixelFormat = pixelFormat;//TextureFormat::RGBAHalf;
 			diffuseConvolution->compressionQuality = compressionQuality;
-			diffuseConvolution->sourceCompressionFormat = TextureSourceCompressionFormat::None;
+			diffuseConvolution->sourceCompressionFormat = compressionFormat;//TextureSourceCompressionFormat::None;
+
+			if (!compressConvolution)
+			{
+				diffuseConvolution->pixelFormat = TextureFormat::RGBAHalf;
+				diffuseConvolution->sourceCompressionFormat = TextureSourceCompressionFormat::None;
+			}
 
 			processInfo.diffuseIrradianceOutput = &diffuseConvolution->source;
 			texture->diffuseConvolution = diffuseConvolution;

@@ -13,7 +13,7 @@ namespace CE::Vulkan
     class CommandList;
     class SwapChain;
     class Texture;
-	class VulkanDescriptorPool;
+	class DescriptorPool;
 	class ShaderResourceManager;
 	class CommandBufferAllocator;
 	class RenderPassCache;
@@ -90,7 +90,7 @@ namespace CE::Vulkan
 			return supportedDeviceExtensions.Exists(name);
 		}
 
-		INLINE VulkanDescriptorPool* GetDescriptorPool() const { return descriptorPool; }
+		INLINE DescriptorPool* GetDescriptorPool() const { return descriptorPool; }
 
 		INLINE const VkPhysicalDeviceLimits& GetDeviceLimits() const
 		{
@@ -175,7 +175,7 @@ namespace CE::Vulkan
 
 		SharedMutex mainThreadMutex{};
 
-		VulkanDescriptorPool* descriptorPool = nullptr;
+		DescriptorPool* descriptorPool = nullptr;
         
         friend class FrameGraphCompiler;
         friend class VulkanRHI;

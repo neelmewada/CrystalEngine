@@ -65,8 +65,10 @@ namespace CE::Vulkan
 
         RenderPass* defaultRenderPass = nullptr;
 
+        SharedMutex pipelineMutex{};
         HashMap<SIZE_T, VkPipeline> pipelinesByHash{};
         HashMap<SIZE_T, VkPipelineCache> pipelineCachesByHash{};
+
         HashMap<PipelineVariant, VkPipeline> pipelines{};
         HashMap<PipelineVariant, VkPipelineCache> pipelineCaches{};
 

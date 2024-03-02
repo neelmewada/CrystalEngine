@@ -3,13 +3,13 @@
 namespace CE::Vulkan
 {
 
-    class VulkanDescriptorPool
+    class DescriptorPool
     {
     public:
         
-        VulkanDescriptorPool(VulkanDevice* device, u32 initialPoolSize = 128, u32 poolSizeIncrement = 128);
+        DescriptorPool(VulkanDevice* device, u32 initialPoolSize = 128, u32 poolSizeIncrement = 128);
         
-        ~VulkanDescriptorPool();
+        ~DescriptorPool();
         
 		List<VkDescriptorSet> Allocate(u32 numDescriptorSets, List<VkDescriptorSetLayout> setLayouts, VkDescriptorPool& outPool);
 
