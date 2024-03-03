@@ -1,21 +1,23 @@
 #include "CoreRPI.h"
 
-#include <algorithm>
-
 namespace CE::RPI
 {
-	CubeMap::CubeMap(const CubeMapDescriptor& desc) : desc(desc)
+
+	static u64 CalculateTotalTextureSize(u32 width, u32 height, u32 bitsPerPixel, u32 arrayCount = 1, u32 mipLevelCount = 1)
 	{
-		
+		u64 size = 0;
+
+		for (int mip = 0; mip < mipLevelCount; mip++)
+		{
+			u32 power = (u32)pow(2, mip);
+			u64 curSize = width / power * height / power * bitsPerPixel / 8 * arrayCount;
+			size += curSize;
+		}
+
+		return size;
 	}
 
-	CubeMap::~CubeMap()
-	{
-		delete cubeMap; cubeMap = nullptr;
-		delete diffuseIrradiance; diffuseIrradiance = nullptr;
-	}
-
-	bool CubeMapProcessor::ProcessCubeMapOffline(const CubeMapProcessInfo& desc, BinaryBlob& output)
+	bool CubeMapProcessor::ProcessCubeMapOffline(const CubeMapOfflineProcessInfo& desc, BinaryBlob& output, u32& outMipLevels)
 	{
 #if !PLATFORM_DESKTOP
 		return false; // Only for desktop platforms
@@ -25,7 +27,7 @@ namespace CE::RPI
 			return false;
 		if (desc.sourceImage.GetWidth() != desc.sourceImage.GetHeight() * 2)
 			return false;
-		
+
 		CMImageFormat sourceFormat = desc.sourceImage.GetFormat();
 		bool isSourceFloatFormat = false;
 		if (sourceFormat == CMImageFormat::RGBA32 || sourceFormat == CMImageFormat::RGB32)
@@ -46,7 +48,11 @@ namespace CE::RPI
 			cubeMapRes = desc.sourceImage.GetHeight();
 
 		RHI::Format hdriFormat = RHI::Format::R16G16B16A16_SFLOAT;
-		bool usesHalfPrecision = true;
+		bool computeSpecularConvolution = desc.specularConvolution;
+		if (desc.specularConvolutionShader == nullptr)
+		{
+			computeSpecularConvolution = false;
+		}
 
 		/////////////////////////////////////////////
 		// - Samplers -
@@ -72,7 +78,7 @@ namespace CE::RPI
 		/////////////////////////////////////////////
 		// - Input Resources -
 
-		int totalMipLevels = ceil(log2(Math::Max(desc.sourceImage.GetWidth(), desc.sourceImage.GetHeight()))) + 1;
+		int totalHdriInputMipLevels = ceil(log2(Math::Max(desc.sourceImage.GetWidth(), desc.sourceImage.GetHeight()))) + 1;
 		
 		RHI::TextureDescriptor hdriMapDesc{};
 		hdriMapDesc.name = "HDRI FlatMap";
@@ -81,16 +87,27 @@ namespace CE::RPI
 		hdriMapDesc.height = desc.sourceImage.GetHeight();
 		hdriMapDesc.depth = 1;
 		hdriMapDesc.dimension = RHI::Dimension::Dim2D;
-		hdriMapDesc.mipLevels = totalMipLevels;
+		hdriMapDesc.mipLevels = totalHdriInputMipLevels;
 		hdriMapDesc.sampleCount = 1;
 		hdriMapDesc.arrayLayers = 1;
 		hdriMapDesc.format = hdriFormat;
 
 		RHI::Texture* hdriMap = RHI::gDynamicRHI->CreateTexture(hdriMapDesc);
 		RPI::Texture* hdriMapRpi = new RPI::Texture(hdriMap);
-		
+
 		/////////////////////////////////////////////
 		// - Output Resources -
+
+		int specularCubeMapMipLevels = 1;
+		if (computeSpecularConvolution)
+		{
+			specularCubeMapMipLevels = ceil(log2(cubeMapRes)) + 1;
+			specularCubeMapMipLevels = Math::Min(specularCubeMapMipLevels, 10); // 10 mip levels max
+			if (specularCubeMapMipLevels > totalHdriInputMipLevels)
+				specularCubeMapMipLevels = totalHdriInputMipLevels;
+		}
+
+		outMipLevels = specularCubeMapMipLevels;
 
 		RHI::TextureDescriptor cubeMapDesc{};
 		cubeMapDesc.name = desc.name;
@@ -99,7 +116,7 @@ namespace CE::RPI
 		cubeMapDesc.width = cubeMapDesc.height = cubeMapRes;
 		cubeMapDesc.depth = 1;
 		cubeMapDesc.dimension = RHI::Dimension::DimCUBE;
-		cubeMapDesc.mipLevels = 1;
+		cubeMapDesc.mipLevels = specularCubeMapMipLevels;
 		cubeMapDesc.sampleCount = 1;
 		cubeMapDesc.arrayLayers = 6;
 		cubeMapDesc.format = hdriFormat;
@@ -110,7 +127,7 @@ namespace CE::RPI
 
 		RHI::Texture* diffuseIrradiance = nullptr;
 		RPI::Texture* diffuseIrradianceRpi = nullptr;
-
+		
 		RHI::Texture* diffuseIrradianceCubeMap = nullptr;
 		u32 diffuseIrradianceResolution = desc.diffuseIrradianceResolution;
 		if (desc.diffuseConvolutionShader == nullptr)
@@ -145,9 +162,10 @@ namespace CE::RPI
 		RHI::BufferDescriptor outputBufferDesc{};
 		outputBufferDesc.name = "Output";
 		outputBufferDesc.bindFlags = RHI::BufferBindFlags::StagingBuffer;
-		outputBufferDesc.bufferSize = cubeMapRes * cubeMapRes * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8 * 6;
+		outputBufferDesc.bufferSize = CalculateTotalTextureSize(cubeMapRes, cubeMapRes, GetBitsPerPixelForFormat(cubeMapDesc.format), 6, cubeMapDesc.mipLevels);
+		//cubeMapRes * cubeMapRes * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8 * 6;
 		outputBufferDesc.defaultHeapType = MemoryHeapType::Upload;
-		
+
 		RHI::Buffer* outputBuffer = RHI::gDynamicRHI->CreateBuffer(outputBufferDesc);
 
 		RHI::BufferDescriptor diffuseIrradianceOutputBufferDesc{};
@@ -170,7 +188,7 @@ namespace CE::RPI
 		RPI::Mesh* cubeMesh = cubeModel->GetMesh(0);
 		const auto& cubeVertInfo = cubeMesh->vertexBufferInfos[0];
 		auto cubeVertexBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(cubeVertInfo.bufferIndex), cubeVertInfo.byteOffset, cubeVertInfo.byteCount, cubeVertInfo.stride);
-		
+
 		// Staging buffer
 		RHI::BufferDescriptor stagingBufferDesc{};
 		stagingBufferDesc.name = "Staging Buffer";
@@ -186,7 +204,7 @@ namespace CE::RPI
 		{
 			void* srcPtr = desc.sourceImage.GetDataPtr();
 			int numPixels = hdriMapDesc.width * hdriMapDesc.height;
-			
+
 			for (int i = 0; i < numPixels; i++)
 			{
 				u16* u16Data = (u16*)dataPtr;
@@ -195,29 +213,19 @@ namespace CE::RPI
 				f32 r = *((f32*)srcPtr + 4 * i + 0);
 				f32 g = *((f32*)srcPtr + 4 * i + 1);
 				f32 b = *((f32*)srcPtr + 4 * i + 2);
-				
-				if (usesHalfPrecision)
-				{
-					// 16 bit float cannot store values higher than 65,000
-					if (r > 65000)
-						r = 65000;
-					if (g > 65000)
-						g = 65000;
-					if (b > 65000)
-						b = 65000;
 
-					*(u16Data + 4 * i + 0) = Math::ToFloat16(r);
-					*(u16Data + 4 * i + 1) = Math::ToFloat16(g);
-					*(u16Data + 4 * i + 2) = Math::ToFloat16(b);
-					*(u16Data + 4 * i + 3) = Math::ToFloat16(1.0f);
-				}
-				else
-				{
-					*(f32Data + 4 * i + 0) = r;
-					*(f32Data + 4 * i + 1) = g;
-					*(f32Data + 4 * i + 2) = b;
-					*(f32Data + 4 * i + 3) = 1.0f;
-				}
+				// 16 bit float cannot store values larger than 65,000
+				if (r > 65000)
+					r = 65000;
+				if (g > 65000)
+					g = 65000;
+				if (b > 65000)
+					b = 65000;
+
+				*(u16Data + 4 * i + 0) = Math::ToFloat16(r);
+				*(u16Data + 4 * i + 1) = Math::ToFloat16(g);
+				*(u16Data + 4 * i + 2) = Math::ToFloat16(b);
+				*(u16Data + 4 * i + 3) = Math::ToFloat16(1.0f);
 			}
 		}
 		stagingBuffer->Unmap();
@@ -258,7 +266,7 @@ namespace CE::RPI
 			rowAverageDesc.width = singleLineWidth;
 			rowAverageDesc.height = hdriMapDesc.height;
 			fillIntermediateDescriptor(rowAverageDesc);
-			
+
 			RHI::TextureDescriptor columnAverageDesc{};
 			columnAverageDesc.name = "Column Average";
 			columnAverageDesc.width = 1;
@@ -276,7 +284,7 @@ namespace CE::RPI
 			pdfMarginalDesc.width = singleLineWidth;
 			pdfMarginalDesc.height = hdriMapDesc.height;
 			fillIntermediateDescriptor(pdfMarginalDesc);
-			
+
 			RHI::TextureDescriptor cdfMarginalInverseDesc{};
 			cdfMarginalInverseDesc.name = "CDF Marginal Inverse";
 			cdfMarginalInverseDesc.width = singleLineWidth;
@@ -306,7 +314,7 @@ namespace CE::RPI
 			//RHI::gDynamicRHI->GetTextureMemoryRequirements(cdfMarginalInverseDesc, requirements[5]);
 			//RHI::gDynamicRHI->GetTextureMemoryRequirements(pdfConditionalDesc, requirements[6]);
 			//RHI::gDynamicRHI->GetTextureMemoryRequirements(cdfConditionalInverseDesc, requirements[7]);
-			
+
 			grayscale = RHI::gDynamicRHI->CreateTexture(grayscaleDesc);
 			rowAverage = RHI::gDynamicRHI->CreateTexture(rowAverageDesc);
 			columnAverage = RHI::gDynamicRHI->CreateTexture(columnAverageDesc);
@@ -326,6 +334,43 @@ namespace CE::RPI
 			cdfConditionalInverseRpi = new RPI::Texture(cdfConditionalInverse);
 		}
 
+		RHI::Texture* specularConvolution = nullptr; RPI::Texture* specularConvolutionRpi = nullptr;
+		Array<RPI::Texture*> specularConvolutionMipMaps{};
+
+		if (computeSpecularConvolution)
+		{
+			RHI::TextureDescriptor specularConvolutionDesc{};
+			specularConvolutionDesc.name = "Specular Convolution";
+			specularConvolutionDesc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+			specularConvolutionDesc.width = hdriMap->GetWidth();
+			specularConvolutionDesc.height = hdriMap->GetHeight();
+			specularConvolutionDesc.arrayLayers = 1;
+			specularConvolutionDesc.mipLevels = specularCubeMapMipLevels;
+			specularConvolutionDesc.depth = 1;
+			specularConvolutionDesc.sampleCount = 1;
+			specularConvolutionDesc.format = hdriFormat;
+			specularConvolutionDesc.dimension = Dimension::Dim2D;
+			
+			specularConvolution = RHI::gDynamicRHI->CreateTexture(specularConvolutionDesc);
+			specularConvolutionRpi = new RPI::Texture(specularConvolution);
+
+			RHI::TextureViewDescriptor viewDesc{};
+			viewDesc.texture = specularConvolution;
+			viewDesc.format = specularConvolution->GetFormat();
+			viewDesc.baseArrayLayer = 0;
+			viewDesc.arrayLayerCount = 1;
+			viewDesc.dimension = Dimension::Dim2D;
+			viewDesc.mipLevelCount = 1;
+
+			for (int mip = 0; mip < specularConvolutionDesc.mipLevels; mip++)
+			{
+				viewDesc.baseMipLevel = mip;
+				
+				RHI::TextureView* textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+				specularConvolutionMipMaps.Add(new RPI::Texture(textureView));
+			}
+		}
+
 		/////////////////////////////////////////////
 		// - Render Targets & RTBs -
 
@@ -335,8 +380,16 @@ namespace CE::RPI
 		RHI::TextureView* irradianceCubeMapRTVs[6] = {};
 		RHI::RenderTargetBuffer* irradianceCubeMapRTBs[6] = {};
 
-		Array<RPI::Texture*> hdriMapRTVs{};
+		// Input HDRI MipMap RTBs
+		Array<RPI::Texture*> hdriMapMipViews{};
 		Array<RHI::RenderTargetBuffer*> hdriMapRTBs{};
+
+		// Specular Convolution
+		Array<RHI::TextureView*> specularConvolutionRTVs{};
+		Array<RHI::RenderTargetBuffer*> specularConvolutionRTBs{};
+		
+		StaticArray<Array<RHI::TextureView*>, 6> cubeMapRTVMips{};
+		StaticArray<Array<RHI::RenderTargetBuffer*>, 6> cubeMapRTBMips{};
 
 		{
 			RHI::RenderTargetLayout rtLayout{};
@@ -382,11 +435,47 @@ namespace CE::RPI
 				viewDesc.baseArrayLayer = 0;
 				viewDesc.arrayLayerCount = 1;
 				viewDesc.dimension = RHI::Dimension::Dim2D;
-				viewDesc.format = cubeMap->GetFormat();
+				viewDesc.format = hdriMap->GetFormat();
 
 				RHI::TextureView* textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
-				hdriMapRTVs.Add(new RPI::Texture(textureView));
+				hdriMapMipViews.Add(new RPI::Texture(textureView));
 				hdriMapRTBs.Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { textureView }));
+			}
+
+			if (computeSpecularConvolution)
+			{
+				for (int mip = 0; mip < specularConvolution->GetMipLevelCount(); mip++)
+				{
+					RHI::TextureViewDescriptor viewDesc{};
+					viewDesc.texture = specularConvolution;
+					viewDesc.baseMipLevel = mip;
+					viewDesc.mipLevelCount = 1;
+					viewDesc.baseArrayLayer = 0;
+					viewDesc.arrayLayerCount = 1;
+					viewDesc.dimension = RHI::Dimension::Dim2D;
+					viewDesc.format = specularConvolution->GetFormat();
+
+					specularConvolutionRTVs.Add(RHI::gDynamicRHI->CreateTextureView(viewDesc));
+					specularConvolutionRTBs.Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { specularConvolutionRTVs.Top() }));
+				}
+
+				for (int face = 0; face < 6; face++)
+				{
+					for (int mip = 0; mip < cubeMap->GetMipLevelCount(); mip++)
+					{
+						RHI::TextureViewDescriptor viewDesc{};
+						viewDesc.texture = cubeMap;
+						viewDesc.baseMipLevel = mip;
+						viewDesc.mipLevelCount = 1;
+						viewDesc.baseArrayLayer = face;
+						viewDesc.arrayLayerCount = 1;
+						viewDesc.dimension = RHI::Dimension::Dim2D;
+						viewDesc.format = cubeMap->GetFormat();
+
+						cubeMapRTVMips[face].Add(RHI::gDynamicRHI->CreateTextureView(viewDesc));
+						cubeMapRTBMips[face].Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { cubeMapRTVMips[face].Top() }));
+					}
+				}
 			}
 		}
 
@@ -429,21 +518,38 @@ namespace CE::RPI
 
 			diffuseConvolutionRTB = gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { diffuseIrradiance });
 		}
-		
+
 		defer(
 			delete hdrRenderTarget;
 			for (int i = 0; i < 6; i++)
 			{
+				for (int mip = 0; mip < cubeMapRTBMips[i].GetSize(); mip++)
+				{
+					delete cubeMapRTBMips[i][mip];
+					delete cubeMapRTVMips[i][mip];
+				}
+
 				delete irradianceCubeMapRTVs[i];
 				delete irradianceCubeMapRTBs[i];
 				delete cubeMapRTVs[i];
 				delete cubeMapRTBs[i];
 			}
 
-			for (int i = 0; i < hdriMapRTVs.GetSize(); i++)
+			for (auto mipMapRpi : specularConvolutionMipMaps)
 			{
-				delete hdriMapRTVs[i];
+				delete mipMapRpi;
+			}
+
+			for (int i = 0; i < hdriMapMipViews.GetSize(); i++)
+			{
+				delete hdriMapMipViews[i];
 				delete hdriMapRTBs[i];
+			}
+
+			for (int i = 0; i < specularConvolutionRTVs.GetSize(); i++)
+			{
+				delete specularConvolutionRTVs[i];
+				delete specularConvolutionRTBs[i];
 			}
 
 			delete grayscaleRenderTarget;
@@ -455,14 +561,14 @@ namespace CE::RPI
 			delete pdfConditionalRTB;
 			delete cdfMarginalInverseRTB;
 			delete cdfConditionalInverseRTB;
-			
+
 			delete diffuseConvolutionRTB;
 		);
 
 		/////////////////////////////////////////////
 		// - Materials & Data -
 
-		static Matrix4x4 captureProjection = Matrix4x4::PerspectiveProjection(1.0f, 90.0f, 0.1f, 10.0f);
+		static Matrix4x4 captureProjection = Matrix4x4::PerspectiveProjection(1.0f, 90.0f, 0.1f, 100.0f);
 
 		// Order: right, left, top, bottom, front, back
 		static Matrix4x4 captureViewMatrices[] = {
@@ -475,6 +581,7 @@ namespace CE::RPI
 		};
 
 		RPI::Shader* equirectShader = desc.equirectangularShader;
+		// 1 material for each face
 		RPI::Material* equirectMaterials[6] = {};
 		RPI::Material* equirectDiffuseIrradianceMaterials[6] = {};
 
@@ -567,29 +674,55 @@ namespace CE::RPI
 			}
 
 			RPI::Material* mipMapMaterial = new RPI::Material(desc.mipMapShader);
-			mipMapMaterial->SetPropertyValue("_InputTexture", hdriMapRTVs[i - 1]);
+			mipMapMaterial->SetPropertyValue("_InputTexture", hdriMapMipViews[i - 1]);
 			mipMapMaterial->SetPropertyValue("_InputSampler", linearClampedSampler);
 			mipMapMaterial->FlushProperties();
 
 			mipMapMaterials.Add(mipMapMaterial);
 		}
 
-		defer(
-			for (int i = 0; i < mipMapMaterials.GetSize(); i++)
-			{
-				delete mipMapMaterials[i];
-			}
+		Array<RPI::Material*> specularConvolutionMaterials{};
+		for (int mip = 0; computeSpecularConvolution && mip < specularConvolution->GetMipLevelCount(); mip++)
+		{
+			int maxMipLevel = specularConvolution->GetMipLevelCount() - 1;
+			if (maxMipLevel == 0)
+				break; // Should never happen!
 
-			delete grayscaleMaterial;
-			delete rowAverageMaterial;
-			delete columnAverageMaterial;
-			delete pdfConditionalMaterial;
-			delete pdfMarginalMaterial;
-			delete cdfConditionalInverseMaterial;
-			delete pdfJointMaterial;
-			delete cdfMarginalInverseMaterial;
-			delete diffuseConvolutionMaterial;
-		);
+			RPI::Material* specularConvMaterial = new RPI::Material(desc.specularConvolutionShader);
+			specularConvMaterial->SetPropertyValue("_InputTexture", hdriMapRpi);
+			specularConvMaterial->SetPropertyValue("_InputSampler", linearSampler);
+			specularConvMaterial->SetPropertyValue("_Roughness", (f32)mip / maxMipLevel);
+			specularConvMaterial->FlushProperties();
+
+			specularConvolutionMaterials.Add(specularConvMaterial);
+		}
+
+		StaticArray<Array<RPI::Material*>, 6> equirectToSpecularConvolutionMaterials{};
+		if (specularConvolution != nullptr)
+		{
+			for (int face = 0; face < 6; face++)
+			{
+				for (int mip = 0; mip < specularConvolution->GetMipLevelCount(); mip++)
+				{
+					if (mip == 0)
+					{
+						equirectToSpecularConvolutionMaterials[face].Add(nullptr);
+						continue;
+					}
+
+					RPI::Material* equirectSpecularMaterial = new RPI::Material(equirectShader);
+					equirectSpecularMaterial->SetPropertyValue("viewMatrix", captureViewMatrices[face]);
+					equirectSpecularMaterial->SetPropertyValue("projectionMatrix", captureProjection);
+					equirectSpecularMaterial->SetPropertyValue("viewProjectionMatrix", captureProjection * captureViewMatrices[face]);
+					equirectSpecularMaterial->SetPropertyValue("viewPosition", Vec4(0, 0, 0, 0));
+					equirectSpecularMaterial->SetPropertyValue("_InputSampler", linearSampler);
+					equirectSpecularMaterial->SetPropertyValue("_InputTexture", specularConvolutionMipMaps[mip]);
+					equirectSpecularMaterial->FlushProperties();
+
+					equirectToSpecularConvolutionMaterials[face].Add(equirectSpecularMaterial);
+				}
+			}
+		}
 
 		/////////////////////////////////////////////
 		// - Command List Submission -
@@ -597,7 +730,7 @@ namespace CE::RPI
 		RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
 		RHI::CommandList* cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
 		RHI::Fence* fence = RHI::gDynamicRHI->CreateFence(false);
-		
+
 		cmdList->Begin();
 		{
 			// - Load Input HDRI Image as a Flat 2D HDR texture -
@@ -643,7 +776,7 @@ namespace CE::RPI
 			cmdList->ResourceBarrier(1, &barrier);
 
 			// Convert equirectangular HDR flat image to HDR CubeMap
-			for (int i = 0; i < 6; i++) 
+			for (int i = 0; i < 6; i++)
 			{
 				cmdList->BeginRenderTarget(hdrRenderTarget, cubeMapRTBs[i], &clearValue);
 
@@ -660,7 +793,7 @@ namespace CE::RPI
 				scissorState.width = viewportState.width;
 				scissorState.height = viewportState.height;
 				cmdList->SetScissors(1, &scissorState);
-				
+
 				RHI::PipelineState* pipeline = equirectMaterials[i]->GetCurrentShader()->GetPipeline();
 				cmdList->BindPipelineState(pipeline);
 
@@ -1127,9 +1260,9 @@ namespace CE::RPI
 					cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
 
 					cmdList->SetShaderResourceGroup(equirectDiffuseIrradianceMaterials[i]->GetShaderResourceGroup());
-					
+
 					cmdList->CommitShaderResources();
-					
+
 					cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
 
 					cmdList->EndRenderTarget();
@@ -1149,16 +1282,15 @@ namespace CE::RPI
 					copyRegion.baseArrayLayer = i;
 					copyRegion.layerCount = 1;
 					copyRegion.dstBuffer = diffuseIrradianceOutputBuffer;
-					copyRegion.bufferOffset = i * diffuseIrradianceCubeMap->GetWidth() * diffuseIrradianceCubeMap->GetHeight() * 
+					copyRegion.bufferOffset = i * diffuseIrradianceCubeMap->GetWidth() * diffuseIrradianceCubeMap->GetHeight() *
 						GetBitsPerPixelForFormat(cubeMapDesc.format) / 8;
-					
+
 					cmdList->CopyTextureRegion(copyRegion);
 				}
 			}
 
 			/////////////////////////////////////////////////////////////////////////////
-			
-			// Generate MipMaps
+			// - Generate MipMaps -
 
 			barrier.resource = hdriMap;
 			barrier.fromState = ResourceState::FragmentShaderResource;
@@ -1211,8 +1343,105 @@ namespace CE::RPI
 			}
 
 			/////////////////////////////////////////////////////////////////////////////
+			// - Specular Convolution -
 
-			// Copy CubeMap to buffer
+			if (computeSpecularConvolution)
+			{
+				barrier.resource = specularConvolution;
+				barrier.fromState = ResourceState::Undefined;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				for (int mip = 1; mip < specularConvolution->GetMipLevelCount(); mip++)
+				{
+					cmdList->BeginRenderTarget(hdrRenderTarget, specularConvolutionRTBs[mip], &clearValue);
+
+					RHI::ViewportState viewportState{};
+					viewportState.x = viewportState.y = 0;
+					viewportState.width = specularConvolution->GetWidth(mip);
+					viewportState.height = specularConvolution->GetHeight(mip);
+					viewportState.minDepth = 0;
+					viewportState.maxDepth = 1;
+					cmdList->SetViewports(1, &viewportState);
+
+					RHI::ScissorState scissorState{};
+					scissorState.x = scissorState.y = 0;
+					scissorState.width = viewportState.width;
+					scissorState.height = viewportState.height;
+					cmdList->SetScissors(1, &scissorState);
+
+					RHI::PipelineState* pipeline = specularConvolutionMaterials[mip]->GetCurrentShader()->GetPipeline();
+					cmdList->BindPipelineState(pipeline);
+
+					cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+					cmdList->SetShaderResourceGroup(specularConvolutionMaterials[mip]->GetShaderResourceGroup());
+
+					cmdList->CommitShaderResources();
+
+					cmdList->DrawLinear(fullscreenQuadArgs);
+
+					cmdList->EndRenderTarget();
+				}
+
+				barrier.resource = specularConvolution;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				barrier.resource = cubeMap;
+				barrier.fromState = ResourceState::FragmentShaderResource;
+				barrier.toState = ResourceState::ColorOutput;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+
+				for (int mip = 1; mip < cubeMap->GetMipLevelCount(); mip++)
+				{
+					for (int face = 0; face < 6; face++)
+					{
+						cmdList->BeginRenderTarget(hdrRenderTarget, cubeMapRTBMips[face][mip], &clearValue);
+						
+						RHI::ViewportState viewportState{};
+						viewportState.x = viewportState.y = 0;
+						viewportState.width = cubeMap->GetWidth(mip);
+						viewportState.height = cubeMap->GetHeight(mip);
+						viewportState.minDepth = 0;
+						viewportState.maxDepth = 1;
+						cmdList->SetViewports(1, &viewportState);
+
+						RHI::ScissorState scissorState{};
+						scissorState.x = scissorState.y = 0;
+						scissorState.width = viewportState.width;
+						scissorState.height = viewportState.height;
+						cmdList->SetScissors(1, &scissorState);
+
+						RHI::PipelineState* pipeline = equirectToSpecularConvolutionMaterials[face][mip]->GetCurrentShader()->GetPipeline();
+						cmdList->BindPipelineState(pipeline);
+
+						cmdList->BindVertexBuffers(0, 1, &cubeVertexBufferView);
+						cmdList->BindIndexBuffer(cubeMesh->indexBufferView);
+
+						cmdList->SetShaderResourceGroup(equirectToSpecularConvolutionMaterials[face][mip]->GetShaderResourceGroup());
+
+						cmdList->CommitShaderResources();
+
+						cmdList->DrawIndexed(cubeMesh->drawArguments.indexedArgs);
+
+						cmdList->EndRenderTarget();
+					}
+				}
+
+				barrier.resource = cubeMap;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange = RHI::SubresourceRange::All();
+				cmdList->ResourceBarrier(1, &barrier);
+			}
+
+			/////////////////////////////////////////////////////////////////////////////
+			// - Copy CubeMap to buffer -
 
 			barrier.resource = cubeMap;
 			barrier.fromState = ResourceState::FragmentShaderResource;
@@ -1220,17 +1449,25 @@ namespace CE::RPI
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
-			for (int i = 0; i < 6; i++)
-			{
-				RHI::TextureToBufferCopy copyRegion{};
-				copyRegion.srcTexture = cubeMap;
-				copyRegion.mipSlice = 0;
-				copyRegion.baseArrayLayer = i;
-				copyRegion.layerCount = 1;
-				copyRegion.dstBuffer = outputBuffer;
-				copyRegion.bufferOffset = i * cubeMap->GetWidth() * cubeMap->GetHeight() * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8;
+			u64 copyBufferOffset = 0;
 
-				cmdList->CopyTextureRegion(copyRegion);
+			for (int mip = 0; mip < cubeMap->GetMipLevelCount(); mip++)
+			{
+				//for (int face = 0; face < 6; face++)
+				{
+					RHI::TextureToBufferCopy copyRegion{};
+					copyRegion.srcTexture = cubeMap;
+					copyRegion.mipSlice = mip;
+					copyRegion.baseArrayLayer = 0;
+					copyRegion.layerCount = 6;
+					copyRegion.dstBuffer = outputBuffer;
+					copyRegion.bufferOffset = copyBufferOffset;
+
+					copyBufferOffset += cubeMap->GetWidth() / (u32)pow(2, mip) * cubeMap->GetHeight() / (u32)pow(2, mip) * 
+						GetBitsPerPixelForFormat(cubeMapDesc.format) / 8 * 6;
+
+					cmdList->CopyTextureRegion(copyRegion);
+				}
 			}
 
 			barrier.resource = cubeMap;
@@ -1257,35 +1494,53 @@ namespace CE::RPI
 			else // BC6H compression
 			{
 				int numPixelsPerFace = cubeMapRes * cubeMapRes;
-				u64 compressedByteSizePerFace = numPixelsPerFace; // BC6H uses 1 byte per pixel
-				output.Reserve(compressedByteSizePerFace * 6);
+				//u64 compressedByteSizePerFace = numPixelsPerFace; // BC6H uses 1 byte per pixel
+				//output.Reserve(compressedByteSizePerFace * 6);
+
+				// BC6H uses 1 byte (8 bits) per pixel
+				u64 totalCompressedSize = CalculateTotalTextureSize(numPixelsPerFace, numPixelsPerFace, 8, 6, cubeMap->GetMipLevelCount());
+				output.Reserve(totalCompressedSize);
 				void* outputDataPtr = output.GetDataPtr();
 
 				Array<Thread> threads{};
 
-				for (int face = 0; face < 6; face++)
+				for (int mip = 0; mip < cubeMap->GetMipLevelCount(); mip++)
 				{
-					threads.EmplaceBack([dataPtr, face, outputDataPtr, compressedByteSizePerFace, numPixelsPerFace, cubeMapRes, &cubeMapDesc]
-						{
-							CMImage image =
-								CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
-									cubeMapRes, cubeMapRes,
-									CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
-
-							CMImageEncoder encoder{};
-
-							bool result = encoder.EncodeToBCn(image, (u8*)outputDataPtr + compressedByteSizePerFace * face, CMImageSourceFormat::BC6H);
-							if (!result)
+					for (int face = 0; face < 6; face++)
+					{
+						threads.EmplaceBack([dataPtr, mip, face, outputDataPtr, cubeMapRes, &cubeMapDesc]
 							{
-								CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
-							}
-						});
+								u64 totalSizeTillCurrentMipLevel = 
+									CalculateTotalTextureSize(cubeMapRes, cubeMapRes, GetBitsPerPixelForFormat(cubeMapDesc.format), 6, mip);
+								u32 currentResolution = cubeMapRes / (u32)pow(2, mip);
+
+								u32 compressedByteSizePerFace = currentResolution * currentResolution * 8 / 8; // BC6H uses 8 bits per pixel
+								u64 totalCompressedSizeTillCurrentMipLevel =
+									CalculateTotalTextureSize(cubeMapRes, cubeMapRes, 8, 6, mip); // BC6H uses 8 bits per pixel
+
+								CMImage image =
+									CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + totalSizeTillCurrentMipLevel +
+											face * currentResolution * currentResolution * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
+										cubeMapRes, cubeMapRes,
+										CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
+
+								CMImageEncoder encoder{};
+
+								bool result = encoder.EncodeToBCn(image, (u8*)outputDataPtr + totalCompressedSizeTillCurrentMipLevel +
+									compressedByteSizePerFace * face,
+									CMImageSourceFormat::BC6H);
+								if (!result)
+								{
+									CE_LOG(Error, All, "BC6H encoding failed: {}", encoder.GetErrorMessage());
+								}
+							});
+					}
 				}
 
-				for (int face = 0; face < 6; face++)
+				for (int i = 0; i < threads.GetSize(); i++)
 				{
-					if (threads[face].IsJoinable())
-						threads[face].Join();
+					if (threads[i].IsJoinable())
+						threads[i].Join();
 				}
 			}
 		}
@@ -1311,7 +1566,7 @@ namespace CE::RPI
 
 					for (int face = 0; face < 6; face++)
 					{
-						threads.EmplaceBack([outputDataPtr, dataPtr, compressedByteSizePerFace, face, numPixelsPerFace, diffuseIrradianceCubeMap , &cubeMapDesc]
+						threads.EmplaceBack([outputDataPtr, dataPtr, compressedByteSizePerFace, face, numPixelsPerFace, diffuseIrradianceCubeMap, &cubeMapDesc]
 							{
 								CMImage image =
 									CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
@@ -1354,10 +1609,38 @@ namespace CE::RPI
 			equirectDiffuseIrradianceMaterials[i] = nullptr;
 		}
 
+		for (int i = 0; i < mipMapMaterials.GetSize(); i++)
+		{
+			delete mipMapMaterials[i];
+		}
+		for (int i = 0; i < specularConvolutionMaterials.GetSize(); i++)
+		{
+			delete specularConvolutionMaterials[i];
+		}
+		for (int face = 0; face < 6; face++)
+		{
+			for (int mip = 0; mip < equirectToSpecularConvolutionMaterials[face].GetSize(); mip++)
+			{
+				delete equirectToSpecularConvolutionMaterials[face][mip];
+			}
+			equirectToSpecularConvolutionMaterials[face].Clear();
+		}
+
+		delete grayscaleMaterial;
+		delete rowAverageMaterial;
+		delete columnAverageMaterial;
+		delete pdfConditionalMaterial;
+		delete pdfMarginalMaterial;
+		delete cdfConditionalInverseMaterial;
+		delete pdfJointMaterial;
+		delete cdfMarginalInverseMaterial;
+		delete diffuseConvolutionMaterial;
+
 		delete cubeMapRpi;
 		delete hdriMapRpi;
 		delete diffuseIrradianceRpi;
 		delete diffuseIrradianceCubeMap;
+		delete specularConvolutionRpi;
 		delete outputBuffer; delete diffuseIrradianceOutputBuffer;
 		delete cubeModel;
 		delete stagingBuffer;
@@ -1373,4 +1656,5 @@ namespace CE::RPI
 		return true;
 	}
 
+    
 } // namespace CE::RPI

@@ -42,8 +42,9 @@ SamplerState _ShadowMapSampler : SRG_PerScene(s3);
 Texture2D<float> DirectionalShadowMap : SRG_PerPass(t0);
 
 TextureCube<float4> _Skybox : SRG_PerScene(t5);
-SamplerState _DefaultSampler : SRG_PerScene(t6);
+SamplerState _DefaultSampler : SRG_PerScene(s6);
 TextureCube<float4> _SkyboxIrradiance : SRG_PerScene(t7);
+SamplerState _SkyboxSampler : SRG_PerScene(s8);
 
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {
@@ -80,7 +81,7 @@ float3 CalculateDiffuseIrradiance(MaterialInput material, float3 N, float3 V)
     float3 kS = FresnelSchlickRoughness(NdotV, F0, material.roughness);
     float3 kD = float3(1, 1, 1) - kS;
     kD *= (1.0 - material.metallic);
-    float3 irradiance = _SkyboxIrradiance.Sample(_DefaultSampler, N).rgb;
+    float3 irradiance = _SkyboxIrradiance.Sample(_SkyboxSampler, N).rgb;
     float3 diffuse = irradiance * material.albedo;
     float3 ambient = (kD * diffuse) * material.ambient;
     //ambient = clamp(ambient, float3(0, 0, 0), float3(1, 1, 1));

@@ -32,6 +32,9 @@ namespace CE::Editor
 		
 		FIELD(Config)
 		bool compressConvolution = false;
+
+		FIELD(Config)
+		bool specularConvolution = false;
 	};
 
 	class EDITORCORE_API TextureAssetImportJob : public AssetImportJob
@@ -65,6 +68,7 @@ namespace CE::Editor
 		bool convoluteCubemap = false;
 		u32 diffuseConvolutionResolution = 32;
 		bool compressConvolution = false;
+		bool specularConvolution = false;
 
 		friend class TextureAssetImporter;
 	};

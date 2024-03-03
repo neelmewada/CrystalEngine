@@ -165,6 +165,7 @@ namespace CE
 		RHI::ShaderModule* depthShaderVert = nullptr;
 		
 		CE::Shader* equirectShader = nullptr;
+		CE::Shader* equirectDebugShader = nullptr;
 		CE::Shader* iblShader = nullptr;
 		CE::Shader* iblConvolutionShader = nullptr;
 		CE::Shader* mipMapShader = nullptr;

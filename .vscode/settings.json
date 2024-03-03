@@ -14,5 +14,8 @@
         "CORERPI_API=",
         "CORERHI_API=",
     ],
-    "esbonio.sphinx.confDir": ""
+    "esbonio.sphinx.confDir": "",
+    "binary-file-viewer.parserFolders": [
+        "${workspaceFolder}/Tools/VSTools/BinaryParsers"
+    ]
 }

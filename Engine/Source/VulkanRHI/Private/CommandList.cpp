@@ -564,9 +564,9 @@ namespace CE::Vulkan
 
 		VkBufferImageCopy copy{};
 		copy.imageOffset = { 0, 0, 0 };
-		copy.imageExtent.width = dstTexture->GetWidth();
-		copy.imageExtent.height = dstTexture->GetHeight();
-		copy.imageExtent.depth = dstTexture->GetDepth();
+		copy.imageExtent.width = dstTexture->GetWidth(region.mipSlice);
+		copy.imageExtent.height = dstTexture->GetHeight(region.mipSlice);
+		copy.imageExtent.depth = dstTexture->GetDepth(region.mipSlice);
 
 		copy.bufferOffset = region.bufferOffset;
 		copy.bufferImageHeight = 0; // 0 means data is tightly packed
@@ -594,9 +594,9 @@ namespace CE::Vulkan
 
 		VkBufferImageCopy copy{};
 		copy.imageOffset = { 0, 0, 0 };
-		copy.imageExtent.width = srcTexture->GetWidth();
-		copy.imageExtent.height = srcTexture->GetHeight();
-		copy.imageExtent.depth = srcTexture->GetDepth();
+		copy.imageExtent.width = srcTexture->GetWidth(region.mipSlice);
+		copy.imageExtent.height = srcTexture->GetHeight(region.mipSlice);
+		copy.imageExtent.depth = srcTexture->GetDepth(region.mipSlice);
 		
 		copy.bufferOffset = region.bufferOffset;
 		copy.bufferImageHeight = 0; // 0 means data is tightly packed

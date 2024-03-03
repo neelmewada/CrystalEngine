@@ -116,7 +116,7 @@ namespace CE
 		quadVertexBuffer->UploadData(quadVertices, quadVertexBuffer->GetBufferSize(), 0);
 		RHI::VertexBufferView quadVertBufferView = RHI::VertexBufferView(quadVertexBuffer, 0, quadVertexBuffer->GetBufferSize(), sizeof(QuadVertex));
 
-		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night2.hdr";
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night.hdr";
 
 		Resource* equirectVertSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.vert.spv", nullptr);
 		Resource* equirectFragSpv = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Equirectangular.frag.spv", nullptr);
@@ -179,7 +179,7 @@ namespace CE
 
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 
-		//if (false) // Skip the block
+		if (false) // Skip the block
 		{
 			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 			iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
@@ -189,7 +189,7 @@ namespace CE
 			BinaryBlob irradianceBlob{};
 
 			CubeMapProcessor cubeMapProcessor{};
-			CubeMapProcessInfo info{};
+			CubeMapOfflineProcessInfo info{};
 			info.name = "Test HDR";
 			info.sourceImage = hdrImage;
 			info.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
@@ -205,9 +205,13 @@ namespace CE
 			info.diffuseIrradianceResolution = 32;
 			info.diffuseIrradianceOutput = &irradianceBlob;
 			info.compressDiffuseIrradiance = false;
+			info.specularConvolution = true;
+			info.specularConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(1);
 
 			BinaryBlob testBlob{};
-			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob);
+			u32 outMipLevels = 0;
+
+			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob, outMipLevels);
 		}
 
 		if (false)
@@ -1609,7 +1613,7 @@ namespace CE
             pipelineDesc.shaderStages.Add({});
             pipelineDesc.shaderStages.Top().entryPoint = "FragMain";
             pipelineDesc.shaderStages.Top().shaderModule = convolutionFragShader;
-            
+			
             irradiancePipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
         }
         

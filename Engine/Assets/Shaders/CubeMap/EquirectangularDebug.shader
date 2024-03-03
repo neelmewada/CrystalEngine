@@ -1,4 +1,4 @@
-Shader "CubeMap/Equirectangular Projection"
+Shader "CubeMap/Equirectangular Projection Debug"
 {
     Properties
     {
@@ -74,8 +74,9 @@ Shader "CubeMap/Equirectangular Projection"
 
             float4 FragMain(PSInput input) : SV_TARGET
             {
+                return float4(1, 0, 0, 1);
                 float2 uv = SampleSphericalMap(normalize(input.localPosition));
-                float3 color = _InputTexture.SampleLevel(_InputSampler, uv, 0.0).rgb;
+                float3 color = _InputTexture.Sample(_InputSampler, uv).rgb;
                 return float4(color, 1);
             }
 

@@ -100,7 +100,7 @@ float3 CalculateBRDF(LightInput light, MaterialInput material)
     kD *= (1 - material.metallic);
 
     // Remove below line for better performance
-    kD *= DisneyDiffuseFactor(NdotV, NdotL, HdotV, material.roughness);
+    //kD *= DisneyDiffuseFactor(NdotV, NdotL, HdotV, material.roughness);
 
     float3 diffuse = kD * material.albedo.rgb / PI;
 

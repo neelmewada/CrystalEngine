@@ -112,6 +112,7 @@ Shader "PBR/Standard"
                 material.ambient = _AmbientOcclusion;
 
                 float3 Lo = float3(0, 0, 0);
+                
 
                 uint i = 0;
                 for (i = 0; i < totalDirectionalLights; i++)

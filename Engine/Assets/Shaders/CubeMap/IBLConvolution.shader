@@ -225,7 +225,7 @@ Shader "CubeMap/IBL Convolution"
 
             cbuffer _Constants : SRG_PerMaterial(b2)
             {
-                float roughness;
+                float _Roughness;
             };
 
             // convert texture coordinates to pixels
@@ -312,7 +312,7 @@ Shader "CubeMap/IBL Convolution"
                 uint width;
                 uint height;
                 _InputTexture.GetDimensions(width, height);
-                float roughness = clamp(roughness, 0.0, 1.0);
+                float roughness = clamp(_Roughness, 0.0, 1.0);
                 float alpha = roughness * roughness;
                 float alpha2 = alpha * alpha;
 
@@ -321,8 +321,8 @@ Shader "CubeMap/IBL Convolution"
                 float3 normal = SphericalEnvmapToDirection(tex);
                 float3 result = float3(0, 0, 0);
                 float weight = 0.0;
-                float N = normal;
-                float V = N;
+                float3 N = normal;
+                float3 V = N;
 
                 const uint SampleCount = 3096;
 
@@ -359,8 +359,9 @@ Shader "CubeMap/IBL Convolution"
                         {
                             lod = 0.0;
                         }
+                        //lod = clamp(lod, 0, 7);
 
-                        result += _InputTexture.Sample(_InputSampler, uv).rgb * NoL;
+                        result += _InputTexture.SampleLevel(_InputSampler, uv, lod).rgb * NoL;
                         weight += NoL;
                     }
                 }

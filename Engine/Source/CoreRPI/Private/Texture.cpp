@@ -95,8 +95,9 @@ namespace CE::RPI
                 copyRegion.mipSlice = mip;
 
                 commandList->CopyTextureRegion(copyRegion);
+                u32 power = (u32)pow(2, mip);
                 
-                bufferOffset += texture->GetWidth() / (mip + 1) * texture->GetHeight() / (mip + 1) * texture->GetBitsPerPixel() / 8 * copyRegion.layerCount;
+                bufferOffset += texture->GetWidth() / power * texture->GetHeight() / power * texture->GetBitsPerPixel() / 8 * copyRegion.layerCount;
             }
 
             barrier.resource = texture;

@@ -16,7 +16,8 @@ namespace CE::Editor
 			job->convoluteCubemap = convoluteCubemap;
 			job->diffuseConvolutionResolution = diffuseConvolutionResolution;
 			job->compressConvolution = compressConvolution;
-
+			job->specularConvolution = specularConvolution;
+			
 			jobs.Add(job);
 		}
 
@@ -28,7 +29,8 @@ namespace CE::Editor
 		static Array<Name> dependencies{
 			"/Engine/Assets/Shaders/CubeMap/Equirectangular",
 			"/Engine/Assets/Shaders/CubeMap/IBL",
-			"/Engine/Assets/Shaders/CubeMap/IBLConvolution"
+			"/Engine/Assets/Shaders/CubeMap/IBLConvolution",
+			"/Engine/Assets/Shaders/Utils/MipMapGen"
 		};
 
 		return dependencies;
@@ -172,8 +174,12 @@ namespace CE::Editor
 		// Temporary code
 		//pixelFormat = TextureFormat::RGBAHalf;
 		//compressionFormat = TextureSourceCompressionFormat::None;
+		if (compressionFormat == TextureSourceCompressionFormat::None)
+		{
+			pixelFormat = TextureFormat::RGBAHalf;
+		}
 
-		texture->anisoLevel = anisotropy;
+		texture->anisoLevel = 0;
 		texture->width = texture->height = sourceImage.GetHeight();
 		texture->mipLevels = 1;
 		texture->addressModeU = texture->addressModeV = TextureAddressMode::Repeat;
@@ -185,8 +191,9 @@ namespace CE::Editor
 		CE::Shader* equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 		CE::Shader* iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
 		CE::Shader* iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+		CE::Shader* mipmapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/MipMapGen");
 
-		RPI::CubeMapProcessInfo processInfo{};
+		RPI::CubeMapOfflineProcessInfo processInfo{};
 		processInfo.name = name;
 		processInfo.sourceImage = sourceImage;
 		processInfo.equirectangularShader = equirectShader->GetOrCreateRPIShader(0);
@@ -197,10 +204,13 @@ namespace CE::Editor
 		processInfo.cdfMarginalInverseShader = iblShader->GetOrCreateRPIShader(4);
 		processInfo.cdfConditionalInverseShader = iblShader->GetOrCreateRPIShader(5);
 		processInfo.diffuseConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(0);
-		processInfo.useCompression = true;
+		processInfo.useCompression = (compressionFormat == TextureSourceCompressionFormat::BC6H);
 		processInfo.diffuseIrradianceResolution = convoluteCubemap ? diffuseConvolutionResolution : 0;
 		processInfo.diffuseIrradianceOutput = nullptr;
 		processInfo.compressDiffuseIrradiance = compressConvolution;
+		processInfo.specularConvolution = specularConvolution;
+		processInfo.specularConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(1);
+		processInfo.mipMapShader = mipmapShader->GetOrCreateRPIShader(0);
 
 		if (convoluteCubemap && diffuseConvolutionResolution > 0)
 		{
@@ -220,6 +230,11 @@ namespace CE::Editor
 				diffuseConvolution->pixelFormat = TextureFormat::RGBAHalf;
 				diffuseConvolution->sourceCompressionFormat = TextureSourceCompressionFormat::None;
 			}
+			else
+			{
+				diffuseConvolution->pixelFormat = TextureFormat::BC6H;
+				diffuseConvolution->sourceCompressionFormat = TextureSourceCompressionFormat::BC6H;
+			}
 
 			processInfo.diffuseIrradianceOutput = &diffuseConvolution->source;
 			texture->diffuseConvolution = diffuseConvolution;
@@ -227,7 +242,7 @@ namespace CE::Editor
 
 		RPI::CubeMapProcessor processor{};
 		
-		bool result = processor.ProcessCubeMapOffline(processInfo, texture->source);
+		bool result = processor.ProcessCubeMapOffline(processInfo, texture->source, texture->mipLevels);
 		return result;
 	}
 

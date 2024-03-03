@@ -12,6 +12,7 @@ namespace CE
 	constexpr u32 skyboxBinding = 5;
 	constexpr u32 defaultSamplerBinding = 6;
 	constexpr u32 skyboxIrradianceBinding = 7;
+	constexpr u32 skyboxSamplerBinding = 8;
 
 	constexpr u32 perViewDataBinding = 0;
 	constexpr u32 perObjectDataBinding = 0;
@@ -613,6 +614,13 @@ namespace CE
 			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::ConstantBuffer;
 			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
 
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_SkyboxSampler";
+			perSceneSrgLayout.variables.Top().bindingSlot = skyboxSamplerBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
 			perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
 
 			RHI::BufferDescriptor sceneConstantBufferDesc{};
@@ -631,8 +639,15 @@ namespace CE
 			shadowSamplerDesc.enableAnisotropy = false;
 			shadowSamplerDesc.maxAnisotropy = 8;
 			shadowSamplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
-			
 			shadowMapSampler = RHI::gDynamicRHI->CreateSampler(shadowSamplerDesc);
+
+			RHI::SamplerDescriptor skyboxSamplerDesc{};
+			skyboxSamplerDesc.borderColor = RHI::SamplerBorderColor::FloatOpaqueWhite;
+			skyboxSamplerDesc.addressModeU = shadowSamplerDesc.addressModeV = shadowSamplerDesc.addressModeW = RHI::SamplerAddressMode::Repeat;
+			skyboxSamplerDesc.enableAnisotropy = false;
+			skyboxSamplerDesc.maxAnisotropy = 0;
+			skyboxSamplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+			skyboxSampler = RHI::gDynamicRHI->CreateSampler(skyboxSamplerDesc);
 
 			perSceneSrg->Bind("_SceneData", sceneConstantBuffer);
 			perSceneSrg->Bind("_ShadowMapSampler", shadowMapSampler);
@@ -844,7 +859,7 @@ namespace CE
 			vertexAttribs[0].inputSlot = 0;
 			vertexAttribs[0].location = 0;
 			vertexAttribs[0].offset = 0;
-
+			
 			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = skyboxPipelineDesc.srgLayouts;
 			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
 			perViewSRGLayout.srgType = RHI::SRGType::PerView;
@@ -877,26 +892,27 @@ namespace CE
 
 			skyboxMaterial = new RPI::Material(skyboxShader);
 
-			//CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
-			//if (cubeMapTex != nullptr)
-			//{
-			//	perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
-			//	if (cubeMapTex->GetDiffuseConvolution() != nullptr)
-			//	{
-			//		perSceneSrg->Bind("_SkyboxIrradiance", cubeMapTex->GetDiffuseConvolution()->GetRpiTexture()->GetRhiTexture());
-			//	}
-			//	else
-			//	{
-			//		perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
-			//	}
-			//}
-			//else
+			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+			if (cubeMapTex != nullptr)
+			{
+				perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
+				if (cubeMapTex->GetDiffuseConvolution() != nullptr)
+				{
+					perSceneSrg->Bind("_SkyboxIrradiance", cubeMapTex->GetDiffuseConvolution()->GetRpiTexture()->GetRhiTexture());
+				}
+				else
+				{
+					perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
+				}
+			}
+			else
 			{
 				perSceneSrg->Bind("_Skybox", hdriCubeMap);
 				perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
 			}
 
 			perSceneSrg->Bind("_DefaultSampler", defaultSampler);
+			perSceneSrg->Bind("_SkyboxSampler", skyboxSampler);
 
 			perSceneSrg->FlushBindings();
 
@@ -1348,6 +1364,7 @@ namespace CE
 	{
 		equirectShader->Destroy(); equirectShader = nullptr;
 		delete shadowMapSampler; shadowMapSampler = nullptr;
+		delete skyboxSampler; skyboxSampler = nullptr;
 		delete sceneConstantBuffer; sceneConstantBuffer = nullptr;
 		delete cubeModel; cubeModel = nullptr;
 		delete sphereModel; sphereModel = nullptr;
