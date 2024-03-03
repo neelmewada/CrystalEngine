@@ -23,6 +23,13 @@ namespace CE::RPI
         samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
     }
 
+    Texture::Texture(RHI::TextureView* textureView, const RHI::SamplerDescriptor& samplerDesc)
+        : texture(nullptr)
+        , textureView(textureView)
+    {
+        samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
+    }
+
     Texture::~Texture()
     {
         delete texture;

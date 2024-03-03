@@ -51,6 +51,8 @@ namespace CE::RPI
 		RPI::Shader* cdfMarginalInverseShader = nullptr;
 		RPI::Shader* diffuseConvolutionShader = nullptr;
 
+		RPI::Shader* mipMapShader = nullptr;
+
 		HdrEncoding hdrEncoding = HdrEncoding::None;
 		bool useCompression = false;
 		bool compressDiffuseIrradiance = false;

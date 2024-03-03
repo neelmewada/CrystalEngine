@@ -30,11 +30,23 @@ namespace CE::Vulkan
 		{
 			thread->sleepEvent.acquire();
 
+			if (thread->terminate)
+			{
+				submitEvent.release();
+				break;
+			}
+
 			submissionMutex.Lock();
 			Array<SubmitBatch> submissions = this->submissions;
 			this->submissions.Clear();
 
 			submissionMutex.Unlock();
+
+			if (thread->terminate)
+			{
+				submitEvent.release();
+				break;
+			}
 
 			for (int batchIdx = 0; batchIdx < submissions.GetSize(); batchIdx++)
 			{
@@ -67,9 +79,10 @@ namespace CE::Vulkan
 
 	CommandQueue::~CommandQueue()
 	{
-		thread->sleepEvent.release();
-
 		thread->terminate = true;
+
+		thread->sleepEvent.release();
+		
 		if (thread->thread.IsJoinable())
 			thread->thread.Join();
 		

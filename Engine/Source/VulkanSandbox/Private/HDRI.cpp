@@ -184,6 +184,7 @@ namespace CE
 			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 			iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
 			iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+			mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/MipMapGen");
 
 			BinaryBlob irradianceBlob{};
 
@@ -199,6 +200,7 @@ namespace CE
 			info.cdfMarginalInverseShader = iblShader->GetOrCreateRPIShader(4);
 			info.cdfConditionalInverseShader = iblShader->GetOrCreateRPIShader(5);
 			info.diffuseConvolutionShader = iblConvolutionShader->GetOrCreateRPIShader(0);
+			info.mipMapShader = mipMapShader->GetOrCreateRPIShader(0);
 			info.useCompression = false;
 			info.diffuseIrradianceResolution = 32;
 			info.diffuseIrradianceOutput = &irradianceBlob;
@@ -206,10 +208,6 @@ namespace CE
 
 			BinaryBlob testBlob{};
 			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob);
-
-			equirectShader->Destroy(); equirectShader = nullptr;
-			iblShader->Destroy(); iblShader = nullptr;
-			iblConvolutionShader->Destroy(); iblConvolutionShader = nullptr;
 		}
 
 		if (false)

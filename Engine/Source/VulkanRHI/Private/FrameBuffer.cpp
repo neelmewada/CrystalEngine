@@ -157,15 +157,20 @@ namespace CE::Vulkan
 			{
 				RHI::Texture* image = imageView->GetTexture();
 
+				u32 imageWidth = image->GetWidth() / Math::Pow(2, imageView->GetBaseMipLevel());
+				u32 imageHeight = image->GetHeight() / Math::Pow(2, imageView->GetBaseMipLevel());
+				imageWidth = Math::Max<u32>(imageWidth, 1);
+				imageHeight = Math::Max<u32>(imageHeight, 1);
+
 				if (width == 0 || height == 0)
 				{
-					width = image->GetWidth();
-					height = image->GetHeight();
+					width = imageWidth;
+					height = imageHeight;
 				}
-				else if (width != image->GetWidth() || height != image->GetHeight())
+				else if (width != imageWidth || height != imageHeight)
 				{
-					width = height = 0;
 					CE_LOG(Error, All, "Failed to create vulkan framebuffer: Width and/or height mismatch!");
+					width = height = 0;
 					return;
 				}
 

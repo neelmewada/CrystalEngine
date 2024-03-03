@@ -53,10 +53,15 @@ namespace CE::RPI
 
 		RHI::SamplerDescriptor linearSamplerDesc{};
 		linearSamplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
+		linearSamplerDesc.enableAnisotropy = false;
 		RHI::Sampler* linearSampler = RPISystem::Get().FindOrCreateSampler(linearSamplerDesc);
+
+		linearSamplerDesc.addressModeU = linearSamplerDesc.addressModeV = linearSamplerDesc.addressModeW = SamplerAddressMode::ClampToEdge;
+		RHI::Sampler* linearClampedSampler = RPISystem::Get().FindOrCreateSampler(linearSamplerDesc);
 
 		RHI::SamplerDescriptor nearestSamplerDesc{};
 		nearestSamplerDesc.samplerFilterMode = RHI::FilterMode::Nearest;
+		nearestSamplerDesc.enableAnisotropy = false;
 		RHI::Sampler* nearest = RPISystem::Get().FindOrCreateSampler(nearestSamplerDesc);
 
 		nearestSamplerDesc.addressModeU = nearestSamplerDesc.addressModeV = nearestSamplerDesc.addressModeW = SamplerAddressMode::ClampToBorder;
@@ -66,15 +71,17 @@ namespace CE::RPI
 
 		/////////////////////////////////////////////
 		// - Input Resources -
+
+		int totalMipLevels = ceil(log2(Math::Max(desc.sourceImage.GetWidth(), desc.sourceImage.GetHeight()))) + 1;
 		
 		RHI::TextureDescriptor hdriMapDesc{};
 		hdriMapDesc.name = "HDRI FlatMap";
-		hdriMapDesc.bindFlags = RHI::TextureBindFlags::ShaderRead;
+		hdriMapDesc.bindFlags = RHI::TextureBindFlags::Color | RHI::TextureBindFlags::ShaderRead;
 		hdriMapDesc.width = desc.sourceImage.GetWidth();
 		hdriMapDesc.height = desc.sourceImage.GetHeight();
 		hdriMapDesc.depth = 1;
 		hdriMapDesc.dimension = RHI::Dimension::Dim2D;
-		hdriMapDesc.mipLevels = 1;
+		hdriMapDesc.mipLevels = totalMipLevels;
 		hdriMapDesc.sampleCount = 1;
 		hdriMapDesc.arrayLayers = 1;
 		hdriMapDesc.format = hdriFormat;
@@ -328,6 +335,9 @@ namespace CE::RPI
 		RHI::TextureView* irradianceCubeMapRTVs[6] = {};
 		RHI::RenderTargetBuffer* irradianceCubeMapRTBs[6] = {};
 
+		Array<RPI::Texture*> hdriMapRTVs{};
+		Array<RHI::RenderTargetBuffer*> hdriMapRTBs{};
+
 		{
 			RHI::RenderTargetLayout rtLayout{};
 			RHI::RenderAttachmentLayout colorAttachment{};
@@ -361,6 +371,22 @@ namespace CE::RPI
 				viewDesc.texture = diffuseIrradianceCubeMap;
 				irradianceCubeMapRTVs[i] = RHI::gDynamicRHI->CreateTextureView(viewDesc);
 				irradianceCubeMapRTBs[i] = RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { irradianceCubeMapRTVs[i] });
+			}
+
+			for (int mip = 0; mip < hdriMap->GetMipLevelCount(); mip++)
+			{
+				RHI::TextureViewDescriptor viewDesc{};
+				viewDesc.texture = hdriMap;
+				viewDesc.baseMipLevel = mip;
+				viewDesc.mipLevelCount = 1;
+				viewDesc.baseArrayLayer = 0;
+				viewDesc.arrayLayerCount = 1;
+				viewDesc.dimension = RHI::Dimension::Dim2D;
+				viewDesc.format = cubeMap->GetFormat();
+
+				RHI::TextureView* textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+				hdriMapRTVs.Add(new RPI::Texture(textureView));
+				hdriMapRTBs.Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(hdrRenderTarget, { textureView }));
 			}
 		}
 
@@ -412,6 +438,12 @@ namespace CE::RPI
 				delete irradianceCubeMapRTBs[i];
 				delete cubeMapRTVs[i];
 				delete cubeMapRTBs[i];
+			}
+
+			for (int i = 0; i < hdriMapRTVs.GetSize(); i++)
+			{
+				delete hdriMapRTVs[i];
+				delete hdriMapRTBs[i];
 			}
 
 			delete grayscaleRenderTarget;
@@ -525,7 +557,29 @@ namespace CE::RPI
 		diffuseConvolutionMaterial->SetPropertyValue("_InputSampler", nearest);
 		diffuseConvolutionMaterial->FlushProperties();
 
+		Array<RPI::Material*> mipMapMaterials{};
+		for (int i = 0; i < hdriMap->GetMipLevelCount(); i++)
+		{
+			if (i == 0)
+			{
+				mipMapMaterials.Add(nullptr);
+				continue;
+			}
+
+			RPI::Material* mipMapMaterial = new RPI::Material(desc.mipMapShader);
+			mipMapMaterial->SetPropertyValue("_InputTexture", hdriMapRTVs[i - 1]);
+			mipMapMaterial->SetPropertyValue("_InputSampler", linearClampedSampler);
+			mipMapMaterial->FlushProperties();
+
+			mipMapMaterials.Add(mipMapMaterial);
+		}
+
 		defer(
+			for (int i = 0; i < mipMapMaterials.GetSize(); i++)
+			{
+				delete mipMapMaterials[i];
+			}
+
 			delete grayscaleMaterial;
 			delete rowAverageMaterial;
 			delete columnAverageMaterial;
@@ -1101,6 +1155,62 @@ namespace CE::RPI
 					cmdList->CopyTextureRegion(copyRegion);
 				}
 			}
+
+			/////////////////////////////////////////////////////////////////////////////
+			
+			// Generate MipMaps
+
+			barrier.resource = hdriMap;
+			barrier.fromState = ResourceState::FragmentShaderResource;
+			barrier.toState = ResourceState::ColorOutput;
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount = 1;
+			barrier.subresourceRange.baseMipLevel = 1;
+			barrier.subresourceRange.levelCount = hdriMap->GetMipLevelCount() - 1;
+			cmdList->ResourceBarrier(1, &barrier);
+
+			for (int i = 1; i < hdriMap->GetMipLevelCount(); i++)
+			{
+				// Generate mip level 'i'
+				cmdList->BeginRenderTarget(hdrRenderTarget, hdriMapRTBs[i], &clearValue);
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = hdriMap->GetWidth(i);
+				viewportState.height = hdriMap->GetHeight(i);
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				RHI::PipelineState* pipeline = mipMapMaterials[i]->GetCurrentShader()->GetPipeline();
+				cmdList->BindPipelineState(pipeline);
+
+				cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+				cmdList->SetShaderResourceGroup(mipMapMaterials[i]->GetShaderResourceGroup());
+
+				cmdList->CommitShaderResources();
+
+				cmdList->DrawLinear(fullscreenQuadArgs);
+
+				cmdList->EndRenderTarget();
+
+				barrier.resource = hdriMap;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange.baseArrayLayer = 0;
+				barrier.subresourceRange.layerCount = 1;
+				barrier.subresourceRange.baseMipLevel = i;
+				barrier.subresourceRange.levelCount = 1;
+				cmdList->ResourceBarrier(1, &barrier);
+			}
+
+			/////////////////////////////////////////////////////////////////////////////
 
 			// Copy CubeMap to buffer
 

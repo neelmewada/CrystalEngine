@@ -14,6 +14,7 @@ namespace CE::RPI
     public:
         Texture(const TextureDescriptor& desc);
         Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc = {});
+        Texture(RHI::TextureView* textureView, const RHI::SamplerDescriptor& samplerDesc = {});
 
         virtual ~Texture();
 

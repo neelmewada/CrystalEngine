@@ -226,7 +226,7 @@ namespace CE::RPI
                             {
                                 shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTextureView());
                             }
-                            else
+                            else if (texture->GetRhiTexture() != nullptr)
                             {
                                 shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTexture());
                             }

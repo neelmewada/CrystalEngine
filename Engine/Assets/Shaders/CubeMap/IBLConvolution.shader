@@ -14,7 +14,7 @@ Shader "CubeMap/IBL Convolution"
 
         Pass
         {
-            Name "Main"
+            Name "Diffuse"
             Tags { 
                 "Vertex"="VertMain", "Fragment"="FragMain"
             }
@@ -173,6 +173,204 @@ Shader "CubeMap/IBL Convolution"
             float4 FragMain(PSInput input) : SV_Target
             {
                 float3 color = PreFilterEnvMapDiffuse(input.uv);
+                return float4(color, 1);
+            }
+
+            #endif
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "Specular"
+            Tags { 
+                "Vertex"="VertMain", "Fragment"="FragMain"
+            }
+            ZWrite Off
+            ZTest Off
+            Cull Off
+
+            HLSLPROGRAM
+
+            #include "Core/Macros.hlsli"
+            #include "Core/Gamma.hlsli"
+
+            struct VSInput
+            {
+                float3 position : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct PSInput
+            {
+                float4 position : SV_POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            #if VERTEX
+            PSInput VertMain(VSInput input)
+            {
+                PSInput o;
+                o.position = float4(input.position, 1.0);
+                o.uv = input.uv;
+                return o;
+            }
+            #endif
+
+            #if FRAGMENT
+
+            Texture2D<float4> _InputTexture : SRG_PerMaterial(t0);
+            SamplerState _InputSampler : SRG_PerMaterial(s1);
+
+            cbuffer _Constants : SRG_PerMaterial(b2)
+            {
+                float roughness;
+            };
+
+            // convert texture coordinates to pixels
+            inline float t2p(in float t, in int noOfPixels) {
+                return t * float(noOfPixels) - 0.5;
+            }
+
+            // from http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+            // Hacker's Delight, Henry S. Warren, 2001
+            float radicalInverse(uint bits) {
+                bits = (bits << 16u) | (bits >> 16u);
+                bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+                bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+                bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+                bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+                return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+            }
+
+            inline float2 hammersley(uint n, uint N) {
+                return float2(float(n) / float(N), radicalInverse(n));
+            }
+
+            float3 SphericalEnvmapToDirection(float2 tex) {
+                float theta = PI * (1.0 - tex.y);
+                float phi = 2.0 * PI * (0.5 - tex.x);
+                return float3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+            }
+
+            float2 DirectionToSphericalEnvmap(float3 dir) {
+                float phi = atan2(dir.y, dir.x);
+                float theta = acos(dir.z);
+                float s = 0.5 - phi / (2.0 * PI);
+                float t = 1.0 - theta / PI;
+                return float2(s, t);
+            }
+
+            float3x3 GetNormalFrame(in float3 normal) {
+                float3 someVec = float3(1.0, 0.0, 0.0);
+                float dd = dot(someVec, normal);
+                float3 tangent = float3(0.0, 1.0, 0.0);
+                if(1.0 - abs(dd) > 1e-6) {
+                    tangent = normalize(cross(someVec, normal));
+                }
+                float3 bitangent = cross(normal, tangent);
+                return float3x3(tangent, bitangent, normal);
+            }
+
+            float Fill(float sdf) {
+                return clamp(0.5 - sdf / fwidth(sdf), 0.0, 1.0);
+            }
+
+            float Circle(float2 pos, float2 center, float radius) {
+                return length(pos - center) - radius;
+            }
+
+            float3 ImportanceSampleGGX( float2 Xi, float Roughness, float3 N, out float CosTheta, out float SinTheta )
+            {
+                float a = Roughness * Roughness;
+                float Phi = 2.0 * PI * Xi.x;
+                CosTheta = sqrt( (1.0 - Xi.y) / ( 1.0 + (a*a - 1.0) * Xi.y ) );
+                SinTheta = sqrt( 1.0 - CosTheta * CosTheta );
+                float3 H;
+                H.x = SinTheta * cos( Phi );
+                H.y = SinTheta * sin( Phi );
+                H.z = CosTheta;
+                float3 UpVector = abs(N.z) < 0.999 ? float3(0,0,1) : float3(1,0,0);
+                float3 TangentX = normalize( cross( UpVector, N ) );
+                float3 TangentY = cross( N, TangentX );
+                // Tangent to world space
+                return TangentX * H.x + TangentY * H.y + N * H.z;
+            }
+
+            float specularD(float roughness, float NoH)
+            {
+                float r2 = roughness * roughness;
+                float NoH2 = NoH * NoH;
+                float a = 1.0/(3.14159*r2*pow(NoH, 4.0));
+                float b = exp((NoH2 - 1.0) / r2 * NoH2);
+                return  a * b;
+            }
+
+            float3 PreFilterEnvMapSpecular(in float2 tex)
+            {
+                uint width;
+                uint height;
+                _InputTexture.GetDimensions(width, height);
+                float roughness = clamp(roughness, 0.0, 1.0);
+                float alpha = roughness * roughness;
+                float alpha2 = alpha * alpha;
+
+                float px = t2p(tex.x, width);
+                float py = t2p(tex.y, height);
+                float3 normal = SphericalEnvmapToDirection(tex);
+                float3 result = float3(0, 0, 0);
+                float weight = 0.0;
+                float N = normal;
+                float V = N;
+
+                const uint SampleCount = 3096;
+
+                for(uint n = 0u; n < SampleCount; n++) 
+                {
+                    float2 Xi = hammersley(n, SampleCount);
+                    float cosTheta;
+                    float sinTheta;
+                    
+                    float3 H = ImportanceSampleGGX( Xi, roughness, N, cosTheta, sinTheta );
+                    float3 L = 2.0 * dot( V, H ) * H - V;
+                    float2 uv = DirectionToSphericalEnvmap(L);
+                    float NoL = clamp(dot( N, L ), 0.0, 1.0);
+                    float VoL = clamp(dot( V, L ), 0.0, 1.0);
+                    float NoH = clamp(dot( N, H ), 0.0, 1.0);
+                    float VoH = clamp(dot( V, H ), 0.0, 1.0);
+                    float NoV = clamp(dot( N, V ), 0.0, 1.0);
+
+                    if (NoL > 0.0)
+                    {
+                        float Dh = specularD(roughness, NoH);
+                        float num = cosTheta * cosTheta * (alpha2 - 1.0) + 1.0;
+                        float pdf = alpha2 * cosTheta * sinTheta / (PI * num * num);
+                        float pdf2 = Dh * NoH / (4.0 * VoH);
+                        float t = alpha + 0.0;
+                        // Lerp the PDFs for better results in low light high frequency scenes. Ex: A nigh cubemap with an extremely bright street lamp.
+                        // For daylight scenes, the results are almost same for both PDFs.
+                        pdf = lerp(pdf, pdf2, t);
+
+                        float solidAngleTexel = 4.0 * PI / (6.0 * float(height) * float(height));
+                        float solidAngleSample = 1.0 / (float(SampleCount) * pdf);
+                        float lod = 0.5 * log2(4.0 * solidAngleSample / solidAngleTexel);
+                        if (roughness <= 1e-8)
+                        {
+                            lod = 0.0;
+                        }
+
+                        result += _InputTexture.Sample(_InputSampler, uv).rgb * NoL;
+                        weight += NoL;
+                    }
+                }
+                result = result / weight;
+                return result;
+            }
+
+            float4 FragMain(PSInput input) : SV_Target
+            {
+                float3 color = PreFilterEnvMapSpecular(input.uv);
                 return float4(color, 1);
             }
 

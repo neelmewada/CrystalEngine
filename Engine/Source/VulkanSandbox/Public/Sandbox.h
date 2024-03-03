@@ -167,6 +167,7 @@ namespace CE
 		CE::Shader* equirectShader = nullptr;
 		CE::Shader* iblShader = nullptr;
 		CE::Shader* iblConvolutionShader = nullptr;
+		CE::Shader* mipMapShader = nullptr;
 
 		CE::Shader* opaqueShader = nullptr;
 		RPI::Shader* opaqueRpiShader = nullptr;

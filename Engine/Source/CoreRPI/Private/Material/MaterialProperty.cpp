@@ -32,6 +32,9 @@ namespace CE::RPI
         case MaterialPropertyDataType::Texture:
             copy.GetValue(u.textureValue);
             break;
+        case MaterialPropertyDataType::TextureView:
+            copy.GetValue(u.textureViewValue);
+            break;
         case MaterialPropertyDataType::Sampler:
             copy.GetValue(u.samplerValue);
             break;
@@ -75,6 +78,9 @@ namespace CE::RPI
             break;
         case MaterialPropertyDataType::Texture:
             copy.GetValue(u.textureValue);
+            break;
+        case MaterialPropertyDataType::TextureView:
+            copy.GetValue(u.textureViewValue);
             break;
         case MaterialPropertyDataType::Sampler:
             copy.GetValue(u.samplerValue);
@@ -121,6 +127,9 @@ namespace CE::RPI
             break;
         case MaterialPropertyDataType::Texture:
             move.GetValue(u.textureValue);
+            break;
+        case MaterialPropertyDataType::TextureView:
+            move.GetValue(u.textureViewValue);
             break;
         case MaterialPropertyDataType::Sampler:
             move.GetValue(u.samplerValue);
