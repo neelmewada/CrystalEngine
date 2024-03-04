@@ -142,7 +142,7 @@ namespace CE::Vulkan
 		VkPhysicalDeviceMemoryProperties memoryProperties{};
 		HashSet<int> ignoredHeapIndices{};
 
-		Array<String> supportedDeviceExtensions{};
+		Array<Name> supportedDeviceExtensions{};
 
         VkPhysicalDevice gpu = nullptr;
         VkPhysicalDeviceProperties gpuProperties{};

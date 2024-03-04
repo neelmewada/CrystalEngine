@@ -886,7 +886,8 @@ namespace CE::Vulkan
 		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        vkQueueSubmit(primaryGraphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
+        //vkQueueSubmit(primaryGraphicsQueue->GetHandle(), 1, &submitInfo, VK_NULL_HANDLE);
+		primaryGraphicsQueue->Submit(1, &submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(primaryGraphicsQueue->GetHandle());
 
         vkFreeCommandBuffers(device, gfxCommandPool, 1, &commandBuffer);
