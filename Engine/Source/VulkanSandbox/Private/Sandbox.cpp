@@ -59,7 +59,7 @@ namespace CE
 		
 		InitCubeMaps();
 		InitTextures();
-		InitHDRIs();
+		//InitHDRIs();
 		//InitCubeMapDemo();
 		InitPipelines();
 		InitLights();
@@ -124,6 +124,7 @@ namespace CE
 		sphereRoughness += deltaTime * 0.1f;
 		if (sphereRoughness >= 1)
 			sphereRoughness = 0.001f;
+		sphereRoughness = 1.0f;
 
 		sphereMaterial->SetPropertyValue("_Roughness", sphereRoughness);
 
@@ -201,7 +202,7 @@ namespace CE
 		DestroyDrawPackets();
 		DestroyTextures();
 		DestroyCubeMaps();
-		DestroyHDRIs();
+		//DestroyHDRIs();
 
 		if (mainWindow)
 		{
@@ -219,23 +220,104 @@ namespace CE
 
 	void VulkanSandbox::InitCubeMaps()
 	{
+		iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+
+		RPI::Shader* brdfGenShader = iblConvolutionShader->GetOrCreateRPIShader(2);
+		RPI::Material* brdfGenMaterial = new RPI::Material(brdfGenShader);
+		brdfGenMaterial->FlushProperties();
+		defer(
+			delete brdfGenMaterial;
+		);
+
+		RHI::TextureDescriptor brdfLutDesc{};
+		brdfLutDesc.name = "BRDF LUT";
+		brdfLutDesc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+		brdfLutDesc.width = 512;
+		brdfLutDesc.height = 512;
+		brdfLutDesc.depth = 1;
+		brdfLutDesc.format = RHI::Format::R8G8_UNORM;
+		brdfLutDesc.mipLevels = 1;
+		brdfLutDesc.sampleCount = 1;
+		brdfLutDesc.dimension = Dimension::Dim2D;
+		brdfLutDesc.defaultHeapType = MemoryHeapType::Default;
+
+		auto brdfLut = RHI::gDynamicRHI->CreateTexture(brdfLutDesc);
+		brdfLutRpi = new RPI::Texture(brdfLut);
+
+		RHI::RenderTarget* brdfLutRT = nullptr;
+		RHI::RenderTargetBuffer* brdfLutRTB = nullptr;
+		{
+			RHI::RenderTargetLayout rtLayout{};
+			RHI::RenderAttachmentLayout colorAttachment{};
+			colorAttachment.attachmentId = "BRDF LUT";
+			colorAttachment.format = RHI::Format::R8G8_UNORM;
+			colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+			colorAttachment.loadAction = AttachmentLoadAction::Clear;
+			colorAttachment.storeAction = AttachmentStoreAction::Store;
+			colorAttachment.multisampleState.sampleCount = 1;
+			rtLayout.attachmentLayouts.Add(colorAttachment);
+
+			brdfLutRT = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+			brdfLutRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(brdfLutRT, { brdfLut });
+		}
+
+		auto queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+		auto cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+		auto fence = RHI::gDynamicRHI->CreateFence(false);
+
+		Array<RHI::VertexBufferView> fullscreenQuad = RPISystem::Get().GetFullScreenQuad();
+		RHI::DrawLinearArguments fullscreenQuadArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
+
+		cmdList->Begin();
+		{
+			RHI::ResourceBarrierDescriptor barrier{};
+			barrier.resource = brdfLut;
+			barrier.fromState = ResourceState::Undefined;
+			barrier.toState = ResourceState::ColorOutput;
+			barrier.subresourceRange = SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			RHI::AttachmentClearValue clear{};
+			clear.clearValue = Vec4(0, 0, 0, 1);
+			cmdList->BeginRenderTarget(brdfLutRT, brdfLutRTB, &clear);
+
+			RHI::ViewportState viewportState{};
+			viewportState.x = viewportState.y = 0;
+			viewportState.width = brdfLut->GetWidth();
+			viewportState.height = brdfLut->GetHeight();
+			viewportState.minDepth = 0;
+			viewportState.maxDepth = 1;
+			cmdList->SetViewports(1, &viewportState);
+
+			RHI::ScissorState scissorState{};
+			scissorState.x = scissorState.y = 0;
+			scissorState.width = viewportState.width;
+			scissorState.height = viewportState.height;
+			cmdList->SetScissors(1, &scissorState);
+
+			cmdList->BindPipelineState(brdfGenMaterial->GetCurrentShader()->GetPipeline());
+
+			cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+			cmdList->DrawLinear(fullscreenQuadArgs);
+
+			cmdList->EndRenderTarget();
+
+			barrier.resource = brdfLut;
+			barrier.fromState = ResourceState::ColorOutput;
+			barrier.toState = ResourceState::FragmentShaderResource;
+			cmdList->ResourceBarrier(1, &barrier);
+		}
+		cmdList->End();
+
+		queue->Execute(1, &cmdList, fence);
+		fence->WaitForFence();
 		
+		RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
+		delete fence;
+		delete brdfLutRT;
+		delete brdfLutRTB;
 	}
-
-    static u16 Float32ToFloat16(f32 floatValue)
-    {
-        f32* ptr = &floatValue;
-        unsigned int fltInt32 = *((u32*)ptr);
-        u16 fltInt16;
-
-        fltInt16 = (fltInt32 >> 31) << 5;
-        u16 tmp = (fltInt32 >> 23) & 0xff;
-        tmp = (tmp - 0x70) & ((unsigned int)((int)(0x70 - tmp) >> 4) >> 27);
-        fltInt16 = (fltInt16 | tmp) << 10;
-        fltInt16 |= (fltInt32 >> 13) & 0x3ff;
-        
-        return fltInt16;
-    }
 
 	void VulkanSandbox::InitTextures()
 	{
@@ -955,22 +1037,7 @@ namespace CE
 		}
 
 		// Opaque Pipeline
-		{
-			Resource* opaqueVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Opaque.vert.spv", nullptr);
-			Resource* opaqueFrag = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Opaque.frag.spv", nullptr);
-
-			RHI::ShaderModuleDescriptor vertDesc{};
-			vertDesc.name = "Opaque Vertex";
-			vertDesc.stage = RHI::ShaderStage::Vertex;
-			vertDesc.byteCode = opaqueVert->GetData();
-			vertDesc.byteSize = opaqueVert->GetDataSize();
-
-			RHI::ShaderModuleDescriptor fragDesc{};
-			fragDesc.name = "Opaque Fragment";
-			fragDesc.stage = RHI::ShaderStage::Fragment;
-			fragDesc.byteCode = opaqueFrag->GetData();
-			fragDesc.byteSize = opaqueFrag->GetDataSize();
-            
+		{            
 			AssetManager* assetManager = gEngine->GetAssetManager();
 			opaqueShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
 
@@ -991,15 +1058,15 @@ namespace CE
                 sphereMaterial->SetPropertyValue("_NormalTex", rpiSystem.GetDefaultNormalTex());
                 sphereMaterial->SetPropertyValue("_MetallicTex", rpiSystem.GetDefaultAlbedoTex());
 
-				//sphereMaterial->SetPropertyValue("_AlbedoTex", plasticTextures.albedo->GetRpiTexture());
-				//sphereMaterial->SetPropertyValue("_RoughnessTex", plasticTextures.roughnessMap->GetRpiTexture());
-				//sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap->GetRpiTexture());
-				//sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_AlbedoTex", plasticTextures.albedo->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_RoughnessTex", plasticTextures.roughnessMap->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap->GetRpiTexture());
 
-				//sphereMaterial->SetPropertyValue("_AlbedoTex", aluminumTextures.albedo->GetRpiTexture());
-				//sphereMaterial->SetPropertyValue("_RoughnessTex", aluminumTextures.roughnessMap->GetRpiTexture());
-				//sphereMaterial->SetPropertyValue("_NormalTex", aluminumTextures.normalMap->GetRpiTexture());
-				//sphereMaterial->SetPropertyValue("_MetallicTex", aluminumTextures.metallicMap->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_AlbedoTex", aluminumTextures.albedo->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_RoughnessTex", aluminumTextures.roughnessMap->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_NormalTex", aluminumTextures.normalMap->GetRpiTexture());
+				sphereMaterial->SetPropertyValue("_MetallicTex", aluminumTextures.metallicMap->GetRpiTexture());
 
 				//sphereMaterial->SetPropertyValue("_AlbedoTex", rustedTextures.albedo->GetRpiTexture());
 				//sphereMaterial->SetPropertyValue("_RoughnessTex", rustedTextures.roughnessMap->GetRpiTexture());
@@ -1036,9 +1103,6 @@ namespace CE
 			}
 
 			cubeMaterial->FlushProperties();
-
-			delete opaqueVert;
-			delete opaqueFrag;
 		}
 
 		// Transparent Pipeline
@@ -1431,6 +1495,7 @@ namespace CE
 
 	void VulkanSandbox::DestroyCubeMaps()
 	{
+		delete brdfLutRpi; brdfLutRpi = nullptr;
         delete defaultSampler; defaultSampler = nullptr;
 		delete skyboxCubeMap; skyboxCubeMap = nullptr;
 	}
