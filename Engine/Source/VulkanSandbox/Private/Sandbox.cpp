@@ -898,98 +898,16 @@ namespace CE
 
 		// Skybox Pipeline
 		{
-			Resource* skyboxVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Skybox.vert.spv", nullptr);
-			Resource* skyboxFrag = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Skybox.frag.spv", nullptr);
+			skyboxShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 
-			RHI::ShaderModuleDescriptor vertDesc{};
-			vertDesc.name = "Skybox Vertex";
-			vertDesc.stage = RHI::ShaderStage::Vertex;
-			vertDesc.byteCode = skyboxVert->GetData();
-			vertDesc.byteSize = skyboxVert->GetDataSize();
-
-			RHI::ShaderModuleDescriptor fragDesc{};
-			fragDesc.name = "Skybox Fragment";
-			fragDesc.stage = RHI::ShaderStage::Fragment;
-			fragDesc.byteCode = skyboxFrag->GetData();
-			fragDesc.byteSize = skyboxFrag->GetDataSize();
-
-			auto skyboxShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
-			auto skyboxShaderFrag = RHI::gDynamicRHI->CreateShaderModule(fragDesc);
-
-			RHI::GraphicsPipelineDescriptor skyboxPipelineDesc{};
-
-			RHI::ColorBlendState colorBlend{};
-			colorBlend.alphaBlendOp = RHI::BlendOp::Add;
-			colorBlend.colorBlendOp = RHI::BlendOp::Add;
-			colorBlend.componentMask = RHI::ColorComponentMask::All;
-			colorBlend.srcColorBlend = RHI::BlendFactor::SrcAlpha;
-			colorBlend.dstColorBlend = RHI::BlendFactor::OneMinusSrcAlpha;
-			colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
-			colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
-			colorBlend.blendEnable = true;
-			skyboxPipelineDesc.blendState.colorBlends.Add(colorBlend);
-
-			skyboxPipelineDesc.depthStencilState.depthState.enable = false;
-
-			skyboxPipelineDesc.shaderStages.Add({});
-			skyboxPipelineDesc.shaderStages.Top().entryPoint = "VertMain";
-			skyboxPipelineDesc.shaderStages.Top().shaderModule = skyboxShaderVert;
-			skyboxPipelineDesc.shaderStages.Add({});
-			skyboxPipelineDesc.shaderStages.Top().entryPoint = "FragMain";
-			skyboxPipelineDesc.shaderStages.Top().shaderModule = skyboxShaderFrag;
-
-			skyboxPipelineDesc.rasterState = {};
-			skyboxPipelineDesc.rasterState.cullMode = RHI::CullMode::None;
-
-			skyboxPipelineDesc.vertexInputSlots.Add({});
-			skyboxPipelineDesc.vertexInputSlots.Top().inputRate = RHI::VertexInputRate::PerVertex;
-			skyboxPipelineDesc.vertexInputSlots.Top().inputSlot = 0;
-			skyboxPipelineDesc.vertexInputSlots.Top().stride = sizeof(Vec3); // float3 Position;
-
-			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = skyboxPipelineDesc.vertexAttributes;
-
-			vertexAttribs.Add({});
-			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3; // Position
-			vertexAttribs[0].inputSlot = 0;
-			vertexAttribs[0].location = 0;
-			vertexAttribs[0].offset = 0;
-			
-			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = skyboxPipelineDesc.srgLayouts;
-			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
-			perViewSRGLayout.srgType = RHI::SRGType::PerView;
-			perViewSRGLayout.variables.Add({});
-			perViewSRGLayout.variables[0].arrayCount = 1;
-			perViewSRGLayout.variables[0].name = "_PerViewData";
-			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
-			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-			srgLayouts.Add(perViewSRGLayout);
-
-			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
-			perObjectSRGLayout.srgType = RHI::SRGType::PerObject;
-			perObjectSRGLayout.variables.Add({});
-			perObjectSRGLayout.variables[0].arrayCount = 1;
-			perObjectSRGLayout.variables[0].name = "_ObjectData";
-			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
-			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-			srgLayouts.Add(perObjectSRGLayout);
-
-			srgLayouts.Add(perSceneSrgLayout);
-
-			skyboxPipelineDesc.name = "Skybox Pipeline";
-
-			skyboxShader = new RPI::Shader();
-			RPI::ShaderVariantDescriptor variant{};
-			variant.pipelineDesc = skyboxPipelineDesc;
-			skyboxShader->AddVariant(variant);
-
-			skyboxMaterial = new RPI::Material(skyboxShader);
+			skyboxMaterial = new RPI::Material(skyboxShader->GetOrCreateRPIShader(0));
+			RHI::ShaderResourceGroupLayout perObjectSRGLayout = skyboxMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerObject);
 
 			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
 			if (cubeMapTex != nullptr)
 			{
 				perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
+				skyboxMaterial->SetPropertyValue("_CubeMap", cubeMapTex->GetRpiTexture());
 				if (cubeMapTex->GetDiffuseConvolution() != nullptr)
 				{
 					perSceneSrg->Bind("_SkyboxIrradiance", cubeMapTex->GetDiffuseConvolution()->GetRpiTexture()->GetRhiTexture());
@@ -1003,6 +921,8 @@ namespace CE
 			{
 				perSceneSrg->Bind("_Skybox", hdriCubeMap);
 				perSceneSrg->Bind("_SkyboxIrradiance", irradianceMap);
+
+				skyboxMaterial->SetPropertyValue("_CubeMap", hdriCubeMapRpi);
 			}
 
 			perSceneSrg->Bind("_DefaultSampler", defaultSampler);
@@ -1010,6 +930,7 @@ namespace CE
 			perSceneSrg->Bind("_BrdfLut", brdfLutRpi->GetRhiTexture());
 
 			perSceneSrg->FlushBindings();
+			skyboxMaterial->FlushProperties();
 
 			RHI::BufferDescriptor desc{};
 			desc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -1032,8 +953,6 @@ namespace CE
 			}
 			
 			skyboxObjectSrg->FlushBindings();
-
-			delete skyboxVert; delete skyboxFrag;
 		}
 
 		// Opaque Pipeline
@@ -1381,6 +1300,7 @@ namespace CE
 
 		builder.AddShaderResourceGroup(perSceneSrg);
 		builder.AddShaderResourceGroup(skyboxObjectSrg);
+		builder.AddShaderResourceGroup(skyboxMaterial->GetShaderResourceGroup());
 
 		RPI::Mesh* mesh = model->GetMesh(0);
 
@@ -1465,13 +1385,10 @@ namespace CE
 		delete depthPipeline; depthPipeline = nullptr;
 		delete depthShaderVert; depthShaderVert = nullptr;
 		
-		delete skyboxShader; skyboxShader = nullptr;
 		delete skyboxMaterial; skyboxMaterial = nullptr;
 		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
 		delete perSceneSrg; perSceneSrg = nullptr;
 
-        //delete opaqueShader; opaqueShader = nullptr;
-		opaqueShader->Destroy(); opaqueShader = nullptr;
 		delete sphereMaterial; sphereMaterial = nullptr;
 		delete cubeMaterial; cubeMaterial = nullptr;
 

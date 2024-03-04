@@ -716,6 +716,7 @@ namespace CE
 		hdriCubeMapDesc.arrayLayers = 6;
 
 		hdriCubeMap = RHI::gDynamicRHI->CreateTexture(hdriCubeMapDesc);
+		hdriCubeMapRpi = new RPI::Texture(hdriCubeMap);
 
 		u32 numPixels = hdrImage.GetWidth() * hdrImage.GetHeight();
 

@@ -54,8 +54,11 @@ namespace CE::RPI
 
 		inline SIZE_T GetVariantId() const { return variantId; }
 
-        
         inline RHI::PipelineState* GetPipeline() const { return pipeline; }
+
+		inline const RHI::GraphicsPipelineDescriptor& GetGraphicsDesc() const { return pipelineDesc; }
+
+		RHI::ShaderResourceGroupLayout GetSrgLayout(RHI::SRGType srgType);
 
 	private:
 

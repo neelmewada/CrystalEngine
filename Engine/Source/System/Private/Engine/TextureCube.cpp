@@ -20,6 +20,10 @@ namespace CE
             desc.samplerDesc.addressModeU = TextureAddressModeToSamplerMode(addressModeU);
             desc.samplerDesc.addressModeV = TextureAddressModeToSamplerMode(addressModeV);
             desc.samplerDesc.addressModeW = desc.samplerDesc.addressModeU;
+            desc.samplerDesc.enableAnisotropy = anisoLevel > 0;
+            desc.samplerDesc.maxAnisotropy = anisoLevel;
+            desc.samplerDesc.samplerFilterMode = filter;
+            desc.samplerDesc.borderColor = SamplerBorderColor::FloatTransparentBlack;
 
             desc.texture.width = width;
             desc.texture.height = height;
@@ -30,6 +34,7 @@ namespace CE
             desc.texture.mipLevels = mipLevels;
             desc.texture.sampleCount = 1;
             desc.texture.dimension = Dimension::DimCUBE;
+            desc.texture.defaultHeapType = MemoryHeapType::Default;
 
             if (TextureSourceCompressionFormatIsBCn(sourceCompressionFormat))
             {

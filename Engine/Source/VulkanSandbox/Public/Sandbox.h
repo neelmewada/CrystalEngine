@@ -138,6 +138,7 @@ namespace CE
 		RHI::Texture* hdriIrradiance = nullptr;
 
 		RHI::Texture* hdriCubeMap = nullptr;
+		RPI::Texture* hdriCubeMapRpi = nullptr;
         RHI::Texture* irradianceMap = nullptr;
         RHI::PipelineState* irradiancePipeline = nullptr;
         RHI::ShaderModule* convolutionVertShader = nullptr;
@@ -179,7 +180,7 @@ namespace CE
 		RPI::Material* cubeMaterial = nullptr;
         RHI::Sampler* defaultSampler = nullptr;
 		
-		RPI::Shader* skyboxShader = nullptr;
+		CE::Shader* skyboxShader = nullptr;
 		RPI::Material* skyboxMaterial = nullptr;
 
 		RHI::PipelineState* transparentPipeline = nullptr;

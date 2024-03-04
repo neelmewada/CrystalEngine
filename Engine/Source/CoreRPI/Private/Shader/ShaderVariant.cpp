@@ -223,4 +223,15 @@ namespace CE::RPI
 		modulesByStage.Clear();
 	}
 
+	RHI::ShaderResourceGroupLayout ShaderVariant::GetSrgLayout(RHI::SRGType srgType)
+	{
+		for (const auto& srgLayout : pipelineDesc.srgLayouts)
+		{
+			if (srgLayout.srgType == srgType)
+				return srgLayout;
+		}
+
+		return RHI::ShaderResourceGroupLayout();
+	}
+
 } // namespace CE::RPI
