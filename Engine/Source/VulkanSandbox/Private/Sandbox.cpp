@@ -903,7 +903,7 @@ namespace CE
 			skyboxMaterial = new RPI::Material(skyboxShader->GetOrCreateRPIShader(0));
 			RHI::ShaderResourceGroupLayout perObjectSRGLayout = skyboxMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerObject);
 
-			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
+			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
 			if (cubeMapTex != nullptr)
 			{
 				perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
