@@ -97,8 +97,13 @@ float3 CalculateSpecularIBL(MaterialInput material, float3 N, float3 V, out floa
     float3 F0 = float3(0.04, 0.04, 0.04);
     F0 = lerp(F0, material.albedo.rgb, material.metallic);
 
+    uint w; uint h;
+    _Skybox.GetDimensions(w, h);
+    float maxMipLevel = log2(min(w, h)) - 1;
+    //maxMipLevel = 9;
+
     F = FresnelSchlickRoughness(NdotV, F0, roughness);
-    float3 prefilteredColor = _Skybox.SampleLevel(_SkyboxSampler, R, roughness * 9); // 10 max Mip levels
+    float3 prefilteredColor = _Skybox.SampleLevel(_SkyboxSampler, R, roughness * maxMipLevel).rgb; // 10 max Mip levels
     float2 envBrdf = _BrdfLut.Sample(_DefaultSampler, float2(NdotV, roughness));
 
     return prefilteredColor * (F * envBrdf.x + envBrdf.y);

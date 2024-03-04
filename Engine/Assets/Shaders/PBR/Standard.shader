@@ -89,7 +89,7 @@ Shader "PBR/Standard"
             Texture2D<float> _RoughnessTex : SRG_PerMaterial(t2);
             Texture2D<float4> _NormalTex : SRG_PerMaterial(t3);
             Texture2D<float> _MetallicTex : SRG_PerMaterial(t4);
-
+            
             float4 FragMain(PSInput input) : SV_TARGET
             {
                 float3 diffuse = 0;
