@@ -112,7 +112,6 @@ Shader "PBR/Standard"
                 material.ambient = _AmbientOcclusion;
 
                 float3 Lo = float3(0, 0, 0);
-                
 
                 uint i = 0;
                 for (i = 0; i < totalDirectionalLights; i++)
@@ -131,7 +130,10 @@ Shader "PBR/Standard"
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);
                 }
 
-                float3 color = CalculateDiffuseIrradiance(material, normal, viewDir).rgb;
+                //float3 color = CalculateDiffuseIrradiance(material, normal, viewDir).rgb;
+                //color = CalculateSpecularIBL(material, normal, viewDir);
+                float3 color = ComputeSkyboxIBL(material, normal, viewDir);
+                
                 color += Lo;
 
                 color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR Tonemapping (optional)

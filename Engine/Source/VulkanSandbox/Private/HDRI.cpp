@@ -179,13 +179,13 @@ namespace CE
 
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 
+		equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
+		iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
+		iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
+		mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/MipMapGen");
+
 		if (false) // Skip the block
 		{
-			equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
-			iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
-			iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
-			mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/MipMapGen");
-
 			BinaryBlob irradianceBlob{};
 
 			CubeMapProcessor cubeMapProcessor{};
@@ -213,6 +213,50 @@ namespace CE
 
 			cubeMapProcessor.ProcessCubeMapOffline(info, testBlob, outMipLevels);
 		}
+
+		RPI::Shader* brdfGenShader = iblConvolutionShader->GetOrCreateRPIShader(2);
+		RPI::Material* brdfGenMaterial = new RPI::Material(brdfGenShader);
+		brdfGenMaterial->FlushProperties();
+		defer(
+			delete brdfGenMaterial;
+		);
+
+		RHI::TextureDescriptor brdfLutDesc{};
+		brdfLutDesc.name = "BRDF LUT";
+		brdfLutDesc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+		brdfLutDesc.width = 512;
+		brdfLutDesc.height = 512;
+		brdfLutDesc.depth = 1;
+		brdfLutDesc.format = RHI::Format::R8G8_UNORM;
+		brdfLutDesc.mipLevels = 1;
+		brdfLutDesc.sampleCount = 1;
+		brdfLutDesc.dimension = Dimension::Dim2D;
+		brdfLutDesc.defaultHeapType = MemoryHeapType::Default;
+
+		auto brdfLut = RHI::gDynamicRHI->CreateTexture(brdfLutDesc);
+		brdfLutRpi = new RPI::Texture(brdfLut);
+
+		RHI::RenderTarget* brdfLutRT = nullptr;
+		RHI::RenderTargetBuffer* brdfLutRTB = nullptr;
+		{
+			RHI::RenderTargetLayout rtLayout{};
+			RHI::RenderAttachmentLayout colorAttachment{};
+			colorAttachment.attachmentId = "BRDF LUT";
+			colorAttachment.format = RHI::Format::R8G8_UNORM;
+			colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+			colorAttachment.loadAction = AttachmentLoadAction::Clear;
+			colorAttachment.storeAction = AttachmentStoreAction::Store;
+			colorAttachment.multisampleState.sampleCount = 1;
+			rtLayout.attachmentLayouts.Add(colorAttachment);
+
+			brdfLutRT = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+			brdfLutRTB = RHI::gDynamicRHI->CreateRenderTargetBuffer(brdfLutRT, { brdfLut });
+		}
+
+		defer(
+			delete brdfLutRT;
+			delete brdfLutRTB;
+		);
 
 		if (false)
 		{
@@ -589,6 +633,9 @@ namespace CE
 		RHI::RenderTargetBuffer* pdfMarginalRTB = nullptr;
 		RHI::ShaderResourceGroup* pdfMarginalSrg = nullptr;
 		RHI::ShaderResourceGroup* pdfConditionalSrg = nullptr;
+
+		Array<RHI::VertexBufferView> fullscreenQuad = RPISystem::Get().GetFullScreenQuad();
+		RHI::DrawLinearArguments fullscreenQuadArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
 
 		RHI::RenderTargetBuffer* pdfJointRTB = nullptr;
 		RHI::ShaderResourceGroup* pdfJointSrg = nullptr;
@@ -1463,6 +1510,44 @@ namespace CE
 			barrier.toState = RHI::ResourceState::FragmentShaderResource;
 			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = brdfLut;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
+			cmdList->ClearShaderResourceGroups();
+
+			cmdList->BeginRenderTarget(brdfLutRT, brdfLutRTB, &clearValue);
+			{
+				RHI::ViewportState viewportState{};
+				viewportState.x = viewportState.y = 0;
+				viewportState.width = brdfLut->GetWidth();
+				viewportState.height = brdfLut->GetHeight();
+				viewportState.minDepth = 0;
+				viewportState.maxDepth = 1;
+				cmdList->SetViewports(1, &viewportState);
+
+				RHI::ScissorState scissorState{};
+				scissorState.x = scissorState.y = 0;
+				scissorState.width = viewportState.width;
+				scissorState.height = viewportState.height;
+				cmdList->SetScissors(1, &scissorState);
+
+				cmdList->BindPipelineState(brdfGenMaterial->GetCurrentShader()->GetPipeline());
+
+				cmdList->BindVertexBuffers(0, fullscreenQuad.GetSize(), fullscreenQuad.GetData());
+
+				cmdList->DrawLinear(fullscreenQuadArgs);
+			}
+			cmdList->EndRenderTarget();
+
+			barrier.resource = brdfLut;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
 		}
 		cmdList->End();
 
@@ -1542,6 +1627,7 @@ namespace CE
 	{
 		DestroyIntermediateHDRIs();
 		
+		delete brdfLutRpi; brdfLutRpi = nullptr;
 		delete hdriIrradiance; hdriIrradiance = nullptr;
 		delete hdriCubeMap; hdriCubeMap = nullptr;
         delete irradianceMap; irradianceMap = nullptr;

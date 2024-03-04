@@ -105,6 +105,16 @@ namespace CE::RPI
 			specularCubeMapMipLevels = Math::Min(specularCubeMapMipLevels, 10); // 10 mip levels max
 			if (specularCubeMapMipLevels > totalHdriInputMipLevels)
 				specularCubeMapMipLevels = totalHdriInputMipLevels;
+
+			for (int mip = 0; desc.useCompression && mip < specularCubeMapMipLevels; mip++)
+			{
+				u32 currentRes = cubeMapRes / (u32)pow(2, mip);
+				if (currentRes < 4)
+				{
+					specularCubeMapMipLevels = mip;
+					break;
+				}
+			}
 		}
 
 		outMipLevels = specularCubeMapMipLevels;
@@ -1453,21 +1463,18 @@ namespace CE::RPI
 
 			for (int mip = 0; mip < cubeMap->GetMipLevelCount(); mip++)
 			{
-				//for (int face = 0; face < 6; face++)
-				{
-					RHI::TextureToBufferCopy copyRegion{};
-					copyRegion.srcTexture = cubeMap;
-					copyRegion.mipSlice = mip;
-					copyRegion.baseArrayLayer = 0;
-					copyRegion.layerCount = 6;
-					copyRegion.dstBuffer = outputBuffer;
-					copyRegion.bufferOffset = copyBufferOffset;
+				RHI::TextureToBufferCopy copyRegion{};
+				copyRegion.srcTexture = cubeMap;
+				copyRegion.mipSlice = mip;
+				copyRegion.baseArrayLayer = 0;
+				copyRegion.layerCount = 6;
+				copyRegion.dstBuffer = outputBuffer;
+				copyRegion.bufferOffset = copyBufferOffset;
 
-					copyBufferOffset += cubeMap->GetWidth() / (u32)pow(2, mip) * cubeMap->GetHeight() / (u32)pow(2, mip) * 
-						GetBitsPerPixelForFormat(cubeMapDesc.format) / 8 * 6;
+				copyBufferOffset += cubeMap->GetWidth() / (u32)pow(2, mip) * cubeMap->GetHeight() / (u32)pow(2, mip) * 
+					GetBitsPerPixelForFormat(cubeMapDesc.format) / 8 * 6;
 
-					cmdList->CopyTextureRegion(copyRegion);
-				}
+				cmdList->CopyTextureRegion(copyRegion);
 			}
 
 			barrier.resource = cubeMap;
@@ -1494,11 +1501,9 @@ namespace CE::RPI
 			else // BC6H compression
 			{
 				int numPixelsPerFace = cubeMapRes * cubeMapRes;
-				//u64 compressedByteSizePerFace = numPixelsPerFace; // BC6H uses 1 byte per pixel
-				//output.Reserve(compressedByteSizePerFace * 6);
 
 				// BC6H uses 1 byte (8 bits) per pixel
-				u64 totalCompressedSize = CalculateTotalTextureSize(numPixelsPerFace, numPixelsPerFace, 8, 6, cubeMap->GetMipLevelCount());
+				u64 totalCompressedSize = CalculateTotalTextureSize(cubeMapRes, cubeMapRes, 8, 6, cubeMap->GetMipLevelCount());
 				output.Reserve(totalCompressedSize);
 				void* outputDataPtr = output.GetDataPtr();
 
@@ -1508,7 +1513,7 @@ namespace CE::RPI
 				{
 					for (int face = 0; face < 6; face++)
 					{
-						threads.EmplaceBack([dataPtr, mip, face, outputDataPtr, cubeMapRes, &cubeMapDesc]
+						threads.EmplaceBack([dataPtr, mip, face, outputDataPtr, cubeMapRes, cubeMapDesc]
 							{
 								u64 totalSizeTillCurrentMipLevel = 
 									CalculateTotalTextureSize(cubeMapRes, cubeMapRes, GetBitsPerPixelForFormat(cubeMapDesc.format), 6, mip);
@@ -1521,8 +1526,10 @@ namespace CE::RPI
 								CMImage image =
 									CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + totalSizeTillCurrentMipLevel +
 											face * currentResolution * currentResolution * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
-										cubeMapRes, cubeMapRes,
-										CMImageFormat::RGBA16, CMImageSourceFormat::None, 16, 64);
+										currentResolution, currentResolution,
+										CMImageFormat::RGBA16, CMImageSourceFormat::None, 
+										GetBitsPerPixelForFormat(cubeMapDesc.format) / 4, 
+										GetBitsPerPixelForFormat(cubeMapDesc.format));
 
 								CMImageEncoder encoder{};
 
@@ -1566,7 +1573,7 @@ namespace CE::RPI
 
 					for (int face = 0; face < 6; face++)
 					{
-						threads.EmplaceBack([outputDataPtr, dataPtr, compressedByteSizePerFace, face, numPixelsPerFace, diffuseIrradianceCubeMap, &cubeMapDesc]
+						threads.EmplaceBack([outputDataPtr, dataPtr, compressedByteSizePerFace, face, numPixelsPerFace, diffuseIrradianceCubeMap, cubeMapDesc]
 							{
 								CMImage image =
 									CMImage::LoadRawImageFromMemory((unsigned char*)dataPtr + face * numPixelsPerFace * GetBitsPerPixelForFormat(cubeMapDesc.format) / 8,
@@ -1586,9 +1593,7 @@ namespace CE::RPI
 					for (int face = 0; face < 6; face++)
 					{
 						if (threads[face].IsJoinable())
-						{
 							threads[face].Join();
-						}
 					}
 				}
 			}

@@ -13,7 +13,7 @@ namespace CE::RHI
 		u32 bitsPerPixel;
 	};
 
-	static Array<FormatEntry> formatEntries = {
+	constexpr FormatEntry formatEntries[] = {
 		{ RHI::Format::R8_UNORM,			1, 8 },
 		{ RHI::Format::R8_SNORM,			1, 8 },
 		{ RHI::Format::R8_SRGB,				1, 8 },
@@ -70,7 +70,7 @@ namespace CE::RHI
 
 	CORERHI_API u32 GetBitsPerPixelForFormat(RHI::Format format)
 	{
-		for (int i = 0; i < formatEntries.GetSize(); i++)
+		for (int i = 0; i < COUNTOF(formatEntries); i++)
 		{
 			if (formatEntries[i].format == format)
 			{
@@ -83,7 +83,7 @@ namespace CE::RHI
 
 	CORERHI_API u32 GetNumChannelsForFormat(RHI::Format format)
 	{
-		for (int i = 0; i < formatEntries.GetSize(); i++)
+		for (int i = 0; i < COUNTOF(formatEntries); i++)
 		{
 			if (formatEntries[i].format == format)
 			{

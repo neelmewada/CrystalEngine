@@ -125,6 +125,7 @@ namespace CE
 		RHI::TextureView* hdrFaceRTVs[6] = {};
 		RPI::Material* equirectMaterials[6] = {};
 
+		RPI::Texture* brdfLutRpi = nullptr;
 		RHI::Texture* hdriMap = nullptr;
 		RHI::Texture* hdriGrayscaleMap = nullptr;
 		RHI::Texture* hdriRowAverage = nullptr;
@@ -149,6 +150,7 @@ namespace CE
 
 		MaterialTextureGroup woodFloorTextures{};
 		MaterialTextureGroup plasticTextures{};
+		MaterialTextureGroup aluminumTextures{};
 		MaterialTextureGroup rustedTextures{};
 
 		RHI::ShaderResourceGroup* depthPerViewSrg = nullptr;

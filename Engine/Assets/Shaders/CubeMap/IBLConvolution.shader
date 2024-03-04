@@ -379,5 +379,99 @@ Shader "CubeMap/IBL Convolution"
 
             ENDHLSL
         }
+
+        Pass
+        {
+            Name "BRDF Generator"
+            Tags { 
+                "Vertex"="VertMain", "Fragment"="FragMain"
+            }
+            ZWrite Off
+            ZTest Off
+            Cull Off
+
+            HLSLPROGRAM
+
+            #include "Core/Macros.hlsli"
+            #include "Core/Utils.hlsli"
+
+            struct VSInput
+            {
+                float3 position : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct PSInput
+            {
+                float4 position : SV_POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            #if VERTEX
+            PSInput VertMain(VSInput input)
+            {
+                PSInput o;
+                o.position = float4(input.position, 1.0);
+                o.uv = input.uv;
+                return o;
+            }
+            #endif // VERTEX
+
+            #if FRAGMENT
+
+            float G1_GGX_Schlick(float NoV, float roughness) {
+                float alpha = roughness * roughness;
+                float k = alpha / 2.0;
+                return max(NoV, 0.001) / (NoV * (1.0 - k) + k);
+            }
+
+            float G_Smith(float NoV, float NoL, float roughness) {
+                return G1_GGX_Schlick(NoL, roughness) * G1_GGX_Schlick(NoV, roughness);
+            }
+
+            // adapted from "Real Shading in Unreal Engine 4", Brian Karis, Epic Games
+            float2 IntegrateBRDF(float roughness, float NoV) 
+            {
+                roughness = clamp(roughness, 0, 1);
+                // view direction in normal space from spherical coordinates
+                float thetaView = acos(NoV);
+                float3 V = float3(sin(thetaView), 0.0, cos(thetaView)); // with phiView = 0.0
+                
+                float2 result = float2(0.0, 0.0);
+                uint N = 2048u;
+                for(uint n = 0u; n < N; n++) {
+                    float2 random = Hammersley(n, N);
+                    float phi = 2.0 * PI * random.x;
+                    float u = random.y;
+                    float alpha = roughness * roughness;
+                    float theta = acos(sqrt((1.0 - u) / (1.0 + (alpha * alpha - 1.0) * u)));
+                    float3 H = float3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+                    float3 L = 2.0 * dot(V, H) * H - V; // or use L = reflect(-V, H);
+                    float NoL = clamp(L.z, 0.0, 1.0);
+                    float NoH = clamp(H.z, 0.0, 1.0);
+                    float VoH = clamp(dot(V, H), 0.0, 1.0);
+
+                    if(NoL > 0.0) {
+                        float G = G_Smith(NoV, NoL, roughness);
+                        float G_Vis = G * VoH / (NoH * NoV);
+                        float Fc = pow(1.0 - VoH, 5.0);
+                        result.x += (1.0 - Fc) * G_Vis;
+                        result.y += Fc * G_Vis;
+                    }
+                }
+                result = result / float(N);
+                return result;
+            }
+
+            float4 FragMain(PSInput input) : SV_Target
+            {
+                float2 color = IntegrateBRDF(1.0 - input.uv.y, input.uv.x);
+                return float4(color.rg, 0, 1);
+            }
+
+            #endif // FRAGMENT
+            
+            ENDHLSL
+        }
     }
 }

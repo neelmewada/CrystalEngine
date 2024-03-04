@@ -45,6 +45,7 @@ TextureCube<float4> _Skybox : SRG_PerScene(t5);
 SamplerState _DefaultSampler : SRG_PerScene(s6);
 TextureCube<float4> _SkyboxIrradiance : SRG_PerScene(t7);
 SamplerState _SkyboxSampler : SRG_PerScene(s8);
+Texture2D<float2> _BrdfLut : SRG_PerScene(s9);
 
 float CalculateDirectionalShadow(in float4 lightSpacePos, in float NdotL)
 {
@@ -86,6 +87,34 @@ float3 CalculateDiffuseIrradiance(MaterialInput material, float3 N, float3 V)
     float3 ambient = (kD * diffuse) * material.ambient;
     //ambient = clamp(ambient, float3(0, 0, 0), float3(1, 1, 1));
     return ambient;
+}
+
+float3 CalculateSpecularIBL(MaterialInput material, float3 N, float3 V, out float3 F)
+{
+    float NdotV = clamp(dot(N, V), 0, 1);
+    float roughness = clamp(material.roughness, 0, 1);
+    float3 R = 2 * dot( V, N ) * N - V;
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, material.albedo.rgb, material.metallic);
+
+    F = FresnelSchlickRoughness(NdotV, F0, roughness);
+    float3 prefilteredColor = _Skybox.SampleLevel(_SkyboxSampler, R, roughness * 9); // 10 max Mip levels
+    float2 envBrdf = _BrdfLut.Sample(_DefaultSampler, float2(NdotV, roughness));
+
+    return prefilteredColor * (F * envBrdf.x + envBrdf.y);
+}
+
+float3 ComputeSkyboxIBL(MaterialInput material, float3 N, float3 V)
+{
+    float3 F = float3(0, 0, 0);
+    float3 diffuse = CalculateDiffuseIrradiance(material, N, V).rgb;
+    float3 specular = CalculateSpecularIBL(material, N, V, F);
+
+    float3 kS = F;
+    float3 kD = float3(1, 1, 1) - kS;
+    kD *= (1.0 - material.metallic);
+
+    return (kD * diffuse + specular) * material.ambient;
 }
 
 #endif // FRAGMENT

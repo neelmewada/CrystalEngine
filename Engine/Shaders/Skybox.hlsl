@@ -34,7 +34,7 @@ PSInput VertMain(VSInput input)
 float4 FragMain(PSInput input) : SV_TARGET
 {
     float3 direction = normalize(input.worldPos - viewPosition);
-    float3 color = _Skybox.Sample(_SkyboxSampler, direction).rgb;
+    float3 color = _Skybox.SampleLevel(_SkyboxSampler, direction, 0.0).rgb;
     color = color / (color + float3(1.0, 1.0, 1.0) * 0.5); // HDR tonemapping (optional)
     return float4(color, 1);
 }

@@ -233,7 +233,7 @@ namespace CE::RPI
                             RHI::Sampler* sampler = texture->GetSamplerState();
                             if (sampler != nullptr)
                             {
-                                shaderResourceGroup->Bind(imageIndex, variable.name.GetString() + "_Sampler", sampler);
+                                shaderResourceGroup->Bind(imageIndex, variable.name.GetString() + "Sampler", sampler);
                             }
                         }
                     }
@@ -417,7 +417,7 @@ namespace CE::RPI
                             RHI::Sampler* sampler = texture->GetSamplerState();
                             if (sampler != nullptr)
                             {
-                                shaderResourceGroup->Bind(variable.name.GetString() + "_Sampler", sampler);
+                                shaderResourceGroup->Bind(variable.name.GetString() + "Sampler", sampler);
                             }
                         }
                     }

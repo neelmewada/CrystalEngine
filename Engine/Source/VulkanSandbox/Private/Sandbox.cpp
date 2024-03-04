@@ -13,6 +13,7 @@ namespace CE
 	constexpr u32 defaultSamplerBinding = 6;
 	constexpr u32 skyboxIrradianceBinding = 7;
 	constexpr u32 skyboxSamplerBinding = 8;
+	constexpr u32 brdfLutBinding = 9;
 
 	constexpr u32 perViewDataBinding = 0;
 	constexpr u32 perObjectDataBinding = 0;
@@ -120,11 +121,11 @@ namespace CE
 
 		//CubeMapDemoTick(deltaTime);
 
-		sphereRoughness += deltaTime * 0.2f;
+		sphereRoughness += deltaTime * 0.1f;
 		if (sphereRoughness >= 1)
 			sphereRoughness = 0.001f;
 
-		//sphereMaterial->SetPropertyValue("_Roughness", sphereRoughness);
+		sphereMaterial->SetPropertyValue("_Roughness", sphereRoughness);
 
 		skyboxMaterial->FlushProperties(imageIndex);
 		cubeMaterial->FlushProperties(imageIndex);
@@ -247,8 +248,12 @@ namespace CE
 		auto timeTaken1 = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
 		prevTime = clock();
-		//rustedTextures = MaterialTextureGroup::Load("RustedIron");
+		aluminumTextures = MaterialTextureGroup::Load("Aluminum");
 		auto timeTaken2 = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
+		prevTime = clock();
+		rustedTextures = MaterialTextureGroup::Load("RustedIron");
+		auto timeTaken3 = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 	}
 
 	void VulkanSandbox::InitCubeMapDemo()
@@ -621,6 +626,13 @@ namespace CE
 			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::SamplerState;
 			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
+			perSceneSrgLayout.variables.Add({});
+			perSceneSrgLayout.variables.Top().arrayCount = 1;
+			perSceneSrgLayout.variables.Top().name = "_BrdfLut";
+			perSceneSrgLayout.variables.Top().bindingSlot = brdfLutBinding;
+			perSceneSrgLayout.variables.Top().type = RHI::ShaderResourceType::Texture2D;
+			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
+
 			perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
 
 			RHI::BufferDescriptor sceneConstantBufferDesc{};
@@ -892,7 +904,7 @@ namespace CE
 
 			skyboxMaterial = new RPI::Material(skyboxShader);
 
-			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_day");
 			if (cubeMapTex != nullptr)
 			{
 				perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
@@ -913,6 +925,7 @@ namespace CE
 
 			perSceneSrg->Bind("_DefaultSampler", defaultSampler);
 			perSceneSrg->Bind("_SkyboxSampler", skyboxSampler);
+			perSceneSrg->Bind("_BrdfLut", brdfLutRpi->GetRhiTexture());
 
 			perSceneSrg->FlushBindings();
 
@@ -968,8 +981,7 @@ namespace CE
 			{
 				sphereMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
 				sphereMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
-				sphereMaterial->SetPropertyValue("_Shininess", (u32)64);
-				sphereMaterial->SetPropertyValue("_Metallic", 0.0f);
+				sphereMaterial->SetPropertyValue("_Metallic", 1.0f);
 				sphereMaterial->SetPropertyValue("_Roughness", 1.0f);
 				sphereMaterial->SetPropertyValue("_NormalStrength", 1.0f);
 				sphereMaterial->SetPropertyValue("_AmbientOcclusion", 1.0f);
@@ -984,10 +996,15 @@ namespace CE
 				//sphereMaterial->SetPropertyValue("_NormalTex", plasticTextures.normalMap->GetRpiTexture());
 				//sphereMaterial->SetPropertyValue("_MetallicTex", plasticTextures.metallicMap->GetRpiTexture());
 
-				//sphereMaterial->SetPropertyValue("_AlbedoTex", rustedTextures.albedo);
-				//sphereMaterial->SetPropertyValue("_RoughnessTex", rustedTextures.roughnessMap);
-				//sphereMaterial->SetPropertyValue("_NormalTex", rustedTextures.normalMap);
-				//sphereMaterial->SetPropertyValue("_MetallicTex", rustedTextures.metallicMap);
+				//sphereMaterial->SetPropertyValue("_AlbedoTex", aluminumTextures.albedo->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_RoughnessTex", aluminumTextures.roughnessMap->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_NormalTex", aluminumTextures.normalMap->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_MetallicTex", aluminumTextures.metallicMap->GetRpiTexture());
+
+				//sphereMaterial->SetPropertyValue("_AlbedoTex", rustedTextures.albedo->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_RoughnessTex", rustedTextures.roughnessMap->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_NormalTex", rustedTextures.normalMap->GetRpiTexture());
+				//sphereMaterial->SetPropertyValue("_MetallicTex", rustedTextures.metallicMap->GetRpiTexture());
 
 				//sphereMaterial->SetPropertyValue("_AlbedoTex", woodFloorTextures.albedo);
 				//sphereMaterial->SetPropertyValue("_RoughnessTex", woodFloorTextures.roughnessMap);
@@ -1002,7 +1019,6 @@ namespace CE
 			{
 				cubeMaterial->SetPropertyValue("_Albedo", Color(1, 1, 1, 1));
 				cubeMaterial->SetPropertyValue("_SpecularStrength", 1.0f);
-				cubeMaterial->SetPropertyValue("_Shininess", (u32)64);
 				cubeMaterial->SetPropertyValue("_Metallic", 0.0f);
 				cubeMaterial->SetPropertyValue("_Roughness", 1.0f);
 				cubeMaterial->SetPropertyValue("_NormalStrength", 1.0f);
@@ -1405,6 +1421,9 @@ namespace CE
 
 		plasticTextures.Release();
 		plasticTextures = {};
+
+		aluminumTextures.Release();
+		aluminumTextures = {};
 
 		rustedTextures.Release();
 		rustedTextures = {};
