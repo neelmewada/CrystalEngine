@@ -745,10 +745,10 @@ namespace CE
 				if (b > 65000)
 					b = 65000;
 
-				*(dstData + 4 * i + 0) = Float32ToFloat16(r);
-				*(dstData + 4 * i + 1) = Float32ToFloat16(g);
-				*(dstData + 4 * i + 2) = Float32ToFloat16(b);
-				*(dstData + 4 * i + 3) = Float32ToFloat16(1.0f);
+				*(dstData + 4 * i + 0) = Math::ToFloat16(r);
+				*(dstData + 4 * i + 1) = Math::ToFloat16(g);
+				*(dstData + 4 * i + 2) = Math::ToFloat16(b);
+				*(dstData + 4 * i + 3) = Math::ToFloat16(1.0f);
 			}
 		}
 		stagingBuffer->Unmap();

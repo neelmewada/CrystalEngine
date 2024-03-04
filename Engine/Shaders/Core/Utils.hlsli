@@ -16,4 +16,4 @@ inline float2 Hammersley(uint n, uint N) {
     return float2(float(n) / float(N), RadicalInverse(n));
 }
 
-#endif
+#endif // __UTILS_HLSL__

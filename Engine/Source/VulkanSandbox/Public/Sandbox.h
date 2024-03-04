@@ -164,8 +164,8 @@ namespace CE
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> directionalLightViewPerImage{};
 		RHI::Sampler* shadowMapSampler = nullptr;
 
-		RHI::PipelineState* depthPipeline = nullptr;
-		RHI::ShaderModule* depthShaderVert = nullptr;
+		//RHI::PipelineState* depthPipeline = nullptr;
+		//RHI::ShaderModule* depthShaderVert = nullptr;
 		
 		CE::Shader* equirectShader = nullptr;
 		CE::Shader* equirectDebugShader = nullptr;
@@ -175,6 +175,9 @@ namespace CE
 
 		CE::Shader* opaqueShader = nullptr;
 		RPI::Shader* opaqueRpiShader = nullptr;
+		CE::Shader* depthShader = nullptr;
+		RPI::Material* depthMaterial = nullptr;
+
 		//RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* sphereMaterial = nullptr;
 		RPI::Material* cubeMaterial = nullptr;

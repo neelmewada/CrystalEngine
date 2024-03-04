@@ -8,8 +8,7 @@ Shader "PBR/Standard"
     SubShader
     {
         Tags {
-            "Blend" = "SrcAlpha,OneMinusSrcAlpha",
-            "Platform" = "Desktop"
+            "Blend" = "SrcAlpha,OneMinusSrcAlpha"
         }
 
         Pass

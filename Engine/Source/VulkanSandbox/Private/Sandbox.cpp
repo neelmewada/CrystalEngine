@@ -342,7 +342,7 @@ namespace CE
 	{
 		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night2.hdr";
 		equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
-
+		
 		CMImage hdrImage = CMImage::LoadFromFile(path);
 		defer(
 			hdrImage.Free();
@@ -816,7 +816,12 @@ namespace CE
 
 		// Depth Pipeline
 		{
-			Resource* depthVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Depth.vert.spv", nullptr);
+			depthShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Depth");
+			
+			depthMaterial = new RPI::Material(depthShader->GetOrCreateRPIShader(0));
+			
+
+			/*Resource* depthVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Depth.vert.spv", nullptr);
 			RHI::ShaderModuleDescriptor vertDesc{};
 			vertDesc.name = "Depth Vertex";
 			vertDesc.stage = RHI::ShaderStage::Vertex;
@@ -893,7 +898,7 @@ namespace CE
 
 			depthPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(depthPipelineDesc);
 
-			delete depthVert;
+			delete depthVert;*/
 		}
 
 		// Skybox Pipeline
@@ -1182,7 +1187,8 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthPipeline;
+			//request.pipelineState = depthPipeline;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
 
 			builder.AddDrawItem(request);
 		}
@@ -1243,7 +1249,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthPipeline;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
 			
 			builder.AddDrawItem(request);
 		}
@@ -1381,9 +1387,6 @@ namespace CE
 
 		delete depthPerViewSrg; depthPerViewSrg = nullptr;
 		delete perViewSrg; perViewSrg = nullptr;
-
-		delete depthPipeline; depthPipeline = nullptr;
-		delete depthShaderVert; depthShaderVert = nullptr;
 		
 		delete skyboxMaterial; skyboxMaterial = nullptr;
 		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
@@ -1463,7 +1466,7 @@ namespace CE
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(directionalLightViewSrg);
 
-				scheduler->UsePipeline(depthPipeline);
+				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline());
 
 				//scheduler->SetVariableAfterExecution("DrawSunShadows", false);
 			}
@@ -1498,7 +1501,7 @@ namespace CE
 				
 				scheduler->UseShaderResourceGroup(depthPerViewSrg);
 
-				scheduler->UsePipeline(depthPipeline);
+				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline());
 			}
 			scheduler->EndScope();
 

@@ -42,6 +42,12 @@ namespace CE::RPI
 		EnumType* cullModeEnum = GetStaticEnum<RHI::CullMode>();
 
 		RHI::ColorBlendState colorBlend = {};
+
+		bool depthOnly = false;
+		if (desc.TagExists("DrawListTag") && desc.GetTagValue("DrawListTag") == "depth")
+		{
+			depthOnly = true;
+		}
 		
 		if (desc.TagExists("Blend"))
 		{
@@ -80,7 +86,10 @@ namespace CE::RPI
 			colorBlend = RHI::ColorBlendState(); // Default value
 		}
 
-		pipelineDesc.blendState.colorBlends.Add(colorBlend);
+		if (!depthOnly)
+		{
+			pipelineDesc.blendState.colorBlends.Add(colorBlend);
+		}
 		
 		pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
 
@@ -199,9 +208,14 @@ namespace CE::RPI
 
 		for (int i = 0; i < desc.moduleDesc.GetSize(); i++)
 		{
+			if (depthOnly && desc.moduleDesc[i].stage != RHI::ShaderStage::Vertex)
+			{
+				continue;
+			}
+
 			auto module = RHI::gDynamicRHI->CreateShaderModule(desc.moduleDesc[i]);
 			modulesByStage[desc.moduleDesc[i].stage] = module;
-
+			
 			pipelineDesc.shaderStages.Add({});
 			pipelineDesc.shaderStages.Top().entryPoint = desc.entryPoints[i];
 			pipelineDesc.shaderStages.Top().shaderModule = module;

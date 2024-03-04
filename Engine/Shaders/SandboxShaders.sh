@@ -44,15 +44,4 @@ CompileCS() {
 }
 
 CompileShader "Depth"
-CompileShader "Opaque"
-CompileShader "Skybox"
-CompileShader "Equirectangular"
-CompileShader "EnvMapConvolution"
-CompileShader "Grayscale"
-CompileShader "ImageRowAverage"
-CompileShader "ImageColumnAverage"
-CompileShader "CDFMarginalInverse"
-CompileShader "PDFDivision"
-CompileShader "CDFConditionalInverse"
-CompileShader "FlatConvolution"
-
+CompileShader "ErrorShader"
