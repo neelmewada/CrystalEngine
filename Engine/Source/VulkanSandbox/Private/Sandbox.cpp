@@ -1015,10 +1015,10 @@ namespace CE
 				cubeMaterial->SetPropertyValue("_NormalStrength", 1.0f);
 				cubeMaterial->SetPropertyValue("_AmbientOcclusion", 1.0f);
 
-				cubeMaterial->SetPropertyValue("_AlbedoTex", woodFloorTextures.albedo->GetRpiTexture()); //rpiSystem.GetDefaultAlbedoTex());
-				cubeMaterial->SetPropertyValue("_RoughnessTex", woodFloorTextures.roughnessMap->GetRpiTexture()); //rpiSystem.GetDefaultRoughnessTex());
-				cubeMaterial->SetPropertyValue("_NormalTex", woodFloorTextures.normalMap->GetRpiTexture()); //rpiSystem.GetDefaultNormalTex());
-				cubeMaterial->SetPropertyValue("_MetallicTex", woodFloorTextures.metallicMap->GetRpiTexture()); // White metallic tex
+				cubeMaterial->SetPropertyValue("_AlbedoTex", woodFloorTextures.albedo->GetRpiTexture());
+				cubeMaterial->SetPropertyValue("_RoughnessTex", woodFloorTextures.roughnessMap->GetRpiTexture());
+				cubeMaterial->SetPropertyValue("_NormalTex", woodFloorTextures.normalMap->GetRpiTexture());
+				cubeMaterial->SetPropertyValue("_MetallicTex", woodFloorTextures.metallicMap->GetRpiTexture());
 
 				//cubeMaterial->SetPropertyValue("_AlbedoTex", rpiSystem.GetDefaultAlbedoTex());
 				//cubeMaterial->SetPropertyValue("_RoughnessTex", rpiSystem.GetDefaultRoughnessTex());

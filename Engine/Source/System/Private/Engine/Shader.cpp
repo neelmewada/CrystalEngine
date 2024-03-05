@@ -102,6 +102,9 @@ namespace CE
 			}
 		}
 
+		if (passIndex < 0 || passIndex >= rpiShaderPerPass.GetSize())
+			return nullptr;
+
 		return rpiShaderPerPass[passIndex];
 	}
 

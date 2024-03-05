@@ -76,6 +76,14 @@ namespace CE::RPI
         properties[propertyName] = value;
     }
 
+    void Material::CopyPropertiesFrom(RPI::Material* other)
+    {
+        for (const auto& [name, value] : other->properties)
+        {
+            this->properties[name] = value;
+        }
+    }
+
     void Material::FlushProperties(u32 imageIndex)
     {
         if (shaderResourceGroup == nullptr)

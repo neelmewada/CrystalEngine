@@ -159,7 +159,7 @@ namespace CE::RPI
 
 			diffuseIrradiance = RHI::gDynamicRHI->CreateTexture(irradianceDesc);
 			diffuseIrradianceRpi = new RPI::Texture(diffuseIrradiance);
-
+			
 			irradianceDesc.dimension = RHI::Dimension::DimCUBE;
 			irradianceDesc.width = diffuseIrradianceResolution;
 			irradianceDesc.height = diffuseIrradianceResolution;

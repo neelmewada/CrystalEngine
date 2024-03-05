@@ -2,7 +2,7 @@
 
 namespace CE
 {
-    CLASS(Abstract)
+    CLASS()
     class SYSTEM_API Material : public MaterialInterface
     {
         CE_CLASS(Material, MaterialInterface)
@@ -27,10 +27,15 @@ namespace CE
 
         virtual void SetProperty(const Name& name, CE::Texture* value) override;
 
+        virtual void SetPass(u32 passIndex) override;
+
+        virtual RPI::Material* GetRpiMaterial() override;
 
     private:
 
         RPI::Material* material = nullptr;
+
+        FIELD()
         CE::Shader* shader = nullptr;
 
         friend class MaterialInstance;

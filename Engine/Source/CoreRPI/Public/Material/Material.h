@@ -46,6 +46,8 @@ namespace CE::RPI
         
         inline RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 
+		void CopyPropertiesFrom(RPI::Material* other);
+
 	private:
 
 		void RecreateShaderResourceGroup();

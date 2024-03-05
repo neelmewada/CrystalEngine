@@ -113,8 +113,9 @@ Spec tables with big endian format
 |---|---|---|---|
 | +00 | 8B | `xx xx xx xx xx xx xx xx` | Size of **array** in bytes excluding **this**. Minimum is `4`. |
 | +08 | 4B | | Total number of elements |
-| +xx | xx |  | [Field Value](#field-value) |
-| +xx | xx |  | [Field Value](#field-value) #2 |
+| +xx | xx |  | [Field Value](#field-value) 0 |
+| +xx | xx |  | [Field Value](#field-value) 1 |
+| +xx | xx |  | [Field Value](#field-value) 2 |
 |...|
 
 ### Object Reference

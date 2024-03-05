@@ -20,11 +20,10 @@ function(ce_add_test NAME)
     if(NOT ${CE_BUILD_TESTS})
         return()
     endif()
-    
 
     set(options AUTORTTI RESOURCES)
     set(oneValueArgs TARGET FOLDER)
-    set(multiValueArgs SOURCES BUILD_DEPENDENCIES)
+    set(multiValueArgs SOURCES BUILD_DEPENDENCIES ASSETS)
     set(include_dirs "${CMAKE_CURRENT_SOURCE_DIR}")
 
     cmake_parse_arguments(ce_add_test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -42,6 +41,36 @@ function(ce_add_test NAME)
         set_property(TARGET ${NAME} PROPERTY
             MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,Development>:ProgramDatabase>"
         )
+    endif()
+
+    set(output_asset_files "")
+
+    foreach(asset_file ${ce_add_test_ASSETS})
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${asset_file}")
+            set(dest_asset_file "${CE_OUTPUT_DIR}/Tests/${ce_add_test_TARGET}/${asset_file}")
+            list(APPEND output_asset_files "${dest_asset_file}")
+            cmake_path(GET dest_asset_file PARENT_PATH dest_asset_file_parent)
+            add_custom_command(OUTPUT ${dest_asset_file}
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/${asset_file}" "${dest_asset_file_parent}"
+            )
+        endif()
+    endforeach()
+    
+    if(output_asset_files)
+        message("Output asset files found for ${NAME}")
+
+        add_custom_target(${NAME}_Assets
+            DEPENDS ${output_asset_files}
+            VERBATIM
+        )
+
+        set_target_properties(${NAME}_Assets
+            PROPERTIES
+                FOLDER "${ce_add_test_FOLDER}"
+        )
+        
+        add_dependencies(${NAME} ${NAME}_Assets)
+
     endif()
 
     set_target_properties(${NAME} 

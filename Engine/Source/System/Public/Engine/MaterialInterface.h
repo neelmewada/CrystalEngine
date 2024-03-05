@@ -26,9 +26,13 @@ namespace CE
 
         virtual void SetProperty(const Name& name, CE::Texture* value) = 0;
 
+        virtual void SetPass(u32 passIndex) = 0;
+
+        virtual RPI::Material* GetRpiMaterial() = 0;
+
     protected:
 
-        
+        u32 passIndex = 0;
 
     };
 
