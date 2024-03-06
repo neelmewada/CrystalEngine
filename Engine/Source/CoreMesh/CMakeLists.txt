@@ -26,6 +26,7 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            ThirdParty::assimp
         PUBLIC
             CE::Core
     RUNTIME_DEPENDENCIES

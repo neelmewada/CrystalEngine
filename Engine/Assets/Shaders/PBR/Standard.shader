@@ -43,7 +43,7 @@ Shader "PBR/Standard"
             {
                 float3 position : POSITION;
                 float3 normal : NORMAL;
-                float4 tangent : TANGENT;
+                float3 tangent : TANGENT;
                 float2 uv : TEXCOORD0;
                 INSTANCING()
             };
@@ -129,8 +129,6 @@ Shader "PBR/Standard"
                     Lo += CalculateBRDF(light, material) * (1.0 - shadow);
                 }
 
-                //float3 color = CalculateDiffuseIrradiance(material, normal, viewDir).rgb;
-                //color = CalculateSpecularIBL(material, normal, viewDir);
                 float3 color = ComputeSkyboxIBL(material, normal, viewDir);
                 
                 color += Lo;

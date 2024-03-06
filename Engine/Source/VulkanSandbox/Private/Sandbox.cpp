@@ -219,15 +219,17 @@ namespace CE
 
 	void VulkanSandbox::InitModels()
 	{
-		IO::Path path = PlatformDirectories::GetLaunchDir() / "Tests/CoreMesh/chair.FBX";
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Tests/CoreMesh/chair.fbx";
 		FileStream fileStream = FileStream(path, Stream::Permissions::ReadOnly);
 		u8* data = (u8*)malloc(fileStream.GetLength());
 		fileStream.Read(data, fileStream.GetLength());
 
-		FbxImporter importer{};
-		MeshImportConfig config{};
+		ModelImporter importer{};
+		ModelLoadConfig config{};
+		config.postProcessFlags |= ModelPostProcessFlags::OptimizeMeshes | ModelPostProcessFlags::OptimizeGraph;
+		config.fileFormat = ModelFileFormat::FBX;
 
-		CMScene* scene = importer.LoadScene(data, fileStream.GetLength(), config);
+		CMScene* scene = importer.ImportScene(data, fileStream.GetLength(), config);
 
 		const auto& meshes = scene->GetMeshes();
 
@@ -235,13 +237,9 @@ namespace CE
 		{
 			const CMMesh& mesh = meshes[0]; // Only load 1 mesh for now
 
-			u32 totalIndices = 0;
-			for (const auto& submesh : mesh.submeshes)
-			{
-				totalIndices += submesh.indices.GetSize();
-			}
+			u32 totalIndices = mesh.indices.GetSize();
 
-			u32 tangentSize = mesh.tangents.GetSize() * sizeof(Vec3);
+			u32 tangentSize = mesh.positions.GetSize() * sizeof(Vec3);
 
 			u64 totalBufferSize = mesh.positions.GetSize() * sizeof(Vec3) +
 				mesh.normals.GetSize() * sizeof(Vec3) + 
@@ -341,11 +339,8 @@ namespace CE
 			}
 
 			// Index Data
-			for (const auto& submesh : mesh.submeshes)
-			{
-				buffer->UploadData(submesh.indices.GetData(), submesh.indices.GetSize() * sizeof(u32), offset);
-				offset += submesh.indices.GetSize() * sizeof(u32);
-			}
+			buffer->UploadData(mesh.indices.GetData(), mesh.indices.GetSize() * sizeof(u32), offset);
+			offset += mesh.indices.GetSize() * sizeof(u32);
 
 			chairModel->AddMesh(rpiMesh);
 		}
@@ -1585,12 +1580,12 @@ namespace CE
 
 	void VulkanSandbox::DestroyPipelines()
 	{
-		equirectShader->Destroy(); equirectShader = nullptr;
 		delete shadowMapSampler; shadowMapSampler = nullptr;
 		delete skyboxSampler; skyboxSampler = nullptr;
 		delete sceneConstantBuffer; sceneConstantBuffer = nullptr;
 		delete cubeModel; cubeModel = nullptr;
 		delete sphereModel; sphereModel = nullptr;
+		delete chairModel; chairModel = nullptr;
 
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{

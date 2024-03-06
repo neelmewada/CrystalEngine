@@ -1,6 +1,6 @@
 include_guard(GLOBAL)
 
-# Utils
+# 3rd Party Packages
 find_package(xxHash REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(yaml REQUIRED)
@@ -14,6 +14,7 @@ find_package(dxcompiler REQUIRED)
 #find_package(compressonator REQUIRED)
 find_package(miniz REQUIRED)
 find_package(ispctexturecompressor REQUIRED)
+find_package(assimp REQUIRED)
 
 # Yoga
 find_package(yoga REQUIRED)

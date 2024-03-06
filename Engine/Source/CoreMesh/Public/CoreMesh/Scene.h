@@ -81,15 +81,35 @@ namespace CE
         Color shadowColor = { 0, 0, 0, 0 };
     };
 
-    struct CMMeshPartition
+    struct CMSubMesh
     {
-        Array<u32> indices{};
-        u32 materialIndex = 0;
+        
     };
 
     struct CMMaterial
     {
+        Color diffuse{};
+        Color specular{};
+        Color ambient{};
+        Color emissive{};
+        Color transparent{};
+        Color reflective{};
 
+        float reflectivity = 0.0f;
+        float shininess = 0.0f;
+        float opacity = 1;
+
+        float metallicFactor = 0.0f;
+        float roughnessFactor = 0.0f;
+        float anisotropyFactor = 0.0f;
+
+        String diffuseMap{};
+        String normalMap{};
+        String ambientOcclussionMap{};
+        String emissiveMap{};
+        String heightMap{};
+        String metallicMap{};
+        String roughnessMap{};
     };
 
     struct CMMesh : CMObject
@@ -99,8 +119,8 @@ namespace CE
         Array<Color> colors{};
         Array<Vec3> tangents{};
         StaticArray<Array<Vec2>, MaxUVChannelCount> uvs{};
-        Array<CMMeshPartition> submeshes{};
-        Array<CMMaterial> materials{};
+        Array<u32> indices{};
+        u32 materialIndex = 0;
     };
 
     class COREMESH_API CMScene final
@@ -114,14 +134,18 @@ namespace CE
 
         const Array<CMMesh>& GetMeshes() const { return meshes; }
 
+        const Array<CMMaterial>& GetMaterials() const { return materials; }
+
     private:
 
         CMSceneLoader loader = CMSceneLoader::None;
 
         Array<CMLight> lights{};
         Array<CMMesh> meshes{};
+        Array<CMMaterial> materials{};
 
         friend class FbxImporter;
+        friend class ModelImporter;
     };
 
 } // namespace CE
