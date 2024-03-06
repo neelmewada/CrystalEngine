@@ -16,7 +16,17 @@ namespace CE
 
     }
 
+    inline Vec4 ToVec4(ofbx::Vec4 v)
+    {
+        return Vec4(v.x, v.y, v.z);
+    }
+
     inline Vec3 ToVec3(ofbx::Vec3 v)
+    {
+        return Vec3(v.x, v.y, v.z);
+    }
+
+    inline Vec3 ToVec3(ofbx::DVec3 v)
     {
         return Vec3(v.x, v.y, v.z);
     }
@@ -24,6 +34,18 @@ namespace CE
     inline Vec2 ToVec2(ofbx::Vec2 v)
     {
         return Vec2(v.x, v.y);
+    }
+
+    inline Matrix4x4 ToMatrix(const ofbx::DMatrix& mat)
+    {
+        Matrix4x4 v{};
+        
+        for (int x = 0; x < 4; x++)
+        {
+            v.rows[x] = Vec4(mat.m[x * 4 + 0], mat.m[x * 4 + 1], mat.m[x * 4 + 2], mat.m[x * 4 + 3]);
+        }
+
+        return v;
     }
 
     CMScene* FbxImporter::LoadScene(const u8* fbxData, int dataSize, const MeshImportConfig& config)
@@ -79,6 +101,12 @@ namespace CE
             light.castShadows = fLight->doesCastShadows();
             light.shadowColor = Color(fLight->getShadowColor().r, fLight->getShadowColor().g, fLight->getShadowColor().b, 1.0f);
 
+            light.localTransform = ToMatrix(fLight->getLocalTransform());
+            light.globalTransform = ToMatrix(fLight->getGlobalTransform());
+            light.localTranslation = ToVec3(fLight->getLocalTranslation());
+            light.localRotation = ToVec3(fLight->getLocalRotation());
+            light.localScaling = ToVec3(fLight->getLocalScaling());
+
             scene->lights.Add(light);
         }
 
@@ -91,10 +119,17 @@ namespace CE
             CMMesh& outMesh = scene->meshes.Top();
 
             const ofbx::Mesh* mesh = fbxScene->getMesh(i);
+            outMesh.localTransform = ToMatrix(mesh->getLocalTransform());
+            outMesh.globalTransform = ToMatrix(mesh->getGlobalTransform());
+            outMesh.localTranslation = ToVec3(mesh->getLocalTranslation());
+            outMesh.localRotation = ToVec3(mesh->getLocalRotation());
+            outMesh.localScaling = ToVec3(mesh->getLocalScaling());
+
             const ofbx::GeometryData& geom = mesh->getGeometryData();
             const ofbx::Vec3Attributes positions = geom.getPositions();
             const ofbx::Vec3Attributes normals = geom.getNormals();
             const ofbx::Vec3Attributes tangents = geom.getTangents();
+            const ofbx::Vec4Attributes colors = geom.getColors();
             const ofbx::Vec2Attributes uvs = geom.getUVs();
             const ofbx::Vec2Attributes uvs1 = geom.getUVs(1);
             u32 indicesOffset = 0;
@@ -123,10 +158,22 @@ namespace CE
                         Vec3 pos = ToVec3(positions.get(triIndices[i]));
                         outMesh.positions.Add(pos);
 
+                        if (tangents.values)
+                        {
+                            Vec3 tangent = ToVec3(tangents.get(triIndices[i]));
+                            outMesh.tangents.Add(tangent);
+                        }
+
                         if (normals.values)
                         {
                             Vec3 normal = ToVec3(normals.get(triIndices[i]));
                             outMesh.normals.Add(normal);
+                        }
+
+                        if (colors.values)
+                        {
+                            Vec4 color = ToVec4(colors.get(triIndices[i]));
+                            outMesh.colors.Add(color);
                         }
 
                         if (uvs.values)
@@ -145,7 +192,6 @@ namespace CE
                     delete[] triIndices;
                 }
 
-                //indicesOffset += positions.count;
                 indicesOffset += partition.triangles_count;
             }
         }

@@ -29,7 +29,7 @@ namespace CE
         Matrix4x4 localTransform{};
         Matrix4x4 globalTransform{};
 
-        Vec3 localPosition{};
+        Vec3 localTranslation{};
         Vec3 localRotation{};
         Vec3 localScaling{};
 
@@ -92,7 +92,7 @@ namespace CE
 
     };
 
-    struct CMMesh
+    struct CMMesh : CMObject
     {
         Array<Vec3> positions{};
         Array<Vec3> normals{};
@@ -111,6 +111,8 @@ namespace CE
     public:
 
         ~CMScene();
+
+        const Array<CMMesh>& GetMeshes() const { return meshes; }
 
     private:
 

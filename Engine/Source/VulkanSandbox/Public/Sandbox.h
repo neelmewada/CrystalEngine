@@ -76,6 +76,7 @@ namespace CE
 
 		void Shutdown();
 		
+		void InitModels();
 		void InitCubeMaps();
 		void InitHDRIs();
         void InitIrradiancePipeline(const RHI::ShaderResourceGroupLayout& irradianceSrgLayout);
@@ -86,6 +87,7 @@ namespace CE
 		void InitLights();
 
 		// DrawPackets
+		void BuildFbxDrawPacket();
 		void BuildCubeMeshDrawPacket();
 		void BuildSphereMeshDrawPacket();
 		void BuildSkyboxDrawPacket();
@@ -192,12 +194,17 @@ namespace CE
 		RHI::SwapChain* swapChain = nullptr;
 		PlatformWindow* mainWindow = nullptr;
 
+		RPI::ModelLod* chairModel = nullptr;
+		RHI::ShaderResourceGroup* chairObjectSrg = nullptr;
+		RHI::Buffer* chairObjectBuffer = nullptr;
+
 		RPI::ModelLod* cubeModel = nullptr;
 		RPI::ModelLod* sphereModel = nullptr;
 		RHI::DrawListContext drawList{};
 
 		RHI::DrawPacket* sphereDrawPacket = nullptr;
 		RHI::DrawPacket* cubeDrawPacket = nullptr;
+		RHI::DrawPacket* chairDrawPacket = nullptr;
 		RHI::DrawPacket* skyboxDrawPacket = nullptr;
 
 		RHI::ShaderResourceGroupLayout perSceneSrgLayout{};

@@ -4,6 +4,7 @@
 
 namespace CE
 {
+
 	CMScene::CMScene()
 	{
 

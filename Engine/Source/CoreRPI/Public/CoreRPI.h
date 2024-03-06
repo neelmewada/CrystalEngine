@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "CoreRHI.h"
 #include "CoreShader.h"
+#include "CoreMesh.h"
 
 // ***********************************
 // CoreRPI Includes

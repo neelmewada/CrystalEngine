@@ -1,7 +1,5 @@
 #include "VulkanSandbox.h"
 
-#include <algorithm>
-
 namespace CE
 {
 	constexpr u32 directionalLightArrayBinding = 0;
@@ -57,6 +55,7 @@ namespace CE
 		cubeModel = RPI::ModelLod::CreateCubeModel();
 		sphereModel = RPI::ModelLod::CreateSphereModel();
 		
+		InitModels();
 		InitCubeMaps();
 		InitTextures();
 		//InitHDRIs();
@@ -217,6 +216,143 @@ namespace CE
 		rpiSystem.Shutdown();
 	}
 	
+
+	void VulkanSandbox::InitModels()
+	{
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Tests/CoreMesh/chair.FBX";
+		FileStream fileStream = FileStream(path, Stream::Permissions::ReadOnly);
+		u8* data = (u8*)malloc(fileStream.GetLength());
+		fileStream.Read(data, fileStream.GetLength());
+
+		FbxImporter importer{};
+		MeshImportConfig config{};
+
+		CMScene* scene = importer.LoadScene(data, fileStream.GetLength(), config);
+
+		const auto& meshes = scene->GetMeshes();
+
+		if (meshes.GetSize() > 0)
+		{
+			const CMMesh& mesh = meshes[0]; // Only load 1 mesh for now
+
+			u32 totalIndices = 0;
+			for (const auto& submesh : mesh.submeshes)
+			{
+				totalIndices += submesh.indices.GetSize();
+			}
+
+			u32 tangentSize = mesh.tangents.GetSize() * sizeof(Vec3);
+
+			u64 totalBufferSize = mesh.positions.GetSize() * sizeof(Vec3) +
+				mesh.normals.GetSize() * sizeof(Vec3) + 
+				mesh.uvs[0].GetSize() * sizeof(Vec2) +
+				tangentSize + // The chair FBX does not have tangents, so let's use (0, 0, 0) for now
+				totalIndices * sizeof(u32);
+
+			chairModel = new ModelLod();
+
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.bindFlags = RHI::BufferBindFlags::VertexBuffer | RHI::BufferBindFlags::IndexBuffer;
+			bufferDesc.bufferSize = totalBufferSize;
+			bufferDesc.defaultHeapType = RHI::MemoryHeapType::Default;
+			bufferDesc.name = "Cube Mesh Buffer";
+
+			RHI::Buffer* buffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			chairModel->TrackBuffer(buffer);
+
+			Mesh rpiMesh{};
+			rpiMesh.indexBufferView = RHI::IndexBufferView(buffer, totalBufferSize - totalIndices * sizeof(u32), totalIndices * sizeof(u32), RHI::IndexFormat::Uint32);
+
+			RHI::DrawIndexedArguments drawArgs{};
+			drawArgs.firstIndex = 0;
+			drawArgs.indexCount = totalIndices;
+			drawArgs.firstInstance = 0;
+			drawArgs.instanceCount = 1;
+			drawArgs.vertexOffset = 0;
+			rpiMesh.drawArguments = RHI::DrawArguments(drawArgs);
+
+			u32 offset = 0;
+
+			{
+				VertexBufferInfo vertInfo{};
+				vertInfo.attributeType = RHI::VertexAttributeDataType::Float3;
+				vertInfo.bufferIndex = 0;
+				vertInfo.byteOffset = offset;
+				vertInfo.byteCount = mesh.positions.GetSize() * sizeof(Vec3);
+				vertInfo.stride = sizeof(Vec3);
+
+				vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::Position);
+				rpiMesh.vertexBufferInfos.Add(vertInfo);
+
+				buffer->UploadData(mesh.positions.GetData(), vertInfo.byteCount, vertInfo.byteOffset);
+				offset += vertInfo.byteCount;
+			}
+
+			{
+				VertexBufferInfo vertInfo{};
+				vertInfo.attributeType = RHI::VertexAttributeDataType::Float3;
+				vertInfo.bufferIndex = 0;
+				vertInfo.byteOffset = offset;
+				vertInfo.byteCount = mesh.normals.GetSize() * sizeof(Vec3);
+				vertInfo.stride = sizeof(Vec3);
+
+				vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::Normal);
+				rpiMesh.vertexBufferInfos.Add(vertInfo);
+
+				buffer->UploadData(mesh.normals.GetData(), vertInfo.byteCount, vertInfo.byteOffset);
+				offset += vertInfo.byteCount;
+			}
+
+			if (mesh.uvs[0].NonEmpty())
+			{
+				VertexBufferInfo vertInfo{};
+				vertInfo.attributeType = RHI::VertexAttributeDataType::Float2;
+				vertInfo.bufferIndex = 0;
+				vertInfo.byteOffset = offset;
+				vertInfo.byteCount = mesh.uvs[0].GetSize() * sizeof(Vec2);
+				vertInfo.stride = sizeof(Vec2);
+
+				vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::UV, 0);
+				rpiMesh.vertexBufferInfos.Add(vertInfo);
+
+				buffer->UploadData(mesh.uvs[0].GetData(), vertInfo.byteCount, vertInfo.byteOffset);
+				offset += vertInfo.byteCount;
+			}
+
+			if (mesh.tangents.NonEmpty())
+			{
+				VertexBufferInfo vertInfo{};
+				vertInfo.attributeType = RHI::VertexAttributeDataType::Float4;
+				vertInfo.bufferIndex = 0;
+				vertInfo.byteOffset = offset;
+				vertInfo.byteCount = mesh.tangents.GetSize() * sizeof(Vec3);
+				vertInfo.stride = sizeof(Vec4);
+
+				vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::Tangent);
+				rpiMesh.vertexBufferInfos.Add(vertInfo);
+
+				buffer->UploadData(mesh.tangents.GetData(), vertInfo.byteCount, vertInfo.byteOffset);
+				offset += vertInfo.byteCount;
+			}
+			else
+			{
+				offset += tangentSize;
+			}
+
+			// Index Data
+			for (const auto& submesh : mesh.submeshes)
+			{
+				buffer->UploadData(submesh.indices.GetData(), submesh.indices.GetSize() * sizeof(u32), offset);
+				offset += submesh.indices.GetSize() * sizeof(u32);
+			}
+
+			chairModel->AddMesh(rpiMesh);
+		}
+
+		free(data);
+		delete scene;
+	}
 
 	void VulkanSandbox::InitCubeMaps()
 	{
@@ -638,6 +774,24 @@ namespace CE
 			}
 
 			cubeObjectSrg->FlushBindings();
+		}
+
+		{
+			chairObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(meshSrgLayout);
+
+			Matrix4x4 modelMatrix = Matrix4x4::Translation(Vec3(0, 0, 0)) * Quat::EulerDegrees(Vec3()).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1) * 0.1f);
+
+			RHI::BufferDescriptor objectBufferDesc{};
+			objectBufferDesc.name = "Object Matrix";
+			objectBufferDesc.bufferSize = sizeof(modelMatrix);
+			objectBufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
+			objectBufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+
+			chairObjectBuffer = RHI::gDynamicRHI->CreateBuffer(objectBufferDesc);
+			chairObjectBuffer->UploadData(&modelMatrix, sizeof(modelMatrix));
+
+			chairObjectSrg->Bind("_ObjectData", chairObjectBuffer);
+			chairObjectSrg->FlushBindings();
 		}
 
 		// Main SRG Layouts
@@ -1167,6 +1321,67 @@ namespace CE
 		perSceneSrg->FlushBindings();
 	}
 
+	void VulkanSandbox::BuildFbxDrawPacket()
+	{
+		RHI::DrawPacketBuilder builder{};
+
+		builder.SetDrawArguments(chairModel->GetMesh(0)->drawArguments);
+
+		builder.AddShaderResourceGroup(chairObjectSrg);
+
+		RPI::Mesh* mesh = chairModel->GetMesh(0);
+
+		// Depth Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(chairModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
+
+		// Opaque Item
+		{
+			u32 variantIdx = cubeMaterial->GetCurrentVariantIndex();
+			const Array<Name>& vertexInputs = opaqueShader->GetShaderPass(0)->variants[variantIdx].reflectionInfo.vertexInputs;
+
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+
+			for (const auto& vertexInputName : vertexInputs)
+			{
+				RHI::ShaderSemantic curSemantic = RHI::ShaderSemantic::Parse(vertexInputName.GetString());
+
+				for (const auto& vertInfo : mesh->vertexBufferInfos)
+				{
+					if (vertInfo.semantic == curSemantic)
+					{
+						auto vertBufferView = RHI::VertexBufferView(chairModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+						request.vertexBufferViews.Add(vertBufferView);
+						break;
+					}
+				}
+			}
+
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+
+			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
+
+			builder.AddDrawItem(request);
+		}
+
+		chairDrawPacket = builder.Build();
+	}
+
 	void VulkanSandbox::BuildCubeMeshDrawPacket()
 	{
 		RHI::DrawPacketBuilder builder{};
@@ -1335,6 +1550,7 @@ namespace CE
 
 	void VulkanSandbox::InitDrawPackets()
 	{
+		BuildFbxDrawPacket();
 		BuildCubeMeshDrawPacket();
 		BuildSphereMeshDrawPacket();
 		BuildSkyboxDrawPacket();
@@ -1346,6 +1562,7 @@ namespace CE
 		
 		delete cubeDrawPacket; cubeDrawPacket = nullptr;
 		delete sphereDrawPacket; sphereDrawPacket = nullptr;
+		delete chairDrawPacket; chairDrawPacket = nullptr;
 		delete skyboxDrawPacket; skyboxDrawPacket = nullptr;
 	}
 
@@ -1576,6 +1793,7 @@ namespace CE
 		drawList.AddDrawPacket(sphereDrawPacket);
 		drawList.AddDrawPacket(cubeDrawPacket);
 		drawList.AddDrawPacket(skyboxDrawPacket);
+		drawList.AddDrawPacket(chairDrawPacket);
 
 		// Finalize
 		drawList.Finalize();
