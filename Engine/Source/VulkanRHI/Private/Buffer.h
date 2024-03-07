@@ -29,6 +29,11 @@ namespace CE::Vulkan
         virtual bool Map(u64 offset, u64 size, void** outPtr) override;
         virtual bool Unmap() override;
 
+        virtual bool IsHostAccessible() const override
+        {
+            return device->IsUnifiedMemoryArchitecture() || device->SupportsReBar() || heapType == MemoryHeapType::Upload || heapType == MemoryHeapType::ReadBack;
+        }
+
     private:
         void CreateUploadContext();
         

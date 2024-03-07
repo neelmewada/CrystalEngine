@@ -41,18 +41,31 @@ namespace CE::RPI
         {
             return shaderResourceGroup != nullptr && shaderResourceGroup->IsCompiled();
         }
+
+		inline bool PropertyExists(Name name) const
+		{
+			return properties.KeyExists(name) && properties.Get(name).GetValueType() != MaterialPropertyDataType::None;
+		}
         
+		void ClearAllValues();
+
         void SetPropertyValue(Name propertyName, const MaterialPropertyValue& value);
+
+		const MaterialPropertyValue& GetPropertyValue(Name propertyName);
         
         inline RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 
 		void CopyPropertiesFrom(RPI::Material* other);
+
+		inline void SetBaseMaterial(RPI::Material* mat) { baseMaterial = mat; }
 
 	private:
 
 		void RecreateShaderResourceGroup();
 		
 		RHI::ShaderResourceGroup* shaderResourceGroup = nullptr;
+
+		RPI::Material* baseMaterial = nullptr;
 
 		MaterialPropertyValueMap properties{};
         

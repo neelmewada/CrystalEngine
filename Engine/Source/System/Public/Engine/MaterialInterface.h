@@ -2,6 +2,72 @@
 
 namespace CE
 {
+    class Texture;
+    class Material;
+    class MaterialInstance;
+
+    ENUM()
+    enum class MaterialPropertyType
+    {
+        None = 0,
+        UInt, Int,
+        Float,
+        Vector,
+        Color,
+        Matrix,
+        Texture
+    };
+    ENUM_CLASS(MaterialPropertyType);
+
+    STRUCT()
+    struct SYSTEM_API MaterialTextureValue
+    {
+        CE_STRUCT(MaterialTextureValue)
+    public:
+
+        FIELD()
+        CE::Texture* texture = nullptr;
+
+        FIELD()
+        Vec2 offset = Vec2(0, 0);
+
+        FIELD()
+        Vec2 scaling = Vec2(1, 1);
+    };
+
+    STRUCT()
+    struct SYSTEM_API MaterialProperty
+    {
+        CE_STRUCT(MaterialProperty)
+    public:
+
+        FIELD()
+        Name name{};
+
+        FIELD()
+        MaterialPropertyType propertyType = MaterialPropertyType::None;
+
+        FIELD()
+        u32 u32Value = 0;
+
+        FIELD()
+        s32 s32Value = 0;
+
+        FIELD()
+        f32 floatValue = 0;
+
+        FIELD()
+        Vec4 vectorValue = {};
+
+        FIELD()
+        Color colorValue = {};
+
+        FIELD()
+        Matrix4x4 matrixValue = {};
+
+        FIELD()
+        MaterialTextureValue textureValue = {};
+    };
 
     CLASS(Abstract)
     class SYSTEM_API MaterialInterface : public Object
@@ -24,16 +90,24 @@ namespace CE
 
         virtual void SetProperty(const Name& name, const Matrix4x4& value) = 0;
 
-        virtual void SetProperty(const Name& name, CE::Texture* value) = 0;
+        virtual void SetProperty(const Name& name, CE::Texture* value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) = 0;
+
+        virtual void ApplyProperties() = 0;
 
         virtual void SetPass(u32 passIndex) = 0;
 
         virtual RPI::Material* GetRpiMaterial() = 0;
 
+        virtual CE::Shader* GetShader() = 0;
+
     protected:
+
+        virtual HashMap<Name, MaterialProperty> GetAllProperties() = 0;
 
         u32 passIndex = 0;
 
+        friend class CE::Material;
+        friend class CE::MaterialInstance;
     };
 
 } // namespace CE

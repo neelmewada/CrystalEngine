@@ -11,6 +11,29 @@
 #include "Asset/AssetRegistry.h"
 #include "Engine/AssetManager.h"
 
+// Asset Types
+#include "Engine/TextureDefines.h"
+#include "Engine/SamplerState.h"
+#include "Engine/Texture.h"
+#include "Engine/Texture2D.h"
+#include "Engine/TextureCube.h"
+#include "Engine/Shader.h"
+#include "Engine/MaterialInterface.h"
+#include "Engine/Material.h"
+#include "Engine/MaterialInstance.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/Scene.h"
+
+// Engine
+#include "Engine/Subsystem.h"
+#include "Engine/EngineSubsystem.h"
+#include "Engine/Subsystems/SceneSubsystem.h"
+#include "Engine/Subsystems/RendererSubsystem.h"
+#include "Engine/GameInstanceSubsystem.h"
+#include "Engine/GameInstance.h"
+#include "Engine/Engine.h"
+
+
 ///////////////////////////////////////////////////////
 // GameFramework
 ///////////////////////////////////////////////////////
@@ -27,27 +50,6 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/StaticMeshActor.h"
 #include "GameFramework/CameraActor.h"
-
-// Asset Types
-#include "Engine/TextureDefines.h"
-#include "Engine/SamplerState.h"
-#include "Engine/Texture.h"
-#include "Engine/Texture2D.h"
-#include "Engine/TextureCube.h"
-#include "Engine/Shader.h"
-#include "Engine/MaterialInterface.h"
-#include "Engine/Material.h"
-#include "Engine/MaterialInstance.h"
-#include "Engine/Scene.h"
-
-// Engine
-#include "Engine/Subsystem.h"
-#include "Engine/EngineSubsystem.h"
-#include "Engine/Subsystems/SceneSubsystem.h"
-#include "Engine/Subsystems/RendererSubsystem.h"
-#include "Engine/GameInstanceSubsystem.h"
-#include "Engine/GameInstance.h"
-#include "Engine/Engine.h"
 
 namespace CE
 {

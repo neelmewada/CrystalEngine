@@ -59,10 +59,7 @@ namespace CE::RHI
 		}
 
 		//! Returns true if buffer data is directly accessibly on Host (CPU) by mapping & unmapping memory
-		inline bool IsHostAccessible() const
-		{
-			return heapType == RHI::MemoryHeapType::Upload || heapType == RHI::MemoryHeapType::ReadBack;
-		}
+		virtual bool IsHostAccessible() const = 0;
 
 		virtual void UploadData(const BufferData& data) = 0;
 

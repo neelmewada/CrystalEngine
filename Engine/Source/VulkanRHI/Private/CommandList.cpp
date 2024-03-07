@@ -614,6 +614,22 @@ namespace CE::Vulkan
 			1, &copy);
 	}
 
+	void CommandList::CopyBufferRegion(const BufferCopy& copy)
+	{
+		if (copy.srcBuffer == nullptr || copy.dstBuffer == nullptr)
+			return;
+
+		Vulkan::Buffer* srcBuffer = (Vulkan::Buffer*)copy.srcBuffer;
+		Vulkan::Buffer* dstBuffer = (Vulkan::Buffer*)copy.dstBuffer;
+
+		VkBufferCopy region{};
+		region.size = copy.totalByteSize;
+		region.srcOffset = copy.srcOffset;
+		region.dstOffset = copy.dstOffset;
+
+		vkCmdCopyBuffer(commandBuffer, srcBuffer->GetBuffer(), dstBuffer->GetBuffer(), 1, &region);
+	}
+
 	void CommandList::BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter)
 	{
 		if (!source || !destination || regionCount == 0 || !regions)

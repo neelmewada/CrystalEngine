@@ -79,14 +79,14 @@ namespace CE::RPI
         {
             u.samplerValue = samplerValue;
         }
-        
+
         MaterialPropertyValue(const Matrix4x4& matrixValue) : valueType(MaterialPropertyDataType::Matrix4x4)
         {
             u.matrixValue = matrixValue;
         }
 
         template<typename TEnum> requires TIsEnum<TEnum>::Value
-        MaterialPropertyValue(TEnum enumValue) : valueType(MaterialPropertyDataType::Enum)
+            MaterialPropertyValue(TEnum enumValue) : valueType(MaterialPropertyDataType::Enum)
         {
             u.enumValue = (s64)enumValue;
         }
@@ -98,6 +98,47 @@ namespace CE::RPI
         MaterialPropertyValue(MaterialPropertyValue&& move) noexcept;
 
         ~MaterialPropertyValue();
+
+        inline bool operator==(const MaterialPropertyValue& other) const
+        {
+            if (valueType != other.valueType)
+                return false;
+
+            switch (valueType)
+            {
+            case MaterialPropertyDataType::Float:
+                return GetValue<float>() == other.GetValue<float>();
+            case MaterialPropertyDataType::UInt:
+                return GetValue<u32>() == other.GetValue<u32>();
+            case MaterialPropertyDataType::Int:
+                return GetValue<s32>() == other.GetValue<s32>();
+            case MaterialPropertyDataType::Color:
+                return u.colorValue.r == other.u.colorValue.r && u.colorValue.g == other.u.colorValue.g && 
+                    u.colorValue.b == other.u.colorValue.b && u.colorValue.a == other.u.colorValue.a;
+            case MaterialPropertyDataType::Vector2:
+                return u.vec2Value.x == other.u.vec2Value.x && u.vec2Value.y == other.u.vec2Value.y;
+            case MaterialPropertyDataType::Vector3:
+                return u.vec3Value.x == other.u.vec3Value.x && u.vec3Value.y == u.vec3Value.y && u.vec3Value.z == u.vec3Value.z;
+            case MaterialPropertyDataType::Vector4:
+                return u.vec4Value.x == other.u.vec4Value.x && u.vec4Value.y == other.u.vec4Value.y &&
+                    u.vec4Value.z == other.u.vec4Value.z && u.vec4Value.w == other.u.vec4Value.w;
+            case MaterialPropertyDataType::Texture:
+                return u.textureValue == other.u.textureValue;
+            case MaterialPropertyDataType::TextureView:
+                return u.textureViewValue == other.u.textureViewValue;
+            case MaterialPropertyDataType::Sampler:
+                return u.samplerValue == other.u.samplerValue;
+            case MaterialPropertyDataType::Matrix4x4:
+                return u.matrixValue == other.u.matrixValue;
+            }
+
+            return false;
+        }
+
+        inline bool operator!=(const MaterialPropertyValue& other) const
+        {
+            return !(*this == other);
+        }
 
         inline MaterialPropertyDataType GetValueType() const { return valueType; }
 
@@ -219,7 +260,7 @@ namespace CE::RPI
 
         union U {
             U() {
-                vec4Value = Vec4();
+                memset(this, 0, sizeof(*this));
             }
             
             s32 intValue;

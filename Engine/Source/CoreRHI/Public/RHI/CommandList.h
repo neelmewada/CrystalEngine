@@ -81,6 +81,15 @@ namespace CE::RHI
 		u16 layerCount = 1;
 	};
 
+	struct BufferCopy
+	{
+		RHI::Buffer* srcBuffer = nullptr;
+		u64 srcOffset = 0;
+		RHI::Buffer* dstBuffer = nullptr;
+		u64 dstOffset = 0;
+		u64 totalByteSize = 0;
+	};
+
 	struct TextureToBufferCopy
 	{
 		RHI::Texture* srcTexture = nullptr;
@@ -153,6 +162,8 @@ namespace CE::RHI
 
 		virtual void CopyTextureRegion(const BufferToTextureCopy& region) = 0;
 		virtual void CopyTextureRegion(const TextureToBufferCopy& region) = 0;
+
+		virtual void CopyBufferRegion(const BufferCopy& copy) = 0;
 
 		virtual void BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter = RHI::FilterMode::Linear) = 0;
 

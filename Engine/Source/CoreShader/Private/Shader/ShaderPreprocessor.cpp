@@ -137,6 +137,14 @@ namespace CE
 					{
 						currentProperty.propertyType = ShaderPropertyType::Float;
 					}
+					else if (curToken.lexeme == "UInt")
+					{
+						currentProperty.propertyType = ShaderPropertyType::UInt;
+					}
+					else if (curToken.lexeme == "Int")
+					{
+						currentProperty.propertyType = ShaderPropertyType::Int;
+					}
 					else if (curToken.lexeme == "Color")
 					{
 						currentProperty.propertyType = ShaderPropertyType::Color;

@@ -77,11 +77,13 @@ namespace CE::RHI
     *   Buffer
     */
 
+    ENUM()
 	enum class IndexFormat
 	{
 		Uint16 = 0,
 		Uint32
 	};
+    ENUM_CLASS(IndexFormat);
 
 	ENUM(Flags)
     enum class BufferBindFlags

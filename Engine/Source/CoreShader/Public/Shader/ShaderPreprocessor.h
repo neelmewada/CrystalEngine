@@ -13,6 +13,7 @@ namespace CE
 	enum class ShaderPropertyType
 	{
 		None = 0,
+		UInt, Int,
 		Float,
 		Color,
 		Vector,

@@ -49,6 +49,8 @@ namespace CE::RPI
 
 #include "VertexBuffer.h"
 #include "Model/ModelLod.h"
+#include "Model/ModelLodAsset.h"
+#include "Model/ModelAsset.h"
 #include "Model/Model.h"
 
 #include "Shader/ShaderResourceGroup.h"

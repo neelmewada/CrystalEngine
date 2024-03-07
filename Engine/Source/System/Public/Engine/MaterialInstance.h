@@ -23,17 +23,29 @@ namespace CE
 
         virtual void SetProperty(const Name& name, const Matrix4x4& value) override;
 
-        virtual void SetProperty(const Name& name, CE::Texture* value) override;
+        virtual void SetProperty(const Name& name, CE::Texture* value, const Vec2& offset = Vec2(0, 0), const Vec2& scaling = Vec2(1, 1)) override;
 
         virtual RPI::Material* GetRpiMaterial() override;
 
+        virtual void OnAfterDeserialize() override;
+
+        virtual void ApplyProperties() override;
+
     private:
 
+        virtual HashMap<Name, MaterialProperty> GetAllProperties() override;
+
         FIELD()
-        CE::Material* material = nullptr;
+        CE::MaterialInterface* baseMaterial = nullptr;
+
+        FIELD()
+        Array<MaterialProperty> properties{};
+
+        HashMap<Name, MaterialProperty> propertyMap{};
 
         RPI::Material* materialOverride = nullptr;
 
+        bool valuesModified = true;
     };
     
 } // namespace CE

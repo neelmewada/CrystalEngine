@@ -1,7 +1,15 @@
 #pragma once
 
+#if PAL_TRAIT_BUILD_EDITOR
+namespace CE::Editor
+{
+	class StaticMeshAssetImporter;
+}
+#endif
+
 namespace CE::RPI
 {
+
 	class Material;
 
 	struct VertexBufferInfo
@@ -72,6 +80,11 @@ namespace CE::RPI
 		u32 totalVertexBuffers = 0;
 		FixedArray<u8*, RHI::Limits::Pipeline::MaxVertexAttribCount> vertexDatas{};
 
+		friend class ModelLodAsset;
+
+#if PAL_TRAIT_BUILD_EDITOR
+		class CE::Editor::StaticMeshAssetImporter;
+#endif
 	};
     
 } // namespace CE::RPI

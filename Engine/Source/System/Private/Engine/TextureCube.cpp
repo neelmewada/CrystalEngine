@@ -35,7 +35,7 @@ namespace CE
             desc.texture.sampleCount = 1;
             desc.texture.dimension = Dimension::DimCUBE;
             desc.texture.defaultHeapType = MemoryHeapType::Default;
-
+            
             if (TextureSourceCompressionFormatIsBCn(sourceCompressionFormat))
             {
                 switch (sourceCompressionFormat)

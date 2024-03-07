@@ -26,7 +26,7 @@ namespace CE::Editor
 
 	Array<Name> TextureAssetImporter::GetProductAssetDependencies()
 	{
-		static Array<Name> dependencies{
+		static const Array<Name> dependencies{
 			"/Engine/Assets/Shaders/CubeMap/Equirectangular",
 			"/Engine/Assets/Shaders/CubeMap/IBL",
 			"/Engine/Assets/Shaders/CubeMap/IBLConvolution",

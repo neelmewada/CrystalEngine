@@ -24,4 +24,6 @@
 #include "Asset/ShaderAssetImporter.h"
 #include "Asset/TextureAssetDefinition.h"
 #include "Asset/TextureAssetImporter.h"
+#include "Asset/StaticMeshDefinition.h"
+#include "Asset/StaticMeshAssetImporter.h"
 
