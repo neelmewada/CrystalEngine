@@ -58,7 +58,7 @@ namespace CE
 
         CMLightType lightType = CMLightType::Point;
         bool castLight = true;
-        Color color = { 1, 1, 1, 1};
+        Vec4 color = { 1, 1, 1, 1};
         f64 intensity = 0;
 
         f64 innerAngle = 0.0;
@@ -78,7 +78,7 @@ namespace CE
         f64 farAttenuationEnd = 0.0;
 
         bool castShadows = true;
-        Color shadowColor = { 0, 0, 0, 0 };
+        Vec4 shadowColor = { 0, 0, 0, 0 };
     };
 
     struct CMSubMesh
@@ -88,12 +88,12 @@ namespace CE
 
     struct CMMaterial
     {
-        Color diffuse{};
-        Color specular{};
-        Color ambient{};
-        Color emissive{};
-        Color transparent{};
-        Color reflective{};
+        Vec4 diffuse{};
+        Vec4 specular{};
+        Vec4 ambient{};
+        Vec4 emissive{};
+        Vec4 transparent{};
+        Vec4 reflective{};
 
         float reflectivity = 0.0f;
         float shininess = 0.0f;
@@ -116,7 +116,7 @@ namespace CE
     {
         Array<Vec3> positions{};
         Array<Vec3> normals{};
-        Array<Color> colors{};
+        Array<Vec4> colors{};
         Array<Vec3> tangents{};
         StaticArray<Array<Vec2>, MaxUVChannelCount> uvs{};
         Array<u32> indices{};

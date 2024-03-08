@@ -13,13 +13,13 @@ namespace CE::RPI
 
     }
 
-    ModelLod* ModelLodAsset::CreateModel()
+    ModelLod* ModelLodAsset::CreateModelLod()
     {
         ModelLod* model = new ModelLod();
 
         VertexBufferList vertexBufferInfos{};
         
-        u64 totalBufferSize = vertexData.GetDataSize() + normalData.GetDataSize() + tangentData.GetDataSize() + color0Data.GetDataSize() +
+        u64 totalBufferSize = positionsData.GetDataSize() + normalData.GetDataSize() + tangentData.GetDataSize() + color0Data.GetDataSize() +
             uv0Data.GetDataSize() + uv1Data.GetDataSize() + uv2Data.GetDataSize() + uv3Data.GetDataSize();
         
         u64 totalIndexBufferDataSize = 0;
@@ -74,13 +74,13 @@ namespace CE::RPI
             vertInfo.attributeType = RHI::VertexAttributeDataType::Float3;
             vertInfo.bufferIndex = 0;
             vertInfo.byteOffset = offset;
-            vertInfo.byteCount = vertexData.GetDataSize();
+            vertInfo.byteCount = positionsData.GetDataSize();
             vertInfo.stride = sizeof(Vec3);
 
             vertInfo.semantic = RHI::ShaderSemantic(RHI::VertexInputAttribute::Position);
             vertexBufferInfos.Add(vertInfo);
 
-            memcpy(dataPtr + vertInfo.byteOffset, vertexData.GetDataPtr(), vertInfo.byteCount);
+            memcpy(dataPtr + vertInfo.byteOffset, positionsData.GetDataPtr(), vertInfo.byteCount);
             offset += vertInfo.byteCount;
         }
 

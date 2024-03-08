@@ -114,11 +114,14 @@ namespace CE::Editor
 		IO::Path sourcePath{};
 		IO::Path productPath{};
 		IO::Path editorProductPath{};
-
-		bool success = false;
+		
 		String errorMessage = "";
 
 		AssetImporter* importer = nullptr;
+
+	private:
+
+		bool success = false;
 
 		friend class AssetImporter;
 	};

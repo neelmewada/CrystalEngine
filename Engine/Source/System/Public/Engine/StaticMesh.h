@@ -12,13 +12,15 @@ namespace CE
         StaticMesh();
         ~StaticMesh();
 
+        inline RPI::ModelAsset* GetModelAsset() const { return modelAsset; }
+
     private:
 
         FIELD()
         RPI::ModelAsset* modelAsset = nullptr;
         
 #if PAL_TRAIT_BUILD_EDITOR
-        friend class CE::Editor::StaticMeshAssetImporter;
+        friend class CE::Editor::StaticMeshAssetImportJob;
 #endif
     };
     

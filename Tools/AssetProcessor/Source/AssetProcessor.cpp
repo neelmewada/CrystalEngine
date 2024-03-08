@@ -222,7 +222,7 @@ namespace CE
 			if (!sourcePath.Exists())
 				continue;
 
-			String extension = sourcePath.GetExtension().GetString();
+			String extension = sourcePath.GetExtension().GetString().ToLower();
 
 			AssetDefinition* assetDef = assetDefRegistry->FindAssetDefinition(extension);
 

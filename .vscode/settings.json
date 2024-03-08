@@ -16,6 +16,6 @@
     ],
     "esbonio.sphinx.confDir": "",
     "binary-file-viewer.parserFolders": [
-        "${workspaceFolder}/Tools/VSTools/BinaryParsers"
+        "./Tools/VSTools/BinaryParsers"
     ]
 }

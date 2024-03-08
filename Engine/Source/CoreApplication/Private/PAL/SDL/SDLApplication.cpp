@@ -19,7 +19,7 @@ namespace CE
 
 	SDLApplication::SDLApplication()
 	{
-
+		
 	}
 
 	SDLApplication::~SDLApplication()

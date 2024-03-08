@@ -12,6 +12,11 @@ namespace CE::Editor
 
     private:
 
+		FIELD(Config)
+		bool optimizeMeshes = true;
+		
+		FIELD(Config)
+		bool generateUV1 = false;
 
     };
 
@@ -29,6 +34,12 @@ namespace CE::Editor
 
 		virtual bool ProcessAsset(Package* package) override;
 
+	private:
+
+		bool optimizeMeshes = true;
+		bool generateUV1 = false;
+
+		friend class StaticMeshAssetImporter;
 	};
     
 } // namespace CE::Editor

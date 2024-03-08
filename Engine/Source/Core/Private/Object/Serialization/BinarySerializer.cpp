@@ -141,11 +141,6 @@ namespace CE
 		if (fieldDeclType == nullptr || fieldDeclId == 0)
 			return false;
 
-		if (field->GetName() == "passes")
-		{
-			String::IsAlphabet('a');
-		}
-
 		if (field->IsPODField())
 		{
 			if (!typeIdToFieldTypeMap.KeyExists(fieldDeclId))

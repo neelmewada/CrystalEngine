@@ -33,7 +33,7 @@ namespace CE::RPI
         ModelLodAsset();
         ~ModelLodAsset();
 
-        ModelLod* CreateModel();
+        ModelLod* CreateModelLod();
 
         inline u32 GetNumVertices() const { return numVertices; }
 
@@ -46,7 +46,7 @@ namespace CE::RPI
         Array<ModelLodSubMesh> subMeshes{};
 
         FIELD()
-        BinaryBlob vertexData{};
+        BinaryBlob positionsData{};
 
         FIELD()
         BinaryBlob normalData{};
@@ -72,7 +72,7 @@ namespace CE::RPI
         friend class ModelLod;
 
 #if PAL_TRAIT_BUILD_EDITOR
-        friend class CE::Editor::StaticMeshAssetImporter;
+        friend class CE::Editor::StaticMeshAssetImportJob;
 #endif
     };
 

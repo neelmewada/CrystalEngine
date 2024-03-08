@@ -194,7 +194,9 @@ namespace CE
 		RHI::SwapChain* swapChain = nullptr;
 		PlatformWindow* mainWindow = nullptr;
 
-		RPI::ModelLod* chairModel = nullptr;
+		RPI::Model* chairModel = nullptr;
+
+		//RPI::ModelLod* chairModel = nullptr;
 		RHI::ShaderResourceGroup* chairObjectSrg = nullptr;
 		RHI::Buffer* chairObjectBuffer = nullptr;
 

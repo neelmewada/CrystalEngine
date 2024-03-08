@@ -10,8 +10,8 @@ namespace CE::Editor
 		for (int i = 0; i < sourceAssets.GetSize(); i++)
 		{
 			auto job = new StaticMeshAssetImportJob(this, sourceAssets[i], productAssets[i]);
-			
-            
+			job->optimizeMeshes = optimizeMeshes;
+			job->generateUV1 = generateUV1;
 
 			jobs.Add(job);
 		}
@@ -29,7 +29,7 @@ namespace CE::Editor
 		// Clear the package of any subobjects/assets, we will build the asset from scratch
 		package->DestroyAllSubobjects();
 
-		String extension = sourcePath.GetFilename().GetExtension().GetString();
+		String extension = sourcePath.GetFilename().GetExtension().GetString().ToLower();
 		String fileName = sourcePath.GetFilename().RemoveExtension().GetString();
 		// Make sure we can use the fileName as name of an object
 		fileName = FixObjectName(fileName);
@@ -38,12 +38,27 @@ namespace CE::Editor
 		fileStream.SetBinaryMode(true);
 		u8* data = (u8*)malloc(fileStream.GetLength());
 		fileStream.Read(data, fileStream.GetLength());
+		defer(
+			free(data);
+		);
 
 		ModelImporter importer{};
 		ModelLoadConfig config{};
-		config.postProcessFlags |= ModelPostProcessFlags::OptimizeMeshes | ModelPostProcessFlags::OptimizeGraph | ModelPostProcessFlags::GenNormals |
-			ModelPostProcessFlags::CalcTangentSpace;
-		config.fileFormat = ModelFileFormat::FBX;
+		config.postProcessFlags |= ModelPostProcessFlags::GenNormals | ModelPostProcessFlags::CalcTangentSpace;
+		if (optimizeMeshes)
+		{
+			config.postProcessFlags |= ModelPostProcessFlags::OptimizeMeshes | ModelPostProcessFlags::OptimizeGraph;
+		}
+
+		if (extension == ".fbx")
+		{
+			config.fileFormat = ModelFileFormat::FBX;
+		}
+		else
+		{
+			errorMessage = "Invalid source extension: " + extension;
+			return false;
+		}
 
 		CMScene* scene = importer.ImportScene(data, fileStream.GetLength(), config);
 		if (scene == nullptr)
@@ -58,7 +73,120 @@ namespace CE::Editor
 
 		StaticMesh* staticMesh = CreateObject<StaticMesh>(package, fileName);
 
+		RPI::ModelAsset* modelAsset = CreateObject<RPI::ModelAsset>(staticMesh, "ModelAsset");
+		staticMesh->modelAsset = modelAsset;
+
+		RPI::ModelLodAsset* lod = CreateObject<RPI::ModelLodAsset>(modelAsset, "Lod0");
+		modelAsset->lods.Add(lod);
 		
+		const Array<CMMesh>& meshes = scene->GetMeshes();
+
+		u64 totalVertices = 0;
+		u64 totalIndices = 0;
+		u64 totalColorCount = 0;
+		u64 totalUVCounts[4] = { 0, 0, 0, 0 };
+		for (int i = 0; i < meshes.GetSize(); i++)
+		{
+			totalVertices += meshes[i].positions.GetSize();
+			totalIndices += meshes[i].indices.GetSize();
+			totalColorCount += meshes[i].colors.GetSize();
+
+			for (int j = 0; j < 4; j++)
+			{
+				totalUVCounts[j] += meshes[i].uvs[j].GetSize();
+			}
+		}
+
+		RHI::IndexFormat indexFormat = IndexFormat::Uint32;
+		u32 bytesPerIndex = 4;
+		if (totalVertices < NumericLimits<u16>::Max())
+		{
+			indexFormat = IndexFormat::Uint16;
+			bytesPerIndex = 2;
+		}
+
+		lod->numVertices = totalVertices;
+
+		lod->positionsData.Reserve(totalVertices * sizeof(Vec4));
+		lod->normalData.Reserve(totalVertices * sizeof(Vec4));
+		lod->tangentData.Reserve(totalVertices * sizeof(Vec4));
+		if (totalColorCount > 0)
+		{
+			lod->color0Data.Reserve(totalVertices * sizeof(Color));
+		}
+		
+		if (totalUVCounts[0] > 0)
+			lod->uv0Data.Reserve(totalVertices * sizeof(Vec2));
+		if (totalUVCounts[1] > 0)
+			lod->uv1Data.Reserve(totalVertices * sizeof(Vec2));
+		if (totalUVCounts[2] > 0)
+			lod->uv2Data.Reserve(totalVertices * sizeof(Vec2));
+		if (totalUVCounts[3] > 0)
+			lod->uv3Data.Reserve(totalVertices * sizeof(Vec2));
+
+		u32 indexStartValueOffset = 0;
+		u64 vec4Offset = 0;
+		u64 vec2Offset = 0;
+		
+		lod->subMeshes.Resize(meshes.GetSize());
+
+		for (int i = 0; i < meshes.GetSize(); i++)
+		{
+			const CMMesh& mesh = meshes[i];
+			u32 numVertices = mesh.positions.GetSize();
+			u32 numIndices = mesh.indices.GetSize();
+
+			u8* positionsPtr = lod->positionsData.GetDataPtr();
+			u8* normalsPtr = lod->normalData.GetDataPtr();
+			u8* tangentsPtr = lod->tangentData.GetDataPtr();
+			u8* colors0Ptr = lod->color0Data.GetDataPtr();
+			u8* uv0Ptr = lod->uv0Data.GetDataPtr();
+
+			memcpy(positionsPtr + vec4Offset, mesh.positions.GetData(), numVertices * sizeof(Vec4));
+			memcpy(normalsPtr + vec4Offset, mesh.normals.GetData(), numVertices * sizeof(Vec4));
+			memcpy(tangentsPtr + vec4Offset, mesh.tangents.GetData(), numVertices * sizeof(Vec4));
+
+			if (colors0Ptr != nullptr && totalColorCount > 0)
+			{
+				if (mesh.colors.NonEmpty())
+					memcpy(colors0Ptr + vec4Offset, mesh.colors.GetData(), numVertices * sizeof(Vec4));
+				else
+					memset(colors0Ptr + vec4Offset, 0, numVertices * sizeof(Vec4));
+			}
+
+			if (uv0Ptr != nullptr && totalUVCounts[0] > 0)
+			{
+				if (mesh.uvs[0].NonEmpty())
+					memcpy(uv0Ptr + vec2Offset, mesh.uvs[0].GetData(), numVertices * sizeof(Vec2));
+				else
+					memset(uv0Ptr + vec2Offset, 0, numVertices * sizeof(Vec2));
+			}
+
+			vec4Offset += numVertices * sizeof(Vec4);
+			vec2Offset += numVertices * sizeof(Vec2);
+			
+			RPI::ModelLodSubMesh& subMesh = lod->subMeshes[i];
+
+			subMesh.indexFormat = indexFormat;
+			subMesh.numIndices = numIndices;
+			subMesh.indicesData.Reserve(numIndices * bytesPerIndex);
+
+			for (u32 i = 0; i < numIndices; i++)
+			{
+				if (indexFormat == IndexFormat::Uint16)
+				{
+					*((u16*)subMesh.indicesData.GetDataPtr() + i) = indexStartValueOffset + mesh.indices[i];
+				}
+				else // Uint32
+				{
+					*((u32*)subMesh.indicesData.GetDataPtr() + i) = indexStartValueOffset + mesh.indices[i];
+				}
+			}
+
+			indexStartValueOffset += numVertices;
+
+			subMesh.materialIndex = mesh.materialIndex;
+		}
 
         return true;
     }

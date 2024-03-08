@@ -26,14 +26,14 @@ namespace CE
 		return Vec2(v.x, v.y);
 	}
 
-	inline Color ToColor(aiColor4D c)
+	inline Vec4 ToVec4(aiColor4D c)
 	{
-		return Color(c.r, c.g, c.b, c.a);
+		return Vec4(c.r, c.g, c.b, c.a);
 	}
 
-	inline Color ToColor(aiColor3D c)
+	inline Vec4 ToVec4(aiColor3D c)
 	{
-		return Color(c.r, c.g, c.b, 1.0f);
+		return Vec4(c.r, c.g, c.b, 1.0f);
 	}
 
 	CMScene* ModelImporter::ImportScene(u8* data, u64 dataSize, const ModelLoadConfig& config)
@@ -74,22 +74,22 @@ namespace CE
 
 				aiColor3D color(0.f, 0.f, 0.f);
 				material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-				outMat.diffuse = ToColor(color);
+				outMat.diffuse = ToVec4(color);
 
 				material->Get(AI_MATKEY_COLOR_SPECULAR, color);
-				outMat.specular = ToColor(color);
+				outMat.specular = ToVec4(color);
 
 				material->Get(AI_MATKEY_COLOR_EMISSIVE, color);
-				outMat.emissive = ToColor(color);
+				outMat.emissive = ToVec4(color);
 
 				material->Get(AI_MATKEY_COLOR_AMBIENT, color);
-				outMat.ambient = ToColor(color);
+				outMat.ambient = ToVec4(color);
 
 				material->Get(AI_MATKEY_COLOR_TRANSPARENT, color);
-				outMat.transparent = ToColor(color);
+				outMat.transparent = ToVec4(color);
 
 				material->Get(AI_MATKEY_COLOR_REFLECTIVE, color);
-				outMat.reflective = ToColor(color);
+				outMat.reflective = ToVec4(color);
 
 				float floatValue = 0;
 				material->Get(AI_MATKEY_REFLECTIVITY, floatValue);
@@ -159,7 +159,7 @@ namespace CE
 
 				if (mesh->HasVertexColors(0))
 				{
-					outMesh.colors.Add(ToColor(mesh->mColors[0][j]));
+					outMesh.colors.Add(ToVec4(mesh->mColors[0][j]));
 				}
 
 				if (mesh->HasTextureCoords(0))

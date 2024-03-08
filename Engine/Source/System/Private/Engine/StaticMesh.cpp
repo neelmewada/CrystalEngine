@@ -5,7 +5,7 @@ namespace CE
 
     StaticMesh::StaticMesh()
     {
-
+        
     }
 
     StaticMesh::~StaticMesh()

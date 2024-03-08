@@ -3,7 +3,7 @@
 #if PAL_TRAIT_BUILD_EDITOR
 namespace CE::Editor
 {
-	class StaticMeshAssetImporter;
+	class StaticMeshAssetImportJob;
 }
 #endif
 
@@ -83,7 +83,7 @@ namespace CE::RPI
 		friend class ModelLodAsset;
 
 #if PAL_TRAIT_BUILD_EDITOR
-		class CE::Editor::StaticMeshAssetImporter;
+		friend class CE::Editor::StaticMeshAssetImportJob;
 #endif
 	};
     
