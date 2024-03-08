@@ -1200,7 +1200,7 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
-		const u32 subMeshIdx = 0;
+		constexpr u32 subMeshIdx = 0;
 
 		builder.SetDrawArguments(chairModel->GetModelLod(0)->GetMesh(subMeshIdx)->drawArguments);
 
@@ -1470,6 +1470,7 @@ namespace CE
 		delete cubeModel; cubeModel = nullptr;
 		delete sphereModel; sphereModel = nullptr;
 		delete chairModel; chairModel = nullptr;
+		delete chairObjectBuffer; chairObjectBuffer = nullptr;
 
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{

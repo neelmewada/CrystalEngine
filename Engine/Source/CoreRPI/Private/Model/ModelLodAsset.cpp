@@ -248,6 +248,7 @@ namespace CE::RPI
             queue->Execute(1, &cmdList, fence);
             fence->WaitForFence();
 
+            delete stagingBuffer;
             delete cmdList;
             delete fence;
         }

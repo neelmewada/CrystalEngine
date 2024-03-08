@@ -4,7 +4,7 @@ namespace CE::RHI
 {
 	/*
 	 * Copyright (c) Contributors to the Open 3D Engine Project.
-	 * Used under Apache license. https://github.com/o3de/o3de/blob/development/LICENSE.txt
+	 * Used under MIT license. https://github.com/o3de/o3de/blob/development/LICENSE_MIT.TXT
 	 */
 
 	class CORERHI_API DrawListContext final
