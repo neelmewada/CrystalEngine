@@ -848,86 +848,6 @@ namespace CE
 			depthShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Depth");
 			
 			depthMaterial = new RPI::Material(depthShader->GetOrCreateRPIShader(0));
-			
-
-			/*Resource* depthVert = GetResourceManager()->LoadResource("/" MODULE_NAME "/Resources/Shaders/Depth.vert.spv", nullptr);
-			RHI::ShaderModuleDescriptor vertDesc{};
-			vertDesc.name = "Depth Vertex";
-			vertDesc.stage = RHI::ShaderStage::Vertex;
-			vertDesc.byteCode = depthVert->GetData();
-			vertDesc.byteSize = depthVert->GetDataSize();
-
-			depthShaderVert = RHI::gDynamicRHI->CreateShaderModule(vertDesc);
-
-			RHI::GraphicsPipelineDescriptor depthPipelineDesc{};
-			RHI::ColorBlendState colorBlend{};
-			colorBlend.alphaBlendOp = RHI::BlendOp::Add;
-			colorBlend.colorBlendOp = RHI::BlendOp::Add;
-			colorBlend.componentMask = RHI::ColorComponentMask::All;
-			colorBlend.srcColorBlend = RHI::BlendFactor::SrcAlpha;
-			colorBlend.dstColorBlend = RHI::BlendFactor::OneMinusSrcAlpha;
-			colorBlend.srcAlphaBlend = RHI::BlendFactor::One;
-			colorBlend.dstAlphaBlend = RHI::BlendFactor::Zero;
-			colorBlend.blendEnable = true;
-			depthPipelineDesc.blendState.colorBlends.Add(colorBlend);
-
-			depthPipelineDesc.depthStencilState.depthState.enable = true;
-			depthPipelineDesc.depthStencilState.depthState.testEnable = true;
-			depthPipelineDesc.depthStencilState.depthState.writeEnable = true;
-			depthPipelineDesc.depthStencilState.depthState.compareOp = RHI::CompareOp::LessOrEqual;
-			depthPipelineDesc.depthStencilState.stencilState.enable = false;
-			
-			depthPipelineDesc.multisampleState.sampleCount = 1;
-			depthPipelineDesc.multisampleState.quality = 0;
-
-			depthPipelineDesc.shaderStages.Add({});
-			depthPipelineDesc.shaderStages[0].entryPoint = "VertMain";
-			depthPipelineDesc.shaderStages[0].shaderModule = depthShaderVert;
-
-			depthPipelineDesc.rasterState = {};
-			depthPipelineDesc.rasterState.cullMode = RHI::CullMode::None;
-
-			depthPipelineDesc.vertexInputSlots.Add({});
-			depthPipelineDesc.vertexInputSlots[0].inputRate = RHI::VertexInputRate::PerVertex;
-			depthPipelineDesc.vertexInputSlots[0].inputSlot = 0;
-			depthPipelineDesc.vertexInputSlots[0].stride = sizeof(Vec3);
-
-			Array<RHI::VertexAttributeDescriptor>& vertexAttribs = depthPipelineDesc.vertexAttributes;
-			
-			vertexAttribs.Add({});
-			vertexAttribs[0].dataType = RHI::VertexAttributeDataType::Float3;
-			vertexAttribs[0].inputSlot = 0;
-			vertexAttribs[0].location = 0;
-			vertexAttribs[0].offset = 0;
-
-			Array<RHI::ShaderResourceGroupLayout>& srgLayouts = depthPipelineDesc.srgLayouts;
-			RHI::ShaderResourceGroupLayout perViewSRGLayout{};
-			perViewSRGLayout.srgType = RHI::SRGType::PerView;
-			perViewSRGLayout.variables.Add({});
-			perViewSRGLayout.variables[0].arrayCount = 1;
-			perViewSRGLayout.variables[0].name = "_PerViewData";
-			perViewSRGLayout.variables[0].bindingSlot = perViewDataBinding;
-			perViewSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perViewSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-			srgLayouts.Add(perViewSRGLayout);
-			
-			RHI::ShaderResourceGroupLayout perObjectSRGLayout{};
-			perObjectSRGLayout.srgType = RHI::SRGType::PerObject;
-			perObjectSRGLayout.variables.Add({});
-			perObjectSRGLayout.variables[0].arrayCount = 1;
-			perObjectSRGLayout.variables[0].name = "_ObjectData";
-			perObjectSRGLayout.variables[0].bindingSlot = perObjectDataBinding;
-			perObjectSRGLayout.variables[0].type = RHI::ShaderResourceType::ConstantBuffer;
-			perObjectSRGLayout.variables[0].shaderStages = RHI::ShaderStage::Vertex | RHI::ShaderStage::Fragment;
-			srgLayouts.Add(perObjectSRGLayout);
-
-			srgLayouts.Add(perSceneSrgLayout);
-
-			depthPipelineDesc.name = "Depth Pipeline";
-
-			depthPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(depthPipelineDesc);
-
-			delete depthVert;*/
 		}
 
 		// Skybox Pipeline
@@ -937,7 +857,7 @@ namespace CE
 			skyboxMaterial = new RPI::Material(skyboxShader->GetOrCreateRPIShader(0));
 			RHI::ShaderResourceGroupLayout perObjectSRGLayout = skyboxMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerObject);
 
-			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night");
+			CE::TextureCube* cubeMapTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::TextureCube>("/Engine/Assets/Textures/HDRI/sample_night2");
 			if (cubeMapTex != nullptr)
 			{
 				perSceneSrg->Bind("_Skybox", cubeMapTex->GetRpiTexture()->GetRhiTexture());
