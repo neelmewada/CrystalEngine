@@ -40,7 +40,7 @@ namespace CE
 
 		RHI::SwapChainDescriptor swapChainDesc{};
 		swapChainDesc.imageCount = 2;
-		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+		swapChainDesc.preferredFormats = { RHI::Format::B8G8R8A8_UNORM, RHI::Format::R8G8B8A8_UNORM };
 #if FORCE_SRGB
 		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_SRGB, RHI::Format::B8G8R8A8_SRGB };
 #endif
@@ -72,7 +72,7 @@ namespace CE
 		CE_LOG(Info, All, "Initialization time: {} seconds", timeTaken);
 	}
 
-	float sphereRoughness = 0.0f;
+	static float sphereRoughness = 0.0f;
 
 	void VulkanSandbox::Tick(f32 deltaTime)
 	{
@@ -1454,6 +1454,16 @@ namespace CE
 			depthDesc.bindFlags = RHI::TextureBindFlags::Depth;
 			depthDesc.format = RHI::gDynamicRHI->GetAvailableDepthOnlyFormats()[0];
 			depthDesc.name = "DepthStencil";
+			depthDesc.sampleCount = 1;
+
+			RHI::ImageDescriptor colorMsaaDesc{};
+			colorMsaaDesc.width = swapChain->GetWidth();
+			colorMsaaDesc.height = swapChain->GetHeight();
+			colorMsaaDesc.depth = 1;
+			colorMsaaDesc.bindFlags = RHI::TextureBindFlags::Color;
+			colorMsaaDesc.format = swapChain->GetSwapChainFormat();
+			colorMsaaDesc.name = "ColorMSAA";
+			colorMsaaDesc.sampleCount = 1;
 
 			RHI::ImageDescriptor shadowMapDesc{};
 			shadowMapDesc.width = 1024;
@@ -1466,9 +1476,14 @@ namespace CE
 
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
+			attachmentDatabase.EmplaceFrameAttachment("ColorMSAA", colorMsaaDesc);
 			attachmentDatabase.EmplaceFrameAttachment("DirectionalShadowMap", shadowMapDesc);
 
 			scheduler->SetVariableInitialValue("DrawSunShadows", true);
+
+			RHI::MultisampleState msaa{};
+			msaa.sampleCount = 1;
+			msaa.quality = 1.0f;
 			
 			scheduler->BeginScope("DirectionalShadowCast");
 			{

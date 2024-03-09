@@ -274,6 +274,13 @@ namespace CE::RPI
 		return pipelineCollection->GetPipeline(variant);
 	}
 
+	RHI::PipelineState* ShaderVariant::GetPipeline(const RHI::MultisampleState& multisampleState)
+	{
+		RPI::GraphicsPipelineVariant variant = pipelineCollection->GetDefaultVariant();
+		variant.sampleState = multisampleState;
+		return pipelineCollection->GetPipeline(variant);
+	}
+
 	RHI::ShaderResourceGroupLayout ShaderVariant::GetSrgLayout(RHI::SRGType srgType)
 	{
 		for (const auto& srgLayout : pipelineDesc.srgLayouts)

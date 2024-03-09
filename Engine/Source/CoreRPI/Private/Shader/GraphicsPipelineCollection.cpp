@@ -52,6 +52,7 @@ namespace CE::RPI
             }
         }
 
+        defaultVariant = variant;
         defaultPipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(desc);
 
         LockGuard<SharedMutex> lock{ mutex };

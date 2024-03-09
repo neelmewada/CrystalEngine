@@ -37,10 +37,13 @@ namespace CE::RPI
 
         inline RHI::PipelineState* GetPipeline() const { return defaultPipeline; }
 
+        inline const GraphicsPipelineVariant& GetDefaultVariant() const { return defaultVariant; }
+
     private:
 
         RHI::GraphicsPipelineDescriptor desc{};
 
+        GraphicsPipelineVariant defaultVariant{};
         RHI::PipelineState* defaultPipeline = nullptr;
 
         SharedMutex mutex{};

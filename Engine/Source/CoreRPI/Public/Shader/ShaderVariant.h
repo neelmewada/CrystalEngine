@@ -58,6 +58,8 @@ namespace CE::RPI
 
 		RHI::PipelineState* GetPipeline(const RPI::GraphicsPipelineVariant& variant);
 
+		RHI::PipelineState* GetPipeline(const RHI::MultisampleState& multisampleState);
+
 		RHI::ShaderResourceGroupLayout GetSrgLayout(RHI::SRGType srgType);
 
 	private:
