@@ -22,6 +22,8 @@ namespace CE
 	constexpr u32 metallicTexBinding = 4;
 	constexpr u32 directionalShadowMapBinding = 0;
 
+	constexpr u32 SampleCount = 4;
+
 	static int counter = 0;
 	static RPI::RPISystem& rpiSystem = RPI::RPISystem::Get();
 
@@ -40,7 +42,7 @@ namespace CE
 
 		RHI::SwapChainDescriptor swapChainDesc{};
 		swapChainDesc.imageCount = 2;
-		swapChainDesc.preferredFormats = { RHI::Format::B8G8R8A8_UNORM, RHI::Format::R8G8B8A8_UNORM };
+		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 #if FORCE_SRGB
 		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_SRGB, RHI::Format::B8G8R8A8_SRGB };
 #endif
@@ -1120,6 +1122,10 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		constexpr u32 subMeshIdx = 0;
 
 		builder.SetDrawArguments(chairModel->GetModelLod(0)->GetMesh(subMeshIdx)->drawArguments);
@@ -1127,6 +1133,22 @@ namespace CE
 		builder.AddShaderResourceGroup(chairObjectSrg);
 
 		RPI::Mesh* mesh = chairModel->GetModelLod(0)->GetMesh(subMeshIdx);
+
+		// Shadow Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(chairModel->GetModelLod(0)->GetBuffer(vertInfo.bufferIndex),
+				vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
 
 		// Depth Item
 		{
@@ -1139,7 +1161,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1171,7 +1193,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
 
@@ -1185,11 +1207,30 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
 
 		builder.AddShaderResourceGroup(cubeObjectSrg);
 
 		RPI::Mesh* mesh = cubeModel->GetMesh(0);
+
+		// Shadow Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
 
 		// Depth Item
 		{
@@ -1201,8 +1242,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			//request.pipelineState = depthPipeline;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1233,7 +1273,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
 
@@ -1247,11 +1287,30 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		builder.SetDrawArguments(sphereModel->GetMesh(0)->drawArguments);
 
 		builder.AddShaderResourceGroup(sphereObjectSrg);
 
 		RPI::Mesh* mesh = sphereModel->GetMesh(0);
+
+		// Shadow Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
 
 		// Depth Item
 		{
@@ -1263,7 +1322,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 			
 			builder.AddDrawItem(request);
 		}
@@ -1294,7 +1353,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(sphereMaterial->GetShaderResourceGroup());
 
@@ -1312,6 +1371,10 @@ namespace CE
 	void VulkanSandbox::BuildSkyboxDrawPacket()
 	{
 		RHI::DrawPacketBuilder builder{};
+
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
 
 		//auto model = cubeModel;
 		auto model = sphereModel;
@@ -1339,7 +1402,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = skyboxMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = skyboxMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1443,6 +1506,10 @@ namespace CE
 		rebuild = false;
 		recompile = true;
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		scheduler->BeginFrameGraph();
 		{
 			RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
@@ -1454,7 +1521,7 @@ namespace CE
 			depthDesc.bindFlags = RHI::TextureBindFlags::Depth;
 			depthDesc.format = RHI::gDynamicRHI->GetAvailableDepthOnlyFormats()[0];
 			depthDesc.name = "DepthStencil";
-			depthDesc.sampleCount = 1;
+			depthDesc.sampleCount = msaa.sampleCount;
 
 			RHI::ImageDescriptor colorMsaaDesc{};
 			colorMsaaDesc.width = swapChain->GetWidth();
@@ -1463,7 +1530,7 @@ namespace CE
 			colorMsaaDesc.bindFlags = RHI::TextureBindFlags::Color;
 			colorMsaaDesc.format = swapChain->GetSwapChainFormat();
 			colorMsaaDesc.name = "ColorMSAA";
-			colorMsaaDesc.sampleCount = 1;
+			colorMsaaDesc.sampleCount = msaa.sampleCount;
 
 			RHI::ImageDescriptor shadowMapDesc{};
 			shadowMapDesc.width = 1024;
@@ -1481,9 +1548,29 @@ namespace CE
 
 			scheduler->SetVariableInitialValue("DrawSunShadows", true);
 
-			RHI::MultisampleState msaa{};
-			msaa.sampleCount = 1;
-			msaa.quality = 1.0f;
+			scheduler->BeginScope("ClearPass");
+			{
+				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				swapChainAttachment.attachmentId = "SwapChain";
+				swapChainAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				swapChainAttachment.multisampleState.sampleCount = 1;
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+			}
+			scheduler->EndScope();
+
+			//scheduler->BeginScope("ClearPassMSAA");
+			//{
+			//	RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+			//	colorMsaaAttachment.attachmentId = "ColorMSAA";
+			//	colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
+			//	colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+			//	colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+			//	colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+			//	scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+			//}
+			//scheduler->EndScope();
 			
 			scheduler->BeginScope("DirectionalShadowCast");
 			{
@@ -1508,17 +1595,25 @@ namespace CE
 			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Skybox");
 			{
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain";
-                swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
-                swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+				//RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				//swapChainAttachment.attachmentId = "SwapChain";
+				//swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
+				//swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				//swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				//scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
+				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+				colorMsaaAttachment.attachmentId = "ColorMSAA";
+				colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
+				colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 				scheduler->UseShaderResourceGroup(perSceneSrg);
 				scheduler->UseShaderResourceGroup(perViewSrg);
 				
-				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
+				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline(msaa));
 			}
 			scheduler->EndScope();
 			
@@ -1530,11 +1625,12 @@ namespace CE
                 depthAttachment.loadStoreAction.clearValueStencil = 0;
                 depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				depthAttachment.multisampleState.sampleCount = msaa.sampleCount;
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
 				
 				scheduler->UseShaderResourceGroup(depthPerViewSrg);
 
-				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline());
+				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline(msaa));
 			}
 			scheduler->EndScope();
 
@@ -1544,21 +1640,27 @@ namespace CE
 				depthAttachment.attachmentId = "DepthStencil";
 				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
+				depthAttachment.multisampleState.sampleCount = msaa.sampleCount;
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
+
+				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+				colorMsaaAttachment.attachmentId = "ColorMSAA";
+				colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-                swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::DontCare;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+				swapChainAttachment.multisampleState.sampleCount = 1;
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Resolve, RHI::ScopeAttachmentAccess::Write);
 
 				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
 				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
 				shadowMapAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				shadowMapAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
 				scheduler->UseAttachment(shadowMapAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
 
 				scheduler->UseShaderResourceGroup(perSceneSrg);
@@ -1566,13 +1668,23 @@ namespace CE
 
 				for (int i = 0; i < opaqueRpiShader->GetVariantCount(); i++)
 				{
-					scheduler->UsePipeline(opaqueRpiShader->GetVariant(i)->GetPipeline());
+					scheduler->UsePipeline(opaqueRpiShader->GetVariant(i)->GetPipeline(msaa));
 				}
 
 				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();
-			//scheduler->EndScopeGroup();
+
+			//scheduler->BeginScope("ResolvePass");
+			//{
+			//	RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+			//	colorMsaaAttachment.attachmentId = "ColorMSAA";
+			//	colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+			//	colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+			//	colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+			//	scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+			//}
+			//scheduler->EndScope();
 		}
 		scheduler->EndFrameGraph();
 	}
@@ -1598,12 +1710,14 @@ namespace CE
 		auto skyboxTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
 		auto depthTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 		auto opaqueTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+		auto shadowTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
 		//auto transparentTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("transparent");
 
 		RHI::DrawListMask drawListMask{};
 		drawListMask.Set(skyboxTag);
 		drawListMask.Set(depthTag);
 		drawListMask.Set(opaqueTag);
+		drawListMask.Set(shadowTag);
 		//drawListMask.Set(transparentTag);
 		drawList.Init(drawListMask);
 		
@@ -1616,7 +1730,7 @@ namespace CE
 		// Finalize
 		drawList.Finalize();
 		scheduler->SetScopeDrawList("Skybox", &drawList.GetDrawListForTag(skyboxTag));
-		scheduler->SetScopeDrawList("DirectionalShadowCast", &drawList.GetDrawListForTag(depthTag));
+		scheduler->SetScopeDrawList("DirectionalShadowCast", &drawList.GetDrawListForTag(shadowTag));
 		scheduler->SetScopeDrawList("Depth", &drawList.GetDrawListForTag(depthTag));
 		scheduler->SetScopeDrawList("Opaque", &drawList.GetDrawListForTag(opaqueTag));
 		//scheduler->SetScopeDrawList("Transparent", &drawList.GetDrawListForTag(transparentTag));

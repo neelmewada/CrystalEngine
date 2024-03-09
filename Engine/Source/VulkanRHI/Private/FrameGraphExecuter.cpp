@@ -766,8 +766,10 @@ namespace CE::Vulkan
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		Vulkan::Scope* signallingScope = scopeChain.Top();
 		
-		if (isFirstSwapChainUse && scope->producers.IsEmpty()) // Frame graph uses a swapchain image
+		if (isFirstSwapChainUse) // Frame graph uses a swapchain image
 		{
 			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + 1;
 			if (waitSemaphores.GetSize() < submitInfo.waitSemaphoreCount)
@@ -798,8 +800,8 @@ namespace CE::Vulkan
 				submitInfo.pWaitDstStageMask = scope->waitSemaphoreStageFlags.GetData();
 			}
 		}
-		submitInfo.signalSemaphoreCount = scope->signalSemaphores[currentImageIndex].GetSize();
-		submitInfo.pSignalSemaphores = scope->signalSemaphores[currentImageIndex].GetData();//&scope->renderFinishedSemaphores[currentImageIndex];
+		submitInfo.signalSemaphoreCount = signallingScope->signalSemaphores[currentImageIndex].GetSize();
+		submitInfo.pSignalSemaphores = signallingScope->signalSemaphores[currentImageIndex].GetData();//&scope->renderFinishedSemaphores[currentImageIndex];
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
