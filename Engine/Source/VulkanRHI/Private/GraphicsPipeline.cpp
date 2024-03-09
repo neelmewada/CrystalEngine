@@ -113,12 +113,24 @@ namespace CE::Vulkan
         SetupMultisampleState();
         SetupVertexInputState();
 
+        auto rpCache = device->GetRenderPassCache();
+
         if (desc.renderTarget != nullptr)
         {
-            RenderPass* rp = ((Vulkan::RenderTarget*)desc.renderTarget)->GetRenderPass();
-            if (rp != nullptr)
+            renderPass = ((Vulkan::RenderTarget*)desc.renderTarget)->GetRenderPass();
+            if (renderPass)
             {
-                FindOrCompile(rp, 0);
+                FindOrCompile(renderPass, desc.subpass);
+            }
+        }
+        else
+        {
+            RenderPass::Descriptor rpDesc{};
+            RenderPass::BuildDescriptor(desc.rtLayout, rpDesc);
+            renderPass = rpCache->FindOrCreate(rpDesc);
+            if (renderPass)
+            {
+                FindOrCompile(renderPass, desc.subpass);
             }
         }
 

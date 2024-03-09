@@ -25,7 +25,7 @@ namespace CE::RPI
 			}
 		}
 		
-		pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
+		pipelineCollection = new GraphicsPipelineCollection(pipelineDesc);
 	}
 
 	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor2& desc)
@@ -220,13 +220,45 @@ namespace CE::RPI
 			pipelineDesc.shaderStages.Top().entryPoint = desc.entryPoints[i];
 			pipelineDesc.shaderStages.Top().shaderModule = module;
 		}
+
+		// Default RenderTarget Layout
+		RHI::RenderAttachmentLayout colorAttachment{};
+		colorAttachment.format = RHI::Format::R8G8B8A8_UNORM;
+		colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+		colorAttachment.attachmentId = "Color";
+		colorAttachment.multisampleState.sampleCount = 1;
+		colorAttachment.loadAction = AttachmentLoadAction::Clear;
+		colorAttachment.storeAction = AttachmentStoreAction::Store;
+		pipelineDesc.rtLayout.attachmentLayouts.Add(colorAttachment);
+
+		RHI::RenderAttachmentLayout depthStencilAttachment{};
+		depthStencilAttachment.attachmentId = "DepthStencil";
+		depthStencilAttachment.format = RHI::gDynamicRHI->GetAvailableDepthStencilFormats()[0];
+		depthStencilAttachment.attachmentUsage = ScopeAttachmentUsage::DepthStencil;
+		depthStencilAttachment.multisampleState.sampleCount = 1;
+		depthStencilAttachment.loadAction = AttachmentLoadAction::Load;
+		depthStencilAttachment.storeAction = AttachmentStoreAction::Store;
+		if (pipelineDesc.depthStencilState.depthState.enable)
+		{
+			if (pipelineDesc.depthStencilState.depthState.writeEnable)
+			{
+				depthStencilAttachment.loadAction = AttachmentLoadAction::Clear;
+			}
+			else if (pipelineDesc.depthStencilState.depthState.testEnable)
+			{
+				depthStencilAttachment.loadAction = AttachmentLoadAction::Load;
+			}
+
+			pipelineDesc.rtLayout.attachmentLayouts.Add(depthStencilAttachment);
+		}
 		
-		pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(pipelineDesc);
+		pipelineCollection = new RPI::GraphicsPipelineCollection(pipelineDesc);
 	}
 
 	ShaderVariant::~ShaderVariant()
 	{
-		delete pipeline; pipeline = nullptr;
+		//delete pipeline; pipeline = nullptr;
+		delete pipelineCollection; pipelineCollection = nullptr;
 
 		for (auto [stage, module] : modulesByStage)
 		{
@@ -235,6 +267,11 @@ namespace CE::RPI
 			RHI::gDynamicRHI->DestroyShaderModule(module);
 		}
 		modulesByStage.Clear();
+	}
+
+	RHI::PipelineState* ShaderVariant::GetPipeline(const RPI::GraphicsPipelineVariant& variant)
+	{
+		return pipelineCollection->GetPipeline(variant);
 	}
 
 	RHI::ShaderResourceGroupLayout ShaderVariant::GetSrgLayout(RHI::SRGType srgType)

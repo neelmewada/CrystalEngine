@@ -63,7 +63,7 @@ namespace CE::RHI
 	struct MultisampleState
 	{
 		u16 sampleCount = 1;
-		u16 quality = 0;
+		f32 quality = 1.0f;
 
         inline SIZE_T GetHash() const
         {

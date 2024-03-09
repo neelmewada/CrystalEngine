@@ -67,7 +67,7 @@ namespace CE
 	};
 
 	static void InitFullScreenQuadPipeline(RHI::GraphicsPipelineDescriptor& pipelineDesc, RHI::ShaderModule* vert, RHI::ShaderModule* frag, 
-		RHI::RenderTarget * precompileTarget = nullptr)
+		RHI::RenderTarget* renderTarget = nullptr)
 	{
 		pipelineDesc.rasterState.cullMode = RHI::CullMode::None;
 		pipelineDesc.multisampleState.sampleCount = 1;
@@ -101,7 +101,8 @@ namespace CE
 		fragDesc.shaderModule = frag;
 		pipelineDesc.shaderStages.Add(fragDesc);
 
-		pipelineDesc.renderTarget = precompileTarget;
+		pipelineDesc.renderTarget = renderTarget;
+		pipelineDesc.subpass = 0;
 	}
 
 	void VulkanSandbox::InitHDRIs()
@@ -436,6 +437,8 @@ namespace CE
 			rowAveragePipeline.srg->Bind("_InputTexture", hdriGrayscaleMap);
 			rowAveragePipeline.srg->Bind("_InputSampler", sampler);
 			rowAveragePipeline.srg->FlushBindings();
+
+			rowAverageDesc.renderTarget = grayscaleRenderTarget;
 
 			rowAveragePipeline.pipeline = RHI::gDynamicRHI->CreateGraphicsPipeline(rowAverageDesc);
 

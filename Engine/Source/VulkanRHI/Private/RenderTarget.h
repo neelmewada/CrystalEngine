@@ -7,7 +7,12 @@ namespace CE::Vulkan
     {
     public:
         RenderTarget(VulkanDevice* device, const RHI::RenderTargetLayout& rtLayout);
+        RenderTarget(VulkanDevice* device, const RenderPass::Descriptor& rpDesc);
         RenderTarget(VulkanDevice* device, RenderPass* renderPass);
+
+        RenderTarget* Clone(const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat, u32 subpassSelection) override;
+
+        void GetAttachmentFormats(Array<RHI::Format>& outColorFormats, RHI::Format& outDepthStencilFormat, u32 subpassSelection) override;
 
         ~RenderTarget();
 

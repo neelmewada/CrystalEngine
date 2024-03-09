@@ -323,6 +323,9 @@ namespace CE::RHI
 		MultisampleState multisampleState{};
 
 		RenderTarget* renderTarget = nullptr;
+		RenderTargetLayout rtLayout{};
+
+		u32 subpass = 0;
 
 		CORERHI_API SIZE_T GetHash() const;
 	};

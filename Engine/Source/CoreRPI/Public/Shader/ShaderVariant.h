@@ -54,9 +54,9 @@ namespace CE::RPI
 
 		inline SIZE_T GetVariantId() const { return variantId; }
 
-        inline RHI::PipelineState* GetPipeline() const { return pipeline; }
+        inline RHI::PipelineState* GetPipeline() const { return pipelineCollection->GetPipeline(); }
 
-		inline const RHI::GraphicsPipelineDescriptor& GetGraphicsDesc() const { return pipelineDesc; }
+		RHI::PipelineState* GetPipeline(const RPI::GraphicsPipelineVariant& variant);
 
 		RHI::ShaderResourceGroupLayout GetSrgLayout(RHI::SRGType srgType);
 
@@ -68,10 +68,12 @@ namespace CE::RPI
 		ShaderVariantFlag flags{};
 
 		RHI::GraphicsPipelineDescriptor pipelineDesc{};
+
+		GraphicsPipelineCollection* pipelineCollection = nullptr;
 		
 		HashMap<RHI::ShaderStage, RHI::ShaderModule*> modulesByStage{};
 
-		RHI::PipelineState* pipeline = nullptr;
+		//RHI::PipelineState* pipeline = nullptr;
 
 		friend class Shader;
 	};

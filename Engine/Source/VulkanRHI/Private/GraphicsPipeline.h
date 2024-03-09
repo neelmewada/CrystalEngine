@@ -2,32 +2,32 @@
 
 namespace CE::Vulkan
 {
-
-    struct PipelineVariant
-    {
-        RenderPass* pass = nullptr;
-        u32 subpass = 0;
-        u32 numViewports = 1;
-        u32 numScissors = 1;
-
-        inline SIZE_T GetHash() const
-        {
-            SIZE_T hash = pass->GetHash();
-            CombineHash(hash, subpass);
-            CombineHash(hash, numViewports);
-            CombineHash(hash, numScissors);
-            return hash;
-        }
-
-        inline bool operator==(const PipelineVariant& other) const
-        {
-            return GetHash() == other.GetHash();
-        }
-    };
     
     class GraphicsPipeline : public Pipeline
     {
     public:
+
+        struct PipelineVariant
+        {
+            RenderPass* pass = nullptr;
+            u32 subpass = 0;
+            u32 numViewports = 1;
+            u32 numScissors = 1;
+
+            inline SIZE_T GetHash() const
+            {
+                SIZE_T hash = pass->GetHash();
+                CombineHash(hash, subpass);
+                CombineHash(hash, numViewports);
+                CombineHash(hash, numScissors);
+                return hash;
+            }
+
+            inline bool operator==(const PipelineVariant& other) const
+            {
+                return GetHash() == other.GetHash();
+            }
+        };
 
         GraphicsPipeline(VulkanDevice* device, const RHI::GraphicsPipelineDescriptor& desc);
         virtual ~GraphicsPipeline();
@@ -63,7 +63,7 @@ namespace CE::Vulkan
 
         void SetupVertexInputState();
 
-        RenderPass* defaultRenderPass = nullptr;
+        RenderPass* renderPass = nullptr;
 
         SharedMutex pipelineMutex{};
         HashMap<SIZE_T, VkPipeline> pipelinesByHash{};

@@ -22,6 +22,10 @@
 #include "RHI/Texture.h"
 #include "RHI/SwapChain.h"
 #include "RHI/Sampler.h"
+
+#include "RHI/AttachmentDefines.h"
+#include "RHI/RenderTarget.h"
+#include "RHI/RenderTargetBuffer.h"
 #include "RHI/PipelineState.h"
 #include "RHI/Shader.h"
 #include "RHI/ShaderResourceGroup.h"
@@ -40,9 +44,6 @@
 #include "RHI/CommandList.h"
 
 // Frame
-#include "RHI/AttachmentDefines.h"
-#include "RHI/RenderTarget.h"
-#include "RHI/RenderTargetBuffer.h"
 #include "RHI/FrameAttachment.h"
 #include "RHI/BufferFrameAttachment.h"
 #include "RHI/ImageFrameAttachment.h"

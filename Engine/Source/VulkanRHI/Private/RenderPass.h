@@ -65,6 +65,8 @@ namespace CE::Vulkan
 			FixedArray<SubPassDescriptor, RHI::Limits::Pipeline::MaxSubPassCount> subpasses{};
 			Array<VkSubpassDependency> dependencies{};
 
+			void CompileDependencies();
+
 			SIZE_T GetHash() const;
 		};
 
