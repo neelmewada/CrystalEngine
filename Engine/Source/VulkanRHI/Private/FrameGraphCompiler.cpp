@@ -84,7 +84,7 @@ namespace CE::Vulkan
 #if PLATFORM_MAC
                 i = 0; // Temp code to force same queue
 #endif
-				//i = 0; // Temp code to force same queue
+				i = 0; // Temp code to force same queue
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
 

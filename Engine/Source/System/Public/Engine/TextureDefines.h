@@ -11,7 +11,6 @@ namespace CE
 		BGRA8,
 		RGB8,
 		BGR8,
-		ARGB4444,
 
 		RGB565,
 

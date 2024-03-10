@@ -597,9 +597,16 @@ namespace CE::Vulkan
 
 									// Draw Indexed
 									commandList->BindVertexBuffers(0, drawItem->vertexBufferViewCount, drawItem->vertexBufferViews);
-									commandList->BindIndexBuffer(*drawItem->indexBufferView);
 
-									commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+									if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsIndexed)
+									{
+										commandList->BindIndexBuffer(*drawItem->indexBufferView);
+										commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+									}
+									else if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsLinear)
+									{
+										commandList->DrawLinear(drawItem->arguments.linearArgs);
+									}
 								}
 							}
 
@@ -823,7 +830,7 @@ namespace CE::Vulkan
 			presentInfo.pSwapchains = &swapchainKhr;
 			presentInfo.pImageIndices = &currentImageIndex;
 			presentInfo.waitSemaphoreCount = 1;
-			presentInfo.pWaitSemaphores = &scope->signalSemaphores[currentImageIndex][0];
+			presentInfo.pWaitSemaphores = &signallingScope->signalSemaphores[currentImageIndex][0];
 			
 			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 		}

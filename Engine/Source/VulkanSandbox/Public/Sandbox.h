@@ -92,6 +92,8 @@ namespace CE
 		void BuildSphereMeshDrawPacket();
 		void BuildSkyboxDrawPacket();
 
+		void BuildUIDrawPackets();
+
 		void DestroyLights();
 		void DestroyDrawPackets();
 		void DestroyPipelines();
@@ -180,6 +182,10 @@ namespace CE
 		CE::Shader* depthShader = nullptr;
 		RPI::Material* depthMaterial = nullptr;
 
+		CE::Shader* sdfShader = nullptr;
+		CE::Texture2D* fontAtlasTex = nullptr;
+		RPI::Material* sdfMaterial = nullptr;
+
 		//RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* sphereMaterial = nullptr;
 		RPI::Material* cubeMaterial = nullptr;
@@ -208,6 +214,7 @@ namespace CE
 		RHI::DrawPacket* cubeDrawPacket = nullptr;
 		RHI::DrawPacket* chairDrawPacket = nullptr;
 		RHI::DrawPacket* skyboxDrawPacket = nullptr;
+		Array<RHI::DrawPacket*> uiDrawPackets{};
 
 		RHI::ShaderResourceGroupLayout perSceneSrgLayout{};
 		SceneConstants sceneConstants{};
@@ -230,6 +237,13 @@ namespace CE
 		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> cubeObjectBufferPerImage{};
 		Matrix4x4 cubeModelMatrix{};
+
+		RHI::ShaderResourceGroup* uiObjectSrg = nullptr;
+		RHI::ShaderResourceGroup* uiSceneSrg = nullptr;
+		RHI::ShaderResourceGroup* uiViewSrg = nullptr;
+		PerViewData uiViewData{};
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> uiViewBufferPerImage{};
+		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> uiObjectBufferPerImage{};
 
 		RHI::ShaderResourceGroup* perSceneSrg = nullptr;
 		RHI::Buffer* directionalLightsBuffer = nullptr;

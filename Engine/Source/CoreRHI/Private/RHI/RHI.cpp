@@ -53,7 +53,6 @@ namespace CE::RHI
 		{ RHI::Format::D24_UNORM_S8_UINT,	2, 32 },
 		{ RHI::Format::D32_SFLOAT_S8_UINT,	2, 40 },
 		{ RHI::Format::D32_SFLOAT,			1, 32 },
-		{ RHI::Format::A4R4G4B4_UNORM,		3, 16 },
 		{ RHI::Format::BC1_RGB_UNORM,		3, 4 },
 		{ RHI::Format::BC1_RGB_SRGB,		3, 4 },
 		{ RHI::Format::BC1_RGBA_UNORM,		4, 4 },
