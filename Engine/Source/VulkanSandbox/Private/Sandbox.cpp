@@ -1548,18 +1548,6 @@ namespace CE
 
 			scheduler->SetVariableInitialValue("DrawSunShadows", true);
 
-			scheduler->BeginScope("ClearPass");
-			{
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				swapChainAttachment.multisampleState.sampleCount = 1;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
-			}
-			scheduler->EndScope();
-
 			//scheduler->BeginScope("ClearPassMSAA");
 			//{
 			//	RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
@@ -1592,16 +1580,8 @@ namespace CE
 			}
 			scheduler->EndScope();
 
-			//scheduler->BeginScopeGroup("MainPass");
 			scheduler->BeginScope("Skybox");
 			{
-				//RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				//swapChainAttachment.attachmentId = "SwapChain";
-				//swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
-				//swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				//swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				//scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
-
 				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
 				colorMsaaAttachment.attachmentId = "ColorMSAA";
 				colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);

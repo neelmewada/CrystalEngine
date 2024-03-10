@@ -84,6 +84,7 @@ namespace CE::Vulkan
 #if PLATFORM_MAC
                 i = 0; // Temp code to force same queue
 #endif
+				//i = 0; // Temp code to force same queue
 				scope->queue = queueAllocator.Acquire(i, scope->queueClass, scope->PresentsSwapChain());
 			}
 
@@ -310,6 +311,8 @@ namespace CE::Vulkan
 					flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 				}
 
+				//flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
 				for (int i = 0; i < imageCount; i++)
 				{
 					current->waitSemaphores[i].Add(producerScope->signalSemaphoresByConsumerScope[i][current->id]);
@@ -391,8 +394,6 @@ namespace CE::Vulkan
 				Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
 
 				bool isDifferentQueue = producerScope->queue != current->queue;
-				//if (producerScope->queue != current->queue)
-				//	continue;
 
 				HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
 

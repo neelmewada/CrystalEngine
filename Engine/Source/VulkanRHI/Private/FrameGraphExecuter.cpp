@@ -154,6 +154,11 @@ namespace CE::Vulkan
 		if (scope->IsSubPass() && scope->prevSubPass != nullptr)
 			return false;
 
+		if (scope->GetId() == "Opaque")
+		{
+			String::IsAlphabet('a');
+		}
+
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameScheduler* scheduler = executeRequest.scheduler;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
@@ -745,7 +750,7 @@ namespace CE::Vulkan
 				imageBarrier.subresourceRange.layerCount = 1;
 				
 				vkCmdPipelineBarrier(cmdBuffer,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 					VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 					0,
 					0, nullptr,
@@ -801,12 +806,12 @@ namespace CE::Vulkan
 			}
 		}
 		submitInfo.signalSemaphoreCount = signallingScope->signalSemaphores[currentImageIndex].GetSize();
-		submitInfo.pSignalSemaphores = signallingScope->signalSemaphores[currentImageIndex].GetData();//&scope->renderFinishedSemaphores[currentImageIndex];
+		submitInfo.pSignalSemaphores = signallingScope->signalSemaphores[currentImageIndex].GetData();
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
-		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
-		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		//bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
 
 		if (presentRequired && swapChain != nullptr)
 		{

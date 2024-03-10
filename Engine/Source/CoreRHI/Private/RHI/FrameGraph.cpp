@@ -183,9 +183,6 @@ namespace CE::RHI
 					object["__Prev"] = scope->prev->GetId().GetString();
 				if (scope->next != nullptr)
 					object["__Next"] = scope->next->GetId().GetString();
-				bool consumersExists = scope->consumers.NonEmpty();
-				if (consumersExists)
-					object["Consumers"] = JObject();
 
 				for (auto child : scope->consumers)
 				{
