@@ -165,6 +165,16 @@ namespace CE
         return nullptr;
     }
 
+    bool StructType::HasFunctions()
+    {
+        if (!functionsCached)
+        {
+            CacheAllFunctions();
+        }
+
+        return cachedFunctions.NonEmpty();
+    }
+
     FunctionType* StructType::FindFunctionWithName(const Name& name)
     {
         if (!functionsCached)
@@ -302,7 +312,6 @@ namespace CE
 
     void StructType::CacheAllFunctions()
     {
-		//LockGuard<RecursiveMutex> lock{ rttiMutex };
         if (functionsCached)
             return;
 

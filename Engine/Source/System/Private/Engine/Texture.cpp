@@ -14,8 +14,6 @@ namespace CE
 			return isSrgb ? RHI::Format::B8G8R8A8_SRGB : RHI::Format::B8G8R8A8_UNORM;
 		case TextureFormat::BGR8:
 			return isSrgb ? RHI::Format::B8G8R8_SRGB : RHI::Format::B8G8R8_UNORM;
-		case TextureFormat::ARGB4444:
-			return RHI::Format::A4R4G4B4_UNORM;
 		case TextureFormat::R8:
 			return isSrgb ? RHI::Format::R8_SRGB : RHI::Format::R8_UNORM;
 		case TextureFormat::R16:

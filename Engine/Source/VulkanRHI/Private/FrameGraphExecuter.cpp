@@ -154,6 +154,11 @@ namespace CE::Vulkan
 		if (scope->IsSubPass() && scope->prevSubPass != nullptr)
 			return false;
 
+		if (scope->GetId() == "Opaque")
+		{
+			String::IsAlphabet('a');
+		}
+
 		FrameGraph* frameGraph = executeRequest.frameGraph;
 		FrameScheduler* scheduler = executeRequest.scheduler;
 		FrameGraphCompiler* compiler = (Vulkan::FrameGraphCompiler*)executeRequest.compiler;
@@ -592,9 +597,16 @@ namespace CE::Vulkan
 
 									// Draw Indexed
 									commandList->BindVertexBuffers(0, drawItem->vertexBufferViewCount, drawItem->vertexBufferViews);
-									commandList->BindIndexBuffer(*drawItem->indexBufferView);
 
-									commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+									if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsIndexed)
+									{
+										commandList->BindIndexBuffer(*drawItem->indexBufferView);
+										commandList->DrawIndexed(drawItem->arguments.indexedArgs);
+									}
+									else if (drawItem->arguments.type == RHI::DrawArgumentsType::DrawArgumentsLinear)
+									{
+										commandList->DrawLinear(drawItem->arguments.linearArgs);
+									}
 								}
 							}
 
@@ -745,7 +757,7 @@ namespace CE::Vulkan
 				imageBarrier.subresourceRange.layerCount = 1;
 				
 				vkCmdPipelineBarrier(cmdBuffer,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 					VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 					0,
 					0, nullptr,
@@ -766,8 +778,10 @@ namespace CE::Vulkan
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		Vulkan::Scope* signallingScope = scopeChain.Top();
 		
-		if (isFirstSwapChainUse && scope->producers.IsEmpty()) // Frame graph uses a swapchain image
+		if (isFirstSwapChainUse) // Frame graph uses a swapchain image
 		{
 			submitInfo.waitSemaphoreCount = scope->waitSemaphores[currentImageIndex].GetSize() + 1;
 			if (waitSemaphores.GetSize() < submitInfo.waitSemaphoreCount)
@@ -798,13 +812,13 @@ namespace CE::Vulkan
 				submitInfo.pWaitDstStageMask = scope->waitSemaphoreStageFlags.GetData();
 			}
 		}
-		submitInfo.signalSemaphoreCount = scope->signalSemaphores[currentImageIndex].GetSize();
-		submitInfo.pSignalSemaphores = scope->signalSemaphores[currentImageIndex].GetData();//&scope->renderFinishedSemaphores[currentImageIndex];
+		submitInfo.signalSemaphoreCount = signallingScope->signalSemaphores[currentImageIndex].GetSize();
+		submitInfo.pSignalSemaphores = signallingScope->signalSemaphores[currentImageIndex].GetData();
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
-		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
-		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		//bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
 
 		if (presentRequired && swapChain != nullptr)
 		{
@@ -816,7 +830,7 @@ namespace CE::Vulkan
 			presentInfo.pSwapchains = &swapchainKhr;
 			presentInfo.pImageIndices = &currentImageIndex;
 			presentInfo.waitSemaphoreCount = 1;
-			presentInfo.pWaitSemaphores = &scope->signalSemaphores[currentImageIndex][0];
+			presentInfo.pWaitSemaphores = &signallingScope->signalSemaphores[currentImageIndex][0];
 			
 			result = vkQueuePresentKHR(presentQueue->GetHandle(), &presentInfo);
 		}

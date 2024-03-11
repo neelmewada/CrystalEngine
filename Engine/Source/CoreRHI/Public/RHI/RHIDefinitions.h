@@ -172,7 +172,6 @@ namespace CE::RHI
 		D24_UNORM_S8_UINT,
         D32_SFLOAT_S8_UINT,
 		D32_SFLOAT,
-        A4R4G4B4_UNORM,
 		// Compressed formats
         BC1_RGB_UNORM,
         BC1_RGB_SRGB,

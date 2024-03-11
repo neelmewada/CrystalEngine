@@ -22,6 +22,8 @@ namespace CE
 	constexpr u32 metallicTexBinding = 4;
 	constexpr u32 directionalShadowMapBinding = 0;
 
+	constexpr u32 SampleCount = 4;
+
 	static int counter = 0;
 	static RPI::RPISystem& rpiSystem = RPI::RPISystem::Get();
 
@@ -40,7 +42,7 @@ namespace CE
 
 		RHI::SwapChainDescriptor swapChainDesc{};
 		swapChainDesc.imageCount = 2;
-		swapChainDesc.preferredFormats = { RHI::Format::B8G8R8A8_UNORM, RHI::Format::R8G8B8A8_UNORM };
+		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 #if FORCE_SRGB
 		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_SRGB, RHI::Format::B8G8R8A8_SRGB };
 #endif
@@ -181,14 +183,33 @@ namespace CE
 		perViewData.viewMatrix = Quat::LookRotation(lookDir).ToMatrix() * Matrix4x4::Translation(-perViewData.viewPosition);
 		perViewData.viewProjectionMatrix = perViewData.projectionMatrix * perViewData.viewMatrix;
 
+		float aspect = swapChain->GetAspectRatio();
+		float w = swapChain->GetWidth();
+		float h = swapChain->GetHeight();
+
+		uiViewData.projectionMatrix = Matrix4x4::OrthographicProjection(- w / 2, w / 2, h / 2, -h / 2, 0.01f, 100.0f);
+		uiViewData.viewMatrix = Quat::EulerDegrees(0, 0, 0).ToMatrix() * Matrix4x4::Translation(Vec3(0, 0, 0));
+		uiViewData.viewProjectionMatrix = uiViewData.projectionMatrix * uiViewData.viewMatrix;
+
+		{
+			RHI::BufferData data{};
+			data.startOffsetInBuffer = 0;
+			data.dataSize = uiViewBufferPerImage[imageIndex]->GetBufferSize();
+			data.data = &uiViewData;
+			
+			uiViewBufferPerImage[imageIndex]->UploadData(data);
+		}
+
 		//perViewData = directionalLightViewData;
 
-		RHI::BufferData data{};
-		data.startOffsetInBuffer = 0;
-		data.dataSize = perViewBufferPerImage[imageIndex]->GetBufferSize();
-		data.data = &perViewData;
+		{
+			RHI::BufferData data{};
+			data.startOffsetInBuffer = 0;
+			data.dataSize = perViewBufferPerImage[imageIndex]->GetBufferSize();
+			data.data = &perViewData;
 
-		perViewBufferPerImage[imageIndex]->UploadData(data);
+			perViewBufferPerImage[imageIndex]->UploadData(data);
+		}
 
 		skyboxModelMatrix = Matrix4x4::Translation(Vec3()) * Quat::EulerDegrees(Vec3(0, 0, 0)).ToMatrix() * Matrix4x4::Scale(skyboxScale);
 
@@ -745,6 +766,7 @@ namespace CE
 			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
 			perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
+			uiSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
 
 			RHI::BufferDescriptor sceneConstantBufferDesc{};
 			sceneConstantBufferDesc.name = "Scene Constants";
@@ -772,6 +794,9 @@ namespace CE
 			skyboxSamplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
 			skyboxSampler = RHI::gDynamicRHI->CreateSampler(skyboxSamplerDesc);
 
+			uiSceneSrg->Bind("_SceneData", sceneConstantBuffer);
+			uiSceneSrg->FlushBindings();
+
 			perSceneSrg->Bind("_SceneData", sceneConstantBuffer);
 			perSceneSrg->Bind("_ShadowMapSampler", shadowMapSampler);
 			perSceneSrg->FlushBindings();
@@ -790,6 +815,7 @@ namespace CE
 			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 			{
 				sphereObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
+				uiObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
 
 				sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, sphereRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
@@ -824,6 +850,8 @@ namespace CE
 
 			perViewSrgLayout.variables.Top().shaderStages |= RHI::ShaderStage::Fragment;
 			perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
+
+			uiViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
 			
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -837,10 +865,15 @@ namespace CE
 
 				perViewSrg->Bind(i, "_PerViewData", perViewBufferPerImage[i]);
 				depthPerViewSrg->Bind(i, "_PerViewData", perViewBufferPerImage[i]);
+
+				uiViewBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+				uiViewSrg->Bind(i, "_PerViewData", uiViewBufferPerImage[i]);
 			}
 			
 			perViewSrg->FlushBindings();
 			depthPerViewSrg->FlushBindings();
+			uiViewSrg->FlushBindings();
 		}
 
 		// Depth Pipeline
@@ -983,6 +1016,30 @@ namespace CE
 
 		}
 
+		// UI Pipelines
+		{
+			sdfShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFText");
+			fontAtlasTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Texture2D>("/Engine/Assets/Sandbox/atlas_mtsdf");
+			fontAtlasTex->GetRpiTexture();
+
+			RPI::Shader* sdfRpiShader = sdfShader->GetOrCreateRPIShader(0);
+			sdfMaterial = new RPI::Material(sdfRpiShader);
+			RHI::ShaderResourceGroupLayout perObjectSRGLayout = sdfMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerObject);
+
+			sdfMaterial->SetPropertyValue("_FontAtlas", fontAtlasTex->GetRpiTexture());
+			sdfMaterial->SetPropertyValue("_FontAtlasSampler", defaultSampler);
+			sdfMaterial->FlushProperties();
+
+			uiObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
+
+			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
+			{
+				uiObjectSrg->Bind(i, "_ObjectData", uiObjectBufferPerImage[i]);
+			}
+
+			uiObjectSrg->FlushBindings();
+		}
+
 		UpdatePerViewData(0);
 		UpdatePerViewData(1);
 	}
@@ -1120,6 +1177,10 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		constexpr u32 subMeshIdx = 0;
 
 		builder.SetDrawArguments(chairModel->GetModelLod(0)->GetMesh(subMeshIdx)->drawArguments);
@@ -1127,6 +1188,22 @@ namespace CE
 		builder.AddShaderResourceGroup(chairObjectSrg);
 
 		RPI::Mesh* mesh = chairModel->GetModelLod(0)->GetMesh(subMeshIdx);
+
+		// Shadow Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(chairModel->GetModelLod(0)->GetBuffer(vertInfo.bufferIndex),
+				vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
 
 		// Depth Item
 		{
@@ -1139,7 +1216,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1171,7 +1248,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
 
@@ -1185,11 +1262,30 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		builder.SetDrawArguments(cubeModel->GetMesh(0)->drawArguments);
 
 		builder.AddShaderResourceGroup(cubeObjectSrg);
 
 		RPI::Mesh* mesh = cubeModel->GetMesh(0);
+
+		// Shadow Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(cubeModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
 
 		// Depth Item
 		{
@@ -1201,8 +1297,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			//request.pipelineState = depthPipeline;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
@@ -1233,7 +1328,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(cubeMaterial->GetShaderResourceGroup());
 
@@ -1247,11 +1342,30 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		builder.SetDrawArguments(sphereModel->GetMesh(0)->drawArguments);
 
 		builder.AddShaderResourceGroup(sphereObjectSrg);
 
 		RPI::Mesh* mesh = sphereModel->GetMesh(0);
+
+		// Shadow Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			const auto& vertInfo = mesh->vertexBufferInfos[0];
+			auto vertBufferView = RHI::VertexBufferView(sphereModel->GetBuffer(vertInfo.bufferIndex), vertInfo.byteOffset, vertInfo.byteCount, vertInfo.stride);
+			request.vertexBufferViews.Add(vertBufferView);
+			request.indexBufferView = mesh->indexBufferView;
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
 
 		// Depth Item
 		{
@@ -1263,7 +1377,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 			
 			builder.AddDrawItem(request);
 		}
@@ -1294,7 +1408,7 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			request.uniqueShaderResourceGroups.Add(sphereMaterial->GetShaderResourceGroup());
 
@@ -1312,6 +1426,10 @@ namespace CE
 	void VulkanSandbox::BuildSkyboxDrawPacket()
 	{
 		RHI::DrawPacketBuilder builder{};
+
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
 
 		//auto model = cubeModel;
 		auto model = sphereModel;
@@ -1339,12 +1457,39 @@ namespace CE
 
 			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = skyboxMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = skyboxMaterial->GetCurrentShader()->GetPipeline(msaa);
 
 			builder.AddDrawItem(request);
 		}
 
 		skyboxDrawPacket = builder.Build();
+	}
+
+	void VulkanSandbox::BuildUIDrawPackets()
+	{
+		RHI::DrawPacketBuilder builder{};
+
+		const auto& vertBuffers = rpiSystem.GetFullScreenQuad();
+		RHI::DrawLinearArguments drawArgs = rpiSystem.GetFullScreenQuadDrawArgs();
+
+		builder.SetDrawArguments(drawArgs);
+
+		builder.AddShaderResourceGroup(uiObjectSrg);
+		builder.AddShaderResourceGroup(sdfMaterial->GetShaderResourceGroup());
+
+		// UI Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			request.vertexBufferViews.AddRange(vertBuffers);
+			
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("ui");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = sdfMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
+
+		uiDrawPackets.Add(builder.Build());
 	}
 
 	void VulkanSandbox::InitDrawPackets()
@@ -1353,6 +1498,8 @@ namespace CE
 		BuildCubeMeshDrawPacket();
 		BuildSphereMeshDrawPacket();
 		BuildSkyboxDrawPacket();
+
+		BuildUIDrawPackets();
 	}
 
 	void VulkanSandbox::DestroyDrawPackets()
@@ -1363,6 +1510,12 @@ namespace CE
 		delete sphereDrawPacket; sphereDrawPacket = nullptr;
 		delete chairDrawPacket; chairDrawPacket = nullptr;
 		delete skyboxDrawPacket; skyboxDrawPacket = nullptr;
+
+		for (auto drawPacket : uiDrawPackets)
+		{
+			delete drawPacket;
+		}
+		uiDrawPackets.Clear();
 	}
 
 	void VulkanSandbox::DestroyLights()
@@ -1398,20 +1551,26 @@ namespace CE
 			delete sphereObjectBufferPerImage[i]; sphereObjectBufferPerImage[i] = nullptr;
 			delete skyboxObjectBufferPerImage[i]; skyboxObjectBufferPerImage[i] = nullptr;
 			delete perViewBufferPerImage[i]; perViewBufferPerImage[i] = nullptr;
+			delete uiViewBufferPerImage[i]; uiViewBufferPerImage[i] = nullptr;
+			delete uiObjectBufferPerImage[i]; uiObjectBufferPerImage[i] = nullptr;
 		}
 		delete cubeObjectSrg; cubeObjectSrg = nullptr;
 		delete sphereObjectSrg; sphereObjectSrg = nullptr;
 		delete chairObjectSrg; chairObjectSrg = nullptr;
+		delete uiObjectSrg; uiObjectSrg = nullptr;
 
+		delete uiViewSrg; uiViewSrg = nullptr;
 		delete depthPerViewSrg; depthPerViewSrg = nullptr;
 		delete perViewSrg; perViewSrg = nullptr;
 		
 		delete skyboxMaterial; skyboxMaterial = nullptr;
 		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
 		delete perSceneSrg; perSceneSrg = nullptr;
+		delete uiSceneSrg; uiSceneSrg = nullptr;
 
 		delete sphereMaterial; sphereMaterial = nullptr;
 		delete cubeMaterial; cubeMaterial = nullptr;
+		delete sdfMaterial; sdfMaterial = nullptr;
 
 		delete transparentPipeline; transparentPipeline = nullptr;
 	}
@@ -1443,6 +1602,10 @@ namespace CE
 		rebuild = false;
 		recompile = true;
 
+		RHI::MultisampleState msaa{};
+		msaa.sampleCount = SampleCount;
+		msaa.quality = 1.0f;
+
 		scheduler->BeginFrameGraph();
 		{
 			RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
@@ -1454,7 +1617,7 @@ namespace CE
 			depthDesc.bindFlags = RHI::TextureBindFlags::Depth;
 			depthDesc.format = RHI::gDynamicRHI->GetAvailableDepthOnlyFormats()[0];
 			depthDesc.name = "DepthStencil";
-			depthDesc.sampleCount = 1;
+			depthDesc.sampleCount = msaa.sampleCount;
 
 			RHI::ImageDescriptor colorMsaaDesc{};
 			colorMsaaDesc.width = swapChain->GetWidth();
@@ -1463,7 +1626,7 @@ namespace CE
 			colorMsaaDesc.bindFlags = RHI::TextureBindFlags::Color;
 			colorMsaaDesc.format = swapChain->GetSwapChainFormat();
 			colorMsaaDesc.name = "ColorMSAA";
-			colorMsaaDesc.sampleCount = 1;
+			colorMsaaDesc.sampleCount = msaa.sampleCount;
 
 			RHI::ImageDescriptor shadowMapDesc{};
 			shadowMapDesc.width = 1024;
@@ -1481,9 +1644,34 @@ namespace CE
 
 			scheduler->SetVariableInitialValue("DrawSunShadows", true);
 
-			RHI::MultisampleState msaa{};
-			msaa.sampleCount = 1;
-			msaa.quality = 1.0f;
+			//scheduler->BeginScope("ClearPassMSAA");
+			//{
+			//	RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+			//	colorMsaaAttachment.attachmentId = "ColorMSAA";
+			//	colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
+			//	colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+			//	colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+			//	colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+			//	scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+			//}
+			//scheduler->EndScope();
+
+			scheduler->BeginScope("Skybox");
+			{
+				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+				colorMsaaAttachment.attachmentId = "ColorMSAA";
+				colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
+				colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(perViewSrg);
+
+				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline(msaa));
+			}
+			scheduler->EndScope();
 			
 			scheduler->BeginScope("DirectionalShadowCast");
 			{
@@ -1504,23 +1692,6 @@ namespace CE
 				//scheduler->SetVariableAfterExecution("DrawSunShadows", false);
 			}
 			scheduler->EndScope();
-
-			//scheduler->BeginScopeGroup("MainPass");
-			scheduler->BeginScope("Skybox");
-			{
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain";
-                swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0.5f, 1);
-                swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
-
-				scheduler->UseShaderResourceGroup(perSceneSrg);
-				scheduler->UseShaderResourceGroup(perViewSrg);
-				
-				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline());
-			}
-			scheduler->EndScope();
 			
 			scheduler->BeginScope("Depth");
 			{
@@ -1530,11 +1701,12 @@ namespace CE
                 depthAttachment.loadStoreAction.clearValueStencil = 0;
                 depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				depthAttachment.multisampleState.sampleCount = msaa.sampleCount;
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Write);
 				
 				scheduler->UseShaderResourceGroup(depthPerViewSrg);
 
-				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline());
+				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline(msaa));
 			}
 			scheduler->EndScope();
 
@@ -1544,21 +1716,28 @@ namespace CE
 				depthAttachment.attachmentId = "DepthStencil";
 				depthAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				depthAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
+				depthAttachment.multisampleState.sampleCount = msaa.sampleCount;
 				scheduler->UseAttachment(depthAttachment, RHI::ScopeAttachmentUsage::DepthStencil, RHI::ScopeAttachmentAccess::Read);
+
+				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+				colorMsaaAttachment.attachmentId = "ColorMSAA";
+				colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-                swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+				swapChainAttachment.multisampleState.sampleCount = 1;
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Resolve, RHI::ScopeAttachmentAccess::Write);
 
 				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
 				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
 				shadowMapAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
 				shadowMapAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-
 				scheduler->UseAttachment(shadowMapAttachment, RHI::ScopeAttachmentUsage::Shader, RHI::ScopeAttachmentAccess::Read);
 
 				scheduler->UseShaderResourceGroup(perSceneSrg);
@@ -1566,13 +1745,28 @@ namespace CE
 
 				for (int i = 0; i < opaqueRpiShader->GetVariantCount(); i++)
 				{
-					scheduler->UsePipeline(opaqueRpiShader->GetVariant(i)->GetPipeline());
+					scheduler->UsePipeline(opaqueRpiShader->GetVariant(i)->GetPipeline(msaa));
 				}
+			}
+			scheduler->EndScope();
+
+			scheduler->BeginScope("UI");
+			{
+				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				swapChainAttachment.attachmentId = "SwapChain";
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				swapChainAttachment.multisampleState.sampleCount = 1;
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(uiViewSrg);
+
+				scheduler->UsePipeline(sdfMaterial->GetCurrentShader()->GetPipeline());
 
 				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();
-			//scheduler->EndScopeGroup();
 		}
 		scheduler->EndFrameGraph();
 	}
@@ -1598,12 +1792,16 @@ namespace CE
 		auto skyboxTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
 		auto depthTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
 		auto opaqueTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+		auto shadowTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+		auto uiTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("ui");
 		//auto transparentTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("transparent");
 
 		RHI::DrawListMask drawListMask{};
 		drawListMask.Set(skyboxTag);
 		drawListMask.Set(depthTag);
 		drawListMask.Set(opaqueTag);
+		drawListMask.Set(shadowTag);
+		drawListMask.Set(uiTag);
 		//drawListMask.Set(transparentTag);
 		drawList.Init(drawListMask);
 		
@@ -1612,13 +1810,18 @@ namespace CE
 		drawList.AddDrawPacket(cubeDrawPacket);
 		drawList.AddDrawPacket(skyboxDrawPacket);
 		drawList.AddDrawPacket(chairDrawPacket);
+		for (int i = 0; i < uiDrawPackets.GetSize(); i++)
+		{
+			drawList.AddDrawPacket(uiDrawPackets[i]);
+		}
 
 		// Finalize
 		drawList.Finalize();
 		scheduler->SetScopeDrawList("Skybox", &drawList.GetDrawListForTag(skyboxTag));
-		scheduler->SetScopeDrawList("DirectionalShadowCast", &drawList.GetDrawListForTag(depthTag));
+		scheduler->SetScopeDrawList("DirectionalShadowCast", &drawList.GetDrawListForTag(shadowTag));
 		scheduler->SetScopeDrawList("Depth", &drawList.GetDrawListForTag(depthTag));
 		scheduler->SetScopeDrawList("Opaque", &drawList.GetDrawListForTag(opaqueTag));
+		scheduler->SetScopeDrawList("UI", &drawList.GetDrawListForTag(uiTag));
 		//scheduler->SetScopeDrawList("Transparent", &drawList.GetDrawListForTag(transparentTag));
 	}
 
@@ -1677,37 +1880,10 @@ namespace CE
 
 		auto prevTime = clock();
 
-		if (true)
-		{
-			auto t1 = Thread([&]()
-				{
-					albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
-				});
-			auto t2 = Thread([&]()
-				{
-					normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
-				});
-			auto t3 = Thread([&]()
-				{
-					roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
-				});
-			auto t4 = Thread([&]()
-				{
-					metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
-				});
-
-			t1.Join();
-			t2.Join();
-			t3.Join();
-			t4.Join();
-		}
-		else
-		{
-			albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
-			normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
-			roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
-			metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
-		}
+		albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
+		normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
+		roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
+		metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
 
 		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 

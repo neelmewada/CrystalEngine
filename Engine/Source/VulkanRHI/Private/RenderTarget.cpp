@@ -55,6 +55,39 @@ namespace CE::Vulkan
         return new RenderTarget(device, rpDesc);
     }
 
+    RenderTarget* RenderTarget::Clone(MultisampleState msaa, const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat, u32 subpassSelection)
+    {
+        if (renderPass == nullptr)
+            return nullptr;
+
+        RenderPass::Descriptor rpDesc = renderPass->GetDescriptor();
+        if (subpassSelection >= rpDesc.subpasses.GetSize())
+            return nullptr;
+
+        const auto& subpass = rpDesc.subpasses[subpassSelection];
+
+        for (int i = 0; i < subpass.colorAttachments.GetSize(); i++)
+        {
+            if (i >= newColorFormats.GetSize())
+                break;
+            if (newColorFormats[i] == RHI::Format::Undefined)
+                continue;
+
+            u32 attachmentIndex = subpass.colorAttachments[i].attachmentIndex;
+            rpDesc.attachments[attachmentIndex].format = newColorFormats[i];
+            rpDesc.attachments[attachmentIndex].multisampleState = msaa;
+        }
+
+        if (subpass.depthStencilAttachment.GetSize() > 0 && depthStencilFormat != RHI::Format::Undefined)
+        {
+            u32 attachmentIndex = subpass.depthStencilAttachment[0].attachmentIndex;
+            rpDesc.attachments[attachmentIndex].format = depthStencilFormat;
+            rpDesc.attachments[attachmentIndex].multisampleState = msaa;
+        }
+
+        return new RenderTarget(device, rpDesc);
+    }
+
     void RenderTarget::GetAttachmentFormats(Array<RHI::Format>& outColorFormats, RHI::Format& outDepthStencilFormat, u32 subpassSelection)
     {
         outColorFormats.Clear();

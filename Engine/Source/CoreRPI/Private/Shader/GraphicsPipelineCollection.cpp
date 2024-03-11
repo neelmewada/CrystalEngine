@@ -114,6 +114,8 @@ namespace CE::RPI
                     int colorIdx = 0;
                     for (auto& attachmentLayout : desc.rtLayout.attachmentLayouts)
                     {
+                        attachmentLayout.multisampleState = desc.multisampleState;
+
                         if (attachmentLayout.attachmentUsage == ScopeAttachmentUsage::Color && colorIdx < variant.colorFormats.GetSize())
                         {
                             RHI::Format format = variant.colorFormats[colorIdx++];

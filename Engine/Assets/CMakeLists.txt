@@ -16,4 +16,6 @@ ce_add_assets(${PROJECT_NAME}
         ".png"
         ".jpg"
         ".jpeg"
+        ".hdr"
+        ".fbx" ".FBX"
 )

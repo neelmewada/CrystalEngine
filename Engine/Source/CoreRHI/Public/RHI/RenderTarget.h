@@ -44,6 +44,9 @@ namespace CE::RHI
         //! @return 
         virtual RenderTarget* Clone(const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat, u32 subpassSelection) = 0;
 
+
+        virtual RenderTarget* Clone(MultisampleState msaa, const Array<RHI::Format>& newColorFormats, RHI::Format depthStencilFormat, u32 subpassSelection) = 0;
+
         //! @brief Returns the formats of color & depth-stencil attachments at the given subpass number.
         virtual void GetAttachmentFormats(Array<RHI::Format>& outColorFormats, RHI::Format& outDepthStencilFormat, u32 subpassSelection) = 0;
 

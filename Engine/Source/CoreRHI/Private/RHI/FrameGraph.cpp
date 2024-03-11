@@ -166,6 +166,38 @@ namespace CE::RHI
 			if (scope->consumers.IsEmpty())
 				endScopes.Add(scope);
 		}
+
+#if CE_DEBUG
+
+		// For debugging
+		FileStream jsonFile = FileStream(PlatformDirectories::GetLaunchDir() / "Temp/FrameGraph.json", Stream::Permissions::WriteOnly);
+		
+		JValue root = JObject();
+
+		std::function<void(RHI::Scope*, JValue&)> travelScope = [&](RHI::Scope* scope, JValue& root)
+			{
+				root[scope->GetId().GetString()] = JObject();
+				JValue& objectValue = root[scope->GetId().GetString()];
+				JObject& object = root[scope->GetId().GetString()].GetObjectValue();
+				if (scope->prev != nullptr)
+					object["__Prev"] = scope->prev->GetId().GetString();
+				if (scope->next != nullptr)
+					object["__Next"] = scope->next->GetId().GetString();
+
+				for (auto child : scope->consumers)
+				{
+					travelScope(child, objectValue);
+				}
+			};
+		
+		for (RHI::Scope* producer : producers)
+		{
+			travelScope(producer, root);
+		}
+
+		JsonSerializer::Serialize2(&jsonFile, root);
+		jsonFile.Close();
+#endif
 	}
 
 } // namespace CE::RHI

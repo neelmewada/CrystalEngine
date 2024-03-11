@@ -57,8 +57,6 @@ function(ce_add_test NAME)
     endforeach()
     
     if(output_asset_files)
-        message("Output asset files found for ${NAME}")
-
         add_custom_target(${NAME}_Assets
             DEPENDS ${output_asset_files}
             VERBATIM

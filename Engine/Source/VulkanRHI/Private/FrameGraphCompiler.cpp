@@ -303,20 +303,20 @@ namespace CE::Vulkan
 				}
 				else if (to->GetUsage() == RHI::ScopeAttachmentUsage::SubpassInput || to->GetUsage() == RHI::ScopeAttachmentUsage::Shader)
 				{
-					flags = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+					flags = VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 				}
 				else
 				{
-					flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+					flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 				}
+
+				flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
 
 				for (int i = 0; i < imageCount; i++)
 				{
-					//current->waitSemaphores[i].Add(producerScope->renderFinishedSemaphores[i]);
 					current->waitSemaphores[i].Add(producerScope->signalSemaphoresByConsumerScope[i][current->id]);
 				}
 				current->waitSemaphoreStageFlags.Add(flags);
-				//current->waitSemaphoreStageFlags.Add(VK_PIPELINE_STAGE_ALL_COMMANDS_BIT | VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 			}
 		}
 
@@ -393,8 +393,6 @@ namespace CE::Vulkan
 				Vulkan::Scope* producerScope = (Vulkan::Scope*)producerRhiScope;
 
 				bool isDifferentQueue = producerScope->queue != current->queue;
-				//if (producerScope->queue != current->queue)
-				//	continue;
 
 				HashMap<ScopeAttachment*, ScopeAttachment*> commonAttachments = Scope::FindCommonFrameAttachments(producerRhiScope, current);
 
