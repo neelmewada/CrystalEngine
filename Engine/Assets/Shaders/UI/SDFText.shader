@@ -24,22 +24,20 @@ Shader "UI/SDF Text"
             HLSLPROGRAM
             
             #include "Core/Macros.hlsli"
-            #include "Core/SceneData.hlsli"
-            #include "Core/ViewData.hlsli"
-            #include "Core/ObjectData.hlsli"
-
             #include "Core/Gamma.hlsli"
 
             struct VSInput
             {
                 float3 position : POSITION;
                 float2 uv : TEXCOORD0;
+                uint instanceId : SV_INSTANCEID;
             };
 
             struct PSInput
             {
                 float4 position : SV_POSITION;
                 float2 uv : TEXCOORD1;
+                uint instanceId : SV_INSTANCEID;
             };
 
             #if VERTEX
@@ -47,23 +45,27 @@ Shader "UI/SDF Text"
             PSInput VertMain(VSInput input)
             {
                 PSInput o;
-                //float3 worldPos = LOCAL_TO_WORLD_SPACE(float4(input.position, 1.0), input).xyz;
-                //o.position = WORLD_TO_CLIP_SPACE(float4(worldPos, 1.0));
                 o.position = float4(input.position, 1.0);
                 o.uv = input.uv;
+                o.instanceId = input.instanceId;
                 return o;
             }
             #endif
 
             #if FRAGMENT
 
+            Texture2D<float4> _FontAtlas : SRG_PerMaterial(t0);
+            SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
+
+            cbuffer _MaterialData : SRG_PerMaterial(b3)
+            {
+                float4 _PixRange;
+            };
+
             cbuffer _PerDraw : SRG_PerDraw(b0)
             {
                 uint2 _ScreenSize;
             };
-
-            Texture2D<float4> _FontAtlas : SRG_PerMaterial(t0);
-            SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
 
             float4 FragMain(PSInput input) : SV_TARGET
             {
@@ -71,7 +73,7 @@ Shader "UI/SDF Text"
                 if (a > 0.5) {
                     a = 1.0;
                 } else {
-                    a = 0.0;
+                    a = min(0.0, input.instanceId);
                 }
                 return float4(a, a, a, a);
             }

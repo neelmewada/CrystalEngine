@@ -268,6 +268,9 @@ namespace JsonTests
 
 		FIELD()
 		Array<InnerStruct> nextInner{};
+
+		FIELD()
+		Vec4 vecValue{};
 	};
 
 	STRUCT()
@@ -440,6 +443,7 @@ CE_RTTI_STRUCT(, JsonTests, InnerStruct,
         CE_FIELD(value)
         CE_FIELD(myInt)
         CE_FIELD(nextInner)
+		CE_FIELD(vecValue)
     ),
     CE_FUNCTION_LIST(
     )

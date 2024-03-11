@@ -21,8 +21,8 @@ namespace CE::RHI
             return IsFormatSupported(format, bindFlags) && (imageFormatSupport[format].filterMask & (1 << (u32)filterMode)) != 0;
         }
 
-        inline u32 GetMaxConstantBufferRange() const { return maxConstantBufferRange; }
-        inline u32 GetMaxStructuredBufferRange() const { return maxStructuredBufferRange; }
+        inline u64 GetMaxConstantBufferRange() const { return maxConstantBufferRange; }
+        inline u64 GetMaxStructuredBufferRange() const { return maxStructuredBufferRange; }
 
     protected:
 

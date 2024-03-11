@@ -240,6 +240,14 @@ namespace CE
 		return GetSize();
 	}
 
+    bool TypeInfo::IsVectorType() const
+    {
+        auto typeId = this->GetTypeId();
+        return typeId == TYPEID(Vec2) || typeId == TYPEID(Vec2i) ||
+            typeId == TYPEID(Vec3) || typeId == TYPEID(Vec3i) ||
+            typeId == TYPEID(Vec4) || typeId == TYPEID(Vec4i);
+    }
+
 	Name TypeInfo::GenerateInstanceName(Uuid uuid) const
     {
         String typeName = GetName().GetString();

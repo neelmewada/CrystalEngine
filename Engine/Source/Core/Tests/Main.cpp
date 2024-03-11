@@ -2035,6 +2035,10 @@ TEST(JSON, FieldSerializer)
 		data.strArray = { "Item0", "Item1", "Item2", "Item3" };
 		data.inner.value = "Inner struct";
 		data.inner.myInt = 412;
+		data.inner.vecValue.left = 0;
+		data.inner.vecValue.right = 1;
+		data.inner.vecValue.top = 2;
+		data.inner.vecValue.bottom = 3;
 		data.innerArray = Array<InnerStruct>{ { "i0", 120 }, { "i1", 121 }, { "i2", 122 }, { "i3", 123 }, { "i4", 124 } };
 		data.innerArray[2].nextInner = Array<InnerStruct>{ { "c0", 0 }, { "c1", 1 }, { "c2", 2 }, { "c3", 3 } };
 
@@ -2054,10 +2058,7 @@ TEST(JSON, FieldSerializer)
 
 		JsonFieldDeserializer fieldDeserializer{ SerializedData::Type(), &data };
 
-		while (fieldDeserializer.HasNext())
-		{
-			fieldDeserializer.ReadNext(&stream);
-		}
+		fieldDeserializer.Deserialize(&stream);
 
 		EXPECT_EQ(data.strVal, "My String");
 		EXPECT_EQ(data.strArray.GetSize(), 4);
@@ -2069,6 +2070,13 @@ TEST(JSON, FieldSerializer)
 		}
 		EXPECT_EQ(data.inner.value, "Inner struct");
 		EXPECT_EQ(data.inner.myInt, 412);
+
+		{
+			EXPECT_EQ(data.inner.vecValue.left, 0);
+			EXPECT_EQ(data.inner.vecValue.right, 1);
+			EXPECT_EQ(data.inner.vecValue.top, 2);
+			EXPECT_EQ(data.inner.vecValue.bottom, 3);
+		}
 
 		EXPECT_EQ(data.innerArray.GetSize(), 5);
 		{

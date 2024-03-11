@@ -215,6 +215,7 @@ namespace CE
 
 		virtual bool IsArrayType() const { return this->GetTypeId() == TYPEID(Array<u8>); }
         virtual bool IsObjectStoreType() const { return this->GetTypeId() == TYPEID(ObjectMap); }
+		virtual bool IsVectorType() const;
         
         virtual bool IsObject() { return IsClass() && IsAssignableTo(TYPEID(Object)); }
 

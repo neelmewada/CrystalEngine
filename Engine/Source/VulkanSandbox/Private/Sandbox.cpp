@@ -1474,7 +1474,7 @@ namespace CE
 
 		builder.SetDrawArguments(drawArgs);
 
-		builder.AddShaderResourceGroup(uiObjectSrg);
+		//builder.AddShaderResourceGroup(uiObjectSrg);
 		builder.AddShaderResourceGroup(sdfMaterial->GetShaderResourceGroup());
 
 		// UI Item
@@ -1759,8 +1759,8 @@ namespace CE
 				swapChainAttachment.multisampleState.sampleCount = 1;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
-				scheduler->UseShaderResourceGroup(perSceneSrg);
-				scheduler->UseShaderResourceGroup(uiViewSrg);
+				//scheduler->UseShaderResourceGroup(perSceneSrg);
+				//scheduler->UseShaderResourceGroup(uiViewSrg);
 
 				scheduler->UsePipeline(sdfMaterial->GetCurrentShader()->GetPipeline());
 

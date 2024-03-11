@@ -1069,6 +1069,44 @@ namespace CE
 
 			return true;
 		}
+		else if (json.IsObjectValue() && (fieldTypeId == TYPEID(Vec4) || fieldTypeId == TYPEID(Vec4i)))
+		{
+			Vec4 value = {};
+			const JObject& objectValue = json.GetObjectValue();
+			if (objectValue.KeyExists("left"))
+				value.left = objectValue.Get("left").GetNumberValue();
+			else if (objectValue.KeyExists("Left"))
+				value.left = objectValue.Get("Left").GetNumberValue();
+
+			if (objectValue.KeyExists("right"))
+				value.right = objectValue.Get("right").GetNumberValue();
+			else if (objectValue.KeyExists("Right"))
+				value.right = objectValue.Get("Right").GetNumberValue();
+
+			if (objectValue.KeyExists("top"))
+				value.top = objectValue.Get("top").GetNumberValue();
+			else if (objectValue.KeyExists("Top"))
+				value.top = objectValue.Get("Top").GetNumberValue();
+
+			if (objectValue.KeyExists("bottom"))
+				value.bottom = objectValue.Get("bottom").GetNumberValue();
+			else if (objectValue.KeyExists("Bottom"))
+				value.bottom = objectValue.Get("Bottom").GetNumberValue();
+
+			if (fieldTypeId == TYPEID(Vec4))
+			{
+				Vec4& val = const_cast<Vec4&>(field->GetFieldValue<Vec4>(rawInstance));
+				val = value;
+			}
+			else if (fieldTypeId == TYPEID(Vec4i))
+			{
+				Vec4i& val = const_cast<Vec4i&>(field->GetFieldValue<Vec4i>(rawInstance));
+				val.left   = lround(value.left);
+				val.right  = lround(value.right);
+				val.top    = lround(value.top);
+				val.bottom = lround(value.bottom);
+			}
+		}
 		else if (json.IsArrayValue() && fieldDeclType->IsArrayType())
 		{
 			if (json.GetArrayValue().IsEmpty())

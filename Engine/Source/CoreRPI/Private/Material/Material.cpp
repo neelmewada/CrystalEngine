@@ -310,9 +310,10 @@ namespace CE::RPI
                                 shaderResourceGroup->Bind(imageIndex, variable.name, texture->GetRhiTexture());
                             }
                             RHI::Sampler* sampler = texture->GetSamplerState();
-                            if (sampler != nullptr)
+                            Name samplerPropertyName = variable.name.GetString() + "Sampler";
+                            if (sampler != nullptr && (!properties.KeyExists(samplerPropertyName) || !properties[samplerPropertyName].IsOfType<RHI::Sampler*>()))
                             {
-                                shaderResourceGroup->Bind(imageIndex, variable.name.GetString() + "Sampler", sampler);
+                                shaderResourceGroup->Bind(imageIndex, samplerPropertyName, sampler);
                             }
                         }
                     }

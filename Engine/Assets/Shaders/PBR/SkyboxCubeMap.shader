@@ -14,7 +14,7 @@ Shader "PBR/Standard"
         Pass
         {
             Name "Opaque"
-            Tags { 
+            Tags {
                 "Vertex"="VertMain", "Fragment"="FragMain", "DrawListTag"="skybox"
             }
             ZWrite Off
