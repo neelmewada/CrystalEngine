@@ -1019,7 +1019,7 @@ namespace CE
 		// UI Pipelines
 		{
 			sdfShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFText");
-			fontAtlasTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Texture2D>("/Engine/Assets/Sandbox/atlas");
+			fontAtlasTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Texture2D>("/Engine/Assets/Sandbox/atlas_mtsdf");
 			fontAtlasTex->GetRpiTexture();
 
 			RPI::Shader* sdfRpiShader = sdfShader->GetOrCreateRPIShader(0);
@@ -1655,6 +1655,23 @@ namespace CE
 			//	scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 			//}
 			//scheduler->EndScope();
+
+			scheduler->BeginScope("Skybox");
+			{
+				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+				colorMsaaAttachment.attachmentId = "ColorMSAA";
+				colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
+				colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->UseShaderResourceGroup(perSceneSrg);
+				scheduler->UseShaderResourceGroup(perViewSrg);
+
+				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline(msaa));
+			}
+			scheduler->EndScope();
 			
 			scheduler->BeginScope("DirectionalShadowCast");
 			{
@@ -1673,23 +1690,6 @@ namespace CE
 				scheduler->UsePipeline(depthMaterial->GetCurrentShader()->GetPipeline());
 
 				//scheduler->SetVariableAfterExecution("DrawSunShadows", false);
-			}
-			scheduler->EndScope();
-
-			scheduler->BeginScope("Skybox");
-			{
-				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
-				colorMsaaAttachment.attachmentId = "ColorMSAA";
-				colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
-				colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
-				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
-
-				scheduler->UseShaderResourceGroup(perSceneSrg);
-				scheduler->UseShaderResourceGroup(perViewSrg);
-				
-				scheduler->UsePipeline(skyboxMaterial->GetCurrentShader()->GetPipeline(msaa));
 			}
 			scheduler->EndScope();
 			
@@ -1728,7 +1728,8 @@ namespace CE
 
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::DontCare;
+				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 				swapChainAttachment.multisampleState.sampleCount = 1;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Resolve, RHI::ScopeAttachmentAccess::Write);
@@ -1879,37 +1880,10 @@ namespace CE
 
 		auto prevTime = clock();
 
-		if (true)
-		{
-			auto t1 = Thread([&]()
-				{
-					albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
-				});
-			auto t2 = Thread([&]()
-				{
-					normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
-				});
-			auto t3 = Thread([&]()
-				{
-					roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
-				});
-			auto t4 = Thread([&]()
-				{
-					metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
-				});
-
-			t1.Join();
-			t2.Join();
-			t3.Join();
-			t4.Join();
-		}
-		else
-		{
-			albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
-			normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
-			roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
-			metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
-		}
+		albedoImage = assetManager->LoadAssetAtPath<CE::Texture2D>(albedoPath);
+		normalImage = assetManager->LoadAssetAtPath<CE::Texture2D>(normalPath);
+		roughnessImage = assetManager->LoadAssetAtPath<CE::Texture2D>(roughnessPath);
+		metallicImage = assetManager->LoadAssetAtPath<CE::Texture2D>(metallicPath);
 
 		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 

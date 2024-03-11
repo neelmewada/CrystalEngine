@@ -57,7 +57,12 @@ Shader "UI/SDF Text"
 
             #if FRAGMENT
 
-            Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
+            cbuffer _PerDraw : SRG_PerDraw(b0)
+            {
+                uint2 _ScreenSize;
+            };
+
+            Texture2D<float4> _FontAtlas : SRG_PerMaterial(t0);
             SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
 
             float4 FragMain(PSInput input) : SV_TARGET

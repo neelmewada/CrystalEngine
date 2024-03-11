@@ -196,6 +196,8 @@ namespace CE
         
         FieldType* FindFieldWithName(const Name& name, TypeId fieldTypeId = 0);
 
+		bool HasFunctions();
+
 		FunctionType* FindFunctionWithName(const Name& name);
 		CE::Array<FunctionType*> FindAllFunctionsWithName(const Name& name);
 

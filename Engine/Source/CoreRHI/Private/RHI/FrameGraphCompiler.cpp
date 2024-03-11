@@ -90,6 +90,8 @@ namespace CE::RHI
 		// Allocate aliased memory pool
 		pool->AllocateMemoryPool(allocationInfo, &bufferPoolRecreated, &imagePoolRecreated, compileRequest.shrinkPool);
 
+		int attachmentIdx = 0;
+
 		for (int imageIdx = 0; imageIdx < compileRequest.numFramesInFlight; imageIdx++)
 		{
 			// Create & bind buffers & images
@@ -103,14 +105,14 @@ namespace CE::RHI
 				{
 					auto bufferAttachment = (RHI::BufferFrameAttachment*)attachment;
 					const auto& desc = bufferAttachment->GetBufferDescriptor();
-					RHI::Buffer* buffer = pool->AllocateBuffer(desc, attachmentOffsets[i]);
+					RHI::Buffer* buffer = pool->AllocateBuffer(desc, attachmentOffsets[attachmentIdx++]);
 					bufferAttachment->SetResource(imageIdx, buffer);
 				}
 				else if (attachment->IsImageAttachment())
 				{
 					auto imageAttachment = (RHI::ImageFrameAttachment*)attachment;
 					const auto& desc = imageAttachment->GetImageDescriptor();
-					RHI::Texture* image = pool->AllocateImage(desc, attachmentOffsets[i]);
+					RHI::Texture* image = pool->AllocateImage(desc, attachmentOffsets[attachmentIdx++]);
 					imageAttachment->SetResource(imageIdx, image);
 				}
 			}
