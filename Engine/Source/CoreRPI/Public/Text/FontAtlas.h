@@ -34,6 +34,8 @@ namespace CE::RPI
         CE_STRUCT(FontGlyphPlaneBounds)
     public:
 
+
+
     };
 
     STRUCT()

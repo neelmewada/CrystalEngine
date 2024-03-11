@@ -2098,6 +2098,29 @@ TEST(JSON, FieldSerializer)
 
 	stream.Close();
 
+	{
+		JValue root = JObject();
+		root["vecValue"] = JObject();
+		root["vecValue"]["left"] = 0;
+		root["vecValue"]["right"] = 1;
+		root["vecValue"]["top"] = 2;
+		root["vecValue"]["bottom"] = 3;
+
+		InnerStruct inner{};
+
+		JsonFieldDeserializer fieldDeserializer{ InnerStruct::Type(), &inner };
+
+		while (fieldDeserializer.HasNext())
+		{
+			fieldDeserializer.ReadNext(root);
+		}
+
+		EXPECT_EQ(inner.vecValue.left, 0);
+		EXPECT_EQ(inner.vecValue.right, 1);
+		EXPECT_EQ(inner.vecValue.top, 2);
+		EXPECT_EQ(inner.vecValue.bottom, 3);
+	}
+
 	CEDeregisterModuleTypes();
 	TEST_END;
 }
