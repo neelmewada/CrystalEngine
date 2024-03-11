@@ -75,7 +75,7 @@ namespace CE
 
 	CE::Texture::~Texture()
 	{
-		delete rpiTexture;
+		delete rpiTexture; rpiTexture = nullptr;
 	}
 
 	CMImageFormat CE::Texture::GetCMPixelFormat()

@@ -158,8 +158,6 @@ namespace CE::RHI
 
 		// - Helper Operations -
 
-		virtual void Blit(Texture* source, Texture* destination, FilterMode filter) = 0;
-
 		virtual u64 GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member) = 0;
 		virtual u64 GetShaderStructMemberSize(const RHI::ShaderStructMember& member) = 0;
 		virtual void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) = 0;

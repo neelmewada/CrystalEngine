@@ -196,50 +196,6 @@ namespace CE::Vulkan
 		return false;
 	}
 
-	void VulkanRHI::Blit(RHI::Texture* source, RHI::Texture* destination, RHI::FilterMode filter)
-	{
-		if (source == nullptr || destination == nullptr)
-			return;
-
-		Texture* src = (Texture*)source;
-		Texture* dst = (Texture*)destination;
-
-		VkFilter vkFilter = VK_FILTER_LINEAR;
-		switch (filter)
-		{
-		case CE::RHI::FilterMode::Nearest:
-			vkFilter = VK_FILTER_NEAREST;
-			break;
-		case CE::RHI::FilterMode::Cubic:
-			if (device->IsDeviceExtensionSupported(VK_EXT_FILTER_CUBIC_EXTENSION_NAME))
-				vkFilter = VK_FILTER_CUBIC_EXT;
-			break;
-		}
-
-		VkCommandBuffer cmdBuffer = device->BeginSingleUseCommandBuffer();
-
-		VkImageBlit region{};
-		region.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
-		region.srcOffsets[1] = VkOffset3D{ (int)src->GetWidth(), (int)src->GetHeight(), (int)src->GetDepth() };
-		region.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
-		region.dstOffsets[1] = VkOffset3D{ (int)dst->GetWidth(), (int)dst->GetHeight(), (int)dst->GetDepth() };
-
-		region.srcSubresource.mipLevel = 0;
-		region.srcSubresource.layerCount = 1;
-		region.srcSubresource.aspectMask = src->GetAspectMask();
-		region.srcSubresource.baseArrayLayer = 0;
-
-		region.dstSubresource.mipLevel = 0;
-		region.dstSubresource.layerCount = 1;
-		region.dstSubresource.aspectMask = dst->GetAspectMask();
-		region.dstSubresource.baseArrayLayer = 0;
-		
-		vkCmdBlitImage(cmdBuffer, src->GetImage(), src->GetImageLayout(), dst->GetImage(), dst->GetImageLayout(), 1, &region, vkFilter);
-
-		device->EndSingleUseCommandBuffer(cmdBuffer);
-		device->SubmitAndWaitSingleUseCommandBuffer(cmdBuffer);
-	}
-
     void VulkanRHI::GetTextureMemoryRequirements(const RHI::TextureDescriptor& desc, ResourceMemoryRequirements& outRequirements)
     {
         VkImageCreateInfo imageCI{};

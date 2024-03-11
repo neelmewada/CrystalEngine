@@ -62,6 +62,7 @@ namespace CE
 		InitTextures();
 		//InitHDRIs();
 		//InitCubeMapDemo();
+		InitFontAtlas();
 		InitPipelines();
 		InitLights();
 		InitDrawPackets();
@@ -231,6 +232,7 @@ namespace CE
 
 		delete scheduler;
 		DestroyPipelines();
+		DestroyFontAtlas();
 
 		delete swapChain;
 
@@ -1018,16 +1020,15 @@ namespace CE
 
 		// UI Pipelines
 		{
-			sdfShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFText");
-			fontAtlasTex = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Texture2D>("/Engine/Assets/Sandbox/atlas_mtsdf");
-			fontAtlasTex->GetRpiTexture();
-
 			RPI::Shader* sdfRpiShader = sdfShader->GetOrCreateRPIShader(0);
 			sdfMaterial = new RPI::Material(sdfRpiShader);
 			RHI::ShaderResourceGroupLayout perObjectSRGLayout = sdfMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerObject);
 
-			sdfMaterial->SetPropertyValue("_FontAtlas", fontAtlasTex->GetRpiTexture());
+			sdfMaterial->SetPropertyValue("_FgColor", Color(1, 1, 1, 1));
+			sdfMaterial->SetPropertyValue("_BgColor", Color(0, 0, 0, 0));
+			sdfMaterial->SetPropertyValue("_FontAtlas", fontAtlas->GetAtlasTexture());
 			sdfMaterial->SetPropertyValue("_FontAtlasSampler", defaultSampler);
+			sdfMaterial->SetPropertyValue("_PixRange", 2.0f);
 			sdfMaterial->FlushProperties();
 
 			uiObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
@@ -1042,6 +1043,137 @@ namespace CE
 
 		UpdatePerViewData(0);
 		UpdatePerViewData(1);
+	}
+
+	void VulkanSandbox::InitFontAtlas()
+	{
+		AssetManager* assetManager = gEngine->GetAssetManager();
+
+		auto prevTime = clock();
+		sdfShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFText");
+		fontAtlasTex = assetManager->LoadAssetAtPath<CE::Texture2D>("/Engine/Assets/Sandbox/atlas_mtsdf");
+		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
+		FontAtlasLayout atlasLayout{};
+
+		JsonFieldDeserializer atlasLayoutDeserializer{ FontAtlasLayout::Type(), &atlasLayout };
+
+		// Temp file
+		FileStream jsonFile = FileStream(PlatformDirectories::GetLaunchDir() / "Temp/atlas_mtsdf.json", Stream::Permissions::ReadOnly);
+
+		int result = atlasLayoutDeserializer.Deserialize(&jsonFile);
+		
+		fontAtlas = RPI::FontAtlas::Create("FontAtlas", fontAtlasTex->CloneRpiTexture(), atlasLayout);
+
+		textPerDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(sdfShader->GetOrCreateRPIShader(0)->GetVariant(0)->GetSrgLayout(RHI::SRGType::PerDraw));
+
+		UpdateTextData();
+
+		{
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.name = "DrawItem Buffer";
+			bufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
+			bufferDesc.bufferSize = sizeof(TextDrawItem) * textDrawItems.GetSize();
+			bufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			bufferDesc.structureByteStride = sizeof(TextDrawItem);
+
+			textDrawItemsBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			textPerDrawSrg->Bind("_DrawList", textDrawItemsBuffer);
+		}
+
+		{
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.name = "PerDraw Text";
+			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
+			bufferDesc.bufferSize = sizeof(textPerDrawData);
+			bufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			bufferDesc.structureByteStride = sizeof(textPerDrawData);
+
+			textPerDrawBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			textPerDrawSrg->Bind("_PerDraw", textPerDrawBuffer);
+		}
+
+		UpdateTextData();
+
+		textPerDrawSrg->FlushBindings();
+	}
+
+	void VulkanSandbox::UpdateTextData()
+	{
+		String text = "G";
+		textDrawItems.Clear();
+
+		const auto& atlasLayout = fontAtlas->GetAtlasLayout();
+
+		u32 w = atlasLayout.atlas.width;
+		u32 h = atlasLayout.atlas.height;
+
+		textPerDrawData.screenWidth = swapChain->GetWidth();
+		textPerDrawData.screenHeight = swapChain->GetHeight();
+		float aspect = textPerDrawData.screenWidth / textPerDrawData.screenHeight;
+		float maxSize = Math::Max(textPerDrawData.screenWidth, textPerDrawData.screenHeight);
+
+		const f32 pixRange = 2;
+
+		float x = 0;
+		float fsScale = 1.0f / (atlasLayout.metrics.ascender - atlasLayout.metrics.descender);
+		float y = -fsScale * atlasLayout.metrics.ascender;
+		f32 fontSize = 86;//32.0f;
+
+		for (int i = 0; i < text.GetLength(); i++)
+		{
+			for (const auto& glyph : atlasLayout.glyphs)
+			{
+				if (glyph.unicode == text[i])
+				{
+					f32 pl = glyph.planeBounds.left;
+					f32 pb = glyph.planeBounds.bottom;
+					f32 pr = glyph.planeBounds.right;
+					f32 pt = glyph.planeBounds.top;
+
+					f32 al = glyph.atlasBounds.left;
+					f32 at = glyph.atlasBounds.top;
+					f32 ar = glyph.atlasBounds.right;
+					f32 ab = glyph.atlasBounds.bottom;
+
+					Vec2 texCoordMin = Vec2(al, ab);
+					Vec2 texCoordMax = Vec2(ar, at);
+
+					Vec2 quadMin = Vec2(pl, pb);
+					Vec2 quadMax = Vec2(pr, pt);
+
+					quadMin *= fsScale; quadMax *= fsScale;
+					quadMin += Vec2(x, y); quadMax += Vec2(x, y);
+
+					float texelWidth = 1.0f / w;
+					float texelHeight = 1.0f / h;
+					al *= texelWidth; ab *= texelHeight; ar *= texelWidth; at *= texelHeight;
+
+					texCoordMin.x *= texelWidth; texCoordMin.y *= texelHeight;
+					texCoordMax.x *= texelWidth; texCoordMax.y *= texelHeight;
+
+					Vec3 scale = Vec3(1.0f / textPerDrawData.screenWidth, 1.0f / textPerDrawData.screenHeight, 1) * fontSize * (1.5f * 2.0f);
+					scale.x *= (quadMax.x - quadMin.x);
+					scale.y *= (quadMax.y - quadMin.y);
+
+					TextDrawItem charItem{};
+					charItem.transform = Matrix4x4::Scale(scale);
+					charItem.atlasUV.left = texCoordMin.x;
+					charItem.atlasUV.top = texCoordMin.y;
+					charItem.atlasUV.right = texCoordMax.x;
+					charItem.atlasUV.bottom = texCoordMax.y;
+
+					textDrawItems.Add(charItem);
+				}
+			}
+		}
+
+		if (textDrawItemsBuffer)
+			textDrawItemsBuffer->UploadData(textDrawItems.GetData(), textDrawItemsBuffer->GetBufferSize());
+		if (textPerDrawBuffer)
+			textPerDrawBuffer->UploadData(&textPerDrawData, textPerDrawBuffer->GetBufferSize());
 	}
 
 	void VulkanSandbox::InitLights()
@@ -1469,13 +1601,15 @@ namespace CE
 	{
 		RHI::DrawPacketBuilder builder{};
 
-		const auto& vertBuffers = rpiSystem.GetFullScreenQuad();
-		RHI::DrawLinearArguments drawArgs = rpiSystem.GetFullScreenQuadDrawArgs();
+		const auto& vertBuffers = rpiSystem.GetTextQuad();
+		RHI::DrawLinearArguments drawArgs = rpiSystem.GetTextQuadDrawArgs();
+		drawArgs.instanceCount = textDrawItems.GetSize();
 
 		builder.SetDrawArguments(drawArgs);
 
 		//builder.AddShaderResourceGroup(uiObjectSrg);
 		builder.AddShaderResourceGroup(sdfMaterial->GetShaderResourceGroup());
+		builder.AddShaderResourceGroup(textPerDrawSrg);
 
 		// UI Item
 		{
@@ -1516,6 +1650,16 @@ namespace CE
 			delete drawPacket;
 		}
 		uiDrawPackets.Clear();
+	}
+
+	void VulkanSandbox::DestroyFontAtlas()
+	{
+		fontAtlas->Destroy();
+		fontAtlas = nullptr;
+
+		delete textDrawItemsBuffer;
+		delete textPerDrawBuffer;
+		delete textPerDrawSrg;
 	}
 
 	void VulkanSandbox::DestroyLights()

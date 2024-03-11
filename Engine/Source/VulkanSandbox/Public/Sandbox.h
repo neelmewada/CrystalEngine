@@ -61,6 +61,18 @@ namespace CE
 		void Release();
 	};
 
+	struct alignas(16) TextDrawItem
+	{
+		Matrix4x4 transform{};
+		Vec4 atlasUV{};
+	};
+
+	struct TextPerDrawData
+	{
+		u32 screenWidth = 0;
+		u32 screenHeight = 0;
+	};
+
 	class VulkanSandbox : IWindowCallbacks
 	{
 	public:
@@ -74,6 +86,8 @@ namespace CE
 
 		void UpdatePerViewData(int imageIndex);
 
+		void UpdateTextData();
+
 		void Shutdown();
 		
 		void InitModels();
@@ -82,6 +96,7 @@ namespace CE
         void InitIrradiancePipeline(const RHI::ShaderResourceGroupLayout& irradianceSrgLayout);
 		void InitTextures();
 		void InitCubeMapDemo();
+		void InitFontAtlas();
 		void InitPipelines();
 		void InitDrawPackets();
 		void InitLights();
@@ -96,6 +111,7 @@ namespace CE
 
 		void DestroyLights();
 		void DestroyDrawPackets();
+		void DestroyFontAtlas();
 		void DestroyPipelines();
 		void DestroyTextures();
 		void DestroyIntermediateHDRIs();
@@ -184,7 +200,13 @@ namespace CE
 
 		CE::Shader* sdfShader = nullptr;
 		CE::Texture2D* fontAtlasTex = nullptr;
+		RPI::FontAtlas* fontAtlas = nullptr;
 		RPI::Material* sdfMaterial = nullptr;
+		Array<TextDrawItem> textDrawItems{};
+		TextPerDrawData textPerDrawData{};
+		RHI::Buffer* textDrawItemsBuffer = nullptr;
+		RHI::Buffer* textPerDrawBuffer = nullptr;
+		RHI::ShaderResourceGroup* textPerDrawSrg = nullptr;
 
 		//RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* sphereMaterial = nullptr;

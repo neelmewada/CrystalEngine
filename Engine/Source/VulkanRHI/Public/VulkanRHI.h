@@ -152,8 +152,6 @@ namespace CE::Vulkan
 
 		// - Utilities -
 
-		virtual void Blit(RHI::Texture* source, RHI::Texture* destination, RHI::FilterMode filter) override;
-
         virtual u64 GetShaderStructMemberAlignment(const RHI::ShaderStructMember& member) override;
         virtual u64 GetShaderStructMemberSize(const RHI::ShaderStructMember& member) override;
         virtual void GetShaderStructMemberOffsets(const Array<RHI::ShaderStructMember>& members, Array<u64>& outOffsets) override;

@@ -41,6 +41,9 @@ namespace CE::RPI
 		inline const Array<RHI::VertexBufferView>& GetFullScreenQuad() const { return quadVertexBufferViews; }
 		inline RHI::DrawLinearArguments GetFullScreenQuadDrawArgs() const { return quadDrawArgs; }
 
+		inline const Array<RHI::VertexBufferView>& GetTextQuad() const { return textQuadVertexBufferViews; }
+		inline RHI::DrawLinearArguments GetTextQuadDrawArgs() const { return textQuadDrawArgs; }
+
 	private:
 
 		RPISystem() = default;
@@ -52,6 +55,9 @@ namespace CE::RPI
 		Array<RHI::Buffer*> vertexBuffers{};
 		Array<RHI::VertexBufferView> quadVertexBufferViews{};
 		RHI::DrawLinearArguments quadDrawArgs{};
+
+		Array<RHI::VertexBufferView> textQuadVertexBufferViews{};
+		RHI::DrawLinearArguments textQuadDrawArgs{};
 
 		Array<ScenePtr> scenes{};
 

@@ -14,6 +14,8 @@ namespace CE
 
         RPI::Texture* GetRpiTexture() override;
 
+        RPI::Texture* CloneRpiTexture() override;
+
         TextureDimension GetDimension() override
         {
             return TextureDimension::TexCube;

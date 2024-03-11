@@ -46,8 +46,6 @@ namespace CE::Vulkan
 
 		void CopyBufferRegion(const BufferCopy& copy) override;
 
-		void BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter = RHI::FilterMode::Linear) override;
-
 		void Begin() override;
 		void End() override;
 

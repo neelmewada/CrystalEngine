@@ -58,6 +58,7 @@ namespace CE::RPI
 #include "Shader/ShaderVariant.h"
 #include "Shader/Shader.h"
 
+#include "Text/FontAtlasLayout.h"
 #include "Text/FontAtlas.h"
 
 #include "Feature/FeatureProcessor.h"

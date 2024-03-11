@@ -165,8 +165,6 @@ namespace CE::RHI
 
 		virtual void CopyBufferRegion(const BufferCopy& copy) = 0;
 
-		virtual void BlitImage(RHI::Texture* source, RHI::Texture* destination, u32 regionCount, BlitRegion* regions, RHI::FilterMode filter = RHI::FilterMode::Linear) = 0;
-
 	protected:
 
 		u32 currentImageIndex = 0;

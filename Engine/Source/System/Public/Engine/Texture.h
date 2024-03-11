@@ -21,6 +21,8 @@ namespace CE
 
 		virtual RPI::Texture* GetRpiTexture() = 0;
 
+		virtual RPI::Texture* CloneRpiTexture() = 0;
+
 		virtual TextureDimension GetDimension() = 0;
 
 		CMImageFormat GetCMPixelFormat();
@@ -35,8 +37,11 @@ namespace CE
 		FIELD()
 		CE::TextureFormat pixelFormat = CE::TextureFormat::None;
 
-		FIELD()
+		FIELD(ImportSetting)
 		TextureCompressionQuality compressionQuality = TextureCompressionQuality::Default;
+
+		FIELD(ImportSetting)
+		TextureDimension dimension = TextureDimension::None;
 
 		FIELD()
 		TextureSourceCompressionFormat sourceCompressionFormat = TextureSourceCompressionFormat::None;

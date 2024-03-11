@@ -19,6 +19,23 @@ namespace CE::RPI
         1.0f, 1.0f,
     };
 
+    static f32 textQuadVertexData[] = {
+        // Positions
+        0.0f, 0.0f, 0, 0,
+        1.0f, 0.0f, 0, 0,
+        0.0f, 1.0f, 0, 0,
+        0.0f, 1.0f, 0, 0,
+        1.0f, 0.0f, 0, 0,
+        1.0f, 1.0f, 0, 0,
+        // UVs
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+    };
+
     RPISystem& RPISystem::Get()
     {
 		static RPISystem instance{};
@@ -73,6 +90,18 @@ namespace CE::RPI
         quadDrawArgs.instanceCount = 1;
         quadDrawArgs.vertexOffset = 0;
         quadDrawArgs.vertexCount = 6;
+
+        RHI::Buffer* textQuadVertexBuffer = RHI::gDynamicRHI->CreateBuffer(quadVertexBufferDesc);
+        textQuadVertexBuffer->UploadData(textQuadVertexData, textQuadVertexBuffer->GetBufferSize(), 0);
+        vertexBuffers.Add(textQuadVertexBuffer);
+
+        textQuadVertexBufferViews.Add(RHI::VertexBufferView(textQuadVertexBuffer, 0, sizeof(Vec4) * 6, sizeof(Vec4)));
+        textQuadVertexBufferViews.Add(RHI::VertexBufferView(textQuadVertexBuffer, sizeof(Vec4) * 6, sizeof(Vec2) * 6, sizeof(Vec2)));
+
+        textQuadDrawArgs.firstInstance = 0;
+        textQuadDrawArgs.instanceCount = 1;
+        textQuadDrawArgs.vertexOffset = 0;
+        textQuadDrawArgs.vertexCount = 6;
     }
 
     RHI::Sampler* RPISystem::FindOrCreateSampler(const RHI::SamplerDescriptor& desc)
