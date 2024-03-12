@@ -14,7 +14,7 @@ namespace CE::RPI
             return;
         }
 
-        UploadData(desc.source);
+        UploadData(desc.source->GetDataPtr(), desc.source->GetDataSize());
     }
 
     Texture::Texture(RHI::Texture* texture, const RHI::SamplerDescriptor& samplerDesc)
@@ -30,6 +30,59 @@ namespace CE::RPI
         samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
     }
 
+    Texture::Texture(const CMImage& sourceImage, const RHI::SamplerDescriptor& samplerDesc)
+    {
+        if (!sourceImage.IsValid())
+            return;
+
+        u8* data = (u8*)sourceImage.GetDataPtr();
+        u32 dataSize = sourceImage.GetDataSize();
+
+        RHI::TextureDescriptor desc{};
+        desc.name = "CMImage";
+        desc.bindFlags = RHI::TextureBindFlags::ShaderRead;
+        desc.mipLevels = 1;
+        desc.arrayLayers = 1;
+        desc.width = sourceImage.GetWidth();
+        desc.height = sourceImage.GetHeight();
+        desc.depth = 1;
+        desc.dimension = Dimension::Dim2D;
+        desc.sampleCount = 1;
+
+        switch (sourceImage.GetFormat())
+        {
+        case CMImageFormat::R8:
+            desc.format = Format::R8_UNORM;
+            break;
+        case CMImageFormat::RG8:
+            desc.format = Format::R8G8_UNORM;
+            break;
+        case CMImageFormat::RGB8:
+            desc.format = Format::R8G8B8_UNORM;
+            break;
+        case CMImageFormat::RGBA8:
+            desc.format = Format::R8G8B8A8_UNORM;
+            break;
+        case CMImageFormat::R16:
+            desc.format = Format::R16_SFLOAT;
+            break;
+        case CMImageFormat::RG16:
+            desc.format = Format::R16G16_SFLOAT;
+            break;
+        case CMImageFormat::RGBA16:
+            desc.format = Format::R16G16B16A16_SFLOAT;
+            break;
+        default:
+            return;
+        }
+
+        texture = RHI::gDynamicRHI->CreateTexture(desc);
+
+        samplerState = RPISystem::Get().FindOrCreateSampler(samplerDesc);
+
+        UploadData(data, dataSize);
+    }
+
     Texture::~Texture()
     {
         delete texture;
@@ -38,14 +91,8 @@ namespace CE::RPI
         textureView = nullptr;
     }
 
-    void Texture::UploadData(BinaryBlob* source, int totalMipLevels)
+    void Texture::UploadData(u8* src, u64 dataSize, int totalMipLevels)
     {
-        if (source == nullptr)
-            return;
-
-        u8* src = (u8*)source->GetDataPtr();
-        u64 dataSize = source->GetDataSize();
-
         if (src == nullptr || dataSize == 0)
         {
             return;

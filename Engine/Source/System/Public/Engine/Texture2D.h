@@ -3,7 +3,7 @@
 namespace CE
 {
 #if PAL_TRAIT_BUILD_EDITOR
-	namespace Editor { class TextureAssetImportJob; }
+	namespace Editor { class TextureAssetImportJob; class FontAssetImportJob; }
 #endif
 
 	CLASS()
@@ -33,6 +33,7 @@ namespace CE
 
 #if PAL_TRAIT_BUILD_EDITOR
 		friend class CE::Editor::TextureAssetImportJob;
+		friend class CE::Editor::FontAssetImportJob;
 #endif
 	};
     

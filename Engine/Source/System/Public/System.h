@@ -22,6 +22,7 @@
 #include "Engine/Material.h"
 #include "Engine/MaterialInstance.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/Font.h"
 #include "Engine/Scene.h"
 
 // Engine

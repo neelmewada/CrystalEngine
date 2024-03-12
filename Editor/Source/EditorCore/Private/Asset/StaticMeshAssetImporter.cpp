@@ -34,7 +34,7 @@ namespace CE::Editor
 		// Make sure we can use the fileName as name of an object
 		fileName = FixObjectName(fileName);
 
-		FileStream fileStream = FileStream(sourcePath, CE::Stream::Permissions::ReadOnly);
+		FileStream fileStream = FileStream(sourcePath, Stream::Permissions::ReadOnly);
 		fileStream.SetBinaryMode(true);
 		u8* data = (u8*)malloc(fileStream.GetLength());
 		fileStream.Read(data, fileStream.GetLength());

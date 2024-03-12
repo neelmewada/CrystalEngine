@@ -188,19 +188,6 @@ namespace CE
 		float w = swapChain->GetWidth();
 		float h = swapChain->GetHeight();
 
-		uiViewData.projectionMatrix = Matrix4x4::OrthographicProjection(- w / 2, w / 2, h / 2, -h / 2, 0.01f, 100.0f);
-		uiViewData.viewMatrix = Quat::EulerDegrees(0, 0, 0).ToMatrix() * Matrix4x4::Translation(Vec3(0, 0, 0));
-		uiViewData.viewProjectionMatrix = uiViewData.projectionMatrix * uiViewData.viewMatrix;
-
-		{
-			RHI::BufferData data{};
-			data.startOffsetInBuffer = 0;
-			data.dataSize = uiViewBufferPerImage[imageIndex]->GetBufferSize();
-			data.data = &uiViewData;
-			
-			uiViewBufferPerImage[imageIndex]->UploadData(data);
-		}
-
 		//perViewData = directionalLightViewData;
 
 		{
@@ -768,7 +755,6 @@ namespace CE
 			perSceneSrgLayout.variables.Top().shaderStages = RHI::ShaderStage::Fragment;
 
 			perSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
-			uiSceneSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perSceneSrgLayout);
 
 			RHI::BufferDescriptor sceneConstantBufferDesc{};
 			sceneConstantBufferDesc.name = "Scene Constants";
@@ -796,9 +782,6 @@ namespace CE
 			skyboxSamplerDesc.samplerFilterMode = RHI::FilterMode::Linear;
 			skyboxSampler = RHI::gDynamicRHI->CreateSampler(skyboxSamplerDesc);
 
-			uiSceneSrg->Bind("_SceneData", sceneConstantBuffer);
-			uiSceneSrg->FlushBindings();
-
 			perSceneSrg->Bind("_SceneData", sceneConstantBuffer);
 			perSceneSrg->Bind("_ShadowMapSampler", shadowMapSampler);
 			perSceneSrg->FlushBindings();
@@ -817,7 +800,6 @@ namespace CE
 			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 			{
 				sphereObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
-				uiObjectBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(desc);
 
 				sphereModelMatrix = Matrix4x4::Translation(Vec3(0, 0, 15)) * Quat::EulerDegrees(Vec3(0, sphereRotation, 0)).ToMatrix() * Matrix4x4::Scale(Vec3(1, 1, 1));
 
@@ -852,8 +834,6 @@ namespace CE
 
 			perViewSrgLayout.variables.Top().shaderStages |= RHI::ShaderStage::Fragment;
 			perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
-
-			uiViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
 			
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
@@ -867,15 +847,10 @@ namespace CE
 
 				perViewSrg->Bind(i, "_PerViewData", perViewBufferPerImage[i]);
 				depthPerViewSrg->Bind(i, "_PerViewData", perViewBufferPerImage[i]);
-
-				uiViewBufferPerImage[i] = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-
-				uiViewSrg->Bind(i, "_PerViewData", uiViewBufferPerImage[i]);
 			}
 			
 			perViewSrg->FlushBindings();
 			depthPerViewSrg->FlushBindings();
-			uiViewSrg->FlushBindings();
 		}
 
 		// Depth Pipeline
@@ -1020,25 +995,7 @@ namespace CE
 
 		// UI Pipelines
 		{
-			RPI::Shader* sdfRpiShader = sdfShader->GetOrCreateRPIShader(0);
-			sdfMaterial = new RPI::Material(sdfRpiShader);
-			RHI::ShaderResourceGroupLayout perObjectSRGLayout = sdfMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerObject);
-
-			sdfMaterial->SetPropertyValue("_FgColor", Color(1, 1, 1, 1));
-			sdfMaterial->SetPropertyValue("_BgColor", Color(0, 0, 0, 0));
-			sdfMaterial->SetPropertyValue("_FontAtlas", fontAtlas->GetAtlasTexture());
-			sdfMaterial->SetPropertyValue("_FontAtlasSampler", defaultSampler);
-			sdfMaterial->SetPropertyValue("_PixRange", 2.0f);
-			sdfMaterial->FlushProperties();
-
-			uiObjectSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perObjectSRGLayout);
-
-			for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
-			{
-				uiObjectSrg->Bind(i, "_ObjectData", uiObjectBufferPerImage[i]);
-			}
-
-			uiObjectSrg->FlushBindings();
+			
 		}
 
 		UpdatePerViewData(0);
@@ -1050,130 +1007,281 @@ namespace CE
 		AssetManager* assetManager = gEngine->GetAssetManager();
 
 		auto prevTime = clock();
-		sdfShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFText");
-		fontAtlasTex = assetManager->LoadAssetAtPath<CE::Texture2D>("/Engine/Assets/Sandbox/atlas_mtsdf");
-		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
-
-		FontAtlasLayout atlasLayout{};
-
-		JsonFieldDeserializer atlasLayoutDeserializer{ FontAtlasLayout::Type(), &atlasLayout };
-
-		// Temp file
-		FileStream jsonFile = FileStream(PlatformDirectories::GetLaunchDir() / "Temp/atlas_mtsdf.json", Stream::Permissions::ReadOnly);
-
-		int result = atlasLayoutDeserializer.Deserialize(&jsonFile);
+		//sdfShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFText");
 		
-		fontAtlas = RPI::FontAtlas::Create("FontAtlas", fontAtlasTex->CloneRpiTexture(), atlasLayout);
+		textShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/Text");
+		textMaterial = new RPI::Material(textShader->GetOrCreateRPIShader(0));
 
-		textPerDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(sdfShader->GetOrCreateRPIShader(0)->GetVariant(0)->GetSrgLayout(RHI::SRGType::PerDraw));
+		sdfGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFTextGen");
+
+		RHI::ShaderResourceGroupLayout perDrawLayout = textMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerDraw);
+		textPerDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawLayout);
+
+		IO::Path fontFilePath = PlatformDirectories::GetLaunchDir() / "Temp/Roboto-Bold.ttf";
+
+		CMFontAtlasGenerateInfo genInfo{};
+		genInfo.charSetRanges.Add(CharRange('a', 'z'));
+		genInfo.charSetRanges.Add(CharRange('A', 'Z'));
+		genInfo.charSetRanges.Add(CharRange('0', '9'));
+		genInfo.charSetRanges.Add(CharRange(32, 47));
+		genInfo.charSetRanges.Add(CharRange(58, 64));
+		genInfo.charSetRanges.Add(CharRange(91, 96));
+		genInfo.charSetRanges.Add(CharRange(123, 126));
+
+		genInfo.padding = 8;
+		genInfo.fontSize = 24;
+
+		genInfo.padding = 16;
+		genInfo.fontSize = 64;
+
+		CMFontAtlas* cmFontAtlas = CMFontAtlas::GenerateFromFontFile(fontFilePath, genInfo);
+
+		fontAtlas = RPI::FontAtlas::Create("FontAtlas", cmFontAtlas);
+		RPI::Texture* fontAtlasTexture = fontAtlas->GetAtlasTexture();
+
+		auto fullScreenQuad = rpiSystem.GetFullScreenQuad();
+		auto fullScreenDrawArgs = rpiSystem.GetFullScreenQuadDrawArgs();
+
+		RPI::Material* sdfGenMaterial = new RPI::Material(sdfGenShader->GetOrCreateRPIShader(0));
+		sdfGenMaterial->SetPropertyValue("_FontAtlas", fontAtlas->GetAtlasTexture());
+		sdfGenMaterial->FlushProperties();
+
+		delete cmFontAtlas;
+
+		auto queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
+		auto cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
+		auto fence = RHI::gDynamicRHI->CreateFence(false);
+
+		RHI::Texture* sdfFontAtlas = nullptr;
+		{
+			RHI::TextureDescriptor desc{};
+			desc.name = "Texture";
+			desc.arrayLayers = 1;
+			desc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
+			desc.width = fontAtlasTexture->GetRhiTexture()->GetWidth();
+			desc.height = fontAtlasTexture->GetRhiTexture()->GetHeight();
+			desc.depth = 1;
+			desc.defaultHeapType = MemoryHeapType::Default;
+			desc.format = RHI::Format::R8_UNORM;
+			desc.dimension = Dimension::Dim2D;
+			desc.mipLevels = 1;
+
+			sdfFontAtlas = RHI::gDynamicRHI->CreateTexture(desc);
+			sdfFontAtlasTexture = new RPI::Texture(sdfFontAtlas);
+		}
+
+		RHI::Buffer* outputBuffer = nullptr;
+		{
+			RHI::BufferDescriptor desc{};
+			desc.name = "Output Image";
+			desc.bindFlags = BufferBindFlags::StagingBuffer;
+			desc.defaultHeapType = MemoryHeapType::ReadBack;
+			desc.bufferSize = sdfFontAtlas->GetWidth() * sdfFontAtlas->GetHeight();
+			
+			outputBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
+		}
+
+		RHI::RenderTarget* renderTarget = nullptr;
+		RHI::RenderTargetBuffer* rtb = nullptr;
+		{
+			RHI::RenderTargetLayout rtLayout{};
+			RHI::RenderAttachmentLayout colorAttachment{};
+			colorAttachment.attachmentId = "Color";
+			colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
+			colorAttachment.format = RHI::Format::R8_UNORM;
+			colorAttachment.multisampleState.sampleCount = 1;
+			colorAttachment.loadAction = AttachmentLoadAction::Clear;
+			colorAttachment.storeAction = AttachmentStoreAction::Store;
+			rtLayout.attachmentLayouts.Add(colorAttachment);
+
+			renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
+
+			rtb = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlas });
+		}
+
+		cmdList->Begin();
+		{
+			RHI::ResourceBarrierDescriptor barrier{};
+			barrier.resource = sdfFontAtlas;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::ColorOutput;
+			cmdList->ResourceBarrier(1, &barrier);
+
+			AttachmentClearValue clear{};
+			clear.clearValue = Vec4(0, 0, 0, 0);
+			cmdList->BeginRenderTarget(renderTarget, rtb, &clear);
+
+			RHI::ViewportState viewport{};
+			viewport.x = viewport.y = 0;
+			viewport.width = sdfFontAtlas->GetWidth();
+			viewport.height = sdfFontAtlas->GetHeight();
+			viewport.minDepth = 0.0f;
+			viewport.maxDepth = 1.0f;
+			cmdList->SetViewports(1, &viewport);
+
+			RHI::ScissorState scissor{};
+			scissor.x = scissor.y = 0;
+			scissor.width = viewport.width;
+			scissor.height = viewport.height;
+			cmdList->SetScissors(1, &scissor);
+
+			RHI::PipelineState* pipeline = sdfGenMaterial->GetCurrentShader()->GetPipeline();
+			cmdList->BindPipelineState(pipeline);
+
+			cmdList->SetShaderResourceGroup(sdfGenMaterial->GetShaderResourceGroup());
+
+			cmdList->CommitShaderResources();
+
+			cmdList->BindVertexBuffers(0, fullScreenQuad.GetSize(), fullScreenQuad.GetData());
+			
+			cmdList->DrawLinear(fullScreenDrawArgs);
+
+			cmdList->EndRenderTarget();
+
+			barrier.resource = outputBuffer;
+			barrier.fromState = RHI::ResourceState::Undefined;
+			barrier.toState = RHI::ResourceState::CopyDestination;
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = sdfFontAtlas;
+			barrier.fromState = RHI::ResourceState::ColorOutput;
+			barrier.toState = RHI::ResourceState::CopySource;
+			cmdList->ResourceBarrier(1, &barrier);
+
+			RHI::TextureToBufferCopy copyRegion{};
+			copyRegion.srcTexture = sdfFontAtlas;
+			copyRegion.baseArrayLayer = 0;
+			copyRegion.layerCount = 1;
+			copyRegion.mipSlice = 0;
+			copyRegion.dstBuffer = outputBuffer;
+			copyRegion.bufferOffset = 0;
+
+			cmdList->CopyTextureRegion(copyRegion);
+
+			barrier.resource = outputBuffer;
+			barrier.fromState = RHI::ResourceState::CopyDestination;
+			barrier.toState = RHI::ResourceState::General;
+			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = sdfFontAtlas;
+			barrier.fromState = RHI::ResourceState::CopySource;
+			barrier.toState = RHI::ResourceState::FragmentShaderResource;
+			cmdList->ResourceBarrier(1, &barrier);
+		}
+		cmdList->End();
+
+		queue->Execute(1, &cmdList, fence);
+		fence->WaitForFence();
+
+		void* dataPtr;
+		outputBuffer->Map(0, outputBuffer->GetBufferSize(), &dataPtr);
+		{
+			CMImage cmImage = CMImage::LoadRawImageFromMemory((u8*)dataPtr, sdfFontAtlas->GetWidth(), sdfFontAtlas->GetHeight(), 
+				CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
+			
+			cmImage.EncodeToPNG(fontFilePath.GetParentPath() / "sdf.png");
+		}
+		outputBuffer->Unmap();
+
+		// Cleanup
+		delete cmdList;
+		delete fence;
+		delete renderTarget; delete rtb;
+		delete outputBuffer;
+		delete sdfGenMaterial;
+
+		textMaterial->SetPropertyValue("_FontAtlas", sdfFontAtlasTexture);
+		textMaterial->SetPropertyValue("_FgColor", Color(1, 1, 1, 1));
+		textMaterial->FlushProperties();
 
 		UpdateTextData();
 
 		{
 			RHI::BufferDescriptor bufferDesc{};
-			bufferDesc.name = "DrawItem Buffer";
-			bufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
-			bufferDesc.bufferSize = sizeof(TextDrawItem) * textDrawItems.GetSize();
+			bufferDesc.name = "TextDrawItems";
+			bufferDesc.bindFlags = BufferBindFlags::StructuredBuffer;
+			bufferDesc.bufferSize = textDrawItems.GetSize() * sizeof(TextDrawItem);
 			bufferDesc.defaultHeapType = MemoryHeapType::Upload;
 			bufferDesc.structureByteStride = sizeof(TextDrawItem);
 
-			textDrawItemsBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+			textDrawItemBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
 
-			textPerDrawSrg->Bind("_DrawList", textDrawItemsBuffer);
+			textDrawItemBuffer->UploadData(textDrawItems.GetData(), textDrawItemBuffer->GetBufferSize());
+
+			textPerDrawSrg->Bind("_DrawList", textDrawItemBuffer);
 		}
-
-		{
-			RHI::BufferDescriptor bufferDesc{};
-			bufferDesc.name = "PerDraw Text";
-			bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-			bufferDesc.bufferSize = sizeof(textPerDrawData);
-			bufferDesc.defaultHeapType = MemoryHeapType::Upload;
-			bufferDesc.structureByteStride = sizeof(textPerDrawData);
-
-			textPerDrawBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
-
-			textPerDrawSrg->Bind("_PerDraw", textPerDrawBuffer);
-		}
-
-		UpdateTextData();
 
 		textPerDrawSrg->FlushBindings();
 	}
 
 	void VulkanSandbox::UpdateTextData()
 	{
-		String text = "G";
+		const String text = "u";
+
+		u32 screenWidth = swapChain->GetWidth();
+		u32 screenHeight = swapChain->GetHeight();
+
+		u32 atlasWidth = fontAtlas->GetAtlasTexture()->GetRhiTexture()->GetWidth();
+		u32 atlasHeight = fontAtlas->GetAtlasTexture()->GetRhiTexture()->GetHeight();
+
+		//constexpr f32 fontSize = 4.0f;
+		constexpr f32 fontSize = 48;
+
 		textDrawItems.Clear();
-
-		const auto& atlasLayout = fontAtlas->GetAtlasLayout();
-
-		u32 w = atlasLayout.atlas.width;
-		u32 h = atlasLayout.atlas.height;
-
-		textPerDrawData.screenWidth = swapChain->GetWidth();
-		textPerDrawData.screenHeight = swapChain->GetHeight();
-		float aspect = textPerDrawData.screenWidth / textPerDrawData.screenHeight;
-		float maxSize = Math::Max(textPerDrawData.screenWidth, textPerDrawData.screenHeight);
-
-		const f32 pixRange = 2;
-
-		float x = 0;
-		float fsScale = 1.0f / (atlasLayout.metrics.ascender - atlasLayout.metrics.descender);
-		float y = -fsScale * atlasLayout.metrics.ascender;
-		f32 fontSize = 86;//32.0f;
 
 		for (int i = 0; i < text.GetLength(); i++)
 		{
-			for (const auto& glyph : atlasLayout.glyphs)
-			{
-				if (glyph.unicode == text[i])
-				{
-					f32 pl = glyph.planeBounds.left;
-					f32 pb = glyph.planeBounds.bottom;
-					f32 pr = glyph.planeBounds.right;
-					f32 pt = glyph.planeBounds.top;
+			char c = text[i];
 
-					f32 al = glyph.atlasBounds.left;
-					f32 at = glyph.atlasBounds.top;
-					f32 ar = glyph.atlasBounds.right;
-					f32 ab = glyph.atlasBounds.bottom;
+			const RPI::FontGlyphLayout& glyphLayout = fontAtlas->GetGlyphLayout(c);
 
-					Vec2 texCoordMin = Vec2(al, ab);
-					Vec2 texCoordMax = Vec2(ar, at);
+			Vec3 scale = Vec3(1, 1, 1);
+			float glyphWidth = (f32)glyphLayout.GetWidth();
+			float glyphHeight = (f32)glyphLayout.GetHeight();
 
-					Vec2 quadMin = Vec2(pl, pb);
-					Vec2 quadMax = Vec2(pr, pt);
+			scale.x = glyphWidth / screenWidth * fontSize / 14.0f;
+			scale.y = glyphHeight / screenHeight * fontSize / 14.0f;
 
-					quadMin *= fsScale; quadMax *= fsScale;
-					quadMin += Vec2(x, y); quadMax += Vec2(x, y);
+			TextDrawItem textDrawItem{};
+			textDrawItem.transform = Matrix4x4::Scale(scale);
+			textDrawItem.atlasUV.left = (f32)glyphLayout.x0 / (f32)atlasWidth;
+			textDrawItem.atlasUV.top = (f32)glyphLayout.y0 / (f32)atlasHeight;
+			textDrawItem.atlasUV.right = (f32)glyphLayout.x1 / (f32)atlasWidth;
+			textDrawItem.atlasUV.bottom = (f32)glyphLayout.y1 / (f32)atlasHeight;
 
-					float texelWidth = 1.0f / w;
-					float texelHeight = 1.0f / h;
-					al *= texelWidth; ab *= texelHeight; ar *= texelWidth; at *= texelHeight;
-
-					texCoordMin.x *= texelWidth; texCoordMin.y *= texelHeight;
-					texCoordMax.x *= texelWidth; texCoordMax.y *= texelHeight;
-
-					Vec3 scale = Vec3(1.0f / textPerDrawData.screenWidth, 1.0f / textPerDrawData.screenHeight, 1) * fontSize * (1.5f * 2.0f);
-					scale.x *= (quadMax.x - quadMin.x);
-					scale.y *= (quadMax.y - quadMin.y);
-
-					TextDrawItem charItem{};
-					charItem.transform = Matrix4x4::Scale(scale);
-					charItem.atlasUV.left = texCoordMin.x;
-					charItem.atlasUV.top = texCoordMin.y;
-					charItem.atlasUV.right = texCoordMax.x;
-					charItem.atlasUV.bottom = texCoordMax.y;
-
-					textDrawItems.Add(charItem);
-				}
-			}
+			textDrawItems.Add(textDrawItem);
 		}
 
-		if (textDrawItemsBuffer)
-			textDrawItemsBuffer->UploadData(textDrawItems.GetData(), textDrawItemsBuffer->GetBufferSize());
-		if (textPerDrawBuffer)
-			textPerDrawBuffer->UploadData(&textPerDrawData, textPerDrawBuffer->GetBufferSize());
+		if (textDrawItemBuffer)
+			textDrawItemBuffer->UploadData(textDrawItems.GetData(), textDrawItemBuffer->GetBufferSize());
+	}
+
+	void VulkanSandbox::BuildUIDrawPackets()
+	{
+		RHI::DrawPacketBuilder builder{};
+
+		const auto& vertBuffers = rpiSystem.GetTextQuad();
+		RHI::DrawLinearArguments drawArgs = rpiSystem.GetTextQuadDrawArgs();
+		drawArgs.instanceCount = 1;
+
+		builder.SetDrawArguments(drawArgs);
+
+		builder.AddShaderResourceGroup(textMaterial->GetShaderResourceGroup());
+		builder.AddShaderResourceGroup(textPerDrawSrg);
+
+		// UI Item
+		{
+			RHI::DrawPacketBuilder::DrawItemRequest request{};
+			request.vertexBufferViews.AddRange(vertBuffers);
+
+			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("ui");
+			request.drawFilterMask = RHI::DrawFilterMask::ALL;
+			request.pipelineState = textMaterial->GetCurrentShader()->GetPipeline();
+
+			builder.AddDrawItem(request);
+		}
+
+		uiDrawPackets.Add(builder.Build());
 	}
 
 	void VulkanSandbox::InitLights()
@@ -1182,7 +1290,6 @@ namespace CE
 
 		DirectionalLight mainLight{};
 		mainLight.direction = Vec3(-0.25f, -0.5f, 0.5f).GetNormalized();
-		//mainLight.direction = Vec3(0, 0, 1);
 		mainLight.colorAndIntensity = Vec4(1.0f, 0.95f, 0.75f);
 		mainLight.colorAndIntensity.w = 5.0f; // intensity
 		mainLight.temperature = 100;
@@ -1597,35 +1704,6 @@ namespace CE
 		skyboxDrawPacket = builder.Build();
 	}
 
-	void VulkanSandbox::BuildUIDrawPackets()
-	{
-		RHI::DrawPacketBuilder builder{};
-
-		const auto& vertBuffers = rpiSystem.GetTextQuad();
-		RHI::DrawLinearArguments drawArgs = rpiSystem.GetTextQuadDrawArgs();
-		drawArgs.instanceCount = textDrawItems.GetSize();
-
-		builder.SetDrawArguments(drawArgs);
-
-		//builder.AddShaderResourceGroup(uiObjectSrg);
-		builder.AddShaderResourceGroup(sdfMaterial->GetShaderResourceGroup());
-		builder.AddShaderResourceGroup(textPerDrawSrg);
-
-		// UI Item
-		{
-			RHI::DrawPacketBuilder::DrawItemRequest request{};
-			request.vertexBufferViews.AddRange(vertBuffers);
-			
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("ui");
-			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = sdfMaterial->GetCurrentShader()->GetPipeline();
-
-			builder.AddDrawItem(request);
-		}
-
-		uiDrawPackets.Add(builder.Build());
-	}
-
 	void VulkanSandbox::InitDrawPackets()
 	{
 		BuildFbxDrawPacket();
@@ -1654,12 +1732,10 @@ namespace CE
 
 	void VulkanSandbox::DestroyFontAtlas()
 	{
-		fontAtlas->Destroy();
-		fontAtlas = nullptr;
-
-		delete textDrawItemsBuffer;
-		delete textPerDrawBuffer;
-		delete textPerDrawSrg;
+		delete fontAtlas; fontAtlas = nullptr;
+		delete textDrawItemBuffer; textDrawItemBuffer = nullptr;
+		delete textPerDrawSrg; textPerDrawSrg = nullptr;
+		delete sdfFontAtlasTexture; sdfFontAtlasTexture = nullptr;
 	}
 
 	void VulkanSandbox::DestroyLights()
@@ -1695,26 +1771,21 @@ namespace CE
 			delete sphereObjectBufferPerImage[i]; sphereObjectBufferPerImage[i] = nullptr;
 			delete skyboxObjectBufferPerImage[i]; skyboxObjectBufferPerImage[i] = nullptr;
 			delete perViewBufferPerImage[i]; perViewBufferPerImage[i] = nullptr;
-			delete uiViewBufferPerImage[i]; uiViewBufferPerImage[i] = nullptr;
-			delete uiObjectBufferPerImage[i]; uiObjectBufferPerImage[i] = nullptr;
 		}
 		delete cubeObjectSrg; cubeObjectSrg = nullptr;
 		delete sphereObjectSrg; sphereObjectSrg = nullptr;
 		delete chairObjectSrg; chairObjectSrg = nullptr;
-		delete uiObjectSrg; uiObjectSrg = nullptr;
 
-		delete uiViewSrg; uiViewSrg = nullptr;
 		delete depthPerViewSrg; depthPerViewSrg = nullptr;
 		delete perViewSrg; perViewSrg = nullptr;
 		
 		delete skyboxMaterial; skyboxMaterial = nullptr;
 		delete skyboxObjectSrg; skyboxObjectSrg = nullptr;
 		delete perSceneSrg; perSceneSrg = nullptr;
-		delete uiSceneSrg; uiSceneSrg = nullptr;
 
 		delete sphereMaterial; sphereMaterial = nullptr;
 		delete cubeMaterial; cubeMaterial = nullptr;
-		delete sdfMaterial; sdfMaterial = nullptr;
+		delete textMaterial; textMaterial = nullptr;
 
 		delete transparentPipeline; transparentPipeline = nullptr;
 	}
@@ -1906,7 +1977,7 @@ namespace CE
 				//scheduler->UseShaderResourceGroup(perSceneSrg);
 				//scheduler->UseShaderResourceGroup(uiViewSrg);
 
-				scheduler->UsePipeline(sdfMaterial->GetCurrentShader()->GetPipeline());
+				//scheduler->UsePipeline(sdfMaterial->GetCurrentShader()->GetPipeline());
 
 				scheduler->PresentSwapChain(swapChain);
 			}

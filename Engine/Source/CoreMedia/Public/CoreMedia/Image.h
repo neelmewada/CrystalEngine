@@ -88,6 +88,8 @@ namespace CE
 		// Encodes raw image pixel data to PNG format
 		static bool EncodePNG(const CMImage& source, Stream* outStream, CMImageFormat pixelFormat, u32 bitDepth = 8);
 
+		bool EncodeToPNG(const IO::Path& path);
+
         // - Public API -
 
         /// Always call the Free() function when image is no longer needed!
@@ -119,6 +121,7 @@ namespace CE
 		bool allocated = true;
 
 		friend class CMImageEncoder;
+		friend class CMFontAtlas;
     };
 
 }

@@ -2,92 +2,41 @@
 
 namespace CE::RPI
 {
-    STRUCT()
-    struct CORERPI_API FontAtlasDesc
-    {
-        CE_STRUCT(FontAtlasDesc)
-    public:
-
-        FIELD()
-        Name type{};
-
-        FIELD()
-        f32 distanceRange = 0;
-
-        FIELD()
-        f32 size = 0;
-
-        FIELD()
-        u32 width = 0;
-
-        FIELD()
-        u32 height = 0;
-
-        FIELD()
-        Name yOrigin{};
-
-    };
 
     STRUCT()
-    struct CORERPI_API FontGlyphMetrics
+    struct CORERPI_API FontGlyphLayout
     {
-        CE_STRUCT(FontGlyphMetrics)
-    public:
-
-        FIELD()
-        u32 emSize = 0;
-
-        FIELD()
-        f32 lineHeight = 0;
-
-        FIELD()
-        f32 ascender = 0;
-
-        FIELD()
-        f32 descender = 0;
-
-        FIELD()
-        f32 underlineY = 0;
-
-        FIELD()
-        f32 underlineThickness = 0;
-    };
-
-    STRUCT()
-    struct CORERPI_API FontGlyphDesc
-    {
-        CE_STRUCT(FontGlyphDesc)
+        CE_STRUCT(FontGlyphLayout)
     public:
 
         FIELD()
         u32 unicode = 0;
 
         FIELD()
-        f32 advance = 0;
+        int x0 = 0;
 
         FIELD()
-        Vec4 planeBounds{};
+        int y0 = 0;
 
         FIELD()
-        Vec4 atlasBounds{};
+        int x1 = 0;
+
+        FIELD()
+        int y1 = 0;
+
+        FIELD()
+        int xOffset = 0; // left bearing when rendering
+
+        FIELD()
+        int yOffset = 0;    // top bearing when rendering
+
+        FIELD()
+        int advance = 0;        // x advance when rendering
+
+        inline int GetWidth() const { return x1 - x0; }
+        inline int GetHeight() const { return y1 - y0; }
     };
 
-    STRUCT()
-    struct CORERPI_API FontAtlasLayout
-    {
-        CE_STRUCT(FontAtlasLayout)
-    public:
-
-        FIELD()
-        FontAtlasDesc atlas{};
-
-        FIELD()
-        FontGlyphMetrics metrics{};
-
-        FIELD()
-        Array<FontGlyphDesc> glyphs{};
-
-    };
 
 } // namespace CE::RPI
 

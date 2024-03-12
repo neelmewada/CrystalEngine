@@ -1,7 +1,6 @@
 
 #include "VulkanSandbox.h"
 
-#include "Resource.h"
 #include "VulkanSandbox.private.h"
 
 int main(int argc, char** argv)
@@ -13,7 +12,6 @@ int main(int argc, char** argv)
 	sandbox.Init();
 
 	CERegisterModuleTypes();
-	CERegisterModuleResources();
 
 	sandbox.PostInit();
 
@@ -21,7 +19,6 @@ int main(int argc, char** argv)
 
 	sandbox.PreShutdown();
 
-	CEDeregisterModuleResources();
 	CEDeregisterModuleTypes();
 
 	sandbox.Shutdown();

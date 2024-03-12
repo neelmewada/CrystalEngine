@@ -8,6 +8,8 @@
 
 #include "CoreMedia/ImageEncoder.h"
 
+#include "CoreMedia/Font.h"
+
 namespace CE
 {
     class COREMEDIA_API CoreMediaModule : public CE::Module

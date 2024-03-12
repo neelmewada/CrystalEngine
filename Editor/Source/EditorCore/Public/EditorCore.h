@@ -26,4 +26,6 @@
 #include "Asset/TextureAssetImporter.h"
 #include "Asset/StaticMeshDefinition.h"
 #include "Asset/StaticMeshAssetImporter.h"
+#include "Asset/FontAssetDefinition.h"
+#include "Asset/FontAssetImporter.h"
 

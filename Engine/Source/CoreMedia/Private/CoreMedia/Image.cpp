@@ -6,6 +6,8 @@
 
 #include "stb_image.h"
 
+#include "stb_image_write.h"
+
 namespace CE
 {
 	static const u8 pngHeader[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, };
@@ -548,6 +550,15 @@ namespace CE
 			}
 			outStream->Write(byte);
 		}
+
+		return true;
+	}
+
+	bool CMImage::EncodeToPNG(const IO::Path& path)
+	{
+		String pathString = path.GetString();
+
+		int result = stbi_write_png(pathString.GetCString(), width, height, numChannels, data, width * bitsPerPixel / 8);
 
 		return true;
 	}

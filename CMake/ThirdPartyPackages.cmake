@@ -15,6 +15,7 @@ find_package(dxcompiler REQUIRED)
 find_package(miniz REQUIRED)
 find_package(ispctexturecompressor REQUIRED)
 find_package(assimp REQUIRED)
+find_package(freetype REQUIRED)
 
 # Yoga
 find_package(yoga REQUIRED)

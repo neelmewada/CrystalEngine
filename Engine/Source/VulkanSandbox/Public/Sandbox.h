@@ -198,14 +198,14 @@ namespace CE
 		CE::Shader* depthShader = nullptr;
 		RPI::Material* depthMaterial = nullptr;
 
-		CE::Shader* sdfShader = nullptr;
-		CE::Texture2D* fontAtlasTex = nullptr;
+		CE::Shader* textShader = nullptr;
+		CE::Shader* sdfGenShader = nullptr;
+		RPI::Material* textMaterial = nullptr;
 		RPI::FontAtlas* fontAtlas = nullptr;
-		RPI::Material* sdfMaterial = nullptr;
+		RPI::Texture* sdfFontAtlasTexture = nullptr;
 		Array<TextDrawItem> textDrawItems{};
-		TextPerDrawData textPerDrawData{};
-		RHI::Buffer* textDrawItemsBuffer = nullptr;
-		RHI::Buffer* textPerDrawBuffer = nullptr;
+		RHI::Buffer* textDrawItemBuffer = nullptr;
+
 		RHI::ShaderResourceGroup* textPerDrawSrg = nullptr;
 
 		//RPI::Shader* opaqueShader = nullptr;
@@ -259,13 +259,6 @@ namespace CE
 		RHI::ShaderResourceGroup* cubeObjectSrg = nullptr;
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> cubeObjectBufferPerImage{};
 		Matrix4x4 cubeModelMatrix{};
-
-		RHI::ShaderResourceGroup* uiObjectSrg = nullptr;
-		RHI::ShaderResourceGroup* uiSceneSrg = nullptr;
-		RHI::ShaderResourceGroup* uiViewSrg = nullptr;
-		PerViewData uiViewData{};
-		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> uiViewBufferPerImage{};
-		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> uiObjectBufferPerImage{};
 
 		RHI::ShaderResourceGroup* perSceneSrg = nullptr;
 		RHI::Buffer* directionalLightsBuffer = nullptr;
