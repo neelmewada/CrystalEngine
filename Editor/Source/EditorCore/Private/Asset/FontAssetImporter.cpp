@@ -240,7 +240,7 @@ namespace CE::Editor
 			barrier.toState = ResourceState::CopyDestination;
 			cmdList->ResourceBarrier(1, &barrier);
 
-			// Input Buffer -> Rasterized Atlas Texture
+			// Transfer: Input Buffer -> Rasterized Atlas Texture
 			{
 				RHI::BufferToTextureCopy copy{};
 				copy.srcBuffer = inputBuffer;
@@ -292,6 +292,19 @@ namespace CE::Editor
 				cmdList->DrawLinear(drawArgs);
 			}
 			cmdList->EndRenderTarget();
+
+			// Transfer: SDF Atlas -> Output buffer
+			{
+				RHI::TextureToBufferCopy copy{};
+				copy.srcTexture = sdfFontAtlas;
+				copy.baseArrayLayer = 0;
+				copy.layerCount = 1;
+				copy.mipSlice = 0;
+				copy.dstBuffer = outputBuffer;
+				copy.bufferOffset = 0;
+
+				cmdList->CopyTextureRegion(copy);
+			}
 
 			barrier.resource = outputBuffer;
 			barrier.fromState = ResourceState::CopyDestination;
