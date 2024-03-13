@@ -5,37 +5,9 @@
 namespace CE::Vulkan
 {
     
-    DescriptorPool::DescriptorPool(VulkanDevice* device, u32 initialPoolSize, u32 poolSizeIncrement)
-        : device(device), initialSize(initialPoolSize), incrementSize(poolSizeIncrement)
+    DescriptorPool::DescriptorPool()
     {
-		VkDescriptorPoolSize poolSizes[] = {
-			{ .type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = initialPoolSize },
-			{ .type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = initialPoolSize },
-			{ .type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = initialPoolSize },
-			{ .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = initialPoolSize },
-			{ .type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
-			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = initialPoolSize },
-			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = initialPoolSize },
-			{ .type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
-		};
-        
-        VkDescriptorPoolCreateInfo info{};
-        info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        info.maxSets = initialPoolSize * 4;
-        info.poolSizeCount = COUNTOF(poolSizes);
-        info.pPoolSizes = poolSizes;
-		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
 		
-        VkDescriptorPool pool = nullptr;
-        
-        auto result = vkCreateDescriptorPool(device->GetHandle(), &info, nullptr, &pool);
-        if (result != VK_SUCCESS)
-        {
-            CE_LOG(Error, All, "Failed to create vulkan descriptor pool. Error code: {}", (int)result);
-            return;
-        }
-        
-        descriptorPools.Add(pool);
     }
 
     DescriptorPool::~DescriptorPool()
@@ -46,6 +18,40 @@ namespace CE::Vulkan
         }
         descriptorPools.Clear();
     }
+
+	void DescriptorPool::Init(VulkanDevice* device, u32 initialPoolSize, u32 poolSizeIncrement)
+	{
+		this->device = device;
+
+		VkDescriptorPoolSize poolSizes[] = {
+			{.type = VK_DESCRIPTOR_TYPE_SAMPLER, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, .descriptorCount = initialPoolSize },
+			{.type = VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, .descriptorCount = initialPoolSize },
+		};
+
+		VkDescriptorPoolCreateInfo info{};
+		info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		info.maxSets = initialPoolSize * 4;
+		info.poolSizeCount = COUNTOF(poolSizes);
+		info.pPoolSizes = poolSizes;
+		info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;// | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+
+		VkDescriptorPool pool = nullptr;
+
+		auto result = vkCreateDescriptorPool(device->GetHandle(), &info, nullptr, &pool);
+		if (result != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to create vulkan descriptor pool. Error code: {}", (int)result);
+			return;
+		}
+
+		descriptorPools.Add(pool);
+	}
 
 	List<VkDescriptorSet> DescriptorPool::Allocate(u32 numDescriptorSets, List<VkDescriptorSetLayout> setLayouts, VkDescriptorPool& outPool)
 	{

@@ -90,7 +90,7 @@ namespace CE::Vulkan
 			return supportedDeviceExtensions.Exists(name);
 		}
 
-		INLINE DescriptorPool* GetDescriptorPool() const { return descriptorPool; }
+        DescriptorPool* GetDescriptorPool();
 
 		INLINE const VkPhysicalDeviceLimits& GetDeviceLimits() const
 		{
@@ -175,7 +175,8 @@ namespace CE::Vulkan
 
 		SharedMutex mainThreadMutex{};
 
-		DescriptorPool* descriptorPool = nullptr;
+		//DescriptorPool* descriptorPool = nullptr;
+        ThreadLocalContext<DescriptorPool> threadedDescriptorPool;
         
         friend class FrameGraphCompiler;
         friend class VulkanRHI;

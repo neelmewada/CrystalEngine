@@ -7,9 +7,13 @@
 
 namespace CE::Vulkan
 {
+	static void InitDescriptorPool(DescriptorPool& pool)
+	{
+		pool.Init(((VulkanRHI*)gDynamicRHI)->GetDevice());
+	}
 
 	VulkanDevice::VulkanDevice(VkInstance instance, VulkanRHI* vulkanRhi)
-		: instance(instance), vulkanRhi(vulkanRhi)
+		: instance(instance), vulkanRhi(vulkanRhi), threadedDescriptorPool(ThreadLocalContext<DescriptorPool>(InitDescriptorPool))
 	{
 		
 	}
@@ -46,8 +50,8 @@ namespace CE::Vulkan
 		if (testSurface != nullptr)
 			VulkanPlatform::DestroySurface(instance, testSurface);
 		testSurface = nullptr;
-
-		descriptorPool = new DescriptorPool(this);
+		
+		//descriptorPool = new DescriptorPool(this);
 
 		srgManager = new ShaderResourceManager(this);
 
@@ -73,8 +77,8 @@ namespace CE::Vulkan
 		delete srgManager;
 		srgManager = nullptr;
 
-		delete descriptorPool;
-		descriptorPool = nullptr;
+		//delete descriptorPool; descriptorPool = nullptr;
+		threadedDescriptorPool.Clear();
 
 		for (auto queue : queues)
 		{
@@ -101,6 +105,12 @@ namespace CE::Vulkan
 		device = nullptr;
 
 		CE_LOG(Info, All, "Vulkan device shutdown");
+	}
+
+	DescriptorPool* VulkanDevice::GetDescriptorPool()
+	{
+		return &threadedDescriptorPool.GetStorage();
+		//return descriptorPool;
 	}
 
 	const Array<RHI::Format>& VulkanDevice::GetAvailableDepthStencilFormats()

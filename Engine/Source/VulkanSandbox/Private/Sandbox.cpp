@@ -1062,7 +1062,7 @@ namespace CE
 
 		const RPI::FontMetrics& metrics = atlasData->GetMetrics();
 
-		constexpr f32 fontSize = 48;
+		constexpr f32 fontSize = 12;
 		f32 atlasFontSize = metrics.fontSize;
 
 		textDrawItems.Clear();
