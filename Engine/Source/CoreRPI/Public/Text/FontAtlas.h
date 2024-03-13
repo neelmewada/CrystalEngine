@@ -28,6 +28,8 @@ namespace CE::RPI
 
         inline TextureAsset* GetAtlasTexture() const { return fontAtlasTexture; }
 
+        inline const FontMetrics& GetMetrics() const { return metrics; }
+
     private:
 
         void OnAfterDeserialize() override;
@@ -36,6 +38,9 @@ namespace CE::RPI
 
         FIELD()
         TextureAsset* fontAtlasTexture = nullptr;
+
+        FIELD()
+        FontMetrics metrics{};
 
         FIELD()
         Array<FontGlyphLayout> glyphLayouts{};

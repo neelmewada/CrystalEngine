@@ -2,6 +2,27 @@
 
 namespace CE::RPI
 {
+    STRUCT()
+    struct CORERPI_API FontMetrics
+    {
+        CE_STRUCT(FontMetrics)
+    public:
+
+        FIELD()
+        f32 ascender = 0;
+
+        FIELD()
+        f32 descender = 0;
+
+        FIELD()
+        f32 lineGap = 0;
+
+        FIELD()
+        f32 lineHeight = 0;
+
+        FIELD()
+        f32 fontSize = 64;
+    };
 
     STRUCT()
     struct CORERPI_API FontGlyphLayout

@@ -164,7 +164,7 @@ namespace CE
 		if (!package)
 			return nullptr;
 
-		Object* object = package->LoadObject(assetData->assetUuid);
+		Object* object = package->LoadObject(package->GetPrimaryObjectUuid());
 		if (!object || !object->IsOfType<Asset>())
 			return nullptr;
 		

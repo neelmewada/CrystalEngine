@@ -11,6 +11,14 @@ namespace CE
         int width; int height;
     };
 
+    struct CMFontMetrics
+    {
+        f32 ascender = 0;
+        f32 descender = 0;
+        f32 lineGap = 0;
+        f32 lineHeight = 0;
+    };
+
     struct CharRange
     {
         CharRange() = default;
@@ -40,11 +48,15 @@ namespace CE
 
         inline const Array<CMGlyphInfo>& GetGlyphInfos() const { return glyphInfos; }
 
+        inline const CMFontMetrics& GetMetrics() const { return metrics; }
+
     private:
 
         CMImage atlas{};
 
         Array<CMGlyphInfo> glyphInfos{};
+
+        CMFontMetrics metrics{};
     };
 
 } // namespace CE

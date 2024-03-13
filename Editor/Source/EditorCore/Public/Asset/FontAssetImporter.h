@@ -18,6 +18,14 @@ namespace CE::Editor
 		FIELD(Config)
 		bool compressFontAtlas = false;
 
+		FIELD(Config)
+		int padding = 16;
+
+		FIELD(Config)
+		int fontSize = 64;
+
+		FIELD(Config)
+		int spread = 7;
     };
 
 	class EDITORCORE_API FontAssetImportJob : public AssetImportJob
@@ -38,6 +46,8 @@ namespace CE::Editor
 
 		CMFontAtlasGenerateInfo genInfo{};
 		bool compressFontAtlas = false;
+
+		int spread = 7;
 
 		friend class FontAssetImporter;
 	};

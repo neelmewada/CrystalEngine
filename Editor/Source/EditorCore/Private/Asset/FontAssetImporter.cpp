@@ -10,9 +10,10 @@ namespace CE::Editor
 		{
 			FontAssetImportJob* job = new FontAssetImportJob(this, sourceAssets[i], productAssets[i]);
 			job->compressFontAtlas = compressFontAtlas;
+			job->spread = spread;
 
-			job->genInfo.padding = 16;
-			job->genInfo.fontSize = 64;
+			job->genInfo.padding = padding;
+			job->genInfo.fontSize = fontSize;
 
 			job->genInfo.charSetRanges.Add(CharRange('a', 'z'));
 			job->genInfo.charSetRanges.Add(CharRange('A', 'Z'));
@@ -83,6 +84,12 @@ namespace CE::Editor
 		const auto& glyphInfos = cmFontAtlas->GetGlyphInfos();
 		font->atlasAsset->glyphLayouts.Resize(glyphInfos.GetSize());
 
+		atlasAsset->metrics.ascender = cmFontAtlas->GetMetrics().ascender;
+		atlasAsset->metrics.descender = cmFontAtlas->GetMetrics().descender;
+		atlasAsset->metrics.lineGap = cmFontAtlas->GetMetrics().lineGap;
+		atlasAsset->metrics.lineHeight = cmFontAtlas->GetMetrics().lineHeight;
+		atlasAsset->metrics.fontSize = genInfo.fontSize;
+
 		for (int i = 0; i < glyphInfos.GetSize(); i++)
 		{
 			atlasAsset->glyphLayouts[i].unicode = glyphInfos[i].charCode;
@@ -96,6 +103,17 @@ namespace CE::Editor
 
 			atlasAsset->glyphLayouts[i].advance = glyphInfos[i].advance;
 		}
+
+		atlasAsset->fontAtlasTexture->addressModeU = atlasAsset->fontAtlasTexture->addressModeV = atlasAsset->fontAtlasTexture->addressModeW
+			= RHI::SamplerAddressMode::ClampToBorder;
+		atlasAsset->fontAtlasTexture->borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
+		atlasAsset->fontAtlasTexture->anisotropy = 0;
+		atlasAsset->fontAtlasTexture->arrayLayers = 1;
+		atlasAsset->fontAtlasTexture->mipLevels = 1;
+		atlasAsset->fontAtlasTexture->filterMode = RHI::FilterMode::Linear;
+		atlasAsset->fontAtlasTexture->format = RHI::Format::R8_UNORM;
+		atlasAsset->fontAtlasTexture->width = fontAtlasImage.GetWidth();
+		atlasAsset->fontAtlasTexture->height = fontAtlasImage.GetHeight();
 
 		////////////////////////////////////////////////////
 		// - Create resources -
@@ -191,6 +209,7 @@ namespace CE::Editor
 		CE::Shader* sdfGenShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFTextGen");
 		RPI::Material* sdfGenMaterial = new RPI::Material(sdfGenShader->GetOrCreateRPIShader(0));
 		sdfGenMaterial->SetPropertyValue("_FontAtlas", rasterizedAtlasRpi);
+		sdfGenMaterial->SetPropertyValue("_Spread", spread);
 		sdfGenMaterial->FlushProperties();
 
 		defer(
@@ -338,18 +357,7 @@ namespace CE::Editor
 		queue->Execute(1, &cmdList, fence);
 		fence->WaitForFence();
 
-		// - Fetch data -
-
-		atlasAsset->fontAtlasTexture->addressModeU = atlasAsset->fontAtlasTexture->addressModeV = atlasAsset->fontAtlasTexture->addressModeW 
-			= RHI::SamplerAddressMode::ClampToBorder;
-		atlasAsset->fontAtlasTexture->borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
-		atlasAsset->fontAtlasTexture->anisotropy = 0;
-		atlasAsset->fontAtlasTexture->arrayLayers = 1;
-		atlasAsset->fontAtlasTexture->mipLevels = 1;
-		atlasAsset->fontAtlasTexture->filterMode = RHI::FilterMode::Linear;
-		atlasAsset->fontAtlasTexture->format = RHI::Format::R8_UNORM;
-		atlasAsset->fontAtlasTexture->width = sdfFontAtlas->GetWidth();
-		atlasAsset->fontAtlasTexture->height = sdfFontAtlas->GetHeight();
+		// - Read data -
 
 		// BCn formats are Desktop only
 		if (!PlatformMisc::IsDesktopPlatform(targetPlatform))
@@ -367,7 +375,7 @@ namespace CE::Editor
 		{
 			CMImage img = CMImage::LoadRawImageFromMemory((u8*)data, sdfFontAtlas->GetWidth(), sdfFontAtlas->GetHeight(), CMImageFormat::R8,
 				CMImageSourceFormat::None, 8, 8);
-			img.EncodeToPNG(PlatformDirectories::GetLaunchDir() / "Temp/sdf.png");
+			img.EncodeToPNG(PlatformDirectories::GetLaunchDir() / ("Temp/" + fileName + ".png"));
 
 			if (!compressFontAtlas)
 			{

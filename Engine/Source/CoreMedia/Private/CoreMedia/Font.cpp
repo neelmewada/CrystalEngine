@@ -108,6 +108,15 @@ namespace CE
 			pen_x += padding;
 		}
 
+		f32 unitsPerEM = face->units_per_EM;
+		f32 scaleFactor = (f32)fontSize / unitsPerEM;
+
+		fontAtlas->metrics.ascender = face->ascender * scaleFactor;
+		fontAtlas->metrics.descender = face->descender * scaleFactor;
+
+		fontAtlas->metrics.lineGap = (face->height - (face->ascender - face->descender)) * scaleFactor;
+		fontAtlas->metrics.lineHeight = (face->ascender - face->descender + fontAtlas->metrics.lineGap) * scaleFactor;
+
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
 

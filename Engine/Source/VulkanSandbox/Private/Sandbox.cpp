@@ -241,6 +241,8 @@ namespace CE
 
 	void VulkanSandbox::InitCubeMaps()
 	{
+		auto prevTime = clock();
+
 		iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
 
 		RPI::Shader* brdfGenShader = iblConvolutionShader->GetOrCreateRPIShader(2);
@@ -333,6 +335,8 @@ namespace CE
 
 		queue->Execute(1, &cmdList, fence);
 		fence->WaitForFence();
+
+		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 		
 		RHI::gDynamicRHI->FreeCommandLists(1, &cmdList);
 		delete fence;
@@ -1048,22 +1052,38 @@ namespace CE
 
 	void VulkanSandbox::UpdateTextData()
 	{
-		const String text = "G";
+		static const String text = "The quick brown fox jumps over the lazy dog\nNew line. <>?![]{};'\"/\\=+-_*!@#$%^&()~`";
 
 		u32 screenWidth = swapChain->GetWidth();
 		u32 screenHeight = swapChain->GetHeight();
 
-		u32 atlasWidth = atlasData->GetAtlasTexture()->GetWidth();
-		u32 atlasHeight = atlasData->GetAtlasTexture()->GetHeight();
+		f32 atlasWidth = atlasData->GetAtlasTexture()->GetWidth();
+		f32 atlasHeight = atlasData->GetAtlasTexture()->GetHeight();
 
-		//constexpr f32 fontSize = 4.0f;
+		const RPI::FontMetrics& metrics = atlasData->GetMetrics();
+
 		constexpr f32 fontSize = 48;
+		f32 atlasFontSize = metrics.fontSize;
 
 		textDrawItems.Clear();
+		Vec3 position = Vec3(0, 0, 0); // range: 0 to screenWidth
+		
+		const float startY = metrics.ascender * fontSize / atlasFontSize;
+		const float startX = 0;
+		
+		position.x = startX;
+		position.y = startY;
 
 		for (int i = 0; i < text.GetLength(); i++)
 		{
 			char c = text[i];
+
+			if (c == '\n')
+			{
+				position.x = startX;
+				position.y += metrics.lineHeight * fontSize / atlasFontSize;
+				continue;
+			}
 
 			const RPI::FontGlyphLayout& glyphLayout = atlasData->GetGlyphLayout(c);
 
@@ -1071,19 +1091,33 @@ namespace CE
 			float glyphWidth = (f32)glyphLayout.GetWidth();
 			float glyphHeight = (f32)glyphLayout.GetHeight();
 
-			scale.x = glyphWidth / screenWidth * fontSize / 14.0f;
-			scale.y = glyphHeight / screenHeight * fontSize / 14.0f;
+			float widthFactor = glyphWidth / screenWidth;
+			float heightFactor = glyphHeight / screenHeight;
+
+			// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+			scale.x = glyphWidth * fontSize / atlasFontSize / screenWidth * 2;
+			scale.y = glyphHeight * fontSize / atlasFontSize / screenHeight * 2;
+
+			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+
+			Vec2 quadPos = position;
+			quadPos.y -= (f32)glyphLayout.yOffset * fontSize / atlasFontSize;
+
+			Vec3 translation = Vec3(quadPos.x * 2 - screenWidth, quadPos.y * 2 - screenHeight, 0); // Final range is: -w to +w
+			translation.x /= screenWidth;
+			translation.y /= screenHeight;
 
 			TextDrawItem textDrawItem{};
-			textDrawItem.transform = Matrix4x4::Scale(scale);
-			textDrawItem.atlasUV.left = (f32)glyphLayout.x0 / (f32)atlasWidth;
-			textDrawItem.atlasUV.top = (f32)glyphLayout.y0 / (f32)atlasHeight;
-			textDrawItem.atlasUV.right = (f32)glyphLayout.x1 / (f32)atlasWidth;
-			textDrawItem.atlasUV.bottom = (f32)glyphLayout.y1 / (f32)atlasHeight;
-
+			textDrawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+			textDrawItem.atlasUV.left = (f32)glyphLayout.x0 / atlasWidth;
+			textDrawItem.atlasUV.top = (f32)glyphLayout.y0 / atlasHeight;
+			textDrawItem.atlasUV.right = (f32)glyphLayout.x1 / atlasWidth;
+			textDrawItem.atlasUV.bottom = (f32)glyphLayout.y1 / atlasHeight;
 			textDrawItems.Add(textDrawItem);
-		}
 
+			position.x += (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+		}
+		
 		if (textDrawItemBuffer)
 			textDrawItemBuffer->UploadData(textDrawItems.GetData(), textDrawItemBuffer->GetBufferSize());
 	}
@@ -1094,7 +1128,7 @@ namespace CE
 
 		const auto& vertBuffers = rpiSystem.GetTextQuad();
 		RHI::DrawLinearArguments drawArgs = rpiSystem.GetTextQuadDrawArgs();
-		drawArgs.instanceCount = 1;
+		drawArgs.instanceCount = textDrawItems.GetSize();
 
 		builder.SetDrawArguments(drawArgs);
 
@@ -1652,6 +1686,8 @@ namespace CE
 		RHI::MultisampleState msaa{};
 		msaa.sampleCount = SampleCount;
 		msaa.quality = 1.0f;
+		
+		UpdateTextData();
 
 		scheduler->BeginFrameGraph();
 		{

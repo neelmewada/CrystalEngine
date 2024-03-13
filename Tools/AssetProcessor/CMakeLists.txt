@@ -26,6 +26,7 @@ ce_add_target(${PROJECT_NAME} TOOL
             CE::System
             CE::EditorCore
             CE::EditorSystem
+        TARGETS Config
     RUNTIME_DEPENDENCIES
 
 )

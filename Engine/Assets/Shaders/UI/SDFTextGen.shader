@@ -54,6 +54,11 @@ Shader "UI/SDF Text Generator"
             Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
             SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
 
+            cbuffer _MaterialData : SRG_PerMaterial(b2)
+            {
+                int _Spread;
+            };
+
             inline uint GetPixelState(float2 uv, float w, float h)
             {
                 // Sample multiple pixels to get pixel state to smooth out corners
@@ -81,8 +86,8 @@ Shader "UI/SDF Text Generator"
                 uint w; uint h;
                 _FontAtlas.GetDimensions(w, h);
 
-                const int spread = 7;
-                const float stepSize = 0.2;
+                int spread = _Spread; // = 7;
+                const float stepSize = 0.1;
                 uint basePixelState = GetPixelState(input.uv, w, h);
                 float maxPossibleSqrDistance = spread * spread + spread * spread;
                 float minSqrDistance = maxPossibleSqrDistance;

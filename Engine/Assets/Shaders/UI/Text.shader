@@ -74,8 +74,9 @@ Shader "UI/Text"
             float4 FragMain(PSInput input) : SV_TARGET
             {
                 float a = _FontAtlas.SampleLevel(_FontAtlasSampler, input.uv, 0.0).r;
+
                 const float upperMidPoint = 0.5;
-                const float lowerMidPoint = 0.47;
+                const float lowerMidPoint = 0.4;
                 float t = (a - lowerMidPoint) / (upperMidPoint - lowerMidPoint);
 
                 a = lerp(0, 1, clamp(t, 0, 1));
