@@ -65,6 +65,7 @@ namespace CE
 	{
 		Matrix4x4 transform{};
 		Vec4 atlasUV{};
+		f32 bgMask = 0;
 	};
 
 	struct TextPerDrawData

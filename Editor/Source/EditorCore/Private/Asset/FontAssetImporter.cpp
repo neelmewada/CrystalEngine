@@ -2,6 +2,20 @@
 
 namespace CE::Editor
 {
+	static u64 CalculateTotalTextureSize(u32 width, u32 height, u32 bitsPerPixel, u32 arrayCount = 1, u32 mipLevelCount = 1)
+	{
+		u64 size = 0;
+
+		for (int mip = 0; mip < mipLevelCount; mip++)
+		{
+			u32 power = (u32)pow(2, mip);
+			u64 curSize = width / power * height / power * bitsPerPixel / 8 * arrayCount;
+			size += curSize;
+		}
+
+		return size;
+	}
+
 	Array<AssetImportJob*> FontAssetImporter::CreateImportJobs(const Array<IO::Path>& sourceAssets, const Array<IO::Path>& productAssets)
 	{
 		Array<AssetImportJob*> jobs{};
@@ -32,7 +46,8 @@ namespace CE::Editor
 	Array<Name> FontAssetImporter::GetProductAssetDependencies()
 	{
 		static const Array<Name> dependencies{
-			"/Engine/Assets/Shaders/UI/SDFTextGen"
+			"/Engine/Assets/Shaders/UI/SDFTextGen",
+			"/Engine/Assets/Shaders/Utils/MipMapGen",
 		};
 
 		return dependencies;
@@ -118,11 +133,19 @@ namespace CE::Editor
 		////////////////////////////////////////////////////
 		// - Create resources -
 
+		int mipLevels = ceil(log2(Math::Max(fontAtlasImage.GetWidth(), fontAtlasImage.GetHeight()))) + 1;
+		mipLevels = Math::Min(mipLevels, 6);
+		atlasAsset->fontAtlasTexture->mipLevels = mipLevels;
+
+		u64 totalTextureSize = CalculateTotalTextureSize(fontAtlasImage.GetWidth(), fontAtlasImage.GetHeight(), 8, 1, mipLevels);
+
 		RHI::SamplerDescriptor samplerDesc{};
 		samplerDesc.addressModeU = samplerDesc.addressModeV = samplerDesc.addressModeW = SamplerAddressMode::ClampToBorder;
 		samplerDesc.borderColor = SamplerBorderColor::FloatOpaqueBlack;
 		samplerDesc.enableAnisotropy = false;
 		samplerDesc.samplerFilterMode = FilterMode::Linear;
+
+		RHI::Sampler* sampler = RPISystem::Get().FindOrCreateSampler(samplerDesc);
 
 		RHI::Texture* rasterizedAtlas = nullptr;
 		RPI::Texture* rasterizedAtlasRpi = nullptr;
@@ -157,12 +180,35 @@ namespace CE::Editor
 			desc.defaultHeapType = MemoryHeapType::Default;
 			desc.format = RHI::Format::R8_UNORM;
 			desc.dimension = Dimension::Dim2D;
-			desc.mipLevels = 1;
+			desc.mipLevels = mipLevels;
 			desc.sampleCount = 1;
 
 			sdfFontAtlas = RHI::gDynamicRHI->CreateTexture(desc);
 			sdfFontAtlasRpi = new RPI::Texture(sdfFontAtlas);
 		}
+
+		Array<RHI::TextureView*> sdfFontAtlasMipViews{};
+
+		for (int i = 0; i < mipLevels; i++)
+		{
+			RHI::TextureViewDescriptor view{};
+			view.texture = sdfFontAtlas;
+			view.arrayLayerCount = 1;
+			view.baseArrayLayer = 0;
+			view.baseMipLevel = i;
+			view.mipLevelCount = 1;
+			view.format = sdfFontAtlas->GetFormat();
+			view.dimension = sdfFontAtlas->GetDimension();
+			
+			sdfFontAtlasMipViews.Add(RHI::gDynamicRHI->CreateTextureView(view));
+		}
+
+		defer(
+			for (int i = 0; i < mipLevels; i++)
+			{
+				delete sdfFontAtlasMipViews[i];
+			}
+		);
 
 		// - Intermediate resources -
 
@@ -191,7 +237,7 @@ namespace CE::Editor
 			desc.name = "Output Image";
 			desc.bindFlags = BufferBindFlags::StagingBuffer;
 			desc.defaultHeapType = MemoryHeapType::ReadBack;
-			desc.bufferSize = rasterizedAtlas->GetWidth() * rasterizedAtlas->GetHeight();
+			desc.bufferSize = totalTextureSize;
 
 			outputBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
 		}
@@ -216,6 +262,25 @@ namespace CE::Editor
 			delete sdfGenMaterial;
 		);
 
+		CE::Shader* mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/MipMapGen");
+		Array<RPI::Material*> mipMapMaterials{};
+
+		for (int i = 1; i < mipLevels; i++)
+		{
+			RPI::Material* mipMapMaterial = new RPI::Material(mipMapShader->GetOrCreateRPIShader(0));
+			mipMapMaterial->SetPropertyValue("_InputTexture", sdfFontAtlasMipViews[i - 1]);
+			mipMapMaterial->SetPropertyValue("_InputSampler", sampler);
+			mipMapMaterial->FlushProperties();
+			mipMapMaterials.Add(mipMapMaterial);
+		}
+
+		defer(
+			for (int i = 0; i < mipMapMaterials.GetSize(); i++)
+			{
+				delete mipMapMaterials[i];
+			}
+		);
+
 		////////////////////////////////////////
 		// - Setup RHI -
 
@@ -227,7 +292,8 @@ namespace CE::Editor
 		auto drawArgs = RPISystem::Get().GetFullScreenQuadDrawArgs();
 
 		RHI::RenderTarget* renderTarget = nullptr;
-		RHI::RenderTargetBuffer* renderTargetBuffer = nullptr;
+		Array<RHI::RenderTargetBuffer*> sdfFontAtlasMipRTBs{};
+
 		{
 			RHI::RenderTargetLayout rtLayout{};
 			RHI::RenderAttachmentLayout colorAttachment{};
@@ -240,14 +306,23 @@ namespace CE::Editor
 			rtLayout.attachmentLayouts.Add(colorAttachment);
 
 			renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
-			renderTargetBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlas });
+			//renderTargetBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlasMipViews[0] });
+
+			for (int i = 0; i < mipLevels; i++)
+			{
+				sdfFontAtlasMipRTBs.Add(RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlasMipViews[i] }));
+			}
 		}
 
 		defer(
 			delete cmdList;
 			delete fence;
 			delete renderTarget;
-			delete renderTargetBuffer;
+			//delete renderTargetBuffer;
+			for (int i = 0; i < mipLevels; i++)
+			{
+				delete sdfFontAtlasMipRTBs[i];
+			}
 		);
 
 		// - Record Commands -
@@ -255,6 +330,7 @@ namespace CE::Editor
 		cmdList->Begin();
 		{
 			RHI::ResourceBarrierDescriptor barrier{};
+			barrier.subresourceRange = RHI::SubresourceRange::All();
 
 			barrier.resource = inputBuffer;
 			barrier.fromState = ResourceState::Undefined;
@@ -297,7 +373,9 @@ namespace CE::Editor
 			RHI::AttachmentClearValue clear{};
 			clear.clearValue = Vec4(0, 0, 0, 0);
 
-			cmdList->BeginRenderTarget(renderTarget, renderTargetBuffer, &clear);
+			// Render SDF atlas into Mip 0
+
+			cmdList->BeginRenderTarget(renderTarget, sdfFontAtlasMipRTBs[0], &clear);
 			{
 				RHI::ViewportState viewport{};
 				viewport.x = viewport.y = 0;
@@ -326,8 +404,50 @@ namespace CE::Editor
 
 			barrier.resource = sdfFontAtlas;
 			barrier.fromState = ResourceState::ColorOutput;
-			barrier.toState = ResourceState::CopySource;
+			barrier.toState = ResourceState::FragmentShaderResource;
+			barrier.subresourceRange.baseMipLevel = 0;
 			cmdList->ResourceBarrier(1, &barrier);
+
+			cmdList->ClearShaderResourceGroups();
+
+			// TODO: Generate Mips
+
+			for (int i = 1; i < mipLevels; i++)
+			{
+				cmdList->BeginRenderTarget(renderTarget, sdfFontAtlasMipRTBs[1], &clear);
+
+				RHI::ViewportState viewport{};
+				viewport.x = viewport.y = 0;
+				viewport.width = sdfFontAtlas->GetWidth(i);
+				viewport.height = sdfFontAtlas->GetHeight(i);
+				viewport.minDepth = 0.0f; viewport.maxDepth = 1.0f;
+				cmdList->SetViewports(1, &viewport);
+
+				RHI::ScissorState scissor{};
+				scissor.x = scissor.y = 0;
+				scissor.width = viewport.width;
+				scissor.height = viewport.height;
+				cmdList->SetScissors(1, &scissor);
+
+				RHI::PipelineState* pipeline = mipMapMaterials[i - 1]->GetCurrentShader()->GetPipeline();
+				cmdList->BindPipelineState(pipeline);
+
+				cmdList->SetShaderResourceGroup(mipMapMaterials[i - 1]->GetShaderResourceGroup());
+				cmdList->CommitShaderResources();
+
+				cmdList->BindVertexBuffers(0, fullScreenQuad.GetSize(), fullScreenQuad.GetData());
+
+				cmdList->DrawLinear(drawArgs);
+
+				cmdList->EndRenderTarget();
+
+				barrier.resource = sdfFontAtlas;
+				barrier.fromState = ResourceState::ColorOutput;
+				barrier.toState = ResourceState::FragmentShaderResource;
+				barrier.subresourceRange.baseMipLevel = i;
+				cmdList->ResourceBarrier(1, &barrier);
+			}
+
 
 			// Transfer: SDF Atlas -> Output buffer
 			{
@@ -364,6 +484,9 @@ namespace CE::Editor
 		{
 			compressFontAtlas = false;
 		}
+
+		// Force disable compression for now
+		compressFontAtlas = false;
 
 		if (compressFontAtlas)
 		{

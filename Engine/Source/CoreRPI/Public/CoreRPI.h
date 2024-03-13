@@ -71,6 +71,8 @@ namespace CE::RPI
 #include "Text/FontAtlasLayout.h"
 #include "Text/FontAtlas.h"
 
+#include "Renderer2D.h"
+
 #include "Feature/FeatureProcessor.h"
 #include "Feature/FeatureProcessorRegistry.h"
 

@@ -1026,8 +1026,12 @@ namespace CE
 
 		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
+		const bool bold = false;
+
 		textMaterial->SetPropertyValue("_FontAtlas", atlasData->GetAtlasTexture()->GetRpiTexture());
+		textMaterial->SetPropertyValue("_BgColor", Color(0, 0, 0, 1));
 		textMaterial->SetPropertyValue("_FgColor", Color(1, 1, 1, 1));
+		textMaterial->SetPropertyValue("_Bold", (u32)bold);
 		textMaterial->FlushProperties();
 
 		UpdateTextData();
@@ -1074,6 +1078,19 @@ namespace CE
 		position.x = startX;
 		position.y = startY;
 
+		float maxX = startX;
+		float maxY = startY;
+
+		constexpr bool showBG = true;
+
+		// BG
+		if (showBG)
+		{
+			TextDrawItem textDrawItem{};
+			textDrawItem.atlasUV.left = textDrawItem.atlasUV.top = textDrawItem.atlasUV.right = textDrawItem.atlasUV.bottom = 0;
+			textDrawItems.Add(textDrawItem);
+		}
+
 		for (int i = 0; i < text.GetLength(); i++)
 		{
 			char c = text[i];
@@ -1113,9 +1130,36 @@ namespace CE
 			textDrawItem.atlasUV.top = (f32)glyphLayout.y0 / atlasHeight;
 			textDrawItem.atlasUV.right = (f32)glyphLayout.x1 / atlasWidth;
 			textDrawItem.atlasUV.bottom = (f32)glyphLayout.y1 / atlasHeight;
+			textDrawItem.bgMask = 0;
 			textDrawItems.Add(textDrawItem);
 
 			position.x += (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+
+			if (position.x > maxX)
+				maxX = position.x;
+			if (position.y + metrics.lineHeight * fontSize / atlasFontSize > maxY)
+				maxY = position.y + metrics.lineHeight * fontSize / atlasFontSize;
+		}
+
+		// Background
+		if (showBG)
+		{
+			Vec3 scale = Vec3(1, 1, 1);
+			float glyphWidth = maxX - startX + 1;
+			float glyphHeight = maxY - startY + 1;
+
+			scale.x = glyphWidth / screenWidth * 2;
+			scale.y = glyphHeight / screenHeight * 2;
+
+			Vec2 quadPos = Vec2(startX, startY - metrics.ascender * fontSize / atlasFontSize);
+
+			Vec3 translation = Vec3(quadPos.x * 2 - screenWidth, quadPos.y * 2 - screenHeight, 0); // Final range is: -w to +w
+			translation.x /= screenWidth;
+			translation.y /= screenHeight;
+
+			TextDrawItem& textDrawItem = textDrawItems[0];
+			textDrawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+			textDrawItem.bgMask = 1.0f;
 		}
 		
 		if (textDrawItemBuffer)
