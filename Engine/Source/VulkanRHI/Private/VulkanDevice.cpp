@@ -9,7 +9,7 @@ namespace CE::Vulkan
 {
 	static void InitDescriptorPool(DescriptorPool& pool)
 	{
-		pool.Init(((VulkanRHI*)gDynamicRHI)->GetDevice());
+		pool.Init(((VulkanRHI*)gDynamicRHI)->GetDevice(), 64, 64);
 	}
 
 	VulkanDevice::VulkanDevice(VkInstance instance, VulkanRHI* vulkanRhi)
