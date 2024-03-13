@@ -76,8 +76,9 @@ Shader "UI/Text"
                 float a = _FontAtlas.SampleLevel(_FontAtlasSampler, input.uv, 0.0).r;
                 const float upperMidPoint = 0.5;
                 const float lowerMidPoint = 0.47;
+                float t = (a - lowerMidPoint) / (upperMidPoint - lowerMidPoint);
 
-                a = lerp(0, 1, clamp((a - lowerMidPoint) / (upperMidPoint - lowerMidPoint), 0, 1));
+                a = lerp(0, 1, clamp(t, 0, 1));
                 
                 return float4(_FgColor.rgb, a * _FgColor.a);
             }

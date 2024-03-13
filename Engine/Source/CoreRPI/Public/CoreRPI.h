@@ -8,6 +8,15 @@
 // ***********************************
 // CoreRPI Includes
 
+#if PAL_TRAIT_BUILD_EDITOR
+namespace CE::Editor
+{
+	class FontAssetImportJob;
+	class TextureAssetImportJob;
+	class ShaderAssetImportJob;
+}
+#endif
+
 namespace CE::RPI
 {
 	template<typename T>
@@ -46,6 +55,7 @@ namespace CE::RPI
 #include "CubeMap/CubeMapProcessor.h"
 #include "Material/MaterialProperty.h"
 #include "Material/Material.h"
+#include "TextureAsset.h"
 
 #include "VertexBuffer.h"
 #include "Model/ModelLod.h"

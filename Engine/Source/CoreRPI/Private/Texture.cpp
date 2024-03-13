@@ -2,6 +2,19 @@
 
 namespace CE::RPI
 {
+    static u64 CalculateTotalTextureSize(u32 width, u32 height, u32 bitsPerPixel, u32 arrayCount = 1, u32 mipLevelCount = 1)
+    {
+        u64 size = 0;
+
+        for (int mip = 0; mip < mipLevelCount; mip++)
+        {
+            u32 power = (u32)pow(2, mip);
+            u64 curSize = width / power * height / power * bitsPerPixel / 8 * arrayCount;
+            size += curSize;
+        }
+
+        return size;
+    }
     
     Texture::Texture(const TextureDescriptor& desc)
     {
@@ -91,17 +104,14 @@ namespace CE::RPI
         textureView = nullptr;
     }
 
-    void Texture::UploadData(u8* src, u64 dataSize, int totalMipLevels)
+    void Texture::UploadData(u8* src, u64 dataSize)
     {
         if (src == nullptr || dataSize == 0)
         {
             return;
         }
 
-        if (totalMipLevels <= 0)
-        {
-            totalMipLevels = texture->GetMipLevelCount();
-        }
+        int totalMipLevels = texture->GetMipLevelCount();
 
         RHI::CommandQueue* queue = RHI::gDynamicRHI->GetPrimaryTransferQueue();
         auto commandList = RHI::gDynamicRHI->AllocateCommandList(queue);
@@ -131,7 +141,7 @@ namespace CE::RPI
 
             u64 bufferOffset = 0;
 
-            for (int mip = 0; mip < texture->GetMipLevelCount(); mip++)
+            for (int mip = 0; mip < totalMipLevels; mip++)
             {
                 RHI::BufferToTextureCopy copyRegion{};
                 copyRegion.srcBuffer = stagingBuffer;

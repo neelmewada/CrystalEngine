@@ -23,6 +23,11 @@ namespace CE
 
         inline TextureCube* GetDiffuseConvolution() const { return diffuseConvolution; }
 
+        u32 GetArrayLayers() const override
+        {
+            return 6;
+        }
+
     private:
 
         FIELD()

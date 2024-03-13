@@ -15,7 +15,9 @@ namespace CE::Editor
 
     private:
 
-		
+		FIELD(Config)
+		bool compressFontAtlas = false;
+
     };
 
 	class EDITORCORE_API FontAssetImportJob : public AssetImportJob
@@ -35,6 +37,7 @@ namespace CE::Editor
 	private:
 
 		CMFontAtlasGenerateInfo genInfo{};
+		bool compressFontAtlas = false;
 
 		friend class FontAssetImporter;
 	};

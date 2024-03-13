@@ -9,6 +9,8 @@ namespace CE::Editor
 		for (int i = 0; i < sourceAssets.GetSize(); i++)
 		{
 			FontAssetImportJob* job = new FontAssetImportJob(this, sourceAssets[i], productAssets[i]);
+			job->compressFontAtlas = compressFontAtlas;
+
 			job->genInfo.padding = 16;
 			job->genInfo.fontSize = 64;
 
@@ -136,6 +138,7 @@ namespace CE::Editor
 			desc.format = RHI::Format::R8_UNORM;
 			desc.dimension = Dimension::Dim2D;
 			desc.mipLevels = 1;
+			desc.sampleCount = 1;
 
 			sdfFontAtlas = RHI::gDynamicRHI->CreateTexture(desc);
 			sdfFontAtlasRpi = new RPI::Texture(sdfFontAtlas);
@@ -219,6 +222,13 @@ namespace CE::Editor
 			renderTargetBuffer = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlas });
 		}
 
+		defer(
+			delete cmdList;
+			delete fence;
+			delete renderTarget;
+			delete renderTargetBuffer;
+		);
+
 		// - Record Commands -
 
 		cmdList->Begin();
@@ -293,6 +303,11 @@ namespace CE::Editor
 			}
 			cmdList->EndRenderTarget();
 
+			barrier.resource = sdfFontAtlas;
+			barrier.fromState = ResourceState::ColorOutput;
+			barrier.toState = ResourceState::CopySource;
+			cmdList->ResourceBarrier(1, &barrier);
+
 			// Transfer: SDF Atlas -> Output buffer
 			{
 				RHI::TextureToBufferCopy copy{};
@@ -310,18 +325,71 @@ namespace CE::Editor
 			barrier.fromState = ResourceState::CopyDestination;
 			barrier.toState = ResourceState::General;
 			cmdList->ResourceBarrier(1, &barrier);
+
+			barrier.resource = sdfFontAtlas;
+			barrier.fromState = ResourceState::CopySource;
+			barrier.toState = ResourceState::FragmentShaderResource;
+			cmdList->ResourceBarrier(1, &barrier);
 		}
 		cmdList->End();
 
 		queue->Execute(1, &cmdList, fence);
 		fence->WaitForFence();
 
-		// - Cleanup -
+		// - Fetch data -
 
-		delete cmdList;
-		delete fence;
-		delete renderTarget;
-		delete renderTargetBuffer;
+		font->fontAtlas->addressModeU = font->fontAtlas->addressModeV = TextureAddressMode::ClampToBorder;
+		font->fontAtlas->borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
+		font->fontAtlas->anisoLevel = 0;
+		font->fontAtlas->arrayCount = 1;
+		font->fontAtlas->mipLevels = 1;
+		font->fontAtlas->filter = RHI::FilterMode::Linear;
+		font->fontAtlas->pixelFormat = TextureFormat::R8;
+		font->fontAtlas->compressionQuality = TextureCompressionQuality::None;
+		font->fontAtlas->sourceCompressionFormat = TextureSourceCompressionFormat::None;
+		font->fontAtlas->width = sdfFontAtlas->GetWidth();
+		font->fontAtlas->height = sdfFontAtlas->GetHeight();
+
+		// BCn formats are only
+		if (!PlatformMisc::IsDesktopPlatform(targetPlatform))
+		{
+			compressFontAtlas = false;
+		}
+
+		if (compressFontAtlas)
+		{
+			font->fontAtlas->pixelFormat = TextureFormat::BC4;
+			font->fontAtlas->compressionQuality = TextureCompressionQuality::Normal;
+			font->fontAtlas->sourceCompressionFormat = TextureSourceCompressionFormat::BC4;
+		}
+
+		void* data;
+		outputBuffer->Map(0, outputBuffer->GetBufferSize(), &data);
+		{
+			CMImage img = CMImage::LoadRawImageFromMemory((u8*)data, sdfFontAtlas->GetWidth(), sdfFontAtlas->GetHeight(), CMImageFormat::R8,
+				CMImageSourceFormat::None, 8, 8);
+			//img.EncodeToPNG(PlatformDirectories::GetLaunchDir() / "Temp/sdf.png");
+
+			if (!compressFontAtlas)
+			{
+				font->fontAtlas->source.LoadData(data, outputBuffer->GetBufferSize());
+			}
+			else
+			{
+				CMImageEncoder encoder{};
+				u64 requiredSize = encoder.GetCompressedSizeRequirement(img, CMImageSourceFormat::BC4);
+				font->fontAtlas->source.Reserve(requiredSize);
+
+				bool success = encoder.EncodeToBCn(img, font->fontAtlas->source.GetDataPtr(), CMImageSourceFormat::BC4, CMImageEncoder::Quality_Slow);
+				if (!success)
+				{
+					return false;
+				}
+			}
+		}
+		outputBuffer->Unmap();
+
+		// - Cleanup -
 
 		return true;
 	}

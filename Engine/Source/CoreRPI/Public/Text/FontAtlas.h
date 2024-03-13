@@ -2,18 +2,15 @@
 
 namespace CE::RPI
 {
+    class TextureAsset;
 
     CLASS()
-    class CORERPI_API FontAtlas : public Object
+    class CORERPI_API FontAtlasAsset : public Object
     {
-        CE_CLASS(FontAtlas, Object)
+        CE_CLASS(FontAtlasAsset, Object)
     public:
 
-        virtual ~FontAtlas();
-
-        static FontAtlas* Create(Name name, CMFontAtlas* cmFontAtlas, Object* outer = nullptr);
-
-        inline RPI::Texture* GetAtlasTexture() const { return atlas; }
+        virtual ~FontAtlasAsset();
 
         inline const Array<FontGlyphLayout>& GetGlyphLayouts() const { return glyphLayouts; }
 
@@ -25,9 +22,9 @@ namespace CE::RPI
             return glyphLayoutCache[unicode]; 
         }
 
-        inline u32 GetWidth() const { return width; }
+        inline u32 GetWidth() const { return fontAtlas != nullptr ? fontAtlas->width : 0; }
 
-        inline u32 GetHeight() const { return height; }
+        inline u32 GetHeight() const { return fontAtlas != nullptr ? fontAtlas->height : 0; }
 
     private:
 
@@ -35,18 +32,17 @@ namespace CE::RPI
 
         void CacheGlyphLayouts();
 
-        RPI::Texture* atlas = nullptr;
-
         FIELD()
-        u32 width = 0;
-
-        FIELD()
-        u32 height = 0;
+        TextureAsset* fontAtlas = nullptr;
 
         FIELD()
         Array<FontGlyphLayout> glyphLayouts{};
 
         HashMap<u32, FontGlyphLayout> glyphLayoutCache{};
+
+#if PAL_TRAIT_BUILD_EDITOR
+        friend class CE::Editor::FontAssetImportJob;
+#endif
     };
 
 } // namespace CE::RPI

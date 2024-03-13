@@ -29,7 +29,7 @@ namespace CE
     {
         glyphLayoutsCache.Clear();
 
-        for (u32 i = 0; glyphLayouts.GetSize(); i++)
+        for (u32 i = 0; i < glyphLayouts.GetSize(); i++)
         {
             glyphLayoutsCache[glyphLayouts[i].unicode] = glyphLayouts[i];
         }

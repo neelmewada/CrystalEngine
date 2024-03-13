@@ -183,9 +183,6 @@ namespace CE
 		RHI::ShaderResourceGroup* directionalLightViewSrg = nullptr;
 		StaticArray<RHI::Buffer*, RHI::Limits::MaxSwapChainImageCount> directionalLightViewPerImage{};
 		RHI::Sampler* shadowMapSampler = nullptr;
-
-		//RHI::PipelineState* depthPipeline = nullptr;
-		//RHI::ShaderModule* depthShaderVert = nullptr;
 		
 		CE::Shader* equirectShader = nullptr;
 		CE::Shader* equirectDebugShader = nullptr;
@@ -201,8 +198,7 @@ namespace CE
 		CE::Shader* textShader = nullptr;
 		CE::Shader* sdfGenShader = nullptr;
 		RPI::Material* textMaterial = nullptr;
-		RPI::FontAtlas* fontAtlas = nullptr;
-		RPI::Texture* sdfFontAtlasTexture = nullptr;
+		Font* fontAsset = nullptr;
 		Array<TextDrawItem> textDrawItems{};
 		RHI::Buffer* textDrawItemBuffer = nullptr;
 

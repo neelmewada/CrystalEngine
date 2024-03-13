@@ -27,6 +27,15 @@ namespace CE
 
 		CMImageFormat GetCMPixelFormat();
 
+		inline u32 GetWidth() const { return width; }
+		inline u32 GetHeight() const { return height; }
+
+		inline u32 GetMipLevels() const { return mipLevels; }
+
+		virtual u32 GetArrayLayers() const = 0;
+
+		inline CE::TextureFormat GetPixelFormat() const { return pixelFormat; }
+
 	protected:
 
 		RPI::Texture* rpiTexture = nullptr;

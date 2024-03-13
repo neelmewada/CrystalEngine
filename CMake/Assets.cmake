@@ -102,6 +102,8 @@ function(ce_add_assets NAME)
             FOLDER "Assets"
     )
 
+    add_dependencies(${NAME} Config)
+
     ce_group_sources_by_folder(${NAME})
 
 endfunction()

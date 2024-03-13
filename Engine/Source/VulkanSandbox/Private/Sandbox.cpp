@@ -1007,7 +1007,6 @@ namespace CE
 		AssetManager* assetManager = gEngine->GetAssetManager();
 
 		auto prevTime = clock();
-		//sdfShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFText");
 		
 		textShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/Text");
 		textMaterial = new RPI::Material(textShader->GetOrCreateRPIShader(0));
@@ -1017,180 +1016,11 @@ namespace CE
 		RHI::ShaderResourceGroupLayout perDrawLayout = textMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerDraw);
 		textPerDrawSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawLayout);
 
-		IO::Path fontFilePath = PlatformDirectories::GetLaunchDir() / "Temp/Roboto-Bold.ttf";
+		fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
 
-		CMFontAtlasGenerateInfo genInfo{};
-		genInfo.charSetRanges.Add(CharRange('a', 'z'));
-		genInfo.charSetRanges.Add(CharRange('A', 'Z'));
-		genInfo.charSetRanges.Add(CharRange('0', '9'));
-		genInfo.charSetRanges.Add(CharRange(32, 47));
-		genInfo.charSetRanges.Add(CharRange(58, 64));
-		genInfo.charSetRanges.Add(CharRange(91, 96));
-		genInfo.charSetRanges.Add(CharRange(123, 126));
+		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
-		genInfo.padding = 8;
-		genInfo.fontSize = 24;
-
-		genInfo.padding = 16;
-		genInfo.fontSize = 64;
-
-		CMFontAtlas* cmFontAtlas = CMFontAtlas::GenerateFromFontFile(fontFilePath, genInfo);
-
-		fontAtlas = RPI::FontAtlas::Create("FontAtlas", cmFontAtlas);
-		RPI::Texture* fontAtlasTexture = fontAtlas->GetAtlasTexture();
-
-		auto fullScreenQuad = rpiSystem.GetFullScreenQuad();
-		auto fullScreenDrawArgs = rpiSystem.GetFullScreenQuadDrawArgs();
-
-		RPI::Material* sdfGenMaterial = new RPI::Material(sdfGenShader->GetOrCreateRPIShader(0));
-		sdfGenMaterial->SetPropertyValue("_FontAtlas", fontAtlas->GetAtlasTexture());
-		sdfGenMaterial->FlushProperties();
-
-		delete cmFontAtlas;
-
-		auto queue = RHI::gDynamicRHI->GetPrimaryGraphicsQueue();
-		auto cmdList = RHI::gDynamicRHI->AllocateCommandList(queue);
-		auto fence = RHI::gDynamicRHI->CreateFence(false);
-
-		RHI::Texture* sdfFontAtlas = nullptr;
-		{
-			RHI::TextureDescriptor desc{};
-			desc.name = "Texture";
-			desc.arrayLayers = 1;
-			desc.bindFlags = TextureBindFlags::Color | TextureBindFlags::ShaderRead;
-			desc.width = fontAtlasTexture->GetRhiTexture()->GetWidth();
-			desc.height = fontAtlasTexture->GetRhiTexture()->GetHeight();
-			desc.depth = 1;
-			desc.defaultHeapType = MemoryHeapType::Default;
-			desc.format = RHI::Format::R8_UNORM;
-			desc.dimension = Dimension::Dim2D;
-			desc.mipLevels = 1;
-
-			sdfFontAtlas = RHI::gDynamicRHI->CreateTexture(desc);
-			sdfFontAtlasTexture = new RPI::Texture(sdfFontAtlas);
-		}
-
-		RHI::Buffer* outputBuffer = nullptr;
-		{
-			RHI::BufferDescriptor desc{};
-			desc.name = "Output Image";
-			desc.bindFlags = BufferBindFlags::StagingBuffer;
-			desc.defaultHeapType = MemoryHeapType::ReadBack;
-			desc.bufferSize = sdfFontAtlas->GetWidth() * sdfFontAtlas->GetHeight();
-			
-			outputBuffer = RHI::gDynamicRHI->CreateBuffer(desc);
-		}
-
-		RHI::RenderTarget* renderTarget = nullptr;
-		RHI::RenderTargetBuffer* rtb = nullptr;
-		{
-			RHI::RenderTargetLayout rtLayout{};
-			RHI::RenderAttachmentLayout colorAttachment{};
-			colorAttachment.attachmentId = "Color";
-			colorAttachment.attachmentUsage = ScopeAttachmentUsage::Color;
-			colorAttachment.format = RHI::Format::R8_UNORM;
-			colorAttachment.multisampleState.sampleCount = 1;
-			colorAttachment.loadAction = AttachmentLoadAction::Clear;
-			colorAttachment.storeAction = AttachmentStoreAction::Store;
-			rtLayout.attachmentLayouts.Add(colorAttachment);
-
-			renderTarget = RHI::gDynamicRHI->CreateRenderTarget(rtLayout);
-
-			rtb = RHI::gDynamicRHI->CreateRenderTargetBuffer(renderTarget, { sdfFontAtlas });
-		}
-
-		cmdList->Begin();
-		{
-			RHI::ResourceBarrierDescriptor barrier{};
-			barrier.resource = sdfFontAtlas;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::ColorOutput;
-			cmdList->ResourceBarrier(1, &barrier);
-
-			AttachmentClearValue clear{};
-			clear.clearValue = Vec4(0, 0, 0, 0);
-			cmdList->BeginRenderTarget(renderTarget, rtb, &clear);
-
-			RHI::ViewportState viewport{};
-			viewport.x = viewport.y = 0;
-			viewport.width = sdfFontAtlas->GetWidth();
-			viewport.height = sdfFontAtlas->GetHeight();
-			viewport.minDepth = 0.0f;
-			viewport.maxDepth = 1.0f;
-			cmdList->SetViewports(1, &viewport);
-
-			RHI::ScissorState scissor{};
-			scissor.x = scissor.y = 0;
-			scissor.width = viewport.width;
-			scissor.height = viewport.height;
-			cmdList->SetScissors(1, &scissor);
-
-			RHI::PipelineState* pipeline = sdfGenMaterial->GetCurrentShader()->GetPipeline();
-			cmdList->BindPipelineState(pipeline);
-
-			cmdList->SetShaderResourceGroup(sdfGenMaterial->GetShaderResourceGroup());
-
-			cmdList->CommitShaderResources();
-
-			cmdList->BindVertexBuffers(0, fullScreenQuad.GetSize(), fullScreenQuad.GetData());
-			
-			cmdList->DrawLinear(fullScreenDrawArgs);
-
-			cmdList->EndRenderTarget();
-
-			barrier.resource = outputBuffer;
-			barrier.fromState = RHI::ResourceState::Undefined;
-			barrier.toState = RHI::ResourceState::CopyDestination;
-			cmdList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = sdfFontAtlas;
-			barrier.fromState = RHI::ResourceState::ColorOutput;
-			barrier.toState = RHI::ResourceState::CopySource;
-			cmdList->ResourceBarrier(1, &barrier);
-
-			RHI::TextureToBufferCopy copyRegion{};
-			copyRegion.srcTexture = sdfFontAtlas;
-			copyRegion.baseArrayLayer = 0;
-			copyRegion.layerCount = 1;
-			copyRegion.mipSlice = 0;
-			copyRegion.dstBuffer = outputBuffer;
-			copyRegion.bufferOffset = 0;
-
-			cmdList->CopyTextureRegion(copyRegion);
-
-			barrier.resource = outputBuffer;
-			barrier.fromState = RHI::ResourceState::CopyDestination;
-			barrier.toState = RHI::ResourceState::General;
-			cmdList->ResourceBarrier(1, &barrier);
-
-			barrier.resource = sdfFontAtlas;
-			barrier.fromState = RHI::ResourceState::CopySource;
-			barrier.toState = RHI::ResourceState::FragmentShaderResource;
-			cmdList->ResourceBarrier(1, &barrier);
-		}
-		cmdList->End();
-
-		queue->Execute(1, &cmdList, fence);
-		fence->WaitForFence();
-
-		void* dataPtr;
-		outputBuffer->Map(0, outputBuffer->GetBufferSize(), &dataPtr);
-		{
-			CMImage cmImage = CMImage::LoadRawImageFromMemory((u8*)dataPtr, sdfFontAtlas->GetWidth(), sdfFontAtlas->GetHeight(), 
-				CMImageFormat::R8, CMImageSourceFormat::None, 8, 8);
-			
-			cmImage.EncodeToPNG(fontFilePath.GetParentPath() / "sdf.png");
-		}
-		outputBuffer->Unmap();
-
-		// Cleanup
-		delete cmdList;
-		delete fence;
-		delete renderTarget; delete rtb;
-		delete outputBuffer;
-		delete sdfGenMaterial;
-
-		textMaterial->SetPropertyValue("_FontAtlas", sdfFontAtlasTexture);
+		textMaterial->SetPropertyValue("_FontAtlas", fontAsset->GetAtlasTexture()->GetRpiTexture());
 		textMaterial->SetPropertyValue("_FgColor", Color(1, 1, 1, 1));
 		textMaterial->FlushProperties();
 
@@ -1216,13 +1046,13 @@ namespace CE
 
 	void VulkanSandbox::UpdateTextData()
 	{
-		const String text = "u";
+		const String text = "G";
 
 		u32 screenWidth = swapChain->GetWidth();
 		u32 screenHeight = swapChain->GetHeight();
 
-		u32 atlasWidth = fontAtlas->GetAtlasTexture()->GetRhiTexture()->GetWidth();
-		u32 atlasHeight = fontAtlas->GetAtlasTexture()->GetRhiTexture()->GetHeight();
+		u32 atlasWidth = fontAsset->GetAtlasTexture()->GetWidth();
+		u32 atlasHeight = fontAsset->GetAtlasTexture()->GetHeight();
 
 		//constexpr f32 fontSize = 4.0f;
 		constexpr f32 fontSize = 48;
@@ -1233,7 +1063,7 @@ namespace CE
 		{
 			char c = text[i];
 
-			const RPI::FontGlyphLayout& glyphLayout = fontAtlas->GetGlyphLayout(c);
+			const RPI::FontGlyphLayout& glyphLayout = fontAsset->GetGlyphLayout(c);
 
 			Vec3 scale = Vec3(1, 1, 1);
 			float glyphWidth = (f32)glyphLayout.GetWidth();
@@ -1732,10 +1562,10 @@ namespace CE
 
 	void VulkanSandbox::DestroyFontAtlas()
 	{
-		delete fontAtlas; fontAtlas = nullptr;
+		//delete fontAtlas; fontAtlas = nullptr;
 		delete textDrawItemBuffer; textDrawItemBuffer = nullptr;
 		delete textPerDrawSrg; textPerDrawSrg = nullptr;
-		delete sdfFontAtlasTexture; sdfFontAtlasTexture = nullptr;
+		//delete sdfFontAtlasTexture; sdfFontAtlasTexture = nullptr;
 	}
 
 	void VulkanSandbox::DestroyLights()

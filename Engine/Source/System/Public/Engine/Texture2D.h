@@ -23,6 +23,11 @@ namespace CE
 			return TextureDimension::Tex2D;
 		}
 
+		u32 GetArrayLayers() const override
+		{
+			return arrayCount;
+		}
+
 	protected:
 
 		FIELD()

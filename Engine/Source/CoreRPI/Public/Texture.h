@@ -23,7 +23,7 @@ namespace CE::RPI
         inline RHI::Sampler* GetSamplerState() const { return samplerState; }
         inline RHI::TextureView* GetRhiTextureView() const { return textureView; }
 
-        virtual void UploadData(u8* src, u64 dataSize, int totalMipLevels = 1);
+        virtual void UploadData(u8* src, u64 dataSize);
 
     protected:
 

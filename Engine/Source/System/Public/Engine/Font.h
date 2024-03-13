@@ -2,9 +2,6 @@
 
 namespace CE
 {
-#if PAL_TRAIT_BUILD_TESTS
-    namespace Editor { class FontAssetImportJob; }
-#endif
 
     CLASS()
     class SYSTEM_API Font : public Asset
