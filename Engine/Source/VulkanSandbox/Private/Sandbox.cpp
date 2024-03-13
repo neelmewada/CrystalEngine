@@ -1018,9 +1018,11 @@ namespace CE
 
 		fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
 
+		atlasData = fontAsset->GetAtlasData();
+
 		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
-		textMaterial->SetPropertyValue("_FontAtlas", fontAsset->GetAtlasTexture()->GetRpiTexture());
+		textMaterial->SetPropertyValue("_FontAtlas", atlasData->GetAtlasTexture()->GetRpiTexture());
 		textMaterial->SetPropertyValue("_FgColor", Color(1, 1, 1, 1));
 		textMaterial->FlushProperties();
 
@@ -1051,8 +1053,8 @@ namespace CE
 		u32 screenWidth = swapChain->GetWidth();
 		u32 screenHeight = swapChain->GetHeight();
 
-		u32 atlasWidth = fontAsset->GetAtlasTexture()->GetWidth();
-		u32 atlasHeight = fontAsset->GetAtlasTexture()->GetHeight();
+		u32 atlasWidth = atlasData->GetAtlasTexture()->GetWidth();
+		u32 atlasHeight = atlasData->GetAtlasTexture()->GetHeight();
 
 		//constexpr f32 fontSize = 4.0f;
 		constexpr f32 fontSize = 48;
@@ -1063,7 +1065,7 @@ namespace CE
 		{
 			char c = text[i];
 
-			const RPI::FontGlyphLayout& glyphLayout = fontAsset->GetGlyphLayout(c);
+			const RPI::FontGlyphLayout& glyphLayout = atlasData->GetGlyphLayout(c);
 
 			Vec3 scale = Vec3(1, 1, 1);
 			float glyphWidth = (f32)glyphLayout.GetWidth();

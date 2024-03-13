@@ -11,25 +11,14 @@ namespace CE
 
         virtual ~Font();
 
-        inline CE::Texture2D* GetAtlasTexture() const { return fontAtlas; }
-
-        const RPI::FontGlyphLayout& GetGlyphLayout(u32 unicode);
+        inline RPI::FontAtlasAsset* GetAtlasData() const { return atlasAsset; }
 
     private:
 
-        void OnAfterDeserialize() override;
-
-        void CacheGlyphLayouts();
-
         FIELD()
-        CE::Texture2D* fontAtlas = nullptr;
+        RPI::FontAtlasAsset* atlasAsset = nullptr;
 
-        FIELD()
-        Array<RPI::FontGlyphLayout> glyphLayouts{};
-
-        HashMap<u32, RPI::FontGlyphLayout> glyphLayoutsCache{};
-
-#if PAL_TRAIT_BUILD_TESTS
+#if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::FontAssetImportJob;
 #endif
     };

@@ -76,23 +76,25 @@ namespace CE::Editor
 		// - Setup objects -
 
 		Font* font = CreateObject<Font>(package, fileName);
-		font->fontAtlas = CreateObject<Texture2D>(font, "FontAtlas");
+		font->atlasAsset = CreateObject<RPI::FontAtlasAsset>(font, "AtlasData");
+		RPI::FontAtlasAsset* atlasAsset = font->atlasAsset;
+		atlasAsset->fontAtlasTexture = CreateObject<TextureAsset>(atlasAsset, "AtlasTexture");
 
 		const auto& glyphInfos = cmFontAtlas->GetGlyphInfos();
-		font->glyphLayouts.Resize(glyphInfos.GetSize());
+		font->atlasAsset->glyphLayouts.Resize(glyphInfos.GetSize());
 
 		for (int i = 0; i < glyphInfos.GetSize(); i++)
 		{
-			font->glyphLayouts[i].unicode = glyphInfos[i].charCode;
-			font->glyphLayouts[i].x0 = glyphInfos[i].x0;
-			font->glyphLayouts[i].x1 = glyphInfos[i].x1;
-			font->glyphLayouts[i].y0 = glyphInfos[i].y0;
-			font->glyphLayouts[i].y1 = glyphInfos[i].y1;
+			atlasAsset->glyphLayouts[i].unicode = glyphInfos[i].charCode;
+			atlasAsset->glyphLayouts[i].x0 = glyphInfos[i].x0;
+			atlasAsset->glyphLayouts[i].x1 = glyphInfos[i].x1;
+			atlasAsset->glyphLayouts[i].y0 = glyphInfos[i].y0;
+			atlasAsset->glyphLayouts[i].y1 = glyphInfos[i].y1;
 
-			font->glyphLayouts[i].xOffset = glyphInfos[i].xOffset;
-			font->glyphLayouts[i].yOffset = glyphInfos[i].yOffset;
+			atlasAsset->glyphLayouts[i].xOffset = glyphInfos[i].xOffset;
+			atlasAsset->glyphLayouts[i].yOffset = glyphInfos[i].yOffset;
 
-			font->glyphLayouts[i].advance = glyphInfos[i].advance;
+			atlasAsset->glyphLayouts[i].advance = glyphInfos[i].advance;
 		}
 
 		////////////////////////////////////////////////////
@@ -338,19 +340,18 @@ namespace CE::Editor
 
 		// - Fetch data -
 
-		font->fontAtlas->addressModeU = font->fontAtlas->addressModeV = TextureAddressMode::ClampToBorder;
-		font->fontAtlas->borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
-		font->fontAtlas->anisoLevel = 0;
-		font->fontAtlas->arrayCount = 1;
-		font->fontAtlas->mipLevels = 1;
-		font->fontAtlas->filter = RHI::FilterMode::Linear;
-		font->fontAtlas->pixelFormat = TextureFormat::R8;
-		font->fontAtlas->compressionQuality = TextureCompressionQuality::None;
-		font->fontAtlas->sourceCompressionFormat = TextureSourceCompressionFormat::None;
-		font->fontAtlas->width = sdfFontAtlas->GetWidth();
-		font->fontAtlas->height = sdfFontAtlas->GetHeight();
+		atlasAsset->fontAtlasTexture->addressModeU = atlasAsset->fontAtlasTexture->addressModeV = atlasAsset->fontAtlasTexture->addressModeW 
+			= RHI::SamplerAddressMode::ClampToBorder;
+		atlasAsset->fontAtlasTexture->borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
+		atlasAsset->fontAtlasTexture->anisotropy = 0;
+		atlasAsset->fontAtlasTexture->arrayLayers = 1;
+		atlasAsset->fontAtlasTexture->mipLevels = 1;
+		atlasAsset->fontAtlasTexture->filterMode = RHI::FilterMode::Linear;
+		atlasAsset->fontAtlasTexture->format = RHI::Format::R8_UNORM;
+		atlasAsset->fontAtlasTexture->width = sdfFontAtlas->GetWidth();
+		atlasAsset->fontAtlasTexture->height = sdfFontAtlas->GetHeight();
 
-		// BCn formats are only
+		// BCn formats are Desktop only
 		if (!PlatformMisc::IsDesktopPlatform(targetPlatform))
 		{
 			compressFontAtlas = false;
@@ -358,9 +359,7 @@ namespace CE::Editor
 
 		if (compressFontAtlas)
 		{
-			font->fontAtlas->pixelFormat = TextureFormat::BC4;
-			font->fontAtlas->compressionQuality = TextureCompressionQuality::Normal;
-			font->fontAtlas->sourceCompressionFormat = TextureSourceCompressionFormat::BC4;
+			atlasAsset->fontAtlasTexture->format = RHI::Format::BC4_UNORM;
 		}
 
 		void* data;
@@ -368,19 +367,19 @@ namespace CE::Editor
 		{
 			CMImage img = CMImage::LoadRawImageFromMemory((u8*)data, sdfFontAtlas->GetWidth(), sdfFontAtlas->GetHeight(), CMImageFormat::R8,
 				CMImageSourceFormat::None, 8, 8);
-			//img.EncodeToPNG(PlatformDirectories::GetLaunchDir() / "Temp/sdf.png");
+			img.EncodeToPNG(PlatformDirectories::GetLaunchDir() / "Temp/sdf.png");
 
 			if (!compressFontAtlas)
 			{
-				font->fontAtlas->source.LoadData(data, outputBuffer->GetBufferSize());
+				atlasAsset->fontAtlasTexture->source.LoadData(data, outputBuffer->GetBufferSize());
 			}
 			else
 			{
 				CMImageEncoder encoder{};
 				u64 requiredSize = encoder.GetCompressedSizeRequirement(img, CMImageSourceFormat::BC4);
-				font->fontAtlas->source.Reserve(requiredSize);
+				atlasAsset->fontAtlasTexture->source.Reserve(requiredSize);
 
-				bool success = encoder.EncodeToBCn(img, font->fontAtlas->source.GetDataPtr(), CMImageSourceFormat::BC4, CMImageEncoder::Quality_Slow);
+				bool success = encoder.EncodeToBCn(img, atlasAsset->fontAtlasTexture->source.GetDataPtr(), CMImageSourceFormat::BC4, CMImageEncoder::Quality_Slow);
 				if (!success)
 				{
 					return false;

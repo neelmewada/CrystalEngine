@@ -29,6 +29,17 @@ namespace CE::RPI
 
 		FIELD()
 		RHI::SamplerAddressMode addressModeV = RHI::SamplerAddressMode::Repeat;
+        FIELD()
+		RHI::SamplerAddressMode addressModeW = RHI::SamplerAddressMode::Repeat;
+
+        FIELD()
+        RHI::FilterMode filterMode = RHI::FilterMode::Linear;
+
+        FIELD()
+        RHI::SamplerBorderColor borderColor = RHI::SamplerBorderColor::FloatOpaqueBlack;
+
+        FIELD()
+        u8 anisotropy = 0;
 
         FIELD()
         u32 width = 0;

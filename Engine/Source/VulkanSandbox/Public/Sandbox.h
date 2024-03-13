@@ -199,6 +199,7 @@ namespace CE
 		CE::Shader* sdfGenShader = nullptr;
 		RPI::Material* textMaterial = nullptr;
 		Font* fontAsset = nullptr;
+		RPI::FontAtlasAsset* atlasData = nullptr;
 		Array<TextDrawItem> textDrawItems{};
 		RHI::Buffer* textDrawItemBuffer = nullptr;
 

@@ -16,11 +16,18 @@ namespace CE::RPI
 			RPI::TextureDescriptor desc{};
 			desc.samplerDesc.addressModeU = addressModeU;
 			desc.samplerDesc.addressModeV = addressModeV;
-			desc.samplerDesc.addressModeW = desc.samplerDesc.addressModeU;
+			desc.samplerDesc.addressModeW = addressModeW;
+			desc.samplerDesc.samplerFilterMode = filterMode;
+			desc.samplerDesc.borderColor = borderColor;
+			desc.samplerDesc.enableAnisotropy = anisotropy > 0;
+			if (desc.samplerDesc.enableAnisotropy)
+			{
+				desc.samplerDesc.maxAnisotropy = anisotropy;
+			}
 
 			desc.texture.width = width;
 			desc.texture.height = height;
-			desc.texture.depth = 1;
+			desc.texture.depth = depth;
 			desc.texture.arrayLayers = arrayLayers;
 			desc.texture.name = GetName();
 			desc.texture.bindFlags = RHI::TextureBindFlags::ShaderRead;

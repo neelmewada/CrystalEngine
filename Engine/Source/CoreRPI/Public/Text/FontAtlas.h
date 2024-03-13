@@ -22,9 +22,11 @@ namespace CE::RPI
             return glyphLayoutCache[unicode]; 
         }
 
-        inline u32 GetWidth() const { return fontAtlas != nullptr ? fontAtlas->width : 0; }
+        inline u32 GetWidth() const { return fontAtlasTexture != nullptr ? fontAtlasTexture->width : 0; }
 
-        inline u32 GetHeight() const { return fontAtlas != nullptr ? fontAtlas->height : 0; }
+        inline u32 GetHeight() const { return fontAtlasTexture != nullptr ? fontAtlasTexture->height : 0; }
+
+        inline TextureAsset* GetAtlasTexture() const { return fontAtlasTexture; }
 
     private:
 
@@ -33,7 +35,7 @@ namespace CE::RPI
         void CacheGlyphLayouts();
 
         FIELD()
-        TextureAsset* fontAtlas = nullptr;
+        TextureAsset* fontAtlasTexture = nullptr;
 
         FIELD()
         Array<FontGlyphLayout> glyphLayouts{};
