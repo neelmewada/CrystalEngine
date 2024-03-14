@@ -317,6 +317,14 @@ namespace CE::RPI
                             }
                         }
                     }
+                    else if (value.GetValueType() == MaterialPropertyDataType::TextureView)
+                    {
+                        RHI::TextureView* textureView = value.GetValue<RHI::TextureView*>();
+                        if (textureView != nullptr)
+                        {
+                            shaderResourceGroup->Bind(imageIndex, variable.name, textureView);
+                        }
+                    }
                 }
                 else if (baseMaterial != nullptr)
                 {
@@ -339,6 +347,14 @@ namespace CE::RPI
                             {
                                 shaderResourceGroup->Bind(imageIndex, variable.name.GetString() + "Sampler", sampler);
                             }
+                        }
+                    }
+                    else if (value.GetValueType() == MaterialPropertyDataType::TextureView)
+                    {
+                        RHI::TextureView* textureView = value.GetValue<RHI::TextureView*>();
+                        if (textureView != nullptr)
+                        {
+                            shaderResourceGroup->Bind(imageIndex, variable.name, textureView);
                         }
                     }
                 }

@@ -172,6 +172,15 @@ namespace CE
 			return Color(Math::Lerp(from.r, to.r, t), Math::Lerp(from.g, to.g, t), Math::Lerp(from.b, to.b, t), Math::Lerp(from.a, to.a, t));
 		}
 
+        inline SIZE_T GetHash() const
+        {
+            SIZE_T hash = CE::GetHash(r);
+            CombineHash(hash, g);
+            CombineHash(hash, b);
+            CombineHash(hash, a);
+            return hash;
+        }
+
     public:
 
         union {

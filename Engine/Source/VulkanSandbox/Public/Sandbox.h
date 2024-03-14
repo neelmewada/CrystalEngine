@@ -196,6 +196,7 @@ namespace CE
 		CE::Shader* depthShader = nullptr;
 		RPI::Material* depthMaterial = nullptr;
 
+		Renderer2D* renderer2d = nullptr;
 		CE::Shader* textShader = nullptr;
 		CE::Shader* sdfGenShader = nullptr;
 		RPI::Material* textMaterial = nullptr;
@@ -205,6 +206,8 @@ namespace CE
 		RHI::Buffer* textDrawItemBuffer = nullptr;
 
 		RHI::ShaderResourceGroup* textPerDrawSrg = nullptr;
+		RHI::ShaderResourceGroup* perView2DSrg = nullptr;
+		RHI::Buffer* perView2DDataBuffer = nullptr;
 
 		//RPI::Shader* opaqueShader = nullptr;
 		RPI::Material* sphereMaterial = nullptr;

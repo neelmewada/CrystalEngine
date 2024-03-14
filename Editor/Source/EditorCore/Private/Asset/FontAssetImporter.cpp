@@ -134,7 +134,7 @@ namespace CE::Editor
 		// - Create resources -
 
 		int mipLevels = ceil(log2(Math::Max(fontAtlasImage.GetWidth(), fontAtlasImage.GetHeight()))) + 1;
-		mipLevels = Math::Min(mipLevels, 6);
+		mipLevels = Math::Min(mipLevels, 3);
 		atlasAsset->fontAtlasTexture->mipLevels = mipLevels;
 
 		u64 totalTextureSize = CalculateTotalTextureSize(fontAtlasImage.GetWidth(), fontAtlasImage.GetHeight(), 8, 1, mipLevels);
@@ -406,15 +406,18 @@ namespace CE::Editor
 			barrier.fromState = ResourceState::ColorOutput;
 			barrier.toState = ResourceState::FragmentShaderResource;
 			barrier.subresourceRange.baseMipLevel = 0;
+			barrier.subresourceRange.levelCount = 1;
+			barrier.subresourceRange.baseArrayLayer = 0;
+			barrier.subresourceRange.layerCount = 1;
 			cmdList->ResourceBarrier(1, &barrier);
 
 			cmdList->ClearShaderResourceGroups();
 
-			// TODO: Generate Mips
+			// Generate Mips
 
 			for (int i = 1; i < mipLevels; i++)
 			{
-				cmdList->BeginRenderTarget(renderTarget, sdfFontAtlasMipRTBs[1], &clear);
+				cmdList->BeginRenderTarget(renderTarget, sdfFontAtlasMipRTBs[i], &clear);
 
 				RHI::ViewportState viewport{};
 				viewport.x = viewport.y = 0;
@@ -445,31 +448,45 @@ namespace CE::Editor
 				barrier.fromState = ResourceState::ColorOutput;
 				barrier.toState = ResourceState::FragmentShaderResource;
 				barrier.subresourceRange.baseMipLevel = i;
+				barrier.subresourceRange.levelCount = 1;
 				cmdList->ResourceBarrier(1, &barrier);
 			}
 
+			barrier.resource = sdfFontAtlas;
+			barrier.fromState = ResourceState::FragmentShaderResource;
+			barrier.toState = ResourceState::CopySource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
+			cmdList->ResourceBarrier(1, &barrier);
+
 
 			// Transfer: SDF Atlas -> Output buffer
+			u64 copyBufferOffset = 0;
+
+			for (int i = 0; i < mipLevels; i++)
 			{
 				RHI::TextureToBufferCopy copy{};
 				copy.srcTexture = sdfFontAtlas;
 				copy.baseArrayLayer = 0;
 				copy.layerCount = 1;
-				copy.mipSlice = 0;
+				copy.mipSlice = i;
 				copy.dstBuffer = outputBuffer;
-				copy.bufferOffset = 0;
+				copy.bufferOffset = copyBufferOffset;
 
 				cmdList->CopyTextureRegion(copy);
+
+				copyBufferOffset += CalculateTotalTextureSize(sdfFontAtlas->GetWidth(i), sdfFontAtlas->GetHeight(i), 8);
 			}
 
 			barrier.resource = outputBuffer;
 			barrier.fromState = ResourceState::CopyDestination;
 			barrier.toState = ResourceState::General;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 
 			barrier.resource = sdfFontAtlas;
 			barrier.fromState = ResourceState::CopySource;
 			barrier.toState = ResourceState::FragmentShaderResource;
+			barrier.subresourceRange = RHI::SubresourceRange::All();
 			cmdList->ResourceBarrier(1, &barrier);
 		}
 		cmdList->End();

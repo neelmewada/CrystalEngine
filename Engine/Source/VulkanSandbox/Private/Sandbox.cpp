@@ -1015,6 +1015,30 @@ namespace CE
 		textShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/Text");
 		textMaterial = new RPI::Material(textShader->GetOrCreateRPIShader(0));
 
+		auto perViewLayout = textMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerView);
+		perView2DSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewLayout);
+
+		PerViewData viewData{};
+		viewData.viewPosition = Vec3(0, 0, 0);
+		viewData.viewMatrix = Matrix4x4::Identity();
+		viewData.projectionMatrix = Matrix4x4::Identity();
+		viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
+		
+		{
+			RHI::BufferDescriptor bufferDesc{};
+			bufferDesc.name = "PerViewData";
+			bufferDesc.bindFlags = BufferBindFlags::ConstantBuffer;
+			bufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			bufferDesc.bufferSize = sizeof(viewData);
+
+			perView2DDataBuffer = RHI::gDynamicRHI->CreateBuffer(bufferDesc);
+
+			perView2DDataBuffer->UploadData(&viewData, sizeof(viewData));
+		}
+
+		perView2DSrg->Bind("_PerViewData", perView2DDataBuffer);
+		perView2DSrg->FlushBindings();
+
 		sdfGenShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFTextGen");
 
 		RHI::ShaderResourceGroupLayout perDrawLayout = textMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerDraw);
@@ -1063,6 +1087,19 @@ namespace CE
 
 		f32 atlasWidth = atlasData->GetAtlasTexture()->GetWidth();
 		f32 atlasHeight = atlasData->GetAtlasTexture()->GetHeight();
+
+		if (renderer2d == nullptr)
+		{
+			Renderer2DDescriptor desc{};
+			desc.screenSize = Vec2i(screenWidth, screenHeight);
+			desc.textShader = textShader->GetOrCreateRPIShader(0);
+			
+			renderer2d = new Renderer2D(desc);
+		}
+		else
+		{
+			renderer2d->SetScreenSize(Vec2i(screenWidth, screenHeight));
+		}
 
 		const RPI::FontMetrics& metrics = atlasData->GetMetrics();
 
@@ -1178,6 +1215,7 @@ namespace CE
 
 		builder.AddShaderResourceGroup(textMaterial->GetShaderResourceGroup());
 		builder.AddShaderResourceGroup(textPerDrawSrg);
+		builder.AddShaderResourceGroup(perView2DSrg);
 
 		// UI Item
 		{
@@ -1696,6 +1734,8 @@ namespace CE
 		delete sphereMaterial; sphereMaterial = nullptr;
 		delete cubeMaterial; cubeMaterial = nullptr;
 		delete textMaterial; textMaterial = nullptr;
+		delete perView2DSrg; perView2DSrg = nullptr;
+		delete perView2DDataBuffer; perView2DDataBuffer = nullptr;
 
 		delete transparentPipeline; transparentPipeline = nullptr;
 	}

@@ -25,6 +25,7 @@ Shader "UI/Text"
             HLSLPROGRAM
             
             #include "Core/Macros.hlsli"
+            #include "Core/ViewData.hlsli"
             #include "Core/Gamma.hlsli"
 
             struct VSInput
@@ -57,6 +58,7 @@ Shader "UI/Text"
                 PSInput o;
                 float4 uvBounds = _DrawList[input.instanceId].atlasUV;
                 o.position = mul(float4(input.position, 1.0), _DrawList[input.instanceId].transform);
+                o.position = mul(o.position, viewProjectionMatrix);
                 o.uv = float2(lerp(uvBounds.x, uvBounds.z, input.uv.x), lerp(uvBounds.y, uvBounds.w, input.uv.y));
                 o.bgMask = _DrawList[input.instanceId].bgMask;
                 return o;
@@ -77,27 +79,12 @@ Shader "UI/Text"
 
             float4 FragMain(PSInput input) : SV_TARGET
             {
-                uint w; uint h;
-                _FontAtlas.GetDimensions(w, h);
-
-                const int spread = 1;
-
-                float a = 0;
-
-                /*for (int x = -spread; x <= spread; x++)
-                {
-                    for (int y = -spread; y <= spread; y++)
-                    {
-                        a += _FontAtlas.SampleLevel(_FontAtlasSampler, input.uv + float2(float(x) / w, float(y) / h), 0.0).r / float(spread * 9);
-                    }
-                }*/
-
-                a = _FontAtlas.SampleLevel(_FontAtlasSampler, input.uv, 0.0).r;
+                float a = _FontAtlas.SampleLevel(_FontAtlasSampler, input.uv, 0.0).r;
 
                 float boldValue = (1.0 - clamp(float(_Bold), 0, 1)) * 0.1;
 
-                float upperMidPoint = 0.5 + boldValue;
-                float lowerMidPoint = 0.4 + boldValue;
+                float upperMidPoint = 0.5 + boldValue; // small size: 0.42
+                float lowerMidPoint = 0.4 + boldValue; // small size: 0.35
                 float t = (a - lowerMidPoint) / (upperMidPoint - lowerMidPoint);
 
                 a = lerp(0, 1, clamp(t, 0, 1));
