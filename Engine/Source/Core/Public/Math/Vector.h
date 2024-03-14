@@ -15,13 +15,9 @@ namespace CE
     typedef TVector3<f32> Vec3;
     typedef TVector4<f32> Vec4;
 
-	typedef Vec4 Rect;
-
     typedef TVector2<s32> Vec2i;
     typedef TVector3<s32> Vec3i;
     typedef TVector4<s32> Vec4i;
-
-	typedef Vec4i RectInt;
 
 	typedef Vec2 Range;
 	typedef Vec2i RangeInt;
@@ -602,6 +598,81 @@ namespace CE
         {
             return String::Format("({}, {}, {}, {})", x, y, z, w);
         }
+    };
+
+    class CORE_API Rect
+    {
+    public:
+
+        Rect() : left(0), top(0), right(0), bottom(0)
+        {}
+
+        Rect(const Vec4& vec) : left(vec.left), top(vec.top), right(vec.right), bottom(vec.bottom)
+        {}
+
+        Rect(f32 left, f32 top, f32 right, f32 bottom) : left(left), top(top), right(right), bottom(bottom)
+        {}
+
+        union {
+            struct {
+                f32 left, top, right, bottom;
+            };
+            struct {
+                Vec2 min, max;
+            };
+        };
+
+        inline Vec2 GetSize() const
+        {
+            return max - min;
+        }
+
+        inline Vec4 ToVec4() const
+        {
+            return Vec4(left, top, right, bottom);
+        }
+
+        inline bool operator==(const Rect& rhs) const
+        {
+            return (left == rhs.left) && (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom);
+        }
+
+        inline bool operator!=(const Rect& rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        inline Rect operator+(const Rect& rhs)
+        {
+            return Rect(left + rhs.left, top + rhs.top, right + rhs.right, bottom + rhs.bottom);
+        }
+
+        inline Rect operator-(const Rect& rhs)
+        {
+            return Rect(left - rhs.left, top - rhs.top, right - rhs.right, bottom - rhs.bottom);
+        }
+
+        inline Rect& operator+=(const Rect& rhs)
+        {
+            left += rhs.left; top += rhs.top; right += rhs.right; bottom += rhs.bottom;
+            return *this;
+        }
+
+        inline Rect& operator-=(const Rect& rhs)
+        {
+            left -= rhs.left; top -= rhs.top; right -= rhs.right; bottom -= rhs.bottom;
+            return *this;
+        }
+
+        inline SIZE_T GetHash() const
+        {
+            SIZE_T hash = CE::GetHash(left);
+            CombineHash(hash, top);
+            CombineHash(hash, right);
+            CombineHash(hash, bottom);
+            return hash;
+        }
+        
     };
 
     template<typename T>

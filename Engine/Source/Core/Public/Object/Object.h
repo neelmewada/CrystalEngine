@@ -304,6 +304,7 @@ namespace CE
         
         friend class Package;
 		friend class SavePackageContext;
+        friend class BinaryDeserializer;
         
         friend class EventBus;
         friend Object* Internal::StaticConstructObject(const Internal::ConstructObjectParams& params);

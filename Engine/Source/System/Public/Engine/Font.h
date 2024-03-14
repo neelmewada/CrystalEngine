@@ -15,6 +15,8 @@ namespace CE
 
     private:
 
+        void OnAfterDeserialize() override;
+
         FIELD()
         RPI::FontAtlasAsset* atlasAsset = nullptr;
 

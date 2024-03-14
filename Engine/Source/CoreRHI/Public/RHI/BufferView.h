@@ -15,6 +15,16 @@ namespace CE::RHI
 		inline u64 GetByteOffset() const { return byteOffset; }
 		inline u64 GetByteCount() const { return byteCount; }
 
+		inline bool operator==(const BufferView& rhs) const
+		{
+			return buffer == rhs.buffer && byteOffset == rhs.byteOffset && byteCount == rhs.byteCount;
+		}
+
+		inline bool operator!=(const BufferView& rhs) const
+		{
+			return !(*this == rhs);
+		}
+
 	private:
 
 		RHI::Buffer* buffer = nullptr;

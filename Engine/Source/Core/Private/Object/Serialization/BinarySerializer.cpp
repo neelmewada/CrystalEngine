@@ -404,7 +404,7 @@ namespace CE
 				DeserializeField(stream, field, instance);
 			}
 
-			clazz->OnAfterDeserialize(instance);
+			((Object*)instance)->OnAfterDeserialize();
 		}
 		else if (type->IsStruct())
 		{

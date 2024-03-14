@@ -12,6 +12,8 @@ namespace CE::RPI
 
         virtual ~FontAtlasAsset();
 
+        RHI::Buffer* GetCharacterLayoutBuffer();
+
         inline const Array<FontGlyphLayout>& GetGlyphLayouts() const { return glyphLayouts; }
 
         inline const FontGlyphLayout& GetGlyphLayout(u32 unicode) 
@@ -20,6 +22,13 @@ namespace CE::RPI
                 CacheGlyphLayouts();
 
             return glyphLayoutCache[unicode]; 
+        }
+
+        inline u32 GetCharacterIndex(u32 unicode)
+        {
+            if (characterIndexByUnicode.KeyExists(unicode))
+                return characterIndexByUnicode[unicode];
+            return 0;
         }
 
         inline u32 GetWidth() const { return fontAtlasTexture != nullptr ? fontAtlasTexture->width : 0; }
@@ -36,6 +45,8 @@ namespace CE::RPI
 
         void CacheGlyphLayouts();
 
+        RHI::Buffer* characterLayoutBuffer = nullptr;
+
         FIELD()
         TextureAsset* fontAtlasTexture = nullptr;
 
@@ -46,6 +57,7 @@ namespace CE::RPI
         Array<FontGlyphLayout> glyphLayouts{};
 
         HashMap<u32, FontGlyphLayout> glyphLayoutCache{};
+        HashMap<u32, u32> characterIndexByUnicode{};
 
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::FontAssetImportJob;

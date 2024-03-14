@@ -19,7 +19,14 @@ namespace CE::RHI
     void DrawListContext::Shutdown()
     {
 		// Clear all lists
-		threadDrawListsByTag.Clear();
+		//threadDrawListsByTag.Clear();
+		threadDrawListsByTag.ForEach([](DrawListsByTag& list)
+			{
+				for (int i = 0; i < list.GetSize(); i++)
+				{
+					list[i].Clear();
+				}
+			});
 
 		for (auto& mergedList : mergedDrawListsByTag)
 		{

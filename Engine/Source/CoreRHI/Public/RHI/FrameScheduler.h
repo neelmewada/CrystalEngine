@@ -9,7 +9,7 @@ namespace CE::RHI
 	{
 		//! @brief Number of frames being rendered simultaneously (ex: triple buffering = 3).
 		//! We don't support more than 1 frames for now.
-		const u32 numFramesInFlight = 1;
+		u32 numFramesInFlight = 1;
 	};
 
 	//! FrameScheduler provides user facing API to construct, compile and execute FrameGraph.

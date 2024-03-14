@@ -4,6 +4,14 @@ namespace CE::RPI
 {
 	class ShaderResourceGroup;
 	class RenderTarget;
+
+	struct alignas(16) PerViewConstants
+	{
+		Matrix4x4 viewMatrix = Matrix4x4::Identity();
+		Matrix4x4 viewProjectionMatrix = Matrix4x4::Identity();
+		Matrix4x4 projectionMatrix = Matrix4x4::Identity();
+		Vec4 viewPosition = Vec4();
+	};
     
 	class CORERPI_API View final : public IntrusiveBase
 	{

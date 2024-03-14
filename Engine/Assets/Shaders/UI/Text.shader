@@ -45,18 +45,26 @@ Shader "UI/Text"
             struct DrawItem
             {
                 float4x4 transform;
-                float4 atlasUV;
                 float bgMask;
+                uint charIndex;
             };
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
+
+            struct CharacterItem
+            {
+                float4 atlasUV;
+            };
+
+            StructuredBuffer<CharacterItem> _CharacterData : SRG_PerMaterial(t3);
 
             #if VERTEX
 
             PSInput VertMain(VSInput input)
             {
                 PSInput o;
-                float4 uvBounds = _DrawList[input.instanceId].atlasUV;
+                //float4 uvBounds = _DrawList[input.instanceId].atlasUV;
+                float4 uvBounds = _CharacterData[_DrawList[input.instanceId].charIndex].atlasUV;
                 o.position = mul(float4(input.position, 1.0), _DrawList[input.instanceId].transform);
                 o.position = mul(o.position, viewProjectionMatrix);
                 o.uv = float2(lerp(uvBounds.x, uvBounds.z, input.uv.x), lerp(uvBounds.y, uvBounds.w, input.uv.y));

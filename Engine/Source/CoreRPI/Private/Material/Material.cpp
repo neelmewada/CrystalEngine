@@ -127,9 +127,7 @@ namespace CE::RPI
         const auto& layout = shaderResourceGroup->GetLayout();
         for (const auto& variable : layout.variables)
         {
-            if (variable.type == RHI::ShaderResourceType::ConstantBuffer ||
-                variable.type == RHI::ShaderResourceType::StructuredBuffer ||
-                variable.type == RHI::ShaderResourceType::RWStructuredBuffer)
+            if (variable.type == RHI::ShaderResourceType::ConstantBuffer)
             {
                 if (variable.structMembers.IsEmpty())
                     continue;
@@ -161,19 +159,7 @@ namespace CE::RPI
                     RHI::BufferDescriptor bufferDesc{};
                     bufferDesc.name = variable.name;
                     bufferDesc.bufferSize = totalSize;
-
-                    switch (variable.type) 
-                    {
-                        case RHI::ShaderResourceType::ConstantBuffer:
-                            bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
-                            break;
-                        case RHI::ShaderResourceType::StructuredBuffer:
-                        case RHI::ShaderResourceType::RWStructuredBuffer:
-                            bufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
-                            break;
-                        default:
-                            continue;
-                    }
+                    bufferDesc.bindFlags = RHI::BufferBindFlags::ConstantBuffer;
 
                     bufferDesc.defaultHeapType = RHI::MemoryHeapType::Upload;
 
@@ -284,6 +270,26 @@ namespace CE::RPI
                 if (bufferRecreated)
                 {
                     shaderResourceGroup->Bind(imageIndex, variable.name, buffer);
+                }
+            }
+            else if (variable.type == RHI::ShaderResourceType::StructuredBuffer ||
+                variable.type == RHI::ShaderResourceType::RWStructuredBuffer)
+            {
+                if (properties.KeyExists(variable.name))
+                {
+                    const MaterialPropertyValue& value = properties[variable.name];
+                    if (value.GetValueType() == MaterialPropertyDataType::Buffer)
+                    {
+                        shaderResourceGroup->Bind(imageIndex, variable.name, value.GetValue<RHI::BufferView>());
+                    }
+                }
+                else if (baseMaterial != nullptr)
+                {
+                    const MaterialPropertyValue& value = baseMaterial->GetPropertyValue(variable.name);
+                    if (value.GetValueType() == MaterialPropertyDataType::Buffer)
+                    {
+                        shaderResourceGroup->Bind(imageIndex, variable.name, value.GetValue<RHI::BufferView>());
+                    }
                 }
             }
             else if (variable.type == RHI::ShaderResourceType::Texture1D || 

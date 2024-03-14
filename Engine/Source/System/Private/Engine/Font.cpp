@@ -8,6 +8,12 @@ namespace CE
 
     }
 
+    void Font::OnAfterDeserialize()
+    {
+        Super::OnAfterDeserialize();
+
+
+    }
     
 
 } // namespace CE

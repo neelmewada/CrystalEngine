@@ -15,6 +15,7 @@ namespace CE::RPI
         Color,
         Texture,
         TextureView,
+        Buffer,
         Sampler,
         Matrix4x4,
         Enum,
@@ -85,6 +86,16 @@ namespace CE::RPI
             u.matrixValue = matrixValue;
         }
 
+        MaterialPropertyValue(RHI::BufferView bufferValue) : valueType(MaterialPropertyDataType::Buffer)
+        {
+            u.bufferValue = bufferValue;
+        }
+
+        MaterialPropertyValue(RHI::Buffer* bufferValue) : valueType(MaterialPropertyDataType::Buffer)
+        {
+            u.bufferValue = bufferValue;
+        }
+
         template<typename TEnum> requires TIsEnum<TEnum>::Value
             MaterialPropertyValue(TEnum enumValue) : valueType(MaterialPropertyDataType::Enum)
         {
@@ -130,6 +141,8 @@ namespace CE::RPI
                 return u.samplerValue == other.u.samplerValue;
             case MaterialPropertyDataType::Matrix4x4:
                 return u.matrixValue == other.u.matrixValue;
+            case MaterialPropertyDataType::Buffer:
+                return u.bufferValue == other.u.bufferValue;
             }
 
             return false;
@@ -142,7 +155,7 @@ namespace CE::RPI
 
         inline MaterialPropertyDataType GetValueType() const { return valueType; }
 
-        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4>::Value or TIsEnum<T>::Value
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4, RHI::BufferView>::Value or TIsEnum<T>::Value
         inline T GetValue() const
         {
             if constexpr (TIsEnum<T>::Value)
@@ -193,16 +206,20 @@ namespace CE::RPI
             {
                 return u.matrixValue;
             }
+            else if constexpr (TIsSameType<T, RHI::BufferView>::Value)
+            {
+                return u.bufferValue;
+            }
             return {};
         }
 
-        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4>::Value or TIsEnum<T>::Value
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4, RHI::BufferView>::Value or TIsEnum<T>::Value
         inline void GetValue(T& outValue) const
         {
             outValue = GetValue<T>();
         }
         
-        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4>::Value or TIsEnum<T>::Value
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4, RHI::BufferView>::Value or TIsEnum<T>::Value
         inline bool IsOfType() const
         {
             if constexpr (TIsEnum<T>::Value)
@@ -253,6 +270,10 @@ namespace CE::RPI
             {
                 return valueType == MaterialPropertyDataType::Matrix4x4;
             }
+            else if constexpr (TIsSameType<T, RHI::BufferView>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Buffer;
+            }
             return false;
         }
         
@@ -274,6 +295,7 @@ namespace CE::RPI
             RPI::Texture* textureValue;
             RHI::TextureView* textureViewValue;
             RHI::Sampler* samplerValue;
+            RHI::BufferView bufferValue;
             s64 enumValue;
         } u;
 

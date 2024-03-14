@@ -4,14 +4,12 @@ namespace CE
 {
 	constexpr u32 MaxDirectionalLightCount = 8;
 
-	
-
 	struct alignas(16) PerViewData
 	{
 		Matrix4x4 viewMatrix;
 		Matrix4x4 viewProjectionMatrix;
 		Matrix4x4 projectionMatrix;
-		Vec3 viewPosition;
+		Vec4 viewPosition;
 	};
 
 	struct alignas(16) DirectionalLight
@@ -64,8 +62,8 @@ namespace CE
 	struct alignas(16) TextDrawItem
 	{
 		Matrix4x4 transform{};
-		Vec4 atlasUV{};
 		f32 bgMask = 0;
+		u32 charIndex = 0;
 	};
 
 	struct TextPerDrawData
@@ -124,7 +122,7 @@ namespace CE
 		void BuildFrameGraph();
 		void CompileFrameGraph();
 
-		void SubmitWork();
+		void SubmitWork(u32 imageIndex);
 
 		void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 
@@ -195,6 +193,13 @@ namespace CE
 		RPI::Shader* opaqueRpiShader = nullptr;
 		CE::Shader* depthShader = nullptr;
 		RPI::Material* depthMaterial = nullptr;
+
+		// Tags
+		RHI::DrawListTag depthTag = 0;
+		RHI::DrawListTag opaqueTag = 0;
+		RHI::DrawListTag skyboxTag = 0;
+		RHI::DrawListTag uiTag = 0;
+		RHI::DrawListTag shadowTag = 0;
 
 		Renderer2D* renderer2d = nullptr;
 		CE::Shader* textShader = nullptr;

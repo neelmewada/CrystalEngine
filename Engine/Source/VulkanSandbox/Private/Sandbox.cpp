@@ -35,6 +35,7 @@ namespace CE
 		rpiSystem.Initialize();
 
 		RHI::FrameSchedulerDescriptor desc{};
+		desc.numFramesInFlight = 2;
 		
 		scheduler = RHI::FrameScheduler::Create(desc);
 
@@ -56,6 +57,12 @@ namespace CE
 		// Load Cube mesh at first
 		cubeModel = RPI::ModelLod::CreateCubeModel();
 		sphereModel = RPI::ModelLod::CreateSphereModel();
+
+		uiTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("ui");
+		skyboxTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("skybox");
+		depthTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("depth");
+		opaqueTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("opaque");
+		shadowTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag("shadow");
 		
 		InitModels();
 		InitCubeMaps();
@@ -111,16 +118,10 @@ namespace CE
 
 			CompileFrameGraph();
 		}
-		
-		if (resubmit)
-		{
-			resubmit = false;
-
-			SubmitWork();
-		}
 
 		u32 imageIndex = scheduler->BeginExecution();
 
+		SubmitWork(imageIndex);
 		//CubeMapDemoTick(deltaTime);
 
 		sphereRoughness += deltaTime * 0.1f;
@@ -1023,7 +1024,7 @@ namespace CE
 		viewData.viewMatrix = Matrix4x4::Identity();
 		viewData.projectionMatrix = Matrix4x4::Identity();
 		viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
-		
+
 		{
 			RHI::BufferDescriptor bufferDesc{};
 			bufferDesc.name = "PerViewData";
@@ -1052,7 +1053,11 @@ namespace CE
 
 		const bool bold = false;
 
+		f32 atlasWidth = atlasData->GetWidth();
+		f32 atlasHeight = atlasData->GetHeight();
+		
 		textMaterial->SetPropertyValue("_FontAtlas", atlasData->GetAtlasTexture()->GetRpiTexture());
+		textMaterial->SetPropertyValue("_CharacterData", atlasData->GetCharacterLayoutBuffer());
 		textMaterial->SetPropertyValue("_BgColor", Color(0, 0, 0, 1));
 		textMaterial->SetPropertyValue("_FgColor", Color(1, 1, 1, 1));
 		textMaterial->SetPropertyValue("_Bold", (u32)bold);
@@ -1093,8 +1098,16 @@ namespace CE
 			Renderer2DDescriptor desc{};
 			desc.screenSize = Vec2i(screenWidth, screenHeight);
 			desc.textShader = textShader->GetOrCreateRPIShader(0);
+			desc.drawListTag = uiTag;
+			desc.numFramesInFlight = swapChain->GetImageCount();
+			
+			desc.viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) * Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) * Quat::EulerDegrees(0, 0, 0).ToMatrix();
+			desc.viewConstantData.viewProjectionMatrix = desc.viewConstantData.projectionMatrix * desc.viewConstantData.viewMatrix;
+			desc.viewConstantData.viewPosition = Vec4();
 			
 			renderer2d = new Renderer2D(desc);
+
+			renderer2d->RegisterFont("Roboto", atlasData);
 		}
 		else
 		{
@@ -1103,7 +1116,7 @@ namespace CE
 
 		const RPI::FontMetrics& metrics = atlasData->GetMetrics();
 
-		constexpr f32 fontSize = 14;
+		constexpr f32 fontSize = 24;
 		f32 atlasFontSize = metrics.fontSize;
 
 		textDrawItems.Clear();
@@ -1118,20 +1131,21 @@ namespace CE
 		float maxX = startX;
 		float maxY = startY;
 
-		constexpr bool showBG = false;
+		constexpr bool showBG = true;
 
 		// BG
 		if (showBG)
 		{
 			TextDrawItem textDrawItem{};
-			textDrawItem.atlasUV.left = textDrawItem.atlasUV.top = textDrawItem.atlasUV.right = textDrawItem.atlasUV.bottom = 0;
+			textDrawItem.charIndex = atlasData->GetCharacterIndex(0);
+			//textDrawItem.atlasUV.left = textDrawItem.atlasUV.top = textDrawItem.atlasUV.right = textDrawItem.atlasUV.bottom = 0;
 			textDrawItems.Add(textDrawItem);
 		}
 
 		PerViewData viewData{};
 		viewData.viewPosition = Vec3(0, 0, 0);
 		viewData.viewMatrix = Matrix4x4::Identity();
-		viewData.projectionMatrix = Matrix4x4::Scale(Vec3(1, 1, 1));
+		viewData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) * Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) * Quat::EulerDegrees(0, 0, 0).ToMatrix();
 		viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
 
 		perView2DDataBuffer->UploadData(&viewData, sizeof(viewData));
@@ -1146,36 +1160,31 @@ namespace CE
 				position.y += metrics.lineHeight * fontSize / atlasFontSize;
 				continue;
 			}
-
 			const RPI::FontGlyphLayout& glyphLayout = atlasData->GetGlyphLayout(c);
-
+			
 			Vec3 scale = Vec3(1, 1, 1);
 			float glyphWidth = (f32)glyphLayout.GetWidth();
 			float glyphHeight = (f32)glyphLayout.GetHeight();
 
-			float widthFactor = glyphWidth / screenWidth;
-			float heightFactor = glyphHeight / screenHeight;
-
 			// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
-			scale.x = glyphWidth * fontSize / atlasFontSize / screenWidth * 2;
-			scale.y = glyphHeight * fontSize / atlasFontSize / screenHeight * 2;
+			scale.x = glyphWidth * fontSize / atlasFontSize * 2;
+			scale.y = glyphHeight * fontSize / atlasFontSize * 2;
 
 			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 
 			Vec2 quadPos = position;
 			quadPos.y -= (f32)glyphLayout.yOffset * fontSize / atlasFontSize;
 
-			Vec3 translation = Vec3(quadPos.x * 2 - screenWidth, quadPos.y * 2 - screenHeight, 0); // Final range is: -w to +w
-			translation.x /= screenWidth;
-			translation.y /= screenHeight;
+			Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
 
 			TextDrawItem textDrawItem{};
 			textDrawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
-			textDrawItem.atlasUV.left = (f32)glyphLayout.x0 / atlasWidth;
-			textDrawItem.atlasUV.top = (f32)glyphLayout.y0 / atlasHeight;
-			textDrawItem.atlasUV.right = (f32)glyphLayout.x1 / atlasWidth;
-			textDrawItem.atlasUV.bottom = (f32)glyphLayout.y1 / atlasHeight;
+			//textDrawItem.atlasUV.left = (f32)glyphLayout.x0 / atlasWidth;
+			//textDrawItem.atlasUV.top = (f32)glyphLayout.y0 / atlasHeight;
+			//textDrawItem.atlasUV.right = (f32)glyphLayout.x1 / atlasWidth;
+			//textDrawItem.atlasUV.bottom = (f32)glyphLayout.y1 / atlasHeight;
 			textDrawItem.bgMask = 0;
+			textDrawItem.charIndex = atlasData->GetCharacterIndex(c);
 			textDrawItems.Add(textDrawItem);
 
 			position.x += (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
@@ -1193,22 +1202,20 @@ namespace CE
 			float glyphWidth = maxX - startX + 1;
 			float glyphHeight = maxY - startY + 1;
 
-			scale.x = glyphWidth / screenWidth * 2;
-			scale.y = glyphHeight / screenHeight * 2;
+			scale.x = glyphWidth * 2;// / screenWidth * 2;
+			scale.y = glyphHeight * 2; // / screenHeight * 2;
 
 			Vec2 quadPos = Vec2(startX, startY - metrics.ascender * fontSize / atlasFontSize);
 
-			Vec3 translation = Vec3(quadPos.x * 2 - screenWidth, quadPos.y * 2 - screenHeight, 0); // Final range is: -w to +w
-			translation.x /= screenWidth;
-			translation.y /= screenHeight;
+			Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
 
 			TextDrawItem& textDrawItem = textDrawItems[0];
 			textDrawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
 			textDrawItem.bgMask = 1.0f;
 		}
 		
-		if (textDrawItemBuffer)
-			textDrawItemBuffer->UploadData(textDrawItems.GetData(), textDrawItemBuffer->GetBufferSize());
+		//if (textDrawItemBuffer)
+		//	textDrawItemBuffer->UploadData(textDrawItems.GetData(), textDrawItemBuffer->GetBufferSize());
 	}
 
 	void VulkanSandbox::BuildUIDrawPackets()
@@ -1230,10 +1237,10 @@ namespace CE
 			RHI::DrawPacketBuilder::DrawItemRequest request{};
 			request.vertexBufferViews.AddRange(vertBuffers);
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("ui");
+			request.drawItemTag = uiTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = textMaterial->GetCurrentShader()->GetPipeline();
-
+			
 			builder.AddDrawItem(request);
 		}
 
@@ -1393,7 +1400,7 @@ namespace CE
 			request.vertexBufferViews.Add(vertBufferView);
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawItemTag = shadowTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
 
@@ -1409,7 +1416,7 @@ namespace CE
 			request.vertexBufferViews.Add(vertBufferView);
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+			request.drawItemTag = depthTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 
@@ -1440,8 +1447,7 @@ namespace CE
 			}
 
 			request.indexBufferView = mesh->indexBufferView;
-
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+			request.drawItemTag = opaqueTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
@@ -1475,7 +1481,7 @@ namespace CE
 			request.vertexBufferViews.Add(vertBufferView);
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawItemTag = shadowTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
 
@@ -1490,7 +1496,7 @@ namespace CE
 			request.vertexBufferViews.Add(vertBufferView);
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+			request.drawItemTag = depthTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 
@@ -1521,7 +1527,7 @@ namespace CE
 
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+			request.drawItemTag = opaqueTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
@@ -1555,7 +1561,7 @@ namespace CE
 			request.vertexBufferViews.Add(vertBufferView);
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
+			request.drawItemTag = shadowTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline();
 
@@ -1570,7 +1576,7 @@ namespace CE
 			request.vertexBufferViews.Add(vertBufferView);
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
+			request.drawItemTag = depthTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = depthMaterial->GetCurrentShader()->GetPipeline(msaa);
 			
@@ -1601,7 +1607,7 @@ namespace CE
 
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
+			request.drawItemTag = opaqueTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = sphereMaterial->GetCurrentShader()->GetPipeline(msaa);
 
@@ -1650,7 +1656,7 @@ namespace CE
 			}
 			request.indexBufferView = mesh->indexBufferView;
 
-			request.drawItemTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
+			request.drawItemTag = skyboxTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
 			request.pipelineState = skyboxMaterial->GetCurrentShader()->GetPipeline(msaa);
 
@@ -1673,6 +1679,8 @@ namespace CE
 	void VulkanSandbox::DestroyDrawPackets()
 	{
 		scheduler->WaitUntilIdle();
+
+		delete renderer2d; renderer2d = nullptr;
 		
 		delete cubeDrawPacket; cubeDrawPacket = nullptr;
 		delete sphereDrawPacket; sphereDrawPacket = nullptr;
@@ -1934,11 +1942,6 @@ namespace CE
 				swapChainAttachment.multisampleState.sampleCount = 1;
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
-				//scheduler->UseShaderResourceGroup(perSceneSrg);
-				//scheduler->UseShaderResourceGroup(uiViewSrg);
-
-				//scheduler->UsePipeline(sdfMaterial->GetCurrentShader()->GetPipeline());
-
 				scheduler->PresentSwapChain(swapChain);
 			}
 			scheduler->EndScope();
@@ -1959,17 +1962,10 @@ namespace CE
 		}
 	}
 
-	void VulkanSandbox::SubmitWork()
+	void VulkanSandbox::SubmitWork(u32 imageIndex)
 	{
 		resubmit = false;
 		drawList.Shutdown();
-		
-		auto skyboxTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("skybox");
-		auto depthTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("depth");
-		auto opaqueTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("opaque");
-		auto shadowTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("shadow");
-		auto uiTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("ui");
-		//auto transparentTag = rpiSystem.GetDrawListTagRegistry()->AcquireTag("transparent");
 
 		RHI::DrawListMask drawListMask{};
 		drawListMask.Set(skyboxTag);
@@ -1989,6 +1985,8 @@ namespace CE
 		{
 			drawList.AddDrawPacket(uiDrawPackets[i]);
 		}
+
+		renderer2d->Submit(imageIndex);
 
 		// Finalize
 		drawList.Finalize();

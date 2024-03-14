@@ -92,7 +92,7 @@ namespace CE
 		PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 
 		RHI::gDynamicRHI = new Vulkan::VulkanRHI();
-
+		
 		RHI::gDynamicRHI->Initialize();
 		RHI::gDynamicRHI->PostInitialize();
 
