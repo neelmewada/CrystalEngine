@@ -1118,7 +1118,7 @@ namespace CE
 		float maxX = startX;
 		float maxY = startY;
 
-		constexpr bool showBG = true;
+		constexpr bool showBG = false;
 
 		// BG
 		if (showBG)
@@ -1127,6 +1127,14 @@ namespace CE
 			textDrawItem.atlasUV.left = textDrawItem.atlasUV.top = textDrawItem.atlasUV.right = textDrawItem.atlasUV.bottom = 0;
 			textDrawItems.Add(textDrawItem);
 		}
+
+		PerViewData viewData{};
+		viewData.viewPosition = Vec3(0, 0, 0);
+		viewData.viewMatrix = Matrix4x4::Identity();
+		viewData.projectionMatrix = Matrix4x4::Scale(Vec3(1, 1, 1));
+		viewData.viewProjectionMatrix = viewData.projectionMatrix * viewData.viewMatrix;
+
+		perView2DDataBuffer->UploadData(&viewData, sizeof(viewData));
 
 		for (int i = 0; i < text.GetLength(); i++)
 		{
