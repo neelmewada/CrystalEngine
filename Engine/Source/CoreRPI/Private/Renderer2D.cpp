@@ -99,8 +99,6 @@ namespace CE::RPI
 	void Renderer2D::SetScreenSize(Vec2i newScreenSize)
 	{
 		this->screenSize = newScreenSize;
-
-		
 	}
 
 	void Renderer2D::Begin()
@@ -160,6 +158,55 @@ namespace CE::RPI
 		this->cursorPosition = position;
 	}
 
+	Vec2 Renderer2D::CalculateTextSize(const String& text)
+	{
+		Vec2 size{};
+
+		const FontInfo& font = fontStack.Top();
+
+		RPI::FontAtlasAsset* fontAtlas = fontAtlasesByName[font.fontName];
+		if (fontAtlas == nullptr)
+			return Vec2();
+
+		const auto& metrics = fontAtlas->GetMetrics();
+		f32 fontSize = font.fontSize;
+		f32 atlasFontSize = metrics.fontSize;
+
+		const float startY = cursorPosition.y + metrics.ascender * fontSize / atlasFontSize;
+		const float startX = cursorPosition.x;
+
+		float maxX = startX;
+		float maxY = startY;
+
+		Vec3 position = Vec3(startX, startY, 0);
+
+		for (int i = 0; i < text.GetLength(); i++)
+		{
+			char c = text[i];
+
+			if (c == '\n')
+			{
+				position.x = startX;
+				position.y += metrics.lineHeight * fontSize / atlasFontSize;
+				continue;
+			}
+
+			const RPI::FontGlyphLayout& glyphLayout = fontAtlas->GetGlyphLayout(c);
+
+			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+
+			position.x += (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+
+			if (position.x > maxX)
+				maxX = position.x;
+			if (position.y + metrics.lineHeight * fontSize / atlasFontSize > maxY)
+				maxY = position.y + metrics.lineHeight * fontSize / atlasFontSize;
+		}
+
+		size = Vec2(maxX - startX, maxY - startY);
+		return size;
+	}
+
 	Vec2 Renderer2D::DrawText(const String& text, Vec2 size)
 	{
 		if (text.IsEmpty())
@@ -169,11 +216,6 @@ namespace CE::RPI
 		const bool isFixedHeight = size.height > 0;
 
 		const FontInfo& font = fontStack.Top();
-
-		TextDrawRequest textRequest{};
-		textRequest.text = text;
-		textRequest.position = cursorPosition;
-		textRequest.size = size;
 
 		RPI::FontAtlasAsset* fontAtlas = fontAtlasesByName[font.fontName];
 		if (fontAtlas == nullptr)
@@ -186,8 +228,8 @@ namespace CE::RPI
 		f32 fontSize = font.fontSize;
 		f32 atlasFontSize = metrics.fontSize;
 
-		const float startY = textRequest.position.y + metrics.ascender * fontSize / atlasFontSize;
-		const float startX = textRequest.position.x;
+		const float startY = cursorPosition.y + metrics.ascender * fontSize / atlasFontSize;
+		const float startX = cursorPosition.x;
 
 		float maxX = startX;
 		float maxY = startY;
@@ -290,8 +332,14 @@ namespace CE::RPI
 				drawPacket = oldPackets[0];
 				oldPackets.RemoveAt(0);
 
+				RPI::Material* material = GetOrCreateMaterial(drawBatch);
+
 				drawPacket->drawItems[0].arguments.linearArgs.firstInstance = drawBatch.firstCharDrawItemIndex;
 				drawPacket->drawItems[0].arguments.linearArgs.instanceCount = drawBatch.charDrawItemCount;
+
+				drawPacket->shaderResourceGroups[0] = material->GetShaderResourceGroup();
+				drawPacket->shaderResourceGroups[1] = charDrawItemSrg;
+				drawPacket->shaderResourceGroups[2] = perViewSrg;
 
 				this->drawPackets.Add(drawPacket);
 			}
@@ -352,6 +400,13 @@ namespace CE::RPI
 			viewConstantsUpdateRequired[imageIndex] = false;
 
 			viewConstantsBuffer[imageIndex]->UploadData(&viewConstants, sizeof(viewConstants));
+		}
+
+		// - Flush Material Properties -
+
+		for (auto [hash, material] : materials)
+		{
+			material->FlushProperties(imageIndex);
 		}
 
 		// - Update Draw Lists -

@@ -58,6 +58,8 @@ namespace CE::RPI
 
         void SetCursor(Vec2 position);
 
+        Vec2 CalculateTextSize(const String& text);
+
         Vec2 DrawText(const String& text, Vec2 size = {});
 
         void End();
@@ -106,7 +108,6 @@ namespace CE::RPI
 
         struct TextDrawBatch
         {
-            Array<TextDrawRequest> textDraws{};
             FontInfo font{};
             Color foreground{};
             Color background{};
@@ -121,6 +122,28 @@ namespace CE::RPI
                 CombineHash(hash, background);
                 return hash;
             }
+        };
+
+        struct SDFDrawBatch
+        {
+            Color background{};
+            Color border{};
+        };
+
+        enum DrawBatchType
+        {
+            DRAW_None = 0,
+            DRAW_Text,
+            DRAW_SDF,
+        };
+
+        struct DrawBatch
+        {
+            DrawBatchType drawType = DRAW_None;
+            union {
+                TextDrawBatch textDraw;
+                
+            };
         };
 
         using MaterialHash = SIZE_T;

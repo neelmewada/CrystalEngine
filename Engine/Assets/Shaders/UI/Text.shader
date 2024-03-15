@@ -3,7 +3,7 @@ Shader "UI/Text"
     Properties
     {
         _FgColor ("Color", Color) = (1, 1, 1, 1)
-        _BgColor ("BG Color", Color) = (0, 0, 0, 0,)
+        _BgColor ("BG Color", Color) = (0, 0, 0, 0)
     }
 
     SubShader

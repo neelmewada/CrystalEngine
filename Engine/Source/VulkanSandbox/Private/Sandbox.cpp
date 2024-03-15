@@ -2003,16 +2003,19 @@ namespace CE
 		renderer2d->Begin();
 		{
 			renderer2d->PushFont("Roboto", 16);
+
 			renderer2d->SetForeground(Color(1, 1, 1, 1));
 			Vec2 pos = Vec2(0, 200);
 			renderer2d->SetCursor(pos);
-			Vec2 size = renderer2d->DrawText("This is a line.\nThis is new line.");
+			Vec2 size = renderer2d->CalculateTextSize("This is a line.\nThis is new line.");
+			renderer2d->DrawText("This is a line.\nThis is new line.");
+
 			renderer2d->SetCursor(pos + Vec2(0, size.y));
 			renderer2d->SetForeground(Color(1, 0, 0, 1));
 			size = renderer2d->DrawText("This is separate text");
+
 			renderer2d->PopFont();
 		}
-
 		renderer2d->End();
 
 		const auto& renderer2dPackets = renderer2d->FlushDrawPackets(imageIndex);
