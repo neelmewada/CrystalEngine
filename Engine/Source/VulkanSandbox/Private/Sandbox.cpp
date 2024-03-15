@@ -1093,7 +1093,7 @@ namespace CE
 		f32 atlasWidth = atlasData->GetAtlasTexture()->GetWidth();
 		f32 atlasHeight = atlasData->GetAtlasTexture()->GetHeight();
 
-		if (renderer2d == nullptr)
+		if (renderer2d == nullptr) // First time setup
 		{
 			Renderer2DDescriptor desc{};
 			desc.screenSize = Vec2i(screenWidth, screenHeight);
@@ -1101,9 +1101,10 @@ namespace CE
 			desc.drawListTag = uiTag;
 			desc.numFramesInFlight = swapChain->GetImageCount();
 			
+			desc.viewConstantData.viewMatrix = Matrix4x4::Identity();
 			desc.viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) * Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) * Quat::EulerDegrees(0, 0, 0).ToMatrix();
 			desc.viewConstantData.viewProjectionMatrix = desc.viewConstantData.projectionMatrix * desc.viewConstantData.viewMatrix;
-			desc.viewConstantData.viewPosition = Vec4();
+			desc.viewConstantData.viewPosition = Vec4(0, 0, 0, 0);
 			
 			renderer2d = new Renderer2D(desc);
 
@@ -1179,10 +1180,6 @@ namespace CE
 
 			TextDrawItem textDrawItem{};
 			textDrawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
-			//textDrawItem.atlasUV.left = (f32)glyphLayout.x0 / atlasWidth;
-			//textDrawItem.atlasUV.top = (f32)glyphLayout.y0 / atlasHeight;
-			//textDrawItem.atlasUV.right = (f32)glyphLayout.x1 / atlasWidth;
-			//textDrawItem.atlasUV.bottom = (f32)glyphLayout.y1 / atlasHeight;
 			textDrawItem.bgMask = 0;
 			textDrawItem.charIndex = atlasData->GetCharacterIndex(c);
 			textDrawItems.Add(textDrawItem);
@@ -1786,8 +1783,23 @@ namespace CE
 		RHI::MultisampleState msaa{};
 		msaa.sampleCount = SampleCount;
 		msaa.quality = 1.0f;
+
+		u32 screenWidth = swapChain->GetWidth();
+		u32 screenHeight = swapChain->GetHeight();
 		
 		UpdateTextData();
+
+		// Update renderer2D's view constants with new screen resolution
+		{
+			RPI::PerViewConstants viewConstantData{};
+			viewConstantData.viewMatrix = Matrix4x4::Identity();
+			viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) * Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) * Quat::EulerDegrees(0, 0, 0).ToMatrix();
+			viewConstantData.viewProjectionMatrix = viewConstantData.projectionMatrix * viewConstantData.viewMatrix;
+			viewConstantData.viewPosition = Vec4(0, 0, 0, 0);
+
+			renderer2d->SetScreenSize(Vec2i(swapChain->GetWidth(), swapChain->GetHeight()));
+			renderer2d->SetViewConstants(viewConstantData);
+		}
 
 		scheduler->BeginFrameGraph();
 		{
@@ -1986,7 +1998,31 @@ namespace CE
 			drawList.AddDrawPacket(uiDrawPackets[i]);
 		}
 
-		renderer2d->Submit(imageIndex);
+		auto prevTime = clock();
+
+		renderer2d->Begin();
+		{
+			renderer2d->PushFont("Roboto", 16);
+			renderer2d->SetForeground(Color(1, 1, 1, 1));
+			Vec2 pos = Vec2(0, 200);
+			renderer2d->SetCursor(pos);
+			Vec2 size = renderer2d->DrawText("This is a line.\nThis is new line.");
+			renderer2d->SetCursor(pos + Vec2(0, size.y));
+			renderer2d->SetForeground(Color(1, 0, 0, 1));
+			size = renderer2d->DrawText("This is separate text");
+			renderer2d->PopFont();
+		}
+
+		renderer2d->End();
+
+		const auto& renderer2dPackets = renderer2d->FlushDrawPackets(imageIndex);
+
+		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
+
+		for (auto drawPacket : renderer2dPackets)
+		{
+			drawList.AddDrawPacket(drawPacket);
+		}
 
 		// Finalize
 		drawList.Finalize();
@@ -2010,26 +2046,6 @@ namespace CE
 		{
 			destroyed = true;
 			this->mainWindow = nullptr;
-		}
-	}
-
-	template<class Func>
-	void ParallelFor(int numThreads, int start, int end, Func&& func) {
-		std::vector<std::thread> threads;
-		int chunkSize = (end - start) / numThreads;
-
-		for (int i = 0; i < numThreads; ++i) {
-			int chunkStart = start + i * chunkSize;
-			int chunkEnd = (i == numThreads - 1) ? end : chunkStart + chunkSize;
-			threads.emplace_back([chunkStart, chunkEnd, &func]() {
-				for (int j = chunkStart; j < chunkEnd; ++j) {
-					func(j);
-				}
-				});
-		}
-
-		for (auto& t : threads) {
-			t.join();
 		}
 	}
 

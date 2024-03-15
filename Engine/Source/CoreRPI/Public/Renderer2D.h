@@ -31,8 +31,6 @@ namespace CE::RPI
         Renderer2D(const Renderer2DDescriptor& desc);
         virtual ~Renderer2D();
 
-        const Array<DrawPacket*>& Submit(u32 imageIndex);
-
         // - Setters -
 
         void SetScreenSize(Vec2i newScreenSize);
@@ -60,16 +58,19 @@ namespace CE::RPI
 
         void SetCursor(Vec2 position);
 
-        void DrawText(const String& text, Vec2 size = {});
+        Vec2 DrawText(const String& text, Vec2 size = {});
 
         void End();
+
+        const Array<DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
     private:
 
         struct TextDrawRequest;
+        struct TextDrawBatch;
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
 
-        void ResizeCharacterDrawItemBuffer(u32 numCharactersToAdd = 0);
+        void IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd = 0);
 
         // - Helpers -
 
@@ -78,7 +79,7 @@ namespace CE::RPI
             destructionQueue.Add({ .buffer = buffer, .imageIndex = curImageIndex });
         }
 
-        RPI::Material* GetOrCreateMaterial(const TextDrawRequest& textDrawRequest);
+        RPI::Material* GetOrCreateMaterial(const TextDrawBatch& textDrawBatch);
 
         // - Data Structs -
 
@@ -98,12 +99,19 @@ namespace CE::RPI
 
         struct TextDrawRequest
         {
-            FontInfo font{};
             String text{};
             Vec2 position{};
             Vec2 size{};
+        };
+
+        struct TextDrawBatch
+        {
+            Array<TextDrawRequest> textDraws{};
+            FontInfo font{};
             Color foreground{};
             Color background{};
+            u32 firstCharDrawItemIndex = 0;
+            u32 charDrawItemCount = 0;
 
             inline SIZE_T GetMaterialHash() const
             {
@@ -116,28 +124,6 @@ namespace CE::RPI
         };
 
         using MaterialHash = SIZE_T;
-
-        struct MaterialVariant
-        {
-            Name fontName{};
-            Color foreground = Color(1, 1, 1, 1);
-            Color background = Color(0, 0, 0, 0);
-            bool bold = false;
-
-            inline SIZE_T GetHash() const
-            {
-                SIZE_T hash = fontName.GetHashValue();
-                CombineHash(hash, foreground);
-                CombineHash(hash, background);
-                CombineHash(hash, bold);
-                return hash;
-            }
-
-            inline bool operator==(const MaterialVariant& other) const
-            {
-                return GetHash() == other.GetHash();
-            }
-        };
 
         struct DestroyItem
         {
@@ -172,12 +158,16 @@ namespace CE::RPI
         PerViewConstants viewConstants{};
         StaticArray<RHI::Buffer*, MaxImageCount> viewConstantsBuffer{};
         RHI::ShaderResourceGroup* perViewSrg = nullptr;
-        StaticArray<bool, MaxImageCount> viewConstantsUpdated{};
+        StaticArray<bool, MaxImageCount> viewConstantsUpdateRequired{};
 
         // - Character Drawing -
 
         StaticArray<RHI::Buffer*, MaxImageCount> charDrawItemsBuffer{};
-        Array<TextDrawRequest> textDrawRequests{};
+        RHI::ShaderResourceGroup* charDrawItemSrg = nullptr;
+        Array<TextDrawBatch> textDrawBatches{};
+        Array<CharacterDrawItem> charDrawItems{};
+        u32 charDrawItemsCount = 0;
+        bool createNewTextBatch = false;
 
         Array<RHI::DrawPacket*> drawPackets{};
         bool rebuildPackets = true;
@@ -191,7 +181,9 @@ namespace CE::RPI
 
         // - Cache -
 
+        Name defaultFontName = "";
         RPI::FontAtlasAsset* defaultFont = nullptr;
+        RPI::Material* defaultMaterial = nullptr;
         HashMap<Name, RPI::FontAtlasAsset*> fontAtlasesByName{};
         HashMap<MaterialHash, RPI::Material*> materials{};
         HashMap<MaterialHash, RHI::DrawPacket*> drawPacketsByMaterial{};
