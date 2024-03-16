@@ -5,15 +5,17 @@ namespace CE::RPI
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
-		, textShader(desc.textShader)
+		//, textShader(desc.textShader)
+		, drawShader(desc.drawShader)
+		, multisampling(desc.multisampling)
 		, drawListTag(desc.drawListTag)
 		, numFramesInFlight(desc.numFramesInFlight)
-		, initialCharacterStorage(desc.initialCharacterStorage)
-		, characterStorageIncrement(desc.characterStorageIncrement)
+		, initialDrawItemStorage(desc.initialDrawItemStorage)
+		, drawItemStorageIncrement(desc.drawItemStorageIncrement)
 		, viewConstants(desc.viewConstantData)
 		, rootTransform(desc.rootTransform)
 	{
-		CE_ASSERT(textShader != nullptr, "Text Shader is null");
+		CE_ASSERT(drawShader != nullptr, "Draw Shader is null");
 		CE_ASSERT(screenSize.x > 0 && screenSize.y > 0, "Screen size is zero!");
 
 		numFramesInFlight = Math::Min(numFramesInFlight, RHI::Limits::MaxSwapChainImageCount);
@@ -21,23 +23,26 @@ namespace CE::RPI
 		textQuadVertices = RPISystem::Get().GetTextQuad();
 		textQuadDrawArgs = RPISystem::Get().GetTextQuadDrawArgs();
 
-		RHI::ShaderResourceGroupLayout perViewSrgLayout = textShader->GetVariant(textShader->GetDefaultVariantIndex())->GetSrgLayout(RHI::SRGType::PerView);
+		defaultMaterial = new RPI::Material(drawShader);
+		defaultMaterial->SelectVariant(drawShader->GetDefaultVariantIndex());
+
+		RHI::ShaderResourceGroupLayout perViewSrgLayout = defaultMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerView);
 		perViewSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewSrgLayout);
 
-		RHI::ShaderResourceGroupLayout perDrawSrgLayout = textShader->GetVariant(textShader->GetDefaultVariantIndex())->GetSrgLayout(RHI::SRGType::PerDraw);
-		charDrawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgLayout);
+		RHI::ShaderResourceGroupLayout perDrawSrgLayout = defaultMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerDraw);
+		drawItemSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perDrawSrgLayout);
 
 		for (int i = 0; i < numFramesInFlight; i++)
 		{
 			RHI::BufferDescriptor drawItemBufferDesc{};
 			drawItemBufferDesc.name = "DrawItem Buffer";
-			drawItemBufferDesc.bufferSize = initialCharacterStorage * sizeof(CharacterDrawItem);
+			drawItemBufferDesc.bufferSize = initialDrawItemStorage * sizeof(DrawItem2D);
 			drawItemBufferDesc.defaultHeapType = MemoryHeapType::Upload;
 			drawItemBufferDesc.bindFlags = BufferBindFlags::StructuredBuffer;
-			drawItemBufferDesc.structureByteStride = sizeof(CharacterDrawItem);
+			drawItemBufferDesc.structureByteStride = sizeof(DrawItem2D);
 
-			charDrawItemsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(drawItemBufferDesc);
-			charDrawItemSrg->Bind(i, "_DrawList", charDrawItemsBuffer[i]);
+			drawItemsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(drawItemBufferDesc);
+			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer[i]);
 
 			RHI::BufferDescriptor viewConstantsBufferDesc{};
 			viewConstantsBufferDesc.name = "ViewConstants";
@@ -52,15 +57,15 @@ namespace CE::RPI
 		}
 		
 		perViewSrg->FlushBindings();
-		charDrawItemSrg->FlushBindings();
+		drawItemSrg->FlushBindings();
 	}
 
 	Renderer2D::~Renderer2D()
 	{
 		for (int i = 0; i < numFramesInFlight; i++)
 		{
-			delete charDrawItemsBuffer[i];
-			charDrawItemsBuffer[i] = nullptr;
+			delete drawItemsBuffer[i];
+			drawItemsBuffer[i] = nullptr;
 
 			delete viewConstantsBuffer[i];
 			viewConstantsBuffer[i] = nullptr;
@@ -72,6 +77,8 @@ namespace CE::RPI
 		}
 		materials.Clear();
 
+		delete defaultMaterial;
+
 		for (auto drawPacket : drawPackets)
 		{
 			delete drawPacket;
@@ -79,7 +86,7 @@ namespace CE::RPI
 		drawPackets.Clear();
 
 		delete perViewSrg; perViewSrg = nullptr;
-		delete charDrawItemSrg; charDrawItemSrg = nullptr;
+		delete drawItemSrg; drawItemSrg = nullptr;
 	}
 
 	void Renderer2D::RegisterFont(Name name, RPI::FontAtlasAsset* fontAtlasData)
@@ -105,18 +112,18 @@ namespace CE::RPI
 	{
 		fontStack.Push({ .fontName = defaultFontName, .fontSize = 16});
 
-		textDrawBatches.Clear();
+		drawBatches.Clear();
 
-		charDrawItemsCount = 0;
+		drawItemCount = 0;
 		createNewTextBatch = true;
 
-		foreground = Color(1, 1, 1, 1);
-		background = Color(0, 0, 0, 0);
+		fillColor = Color(1, 1, 1, 1);
+		outlineColor = Color(0, 0, 0, 0);
 	}
 
 	void Renderer2D::PushFont(Name family, u32 fontSize, bool bold)
 	{
-		if (fontStack.Top().fontName != family || fontStack.Top().bold != bold)
+		if (fontStack.Top().fontName != family)
 			createNewTextBatch = true;
 
 		fontStack.Push({ .fontName = family, .fontSize = fontSize, .bold = bold });
@@ -127,30 +134,25 @@ namespace CE::RPI
 		const FontInfo& last = fontStack.Top();
 		const FontInfo& lastSecond = fontStack[fontStack.GetSize() - 2];
 
-		if (last.fontName != lastSecond.fontName || last.bold != lastSecond.bold)
+		if (last.fontName != lastSecond.fontName)
 			createNewTextBatch = true;
 
 		fontStack.Pop();
 	}
 
-	void Renderer2D::SetForeground(const Color& foreground)
+	void Renderer2D::SetFillColor(const Color& color)
 	{
-		if (this->foreground.ToVec4() != foreground.ToVec4())
-		{
-			createNewTextBatch = true;
-		}
-
-		this->foreground = foreground;
+		this->fillColor = color;
 	}
 
-	void Renderer2D::SetBackground(const Color& background)
+	void Renderer2D::SetOutlineColor(const Color& color)
 	{
-		if (this->background.ToVec4() != background.ToVec4())
-		{
-			createNewTextBatch = true;
-		}
+		this->outlineColor = color;
+	}
 
-		this->background = background;
+	void Renderer2D::SetBorderThickness(f32 thickness)
+	{
+		this->borderThickness = thickness;
 	}
 
 	void Renderer2D::SetCursor(Vec2 position)
@@ -221,13 +223,13 @@ namespace CE::RPI
 		if (fontAtlas == nullptr)
 			return Vec2();
 
-		if (charDrawItems.GetSize() < charDrawItemsCount + text.GetLength())
-			charDrawItems.Resize(charDrawItemsCount + text.GetLength());
+		if (drawItems.GetSize() < drawItemCount + text.GetLength())
+			drawItems.Resize(drawItemCount + text.GetLength());
 
 		const auto& metrics = fontAtlas->GetMetrics();
 		f32 fontSize = font.fontSize;
 		f32 atlasFontSize = metrics.fontSize;
-
+		
 		const float startY = cursorPosition.y + metrics.ascender * fontSize / atlasFontSize;
 		const float startX = cursorPosition.x;
 
@@ -237,19 +239,17 @@ namespace CE::RPI
 		Vec3 position = Vec3(startX, startY, 0);
 
 		int totalCharactersDrawn = 0;
-		int firstCharDrawItemIndex = charDrawItemsCount;
+		int firstDrawItemIndex = drawItemCount;
 
-		if (textDrawBatches.IsEmpty() || createNewTextBatch)
+		if (drawBatches.IsEmpty() || createNewTextBatch)
 		{
 			createNewTextBatch = false;
-			textDrawBatches.Add({});
-			textDrawBatches.Top().firstCharDrawItemIndex = charDrawItemsCount;
-			textDrawBatches.Top().foreground = foreground;
-			textDrawBatches.Top().background = background;
-			textDrawBatches.Top().font = font;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
 		}
 
-		TextDrawBatch& curDrawBatch = textDrawBatches.Top();
+		DrawBatch& curDrawBatch = drawBatches.Top();
 
 		for (int i = 0; i < text.GetLength(); i++)
 		{
@@ -262,7 +262,7 @@ namespace CE::RPI
 				continue;
 			}
 
-			CharacterDrawItem& drawItem = charDrawItems[firstCharDrawItemIndex + i];
+			DrawItem2D& drawItem = drawItems[firstDrawItemIndex + i];
 			
 			const RPI::FontGlyphLayout& glyphLayout = fontAtlas->GetGlyphLayout(c);
 
@@ -286,13 +286,19 @@ namespace CE::RPI
 			quadPos.y -= (f32)glyphLayout.yOffset * fontSize / atlasFontSize;
 
 			Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
-
+			
+			drawItem.fillColor = fillColor.ToVec4();
+			drawItem.outlineColor = outlineColor.ToVec4();
+			drawItem.itemSize = scale;
+			drawItem.borderThickness = 0.0f;
+			drawItem.bold = 0;
+			drawItem.drawType = DRAW_Text;
+			
 			drawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
 			drawItem.charIndex = fontAtlas->GetCharacterIndex(c);
-			drawItem.bgMask = 0;
 
 			position.x += (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
-
+			
 			if (position.x > maxX)
 				maxX = position.x;
 			if (position.y + metrics.lineHeight * fontSize / atlasFontSize > maxY)
@@ -301,10 +307,100 @@ namespace CE::RPI
 			totalCharactersDrawn++;
 		}
 
-		charDrawItemsCount += totalCharactersDrawn;
-		curDrawBatch.charDrawItemCount += totalCharactersDrawn;
+		drawItemCount += totalCharactersDrawn;
+		curDrawBatch.drawItemCount += totalCharactersDrawn;
 
 		size = Vec2(maxX - startX, maxY - startY);
+		return size;
+	}
+
+	Vec2 Renderer2D::DrawCircle(Vec2 size)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if (drawBatches.IsEmpty() || createNewTextBatch)
+		{
+			createNewTextBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+		
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+
+		drawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_Circle;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+
+		curDrawBatch.drawItemCount++;
+		
+		drawItemCount++;
+		return size;
+	}
+
+	Vec2 Renderer2D::DrawRect(Vec2 size)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if (drawBatches.IsEmpty() || createNewTextBatch)
+		{
+			createNewTextBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+
+		drawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_Rect;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+
+		curDrawBatch.drawItemCount++;
+
+		drawItemCount++;
 		return size;
 	}
 
@@ -321,11 +417,9 @@ namespace CE::RPI
 		Array<DrawPacket*> oldPackets = this->drawPackets;
 		this->drawPackets.Clear();
 
-		for (int i = 0; i < textDrawBatches.GetSize(); i++)
+		for (int i = 0; i < drawBatches.GetSize(); i++)
 		{
-			const TextDrawBatch& drawBatch = textDrawBatches[i];
-
-			currentMaterialHash = drawBatch.GetMaterialHash();
+			const DrawBatch& drawBatch = drawBatches[i];
 
 			if (oldPackets.NonEmpty()) // Reuse draw packet
 			{
@@ -334,11 +428,11 @@ namespace CE::RPI
 
 				RPI::Material* material = GetOrCreateMaterial(drawBatch);
 
-				drawPacket->drawItems[0].arguments.linearArgs.firstInstance = drawBatch.firstCharDrawItemIndex;
-				drawPacket->drawItems[0].arguments.linearArgs.instanceCount = drawBatch.charDrawItemCount;
+				drawPacket->drawItems[0].arguments.linearArgs.firstInstance = drawBatch.firstDrawItemIndex;
+				drawPacket->drawItems[0].arguments.linearArgs.instanceCount = drawBatch.drawItemCount;
 
 				drawPacket->shaderResourceGroups[0] = material->GetShaderResourceGroup();
-				drawPacket->shaderResourceGroups[1] = charDrawItemSrg;
+				drawPacket->shaderResourceGroups[1] = drawItemSrg;
 				drawPacket->shaderResourceGroups[2] = perViewSrg;
 
 				this->drawPackets.Add(drawPacket);
@@ -347,14 +441,14 @@ namespace CE::RPI
 			{
 				RHI::DrawPacketBuilder builder{};
 
-				drawArgs.firstInstance = drawBatch.firstCharDrawItemIndex;
-				drawArgs.instanceCount = drawBatch.charDrawItemCount;
+				drawArgs.firstInstance = drawBatch.firstDrawItemIndex;
+				drawArgs.instanceCount = drawBatch.drawItemCount;
 				builder.SetDrawArguments(drawArgs);
 
 				RPI::Material* material = GetOrCreateMaterial(drawBatch);
 
 				builder.AddShaderResourceGroup(material->GetShaderResourceGroup());
-				builder.AddShaderResourceGroup(charDrawItemSrg);
+				builder.AddShaderResourceGroup(drawItemSrg);
 				builder.AddShaderResourceGroup(perViewSrg);
 
 				// UI Item
@@ -364,7 +458,7 @@ namespace CE::RPI
 
 					request.drawItemTag = drawListTag;
 					request.drawFilterMask = RHI::DrawFilterMask::ALL;
-					request.pipelineState = material->GetCurrentShader()->GetPipeline();
+					request.pipelineState = material->GetCurrentShader()->GetPipeline(multisampling);
 
 					builder.AddDrawItem(request);
 				}
@@ -411,22 +505,21 @@ namespace CE::RPI
 
 		// - Update Draw Lists -
 
-		if (charDrawItemsBuffer[imageIndex] != nullptr)
+		if (drawItemsBuffer[imageIndex] != nullptr)
 		{
-			if (charDrawItemsBuffer[imageIndex]->GetBufferSize() < charDrawItemsCount * sizeof(CharacterDrawItem))
+			if (drawItemsBuffer[imageIndex]->GetBufferSize() < drawItemCount * sizeof(DrawItem2D))
 			{
 				// TODO: Implement buffer size expansion
-				//IncrementCharacterDrawItemBuffer(charDrawItemsCount + 10);
+				//IncrementCharacterDrawItemBuffer(drawItemCount + 10);
 			}
-
+			
 			void* data;
-			charDrawItemsBuffer[imageIndex]->Map(0, charDrawItemsBuffer[imageIndex]->GetBufferSize(), &data);
+			drawItemsBuffer[imageIndex]->Map(0, drawItemsBuffer[imageIndex]->GetBufferSize(), &data);
 			{
-				memcpy(data, charDrawItems.GetData(), charDrawItemsCount * sizeof(CharacterDrawItem));
+				memcpy(data, drawItems.GetData(), drawItemCount * sizeof(DrawItem2D));
 			}
-			charDrawItemsBuffer[imageIndex]->Unmap();
+			drawItemsBuffer[imageIndex]->Unmap();
 		}
-		charDrawItemsCount;
 		
 		return drawPackets;
 	}
@@ -443,40 +536,40 @@ namespace CE::RPI
 
 	void Renderer2D::IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd)
 	{
-		numCharactersToAdd = Math::Max(numCharactersToAdd, characterStorageIncrement);
+		numCharactersToAdd = Math::Max(numCharactersToAdd, drawItemStorageIncrement);
 
 		for (int i = 0; i < numFramesInFlight; i++)
 		{
-			RHI::Buffer* original = charDrawItemsBuffer[i];
+			RHI::Buffer* original = drawItemsBuffer[i];
 
 			RHI::BufferDescriptor newBufferDesc{};
 			newBufferDesc.name = "DrawItem Buffer";
 			newBufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
 			newBufferDesc.defaultHeapType = MemoryHeapType::Upload;
-			newBufferDesc.structureByteStride = sizeof(CharacterDrawItem);
-			newBufferDesc.bufferSize = original->GetBufferSize() + numCharactersToAdd * sizeof(CharacterDrawItem);
+			newBufferDesc.structureByteStride = sizeof(DrawItem2D);
+			newBufferDesc.bufferSize = original->GetBufferSize() + numCharactersToAdd * sizeof(DrawItem2D);
 
-			charDrawItemsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(newBufferDesc);
-			charDrawItemSrg->Bind(i, "_DrawList", charDrawItemsBuffer[i]);
+			drawItemsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(newBufferDesc);
+			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer[i]);
 			
 			void* data;
 			original->Map(0, original->GetBufferSize(), &data);
 			{
-				charDrawItemsBuffer[i]->UploadData(data, original->GetBufferSize());
+				drawItemsBuffer[i]->UploadData(data, original->GetBufferSize());
 			}
 			original->Unmap();
 
 			QueueDestroy(original);
 		}
 
-		charDrawItemSrg->FlushBindings();
+		drawItemSrg->FlushBindings();
 	}
 
-	RPI::Material* Renderer2D::GetOrCreateMaterial(const TextDrawBatch& textDrawBatch)
+	RPI::Material* Renderer2D::GetOrCreateMaterial(const DrawBatch& drawBatch)
 	{
-		Name fontName = textDrawBatch.font.fontName;
-		bool isBold = textDrawBatch.font.bold;
-		u32 fontSize = textDrawBatch.font.fontSize;
+		Name fontName = drawBatch.font.fontName;
+		bool isBold = drawBatch.font.bold;
+		u32 fontSize = drawBatch.font.fontSize;
 		if (fontSize < 4)
 			return nullptr;
 
@@ -484,19 +577,17 @@ namespace CE::RPI
 		if (fontAtlas == nullptr)
 			return nullptr;
 
-		RPI::Material* material = materials[textDrawBatch.GetMaterialHash()];
+		RPI::Material* material = materials[drawBatch.GetMaterialHash()];
 		if (material)
 			return material;
 
-		material = new RPI::Material(textShader);
+		material = new RPI::Material(drawShader);
 		material->SetPropertyValue("_FontAtlas", fontAtlas->GetAtlasTexture()->GetRpiTexture());
 		material->SetPropertyValue("_CharacterData", fontAtlas->GetCharacterLayoutBuffer());
-		material->SetPropertyValue("_BgColor", textDrawBatch.background);
-		material->SetPropertyValue("_FgColor", textDrawBatch.foreground);
-		material->SetPropertyValue("_Bold", (u32)isBold);
+		material->SetPropertyValue("_SDFSmoothness", 50.0f);
 		material->FlushProperties();
 
-		materials[textDrawBatch.GetMaterialHash()] = material;
+		materials[drawBatch.GetMaterialHash()] = material;
 		return material;
 	}
 

@@ -203,6 +203,7 @@ namespace CE
 
 		Renderer2D* renderer2d = nullptr;
 		CE::Shader* textShader = nullptr;
+		CE::Shader* renderer2dShader = nullptr;
 		CE::Shader* sdfGenShader = nullptr;
 		RPI::Material* textMaterial = nullptr;
 		Font* fontAsset = nullptr;

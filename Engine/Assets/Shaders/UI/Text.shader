@@ -63,7 +63,6 @@ Shader "UI/Text"
             PSInput VertMain(VSInput input)
             {
                 PSInput o;
-                //float4 uvBounds = _DrawList[input.instanceId].atlasUV;
                 float4 uvBounds = _CharacterData[_DrawList[input.instanceId].charIndex].atlasUV;
                 o.position = mul(float4(input.position, 1.0), _DrawList[input.instanceId].transform);
                 o.position = mul(o.position, viewProjectionMatrix);

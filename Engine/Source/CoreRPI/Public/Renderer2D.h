@@ -7,20 +7,22 @@ namespace CE::RPI
     struct Renderer2DDescriptor
     {
         Vec2i screenSize{};
-        RPI::Shader* textShader = nullptr;
+        //RPI::Shader* textShader = nullptr;
+        RPI::Shader* drawShader = nullptr;
         u32 numFramesInFlight = 2;
         PerViewConstants viewConstantData{};
         RHI::DrawListTag drawListTag = 0;
+        RHI::MultisampleState multisampling{};
 
         Matrix4x4 rootTransform = Matrix4x4::Identity();
         
 #if PLATFORM_DESKTOP
-        // Pre-allocates storage for a set number of text characters. Ex: 10,000 characters
-        u32 initialCharacterStorage = 50'000;
-        u32 characterStorageIncrement = 50'000;
+        // Pre-allocates storage for a set number of draw items. Ex: 10,000 characters
+        u32 initialDrawItemStorage = 50'000;
+        u32 drawItemStorageIncrement = 50'000;
 #else
-        u32 initialCharacterStorage = 10'000;
-        u32 characterStorageIncrement = 10'000;
+        u32 initialDrawItemStorage = 10'000;
+        u32 drawItemStorageIncrement = 10'000;
 #endif
     };
     
@@ -53,14 +55,19 @@ namespace CE::RPI
         void PushFont(Name family, u32 fontSize = 16, bool bold = false);
         void PopFont();
 
-        void SetForeground(const Color& foreground);
-        void SetBackground(const Color& background);
+        void SetFillColor(const Color& color);
+        void SetOutlineColor(const Color& color);
+        void SetBorderThickness(f32 thickness);
 
         void SetCursor(Vec2 position);
 
         Vec2 CalculateTextSize(const String& text);
 
         Vec2 DrawText(const String& text, Vec2 size = {});
+
+        Vec2 DrawCircle(Vec2 size);
+
+        Vec2 DrawRect(Vec2 size);
 
         void End();
 
@@ -70,6 +77,7 @@ namespace CE::RPI
 
         struct TextDrawRequest;
         struct TextDrawBatch;
+        struct DrawBatch;
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
 
         void IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd = 0);
@@ -81,15 +89,36 @@ namespace CE::RPI
             destructionQueue.Add({ .buffer = buffer, .imageIndex = curImageIndex });
         }
 
-        RPI::Material* GetOrCreateMaterial(const TextDrawBatch& textDrawBatch);
+        RPI::Material* GetOrCreateMaterial(const DrawBatch& textDrawBatch);
 
         // - Data Structs -
 
-        struct alignas(16) CharacterDrawItem
+        //struct alignas(16) CharacterDrawItem
+        //{
+        //    Matrix4x4 transform{};
+        //    f32 bgMask = 0;
+        //    u32 charIndex = 0;
+        //};
+
+        enum DrawType : u32
+        {
+            DRAW_None = 0,
+            DRAW_Text,
+            DRAW_Circle,
+            DRAW_Rect,
+            DRAW_RoundedRect,
+        };
+
+        struct alignas(16) DrawItem2D
         {
             Matrix4x4 transform{};
-            f32 bgMask = 0;
-            u32 charIndex = 0;
+            Vec4 fillColor = Vec4();
+            Vec4 outlineColor = Vec4();
+            Vec2 itemSize = Vec2(); // item size in pixels
+            float borderThickness = 0;
+            DrawType drawType = DRAW_None; // enum DrawType
+            u32 charIndex = 0; // For character drawing
+            u32 bold = 0;
         };
 
         struct FontInfo
@@ -124,26 +153,16 @@ namespace CE::RPI
             }
         };
 
-        struct SDFDrawBatch
-        {
-            Color background{};
-            Color border{};
-        };
-
-        enum DrawBatchType
-        {
-            DRAW_None = 0,
-            DRAW_Text,
-            DRAW_SDF,
-        };
-
         struct DrawBatch
         {
-            DrawBatchType drawType = DRAW_None;
-            union {
-                TextDrawBatch textDraw;
-                
-            };
+            FontInfo font{};
+            u32 firstDrawItemIndex = 0;
+            u32 drawItemCount = 0;
+
+            inline SIZE_T GetMaterialHash() const
+            {
+                return font.fontName.GetHashValue();
+            }
         };
 
         using MaterialHash = SIZE_T;
@@ -158,11 +177,13 @@ namespace CE::RPI
 
         // - Config -
 
-        RPI::Shader* textShader = nullptr;
+        //RPI::Shader* textShader = nullptr;
+        RPI::Shader* drawShader = nullptr;
         RHI::DrawListTag drawListTag = 0;
         u32 numFramesInFlight = 2;
-        u32 initialCharacterStorage = 50'000;
-        u32 characterStorageIncrement = 50'000;
+        u32 initialDrawItemStorage = 50'000;
+        u32 drawItemStorageIncrement = 50'000;
+        RHI::MultisampleState multisampling{};
 
         // - State -
 
@@ -172,8 +193,9 @@ namespace CE::RPI
         Array<FontInfo> fontStack{};
 
         Vec2 cursorPosition{};
-        Color foreground = Color(1, 1, 1, 1);
-        Color background = Color(0, 0, 0, 0);
+        Color fillColor = Color(1, 1, 1, 1);
+        Color outlineColor = Color(0, 0, 0, 0);
+        float borderThickness = 0.0f;
 
         // - Constants -
 
@@ -183,13 +205,15 @@ namespace CE::RPI
         RHI::ShaderResourceGroup* perViewSrg = nullptr;
         StaticArray<bool, MaxImageCount> viewConstantsUpdateRequired{};
 
-        // - Character Drawing -
+        // - Drawing -
 
-        StaticArray<RHI::Buffer*, MaxImageCount> charDrawItemsBuffer{};
-        RHI::ShaderResourceGroup* charDrawItemSrg = nullptr;
-        Array<TextDrawBatch> textDrawBatches{};
-        Array<CharacterDrawItem> charDrawItems{};
-        u32 charDrawItemsCount = 0;
+        StaticArray<RHI::Buffer*, MaxImageCount> drawItemsBuffer{};
+        RHI::ShaderResourceGroup* drawItemSrg = nullptr;
+        //Array<TextDrawBatch> textDrawBatches{};
+        //Array<CharacterDrawItem> charDrawItems{};
+        Array<DrawBatch> drawBatches{};
+        Array<DrawItem2D> drawItems{};
+        u32 drawItemCount = 0;
         bool createNewTextBatch = false;
 
         Array<RHI::DrawPacket*> drawPackets{};

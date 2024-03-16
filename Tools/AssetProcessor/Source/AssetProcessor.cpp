@@ -260,6 +260,8 @@ namespace CE
 			if (assetImporter == nullptr)
 				continue;
 
+			// Get product asset dependencies required by the asset importer.
+
 			Array<Name> productAssetDependencies = assetImporter->GetProductAssetDependencies();
 			Array<IO::Path> productDependencies{};
 			for (const Name& productAssetName : productAssetDependencies)

@@ -23,6 +23,7 @@ namespace CE
 	constexpr u32 directionalShadowMapBinding = 0;
 
 	constexpr u32 SampleCount = 4;
+	constexpr u32 UISampleCount = 4;
 
 	static int counter = 0;
 	static RPI::RPISystem& rpiSystem = RPI::RPISystem::Get();
@@ -1016,6 +1017,8 @@ namespace CE
 		textShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/Text");
 		textMaterial = new RPI::Material(textShader->GetOrCreateRPIShader(0));
 
+		renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
+
 		auto perViewLayout = textMaterial->GetCurrentShader()->GetSrgLayout(RHI::SRGType::PerView);
 		perView2DSrg = RHI::gDynamicRHI->CreateShaderResourceGroup(perViewLayout);
 
@@ -1097,9 +1100,12 @@ namespace CE
 		{
 			Renderer2DDescriptor desc{};
 			desc.screenSize = Vec2i(screenWidth, screenHeight);
-			desc.textShader = textShader->GetOrCreateRPIShader(0);
+			//desc.textShader = textShader->GetOrCreateRPIShader(0);
+			desc.drawShader = renderer2dShader->GetOrCreateRPIShader(0);
 			desc.drawListTag = uiTag;
 			desc.numFramesInFlight = swapChain->GetImageCount();
+			desc.multisampling.sampleCount = UISampleCount;
+			desc.multisampling.quality = 1.0f;
 			
 			desc.viewConstantData.viewMatrix = Matrix4x4::Identity();
 			desc.viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) * Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) * Quat::EulerDegrees(0, 0, 0).ToMatrix();
@@ -1234,9 +1240,13 @@ namespace CE
 			RHI::DrawPacketBuilder::DrawItemRequest request{};
 			request.vertexBufferViews.AddRange(vertBuffers);
 
+			RHI::MultisampleState multisampling{};
+			multisampling.sampleCount = UISampleCount;
+			multisampling.quality = 1.0f;
+
 			request.drawItemTag = uiTag;
 			request.drawFilterMask = RHI::DrawFilterMask::ALL;
-			request.pipelineState = textMaterial->GetCurrentShader()->GetPipeline();
+			request.pipelineState = textMaterial->GetCurrentShader()->GetPipeline(multisampling);
 			
 			builder.AddDrawItem(request);
 		}
@@ -1921,13 +1931,13 @@ namespace CE
 				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
 				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				swapChainAttachment.multisampleState.sampleCount = 1;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Resolve, RHI::ScopeAttachmentAccess::Write);
+				//RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				//swapChainAttachment.attachmentId = "SwapChain";
+				//swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+				//swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				//swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				//swapChainAttachment.multisampleState.sampleCount = 1;
+				//scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Resolve, RHI::ScopeAttachmentAccess::Write);
 
 				RHI::ImageScopeAttachmentDescriptor shadowMapAttachment{};
 				shadowMapAttachment.attachmentId = "DirectionalShadowMap";
@@ -1947,12 +1957,27 @@ namespace CE
 
 			scheduler->BeginScope("UI");
 			{
+				//RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				//swapChainAttachment.attachmentId = "SwapChain";
+				//swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				//swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				//swapChainAttachment.multisampleState.sampleCount = 1;
+				//scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
+				RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
+				colorMsaaAttachment.attachmentId = "ColorMSAA";
+				colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
+				scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
 				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
 				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Load;
+				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::DontCare;
 				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
 				swapChainAttachment.multisampleState.sampleCount = 1;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Resolve, RHI::ScopeAttachmentAccess::Write);
 
 				scheduler->PresentSwapChain(swapChain);
 			}
@@ -2004,15 +2029,24 @@ namespace CE
 		{
 			renderer2d->PushFont("Roboto", 16);
 
-			renderer2d->SetForeground(Color(1, 1, 1, 1));
+			renderer2d->SetFillColor(Color(1, 1, 1, 1));
 			Vec2 pos = Vec2(0, 200);
 			renderer2d->SetCursor(pos);
-			Vec2 size = renderer2d->CalculateTextSize("This is a line.\nThis is new line.");
-			renderer2d->DrawText("This is a line.\nThis is new line.");
+			String text1 = "This is a line.\nThis is new line.";
+			Vec2 size = renderer2d->CalculateTextSize(text1);
+			renderer2d->DrawText(text1);
 
 			renderer2d->SetCursor(pos + Vec2(0, size.y));
-			renderer2d->SetForeground(Color(1, 0, 0, 1));
+			renderer2d->SetFillColor(Color(1, 0, 0, 1));
 			size = renderer2d->DrawText("This is separate text");
+
+			renderer2d->SetFillColor(Color::White());
+			renderer2d->SetOutlineColor(Color::Red());
+			renderer2d->SetBorderThickness(5);
+
+			renderer2d->SetCursor(Vec2(200, 200));
+			//renderer2d->DrawCircle(Vec2(50, 50));
+			renderer2d->DrawRect(Vec2(200, 50));
 
 			renderer2d->PopFont();
 		}
