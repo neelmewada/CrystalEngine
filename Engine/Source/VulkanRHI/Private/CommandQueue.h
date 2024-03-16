@@ -59,22 +59,7 @@ namespace CE::Vulkan
             VkFence fence = nullptr;
         };
 
-        struct SubmissionThread
-        {
-            std::counting_semaphore<> sleepEvent{ 0 };
-
-            Thread thread;
-
-            Atomic<bool> terminate = false;
-        };
-
-        void ProcessSubmissionThread();
-
-        SubmissionThread* thread = nullptr;
-        std::counting_semaphore<> submitEvent{ 0 };
-
         SharedMutex submissionMutex{};
-        Array<SubmitBatch> submissions{};
 
         VulkanDevice* device;
         u32 familyIndex;

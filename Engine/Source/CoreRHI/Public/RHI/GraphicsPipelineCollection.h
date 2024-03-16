@@ -1,6 +1,6 @@
 #pragma once
 
-namespace CE::RPI
+namespace CE::RHI
 {
     struct GraphicsPipelineVariant
     {
@@ -25,7 +25,7 @@ namespace CE::RPI
         }
     };
 
-    class CORERPI_API GraphicsPipelineCollection
+    class CORERHI_API GraphicsPipelineCollection
     {
     public:
 

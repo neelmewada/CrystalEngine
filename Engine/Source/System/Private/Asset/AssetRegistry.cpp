@@ -329,6 +329,65 @@ namespace CE
 				});
 		}
 
+		auto launchDir = PlatformDirectories::GetLaunchDir();
+
+		// Editor assets
+		if ((launchDir / "Editor/Assets").Exists())
+		{
+			auto editorAssetsPath = launchDir / "Editor/Assets";
+
+			editorAssetsPath.RecursivelyIterateChildren([&](const IO::Path& item)
+				{
+					auto relativePath = IO::Path::GetRelative(item, launchDir);
+					auto relativePathStr = relativePath.RemoveExtension().GetString().Replace({ '\\' }, '/');
+					if (!relativePathStr.StartsWith("/"))
+						relativePathStr = "/" + relativePathStr;
+
+					String parentRelativePathStr = relativePath.GetParentPath().GetString().Replace({ '\\' }, '/');
+					if (!parentRelativePathStr.StartsWith("/"))
+						parentRelativePathStr = "/" + parentRelativePathStr;
+
+					if (item.IsDirectory()) // Folder
+					{
+						if (!relativePathStr.IsEmpty())
+						{
+							cachedPathTree.AddPath(relativePathStr);
+							directoryTree.AddPath(relativePathStr);
+						}
+					}
+					else if (item.GetExtension() == ".casset") // Product asset file
+					{
+						Package* load = Package::LoadPackage(nullptr, item, LOAD_Default);
+						if (load != nullptr)
+						{
+							AssetData* assetData = new AssetData();
+							if (!load->GetPrimaryObjectName().IsValid())
+								load->LoadFully();
+							Name primaryName = load->GetPrimaryObjectName();
+							Name primaryTypeName = load->GetPrimaryObjectTypeName();
+							assetData->packageName = load->GetPackageName();
+							assetData->assetName = primaryName;
+							assetData->assetClassPath = primaryTypeName;
+							assetData->packageUuid = load->GetUuid();
+							assetData->assetUuid = load->GetPrimaryObjectUuid();
+#if PAL_TRAIT_BUILD_EDITOR
+							// Source asset path relative to project assets directory
+							assetData->sourceAssetPath = load->GetPrimarySourceAssetRelativePath();
+#endif
+							load->RequestDestroy();
+							load = nullptr;
+
+							AddAssetEntry(relativePathStr, assetData);
+						}
+						else
+						{
+							CE_LOG(Error, All, "Failed to load asset metadata: {}", item);
+						}
+					}
+				}
+			);
+		}
+
 		cacheInitialized = true;
 	}
 

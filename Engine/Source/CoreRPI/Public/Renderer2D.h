@@ -114,6 +114,7 @@ namespace CE::RPI
             Matrix4x4 transform{};
             Vec4 fillColor = Vec4();
             Vec4 outlineColor = Vec4();
+            Vec4 borderRadius = Vec4();
             Vec2 itemSize = Vec2(); // item size in pixels
             float borderThickness = 0;
             DrawType drawType = DRAW_None; // enum DrawType

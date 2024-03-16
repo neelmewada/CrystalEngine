@@ -252,7 +252,7 @@ namespace CE::RPI
 			pipelineDesc.rtLayout.attachmentLayouts.Add(depthStencilAttachment);
 		}
 		
-		pipelineCollection = new RPI::GraphicsPipelineCollection(pipelineDesc);
+		pipelineCollection = new RHI::GraphicsPipelineCollection(pipelineDesc);
 	}
 
 	ShaderVariant::~ShaderVariant()
@@ -269,14 +269,14 @@ namespace CE::RPI
 		modulesByStage.Clear();
 	}
 
-	RHI::PipelineState* ShaderVariant::GetPipeline(const RPI::GraphicsPipelineVariant& variant)
+	RHI::PipelineState* ShaderVariant::GetPipeline(const RHI::GraphicsPipelineVariant& variant)
 	{
 		return pipelineCollection->GetPipeline(variant);
 	}
 
 	RHI::PipelineState* ShaderVariant::GetPipeline(const RHI::MultisampleState& multisampleState)
 	{
-		RPI::GraphicsPipelineVariant variant = pipelineCollection->GetDefaultVariant();
+		RHI::GraphicsPipelineVariant variant = pipelineCollection->GetDefaultVariant();
 		variant.sampleState = multisampleState;
 		return pipelineCollection->GetPipeline(variant);
 	}

@@ -47,7 +47,7 @@ namespace CE::Vulkan
 
 	void CommandList::SetViewports(u32 count, ViewportState* viewports)
 	{
-		static Array<VkViewport> vkViewports{};
+		Array<VkViewport> vkViewports{};
 		if (vkViewports.GetSize() < count)
 			vkViewports.Resize(count);
 
@@ -65,7 +65,7 @@ namespace CE::Vulkan
 
 	void CommandList::SetScissors(u32 count, ScissorState* scissors)
 	{
-		static Array<VkRect2D> vkScissors{};
+		Array<VkRect2D> vkScissors{};
 		if (vkScissors.GetSize() < count)
 			vkScissors.Resize(count);
 

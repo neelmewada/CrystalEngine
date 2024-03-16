@@ -63,7 +63,6 @@ namespace CE::RPI
 #include "Model/ModelAsset.h"
 #include "Model/Model.h"
 
-#include "Shader/GraphicsPipelineCollection.h"
 #include "Shader/ShaderResourceGroup.h"
 #include "Shader/ShaderVariant.h"
 #include "Shader/Shader.h"

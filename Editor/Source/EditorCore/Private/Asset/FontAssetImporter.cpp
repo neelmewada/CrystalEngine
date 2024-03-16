@@ -46,8 +46,8 @@ namespace CE::Editor
 	Array<Name> FontAssetImporter::GetProductAssetDependencies()
 	{
 		static const Array<Name> dependencies{
-			"/Engine/Assets/Shaders/UI/SDFTextGen",
-			"/Engine/Assets/Shaders/Utils/MipMapGen",
+			"/Editor/Assets/Shaders/UI/SDFTextGen",
+			"/Editor/Assets/Shaders/Utils/MipMapGen",
 		};
 
 		return dependencies;
@@ -252,7 +252,7 @@ namespace CE::Editor
 		/////////////////////////////////////////
 		// - Setup shaders & materials -
 
-		CE::Shader* sdfGenShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/UI/SDFTextGen");
+		CE::Shader* sdfGenShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/UI/SDFTextGen");
 		RPI::Material* sdfGenMaterial = new RPI::Material(sdfGenShader->GetOrCreateRPIShader(0));
 		sdfGenMaterial->SetPropertyValue("_FontAtlas", rasterizedAtlasRpi);
 		sdfGenMaterial->SetPropertyValue("_Spread", spread);
@@ -262,7 +262,7 @@ namespace CE::Editor
 			delete sdfGenMaterial;
 		);
 
-		CE::Shader* mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/MipMapGen");
+		CE::Shader* mipMapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/Utils/MipMapGen");
 		Array<RPI::Material*> mipMapMaterials{};
 
 		for (int i = 1; i < mipLevels; i++)

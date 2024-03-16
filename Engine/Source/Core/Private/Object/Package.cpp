@@ -66,6 +66,10 @@ namespace CE
 		{
 			return gProjectPath / (packageNameStr.GetSubstring(1) + ".casset");
 		}
+		else if (packageNameStr.StartsWith("/Editor/") || packageNameStr == "/Editor")
+		{
+			return PlatformDirectories::GetLaunchDir() / (packageNameStr.GetSubstring(1) + ".casset");
+		}
 		else if (packageNameStr.StartsWith("/Temp/") || packageNameStr == "/Temp")
 		{
 			return gProjectPath / (packageNameStr.GetSubstring(1) + ".temp");

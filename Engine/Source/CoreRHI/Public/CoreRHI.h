@@ -27,6 +27,7 @@
 #include "RHI/RenderTarget.h"
 #include "RHI/RenderTargetBuffer.h"
 #include "RHI/PipelineState.h"
+#include "RHI/GraphicsPipelineCollection.h"
 #include "RHI/Shader.h"
 #include "RHI/ShaderResourceGroup.h"
 #include "RHI/IndexBufferView.h"

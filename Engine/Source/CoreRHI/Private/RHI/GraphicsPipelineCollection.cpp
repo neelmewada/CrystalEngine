@@ -1,6 +1,6 @@
-#include "CoreRPI.h"
+#include "CoreRHI.h"
 
-namespace CE::RPI
+namespace CE::RHI
 {
     GraphicsPipelineCollection::GraphicsPipelineCollection(const RHI::GraphicsPipelineDescriptor& desc)
         : desc(desc)

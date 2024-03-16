@@ -15,78 +15,11 @@ namespace CE::Vulkan
 		, presentSupported(presentSupported)
 	{
 		this->queueMask = queueMask;
-
-		thread = new SubmissionThread();
-
-		thread->thread = Thread([this]()
-			{
-				ProcessSubmissionThread();
-			});
-	}
-
-	void CommandQueue::ProcessSubmissionThread()
-	{
-		while (!thread->terminate)
-		{
-			thread->sleepEvent.acquire();
-
-			if (thread->terminate)
-			{
-				submitEvent.release();
-				break;
-			}
-
-			submissionMutex.Lock();
-			Array<SubmitBatch> submissions = this->submissions;
-			this->submissions.Clear();
-
-			submissionMutex.Unlock();
-
-			if (thread->terminate)
-			{
-				submitEvent.release();
-				break;
-			}
-
-			for (int batchIdx = 0; batchIdx < submissions.GetSize(); batchIdx++)
-			{
-				List<VkSubmitInfo> submitInfos{};
-
-				for (int i = 0; i < submissions[batchIdx].submitInfos.GetSize(); i++)
-				{
-					VkSubmitInfo submitInfo{};
-					submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-					submitInfo.commandBufferCount = submissions[batchIdx].submitInfos[i].commandBuffers.GetSize();
-					submitInfo.pCommandBuffers = submissions[batchIdx].submitInfos[i].commandBuffers.GetData();
-					submitInfo.waitSemaphoreCount = submissions[batchIdx].submitInfos[i].waitSemaphores.GetSize();
-					submitInfo.pWaitSemaphores = submissions[batchIdx].submitInfos[i].waitSemaphores.GetData();
-					submitInfo.pWaitDstStageMask = submissions[batchIdx].submitInfos[i].waitDstStageMask.GetData();
-					submitInfo.signalSemaphoreCount = submissions[batchIdx].submitInfos[i].signalSemaphores.GetSize();
-					submitInfo.pSignalSemaphores = submissions[batchIdx].submitInfos[i].signalSemaphores.GetData();
-
-					submitInfos.Add(submitInfo);
-				}
-
-				if (!submitInfos.IsEmpty())
-				{
-					vkQueueSubmit(queue, submitInfos.GetSize(), submitInfos.GetData(), submissions[batchIdx].fence);
-				}
-			}
-
-			submitEvent.release();
-		}
 	}
 
 	CommandQueue::~CommandQueue()
 	{
-		thread->terminate = true;
-
-		thread->sleepEvent.release();
 		
-		if (thread->thread.IsJoinable())
-			thread->thread.Join();
-		
-		delete thread;
 	}
 
 	bool CommandQueue::Execute(u32 count, RHI::CommandList** commandLists, RHI::Fence* fence)
@@ -105,21 +38,23 @@ namespace CE::Vulkan
 			info.commandBuffers[i] = ((Vulkan::CommandList*)commandLists[i])->GetCommandBuffer();
 		}
 
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = info.commandBuffers.GetSize();
+		submitInfo.pCommandBuffers = info.commandBuffers.GetData();
+
 		submissionMutex.Lock();
 		if (fence != nullptr)
 		{
 			auto submitFence = ((Vulkan::Fence*)fence)->GetHandle();
-			submissions.Add(SubmitBatch{ { info }, submitFence});
+			vkQueueSubmit(queue, 1, &submitInfo, submitFence);
 		}
 		else
 		{
-			submissions.Add(SubmitBatch{ { info }, VK_NULL_HANDLE });
+			vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 		}
 		submissionMutex.Unlock();
 		
-		thread->sleepEvent.release();
-		submitEvent.acquire();
-
 		return true;
 	}
 
@@ -129,6 +64,7 @@ namespace CE::Vulkan
 			return true;
 
 		Array<SubmitInfo> infos{};
+		List<VkSubmitInfo> vkSubmits{};
 		infos.Resize(count);
 
 		for (int i = 0; i < count; i++)
@@ -157,12 +93,25 @@ namespace CE::Vulkan
 			}
 		}
 
-		submissionMutex.Lock();
-		submissions.Add(SubmitBatch{ infos, fence });
-		submissionMutex.Unlock();
+		for (int i = 0; i < count; i++)
+		{
+			VkSubmitInfo submitInfo{};
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submitInfo.commandBufferCount = infos[i].commandBuffers.GetSize();
+			submitInfo.pCommandBuffers = infos[i].commandBuffers.GetData();
 
-		thread->sleepEvent.release();
-		submitEvent.acquire();
+			submitInfo.waitSemaphoreCount = infos[i].waitSemaphores.GetSize();
+			submitInfo.pWaitSemaphores = infos[i].waitSemaphores.GetData();
+			submitInfo.pWaitDstStageMask = infos[i].waitDstStageMask.GetData();
+			submitInfo.signalSemaphoreCount = infos[i].signalSemaphores.GetSize();
+			submitInfo.pSignalSemaphores = infos[i].signalSemaphores.GetData();
+
+			vkSubmits.Add(submitInfo);
+		}
+
+		submissionMutex.Lock();
+		vkQueueSubmit(queue, count, vkSubmits.GetData(), fence);
+		submissionMutex.Unlock();
 
 		return true;
 	}

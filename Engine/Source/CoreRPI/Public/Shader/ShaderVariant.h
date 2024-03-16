@@ -56,7 +56,7 @@ namespace CE::RPI
 
         inline RHI::PipelineState* GetPipeline() const { return pipelineCollection->GetPipeline(); }
 
-		RHI::PipelineState* GetPipeline(const RPI::GraphicsPipelineVariant& variant);
+		RHI::PipelineState* GetPipeline(const RHI::GraphicsPipelineVariant& variant);
 
 		RHI::PipelineState* GetPipeline(const RHI::MultisampleState& multisampleState);
 

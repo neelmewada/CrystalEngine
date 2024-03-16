@@ -111,6 +111,11 @@ namespace CE::Editor
 			CE_LOG(Info, All, "Generated Asset: {}", job->productPath);
 		}
 
+		if (job->success)
+		{
+			gEngine->GetAssetManager()->GetRegistry();
+		}
+
 		importResults.Add(importResult);
 
 		numJobsInProgress--;

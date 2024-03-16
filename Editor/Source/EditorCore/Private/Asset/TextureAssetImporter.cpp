@@ -27,10 +27,10 @@ namespace CE::Editor
 	Array<Name> TextureAssetImporter::GetProductAssetDependencies()
 	{
 		static const Array<Name> dependencies{
-			"/Engine/Assets/Shaders/CubeMap/Equirectangular",
-			"/Engine/Assets/Shaders/CubeMap/IBL",
-			"/Engine/Assets/Shaders/CubeMap/IBLConvolution",
-			"/Engine/Assets/Shaders/Utils/MipMapGen"
+			"/Editor/Assets/Shaders/CubeMap/Equirectangular",
+			"/Editor/Assets/Shaders/CubeMap/IBL",
+			"/Editor/Assets/Shaders/CubeMap/IBLConvolution",
+			"/Editor/Assets/Shaders/Utils/MipMapGen"
 		};
 
 		return dependencies;
@@ -188,10 +188,10 @@ namespace CE::Editor
 		texture->compressionQuality = compressionQuality;
 		texture->sourceCompressionFormat = compressionFormat;
 
-		CE::Shader* equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
-		CE::Shader* iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBL");
-		CE::Shader* iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/IBLConvolution");
-		CE::Shader* mipmapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/Utils/MipMapGen");
+		CE::Shader* equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/CubeMap/Equirectangular");
+		CE::Shader* iblShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/CubeMap/IBL");
+		CE::Shader* iblConvolutionShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/CubeMap/IBLConvolution");
+		CE::Shader* mipmapShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Editor/Assets/Shaders/Utils/MipMapGen");
 
 		RPI::CubeMapOfflineProcessInfo processInfo{};
 		processInfo.name = name;
