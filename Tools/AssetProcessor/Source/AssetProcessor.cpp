@@ -333,7 +333,6 @@ namespace CE
 		int failCounter = 0;
 
 		// Update time stamps
-		//if (false)
 		{
 			for (const auto& result : assetImportResults)
 			{

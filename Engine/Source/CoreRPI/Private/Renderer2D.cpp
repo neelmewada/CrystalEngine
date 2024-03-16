@@ -404,6 +404,52 @@ namespace CE::RPI
 		return size;
 	}
 
+	Vec2 Renderer2D::DrawRoundedRect(Vec2 size, const Vec4& cornerRadius)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if (drawBatches.IsEmpty() || createNewTextBatch)
+		{
+			createNewTextBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+
+		drawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_RoundedRect;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.cornerRadius = cornerRadius;
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+
+		curDrawBatch.drawItemCount++;
+
+		drawItemCount++;
+		return size;
+	}
+
 	void Renderer2D::End()
 	{
 		fontStack.Pop(); // Default font

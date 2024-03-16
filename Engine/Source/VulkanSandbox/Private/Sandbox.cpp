@@ -367,7 +367,7 @@ namespace CE
 
 	void VulkanSandbox::InitCubeMapDemo()
 	{
-		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night2.hdr";
+		IO::Path path = PlatformDirectories::GetLaunchDir() / "Engine/Assets/Textures/HDRI/sample_night3.hdr";
 		equirectShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/CubeMap/Equirectangular");
 		
 		CMImage hdrImage = CMImage::LoadFromFile(path);
@@ -2041,12 +2041,15 @@ namespace CE
 			size = renderer2d->DrawText("This is separate text");
 
 			renderer2d->SetFillColor(Color::White());
-			renderer2d->SetOutlineColor(Color::Red());
-			renderer2d->SetBorderThickness(5);
+			renderer2d->SetOutlineColor(Color::Blue());
+			renderer2d->SetBorderThickness(5.0f);
 
 			renderer2d->SetCursor(Vec2(200, 200));
-			//renderer2d->DrawCircle(Vec2(50, 50));
-			renderer2d->DrawRect(Vec2(200, 50));
+			renderer2d->DrawCircle(Vec2(50, 50));
+
+			renderer2d->SetCursor(Vec2(400, 200));
+			renderer2d->SetBorderThickness(5.0f);
+			renderer2d->DrawRoundedRect(Vec2(200, 100), Vec4(5, 15, 25, 35));
 
 			renderer2d->PopFont();
 		}

@@ -31,9 +31,9 @@ namespace CE
 	{
 		Super::Initialize();
 		
-		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_EVENTS) != 0)
 		{
-			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! " + String(SDL_GetError()));
+			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! {}", SDL_GetError());
 		}
 	}
 

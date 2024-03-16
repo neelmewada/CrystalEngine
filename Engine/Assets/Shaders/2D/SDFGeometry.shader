@@ -46,10 +46,10 @@ Shader "2D/SDF Geometry"
                 float4x4 transform;
                 float4 fillColor;
                 float4 outlineColor;
-                float4 borderRadius;
+                float4 cornerRadius;
                 float2 itemSize; // item size in pixels
                 float borderThickness;
-                uint drawType; // 0 = None ; 1 = Text ; 2 = Circle ; 3 = Rect ; 4 = Rounded Rect
+                uint drawType; // enum DrawType;
                 uint charIndex; // For character drawing
                 uint bold;
             };
@@ -117,9 +117,9 @@ Shader "2D/SDF Geometry"
                 return float4(color.rgb, a * color.a);
             }
 
-            inline float SDFCircle(float2 uv)
+            inline float SDFCircle(float2 p, float r)
             {
-                return length(uv - float2(0.5, 0.5)) - 0.5;
+                return length(p) - r;
             }
             
             // Credit: https://iquilezles.org/articles/distfunctions2d/
@@ -131,8 +131,8 @@ Shader "2D/SDF Geometry"
             // r.w = roundness bottom-left
             inline float SDFRoundRect(in float2 p, in float2 b, in float4 r ) 
             {
-                p -= float2(0.5, 0.5);
-                b *= float2(0.5, 0.5);
+                //p -= float2(0.5, 0.5);
+                //b *= float2(0.5, 0.5);
 
                 r.xy = (p.x>0.0)?r.xy : r.zw;
                 r.x  = (p.y>0.0)?r.x  : r.y;
@@ -144,28 +144,33 @@ Shader "2D/SDF Geometry"
             {
                 float4 fillColor;
                 float4 outlineColor;
-                float4 borderRadius;
+                float4 cornerRadius;
                 float2 itemSize;
+                float2 uv;
                 float borderThickness;
             };
 
-            float4 RenderCircle(in GeometryInfo info, float2 uv)
+            float4 RenderCircle(in GeometryInfo info, float2 p)
             {
-                float itemSize = (info.itemSize.x + info.itemSize.y) / 2.0;
-                float sdf = SDFCircle(uv);
+                float itemSize = min(info.itemSize.x, info.itemSize.y);
+                float sdf = SDFCircle(p, itemSize / 2.0);
                 const float invSdf = -sdf;
-                float borderThickness = info.borderThickness / itemSize;
+                float borderThickness = info.borderThickness;
 
-                float4 color = lerp(float4(info.fillColor.rgb, 0), info.fillColor, -sdf * _SDFSmoothness);
-                color = clamp(color, float4(0, 0, 0, 0), float4(1, 1, 1, 1));
+                float4 color = info.fillColor;
 
                 float borderMask = 0.0;
                 if (sdf > -borderThickness && sdf <= 0)
 		            borderMask = 1.0;
 
+                const float borderSmoothStart = -borderThickness - 1.0;
+                const float borderSmoothEnd = -borderThickness;
+                borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
+
                 borderMask = clamp(borderMask, 0, 1);
-                color = lerp(color, info.outlineColor, borderMask * clamp(invSdf * _SDFSmoothness * 0.9, 0, 1));
-                return color;
+                color = lerp(color, info.outlineColor, borderMask); // * clamp(invSdf, 0, 1)
+
+                return lerp(float4(color.rgb, 0), color, -sdf);
             }
 
             float4 RenderRect(in GeometryInfo info, float2 uv)
@@ -184,21 +189,27 @@ Shader "2D/SDF Geometry"
                 return color;
             }
 
-            float4 RenderRoundedRect(in GeometryInfo info, float2 uv)
+            float4 RenderRoundedRect(in GeometryInfo info, float2 p)
             {
-                const float sdf = SDFRoundRect(uv, float2(1, 1), float4(info.borderRadius.y, info.borderRadius.z, info.borderRadius.x, info.borderRadius.w));
+                const float sdf = SDFRoundRect(p, info.itemSize * 0.5, float4(info.cornerRadius.z, info.cornerRadius.y, info.cornerRadius.w, info.cornerRadius.x));
                 const float invSdf = -sdf;
 
-                float2 borderThickness = float2(info.borderThickness, info.borderThickness) / info.itemSize;
+                float borderThickness = info.borderThickness;
 
-                float4 color = lerp(float4(info.fillColor.rgb, 0), info.fillColor, -sdf * _SDFSmoothness);
-                color = clamp(color, float4(0, 0, 0, 0), float4(1, 1, 1, 1));
+                float4 color = info.fillColor;
 
                 float borderMask = 0.0;
+                if (sdf > -borderThickness && sdf <= 0)
+		            borderMask = 1.0;
 
+                const float borderSmoothStart = -borderThickness - 1.0;
+                const float borderSmoothEnd = -borderThickness;
+                borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
                 borderMask = clamp(borderMask, 0, 1);
-                color = lerp(color, info.outlineColor, borderMask * clamp(invSdf * _SDFSmoothness * 0.9, 0, 1));
-                return color;
+
+                color = lerp(color, info.outlineColor, borderMask);
+
+                return lerp(float4(color.rgb, 0), color, -sdf);
             }
 
             #define idx input.instanceId
@@ -210,7 +221,23 @@ Shader "2D/SDF Geometry"
                 info.outlineColor = _DrawList[idx].outlineColor;
                 info.borderThickness = _DrawList[idx].borderThickness;
                 info.itemSize = _DrawList[idx].itemSize;
-                info.borderRadius = _DrawList[idx].borderRadius;
+                info.cornerRadius = _DrawList[idx].cornerRadius;
+                info.uv = input.uv;
+                float2 uv = input.uv;
+
+                float2 p = (uv - float2(0.5, 0.5)) * info.itemSize;
+                
+                switch (_DrawList[idx].drawType)
+                {
+                case DRAW_Text:
+                    return RenderText(_DrawList[idx].fillColor, input.uv, _DrawList[idx].bold);
+                case DRAW_Circle:
+                    return RenderCircle(info, p);
+                case DRAW_Rect:
+                    return RenderRect(info, input.uv);
+                case DRAW_RoundedRect:
+                    return RenderRoundedRect(info, p);
+                }
 
                 if (_DrawList[idx].drawType == DRAW_Text) // Text
                 {
@@ -218,7 +245,7 @@ Shader "2D/SDF Geometry"
                 }
                 else if (_DrawList[idx].drawType == DRAW_Circle) // Circle
                 {
-                    return RenderCircle(info, input.uv);
+                    return RenderCircle(info, p);
                 }
                 else if (_DrawList[idx].drawType == DRAW_Rect) // Rectangle
                 {
@@ -226,7 +253,7 @@ Shader "2D/SDF Geometry"
                 }
                 else if (_DrawList[idx].drawType == DRAW_RoundedRect) // Rounded Rectangle
                 {
-                    return RenderRoundedRect(info, input.uv);
+                    return RenderRoundedRect(info, p);
                 }
 
                 return float4(0, 0, 0, 0);

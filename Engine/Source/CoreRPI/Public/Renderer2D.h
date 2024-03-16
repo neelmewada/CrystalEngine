@@ -69,6 +69,8 @@ namespace CE::RPI
 
         Vec2 DrawRect(Vec2 size);
 
+        Vec2 DrawRoundedRect(Vec2 size, const Vec4& cornerRadius);
+
         void End();
 
         const Array<DrawPacket*>& FlushDrawPackets(u32 imageIndex);
@@ -114,7 +116,7 @@ namespace CE::RPI
             Matrix4x4 transform{};
             Vec4 fillColor = Vec4();
             Vec4 outlineColor = Vec4();
-            Vec4 borderRadius = Vec4();
+            Vec4 cornerRadius = Vec4();
             Vec2 itemSize = Vec2(); // item size in pixels
             float borderThickness = 0;
             DrawType drawType = DRAW_None; // enum DrawType
