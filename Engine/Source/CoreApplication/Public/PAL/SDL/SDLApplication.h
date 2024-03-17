@@ -32,6 +32,8 @@ namespace CE
 
         PlatformWindow* GetMainWindow() override;
 
+        virtual PlatformWindow* FindWindow(u64 windowId) override;
+
         virtual PlatformWindow* CreatePlatformWindow(const String& title) override;
         virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) override;
 
@@ -53,6 +55,8 @@ namespace CE
 
         void ProcessWindowEvents(SDL_Event& event);
 
+        void ProcessInputEvents(SDL_Event& event);
+
         void ProcessWindowResizeEvent(SDLPlatformWindow* window);
 
         SDLApplication();
@@ -60,6 +64,8 @@ namespace CE
         SDLPlatformWindow* mainWindow = nullptr;
 
         Array<SDLPlatformWindow*> windowList{};
+
+        friend int SDLWindowEventWatch(void* data, SDL_Event* event);
     };
 
     typedef SDLApplication PlatformApplicationImpl;

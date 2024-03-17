@@ -61,7 +61,7 @@ namespace CE::RPI
 
         void SetCursor(Vec2 position);
 
-        Vec2 CalculateTextSize(const String& text);
+        Vec2 CalculateTextSize(const String& text, f32 width = 0.0);
 
         Vec2 DrawText(const String& text, Vec2 size = {});
 

@@ -46,7 +46,9 @@ namespace CE
 
 		virtual void SetResizable(bool resizable) = 0;
 
-        virtual u32 GetWindowId() = 0;
+        virtual void SetBorderless(bool borderless) = 0;
+
+        virtual u64 GetWindowId() = 0;
 
 		inline void AddListener(IWindowCallbacks* listener) { windowCallbacks.Add(listener); }
 

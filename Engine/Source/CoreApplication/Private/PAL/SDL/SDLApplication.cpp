@@ -5,7 +5,7 @@
 
 namespace CE
 {
-	static int ResizingEventWatch(void* data, SDL_Event* event);
+	static int SDLWindowEventWatch(void* data, SDL_Event* event);
 
 	SDLApplication* SDLApplication::Create()
 	{
@@ -35,6 +35,9 @@ namespace CE
 		{
 			CE_LOG(Error, All, "Failed to initialize SDL Video & Audio! {}", SDL_GetError());
 		}
+
+		SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+		SDL_EventState(SDL_DROPTEXT, SDL_ENABLE);
 	}
 
 	void SDLApplication::PreShutdown()
@@ -59,7 +62,7 @@ namespace CE
 			mainWindow = new SDLPlatformWindow(title, width, height, maximised, fullscreen, resizable);
 			windowList.Add(mainWindow);
 
-			SDL_AddEventWatch(ResizingEventWatch, mainWindow->handle);
+			SDL_AddEventWatch(SDLWindowEventWatch, mainWindow->handle);
 		}
 		return mainWindow;
 	}
@@ -67,6 +70,19 @@ namespace CE
 	PlatformWindow* SDLApplication::GetMainWindow()
 	{
 		return mainWindow;
+	}
+
+	PlatformWindow* SDLApplication::FindWindow(u64 windowId)
+	{
+		for (auto window : windowList)
+		{
+			if (window->GetWindowId() == windowId)
+			{
+				return window;
+			}
+		}
+
+		return nullptr;
 	}
 
 	PlatformWindow* SDLApplication::CreatePlatformWindow(const String& title)
@@ -135,7 +151,7 @@ namespace CE
 
 		if (sdlWindow->GetWindowId() == mainWindow->GetWindowId())
 		{
-			SDL_DelEventWatch(ResizingEventWatch, mainWindow->handle);
+			SDL_DelEventWatch(SDLWindowEventWatch, mainWindow->handle);
 
 			// Destroy all windows (i.e. shutdown application) if main window is destroyed
 			for (auto win : windowList)
@@ -158,6 +174,8 @@ namespace CE
 
 	void SDLApplication::Tick()
 	{
+		PlatformApplication::Tick();
+
 		// Handle SDL Events
 		SDL_Event sdlEvent;
 		while (SDL_PollEvent(&sdlEvent))
@@ -175,13 +193,17 @@ namespace CE
 				RequestEngineExit("APP_QUIT");
 				break;
 			}
-
+			
 			if (sdlEvent.type == SDL_WINDOWEVENT)
 			{
 				ProcessWindowEvents(sdlEvent);
 			}
-
 			
+			if (sdlEvent.type == SDL_KEYDOWN || sdlEvent.type == SDL_KEYUP ||
+				sdlEvent.type == SDL_MOUSEMOTION || sdlEvent.type == SDL_MOUSEBUTTONDOWN || sdlEvent.type == SDL_MOUSEBUTTONUP || sdlEvent.type == SDL_MOUSEWHEEL)
+			{
+				ProcessInputEvents(sdlEvent);
+			}
 		}
 
 		Super::Tick();
@@ -207,7 +229,7 @@ namespace CE
                 }
             }
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_CLOSE)
+		else if (event.window.event == SDL_WINDOWEVENT_CLOSE) // Close a specific window
 		{
 			for (PlatformWindow* window : windowList)
 			{
@@ -217,6 +239,18 @@ namespace CE
 					break;
 				}
 			}
+		}
+		else if (event.window.event == SDL_WINDOWEVENT_EXPOSED)
+		{
+
+		}
+	}
+
+	void SDLApplication::ProcessInputEvents(SDL_Event& event)
+	{
+		for (auto handler : messageHandlers)
+		{
+			handler->ProcessInputEvents(&event);
 		}
 	}
 
@@ -242,17 +276,19 @@ namespace CE
 		}
 	}
 
-	int ResizingEventWatch(void* data, SDL_Event* event)
+	int SDLWindowEventWatch(void* data, SDL_Event* event)
 	{
+#if PLATFORM_WINDOWS
 		if (event->type == SDL_WINDOWEVENT &&
-			event->window.event == SDL_WINDOWEVENT_RESIZED) 
+			event->window.event == SDL_WINDOWEVENT_EXPOSED) 
 		{
-			SDL_Window* sdlWindow = SDL_GetWindowFromID(event->window.windowID);
-			if (sdlWindow == (SDL_Window*)data)
+			auto app = SDLApplication::Get();
+			for (const auto& tickHandler : app->tickHanders)
 			{
-
+				tickHandler.InvokeIfValid();
 			}
 		}
+#endif
 		return 0;
 	}
 }

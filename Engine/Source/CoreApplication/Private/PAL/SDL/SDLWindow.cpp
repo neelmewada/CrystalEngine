@@ -8,6 +8,9 @@
 
 #include <SDL_syswm.h>
 
+#define MOUSE_GRAB_PADDING 10
+#define WINDOW_DRAG_PADDING 50
+
 namespace CE
 {
 	SDLPlatformWindow::~SDLPlatformWindow()
@@ -15,6 +18,58 @@ namespace CE
 		if (handle != nullptr)
 			SDL_DestroyWindow(handle);
 		handle = nullptr;
+	}
+
+	// Credit: https://gist.github.com/dele256/901dd1e8f920327fc457a538996f2a29
+	SDL_HitTestResult HitTestCallback(SDL_Window* Window, const SDL_Point* Area, void* Data)
+	{
+		int Width, Height;
+		SDL_GetWindowSize(Window, &Width, &Height);
+
+		if (Area->y < MOUSE_GRAB_PADDING)
+		{
+			if (Area->x < MOUSE_GRAB_PADDING)
+			{
+				return SDL_HITTEST_RESIZE_TOPLEFT;
+			}
+			else if (Area->x > Width - MOUSE_GRAB_PADDING)
+			{
+				return SDL_HITTEST_RESIZE_TOPRIGHT;
+			}
+			else
+			{
+				return SDL_HITTEST_RESIZE_TOP;
+			}
+		}
+		else if (Area->y > Height - MOUSE_GRAB_PADDING)
+		{
+			if (Area->x < MOUSE_GRAB_PADDING)
+			{
+				return SDL_HITTEST_RESIZE_BOTTOMLEFT;
+			}
+			else if (Area->x > Width - MOUSE_GRAB_PADDING)
+			{
+				return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
+			}
+			else
+			{
+				return SDL_HITTEST_RESIZE_BOTTOM;
+			}
+		}
+		else if (Area->x < MOUSE_GRAB_PADDING)
+		{
+			return SDL_HITTEST_RESIZE_LEFT;
+		}
+		else if (Area->x > Width - MOUSE_GRAB_PADDING)
+		{
+			return SDL_HITTEST_RESIZE_RIGHT;
+		}
+		else if (Area->y < WINDOW_DRAG_PADDING)
+		{
+			return SDL_HITTEST_DRAGGABLE;
+		}
+
+		return SDL_HITTEST_NORMAL; // SDL_HITTEST_NORMAL <- Windows behaviour
 	}
 
 	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
@@ -29,6 +84,7 @@ namespace CE
 			flags |= SDL_WINDOW_MAXIMIZED;
 		if (fullscreen)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		
 		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
 	}
 
@@ -58,6 +114,21 @@ namespace CE
 		SDL_SetWindowResizable(handle, resizable ? SDL_TRUE : SDL_FALSE);
 	}
 
+	void SDLPlatformWindow::SetBorderless(bool borderless)
+	{
+		SDL_SetWindowBordered(handle, borderless ? SDL_FALSE : SDL_TRUE);
+
+		if (borderless)
+		{
+			SDL_SetWindowHitTest(handle, HitTestCallback, nullptr);
+			SDL_SetWindowTitle(handle, "");
+		}
+		else
+		{
+			SDL_SetWindowHitTest(handle, nullptr, nullptr);
+		}
+	}
+
 	VkSurfaceKHR SDLPlatformWindow::CreateVulkanSurface(VkInstance instance)
 	{
 		VkSurfaceKHR surface = nullptr;
@@ -65,7 +136,7 @@ namespace CE
 		return surface;
 	}
 
-	u32 SDLPlatformWindow::GetWindowId()
+	u64 SDLPlatformWindow::GetWindowId()
 	{
 		return SDL_GetWindowID(handle);
 	}

@@ -5,6 +5,7 @@
 #include "CoreRPI.h"
 #include "CoreShader.h"
 #include "CoreSettings.h"
+#include "CoreInput.h"
 
 // Asset Meta
 #include "Asset/AssetData.h"

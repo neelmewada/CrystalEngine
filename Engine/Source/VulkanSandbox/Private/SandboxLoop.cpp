@@ -83,6 +83,7 @@ namespace CE
 	{
 		auto app = PlatformApplication::Get();
 		app->Initialize();
+		InputManager::Get().Initialize(app);
 
 		gEngine->PreInit();
 
@@ -90,6 +91,9 @@ namespace CE
 		gDefaultWindowHeight = 720;
 
 		PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+
+		secondWindow = app->CreatePlatformWindow("Test Window", 512, 512, false, false);
+		secondWindow->SetBorderless(true);
 
 		RHI::gDynamicRHI = new Vulkan::VulkanRHI();
 		
@@ -103,6 +107,10 @@ namespace CE
 		main->Init(mainWindow);
 
 		gEngine->PostInitialize();
+
+		auto tickDelegate = MemberDelegate(&SandboxLoop::Tick, this);
+		this->tickDelegateHandle = tickDelegate.GetHandle();
+		//app->AddTickHandler(tickDelegate);
 	}
 
 	void SandboxLoop::RunLoop()
@@ -111,27 +119,52 @@ namespace CE
 
 		while (!IsEngineRequestingExit())
 		{
-			auto curTime = clock();
-			f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+			Tick();
 
-			app->Tick();
+			if (InputManager::IsKeyDown(KeyCode::Backspace))
+			{
+				if (secondWindowHidden)
+					secondWindow->Show();
+				else
+					secondWindow->Hide();
 
-			main->Tick(deltaTime);
-
-			previousTime = curTime;
+				secondWindowHidden = !secondWindowHidden;
+			}
 		}
+	}
+
+	void SandboxLoop::Tick()
+	{
+		auto app = PlatformApplication::Get();
+
+		auto curTime = clock();
+		f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+
+		// App & Input Tick
+		app->Tick();
+		InputManager::Get().Tick();
+
+		// Engine tick
+		//gEngine->Tick(deltaTime);
+
+		// Game tick
+		main->Tick(deltaTime);
+
+		previousTime = curTime;
 	}
 
 	void SandboxLoop::PreShutdown()
 	{
+		auto app = PlatformApplication::Get();
+		app->RemoveTickHandler(tickDelegateHandle);
+
 		main->Shutdown();
 
 		gEngine->PreShutdown();
 
-		auto app = PlatformApplication::Get();
-
 		RHI::gDynamicRHI->PreShutdown();
 
+		InputManager::Get().Shutdown(app);
 		app->PreShutdown();
 	}
 

@@ -25,9 +25,11 @@ namespace CE
 
 		virtual void SetResizable(bool resizable) override;
 
+        virtual void SetBorderless(bool borderless) override;
+
         VkSurfaceKHR CreateVulkanSurface(VkInstance instance) override;
 
-        u32 GetWindowId() override;
+        u64 GetWindowId() override;
 
     protected:
 

@@ -2029,12 +2029,16 @@ namespace CE
 		{
 			renderer2d->PushFont("Roboto", 16);
 
-			renderer2d->SetFillColor(Color(1, 1, 1, 1));
+			renderer2d->SetFillColor(Color(0, 0, 0, 1));
 			Vec2 pos = Vec2(0, 200);
 			renderer2d->SetCursor(pos);
+
 			String text1 = "This is a line.\nThis is new line.";
-			Vec2 size = renderer2d->CalculateTextSize(text1);
-			renderer2d->DrawText(text1);
+			Vec2 size = renderer2d->CalculateTextSize(text1, 100);
+			renderer2d->DrawRect(size);
+
+			renderer2d->SetFillColor(Color(1, 1, 1, 1));
+			renderer2d->DrawText(text1, size);
 
 			renderer2d->SetCursor(pos + Vec2(0, size.y));
 			renderer2d->SetFillColor(Color(1, 0, 0, 1));

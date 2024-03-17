@@ -117,6 +117,7 @@ namespace CE::RPI
 		drawItemCount = 0;
 		createNewTextBatch = true;
 
+		borderThickness = 0.0f;
 		fillColor = Color(1, 1, 1, 1);
 		outlineColor = Color(0, 0, 0, 0);
 	}
@@ -160,9 +161,12 @@ namespace CE::RPI
 		this->cursorPosition = position;
 	}
 
-	Vec2 Renderer2D::CalculateTextSize(const String& text)
+	Vec2 Renderer2D::CalculateTextSize(const String& text, f32 width)
 	{
 		Vec2 size{};
+		size.width = width;
+
+		const bool isFixedWidth = width > 0;
 
 		const FontInfo& font = fontStack.Top();
 
@@ -181,13 +185,32 @@ namespace CE::RPI
 		float maxY = startY;
 
 		Vec3 position = Vec3(startX, startY, 0);
+		int whitespaceIdx = -1;
+
+		struct CharacterPosition
+		{
+			Vec3 translation;
+			Vec3 scale;
+		};
+
+		static Array<CharacterPosition> positions{};
+		if (positions.GetSize() < text.GetLength())
+		{
+			positions.Resize(text.GetLength());
+		}
 
 		for (int i = 0; i < text.GetLength(); i++)
 		{
 			char c = text[i];
 
+			if (c == ' ')
+			{
+				whitespaceIdx = i;
+			}
+
 			if (c == '\n')
 			{
+				whitespaceIdx = -1;
 				position.x = startX;
 				position.y += metrics.lineHeight * fontSize / atlasFontSize;
 				continue;
@@ -195,7 +218,38 @@ namespace CE::RPI
 
 			const RPI::FontGlyphLayout& glyphLayout = fontAtlas->GetGlyphLayout(c);
 
+			const float glyphWidth = (f32)glyphLayout.GetWidth();
+			const float glyphHeight = (f32)glyphLayout.GetHeight();
+
 			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+
+			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > width)
+			{
+				position.x = startX;
+				position.y += metrics.lineHeight * fontSize / atlasFontSize;
+
+				// Go through previous characters and bring them to this new-line
+				if (whitespaceIdx >= 0)
+				{
+					position.x -= (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+
+					for (int j = whitespaceIdx + 1; j < i; j++)
+					{
+						char prevChar = text[j];
+						const RPI::FontGlyphLayout& prevGlyphLayout = fontAtlas->GetGlyphLayout(prevChar);
+
+						position.x += (f32)prevGlyphLayout.xOffset * fontSize / atlasFontSize;
+
+						position.x += (f32)prevGlyphLayout.advance * fontSize / atlasFontSize - (f32)prevGlyphLayout.xOffset * fontSize / atlasFontSize;
+
+					}
+					whitespaceIdx = -1;
+
+					position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+				}
+			}
+
+			positions[i] = { .translation = position, .scale = Vec3((f32)glyphLayout.advance * fontSize / atlasFontSize, 0, 0) };
 
 			position.x += (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 
@@ -206,6 +260,8 @@ namespace CE::RPI
 		}
 
 		size = Vec2(maxX - startX, maxY - startY);
+		if (isFixedWidth)
+			size.width = width;
 		return size;
 	}
 
@@ -250,13 +306,20 @@ namespace CE::RPI
 		}
 
 		DrawBatch& curDrawBatch = drawBatches.Top();
+		int whitespaceIdx = -1;
 
 		for (int i = 0; i < text.GetLength(); i++)
 		{
 			char c = text[i];
 
+			if (c == ' ')
+			{
+				whitespaceIdx = i;
+			}
+
 			if (c == '\n')
 			{
+				whitespaceIdx = -1;
 				position.x = startX;
 				position.y += metrics.lineHeight * fontSize / atlasFontSize;
 				continue;
@@ -270,21 +333,53 @@ namespace CE::RPI
 			const float glyphWidth = (f32)glyphLayout.GetWidth();
 			const float glyphHeight = (f32)glyphLayout.GetHeight();
 
-			// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+			// Need to multiply by 2 because final range is [-w, w] instead of [0, w] (which is double the size)
 			scale.x = glyphWidth * fontSize / atlasFontSize * 2;
 			scale.y = glyphHeight * fontSize / atlasFontSize * 2;
 
 			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 
-			if (isFixedWidth && position.x > size.width)
+			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > size.width)
 			{
 				position.x = startX;
 				position.y += metrics.lineHeight * fontSize / atlasFontSize;
+
+				// Go through previous characters and bring them to this new-line
+				if (whitespaceIdx >= 0)
+				{
+					position.x -= (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+
+					for (int j = whitespaceIdx + 1; j < i; j++)
+					{
+						char prevChar = text[j];
+
+						const RPI::FontGlyphLayout& prevGlyphLayout = fontAtlas->GetGlyphLayout(prevChar);
+
+						DrawItem2D& prevDrawItem = drawItems[firstDrawItemIndex + j];
+
+						position.x += (f32)prevGlyphLayout.xOffset * fontSize / atlasFontSize;
+
+						Vec2 prevQuadPos = position;
+						prevQuadPos.y -= (f32)prevGlyphLayout.yOffset * fontSize / atlasFontSize;
+
+						// Need to multiply by 2 because final range is [-w, w] instead of [0, w] (which is double the size)
+						Vec3 prevTranslation = Vec3(prevQuadPos.x * 2, prevQuadPos.y * 2, 0);
+						
+						prevDrawItem.transform = Matrix4x4::Translation(prevTranslation) * Matrix4x4::Scale(prevDrawItem.itemSize);
+
+						position.x += (f32)prevGlyphLayout.advance * fontSize / atlasFontSize - (f32)prevGlyphLayout.xOffset * fontSize / atlasFontSize;
+						
+					}
+					whitespaceIdx = -1;
+
+					position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+				}
 			}
 			
 			Vec2 quadPos = position;
 			quadPos.y -= (f32)glyphLayout.yOffset * fontSize / atlasFontSize;
 
+			// Need to multiply by 2 because final range is [-w, w] instead of [0, w] (which is double the size)
 			Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
 			
 			drawItem.fillColor = fillColor.ToVec4();

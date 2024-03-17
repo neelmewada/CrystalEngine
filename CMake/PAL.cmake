@@ -157,7 +157,6 @@ function(ce_filter_platform_files FILES_LIST)
         list(FILTER ${FILES_LIST} EXCLUDE REGEX ".*/PAL/SDL/.*")
     endif()
     
-
     set(${FILES_LIST} ${${FILES_LIST}} PARENT_SCOPE)
 endfunction()
 

@@ -34,6 +34,16 @@ namespace CE
             this->messageHandlers.Remove(handler);
         }
 
+        virtual void AddTickHandler(const Delegate<void(void)> tickHandler)
+        {
+            this->tickHanders.Add(tickHandler);
+        }
+
+        virtual void RemoveTickHandler(DelegateHandle tickHandle)
+        {
+            this->tickHanders.RemoveAll([&](const Delegate<void()>& del) { return del.GetHandle() == tickHandle; });
+        }
+
         virtual const Array<ApplicationMessageHandler*>& GetMessageHandlers() const
         {
             return messageHandlers;
@@ -50,6 +60,8 @@ namespace CE
         virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) = 0;
 
         virtual PlatformWindow* GetMainWindow() = 0;
+
+        virtual PlatformWindow* FindWindow(u64 windowId) = 0;
 
         virtual PlatformWindow* CreatePlatformWindow(const String& title) = 0;
         virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) = 0;
@@ -68,6 +80,7 @@ namespace CE
         static PlatformApplication* instance;
 
         Array<ApplicationMessageHandler*> messageHandlers{};
+        Array<Delegate<void(void)>> tickHanders{};
     };
 
 } // namespace CE

@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(CoreRPI CXX)
+project(CoreInput CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 ce_add_target(${PROJECT_NAME} SHARED
     AUTORTTI
-    RESOURCES
     NAMESPACE CE
     FOLDER Engine/Source
     PCHHEADER
@@ -27,20 +26,12 @@ ce_add_target(${PROJECT_NAME} SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
+            $<${PAL_TRAIT_SDL_SUPPORTED}:ThirdParty::sdl>
         PUBLIC
             CE::Core
-            CE::CoreInput
-            CE::CoreMedia
-            CE::CoreMesh
-            CE::CoreShader
-            CE::CoreRHI
-            $<${PAL_TRAIT_VULKAN_SUPPORTED}:CE::VulkanRHI>
+            CE::CoreApplication
     RUNTIME_DEPENDENCIES
 
 )
 
-
-if(${PAL_TRAIT_BUILD_TESTS_SUPPORTED})
-    add_subdirectory(Tests)
-endif()
 
