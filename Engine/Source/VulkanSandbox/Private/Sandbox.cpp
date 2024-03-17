@@ -51,6 +51,8 @@ namespace CE
 
 		swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
 
+		swapChain2 = RHI::gDynamicRHI->CreateSwapChain(secondWindow, swapChainDesc);
+
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
 		mainWindow->AddListener(this);
@@ -97,11 +99,21 @@ namespace CE
 		u32 curWidth = 0, curHeight = 0;
 		mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
 
+		u32 curWidth2 = 0, curHeight2 = 0;
+		secondWindow->GetDrawableWindowSize(&curWidth2, &curHeight2);
+
 		if (width != curWidth || height != curHeight)
 		{
 			rebuild = recompile = true;
 			width = curWidth;
 			height = curHeight;
+		}
+
+		if (width2 != curWidth2 || height2 != curHeight2)
+		{
+			rebuild = recompile = true;
+			width2 = curWidth2;
+			height2 = curHeight2;
 		}
 
 		if (rebuild)
@@ -122,8 +134,10 @@ namespace CE
 
 		u32 imageIndex = scheduler->BeginExecution();
 
+		if (imageIndex > RHI::Limits::MaxSwapChainImageCount)
+			return;
+
 		SubmitWork(imageIndex);
-		//CubeMapDemoTick(deltaTime);
 
 		sphereRoughness += deltaTime * 0.1f;
 		if (sphereRoughness >= 1)
@@ -170,7 +184,7 @@ namespace CE
 
 	void VulkanSandbox::UpdatePerViewData(int imageIndex)
 	{
-		float farPlane = 1000.0f;
+		const float farPlane = 1000.0f;
 		
 		//cameraRotation = 0;
 		Vec3 spherePos = Vec3(0, 0.5f, 5);
@@ -223,7 +237,8 @@ namespace CE
 		DestroyPipelines();
 		DestroyFontAtlas();
 
-		delete swapChain;
+		delete swapChain; swapChain = nullptr;
+		delete swapChain2; swapChain2 = nullptr;
 
 		rpiSystem.Shutdown();
 	}
@@ -1844,22 +1859,11 @@ namespace CE
 
 			attachmentDatabase.EmplaceFrameAttachment("DepthStencil", depthDesc);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
+			attachmentDatabase.EmplaceFrameAttachment("SwapChain2", swapChain2);
 			attachmentDatabase.EmplaceFrameAttachment("ColorMSAA", colorMsaaDesc);
 			attachmentDatabase.EmplaceFrameAttachment("DirectionalShadowMap", shadowMapDesc);
 
 			scheduler->SetVariableInitialValue("DrawSunShadows", true);
-
-			//scheduler->BeginScope("ClearPassMSAA");
-			//{
-			//	RHI::ImageScopeAttachmentDescriptor colorMsaaAttachment{};
-			//	colorMsaaAttachment.attachmentId = "ColorMSAA";
-			//	colorMsaaAttachment.loadStoreAction.clearValue = Vec4(0.0f, 0.0f, 0.0f, 1);
-			//	colorMsaaAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-			//	colorMsaaAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-			//	colorMsaaAttachment.multisampleState.sampleCount = msaa.sampleCount;
-			//	scheduler->UseAttachment(colorMsaaAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
-			//}
-			//scheduler->EndScope();
 
 			scheduler->BeginScope("Skybox");
 			{
@@ -1980,6 +1984,20 @@ namespace CE
 				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Resolve, RHI::ScopeAttachmentAccess::Write);
 
 				scheduler->PresentSwapChain(swapChain);
+			}
+			scheduler->EndScope();
+
+			scheduler->BeginScope("UI2");
+			{
+				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+				swapChainAttachment.attachmentId = "SwapChain2";
+				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0, 1);
+				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+				swapChainAttachment.multisampleState.sampleCount = 1;
+				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
+				scheduler->PresentSwapChain(swapChain2);
 			}
 			scheduler->EndScope();
 		}

@@ -19,7 +19,6 @@ namespace CE::Vulkan
 	private:
         
 		void DestroySyncObjects();
-		void DestroyCommandLists();
 
 		void CompileCrossQueueDependencies(const FrameGraphCompileRequest& compileRequest);
 
@@ -32,8 +31,8 @@ namespace CE::Vulkan
 
 		VulkanDevice* device = nullptr;
 
-		FixedArray<VkSemaphore, RHI::Limits::MaxSwapChainImageCount> imageAcquiredSemaphores{};
-        FixedArray<VkFence, RHI::Limits::MaxSwapChainImageCount> imageAcquiredFences{};
+		StaticArray<List<VkSemaphore>, RHI::Limits::MaxSwapChainImageCount> imageAcquiredSemaphores{};
+        StaticArray<List<VkFence>, RHI::Limits::MaxSwapChainImageCount> imageAcquiredFences{};
 
 		StaticArray<List<VkFence>, RHI::Limits::MaxSwapChainImageCount> graphExecutionFences{};
 

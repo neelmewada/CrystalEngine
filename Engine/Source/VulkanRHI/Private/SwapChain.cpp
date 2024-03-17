@@ -255,8 +255,6 @@ namespace CE::Vulkan
         }
 
 		swapChainCI.preTransform = preTransform;
-		//swapChainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
-		//	VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		swapChainCI.imageFormat = selectedSurfaceFormat.format;
 		swapChainCI.imageColorSpace = selectedSurfaceFormat.colorSpace;
 		swapChainCI.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;

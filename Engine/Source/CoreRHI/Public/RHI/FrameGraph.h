@@ -18,10 +18,9 @@ namespace CE::RHI
         FrameGraph();
         virtual ~FrameGraph();
 
-		inline SwapChain* GetSwapChain() const
-		{
-			return presentSwapChain;
-		}
+		inline u32 GetSwapChainCount() const { return presentSwapChains.GetSize(); }
+
+		inline SwapChain* GetSwapChain(u32 index) const { return presentSwapChains[index]; }
 
     private:
 
@@ -91,8 +90,8 @@ namespace CE::RHI
 		//! Multiple scopes can be grouped together as subpasses in a single render pass.
 		Array<ScopeGroup> scopeGroups{};
 
-		SwapChain* presentSwapChain = nullptr;
-		Scope* presentingScope = nullptr;
+		Array<SwapChain*> presentSwapChains{};
+		Array<Scope*> presentingScopes{};
 
 		u32 numFramesInFlight = 1;
 		

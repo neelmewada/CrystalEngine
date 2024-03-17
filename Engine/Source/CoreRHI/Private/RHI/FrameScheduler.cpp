@@ -51,9 +51,9 @@ namespace CE::RHI
 
     void FrameScheduler::Compile()
     {
-		if (frameGraph->presentSwapChain != nullptr)
+		if (frameGraph->presentSwapChains.NonEmpty())
 		{
-			numFramesInFlight = frameGraph->presentSwapChain->GetImageCount();
+			numFramesInFlight = frameGraph->presentSwapChains[0]->GetImageCount();
 		}
 
         FrameGraphCompileRequest compileRequest{};

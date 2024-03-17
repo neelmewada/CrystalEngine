@@ -225,8 +225,12 @@ namespace CE
 
 		RHI::PipelineState* transparentPipeline = nullptr;
 
+		PlatformWindow* secondWindow = nullptr;
+		bool secondWindowHidden = false;
+
 		RHI::FrameScheduler* scheduler = nullptr;
 		RHI::SwapChain* swapChain = nullptr;
+		RHI::SwapChain* swapChain2 = nullptr;
 		PlatformWindow* mainWindow = nullptr;
 
 		RPI::Model* chairModel = nullptr;
@@ -277,6 +281,9 @@ namespace CE
 
 		u32 width = 0;
 		u32 height = 0;
+
+		u32 width2 = 0;
+		u32 height2 = 0;
 		bool destroyed = false;
 
 		int localCounter = 0;

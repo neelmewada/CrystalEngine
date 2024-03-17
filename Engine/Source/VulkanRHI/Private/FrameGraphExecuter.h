@@ -22,15 +22,15 @@ namespace CE::Vulkan
 
 	private:
 
-		void ExecuteScopesRecursively(Vulkan::Scope* scope);
-
-		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<ScopeID>& executedScopes);
+		bool ExecuteScope(const FrameGraphExecuteRequest& executeRequest, Vulkan::Scope* scope, HashSet<ScopeID>& executedScopes, 
+			HashSet<Vulkan::SwapChain*>& usedSwapChains);
 
 		VulkanDevice* device = nullptr;
 		FrameGraphCompiler* compiler = nullptr;
 
 		u32 currentSubmissionIndex = 0;
 		u32 currentImageIndex = 0;
+		Array<u32> currentImageIndices{};
 
 		u64 totalFramesSubmitted = 0;
 	};

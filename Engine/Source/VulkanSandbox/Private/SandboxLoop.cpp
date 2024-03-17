@@ -92,8 +92,10 @@ namespace CE
 
 		PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 
-		secondWindow = app->CreatePlatformWindow("Test Window", 512, 512, false, false);
-		secondWindow->SetBorderless(true);
+		main = new VulkanSandbox();
+
+		main->secondWindow = app->CreatePlatformWindow("Test Window", 512, 512, false, false);
+		main->secondWindow->SetBorderless(true);
 
 		RHI::gDynamicRHI = new Vulkan::VulkanRHI();
 		
@@ -101,8 +103,6 @@ namespace CE
 		RHI::gDynamicRHI->PostInitialize();
 
 		gEngine->Initialize();
-
-		main = new VulkanSandbox();
 
 		main->Init(mainWindow);
 
@@ -123,12 +123,12 @@ namespace CE
 
 			if (InputManager::IsKeyDown(KeyCode::Backspace))
 			{
-				if (secondWindowHidden)
-					secondWindow->Show();
+				if (main->secondWindowHidden)
+					main->secondWindow->Show();
 				else
-					secondWindow->Hide();
+					main->secondWindow->Hide();
 
-				secondWindowHidden = !secondWindowHidden;
+				main->secondWindowHidden = !main->secondWindowHidden;
 			}
 		}
 	}

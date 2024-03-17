@@ -59,7 +59,6 @@ namespace CE::Vulkan
 		vkDeviceWaitIdle(device->GetHandle());
 
 		DestroySyncObjects();
-		DestroyCommandLists();
 	}
 
 	void FrameGraphCompiler::CompileScopesInternal(const FrameGraphCompileRequest& compileRequest)
@@ -95,13 +94,15 @@ namespace CE::Vulkan
 				if (frameAttachment->IsSwapChainAttachment())
 				{
 					swapChainFound = true;
-					scope->usesSwapChainAttachment = true;
+					RHI::SwapChain* swapChain = ((SwapChainFrameAttachment*)frameAttachment)->GetSwapChain();
+					if (!scope->swapChainsUsedByAttachments.Exists(swapChain))
+						scope->swapChainsUsedByAttachments.Add(swapChain);
 				}
 			}
 
 			if (!swapChainFound)
 			{
-				scope->usesSwapChainAttachment = false;
+				scope->swapChainsUsedByAttachments.Clear();
 			}
             
             for (auto consumer : frameGraph->nodes[scope->id].consumers)
@@ -127,16 +128,27 @@ namespace CE::Vulkan
 
 		vkDeviceWaitIdle(device->GetHandle());
 
-		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 		numFramesInFlight = compileRequest.numFramesInFlight;
 		imageCount = numFramesInFlight;
+
+		// If framegraph presents at least 1 swapchain
+		bool presentSwapChains = false;
+
+		if (frameGraph->presentSwapChains.NonEmpty())
+		{
+			imageCount = frameGraph->presentSwapChains[0]->GetImageCount();
+			numFramesInFlight = imageCount;
+			presentSwapChains = true;
+		}
+		
+		/*Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
+		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 
 		if (swapChain && presentingScope)
 		{
 			imageCount = swapChain->GetImageCount();
 			numFramesInFlight = imageCount;
-		}
+		}*/
 
 		for (auto scope : frameGraph->scopes)
 		{
@@ -178,42 +190,41 @@ namespace CE::Vulkan
 		// Destroy old objects
 
 		DestroySyncObjects();
-		DestroyCommandLists();
 
 		// ----------------------------
 		// Create new objects
 
-		if (swapChain && presentingScope)
+		if (presentSwapChains)
 		{
-			imageCount = swapChain->GetImageCount();
-			numFramesInFlight = imageCount;
-
 			for (int i = 0; i < imageCount; i++)
 			{
-				VkSemaphoreCreateInfo semaphoreCI{};
-				semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-				VkSemaphore semaphore = nullptr;
-				auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
-				if (result != VK_SUCCESS)
+				for (int j = 0; j < frameGraph->presentSwapChains.GetSize(); j++)
 				{
-					continue;
+					VkSemaphoreCreateInfo semaphoreCI{};
+					semaphoreCI.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+					VkSemaphore semaphore = nullptr;
+					auto result = vkCreateSemaphore(device->GetHandle(), &semaphoreCI, nullptr, &semaphore);
+					if (result != VK_SUCCESS)
+					{
+						continue;
+					}
+
+					imageAcquiredSemaphores[i].Add(semaphore);
+
+					VkFenceCreateInfo fenceCI{};
+					fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+					fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+					VkFence fence = nullptr;
+					result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
+					if (result != VK_SUCCESS)
+					{
+						continue;
+					}
+
+					imageAcquiredFences[i].Add(fence);
 				}
-
-				imageAcquiredSemaphores.Add(semaphore);
-
-				VkFenceCreateInfo fenceCI{};
-				fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-				fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-				VkFence fence = nullptr;
-				result = vkCreateFence(device->GetHandle(), &fenceCI, nullptr, &fence);
-				if (result != VK_SUCCESS)
-				{
-					continue;
-				}
-
-				imageAcquiredFences.Add(fence);
 			}
 		}
 
@@ -243,23 +254,21 @@ namespace CE::Vulkan
     {
 		vkDeviceWaitIdle(device->GetHandle());
 
-		for (VkSemaphore semaphore : imageAcquiredSemaphores)
+		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
-			vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
-		}
-		imageAcquiredSemaphores.Clear();
-        
-        for (VkFence fence : imageAcquiredFences)
-        {
-            vkDestroyFence(device->GetHandle(), fence, nullptr);
-        }
-        imageAcquiredFences.Clear();
-    }
+			for (VkSemaphore semaphore : imageAcquiredSemaphores[i])
+			{
+				vkDestroySemaphore(device->GetHandle(), semaphore, nullptr);
+			}
+			imageAcquiredSemaphores[i].Clear();
 
-	void FrameGraphCompiler::DestroyCommandLists()
-	{
-		
-	}
+			for (VkFence fence : imageAcquiredFences[i])
+			{
+				vkDestroyFence(device->GetHandle(), fence, nullptr);
+			}
+			imageAcquiredFences[i].Clear();
+		}
+    }
 
     //! If two scopes are executed one different queues and there's a dependency between them, then we
 	//! need to use a wait semaphore for it.
@@ -272,7 +281,8 @@ namespace CE::Vulkan
 		}
 	}
 
-	void FrameGraphCompiler::CompileCrossQueueDependenciesInternal(const FrameGraphCompileRequest& compileRequest, Vulkan::Scope* current, 
+	void FrameGraphCompiler::CompileCrossQueueDependenciesInternal(const FrameGraphCompileRequest& compileRequest, 
+		Vulkan::Scope* current, 
 		HashSet<ScopeID>& visitedScopes)
 	{
 		FrameGraph* frameGraph = compileRequest.frameGraph;
@@ -380,8 +390,6 @@ namespace CE::Vulkan
 			return;
 
 		FrameGraph* frameGraph = compileRequest.frameGraph;
-		Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
 
 		if (!visitedScopes[imageIndex].Exists(current->id))
 		{

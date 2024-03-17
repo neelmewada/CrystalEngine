@@ -58,13 +58,12 @@ namespace CE::Vulkan
 		frameBuffers.Clear();
 
 		auto frameGraph = compileRequest.frameGraph;
-		SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->GetSwapChain();
 
 		u32 imageCount = Math::Clamp<u32>(compileRequest.numFramesInFlight, 1, RHI::Limits::MaxSwapChainImageCount);
 
-		if (swapChain != nullptr)
+		if (frameGraph->GetSwapChainCount() > 0)
 		{
-			imageCount = swapChain->GetImageCount();
+			imageCount = frameGraph->GetSwapChain(0)->GetImageCount();
 		}
 
 		waitSemaphores.Clear();

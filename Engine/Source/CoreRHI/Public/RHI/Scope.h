@@ -59,7 +59,7 @@ namespace CE::RHI
 			ScopeAttachmentAccess access,
 			const DescriptorType& descriptor);
 
-		inline bool PresentsSwapChain() const { return presentsSwapChain; }
+		inline bool PresentsSwapChain() const { return presentSwapChains.NonEmpty(); }
 
 		bool Compile(const FrameGraphCompileRequest& compileRequest);
 
@@ -95,7 +95,8 @@ namespace CE::RHI
 
 		ScopeID id{};
 		int scopeGroupIndex = -1;
-		bool usesSwapChainAttachment = false;
+		//bool usesSwapChainAttachment = false;
+		Array<SwapChain*> swapChainsUsedByAttachments{};
 
 		Scope* prevSubPass = nullptr;
 		Scope* nextSubPass = nullptr;
@@ -126,7 +127,7 @@ namespace CE::RHI
 		Array<ScopeAttachment*> readAttachments{};
 		Array<ScopeAttachment*> writeAttachments{};
 
-		bool presentsSwapChain = false;
+		Array<RHI::SwapChain*> presentSwapChains{};
 
 		friend class FrameGraph;
         friend class FrameGraphCompiler;

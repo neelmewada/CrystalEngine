@@ -25,9 +25,6 @@ namespace CE
 
 		clock_t previousTime{};
 
-		PlatformWindow* secondWindow = nullptr;
-		bool secondWindowHidden = false;
-
 		VulkanSandbox* main = nullptr;
 
 		DelegateHandle tickDelegateHandle = 0;

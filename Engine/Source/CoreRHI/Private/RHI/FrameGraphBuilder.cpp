@@ -172,9 +172,9 @@ namespace CE::RHI
 		if (!currentScope || !frameGraph)
 			return false;
 		frameGraph->numFramesInFlight = swapChain->GetImageCount();
-		frameGraph->presentSwapChain = swapChain;
-		frameGraph->presentingScope = currentScope;
-		currentScope->presentsSwapChain = true;
+		frameGraph->presentSwapChains.Add(swapChain);
+		frameGraph->presentingScopes.Add(currentScope);
+		currentScope->presentSwapChains.Add(swapChain);
 		return true;
 	}
 

@@ -15,8 +15,8 @@ namespace CE::RHI
 
     void FrameGraph::Clear()
     {
-		presentingScope = nullptr;
-		presentSwapChain = nullptr;
+		presentingScopes.Clear();
+		presentSwapChains.Clear();
 		for (auto scope : scopes)
 		{
 			delete scope;
