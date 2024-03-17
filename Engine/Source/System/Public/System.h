@@ -6,6 +6,7 @@
 #include "CoreShader.h"
 #include "CoreSettings.h"
 #include "CoreInput.h"
+#include "CrystalWidgets.h"
 
 // Asset Meta
 #include "Asset/AssetData.h"

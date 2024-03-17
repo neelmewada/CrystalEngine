@@ -54,9 +54,13 @@ namespace CE
 
 		inline void RemoveListener(IWindowCallbacks* listener) { windowCallbacks.Remove(listener); }
 
+        inline bool IsMainWindow() const { return isMainWindow; }
+
     protected:
 
 		List<IWindowCallbacks*> windowCallbacks{};
+
+        bool isMainWindow = false;
 
 		friend class PlatformApplication;
     };

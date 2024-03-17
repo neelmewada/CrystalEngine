@@ -60,6 +60,7 @@ namespace CE
 		if (mainWindow == nullptr)
 		{
 			mainWindow = new SDLPlatformWindow(title, width, height, maximised, fullscreen, resizable);
+			mainWindow->isMainWindow = true;
 			windowList.Add(mainWindow);
 
 			SDL_AddEventWatch(SDLWindowEventWatch, mainWindow->handle);

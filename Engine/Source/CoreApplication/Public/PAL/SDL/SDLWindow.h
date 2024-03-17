@@ -38,7 +38,6 @@ namespace CE
         SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true);
 
         SDL_Window* handle = nullptr;
-
     };
 
     

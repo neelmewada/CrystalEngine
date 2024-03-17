@@ -1,20 +1,21 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(System CXX)
+project(CrystalWidgets CXX)
 
-ce_add_target(System SHARED
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
+
+ce_add_target(${PROJECT_NAME} SHARED
     AUTORTTI
-    RESOURCES
     NAMESPACE CE
     FOLDER Engine/Source
-    PCHHEADER 
-        PRIVATE 
-            Public/System.h
+    PCHHEADER
+        PRIVATE
+            Public/${PROJECT_NAME}.h
     FILES_CMAKE
         PRIVATE
-            system_private_files.cmake
+            ${PROJECT_NAME_LOWERCASE}_private_files.cmake
         PUBLIC
-            system_public_files.cmake
+            ${PROJECT_NAME_LOWERCASE}_public_files.cmake
     INCLUDE_DIRECTORIES
         PRIVATE
             Private/
@@ -25,20 +26,16 @@ ce_add_target(System SHARED
             ${PROJECT_NAME}_EXPORTS
     BUILD_DEPENDENCIES
         PRIVATE
-            ThirdParty::sdl
-            CE::CoreApplication
         PUBLIC
+            ThirdParty::yoga
             CE::Core
-            CE::CoreSettings
             CE::CoreMedia
-            CE::CoreShader
+            CE::CoreApplication
+            CE::CoreInput
             CE::CoreRHI
             CE::CoreRPI
-            CE::CrystalWidgets
-        TARGETS 
-            Config
     RUNTIME_DEPENDENCIES
-        
+
 )
 
 
