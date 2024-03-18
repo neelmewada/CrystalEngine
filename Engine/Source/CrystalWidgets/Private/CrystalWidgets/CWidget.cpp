@@ -56,7 +56,7 @@ namespace CE::Widgets
 
 		for (auto widget : attachedWidgets)
 		{
-			if (widget != this && widget->NeedsPaint())
+			if (widget != this && widget != nullptr && widget->NeedsPaint())
 				return true;
 		}
 
@@ -69,7 +69,7 @@ namespace CE::Widgets
 
 		for (auto widget : attachedWidgets)
 		{
-			if (widget != this)
+			if (widget != this && widget != nullptr)
 				widget->SetNeedsPaintRecursively(newValue);
 		}
 	}
@@ -127,7 +127,7 @@ namespace CE::Widgets
 		{
 			for (CWidget* widget : attachedWidgets)
 			{
-				if (event->isHandled && event->stopPropagation)
+				if (event->isConsumed && event->stopPropagation)
 					return;
 				widget->HandleEvent(event);
 			}

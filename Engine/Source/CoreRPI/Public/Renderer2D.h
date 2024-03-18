@@ -118,9 +118,9 @@ namespace CE::RPI
             Vec4 fillColor = Vec4();
             Vec4 outlineColor = Vec4();
             Vec4 cornerRadius = Vec4();
-            Vec2 itemSize = Vec2(); // item size in pixels
+            Vec2 itemSize = Vec2(); // Item size in pixels
             float borderThickness = 0;
-            DrawType drawType = DRAW_None; // enum DrawType
+            DrawType drawType = DRAW_None;
             u32 charIndex = 0; // For character drawing
             u32 bold = 0;
         };
@@ -199,7 +199,7 @@ namespace CE::RPI
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
         u32 drawItemCount = 0;
-        bool createNewTextBatch = false;
+        bool createNewDrawBatch = false;
 
         Array<RHI::DrawPacket*> drawPackets{};
         StaticArray<bool, MaxImageCount> resubmitDrawData = {};

@@ -10,16 +10,6 @@ namespace CE
 {
 	typedef void* WindowHandle;
 	class PlatformWindow;
-
-	class IWindowCallbacks
-	{
-	public:
-
-		virtual void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) {}
-
-		virtual void OnWindowDestroyed(PlatformWindow* window) {}
-
-	};
     
     class COREAPPLICATION_API PlatformWindow
     {
@@ -48,17 +38,18 @@ namespace CE
 
         virtual void SetBorderless(bool borderless) = 0;
 
+        virtual bool IsMinimized() = 0;
+        virtual bool IsFullscreen() = 0;
+        virtual bool IsShown() = 0;
+        virtual bool IsHidden() = 0;
+
         virtual u64 GetWindowId() = 0;
-
-		inline void AddListener(IWindowCallbacks* listener) { windowCallbacks.Add(listener); }
-
-		inline void RemoveListener(IWindowCallbacks* listener) { windowCallbacks.Remove(listener); }
 
         inline bool IsMainWindow() const { return isMainWindow; }
 
     protected:
 
-		List<IWindowCallbacks*> windowCallbacks{};
+		//List<IWindowCallbacks*> windowCallbacks{};
 
         bool isMainWindow = false;
 

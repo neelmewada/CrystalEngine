@@ -68,7 +68,7 @@ namespace CE
 		{
 			return SDL_HITTEST_DRAGGABLE;
 		}
-
+		
 		return SDL_HITTEST_NORMAL; // SDL_HITTEST_NORMAL <- Windows behaviour
 	}
 
@@ -127,6 +127,26 @@ namespace CE
 		{
 			SDL_SetWindowHitTest(handle, nullptr, nullptr);
 		}
+	}
+
+	bool SDLPlatformWindow::IsMinimized()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_MINIMIZED) != 0;
+	}
+
+	bool SDLPlatformWindow::IsFullscreen()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_FULLSCREEN) != 0;
+	}
+
+	bool SDLPlatformWindow::IsShown()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_SHOWN) != 0;
+	}
+
+	bool SDLPlatformWindow::IsHidden()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_HIDDEN) != 0;
 	}
 
 	VkSurfaceKHR SDLPlatformWindow::CreateVulkanSurface(VkInstance instance)

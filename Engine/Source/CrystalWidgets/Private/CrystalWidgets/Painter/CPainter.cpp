@@ -36,6 +36,12 @@ namespace CE::Widgets
         renderer->SetFillColor(brush.color);
     }
 
+    void CPainter::SetFont(const CFont& font)
+    {
+        renderer->PushFont(font.family, font.size, font.bold);
+        numFontsPushed++;
+    }
+
     void CPainter::SetRotation(f32 rotation)
     {
         renderer->SetRotation(rotation);
@@ -43,32 +49,43 @@ namespace CE::Widgets
 
     void CPainter::DrawRect(const Rect& rect)
     {
-        renderer->SetCursor(rect.min);
+        renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawRect(rect.GetSize());
     }
 
     void CPainter::DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
     {
-        renderer->SetCursor(rect.min);
+        renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawRoundedRect(rect.GetSize(), cornerRadius);
-    }
-
-    void CPainter::SetFont(const CFont& font)
-    {
-        renderer->PushFont(font.family, font.size, font.bold);
-        numFontsPushed++;
     }
 
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
-        renderer->SetCursor(position);
+        renderer->SetCursor(GetOrigin() + position);
         renderer->DrawText(text);
     }
 
     void CPainter::DrawText(const String& text, const Rect& rect)
     {
-        renderer->SetCursor(rect.min);
+        renderer->SetCursor(GetOrigin() + rect.min);
         renderer->DrawText(text, rect.GetSize());
+    }
+
+    void CPainter::PushChildCoordinateSpace(Vec2 newOrigin)
+    {
+        if (coordinateSpaceStack.IsEmpty())
+        {
+	        coordinateSpaceStack.Push(newOrigin);
+        }
+        else
+        {
+            coordinateSpaceStack.Push(coordinateSpaceStack.Top() + newOrigin);
+        }
+    }
+
+    void CPainter::PopChildCoordinateSpace()
+    {
+        coordinateSpaceStack.Pop();
     }
 
 } // namespace CE::Widgets

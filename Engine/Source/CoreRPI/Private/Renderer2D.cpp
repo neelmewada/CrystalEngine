@@ -115,7 +115,7 @@ namespace CE::RPI
 		drawBatches.Clear();
 
 		drawItemCount = 0;
-		createNewTextBatch = true;
+		createNewDrawBatch = true;
 
 		ResetToDefaults();
 
@@ -141,7 +141,7 @@ namespace CE::RPI
 		}
 
 		if (fontStack.Top().fontName != family)
-			createNewTextBatch = true;
+			createNewDrawBatch = true;
 
 		fontStack.Push({ .fontName = family, .fontSize = fontSize, .bold = bold });
 	}
@@ -152,7 +152,7 @@ namespace CE::RPI
 		const FontInfo& lastSecond = fontStack[fontStack.GetSize() - 2];
 
 		if (last.fontName != lastSecond.fontName)
-			createNewTextBatch = true;
+			createNewDrawBatch = true;
 
 		fontStack.Pop();
 	}
@@ -320,9 +320,9 @@ namespace CE::RPI
 
 		Matrix4x4 rotationMat = Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix();
 
-		if (drawBatches.IsEmpty() || createNewTextBatch)
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
-			createNewTextBatch = false;
+			createNewDrawBatch = false;
 			drawBatches.Add({});
 			drawBatches.Top().firstDrawItemIndex = drawItemCount;
 			drawBatches.Top().font = font;
@@ -441,9 +441,9 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
-		if (drawBatches.IsEmpty() || createNewTextBatch)
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
-			createNewTextBatch = false;
+			createNewDrawBatch = false;
 			drawBatches.Add({});
 			drawBatches.Top().firstDrawItemIndex = drawItemCount;
 			drawBatches.Top().font = font;
@@ -486,9 +486,9 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
-		if (drawBatches.IsEmpty() || createNewTextBatch)
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
-			createNewTextBatch = false;
+			createNewDrawBatch = false;
 			drawBatches.Add({});
 			drawBatches.Top().firstDrawItemIndex = drawItemCount;
 			drawBatches.Top().font = font;
@@ -531,9 +531,9 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
-		if (drawBatches.IsEmpty() || createNewTextBatch)
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
-			createNewTextBatch = false;
+			createNewDrawBatch = false;
 			drawBatches.Add({});
 			drawBatches.Top().firstDrawItemIndex = drawItemCount;
 			drawBatches.Top().font = font;

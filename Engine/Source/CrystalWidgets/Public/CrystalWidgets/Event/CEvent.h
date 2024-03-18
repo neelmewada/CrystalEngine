@@ -16,9 +16,14 @@ namespace CE::Widgets
         CE_STRUCT(CEvent)
     public:
 
-		inline void MarkHandled()
+		inline void Consume(CWidget* handler)
 		{
-			isHandled = true;
+			isConsumed = true;
+
+			if (handler && firstConsumer == nullptr)
+				firstConsumer = handler;
+			if (handler)
+				lastConsumer = handler;
 		}
 
 		inline void StopPropagation()
@@ -26,14 +31,19 @@ namespace CE::Widgets
 			stopPropagation = true;
 		}
 
-		inline void HandleAndStopPropagation()
+		inline void ConsumeAndStopPropagation(CWidget* handler)
 		{
-			isHandled = stopPropagation = true;
+			isConsumed = stopPropagation = true;
+
+			if (handler && firstConsumer == nullptr)
+				firstConsumer = handler;
+			if (handler)
+				lastConsumer = handler;
 		}
 
 		inline bool ShouldPropagate()
 		{
-			return !isHandled || !stopPropagation;
+			return !stopPropagation;
 		}
 
 		inline CEventType GetEventType() const
@@ -51,7 +61,7 @@ namespace CE::Widgets
 		TypeId customType{}; // TypeId of the custom event struct
 
 		FIELD()
-		b8 isHandled = false;
+		b8 isConsumed = false;
 
 		FIELD()
 		b8 stopPropagation = false;
@@ -61,6 +71,11 @@ namespace CE::Widgets
 
 		FIELD()
 		CEventDirection direction = CEventDirection::BottomToTop;
+
+		// The first widget that handled this event
+		CWidget* firstConsumer = nullptr;
+
+		CWidget* lastConsumer = nullptr;
     };
 
 	class CPainter;

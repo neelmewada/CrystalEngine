@@ -30,6 +30,13 @@ namespace CE::Vulkan
 
 		inline VkSwapchainKHR GetHandle() const { return swapChain; }
 
+		PlatformWindow* GetNativeWindow() override { return window; }
+
+		void Rebuild() override
+		{
+			RebuildSwapChain();
+		}
+
 	protected:
 
 		void OnWindowResized(PlatformWindow* window, u32 newDrawWidth, u32 newDrawHeight);

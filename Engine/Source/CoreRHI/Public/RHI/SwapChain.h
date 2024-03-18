@@ -51,6 +51,10 @@ namespace CE::RHI
 
 		inline RHI::Format GetSwapChainFormat() const { return swapChainColorFormat; }
 
+		virtual PlatformWindow* GetNativeWindow() = 0;
+
+		virtual void Rebuild() = 0;
+
 	protected:
 
 		Array<Texture*> images{};

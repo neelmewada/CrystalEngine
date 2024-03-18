@@ -27,6 +27,13 @@ namespace CE
 
         virtual void SetBorderless(bool borderless) override;
 
+        virtual bool IsMinimized() override;
+
+        virtual bool IsFullscreen() override;
+
+        virtual bool IsShown() override;
+        virtual bool IsHidden() override;
+
         VkSurfaceKHR CreateVulkanSurface(VkInstance instance) override;
 
         u64 GetWindowId() override;

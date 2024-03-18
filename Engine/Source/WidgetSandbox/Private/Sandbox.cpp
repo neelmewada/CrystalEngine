@@ -32,12 +32,13 @@ namespace CE
 
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
-		mainWindow->AddListener(this);
-		secondWindow->AddListener(this);
+		PlatformApplication::Get()->AddMessageHandler(this);
 
 		CApplication* app = CApplication::Get();
 		widgetWindows.Add(app->CreateWindow(MODULE_NAME, MODULE_NAME, mainWindow));
 		widgetWindows.Add(app->CreateWindow("Second", "Second", secondWindow));
+		windowMain = widgetWindows[0];
+		windowSecond = widgetWindows[1];
 		
 		InitFontAtlas();
 
@@ -123,15 +124,7 @@ namespace CE
 		}
 		widgetWindows.Clear();
 
-		if (mainWindow)
-		{
-			mainWindow->RemoveListener(this);
-		}
-
-		if (secondWindow)
-		{
-			secondWindow->RemoveListener(this);
-		}
+		PlatformApplication::Get()->RemoveMessageHandler(this);
 
 		delete swapChain; swapChain = nullptr;
 		delete swapChain2; swapChain2 = nullptr;
@@ -171,33 +164,39 @@ namespace CE
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
 			attachmentDatabase.EmplaceFrameAttachment("SwapChain2", swapChain2);
 
-			scheduler->BeginScope("UI");
+			if (!mainWindow->IsMinimized() && mainWindow->IsShown())
 			{
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain";
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0.15f, 0.15f, 0.15f, 1);
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				swapChainAttachment.multisampleState.sampleCount = 1;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+				scheduler->BeginScope(windowMain->GetName());
+				{
+					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+					swapChainAttachment.attachmentId = "SwapChain";
+					swapChainAttachment.loadStoreAction.clearValue = Vec4(0.15f, 0.15f, 0.15f, 1);
+					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+					swapChainAttachment.multisampleState.sampleCount = 1;
+					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
-				scheduler->PresentSwapChain(swapChain);
+					scheduler->PresentSwapChain(swapChain);
+				}
+				scheduler->EndScope();
 			}
-			scheduler->EndScope();
 
-			scheduler->BeginScope("UI2");
+			if (!secondWindow->IsMinimized() && secondWindow->IsShown())
 			{
-				RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-				swapChainAttachment.attachmentId = "SwapChain2";
-				swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0, 1);
-				swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-				swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-				swapChainAttachment.multisampleState.sampleCount = 1;
-				scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+				scheduler->BeginScope(windowSecond->GetName());
+				{
+					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+					swapChainAttachment.attachmentId = "SwapChain2";
+					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0, 1);
+					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+					swapChainAttachment.multisampleState.sampleCount = 1;
+					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
-				scheduler->PresentSwapChain(swapChain2);
+					scheduler->PresentSwapChain(swapChain2);
+				}
+				scheduler->EndScope();
 			}
-			scheduler->EndScope();
 		}
 		scheduler->EndFrameGraph();
 	}
@@ -247,13 +246,20 @@ namespace CE
 		// Finalize
 		drawList.Finalize();
 
-		scheduler->SetScopeDrawList("UI", &drawList.GetDrawListForTag(widgetWindows[0]->GetDrawListTag()));
-		scheduler->SetScopeDrawList("UI2", &drawList.GetDrawListForTag(widgetWindows[1]->GetDrawListTag()));
+		scheduler->SetScopeDrawList(windowMain->GetName(), &drawList.GetDrawListForTag(widgetWindows[0]->GetDrawListTag()));
+		scheduler->SetScopeDrawList(windowSecond->GetName(), &drawList.GetDrawListForTag(widgetWindows[1]->GetDrawListTag()));
 	}
 
 	void WidgetSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
 	{
 		rebuild = recompile = true;
+
+		scheduler->WaitUntilIdle();
+
+		if (!mainWindow->IsMinimized())
+			swapChain->Rebuild();
+		if (!secondWindow->IsMinimized())
+			swapChain2->Rebuild();
 	}
 
 	void WidgetSandbox::OnWindowDestroyed(PlatformWindow* window)
@@ -263,6 +269,16 @@ namespace CE
 			destroyed = true;
 			this->mainWindow = nullptr;
 		}
+	}
+
+	void WidgetSandbox::OnWindowMinimized(PlatformWindow* window)
+	{
+		rebuild = recompile = true;
+	}
+
+	void WidgetSandbox::OnWindowRestored(PlatformWindow* window)
+	{
+		rebuild = recompile = true;
 	}
 
 } // namespace CE

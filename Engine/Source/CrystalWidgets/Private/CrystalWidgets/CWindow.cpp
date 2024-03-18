@@ -88,6 +88,13 @@ namespace CE::Widgets
         return renderer->FlushDrawPackets(imageIndex);
     }
 
+    void CWindow::SetWindowType(CWindowType windowType)
+    {
+        this->windowType = windowType;
+
+        SetNeedsPaintRecursively(true);
+    }
+
     void CWindow::OnWindowSizeChanged(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
         if (!nativeWindow || !renderer)
@@ -114,6 +121,7 @@ namespace CE::Widgets
         if (!renderer)
             return;
 
+        // Painting
         if (NeedsPaint())
         {
             SetNeedsPaintRecursively(false);
@@ -134,9 +142,10 @@ namespace CE::Widgets
                 renderer->PopFont();
             }
             renderer->End();
-
-            painter->Destroy();
         }
+
+        // TODO: Input Handling
+
     }
 
     void CWindow::OnBeforeDestroy()

@@ -164,10 +164,9 @@ namespace CE
 			this->mainWindow = nullptr;
 		}
 
-		for (auto callback : sdlWindow->windowCallbacks)
+		for (ApplicationMessageHandler* handler : messageHandlers)
 		{
-			if (callback)
-				callback->OnWindowDestroyed(window);
+			handler->OnWindowDestroyed(window);
 		}
 
 		delete sdlWindow;
@@ -241,9 +240,33 @@ namespace CE
 				}
 			}
 		}
-		else if (event.window.event == SDL_WINDOWEVENT_EXPOSED)
+		else if (event.window.event == SDL_WINDOWEVENT_MINIMIZED)
 		{
-
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the minimized window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowMinimized(window);
+					}
+					break;
+				}
+			}
+		}
+		else if (event.window.event == SDL_WINDOWEVENT_RESTORED)
+		{
+			for (auto window : windowList)
+			{
+				if ((u32)window->GetWindowId() == event.window.windowID) // Found the minimized window
+				{
+					for (ApplicationMessageHandler* handler : messageHandlers)
+					{
+						handler->OnWindowRestored(window);
+					}
+					break;
+				}
+			}
 		}
 	}
 
@@ -268,11 +291,10 @@ namespace CE
 					handler->OnMainWindowDrawableSizeChanged(w, h);
 			}
             onWindowDrawableSizeChanged.Broadcast(window, w, h);
-			
-			for (auto callback : window->windowCallbacks)
+
+			for (ApplicationMessageHandler* handler : messageHandlers)
 			{
-				if (callback)
-					callback->OnWindowResized(window, w, h);
+				handler->OnWindowResized(window, w, h);
 			}
 		}
 	}

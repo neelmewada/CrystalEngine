@@ -28,7 +28,19 @@ namespace CE::Widgets
         void DrawText(const String& text, const Vec2& position);
         void DrawText(const String& text, const Rect& rect);
 
+        void PushChildCoordinateSpace(Vec2 newOrigin);
+        void PopChildCoordinateSpace();
+
     private:
+
+        Array<Vec2> coordinateSpaceStack{};
+
+        Vec2 GetOrigin() const
+        {
+            if (coordinateSpaceStack.IsEmpty())
+                return Vec2(0, 0);
+	        return coordinateSpaceStack.Top();
+        }
 
         Renderer2D* renderer = nullptr;
         int numFontsPushed = 0;

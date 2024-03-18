@@ -1452,7 +1452,7 @@ namespace CE::Widgets
 
 	void CWidget::HandleEvent(CEvent* event)
     {
-		if (event->isHandled && event->stopPropagation)
+		if (event->isConsumed && event->stopPropagation)
 			return;
 
 		GUI::MouseCursor mouseCursor = GUI::MouseCursor_None;
@@ -1488,7 +1488,7 @@ namespace CE::Widgets
 			}
 		}
 
-		if (!event->isHandled && event->GetEventType() == CEventType::MouseButtonClick)
+		if (!event->isConsumed && event->GetEventType() == CEventType::MouseButtonClick)
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
 			if (mouseEvent->mouseButton == 0) // Left click
@@ -1508,7 +1508,7 @@ namespace CE::Widgets
 			}
 		}
 
-		if (!event->isHandled && event->GetEventType() == CEventType::FocusChanged)
+		if (!event->isConsumed && event->GetEventType() == CEventType::FocusChanged)
 		{
 			CFocusEvent* focusEvent = (CFocusEvent*)event;
 			OnFocusChanged(focusEvent->GotFocus());
@@ -1529,7 +1529,7 @@ namespace CE::Widgets
 
 		for (CWidget* parent = GetOwner(); parent != nullptr; parent = parent->GetOwner())
 		{
-			if (event->isHandled && event->stopPropagation)
+			if (event->isConsumed && event->stopPropagation)
 				return;
 			if (parent != this)
 				parent->HandleEvent(event);

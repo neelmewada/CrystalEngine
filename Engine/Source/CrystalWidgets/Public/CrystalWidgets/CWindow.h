@@ -4,6 +4,15 @@ namespace CE::Widgets
 {
     class CPainter;
 
+    ENUM()
+    enum class CWindowType
+    {
+        MajorTabWindow,
+        MinorTabWindow,
+        ToolWindow,
+    };
+    ENUM_CLASS(CWindowType);
+
     CLASS()
     class CRYSTALWIDGETS_API CWindow : public CWidget
     {
@@ -19,6 +28,8 @@ namespace CE::Widgets
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
+        void SetWindowType(CWindowType windowType);
+
     private:
 
         void Tick();
@@ -31,6 +42,9 @@ namespace CE::Widgets
 
         void OnSubobjectDetached(Object* object) override;
         void OnSubobjectAttached(Object* object) override;
+
+        FIELD(ReadOnly)
+        CWindowType windowType = CWindowType::MajorTabWindow;
 
         PlatformWindow* nativeWindow = nullptr;
         DelegateHandle windowResizeDelegate = 0;

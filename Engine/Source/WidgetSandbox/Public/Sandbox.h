@@ -48,7 +48,7 @@ namespace CE
 		f32 fieldOfView = 60;
 	};
 
-	class WidgetSandbox : IWindowCallbacks
+	class WidgetSandbox : ApplicationMessageHandler
 	{
 	public:
 
@@ -76,6 +76,11 @@ namespace CE
 
 		void OnWindowDestroyed(PlatformWindow* window) override;
 
+		void OnWindowMinimized(PlatformWindow* window) override;
+
+		void OnWindowRestored(PlatformWindow* window) override;
+
+	private:
 		bool rebuild = true;
 		bool recompile = true;
 		bool resubmit = true;

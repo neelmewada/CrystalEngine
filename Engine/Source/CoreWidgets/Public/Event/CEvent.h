@@ -34,7 +34,7 @@ namespace CE::Widgets
 
 		inline void MarkHandled()
 		{
-			isHandled = true;
+			isConsumed = true;
 		}
 
 		inline void StopPropagation()
@@ -44,12 +44,12 @@ namespace CE::Widgets
 
 		inline void HandleAndStopPropagation()
 		{
-			isHandled = stopPropagation = true;
+			isConsumed = stopPropagation = true;
 		}
 
 		inline bool ShouldPropagate()
 		{
-			return !isHandled || !stopPropagation;
+			return !isConsumed || !stopPropagation;
 		}
 
 		inline CEventType GetEventType() const 
@@ -67,7 +67,7 @@ namespace CE::Widgets
 		TypeId customEventType{}; // TypeId of the event type struct
 
 		FIELD()
-		b8 isHandled = false;
+		b8 isConsumed = false;
 
 		FIELD()
 		b8 stopPropagation = false;
