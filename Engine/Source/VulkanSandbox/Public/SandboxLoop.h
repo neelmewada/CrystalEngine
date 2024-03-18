@@ -16,7 +16,7 @@ namespace CE
 
 		void RunLoop();
 
-		void Tick();
+		void AlternativeTick();
 
 		void PreShutdown();
 		void Shutdown();
@@ -24,6 +24,7 @@ namespace CE
 	private:
 
 		clock_t previousTime{};
+		f32 deltaTime = 0.0f;
 
 		VulkanSandbox* main = nullptr;
 

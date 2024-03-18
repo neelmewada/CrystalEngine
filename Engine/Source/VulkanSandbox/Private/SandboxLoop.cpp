@@ -112,9 +112,9 @@ namespace CE
 
 		gEngine->PostInitialize();
 
-		auto tickDelegate = MemberDelegate(&SandboxLoop::Tick, this);
+		auto tickDelegate = MemberDelegate(&SandboxLoop::AlternativeTick, this);
 		this->tickDelegateHandle = tickDelegate.GetHandle();
-		//app->AddTickHandler(tickDelegate);
+		app->AddTickHandler(tickDelegate);
 	}
 
 	void SandboxLoop::RunLoop()
@@ -123,7 +123,20 @@ namespace CE
 
 		while (!IsEngineRequestingExit())
 		{
-			Tick();
+			auto curTime = clock();
+			deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+
+			// App & Input Tick
+			app->Tick();
+			InputManager::Get().Tick();
+
+			CApplication::Get()->Tick();
+
+			// Engine tick
+			//gEngine->Tick(deltaTime);
+
+			// Game tick
+			main->Tick(deltaTime);
 
 			if (InputManager::IsKeyDown(KeyCode::Backspace))
 			{
@@ -134,26 +147,18 @@ namespace CE
 
 				main->secondWindowHidden = !main->secondWindowHidden;
 			}
+
+			previousTime = curTime;
 		}
 	}
 
-	void SandboxLoop::Tick()
+	void SandboxLoop::AlternativeTick()
 	{
 		auto app = PlatformApplication::Get();
 
 		auto curTime = clock();
-		f32 deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
+		deltaTime = ((f32)(curTime - previousTime)) / CLOCKS_PER_SEC;
 
-		// App & Input Tick
-		app->Tick();
-		InputManager::Get().Tick();
-
-		CApplication::Get()->Tick();
-
-		// Engine tick
-		//gEngine->Tick(deltaTime);
-
-		// Game tick
 		main->Tick(deltaTime);
 
 		previousTime = curTime;

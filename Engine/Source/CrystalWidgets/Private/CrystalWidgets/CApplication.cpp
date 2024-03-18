@@ -6,6 +6,9 @@ namespace CE::Widgets
 
 	CApplication::CApplication()
 	{
+		if (IsDefaultInstance())
+			return;
+
 		CE_ASSERT(instance == nullptr, "Only 1 instance of CApplication is allowed");
 		instance = this;
 	}

@@ -109,6 +109,9 @@ namespace CE::Vulkan
 
 		if (swapChainExists)
 		{
+			//vkWaitForFences(device->GetHandle(), compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
+			//	compiler->imageAcquiredFences[currentSubmissionIndex].GetData(), VK_TRUE, u64Max);
+
 			vkResetFences(device->GetHandle(), compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
 				compiler->imageAcquiredFences[currentSubmissionIndex].GetData());
 
@@ -124,7 +127,7 @@ namespace CE::Vulkan
 				result = vkAcquireNextImageKHR(device->GetHandle(),
 					swapChain->GetHandle(), u64Max,
 					compiler->imageAcquiredSemaphores[currentSubmissionIndex][i],
-					//compiler->imageAcquiredFences[currentSubmissionIndex],
+					//compiler->imageAcquiredFences[currentSubmissionIndex][i],
 					nullptr,
 					&swapChain->currentImageIndex);
 
