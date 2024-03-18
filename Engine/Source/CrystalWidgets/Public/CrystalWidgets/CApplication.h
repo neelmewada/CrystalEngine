@@ -51,6 +51,8 @@ namespace CE::Widgets
 
     crystalwidgets_internal:
 
+        void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
+
         RPI::Shader* draw2dShader = nullptr;
         Name defaultFontName = "";
         RPI::FontAtlasAsset* defaultFont = nullptr;

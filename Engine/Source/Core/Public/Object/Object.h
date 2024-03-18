@@ -64,7 +64,7 @@ namespace CE
     public:
 
         // - Getters & Setters -
-        virtual const Name& GetName() const
+        const Name& GetName() const
         {
             return name;
         }

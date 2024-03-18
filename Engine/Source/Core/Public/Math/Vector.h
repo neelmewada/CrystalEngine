@@ -616,6 +616,16 @@ namespace CE
         Rect(f32 left, f32 top, f32 right, f32 bottom) : left(left), top(top), right(right), bottom(bottom)
         {}
 
+        static Rect FromSize(const Vec2& min, const Vec2& size)
+        {
+            return Rect(min, min + size);
+        }
+
+        static Rect FromSize(f32 x, f32 y, f32 w, f32 h)
+        {
+            return Rect(x, y, x + w, y + h);
+        }
+
         union {
             struct {
                 f32 left, top, right, bottom;

@@ -183,9 +183,7 @@ Shader "2D/SDF Geometry"
                 float2 borderThickness = float2(info.borderThickness, info.borderThickness) / info.itemSize;
 
                 float borderMask = 0.0;
-                if (uv.x < borderThickness.x || uv.x > 1.0 - borderThickness.x)
-                    borderMask = 1.0;
-                if (uv.y < borderThickness.y || uv.y > 1.0 - borderThickness.y)
+                if (uv.x < borderThickness.x || uv.x > 1.0 - borderThickness.x || uv.y < borderThickness.y || uv.y > 1.0 - borderThickness.y)
                     borderMask = 1.0;
 
                 borderMask = clamp(borderMask, 0, 1);

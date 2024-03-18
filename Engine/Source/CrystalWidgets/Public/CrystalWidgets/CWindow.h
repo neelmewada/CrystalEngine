@@ -7,8 +7,8 @@ namespace CE::Widgets
     ENUM()
     enum class CWindowType
     {
-        MajorTabWindow,
-        MinorTabWindow,
+        MajorDockWindow,
+        MinorDockWindow,
         ToolWindow,
     };
     ENUM_CLASS(CWindowType);
@@ -30,7 +30,11 @@ namespace CE::Widgets
 
         void SetWindowType(CWindowType windowType);
 
-    private:
+        inline void SetTitle(const String& title) { this->title = title; }
+
+    protected:
+
+        void OnPaint(CPaintEvent* paintEvent) override;
 
         void Tick();
 
@@ -43,8 +47,11 @@ namespace CE::Widgets
         void OnSubobjectDetached(Object* object) override;
         void OnSubobjectAttached(Object* object) override;
 
+        FIELD()
+        String title = "";
+
         FIELD(ReadOnly)
-        CWindowType windowType = CWindowType::MajorTabWindow;
+        CWindowType windowType = CWindowType::MajorDockWindow;
 
         PlatformWindow* nativeWindow = nullptr;
         DelegateHandle windowResizeDelegate = 0;

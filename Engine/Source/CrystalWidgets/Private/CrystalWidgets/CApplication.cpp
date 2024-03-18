@@ -61,6 +61,7 @@ namespace CE::Widgets
 	{
 		CWindow* window = CreateObject<CWindow>(this, name);
 		window->SetPlatformWindow(nativeWindow);
+		window->SetTitle(title);
 		return window;
 	}
 
@@ -73,6 +74,17 @@ namespace CE::Widgets
 			if (window->renderer != nullptr)
 			{
 				window->renderer->RegisterFont(fontName, fontAtlas);
+			}
+		}
+	}
+
+	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)
+	{
+		for (CWindow* window : windows)
+		{
+			if (window->nativeWindow == nativeWindow)
+			{
+				window->SetNeedsPaint();
 			}
 		}
 	}

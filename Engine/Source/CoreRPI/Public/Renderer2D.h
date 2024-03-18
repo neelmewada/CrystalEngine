@@ -68,11 +68,35 @@ namespace CE::RPI
 
         Vec2 DrawText(const String& text, Vec2 size = {});
 
+        inline Vec2 DrawText(const Rect& rect, const String& text)
+        {
+            SetCursor(rect.min);
+            return DrawText(text, rect.GetSize());
+        }
+
         Vec2 DrawCircle(Vec2 size);
+
+        inline Vec2 DrawCircle(const Rect& rect)
+        {
+            SetCursor(rect.min);
+            return DrawCircle(rect.GetSize());
+        }
 
         Vec2 DrawRect(Vec2 size);
 
+        inline Vec2 DrawRect(const Rect& rect)
+        {
+            SetCursor(rect.min);
+            return DrawRect(rect.GetSize());
+        }
+
         Vec2 DrawRoundedRect(Vec2 size, const Vec4& cornerRadius);
+
+        inline Vec2 DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
+        {
+            SetCursor(rect.min);
+            return DrawRoundedRect(rect.GetSize(), cornerRadius);
+        }
 
         void End();
 

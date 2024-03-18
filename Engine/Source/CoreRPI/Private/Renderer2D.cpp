@@ -365,12 +365,12 @@ namespace CE::RPI
 
 			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > size.width)
 			{
-				position.x = startX;
-				position.y += metrics.lineHeight * fontSize / atlasFontSize;
-
 				// Go through previous characters and bring them to this new-line
 				if (whitespaceIdx >= 0)
 				{
+					position.x = startX;
+					position.y += metrics.lineHeight * fontSize / atlasFontSize;
+
 					position.x -= (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 
 					for (int j = whitespaceIdx + 1; j < i; j++)
@@ -406,7 +406,7 @@ namespace CE::RPI
 			// Need to multiply by 2 because final range is [-w, w] instead of [0, w] (which is double the size)
 			Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
 			
-			drawItem.fillColor = fillColor.ToVec4();
+			drawItem.fillColor = outlineColor.ToVec4();
 			drawItem.outlineColor = outlineColor.ToVec4();
 			drawItem.itemSize = scale;
 			drawItem.borderThickness = 0.0f;

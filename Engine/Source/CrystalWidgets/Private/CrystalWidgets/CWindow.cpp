@@ -7,6 +7,8 @@ namespace CE::Widgets
     {
         if (!IsDefaultInstance())
         {
+            title = GetName().GetString();
+
             painter = CreateDefaultSubobject<CPainter>("Painter");
 
             windowResizeDelegate =
@@ -132,27 +134,37 @@ namespace CE::Widgets
             {
                 renderer->PushFont(CApplication::Get()->defaultFontName, 16);
 
-                renderer->SetFillColor(Color::FromRGBA32(21, 21, 21));
-                
-                u32 w = 0, h = 0;
-                nativeWindow->GetDrawableWindowSize(&w, &h);
+                // renderer->SetFillColor(Color::FromRGBA32(21, 21, 21));
+                //
+                // u32 w = 0, h = 0;
+                // nativeWindow->GetDrawableWindowSize(&w, &h);
+                //
+                // if (nativeWindow->IsBorderless())
+                // {
+                //     renderer->SetBorderThickness(2.0f);
+                //     renderer->SetOutlineColor(Color::FromRGBA32(48, 48, 48));
+                // }
+                //
+                // renderer->SetCursor(Vec2(0, 0));
+                // renderer->DrawRect(Vec2(w, h));
+                //
+                // // Draw Tab
+                //
+                // renderer->SetBorderThickness(0.0f);
+                // renderer->SetFillColor(Color::FromRGBA32(36, 36, 36));
+                // renderer->SetCursor(Vec2(20, 2.5f));
+                // renderer->DrawRoundedRect(Vec2(100, 35), Vec4(5, 5, 0, 0));
+                //
+                // renderer->SetOutlineColor(Color::White());
+                // renderer->DrawText(title, Vec2(100, 35));
 
-                if (nativeWindow->IsBorderless())
-                {
-                    renderer->SetBorderThickness(2.0f);
-                    renderer->SetOutlineColor(Color::FromRGBA32(48, 48, 48));
-                }
-
-                renderer->SetCursor(Vec2(0, 0));
-                renderer->DrawRect(Vec2(w, h));
-
-                CPaintEvent thisPaint = CPaintEvent();
+                auto thisPaint = CPaintEvent();
                 thisPaint.painter = painter;
                 thisPaint.sender = this;
                 thisPaint.name = "PaintEvent";
                 
                 this->HandleEvent(&thisPaint);
-
+                
                 renderer->PopFont();
             }
             renderer->End();
@@ -174,6 +186,52 @@ namespace CE::Widgets
         Super::Construct();
 
         
+    }
+
+    void CWindow::OnPaint(CPaintEvent* paintEvent)
+    {
+        Super::OnPaint(paintEvent);
+
+        CPainter* painter = paintEvent->painter;
+
+        u32 w = 0, h = 0;
+        nativeWindow->GetDrawableWindowSize(&w, &h);
+
+        // - Draw Background -
+
+        CPen pen = CPen(Color::FromRGBA32(48, 48, 48));
+        CBrush brush = CBrush(Color::FromRGBA32(21, 21, 21));
+        CFont font = CFont("Roboto", 12, false);
+
+        painter->SetBrush(brush);
+
+        if (nativeWindow->IsBorderless())
+        {
+            pen.SetWidth(2.0f);
+            painter->SetPen(pen);
+        }
+
+        painter->DrawRect(Rect::FromSize(0, 0, w, h));
+
+        // - Draw Tab -
+
+        pen.SetWidth(0.0f);
+        pen.SetColor(Color::Clear());
+
+        brush.SetColor(Color::FromRGBA32(36, 36, 36));
+
+        painter->SetPen(pen);
+        painter->SetBrush(brush);
+        painter->SetFont(font);
+
+        Rect tabRect = Rect::FromSize(20, 2.5f, 100, 35);
+        painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
+
+        pen.SetColor(Color::White());
+        painter->SetPen(pen);
+
+        painter->DrawText(title, tabRect);
+
     }
 
     void CWindow::OnSubobjectAttached(Object* object)

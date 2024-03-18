@@ -11,6 +11,7 @@
 #include "yoga/YGStyle.h"
 
 #include "CrystalWidgets/CApplication.h"
+#include "CrystalWidgets/CNativeWindow.h"
 
 // Painting
 #include "CrystalWidgets/Painter/CPen.h"
