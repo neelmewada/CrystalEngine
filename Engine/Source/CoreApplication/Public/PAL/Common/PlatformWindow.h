@@ -38,6 +38,7 @@ namespace CE
 
         virtual void SetBorderless(bool borderless) = 0;
 
+        virtual bool IsBorderless() = 0;
         virtual bool IsMinimized() = 0;
         virtual bool IsFullscreen() = 0;
         virtual bool IsShown() = 0;

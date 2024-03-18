@@ -96,7 +96,6 @@ namespace CE::Vulkan
 
 	void FrameGraphExecuter::WaitUntilIdle()
 	{
-		// TODO: Improve this code later using fences
 		vkDeviceWaitIdle(device->GetHandle());
 	}
 
@@ -118,7 +117,8 @@ namespace CE::Vulkan
 			//vkWaitForFences(device->GetHandle(), compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
 			//	compiler->imageAcquiredFences[currentSubmissionIndex].GetData(), VK_TRUE, u64Max);
 
-			vkResetFences(device->GetHandle(), compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
+			vkResetFences(device->GetHandle(),
+				compiler->imageAcquiredFences[currentSubmissionIndex].GetSize(),
 				compiler->imageAcquiredFences[currentSubmissionIndex].GetData());
 
 			vkWaitForFences(device->GetHandle(),
@@ -128,7 +128,7 @@ namespace CE::Vulkan
 
 			for (int i = 0; i < frameGraph->presentSwapChains.GetSize(); i++)
 			{
-				Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
+				auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
 
 				result = vkAcquireNextImageKHR(device->GetHandle(),
 					swapChain->GetHandle(), acquireTimeout,

@@ -129,6 +129,11 @@ namespace CE
 		}
 	}
 
+	bool SDLPlatformWindow::IsBorderless()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_BORDERLESS) != 0;
+	}
+
 	bool SDLPlatformWindow::IsMinimized()
 	{
 		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_MINIMIZED) != 0;

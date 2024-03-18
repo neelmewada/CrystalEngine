@@ -84,25 +84,25 @@ namespace CE::Widgets
 		// TODO: Temporary code only for testing
 		CPainter* painter = paintEvent->painter;
 
-		CPen pen;
-		pen.SetColor(Color(1, 1, 0, 1));
-		pen.SetWidth(5.0);
-		painter->SetPen(pen);
-
-		CBrush brush;
-		brush.SetColor(Color(1, 1, 1, 1));
-		
-		painter->SetBrush(brush);
-
-		painter->DrawRoundedRect(Rect(50, 50, 200, 100), Vec4(5, 10, 15, 20));
-
-		CFont font{};
-		font.SetFamily("Poppins");
-		font.SetSize(14);
-		font.SetBold(false);
-
-		painter->SetFont(font);
-		painter->DrawText("This is first sentence. This is second sentence.\nThis is third sentence.\nThis is fourth sentence.", Vec2(0, 100));
+		// CPen pen;
+		// pen.SetColor(Color(1, 1, 0, 1));
+		// pen.SetWidth(5.0);
+		// painter->SetPen(pen);
+		//
+		// CBrush brush;
+		// brush.SetColor(Color(1, 1, 1, 1));
+		//
+		// painter->SetBrush(brush);
+		//
+		// painter->DrawRoundedRect(Rect(50, 50, 200, 100), Vec4(5, 10, 15, 20));
+		//
+		// CFont font{};
+		// font.SetFamily("Poppins");
+		// font.SetSize(14);
+		// font.SetBold(false);
+		//
+		// painter->SetFont(font);
+		// painter->DrawText("This is first sentence. This is second sentence.\nThis is third sentence.\nThis is fourth sentence.", Vec2(0, 100));
 	}
 
 	void CWidget::HandleEvent(CEvent* event)

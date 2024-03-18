@@ -50,7 +50,7 @@ namespace CE::Widgets
             PlatformWindow* platformWindow = nativeWindow;
             if (platformWindow == nullptr)
                 platformWindow = platformApp->GetMainWindow();
-
+            
             platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
 
             desc.viewConstantData.viewMatrix = Matrix4x4::Identity();
@@ -131,6 +131,20 @@ namespace CE::Widgets
             renderer->Begin();
             {
                 renderer->PushFont(CApplication::Get()->defaultFontName, 16);
+
+                renderer->SetFillColor(Color::FromRGBA32(21, 21, 21));
+                
+                u32 w = 0, h = 0;
+                nativeWindow->GetDrawableWindowSize(&w, &h);
+
+                if (nativeWindow->IsBorderless())
+                {
+                    renderer->SetBorderThickness(2.0f);
+                    renderer->SetOutlineColor(Color::FromRGBA32(48, 48, 48));
+                }
+
+                renderer->SetCursor(Vec2(0, 0));
+                renderer->DrawRect(Vec2(w, h));
 
                 CPaintEvent thisPaint = CPaintEvent();
                 thisPaint.painter = painter;

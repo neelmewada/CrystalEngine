@@ -185,7 +185,7 @@ namespace CE
 		CApplication::Get()->Shutdown();
 		CApplication::Get()->Destroy();
 
-		RHI::gDynamicRHI->PreShutdown();
+		gDynamicRHI->PreShutdown();
 
 		InputManager::Get().Shutdown(app);
 		app->PreShutdown();
@@ -197,11 +197,11 @@ namespace CE
 
 		gEngine->Shutdown();
 
-		RHI::gDynamicRHI->Shutdown();
+		gDynamicRHI->Shutdown();
 		app->Shutdown();
 
-		delete RHI::gDynamicRHI;
-		RHI::gDynamicRHI = nullptr;
+		delete gDynamicRHI;
+		gDynamicRHI = nullptr;
 
 		delete app;
 		app = nullptr;

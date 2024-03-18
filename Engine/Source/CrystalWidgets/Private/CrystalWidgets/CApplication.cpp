@@ -67,7 +67,7 @@ namespace CE::Widgets
 	void CApplication::RegisterFont(Name fontName, RPI::FontAtlasAsset* fontAtlas)
 	{
 		registeredFonts[fontName] = fontAtlas;
-
+		
 		for (auto window : windows)
 		{
 			if (window->renderer != nullptr)
