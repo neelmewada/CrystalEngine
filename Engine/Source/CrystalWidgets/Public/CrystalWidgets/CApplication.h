@@ -37,7 +37,7 @@ namespace CE::Widgets
 
         void Tick();
 
-        CWindow* CreateWindow(const String& name, const String& title);
+        CWindow* CreateWindow(const String& name, const String& title, PlatformWindow* nativeWindow);
 
     private:
 

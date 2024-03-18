@@ -58,6 +58,7 @@ namespace CE::RPI
         void SetFillColor(const Color& color);
         void SetOutlineColor(const Color& color);
         void SetBorderThickness(f32 thickness);
+        void SetRotation(f32 degrees);
 
         void SetCursor(Vec2 position);
 
@@ -199,6 +200,7 @@ namespace CE::RPI
         Color fillColor = Color(1, 1, 1, 1);
         Color outlineColor = Color(0, 0, 0, 0);
         float borderThickness = 0.0f;
+        f32 rotation = 0;
 
         // - Constants -
 

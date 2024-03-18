@@ -13,11 +13,23 @@ namespace CE::Widgets
         CWidget();
         virtual ~CWidget();
 
-    protected:
+
+    crystalwidgets_protected_internal:
 
         FIELD()
         Array<CWidget*> attachedWidgets{};
 
+        FIELD()
+        CWidget* parent = nullptr;
+
+        FIELD()
+        CWindow* ownerWindow = nullptr;
+
+
+
+    crystalwidgets_internal:
+
+        YGNodeRef node = nullptr;
 
     };
 

@@ -943,7 +943,7 @@ namespace CE
 		auto underlyingType = field->GetUnderlyingType();
 
 		bool isVectorField = false;
-		if (fieldTypeId == TYPEID(Vec2) || fieldTypeId == TYPEID(Vec3) || fieldTypeId == TYPEID(Vec4) ||
+		if (fieldTypeId == TYPEID(Vec2) || fieldTypeId == TYPEID(Vec3) || fieldTypeId == TYPEID(Vec4) || fieldTypeId == TYPEID(Rect) ||
 			fieldTypeId == TYPEID(Vec2i) || fieldTypeId == TYPEID(Vec3i) || fieldTypeId == TYPEID(Vec4i) ||
 			fieldTypeId == TYPEID(Color))
 		{
@@ -1185,6 +1185,8 @@ namespace CE
 				field->SetFieldValue<Vec3>(rawInstance, vec4);
 			else if (fieldTypeId == TYPEID(Vec4))
 				field->SetFieldValue<Vec4>(rawInstance, vec4);
+			else if (fieldTypeId == TYPEID(Rect))
+				field->SetFieldValue<Rect>(rawInstance, Rect(vec4.x, vec4.y, vec4.z, vec4.w));
 			else if (fieldTypeId == TYPEID(Vec2i))
 				field->SetFieldValue<Vec2i>(rawInstance, vec4i);
 			else if (fieldTypeId == TYPEID(Vec3i))

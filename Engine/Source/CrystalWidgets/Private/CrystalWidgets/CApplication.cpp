@@ -8,7 +8,7 @@ namespace CE::Widgets
 	{
 		if (IsDefaultInstance())
 			return;
-
+		
 		CE_ASSERT(instance == nullptr, "Only 1 instance of CApplication is allowed");
 		instance = this;
 	}
@@ -45,10 +45,10 @@ namespace CE::Widgets
 		
 	}
 
-	CWindow* CApplication::CreateWindow(const String& name, const String& title)
+	CWindow* CApplication::CreateWindow(const String& name, const String& title, PlatformWindow* nativeWindow)
 	{
 		CWindow* window = CreateObject<CWindow>(this, name);
-		window->SetPlatformWindow(PlatformApplication::Get()->GetMainWindow());
+		window->SetPlatformWindow(nativeWindow);
 		return window;
 	}
 

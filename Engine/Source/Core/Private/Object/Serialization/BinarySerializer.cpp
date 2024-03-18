@@ -26,7 +26,7 @@ namespace CE
 		{ TYPEID(Array<>), 0x11 }, { TYPEID(ObjectMap), 0x11 },
 		{ TYPEID(Vec2), 0x81 }, { TYPEID(Vec2i), 0x81 },
 		{ TYPEID(Vec3), 0x82 }, { TYPEID(Vec3i), 0x82 },
-		{ TYPEID(Vec4), 0x83 }, { TYPEID(Vec4i), 0x83 }, { TYPEID(Quat), 0x83 }, { TYPEID(Color), 0x83 },
+		{ TYPEID(Vec4), 0x83 }, { TYPEID(Rect), 0x83 }, { TYPEID(Vec4i), 0x83 }, { TYPEID(Quat), 0x83 }, { TYPEID(Color), 0x83 },
 		{ TYPEID(Matrix4x4), 0x84 },
 	};
 
@@ -209,6 +209,14 @@ namespace CE
 				*stream << value.y;
 				*stream << value.z;
 				*stream << value.w;
+			}
+			else if (fieldDeclId == TYPEID(Rect))
+			{
+				const Rect& value = field->GetFieldValue<Rect>(instance);
+				*stream << value.min.x;
+				*stream << value.min.y;
+				*stream << value.max.x;
+				*stream << value.max.y;
 			}
 			else if (fieldDeclId == TYPEID(Vec4i))
 			{
@@ -959,6 +967,10 @@ namespace CE
 			else if (fieldDeclId == TYPEID(Vec4))
 			{
 				field->ForceSetFieldValue<Vec4>(instance, val);
+			}
+			else if (fieldDeclId == TYPEID(Rect))
+			{
+				field->ForceSetFieldValue<Rect>(instance, Rect(val.x, val.y, val.z, val.w));
 			}
 			else if (fieldDeclId == TYPEID(Vec4i))
 			{

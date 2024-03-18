@@ -5,21 +5,27 @@ namespace CE::Widgets
     
     CWindow::CWindow()
     {
-        windowResizeDelegate = 
-            PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(
-                MemberDelegate(&Self::OnWindowSizeChanged, this));
+        if (!IsDefaultInstance())
+        {
+            windowResizeDelegate =
+                PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(
+                    MemberDelegate(&Self::OnWindowSizeChanged, this));
+        }
     }
 
     CWindow::~CWindow()
     {
-        PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeDelegate);
+        if (windowResizeDelegate != 0)
+        {
+            PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeDelegate);
+        }
     }
 
     void CWindow::OnWindowSizeChanged(PlatformWindow* window, u32 newWidth, u32 newHeight)
     {
         if (this->nativeWindow == window)
         {
-            // TODO: Window resize event
+            // TODO: Platform Window resize event
         }
     }
 

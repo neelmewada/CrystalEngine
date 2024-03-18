@@ -117,6 +117,7 @@ namespace CE::RPI
 		drawItemCount = 0;
 		createNewTextBatch = true;
 
+		rotation = 0.0;
 		borderThickness = 0.0f;
 		fillColor = Color(1, 1, 1, 1);
 		outlineColor = Color(0, 0, 0, 0);
@@ -154,6 +155,11 @@ namespace CE::RPI
 	void Renderer2D::SetBorderThickness(f32 thickness)
 	{
 		this->borderThickness = thickness;
+	}
+
+	void Renderer2D::SetRotation(f32 degrees)
+	{
+		this->rotation = degrees;
 	}
 
 	void Renderer2D::SetCursor(Vec2 position)
@@ -297,6 +303,8 @@ namespace CE::RPI
 		int totalCharactersDrawn = 0;
 		int firstDrawItemIndex = drawItemCount;
 
+		Matrix4x4 rotationMat = Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix();
+
 		if (drawBatches.IsEmpty() || createNewTextBatch)
 		{
 			createNewTextBatch = false;
@@ -365,7 +373,7 @@ namespace CE::RPI
 						// Need to multiply by 2 because final range is [-w, w] instead of [0, w] (which is double the size)
 						Vec3 prevTranslation = Vec3(prevQuadPos.x * 2, prevQuadPos.y * 2, 0);
 						
-						prevDrawItem.transform = Matrix4x4::Translation(prevTranslation) * Matrix4x4::Scale(prevDrawItem.itemSize);
+						prevDrawItem.transform = rotationMat * Matrix4x4::Translation(prevTranslation)  * Matrix4x4::Scale(prevDrawItem.itemSize);
 
 						position.x += (f32)prevGlyphLayout.advance * fontSize / atlasFontSize - (f32)prevGlyphLayout.xOffset * fontSize / atlasFontSize;
 						
@@ -389,7 +397,7 @@ namespace CE::RPI
 			drawItem.bold = 0;
 			drawItem.drawType = DRAW_Text;
 			
-			drawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+			drawItem.transform = rotationMat * Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
 			drawItem.charIndex = fontAtlas->GetCharacterIndex(c);
 
 			position.x += (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
@@ -530,7 +538,7 @@ namespace CE::RPI
 		Vec2 quadPos = cursorPosition;
 		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
 
-		drawItem.transform = Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
+		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
 		drawItem.drawType = DRAW_RoundedRect;
 		drawItem.fillColor = fillColor.ToVec4();
 		drawItem.outlineColor = outlineColor.ToVec4();

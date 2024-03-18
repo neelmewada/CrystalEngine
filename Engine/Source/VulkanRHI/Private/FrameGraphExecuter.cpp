@@ -53,6 +53,11 @@ namespace CE::Vulkan
 					return false; // TODO: Try acquiring image again next frame...
 				}
 
+				if (result != VK_SUCCESS)
+				{
+					return false;
+				}
+
 				if (i == 0)
 				{
 					// TODO: Switch to using currentSubmissionIndex instead
@@ -105,6 +110,7 @@ namespace CE::Vulkan
 
 		const Array<RHI::Scope*>& producers = frameGraph->producers;
 		constexpr u64 u64Max = NumericLimits<u64>::Max();
+		constexpr u64 acquireTimeout = 100000000; // 0.1 second
 		VkResult result = VK_SUCCESS;
 
 		if (swapChainExists)
@@ -125,7 +131,7 @@ namespace CE::Vulkan
 				Vulkan::SwapChain* swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChains[i];
 
 				result = vkAcquireNextImageKHR(device->GetHandle(),
-					swapChain->GetHandle(), u64Max,
+					swapChain->GetHandle(), acquireTimeout,
 					compiler->imageAcquiredSemaphores[currentSubmissionIndex][i],
 					//compiler->imageAcquiredFences[currentSubmissionIndex][i],
 					nullptr,
@@ -137,7 +143,12 @@ namespace CE::Vulkan
 					{
 						((Vulkan::SwapChain*)swapChainToRebuild)->RebuildSwapChain();
 					}
-					return false; // TODO: Try acquiring image again next frame...
+					return RHI::Limits::MaxSwapChainImageCount; // TODO: Try acquiring image again next frame...
+				}
+
+				if (result != VK_SUCCESS)
+				{
+					return RHI::Limits::MaxSwapChainImageCount;
 				}
 
 				if (i == 0)
@@ -872,8 +883,8 @@ namespace CE::Vulkan
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandList->commandBuffer;
 		
-		result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
-		//bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		//result = vkQueueSubmit(scope->queue->GetHandle(), 1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
+		bool success = scope->queue->Submit(1, &submitInfo, scope->renderFinishedFences[currentImageIndex]);
 
 		if (presentRequired && scopeChain.Top()->presentSwapChains.NonEmpty())
 		{

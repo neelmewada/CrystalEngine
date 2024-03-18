@@ -610,6 +610,9 @@ namespace CE
         Rect(const Vec4& vec) : left(vec.left), top(vec.top), right(vec.right), bottom(vec.bottom)
         {}
 
+        Rect(const Vec2& min, const Vec2& max) : min(min), max(max)
+        {}
+
         Rect(f32 left, f32 top, f32 right, f32 bottom) : left(left), top(top), right(right), bottom(bottom)
         {}
 

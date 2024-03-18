@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(VulkanSandbox CXX)
+project(WidgetSandbox CXX)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
