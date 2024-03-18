@@ -42,6 +42,11 @@ namespace CE::Widgets
         numFontsPushed++;
     }
 
+    Vec2 CPainter::CalculateTextSize(const String& text, f32 width)
+    {
+        return renderer->CalculateTextSize(text, width);
+    }
+
     void CPainter::SetRotation(f32 rotation)
     {
         renderer->SetRotation(rotation);

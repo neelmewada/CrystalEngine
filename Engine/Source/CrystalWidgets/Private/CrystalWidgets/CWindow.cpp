@@ -201,13 +201,15 @@ namespace CE::Widgets
 
         CPen pen = CPen(Color::FromRGBA32(48, 48, 48));
         CBrush brush = CBrush(Color::FromRGBA32(21, 21, 21));
-        CFont font = CFont("Roboto", 12, false);
+        CFont font = CFont("Roboto", 15, false);
 
         painter->SetBrush(brush);
+        f32 windowEdgeSize = 0;
 
         if (nativeWindow->IsBorderless())
         {
-            pen.SetWidth(2.0f);
+            windowEdgeSize = 2.0f;
+            pen.SetWidth(windowEdgeSize);
             painter->SetPen(pen);
         }
 
@@ -224,14 +226,16 @@ namespace CE::Widgets
         painter->SetBrush(brush);
         painter->SetFont(font);
 
-        Rect tabRect = Rect::FromSize(20, 2.5f, 100, 35);
+        Vec2 tabTitleSize = painter->CalculateTextSize(title);
+
+        Rect tabRect = Rect::FromSize(20, 2.5f, Math::Min(tabTitleSize.width + 70, 270.0f), 40);
         painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
+        painter->DrawRect(Rect::FromSize(windowEdgeSize, tabRect.bottom, w - windowEdgeSize * 2, 40));
 
         pen.SetColor(Color::White());
         painter->SetPen(pen);
 
-        painter->DrawText(title, tabRect);
-
+        painter->DrawText(title, tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
     }
 
     void CWindow::OnSubobjectAttached(Object* object)

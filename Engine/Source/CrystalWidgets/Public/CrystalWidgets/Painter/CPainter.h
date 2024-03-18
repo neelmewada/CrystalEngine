@@ -25,6 +25,8 @@ namespace CE::Widgets
 
         void SetFont(const CFont& font);
 
+        Vec2 CalculateTextSize(const String& text, f32 width = 0);
+
         void DrawText(const String& text, const Vec2& position);
         void DrawText(const String& text, const Rect& rect);
 
