@@ -117,6 +117,16 @@ namespace CE::RPI
 		drawItemCount = 0;
 		createNewTextBatch = true;
 
+		ResetToDefaults();
+
+		for (int i = 0; i < resubmitDrawData.GetSize(); i++)
+		{
+			resubmitDrawData[i] = true;
+		}
+	}
+
+	void Renderer2D::ResetToDefaults()
+	{
 		rotation = 0.0;
 		borderThickness = 0.0f;
 		fillColor = Color(1, 1, 1, 1);
@@ -125,6 +135,11 @@ namespace CE::RPI
 
 	void Renderer2D::PushFont(Name family, u32 fontSize, bool bold)
 	{
+		if (!family.IsValid())
+		{
+			family = fontStack.Top().fontName;
+		}
+
 		if (fontStack.Top().fontName != family)
 			createNewTextBatch = true;
 
@@ -315,6 +330,7 @@ namespace CE::RPI
 
 		DrawBatch& curDrawBatch = drawBatches.Top();
 		int whitespaceIdx = -1;
+		int idx = 0;
 
 		for (int i = 0; i < text.GetLength(); i++)
 		{
@@ -333,7 +349,7 @@ namespace CE::RPI
 				continue;
 			}
 
-			DrawItem2D& drawItem = drawItems[firstDrawItemIndex + i];
+			DrawItem2D& drawItem = drawItems[firstDrawItemIndex + totalCharactersDrawn];
 			
 			const RPI::FontGlyphLayout& glyphLayout = fontAtlas->GetGlyphLayout(c);
 
@@ -394,7 +410,7 @@ namespace CE::RPI
 			drawItem.outlineColor = outlineColor.ToVec4();
 			drawItem.itemSize = scale;
 			drawItem.borderThickness = 0.0f;
-			drawItem.bold = 0;
+			drawItem.bold = font.bold ? 1 : 0;
 			drawItem.drawType = DRAW_Text;
 			
 			drawItem.transform = rotationMat * Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
@@ -408,6 +424,7 @@ namespace CE::RPI
 				maxY = position.y + metrics.lineHeight * fontSize / atlasFontSize;
 
 			totalCharactersDrawn++;
+			idx++;
 		}
 
 		drawItemCount += totalCharactersDrawn;
@@ -621,13 +638,15 @@ namespace CE::RPI
 
 	const Array<DrawPacket*>& Renderer2D::FlushDrawPackets(u32 imageIndex)
 	{
-		curImageIndex = imageIndex;
+		curImageIndex = (int)imageIndex;
 
-		// - Destroy queued resources
+		// - Destroy queued resources only when they are out of usage scope
 
-		for (int i = destructionQueue.GetSize() - 1; i >= 0; i--)
+		for (int i = (int)destructionQueue.GetSize() - 1; i >= 0; i--)
 		{
-			if (destructionQueue[i].imageIndex == imageIndex)
+			destructionQueue[i].frameCounter++;
+
+			if (destructionQueue[i].frameCounter > (int)RHI::Limits::MaxSwapChainImageCount * 2)
 			{
 				delete destructionQueue[i].buffer;
 				delete destructionQueue[i].srg;
@@ -652,14 +671,16 @@ namespace CE::RPI
 			material->FlushProperties(imageIndex);
 		}
 
-		// - Update Draw Lists -
+		// - Update Item Buffer -
 
-		if (drawItemsBuffer[imageIndex] != nullptr)
+		if (drawItemsBuffer[imageIndex] != nullptr && resubmitDrawData[imageIndex])
 		{
+			resubmitDrawData[imageIndex] = false;
+
 			if (drawItemsBuffer[imageIndex]->GetBufferSize() < drawItemCount * sizeof(DrawItem2D))
 			{
 				// TODO: Implement buffer size expansion
-				//IncrementCharacterDrawItemBuffer(drawItemCount + 10);
+				IncrementCharacterDrawItemBuffer(drawItemCount + 10);
 			}
 			
 			void* data;
@@ -685,7 +706,10 @@ namespace CE::RPI
 
 	void Renderer2D::IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd)
 	{
-		numCharactersToAdd = Math::Max(numCharactersToAdd, drawItemStorageIncrement);
+		u32 curNumItems = drawItemsBuffer[0]->GetBufferSize() / sizeof(DrawItem2D);
+		u32 incrementCount = curNumItems * 3 / 2; // Add 50% to the storage
+
+		numCharactersToAdd = Math::Max(numCharactersToAdd, incrementCount);
 
 		for (int i = 0; i < numFramesInFlight; i++)
 		{

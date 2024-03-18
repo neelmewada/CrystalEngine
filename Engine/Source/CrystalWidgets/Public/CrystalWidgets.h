@@ -11,10 +11,21 @@
 #include "yoga/YGStyle.h"
 
 #include "CrystalWidgets/CApplication.h"
+
+// Painting
+#include "CrystalWidgets/Painter/CPen.h"
+#include "CrystalWidgets/Painter/CBrush.h"
+#include "CrystalWidgets/Painter/CFont.h"
+#include "CrystalWidgets/Painter/CPainter.h"
+
+#include "CrystalWidgets/Event/CEventType.h"
+#include "CrystalWidgets/Event/CEvent.h"
+
+// Widgets
 #include "CrystalWidgets/CWidget.h"
 #include "CrystalWidgets/CWindow.h"
 
-namespace CE
+namespace CE::Widgets
 {
     
 }

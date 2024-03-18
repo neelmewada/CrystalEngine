@@ -104,8 +104,6 @@ namespace CE
 		RHI::gDynamicRHI->Initialize();
 		RHI::gDynamicRHI->PostInitialize();
 
-		CApplication::Get()->Initialize();
-
 		gEngine->Initialize();
 
 		main->Init(mainWindow);
@@ -129,8 +127,6 @@ namespace CE
 			// App & Input Tick
 			app->Tick();
 			InputManager::Get().Tick();
-
-			CApplication::Get()->Tick();
 
 			// Engine tick
 			//gEngine->Tick(deltaTime);
@@ -172,9 +168,6 @@ namespace CE
 		main->Shutdown();
 
 		gEngine->PreShutdown();
-
-		CApplication::Get()->Shutdown();
-		CApplication::Get()->Destroy();
 
 		RHI::gDynamicRHI->PreShutdown();
 

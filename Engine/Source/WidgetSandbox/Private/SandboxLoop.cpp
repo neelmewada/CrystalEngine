@@ -76,6 +76,7 @@ namespace CE
 		ModuleManager::Get().LoadModule("VulkanRHI");
 		ModuleManager::Get().LoadModule("CoreRPI");
 		ModuleManager::Get().LoadModule("CoreShader");
+		ModuleManager::Get().LoadModule("CrystalWidgets");
 		ModuleManager::Get().LoadModule("System");
 		ModuleManager::Get().LoadModule("GameSystem");
 
@@ -104,9 +105,26 @@ namespace CE
 		RHI::gDynamicRHI->Initialize();
 		RHI::gDynamicRHI->PostInitialize();
 
-		CApplication::Get()->Initialize();
-
 		gEngine->Initialize();
+
+		auto assetManager = gEngine->GetAssetManager();
+
+		auto renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
+
+		auto fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
+		auto poppinsFont = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Poppins");
+
+		auto atlasData = fontAsset->GetAtlasData();
+
+		CApplicationInitInfo appInitInfo{};
+		appInitInfo.draw2dShader = renderer2dShader->GetOrCreateRPIShader(0);
+		appInitInfo.defaultFont = atlasData;
+		appInitInfo.defaultFontName = "Roboto";
+		appInitInfo.numFramesInFlight = 2;
+
+		CApplication::Get()->Initialize(appInitInfo);
+
+		CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
 
 		main->Init(mainWindow);
 
@@ -130,6 +148,7 @@ namespace CE
 			app->Tick();
 			InputManager::Get().Tick();
 
+			// Tick Widgets app
 			CApplication::Get()->Tick();
 
 			// Engine tick
@@ -137,16 +156,6 @@ namespace CE
 
 			// Game tick
 			main->Tick(deltaTime);
-
-			if (InputManager::IsKeyDown(KeyCode::Backspace))
-			{
-				if (main->secondWindowHidden)
-					main->secondWindow->Show();
-				else
-					main->secondWindow->Hide();
-
-				main->secondWindowHidden = !main->secondWindowHidden;
-			}
 
 			previousTime = curTime;
 		}
@@ -199,6 +208,7 @@ namespace CE
 
 		ModuleManager::Get().UnloadModule("GameSystem");
 		ModuleManager::Get().UnloadModule("System");
+		ModuleManager::Get().UnloadModule("CrystalWidgets");
 		ModuleManager::Get().UnloadModule("CoreShader");
 		ModuleManager::Get().UnloadModule("CoreRPI");
 		ModuleManager::Get().UnloadModule("VulkanRHI");

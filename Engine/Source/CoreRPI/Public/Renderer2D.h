@@ -52,6 +52,8 @@ namespace CE::RPI
 
         void Begin();
 
+        void ResetToDefaults();
+
         void PushFont(Name family, u32 fontSize = 16, bool bold = false);
         void PopFont();
 
@@ -78,8 +80,6 @@ namespace CE::RPI
 
     private:
 
-        struct TextDrawRequest;
-        struct TextDrawBatch;
         struct DrawBatch;
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
 
@@ -89,7 +89,7 @@ namespace CE::RPI
 
         inline void QueueDestroy(RHI::Buffer* buffer)
         {
-            destructionQueue.Add({ .buffer = buffer, .imageIndex = curImageIndex });
+            destructionQueue.Add({ .buffer = buffer });
         }
 
         RPI::Material* GetOrCreateMaterial(const DrawBatch& textDrawBatch);
@@ -139,24 +139,6 @@ namespace CE::RPI
             Vec2 size{};
         };
 
-        struct TextDrawBatch
-        {
-            FontInfo font{};
-            Color foreground{};
-            Color background{};
-            u32 firstCharDrawItemIndex = 0;
-            u32 charDrawItemCount = 0;
-
-            inline SIZE_T GetMaterialHash() const
-            {
-                SIZE_T hash = font.fontName.GetHashValue();
-                CombineHash(hash, font.bold);
-                CombineHash(hash, foreground);
-                CombineHash(hash, background);
-                return hash;
-            }
-        };
-
         struct DrawBatch
         {
             FontInfo font{};
@@ -176,7 +158,7 @@ namespace CE::RPI
             RHI::Buffer* buffer = nullptr;
             RPI::Material* material = nullptr;
             RHI::ShaderResourceGroup* srg = nullptr;
-            int imageIndex = 0;
+            int frameCounter = 0;
         };
 
         // - Config -
@@ -214,15 +196,13 @@ namespace CE::RPI
 
         StaticArray<RHI::Buffer*, MaxImageCount> drawItemsBuffer{};
         RHI::ShaderResourceGroup* drawItemSrg = nullptr;
-        //Array<TextDrawBatch> textDrawBatches{};
-        //Array<CharacterDrawItem> charDrawItems{};
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
         u32 drawItemCount = 0;
         bool createNewTextBatch = false;
 
         Array<RHI::DrawPacket*> drawPackets{};
-        bool rebuildPackets = true;
+        StaticArray<bool, MaxImageCount> resubmitDrawData = {};
         
         // - Utils -
 

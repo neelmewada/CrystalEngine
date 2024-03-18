@@ -326,7 +326,7 @@ public:\
     constexpr static bool IsStruct = true;\
 	static CE::String StaticPackage();\
 	static CE::String StaticModule();\
-	~Struct()\
+	virtual ~Struct()\
 	{\
 		CE::Object::UnbindAllSignals(this);\
 		if constexpr (TStructReleaseFunction<Struct>::Value)\

@@ -131,9 +131,6 @@ Shader "2D/SDF Geometry"
             // r.w = roundness bottom-left
             inline float SDFRoundRect(in float2 p, in float2 b, in float4 r ) 
             {
-                //p -= float2(0.5, 0.5);
-                //b *= float2(0.5, 0.5);
-
                 r.xy = (p.x>0.0)?r.xy : r.zw;
                 r.x  = (p.y>0.0)?r.x  : r.y;
                 float2 q = abs(p)-b+r.x;
@@ -236,23 +233,6 @@ Shader "2D/SDF Geometry"
                 case DRAW_Rect:
                     return RenderRect(info, input.uv);
                 case DRAW_RoundedRect:
-                    return RenderRoundedRect(info, p);
-                }
-
-                if (_DrawList[idx].drawType == DRAW_Text) // Text
-                {
-                    return RenderText(_DrawList[idx].fillColor, input.uv, _DrawList[idx].bold);
-                }
-                else if (_DrawList[idx].drawType == DRAW_Circle) // Circle
-                {
-                    return RenderCircle(info, p);
-                }
-                else if (_DrawList[idx].drawType == DRAW_Rect) // Rectangle
-                {
-                    return RenderRect(info, input.uv);
-                }
-                else if (_DrawList[idx].drawType == DRAW_RoundedRect) // Rounded Rectangle
-                {
                     return RenderRoundedRect(info, p);
                 }
 

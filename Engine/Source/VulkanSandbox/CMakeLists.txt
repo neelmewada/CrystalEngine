@@ -34,7 +34,6 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::VulkanRHI
             CE::CoreRPI
             CE::CoreShader
-            CE::CrystalWidgets
             CE::System
             CE::GameSystem
         TARGETS

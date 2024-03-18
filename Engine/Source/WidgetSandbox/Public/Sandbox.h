@@ -58,8 +58,6 @@ namespace CE
 
 		void Tick(f32 deltaTime);
 
-		void UpdateTextData();
-
 		void Shutdown();
 
 	private:
@@ -86,14 +84,6 @@ namespace CE
 		CWindow* windowMain = nullptr;
 		CWindow* windowSecond = nullptr;
 
-		// Tags
-		RHI::DrawListTag uiTag = 0;
-
-		Renderer2D* renderer2d = nullptr;
-		CE::Shader* renderer2dShader = nullptr;
-		Font* fontAsset = nullptr;
-		RPI::FontAtlasAsset* atlasData = nullptr;
-
 		PlatformWindow* secondWindow = nullptr;
 		bool secondWindowHidden = false;
 
@@ -102,11 +92,11 @@ namespace CE
 		RHI::SwapChain* swapChain2 = nullptr;
 		PlatformWindow* mainWindow = nullptr;
 
+		Array<CWindow*> widgetWindows{};
+
 		RPI::Model* chairModel = nullptr;
 
 		RHI::DrawListContext drawList{};
-
-		Array<RHI::DrawPacket*> uiDrawPackets{};
 
 		u32 width = 0;
 		u32 height = 0;

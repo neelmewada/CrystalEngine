@@ -21,6 +21,14 @@ namespace CE::Widgets
         String message{};
     };
 
+    struct CApplicationInitInfo
+    {
+        RPI::Shader* draw2dShader = nullptr;
+        Name defaultFontName = "";
+        RPI::FontAtlasAsset* defaultFont = nullptr;
+        u32 numFramesInFlight = 2;
+    };
+
     CLASS()
     class CRYSTALWIDGETS_API CApplication final : public Object, public ApplicationMessageHandler
     {
@@ -32,15 +40,31 @@ namespace CE::Widgets
 
         static CApplication* Get();
 
-        void Initialize();
+        void Initialize(const CApplicationInitInfo& initInfo);
         void Shutdown();
 
         void Tick();
-
+        
         CWindow* CreateWindow(const String& name, const String& title, PlatformWindow* nativeWindow);
+
+        void RegisterFont(Name fontName, RPI::FontAtlasAsset* fontAtlas);
+
+    crystalwidgets_internal:
+
+        RPI::Shader* draw2dShader = nullptr;
+        Name defaultFontName = "";
+        RPI::FontAtlasAsset* defaultFont = nullptr;
+        u32 numFramesInFlight = 2;
+
+        HashMap<Name, RPI::FontAtlasAsset*> registeredFonts{};
 
     private:
 
+        void OnSubobjectDetached(Object* object) override;
+        void OnSubobjectAttached(Object* object) override;
+
+        FIELD(ReadOnly)
+        Array<CWindow*> windows{};
 
     };
 

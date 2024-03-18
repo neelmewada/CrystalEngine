@@ -30,8 +30,15 @@ namespace CE::Widgets
 		return instance;
 	}
 
-	void CApplication::Initialize()
+	void CApplication::Initialize(const CApplicationInitInfo& initInfo)
 	{
+		draw2dShader = initInfo.draw2dShader;
+		defaultFontName = initInfo.defaultFontName;
+		defaultFont = initInfo.defaultFont;
+		numFramesInFlight = initInfo.numFramesInFlight;
+
+		registeredFonts[defaultFontName] = initInfo.defaultFont;
+
 		PlatformApplication::Get()->AddMessageHandler(this);
 	}
 
@@ -42,7 +49,12 @@ namespace CE::Widgets
 
 	void CApplication::Tick()
 	{
-		
+		// TODO: Update and render all windows
+
+		for (CWindow* window : windows)
+		{
+			window->Tick();
+		}
 	}
 
 	CWindow* CApplication::CreateWindow(const String& name, const String& title, PlatformWindow* nativeWindow)
@@ -50,6 +62,45 @@ namespace CE::Widgets
 		CWindow* window = CreateObject<CWindow>(this, name);
 		window->SetPlatformWindow(nativeWindow);
 		return window;
+	}
+
+	void CApplication::RegisterFont(Name fontName, RPI::FontAtlasAsset* fontAtlas)
+	{
+		registeredFonts[fontName] = fontAtlas;
+
+		for (auto window : windows)
+		{
+			if (window->renderer != nullptr)
+			{
+				window->renderer->RegisterFont(fontName, fontAtlas);
+			}
+		}
+	}
+
+	void CApplication::OnSubobjectDetached(Object* object)
+	{
+		Super::OnSubobjectDetached(object);
+
+		if (!object)
+			return;
+
+		if (object->IsOfType<CWindow>())
+		{
+			windows.Remove((CWindow*)object);
+		}
+	}
+
+	void CApplication::OnSubobjectAttached(Object* object)
+	{
+		Super::OnSubobjectAttached(object);
+
+		if (!object)
+			return;
+
+		if (object->IsOfType<CWindow>())
+		{
+			windows.Add((CWindow*)object);
+		}
 	}
 
 } // namespace CE::Widgets
