@@ -1,5 +1,19 @@
 #include "WidgetSandbox.h"
 
+static const CE::String css = R"(
+.Class1 .Class2::tab:hover { /* some comment */
+	padding: 0% 0px;
+	icon: url('path/to/icon');
+	icon: url("path/to/icon");
+}
+
+CButton:hover, CLabel.SomeClass, #SomeName, CWindow > CToolBar, CTextInput[type="password"], * {
+	background: rgba(255, 255, 255, 255);
+}
+)";
+
+using namespace CE::Widgets;
+
 namespace CE
 {
 	static int counter = 0;
@@ -11,34 +25,36 @@ namespace CE
 
 		localCounter = counter++;
 		rpiSystem.Initialize();
-
+		
 		RHI::FrameSchedulerDescriptor desc{};
 		desc.numFramesInFlight = 2;
 		
 		scheduler = RHI::FrameScheduler::Create(desc);
 
 		mainWindow = window;
+		mainWindow->SetBorderless(true);
 
 		RHI::SwapChainDescriptor swapChainDesc{};
 		swapChainDesc.imageCount = 2;
 		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
-#if FORCE_SRGB
-		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_SRGB, RHI::Format::B8G8R8A8_SRGB };
-#endif
 
 		swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
-
-		swapChain2 = RHI::gDynamicRHI->CreateSwapChain(secondWindow, swapChainDesc);
 
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
 		PlatformApplication::Get()->AddMessageHandler(this);
 
 		CApplication* app = CApplication::Get();
-		widgetWindows.Add(app->CreateWindow(MODULE_NAME, MODULE_NAME, mainWindow));
-		widgetWindows.Add(app->CreateWindow("Second", "Second", secondWindow));
-		windowMain = widgetWindows[0];
-		windowSecond = widgetWindows[1];
+
+		app->LoadGlobalStyleSheet(PlatformDirectories::GetLaunchDir() / "Engine/Styles/Style.css");
+
+		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
+		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace);
+		//auto secondWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
+
+		widgetWindows.Add(mainDockSpace);
+		widgetWindows.Add(mainDockWindow);
+		//widgetWindows.Add(secondWindow);
 		
 		InitFontAtlas();
 
@@ -58,31 +74,11 @@ namespace CE
 		u32 curWidth = 0, curHeight = 0;
 		mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);
 
-		u32 curWidth2 = 0, curHeight2 = 0;
-		secondWindow->GetDrawableWindowSize(&curWidth2, &curHeight2);
-
-		if (InputManager::IsKeyDown(KeyCode::Backspace))
-		{
-			if (secondWindowHidden)
-				secondWindow->Show();
-			else
-				secondWindow->Hide();
-
-			secondWindowHidden = !secondWindowHidden;
-		}
-
 		if (width != curWidth || height != curHeight)
 		{
 			rebuild = recompile = true;
 			width = curWidth;
 			height = curHeight;
-		}
-
-		if (width2 != curWidth2 || height2 != curHeight2)
-		{
-			rebuild = recompile = true;
-			width2 = curWidth2;
-			height2 = curHeight2;
 		}
 
 		if (rebuild)
@@ -112,17 +108,16 @@ namespace CE
 		SubmitWork(imageIndex);
 
 		scheduler->EndExecution();
+
+		if (InputManager::IsKeyDown(KeyCode::Escape))
+		{
+			RequestEngineExit("USER_EXIT");
+		}
 	}
 
 	void WidgetSandbox::Shutdown()
 	{
 		delete scheduler;
-
-		for (CWindow* window : widgetWindows)
-		{
-			window->Destroy();
-		}
-		widgetWindows.Clear();
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
 
@@ -161,15 +156,14 @@ namespace CE
 		{
 			RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
 
-			attachmentDatabase.EmplaceFrameAttachment("SwapChain", swapChain);
-			attachmentDatabase.EmplaceFrameAttachment("SwapChain2", swapChain2);
+			attachmentDatabase.EmplaceFrameAttachment(mainWindow->GetTitle(), swapChain);
 
 			if (!mainWindow->IsMinimized() && mainWindow->IsShown())
 			{
-				scheduler->BeginScope(windowMain->GetName());
+				scheduler->BeginScope(mainWindow->GetTitle());
 				{
 					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-					swapChainAttachment.attachmentId = "SwapChain";
+					swapChainAttachment.attachmentId = mainWindow->GetTitle();
 					swapChainAttachment.loadStoreAction.clearValue = Vec4(0.15f, 0.15f, 0.15f, 1);
 					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
@@ -177,23 +171,6 @@ namespace CE
 					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
 
 					scheduler->PresentSwapChain(swapChain);
-				}
-				scheduler->EndScope();
-			}
-
-			if (!secondWindow->IsMinimized() && secondWindow->IsShown())
-			{
-				scheduler->BeginScope(windowSecond->GetName());
-				{
-					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-					swapChainAttachment.attachmentId = "SwapChain2";
-					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0.5f, 0, 1);
-					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-					swapChainAttachment.multisampleState.sampleCount = 1;
-					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
-
-					scheduler->PresentSwapChain(swapChain2);
 				}
 				scheduler->EndScope();
 			}
@@ -220,10 +197,7 @@ namespace CE
 		drawList.Shutdown();
 
 		RHI::DrawListMask drawListMask{};
-		for (CWindow* window : widgetWindows)
-		{
-			drawListMask.Set(window->GetDrawListTag());
-		}
+		drawListMask.Set(mainDockSpace->GetDrawListTag());
 		drawList.Init(drawListMask);
 		
 		// Add items
@@ -246,8 +220,7 @@ namespace CE
 		// Finalize
 		drawList.Finalize();
 
-		scheduler->SetScopeDrawList(windowMain->GetName(), &drawList.GetDrawListForTag(widgetWindows[0]->GetDrawListTag()));
-		scheduler->SetScopeDrawList(windowSecond->GetName(), &drawList.GetDrawListForTag(widgetWindows[1]->GetDrawListTag()));
+		scheduler->SetScopeDrawList(mainWindow->GetTitle(), &drawList.GetDrawListForTag(mainDockSpace->GetDrawListTag()));
 	}
 
 	void WidgetSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
@@ -258,8 +231,6 @@ namespace CE
 
 		if (!mainWindow->IsMinimized())
 			swapChain->Rebuild();
-		if (!secondWindow->IsMinimized())
-			swapChain2->Rebuild();
 	}
 
 	void WidgetSandbox::OnWindowDestroyed(PlatformWindow* window)

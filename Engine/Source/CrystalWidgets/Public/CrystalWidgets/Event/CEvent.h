@@ -58,7 +58,7 @@ namespace CE::Widgets
 		CEventType type{};
 
 		FIELD()
-		TypeId customType{}; // TypeId of the custom event struct
+		Struct* customType = nullptr; // Type of the custom event struct
 
 		FIELD()
 		b8 isConsumed = false;

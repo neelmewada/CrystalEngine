@@ -5,11 +5,11 @@ namespace CE::Widgets
     
     CWindow::CWindow()
     {
+        painter = CreateDefaultSubobject<CPainter>("Painter");
+
         if (!IsDefaultInstance())
         {
             title = GetName().GetString();
-
-            painter = CreateDefaultSubobject<CPainter>("Painter");
 
             windowResizeDelegate =
                 PlatformApplication::Get()->onWindowDrawableSizeChanged.AddDelegateInstance(
@@ -31,7 +31,21 @@ namespace CE::Widgets
     void CWindow::SetPlatformWindow(PlatformWindow* window)
     {
         this->nativeWindow = window;
+    }
 
+    const Array<RHI::DrawPacket*>& CWindow::FlushDrawPackets(u32 imageIndex)
+    {
+        static const Array<RHI::DrawPacket*> empty{};
+        if (!IsVisible() || !IsEnabled())
+        {
+            return empty;
+        }
+
+        return renderer->FlushDrawPackets(imageIndex);
+    }
+
+    void CWindow::ConstructWindow()
+    {
         if (renderer == nullptr)
         {
             auto app = CApplication::Get();
@@ -49,22 +63,21 @@ namespace CE::Widgets
             desc.drawItemStorageIncrement = 1'000;
 
             u32 screenWidth = 0, screenHeight = 0;
-            PlatformWindow* platformWindow = nativeWindow;
-            if (platformWindow == nullptr)
-                platformWindow = platformApp->GetMainWindow();
-            
+            PlatformWindow* platformWindow = GetRootNativeWindow();
+            CE_ASSERT(platformWindow != nullptr, "CWindow could not find a PlatformWindow in parent hierarchy!");
+
             platformWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
 
             desc.viewConstantData.viewMatrix = Matrix4x4::Identity();
-            desc.viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) * 
-                Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) * 
+            desc.viewConstantData.projectionMatrix = Matrix4x4::Translation(Vec3(-1, -1, 0)) *
+                Matrix4x4::Scale(Vec3(1.0f / screenWidth, 1.0f / screenHeight, 1)) *
                 Quat::EulerDegrees(0, 0, 0).ToMatrix();
             desc.viewConstantData.viewProjectionMatrix = desc.viewConstantData.projectionMatrix * desc.viewConstantData.viewMatrix;
             desc.viewConstantData.viewPosition = Vec4(0, 0, 0, 0);
             desc.screenSize = Vec2i(screenWidth, screenHeight);
 
             renderer = new RPI::Renderer2D(desc);
-
+            
             for (auto [family, fontAtlas] : app->registeredFonts)
             {
                 renderer->RegisterFont(family, fontAtlas);
@@ -77,24 +90,6 @@ namespace CE::Widgets
 
             OnWindowSizeChanged(nativeWindow, screenWidth, screenHeight);
         }
-    }
-
-    const Array<RHI::DrawPacket*>& CWindow::FlushDrawPackets(u32 imageIndex)
-    {
-        static const Array<RHI::DrawPacket*> empty{};
-        if (!IsVisible() || !IsEnabled())
-        {
-            return empty;
-        }
-
-        return renderer->FlushDrawPackets(imageIndex);
-    }
-
-    void CWindow::SetWindowType(CWindowType windowType)
-    {
-        this->windowType = windowType;
-
-        SetNeedsPaintRecursively(true);
     }
 
     void CWindow::OnWindowSizeChanged(PlatformWindow* window, u32 newWidth, u32 newHeight)
@@ -134,30 +129,6 @@ namespace CE::Widgets
             {
                 renderer->PushFont(CApplication::Get()->defaultFontName, 16);
 
-                // renderer->SetFillColor(Color::FromRGBA32(21, 21, 21));
-                //
-                // u32 w = 0, h = 0;
-                // nativeWindow->GetDrawableWindowSize(&w, &h);
-                //
-                // if (nativeWindow->IsBorderless())
-                // {
-                //     renderer->SetBorderThickness(2.0f);
-                //     renderer->SetOutlineColor(Color::FromRGBA32(48, 48, 48));
-                // }
-                //
-                // renderer->SetCursor(Vec2(0, 0));
-                // renderer->DrawRect(Vec2(w, h));
-                //
-                // // Draw Tab
-                //
-                // renderer->SetBorderThickness(0.0f);
-                // renderer->SetFillColor(Color::FromRGBA32(36, 36, 36));
-                // renderer->SetCursor(Vec2(20, 2.5f));
-                // renderer->DrawRoundedRect(Vec2(100, 35), Vec4(5, 5, 0, 0));
-                //
-                // renderer->SetOutlineColor(Color::White());
-                // renderer->DrawText(title, Vec2(100, 35));
-
                 auto thisPaint = CPaintEvent();
                 thisPaint.painter = painter;
                 thisPaint.sender = this;
@@ -188,54 +159,28 @@ namespace CE::Widgets
         
     }
 
+    bool CWindow::IsDockSpace()
+    {
+        return IsOfType<CDockSpace>();
+    }
+
+    PlatformWindow* CWindow::GetRootNativeWindow()
+    {
+        if (nativeWindow)
+            return nativeWindow;
+
+        for (CWindow* owner = ownerWindow; owner != nullptr; owner = owner->ownerWindow)
+        {
+            if (owner->nativeWindow != nullptr)
+                return owner->nativeWindow;
+        }
+
+        return nullptr;
+    }
+
     void CWindow::OnPaint(CPaintEvent* paintEvent)
     {
         Super::OnPaint(paintEvent);
-
-        CPainter* painter = paintEvent->painter;
-
-        u32 w = 0, h = 0;
-        nativeWindow->GetDrawableWindowSize(&w, &h);
-
-        // - Draw Background -
-
-        CPen pen = CPen(Color::FromRGBA32(48, 48, 48));
-        CBrush brush = CBrush(Color::FromRGBA32(21, 21, 21));
-        CFont font = CFont("Roboto", 15, false);
-
-        painter->SetBrush(brush);
-        f32 windowEdgeSize = 0;
-
-        if (nativeWindow->IsBorderless())
-        {
-            windowEdgeSize = 2.0f;
-            pen.SetWidth(windowEdgeSize);
-            painter->SetPen(pen);
-        }
-
-        painter->DrawRect(Rect::FromSize(0, 0, w, h));
-
-        // - Draw Tab -
-
-        pen.SetWidth(0.0f);
-        pen.SetColor(Color::Clear());
-
-        brush.SetColor(Color::FromRGBA32(36, 36, 36));
-
-        painter->SetPen(pen);
-        painter->SetBrush(brush);
-        painter->SetFont(font);
-
-        Vec2 tabTitleSize = painter->CalculateTextSize(title);
-
-        Rect tabRect = Rect::FromSize(20, 2.5f, Math::Min(tabTitleSize.width + 70, 270.0f), 40);
-        painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
-        painter->DrawRect(Rect::FromSize(windowEdgeSize, tabRect.bottom, w - windowEdgeSize * 2, 40));
-
-        pen.SetColor(Color::White());
-        painter->SetPen(pen);
-
-        painter->DrawText(title, tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
     }
 
     void CWindow::OnSubobjectAttached(Object* object)

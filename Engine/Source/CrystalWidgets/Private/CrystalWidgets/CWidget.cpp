@@ -30,9 +30,10 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
-		if (object->IsOfType<CWidget>() && !IsOfType<CWindow>())
+		if (object->IsOfType<CWidget>())
 		{
-			((CWidget*)object)->ownerWindow = ownerWindow;
+			CWidget* widget = (CWidget*)object;
+			widget->ownerWindow = ownerWindow;
 		}
 	}
 
@@ -43,9 +44,10 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
-		if (object->IsOfType<CWidget>() && !IsOfType<CWindow>())
+		if (object->IsOfType<CWidget>())
 		{
-			((CWidget*)object)->ownerWindow = nullptr;
+			CWidget* widget = (CWidget*)object;
+			widget->ownerWindow = nullptr;
 		}
 	}
 
@@ -61,6 +63,26 @@ namespace CE::Widgets
 		}
 
 		return false;
+	}
+
+	void CWidget::AddSubWidget(CWidget* widget)
+	{
+		AttachSubobject(widget);
+
+		attachedWidgets.Add(widget);
+		widget->parent = this;
+
+		SetNeedsPaint();
+	}
+
+	void CWidget::RemoveSubWidget(CWidget* widget)
+	{
+		DetachSubobject(widget);
+
+		attachedWidgets.Remove(widget);
+		widget->parent = nullptr;
+
+		SetNeedsPaint();
 	}
 
 	void CWidget::SetNeedsPaintRecursively(bool newValue)
@@ -81,28 +103,7 @@ namespace CE::Widgets
 
 	void CWidget::OnPaint(CPaintEvent* paintEvent)
 	{
-		// TODO: Temporary code only for testing
-		CPainter* painter = paintEvent->painter;
-
-		// CPen pen;
-		// pen.SetColor(Color(1, 1, 0, 1));
-		// pen.SetWidth(5.0);
-		// painter->SetPen(pen);
-		//
-		// CBrush brush;
-		// brush.SetColor(Color(1, 1, 1, 1));
-		//
-		// painter->SetBrush(brush);
-		//
-		// painter->DrawRoundedRect(Rect(50, 50, 200, 100), Vec4(5, 10, 15, 20));
-		//
-		// CFont font{};
-		// font.SetFamily("Poppins");
-		// font.SetSize(14);
-		// font.SetBold(false);
-		//
-		// painter->SetFont(font);
-		// painter->DrawText("This is first sentence. This is second sentence.\nThis is third sentence.\nThis is fourth sentence.", Vec2(0, 100));
+		
 	}
 
 	void CWidget::HandleEvent(CEvent* event)
@@ -111,11 +112,10 @@ namespace CE::Widgets
 			return;
 
 		// Handle event for this widget
-
 		if (event->type == CEventType::PaintEvent)
 		{
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
-			if (paintEvent->painter != nullptr)
+			if (paintEvent->painter != nullptr && CanPaint())
 			{
 				paintEvent->painter->Reset();
 				OnPaint(paintEvent);

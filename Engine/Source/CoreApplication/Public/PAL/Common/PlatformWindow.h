@@ -24,6 +24,8 @@ namespace CE
 
 		virtual WindowHandle GetOSNativeHandle() = 0;
 
+        virtual String GetTitle() = 0;
+
         virtual void Show() = 0;
         virtual void Hide() = 0;
 
@@ -31,6 +33,7 @@ namespace CE
 
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) = 0;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) = 0;
+        virtual Vec2i GetDrawableWindowSize() = 0;
 
         virtual VkSurfaceKHR CreateVulkanSurface(VkInstance instance) = 0;
 

@@ -7,11 +7,20 @@
 
 // Yoga
 #include "yoga/Yoga.h"
-#include "yoga/YGNode.h"
-#include "yoga/YGStyle.h"
 
 #include "CrystalWidgets/CApplication.h"
-#include "CrystalWidgets/CNativeWindow.h"
+
+// Style
+#include "CrystalWidgets/Style/FlexEnums.h"
+#include "CrystalWidgets/Style/CStyle.h"
+#include "CrystalWidgets/Style/CStyleSheet.h"
+
+// CSS
+#include "CrystalWidgets/Style/CSS/CSSParserToken.h"
+#include "CrystalWidgets/Style/CSS/CSSTokenizer.h"
+#include "CrystalWidgets/Style/CSS/CSSSelector.h"
+#include "CrystalWidgets/Style/CSS/CSSStyleSheet.h"
+#include "CrystalWidgets/Style/CSS/CSSParser.h"
 
 // Painting
 #include "CrystalWidgets/Painter/CPen.h"
@@ -24,7 +33,9 @@
 
 // Widgets
 #include "CrystalWidgets/CWidget.h"
-#include "CrystalWidgets/CWindow.h"
+#include "CrystalWidgets/Window/CWindow.h"
+#include "CrystalWidgets/Window/CDockSpace.h"
+#include "CrystalWidgets/Window/CDockWindow.h"
 
 namespace CE::Widgets
 {

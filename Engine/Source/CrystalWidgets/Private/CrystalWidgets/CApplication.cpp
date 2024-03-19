@@ -78,6 +78,16 @@ namespace CE::Widgets
 		}
 	}
 
+	void CApplication::SetGlobalStyleSheet(CStyleSheet* globalStyleSheet)
+	{
+		this->globalStyleSheet = globalStyleSheet;
+	}
+
+	void CApplication::LoadGlobalStyleSheet(const IO::Path& path)
+	{
+		globalStyleSheet = CSSStyleSheet::Load(path, this);
+	}
+
 	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)
 	{
 		for (CWindow* window : windows)

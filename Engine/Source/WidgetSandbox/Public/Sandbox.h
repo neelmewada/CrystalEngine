@@ -86,18 +86,17 @@ namespace CE
 		bool resubmit = true;
 
 		// Widgets
-		CWindow* windowMain = nullptr;
-		CWindow* windowSecond = nullptr;
+		// Root windows that represent a native PlatformWindow directly
+		Array<CWindow*> rootWindows{};
+		Array<CWindow*> widgetWindows{};
 
-		PlatformWindow* secondWindow = nullptr;
-		bool secondWindowHidden = false;
+		CDockSpace* mainDockSpace = nullptr;
+		CDockWindow* mainDockWindow = nullptr;
 
 		RHI::FrameScheduler* scheduler = nullptr;
 		RHI::SwapChain* swapChain = nullptr;
 		RHI::SwapChain* swapChain2 = nullptr;
 		PlatformWindow* mainWindow = nullptr;
-
-		Array<CWindow*> widgetWindows{};
 
 		RPI::Model* chairModel = nullptr;
 

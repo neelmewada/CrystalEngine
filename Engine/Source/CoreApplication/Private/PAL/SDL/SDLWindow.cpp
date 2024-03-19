@@ -109,6 +109,18 @@ namespace CE
 #endif
 	}
 
+	Vec2i SDLPlatformWindow::GetDrawableWindowSize()
+	{
+		int w = 0, h = 0;
+#if PAL_TRAIT_VULKAN_SUPPORTED
+		SDL_Vulkan_GetDrawableSize(handle, &w, &h);
+		return Vec2i(w, h);
+#else
+		SDL_GetWindowSize(handle, &w, &h);
+		return Vec2i(w, h);
+#endif
+	}
+
 	void SDLPlatformWindow::SetResizable(bool resizable)
 	{
 		SDL_SetWindowResizable(handle, resizable ? SDL_TRUE : SDL_FALSE);
@@ -183,6 +195,11 @@ namespace CE
 #else
 #   error Platform window handle not specified
 #endif
+	}
+
+	String SDLPlatformWindow::GetTitle()
+	{
+		return SDL_GetWindowTitle(handle);
 	}
 
 	void SDLPlatformWindow::Show()

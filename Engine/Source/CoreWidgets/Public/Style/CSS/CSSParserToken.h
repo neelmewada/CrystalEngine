@@ -25,6 +25,7 @@ namespace CE::Widgets
 		StringToken,
 		NumberToken,
 		HyphenToken, ExclamationToken,
+		TildeToken,
 	};
 	ENUM_CLASS_FLAGS(CSSParserTokenType);
 

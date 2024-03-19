@@ -94,11 +94,9 @@ namespace CE
 		gDefaultWindowHeight = 720;
 
 		PlatformWindow* mainWindow = app->InitMainWindow(MODULE_NAME, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
+		mainWindow->SetBorderless(true);
 
 		main = new WidgetSandbox();
-
-		main->secondWindow = app->CreatePlatformWindow("Test Window", 512, 512, false, false);
-		main->secondWindow->SetBorderless(true);
 
 		RHI::gDynamicRHI = new Vulkan::VulkanRHI();
 		

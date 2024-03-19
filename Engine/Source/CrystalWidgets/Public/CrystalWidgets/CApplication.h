@@ -4,6 +4,7 @@ namespace CE::Widgets
 {
     class CWidget;
     class CWindow;
+    class CStyleSheet;
 
     class CWidgetException : public std::exception
     {
@@ -49,6 +50,12 @@ namespace CE::Widgets
 
         void RegisterFont(Name fontName, RPI::FontAtlasAsset* fontAtlas);
 
+        void SetGlobalStyleSheet(CStyleSheet* globalStyleSheet);
+
+        CStyleSheet* GetGlobalStyleSheet() const { return globalStyleSheet; }
+
+        void LoadGlobalStyleSheet(const IO::Path& path);
+
     crystalwidgets_internal:
 
         void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
@@ -67,6 +74,9 @@ namespace CE::Widgets
 
         FIELD(ReadOnly)
         Array<CWindow*> windows{};
+
+        FIELD()
+        CStyleSheet* globalStyleSheet = nullptr;
 
     };
 

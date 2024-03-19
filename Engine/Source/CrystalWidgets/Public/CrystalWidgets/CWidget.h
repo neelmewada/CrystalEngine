@@ -29,6 +29,16 @@ namespace CE::Widgets
 
         bool NeedsPaint();
 
+        void AddSubWidget(CWidget* widget);
+        void RemoveSubWidget(CWidget* widget);
+
+        u32 GetSubWidgetCount() const { return attachedWidgets.GetSize(); }
+        CWidget* GetSubWidget(u32 index) const { return attachedWidgets[index]; }
+
+        u32 GetSubWidgetIndex(CWidget* widget) const { return attachedWidgets.IndexOf(widget); }
+
+        bool StyleClassExists(const Name& name) const { return styleClasses.Exists(name); }
+
     protected:
 
         void SetNeedsPaintRecursively(bool newValue = false);
@@ -70,9 +80,23 @@ namespace CE::Widgets
         FIELD()
         b8 needsLayout = true;
 
+        FIELD()
+        b8 needsStyle = true;
+
+        FIELD()
+		CStateFlag stateFlags{};
+
+		FIELD()
+		CSubControl subControl = CSubControl::None;
+
+        FIELD()
+        Array<Name> styleClasses{};
+
     crystalwidgets_internal:
 
         YGNodeRef node = nullptr;
+
+        CStyle computedStyle{};
 
     private:
 

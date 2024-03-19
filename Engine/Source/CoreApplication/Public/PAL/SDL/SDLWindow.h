@@ -13,6 +13,7 @@ namespace CE
 
         virtual void* GetUnderlyingHandle() override;
 		virtual WindowHandle GetOSNativeHandle() override;
+        virtual String GetTitle() override;
 
         void Show() override;
 
@@ -22,6 +23,7 @@ namespace CE
 
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) override;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) override;
+        virtual Vec2i GetDrawableWindowSize() override;
 
 		virtual void SetResizable(bool resizable) override;
 

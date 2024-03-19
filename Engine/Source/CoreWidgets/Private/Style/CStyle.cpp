@@ -302,14 +302,14 @@ namespace CE::Widgets
 		{ "col-gap", CStylePropertyType::ColumnGap }, { "column-gap", CStylePropertyType::ColumnGap },
 	};
 
-	COREWIDGETS_API CStylePropertyType StylePropertyTypeFromString(const String& in)
+	COREWIDGETS_API CStylePropertyType StylePropertyTypeFromString(const String& string)
     {
-		if (!stringToStylePropertyTypeMap.KeyExists(in))
+		if (!stringToStylePropertyTypeMap.KeyExists(string))
 		{
-			String pascalCase = in.ToPascalCase();
+			String pascalCase = string.ToPascalCase();
 			return GetStaticEnum<CStylePropertyType>()->GetConstantValue<CStylePropertyType>(pascalCase);
 		}
-		return stringToStylePropertyTypeMap[in];
+		return stringToStylePropertyTypeMap[string];
 	}
 
 	static HashMap<CStylePropertyType, EnumType*> propertyTypeToEnumMap{

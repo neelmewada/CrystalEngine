@@ -38,7 +38,9 @@ ce_add_target(${PROJECT_NAME} CONSOLEAPP
             CE::System
             CE::GameSystem
         TARGETS
-            Config EngineAssets
+            Config 
+            EngineAssets 
+            EngineStyles
     RUNTIME_DEPENDENCIES
 
 )

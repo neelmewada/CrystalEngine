@@ -9,7 +9,6 @@ namespace CE::Widgets
 	{
 		struct CSSNode
 		{
-
 			Array<CSSNode*> children{};
 		};
 

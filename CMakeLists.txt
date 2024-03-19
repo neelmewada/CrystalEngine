@@ -28,6 +28,7 @@ include(CMake/Assets.cmake)
 include(CMake/Tests.cmake)
 include(CMake/ConfigIni.cmake)
 include(CMake/Shader.cmake)
+include(CMake/Styles.cmake)
 
 
 # Import 3rd Party libraries
