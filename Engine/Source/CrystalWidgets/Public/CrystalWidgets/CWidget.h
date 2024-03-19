@@ -27,7 +27,13 @@ namespace CE::Widgets
 
         void SetNeedsPaint() { needsPaint = true; }
 
+        void SetNeedsLayout();
+
+        void SetNeedsStyle();
+
         bool NeedsPaint();
+
+        bool NeedsStyle();
 
         void AddSubWidget(CWidget* widget);
         void RemoveSubWidget(CWidget* widget);
@@ -38,6 +44,57 @@ namespace CE::Widgets
         u32 GetSubWidgetIndex(CWidget* widget) const { return attachedWidgets.IndexOf(widget); }
 
         bool StyleClassExists(const Name& name) const { return styleClasses.Exists(name); }
+
+        void UpdateStyleIfNeeded();
+
+        // - Style API -
+
+        inline const CStyle& GetComputedStyle()
+        {
+            return computedStyle;
+        }
+
+        inline u32 GetStyleClassesCount() const
+        {
+            return styleClasses.GetSize();
+        }
+
+        inline const Name& GetStyleClass(u32 index) const
+        {
+            return styleClasses[index];
+        }
+
+        inline void AddStyleClass(const String& styleClass)
+        {
+            if (!StyleClassExists(styleClass))
+            {
+                styleClasses.Add(styleClass);
+                SetNeedsStyle();
+                SetNeedsLayout();
+            }
+        }
+
+        inline void AddStyleClasses(const Array<String>& styleClasses)
+        {
+            for (const auto& styleClass : styleClasses)
+            {
+                AddStyleClass(styleClass);
+            }
+        }
+
+        inline void RemoveStyleClass(const String& styleClass)
+        {
+            if (styleClasses.Remove(styleClass))
+            {
+                SetNeedsStyle();
+                SetNeedsLayout();
+            }
+        }
+
+        inline bool StyleClassExists(const String& styleClass) const
+        {
+            return styleClasses.Exists(styleClass);
+        }
 
     protected:
 
@@ -91,6 +148,9 @@ namespace CE::Widgets
 
         FIELD()
         Array<Name> styleClasses{};
+
+        FIELD()
+        CStyleSheet* styleSheet = nullptr;
 
     crystalwidgets_internal:
 

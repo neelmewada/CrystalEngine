@@ -10,13 +10,15 @@ namespace CE::Widgets
 
 		CStyle result{};
 
+		CStyleSheet* globalStyleSheet = CApplication::Get()->GetGlobalStyleSheet();
+
 		if (parent != nullptr && parent != this)
 		{
 			result.ApplyProperties(parent->SelectStyle(widget, state, subControl));
 		}
-		else if (parent == nullptr && CApplication::Get()->GetGlobalStyleSheet() != this)
+		else if (parent == nullptr && globalStyleSheet != this && globalStyleSheet != nullptr)
 		{
-			result.ApplyProperties(CApplication::Get()->GetGlobalStyleSheet()->SelectStyle(widget, state, subControl));
+			result.ApplyProperties(globalStyleSheet->SelectStyle(widget, state, subControl));
 		}
 
 		for (auto& rule : rules)

@@ -22,7 +22,7 @@ namespace CE::Widgets
 
 		if (subObject == nullptr || !subObject->IsOfType<CStyleSheet>())
 			return;
-
+		
 		CStyleSheet* subStylesheet = (CStyleSheet*)subObject;
 		subStylesheet->parent = this;
 	}
