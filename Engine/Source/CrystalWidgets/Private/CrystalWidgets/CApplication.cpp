@@ -94,6 +94,8 @@ namespace CE::Widgets
 		{
 			if (window->nativeWindow == nativeWindow)
 			{
+				window->SetNeedsStyle();
+				window->SetNeedsLayout();
 				window->SetNeedsPaint();
 			}
 		}

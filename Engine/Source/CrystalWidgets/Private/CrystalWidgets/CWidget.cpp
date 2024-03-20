@@ -2,11 +2,29 @@
 
 namespace CE::Widgets
 {
+	YGSize CWidget::MeasureFunctionCallback(YGNodeConstRef nodeRef,
+		float width,
+		YGMeasureMode widthMode,
+		float height,
+		YGMeasureMode heightMode)
+	{
+		CWidget* widget = (CWidget*)YGNodeGetContext(nodeRef);
+		if (widget == nullptr)
+			return YGSize();
+
+		auto size = widget->CalculateIntrinsicSize(width, height);
+		return YGSize{ size.x, size.y };
+	}
 
 	CWidget::CWidget()
 	{
 		node = YGNodeNew();
 		YGNodeSetContext(node, this);
+		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+
+		detachedNode = YGNodeNew();
+		YGNodeSetContext(detachedNode, this);
+		YGNodeSetMeasureFunc(detachedNode, MeasureFunctionCallback);
 
 		this->styleSheet = CreateDefaultSubobject<CSSStyleSheet>("StyleSheet");
 	}
@@ -15,6 +33,9 @@ namespace CE::Widgets
 	{
 		YGNodeFree(node);
 		node = nullptr;
+
+		YGNodeFree(detachedNode);
+		detachedNode = nullptr;
 	}
 
 	void CWidget::OnAfterConstruct()
@@ -32,11 +53,35 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
-		if (object->IsOfType<CWidget>())
+		// DockSpace has its own SubWidget logic
+		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>())
 		{
 			CWidget* widget = (CWidget*)object;
+			attachedWidgets.Add(widget);
+			widget->parent = this;
 			widget->ownerWindow = ownerWindow;
+
+			if (widget->IsLayoutCalculationRoot())
+			{
+				// SubWidget requires independent layout calculation for its children.
+				// Ex: Child window, Splitter view, etc. Insert a new root (detached) node for that.
+				YGNodeSetMeasureFunc(node, nullptr);
+
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, widget->detachedNode, childCount);
+			}
+			else
+			{
+				YGNodeSetMeasureFunc(node, nullptr);
+
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, widget->node, childCount);
+			}
 		}
+
+		SetNeedsStyle();
+		SetNeedsLayout();
+		SetNeedsPaint();
 	}
 
 	void CWidget::OnSubobjectDetached(Object* object)
@@ -46,20 +91,68 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
-		if (object->IsOfType<CWidget>())
+		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>())
 		{
 			CWidget* widget = (CWidget*)object;
+			widget->parent = nullptr;
+			attachedWidgets.Remove(widget);
 			widget->ownerWindow = nullptr;
+
+			auto childCount = YGNodeGetChildCount(node);
+			for (int i = 0; i < childCount; i++)
+			{
+				auto childNodeRef = YGNodeGetChild(node, i);
+				CWidget* ctx = (CWidget*)YGNodeGetContext(childNodeRef);
+				if (ctx != nullptr && ctx == widget)
+				{
+					YGNodeRemoveChild(node, childNodeRef);
+					break;
+				}
+			}
+
+			childCount = YGNodeGetChildCount(node);
+			if (childCount == 0)
+			{
+				YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+			}
 		}
+
+		SetNeedsStyle();
+		SetNeedsLayout();
+		SetNeedsPaint();
+	}
+
+	bool CWidget::IsWindow()
+	{
+		return IsOfType<CWindow>();
 	}
 
 	void CWidget::SetNeedsLayout()
 	{
 		needsLayout = true;
+		if (YGNodeGetChildCount(node) == 0)
+		{
+			if (!YGNodeHasMeasureFunc(node))
+			{
+				YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+			}
+
+			YGNodeMarkDirty(node);
+		}
 
 		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
 		{
 			attachedWidgets[i]->SetNeedsLayout();
+		}
+	}
+
+	void CWidget::ClearNeedsLayout()
+	{
+		needsLayout = false;
+
+		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
+		{
+			attachedWidgets[i]->ClearNeedsLayout();
 		}
 	}
 
@@ -89,16 +182,70 @@ namespace CE::Widgets
 
 	bool CWidget::NeedsStyle()
 	{
-		if (needsStyle)
-			return true;
+		return needsStyle;
+	}
 
-		for (auto widget : attachedWidgets)
+	bool CWidget::NeedsLayout()
+	{
+		return needsLayout;
+	}
+
+	void CWidget::UpdateLayoutIfNeeded()
+	{
+		if (NeedsLayout())
 		{
-			if (widget != this && widget != nullptr && widget->NeedsStyle())
-				return true;
-		}
+			UpdateStyleIfNeeded();
 
-		return false;
+			Vec2 availableSize = Vec2(YGUndefined, YGUndefined);
+
+			if (IsOfType<CWindow>())
+			{
+				CWindow* window = (CWindow*)this;
+				CWindow* parentWindow = nullptr;
+				if (window->parent && window->parent->IsOfType<CWindow>())
+					parentWindow = (CWindow*)window->parent;
+
+				PlatformWindow* nativeWindow = window->nativeWindow;
+
+				if (nativeWindow)
+				{
+					u32 w, h;
+					nativeWindow->GetWindowSize(&w, &h);
+					window->windowSize = Vec2(w, h);
+					availableSize = window->windowSize;
+				}
+				else if (parentWindow)
+				{
+					window->windowSize = parentWindow->windowSize - 
+						Vec2(parentWindow->rootPadding.left + parentWindow->rootPadding.right,
+							parentWindow->rootPadding.top + parentWindow->rootPadding.bottom);
+					availableSize = window->windowSize;
+				}
+			}
+
+			if (parent)
+			{
+				Vec2 parentSize = parent->GetComputedLayoutSize();
+				availableSize = parentSize -
+					Vec2(parent->rootPadding.left + parent->rootPadding.right,
+						parent->rootPadding.top + parent->rootPadding.bottom);
+			}
+
+			if (IsLayoutCalculationRoot()) // Found a widget with independent layout calculation
+			{
+				YGNodeCalculateLayout(node, availableSize.width, availableSize.height, YGDirectionLTR);
+			}
+
+			Vec2 pos = GetComputedLayoutTopLeft();
+			Vec2 size = GetComputedLayoutSize();
+
+			for (CWidget* widget : attachedWidgets)
+			{
+				widget->UpdateLayoutIfNeeded();
+			}
+
+			needsLayout = false;
+		}
 	}
 
 	void CWidget::UpdateStyleIfNeeded()
@@ -106,11 +253,33 @@ namespace CE::Widgets
 		if (!NeedsStyle())
 			return;
 
-		YGNodeReset(node);
+		SetNeedsStyle();
+		
+		CStyle prevComputedStyle = computedStyle;
 		computedStyle = {};
+
+		if (parent != nullptr)
+		{
+			const auto& parentComputedStyle = parent->computedStyle;
+			const auto& inheritedProperties = CStyle::GetInheritedProperties();
+			for (auto property : inheritedProperties)
+			{
+				if (parentComputedStyle.properties.KeyExists(property))
+				{
+					computedStyle.properties[property] = parentComputedStyle.properties.Get(property);
+				}
+			}
+		}
 
 		auto selectStyle = styleSheet->SelectStyle(this, stateFlags, subControl);
 		computedStyle.ApplyProperties(selectStyle);
+
+		bool layoutChanged = computedStyle.CompareLayoutProperties(prevComputedStyle);
+
+		if (layoutChanged)
+		{
+			CE_LOG(Info, All, "Layout changed!");
+		}
 
 		for (const auto& [property, value] : selectStyle.properties)
 		{
@@ -376,27 +545,24 @@ namespace CE::Widgets
 			}
 		}
 
+		needsStyle = false;
+
+		for (CWidget* child : attachedWidgets)
+		{
+			child->UpdateStyleIfNeeded();
+		}
+
 		SetNeedsLayout();
 	}
 
 	void CWidget::AddSubWidget(CWidget* widget)
 	{
 		AttachSubobject(widget);
-
-		attachedWidgets.Add(widget);
-		widget->parent = this;
-
-		SetNeedsPaint();
 	}
 
 	void CWidget::RemoveSubWidget(CWidget* widget)
 	{
 		DetachSubobject(widget);
-
-		attachedWidgets.Remove(widget);
-		widget->parent = nullptr;
-
-		SetNeedsPaint();
 	}
 
 	void CWidget::SetNeedsPaintRecursively(bool newValue)
@@ -420,7 +586,13 @@ namespace CE::Widgets
 
 	void CWidget::OnPaint(CPaintEvent* paintEvent)
 	{
-		
+		CPainter* painter = paintEvent->painter;
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::Background))
+		{
+			Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
+			
+		}
 	}
 
 	void CWidget::HandleEvent(CEvent* event)
@@ -428,13 +600,22 @@ namespace CE::Widgets
 		if (event == nullptr)
 			return;
 
+		bool popPaintCoords = false;
+
 		// Handle event for this widget
 		if (event->type == CEventType::PaintEvent)
 		{
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
+			paintEvent->direction = CEventDirection::TopToBottom;
+
 			if (paintEvent->painter != nullptr && CanPaint())
 			{
 				paintEvent->painter->Reset();
+				popPaintCoords = true;
+				auto origin = GetComputedLayoutTopLeft();
+				if (parent != nullptr)
+					origin += parent->rootPadding.min;
+				paintEvent->painter->PushChildCoordinateSpace(origin);
 				OnPaint(paintEvent);
 			}
 		}
@@ -456,6 +637,15 @@ namespace CE::Widgets
 				{
 					parent->HandleEvent(event);
 				}
+			}
+		}
+
+		if (event->type == CEventType::PaintEvent)
+		{
+			CPaintEvent* paintEvent = (CPaintEvent*)event;
+			if (paintEvent->painter != nullptr && popPaintCoords)
+			{
+				paintEvent->painter->PopChildCoordinateSpace();
 			}
 		}
 	}

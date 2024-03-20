@@ -53,8 +53,22 @@ namespace CE::Widgets
 		{ CStylePropertyType::FlexOrder, TYPE(f32), true },
 		{ CStylePropertyType::RowGap, TYPE(f32), true },
 		{ CStylePropertyType::ColumnGap, TYPE(f32), true },
-
 	};
+
+	static HashMap<CStylePropertyType, CStylePropertyMeta> propertyMetaMap{};
+
+	static const HashMap<CStylePropertyType, CStylePropertyMeta>& GetPropertiesMetaMap()
+	{
+		if (propertyMetaMap.IsEmpty())
+		{
+			for (const CStylePropertyMeta& propertyMeta : propertyMetas)
+			{
+				propertyMetaMap[propertyMeta.property] = propertyMeta;
+			}
+		}
+
+		return propertyMetaMap;
+	}
 
 	static HashMap<String, CStylePropertyType> stringToStylePropertyTypeMap{
 		{ "opacity", CStylePropertyType::Opacity },
@@ -113,6 +127,7 @@ namespace CE::Widgets
 	}
 
 	static HashMap<CStylePropertyType, EnumType*> propertyTypeToEnumMap{
+		{ CStylePropertyType::Position, GetStaticEnum<CPosition>() },
 		{ CStylePropertyType::TextAlign, GetStaticEnum<CTextAlign>() },
 		{ CStylePropertyType::AlignContent, GetStaticEnum<CAlign>() },
 		{ CStylePropertyType::AlignItems, GetStaticEnum<CAlign>() },
@@ -252,7 +267,7 @@ namespace CE::Widgets
 
 	bool CStyle::IsLayoutProperty(CStylePropertyType property)
 	{
-		return propertyMetas.Exists([](const CStylePropertyMeta& meta) -> bool { return meta.affectsLayout; });
+		return GetPropertiesMetaMap().KeyExists(property) && GetPropertiesMetaMap().Get(property).affectsLayout;
 	}
 
 	CStylePropertyTypeFlags CStyle::GetPropertyTypeFlags(CStylePropertyType property)
@@ -274,6 +289,31 @@ namespace CE::Widgets
 		{
 			properties[property] = value;
 		}
+	}
+
+	bool CStyle::CompareLayoutProperties(const CStyle& rhs)
+	{
+		for (const auto& [property, value] : rhs.properties)
+		{
+			if (!IsLayoutProperty(property))
+				continue;
+
+			if (!properties.KeyExists(property))
+				return true;
+			if (properties.Get(property) != value)
+				return true;
+		}
+		for (const auto& [property, value] : properties)
+		{
+			if (!IsLayoutProperty(property))
+				continue;
+
+			if (!rhs.properties.KeyExists(property))
+				return true;
+			if (rhs.properties.Get(property) != value)
+				return true;
+		}
+		return false;
 	}
 
 	CRYSTALWIDGETS_API CStateFlag StateFlagsFromString(const String& string)

@@ -30,7 +30,6 @@ namespace CE
         SDL_Window* window = (SDL_Window*)app->GetMainWindow()->GetUnderlyingHandle();
 
         SDL_Event* event = (SDL_Event*)nativeEvent;
-
         mouseDelta = Vec2i(0, 0);
 
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
@@ -99,7 +98,9 @@ namespace CE
         input.windowId = windowId;
         input.mousePosition = mousePosition;
         input.globalMousePosition = globalMousePosition;
-        input.mouseDelta = mouseDelta;
+        input.mouseDelta = mousePosition - prevMousePosition;
+
+        prevMousePosition = mousePosition;
 
         stateChangesThisTick.Clear();
         mouseButtonStateChanges.Clear();

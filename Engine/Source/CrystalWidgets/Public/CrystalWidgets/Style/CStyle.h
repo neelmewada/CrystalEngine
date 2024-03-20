@@ -219,6 +219,28 @@ namespace CE::Widgets
 		inline bool IsColor() const { return IsOfType(Type_Color); }
 		inline bool IsString() const { return IsOfType(Type_String); }
 
+		bool operator==(const CStyleValue& rhs) const
+		{
+			if (valueType != rhs.valueType)
+				return false;
+			if (IsSingle() && single != rhs.single)
+				return false;
+			if (IsVector() && vector != rhs.vector)
+				return false;
+			if (IsColor() && color.ToVec4() != rhs.color.ToVec4())
+				return false;
+			if (IsString() && string != rhs.string)
+				return false;
+			if (enumValue != rhs.enumValue)
+				return false;
+			return true;
+		}
+
+		bool operator!=(const CStyleValue& rhs) const
+		{
+			return !(*this == rhs);
+		}
+
 		// Modifiers
 
 		CStyleValue& AsAbsolute()
@@ -306,6 +328,9 @@ namespace CE::Widgets
 		static CStylePropertyTypeFlags GetPropertyTypeFlags(CStylePropertyType property);
 
 		void ApplyProperties(const CStyle& from);
+
+		//! Returns true if layout properties are different, else false.
+		bool CompareLayoutProperties(const CStyle& rhs);
 
 	crystalwidgets_internal:
 

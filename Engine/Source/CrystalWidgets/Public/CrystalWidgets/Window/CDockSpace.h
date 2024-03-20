@@ -4,6 +4,7 @@
 namespace CE::Widgets
 {
 	class CDockWindow;
+	class CDockSpace;
 
 	ENUM()
 	enum class CDockSplitDirection
@@ -36,7 +37,9 @@ namespace CE::Widgets
 
 		CDockSplitView* FindSplit(Name splitName);
 
-	private:
+		bool IsLayoutCalculationRoot() override { return true; }
+
+	crystalwidgets_internal:
 
 		void OnSubobjectAttached(Object* subobject) override;
 		void OnSubobjectDetached(Object* subobject) override;
@@ -52,6 +55,9 @@ namespace CE::Widgets
 
 		FIELD()
 		f32 splitRatio = 1.0f;
+
+		FIELD()
+		CDockSpace* dockSpace = nullptr;
 
 		friend class CDockSpace;
 	};

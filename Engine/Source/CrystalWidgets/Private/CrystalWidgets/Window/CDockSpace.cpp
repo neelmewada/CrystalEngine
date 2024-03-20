@@ -35,8 +35,17 @@ namespace CE::Widgets
 
         if (subobject->IsOfType<CDockSplitView>())
         {
-            children.Add((CDockSplitView*)subobject);
-            ((CDockSplitView*)subobject)->parentSplitView = this;
+            CDockSplitView* splitView = (CDockSplitView*)subobject;
+            splitView->dockSpace = dockSpace;
+            children.Add(splitView);
+            splitView->parentSplitView = this;
+            rootPadding = Vec4(0, 0, 0, 0);
+        }
+        else if (subobject->IsOfType<CDockWindow>())
+        {
+            CDockWindow* dockWindow = (CDockWindow*)subobject;
+            dockWindow->dockSpace = dockSpace;
+            rootPadding = Vec4(0, 40, 0, 0);
         }
 	}
 
@@ -46,8 +55,15 @@ namespace CE::Widgets
 
         if (subobject->IsOfType<CDockSplitView>())
         {
-            children.Remove((CDockSplitView*)subobject);
-            ((CDockSplitView*)subobject)->parentSplitView = nullptr;
+            CDockSplitView* splitView = (CDockSplitView*)subobject;
+            splitView->dockSpace = nullptr;
+            children.Remove(splitView);
+            splitView->parentSplitView = nullptr;
+        }
+        else if (subobject->IsOfType<CDockWindow>())
+        {
+            CDockWindow* dockWindow = (CDockWindow*)subobject;
+            dockWindow->dockSpace = nullptr;
         }
 	}
 
@@ -56,6 +72,7 @@ namespace CE::Widgets
         dockSplits.Clear();
 
         CDockSplitView* full = CreateDefaultSubobject<CDockSplitView>("Split");
+        full->dockSpace = this;
         full->splitRatio = 1.0f;
 
         dockSplits.Add(full);
@@ -75,6 +92,7 @@ namespace CE::Widgets
 
         first->splitRatio = 1.0f - splitRatio;
         second->splitRatio = splitRatio;
+        first->dockSpace = second->dockSpace = this;
 
         originalSplit->splitDirection = splitDirection;
 
@@ -100,6 +118,12 @@ namespace CE::Widgets
 
             dockSplits.Top()->AddSubWidget(window);
         }
+        else if (object->IsOfType<CDockSplitView>())
+        {
+            CDockSplitView* splitView = (CDockSplitView*)object;
+            splitView->parent = this;
+            attachedWidgets.Add(splitView);
+        }
 	}
 
 	void CDockSpace::OnSubobjectDetached(Object* object)
@@ -117,6 +141,12 @@ namespace CE::Widgets
             {
                 dockSplit->RemoveSubWidget(window);
             }
+        }
+        else if (object->IsOfType<CDockSplitView>())
+        {
+            CDockSplitView* splitView = (CDockSplitView*)object;
+            splitView->parent = nullptr;
+            attachedWidgets.Remove(splitView);
         }
 	}
 
@@ -153,7 +183,8 @@ namespace CE::Widgets
 
         // - Draw Tabs -
 
-        constexpr f32 majorTabHeight = 40.0f;
+        // Set tab height same as the top padding
+        f32 majorTabHeight = 40.0f;//windowPadding.top;
 
         if (dockType == CDockType::Major && dockSplits.NonEmpty())
         {
@@ -180,7 +211,6 @@ namespace CE::Widgets
 
                     Rect tabRect = Rect::FromSize(xOffset, 2.5f, Math::Min(tabTitleSize.width + 70, 270.0f), majorTabHeight);
                     painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
-                    //painter->DrawRect(Rect::FromSize(windowEdgeSize, tabRect.bottom, w - windowEdgeSize * 2, 40));
 
                     pen.SetColor(Color::White());
                     painter->SetPen(pen);

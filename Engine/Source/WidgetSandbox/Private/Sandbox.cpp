@@ -7,7 +7,7 @@ static const CE::String css = R"(
 	icon: url("path/to/icon");
 }
 
-CButton:hover, CLabel.SomeClass, #SomeName, CWindow > CToolBar, CTextInput[type="password"], * {
+CButton:hover, CLabel.SomeClass, #SomeName, CWindow > CToolBar, CTextInput[mode="password"], * {
 	background: rgba(255, 255, 255, 255);
 }
 )";
@@ -53,10 +53,11 @@ namespace CE
 		//auto secondWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
 
 		widgetWindows.Add(mainDockSpace);
-		widgetWindows.Add(mainDockWindow);
+		//widgetWindows.Add(mainDockWindow);
 		//widgetWindows.Add(secondWindow);
 		
 		InitFontAtlas();
+		InitWidgets();
 
 		BuildFrameGraph();
 		CompileFrameGraph();
@@ -117,6 +118,8 @@ namespace CE
 
 	void WidgetSandbox::Shutdown()
 	{
+		DestroyWidgets();
+
 		delete scheduler;
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
@@ -138,6 +141,8 @@ namespace CE
 
 	void WidgetSandbox::InitWidgets()
 	{
+		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
+
 	}
 
 	void WidgetSandbox::DestroyWidgets()

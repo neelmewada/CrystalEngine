@@ -2,6 +2,9 @@
 
 namespace CE::Widgets
 {
+	class CDockSpace;
+	class CDockSplitView;
+
 	CLASS()
 	class CRYSTALWIDGETS_API CDockWindow : public CWindow
 	{
@@ -13,10 +16,16 @@ namespace CE::Widgets
 
 		CDockType GetDockType() const { return dockType; }
 
-	private:
+		CDockSpace* GetDockSpace() const { return dockSpace; }
+
+	crystalwidgets_internal:
 
 		FIELD()
 		CDockType dockType = CDockType::Major;
+
+		FIELD()
+		CDockSpace* dockSpace = nullptr;
+
 
 	};
 

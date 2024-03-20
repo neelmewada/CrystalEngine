@@ -5,6 +5,7 @@ namespace CE::Widgets
     
     CWindow::CWindow()
     {
+        interactable = false;
         painter = CreateDefaultSubobject<CPainter>("Painter");
 
         if (!IsDefaultInstance())
@@ -40,12 +41,22 @@ namespace CE::Widgets
         {
             return empty;
         }
-
+        
         return renderer->FlushDrawPackets(imageIndex);
+    }
+
+    void CWindow::UpdateLayoutIfNeeded()
+    {
+        Super::UpdateLayoutIfNeeded();
+
+
     }
 
     void CWindow::ConstructWindow()
     {
+        if (parent != nullptr) // Renderer2D is created only for Root windows
+            return;
+
         if (renderer == nullptr)
         {
             auto app = CApplication::Get();
@@ -118,6 +129,15 @@ namespace CE::Widgets
         if (!renderer)
             return;
 
+        // TODO: Input Handling
+        Vec2i globalMousePose = InputManager::GetGlobalMousePosition();
+
+        // TODO: Styling
+        UpdateStyleIfNeeded();
+
+        // TODO: Layout
+        UpdateLayoutIfNeeded();
+
         // Painting
         if (NeedsPaint())
         {
@@ -141,8 +161,6 @@ namespace CE::Widgets
             renderer->End();
         }
 
-        // TODO: Input Handling
-
     }
 
     void CWindow::OnBeforeDestroy()
@@ -157,6 +175,11 @@ namespace CE::Widgets
         Super::Construct();
 
         
+    }
+
+    Vec2 CWindow::CalculateIntrinsicSize(f32 width, f32 height)
+    {
+        return Vec2(windowSize.x <= 0 ? YGUndefined : windowSize.x, (allowVerticalScroll || windowSize.y <= 0) ? YGUndefined : windowSize.y);
     }
 
     bool CWindow::IsDockSpace()

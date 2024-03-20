@@ -20,6 +20,7 @@ namespace CE
         u64 windowId = 0;
         Vec2i globalMousePosition{};
         Vec2i mousePosition{};
+        Vec2i prevMousePosition{};
         Vec2i mouseDelta{};
 
         HashMap<KeyCode, bool> keyStates{};

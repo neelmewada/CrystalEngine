@@ -20,6 +20,10 @@ namespace CE::Widgets
 
         void SetTitle(const String& title) { this->title = title; }
 
+        bool IsLayoutCalculationRoot() override { return true; }
+
+        Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
+
         bool IsDockSpace();
 
         PlatformWindow* GetRootNativeWindow();
@@ -31,6 +35,8 @@ namespace CE::Widgets
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
     protected:
+
+        void UpdateLayoutIfNeeded() override;
 
         virtual void ConstructWindow();
 
@@ -49,6 +55,15 @@ namespace CE::Widgets
 
         FIELD()
         String title = "";
+
+        FIELD()
+        Vec2 windowSize = Vec2(0, 0);
+
+        FIELD()
+		b8 allowHorizontalScroll = false;
+
+		FIELD()
+		b8 allowVerticalScroll = false;
 
         PlatformWindow* nativeWindow = nullptr;
         DelegateHandle windowResizeDelegate = 0;

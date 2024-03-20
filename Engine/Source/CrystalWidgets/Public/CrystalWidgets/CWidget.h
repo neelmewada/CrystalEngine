@@ -20,7 +20,11 @@ namespace CE::Widgets
 
         inline bool IsInteractable() const { return interactable; }
 
+        virtual bool IsLayoutCalculationRoot() { return IsWindow(); }
+
         virtual bool CanPaint() const { return true; }
+
+        bool IsWindow();
 
         inline void SetVisible(bool visible) { this->visible = visible; }
         inline void SetEnabled(bool enabled) { this->enabled = enabled; }
@@ -28,8 +32,11 @@ namespace CE::Widgets
         void SetNeedsPaint() { needsPaint = true; }
 
         void SetNeedsLayout();
+        void ClearNeedsLayout();
 
         void SetNeedsStyle();
+
+        bool NeedsLayout();
 
         bool NeedsPaint();
 
@@ -46,6 +53,9 @@ namespace CE::Widgets
         bool StyleClassExists(const Name& name) const { return styleClasses.Exists(name); }
 
         void UpdateStyleIfNeeded();
+        virtual void UpdateLayoutIfNeeded();
+
+        virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height) { return Vec2(); }
 
         // - Style API -
 
@@ -96,6 +106,9 @@ namespace CE::Widgets
             return styleClasses.Exists(styleClass);
         }
 
+        inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
+        inline Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
+
     protected:
 
         void SetNeedsPaintRecursively(bool newValue = false);
@@ -117,6 +130,9 @@ namespace CE::Widgets
         Array<CWidget*> attachedWidgets{};
 
         FIELD()
+        Vec4 rootPadding = Vec4();
+
+        FIELD()
         CWidget* parent = nullptr;
 
         FIELD()
@@ -129,7 +145,7 @@ namespace CE::Widgets
 		b8 visible = true;
 
 		FIELD()
-		b8 interactable = true;
+		b8 interactable = true; // If the widget should listen to interaction events: hover, press, etc.
 
         FIELD()
         b8 needsPaint = true;
@@ -155,10 +171,17 @@ namespace CE::Widgets
     crystalwidgets_internal:
 
         YGNodeRef node = nullptr;
+        YGNodeRef detachedNode = nullptr;
 
         CStyle computedStyle{};
 
-    private:
+    protected:
+
+        static YGSize MeasureFunctionCallback(YGNodeConstRef node,
+            float width,
+            YGMeasureMode widthMode,
+            float height,
+            YGMeasureMode heightMode);
 
     };
 
