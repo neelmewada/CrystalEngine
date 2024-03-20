@@ -646,9 +646,11 @@ namespace CE::Widgets
 			{
 				paintEvent->painter->Reset();
 				popPaintCoords = true;
-				auto origin = GetComputedLayoutTopLeft();
+				Vec2 origin = Vec2();
 				if (parent != nullptr)
-					origin += parent->rootPadding.min;
+				{
+					origin = parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
+				}
 				paintEvent->painter->PushChildCoordinateSpace(origin);
 				OnPaint(paintEvent);
 			}

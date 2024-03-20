@@ -143,6 +143,10 @@ namespace CE
 	{
 		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
 
+		for (int i = 0; i < 4; ++i)
+		{
+			CWidget* btn = CreateObject<CWidget>(toolBar, "Button");
+		}
 	}
 
 	void WidgetSandbox::DestroyWidgets()
