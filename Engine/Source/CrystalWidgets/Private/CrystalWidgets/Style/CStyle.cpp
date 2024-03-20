@@ -25,7 +25,7 @@ namespace CE::Widgets
 		{ CStylePropertyType::BackgroundImage, TYPE(String), false },
 		{ CStylePropertyType::BackgroundSize, TYPE(Vec2), false },
 		{ CStylePropertyType::BorderRadius, TYPE(Vec4), false },
-		{ CStylePropertyType::BorderWidth, TYPE(Vec4), false },
+		{ CStylePropertyType::BorderWidth, TYPE(f32), false },
 		{ CStylePropertyType::BorderColor, TYPE(Color), false },
 		{ CStylePropertyType::ShadowColor, TYPE(Color), false },
 		{ CStylePropertyType::ShadowOffset, TYPE(Vec2), false },

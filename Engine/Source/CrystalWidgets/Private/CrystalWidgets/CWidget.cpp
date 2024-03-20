@@ -461,18 +461,18 @@ namespace CE::Widgets
 						YGNodeStyleSetPadding(node, YGEdgeBottom, value.vector.w);
 				}
 			}
-			else if (property == CStylePropertyType::BorderWidth)
+			else if (property == CStylePropertyType::BorderWidth) // Do not apply border width for layout purposes
 			{
 				if (value.IsSingle())
 				{
-					YGNodeStyleSetBorder(node, YGEdgeAll, value.single);
+					//YGNodeStyleSetBorder(node, YGEdgeAll, value.single);
 				}
 				else if (value.IsVector())
 				{
-					YGNodeStyleSetBorder(node, YGEdgeLeft, value.vector.left);
-					YGNodeStyleSetBorder(node, YGEdgeTop, value.vector.top);
-					YGNodeStyleSetBorder(node, YGEdgeRight, value.vector.right);
-					YGNodeStyleSetBorder(node, YGEdgeBottom, value.vector.bottom);
+					// YGNodeStyleSetBorder(node, YGEdgeLeft, value.vector.left);
+					// YGNodeStyleSetBorder(node, YGEdgeTop, value.vector.top);
+					// YGNodeStyleSetBorder(node, YGEdgeRight, value.vector.right);
+					// YGNodeStyleSetBorder(node, YGEdgeBottom, value.vector.bottom);
 				}
 			}
 			else if (property == CStylePropertyType::Width)
@@ -588,11 +588,45 @@ namespace CE::Widgets
 	{
 		CPainter* painter = paintEvent->painter;
 
+		Color bgColor = Color();
+		Color outlineColor = Color();
+		f32 borderWidth = 0.0f;
+		Vec4 borderRadius = Vec4();
+
 		if (computedStyle.properties.KeyExists(CStylePropertyType::Background))
 		{
-			Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
-			
+			bgColor = computedStyle.properties[CStylePropertyType::Background].color;
 		}
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BorderColor))
+		{
+			outlineColor = computedStyle.properties[CStylePropertyType::BorderColor].color;
+		}
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BorderWidth))
+		{
+			borderWidth = computedStyle.properties[CStylePropertyType::BorderWidth].single;
+		}
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BorderRadius))
+		{
+			borderRadius = computedStyle.properties[CStylePropertyType::BorderRadius].vector;
+		}
+
+		CPen pen = CPen(); pen.SetColor(outlineColor); pen.SetWidth(borderWidth);
+		CBrush brush = CBrush(); brush.SetColor(bgColor);
+		painter->SetPen(pen);
+		painter->SetBrush(brush);
+
+		if (borderRadius == Vec4(0, 0, 0, 0))
+		{
+			painter->DrawRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
+		}
+		else
+		{
+			painter->DrawRoundedRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()), borderRadius);
+		}
+
 	}
 
 	void CWidget::HandleEvent(CEvent* event)

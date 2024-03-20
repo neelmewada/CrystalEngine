@@ -121,6 +121,12 @@ Shader "2D/SDF Geometry"
             {
                 return length(p) - r;
             }
+
+            inline float SDFBox( in float2 p, in float2 b )
+            {
+                float2 d = abs(p) - b;
+                return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+            }
             
             // Credit: https://iquilezles.org/articles/distfunctions2d/
             // b.x = width
@@ -177,7 +183,7 @@ Shader "2D/SDF Geometry"
                 return lerp(float4(color.rgb, 0), color, -sdf);
             }
 
-            float4 RenderRect(in GeometryInfo info, float2 uv)
+            float4 RenderRect0(in GeometryInfo info, float2 uv)
             {
                 float4 color = info.fillColor;
                 float2 borderThickness = float2(info.borderThickness, info.borderThickness) / info.itemSize;
@@ -189,6 +195,29 @@ Shader "2D/SDF Geometry"
                 borderMask = clamp(borderMask, 0, 1);
                 color = lerp(color, info.outlineColor, borderMask);
                 return color;
+            }
+
+            float4 RenderRect(in GeometryInfo info, float2 p)
+            {
+                const float sdf = SDFBox(p, info.itemSize * 0.5);
+                const float invSdf = -sdf;
+
+                float borderThickness = info.borderThickness;
+
+                float4 color = info.fillColor;
+
+                float borderMask = 0.0;
+                if (sdf > -borderThickness && sdf <= 0)
+                    borderMask = 1.0;
+
+                const float borderSmoothStart = -borderThickness - 1.0;
+                const float borderSmoothEnd = -borderThickness;
+                borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
+                borderMask = clamp(borderMask, 0, 1);
+
+                color = lerp(color, info.outlineColor, borderMask);
+
+                return lerp(float4(color.rgb, 0), color, -sdf);
             }
 
             float4 RenderRoundedRect(in GeometryInfo info, float2 p)
@@ -236,7 +265,7 @@ Shader "2D/SDF Geometry"
                 case DRAW_Circle:
                     return RenderCircle(info, p);
                 case DRAW_Rect:
-                    return RenderRect(info, input.uv);
+                    return RenderRect(info, p);
                 case DRAW_RoundedRect:
                     return RenderRoundedRect(info, p);
                 }

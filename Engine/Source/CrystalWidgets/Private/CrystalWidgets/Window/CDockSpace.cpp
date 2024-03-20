@@ -4,7 +4,7 @@ namespace CE::Widgets
 {
 	CDockSplitView::CDockSplitView()
 	{
-
+        
 	}
 
 	CDockSplitView::~CDockSplitView()
@@ -69,7 +69,7 @@ namespace CE::Widgets
 
 	CDockSpace::CDockSpace()
 	{
-        dockSplits.Clear();
+        rootPadding = Vec4(1, 1, 1, 1) * 2.0f;
 
         CDockSplitView* full = CreateDefaultSubobject<CDockSplitView>("Split");
         full->dockSpace = this;

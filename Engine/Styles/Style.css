@@ -1,5 +1,5 @@
 
-CDockSpace::tab {
+CDockSplitView::tab {
     background: rgb(36, 36, 36);
     border-radius: 5px 5px 0 0;
 }
