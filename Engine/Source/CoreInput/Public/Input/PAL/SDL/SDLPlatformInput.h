@@ -15,6 +15,8 @@ namespace CE
 
         virtual void Tick() override;
 
+        void ProcessNativeEvent(void* nativeEvent) override;
+
     private:
 
         u64 windowId = 0;
@@ -22,6 +24,9 @@ namespace CE
         Vec2i mousePosition{};
         Vec2i prevMousePosition{};
         Vec2i mouseDelta{};
+
+        Array<u64> focusGainedWindows{};
+        Array<u64> focusLostWindows{};
 
         HashMap<KeyCode, bool> keyStates{};
         HashMap<KeyCode, bool> keyStatesDelayed{};

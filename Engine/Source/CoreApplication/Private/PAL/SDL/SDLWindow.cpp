@@ -218,5 +218,12 @@ namespace CE
 		return (flags & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS)) != 0;
 	}
 
+	Vec2i SDLPlatformWindow::GetWindowPosition()
+	{
+		int x;  int y;
+		SDL_GetWindowPosition(handle, &x, &y);
+		return Vec2i(x, y);
+	}
+
 } // namespace CE
 

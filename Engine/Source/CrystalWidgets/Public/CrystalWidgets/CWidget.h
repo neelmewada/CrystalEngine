@@ -18,8 +18,6 @@ namespace CE::Widgets
 
         inline bool IsVisible() const { return visible; }
 
-        inline bool IsInteractable() const { return interactable; }
-
         virtual bool IsLayoutCalculationRoot() { return IsWindow(); }
 
         virtual bool CanPaint() const { return true; }
@@ -50,6 +48,8 @@ namespace CE::Widgets
 
         u32 GetSubWidgetIndex(CWidget* widget) const { return attachedWidgets.IndexOf(widget); }
 
+        bool SubWidgetExistsRecursive(CWidget* subWidget);
+
         bool StyleClassExists(const Name& name) const { return styleClasses.Exists(name); }
 
         void UpdateStyleIfNeeded();
@@ -59,22 +59,22 @@ namespace CE::Widgets
 
         // - Style API -
 
-        inline const CStyle& GetComputedStyle()
+        const CStyle& GetComputedStyle()
         {
             return computedStyle;
         }
 
-        inline u32 GetStyleClassesCount() const
+        u32 GetStyleClassesCount() const
         {
             return styleClasses.GetSize();
         }
 
-        inline const Name& GetStyleClass(u32 index) const
+        const Name& GetStyleClass(u32 index) const
         {
             return styleClasses[index];
         }
 
-        inline void AddStyleClass(const String& styleClass)
+        void AddStyleClass(const String& styleClass)
         {
             if (!StyleClassExists(styleClass))
             {
@@ -84,7 +84,7 @@ namespace CE::Widgets
             }
         }
 
-        inline void AddStyleClasses(const Array<String>& styleClasses)
+        void AddStyleClasses(const Array<String>& styleClasses)
         {
             for (const auto& styleClass : styleClasses)
             {
@@ -92,7 +92,7 @@ namespace CE::Widgets
             }
         }
 
-        inline void RemoveStyleClass(const String& styleClass)
+        void RemoveStyleClass(const String& styleClass)
         {
             if (styleClasses.Remove(styleClass))
             {
@@ -101,15 +101,19 @@ namespace CE::Widgets
             }
         }
 
-        inline bool StyleClassExists(const String& styleClass) const
+        bool StyleClassExists(const String& styleClass) const
         {
             return styleClasses.Exists(styleClass);
         }
 
-        inline Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
-        inline Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
+        Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
+        Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
 
-    protected:
+        Rect GetScreenSpaceRect();
+
+        PlatformWindow* GetNativeWindow();
+
+    crystalwidgets_protected_internal:
 
         void SetNeedsPaintRecursively(bool newValue = false);
 
@@ -124,8 +128,6 @@ namespace CE::Widgets
 
         virtual void HandleEvent(CEvent* event);
 
-    crystalwidgets_protected_internal:
-
         FIELD()
         Array<CWidget*> attachedWidgets{};
 
@@ -139,13 +141,13 @@ namespace CE::Widgets
         CWindow* ownerWindow = nullptr;
 
         FIELD()
+        Vec2 rootOrigin = Vec2(); // Origin position based on window space coordinates
+
+        FIELD()
         b8 enabled = true;
 
         FIELD()
 		b8 visible = true;
-
-		FIELD()
-		b8 interactable = true; // If the widget should listen to interaction events: hover, press, etc.
 
         FIELD()
         b8 needsPaint = true;
@@ -156,11 +158,17 @@ namespace CE::Widgets
         FIELD()
         b8 needsStyle = true;
 
+        FIELD(ReadOnly)
+        b8 isPressed = false;
+
         FIELD()
 		CStateFlag stateFlags{};
 
 		FIELD()
 		CSubControl subControl = CSubControl::None;
+
+        FIELD()
+        b8 receiveMouseEvents = true;
 
         FIELD()
         Array<Name> styleClasses{};
@@ -174,6 +182,8 @@ namespace CE::Widgets
         YGNodeRef detachedNode = nullptr;
 
         CStyle computedStyle{};
+
+        b8 isMouseInside = false;
 
     protected:
 

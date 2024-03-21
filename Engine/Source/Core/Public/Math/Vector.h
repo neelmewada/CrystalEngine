@@ -67,6 +67,11 @@ namespace CE
 			});
 		}
 
+        Vec2 ToVec2() const
+		{
+            return Vec2(x, y);
+		}
+
         inline TVector2 operator+(const TVector2& rhs) const
         {
             return TVector2(x + rhs.x, y + rhs.y);
@@ -240,6 +245,11 @@ namespace CE
         inline T operator[](int index) const
         {
             return xyz[index];
+        }
+
+        Vec3 ToVec3() const
+        {
+            return Vec3(x, y, z);
         }
 
         inline TVector3 operator+(const TVector3& rhs) const
@@ -441,6 +451,11 @@ namespace CE
 			});
 		}
 
+        Vec4 ToVec4() const
+        {
+            return Vec4(x, y, z, w);
+        }
+
         inline T& operator[](int index)
         {
             return xyzw[index];
@@ -626,6 +641,11 @@ namespace CE
             return Rect(x, y, x + w, y + h);
         }
 
+        inline bool Contains(Vec2 point) const
+        {
+            return point.x >= min.x && point.y >= min.y && point.x <= max.x && point.y <= max.y;
+        }
+
         union {
             struct {
                 f32 left, top, right, bottom;
@@ -684,6 +704,11 @@ namespace CE
             CombineHash(hash, right);
             CombineHash(hash, bottom);
             return hash;
+        }
+
+        inline String ToString() const
+        {
+            return String::Format("({}, {}, {}, {})", left, top, right, bottom);
         }
         
     };
@@ -857,6 +882,22 @@ template <> struct fmt::formatter<CE::Vec4i> {
     auto format(const CE::Vec4i& vec4, FormatContext& ctx) const -> decltype(ctx.out()) {
         // ctx.out() is an output iterator to write to.
         return fmt::format_to(ctx.out(), "{}", vec4.ToString());
+    }
+};
+
+template <> struct fmt::formatter<CE::Rect> {
+    // Parses format specifications of the form ['f' | 'e'].
+    constexpr auto parse(format_parse_context& ctx) -> decltype(ctx.begin()) {
+        // Return an iterator past the end of the parsed range:
+        return ctx.end();
+    }
+
+    // Formats the point p using the parsed format specification (presentation)
+    // stored in this formatter.
+    template <typename FormatContext>
+    auto format(const CE::Rect& rect, FormatContext& ctx) const -> decltype(ctx.out()) {
+        // ctx.out() is an output iterator to write to.
+        return fmt::format_to(ctx.out(), "{}", rect.ToString());
     }
 };
 

@@ -20,6 +20,27 @@ namespace CE
         return new SDLPlatformInput();
     }
 
+    void SDLPlatformInput::ProcessNativeEvent(void* nativeEvent)
+    {
+        if (nativeEvent == nullptr)
+            return;
+
+        SDL_Event* event = (SDL_Event*)nativeEvent;
+
+        if (event->type == SDL_WINDOWEVENT)
+        {
+	        switch (event->window.event)
+	        {
+	        case SDL_WINDOWEVENT_FOCUS_GAINED:
+                focusGainedWindows.Add(event->window.windowID);
+                break;
+	        case SDL_WINDOWEVENT_FOCUS_LOST:
+                focusLostWindows.Add(event->window.windowID);
+                break;
+	        }
+        }
+    }
+
     void SDLPlatformInput::ProcessInputEvent(void* nativeEvent)
     {
         if (nativeEvent == nullptr)
@@ -89,6 +110,9 @@ namespace CE
         InputManager& input = InputManager::Get();
         auto app = PlatformApplication::Get();
 
+        SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
+        SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
+
         input.stateChangesThisTick = stateChangesThisTick;
         input.keyStates = keyStates;
         input.modifierStates = modifierStates;
@@ -98,12 +122,14 @@ namespace CE
         input.windowId = windowId;
         input.mousePosition = mousePosition;
         input.globalMousePosition = globalMousePosition;
-        input.mouseDelta = mousePosition - prevMousePosition;
+        input.mouseDelta = globalMousePosition - prevMousePosition;
 
-        prevMousePosition = mousePosition;
+        prevMousePosition = globalMousePosition;
 
         stateChangesThisTick.Clear();
         mouseButtonStateChanges.Clear();
+        focusGainedWindows.Clear();
+        focusLostWindows.Clear();
     }
 
 } // namespace CE

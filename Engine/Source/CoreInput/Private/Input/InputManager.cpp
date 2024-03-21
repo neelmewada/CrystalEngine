@@ -33,4 +33,9 @@ namespace CE
 		platformInput->ProcessInputEvent(nativeEvent);
 	}
 
+	void InputManager::ProcessNativeEvents(void* nativeEvent)
+	{
+		platformInput->ProcessNativeEvent(nativeEvent);
+	}
+
 } // namespace CE

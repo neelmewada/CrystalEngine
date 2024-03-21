@@ -12,6 +12,8 @@ namespace CE
 
         virtual void Tick() = 0;
 
+        virtual void ProcessNativeEvent(void* nativeEvent) = 0;
+
     protected:
         PlatformInput() = default;
 

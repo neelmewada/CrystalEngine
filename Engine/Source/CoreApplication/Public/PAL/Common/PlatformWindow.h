@@ -31,6 +31,8 @@ namespace CE
 
 		virtual bool IsFocussed() = 0;
 
+        virtual Vec2i GetWindowPosition() = 0;
+
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) = 0;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) = 0;
         virtual Vec2i GetDrawableWindowSize() = 0;

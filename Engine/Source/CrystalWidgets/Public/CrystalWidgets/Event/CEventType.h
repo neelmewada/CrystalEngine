@@ -9,6 +9,12 @@ namespace CE::Widgets
 		CustomEvent,
 
 		PaintEvent,
+
+		MouseEnter,
+		MouseMove,
+		MouseLeave,
+		MousePress,
+		MouseRelease,
 	};
 	ENUM_CLASS(CEventType);
 

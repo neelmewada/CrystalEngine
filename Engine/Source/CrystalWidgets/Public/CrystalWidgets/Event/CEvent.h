@@ -16,14 +16,14 @@ namespace CE::Widgets
         CE_STRUCT(CEvent)
     public:
 
-		inline void Consume(CWidget* handler)
+		inline void Consume(CWidget* consumer)
 		{
 			isConsumed = true;
 
-			if (handler && firstConsumer == nullptr)
-				firstConsumer = handler;
-			if (handler)
-				lastConsumer = handler;
+			if (consumer && firstConsumer == nullptr)
+				firstConsumer = consumer;
+			if (consumer)
+				lastConsumer = consumer;
 		}
 
 		inline void StopPropagation()
@@ -31,14 +31,14 @@ namespace CE::Widgets
 			stopPropagation = true;
 		}
 
-		inline void ConsumeAndStopPropagation(CWidget* handler)
+		inline void ConsumeAndStopPropagation(CWidget* consumer)
 		{
 			isConsumed = stopPropagation = true;
 
-			if (handler && firstConsumer == nullptr)
-				firstConsumer = handler;
-			if (handler)
-				lastConsumer = handler;
+			if (consumer && firstConsumer == nullptr)
+				firstConsumer = consumer;
+			if (consumer)
+				lastConsumer = consumer;
 		}
 
 		inline bool ShouldPropagate()
@@ -49,6 +49,27 @@ namespace CE::Widgets
 		inline CEventType GetEventType() const
 		{
 			return type;
+		}
+
+		inline bool IsMouseEvent() const
+		{
+			switch (type)
+			{
+			case CEventType::MouseEnter:
+			case CEventType::MouseLeave:
+			case CEventType::MouseMove:
+			case CEventType::MousePress:
+			case CEventType::MouseRelease:
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		// Reset the consumed and propagation flags
+		void Reset()
+		{
+			isConsumed = stopPropagation = false;
 		}
 
         FIELD()
@@ -72,9 +93,10 @@ namespace CE::Widgets
 		FIELD()
 		CEventDirection direction = CEventDirection::BottomToTop;
 
-		// The first widget that handled this event
+		// The first widget that consumed this event. Do not modify this directly.
 		CWidget* firstConsumer = nullptr;
 
+		// The last widget that consumed this event. Do not modify this directly.
 		CWidget* lastConsumer = nullptr;
     };
 
@@ -94,6 +116,31 @@ namespace CE::Widgets
 
 		FIELD()
 		CPainter* painter = nullptr;
+
+	};
+
+	STRUCT()
+	struct CRYSTALWIDGETS_API CMouseEvent : CEvent
+	{
+		CE_STRUCT(CMouseEvent, CEvent)
+	public:
+
+		CMouseEvent()
+		{
+			Super::direction = CEventDirection::BottomToTop;
+		}
+
+		FIELD()
+		MouseButton button{};
+
+		FIELD()
+		Vec2 mousePos{}; // Mouse position in screen space
+
+		FIELD()
+		Vec2 prevMousePos{}; // Previous mouse position in screen space
+
+		FIELD()
+		b8 isInside = true;
 
 	};
     

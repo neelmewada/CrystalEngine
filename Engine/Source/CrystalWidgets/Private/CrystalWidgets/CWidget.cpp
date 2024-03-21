@@ -158,6 +158,9 @@ namespace CE::Widgets
 
 	void CWidget::SetNeedsStyle()
 	{
+		if (needsStyle)
+			return;
+
 		needsStyle = true;
 
 		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
@@ -213,6 +216,7 @@ namespace CE::Widgets
 					nativeWindow->GetWindowSize(&w, &h);
 					window->windowSize = Vec2(w, h);
 					availableSize = window->windowSize;
+					rootOrigin = Vec2(0, 0);
 				}
 				else if (parentWindow)
 				{
@@ -235,6 +239,11 @@ namespace CE::Widgets
 			{
 				YGNodeCalculateLayout(node, availableSize.width, availableSize.height, YGDirectionLTR);
 			}
+			
+			if (parent)
+			{
+				rootOrigin = parent->rootOrigin + parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
+			}
 
 			Vec2 pos = GetComputedLayoutTopLeft();
 			Vec2 size = GetComputedLayoutSize();
@@ -246,6 +255,20 @@ namespace CE::Widgets
 
 			needsLayout = false;
 		}
+	}
+
+	bool CWidget::SubWidgetExistsRecursive(CWidget* subWidget)
+	{
+		if (subWidget == this)
+			return true;
+
+		for (CWidget* widget : attachedWidgets)
+		{
+			if (widget->SubWidgetExistsRecursive(subWidget))
+				return true;
+		}
+
+		return false;
 	}
 
 	void CWidget::UpdateStyleIfNeeded()
@@ -565,6 +588,46 @@ namespace CE::Widgets
 		DetachSubobject(widget);
 	}
 
+	Rect CWidget::GetScreenSpaceRect()
+	{
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					Vec2i posInt = window->nativeWindow->GetWindowPosition();
+					Vec2 pos = Vec2(posInt.x, posInt.y);
+					u32 w, h;
+					window->nativeWindow->GetWindowSize(&w, &h);
+
+					return Rect::FromSize(pos + rootOrigin, Vec2(w, h));
+				}
+			}
+
+			return {};
+		}
+
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		if (nativeWindow == nullptr)
+			return {};
+
+		{
+			Vec2i posInt = nativeWindow->GetWindowPosition();
+			Vec2 pos = Vec2(posInt.x, posInt.y);
+
+			return Rect::FromSize(pos + rootOrigin + GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+		}
+	}
+
+	PlatformWindow* CWidget::GetNativeWindow()
+	{
+		if (!ownerWindow)
+			return nullptr;
+		return ownerWindow->GetRootNativeWindow();
+	}
+
 	void CWidget::SetNeedsPaintRecursively(bool newValue)
 	{
 		needsPaint = newValue;
@@ -655,24 +718,73 @@ namespace CE::Widgets
 				OnPaint(paintEvent);
 			}
 		}
+
+		// Mouse events
+		if (receiveMouseEvents && event->IsMouseEvent() && !event->isConsumed)
+		{
+			CMouseEvent* mouseEvent = (CMouseEvent*)event;
+
+			mouseEvent->Consume(this);
+			if (event->type == CEventType::MousePress)
+			{
+				CE_LOG(Info, All, "MousePress: {}", GetName());
+			}
+			else if (event->type == CEventType::MouseRelease)
+			{
+				CE_LOG(Info, All, "MouseRelease: {}", GetName());
+			}
+
+			if (event->type == CEventType::MousePress)
+			{
+				stateFlags |= CStateFlag::Pressed;
+				isPressed = true;
+				SetNeedsStyle();
+			}
+			else if (event->type == CEventType::MouseRelease)
+			{
+				stateFlags &= ~CStateFlag::Pressed;
+				isPressed = false;
+				SetNeedsStyle();
+			}
+
+			if (event->type == CEventType::MouseEnter)
+			{
+				stateFlags |= CStateFlag::Hovered;
+				if (isPressed)
+				{
+					stateFlags |= CStateFlag::Pressed;
+				}
+				SetNeedsStyle();
+			}
+			else if (event->type == CEventType::MouseLeave)
+			{
+				stateFlags &= ~CStateFlag::Hovered;
+				if (isPressed)
+				{
+					stateFlags &= ~CStateFlag::Pressed;
+				}
+				SetNeedsStyle();
+			}
+
+			CE_LOG(Info, All, "{}: {} ({})", event->type, GetName(), GetClass()->GetName().GetLastComponent());
+		}
 		
 		if (event->direction == CEventDirection::TopToBottom) // Pass event down the chain
 		{
 			for (CWidget* widget : attachedWidgets)
 			{
-				if (event->isConsumed && event->stopPropagation)
+				if (event->stopPropagation)
 					return;
 				widget->HandleEvent(event);
 			}
 		}
 		else if (event->direction == CEventDirection::BottomToTop) // Pass event up the chain
 		{
-			for (CWidget* parent = this->parent; parent != nullptr; parent = parent->parent)
+			if (event->stopPropagation)
+				return;
+			if (parent != nullptr)
 			{
-				if (parent != this) // Prevent infinite recursion!
-				{
-					parent->HandleEvent(event);
-				}
+				parent->HandleEvent(event);
 			}
 		}
 

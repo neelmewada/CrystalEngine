@@ -80,6 +80,8 @@ namespace CE
 
         void ProcessInputEvents(void* nativeEvent) override;
 
+        void ProcessNativeEvents(void* nativeEvent) override;
+
         InputManager() = default;
 
         static InputManager instance;

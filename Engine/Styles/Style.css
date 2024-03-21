@@ -19,3 +19,6 @@ CDockSplitView::tab {
     height: 30px;
 }
 
+#Buttonh:hovered {
+    background: rgb(128, 0, 0);
+}

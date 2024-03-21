@@ -65,6 +65,13 @@ namespace CE::Widgets
 		FIELD()
 		b8 allowVerticalScroll = false;
 
+    crystalwidgets_internal:
+
+        Array<CWidget*> prevHoveredWidgets = {};
+        StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};
+
+        Vec2 prevMousePos = Vec2();
+
         PlatformWindow* nativeWindow = nullptr;
         DelegateHandle windowResizeDelegate = 0;
 

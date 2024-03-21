@@ -21,6 +21,8 @@ namespace CE
 
 		bool IsFocussed() override;
 
+        Vec2i GetWindowPosition() override;
+
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) override;
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) override;
         virtual Vec2i GetDrawableWindowSize() override;

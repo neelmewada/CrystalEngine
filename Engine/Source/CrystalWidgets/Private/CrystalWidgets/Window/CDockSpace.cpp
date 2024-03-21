@@ -71,7 +71,7 @@ namespace CE::Widgets
 	{
         rootPadding = Vec4(1, 1, 1, 1) * 2.0f;
 
-        CDockSplitView* full = CreateDefaultSubobject<CDockSplitView>("Split");
+        CDockSplitView* full = CreateDefaultSubobject<CDockSplitView>("DockSplitView");
         full->dockSpace = this;
         full->splitRatio = 1.0f;
 
@@ -87,8 +87,8 @@ namespace CE::Widgets
     {
         splitRatio = Math::Clamp(splitRatio, 0.05f, 0.95f);
 
-        CDockSplitView* first = CreateObject<CDockSplitView>(originalSplit, "Split");
-        CDockSplitView* second = CreateObject<CDockSplitView>(originalSplit, "Split");
+        CDockSplitView* first = CreateObject<CDockSplitView>(originalSplit, "DockSplitView");
+        CDockSplitView* second = CreateObject<CDockSplitView>(originalSplit, "DockSplitView");
 
         first->splitRatio = 1.0f - splitRatio;
         second->splitRatio = splitRatio;

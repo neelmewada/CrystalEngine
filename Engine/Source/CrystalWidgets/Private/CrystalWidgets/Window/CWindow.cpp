@@ -5,7 +5,7 @@ namespace CE::Widgets
     
     CWindow::CWindow()
     {
-        interactable = false;
+        receiveMouseEvents = false;
         painter = CreateDefaultSubobject<CPainter>("Painter");
 
         if (!IsDefaultInstance())
@@ -69,7 +69,7 @@ namespace CE::Widgets
             desc.drawListTag = drawListTag = RPISystem::Get().GetDrawListTagRegistry()->AcquireTag(GetName());
             desc.drawShader = CApplication::Get()->draw2dShader;
             desc.numFramesInFlight = CApplication::Get()->numFramesInFlight;
-
+            
             desc.initialDrawItemStorage = 1'000;
             desc.drawItemStorageIncrement = 1'000;
 
@@ -129,16 +129,181 @@ namespace CE::Widgets
         if (!renderer)
             return;
 
-        // TODO: Input Handling
-        Vec2i globalMousePose = InputManager::GetGlobalMousePosition();
+        // Tick: Input Handling
+        Vec2 globalMousePos = InputManager::GetGlobalMousePosition().ToVec2();
+        Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
+        if (prevMousePos == Vec2())
+            prevMousePos = globalMousePos;
 
-        // TODO: Styling
+        std::function<CWidget*(CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
+            {
+				if (widget == nullptr)
+					return nullptr;
+
+                Rect widgetRect = widget->GetScreenSpaceRect();
+                CWindow* ownerWindow = widget->ownerWindow;
+				if (ownerWindow)
+				{
+					if (PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow())
+                    {
+	                    if (!nativeWindow->IsFocussed() || !nativeWindow->IsShown() || nativeWindow->IsMinimized())
+	                    {
+                            return nullptr;
+	                    }
+                    }
+				}
+
+                if (widgetRect.Contains(globalMousePos))
+                {
+                    for (int i = widget->attachedWidgets.GetSize() - 1; i >= 0; --i)
+                    {
+                        CWidget* insideWidget = getBottomMostHoveredWidget(widget->attachedWidgets[i]);
+                        if (insideWidget && insideWidget->receiveMouseEvents)
+                            return insideWidget;
+                    }
+
+                    return widget;
+                }
+
+                return nullptr;
+            };
+
+
+        CWidget* hoveredWidget = getBottomMostHoveredWidget(this);
+
+        PlatformWindow* platformWindow = GetRootNativeWindow();
+        if (platformWindow && !platformWindow->IsFocussed())
+        {
+            hoveredWidget = nullptr;
+        }
+
+        if (prevHoveredWidgets.NonEmpty() && prevHoveredWidgets.Top() != hoveredWidget &&
+            (hoveredWidget == nullptr || !prevHoveredWidgets.Top()->SubWidgetExistsRecursive(hoveredWidget)))
+        {
+            CMouseEvent mouseEvent{};
+            mouseEvent.name = "MouseLeave";
+            mouseEvent.type = CEventType::MouseLeave;
+            mouseEvent.button = MouseButton::None;
+            mouseEvent.mousePos = globalMousePos;
+            mouseEvent.prevMousePos = prevMousePos;
+            mouseEvent.direction = CEventDirection::BottomToTop;
+
+            while (prevHoveredWidgets.NonEmpty() && prevHoveredWidgets.Top() != hoveredWidget)
+            {
+                mouseEvent.sender = prevHoveredWidgets.Top();
+                prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
+                prevHoveredWidgets.Pop();
+            }
+        }
+
+        if (hoveredWidget != nullptr && (prevHoveredWidgets.IsEmpty() || prevHoveredWidgets.Top() != hoveredWidget) &&
+            (prevHoveredWidgets.IsEmpty() || !hoveredWidget->SubWidgetExistsRecursive(prevHoveredWidgets.Top())))
+        {
+            CMouseEvent mouseEvent{};
+            mouseEvent.name = "MouseEnter";
+            mouseEvent.type = CEventType::MouseEnter;
+            mouseEvent.button = MouseButton::None;
+            mouseEvent.mousePos = globalMousePos;
+            mouseEvent.prevMousePos = prevMousePos;
+            mouseEvent.direction = CEventDirection::BottomToTop;
+
+            int idx = prevHoveredWidgets.GetSize();
+            CWidget* basePrevWidget = nullptr;
+            if (prevHoveredWidgets.NonEmpty())
+                basePrevWidget = prevHoveredWidgets.Top();
+
+            auto widget = hoveredWidget;
+            
+            while ((prevHoveredWidgets.IsEmpty() || widget != basePrevWidget) && widget != nullptr)
+            {
+                prevHoveredWidgets.InsertAt(idx, widget);
+                widget = widget->parent;
+            }
+
+            for (int i = idx; i < prevHoveredWidgets.GetSize(); i++)
+            {
+                mouseEvent.sender = prevHoveredWidgets[i];
+                prevHoveredWidgets[i]->HandleEvent(&mouseEvent);
+            }
+        }
+
+        if (mouseDelta.x > 0 || mouseDelta.y > 0)
+        {
+            CMouseEvent mouseEvent{};
+            mouseEvent.name = "MouseMove";
+            mouseEvent.type = CEventType::MouseMove;
+            mouseEvent.button = MouseButton::None;
+            mouseEvent.mousePos = globalMousePos;
+            mouseEvent.prevMousePos = prevMousePos;
+            mouseEvent.direction = CEventDirection::BottomToTop;
+
+            if (prevHoveredWidgets.NonEmpty())
+            {
+	            mouseEvent.sender = prevHoveredWidgets.Top();
+                prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
+            }
+        }
+
+        Enum* mouseButtonEnum = GetStaticEnum<MouseButton>();
+        for (int i = 0; i < mouseButtonEnum->GetConstantsCount(); ++i)
+        {
+            MouseButton mouseButton = (MouseButton)mouseButtonEnum->GetConstant(i)->GetValue();
+	        if (InputManager::IsMouseButtonDown(mouseButton))
+	        {
+                CMouseEvent event{};
+                event.name = "MousePress";
+                event.type = CEventType::MousePress;
+                event.button = mouseButton;
+                event.mousePos = globalMousePos;
+                event.prevMousePos = prevMousePos;
+                event.direction = CEventDirection::BottomToTop;
+                event.isInside = true;
+
+                if (prevHoveredWidgets.NonEmpty())
+                {
+                    event.sender = prevHoveredWidgets.Top();
+                    widgetsPressedPerMouseButton[i] = event.sender;
+                    prevHoveredWidgets.Top()->HandleEvent(&event);
+                }
+	        }
+
+            if (InputManager::IsMouseButtonUp(mouseButton))
+            {
+                CMouseEvent event{};
+                event.name = "MouseRelease";
+                event.type = CEventType::MouseRelease;
+                event.button = mouseButton;
+                event.mousePos = globalMousePos;
+                event.prevMousePos = prevMousePos;
+                event.direction = CEventDirection::BottomToTop;
+                event.isInside = true;
+
+                if (prevHoveredWidgets.NonEmpty())
+                {
+                    event.sender = prevHoveredWidgets.Top();
+                    prevHoveredWidgets.Top()->HandleEvent(&event);
+                }
+
+                if (widgetsPressedPerMouseButton[i] != nullptr)
+                {
+                    event.Reset();
+                    event.isInside = false;
+                    widgetsPressedPerMouseButton[i]->HandleEvent(&event);
+                }
+
+                widgetsPressedPerMouseButton[i] = nullptr;
+            }
+        }
+
+        prevMousePos = globalMousePos;
+
+        // Tick: Styling
         UpdateStyleIfNeeded();
 
-        // TODO: Layout
+        // Tick: Layout
         UpdateLayoutIfNeeded();
 
-        // Painting
+        // Tick: Painting
         if (NeedsPaint())
         {
             SetNeedsPaintRecursively(false);
@@ -161,6 +326,7 @@ namespace CE::Widgets
             renderer->End();
         }
 
+        
     }
 
     void CWindow::OnBeforeDestroy()
