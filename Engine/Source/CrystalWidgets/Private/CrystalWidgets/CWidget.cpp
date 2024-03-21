@@ -162,6 +162,7 @@ namespace CE::Widgets
 			return;
 
 		needsStyle = true;
+		needsPaint = true;
 
 		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
 		{
@@ -190,7 +191,16 @@ namespace CE::Widgets
 
 	bool CWidget::NeedsLayout()
 	{
-		return needsLayout;
+		if (needsLayout)
+			return true;
+
+		for (CWidget* widget : attachedWidgets)
+		{
+			if (widget->NeedsLayout())
+				return true;
+		}
+
+		return false;
 	}
 
 	void CWidget::UpdateLayoutIfNeeded()
@@ -273,309 +283,310 @@ namespace CE::Widgets
 
 	void CWidget::UpdateStyleIfNeeded()
 	{
-		if (!NeedsStyle())
-			return;
-
-		SetNeedsStyle();
-		
-		CStyle prevComputedStyle = computedStyle;
-		computedStyle = {};
-
-		if (parent != nullptr)
+		if (NeedsStyle())
 		{
-			const auto& parentComputedStyle = parent->computedStyle;
-			const auto& inheritedProperties = CStyle::GetInheritedProperties();
-			for (auto property : inheritedProperties)
+			CStyle prevComputedStyle = computedStyle;
+			computedStyle = {};
+
+			if (parent != nullptr)
 			{
-				if (parentComputedStyle.properties.KeyExists(property))
+				const auto& parentComputedStyle = parent->computedStyle;
+				const auto& inheritedProperties = CStyle::GetInheritedProperties();
+				for (auto property : inheritedProperties)
 				{
-					computedStyle.properties[property] = parentComputedStyle.properties.Get(property);
+					if (parentComputedStyle.properties.KeyExists(property))
+					{
+						computedStyle.properties[property] = parentComputedStyle.properties.Get(property);
+					}
 				}
 			}
-		}
 
-		auto selectStyle = styleSheet->SelectStyle(this, stateFlags, subControl);
-		computedStyle.ApplyProperties(selectStyle);
+			if (EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
+			{
+				String::IsAlphabet('a');
+			}
 
-		bool layoutChanged = computedStyle.CompareLayoutProperties(prevComputedStyle);
+			auto selectStyle = styleSheet->SelectStyle(this, stateFlags, subControl);
+			computedStyle.ApplyProperties(selectStyle);
 
-		if (layoutChanged)
-		{
-			CE_LOG(Info, All, "Layout changed!");
-		}
+			bool layoutChanged = computedStyle.CompareLayoutProperties(prevComputedStyle);
 
-		for (const auto& [property, value] : selectStyle.properties)
-		{
-			if (!value.IsValid())
-				continue;
+			for (const auto& [property, value] : selectStyle.properties)
+			{
+				if (!value.IsValid())
+					continue;
 
-			// Yoga Properties
-			if (property == CStylePropertyType::Display && value.IsEnum())
-			{
-				YGNodeStyleSetDisplay(node, (YGDisplay)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::Position && value.IsEnum())
-			{
-				YGNodeStyleSetPositionType(node, (YGPositionType)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::Left && value.IsSingle())
-			{
-				if (value.IsPercentValue())
-					YGNodeStyleSetPositionPercent(node, YGEdgeLeft, value.single);
-				else
-					YGNodeStyleSetPosition(node, YGEdgeLeft, value.single);
-			}
-			else if (property == CStylePropertyType::Top && value.IsSingle())
-			{
-				if (value.IsPercentValue())
-					YGNodeStyleSetPositionPercent(node, YGEdgeTop, value.single);
-				else
-					YGNodeStyleSetPosition(node, YGEdgeTop, value.single);
-			}
-			else if (property == CStylePropertyType::Right && value.IsSingle())
-			{
-				if (value.IsPercentValue())
-					YGNodeStyleSetPositionPercent(node, YGEdgeRight, value.single);
-				else
-					YGNodeStyleSetPosition(node, YGEdgeRight, value.single);
-			}
-			else if (property == CStylePropertyType::Bottom && value.IsSingle())
-			{
-				if (value.IsPercentValue())
-					YGNodeStyleSetPositionPercent(node, YGEdgeBottom, value.single);
-				else
-					YGNodeStyleSetPosition(node, YGEdgeBottom, value.single);
-			}
-			else if (property == CStylePropertyType::AlignContent && value.IsEnum())
-			{
-				YGNodeStyleSetAlignContent(node, (YGAlign)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::AlignItems && value.IsEnum())
-			{
-				YGNodeStyleSetAlignItems(node, (YGAlign)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::AlignSelf && value.IsEnum())
-			{
-				YGNodeStyleSetAlignSelf(node, (YGAlign)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::JustifyContent && value.IsEnum())
-			{
-				YGNodeStyleSetJustifyContent(node, (YGJustify)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::Flex && value.IsSingle())
-			{
-				YGNodeStyleSetFlex(node, value.single);
-			}
-			else if (property == CStylePropertyType::FlexBasis)
-			{
-				if (value.IsAutoValue())
+				// Yoga Properties
+				if (property == CStylePropertyType::Display && value.IsEnum())
 				{
-					YGNodeStyleSetFlexBasisAuto(node);
+					YGNodeStyleSetDisplay(node, (YGDisplay)value.enumValue.x);
 				}
-				else if (value.IsSingle())
+				else if (property == CStylePropertyType::Position && value.IsEnum())
+				{
+					YGNodeStyleSetPositionType(node, (YGPositionType)value.enumValue.x);
+				}
+				else if (property == CStylePropertyType::Left && value.IsSingle())
 				{
 					if (value.IsPercentValue())
-						YGNodeStyleSetFlexBasisPercent(node, value.single);
+						YGNodeStyleSetPositionPercent(node, YGEdgeLeft, value.single);
 					else
-						YGNodeStyleSetFlexBasis(node, value.single);
+						YGNodeStyleSetPosition(node, YGEdgeLeft, value.single);
 				}
-			}
-			else if (property == CStylePropertyType::FlexWrap && value.IsEnum())
-			{
-				YGNodeStyleSetFlexWrap(node, (YGWrap)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::FlexGrow && value.IsSingle())
-			{
-				YGNodeStyleSetFlexGrow(node, value.single);
-			}
-			else if (property == CStylePropertyType::FlexShrink && value.IsSingle())
-			{
-				YGNodeStyleSetFlexShrink(node, value.single);
-			}
-			else if (property == CStylePropertyType::FlexDirection && value.IsEnum())
-			{
-				YGNodeStyleSetFlexDirection(node, (YGFlexDirection)value.enumValue.x);
-			}
-			else if (property == CStylePropertyType::RowGap && value.IsSingle())
-			{
-				YGNodeStyleSetGap(node, YGGutterRow, value.single);
-			}
-			else if (property == CStylePropertyType::ColumnGap && value.IsSingle())
-			{
-				YGNodeStyleSetGap(node, YGGutterColumn, value.single);
-			}
-			else if (property == CStylePropertyType::Margin)
-			{
-				if (value.IsEnum())
+				else if (property == CStylePropertyType::Top && value.IsSingle())
 				{
-					YGNodeStyleSetMarginAuto(node, YGEdgeAll);
+					if (value.IsPercentValue())
+						YGNodeStyleSetPositionPercent(node, YGEdgeTop, value.single);
+					else
+						YGNodeStyleSetPosition(node, YGEdgeTop, value.single);
 				}
-				else if (value.IsSingle())
+				else if (property == CStylePropertyType::Right && value.IsSingle())
 				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetMarginPercent(node, YGEdgeAll, value.single);
-					else if (value.enumValue.x == CStyleValue::Auto)
+					if (value.IsPercentValue())
+						YGNodeStyleSetPositionPercent(node, YGEdgeRight, value.single);
+					else
+						YGNodeStyleSetPosition(node, YGEdgeRight, value.single);
+				}
+				else if (property == CStylePropertyType::Bottom && value.IsSingle())
+				{
+					if (value.IsPercentValue())
+						YGNodeStyleSetPositionPercent(node, YGEdgeBottom, value.single);
+					else
+						YGNodeStyleSetPosition(node, YGEdgeBottom, value.single);
+				}
+				else if (property == CStylePropertyType::AlignContent && value.IsEnum())
+				{
+					YGNodeStyleSetAlignContent(node, (YGAlign)value.enumValue.x);
+				}
+				else if (property == CStylePropertyType::AlignItems && value.IsEnum())
+				{
+					YGNodeStyleSetAlignItems(node, (YGAlign)value.enumValue.x);
+				}
+				else if (property == CStylePropertyType::AlignSelf && value.IsEnum())
+				{
+					YGNodeStyleSetAlignSelf(node, (YGAlign)value.enumValue.x);
+				}
+				else if (property == CStylePropertyType::JustifyContent && value.IsEnum())
+				{
+					YGNodeStyleSetJustifyContent(node, (YGJustify)value.enumValue.x);
+				}
+				else if (property == CStylePropertyType::Flex && value.IsSingle())
+				{
+					YGNodeStyleSetFlex(node, value.single);
+				}
+				else if (property == CStylePropertyType::FlexBasis)
+				{
+					if (value.IsAutoValue())
+					{
+						YGNodeStyleSetFlexBasisAuto(node);
+					}
+					else if (value.IsSingle())
+					{
+						if (value.IsPercentValue())
+							YGNodeStyleSetFlexBasisPercent(node, value.single);
+						else
+							YGNodeStyleSetFlexBasis(node, value.single);
+					}
+				}
+				else if (property == CStylePropertyType::FlexWrap && value.IsEnum())
+				{
+					YGNodeStyleSetFlexWrap(node, (YGWrap)value.enumValue.x);
+				}
+				else if (property == CStylePropertyType::FlexGrow && value.IsSingle())
+				{
+					YGNodeStyleSetFlexGrow(node, value.single);
+				}
+				else if (property == CStylePropertyType::FlexShrink && value.IsSingle())
+				{
+					YGNodeStyleSetFlexShrink(node, value.single);
+				}
+				else if (property == CStylePropertyType::FlexDirection && value.IsEnum())
+				{
+					YGNodeStyleSetFlexDirection(node, (YGFlexDirection)value.enumValue.x);
+				}
+				else if (property == CStylePropertyType::RowGap && value.IsSingle())
+				{
+					YGNodeStyleSetGap(node, YGGutterRow, value.single);
+				}
+				else if (property == CStylePropertyType::ColumnGap && value.IsSingle())
+				{
+					YGNodeStyleSetGap(node, YGGutterColumn, value.single);
+				}
+				else if (property == CStylePropertyType::Margin)
+				{
+					if (value.IsEnum())
+					{
 						YGNodeStyleSetMarginAuto(node, YGEdgeAll);
-					else
-						YGNodeStyleSetMargin(node, YGEdgeAll, value.single);
+					}
+					else if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetMarginPercent(node, YGEdgeAll, value.single);
+						else if (value.enumValue.x == CStyleValue::Auto)
+							YGNodeStyleSetMarginAuto(node, YGEdgeAll);
+						else
+							YGNodeStyleSetMargin(node, YGEdgeAll, value.single);
+					}
+					else if (value.IsVector())
+					{
+						// Left
+						if (value.enumValue.x == CStyleValue::None)
+							YGNodeStyleSetMargin(node, YGEdgeLeft, value.vector.x);
+						else if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetMarginPercent(node, YGEdgeLeft, value.vector.x);
+						else if (value.enumValue.x == CStyleValue::Auto)
+							YGNodeStyleSetMarginAuto(node, YGEdgeLeft);
+						// Top
+						if (value.enumValue.y == CStyleValue::None)
+							YGNodeStyleSetMargin(node, YGEdgeTop, value.vector.y);
+						else if (value.enumValue.y == CStyleValue::Percent)
+							YGNodeStyleSetMarginPercent(node, YGEdgeTop, value.vector.y);
+						else if (value.enumValue.y == CStyleValue::Auto)
+							YGNodeStyleSetMarginAuto(node, YGEdgeTop);
+						// Right
+						if (value.enumValue.z == CStyleValue::None)
+							YGNodeStyleSetMargin(node, YGEdgeRight, value.vector.z);
+						else if (value.enumValue.z == CStyleValue::Percent)
+							YGNodeStyleSetMarginPercent(node, YGEdgeRight, value.vector.z);
+						else if (value.enumValue.z == CStyleValue::Auto)
+							YGNodeStyleSetMarginAuto(node, YGEdgeRight);
+						// Bottom
+						if (value.enumValue.w == CStyleValue::None)
+							YGNodeStyleSetMargin(node, YGEdgeBottom, value.vector.w);
+						else if (value.enumValue.w == CStyleValue::Percent)
+							YGNodeStyleSetMarginPercent(node, YGEdgeBottom, value.vector.w);
+						else if (value.enumValue.w == CStyleValue::Auto)
+							YGNodeStyleSetMarginAuto(node, YGEdgeBottom);
+					}
 				}
-				else if (value.IsVector())
+				else if (property == CStylePropertyType::Padding)
 				{
-					// Left
-					if (value.enumValue.x == CStyleValue::None)
-						YGNodeStyleSetMargin(node, YGEdgeLeft, value.vector.x);
-					else if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetMarginPercent(node, YGEdgeLeft, value.vector.x);
-					else if (value.enumValue.x == CStyleValue::Auto)
-						YGNodeStyleSetMarginAuto(node, YGEdgeLeft);
-					// Top
-					if (value.enumValue.y == CStyleValue::None)
-						YGNodeStyleSetMargin(node, YGEdgeTop, value.vector.y);
-					else if (value.enumValue.y == CStyleValue::Percent)
-						YGNodeStyleSetMarginPercent(node, YGEdgeTop, value.vector.y);
-					else if (value.enumValue.y == CStyleValue::Auto)
-						YGNodeStyleSetMarginAuto(node, YGEdgeTop);
-					// Right
-					if (value.enumValue.z == CStyleValue::None)
-						YGNodeStyleSetMargin(node, YGEdgeRight, value.vector.z);
-					else if (value.enumValue.z == CStyleValue::Percent)
-						YGNodeStyleSetMarginPercent(node, YGEdgeRight, value.vector.z);
-					else if (value.enumValue.z == CStyleValue::Auto)
-						YGNodeStyleSetMarginAuto(node, YGEdgeRight);
-					// Bottom
-					if (value.enumValue.w == CStyleValue::None)
-						YGNodeStyleSetMargin(node, YGEdgeBottom, value.vector.w);
-					else if (value.enumValue.w == CStyleValue::Percent)
-						YGNodeStyleSetMarginPercent(node, YGEdgeBottom, value.vector.w);
-					else if (value.enumValue.w == CStyleValue::Auto)
-						YGNodeStyleSetMarginAuto(node, YGEdgeBottom);
+					if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetPaddingPercent(node, YGEdgeAll, value.single);
+						else
+							YGNodeStyleSetPadding(node, YGEdgeAll, value.single);
+					}
+					else if (value.IsVector())
+					{
+						// Left
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetPaddingPercent(node, YGEdgeLeft, value.vector.x);
+						else
+							YGNodeStyleSetPadding(node, YGEdgeLeft, value.vector.x);
+						// Top
+						if (value.enumValue.y == CStyleValue::Percent)
+							YGNodeStyleSetPaddingPercent(node, YGEdgeTop, value.vector.y);
+						else
+							YGNodeStyleSetPadding(node, YGEdgeTop, value.vector.y);
+						// Right
+						if (value.enumValue.z == CStyleValue::Percent)
+							YGNodeStyleSetPaddingPercent(node, YGEdgeRight, value.vector.z);
+						else
+							YGNodeStyleSetPadding(node, YGEdgeRight, value.vector.z);
+						// Bottom
+						if (value.enumValue.w == CStyleValue::Percent)
+							YGNodeStyleSetPaddingPercent(node, YGEdgeBottom, value.vector.w);
+						else
+							YGNodeStyleSetPadding(node, YGEdgeBottom, value.vector.w);
+					}
+				}
+				else if (property == CStylePropertyType::BorderWidth) // Do not apply border width for layout purposes
+				{
+					if (value.IsSingle())
+					{
+						//YGNodeStyleSetBorder(node, YGEdgeAll, value.single);
+					}
+					else if (value.IsVector())
+					{
+						// YGNodeStyleSetBorder(node, YGEdgeLeft, value.vector.left);
+						// YGNodeStyleSetBorder(node, YGEdgeTop, value.vector.top);
+						// YGNodeStyleSetBorder(node, YGEdgeRight, value.vector.right);
+						// YGNodeStyleSetBorder(node, YGEdgeBottom, value.vector.bottom);
+					}
+				}
+				else if (property == CStylePropertyType::Width)
+				{
+					if (value.IsAutoValue())
+					{
+						YGNodeStyleSetWidthAuto(node);
+					}
+					else if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetWidthPercent(node, value.single);
+						else
+							YGNodeStyleSetWidth(node, value.single);
+					}
+				}
+				else if (property == CStylePropertyType::MinWidth)
+				{
+					if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetMinWidthPercent(node, value.single);
+						else
+							YGNodeStyleSetMinWidth(node, value.single);
+					}
+				}
+				else if (property == CStylePropertyType::MaxWidth)
+				{
+					if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetMaxWidthPercent(node, value.single);
+						else
+							YGNodeStyleSetMaxWidth(node, value.single);
+					}
+				}
+				else if (property == CStylePropertyType::Height)
+				{
+					if (value.IsAutoValue())
+					{
+						YGNodeStyleSetHeightAuto(node);
+					}
+					else if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetHeightPercent(node, value.single);
+						else
+							YGNodeStyleSetHeight(node, value.single);
+					}
+				}
+				else if (property == CStylePropertyType::MinHeight)
+				{
+					if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetMinHeightPercent(node, value.single);
+						else
+							YGNodeStyleSetMinHeight(node, value.single);
+					}
+				}
+				else if (property == CStylePropertyType::MaxHeight)
+				{
+					if (value.IsSingle())
+					{
+						if (value.enumValue.x == CStyleValue::Percent)
+							YGNodeStyleSetMaxHeightPercent(node, value.single);
+						else
+							YGNodeStyleSetMaxHeight(node, value.single);
+					}
 				}
 			}
-			else if (property == CStylePropertyType::Padding)
+
+			needsStyle = false;
+
+			if (layoutChanged)
 			{
-				if (value.IsSingle())
-				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetPaddingPercent(node, YGEdgeAll, value.single);
-					else
-						YGNodeStyleSetPadding(node, YGEdgeAll, value.single);
-				}
-				else if (value.IsVector())
-				{
-					// Left
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetPaddingPercent(node, YGEdgeLeft, value.vector.x);
-					else
-						YGNodeStyleSetPadding(node, YGEdgeLeft, value.vector.x);
-					// Top
-					if (value.enumValue.y == CStyleValue::Percent)
-						YGNodeStyleSetPaddingPercent(node, YGEdgeTop, value.vector.y);
-					else
-						YGNodeStyleSetPadding(node, YGEdgeTop, value.vector.y);
-					// Right
-					if (value.enumValue.z == CStyleValue::Percent)
-						YGNodeStyleSetPaddingPercent(node, YGEdgeRight, value.vector.z);
-					else
-						YGNodeStyleSetPadding(node, YGEdgeRight, value.vector.z);
-					// Bottom
-					if (value.enumValue.w == CStyleValue::Percent)
-						YGNodeStyleSetPaddingPercent(node, YGEdgeBottom, value.vector.w);
-					else
-						YGNodeStyleSetPadding(node, YGEdgeBottom, value.vector.w);
-				}
-			}
-			else if (property == CStylePropertyType::BorderWidth) // Do not apply border width for layout purposes
-			{
-				if (value.IsSingle())
-				{
-					//YGNodeStyleSetBorder(node, YGEdgeAll, value.single);
-				}
-				else if (value.IsVector())
-				{
-					// YGNodeStyleSetBorder(node, YGEdgeLeft, value.vector.left);
-					// YGNodeStyleSetBorder(node, YGEdgeTop, value.vector.top);
-					// YGNodeStyleSetBorder(node, YGEdgeRight, value.vector.right);
-					// YGNodeStyleSetBorder(node, YGEdgeBottom, value.vector.bottom);
-				}
-			}
-			else if (property == CStylePropertyType::Width)
-			{
-				if (value.IsAutoValue())
-				{
-					YGNodeStyleSetWidthAuto(node);
-				}
-				else if (value.IsSingle())
-				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetWidthPercent(node, value.single);
-					else
-						YGNodeStyleSetWidth(node, value.single);
-				}
-			}
-			else if (property == CStylePropertyType::MinWidth)
-			{
-				if (value.IsSingle())
-				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetMinWidthPercent(node, value.single);
-					else
-						YGNodeStyleSetMinWidth(node, value.single);
-				}
-			}
-			else if (property == CStylePropertyType::MaxWidth)
-			{
-				if (value.IsSingle())
-				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetMaxWidthPercent(node, value.single);
-					else
-						YGNodeStyleSetMaxWidth(node, value.single);
-				}
-			}
-			else if (property == CStylePropertyType::Height)
-			{
-				if (value.IsAutoValue())
-				{
-					YGNodeStyleSetHeightAuto(node);
-				}
-				else if (value.IsSingle())
-				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetHeightPercent(node, value.single);
-					else
-						YGNodeStyleSetHeight(node, value.single);
-				}
-			}
-			else if (property == CStylePropertyType::MinHeight)
-			{
-				if (value.IsSingle())
-				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetMinHeightPercent(node, value.single);
-					else
-						YGNodeStyleSetMinHeight(node, value.single);
-				}
-			}
-			else if (property == CStylePropertyType::MaxHeight)
-			{
-				if (value.IsSingle())
-				{
-					if (value.enumValue.x == CStyleValue::Percent)
-						YGNodeStyleSetMaxHeightPercent(node, value.single);
-					else
-						YGNodeStyleSetMaxHeight(node, value.single);
-				}
+				SetNeedsLayout();
 			}
 		}
-
-		needsStyle = false;
 
 		for (CWidget* child : attachedWidgets)
 		{
 			child->UpdateStyleIfNeeded();
 		}
-
-		SetNeedsLayout();
 	}
 
 	void CWidget::AddSubWidget(CWidget* widget)
@@ -727,11 +738,11 @@ namespace CE::Widgets
 			mouseEvent->Consume(this);
 			if (event->type == CEventType::MousePress)
 			{
-				CE_LOG(Info, All, "MousePress: {}", GetName());
+				//CE_LOG(Info, All, "MousePress: {}", GetName());
 			}
 			else if (event->type == CEventType::MouseRelease)
 			{
-				CE_LOG(Info, All, "MouseRelease: {}", GetName());
+				//CE_LOG(Info, All, "MouseRelease: {}", GetName());
 			}
 
 			if (event->type == CEventType::MousePress)
@@ -765,8 +776,6 @@ namespace CE::Widgets
 				}
 				SetNeedsStyle();
 			}
-
-			CE_LOG(Info, All, "{}: {} ({})", event->type, GetName(), GetClass()->GetName().GetLastComponent());
 		}
 		
 		if (event->direction == CEventDirection::TopToBottom) // Pass event down the chain

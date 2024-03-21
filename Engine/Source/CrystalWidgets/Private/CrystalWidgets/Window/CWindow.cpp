@@ -191,7 +191,12 @@ namespace CE::Widgets
             while (prevHoveredWidgets.NonEmpty() && prevHoveredWidgets.Top() != hoveredWidget)
             {
                 mouseEvent.sender = prevHoveredWidgets.Top();
-                prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
+                mouseEvent.Reset();
+                if (prevHoveredWidgets.Top()->receiveMouseEvents)
+                {
+	                prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
+                	//CE_LOG(Info, All, "MouseLeave: {}", prevHoveredWidgets.Top()->GetName());
+                }
                 prevHoveredWidgets.Pop();
             }
         }
@@ -222,8 +227,13 @@ namespace CE::Widgets
 
             for (int i = idx; i < prevHoveredWidgets.GetSize(); i++)
             {
+                mouseEvent.Reset();
                 mouseEvent.sender = prevHoveredWidgets[i];
-                prevHoveredWidgets[i]->HandleEvent(&mouseEvent);
+                if (prevHoveredWidgets[i]->receiveMouseEvents)
+                {
+                    prevHoveredWidgets[i]->HandleEvent(&mouseEvent);
+                    //CE_LOG(Info, All, "MouseEnter: {}", prevHoveredWidgets[i]->GetName());
+                }
             }
         }
 
