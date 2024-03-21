@@ -10,6 +10,8 @@ namespace CE
 {
 	typedef void* WindowHandle;
 	class PlatformWindow;
+
+    typedef Delegate<bool(PlatformWindow* window, Vec2 position)> WindowDragHitTestDelegate;
     
     class COREAPPLICATION_API PlatformWindow
     {
@@ -53,9 +55,14 @@ namespace CE
 
         inline bool IsMainWindow() const { return isMainWindow; }
 
-    protected:
+        void SetHitTestDelegate(const WindowDragHitTestDelegate& delegate)
+        {
+            this->dragHitTest = delegate;
+        }
 
-		//List<IWindowCallbacks*> windowCallbacks{};
+    coreapplication_protected_internal:
+
+        WindowDragHitTestDelegate dragHitTest{};
 
         bool isMainWindow = false;
 

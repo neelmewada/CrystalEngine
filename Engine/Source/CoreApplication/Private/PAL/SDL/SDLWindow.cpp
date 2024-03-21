@@ -21,18 +21,20 @@ namespace CE
 	}
 
 	// Credit: https://gist.github.com/dele256/901dd1e8f920327fc457a538996f2a29
-	SDL_HitTestResult HitTestCallback(SDL_Window* Window, const SDL_Point* Area, void* Data)
+	static SDL_HitTestResult HitTestCallback(SDL_Window* window, const SDL_Point* area, void* data)
 	{
 		int Width, Height;
-		SDL_GetWindowSize(Window, &Width, &Height);
+		SDL_GetWindowSize(window, &Width, &Height);
 
-		if (Area->y < MOUSE_GRAB_PADDING)
+		SDLPlatformWindow* platformWindow = (SDLPlatformWindow*)data;
+
+		if (area->y < MOUSE_GRAB_PADDING)
 		{
-			if (Area->x < MOUSE_GRAB_PADDING)
+			if (area->x < MOUSE_GRAB_PADDING)
 			{
 				return SDL_HITTEST_RESIZE_TOPLEFT;
 			}
-			else if (Area->x > Width - MOUSE_GRAB_PADDING)
+			else if (area->x > Width - MOUSE_GRAB_PADDING)
 			{
 				return SDL_HITTEST_RESIZE_TOPRIGHT;
 			}
@@ -41,13 +43,13 @@ namespace CE
 				return SDL_HITTEST_RESIZE_TOP;
 			}
 		}
-		else if (Area->y > Height - MOUSE_GRAB_PADDING)
+		else if (area->y > Height - MOUSE_GRAB_PADDING)
 		{
-			if (Area->x < MOUSE_GRAB_PADDING)
+			if (area->x < MOUSE_GRAB_PADDING)
 			{
 				return SDL_HITTEST_RESIZE_BOTTOMLEFT;
 			}
-			else if (Area->x > Width - MOUSE_GRAB_PADDING)
+			else if (area->x > Width - MOUSE_GRAB_PADDING)
 			{
 				return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
 			}
@@ -56,15 +58,20 @@ namespace CE
 				return SDL_HITTEST_RESIZE_BOTTOM;
 			}
 		}
-		else if (Area->x < MOUSE_GRAB_PADDING)
+		else if (area->x < MOUSE_GRAB_PADDING)
 		{
 			return SDL_HITTEST_RESIZE_LEFT;
 		}
-		else if (Area->x > Width - MOUSE_GRAB_PADDING)
+		else if (area->x > Width - MOUSE_GRAB_PADDING)
 		{
 			return SDL_HITTEST_RESIZE_RIGHT;
 		}
-		else if (Area->y < WINDOW_DRAG_PADDING)
+
+		if (platformWindow->dragHitTest.IsValid())
+		{
+			return platformWindow->dragHitTest.Invoke(platformWindow, Vec2(area->x, area->y)) ? SDL_HITTEST_DRAGGABLE : SDL_HITTEST_NORMAL;
+		}
+		else if (area->y < WINDOW_DRAG_PADDING)
 		{
 			return SDL_HITTEST_DRAGGABLE;
 		}
@@ -132,7 +139,7 @@ namespace CE
 
 		if (borderless)
 		{
-			SDL_SetWindowHitTest(handle, HitTestCallback, nullptr);
+			SDL_SetWindowHitTest(handle, HitTestCallback, this);
 			SDL_SetWindowTitle(handle, "");
 		}
 		else

@@ -50,7 +50,7 @@ namespace CE
 
 		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
 		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace);
-		//auto secondWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
+		secondDockWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
 
 		widgetWindows.Add(mainDockSpace);
 		//widgetWindows.Add(mainDockWindow);

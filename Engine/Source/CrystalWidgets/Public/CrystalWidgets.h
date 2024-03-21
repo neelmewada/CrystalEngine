@@ -34,6 +34,7 @@
 // Widgets
 #include "CrystalWidgets/CWidget.h"
 #include "CrystalWidgets/Window/CWindow.h"
+#include "CrystalWidgets/Window/CDockSplitView.h"
 #include "CrystalWidgets/Window/CDockSpace.h"
 #include "CrystalWidgets/Window/CDockWindow.h"
 

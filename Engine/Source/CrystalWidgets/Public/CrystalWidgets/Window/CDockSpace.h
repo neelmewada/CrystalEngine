@@ -3,64 +3,6 @@
 
 namespace CE::Widgets
 {
-	class CDockWindow;
-	class CDockSpace;
-
-	ENUM()
-	enum class CDockSplitDirection
-	{
-		Vertical = 0,
-		Horizontal
-	};
-	ENUM_CLASS(CDockSplitDirection);
-
-	ENUM()
-	enum class CDockType
-	{
-		Major = 0,
-		Minor
-	};
-	ENUM_CLASS(CDockType);
-
-	CLASS()
-	class CRYSTALWIDGETS_API CDockSplitView : public CWidget
-	{
-		CE_CLASS(CDockSplitView, CWidget)
-	public:
-
-		CDockSplitView();
-		virtual ~CDockSplitView();
-
-		CDockSplitDirection GetSplitDirection() const { return splitDirection; }
-
-		f32 GetSplitRatio() const { return splitRatio; }
-
-		CDockSplitView* FindSplit(Name splitName);
-
-		bool IsLayoutCalculationRoot() override { return true; }
-
-	crystalwidgets_internal:
-
-		void OnSubobjectAttached(Object* subobject) override;
-		void OnSubobjectDetached(Object* subobject) override;
-
-		FIELD()
-		CDockSplitView* parentSplitView = nullptr;
-
-		FIELD()
-		Array<CDockSplitView*> children{};
-
-		FIELD()
-		CDockSplitDirection splitDirection = CDockSplitDirection::Vertical;
-
-		FIELD()
-		f32 splitRatio = 1.0f;
-
-		FIELD()
-		CDockSpace* dockSpace = nullptr;
-
-		friend class CDockSpace;
-	};
 
 	CLASS()
 	class CRYSTALWIDGETS_API CDockSpace : public CWindow
@@ -81,16 +23,25 @@ namespace CE::Widgets
 
 	private:
 
+		void HandleEvent(CEvent* event) override;
+
+		void OnPlatformWindowSet() override;
+
 		void OnSubobjectAttached(Object* object) override;
 		void OnSubobjectDetached(Object* object) override;
 
 		void OnPaint(CPaintEvent* paintEvent) override;
+
+		bool WindowHitTest(PlatformWindow* window, Vec2 position);
 
 		FIELD()
 		Array<CDockSplitView*> dockSplits{};
 
 		FIELD()
 		CDockType dockType = CDockType::Major;
+
+
+		Array<Rect> tabRects{};
 	};
 
 } // namespace CE::Widgets

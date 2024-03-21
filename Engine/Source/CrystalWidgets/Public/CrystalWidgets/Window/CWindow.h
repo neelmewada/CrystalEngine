@@ -36,6 +36,8 @@ namespace CE::Widgets
 
     protected:
 
+        virtual void OnPlatformWindowSet() {}
+
         void UpdateLayoutIfNeeded() override;
 
         virtual void ConstructWindow();

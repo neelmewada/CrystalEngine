@@ -20,6 +20,8 @@ namespace CE::Widgets
 		Active = BIT(11),
 		Inactive = BIT(12),
 		Collapsed = BIT(13),
+		Major = BIT(14),
+		Minor = BIT(15)
 	};
 	ENUM_CLASS_FLAGS(CStateFlag);
 

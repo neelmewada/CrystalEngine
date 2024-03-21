@@ -92,6 +92,7 @@ namespace CE
 
 		CDockSpace* mainDockSpace = nullptr;
 		CDockWindow* mainDockWindow = nullptr;
+		CDockWindow* secondDockWindow = nullptr;
 
 		RHI::FrameScheduler* scheduler = nullptr;
 		RHI::SwapChain* swapChain = nullptr;

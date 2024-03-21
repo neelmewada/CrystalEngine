@@ -32,6 +32,7 @@ namespace CE::Widgets
     void CWindow::SetPlatformWindow(PlatformWindow* window)
     {
         this->nativeWindow = window;
+        OnPlatformWindowSet();
     }
 
     const Array<RHI::DrawPacket*>& CWindow::FlushDrawPackets(u32 imageIndex)
