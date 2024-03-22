@@ -40,8 +40,6 @@ namespace CE::Widgets
 		FIELD()
 		CDockType dockType = CDockType::Major;
 
-
-		Array<Rect> tabRects{};
 	};
 
 } // namespace CE::Widgets

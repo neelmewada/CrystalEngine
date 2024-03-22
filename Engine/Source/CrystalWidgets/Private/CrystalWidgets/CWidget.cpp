@@ -91,7 +91,7 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
-		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>())
+		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()))
 		{
 			CWidget* widget = (CWidget*)object;
 			widget->parent = nullptr;
@@ -122,9 +122,24 @@ namespace CE::Widgets
 		SetNeedsPaint();
 	}
 
+	bool CWidget::IsSubWidgetAllowed(Class* subWidgetClass)
+	{
+		return subWidgetClass != nullptr && subWidgetClass->IsSubclassOf<CWidget>();
+	}
+
 	bool CWidget::IsWindow()
 	{
 		return IsOfType<CWindow>();
+	}
+
+	void CWidget::SetNeedsPaint()
+	{
+		needsPaint = true;
+
+		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
+		{
+			attachedWidgets[i]->SetNeedsPaint();
+		}
 	}
 
 	void CWidget::SetNeedsLayout()
@@ -707,16 +722,19 @@ namespace CE::Widgets
 	{
 		if (event == nullptr)
 			return;
+		if (!IsEnabled())
+			return;
 
 		bool popPaintCoords = false;
+		bool shouldPropagateDownwards = true;
 
-		// Handle event for this widget
+		// Paint event
 		if (event->type == CEventType::PaintEvent)
 		{
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
 			paintEvent->direction = CEventDirection::TopToBottom;
 
-			if (paintEvent->painter != nullptr && CanPaint())
+			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())
 			{
 				paintEvent->painter->Reset();
 				popPaintCoords = true;
@@ -728,23 +746,19 @@ namespace CE::Widgets
 				paintEvent->painter->PushChildCoordinateSpace(origin);
 				OnPaint(paintEvent);
 			}
+			else
+			{
+				shouldPropagateDownwards = false;
+			}
 		}
 
 		// Mouse events
-		if (receiveMouseEvents && event->IsMouseEvent() && !event->isConsumed)
+		if (receiveMouseEvents && event->IsMouseEvent() && !event->IsDragEvent() && !event->isConsumed)
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
 
 			mouseEvent->Consume(this);
-			if (event->type == CEventType::MousePress)
-			{
-				//CE_LOG(Info, All, "MousePress: {}", GetName());
-			}
-			else if (event->type == CEventType::MouseRelease)
-			{
-				//CE_LOG(Info, All, "MouseRelease: {}", GetName());
-			}
-
+			
 			if (event->type == CEventType::MousePress)
 			{
 				stateFlags |= CStateFlag::Pressed;
@@ -758,7 +772,16 @@ namespace CE::Widgets
 				SetNeedsStyle();
 			}
 
-			if (event->type == CEventType::MouseEnter)
+			if (event->type == CEventType::MouseEnter && mouseEvent->button == MouseButton::None)
+			{
+				stateFlags |= CStateFlag::Hovered;
+				if (isPressed)
+				{
+					stateFlags |= CStateFlag::Pressed;
+				}
+				SetNeedsStyle();
+			}
+			else if (event->type == CEventType::MouseMove && mouseEvent->button == MouseButton::None && !EnumHasFlag(stateFlags, CStateFlag::Hovered))
 			{
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
@@ -778,19 +801,28 @@ namespace CE::Widgets
 			}
 		}
 		
-		if (event->direction == CEventDirection::TopToBottom) // Pass event down the chain
+		if (event->direction == CEventDirection::TopToBottom && IsEnabled()) // Pass event down the chain
 		{
+			if (!shouldPropagateDownwards)
+			{
+				return;
+			}
+
 			for (CWidget* widget : attachedWidgets)
 			{
 				if (event->stopPropagation)
+				{
 					return;
+				}
 				widget->HandleEvent(event);
 			}
 		}
 		else if (event->direction == CEventDirection::BottomToTop) // Pass event up the chain
 		{
 			if (event->stopPropagation)
+			{
 				return;
+			}
 			if (parent != nullptr)
 			{
 				parent->HandleEvent(event);

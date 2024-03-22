@@ -3,7 +3,7 @@
 namespace CE::Widgets
 {
 
-    class CFont
+    struct CFont
     {
     public:
 

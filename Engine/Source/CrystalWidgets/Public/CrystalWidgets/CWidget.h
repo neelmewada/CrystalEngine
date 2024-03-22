@@ -22,12 +22,14 @@ namespace CE::Widgets
 
         virtual bool CanPaint() const { return true; }
 
+        virtual bool IsSubWidgetAllowed(Class* subWidgetClass);
+
         bool IsWindow();
 
         inline void SetVisible(bool visible) { this->visible = visible; }
         inline void SetEnabled(bool enabled) { this->enabled = enabled; }
 
-        void SetNeedsPaint() { needsPaint = true; }
+        void SetNeedsPaint();
 
         void SetNeedsLayout();
         void ClearNeedsLayout();
@@ -169,6 +171,9 @@ namespace CE::Widgets
 
         FIELD()
         b8 receiveMouseEvents = true;
+
+        FIELD()
+        b8 receiveDragEvents = false;
 
         FIELD()
         Array<Name> styleClasses{};

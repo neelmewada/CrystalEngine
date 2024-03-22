@@ -8,7 +8,7 @@
 
 #include <SDL_syswm.h>
 
-#define MOUSE_GRAB_PADDING 10
+#define MOUSE_GRAB_PADDING 5
 #define WINDOW_DRAG_PADDING 50
 
 namespace CE
@@ -140,7 +140,6 @@ namespace CE
 		if (borderless)
 		{
 			SDL_SetWindowHitTest(handle, HitTestCallback, this);
-			SDL_SetWindowTitle(handle, "");
 		}
 		else
 		{
@@ -230,6 +229,11 @@ namespace CE
 		int x;  int y;
 		SDL_GetWindowPosition(handle, &x, &y);
 		return Vec2i(x, y);
+	}
+
+	void SDLPlatformWindow::SetWindowPosition(Vec2i position)
+	{
+		SDL_SetWindowPosition(handle, position.x, position.y);
 	}
 
 } // namespace CE

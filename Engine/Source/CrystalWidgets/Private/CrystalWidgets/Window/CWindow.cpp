@@ -23,6 +23,8 @@ namespace CE::Widgets
         RPISystem::Get().GetDrawListTagRegistry()->ReleaseTag(drawListTag);
         drawListTag = 0;
 
+        delete swapChain; swapChain = nullptr;
+
         if (windowResizeDelegate != 0)
         {
             PlatformApplication::Get()->onWindowDrawableSizeChanged.RemoveDelegateInstance(windowResizeDelegate);
@@ -32,6 +34,18 @@ namespace CE::Widgets
     void CWindow::SetPlatformWindow(PlatformWindow* window)
     {
         this->nativeWindow = window;
+
+        if (!swapChain && nativeWindow)
+        {
+            RHI::SwapChainDescriptor desc{};
+            desc.imageCount = CApplication::Get()->numFramesInFlight;
+            desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+            
+            nativeWindow->GetWindowSize(&desc.preferredWidth, &desc.preferredHeight);
+
+            swapChain = RHI::gDynamicRHI->CreateSwapChain(nativeWindow, desc);
+        }
+
         OnPlatformWindowSet();
     }
 
@@ -109,6 +123,11 @@ namespace CE::Widgets
         if (!nativeWindow || !renderer)
             return;
 
+        if (swapChain)
+        {
+            swapChain->Rebuild();
+        }
+
         u32 screenWidth = 0; u32 screenHeight = 0;
         nativeWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
 
@@ -136,6 +155,20 @@ namespace CE::Widgets
         if (prevMousePos == Vec2())
             prevMousePos = globalMousePos;
 
+        MouseButton curButton = MouseButton::None;
+        if (InputManager::IsMouseButtonHeld(MouseButton::Left))
+        {
+            curButton = MouseButton::Left;
+        }
+        else if (InputManager::IsMouseButtonHeld(MouseButton::Right))
+        {
+            curButton = MouseButton::Right;
+        }
+        else if (InputManager::IsMouseButtonHeld(MouseButton::Middle))
+        {
+            curButton = MouseButton::Middle;
+        }
+
         std::function<CWidget*(CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
             {
 				if (widget == nullptr)
@@ -158,6 +191,8 @@ namespace CE::Widgets
                 {
                     for (int i = widget->attachedWidgets.GetSize() - 1; i >= 0; --i)
                     {
+                        if (!widget->attachedWidgets[i]->IsEnabled())
+                            continue;
                         CWidget* insideWidget = getBottomMostHoveredWidget(widget->attachedWidgets[i]);
                         if (insideWidget && insideWidget->receiveMouseEvents)
                             return insideWidget;
@@ -168,7 +203,6 @@ namespace CE::Widgets
 
                 return nullptr;
             };
-
 
         CWidget* hoveredWidget = getBottomMostHoveredWidget(this);
 
@@ -184,7 +218,7 @@ namespace CE::Widgets
             CMouseEvent mouseEvent{};
             mouseEvent.name = "MouseLeave";
             mouseEvent.type = CEventType::MouseLeave;
-            mouseEvent.button = MouseButton::None;
+            mouseEvent.button = curButton;
             mouseEvent.mousePos = globalMousePos;
             mouseEvent.prevMousePos = prevMousePos;
             mouseEvent.direction = CEventDirection::BottomToTop;
@@ -196,19 +230,18 @@ namespace CE::Widgets
                 if (prevHoveredWidgets.Top()->receiveMouseEvents)
                 {
 	                prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
-                	//CE_LOG(Info, All, "MouseLeave: {}", prevHoveredWidgets.Top()->GetName());
                 }
                 prevHoveredWidgets.Pop();
             }
         }
-
+        
         if (hoveredWidget != nullptr && (prevHoveredWidgets.IsEmpty() || prevHoveredWidgets.Top() != hoveredWidget) &&
             (prevHoveredWidgets.IsEmpty() || !hoveredWidget->SubWidgetExistsRecursive(prevHoveredWidgets.Top())))
         {
             CMouseEvent mouseEvent{};
             mouseEvent.name = "MouseEnter";
             mouseEvent.type = CEventType::MouseEnter;
-            mouseEvent.button = MouseButton::None;
+            mouseEvent.button = curButton;
             mouseEvent.mousePos = globalMousePos;
             mouseEvent.prevMousePos = prevMousePos;
             mouseEvent.direction = CEventDirection::BottomToTop;
@@ -233,17 +266,17 @@ namespace CE::Widgets
                 if (prevHoveredWidgets[i]->receiveMouseEvents)
                 {
                     prevHoveredWidgets[i]->HandleEvent(&mouseEvent);
-                    //CE_LOG(Info, All, "MouseEnter: {}", prevHoveredWidgets[i]->GetName());
                 }
             }
         }
 
-        if (mouseDelta.x > 0 || mouseDelta.y > 0)
+
+        if (abs(mouseDelta.x) >= FLT_EPSILON || abs(mouseDelta.y) >= FLT_EPSILON)
         {
             CMouseEvent mouseEvent{};
             mouseEvent.name = "MouseMove";
             mouseEvent.type = CEventType::MouseMove;
-            mouseEvent.button = MouseButton::None;
+            mouseEvent.button = curButton;
             mouseEvent.mousePos = globalMousePos;
             mouseEvent.prevMousePos = prevMousePos;
             mouseEvent.direction = CEventDirection::BottomToTop;
@@ -252,6 +285,25 @@ namespace CE::Widgets
             {
 	            mouseEvent.sender = prevHoveredWidgets.Top();
                 prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
+            }
+
+            if (draggedWidget != nullptr)
+            {
+                CDragEvent dragEvent{};
+                dragEvent.name = "DragEvent";
+                dragEvent.type = CEventType::DragMove;
+                dragEvent.button = MouseButton::Left;
+                dragEvent.mousePos = globalMousePos;
+                dragEvent.prevMousePos = prevMousePos;
+                dragEvent.direction = CEventDirection::BottomToTop;
+                dragEvent.isInside = true;
+
+                dragEvent.sender = nullptr;
+                if (prevHoveredWidgets.NonEmpty())
+                    dragEvent.sender = prevHoveredWidgets.Top();
+                dragEvent.draggedWidget = draggedWidget;
+
+                draggedWidget->HandleEvent(&dragEvent);
             }
         }
 
@@ -275,6 +327,27 @@ namespace CE::Widgets
                     event.sender = prevHoveredWidgets.Top();
                     widgetsPressedPerMouseButton[i] = event.sender;
                     prevHoveredWidgets.Top()->HandleEvent(&event);
+
+                    if (prevHoveredWidgets.Top()->receiveDragEvents && mouseButton == MouseButton::Left)
+                    {
+                        CDragEvent dragEvent{};
+                        dragEvent.name = "DragEvent";
+                        dragEvent.type = CEventType::DragBegin;
+                        dragEvent.button = mouseButton;
+                        dragEvent.mousePos = globalMousePos;
+                        dragEvent.prevMousePos = prevMousePos;
+                        dragEvent.direction = CEventDirection::BottomToTop;
+                        dragEvent.isInside = true;
+
+                        dragEvent.sender = prevHoveredWidgets.Top();
+                        dragEvent.draggedWidget = prevHoveredWidgets.Top();
+                        prevHoveredWidgets.Top()->HandleEvent(&dragEvent);
+
+						if (dragEvent.isConsumed)
+						{
+							draggedWidget = dragEvent.draggedWidget;
+						}
+                    }
                 }
 	        }
 
@@ -300,6 +373,27 @@ namespace CE::Widgets
                     event.Reset();
                     event.isInside = false;
                     widgetsPressedPerMouseButton[i]->HandleEvent(&event);
+                }
+
+                if (draggedWidget != nullptr)
+                {
+                    CDragEvent dragEvent{};
+                    dragEvent.name = "DragEvent";
+                    dragEvent.type = CEventType::DragEnd;
+                    dragEvent.button = mouseButton;
+                    dragEvent.mousePos = globalMousePos;
+                    dragEvent.prevMousePos = prevMousePos;
+                    dragEvent.direction = CEventDirection::BottomToTop;
+                    dragEvent.isInside = true;
+
+                    dragEvent.sender = nullptr;
+                    if (prevHoveredWidgets.NonEmpty())
+                        dragEvent.sender = prevHoveredWidgets.Top();
+                    dragEvent.draggedWidget = draggedWidget;
+                    dragEvent.dropTarget = dragEvent.sender;
+                    draggedWidget->HandleEvent(&dragEvent);
+
+                    draggedWidget = nullptr;
                 }
 
                 widgetsPressedPerMouseButton[i] = nullptr;

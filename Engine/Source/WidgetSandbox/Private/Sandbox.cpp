@@ -31,14 +31,35 @@ namespace CE
 		
 		scheduler = RHI::FrameScheduler::Create(desc);
 
+		auto assetManager = gEngine->GetAssetManager();
+
+		auto renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
+
+		auto fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
+		auto poppinsFont = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Poppins");
+
+		auto atlasData = fontAsset->GetAtlasData();
+
+		CApplicationInitInfo appInitInfo{};
+		appInitInfo.draw2dShader = renderer2dShader->GetOrCreateRPIShader(0);
+		appInitInfo.defaultFont = atlasData;
+		appInitInfo.defaultFontName = "Roboto";
+		appInitInfo.numFramesInFlight = 2;
+		appInitInfo.scheduler = scheduler;
+
+		CApplication::Get()->Initialize(appInitInfo);
+
+		CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
+
 		mainWindow = window;
 		mainWindow->SetBorderless(true);
+		platformWindows.Add(mainWindow);
 
-		RHI::SwapChainDescriptor swapChainDesc{};
-		swapChainDesc.imageCount = 2;
-		swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
+		//RHI::SwapChainDescriptor swapChainDesc{};
+		//swapChainDesc.imageCount = 2;
+		//swapChainDesc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
 
-		swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
+		//swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
 
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
@@ -47,14 +68,6 @@ namespace CE
 		CApplication* app = CApplication::Get();
 
 		app->LoadGlobalStyleSheet(PlatformDirectories::GetLaunchDir() / "Engine/Styles/Style.css");
-
-		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
-		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace);
-		secondDockWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
-
-		widgetWindows.Add(mainDockSpace);
-		//widgetWindows.Add(mainDockWindow);
-		//widgetWindows.Add(secondWindow);
 		
 		InitFontAtlas();
 		InitWidgets();
@@ -65,6 +78,41 @@ namespace CE
 		f32 timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 
 		CE_LOG(Info, All, "Initialization time: {} seconds", timeTaken);
+	}
+
+	void WidgetSandbox::InitWidgets()
+	{
+		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
+		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace);
+		mainDockWindow->SetAsMainWindow(true);
+		secondDockWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
+		thirdDockWindow = CreateWindow<CDockWindow>("Third", mainDockSpace);
+
+		auto newWindow = PlatformApplication::Get()->CreatePlatformWindow("SecondWindow", 1024, 768, false, false);
+		platformWindows.Add(newWindow);
+
+		newWindow->SetBorderless(true);
+		secondDockSpace = CreateWindow<CDockSpace>("SecondDockSpace", nullptr, newWindow);
+		auto secondWindow = CreateWindow<CDockWindow>("Second", secondDockSpace);
+
+		//widgetWindows.Add(mainDockSpace);
+		//widgetWindows.Add(secondDockSpace);
+		//widgetWindows.Add(secondWindow);
+
+		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
+		if (secondDockWindow)
+		{
+			CWidget* toolBar2 = CreateObject<CWidget>(secondDockWindow, "ToolBar");
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			CWidget* btn = CreateObject<CWidget>(toolBar, "Button");
+		}
+	}
+
+	void WidgetSandbox::DestroyWidgets()
+	{
 	}
 
 	void WidgetSandbox::Tick(f32 deltaTime)
@@ -124,8 +172,8 @@ namespace CE
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
 
-		delete swapChain; swapChain = nullptr;
-		delete swapChain2; swapChain2 = nullptr;
+		//delete swapChain; swapChain = nullptr;
+		//delete swapChain2; swapChain2 = nullptr;
 
 		rpiSystem.Shutdown();
 	}
@@ -139,33 +187,26 @@ namespace CE
 		auto timeTaken = ((f32)(clock() - prevTime)) / CLOCKS_PER_SEC;
 	}
 
-	void WidgetSandbox::InitWidgets()
-	{
-		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
-
-		for (int i = 0; i < 4; ++i)
-		{
-			CWidget* btn = CreateObject<CWidget>(toolBar, "Button");
-		}
-	}
-
-	void WidgetSandbox::DestroyWidgets()
-	{
-	}
-
 	void WidgetSandbox::BuildFrameGraph()
 	{
 		rebuild = false;
 		recompile = true;
 
-		u32 screenWidth = swapChain->GetWidth();
-		u32 screenHeight = swapChain->GetHeight();
+		//u32 screenWidth = swapChain->GetWidth();
+		//u32 screenHeight = swapChain->GetHeight();
 
 		scheduler->BeginFrameGraph();
 		{
 			RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
 
-			attachmentDatabase.EmplaceFrameAttachment(mainWindow->GetTitle(), swapChain);
+			for (PlatformWindow* platformWindow : platformWindows)
+			{
+				//attachmentDatabase.EmplaceFrameAttachment(platformWindow->GetTitle(), swapChain);
+			}
+
+			CApplication::Get()->BuildFrameGraph();
+
+			/*attachmentDatabase.EmplaceFrameAttachment(mainWindow->GetTitle(), swapChain);
 
 			if (!mainWindow->IsMinimized() && mainWindow->IsShown())
 			{
@@ -182,7 +223,7 @@ namespace CE
 					scheduler->PresentSwapChain(swapChain);
 				}
 				scheduler->EndScope();
-			}
+			}*/
 		}
 		scheduler->EndFrameGraph();
 	}
@@ -206,11 +247,14 @@ namespace CE
 		drawList.Shutdown();
 
 		RHI::DrawListMask drawListMask{};
-		drawListMask.Set(mainDockSpace->GetDrawListTag());
+		//drawListMask.Set(mainDockSpace->GetDrawListTag());
+		CApplication::Get()->SetDrawListMasks(drawListMask);
 		drawList.Init(drawListMask);
-		
+
+		CApplication::Get()->FlushDrawPackets(drawList, imageIndex);
+
 		// Add items
-		for (int i = 0; i < widgetWindows.GetSize(); i++)
+		/*for (int i = 0; i < widgetWindows.GetSize(); i++)
 		{
 			if (!widgetWindows[i]->IsVisible() || !widgetWindows[i]->IsEnabled())
 				continue;
@@ -220,7 +264,7 @@ namespace CE
 			{
 				drawList.AddDrawPacket(drawPacket);
 			}
-		}
+		}*/
 
 		auto prevTime = clock();
 
@@ -229,7 +273,8 @@ namespace CE
 		// Finalize
 		drawList.Finalize();
 
-		scheduler->SetScopeDrawList(mainWindow->GetTitle(), &drawList.GetDrawListForTag(mainDockSpace->GetDrawListTag()));
+		CApplication::Get()->SubmitDrawPackets(drawList);
+		//scheduler->SetScopeDrawList(mainWindow->GetTitle(), &drawList.GetDrawListForTag(mainDockSpace->GetDrawListTag()));
 	}
 
 	void WidgetSandbox::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
@@ -238,12 +283,14 @@ namespace CE
 
 		scheduler->WaitUntilIdle();
 
-		if (!mainWindow->IsMinimized())
-			swapChain->Rebuild();
+		//if (!mainWindow->IsMinimized())
+		//	swapChain->Rebuild();
 	}
 
 	void WidgetSandbox::OnWindowDestroyed(PlatformWindow* window)
 	{
+		rebuild = recompile = true;
+
 		if (window == this->mainWindow)
 		{
 			destroyed = true;

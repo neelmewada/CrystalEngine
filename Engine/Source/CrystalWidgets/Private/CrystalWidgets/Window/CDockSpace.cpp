@@ -5,7 +5,7 @@ namespace CE::Widgets
 
 	CDockSpace::CDockSpace()
 	{
-        receiveMouseEvents = true;
+        receiveMouseEvents = false;
         rootPadding = Vec4(1, 1, 1, 1) * 2.0f;
 
         CDockSplitView* full = CreateDefaultSubobject<CDockSplitView>("DockSplitView");
@@ -25,6 +25,9 @@ namespace CE::Widgets
 
     bool CDockSpace::Split(CDockSplitView* originalSplit, f32 splitRatio, CDockSplitDirection splitDirection)
     {
+        if (dockType == CDockType::Major)
+            return false;
+
         splitRatio = Math::Clamp(splitRatio, 0.05f, 0.95f);
 
         CDockSplitView* first = CreateObject<CDockSplitView>(originalSplit, "DockSplitView");
@@ -41,18 +44,16 @@ namespace CE::Widgets
 
     bool CDockSpace::Split(f32 splitRatio, CDockSplitDirection splitDirection)
     {
+        if (dockType == CDockType::Major)
+            return false;
+
         CDockSplitView* originalSplit = dockSplits.Top();
         return Split(originalSplit, splitRatio, splitDirection);
     }
 
     void CDockSpace::HandleEvent(CEvent* event)
     {
-        // TODO: Handle events here
-        if (!event->isConsumed && event->IsMouseEvent())
-        {
-            CE_LOG(Info, All, "{}", event->type);
-        }
-
+        
 	    Super::HandleEvent(event);
     }
 
@@ -140,68 +141,24 @@ namespace CE::Widgets
         }
 
         painter->DrawRect(Rect::FromSize(0, 0, w, h));
-
-        // - Draw Tabs -
-
-        // Set tab height same as the top padding
-        f32 majorTabHeight = 40.0f;//windowPadding.top;
-        tabRects.Clear();
-
-        // Only 1 DockSplitView supported in a Major DockSpace
-        if (dockType == CDockType::Major && dockSplits.NonEmpty())
-        {
-            CDockSplitView* split = dockSplits[0];
-
-            f32 xOffset = 20.0f;
-
-            for (int i = 0; i < split->GetSubWidgetCount(); ++i)
-            {
-                CWidget* subWidget = split->GetSubWidget(i);
-
-                if (subWidget->IsOfType<CDockWindow>())
-                {
-                    CDockWindow* dockWindow = (CDockWindow*)subWidget;
-
-                    Vec2 tabTitleSize = painter->CalculateTextSize(dockWindow->GetTitle());
-
-                    pen.SetWidth(0.0f);
-                    pen.SetColor(Color::Clear());
-                    brush.SetColor(Color::FromRGBA32(36, 36, 36));
-                    if (i == 1)
-                        brush.SetColor(bgColor);
-                    painter->SetPen(pen);
-                    painter->SetBrush(brush);
-                    painter->SetFont(font);
-
-                    Rect tabRect = Rect::FromSize(xOffset, 25.0f, Math::Min(tabTitleSize.width + 70, 270.0f), majorTabHeight);
-                    painter->DrawRoundedRect(tabRect, Vec4(5, 5, 0, 0));
-                    tabRects.Add(tabRect);
-
-                    pen.SetColor(Color::White());
-                    painter->SetPen(pen);
-
-                    painter->DrawText(dockWindow->GetTitle(), tabRect + Rect(15, tabRect.GetSize().height / 2 - tabTitleSize.height / 2, 0, 0));
-
-                    xOffset += tabRect.GetSize().width + 2.5f;
-                }
-            }
-        }
-        else if (dockType == CDockType::Minor)
-        {
-	        
-        }
-
 	}
 
     bool CDockSpace::WindowHitTest(PlatformWindow* window, Vec2 position)
     {
-        for (const Rect& tabRect : tabRects)
+        if (dockSplits.IsEmpty()) // Should never happen
         {
-	        if (tabRect.Contains(position))
+            if (position.y < 60)
+                return true;
+            return false;
+        }
+
+        for (const auto& tab : dockSplits[0]->tabs)
+        {
+	        if (tab.rect.Contains(position))
                 return false;
         }
 
-        if (position.y < 60)
+        if (position.y < 60) // Add width offset for menu bar: (position.x > 256)
             return true;
         return false;
     }

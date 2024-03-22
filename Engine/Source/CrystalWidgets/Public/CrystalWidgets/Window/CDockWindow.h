@@ -18,6 +18,10 @@ namespace CE::Widgets
 
 		CDockSpace* GetDockSpace() const { return dockSpace; }
 
+		bool IsMainWindow() const { return isMainWindow; }
+
+		void SetAsMainWindow(bool set) { isMainWindow = set; }
+		
 	crystalwidgets_internal:
 
 		FIELD()
@@ -26,6 +30,8 @@ namespace CE::Widgets
 		FIELD()
 		CDockSpace* dockSpace = nullptr;
 
+		FIELD()
+		b8 isMainWindow = false;
 
 	};
 

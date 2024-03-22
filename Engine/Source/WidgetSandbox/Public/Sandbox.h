@@ -88,16 +88,21 @@ namespace CE
 		// Widgets
 		// Root windows that represent a native PlatformWindow directly
 		Array<CWindow*> rootWindows{};
-		Array<CWindow*> widgetWindows{};
+		//Array<CWindow*> widgetWindows{};
 
 		CDockSpace* mainDockSpace = nullptr;
 		CDockWindow* mainDockWindow = nullptr;
 		CDockWindow* secondDockWindow = nullptr;
+		CDockWindow* thirdDockWindow = nullptr;
+
+		CDockSpace* secondDockSpace = nullptr;
 
 		RHI::FrameScheduler* scheduler = nullptr;
-		RHI::SwapChain* swapChain = nullptr;
-		RHI::SwapChain* swapChain2 = nullptr;
+		//RHI::SwapChain* swapChain = nullptr;
+		//RHI::SwapChain* swapChain2 = nullptr;
 		PlatformWindow* mainWindow = nullptr;
+
+		Array<PlatformWindow*> platformWindows{};
 
 		RPI::Model* chairModel = nullptr;
 

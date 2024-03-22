@@ -39,16 +39,25 @@ namespace CE::Widgets
 
 		bool IsLayoutCalculationRoot() override { return true; }
 
+		bool IsSubWidgetAllowed(Class* subWidgetClass) override;
+
 	crystalwidgets_internal:
 
 		void OnSubobjectAttached(Object* subobject) override;
 		void OnSubobjectDetached(Object* subobject) override;
+
+		void HandleEvent(CEvent* event) override;
+
+		void OnPaint(CPaintEvent* paintEvent) override;
 
 		FIELD()
 		CDockSplitView* parentSplitView = nullptr;
 
 		FIELD()
 		Array<CDockSplitView*> children{};
+
+		FIELD()
+		Array<CDockWindow*> dockedWindows{};
 
 		FIELD()
 		CDockSplitDirection splitDirection = CDockSplitDirection::Vertical;
@@ -58,6 +67,16 @@ namespace CE::Widgets
 
 		FIELD()
 		CDockSpace* dockSpace = nullptr;
+
+		int selectedTab = 0;
+		b8 isLeftMousePressedOnTab = false;
+
+		struct TabData
+		{
+			Rect rect{};
+		};
+
+		Array<TabData> tabs{};
 
 		friend class CDockSpace;
 	};

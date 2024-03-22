@@ -28,6 +28,7 @@ namespace CE::Widgets
         Name defaultFontName = "";
         RPI::FontAtlasAsset* defaultFont = nullptr;
         u32 numFramesInFlight = 2;
+        RHI::FrameScheduler* scheduler = nullptr;
     };
 
     CLASS()
@@ -56,9 +57,18 @@ namespace CE::Widgets
 
         void LoadGlobalStyleSheet(const IO::Path& path);
 
+        void BuildFrameGraph();
+
+        void SetDrawListMasks(RHI::DrawListMask& outMask);
+
+        void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
+        void SubmitDrawPackets(RHI::DrawListContext& drawList);
+
     crystalwidgets_internal:
 
         void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
+
+        void OnWindowDestroyed(PlatformWindow* window) override;
 
         RPI::Shader* draw2dShader = nullptr;
         Name defaultFontName = "";
@@ -77,6 +87,8 @@ namespace CE::Widgets
 
         FIELD()
         CStyleSheet* globalStyleSheet = nullptr;
+
+        RHI::FrameScheduler* scheduler = nullptr;
 
     };
 

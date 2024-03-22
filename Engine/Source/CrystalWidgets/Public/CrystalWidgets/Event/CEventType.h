@@ -15,6 +15,10 @@ namespace CE::Widgets
 		MouseLeave,
 		MousePress,
 		MouseRelease,
+
+		DragBegin,
+		DragMove,
+		DragEnd,
 	};
 	ENUM_CLASS(CEventType);
 

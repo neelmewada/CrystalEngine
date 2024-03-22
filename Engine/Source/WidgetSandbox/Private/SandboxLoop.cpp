@@ -105,25 +105,6 @@ namespace CE
 
 		gEngine->Initialize();
 
-		auto assetManager = gEngine->GetAssetManager();
-
-		auto renderer2dShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/2D/SDFGeometry");
-
-		auto fontAsset = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Roboto");
-		auto poppinsFont = assetManager->LoadAssetAtPath<Font>("/Engine/Assets/Fonts/Poppins");
-
-		auto atlasData = fontAsset->GetAtlasData();
-
-		CApplicationInitInfo appInitInfo{};
-		appInitInfo.draw2dShader = renderer2dShader->GetOrCreateRPIShader(0);
-		appInitInfo.defaultFont = atlasData;
-		appInitInfo.defaultFontName = "Roboto";
-		appInitInfo.numFramesInFlight = 2;
-
-		CApplication::Get()->Initialize(appInitInfo);
-
-		CApplication::Get()->RegisterFont("Poppins", poppinsFont->GetAtlasData());
-
 		main->Init(mainWindow);
 
 		gEngine->PostInitialize();

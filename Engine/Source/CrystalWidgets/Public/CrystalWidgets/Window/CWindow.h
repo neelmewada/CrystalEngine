@@ -71,6 +71,7 @@ namespace CE::Widgets
 
         Array<CWidget*> prevHoveredWidgets = {};
         StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};
+        CWidget* draggedWidget = nullptr;
 
         Vec2 prevMousePos = Vec2();
 
@@ -80,6 +81,7 @@ namespace CE::Widgets
         CPainter* painter = nullptr;
         RPI::Renderer2D* renderer = nullptr;
         RHI::DrawListTag drawListTag = 0;
+        RHI::SwapChain* swapChain = nullptr;
 
         friend class CApplication;
         friend class CWidget;

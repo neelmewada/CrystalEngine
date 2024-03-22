@@ -36,6 +36,7 @@ namespace CE::Widgets
 		defaultFontName = initInfo.defaultFontName;
 		defaultFont = initInfo.defaultFont;
 		numFramesInFlight = initInfo.numFramesInFlight;
+		scheduler = initInfo.scheduler;
 
 		registeredFonts[defaultFontName] = initInfo.defaultFont;
 
@@ -86,6 +87,87 @@ namespace CE::Widgets
 	void CApplication::LoadGlobalStyleSheet(const IO::Path& path)
 	{
 		globalStyleSheet = CSSStyleSheet::Load(path, this);
+	}
+
+	void CApplication::BuildFrameGraph()
+	{
+		for (int i = 0; i < windows.GetSize(); ++i)
+		{
+			PlatformWindow* platformWindow = windows[i]->nativeWindow;
+
+			if (!platformWindow)
+				continue;
+
+			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
+
+			attachmentDatabase.EmplaceFrameAttachment(platformWindow->GetTitle(), windows[i]->swapChain);
+
+			if (!platformWindow->IsMinimized() && platformWindow->IsShown())
+			{
+				scheduler->BeginScope(platformWindow->GetTitle());
+				{
+					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
+					swapChainAttachment.attachmentId = platformWindow->GetTitle();
+					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
+					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
+					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
+					swapChainAttachment.multisampleState.sampleCount = 1;
+					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
+
+					scheduler->PresentSwapChain(windows[i]->swapChain);
+				}
+				scheduler->EndScope();
+			}
+		}
+	}
+
+	void CApplication::SetDrawListMasks(RHI::DrawListMask& outMask)
+	{
+		for (int i = 0; i < windows.GetSize(); ++i)
+		{
+			outMask.Set(windows[i]->GetDrawListTag());
+		}
+	}
+
+	void CApplication::FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex)
+	{
+		for (int i = 0; i < windows.GetSize(); ++i)
+		{
+			if (!windows[i]->IsVisible() || !windows[i]->IsEnabled())
+				continue;
+
+			const auto& packets = windows[i]->FlushDrawPackets(imageIndex);
+
+			for (RHI::DrawPacket* drawPacket : packets)
+			{
+				drawList.AddDrawPacket(drawPacket);
+			}
+		}
+	}
+
+	void CApplication::SubmitDrawPackets(RHI::DrawListContext& drawList)
+	{
+		for (int i = 0; i < windows.GetSize(); ++i)
+		{
+			PlatformWindow* platformWindow = windows[i]->nativeWindow;
+
+			if (!platformWindow)
+				continue;
+
+			scheduler->SetScopeDrawList(platformWindow->GetTitle(), &drawList.GetDrawListForTag(windows[i]->GetDrawListTag()));
+		}
+	}
+
+	void CApplication::OnWindowDestroyed(PlatformWindow* nativeWindow)
+	{
+		for (int i = windows.GetSize() - 1; i >= 0; --i)
+		{
+			if (windows[i]->nativeWindow == nativeWindow)
+			{
+				windows[i]->Destroy();
+				windows.RemoveAt(i);
+			}
+		}
 	}
 
 	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)

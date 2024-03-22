@@ -60,6 +60,22 @@ namespace CE::Widgets
 			case CEventType::MouseMove:
 			case CEventType::MousePress:
 			case CEventType::MouseRelease:
+			case CEventType::DragBegin:
+			case CEventType::DragMove:
+			case CEventType::DragEnd:
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		inline bool IsDragEvent() const
+		{
+			switch (type)
+			{
+			case CEventType::DragBegin:
+			case CEventType::DragMove:
+			case CEventType::DragEnd:
 				return true;
 			default:
 				return false;
@@ -141,6 +157,25 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isInside = true;
+
+	};
+
+	STRUCT()
+	struct CRYSTALWIDGETS_API CDragEvent : CMouseEvent
+	{
+		CE_STRUCT(CDragEvent, CMouseEvent)
+	public:
+
+		CDragEvent()
+		{
+			
+		}
+
+		FIELD()
+		CWidget* draggedWidget = nullptr;
+
+		FIELD()
+		CWidget* dropTarget = nullptr;
 
 	};
     
