@@ -41,6 +41,7 @@ namespace CE::Widgets
         virtual ~CApplication();
 
         static CApplication* Get();
+        static CApplication* TryGet();
 
         void Initialize(const CApplicationInitInfo& initInfo);
         void Shutdown();
@@ -67,6 +68,8 @@ namespace CE::Widgets
         RHI::FrameScheduler* GetFrameScheduler() const { return scheduler; }
 
     crystalwidgets_internal:
+
+        void OnWidgetDestroyed(CWidget* widget);
 
         void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 
@@ -95,6 +98,12 @@ namespace CE::Widgets
         RHI::FrameScheduler* scheduler = nullptr;
 
         Array<CWidget*> destructionQueue{};
+
+        Array<CWidget*> hoveredWidgetsStack = {};
+        StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};
+        CWidget* draggedWidget = nullptr;
+
+        Vec2 prevMousePos = Vec2();
 
         friend class CWidget;
     };

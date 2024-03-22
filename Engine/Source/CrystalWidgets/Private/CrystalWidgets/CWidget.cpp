@@ -59,6 +59,7 @@ namespace CE::Widgets
 			CWidget* widget = (CWidget*)object;
 			attachedWidgets.Add(widget);
 			widget->parent = this;
+			widget->styleSheet->parent = styleSheet;
 			widget->ownerWindow = ownerWindow;
 
 			if (widget->IsLayoutCalculationRoot())
@@ -95,6 +96,7 @@ namespace CE::Widgets
 		{
 			CWidget* widget = (CWidget*)object;
 			widget->parent = nullptr;
+			widget->styleSheet->parent = nullptr;
 			attachedWidgets.Remove(widget);
 			widget->ownerWindow = nullptr;
 
@@ -109,7 +111,7 @@ namespace CE::Widgets
 					break;
 				}
 			}
-
+			
 			childCount = YGNodeGetChildCount(node);
 			if (childCount == 0)
 			{
@@ -660,9 +662,15 @@ namespace CE::Widgets
 			return;
 		isQueuedForDestruction = true;
 
+		SetEnabled(false);
+
 		if (parent)
 		{
 			parent->RemoveSubWidget(this);
+		}
+		else if (IsOfType<CWindow>())
+		{
+			CApplication::Get()->windows.Remove((CWindow*)this);
 		}
 		
 		CApplication::Get()->destructionQueue.Add(this);
@@ -788,6 +796,7 @@ namespace CE::Widgets
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))
 			{
+				//CE_LOG(Info, All, "MouseEnter: {}", GetName());
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
 				{
@@ -852,5 +861,17 @@ namespace CE::Widgets
 			}
 		}
 	}
+
+	void CWidget::OnBeforeDestroy()
+	{
+		Super::OnBeforeDestroy();
+
+		CApplication* app = CApplication::TryGet();
+		if (app)
+		{
+			app->OnWidgetDestroyed(this);
+		}
+	}
+
     
 } // namespace CE::Widgets

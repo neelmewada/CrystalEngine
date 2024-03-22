@@ -110,6 +110,21 @@ namespace CE
 		return size;
 	}
 
+	void SDLPlatformWindow::SetWindowSize(Vec2i newSize)
+	{
+		SDL_SetWindowSize(handle, newSize.x, newSize.y);
+	}
+
+	void SDLPlatformWindow::SetOpacity(f32 opacity)
+	{
+		SDL_SetWindowOpacity(handle, opacity);
+	}
+
+	void SDLPlatformWindow::SetAlwaysOnTop(bool alwaysOnTop)
+	{
+		SDL_SetWindowAlwaysOnTop(handle, alwaysOnTop ? SDL_TRUE : SDL_FALSE);
+	}
+
 	void SDLPlatformWindow::GetDrawableWindowSize(u32* outWidth, u32* outHeight)
 	{
 #if PAL_TRAIT_VULKAN_SUPPORTED

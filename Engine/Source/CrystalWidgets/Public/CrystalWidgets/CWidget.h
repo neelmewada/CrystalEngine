@@ -197,6 +197,8 @@ namespace CE::Widgets
 
     protected:
 
+        virtual void OnBeforeDestroy() override;
+
         static YGSize MeasureFunctionCallback(YGNodeConstRef node,
             float width,
             YGMeasureMode widthMode,

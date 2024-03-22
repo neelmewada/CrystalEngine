@@ -30,6 +30,11 @@ namespace CE::Widgets
 		return instance;
 	}
 
+	CApplication* CApplication::TryGet()
+	{
+		return instance;
+	}
+
 	void CApplication::Initialize(const CApplicationInitInfo& initInfo)
 	{
 		draw2dShader = initInfo.draw2dShader;
@@ -110,14 +115,16 @@ namespace CE::Widgets
 
 			FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
 
-			attachmentDatabase.EmplaceFrameAttachment(platformWindow->GetTitle(), windows[i]->swapChain);
+			Name id = String::Format("{}", platformWindow->GetWindowId());
+
+			attachmentDatabase.EmplaceFrameAttachment(id, windows[i]->swapChain);
 
 			if (!platformWindow->IsMinimized() && platformWindow->IsShown())
 			{
-				scheduler->BeginScope(platformWindow->GetTitle());
+				scheduler->BeginScope(id);
 				{
 					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-					swapChainAttachment.attachmentId = platformWindow->GetTitle();
+					swapChainAttachment.attachmentId = id;
 					swapChainAttachment.loadStoreAction.clearValue = Vec4(0, 0, 0, 1);
 					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
 					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
@@ -164,7 +171,9 @@ namespace CE::Widgets
 			if (!platformWindow)
 				continue;
 
-			scheduler->SetScopeDrawList(platformWindow->GetTitle(), &drawList.GetDrawListForTag(windows[i]->GetDrawListTag()));
+			Name id = String::Format("{}", platformWindow->GetWindowId());
+
+			scheduler->SetScopeDrawList(id, &drawList.GetDrawListForTag(windows[i]->GetDrawListTag()));
 		}
 	}
 
@@ -181,6 +190,11 @@ namespace CE::Widgets
 	}
 
 	void CApplication::OnWindowCreated(PlatformWindow* window)
+	{
+
+	}
+
+	void CApplication::OnWidgetDestroyed(CWidget* widget)
 	{
 
 	}

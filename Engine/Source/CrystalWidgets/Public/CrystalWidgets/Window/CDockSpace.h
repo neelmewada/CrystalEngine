@@ -21,7 +21,7 @@ namespace CE::Widgets
 
 		CDockType GetDockType() const { return dockType; }
 
-	private:
+	crystalwidgets_internal:
 
 		void HandleEvent(CEvent* event) override;
 
@@ -40,6 +40,7 @@ namespace CE::Widgets
 		FIELD()
 		CDockType dockType = CDockType::Major;
 
+		b8 isDetachedMode = false;
 	};
 
 } // namespace CE::Widgets
