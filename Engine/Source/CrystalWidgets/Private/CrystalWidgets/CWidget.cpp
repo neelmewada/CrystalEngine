@@ -786,7 +786,7 @@ namespace CE::Widgets
 				SetNeedsStyle();
 			}
 
-			if (event->type == CEventType::MouseEnter && mouseEvent->button == MouseButton::None)
+			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))
 			{
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)

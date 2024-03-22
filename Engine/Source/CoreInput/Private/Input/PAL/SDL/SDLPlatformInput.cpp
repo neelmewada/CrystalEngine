@@ -54,8 +54,9 @@ namespace CE
         mouseDelta = Vec2i(0, 0);
 
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
-        SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
-
+        u32 mouseBtnMask = SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
+        
+        
         switch (event->type)
         {
         case SDL_KEYDOWN:
@@ -103,6 +104,11 @@ namespace CE
             break;
         }
 
+        if (mouseButtonStates[MouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON(SDL_BUTTON_LEFT)) == 0)
+        {
+            mouseButtonStateChanges[MouseButton::Left] = 0;
+            mouseButtonStates[MouseButton::Left] = 0;
+        }
     }
 
     void SDLPlatformInput::Tick()

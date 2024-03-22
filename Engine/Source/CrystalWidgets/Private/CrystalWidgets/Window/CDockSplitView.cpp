@@ -149,6 +149,7 @@ namespace CE::Widgets
                         }
 
                         bool canDetach = !dockedWindows[selectedTab]->IsMainWindow();
+                        dragEvent->Consume(this);
 
                         if (canDetach && (pos.y < 0 || pos.y > majorTabOffset + majorTabHeight + 5))
                         {
@@ -159,7 +160,7 @@ namespace CE::Widgets
                             PlatformWindow* newWindow = PlatformApplication::Get()->
                         		CreatePlatformWindow(dockWindow->GetName().GetString(), windowSize.width, windowSize.height, false, false);
                             newWindow->SetBorderless(true);
-                            newWindow->SetWindowPosition(Vec2i(mouseEvent->mousePos.x - 40, mouseEvent->mousePos.y - majorTabHeight));
+                            newWindow->SetWindowPosition(Vec2i(mouseEvent->mousePos.x - 50, mouseEvent->mousePos.y - majorTabHeight));
 
                             CDockSpace* newDockSpace = CreateWindow<CDockSpace>(dockWindow->GetName().GetString(), nullptr, newWindow);
                             newDockSpace->AddSubWidget(dockWindow);
@@ -170,12 +171,7 @@ namespace CE::Widgets
                             SetNeedsStyle();
                             SetNeedsPaint();
 
-                            //dragEvent->draggedWidget = newDockSpace->GetLastDockSplit();
-                            //dragEvent->Consume(this);
-                        }
-                        else
-                        {
-                            dragEvent->Consume(this);
+                            dragEvent->draggedWidget = newDockSpace->GetLastDockSplit();
                         }
                     }
                 }
