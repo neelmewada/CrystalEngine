@@ -103,6 +103,13 @@ namespace CE
 		*outHeight = (u32)h;
 	}
 
+	Vec2i SDLPlatformWindow::GetWindowSize()
+	{
+		Vec2i size{};
+		SDL_GetWindowSize(handle, &size.width, &size.height);
+		return size;
+	}
+
 	void SDLPlatformWindow::GetDrawableWindowSize(u32* outWidth, u32* outHeight)
 	{
 #if PAL_TRAIT_VULKAN_SUPPORTED

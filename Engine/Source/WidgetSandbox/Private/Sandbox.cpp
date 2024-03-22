@@ -88,7 +88,7 @@ namespace CE
 		secondDockWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
 		thirdDockWindow = CreateWindow<CDockWindow>("Third", mainDockSpace);
 
-		auto newWindow = PlatformApplication::Get()->CreatePlatformWindow("SecondWindow", 1024, 768, false, false);
+		auto newWindow = PlatformApplication::Get()->CreatePlatformWindow("SecondWindow", 720, 480, false, false);
 		platformWindows.Add(newWindow);
 
 		newWindow->SetBorderless(true);
@@ -171,9 +171,6 @@ namespace CE
 		delete scheduler;
 
 		PlatformApplication::Get()->RemoveMessageHandler(this);
-
-		//delete swapChain; swapChain = nullptr;
-		//delete swapChain2; swapChain2 = nullptr;
 
 		rpiSystem.Shutdown();
 	}
@@ -304,6 +301,11 @@ namespace CE
 	}
 
 	void WidgetSandbox::OnWindowRestored(PlatformWindow* window)
+	{
+		rebuild = recompile = true;
+	}
+
+	void WidgetSandbox::OnWindowCreated(PlatformWindow* window)
 	{
 		rebuild = recompile = true;
 	}

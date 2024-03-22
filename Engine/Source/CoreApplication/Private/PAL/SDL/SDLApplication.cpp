@@ -65,6 +65,11 @@ namespace CE
 
 			SDL_AddEventWatch(SDLWindowEventWatch, mainWindow->handle);
 		}
+
+		for (auto messageHandler : messageHandlers)
+		{
+			messageHandler->OnWindowCreated(mainWindow);
+		}
 		return mainWindow;
 	}
 
@@ -94,6 +99,10 @@ namespace CE
 		}
 		auto window = new SDLPlatformWindow(title, gDefaultWindowWidth, gDefaultWindowHeight, false, false);
 		windowList.Add(window);
+		for (auto messageHandler : messageHandlers)
+		{
+			messageHandler->OnWindowCreated(window);
+		}
 		return window;
 	}
 
@@ -105,6 +114,10 @@ namespace CE
 		}
 		auto window = new SDLPlatformWindow(title, width, height, maximised, fullscreen);
 		windowList.Add(window);
+		for (auto messageHandler : messageHandlers)
+		{
+			messageHandler->OnWindowCreated(window);
+		}
 		return window;
 	}
 
@@ -155,9 +168,14 @@ namespace CE
 			SDL_DelEventWatch(SDLWindowEventWatch, mainWindow->handle);
 
 			// Destroy all windows (i.e. shutdown application) if main window is destroyed
-			for (auto win : windowList)
+			for (int i = windowList.GetSize() - 1; i >= 0; --i)
 			{
-				DestroyWindow(win);
+				if (windowList[i] == mainWindow)
+				{
+					windowList.RemoveAt(i);
+					continue;
+				}
+				DestroyWindow(windowList[i]);
 			}
 
 			RequestEngineExit("MAIN_WINDOW_CLOSED");

@@ -25,6 +25,8 @@ namespace CE
         void SetWindowPosition(Vec2i position) override;
 
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) override;
+        virtual Vec2i GetWindowSize() override;
+
         virtual void GetDrawableWindowSize(u32* outWidth, u32* outHeight) override;
         virtual Vec2i GetDrawableWindowSize() override;
 

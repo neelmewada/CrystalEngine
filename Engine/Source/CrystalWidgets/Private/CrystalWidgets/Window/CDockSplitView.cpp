@@ -98,6 +98,8 @@ namespace CE::Widgets
             {
                 PlatformWindow* platformWindow = dockSpace->GetRootNativeWindow();
                 Vec2 windowPos = platformWindow->GetWindowPosition().ToVec2();
+                Vec2i windowSize = platformWindow->GetWindowSize();
+                platformWindow->GetWindowSize();
                 Vec2 pos = mouseEvent->mousePos - windowPos;
                 Vec2 prevPos = mouseEvent->prevMousePos - windowPos;
                 Vec2 delta = pos - prevPos;
@@ -127,13 +129,13 @@ namespace CE::Widgets
                 else if (event->type == CEventType::DragMove)
                 {
                     CDragEvent* dragEvent = (CDragEvent*)event;
-                    event->Consume(this);
 
                     if (tabs.GetSize() == 1)
                     {
                         platformWindow->SetWindowPosition(Vec2i(windowPos.x + delta.x, windowPos.y + delta.y));
+                        dragEvent->Consume(this);
                     }
-                    else
+                    else if (tabs.GetSize() > 1)
                     {
                         for (int i = 0; i < tabs.GetSize(); ++i)
                         {
@@ -146,9 +148,34 @@ namespace CE::Widgets
                             }
                         }
 
-                        if (pos.y < 0 || pos.y > majorTabOffset + majorTabHeight + 5)
+                        bool canDetach = !dockedWindows[selectedTab]->IsMainWindow();
+
+                        if (canDetach && (pos.y < 0 || pos.y > majorTabOffset + majorTabHeight + 5))
                         {
-                            // Detach the window from dockspace
+                            // Detach the window from this DockSpace
+                            CDockWindow* dockWindow = dockedWindows[selectedTab];
+                            RemoveSubWidget(dockWindow);
+
+                            PlatformWindow* newWindow = PlatformApplication::Get()->
+                        		CreatePlatformWindow(dockWindow->GetName().GetString(), windowSize.width, windowSize.height, false, false);
+                            newWindow->SetBorderless(true);
+                            newWindow->SetWindowPosition(Vec2i(mouseEvent->mousePos.x - 40, mouseEvent->mousePos.y - majorTabHeight));
+
+                            CDockSpace* newDockSpace = CreateWindow<CDockSpace>(dockWindow->GetName().GetString(), nullptr, newWindow);
+                            newDockSpace->AddSubWidget(dockWindow);
+                            
+                            selectedTab = 0;
+
+                            tabs.Clear();
+                            SetNeedsStyle();
+                            SetNeedsPaint();
+
+                            //dragEvent->draggedWidget = newDockSpace->GetLastDockSplit();
+                            //dragEvent->Consume(this);
+                        }
+                        else
+                        {
+                            dragEvent->Consume(this);
                         }
                     }
                 }
@@ -189,6 +216,11 @@ namespace CE::Widgets
             if (tabsCount < GetSubWidgetCount())
             {
                 tabs.Resize(GetSubWidgetCount());
+
+                for (int i = 0; i < tabs.GetSize(); ++i)
+                {
+                    GetSubWidget(i)->SetEnabled(selectedTab == i);
+                }
             }
 
             // Draw non-selected tabs first

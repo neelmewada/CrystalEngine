@@ -157,12 +157,12 @@ namespace CE
 		auto app = PlatformApplication::Get();
 		app->RemoveTickHandler(tickDelegateHandle);
 
+		CApplication::Get()->Shutdown();
+		CApplication::Get()->Destroy();
+
 		main->Shutdown();
 
 		gEngine->PreShutdown();
-
-		CApplication::Get()->Shutdown();
-		CApplication::Get()->Destroy();
 
 		gDynamicRHI->PreShutdown();
 

@@ -80,6 +80,8 @@ namespace CE
 
 		void OnWindowRestored(PlatformWindow* window) override;
 
+		void OnWindowCreated(PlatformWindow* window) override;
+
 	private:
 		bool rebuild = true;
 		bool recompile = true;

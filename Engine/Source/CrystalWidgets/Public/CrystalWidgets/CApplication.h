@@ -64,11 +64,15 @@ namespace CE::Widgets
         void FlushDrawPackets(RHI::DrawListContext& drawList, u32 imageIndex);
         void SubmitDrawPackets(RHI::DrawListContext& drawList);
 
+        RHI::FrameScheduler* GetFrameScheduler() const { return scheduler; }
+
     crystalwidgets_internal:
 
         void OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight) override;
 
         void OnWindowDestroyed(PlatformWindow* window) override;
+
+        void OnWindowCreated(PlatformWindow* window) override;
 
         RPI::Shader* draw2dShader = nullptr;
         Name defaultFontName = "";
@@ -90,6 +94,9 @@ namespace CE::Widgets
 
         RHI::FrameScheduler* scheduler = nullptr;
 
+        Array<CWidget*> destructionQueue{};
+
+        friend class CWidget;
     };
 
 } // namespace CE::Widgets

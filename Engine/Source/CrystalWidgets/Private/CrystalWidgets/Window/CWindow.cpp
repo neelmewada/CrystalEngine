@@ -212,8 +212,8 @@ namespace CE::Widgets
             hoveredWidget = nullptr;
         }
 
-        if (prevHoveredWidgets.NonEmpty() && prevHoveredWidgets.Top() != hoveredWidget &&
-            (hoveredWidget == nullptr || !prevHoveredWidgets.Top()->SubWidgetExistsRecursive(hoveredWidget)))
+        if (hoveredWidgetsStack.NonEmpty() && hoveredWidgetsStack.Top() != hoveredWidget &&
+            (hoveredWidget == nullptr || !hoveredWidgetsStack.Top()->SubWidgetExistsRecursive(hoveredWidget)))
         {
             CMouseEvent mouseEvent{};
             mouseEvent.name = "MouseLeave";
@@ -223,20 +223,20 @@ namespace CE::Widgets
             mouseEvent.prevMousePos = prevMousePos;
             mouseEvent.direction = CEventDirection::BottomToTop;
 
-            while (prevHoveredWidgets.NonEmpty() && prevHoveredWidgets.Top() != hoveredWidget)
+            while (hoveredWidgetsStack.NonEmpty() && hoveredWidgetsStack.Top() != hoveredWidget)
             {
-                mouseEvent.sender = prevHoveredWidgets.Top();
+                mouseEvent.sender = hoveredWidgetsStack.Top();
                 mouseEvent.Reset();
-                if (prevHoveredWidgets.Top()->receiveMouseEvents)
+                if (hoveredWidgetsStack.Top()->receiveMouseEvents)
                 {
-	                prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
+	                hoveredWidgetsStack.Top()->HandleEvent(&mouseEvent);
                 }
-                prevHoveredWidgets.Pop();
+                hoveredWidgetsStack.Pop();
             }
         }
         
-        if (hoveredWidget != nullptr && (prevHoveredWidgets.IsEmpty() || prevHoveredWidgets.Top() != hoveredWidget) &&
-            (prevHoveredWidgets.IsEmpty() || !hoveredWidget->SubWidgetExistsRecursive(prevHoveredWidgets.Top())))
+        if (hoveredWidget != nullptr && (hoveredWidgetsStack.IsEmpty() || hoveredWidgetsStack.Top() != hoveredWidget) &&
+            (hoveredWidgetsStack.IsEmpty() || !hoveredWidget->SubWidgetExistsRecursive(hoveredWidgetsStack.Top())))
         {
             CMouseEvent mouseEvent{};
             mouseEvent.name = "MouseEnter";
@@ -246,26 +246,26 @@ namespace CE::Widgets
             mouseEvent.prevMousePos = prevMousePos;
             mouseEvent.direction = CEventDirection::BottomToTop;
 
-            int idx = prevHoveredWidgets.GetSize();
+            int idx = hoveredWidgetsStack.GetSize();
             CWidget* basePrevWidget = nullptr;
-            if (prevHoveredWidgets.NonEmpty())
-                basePrevWidget = prevHoveredWidgets.Top();
+            if (hoveredWidgetsStack.NonEmpty())
+                basePrevWidget = hoveredWidgetsStack.Top();
 
             auto widget = hoveredWidget;
             
-            while ((prevHoveredWidgets.IsEmpty() || widget != basePrevWidget) && widget != nullptr)
+            while ((hoveredWidgetsStack.IsEmpty() || widget != basePrevWidget) && widget != nullptr)
             {
-                prevHoveredWidgets.InsertAt(idx, widget);
+                hoveredWidgetsStack.InsertAt(idx, widget);
                 widget = widget->parent;
             }
 
-            for (int i = idx; i < prevHoveredWidgets.GetSize(); i++)
+            for (int i = idx; i < hoveredWidgetsStack.GetSize(); i++)
             {
                 mouseEvent.Reset();
-                mouseEvent.sender = prevHoveredWidgets[i];
-                if (prevHoveredWidgets[i]->receiveMouseEvents)
+                mouseEvent.sender = hoveredWidgetsStack[i];
+                if (hoveredWidgetsStack[i]->receiveMouseEvents)
                 {
-                    prevHoveredWidgets[i]->HandleEvent(&mouseEvent);
+                    hoveredWidgetsStack[i]->HandleEvent(&mouseEvent);
                 }
             }
         }
@@ -281,10 +281,10 @@ namespace CE::Widgets
             mouseEvent.prevMousePos = prevMousePos;
             mouseEvent.direction = CEventDirection::BottomToTop;
 
-            if (prevHoveredWidgets.NonEmpty())
+            if (hoveredWidgetsStack.NonEmpty())
             {
-	            mouseEvent.sender = prevHoveredWidgets.Top();
-                prevHoveredWidgets.Top()->HandleEvent(&mouseEvent);
+	            mouseEvent.sender = hoveredWidgetsStack.Top();
+                hoveredWidgetsStack.Top()->HandleEvent(&mouseEvent);
             }
 
             if (draggedWidget != nullptr)
@@ -299,11 +299,21 @@ namespace CE::Widgets
                 dragEvent.isInside = true;
 
                 dragEvent.sender = nullptr;
-                if (prevHoveredWidgets.NonEmpty())
-                    dragEvent.sender = prevHoveredWidgets.Top();
+                if (hoveredWidgetsStack.NonEmpty())
+                    dragEvent.sender = hoveredWidgetsStack.Top();
                 dragEvent.draggedWidget = draggedWidget;
 
                 draggedWidget->HandleEvent(&dragEvent);
+
+                // Cancel dragging if any of the CDragEvent's are not consumed by the dragged widget
+                if (!dragEvent.isConsumed)
+                {
+                    draggedWidget = nullptr;
+                }
+                else
+                {
+                    draggedWidget = dragEvent.draggedWidget;
+                }
             }
         }
 
@@ -322,13 +332,13 @@ namespace CE::Widgets
                 event.direction = CEventDirection::BottomToTop;
                 event.isInside = true;
 
-                if (prevHoveredWidgets.NonEmpty())
+                if (hoveredWidgetsStack.NonEmpty())
                 {
-                    event.sender = prevHoveredWidgets.Top();
+                    event.sender = hoveredWidgetsStack.Top();
                     widgetsPressedPerMouseButton[i] = event.sender;
-                    prevHoveredWidgets.Top()->HandleEvent(&event);
+                    hoveredWidgetsStack.Top()->HandleEvent(&event);
 
-                    if (prevHoveredWidgets.Top()->receiveDragEvents && mouseButton == MouseButton::Left)
+                    if (hoveredWidgetsStack.Top()->receiveDragEvents && mouseButton == MouseButton::Left)
                     {
                         CDragEvent dragEvent{};
                         dragEvent.name = "DragEvent";
@@ -339,9 +349,9 @@ namespace CE::Widgets
                         dragEvent.direction = CEventDirection::BottomToTop;
                         dragEvent.isInside = true;
 
-                        dragEvent.sender = prevHoveredWidgets.Top();
-                        dragEvent.draggedWidget = prevHoveredWidgets.Top();
-                        prevHoveredWidgets.Top()->HandleEvent(&dragEvent);
+                        dragEvent.sender = hoveredWidgetsStack.Top();
+                        dragEvent.draggedWidget = hoveredWidgetsStack.Top();
+                        hoveredWidgetsStack.Top()->HandleEvent(&dragEvent);
 
 						if (dragEvent.isConsumed)
 						{
@@ -362,10 +372,10 @@ namespace CE::Widgets
                 event.direction = CEventDirection::BottomToTop;
                 event.isInside = true;
 
-                if (prevHoveredWidgets.NonEmpty())
+                if (hoveredWidgetsStack.NonEmpty())
                 {
-                    event.sender = prevHoveredWidgets.Top();
-                    prevHoveredWidgets.Top()->HandleEvent(&event);
+                    event.sender = hoveredWidgetsStack.Top();
+                    hoveredWidgetsStack.Top()->HandleEvent(&event);
                 }
 
                 if (widgetsPressedPerMouseButton[i] != nullptr)
@@ -387,8 +397,8 @@ namespace CE::Widgets
                     dragEvent.isInside = true;
 
                     dragEvent.sender = nullptr;
-                    if (prevHoveredWidgets.NonEmpty())
-                        dragEvent.sender = prevHoveredWidgets.Top();
+                    if (hoveredWidgetsStack.NonEmpty())
+                        dragEvent.sender = hoveredWidgetsStack.Top();
                     dragEvent.draggedWidget = draggedWidget;
                     dragEvent.dropTarget = dragEvent.sender;
                     draggedWidget->HandleEvent(&dragEvent);
@@ -437,6 +447,11 @@ namespace CE::Widgets
     void CWindow::OnBeforeDestroy()
     {
         Super::OnBeforeDestroy();
+
+        if (!IsDefaultInstance())
+        {
+            CApplication::Get()->GetFrameScheduler()->WaitUntilIdle();
+        }
 
         delete renderer; renderer = nullptr;
     }

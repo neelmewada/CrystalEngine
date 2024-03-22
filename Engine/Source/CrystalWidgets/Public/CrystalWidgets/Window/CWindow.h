@@ -69,7 +69,7 @@ namespace CE::Widgets
 
     crystalwidgets_internal:
 
-        Array<CWidget*> prevHoveredWidgets = {};
+        Array<CWidget*> hoveredWidgetsStack = {};
         StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};
         CWidget* draggedWidget = nullptr;
 

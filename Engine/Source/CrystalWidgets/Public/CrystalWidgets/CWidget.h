@@ -115,6 +115,8 @@ namespace CE::Widgets
 
         PlatformWindow* GetNativeWindow();
 
+        void QueueDestroy();
+
     crystalwidgets_protected_internal:
 
         void SetNeedsPaintRecursively(bool newValue = false);
@@ -189,6 +191,9 @@ namespace CE::Widgets
         CStyle computedStyle{};
 
         b8 isMouseInside = false;
+
+        int destroyFrameCounter = 0;
+        b8 isQueuedForDestruction = false;
 
     protected:
 

@@ -654,6 +654,20 @@ namespace CE::Widgets
 		return ownerWindow->GetRootNativeWindow();
 	}
 
+	void CWidget::QueueDestroy()
+	{
+		if (isQueuedForDestruction)
+			return;
+		isQueuedForDestruction = true;
+
+		if (parent)
+		{
+			parent->RemoveSubWidget(this);
+		}
+		
+		CApplication::Get()->destructionQueue.Add(this);
+	}
+
 	void CWidget::SetNeedsPaintRecursively(bool newValue)
 	{
 		needsPaint = newValue;

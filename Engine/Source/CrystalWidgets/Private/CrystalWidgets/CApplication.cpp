@@ -50,11 +50,21 @@ namespace CE::Widgets
 
 	void CApplication::Tick()
 	{
-		// TODO: Update and render all windows
+		constexpr u32 destroyAfterFrames = 8;
 
-		for (CWindow* window : windows)
+		for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
 		{
-			window->Tick();
+			destructionQueue[i]->destroyFrameCounter++;
+			if (destructionQueue[i]->destroyFrameCounter > destroyAfterFrames)
+			{
+				destructionQueue[i]->Destroy();
+				destructionQueue.RemoveAt(i);
+			}
+		}
+
+		for (int i = 0; i < windows.GetSize(); i++)
+		{
+			windows[i]->Tick();
 		}
 	}
 
@@ -168,6 +178,11 @@ namespace CE::Widgets
 				windows.RemoveAt(i);
 			}
 		}
+	}
+
+	void CApplication::OnWindowCreated(PlatformWindow* window)
+	{
+
 	}
 
 	void CApplication::OnWindowResized(PlatformWindow* nativeWindow, u32 newWidth, u32 newHeight)
