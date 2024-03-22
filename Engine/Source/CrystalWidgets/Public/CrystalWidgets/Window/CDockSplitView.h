@@ -78,6 +78,8 @@ namespace CE::Widgets
 
 		Array<TabData> tabs{};
 
+		f32 totalDeltaX = 0;
+
 		friend class CDockSpace;
 	};
 

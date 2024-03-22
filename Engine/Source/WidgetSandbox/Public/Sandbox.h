@@ -96,6 +96,7 @@ namespace CE
 		CDockWindow* mainDockWindow = nullptr;
 		CDockWindow* secondDockWindow = nullptr;
 		CDockWindow* thirdDockWindow = nullptr;
+		CDockWindow* fourthDockWindow = nullptr;
 
 		CDockSpace* secondDockSpace = nullptr;
 

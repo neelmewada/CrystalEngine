@@ -107,6 +107,8 @@ namespace CE::Widgets
 
                 if (event->type == CEventType::DragBegin && event->sender == this)
                 {
+                    totalDeltaX = 0;
+
                     for (int i = 0; i < tabs.GetSize(); ++i)
                     {
                         if (tabs[i].rect.Contains(pos))
@@ -141,8 +143,39 @@ namespace CE::Widgets
                             {
                                 Vec2 size = tabs[i].rect.GetSize();
                                 tabs[i].rect.min.x += delta.x;
+                                totalDeltaX += delta.x;
                                 tabs[i].rect.max = tabs[i].rect.min + size;
+                                f32 nextMidPoint = (tabs[i].rect.min.x + size.width * 0.5f);
+                                f32 prevMidPoint = (tabs[i].rect.min.x + size.width * 0.5f);
+                                if (i < tabs.GetSize() - 1)
+                                {
+                                    f32 nextStartPoint = tabs[i + 1].rect.min.x;
+                                    if (nextMidPoint > nextStartPoint)
+                                    {
+                                        std::swap(tabs[selectedTab], tabs[selectedTab + 1]);
+                                        std::swap(attachedWidgets[selectedTab], attachedWidgets[selectedTab + 1]);
+                                        std::swap(dockedWindows[selectedTab], dockedWindows[selectedTab + 1]);
+                                        Vec2 prevSize = tabs[selectedTab].rect.GetSize();
+                                        tabs[selectedTab].rect.min.x = tabs[selectedTab + 1].rect.min.x - totalDeltaX;
+                                        tabs[selectedTab].rect.max.x = tabs[selectedTab].rect.min.x + prevSize.x;
+                                        selectedTab++;
+                                        totalDeltaX = 0;
+                                    }
+                                }
+                                //if (i > 0)
+                                if (false)
+                                {
+                                    f32 prevEndPoint = tabs[i - 1].rect.max.x;
+                                    if (prevMidPoint < prevEndPoint)
+                                    {
+                                        std::swap(tabs[selectedTab - 1], tabs[selectedTab]);
+                                        std::swap(attachedWidgets[selectedTab - 1], attachedWidgets[selectedTab]);
+                                        std::swap(dockedWindows[selectedTab - 1], dockedWindows[selectedTab]);
+                                        selectedTab--;
+                                    }
+                                }
                                 SetNeedsPaint();
+                                break;
                             }
                         }
                     }
@@ -150,6 +183,7 @@ namespace CE::Widgets
                 else if (event->type == CEventType::DragEnd)
                 {
                     event->Consume(this);
+                    totalDeltaX = 0;
 
                     tabs.Clear();
                     SetNeedsPaint();
@@ -249,12 +283,6 @@ namespace CE::Widgets
                     if (i != selectedTab)
                     	brush.SetColor(bgColor);
                     painter->SetPen(pen); painter->SetBrush(brush); painter->SetFont(font);
-
-                    if (i >= tabsCount)
-                    {
-                        Rect rect = Rect::FromSize(xOffset, majorTabOffset, Math::Min(tabTitleSize.width + 70, 270.0f), majorTabHeight);
-                        tabs[i] = { rect };
-                    }
 
                     Rect tabRect = tabs[i].rect;
                     auto size = tabRect.GetSize();

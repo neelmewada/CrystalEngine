@@ -87,6 +87,7 @@ namespace CE
 		mainDockWindow->SetAsMainWindow(true);
 		secondDockWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
 		thirdDockWindow = CreateWindow<CDockWindow>("Third", mainDockSpace);
+		fourthDockWindow = CreateWindow<CDockWindow>("Fourth", mainDockSpace);
 
 		//auto newWindow = PlatformApplication::Get()->CreatePlatformWindow("SecondWindow", 720, 480, false, false);
 		//platformWindows.Add(newWindow);
