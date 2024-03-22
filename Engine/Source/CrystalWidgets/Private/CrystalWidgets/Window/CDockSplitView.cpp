@@ -135,71 +135,21 @@ namespace CE::Widgets
                         bool canDetach = !dockedWindows[selectedTab]->IsMainWindow() && !dockSpace->isDetachedMode;
                         dragEvent->Consume(this);
 
-                        if (dockSpace->isDetachedMode)
+                        for (int i = 0; i < tabs.GetSize(); ++i)
                         {
-                            platformWindow->SetWindowPosition(Vec2i(windowPos.x + delta.x, windowPos.y + delta.y));
-                        }
-                        else
-                        {
-                            for (int i = 0; i < tabs.GetSize(); ++i)
+                            if (i == selectedTab)
                             {
-                                if (i == selectedTab)
-                                {
-                                    Vec2 size = tabs[i].rect.GetSize();
-                                    tabs[i].rect.min.x += delta.x;
-                                    tabs[i].rect.max = tabs[i].rect.min + size;
-                                    SetNeedsPaint();
-                                }
+                                Vec2 size = tabs[i].rect.GetSize();
+                                tabs[i].rect.min.x += delta.x;
+                                tabs[i].rect.max = tabs[i].rect.min + size;
+                                SetNeedsPaint();
                             }
-                        }
-
-                        if (canDetach && (pos.y < 0 || pos.y > majorTabOffset + majorTabHeight + 5))
-                        {
-                            // Detach the window from this DockSpace
-                            CDockWindow* dockWindow = dockedWindows[selectedTab];
-                            RemoveSubWidget(dockWindow);
-
-                            PlatformWindow* newWindow = PlatformApplication::Get()->
-                        		CreatePlatformWindow(dockWindow->GetName().GetString(), windowSize.width, windowSize.height, false, false);
-                            newWindow->SetBorderless(true);
-                            newWindow->SetWindowPosition(Vec2i(mouseEvent->mousePos.x - 50, mouseEvent->mousePos.y - majorTabHeight));
-                            newWindow->SetOpacity(0.5f);
-
-                            CDockSpace* newDockSpace = CreateWindow<CDockSpace>(dockWindow->GetName().GetString(), nullptr, newWindow);
-                            newDockSpace->AddSubWidget(dockWindow);
-                            newDockSpace->isDetachedMode = true;
-                            newDockSpace->GetLastDockSplit()->selectedTab = 0;
-                            
-                            selectedTab = 0;
-
-                            tabs.Clear(); // Reset tabs List, it will be recalculated in OnPaint() next time.
-                            SetNeedsStyle();
-                            SetNeedsPaint();
-                            
-                            dragEvent->draggedWidget = newDockSpace->GetLastDockSplit();
-
-                            if (dockedWindows.IsEmpty())
-                            {
-                                dockSpace->QueueDestroy();
-                            }
-                        }
-                        else if (dockSpace->isDetachedMode)
-                        {
-                            CDockWindow* dockWindow = dockedWindows[selectedTab];
-                        	PlatformWindow* nativeWindow = dockWindow->GetRootNativeWindow();
-
                         }
                     }
                 }
                 else if (event->type == CEventType::DragEnd)
                 {
                     event->Consume(this);
-                    if (dockSpace->isDetachedMode)
-                    {
-                        platformWindow->SetOpacity(1.0f);
-                        //platformWindow->SetWindowSize(platformWindow->GetWindowSize() * 2);
-                    }
-                    dockSpace->isDetachedMode = false;
 
                     tabs.Clear();
                     SetNeedsPaint();

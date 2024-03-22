@@ -61,9 +61,9 @@ namespace CE::Vulkan
 
 		if (preferredWidth != 0 && preferredHeight != 0)
 		{
-			f32 aspect = width / height;
+			f32 aspect = (f32)width / (f32)height;
 			width = preferredWidth;
-			height = preferredWidth / aspect;
+			height = (u32)((f32)preferredWidth / aspect);
 		}
 
 		Create();

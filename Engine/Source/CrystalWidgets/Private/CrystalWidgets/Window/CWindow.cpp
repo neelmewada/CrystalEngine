@@ -130,6 +130,7 @@ namespace CE::Widgets
 
         u32 screenWidth = 0; u32 screenHeight = 0;
         nativeWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
+        CE_LOG(Info, All, "Resize: {}x{}", screenWidth, screenHeight);
 
         RPI::PerViewConstants viewConstantData{};
         viewConstantData.viewMatrix = Matrix4x4::Identity();
@@ -142,6 +143,9 @@ namespace CE::Widgets
         
         renderer->SetScreenSize(Vec2i(screenWidth, screenHeight));
         renderer->SetViewConstants(viewConstantData);
+
+        SetNeedsLayout();
+        SetNeedsPaint();
     }
 
     void CWindow::Tick()
@@ -197,8 +201,6 @@ namespace CE::Widgets
             }
             renderer->End();
         }
-
-        
     }
 
     void CWindow::OnBeforeDestroy()

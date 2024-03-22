@@ -88,12 +88,12 @@ namespace CE
 		secondDockWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
 		thirdDockWindow = CreateWindow<CDockWindow>("Third", mainDockSpace);
 
-		auto newWindow = PlatformApplication::Get()->CreatePlatformWindow("SecondWindow", 720, 480, false, false);
-		platformWindows.Add(newWindow);
+		//auto newWindow = PlatformApplication::Get()->CreatePlatformWindow("SecondWindow", 720, 480, false, false);
+		//platformWindows.Add(newWindow);
 
-		newWindow->SetBorderless(true);
-		secondDockSpace = CreateWindow<CDockSpace>("SecondDockSpace", nullptr, newWindow);
-		auto secondWindow = CreateWindow<CDockWindow>("Second", secondDockSpace);
+		//newWindow->SetBorderless(true);
+		//secondDockSpace = CreateWindow<CDockSpace>("SecondDockSpace", nullptr, newWindow);
+		//auto secondWindow = CreateWindow<CDockWindow>("Second", secondDockSpace);
 
 		//widgetWindows.Add(mainDockSpace);
 		//widgetWindows.Add(secondDockSpace);
