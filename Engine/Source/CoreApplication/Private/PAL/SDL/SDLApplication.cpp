@@ -52,7 +52,26 @@ namespace CE
 	{
 		Super::Shutdown();
 
+		for (int i = 0; i < systemCursors.GetSize(); ++i)
+		{
+			if (systemCursors[i] != nullptr)
+			{
+				SDL_FreeCursor(systemCursors[i]);
+				systemCursors[i] = nullptr;
+			}
+		}
+
 		SDL_Quit();
+	}
+
+	void SDLApplication::SetSystemCursor(SystemCursor cursor)
+	{
+		if (systemCursors[(int)cursor] == nullptr)
+		{
+			systemCursors[(int)cursor] = SDL_CreateSystemCursor((SDL_SystemCursor)cursor);
+		}
+
+		SDL_SetCursor(systemCursors[(int)cursor]);
 	}
 
 	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
@@ -158,7 +177,7 @@ namespace CE
 	{
 		if (window == nullptr)
 			return;
-
+		
 		auto sdlWindow = (SDLPlatformWindow*)window;
 
 		windowList.Remove(sdlWindow);

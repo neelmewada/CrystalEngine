@@ -27,6 +27,7 @@ namespace CE
         virtual void GetWindowSize(u32* outWidth, u32* outHeight) override;
         virtual Vec2i GetWindowSize() override;
         virtual void SetWindowSize(Vec2i newSize) override;
+        virtual void SetMinimumSize(Vec2i minSize) override;
 
         virtual void SetOpacity(f32 opacity) override;
         virtual void SetAlwaysOnTop(bool alwaysOnTop) override;

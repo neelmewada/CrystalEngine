@@ -54,7 +54,7 @@ namespace CE::Widgets
 			return;
 
 		// DockSpace has its own SubWidget logic
-		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>())
+		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()))
 		{
 			CWidget* widget = (CWidget*)object;
 			attachedWidgets.Add(widget);
@@ -247,7 +247,10 @@ namespace CE::Widgets
 				}
 				else if (parentWindow)
 				{
-					window->windowSize = parentWindow->windowSize - 
+					auto parentSize = parentWindow->windowSize;//parentWindow->GetComputedLayoutSize();
+					if (parentSize == Vec2(0, 0))
+						parentSize = parentWindow->GetComputedLayoutSize();
+					window->windowSize = parentSize -
 						Vec2(parentWindow->rootPadding.left + parentWindow->rootPadding.right,
 							parentWindow->rootPadding.top + parentWindow->rootPadding.bottom);
 					availableSize = window->windowSize;
@@ -266,14 +269,22 @@ namespace CE::Widgets
 			{
 				YGNodeCalculateLayout(node, availableSize.width, availableSize.height, YGDirectionLTR);
 			}
+
+			if (IsOfType<CWindow>())
+			{
+				CWindow* window = (CWindow*)this;
+
+				auto size = GetComputedLayoutSize();
+				if (size != Vec2(0, 0) && !isnan(size.x) && !isnan(size.y))
+				{
+					window->windowSize = size;
+				}
+			}
 			
 			if (parent)
 			{
 				rootOrigin = parent->rootOrigin + parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
 			}
-
-			Vec2 pos = GetComputedLayoutTopLeft();
-			Vec2 size = GetComputedLayoutSize();
 
 			for (CWidget* widget : attachedWidgets)
 			{
@@ -317,12 +328,7 @@ namespace CE::Widgets
 					}
 				}
 			}
-
-			if (EnumHasAnyFlags(stateFlags, CStateFlag::Pressed))
-			{
-				String::IsAlphabet('a');
-			}
-
+			
 			auto selectStyle = styleSheet->SelectStyle(this, stateFlags, subControl);
 			computedStyle.ApplyProperties(selectStyle);
 
@@ -332,6 +338,11 @@ namespace CE::Widgets
 			{
 				if (!value.IsValid())
 					continue;
+
+				if (property == CStylePropertyType::Cursor)
+				{
+					hoverCursor = static_cast<CCursor>(value.enumValue.x);
+				}
 
 				// Yoga Properties
 				if (property == CStylePropertyType::Display && value.IsEnum())
@@ -796,11 +807,14 @@ namespace CE::Widgets
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))
 			{
-				//CE_LOG(Info, All, "MouseEnter: {}", GetName());
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
 				{
 					stateFlags |= CStateFlag::Pressed;
+				}
+				if (hoverCursor != CCursor::Inherited)
+				{
+					CApplication::Get()->PushCursor(hoverCursor);
 				}
 				SetNeedsStyle();
 			}
@@ -819,6 +833,10 @@ namespace CE::Widgets
 				if (isPressed)
 				{
 					stateFlags &= ~CStateFlag::Pressed;
+				}
+				if (hoverCursor != CCursor::Inherited)
+				{
+					CApplication::Get()->PopCursor();
 				}
 				SetNeedsStyle();
 			}
@@ -872,6 +890,5 @@ namespace CE::Widgets
 			app->OnWidgetDestroyed(this);
 		}
 	}
-
     
 } // namespace CE::Widgets

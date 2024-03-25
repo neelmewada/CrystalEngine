@@ -133,10 +133,49 @@ namespace CE::Widgets
 	enum class CCursor : u8
 	{
 		Inherited = 0,
-		Arrow = 1,
-		Hand = 2,
+		Arrow,
+		Hand,
+		Edit,
+		SizeTL,
+		SizeBR,
+		SizeTR,
+		SizeBL,
+		SizeH,
+		SizeV,
+		SizeAll,
+		Wait
 	};
 	ENUM_CLASS(CCursor);
+
+	inline SystemCursor ToSystemCursor(CCursor cursor)
+	{
+		switch (cursor)
+		{
+		case CCursor::Inherited:
+			return SystemCursor::Default;
+		case CCursor::Arrow:
+			return SystemCursor::Arrow;
+		case CCursor::Hand:
+			return SystemCursor::Hand;
+		case CCursor::Edit:
+			return SystemCursor::IBeam;
+		case CCursor::SizeTL:
+		case CCursor::SizeBR:
+			return SystemCursor::SizeTopLeft;
+		case CCursor::SizeTR:
+		case CCursor::SizeBL:
+			return SystemCursor::SizeTopRight;
+		case CCursor::SizeH:
+			return SystemCursor::SizeHorizontal;
+		case CCursor::SizeV:
+			return SystemCursor::SizeVertical;
+		case CCursor::SizeAll:
+			return SystemCursor::SizeAll;
+		case CCursor::Wait:
+			return SystemCursor::Wait;
+		}
+		return SystemCursor::Default;
+	}
 
 	ENUM()
 	enum class CWordWrap : u8

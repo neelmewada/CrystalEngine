@@ -84,6 +84,10 @@ namespace CE::Widgets
 
         HashMap<Name, RPI::FontAtlasAsset*> registeredFonts{};
 
+        void PushCursor(CCursor cursor);
+        CCursor GetTopCursor();
+        void PopCursor();
+
     private:
 
         void OnSubobjectDetached(Object* object) override;
@@ -98,6 +102,8 @@ namespace CE::Widgets
         RHI::FrameScheduler* scheduler = nullptr;
 
         Array<CWidget*> destructionQueue{};
+
+        Array<CCursor> cursorStack{};
 
         Array<CWidget*> hoveredWidgetsStack = {};
         StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};

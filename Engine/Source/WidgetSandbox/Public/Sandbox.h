@@ -93,10 +93,12 @@ namespace CE
 		//Array<CWindow*> widgetWindows{};
 
 		CDockSpace* mainDockSpace = nullptr;
+		CDockSpace* minorDockSpace = nullptr;
 		CDockWindow* mainDockWindow = nullptr;
 		CDockWindow* secondDockWindow = nullptr;
 		CDockWindow* thirdDockWindow = nullptr;
 		CDockWindow* fourthDockWindow = nullptr;
+		CDockWindow* fifthDockWindow = nullptr;
 
 		CDockSpace* secondDockSpace = nullptr;
 

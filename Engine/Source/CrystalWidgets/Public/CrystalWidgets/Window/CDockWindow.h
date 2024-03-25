@@ -14,8 +14,6 @@ namespace CE::Widgets
 		CDockWindow();
 		virtual ~CDockWindow();
 
-		CDockType GetDockType() const { return dockType; }
-
 		CDockSpace* GetDockSpace() const { return dockSpace; }
 
 		bool IsMainWindow() const { return isMainWindow; }
@@ -23,9 +21,6 @@ namespace CE::Widgets
 		void SetAsMainWindow(bool set) { isMainWindow = set; }
 		
 	crystalwidgets_internal:
-
-		FIELD()
-		CDockType dockType = CDockType::Major;
 
 		FIELD()
 		CDockSpace* dockSpace = nullptr;

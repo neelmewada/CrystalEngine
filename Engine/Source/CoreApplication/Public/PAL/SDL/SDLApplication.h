@@ -1,6 +1,7 @@
 #pragma once
 
 union SDL_Event;
+struct SDL_Cursor;
 
 namespace CE
 {
@@ -27,6 +28,8 @@ namespace CE
         {
             return PlatformBackend::SDL;
         }
+
+        virtual void SetSystemCursor(SystemCursor cursor) override;
 
         PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) override;
 
@@ -66,6 +69,10 @@ namespace CE
         Array<SDLPlatformWindow*> windowList{};
 
         friend int SDLWindowEventWatch(void* data, SDL_Event* event);
+
+    private:
+
+        StaticArray<SDL_Cursor*, (SIZE_T)SystemCursor::COUNT> systemCursors{};
     };
 
     typedef SDLApplication PlatformApplicationImpl;

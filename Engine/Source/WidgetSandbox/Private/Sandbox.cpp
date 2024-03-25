@@ -1,17 +1,5 @@
 #include "WidgetSandbox.h"
 
-static const CE::String css = R"(
-.Class1 .Class2::tab:hover { /* some comment */
-	padding: 0% 0px;
-	icon: url('path/to/icon');
-	icon: url("path/to/icon");
-}
-
-CButton:hover, CLabel.SomeClass, #SomeName, CWindow > CToolBar, CTextInput[mode="password"], * {
-	background: rgba(255, 255, 255, 255);
-}
-)";
-
 using namespace CE::Widgets;
 
 namespace CE
@@ -61,6 +49,7 @@ namespace CE
 
 		//swapChain = RHI::gDynamicRHI->CreateSwapChain(mainWindow, swapChainDesc);
 
+		mainWindow->SetMinimumSize(Vec2i(1280, 720));
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
 		PlatformApplication::Get()->AddMessageHandler(this);
@@ -83,32 +72,37 @@ namespace CE
 	void WidgetSandbox::InitWidgets()
 	{
 		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
-		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace);
+		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace->GetRootDockSplit());
 		mainDockWindow->SetAsMainWindow(true);
-		secondDockWindow = CreateWindow<CDockWindow>("Second", mainDockSpace);
-		thirdDockWindow = CreateWindow<CDockWindow>("Third", mainDockSpace);
-		fourthDockWindow = CreateWindow<CDockWindow>("Fourth", mainDockSpace);
-
-		//auto newWindow = PlatformApplication::Get()->CreatePlatformWindow("SecondWindow", 720, 480, false, false);
-		//platformWindows.Add(newWindow);
-
-		//newWindow->SetBorderless(true);
-		//secondDockSpace = CreateWindow<CDockSpace>("SecondDockSpace", nullptr, newWindow);
-		//auto secondWindow = CreateWindow<CDockWindow>("Second", secondDockSpace);
-
-		//widgetWindows.Add(mainDockSpace);
-		//widgetWindows.Add(secondDockSpace);
-		//widgetWindows.Add(secondWindow);
 
 		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
-		if (secondDockWindow)
-		{
-			CWidget* toolBar2 = CreateObject<CWidget>(secondDockWindow, "ToolBar");
-		}
 
 		for (int i = 0; i < 4; ++i)
 		{
 			CWidget* btn = CreateObject<CWidget>(toolBar, "Button");
+		}
+		
+		minorDockSpace = CreateWindow<CDockSpace>("MinorDockSpace", nullptr);
+		minorDockSpace->SetDockType(CDockType::Minor);
+		mainDockWindow->AddSubWidget(minorDockSpace);
+
+		minorDockSpace->Split(0.25f, CDockSplitDirection::Horizontal, "SplitLeft", "SplitRight");
+		auto parentSplit = minorDockSpace->GetRootDockSplit();
+		auto left = parentSplit->GetSplit(0);
+		auto right = parentSplit->GetSplit(1);
+
+		minorDockSpace->Split(right, 0.5f, CDockSplitDirection::Vertical, "SplitRightTop", "SplitRightBottom");
+		auto rightTop = right->GetSplit(0);
+		auto rightBottom = right->GetSplit(1);
+
+		secondDockWindow = CreateWindow<CDockWindow>("Second", left);
+		thirdDockWindow = CreateWindow<CDockWindow>("Third", rightTop);
+		fourthDockWindow = CreateWindow<CDockWindow>("Fourth", rightBottom);
+		fifthDockWindow = CreateWindow<CDockWindow>("Fifth", rightBottom);
+
+		for (int i = 0; i < 4; ++i)
+		{
+			CWidget* btn = CreateObject<CWidget>(thirdDockWindow, "Button");
 		}
 	}
 

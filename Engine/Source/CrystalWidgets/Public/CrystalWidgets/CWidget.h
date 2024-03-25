@@ -108,8 +108,8 @@ namespace CE::Widgets
             return styleClasses.Exists(styleClass);
         }
 
-        Vec2 GetComputedLayoutTopLeft() const { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
-        Vec2 GetComputedLayoutSize() const { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
+        virtual Vec2 GetComputedLayoutTopLeft() { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
+        virtual Vec2 GetComputedLayoutSize() { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
 
         Rect GetScreenSpaceRect();
 
@@ -189,6 +189,7 @@ namespace CE::Widgets
         YGNodeRef detachedNode = nullptr;
 
         CStyle computedStyle{};
+        CCursor hoverCursor = CCursor::Inherited;
 
         b8 isMouseInside = false;
 

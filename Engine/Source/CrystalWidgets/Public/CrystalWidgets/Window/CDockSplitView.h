@@ -37,9 +37,15 @@ namespace CE::Widgets
 
 		CDockSplitView* FindSplit(Name splitName);
 
+		u32 GetSplitCount() const { return children.GetSize(); }
+		CDockSplitView* GetSplit(u32 index) const { return children[index]; }
+
 		bool IsLayoutCalculationRoot() override { return true; }
 
 		bool IsSubWidgetAllowed(Class* subWidgetClass) override;
+
+		virtual Vec2 GetComputedLayoutTopLeft() override;
+		virtual Vec2 GetComputedLayoutSize() override;
 
 	crystalwidgets_internal:
 
@@ -68,8 +74,11 @@ namespace CE::Widgets
 		FIELD()
 		CDockSpace* dockSpace = nullptr;
 
+		int draggedSplitIdx = -1;
+		int hoveredSplitIdx = -1;
 		int selectedTab = 0;
 		b8 isLeftMousePressedOnTab = false;
+		b8 hasPushedResizeCursor = false;
 
 		struct TabData
 		{

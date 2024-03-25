@@ -13,6 +13,27 @@ namespace CE
         None = 0,
         SDL
     };
+
+    enum class SystemCursor
+    {
+        Default = 0,
+        Arrow = 0,
+        IBeam,
+        Wait,
+        CrossHair,
+        WaitArrow,
+        SizeTopLeft,
+        SizeBottomRight = SizeTopLeft,
+        SizeTopRight,
+        SizeBottomLeft = SizeTopRight,
+        SizeHorizontal,
+        SizeVertical,
+        SizeAll,
+        No,
+        Hand,
+        COUNT
+    };
+    ENUM_CLASS(SystemCursor);
     
     class COREAPPLICATION_API PlatformApplication
     {
@@ -56,6 +77,8 @@ namespace CE
         virtual void Tick();
 
         virtual PlatformBackend GetBackend() = 0;
+
+        virtual void SetSystemCursor(SystemCursor cursor) = 0;
 
         virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) = 0;
 

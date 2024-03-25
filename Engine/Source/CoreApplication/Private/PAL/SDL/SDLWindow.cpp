@@ -8,7 +8,7 @@
 
 #include <SDL_syswm.h>
 
-#define MOUSE_GRAB_PADDING 5
+#define MOUSE_GRAB_PADDING 8
 #define WINDOW_DRAG_PADDING 50
 
 namespace CE
@@ -113,6 +113,11 @@ namespace CE
 	void SDLPlatformWindow::SetWindowSize(Vec2i newSize)
 	{
 		SDL_SetWindowSize(handle, newSize.x, newSize.y);
+	}
+
+	void SDLPlatformWindow::SetMinimumSize(Vec2i minSize)
+	{
+		SDL_SetWindowMinimumSize(handle, minSize.width, minSize.height);
 	}
 
 	void SDLPlatformWindow::SetOpacity(f32 opacity)

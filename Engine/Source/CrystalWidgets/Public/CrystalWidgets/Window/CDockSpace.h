@@ -13,13 +13,17 @@ namespace CE::Widgets
 		CDockSpace();
 		virtual ~CDockSpace();
 
-		CDockSplitView* GetLastDockSplit() const { return dockSplits.Top(); }
+		bool IsLayoutCalculationRoot() override { return dockType == CDockType::Major; }
 
-		bool Split(CDockSplitView* originalSplitView, f32 splitRatio, CDockSplitDirection splitDirection);
+		CDockSplitView* GetRootDockSplit() const { return dockSplits.Top(); }
 
-		bool Split(f32 splitRatio, CDockSplitDirection splitDirection);
+		bool Split(CDockSplitView* originalSplitView, f32 splitRatio, CDockSplitDirection splitDirection, Name splitName1 = "", Name splitName2 = "");
+
+		bool Split(f32 splitRatio, CDockSplitDirection splitDirection, Name splitName1 = "", Name splitName2 = "");
 
 		CDockType GetDockType() const { return dockType; }
+
+		void SetDockType(CDockType dockType) { this->dockType = dockType; }
 
 	crystalwidgets_internal:
 

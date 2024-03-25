@@ -23,15 +23,20 @@ namespace CE::Widgets
         }
 	}
 
-    bool CDockSpace::Split(CDockSplitView* originalSplit, f32 splitRatio, CDockSplitDirection splitDirection)
+    bool CDockSpace::Split(CDockSplitView* originalSplit, f32 splitRatio, CDockSplitDirection splitDirection, Name splitName1, Name splitName2)
     {
         if (dockType == CDockType::Major)
             return false;
 
         splitRatio = Math::Clamp(splitRatio, 0.05f, 0.95f);
 
-        CDockSplitView* first = CreateObject<CDockSplitView>(originalSplit, "DockSplitView");
-        CDockSplitView* second = CreateObject<CDockSplitView>(originalSplit, "DockSplitView");
+        if (!splitName1.IsValid())
+            splitName1 = "DockSplitView";
+        if (!splitName2.IsValid())
+            splitName2 = "DockSplitView";
+
+        CDockSplitView* first = CreateObject<CDockSplitView>(originalSplit, splitName1.GetString());
+        CDockSplitView* second = CreateObject<CDockSplitView>(originalSplit, splitName2.GetString());
 
         first->splitRatio = 1.0f - splitRatio;
         second->splitRatio = splitRatio;
@@ -42,13 +47,13 @@ namespace CE::Widgets
         return true;
     }
 
-    bool CDockSpace::Split(f32 splitRatio, CDockSplitDirection splitDirection)
+    bool CDockSpace::Split(f32 splitRatio, CDockSplitDirection splitDirection, Name splitName1, Name splitName2)
     {
         if (dockType == CDockType::Major)
             return false;
 
         CDockSplitView* originalSplit = dockSplits.Top();
-        return Split(originalSplit, splitRatio, splitDirection);
+        return Split(originalSplit, splitRatio, splitDirection, splitName1, splitName2);
     }
 
     void CDockSpace::HandleEvent(CEvent* event)
@@ -61,7 +66,10 @@ namespace CE::Widgets
     {
         Super::OnPlatformWindowSet();
 
-        nativeWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+        if (nativeWindow)
+        {
+	        nativeWindow->SetHitTestDelegate(MemberDelegate(&Self::WindowHitTest, this));
+        }
     }
 
     void CDockSpace::OnSubobjectAttached(Object* object)
@@ -115,32 +123,44 @@ namespace CE::Widgets
 
         CPainter* painter = paintEvent->painter;
 
-        PlatformWindow* nativeWindow = GetRootNativeWindow();
-
-        u32 w = 0, h = 0;
-        nativeWindow->GetDrawableWindowSize(&w, &h);
-
-        // - Fetch Styles -
-
-        // - Draw Background -
-
         Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
-        
+
         CPen pen = CPen(Color::FromRGBA32(48, 48, 48));
-        CBrush brush = CBrush(bgColor);//CBrush(Color::FromRGBA32(21, 21, 21));
+        CBrush brush = CBrush(bgColor);
         CFont font = CFont("Roboto", 15, false);
 
-        painter->SetBrush(brush);
-        f32 windowEdgeSize = 0;
-
-        if (this->nativeWindow != nullptr && this->nativeWindow->IsBorderless())
+        if (GetDockType() == CDockType::Major)
         {
-            windowEdgeSize = 2.0f;
-            pen.SetWidth(windowEdgeSize);
-            painter->SetPen(pen);
-        }
+            PlatformWindow* nativeWindow = GetRootNativeWindow();
 
-        painter->DrawRect(Rect::FromSize(0, 0, w, h));
+            u32 w = 0, h = 0;
+            nativeWindow->GetDrawableWindowSize(&w, &h);
+
+            // - Fetch Styles -
+
+            // - Draw Background -
+
+            painter->SetBrush(brush);
+            f32 windowEdgeSize = 0;
+
+            if (this->nativeWindow != nullptr && this->nativeWindow->IsBorderless())
+            {
+                windowEdgeSize = 2.0f;
+                pen.SetWidth(windowEdgeSize);
+                painter->SetPen(pen);
+            }
+
+            painter->DrawRect(Rect::FromSize(0, 0, w, h));
+        }
+        else
+        {
+            Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+
+            painter->SetBrush(brush);
+            f32 windowEdgeSize = 0;
+
+            painter->DrawRect(rect);
+        }
 	}
 
     bool CDockSpace::WindowHitTest(PlatformWindow* window, Vec2 position)

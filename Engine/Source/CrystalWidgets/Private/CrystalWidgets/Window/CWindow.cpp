@@ -71,6 +71,8 @@ namespace CE::Widgets
     {
         if (parent != nullptr) // Renderer2D is created only for Root windows
             return;
+        if (nativeWindow == nullptr)
+            return;
 
         if (renderer == nullptr)
         {

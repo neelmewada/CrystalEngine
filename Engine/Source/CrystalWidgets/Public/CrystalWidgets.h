@@ -8,11 +8,11 @@
 // Yoga
 #include "yoga/Yoga.h"
 
-#include "CrystalWidgets/CApplication.h"
-
 // Style
 #include "CrystalWidgets/Style/FlexEnums.h"
 #include "CrystalWidgets/Style/CStyle.h"
+#include "CrystalWidgets/CApplication.h"
+
 #include "CrystalWidgets/Style/CStyleSheet.h"
 
 // CSS

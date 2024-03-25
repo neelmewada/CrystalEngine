@@ -10,11 +10,6 @@ namespace CE::Widgets
 		if (!rule.IsValid())
 			return false;
 
-		if (widget->GetName() == "Button" && curStates == CStateFlag::Pressed)
-		{
-			String::IsAlphabet('a');
-		}
-
 		if (rule.matches == Any)
 			return true;
 

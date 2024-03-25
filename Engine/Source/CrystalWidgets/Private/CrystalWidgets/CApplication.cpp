@@ -488,6 +488,38 @@ namespace CE::Widgets
 		}
 	}
 
+	void CApplication::PushCursor(CCursor cursor)
+	{
+		cursorStack.Push(cursor);
+		PlatformApplication::Get()->SetSystemCursor(ToSystemCursor(cursor));
+	}
+
+	CCursor CApplication::GetTopCursor()
+	{
+		if (cursorStack.NonEmpty())
+			return cursorStack.Top();
+		return CCursor::Arrow;
+	}
+
+	void CApplication::PopCursor()
+	{
+		if (cursorStack.IsEmpty())
+		{
+			PlatformApplication::Get()->SetSystemCursor(SystemCursor::Arrow);
+			return;
+		}
+
+		cursorStack.Pop();
+		if (cursorStack.IsEmpty())
+		{
+			PlatformApplication::Get()->SetSystemCursor(SystemCursor::Arrow);
+		}
+		else
+		{
+			PlatformApplication::Get()->SetSystemCursor(ToSystemCursor(cursorStack.Top()));
+		}
+	}
+
 	void CApplication::OnSubobjectDetached(Object* object)
 	{
 		Super::OnSubobjectDetached(object);

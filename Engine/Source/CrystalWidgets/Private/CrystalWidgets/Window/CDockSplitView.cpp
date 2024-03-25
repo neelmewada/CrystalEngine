@@ -4,6 +4,11 @@ namespace CE::Widgets
 {
     constexpr f32 majorTabHeight = 40.0f;
     constexpr f32 majorTabOffset = 25.0f;
+    constexpr f32 majorTabWidth = 270.0f;
+    constexpr f32 minorTabHeight = 27.0f;
+    constexpr f32 minorTabOffset = 2.0f;
+    constexpr f32 minorTabWidth = 200.0f;
+    constexpr f32 splitterWidth = 2.0f;
 
     CDockSplitView::CDockSplitView()
     {
@@ -41,6 +46,47 @@ namespace CE::Widgets
         if (dockSpace->GetDockType() == CDockType::Minor && subWidgetClass->IsSubclassOf<CDockSplitView>())
             return true;
         return false;
+    }
+
+    Vec2 CDockSplitView::GetComputedLayoutTopLeft()
+    {
+        if (parentSplitView == nullptr || dockSpace->GetDockType() != CDockType::Minor)
+            return Super::GetComputedLayoutTopLeft();
+
+        Vec2 pos = Vec2();
+        Vec2 parentSize = parentSplitView->GetComputedLayoutSize();
+        int index = parentSplitView->children.IndexOf(this);
+        int numChildren = parentSplitView->children.GetSize();
+        if (index < 0)
+            return Super::GetComputedLayoutTopLeft();
+        CDockSplitView* prevSplitView = nullptr;
+    
+        for (int i = 0; i < index; i++)
+        {
+            if (parentSplitView->GetSplitDirection() == CDockSplitDirection::Horizontal)
+                pos.x += parentSplitView->children[i]->splitRatio * parentSize.width + splitterWidth;
+            else
+                pos.y += parentSplitView->children[i]->splitRatio * parentSize.height + splitterWidth;
+        }
+
+        return pos;
+    }
+
+    Vec2 CDockSplitView::GetComputedLayoutSize()
+    {
+        if (parentSplitView == nullptr || dockSpace->GetDockType() != CDockType::Minor)
+            return Super::GetComputedLayoutSize();
+
+        Vec2 parentSize = parentSplitView->GetComputedLayoutSize();
+        int index = parentSplitView->children.IndexOf(this);
+        int numChildren = parentSplitView->children.GetSize();
+        if (index < 0)
+            return Super::GetComputedLayoutSize();
+
+        if (parentSplitView->GetSplitDirection() == CDockSplitDirection::Horizontal)
+            return Vec2(parentSize.x * splitRatio - (numChildren - 1) * splitterWidth, parentSize.y);
+
+        return Vec2(parentSize.x, parentSize.y * splitRatio - (numChildren - 1) * splitterWidth);
     }
 
     void CDockSplitView::OnSubobjectAttached(Object* subobject)
@@ -94,7 +140,163 @@ namespace CE::Widgets
         {
             CMouseEvent* mouseEvent = (CMouseEvent*)event;
 
-            if (!event->isConsumed && dockSpace->GetDockType() == CDockType::Major)
+            if (event->type == CEventType::MousePress && children.GetSize() > 1 && mouseEvent->button == MouseButton::Left)
+            {
+                int splitIdx = -1;
+
+                for (int i = 0; i < children.GetSize() - 1; i++)
+                {
+                    Rect childRect = children[i]->GetScreenSpaceRect();
+
+                    if (splitDirection == CDockSplitDirection::Horizontal)
+                    {
+                        Rect splitterRect = Rect::FromSize(childRect.min + Vec2(childRect.GetSize().width, 0),
+                            Vec2(splitterWidth * 2, childRect.GetSize().height));
+
+                        if (splitterRect.Contains(mouseEvent->mousePos))
+                        {
+                            splitIdx = i;
+                            break;
+                        }
+                    }
+                    else if (splitDirection == CDockSplitDirection::Vertical)
+                    {
+                        Rect splitterRect = Rect::FromSize(childRect.min + Vec2(0, childRect.GetSize().height),
+                            Vec2(childRect.GetSize().width, splitterWidth * 2));
+
+                        if (splitterRect.Contains(mouseEvent->mousePos))
+                        {
+                            splitIdx = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (splitIdx >= 0)
+                {
+                    draggedSplitIdx = splitIdx;
+                }
+            }
+            else if (event->type == CEventType::MouseMove && children.GetSize() > 1)
+            {
+                if (draggedSplitIdx >= 0 && mouseEvent->button == MouseButton::Left) // User is dragging the splitter
+                {
+                    Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
+                    if (splitDirection == CDockSplitDirection::Horizontal)
+                    {
+                        mouseDelta.x /= GetComputedLayoutSize().x;
+                        for (int i = 0; i < children.GetSize(); i++)
+                        {
+	                        if (i == draggedSplitIdx && i < children.GetSize() - 1)
+	                        {
+                                children[i]->splitRatio += mouseDelta.x;
+                                children[i]->splitRatio = Math::Clamp(children[i]->splitRatio, 0.1f, 0.9f);
+                                children[i + 1]->splitRatio -= mouseDelta.x;
+                                children[i + 1]->splitRatio = Math::Clamp(children[i + 1]->splitRatio, 0.1f, 0.9f);
+                                SetNeedsStyle();
+	                        	SetNeedsLayout();
+                                SetNeedsPaint();
+		                        break;
+	                        }
+                        }
+                    }
+                    else
+                    {
+                        mouseDelta.y /= GetComputedLayoutSize().y;
+                        for (int i = 0; i < children.GetSize(); i++)
+                        {
+                            if (i == draggedSplitIdx && i < children.GetSize() - 1)
+                            {
+                                children[i]->splitRatio += mouseDelta.y;
+                                children[i]->splitRatio = Math::Clamp(children[i]->splitRatio, 0.1f, 0.9f);
+                                children[i + 1]->splitRatio -= mouseDelta.y;
+                                children[i + 1]->splitRatio = Math::Clamp(children[i + 1]->splitRatio, 0.1f, 0.9f);
+                                SetNeedsStyle();
+                                SetNeedsLayout();
+                                SetNeedsPaint();
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if (mouseEvent->button == MouseButton::None) // User is just hovering over the splitter without left mouse button held
+                {
+                    hoveredSplitIdx = -1;
+
+                    for (int i = 0; i < children.GetSize() - 1; i++)
+                    {
+                        Rect childRect = children[i]->GetScreenSpaceRect();
+
+                        if (splitDirection == CDockSplitDirection::Horizontal)
+                        {
+                            Rect splitterRect = Rect::FromSize(childRect.min + Vec2(childRect.GetSize().width, 0),
+                                Vec2(splitterWidth * 2, childRect.GetSize().height));
+
+                            if (splitterRect.Contains(mouseEvent->mousePos))
+                            {
+                                hoveredSplitIdx = i;
+                                break;
+                            }
+                        }
+                        else if (splitDirection == CDockSplitDirection::Vertical)
+                        {
+                            Rect splitterRect = Rect::FromSize(childRect.min + Vec2(0, childRect.GetSize().height),
+                                Vec2(childRect.GetSize().width, splitterWidth * 2));
+
+                            if (splitterRect.Contains(mouseEvent->mousePos))
+                            {
+                                hoveredSplitIdx = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (hoveredSplitIdx >= 0)
+                    {
+                        if (hasPushedResizeCursor)
+                        {
+                            if ((splitDirection == CDockSplitDirection::Horizontal && CApplication::Get()->GetTopCursor() != CCursor::SizeH) ||
+                                (splitDirection == CDockSplitDirection::Vertical && CApplication::Get()->GetTopCursor() != CCursor::SizeV))
+                            {
+                                CApplication::Get()->PopCursor();
+                                hasPushedResizeCursor = false;
+                            }
+                        }
+                        if (!hasPushedResizeCursor)
+                        {
+                            CApplication::Get()->PushCursor(splitDirection == CDockSplitDirection::Horizontal ? CCursor::SizeH : CCursor::SizeV);
+                            hasPushedResizeCursor = true;
+                        }
+                    }
+                    else
+                    {
+                        if (hasPushedResizeCursor)
+                        {
+                            CApplication::Get()->PopCursor();
+                            hasPushedResizeCursor = false;
+                        }
+                    }
+                }
+            }
+            else if (event->type == CEventType::MouseLeave && children.GetSize() > 1)
+            {
+                if (hasPushedResizeCursor && draggedSplitIdx < 0)
+                {
+                    CApplication::Get()->PopCursor();
+                    hasPushedResizeCursor = false;
+                }
+            }
+            else if (event->type == CEventType::MouseRelease)
+            {
+                if (hasPushedResizeCursor)
+                {
+                    CApplication::Get()->PopCursor();
+                    hasPushedResizeCursor = false;
+                }
+                draggedSplitIdx = -1;
+            }
+            
+            if (!event->isConsumed)
             {
                 PlatformWindow* platformWindow = dockSpace->GetRootNativeWindow();
                 Vec2 windowPos = platformWindow->GetWindowPosition().ToVec2();
@@ -134,7 +336,6 @@ namespace CE::Widgets
 
                     if (dockedWindows.GetSize() > 0)
                     {
-                        bool canDetach = !dockedWindows[selectedTab]->IsMainWindow() && !dockSpace->isDetachedMode;
                         dragEvent->Consume(this);
 
                         for (int i = 0; i < tabs.GetSize(); ++i)
@@ -147,7 +348,8 @@ namespace CE::Widgets
                                 tabs[i].rect.max = tabs[i].rect.min + size;
                                 f32 nextMidPoint = (tabs[i].rect.min.x + size.width * 0.5f);
                                 f32 prevMidPoint = (tabs[i].rect.min.x + size.width * 0.5f);
-                                if (i < tabs.GetSize() - 1)
+                                //if (i < tabs.GetSize() - 1)
+                                if (false) // TODO: Tab reordering logic
                                 {
                                     f32 nextStartPoint = tabs[i + 1].rect.min.x;
                                     if (nextMidPoint > nextStartPoint)
@@ -162,18 +364,7 @@ namespace CE::Widgets
                                         totalDeltaX = 0;
                                     }
                                 }
-                                //if (i > 0)
-                                if (false)
-                                {
-                                    f32 prevEndPoint = tabs[i - 1].rect.max.x;
-                                    if (prevMidPoint < prevEndPoint)
-                                    {
-                                        std::swap(tabs[selectedTab - 1], tabs[selectedTab]);
-                                        std::swap(attachedWidgets[selectedTab - 1], attachedWidgets[selectedTab]);
-                                        std::swap(dockedWindows[selectedTab - 1], dockedWindows[selectedTab]);
-                                        selectedTab--;
-                                    }
-                                }
+
                                 SetNeedsPaint();
                                 break;
                             }
@@ -208,10 +399,30 @@ namespace CE::Widgets
         CFont font = CFont("Roboto", 15, false);
 
         // - Draw Tabs -
+        tabs.Clear();
 
-        if (dockSpace->GetDockType() == CDockType::Major)
+        if (children.IsEmpty())
         {
-            f32 xOffset = 20.0f;
+            Vec2 baseOffset = {};
+            if (parentSplitView != nullptr && dockSpace->GetDockType() == CDockType::Minor)
+            {
+                int index = parentSplitView->children.IndexOf(this);
+                Vec2 parentSize = parentSplitView->GetComputedLayoutSize();
+                baseOffset.x -= 19;
+
+                for (int i = 0; i < index; ++i)
+                {
+	                if (parentSplitView->GetSplitDirection() == CDockSplitDirection::Horizontal)
+		                baseOffset.x += parentSplitView->children[i]->splitRatio * parentSize.width;
+	                else
+		                baseOffset.y += parentSplitView->children[i]->splitRatio * parentSize.height;
+                }
+            }
+
+            f32 startXOffset = 20.0f + baseOffset.x;
+            const f32 startYOffset = baseOffset.y;
+
+            f32 xOffset = startXOffset;
 
             int tabsCount = tabs.GetSize();
             if (tabsCount < GetSubWidgetCount())
@@ -223,6 +434,19 @@ namespace CE::Widgets
                     GetSubWidget(i)->SetEnabled(selectedTab == i);
                 }
             }
+
+            f32 tabOffsetY = majorTabOffset;
+            f32 tabHeight = majorTabHeight;
+            f32 maxTabWidth = majorTabWidth;
+            if (dockSpace->GetDockType() == CDockType::Minor)
+            {
+                tabOffsetY = minorTabOffset;
+                tabHeight = minorTabHeight;
+                maxTabWidth = minorTabWidth;
+                font.SetSize(14);
+            }
+
+            tabOffsetY += startYOffset;
 
             // Draw non-selected tabs first
             for (int i = 0; i < GetSubWidgetCount(); ++i)
@@ -244,7 +468,7 @@ namespace CE::Widgets
 
                     if (i >= tabsCount)
                     {
-                        Rect rect = Rect::FromSize(xOffset, majorTabOffset, Math::Min(tabTitleSize.width + 70, 270.0f), majorTabHeight);
+                        Rect rect = Rect::FromSize(xOffset, tabOffsetY, Math::Min(tabTitleSize.width + 70, maxTabWidth), tabHeight);
                         tabs[i] = { rect };
                     }
 
@@ -265,7 +489,7 @@ namespace CE::Widgets
             }
 
             // Draw selected tab at last
-            xOffset = 20.0f;
+            xOffset = startXOffset;
 
             for (int i = 0; i < GetSubWidgetCount(); ++i)
             {
@@ -288,8 +512,8 @@ namespace CE::Widgets
                     auto size = tabRect.GetSize();
                     if (tabRect.min.x < 20)
                     {
-                        tabRect.min.x = 20;
-                        tabRect.max.x = tabRect.min.x + size.x;
+                        //tabRect.min.x = 20;
+                        //tabRect.max.x = tabRect.min.x + size.x;
                     }
 
                     if (selectedTab == i)
@@ -307,8 +531,9 @@ namespace CE::Widgets
             }
 
         }
-        else if (dockSpace->GetDockType() == CDockType::Minor)
+        else
         {
+            // Children dock splits exist
 
         }
     }

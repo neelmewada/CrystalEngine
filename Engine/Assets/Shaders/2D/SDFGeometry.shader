@@ -207,13 +207,14 @@ Shader "2D/SDF Geometry"
                 float4 color = info.fillColor;
 
                 float borderMask = 0.0;
-                if (sdf > -borderThickness && sdf <= 0)
-                    borderMask = 1.0;
-
-                const float borderSmoothStart = -borderThickness - 1.0;
-                const float borderSmoothEnd = -borderThickness;
-                borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
-                borderMask = clamp(borderMask, 0, 1);
+                
+                if (borderThickness > 0.1)
+                {
+                    const float borderSmoothStart = -borderThickness - 1.0;
+                    const float borderSmoothEnd = -borderThickness;
+                    borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
+                    borderMask = clamp(borderMask, 0, 1);
+                }
 
                 color = lerp(color, info.outlineColor, borderMask);
 
@@ -225,22 +226,23 @@ Shader "2D/SDF Geometry"
                 const float sdf = SDFRoundRect(p, info.itemSize * 0.5, float4(info.cornerRadius.z, info.cornerRadius.y, info.cornerRadius.w, info.cornerRadius.x));
                 const float invSdf = -sdf;
 
-                float borderThickness = info.borderThickness;
+                const float borderThickness = info.borderThickness;
 
                 float4 color = info.fillColor;
 
                 float borderMask = 0.0;
-                if (sdf > -borderThickness && sdf <= 0)
-		            borderMask = 1.0;
 
-                const float borderSmoothStart = -borderThickness - 1.0;
-                const float borderSmoothEnd = -borderThickness;
-                borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
-                borderMask = clamp(borderMask, 0, 1);
+                if (borderThickness > 0.1)
+                {
+                    const float borderSmoothStart = -borderThickness - 1.0;
+                    const float borderSmoothEnd = -borderThickness;
+                    borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
+                    borderMask = clamp(borderMask, 0, 1);
+                }
 
                 color = lerp(color, info.outlineColor, borderMask);
 
-                return lerp(float4(color.rgb, 0), color, -sdf);
+                return lerp(float4(color.rgb, 0), color, invSdf * 0.8);
             }
 
             #define idx input.instanceId

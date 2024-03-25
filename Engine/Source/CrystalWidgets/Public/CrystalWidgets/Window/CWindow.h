@@ -87,15 +87,15 @@ namespace CE::Widgets
         friend class CWidget;
 
         template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
-        friend TWindow* CreateWindow(const String& name, CWindow* parentWindow, PlatformWindow* nativeWindow, Class* windowClass);
+        friend TWindow* CreateWindow(const String& name, CWidget* parent, PlatformWindow* nativeWindow, Class* windowClass);
     };
 
     template<typename TWindow> requires TIsBaseClassOf<CWindow, TWindow>::Value
-    TWindow* CreateWindow(const String& name, CWindow* parentWindow = nullptr, PlatformWindow* nativeWindow = nullptr, Class* windowClass = GetStaticClass<TWindow>())
+    TWindow* CreateWindow(const String& name, CWidget* parent = nullptr, PlatformWindow* nativeWindow = nullptr, Class* windowClass = GetStaticClass<TWindow>())
     {
         if (windowClass == nullptr)
             windowClass = GetStaticClass<TWindow>();
-        Object* outer = parentWindow;
+        Object* outer = parent;
         if (outer == nullptr)
             outer = CApplication::Get();
 

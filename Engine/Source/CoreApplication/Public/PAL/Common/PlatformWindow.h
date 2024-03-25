@@ -40,6 +40,8 @@ namespace CE
         virtual Vec2i GetWindowSize() = 0;
         virtual void SetWindowSize(Vec2i newSize) = 0;
 
+        virtual void SetMinimumSize(Vec2i minSize) = 0;
+
         virtual void SetOpacity(f32 opacity) = 0;
 
         virtual void SetAlwaysOnTop(bool alwaysOnTop) = 0;
