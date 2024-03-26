@@ -1,8 +1,11 @@
 # Crystal Engine
 
-A Work-in-progress Vulkan game engine with PBR rendering and FrameGraph.
+A Work-in-progress Vulkan game engine with PBR rendering, FrameGraph based render architecture, and a Widget library that uses CSS & Yoga Layout engine.
 
-![](./Screenshots/IBL%20Demo%20Night.png)
+PBR Demo            |  Widgets Demo
+:-------------------------:|:-------------------------:
+![](./Screenshots/IBL%20Demo%20Night.png)  |  ![](./Screenshots/WidgetDemo.gif)
+
 
 ## Requirements
 
@@ -10,15 +13,16 @@ Only Windows and macOS are supported. However, macOS builds are experimental and
 
 ## Building
 
-Please look at the [Build.md](./Docs/Build.md) to know the steps required to build.
+Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies required to build.
 
 ## Features
 
 - A modular architecture, where the engine is split into multiple modules that are loaded & unloaded as dynamic libraries.
 - A custom runtime reflection system to reflect classes, structs and plain data types using either simple macros or automatically through AutoRTTI tool.
-- Reflect class and struct member fields and functions. Dynamically modify fields and call functions using just it's name.
 - A FrameGraph based render pipeline which allows you to build a complex graph with lots of passes which can be executed parallely on different GPU queues.
+- **CrystalWidgets**: Build a UI widget application that uses CSS for styling & flex-box layout.
 - AssetProcessor can process shader and texture assets. In case of HDR files, it will automatially convert it into a cubemap and generate the diffuse & specular convolution required for Image Based Lighting (IBL).
+- All assets are stored in a custom Binary format for fast deserialization!
 
 ## Modules Overview
 
@@ -38,6 +42,7 @@ All modules inside the core domain are at the low level of the engine.
 #### System domain
 System domain modules are at high level of the engine.
 
+* **CrystalWidgets**: Widgets library used to build GUI applications with CSS & FlexBox. Uses CoreRPI for 2D rendering.
 * **System module**: The main module that contains the high level game engine systems, game framework, etc.
 * **GameSystem**: Only for standalone builds. Runtime implementation of System module.
 

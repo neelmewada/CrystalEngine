@@ -22,6 +22,7 @@ namespace CE::Widgets
 
         void DrawRect(const Rect& rect);
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
+        void DrawRoundedX(const Rect& rect);
 
         void SetFont(const CFont& font);
 

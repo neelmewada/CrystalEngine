@@ -125,8 +125,8 @@ namespace CE::Widgets
 
         Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
 
-        CPen pen = CPen(Color::FromRGBA32(48, 48, 48));
-        CBrush brush = CBrush(bgColor);
+        CPen pen = CPen(Color::FromRGBA32(60, 60, 60));
+        CBrush brush = CBrush(Color::Clear());
         CFont font = CFont("Roboto", 15, false);
 
         if (GetDockType() == CDockType::Major)
@@ -152,7 +152,7 @@ namespace CE::Widgets
 
             painter->DrawRect(Rect::FromSize(0, 0, w, h));
         }
-        else
+        else if (GetDockType() == CDockType::Minor)
         {
             Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
 
@@ -175,6 +175,16 @@ namespace CE::Widgets
         for (const auto& tab : dockSplits[0]->tabs)
         {
 	        if (tab.rect.Contains(position))
+                return false;
+        }
+
+        if (controlRects.NonEmpty() && nativeWindow != nullptr && PlatformMisc::GetCurrentPlatform() != PlatformName::Mac)
+        {
+            if (canBeMinimized && position.x >= controlRects[0].min.x && position.y < 60)
+                return false;
+            if (canBeMaximized && position.x >= controlRects[1].min.x && position.y < 60)
+                return false;
+            if (canBeClosed && position.x >= controlRects[2].min.x && position.y < 60)
                 return false;
         }
 

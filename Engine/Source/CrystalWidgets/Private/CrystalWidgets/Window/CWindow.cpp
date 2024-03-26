@@ -39,6 +39,8 @@ namespace CE::Widgets
 
         if (!swapChain && nativeWindow)
         {
+            receiveMouseEvents = true;
+
             RHI::SwapChainDescriptor desc{};
             desc.imageCount = CApplication::Get()->numFramesInFlight;
             desc.preferredFormats = { RHI::Format::R8G8B8A8_UNORM, RHI::Format::B8G8R8A8_UNORM };
@@ -252,10 +254,202 @@ namespace CE::Widgets
         return nullptr;
     }
 
+    static Rect ScaleRect(const Rect& rect, Vec2 scale = Vec2(1, 1))
+    {
+        Vec2 size = rect.GetSize();
+        Vec2 center = (rect.min + rect.max) * 0.5f;
+        return Rect(center - size / 2.0f * scale, center + size / 2.0f * scale);
+    }
+
+    static Rect ScaleRect(const Rect& rect, f32 scale)
+    {
+        return ScaleRect(rect, Vec2(scale, scale));
+    }
+
+    static Rect TranslateRect(const Rect& rect, Vec2 translation = Vec2(0, 0))
+    {
+        Vec2 size = rect.GetSize();
+        return Rect::FromSize(rect.min + translation, size);
+    }
+
     void CWindow::OnPaint(CPaintEvent* paintEvent)
     {
         Super::OnPaint(paintEvent);
+
+        CPainter* painter = paintEvent->painter;
+
+        Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
+
+        CPen pen = CPen(); pen.SetColor(Color(1, 1, 1, 1)); pen.SetWidth(2.0f);
+        CBrush brush = CBrush();
+
+        painter->SetPen(pen);
+        painter->SetBrush(brush);
+
+        if (nativeWindow != nullptr && PlatformMisc::GetCurrentPlatform() != PlatformName::Mac) // The CWindow is a native window
+        {
+            Vec2 size = GetComputedLayoutSize() - Vec2(rootPadding.x + rootPadding.z, rootPadding.y + rootPadding.w);
+            Vec2 pos = GetComputedLayoutTopLeft() + rootPadding.min;
+            constexpr f32 controlWidth = 40;
+
+            controlRects.Resize(3);
+
+            for (int i = 0; i < 3; i++)
+            {
+                controlRects[i] = Rect::FromSize(pos + Vec2(size.width - controlWidth * (3 - i), 0), 
+                    Vec2(controlWidth, controlWidth));
+                // Shrink the rect perpendicular to it's edges
+                controlRects[i] = Rect::FromSize(controlRects[i].min + Vec2(controlWidth, controlWidth) * 0.35f, 
+                    Vec2(controlWidth, controlWidth) * 0.3f);
+            }
+
+            if (canBeClosed)
+            {
+                if (!hoveredControls[2])
+                {
+                    pen.SetColor(Color::FromRGBA32(180, 180, 180));
+                    painter->SetPen(pen);
+                }
+                else
+                {
+                    pen.SetColor(Color::FromRGBA32(255, 255, 255));
+                    painter->SetPen(pen);
+                }
+
+                painter->DrawRoundedX(controlRects[2]);
+            }
+
+            pen.SetWidth(1.25f);
+
+            if (canBeMaximized)
+            {
+                if (!hoveredControls[1])
+                {
+                    pen.SetColor(Color::FromRGBA32(200, 200, 200));
+                    painter->SetPen(pen);
+                }
+                else
+                {
+                    pen.SetColor(Color::White());
+                    painter->SetPen(pen);
+                }
+
+	            if (!nativeWindow->IsMaximized())
+	            {
+                    painter->DrawRect(ScaleRect(controlRects[1], 0.98f));
+	            }
+	            else
+	            {
+                    brush.SetColor(bgColor);
+                    painter->SetBrush(brush);
+
+                    auto rectSize = controlRects[1].GetSize();
+                    painter->DrawRect(TranslateRect(ScaleRect(controlRects[1], 0.8f), Vec2(1, -1) * 2.0f));
+                    painter->DrawRect(ScaleRect(controlRects[1], 0.8f));
+	            }
+            }
+
+            brush.SetColor(Color::Clear());
+            pen.SetColor(Color::Clear());
+            pen.SetWidth(0.0f);
+
+            if (!hoveredControls[0])
+            {
+                brush.SetColor(Color::FromRGBA32(180, 180, 180));
+                painter->SetPen(pen);
+                painter->SetBrush(brush);
+            }
+            else
+            {
+                brush.SetColor(Color::White());
+                painter->SetPen(pen);
+                painter->SetBrush(brush);
+            }
+
+            if (canBeMinimized)
+            {
+                Vec2 rectSize = controlRects[0].GetSize();
+                painter->DrawRect(Rect::FromSize(Vec2(controlRects[0].min.x, controlRects[0].min.y + rectSize.y / 2 - 2.0f / 2.0f),
+                    Vec2(rectSize.width, 2.0f)));
+            }
+        }
     }
+
+    void CWindow::HandleEvent(CEvent* event)
+    {
+        if (event->IsMouseEvent())
+        {
+            CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
+            Vec2 globalMousePos = mouseEvent->mousePos;
+            Rect screenSpaceWindowRect = GetScreenSpaceRect();
+            Vec2 localMousePos = globalMousePos - screenSpaceWindowRect.min;
+
+            if (controlRects.NonEmpty() && nativeWindow != nullptr)
+            {
+                if (mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
+                {
+                    for (int i = 0; i < controlRects.GetSize(); ++i)
+                    {
+                        if (controlRects[i].Contains(localMousePos))
+                        {
+                            clickedControlIdx = i;
+                        }
+                    }
+                }
+                else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
+                {
+	                for (int i = 0; i < controlRects.GetSize(); ++i)
+	                {
+		                if (controlRects[i].Contains(localMousePos))
+		                {
+                            if (i == clickedControlIdx)
+                            {
+                                if (clickedControlIdx == 0)
+                                    nativeWindow->Minimize();
+                                else if (clickedControlIdx == 1 && nativeWindow->IsMaximized())
+                                    nativeWindow->Restore();
+                                else if (clickedControlIdx == 1)
+                                    nativeWindow->Maximize();
+                                else if (clickedControlIdx == 2)
+                                    QueueDestroy();
+                            }
+		                }
+	                }
+
+                    clickedControlIdx = -1;
+                }
+                else if (mouseEvent->type == CEventType::MouseMove)
+                {
+                    for (int i = 0; i < controlRects.GetSize(); ++i)
+                    {
+                        if (controlRects[i].Contains(localMousePos))
+                        {
+                            hoveredControls[i] = true;
+                            SetNeedsPaint();
+                        }
+                        else
+                        {
+                            if (hoveredControls[i])
+                                SetNeedsPaint();
+                            hoveredControls[i] = false;
+                        }
+                    }
+                }
+                else if (mouseEvent->type == CEventType::MouseLeave)
+                {
+                    for (int i = 0; i < controlRects.GetSize(); ++i)
+                    {
+                        if (hoveredControls[i])
+                            SetNeedsPaint();
+                        hoveredControls[i] = false;
+                    }
+                }
+            }
+        }
+
+        Super::HandleEvent(event);
+    }
+
 
     void CWindow::OnSubobjectAttached(Object* object)
     {

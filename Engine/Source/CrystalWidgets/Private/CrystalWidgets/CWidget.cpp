@@ -901,6 +901,16 @@ namespace CE::Widgets
 		{
 			app->OnWidgetDestroyed(this);
 		}
+
+		if (IsWindow())
+		{
+			CWindow* window = (CWindow*)this;
+			if (window->nativeWindow != nullptr)
+			{
+				PlatformApplication::Get()->DestroyWindow(window->nativeWindow);
+				window->nativeWindow = nullptr;
+			}
+		}
 	}
     
 } // namespace CE::Widgets

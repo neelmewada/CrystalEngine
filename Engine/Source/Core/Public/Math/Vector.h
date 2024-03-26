@@ -129,6 +129,11 @@ namespace CE
             return TVector2(value * x, value * y);
         }
 
+        inline TVector2 operator*(TVector2 value) const
+        {
+            return TVector2(value.x * x, value.y * y);
+        }
+
         inline TVector2 operator*=(s32 value)
         {
             *this = *this * value;
@@ -142,6 +147,12 @@ namespace CE
         }
 
         inline TVector2 operator*=(f32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector2 operator*=(TVector2 value)
         {
             *this = *this * value;
             return *this;
@@ -309,6 +320,11 @@ namespace CE
             return TVector3(value * x, value * y, value * z);
         }
 
+        inline TVector3 operator*(const TVector3& value) const
+        {
+            return TVector3(value.x * x, value.y * y, value.z * z);
+        }
+
         inline TVector3 operator*=(s32 value)
         {
             *this = *this * value;
@@ -322,6 +338,12 @@ namespace CE
         }
 
         inline TVector3 operator*=(f32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector3 operator*=(const TVector3& value)
         {
             *this = *this * value;
             return *this;
@@ -523,6 +545,11 @@ namespace CE
             return TVector4(value * x, value * y, value * z, value * w);
         }
 
+        inline TVector4 operator*(const TVector4& value) const
+        {
+            return TVector4(value.x * x, value.y * y, value.z * z, value.w * w);
+        }
+
         inline TVector4 operator*=(s32 value)
         {
             *this = *this * value;
@@ -536,6 +563,12 @@ namespace CE
         }
 
         inline TVector4 operator*=(f32 value)
+        {
+            *this = *this * value;
+            return *this;
+        }
+
+        inline TVector4 operator*=(const TVector4& value)
         {
             *this = *this * value;
             return *this;

@@ -18,7 +18,7 @@ namespace CE::Widgets
 
 		bool IsMainWindow() const { return isMainWindow; }
 
-		void SetAsMainWindow(bool set) { isMainWindow = set; }
+		void SetAsMainWindow(bool set) { isMainWindow = set; canBeClosed = !isMainWindow; }
 		
 	crystalwidgets_internal:
 

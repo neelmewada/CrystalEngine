@@ -184,6 +184,11 @@ namespace CE
 		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_MINIMIZED) != 0;
 	}
 
+	bool SDLPlatformWindow::IsMaximized()
+	{
+		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_MAXIMIZED) != 0;
+	}
+
 	bool SDLPlatformWindow::IsFullscreen()
 	{
 		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_FULLSCREEN) != 0;
@@ -197,6 +202,21 @@ namespace CE
 	bool SDLPlatformWindow::IsHidden()
 	{
 		return (SDL_GetWindowFlags(handle) & SDL_WINDOW_HIDDEN) != 0;
+	}
+
+	void SDLPlatformWindow::Minimize()
+	{
+		SDL_MinimizeWindow(handle);
+	}
+
+	void SDLPlatformWindow::Restore()
+	{
+		SDL_RestoreWindow(handle);
+	}
+
+	void SDLPlatformWindow::Maximize()
+	{
+		SDL_MaximizeWindow(handle);
 	}
 
 	VkSurfaceKHR SDLPlatformWindow::CreateVulkanSurface(VkInstance instance)

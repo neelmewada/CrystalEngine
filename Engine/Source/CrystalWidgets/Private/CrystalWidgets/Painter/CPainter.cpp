@@ -64,6 +64,12 @@ namespace CE::Widgets
         renderer->DrawRoundedRect(rect.GetSize(), cornerRadius);
     }
 
+    void CPainter::DrawRoundedX(const Rect& rect)
+    {
+        renderer->SetCursor(GetOrigin() + rect.min);
+        renderer->DrawRoundedX(rect.GetSize());
+    }
+
     void CPainter::DrawText(const String& text, const Vec2& position)
     {
         renderer->SetCursor(GetOrigin() + position);

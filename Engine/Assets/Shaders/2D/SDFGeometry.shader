@@ -74,6 +74,7 @@ Shader "2D/SDF Geometry"
                 DRAW_Circle,
                 DRAW_Rect,
                 DRAW_RoundedRect,
+                DRAW_RoundedX,
             };
 
             #if VERTEX
@@ -155,6 +156,13 @@ Shader "2D/SDF Geometry"
                 return length(p-min(p.x+p.y,w)*0.5) - r;
             }
 
+            // Credit: https://iquilezles.org/articles/distfunctions2d/
+            float SDFRoundedX( in float2 p, in float w, in float r )
+            {
+                p = abs(p);
+                return length(p-min(p.x+p.y,w)*0.5) - r;
+            }
+
             struct GeometryInfo
             {
                 float4 fillColor;
@@ -213,17 +221,12 @@ Shader "2D/SDF Geometry"
 
                 float borderMask = 0.0;
                 
-                if (borderThickness > 0.1)
-                {
-                    const float borderSmoothStart = -borderThickness - 1.0;
-                    const float borderSmoothEnd = -borderThickness;
-                    borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
-                    borderMask = clamp(borderMask, 0, 1);
-                }
+                if (sdf > -borderThickness && sdf <= 0)
+		            borderMask = 1.0;
 
                 color = lerp(color, info.outlineColor, borderMask);
 
-                return lerp(float4(color.rgb, 0), color, -sdf);
+                return lerp(float4(color.rgb, 0), color, clamp(-sdf * 5.0, 0, 1)); // 1.5 = sharpness
             }
 
             float4 RenderRoundedRect(in GeometryInfo info, float2 p)
@@ -239,7 +242,7 @@ Shader "2D/SDF Geometry"
 
                 if (borderThickness > 0.1)
                 {
-                    const float borderSmoothStart = -borderThickness - 1.0;
+                    const float borderSmoothStart = -borderThickness - 1.0; // 1.0
                     const float borderSmoothEnd = -borderThickness;
                     borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
                     borderMask = clamp(borderMask, 0, 1);
@@ -247,7 +250,17 @@ Shader "2D/SDF Geometry"
 
                 color = lerp(color, info.outlineColor, borderMask);
 
-                return lerp(float4(color.rgb, 0), color, invSdf * 0.8);
+                return lerp(float4(color.rgb, 0), color, invSdf * 0.9);
+            }
+
+            float4 RenderRoundedX(in GeometryInfo info, float2 p)
+            {
+                const float sdf = SDFRoundedX(p, min(info.itemSize.x, info.itemSize.y), info.borderThickness * 0.7);
+                const float invSdf = -sdf;
+
+                float4 color = info.fillColor;
+
+                return lerp(float4(color.rgb, 0), color, clamp(invSdf * 5.0, 0, 1));
             }
 
             #define idx input.instanceId
@@ -280,6 +293,8 @@ Shader "2D/SDF Geometry"
                     return RenderRect(info, p);
                 case DRAW_RoundedRect:
                     return RenderRoundedRect(info, p);
+                case DRAW_RoundedX:
+                    return RenderRoundedX(info, p);
                 }
 
                 return float4(0, 0, 0, 0);

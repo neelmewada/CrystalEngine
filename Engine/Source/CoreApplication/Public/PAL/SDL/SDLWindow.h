@@ -41,9 +41,14 @@ namespace CE
 
         virtual bool IsBorderless() override;
         virtual bool IsMinimized() override;
+        virtual bool IsMaximized() override;
         virtual bool IsFullscreen() override;
         virtual bool IsShown() override;
         virtual bool IsHidden() override;
+
+        virtual void Minimize() override;
+        virtual void Restore() override;
+        virtual void Maximize() override;
 
         VkSurfaceKHR CreateVulkanSurface(VkInstance instance) override;
 

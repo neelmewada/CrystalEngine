@@ -2,6 +2,7 @@
 
 namespace CE::RPI
 {
+	constexpr bool forceDisableBatching = true;
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
@@ -355,6 +356,11 @@ namespace CE::RPI
 
 		Matrix4x4 rotationMat = Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix();
 
+		if constexpr (forceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
 		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
 			createNewDrawBatch = false;
@@ -477,6 +483,11 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
+		if constexpr (forceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
 		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
 			createNewDrawBatch = false;
@@ -522,6 +533,11 @@ namespace CE::RPI
 			return Vec2(0, 0);
 
 		const FontInfo& font = fontStack.Top();
+
+		if constexpr (forceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
 
 		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
@@ -569,6 +585,11 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
+		if constexpr (forceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
 		if (drawBatches.IsEmpty() || createNewDrawBatch)
 		{
 			createNewDrawBatch = false;
@@ -603,6 +624,57 @@ namespace CE::RPI
 		drawItem.bold = 0;
 		drawItem.clipRectIdx = clipRectStack.Top();
 
+		curDrawBatch.drawItemCount++;
+
+		drawItemCount++;
+		return size;
+	}
+
+	Vec2 Renderer2D::DrawRoundedX(Vec2 size)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if constexpr (forceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
+		{
+			createNewDrawBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+
+		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_RoundedX;
+		drawItem.fillColor = outlineColor.ToVec4();
+		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
+		
 		curDrawBatch.drawItemCount++;
 
 		drawItemCount++;

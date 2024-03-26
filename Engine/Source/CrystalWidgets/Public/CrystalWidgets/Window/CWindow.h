@@ -44,6 +44,8 @@ namespace CE::Widgets
 
         void OnPaint(CPaintEvent* paintEvent) override;
 
+        void HandleEvent(CEvent* event) override;
+
         void Tick();
 
         void OnBeforeDestroy() override;
@@ -66,6 +68,19 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 allowVerticalScroll = false;
+
+        FIELD()
+        b8 canBeClosed = true;
+
+        FIELD()
+        b8 canBeMinimized = true;
+
+        FIELD()
+        b8 canBeMaximized = true;
+
+        Array<Rect> controlRects{};
+        StaticArray<bool, 3> hoveredControls{};
+        int clickedControlIdx = -1;
 
     crystalwidgets_internal:
 

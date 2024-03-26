@@ -57,9 +57,14 @@ namespace CE
 
         virtual bool IsBorderless() = 0;
         virtual bool IsMinimized() = 0;
+        virtual bool IsMaximized() = 0;
         virtual bool IsFullscreen() = 0;
         virtual bool IsShown() = 0;
         virtual bool IsHidden() = 0;
+
+        virtual void Minimize() = 0;
+        virtual void Restore() = 0;
+        virtual void Maximize() = 0;
 
         virtual u64 GetWindowId() = 0;
 

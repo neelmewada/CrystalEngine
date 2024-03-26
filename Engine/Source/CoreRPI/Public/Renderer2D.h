@@ -101,6 +101,14 @@ namespace CE::RPI
             return DrawRoundedRect(rect.GetSize(), cornerRadius);
         }
 
+        Vec2 DrawRoundedX(Vec2 size);
+
+        Vec2 DrawRoundedX(const Rect& rect)
+        {
+            SetCursor(rect.min);
+            return DrawRoundedX(rect.GetSize());
+        }
+
         void End();
 
         const Array<DrawPacket*>& FlushDrawPackets(u32 imageIndex);
@@ -131,6 +139,7 @@ namespace CE::RPI
             DRAW_Circle,
             DRAW_Rect,
             DRAW_RoundedRect,
+            DRAW_RoundedX,
         };
 
         struct alignas(16) DrawItem2D
