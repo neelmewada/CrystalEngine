@@ -698,6 +698,42 @@ namespace CE
             return Vec4(left, top, right, bottom);
         }
 
+        Rect Scale(Vec2 scale) const
+        {
+            Vec2 size = GetSize();
+            Vec2 center = (min + max) * 0.5f;
+            return Rect(center - size / 2.0f * scale, center + size / 2.0f * scale);
+        }
+
+        Rect Scale(f32 scale) const
+        {
+            return Scale(Vec2(scale, scale));
+        }
+
+        Rect Translate(Vec2 translation) const
+        {
+            Vec2 size = GetSize();
+            return Rect::FromSize(min + translation, size);
+        }
+
+        Rect Encapsulate(const Vec2& point) const
+        {
+            auto xmin = Math::Min({ min.x, max.x, point.x });
+            auto xmax = Math::Max({ min.x, max.x, point.x });
+            auto ymin = Math::Min({ min.y, max.y, point.y });
+            auto ymax = Math::Max({ min.y, max.y, point.y });
+            return Rect(xmin, ymin, xmax, ymax);
+        }
+
+        Rect Encapsulate(const Rect& other) const
+        {
+			auto xmin = Math::Min({ min.x, max.x, other.min.x, other.max.x });
+            auto xmax = Math::Max({ min.x, max.x, other.min.x, other.max.x });
+            auto ymin = Math::Min({ min.y, max.y, other.min.y, other.max.y });
+            auto ymax = Math::Max({ min.y, max.y, other.min.y, other.max.y });
+            return Rect(xmin, ymin, xmax, ymax);
+        }
+
         inline bool operator==(const Rect& rhs) const
         {
             return (left == rhs.left) && (top == rhs.top) && (right == rhs.right) && (bottom == rhs.bottom);

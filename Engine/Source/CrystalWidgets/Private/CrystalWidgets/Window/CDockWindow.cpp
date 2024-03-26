@@ -5,7 +5,8 @@ namespace CE::Widgets
 
 	CDockWindow::CDockWindow()
 	{
-		
+		allowVerticalScroll = true;
+		receiveMouseEvents = true;
 	}
 
 	CDockWindow::~CDockWindow()

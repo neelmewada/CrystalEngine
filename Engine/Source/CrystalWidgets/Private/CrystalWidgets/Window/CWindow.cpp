@@ -2,6 +2,8 @@
 
 namespace CE::Widgets
 {
+    constexpr f32 ScrollRectWidth = 10.0f;
+    constexpr f32 MinScrollRectSize = 20.0f;
     
     CWindow::CWindow()
     {
@@ -68,7 +70,26 @@ namespace CE::Widgets
     {
         Super::UpdateLayoutIfNeeded();
 
+    }
 
+    void CWindow::OnAfterUpdateLayout()
+    {
+	    Super::OnAfterUpdateLayout();
+
+        Vec2 originalSize = GetComputedLayoutSize();
+        f32 contentMaxY = originalSize.height;
+        f32 contentMaxX = originalSize.width;
+
+        for (CWidget* widget : attachedWidgets)
+        {
+            f32 y = widget->GetComputedLayoutTopLeft().y;
+            f32 maxY = y + widget->GetComputedLayoutSize().height;
+
+            contentMaxY = Math::Max(contentMaxY, maxY);
+            contentMaxX = Math::Max(contentMaxX, maxY);
+        }
+
+        contentSize = Vec2(contentMaxX, contentMaxY);
     }
 
     void CWindow::ConstructWindow()
@@ -307,12 +328,12 @@ namespace CE::Widgets
             {
                 if (!hoveredControls[2])
                 {
-                    pen.SetColor(Color::FromRGBA32(180, 180, 180));
+                    pen.SetColor(Color::RGBA8(180, 180, 180));
                     painter->SetPen(pen);
                 }
                 else
                 {
-                    pen.SetColor(Color::FromRGBA32(255, 255, 255));
+                    pen.SetColor(Color::RGBA8(255, 255, 255));
                     painter->SetPen(pen);
                 }
 
@@ -325,7 +346,7 @@ namespace CE::Widgets
             {
                 if (!hoveredControls[1])
                 {
-                    pen.SetColor(Color::FromRGBA32(200, 200, 200));
+                    pen.SetColor(Color::RGBA8(200, 200, 200));
                     painter->SetPen(pen);
                 }
                 else
@@ -355,7 +376,7 @@ namespace CE::Widgets
 
             if (!hoveredControls[0])
             {
-                brush.SetColor(Color::FromRGBA32(180, 180, 180));
+                brush.SetColor(Color::RGBA8(180, 180, 180));
                 painter->SetPen(pen);
                 painter->SetBrush(brush);
             }
@@ -375,6 +396,58 @@ namespace CE::Widgets
         }
     }
 
+    void CWindow::OnPaintOverlay(CPaintEvent* paintEvent)
+    {
+        Super::OnPaintOverlay(paintEvent);
+
+        CPainter* painter = paintEvent->painter;
+
+        if (allowVerticalScroll)
+        {
+            Vec2 originalSize = GetComputedLayoutSize();
+            f32 originalHeight = originalSize.height;
+            f32 contentMaxY = contentSize.height;
+
+            if (contentMaxY > originalHeight)
+            {
+                Rect scrollRect = GetVerticalScrollBarRect();
+                //scrollRect = scrollRect.Translate(Vec2(0, scrollOffset.y));
+
+                CPen pen{};
+                CBrush brush = CBrush(Color::RGBA(87, 87, 87));
+
+                painter->SetPen(pen);
+                painter->SetBrush(brush);
+
+                painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * ScrollRectWidth * 0.5f);
+            }
+        }
+    }
+
+    Rect CWindow::GetVerticalScrollBarRect()
+    {
+        if (allowVerticalScroll)
+        {
+            Vec2 originalSize = GetComputedLayoutSize();
+            f32 originalHeight = originalSize.height;
+            f32 contentMaxY = contentSize.height;
+
+            if (contentMaxY > originalHeight)
+            {
+                Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
+                f32 scrollRectHeightRatio = originalHeight / contentMaxY;
+
+                Rect scrollRect = Rect::FromSize(scrollRegion.min,
+                    Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, MinScrollRectSize)));
+                scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * scrollOffset.y / contentMaxY));
+
+                return scrollRect;
+            }
+        }
+
+        return Rect();
+    }
+
     void CWindow::HandleEvent(CEvent* event)
     {
         if (event->IsMouseEvent())
@@ -382,7 +455,50 @@ namespace CE::Widgets
             CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
             Vec2 globalMousePos = mouseEvent->mousePos;
             Rect screenSpaceWindowRect = GetScreenSpaceRect();
-            Vec2 localMousePos = globalMousePos - screenSpaceWindowRect.min;
+            Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
+            Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
+
+            if (mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
+            {
+                if (allowVerticalScroll)
+                {
+                    Vec2 originalSize = GetComputedLayoutSize();
+                    f32 originalHeight = originalSize.height;
+                    f32 contentMaxY = contentSize.height;
+
+                    if (contentMaxY > originalHeight)
+                    {
+                        Rect scrollRect = GetVerticalScrollBarRect();
+                        scrollRect = LocalToScreenSpaceRect(scrollRect);
+
+                        if (scrollRect.Contains(globalMousePos))
+                        {
+                            isVerticalScrollPressed = true;
+                        }
+                    }
+                }
+            }
+            else if (mouseEvent->type == CEventType::MouseMove)
+            {
+	            if (isVerticalScrollPressed && allowVerticalScroll)
+	            {
+                    Vec2 originalSize = GetComputedLayoutSize();
+                    f32 originalHeight = originalSize.height;
+                    f32 contentMaxY = contentSize.height;
+
+                    scrollOffset.y += mouseDelta.y;
+                    scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, contentSize.height);
+                    CE_LOG(Info, All, "Scroll: {}", scrollOffset.y);
+
+                    SetNeedsStyle();
+                    SetNeedsLayout();
+                    SetNeedsPaint();
+	            }
+            }
+            else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
+            {
+                isVerticalScrollPressed = false;
+            }
 
             if (controlRects.NonEmpty() && nativeWindow != nullptr)
             {
@@ -390,7 +506,7 @@ namespace CE::Widgets
                 {
                     for (int i = 0; i < controlRects.GetSize(); ++i)
                     {
-                        if (controlRects[i].Contains(localMousePos))
+                        if (controlRects[i].Contains(windowSpaceMousePos))
                         {
                             clickedControlIdx = i;
                         }
@@ -400,7 +516,7 @@ namespace CE::Widgets
                 {
 	                for (int i = 0; i < controlRects.GetSize(); ++i)
 	                {
-		                if (controlRects[i].Contains(localMousePos))
+		                if (controlRects[i].Contains(windowSpaceMousePos))
 		                {
                             if (i == clickedControlIdx)
                             {
@@ -422,7 +538,7 @@ namespace CE::Widgets
                 {
                     for (int i = 0; i < controlRects.GetSize(); ++i)
                     {
-                        if (controlRects[i].Contains(localMousePos))
+                        if (controlRects[i].Contains(windowSpaceMousePos))
                         {
                             hoveredControls[i] = true;
                             SetNeedsPaint();
@@ -449,7 +565,6 @@ namespace CE::Widgets
 
         Super::HandleEvent(event);
     }
-
 
     void CWindow::OnSubobjectAttached(Object* object)
     {

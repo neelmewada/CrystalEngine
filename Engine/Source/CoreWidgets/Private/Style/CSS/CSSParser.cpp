@@ -332,12 +332,12 @@ namespace CE::Widgets
 		{ "red", Color::Red() },
 		{ "green", Color::Green() },
 		{ "blue", Color::Blue() },
-		{ "yellow", Color::FromRGBA32(255, 255, 0) },
-		{ "cyan", Color::FromRGBA32(0, 255, 255) },
-		{ "pink", Color::FromRGBA32(255, 0, 255) },
-		{ "orange", Color::FromRGBA32(255, 128, 0) },
-		{ "teal", Color::FromRGBA32(0, 128, 128) },
-		{ "gray", Color::FromRGBA32(128, 128, 128) },
+		{ "yellow", Color::RGBA8(255, 255, 0) },
+		{ "cyan", Color::RGBA8(0, 255, 255) },
+		{ "pink", Color::RGBA8(255, 0, 255) },
+		{ "orange", Color::RGBA8(255, 128, 0) },
+		{ "teal", Color::RGBA8(0, 128, 128) },
+		{ "gray", Color::RGBA8(128, 128, 128) },
 	};
 
 	void CSSParser::ParsePropertyValue(int& cursor, CStylePropertyType property, CStyleValue& outValue)
@@ -581,7 +581,7 @@ namespace CE::Widgets
 		int len = lexeme.GetLength();
 		u32 value = 0;
 		sscanf(lexeme.GetCString(), "%x", &value);
-		out = Color::FromRGBAHex(value);
+		out = Color::RGBAHex(value);
 	}
 
 } // namespace CE::Widgets

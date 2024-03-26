@@ -291,6 +291,8 @@ namespace CE::Widgets
 				widget->UpdateLayoutIfNeeded();
 			}
 
+			OnAfterUpdateLayout();
+
 			needsLayout = false;
 		}
 	}
@@ -656,7 +658,42 @@ namespace CE::Widgets
 			Vec2i posInt = nativeWindow->GetWindowPosition();
 			Vec2 pos = Vec2(posInt.x, posInt.y);
 
-			return Rect::FromSize(pos + rootOrigin + GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+			return Rect::FromSize(pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset, GetComputedLayoutSize());
+		}
+	}
+
+	Rect CWidget::LocalToScreenSpaceRect(const Rect& rect)
+	{
+		auto size = rect.GetSize();
+
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					Vec2i posInt = window->nativeWindow->GetWindowPosition();
+					Vec2 pos = Vec2(posInt.x, posInt.y);
+					u32 w, h;
+					window->nativeWindow->GetWindowSize(&w, &h);
+
+					return Rect::FromSize(pos + rootOrigin + rect.min, size);
+				}
+			}
+
+			return rect;
+		}
+
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		if (nativeWindow == nullptr)
+			return rect;
+
+		{
+			Vec2i posInt = nativeWindow->GetWindowPosition();
+			Vec2 pos = posInt.ToVec2();
+
+			return Rect::FromSize(pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset + rect.min, size);
 		}
 	}
 
@@ -751,6 +788,13 @@ namespace CE::Widgets
 
 	}
 
+	void CWidget::OnPaintOverlay(CPaintEvent* paintEvent)
+	{
+		CPainter* painter = paintEvent->painter;
+
+
+	}
+
 	void CWidget::HandleEvent(CEvent* event)
 	{
 		if (event == nullptr)
@@ -759,7 +803,6 @@ namespace CE::Widgets
 			return;
 
 		bool popPaintCoords = false;
-		bool popClipRect = false;
 		bool shouldPropagateDownwards = true;
 
 		// Paint event
@@ -767,6 +810,11 @@ namespace CE::Widgets
 		{
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
 			paintEvent->direction = CEventDirection::TopToBottom;
+
+			if (GetName() == "Third")
+			{
+				String::IsAlphabet('a');
+			}
 
 			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())
 			{
@@ -777,10 +825,10 @@ namespace CE::Widgets
 				{
 					origin = parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
 				}
-				paintEvent->painter->PushChildCoordinateSpace(origin);
+				paintEvent->painter->PushChildCoordinateSpace(origin - scrollOffset);
 				if (clipChildren)
 				{
-					paintEvent->painter->PushChildClipRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
+					paintEvent->painter->PushChildClipRect(Rect::FromSize(GetComputedLayoutTopLeft() + scrollOffset, GetComputedLayoutSize()));
 				}
 				OnPaint(paintEvent);
 			}
@@ -794,17 +842,17 @@ namespace CE::Widgets
 		if (receiveMouseEvents && event->IsMouseEvent() && !event->IsDragEvent() && !event->isConsumed)
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
-
-			mouseEvent->Consume(this);
 			
 			if (event->type == CEventType::MousePress)
 			{
+				mouseEvent->Consume(this);
 				stateFlags |= CStateFlag::Pressed;
 				isPressed = true;
 				SetNeedsStyle();
 			}
 			else if (event->type == CEventType::MouseRelease)
 			{
+				mouseEvent->Consume(this);
 				stateFlags &= ~CStateFlag::Pressed;
 				isPressed = false;
 				SetNeedsStyle();
@@ -812,6 +860,7 @@ namespace CE::Widgets
 
 			if (event->type == CEventType::MouseEnter && (mouseEvent->button == MouseButton::None || isPressed))
 			{
+				mouseEvent->Consume(this);
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
 				{
@@ -825,6 +874,7 @@ namespace CE::Widgets
 			}
 			else if (event->type == CEventType::MouseMove && mouseEvent->button == MouseButton::None && !EnumHasFlag(stateFlags, CStateFlag::Hovered))
 			{
+				mouseEvent->Consume(this);
 				stateFlags |= CStateFlag::Hovered;
 				if (isPressed)
 				{
@@ -834,6 +884,7 @@ namespace CE::Widgets
 			}
 			else if (event->type == CEventType::MouseLeave)
 			{
+				mouseEvent->Consume(this);
 				stateFlags &= ~CStateFlag::Hovered;
 				if (isPressed)
 				{
@@ -880,6 +931,7 @@ namespace CE::Widgets
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
 			if (paintEvent->painter != nullptr)
 			{
+				OnPaintOverlay(paintEvent);
 				if (clipChildren)
 				{
 					paintEvent->painter->PopChildClipRect();

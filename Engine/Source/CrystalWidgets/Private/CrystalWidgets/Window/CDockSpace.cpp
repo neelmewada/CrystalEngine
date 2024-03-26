@@ -5,6 +5,7 @@ namespace CE::Widgets
 
 	CDockSpace::CDockSpace()
 	{
+        allowVerticalScroll = allowHorizontalScroll = false;
         receiveMouseEvents = false;
         rootPadding = Vec4(1, 1, 1, 1) * 2.0f;
 
@@ -125,7 +126,7 @@ namespace CE::Widgets
 
         Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
 
-        CPen pen = CPen(Color::FromRGBA32(60, 60, 60));
+        CPen pen = CPen(Color::RGBA8(60, 60, 60));
         CBrush brush = CBrush(Color::Clear());
         CFont font = CFont("Roboto", 15, false);
 

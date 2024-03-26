@@ -398,7 +398,7 @@ namespace CE::Widgets
 
         Color bgColor = computedStyle.properties[CStylePropertyType::Background].color;
 
-        CPen pen = CPen(Color::FromRGBA32(48, 48, 48));
+        CPen pen = CPen(Color::RGBA8(48, 48, 48));
         CBrush brush = CBrush(bgColor);//CBrush(Color::FromRGBA32(21, 21, 21));
         CFont font = CFont("Roboto", 15, false);
 
@@ -465,7 +465,7 @@ namespace CE::Widgets
 
                     pen.SetWidth(0.0f);
                     pen.SetColor(Color::Clear());
-                    brush.SetColor(Color::FromRGBA32(36, 36, 36));
+                    brush.SetColor(Color::RGBA8(36, 36, 36));
                     if (i != selectedTab)
                         brush.SetColor(bgColor);
                     painter->SetPen(pen); painter->SetBrush(brush); painter->SetFont(font);
@@ -507,18 +507,12 @@ namespace CE::Widgets
 
                     pen.SetWidth(0.0f);
                     pen.SetColor(Color::Clear());
-                    brush.SetColor(Color::FromRGBA32(36, 36, 36));
+                    brush.SetColor(Color::RGBA8(36, 36, 36));
                     if (i != selectedTab)
                     	brush.SetColor(bgColor);
                     painter->SetPen(pen); painter->SetBrush(brush); painter->SetFont(font);
 
                     Rect tabRect = tabs[i].rect;
-                    auto size = tabRect.GetSize();
-                    if (tabRect.min.x < 20)
-                    {
-                        //tabRect.min.x = 20;
-                        //tabRect.max.x = tabRect.min.x + size.x;
-                    }
 
                     if (selectedTab == i)
                     {

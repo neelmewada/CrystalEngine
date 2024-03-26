@@ -207,19 +207,19 @@ namespace CE::Widgets
 		
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::Margin))
 		{
-			GUI::FillRectWidth(globalMargin, globalMargin + Rect(margin.min, -margin.max), Color::FromRGBA32(173, 128, 82));
+			GUI::FillRectWidth(globalMargin, globalMargin + Rect(margin.min, -margin.max), Color::RGBA8(173, 128, 82));
 		}
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::Border))
 		{
-			GUI::FillRectWidth(globalBorder, globalBorder + Rect(border.min, -border.max), Color::FromRGBA32(227, 195, 129));
+			GUI::FillRectWidth(globalBorder, globalBorder + Rect(border.min, -border.max), Color::RGBA8(227, 195, 129));
 		}
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::Padding))
 		{
-			GUI::FillRectWidth(globalPadding, globalPadding + Rect(padding.min, -padding.max), Color::FromRGBA32(183, 196, 127));
+			GUI::FillRectWidth(globalPadding, globalPadding + Rect(padding.min, -padding.max), Color::RGBA8(183, 196, 127));
 		}
 		if (EnumHasFlag(filter, CDebugBackgroundFilter::IntrinsicSize))
 		{
-			GUI::FillRect(globalRect, Color::FromRGBA32(135, 178, 188));
+			GUI::FillRect(globalRect, Color::RGBA8(135, 178, 188));
 		}
 	}
 

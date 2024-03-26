@@ -2,19 +2,19 @@
 
 namespace CE
 {
-	Color Color::FromRGBA32(u8 r, u8 g, u8 b, u8 a)
+	Color Color::RGBA8(u8 r, u8 g, u8 b, u8 a)
 	{
 		return Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 	}
 
-	Color Color::FromRGBHex(u32 hex)
+	Color Color::RGBHex(u32 hex)
 	{
-		return FromRGBA32((u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
+		return RGBA8((u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
 	}
 
-	Color Color::FromRGBAHex(u32 hex)
+	Color Color::RGBAHex(u32 hex)
 	{
-		return FromRGBA32((u8)(hex >> 24), (u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
+		return RGBA8((u8)(hex >> 24), (u8)(hex >> 16), (u8)(hex >> 8), (u8)(hex));
 	}
 
 	u32 Color::ToU32() const

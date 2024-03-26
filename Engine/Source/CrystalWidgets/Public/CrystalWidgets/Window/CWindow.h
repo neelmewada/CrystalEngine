@@ -34,15 +34,19 @@ namespace CE::Widgets
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
-    protected:
+    crystalwidgets_protected_internal:
 
         virtual void OnPlatformWindowSet() {}
 
         void UpdateLayoutIfNeeded() override;
 
+        void OnAfterUpdateLayout() override;
+
         virtual void ConstructWindow();
 
         void OnPaint(CPaintEvent* paintEvent) override;
+
+        void OnPaintOverlay(CPaintEvent* paintEvent) override;
 
         void HandleEvent(CEvent* event) override;
 
@@ -57,17 +61,13 @@ namespace CE::Widgets
         void OnSubobjectAttached(Object* object) override;
         void OnSubobjectDetached(Object* object) override;
 
+        Rect GetVerticalScrollBarRect();
+
         FIELD()
         String title = "";
 
         FIELD()
         Vec2 windowSize = Vec2(0, 0);
-
-        FIELD()
-		b8 allowHorizontalScroll = false;
-
-		FIELD()
-		b8 allowVerticalScroll = false;
 
         FIELD()
         b8 canBeClosed = true;
@@ -81,6 +81,7 @@ namespace CE::Widgets
         Array<Rect> controlRects{};
         StaticArray<bool, 3> hoveredControls{};
         int clickedControlIdx = -1;
+        b8 isVerticalScrollPressed = false;
 
     crystalwidgets_internal:
 

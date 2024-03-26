@@ -11,7 +11,7 @@ CDockSplitView::splitter {
 #MinorDockSpace {
     background: rgb(128, 0, 0);
     width: 100%;
-    height: 100%;
+    flex-grow: 4;
 }
 
 #SplitLeft {
@@ -33,6 +33,10 @@ CDockSplitView::splitter {
     flex-direction: row;
     align-items: center;
     column-gap: 10px;
+}
+
+#Third {
+    row-gap: 10px;
 }
 
 #Button {

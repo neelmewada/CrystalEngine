@@ -12,7 +12,7 @@ namespace CE::Widgets
 		if (!isShown)
 			return;
 
-		GUI::PushStyleColor(GUI::StyleCol_WindowBg, Color::FromRGBA32(32, 33, 36));
+		GUI::PushStyleColor(GUI::StyleCol_WindowBg, Color::RGBA8(32, 33, 36));
 		GUI::PushStyleColor(GUI::StyleCol_TitleBg, Color::RGBA(20, 20, 20));
 		GUI::PushStyleColor(GUI::StyleCol_TitleBgActive, Color::RGBA(20, 20, 20));
 		GUI::PushStyleColor(GUI::StyleCol_TitleBgCollapsed, Color::RGBA(20, 20, 20));

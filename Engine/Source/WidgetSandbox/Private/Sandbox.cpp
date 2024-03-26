@@ -100,7 +100,7 @@ namespace CE
 		fourthDockWindow = CreateWindow<CDockWindow>("Fourth", rightBottom);
 		fifthDockWindow = CreateWindow<CDockWindow>("Fifth", rightBottom);
 
-		for (int i = 0; i < 4; ++i)
+		for (int i = 0; i < 12; ++i)
 		{
 			CWidget* btn = CreateObject<CWidget>(thirdDockWindow, "Button");
 		}

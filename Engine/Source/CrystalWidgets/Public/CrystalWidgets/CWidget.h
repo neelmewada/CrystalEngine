@@ -57,6 +57,8 @@ namespace CE::Widgets
         void UpdateStyleIfNeeded();
         virtual void UpdateLayoutIfNeeded();
 
+        virtual void OnAfterUpdateLayout() {}
+
         virtual Vec2 CalculateIntrinsicSize(f32 width, f32 height) { return Vec2(); }
 
         // - Style API -
@@ -112,6 +114,7 @@ namespace CE::Widgets
         virtual Vec2 GetComputedLayoutSize() { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
 
         Rect GetScreenSpaceRect();
+        Rect LocalToScreenSpaceRect(const Rect& localRect);
 
         PlatformWindow* GetNativeWindow();
 
@@ -126,6 +129,7 @@ namespace CE::Widgets
         void OnAfterConstruct() override final;
 
         virtual void OnPaint(CPaintEvent* paintEvent);
+        virtual void OnPaintOverlay(CPaintEvent* paintEvent);
 
         void OnSubobjectDetached(Object* object) override;
         void OnSubobjectAttached(Object* object) override;
@@ -185,6 +189,18 @@ namespace CE::Widgets
 
         FIELD()
         CStyleSheet* styleSheet = nullptr;
+
+        FIELD()
+		b8 allowHorizontalScroll = false;
+
+		FIELD()
+		b8 allowVerticalScroll = false;
+
+        FIELD()
+        Vec2 scrollOffset{};
+
+        FIELD(ReadOnly)
+        Vec2 contentSize{};
 
     crystalwidgets_internal:
 

@@ -2,7 +2,7 @@
 
 namespace CE::RPI
 {
-	constexpr bool forceDisableBatching = true;
+	constexpr bool ForceDisableBatching = false;
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
@@ -356,7 +356,7 @@ namespace CE::RPI
 
 		Matrix4x4 rotationMat = Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix();
 
-		if constexpr (forceDisableBatching)
+		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
 		}
@@ -483,7 +483,7 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
-		if constexpr (forceDisableBatching)
+		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
 		}
@@ -534,7 +534,7 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
-		if constexpr (forceDisableBatching)
+		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
 		}
@@ -585,7 +585,7 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
-		if constexpr (forceDisableBatching)
+		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
 		}
@@ -637,7 +637,7 @@ namespace CE::RPI
 
 		const FontInfo& font = fontStack.Top();
 
-		if constexpr (forceDisableBatching)
+		if constexpr (ForceDisableBatching)
 		{
 			createNewDrawBatch = true;
 		}
