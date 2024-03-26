@@ -313,7 +313,11 @@ namespace CE::Widgets
 
                     for (int i = 0; i < tabs.GetSize(); ++i)
                     {
-                        if (tabs[i].rect.Contains(pos))
+                        Rect tabRect = tabs[i].rect;
+                        auto tabSize = tabRect.GetSize();
+                        tabRect.min += rootOrigin;
+                        tabRect.max = tabRect.min + tabSize;
+                        if (tabRect.Contains(pos))
                         {
                             if (selectedTab != i)
                             {

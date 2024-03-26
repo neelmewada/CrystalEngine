@@ -178,6 +178,9 @@ namespace CE::Widgets
         b8 receiveDragEvents = false;
 
         FIELD()
+        b8 clipChildren = false;
+
+        FIELD()
         Array<Name> styleClasses{};
 
         FIELD()

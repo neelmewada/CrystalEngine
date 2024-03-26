@@ -759,6 +759,7 @@ namespace CE::Widgets
 			return;
 
 		bool popPaintCoords = false;
+		bool popClipRect = false;
 		bool shouldPropagateDownwards = true;
 
 		// Paint event
@@ -777,6 +778,10 @@ namespace CE::Widgets
 					origin = parent->GetComputedLayoutTopLeft() + parent->rootPadding.min;
 				}
 				paintEvent->painter->PushChildCoordinateSpace(origin);
+				if (clipChildren)
+				{
+					paintEvent->painter->PushChildClipRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
+				}
 				OnPaint(paintEvent);
 			}
 			else
@@ -873,9 +878,16 @@ namespace CE::Widgets
 		if (event->type == CEventType::PaintEvent)
 		{
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
-			if (paintEvent->painter != nullptr && popPaintCoords)
+			if (paintEvent->painter != nullptr)
 			{
-				paintEvent->painter->PopChildCoordinateSpace();
+				if (clipChildren)
+				{
+					paintEvent->painter->PopChildClipRect();
+				}
+				if (popPaintCoords)
+				{
+					paintEvent->painter->PopChildCoordinateSpace();
+				}
 			}
 		}
 	}

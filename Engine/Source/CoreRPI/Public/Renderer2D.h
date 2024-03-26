@@ -57,6 +57,9 @@ namespace CE::RPI
         void PushFont(Name family, u32 fontSize = 16, bool bold = false);
         void PopFont();
 
+        void PushClipRect(const Rect& clipRect);
+        void PopClipRect();
+
         void SetFillColor(const Color& color);
         void SetOutlineColor(const Color& color);
         void SetBorderThickness(f32 thickness);
@@ -108,6 +111,7 @@ namespace CE::RPI
         static constexpr u32 MaxImageCount = RHI::Limits::MaxSwapChainImageCount;
 
         void IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd = 0);
+        void IncrementClipRectsBuffer(u32 numRectsToAdd = 0);
 
         // - Helpers -
 
@@ -119,13 +123,6 @@ namespace CE::RPI
         RPI::Material* GetOrCreateMaterial(const DrawBatch& textDrawBatch);
 
         // - Data Structs -
-
-        //struct alignas(16) CharacterDrawItem
-        //{
-        //    Matrix4x4 transform{};
-        //    f32 bgMask = 0;
-        //    u32 charIndex = 0;
-        //};
 
         enum DrawType : u32
         {
@@ -147,6 +144,7 @@ namespace CE::RPI
             DrawType drawType = DRAW_None;
             u32 charIndex = 0; // For character drawing
             u32 bold = 0;
+            u32 clipRectIdx = 0;
         };
 
         struct FontInfo
@@ -219,14 +217,19 @@ namespace CE::RPI
         // - Drawing -
 
         StaticArray<RHI::Buffer*, MaxImageCount> drawItemsBuffer{};
+        StaticArray<RHI::Buffer*, MaxImageCount> clipRectsBuffer{};
         RHI::ShaderResourceGroup* drawItemSrg = nullptr;
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
+        Array<Rect> clipRects{};
         u32 drawItemCount = 0;
+        u32 clipRectCount = 0;
+        Array<u32> clipRectStack{};
         bool createNewDrawBatch = false;
 
         Array<RHI::DrawPacket*> drawPackets{};
         StaticArray<bool, MaxImageCount> resubmitDrawData = {};
+        StaticArray<bool, MaxImageCount> resubmitClipRects = {};
         
         // - Utils -
 

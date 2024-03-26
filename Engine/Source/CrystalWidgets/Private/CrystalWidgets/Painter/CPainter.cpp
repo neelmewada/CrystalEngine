@@ -93,4 +93,15 @@ namespace CE::Widgets
         coordinateSpaceStack.Pop();
     }
 
+    void CPainter::PushChildClipRect(const Rect& clipRect)
+    {
+        Rect rect = Rect::FromSize(GetOrigin() + clipRect.min, clipRect.GetSize());
+        renderer->PushClipRect(rect);
+    }
+
+    void CPainter::PopChildClipRect()
+    {
+        renderer->PopClipRect();
+    }
+
 } // namespace CE::Widgets

@@ -6,6 +6,8 @@ namespace CE::Widgets
     CWindow::CWindow()
     {
         receiveMouseEvents = false;
+        clipChildren = true;
+
         painter = CreateDefaultSubobject<CPainter>("Painter");
 
         if (!IsDefaultInstance())
@@ -102,6 +104,7 @@ namespace CE::Widgets
                 Quat::EulerDegrees(0, 0, 0).ToMatrix();
             desc.viewConstantData.viewProjectionMatrix = desc.viewConstantData.projectionMatrix * desc.viewConstantData.viewMatrix;
             desc.viewConstantData.viewPosition = Vec4(0, 0, 0, 0);
+            desc.viewConstantData.pixelResolution = Vec2(screenWidth, screenHeight);
             desc.screenSize = Vec2i(screenWidth, screenHeight);
 
             renderer = new RPI::Renderer2D(desc);
@@ -142,6 +145,7 @@ namespace CE::Widgets
 
         viewConstantData.viewProjectionMatrix = viewConstantData.projectionMatrix * viewConstantData.viewMatrix;
         viewConstantData.viewPosition = Vec4(0, 0, 0, 0);
+        viewConstantData.pixelResolution = Vec2(screenWidth, screenHeight);
         
         renderer->SetScreenSize(Vec2i(screenWidth, screenHeight));
         renderer->SetViewConstants(viewConstantData);

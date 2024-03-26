@@ -11,6 +11,7 @@ namespace CE::RPI
 		Matrix4x4 viewProjectionMatrix = Matrix4x4::Identity();
 		Matrix4x4 projectionMatrix = Matrix4x4::Identity();
 		Vec4 viewPosition = Vec4();
+		Vec2 pixelResolution = Vec2();
 	};
     
 	class CORERPI_API View final : public IntrusiveBase

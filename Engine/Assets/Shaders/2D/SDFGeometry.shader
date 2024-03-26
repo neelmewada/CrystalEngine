@@ -39,6 +39,7 @@ Shader "2D/SDF Geometry"
                 float4 position : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 nointerpolation uint instanceId : TEXCOORD1;
+                float2 screenPosition : TEXCOORD2;
             };
 
             struct DrawItem
@@ -52,9 +53,12 @@ Shader "2D/SDF Geometry"
                 uint drawType; // enum DrawType;
                 uint charIndex; // For character drawing
                 uint bold;
+                uint clipRect;
             };
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
+
+            StructuredBuffer<float4> _ClipRects : SRG_PerDraw(t1);
 
             struct CharacterItem
             {
@@ -86,6 +90,7 @@ Shader "2D/SDF Geometry"
                 }
 
                 o.position = mul(float4(input.position, 1.0), _DrawList[input.instanceId].transform);
+                o.screenPosition = o.position.xy / 2.0;
                 o.position = mul(o.position, viewProjectionMatrix);
                 return o;
             }
@@ -257,8 +262,13 @@ Shader "2D/SDF Geometry"
                 info.cornerRadius = _DrawList[idx].cornerRadius;
                 info.uv = input.uv;
                 float2 uv = input.uv;
+                const float2 screenPos = input.screenPosition;
 
                 float2 p = (uv - float2(0.5, 0.5)) * info.itemSize;
+
+                const float4 clipRect = _ClipRects[_DrawList[idx].clipRect];
+                if (screenPos.x < clipRect.x || screenPos.x > clipRect.z || screenPos.y < clipRect.y || screenPos.y > clipRect.w)
+                    discard;
                 
                 switch (_DrawList[idx].drawType)
                 {

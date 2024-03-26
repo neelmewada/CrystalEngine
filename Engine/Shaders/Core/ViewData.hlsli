@@ -6,7 +6,8 @@ cbuffer _PerViewData : SRG_PerView(b0)
     float4x4 viewMatrix;
     float4x4 viewProjectionMatrix;
     float4x4 projectionMatrix;
-    float3 viewPosition;
+    float4 viewPosition;
+    float2 pixelResolution;
 };
 
 #endif // __VIEW_DATA_HLSL__

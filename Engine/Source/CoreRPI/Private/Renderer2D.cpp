@@ -44,6 +44,16 @@ namespace CE::RPI
 			drawItemsBuffer[i] = RHI::gDynamicRHI->CreateBuffer(drawItemBufferDesc);
 			drawItemSrg->Bind(i, "_DrawList", drawItemsBuffer[i]);
 
+			RHI::BufferDescriptor clipRectBufferDesc{};
+			clipRectBufferDesc.name = "ClipRect Buffer";
+			clipRectBufferDesc.bufferSize = 100 * sizeof(Rect);
+			clipRectBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			clipRectBufferDesc.bindFlags = BufferBindFlags::StructuredBuffer;
+			clipRectBufferDesc.structureByteStride = sizeof(Rect);
+
+			clipRectsBuffer[i] = gDynamicRHI->CreateBuffer(clipRectBufferDesc);
+			drawItemSrg->Bind(i, "_ClipRects", clipRectsBuffer[i]);
+
 			RHI::BufferDescriptor viewConstantsBufferDesc{};
 			viewConstantsBufferDesc.name = "ViewConstants";
 			viewConstantsBufferDesc.bufferSize = sizeof(viewConstants);
@@ -66,6 +76,9 @@ namespace CE::RPI
 		{
 			delete drawItemsBuffer[i];
 			drawItemsBuffer[i] = nullptr;
+
+			delete clipRectsBuffer[i];
+			clipRectsBuffer[i] = nullptr;
 
 			delete viewConstantsBuffer[i];
 			viewConstantsBuffer[i] = nullptr;
@@ -113,15 +126,20 @@ namespace CE::RPI
 		fontStack.Push({ .fontName = defaultFontName, .fontSize = 16});
 
 		drawBatches.Clear();
+		clipRectStack.Clear();
 
 		drawItemCount = 0;
+		clipRectCount = 0;
 		createNewDrawBatch = true;
 
 		ResetToDefaults();
 
+		PushClipRect(Rect::FromSize(Vec2(0, 0), screenSize.ToVec2()));
+
 		for (int i = 0; i < resubmitDrawData.GetSize(); i++)
 		{
 			resubmitDrawData[i] = true;
+			resubmitClipRects[i] = true;
 		}
 	}
 
@@ -155,6 +173,23 @@ namespace CE::RPI
 			createNewDrawBatch = true;
 
 		fontStack.Pop();
+	}
+
+	void Renderer2D::PushClipRect(const Rect& clipRect)
+	{
+		if (clipRects.GetSize() < clipRectCount + 1)
+		{
+			clipRects.Resize(clipRectCount + 1);
+		}
+
+		clipRects[clipRectCount] = clipRect;
+		clipRectStack.Push(clipRectCount);
+		clipRectCount++;
+	}
+
+	void Renderer2D::PopClipRect()
+	{
+		clipRectStack.Pop();
 	}
 
 	void Renderer2D::SetFillColor(const Color& color)
@@ -412,6 +447,7 @@ namespace CE::RPI
 			drawItem.borderThickness = 0.0f;
 			drawItem.bold = font.bold ? 1 : 0;
 			drawItem.drawType = DRAW_Text;
+			drawItem.clipRectIdx = clipRectStack.Top();
 			
 			drawItem.transform = rotationMat * Matrix4x4::Translation(translation) * Matrix4x4::Scale(scale);
 			drawItem.charIndex = fontAtlas->GetCharacterIndex(c);
@@ -472,6 +508,7 @@ namespace CE::RPI
 		drawItem.itemSize = size;
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
 
 		curDrawBatch.drawItemCount++;
 		
@@ -517,6 +554,7 @@ namespace CE::RPI
 		drawItem.itemSize = size;
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
 
 		curDrawBatch.drawItemCount++;
 
@@ -563,6 +601,7 @@ namespace CE::RPI
 		drawItem.itemSize = size;
 		drawItem.borderThickness = borderThickness;
 		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
 
 		curDrawBatch.drawItemCount++;
 
@@ -572,6 +611,8 @@ namespace CE::RPI
 
 	void Renderer2D::End()
 	{
+		PopClipRect();
+
 		fontStack.Pop(); // Default font
 
 		const auto& vertBuffers = RPISystem::Get().GetTextQuad();
@@ -634,6 +675,11 @@ namespace CE::RPI
 			}
 		}
 
+		while (oldPackets.NonEmpty())
+		{
+			delete oldPackets[0];
+			oldPackets.RemoveAt(0);
+		}
 	}
 
 	const Array<DrawPacket*>& Renderer2D::FlushDrawPackets(u32 imageIndex)
@@ -679,7 +725,6 @@ namespace CE::RPI
 
 			if (drawItemsBuffer[imageIndex]->GetBufferSize() < drawItemCount * sizeof(DrawItem2D))
 			{
-				// TODO: Implement buffer size expansion
 				IncrementCharacterDrawItemBuffer(drawItemCount + 10);
 			}
 			
@@ -689,6 +734,25 @@ namespace CE::RPI
 				memcpy(data, drawItems.GetData(), drawItemCount * sizeof(DrawItem2D));
 			}
 			drawItemsBuffer[imageIndex]->Unmap();
+		}
+
+		// - Update Clip Rects Buffer -
+
+		if (clipRectsBuffer[imageIndex] != nullptr && resubmitClipRects[imageIndex])
+		{
+			resubmitClipRects[imageIndex] = false;
+
+			if (clipRectsBuffer[imageIndex]->GetBufferSize() < clipRectCount * sizeof(Rect))
+			{
+				IncrementClipRectsBuffer(clipRectCount + 10);
+			}
+
+			void* data;
+			clipRectsBuffer[imageIndex]->Map(0, clipRectsBuffer[imageIndex]->GetBufferSize(), &data);
+			{
+				memcpy(data, clipRects.GetData(), clipRectCount * sizeof(Rect));
+			}
+			clipRectsBuffer[imageIndex]->Unmap();
 		}
 		
 		return drawPackets;
@@ -736,6 +800,38 @@ namespace CE::RPI
 		}
 
 		drawItemSrg->FlushBindings();
+	}
+
+	void Renderer2D::IncrementClipRectsBuffer(u32 numRectsToAdd)
+	{
+		u32 curNumRects = clipRectsBuffer[0]->GetBufferSize() / sizeof(Rect);
+		u32 incrementCount = curNumRects * 3 / 2;
+
+		numRectsToAdd = Math::Max(numRectsToAdd, incrementCount);
+
+		for (int i = 0; i < numFramesInFlight; ++i)
+		{
+			RHI::Buffer* original = clipRectsBuffer[i];
+
+			RHI::BufferDescriptor newBufferDesc{};
+			newBufferDesc.name = "ClipRects Buffer";
+			newBufferDesc.bindFlags = RHI::BufferBindFlags::StructuredBuffer;
+			newBufferDesc.defaultHeapType = MemoryHeapType::Upload;
+			newBufferDesc.structureByteStride = sizeof(Rect);
+			newBufferDesc.bufferSize = original->GetBufferSize() + numRectsToAdd * sizeof(Rect);
+
+			clipRectsBuffer[i] = gDynamicRHI->CreateBuffer(newBufferDesc);
+			drawItemSrg->Bind(i, "_ClipRect", clipRectsBuffer[i]);
+
+			void* data;
+			original->Map(0, original->GetBufferSize(), &data);
+			{
+				clipRectsBuffer[i]->UploadData(data, original->GetBufferSize());
+			}
+			original->Unmap();
+
+			QueueDestroy(original);
+		}
 	}
 
 	RPI::Material* Renderer2D::GetOrCreateMaterial(const DrawBatch& drawBatch)

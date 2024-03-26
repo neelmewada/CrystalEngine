@@ -10,6 +10,7 @@ namespace CE
 		Matrix4x4 viewProjectionMatrix;
 		Matrix4x4 projectionMatrix;
 		Vec4 viewPosition;
+		Vec2 pixelResolution;
 	};
 
 	struct alignas(16) DirectionalLight
