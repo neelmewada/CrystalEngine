@@ -55,7 +55,7 @@ namespace CE
 
 		mainWindow->GetDrawableWindowSize(&width, &height);
 
-		mainWindow->AddListener(this);
+		PlatformApplication::Get()->AddMessageHandler(this);
 
 		// Load Cube mesh at first
 		cubeModel = RPI::ModelLod::CreateCubeModel();
@@ -228,10 +228,7 @@ namespace CE
 		DestroyCubeMaps();
 		//DestroyHDRIs();
 
-		if (mainWindow)
-		{
-			mainWindow->RemoveListener(this);
-		}
+		PlatformApplication::Get()->RemoveMessageHandler(this);
 
 		delete scheduler;
 		DestroyPipelines();

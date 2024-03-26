@@ -73,7 +73,7 @@ namespace CE
 		u32 screenHeight = 0;
 	};
 
-	class VulkanSandbox : IWindowCallbacks
+	class VulkanSandbox : ApplicationMessageHandler
 	{
 	public:
 

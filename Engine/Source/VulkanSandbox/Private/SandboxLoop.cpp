@@ -2,8 +2,6 @@
 
 #include <cxxopts.hpp>
 
-using namespace CE::Widgets;
-
 namespace CE
 {
 	SandboxLoop::SandboxLoop()

@@ -348,6 +348,7 @@ namespace CE
 				tickHandler.InvokeIfValid();
 			}
 		}
+		
 #endif
 		return 0;
 	}
