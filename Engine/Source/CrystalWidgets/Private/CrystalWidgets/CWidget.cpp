@@ -819,11 +819,6 @@ namespace CE::Widgets
 			CPaintEvent* paintEvent = (CPaintEvent*)event;
 			paintEvent->direction = CEventDirection::TopToBottom;
 
-			if (GetName() == "Third")
-			{
-				String::IsAlphabet('a');
-			}
-
 			Vec2 scrollOffset = Vec2();
 			if (parent != nullptr)
 				scrollOffset = parent->scrollOffset;

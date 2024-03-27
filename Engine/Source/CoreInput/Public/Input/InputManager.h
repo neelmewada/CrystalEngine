@@ -15,63 +15,68 @@ namespace CE
 
         void Tick();
 
-        inline static Vec2i GetMousePosition()
+        static Vec2i GetMousePosition()
         {
             return Get().mousePosition;
         }
 
-        inline static Vec2i GetGlobalMousePosition()
+        static Vec2i GetGlobalMousePosition()
         {
             return Get().globalMousePosition;
         }
 
-        inline static Vec2i GetMouseDelta()
+        static Vec2i GetMouseDelta()
         {
             return Get().mouseDelta;
         }
 
-        inline static u64 GetFocusWindowID()
+        static Vec2 GetMouseWheelDelta()
+        {
+            return Get().wheelDelta;
+        }
+
+        static u64 GetFocusWindowID()
         {
             return Get().windowId;
         }
 
-        inline static bool IsKeyDown(KeyCode key)
+        static bool IsKeyDown(KeyCode key)
         {
             return Get().stateChangesThisTick.KeyExists(key) && Get().stateChangesThisTick[key];
         }
 
-        inline static bool IsKeyHeld(KeyCode key)
+        static bool IsKeyHeld(KeyCode key)
         {
             return Get().keyStates.KeyExists(key) && Get().keyStates[key];
         }
 
-        inline static bool IsKeyHeldDelayed(KeyCode key)
+        static bool IsKeyHeldDelayed(KeyCode key)
         {
             return Get().keyStatesDelayed.KeyExists(key) && Get().keyStatesDelayed[key];
         }
 
-        inline static bool IsKeyUp(KeyCode key)
+        static bool IsKeyUp(KeyCode key)
         {
             return Get().stateChangesThisTick.KeyExists(key) && !Get().stateChangesThisTick[key];
         }
 
-        inline static bool IsMouseButtonDown(MouseButton mouseButton)
+        static bool IsMouseButtonDown(MouseButton mouseButton)
         {
             return Get().mouseButtonStateChanges.KeyExists(mouseButton) && Get().mouseButtonStateChanges[mouseButton] > 0;
         }
 
-        inline static bool IsMouseButtonUp(MouseButton mouseButton)
+        static bool IsMouseButtonUp(MouseButton mouseButton)
         {
             return Get().mouseButtonStateChanges.KeyExists(mouseButton) && Get().mouseButtonStateChanges[mouseButton] == 0;
         }
 
-        inline static bool IsMouseButtonHeld(MouseButton mouseButton)
+        static bool IsMouseButtonHeld(MouseButton mouseButton)
         {
             return Get().mouseButtonStates.KeyExists(mouseButton) && Get().mouseButtonStates[mouseButton] > 0;
         }
 
         //! @brief Tests for presence of ALL of the given modifiers
-        inline static bool TestModifiers(KeyModifier modifier)
+        static bool TestModifiers(KeyModifier modifier)
         {
             return EnumHasAllFlags(Get().modifierStates, modifier);
         }
@@ -90,6 +95,7 @@ namespace CE
         Vec2i globalMousePosition{};
         Vec2i mousePosition{};
         Vec2i mouseDelta{};
+        Vec2 wheelDelta{};
 
         HashMap<KeyCode, bool> keyStates{};
         HashMap<KeyCode, bool> keyStatesDelayed{};

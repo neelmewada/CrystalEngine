@@ -102,6 +102,10 @@ namespace CE
             windowId = event->motion.windowID;
             mouseDelta = Vec2i(event->motion.xrel, event->motion.yrel);
             break;
+        case SDL_MOUSEWHEEL:
+            windowId = event->wheel.windowID;
+            wheelDelta = Vec2(event->wheel.preciseX, event->wheel.preciseY);
+            break;
         }
 
         if (mouseButtonStates[MouseButton::Left] != 0 && (mouseBtnMask & SDL_BUTTON(SDL_BUTTON_LEFT)) == 0)
@@ -129,8 +133,11 @@ namespace CE
         input.mousePosition = mousePosition;
         input.globalMousePosition = globalMousePosition;
         input.mouseDelta = globalMousePosition - prevMousePosition;
+        input.wheelDelta = wheelDelta;
 
+        // Reset temp values
         prevMousePosition = globalMousePosition;
+        wheelDelta = Vec2();
 
         stateChangesThisTick.Clear();
         mouseButtonStateChanges.Clear();

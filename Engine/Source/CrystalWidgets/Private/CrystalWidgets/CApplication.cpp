@@ -71,6 +71,7 @@ namespace CE::Widgets
 
 		Vec2 globalMousePos = InputManager::GetGlobalMousePosition().ToVec2();
 		Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
+		Vec2 mouseWheelDelta = InputManager::GetMouseWheelDelta();
 		if (prevMousePos == Vec2())
 			prevMousePos = globalMousePos;
 
@@ -149,6 +150,7 @@ namespace CE::Widgets
 			mouseEvent.mousePos = globalMousePos;
 			mouseEvent.prevMousePos = prevMousePos;
 			mouseEvent.direction = CEventDirection::BottomToTop;
+			mouseEvent.wheelDelta = mouseWheelDelta;
 
 			while (hoveredWidgetsStack.NonEmpty() && hoveredWidgetsStack.Top() != hoveredWidget)
 			{
@@ -172,6 +174,7 @@ namespace CE::Widgets
 			mouseEvent.mousePos = globalMousePos;
 			mouseEvent.prevMousePos = prevMousePos;
 			mouseEvent.direction = CEventDirection::BottomToTop;
+			mouseEvent.wheelDelta = mouseWheelDelta;
 
 			int idx = hoveredWidgetsStack.GetSize();
 			CWidget* basePrevWidget = nullptr;
@@ -197,6 +200,24 @@ namespace CE::Widgets
 			}
 		}
 
+		if (abs(mouseWheelDelta.x) >= FLT_EPSILON || abs(mouseWheelDelta.y) >= FLT_EPSILON)
+		{
+			CMouseEvent mouseEvent{};
+			mouseEvent.name = "MouseWheel";
+			mouseEvent.type = CEventType::MouseWheel;
+			mouseEvent.button = curButton;
+			mouseEvent.mousePos = globalMousePos;
+			mouseEvent.prevMousePos = prevMousePos;
+			mouseEvent.direction = CEventDirection::BottomToTop;
+			mouseEvent.wheelDelta = mouseWheelDelta;
+
+			if (hoveredWidgetsStack.NonEmpty())
+			{
+				mouseEvent.sender = hoveredWidgetsStack.Top();
+				hoveredWidgetsStack.Top()->HandleEvent(&mouseEvent);
+			}
+		}
+
 		if (abs(mouseDelta.x) >= FLT_EPSILON || abs(mouseDelta.y) >= FLT_EPSILON)
 		{
 			CMouseEvent mouseEvent{};
@@ -206,6 +227,7 @@ namespace CE::Widgets
 			mouseEvent.mousePos = globalMousePos;
 			mouseEvent.prevMousePos = prevMousePos;
 			mouseEvent.direction = CEventDirection::BottomToTop;
+			mouseEvent.wheelDelta = mouseWheelDelta;
 
 			if (hoveredWidgetsStack.NonEmpty())
 			{
@@ -222,6 +244,7 @@ namespace CE::Widgets
 				dragEvent.mousePos = globalMousePos;
 				dragEvent.prevMousePos = prevMousePos;
 				dragEvent.direction = CEventDirection::BottomToTop;
+				dragEvent.wheelDelta = mouseWheelDelta;
 				dragEvent.isInside = true;
 
 				dragEvent.sender = nullptr;
@@ -257,6 +280,7 @@ namespace CE::Widgets
 				event.prevMousePos = prevMousePos;
 				event.direction = CEventDirection::BottomToTop;
 				event.isInside = true;
+				event.wheelDelta = mouseWheelDelta;
 
 				if (hoveredWidgetsStack.NonEmpty())
 				{
@@ -274,6 +298,7 @@ namespace CE::Widgets
 						dragEvent.prevMousePos = prevMousePos;
 						dragEvent.direction = CEventDirection::BottomToTop;
 						dragEvent.isInside = true;
+						dragEvent.wheelDelta = mouseWheelDelta;
 
 						dragEvent.sender = hoveredWidgetsStack.Top();
 						dragEvent.draggedWidget = hoveredWidgetsStack.Top();
@@ -297,6 +322,7 @@ namespace CE::Widgets
 				event.prevMousePos = prevMousePos;
 				event.direction = CEventDirection::BottomToTop;
 				event.isInside = true;
+				event.wheelDelta = mouseWheelDelta;
 
 				if (hoveredWidgetsStack.NonEmpty())
 				{
@@ -321,6 +347,7 @@ namespace CE::Widgets
 					dragEvent.prevMousePos = prevMousePos;
 					dragEvent.direction = CEventDirection::BottomToTop;
 					dragEvent.isInside = true;
+					dragEvent.wheelDelta = mouseWheelDelta;
 
 					dragEvent.sender = nullptr;
 					if (hoveredWidgetsStack.NonEmpty())

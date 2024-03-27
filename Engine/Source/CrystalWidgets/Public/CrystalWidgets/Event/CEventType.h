@@ -12,6 +12,7 @@ namespace CE::Widgets
 
 		MouseEnter,
 		MouseMove,
+		MouseWheel,
 		MouseLeave,
 		MousePress,
 		MouseRelease,

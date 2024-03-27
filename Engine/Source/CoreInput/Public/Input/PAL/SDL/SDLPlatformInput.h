@@ -24,6 +24,7 @@ namespace CE
         Vec2i mousePosition{};
         Vec2i prevMousePosition{};
         Vec2i mouseDelta{};
+        Vec2 wheelDelta{};
 
         Array<u64> focusGainedWindows{};
         Array<u64> focusLostWindows{};

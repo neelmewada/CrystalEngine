@@ -511,6 +511,21 @@ namespace CE::Widgets
                 isVerticalScrollPressed = false;
                 dragEvent->ConsumeAndStopPropagation(this);
             }
+            else if (mouseEvent->type == CEventType::MouseWheel && allowVerticalScroll)
+            {
+                Vec2 originalSize = GetComputedLayoutSize();
+                f32 originalHeight = originalSize.height;
+                f32 contentMaxY = contentSize.height;
+
+                if (contentMaxY > originalHeight) // Scroll is possible
+                {
+                    scrollOffset.y += -mouseEvent->wheelDelta.y * scrollSensitivity;
+                    scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, contentSize.height - originalHeight);
+
+                    SetNeedsLayout();
+                    SetNeedsPaint();
+                }
+            }
 
             if (controlRects.NonEmpty() && nativeWindow != nullptr)
             {

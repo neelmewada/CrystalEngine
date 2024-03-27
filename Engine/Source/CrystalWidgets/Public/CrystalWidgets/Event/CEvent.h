@@ -58,6 +58,7 @@ namespace CE::Widgets
 			case CEventType::MouseEnter:
 			case CEventType::MouseLeave:
 			case CEventType::MouseMove:
+			case CEventType::MouseWheel:
 			case CEventType::MousePress:
 			case CEventType::MouseRelease:
 			case CEventType::DragBegin:
@@ -156,7 +157,10 @@ namespace CE::Widgets
 		Vec2 prevMousePos{}; // Previous mouse position in screen space
 
 		FIELD()
-		b8 isInside = true;
+		Vec2 wheelDelta{};
+
+		FIELD()
+		b8 isInside = true; // Valid only for MouseRelease events
 
 	};
 

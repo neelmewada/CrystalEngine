@@ -5,7 +5,7 @@ namespace CE::Widgets
 	class CPainter;
 	class CWindow;
 
-    CLASS()
+    CLASS(Config = Engine)
     class CRYSTALWIDGETS_API CWidget : public Object
     {
         CE_CLASS(CWidget, Object)
@@ -201,6 +201,11 @@ namespace CE::Widgets
 
         FIELD(ReadOnly)
         Vec2 contentSize{};
+
+        // - Configs -
+
+        FIELD(Config)
+        f32 scrollSensitivity = 1.0f;
 
     crystalwidgets_internal:
 
