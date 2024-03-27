@@ -106,7 +106,10 @@ namespace CE::Widgets
             CDockWindow* dockWindow = (CDockWindow*)subobject;
             dockWindow->dockSpace = dockSpace;
             dockWindow->SetEnabled(selectedTab == dockedWindows.GetSize());
+            if (dockSpace->GetDockType() == CDockType::Major)
+                dockWindow->allowVerticalScroll = dockWindow->allowHorizontalScroll = false;
             dockedWindows.Add(dockWindow);
+
             selectedTab = 0;
             if (dockSpace->GetDockType() == CDockType::Major)
                 rootPadding = Vec4(0, 60, 0, 0);

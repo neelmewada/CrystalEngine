@@ -12,6 +12,7 @@ CDockSplitView::splitter {
     background: rgb(128, 0, 0);
     width: 100%;
     flex-grow: 4;
+    flex-shrink: 2;
 }
 
 #SplitLeft {

@@ -436,10 +436,11 @@ namespace CE::Widgets
             {
                 Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
                 f32 scrollRectHeightRatio = originalHeight / contentMaxY;
+                f32 normalizedScrollY = scrollOffset.y / (contentMaxY - originalHeight);
 
                 Rect scrollRect = Rect::FromSize(scrollRegion.min,
                     Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, MinScrollRectSize)));
-                scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * scrollOffset.y / contentMaxY));
+                scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * normalizedScrollY));
 
                 return scrollRect;
             }
@@ -450,6 +451,9 @@ namespace CE::Widgets
 
     void CWindow::HandleEvent(CEvent* event)
     {
+        if (allowVerticalScroll || allowHorizontalScroll)
+            receiveDragEvents = true;
+
         if (event->IsMouseEvent())
         {
             CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
@@ -458,10 +462,12 @@ namespace CE::Widgets
             Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
             Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
 
-            if (mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
+            if (mouseEvent->type == CEventType::DragBegin && (allowVerticalScroll || allowHorizontalScroll))
             {
-                if (allowVerticalScroll)
-                {
+                CDragEvent* dragEvent = (CDragEvent*)event;
+
+	            if (allowVerticalScroll)
+	            {
                     Vec2 originalSize = GetComputedLayoutSize();
                     f32 originalHeight = originalSize.height;
                     f32 contentMaxY = contentSize.height;
@@ -473,31 +479,37 @@ namespace CE::Widgets
 
                         if (scrollRect.Contains(globalMousePos))
                         {
+                            dragEvent->draggedWidget = this;
+                            dragEvent->ConsumeAndStopPropagation(this);
                             isVerticalScrollPressed = true;
                         }
                     }
-                }
-            }
-            else if (mouseEvent->type == CEventType::MouseMove)
-            {
-	            if (isVerticalScrollPressed && allowVerticalScroll)
-	            {
-                    Vec2 originalSize = GetComputedLayoutSize();
-                    f32 originalHeight = originalSize.height;
-                    f32 contentMaxY = contentSize.height;
-
-                    scrollOffset.y += mouseDelta.y;
-                    scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, contentSize.height);
-                    CE_LOG(Info, All, "Scroll: {}", scrollOffset.y);
-
-                    SetNeedsStyle();
-                    SetNeedsLayout();
-                    SetNeedsPaint();
 	            }
             }
-            else if (mouseEvent->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
+            else if (mouseEvent->type == CEventType::DragMove && isVerticalScrollPressed)
             {
+                CDragEvent* dragEvent = (CDragEvent*)event;
+
+                if (allowVerticalScroll && isVerticalScrollPressed)
+                {
+                    Vec2 originalSize = GetComputedLayoutSize();
+                    f32 originalHeight = originalSize.height;
+
+                    scrollOffset.y += mouseDelta.y;
+                    scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, contentSize.height - originalHeight);
+                    //CE_LOG(Info, All, "Scroll Offset: {}", scrollOffset.y);
+
+                    dragEvent->ConsumeAndStopPropagation(this);
+                    SetNeedsLayout();
+                    SetNeedsPaint();
+                }
+            }
+            else if (mouseEvent->type == CEventType::DragEnd && isVerticalScrollPressed)
+            {
+                CDragEvent* dragEvent = (CDragEvent*)event;
+
                 isVerticalScrollPressed = false;
+                dragEvent->ConsumeAndStopPropagation(this);
             }
 
             if (controlRects.NonEmpty() && nativeWindow != nullptr)

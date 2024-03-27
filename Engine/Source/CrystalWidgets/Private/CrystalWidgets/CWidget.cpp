@@ -654,6 +654,10 @@ namespace CE::Widgets
 		if (nativeWindow == nullptr)
 			return {};
 
+		Vec2 scrollOffset = Vec2();
+		if (parent != nullptr)
+			scrollOffset = parent->scrollOffset;
+
 		{
 			Vec2i posInt = nativeWindow->GetWindowPosition();
 			Vec2 pos = Vec2(posInt.x, posInt.y);
@@ -688,6 +692,10 @@ namespace CE::Widgets
 		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
 		if (nativeWindow == nullptr)
 			return rect;
+
+		Vec2 scrollOffset = Vec2();
+		if (parent != nullptr)
+			scrollOffset = parent->scrollOffset;
 
 		{
 			Vec2i posInt = nativeWindow->GetWindowPosition();
@@ -815,6 +823,10 @@ namespace CE::Widgets
 			{
 				String::IsAlphabet('a');
 			}
+
+			Vec2 scrollOffset = Vec2();
+			if (parent != nullptr)
+				scrollOffset = parent->scrollOffset;
 
 			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())
 			{

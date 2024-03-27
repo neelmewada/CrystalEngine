@@ -57,7 +57,7 @@ namespace CE
         GSystemConsoleSink->set_level((spdlog::level::level_enum)GConsoleLogLevel);
         GSystemConsoleSink->set_pattern("[%^%l%$] %v");
 
-        auto logPath = (PlatformDirectories::GetLogDir() / "log.txt").GetString();
+        auto logPath = (PlatformDirectories::GetLogDir() / ("Log " + DateTime::Now().ToString().Replace({':'}, '-') + ".txt")).GetString();
 
         GLogFileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logPath.GetCString());
         GLogFileSink->set_level((spdlog::level::level_enum)GFileDumpLogLevel);
