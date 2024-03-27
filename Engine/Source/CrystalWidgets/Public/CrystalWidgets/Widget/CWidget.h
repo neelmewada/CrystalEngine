@@ -26,8 +26,8 @@ namespace CE::Widgets
 
         bool IsWindow();
 
-        inline void SetVisible(bool visible) { this->visible = visible; }
-        inline void SetEnabled(bool enabled) { this->enabled = enabled; }
+        void SetVisible(bool visible);
+        void SetEnabled(bool enabled);
 
         void SetNeedsPaint();
 
@@ -208,6 +208,9 @@ namespace CE::Widgets
         f32 scrollSensitivity = 1.0f;
 
     crystalwidgets_internal:
+
+        void ClearChildNodes();
+        void ReAddChildNodes();
 
         YGNodeRef node = nullptr;
         YGNodeRef detachedNode = nullptr;

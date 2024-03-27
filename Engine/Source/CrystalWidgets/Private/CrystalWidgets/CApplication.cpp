@@ -91,7 +91,7 @@ namespace CE::Widgets
 
 		std::function<CWidget* (CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
 			{
-				if (widget == nullptr)
+				if (widget == nullptr || !widget->IsEnabled())
 					return nullptr;
 				Rect widgetRect = widget->GetScreenSpaceRect();
 
@@ -327,7 +327,7 @@ namespace CE::Widgets
 					hoveredWidgetsStack.Top()->HandleEvent(&event);
 				}
 
-				if (widgetsPressedPerMouseButton[i] != nullptr)
+				if (widgetsPressedPerMouseButton[i] != nullptr && widgetsPressedPerMouseButton[i] != event.sender)
 				{
 					event.Reset();
 					event.isInside = false;

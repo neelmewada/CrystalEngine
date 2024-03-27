@@ -82,11 +82,20 @@ namespace CE::Widgets
 
         for (CWidget* widget : attachedWidgets)
         {
-            f32 y = widget->GetComputedLayoutTopLeft().y;
-            f32 maxY = y + widget->GetComputedLayoutSize().height;
+            if (!widget->IsEnabled())
+                continue;
+
+            Vec2 pos = widget->GetComputedLayoutTopLeft();
+            Vec2 size = widget->GetComputedLayoutSize();
+            f32 maxY = pos.y + size.height;
+            f32 maxX = pos.x + size.width;
+            if (isnan(maxX))
+                maxX = 0;
+            if (isnan(maxY))
+                maxY = 0;
 
             contentMaxY = Math::Max(contentMaxY, maxY);
-            contentMaxX = Math::Max(contentMaxX, maxY);
+            contentMaxX = Math::Max(contentMaxX, maxX);
         }
 
         contentSize = Vec2(contentMaxX, contentMaxY);
@@ -158,7 +167,7 @@ namespace CE::Widgets
 
         u32 screenWidth = 0; u32 screenHeight = 0;
         nativeWindow->GetDrawableWindowSize(&screenWidth, &screenHeight);
-        CE_LOG(Info, All, "Resize: {}x{}", screenWidth, screenHeight);
+        //CE_LOG(Info, All, "Resize: {}x{}", screenWidth, screenHeight);
 
         RPI::PerViewConstants viewConstantData{};
         viewConstantData.viewMatrix = Matrix4x4::Identity();
@@ -408,6 +417,8 @@ namespace CE::Widgets
             f32 originalHeight = originalSize.height;
             f32 contentMaxY = contentSize.height;
 
+            //CE_LOG(Info, All, "originalSize: {} | contentSize: {}", originalSize, contentSize);
+
             if (contentMaxY > originalHeight)
             {
                 Rect scrollRect = GetVerticalScrollBarRect();
@@ -420,6 +431,10 @@ namespace CE::Widgets
                 painter->SetBrush(brush);
 
                 painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * ScrollRectWidth * 0.5f);
+            }
+            else
+            {
+                normalizedScroll = Vec2(0, 0);
             }
         }
     }
@@ -506,7 +521,7 @@ namespace CE::Widgets
             else if (mouseEvent->type == CEventType::DragEnd && isVerticalScrollPressed)
             {
                 CDragEvent* dragEvent = (CDragEvent*)event;
-
+                
                 isVerticalScrollPressed = false;
                 dragEvent->ConsumeAndStopPropagation(this);
             }
@@ -516,7 +531,7 @@ namespace CE::Widgets
                 f32 originalHeight = originalSize.height;
                 f32 contentMaxY = contentSize.height;
 
-                if (contentMaxY > originalHeight) // Scroll is possible
+                if (contentMaxY > originalHeight) // If scrolling is possible
                 {
                     normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity * 0.1f;
                     normalizedScroll.y = Math::Clamp01(normalizedScroll.y);

@@ -46,6 +46,43 @@ namespace CE::Widgets
 		}
 	}
 
+	void CWidget::ClearChildNodes()
+	{
+		YGNodeRemoveAllChildren(node);
+		YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
+	}
+
+	void CWidget::ReAddChildNodes()
+	{
+		ClearChildNodes();
+
+		if (attachedWidgets.NonEmpty())
+			YGNodeSetMeasureFunc(node, nullptr);
+
+		for (auto subWidget : attachedWidgets)
+		{
+			if (!subWidget->IsEnabled())
+				continue;
+
+			if (subWidget->IsLayoutCalculationRoot())
+			{
+				// SubWidget requires independent layout calculation for its children.
+				// Ex: Child window, Splitter view, etc. Insert a new root (detached) node for that.
+				YGNodeSetMeasureFunc(node, nullptr);
+
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, subWidget->detachedNode, childCount);
+			}
+			else
+			{
+				YGNodeSetMeasureFunc(node, nullptr);
+
+				auto childCount = YGNodeGetChildCount(node);
+				YGNodeInsertChild(node, subWidget->node, childCount);
+			}
+		}
+	}
+
 	void CWidget::OnSubobjectAttached(Object* object)
 	{
 		Super::OnSubobjectAttached(object);
@@ -122,6 +159,37 @@ namespace CE::Widgets
 		SetNeedsStyle();
 		SetNeedsLayout();
 		SetNeedsPaint();
+	}
+
+	void CWidget::SetVisible(bool visible)
+	{
+		if (this->visible == visible)
+			return;
+
+		this->visible = visible;
+		SetNeedsPaint();
+	}
+
+	void CWidget::SetEnabled(bool enabled)
+	{
+		if (this->enabled == enabled)
+			return;
+
+		this->enabled = enabled;
+		if (!enabled)
+		{
+			stateFlags = CStateFlag::Default;
+		}
+
+		SetNeedsLayout();
+		SetNeedsStyle();
+		SetNeedsPaint();
+
+		if (parent)
+		{
+			parent->ClearChildNodes();
+			parent->ReAddChildNodes();
+		}
 	}
 
 	bool CWidget::IsSubWidgetAllowed(Class* subWidgetClass)
@@ -796,7 +864,6 @@ namespace CE::Widgets
 		{
 			painter->DrawRoundedRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()), borderRadius);
 		}
-
 	}
 
 	void CWidget::OnPaintOverlay(CPaintEvent* paintEvent)
@@ -849,7 +916,7 @@ namespace CE::Widgets
 		}
 
 		// Mouse events
-		if (receiveMouseEvents && event->IsMouseEvent() && !event->IsDragEvent() && !event->isConsumed)
+		if (receiveMouseEvents && event->IsMouseEvent() && !event->IsDragEvent() && (!event->isConsumed || event->firstConsumer == this))
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
 			

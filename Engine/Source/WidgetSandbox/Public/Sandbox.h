@@ -100,6 +100,8 @@ namespace CE
 		CDockWindow* fourthDockWindow = nullptr;
 		CDockWindow* fifthDockWindow = nullptr;
 
+		Array<CButton*> buttons{};
+
 		CDockSpace* secondDockSpace = nullptr;
 
 		RHI::FrameScheduler* scheduler = nullptr;

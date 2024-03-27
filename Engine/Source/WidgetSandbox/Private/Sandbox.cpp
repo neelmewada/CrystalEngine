@@ -102,7 +102,14 @@ namespace CE
 
 		for (int i = 0; i < 12; ++i)
 		{
-			CWidget* btn = CreateObject<CWidget>(thirdDockWindow, "Button");
+			CButton* btn = CreateObject<CButton>(thirdDockWindow, "Button");
+
+			Object::Bind(btn, MEMBER_FUNCTION(CButton, OnButtonClicked), [i](CButton* clickedBtn, MouseButton button)
+				{
+					clickedBtn->SetEnabled(false);
+				});
+
+			buttons.Add(btn);
 		}
 	}
 
@@ -114,6 +121,23 @@ namespace CE
 	{
 		if (destroyed)
 			return;
+
+		if (InputManager::IsKeyDown(KeyCode::Space))
+		{
+			for (CButton* button : buttons)
+			{
+				button->SetEnabled(true);
+			}
+		}
+		if (InputManager::IsKeyDown(KeyCode::A))
+		{
+			int i = 0;
+			for (CButton* button : buttons)
+			{
+				Rect rect = Rect::FromSize(button->GetComputedLayoutTopLeft(), button->GetComputedLayoutSize());
+				CE_LOG(Info, All, "[{}] Rect: {}", i++, rect);
+			}
+		}
 
 		u32 curWidth = 0, curHeight = 0;
 		mainWindow->GetDrawableWindowSize(&curWidth, &curHeight);

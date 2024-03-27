@@ -32,7 +32,9 @@
 #include "CrystalWidgets/Event/CEvent.h"
 
 // Widgets
-#include "CrystalWidgets/CWidget.h"
+#include "CrystalWidgets/Widget/CWidget.h"
+#include "CrystalWidgets/Widget/CButton.h"
+// Windows
 #include "CrystalWidgets/Window/CWindow.h"
 #include "CrystalWidgets/Window/CDockSplitView.h"
 #include "CrystalWidgets/Window/CDockSpace.h"
