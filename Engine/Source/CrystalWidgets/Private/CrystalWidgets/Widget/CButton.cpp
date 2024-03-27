@@ -8,11 +8,13 @@ namespace CE::Widgets
         receiveDragEvents = false;
         receiveMouseEvents = true;
         allowVerticalScroll = allowHorizontalScroll = false;
+
+        label = CreateDefaultSubobject<CLabel>("Label");
     }
 
     CButton::~CButton()
     {
-        CE::GetTypeId<String>();
+        
     }
 
     void CButton::HandleEvent(CEvent* event)

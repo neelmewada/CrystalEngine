@@ -15,6 +15,8 @@ namespace CE::Widgets
 
         void Reset();
 
+        Name GetDefaultFontName() const { return renderer->GetDefaultFontName(); }
+
         void SetPen(const CPen& pen);
         void SetBrush(const CBrush& brush);
 

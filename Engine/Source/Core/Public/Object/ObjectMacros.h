@@ -5,7 +5,7 @@
 namespace CE
 {
 
-	enum ObjectFlags
+	enum ObjectFlags : u32
 	{
 		OF_NoFlags = 0,
 
@@ -13,10 +13,14 @@ namespace CE
 		OF_ClassDefaultInstance = BIT(1),
 		OF_TemplateInstance = BIT(2),
 		OF_DefaultSubobject = BIT(3),
+		// Internal flag!
+		OF_SubobjectPending = BIT(4),
+		// Internal flag!
+		OF_InsideConstructor = BIT(5),
 	};
 	ENUM_CLASS_FLAGS(ObjectFlags);
 
-	enum LoadFlags
+	enum LoadFlags : u32
 	{
 		LOAD_Default = 0,
 		LOAD_Full = BIT(0),

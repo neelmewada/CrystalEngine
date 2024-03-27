@@ -240,6 +240,8 @@ namespace CE
 
 	private:
 
+        void OnAfterConstructInternal();
+
 		Object* GetDefaultSubobject(ClassType* classType, const String& name);
 
 		void FetchObjectReferencesInStructField(HashMap<Uuid, Object*>& outReferences, StructType* structType, void* structInstance);

@@ -19,7 +19,7 @@ namespace CE
 			}
             
 			ObjectInitializer init = ObjectInitializer();
-			init.objectFlags = params.objectFlags;
+			init.objectFlags = params.objectFlags | OF_InsideConstructor;
 			init.name = params.name;
 			init.uuid = params.uuid;
             init.objectClass = params.objectClass;
@@ -32,6 +32,8 @@ namespace CE
                 ObjectThreadContext::Get().PopInitializer();
                 return nullptr;
             }
+
+			instance->objectFlags &= ~OF_InsideConstructor;
 
 			if (instance->HasAnyObjectFlags(OF_ClassDefaultInstance)) // Class Default Instance
 			{
@@ -52,8 +54,8 @@ namespace CE
 				params.outer->AttachSubobject(instance);
 			}
 
-			if (!instance->HasAnyObjectFlags(OF_ClassDefaultInstance))
-				instance->OnAfterConstruct();
+			//if (!instance->HasAnyObjectFlags(OF_ClassDefaultInstance))
+				instance->OnAfterConstructInternal();
 			return instance;
 		}
 		

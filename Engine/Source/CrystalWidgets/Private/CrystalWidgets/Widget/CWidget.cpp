@@ -856,7 +856,7 @@ namespace CE::Widgets
 		painter->SetPen(pen);
 		painter->SetBrush(brush);
 
-		if (borderRadius == Vec4(0, 0, 0, 0) && (outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0)
+		if (borderRadius == Vec4(0, 0, 0, 0) && ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0))
 		{
 			painter->DrawRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
 		}

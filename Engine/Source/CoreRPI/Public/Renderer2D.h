@@ -33,7 +33,9 @@ namespace CE::RPI
         Renderer2D(const Renderer2DDescriptor& desc);
         virtual ~Renderer2D();
 
-        // - Setters -
+        // - Getters & Setters -
+
+        Name GetDefaultFontName() const { return defaultFontName; }
 
         void SetScreenSize(Vec2i newScreenSize);
 
@@ -68,6 +70,7 @@ namespace CE::RPI
         void SetCursor(Vec2 position);
 
         Vec2 CalculateTextSize(const String& text, f32 width = 0.0);
+        Vec2 CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width = 0.0);
 
         Vec2 DrawText(const String& text, Vec2 size = {});
 

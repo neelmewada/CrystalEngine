@@ -1,4 +1,8 @@
 
+* {
+    font-size: 14px;
+    font-name: Roboto;
+}
 
 CDockSpace {
     background: rgb(21, 21, 21);
@@ -53,3 +57,37 @@ CDockSplitView::splitter {
 #Button:pressed {
     background: rgb(0, 128, 0);
 }
+
+CButton {
+    background: rgb(56, 56, 56);
+    flex-direction: row;
+    min-width: 40px;
+    min-height: 20px;
+}
+
+CButton::alternate {
+    width: 40px;
+    min-height: 20px;
+    border-radius: 5px 5px;
+}
+
+CButton:hovered {
+    background: rgb(95, 95, 95);
+}
+
+CButton:pressed {
+    background: rgb(70, 70, 70);
+}
+
+CButton::alternate {
+    background: rgb(0, 112, 224);
+}
+
+CButton::alternate:hovered {
+    background: rgb(14, 134, 255);
+}
+
+CButton::alternate:pressed {
+    background: rgb(0, 80, 160);
+}
+

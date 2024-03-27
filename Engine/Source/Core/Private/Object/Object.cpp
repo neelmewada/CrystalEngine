@@ -71,15 +71,15 @@ namespace CE
     void Object::ConstructInternal()
     {
         auto initializer = ObjectThreadContext::Get().TopInitializer();
-        ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+		CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
         ObjectThreadContext::Get().PopInitializer();
         ConstructInternal(initializer);
     }
 
     void Object::ConstructInternal(ObjectInitializer* initializer)
     {
-        ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
-        ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
+        CE_ASSERT(initializer != nullptr, "An object was contructed without any initializers set! This usually happens when you construct an object using 'new' operator.");
+		CE_ASSERT(initializer->objectClass != nullptr, "Object initializer passed with null objectClass!");
 
         this->objectFlags = initializer->GetObjectFlags();
         if (initializer->uuid != 0)
@@ -105,8 +105,17 @@ namespace CE
 			LockGuard<SharedMutex> lock{ package->loadedObjectsMutex };
 			package->loadedObjects[subobject->GetUuid()] = subobject;
 		}
-
-		OnSubobjectAttached(subobject);
+		
+		if (EnumHasFlag(subobject->objectFlags, OF_DefaultSubobject) && 
+			EnumHasFlag(objectFlags, OF_InsideConstructor))
+		{
+			// Do not call OnSubobjectAttached on default subobjects because they are created from constructors.
+			subobject->objectFlags |= OF_SubobjectPending;
+		}
+		else
+		{
+			OnSubobjectAttached(subobject);
+		}
     }
 
     void Object::DetachSubobject(Object* subobject)
@@ -1092,6 +1101,37 @@ namespace CE
 	void Object::EmitSignal(const String& name, const Array<Variant>& args)
 	{
 		Object::EmitSignal(this, name, args);
+	}
+
+	void Object::OnAfterConstructInternal()
+	{
+		// The parent should not be pending!
+		if (outer != nullptr && EnumHasFlag(outer->objectFlags, OF_SubobjectPending))
+		{
+			return;
+		}
+		if (EnumHasFlag(objectFlags, OF_SubobjectPending))
+		{
+			return;
+		}
+
+		for (Object* subObject : attachedObjects)
+		{
+			if (!subObject)
+				continue;
+
+			if ((subObject->objectFlags & OF_SubobjectPending) != 0)
+			{
+				subObject->objectFlags &= ~OF_SubobjectPending;
+				OnSubobjectAttached(subObject);
+				subObject->OnAfterConstructInternal();
+			}
+		}
+
+		if (!IsDefaultInstance())
+		{
+			OnAfterConstruct();
+		}
 	}
 
 	DelegateHandle Object::BindInternal(void* sourceInstance, FunctionType* sourceFunction, Delegate<void(const Array<Variant>&)> delegate)

@@ -12,6 +12,7 @@ CE_RTTI_CLASS_IMPL(, ObjectTests, DerivedClassA)
 CE_RTTI_CLASS_IMPL(, ObjectTests, Sender)
 CE_RTTI_CLASS_IMPL(, ObjectTests, Receiver)
 CE_RTTI_CLASS_IMPL(, CDITests, AnotherObject)
+CE_RTTI_CLASS_IMPL(, CDITests, BottomObject)
 CE_RTTI_CLASS_IMPL(, CDITests, TestObject)
 CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStructBase)
 CE_RTTI_STRUCT_IMPL(, PackageTests, WritingTestStruct1)
@@ -31,6 +32,7 @@ static void CERegisterModuleTypes()
         ObjectTests::Sender,
         ObjectTests::Receiver,
         CDITests::AnotherObject,
+		CDITests::BottomObject,
         CDITests::TestObject,
         PackageTests::WritingTestStructBase,
         PackageTests::WritingTestStruct1,
@@ -51,6 +53,7 @@ static void CEDeregisterModuleTypes()
         ObjectTests::Sender,
         ObjectTests::Receiver,
         CDITests::AnotherObject,
+		CDITests::BottomObject,
         CDITests::TestObject,
         PackageTests::WritingTestStructBase,
         PackageTests::WritingTestStruct1,
@@ -1413,6 +1416,11 @@ namespace ObjectTest
 		CE_CLASS(CDISubClass, Object)
 	public:
 
+		void OnSubobjectAttached(Object* subobject) override
+		{
+			Super::OnSubobjectAttached(subobject);
+		}
+
 		String subString = "sub-string";
 
 		CDISubClass* subClass = nullptr;
@@ -1427,6 +1435,11 @@ namespace ObjectTest
 		{
 			subClass = CreateDefaultSubobject<CDISubClass>("SubClassObject");
 			subClass->subString = "modified";
+		}
+
+		void OnSubobjectAttached(Object* subobject) override
+		{
+			Super::OnSubobjectAttached(subobject);
 		}
         
 		f32 floatValue = 1.21f;

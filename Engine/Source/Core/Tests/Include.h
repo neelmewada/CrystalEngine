@@ -183,6 +183,27 @@ namespace CDITests
 	};
 
 	CLASS()
+	class BottomObject : public Object
+	{
+		CE_CLASS(BottomObject, Object)
+	public:
+
+		BottomObject()
+		{
+			
+		}
+
+		void OnSubobjectAttached(Object* subobject) override
+		{
+			String::IsAlphabet('a');
+		}
+
+		FIELD()
+		String someString = "bottom";
+
+	};
+
+	CLASS()
 	class AnotherObject : public Object
 	{
 		CE_CLASS(AnotherObject, Object)
@@ -194,7 +215,18 @@ namespace CDITests
 				"another0", "another1", "another2"
 			};
 			data.another = this;
+
+			bottomObject = CreateDefaultSubobject<BottomObject>("BottomMostSubobject");
+			bottomObject->someString = "Created from AnotherObject";
 		}
+
+		void OnSubobjectAttached(Object* subobject) override
+		{
+			String::IsAlphabet('a');
+		}
+
+		FIELD()
+		BottomObject* bottomObject = nullptr;
 
 		FIELD()
 		TestStruct data{};
@@ -231,6 +263,11 @@ namespace CDITests
 				another = CreateDefaultSubobject<AnotherObject>("AnotherSubobject");
 				another->myString = "modified manually";
 			}
+		}
+
+		void OnSubobjectAttached(Object* subobject) override
+		{
+			String::IsAlphabet('a');
 		}
 
 		FIELD()
@@ -361,11 +398,22 @@ CE_RTTI_CLASS(, ObjectTests, Receiver,
         CE_FUNCTION2(PrintString, void, (String string))
     )
 )
+CE_RTTI_CLASS(, CDITests, BottomObject,
+	CE_SUPER(Object),
+	CE_NOT_ABSTRACT,
+	CE_ATTRIBS(),
+	CE_FIELD_LIST(
+		CE_FIELD(someString)
+	),
+	CE_FUNCTION_LIST(
+	)
+)
 CE_RTTI_CLASS(, CDITests, AnotherObject,
     CE_SUPER(Object),
     CE_NOT_ABSTRACT,
     CE_ATTRIBS(),
     CE_FIELD_LIST(
+		CE_FIELD(bottomObject)
         CE_FIELD(data)
         CE_FIELD(myString)
         CE_FIELD(test)

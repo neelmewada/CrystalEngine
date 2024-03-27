@@ -103,14 +103,20 @@ namespace CE
 		for (int i = 0; i < 12; ++i)
 		{
 			CButton* btn = CreateObject<CButton>(thirdDockWindow, "Button");
-
+			
 			Object::Bind(btn, MEMBER_FUNCTION(CButton, OnButtonClicked), [i](CButton* clickedBtn, MouseButton button)
 				{
-					clickedBtn->SetEnabled(false);
+					//clickedBtn->SetEnabled(false);
 				});
+
+			if (i == 0)
+				btn->SetAlternateStyle(true);
 
 			buttons.Add(btn);
 		}
+
+		CButton* testButton = CreateObject<CButton>(fourthDockWindow, "TestButton");
+		testButton->SetText("Click Me");
 	}
 
 	void WidgetSandbox::DestroyWidgets()
@@ -127,15 +133,6 @@ namespace CE
 			for (CButton* button : buttons)
 			{
 				button->SetEnabled(true);
-			}
-		}
-		if (InputManager::IsKeyDown(KeyCode::A))
-		{
-			int i = 0;
-			for (CButton* button : buttons)
-			{
-				Rect rect = Rect::FromSize(button->GetComputedLayoutTopLeft(), button->GetComputedLayoutSize());
-				CE_LOG(Info, All, "[{}] Rect: {}", i++, rect);
 			}
 		}
 
@@ -208,38 +205,9 @@ namespace CE
 		rebuild = false;
 		recompile = true;
 
-		//u32 screenWidth = swapChain->GetWidth();
-		//u32 screenHeight = swapChain->GetHeight();
-
 		scheduler->BeginFrameGraph();
 		{
-			RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetFrameAttachmentDatabase();
-
-			for (PlatformWindow* platformWindow : platformWindows)
-			{
-				//attachmentDatabase.EmplaceFrameAttachment(platformWindow->GetTitle(), swapChain);
-			}
-
 			CApplication::Get()->BuildFrameGraph();
-
-			/*attachmentDatabase.EmplaceFrameAttachment(mainWindow->GetTitle(), swapChain);
-
-			if (!mainWindow->IsMinimized() && mainWindow->IsShown())
-			{
-				scheduler->BeginScope(mainWindow->GetTitle());
-				{
-					RHI::ImageScopeAttachmentDescriptor swapChainAttachment{};
-					swapChainAttachment.attachmentId = mainWindow->GetTitle();
-					swapChainAttachment.loadStoreAction.clearValue = Vec4(0.15f, 0.15f, 0.15f, 1);
-					swapChainAttachment.loadStoreAction.loadAction = RHI::AttachmentLoadAction::Clear;
-					swapChainAttachment.loadStoreAction.storeAction = RHI::AttachmentStoreAction::Store;
-					swapChainAttachment.multisampleState.sampleCount = 1;
-					scheduler->UseAttachment(swapChainAttachment, RHI::ScopeAttachmentUsage::Color, RHI::ScopeAttachmentAccess::Write);
-
-					scheduler->PresentSwapChain(swapChain);
-				}
-				scheduler->EndScope();
-			}*/
 		}
 		scheduler->EndFrameGraph();
 	}
@@ -268,19 +236,6 @@ namespace CE
 		drawList.Init(drawListMask);
 
 		CApplication::Get()->FlushDrawPackets(drawList, imageIndex);
-
-		// Add items
-		/*for (int i = 0; i < widgetWindows.GetSize(); i++)
-		{
-			if (!widgetWindows[i]->IsVisible() || !widgetWindows[i]->IsEnabled())
-				continue;
-
-			const Array<RHI::DrawPacket*>& drawPackets = widgetWindows[i]->FlushDrawPackets(imageIndex);
-			for (RHI::DrawPacket* drawPacket : drawPackets)
-			{
-				drawList.AddDrawPacket(drawPacket);
-			}
-		}*/
 
 		auto prevTime = clock();
 
