@@ -436,11 +436,11 @@ namespace CE::Widgets
             {
                 Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
                 f32 scrollRectHeightRatio = originalHeight / contentMaxY;
-                f32 normalizedScrollY = scrollOffset.y / (contentMaxY - originalHeight);
+                //f32 normalizedScrollY = scrollOffset.y / (contentMaxY - originalHeight);
 
                 Rect scrollRect = Rect::FromSize(scrollRegion.min,
                     Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, MinScrollRectSize)));
-                scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * normalizedScrollY));
+                scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * normalizedScroll.y));
 
                 return scrollRect;
             }
@@ -495,9 +495,8 @@ namespace CE::Widgets
                     Vec2 originalSize = GetComputedLayoutSize();
                     f32 originalHeight = originalSize.height;
 
-                    scrollOffset.y += mouseDelta.y;
-                    scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, contentSize.height - originalHeight);
-                    //CE_LOG(Info, All, "Scroll Offset: {}", scrollOffset.y);
+                    normalizedScroll.y += mouseDelta.y / (originalHeight - GetVerticalScrollBarRect().GetSize().height);
+                    normalizedScroll.y = Math::Clamp01(normalizedScroll.y);
 
                     dragEvent->ConsumeAndStopPropagation(this);
                     SetNeedsLayout();
@@ -519,8 +518,8 @@ namespace CE::Widgets
 
                 if (contentMaxY > originalHeight) // Scroll is possible
                 {
-                    scrollOffset.y += -mouseEvent->wheelDelta.y * scrollSensitivity;
-                    scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, contentSize.height - originalHeight);
+                    normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity * 0.1f;
+                    normalizedScroll.y = Math::Clamp01(normalizedScroll.y);
 
                     SetNeedsLayout();
                     SetNeedsPaint();

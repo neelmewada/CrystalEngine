@@ -157,6 +157,9 @@ namespace CE::Widgets
 			YGNodeMarkDirty(node);
 		}
 
+		YGNodeSetHasNewLayout(node, true);
+		YGNodeSetHasNewLayout(detachedNode, true);
+
 		for (int i = 0; i < attachedWidgets.GetSize(); ++i)
 		{
 			attachedWidgets[i]->SetNeedsLayout();
@@ -656,7 +659,7 @@ namespace CE::Widgets
 
 		Vec2 scrollOffset = Vec2();
 		if (parent != nullptr)
-			scrollOffset = parent->scrollOffset;
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
 		{
 			Vec2i posInt = nativeWindow->GetWindowPosition();
@@ -695,7 +698,7 @@ namespace CE::Widgets
 
 		Vec2 scrollOffset = Vec2();
 		if (parent != nullptr)
-			scrollOffset = parent->scrollOffset;
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
 		{
 			Vec2i posInt = nativeWindow->GetWindowPosition();
@@ -785,11 +788,11 @@ namespace CE::Widgets
 		painter->SetPen(pen);
 		painter->SetBrush(brush);
 
-		if (borderRadius == Vec4(0, 0, 0, 0))
+		if (borderRadius == Vec4(0, 0, 0, 0) && (outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0)
 		{
 			painter->DrawRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
 		}
-		else
+		else if ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0)
 		{
 			painter->DrawRoundedRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()), borderRadius);
 		}
@@ -821,7 +824,7 @@ namespace CE::Widgets
 
 			Vec2 scrollOffset = Vec2();
 			if (parent != nullptr)
-				scrollOffset = parent->scrollOffset;
+				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
 			if (paintEvent->painter != nullptr && CanPaint() && IsVisible() && IsEnabled())
 			{

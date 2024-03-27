@@ -197,7 +197,7 @@ namespace CE::Widgets
 		b8 allowVerticalScroll = false;
 
         FIELD()
-        Vec2 scrollOffset{};
+        Vec2 normalizedScroll{};
 
         FIELD(ReadOnly)
         Vec2 contentSize{};

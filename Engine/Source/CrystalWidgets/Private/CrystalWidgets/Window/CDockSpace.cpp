@@ -142,11 +142,10 @@ namespace CE::Widgets
             // - Draw Background -
 
             painter->SetBrush(brush);
-            f32 windowEdgeSize = 0;
 
-            if (this->nativeWindow != nullptr && this->nativeWindow->IsBorderless())
+            if (this->nativeWindow != nullptr && this->nativeWindow->IsBorderless() && !this->nativeWindow->IsMaximized() && !this->nativeWindow->IsFullscreen())
             {
-                windowEdgeSize = 2.0f;
+                f32 windowEdgeSize = 2.0f;
                 pen.SetWidth(windowEdgeSize);
                 painter->SetPen(pen);
             }
@@ -158,7 +157,6 @@ namespace CE::Widgets
             Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
 
             painter->SetBrush(brush);
-            f32 windowEdgeSize = 0;
 
             painter->DrawRect(rect);
         }

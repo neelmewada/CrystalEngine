@@ -93,9 +93,6 @@ namespace CE::Widgets
 			{
 				if (widget == nullptr)
 					return nullptr;
-				Vec2 scrollOffset = Vec2();
-				if (widget->parent != nullptr)
-					scrollOffset = widget->parent->scrollOffset;
 				Rect widgetRect = widget->GetScreenSpaceRect();
 
 				CWindow* ownerWindow = widget->ownerWindow;
