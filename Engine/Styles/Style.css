@@ -1,6 +1,5 @@
 
 * {
-    font-size: 14px;
     font-name: Roboto;
 }
 
@@ -13,22 +12,25 @@ CDockSplitView::splitter {
 }
 
 #MinorDockSpace {
-    background: rgb(128, 0, 0);
     width: 100%;
     flex-grow: 4;
     flex-shrink: 2;
 }
 
 #SplitLeft {
-    background: rgb(255, 255, 255);
+    background: rgb(21, 21, 21);
 }
 
 #SplitRightBottom {
-    background: rgb(0, 0, 255);
+    background: rgb(21, 21, 21);
 }
 
 #SplitRightTop {
-    background: rgb(0, 255, 0);
+    background: rgb(21, 21, 21);
+}
+
+CDockWindow {
+    background: rgb(36, 36, 36);
 }
 
 #ToolBar {
@@ -40,21 +42,23 @@ CDockSplitView::splitter {
     column-gap: 10px;
 }
 
-#Third {
+#Third, #Fourth {
     row-gap: 10px;
+    font-size: 13px;
+    align-items: flex-start;
 }
 
-#Button {
+#TestButton {
     background: rgb(128, 128, 0);
     width: 30px;
     height: 30px;
 }
 
-#Button:hovered {
+#TestButton:hovered {
     background: rgb(128, 0, 0);
 }
 
-#Button:pressed {
+#TestButton:pressed {
     background: rgb(0, 128, 0);
 }
 
@@ -63,12 +67,10 @@ CButton {
     flex-direction: row;
     min-width: 40px;
     min-height: 20px;
-}
-
-CButton::alternate {
-    width: 40px;
-    min-height: 20px;
+    padding: 10px 5px;
     border-radius: 5px 5px;
+    border-color: rgb(24, 24, 24);
+    border-width: 1px;
 }
 
 CButton:hovered {
@@ -77,10 +79,18 @@ CButton:hovered {
 
 CButton:pressed {
     background: rgb(70, 70, 70);
+    padding: 10px 6px 10px 4px;
 }
 
 CButton::alternate {
     background: rgb(0, 112, 224);
+    flex-direction: row;
+    min-width: 40px;
+    min-height: 20px;
+    padding: 10px 5px;
+    border-radius: 5px 5px;
+    border-color: rgb(24, 24, 24);
+    border-width: 1px;
 }
 
 CButton::alternate:hovered {
@@ -89,5 +99,6 @@ CButton::alternate:hovered {
 
 CButton::alternate:pressed {
     background: rgb(0, 80, 160);
+    padding: 10px 6px 10px 4px;
 }
 

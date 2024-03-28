@@ -7,6 +7,7 @@ namespace CE::Widgets
     {
         receiveDragEvents = receiveMouseEvents = false;
         allowVerticalScroll = allowHorizontalScroll = false;
+        clipChildren = false;
     }
 
     CLabel::~CLabel()
@@ -62,6 +63,9 @@ namespace CE::Widgets
     {
         Super::OnPaint(paintEvent);
 
+        if (text.IsEmpty())
+            return;
+
         CPainter* painter = paintEvent->painter;
 
         Name fontName = computedStyle.properties[CStylePropertyType::FontName].string;
@@ -74,9 +78,9 @@ namespace CE::Widgets
         CPen pen = CPen(Color::White());
 
         painter->SetFont(font);
+        painter->SetPen(pen);
 
         Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
-        rect = Rect::FromSize(0, 0, 100, 20);
 
         painter->DrawText(text, rect);
     }

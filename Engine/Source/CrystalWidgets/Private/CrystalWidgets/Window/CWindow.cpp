@@ -313,11 +313,11 @@ namespace CE::Widgets
         CPen pen = CPen(); pen.SetColor(Color(1, 1, 1, 1)); pen.SetWidth(2.0f);
         CBrush brush = CBrush();
 
-        painter->SetPen(pen);
-        painter->SetBrush(brush);
-
         if (nativeWindow != nullptr && PlatformMisc::GetCurrentPlatform() != PlatformName::Mac) // The CWindow is a native window
         {
+            painter->SetPen(pen);
+            painter->SetBrush(brush);
+
             Vec2 size = GetComputedLayoutSize() - Vec2(rootPadding.x + rootPadding.z, rootPadding.y + rootPadding.w);
             Vec2 pos = GetComputedLayoutTopLeft() + rootPadding.min;
             constexpr f32 controlWidth = 40;

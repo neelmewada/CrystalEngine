@@ -79,7 +79,7 @@ namespace CE
 
 		for (int i = 0; i < 4; ++i)
 		{
-			CWidget* btn = CreateObject<CWidget>(toolBar, "Button");
+			CWidget* btn = CreateObject<CWidget>(toolBar, "TestButton");
 		}
 		
 		minorDockSpace = CreateWindow<CDockSpace>("MinorDockSpace", nullptr);
@@ -100,23 +100,22 @@ namespace CE
 		fourthDockWindow = CreateWindow<CDockWindow>("Fourth", rightBottom);
 		fifthDockWindow = CreateWindow<CDockWindow>("Fifth", rightBottom);
 
-		for (int i = 0; i < 12; ++i)
+		for (int i = 0; i < 24; ++i)
 		{
 			CButton* btn = CreateObject<CButton>(thirdDockWindow, "Button");
-			
-			Object::Bind(btn, MEMBER_FUNCTION(CButton, OnButtonClicked), [i](CButton* clickedBtn, MouseButton button)
-				{
-					//clickedBtn->SetEnabled(false);
-				});
-
-			if (i == 0)
-				btn->SetAlternateStyle(true);
-
-			buttons.Add(btn);
+			btn->SetText(String("Button ") + i);
 		}
 
-		CButton* testButton = CreateObject<CButton>(fourthDockWindow, "TestButton");
-		testButton->SetText("Click Me");
+		if (false)
+		{
+			CButton* btn = CreateObject<CButton>(fourthDockWindow, "Button");
+			btn->SetText("Click On this Button link");
+
+			Object::Bind(btn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [btn]
+				{
+					CE_LOG(Info, All, "Button Clicked!");
+				});
+		}
 	}
 
 	void WidgetSandbox::DestroyWidgets()

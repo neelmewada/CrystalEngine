@@ -890,6 +890,9 @@ namespace CE::Widgets
 			paintEvent->direction = CEventDirection::TopToBottom;
 
 			Vec2 scrollOffset = Vec2();
+			auto parentWidget = parent;
+			bool isButton = IsOfType<CButton>();
+
 			if (parent != nullptr)
 				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
 
@@ -905,7 +908,7 @@ namespace CE::Widgets
 				paintEvent->painter->PushChildCoordinateSpace(origin - scrollOffset);
 				if (clipChildren)
 				{
-					paintEvent->painter->PushChildClipRect(Rect::FromSize(GetComputedLayoutTopLeft() + scrollOffset, GetComputedLayoutSize()));
+					paintEvent->painter->PushChildClipRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
 				}
 				OnPaint(paintEvent);
 			}
@@ -920,14 +923,14 @@ namespace CE::Widgets
 		{
 			CMouseEvent* mouseEvent = (CMouseEvent*)event;
 			
-			if (event->type == CEventType::MousePress)
+			if (event->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left)
 			{
 				mouseEvent->Consume(this);
 				stateFlags |= CStateFlag::Pressed;
 				isPressed = true;
 				SetNeedsStyle();
 			}
-			else if (event->type == CEventType::MouseRelease)
+			else if (event->type == CEventType::MouseRelease && mouseEvent->button == MouseButton::Left)
 			{
 				mouseEvent->Consume(this);
 				stateFlags &= ~CStateFlag::Pressed;

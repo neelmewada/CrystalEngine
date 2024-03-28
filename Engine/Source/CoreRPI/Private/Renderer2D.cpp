@@ -2,7 +2,7 @@
 
 namespace CE::RPI
 {
-	constexpr bool ForceDisableBatching = false;
+	constexpr bool ForceDisableBatching = true;
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
@@ -176,11 +176,19 @@ namespace CE::RPI
 		fontStack.Pop();
 	}
 
-	void Renderer2D::PushClipRect(const Rect& clipRect)
+	void Renderer2D::PushClipRect(Rect clipRect)
 	{
 		if (clipRects.GetSize() < clipRectCount + 1)
 		{
 			clipRects.Resize(clipRectCount + 1);
+		}
+
+		if (clipRectStack.NonEmpty())
+		{
+			clipRect.min.y = Math::Max(clipRect.min.y, clipRects[clipRectStack.Top()].min.y);
+			clipRect.max.y = Math::Min(clipRect.max.y, clipRects[clipRectStack.Top()].max.y);
+			clipRect.min.x = Math::Max(clipRect.min.x, clipRects[clipRectStack.Top()].min.x);
+			clipRect.max.x = Math::Min(clipRect.max.x, clipRects[clipRectStack.Top()].max.x);
 		}
 
 		clipRects[clipRectCount] = clipRect;
@@ -383,7 +391,7 @@ namespace CE::RPI
 
 			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 
-			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > width)
+			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > startX + width)
 			{
 				position.x = startX;
 				position.y += metrics.lineHeight * fontSize / atlasFontSize;
@@ -507,7 +515,7 @@ namespace CE::RPI
 
 			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 
-			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > size.width)
+			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > startX + size.width)
 			{
 				// Go through previous characters and bring them to this new-line
 				if (whitespaceIdx >= 0)

@@ -8,6 +8,7 @@ namespace CE::Widgets
         receiveDragEvents = false;
         receiveMouseEvents = true;
         allowVerticalScroll = allowHorizontalScroll = false;
+        clipChildren = true;
 
         label = CreateDefaultSubobject<CLabel>("Label");
     }
@@ -27,7 +28,8 @@ namespace CE::Widgets
             if (event->type == CEventType::MouseRelease && wasPressedInside)
             {
                 event->Consume(this);
-                OnButtonClicked(this, mouseEvent->button);
+                OnButtonLeftClicked();
+                OnButtonClicked(mouseEvent->button);
             }
         }
 

@@ -21,7 +21,9 @@ namespace CE::Widgets
 
         // - Signals -
 
-        CE_SIGNAL(OnButtonClicked, CButton*, MouseButton);
+        CE_SIGNAL(OnButtonClicked, MouseButton);
+
+        CE_SIGNAL(OnButtonLeftClicked);
 
     protected:
 

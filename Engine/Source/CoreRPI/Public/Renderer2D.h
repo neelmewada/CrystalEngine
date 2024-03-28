@@ -59,7 +59,7 @@ namespace CE::RPI
         void PushFont(Name family, u32 fontSize = 16, bool bold = false);
         void PopFont();
 
-        void PushClipRect(const Rect& clipRect);
+        void PushClipRect(Rect clipRect);
         void PopClipRect();
 
         void SetFillColor(const Color& color);
