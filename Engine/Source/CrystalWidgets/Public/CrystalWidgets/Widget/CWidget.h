@@ -127,6 +127,7 @@ namespace CE::Widgets
 
         Rect GetScreenSpaceRect();
         Rect LocalToScreenSpaceRect(const Rect& localRect);
+        Rect LocalToWindowSpaceRect(const Rect& localRect);
 
         PlatformWindow* GetNativeWindow();
 

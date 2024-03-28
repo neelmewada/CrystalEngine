@@ -679,6 +679,11 @@ namespace CE
             return point.x >= min.x && point.y >= min.y && point.x <= max.x && point.y <= max.y;
         }
 
+        bool Overlaps(const Rect& other) const
+        {
+            return !(right < other.left || left > other.right || bottom < other.top || top > other.bottom);
+        }
+
         union {
             struct {
                 f32 left, top, right, bottom;

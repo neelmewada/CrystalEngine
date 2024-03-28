@@ -803,6 +803,34 @@ namespace CE::Widgets
 		}
 	}
 
+	Rect CWidget::LocalToWindowSpaceRect(const Rect& rect)
+	{
+		auto size = rect.GetSize();
+
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					u32 w, h;
+					window->nativeWindow->GetWindowSize(&w, &h);
+
+					return Rect::FromSize(rootOrigin + rect.min, size);
+				}
+			}
+
+			return rect;
+		}
+
+		Vec2 scrollOffset = Vec2();
+		if (parent != nullptr)
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+		return Rect::FromSize(rootOrigin + GetComputedLayoutTopLeft() - scrollOffset + rect.min, size);
+	}
+
 	PlatformWindow* CWidget::GetNativeWindow()
 	{
 		if (!ownerWindow)
@@ -930,6 +958,7 @@ namespace CE::Widgets
 		bool popPaintCoords = false;
 		bool shouldPropagateDownwards = true;
 		bool skipPaint = false;
+		bool isButton = IsOfType<CButton>();
 
 		// Paint event
 		if (event->type == CEventType::PaintEvent)
@@ -954,12 +983,13 @@ namespace CE::Widgets
 				paintEvent->painter->PushChildCoordinateSpace(origin - scrollOffset);
 				if (clipChildren)
 				{
-					auto clipRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
-					//if (paintEvent->painter->ClipRectExists() && clipRect.Contains())
+					auto contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+					if (paintEvent->painter->ClipRectExists())
 					{
-						
+						Rect windowSpaceContentRect = LocalToWindowSpaceRect(contentRect);
+						Rect prevClipRect = paintEvent->painter->GetLastClipRect();
 					}
-					paintEvent->painter->PushClipRect(clipRect);
+					paintEvent->painter->PushClipRect(contentRect);
 				}
 
 				if (!skipPaint)

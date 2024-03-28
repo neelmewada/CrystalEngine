@@ -2,7 +2,7 @@
 
 namespace CE::RPI
 {
-	constexpr bool ForceDisableBatching = true;
+	constexpr bool ForceDisableBatching = false;
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
