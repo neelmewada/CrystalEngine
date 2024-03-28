@@ -20,6 +20,4 @@ ce_add_target(${PROJECT_NAME} TOOL
 
 )
 
-add_dependencies(EditorTools "CE::Tools::${PROJECT_NAME}")
-
 

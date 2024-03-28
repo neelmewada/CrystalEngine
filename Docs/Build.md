@@ -24,10 +24,10 @@ Run the following cmake command to make host build from the project's root direc
 cmake -B Build/Windows -S . -G "Visual Studio 17 2022" -Wno-dev
 ```
 
-Now, you can either build the host tools and other targets through visual studio or Xcode, or you can run the following command to build instead. Note: It's recommended to only stick with debug builds for now.
+Now, you can either build the host tools and other targets through visual studio or Xcode, or you can run the following command to build instead. Note: It's recommended to only stick with **debug** builds for now as that's what is primary used for development.
 
 ```sh
-cmake --build Build/Windows --config Debug --target EditorTools -Wno-dev
+cmake --build Build/Windows --config Debug --target HostTools -Wno-dev
 ```
 
 ## Building standalone

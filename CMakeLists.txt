@@ -41,8 +41,6 @@ add_subdirectory(Config)
 # Build Engine
 add_subdirectory(Engine)
 
-add_library(EditorTools INTERFACE)
-
 # Build Editor
 if(${PAL_TRAIT_BUILD_EDITOR})
     add_subdirectory(Editor)

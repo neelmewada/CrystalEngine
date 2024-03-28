@@ -31,6 +31,7 @@ ce_add_target(${PROJECT_NAME} TOOL
 
 )
 
+add_dependencies(EditorTools "CE::Tools::${PROJECT_NAME}")
 
 if(${PAL_TRAIT_BUILD_TESTS})
     add_subdirectory(Tests)

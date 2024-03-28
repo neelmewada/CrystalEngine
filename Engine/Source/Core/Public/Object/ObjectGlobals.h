@@ -59,7 +59,8 @@ namespace CE
 		String objectName = "",
 		ObjectFlags flags = OF_NoFlags,
 		ClassType* objectClass = TClass::Type(), 
-		Object* templateObject = NULL)
+		Object* templateObject = NULL,
+		Uuid uuid = 0)
 	{
 		if (objectClass == nullptr || !objectClass->IsSubclassOf(TClass::Type()))
 			return nullptr;
@@ -69,6 +70,7 @@ namespace CE
 		params.name = objectName;
 		params.templateObject = templateObject;
 		params.objectFlags = flags;
+		params.uuid = uuid;
 		
 		return static_cast<TClass*>(Internal::StaticConstructObject(params));
 	}
