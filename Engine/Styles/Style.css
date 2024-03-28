@@ -78,8 +78,13 @@ CButton:hovered {
 }
 
 CButton:pressed {
-    background: rgb(70, 70, 70);
+    background: rgb(50, 50, 50);
     padding: 10px 6px 10px 4px;
+}
+
+CButton:disabled {
+    background: rgb(50, 50, 50);
+    color: rgb(128, 128, 128);
 }
 
 CButton::alternate {
@@ -98,7 +103,24 @@ CButton::alternate:hovered {
 }
 
 CButton::alternate:pressed {
-    background: rgb(0, 80, 160);
+    background: rgb(0, 100, 200);
     padding: 10px 6px 10px 4px;
 }
 
+CButton::alternate:disabled {
+    background: rgb(0, 85, 171);
+    color: rgb(128, 128, 128);
+}
+
+CTextInput {
+    cursor: edit;
+    padding: 5px 4px;
+    background: rgb(15, 15, 15);
+    border-width: 1px;
+    border-color: rgb(50, 50, 50);
+    border-radius: 5px 5px;
+}
+
+#TestLabel {
+    font-size: 48px;
+}

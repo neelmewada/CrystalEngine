@@ -61,6 +61,8 @@ namespace CE::RPI
 
         void PushClipRect(Rect clipRect);
         void PopClipRect();
+        bool ClipRectExists();
+        Rect GetLastClipRect();
 
         void SetFillColor(const Color& color);
         void SetOutlineColor(const Color& color);

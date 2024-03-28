@@ -245,6 +245,20 @@ namespace CE
 		return Buffer;
 	}
 
+    bool String::IsEmptyOrWhiteSpace() const
+    {
+        if (IsEmpty())
+			return true;
+
+        for (int i = 0; i < StringLength; ++i)
+        {
+            if (Buffer[i] != ' ')
+                return false;
+        }
+
+        return true;
+    }
+
     bool String::NaturalCompare(const String& lhs, const String& rhs)
     {
 		auto left = lhs.ToLower();

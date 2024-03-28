@@ -108,21 +108,6 @@ Shader "2D/SDF Geometry"
                 float _SDFSmoothness;
             };
 
-            float4 RenderText(float4 color, float2 uv, uint bold)
-            {
-                float a = _FontAtlas.SampleLevel(_FontAtlasSampler, uv, 0.0).r;
-
-                float boldValue = (1.0 - clamp(float(bold), 0, 1)) * 0.1;
-
-                float upperMidPoint = 0.5 + boldValue; // small size: 0.42
-                float lowerMidPoint = 0.4 + boldValue; // small size: 0.35
-                float t = (a - lowerMidPoint) / (upperMidPoint - lowerMidPoint);
-
-                a = lerp(0, 1, clamp(t, 0, 1));
-                
-                return float4(color.rgb, a * color.a);
-            }
-
             inline float SDFCircle(float2 p, float r)
             {
                 return length(p) - r;
@@ -172,6 +157,15 @@ Shader "2D/SDF Geometry"
                 float2 uv;
                 float borderThickness;
             };
+
+            float4 RenderText(float4 color, float2 uv, float2 itemSize, uint bold)
+            {
+                const float screenPxRange = itemSize.x / 7.5;
+                float sdf = _FontAtlas.SampleLevel(_FontAtlasSampler, uv, 0.0).r;
+                float screenPxDistance = screenPxRange * (sdf - 0.5);
+                float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
+                return lerp(float4(color.rgb, 0), color, opacity);
+            }
 
             float4 RenderCircle(in GeometryInfo info, float2 p)
             {
@@ -286,7 +280,7 @@ Shader "2D/SDF Geometry"
                 switch (_DrawList[idx].drawType)
                 {
                 case DRAW_Text:
-                    return RenderText(_DrawList[idx].fillColor, input.uv, _DrawList[idx].bold);
+                    return RenderText(_DrawList[idx].fillColor, input.uv, info.itemSize, _DrawList[idx].bold);
                 case DRAW_Circle:
                     return RenderCircle(info, p);
                 case DRAW_Rect:

@@ -417,12 +417,9 @@ namespace CE::Widgets
             f32 originalHeight = originalSize.height;
             f32 contentMaxY = contentSize.height;
 
-            //CE_LOG(Info, All, "originalSize: {} | contentSize: {}", originalSize, contentSize);
-
             if (contentMaxY > originalHeight)
             {
                 Rect scrollRect = GetVerticalScrollBarRect();
-                //scrollRect = scrollRect.Translate(Vec2(0, scrollOffset.y));
 
                 CPen pen{};
                 CBrush brush = CBrush(Color::RGBA(87, 87, 87));

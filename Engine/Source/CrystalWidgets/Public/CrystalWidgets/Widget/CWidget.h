@@ -18,6 +18,8 @@ namespace CE::Widgets
 
         inline bool IsVisible() const { return visible; }
 
+        bool IsInteractable() const;
+
         virtual bool IsLayoutCalculationRoot() { return IsWindow(); }
 
         virtual bool CanPaint() const { return true; }
@@ -26,8 +28,11 @@ namespace CE::Widgets
 
         bool IsWindow();
 
+        bool IsFocussed() const { return EnumHasFlag(stateFlags, CStateFlag::Focused); }
+
         void SetVisible(bool visible);
         void SetEnabled(bool enabled);
+        void SetInteractable(bool interactable);
 
         void SetNeedsPaint();
 
@@ -113,12 +118,21 @@ namespace CE::Widgets
         virtual Vec2 GetComputedLayoutTopLeft() { return Vec2(YGNodeLayoutGetLeft(node), YGNodeLayoutGetTop(node)); }
         virtual Vec2 GetComputedLayoutSize() { return Vec2(YGNodeLayoutGetWidth(node), YGNodeLayoutGetHeight(node)); }
 
+        Vec4 GetComputedLayoutPadding() {
+            return Vec4(YGNodeLayoutGetPadding(node, YGEdgeLeft),
+                YGNodeLayoutGetPadding(node, YGEdgeTop),
+                YGNodeLayoutGetPadding(node, YGEdgeRight),
+                YGNodeLayoutGetPadding(node, YGEdgeBottom));
+        }
+
         Rect GetScreenSpaceRect();
         Rect LocalToScreenSpaceRect(const Rect& localRect);
 
         PlatformWindow* GetNativeWindow();
 
         void QueueDestroy();
+
+        Vec2 CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width);
 
     crystalwidgets_protected_internal:
 
@@ -156,6 +170,9 @@ namespace CE::Widgets
 
         FIELD()
 		b8 visible = true;
+
+        FIELD()
+        b8 interactable = true;
 
         FIELD()
         b8 needsPaint = true;

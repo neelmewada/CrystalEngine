@@ -192,6 +192,22 @@ namespace CE::Widgets
 		}
 	}
 
+	bool CWidget::IsInteractable() const
+	{
+		if (!interactable)
+			return false;
+
+		if (parent != nullptr && !parent->IsInteractable())
+			return false;
+
+		return interactable;
+	}
+
+	void CWidget::SetInteractable(bool interactable)
+	{
+		this->interactable = interactable;
+	}
+
 	bool CWidget::IsSubWidgetAllowed(Class* subWidgetClass)
 	{
 		return subWidgetClass != nullptr && subWidgetClass->IsSubclassOf<CWidget>();
@@ -400,6 +416,17 @@ namespace CE::Widgets
 						computedStyle.properties[property] = parentComputedStyle.properties.Get(property);
 					}
 				}
+			}
+
+			if (!IsInteractable())
+			{
+				stateFlags &= ~CStateFlag::Enabled;
+				stateFlags |= CStateFlag::Disabled;
+			}
+			else
+			{
+				stateFlags |= CStateFlag::Enabled;
+				stateFlags &= ~CStateFlag::Disabled;
 			}
 			
 			auto selectStyle = styleSheet->SelectStyle(this, stateFlags, subControl);
@@ -803,6 +830,26 @@ namespace CE::Widgets
 		CApplication::Get()->destructionQueue.Add(this);
 	}
 
+	Vec2 CWidget::CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width)
+	{
+		Renderer2D* renderer = nullptr;
+		CWindow* owner = ownerWindow;
+		while (owner != nullptr)
+		{
+			if (owner->ownerWindow == nullptr)
+			{
+				renderer = owner->renderer;
+				break;
+			}
+			owner = owner->ownerWindow;
+		}
+
+		if (!renderer)
+			return Vec2();
+
+		return renderer->CalculateTextSize(text, fontSize, fontName, width);
+	}
+
 	void CWidget::SetNeedsPaintRecursively(bool newValue)
 	{
 		needsPaint = newValue;
@@ -882,6 +929,7 @@ namespace CE::Widgets
 
 		bool popPaintCoords = false;
 		bool shouldPropagateDownwards = true;
+		bool skipPaint = false;
 
 		// Paint event
 		if (event->type == CEventType::PaintEvent)
@@ -890,8 +938,6 @@ namespace CE::Widgets
 			paintEvent->direction = CEventDirection::TopToBottom;
 
 			Vec2 scrollOffset = Vec2();
-			auto parentWidget = parent;
-			bool isButton = IsOfType<CButton>();
 
 			if (parent != nullptr)
 				scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
@@ -908,9 +954,18 @@ namespace CE::Widgets
 				paintEvent->painter->PushChildCoordinateSpace(origin - scrollOffset);
 				if (clipChildren)
 				{
-					paintEvent->painter->PushChildClipRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
+					auto clipRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+					//if (paintEvent->painter->ClipRectExists() && clipRect.Contains())
+					{
+						
+					}
+					paintEvent->painter->PushClipRect(clipRect);
 				}
-				OnPaint(paintEvent);
+
+				if (!skipPaint)
+				{
+					OnPaint(paintEvent);
+				}
 			}
 			else
 			{
@@ -1014,7 +1069,7 @@ namespace CE::Widgets
 				OnPaintOverlay(paintEvent);
 				if (clipChildren)
 				{
-					paintEvent->painter->PopChildClipRect();
+					paintEvent->painter->PopClipRect();
 				}
 				if (popPaintCoords)
 				{

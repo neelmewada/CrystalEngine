@@ -36,8 +36,11 @@ namespace CE::Widgets
         void PushChildCoordinateSpace(Vec2 newOrigin);
         void PopChildCoordinateSpace();
 
-        void PushChildClipRect(const Rect& clipRect);
-        void PopChildClipRect();
+        void PushClipRect(const Rect& clipRect);
+        void PopClipRect();
+
+        bool ClipRectExists();
+        Rect GetLastClipRect();
 
     private:
 

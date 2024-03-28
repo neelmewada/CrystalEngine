@@ -74,11 +74,18 @@ namespace CE::Widgets
         if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
             fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
+        Color color = Color::White();
+
+        if (computedStyle.properties.KeyExists(CStylePropertyType::Foreground))
+            color = computedStyle.properties[CStylePropertyType::Foreground].color;
+
         CFont font = CFont(fontName, (u32)fontSize, false);
-        CPen pen = CPen(Color::White());
+        CPen pen = CPen(color);
 
         painter->SetFont(font);
         painter->SetPen(pen);
+
+        bool isLabel = parent == nullptr || !parent->IsOfType<CButton>();
 
         Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
 

@@ -102,20 +102,29 @@ namespace CE
 
 		for (int i = 0; i < 24; ++i)
 		{
-			CButton* btn = CreateObject<CButton>(thirdDockWindow, "Button");
-			btn->SetText(String("Button ") + i);
-		}
-
-		if (false)
-		{
 			CButton* btn = CreateObject<CButton>(fourthDockWindow, "Button");
-			btn->SetText("Click On this Button link");
+			btn->SetText(String("Button ") + i);
+			if (i % 2 == 0)
+				btn->SetAlternateStyle(true);
 
-			Object::Bind(btn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [btn]
+			Object::Bind(btn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [btn, i]
 				{
-					CE_LOG(Info, All, "Button Clicked!");
+					btn->SetInteractable(false);
+					CE_LOG(Info, All, "Button {} Clicked!", i);
 				});
 		}
+
+		CButton* newBtn = CreateObject<CButton>(thirdDockWindow, "Button");
+		newBtn->SetText("New Button");
+
+		CLabel* label = CreateObject<CLabel>(thirdDockWindow, "Label");
+		label->SetText("This is a label");
+
+		CTextInput* textInput = CreateObject<CTextInput>(thirdDockWindow, "TextInput");
+		textInput->SetValue("This is text box");
+
+		CLabel* testLabel = CreateObject<CLabel>(thirdDockWindow, "TestLabel");
+		testLabel->SetText("This is a test label");
 	}
 
 	void WidgetSandbox::DestroyWidgets()

@@ -91,8 +91,9 @@ namespace CE::Widgets
 
 		std::function<CWidget* (CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
 			{
-				if (widget == nullptr || !widget->IsEnabled())
+				if (widget == nullptr || !widget->IsEnabled() || !widget->interactable)
 					return nullptr;
+
 				Rect widgetRect = widget->GetScreenSpaceRect();
 
 				CWindow* ownerWindow = widget->ownerWindow;

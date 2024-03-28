@@ -201,6 +201,18 @@ namespace CE::RPI
 		clipRectStack.Pop();
 	}
 
+	bool Renderer2D::ClipRectExists()
+	{
+		return clipRectStack.NonEmpty();
+	}
+
+	Rect Renderer2D::GetLastClipRect()
+	{
+		if (!ClipRectExists())
+			return Rect();
+		return clipRects[clipRectStack.Top()];
+	}
+
 	void Renderer2D::SetFillColor(const Color& color)
 	{
 		this->fillColor = color;

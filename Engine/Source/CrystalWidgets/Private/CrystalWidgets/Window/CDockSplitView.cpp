@@ -420,7 +420,7 @@ namespace CE::Widgets
             {
                 int index = parentSplitView->children.IndexOf(this);
                 Vec2 parentSize = parentSplitView->GetComputedLayoutSize();
-                baseOffset.x -= 19;
+                baseOffset.x -= 20.5f;
 
                 for (int i = 0; i < index; ++i)
                 {

@@ -35,6 +35,7 @@
 #include "CrystalWidgets/Widget/CWidget.h"
 #include "CrystalWidgets/Widget/CLabel.h"
 #include "CrystalWidgets/Widget/CButton.h"
+#include "CrystalWidgets/Widget/CTextInput.h"
 
 // Windows
 #include "CrystalWidgets/Window/CWindow.h"

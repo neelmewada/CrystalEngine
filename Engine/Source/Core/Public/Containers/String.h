@@ -158,6 +158,8 @@ namespace CE
         inline bool IsEmpty() const { return StringLength == 0; }
 		inline bool NonEmpty() const { return StringLength > 0; }
 
+        bool IsEmptyOrWhiteSpace() const;
+
 		/// Returns true if lhs is less than rhs
 		static bool NaturalCompare(const String& lhs, const String& rhs);
 		static bool Compare(const String& lhs, const String& rhs);
