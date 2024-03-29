@@ -13,7 +13,7 @@ namespace CE
 
             for (int i = 0; i < string.GetLength(); i++)
             {
-                CHAR ch = string[i];
+                char ch = string[i];
 
                 switch (ch)
                 {

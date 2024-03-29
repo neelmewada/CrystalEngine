@@ -7,7 +7,7 @@ namespace CE
     {
     public:
 
-        FORCE_INLINE static void WriteChar(Stream* stream, CHAR ch)
+        FORCE_INLINE static void WriteChar(Stream* stream, char ch)
         {
             stream->Write(&ch, sizeof(ch));
         }

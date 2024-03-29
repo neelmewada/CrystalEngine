@@ -17,12 +17,16 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 
 ## Features
 
-- A modular architecture, where the engine is split into multiple modules that are loaded & unloaded as dynamic libraries.
-- A custom runtime reflection system to reflect classes, structs and plain data types using either simple macros or automatically through AutoRTTI tool.
-- A FrameGraph based render pipeline which allows you to build a complex graph with lots of passes which can be executed parallely on different GPU queues.
-- **CrystalWidgets**: Build a UI widget application that uses CSS for styling & flex-box layout.
-- AssetProcessor can process shader and texture assets. In case of HDR files, it will automatially convert it into a cubemap and generate the diffuse & specular convolution required for Image Based Lighting (IBL).
-- All assets are stored in a custom Binary format for fast deserialization!
+- Modular engine architecture.
+- Use HLSL to write shaders for Vulkan.
+- Forward PBR rendering with CubeMap IBL.
+- Directional shadow maps.
+- Multi-threaded job system, used in Asset Processing.
+- Asset processing to generate binary assets for use by engine.
+- Auto C++ reflection info generation.
+- Object serialization: Custom binary format and JSON.
+- Render graph based pipeline with automatic dependencies.
+- **CrystalWidgets** framework for GUI apps.
 
 ## Modules Overview
 

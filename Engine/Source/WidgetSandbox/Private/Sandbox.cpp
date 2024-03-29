@@ -121,10 +121,16 @@ namespace CE
 		label->SetText("This is a label");
 
 		CTextInput* textInput = CreateObject<CTextInput>(thirdDockWindow, "TextInput");
-		textInput->SetValue("This is text box");
+		textInput->SetText("This is text box with a large text value.");
+		textInput->SetAsPassword(false);
 
 		CLabel* testLabel = CreateObject<CLabel>(thirdDockWindow, "TestLabel");
 		testLabel->SetText("This is a test label");
+
+		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [textInput]
+			{
+				textInput->SetAsPassword(!textInput->IsPassword());
+			});
 	}
 
 	void WidgetSandbox::DestroyWidgets()

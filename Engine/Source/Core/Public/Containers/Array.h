@@ -294,6 +294,11 @@ namespace CE
             Impl.resize(newSize);
         }
 
+        void Reserve(u32 capacity)
+        {
+            Impl.reserve(capacity);
+        }
+
         bool Exists(const ElementType& item) const
         {
             for (int i = 0; i < Impl.size(); i++)
@@ -750,6 +755,11 @@ namespace CE
 		{
 			List<ElementType>::Impl.resize(newSize, defaultValue);
 		}
+
+        void Reserve(u32 capacity)
+        {
+            List<ElementType>::Reserve(capacity);
+        }
 
         bool Exists(const ElementType& item) const
         {

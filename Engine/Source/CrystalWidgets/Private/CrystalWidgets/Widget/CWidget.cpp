@@ -831,6 +831,23 @@ namespace CE::Widgets
 		return Rect::FromSize(rootOrigin + GetComputedLayoutTopLeft() - scrollOffset + rect.min, size);
 	}
 
+	Renderer2D* CWidget::GetRenderer()
+	{
+		Renderer2D* renderer = nullptr;
+		CWindow* owner = ownerWindow;
+		while (owner != nullptr)
+		{
+			if (owner->ownerWindow == nullptr)
+			{
+				renderer = owner->renderer;
+				break;
+			}
+			owner = owner->ownerWindow;
+		}
+
+		return renderer;
+	}
+
 	PlatformWindow* CWidget::GetNativeWindow()
 	{
 		if (!ownerWindow)

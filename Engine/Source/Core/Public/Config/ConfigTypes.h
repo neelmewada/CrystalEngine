@@ -56,8 +56,8 @@ namespace CE
     
     struct ConfigLayer
     {
-        const CHAR* displayName;
-        const CHAR* relativePath;
+        const char* displayName;
+        const char* relativePath;
     };
     
 }

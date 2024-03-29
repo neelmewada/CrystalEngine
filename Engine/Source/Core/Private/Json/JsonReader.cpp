@@ -246,7 +246,7 @@ namespace CE
 
         while (!stream->IsOutOfBounds())
         {
-            CHAR cur = stream->Read();
+            char cur = stream->Read();
 
             if (cur == '\0')
             {
@@ -296,7 +296,7 @@ namespace CE
 			case '/': // Possibly a comment
 				if (!stream->IsOutOfBounds())
 				{
-					CHAR next = stream->Read();
+					char next = stream->Read();
 					if (next == '/') // Single line comment
 					{
 						while (!stream->IsOutOfBounds()) // Skip thru entire comment
@@ -311,7 +311,7 @@ namespace CE
 					}
 					else if (next == '*') // Multi line comment
 					{
-						CHAR prev = 0;
+						char prev = 0;
 						while (!stream->IsOutOfBounds()) // Skip thru entire comment
 						{
 							next = stream->Read();

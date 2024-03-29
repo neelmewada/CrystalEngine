@@ -103,7 +103,7 @@ namespace CE::Widgets
 
     void CWindow::ConstructWindow()
     {
-        if (parent != nullptr) // Renderer2D is created only for Root windows
+        if (parent != nullptr) // Renderer2D is created only for root native windows
             return;
         if (nativeWindow == nullptr)
             return;

@@ -129,6 +129,8 @@ namespace CE::Widgets
         Rect LocalToScreenSpaceRect(const Rect& localRect);
         Rect LocalToWindowSpaceRect(const Rect& localRect);
 
+        Renderer2D* GetRenderer();
+
         PlatformWindow* GetNativeWindow();
 
         void QueueDestroy();

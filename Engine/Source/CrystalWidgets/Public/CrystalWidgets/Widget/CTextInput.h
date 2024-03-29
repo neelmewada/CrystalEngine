@@ -13,9 +13,9 @@ namespace CE::Widgets
 
 		Vec2 CalculateIntrinsicSize(f32 width, f32 height) override;
 
-		void SetValue(const String& value);
+		void SetText(const String& value);
 
-		const String& GetValue() const { return value; }
+		const String& GetText() const { return text; }
 
 		const String& GetHint() const { return hint; }
 
@@ -27,6 +27,9 @@ namespace CE::Widgets
 
 	protected:
 
+		// For internal use only!
+		String GetDisplayText();
+
 		Vec2 GetComputedLayoutSize() override;
 
 		void OnPaint(CPaintEvent* paintEvent) override;
@@ -36,7 +39,7 @@ namespace CE::Widgets
 	crystalwidgets_protected_internal:
 
 		FIELD()
-		String value{};
+		String text{};
 
 		FIELD()
 		String hint{};
@@ -46,6 +49,8 @@ namespace CE::Widgets
 
 		FIELD()
 		b8 isMultiline = false;
+
+		int charStartOffset = 0;
 
 	};
 
