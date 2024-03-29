@@ -803,6 +803,39 @@ namespace CE::Widgets
 		}
 	}
 
+	Vec2 CWidget::ScreenSpaceToLocalPoint(const Vec2& point)
+	{
+		if (ownerWindow == nullptr)
+		{
+			if (IsWindow())
+			{
+				CWindow* window = (CWindow*)this;
+				if (window->nativeWindow != nullptr)
+				{
+					Vec2 pos = window->nativeWindow->GetWindowPosition().ToVec2();
+
+					return point - (pos + rootOrigin);
+				}
+			}
+
+			return point;
+		}
+
+		PlatformWindow* nativeWindow = ownerWindow->GetRootNativeWindow();
+		if (nativeWindow == nullptr)
+			return point; // Should never happen
+
+		Vec2 scrollOffset = Vec2();
+		if (parent != nullptr)
+			scrollOffset = parent->normalizedScroll * (parent->contentSize - parent->GetComputedLayoutSize());
+
+		{
+			Vec2 pos = nativeWindow->GetWindowPosition().ToVec2();
+
+			return point - (pos + rootOrigin + GetComputedLayoutTopLeft() - scrollOffset);
+		}
+	}
+
 	Rect CWidget::LocalToWindowSpaceRect(const Rect& rect)
 	{
 		auto size = rect.GetSize();

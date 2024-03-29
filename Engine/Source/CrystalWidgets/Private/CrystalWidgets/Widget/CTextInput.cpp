@@ -86,6 +86,8 @@ namespace CE::Widgets
         {
             CMouseEvent* mouseEvent = (CMouseEvent*)event;
             Vec2 screenMousePos = mouseEvent->mousePos;
+            Vec2 localMousePos = ScreenSpaceToLocalPoint(screenMousePos);
+            Vec4 padding = GetComputedLayoutPadding();
 
             Renderer2D* renderer = GetRenderer();
             String display = text;
@@ -109,7 +111,19 @@ namespace CE::Widgets
                 Array<Rect> offsets{};
                 Vec2 size = renderer->CalculateTextOffsets(offsets, display, fontSize, fontName);
 
-                
+                int selectedIdx = -1;
+
+                for (int i = 0; i < offsets.GetSize(); ++i)
+                {
+                    Rect localPos = offsets[i].Translate(padding.min);
+
+                    if (localMousePos.x < localPos.left + localPos.GetSize().width * 0.4f)
+                    {
+                        selectedIdx = i + charStartOffset;
+                        CE_LOG(Info, All, "Select at: {}", selectedIdx);
+	                    break;
+                    }
+                }
             }
         }
 
@@ -150,10 +164,10 @@ namespace CE::Widgets
         Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
         Vec4 padding = GetComputedLayoutPadding();
 
-        Vec2 textSize = painter->CalculateTextSize(text, isMultiline ? rect.GetSize().width : 0);
+        Vec2 textSize = painter->CalculateTextSize(display, isMultiline ? rect.GetSize().width : 0);
         Rect textRect = rect.Translate(Vec2(padding.left, rect.GetSize().height / 2 - textSize.height / 2));
         textRect.max -= Vec2(padding.left + padding.right, rect.GetSize().height / 2 - textSize.height / 2);
-
+        
         painter->PushClipRect(textRect);
         painter->DrawText(display, textRect.min);
         painter->PopClipRect();

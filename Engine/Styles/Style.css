@@ -121,6 +121,10 @@ CTextInput {
     border-radius: 5px 5px;
 }
 
+#TextInputDemo {
+    max-width: 100px;
+}
+
 #TestLabel {
     font-size: 48px;
 }

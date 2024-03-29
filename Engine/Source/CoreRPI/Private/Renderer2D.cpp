@@ -496,8 +496,9 @@ namespace CE::RPI
 			position.x += (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 
 			outRects[i].min = position - cursorPosition;
-			outRects[i].max.x = outRects[i].min.x + (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
-			outRects[i].max.y = outRects[i].min.y + glyphHeight * fontSize / atlasFontSize;
+			outRects[i].max = outRects[i].min + Vec2(glyphWidth * fontSize / atlasFontSize, glyphHeight * fontSize / atlasFontSize);
+			//outRects[i].max.x = outRects[i].min.x + (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
+			//outRects[i].max.y = outRects[i].min.y + glyphHeight * fontSize / atlasFontSize;
 
 			if (isFixedWidth && position.x + glyphWidth * fontSize / atlasFontSize > startX + width)
 			{
@@ -517,7 +518,7 @@ namespace CE::RPI
 						position.x += (f32)prevGlyphLayout.xOffset * fontSize / atlasFontSize;
 
 						outRects[j].min = position - cursorPosition;
-						outRects[j].max = outRects[j].min + Vec2(glyphWidth * fontSize / atlasFontSize * 2, glyphHeight * fontSize / atlasFontSize * 2);
+						outRects[j].max = outRects[j].min + Vec2(glyphWidth * fontSize / atlasFontSize, glyphHeight * fontSize / atlasFontSize);
 
 						position.x += (f32)prevGlyphLayout.advance * fontSize / atlasFontSize - (f32)prevGlyphLayout.xOffset * fontSize / atlasFontSize;
 

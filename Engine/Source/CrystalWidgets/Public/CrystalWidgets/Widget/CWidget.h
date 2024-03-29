@@ -128,6 +128,7 @@ namespace CE::Widgets
         Rect GetScreenSpaceRect();
         Rect LocalToScreenSpaceRect(const Rect& localRect);
         Rect LocalToWindowSpaceRect(const Rect& localRect);
+        Vec2 ScreenSpaceToLocalPoint(const Vec2& point);
 
         Renderer2D* GetRenderer();
 

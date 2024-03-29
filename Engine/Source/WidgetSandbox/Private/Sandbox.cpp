@@ -120,7 +120,7 @@ namespace CE
 		CLabel* label = CreateObject<CLabel>(thirdDockWindow, "Label");
 		label->SetText("This is a label");
 
-		CTextInput* textInput = CreateObject<CTextInput>(thirdDockWindow, "TextInput");
+		CTextInput* textInput = CreateObject<CTextInput>(thirdDockWindow, "TextInputDemo");
 		textInput->SetText("This is text box with a large text value.");
 		textInput->SetAsPassword(false);
 
