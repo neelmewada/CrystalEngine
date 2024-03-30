@@ -23,7 +23,7 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - Directional shadow maps.
 - Multi-threaded job system, used in Asset Processing.
 - Asset processing to generate binary assets for use by engine.
-- Auto C++ reflection info generation.
+- Automatic C++ runtime reflection generation.
 - Object serialization: Custom binary format and JSON.
 - Render graph based pipeline with automatic dependencies.
 - **CrystalWidgets** framework for GUI apps.

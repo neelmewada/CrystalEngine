@@ -51,7 +51,7 @@ namespace CE::Widgets
 			return type;
 		}
 
-		inline bool IsMouseEvent() const
+		bool IsMouseEvent() const
 		{
 			switch (type)
 			{
@@ -70,7 +70,7 @@ namespace CE::Widgets
 			}
 		}
 
-		inline bool IsDragEvent() const
+		bool IsDragEvent() const
 		{
 			switch (type)
 			{
@@ -81,6 +81,19 @@ namespace CE::Widgets
 			default:
 				return false;
 			}
+		}
+
+		bool IsKeyEvent() const
+		{
+			switch (type)
+			{
+			case CEventType::KeyPress:
+			case CEventType::KeyHeld:
+			case CEventType::KeyRelease:
+				return true;
+			}
+
+			return false;
 		}
 
 		// Reset the consumed and propagation flags
@@ -162,6 +175,9 @@ namespace CE::Widgets
 		FIELD()
 		b8 isInside = true; // Valid only for MouseRelease events
 
+		FIELD()
+		b8 isDoubleClick = false;
+
 	};
 
 	STRUCT()
@@ -202,6 +218,26 @@ namespace CE::Widgets
 
 		FIELD()
 		CWidget* focusedWidget = nullptr;
+
+	};
+
+	STRUCT()
+	struct CRYSTALWIDGETS_API CKeyEvent : CEvent
+	{
+		CE_STRUCT(CKeyEvent, CEvent)
+	public:
+
+		CKeyEvent()
+		{
+			
+		}
+
+		FIELD()
+		KeyCode key = KeyCode::Unknown;
+
+		FIELD()
+		KeyModifier modifier = KeyModifier::None;
+
 
 	};
     

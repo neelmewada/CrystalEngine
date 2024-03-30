@@ -22,6 +22,10 @@ namespace CE::Widgets
 		DragEnd,
 
 		FocusChanged,
+
+		KeyPress,
+		KeyHeld,
+		KeyRelease
 	};
 	ENUM_CLASS(CEventType);
 

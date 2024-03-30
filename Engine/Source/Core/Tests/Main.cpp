@@ -388,6 +388,13 @@ TEST(Containers, String)
     EXPECT_EQ(components[1], "Obj2");
     EXPECT_EQ(components[2], "Obj3");
 
+	str2.RemoveAt(4);
+	str2.RemoveAt(8);
+	EXPECT_EQ(str2, "Obj1Obj2Obj3.");
+
+	str.RemoveAt(1);
+	EXPECT_EQ(str, ":");
+
     // 2. Format Tests
     
     {

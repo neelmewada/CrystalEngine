@@ -214,6 +214,9 @@ namespace CE::Widgets
         b8 receiveDragEvents = false;
 
         FIELD()
+        b8 receiveKeyEvents = true;
+
+        FIELD()
         b8 clipChildren = false;
 
         FIELD()

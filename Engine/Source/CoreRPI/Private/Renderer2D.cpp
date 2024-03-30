@@ -445,6 +445,13 @@ namespace CE::RPI
 		return size;
 	}
 
+	Vec2 Renderer2D::CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 width)
+	{
+		const FontInfo& font = fontStack.Top();
+
+		return CalculateTextOffsets(outOffsetRects, text, font.fontSize, font.fontName, width);
+	}
+
 	Vec2 Renderer2D::CalculateTextOffsets(Array<Rect>& outRects, const String& text, f32 fontSize, Name fontName, f32 width)
 	{
 		Vec2 size{};
@@ -497,6 +504,13 @@ namespace CE::RPI
 
 			outRects[i].min = position - cursorPosition;
 			outRects[i].max = outRects[i].min + Vec2(glyphWidth * fontSize / atlasFontSize, glyphHeight * fontSize / atlasFontSize);
+			if (glyphWidth == 0)
+			{
+				// TODO: Temporary hack
+				const FontGlyphLayout& hLayout = fontAtlas->GetGlyphLayout('h');
+
+				outRects[i].max = outRects[i].min + Vec2((f32)glyphLayout.advance * fontSize / atlasFontSize, hLayout.GetHeight() * fontSize / atlasFontSize);
+			}
 			//outRects[i].max.x = outRects[i].min.x + (f32)glyphLayout.advance * fontSize / atlasFontSize - (f32)glyphLayout.xOffset * fontSize / atlasFontSize;
 			//outRects[i].max.y = outRects[i].min.y + glyphHeight * fontSize / atlasFontSize;
 

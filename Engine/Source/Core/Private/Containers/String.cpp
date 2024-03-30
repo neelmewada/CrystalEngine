@@ -842,6 +842,20 @@ namespace CE
 		return result;
 	}
 
+	void String::RemoveAt(int index)
+	{
+        if (index < 0 || index >= StringLength || StringLength < 1)
+            return;
+
+        for (int i = index; i < StringLength - 1; ++i)
+        {
+            Buffer[i] = Buffer[i + 1];
+        }
+
+        Buffer[StringLength - 1] = 0;
+        StringLength--;
+	}
+
 	void String::UpdateLength()
 	{
 		StringLength = (u32)std::strlen(Buffer);

@@ -47,6 +47,11 @@ namespace CE::Widgets
         return renderer->CalculateTextSize(text, width);
     }
 
+    Vec2 CPainter::CalculateTextOffsets(Array<Rect>& outOffsets, const String& text, f32 width)
+    {
+        return renderer->CalculateTextOffsets(outOffsets, text, width);
+    }
+
     void CPainter::SetRotation(f32 rotation)
     {
         renderer->SetRotation(rotation);

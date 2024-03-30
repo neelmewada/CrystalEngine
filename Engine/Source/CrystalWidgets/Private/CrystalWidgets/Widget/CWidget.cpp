@@ -1041,13 +1041,13 @@ namespace CE::Widgets
 				//CE_LOG(Info, All, "Lost Focus: {}", GetName());
 			}
 
-			if (focusEvent->GotFocus())
+			if (focusEvent->GotFocus() && !IsFocussed())
 			{
 				stateFlags |= CStateFlag::Focused;
 				SetNeedsStyle();
 				SetNeedsPaint();
 			}
-			else
+			else if (focusEvent->LostFocus() && IsFocussed())
 			{
 				stateFlags &= ~CStateFlag::Focused;
 				SetNeedsStyle();

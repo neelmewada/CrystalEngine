@@ -70,6 +70,13 @@ namespace CE
             return Get().mouseButtonStateChanges.KeyExists(mouseButton) && Get().mouseButtonStateChanges[mouseButton] == 0;
         }
 
+        static int GetMouseButtonClicks(MouseButton mouseButton)
+        {
+            if (Get().mouseButtonStateChanges.KeyExists(mouseButton))
+                return Get().mouseButtonStateChanges[mouseButton];
+            return 0;
+        }
+
         static bool IsMouseButtonHeld(MouseButton mouseButton)
         {
             return Get().mouseButtonStates.KeyExists(mouseButton) && Get().mouseButtonStates[mouseButton] > 0;

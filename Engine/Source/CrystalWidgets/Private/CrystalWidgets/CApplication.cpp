@@ -67,6 +67,11 @@ namespace CE::Widgets
 			}
 		}
 
+		for (CTimer* timer : timers)
+		{
+			timer->Tick();
+		}
+
 		// Global events
 
 		Vec2 globalMousePos = InputManager::GetGlobalMousePosition().ToVec2();
@@ -273,6 +278,8 @@ namespace CE::Widgets
 			}
 		}
 
+		// - Mouse Click Events -
+
 		Enum* mouseButtonEnum = GetStaticEnum<MouseButton>();
 		for (int i = 0; i < mouseButtonEnum->GetConstantsCount(); ++i)
 		{
@@ -288,6 +295,7 @@ namespace CE::Widgets
 				event.direction = CEventDirection::BottomToTop;
 				event.isInside = true;
 				event.wheelDelta = mouseWheelDelta;
+				event.isDoubleClick = InputManager::GetMouseButtonClicks(mouseButton) == 2;
 
 				if (hoveredWidgetsStack.NonEmpty())
 				{
@@ -319,37 +327,6 @@ namespace CE::Widgets
 						}
 					}
 				}
-			}
-
-			if (focusWidget != curFocusedWidget)
-			{
-				if (curFocusedWidget != nullptr)
-				{
-					// The newly focused widget is not a child of the previously focused widget
-					CFocusEvent focusLostEvent{};
-					focusLostEvent.name = "LostFocus";
-					focusLostEvent.type = CEventType::FocusChanged;
-					focusLostEvent.sender = curFocusedWidget;
-					focusLostEvent.gotFocus = false;
-					focusLostEvent.focusedWidget = focusWidget;
-
-					curFocusedWidget->HandleEvent(&focusLostEvent);
-				}
-
-				if (focusWidget != nullptr)
-				{
-					CFocusEvent focusEvent{};
-					focusEvent.name = "GotFocus";
-					focusEvent.type = CEventType::FocusChanged;
-					focusEvent.sender = focusEvent.focusedWidget = focusWidget;
-					focusEvent.gotFocus = true;
-
-					focusEvent.sender = focusWidget;
-
-					focusWidget->HandleEvent(&focusEvent);
-				}
-
-				curFocusedWidget = focusWidget;
 			}
 
 			if (InputManager::IsMouseButtonUp(mouseButton))
@@ -403,14 +380,110 @@ namespace CE::Widgets
 			}
 		}
 
+		// - Focus Events -
+
+		if (curFocusedWidget != nullptr && !curFocusedWidget->IsFocussed() && curFocusedWidget == focusWidget)
+		{
+			curFocusedWidget = nullptr;
+			focusWidget = nullptr;
+		}
+
+		if (focusWidget != curFocusedWidget)
+		{
+			if (curFocusedWidget != nullptr)
+			{
+				CFocusEvent focusLostEvent{};
+				focusLostEvent.name = "LostFocus";
+				focusLostEvent.type = CEventType::FocusChanged;
+				focusLostEvent.sender = curFocusedWidget;
+				focusLostEvent.gotFocus = false;
+				focusLostEvent.focusedWidget = focusWidget;
+
+				curFocusedWidget->HandleEvent(&focusLostEvent);
+			}
+
+			if (focusWidget != nullptr)
+			{
+				CFocusEvent focusEvent{};
+				focusEvent.name = "GotFocus";
+				focusEvent.type = CEventType::FocusChanged;
+				focusEvent.sender = focusEvent.focusedWidget = focusWidget;
+				focusEvent.gotFocus = true;
+
+				focusEvent.sender = focusWidget;
+
+				focusWidget->HandleEvent(&focusEvent);
+			}
+
+			curFocusedWidget = focusWidget;
+		}
+
 		prevMousePos = globalMousePos;
 
-		// Per window events inside Tick()
+		Enum* keyCodeEnum = GetStaticEnum<KeyCode>();
+		Enum* keyModifierEnum = GetStaticEnum<KeyModifier>();
 
-		for (CTimer* timer : timers)
+		keyModifierStates = KeyModifier::None;
+		keyPressStates.Resize(keyCodeEnum->GetConstantsCount());
+
+		CWidget* keyEventWidget = curFocusedWidget;
+		while (keyEventWidget != nullptr && !keyEventWidget->receiveKeyEvents)
 		{
-			timer->Tick();
+			keyEventWidget = keyEventWidget->parent;
 		}
+
+		if (keyEventWidget)
+		{
+			for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
+			{
+				if (InputManager::TestModifiers((KeyModifier)keyModifierEnum->GetConstant(i)->GetValue()))
+				{
+					keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
+				}
+			}
+
+			for (int i = 0; i < keyCodeEnum->GetConstantsCount(); ++i)
+			{
+				KeyCode keyCode = (KeyCode)keyCodeEnum->GetConstant(i)->GetValue();
+
+				bool isDown = InputManager::IsKeyDown(keyCode);
+				bool isUp = InputManager::IsKeyUp(keyCode);
+
+				bool isHeldDelayed = InputManager::IsKeyHeldDelayed(keyCode);
+
+				CKeyEvent keyEvent{};
+				keyEvent.name = "KeyEvent";
+				keyEvent.modifier = keyModifierStates;
+				keyEvent.key = keyCode;
+				keyEvent.sender = keyEventWidget;
+
+				if (isDown && !keyPressStates[i])
+				{
+					keyEvent.type = CEventType::KeyPress;
+
+					keyPressStates[i] = true;
+
+					keyEventWidget->HandleEvent(&keyEvent);
+				}
+				else if (isUp && keyPressStates[i])
+				{
+					keyEvent.type = CEventType::KeyRelease;
+
+					keyPressStates[i] = false;
+
+					keyEventWidget->HandleEvent(&keyEvent);
+				}
+
+				if (isHeldDelayed)
+				{
+					keyEvent.type = CEventType::KeyHeld;
+
+					keyEventWidget->HandleEvent(&keyEvent);
+				}
+			}
+		}
+
+		// Per window events inside Tick()
 
 		for (int i = 0; i < windows.GetSize(); i++)
 		{
@@ -593,6 +666,11 @@ namespace CE::Widgets
 		{
 			PlatformApplication::Get()->SetSystemCursor(ToSystemCursor(cursorStack.Top()));
 		}
+	}
+
+	void CApplication::SetFocus(CWidget* widget)
+	{
+		focusWidget = widget;
 	}
 
 	void CApplication::OnSubobjectDetached(Object* object)

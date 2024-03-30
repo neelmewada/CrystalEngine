@@ -88,6 +88,8 @@ namespace CE::Widgets
         CCursor GetTopCursor();
         void PopCursor();
 
+        void SetFocus(CWidget* widget);
+
     private:
 
         void OnSubobjectDetached(Object* object) override;
@@ -105,6 +107,9 @@ namespace CE::Widgets
 
         Array<CCursor> cursorStack{};
         Array<CTimer*> timers{};
+
+        KeyModifier keyModifierStates{};
+        Array<bool> keyPressStates{};
 
         Array<CWidget*> hoveredWidgetsStack = {};
         StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};

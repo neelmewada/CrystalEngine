@@ -274,6 +274,8 @@ namespace CE
 
 		String Replace(const Array<char>& charsToReplace, char replaceWith) const;
 
+        void RemoveAt(int index);
+
 		void UpdateLength();
 
 	    // Character Utils

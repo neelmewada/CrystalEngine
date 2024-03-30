@@ -25,6 +25,12 @@ namespace CE::Widgets
 
 		void SetAsPassword(b8 set);
 
+		b8 IsEditable() const { return isEditable; }
+
+		void SetEditable(bool editable) { isEditable = editable; }
+
+		void SelectAll() { selectAll = true; SetNeedsPaint(); }
+
 	protected:
 
 		FUNCTION()
@@ -38,6 +44,10 @@ namespace CE::Widgets
 		void OnPaint(CPaintEvent* paintEvent) override;
 
 		void HandleEvent(CEvent* event) override;
+
+		void OnFocusGained() override;
+
+		void OnFocusLost() override;
 
 	crystalwidgets_protected_internal:
 
@@ -57,12 +67,24 @@ namespace CE::Widgets
 		b8 isMultiline = false;
 
 		FIELD()
+		b8 isEditable = true;
+
+		FIELD()
 		CTimer* timer = nullptr;
 
 	private:
 
-		int charStartOffset = 0;
+		f32 textScrollOffset = 0;
 
+		int cursorPos = 0;
+
+		b8 cursorState = true;
+
+		RangeInt selectionRange = RangeInt(-1, -1);
+
+		f32 selectionDistance = 0;
+
+		b8 selectAll = false;
 	};
 
 } // namespace CE::Widgets
