@@ -116,9 +116,17 @@ CTextInput {
     cursor: edit;
     padding: 5px 4px;
     background: rgb(15, 15, 15);
-    border-width: 1px;
+    border-width: 1.5px;
     border-color: rgb(50, 50, 50);
     border-radius: 5px 5px;
+}
+
+CTextInput:hovered {
+    border-color: rgb(74, 74, 74);
+}
+
+CTextInput:focused {
+    border-color: rgb(0, 112, 224);
 }
 
 #TextInputDemo {

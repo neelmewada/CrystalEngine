@@ -1028,26 +1028,17 @@ namespace CE::Widgets
 			CFocusEvent* focusEvent = static_cast<CFocusEvent*>(event);
 			focusEvent->Consume(this);
 
-			if (parent != nullptr && parent->IsFocussed() && focusEvent->GotFocus())
-			{
-				//focusEvent->StopPropagation();
-			}
-			if (parent != nullptr && !parent->IsFocussed() && focusEvent->LostFocus())
-			{
-				//focusEvent->StopPropagation();
-			}
-
 			if (focusEvent->GotFocus() && !IsFocussed())
 			{
 				OnFocusGained();
 				OnFocused();
-				CE_LOG(Info, All, "Got Focus: {}", GetName());
+				//CE_LOG(Info, All, "Got Focus: {}", GetName());
 			}
 			else if (focusEvent->LostFocus() && IsFocussed())
 			{
 				OnFocusLost();
 				OnUnfocused();
-				CE_LOG(Info, All, "Lost Focus: {}", GetName());
+				//CE_LOG(Info, All, "Lost Focus: {}", GetName());
 			}
 
 			if (focusEvent->GotFocus())
