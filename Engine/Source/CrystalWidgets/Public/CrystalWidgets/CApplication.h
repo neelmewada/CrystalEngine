@@ -104,14 +104,18 @@ namespace CE::Widgets
         Array<CWidget*> destructionQueue{};
 
         Array<CCursor> cursorStack{};
+        Array<CTimer*> timers{};
 
         Array<CWidget*> hoveredWidgetsStack = {};
         StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};
         CWidget* draggedWidget = nullptr;
+        CWidget* focusWidget = nullptr;
+        CWidget* curFocusedWidget = nullptr;
 
         Vec2 prevMousePos = Vec2();
 
         friend class CWidget;
+        friend class CTimer;
     };
 
 } // namespace CE::Widgets

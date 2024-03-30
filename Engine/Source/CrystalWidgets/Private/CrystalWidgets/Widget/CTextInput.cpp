@@ -11,6 +11,12 @@ namespace CE::Widgets
         interactable = true;
 
         //clipChildren = true;
+        timer = CreateDefaultSubobject<CTimer>("Timer");
+        if (!IsDefaultInstance())
+        {
+            Bind(timer, MEMBER_FUNCTION(CTimer, OnTimeOut),
+                this, MEMBER_FUNCTION(Self, OnTimerTick));
+        }
     }
 
     CTextInput::~CTextInput()
@@ -61,6 +67,11 @@ namespace CE::Widgets
         isPassword = set;
 
         SetNeedsLayout();
+        SetNeedsPaint();
+    }
+
+    void CTextInput::OnTimerTick()
+    {
         SetNeedsPaint();
     }
 
@@ -115,7 +126,7 @@ namespace CE::Widgets
 
                 for (int i = 0; i < offsets.GetSize(); ++i)
                 {
-                    Rect localPos = offsets[i].Translate(padding.min);
+                    Rect localPos = offsets[i].Translate(padding.min - offsets[charStartOffset].min);
 
                     if (localMousePos.x < localPos.left + localPos.GetSize().width * 0.4f)
                     {
@@ -124,6 +135,21 @@ namespace CE::Widgets
 	                    break;
                     }
                 }
+
+                if (selectedIdx != -1)
+                {
+                    timer->Reset();
+                    timer->Start(cursorBlinkMillis);
+                }
+            }
+        }
+        else if (event->type == CEventType::FocusChanged)
+        {
+            CFocusEvent* focusEvent = static_cast<CFocusEvent*>(event);
+
+            if (focusEvent->LostFocus())
+            {
+                timer->Stop();
             }
         }
 

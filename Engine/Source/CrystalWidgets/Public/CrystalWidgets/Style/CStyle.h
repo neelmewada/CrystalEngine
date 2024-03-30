@@ -16,12 +16,11 @@ namespace CE::Widgets
 		Disabled = BIT(7),
 		Enabled = BIT(8),
 		Window = BIT(9),
-		Unfocused = BIT(10),
+		Collapsed = BIT(10),
 		Active = BIT(11),
 		Inactive = BIT(12),
-		Collapsed = BIT(13),
-		Major = BIT(14),
-		Minor = BIT(15)
+		Major = BIT(13),
+		Minor = BIT(14)
 	};
 	ENUM_CLASS_FLAGS(CStateFlag);
 

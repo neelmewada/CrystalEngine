@@ -211,6 +211,31 @@ namespace CE::Widgets
             curButton = MouseButton::Middle;
         }
 
+        if (nativeWindow != nullptr)
+        {
+	        if (nativeWindow->IsFocussed() && !IsFocussed())
+	        {
+                CFocusEvent focusEvent{};
+                focusEvent.name = "GotFocus";
+                focusEvent.gotFocus = true;
+                focusEvent.type = CEventType::FocusChanged;
+                focusEvent.focusedWidget = this;
+
+                HandleEvent(&focusEvent);
+	        }
+            else if (!nativeWindow->IsFocussed() && IsFocussed())
+            {
+                CFocusEvent focusEvent{};
+                focusEvent.name = "LostFocus";
+                focusEvent.gotFocus = false;
+                focusEvent.type = CEventType::FocusChanged;
+                focusEvent.focusedWidget = this;
+                focusEvent.direction = CEventDirection::TopToBottom;
+
+                HandleEvent(&focusEvent);
+            }
+        }
+
         // Tick: Styling
         UpdateStyleIfNeeded();
 
@@ -321,7 +346,7 @@ namespace CE::Widgets
             Vec2 size = GetComputedLayoutSize() - Vec2(rootPadding.x + rootPadding.z, rootPadding.y + rootPadding.w);
             Vec2 pos = GetComputedLayoutTopLeft() + rootPadding.min;
             constexpr f32 controlWidth = 40;
-
+            
             controlRects.Resize(3);
 
             for (int i = 0; i < 3; i++)

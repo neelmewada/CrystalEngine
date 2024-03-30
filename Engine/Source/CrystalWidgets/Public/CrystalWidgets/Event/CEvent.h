@@ -94,7 +94,7 @@ namespace CE::Widgets
 
 		FIELD()
 		CEventType type{};
-
+		
 		FIELD()
 		Struct* customType = nullptr; // Type of the custom event struct
 
@@ -180,6 +180,28 @@ namespace CE::Widgets
 
 		FIELD()
 		CWidget* dropTarget = nullptr;
+
+	};
+
+	STRUCT()
+	struct CRYSTALWIDGETS_API CFocusEvent : CEvent
+	{
+		CE_STRUCT(CFocusEvent, CEvent)
+	public:
+
+		CFocusEvent()
+		{
+			direction = CEventDirection::BottomToTop;
+		}
+
+		bool GotFocus() const { return gotFocus; }
+		bool LostFocus() const { return !gotFocus; }
+
+		FIELD()
+		bool gotFocus = false;
+
+		FIELD()
+		CWidget* focusedWidget = nullptr;
 
 	};
     

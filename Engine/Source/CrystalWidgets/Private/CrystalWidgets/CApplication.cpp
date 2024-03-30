@@ -138,6 +138,15 @@ namespace CE::Widgets
 			}
 		}
 
+		if (hoveredWidget)
+		{
+			PlatformWindow* platformWindow = hoveredWidget->GetNativeWindow();
+			if (platformWindow && !platformWindow->IsFocussed())
+			{
+				hoveredWidget = nullptr;
+			}
+		}
+
 		if (hoveredWidgetsStack.NonEmpty() && hoveredWidgetsStack.Top() != hoveredWidget &&
 			(hoveredWidget == nullptr || !hoveredWidgetsStack.Top()->SubWidgetExistsRecursive(hoveredWidget)))
 		{
@@ -282,6 +291,8 @@ namespace CE::Widgets
 
 				if (hoveredWidgetsStack.NonEmpty())
 				{
+					focusWidget = hoveredWidgetsStack.Top();
+					
 					event.sender = hoveredWidgetsStack.Top();
 					widgetsPressedPerMouseButton[i] = event.sender;
 					hoveredWidgetsStack.Top()->HandleEvent(&event);
@@ -308,6 +319,37 @@ namespace CE::Widgets
 						}
 					}
 				}
+			}
+
+			if (focusWidget != curFocusedWidget)
+			{
+				if (curFocusedWidget != nullptr)
+				{
+					// The newly focused widget is not a child of the previously focused widget
+					CFocusEvent focusLostEvent{};
+					focusLostEvent.name = "LostFocus";
+					focusLostEvent.type = CEventType::FocusChanged;
+					focusLostEvent.sender = curFocusedWidget;
+					focusLostEvent.gotFocus = false;
+					focusLostEvent.focusedWidget = focusWidget;
+
+					curFocusedWidget->HandleEvent(&focusLostEvent);
+				}
+
+				if (focusWidget != nullptr)
+				{
+					CFocusEvent focusEvent{};
+					focusEvent.name = "GotFocus";
+					focusEvent.type = CEventType::FocusChanged;
+					focusEvent.sender = focusEvent.focusedWidget = focusWidget;
+					focusEvent.gotFocus = true;
+
+					focusEvent.sender = focusWidget;
+
+					focusWidget->HandleEvent(&focusEvent);
+				}
+
+				curFocusedWidget = focusWidget;
 			}
 
 			if (InputManager::IsMouseButtonUp(mouseButton))
@@ -364,6 +406,11 @@ namespace CE::Widgets
 		prevMousePos = globalMousePos;
 
 		// Per window events inside Tick()
+
+		for (CTimer* timer : timers)
+		{
+			timer->Tick();
+		}
 
 		for (int i = 0; i < windows.GetSize(); i++)
 		{

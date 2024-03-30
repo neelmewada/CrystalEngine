@@ -386,6 +386,8 @@ namespace CE::Widgets
 
 	bool CWidget::SubWidgetExistsRecursive(CWidget* subWidget)
 	{
+		if (!subWidget)
+			return false;
 		if (subWidget == this)
 			return true;
 
@@ -396,6 +398,17 @@ namespace CE::Widgets
 		}
 
 		return false;
+	}
+
+	bool CWidget::ParentWidgetExistsRecursive(CWidget* parentWidget)
+	{
+		if (!parentWidget)
+			return false;
+		if (parentWidget == this)
+			return true;
+		if (parent == nullptr)
+			return false;
+		return parent->ParentWidgetExistsRecursive(parentWidget);
 	}
 
 	void CWidget::UpdateStyleIfNeeded()
@@ -1009,6 +1022,47 @@ namespace CE::Widgets
 		bool shouldPropagateDownwards = true;
 		bool skipPaint = false;
 		bool isButton = IsOfType<CButton>();
+
+		if (event->type == CEventType::FocusChanged)
+		{
+			CFocusEvent* focusEvent = static_cast<CFocusEvent*>(event);
+			focusEvent->Consume(this);
+
+			if (parent != nullptr && parent->IsFocussed() && focusEvent->GotFocus())
+			{
+				//focusEvent->StopPropagation();
+			}
+			if (parent != nullptr && !parent->IsFocussed() && focusEvent->LostFocus())
+			{
+				//focusEvent->StopPropagation();
+			}
+
+			if (focusEvent->GotFocus() && !IsFocussed())
+			{
+				OnFocusGained();
+				OnFocused();
+				CE_LOG(Info, All, "Got Focus: {}", GetName());
+			}
+			else if (focusEvent->LostFocus() && IsFocussed())
+			{
+				OnFocusLost();
+				OnUnfocused();
+				CE_LOG(Info, All, "Lost Focus: {}", GetName());
+			}
+
+			if (focusEvent->GotFocus())
+			{
+				stateFlags |= CStateFlag::Focused;
+				SetNeedsStyle();
+				SetNeedsPaint();
+			}
+			else
+			{
+				stateFlags &= ~CStateFlag::Focused;
+				SetNeedsStyle();
+				SetNeedsPaint();
+			}
+		}
 
 		// Paint event
 		if (event->type == CEventType::PaintEvent)

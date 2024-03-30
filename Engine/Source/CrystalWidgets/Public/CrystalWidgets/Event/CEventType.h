@@ -20,6 +20,8 @@ namespace CE::Widgets
 		DragBegin,
 		DragMove,
 		DragEnd,
+
+		FocusChanged,
 	};
 	ENUM_CLASS(CEventType);
 

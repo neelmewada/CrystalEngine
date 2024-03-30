@@ -57,6 +57,8 @@ namespace CE::Widgets
 
         bool SubWidgetExistsRecursive(CWidget* subWidget);
 
+        bool ParentWidgetExistsRecursive(CWidget* widget);
+
         bool StyleClassExists(const Name& name) const { return styleClasses.Exists(name); }
 
         void UpdateStyleIfNeeded();
@@ -138,7 +140,16 @@ namespace CE::Widgets
 
         Vec2 CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width);
 
+        // - Signals -
+
+        CE_SIGNAL(OnFocused);
+
+        CE_SIGNAL(OnUnfocused);
+
     crystalwidgets_protected_internal:
+
+        virtual void OnFocusGained() {}
+        virtual void OnFocusLost() {}
 
         void SetNeedsPaintRecursively(bool newValue = false);
 

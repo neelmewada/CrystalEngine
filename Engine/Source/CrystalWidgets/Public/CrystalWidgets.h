@@ -11,6 +11,9 @@
 // Style
 #include "CrystalWidgets/Style/FlexEnums.h"
 #include "CrystalWidgets/Style/CStyle.h"
+
+// App & Utils
+#include "CrystalWidgets/Event/CTimer.h"
 #include "CrystalWidgets/CApplication.h"
 
 #include "CrystalWidgets/Style/CStyleSheet.h"

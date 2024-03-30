@@ -2,7 +2,7 @@
 
 namespace CE::Widgets
 {
-	CLASS()
+	CLASS(Config = Engine)
 	class CRYSTALWIDGETS_API CTextInput : public CWidget
 	{
 		CE_CLASS(CTextInput, CWidget)
@@ -27,6 +27,9 @@ namespace CE::Widgets
 
 	protected:
 
+		FUNCTION()
+		void OnTimerTick();
+
 		// For internal use only!
 		String GetDisplayText();
 
@@ -44,11 +47,19 @@ namespace CE::Widgets
 		FIELD()
 		String hint{};
 
+		FIELD(Config)
+		int cursorBlinkMillis = 500;
+
 		FIELD()
 		b8 isPassword = false;
 
 		FIELD()
 		b8 isMultiline = false;
+
+		FIELD()
+		CTimer* timer = nullptr;
+
+	private:
 
 		int charStartOffset = 0;
 
