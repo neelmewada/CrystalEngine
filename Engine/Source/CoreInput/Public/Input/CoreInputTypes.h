@@ -1,8 +1,5 @@
 #pragma once
 
-#define SCANCODE_MASK (1<<30)
-#define SDL_SCANCODE_TO_KEYCODE(X)  (X | SCANCODE_MASK)
-
 namespace CE
 {
     ENUM()
@@ -94,6 +91,20 @@ namespace CE
         F10 = (67 | (1 << 30)),
         F11 = (68 | (1 << 30)),
         F12 = (69 | (1 << 30)),
+
+        PrintScreen = (70 | (1<<30)),
+        ScrollLock = (71 | (1<<30)),
+        Pause = (72 | (1<<30)),
+        Insert = (73 | (1<<30)),
+        Home = (74 | (1<<30)),
+        PageUp = (75 | (1<<30)),
+        Delete = '\x7F',
+        End = (77 | (1<<30)),
+        PageDown = (78 | (1<<30)),
+        Right = (79 | (1<<30)),
+        Left = (80 | (1<<30)),
+        Down = (81 | (1<<30)),
+        Up = (82 | (1<<30)),
 
         NumlockClear = (83 | (1 << 30)),
         KeypadDivide = (84 | (1 << 30)),

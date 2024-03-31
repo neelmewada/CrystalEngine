@@ -187,11 +187,6 @@ namespace CE
 		SubmitWork(imageIndex);
 
 		scheduler->EndExecution();
-
-		if (InputManager::IsKeyDown(KeyCode::Escape))
-		{
-			RequestEngineExit("USER_EXIT");
-		}
 	}
 
 	void WidgetSandbox::Shutdown()

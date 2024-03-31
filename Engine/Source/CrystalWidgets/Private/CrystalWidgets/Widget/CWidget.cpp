@@ -941,6 +941,16 @@ namespace CE::Widgets
 		return renderer->CalculateTextSize(text, fontSize, fontName, width);
 	}
 
+	void CWidget::Focus()
+	{
+		CApplication::Get()->SetFocus(this);
+	}
+
+	void CWidget::Unfocus()
+	{
+		CApplication::Get()->SetFocus(parent);
+	}
+
 	void CWidget::SetNeedsPaintRecursively(bool newValue)
 	{
 		needsPaint = newValue;

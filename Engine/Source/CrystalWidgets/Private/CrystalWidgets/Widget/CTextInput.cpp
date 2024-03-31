@@ -30,6 +30,8 @@ namespace CE::Widgets
             return Vec2();
 
         String display = GetDisplayText();
+        if (display.IsEmpty())
+            display = " ";
 
         Vec2 base = Super::CalculateIntrinsicSize(width, height);
 
@@ -70,6 +72,11 @@ namespace CE::Widgets
         SetNeedsPaint();
     }
 
+    bool CTextInput::IsTextSelected()
+    {
+        return selectionRange.min >= 0 && selectionRange.max >= 0 && selectionRange.min <= selectionRange.max;
+    }
+
     void CTextInput::OnTimerTick()
     {
         cursorState = !cursorState;
@@ -100,10 +107,22 @@ namespace CE::Widgets
     void CTextInput::OnFocusLost()
     {
         Super::OnFocusLost();
+
+        textScrollOffset = 0;
+        timer->Stop();
+        isEditing = false;
+        cursorState = false;
+        SetNeedsPaint();
     }
 
     void CTextInput::HandleEvent(CEvent* event)
     {
+        Name fontName = computedStyle.properties[CStylePropertyType::FontName].string;
+
+        f32 fontSize = 14;
+        if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
+            fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
+
         if (event->IsMouseEvent())
         {
             CMouseEvent* mouseEvent = (CMouseEvent*)event;
@@ -114,12 +133,6 @@ namespace CE::Widgets
 
             Renderer2D* renderer = GetRenderer();
             String display = text;
-
-            Name fontName = computedStyle.properties[CStylePropertyType::FontName].string;
-
-            f32 fontSize = 14;
-            if (computedStyle.properties.KeyExists(CStylePropertyType::FontSize))
-                fontSize = computedStyle.properties[CStylePropertyType::FontSize].single;
 
             if (renderer && mouseEvent->type == CEventType::MouseEnter)
             {
@@ -153,11 +166,26 @@ namespace CE::Widgets
                     }
                 }
 
+                if (selectedIdx == -1 && offsets.NonEmpty())
+                {
+                    Rect localPos = offsets.Top().Translate(padding.min - Vec2(textScrollOffset, 0));
+
+                    if (localMousePos.x > localPos.max.x)
+                    {
+                        selectedIdx = offsets.GetSize();
+                        cursorPos = selectedIdx;
+                    }
+                }
+
+                CE_LOG(Info, All, "SelectedIdx: {}", selectedIdx);
+
                 if (selectedIdx != -1)
                 {
                     timer->Reset();
                     timer->Start(cursorBlinkMillis);
                     cursorState = true;
+                    isEditing = true;
+                    originalText = text;
                     SetNeedsPaint();
                 }
             }
@@ -221,7 +249,7 @@ namespace CE::Widgets
                     prevCenterPoint = centerPoint;
                 }
 
-                if (selectionDistance > 0 && range.min == -1)
+                if (selectionDistance > 0 && range.min == -1 && range.max >= 0 && range.max < offsets.GetSize())
                 {
 	                range.min = cursorPos;
 
@@ -234,7 +262,7 @@ namespace CE::Widgets
                         textScrollOffset = Math::Min(textScrollOffset, lastCharacterRect.min.x + lastCharacterRect.GetSize().width - contentRect.GetSize().width);
                     }
                 }
-                if (selectionDistance < 0 && range.max == -1)
+                if (selectionDistance < 0 && range.max == -1 && range.min >= 0 && range.min < offsets.GetSize())
                 {
 	                range.max = cursorPos - 1;
 
@@ -252,17 +280,6 @@ namespace CE::Widgets
                 SetNeedsPaint();
             }
         }
-        else if (event->type == CEventType::FocusChanged)
-        {
-            CFocusEvent* focusEvent = static_cast<CFocusEvent*>(event);
-
-            if (focusEvent->LostFocus())
-            {
-                timer->Stop();
-                cursorState = false;
-                SetNeedsPaint();
-            }
-        }
         else if (event->type == CEventType::KeyHeld || event->type == CEventType::KeyPress)
         {
             CKeyEvent* keyEvent = static_cast<CKeyEvent*>(event);
@@ -273,9 +290,15 @@ namespace CE::Widgets
             bool isUpperCase = shiftPressed != capslock;
 
             char c = 0;
+            Renderer2D* renderer = GetRenderer();
+            Vec4 padding = GetComputedLayoutPadding();
+
+            Rect contentRect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+            contentRect.min += padding.min;
+            contentRect.max -= padding.max;
 
             // A valid text character
-            if ((int)keyEvent->key >= (int)KeyCode::Space && (int)keyEvent->key <= (int)KeyCode::Z)
+            if ((int)keyEvent->key >= (int)KeyCode::Space && (int)keyEvent->key <= (int)KeyCode::Z && IsEditing())
             {
                 c = (char)keyEvent->key;
 
@@ -284,7 +307,175 @@ namespace CE::Widgets
                     c += ('A' - 'a');
                 }
 
-                CE_LOG(Info, All, "Append: {}", c);
+                if (shiftPressed && (int)keyEvent->key >= (int)KeyCode::N0 && (int)keyEvent->key <= (int)KeyCode::N9)
+                {
+	                switch (keyEvent->key)
+	                {
+	                case KeyCode::N0:
+                        c = ')';
+                        break;
+                    case KeyCode::N1:
+                        c = '!';
+                        break;
+                    case KeyCode::N2:
+                        c = '@';
+                        break;
+                    case KeyCode::N3:
+                        c = '#';
+                        break;
+                    case KeyCode::N4:
+                        c = '$';
+                        break;
+                    case KeyCode::N5:
+                        c = '%';
+                        break;
+                    case KeyCode::N6:
+                        c = '^';
+                        break;
+                    case KeyCode::N7:
+                        c = '&';
+                        break;
+                    case KeyCode::N8:
+                        c = '*';
+                        break;
+                    case KeyCode::N9:
+                        c = '(';
+                        break;
+	                }
+                }
+
+                String newText = text;
+                newText.InsertAt(c, cursorPos);
+
+                String newDisplayText = "";
+                for (int i = 0; i < newText.GetLength(); ++i)
+                {
+                    if (isPassword)
+                        newDisplayText.Append('*');
+                    else
+                        newDisplayText.Append(newText[i]);
+                }
+
+                Array<Rect> offsets{};
+                Vec2 size = renderer->CalculateTextOffsets(offsets, newDisplayText, fontSize, fontName);
+
+                if (!inputValidator.IsValid() || inputValidator(newText))
+                {
+                    this->text = newText;
+
+                    Rect cursorCharRect = offsets[cursorPos].Translate(padding.min);
+                    if (cursorCharRect.min.x > contentRect.GetSize().width)
+						textScrollOffset = cursorCharRect.min.x + cursorCharRect.GetSize().width - contentRect.GetSize().width;
+
+                    cursorPos++;
+                    SetNeedsLayout();
+                    SetNeedsPaint();
+                }
+            }
+            else if (keyEvent->key == KeyCode::Backspace && cursorPos > 0 && !IsTextSelected())
+            {
+                String newText = text;
+                newText.Remove(cursorPos - 1, 1);
+
+                if (!inputValidator.IsValid() || inputValidator(newText))
+                {
+                    this->text = newText;
+                    cursorPos--;
+
+                    String displayText = "";
+                    for (int i = 0; i < text.GetLength(); ++i)
+                    {
+                        if (isPassword)
+                            displayText.Append('*');
+                        else
+                            displayText.Append(text[i]);
+                    }
+
+                    Array<Rect> offsets{};
+                    Vec2 size = renderer->CalculateTextOffsets(offsets, displayText, fontSize, fontName);
+
+                    //Rect cursorCharRect = offsets[cursorPos].Translate(padding.min);
+                    
+                    SetNeedsLayout();
+                    SetNeedsPaint();
+                }
+            }
+            else if ((keyEvent->key == KeyCode::Backspace || keyEvent->key == KeyCode::Delete) && IsTextSelected()) // A text selection got removed
+            {
+                String newText = text;
+                newText.Remove(selectionRange.min, selectionRange.max - selectionRange.min + 1);
+
+                if (!inputValidator.IsValid() || inputValidator(newText))
+                {
+                    this->text = newText;
+                    cursorPos = selectionRange.min;
+
+                    String displayText = "";
+                    for (int i = 0; i < text.GetLength(); ++i)
+                    {
+                        if (isPassword)
+                            displayText.Append('*');
+                        else
+                            displayText.Append(text[i]);
+                    }
+
+                    Array<Rect> offsets{};
+                    Vec2 size = renderer->CalculateTextOffsets(offsets, displayText, fontSize, fontName);
+
+                    selectionRange.min = selectionRange.max = -1;
+                    textScrollOffset = 0;
+
+                    SetNeedsLayout();
+                    SetNeedsPaint();
+                }
+            }
+            else if (keyEvent->key == KeyCode::Left)
+            {
+                String displayText = "";
+                for (int i = 0; i < text.GetLength(); ++i)
+                {
+                    if (isPassword)
+                        displayText.Append('*');
+                    else
+                        displayText.Append(text[i]);
+                }
+
+                int focusPos = 0;
+	            if (EnumHasAnyFlags(keyEvent->modifier, KeyModifier::LShift | KeyModifier::RShift))
+	            {
+                    selectionRange.min = Math::Max(-1, selectionRange.min - 1);
+                    cursorPos = Math::Max(0, cursorPos - 1);
+                    focusPos = selectionRange.min;
+	            }
+                else
+                {
+                    selectionRange.min = selectionRange.max = -1; // Clear selection
+                    cursorPos = Math::Max(0, cursorPos - 1);
+                    focusPos = cursorPos;
+                }
+
+                Array<Rect> offsets{};
+                Vec2 size = renderer->CalculateTextOffsets(offsets, displayText, fontSize, fontName);
+
+                if (focusPos >= 0 && focusPos < offsets.GetSize())
+                {
+                    if (offsets[focusPos].min.x - textScrollOffset < 0)
+                    {
+                        textScrollOffset = offsets[focusPos].min.x;
+                    }
+                }
+
+                SetNeedsLayout();
+                SetNeedsPaint();
+            }
+            else if (keyEvent->key == KeyCode::Return)
+            {
+                Unfocus();
+            }
+            else if (keyEvent->key == KeyCode::Escape)
+            {
+                text = originalText;
+                Unfocus();
             }
         }
 
@@ -346,16 +537,19 @@ namespace CE::Widgets
         Rect textRect = rect.Translate(Vec2(padding.left - textScrollOffset, rect.GetSize().height / 2 - textSize.height / 2));
         textRect.max -= Vec2(padding.left + padding.right, rect.GetSize().height / 2 - textSize.height / 2);
 
-        cursorPos = Math::Clamp(cursorPos, 0, (int)text.GetLength() - 1);
+        cursorPos = Math::Clamp(cursorPos, 0, (int)text.GetLength());
+
+        selectionRange.min = Math::Max(0, selectionRange.min);
+        selectionRange.max = Math::Min(selectionRange.max, (int)offsets.GetSize() - 1);
 
         // Add text scroll offset to negate its effect from Clip Rect
         painter->PushClipRect(textRect.Translate(Vec2(textScrollOffset, 0)));
         painter->PushChildCoordinateSpace(rect.min);
         {
-            if (IsFocussed() && IsInteractable()) // Edit mode
+            if (isEditing) // Edit mode
             {
                 // Draw text selection background
-                if (selectionRange.min >= 0 && selectionRange.max >= 0 && selectionRange.min <= selectionRange.max)
+                if (IsTextSelected())
                 {
                     Vec2 selectionStart = offsets[selectionRange.min].Translate(padding.min - Vec2(textScrollOffset, 0)).min;
                     Vec2 selectionEnd = offsets[selectionRange.max].Translate(padding.min - Vec2(textScrollOffset, 0)).min +
@@ -374,7 +568,16 @@ namespace CE::Widgets
                 // Draw cursor
 
                 constexpr f32 cursorWidth = 2.0f;
-                Rect cursorRect = offsets[cursorPos].Translate(padding.min - Vec2(textScrollOffset, 0) - Vec2(cursorWidth / 2.0f, 0));
+                Rect cursorRect = Rect();
+                if (cursorPos >= 0 && cursorPos < offsets.GetSize())
+                {
+	                cursorRect = offsets[cursorPos].Translate(padding.min - Vec2(textScrollOffset, 0) - Vec2(cursorWidth / 2.0f, 0));
+                }
+                else if (cursorPos == offsets.GetSize() && offsets.NonEmpty())
+                {
+	                cursorRect = offsets.Top().Translate(padding.min - Vec2(textScrollOffset, 0) - Vec2(cursorWidth / 2.0f, 0) + 
+					   Vec2(offsets.Top().GetSize().width, 0));
+                }
                 cursorRect.max.x = cursorRect.min.x + cursorWidth;
                 cursorRect.max.y = cursorRect.min.y + textSize.height;
 

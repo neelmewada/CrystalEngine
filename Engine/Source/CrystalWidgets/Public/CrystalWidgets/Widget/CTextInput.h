@@ -25,11 +25,20 @@ namespace CE::Widgets
 
 		void SetAsPassword(b8 set);
 
+		b8 IsEditing() const { return isEditing; }
+
 		b8 IsEditable() const { return isEditable; }
 
 		void SetEditable(bool editable) { isEditable = editable; }
 
 		void SelectAll() { selectAll = true; SetNeedsPaint(); }
+
+		void SetInputValidator(CInputValidator validator)
+		{
+			this->inputValidator = validator;
+		}
+
+		bool IsTextSelected();
 
 	protected:
 
@@ -74,6 +83,10 @@ namespace CE::Widgets
 
 	private:
 
+		CInputValidator inputValidator{};
+
+		String originalText{};
+
 		f32 textScrollOffset = 0;
 
 		int cursorPos = 0;
@@ -85,6 +98,9 @@ namespace CE::Widgets
 		f32 selectionDistance = 0;
 
 		b8 selectAll = false;
+
+		b8 isEditing = false;
+
 	};
 
 } // namespace CE::Widgets

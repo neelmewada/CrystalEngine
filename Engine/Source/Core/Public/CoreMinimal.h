@@ -87,12 +87,6 @@
 // Json
 #include "Json/Json.h"
 
-// Structured Streams
-#include "Serialization/StructuredStream.h"
-#include "Serialization/Formatters/JsonStreamOutputFormatter.h"
-#include "Serialization/Formatters/JsonStreamInputFormatter.h"
-
-
 // RTTI & Object
 #include "RTTI/RTTI.h"
 #include "Object/Object.h"

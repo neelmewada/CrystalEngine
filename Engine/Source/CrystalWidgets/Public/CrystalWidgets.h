@@ -34,6 +34,8 @@
 #include "CrystalWidgets/Event/CEventType.h"
 #include "CrystalWidgets/Event/CEvent.h"
 
+#include "CrystalWidgets/Validation/CTextInputValidation.h"
+
 // Widgets
 #include "CrystalWidgets/Widget/CWidget.h"
 #include "CrystalWidgets/Widget/CLabel.h"

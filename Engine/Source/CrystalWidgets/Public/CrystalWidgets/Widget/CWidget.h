@@ -140,6 +140,9 @@ namespace CE::Widgets
 
         Vec2 CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width);
 
+        void Focus();
+        void Unfocus();
+
         // - Signals -
 
         CE_SIGNAL(OnFocused);

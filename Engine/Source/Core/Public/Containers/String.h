@@ -276,6 +276,10 @@ namespace CE
 
         void RemoveAt(int index);
 
+        void InsertAt(char c, int index);
+
+        void Remove(int startIndex, int count = -1);
+
 		void UpdateLength();
 
 	    // Character Utils

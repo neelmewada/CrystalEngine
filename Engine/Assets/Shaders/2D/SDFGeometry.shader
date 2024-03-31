@@ -233,14 +233,16 @@ Shader "2D/SDF Geometry"
                 float4 color = info.fillColor;
 
                 float borderMask = 0.0;
+                if (sdf > -borderThickness && sdf <= 0)
+		            borderMask = 1.0;
 
-                if (borderThickness > 0.1)
+                /*if (borderThickness > 0.1)
                 {
                     const float borderSmoothStart = -borderThickness - 1.0; // 1.0
                     const float borderSmoothEnd = -borderThickness;
                     borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
                     borderMask = clamp(borderMask, 0, 1);
-                }
+                }*/
 
                 color = lerp(color, info.outlineColor, borderMask);
 

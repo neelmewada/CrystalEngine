@@ -199,7 +199,7 @@ namespace CE
                 if (StringLength > 0)
                     memcpy(stagingBuffer, Buffer, StringLength + 1);
                 else
-                    Buffer[0] = 0;
+                    memset(stagingBuffer, 0, reserveCharacterCount);
 
                 Capacity = reserveCharacterCount;
                 delete[] Buffer;
@@ -855,6 +855,43 @@ namespace CE
         Buffer[StringLength - 1] = 0;
         StringLength--;
 	}
+
+	void String::InsertAt(char c, int index)
+	{
+        Reserve(GetLength() + 1);
+
+        StringLength++;
+
+        for (int i = StringLength - 1; i >= index; --i)
+        {
+            if (i > 0)
+            {
+	            Buffer[i] = Buffer[i - 1];
+            }
+        }
+
+        Buffer[index] = c;
+        Buffer[StringLength] = 0;
+	}
+
+    void String::Remove(int startIndex, int count)
+    {
+        if (count < 0)
+            count = StringLength - startIndex;
+
+        for (int i = startIndex; i < StringLength; ++i)
+        {
+            char value = Buffer[Math::Min<int>(count + i, StringLength)];
+
+            Buffer[i] = value;
+
+            if (value == 0)
+                break;
+        }
+
+        StringLength -= count;
+        Buffer[StringLength] = 0;
+    }
 
 	void String::UpdateLength()
 	{
