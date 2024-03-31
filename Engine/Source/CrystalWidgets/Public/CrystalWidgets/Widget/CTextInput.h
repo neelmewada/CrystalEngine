@@ -92,6 +92,7 @@ namespace CE::Widgets
 		int cursorPos = 0;
 
 		b8 cursorState = true;
+		b8 isCursorMoving = false;
 
 		RangeInt selectionRange = RangeInt(-1, -1);
 
