@@ -612,15 +612,6 @@ namespace CE::Widgets
         Array<Rect> offsets{};
         Vec2 size = painter->CalculateTextOffsets(offsets, display);
 
-        if (selectAll && offsets.NonEmpty())
-        {
-            Rect lastCharacterRect = offsets.Top().Translate(padding.min);
-            textScrollOffset = lastCharacterRect.min.x + lastCharacterRect.GetSize().width - contentRect.GetSize().width;
-            selectionRange = RangeInt(0, offsets.GetSize() - 1);
-        }
-
-        selectAll = false;
-
         Vec2 textSize = painter->CalculateTextSize(display, isMultiline ? rect.GetSize().width : 0);
         Rect textRect = rect.Translate(Vec2(padding.left - textScrollOffset, rect.GetSize().height / 2 - textSize.height / 2));
         textRect.max -= Vec2(padding.left + padding.right, rect.GetSize().height / 2 - textSize.height / 2);

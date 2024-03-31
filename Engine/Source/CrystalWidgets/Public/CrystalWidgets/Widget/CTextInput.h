@@ -83,6 +83,12 @@ namespace CE::Widgets
 
 	private:
 
+		// - Internal API -
+
+
+
+		// Fields
+
 		CInputValidator inputValidator{};
 
 		String originalText{};
@@ -90,15 +96,12 @@ namespace CE::Widgets
 		f32 textScrollOffset = 0;
 
 		int cursorPos = 0;
+		RangeInt selectionRange{};
 
 		b8 cursorState = true;
 		b8 isCursorMoving = false;
 
-		RangeInt selectionRange = RangeInt(-1, -1);
-
 		f32 selectionDistance = 0;
-
-		b8 selectAll = false;
 
 		b8 isEditing = false;
 
