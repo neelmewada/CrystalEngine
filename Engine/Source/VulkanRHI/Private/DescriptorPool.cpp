@@ -65,7 +65,7 @@ namespace CE::Vulkan
 		// TODO: Implement dynamic array sizing!
 		VkDescriptorSetVariableDescriptorCountAllocateInfo setCount{};
 		setCount.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-		setCount.descriptorSetCount = 1;
+		setCount.descriptorSetCount = numDescriptorSets;
 		setCount.pDescriptorCounts = &arraySize;
 
 		if (descriptorPools.IsEmpty())
@@ -111,6 +111,66 @@ namespace CE::Vulkan
 			return {};
 		}
 		
+		outPool = allocInfo.descriptorPool;
+		return sets;
+	}
+
+	List<VkDescriptorSet> DescriptorPool::Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool, const List<u32>& descriptorCounts)
+	{
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorSetCount = numDescriptorSets;
+		allocInfo.pSetLayouts = setLayouts.GetData();
+
+		// TODO: Implement dynamic array sizing!
+		VkDescriptorSetVariableDescriptorCountAllocateInfo setCount{};
+		setCount.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
+		setCount.descriptorSetCount = numDescriptorSets;
+		setCount.pDescriptorCounts = descriptorCounts.GetData();
+
+		if (descriptorPools.IsEmpty())
+			Increment(Math::Max(incrementSize, numDescriptorSets));
+		allocInfo.descriptorPool = descriptorPools.GetLast();
+
+		List<VkDescriptorSet> sets = List<VkDescriptorSet>(numDescriptorSets);
+
+		VkResult result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
+		int counter = 0;
+
+		if (result == VK_ERROR_OUT_OF_POOL_MEMORY)
+		{
+			// If we need a lot of descriptor sets allocated
+			if (numDescriptorSets > initialSize)
+			{
+				Increment(Math::Max(incrementSize, numDescriptorSets));
+				allocInfo.descriptorPool = descriptorPools.GetLast();
+				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
+			}
+
+			for (int i = descriptorPools.GetSize() - 1; i >= 0 && result != VK_SUCCESS; i--)
+			{
+				allocInfo.descriptorPool = descriptorPools[i];
+				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
+			}
+
+			if (result != VK_SUCCESS)
+			{
+				Increment(Math::Max(incrementSize, numDescriptorSets));
+			}
+
+			for (int i = descriptorPools.GetSize() - 1; i >= 0 && result != VK_SUCCESS; i--)
+			{
+				allocInfo.descriptorPool = descriptorPools[i];
+				result = vkAllocateDescriptorSets(device->GetHandle(), &allocInfo, sets.GetData());
+			}
+		}
+
+		if (result != VK_SUCCESS)
+		{
+			CE_LOG(Error, All, "Failed to allocate descriptor sets! Error code {}", (int)result);
+			return {};
+		}
+
 		outPool = allocInfo.descriptorPool;
 		return sets;
 	}

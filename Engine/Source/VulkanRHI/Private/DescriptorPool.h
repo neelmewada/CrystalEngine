@@ -15,6 +15,8 @@ namespace CE::Vulkan
         
 		List<VkDescriptorSet> Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool);
 
+        List<VkDescriptorSet> Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool, const List<u32>& descriptorCounts);
+
 		void Free(const List<VkDescriptorSet>& sets);
         
         void Increment(u32 size);
