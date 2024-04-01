@@ -677,7 +677,7 @@ namespace CE::Vulkan
 		}
 
 		imageInfosBoundBySlot[i][bindingSlot].Clear();
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
+		imageInfosBoundBySlot[i][bindingSlot].Reserve(count);
 
 		for (int j = 0; j < count; j++)
 		{
@@ -724,7 +724,6 @@ namespace CE::Vulkan
 			break;
 		}
 
-		imageInfosBoundBySlot[i][bindingSlot].Clear();
 		imageInfosBoundBySlot[i][bindingSlot].Clear();
 
 		for (int j = 0; j < count; j++)
@@ -821,9 +820,13 @@ namespace CE::Vulkan
 
 				VkWriteDescriptorSet& write = writes[idx++];
 				write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				write.descriptorCount = variable.descriptorCount;
 				write.descriptorType = variable.descriptorType;
 				write.dstArrayElement = 0;
+				write.descriptorCount = variable.descriptorCount; // Array count
+				if (write.descriptorCount == 0) // Dynamic sized array
+				{
+					write.descriptorCount = bufferWrites.GetSize();
+				}
 				write.dstBinding = variable.binding;
 				write.dstSet = descriptorSet->GetHandle();
 				write.pBufferInfo = bufferWrites.GetData();
@@ -838,15 +841,20 @@ namespace CE::Vulkan
 
 				VkWriteDescriptorSet& write = writes[idx++];
 				write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-				write.descriptorCount = variable.descriptorCount;
 				write.descriptorType = variable.descriptorType;
 				write.dstArrayElement = 0;
+				write.descriptorCount = variable.descriptorCount; // Array count
+				if (write.descriptorCount == 0) // Dynamic sized array
+				{
+					write.descriptorCount = imageWrites.GetSize();
+				}
 				write.dstBinding = variable.binding;
 				write.dstSet = descriptorSet->GetHandle();
 				write.pImageInfo = imageWrites.GetData();
 			}
-
-			vkUpdateDescriptorSets(device->GetHandle(), writes.GetSize(), writes.GetData(), 0, nullptr);
+			
+			vkUpdateDescriptorSets(device->GetHandle(), writes.GetSize(), writes.GetData(), 
+				0, nullptr);
 		}
 	}
 

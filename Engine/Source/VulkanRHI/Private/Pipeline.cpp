@@ -106,11 +106,28 @@ namespace CE::Vulkan
 
                 found = true;
 
-                for (const auto& variable : srgLayout.variables)
+                List<VkDescriptorBindingFlags> bindingFlags{};
+                bindingFlags.Reserve(srgLayout.variables.GetSize());
+
+                for (int i = 0; i < srgLayout.variables.GetSize(); i++)
                 {
+                    const auto& variable = srgLayout.variables[i];
+
                     VkDescriptorSetLayoutBinding layoutBinding{};
                     layoutBinding.binding = variable.bindingSlot;
                     layoutBinding.descriptorCount = variable.arrayCount;
+                    if (layoutBinding.descriptorCount == 0) // Dynamic size arrays will have descriptor count set as 0
+                    {
+                        bindingFlags.Add(VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT | VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+                    }
+                    else
+                    {
+                        bindingFlags.Add(0);
+                    }
+#if !PLATFORM_DESKTOP
+                    CE_ASSERT(layoutBinding.descriptorCount > 0, "Unbounded descriptor arrays are supported only on windows!");
+#endif
+
                     layoutBinding.stageFlags = 0;
                     if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Vertex))
                     {
@@ -168,20 +185,17 @@ namespace CE::Vulkan
                 }
 
                 // TODO: Implement variable size arrays
-                VkDescriptorBindingFlags flags[3];
-                flags[0] = 0;
-                flags[1] = 0;
-                flags[2] = VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT | VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
 
-                VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags{};
-                bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-                bindingFlags.bindingCount = 3;
-                bindingFlags.pBindingFlags = flags;
+                VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsInfo{};
+                bindingFlagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+                bindingFlagsInfo.bindingCount = bindingFlags.GetSize();
+                bindingFlagsInfo.pBindingFlags = bindingFlags.GetData();
 
                 VkDescriptorSetLayoutCreateInfo setLayoutCI{};
                 setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
                 setLayoutCI.bindingCount = setLayoutBindingsMap[setNumber].GetSize();
                 setLayoutCI.pBindings = setLayoutBindingsMap[setNumber].GetData();
+                setLayoutCI.pNext = &bindingFlagsInfo;
 
                 VkDescriptorSetLayout setLayout = nullptr;
                 result = vkCreateDescriptorSetLayout(device->GetHandle(), &setLayoutCI, nullptr, &setLayout);
