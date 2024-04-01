@@ -49,6 +49,10 @@ namespace CE
 
         void Tick() override;
 
+        bool HasClipboardText() override;
+        String GetClipboardText() override;
+        void SetClipboardText(const String& text) override;
+
     public:
         Mutex mutex{};
 

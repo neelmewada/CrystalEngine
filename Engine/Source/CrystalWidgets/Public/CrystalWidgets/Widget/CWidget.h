@@ -154,6 +154,9 @@ namespace CE::Widgets
         virtual void OnFocusGained() {}
         virtual void OnFocusLost() {}
 
+        virtual void OnBeforeComputeStyle() {}
+        virtual void OnAfterComputeStyle() {}
+
         void SetNeedsPaintRecursively(bool newValue = false);
 
         virtual void Construct();

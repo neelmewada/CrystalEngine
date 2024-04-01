@@ -12,6 +12,11 @@ namespace CE
 		return instance;
 	}
 
+	PlatformApplication* PlatformApplication::TryGet()
+	{
+		return instance;
+	}
+
 	PlatformApplication::~PlatformApplication()
 	{
 		instance = nullptr;

@@ -246,6 +246,24 @@ namespace CE
 		Super::Tick();
 	}
 
+	bool SDLApplication::HasClipboardText()
+	{
+		return SDL_HasClipboardText();
+	}
+
+	String SDLApplication::GetClipboardText()
+	{
+		char* cString = SDL_GetClipboardText();
+		String string = cString;
+		SDL_free(cString);
+		return string;
+	}
+
+	void SDLApplication::SetClipboardText(const String& text)
+	{
+		SDL_SetClipboardText(text.GetCString());
+	}
+
 	void SDLApplication::ProcessWindowEvents(SDL_Event& event)
 	{
 		if (event.window.event == SDL_WINDOWEVENT_RESIZED)

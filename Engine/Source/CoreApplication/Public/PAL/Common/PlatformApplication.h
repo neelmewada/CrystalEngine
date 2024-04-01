@@ -41,6 +41,8 @@ namespace CE
 
         static PlatformApplication* Get();
 
+        static PlatformApplication* TryGet();
+
         PlatformApplication() = default;
 
         virtual ~PlatformApplication();
@@ -95,6 +97,12 @@ namespace CE
 		virtual Vec2i GetScreenSizeForWindow(PlatformWindow* window) = 0;
 
 		virtual Vec2i GetWindowSize(void* nativeWindowHandle) = 0;
+
+        // Clipboard
+
+        virtual bool HasClipboardText() = 0;
+        virtual String GetClipboardText() = 0;
+        virtual void SetClipboardText(const String& text) = 0;
 
         WindowResizeDelegate onWindowDrawableSizeChanged{};
 

@@ -31,8 +31,6 @@ namespace CE::Widgets
 
 		void SetEditable(bool editable) { isEditable = editable; }
 
-		void SelectAll() { selectAll = true; SetNeedsPaint(); }
-
 		void SetInputValidator(CInputValidator validator)
 		{
 			this->inputValidator = validator;
@@ -83,9 +81,31 @@ namespace CE::Widgets
 
 	private:
 
+		void OnAfterComputeStyle() override
+		{
+			RecalculateOffsets();
+		}
+
 		// - Internal API -
 
+		void RecalculateOffsets();
 
+		void SetCursorPos(int cursorPos);
+
+		void ScrollTo(int cursorPos);
+
+		void InsertAt(const String& string, int insertPos);
+
+		void RemoveRange(int startIndex, int count);
+
+		void RemoveSelected();
+
+		void SelectRange(int startIndex, int endIndex);
+		void SelectAll();
+
+		String GetSelectedText();
+
+		void DeselectAll();
 
 		// Fields
 
@@ -95,7 +115,11 @@ namespace CE::Widgets
 
 		f32 textScrollOffset = 0;
 
+		Array<Rect> characterOffsets{};
+		Vec2 textSize{};
+
 		int cursorPos = 0;
+		b8 isSelectionActive = false;
 		RangeInt selectionRange{};
 
 		b8 cursorState = true;

@@ -447,6 +447,8 @@ namespace CE::Widgets
 
 			bool layoutChanged = computedStyle.CompareLayoutProperties(prevComputedStyle);
 
+			OnBeforeComputeStyle();
+
 			for (const auto& [property, value] : selectStyle.properties)
 			{
 				if (!value.IsValid())
@@ -715,6 +717,8 @@ namespace CE::Widgets
 					}
 				}
 			}
+
+			OnAfterComputeStyle();
 
 			needsStyle = false;
 
