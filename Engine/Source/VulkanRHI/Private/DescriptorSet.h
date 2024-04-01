@@ -8,7 +8,7 @@ namespace CE::Vulkan
     class DescriptorSet
     {
     public:
-        DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout);
+        DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout);
 
         virtual ~DescriptorSet();
 

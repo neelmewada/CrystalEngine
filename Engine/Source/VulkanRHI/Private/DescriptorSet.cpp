@@ -2,7 +2,7 @@
 
 namespace CE::Vulkan
 {
-    DescriptorSet::DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout)
+    DescriptorSet::DescriptorSet(VulkanDevice* device, VkDescriptorSetLayout setLayout, const RHI::ShaderResourceGroupLayout& srgLayout)
 		: device(device)
     {
 		this->srgLayout = srgLayout;

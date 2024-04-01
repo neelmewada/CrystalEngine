@@ -13,7 +13,7 @@ namespace CE::Vulkan
 
         void Init(VulkanDevice* device, u32 initialPoolSize = 128, u32 poolSizeIncrement = 128);
         
-		List<VkDescriptorSet> Allocate(u32 numDescriptorSets, List<VkDescriptorSetLayout> setLayouts, VkDescriptorPool& outPool);
+		List<VkDescriptorSet> Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool);
 
 		void Free(const List<VkDescriptorSet>& sets);
         

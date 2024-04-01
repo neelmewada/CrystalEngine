@@ -53,7 +53,7 @@ namespace CE::Vulkan
 		descriptorPools.Add(pool);
 	}
 
-	List<VkDescriptorSet> DescriptorPool::Allocate(u32 numDescriptorSets, List<VkDescriptorSetLayout> setLayouts, VkDescriptorPool& outPool)
+	List<VkDescriptorSet> DescriptorPool::Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool)
 	{
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;

@@ -802,7 +802,7 @@ namespace CE::Vulkan
 
 		for (int i = 0; i < descriptorSets.GetSize(); i++)
 		{
-			descriptorSets[i] = new DescriptorSet(device, setLayout);
+			descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout);
 		}
 
 		UpdateBindings();
