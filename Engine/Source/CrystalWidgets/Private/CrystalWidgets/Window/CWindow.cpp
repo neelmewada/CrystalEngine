@@ -436,7 +436,7 @@ namespace CE::Widgets
 
         CPainter* painter = paintEvent->painter;
 
-        if (allowVerticalScroll)
+        if (allowVerticalScroll) // Draw Vertical Scroll Bar
         {
             Vec2 originalSize = GetComputedLayoutSize();
             f32 originalHeight = originalSize.height;
@@ -448,6 +448,11 @@ namespace CE::Widgets
 
                 CPen pen{};
                 CBrush brush = CBrush(Color::RGBA(87, 87, 87));
+
+                if (isVerticalScrollHovered || isVerticalScrollPressed)
+                {
+                    brush.SetColor(Color::RGBA(128, 128, 128));
+                }
 
                 painter->SetPen(pen);
                 painter->SetBrush(brush);
@@ -499,7 +504,35 @@ namespace CE::Widgets
             Vec2 windowSpaceMousePos = globalMousePos - screenSpaceWindowRect.min;
             Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
 
-            if (mouseEvent->type == CEventType::DragBegin && (allowVerticalScroll || allowHorizontalScroll))
+            if (mouseEvent->type == CEventType::MouseMove && (allowVerticalScroll || allowHorizontalScroll))
+            {
+                isVerticalScrollHovered = false;
+                SetNeedsPaint();
+
+	            if (allowVerticalScroll)
+	            {
+                    Vec2 originalSize = GetComputedLayoutSize();
+                    f32 originalHeight = originalSize.height;
+                    f32 contentMaxY = contentSize.height;
+
+                    if (contentMaxY > originalHeight)
+                    {
+                        Rect scrollRect = GetVerticalScrollBarRect();
+                        scrollRect = LocalToScreenSpaceRect(scrollRect);
+
+                        if (scrollRect.Contains(globalMousePos))
+                        {
+                            isVerticalScrollHovered = true;
+                        }
+                    }
+	            }
+            }
+            else if (mouseEvent->type == CEventType::MouseLeave && (allowVerticalScroll || allowHorizontalScroll))
+            {
+                isVerticalScrollHovered = false;
+                SetNeedsPaint();
+            }
+            else if (mouseEvent->type == CEventType::DragBegin && (allowVerticalScroll || allowHorizontalScroll))
             {
                 CDragEvent* dragEvent = (CDragEvent*)event;
 

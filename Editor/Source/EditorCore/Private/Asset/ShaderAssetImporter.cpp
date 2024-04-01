@@ -24,7 +24,7 @@ namespace CE::Editor
 			return false;
 
 		// NOTE: The package might already have assets & objects stored in it if asset already existed
-		// It is responsibilty of the derived asset importer to clear the old objects or just modify them as per need.
+		// It is responsibility of the derived asset importer to clear the old objects or just modify them as per need.
 		
 		// Clear the package of any subobjects, we will build the asset from scratch
 		package->DestroyAllSubobjects();

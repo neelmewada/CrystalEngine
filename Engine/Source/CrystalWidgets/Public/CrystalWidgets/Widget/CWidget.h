@@ -14,9 +14,13 @@ namespace CE::Widgets
         CWidget();
         virtual ~CWidget();
 
-        inline bool IsEnabled() const { return enabled; }
+        bool IsEnabled() const;
 
-        inline bool IsVisible() const { return visible; }
+        bool IsSelfEnabled() const { return enabled; }
+
+        bool IsVisible() const;
+
+        bool IsSelfVisible() const { return visible; }
 
         bool IsInteractable() const;
 

@@ -136,8 +136,12 @@ namespace CE
 			String internalName = reflection->get_name(uniformBuffer.base_type_id);
 			auto type = reflection->get_type(uniformBuffer.type_id);
 			int count = 1;
+			bool isArray = false;
 			if (type.array.size() > 0)
+			{
 				count = type.array[0];
+				isArray = true;
+			}
 
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
@@ -169,8 +173,12 @@ namespace CE
 
 			auto type = reflection->get_type(storageBuffer.type_id);
 			int count = 1;
+			bool isArray = false;
 			if (type.array.size() > 0)
+			{
 				count = type.array[0];
+				isArray = true;
+			}
 
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
@@ -202,8 +210,12 @@ namespace CE
 
 			auto type = reflection->get_type(storageImage.type_id);
 			int count = 1;
+			bool isArray = false;
 			if (type.array.size() > 0)
+			{
 				count = type.array[0];
+				isArray = true;
+			}
 
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
@@ -242,8 +254,12 @@ namespace CE
 
 			auto type = reflection->get_type(texture.type_id);
 			int count = 1;
+			bool isArray = false;
 			if (type.array.size() > 0)
+			{
 				count = type.array[0];
+				isArray = true;
+			}
 
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);
@@ -290,8 +306,12 @@ namespace CE
 
 			auto type = reflection->get_type(sampler.type_id);
 			int count = 1;
+			bool isArray = false;
 			if (type.array.size() > 0)
+			{
 				count = type.array[0];
+				isArray = true;
+			}
 
 			u32 set = reflection->get_decoration(id, spv::DecorationDescriptorSet);
 			u32 binding = reflection->get_decoration(id, spv::DecorationBinding);

@@ -82,6 +82,7 @@ namespace CE::Widgets
         StaticArray<bool, 3> hoveredControls{};
         int clickedControlIdx = -1;
         b8 isVerticalScrollPressed = false;
+        b8 isVerticalScrollHovered = false;
 
     crystalwidgets_internal:
 

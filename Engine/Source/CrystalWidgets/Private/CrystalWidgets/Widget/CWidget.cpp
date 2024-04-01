@@ -192,6 +192,22 @@ namespace CE::Widgets
 		}
 	}
 
+	bool CWidget::IsEnabled() const
+	{
+		if (parent == nullptr)
+			return enabled;
+
+		return enabled && parent->IsEnabled();
+	}
+
+	bool CWidget::IsVisible() const
+	{
+		if (parent == nullptr)
+			return enabled && visible;
+
+		return enabled && visible && parent->IsVisible() && parent->IsEnabled();
+	}
+
 	bool CWidget::IsInteractable() const
 	{
 		if (!interactable)

@@ -167,6 +167,17 @@ namespace CE::Vulkan
                     setLayoutBindingsByName[variable.name] = layoutBinding;
                 }
 
+                // TODO: Implement variable size arrays
+                VkDescriptorBindingFlags flags[3];
+                flags[0] = 0;
+                flags[1] = 0;
+                flags[2] = VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT | VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+
+                VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags{};
+                bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+                bindingFlags.bindingCount = 3;
+                bindingFlags.pBindingFlags = flags;
+
                 VkDescriptorSetLayoutCreateInfo setLayoutCI{};
                 setLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
                 setLayoutCI.bindingCount = setLayoutBindingsMap[setNumber].GetSize();

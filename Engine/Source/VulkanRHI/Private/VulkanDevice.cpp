@@ -354,6 +354,20 @@ namespace CE::Vulkan
 		deviceFeaturesToUse.textureCompressionBC = VK_TRUE;
 #endif
 
+		// Descriptor Indexing features
+		VkPhysicalDeviceDescriptorIndexingFeatures descriptorIndexingFeatures{};
+		descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+
+		// Enable non-uniform indexing
+		descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+		descriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
+		descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
+		descriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+
+#if PLATFORM_DESKTOP
+		deviceCI.pNext = &descriptorIndexingFeatures;
+#endif
+
 		deviceCI.pEnabledFeatures = &deviceFeaturesToUse;
 
 		if (vkCreateDevice(gpu, &deviceCI, nullptr, &device) != VK_SUCCESS)

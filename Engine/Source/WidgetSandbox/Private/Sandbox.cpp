@@ -127,9 +127,11 @@ namespace CE
 		CLabel* testLabel = CreateObject<CLabel>(thirdDockWindow, "TestLabel");
 		testLabel->SetText("This is a test label");
 
-		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [textInput]
+		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [textInput, this, right]
 			{
-				textInput->SetAsPassword(!textInput->IsPassword());
+				fifthDockWindow->SetEnabled(!fifthDockWindow->IsEnabled());
+				right->SetNeedsLayout();
+				right->SetNeedsPaint();
 			});
 	}
 

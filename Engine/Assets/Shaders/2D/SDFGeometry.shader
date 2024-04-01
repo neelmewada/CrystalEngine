@@ -13,9 +13,9 @@ Shader "2D/SDF Geometry"
 
         Pass
         {
-            Name "Rect"
+            Name "SDF"
             Tags { 
-                "Vertex"="VertMain", "Fragment"="FragMain"
+                "Vertex"="VertMain", "Fragment"="FragMain", "Platform"="Desktop"
             }
             ZWrite Off
             ZTest Off
@@ -100,6 +100,8 @@ Shader "2D/SDF Geometry"
 
             #if FRAGMENT
 
+            #define MAX_TEXTURES 64
+
             Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
             SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
 
@@ -108,11 +110,15 @@ Shader "2D/SDF Geometry"
                 float _SDFSmoothness;
             };
 
+            // Do NOT add any resource after t4 in SRG_PerMaterial, because unbounded array should always be the last one!
+            //Texture2D<float> _Textures[] : SRG_PerMaterial(t4);
+
             inline float SDFCircle(float2 p, float r)
             {
                 return length(p) - r;
             }
 
+            // Credit: https://iquilezles.org/articles/distfunctions2d/
             inline float SDFBox( in float2 p, in float2 b )
             {
                 float2 d = abs(p) - b;
