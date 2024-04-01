@@ -265,6 +265,9 @@ namespace CE::Vulkan
 		variableBindingsByName.Clear();
 		variableBindingsBySlot.Clear();
 
+		List<VkDescriptorBindingFlags> bindingFlags{};
+		bindingFlags.Reserve(srgLayout.variables.GetSize());
+
 		for (const RHI::SRGVariableDescriptor& variable : srgLayout.variables)
 		{
 			setLayoutBindings.Add({});
@@ -275,6 +278,18 @@ namespace CE::Vulkan
 			entry.descriptorCount = variable.arrayCount;
 			entry.descriptorType = srgManager->GetDescriptorType(variable.type, variable.usesDynamicOffset);
 			entry.stageFlags = 0;
+
+			if (entry.descriptorCount == 0) // Dynamic size arrays will have descriptor count set as 0
+			{
+				bindingFlags.Add(VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT | VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+			}
+			else
+			{
+				bindingFlags.Add(0);
+			}
+#if !PLATFORM_DESKTOP
+			CE_ASSERT(layoutBinding.descriptorCount > 0, "Unbounded descriptor arrays are supported only on windows!");
+#endif
 
 			if (EnumHasFlag(variable.shaderStages, RHI::ShaderStage::Vertex))
 			{
@@ -294,10 +309,18 @@ namespace CE::Vulkan
 			variableBindingsBySlot[variable.bindingSlot] = entry;
 		}
 
+		// TODO: Implement variable size arrays
+
+		VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsInfo{};
+		bindingFlagsInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+		bindingFlagsInfo.bindingCount = bindingFlags.GetSize();
+		bindingFlagsInfo.pBindingFlags = bindingFlags.GetData();
+
 		VkDescriptorSetLayoutCreateInfo layoutCI{};
 		layoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		layoutCI.bindingCount = setLayoutBindings.GetSize();
 		layoutCI.pBindings = setLayoutBindings.GetData();
+		layoutCI.pNext = &bindingFlagsInfo;
 
 		auto result = vkCreateDescriptorSetLayout(device->GetHandle(), &layoutCI, nullptr, &setLayout);
 		if (result != VK_SUCCESS)

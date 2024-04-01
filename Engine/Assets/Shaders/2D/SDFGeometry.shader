@@ -111,7 +111,7 @@ Shader "2D/SDF Geometry"
             };
 
             // Do NOT add any resource after t4 in SRG_PerMaterial, because unbounded array should always be the last one!
-            //Texture2D<float> _Textures[] : SRG_PerMaterial(t4);
+            Texture2D<float> _Textures[] : SRG_PerMaterial(t4);
 
             inline float SDFCircle(float2 p, float r)
             {
