@@ -268,6 +268,8 @@ namespace CE::Widgets
         int destroyFrameCounter = 0;
         b8 isQueuedForDestruction = false;
 
+        Name backgroundImagePath{};
+
     protected:
 
         virtual void OnBeforeDestroy() override;

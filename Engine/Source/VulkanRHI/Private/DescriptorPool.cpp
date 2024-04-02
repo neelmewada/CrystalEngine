@@ -60,14 +60,6 @@ namespace CE::Vulkan
 		allocInfo.descriptorSetCount = numDescriptorSets;
 		allocInfo.pSetLayouts = setLayouts.GetData();
 
-		uint32_t arraySize = 0;
-
-		// TODO: Implement dynamic array sizing!
-		VkDescriptorSetVariableDescriptorCountAllocateInfo setCount{};
-		setCount.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
-		setCount.descriptorSetCount = numDescriptorSets;
-		setCount.pDescriptorCounts = &arraySize;
-
 		if (descriptorPools.IsEmpty())
 			Increment(Math::Max(incrementSize, numDescriptorSets));
 		allocInfo.descriptorPool = descriptorPools.GetLast();
@@ -115,7 +107,8 @@ namespace CE::Vulkan
 		return sets;
 	}
 
-	List<VkDescriptorSet> DescriptorPool::Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool, const List<u32>& descriptorCounts)
+	List<VkDescriptorSet> DescriptorPool::Allocate(u32 numDescriptorSets, const List<VkDescriptorSetLayout>& setLayouts, VkDescriptorPool& outPool, 
+		const List<uint32_t>& descriptorCounts)
 	{
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -127,6 +120,8 @@ namespace CE::Vulkan
 		setCount.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO;
 		setCount.descriptorSetCount = numDescriptorSets;
 		setCount.pDescriptorCounts = descriptorCounts.GetData();
+
+		allocInfo.pNext = &setCount;
 
 		if (descriptorPools.IsEmpty())
 			Increment(Math::Max(incrementSize, numDescriptorSets));

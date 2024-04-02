@@ -2,12 +2,11 @@
 
 namespace CE::RHI
 {
-	SharedMutex frameSchedulerInstancesMutex{};
-	Array<FrameScheduler*> FrameScheduler::frameSchedulerInstances{};
+	FrameScheduler* frameSchedulerInstance = nullptr;
 
 	FrameScheduler::FrameScheduler(const FrameSchedulerDescriptor& descriptor)
 	{
-		frameSchedulerInstances.Add(this);
+		frameSchedulerInstance = this;
 
 		frameGraph = new FrameGraph();
         transientMemoryPool = new TransientMemoryPool();
@@ -19,19 +18,15 @@ namespace CE::RHI
 
 	FrameScheduler* FrameScheduler::Create(const FrameSchedulerDescriptor& descriptor)
 	{
-		LockGuard<SharedMutex> lock{ frameSchedulerInstancesMutex };
-
-		if (frameSchedulerInstances.GetSize() >= RHI::Limits::MaxFrameSchedulerCount)
-			return nullptr;
-
 		return new FrameScheduler(descriptor);
 	}
 
 	FrameScheduler::~FrameScheduler()
 	{
-		LockGuard<SharedMutex> lock{ frameSchedulerInstancesMutex };
-
-		frameSchedulerInstances.Remove(this);
+		if (frameSchedulerInstance == this)
+		{
+			frameSchedulerInstance = nullptr;
+		}
 
 		delete executer;
 		delete compiler;
@@ -42,11 +37,6 @@ namespace CE::RHI
 	void FrameScheduler::BeginFrameGraph()
 	{
 		FrameGraphBuilder::BeginFrameGraph(frameGraph);
-	}
-
-	void FrameScheduler::Construct()
-	{
-		
 	}
 
     void FrameScheduler::Compile()
@@ -121,20 +111,9 @@ namespace CE::RHI
 		executer->WaitUntilIdle();
 	}
 
-	FrameScheduler* FrameScheduler::GetFrameScheduler(int instanceIndex)
+	FrameScheduler* FrameScheduler::Get()
 	{
-		LockGuard<SharedMutex> lock{ frameSchedulerInstancesMutex };
-
-		if (instanceIndex < 0 || instanceIndex >= frameSchedulerInstances.GetSize())
-			return nullptr;
-		return frameSchedulerInstances[instanceIndex];
-	}
-
-	int FrameScheduler::GetTotalFrameSchedulerCount()
-	{
-		LockGuard<SharedMutex> lock{ frameSchedulerInstancesMutex };
-
-		return frameSchedulerInstances.GetSize();
+		return frameSchedulerInstance;
 	}
 
 	void FrameScheduler::SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value)

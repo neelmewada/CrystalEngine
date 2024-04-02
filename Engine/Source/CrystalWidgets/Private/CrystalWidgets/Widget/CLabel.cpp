@@ -85,8 +85,6 @@ namespace CE::Widgets
         painter->SetFont(font);
         painter->SetPen(pen);
 
-        bool isLabel = parent == nullptr || !parent->IsOfType<CButton>();
-
         Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
 
         painter->DrawText(text, rect);

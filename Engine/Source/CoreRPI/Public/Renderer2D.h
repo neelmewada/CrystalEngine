@@ -3,6 +3,7 @@
 namespace CE::RPI
 {
     class Shader;
+    class Texture;
 
     struct Renderer2DDescriptor
     {
@@ -117,6 +118,14 @@ namespace CE::RPI
             return DrawRoundedX(rect.GetSize());
         }
 
+        Vec2 DrawTexture(RPI::Texture* texture, Vec2 size);
+
+        Vec2 DrawTexture(RPI::Texture* texture, const Rect& rect)
+        {
+            SetCursor(rect.min);
+            return DrawTexture(texture, rect.GetSize());
+        }
+
         void End();
 
         const Array<DrawPacket*>& FlushDrawPackets(u32 imageIndex);
@@ -148,6 +157,7 @@ namespace CE::RPI
             DRAW_Rect,
             DRAW_RoundedRect,
             DRAW_RoundedX,
+            DRAW_Texture,
         };
 
         struct alignas(16) DrawItem2D
@@ -162,6 +172,7 @@ namespace CE::RPI
             u32 charIndex = 0; // For character drawing
             u32 bold = 0;
             u32 clipRectIdx = 0;
+            u32 textureIndex = 0;
         };
 
         struct FontInfo
@@ -238,9 +249,11 @@ namespace CE::RPI
         RHI::ShaderResourceGroup* drawItemSrg = nullptr;
         Array<DrawBatch> drawBatches{};
         Array<DrawItem2D> drawItems{};
+        Array<RPI::Texture*> textures{};
         Array<Rect> clipRects{};
         u32 drawItemCount = 0;
         u32 clipRectCount = 0;
+        u32 textureCount = 0;
         Array<u32> clipRectStack{};
         bool createNewDrawBatch = false;
 

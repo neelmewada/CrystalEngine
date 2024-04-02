@@ -557,6 +557,10 @@ namespace CE::Widgets
 				outValue.enumValue = enumValue;
 			}
 		}
+		else if (current->type == CSS::StringLiteral)
+		{
+			outValue = current->lexeme;
+		}
 	}
 
 	void CSSParser::ParseVector(int startCursor, int endCursor, Vec4& out)

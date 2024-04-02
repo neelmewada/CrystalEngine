@@ -54,11 +54,19 @@ Shader "2D/SDF Geometry"
                 uint charIndex; // For character drawing
                 uint bold;
                 uint clipRect;
+                uint textureIndex;
             };
 
             StructuredBuffer<DrawItem> _DrawList : SRG_PerDraw(t0);
 
             StructuredBuffer<float4> _ClipRects : SRG_PerDraw(t1);
+
+            SamplerState _TextureSampler : SRG_PerDraw(s2);
+
+            #define MAX_TEXTURES 10000
+
+            // Do NOT add any resource after t2 in SRG_PerDraw, because unbounded array should always be the last one in a SRG!
+            Texture2D<float4> _Textures[MAX_TEXTURES] : SRG_PerDraw(t3);
 
             struct CharacterItem
             {
@@ -75,6 +83,7 @@ Shader "2D/SDF Geometry"
                 DRAW_Rect,
                 DRAW_RoundedRect,
                 DRAW_RoundedX,
+                DRAW_Texture,
             };
 
             #if VERTEX
@@ -100,8 +109,6 @@ Shader "2D/SDF Geometry"
 
             #if FRAGMENT
 
-            #define MAX_TEXTURES 64
-
             Texture2D<float> _FontAtlas : SRG_PerMaterial(t0);
             SamplerState _FontAtlasSampler : SRG_PerMaterial(s1);
 
@@ -109,9 +116,6 @@ Shader "2D/SDF Geometry"
             {
                 float _SDFSmoothness;
             };
-
-            // Do NOT add any resource after t4 in SRG_PerMaterial, because unbounded array should always be the last one!
-            Texture2D<float> _Textures[] : SRG_PerMaterial(t4);
 
             inline float SDFCircle(float2 p, float r)
             {
@@ -196,20 +200,6 @@ Shader "2D/SDF Geometry"
                 return lerp(float4(color.rgb, 0), color, -sdf);
             }
 
-            float4 RenderRect0(in GeometryInfo info, float2 uv)
-            {
-                float4 color = info.fillColor;
-                float2 borderThickness = float2(info.borderThickness, info.borderThickness) / info.itemSize;
-
-                float borderMask = 0.0;
-                if (uv.x < borderThickness.x || uv.x > 1.0 - borderThickness.x || uv.y < borderThickness.y || uv.y > 1.0 - borderThickness.y)
-                    borderMask = 1.0;
-
-                borderMask = clamp(borderMask, 0, 1);
-                color = lerp(color, info.outlineColor, borderMask);
-                return color;
-            }
-
             float4 RenderRect(in GeometryInfo info, float2 p)
             {
                 const float sdf = SDFBox(p, info.itemSize * 0.5);
@@ -239,16 +229,16 @@ Shader "2D/SDF Geometry"
                 float4 color = info.fillColor;
 
                 float borderMask = 0.0;
-                if (sdf > -borderThickness && sdf <= 0)
-		            borderMask = 1.0;
+                //if (sdf > -borderThickness && sdf <= 0)
+		        //    borderMask = 1.0;
 
-                /*if (borderThickness > 0.1)
+                if (borderThickness > 0.1)
                 {
-                    const float borderSmoothStart = -borderThickness - 1.0; // 1.0
+                    const float borderSmoothStart = -borderThickness - 1.0;
                     const float borderSmoothEnd = -borderThickness;
                     borderMask = lerp(borderMask, 1, clamp((sdf - borderSmoothStart) / (borderSmoothEnd - borderSmoothStart), 0, 1));
                     borderMask = clamp(borderMask, 0, 1);
-                }*/
+                }
 
                 color = lerp(color, info.outlineColor, borderMask);
 
@@ -297,6 +287,8 @@ Shader "2D/SDF Geometry"
                     return RenderRoundedRect(info, p);
                 case DRAW_RoundedX:
                     return RenderRoundedX(info, p);
+                case DRAW_Texture:
+                    return _Textures[_DrawList[idx].textureIndex].SampleLevel(_TextureSampler, uv, 0.0);
                 }
 
                 return float4(0, 0, 0, 0);

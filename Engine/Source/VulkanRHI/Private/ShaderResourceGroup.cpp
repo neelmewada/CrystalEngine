@@ -390,8 +390,6 @@ namespace CE::Vulkan
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
 			Bind(i, name, count, bufferViews);
-
-			needsRecompile = true;
 		}
 		
 		return true;
@@ -446,8 +444,6 @@ namespace CE::Vulkan
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
 			Bind(i, name, count, textures);
-
-			needsRecompile = true;
 		}
 		
 		return true;
@@ -463,8 +459,6 @@ namespace CE::Vulkan
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
 			Bind(i, name, count, textureViews);
-
-			needsRecompile = true;
 		}
 
 		return true;
@@ -500,8 +494,6 @@ namespace CE::Vulkan
 		for (int i = 0; i < RHI::Limits::MaxSwapChainImageCount; i++)
 		{
 			Bind(i, name, count, samplers);
-
-			needsRecompile = true;
 		}
 
 		return true;
@@ -747,6 +739,33 @@ namespace CE::Vulkan
 			break;
 		}
 
+		if (count != imageInfosBoundBySlot[i][bindingSlot].GetSize())
+		{
+			needsRecompile = true;
+		}
+		else
+		{
+			for (int j = 0; j < count; ++j)
+			{
+				if (j >= imageInfosBoundBySlot[i][bindingSlot].GetSize())
+				{
+					needsRecompile = true;
+					break;
+				}
+
+				Vulkan::TextureView* texture = (Vulkan::TextureView*)textureViews[j];
+
+				if (imageInfosBoundBySlot[i][bindingSlot][j].imageView != texture->GetImageView())
+				{
+					needsRecompile = true;
+					break;
+				}
+			}
+		}
+
+		if (!needsRecompile)
+			return true;
+
 		imageInfosBoundBySlot[i][bindingSlot].Clear();
 
 		for (int j = 0; j < count; j++)
@@ -760,8 +779,6 @@ namespace CE::Vulkan
 
 			imageInfosBoundBySlot[i][bindingSlot].Add(imageWrite);
 		}
-
-		needsRecompile = true;
 
 		return true;
 	}
@@ -802,7 +819,44 @@ namespace CE::Vulkan
 
 		for (int i = 0; i < descriptorSets.GetSize(); i++)
 		{
-			descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout);
+			Name dynamicArrayName = "";
+			u32 dynamicArraySize = 0;
+
+			for (const auto& variable : srgLayout.variables)
+			{
+				if (variable.arrayCount == 0)
+				{
+					switch (variable.type)
+					{
+					case ShaderResourceType::None:
+						continue;
+					case ShaderResourceType::ConstantBuffer:
+					case ShaderResourceType::StructuredBuffer:
+					case ShaderResourceType::RWStructuredBuffer:
+						dynamicArraySize = bufferInfosBoundBySlot[i][variable.bindingSlot].GetSize();
+						break;
+					case ShaderResourceType::Texture1D:
+					case ShaderResourceType::Texture2D:
+					case ShaderResourceType::Texture3D:
+					case ShaderResourceType::TextureCube:
+					case ShaderResourceType::RWTexture2D:
+					case ShaderResourceType::RWTexture3D:
+					case ShaderResourceType::RWTexture2DArray:
+					case ShaderResourceType::SamplerState:
+					case ShaderResourceType::SubpassInput:
+						dynamicArraySize = imageInfosBoundBySlot[i][variable.bindingSlot].GetSize();
+						break;
+					}
+
+					dynamicArrayName = variable.name;
+					break;
+				}
+			}
+
+			if (dynamicArrayName.IsValid())
+				descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout, dynamicArraySize);
+			else
+				descriptorSets[i] = new DescriptorSet(device, setLayout, srgLayout);
 		}
 
 		UpdateBindings();
@@ -862,21 +916,24 @@ namespace CE::Vulkan
 
 				VkDescriptorSetLayoutBinding& variable = variableBindingsBySlot[slot];
 
+				if (variable.descriptorCount == 0 && imageWrites.IsEmpty())
+					continue;
+
 				VkWriteDescriptorSet& write = writes[idx++];
 				write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 				write.descriptorType = variable.descriptorType;
 				write.dstArrayElement = 0;
-				write.descriptorCount = variable.descriptorCount; // Array count
+				write.descriptorCount = imageWrites.GetSize(); // Array count
 				if (write.descriptorCount == 0) // Dynamic sized array
 				{
-					write.descriptorCount = imageWrites.GetSize();
+					//write.descriptorCount = imageWrites.GetSize();
 				}
 				write.dstBinding = variable.binding;
 				write.dstSet = descriptorSet->GetHandle();
 				write.pImageInfo = imageWrites.GetData();
 			}
 			
-			vkUpdateDescriptorSets(device->GetHandle(), writes.GetSize(), writes.GetData(), 
+			vkUpdateDescriptorSets(device->GetHandle(), idx, writes.GetData(),
 				0, nullptr);
 		}
 	}

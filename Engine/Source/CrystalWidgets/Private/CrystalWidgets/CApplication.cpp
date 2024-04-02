@@ -40,8 +40,11 @@ namespace CE::Widgets
 		draw2dShader = initInfo.draw2dShader;
 		defaultFontName = initInfo.defaultFontName;
 		defaultFont = initInfo.defaultFont;
-		numFramesInFlight = initInfo.numFramesInFlight;
 		scheduler = initInfo.scheduler;
+		numFramesInFlight = initInfo.numFramesInFlight;
+		resourceLoader = initInfo.resourceLoader;
+
+		CE_ASSERT(resourceLoader != nullptr, "CApplication passed with null resource loader!");
 
 		registeredFonts[defaultFontName] = initInfo.defaultFont;
 
@@ -610,6 +613,11 @@ namespace CE::Widgets
 	void CApplication::OnWindowCreated(PlatformWindow* window)
 	{
 
+	}
+
+	RPI::Texture* CApplication::LoadImage(const Name& assetpath)
+	{
+		return resourceLoader->LoadImage(assetpath);
 	}
 
 	void CApplication::OnWidgetDestroyed(CWidget* widget)

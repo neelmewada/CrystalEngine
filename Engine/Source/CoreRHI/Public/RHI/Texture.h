@@ -18,6 +18,8 @@ namespace CE::RHI
 
     using ImageDescriptor = TextureDescriptor;
 
+	class TextureView;
+
 	class CORERHI_API Texture : public RHIResource, public IDeviceObject
 	{
 	protected:

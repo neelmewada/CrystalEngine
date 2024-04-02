@@ -8,8 +8,7 @@ namespace CE::RHI
 	struct FrameSchedulerDescriptor
 	{
 		//! @brief Number of frames being rendered simultaneously (ex: triple buffering = 3).
-		//! We don't support more than 1 frames for now.
-		u32 numFramesInFlight = 1;
+		u32 numFramesInFlight = 2;
 	};
 
 	//! FrameScheduler provides user facing API to construct, compile and execute FrameGraph.
@@ -30,10 +29,9 @@ namespace CE::RHI
 
 		inline FrameGraph* GetFrameGraph() const { return frameGraph; }
 
+		u32 GetFramesInFlight() const { return numFramesInFlight; }
+
 		void BeginFrameGraph();
-        
-		//! @brief Call it after EndFrameGraph()
-		void Construct();
 
 		//! @brief Compile the transient attachments, and everything.
 		void Compile();
@@ -54,17 +52,14 @@ namespace CE::RHI
 
 		void WaitUntilIdle();
 
-		static FrameScheduler* GetFrameScheduler(int instanceIndex);
-		static int GetTotalFrameSchedulerCount();
+		static FrameScheduler* Get();
 
 		void SetFrameGraphVariable(const Name& variableName, const RHI::FrameGraphVariable& value);
 		void SetFrameGraphVariable(int imageIndex, const Name& variableName, const RHI::FrameGraphVariable& value);
 
 	private:
 
-		static Array<FrameScheduler*> frameSchedulerInstances;
-
-		u32 numFramesInFlight = 1;
+		u32 numFramesInFlight = 2;
 
 		RHI::Scope* drawListScope = nullptr;
         

@@ -995,6 +995,7 @@ namespace CE::Widgets
 		CPainter* painter = paintEvent->painter;
 
 		Color bgColor = Color();
+		Name bgImage = "";
 		Color outlineColor = Color();
 		f32 borderWidth = 0.0f;
 		Vec4 borderRadius = Vec4();
@@ -1002,6 +1003,11 @@ namespace CE::Widgets
 		if (computedStyle.properties.KeyExists(CStylePropertyType::Background))
 		{
 			bgColor = computedStyle.properties[CStylePropertyType::Background].color;
+		}
+
+		if (computedStyle.properties.KeyExists(CStylePropertyType::BackgroundImage))
+		{
+			bgImage = computedStyle.properties[CStylePropertyType::BackgroundImage].string;
 		}
 
 		if (computedStyle.properties.KeyExists(CStylePropertyType::BorderColor))
@@ -1024,13 +1030,24 @@ namespace CE::Widgets
 		painter->SetPen(pen);
 		painter->SetBrush(brush);
 
+		Rect rect = Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize());
+
 		if (borderRadius == Vec4(0, 0, 0, 0) && ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0))
 		{
-			painter->DrawRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()));
+			painter->DrawRect(rect);
 		}
 		else if ((outlineColor.a > 0 && borderWidth > 0) || bgColor.a > 0)
 		{
-			painter->DrawRoundedRect(Rect::FromSize(GetComputedLayoutTopLeft(), GetComputedLayoutSize()), borderRadius);
+			painter->DrawRoundedRect(rect, borderRadius);
+		}
+
+		if (bgImage.IsValid())
+		{
+			RPI::Texture* texture = CApplication::Get()->LoadImage(bgImage);
+			if (texture)
+			{
+				painter->DrawTexture(rect, texture);
+			}
 		}
 	}
 

@@ -104,6 +104,26 @@ namespace CE::RPI
         textureView = nullptr;
     }
 
+    RHI::TextureView* Texture::GetOrCreateTextureView()
+    {
+        if (textureView)
+            return textureView;
+        if (!texture)
+            return nullptr;
+
+        RHI::TextureViewDescriptor viewDesc{};
+        viewDesc.texture = texture;
+        viewDesc.arrayLayerCount = texture->GetArrayLayerCount();
+        viewDesc.mipLevelCount = texture->GetMipLevelCount();
+        viewDesc.baseArrayLayer = 0;
+        viewDesc.baseMipLevel = 0;
+        viewDesc.dimension = texture->GetDimension();
+        viewDesc.format = texture->GetFormat();
+
+        textureView = RHI::gDynamicRHI->CreateTextureView(viewDesc);
+        return textureView;
+    }
+
     void Texture::UploadData(u8* src, u64 dataSize)
     {
         if (src == nullptr || dataSize == 0)

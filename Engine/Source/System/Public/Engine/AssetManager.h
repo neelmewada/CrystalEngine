@@ -2,11 +2,12 @@
 
 namespace CE
 {
+	// TODO: Implement CWidgetResourceLoader in AssetManager
 
 	CLASS()
-	class SYSTEM_API AssetManager : public CE::Object
+	class SYSTEM_API AssetManager : public Object
 	{
-		CE_CLASS(AssetManager, CE::Object)
+		CE_CLASS(AssetManager, Object)
 	public:
 
 		AssetManager();

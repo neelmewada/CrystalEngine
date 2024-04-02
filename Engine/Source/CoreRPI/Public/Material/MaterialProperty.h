@@ -97,7 +97,7 @@ namespace CE::RPI
         }
 
         template<typename TEnum> requires TIsEnum<TEnum>::Value
-            MaterialPropertyValue(TEnum enumValue) : valueType(MaterialPropertyDataType::Enum)
+        MaterialPropertyValue(TEnum enumValue) : valueType(MaterialPropertyDataType::Enum)
         {
             u.enumValue = (s64)enumValue;
         }
@@ -301,5 +301,180 @@ namespace CE::RPI
 
         MaterialPropertyDataType valueType = MaterialPropertyDataType::None;
     };
-    
+
+    class MaterialPropertyValueArray
+    {
+    public:
+
+        MaterialPropertyValueArray() {}
+
+        MaterialPropertyValueArray(s32 intValue)
+        {
+            values.Add(intValue);
+        }
+
+        MaterialPropertyValueArray(u32 uintValue)
+        {
+            values.Add(uintValue);
+        }
+
+        MaterialPropertyValueArray(f32 floatValue)
+        {
+            values.Add(floatValue);
+        }
+
+        MaterialPropertyValueArray(Color colorValue)
+        {
+            values.Add(colorValue);
+        }
+
+        MaterialPropertyValueArray(Vec2 vec2Value)
+        {
+            values.Add(vec2Value);
+        }
+
+        MaterialPropertyValueArray(Vec3 vec3Value)
+        {
+            values.Add(vec3Value);
+        }
+
+        MaterialPropertyValueArray(Vec4 vec4Value)
+        {
+            values.Add(vec4Value);
+        }
+
+        MaterialPropertyValueArray(RPI::Texture* textureValue)
+        {
+            values.Add(textureValue);
+        }
+
+        MaterialPropertyValueArray(RHI::TextureView* textureViewValue)
+        {
+            values.Add(textureViewValue);
+        }
+
+        MaterialPropertyValueArray(RHI::Sampler* samplerValue)
+        {
+            values.Add(samplerValue);
+        }
+
+        MaterialPropertyValueArray(const Matrix4x4& matrixValue)
+        {
+            values.Add(matrixValue);
+        }
+
+        MaterialPropertyValueArray(RHI::BufferView bufferValue)
+        {
+            values.Add(bufferValue);
+        }
+
+        MaterialPropertyValueArray(RHI::Buffer* bufferValue)
+        {
+            values.Add(bufferValue);
+        }
+
+        template<typename TEnum> requires TIsEnum<TEnum>::Value and not TIsSameType<TEnum, MaterialPropertyDataType>::Value
+        MaterialPropertyValueArray(TEnum enumValue)
+        {
+            values.Add(enumValue);
+        }
+
+        bool Exists(const MaterialPropertyValue& rhs) const
+        {
+            return values.Exists(rhs);
+        }
+
+        u32 GetArrayCount() const { return values.GetSize(); }
+
+        MaterialPropertyDataType GetValueType() const
+        {
+            if (values.IsEmpty())
+                return MaterialPropertyDataType::None;
+            return values[0].GetValueType();
+        }
+
+        inline const MaterialPropertyValue& GetValue(u32 index) const
+        {
+            return values[index];
+        }
+
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4, RHI::BufferView>::Value or TIsEnum<T>::Value
+        inline const T& GetRawValue(u32 index) const
+        {
+            return values[index].GetValue<T>();
+        }
+
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4, RHI::BufferView>::Value or TIsEnum<T>::Value
+        inline bool IsOfType() const
+        {
+            if constexpr (TIsEnum<T>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Enum;
+            }
+            else if constexpr (TIsSameType<T, s32>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Int;
+            }
+            else if constexpr (TIsSameType<T, u32>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::UInt;
+            }
+            else if constexpr (TIsSameType<T, f32>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Float;
+            }
+            else if constexpr (TIsSameType<T, Color>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Color;
+            }
+            else if constexpr (TIsSameType<T, Vec2>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Vector2;
+            }
+            else if constexpr (TIsSameType<T, Vec3>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Vector3;
+            }
+            else if constexpr (TIsSameType<T, Vec4>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Vector4;
+            }
+            else if constexpr (TIsSameType<T, RPI::Texture*>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Texture;
+            }
+            else if constexpr (TIsSameType<T, RHI::TextureView*>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::TextureView;
+            }
+            else if constexpr (TIsSameType<T, RHI::Sampler*>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Sampler;
+            }
+            else if constexpr (TIsSameType<T, Matrix4x4>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Matrix4x4;
+            }
+            else if constexpr (TIsSameType<T, RHI::BufferView>::Value)
+            {
+                return GetValueType() == MaterialPropertyDataType::Buffer;
+            }
+            return false;
+        }
+
+        void Clear()
+        {
+            values.Clear();
+        }
+
+        void Add(const MaterialPropertyValue& value);
+
+        void Insert(int index, const MaterialPropertyValue& value);
+        void RemoveAt(int index);
+
+    private:
+
+        Array<MaterialPropertyValue> values{};
+    };
+
 } // namespace CE::RPI

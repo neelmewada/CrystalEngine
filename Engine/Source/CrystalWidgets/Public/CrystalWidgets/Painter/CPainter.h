@@ -26,6 +26,8 @@ namespace CE::Widgets
         void DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius);
         void DrawRoundedX(const Rect& rect);
 
+        void DrawTexture(const Rect& rect, RPI::Texture* texture);
+
         void SetFont(const CFont& font);
 
         Vec2 CalculateTextSize(const String& text, f32 width = 0);

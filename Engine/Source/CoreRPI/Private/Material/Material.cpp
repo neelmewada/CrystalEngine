@@ -66,6 +66,11 @@ namespace CE::RPI
 		}
 	}
 
+	bool Material::PropertyExists(Name name) const
+	{
+        return properties.KeyExists(name) && properties.Get(name).GetArrayCount() > 0 && properties.Get(name).GetValueType() != MaterialPropertyDataType::None;
+	}
+
     void Material::ClearAllValues()
     {
         for (int i = 0; i < updateRequired.GetSize(); i++)
@@ -78,7 +83,7 @@ namespace CE::RPI
 
     void Material::SetPropertyValue(Name propertyName, const MaterialPropertyValue& value)
     {
-        if (properties[propertyName] == value)
+        if (properties[propertyName].Exists(value))
             return;
 
         for (int i = 0; i < updateRequired.GetSize(); i++)
@@ -86,7 +91,29 @@ namespace CE::RPI
             updateRequired[i] = true;
         }
 
-        properties[propertyName] = value;
+        properties[propertyName].Clear();
+        properties[propertyName].Add(value);
+    }
+
+    void Material::InsertPropertyValue(Name propertyName, const MaterialPropertyValue& value, int index)
+    {
+        if (index < 0 || index > properties[propertyName].GetArrayCount())
+            index = properties[propertyName].GetArrayCount();
+
+        properties[propertyName].Insert(index, value);
+    }
+
+    void Material::RemovePropertyValue(Name propertyName, int index)
+    {
+        if (index < 0 || index >= properties[propertyName].GetArrayCount())
+            return;
+
+        properties[propertyName].RemoveAt(index);
+    }
+
+    void Material::ClearPropertyValue(Name propertyName)
+    {
+        properties[propertyName].Clear();
     }
 
     const MaterialPropertyValue& Material::GetPropertyValue(Name propertyName)
@@ -94,11 +121,28 @@ namespace CE::RPI
         static const MaterialPropertyValue defaultValue{};
 
         if (PropertyExists(propertyName))
-            return properties[propertyName];
+            return properties[propertyName].GetValue(0);
 
         if (baseMaterial != nullptr)
         {
             return baseMaterial->GetPropertyValue(propertyName);
+        }
+
+        return defaultValue;
+    }
+
+    const MaterialPropertyValue& Material::GetPropertyValue(Name propertyName, int index)
+    {
+        static const MaterialPropertyValue defaultValue{};
+
+        if (PropertyExists(propertyName) && index >= 0 && index < properties[propertyName].GetArrayCount())
+        {
+	        return properties[propertyName].GetValue(index);
+        }
+
+        if (baseMaterial != nullptr)
+        {
+            return baseMaterial->GetPropertyValue(propertyName, index);
         }
 
         return defaultValue;
@@ -175,9 +219,9 @@ namespace CE::RPI
                     {
                         u8* ptr = (u8*)data + offsets[i];
                         Name propertyName = variable.structMembers[i].name;
-                        if (properties.KeyExists(propertyName))
+                        if (properties.KeyExists(propertyName) && properties[propertyName].GetArrayCount() > 0)
                         {
-                            const MaterialPropertyValue& value = properties[propertyName];
+                            const MaterialPropertyValue& value = properties[propertyName].GetValue(0);
                             switch (variable.structMembers[i].dataType) {
                                 case RHI::ShaderStructMemberType::UInt:
                                     if (value.IsOfType<u32>())
@@ -275,9 +319,9 @@ namespace CE::RPI
             else if (variable.type == RHI::ShaderResourceType::StructuredBuffer ||
                 variable.type == RHI::ShaderResourceType::RWStructuredBuffer)
             {
-                if (properties.KeyExists(variable.name))
+                if (properties.KeyExists(variable.name) && properties[variable.name].GetArrayCount() > 0)
                 {
-                    const MaterialPropertyValue& value = properties[variable.name];
+                    const MaterialPropertyValue& value = properties[variable.name].GetValue(0);
                     if (value.GetValueType() == MaterialPropertyDataType::Buffer)
                     {
                         shaderResourceGroup->Bind(imageIndex, variable.name, value.GetValue<RHI::BufferView>());
@@ -299,9 +343,9 @@ namespace CE::RPI
                 variable.type == RHI::ShaderResourceType::RWTexture2D ||
                 variable.type == RHI::ShaderResourceType::RWTexture3D)
             {
-                if (properties.KeyExists(variable.name))
+                if (properties.KeyExists(variable.name) && properties[variable.name].GetArrayCount() > 0)
                 {
-                    const MaterialPropertyValue& value = properties[variable.name];
+                    const MaterialPropertyValue& value = properties[variable.name].GetValue(0);
                     if (value.GetValueType() == MaterialPropertyDataType::Texture)
                     {
                         RPI::Texture* texture = value.GetValue<RPI::Texture*>();
@@ -369,7 +413,7 @@ namespace CE::RPI
             {
                 if (properties.KeyExists(variable.name))
                 {
-                    const MaterialPropertyValue& value = properties[variable.name];
+                    const MaterialPropertyValue& value = properties[variable.name].GetValue(0);
                     if (value.GetValueType() == MaterialPropertyDataType::Sampler)
                     {
                         RHI::Sampler* sampler = value.GetValue<RHI::Sampler*>();

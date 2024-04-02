@@ -138,3 +138,15 @@ CTextInput:focused {
 #TestLabel {
     font-size: 48px;
 }
+
+#ImageWidget {
+    width: 80px;
+    height: 80px;
+    background-image: "/Engine/Assets/Sandbox/TopView";
+}
+
+#ImageWidget2 {
+    width: 28px;
+    height: 28px;
+    background-image: "/Engine/Assets/Sandbox/Object";
+}

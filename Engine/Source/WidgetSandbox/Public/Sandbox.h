@@ -48,7 +48,7 @@ namespace CE
 		f32 fieldOfView = 60;
 	};
 
-	class WidgetSandbox : ApplicationMessageHandler
+	class WidgetSandbox : public ApplicationMessageHandler, public CWidgetResourceLoader
 	{
 	public:
 
@@ -61,6 +61,8 @@ namespace CE
 		void Shutdown();
 
 	private:
+
+		RPI::Texture* LoadImage(const Name& assetPath) override;
 
 		void InitFontAtlas();
 
@@ -98,6 +100,8 @@ namespace CE
 		CDockWindow* thirdDockWindow = nullptr;
 		CDockWindow* fourthDockWindow = nullptr;
 		CDockWindow* fifthDockWindow = nullptr;
+
+		CE::Texture* topViewTex = nullptr;
 
 		Array<CButton*> buttons{};
 

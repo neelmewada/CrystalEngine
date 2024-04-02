@@ -2,7 +2,7 @@
 
 namespace CE
 {
-	using Resource = CE::Resource;
+	class Resource;
     
 	class CORE_API ResourceManager : public Object
 	{

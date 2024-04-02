@@ -163,4 +163,19 @@ namespace CE::RPI
         memset(&u, 0, sizeof(u));
     }
 
+    void MaterialPropertyValueArray::Add(const MaterialPropertyValue& value)
+    {
+        values.Add(value);
+    }
+
+    void MaterialPropertyValueArray::Insert(int index, const MaterialPropertyValue& value)
+    {
+        values.InsertAt(index, value);
+    }
+
+    void MaterialPropertyValueArray::RemoveAt(int index)
+    {
+        values.RemoveAt(index);
+    }
+
 } // namespace CE::RPI

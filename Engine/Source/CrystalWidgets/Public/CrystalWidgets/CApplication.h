@@ -18,8 +18,21 @@ namespace CE::Widgets
             return message.GetCString();
         }
 
+        const String& GetMessage() const { return message; }
+
     private:
         String message{};
+    };
+
+    class CWidgetResourceLoader
+    {
+    protected:
+        virtual ~CWidgetResourceLoader() = default;
+
+    public:
+
+        virtual RPI::Texture* LoadImage(const Name& assetPath) = 0;
+
     };
 
     struct CApplicationInitInfo
@@ -29,6 +42,7 @@ namespace CE::Widgets
         RPI::FontAtlasAsset* defaultFont = nullptr;
         u32 numFramesInFlight = 2;
         RHI::FrameScheduler* scheduler = nullptr;
+        CWidgetResourceLoader* resourceLoader = nullptr;
     };
 
     CLASS()
@@ -66,6 +80,8 @@ namespace CE::Widgets
         void SubmitDrawPackets(RHI::DrawListContext& drawList);
 
         RHI::FrameScheduler* GetFrameScheduler() const { return scheduler; }
+
+        RPI::Texture* LoadImage(const Name& assetpath);
 
     crystalwidgets_internal:
 
@@ -110,6 +126,8 @@ namespace CE::Widgets
 
         KeyModifier keyModifierStates{};
         Array<bool> keyPressStates{};
+
+        CWidgetResourceLoader* resourceLoader = nullptr;
 
         Array<CWidget*> hoveredWidgetsStack = {};
         StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};

@@ -12,7 +12,7 @@ namespace CE::RPI
 	class Shader;
 	class ShaderVariant;
 
-	typedef HashMap<Name, MaterialPropertyValue> MaterialPropertyValueMap;
+	typedef HashMap<Name, MaterialPropertyValueArray> MaterialPropertyValueMap;
 
 	class CORERPI_API Material
 	{
@@ -42,16 +42,24 @@ namespace CE::RPI
             return shaderResourceGroup != nullptr && shaderResourceGroup->IsCompiled();
         }
 
-		inline bool PropertyExists(Name name) const
-		{
-			return properties.KeyExists(name) && properties.Get(name).GetValueType() != MaterialPropertyDataType::None;
-		}
+		bool PropertyExists(Name name) const;
         
 		void ClearAllValues();
 
         void SetPropertyValue(Name propertyName, const MaterialPropertyValue& value);
 
+		// Used for shader resource arrays
+		void InsertPropertyValue(Name propertyName, const MaterialPropertyValue& value, int index = -1);
+
+		// Used for shader resource arrays
+		void RemovePropertyValue(Name propertyName, int index);
+
+		void ClearPropertyValue(Name propertyName);
+
 		const MaterialPropertyValue& GetPropertyValue(Name propertyName);
+
+		// Used for shader resource arrays
+		const MaterialPropertyValue& GetPropertyValue(Name propertyName, int index);
         
         inline RHI::ShaderResourceGroup* GetShaderResourceGroup() const { return shaderResourceGroup; }
 

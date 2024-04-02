@@ -34,6 +34,7 @@ namespace CE
 		appInitInfo.defaultFontName = "Roboto";
 		appInitInfo.numFramesInFlight = 2;
 		appInitInfo.scheduler = scheduler;
+		appInitInfo.resourceLoader = this;
 
 		CApplication::Get()->Initialize(appInitInfo);
 
@@ -74,6 +75,10 @@ namespace CE
 		mainDockSpace = CreateWindow<CDockSpace>(MODULE_NAME, nullptr, mainWindow);
 		mainDockWindow = CreateWindow<CDockWindow>(MODULE_NAME, mainDockSpace->GetRootDockSplit());
 		mainDockWindow->SetAsMainWindow(true);
+
+		AssetManager* assetManager = gEngine->GetAssetManager();
+
+		topViewTex = assetManager->LoadAssetAtPath<CE::Texture>("/Engine/Assets/Sandbox/TopView");
 
 		CWidget* toolBar = CreateObject<CWidget>(mainDockWindow, "ToolBar");
 
@@ -119,13 +124,17 @@ namespace CE
 
 		CLabel* label = CreateObject<CLabel>(thirdDockWindow, "Label");
 		label->SetText("This is a label");
-
+		
 		CTextInput* textInput = CreateObject<CTextInput>(thirdDockWindow, "TextInputDemo");
 		textInput->SetText("This is text box with a large text value.");
 		textInput->SetAsPassword(false);
 
 		CLabel* testLabel = CreateObject<CLabel>(thirdDockWindow, "TestLabel");
 		testLabel->SetText("This is a test label");
+
+		CWidget* imageWidget = CreateObject<CWidget>(thirdDockWindow, "ImageWidget");
+
+		CWidget* imageWidget2 = CreateObject<CWidget>(thirdDockWindow, "ImageWidget2");
 
 		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [textInput, this, right]
 			{
@@ -201,7 +210,16 @@ namespace CE
 
 		rpiSystem.Shutdown();
 	}
-	
+
+	RPI::Texture* WidgetSandbox::LoadImage(const Name& assetPath)
+	{
+		AssetManager* assetManager = gEngine->GetAssetManager();
+		CE::Texture* texture = assetManager->LoadAssetAtPath<CE::Texture>(assetPath);
+		if (!texture)
+			return nullptr;
+		return texture->GetRpiTexture();
+	}
+
 	void WidgetSandbox::InitFontAtlas()
 	{
 		AssetManager* assetManager = gEngine->GetAssetManager();

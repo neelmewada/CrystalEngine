@@ -6,7 +6,6 @@ namespace CE::RPI
 
 	Renderer2D::Renderer2D(const Renderer2DDescriptor& desc)
 		: screenSize(desc.screenSize)
-		//, textShader(desc.textShader)
 		, drawShader(desc.drawShader)
 		, multisampling(desc.multisampling)
 		, drawListTag(desc.drawListTag)
@@ -66,6 +65,13 @@ namespace CE::RPI
 			viewConstantsBuffer[i]->UploadData(&viewConstants, sizeof(viewConstants));
 			perViewSrg->Bind(i, "_PerViewData", viewConstantsBuffer[i]);
 		}
+
+		RHI::SamplerDescriptor textureSampler{};
+		textureSampler.addressModeU = textureSampler.addressModeV = textureSampler.addressModeW = SamplerAddressMode::ClampToBorder;
+		textureSampler.borderColor = SamplerBorderColor::FloatTransparentBlack;
+		textureSampler.enableAnisotropy = false;
+		textureSampler.samplerFilterMode = FilterMode::Cubic;
+		drawItemSrg->Bind("_TextureSampler", RPISystem::Get().FindOrCreateSampler(textureSampler));
 		
 		perViewSrg->FlushBindings();
 		drawItemSrg->FlushBindings();
@@ -131,6 +137,7 @@ namespace CE::RPI
 
 		drawItemCount = 0;
 		clipRectCount = 0;
+		textureCount = 0;
 		createNewDrawBatch = true;
 
 		ResetToDefaults();
@@ -916,6 +923,63 @@ namespace CE::RPI
 		return size;
 	}
 
+	Vec2 Renderer2D::DrawTexture(RPI::Texture* texture, Vec2 size)
+	{
+		if (size.x <= 0 || size.y <= 0)
+			return Vec2(0, 0);
+
+		const FontInfo& font = fontStack.Top();
+
+		if constexpr (ForceDisableBatching)
+		{
+			createNewDrawBatch = true;
+		}
+
+		if (drawBatches.IsEmpty() || createNewDrawBatch)
+		{
+			createNewDrawBatch = false;
+			drawBatches.Add({});
+			drawBatches.Top().firstDrawItemIndex = drawItemCount;
+			drawBatches.Top().font = font;
+		}
+
+		if (drawItems.GetSize() < drawItemCount + 1)
+			drawItems.Resize(drawItemCount + 1);
+		if (textures.GetSize() < textureCount + 1)
+			textures.Resize(textureCount + 1);
+		
+		DrawBatch& curDrawBatch = drawBatches.Top();
+
+		DrawItem2D& drawItem = drawItems[drawItemCount];
+
+		textures[textureCount] = texture;
+
+		Vec3 scale = Vec3(1, 1, 1);
+
+		// Need to multiply by 2 because final range is [-w, w] instead of [0, w]
+		scale.x = size.width * 2;
+		scale.y = size.height * 2;
+
+		Vec2 quadPos = cursorPosition;
+		Vec3 translation = Vec3(quadPos.x * 2, quadPos.y * 2, 0);
+
+		drawItem.transform = Matrix4x4::Translation(translation) * Quat::EulerDegrees(Vec3(0, 0, rotation)).ToMatrix() * Matrix4x4::Scale(scale);
+		drawItem.drawType = DRAW_Texture;
+		drawItem.fillColor = fillColor.ToVec4();
+		drawItem.outlineColor = outlineColor.ToVec4();
+		drawItem.itemSize = size;
+		drawItem.borderThickness = borderThickness;
+		drawItem.bold = 0;
+		drawItem.clipRectIdx = clipRectStack.Top();
+		drawItem.textureIndex = textureCount;
+		
+		curDrawBatch.drawItemCount++;
+
+		drawItemCount++;
+		textureCount++;
+		return size;
+	}
+
 	void Renderer2D::End()
 	{
 		PopClipRect();
@@ -1061,6 +1125,23 @@ namespace CE::RPI
 			}
 			clipRectsBuffer[imageIndex]->Unmap();
 		}
+
+		 // - Update Texture Array -
+
+		Array<RHI::TextureView*> textureViews{};
+		textureViews.Reserve(textureCount);
+
+		for (int i = 0; i < textureCount; ++i)
+		{
+			textureViews.Add(textures[i]->GetOrCreateTextureView());
+		}
+
+		if (textureCount > 0)
+		{
+			drawItemSrg->Bind("_Textures", textureCount, textureViews.GetData());
+		}
+
+		drawItemSrg->FlushBindings();
 		
 		return drawPackets;
 	}
