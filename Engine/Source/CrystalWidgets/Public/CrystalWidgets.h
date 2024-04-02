@@ -36,8 +36,13 @@
 
 #include "CrystalWidgets/Validation/CTextInputValidation.h"
 
-// Widgets
 #include "CrystalWidgets/Widget/CWidget.h"
+
+// Data
+#include "CrystalWidgets/Data/CModelIndex.h"
+#include "CrystalWidgets/Data/CDataModel.h"
+
+// Widgets
 #include "CrystalWidgets/Widget/CLabel.h"
 #include "CrystalWidgets/Widget/CButton.h"
 #include "CrystalWidgets/Widget/CTextInput.h"

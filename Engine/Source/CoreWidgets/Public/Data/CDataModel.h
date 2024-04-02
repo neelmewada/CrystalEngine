@@ -41,7 +41,7 @@ namespace CE::Widgets
 	typedef Array<CModelIndex> CModelIndexList;
 
 	CLASS(Abstract)
-		class COREWIDGETS_API CDataModel : public Object
+	class COREWIDGETS_API CDataModel : public Object
 	{
 		CE_CLASS(CDataModel, Object)
 	public:

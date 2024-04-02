@@ -10,7 +10,7 @@ add_subdirectory(Assets)
 add_subdirectory(Source/EditorCore)
 add_subdirectory(Source/EditorWidgets)
 add_subdirectory(Source/EditorSystem)
-#add_subdirectory(Source/CrystalEditor)
+add_subdirectory(Source/CrystalEditor)
 
 # Editor Executables
 #add_subdirectory(Source/ProjectBrowser)
