@@ -65,7 +65,6 @@ Shader "2D/SDF Geometry"
 
             #define MAX_TEXTURES 10000
 
-            // Do NOT add any resource after t2 in SRG_PerDraw, because unbounded array should always be the last one in a SRG!
             Texture2D<float4> _Textures[MAX_TEXTURES] : SRG_PerDraw(t3);
 
             struct CharacterItem

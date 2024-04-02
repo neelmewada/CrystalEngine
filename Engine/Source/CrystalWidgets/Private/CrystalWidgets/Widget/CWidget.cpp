@@ -1055,7 +1055,7 @@ namespace CE::Widgets
 	{
 		CPainter* painter = paintEvent->painter;
 
-
+		
 	}
 
 	void CWidget::HandleEvent(CEvent* event)
