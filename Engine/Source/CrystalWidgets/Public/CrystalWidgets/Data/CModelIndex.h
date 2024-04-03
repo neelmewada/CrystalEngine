@@ -2,12 +2,12 @@
 
 namespace CE::Widgets
 {
-	class CDataModel;
+	class CBaseItemModel;
 
 	struct CRYSTALWIDGETS_API CModelIndex
 	{
 	private:
-		CModelIndex(u32 row, u32 col, CDataModel* model, void* data = nullptr);
+		CModelIndex(u32 row, u32 col, CBaseItemModel* model, void* data = nullptr);
 
 	public:
 
@@ -24,15 +24,17 @@ namespace CE::Widgets
 		bool operator==(const CModelIndex& other) const;
 		bool operator!=(const CModelIndex& other) const;
 
+		CBaseItemModel* GetModel() const { return model; }
+
 	private:
 
-		friend class CDataModel;
+		friend class CBaseItemModel;
 
 		u32 row = 0;
 		u32 col = 0;
 		void* data = nullptr;
 
-		CDataModel* model = nullptr;
+		CBaseItemModel* model = nullptr;
 
 	};
 

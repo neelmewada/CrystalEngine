@@ -60,8 +60,8 @@ namespace CE::Widgets
 
 		// Getters & Setters
 
-		inline CDataModel* GetModel() const { return model; }
-		inline void SetModel(CDataModel* model) { this->model = model; }
+		inline CBaseItemModel* GetModel() const { return model; }
+		inline void SetModel(CBaseItemModel* model) { this->model = model; }
 
 		inline bool AlwaysShowVerticalScroll() const { return alwaysShowVerticalScroll; }
 		inline void SetAlwaysShowVerticalScroll(bool set) { alwaysShowVerticalScroll = set; }
@@ -83,7 +83,7 @@ namespace CE::Widgets
 		void DrawChildren(const CModelIndex& parent, int indent = 0);
 
 		FIELD()
-		CDataModel* model = nullptr;
+		CBaseItemModel* model = nullptr;
 
 		FIELD()
 		b8 alwaysShowVerticalScroll = false;

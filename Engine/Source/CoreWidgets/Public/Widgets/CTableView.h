@@ -39,8 +39,8 @@ namespace CE::Widgets
 
 		// Getters & Setters
 
-		inline CDataModel* GetModel() const { return model; }
-		inline void SetModel(CDataModel* model) { this->model = model; }
+		inline CBaseItemModel* GetModel() const { return model; }
+		inline void SetModel(CBaseItemModel* model) { this->model = model; }
 
 		inline f32 GetCellHeight() const { return cellHeight; }
 		void SetCellHeight(f32 cellHeight);
@@ -64,7 +64,7 @@ namespace CE::Widgets
 		f32 cellHeight = 10;
 
 		FIELD()
-		CDataModel* model = nullptr;
+		CBaseItemModel* model = nullptr;
 
 		FIELD()
 		CTableFlags tableFlags = CTableFlags::ScrollY;

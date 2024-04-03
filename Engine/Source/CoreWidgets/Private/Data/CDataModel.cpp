@@ -3,7 +3,7 @@
 namespace CE::Widgets
 {
 
-	CModelIndex::CModelIndex(u32 row, u32 col, CDataModel* model, void* data)
+	CModelIndex::CModelIndex(u32 row, u32 col, CBaseItemModel* model, void* data)
 		: row(row), col(col), model(model), data(data)
 	{
 	}
@@ -30,12 +30,12 @@ namespace CE::Widgets
 		return !(*this == other);
 	}
 
-	CModelIndex CDataModel::CreateIndex(u32 row, u32 col, void* data)
+	CModelIndex CBaseItemModel::CreateIndex(u32 row, u32 col, void* data)
 	{
 		return CModelIndex(row, col, this, data);
 	}
 
-	CModelIndex CDataModel::FindIndex(void* internalData, const CModelIndex& parent)
+	CModelIndex CBaseItemModel::FindIndex(void* internalData, const CModelIndex& parent)
 	{
 		if (internalData == nullptr)
 			return CModelIndex();
@@ -64,7 +64,7 @@ namespace CE::Widgets
 		return CModelIndex();
 	}
 
-	bool CDataModel::IsIndexInParentChain(const CModelIndex& indexToSearch, const CModelIndex& bottomMostIndex)
+	bool CBaseItemModel::IsIndexInParentChain(const CModelIndex& indexToSearch, const CModelIndex& bottomMostIndex)
 	{
 		if (!indexToSearch.IsValid() || !bottomMostIndex.IsValid())
 			return false;

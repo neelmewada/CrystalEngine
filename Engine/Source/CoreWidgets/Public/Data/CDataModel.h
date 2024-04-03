@@ -2,14 +2,14 @@
 
 namespace CE::Widgets
 {
-	class CDataModel;
+	class CBaseItemModel;
 	class CWidget;
 	class CAbstractItemCell;
 
 	struct COREWIDGETS_API CModelIndex
 	{
 	private:
-		CModelIndex(u32 row, u32 col, CDataModel* model, void* data = nullptr);
+		CModelIndex(u32 row, u32 col, CBaseItemModel* model, void* data = nullptr);
 
 	public:
 
@@ -28,22 +28,22 @@ namespace CE::Widgets
 
 	private:
 
-		friend class CDataModel;
+		friend class CBaseItemModel;
 
 		u32 row = 0;
 		u32 col = 0;
 		void* data = nullptr;
 
-		CDataModel* model = nullptr;
+		CBaseItemModel* model = nullptr;
 
 	};
 
 	typedef Array<CModelIndex> CModelIndexList;
 
 	CLASS(Abstract)
-	class COREWIDGETS_API CDataModel : public Object
+	class COREWIDGETS_API CBaseItemModel : public Object
 	{
-		CE_CLASS(CDataModel, Object)
+		CE_CLASS(CBaseItemModel, Object)
 	public:
 
 		virtual bool HasHeader() { return false; }
