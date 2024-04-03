@@ -1,6 +1,6 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Core.h"
 #include "CoreApplication.h"
 #include "CoreInput.h"
 #include "CoreRPI.h"
@@ -41,15 +41,18 @@
 // Data
 #include "CrystalWidgets/Data/CModelIndex.h"
 #include "CrystalWidgets/Data/CBaseItemModel.h"
+#include "CrystalWidgets/Data/CFileSystemModel.h"
 
 // Widgets
 #include "CrystalWidgets/Widget/CLabel.h"
 #include "CrystalWidgets/Widget/CButton.h"
 #include "CrystalWidgets/Widget/CTextInput.h"
+
 #include "CrystalWidgets/Item/CItemSelectionModel.h"
 #include "CrystalWidgets/Item/CBaseItemDelegate.h"
 #include "CrystalWidgets/Item/CStandardItemDelegate.h"
 #include "CrystalWidgets/Item/CBaseItemView.h"
+#include "CrystalWidgets/Item/CTreeView.h"
 
 // Windows
 #include "CrystalWidgets/Window/CWindow.h"

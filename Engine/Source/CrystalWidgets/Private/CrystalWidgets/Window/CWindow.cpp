@@ -478,7 +478,6 @@ namespace CE::Widgets
             {
                 Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
                 f32 scrollRectHeightRatio = originalHeight / contentMaxY;
-                //f32 normalizedScrollY = scrollOffset.y / (contentMaxY - originalHeight);
 
                 Rect scrollRect = Rect::FromSize(scrollRegion.min,
                     Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, MinScrollRectSize)));

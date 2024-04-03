@@ -106,7 +106,7 @@ namespace CE
 		if (!path.IsValid())
 			return false;
 
-		String pathStr = path.GetString();
+		const String& pathStr = path.GetString();
 		if (!pathStr.StartsWith("/"))
 			return false;
 
@@ -138,7 +138,7 @@ namespace CE
 		if (!path.IsValid())
 			return false;
 
-		String pathStr = path.GetString();
+		const String& pathStr = path.GetString();
 		if (!pathStr.StartsWith("/") || pathStr == "/")
 			return false;
 

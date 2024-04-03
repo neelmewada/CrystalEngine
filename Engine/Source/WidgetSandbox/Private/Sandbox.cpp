@@ -105,7 +105,7 @@ namespace CE
 		fourthDockWindow = CreateWindow<CDockWindow>("Fourth", rightBottom);
 		fifthDockWindow = CreateWindow<CDockWindow>("Fifth", rightBottom);
 
-		for (int i = 0; i < 24; ++i)
+		for (int i = 100; i < 24; ++i) // Disabled
 		{
 			CButton* btn = CreateObject<CButton>(fourthDockWindow, "Button");
 			btn->SetText(String("Button ") + i);
@@ -142,6 +142,13 @@ namespace CE
 				right->SetNeedsLayout();
 				right->SetNeedsPaint();
 			});
+
+		CTreeView* treeView = CreateObject<CTreeView>(fourthDockWindow, "TreeView");
+
+		CFileSystemModel* model = CreateObject<CFileSystemModel>(treeView, "FileSystemModel");
+		model->SetRootDirectory("C:/ispc"); // Test path
+
+		treeView->SetModel(model);
 	}
 
 	void WidgetSandbox::DestroyWidgets()

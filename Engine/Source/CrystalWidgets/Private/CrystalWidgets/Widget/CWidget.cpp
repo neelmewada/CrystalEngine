@@ -91,7 +91,7 @@ namespace CE::Widgets
 			return;
 
 		// DockSpace has its own SubWidget logic
-		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()))
+		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()) && IsContainer())
 		{
 			CWidget* widget = (CWidget*)object;
 			attachedWidgets.Add(widget);
@@ -129,7 +129,7 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
-		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()))
+		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()) && IsContainer())
 		{
 			CWidget* widget = (CWidget*)object;
 			widget->parent = nullptr;
@@ -1068,7 +1068,6 @@ namespace CE::Widgets
 		bool popPaintCoords = false;
 		bool shouldPropagateDownwards = true;
 		bool skipPaint = false;
-		bool isButton = IsOfType<CButton>();
 
 		if (event->type == CEventType::FocusChanged)
 		{
@@ -1079,13 +1078,11 @@ namespace CE::Widgets
 			{
 				OnFocusGained();
 				OnFocused();
-				//CE_LOG(Info, All, "Got Focus: {}", GetName());
 			}
 			else if (focusEvent->LostFocus() && IsFocussed())
 			{
 				OnFocusLost();
 				OnUnfocused();
-				//CE_LOG(Info, All, "Lost Focus: {}", GetName());
 			}
 
 			if (focusEvent->GotFocus() && !IsFocussed())
@@ -1137,6 +1134,11 @@ namespace CE::Widgets
 				if (!skipPaint)
 				{
 					OnPaint(paintEvent);
+				}
+
+				if (!IsContainer())
+				{
+					shouldPropagateDownwards = false;
 				}
 			}
 			else

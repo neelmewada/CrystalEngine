@@ -150,3 +150,12 @@ CTextInput:focused {
     height: 28px;
     background-image: "/Engine/Assets/Sandbox/Object";
 }
+
+#Fourth {
+    align-items: stretch;
+}
+
+#TreeView {
+    flex-grow: 4;
+    flex-shrink: 2;
+}

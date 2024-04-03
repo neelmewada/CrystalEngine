@@ -30,6 +30,8 @@ namespace CE::Widgets
 
         virtual bool IsSubWidgetAllowed(Class* subWidgetClass);
 
+        virtual bool IsContainer() const { return true; }
+
         bool IsWindow();
 
         bool IsFocussed() const { return EnumHasFlag(stateFlags, CStateFlag::Focused); }
