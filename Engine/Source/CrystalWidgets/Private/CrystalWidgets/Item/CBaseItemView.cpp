@@ -2,6 +2,7 @@
 
 namespace CE::Widgets
 {
+	constexpr f32 DefaultDecorationSize = 10.0f;
 
 	CBaseItemView::CBaseItemView()
 	{
@@ -94,7 +95,7 @@ namespace CE::Widgets
 					{
 						headerViewStyle.features |= CViewItemFeature::HasDecoration;
 						headerViewStyle.icon = headerIcon.GetNameValue();
-						headerViewStyle.decorationRect = Rect::FromSize(0, 0, 10, 10);
+						headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
 					}
 
 					if (headerDisplay.IsTextType())
@@ -116,7 +117,7 @@ namespace CE::Widgets
 					{
 						headerViewStyle.features |= CViewItemFeature::HasDecoration;
 						headerViewStyle.icon = headerIcon.GetNameValue();
-						headerViewStyle.decorationRect = Rect::FromSize(0, 0, 10, 10);
+						headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
 					}
 
 					if (headerDisplay.IsTextType())
@@ -213,6 +214,8 @@ namespace CE::Widgets
 
 		CStyle headerStyle = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::Header);
 		CStyle headerHoveredStyle = styleSheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Header);
+		CStyle alternateStyle = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::Alternate);
+		alternateBgColor = alternateStyle.properties[CStylePropertyType::Background].color;
 
 		if (rowHeightsByParent[{}].GetSize() != numRows)
 			recalculateRows = true;
@@ -258,7 +261,7 @@ namespace CE::Widgets
 					{
 						headerViewStyle.features |= CViewItemFeature::HasDecoration;
 						headerViewStyle.icon = headerIcon.GetNameValue();
-						headerViewStyle.decorationRect = Rect::FromSize(0, 0, 10, 10);
+						headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
 					}
 
 					if (headerDisplay.IsTextType())
@@ -280,7 +283,7 @@ namespace CE::Widgets
 					{
 						headerViewStyle.features |= CViewItemFeature::HasDecoration;
 						headerViewStyle.icon = headerIcon.GetNameValue();
-						headerViewStyle.decorationRect = Rect::FromSize(0, 0, 10, 10);
+						headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
 					}
 
 					if (headerDisplay.IsTextType())
@@ -300,6 +303,7 @@ namespace CE::Widgets
 			cellStyle = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::Cell);
 			cellHoveredStyle = styleSheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Cell);
 			cellSelectedStyle = styleSheet->SelectStyle(this, CStateFlag::Active, CSubControl::Cell);
+			totalContentHeight = 0.0f;
 
 			CalculateRowHeights(rowHeightsByParent[CModelIndex()], CModelIndex());
 		}
@@ -317,13 +321,7 @@ namespace CE::Widgets
 		painter->PushChildCoordinateSpace(Vec2(0, columnHeaderHeight));
 		painter->PushClipRect(Rect::FromSize(0, 0, contentSize.width, contentSize.height - columnHeaderHeight));
 
-		for (int row = 0; row < numRows; ++row)
-		{
-			for (int col = 0; col < numColumns; ++col)
-			{
-				
-			}
-		}
+		//PaintRows(painter, Rect::FromSize(0, 0, contentSize.width, contentSize.height - columnHeaderHeight), CModelIndex());
 
 		painter->PopClipRect();
 		painter->PopChildCoordinateSpace();
@@ -356,7 +354,7 @@ namespace CE::Widgets
 				{
 					headerViewStyle.features |= CViewItemFeature::HasDecoration;
 					headerViewStyle.icon = headerIcon.GetNameValue();
-					headerViewStyle.decorationRect = Rect::FromSize(0, 0, 10, 10);
+					headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
 				}
 
 				if (headerDisplay.IsTextType())
@@ -380,7 +378,7 @@ namespace CE::Widgets
 				{
 					headerViewStyle.features |= CViewItemFeature::HasDecoration;
 					headerViewStyle.icon = headerIcon.GetNameValue();
-					headerViewStyle.decorationRect = Rect::FromSize(0, 0, 10, 10);
+					headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
 				}
 
 				if (headerDisplay.IsTextType())
@@ -408,6 +406,61 @@ namespace CE::Widgets
 		recalculateRows = false;
 	}
 
+	void CBaseItemView::PaintRows(CPainter* painter, const Rect& rect, const CModelIndex& parentIndex)
+	{
+		int numRows = model->GetRowCount(parentIndex);
+		int numColumns = model->GetColumnCount(parentIndex);
+
+		f32 rowPosY = -normalizedScroll.y * Math::Max(0.0f, totalContentHeight - rect.GetSize().height);
+		CFont font{};
+
+		font.SetFamily(cellStyle.GetFontName());
+		if (!font.GetFamily().IsValid())
+		{
+			font.SetFamily(computedStyle.GetFontName());
+		}
+
+		font.SetSize(cellStyle.GetFontSize());
+
+		for (int row = 0; row < numRows; ++row)
+		{
+			if (row % 2 != 0 && alternateBgColor.a > 0)
+			{
+				
+			}
+
+			for (int col = 0; col < numColumns; ++col)
+			{
+				CModelIndex index = model->GetIndex(row, col, parentIndex);
+				CViewItemStyle itemStyle{};
+				itemStyle.font = font;
+
+				Variant display = model->GetData(index, CItemDataUsage::Display);
+				if (display.HasValue() && display.IsTextType())
+				{
+					itemStyle.features |= CViewItemFeature::HasDisplay;
+					itemStyle.text = display.GetTextValue();
+				}
+
+				Variant icon = model->GetData(index, CItemDataUsage::Decoration);
+				if (icon.HasValue() && icon.IsTextType())
+				{
+					itemStyle.features |= CViewItemFeature::HasDecoration;
+					itemStyle.icon = icon.GetNameValue();
+					itemStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
+				}
+
+				itemStyle.padding = cellStyle.GetPadding();
+				itemStyle.textColor = computedStyle.GetForegroundColor();
+				itemStyle.bgColor = Color::Clear();
+
+				delegate->Paint(painter, itemStyle, index);
+			}
+
+			rowPosY += rowHeightsByParent[parentIndex][row];
+		}
+	}
+
 	void CBaseItemView::CalculateRowHeights(Array<f32>& outHeights, const CModelIndex& parentIndex)
 	{
 		outHeights.Clear();
@@ -419,6 +472,15 @@ namespace CE::Widgets
 			return;
 
 		outHeights.Reserve(numRows);
+		CFont font{};
+
+		font.SetFamily(cellStyle.GetFontName());
+		if (!font.GetFamily().IsValid())
+		{
+			font.SetFamily(computedStyle.GetFontName());
+		}
+
+		font.SetSize(cellStyle.GetFontSize());
 
 		for (int row = 0; row < numRows; ++row)
 		{
@@ -434,12 +496,33 @@ namespace CE::Widgets
 				}
 
 				CViewItemStyle itemStyle{};
+				itemStyle.font = font;
+
+				Variant display = model->GetData(index, CItemDataUsage::Display);
+				if (display.HasValue() && display.IsTextType())
+				{
+					itemStyle.features |= CViewItemFeature::HasDisplay;
+					itemStyle.text = display.GetTextValue();
+				}
+
+				Variant icon = model->GetData(index, CItemDataUsage::Decoration);
+				if (icon.HasValue() && icon.IsTextType())
+				{
+					itemStyle.features |= CViewItemFeature::HasDecoration;
+					itemStyle.icon = icon.GetNameValue();
+					itemStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
+				}
+
+				itemStyle.padding = cellStyle.GetPadding();
+				itemStyle.textColor = computedStyle.GetForegroundColor();
+				itemStyle.bgColor = Color::Clear();
 
 				Vec2 size = delegate->GetSizeHint(itemStyle, parentIndex);
 
 				height = Math::Max(height, size.height);
 			}
 
+			totalContentHeight += height;
 			outHeights.Add(height);
 		}
 	}

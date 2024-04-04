@@ -399,6 +399,13 @@ namespace CE::Widgets
 			return fontSize;
 		}
 
+		Color GetForegroundColor() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::Foreground))
+				return Color::White();
+			return properties.Get(CStylePropertyType::Foreground).color;
+		}
+
 	crystalwidgets_internal:
 
 		HashMap<CStylePropertyType, CStyleValue> properties{};

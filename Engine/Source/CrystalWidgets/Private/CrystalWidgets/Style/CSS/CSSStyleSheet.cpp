@@ -27,6 +27,8 @@ namespace CE::Widgets
 				result.ApplyProperties(rule.style);
 		}
 
+		// TODO: Inherit style from parent widget
+
 		return result;
 	}
 

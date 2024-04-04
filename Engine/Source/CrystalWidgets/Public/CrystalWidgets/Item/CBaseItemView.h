@@ -65,6 +65,8 @@ namespace CE::Widgets
 
         void CalculateRowHeights(Array<f32>& outHeights, const CModelIndex& parent = {});
 
+        void PaintRows(CPainter* painter, const Rect& clipRect, const CModelIndex& parent = {});
+
         void HandleEvent(CEvent* event) override;
 
         void Construct() override;
@@ -109,6 +111,8 @@ namespace CE::Widgets
         b8 modelUpdated = true;
         b8 recalculateRows = true;
 
+        Color alternateBgColor{};
+
         HashSet<CModelIndex> expandedRows{};
         CStyle cellStyle{};
         CStyle cellHoveredStyle{};
@@ -121,6 +125,7 @@ namespace CE::Widgets
 
         f32 columnHeaderHeight = 0.0f;
         HashMap<CModelIndex, Array<f32>> rowHeightsByParent{};
+        f32 totalContentHeight = 0;
 
     };
     
