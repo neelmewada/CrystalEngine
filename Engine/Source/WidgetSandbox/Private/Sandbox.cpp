@@ -149,6 +149,9 @@ namespace CE
 		model->SetRootDirectory("C:/ispc"); // Test path
 
 		treeView->SetModel(model);
+
+		treeView->SetColumnResizable(0, 0.5f);
+		treeView->SetColumnResizable(1, 0.5f);
 	}
 
 	void WidgetSandbox::DestroyWidgets()

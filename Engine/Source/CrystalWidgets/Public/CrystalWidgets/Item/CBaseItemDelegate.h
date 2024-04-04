@@ -16,6 +16,12 @@ namespace CE::Widgets
     {
         CFont font{};
         CViewItemFeature features{};
+        Rect decorationRect{};
+        Name icon{};
+        String text{};
+        Vec4 padding{};
+        Color bgColor{};
+        Color textColor{};
     };
 
     CLASS(Abstract)
@@ -31,7 +37,7 @@ namespace CE::Widgets
 
         virtual Vec2 GetSizeHint(const CViewItemStyle& itemStyle, const CModelIndex& index) = 0;
 
-        virtual void PaintHeader(CPainter* painter, const CViewItemStyle& itemStyle, int position, COrientation orientation, CBaseItemModel* model) = 0;
+        virtual void PaintHeader(CPainter* painter, Vec2 size, const CViewItemStyle& itemStyle, int position, COrientation orientation, CBaseItemModel* model) = 0;
 
         virtual Vec2 GetHeaderSizeHint(const CViewItemStyle& itemStyle, int position, COrientation orientation, CBaseItemModel* model) = 0;
 

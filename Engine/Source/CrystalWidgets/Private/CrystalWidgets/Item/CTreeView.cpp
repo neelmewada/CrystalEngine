@@ -5,7 +5,7 @@ namespace CE::Widgets
 
 	CTreeView::CTreeView()
 	{
-		
+		canDrawRowHeader = false;
 	}
 
 	CTreeView::~CTreeView()

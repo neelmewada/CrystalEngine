@@ -45,7 +45,7 @@ namespace CE::Widgets
 
     u32 CFileSystemModel::GetColumnCount(const CModelIndex& parent)
     {
-        return 1;
+        return 2;
     }
 
     CModelIndex CFileSystemModel::GetParent(const CModelIndex& index)
@@ -91,21 +91,40 @@ namespace CE::Widgets
         if (node == nullptr)
             return Variant();
         
-        if (usage == CItemDataUsage::Display)
+        if (index.GetColumn() == 0)
         {
-            return node->name;
+            if (usage == CItemDataUsage::Display)
+            {
+                return node->name;
+            }
+            else if (usage == CItemDataUsage::Decoration)
+            {
+                return Variant();
+            }
         }
-        else if (usage == CItemDataUsage::Decoration)
+        else if (index.GetColumn() == 1) // Type column
         {
-	        // TODO: Icon
+            if (usage == CItemDataUsage::Display)
+            {
+                return node->IsTerminal() && node->name.GetString().Contains('.') ? "File" : "Folder";
+            }
+            else if (usage == CItemDataUsage::Decoration)
+            {
+                return Variant();
+            }
         }
         return Variant();
     }
 
     Variant CFileSystemModel::GetHeaderData(int position, COrientation orientation, CItemDataUsage usage)
     {
-        if (position == 0 && orientation == COrientation::Vertical)
-			return "Name";
+        if (usage == CItemDataUsage::Display && orientation == COrientation::Horizontal)
+        {
+            if (position == 0)
+                return "Name";
+            else if (position == 1)
+                return "Type";
+        }
         
         return Variant();
     }

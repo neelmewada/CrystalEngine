@@ -372,6 +372,33 @@ namespace CE::Widgets
 		//! Returns true if layout properties are different, else false.
 		bool CompareLayoutProperties(const CStyle& rhs);
 
+		Vec4 GetPadding() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::Padding))
+				return Vec4();
+			return properties.Get(CStylePropertyType::Padding).vector;
+		}
+
+		Name GetFontName() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::FontName))
+				return "Roboto";
+			String fontName = properties.Get(CStylePropertyType::FontName).string;
+			if (fontName.IsEmptyOrWhiteSpace())
+				return "Roboto";
+			return fontName;
+		}
+
+		f32 GetFontSize() const
+		{
+			if (!properties.KeyExists(CStylePropertyType::FontSize))
+				return 14;
+			f32 fontSize = properties.Get(CStylePropertyType::FontSize).single;
+			if (fontSize < 1)
+				fontSize = 14;
+			return fontSize;
+		}
+
 	crystalwidgets_internal:
 
 		HashMap<CStylePropertyType, CStyleValue> properties{};

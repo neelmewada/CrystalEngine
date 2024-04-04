@@ -10,8 +10,8 @@ namespace CE::Widgets
 	};
 	ENUM_CLASS(COrientation);
 
-	ENUM()
-	enum class CItemDataUsage
+
+	enum class CItemDataUsage : u32
 	{
 		Display = 0,
 		Decoration,

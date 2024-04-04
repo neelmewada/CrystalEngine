@@ -15,7 +15,7 @@ namespace CE::Widgets
 
 		Vec2 GetSizeHint(const CViewItemStyle& itemStyle, const CModelIndex& index) override;
 
-		void PaintHeader(CPainter* painter, const CViewItemStyle& itemStyle, int position, COrientation orientation, CBaseItemModel* model) override;
+		void PaintHeader(CPainter* painter, Vec2 size, const CViewItemStyle& itemStyle, int position, COrientation orientation, CBaseItemModel* model) override;
 
 		Vec2 GetHeaderSizeHint(const CViewItemStyle& itemStyle, int position, COrientation orientation, CBaseItemModel* model) override;
 

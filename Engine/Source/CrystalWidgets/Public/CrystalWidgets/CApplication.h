@@ -83,6 +83,9 @@ namespace CE::Widgets
 
         RPI::Texture* LoadImage(const Name& assetpath);
 
+        Vec2 CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width = 0.0f);
+        Vec2 CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 fontSize, Name fontName, f32 width = 0.0f);
+
     crystalwidgets_internal:
 
         void OnWidgetDestroyed(CWidget* widget);
@@ -136,6 +139,8 @@ namespace CE::Widgets
         CWidget* curFocusedWidget = nullptr;
 
         Vec2 prevMousePos = Vec2();
+
+        HashMap<Name, RPI::Texture*> texturesByPath{};
 
         friend class CWidget;
         friend class CTimer;

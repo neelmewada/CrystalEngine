@@ -90,6 +90,8 @@ namespace CE::Widgets
 		if (!object)
 			return;
 
+		bool isFourth = GetName() == "Fourth";
+
 		// DockSpace has its own SubWidget logic
 		if (object->IsOfType<CWidget>() && !IsOfType<CDockSpace>() && IsSubWidgetAllowed(object->GetClass()) && IsContainer())
 		{
@@ -115,6 +117,12 @@ namespace CE::Widgets
 				auto childCount = YGNodeGetChildCount(node);
 				YGNodeInsertChild(node, widget->node, childCount);
 			}
+		}
+		else if (object->IsOfType<CWidget>())
+		{
+			CWidget* widget = (CWidget*)object;
+			widget->styleSheet->parent = styleSheet;
+			widget->ownerWindow = ownerWindow;
 		}
 
 		SetNeedsStyle();
@@ -154,6 +162,12 @@ namespace CE::Widgets
 			{
 				YGNodeSetMeasureFunc(node, MeasureFunctionCallback);
 			}
+		}
+		else if (object->IsOfType<CWidget>())
+		{
+			CWidget* widget = (CWidget*)object;
+			widget->styleSheet->parent = nullptr;
+			widget->ownerWindow = nullptr;
 		}
 
 		SetNeedsStyle();

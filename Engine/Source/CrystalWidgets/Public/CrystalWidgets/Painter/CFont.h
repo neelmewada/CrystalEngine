@@ -10,20 +10,26 @@ namespace CE::Widgets
         CFont()
         {}
 
-        CFont(const Name& family, u32 size = 14, bool bold = false)
+        CFont(const Name& family, f32 size = 14, bool bold = false)
     	: family(family), size(size), bold(bold)
         {}
 
         void SetFamily(const Name& family) { this->family = family; }
 
-        void SetSize(u32 size) { this->size = size; }
+        void SetSize(f32 size) { this->size = size; }
 
     	void SetBold(bool set) { this->bold = set; }
+
+        Name GetFamily() const { return family; }
+
+        u32 GetSize() const { return size; }
+
+        bool IsBold() const { return bold; }
 
     private:
 
         Name family = "";
-        u32 size = 14;
+        f32 size = 14;
         bool bold = false;
 
         friend class CPainter;

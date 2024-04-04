@@ -195,6 +195,43 @@ namespace CE
 			return valueTypeId == TYPEID(T);
 		}
 
+		bool IsTextType() const
+		{
+			return IsOfType<String>() || IsOfType<Name>();
+		}
+
+		String GetTextValue() const
+		{
+			if (IsOfType<String>())
+			{
+				return StringValue;
+			}
+			else if (IsOfType<Name>())
+			{
+				return nameValue.GetString();
+			}
+			else
+			{
+				throw VariantCastException(String::Format("Failed to cast Variant to a Text type"));
+			}
+		}
+
+		Name GetNameValue() const
+		{
+			if (IsOfType<String>())
+			{
+				return StringValue;
+			}
+			else if (IsOfType<Name>())
+			{
+				return nameValue;
+			}
+			else
+			{
+				throw VariantCastException(String::Format("Failed to cast Variant to a Text type"));
+			}
+		}
+
 		INLINE TypeId GetValueTypeId() const
 		{
 			return valueTypeId;

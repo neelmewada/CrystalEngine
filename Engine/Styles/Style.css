@@ -155,7 +155,25 @@ CTextInput:focused {
     align-items: stretch;
 }
 
-#TreeView {
+CTreeView {
+    background-color: rgb(26, 26, 26);
     flex-grow: 4;
     flex-shrink: 2;
 }
+
+CTreeView::header {
+    color: white;
+    background-color: rgb(47, 47, 47);
+    font-size: 14px;
+    padding: 10px 5px;
+}
+
+CTreeView::header:hovered {
+    background-color: rgb(56, 56, 56);
+    font-size: 14px;
+}
+
+CTreeView::cell {
+    padding: 5px 5px;
+}
+

@@ -617,7 +617,41 @@ namespace CE::Widgets
 
 	RPI::Texture* CApplication::LoadImage(const Name& assetpath)
 	{
-		return resourceLoader->LoadImage(assetpath);
+		if (texturesByPath.KeyExists(assetpath))
+		{
+			return texturesByPath[assetpath];
+		}
+
+		RPI::Texture* texture = resourceLoader->LoadImage(assetpath);
+		texturesByPath[assetpath] = texture;
+		return texture;
+	}
+
+	Vec2 CApplication::CalculateTextSize(const String& text, f32 fontSize, Name fontName, f32 width)
+	{
+		for (CWindow* window : windows)
+		{
+			if (window->renderer != nullptr)
+			{
+				return window->renderer->CalculateTextSize(text, fontSize, fontName, width);
+			}
+		}
+
+		return Vec2();
+	}
+
+	Vec2 CApplication::CalculateTextOffsets(Array<Rect>& outOffsetRects, const String& text, f32 fontSize,
+		Name fontName, f32 width)
+	{
+		for (CWindow* window : windows)
+		{
+			if (window->renderer != nullptr)
+			{
+				return window->renderer->CalculateTextOffsets(outOffsetRects, text, fontSize, fontName, width);
+			}
+		}
+
+		return Vec2();
 	}
 
 	void CApplication::OnWidgetDestroyed(CWidget* widget)

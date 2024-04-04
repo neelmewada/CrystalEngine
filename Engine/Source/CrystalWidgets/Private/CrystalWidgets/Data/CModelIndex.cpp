@@ -4,7 +4,7 @@ namespace CE::Widgets
 {
 
     CModelIndex::CModelIndex(u32 row, u32 col, CBaseItemModel* model, void* data)
-	    : row(row), col(col), model(model), data(data)
+	    : row(row), col(col), data(data), model(model)
     {
 	    
     }
