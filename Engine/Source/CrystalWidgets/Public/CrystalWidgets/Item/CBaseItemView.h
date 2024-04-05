@@ -63,9 +63,11 @@ namespace CE::Widgets
 
     protected:
 
+        Rect GetVerticalScrollRect();
+
         void CalculateRowHeights(Array<f32>& outHeights, const CModelIndex& parent = {});
 
-        void PaintRows(CPainter* painter, const Rect& clipRect, const CModelIndex& parent = {});
+        void PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel, const CModelIndex& parent = {});
 
         void HandleEvent(CEvent* event) override;
 
@@ -93,6 +95,8 @@ namespace CE::Widgets
 
     private:
 
+        Vec2 scrollOffset = Vec2(0, 0);
+
         FIELD()
         CItemSelectionModel* selectionModel = nullptr;
 
@@ -107,6 +111,7 @@ namespace CE::Widgets
 
         int hoveredColumnHeader = -1;
         int hoveredRowHeader = -1;
+        int expandableColumn = -1;
 
         b8 modelUpdated = true;
         b8 recalculateRows = true;

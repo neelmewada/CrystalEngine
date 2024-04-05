@@ -15,7 +15,15 @@ namespace CE
 {
 	template<typename T>
 	class Array;
-	
+
+	struct Hash128
+	{
+		u64 high64;
+		u64 low64;
+	};
+
+	CORE_API Hash128 CalculateHash128(const void* data, SIZE_T length);
+
 	CORE_API SIZE_T CalculateHash(const void* data, SIZE_T length);
 
     /// Default implementation does not have any 'special' code other than for pointers. Specializations do all the work.

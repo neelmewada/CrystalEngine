@@ -22,6 +22,8 @@ namespace CE::Widgets
         Vec4 padding{};
         Color bgColor{};
         Color textColor{};
+        b8 isExpanded = false;
+        int expandableColumn = -1;
     };
 
     CLASS(Abstract)

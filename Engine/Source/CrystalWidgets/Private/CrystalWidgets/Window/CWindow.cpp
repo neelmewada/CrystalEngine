@@ -4,6 +4,7 @@ namespace CE::Widgets
 {
     constexpr f32 ScrollRectWidth = 10.0f;
     constexpr f32 MinScrollRectSize = 20.0f;
+    constexpr f32 ScrollSizeBuffer = 1.0f;
     
     CWindow::CWindow()
     {
@@ -442,7 +443,7 @@ namespace CE::Widgets
             f32 originalHeight = originalSize.height;
             f32 contentMaxY = contentSize.height;
 
-            if (contentMaxY > originalHeight)
+            if (contentMaxY > originalHeight + ScrollSizeBuffer)
             {
                 Rect scrollRect = GetVerticalScrollBarRect();
 
@@ -474,7 +475,7 @@ namespace CE::Widgets
             f32 originalHeight = originalSize.height;
             f32 contentMaxY = contentSize.height;
 
-            if (contentMaxY > originalHeight)
+            if (contentMaxY > originalHeight + ScrollSizeBuffer)
             {
                 Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
                 f32 scrollRectHeightRatio = originalHeight / contentMaxY;
@@ -514,7 +515,7 @@ namespace CE::Widgets
                     f32 originalHeight = originalSize.height;
                     f32 contentMaxY = contentSize.height;
 
-                    if (contentMaxY > originalHeight)
+                    if (contentMaxY > originalHeight + ScrollSizeBuffer)
                     {
                         Rect scrollRect = GetVerticalScrollBarRect();
                         scrollRect = LocalToScreenSpaceRect(scrollRect);
@@ -541,7 +542,7 @@ namespace CE::Widgets
                     f32 originalHeight = originalSize.height;
                     f32 contentMaxY = contentSize.height;
 
-                    if (contentMaxY > originalHeight)
+                    if (contentMaxY > originalHeight + ScrollSizeBuffer)
                     {
                         Rect scrollRect = GetVerticalScrollBarRect();
                         scrollRect = LocalToScreenSpaceRect(scrollRect);
@@ -585,7 +586,7 @@ namespace CE::Widgets
                 f32 originalHeight = originalSize.height;
                 f32 contentMaxY = contentSize.height;
 
-                if (contentMaxY > originalHeight) // If scrolling is possible
+                if (contentMaxY > originalHeight + ScrollSizeBuffer) // If scrolling is possible
                 {
                     normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity * 0.1f;
                     normalizedScroll.y = Math::Clamp01(normalizedScroll.y);

@@ -176,5 +176,6 @@ CTreeView::header:hovered {
 CTreeView::cell {
     color: white;
     padding: 5px 5px;
+    font-size: 14px;
 }
 

@@ -15,11 +15,59 @@ namespace CE::Widgets
 
     void CStandardItemDelegate::Paint(CPainter* painter, const CViewItemStyle& itemStyle, const CModelIndex& index)
     {
-        CBaseItemModel* model = index.GetModel();
-        if (!model)
+        if (!index.IsValid())
             return;
 
-        
+        Vec2 size = Vec2();
+
+        CBaseItemModel* model = index.GetModel();
+
+        if (!EnumHasAnyFlags(itemStyle.features, CViewItemFeature::HasDecoration | CViewItemFeature::HasDisplay))
+            return;
+
+        if (index.GetColumn() == itemStyle.expandableColumn)
+        {
+            size.x += 15.0f; // Expand/collapse arrow
+        }
+
+        size.x += itemStyle.padding.left;
+
+        if (EnumHasFlag(itemStyle.features, CViewItemFeature::HasDecoration) && model->GetData(index, CItemDataUsage::Decoration).HasValue())
+        {
+            size.x += itemStyle.decorationRect.min.x;
+            size.x += itemStyle.decorationRect.GetSize().width;
+
+            if (EnumHasFlag(itemStyle.features, CViewItemFeature::HasDisplay))
+            {
+                size.x += 2.5f; // padding between decoration & text
+            }
+        }
+
+        size.y = 10.0f;
+
+        if (EnumHasFlag(itemStyle.features, CViewItemFeature::HasDisplay))
+        {
+            String text = "";
+            Variant value = model->GetData(index, CItemDataUsage::Display);
+            if (value.IsOfType<String>())
+            {
+                text = value.GetValue<String>();
+            }
+            else if (value.IsOfType<Name>())
+            {
+                text = value.GetValue<Name>().GetString();
+            }
+
+            CPen pen = CPen(itemStyle.textColor);
+            painter->SetPen(pen);
+
+            painter->SetFont(itemStyle.font);
+
+            if (text.NonEmpty())
+            {
+                painter->DrawText(text, Vec2(size.x, itemStyle.padding.top));
+            }
+        }
     }
 
     Vec2 CStandardItemDelegate::GetSizeHint(const CViewItemStyle& itemStyle, const CModelIndex& index)
@@ -34,9 +82,14 @@ namespace CE::Widgets
         if (!EnumHasAnyFlags(itemStyle.features, CViewItemFeature::HasDecoration | CViewItemFeature::HasDisplay))
             return Vec2();
 
-        if (model->GetRowCount(index) > 0) // Has children
+        if (index.GetColumn() == itemStyle.expandableColumn)
         {
             size.x += 15.0f; // Expand/collapse arrow
+        }
+
+        if (model->GetRowCount(index) > 0) // Has children
+        {
+            
         }
 
         size.x += itemStyle.padding.left;

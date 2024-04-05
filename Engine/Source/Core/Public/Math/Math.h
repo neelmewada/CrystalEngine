@@ -97,7 +97,12 @@ namespace CE
         }
 
         template<typename T>
-        CE_INLINE static T Clamp(T value, T min, T max) { return Min(Max(value, min), max); }
+        CE_INLINE static T Clamp(T value, T min, T max)
+        {
+            if (min > max)
+                std::swap(min, max);
+	        return Min(Max(value, min), max);
+        }
 
         template<typename T>
         CE_INLINE static T Clamp01(T value) { return Clamp<T>(value, 0, 1); }

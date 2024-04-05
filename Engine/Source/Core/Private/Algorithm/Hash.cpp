@@ -7,6 +7,14 @@
 
 namespace CE
 {
+	CORE_API Hash128 CalculateHash128(const void* data, SIZE_T length)
+	{
+		XXH128_hash_t hash = XXH3_128bits(data, length);
+		Hash128 out;
+		out.high64 = hash.high64;
+		out.low64 = hash.low64;
+		return out;
+	}
 
 	CORE_API SIZE_T CalculateHash(const void* data, SIZE_T length)
 	{

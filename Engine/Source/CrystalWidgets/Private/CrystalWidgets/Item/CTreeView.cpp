@@ -6,6 +6,8 @@ namespace CE::Widgets
 	CTreeView::CTreeView()
 	{
 		canDrawRowHeader = false;
+		selectionType = CItemSelectionType::SelectRow;
+		selectionMode = CItemSelectionMode::MultiSelection;
 	}
 
 	CTreeView::~CTreeView()

@@ -4,6 +4,10 @@ namespace CE::Widgets
 {
 	constexpr f32 DefaultDecorationSize = 10.0f;
 
+	constexpr f32 ScrollRectWidth = 10.0f;
+	constexpr f32 MinScrollRectSize = 20.0f;
+	constexpr f32 ScrollSizeBuffer = 1.0f;
+
 	CBaseItemView::CBaseItemView()
 	{
 		defaultSelectionModel = CreateDefaultSubobject<CItemSelectionModel>("ItemSelectionModel");
@@ -304,8 +308,12 @@ namespace CE::Widgets
 			cellHoveredStyle = styleSheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Cell);
 			cellSelectedStyle = styleSheet->SelectStyle(this, CStateFlag::Active, CSubControl::Cell);
 			totalContentHeight = 0.0f;
+			expandableColumn = -1;
 
 			CalculateRowHeights(rowHeightsByParent[CModelIndex()], CModelIndex());
+
+			contentSize.height = totalContentHeight;
+			contentSize.width = regionSize.width;
 		}
 
 		for (int col = 0; col < numColumns; ++col)
@@ -318,10 +326,14 @@ namespace CE::Widgets
 
 		// - Paint rows & cells
 
-		painter->PushChildCoordinateSpace(Vec2(0, columnHeaderHeight));
-		painter->PushClipRect(Rect::FromSize(0, 0, contentSize.width, contentSize.height - columnHeaderHeight));
+		scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, totalContentHeight - contentSize.height - columnHeaderHeight);
+		if (totalContentHeight <= contentSize.height - columnHeaderHeight)
+			scrollOffset.y = 0.0f;
 
-		//PaintRows(painter, Rect::FromSize(0, 0, contentSize.width, contentSize.height - columnHeaderHeight), CModelIndex());
+		painter->PushChildCoordinateSpace(Vec2(0, columnHeaderHeight - scrollOffset.y));
+		painter->PushClipRect(Rect::FromSize(0, 0, regionSize.width, contentSize.height - columnHeaderHeight));
+
+		PaintRows(painter, Rect::FromSize(0, 0, regionSize.width, regionSize.height - columnHeaderHeight), 0, CModelIndex());
 
 		painter->PopClipRect();
 		painter->PopChildCoordinateSpace();
@@ -406,12 +418,12 @@ namespace CE::Widgets
 		recalculateRows = false;
 	}
 
-	void CBaseItemView::PaintRows(CPainter* painter, const Rect& rect, const CModelIndex& parentIndex)
+	void CBaseItemView::PaintRows(CPainter* painter, const Rect& regionRect, int indentLevel, const CModelIndex& parentIndex)
 	{
 		int numRows = model->GetRowCount(parentIndex);
 		int numColumns = model->GetColumnCount(parentIndex);
 
-		f32 rowPosY = -normalizedScroll.y * Math::Max(0.0f, totalContentHeight - rect.GetSize().height);
+		f32 rowPosY = 0.0f;
 		CFont font{};
 
 		font.SetFamily(cellStyle.GetFontName());
@@ -424,17 +436,42 @@ namespace CE::Widgets
 
 		for (int row = 0; row < numRows; ++row)
 		{
+			if (rowPosY > regionRect.GetSize().height)
+			{
+				return; // Out of bounds
+			}
+
 			if (row % 2 != 0 && alternateBgColor.a > 0)
 			{
-				
+				// TODO: Paint alternate Background
 			}
+
+			if (selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow)
+			{
+				for (int col = 0; col < numColumns; ++col)
+				{
+					CModelIndex index = model->GetIndex(row, col, parentIndex);
+					if (selectionModel->IsSelected(index))
+					{
+						CBrush brush = CBrush(Color::RGBA(0, 112, 224));
+						painter->SetBrush(brush);
+						painter->SetPen(CPen());
+
+						painter->DrawRect(Rect::FromSize(0, rowPosY, regionRect.GetSize().width, ceil(rowHeightsByParent[parentIndex][row])));
+
+						break;
+					}
+				}
+			}
+
+			f32 posX = 0.0f;
 
 			for (int col = 0; col < numColumns; ++col)
 			{
 				CModelIndex index = model->GetIndex(row, col, parentIndex);
 				CViewItemStyle itemStyle{};
 				itemStyle.font = font;
-
+				
 				Variant display = model->GetData(index, CItemDataUsage::Display);
 				if (display.HasValue() && display.IsTextType())
 				{
@@ -453,8 +490,25 @@ namespace CE::Widgets
 				itemStyle.padding = cellStyle.GetPadding();
 				itemStyle.textColor = computedStyle.GetForegroundColor();
 				itemStyle.bgColor = Color::Clear();
+				itemStyle.isExpanded = expandedRows.Exists(index);
+				itemStyle.expandableColumn = expandableColumn;
+
+				Rect columnRect = Rect::FromSize(posX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
+
+				painter->PushChildCoordinateSpace(columnRect.min);
+				painter->PushClipRect(Rect::FromSize(Vec2(0, 0), columnRect.GetSize()));
 
 				delegate->Paint(painter, itemStyle, index);
+
+				painter->PopClipRect();
+				painter->PopChildCoordinateSpace();
+
+				if (itemStyle.isExpanded)
+				{
+					PaintRows(painter, regionRect, indentLevel + 1, index);
+				}
+
+				posX += columnWidths[col];
 			}
 
 			rowPosY += rowHeightsByParent[parentIndex][row];
@@ -490,9 +544,17 @@ namespace CE::Widgets
 			{
 				CModelIndex index = model->GetIndex(row, col, parentIndex);
 
-				if (model->GetRowCount(index) > 0 && expandedRows.Exists(index))
+				if (model->GetRowCount(index) > 0)
 				{
-					CalculateRowHeights(rowHeightsByParent[index], index);
+					if (expandableColumn == -1)
+					{
+						expandableColumn = col;
+					}
+
+					if (expandedRows.Exists(index))
+					{
+						CalculateRowHeights(rowHeightsByParent[index], index);
+					}
 				}
 
 				CViewItemStyle itemStyle{};
@@ -516,8 +578,9 @@ namespace CE::Widgets
 				itemStyle.padding = cellStyle.GetPadding();
 				itemStyle.textColor = computedStyle.GetForegroundColor();
 				itemStyle.bgColor = Color::Clear();
+				itemStyle.expandableColumn = expandableColumn;
 
-				Vec2 size = delegate->GetSizeHint(itemStyle, parentIndex);
+				Vec2 size = delegate->GetSizeHint(itemStyle, index);
 
 				height = Math::Max(height, size.height);
 			}
@@ -542,7 +605,6 @@ namespace CE::Widgets
 
 		columnHeaderFlags.Resize(column + 1, CItemViewHeaderFlags::None);
 		columnHeaderFlags[column] &= ~CItemViewHeaderFlags::Resizable;
-
 	}
 
 	void CBaseItemView::SetColumnResizable(u32 column, f32 widthRatio)
@@ -552,6 +614,32 @@ namespace CE::Widgets
 
 		columnHeaderFlags.Resize(column + 1, CItemViewHeaderFlags::None);
 		columnHeaderFlags[column] |= CItemViewHeaderFlags::Resizable;
+	}
+
+	Rect CBaseItemView::GetVerticalScrollRect()
+	{
+		if (allowVerticalScroll)
+		{
+			Vec2 originalSize = GetComputedLayoutSize();
+			f32 originalHeight = originalSize.height;
+			f32 contentMaxY = contentSize.height;
+
+			if (contentMaxY > originalHeight + ScrollSizeBuffer)
+			{
+				Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
+				f32 scrollRectHeightRatio = originalHeight / contentMaxY;
+
+				normalizedScroll.y = Math::Clamp01(scrollOffset.y);
+
+				Rect scrollRect = Rect::FromSize(scrollRegion.min,
+					Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, MinScrollRectSize)));
+				scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * normalizedScroll.y));
+
+				return scrollRect;
+			}
+		}
+
+		return Rect();
 	}
 
 	void CBaseItemView::HandleEvent(CEvent* event)
