@@ -588,7 +588,7 @@ namespace CE::Widgets
 
                 if (contentMaxY > originalHeight + ScrollSizeBuffer) // If scrolling is possible
                 {
-                    normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity * 0.1f;
+                    normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity / (contentMaxY - originalHeight);
                     normalizedScroll.y = Math::Clamp01(normalizedScroll.y);
 
                     SetNeedsLayout();

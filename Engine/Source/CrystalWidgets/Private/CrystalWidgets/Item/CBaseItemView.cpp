@@ -10,8 +10,15 @@ namespace CE::Widgets
 
 	CBaseItemView::CBaseItemView()
 	{
+		receiveMouseEvents = true;
+		receiveDragEvents = true;
+		receiveKeyEvents = true;
+
 		defaultSelectionModel = CreateDefaultSubobject<CItemSelectionModel>("ItemSelectionModel");
 		delegate = CreateDefaultSubobject<CStandardItemDelegate>("StandardItemDelegate");
+
+		allowVerticalScroll = true;
+		allowHorizontalScroll = false;
 
 		if (!IsDefaultInstance())
 		{
@@ -324,11 +331,13 @@ namespace CE::Widgets
 			}
 		}
 
-		// - Paint rows & cells
+		// - Paint rows & cells -
 
-		scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, totalContentHeight - contentSize.height - columnHeaderHeight);
-		if (totalContentHeight <= contentSize.height - columnHeaderHeight)
+		scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, totalContentHeight - regionSize.height - columnHeaderHeight);
+		if (totalContentHeight <= regionSize.height - columnHeaderHeight)
+		{
 			scrollOffset.y = 0.0f;
+		}
 
 		painter->PushChildCoordinateSpace(Vec2(0, columnHeaderHeight - scrollOffset.y));
 		painter->PushClipRect(Rect::FromSize(0, 0, regionSize.width, contentSize.height - columnHeaderHeight));
@@ -340,7 +349,8 @@ namespace CE::Widgets
 
 		Vec2 headerOrigin = Vec2();
 
-		// - Paint headers
+		// - Paint headers -
+
 		for (int col = 0; hasColumnHeader && col < numColumns; ++col)
 		{
 			CViewItemStyle headerViewStyle{};
@@ -412,6 +422,37 @@ namespace CE::Widgets
 			headerOrigin += Vec2(headerSize.width, 0);
 		}
 
+		// - Scroll Rect -
+
+		if (allowVerticalScroll) // Draw Vertical Scroll Bar
+		{
+			Vec2 originalSize = GetComputedLayoutSize();
+			f32 originalHeight = originalSize.height;
+			f32 contentMaxY = contentSize.height;
+
+			if (contentMaxY > originalHeight + ScrollSizeBuffer)
+			{
+				Rect scrollRect = GetVerticalScrollBarRect();
+
+				CPen pen{};
+				CBrush brush = CBrush(Color::RGBA(87, 87, 87));
+
+				if (isVerticalScrollHovered || isVerticalScrollPressed)
+				{
+					brush.SetColor(Color::RGBA(128, 128, 128));
+				}
+
+				painter->SetPen(pen);
+				painter->SetBrush(brush);
+
+				painter->DrawRoundedRect(scrollRect, Vec4(1, 1, 1, 1) * ScrollRectWidth * 0.5f);
+			}
+			else
+			{
+				normalizedScroll = Vec2(0, 0);
+			}
+		}
+
 		painter->PopClipRect();
 		painter->PopChildCoordinateSpace();
 
@@ -436,7 +477,7 @@ namespace CE::Widgets
 
 		for (int row = 0; row < numRows; ++row)
 		{
-			if (rowPosY > regionRect.GetSize().height)
+			if (rowPosY - scrollOffset.y > regionRect.GetSize().height)
 			{
 				return; // Out of bounds
 			}
@@ -616,25 +657,29 @@ namespace CE::Widgets
 		columnHeaderFlags[column] |= CItemViewHeaderFlags::Resizable;
 	}
 
-	Rect CBaseItemView::GetVerticalScrollRect()
+	Rect CBaseItemView::GetVerticalScrollBarRect()
 	{
 		if (allowVerticalScroll)
 		{
 			Vec2 originalSize = GetComputedLayoutSize();
-			f32 originalHeight = originalSize.height;
+			f32 originalHeight = originalSize.height - columnHeaderHeight;
 			f32 contentMaxY = contentSize.height;
 
 			if (contentMaxY > originalHeight + ScrollSizeBuffer)
 			{
-				Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, 0), Vec2(ScrollRectWidth, originalHeight));
+				Rect scrollRegion = Rect::FromSize(Vec2(originalSize.width - ScrollRectWidth, columnHeaderHeight), 
+					Vec2(ScrollRectWidth, originalHeight));
 				f32 scrollRectHeightRatio = originalHeight / contentMaxY;
-
-				normalizedScroll.y = Math::Clamp01(scrollOffset.y);
+				
+				if (contentMaxY != originalHeight)
+					normalizedScroll.y = Math::Clamp01(scrollOffset.y / (contentMaxY - originalHeight));
+				else
+					normalizedScroll.y = 0.0f;
 
 				Rect scrollRect = Rect::FromSize(scrollRegion.min,
 					Vec2(scrollRegion.GetSize().width, Math::Max(scrollRegion.GetSize().height * scrollRectHeightRatio, MinScrollRectSize)));
 				scrollRect = scrollRect.Translate(Vec2(0, (originalHeight - scrollRect.GetSize().height) * normalizedScroll.y));
-
+				
 				return scrollRect;
 			}
 		}
@@ -647,16 +692,87 @@ namespace CE::Widgets
 		if (event->IsMouseEvent())
 		{
 			CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
+			Vec2 globalMousePos = mouseEvent->mousePos;
+			Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
 
-			mouseEvent->Consume(this);
+			Vec2 originalSize = GetComputedLayoutSize();
+			f32 originalHeight = originalSize.height - columnHeaderHeight;
+			f32 contentMaxY = contentSize.height;
+
+			Rect scrollBarRect = GetVerticalScrollBarRect();
+			scrollBarRect = LocalToScreenSpaceRect(scrollBarRect);
 
 			if (mouseEvent->type == CEventType::MouseEnter || mouseEvent->type == CEventType::MouseMove)
 			{
-				
+				mouseEvent->Consume(this);
+
+				if (contentMaxY > originalHeight + ScrollSizeBuffer && scrollBarRect.Contains(globalMousePos))
+				{
+					isVerticalScrollHovered = true;
+				}
+				else
+				{
+					isVerticalScrollHovered = false;
+				}
 			}
 			else if (mouseEvent->type == CEventType::MouseLeave)
 			{
-				
+				mouseEvent->Consume(this);
+
+				isVerticalScrollHovered = false;
+			}
+			else if (mouseEvent->type == CEventType::MouseWheel)
+			{
+				mouseEvent->Consume(this);
+
+				if (contentMaxY > originalHeight + ScrollSizeBuffer) // If scrolling is possible
+				{
+					normalizedScroll.y += -mouseEvent->wheelDelta.y * scrollSensitivity / (contentMaxY - originalHeight);
+					normalizedScroll.y = Math::Clamp01(normalizedScroll.y);
+
+					scrollOffset.y = normalizedScroll.y * (contentMaxY - originalHeight);
+					scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, (contentMaxY - originalHeight));
+
+					SetNeedsLayout();
+					SetNeedsPaint();
+				}
+			}
+
+			if (event->IsDragEvent())
+			{
+				CDragEvent* dragEvent = (CDragEvent*)mouseEvent;
+
+				if (dragEvent->type == CEventType::DragBegin)
+				{
+					if (isVerticalScrollHovered)
+					{
+						isVerticalScrollPressed = true;
+
+						dragEvent->Consume(this);
+					}
+				}
+				else if (dragEvent->type == CEventType::DragMove)
+				{
+					if (isVerticalScrollPressed)
+					{
+						dragEvent->Consume(this);
+
+						normalizedScroll.y += mouseDelta.y / (originalHeight - GetVerticalScrollBarRect().GetSize().height);
+						normalizedScroll.y = Math::Clamp01(normalizedScroll.y);
+
+						scrollOffset.y = normalizedScroll.y * (contentMaxY - originalHeight);
+						scrollOffset.y = Math::Clamp(scrollOffset.y, 0.0f, (contentMaxY - originalHeight));
+					}
+				}
+				else if (dragEvent->type == CEventType::DragEnd)
+				{
+					if (isVerticalScrollPressed)
+					{
+						isVerticalScrollPressed = false;
+
+						dragEvent->Consume(this);
+					}
+				}
 			}
 
 			SetNeedsPaint();

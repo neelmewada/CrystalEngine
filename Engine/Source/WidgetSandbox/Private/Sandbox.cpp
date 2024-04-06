@@ -146,7 +146,7 @@ namespace CE
 		CTreeView* treeView = CreateObject<CTreeView>(fourthDockWindow, "TreeView");
 
 		CFileSystemModel* model = CreateObject<CFileSystemModel>(treeView, "FileSystemModel");
-		model->SetRootDirectory("C:/ispc"); // Test path
+		model->SetRootDirectory(PlatformDirectories::GetLaunchDir()); // Test path
 
 		treeView->SetModel(model);
 

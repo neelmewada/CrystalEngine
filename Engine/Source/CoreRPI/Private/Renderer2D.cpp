@@ -1159,7 +1159,7 @@ namespace CE::RPI
 	void Renderer2D::IncrementCharacterDrawItemBuffer(u32 numCharactersToAdd)
 	{
 		u32 curNumItems = drawItemsBuffer[0]->GetBufferSize() / sizeof(DrawItem2D);
-		u32 incrementCount = curNumItems * 3 / 2; // Add 50% to the storage
+		u32 incrementCount = curNumItems / 2; // Add 50% to the storage
 
 		numCharactersToAdd = Math::Max(numCharactersToAdd, incrementCount);
 
@@ -1193,7 +1193,7 @@ namespace CE::RPI
 	void Renderer2D::IncrementClipRectsBuffer(u32 numRectsToAdd)
 	{
 		u32 curNumRects = clipRectsBuffer[0]->GetBufferSize() / sizeof(Rect);
-		u32 incrementCount = curNumRects * 3 / 2;
+		u32 incrementCount = curNumRects / 2;
 
 		numRectsToAdd = Math::Max(numRectsToAdd, incrementCount);
 
@@ -1209,7 +1209,7 @@ namespace CE::RPI
 			newBufferDesc.bufferSize = original->GetBufferSize() + numRectsToAdd * sizeof(Rect);
 
 			clipRectsBuffer[i] = gDynamicRHI->CreateBuffer(newBufferDesc);
-			drawItemSrg->Bind(i, "_ClipRect", clipRectsBuffer[i]);
+			drawItemSrg->Bind(i, "_ClipRects", clipRectsBuffer[i]);
 
 			void* data;
 			original->Map(0, original->GetBufferSize(), &data);
@@ -1220,6 +1220,8 @@ namespace CE::RPI
 
 			QueueDestroy(original);
 		}
+
+		drawItemSrg->FlushBindings();
 	}
 
 	RPI::Material* Renderer2D::GetOrCreateMaterial(const DrawBatch& drawBatch)

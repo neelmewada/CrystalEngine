@@ -19,7 +19,8 @@ namespace CE::Widgets
 	    SingleSelection,
         ContiguousSelection,
         MultiSelection,
-        NoSelection
+        NoSelection,
+        ExtendedSelection
     };
     ENUM_CLASS(CItemSelectionMode);
 
@@ -63,7 +64,7 @@ namespace CE::Widgets
 
     protected:
 
-        Rect GetVerticalScrollRect();
+        Rect GetVerticalScrollBarRect();
 
         void CalculateRowHeights(Array<f32>& outHeights, const CModelIndex& parent = {});
 
@@ -115,6 +116,9 @@ namespace CE::Widgets
 
         b8 modelUpdated = true;
         b8 recalculateRows = true;
+
+        b8 isVerticalScrollHovered = false;
+        b8 isVerticalScrollPressed = false;
 
         Color alternateBgColor{};
 
