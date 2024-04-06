@@ -17,7 +17,6 @@ namespace CE::Widgets
     enum class CItemSelectionMode
     {
 	    SingleSelection,
-        ContiguousSelection,
         MultiSelection,
         NoSelection,
         ExtendedSelection
@@ -63,6 +62,9 @@ namespace CE::Widgets
 
 
     protected:
+
+        FUNCTION()
+        void OnSelectionModelUpdated();
 
         Rect GetVerticalScrollBarRect();
 
@@ -128,6 +130,7 @@ namespace CE::Widgets
         CStyle cellSelectedStyle{};
 
         CModelIndex hoveredCell{};
+        KeyModifier keyModifier{};
 
         Array<f32> columnWidths{};
         Array<f32> columnWidthRatios{};
@@ -136,6 +139,9 @@ namespace CE::Widgets
         HashMap<CModelIndex, Array<f32>> rowHeightsByParent{};
         f32 totalContentHeight = 0;
 
+        Vec2 localMousePos = Vec2(-1, -1);
+        b8 isMouseHovering = false;
+        b8 isMouseLeftClick = false;
     };
     
 } // namespace CE::Widgets

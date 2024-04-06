@@ -7,7 +7,7 @@ namespace CE::Widgets
 	{
 		canDrawRowHeader = false;
 		selectionType = CItemSelectionType::SelectRow;
-		selectionMode = CItemSelectionMode::MultiSelection;
+		selectionMode = CItemSelectionMode::ExtendedSelection;
 	}
 
 	CTreeView::~CTreeView()

@@ -43,7 +43,6 @@ namespace CE
 
 #define CE_SIGNAL(SignalName, ...) FORCE_INLINE void SignalName(CE_EXPAND(CE_EXPAND(CE_CONCATENATE(__CE_ARG_,CE_ARG_COUNT(__VA_ARGS__)))(__VA_ARGS__)))\
 {\
-    CE::Array<CE::Variant> args = { CE_EXPAND(CE_CONCATENATE(__CE_ARG_LIST_,CE_ARG_COUNT(__VA_ARGS__))) };\
-    CE::Object::EmitSignal(this, #SignalName, args);\
+    CE::Object::EmitSignal(this, #SignalName,  CE::Array<CE::Variant>{ CE_EXPAND(CE_CONCATENATE(__CE_ARG_LIST_,CE_ARG_COUNT(__VA_ARGS__))) });\
 }
 

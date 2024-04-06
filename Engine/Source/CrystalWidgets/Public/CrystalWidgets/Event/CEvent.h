@@ -164,6 +164,9 @@ namespace CE::Widgets
 		MouseButton button{};
 
 		FIELD()
+		KeyModifier keyModifiers{};
+
+		FIELD()
 		Vec2 mousePos{}; // Mouse position in screen space
 
 		FIELD()

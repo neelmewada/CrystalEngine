@@ -22,7 +22,7 @@ namespace CE::Widgets
 
 		if (!IsDefaultInstance())
 		{
-			selectionModel = defaultSelectionModel;
+			SetSelectionModel(defaultSelectionModel);
 		}
 	}
 
@@ -33,127 +33,23 @@ namespace CE::Widgets
 
 	Vec2 CBaseItemView::CalculateIntrinsicSize(f32 width, f32 height)
 	{
-		if (!model || !delegate)
-			return Vec2();
-
-		u32 numColumns = model->GetColumnCount({});
-		u32 numRows = model->GetRowCount({});
-
-		if (numColumns == 0)
-			return Vec2();
-
-		bool hasColumnHeader = true;
-
-		for (int i = 0; i < numColumns; ++i)
-		{
-			Variant headerData = model->GetHeaderData(i, COrientation::Horizontal);
-			if (!headerData.HasValue())
-			{
-				hasColumnHeader = false;
-				break;
-			}
-		}
-
-		bool hasRowHeader = true;
-
-		for (int i = 0; i < numRows; ++i)
-		{
-			Variant headerData = model->GetHeaderData(i, COrientation::Vertical);
-			if (!headerData.HasValue())
-			{
-				hasRowHeader = false;
-				break;
-			}
-		}
-
-		if (!canDrawColumnHeader)
-			hasColumnHeader = false;
-		if (!canDrawRowHeader)
-			hasRowHeader = false;
-
-		CStyle headerStyle = styleSheet->SelectStyle(this, CStateFlag::Default, CSubControl::Header);
-		CStyle headerHoveredStyle = styleSheet->SelectStyle(this, CStateFlag::Hovered, CSubControl::Header);
-
-		Vec2 size = Vec2();
-
-		columnWidths.Resize(numColumns);
-		columnHeaderHeight = 0;
-
-		for (int col = 0; col < numColumns; ++col)
-		{
-			columnWidths[col] = 0;
-
-			if (hasColumnHeader)
-			{
-				CViewItemStyle headerViewStyle{};
-				Variant headerText = model->GetHeaderData(col, COrientation::Horizontal, CItemDataUsage::Display);
-				if (headerText.IsTextType())
-				{
-					headerViewStyle.text = headerText.GetTextValue();
-				}
-
-				if (hoveredColumnHeader == col) // Hovered column
-				{
-					headerViewStyle.padding = headerHoveredStyle.properties[CStylePropertyType::Padding].vector;
-					headerViewStyle.font.SetFamily(headerHoveredStyle.GetFontName());
-					headerViewStyle.font.SetSize(headerHoveredStyle.GetFontSize());
-					headerViewStyle.features = CViewItemFeature::HasDisplay;
-
-					Variant headerDisplay = model->GetHeaderData(col, COrientation::Horizontal);
-					Variant headerIcon = model->GetHeaderData(col, COrientation::Horizontal, CItemDataUsage::Decoration);
-
-					if (headerIcon.HasValue() && headerIcon.IsTextType())
-					{
-						headerViewStyle.features |= CViewItemFeature::HasDecoration;
-						headerViewStyle.icon = headerIcon.GetNameValue();
-						headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
-					}
-
-					if (headerDisplay.IsTextType())
-					{
-						headerViewStyle.text = headerDisplay.GetTextValue();
-					}
-				}
-				else
-				{
-					headerViewStyle.padding = headerStyle.properties[CStylePropertyType::Padding].vector;
-					headerViewStyle.font.SetFamily(headerStyle.GetFontName());
-					headerViewStyle.font.SetSize(headerStyle.GetFontSize());
-					headerViewStyle.features = CViewItemFeature::HasDisplay;
-
-					Variant headerDisplay = model->GetHeaderData(col, COrientation::Horizontal);
-					Variant headerIcon = model->GetHeaderData(col, COrientation::Horizontal, CItemDataUsage::Decoration);
-
-					if (headerIcon.HasValue() && headerIcon.IsTextType())
-					{
-						headerViewStyle.features |= CViewItemFeature::HasDecoration;
-						headerViewStyle.icon = headerIcon.GetNameValue();
-						headerViewStyle.decorationRect = Rect::FromSize(0, 0, DefaultDecorationSize, DefaultDecorationSize);
-					}
-
-					if (headerDisplay.IsTextType())
-					{
-						headerViewStyle.text = headerDisplay.GetTextValue();
-					}
-				}
-
-				Vec2 headerSize = delegate->GetHeaderSizeHint(headerViewStyle, col, COrientation::Horizontal, model);
-
-				columnHeaderHeight = Math::Max(columnHeaderHeight, headerSize.height);
-			}
-
-			for (int row = 0; row < numRows; ++row)
-			{
-				
-			}
-		}
-		
-		return size;
+		return Vec2(); // Should never rely on intrinsic size
 	}
 
 	void CBaseItemView::SetSelectionModel(CItemSelectionModel* selectionModel)
 	{
+		if (this->selectionModel == selectionModel)
+			return;
+
+		if (this->selectionModel != nullptr)
+		{
+			UnbindSignals(this, this->selectionModel);
+		}
+
 		this->selectionModel = selectionModel;
+
+		Bind(this->selectionModel, MEMBER_FUNCTION(CItemSelectionModel, OnSelectionChanged),
+			this, MEMBER_FUNCTION(Self, OnSelectionModelUpdated));
 	}
 
 	void CBaseItemView::SetModel(CBaseItemModel* model)
@@ -162,6 +58,21 @@ namespace CE::Widgets
 
 		if (selectionModel)
 			selectionModel->SetModel(model);
+
+		if (model != nullptr)
+		{
+			u32 numColumns = model->GetColumnCount({});
+
+			if (columnWidthRatios.GetSize() != numColumns)
+			{
+				columnWidthRatios.Resize(numColumns);
+
+				for (int i = 0; i < numColumns; ++i)
+				{
+					columnWidthRatios[i] = 0.0f;
+				}
+			}
+		}
 	}
 
 	void CBaseItemView::SetDelegate(CBaseItemDelegate* delegate)
@@ -302,7 +213,7 @@ namespace CE::Widgets
 						headerViewStyle.text = headerDisplay.GetTextValue();
 					}
 				}
-
+				
 				Vec2 headerSize = delegate->GetHeaderSizeHint(headerViewStyle, col, COrientation::Horizontal, model);
 
 				columnHeaderHeight = Math::Max(columnHeaderHeight, headerSize.height);
@@ -487,7 +398,7 @@ namespace CE::Widgets
 				// TODO: Paint alternate Background
 			}
 
-			if (selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow)
+			if (selectionModel != nullptr && selectionType == CItemSelectionType::SelectRow) // Draw row selection
 			{
 				for (int col = 0; col < numColumns; ++col)
 				{
@@ -534,12 +445,27 @@ namespace CE::Widgets
 				itemStyle.isExpanded = expandedRows.Exists(index);
 				itemStyle.expandableColumn = expandableColumn;
 
-				Rect columnRect = Rect::FromSize(posX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
+				Rect cellRect = Rect::FromSize(posX, rowPosY, columnWidths[col], rowHeightsByParent[parentIndex][row]);
 
-				painter->PushChildCoordinateSpace(columnRect.min);
-				painter->PushClipRect(Rect::FromSize(Vec2(0, 0), columnRect.GetSize()));
+				painter->PushChildCoordinateSpace(cellRect.min);
+				painter->PushClipRect(Rect::FromSize(Vec2(0, 0), cellRect.GetSize()));
 
-				delegate->Paint(painter, itemStyle, index);
+				if (isMouseHovering)
+				{
+					Vec2 rowMousePos = localMousePos - Vec2(0, columnHeaderHeight) + Vec2(0, scrollOffset.y);
+
+					if (cellRect.Contains(rowMousePos) && isMouseLeftClick && selectionMode != CItemSelectionMode::NoSelection)
+					{
+						if (selectionMode == CItemSelectionMode::SingleSelection)
+							selectionModel->Clear();
+						else if (selectionMode == CItemSelectionMode::ExtendedSelection && !EnumHasAnyFlags(keyModifier, KeyModifier::Ctrl))
+							selectionModel->Clear();
+
+						selectionModel->Select(index);
+					}
+				}
+
+				delegate->Paint(painter, itemStyle, index); // Paint cell
 
 				painter->PopClipRect();
 				painter->PopChildCoordinateSpace();
@@ -657,6 +583,11 @@ namespace CE::Widgets
 		columnHeaderFlags[column] |= CItemViewHeaderFlags::Resizable;
 	}
 
+	void CBaseItemView::OnSelectionModelUpdated()
+	{
+		SetNeedsPaint();
+	}
+
 	Rect CBaseItemView::GetVerticalScrollBarRect()
 	{
 		if (allowVerticalScroll)
@@ -694,6 +625,7 @@ namespace CE::Widgets
 			CMouseEvent* mouseEvent = static_cast<CMouseEvent*>(event);
 			Vec2 globalMousePos = mouseEvent->mousePos;
 			Vec2 mouseDelta = mouseEvent->mousePos - mouseEvent->prevMousePos;
+			keyModifier = mouseEvent->keyModifiers;
 
 			Vec2 originalSize = GetComputedLayoutSize();
 			f32 originalHeight = originalSize.height - columnHeaderHeight;
@@ -702,17 +634,26 @@ namespace CE::Widgets
 			Rect scrollBarRect = GetVerticalScrollBarRect();
 			scrollBarRect = LocalToScreenSpaceRect(scrollBarRect);
 
-			if (mouseEvent->type == CEventType::MouseEnter || mouseEvent->type == CEventType::MouseMove)
+			if (mouseEvent->type == CEventType::MouseEnter || mouseEvent->type == CEventType::MouseMove || 
+				mouseEvent->type == CEventType::MousePress || mouseEvent->type == CEventType::MouseRelease)
 			{
 				mouseEvent->Consume(this);
+
+				isMouseLeftClick = mouseEvent->type == CEventType::MousePress && mouseEvent->button == MouseButton::Left;
 
 				if (contentMaxY > originalHeight + ScrollSizeBuffer && scrollBarRect.Contains(globalMousePos))
 				{
 					isVerticalScrollHovered = true;
+
+					localMousePos = Vec2(-1, -1);
+					isMouseHovering = false;
 				}
 				else
 				{
 					isVerticalScrollHovered = false;
+
+					localMousePos = ScreenSpaceToLocalPoint(globalMousePos);
+					isMouseHovering = true;
 				}
 			}
 			else if (mouseEvent->type == CEventType::MouseLeave)
@@ -720,6 +661,7 @@ namespace CE::Widgets
 				mouseEvent->Consume(this);
 
 				isVerticalScrollHovered = false;
+				isMouseHovering = false;
 			}
 			else if (mouseEvent->type == CEventType::MouseWheel)
 			{

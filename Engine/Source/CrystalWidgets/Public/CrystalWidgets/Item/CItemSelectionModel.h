@@ -12,6 +12,11 @@ namespace CE::Widgets
     {
         Array<CItemSelectionRange> selectionRanges{};
 
+        void ClearAll()
+        {
+            selectionRanges.Clear();
+        }
+
         void Select(const CModelIndex& start, const CModelIndex& end)
         {
             selectionRanges.Add({ start, end });
@@ -57,6 +62,14 @@ namespace CE::Widgets
         CBaseItemModel* GetModel() const { return model; }
 
         void SetModel(CBaseItemModel* model) { this->model = model; }
+
+        void Select(const CModelIndex& start, const CModelIndex& end);
+
+        void Select(const CModelIndex& index);
+
+        void Clear();
+
+        CE_SIGNAL(OnSelectionChanged);
 
     protected:
 

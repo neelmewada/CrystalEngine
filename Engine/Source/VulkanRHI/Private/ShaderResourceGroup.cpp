@@ -504,7 +504,10 @@ namespace CE::Vulkan
 		if (!bufferView.GetBuffer())
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
+		{
+			CE_LOG(Warn, All, "Variable named {} does not exist in SRG", name);
 			return false;
+		}
 
 		int bindingSlot = bindingSlotsByVariableName[name];
 		int i = imageIndex;
@@ -529,7 +532,10 @@ namespace CE::Vulkan
 		if (!rhiTexture)
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
+		{
+			CE_LOG(Warn, All, "Variable named {} does not exist in SRG", name);
 			return false;
+		}
 
 		int i = imageIndex;
 		int bindingSlot = bindingSlotsByVariableName[name];
@@ -617,7 +623,10 @@ namespace CE::Vulkan
 		if (!rhiSampler)
 			return false;
 		if (!bindingSlotsByVariableName.KeyExists(name))
+		{
+			CE_LOG(Warn, All, "Variable named {} does not exist in SRG", name);
 			return false;
+		}
 
 		int i = imageIndex;
 		int bindingSlot = bindingSlotsByVariableName[name];
@@ -639,7 +648,10 @@ namespace CE::Vulkan
 	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::BufferView* bufferViews)
 	{
 		if (!bindingSlotsByVariableName.KeyExists(name))
+		{
+			CE_LOG(Warn, All, "Variable named {} does not exist in SRG", name);
 			return false;
+		}
 
 		int bindingSlot = bindingSlotsByVariableName[name];
 		int i = imageIndex;
@@ -666,7 +678,10 @@ namespace CE::Vulkan
 	bool ShaderResourceGroup::Bind(u32 imageIndex, Name name, u32 count, RHI::Texture** textures)
 	{
 		if (!bindingSlotsByVariableName.KeyExists(name))
+		{
+			CE_LOG(Warn, All, "Variable named {} does not exist in SRG", name);
 			return false;
+		}
 
 		int bindingSlot = bindingSlotsByVariableName[name];
 		int i = imageIndex;

@@ -97,6 +97,20 @@ namespace CE::Widgets
 			curButton = MouseButton::Middle;
 		}
 
+		Enum* keyCodeEnum = GetStaticEnum<KeyCode>();
+		Enum* keyModifierEnum = GetStaticEnum<KeyModifier>();
+
+		keyModifierStates = KeyModifier::None;
+		keyPressStates.Resize(keyCodeEnum->GetConstantsCount());
+
+		for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
+		{
+			if (InputManager::TestModifiers((KeyModifier)keyModifierEnum->GetConstant(i)->GetValue()))
+			{
+				keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
+			}
+		}
+
 		std::function<CWidget* (CWidget*)> getBottomMostHoveredWidget = [&](CWidget* widget) -> CWidget*
 			{
 				if (widget == nullptr || !widget->IsEnabled() || !widget->interactable)
@@ -166,6 +180,7 @@ namespace CE::Widgets
 			mouseEvent.prevMousePos = prevMousePos;
 			mouseEvent.direction = CEventDirection::BottomToTop;
 			mouseEvent.wheelDelta = mouseWheelDelta;
+			mouseEvent.keyModifiers = keyModifierStates;
 
 			while (hoveredWidgetsStack.NonEmpty() && hoveredWidgetsStack.Top() != hoveredWidget)
 			{
@@ -190,6 +205,7 @@ namespace CE::Widgets
 			mouseEvent.prevMousePos = prevMousePos;
 			mouseEvent.direction = CEventDirection::BottomToTop;
 			mouseEvent.wheelDelta = mouseWheelDelta;
+			mouseEvent.keyModifiers = keyModifierStates;
 
 			int idx = hoveredWidgetsStack.GetSize();
 			CWidget* basePrevWidget = nullptr;
@@ -225,6 +241,7 @@ namespace CE::Widgets
 			mouseEvent.prevMousePos = prevMousePos;
 			mouseEvent.direction = CEventDirection::BottomToTop;
 			mouseEvent.wheelDelta = mouseWheelDelta;
+			mouseEvent.keyModifiers = keyModifierStates;
 
 			if (hoveredWidgetsStack.NonEmpty())
 			{
@@ -243,6 +260,7 @@ namespace CE::Widgets
 			mouseEvent.prevMousePos = prevMousePos;
 			mouseEvent.direction = CEventDirection::BottomToTop;
 			mouseEvent.wheelDelta = mouseWheelDelta;
+			mouseEvent.keyModifiers = keyModifierStates;
 
 			if (hoveredWidgetsStack.NonEmpty())
 			{
@@ -261,6 +279,7 @@ namespace CE::Widgets
 				dragEvent.direction = CEventDirection::BottomToTop;
 				dragEvent.wheelDelta = mouseWheelDelta;
 				dragEvent.isInside = true;
+				dragEvent.keyModifiers = keyModifierStates;
 
 				dragEvent.sender = nullptr;
 				if (hoveredWidgetsStack.NonEmpty())
@@ -299,6 +318,7 @@ namespace CE::Widgets
 				event.isInside = true;
 				event.wheelDelta = mouseWheelDelta;
 				event.isDoubleClick = InputManager::GetMouseButtonClicks(mouseButton) == 2;
+				event.keyModifiers = keyModifierStates;
 
 				if (hoveredWidgetsStack.NonEmpty())
 				{
@@ -319,6 +339,7 @@ namespace CE::Widgets
 						dragEvent.direction = CEventDirection::BottomToTop;
 						dragEvent.isInside = true;
 						dragEvent.wheelDelta = mouseWheelDelta;
+						dragEvent.keyModifiers = keyModifierStates;
 
 						dragEvent.sender = hoveredWidgetsStack.Top();
 						dragEvent.draggedWidget = hoveredWidgetsStack.Top();
@@ -343,6 +364,7 @@ namespace CE::Widgets
 				event.direction = CEventDirection::BottomToTop;
 				event.isInside = true;
 				event.wheelDelta = mouseWheelDelta;
+				event.keyModifiers = keyModifierStates;
 
 				if (hoveredWidgetsStack.NonEmpty())
 				{
@@ -368,6 +390,7 @@ namespace CE::Widgets
 					dragEvent.direction = CEventDirection::BottomToTop;
 					dragEvent.isInside = true;
 					dragEvent.wheelDelta = mouseWheelDelta;
+					dragEvent.keyModifiers = keyModifierStates;
 
 					dragEvent.sender = nullptr;
 					if (hoveredWidgetsStack.NonEmpty())
@@ -423,12 +446,6 @@ namespace CE::Widgets
 
 		prevMousePos = globalMousePos;
 
-		Enum* keyCodeEnum = GetStaticEnum<KeyCode>();
-		Enum* keyModifierEnum = GetStaticEnum<KeyModifier>();
-
-		keyModifierStates = KeyModifier::None;
-		keyPressStates.Resize(keyCodeEnum->GetConstantsCount());
-
 		CWidget* keyEventWidget = curFocusedWidget;
 		while (keyEventWidget != nullptr && !keyEventWidget->receiveKeyEvents)
 		{
@@ -437,14 +454,6 @@ namespace CE::Widgets
 
 		if (keyEventWidget)
 		{
-			for (int i = 0; i < keyModifierEnum->GetConstantsCount(); ++i)
-			{
-				if (InputManager::TestModifiers((KeyModifier)keyModifierEnum->GetConstant(i)->GetValue()))
-				{
-					keyModifierStates |= (KeyModifier)keyModifierEnum->GetConstant(i)->GetValue();
-				}
-			}
-
 			for (int i = 0; i < keyCodeEnum->GetConstantsCount(); ++i)
 			{
 				KeyCode keyCode = (KeyCode)keyCodeEnum->GetConstant(i)->GetValue();

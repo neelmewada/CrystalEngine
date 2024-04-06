@@ -136,11 +136,9 @@ namespace CE
 
 		CWidget* imageWidget2 = CreateObject<CWidget>(thirdDockWindow, "ImageWidget2");
 
-		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [textInput, this, right]
+		Object::Bind(newBtn, MEMBER_FUNCTION(CButton, OnButtonLeftClicked), [this]
 			{
-				fifthDockWindow->SetEnabled(!fifthDockWindow->IsEnabled());
-				right->SetNeedsLayout();
-				right->SetNeedsPaint();
+				
 			});
 
 		CTreeView* treeView = CreateObject<CTreeView>(fourthDockWindow, "TreeView");
