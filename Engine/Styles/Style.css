@@ -179,3 +179,7 @@ CTreeView::cell {
     font-size: 14px;
 }
 
+CMenuItem {
+    flex-direction: row;
+    align-items: center;
+}

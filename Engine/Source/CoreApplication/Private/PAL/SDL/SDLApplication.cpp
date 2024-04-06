@@ -92,6 +92,25 @@ namespace CE
 		return mainWindow;
 	}
 
+	PlatformWindow* SDLApplication::InitMainWindow(const String& title, u32 width, u32 height,
+		const PlatformWindowInfo& info)
+	{
+		if (mainWindow == nullptr)
+		{
+			mainWindow = new SDLPlatformWindow(title, width, height, info);
+			mainWindow->isMainWindow = true;
+			windowList.Add(mainWindow);
+
+			SDL_AddEventWatch(SDLWindowEventWatch, mainWindow->handle);
+		}
+
+		for (auto messageHandler : messageHandlers)
+		{
+			messageHandler->OnWindowCreated(mainWindow);
+		}
+		return mainWindow;
+	}
+
 	PlatformWindow* SDLApplication::GetMainWindow()
 	{
 		return mainWindow;
@@ -125,13 +144,29 @@ namespace CE
 		return window;
 	}
 
-	PlatformWindow* SDLApplication::CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen)
+	PlatformWindow* SDLApplication::CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool hidden)
 	{
 		if (mainWindow == nullptr)
 		{
 			return InitMainWindow(title, width, height, maximised, fullscreen);
 		}
-		auto window = new SDLPlatformWindow(title, width, height, maximised, fullscreen);
+		auto window = new SDLPlatformWindow(title, width, height, maximised, fullscreen, false, hidden);
+		windowList.Add(window);
+		for (auto messageHandler : messageHandlers)
+		{
+			messageHandler->OnWindowCreated(window);
+		}
+		return window;
+	}
+
+	PlatformWindow* SDLApplication::CreatePlatformWindow(const String& title, u32 width, u32 height,
+		const PlatformWindowInfo& info)
+	{
+		if (mainWindow == nullptr)
+		{
+			return InitMainWindow(title, width, height, info);
+		}
+		auto window = new SDLPlatformWindow(title, width, height, info);
 		windowList.Add(window);
 		for (auto messageHandler : messageHandlers)
 		{

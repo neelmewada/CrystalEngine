@@ -1024,6 +1024,11 @@ namespace CE::Widgets
 			bgImage = computedStyle.properties[CStylePropertyType::BackgroundImage].string;
 		}
 
+		if (backgroundImageOverride.IsValid())
+		{
+			bgImage = backgroundImageOverride;
+		}
+
 		if (computedStyle.properties.KeyExists(CStylePropertyType::BorderColor))
 		{
 			outlineColor = computedStyle.properties[CStylePropertyType::BorderColor].color;

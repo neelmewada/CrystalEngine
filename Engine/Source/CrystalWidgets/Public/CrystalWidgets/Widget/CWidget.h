@@ -76,6 +76,10 @@ namespace CE::Widgets
 
         // - Style API -
 
+        void SetBackgroundImage(const Name& imagePath) { this->backgroundImageOverride = imagePath; SetNeedsPaint(); }
+
+        Name GetBackgroundImage() const { return backgroundImageOverride; }
+
         const CStyle& GetComputedStyle()
         {
             return computedStyle;
@@ -248,6 +252,9 @@ namespace CE::Widgets
 
         FIELD(ReadOnly)
         Vec2 contentSize{};
+
+        FIELD()
+        Name backgroundImageOverride{};
 
         // - Configs -
 

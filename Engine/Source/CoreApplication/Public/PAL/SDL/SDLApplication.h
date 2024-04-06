@@ -33,12 +33,16 @@ namespace CE
 
         PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) override;
 
+        PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info) override;
+
         PlatformWindow* GetMainWindow() override;
 
         virtual PlatformWindow* FindWindow(u64 windowId) override;
 
         virtual PlatformWindow* CreatePlatformWindow(const String& title) override;
-        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) override;
+        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen = false, bool hidden = false) override;
+
+        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info) override;
 
 		virtual Vec2i GetMainScreenSize() override;
 		virtual Vec2i GetScreenSizeForWindow(PlatformWindow* window) override;

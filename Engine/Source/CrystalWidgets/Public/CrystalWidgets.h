@@ -36,17 +36,26 @@
 
 #include "CrystalWidgets/Validation/CTextInputValidation.h"
 
-#include "CrystalWidgets/Widget/CWidget.h"
-
 // Data
 #include "CrystalWidgets/Data/CModelIndex.h"
 #include "CrystalWidgets/Data/CBaseItemModel.h"
 #include "CrystalWidgets/Data/CFileSystemModel.h"
 
+// Base Classes
+#include "CrystalWidgets/Widget/CWidget.h"
+#include "CrystalWidgets/Window/CWindow.h"
+
 // Widgets
 #include "CrystalWidgets/Widget/CLabel.h"
 #include "CrystalWidgets/Widget/CButton.h"
 #include "CrystalWidgets/Widget/CTextInput.h"
+
+// Popups
+#include "CrystalWidgets/Popup/CPopup.h"
+
+//Menu
+#include "CrystalWidgets/Menu/CMenu.h"
+#include "CrystalWidgets/Menu/CMenuItem.h"
 
 #include "CrystalWidgets/Item/CItemSelectionModel.h"
 #include "CrystalWidgets/Item/CBaseItemDelegate.h"
@@ -55,7 +64,6 @@
 #include "CrystalWidgets/Item/CTreeView.h"
 
 // Windows
-#include "CrystalWidgets/Window/CWindow.h"
 #include "CrystalWidgets/Window/CDockSplitView.h"
 #include "CrystalWidgets/Window/CDockSpace.h"
 #include "CrystalWidgets/Window/CDockWindow.h"

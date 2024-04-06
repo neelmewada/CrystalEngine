@@ -3,7 +3,8 @@
 namespace CE::Widgets
 {
     class CPainter;
-
+    class CMenu;
+    class CMenuItem;
 
     CLASS()
     class CRYSTALWIDGETS_API CWindow : public CWidget
@@ -28,13 +29,17 @@ namespace CE::Widgets
 
         PlatformWindow* GetRootNativeWindow();
 
+        virtual void Show();
+
+        virtual void Hide();
+
         // - Rendering -
 
         RHI::DrawListTag GetDrawListTag() const { return drawListTag; }
 
         const Array<RHI::DrawPacket*>& FlushDrawPackets(u32 imageIndex);
 
-    crystalwidgets_protected_internal:
+    protected:
 
         virtual void OnPlatformWindowSet() {}
 
@@ -78,19 +83,14 @@ namespace CE::Widgets
         FIELD()
         b8 canBeMaximized = true;
 
+        FIELD()
+        Array<CMenuItem*> menuItems{};
+
         Array<Rect> controlRects{};
         StaticArray<bool, 3> hoveredControls{};
         int clickedControlIdx = -1;
         b8 isVerticalScrollPressed = false;
         b8 isVerticalScrollHovered = false;
-
-    crystalwidgets_internal:
-
-        //Array<CWidget*> hoveredWidgetsStack = {};
-        //StaticArray<CWidget*, 6> widgetsPressedPerMouseButton{};
-        //CWidget* draggedWidget = nullptr;
-
-        //Vec2 prevMousePos = Vec2();
 
         PlatformWindow* nativeWindow = nullptr;
         DelegateHandle windowResizeDelegate = 0;

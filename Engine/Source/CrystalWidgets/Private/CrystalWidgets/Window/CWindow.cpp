@@ -36,6 +36,22 @@ namespace CE::Widgets
         }
     }
 
+    void CWindow::Show()
+    {
+	    if (nativeWindow)
+	    {
+            nativeWindow->Show();
+	    }
+    }
+
+    void CWindow::Hide()
+    {
+	    if (nativeWindow)
+	    {
+            nativeWindow->Hide();
+	    }
+    }
+
     void CWindow::SetPlatformWindow(PlatformWindow* window)
     {
         this->nativeWindow = window;

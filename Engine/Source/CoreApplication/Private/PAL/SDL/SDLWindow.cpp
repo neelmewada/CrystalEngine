@@ -79,11 +79,13 @@ namespace CE
 		return SDL_HITTEST_NORMAL; // SDL_HITTEST_NORMAL <- Windows behaviour
 	}
 
-	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable)
+	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable, bool isHidden)
 	{
 		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI;
 		if (resizable)
 			flags |= SDL_WINDOW_RESIZABLE;
+		if (isHidden)
+			flags |= SDL_WINDOW_HIDDEN;
 #if PAL_TRAIT_VULKAN_SUPPORTED
 		flags |= SDL_WINDOW_VULKAN;
 #endif
@@ -92,6 +94,32 @@ namespace CE
 		if (fullscreen)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		
+		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
+	}
+
+	SDLPlatformWindow::SDLPlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info)
+	{
+		u32 flags = SDL_WINDOW_ALLOW_HIGHDPI;
+		if (info.resizable)
+			flags |= SDL_WINDOW_RESIZABLE;
+		if (info.hidden)
+			flags |= SDL_WINDOW_HIDDEN;
+#if PAL_TRAIT_VULKAN_SUPPORTED
+		flags |= SDL_WINDOW_VULKAN;
+#endif
+		if (info.maximised)
+			flags |= SDL_WINDOW_MAXIMIZED;
+		if (info.fullscreen)
+			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::SkipTaskbar))
+			flags |= SDL_WINDOW_SKIP_TASKBAR;
+		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::PopupMenu))
+			flags |= SDL_WINDOW_POPUP_MENU;
+		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::ToolTip))
+			flags |= SDL_WINDOW_TOOLTIP;
+		if (EnumHasFlag(info.windowFlags, PlatformWindowFlags::Utility))
+			flags |= SDL_WINDOW_UTILITY;
+
 		handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
 	}
 

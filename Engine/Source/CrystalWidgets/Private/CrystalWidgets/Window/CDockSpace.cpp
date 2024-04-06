@@ -130,14 +130,12 @@ namespace CE::Widgets
         CBrush brush = CBrush(Color::Clear());
         CFont font = CFont("Roboto", 15, false);
 
-        if (GetDockType() == CDockType::Major)
+        if (GetDockType() == CDockType::Major) // Major dock space
         {
             PlatformWindow* nativeWindow = GetRootNativeWindow();
 
             u32 w = 0, h = 0;
             nativeWindow->GetDrawableWindowSize(&w, &h);
-
-            // - Fetch Styles -
 
             // - Draw Background -
 
@@ -151,6 +149,15 @@ namespace CE::Widgets
             }
 
             painter->DrawRect(Rect::FromSize(0, 0, w, h));
+
+            // Draw menu items
+
+            for (int i = 0; i < menuItems.GetSize(); ++i)
+            {
+                CMenuItem* menuItem = menuItems[i];
+
+                
+            }
         }
         else if (GetDockType() == CDockType::Minor)
         {

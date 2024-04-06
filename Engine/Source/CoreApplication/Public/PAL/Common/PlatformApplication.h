@@ -34,7 +34,26 @@ namespace CE
         COUNT
     };
     ENUM_CLASS(SystemCursor);
-    
+
+    enum class PlatformWindowFlags
+    {
+        None = 0,
+        SkipTaskbar = BIT(0),
+        ToolTip = BIT(1),
+        PopupMenu = BIT(2),
+        Utility = BIT(3)
+    };
+    ENUM_CLASS_FLAGS(PlatformWindowFlags);
+
+    struct PlatformWindowInfo
+    {
+        bool maximised = false;
+    	bool fullscreen = false;
+    	bool resizable = true;
+        bool hidden = false;
+        PlatformWindowFlags windowFlags = PlatformWindowFlags::None;
+    };
+
     class COREAPPLICATION_API PlatformApplication
     {
     public:
@@ -84,12 +103,16 @@ namespace CE
 
         virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen, bool resizable = true) = 0;
 
+        virtual PlatformWindow* InitMainWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info) = 0;
+
         virtual PlatformWindow* GetMainWindow() = 0;
 
         virtual PlatformWindow* FindWindow(u64 windowId) = 0;
 
         virtual PlatformWindow* CreatePlatformWindow(const String& title) = 0;
-        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen) = 0;
+        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, bool maximised, bool fullscreen = false, bool hidden = false) = 0;
+
+        virtual PlatformWindow* CreatePlatformWindow(const String& title, u32 width, u32 height, const PlatformWindowInfo& info) = 0;
 
         virtual void DestroyWindow(PlatformWindow* window) = 0;
 
